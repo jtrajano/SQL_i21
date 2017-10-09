@@ -302,8 +302,9 @@ namespace iRely.Inventory.BusinessLayer
             {
                 var query = 
                         _db.GetQuery<vyuICGetItemStock>()
-                        .Include(p => p.tblICItemAccounts)
-                        .Include(p => p.tblICItemPricings).Filter(param, true)
+                        //.Include(p => p.tblICItemAccounts)
+                        //.Include(p => p.tblICItemPricings)
+                        .Filter(param, true)
                         .Where(p => 
                             // Use ternary operators. It is translated as CASE WHEN statements in SQL: 
                             true ==
@@ -323,8 +324,9 @@ namespace iRely.Inventory.BusinessLayer
             }
             else {
                 var query = _db.GetQuery<vyuICGetItemStock>()
-                .Include(p => p.tblICItemAccounts)
-                .Include(p => p.tblICItemPricings).Filter(param, true)
+                //.Include(p => p.tblICItemAccounts)
+                //.Include(p => p.tblICItemPricings)
+                .Filter(param, true)
                 .Where(p => p.strStatus != "Discontinued");
 
                 var data = await query.ExecuteProjection(param, "strItemNo").ToListAsync(param.cancellationToken);
@@ -337,6 +339,28 @@ namespace iRely.Inventory.BusinessLayer
 	            };
             }
         }
+
+        /// <summary>
+        /// Get Item GL Account Setup
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public async Task<SearchResult> SearchItemAccounts(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICGetItemAccount>()
+            .Filter(param, true);
+
+            var data = await query
+                .Execute(param, "strAccountId")
+                .ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
+
 
         /// <summary>
         /// Get Item Stock UOM Summary

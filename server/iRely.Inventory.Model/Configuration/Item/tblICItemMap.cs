@@ -514,12 +514,12 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnGrossUOMAllowPurchase).HasColumnName("ysnGrossUOMAllowPurchase");
             this.Property(t => t.ysnGrossUOMAllowSale).HasColumnName("ysnGrossUOMAllowSale");
             this.Property(t => t.ysnLotWeightsRequired).HasColumnName("ysnLotWeightsRequired");
-            this.HasMany(p => p.tblICItemAccounts)
-                .WithRequired(p => p.vyuICGetItemStock)
-                .HasForeignKey(p => p.intKey);
-            this.HasMany(p => p.tblICItemPricings)
-                .WithRequired(p => p.vyuICGetItemStock)
-                .HasForeignKey(p => p.intKey);
+            //this.HasMany(p => p.tblICItemAccounts)
+            //    .WithRequired(p => p.vyuICGetItemStock)
+            //    .HasForeignKey(p => p.intKey);
+            //this.HasMany(p => p.tblICItemPricings)
+            //    .WithRequired(p => p.vyuICGetItemStock)
+            //    .HasForeignKey(p => p.intKey);
         }
     }
 
@@ -692,7 +692,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strAccountGroup).HasColumnName("strAccountGroup");
             this.Property(t => t.strAccountId).HasColumnName("strAccountId");
             this.Property(t => t.strAccountType).HasColumnName("strAccountType");
-            this.Property(t => t.strAccountDescription).HasColumnName("strAccountDescription");
+            this.Property(t => t.strDescription).HasColumnName("strDescription");
         }
     }
 

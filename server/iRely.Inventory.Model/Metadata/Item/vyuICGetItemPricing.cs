@@ -43,6 +43,6 @@ namespace iRely.Inventory.Model
         public int? intSort { get; set; }
         public int? intDecimalPlaces { get; set; }
 
-        public vyuICGetItemStock vyuICGetItemStock { get; set; }
+        //public vyuICGetItemStock vyuICGetItemStock { get; set; }
     }
 }

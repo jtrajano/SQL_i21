@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets7a5345ef81342497ccd4939edba8b99a225482d1b3192bdb76ac621b3b5a9894))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets477be098999a6ba30c34af752f130a5c83789cff45b54aa40ebba69154689b17))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets7a5345ef81342497ccd4939edba8b99a225482d1b3192bdb76ac621b3b5a9894 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets477be098999a6ba30c34af752f130a5c83789cff45b54aa40ebba69154689b17 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "7a5345ef81342497ccd4939edba8b99a225482d1b3192bdb76ac621b3b5a9894"; }
+            get { return "477be098999a6ba30c34af752f130a5c83789cff45b54aa40ebba69154689b17"; }
         }
 
         /// <summary>
@@ -1572,87 +1572,87 @@ namespace Edm_EntityMappingGeneratedViews
                 return GetView304();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetItemAccount")
+            if (extentName == "InventoryEntities.vyuICGetItemStocks")
             {
                 return GetView305();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetItemPricing")
+            if (extentName == "CodeFirstDatabase.vyuICGetItemStockSummary")
             {
                 return GetView306();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetItemStocks")
+            if (extentName == "InventoryEntities.vyuICGetItemStockSummaries")
             {
                 return GetView307();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetItemAccounts")
+            if (extentName == "CodeFirstDatabase.vyuICGetItemStockSummaryByLot")
             {
                 return GetView308();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetItemPricings")
+            if (extentName == "InventoryEntities.vyuICGetItemStockSummaryByLots")
             {
                 return GetView309();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetItemStockSummary")
+            if (extentName == "CodeFirstDatabase.vyuICGetItemStockUOM")
             {
                 return GetView310();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetItemStockSummaries")
+            if (extentName == "InventoryEntities.vyuICGetItemStockUOMs")
             {
                 return GetView311();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetItemStockSummaryByLot")
+            if (extentName == "CodeFirstDatabase.vyuICGetItemStockUOMTotals")
             {
                 return GetView312();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetItemStockSummaryByLots")
+            if (extentName == "InventoryEntities.vyuICGetItemStockUOMTotals")
             {
                 return GetView313();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetItemStockUOM")
+            if (extentName == "CodeFirstDatabase.vyuICGetItemStockUOMSummary")
             {
                 return GetView314();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetItemStockUOMs")
+            if (extentName == "InventoryEntities.vyuICGetItemStockUOMSummaries")
             {
                 return GetView315();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetItemStockUOMTotals")
+            if (extentName == "CodeFirstDatabase.vyuICGetItemStockUOMForAdjustment")
             {
                 return GetView316();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetItemStockUOMTotals")
+            if (extentName == "InventoryEntities.vyuICGetItemStockUOMForAdjustments")
             {
                 return GetView317();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetItemStockUOMSummary")
+            if (extentName == "CodeFirstDatabase.vyuICGetItemAccount")
             {
                 return GetView318();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetItemStockUOMSummaries")
+            if (extentName == "InventoryEntities.vyuICGetItemAccounts")
             {
                 return GetView319();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetItemStockUOMForAdjustment")
+            if (extentName == "CodeFirstDatabase.vyuICGetItemPricing")
             {
                 return GetView320();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetItemStockUOMForAdjustments")
+            if (extentName == "InventoryEntities.vyuICGetItemPricings")
             {
                 return GetView321();
             }
@@ -12237,89 +12237,10 @@ namespace Edm_EntityMappingGeneratedViews
         }
 
         /// <summary>
-        /// Gets the view for CodeFirstDatabase.vyuICGetItemAccount.
-        /// </summary>
-        /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView305()
-        {
-            return new DbMappingView(@"
-    SELECT VALUE -- Constructing vyuICGetItemAccount
-        [CodeFirstDatabaseSchema.vyuICGetItemAccount](T1.vyuICGetItemAccount_intAccountKey, T1.vyuICGetItemAccount_intKey, T1.vyuICGetItemAccount_intItemAccountId, T1.vyuICGetItemAccount_intItemId, T1.vyuICGetItemAccount_intAccountId, T1.vyuICGetItemAccount_strAccountId, T1.vyuICGetItemAccount_intAccountGroupId, T1.vyuICGetItemAccount_intAccountCategoryId, T1.vyuICGetItemAccount_strAccountGroup, T1.vyuICGetItemAccount_strAccountType, T1.vyuICGetItemAccount_strAccountCategory, T1.vyuICGetItemAccount_intSort, T1.vyuICGetItemAccount_strAccountDescription)
-    FROM (
-        SELECT 
-            T.intAccountKey AS vyuICGetItemAccount_intAccountKey, 
-            T.intKey AS vyuICGetItemAccount_intKey, 
-            T.intItemAccountId AS vyuICGetItemAccount_intItemAccountId, 
-            T.intItemId AS vyuICGetItemAccount_intItemId, 
-            T.intAccountId AS vyuICGetItemAccount_intAccountId, 
-            T.strAccountId AS vyuICGetItemAccount_strAccountId, 
-            T.intAccountGroupId AS vyuICGetItemAccount_intAccountGroupId, 
-            T.intAccountCategoryId AS vyuICGetItemAccount_intAccountCategoryId, 
-            T.strAccountGroup AS vyuICGetItemAccount_strAccountGroup, 
-            T.strAccountType AS vyuICGetItemAccount_strAccountType, 
-            T.strAccountCategory AS vyuICGetItemAccount_strAccountCategory, 
-            T.intSort AS vyuICGetItemAccount_intSort, 
-            T.strAccountDescription AS vyuICGetItemAccount_strAccountDescription, 
-            True AS _from0
-        FROM InventoryEntities.vyuICGetItemAccounts AS T
-    ) AS T1");
-        }
-
-        /// <summary>
-        /// Gets the view for CodeFirstDatabase.vyuICGetItemPricing.
-        /// </summary>
-        /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView306()
-        {
-            return new DbMappingView(@"
-    SELECT VALUE -- Constructing vyuICGetItemPricing
-        [CodeFirstDatabaseSchema.vyuICGetItemPricing](T1.vyuICGetItemPricing_intPricingKey, T1.vyuICGetItemPricing_intKey, T1.vyuICGetItemPricing_strItemNo, T1.vyuICGetItemPricing_strDescription, T1.vyuICGetItemPricing_intVendorId, T1.vyuICGetItemPricing_strVendorId, T1.vyuICGetItemPricing_strVendorName, T1.vyuICGetItemPricing_strUpcCode, T1.vyuICGetItemPricing_strLongUPCCode, T1.vyuICGetItemPricing_intItemPricingId, T1.vyuICGetItemPricing_intItemId, T1.vyuICGetItemPricing_intLocationId, T1.vyuICGetItemPricing_intItemLocationId, T1.vyuICGetItemPricing_strLocationName, T1.vyuICGetItemPricing_strLocationType, T1.vyuICGetItemPricing_intItemUnitMeasureId, T1.vyuICGetItemPricing_intItemUOMId, T1.vyuICGetItemPricing_intUnitMeasureId, T1.vyuICGetItemPricing_strUnitMeasure, T1.vyuICGetItemPricing_strUnitType, T1.vyuICGetItemPricing_ysnStockUnit, T1.vyuICGetItemPricing_ysnAllowPurchase, T1.vyuICGetItemPricing_ysnAllowSale, T1.vyuICGetItemPricing_dblUnitQty, T1.vyuICGetItemPricing_dblAmountPercent, T1.vyuICGetItemPricing_dblSalePrice, T1.vyuICGetItemPricing_dblMSRPPrice, T1.vyuICGetItemPricing_strPricingMethod, T1.vyuICGetItemPricing_dblLastCost, T1.vyuICGetItemPricing_dblStandardCost, T1.vyuICGetItemPricing_dblAverageCost, T1.vyuICGetItemPricing_dblEndMonthCost, T1.vyuICGetItemPricing_intSort, T1.vyuICGetItemPricing_intDecimalPlaces)
-    FROM (
-        SELECT 
-            T.intPricingKey AS vyuICGetItemPricing_intPricingKey, 
-            T.intKey AS vyuICGetItemPricing_intKey, 
-            T.strItemNo AS vyuICGetItemPricing_strItemNo, 
-            T.strDescription AS vyuICGetItemPricing_strDescription, 
-            T.intVendorId AS vyuICGetItemPricing_intVendorId, 
-            T.strVendorId AS vyuICGetItemPricing_strVendorId, 
-            T.strVendorName AS vyuICGetItemPricing_strVendorName, 
-            T.strUpcCode AS vyuICGetItemPricing_strUpcCode, 
-            T.strLongUPCCode AS vyuICGetItemPricing_strLongUPCCode, 
-            T.intItemPricingId AS vyuICGetItemPricing_intItemPricingId, 
-            T.intItemId AS vyuICGetItemPricing_intItemId, 
-            T.intLocationId AS vyuICGetItemPricing_intLocationId, 
-            T.intItemLocationId AS vyuICGetItemPricing_intItemLocationId, 
-            T.strLocationName AS vyuICGetItemPricing_strLocationName, 
-            T.strLocationType AS vyuICGetItemPricing_strLocationType, 
-            T.intItemUnitMeasureId AS vyuICGetItemPricing_intItemUnitMeasureId, 
-            T.intItemUOMId AS vyuICGetItemPricing_intItemUOMId, 
-            T.intUnitMeasureId AS vyuICGetItemPricing_intUnitMeasureId, 
-            T.strUnitMeasure AS vyuICGetItemPricing_strUnitMeasure, 
-            T.strUnitType AS vyuICGetItemPricing_strUnitType, 
-            T.ysnStockUnit AS vyuICGetItemPricing_ysnStockUnit, 
-            T.ysnAllowPurchase AS vyuICGetItemPricing_ysnAllowPurchase, 
-            T.ysnAllowSale AS vyuICGetItemPricing_ysnAllowSale, 
-            T.dblUnitQty AS vyuICGetItemPricing_dblUnitQty, 
-            T.dblAmountPercent AS vyuICGetItemPricing_dblAmountPercent, 
-            T.dblSalePrice AS vyuICGetItemPricing_dblSalePrice, 
-            T.dblMSRPPrice AS vyuICGetItemPricing_dblMSRPPrice, 
-            T.strPricingMethod AS vyuICGetItemPricing_strPricingMethod, 
-            T.dblLastCost AS vyuICGetItemPricing_dblLastCost, 
-            T.dblStandardCost AS vyuICGetItemPricing_dblStandardCost, 
-            T.dblAverageCost AS vyuICGetItemPricing_dblAverageCost, 
-            T.dblEndMonthCost AS vyuICGetItemPricing_dblEndMonthCost, 
-            T.intSort AS vyuICGetItemPricing_intSort, 
-            T.intDecimalPlaces AS vyuICGetItemPricing_intDecimalPlaces, 
-            True AS _from0
-        FROM InventoryEntities.vyuICGetItemPricings AS T
-    ) AS T1");
-        }
-
-        /// <summary>
         /// Gets the view for InventoryEntities.vyuICGetItemStocks.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView307()
+        private static DbMappingView GetView305()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemStocks
@@ -12445,89 +12366,10 @@ namespace Edm_EntityMappingGeneratedViews
         }
 
         /// <summary>
-        /// Gets the view for InventoryEntities.vyuICGetItemAccounts.
-        /// </summary>
-        /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView308()
-        {
-            return new DbMappingView(@"
-    SELECT VALUE -- Constructing vyuICGetItemAccounts
-        [iRely.Inventory.Model.vyuICGetItemAccount](T1.vyuICGetItemAccount_intAccountKey, T1.vyuICGetItemAccount_intKey, T1.vyuICGetItemAccount_intItemAccountId, T1.vyuICGetItemAccount_intItemId, T1.vyuICGetItemAccount_intAccountId, T1.vyuICGetItemAccount_strAccountId, T1.vyuICGetItemAccount_intAccountGroupId, T1.vyuICGetItemAccount_intAccountCategoryId, T1.vyuICGetItemAccount_strAccountGroup, T1.vyuICGetItemAccount_strAccountType, T1.vyuICGetItemAccount_strAccountCategory, T1.vyuICGetItemAccount_intSort, T1.vyuICGetItemAccount_strAccountDescription)
-    FROM (
-        SELECT 
-            T.intAccountKey AS vyuICGetItemAccount_intAccountKey, 
-            T.intKey AS vyuICGetItemAccount_intKey, 
-            T.intItemAccountId AS vyuICGetItemAccount_intItemAccountId, 
-            T.intItemId AS vyuICGetItemAccount_intItemId, 
-            T.intAccountId AS vyuICGetItemAccount_intAccountId, 
-            T.strAccountId AS vyuICGetItemAccount_strAccountId, 
-            T.intAccountGroupId AS vyuICGetItemAccount_intAccountGroupId, 
-            T.intAccountCategoryId AS vyuICGetItemAccount_intAccountCategoryId, 
-            T.strAccountGroup AS vyuICGetItemAccount_strAccountGroup, 
-            T.strAccountType AS vyuICGetItemAccount_strAccountType, 
-            T.strAccountCategory AS vyuICGetItemAccount_strAccountCategory, 
-            T.intSort AS vyuICGetItemAccount_intSort, 
-            T.strAccountDescription AS vyuICGetItemAccount_strAccountDescription, 
-            True AS _from0
-        FROM CodeFirstDatabase.vyuICGetItemAccount AS T
-    ) AS T1");
-        }
-
-        /// <summary>
-        /// Gets the view for InventoryEntities.vyuICGetItemPricings.
-        /// </summary>
-        /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView309()
-        {
-            return new DbMappingView(@"
-    SELECT VALUE -- Constructing vyuICGetItemPricings
-        [iRely.Inventory.Model.vyuICGetItemPricing](T1.vyuICGetItemPricing_intPricingKey, T1.vyuICGetItemPricing_intKey, T1.vyuICGetItemPricing_strItemNo, T1.vyuICGetItemPricing_strDescription, T1.vyuICGetItemPricing_intVendorId, T1.vyuICGetItemPricing_strVendorId, T1.vyuICGetItemPricing_strVendorName, T1.vyuICGetItemPricing_strUpcCode, T1.vyuICGetItemPricing_strLongUPCCode, T1.vyuICGetItemPricing_intItemPricingId, T1.vyuICGetItemPricing_intItemId, T1.vyuICGetItemPricing_intLocationId, T1.vyuICGetItemPricing_intItemLocationId, T1.vyuICGetItemPricing_strLocationName, T1.vyuICGetItemPricing_strLocationType, T1.vyuICGetItemPricing_intItemUnitMeasureId, T1.vyuICGetItemPricing_intItemUOMId, T1.vyuICGetItemPricing_intUnitMeasureId, T1.vyuICGetItemPricing_strUnitMeasure, T1.vyuICGetItemPricing_strUnitType, T1.vyuICGetItemPricing_ysnStockUnit, T1.vyuICGetItemPricing_ysnAllowPurchase, T1.vyuICGetItemPricing_ysnAllowSale, T1.vyuICGetItemPricing_dblUnitQty, T1.vyuICGetItemPricing_dblAmountPercent, T1.vyuICGetItemPricing_dblSalePrice, T1.vyuICGetItemPricing_dblMSRPPrice, T1.vyuICGetItemPricing_strPricingMethod, T1.vyuICGetItemPricing_dblLastCost, T1.vyuICGetItemPricing_dblStandardCost, T1.vyuICGetItemPricing_dblAverageCost, T1.vyuICGetItemPricing_dblEndMonthCost, T1.vyuICGetItemPricing_intSort, T1.vyuICGetItemPricing_intDecimalPlaces)
-    FROM (
-        SELECT 
-            T.intPricingKey AS vyuICGetItemPricing_intPricingKey, 
-            T.intKey AS vyuICGetItemPricing_intKey, 
-            T.strItemNo AS vyuICGetItemPricing_strItemNo, 
-            T.strDescription AS vyuICGetItemPricing_strDescription, 
-            T.intVendorId AS vyuICGetItemPricing_intVendorId, 
-            T.strVendorId AS vyuICGetItemPricing_strVendorId, 
-            T.strVendorName AS vyuICGetItemPricing_strVendorName, 
-            T.strUpcCode AS vyuICGetItemPricing_strUpcCode, 
-            T.strLongUPCCode AS vyuICGetItemPricing_strLongUPCCode, 
-            T.intItemPricingId AS vyuICGetItemPricing_intItemPricingId, 
-            T.intItemId AS vyuICGetItemPricing_intItemId, 
-            T.intLocationId AS vyuICGetItemPricing_intLocationId, 
-            T.intItemLocationId AS vyuICGetItemPricing_intItemLocationId, 
-            T.strLocationName AS vyuICGetItemPricing_strLocationName, 
-            T.strLocationType AS vyuICGetItemPricing_strLocationType, 
-            T.intItemUnitMeasureId AS vyuICGetItemPricing_intItemUnitMeasureId, 
-            T.intItemUOMId AS vyuICGetItemPricing_intItemUOMId, 
-            T.intUnitMeasureId AS vyuICGetItemPricing_intUnitMeasureId, 
-            T.strUnitMeasure AS vyuICGetItemPricing_strUnitMeasure, 
-            T.strUnitType AS vyuICGetItemPricing_strUnitType, 
-            T.ysnStockUnit AS vyuICGetItemPricing_ysnStockUnit, 
-            T.ysnAllowPurchase AS vyuICGetItemPricing_ysnAllowPurchase, 
-            T.ysnAllowSale AS vyuICGetItemPricing_ysnAllowSale, 
-            T.dblUnitQty AS vyuICGetItemPricing_dblUnitQty, 
-            T.dblAmountPercent AS vyuICGetItemPricing_dblAmountPercent, 
-            T.dblSalePrice AS vyuICGetItemPricing_dblSalePrice, 
-            T.dblMSRPPrice AS vyuICGetItemPricing_dblMSRPPrice, 
-            T.strPricingMethod AS vyuICGetItemPricing_strPricingMethod, 
-            T.dblLastCost AS vyuICGetItemPricing_dblLastCost, 
-            T.dblStandardCost AS vyuICGetItemPricing_dblStandardCost, 
-            T.dblAverageCost AS vyuICGetItemPricing_dblAverageCost, 
-            T.dblEndMonthCost AS vyuICGetItemPricing_dblEndMonthCost, 
-            T.intSort AS vyuICGetItemPricing_intSort, 
-            T.intDecimalPlaces AS vyuICGetItemPricing_intDecimalPlaces, 
-            True AS _from0
-        FROM CodeFirstDatabase.vyuICGetItemPricing AS T
-    ) AS T1");
-        }
-
-        /// <summary>
         /// Gets the view for CodeFirstDatabase.vyuICGetItemStockSummary.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView310()
+        private static DbMappingView GetView306()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemStockSummary
@@ -12568,7 +12410,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetItemStockSummaries.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView311()
+        private static DbMappingView GetView307()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemStockSummaries
@@ -12609,7 +12451,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.vyuICGetItemStockSummaryByLot.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView312()
+        private static DbMappingView GetView308()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemStockSummaryByLot
@@ -12653,7 +12495,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetItemStockSummaryByLots.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView313()
+        private static DbMappingView GetView309()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemStockSummaryByLots
@@ -12697,7 +12539,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.vyuICGetItemStockUOM.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView314()
+        private static DbMappingView GetView310()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemStockUOM
@@ -12749,7 +12591,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetItemStockUOMs.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView315()
+        private static DbMappingView GetView311()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemStockUOMs
@@ -12801,7 +12643,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.vyuICGetItemStockUOMTotals.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView316()
+        private static DbMappingView GetView312()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemStockUOMTotals
@@ -12831,7 +12673,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetItemStockUOMTotals.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView317()
+        private static DbMappingView GetView313()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemStockUOMTotals
@@ -12861,7 +12703,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.vyuICGetItemStockUOMSummary.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView318()
+        private static DbMappingView GetView314()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemStockUOMSummary
@@ -12899,7 +12741,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetItemStockUOMSummaries.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView319()
+        private static DbMappingView GetView315()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemStockUOMSummaries
@@ -12937,7 +12779,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.vyuICGetItemStockUOMForAdjustment.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView320()
+        private static DbMappingView GetView316()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemStockUOMForAdjustment
@@ -12972,7 +12814,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetItemStockUOMForAdjustments.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView321()
+        private static DbMappingView GetView317()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemStockUOMForAdjustments
@@ -13000,6 +12842,164 @@ namespace Edm_EntityMappingGeneratedViews
             T.ysnStockUnit AS vyuICGetItemStockUOMForAdjustment_ysnStockUnit, 
             True AS _from0
         FROM CodeFirstDatabase.vyuICGetItemStockUOMForAdjustment AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for CodeFirstDatabase.vyuICGetItemAccount.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView318()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing vyuICGetItemAccount
+        [CodeFirstDatabaseSchema.vyuICGetItemAccount](T1.vyuICGetItemAccount_intAccountKey, T1.vyuICGetItemAccount_intKey, T1.vyuICGetItemAccount_intItemAccountId, T1.vyuICGetItemAccount_intItemId, T1.vyuICGetItemAccount_intAccountId, T1.vyuICGetItemAccount_strAccountId, T1.vyuICGetItemAccount_intAccountGroupId, T1.vyuICGetItemAccount_intAccountCategoryId, T1.vyuICGetItemAccount_strAccountGroup, T1.vyuICGetItemAccount_strAccountType, T1.vyuICGetItemAccount_strAccountCategory, T1.vyuICGetItemAccount_intSort, T1.vyuICGetItemAccount_strDescription)
+    FROM (
+        SELECT 
+            T.intAccountKey AS vyuICGetItemAccount_intAccountKey, 
+            T.intKey AS vyuICGetItemAccount_intKey, 
+            T.intItemAccountId AS vyuICGetItemAccount_intItemAccountId, 
+            T.intItemId AS vyuICGetItemAccount_intItemId, 
+            T.intAccountId AS vyuICGetItemAccount_intAccountId, 
+            T.strAccountId AS vyuICGetItemAccount_strAccountId, 
+            T.intAccountGroupId AS vyuICGetItemAccount_intAccountGroupId, 
+            T.intAccountCategoryId AS vyuICGetItemAccount_intAccountCategoryId, 
+            T.strAccountGroup AS vyuICGetItemAccount_strAccountGroup, 
+            T.strAccountType AS vyuICGetItemAccount_strAccountType, 
+            T.strAccountCategory AS vyuICGetItemAccount_strAccountCategory, 
+            T.intSort AS vyuICGetItemAccount_intSort, 
+            T.strDescription AS vyuICGetItemAccount_strDescription, 
+            True AS _from0
+        FROM InventoryEntities.vyuICGetItemAccounts AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for InventoryEntities.vyuICGetItemAccounts.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView319()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing vyuICGetItemAccounts
+        [iRely.Inventory.Model.vyuICGetItemAccount](T1.vyuICGetItemAccount_intAccountKey, T1.vyuICGetItemAccount_intKey, T1.vyuICGetItemAccount_intItemAccountId, T1.vyuICGetItemAccount_intItemId, T1.vyuICGetItemAccount_intAccountId, T1.vyuICGetItemAccount_strAccountId, T1.vyuICGetItemAccount_intAccountGroupId, T1.vyuICGetItemAccount_intAccountCategoryId, T1.vyuICGetItemAccount_strAccountGroup, T1.vyuICGetItemAccount_strAccountType, T1.vyuICGetItemAccount_strAccountCategory, T1.vyuICGetItemAccount_intSort, T1.vyuICGetItemAccount_strDescription)
+    FROM (
+        SELECT 
+            T.intAccountKey AS vyuICGetItemAccount_intAccountKey, 
+            T.intKey AS vyuICGetItemAccount_intKey, 
+            T.intItemAccountId AS vyuICGetItemAccount_intItemAccountId, 
+            T.intItemId AS vyuICGetItemAccount_intItemId, 
+            T.intAccountId AS vyuICGetItemAccount_intAccountId, 
+            T.strAccountId AS vyuICGetItemAccount_strAccountId, 
+            T.intAccountGroupId AS vyuICGetItemAccount_intAccountGroupId, 
+            T.intAccountCategoryId AS vyuICGetItemAccount_intAccountCategoryId, 
+            T.strAccountGroup AS vyuICGetItemAccount_strAccountGroup, 
+            T.strAccountType AS vyuICGetItemAccount_strAccountType, 
+            T.strAccountCategory AS vyuICGetItemAccount_strAccountCategory, 
+            T.intSort AS vyuICGetItemAccount_intSort, 
+            T.strDescription AS vyuICGetItemAccount_strDescription, 
+            True AS _from0
+        FROM CodeFirstDatabase.vyuICGetItemAccount AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for CodeFirstDatabase.vyuICGetItemPricing.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView320()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing vyuICGetItemPricing
+        [CodeFirstDatabaseSchema.vyuICGetItemPricing](T1.vyuICGetItemPricing_intPricingKey, T1.vyuICGetItemPricing_intKey, T1.vyuICGetItemPricing_strItemNo, T1.vyuICGetItemPricing_strDescription, T1.vyuICGetItemPricing_intVendorId, T1.vyuICGetItemPricing_strVendorId, T1.vyuICGetItemPricing_strVendorName, T1.vyuICGetItemPricing_strUpcCode, T1.vyuICGetItemPricing_strLongUPCCode, T1.vyuICGetItemPricing_intItemPricingId, T1.vyuICGetItemPricing_intItemId, T1.vyuICGetItemPricing_intLocationId, T1.vyuICGetItemPricing_intItemLocationId, T1.vyuICGetItemPricing_strLocationName, T1.vyuICGetItemPricing_strLocationType, T1.vyuICGetItemPricing_intItemUnitMeasureId, T1.vyuICGetItemPricing_intItemUOMId, T1.vyuICGetItemPricing_intUnitMeasureId, T1.vyuICGetItemPricing_strUnitMeasure, T1.vyuICGetItemPricing_strUnitType, T1.vyuICGetItemPricing_ysnStockUnit, T1.vyuICGetItemPricing_ysnAllowPurchase, T1.vyuICGetItemPricing_ysnAllowSale, T1.vyuICGetItemPricing_dblUnitQty, T1.vyuICGetItemPricing_dblAmountPercent, T1.vyuICGetItemPricing_dblSalePrice, T1.vyuICGetItemPricing_dblMSRPPrice, T1.vyuICGetItemPricing_strPricingMethod, T1.vyuICGetItemPricing_dblLastCost, T1.vyuICGetItemPricing_dblStandardCost, T1.vyuICGetItemPricing_dblAverageCost, T1.vyuICGetItemPricing_dblEndMonthCost, T1.vyuICGetItemPricing_intSort, T1.vyuICGetItemPricing_intDecimalPlaces)
+    FROM (
+        SELECT 
+            T.intPricingKey AS vyuICGetItemPricing_intPricingKey, 
+            T.intKey AS vyuICGetItemPricing_intKey, 
+            T.strItemNo AS vyuICGetItemPricing_strItemNo, 
+            T.strDescription AS vyuICGetItemPricing_strDescription, 
+            T.intVendorId AS vyuICGetItemPricing_intVendorId, 
+            T.strVendorId AS vyuICGetItemPricing_strVendorId, 
+            T.strVendorName AS vyuICGetItemPricing_strVendorName, 
+            T.strUpcCode AS vyuICGetItemPricing_strUpcCode, 
+            T.strLongUPCCode AS vyuICGetItemPricing_strLongUPCCode, 
+            T.intItemPricingId AS vyuICGetItemPricing_intItemPricingId, 
+            T.intItemId AS vyuICGetItemPricing_intItemId, 
+            T.intLocationId AS vyuICGetItemPricing_intLocationId, 
+            T.intItemLocationId AS vyuICGetItemPricing_intItemLocationId, 
+            T.strLocationName AS vyuICGetItemPricing_strLocationName, 
+            T.strLocationType AS vyuICGetItemPricing_strLocationType, 
+            T.intItemUnitMeasureId AS vyuICGetItemPricing_intItemUnitMeasureId, 
+            T.intItemUOMId AS vyuICGetItemPricing_intItemUOMId, 
+            T.intUnitMeasureId AS vyuICGetItemPricing_intUnitMeasureId, 
+            T.strUnitMeasure AS vyuICGetItemPricing_strUnitMeasure, 
+            T.strUnitType AS vyuICGetItemPricing_strUnitType, 
+            T.ysnStockUnit AS vyuICGetItemPricing_ysnStockUnit, 
+            T.ysnAllowPurchase AS vyuICGetItemPricing_ysnAllowPurchase, 
+            T.ysnAllowSale AS vyuICGetItemPricing_ysnAllowSale, 
+            T.dblUnitQty AS vyuICGetItemPricing_dblUnitQty, 
+            T.dblAmountPercent AS vyuICGetItemPricing_dblAmountPercent, 
+            T.dblSalePrice AS vyuICGetItemPricing_dblSalePrice, 
+            T.dblMSRPPrice AS vyuICGetItemPricing_dblMSRPPrice, 
+            T.strPricingMethod AS vyuICGetItemPricing_strPricingMethod, 
+            T.dblLastCost AS vyuICGetItemPricing_dblLastCost, 
+            T.dblStandardCost AS vyuICGetItemPricing_dblStandardCost, 
+            T.dblAverageCost AS vyuICGetItemPricing_dblAverageCost, 
+            T.dblEndMonthCost AS vyuICGetItemPricing_dblEndMonthCost, 
+            T.intSort AS vyuICGetItemPricing_intSort, 
+            T.intDecimalPlaces AS vyuICGetItemPricing_intDecimalPlaces, 
+            True AS _from0
+        FROM InventoryEntities.vyuICGetItemPricings AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for InventoryEntities.vyuICGetItemPricings.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView321()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing vyuICGetItemPricings
+        [iRely.Inventory.Model.vyuICGetItemPricing](T1.vyuICGetItemPricing_intPricingKey, T1.vyuICGetItemPricing_intKey, T1.vyuICGetItemPricing_strItemNo, T1.vyuICGetItemPricing_strDescription, T1.vyuICGetItemPricing_intVendorId, T1.vyuICGetItemPricing_strVendorId, T1.vyuICGetItemPricing_strVendorName, T1.vyuICGetItemPricing_strUpcCode, T1.vyuICGetItemPricing_strLongUPCCode, T1.vyuICGetItemPricing_intItemPricingId, T1.vyuICGetItemPricing_intItemId, T1.vyuICGetItemPricing_intLocationId, T1.vyuICGetItemPricing_intItemLocationId, T1.vyuICGetItemPricing_strLocationName, T1.vyuICGetItemPricing_strLocationType, T1.vyuICGetItemPricing_intItemUnitMeasureId, T1.vyuICGetItemPricing_intItemUOMId, T1.vyuICGetItemPricing_intUnitMeasureId, T1.vyuICGetItemPricing_strUnitMeasure, T1.vyuICGetItemPricing_strUnitType, T1.vyuICGetItemPricing_ysnStockUnit, T1.vyuICGetItemPricing_ysnAllowPurchase, T1.vyuICGetItemPricing_ysnAllowSale, T1.vyuICGetItemPricing_dblUnitQty, T1.vyuICGetItemPricing_dblAmountPercent, T1.vyuICGetItemPricing_dblSalePrice, T1.vyuICGetItemPricing_dblMSRPPrice, T1.vyuICGetItemPricing_strPricingMethod, T1.vyuICGetItemPricing_dblLastCost, T1.vyuICGetItemPricing_dblStandardCost, T1.vyuICGetItemPricing_dblAverageCost, T1.vyuICGetItemPricing_dblEndMonthCost, T1.vyuICGetItemPricing_intSort, T1.vyuICGetItemPricing_intDecimalPlaces)
+    FROM (
+        SELECT 
+            T.intPricingKey AS vyuICGetItemPricing_intPricingKey, 
+            T.intKey AS vyuICGetItemPricing_intKey, 
+            T.strItemNo AS vyuICGetItemPricing_strItemNo, 
+            T.strDescription AS vyuICGetItemPricing_strDescription, 
+            T.intVendorId AS vyuICGetItemPricing_intVendorId, 
+            T.strVendorId AS vyuICGetItemPricing_strVendorId, 
+            T.strVendorName AS vyuICGetItemPricing_strVendorName, 
+            T.strUpcCode AS vyuICGetItemPricing_strUpcCode, 
+            T.strLongUPCCode AS vyuICGetItemPricing_strLongUPCCode, 
+            T.intItemPricingId AS vyuICGetItemPricing_intItemPricingId, 
+            T.intItemId AS vyuICGetItemPricing_intItemId, 
+            T.intLocationId AS vyuICGetItemPricing_intLocationId, 
+            T.intItemLocationId AS vyuICGetItemPricing_intItemLocationId, 
+            T.strLocationName AS vyuICGetItemPricing_strLocationName, 
+            T.strLocationType AS vyuICGetItemPricing_strLocationType, 
+            T.intItemUnitMeasureId AS vyuICGetItemPricing_intItemUnitMeasureId, 
+            T.intItemUOMId AS vyuICGetItemPricing_intItemUOMId, 
+            T.intUnitMeasureId AS vyuICGetItemPricing_intUnitMeasureId, 
+            T.strUnitMeasure AS vyuICGetItemPricing_strUnitMeasure, 
+            T.strUnitType AS vyuICGetItemPricing_strUnitType, 
+            T.ysnStockUnit AS vyuICGetItemPricing_ysnStockUnit, 
+            T.ysnAllowPurchase AS vyuICGetItemPricing_ysnAllowPurchase, 
+            T.ysnAllowSale AS vyuICGetItemPricing_ysnAllowSale, 
+            T.dblUnitQty AS vyuICGetItemPricing_dblUnitQty, 
+            T.dblAmountPercent AS vyuICGetItemPricing_dblAmountPercent, 
+            T.dblSalePrice AS vyuICGetItemPricing_dblSalePrice, 
+            T.dblMSRPPrice AS vyuICGetItemPricing_dblMSRPPrice, 
+            T.strPricingMethod AS vyuICGetItemPricing_strPricingMethod, 
+            T.dblLastCost AS vyuICGetItemPricing_dblLastCost, 
+            T.dblStandardCost AS vyuICGetItemPricing_dblStandardCost, 
+            T.dblAverageCost AS vyuICGetItemPricing_dblAverageCost, 
+            T.dblEndMonthCost AS vyuICGetItemPricing_dblEndMonthCost, 
+            T.intSort AS vyuICGetItemPricing_intSort, 
+            T.intDecimalPlaces AS vyuICGetItemPricing_intDecimalPlaces, 
+            True AS _from0
+        FROM CodeFirstDatabase.vyuICGetItemPricing AS T
     ) AS T1");
         }
 
