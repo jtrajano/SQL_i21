@@ -5691,6 +5691,7 @@
     <Build Include="dbo\Views\vyuAPPaidOriginPrepaid.sql" />
     <Build Include="dbo\Views\vyuAPOriginPayables.sql" />
     <Build Include="dbo\Views\vyuSCTicketScreenView.sql" />
+    <Build Include="Scripts\Post-Deployment\AR\DefaultData\32_UpdateCommissionScheduleEntity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
