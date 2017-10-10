@@ -709,7 +709,16 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[intItemUOMId]				--[intOrderUOMId]					
 					,[dblQtyOrdered]			--[dblQtyOrdered]
 					,[intItemUOMId]				--[intItemUOMId]					
-					,[dblQtyOrdered]			--[dblQtyShipped]
+					,CASE WHEN [strFrequency] = 'Bi-Monthly' 
+						  THEN 2 * [dblQtyOrdered]
+						  WHEN [strFrequency] = 'Quarterly'
+						  THEN 3 * [dblQtyOrdered]
+						  WHEN [strFrequency] = 'Semi-Annually'
+						  THEN 6 * [dblQtyOrdered]
+						  WHEN [strFrequency] = 'Annually'
+						  THEN 12 * [dblQtyOrdered]
+						  ELSE [dblQtyOrdered]
+					 END						--[dblQtyShipped]
 					,0							--[dblDiscount]
 					,[dblMaintenanceAmount]		--[dblPrice]
 					,[strPricing] 
@@ -723,7 +732,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[intSalesOrderDetailId]    --[intSalesOrderDetailId]
 					,[intContractHeaderId]		--[intContractHeaderId]
 					,[intContractDetailId]		--[intContractDetailId]
-					,[strMaintenanceType]		--[strMaintenanceType]
+					,'Maintenance Only'			--[strMaintenanceType]
 					,[strFrequency]		        --[strFrequency]
 					,[dblMaintenanceAmount]		--[dblMaintenanceAmount]
 					,CASE WHEN strMaintenanceType IN ('License Only', 'License/Maintenance') THEN [dblLicenseAmount] ELSE 0 END	--[dblLicenseAmount]
