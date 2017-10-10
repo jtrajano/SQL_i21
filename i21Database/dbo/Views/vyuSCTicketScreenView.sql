@@ -144,8 +144,8 @@
 	,GRDiscountId.strDiscountId
 	,GRSSR.strScheduleId
 	,GRSSR.strScheduleDescription
-	,GRStorage.ysnDPOwnedType
-	,GRStorage.ysnCustomerStorage
+	,ISNULL(GRStorage.ysnDPOwnedType, CAST(0 AS BIT)) AS ysnDPOwnedType
+	,ISNULL(GRStorage.ysnCustomerStorage, CAST(0 AS BIT)) AS ysnCustomerStorage
 
 	,EMSplit.strSplitNumber
 	,EMEntityFarm.strFarmDescription
