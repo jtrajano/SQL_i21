@@ -110,9 +110,19 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblFreightAmount).HasColumnName("dblFreightAmount").HasPrecision(18, 6);
             this.Property(t => t.intSort).HasColumnName("intSort");
             this.Property(t => t.ysnWeights).HasColumnName("ysnWeights");
-
+            this.Property(t => t.strDescription).HasColumnName("strDescription");
+            this.Property(t => t.dblGross).HasColumnName("dblGross");
+            this.Property(t => t.dblTare).HasColumnName("dblTare");
+            this.Property(t => t.dblNet).HasColumnName("dblNet");
+            this.Property(t => t.intGrossNetUOMId).HasColumnName("intGrossNetUOMId");
+            this.Property(t => t.intNewLotStatusId).HasColumnName("intNewLotStatusId");
+            this.Property(t => t.dblGrossNetUnitQty).HasColumnName("dblGrossNetUnitQty");
+            this.Property(t => t.dblItemUnitQty).HasColumnName("dblItemUnitQty");
             this.HasOptional(p => p.vyuICGetInventoryTransferDetail)
                 .WithRequired(p => p.tblICInventoryTransferDetail);
+            this.HasOptional(p => p.tblICLotStatus)
+                .WithMany(p => p.tblICInventoryTransferDetails)
+                .HasForeignKey(p => p.intNewLotStatusId);
         }
     }
     
@@ -145,6 +155,17 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblReservedQty).HasColumnName("dblReservedQty").HasPrecision(38, 20);
             this.Property(t => t.dblAvailableQty).HasColumnName("dblAvailableQty").HasPrecision(38, 20);
             this.Property(t => t.ysnWeights).HasColumnName("ysnWeights");
+            this.Property(t => t.strDescription).HasColumnName("strDescription");
+            this.Property(t => t.strItemType).HasColumnName("strItemType");
+            this.Property(t => t.dblGross).HasColumnName("dblGross");
+            this.Property(t => t.dblTare).HasColumnName("dblTare");
+            this.Property(t => t.dblNet).HasColumnName("dblNet");
+            this.Property(t => t.intWeightUOMId).HasColumnName("intWeightUOMId");
+            this.Property(t => t.intNewLotStatusId).HasColumnName("intNewLotStatusId");
+            this.Property(t => t.intGrossNetUOMId).HasColumnName("intGrossNetUOMId");
+            this.Property(t => t.strGrossNetUOM).HasColumnName("strGrossNetUOM");
+            this.Property(t => t.dblGrossNetUnitQty).HasColumnName("dblGrossNetUnitQty");
+            this.Property(t => t.dblItemUnitQty).HasColumnName("dblItemUnitQty");
         }
     }
 }

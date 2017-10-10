@@ -54,7 +54,25 @@ Ext.define('Inventory.model.TransferDetail', {
 
         { name: 'dblOriginalAvailableQty', type: 'float' },
         { name: 'dblOriginalStorageQty', type: 'float' },
-        { name: 'strToStorageLocationName', type: 'string'}
+        { name: 'strToStorageLocationName', type: 'string'},
+        { name: 'strItemType', type: 'string'},
+        { name: 'dblGross', type: 'float', defaultValue: 0.00, allowNull: true },
+        { name: 'dblNet', type: 'float', defaultValue: 0.00, allowNull: true, persist: true, 
+            convert: function(value, record) {
+                if(!record) return value;
+                var dblGross = iRely.Functions.isEmpty(record.get('dblGross')) ? 0 : record.get('dblGross');
+                var dblTare = iRely.Functions.isEmpty(record.get('dblTare')) ? 0 : record.get('dblTare');
+                return dblGross - dblTare;
+            },
+            depends: ['dblGross', 'dblTare']
+        },
+        { name: 'dblTare', type: 'float', defaultValue: 0.00, allowNull: true },
+        { name: 'intNewLotStatusId', type: 'int', allowNull: true },
+        { name: 'strNewLotStatus', type: 'string' },
+        { name: 'intGrossNetUOMId', type: 'int', allowNull: true },
+        { name: 'strGrossNetUOM', type: 'string' },
+        { name: 'dblGrossNetUnitQty', type: 'float', allowNull: true },
+        { name: 'dblItemUnitQty', type: 'float', allowNull: true}
     ],
 
     validators: [
@@ -64,14 +82,14 @@ Ext.define('Inventory.model.TransferDetail', {
 
     validate: function(options) {
         var errors = this.callParent(arguments);
-        if (this.get('dblQuantity') <= 0) {
+        if (this.get('dblQuantity') <= 0 && this.get('strItemType') !== 'Comment') {
             errors.add({
                 field: 'dblQuantity',
                 message: 'Transfer Qty must be greater than zero(0).'
             })
         }
 
-        if (this.get('intLotId') && !this.get('intToStorageLocationId')) {
+        if (this.get('intLotId') && !this.get('intToStorageLocationId') && this.get('strItemType') !== 'Comment') {
             errors.add({
                 field: 'strToStorageLocationName',
                 message: 'Storage Unit is required for lotted items.'

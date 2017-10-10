@@ -85,6 +85,14 @@ namespace iRely.Inventory.Model
         public int intLotId { get; set; }
         public string strWeightUOM { get; set; }
         public string strCostUOM { get; set; }
+        public decimal? dblItemUnitQty { get; set; }
+        public int? intItemId { get; set; }
+	    public int? intItemLocationId { get; set; }
+        public int? intSubLocationId { get; set; }
+        public int? intStorageLocationId { get; set; }
+        public int? intLotStatusId { get; set; }
+        public string strLotStatus { get; set; }
+        public int? intItemUOMId { get; set; }
     }
 
     public class vyuICLotHistory

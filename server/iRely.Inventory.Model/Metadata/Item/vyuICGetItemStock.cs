@@ -127,7 +127,8 @@ namespace iRely.Inventory.Model
         public bool? ysnLotWeightsRequired { get; set; }
 
 
-        //public ICollection<vyuICGetItemPricing> tblICItemPricings { get; set; }
-        //public ICollection<vyuICGetItemAccount> tblICItemAccounts { get; set; }
+        public ICollection<vyuICGetItemPricing> tblICItemPricings { get; set; }
+        public ICollection<vyuICGetItemAccount> tblICItemAccounts { get; set; }
+        public tblICItem tblICItem { get; set; }
     }
 }

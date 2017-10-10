@@ -664,7 +664,11 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                         itemId: 'colDescription',
                                                         width: 150,
                                                         dataIndex: 'strDescription',
-                                                        text: 'Description'
+                                                        text: 'Description',
+                                                        editor: {
+                                                            xtype: 'textfield',
+                                                            itemId: 'txtDescription'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
@@ -890,6 +894,11 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                     flex: 1
                                                                 },
                                                                 {
+                                                                    dataIndex: 'intLotStatusId',
+                                                                    dataType: 'numeric',
+                                                                    hidden: true
+                                                                },
+                                                                {
                                                                     dataIndex: 'dblQty',
                                                                     dataType: 'float',
                                                                     text: 'Available Qty',
@@ -906,6 +915,11 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                     dataType: 'string',
                                                                     text: 'UOM',
                                                                     flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'dblItemUnitQty',
+                                                                    dataType: 'float',
+                                                                    hidden: true
                                                                 }
                                                             ],
                                                             itemId: 'cboLot',
@@ -1051,6 +1065,103 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                         editor: {
                                                             xtype: 'numberfield',
                                                             quantityField: true
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        itemId: 'colGross',
+                                                        text: 'Gross',
+                                                        editor: {
+                                                            xtype: 'numberfield'
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        itemId: 'colTare',
+                                                        text: 'Tare',
+                                                        editor: {
+                                                            xtype: 'numberfield'
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        itemId: 'colNet',
+                                                        text: 'Net'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colNetUOM',
+                                                        text: 'Gross/Net UOM',
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intItemUOMId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Unit Of Measure Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitMeasure',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Measure',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitType',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Type',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'dblUnitQty',
+                                                                    dataType: 'float',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    xtype: 'checkcolumn',
+                                                                    dataIndex: 'ysnStockUnit',
+                                                                    dataType: 'boolean',
+                                                                    text: 'Stock Unit',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            allowEmpty: true,
+                                                            itemId: 'cboNetUOM',
+                                                            displayField: 'strUnitMeasure',
+                                                            valueField: 'strUnitMeasure'
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colNewLotStatus',
+                                                        text: 'New Lot Status',
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intLotStatusId',
+                                                                    hidden: true,
+                                                                    dataType: 'numeric'
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strPrimaryStatus',
+                                                                    dataType: 'string',
+                                                                    hidden: true,
+                                                                    flex: 1,
+                                                                    text: 'Status'
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strSecondaryStatus',
+                                                                    dataType: 'string',
+                                                                    hidden: false,
+                                                                    flex: 1,
+                                                                    text: 'Secondary Status'
+                                                                }
+                                                            ],
+                                                            itemId: 'cboNewLotStatus',
+                                                            displayField: 'strSecondaryStatus',
+                                                            valueField: 'strSecondaryStatus'
                                                         }
                                                     }
                                                 ],

@@ -635,6 +635,7 @@ namespace iRely.Inventory.Model
         public ICollection<tblICBuildAssemblyDetail> tblICBuildAssemblyDetails { get; set; }
 
         public ICollection<tblICItemMotorFuelTax> tblICItemMotorFuelTaxes { get; set; }
-                
+        public ICollection<vyuICGetItemStock> vyuICGetItemStock { get; set; }
+        public ICollection<tblICInventoryTransferDetail> tblICInventoryTransferDetails { get; set; }
     }
 }

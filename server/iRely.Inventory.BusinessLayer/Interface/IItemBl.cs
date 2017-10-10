@@ -14,6 +14,7 @@ namespace iRely.Inventory.BusinessLayer
         Task<SearchResult> SearchCompactItems(GetParameter param);
         Task<SearchResult> SearchAssemblyComponents(GetParameter param);
         Task<SearchResult> SearchItemStocks(GetParameter param);
+        Task<SearchResult> SearchItemStocksWithComments(GetParameter param);
         Task<SearchResult> SearchItemStockDetails(GetParameter param);
         Task<SearchResult> SearchItemAccounts(GetParameter param);
         Task<SearchResult> GetItemStockUOMSummary(int? ItemId, int? LocationId, int? SubLocationId, int? StorageLocationId);
@@ -33,7 +34,7 @@ namespace iRely.Inventory.BusinessLayer
         Task<SearchResult> SearchItemOwner(GetParameter param);
         Task<SearchResult> SearchItemSubLocations(GetParameter param);
         Task<SearchResult> GetItemMotorFuelTax(GetParameter param); 
-         Task<SearchResult> SearchStockDetail(GetParameter param);
+        Task<SearchResult> SearchStockDetail(GetParameter param);
         Task<SearchResult> SearchItemUOMDetail(GetParameter param);
 
         Task<decimal> GetUnitConversion(int? fromUnitMeasureId, int? toUnitMeasureId);

@@ -154,6 +154,54 @@ namespace iRely.Inventory.Model
         public decimal? dblOriginalAvailableQty { get; set; }
         public decimal? dblOriginalStorageQty { get; set; }
         public bool? ysnWeights { get; set; }
+        public string strDescription { get; set; }
+        public decimal? dblGross { get; set; }
+        public decimal? dblTare { get; set; }
+        public decimal? dblNet { get; set; }
+        public int? intGrossNetUOMId { get; set; }
+        public int? intNewLotStatusId { get; set; }
+        public string strItemType { get; set; }
+        public decimal? dblGrossNetUnitQty { get; set; }
+        public decimal? dblItemUnitQty { get; set; }
+        private string _strNewLotStatus;
+        [NotMapped]
+        public string strNewLotStatus
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_strNewLotStatus))
+                    if (tblICLotStatus != null)
+                        return tblICLotStatus.strSecondaryStatus;
+                    else
+                        return null;
+                else
+                    return _strNewLotStatus;
+            }
+            set
+            {
+                _strNewLotStatus = value;
+            }
+        }
+
+        private string _strGrossNetUOM;
+        [NotMapped]
+        public string strGrossNetUOM
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_strGrossNetUOM))
+                    if (vyuICGetInventoryTransferDetail != null)
+                        return vyuICGetInventoryTransferDetail.strGrossNetUOM;
+                    else
+                        return null;
+                else
+                    return _strGrossNetUOM;
+            }
+            set
+            {
+                _strGrossNetUOM = value;
+            }
+        }
         private string _sourceNo;
         [NotMapped]
         public string strSourceNumber
@@ -421,6 +469,8 @@ namespace iRely.Inventory.Model
 
         public vyuICGetInventoryTransferDetail vyuICGetInventoryTransferDetail { get; set; }
         public tblICInventoryTransfer tblICInventoryTransfer { get; set; }
+        public tblICLotStatus tblICLotStatus { get; set; }
+        public tblICItem tblICItem { get; set; }
     }
 
     public class vyuICGetInventoryTransferDetail
@@ -466,7 +516,18 @@ namespace iRely.Inventory.Model
         public string strOwnershipType { get; set; }
         public bool? ysnPosted { get; set; }
         public bool? ysnWeights { get; set; }
+        public string strDescription { get; set; }
+        public string strItemType { get; set; }
+        public decimal? dblGross { get; set; }
+        public decimal? dblTare { get; set; }
+        public decimal? dblNet { get; set; }
+        public int? intNewLotStatusId { get; set; }
+        public int? intGrossNetUOMId { get; set; }
+        public string strGrossNetUOM { get; set; }
+        public decimal? dblGrossNetUnitQty { get; set; }
+        public decimal? dblItemUnitQty { get; set; }
 
         public tblICInventoryTransferDetail tblICInventoryTransferDetail { get; set; }
+        public tblICLotStatus tblICLotStatus { get; set; }
     }
 }

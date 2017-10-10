@@ -12,17 +12,31 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
         'Inventory.store.BufferedItemStockUOMView',
         'Inventory.store.BufferedStorageLocation',
         'Inventory.store.BufferedLot',
+        'Inventory.store.BufferedSearchLot',
         'Inventory.store.BufferedStatus',
         'Inventory.store.BufferedItemUnitMeasure',
         'Inventory.store.BufferedItemWeightUOM',
+        'Inventory.store.BufferedItemWeightVolumeUOM',        
         'Inventory.store.BufferedUnitMeasure',
+        'Inventory.store.BufferedItemStockViewWithComments',
         'Inventory.store.BufferedItemStockUOMViewTotals',
         'GeneralLedger.controls.RecapTab',
         'GeneralLedger.controls.PostHistory'      
     ],
 
     stores: {
-
+        weightUOM: {
+            type: 'icbuffereditemweightvolumeuom'
+        },
+        lotStatuses: {
+            data: [
+                { intLotStatusId: 1, strSecondaryStatus: 'Active' },
+                { intLotStatusId: 2, strSecondaryStatus: 'On Hold' },
+                { intLotStatusId: 3, strSecondaryStatus: 'Quarantine' },
+                { intLotStatusId: 4, strSecondaryStatus: 'Pre-Sanitized' }
+            ],
+            fields: [{ name: 'intLotStatusId' }, { name: 'strSecondaryStatus' }]
+        },
         transferTypes: {
             data: [
                 {
@@ -87,10 +101,10 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
             type: 'icbuffereditemstockuomview'
         },
         item: {
-            type: 'icbuffereditemstockview'
+            type: 'icbuffereditemstockviewwithcomments'
         },
         lot: {
-            type: 'icbufferedlot'
+            type: 'icbufferedsearchlot'
         },
         fromSubLocation: {
             type: 'icbuffereditemstockuomviewtotals'
@@ -237,7 +251,7 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
             }
         },
         readOnlyInventoryTransferField: function(get) {
-            if (get('grdInventoryTransfer.selection.intItemId') !== null)
+            if (get('grdInventoryTransfer.selection.intItemId') !== null && get('grdInventoryTransfer.selection.strItemType') !== 'Comment')
                 {
                     return false;
                 }

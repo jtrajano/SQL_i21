@@ -88,7 +88,15 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intLotId).HasColumnName("intLotId");
             this.Property(t => t.strWeightUOM).HasColumnName("strWeightUOM");
             this.Property(t => t.strCostUOM).HasColumnName("strCostUOM");
-        }
+            this.Property(t => t.dblItemUnitQty).HasColumnName("dblItemUnitQty");
+            this.Property(t => t.intItemId).HasColumnName("intItemId");
+            this.Property(t => t.intItemLocationId).HasColumnName("intItemLocationId");
+            this.Property(t => t.intSubLocationId).HasColumnName("intSubLocationId");
+            this.Property(t => t.intStorageLocationId).HasColumnName("intStorageLocationId");
+            this.Property(t => t.intLotStatusId).HasColumnName("intLotStatusId");
+            this.Property(t => t.strLotStatus).HasColumnName("strLotStatus");
+            this.Property(t => t.intItemUOMId).HasColumnName("intItemUOMId");
+    }
     }
 
     public class vyuICGetPostedLotMap : EntityTypeConfiguration<vyuICGetPostedLot>
