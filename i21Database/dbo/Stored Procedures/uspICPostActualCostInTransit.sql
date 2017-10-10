@@ -85,6 +85,7 @@ BEGIN
 				,@dblCost
 				,@strTransactionId
 				,@intTransactionId
+				,@intTransactionDetailId
 				,@intEntityUserSecurityId
 				,@RemainingQty OUTPUT
 				,@CostUsed OUTPUT 
