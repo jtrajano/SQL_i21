@@ -1,6 +1,7 @@
 ﻿/*
 	Note: Standard amount of void payment transaction is negative. The original transaction should be positive
 	Note: Origin transaction do not have multi currency implementation, also to handle issue (see 792717-000, CISCO transaction of COPP)
+	Note: Handle negative quantity received
 */
 CREATE VIEW vyuAPPayables
 WITH SCHEMABINDING
@@ -10,10 +11,10 @@ SELECT
 	, A.intBillId 
 	, A.strBillId 
 	, 0 AS dblAmountPaid 
-	, CASE WHEN A.intTransactionType != 1 AND SUM(B.dblTotal) > 0 THEN (SUM(B.dblTotal) + SUM(B.dblTax)) *  ISNULL(B.dblRate,0) * -1 
-				ELSE (SUM(B.dblTotal) + SUM(B.dblTax)) * ISNULL(B.dblRate,0) 
+	, CASE WHEN A.intTransactionType != 1 THEN (B.dblTotal + B.dblTax) *  B.dblRate * -1 
+				ELSE (B.dblTotal + B.dblTax) * B.dblRate
 		END AS dblTotal
-	, CASE WHEN A.intTransactionType != 1 AND A.dblAmountDue > 0 THEN A.dblAmountDue * -1 ELSE A.dblAmountDue
+	, CASE WHEN A.intTransactionType != 1 THEN A.dblAmountDue * -1 ELSE A.dblAmountDue
 		END AS dblAmountDue 
 	, dblWithheld = 0
 	, dblDiscount = 0 
@@ -31,22 +32,21 @@ LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] 
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId	
 LEFT JOIN dbo.tblAPBillDetail B ON B.intBillId = A.intBillId
 WHERE A.ysnPosted = 1 AND intTransactionType NOT IN (7, 2)  AND A.ysnOrigin = 0
-GROUP BY  
-	 A.dtmDate
-	,A.intBillId 
-	,A.strBillId 
-	,A.intTransactionType
-	,B.dblTotal
-	,A.dblAmountDue
-	,C1.strVendorId 
-	,C1.strVendorId
-	,C2.strName
-	, A.dtmDueDate
-	, A.ysnPosted 
-	, A.ysnPaid
-	, A.intAccountId
-	, EC.strClass
-	, dblRate
+-- GROUP BY  
+-- 	 A.dtmDate
+-- 	,A.intBillId 
+-- 	,A.strBillId 
+-- 	,A.intTransactionType
+-- 	,B.dblTotal
+-- 	,A.dblAmountDue
+-- 	,C1.strVendorId 
+-- 	,C2.strName
+-- 	, A.dtmDueDate
+-- 	, A.ysnPosted 
+-- 	, A.ysnPaid
+-- 	, A.intAccountId
+-- 	, EC.strClass
+-- 	, dblRate
 UNION ALL
 SELECT 
 	A.dtmDate	
