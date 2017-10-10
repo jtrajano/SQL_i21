@@ -152,10 +152,10 @@ IF @strStatementFormat = 'Balance Forward'
 			, @ysnIncludeBudget			= @ysnIncludeBudget
 			, @ysnPrintOnlyPastDue		= @ysnPrintOnlyPastDue
 			, @ysnPrintFromCF			= 0
-			, @ysnSearchOnly			= 0
 			, @strCustomerNumber		= @strCustomerNumber
 			, @strAccountStatusCode		= @strAccountStatusCode
 			, @strLocationName			= @strLocationName
+			, @strCustomerName			= @strCustomerName
 	END
 ELSE IF ISNULL(@strStatementFormat, 'Open Item') IN ('Open Item', 'Running Balance')
 	BEGIN
@@ -166,11 +166,11 @@ ELSE IF ISNULL(@strStatementFormat, 'Open Item') IN ('Open Item', 'Running Balan
 		    , @ysnPrintCreditBalance	= @ysnPrintCreditBalance
 		    , @ysnIncludeBudget			= @ysnIncludeBudget
 		    , @ysnPrintOnlyPastDue		= @ysnPrintOnlyPastDue
-			, @ysnSearchOnly			= 0
 		    , @strCustomerNumber		= @strCustomerNumber
 		    , @strAccountStatusCode		= @strAccountStatusCode
 		    , @strLocationName			= @strLocationName
 		    , @strStatementFormat		= @strStatementFormat
+			, @strCustomerName			= @strCustomerName
 	END
 ELSE IF @strStatementFormat = 'Payment Activity'
 	BEGIN
@@ -181,10 +181,10 @@ ELSE IF @strStatementFormat = 'Payment Activity'
 		    , @ysnPrintCreditBalance	= @ysnPrintCreditBalance
 		    , @ysnIncludeBudget			= @ysnIncludeBudget
 		    , @ysnPrintOnlyPastDue		= @ysnPrintOnlyPastDue
-			, @ysnSearchOnly			= 0
 		    , @strCustomerNumber		= @strCustomerNumber
 		    , @strAccountStatusCode		= @strAccountStatusCode
 		    , @strLocationName			= @strLocationName
+			, @strCustomerName			= @strCustomerName
 	END
 
 INSERT INTO @temp_SOA_table

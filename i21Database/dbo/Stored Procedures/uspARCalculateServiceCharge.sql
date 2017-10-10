@@ -75,7 +75,7 @@ AS
 		BEGIN
 			TRUNCATE TABLE tblARCustomerAgingStagingTable
 			INSERT INTO tblARCustomerAgingStagingTable (
-				   strCustomerName
+				  strCustomerName
 				, strCustomerNumber
 				, strCustomerInfo
 				, strInvoiceNumber
