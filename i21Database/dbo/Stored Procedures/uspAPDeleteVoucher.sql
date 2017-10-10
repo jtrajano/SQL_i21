@@ -33,7 +33,7 @@ BEGIN TRY
 
 	DELETE FROM dbo.tblSMTransaction
 	WHERE intRecordId = @intBillId 
-	AND intScreenId = (SELECT intScreenId FROM tblSMScreen WHERE strScreenName = 'AccountsPayable.view.Voucher')
+	AND intScreenId = (SELECT intScreenId FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.Voucher')
 	
 	--Audit Log          
 	EXEC dbo.uspSMAuditLog 
