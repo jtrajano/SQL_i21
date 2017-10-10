@@ -5737,8 +5737,7 @@
     <Build Include="dbo\Stored Procedures\uspQMSampleImportErrors.sql" />
     <Build Include="dbo\Tables\tblVRProgram.sql" />
     <Build Include="dbo\Tables\tblVRCustomerXref.sql" />
-    <Build Include="Scripts\Post-Deployment\AR\DefaultData\32_UpdateCommissionScheduleEntity.sql" />
-	<Build Include="dbo\Stored Procedures\uspGLSyncGLAccountDescription.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLSyncGLAccountDescription.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -5883,6 +5882,7 @@
     <None Include="Scripts\Post-Deployment\HD\RenameHDScreen.sql" />
     <None Include="Scripts\Post-Deployment\CRM\RenameCRMScreen.sql" />
     <Build Include="dbo\Functions\fnHDCoalesceJiraKey.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\32_UpdateCommissionScheduleEntity.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
