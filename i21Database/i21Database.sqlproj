@@ -5738,6 +5738,7 @@
     <Build Include="dbo\Tables\tblVRProgram.sql" />
     <Build Include="dbo\Tables\tblVRCustomerXref.sql" />
     <Build Include="Scripts\Post-Deployment\AR\DefaultData\32_UpdateCommissionScheduleEntity.sql" />
+	<Build Include="dbo\Stored Procedures\uspGLSyncGLAccountDescription.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
