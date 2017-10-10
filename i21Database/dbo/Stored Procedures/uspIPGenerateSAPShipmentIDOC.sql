@@ -390,10 +390,10 @@ Begin
 					Where ld.intLoadId=@intLoadId AND lc.intLoadDetailId=@intLoadDetailId)>1
 				Begin
 					--Generate POSNR
-					SELECT @intExternalContainerNo = CASE WHEN ISNULL(MAX(strExternalContainerId),0)=0 THEN 900000 ELSE MAX(strExternalContainerId) END 
+					SELECT @intExternalContainerNo = CASE WHEN ISNULL(MAX(strExternalContainerId),0)<900000 THEN 900000 ELSE MAX(strExternalContainerId) END 
 					FROM tblLGLoadContainerStg Where intLoadStgId=@intLoadStgId
 					Update tblLGLoadContainerStg Set strExternalContainerId=@intExternalContainerNo,@intExternalContainerNo=@intExternalContainerNo+1
-					Where intLoadStgId=@intLoadStgId AND ISNULL(strExternalContainerId,'')=''
+					Where intLoadStgId=@intLoadStgId AND CAST(ISNULL(strExternalContainerId,0) AS INT)<900000
 
 					Delete From @tblContainer
 
