@@ -171,7 +171,6 @@ OPEN intListCursor;
 							IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
 							BEGIN
 								IF	ISNULL(@intLoopContractId,0) != 0
-								--EXEC uspCTUpdateScheduleQuantity @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale'
 								EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
 								EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;
 							END
