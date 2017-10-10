@@ -475,8 +475,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         readOnly: '{disableFieldInReceiptGrid}',
                         origValueField: 'intTaxGroupId',
                         origUpdateField: 'intTaxGroupId',
-                        store: '{taxGroup}',
-                        forceSelection: false 
+                        store: '{taxGroup}'
                     }
                 },
                 colForexRateType: {
@@ -799,8 +798,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         readOnly: '{readyOnlyChargeTaxGroup}',
                         origValueField: 'intTaxGroupId',
                         origUpdateField: 'intTaxGroupId',
-                        store: '{taxGroup}',
-                        forceSelection: false 
+                        store: '{taxGroup}'
                     }
                 },
                 colChargeForexRateType: {
