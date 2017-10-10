@@ -2,7 +2,8 @@
 AS
 	SELECT      TOP 1000000 
 				account.intConcurrencyId,account.strAccountId,replace(account.strAccountId,'-','') strAccountId1,
-				map.strOldAccountId, account.strDescription, grp.strAccountGroup, grp.strAccountType, cat.strAccountCategory, 
+				map.strOldAccountId,replace(map.strOldAccountId,'-','') strOldAccountId1,
+				account.strDescription, grp.strAccountGroup, grp.strAccountType, cat.strAccountCategory, 
                 account.strComments, account.strCashFlow, account.ysnActive, account.ysnSystem, account.ysnRevalue, u.intAccountUnitId, 
                 u.strUOMCode, account.intAccountId, account.intCurrencyID, account.intCurrencyExchangeRateTypeId, account.strNote, 
 				curr.strCurrency, rtype.strCurrencyExchangeRateType, account.intAccountGroupId, segment.intAccountCategoryId,
