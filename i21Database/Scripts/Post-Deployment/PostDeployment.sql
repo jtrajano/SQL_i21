@@ -263,6 +263,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\19_M2MComputations.sql
 :r .\IC\20_UpdateContractItemStatuses.sql
 :r .\IC\21_Update_LotWeightsRequired_tblICItem.sql
+:r .\IC\22_Update_tblICTransferDetail_Description.sql
 :r .\IC\PopulateLotContainerNoAndCondition.sql
 
 -- Patronage

@@ -2,7 +2,14 @@
 AS
 
 SELECT
-	  strItemNo = item.strItemNo
+	  intItemId = item.intItemId
+	, intItemLocationId = lot.intItemLocationId
+	, intSubLocationId = lot.intSubLocationId
+	, intStorageLocationId = lot.intStorageLocationId
+	, intLotStatusId = lot.intLotStatusId
+	, strLotStatus = lotStatus.strSecondaryStatus
+	, intItemUOMId = lot.intItemUOMId
+	, strItemNo = item.strItemNo
 	, strItemDescription = item.strDescription
 	, strProductType = att.strDescription
 	, strLocationName = loc.strLocationName
@@ -12,6 +19,7 @@ SELECT
 	, dblQty = lot.dblQty
 	, dblWeight = lot.dblWeight
 	, strItemUOM = uom.strUnitMeasure
+	, dblItemUnitQty = iuom.dblUnitQty
 	, dblWeightPerQty = lot.dblWeightPerQty
 	, dblLastCost = lot.dblLastCost
 	, intLotId = lot.intLotId
@@ -31,3 +39,4 @@ FROM tblICLot lot
 	LEFT JOIN tblICUnitMeasure weightUOM ON weightUOM.intUnitMeasureId = iweightUOM.intUnitMeasureId
 	LEFT JOIN tblICItemUOM icostUOM ON icostUOM.intItemId = lot.intItemId AND icostUOM.ysnStockUnit=1
 	LEFT JOIN tblICUnitMeasure costUOM ON costUOM.intUnitMeasureId = icostUOM.intUnitMeasureId
+	LEFT JOIN tblICLotStatus lotStatus ON lotStatus.intLotStatusId = lot.intLotStatusId
