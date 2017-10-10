@@ -12,10 +12,22 @@ SELECT DISTINCT Rtrim(Convert(CHAR, W.dtmPlannedDate, 101)) [Dump Date]
 	,W.strWorkOrderNo AS [Job #]
 	,I1.strItemNo AS [WSI Item]
 	,I1.strDescription [WSI Item Description]
-	,Round(SUM(WC.dblIssuedQuantity) + SUM(IsNULL(WC1.dblIssuedQuantity, 0)),0) AS [Total Consumed Quantity]
+	,Round(SUM(WC.dblIssuedQuantity) + IsNULL((
+			SELECT Round(SUM(IsNULL(WC1.dblIssuedQuantity, 0)), 0)
+			FROM dbo.tblMFWorkOrderConsumedLot WC1
+			WHERE WC1.intWorkOrderId = W.intWorkOrderId
+				AND WC1.intItemId = WC.intItemId
+				AND WC1.intSequenceNo = 9999
+			),0), 0) AS [Total Consumed Quantity]
 	,SUM(WC.dblIssuedQuantity) AS [Used in Packaging]
 	,UM1.strUnitMeasure AS [UOM]
-	,Round(SUM(IsNULL(WC1.dblIssuedQuantity, 0)),0) AS [Damaged]
+	,IsNUll((
+		SELECT Round(SUM(IsNULL(WC1.dblIssuedQuantity, 0)), 0)
+		FROM dbo.tblMFWorkOrderConsumedLot WC1
+		WHERE WC1.intWorkOrderId = W.intWorkOrderId
+			AND WC1.intItemId = WC.intItemId
+			AND WC1.intSequenceNo = 9999
+		),0) AS [Damaged]
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderConsumedLot WC ON WC.intWorkOrderId = W.intWorkOrderId
 	AND intSequenceNo <> 9999
@@ -26,9 +38,6 @@ JOIN dbo.tblICUnitMeasure UM1 ON UM1.intUnitMeasureId = IU1.intUnitMeasureId
 JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId
 JOIN dbo.tblICItem I1 ON I1.intItemId = WC.intItemId
 JOIN dbo.tblICCategory C ON C.intCategoryId = I1.intCategoryId
-LEFT JOIN dbo.tblMFWorkOrderConsumedLot WC1 ON WC1.intWorkOrderId = W.intWorkOrderId
-	AND WC1.intSequenceNo = 9999
-	AND WC1.intItemId = WC.intItemId
 WHERE C.strCategoryCode IN (
 		SELECT PA.strAttributeValue
 		FROM tblMFManufacturingProcessAttribute PA
