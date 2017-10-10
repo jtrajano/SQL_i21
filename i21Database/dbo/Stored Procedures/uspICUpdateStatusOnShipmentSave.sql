@@ -14,31 +14,11 @@ BEGIN
 			,@SourceTypeScale AS INT = 1
 			,@SourceTypeInboundShipment AS INT = 2
 			,@SourceTypePickLot AS INT = 3
-
+			
 	-- Update the Sales Order Status. 
 	IF EXISTS(SELECT TOP 1 1 FROM tblICInventoryShipment WHERE intInventoryShipmentId = @intShipmentId AND intOrderType = @OrderTypeSalesOrder)
 	BEGIN
-		DECLARE @SOId INT
-
-		SELECT	DISTINCT 
-				intOrderId 
-		INTO	#tmpSOList FROM tblICInventoryShipmentItem
-		WHERE	intInventoryShipmentId = @intShipmentId
-				AND intOrderId IS NOT NULL 
-
-		WHILE EXISTS(SELECT TOP 1 1 FROM #tmpSOList)
-		BEGIN
-			SELECT TOP 1 @SOId = intOrderId FROM #tmpSOList
-
-			IF (@ysnOpenStatus = 1)
-				EXEC uspSOUpdateOrderShipmentStatus @SOId, 1
-			ELSE
-				EXEC uspSOUpdateOrderShipmentStatus @SOId, NULL 
-
-			DELETE FROM #tmpSOList WHERE intOrderId = @SOId
-		END
-		
-		DROP TABLE #tmpSOList
+		EXEC uspSOUpdateOrderShipmentStatus @intShipmentId, 'Inventory', @ysnOpenStatus		
 	END
 
 	-- Update the Logistic Status
