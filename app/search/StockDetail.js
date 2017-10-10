@@ -55,23 +55,32 @@ Ext.define('Inventory.search.StockDetail', {
                                 var selection = _.first(grid.getSelectionModel().selected.items);
 
                                 if(selection) {
+                                    var filters = [{
+                                        column: 'strItemNo',
+                                        value: selection.get('strItemNo'),
+                                        condition: 'eq',
+                                        conjunction: 'And'
+                                    },
+                                    {
+                                        column: 'strLocationName',
+                                        value: selection.get('strLocationName'),
+                                        condition: 'eq',
+                                        conjunction: 'And'
+                                    }];
+                                    
+                                    if(!gl)
+                                        app.getController('GeneralLedger.controller.Global')
+
+                                    if(gl.getPostRemind().StartDate && gl.getPostRemind().EndDate &&
+                                        gl.getPostRemind().StartDate != "" && gl.getPostRemind().EndDate != ""){
+                                            filters.push({ column: 'dtmDate', condition: 'gte', conjunction: 'And', value: Ext.Date.format(gl.getPostRemind().StartDate, "m/d/Y"), displayCondition: 'Between', group: 'ValuationFiscal' },
+                                            { column: 'dtmDate', condition: 'lte', conjunction: 'And', value: Ext.Date.format(gl.getPostRemind().EndDate, "m/d/Y"), displayCondition: 'Between', group: 'ValuationFiscal' })
+                                    }
+                                        
                                     iRely.Functions.openScreen('Inventory.view.InventoryValuation', {
                                         showSearch: true,
                                         isFloating: true,
-                                        filters: [
-                                            {
-                                                column: 'strItemNo',
-                                                value: selection.get('strItemNo'),
-                                                condition: 'eq',
-                                                conjunction: 'And'
-                                            },
-                                            {
-                                                column: 'strLocationName',
-                                                value: selection.get('strLocationName'),
-                                                condition: 'eq',
-                                                conjunction: 'And'
-                                            }
-                                        ]
+                                        filters: filters
                                     });
 
                                     //iRely.Functions.openScreen('Inventory.view.InventoryValuation', { isMenuClick: true });
