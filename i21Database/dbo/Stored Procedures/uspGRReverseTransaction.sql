@@ -39,6 +39,7 @@ BEGIN TRY
 	DECLARE @dblOldBalance NUMERIC(18,6)
 	DECLARE @dblOldQuantity NUMERIC(18,6)
 	DECLARE @dblTolerance NUMERIC(18,6) = 0.0001
+	DECLARE @NoOFHistorysForBill INT
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXml
@@ -163,8 +164,9 @@ BEGIN TRY
 	END
 	ELSE IF @intTransactionTypeId =4 --Settle Storage
 	BEGIN
+		SELECT @NoOFHistorysForBill=COUNT(1) FROM [tblGRStorageHistory] WHERE intBillId=@intBillId
 		---1. UnPost Voucher 
-		IF EXISTS(SELECT 1 FROM tblAPBill WHERE ISNULL(ysnPosted,0)=1)
+		IF EXISTS(SELECT 1 FROM tblAPBill WHERE ISNULL(ysnPosted,0)=1 AND intBillId = @intBillId)
 		BEGIN
 			EXEC uspAPPostBill 
 			 @post=0
@@ -290,9 +292,16 @@ BEGIN TRY
 				, @intEntityUserSecurityId 
 		
 
-		-- 4. Delete the Voucher(From User Interface deleting Voucher Should not be allowed)		
-		EXEC uspGRDeleteStorageHistory 'Voucher',@intBillId
-		EXEC uspAPDeleteVoucher @intBillId,@intEntityUserSecurityId		
+		-- 4. Delete the Voucher(From User Interface deleting Voucher Should not be allowed)
+		IF @NoOFHistorysForBill = 1
+		BEGIN		
+				EXEC uspGRDeleteStorageHistory 'Voucher',@intBillId
+				EXEC uspAPDeleteVoucher @intBillId,@intEntityUserSecurityId		
+		END
+		ELSE
+		BEGIN
+				DELETE FROM tblGRStorageHistory WHERE intStorageHistoryId = @intStorageHistoryId
+		END
 		
 	END
 			
