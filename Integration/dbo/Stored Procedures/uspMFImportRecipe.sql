@@ -109,9 +109,9 @@ BEGIN
 		-- end 
 
 			--==========================================================
-			--     Insert into tblARInvoiceDetail - PT INVOICE DETAILS
+			--     Insert into tblMFRecipeItem - PT FORMULA DETAILS
 			--==========================================================
-		IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptivcmst')
+		IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptfrmmst')
 		 Begin
 		 -- Insert Output item
 			INSERT INTO [tblMFRecipeItem]
@@ -235,7 +235,7 @@ BEGIN
 					   ,(CASE WHEN ISDATE(FRMI.ptfrm_last_chg_rev_dt) = 1 THEN CONVERT(DATE, CAST(FRMI.ptfrm_last_chg_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END)
 					   ,1          
 			FROM ptfrmmst FRMI
-			INNER JOIN ptitmmst OITM ON OITM.ptitm_itm_no = FRMI.ptfrm_ingr_itm_no_'+CAST(@cnt AS NVARCHAR)+'
+			INNER JOIN ptitmmst OITM ON OITM.ptitm_itm_no = FRMI.ptfrm_ingr_itm_no_'+CAST(@cnt AS NVARCHAR)+' AND OITM.ptitm_loc_no = FRMI.ptfrm_loc_no
 			INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = FRMI.ptfrm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS
 			INNER JOIN tblICItem ITM1 ON ITM1.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = FRMI.ptfrm_ingr_itm_no_'+CAST(@cnt AS NVARCHAR)+' COLLATE SQL_Latin1_General_CP1_CS_AS
 			INNER JOIN tblSMCompanyLocation LOC ON LOC.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS = FRMI.ptfrm_loc_no  COLLATE SQL_Latin1_General_CP1_CS_AS
