@@ -16,6 +16,15 @@ SET ANSI_WARNINGS OFF
 --Use this script to import bins
 --+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+--create sublocation for each location. i21 requires a sublocation to be created if there are storage locations
+--origin does not have sublocations
+insert into tblSMCompanyLocationSubLocation
+(intCompanyLocationId, strSubLocationName, strSubLocationDescription, strClassification, intConcurrencyId)
+select distinct intCompanyLocationId, strLocationName, strLocationName strDescription, 'Inventory' strClassification, 1 Concurrencyid
+from tblSMCompanyLocation L 
+join ptitmmst os on os.ptitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = L.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS
+where ptitm_binloc is not null
+
 
 ----====================================STEP 1=============================================
 --import storage locations from origin and update the sub location required for i21 
