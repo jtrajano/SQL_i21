@@ -423,6 +423,12 @@ where intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intReportingComponentId = 2528, strFormCode = '3978', strFormName = 'Supplier Return (Monthly)', strScheduleCode = '7BOH', strScheduleName = 'Gallons Exported to OH, MI Tax Paid', strType = 'Undyed Diesel', strNote = '', strTransactionType = 'Invoice', intSort = 1148, strSPInventory = 'uspTFGetInventoryTax', strSPInvoice = 'uspTFGetInvoiceTax', strSPRunReport = '', intMasterId = 222528, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 2529, strFormCode = '3978', strFormName = 'Supplier Return (Monthly)', strScheduleCode = '7BOH', strScheduleName = 'Gallons Exported to OH, MI Tax Paid', strType = 'Undyed Biodiesel (B05 or higher)', strNote = '', strTransactionType = 'Invoice', intSort = 1149, strSPInventory = 'uspTFGetInventoryTax', strSPInvoice = 'uspTFGetInvoiceTax', strSPRunReport = '', intMasterId = 222529, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 2530, strFormCode = '3978', strFormName = 'Supplier Return (Monthly)', strScheduleCode = '7BOH', strScheduleName = 'Gallons Exported to OH, MI Tax Paid', strType = 'Aviation', strNote = '', strTransactionType = 'Invoice', intSort = 1150, strSPInventory = 'uspTFGetInventoryTax', strSPInvoice = 'uspTFGetInvoiceTax', strSPRunReport = '', intMasterId = 222530, intComponentTypeId = 1
+    UNION ALL SELECT intReportingComponentId = 776, strFormCode = '3724', strFormName = 'Transporter Return (Quarterly)', strScheduleCode = 'E-file', strScheduleName = 'MI TR E-file', strType = '', strNote = '', strTransactionType = NULL, intSort = 51, strSPInventory = 'uspTFGetInventoryTax', strSPInvoice = 'uspTFGetInvoiceTax', strSPRunReport = '', intMasterId = 222531, intComponentTypeId = 4
+    UNION ALL SELECT intReportingComponentId = 777, strFormCode = '3791', strFormName = 'Blender Return (Monthly)', strScheduleCode = 'E-file', strScheduleName = 'MI BL E-file', strType = '', strNote = '', strTransactionType = NULL, intSort = 651, strSPInventory = 'uspTFGetInventoryTax', strSPInvoice = 'uspTFGetInvoiceTax', strSPRunReport = '', intMasterId = 222532, intComponentTypeId = 4
+    UNION ALL SELECT intReportingComponentId = 778, strFormCode = '3978', strFormName = 'Supplier Return (Monthly)', strScheduleCode = 'E-file', strScheduleName = 'MI SU E-file', strType = '', strNote = '', strTransactionType = NULL, intSort = 1391, strSPInventory = 'uspTFGetInventoryTax', strSPInvoice = 'uspTFGetInvoiceTax', strSPRunReport = '', intMasterId = 222533, intComponentTypeId = 4
+    UNION ALL SELECT intReportingComponentId = 779, strFormCode = '3992', strFormName = 'Importer Return (Monthly)', strScheduleCode = 'E-file', strScheduleName = 'MI OI/BI/TW E-file', strType = '', strNote = '', strTransactionType = NULL, intSort = 1901, strSPInventory = 'uspTFGetInventoryTax', strSPInvoice = 'uspTFGetInvoiceTax', strSPRunReport = '', intMasterId = 222534, intComponentTypeId = 4
+    UNION ALL SELECT intReportingComponentId = 780, strFormCode = '4004', strFormName = 'Exporter Return (Quarterly)', strScheduleCode = 'E-file', strScheduleName = 'MI EX E-file', strType = '', strNote = '', strTransactionType = NULL, intSort = 2031, strSPInventory = 'uspTFGetInventoryTax', strSPInvoice = 'uspTFGetInvoiceTax', strSPRunReport = '', intMasterId = 222535, intComponentTypeId = 4
+
 
 	EXEC uspTFUpgradeReportingComponents @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponent = @ReportingComponent
 
@@ -6257,7 +6263,12 @@ where FP.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intFilingPacketId = 2869, strFormCode = '3978', strScheduleCode = '7BOH', strType = 'Undyed Diesel', ysnStatus = 1, intFrequency = 1, intMasterId = 222869
 	UNION ALL SELECT intFilingPacketId = 2870, strFormCode = '3978', strScheduleCode = '7BOH', strType = 'Undyed Biodiesel (B05 or higher)', ysnStatus = 1, intFrequency = 1, intMasterId = 222870
 	UNION ALL SELECT intFilingPacketId = 2871, strFormCode = '3978', strScheduleCode = '7BOH', strType = 'Aviation', ysnStatus = 1, intFrequency = 1, intMasterId = 222871
-	
+    UNION ALL SELECT intFilingPacketId = 1023, strFormCode = '3724', strScheduleCode = 'E-file', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 222872
+    UNION ALL SELECT intFilingPacketId = 1024, strFormCode = '3791', strScheduleCode = 'E-file', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 222873
+    UNION ALL SELECT intFilingPacketId = 1025, strFormCode = '3978', strScheduleCode = 'E-file', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 222874
+    UNION ALL SELECT intFilingPacketId = 1026, strFormCode = '3992', strScheduleCode = 'E-file', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 222875
+    UNION ALL SELECT intFilingPacketId = 1027, strFormCode = '4004', strScheduleCode = 'E-file', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 222876
+
 	EXEC uspTFUpgradeFilingPackets @TaxAuthorityCode = @TaxAuthorityCode, @FilingPackets = @FilingPackets
 
 END
