@@ -149,6 +149,25 @@ BEGIN TRY
 			EXEC uspCTUpdateSequenceBasis @intContractDetailId,@dblBasis
 		END
 
+		IF @intPricingTypeId IN (1,2)
+		BEGIN
+			UPDATE	CD 
+			SET		CD.dblConvertedBasis = dbo.fnCTConvertQtyToTargetItemUOM(CD.intPriceItemUOMId,CD.intBasisUOMId,CD.dblBasis) / 
+					CASE	WHEN	CD.intCurrencyId = CD.intBasisCurrencyId THEN 1 
+							WHEN	ISNULL(CY.ysnSubCurrency,0) = 1 THEN 0.01 
+							ELSE	100
+					END
+			FROM	tblCTContractDetail CD
+			JOIN	tblSMCurrency		CY	ON	CD.intCurrencyId	=	CY.intCurrencyID
+			WHERE	CD.intContractDetailId	=	@intContractDetailId 
+		END
+		ELSE
+		BEGIN
+			UPDATE	tblCTContractDetail 
+			SET		dblConvertedBasis	=	NULL
+			WHERE	intContractDetailId	=	@intContractDetailId 
+		END
+
 		EXEC uspLGUpdateLoadItem @intContractDetailId
 		IF NOT EXISTS(SELECT 1 FROM tblCTContractDetail WHERE intParentDetailId = @intContractDetailId AND ysnSlice = 1 ) OR (@ysnSlice <> 1)
 		BEGIN
