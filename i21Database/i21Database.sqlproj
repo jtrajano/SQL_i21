@@ -5691,7 +5691,6 @@
     <Build Include="dbo\Views\vyuAPPaidOriginPrepaid.sql" />
     <Build Include="dbo\Views\vyuAPOriginPayables.sql" />
     <Build Include="dbo\Views\vyuSCTicketScreenView.sql" />
-    <Build Include="Scripts\Post-Deployment\AR\DefaultData\32_UpdateCommissionScheduleEntity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -5836,6 +5835,7 @@
     <None Include="Scripts\Post-Deployment\CRM\RenameCRMScreen.sql" />
     <None Include="Scripts\Post-Deployment\CCR\RemoveCCRObsoleteScreen.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateBillDetailRate.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\32_UpdateCommissionScheduleEntity.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
