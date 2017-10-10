@@ -617,6 +617,12 @@ Ext.define('Inventory.view.ItemViewModel', {
                 },
                 {
                     strDescription: 'Percent of Margin'
+                },
+                {
+                    strDescription: 'Markup Last Cost'
+                },
+                {
+                    strDescription: 'Markup Avg Cost'
                 }
             ],
             fields: [
@@ -659,6 +665,12 @@ Ext.define('Inventory.view.ItemViewModel', {
                 },
                 {
                     strDescription: 'Percent of Margin (MSRP)'
+                },
+                {
+                    strDescription: 'Markup Last Cost'
+                },
+                {
+                    strDescription: 'Markup Avg Cost'
                 }
             ],
             fields: [
