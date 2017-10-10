@@ -3542,8 +3542,8 @@ IF @recap = 1
 			,A.[dtmTransactionDate]
 			,Debit.Value
 			,Credit.Value
-			,A.[dblDebitUnit]
-			,A.[dblCreditUnit]
+			,DebitUnit.Value
+			,CreditUnit.Value
 			,[dblDebitForeign]					= CASE WHEN A.[intCurrencyId] = @DefaultCurrencyId THEN 0.00 ELSE A.[dblDebitForeign] END
 			,[dblCreditForeign]					= CASE WHEN A.[intCurrencyId] = @DefaultCurrencyId THEN 0.00 ELSE A.[dblCreditForeign]	 END 		
 			,A.[intCurrencyId]
