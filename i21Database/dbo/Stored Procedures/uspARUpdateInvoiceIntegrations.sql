@@ -30,7 +30,7 @@ IF @ForDelete = 1
 	END
 
 EXEC dbo.[uspARUpdatePricingHistory] 2, @intInvoiceId, @intUserId
-EXEC dbo.[uspARUpdateSOStatusFromInvoice] @intInvoiceId, @ForDelete
+EXEC dbo.[uspSOUpdateOrderShipmentStatus] @intInvoiceId, 'Invoice', @ForDelete
 EXEC dbo.[uspARUpdateItemComponent] @intInvoiceId, 0
 EXEC dbo.[uspARUpdateReservedStock] @intInvoiceId, @ForDelete, @intUserId, 0
 EXEC dbo.[uspARUpdateItemComponent] @intInvoiceId, 1

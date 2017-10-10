@@ -33,7 +33,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @OrderToUpdate ORDER BY intSalesOrderId)
 					
 		SELECT TOP 1 @intSalesOrderId = intSalesOrderId FROM @OrderToUpdate ORDER BY intSalesOrderId
 
-		EXEC dbo.uspSOUpdateOrderShipmentStatus @intSalesOrderId
+		EXEC dbo.uspSOUpdateOrderShipmentStatus @intSalesOrderId, 'Sales Order'
 									
 		DELETE FROM @OrderToUpdate WHERE intSalesOrderId = @intSalesOrderId AND intSalesOrderId = @intSalesOrderId 
 												
