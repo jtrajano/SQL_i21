@@ -154,9 +154,6 @@ WHERE
 EXEC dbo.[uspARUpdatePrepaymentsAndCreditMemos] @InvoiceIds = @IIDs
 
 
---Sales Order Status
-EXEC dbo.[uspARPostSOStatusFromInvoices] @InvoiceIds = @IIDs
-
 --Committed
 --EXEC dbo.[uspARUpdateCommitted] @intTransactionId, @ysnPost, @intUserId, 1
 
