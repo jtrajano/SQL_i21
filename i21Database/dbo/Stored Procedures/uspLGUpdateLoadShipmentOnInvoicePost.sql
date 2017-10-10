@@ -19,6 +19,7 @@ BEGIN TRY
 	DECLARE @intInvoiceDetailId INT
 	DECLARE @intPurchaseSale INT
 	DECLARE @strErrMsg NVARCHAR(MAX)
+	DECLARE @intSContractDetailId INT
 	DECLARE @tblInvoiceDetail TABLE (
 		intRecordId INT IDENTITY(1, 1)
 		,intInvoiceId INT
@@ -50,6 +51,7 @@ BEGIN TRY
 		WHERE intRecordId = @intMinRecordId
 
 		SELECT @intPContractDetailId = intPContractDetailId
+		      ,@intSContractDetailId = intSContractDetailId
 			  ,@dblLoadDetailQty = CASE WHEN ISNULL(@Post,0) =  1 THEN dblQuantity ELSE -dblQuantity END
 			  ,@intLoadId = intLoadId
 		FROM tblLGLoadDetail
@@ -67,12 +69,25 @@ BEGIN TRY
 				,@intExternalId = @intInvoiceDetailId
 				,@strScreenName = 'Invoice'
 
+
+			EXEC uspCTUpdateSequenceBalance @intContractDetailId = @intSContractDetailId
+				,@dblQuantityToUpdate	=	@dblLoadDetailQty
+				,@intUserId				=	@UserId
+				,@intExternalId			=	@intInvoiceDetailId
+				,@strScreenName			=	'Invoice' 
+
 			SET @dblLoadDetailQty = -@dblLoadDetailQty
 			EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intPContractDetailId
 				,@dblQuantityToUpdate =  @dblLoadDetailQty
 				,@intUserId = @UserId
 				,@intExternalId = @intInvoiceDetailId
 				,@strScreenName = 'Invoice'
+
+			EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intSContractDetailId
+				,@dblQuantityToUpdate	=	@dblLoadDetailQty
+				,@intUserId				=	@UserId
+				,@intExternalId			=	@intInvoiceDetailId
+				,@strScreenName			=	'Invoice' 
 		END
 
 		SELECT @intMinRecordId = MIN(intRecordId)
