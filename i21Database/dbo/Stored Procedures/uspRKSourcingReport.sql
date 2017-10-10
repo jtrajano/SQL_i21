@@ -29,18 +29,20 @@ SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarch
 
              ,((SELECT sum(
               dbo.fnCTConvertQtyToTargetCommodityUOM(@intCommodityId, det.intUnitMeasureId, ic.intUnitMeasureId,det.dblQuantity)*
-                ((det.dblConvertedBasis/case when isnull(c.ysnSubCurrency,0) = 1 then 100 else 1 end)+
+                (det.dblConvertedBasis+
                 (dbo.fnCTConvertQtyToTargetCommodityUOM(@intCommodityId,ic.intUnitMeasureId,MA.intUnitMeasureId, ISNULL(dbo.fnRKGetLatestClosingPrice(det.intFutureMarketId,det.intFutureMonthId,getdate()),0)))/
                            case when isnull(mc.ysnSubCurrency,0) = 1 then 100 else 1 end
                            ) )
              FROM tblCTContractDetail det
-                       JOIN tblCTContractHeader ch on det.intContractHeaderId= ch.intContractHeaderId
-                       JOIN tblICCommodityUnitMeasure cuc on  cuc.intCommodityUnitMeasureId=ch.intCommodityUOMId 
-              join tblICItemUOM ic on det.intPriceItemUOMId=ic.intItemUOMId 
-              join tblSMCurrency c on det.intCurrencyId=c.intCurrencyID
-                       JOIN tblRKFutureMarket MA ON MA.intFutureMarketId = det.intFutureMarketId
-                       join tblSMCurrency mc on MA.intCurrencyId=mc.intCurrencyID
-              WHERE det.intContractDetailId=cd.intContractDetailId and det.intPricingTypeId in(2))) dblUnPriced
+                JOIN tblCTContractHeader ch on det.intContractHeaderId= ch.intContractHeaderId
+                JOIN tblICCommodityUnitMeasure cuc on  cuc.intCommodityUnitMeasureId=ch.intCommodityUOMId 
+                join tblICItemUOM ic on det.intPriceItemUOMId=ic.intItemUOMId 
+                join tblSMCurrency c on det.intCurrencyId=c.intCurrencyID
+                JOIN tblRKFutureMarket MA ON MA.intFutureMarketId = det.intFutureMarketId
+                join tblSMCurrency mc on MA.intCurrencyId=mc.intCurrencyID
+              WHERE det.intContractDetailId=cd.intContractDetailId and det.intPricingTypeId in(2)
+			  AND intContractDetailId NOT IN(SELECT intContractDetailId FROM vyuCTSearchPriceContract)
+			  )) dblUnPriced
 
                        ,(SELECT sum(det.dblConvertedBasis)--/case when isnull(c.ysnSubCurrency,0) = 1 then 100 else 1 end                        
                          FROM tblCTContractDetail det
@@ -65,9 +67,9 @@ SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarch
                                   ((((SUM(detcd.dblFixationPrice*detcd.dblLotsFixed) OVER (PARTITION BY det.intContractDetailId )  
                                    + (isnull(detcd.dblBalanceNoOfLots,0) * ISNULL(dbo.fnRKGetLatestClosingPrice(det.intFutureMarketId,tcd.intFutureMonthId,getdate()),0)))
                                   )/ cd.dblNoOfLots)
-                                  +det.dblBasis)
+                                  +tcd.dblConvertedBasis)
                                   * 
-                                  dbo.fnCTConvertQtyToTargetCommodityUOM(@intCommodityId,cuc.intCommodityUnitMeasureId, @intUnitMeasureId,cd.dblQuantity)
+                                  dbo.fnCTConvertQtyToTargetCommodityUOM(@intCommodityId, tcd.intUnitMeasureId,cuc.intUnitMeasureId,cd.dblQuantity)
                                   )
                            --/ case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end
               FROM vyuCTSearchPriceContract det
@@ -84,7 +86,7 @@ SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarch
 
                        (SELECT DISTINCT
                dbo.fnCTConvertQtyToTargetCommodityUOM
-                        (@intCommodityId,tcd.intUnitMeasureId, cuc.intUnitMeasureId,det.dblBasis)
+                        (@intCommodityId,tcd.intUnitMeasureId, cuc.intUnitMeasureId,tcd.dblConvertedBasis)
                            --/ case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end
               FROM vyuCTSearchPriceContract det
                        JOIN tblCTContractDetail tcd on det.intContractDetailId = tcd.intContractDetailId
@@ -154,7 +156,7 @@ SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarch
 
              ,((SELECT sum(
               dbo.fnCTConvertQtyToTargetCommodityUOM(@intCommodityId, det.intUnitMeasureId, ic.intUnitMeasureId,det.dblQuantity)*
-                ((det.dblConvertedBasis/case when isnull(c.ysnSubCurrency,0) = 1 then 100 else 1 end)+
+                (det.dblConvertedBasis+
                 (dbo.fnCTConvertQtyToTargetCommodityUOM(@intCommodityId,ic.intUnitMeasureId,MA.intUnitMeasureId, ISNULL(dbo.fnRKGetLatestClosingPrice(det.intFutureMarketId,det.intFutureMonthId,getdate()),0)))/
                            case when isnull(mc.ysnSubCurrency,0) = 1 then 100 else 1 end
                            ) )
@@ -165,7 +167,9 @@ SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarch
               join tblSMCurrency c on det.intCurrencyId=c.intCurrencyID
                        JOIN tblRKFutureMarket MA ON MA.intFutureMarketId = det.intFutureMarketId
                        join tblSMCurrency mc on MA.intCurrencyId=mc.intCurrencyID
-              WHERE det.intContractDetailId=cd.intContractDetailId and det.intPricingTypeId in(2))) dblUnPriced
+              WHERE det.intContractDetailId=cd.intContractDetailId and det.intPricingTypeId in(2)
+			  AND intContractDetailId NOT IN(SELECT intContractDetailId FROM vyuCTSearchPriceContract)
+			  )) dblUnPriced
 
                        ,(SELECT sum(det.dblConvertedBasis)--/case when isnull(c.ysnSubCurrency,0) = 1 then 100 else 1 end                        
                          FROM tblCTContractDetail det
@@ -190,9 +194,9 @@ SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarch
                                   ((((SUM(detcd.dblFixationPrice*detcd.dblLotsFixed) OVER (PARTITION BY det.intContractDetailId )  
                                    + (isnull(detcd.dblBalanceNoOfLots,0) * ISNULL(dbo.fnRKGetLatestClosingPrice(det.intFutureMarketId,tcd.intFutureMonthId,getdate()),0)))
                                   )/ cd.dblNoOfLots)
-                                  +det.dblBasis)
+                                  +tcd.dblConvertedBasis)
                                   * 
-                                  dbo.fnCTConvertQtyToTargetCommodityUOM(@intCommodityId,cuc.intCommodityUnitMeasureId, @intUnitMeasureId,cd.dblQuantity)
+                                  dbo.fnCTConvertQtyToTargetCommodityUOM(@intCommodityId, tcd.intUnitMeasureId,cuc.intUnitMeasureId,cd.dblQuantity)
                                   )
                            --/ case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end
               FROM vyuCTSearchPriceContract det
@@ -209,7 +213,7 @@ SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarch
 
                        (SELECT DISTINCT
                dbo.fnCTConvertQtyToTargetCommodityUOM
-                        (@intCommodityId,tcd.intUnitMeasureId, cuc.intUnitMeasureId,det.dblBasis)
+                        (@intCommodityId,tcd.intUnitMeasureId, cuc.intUnitMeasureId,tcd.dblConvertedBasis)
                            --/ case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end
               FROM vyuCTSearchPriceContract det
                        JOIN tblCTContractDetail tcd on det.intContractDetailId = tcd.intContractDetailId
