@@ -5424,6 +5424,8 @@
     <Build Include="dbo\Tables\tblARGLSummaryStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGenerateWhereClause.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleImportErrors.sql" />
+    <Build Include="vyuAP1099DIV.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRpt1099DIVTwoPart.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
