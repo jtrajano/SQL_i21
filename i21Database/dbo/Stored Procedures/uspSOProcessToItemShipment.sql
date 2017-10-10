@@ -16,7 +16,7 @@ DECLARE	 @ShipmentId INT
 		,@InvoiceId  INT = 0	    
 
 --VALIDATE IF SO IS ALREADY CLOSED
-IF EXISTS(SELECT NULL FROM tblSOSalesOrder WHERE [intSalesOrderId] = @SalesOrderId AND [strOrderStatus] = 'Closed') 
+IF EXISTS(SELECT NULL FROM tblSOSalesOrder WHERE [intSalesOrderId] = @SalesOrderId AND [strOrderStatus] = 'Closed' AND @Unship = 0)
 	BEGIN
 		RAISERROR('Sales Order already closed.', 16, 1)
 		RETURN;
@@ -56,11 +56,9 @@ IF @Unship = 1
 					WHERE intOrderId = @SalesOrderId
 					
 					EXEC dbo.uspICUnshipInventoryItem @intInventoryShipmentId, @UserId
+					EXEC dbo.uspSOUpdateOrderShipmentStatus @intInventoryShipmentId, 'Inventory', 1
 				END
 			
-				--UPDATE ORDER STATUS
-				EXEC dbo.uspSOUpdateOrderShipmentStatus @SalesOrderId, 0, 1
-
 				UPDATE tblSOSalesOrder SET ysnShipped = 0 WHERE intSalesOrderId = @SalesOrderId
 				RETURN 1
 			END
@@ -92,7 +90,7 @@ ELSE
 		IF @@ERROR > 0 
 			RETURN 0;
 
-		EXEC dbo.uspSOUpdateOrderShipmentStatus @SalesOrderId
+		EXEC dbo.uspSOUpdateOrderShipmentStatus @InventoryShipmentId, 'Inventory', 0
 
 		UPDATE tblSOSalesOrder
 		SET dtmProcessDate = GETDATE()

@@ -1109,9 +1109,8 @@ IF ISNULL(@RaiseError,0) = 0
 		END	
 
 		EXEC dbo.uspARInsertTransactionDetail @NewInvoiceId	
-		EXEC dbo.uspARUpdateInvoiceIntegrations @NewInvoiceId, 0, @UserId
-		EXEC dbo.uspSOUpdateOrderShipmentStatus @SalesOrderId
-		EXEC dbo.[uspARReComputeInvoiceAmounts] @NewInvoiceId
+		EXEC dbo.uspARUpdateInvoiceIntegrations @NewInvoiceId, 0, @UserId		
+		EXEC dbo.uspARReComputeInvoiceAmounts @NewInvoiceId
 		
 		UPDATE
 			tblSOSalesOrder
