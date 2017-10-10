@@ -5703,6 +5703,7 @@
     <Build Include="dbo\Stored Procedures\uspQMSampleImportErrors.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\32_UpdateCommissionScheduleEntity.sql" />
     <Build Include="dbo\Stored Procedures\uspGLSyncGLAccountDescription.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMDropSubsidiary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
