@@ -40,7 +40,7 @@ Ext.define('Inventory.model.ItemVendorXref', {
                 }
             }
         },
-        { name: 'intItemLocationId', type: 'int', allowNull: true },
+        { name: 'intItemLocationId', type: 'int', allowNull: true, defaultValue: null },
         { name: 'intVendorId', type: 'int', allowNull: true },
         { name: 'strVendorProduct', type: 'string' },
         { name: 'strProductDescription', type: 'string' },
@@ -54,7 +54,6 @@ Ext.define('Inventory.model.ItemVendorXref', {
     ],
 
     validators: [
-        {type: 'presence', field: 'strLocationName'},
         {type: 'presence', field: 'strVendorId'},
         {type: 'presence', field: 'strVendorProduct'},
         {type: 'presence', field: 'strProductDescription'}

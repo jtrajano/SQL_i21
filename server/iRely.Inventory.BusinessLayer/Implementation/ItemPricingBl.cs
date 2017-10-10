@@ -77,6 +77,7 @@ namespace iRely.Inventory.BusinessLayer
                     strPriceLevel = p.strPriceLevel,
                     intItemUnitMeasureId = p.intItemUnitMeasureId,
                     dblUnit = p.dblUnit,
+                    dtmEffectiveDate = p.dtmEffectiveDate,
                     dblMin = p.dblMin,
                     dblMax = p.dblMax,
                     strPricingMethod = p.strPricingMethod,
