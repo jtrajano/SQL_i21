@@ -6868,7 +6868,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var newCF = current.get('dblItemUOMConvFactor');
         var received = current.get('dblReceived');
         var ordered = current.get('dblOrderQty');
-        var qtyToReceive = ordered - received;
+        var qtyToReceive = plugin.getActiveEditor().getValue();//ordered - received;
         if (origCF > 0 && newCF > 0) {
             //qtyToReceive = (qtyToReceive * origCF) / newCF;
             qtyToReceive = me.convertQtyBetweenUOM(origCF, newCF, qtyToReceive);
