@@ -225,6 +225,7 @@ Ext.define('Inventory.view.Item', {
                                                                 itemId: 'cboStatus',
                                                                 fieldLabel: 'Status',
                                                                 displayField: 'strStatus',
+                                                                queryMode: 'local',
                                                                 valueField: 'strStatus'
                                                             },
                                                             {
@@ -3786,6 +3787,7 @@ Ext.define('Inventory.view.Item', {
                                                                         fieldLabel: 'Cost Type',
                                                                         labelWidth: 150,
                                                                         displayField: 'strDescription',
+                                                                        queryMode: 'local',
                                                                         valueField: 'strDescription'
                                                                     },
                                                                     {
@@ -3830,6 +3832,7 @@ Ext.define('Inventory.view.Item', {
                                                                         fieldLabel: 'Cost Method',
                                                                         labelWidth: 150,
                                                                         displayField: 'strDescription',
+                                                                        queryMode: 'local',
                                                                         valueField: 'strDescription'
                                                                     },
                                                                     {
@@ -4666,6 +4669,7 @@ Ext.define('Inventory.view.Item', {
                                                                             xtype: 'combobox',
                                                                             itemId: 'cboPricingLevelMethod',
                                                                             displayField: 'strDescription',
+                                                                            queryMode: 'local',
                                                                             valueField: 'strDescription'
                                                                         }
                                                                     },
@@ -4763,6 +4767,7 @@ Ext.define('Inventory.view.Item', {
                                                                             xtype: 'combobox',
                                                                             itemId: 'cboPricingLevelCommissionOn',
                                                                             displayField: 'strDescription',
+                                                                            queryMode: 'local',
                                                                             valueField: 'strDescription'
                                                                         }
                                                                     },
@@ -4880,6 +4885,7 @@ Ext.define('Inventory.view.Item', {
                                                                             xtype: 'combobox',
                                                                             itemId: 'cboSpecialPricingPromotionType',
                                                                             displayField: 'strDescription',
+                                                                            queryMode: 'local',
                                                                             valueField: 'strDescription'
                                                                         }
                                                                     },
@@ -4964,6 +4970,7 @@ Ext.define('Inventory.view.Item', {
                                                                             xtype: 'combobox',
                                                                             itemId: 'cboSpecialPricingDiscountBy',
                                                                             displayField: 'strDescription',
+                                                                            queryMode: 'local',
                                                                             valueField: 'strDescription'
                                                                         }
                                                                     },

@@ -661,6 +661,7 @@
                                                         "fieldLabel": "Status",
                                                         "itemId": "cboStatus",
                                                         "layout|flex": null,
+                                                        "queryMode": "local",
                                                         "tabIndex": null,
                                                         "valueField": "strStatus"
                                                     },
@@ -671,7 +672,8 @@
                                                         "layout|flex": "number",
                                                         "tabIndex": "number",
                                                         "valueField": "datafield",
-                                                        "scrollable": "boolean"
+                                                        "scrollable": "boolean",
+                                                        "queryMode": "string"
                                                     },
                                                     "name": "MyComboBox5",
                                                     "designerId": "b047e1a1-e9d3-4e6c-a2cb-65904a7aa1d9"
@@ -11465,6 +11467,7 @@
                                                                 "itemId": "cboCostType",
                                                                 "labelWidth": 150,
                                                                 "layout|flex": null,
+                                                                "queryMode": "local",
                                                                 "valueField": "strDescription"
                                                             },
                                                             "configAlternates": {
@@ -11476,7 +11479,8 @@
                                                                 "labelWidth": "number",
                                                                 "layout|flex": "number",
                                                                 "valueField": "datafield",
-                                                                "scrollable": "boolean"
+                                                                "scrollable": "boolean",
+                                                                "queryMode": "string"
                                                             },
                                                             "name": "MyComboBox86",
                                                             "designerId": "8758691a-294d-4389-99c9-e7a102868473",
@@ -11572,6 +11576,7 @@
                                                                 "itemId": "cboCostMethod",
                                                                 "labelWidth": 150,
                                                                 "layout|flex": null,
+                                                                "queryMode": "local",
                                                                 "valueField": "strDescription"
                                                             },
                                                             "configAlternates": {
@@ -11583,7 +11588,8 @@
                                                                 "labelWidth": "number",
                                                                 "layout|flex": "number",
                                                                 "valueField": "datafield",
-                                                                "scrollable": "boolean"
+                                                                "scrollable": "boolean",
+                                                                "queryMode": "string"
                                                             },
                                                             "name": "MyComboBox73",
                                                             "designerId": "53f0848c-564e-4545-a0df-f95230809d4e",
@@ -14084,13 +14090,15 @@
                                                                     "userConfig": {
                                                                         "displayField": "strDescription",
                                                                         "itemId": "cboPricingLevelMethod",
+                                                                        "queryMode": "local",
                                                                         "valueField": "strDescription"
                                                                     },
                                                                     "configAlternates": {
                                                                         "displayField": "datafield",
                                                                         "itemId": "string",
                                                                         "valueField": "datafield",
-                                                                        "scrollable": "boolean"
+                                                                        "scrollable": "boolean",
+                                                                        "queryMode": "string"
                                                                     },
                                                                     "name": "MyComboBox58",
                                                                     "designerId": "11cecfd6-8449-401e-aa35-550c19dbada7"
@@ -14382,13 +14390,15 @@
                                                                     "userConfig": {
                                                                         "displayField": "strDescription",
                                                                         "itemId": "cboPricingLevelCommissionOn",
+                                                                        "queryMode": "local",
                                                                         "valueField": "strDescription"
                                                                     },
                                                                     "configAlternates": {
                                                                         "displayField": "datafield",
                                                                         "itemId": "string",
                                                                         "valueField": "datafield",
-                                                                        "scrollable": "boolean"
+                                                                        "scrollable": "boolean",
+                                                                        "queryMode": "string"
                                                                     },
                                                                     "name": "MyComboBox59",
                                                                     "designerId": "243e00fb-ec0e-4e1a-88e7-ea56d3a4cd8e"
@@ -14755,13 +14765,15 @@
                                                                     "userConfig": {
                                                                         "displayField": "strDescription",
                                                                         "itemId": "cboSpecialPricingPromotionType",
+                                                                        "queryMode": "local",
                                                                         "valueField": "strDescription"
                                                                     },
                                                                     "configAlternates": {
                                                                         "displayField": "datafield",
                                                                         "itemId": "string",
                                                                         "valueField": "datafield",
-                                                                        "scrollable": "boolean"
+                                                                        "scrollable": "boolean",
+                                                                        "queryMode": "string"
                                                                     },
                                                                     "name": "MyComboBox61",
                                                                     "designerId": "a9c6317e-ad23-49f2-af98-4be08145957c"
@@ -14979,13 +14991,15 @@
                                                                     "userConfig": {
                                                                         "displayField": "strDescription",
                                                                         "itemId": "cboSpecialPricingDiscountBy",
+                                                                        "queryMode": "local",
                                                                         "valueField": "strDescription"
                                                                     },
                                                                     "configAlternates": {
                                                                         "displayField": "datafield",
                                                                         "itemId": "string",
                                                                         "valueField": "datafield",
-                                                                        "scrollable": "boolean"
+                                                                        "scrollable": "boolean",
+                                                                        "queryMode": "string"
                                                                     },
                                                                     "name": "MyComboBox63",
                                                                     "designerId": "89ac4e4a-8ba8-49b1-b304-74795b98e724"
