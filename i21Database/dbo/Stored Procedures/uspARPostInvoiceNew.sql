@@ -3380,8 +3380,8 @@ IF @Recap = 1
 			,A.[dtmTransactionDate]
 			,Debit.Value
 			,Credit.Value
-			,A.[dblDebitUnit]
-			,A.[dblCreditUnit]
+			,DebitUnit.Value
+			,CreditUnit.Value
 			,A.[dblDebitForeign]
 			,A.[dblCreditForeign]			
 			,A.[intCurrencyId]
