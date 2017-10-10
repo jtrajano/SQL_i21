@@ -412,7 +412,7 @@ BEGIN
 		,@ItemSubCurrencyId				= (CASE WHEN @GroupingOption = 0 THEN [intSubCurrencyId] ELSE NULL END)
 		,@ItemSubCurrencyRate			= (CASE WHEN @GroupingOption = 0 THEN [dblSubCurrencyRate] ELSE 1 END)
 		,@ItemIsBlended					= (CASE WHEN @GroupingOption = 0 THEN [ysnBlended] ELSE 0 END)
-		,@ItemConversionAccountId		= (CASE WHEN @GroupingOption = 0 THEN [intConversionAccountId] ELSE NULL END)
+		,@ItemConversionAccountId		= (CASE WHEN @GroupingOption = 0 OR ISNULL([strSourceTransaction],'') = 'Import' THEN [intConversionAccountId] ELSE NULL END)
 		,@ItemSalesAccountId			= (CASE WHEN @GroupingOption = 0 THEN [intSalesAccountId] ELSE NULL END)
 		,@ItemStorageScheduleTypeId		= (CASE WHEN @GroupingOption = 0 THEN [intStorageScheduleTypeId] ELSE NULL END)
 		,@ItemDestinationGradeId		= (CASE WHEN @GroupingOption = 0 THEN [intDestinationGradeId] ELSE NULL END)
