@@ -16,3 +16,8 @@ GO
 CREATE NONCLUSTERED INDEX [IX_tblGLAccountSegmentMapping_intAccountSegmentId]
     ON [dbo].[tblGLAccountSegmentMapping]([intAccountSegmentId] ASC);
 GO
+
+CREATE NONCLUSTERED INDEX IX_tblGLAccountSegmentMapping_intAccount_intAccountSegmentId
+ON [dbo].[tblGLAccountSegmentMapping] ([intAccountSegmentId])
+INCLUDE ([intAccountId])
+GO
