@@ -3488,7 +3488,6 @@
                                                                                 "designer|createAlias": "gridcombobox",
                                                                                 "displayField": "strUnitMeasure",
                                                                                 "itemId": "cboCostUOM",
-                                                                                "selectOnTab": false,
                                                                                 "valueField": "strUnitMeasure"
                                                                             },
                                                                             "configAlternates": {
@@ -3498,7 +3497,6 @@
                                                                                 "itemId": "string",
                                                                                 "valueField": "datafield",
                                                                                 "scrollable": "boolean"
-                                                                                "selectOnTab": "boolean"
                                                                             },
                                                                             "name": "MyComboBox77",
                                                                             "designerId": "4667e791-0d8a-40bc-901f-f00e4553fb0c",
@@ -3583,7 +3581,6 @@
                                                                                 "designer|createAlias": "gridcombobox",
                                                                                 "displayField": "strUnitMeasure",
                                                                                 "itemId": "cboWeightUOM",
-                                                                                "selectOnTab": false,
                                                                                 "valueField": "strUnitMeasure"
                                                                             },
                                                                             "configAlternates": {
@@ -3594,7 +3591,6 @@
                                                                                 "itemId": "string",
                                                                                 "valueField": "datafield",
                                                                                 "scrollable": "boolean"
-                                                                                "selectOnTab": "boolean"
                                                                             },
                                                                             "name": "MyComboBox71",
                                                                             "designerId": "340c1094-1554-4f84-8b19-c0fa44dd185b",
@@ -3833,7 +3829,6 @@
                                                                                 "designer|createAlias": "gridcombobox",
                                                                                 "displayField": "strTaxGroup",
                                                                                 "itemId": "cboItemTaxGroup",
-                                                                                "selectOnTab": false,
                                                                                 "valueField": "strTaxGroup"
                                                                             },
                                                                             "configAlternates": {
@@ -3845,7 +3840,6 @@
                                                                                 "itemId": "string",
                                                                                 "valueField": "datafield",
                                                                                 "scrollable": "boolean"
-                                                                                "selectOnTab": "boolean"
                                                                             },
                                                                             "name": "MyComboBox14",
                                                                             "designerId": "c9f3cb62-a30c-492b-b540-958120e96f2b",
@@ -3944,7 +3938,6 @@
                                                                                 "designer|createAlias": "gridcombobox",
                                                                                 "displayField": "strCurrencyExchangeRateType",
                                                                                 "itemId": "cboForexRateType",
-                                                                                "selectOnTab": false,
                                                                                 "valueField": "strCurrencyExchangeRateType"
                                                                             },
                                                                             "configAlternates": {
@@ -3954,7 +3947,6 @@
                                                                                 "itemId": "string",
                                                                                 "valueField": "datafield",
                                                                                 "scrollable": "boolean"
-                                                                                "selectOnTab": "boolean"
                                                                             },
                                                                             "name": "MyComboBox4",
                                                                             "designerId": "63927701-e392-4fdc-88c8-a5370742b90a",
@@ -4085,7 +4077,6 @@
                                                                                 "designer|createAlias": "gridcombobox",
                                                                                 "displayField": "strSubLocationName",
                                                                                 "itemId": "cboSubLocation",
-                                                                                "selectOnTab": false,
                                                                                 "valueField": "strSubLocationName"
                                                                             },
                                                                             "configAlternates": {
@@ -4095,7 +4086,6 @@
                                                                                 "itemId": "string",
                                                                                 "valueField": "datafield",
                                                                                 "scrollable": "boolean"
-                                                                                "selectOnTab": "boolean"
                                                                             },
                                                                             "name": "MyComboBox4",
                                                                             "designerId": "fba48e02-b92d-4bec-8ad9-1aa798883515",
@@ -4174,7 +4164,6 @@
                                                                                 "designer|createAlias": "gridcombobox",
                                                                                 "displayField": "strName",
                                                                                 "itemId": "cboStorageLocation",
-                                                                                "selectOnTab": false,
                                                                                 "valueField": "strName"
                                                                             },
                                                                             "configAlternates": {
@@ -4184,7 +4173,6 @@
                                                                                 "itemId": "string",
                                                                                 "valueField": "datafield",
                                                                                 "scrollable": "boolean"
-                                                                                "selectOnTab": "boolean"
                                                                             },
                                                                             "name": "MyComboBox4",
                                                                             "designerId": "2dc9f454-f057-4c5f-99e5-665d76e1374e",
@@ -4256,7 +4244,6 @@
                                                                                 "designer|createAlias": "gridcombobox",
                                                                                 "displayField": "strDescription",
                                                                                 "itemId": "cboGrade",
-                                                                                "selectOnTab": false,
                                                                                 "valueField": "strDescription"
                                                                             },
                                                                             "configAlternates": {
@@ -4266,7 +4253,6 @@
                                                                                 "itemId": "string",
                                                                                 "valueField": "datafield",
                                                                                 "scrollable": "boolean"
-                                                                                "selectOnTab": "boolean"
                                                                             },
                                                                             "name": "MyComboBox4",
                                                                             "designerId": "7ba8752d-9e3d-45bb-8dbb-318ebdec7c01",
@@ -5013,7 +4999,6 @@
                                                                                 "designer|createAlias": "gridcombobox",
                                                                                 "displayField": "strParentLotNumber",
                                                                                 "itemId": "cboLotParent",
-                                                                                "selectOnTab": false,
                                                                                 "valueField": "strParentLotNumber"
                                                                             },
                                                                             "configAlternates": {
@@ -5023,7 +5008,6 @@
                                                                                 "itemId": "string",
                                                                                 "valueField": "datafield",
                                                                                 "scrollable": "boolean"
-                                                                                "selectOnTab": "boolean"
                                                                             },
                                                                             "name": "MyComboBox11",
                                                                             "designerId": "a8405ff5-c5f3-4198-89c0-02ad58160c5c",
@@ -5446,7 +5430,6 @@
                                                                                 "designer|createAlias": "gridcombobox",
                                                                                 "displayField": "strName",
                                                                                 "itemId": "cboLotStorageLocation",
-                                                                                "selectOnTab": false,
                                                                                 "valueField": "strName"
                                                                             },
                                                                             "configAlternates": {
@@ -5456,7 +5439,6 @@
                                                                                 "itemId": "string",
                                                                                 "valueField": "datafield",
                                                                                 "scrollable": "boolean"
-                                                                                "selectOnTab": "boolean"
                                                                             },
                                                                             "name": "MyComboBox72",
                                                                             "designerId": "77b0abe2-12d2-4358-8c2c-0ce7c35acbc8",
@@ -6006,7 +5988,6 @@
                                                                                 "designer|createAlias": "gridcombobox",
                                                                                 "displayField": "strDescription",
                                                                                 "itemId": "cboLotGrade",
-                                                                                "selectOnTab": false,
                                                                                 "valueField": "strDescription"
                                                                             },
                                                                             "configAlternates": {
@@ -6016,7 +5997,6 @@
                                                                                 "itemId": "string",
                                                                                 "valueField": "datafield",
                                                                                 "scrollable": "boolean"
-                                                                                "selectOnTab": "boolean"
                                                                             },
                                                                             "name": "MyComboBox91",
                                                                             "designerId": "22d9cc48-b5b0-4ded-a045-fb386fa8e5af",
@@ -6080,7 +6060,6 @@
                                                                                 "designer|createAlias": "gridcombobox",
                                                                                 "displayField": "strCountry",
                                                                                 "itemId": "cboLotOrigin",
-                                                                                "selectOnTab": false,
                                                                                 "valueField": "strCountry"
                                                                             },
                                                                             "configAlternates": {
@@ -6090,7 +6069,6 @@
                                                                                 "itemId": "string",
                                                                                 "valueField": "datafield",
                                                                                 "scrollable": "boolean"
-                                                                                "selectOnTab": "boolean"
                                                                             },
                                                                             "name": "MyComboBox75",
                                                                             "designerId": "866ae80b-f3a3-42c1-aeca-e4ee1cd529b9",
@@ -6301,7 +6279,6 @@
                                                                             "userConfig": {
                                                                                 "displayField": "strDescription",
                                                                                 "itemId": "cboLotCondition",
-                                                                                "selectOnTab": false,
                                                                                 "valueField": "strDescription"
                                                                             },
                                                                             "configAlternates": {
@@ -6309,7 +6286,6 @@
                                                                                 "itemId": "string",
                                                                                 "valueField": "datafield",
                                                                                 "scrollable": "boolean"
-                                                                                "selectOnTab": "boolean"
                                                                             },
                                                                             "name": "MyComboBox76",
                                                                             "designerId": "15fc5ca9-0c35-48d2-89ba-1aa0be26ac6d"
@@ -7587,7 +7563,6 @@
                                                                         "designer|createAlias": "gridcombobox",
                                                                         "displayField": "strCurrency",
                                                                         "itemId": "cboChargeCurrency",
-                                                                        "selectOnTab": false,
                                                                         "valueField": "strCurrency"
                                                                     },
                                                                     "configAlternates": {
@@ -7597,7 +7572,6 @@
                                                                         "itemId": "string",
                                                                         "valueField": "datafield",
                                                                         "scrollable": "boolean"
-                                                                        "selectOnTab": "boolean"
                                                                     },
                                                                     "name": "MyComboBox",
                                                                     "designerId": "37a053d5-ab58-4998-aefa-31985f86a6a4",
@@ -7668,7 +7642,6 @@
                                                                         "designer|createAlias": "gridcombobox",
                                                                         "displayField": "strCurrencyExchangeRateType",
                                                                         "itemId": "cboChargeForexRateType",
-                                                                        "selectOnTab": false,
                                                                         "valueField": "strCurrencyExchangeRateType"
                                                                     },
                                                                     "configAlternates": {
@@ -7678,7 +7651,6 @@
                                                                         "itemId": "string",
                                                                         "valueField": "datafield",
                                                                         "scrollable": "boolean"
-                                                                        "selectOnTab": "boolean"
                                                                     },
                                                                     "name": "MyComboBox4",
                                                                     "designerId": "000958bf-ddbf-431e-9494-97dba8e0b2c8",
@@ -7864,7 +7836,6 @@
                                                                         "designer|createAlias": "gridcombobox",
                                                                         "displayField": "strUnitMeasure",
                                                                         "itemId": "cboChargeUOM",
-                                                                        "selectOnTab": false,
                                                                         "valueField": "strUnitMeasure"
                                                                     },
                                                                     "configAlternates": {
@@ -7874,7 +7845,6 @@
                                                                         "itemId": "string",
                                                                         "valueField": "datafield",
                                                                         "scrollable": "boolean"
-                                                                        "selectOnTab": "boolean"
                                                                     },
                                                                     "name": "MyComboBox82",
                                                                     "designerId": "d108ae3d-55d8-4b59-8d67-e0c9595fa027",
@@ -8077,7 +8047,6 @@
                                                                         "designer|createAlias": "gridcombobox",
                                                                         "displayField": "strName",
                                                                         "itemId": "cboCostVendor",
-                                                                        "selectOnTab": false,
                                                                         "valueField": "strName"
                                                                     },
                                                                     "configAlternates": {
@@ -8087,7 +8056,6 @@
                                                                         "itemId": "string",
                                                                         "valueField": "datafield",
                                                                         "scrollable": "boolean"
-                                                                        "selectOnTab": "boolean"
                                                                     },
                                                                     "name": "MyComboBox83",
                                                                     "designerId": "62fb327d-d2f9-4ca7-aa2d-67d8c9cd54d6",
@@ -8351,7 +8319,6 @@
                                                                         "designer|createAlias": "gridcombobox",
                                                                         "displayField": "strTaxGroup",
                                                                         "itemId": "cboChargeTaxGroup",
-                                                                        "selectOnTab": false,
                                                                         "valueField": "strTaxGroup"
                                                                     },
                                                                     "configAlternates": {
@@ -8361,7 +8328,6 @@
                                                                         "itemId": "string",
                                                                         "valueField": "datafield",
                                                                         "scrollable": "boolean"
-                                                                        "selectOnTab": "boolean"
                                                                     },
                                                                     "name": "MyComboBox24",
                                                                     "designerId": "398fde24-ff79-4931-ab26-04c957b7477a",
