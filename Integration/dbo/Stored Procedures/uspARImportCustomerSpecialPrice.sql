@@ -6,7 +6,8 @@ GO
 
 
 CREATE PROCEDURE [dbo].[uspARImportCustomerSpecialPrice]
-		@CustomerId NVARCHAR(50) = NULL
+			@Checking BIT = 0,
+			@Total INT = 0 OUTPUT
 
 AS
 BEGIN
@@ -18,30 +19,70 @@ BEGIN
 	SELECT TOP 1 @ysnAG = CASE WHEN ISNULL(coctl_ag, '') = 'Y' THEN 1 ELSE 0 END
 			   , @ysnPT = CASE WHEN ISNULL(coctl_pt, '') = 'Y' THEN 1 ELSE 0 END 
 	FROM coctlmst	
+	
+	IF  EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'tmpagcusname')
+	DROP TABLE tmpagcusname
 
+	SELECT	agcus_key, agcus_bill_to,
+			(CASE WHEN agcus_co_per_ind_cp = 'C' THEN 
+						agcus_last_name + agcus_first_name 
+				 WHEN agcus_co_per_ind_cp = 'P' THEN 
+						RTRIM(LTRIM(agcus_last_name)) + ', ' + RTRIM(LTRIM(agcus_first_name))
+			 END) as agcus_name 
+	INTO tmpagcusname
+	FROM agcusmst WHERE agcus_key = agcus_bill_to
+
+	INSERT INTO tmpagcusname (agcus_key, agcus_bill_to, agcus_name)
+	SELECT	agcus_key, agcus_bill_to,
+			(RTRIM (CASE WHEN agcus_co_per_ind_cp = 'C' THEN agcus_last_name + agcus_first_name 
+						 WHEN agcus_co_per_ind_cp = 'P' THEN RTRIM(LTRIM(agcus_last_name)) 
+						 + ', ' + RTRIM(LTRIM(agcus_first_name))
+					 END)) +'_' + CAST(A4GLIdentity AS NVARCHAR) 
+	FROM agcusmst  WHERE agcus_key <> agcus_bill_to
+	
+	IF  EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'tmpptcusname')
+		DROP TABLE tmpptcusname
+
+	IF  EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'tmpvndname')
+		DROP TABLE tmpvndname
+
+	SELECT	ptcus_cus_no, ptcus_bill_to,
+			(CASE WHEN ptcus_co_per_ind_cp = 'C' THEN 
+						ptcus_last_name + ptcus_first_name 
+				 WHEN ptcus_co_per_ind_cp = 'P' THEN 
+						RTRIM(LTRIM(ptcus_last_name)) + ', ' + RTRIM(LTRIM(ptcus_first_name))
+			 END) as ptcus_name 
+	INTO tmpptcusname
+	FROM ptcusmst WHERE ptcus_cus_no = ptcus_bill_to
+
+	INSERT INTO tmpptcusname (ptcus_cus_no, ptcus_bill_to, ptcus_name)
+	SELECT	ptcus_cus_no, ptcus_bill_to,
+			(RTRIM (CASE WHEN ptcus_co_per_ind_cp = 'C' THEN ptcus_last_name + ptcus_first_name 
+						 WHEN ptcus_co_per_ind_cp = 'P' THEN RTRIM(LTRIM(ptcus_last_name)) 
+						 + ', ' + RTRIM(LTRIM(ptcus_first_name))
+					 END)) +'_' + CAST(A4GLIdentity AS NVARCHAR) 
+	FROM ptcusmst  WHERE ptcus_cus_no <> ptcus_bill_to
+
+	SELECT	ssvnd_vnd_no, ssvnd_pay_to,
+			(RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = 'C' THEN ssvnd_name
+			ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name)))
+						+ ' ' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
+					END,''))) as ssvnd_name 
+	INTO tmpvndname
+	FROM ssvndmst  WHERE ssvnd_vnd_no = ssvnd_pay_to OR ssvnd_pay_to is null
+
+	INSERT INTO tmpvndname (ssvnd_vnd_no,ssvnd_pay_to,ssvnd_name)
+	SELECT	ssvnd_vnd_no, ssvnd_pay_to,
+			(RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = 'C' THEN ssvnd_name
+			ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name)))
+						+ ' ' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
+					END,'')) + '_' + CAST(A4GLIdentity AS NVARCHAR))  
+	FROM ssvndmst  WHERE ssvnd_vnd_no <> ssvnd_pay_to
+
+	
 	IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'spprcmst')
+	AND (@Checking = 0) 
 	BEGIN
-
-		IF  EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'tmpagcusname')
-			DROP TABLE tmpagcusname
-
-		SELECT	agcus_key, agcus_bill_to,
-				(CASE WHEN agcus_co_per_ind_cp = 'C' THEN 
-							agcus_last_name + agcus_first_name 
-					 WHEN agcus_co_per_ind_cp = 'P' THEN 
-							RTRIM(LTRIM(agcus_last_name)) + ', ' + RTRIM(LTRIM(agcus_first_name))
-				 END) as agcus_name 
-		INTO tmpagcusname
-		FROM agcusmst WHERE agcus_key = agcus_bill_to
-
-		INSERT INTO tmpagcusname (agcus_key, agcus_bill_to, agcus_name)
-		SELECT	agcus_key, agcus_bill_to,
-				(RTRIM (CASE WHEN agcus_co_per_ind_cp = 'C' THEN agcus_last_name + agcus_first_name 
-							 WHEN agcus_co_per_ind_cp = 'P' THEN RTRIM(LTRIM(agcus_last_name)) 
-							 + ', ' + RTRIM(LTRIM(agcus_first_name))
-						 END)) +'_' + CAST(A4GLIdentity AS NVARCHAR) 
-		FROM agcusmst  WHERE agcus_key <> agcus_bill_to
-
 
 		INSERT INTO [dbo].[tblARCustomerSpecialPrice]
 				   ([intEntityCustomerId]
@@ -87,50 +128,13 @@ BEGIN
 		INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.agcus_bill_to COLLATE SQL_Latin1_General_CP1_CS_AS
 		INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityId 
 				   AND CLOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.agcus_name COLLATE SQL_Latin1_General_CP1_CS_AS
-		WHERE SP.spprc_cus_no = @CustomerId
+		--WHERE SP.spprc_cus_no = @CustomerId
 	END
 
 	IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptpdvmst')
+	AND (@Checking = 0) 
+	
 	BEGIN
-
-		IF  EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'tmpptcusname')
-			DROP TABLE tmpptcusname
-
-		IF  EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'tmpvndname')
-			DROP TABLE tmpvndname
-
-		SELECT	ptcus_cus_no, ptcus_bill_to,
-				(CASE WHEN ptcus_co_per_ind_cp = 'C' THEN 
-							ptcus_last_name + ptcus_first_name 
-					 WHEN ptcus_co_per_ind_cp = 'P' THEN 
-							RTRIM(LTRIM(ptcus_last_name)) + ', ' + RTRIM(LTRIM(ptcus_first_name))
-				 END) as ptcus_name 
-		INTO tmpptcusname
-		FROM ptcusmst WHERE ptcus_cus_no = ptcus_bill_to
-
-		INSERT INTO tmpptcusname (ptcus_cus_no, ptcus_bill_to, ptcus_name)
-		SELECT	ptcus_cus_no, ptcus_bill_to,
-				(RTRIM (CASE WHEN ptcus_co_per_ind_cp = 'C' THEN ptcus_last_name + ptcus_first_name 
-							 WHEN ptcus_co_per_ind_cp = 'P' THEN RTRIM(LTRIM(ptcus_last_name)) 
-							 + ', ' + RTRIM(LTRIM(ptcus_first_name))
-						 END)) +'_' + CAST(A4GLIdentity AS NVARCHAR) 
-		FROM ptcusmst  WHERE ptcus_cus_no <> ptcus_bill_to
-
-		SELECT	ssvnd_vnd_no, ssvnd_pay_to,
-				(RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = 'C' THEN ssvnd_name
-				ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name)))
-							+ ' ' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
-						END,''))) as ssvnd_name 
-		INTO tmpvndname
-		FROM ssvndmst  WHERE ssvnd_vnd_no = ssvnd_pay_to OR ssvnd_pay_to is null
-
-		INSERT INTO tmpvndname (ssvnd_vnd_no,ssvnd_pay_to,ssvnd_name)
-		SELECT	ssvnd_vnd_no, ssvnd_pay_to,
-				(RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = 'C' THEN ssvnd_name
-				ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name)))
-							+ ' ' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
-						END,'')) + '_' + CAST(A4GLIdentity AS NVARCHAR))  
-		FROM ssvndmst  WHERE ssvnd_vnd_no <> ssvnd_pay_to
 
 		INSERT INTO [dbo].[tblARCustomerSpecialPrice]
 				   ([intEntityCustomerId]
@@ -215,7 +219,29 @@ BEGIN
 		INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.ptcus_bill_to COLLATE SQL_Latin1_General_CP1_CS_AS
 		INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityId 
 				   AND CLOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.ptcus_name COLLATE SQL_Latin1_General_CP1_CS_AS
-		WHERE PDV.ptpdv_cus_no = @CustomerId
+		--WHERE PDV.ptpdv_cus_no = @CustomerId
+	END
+	
+	IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'spprcmst')
+	AND (@Checking = 1) 
+	BEGIN
+		SELECT @Total = COUNT(*) FROM spprcmst SP
+		INNER JOIN tmpagcusname OCUS ON OCUS.agcus_key COLLATE SQL_Latin1_General_CP1_CS_AS = SP.spprc_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
+		INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.agcus_bill_to COLLATE SQL_Latin1_General_CP1_CS_AS
+		INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityId 
+				   AND CLOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.agcus_name COLLATE SQL_Latin1_General_CP1_CS_AS
+		
+	END
+	
+
+	IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptpdvmst')
+	AND (@Checking = 1) 
+	BEGIN	
+		SELECT @Total = COUNT(*) FROM ptpdvmst PDV
+		INNER JOIN tmpptcusname OCUS ON OCUS.ptcus_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
+		INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.ptcus_bill_to COLLATE SQL_Latin1_General_CP1_CS_AS
+		INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityId 
+				   AND CLOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.ptcus_name COLLATE SQL_Latin1_General_CP1_CS_AS		
 	END
 
 		IF  EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'tmpagcusname')
