@@ -96,7 +96,7 @@ SELECT
 FROM 
 	@Invoices ARI 
 INNER JOIN 
-	(SELECT [intInvoiceId], [intInvoiceDetailId], [intInventoryShipmentItemId], [dblPrice], [intCurrencyExchangeRateTypeId], [dblCurrencyExchangeRate] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
+	(SELECT [intInvoiceId], [intInvoiceDetailId], [intInventoryShipmentItemId], [dblPrice], [intCurrencyExchangeRateTypeId], [dblCurrencyExchangeRate], [intLoadDetailId] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 		ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN 
 	(SELECT [intInventoryShipmentId], [intInventoryShipmentItemId] FROM tblICInventoryShipmentItem WITH (NOLOCK)) ICISI
@@ -105,12 +105,9 @@ INNER JOIN (SELECT [intItemId], [intItemLocationId], [intItemUOMId], [intTransac
 		[intInTransitSourceLocationId], [ysnIsUnposted]
 	FROM tblICInventoryTransaction WITH (NOLOCK)) ICIT
 		ON ICIT.[intTransactionId] = ICISI.[intInventoryShipmentId] AND ICIT.[intTransactionDetailId] = ICISI.[intInventoryShipmentItemId] AND [ysnIsUnposted] = 0			 
-LEFT OUTER JOIN
-    (SELECT [intLoadId], [intPurchaseSale] FROM tblLGLoad WITH (NOLOCK)) LGL
-		ON LGL.[intLoadId] = ARI.[intLoadId]
 WHERE
 	ICIT.[intFobPointId] = @FOB_DESTINATION
-	AND ISNULL(LGL.[intLoadId], 0) = 0
+	AND ISNULL(ARID.[intLoadDetailId], 0) = 0
 
 
 UNION ALL
