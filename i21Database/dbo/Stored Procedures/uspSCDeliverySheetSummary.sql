@@ -181,7 +181,7 @@ BEGIN
 		INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
 		INNER JOIN tblGRCustomerStorage GRC ON SCD.intDeliverySheetId = GRC.intDeliverySheetId
 		INNER JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = GRC.intStorageTypeId
-		WHERE IR.intEntityVendorId = 1150 AND IRI.intOwnershipType = 2 
+		WHERE IR.intEntityVendorId = @intEntityId AND IRI.intOwnershipType = 2 
 		AND IR.intSourceType IN (1,5) AND GR.ysnReceiptedStorage = 0 
 		AND GR.ysnDPOwnedType = 0 AND GR.ysnGrainBankType = 0 AND GR.ysnCustomerStorage = 0), 0)
 		
@@ -204,7 +204,7 @@ BEGIN
 		INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
 		INNER JOIN tblGRCustomerStorage GRC ON SCD.intDeliverySheetId = GRC.intDeliverySheetId
 		INNER JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = GRC.intStorageTypeId
-		WHERE IR.intEntityVendorId = 1150 AND IRI.intOwnershipType = 2 
+		WHERE IR.intEntityVendorId = @intEntityId AND IRI.intOwnershipType = 2 
 		AND IR.intSourceType IN (1,5) AND GR.ysnDPOwnedType = 1 
 		AND GR.ysnCustomerStorage = 0 AND GR.intStorageScheduleTypeId > 0), 0)
 
@@ -236,7 +236,7 @@ BEGIN
 		INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
 		INNER JOIN tblGRCustomerStorage GRC ON SCD.intDeliverySheetId = GRC.intDeliverySheetId
 		INNER JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = GRC.intStorageTypeId
-		WHERE IR.intEntityVendorId = 1150 AND IRI.intOwnershipType = 2 
+		WHERE IR.intEntityVendorId = @intEntityId AND IRI.intOwnershipType = 2 
 		AND IR.intSourceType IN (1,5) AND IRI.intItemId = @intItemId
 		AND (GR.ysnReceiptedStorage = 1 OR GR.ysnGrainBankType = 1) AND GR.ysnDPOwnedType = 0 AND GR.ysnCustomerStorage = 0), 0)
 
@@ -306,7 +306,7 @@ IF ISNULL(@intEntityId,0) = 0
 		INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
 		INNER JOIN tblGRCustomerStorage GRC ON SCD.intDeliverySheetId = GRC.intDeliverySheetId
 		INNER JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = GRC.intStorageTypeId
-		WHERE IR.intEntityVendorId = 1150 AND IRI.intOwnershipType = 2 
+		WHERE IR.intEntityVendorId = @intEntityId AND IRI.intOwnershipType = 2 
 		AND IR.intSourceType IN (1,5) AND GR.ysnReceiptedStorage = 0 
 		AND GR.ysnDPOwnedType = 0 AND GR.ysnGrainBankType = 0 AND GR.ysnCustomerStorage = 0), 0)
 		
@@ -329,7 +329,7 @@ IF ISNULL(@intEntityId,0) = 0
 		INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
 		INNER JOIN tblGRCustomerStorage GRC ON SCD.intDeliverySheetId = GRC.intDeliverySheetId
 		INNER JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = GRC.intStorageTypeId
-		WHERE IR.intEntityVendorId = 1150 AND IRI.intOwnershipType = 2 
+		WHERE IR.intEntityVendorId = @intEntityId AND IRI.intOwnershipType = 2 
 		AND IR.intSourceType IN (1,5) AND GR.ysnDPOwnedType = 1 
 		AND GR.ysnCustomerStorage = 0 AND GR.intStorageScheduleTypeId > 0), 0)
 
@@ -361,7 +361,7 @@ IF ISNULL(@intEntityId,0) = 0
 		INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
 		INNER JOIN tblGRCustomerStorage GRC ON SCD.intDeliverySheetId = GRC.intDeliverySheetId
 		INNER JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = GRC.intStorageTypeId
-		WHERE IR.intEntityVendorId = 1150 AND IRI.intOwnershipType = 2 
+		WHERE IR.intEntityVendorId = @intEntityId AND IRI.intOwnershipType = 2 
 		AND IR.intSourceType IN (1,5) AND IRI.intItemId = @intItemId
 		AND (GR.ysnReceiptedStorage = 1 OR GR.ysnGrainBankType = 1) AND GR.ysnDPOwnedType = 0 AND GR.ysnCustomerStorage = 0), 0)
 
