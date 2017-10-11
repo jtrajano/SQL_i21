@@ -461,7 +461,7 @@ BEGIN
 					AND cb.dblStockIn <> 0 
 		END
 
-		-- Call the escalate sp
+		-- Check if there is a transaction where the cost change needs escalation. 
 		BEGIN 
 			SET @EscalateCostAdjustment = 0 
 			SET @EscalateCostAdjustment -= (@t_dblQty * @NewAverageCost) - (@t_dblQty * @OriginalAverageCost)

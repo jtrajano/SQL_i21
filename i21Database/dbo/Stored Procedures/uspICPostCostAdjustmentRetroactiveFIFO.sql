@@ -359,100 +359,18 @@ BEGIN
 		IF @t_dblQty > 0 AND @t_intInventoryTransactionId = @InventoryTransactionStartId  
 		BEGIN 
 			UPDATE	cb
-			SET		cb.dblCost = (@CostBucketOriginalValue + @CostAdjustment) / cb.dblStockIn 
+			SET		cb.dblCost = 
+						dbo.fnDivide(
+							(@CostBucketOriginalValue + @CostAdjustment) 
+							,cb.dblStockIn 
+						) 
 			FROM	tblICInventoryFIFO cb
 			WHERE	cb.intItemId = @intItemId
 					AND cb.intInventoryFIFOId = @CostBucketId
 					AND cb.dblStockIn <> 0 
-		END
+		END		
 
-		---- Check if the system needs to escalate the cost adjustment. 
-		--SET @EscalateInventoryTransactionId = NULL 
-		--SELECT	TOP 1 
-		--		@EscalateInventoryTransactionId = t.intInventoryTransactionId							
-		--		,@EscalateInventoryTransactionTypeId = t.intTransactionTypeId
-		--FROM	dbo.tblICInventoryTransaction t
-		--WHERE	@t_dblQty < 0 
-		--		AND t.strBatchId = @t_strBatchId 
-		--		AND t.intTransactionId = @t_intTransactionId
-		--		AND t.strTransactionId = @t_strTransactionId
-		--		AND ISNULL(t.ysnIsUnposted, 0) = 0
-		--		AND ISNULL(t.dblQty, 0) > 0 				
-		--		AND 1 = 
-		--			CASE WHEN t.intTransactionTypeId = @INV_TRANS_TYPE_Produce THEN 1 
-		--				 WHEN t.intItemId = @t_intItemId AND t.intTransactionDetailId = @t_intTransactionDetailId THEN 1 
-		--				 ELSE 0 
-		--			END 
-
-		--IF @EscalateInventoryTransactionId IS NOT NULL 
-		--BEGIN 
-		--	-- Calculate the value to be escalated. 
-		--	SET @EscalateCostAdjustment = 0 
-		--	SET @EscalateCostAdjustment -= (@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
-			
-		--	-- Insert data into the #tmpRevalueProducedItems table. 
-		--	INSERT INTO #tmpRevalueProducedItems (
-		--			[intItemId] 
-		--			,[intItemLocationId] 
-		--			,[intItemUOMId] 
-		--			,[dtmDate] 
-		--			,[dblQty] 
-		--			,[dblUOMQty] 
-		--			,[dblNewValue]
-		--			,[intCurrencyId] 
-		--			,[intTransactionId] 
-		--			,[intTransactionDetailId] 
-		--			,[strTransactionId] 
-		--			,[intTransactionTypeId] 
-		--			,[intLotId] 
-		--			,[intSubLocationId] 
-		--			,[intStorageLocationId] 
-		--			,[ysnIsStorage] 
-		--			,[strActualCostId] 
-		--			,[intSourceTransactionId] 
-		--			,[intSourceTransactionDetailId] 
-		--			,[strSourceTransactionId]
-		--			,[intRelatedInventoryTransactionId]
-		--			,[intFobPointId]
-		--			,[intInTransitSourceLocationId]
-		--	)
-		--	SELECT 
-		--			[intItemId]						= t.intItemId
-		--			,[intItemLocationId]			= t.intItemLocationId
-		--			,[intItemUOMId]					= t.intItemUOMId
-		--			,[dtmDate]						= @dtmDate
-		--			,[dblQty]						= t.dblQty
-		--			,[dblUOMQty]					= t.dblUOMQty
-		--			,[dblNewValue]					= @EscalateCostAdjustment
-		--			,[intCurrencyId]				= t.intCurrencyId
-		--			,[intTransactionId]				= @intTransactionId
-		--			,[intTransactionDetailId]		= @intTransactionDetailId
-		--			,[strTransactionId]				= @strTransactionId
-		--			,[intTransactionTypeId]			= @EscalateInventoryTransactionTypeId
-		--			,[intLotId]						= t.intLotId
-		--			,[intSubLocationId]				= t.intSubLocationId
-		--			,[intStorageLocationId]			= t.intStorageLocationId
-		--			,[ysnIsStorage]					= NULL 
-		--			,[strActualCostId]				= actualCostCb.strActualCostId  
-		--			,[intSourceTransactionId]		= t.intTransactionId
-		--			,[intSourceTransactionDetailId]	= t.intTransactionDetailId
-		--			,[strSourceTransactionId]		= t.strTransactionId
-		--			,[intRelatedInventoryTransactionId] = t.intInventoryTransactionId	
-		--			,[intFobPointId]				= t.intFobPointId
-		--			,[intInTransitSourceLocationId]	= t.intInTransitSourceLocationId
-		--	FROM	dbo.tblICInventoryTransaction t LEFT JOIN tblICInventoryActualCost actualCostCb
-		--				ON actualCostCb.strTransactionId = t.strTransactionId
-		--				AND actualCostCb.intTransactionId = t.intTransactionId
-		--				AND actualCostCb.intTransactionDetailId = t.intTransactionDetailId
-		--				AND actualCostCb.intItemId = t.intItemId
-		--				AND actualCostCb.intItemLocationId = t.intItemLocationId
-		--				AND t.intCostingMethod = @ACTUALCOST
-		--				AND actualCostCb.ysnIsUnposted = 0 
-		--	WHERE	intInventoryTransactionId = @EscalateInventoryTransactionId
-		--END 
-
-		-- Call the escalate sp
-
+		-- Check if there is a transaction where the cost change needs escalation. 
 		BEGIN 
 			SET @EscalateCostAdjustment = 0 
 			SET @EscalateCostAdjustment -= (@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
