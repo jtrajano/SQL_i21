@@ -1355,6 +1355,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     ],
                                                                                     itemId: 'cboCostUOM',
                                                                                     displayField: 'strUnitMeasure',
+                                                                                    selectOnTab: false,
                                                                                     valueField: 'strUnitMeasure'
                                                                                 }
                                                                             },
@@ -1402,6 +1403,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     allowEmpty: true,
                                                                                     itemId: 'cboWeightUOM',
                                                                                     displayField: 'strUnitMeasure',
+                                                                                    selectOnTab: false,
                                                                                     valueField: 'strUnitMeasure'
                                                                                 }
                                                                             },
@@ -1466,6 +1468,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     allowEmpty: true,
                                                                                     itemId: 'cboItemTaxGroup',
                                                                                     displayField: 'strTaxGroup',
+                                                                                    selectOnTab: false,
                                                                                     valueField: 'strTaxGroup'
                                                                                 }
                                                                             },
@@ -1507,6 +1510,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     ],
                                                                                     itemId: 'cboForexRateType',
                                                                                     displayField: 'strCurrencyExchangeRateType',
+                                                                                    selectOnTab: false,
                                                                                     valueField: 'strCurrencyExchangeRateType'
                                                                                 }
                                                                             },
@@ -1560,6 +1564,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     ],
                                                                                     itemId: 'cboSubLocation',
                                                                                     displayField: 'strSubLocationName',
+                                                                                    selectOnTab: false,
                                                                                     valueField: 'strSubLocationName'
                                                                                 }
                                                                             },
@@ -1602,6 +1607,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     ],
                                                                                     itemId: 'cboStorageLocation',
                                                                                     displayField: 'strName',
+                                                                                    selectOnTab: false,
                                                                                     valueField: 'strName'
                                                                                 }
                                                                             },
@@ -1635,6 +1641,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     ],
                                                                                     itemId: 'cboGrade',
                                                                                     displayField: 'strDescription',
+                                                                                    selectOnTab: false,
                                                                                     valueField: 'strDescription'
                                                                                 }
                                                                             },
@@ -1919,6 +1926,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     ],
                                                                                     itemId: 'cboLotParent',
                                                                                     displayField: 'strParentLotNumber',
+                                                                                    selectOnTab: false,
                                                                                     valueField: 'strParentLotNumber'
                                                                                 }
                                                                             },
@@ -2072,6 +2080,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     ],
                                                                                     itemId: 'cboLotStorageLocation',
                                                                                     displayField: 'strName',
+                                                                                    selectOnTab: false,
                                                                                     valueField: 'strName'
                                                                                 }
                                                                             },
@@ -2234,6 +2243,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     ],
                                                                                     itemId: 'cboLotGrade',
                                                                                     displayField: 'strDescription',
+                                                                                    selectOnTab: false,
                                                                                     valueField: 'strDescription'
                                                                                 }
                                                                             },
@@ -2261,6 +2271,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     ],
                                                                                     itemId: 'cboLotOrigin',
                                                                                     displayField: 'strCountry',
+                                                                                    selectOnTab: false,
                                                                                     valueField: 'strCountry'
                                                                                 }
                                                                             },
@@ -2315,6 +2326,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     xtype: 'combobox',
                                                                                     itemId: 'cboLotCondition',
                                                                                     displayField: 'strDescription',
+                                                                                    selectOnTab: false,
                                                                                     valueField: 'strDescription'
                                                                                 }
                                                                             },
@@ -2714,6 +2726,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             ],
                                                                             itemId: 'cboChargeCurrency',
                                                                             displayField: 'strCurrency',
+                                                                            selectOnTab: false,
                                                                             valueField: 'strCurrency'
                                                                         }
                                                                     },
@@ -2748,6 +2761,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             ],
                                                                             itemId: 'cboChargeForexRateType',
                                                                             displayField: 'strCurrencyExchangeRateType',
+                                                                            selectOnTab: false,
                                                                             valueField: 'strCurrencyExchangeRateType'
                                                                         }
                                                                     },
@@ -2811,6 +2825,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             ],
                                                                             itemId: 'cboChargeUOM',
                                                                             displayField: 'strUnitMeasure',
+                                                                            selectOnTab: false,
                                                                             valueField: 'strUnitMeasure'
                                                                         }
                                                                     },
@@ -2889,6 +2904,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             ],
                                                                             itemId: 'cboCostVendor',
                                                                             displayField: 'strName',
+                                                                            selectOnTab: false,
                                                                             valueField: 'strName'
                                                                         }
                                                                     },
@@ -2957,6 +2973,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             ],
                                                                             itemId: 'cboChargeTaxGroup',
                                                                             displayField: 'strTaxGroup',
+                                                                            selectOnTab: false,
                                                                             valueField: 'strTaxGroup'
                                                                         }
                                                                     },
