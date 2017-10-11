@@ -1890,7 +1890,7 @@ IF @post = 1
 				(SELECT [intInvoiceId], strInvoiceNumber, dtmPostDate, dtmDate, [intEntityCustomerId], strTransactionType, intCurrencyId, strComments, intPeriodsToAccrue
 				 FROM tblARInvoice WITH (NOLOCK) ) A ON ARPAC.[intInvoiceId] = A.[intInvoiceId] AND  ISNULL(ARPAC.[ysnApplied],0) = 1 AND ARPAC.[dblAppliedInvoiceDetailAmount] <> @ZeroDecimal				 
 			INNER JOIN
-				(SELECT [intInvoiceId], [strInvoiceNumber], intAccountId FROM tblARInvoice WITH (NOLOCK)  WHERE strTransactionType IN ('Credit Memo', 'Credit Note')) ARI1 
+				(SELECT [intInvoiceId], [strInvoiceNumber], intAccountId FROM tblARInvoice WITH (NOLOCK)  WHERE strTransactionType NOT IN ('Credit Memo', 'Credit Note')) ARI1 
 					ON ARPAC.[intPrepaymentId] = ARI1.[intInvoiceId] 
 			LEFT JOIN 
 				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.[intEntityId]
@@ -3868,11 +3868,13 @@ IF @recap = 0
 					DELETE FROM @InvoiceToUpdate WHERE intInvoiceId = @intInvoiceIntegractionId AND intInvoiceId = @intInvoiceIntegractionId 												
 				END
 
-			DELETE dbo.tblARPrepaidAndCredit  
-			FROM 
-				(SELECT intInvoiceId, ysnApplied FROM dbo.tblARPrepaidAndCredit WITH (NOLOCK)) A 
-			INNER JOIN (SELECT intInvoiceId FROM @PostInvoiceData ) B  
-			   ON A.intInvoiceId = B.intInvoiceId AND (ISNULL(ysnApplied,0) = 0 OR @post = 0)
+			DELETE A
+			FROM tblARPrepaidAndCredit A
+			INNER JOIN (
+				SELECT intInvoiceId 
+				FROM @PostInvoiceData
+			) B ON A.intInvoiceId = B.intInvoiceId 
+			WHERE ysnApplied = 0
 																
 		END TRY
 		BEGIN CATCH	
