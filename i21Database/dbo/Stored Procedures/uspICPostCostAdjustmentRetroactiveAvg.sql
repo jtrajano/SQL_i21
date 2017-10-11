@@ -71,7 +71,6 @@ BEGIN
 			,@INV_TRANS_TYPE_ADJ_Lot_Move AS INT = 20
 			,@INV_TRANS_TYPE_Cost_Adjustment AS INT = 26
 			,@INV_TRANS_TYPE_Invoice AS INT = 33
-
 			,@INV_TRANS_TYPE_NegativeStock AS INT = 35
 
 	DECLARE	@RunningQty AS NUMERIC(38, 20)
@@ -322,7 +321,7 @@ BEGIN
 			,il.intLocationId
 			,t.strRelatedTransactionId
 			,t.intRelatedTransactionId
-			,cb.dblCost 
+			,[negative stock cost] = cb.dblCost 
 	FROM	tblICInventoryTransaction t INNER JOIN tblICItemLocation il
 				ON t.intItemLocationId = il.intItemLocationId
 				AND t.intItemId = il.intItemId
