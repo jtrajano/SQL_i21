@@ -4451,6 +4451,8 @@
     <Build Include="dbo\Tables\tblMFHandheldMenuItem.sql" />
     <Build Include="dbo\Tables\tblMFHaldheldUserMenuItemMap.sql" />
     <Build Include="dbo\Views\vyuICGetItemStockUOMTotals.sql" />
+    <Build Include="dbo\Views\vyuICGetItemStockUOMTotalsAllLocations.sql" />
+    <Build Include="dbo\Views\vyuICGetItemStockUOMTotalsAllStorageUnits.sql" />
     <Build Include="dbo\Tables\tblLGLoadStorageCost.sql" />
     <Build Include="dbo\Views\vyuMFGetWorkOrderItem.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099PATRTwoPart.sql" />

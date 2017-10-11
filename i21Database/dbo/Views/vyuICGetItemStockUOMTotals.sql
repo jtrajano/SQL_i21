@@ -28,7 +28,8 @@ SELECT
 			END
 		),
 	dblStorageQty = SUM(StockUOM.dblUnitStorage),
-	ysnStockUnit = ItemUOM.ysnStockUnit
+	ysnStockUnit = ItemUOM.ysnStockUnit,
+	ItemLoc.intAllowNegativeInventory
 FROM tblICItemStockUOM StockUOM
 	LEFT JOIN tblICItem Item ON Item.intItemId = StockUOM.intItemId
 	LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemLocationId = StockUOM.intItemLocationId
@@ -62,6 +63,7 @@ FROM tblICItemStockUOM StockUOM
 		AND Lot.intStorageLocationId = StockUOM.intStorageLocationId
 	GROUP BY ItemUOM.ysnStockUnit,
 		StockUOM.intItemStockUOMId,
+		ItemLoc.intAllowNegativeInventory,
 		StockUOM.intItemId,
 		Location.intCompanyLocationId,
 		StockUOM.intItemLocationId,
