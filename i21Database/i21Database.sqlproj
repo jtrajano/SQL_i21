@@ -5695,6 +5695,7 @@
     <Build Include="dbo\Functions\fnGetItemOnHandQty.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentRetroactiveAvg.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateGLEntriesOnCostAdjustment.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentEscalate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
