@@ -29,6 +29,9 @@ BEGIN
 		, intItemLocationId
 		, intSubLocationId
 		, intStorageLocationId
+		, intParentLotId
+		, strParentLotNo
+		, strParentLotAlias
 		, intLotId
 		, strLotNo
 		, strLotAlias
@@ -47,6 +50,9 @@ BEGIN
 		, intItemLocationId
 		, intSubLocationId
 		, intStorageLocationId
+		, intParentLotId
+		, strParentLotNumber
+		, strParentLotAlias
 		, intLotId
 		, strLotNumber
 		, strLotAlias
