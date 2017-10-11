@@ -298,8 +298,6 @@ BEGIN
 				AND cbOut.intRevalueFifoId IS NOT NULL 
 			LEFT JOIN tblICInventoryFIFO cb
 				ON cb.intInventoryFIFOId = cbOut.intRevalueFifoId
-
-
 	WHERE	t.intItemId = @intItemId
 			AND t.intItemLocationId = @intItemLocationId			
 			AND ISNULL(t.ysnIsUnposted, 0) = 0 
