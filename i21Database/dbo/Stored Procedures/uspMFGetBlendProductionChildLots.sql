@@ -289,7 +289,9 @@ Begin
 	ls.strSecondaryStatus AS strLotStatus,
 	tpl.strSubLocationName,
 	tpl.strLocationName,
-	i.strLotTracking
+	i.strLotTracking,
+	tpl.intSubLocationId,
+	tpl.intStorageLocationId
 	From @tblPickedLots tpl 
 	Left Join tblICLot l on tpl.intLotId=l.intLotId
 	Left Join tblICParentLot pl on l.intParentLotId=pl.intParentLotId
