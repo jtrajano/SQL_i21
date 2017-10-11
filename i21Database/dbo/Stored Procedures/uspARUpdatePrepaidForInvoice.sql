@@ -74,33 +74,50 @@ BEGIN TRY
 		,[intRowNumber]
 		,[intConcurrencyId])
 	SELECT DISTINCT
-		 [intInvoiceId]						= @InvoiceId
-		,[intInvoiceDetailId]				= NULL
-		,[intPrepaymentId]					= I.intInvoiceId
-		,[intPrepaymentDetailId]			= ID.intInvoiceDetailId
-		,[dblPostedAmount]					= @ZeroDecimal
-		,[dblPostedDetailAmount]			= @ZeroDecimal
-		,[dblAppliedInvoiceAmount]			= @ZeroDecimal
-		,[dblAppliedInvoiceDetailAmount]	= @ZeroDecimal
-		,[ysnApplied]						= 0
-		,[ysnPosted]						= 0
-		,[intRowNumber]						= ROW_NUMBER() OVER(ORDER BY I.intInvoiceId ASC)
-		,[intConcurrencyId]					= 1
-	FROM dbo.tblARInvoice I WITH (NOLOCK)
-	INNER JOIN (SELECT intPaymentId 
-				FROM dbo.tblARPayment WITH (NOLOCK)
-				WHERE ysnPosted = 1
-	) AS P ON I.intPaymentId = P.intPaymentId
-	CROSS APPLY (SELECT TOP 1 intInvoiceDetailId 
-				 FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
-				 WHERE ID.intInvoiceId = I.intInvoiceId 
-					 AND (ID.ysnRestricted = 0 OR (ID.ysnRestricted = 1 AND ID.intContractDetailId = @intContractDetailId) OR (ID.intContractDetailId IS NULL AND ID.intItemId = @intItemId))
-	) AS ID 
-	WHERE I.strTransactionType IN ('Customer Prepayment', 'Credit Memo')
-	  AND I.ysnPosted = 1
-	  AND I.ysnPaid = 0
-	  AND I.intEntityCustomerId = @EntityCustomerId
-	  AND I.intInvoiceId <> @InvoiceId
+		  intInvoiceId						= @InvoiceId
+		, intInvoiceDetailId				= NULL
+		, intPrepaymentId					= I.intInvoiceId
+		, intPrepaymentDetailId				= I.intInvoiceDetailId
+		, dblPostedAmount					= @ZeroDecimal
+		, dblPostedDetailAmount				= @ZeroDecimal
+		, dblAppliedInvoiceAmount			= @ZeroDecimal
+		, dblAppliedInvoiceDetailAmount		= @ZeroDecimal
+		, ysnApplied						= 0
+		, ysnPosted							= 0
+		, intRowNumber						= ROW_NUMBER() OVER(ORDER BY I.intInvoiceId ASC)
+		, intConcurrencyId					= 1
+	FROM (
+		SELECT I.intInvoiceId
+			 , ID.intInvoiceDetailId
+		FROM dbo.tblARInvoice I WITH (NOLOCK)
+		INNER JOIN (
+			SELECT intPaymentId 
+			FROM dbo.tblARPayment WITH (NOLOCK)
+			WHERE ysnPosted = 1
+		) AS P ON I.intPaymentId = P.intPaymentId
+		CROSS APPLY (
+			SELECT TOP 1 intInvoiceDetailId 
+			FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
+			WHERE ID.intInvoiceId = I.intInvoiceId 
+			 AND (ID.ysnRestricted = 0 OR (ID.ysnRestricted = 1 AND ID.intContractDetailId = @intContractDetailId) OR (ID.intContractDetailId IS NULL AND ID.intItemId = @intItemId))
+		) AS ID 
+		WHERE I.strTransactionType = 'Customer Prepayment'
+			AND I.ysnPosted = 1
+			AND I.ysnPaid = 0
+			AND I.intEntityCustomerId = @EntityCustomerId
+			AND I.intInvoiceId <> @InvoiceId
+
+		UNION ALL
+
+		SELECT I.intInvoiceId
+			 , intInvoiceDetailId = NULL		 
+		FROM dbo.tblARInvoice I WITH (NOLOCK)
+		WHERE I.strTransactionType = 'Credit Memo'
+		  AND I.ysnPosted = 1
+		  AND I.ysnPaid = 0
+		  AND I.intEntityCustomerId = @EntityCustomerId
+		  AND I.intInvoiceId <> @InvoiceId
+	) I
 
 END TRY
 BEGIN CATCH	
