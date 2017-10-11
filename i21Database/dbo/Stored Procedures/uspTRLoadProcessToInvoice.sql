@@ -140,6 +140,8 @@ BEGIN TRY
 		,[dblSurcharge]							= DD.dblDistSurcharge
 		,DD.dblFreightRate
 		,DD.ysnFreightInPrice
+		,intTruckDriverId = TL.intDriverId
+		,intTruckDriverReferenceId = SC.intTruckDriverReferenceId
 	INTO #tmpSourceTable
 	FROM tblTRLoadHeader TL
 	LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
@@ -149,6 +151,7 @@ BEGIN TRY
 	LEFT JOIN vyuICGetItemLocation Item ON Item.intItemId = DD.intItemId AND Item.intLocationId = DH.intCompanyLocationId
 	LEFT JOIN tblLGLoad LG ON LG.intLoadId = TL.intLoadId
 	LEFT JOIN vyuICGetItemStock IC ON IC.intItemId = DD.intItemId AND IC.intLocationId = DH.intCompanyLocationId
+	LEFT JOIN tblSCTruckDriverReference SC ON SC.strData = TL.strTractor
 	LEFT JOIN tblTRLoadReceipt TR ON TR.intLoadHeaderId = TL.intLoadHeaderId AND TR.strReceiptLine IN (
 		SELECT Item 
 		FROM dbo.fnTRSplit(DD.strReceiptLink,','))
@@ -790,6 +793,8 @@ BEGIN TRY
 		,[ysnClearDetailTaxes]					
 		,[intTempDetailIdForTaxes]
 		,[intLoadDistributionHeaderId]
+		,[intTruckDriverId]
+		,[intTruckDriverReferenceId]
 	)
 	SELECT
 		 [strSourceTransaction]					= TR.strSourceTransaction
@@ -867,6 +872,8 @@ BEGIN TRY
 		,[ysnClearDetailTaxes]					= TR.ysnClearDetailTaxes
 		,[intTempDetailIdForTaxes]				= TR.intTempDetailIdForTaxes
 		,[intLoadDistributionHeaderId]			= TR.intLoadDistributionHeaderId
+		,intTruckDriverId						= TR.intTruckDriverId
+		,intTruckDriverReferenceId				= TR.intTruckDriverReferenceId
 	FROM #tmpSourceTableFinal TR
 	ORDER BY TR.intLoadDistributionDetailId, intId DESC
 
