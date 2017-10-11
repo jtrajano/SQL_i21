@@ -131,7 +131,8 @@ BEGIN
 					IN (SELECT glact_acct1_8 FROM tblGLOriginAccounts))
 					BEGIN
 						SET @result = ''invalid-2,'' + cast(  @primarylen as varchar)
-						COMMIT TRANSACTION
+						IF @@TRANCOUNT > 0
+							COMMIT TRANSACTION
 						RETURN
 					END
 					UPDATE [tblGLOriginAccounts] set glact_acct1_8_new =  cast(glact_acct1_8_new  as varchar) + replicate(''0'',@primarylen-len( glact_acct1_8_new))

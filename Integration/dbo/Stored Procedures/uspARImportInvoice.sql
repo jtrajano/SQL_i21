@@ -17,8 +17,10 @@ BEGIN
 	--================================================
 
 	DECLARE  @ZeroDecimal		DECIMAL(18,6)
-	SET @ZeroDecimal = 0.000000	
-	
+	SET @ZeroDecimal = 0.000000
+	DECLARE @cnt INT = 1
+	DECLARE @SQLCMD NVARCHAR(4000)	
+			
 	IF (@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0)
 		BEGIN
 			SET @StartDate = NULL
@@ -308,7 +310,104 @@ BEGIN
 			INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE Latin1_General_CI_AS = RTRIM(agstm_itm_no  COLLATE Latin1_General_CI_AS)
 			WHERE agstm_un IS NOT NULL AND agstm_un_prc IS NOT NULL AND agstm_sls IS NOT NULL	
 
-			EXEC [dbo].[uspARImportAGTax] 
+			--EXEC [dbo].[uspARImportAGTax] 
+			
+			--IMPORT SET TAX DETAILS 			
+			INSERT INTO [dbo].[tblARInvoiceDetail]
+			   ([intInvoiceId]
+			   ,[intItemId]
+			   ,[strItemDescription]
+			   ,[dblQtyOrdered]
+			   ,[dblQtyShipped]
+			   ,[dblPrice]
+			   ,[dblTotal])
+			SELECT 
+				INV.intInvoiceId,
+				ITM.intItemId,
+				ITM.strDescription,
+				NULL,
+				agstm_un,
+				0,
+				agstm_set_amt
+			FROM agstmmst
+			INNER JOIN tblARInvoice INV ON INV.strShipToAddress COLLATE Latin1_General_CI_AS = LTRIM(RTRIM(agstm_ivc_no COLLATE Latin1_General_CI_AS)) + LTRIM(RTRIM(agstm_bill_to_cus COLLATE Latin1_General_CI_AS))
+			INNER JOIN tblICItem ITM ON ITM.strItemNo = 'SET'-- COLLATE Latin1_General_CI_AS = RTRIM(agstm_itm_no  COLLATE Latin1_General_CI_AS)
+			WHERE agstm_un IS NOT NULL AND agstm_un_prc IS NOT NULL AND agstm_sls IS NOT NULL AND agstm_set_amt <> 0
+
+			--IMPORT FET TAX DETAILS 			
+			INSERT INTO [dbo].[tblARInvoiceDetail]
+			   ([intInvoiceId]
+			   ,[intItemId]
+			   ,[strItemDescription]
+			   ,[dblQtyOrdered]
+			   ,[dblQtyShipped]
+			   ,[dblPrice]
+			   ,[dblTotal])
+			SELECT 
+				INV.intInvoiceId,
+				ITM.intItemId,
+				ITM.strDescription,
+				NULL,
+				agstm_un,
+				0,
+				agstm_fet_amt
+			FROM agstmmst
+			INNER JOIN tblARInvoice INV ON INV.strShipToAddress COLLATE Latin1_General_CI_AS = LTRIM(RTRIM(agstm_ivc_no COLLATE Latin1_General_CI_AS)) + LTRIM(RTRIM(agstm_bill_to_cus COLLATE Latin1_General_CI_AS))
+			INNER JOIN tblICItem ITM ON ITM.strItemNo = 'FET'-- COLLATE Latin1_General_CI_AS = RTRIM(agstm_itm_no  COLLATE Latin1_General_CI_AS)
+			WHERE agstm_un IS NOT NULL AND agstm_un_prc IS NOT NULL AND agstm_sls IS NOT NULL AND agstm_fet_amt <> 0
+
+			--IMPORT SST TAX DETAILS 			
+			INSERT INTO [dbo].[tblARInvoiceDetail]
+			   ([intInvoiceId]
+			   ,[intItemId]
+			   ,[strItemDescription]
+			   ,[dblQtyOrdered]
+			   ,[dblQtyShipped]
+			   ,[dblPrice]
+			   ,[dblTotal])			
+			SELECT 
+				INV.intInvoiceId,
+				ITM.intItemId,
+				ITM.strDescription,
+				NULL,
+				agstm_un,
+				0,
+				agstm_sst_amt
+			FROM agstmmst
+			INNER JOIN tblARInvoice INV ON INV.strShipToAddress COLLATE Latin1_General_CI_AS = LTRIM(RTRIM(agstm_ivc_no COLLATE Latin1_General_CI_AS)) + LTRIM(RTRIM(agstm_bill_to_cus COLLATE Latin1_General_CI_AS))
+			INNER JOIN tblICItem ITM ON ITM.strItemNo = 'SST'-- COLLATE Latin1_General_CI_AS = RTRIM(agstm_itm_no  COLLATE Latin1_General_CI_AS)
+			WHERE agstm_un IS NOT NULL AND agstm_un_prc IS NOT NULL AND agstm_sls IS NOT NULL AND agstm_sst_amt <> 0
+
+			--IMPORT LOCALE TAX DETAILS 			
+
+			WHILE @cnt < 13
+					BEGIN
+					   SET @SQLCMD = ' INSERT INTO [dbo].[tblARInvoiceDetail]
+					   ([intInvoiceId]
+					   ,[intItemId]
+					   ,[strItemDescription]
+					   ,[dblQtyOrdered]
+					   ,[dblQtyShipped]
+					   ,[dblPrice]
+					   ,[dblTotal])
+					SELECT 
+						INV.intInvoiceId,
+						ITM.intItemId,
+						ITM.strDescription,
+						NULL,
+						agstm_un,
+						0,
+						agstm_lc'+CAST(@cnt AS NVARCHAR)+'_amt
+					FROM agstmmst
+					INNER JOIN tblARInvoice INV ON INV.strShipToAddress COLLATE Latin1_General_CI_AS = LTRIM(RTRIM(agstm_ivc_no COLLATE Latin1_General_CI_AS)) + LTRIM(RTRIM(agstm_bill_to_cus COLLATE Latin1_General_CI_AS))
+					INNER JOIN tblICItem ITM ON ITM.strItemNo = ''LC'+CAST(@cnt AS NVARCHAR)+'-''+SUBSTRING (agstm_tax_key ,11 , 2 ) COLLATE Latin1_General_CI_AS
+					WHERE agstm_un IS NOT NULL AND agstm_un_prc IS NOT NULL AND agstm_sls IS NOT NULL AND agstm_lc'+CAST(@cnt AS NVARCHAR)+'_amt <> 0'			
+
+					   EXEC (@SQLCMD)
+
+					   SET @cnt = @cnt + 1;
+					END
+			
 		 end 
 
 			--==========================================================
@@ -337,7 +436,103 @@ BEGIN
 			INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE Latin1_General_CI_AS = RTRIM(ptstm_itm_no  COLLATE Latin1_General_CI_AS)
 			WHERE ptstm_un IS NOT NULL AND ptstm_un_prc IS NOT NULL AND ptstm_net IS NOT NULL	
 
-			EXEC [dbo].[uspARImportPTTax] 
+			--EXEC [dbo].[uspARImportPTTax] 
+
+			--IMPORT SET TAX DETAILS 			
+			INSERT INTO [dbo].[tblARInvoiceDetail]
+			   ([intInvoiceId]
+			   ,[intItemId]
+			   ,[strItemDescription]
+			   ,[dblQtyOrdered]
+			   ,[dblQtyShipped]
+			   ,[dblPrice]
+			   ,[dblTotal])
+			SELECT 
+				INV.intInvoiceId,
+				ITM.intItemId,
+				ITM.strDescription,
+				NULL,
+				ptstm_un,
+				0,
+				ptstm_set_amt
+			FROM ptstmmst
+			INNER JOIN tblARInvoice INV ON INV.strShipToAddress COLLATE Latin1_General_CI_AS = LTRIM(RTRIM(ptstm_ivc_no COLLATE Latin1_General_CI_AS)) + LTRIM(RTRIM(ptstm_bill_to_cus COLLATE Latin1_General_CI_AS))
+			INNER JOIN tblICItem ITM ON ITM.strItemNo = 'SET'-- COLLATE Latin1_General_CI_AS = RTRIM(ptstm_itm_no  COLLATE Latin1_General_CI_AS)
+			WHERE ptstm_un IS NOT NULL AND ptstm_un_prc IS NOT NULL AND ptstm_net IS NOT NULL AND ptstm_set_amt <> 0
+
+			--IMPORT FET TAX DETAILS 			
+			INSERT INTO [dbo].[tblARInvoiceDetail]
+			   ([intInvoiceId]
+			   ,[intItemId]
+			   ,[strItemDescription]
+			   ,[dblQtyOrdered]
+			   ,[dblQtyShipped]
+			   ,[dblPrice]
+			   ,[dblTotal])
+			SELECT 
+				INV.intInvoiceId,
+				ITM.intItemId,
+				ITM.strDescription,
+				NULL,
+				ptstm_un,
+				0,
+				ptstm_fet_amt
+			FROM ptstmmst
+			INNER JOIN tblARInvoice INV ON INV.strShipToAddress COLLATE Latin1_General_CI_AS = LTRIM(RTRIM(ptstm_ivc_no COLLATE Latin1_General_CI_AS)) + LTRIM(RTRIM(ptstm_bill_to_cus COLLATE Latin1_General_CI_AS))
+			INNER JOIN tblICItem ITM ON ITM.strItemNo = 'FET'-- COLLATE Latin1_General_CI_AS = RTRIM(ptstm_itm_no  COLLATE Latin1_General_CI_AS)
+			WHERE ptstm_un IS NOT NULL AND ptstm_un_prc IS NOT NULL AND ptstm_net IS NOT NULL AND ptstm_fet_amt <> 0
+
+			--IMPORT SST TAX DETAILS 			
+			INSERT INTO [dbo].[tblARInvoiceDetail]
+			   ([intInvoiceId]
+			   ,[intItemId]
+			   ,[strItemDescription]
+			   ,[dblQtyOrdered]
+			   ,[dblQtyShipped]
+			   ,[dblPrice]
+			   ,[dblTotal])			
+			SELECT 
+				INV.intInvoiceId,
+				ITM.intItemId,
+				ITM.strDescription,
+				NULL,
+				ptstm_un,
+				0,
+				ptstm_sst_amt
+			FROM ptstmmst
+			INNER JOIN tblARInvoice INV ON INV.strShipToAddress COLLATE Latin1_General_CI_AS = LTRIM(RTRIM(ptstm_ivc_no COLLATE Latin1_General_CI_AS)) + LTRIM(RTRIM(ptstm_bill_to_cus COLLATE Latin1_General_CI_AS))
+			INNER JOIN tblICItem ITM ON ITM.strItemNo = 'SST'-- COLLATE Latin1_General_CI_AS = RTRIM(ptstm_itm_no  COLLATE Latin1_General_CI_AS)
+			WHERE ptstm_un IS NOT NULL AND ptstm_un_prc IS NOT NULL AND ptstm_net IS NOT NULL AND ptstm_sst_amt <> 0
+
+			--IMPORT LOCALE TAX DETAILS 			
+
+			WHILE @cnt < 13
+					BEGIN
+					   SET @SQLCMD = ' INSERT INTO [dbo].[tblARInvoiceDetail]
+					   ([intInvoiceId]
+					   ,[intItemId]
+					   ,[strItemDescription]
+					   ,[dblQtyOrdered]
+					   ,[dblQtyShipped]
+					   ,[dblPrice]
+					   ,[dblTotal])
+					SELECT 
+						INV.intInvoiceId,
+						ITM.intItemId,
+						ITM.strDescription,
+						NULL,
+						ptstm_un,
+						0,
+						ptstm_lc'+CAST(@cnt AS NVARCHAR)+'_amt
+					FROM ptstmmst
+					INNER JOIN tblARInvoice INV ON INV.strShipToAddress COLLATE Latin1_General_CI_AS = LTRIM(RTRIM(ptstm_ivc_no COLLATE Latin1_General_CI_AS)) + LTRIM(RTRIM(ptstm_bill_to_cus COLLATE Latin1_General_CI_AS))
+					INNER JOIN tblICItem ITM ON ITM.strItemNo = ''LC'+CAST(@cnt AS NVARCHAR)+'-''+SUBSTRING (ptstm_tax_key ,11 , 2 ) COLLATE Latin1_General_CI_AS
+					WHERE ptstm_un IS NOT NULL AND ptstm_un_prc IS NOT NULL AND ptstm_net IS NOT NULL AND ptstm_lc'+CAST(@cnt AS NVARCHAR)+'_amt <> 0'			
+
+					   EXEC (@SQLCMD)
+
+					   SET @cnt = @cnt + 1;
+					END			
 
 		 end
 
@@ -370,6 +565,13 @@ BEGIN
 			INNER JOIN tblARInvoice IVC on IVC.intEntityCustomerId = C.intEntityId		
 			WHERE
 				intInvoiceId > @maxInvoiceId
+				
+		--UPDATE Tax Total		
+			UPDATE tblARInvoice  SET tblARInvoice.dblTax = Tax
+			FROM (SELECT ID.intInvoiceId,SUM(ID.dblTotal) as Tax FROM tblARInvoice I
+			INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
+			where I.intInvoiceId > @maxInvoiceId AND ID.dblPrice = 0 
+			GROUP BY ID.intInvoiceId) GRP WHERE GRP.intInvoiceId = tblARInvoice.intInvoiceId				
 
 	END
 

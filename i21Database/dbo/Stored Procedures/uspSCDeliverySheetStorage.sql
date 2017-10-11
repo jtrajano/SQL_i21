@@ -274,7 +274,8 @@ BEGIN TRY
 			   ,[intCompanyLocationSubLocationId]
 			   ,[intStorageLocationId]
 			   ,[intUnitMeasureId])
-	SELECT 	[intConcurrencyId]		= 1
+	SELECT DISTINCT 
+			[intConcurrencyId]		= 1
 			,[intEntityId]			= @intEntityId
 			,[intCommodityId]		= IC.intCommodityId
 			,[intStorageScheduleId]	= @intDefaultStorageSchedule -- TODO Storage Schedule
@@ -307,10 +308,10 @@ BEGIN TRY
 			,NULL -- SET to null delivery sheet has no requirements yet for sub location
 			,(SELECT intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = @intTicketItemUOMId)
 	FROM	dbo.tblSCDeliverySheet SCD 
+	INNER JOIN dbo.tblICItem IC ON IC.intItemId = SCD.intItemId
 	INNER JOIN tblGRDiscountId GRD ON GRD.intDiscountId = SCD.intDiscountId
 	INNER JOIN tblGRDiscountCrossReference GRDCR ON GRDCR.intDiscountId = GRD.intDiscountId
-	INNER JOIN tblGRDiscountSchedule GRDS ON GRDS.intDiscountScheduleId = GRDCR.intDiscountScheduleId
-	INNER JOIN dbo.tblICItem IC ON IC.intItemId = SCD.intItemId
+	INNER JOIN tblGRDiscountSchedule GRDS ON GRDS.intDiscountScheduleId = GRDCR.intDiscountScheduleId AND GRDS.intCommodityId = IC.intCommodityId
 	WHERE	SCD.intDeliverySheetId = @intDeliverySheetId
 
 	SELECT @intCustomerStorageId = SCOPE_IDENTITY()
@@ -400,8 +401,10 @@ BEGIN TRY
 		SET  CS.dblDiscountsDue=QM.dblDiscountsDue
 			,CS.dblDiscountsPaid=QM.dblDiscountsPaid
 		FROM tblGRCustomerStorage CS
-		JOIN (SELECT intTicketFileId,SUM(dblDiscountDue) dblDiscountsDue ,SUM(dblDiscountPaid)dblDiscountsPaid FROM dbo.[tblQMTicketDiscount] WHERE intTicketFileId = @intCustomerStorageId AND strSourceType = 'Storage' GROUP BY intTicketFileId)QM
-		ON CS.intCustomerStorageId=QM.intTicketFileId
+		OUTER APPLY (
+			SELECT SUM(dblDiscountDue) dblDiscountsDue ,SUM(dblDiscountPaid)dblDiscountsPaid FROM dbo.[tblQMTicketDiscount] WHERE intTicketFileId = @intCustomerStorageId AND strSourceType = 'Storage'
+		) QM
+		WHERE CS.intCustomerStorageId = @intCustomerStorageId
 
 	END
 	
@@ -410,7 +413,8 @@ BEGIN TRY
 			SELECT @strDistributionOption = GR.strStorageTypeCode FROM tblGRStorageType GR WHERE intStorageScheduleTypeId = @intGRStorageId
 		END
 
-		SELECT intItemId = SCD.intItemId
+		SELECT
+		intItemId = SCD.intItemId
 		,intLocationId = ItemLocation.intItemLocationId 
 		,intItemUOMId = ItemUOM.intItemUOMId
 		,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
@@ -445,7 +449,7 @@ BEGIN TRY
 		OUTER APPLY(
 			SELECT * FROM dbo.vyuCTContractDetailView WHERE intContractDetailId = @intDPContractId
 		) CNT
-		WHERE SCD.intDeliverySheetId = @intDeliverySheetId
+		WHERE SCD.intDeliverySheetId = @intDeliverySheetId AND ItemUOM.ysnStockUnit = 1
 	
 	CONTINUEISH:
 

@@ -9,9 +9,13 @@
                SELECT * FROM [$(TableName)]
 --------------------------------------------------------------------------------------
 */
+GO
+/*Corrects the intFiscalYearId to avoid foreign constraint issues*/
 IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblGLCurrentFiscalYear]') AND type in (N'U')) 
 BEGIN
-    UPDATE CF 
-    SET intFiscalYearId = F.intFiscalYearId
-    FROM tblGLCurrentFiscalYear  CF JOIN tblGLFiscalYear F ON F.dtmDateFrom = CF.dtmBeginDate
+	UPDATE CF 
+	SET intFiscalYearId = F.intFiscalYearId
+	FROM tblGLCurrentFiscalYear  CF JOIN tblGLFiscalYear F ON F.dtmDateFrom = CF.dtmBeginDate
 END
+
+GO

@@ -432,5 +432,7 @@
     <None Include="dbo\Stored Procedures\uspGRImportStorageType.sql" />
     <None Include="dbo\Stored Procedures\uspGRImportWeightGrades.sql" />
     <None Include="dbo\Stored Procedures\deleteSP.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateETExportTankManagementSiteView.sql" />
+    <None Include="Scripts\SM\CopyCashToUndepositedFund.sql" />
   </ItemGroup>
 </Project>

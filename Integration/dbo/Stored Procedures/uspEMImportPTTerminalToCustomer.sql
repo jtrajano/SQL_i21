@@ -41,7 +41,7 @@ INSERT INTO [dbo].[tblARCustomerFreightXRef]
            ,[intEntityLocationId]
            ,[strZipCode]
            ,[intConcurrencyId])
-SELECT CUS.intEntityCustomerId
+SELECT CUS.intEntityId
 	  ,CAT.intCategoryId
 	  ,CASE WHEN(DVC.trdvc_frt_only_yn = 'Y') THEN 1 ELSE 0 END
 	  ,CASE WHEN(DVC.trdvc_frt_type = 'M') THEN 'Miles'
@@ -61,7 +61,7 @@ INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General
 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = DVC.trdvc_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
 INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = DVC.trdvc_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
 INNER JOIN tblICCategory CAT ON CAT.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = DVC.trdvc_class COLLATE SQL_Latin1_General_CP1_CS_AS
-INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityCustomerId 
+INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityId 
 		   AND CLOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.ptcus_name COLLATE SQL_Latin1_General_CP1_CS_AS
 WHERE DVC.trdvc_cus_no = @CustomerId
 
@@ -78,7 +78,7 @@ INSERT INTO [dbo].[tblARCustomerFreightXRef]
            ,[intEntityLocationId]
            ,[strZipCode]
            ,[intConcurrencyId])
-SELECT CUS.intEntityCustomerId
+SELECT CUS.intEntityId
 	  ,CAT.intCategoryId
 	  ,CASE WHEN(DVC.trdvc_frt_only_yn = 'Y') THEN 1 ELSE 0 END
 	  ,CASE WHEN(DVC.trdvc_frt_type = 'M') THEN 'Miles'
@@ -98,7 +98,7 @@ INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General
 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = DVC.trdvc_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
 INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = DVC.trdvc_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
 INNER JOIN tblICCategory CAT ON CAT.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = DVC.trdvc_class COLLATE SQL_Latin1_General_CP1_CS_AS
-INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityCustomerId 
+INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityId 
 		   AND CLOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS1.ptcus_name COLLATE SQL_Latin1_General_CP1_CS_AS
 WHERE DVC.trdvc_cus_no = @CustomerId
 

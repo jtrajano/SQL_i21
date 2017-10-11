@@ -5688,7 +5688,23 @@
     <Build Include="dbo\Stored Procedures\uspCFInsertItemRecord.sql" />
     <Build Include="dbo\Views\vyuAPPaidOriginPrepaid.sql" />
     <Build Include="dbo\Views\vyuAPOriginPayables.sql" />
+    <Build Include="dbo\Tables\tblQMSampleImportSampleType.sql" />
+    <Build Include="dbo\Tables\tblARGLSummaryStagingTable.sql" />
+    <Build Include="dbo\Tables\tblARCustomerAgingStagingTable.sql" />
     <Build Include="dbo\Views\vyuSCTicketScreenView.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1710_to_1730_UpdateHomePanelDashboard.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCUnpostDeliverySheet.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCUpdateDeliverySheetStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCReverseScheduleQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateCost.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGenerateWhereClause.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSampleImportErrors.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\32_UpdateCommissionScheduleEntity.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLSyncGLAccountDescription.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMDropSubsidiary.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRpt1099DIVTwoPart.sql" />
+    <Build Include="dbo\Views\vyuAP1099DIV.sql" />
+    <Build Include="dbo\Views\vyuPATDividends.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -5833,7 +5849,7 @@
     <None Include="Scripts\Post-Deployment\CRM\RenameCRMScreen.sql" />
     <None Include="Scripts\Post-Deployment\CCR\RemoveCCRObsoleteScreen.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateBillDetailRate.sql" />
-    <None Include="Scripts\Post-Deployment\AR\DefaultData\32_UpdateCommissionScheduleEntity.sql" />
+    <Build Include="dbo\Functions\fnHDCoalesceJiraKey.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

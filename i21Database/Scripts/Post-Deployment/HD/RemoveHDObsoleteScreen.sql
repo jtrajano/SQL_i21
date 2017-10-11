@@ -188,6 +188,7 @@ GO
 	end
 	
 	--14
+	/*
 	set @nameSpace = 'HelpDesk.view.MentionDetails';
 	if ((select count(*) from tblSMScreen where strModule = @moduleName and strNamespace = @nameSpace) > 0)
 	begin
@@ -200,6 +201,7 @@ GO
 			rollback transaction;
 		end catch
 	end
+	*/
 	
 	--15
 	set @nameSpace = 'HelpDesk.view.Reminder';

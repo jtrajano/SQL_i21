@@ -214,7 +214,12 @@ BEGIN TRY
 		END
 	END
 
-	IF (@dblMoveQty = @dblLotAvailableQty)
+	IF (CASE 
+					WHEN @intItemUOMId = @intMoveItemUOMId
+						AND @intWeightUOMId IS NOT NULL
+						THEN @dblMoveQty * @dblWeightPerQty
+					ELSE @dblMoveQty
+					END) = @dblLotAvailableQty
 	BEGIN
 		SET @blnIsPartialMove = 0
 	END

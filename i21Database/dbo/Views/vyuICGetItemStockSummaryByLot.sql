@@ -37,6 +37,9 @@ SELECT
 	, dblConversionFactor = ItemUOM.dblUnitQty
 	, ItemPricing.dblLastCost
 	, dblTotalCost = ItemStock.dblOnHand * ItemUOM.dblUnitQty * ItemPricing.dblLastCost
+	, Lot.intParentLotId
+	, ParentLot.strParentLotNumber
+	, ParentLot.strParentLotAlias
 FROM (
 	SELECT intItemId
 			, intItemLocationId
@@ -168,3 +171,4 @@ FROM (
 	LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = ItemStock.intSubLocationId
 	LEFT JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLocationId = ItemStock.intStorageLocationId
 	LEFT JOIN tblICLot Lot ON Lot.intLotId = ItemStock.intLotId
+	LEFT JOIN tblICParentLot ParentLot ON ParentLot.intParentLotId = Lot.intParentLotId

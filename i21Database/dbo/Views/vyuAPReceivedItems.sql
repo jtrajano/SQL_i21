@@ -794,7 +794,7 @@ FROM
 		,[dblQuantityToBill]						=	A.dblQuantity
 		,[dblQuantityBilled]						=	0
 		,[intLineNo]								=	A.intLoadDetailId
-		,[intInventoryReceiptItemId]				=	NULL
+		,[intInventoryReceiptItemId]				=	A.intInventoryReceiptItemId
 		,[intInventoryReceiptChargeId]				=	NULL
 		,[intContractChargeId]						=	NULL
 		,[dblUnitCost]								=	ISNULL(A.dblCashPrice,0)
@@ -845,8 +845,8 @@ FROM
 		,[dblWeightLoss]							=	0.00
 		,[dblFranchiseWeight]						=	0.00
 		,[dblClaimAmount]							=	0.00
-		,[intLocationId]							=	A.intLocationId
-		,[strReceiptLocation]						=	NULL
+		,[intLocationId]							=	A.intCompanyLocationId
+		,[strReceiptLocation]						=	(SELECT strLocationName FROM dbo.tblSMCompanyLocation WHERE intCompanyLocationId = A.intCompanyLocationId)
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
 		,[intTaxGroupId]							=	NULL

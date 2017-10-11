@@ -1,8 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuSCTicketScreenView]
 	AS select 
-	SCT.intConcurrencyId
-	,SCT.strOfflineGuid
-	,SCT.intTicketId
+	SCT.intTicketId
 	,SCT.strTicketStatus
 	,SCT.strTicketNumber
 	,SCT.intScaleSetupId
@@ -130,6 +128,7 @@
 	,SCT.ysnRailCar
 	,SCD.strDeliverySheetNumber
 	,SCListTicket.strTicketType
+	,SCT.ysnDeliverySheetPost
 	,(SELECT SCMatch.strTicketNumber FROM tblSCTicket SCMatch WHERE SCMatch.intMatchTicketId = SCT.intMatchTicketId) AS strMatchTicketNumber
     
 	,SMC.strLocationName AS strProcessingLocationName
@@ -145,6 +144,8 @@
 	,GRDiscountId.strDiscountId
 	,GRSSR.strScheduleId
 	,GRSSR.strScheduleDescription
+	,ISNULL(GRStorage.ysnDPOwnedType, CAST(0 AS BIT)) AS ysnDPOwnedType
+	,ISNULL(GRStorage.ysnCustomerStorage, CAST(0 AS BIT)) AS ysnCustomerStorage
 
 	,EMSplit.strSplitNumber
 	,EMEntityFarm.strFarmDescription
@@ -154,7 +155,7 @@
 
 	,ICItem.strItemNo
 	,ICCA.strDescription AS strGrade
-	,ICStorageLocation.strDescription
+	,ICStorageLocation.strName AS strStorageLocation
 	,ICUM.strUnitMeasure
 	,ICCommodity.dblPriceCheckMin
 	,ICCommodity.dblPriceCheckMax
@@ -168,8 +169,11 @@
 		CASE WHEN (SELECT ISNULL(ICAttribute.intCommodityAttributeId,0) FROM tblICCommodityAttribute ICAttribute WHERE ICAttribute.intCommodityId = SCT.intCommodityId ) > 1 THEN 1
 		ELSE 0 END
 	 AS BIT) AS ysnHasCommodityGrade
+	 ,ICIUOMFrom.dblUnitQty AS dblUnitQtyFrom
+	 ,ICIUOM.dblUnitQty AS dblUnitQtyTo
 
 	,SCSetup.strStationShortDescription
+	,SCSetup.strWeightDescription
 	,SCSetup.intFreightItemId
 	,SCSetup.intDefaultFeeItemId
 	,SCSetup.ysnMultipleWeights
@@ -200,6 +204,8 @@
 		END) strLoadInfo
 
 	,CAST (0 AS BIT) ysnDateModified
+	,SCT.intConcurrencyId
+	,SCT.strOfflineGuid
   from tblSCTicket SCT
 	LEFT JOIN tblSCTicketPool SCTPool on SCTPool.intTicketPoolId = SCT.intTicketPoolId
 	LEFT JOIN tblSCScaleSetup SCSetup on SCSetup.intScaleSetupId = SCT.intScaleSetupId
@@ -213,7 +219,6 @@
 	LEFT JOIN tblEMEntity EMEntity on EMEntity.intEntityId = SCT.intEntityId
 	LEFT JOIN tblEMEntitySplit EMSplit on EMSplit.intSplitId = SCT.intSplitId
 	LEFT JOIN tblEMEntityFarm EMEntityFarm on EMEntityFarm.intFarmFieldId = SCT.intFarmFieldId
-	
 
 	LEFT JOIN tblICItem ICItem on ICItem.intItemId = SCT.intItemId
 	LEFT JOIN tblICCommodity ICCommodity on ICCommodity.intCommodityId = SCT.intCommodityId
@@ -222,14 +227,13 @@
 	LEFT JOIN tblICItem ICFreight on ICFreight.intItemId = SCSetup.intFreightItemId
 	LEFT JOIN tblICItem ICFees on ICFees.intItemId = SCSetup.intDefaultFeeItemId
 	LEFT JOIN tblICItemUOM ICIUOM on ICIUOM.intItemUOMId = intItemUOMIdTo
+	LEFT JOIN tblICItemUOM ICIUOMFrom on ICIUOMFrom.intItemUOMId = intItemUOMIdFrom
 	LEFT JOIN tblICUnitMeasure ICUM on ICUM.intUnitMeasureId = ICIUOM.intUnitMeasureId
-	LEFT JOIN tblICStorageLocation ICStorageLoc on ICStorageLoc.intSubLocationId = SCT.intSubLocationId
 
 	LEFT JOIN tblGRStorageType GRStorage on GRStorage.strStorageTypeCode = SCT.strDistributionOption
 	LEFT JOIN tblGRDiscountId GRDiscountId on GRDiscountId.intDiscountId = SCT.intDiscountId
 	LEFT JOIN tblGRStorageScheduleRule GRSSR on GRSSR.intStorageScheduleRuleId = SCT.intStorageScheduleId
 
-	
 	LEFT JOIN vyuCTContractDetailView CT on CT.intContractDetailId = SCT.intContractId
 	LEFT JOIN vyuCTEntity CTEntity on CTEntity.intEntityId = SCT.intHaulerId
 	LEFT JOIN tblCTWeightGrade CTGrade on CTGrade.intWeightGradeId = SCT.intGradeId

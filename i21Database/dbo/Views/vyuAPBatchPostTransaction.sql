@@ -55,4 +55,4 @@ SELECT 'Vendor Prepayment' AS strTransactionType,
        strComment AS strReference,
        NULL AS intCompanyLocationId
 FROM tblAPBill
-WHERE intTransactionType = 2
+WHERE intTransactionType = 2 AND ysnPosted = 0

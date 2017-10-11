@@ -192,7 +192,7 @@ SET @Recap = ISNULL(@Recap, 0)
 IF (@TransType IS NULL OR RTRIM(LTRIM(@TransType)) = '')
 	SET @TransType = 'all'
 
-IF @IntegrationLogId IS NOT NULL
+IF @IntegrationLogId IS NOT NULL AND NOT EXISTS(SELECT TOP 1 NULL FROM @InvoiceIds)
 	BEGIN
         INSERT INTO @PostInvoiceData(
 			 [intInvoiceId]
@@ -302,6 +302,122 @@ IF @IntegrationLogId IS NOT NULL
             NOT EXISTS(SELECT NULL FROM @PostInvoiceData PID WHERE PID.[intInvoiceId] = ARI.[intInvoiceId])
             AND (ARI.[strTransactionType] = @TransType OR ISNULL(@TransType,'all') = 'all')
 	END
+
+
+IF @IntegrationLogId IS NOT NULL AND EXISTS(SELECT TOP 1 NULL FROM @InvoiceIds)
+	BEGIN
+        INSERT INTO @PostInvoiceData(
+			 [intInvoiceId]
+			,[strInvoiceNumber]
+			,[strTransactionType]
+			,[strType]
+			,[dtmDate]
+			,[dtmPostDate]
+			,[dtmShipDate]
+			,[intEntityCustomerId]
+			,[intCompanyLocationId]
+			,[intAccountId]
+			,[intDeferredRevenueAccountId]
+			,[intCurrencyId]
+			,[intTermId]
+			,[dblInvoiceTotal]
+			,[dblShipping]
+			,[dblTax]
+			,[strImportFormat]
+			,[intDistributionHeaderId]
+			,[intLoadDistributionHeaderId]
+			,[intLoadId]
+			,[intFreightTermId]
+			,[strActualCostId]
+			,[intPeriodsToAccrue]
+			,[ysnAccrueLicense]
+			,[intSplitId]
+			,[dblSplitPercent]
+			,[ysnSplitted]
+			,[ysnImpactInventory]
+			,[intEntityId]
+			,[ysnPost]
+			,[intInvoiceDetailId]
+			,[intItemId]
+			,[intItemUOMId]
+			,[intDiscountAccountId]
+			,[intCustomerStorageId]
+			,[intStorageScheduleTypeId]
+			,[intSubLocationId]
+			,[intStorageLocationId]
+			,[dblQuantity]
+			,[dblMaxQuantity]
+			,[strOptionType]
+			,[strSourceType]
+			,[strBatchId]
+			,[strPostingMessage]
+			,[intUserId]
+			,[ysnAllowOtherUserToPost]
+			)
+		SELECT DISTINCT
+			 [intInvoiceId]					= ARI.[intInvoiceId]
+			,[strInvoiceNumber]				= ARI.[strInvoiceNumber]
+			,[strTransactionType]			= ARI.[strTransactionType]
+			,[strType]						= ARI.[strType]
+			,[dtmDate]						= ARI.[dtmDate]
+			,[dtmPostDate]					= ARI.[dtmPostDate]
+			,[dtmShipDate]					= ARI.[dtmShipDate]
+			,[intEntityCustomerId]			= ARI.[intEntityCustomerId]
+			,[intCompanyLocationId]			= ARI.[intCompanyLocationId]
+			,[intAccountId]					= ARI.[intAccountId]
+			,[intDeferredRevenueAccountId]	= @DeferredRevenueAccountId
+			,[intCurrencyId]				= ARI.[intCurrencyId]
+			,[intTermId]					= ARI.[intTermId]
+			,[dblInvoiceTotal]				= ARI.[dblInvoiceTotal]
+			,[dblShipping]					= ARI.[dblShipping]
+			,[dblTax]						= ARI.[dblTax]
+			,[strImportFormat]				= ARI.[strImportFormat]
+			,[intDistributionHeaderId]		= ARI.[intDistributionHeaderId]
+			,[intLoadDistributionHeaderId]	= ARI.[intLoadDistributionHeaderId]
+			,[intLoadId]					= ARI.[intLoadId]
+			,[intFreightTermId]				= ARI.[intFreightTermId]
+			,[strActualCostId]				= ARI.[strActualCostId]
+			,[intPeriodsToAccrue]			= ARI.[intPeriodsToAccrue]
+			,[ysnAccrueLicense]				= ARIILD.[ysnAccrueLicense]
+			,[intSplitId]					= ARI.[intSplitId]
+			,[dblSplitPercent]				= ARI.[dblSplitPercent]			
+			,[ysnSplitted]					= ARI.[ysnSplitted]
+			,[ysnImpactInventory]			= ARI.[ysnImpactInventory]
+			,[intEntityId]					= ARI.[intEntityId]
+			,[ysnPost]						= @Post
+			,[intInvoiceDetailId]			= NULL
+			,[intItemId]					= NULL
+			,[intItemUOMId]					= NULL
+			,[intDiscountAccountId]			= @DiscountAccountId
+			,[intCustomerStorageId]			= NULL
+			,[intStorageScheduleTypeId]		= NULL
+			,[intSubLocationId]				= NULL
+			,[intStorageLocationId]			= NULL
+			,[dblQuantity]					= @ZeroDecimal
+			,[dblMaxQuantity]				= @ZeroDecimal
+			,[strOptionType]				= NULL
+			,[strSourceType]				= NULL
+			,[strBatchId]					= @BatchIdUsed
+			,[strPostingMessage]			= ''
+			,[intUserId]					= @UserEntityID
+			,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost		
+        FROM
+            dbo.tblARInvoice ARI WITH (NOLOCK) 
+        INNER JOIN
+            tblARInvoiceIntegrationLogDetail ARIILD
+                ON ARI.[intInvoiceId] = ARIILD.[intInvoiceId]
+                AND ARIILD.[ysnPost] IS NOT NULL 
+                AND ARIILD.[ysnPost] = @Post
+                AND ARIILD.[ysnHeader] = 1
+                AND ARIILD.[intIntegrationLogId] = @IntegrationLogId
+		INNER JOIN
+			@InvoiceIds II
+				ON ARIILD.[intInvoiceId] = II.[intHeaderId]
+        WHERE
+            NOT EXISTS(SELECT NULL FROM @PostInvoiceData PID WHERE PID.[intInvoiceId] = ARI.[intInvoiceId])
+            AND (ARI.[strTransactionType] = @TransType OR ISNULL(@TransType,'all') = 'all')
+	END
+
 
 IF(@BeginDate IS NOT NULL)
 	BEGIN

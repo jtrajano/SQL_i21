@@ -11,7 +11,7 @@ SELECT	DISTINCT
 	CH.strEntityName,
 	CH.intEntityId,
 	CD.dblQuantity	AS	dblDetailQuantity,
-	CD.dblBasis,
+	CD.dblConvertedBasis dblBasis,
 	CH.intContractHeaderId			
 FROM	tblCTContractDetail		CD		
 JOIN	vyuCTContractHeaderView	CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId					

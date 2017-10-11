@@ -18,6 +18,9 @@ BEGIN TRY
 	DECLARE @ReceiptStagingTable ReceiptStagingTable
 	DECLARE @LotEntries ReceiptItemLotStagingTable
 	DECLARE @OtherCharges ReceiptOtherChargesTableType
+	DECLARE @intPContractDetailId INT
+	DECLARE @intPEntityId INT
+	DECLARE @intPItemId INT
 	DECLARE @tblLoadDetail TABLE (
 		intRecordId INT Identity(1, 1)
 		,intLoadDetailId INT
@@ -350,6 +353,9 @@ BEGIN TRY
 	FROM #tmpAddItemReceiptResult
 
 	DECLARE @intMinInvRecItemId INT
+	DECLARE @dblVoucherQty NUMERIC(18,6)
+	DECLARE @dblBillQty NUMERIC(18, 6)
+	DECLARE @dblPContractDetailQty NUMERIC(18, 6)
 
 	SELECT @intMinInvRecItemId = MIN(intInventoryReceiptItemId)
 	FROM tblICInventoryReceiptItem
@@ -357,6 +363,48 @@ BEGIN TRY
 
 	WHILE @intMinInvRecItemId > 0
 	BEGIN
+		SET @intPContractDetailId = NULL
+		SET @dblVoucherQty = NULL
+		SET @dblBillQty = NULL
+
+		SELECT @intPContractDetailId = intLineNo
+			  ,@intPItemId = intItemId
+		FROM tblICInventoryReceiptItem
+		WHERE intInventoryReceiptItemId = @intMinInvRecItemId
+
+		SELECT @dblPContractDetailQty = dblQuantity
+		FROM tblCTContractDetail
+		WHERE intContractDetailId = @intPContractDetailId
+
+		SELECT @intPEntityId = intEntityVendorId
+		FROM tblICInventoryReceipt
+		WHERE intInventoryReceiptId = @intInventoryReceiptId
+
+		IF EXISTS (
+				SELECT TOP 1 1
+				FROM tblAPBill BI
+				JOIN tblAPBillDetail BID ON BI.intBillId = BID.intBillId
+				WHERE BID.intLoadId = @intLoadId
+					AND BID.intContractDetailId = @intPContractDetailId
+					AND BI.intTransactionType IN (1,2)
+					AND BI.intEntityVendorId = @intPEntityId
+					AND BID.intItemId = @intPItemId
+				)
+		BEGIN
+			SELECT @dblVoucherQty = BID.dblQtyReceived
+			FROM tblAPBill BI
+			JOIN tblAPBillDetail BID ON BI.intBillId = BID.intBillId
+			WHERE BID.intLoadId = @intLoadId
+				AND BID.intContractDetailId = @intPContractDetailId
+				AND BI.intTransactionType IN (1,2)
+				AND BI.intEntityVendorId = @intPEntityId
+				AND BID.intItemId = @intPItemId
+
+			UPDATE tblICInventoryReceiptItem
+			SET dblBillQty = (@dblVoucherQty / @dblPContractDetailQty) * dblReceived
+			WHERE intInventoryReceiptItemId = @intMinInvRecItemId
+		END
+
 		INSERT INTO dbo.tblICInventoryReceiptItemLot (
 			[intInventoryReceiptItemId]
 			,[intLotId]

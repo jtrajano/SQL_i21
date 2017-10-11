@@ -339,7 +339,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 											ELSE 0
 											END,
 			[int1099Category]			=	ISNULL((SELECT TOP 1 int1099CategoryId FROM tblAP1099Category WHERE strCategory = D2.str1099Type),0),
-			[intLoadDetailId]			=	B.intSourceId,
+			[intLoadDetailId]			=	CASE WHEN A.strReceiptType = 'Purchase Contract' AND A.intSourceType = 2 THEN B.intSourceId ELSE NULL END,
 			[strBillOfLading]			= 	A.strBillOfLading
 		FROM tblICInventoryReceipt A
 		INNER JOIN tblICInventoryReceiptItem B

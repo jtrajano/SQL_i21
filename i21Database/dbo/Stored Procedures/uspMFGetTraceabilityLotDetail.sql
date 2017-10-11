@@ -34,7 +34,7 @@ Begin
 		group by t.strTransactionName,t.intItemId,t.strItemNo,t.strDescription,t.intCategoryId,t.strCategoryCode,t.intLotId,t.strLotNumber,t.strLotAlias,t.intParentLotId
 
 	If Exists(Select 1 from tblMFWorkOrderConsumedLot where intLotId in (Select intLotId From tblICLot Where intParentLotId=@intLotId)) AND @ysnParentLot=1
-		Select 'Receipt' AS strTransactionName,t.intLotId,t.strLotNumber,t.strLotAlias,t.intItemId,t.strItemNo,t.strDescription,
+		Select TOP 1 'Receipt' AS strTransactionName,t.intLotId,t.strLotNumber,t.strLotAlias,t.intItemId,t.strItemNo,t.strDescription,
 		t.intCategoryId,t.strCategoryCode,SUM(t.dblQuantity) AS dblQuantity,MAX(t.strUOM) AS strUOM,
 		MAX(t.dtmTransactionDate) AS dtmTransactionDate,t.intParentLotId,2 AS intImageTypeId
 		FROM (  
@@ -109,8 +109,27 @@ Begin
 		Where rl.intLotId IN (Select intLotId From tblICLot Where strLotNumber=@strLotNumber)) t
 		group by t.strTransactionName,t.intItemId,t.strItemNo,t.strDescription,t.intCategoryId,t.strCategoryCode,t.intLotId,t.strLotNumber,t.strLotAlias,t.intParentLotId
 
-	If Exists(Select 1 from tblMFWorkOrderProducedLot where intLotId in (Select intLotId From tblICLot Where intParentLotId=@intLotId) AND ISNULL(ysnProductionReversed,0)=0) AND @ysnParentLot=1
+	If Exists(Select 1 from tblICInventoryReceiptItemLot where intLotId IN (Select intLotId From tblICLot Where strLotNumber=@strLotNumber)) AND @ysnParentLot=0
 		Select 'Ship' AS strTransactionName,t.intLotId,t.strLotNumber,t.strLotAlias,t.intItemId,t.strItemNo,t.strDescription,
+		t.intCategoryId,t.strCategoryCode,SUM(t.dblQuantity) AS dblQuantity,MAX(t.strUOM) AS strUOM,
+		MAX(t.dtmTransactionDate) AS dtmTransactionDate,t.intParentLotId,6 AS intImageTypeId
+		FROM (  
+		Select DISTINCT '' AS strTransactionName,l.intLotId,l.strLotNumber,l.strLotAlias,i.intItemId,i.strItemNo,i.strDescription,
+		mt.intCategoryId,mt.strCategoryCode,rl.dblQuantity,um.strUnitMeasure AS strUOM,
+		r.dtmReceiptDate AS dtmTransactionDate,l.intParentLotId
+		from tblICInventoryReceipt r 
+		Join tblICInventoryReceiptItem ri on r.intInventoryReceiptId=ri.intInventoryReceiptId
+		Join tblICInventoryReceiptItemLot rl on ri.intInventoryReceiptItemId=rl.intInventoryReceiptItemId
+		Join tblICLot l on rl.intLotId=l.intLotId
+		Join tblICItem i on l.intItemId=i.intItemId
+		Join tblICCategory mt on mt.intCategoryId=i.intCategoryId
+		Join tblICItemUOM iu on l.intItemUOMId=iu.intItemUOMId
+		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
+		Where rl.intLotId IN (Select intLotId From tblICLot Where strLotNumber=@strLotNumber)) t
+		group by t.strTransactionName,t.intItemId,t.strItemNo,t.strDescription,t.intCategoryId,t.strCategoryCode,t.intLotId,t.strLotNumber,t.strLotAlias,t.intParentLotId
+
+	If Exists(Select 1 from tblMFWorkOrderProducedLot where intLotId in (Select intLotId From tblICLot Where intParentLotId=@intLotId) AND ISNULL(ysnProductionReversed,0)=0) AND @ysnParentLot=1
+		Select TOP 1 'Ship' AS strTransactionName,t.intLotId,t.strLotNumber,t.strLotAlias,t.intItemId,t.strItemNo,t.strDescription,
 		t.intCategoryId,t.strCategoryCode,SUM(t.dblQuantity) AS dblQuantity,MAX(t.strUOM) AS strUOM,
 		MAX(t.dtmTransactionDate) AS dtmTransactionDate,t.intParentLotId,6 AS intImageTypeId
 		FROM (  

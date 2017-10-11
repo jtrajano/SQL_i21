@@ -84,6 +84,7 @@ BEGIN
 			,@intTransferorId AS INT
 			,@intLocationId AS INT 
 			,@intSourceType AS INT 
+			,@strFobPoint AS NVARCHAR(50) 
   
 	SELECT TOP 1   
 			@intTransactionId = intInventoryReceiptId  
@@ -94,7 +95,9 @@ BEGIN
 			,@intTransferorId = intTransferorId
 			,@intLocationId = intLocationId
 			,@intSourceType = intSourceType 
-	FROM	dbo.tblICInventoryReceipt   
+			,@strFobPoint = ft.strFobPoint
+	FROM	dbo.tblICInventoryReceipt r LEFT JOIN tblSMFreightTerms ft
+				ON r.intFreightTermId = ft.intFreightTermId
 	WHERE	strReceiptNumber = @strTransactionId  
 END  
   
@@ -672,6 +675,7 @@ BEGIN
 		-- Reduce In-Transit stocks coming from Inbound Shipment. 
 		IF	(@intSourceType = @SOURCE_TYPE_InboundShipment) 
 			AND EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)	
+			AND @strFobPoint = 'Origin'
 		BEGIN 
 			DECLARE @ItemsForInTransitCosting AS ItemInTransitCostingTableType
 
@@ -843,7 +847,7 @@ BEGIN
 			-- Call the post routine for posting the company owned items 
 			IF EXISTS (SELECT TOP 1 1 FROM @CompanyOwnedItemsForPost)
 			BEGIN 
-				IF @intSourceType = @SOURCE_TYPE_InboundShipment 
+				IF @intSourceType = @SOURCE_TYPE_InboundShipment AND @strFobPoint = 'Origin'
 				BEGIN 
 					SET @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY = @TRANSFER_ORDER_ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY 
 					INSERT INTO @DummyGLEntries (

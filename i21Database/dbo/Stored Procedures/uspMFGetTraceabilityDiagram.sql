@@ -395,9 +395,15 @@ Begin
 
 				-- From Lot to WorkOrders
 				If @strType='L'
-					Insert Into @tblData(strTransactionName,intLotId,strLotNumber,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
-					dblQuantity,strUOM,dtmTransactionDate,strProcessName,strType,intAttributeTypeId)
-					Exec uspMFGetTraceabilityWorkOrderDetail @intId,@intDirectionId,@ysnParentLot
+					Begin
+						Insert Into @tblData(strTransactionName,intLotId,strLotNumber,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+						dblQuantity,strUOM,dtmTransactionDate,strProcessName,strType,intAttributeTypeId)
+						Exec uspMFGetTraceabilityWorkOrderDetail @intId,@intDirectionId,@ysnParentLot
+
+						--Remove circular Reference, Remove the WO if exists
+						If Exists (Select 1 from @tblData Where  intLotId in (Select intLotId from @tblNodeData Where strType='W'))
+							Delete From @tblData
+					End
 
 				-- WorkOrder Output details
 				If @strType='W'  			
@@ -536,9 +542,15 @@ Begin
 
 				-- From Lot to WorkOrders
 				If @strType='L'
-					Insert Into @tblData(strTransactionName,intLotId,strLotNumber,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
-					dblQuantity,strUOM,dtmTransactionDate,strProcessName,strType,intAttributeTypeId)
-					Exec uspMFGetTraceabilityWorkOrderDetail @intId,@intDirectionId,@ysnParentLot
+					Begin
+						Insert Into @tblData(strTransactionName,intLotId,strLotNumber,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+						dblQuantity,strUOM,dtmTransactionDate,strProcessName,strType,intAttributeTypeId)
+						Exec uspMFGetTraceabilityWorkOrderDetail @intId,@intDirectionId,@ysnParentLot
+
+						--Remove circular Reference, Remove the WO if exists
+						If Exists (Select 1 from @tblData Where  intLotId in (Select intLotId from @tblNodeData Where strType='W'))
+							Delete From @tblData
+					End
 
 				-- WorkOrder Input details
 				If @strType='W'  			

@@ -53,7 +53,9 @@ BEGIN
 			END
 			CLOSE cursor_accountId
 			DEALLOCATE cursor_accountId
-			COMMIT TRANSACTION
+
+			IF @@TRANCOUNT > 0
+				COMMIT TRANSACTION
 			SELECT 'success'
 	END TRY
 	BEGIN CATCH

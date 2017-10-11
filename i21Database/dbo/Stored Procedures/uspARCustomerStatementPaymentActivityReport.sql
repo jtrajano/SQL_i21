@@ -5,10 +5,10 @@
 	, @ysnPrintCreditBalance	AS BIT				= 1
 	, @ysnIncludeBudget			AS BIT				= 0
 	, @ysnPrintOnlyPastDue		AS BIT				= 0
-	, @ysnSearchOnly			AS BIT				= 0
 	, @strCustomerNumber		AS NVARCHAR(MAX)	= NULL
 	, @strAccountStatusCode		AS NVARCHAR(MAX)	= NULL
 	, @strLocationName			AS NVARCHAR(MAX)	= NULL
+	, @strCustomerName			AS NVARCHAR(MAX)	= NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -26,34 +26,23 @@ DECLARE @dtmDateToLocal				AS DATETIME			= NULL
 	  , @strCustomerNumberLocal		AS NVARCHAR(MAX)	= NULL
 	  , @strLocationNameLocal		AS NVARCHAR(MAX)	= NULL
 	  , @strAccountStatusCodeLocal	AS NVARCHAR(MAX)	= NULL
+	  , @strCustomerNameLocal		AS NVARCHAR(MAX)	= NULL
 	  , @strDateTo					AS NVARCHAR(50)
 	  , @strDateFrom				AS NVARCHAR(50)
 	  , @query						AS NVARCHAR(MAX)
 	  , @queryBudget				AS NVARCHAR(MAX)
 	  , @filter						AS NVARCHAR(MAX)	= ''
-	  , @intEntityCustomerId		AS INT				= NULL
-
-DECLARE @temp_aging_table TABLE(
-     [strCustomerName]          NVARCHAR(100)
-    ,[strEntityNo]              NVARCHAR(100)
-    ,[intEntityCustomerId]      INT
-    ,[dblCreditLimit]			NUMERIC(18,6)
-    ,[dblTotalAR]               NUMERIC(18,6)
-    ,[dblFuture]                NUMERIC(18,6)
-    ,[dbl0Days]                 NUMERIC(18,6)
-    ,[dbl10Days]                NUMERIC(18,6)
-    ,[dbl30Days]                NUMERIC(18,6)
-    ,[dbl60Days]                NUMERIC(18,6)
-    ,[dbl90Days]                NUMERIC(18,6)
-    ,[dbl91Days]                NUMERIC(18,6)
-    ,[dblTotalDue]              NUMERIC(18,6)
-    ,[dblAmountPaid]            NUMERIC(18,6)
-    ,[dblCredits]               NUMERIC(18,6)
-	,[dblPrepayments]			NUMERIC(18,6)
-    ,[dblPrepaids]              NUMERIC(18,6)
-    ,[dtmAsOfDate]              DATETIME
-    ,[strSalespersonName]       NVARCHAR(100)
-	,[strSourceTransaction]		NVARCHAR(100)
+		
+DECLARE @temp_xml_table TABLE (
+	 [id]			INT IDENTITY(1,1)
+	,[fieldname]	NVARCHAR(50)
+	,[condition]	NVARCHAR(20)
+	,[from]			NVARCHAR(MAX)
+	,[to]			NVARCHAR(MAX)
+	,[join]			NVARCHAR(10)
+	,[begingroup]	NVARCHAR(50)
+	,[endgroup]		NVARCHAR(50)
+	,[datatype]		NVARCHAR(50)
 )
 
 DECLARE @temp_statement_table TABLE(
@@ -93,6 +82,20 @@ DECLARE @temp_cf_table TABLE(
 	,[dtmInvoiceDate]			DATETIME
 )
 
+IF(OBJECT_ID('tempdb..#CUSTOMERS') IS NOT NULL)
+BEGIN
+    DROP TABLE #CUSTOMERS
+END
+
+SELECT intEntityCustomerId  = intEntityId
+	 , strCustomerNumber	= CAST(strCustomerNumber COLLATE Latin1_General_CI_AS AS NVARCHAR(200))
+	 , strCustomerName		= CAST('' COLLATE Latin1_General_CI_AS AS NVARCHAR(200))
+	 , dblCreditLimit
+	 , dblARBalance
+INTO #CUSTOMERS
+FROM tblARCustomer
+WHERE 1 = 0
+
 SET @dtmDateToLocal				= ISNULL(@dtmDateTo, GETDATE())
 SET	@dtmDateFromLocal			= ISNULL(@dtmDateFrom, CAST(-53690 AS DATETIME))
 SET @ysnPrintZeroBalanceLocal	= ISNULL(@ysnPrintZeroBalance, 0)
@@ -107,12 +110,40 @@ SET @strDateFrom				= ''''+ CONVERT(NVARCHAR(50),@dtmDateFromLocal, 110) + ''''
 
 IF @strCustomerNumberLocal IS NOT NULL
 	BEGIN
-		SET @filter = 'strCustomerNumber = ''' + @strCustomerNumberLocal + ''''
-
-		SELECT TOP 1 @intEntityCustomerId = intEntityId 
-		FROM vyuARCustomerSearch WITH (NOLOCK)
-		WHERE strCustomerNumber = @strCustomerNumberLocal
+		INSERT INTO #CUSTOMERS
+		SELECT TOP 1 intEntityCustomerId    = C.intEntityId 
+				   , strCustomerNumber      = C.strCustomerNumber
+				   , strCustomerName        = EC.strName
+				   , dblCreditLimit         = C.dblCreditLimit
+				   , dblARBalance           = C.dblARBalance        
+		FROM tblARCustomer C WITH (NOLOCK)
+		INNER JOIN (
+			SELECT intEntityId
+					, strName
+			FROM dbo.tblEMEntity WITH (NOLOCK)
+			WHERE strEntityNo = @strCustomerNumberLocal
+		) EC ON C.intEntityId = EC.intEntityId
+		WHERE C.ysnActive = 1
+			AND C.strStatementFormat = 'Payment Activity'
 	END
+ELSE
+	BEGIN
+		INSERT INTO #CUSTOMERS
+		SELECT intEntityCustomerId  = C.intEntityId 
+			 , strCustomerNumber	= C.strCustomerNumber
+			 , strCustomerName      = EC.strName
+			 , dblCreditLimit       = C.dblCreditLimit
+			 , dblARBalance         = C.dblARBalance
+		FROM tblARCustomer C WITH (NOLOCK)
+		INNER JOIN (
+			SELECT intEntityId
+					, strName
+			FROM dbo.tblEMEntity WITH (NOLOCK)
+			WHERE (@strCustomerNameLocal IS NULL OR strName LIKE '%'+ @strCustomerNameLocal +'%')
+		) EC ON C.intEntityId = EC.intEntityId
+		WHERE C.ysnActive = 1
+			AND C.strStatementFormat = 'Payment Activity'
+END
 
 IF @strAccountStatusCodeLocal IS NOT NULL
 	SET @filter = CASE WHEN ISNULL(@filter, '') <> '' THEN @filter + ' AND ' ELSE @filter + '' END + 'strAccountStatusCode LIKE (%''' + @strAccountStatusCodeLocal + '''%)'
@@ -120,11 +151,36 @@ IF @strAccountStatusCodeLocal IS NOT NULL
 IF @strLocationNameLocal IS NOT NULL
 	SET @filter = CASE WHEN ISNULL(@filter, '') <> '' THEN @filter + ' AND ' ELSE @filter + '' END + 'strLocationName = ''' + @strLocationNameLocal + ''''
 
-IF @ysnSearchOnly = 0
-BEGIN
-	INSERT INTO @temp_aging_table
-	EXEC dbo.uspARCustomerAgingAsOfDateReport NULL, @dtmDateToLocal, NULL, @intEntityCustomerId, NULL, @strLocationNameLocal, @ysnIncludeBudgetLocal, @ysnPrintCreditBalanceLocal
-END
+TRUNCATE TABLE tblARCustomerAgingStagingTable
+INSERT INTO tblARCustomerAgingStagingTable (
+		strCustomerName
+		, strCustomerNumber
+		, intEntityCustomerId
+		, dblCreditLimit
+		, dblTotalAR
+		, dblFuture
+		, dbl0Days
+		, dbl10Days
+		, dbl30Days
+		, dbl60Days
+		, dbl90Days
+		, dbl91Days
+		, dblTotalDue
+		, dblAmountPaid
+		, dblCredits
+		, dblPrepayments
+		, dblPrepaids
+		, dtmAsOfDate
+		, strSalespersonName
+		, strSourceTransaction
+		, strCompanyName
+		, strCompanyAddress
+)
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo = @dtmDateToLocal
+										  , @strCompanyLocation = @strLocationNameLocal
+										  , @ysnIncludeBudget = @ysnIncludeBudgetLocal
+										  , @ysnIncludeCredits = @ysnPrintCreditBalanceLocal
+										  , @strCustomerName = @strCustomerNameLocal
 
 SET @query = CAST('' AS NVARCHAR(MAX)) + 
 'SELECT * 
@@ -157,6 +213,7 @@ SELECT intEntityCustomerId	= C.intEntityId
 	  , dblARBalance		= C.dblARBalance
 	  , ysnStatementCreditLimit	= ysnStatementCreditLimit
 FROM vyuARCustomerSearch C
+	INNER JOIN #CUSTOMERS CUST ON C.intEntityCustomerId = CUST.intEntityCustomerId
 	LEFT JOIN (
 		SELECT intInvoiceId
 			 , intEntityCustomerId
@@ -195,7 +252,7 @@ FROM vyuARCustomerSearch C
 																  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) > '+ @strDateTo +'
 														 ) P ON PD.intPaymentId = P.intPaymentId))))
 		AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN (''AR Account'', ''Customer Prepayments''))			
-	) I ON I.intEntityCustomerId = C.intEntityId		
+	) I ON I.intEntityCustomerId = C.intEntityId
 	LEFT JOIN (
 		SELECT intInvoiceId
 			 , dblPayment
@@ -278,7 +335,7 @@ IF @ysnIncludeBudgetLocal = 1
         SET @queryBudget = CAST('' AS NVARCHAR(MAX)) + 
             'SELECT intEntityCustomerId         = C.intEntityId 
 			      , strCustomerNumber           = C.strCustomerNumber
-				  , strCustomerName             = C.strName
+				  , strCustomerName             = C.strCustomerName
 				  , dblCreditLimit              = C.dblCreditLimit
 				  , intInvoiceId				= CB.intCustomerBudgetId
 			      , strInvoiceNumber			= ''Budget for: '' + + CONVERT(NVARCHAR(50), CB.dtmBudgetDate, 101) 
@@ -304,8 +361,8 @@ IF @ysnIncludeBudgetLocal = 1
 				  , dblARBalance				= C.dblARBalance
 				  , ysnStatementCreditLimit		= C.ysnStatementCreditLimit
             FROM tblARCustomerBudget CB
-                INNER JOIN vyuARCustomerSearch C ON CB.intEntityCustomerId = C.intEntityId
-				OUTER APPLY (
+            INNER JOIN #CUSTOMERS C ON CB.intEntityCustomerId = C.intEntityCustomerId
+            OUTER APPLY (
 					SELECT strAccountStatusCode = LEFT(strAccountStatusCode, LEN(strAccountStatusCode) - 1)
 					FROM (
 						SELECT CAST(ARAS.strAccountStatusCode AS VARCHAR(200))  + '', ''
@@ -334,19 +391,19 @@ IF @ysnIncludeBudgetLocal = 1
 IF @ysnPrintOnlyPastDueLocal = 1
     BEGIN        
 		DELETE FROM @temp_statement_table WHERE DATEDIFF(DAYOFYEAR, dtmDueDate, @dtmDateToLocal) > 0
-        UPDATE @temp_aging_table SET dblTotalAR = dblTotalAR - dbl0Days , dbl0Days = 0
+        UPDATE tblARCustomerAgingStagingTable SET dblTotalAR = dblTotalAR - dbl0Days , dbl0Days = 0
     END
 
 IF @ysnPrintZeroBalanceLocal = 0
     BEGIN
         DELETE FROM @temp_statement_table WHERE ISNULL(dblBalance, 0) = 0
-        DELETE FROM @temp_aging_table WHERE dblTotalAR = 0
+        DELETE FROM tblARCustomerAgingStagingTable WHERE dblTotalAR = 0
     END
 
 IF @ysnPrintCreditBalanceLocal = 0
 	BEGIN
 		DELETE FROM @temp_statement_table WHERE strTransactionType IN ('Credit Memo', 'Customer Prepayment', 'Overpayment')
-		DELETE FROM @temp_aging_table WHERE dblTotalAR < 0 
+		DELETE FROM tblARCustomerAgingStagingTable WHERE dblTotalAR < 0 
 	END
 
 INSERT INTO @temp_cf_table (
@@ -516,10 +573,6 @@ FROM (
 		FROM @temp_cf_table
 	) CFReportTable ON STATEMENTREPORT.intInvoiceId = CFReportTable.intInvoiceId
 ) MAINREPORT
-LEFT JOIN @temp_aging_table AS AGINGREPORT 
+LEFT JOIN tblARCustomerAgingStagingTable AS AGINGREPORT 
 	ON MAINREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
-INNER JOIN (
-	SELECT intEntityId
-	FROM dbo.tblARCustomer WITH (NOLOCK)
-	WHERE strStatementFormat = 'Payment Activity'
-) CUSTOMER ON MAINREPORT.intEntityCustomerId = CUSTOMER.intEntityId	
+INNER JOIN #CUSTOMERS CUSTOMER ON MAINREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId

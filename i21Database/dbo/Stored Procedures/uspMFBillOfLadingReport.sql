@@ -105,64 +105,127 @@ BEGIN TRY
 
 		SELECT *
 			,COUNT(1) OVER () AS intPalletsCount
-		--,SUM(CEILING(dblQty / intCasesPerPallet)) OVER () AS intPalletsCount
 		FROM (
 			SELECT Shipment.intInventoryShipmentId
 				,Shipment.strShipmentNumber
-				,strShipFromAddress = Shipment.strShipFromAddress
-				,strShipToAddress = Shipment.strShipToLocation + ' ' + Shipment.strShipToAddress
+				,LTRIM(RTRIM(CASE 
+							WHEN ISNULL(CL.strAddress, '') = ''
+								THEN ''
+							ELSE CL.strAddress + CHAR(13)
+							END + CASE 
+							WHEN ISNULL(CL.strCity, '') = ''
+								THEN ''
+							ELSE CL.strCity + ', '
+							END + CASE 
+							WHEN ISNULL(CL.strStateProvince, '') = ''
+								THEN ''
+							ELSE CL.strStateProvince + ', '
+							END + CASE 
+							WHEN ISNULL(CL.strZipPostalCode, '') = ''
+								THEN ''
+							ELSE CL.strZipPostalCode + ', '
+							END + CASE 
+							WHEN ISNULL(CL.strCountry, '') = ''
+								THEN ''
+							ELSE CL.strCountry
+							END)) AS strShipFromAddress
+				,LTRIM(RTRIM(CASE 
+							WHEN ISNULL(EL.strLocationName, '') = ''
+								THEN ''
+							ELSE EL.strLocationName + ' '
+							END + CASE 
+							WHEN ISNULL(EL.strAddress, '') = ''
+								THEN ''
+							ELSE EL.strAddress + CHAR(13)
+							END + CASE 
+							WHEN ISNULL(EL.strCity, '') = ''
+								THEN ''
+							ELSE EL.strCity + ', '
+							END + CASE 
+							WHEN ISNULL(EL.strState, '') = ''
+								THEN ''
+							ELSE EL.strState + ', '
+							END + CASE 
+							WHEN ISNULL(EL.strZipCode, '') = ''
+								THEN ''
+							ELSE EL.strZipCode + ', '
+							END + CASE 
+							WHEN ISNULL(EL.strCountry, '') = ''
+								THEN ''
+							ELSE EL.strCountry
+							END)) AS strShipToAddress
 				,Shipment.strBOLNumber
-				,ShipmentItem.strOrderNumber
+				,'' AS strOrderNumber
 				,strCustomerPO = SO.strPONumber
 				,Shipment.dtmShipDate
 				,ShipVia.strShipVia
 				,Shipment.strDeliveryInstruction
 				,FreightTerm.strFreightTerm
-				,ShipmentItem.strItemNo
-				,ShipmentItem.strItemDescription
+				,Item.strItemNo
+				,strItemDescription = Item.strDescription
 				,Lot.strLotNumber
 				,Lot.strLotAlias
-				,ISNULL(ShipmentItemLot.dblLotQty, ISNULL(ShipmentItem.dblQtyToShip, 0)) AS dblQty
-				,ISNULL(ShipmentItemLot.strLotUOM, ShipmentItem.strUnitMeasure) AS strUOM
-				--,ISNULL(ShipmentItemLot.dblNetWeight, 0) AS dblNetWeight
+				,ISNULL(ShipmentItemLot.dblQuantityShipped, ISNULL(ShipmentItem.dblQuantity, 0)) AS dblQty
+				,ISNULL(LUOM.strUnitMeasure, UOM.strUnitMeasure) AS strUOM
 				,(
 					CASE 
-						WHEN strLotUOM <> IsNULL(UM.strUnitMeasure, '')
-							THEN (ISNULL(ShipmentItemLot.dblLotQty, ISNULL(ShipmentItem.dblQtyToShip, 0)) * Item.dblWeight)
-						ELSE ISNULL(ShipmentItemLot.dblLotQty, ISNULL(ShipmentItem.dblQtyToShip, 0))
+						WHEN LUOM.strUnitMeasure <> ISNULL(WUOM.strUnitMeasure, '')
+							THEN (ISNULL(ShipmentItemLot.dblQuantityShipped, ISNULL(ShipmentItem.dblQuantity, 0)) * Item.dblWeight)
+						ELSE ISNULL(ShipmentItemLot.dblQuantityShipped, ISNULL(ShipmentItem.dblQuantity, 0))
 						END
 					) AS dblNetWeight
-				,SUM(ShipmentItemLot.dblNetWeight) OVER () AS dblTotalWeight
-				,intWarehouseInstructionHeaderId = ISNULL(WarehouseInstruction.intWarehouseInstructionHeaderId, 0)
-				,Shipment.strCompanyName
-				,Shipment.strCompanyAddress
+				,SUM(ISNULL(ShipmentItemLot.dblGrossWeight, 0) - ISNULL(ShipmentItemLot.dblTareWeight, 0)) OVER () AS dblTotalWeight
+				,intWarehouseInstructionHeaderId = 0
+				,strCompanyName = (
+					SELECT TOP 1 strCompanyName
+					FROM tblSMCompanySetup
+					)
+				,LTRIM(RTRIM(CASE 
+							WHEN ISNULL(CL.strAddress, '') = ''
+								THEN ''
+							ELSE CL.strAddress + ', '
+							END + CASE 
+							WHEN ISNULL(CL.strCity, '') = ''
+								THEN ''
+							ELSE CL.strCity + ', '
+							END + CASE 
+							WHEN ISNULL(CL.strStateProvince, '') = ''
+								THEN ''
+							ELSE CL.strStateProvince + ', '
+							END + CASE 
+							WHEN ISNULL(CL.strZipPostalCode, '') = ''
+								THEN ''
+							ELSE CL.strZipPostalCode + ', '
+							END + CASE 
+							WHEN ISNULL(CL.strCountry, '') = ''
+								THEN ''
+							ELSE CL.strCountry
+							END)) AS strCompanyAddress
 				,ParentLot.strParentLotNumber
-				,Shipment.strCustomerName
-				,strShipFromLocation = Shipment.strShipFromLocation
+				,Entity.strName AS strCustomerName
+				,strShipFromLocation = CL.strLocationName
 				,Shipment.strReferenceNumber
 				,Shipment.strVessel
 				,Shipment.strSealNumber
 				,ISNULL(@strCustomCustomerPO, '') AS strCustomCustomerPO
-			--,(
-			--	CASE 
-			--		WHEN ISNULL((Item.intLayerPerPallet * Item.intUnitPerLayer), 0) = 0
-			--			THEN 1
-			--		ELSE (Item.intLayerPerPallet * Item.intUnitPerLayer)
-			--		END
-			--	) AS intCasesPerPallet
-			FROM vyuICGetInventoryShipmentBillOfLading Shipment
-			LEFT JOIN vyuICGetInventoryShipmentItem ShipmentItem ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
-			LEFT JOIN tblICInventoryShipmentItem SI ON SI.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
-			LEFT JOIN tblICItem Item ON Item.intItemId = SI.intItemId
-			LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = Item.intWeightUOMId
-			LEFT JOIN vyuICGetInventoryShipmentItemLot ShipmentItemLot ON ShipmentItemLot.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
-			LEFT JOIN vyuICGetLot Lot ON Lot.intLotId = ShipmentItemLot.intLotId
-			LEFT JOIN tblICParentLot ParentLot ON Lot.intParentLotId = ParentLot.intParentLotId
+			FROM tblICInventoryShipment Shipment
+			JOIN tblICInventoryShipmentItem ShipmentItem ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
+			JOIN tblICItem Item ON Item.intItemId = ShipmentItem.intItemId
+			JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = ShipmentItem.intItemUOMId
+			JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+			JOIN tblICInventoryShipmentItemLot ShipmentItemLot ON ShipmentItemLot.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
+			JOIN tblICLot Lot ON Lot.intLotId = ShipmentItemLot.intLotId
+			JOIN tblICItemUOM ItemUOM1 ON ItemUOM1.intItemUOMId = Lot.intItemUOMId
+			JOIN tblICUnitMeasure LUOM ON LUOM.intUnitMeasureId = ItemUOM1.intUnitMeasureId
+			JOIN tblICParentLot ParentLot ON Lot.intParentLotId = ParentLot.intParentLotId
+			LEFT JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = Item.intWeightUOMId
+			LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = Shipment.intShipFromLocationId
+			LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = Shipment.intShipToLocationId
+			LEFT JOIN tblEMEntity Entity ON Entity.intEntityId = Shipment.intEntityCustomerId
 			LEFT JOIN tblSMShipVia ShipVia ON ShipVia.intEntityId = Shipment.intShipViaId
 			LEFT JOIN tblSMFreightTerms FreightTerm ON FreightTerm.intFreightTermId = Shipment.intFreightTermId
-			LEFT JOIN tblLGWarehouseInstructionHeader WarehouseInstruction ON WarehouseInstruction.intInventoryShipmentId = Shipment.intInventoryShipmentId
 			LEFT JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = ShipmentItem.intOrderId
-				AND ShipmentItem.strOrderType = 'Sales Order'
+				AND Shipment.intOrderType = 2 -- 'Sales Order'
 			) AS a
 		WHERE strShipmentNumber = @strShipmentNo
 	END

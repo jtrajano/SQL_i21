@@ -74,6 +74,7 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 BEGIN
 --SET @xmlParam = NULL 
 	SELECT *, NULL AS strCorrected 
+			,NULL AS strYear 
 			,NULL AS strEmployerAddress2
 			,NULL AS strCompanyName2
 			,NULL AS strEIN2
@@ -191,6 +192,7 @@ WITH MISC1099 (
 	,intEntityVendorId
 	,dblTotalPayment
 	,strCorrected
+	,strYear
 )
 AS 
 (
@@ -198,6 +200,7 @@ AS
      int1099MISCId = ROW_NUMBER() OVER(ORDER BY (SELECT 1))
 	,A.* 
 	,(CASE WHEN ISNULL(@correctedParam,0) = 0 THEN NULL ELSE 'X' END) AS strCorrected
+	,(SELECT RIGHT(@yearParam,2)) AS strYear
 	FROM vyuAP1099MISC A
 	OUTER APPLY 
 	(
@@ -249,6 +252,7 @@ SELECT
 	,MISC1099Top.intEntityVendorId
 	,MISC1099Top.strCorrected
 	,MISC1099Top.dblTotalPayment
+	,MISC1099Top.strYear
 	,MISC1099Bottom.strEmployerAddress			AS strEmployerAddress2
 	,MISC1099Bottom.strCompanyName				AS strCompanyName2
 	,MISC1099Bottom.strEIN						AS strEIN2
@@ -277,6 +281,7 @@ SELECT
 	,MISC1099Bottom.intEntityVendorId			AS intEntityVendorId2
 	,MISC1099Bottom.strCorrected				AS strCorrected2
 	,MISC1099Bottom.dblTotalPayment				AS dblTotalPayment2
+	,MISC1099Bottom.strYear						AS strYear2
 FROM (
 	SELECT
 	*

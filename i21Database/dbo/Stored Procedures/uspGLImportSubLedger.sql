@@ -14,3 +14,4 @@ CREATE PROCEDURE  [dbo].[uspGLImportSubLedger]
 	 @version			VARCHAR(20),
 	 @importLogId		INT OUTPUT
 AS
+RAISERROR('Import Subledger Procedure is not available', 16, 1);

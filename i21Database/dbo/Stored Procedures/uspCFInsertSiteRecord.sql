@@ -61,18 +61,13 @@ BEGIN
 	DECLARE @intARCashCustomer						  INT = 0
 	DECLARE @intImportMapping						  INT = 0
 	---------------------------------------------------------
-	
-	
-	
-	
+	DECLARE @strAllowExemptionsOnExtAndRetailTrans	  NVARCHAR(50)
+	---------------------------------------------------------
 
 
 	---------------------------------------------------------
 	----				    VALIDATION		   			 ----
 	---------------------------------------------------------
-	
-
-	 
 
 	---------------------------------------------------------
 	--					 REQUIRED FIELDS				   --
@@ -430,6 +425,21 @@ BEGIN
 		RETURN
 	END
 
+
+	
+	---------------------------------------------------------
+	----				    DEFAULT			   			 ----
+	---------------------------------------------------------
+
+	SELECT TOP 1 
+	@strAllowExemptionsOnExtAndRetailTrans = strAllowExemptionsOnExtAndRetailTrans
+	FROM tblCFNetwork
+	WHERE intNetworkId = @intNetworkId
+
+	
+	---------------------------------------------------------
+
+
 	---------------------------------------------------------
 	--				INSERT ACCOUNT RECORD			       --		
 	---------------------------------------------------------
@@ -462,6 +472,7 @@ BEGIN
 				,ysnPumpCalculatesTaxes	
 				,ysnRecalculateTaxesOnRemote	
 				,ysnMultipleSiteImport
+				,strAllowExemptionsOnExtAndRetailTrans
 	        )
 			VALUES
 			(
@@ -489,6 +500,7 @@ BEGIN
 				,@ysnPumpCalculatesExemptPrice	
 				,@ysnRecalculateTaxesOnRemote	
 				,@ysnImportContainsMultipleSites
+				,@strAllowExemptionsOnExtAndRetailTrans
 			)
 
 			COMMIT TRANSACTION

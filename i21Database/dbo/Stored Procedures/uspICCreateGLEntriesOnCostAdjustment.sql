@@ -2,6 +2,7 @@
 	@strBatchId AS NVARCHAR(20)
 	,@intEntityUserSecurityId AS INT
 	,@strGLDescription AS NVARCHAR(255) = NULL 
+	,@AccountCategory_Cost_Adjustment AS NVARCHAR(50) = 'AP Clearing' 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -14,7 +15,7 @@ SET ANSI_WARNINGS OFF
 DECLARE @AccountCategory_Inventory AS NVARCHAR(30) = 'Inventory'
 		,@AccountCategory_Auto_Variance AS NVARCHAR(30) = 'Inventory Adjustment' --'Auto-Variance' -- Auto-variance will no longer be used. It will not use Inventory Adjustment. 
 
-		,@AccountCategory_Cost_Adjustment AS NVARCHAR(30) = 'AP Clearing' 
+		--,@AccountCategory_Cost_Adjustment AS NVARCHAR(30) = 'AP Clearing' 
 		,@AccountCategory_Revalue_WIP AS NVARCHAR(30) = 'Work In Progress' 
 
 		,@AccountCategory_Revalue_Sold AS NVARCHAR(30) = 'Cost of Goods'

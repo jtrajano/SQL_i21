@@ -1230,6 +1230,7 @@ ELSE
 
 		UNION
 		--ALREADY HAVE PAYMENTS
+		--AR-5542 added the additional comment for have payments
 		SELECT
 			 [intInvoiceId]			= I.[intInvoiceId]
 			,[strInvoiceNumber]		= I.[strInvoiceNumber]		
@@ -1237,7 +1238,7 @@ ELSE
 			,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
 			,[intItemId]			= I.[intItemId]
 			,[strBatchId]			= I.[strBatchId]
-			,[strPostingError]		= ARP.[strRecordNumber] + ' payment was already made on this ' + I.strTransactionType + '.'
+			,[strPostingError]		= ARP.[strRecordNumber] + ' payment was already made on this ' + I.strTransactionType + '.' + CASE WHEN I.strTransactionType = 'Credit Memo' THEN ' Please remove payment record and try again.' ELSE '' END
 		FROM 
 			(SELECT [intPaymentId], [strRecordNumber] FROM tblARPayment WITH (NOLOCK)) ARP
 		INNER JOIN 

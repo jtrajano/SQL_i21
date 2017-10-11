@@ -103,7 +103,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 		--1 Time synchronization here
 		PRINT ''1 Time Salesperson Synchronization''
 
-		DECLARE @originSalespersonId		NVARCHAR(3)
+		DECLARE @originSalespersonId		NVARCHAR (3)
 		DECLARE @strSalespersonId			NVARCHAR (3)
 		DECLARE	@strName					NVARCHAR (100)
 		DECLARE @strType					NVARCHAR (20)
@@ -361,8 +361,8 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 		--1 Time synchronization here
 		PRINT ''1 Time Salesperson Synchronization''
 
-		DECLARE @originSalespersonId		NVARCHAR(3)
-		DECLARE @strSalespersonId			NVARCHAR (3)
+		DECLARE @originSalespersonId		NVARCHAR (10)
+		DECLARE @strSalespersonId			NVARCHAR (10)
 		DECLARE	@strName					NVARCHAR (100)
 		DECLARE @strType					NVARCHAR (20)
 		DECLARE @strEmail					NVARCHAR (50)
@@ -390,10 +390,11 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 				ON ptslsmst.ptsls_slsmn_id COLLATE Latin1_General_CI_AS = tblARSalesperson.strSalespersonId COLLATE Latin1_General_CI_AS
 			WHERE tblARSalesperson.strSalespersonId IS NULL
 			UNION ALL 
-			SELECT trdrv_driver, ''TR'' FROM trdrvmst
-			LEFT JOIN tblARSalesperson
-				ON trdrvmst.trdrv_driver COLLATE Latin1_General_CI_AS = tblARSalesperson.strSalespersonId COLLATE Latin1_General_CI_AS
-			WHERE tblARSalesperson.strSalespersonId IS NULL		
+			SELECT trdrv_driver, ''TR'' FROM trdrvmst TR
+			WHERE trdrv_name COLLATE Latin1_General_CI_AS  NOT IN (SELECT EM.strName FROM tblEMEntity EM 
+			INNER JOIN tblEMEntityType EMT ON EMT.intEntityId = EM.intEntityId AND strType = ''Salesperson''
+			INNER JOIN tblARSalesperson SLS ON SLS.intEntityId = EMT.intEntityId 
+			WHERE EM.strName COLLATE Latin1_General_CI_AS = TR.trdrv_name COLLATE Latin1_General_CI_AS)	
 
 		WHILE (EXISTS(SELECT 1 FROM @tmpptslsmst))
 		BEGIN
@@ -540,11 +541,12 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 			ON ptslsmst.ptsls_slsmn_id COLLATE Latin1_General_CI_AS = tblARSalesperson.strSalespersonId COLLATE Latin1_General_CI_AS
 		WHERE tblARSalesperson.strSalespersonId IS NULL
 		
-		SELECT @Total = @Total + COUNT(trdrv_driver)
-			FROM trdrvmst
-		LEFT JOIN tblARSalesperson
-			ON trdrvmst.trdrv_driver COLLATE Latin1_General_CI_AS = tblARSalesperson.strSalespersonId COLLATE Latin1_General_CI_AS
-		WHERE tblARSalesperson.strSalespersonId IS NULL		
+		SELECT @Total = @Total + COUNT(trdrv_name)
+		FROM trdrvmst TR
+		WHERE trdrv_name COLLATE Latin1_General_CI_AS  NOT IN (SELECT EM.strName FROM tblEMEntity EM 
+		INNER JOIN tblEMEntityType EMT ON EMT.intEntityId = EM.intEntityId AND strType = ''Salesperson''
+		INNER JOIN tblARSalesperson SLS ON SLS.intEntityId = EMT.intEntityId 
+		WHERE EM.strName COLLATE Latin1_General_CI_AS = TR.trdrv_name COLLATE Latin1_General_CI_AS)
 	END
 	END'
 )

@@ -112,7 +112,7 @@ SELECT
 										WHEN ISNULL(CNT.intContractDetailId,0) = 0 THEN SCD.intCurrencyId 
 										WHEN ISNULL(CNT.intContractDetailId,0) > 0 THEN CNT.intCurrencyId
 									END
-		,intLocationId				= LI.intItemLocationId
+		,intLocationId				= SCD.intCompanyLocationId
 		,intShipFromId				= (select top 1 intShipFromId from tblAPVendor where intEntityId = @intEntityId)
 		,intShipViaId				= NULL
 		,intDiscountSchedule		= SCD.intDiscountId
@@ -157,7 +157,7 @@ SELECT
 FROM	@Items LI 
 		INNER JOIN tblSCDeliverySheet SCD ON SCD.intDeliverySheetId = LI.intTransactionId
 		INNER JOIN tblICItem IC ON IC.intItemId = SCD.intItemId
-		INNER JOIN dbo.vyuCTContractDetailView CNT ON CNT.intContractDetailId = LI.intTransactionDetailId
+		LEFT JOIN dbo.vyuCTContractDetailView CNT ON CNT.intContractDetailId = LI.intTransactionDetailId
 WHERE	SCD.intDeliverySheetId = @intDeliverySheetId
 
 -- Get the identity value from tblICInventoryReceipt

@@ -148,11 +148,19 @@ BEGIN
 		,intSubLocationId			= SC.intSubLocationId
 		,intStorageLocationId		= SC.intStorageLocationId
 		,intStorageScheduleTypeId	= CASE
-									  WHEN LI.ysnIsStorage = 0 THEN NULL
+									  WHEN LI.ysnIsStorage = 0 THEN  
+										CASE 
+											WHEN ISNULL(SC.intStorageScheduleTypeId,0) > 0 THEN SC.intStorageScheduleTypeId
+											ELSE NULL
+										END
 									  WHEN LI.ysnIsStorage = 1 THEN 
 										CASE 
 											WHEN ISNULL(SC.intStorageScheduleTypeId,0) > 0 THEN SC.intStorageScheduleTypeId
-											WHEN ISNULL(SC.intStorageScheduleTypeId,0) = 0 THEN (SELECT intDefaultStorageTypeId FROM	tblSCScaleSetup WHERE intScaleSetupId = SC.intScaleSetupId)
+											WHEN ISNULL(SC.intStorageScheduleTypeId,0) <= 0 THEN 
+											CASE
+												WHEN ISNULL(LI.intStorageScheduleTypeId,0) = 0 THEN (SELECT intDefaultStorageTypeId FROM tblSCScaleSetup WHERE intScaleSetupId = SC.intScaleSetupId)
+												WHEN ISNULL(LI.intStorageScheduleTypeId,0) > 0 THEN LI.intStorageScheduleTypeId
+											END
 										END
 									  END
 		,intItemUOMId				= LI.intItemUOMId

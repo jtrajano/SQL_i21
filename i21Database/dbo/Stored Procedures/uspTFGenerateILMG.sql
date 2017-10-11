@@ -14,9 +14,7 @@ DECLARE @ErrorState INT
 
 BEGIN TRY
 
-	IF (ISNULL(@xmlParam,'') = '')
-	BEGIN 
-		DECLARE @Output TABLE(
+	DECLARE @Output TABLE(
 			dtmBlendedDate DATE
 			, dblPrimary_a NUMERIC
 			, dblPrimary_b NUMERIC
@@ -28,9 +26,7 @@ BEGIN TRY
 			, dtmFromDate DATE
 			, dtmToDate DATE)
 
-		SELECT * FROM @Output
-	END
-	ELSE
+	IF (ISNULL(@xmlParam,'') != '')
 	BEGIN		
 		DECLARE @idoc INT
 		EXEC sp_xml_preparedocument @idoc OUTPUT, @xmlParam
@@ -73,6 +69,7 @@ BEGIN TRY
 		WHERE intTaxAuthorityId = @TaxAuthorityId
 			AND strProductCode IN ('065', 'E00', '123', '999')
 		
+		INSERT INTO @Output
 		SELECT 
 			--Blend.intBlendTransactionId
 			--, Blend.strBlendTransactionNo
@@ -115,6 +112,8 @@ BEGIN TRY
 			AND (PrimaryItem.intProductCodeId IN (SELECT intProductCodeId FROM @RawMaterialCode)
 			OR AgentItem.intProductCodeId IN (SELECT intProductCodeId FROM @RawMaterialCode))
 	END
+
+	SELECT * FROM @Output
 
 END TRY
 BEGIN CATCH
