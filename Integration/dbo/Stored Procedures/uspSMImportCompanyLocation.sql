@@ -509,16 +509,16 @@ BEGIN
 				,[intSalesAdvAcct]
 				,[intPurchaseAdvAccount]
 				,[intFreightAPAccount]
-				,[intFreightExpenses]
-				,[intFreightIncome]
-				,[intServiceCharges]
-				,[intSalesDiscounts]
-				,[intCashOverShort]
-				,[intWriteOff]
-				,[intCreditCardFee]
-				,[intSalesAccount]
-				,[intCostofGoodsSold]
-				,[intInventory]
+				--,[intFreightExpenses]
+				--,[intFreightIncome]
+				--,[intServiceCharges]
+				--,[intSalesDiscounts]
+				--,[intCashOverShort]
+				--,[intWriteOff]
+				--,[intCreditCardFee]
+				--,[intSalesAccount]
+				--,[intCostofGoodsSold]
+				--,[intInventory]
 				,[intUndepositedFundsId]
 				,[strInvoiceType]
 				,[strPickTicketType]
@@ -592,16 +592,16 @@ BEGIN
 				,SAA.[inti21Id]						--<intSalesAdvAcct, int,>
 				,PAA.[inti21Id]						--<intPurchaseAdvAccount, int,>
 				,FAP.[inti21Id]						--<intFreightAPAccount, int,>
-				,0									--<intFreightExpenses, int,>
-				,0									--<intFreightIncome, int,>
-				,0									--<intServiceCharges, int,>
-				,0									--<intSalesDiscounts, int,>
-				,0									--<intCashOverShort, int,>
-				,0									--<intWriteOff, int,>
-				,0									--<intCreditCardFee, int,>
-				,0									--<intSalesAccount, int,>
-				,0									--<intCostofGoodsSold, int,>
-				,0									--<intInventory, int,>
+				--,0									--<intFreightExpenses, int,>
+				--,0									--<intFreightIncome, int,>
+				--,0									--<intServiceCharges, int,>
+				--,0									--<intSalesDiscounts, int,>
+				--,0									--<intCashOverShort, int,>
+				--,0									--<intWriteOff, int,>
+				--,0									--<intCreditCardFee, int,>
+				--,0									--<intSalesAccount, int,>
+				--,0									--<intCostofGoodsSold, int,>
+				--,0									--<intInventory, int,>
 				,CA.[inti21Id]						--[intUndepositedFundsId] <[galoc_gl_cash], int,>
 				,''''									--<strInvoiceType, nvarchar(50),>
 				,''''									--<strPickTicketType, nvarchar(50),>
