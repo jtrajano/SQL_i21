@@ -110,7 +110,9 @@
 
 
 	,@strInvoiceReportNumber			NVARCHAR(MAX)	= NULL
-	,@dtmInvoiceDate					DATETIME		= NULL				
+	,@dtmInvoiceDate					DATETIME		= NULL		
+	
+	,@strSiteTaxLocation				NVARCHAR(MAX)	= NULL
 
 	
 	
@@ -527,6 +529,41 @@ BEGIN
 				,strSiteCity			= @strSiteCity	
 				,strSiteType			= 'Extended Remote'
 				,intTaxGroupId			= @intTaxGroupByState
+				
+
+			SET @intSiteId = SCOPE_IDENTITY();
+			SET @ysnSiteCreated = 1;
+	END
+	ELSE IF ((@intSiteId IS NULL OR @intSiteId = 0) AND @intNetworkId != 0 AND @strNetworkType = 'CFN')
+	BEGIN
+
+		DECLARE @CFNState	NVARCHAR(MAX) = NULL
+		SELECT TOP 1 @CFNState = strPostalCode FROM tblCFStateCode where strStateName = @strSiteTaxLocation
+
+		INSERT INTO tblCFSite
+			(
+				 intNetworkId		
+				,strSiteNumber	
+				,strSiteName
+				,strDeliveryPickup	
+				,intARLocationId	
+				,strControllerType	
+				,strTaxState			
+				,strSiteType
+			)
+			SELECT
+				intNetworkId			= @intNetworkId
+				,strSiteNumber			= @strSiteId
+				,strSiteName			= @strSiteId
+				,strDeliveryPickup		= 'Pickup'
+				,intARLocationId		= @intNetworkLocation
+				,strControllerType		= 'CFN'
+				,strTaxState			= @CFNState
+				,strSiteType			= (CASE @strTransactionType 
+											WHEN 'Foreign Sales' 
+												THEN 'Local/Network'
+											ELSE @strTransactionType
+											END)
 				
 
 			SET @intSiteId = SCOPE_IDENTITY();

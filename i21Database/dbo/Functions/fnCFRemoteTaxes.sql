@@ -123,6 +123,57 @@ BEGIN
 	SELECT @intItemCategoryId = intCategoryId FROM tblICItem WHERE intItemId = @intItemId 
 	--DECLARE @DisregardExemptionSetup BIT
 
+
+	IF (ISNUMERIC(@Tax1) = 1)
+	BEGIN
+		SET @Tax1 =  substring(@Tax1, patindex('%[^0]%',@Tax1), 10)
+	END
+
+	IF (ISNUMERIC(@Tax2) = 1)
+	BEGIN
+		SET @Tax2 =  substring(@Tax2, patindex('%[^0]%',@Tax2), 10)
+	END
+
+	IF (ISNUMERIC(@Tax3) = 1)
+	BEGIN
+		SET @Tax3 =  substring(@Tax3, patindex('%[^0]%',@Tax3), 10)
+	END
+
+	IF (ISNUMERIC(@Tax4) = 1)
+	BEGIN
+		SET @Tax4 =  substring(@Tax4, patindex('%[^0]%',@Tax4), 10)
+	END
+
+	IF (ISNUMERIC(@Tax5) = 1)
+	BEGIN
+		SET @Tax5 =  substring(@Tax5, patindex('%[^0]%',@Tax5), 10)
+	END
+
+	IF (ISNUMERIC(@Tax6) = 1)
+	BEGIN
+		SET @Tax6 =  substring(@Tax6, patindex('%[^0]%',@Tax6), 10)
+	END
+
+	IF (ISNUMERIC(@Tax7) = 1)
+	BEGIN
+		SET @Tax7 =  substring(@Tax7, patindex('%[^0]%',@Tax7), 10)
+	END
+
+	IF (ISNUMERIC(@Tax8) = 1)
+	BEGIN
+		SET @Tax8 =  substring(@Tax8, patindex('%[^0]%',@Tax8), 10)
+	END
+
+	IF (ISNUMERIC(@Tax9) = 1)
+	BEGIN
+		SET @Tax9 =  substring(@Tax9, patindex('%[^0]%',@Tax9), 10)
+	END
+
+	IF (ISNUMERIC(@Tax10) = 1)
+	BEGIN
+		SET @Tax10 =  substring(@Tax10, patindex('%[^0]%',@Tax10), 10)
+	END
+	
 	INSERT INTO @tblNetworkTaxMapping
 	SELECT
 		 cfNetwork.strNetwork				
