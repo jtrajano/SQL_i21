@@ -50,6 +50,34 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
+        public async Task<SearchResult> SearchItemStockUOMViewTotalsAllLocations(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICGetItemStockUOMTotalsAllLocations>()
+                .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "intItemId").ToListAsync(param.cancellationToken);
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync(param.cancellationToken),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
+            };
+        }
+
+        public async Task<SearchResult> SearchItemStockUOMViewTotalsAllStorageUnits(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICGetItemStockUOMTotalsAllStorageUnits>()
+                .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "intItemId").ToListAsync(param.cancellationToken);
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync(param.cancellationToken),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
+            };
+        }
+
         public async Task<SearchResult> GetLocationStockOnHand(int? intLocationId, int? intItemId, int? intSubLocationId, int? intStorageLocationId, int? intLotId, int? intItemUOMId)
         {
             var query = _db.GetQuery<vyuICGetItemStockUOM>()

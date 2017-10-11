@@ -189,6 +189,8 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuICGetItemStockSummaryByLotMap());
             modelBuilder.Configurations.Add(new vyuICGetItemStockUOMMap());
             modelBuilder.Configurations.Add(new vyuICGetItemStockUOMTotalsMap());
+            modelBuilder.Configurations.Add(new vyuICGetItemStockUOMTotalsAllLocationsMap());
+            modelBuilder.Configurations.Add(new vyuICGetItemStockUOMTotalsAllStorageUnitsMap());
             modelBuilder.Configurations.Add(new vyuICGetItemStockUOMSummaryMap());
             modelBuilder.Configurations.Add(new vyuICGetItemStockUOMForAdjustmentMap());
             modelBuilder.Configurations.Add(new vyuICGetItemAccountMap());

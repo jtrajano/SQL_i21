@@ -20,6 +20,8 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
         'Inventory.store.BufferedUnitMeasure',
         'Inventory.store.BufferedItemStockViewWithComments',
         'Inventory.store.BufferedItemStockUOMViewTotals',
+        'Inventory.store.BufferedItemStockUOMViewTotalsAllLocations',
+        'Inventory.store.BufferedItemStockUOMViewTotalsAllStorageUnits',
         'GeneralLedger.controls.RecapTab',
         'GeneralLedger.controls.PostHistory'      
     ],
@@ -107,10 +109,10 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
             type: 'icbufferedsearchlot'
         },
         fromSubLocation: {
-            type: 'icbuffereditemstockuomviewtotals'
+            type: 'icbuffereditemstockuomviewtotalsalllocations'
         },
         fromStorageLocation: {
-            type: 'icbuffereditemstockuomviewtotals'
+            type: 'icbuffereditemstockuomviewtotalsallstorageunits'
         },
         toSubLocation: {
             type: 'smcompanylocationsublocationbuffered'

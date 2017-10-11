@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace iRely.Inventory.Model
 {
-    public class vyuICGetItemStockUOMTotals
+    public class vyuICGetItemStockUOMTotalsAllStorageUnits
     {
         public int? intStorageLocationId { get; set; }
         public int intItemStockUOMId { get; set; }

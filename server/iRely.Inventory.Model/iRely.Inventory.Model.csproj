@@ -193,6 +193,8 @@
     <Compile Include="Configuration\vyuICLotHistoryMap.cs" />
     <Compile Include="InventoryEntities.Views.cs" />
     <Compile Include="Metadata\Item\tblICItemSubLocation.cs" />
+    <Compile Include="Metadata\Item\vyuICGetItemStockUOMTotalsAllLocations.cs" />
+    <Compile Include="Metadata\Item\vyuICGetItemStockUOMTotalsAllStorageUnits.cs" />
     <Compile Include="Metadata\Item\vyuICItemUOMDetail.cs" />
     <Compile Include="Metadata\MiscViews\vyuICGetItemUOMByType.cs" />
     <Compile Include="Metadata\Receipt\tblICInventoryReceiptCharge.cs" />

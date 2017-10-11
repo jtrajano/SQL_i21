@@ -110,25 +110,35 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                     editor: {
                         store: '{fromSubLocation}',
                         readOnly: '{readOnlyInventoryTransferField}',
-                        defaultFilters: [{
-                            column: 'intItemId',
-                            value: '{grdInventoryTransfer.selection.intItemId}',
-                            conjunction: 'and'
-                        },{
-                            column: 'intLocationId',
-                            value: '{current.intFromLocationId}',
-                            conjunction: 'and'
-                        },{
-                            column: 'dblOnHand',
-                            value: '0',
-                            conjunction: 'and',
-                            condition: 'gt'
-                        },{
-                            column: 'ysnStockUnit',
-                            value: true,
-                            conjunction: 'and',
-                            condition: 'eq'
-                        }
+                        defaultFilters: 
+                        [
+                            {
+                                column: 'intItemId',
+                                value: '{grdInventoryTransfer.selection.intItemId}',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intLocationId',
+                                value: '{current.intFromLocationId}',
+                                conjunction: 'and'
+                            },
+                            // {
+                            //     inner: [
+                            //         {
+                            //             column: 'dblOnHand',
+                            //             value: '0',
+                            //             conjunction: 'and',
+                            //             condition: 'gt'
+                            //         },
+                            //         {
+                            //             column: 'ysnStockUnit',
+                            //             value: true,
+                            //             conjunction: 'and',
+                            //             condition: 'eq'
+                            //         }
+                            //     ],
+                            //     conjunction: 'or'
+                            // }
                         ]
                     }
                 },
@@ -149,11 +159,6 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                             column: 'intSubLocationId',
                             value: '{grdInventoryTransfer.selection.intFromSubLocationId}',
                             conjunction: 'and'
-                        },{
-                            column: 'dblOnHand',
-                            value: '0',
-                            conjunction: 'and',
-                            condition: 'gt'
                         }]
                     }
                 },
