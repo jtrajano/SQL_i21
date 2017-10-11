@@ -5740,6 +5740,7 @@
     <Build Include="dbo\Stored Procedures\uspGLSyncGLAccountDescription.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099DIVTwoPart.sql" />
     <Build Include="dbo\Views\vyuAP1099DIV.sql" />
+    <Build Include="dbo\Views\vyuPATDividends.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
