@@ -153,6 +153,7 @@
     <None Include="Scripts\AP\UpdateImportedBills1099.sql" />
     <None Include="Scripts\PAT\DropStoredProcedures.sql" />
     <None Include="Scripts\SM\InsertOriginTaxClassXRef.sql" />
+    <None Include="dbo\Stored Procedures\uspPRImportOriginEmployeeTaxes.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />
@@ -421,5 +422,6 @@
     <None Include="dbo\Stored Procedures\uspGRImportWeightGrades.sql" />
     <None Include="dbo\Stored Procedures\deleteSP.sql" />
     <None Include="Scripts\SM\CopyCashToUndepositedFund.sql" />
+    <None Include="dbo\Stored Procedures\uspPRImportOriginTaxTypes.sql" />
   </ItemGroup>
 </Project>

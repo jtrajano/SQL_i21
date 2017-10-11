@@ -99,3 +99,9 @@ GO
 GO
 :r "..\Scripts\IC\uspICDCUomMigrationPt.sql"
 GO
+
+--Payroll
+:r "..\dbo\Stored Procedures\uspPRImportOriginTaxTypes.sql"
+:r "..\dbo\Stored Procedures\uspPRImportOriginEmployeeTaxes.sql"
+
+GO
