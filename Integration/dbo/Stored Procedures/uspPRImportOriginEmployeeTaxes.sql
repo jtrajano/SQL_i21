@@ -133,7 +133,7 @@ EXEC('
 				SELECT 1 FROM tblPREmployeeTax 
 				WHERE intEntityEmployeeId = iEMP.intEntityEmployeeId 
 				AND intTypeTaxId = iTAX.intTypeTaxId)
-			AND strEmployeeId = ISNULL(@EmployeId, strEmployeeId)
+			AND strEmployeeId = ISNULL(@strEmployeeId, strEmployeeId)
 
 	END
 ')
