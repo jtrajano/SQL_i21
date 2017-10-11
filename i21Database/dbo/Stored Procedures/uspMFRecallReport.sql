@@ -172,13 +172,13 @@ Begin
 	--Update @tblNodeData Set strVendor=(Select TOP 1 strName From vyuAPVendor Where intEntityId in (Select intEntityVendorId From tblICLot Where strLotNumber=@strLotNumber))
 
 	--Receipt
-	Insert Into @tblNodeData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
-	dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strVendor,strType)
-	Exec uspMFGetTraceabilityLotReceiptDetail @intLotId,@ysnParentLot
+	--Insert Into @tblNodeData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+	--dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strVendor,strType)
+	--Exec uspMFGetTraceabilityLotReceiptDetail @intLotId,@ysnParentLot
 
-	--Update RecordId, ParentId
-	SELECT @intMaxRecordCount = ISNULL(Max(intRecordId),0) + 1,@intParentId = ISNULL(Max(intRecordId),0) FROM @tblNodeData
-	Update @tblNodeData Set intRecordId=@intMaxRecordCount,intParentId=@intParentId Where intParentId is null
+	----Update RecordId, ParentId
+	--SELECT @intMaxRecordCount = ISNULL(Max(intRecordId),0) + 1,@intParentId = ISNULL(Max(intRecordId),0) FROM @tblNodeData
+	--Update @tblNodeData Set intRecordId=@intMaxRecordCount,intParentId=@intParentId Where intParentId is null
 
 	--Lot Detail
 	Insert Into @tblNodeData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
@@ -389,8 +389,9 @@ Begin
 	--Insert Into @tblLinkData(intFromRecordId,intToRecordId,strTransactionName)
 	--Select intParentId,intRecordId,strTransactionName From @tblNodeData
 
-	If (Select COUNT(1) From @tblNodeData)=0
+	If (Select COUNT(1) From @tblNodeData)>0
 	Begin
+		Select Top 1 @intLotId=intLotId from @tblNodeData Where strType='L' order by intRecordId Desc
 		Set @intDirectionId=1
 		GOTO DIR_FORWARD	
 	End
