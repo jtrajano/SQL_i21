@@ -72,6 +72,8 @@ BEGIN
 			,@INV_TRANS_TYPE_Cost_Adjustment AS INT = 26
 			,@INV_TRANS_TYPE_Invoice AS INT = 33
 
+			,@INV_TRANS_TYPE_NegativeStock AS INT = 35
+
 	DECLARE	@RunningQty AS NUMERIC(38, 20)
 			,@NewRunningValue AS NUMERIC(38, 20)
 			,@OriginalRunningValue AS NUMERIC(38, 20)
@@ -97,6 +99,7 @@ BEGIN
 			,@t_intLocationId AS INT 
 			,@t_strRelatedTransactionId AS NVARCHAR(50)
 			,@t_intRelatedTransactionId AS INT 
+			,@t_NegativeStockCost AS NUMERIC(38, 20)
 
 			,@EscalateInventoryTransactionId AS INT 
 			,@EscalateInventoryTransactionTypeId AS INT 
@@ -205,14 +208,6 @@ BEGIN
 	END 
 
 	SET @CostBucketOriginalValue = ISNULL(@CostBucketOriginalValue, 0) 
-END 
-
--- If IR transaction is used to offset an negative stock, then reset the starting id. 
-BEGIN 
-	SELECT  @InventoryTransactionStartId = ISNULL(MIN(cbOut.intInventoryTransactionId), @InventoryTransactionStartId) 
-	FROM	tblICInventoryFIFOOut cbOut
-	WHERE	cbOut.intInventoryFIFOId = @CostBucketId
-			AND cbOut.intInventoryTransactionId < @InventoryTransactionStartId
 END 
 
 -- Log the original cost
@@ -327,12 +322,16 @@ BEGIN
 			,il.intLocationId
 			,t.strRelatedTransactionId
 			,t.intRelatedTransactionId
+			,cb.dblCost 
 	FROM	tblICInventoryTransaction t INNER JOIN tblICItemLocation il
 				ON t.intItemLocationId = il.intItemLocationId
 				AND t.intItemId = il.intItemId
 			LEFT JOIN tblICInventoryFIFOOut cbOut 
 				ON cbOut.intInventoryTransactionId = t.intInventoryTransactionId
 				AND cbOut.intRevalueFifoId IS NOT NULL 
+			LEFT JOIN tblICInventoryFIFO cb
+				ON cb.intInventoryFIFOId = cbOut.intRevalueFifoId
+
 	WHERE	t.intItemId = @intItemId
 			AND t.intItemLocationId = @intItemLocationId			
 			AND ISNULL(t.ysnIsUnposted, 0) = 0 
@@ -359,6 +358,7 @@ BEGIN
 		,@t_intLocationId
 		,@t_strRelatedTransactionId
 		,@t_intRelatedTransactionId 
+		,@t_NegativeStockCost
 	;
 
 	WHILE @@FETCH_STATUS = 0 
@@ -380,27 +380,14 @@ BEGIN
 						@t_dblQty > 0 
 						AND @t_intInventoryTransactionId = @InventoryTransactionStartId THEN 
 							@CostBucketOriginalValue
-					WHEN 
-						@t_dblQty > 0 
-						AND @t_strTransactionId = @strSourceTransactionId 
-						AND @t_intTransactionId = @intSourceTransactionId 
-						AND @t_intTransactionDetailId = @intSourceTransactionDetailId 
-						AND @t_intInventoryTransactionId <> @InventoryTransactionStartId THEN 
-							0
 
 					WHEN 
-						@t_dblQty < 0 THEN 
-							@t_dblQty * @OriginalAverageCost
+						@t_dblQty < 0 AND @t_intTransactionTypeId = @INV_TRANS_TYPE_NegativeStock THEN 
+							@t_dblValue 
 					
 					ELSE 
 						@CurrentValue
 			END 
-
-		-- Calculate a new average cost if offsetting a negative stock 
-		IF @t_dblQty < 0 AND @t_intInventoryTransactionId = @InventoryTransactionStartId
-		BEGIN 
-			SET @NewAverageCost = (@CostBucketOriginalValue + @CostAdjustment) / @CostBucketOriginalStockIn
-		END 
 
 		-- Calculate the New Running Value. 
 		SET @NewRunningValue += 
@@ -410,15 +397,13 @@ BEGIN
 							@CostBucketOriginalValue + @CostAdjustment
 
 					WHEN 
-						@t_dblQty > 0 
-						AND @t_strTransactionId = @strSourceTransactionId 
-						AND @t_intTransactionId = @intSourceTransactionId 
-						AND @t_intTransactionDetailId = @intSourceTransactionDetailId 
-						AND @t_intInventoryTransactionId <> @InventoryTransactionStartId THEN 
-							@CostBucketOriginalValue + @CostAdjustment
-					
+						@t_dblQty < 0 
+						AND @t_intTransactionTypeId = @INV_TRANS_TYPE_NegativeStock THEN 							
+							@t_dblQty * @NewAverageCost
+							+ (-@t_dblQty * @t_NegativeStockCost) 
+
 					WHEN @t_dblQty < 0 THEN 
-						@t_dblQty * @NewAverageCost -- Reduce the stock using the new avg cost. 
+						@t_dblQty * @NewAverageCost 
 
 					ELSE 
 						@CurrentValue
@@ -461,8 +446,7 @@ BEGIN
 							END 				
 					ELSE 
 						@NewAverageCost
-			END
-		 
+			END	 
 
 		-- Update the cost bucket cost. 
 		IF	@t_dblQty > 0 
@@ -499,7 +483,7 @@ BEGIN
 				,@strTransactionId 
 		END 
 
-		-- TODO: Escalate the negative stocks. 
+		-- TODO: Escalate the negative stocks that does not have records in tblICInventoryFIFOOut.  
 
 		-- Log the cost adjustment 
 		BEGIN 
@@ -605,7 +589,7 @@ BEGIN
 			,@t_intLocationId
 			,@t_strRelatedTransactionId
 			,@t_intRelatedTransactionId 
-
+			,@t_NegativeStockCost
 		;		
 	END 
 
@@ -627,10 +611,11 @@ BEGIN
 	SELECT	@CurrentValue = 
 				ISNULL(@NewRunningValue, 0) 
 				- SUM(ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0)) 
-	FROM	tblICInventoryTransaction t
+	FROM	tblICInventoryTransaction t 
 	WHERE	t.intItemId = @intItemId
 			AND t.intItemLocationId = @intItemLocationId
 			AND ISNULL(t.ysnIsUnposted, 0) = 0 
+
 
 	-- Create the 'Cost Adjustment' inventory transaction. 
 	EXEC [uspICPostInventoryTransaction]
