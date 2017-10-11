@@ -480,6 +480,7 @@ BEGIN
 				,@intTransactionId 
 				,@intTransactionDetailId 
 				,@strTransactionId 
+				,@EscalateInventoryTransactionTypeId OUTPUT 
 		END 
 
 		-- TODO: Escalate the negative stocks that does not have records in tblICInventoryFIFOOut.  

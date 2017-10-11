@@ -454,6 +454,7 @@ BEGIN
 		--END 
 
 		-- Call the escalate sp
+
 		BEGIN 
 			SET @EscalateCostAdjustment = 0 
 			SET @EscalateCostAdjustment -= (@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
@@ -472,6 +473,7 @@ BEGIN
 				,@intTransactionId 
 				,@intTransactionDetailId 
 				,@strTransactionId 
+				,@EscalateInventoryTransactionTypeId OUTPUT 
 		END 
 
 		-- Log the cost adjustment 

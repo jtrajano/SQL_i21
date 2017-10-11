@@ -17,6 +17,7 @@ DECLARE @AccountCategory_Inventory AS NVARCHAR(30) = 'Inventory'
 		,@AccountCategory_WIP AS NVARCHAR(30) = 'Work In Progress' 
 		,@AccountCategory_InTransit AS NVARCHAR(30) = 'Inventory In-Transit'
 		,@AccountCategory_Sold AS NVARCHAR(30) = 'Cost of Goods'
+		,@AccountCategory_Auto_Variance AS NVARCHAR(30) = 'Inventory Adjustment'
 
 
 -- Create the variables for the internal transaction types used by costing. 
@@ -50,6 +51,7 @@ DECLARE @COST_ADJ_TYPE_Original_Cost AS INT = 1
 		,@COST_ADJ_TYPE_Adjust_InTransit_Inventory AS INT = 7
 		,@COST_ADJ_TYPE_Adjust_InTransit_Sold AS INT = 8
 		,@COST_ADJ_TYPE_Adjust_InventoryAdjustment AS INT = 9
+		,@COST_ADJ_TYPE_Adjust_Auto_Variance AS INT = 10
 					
 -- Initialize the module name
 DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory';
@@ -64,6 +66,7 @@ INSERT INTO @GLAccounts (
 		,intRevalueWIP
 		,intRevalueInTransit
 		,intRevalueSoldId
+		,intAutoNegativeId
 		,intTransactionTypeId
 )
 SELECT	Query.intItemId
@@ -73,6 +76,7 @@ SELECT	Query.intItemId
 		,intRevalueWIP = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_WIP) 
 		,intRevalueInTransit = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_InTransit) 
 		,intRevalueSoldId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Sold) 
+		,intAutoNegativeId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Auto_Variance) 
 		,intTransactionTypeId
 FROM	(
 			SELECT	DISTINCT 
@@ -93,6 +97,7 @@ INSERT INTO @GLAccounts (
 		,intRevalueWIP
 		,intRevalueInTransit
 		,intRevalueSoldId
+		,intAutoNegativeId
 		,intTransactionTypeId
 )
 SELECT	Query.intItemId
@@ -102,6 +107,7 @@ SELECT	Query.intItemId
 		,intRevalueWIP = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_WIP) 
 		,intRevalueInTransit = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_InTransit) 
 		,intRevalueSoldId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Sold) 
+		,intAutoNegativeId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Auto_Variance) 
 		,intTransactionTypeId
 FROM	(
 			SELECT	DISTINCT 
@@ -408,6 +414,7 @@ INSERT INTO dbo.tblICInventoryGLAccountUsedOnPostLog (
 		,intRevalueWIP
 		,intRevalueInTransit
 		,intRevalueSoldId
+		,intAutoNegativeId
 		,strBatchId
 )
 SELECT 
@@ -418,6 +425,7 @@ SELECT
 		,intRevalueWIP
 		,intRevalueInTransit
 		,intRevalueSoldId
+		,intAutoNegativeId
 		,@strBatchId
 FROM	@GLAccounts
 ;
@@ -571,6 +579,35 @@ AS
 				AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
 	WHERE	t.strBatchId = @strBatchId
 			AND ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2) <> 0 
+
+	UNION ALL 
+	SELECT	t.dtmDate
+			,t.intItemId
+			,t.intItemLocationId
+			,t.intTransactionId
+			,t.strTransactionId
+			,dblValue = ROUND(ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0), 2)
+			,t.intTransactionTypeId
+			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
+			,t.dblExchangeRate
+			,t.intInventoryTransactionId
+			,strInventoryTransactionTypeName = TransType.strName
+			,TransType.strTransactionForm
+			,t.intInTransitSourceLocationId
+			,i.strItemNo
+			,t.intRelatedTransactionId
+			,t.strRelatedTransactionId
+			,t.strBatchId
+			,t.intLotId 
+			,t.intFobPointId
+			,t.dblForexRate
+			,intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Auto_Variance
+	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
+				ON t.intTransactionTypeId = TransType.intTransactionTypeId
+			INNER JOIN tblICItem i 
+				ON i.intItemId = t.intItemId
+	WHERE	t.strBatchId = @strBatchId
+			AND t.intTransactionTypeId = @INV_TRANS_TYPE_Auto_Variance
 
 )
 
@@ -1149,3 +1186,106 @@ FROM	ForGLEntries_CTE
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
 WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Sold
+
+/*-------------------------------------------------------------------------------------------
+  GL Entries for Auto Variance 
+  Debit	....... Inventory
+  Credit	..................... Inventory Adjustment (usually, it is the same as COGS)
+-------------------------------------------------------------------------------------------*/
+UNION ALL 
+SELECT	
+		dtmDate						= ForGLEntries_CTE.dtmDate
+		,strBatchId					= @strBatchId
+		,intAccountId				= tblGLAccount.intAccountId
+		,dblDebit					= Debit.Value
+		,dblCredit					= Credit.Value
+		,dblDebitUnit				= 0
+		,dblCreditUnit				= 0
+		,strDescription				= dbo.fnCreateCostAdjGLDescription(
+										@strGLDescription
+										,tblGLAccount.strDescription
+										,ForGLEntries_CTE.strItemNo
+										,ForGLEntries_CTE.strRelatedTransactionId
+									) 
+		,strCode					= 'ICA' 
+		,strReference				= '' 
+		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
+		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,dtmDateEntered				= GETDATE()
+		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
+        ,strJournalLineDescription  = '' 
+		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
+		,ysnIsUnposted				= CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
+		,intUserId					= NULL 
+		,intEntityId				= @intEntityUserSecurityId
+		,strTransactionId			= ForGLEntries_CTE.strTransactionId
+		,intTransactionId			= ForGLEntries_CTE.intTransactionId
+		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
+		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
+		,strModuleName				= @ModuleName
+		,intConcurrencyId			= 1
+		,dblDebitForeign			= NULL 
+		,dblDebitReport				= NULL 
+		,dblCreditForeign			= NULL 
+		,dblCreditReport			= NULL 
+		,dblReportingRate			= NULL 
+		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+FROM	ForGLEntries_CTE
+		INNER JOIN @GLAccounts GLAccounts
+			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
+			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId 
+			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
+		INNER JOIN dbo.tblGLAccount
+			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
+		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
+		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Auto_Variance
+
+UNION ALL 
+SELECT	
+		dtmDate						= ForGLEntries_CTE.dtmDate
+		,strBatchId					= @strBatchId
+		,intAccountId				= tblGLAccount.intAccountId
+		,dblDebit					= Credit.Value
+		,dblCredit					= Debit.Value
+		,dblDebitUnit				= 0
+		,dblCreditUnit				= 0
+		,strDescription				= dbo.fnCreateCostAdjGLDescription(
+										@strGLDescription
+										,tblGLAccount.strDescription
+										,ForGLEntries_CTE.strItemNo
+										,ForGLEntries_CTE.strRelatedTransactionId
+									)
+		,strCode					= 'ICA' 
+		,strReference				= '' 
+		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
+		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,dtmDateEntered				= GETDATE()
+		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
+        ,strJournalLineDescription  = '' 
+		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
+		,ysnIsUnposted				= CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
+		,intUserId					= NULL 
+		,intEntityId				= @intEntityUserSecurityId
+		,strTransactionId			= ForGLEntries_CTE.strTransactionId
+		,intTransactionId			= ForGLEntries_CTE.intTransactionId
+		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
+		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
+		,strModuleName				= @ModuleName
+		,intConcurrencyId			= 1
+		,dblDebitForeign			= NULL 
+		,dblDebitReport				= NULL 
+		,dblCreditForeign			= NULL 
+		,dblCreditReport			= NULL 
+		,dblReportingRate			= NULL 
+		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+FROM	ForGLEntries_CTE 
+		INNER JOIN @GLAccounts GLAccounts
+			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
+			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
+			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
+		INNER JOIN dbo.tblGLAccount
+			ON tblGLAccount.intAccountId = GLAccounts.intAutoNegativeId
+		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
+		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Auto_Variance

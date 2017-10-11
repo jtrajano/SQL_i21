@@ -15,6 +15,7 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentEscalate]
 	,@intTransactionId AS INT 
 	,@intTransactionDetailId AS INT
 	,@strTransactionId AS NVARCHAR(50) 
+	,@EscalateInventoryTransactionTypeId AS INT OUTPUT 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -81,7 +82,6 @@ BEGIN
 			,@INV_TRANS_TYPE_Invoice AS INT = 33
 
 	DECLARE @EscalateInventoryTransactionId AS INT 
-			,@EscalateInventoryTransactionTypeId AS INT 
 
 END 
 
