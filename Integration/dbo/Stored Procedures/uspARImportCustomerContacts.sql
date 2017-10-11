@@ -103,14 +103,16 @@ SELECT ED.coefd_contact_id, ED.coefd_cus_no,
 					OR isnull(sscon_email, '') = ''
 				)
 			AND sscon_cus_no in (select strCustomerNumber collate SQL_Latin1_General_CP1_CS_AS from tblARCustomer)
-			AND rtrim(ltrim(sscon_last_name)) + ', ' + rtrim(ltrim(sscon_first_name))
-			not in (
-				select G.strName COLLATE SQL_Latin1_General_CP1_CS_AS from tblEMEntity E
-					join tblEMEntityToContact F
-						on E.intEntityId = F.intEntityId
-					join tblEMEntity G
-						on F.intEntityContactId = G.intEntityId
-			)
+			-- AND rtrim(ltrim(sscon_last_name)) + ', ' + rtrim(ltrim(sscon_first_name))
+			-- not in (
+			-- 	select G.strName COLLATE SQL_Latin1_General_CP1_CS_AS from tblEMEntity E
+			-- 		join tblEMEntityToContact F
+			-- 			on E.intEntityId = F.intEntityId
+			-- 		join tblEMEntity G
+			-- 			on F.intEntityContactId = G.intEntityId
+			-- )
+			and sscon_contact_id not in (select strContactNumber collate SQL_Latin1_General_CP1_CS_AS  
+											from tblEMEntity where isnull(strContactMethod,'') <> '')
 
 	END
 		-- LOOP Insertions
@@ -241,13 +243,15 @@ BEGIN
 	LEFT JOIN tblEMEntity Con 
 		ON ssconmst.sscon_contact_id COLLATE Latin1_General_CI_AS = Con.strContactNumber COLLATE Latin1_General_CI_AS
 	WHERE Con.strContactNumber IS NULL AND ssconmst.sscon_contact_id  = UPPER(ssconmst.sscon_contact_id ) COLLATE Latin1_General_CS_AS
-	AND rtrim(ltrim(sscon_last_name)) + ', ' + rtrim(ltrim(sscon_first_name))
-	NOT IN (select G.strName COLLATE SQL_Latin1_General_CP1_CS_AS 
-				from tblEMEntity E 
-				join tblEMEntityToContact F
-					on E.intEntityId = F.intEntityId
-				join tblEMEntity G
-					on F.intEntityContactId = G.intEntityId)
+		and sscon_contact_id not in (select strContactNumber collate SQL_Latin1_General_CP1_CS_AS  
+											from tblEMEntity where isnull(strContactMethod,'') <> '')
+	-- AND rtrim(ltrim(sscon_last_name)) + ', ' + rtrim(ltrim(sscon_first_name))
+	-- NOT IN (select G.strName COLLATE SQL_Latin1_General_CP1_CS_AS 
+	-- 			from tblEMEntity E 
+	-- 			join tblEMEntityToContact F
+	-- 				on E.intEntityId = F.intEntityId
+	-- 			join tblEMEntity G
+	-- 				on F.intEntityContactId = G.intEntityId)
 	
 END
 END
