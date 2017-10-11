@@ -11,7 +11,8 @@
 
 		SELECT @EntityNo = strCustomerNumber from tblEMEntityToContact A
 			JOIN tblARCustomer B
-				ON A.intEntityId = B.intEntityId
+				ON A.intEntityId = B.intEntityId 
+		WHERE A.intEntityContactId = @EntityId
 	END		
 	--================================================
 	--     UPDATE/INSERT IN ORIGIN	
