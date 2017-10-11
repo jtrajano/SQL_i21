@@ -237,10 +237,11 @@ SET @query = 'SELECT * FROM
 		, strStatementFooterComment = [dbo].fnARGetFooterComment(I.intCompanyLocationId, I.intEntityCustomerId, ''Statement Footer'')	 
 		, strCompanyName = (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
 		, strCompanyAddress = (SELECT TOP 1 dbo.[fnARFormatCustomerAddress]('''', '''', '''', strAddress, strCity, strState, strZip, strCountry, '''', 0) FROM tblSMCompanySetup)
+		, C.ysnStatementCreditLimit
 FROM tblARInvoice I
 	INNER JOIN (tblARInvoiceDetail ID 
 		LEFT JOIN tblICItem IC ON ID.intItemId = IC.intItemId) ON I.intInvoiceId = ID.intInvoiceId	
-	INNER JOIN (vyuARCustomer C INNER JOIN #CUSTOMERS CC ON C.intEntityCustomerId = CC.intEntityCustomerId) ON I.intEntityCustomerId = C.intEntityCustomerId
+	INNER JOIN (vyuARCustomerSearch C INNER JOIN #CUSTOMERS CC ON C.intEntityCustomerId = CC.intEntityCustomerId) ON I.intEntityCustomerId = C.intEntityCustomerId
 	LEFT JOIN tblSMTerm T ON I.intTermId = T.intTermID	
 WHERE I.ysnPosted = 1
 	AND I.ysnPaid = 0
@@ -297,6 +298,7 @@ SELECT strReferenceNumber			= STATEMENTREPORT.strReferenceNumber
 	 , strCompanyName				= STATEMENTREPORT.strCompanyName
 	 , strCompanyAddress			= STATEMENTREPORT.strCompanyAddress
 	 , dtmAsOfDate					= @dtmDateTo
+	 , ysnStatementCreditLimit		= STATEMENTREPORT.ysnStatementCreditLimit
 FROM @temp_statement_table AS STATEMENTREPORT
 INNER JOIN tblARCustomerAgingStagingTable AS AGINGREPORT 
 ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
