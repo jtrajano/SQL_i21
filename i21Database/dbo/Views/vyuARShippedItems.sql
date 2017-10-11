@@ -979,15 +979,15 @@ FROM (
 	     , strVFDDocumentNumber				= NULL
 	     , dblTotalTax						= 0
 	     , dblTotal							= ((ARCC.dblUnitPrice) / dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId), ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), 1))
-											* dbo.fnCalculateQtyBetweenUOM(ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), LDL.dblNet)
+											* dbo.fnCalculateQtyBetweenUOM(ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), ISNULL(LDL.dblNet,LD.dblNet))
 	     , intStorageLocationId				= NULL
 	     , intTermId						= NULL
 	     , intEntityShipViaId				= NULL
 	     , intTicketId						= NULL
 	     , intTaxGroupId					= NULL
-	     , dblGrossWt						= dbo.fnCalculateQtyBetweenUOM(ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), LDL.dblGross)
-	     , dblTareWt						= dbo.fnCalculateQtyBetweenUOM(ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), LDL.dblTare)
-	     , dblNetWt							= dbo.fnCalculateQtyBetweenUOM(ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), LDL.dblNet)
+	     , dblGrossWt						= dbo.fnCalculateQtyBetweenUOM(ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), ISNULL(LDL.dblGross,LD.dblGross))
+	     , dblTareWt						= dbo.fnCalculateQtyBetweenUOM(ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), ISNULL(LDL.dblTare,LD.dblTare))
+	     , dblNetWt							= dbo.fnCalculateQtyBetweenUOM(ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), ISNULL(LDL.dblNet,LD.dblNet))
 	     , strPONumber						= ''
 	     , strBOLNumber						= ''
 	     , intSplitId						= NULL
@@ -1025,7 +1025,10 @@ FROM (
 			 , intWeightItemUOMId
 			 , intSCompanyLocationId
 			 , intPContractDetailId
-			 , dblQuantity			 
+			 , dblQuantity
+			 , dblGross
+			 , dblTare
+			 , dblNet
 		FROM 
 			dbo.tblLGLoadDetail WITH (NOLOCK)		
 
