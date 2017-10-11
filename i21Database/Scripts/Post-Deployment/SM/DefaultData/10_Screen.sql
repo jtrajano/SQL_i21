@@ -518,6 +518,15 @@ UPDATE tblSMScreen SET strScreenName = N'Price Contracts',strNamespace = 'Contra
 WHERE strNamespace = 'ContractManagement.view.PriceContractsNew' AND strModule = N'Contract Management'
 
 ------------------------END Contract Management------------
+GO
+-------------------------LOGISTICS------------
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Logistics.view.ShipmentSchedule')
+    INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+    VALUES (N'', N'Load/Shipment Schedule', N'Logistics.view.ShipmentSchedule', N'Logistics', N'', 0)
+ELSE
+    UPDATE tblSMScreen SET strScreenName = N'Load/Shipment Schedule', strModule = N'Logistics' WHERE strNamespace = 'Logistics.view.ShipmentSchedule'
+-------------------------END LOGISTICS------------
+GO
 
 PRINT N'END INSERT DEFAULT SCREEN'
 GO
