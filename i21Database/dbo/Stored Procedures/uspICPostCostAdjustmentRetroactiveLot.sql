@@ -70,6 +70,7 @@ BEGIN
 			,@INV_TRANS_TYPE_ADJ_Lot_Move AS INT = 20
 			,@INV_TRANS_TYPE_Cost_Adjustment AS INT = 26
 			,@INV_TRANS_TYPE_Invoice AS INT = 33
+			,@INV_TRANS_TYPE_NegativeStock AS INT = 35
 
 	DECLARE	
 			@CostAdjustment AS NUMERIC(38, 20)			
@@ -93,6 +94,7 @@ BEGIN
 			,@t_strBatchId AS NVARCHAR(50) 
 			,@t_intLocationId AS INT 
 			,@t_intLotId AS INT 
+			,@t_NegativeStockCost AS NUMERIC(38, 20) 
 
 			,@EscalateInventoryTransactionId AS INT 
 			,@EscalateInventoryTransactionTypeId AS INT 
@@ -156,7 +158,9 @@ END
 
 -- Get the top cost bucket.
 BEGIN 
-	DECLARE @CostBucketId AS INT  
+	DECLARE @InventoryTransactionStartId AS INT
+			,@CostBucketId AS INT  
+			,@CostBucketOriginalStockIn AS NUMERIC(38, 20)
 			,@CostBucketOriginalCost AS NUMERIC(38, 20)
 			,@CostBucketOriginalValue AS NUMERIC(38, 20) 
 
@@ -172,6 +176,9 @@ BEGIN
 
 	SELECT	TOP 1 
 			@CostBucketId = cb.intInventoryLotId
+			,@CostBucketOriginalStockIn = cb.dblStockIn
+			,@CostBucketOriginalCost = cb.dblCost
+			,@CostBucketOriginalValue = ISNULL(cb.dblStockIn, 0) * ISNULL(cb.dblCost, 0)
 	FROM	tblICInventoryLot cb
 	WHERE	cb.intItemId = @intItemId
 			AND cb.intItemLocationId = @intItemLocationId
@@ -195,6 +202,8 @@ BEGIN
 			RETURN -80062;
 		END
 	END 
+
+	SET @CostBucketOriginalValue = ISNULL(@CostBucketOriginalValue, 0) 
 END 
 
 -- Create the list of Inventory Transaction related to the cost bucket.
@@ -337,7 +346,7 @@ BEGIN
 			,t.intItemId
 			,t.intItemLocationId
 			,t.intItemUOMId
-			,t.dblQty
+			,dblQty = ISNULL(-cbOut.dblQty, t.dblQty)
 			,t.dblCost
 			,t.dblValue
 			,t.strTransactionId
@@ -347,14 +356,21 @@ BEGIN
 			,t.strBatchId 
 			,t.intLotId 
 			,il.intLocationId
+			,[negative stock cost] = cb.dblCost 
 	FROM	tblICInventoryTransaction t INNER JOIN #tmpRetroactiveTransactions tmp
 				ON t.intInventoryTransactionId = tmp.intInventoryTransactionId
 			INNER JOIN tblICItemLocation il
 				ON t.intItemLocationId = il.intItemLocationId
 				AND t.intItemId = il.intItemId
+			LEFT JOIN tblICInventoryLotOut cbOut 
+				ON cbOut.intInventoryTransactionId = t.intInventoryTransactionId
+				AND cbOut.intRevalueLotId IS NOT NULL 
+			LEFT JOIN tblICInventoryLot cb
+				ON cb.intInventoryLotId = cbOut.intRevalueLotId
 	WHERE	t.intItemId = @intItemId
 			AND t.intItemLocationId = @intItemLocationId			
 			AND ISNULL(t.ysnIsUnposted, 0) = 0 
+	ORDER BY t.intInventoryTransactionId ASC 
 
 	OPEN loopRetroactive;
 
@@ -374,6 +390,7 @@ BEGIN
 		,@t_strBatchId
 		,@t_intLotId
 		,@t_intLocationId
+		,@t_NegativeStockCost
 	;
 
 	WHILE @@FETCH_STATUS = 0 
@@ -418,108 +435,61 @@ BEGIN
 		SET @CurrentCostAdjustment = 
 			CASE	WHEN @IsSourceTransaction = 1  THEN 
 						@CostAdjustmentPerLot * @t_dblQty 
+					WHEN 
+						@t_dblQty < 0 
+						AND @t_intTransactionTypeId = @INV_TRANS_TYPE_NegativeStock THEN 							
+							@t_dblQty * @CostBucketNewCost
+							+ (-@t_dblQty * @t_NegativeStockCost) 
+
 					WHEN @t_dblQty < 0 THEN 
 						(@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost) 
  					ELSE 
 						0
 			END 
 
-		-- Update the cost bucket
+		-- Update the cost bucket and last cost from the lot table. 
 		IF  @IsSourceTransaction = 1
 		BEGIN 
 			UPDATE  cb
-			SET		cb.dblCost = (@CostBucketOriginalValue + @CostAdjustment) / cb.dblStockIn 
+			SET		cb.dblCost = 
+						dbo.fnDivide(
+							(@CostBucketOriginalValue + @CostAdjustment) 
+							,cb.dblStockIn 
+						) 
 			FROM	tblICInventoryLot cb
 			WHERE	cb.intLotId = @t_intLotId
 					AND cb.ysnIsUnposted = 0 
 					AND cb.intTransactionId = @t_intTransactionId
 					AND cb.intTransactionDetailId = @t_intTransactionDetailId
 					AND cb.strTransactionId = @t_strTransactionId	
+
+			UPDATE	l
+			SET		l.dblLastCost = cb.dblCost
+			FROM	tblICLot l INNER JOIN tblICInventoryLot cb
+						ON l.intLotId = cb.intLotId
+			WHERE	l.intLotId = @t_intLotId
 		END 
 
-		-- Check if the system needs to escalate the cost adjustment. 
-		SET @EscalateInventoryTransactionId = NULL 
-		SELECT	TOP 1 
-				@EscalateInventoryTransactionId = t.intInventoryTransactionId							
-				,@EscalateInventoryTransactionTypeId = t.intTransactionTypeId
-		FROM	dbo.tblICInventoryTransaction t
-		WHERE	@t_dblQty < 0 
-				AND t.strBatchId = @t_strBatchId 
-				AND t.intTransactionId = @t_intTransactionId
-				AND t.strTransactionId = @t_strTransactionId
-				AND ISNULL(t.ysnIsUnposted, 0) = 0
-				AND ISNULL(t.dblQty, 0) > 0 				
-				AND 1 = 
-					CASE WHEN t.intTransactionTypeId = @INV_TRANS_TYPE_Produce THEN 1 
-						 WHEN t.intItemId = @t_intItemId AND t.intTransactionDetailId = @t_intTransactionDetailId THEN 1 
-						 ELSE 0 
-					END 
-
-		IF @EscalateInventoryTransactionId IS NOT NULL 
+		-- Check if there is a transaction where the cost change needs escalation. 
 		BEGIN 
-			-- Calculate the value to be escalated. 
 			SET @EscalateCostAdjustment = 0 
 			SET @EscalateCostAdjustment -= (@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
-			
-			-- Insert data into the #tmpRevalueProducedItems table. 
-			INSERT INTO #tmpRevalueProducedItems (
-					[intItemId] 
-					,[intItemLocationId] 
-					,[intItemUOMId] 
-					,[dtmDate] 
-					,[dblQty] 
-					,[dblUOMQty] 
-					,[dblNewValue]
-					,[intCurrencyId] 
-					,[intTransactionId] 
-					,[intTransactionDetailId] 
-					,[strTransactionId] 
-					,[intTransactionTypeId] 
-					,[intLotId] 
-					,[intSubLocationId] 
-					,[intStorageLocationId] 
-					,[ysnIsStorage] 
-					,[strActualCostId] 
-					,[intSourceTransactionId] 
-					,[intSourceTransactionDetailId] 
-					,[strSourceTransactionId]
-					,[intRelatedInventoryTransactionId]
-					,[intFobPointId]
-					,[intInTransitSourceLocationId]
-			)
-			SELECT 
-					[intItemId]						= t.intItemId
-					,[intItemLocationId]			= t.intItemLocationId
-					,[intItemUOMId]					= t.intItemUOMId
-					,[dtmDate]						= @dtmDate
-					,[dblQty]						= t.dblQty
-					,[dblUOMQty]					= t.dblUOMQty
-					,[dblNewValue]					= @EscalateCostAdjustment
-					,[intCurrencyId]				= t.intCurrencyId
-					,[intTransactionId]				= @intTransactionId
-					,[intTransactionDetailId]		= @intTransactionDetailId
-					,[strTransactionId]				= @strTransactionId
-					,[intTransactionTypeId]			= @EscalateInventoryTransactionTypeId
-					,[intLotId]						= t.intLotId
-					,[intSubLocationId]				= t.intSubLocationId
-					,[intStorageLocationId]			= t.intStorageLocationId
-					,[ysnIsStorage]					= NULL 
-					,[strActualCostId]				= actualCostCb.strActualCostId  
-					,[intSourceTransactionId]		= t.intTransactionId
-					,[intSourceTransactionDetailId]	= t.intTransactionDetailId
-					,[strSourceTransactionId]		= t.strTransactionId
-					,[intRelatedInventoryTransactionId] = t.intInventoryTransactionId	
-					,[intFobPointId]				= t.intFobPointId
-					,[intInTransitSourceLocationId]	= t.intInTransitSourceLocationId
-			FROM	dbo.tblICInventoryTransaction t LEFT JOIN tblICInventoryActualCost actualCostCb
-						ON actualCostCb.strTransactionId = t.strTransactionId
-						AND actualCostCb.intTransactionId = t.intTransactionId
-						AND actualCostCb.intTransactionDetailId = t.intTransactionDetailId
-						AND actualCostCb.intItemId = t.intItemId
-						AND actualCostCb.intItemLocationId = t.intItemLocationId
-						AND t.intCostingMethod = @ACTUALCOST
-						AND actualCostCb.ysnIsUnposted = 0 
-			WHERE	intInventoryTransactionId = @EscalateInventoryTransactionId
+
+			EXEC [uspICPostCostAdjustmentEscalate]
+				@dtmDate 
+				,@t_intItemId 
+				,@t_intItemLocationId 
+				,@t_dblQty 
+				,@t_strBatchId 
+				,@t_intTransactionId 
+				,@t_intTransactionDetailId 
+				,@t_strTransactionId 
+				,@t_intInventoryTransactionId 
+				,@EscalateCostAdjustment 
+				,@intTransactionId 
+				,@intTransactionDetailId 
+				,@strTransactionId 
+				,@EscalateInventoryTransactionTypeId OUTPUT 
 		END 
 
 		-- Log the cost adjustment 
@@ -625,6 +595,7 @@ BEGIN
 			,@t_strBatchId
 			,@t_intLotId
 			,@t_intLocationId
+			,@t_NegativeStockCost
 		;		
 	END 
 
