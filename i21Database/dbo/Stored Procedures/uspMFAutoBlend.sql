@@ -291,7 +291,7 @@ BEGIN TRY
 				SELECT	TOP 1 intCompanyLocationId 
 				FROM	tblSMCompanyLocationSubLocation 
 				WHERE	intCompanyLocationSubLocationId = @intSubLocationId
-						AND intCompanyLocationId <> @intLocationId
+						AND intCompanyLocationId = @intLocationId
 			)
 				RAISERROR('Sub Location does not belong to location',16,1)
 		END
@@ -308,7 +308,7 @@ BEGIN TRY
 				SELECT	TOP 1 intSubLocationId 
 				FROM	tblICStorageLocation 
 				WHERE	intStorageLocationId = @intStorageLocationId 
-						AND intSubLocationId <> @intSubLocationId
+						AND intSubLocationId = @intSubLocationId
 			)
 				RAISERROR('Storage Location does not belong to sub location',16,1)
 		END
