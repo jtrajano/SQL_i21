@@ -193,8 +193,8 @@ BEGIN
 			,(CASE	WHEN ptsrv_allow_mthly_chg_freq = ''Y''
 							THEN 1
 						ELSE 0
-						END
-			,1)
+						END)
+			,1
 		FROM ptsrvmst LEFT JOIN 
 		tblARServiceCharge ON ptsrvmst.ptsrv_code  = tblARServiceCharge.strServiceChargeCode COLLATE Latin1_General_CI_AS
 		WHERE tblARServiceCharge.strServiceChargeCode IS NULL
