@@ -90,6 +90,16 @@
 	,@CountySalesTaxPercentageRate		NUMERIC(18,6)	= 0.000000
 	,@CitySalesTaxPercentageRate  		NUMERIC(18,6)	= 0.000000
 	,@OtherSalesTaxPercentageRate 		NUMERIC(18,6)	= 0.000000
+
+	,@FederalExciseTaxRateReference        	  NVARCHAR(MAX)	= NULL
+	,@StateExciseTaxRate1Reference         	  NVARCHAR(MAX)	= NULL
+	,@StateExciseTaxRate2Reference         	  NVARCHAR(MAX)	= NULL
+	,@CountyExciseTaxRateReference         	  NVARCHAR(MAX)	= NULL
+	,@CityExciseTaxRateReference           	  NVARCHAR(MAX)	= NULL
+	,@StateSalesTaxPercentageRateReference 	  NVARCHAR(MAX)	= NULL
+	,@CountySalesTaxPercentageRateReference	  NVARCHAR(MAX)	= NULL
+	,@CitySalesTaxPercentageRateReference  	  NVARCHAR(MAX)	= NULL
+	,@OtherSalesTaxPercentageRateReference 	  NVARCHAR(MAX)	= NULL
 	
 	,@ysnOriginHistory					BIT				= 0
 	,@ysnPostedCSV						BIT				= 0
@@ -241,6 +251,8 @@ BEGIN
 			WHERE intNetworkId = @intNetworkId
 		END
 
+	
+
 	IF(@strNetworkType = 'PacPride' AND ISNULL(@ysnPosted,0) = 0)
 	BEGIN
 
@@ -330,6 +342,65 @@ BEGIN
 			SET @strTransactionType = 'Extended Remote'
 		END
 	END
+
+
+	--TAX REFERENCE--
+	IF(@strNetworkType = 'PacPride')
+	BEGIN
+		IF(@strTransactionType = 'Remote' OR @strTransactionType = 'Extended Remote')
+		BEGIN
+
+			IF(ISNULL(@FederalExciseTaxRateReference,'') = '' OR @FederalExciseTaxRateReference = 'R')
+			BEGIN
+				SET @FederalExciseTaxRate = 0.000000
+			END
+
+			IF(ISNULL(@StateExciseTaxRate1Reference,'') = '' OR @StateExciseTaxRate1Reference = 'R')
+			BEGIN
+				SET @StateExciseTaxRate1 = 0.000000
+			END
+
+			IF(ISNULL(@StateExciseTaxRate2Reference,'') = '' OR @StateExciseTaxRate2Reference = 'R')
+			BEGIN
+				SET @StateExciseTaxRate2 = 0.000000
+			END
+
+			IF(ISNULL(@CountyExciseTaxRateReference,'') = '' OR @CountyExciseTaxRateReference = 'R')
+			BEGIN
+				SET @CountyExciseTaxRate = 0.000000
+			END
+			
+			IF(ISNULL(@CityExciseTaxRateReference,'') = '' OR @CityExciseTaxRateReference = 'R')
+			BEGIN
+				SET @CityExciseTaxRate = 0.000000
+			END
+			
+			IF(ISNULL(@StateSalesTaxPercentageRateReference,'') = '' OR @StateSalesTaxPercentageRateReference = 'R')
+			BEGIN
+				SET @StateSalesTaxPercentageRate = 0.000000
+			END
+
+			IF(ISNULL(@CountySalesTaxPercentageRateReference,'') = '' OR @CountySalesTaxPercentageRateReference = 'R')
+			BEGIN
+				SET @CountySalesTaxPercentageRate = 0.000000
+			END
+
+			IF(ISNULL(@CitySalesTaxPercentageRateReference,'') = '' OR @CitySalesTaxPercentageRateReference = 'R')
+			BEGIN
+				SET @CitySalesTaxPercentageRate = 0.000000
+			END
+
+			IF(ISNULL(@OtherSalesTaxPercentageRateReference,'') = '' OR @OtherSalesTaxPercentageRateReference = 'R')
+			BEGIN
+				SET @OtherSalesTaxPercentageRate = 0.000000
+			END
+			
+
+		END
+	END
+
+	
+	--TAX REFERENCE--
 
 
 	IF(@dblOriginalGrossPrice < 0)
