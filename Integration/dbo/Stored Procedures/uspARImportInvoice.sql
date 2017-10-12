@@ -65,7 +65,7 @@ BEGIN
 	BEGIN
 		
 		DECLARE @Sucess BIT
-		DECLARE @Message NVARCHAR(100)		
+		DECLARE @Message NVARCHAR(MAX)		
 		EXEC uspARValidations @UserId, @Sucess OUT, @Message OUT, @StartDate, @EndDate, @LogKey OUT
 		
 		IF(@Sucess = 0)
