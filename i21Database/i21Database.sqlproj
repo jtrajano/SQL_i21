@@ -5694,6 +5694,7 @@
     <Build Include="dbo\Stored Procedures\uspEMUpdateEntityType.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\32_UpdateCommissionScheduleEntity.sql" />
     <None Include="Scripts\Post-Deployment\SM\1730_UpdateManufacturingMenus.sql" />
+    <Build Include="dbo\Views\vyuCMMultiCurrencyRevalue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
