@@ -218,7 +218,7 @@ BEGIN TRY
 			END
 		END
 
-		-- Property Name
+		-- Property Name and Value
 		IF ISNULL(@strPropertyName, '') = ''
 			SELECT @strPreviousErrMsg += 'Invalid Property Name. '
 		ELSE
@@ -229,6 +229,45 @@ BEGIN TRY
 					WHERE strPropertyName = @strPropertyName
 					)
 				SELECT @strPreviousErrMsg += 'Invalid Property Name. '
+			ELSE
+			BEGIN
+				IF ISNULL(@strPropertyValue, '') <> ''
+				BEGIN
+					DECLARE @intDataTypeId INT = 0
+
+					SELECT @intDataTypeId = intDataTypeId
+					FROM tblQMProperty
+					WHERE strPropertyName = @strPropertyName
+
+					IF @intDataTypeId = 1 -- Integer
+					BEGIN
+						IF (@strPropertyValue LIKE '%[^0-9]%')
+							SELECT @strPreviousErrMsg += 'Property Value should be Whole Number. '
+					END
+					ELSE IF @intDataTypeId = 2 -- Float
+					BEGIN
+						IF ISNUMERIC(@strPropertyValue) <> 1
+							SELECT @strPreviousErrMsg += 'Property Value should be Whole Number / Decimal Number. '
+						ELSE IF CONVERT(FLOAT, @strPropertyValue) < 0
+							SELECT @strPreviousErrMsg += 'Property Value cannot be Negative. '
+					END
+					ELSE IF @intDataTypeId = 4 -- Bit
+					BEGIN
+						IF (
+								LOWER(@strPropertyValue) NOT IN (
+									'true'
+									,'false'
+									)
+								)
+							SELECT @strPreviousErrMsg += 'Property Value should be true / false. '
+					END
+					ELSE IF @intDataTypeId = 12 -- DateTime
+					BEGIN
+						IF ISDATE(@strPropertyValue) = 0
+							SELECT @strPreviousErrMsg += 'Property Value should be a Date. '
+					END
+				END
+			END
 		END
 
 		-- Result
