@@ -104,7 +104,7 @@ BEGIN TRY
 		FROM tblCTSequenceUsageHistory UH
 		JOIN tblGRSettleStorageTicket SST ON SST.intSettleStorageTicketId = UH.intExternalId AND SST.intSettleStorageId = UH.intExternalHeaderId
 		JOIN tblGRStorageHistory SH ON SH.intContractHeaderId = UH.intContractHeaderId AND SH.intCustomerStorageId = SST.intCustomerStorageId
-		WHERE UH.intExternalHeaderId = @intSettleStorageId AND UH.strScreenName = 'Settle Storage' AND UH.strFieldName = 'Balance' AND SH.strType = 'From Scale'
+		WHERE UH.intExternalHeaderId = @intSettleStorageId AND UH.strScreenName = 'Settle Storage' AND UH.strFieldName = 'Balance' AND SH.strType IN ('From Scale','From Delivery Sheet')
 		
 		UNION ALL
 		
