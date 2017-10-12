@@ -144,7 +144,7 @@ Ext.define('Inventory.view.CategoryViewController', {
                 colVendorId: {
                     dataIndex: 'strVendorId',
                     editor: {
-                        origValueField: 'intEntityVendorId',
+                        origValueField: 'intEntityId',
                         origUpdateField: 'intVendorId',
                         store: '{vendor}'
                     }

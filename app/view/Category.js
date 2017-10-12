@@ -945,7 +945,7 @@ Ext.define('Inventory.view.Category', {
                                                             xtype: 'gridcombobox',
                                                             columns: [
                                                                 {
-                                                                    dataIndex: 'intEntityVendorId',
+                                                                    dataIndex: 'intEntityId',
                                                                     dataType: 'numeric',
                                                                     text: 'Vendor Id',
                                                                     hidden: true
@@ -970,10 +970,10 @@ Ext.define('Inventory.view.Category', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        itemId: 'colVendorDepartment',
+                                                        itemId: 'colVendorCategory',
                                                         width: 105,
                                                         dataIndex: 'string',
-                                                        text: 'Vendor<br>Department',
+                                                        text: 'Vendor<br>Category',
                                                         editor: {
                                                             xtype: 'textfield'
                                                         }

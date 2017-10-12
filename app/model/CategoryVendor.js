@@ -48,7 +48,6 @@ Ext.define('Inventory.model.CategoryVendor', {
     ],
 
     validators: [
-        {type: 'presence', field: 'strLocationName'},
         {type: 'presence', field: 'strVendorId'}
     ]
 });

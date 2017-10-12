@@ -2713,7 +2713,7 @@
                                                         "columns": [
                                                             "[",
                                                             "\t{",
-                                                            "\t\tdataIndex: 'intEntityVendorId',",
+                                                            "\t\tdataIndex: 'intEntityId',",
                                                             "\t\tdataType: 'numeric',",
                                                             "\t\ttext: 'Vendor Id',",
                                                             "\t\thidden: true",
@@ -2767,8 +2767,8 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": null,
-                                                "itemId": "colVendorDepartment",
-                                                "text": "Vendor<br>Department",
+                                                "itemId": "colVendorCategory",
+                                                "text": "Vendor<br>Category",
                                                 "width": 105
                                             },
                                             "configAlternates": {

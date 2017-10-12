@@ -10433,7 +10433,7 @@
                                                                         "columns": [
                                                                             "[",
                                                                             "\t{",
-                                                                            "\t\tdataIndex: 'intCustomerId',",
+                                                                            "\t\tdataIndex: 'intEntityId',",
                                                                             "\t\tdataType: 'numeric',",
                                                                             "\t\ttext: 'Customer Id',",
                                                                             "\t\thidden: true",
@@ -10886,7 +10886,7 @@
                                                                         "columns": [
                                                                             "[",
                                                                             "\t{",
-                                                                            "\t\tdataIndex: 'intEntityVendorId',",
+                                                                            "\t\tdataIndex: 'intEntityId',",
                                                                             "\t\tdataType: 'numeric',",
                                                                             "\t\ttext: 'Vendor Id',",
                                                                             "\t\thidden: true",
