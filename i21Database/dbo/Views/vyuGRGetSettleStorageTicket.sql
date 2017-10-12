@@ -34,5 +34,5 @@ LEFT JOIN (SELECT intCustomerStorageId,SUM(dblUnits) TotalUnits FROM tblGRSettle
 LEFT JOIN tblGRStorageHistory SH ON SH.intCustomerStorageId=CS.intCustomerStorageId
 LEFT JOIN tblGRStorageHistory SH1 ON SH1.intCustomerStorageId=CS.intCustomerStorageId AND SH1.strType='From Scale'
 LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId=SH.intContractHeaderId  
-WHERE ISNULL(CS.strStorageType,'') <> 'ITR'AND SH.strType IN('From Scale','From Transfer') 
+WHERE ISNULL(CS.strStorageType,'') <> 'ITR'AND SH.strType IN('From Scale','From Transfer','From Delivery Sheet') 
 ORDER BY CS.dtmDeliveryDate

@@ -67,7 +67,7 @@ BEGIN TRY
 	 SELECT @TotalBeginingBalance=[dbo].[fnRemoveTrailingZeroes](
 	 ISNULL(SUM(
 				CASE 
-					WHEN (SH.strType='From Scale' OR SH.strType='Open Balance Adj' OR SH.strType='Reverse Adjustment' OR SH.strType='Reverse By Invoice' OR SH.strType='Reverse Settlement') THEN dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CS.intUnitMeasureId,CU.intUnitMeasureId,ISNULL(SH.dblUnits,0))
+					WHEN (SH.strType='From Scale' OR SH.strType='From Delivery Sheet' OR SH.strType='Open Balance Adj' OR SH.strType='Reverse Adjustment' OR SH.strType='Reverse By Invoice' OR SH.strType='Reverse Settlement') THEN dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CS.intUnitMeasureId,CU.intUnitMeasureId,ISNULL(SH.dblUnits,0))
 					WHEN (SH.strType='Reduced By Invoice' OR SH.strType='Settlement') THEN - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CS.intUnitMeasureId,CU.intUnitMeasureId,ISNULL(SH.dblUnits,0))
 					ELSE 0
 				END
@@ -79,7 +79,7 @@ BEGIN TRY
 	AND CS.intEntityId = @intEntityId
 	AND CS.intItemId =  @intItemId
 	AND dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) < dbo.fnRemoveTimeOnDate(@dtmStartDate)
-	AND strType IN ('From Scale','Open Balance Adj','Reverse Adjustment','Reverse By Invoice','Reverse Settlement','Reduced By Invoice','Settlement')
+	AND strType IN ('From Scale','From Delivery Sheet','Open Balance Adj','Reverse Adjustment','Reverse By Invoice','Reverse Settlement','Reduced By Invoice','Settlement')
 
 	
 	 
@@ -161,7 +161,7 @@ BEGIN TRY
 	CS.strStorageTicketNumber,
 	CONVERT(Nvarchar,SH.dtmHistoryDate,101) AS dtmHistoryDate,
 	CASE 
-			WHEN SH.strType='From Scale' THEN 'DELIVERED'				
+			WHEN SH.strType IN('From Scale','From Delivery Sheet') THEN 'DELIVERED'				
 			ELSE UPPER(SH.strType)
 	END
 	AS strDescription,
@@ -169,7 +169,7 @@ BEGIN TRY
 	[dbo].[fnRemoveTrailingZeroes]
 	(
 		CASE 
-					WHEN (SH.strType='From Scale' OR SH.strType='Open Balance Adj' OR SH.strType='Reverse Adjustment' OR SH.strType='Reverse By Invoice' OR SH.strType='Reverse Settlement') THEN dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CS.intUnitMeasureId,@ScaleUOMId,ISNULL(SH.dblUnits,0))				
+					WHEN (SH.strType='From Scale' OR SH.strType='From Delivery Sheet' OR SH.strType='Open Balance Adj' OR SH.strType='Reverse Adjustment' OR SH.strType='Reverse By Invoice' OR SH.strType='Reverse Settlement') THEN dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CS.intUnitMeasureId,@ScaleUOMId,ISNULL(SH.dblUnits,0))				
 					ELSE NULL
 		END
 	)
@@ -186,7 +186,7 @@ BEGIN TRY
 	[dbo].[fnRemoveTrailingZeroes]
 	(
 		CASE 
-					WHEN (SH.strType='From Scale' OR SH.strType='Open Balance Adj' OR SH.strType='Reverse Adjustment' OR SH.strType='Reverse By Invoice' OR SH.strType='Reverse Settlement') THEN ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CS.intUnitMeasureId,@ScaleUOMId,ISNULL(SH.dblUnits,0)),3)
+					WHEN (SH.strType='From Scale' OR SH.strType='From Delivery Sheet'  OR SH.strType='Open Balance Adj' OR SH.strType='Reverse Adjustment' OR SH.strType='Reverse By Invoice' OR SH.strType='Reverse Settlement') THEN ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CS.intUnitMeasureId,@ScaleUOMId,ISNULL(SH.dblUnits,0)),3)
 					WHEN (SH.strType='Reduced By Invoice' OR SH.strType='Settlement') THEN - ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CS.intUnitMeasureId,@ScaleUOMId,ISNULL(SH.dblUnits,0)),3)			
 					ELSE NULL
 		END
@@ -200,7 +200,7 @@ BEGIN TRY
 	AND   CS.intEntityId = @intEntityId
 	AND	  CS.intItemId =  @intItemId
 	AND   ISNULL(SH.dblUnits,0) <>0
-	AND   SH.strType IN ('From Scale','Open Balance Adj','Reverse Adjustment','Reverse By Invoice','Reverse Settlement','Reduced By Invoice','Settlement')
+	AND   SH.strType IN ('From Scale','From Delivery Sheet','Open Balance Adj','Reverse Adjustment','Reverse By Invoice','Reverse Settlement','Reduced By Invoice','Settlement')
 	AND   dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) >= dbo.fnRemoveTimeOnDate(@dtmStartDate)
 	AND   dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) <= @dtmEndDate	 
 	ORDER BY SH.intStorageHistoryId

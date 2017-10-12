@@ -40,5 +40,5 @@ LEFT JOIN tblSMCompanyLocationSubLocation SLOC ON SLOC.intCompanyLocationSubLoca
 LEFT JOIN tblGRStorageHistory SH ON SH.intCustomerStorageId=CS.intCustomerStorageId
 LEFT JOIN tblGRStorageHistory SH1 ON SH1.intCustomerStorageId=CS.intCustomerStorageId AND SH1.strType='From Scale'
 LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId=SH.intContractHeaderId  
-WHERE CS.dblOpenBalance >0 AND ISNULL(CS.strStorageType,'') <> 'ITR'AND SH.strType IN('From Scale','From Transfer')  
+WHERE CS.dblOpenBalance >0 AND ISNULL(CS.strStorageType,'') <> 'ITR'AND SH.strType IN('From Scale','From Transfer','From Delivery Sheet')  
 ORDER BY CS.dtmDeliveryDate
