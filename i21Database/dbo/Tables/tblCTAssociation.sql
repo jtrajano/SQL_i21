@@ -3,7 +3,7 @@
 	[intAssociationId] INT NOT NULL IDENTITY, 
     [intConcurrencyId] INT NOT NULL, 
     [strName] NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL, 
-    [strComment] NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
+    [strComment] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[intLastWeighingDays] INT NULL,
     [intClaimValidTill] INT NULL, 
     [ysnActive] BIT NOT NULL,
