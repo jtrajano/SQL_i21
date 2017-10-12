@@ -620,8 +620,17 @@ BEGIN TRY
 		ORDER BY PP.intSequenceNo
 
 		-- Update Properties Value, Comment, Result for the available properties
+		-- Setting Bit to lower case then only in sencha client, it is recogonizing and correct date format
 		UPDATE tblQMTestResult
-		SET strPropertyValue = SI.strPropertyValue
+		SET strPropertyValue = (
+				CASE P.intDataTypeId
+					WHEN 4
+						THEN LOWER(SI.strPropertyValue)
+					WHEN 12
+						THEN CONVERT(DATETIME, SI.strPropertyValue, 120)
+					ELSE SI.strPropertyValue
+					END
+				)
 			,strComment = SI.strComment
 			,strResult = SI.strResult
 			,dtmPropertyValueCreated = (
