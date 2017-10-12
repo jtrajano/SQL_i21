@@ -1,11 +1,16 @@
-
+IF EXISTS (select top 1 1 from sys.procedures where name = 'uspEMImportPTTerminalToCustomer')
+	DROP PROCEDURE uspEMImportPTTerminalToCustomer
+GO
+	
 CREATE PROCEDURE [dbo].[uspEMImportPTTerminalToCustomer]
-		@CustomerId NVARCHAR(50) = NULL
+			@Checking BIT = 0,
+			@Total INT = 0 OUTPUT
 
 AS
 BEGIN
 
 	SET NOCOUNT ON;
+	
 IF  EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'tmpcusname')
 	DROP TABLE tmpcusname
 IF  EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'tmpcusname1')
@@ -27,6 +32,37 @@ SELECT	ptcus_cus_no, ptcus_bill_to,
 			     END)) +'_' + CAST(A4GLIdentity AS NVARCHAR) as ptcus_name 
 INTO tmpcusname1
 FROM ptcusmst  WHERE ptcus_cus_no <> ptcus_bill_to
+
+IF (@Checking =1)
+BEGIN 
+
+	SELECT @Total = COUNT (*)
+	 FROM trdvcmst DVC 
+	INNER JOIN tmpcusname OCUS ON OCUS.ptcus_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS = DVC.trdvc_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
+	INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.ptcus_bill_to COLLATE SQL_Latin1_General_CP1_CS_AS
+	INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = DVC.trdvc_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
+	INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = DVC.trdvc_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
+	INNER JOIN tblICCategory CAT ON CAT.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = DVC.trdvc_class COLLATE SQL_Latin1_General_CP1_CS_AS
+	INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityId 
+			   AND CLOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.ptcus_name COLLATE SQL_Latin1_General_CP1_CS_AS
+	WHERE NOT EXISTS (SELECT * FROM tblARCustomerFreightXRef WHERE intEntityCustomerId = CUS.intEntityId AND intCategoryId = CAT.intCategoryId
+					 AND intEntityLocationId = CLOC.intEntityLocationId)
+
+	SELECT @Total = @Total + COUNT(*)
+	 FROM trdvcmst DVC 
+	INNER JOIN tmpcusname1 OCUS1 ON OCUS1.ptcus_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS = DVC.trdvc_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
+	INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS1.ptcus_bill_to COLLATE SQL_Latin1_General_CP1_CS_AS
+	INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = DVC.trdvc_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
+	INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = DVC.trdvc_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
+	INNER JOIN tblICCategory CAT ON CAT.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = DVC.trdvc_class COLLATE SQL_Latin1_General_CP1_CS_AS
+	INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityId 
+			   AND CLOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS1.ptcus_name COLLATE SQL_Latin1_General_CP1_CS_AS
+	WHERE NOT EXISTS (SELECT * FROM tblARCustomerFreightXRef WHERE intEntityCustomerId = CUS.intEntityId AND intCategoryId = CAT.intCategoryId
+					AND intEntityLocationId = CLOC.intEntityLocationId)
+	RETURN @Total
+
+END
+
 
 INSERT INTO [dbo].[tblARCustomerFreightXRef]
            ([intEntityCustomerId]
@@ -63,7 +99,7 @@ INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_
 INNER JOIN tblICCategory CAT ON CAT.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = DVC.trdvc_class COLLATE SQL_Latin1_General_CP1_CS_AS
 INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityId 
 		   AND CLOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.ptcus_name COLLATE SQL_Latin1_General_CP1_CS_AS
-WHERE DVC.trdvc_cus_no = @CustomerId
+WHERE NOT EXISTS (SELECT * FROM tblARCustomerFreightXRef WHERE intEntityCustomerId = CUS.intEntityId AND intCategoryId = CAT.intCategoryId)
 
 INSERT INTO [dbo].[tblARCustomerFreightXRef]
            ([intEntityCustomerId]
@@ -100,7 +136,7 @@ INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_
 INNER JOIN tblICCategory CAT ON CAT.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = DVC.trdvc_class COLLATE SQL_Latin1_General_CP1_CS_AS
 INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityId 
 		   AND CLOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS1.ptcus_name COLLATE SQL_Latin1_General_CP1_CS_AS
-WHERE DVC.trdvc_cus_no = @CustomerId
+--WHERE DVC.trdvc_cus_no = @CustomerId
 
 END
 GO
