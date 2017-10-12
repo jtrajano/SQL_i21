@@ -620,14 +620,12 @@ BEGIN TRY
 		ORDER BY PP.intSequenceNo
 
 		-- Update Properties Value, Comment, Result for the available properties
-		-- Setting Bit to lower case then only in sencha client, it is recogonizing and correct date format
+		-- Setting Bit to lower case then only in sencha client, it is recogonizing
 		UPDATE tblQMTestResult
 		SET strPropertyValue = (
 				CASE P.intDataTypeId
 					WHEN 4
 						THEN LOWER(SI.strPropertyValue)
-					WHEN 12
-						THEN CONVERT(DATETIME, SI.strPropertyValue, 120)
 					ELSE SI.strPropertyValue
 					END
 				)
@@ -645,6 +643,15 @@ BEGIN TRY
 			AND TR.intSampleId = @intSampleId
 		JOIN tblQMSampleImport SI ON SI.strPropertyName = P.strPropertyName
 			AND SI.strSampleNumber = @strSampleRefNo
+
+		-- Setting correct date format
+		UPDATE tblQMTestResult
+		SET strPropertyValue = CONVERT(DATETIME, TR.strPropertyValue, 120)
+		FROM tblQMTestResult TR
+		JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+			AND TR.intSampleId = @intSampleId
+			AND ISNULL(TR.strPropertyValue, '') <> ''
+			AND P.intDataTypeId = 12
 
 		SELECT @intSampleImportId = MIN(intSampleImportId)
 		FROM @ImportHeader
