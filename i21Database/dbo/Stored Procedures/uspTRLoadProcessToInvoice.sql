@@ -1253,11 +1253,28 @@ BEGIN TRY
 	-- Unpost Blending Transaction
 	IF (ISNULL(@ysnPostOrUnPost, 0) = 0 AND @HasBlend = 1)
 	BEGIN
-		EXEC uspMFReverseAutoBlend
+		SELECT DISTINCT DistItem.intLoadDistributionDetailId
+		INTO #tmpBlendItems
+		FROM vyuTRGetLoadBlendIngredient DistItem
+		LEFT JOIN tblTRLoadDistributionHeader HeaderDistItem ON HeaderDistItem.intLoadDistributionHeaderId = DistItem.intLoadDistributionHeaderId
+		WHERE HeaderDistItem.intLoadHeaderId = @intLoadHeaderId
+
+		WHILE EXISTS (SELECT TOP 1 1 FROM #tmpBlendItems)
+		BEGIN
+		
+			SELECT TOP 1 @DistributionItemId = intLoadDistributionDetailId FROM #tmpBlendItems
+
+			EXEC uspMFReverseAutoBlend
 			@intSalesOrderDetailId = NULL
 			, @intInvoiceDetailId = NULL
 			, @intLoadDistributionDetailId = @DistributionItemId
-			, @intUserId = @intUserId
+			, @intUserId = @intUserId	
+
+			DELETE FROM #tmpBlendItems WHERE intLoadDistributionDetailId = @DistributionItemId
+			
+		END
+			
+		DROP TABLE #tmpBlendItems
 	END
 
 	IF (@ErrorMessage IS NULL)
