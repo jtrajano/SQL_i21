@@ -5426,6 +5426,8 @@
     <Build Include="dbo\Stored Procedures\uspQMSampleImportErrors.sql" />
     <Build Include="vyuAP1099DIV.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099DIVTwoPart.sql" />
+    <Build Include="dbo\Views\vyuAP1099Summary.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRpt1099Summary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
