@@ -112,6 +112,11 @@ BEGIN TRY
 		BEGIN
 			IF ISDATE(@dtmSampleReceivedDate) = 0
 				SELECT @strPreviousErrMsg += 'Invalid Sample Date. '
+			ELSE
+			BEGIN
+				IF CONVERT(DATE, @dtmSampleReceivedDate) > CONVERT(DATE, GETDATE())
+					SELECT @strPreviousErrMsg += 'Sample Date cannot be Future Date. '
+			END
 		END
 
 		-- Item Short Name
