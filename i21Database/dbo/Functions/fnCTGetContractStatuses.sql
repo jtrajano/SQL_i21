@@ -21,5 +21,5 @@ BEGIN
 	FROM tblCTContractHeader CH																
 	WHERE intContractHeaderId = @intContractHeaderId	
 
-	RETURN @strStatus;	
+	RETURN ISNULL(@strStatus,'Incomplete');	
 END
