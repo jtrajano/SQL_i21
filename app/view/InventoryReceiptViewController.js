@@ -1187,7 +1187,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         }
                     ],
                     params: {
-                        columns: 'strCurrency:intSubCurrencyCent:'
+                        columns: 'strCurrency:intSubCurrencyCent:intCurrencyID:'
                     },
                     callback: function(records, operation, success){
                         var record; 
@@ -1195,11 +1195,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             record = records[0];
                         }
 
-                        if(success && record){
-                            newRecord.set('strCurrency', record.get('strCurrency'));
+                        if(success && record){                            
                             var subCurrencyCents = record.get('intSubCurrencyCent');
                             subCurrencyCents = Ext.isNumeric(subCurrencyCents) && subCurrencyCents > 0 ? subCurrencyCents : 1; 
                             newRecord.set('intSubCurrencyCents', subCurrencyCents);
+                            newRecord.set('intCurrencyId', record.get('intCurrencyID'));
+                            newRecord.set('strCurrency', record.get('strCurrency'));
                         }
                     }
                 }
