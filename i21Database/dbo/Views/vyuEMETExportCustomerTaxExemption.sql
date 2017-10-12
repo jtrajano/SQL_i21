@@ -37,7 +37,7 @@
 			join tblEMEntityLocation c
 				on a.[intEntityId] = c.intEntityId and c.ysnDefaultLocation = 1 and c.intTaxGroupId in (select intTaxGroupId from tblETExportFilterTaxGroup)
 			join tblSMCompanyLocation d
-				on c.intWarehouseId = d.intCompanyLocationId and d.intTaxGroupId is not null
+				on c.intWarehouseId = d.intCompanyLocationId and c.intTaxGroupId is not null
 			join tblARCustomerTaxingTaxException e
 				on e.intEntityCustomerId = a.[intEntityId] and e.intItemId is not null and e.intCategoryId is not null
 			join tblICItem f
@@ -68,7 +68,7 @@
 			join tblEMEntityLocation c
 				on a.[intEntityId] = c.intEntityId and c.ysnDefaultLocation = 1 and c.intTaxGroupId in (select intTaxGroupId from tblETExportFilterTaxGroup)
 			join tblSMCompanyLocation d
-				on c.intWarehouseId = d.intCompanyLocationId and d.intTaxGroupId is not null
+				on c.intWarehouseId = d.intCompanyLocationId and c.intTaxGroupId is not null
 			join tblARCustomerTaxingTaxException e
 				on e.intEntityCustomerId = a.[intEntityId] and e.intCategoryId is not null and e.intItemId is null
 			join tblICItem f
@@ -95,7 +95,7 @@
 			join tblEMEntityLocation c
 				on a.[intEntityId] = c.intEntityId and c.ysnDefaultLocation = 1 and c.intTaxGroupId in (select intTaxGroupId from tblETExportFilterTaxGroup)
 			join tblSMCompanyLocation d
-				on c.intWarehouseId = d.intCompanyLocationId and d.intTaxGroupId is not null
+				on c.intWarehouseId = d.intCompanyLocationId and c.intTaxGroupId is not null
 			join tblARCustomerTaxingTaxException e
 				on e.intEntityCustomerId = a.[intEntityId] and e.intCategoryId is null and e.intItemId is null
 			left join tblETExportFilterItem f
