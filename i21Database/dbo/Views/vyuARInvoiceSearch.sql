@@ -56,6 +56,7 @@ SELECT
 	,strCustomerReferences			= dbo.fnARGetCustomerReferencesFromInvoice(I.intInvoiceId)
 	,ysnHasEmailSetup				= CASE WHEN EMAILSETUP.intEmailSetupCount > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END	
 	,strCurrencyDescription			= CUR.strDescription
+	,ysnMailSent					= CASE WHEN (SELECT COUNT(1) FROM tblSMTransaction trans INNER JOIN tblSMActivity tsa on tsa.intTransactionId = trans.intTransactionId WHERE trans.intRecordId = intInvoiceId AND tsa.strType = 'Email' AND tsa.strStatus = 'Sent') > 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT)  END 
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (
 	SELECT intEntityId
