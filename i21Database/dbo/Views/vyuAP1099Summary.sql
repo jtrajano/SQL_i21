@@ -2,7 +2,7 @@
 AS
 SELECT
       strVendorId = C.strVendorId
-	, intEntityVendorId = C.intEntityVendorId
+	, intEntityVendorId = C.intEntityId
 	, strCompanyAddress = (SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) 
 	, strCompanyName =(SELECT Top 1 strCompanyName FROM dbo.tblSMCompanySetup)
     , strVendorCompanyName = dbo.fnAPRemoveSpecialChars(REPLACE((CASE WHEN ISNULL(C2.str1099Name,'') <> '' THEN dbo.fnTrimX(C2.str1099Name) ELSE dbo.fnTrimX(C2.strName) END), '&', 'and'))  COLLATE Latin1_General_CI_AS 
@@ -26,9 +26,9 @@ INNER JOIN tblAPBill B
     ON B.intBillId = A.intBillId
 LEFT JOIN vyuAPBillPayment B2
 	ON B.intBillId = B2.intBillId   
-LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity C2 ON C.intEntityVendorId = C2.intEntityId)
-    ON C.intEntityVendorId = B.intEntityVendorId
+LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity C2 ON C.intEntityId = C2.intEntityId)
+    ON C.intEntityId = B.intEntityVendorId
 LEFT JOIN [tblEMEntityLocation] D
-	ON C.intEntityVendorId = D.intEntityId AND D.ysnDefaultLocation = 1     
+	ON C.intEntityId = D.intEntityId AND D.ysnDefaultLocation = 1     
 WHERE ((B.ysnPosted = 1) OR B.intTransactionType = 9) AND A.int1099Form <> 0
 GO
