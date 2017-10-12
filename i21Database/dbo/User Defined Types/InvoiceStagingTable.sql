@@ -72,6 +72,7 @@ CREATE TYPE [dbo].[InvoiceStagingTable] AS TABLE
 	,[ysnForgiven]							BIT												NULL		
 	,[ysnCalculated]						BIT												NULL		
 	,[ysnSplitted]							BIT												NULL	
+	,[ysnImpactInventory]					BIT												NULL	
 	,[intPaymentId]							INT												NULL		-- Key Value from tblARPayment (Customer Prepayment/Overpayment) 
 	,[intSplitId]							INT												NULL		-- Key Value from tblEMEntitySplit (Customer Split) 
 	,[intLoadDistributionHeaderId]			INT												NULL		-- Key Value from tblTRLoadDistributionHeader (Transport Load-New Screen) 
