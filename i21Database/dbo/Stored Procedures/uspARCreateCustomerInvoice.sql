@@ -31,6 +31,7 @@
 	,@Forgiven						BIT				= 0			
 	,@Calculated					BIT				= 0			
 	,@Splitted						BIT				= 0			
+	,@ImpactInventory				BIT				= 0			
 	,@PaymentId						INT				= NULL
 	,@SplitId						INT				= NULL
 	,@LoadDistributionHeaderId		INT				= NULL
@@ -372,6 +373,7 @@ BEGIN TRY
 		,[ysnForgiven]
 		,[ysnCalculated]
 		,[ysnSplitted]
+		,[ysnImpactInventory]
 		,[intPaymentId]
 		,[intSplitId]
 		,[intLoadDistributionHeaderId]
@@ -440,6 +442,7 @@ BEGIN TRY
 		,[ysnForgiven]					= ISNULL(@Forgiven,0) 
 		,[ysnCalculated]				= ISNULL(@Calculated,0)
 		,[ysnSplitted]					= ISNULL(@Splitted,0)		
+		,[ysnImpactInventory]			= ISNULL(@ImpactInventory,0)		
 		,[intPaymentId]					= @PaymentId 
 		,[intSplitId]					= @SplitId 
 		,[intLoadDistributionHeaderId]	= @LoadDistributionHeaderId 

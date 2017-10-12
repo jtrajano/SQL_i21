@@ -55,6 +55,7 @@ INSERT INTO @InvoicesToGenerate (
 	,[ysnForgiven]
 	,[ysnCalculated]
 	,[ysnSplitted]
+	,[ysnImpactInventory]
 	,[intPaymentId]
 	,[intSplitId]
 	,[intLoadDistributionHeaderId]
@@ -192,6 +193,7 @@ SELECT
 	,[ysnForgiven]						= [ysnForgiven]
 	,[ysnCalculated]					= [ysnCalculated]
 	,[ysnSplitted]						= [ysnSplitted]
+	,[ysnImpactInventory]				= [ysnImpactInventory]
 	,[intPaymentId]						= [intPaymentId]
 	,[intSplitId]						= [intSplitId]
 	,[intLoadDistributionHeaderId]		= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Transport Load' THEN ISNULL([intLoadDistributionHeaderId], [intSourceId]) ELSE NULL END)
@@ -986,33 +988,33 @@ USING
 		,[ysnPaid]						= 0
 		,[ysnProcessed]					= 0
 		,[ysnRecurring]					= 0
-		,[ysnTemplate]					= ISNULL(ITG.ysnTemplate,0)
-		,[ysnForgiven]					= ISNULL(ITG.ysnForgiven,0) 
-		,[ysnCalculated]				= ISNULL(ITG.ysnCalculated,0)
-		,[ysnSplitted]					= ISNULL(ITG.ysnSplitted,0)		
-		,[dblSplitPercent]				= 1.000000
-		,[ysnImpactInventory]			= 0
+		,[ysnTemplate]					= ISNULL(ITG.[ysnTemplate],0)
+		,[ysnForgiven]					= ISNULL(ITG.[ysnForgiven],0) 
+		,[ysnCalculated]				= ISNULL(ITG.[ysnCalculated],0)
+		,[ysnSplitted]					= ISNULL(ITG.[ysnSplitted],0)		
+		,[ysnImpactInventory]			= ISNULL(ITG.[ysnImpactInventory],0)
+		,[dblSplitPercent]				= 1.000000		
 		,[ysnImportedFromOrigin]		= 0
 		,[ysnImportedAsPosted]			= 0
-		,[intPaymentId]					= ITG.intPaymentId 
-		,[intSplitId]					= ITG.intSplitId 
+		,[intPaymentId]					= ITG.[intPaymentId]
+		,[intSplitId]					= ITG.[intSplitId] 
 		,[intDistributionHeaderId]		= NULL
-		,[intLoadDistributionHeaderId]	= ITG.intLoadDistributionHeaderId 
-		,[strActualCostId]				= ITG.strActualCostId
-		,[strImportFormat]				= ITG.strImportFormat
-		,[intShipmentId]				= ITG.intShipmentId 
-		,[intTransactionId]				= ITG.intTransactionId
-		,[intMeterReadingId]			= ITG.intMeterReadingId
-		,[intContractHeaderId]			= ITG.intContractHeaderId
-		,[intOriginalInvoiceId]			= ITG.intOriginalInvoiceId
-		,[intLoadId]                    = ITG.intLoadId
-		,[intEntityId]					= ITG.intEntityId
-		,[intEntityContactId]			= ITG.intEntityContactId
+		,[intLoadDistributionHeaderId]	= ITG.[intLoadDistributionHeaderId] 
+		,[strActualCostId]				= ITG.[strActualCostId]
+		,[strImportFormat]				= ITG.[strImportFormat]
+		,[intShipmentId]				= ITG.[intShipmentId] 
+		,[intTransactionId]				= ITG.[intTransactionId]
+		,[intMeterReadingId]			= ITG.[intMeterReadingId]
+		,[intContractHeaderId]			= ITG.[intContractHeaderId]
+		,[intOriginalInvoiceId]			= ITG.[intOriginalInvoiceId]
+		,[intLoadId]                    = ITG.[intLoadId]
+		,[intEntityId]					= ITG.[intEntityId]
+		,[intEntityContactId]			= ITG.[intEntityContactId]
 		,[intDocumentMaintenanceId]		= NULL
 		,[dblTotalWeight]				= @ZeroDecimal
 		,[dblTotalTermDiscount]			= @ZeroDecimal
-		,[intTruckDriverId]				= ITG.intTruckDriverId
-		,[intTruckDriverReferenceId]	= ITG.intTruckDriverReferenceId
+		,[intTruckDriverId]				= ITG.[intTruckDriverId]
+		,[intTruckDriverReferenceId]	= ITG.[intTruckDriverReferenceId]
 		,[intConcurrencyId]				= 0
 		,[intId]						= ITG.[intId]
 		,[strSourceTransaction]			= ITG.[strSourceTransaction]
@@ -1120,8 +1122,8 @@ INSERT(
 	,[ysnForgiven]
 	,[ysnCalculated]
 	,[ysnSplitted]
-	,[dblSplitPercent]
 	,[ysnImpactInventory]
+	,[dblSplitPercent]
 	,[ysnImportedFromOrigin]
 	,[ysnImportedAsPosted]
 	,[intPaymentId]
@@ -1210,8 +1212,8 @@ VALUES(
 	,[ysnForgiven]
 	,[ysnCalculated]
 	,[ysnSplitted]
-	,[dblSplitPercent]
 	,[ysnImpactInventory]
+	,[dblSplitPercent]
 	,[ysnImportedFromOrigin]
 	,[ysnImportedAsPosted]
 	,[intPaymentId]
@@ -1361,6 +1363,7 @@ BEGIN TRY
 		,[ysnForgiven]
 		,[ysnCalculated]
 		,[ysnSplitted]
+		,[ysnImpactInventory]
 		,[intPaymentId]
 		,[intSplitId]
 		,[intLoadDistributionHeaderId]
@@ -1499,6 +1502,7 @@ BEGIN TRY
 		,[ysnForgiven]							= ITG.[ysnForgiven]
 		,[ysnCalculated]						= ITG.[ysnCalculated]
 		,[ysnSplitted]							= ITG.[ysnSplitted]
+		,[ysnImpactInventory]					= ITG.[ysnImpactInventory]
 		,[intPaymentId]							= ITG.[intPaymentId]
 		,[intSplitId]							= ITG.[intSplitId]
 		,[intLoadDistributionHeaderId]			= ITG.[intLoadDistributionHeaderId]

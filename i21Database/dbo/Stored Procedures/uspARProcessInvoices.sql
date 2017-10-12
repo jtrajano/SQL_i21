@@ -161,6 +161,7 @@ DECLARE  @Id									INT
 		,@Forgiven								BIT
 		,@Calculated							BIT
 		,@Splitted								BIT
+		,@ImpactInventory						BIT
 		,@PaymentId								INT
 		,@SplitId								INT
 		,@LoadDistributionHeaderId				INT
@@ -321,6 +322,7 @@ BEGIN
 		,@Forgiven						= [ysnForgiven]
 		,@Calculated					= [ysnCalculated]
 		,@Splitted						= [ysnSplitted]
+		,@ImpactInventory				= [ysnImpactInventory]
 		,@PaymentId						= [intPaymentId]
 		,@SplitId						= [intSplitId]
 		,@LoadDistributionHeaderId		= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Transport Load' THEN ISNULL([intLoadDistributionHeaderId], [intSourceId]) ELSE NULL END)
@@ -545,6 +547,7 @@ BEGIN
 			,@Forgiven						= @Forgiven
 			,@Calculated					= @Calculated
 			,@Splitted						= @Splitted
+			,@ImpactInventory				= [ysnImpactInventory]
 			,@PaymentId						= @PaymentId
 			,@SplitId						= @SplitId
 			,@LoadDistributionHeaderId		= @LoadDistributionHeaderId
@@ -1122,6 +1125,7 @@ BEGIN TRY
 			,@Forgiven						= [ysnForgiven]
 			,@Calculated					= [ysnCalculated]
 			,@Splitted						= [ysnSplitted]
+			,@ImpactInventory				= [ysnImpactInventory]
 			,@PaymentId						= [intPaymentId]
 			,@SplitId						= [intSplitId]			
 			,@LoadDistributionHeaderId		= [intLoadDistributionHeaderId]
@@ -1257,6 +1261,7 @@ BEGIN TRY
 			,[ysnForgiven]				= ISNULL(@Forgiven,0)
 			,[ysnCalculated]			= ISNULL(@Calculated,0)
 			,[ysnSplitted]				= ISNULL(@Splitted,0)
+			,[ysnImpactInventory]		= ISNULL(@ImpactInventory,0)
 			,[intPaymentId]				= @PaymentId
 			,[intSplitId]				= @SplitId
 			,[intLoadDistributionHeaderId]	= @LoadDistributionHeaderId
