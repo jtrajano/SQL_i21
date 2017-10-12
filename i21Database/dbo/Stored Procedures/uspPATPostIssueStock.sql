@@ -277,199 +277,120 @@ BEGIN
 			AND strModuleName = @MODULE_NAME AND strTransactionForm = @RETIRE_STOCK
 	END
 END
---ELSE
---BEGIN
---	IF(@ysnPosted = 1)
---	BEGIN
+ELSE
+BEGIN
+	IF(@ysnPosted = 1)
+	BEGIN
 
---	------------------------CREATE GL ENTRIES---------------------
---		INSERT INTO @GLEntries(
---			[dtmDate], 
---			[strBatchId], 
---			[intAccountId],
---			[dblDebit],
---			[dblCredit],
---			[dblDebitUnit],
---			[dblCreditUnit],
---			[strDescription],
---			[strCode],
---			[strReference],
---			[intCurrencyId],
---			[dtmDateEntered],
---			[dtmTransactionDate],
---			[strJournalLineDescription],
---			[intJournalLineNo],
---			[ysnIsUnposted],
---			[intUserId],
---			[intEntityId],
---			[strTransactionId],
---			[intTransactionId],
---			[strTransactionType],
---			[strTransactionForm],
---			[strModuleName],
---			[dblDebitForeign],
---			[dblDebitReport],
---			[dblCreditForeign],
---			[dblCreditReport],
---			[dblReportingRate],
---			[dblForeignRate],
---			[strRateType]
---		)
---		SELECT	
---			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
---			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
---			[intAccountId]					=	CASE WHEN A.strStockStatus = 'Voting' THEN ComPref.intVotingStockId ELSE ComPref.intNonVotingStockId END,
---			[dblDebit]						=	0,
---			[dblCredit]						=	ROUND(A.dblFaceValue,2),
---			[dblDebitUnit]					=	0,
---			[dblCreditUnit]					=	0,
---			[strDescription]				=	CASE WHEN A.strStockStatus = 'Voting' THEN 'Voting Stock Issue' ELSE 'Non-Voting/Other Stock Issue' END,
---			[strCode]						=	@MODULE_CODE,
---			[strReference]					=	A.strCertificateNo,
---			[intCurrencyId]					=	1,
---			[dtmDateEntered]				=	GETDATE(),
---			[dtmTransactionDate]			=	NULL,
---			[strJournalLineDescription]		=	CASE WHEN A.strStockStatus = 'Voting' THEN 'Voting Stock Issue' ELSE 'Non-Voting/Other Stock Issue' END,
---			[intJournalLineNo]				=	1,
---			[ysnIsUnposted]					=	0,
---			[intUserId]						=	@intUserId,
---			[intEntityId]					=	@intUserId,
---			[strTransactionId]				=	A.intCustomerStockId, 
---			[intTransactionId]				=	A.intCustomerStockId, 
---			[strTransactionType]			=	CASE WHEN A.strStockStatus = 'Voting' THEN 'Voting Stock' ELSE 'Non-Voting/Other' END,
---			[strTransactionForm]			=	@ISSUE_STOCK,
---			[strModuleName]					=	@MODULE_NAME,
---			[dblDebitForeign]				=	0,      
---			[dblDebitReport]				=	0,
---			[dblCreditForeign]				=	0,
---			[dblCreditReport]				=	0,
---			[dblReportingRate]				=	0,
---			[dblForeignRate]				=	0,
---			[strRateType]					=	NULL
---		FROM	[dbo].[tblPATCustomerStock] A
---				CROSS JOIN tblPATCompanyPreference ComPref
---		WHERE	A.intCustomerStockId IN (SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@intCustomerStockId))
---		UNION ALL
---		--AR Account
---		SELECT	
---			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
---			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
---			[intAccountId]					=	ComPref.intARAccountId, 
---			[dblDebit]						=	ROUND(A.dblFaceValue,2),
---			[dblCredit]						=	0,
---			[dblDebitUnit]					=	0,
---			[dblCreditUnit]					=	0,
---			[strDescription]				=	'AR Account from Issued Stock',
---			[strCode]						=	@MODULE_CODE,
---			[strReference]					=	A.strCertificateNo,
---			[intCurrencyId]					=	1,
---			[dtmDateEntered]				=	GETDATE(),
---			[dtmTransactionDate]			=	NULL,
---			[strJournalLineDescription]		=	'AR Account from Issued Stock',
---			[intJournalLineNo]				=	1,
---			[ysnIsUnposted]					=	0,
---			[intUserId]						=	@intUserId,
---			[intEntityId]					=	@intUserId,
---			[strTransactionId]				=	A.intCustomerStockId, 
---			[intTransactionId]				=	A.intCustomerStockId, 
---			[strTransactionType]			=	'Voting Stock',
---			[strTransactionForm]			=	@ISSUE_STOCK,
---			[strModuleName]					=	@MODULE_NAME,
---			[dblDebitForeign]				=	0,      
---			[dblDebitReport]				=	0,
---			[dblCreditForeign]				=	0,
---			[dblCreditReport]				=	0,
---			[dblReportingRate]				=	0,
---			[dblForeignRate]				=	0,
---			[strRateType]					=	NULL
---		FROM	[dbo].[tblPATCustomerStock] A
---		CROSS APPLY tblARCompanyPreference ComPref
---		WHERE	A.intCustomerStockId IN (SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@intCustomerStockId))
+	------------------------CREATE GL ENTRIES---------------------
+		INSERT INTO @GLEntries(
+			[dtmDate], 
+			[strBatchId], 
+			[intAccountId],
+			[dblDebit],
+			[dblCredit],
+			[dblDebitUnit],
+			[dblCreditUnit],
+			[strDescription],
+			[strCode],
+			[strReference],
+			[intCurrencyId],
+			[dtmDateEntered],
+			[dtmTransactionDate],
+			[strJournalLineDescription],
+			[intJournalLineNo],
+			[ysnIsUnposted],
+			[intUserId],
+			[intEntityId],
+			[strTransactionId],
+			[intTransactionId],
+			[strTransactionType],
+			[strTransactionForm],
+			[strModuleName],
+			[dblDebitForeign],
+			[dblDebitReport],
+			[dblCreditForeign],
+			[dblCreditReport],
+			[dblReportingRate],
+			[dblForeignRate],
+			[strRateType]
+		)
+		SELECT	
+			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
+			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
+			[intAccountId]					=	SADef.intSalesAccount,
+			[dblDebit]						=	0,
+			[dblCredit]						=	ROUND(A.dblFaceValue,2),
+			[dblDebitUnit]					=	0,
+			[dblCreditUnit]					=	0,
+			[strDescription]				=	GL.strDescription,
+			[strCode]						=	@MODULE_CODE,
+			[strReference]					=	A.strCertificateNo,
+			[intCurrencyId]					=	1,
+			[dtmDateEntered]				=	GETDATE(),
+			[dtmTransactionDate]			=	NULL,
+			[strJournalLineDescription]		=	GL.strDescription,
+			[intJournalLineNo]				=	1,
+			[ysnIsUnposted]					=	0,
+			[intUserId]						=	@intUserId,
+			[intEntityId]					=	@intUserId,
+			[strTransactionId]				=	A.intCustomerStockId, 
+			[intTransactionId]				=	A.intCustomerStockId, 
+			[strTransactionType]			=	CASE WHEN A.strStockStatus = 'Voting' THEN 'Voting Stock' ELSE 'Non-Voting/Other' END,
+			[strTransactionForm]			=	@ISSUE_STOCK,
+			[strModuleName]					=	@MODULE_NAME,
+			[dblDebitForeign]				=	0,      
+			[dblDebitReport]				=	0,
+			[dblCreditForeign]				=	0,
+			[dblCreditReport]				=	0,
+			[dblReportingRate]				=	0,
+			[dblForeignRate]				=	0,
+			[strRateType]					=	NULL
+		FROM	[dbo].[tblPATCustomerStock] A
+		CROSS JOIN (SELECT intSalesAccount FROM tblSMCompanyLocation where intCompanyLocationId = @intCompanyLocationId) SADef
+		INNER JOIN tblGLAccount GL ON GL.intAccountId = SADef.intSalesAccount
+		WHERE	A.intCustomerStockId IN (SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@intCustomerStockId))
+		UNION ALL
+		--AR Account
+		SELECT	
+			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
+			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
+			[intAccountId]					=	ComPref.intARAccountId, 
+			[dblDebit]						=	ROUND(A.dblFaceValue,2),
+			[dblCredit]						=	0,
+			[dblDebitUnit]					=	0,
+			[dblCreditUnit]					=	0,
+			[strDescription]				=	GL.strDescription,
+			[strCode]						=	@MODULE_CODE,
+			[strReference]					=	A.strCertificateNo,
+			[intCurrencyId]					=	1,
+			[dtmDateEntered]				=	GETDATE(),
+			[dtmTransactionDate]			=	NULL,
+			[strJournalLineDescription]		=	GL.strDescription,
+			[intJournalLineNo]				=	1,
+			[ysnIsUnposted]					=	0,
+			[intUserId]						=	@intUserId,
+			[intEntityId]					=	@intUserId,
+			[strTransactionId]				=	A.intCustomerStockId, 
+			[intTransactionId]				=	A.intCustomerStockId, 
+			[strTransactionType]			=	'Voting Stock',
+			[strTransactionForm]			=	@ISSUE_STOCK,
+			[strModuleName]					=	@MODULE_NAME,
+			[dblDebitForeign]				=	0,      
+			[dblDebitReport]				=	0,
+			[dblCreditForeign]				=	0,
+			[dblCreditReport]				=	0,
+			[dblReportingRate]				=	0,
+			[dblForeignRate]				=	0,
+			[strRateType]					=	NULL
+		FROM	[dbo].[tblPATCustomerStock] A
+		CROSS APPLY tblARCompanyPreference ComPref
+		INNER JOIN tblGLAccount GL
+			ON ComPref.intARAccountId = GL.intAccountId
+		WHERE	A.intCustomerStockId IN (SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@intCustomerStockId))
 
---	END
---	ELSE
---	BEGIN
-
---	END
---	ELSE
---	BEGIN
-
---	------------------------REVERSE GL ENTRIES---------------------
---		INSERT INTO @GLEntries(
---			[strTransactionId]
---			,[intTransactionId]
---			,[dtmDate]
---			,[strBatchId]
---			,[intAccountId]
---			,[dblDebit]
---			,[dblCredit]
---			,[dblDebitUnit]
---			,[dblCreditUnit]
---			,[strDescription]
---			,[strCode]
---			,[strReference]
---			,[intCurrencyId]
---			,[dblExchangeRate]
---			,[dtmDateEntered]
---			,[dtmTransactionDate]
---			,[strJournalLineDescription]
---			,[intJournalLineNo]
---			,[ysnIsUnposted]
---			,[intUserId]
---			,[intEntityId]
---			,[strTransactionType]
---			,[strTransactionForm]
---			,[strModuleName]
---			,[dblDebitForeign]           
---			,[dblDebitReport]            
---			,[dblCreditForeign]          
---			,[dblCreditReport]           
---			,[dblReportingRate]          
---			,[dblForeignRate]
---			,[strRateType]
---		)
---		SELECT	
---			[strTransactionId]
---			,[intTransactionId]
---			,[dtmDate]
---			,strBatchId = @batchId COLLATE Latin1_General_CI_AS
---			,[intAccountId]
---			,[dblDebit] = [dblCredit]		-- (Debit -> Credit)
---			,[dblCredit] = [dblDebit]		-- (Debit <- Credit)
---			,[dblDebitUnit] = [dblCreditUnit]	-- (Debit Unit -> Credit Unit)
---			,[dblCreditUnit] = [dblDebitUnit]	-- (Debit Unit <- Credit Unit)
---			,[strDescription]
---			,[strCode]
---			,[strReference]
---			,[intCurrencyId]
---			,[dblExchangeRate]
---			,dtmDateEntered = GETDATE()
---			,[dtmTransactionDate]
---			,[strJournalLineDescription]
---			,[intJournalLineNo]
---			,ysnIsUnposted = 1
---			,intUserId = @intUserId
---			,[intEntityId]
---			,[strTransactionType]
---			,[strTransactionForm]
---			,[strModuleName]
---			,[dblDebitForeign]           
---			,[dblDebitReport]            
---			,[dblCreditForeign]          
---			,[dblCreditReport]           
---			,[dblReportingRate]          
---			,[dblForeignRate]
---			,NULL
---		FROM	tblGLDetail 
---		WHERE	intTransactionId IN (SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@intCustomerStockId))
---		AND ysnIsUnposted = 0 AND strTransactionForm = @ISSUE_STOCK AND strModuleName = @MODULE_NAME
---		ORDER BY intGLDetailId
-
---		UPDATE tblGLDetail SET ysnIsUnposted = 1
---		WHERE intTransactionId = @intCustomerStockId 
---			AND strModuleName = @MODULE_NAME AND strTransactionForm = @ISSUE_STOCK
---	END
---END
+	END
+END
 
 BEGIN TRY
 IF(ISNULL(@ysnRecap, 0) = 0)

@@ -73,6 +73,16 @@ SELECT TransferDetail.intInventoryTransferId
 								ELSE NULL END)
 	, ysnPosted
 	, ysnWeights
+	, TransferDetail.strDescription
+	, TransferDetail.strItemType
+	, TransferDetail.dblGross
+	, TransferDetail.dblNet
+	, TransferDetail.dblTare
+	, TransferDetail.intNewLotStatusId
+	, TransferDetail.intGrossNetUOMId
+	, strGrossNetUOM = GrossNetUOM.strUnitMeasure
+	, TransferDetail.dblGrossNetUnitQty
+	, TransferDetail.dblItemUnitQty
 FROM tblICInventoryTransferDetail TransferDetail
 	LEFT JOIN tblICInventoryTransfer [Transfer] ON [Transfer].intInventoryTransferId = TransferDetail.intInventoryTransferId
 	LEFT JOIN tblICItem Item ON Item.intItemId = TransferDetail.intItemId
@@ -83,6 +93,7 @@ FROM tblICInventoryTransferDetail TransferDetail
 	LEFT JOIN tblICStorageLocation ToStorageLocation ON ToStorageLocation.intStorageLocationId = TransferDetail.intToStorageLocationId
 	LEFT JOIN vyuICGetItemUOM ItemUOM ON ItemUOM.intItemUOMId = TransferDetail.intItemUOMId
 	LEFT JOIN vyuICGetItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = TransferDetail.intItemWeightUOMId
+	LEFT JOIN vyuICGetItemUOM GrossNetUOM ON GrossNetUOM.intItemUOMId = TransferDetail.intGrossNetUOMId	
 	LEFT JOIN tblSMTaxCode TaxCode ON TaxCode.intTaxCodeId = TransferDetail.intTaxCodeId
 	LEFT JOIN vyuICGetItemStockUOM StockFrom ON StockFrom.intItemId = TransferDetail.intItemId
 		AND StockFrom.intLocationId = [Transfer].intFromLocationId

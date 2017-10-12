@@ -506,6 +506,27 @@ GO
 
 -- Patronage - End Screen Rename --
 
+----------------------------Contract Management------------
+
+UPDATE tblSMScreen set ysnAvailable = 0 WHERE strScreenName IN ('Allocations','Contract Ag Petro','Contract Options','Cost Type','Cost Type New','Deferred Payment Rates','Freight Rates','Freight Rate New','Market Zone','Price Contracts','Weight Grade New','Approval Basis','Packing Description','Delivery Sheet','Acre Contract','Approval','Crop Year New')
+AND strModule = 'Contract Management'
+
+UPDATE tblSMScreen SET strScreenName = N'Weight Grade',strNamespace = 'ContractManagement.view.WeightGrade' 
+WHERE strNamespace = 'ContractManagement.view.WeightsGrades' AND strModule = N'Contract Management'
+
+UPDATE tblSMScreen SET strScreenName = N'Price Contracts',strNamespace = 'ContractManagement.view.PriceContracts' 
+WHERE strNamespace = 'ContractManagement.view.PriceContractsNew' AND strModule = N'Contract Management'
+
+------------------------END Contract Management------------
+GO
+-------------------------LOGISTICS------------
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Logistics.view.ShipmentSchedule')
+    INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+    VALUES (N'', N'Load/Shipment Schedule', N'Logistics.view.ShipmentSchedule', N'Logistics', N'', 0)
+ELSE
+    UPDATE tblSMScreen SET strScreenName = N'Load/Shipment Schedule', strModule = N'Logistics' WHERE strNamespace = 'Logistics.view.ShipmentSchedule'
+-------------------------END LOGISTICS------------
+GO
 
 PRINT N'END INSERT DEFAULT SCREEN'
 GO

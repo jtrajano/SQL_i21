@@ -59,6 +59,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1730_UpdateTicketManagementMenus.sql
 :r .\SM\1730_UpdatePayrollMenus.sql
 :r .\SM\1730_UpdateGeneralLedgerMenus.sql
+:r .\SM\1710_to_1730_UpdateHomePanelDashboard.sql
 
 -- Canned Report
 :r .\Reports\1_ReportDisableConstraints.sql
@@ -217,6 +218,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\29_UpdateInvoiceDetailLotId.sql
 :r .\AR\DefaultData\30_UpdateBatchIdUsed.sql
 :r .\AR\DefaultData\31_UpdateCustomerRackQuoteHeader.sql
+:r .\AR\DefaultData\32_UpdateCommissionScheduleEntity.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
@@ -246,6 +248,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\DefaultDataBalance.sql
 :r .\AP\UpdatePrepayVoucherStatus.sql
 :r .\AP\UpdateTaxGroupId.sql
+:r .\AP\UpdateBillDetailRate.sql
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 
@@ -260,6 +263,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\19_M2MComputations.sql
 :r .\IC\20_UpdateContractItemStatuses.sql
 :r .\IC\21_Update_LotWeightsRequired_tblICItem.sql
+:r .\IC\22_Update_tblICTransferDetail_Description.sql
 :r .\IC\PopulateLotContainerNoAndCondition.sql
 
 -- Patronage

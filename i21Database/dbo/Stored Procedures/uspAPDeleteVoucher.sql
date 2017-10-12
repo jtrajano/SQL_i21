@@ -30,6 +30,10 @@ BEGIN TRY
 
 	DELETE FROM dbo.tblAPAppliedPrepaidAndDebit
 	WHERE intBillId = @intBillId
+
+	DELETE FROM dbo.tblSMTransaction
+	WHERE intRecordId = @intBillId 
+	AND intScreenId = (SELECT intScreenId FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.Voucher')
 	
 	--Audit Log          
 	EXEC dbo.uspSMAuditLog 

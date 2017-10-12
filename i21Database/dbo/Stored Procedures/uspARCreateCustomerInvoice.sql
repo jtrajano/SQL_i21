@@ -59,6 +59,7 @@
 	,@ItemTermDiscount				NUMERIC(18,6)	= 0.000000
 	,@ItemTermDiscountBy			NVARCHAR(50)	= NULL
 	,@ItemPrice						NUMERIC(18,6)	= 0.000000	
+	,@ItemUnitPrice					NUMERIC(18,6)	= 0.000000	
 	,@RefreshPrice					BIT				= 0
 	,@ItemMaintenanceType			NVARCHAR(50)	= NULL
 	,@ItemFrequency					NVARCHAR(50)	= NULL
@@ -555,6 +556,7 @@ BEGIN TRY
 		,@ItemTermDiscount				= @ItemTermDiscount
 		,@ItemTermDiscountBy			= @ItemTermDiscountBy
 		,@ItemPrice						= @ItemPrice
+		,@ItemUnitPrice					= @ItemUnitPrice
 		,@RefreshPrice					= @RefreshPrice
 		,@ItemMaintenanceType			= @ItemMaintenanceType
 		,@ItemFrequency					= @ItemFrequency

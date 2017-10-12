@@ -115,6 +115,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[dblItemWeight]						NUMERIC(18, 6)									NULL
 	,[intItemWeightUOMId]					INT												NULL	
     ,[dblPrice]								NUMERIC(18, 6)									NULL		-- The line item price
+	,[dblUnitPrice]							NUMERIC(18, 6)									NULL		-- The line item unit price
     ,[strPricing]							NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL
 	,[strVFDDocumentNumber]					NVARCHAR(100) 	COLLATE Latin1_General_CI_AS	NULL
     ,[ysnRefreshPrice]						BIT												NULL		-- Indicate whether to recompute for Price based on the available pricing setup	

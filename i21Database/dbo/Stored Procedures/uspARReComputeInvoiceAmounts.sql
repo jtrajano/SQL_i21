@@ -51,7 +51,9 @@ SET
 	,[dblItemWeight]			= ISNULL([dblItemWeight], 1.00)
 	,[dblShipmentNetWt]			= ISNULL([dblShipmentNetWt], [dblQtyShipped])
 	,[dblPrice]					= ISNULL([dblPrice], @ZeroDecimal)
-	,[dblBasePrice]				= CASE WHEN [dblBasePrice] <> [dblPrice] AND [dblBasePrice] = @ZeroDecimal THEN (ISNULL([dblPrice], @ZeroDecimal) * (CASE WHEN ISNULL([dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE [dblCurrencyExchangeRate] END)) ELSE ISNULL([dblBasePrice], @ZeroDecimal) END
+	,[dblBasePrice]				= ISNULL(ISNULL([dblPrice], @ZeroDecimal) * (CASE WHEN ISNULL([dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE [dblCurrencyExchangeRate] END), @ZeroDecimal)
+	,[dblUnitPrice] 			= ISNULL(ISNULL([dblUnitPrice], [dblPrice]), @ZeroDecimal)
+	,[dblBaseUnitPrice]			= ISNULL(ISNULL(ISNULL([dblUnitPrice], [dblPrice]), @ZeroDecimal) * (CASE WHEN ISNULL([dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE [dblCurrencyExchangeRate] END), @ZeroDecimal)
 	,[dblTotalTax]				= ISNULL([dblTotalTax], @ZeroDecimal)
 	,[dblBaseTotalTax]			= ISNULL([dblBaseTotalTax], @ZeroDecimal)
 	,[dblTotal]					= ISNULL([dblTotal], @ZeroDecimal)
@@ -133,8 +135,8 @@ IF (@AvailableDiscountOnly = 1)
 UPDATE
 	tblARInvoiceDetail
 SET
-	  [dblTotalTax]		= T.[dblAdjustedTax]
-	 ,[dblBaseTotalTax]	= T.[dblBaseAdjustedTax]
+	  [dblTotalTax]		= ISNULL(T.[dblAdjustedTax], @ZeroDecimal)
+	 ,[dblBaseTotalTax]	= ISNULL(T.[dblBaseAdjustedTax], @ZeroDecimal)
 FROM
 	(
 		SELECT
@@ -156,9 +158,9 @@ UPDATE
 SET
 	ARID.[dblTotal]		= (CASE WHEN ISNULL(ICI.[strType], '') = 'Comment' THEN @ZeroDecimal
 							ELSE
-								(	CASE WHEN ((ISNULL(ARID.[intShipmentId],0) <> 0 OR ISNULL(ARID.[intShipmentPurchaseSalesContractId],0) <> 0 OR ISNULL(ARID.[intLoadDetailId],0) <> 0) AND ISNULL(ARID.[intItemWeightUOMId],0) <> 0)
+								(	CASE WHEN (ISNULL(ARID.[intLoadDetailId],0) <> 0 AND ISNULL(ARID.[intItemWeightUOMId],0) <> 0)
 										THEN
-											[dbo].fnRoundBanker([dbo].fnRoundBanker(((ARID.[dblPrice] / ARID.[dblSubCurrencyRate]) * (ARID.[dblItemWeight] * ARID.[dblShipmentNetWt])), [dbo].[fnARGetDefaultDecimal]()) - [dbo].fnRoundBanker((((ARID.[dblPrice] / ARID.[dblSubCurrencyRate]) * (ARID.[dblItemWeight] * ARID.[dblShipmentNetWt])) * (ARID.[dblDiscount]/100.00)), [dbo].[fnARGetDefaultDecimal]()), [dbo].[fnARGetDefaultDecimal]())
+											[dbo].fnRoundBanker([dbo].fnRoundBanker(((ARID.[dblUnitPrice] / ARID.[dblSubCurrencyRate]) * ARID.[dblShipmentNetWt]), [dbo].[fnARGetDefaultDecimal]()) - [dbo].fnRoundBanker((((ARID.[dblUnitPrice] / ARID.[dblSubCurrencyRate]) * ARID.[dblShipmentNetWt]) * (ARID.[dblDiscount]/100.00)), [dbo].[fnARGetDefaultDecimal]()), [dbo].[fnARGetDefaultDecimal]())
 										ELSE
 											[dbo].fnRoundBanker([dbo].fnRoundBanker(((ARID.[dblPrice] / ARID.[dblSubCurrencyRate]) * ARID.[dblQtyShipped]), [dbo].[fnARGetDefaultDecimal]()) - [dbo].fnRoundBanker((((ARID.[dblPrice] / ARID.[dblSubCurrencyRate]) * ARID.[dblQtyShipped]) * (ARID.[dblDiscount]/100.00)), [dbo].[fnARGetDefaultDecimal]()), [dbo].[fnARGetDefaultDecimal]())
 									END							
@@ -190,10 +192,10 @@ WHERE
 UPDATE
 	tblARInvoice
 SET
-	 [dblTax]					= T.[dblTotalTax]
-	,[dblBaseTax]				= T.[dblBaseTotalTax]
-	,[dblInvoiceSubtotal]		= T.[dblTotal]
-	,[dblBaseInvoiceSubtotal]	= T.[dblBaseTotal]
+	 [dblTax]					= ISNULL(T.[dblTotalTax], @ZeroDecimal)
+	,[dblBaseTax]				= ISNULL(T.[dblBaseTotalTax], @ZeroDecimal)
+	,[dblInvoiceSubtotal]		= ISNULL(T.[dblTotal], @ZeroDecimal)
+	,[dblBaseInvoiceSubtotal]	= ISNULL(T.[dblBaseTotal], @ZeroDecimal)
 FROM
 	(
 		SELECT 
@@ -227,20 +229,23 @@ WHERE
 
 END
 
-IF ISNULL(@OriginalInvoiceId, 0) <> 0
-	BEGIN
-		DECLARE @dblProvisionalAmt	NUMERIC(18,6)
+--IF ISNULL(@OriginalInvoiceId, 0) <> 0
+--	BEGIN
+--		DECLARE @dblProvisionalAmt	NUMERIC(18,6)
+--				,@dblBaseProvisionalAmt	NUMERIC(18,6)
 
-		SELECT TOP 1 @dblProvisionalAmt = dblInvoiceTotal 
-		FROM dbo.tblARInvoice WITH (NOLOCK)
-		WHERE intInvoiceId = @OriginalInvoiceId
-		  AND ysnProcessed = 1
-		  AND strType = 'Provisional'
+--		SELECT TOP 1 
+--			 @dblProvisionalAmt = dblAmountDue 
+--			,@dblBaseProvisionalAmt = dblBaseAmountDue 
+--		FROM dbo.tblARInvoice WITH (NOLOCK)
+--		WHERE intInvoiceId = @OriginalInvoiceId
+--		  AND ysnProcessed = 1
+--		  AND strType = 'Provisional'
 
-		UPDATE tblARInvoice
-		SET dblAmountDue		= dblAmountDue - @dblProvisionalAmt
-		  , dblBaseAmountDue	= dblAmountDue - @dblProvisionalAmt
-		  , dblPayment			= @dblProvisionalAmt
-		  , dblBasePayment		= @dblProvisionalAmt
-		WHERE intInvoiceId = @InvoiceIdLocal
-	END
+--		UPDATE tblARInvoice
+--		SET dblAmountDue		= dblAmountDue - ISNULL(@dblProvisionalAmt, @ZeroDecimal)
+--		  , dblBaseAmountDue	= dblAmountDue - ISNULL(@dblBaseProvisionalAmt, @ZeroDecimal)
+--		  , dblPayment			= ISNULL(@dblProvisionalAmt, @ZeroDecimal)
+--		  , dblBasePayment		= ISNULL(@dblBaseProvisionalAmt, @ZeroDecimal)
+--		WHERE intInvoiceId = @OriginalInvoiceId
+--	END

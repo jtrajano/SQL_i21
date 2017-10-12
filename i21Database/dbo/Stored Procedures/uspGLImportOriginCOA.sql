@@ -15,3 +15,4 @@ CREATE PROCEDURE  [dbo].[uspGLImportOriginCOA]
 	@ysnBuild		BIT = 0,
 	@result			NVARCHAR(500) = '' OUTPUT
 AS
+RAISERROR('Import Origin Account Procedure is not available', 16, 1);

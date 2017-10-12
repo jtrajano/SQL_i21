@@ -74,6 +74,7 @@ BEGIN
 				,A.strZipCode
 				,strGlobalJulianCalendar = R.strDescription
 				,intCustomerEntityId = B.intCustomerNumber
+				,strSiteAccountStatus = A.strAcctStatus
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID
@@ -158,6 +159,7 @@ BEGIN
 				,A.strZipCode
 				,strGlobalJulianCalendar = R.strDescription
 				,intCustomerEntityId = B.intCustomerNumber
+				,strSiteAccountStatus = A.strAcctStatus
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID

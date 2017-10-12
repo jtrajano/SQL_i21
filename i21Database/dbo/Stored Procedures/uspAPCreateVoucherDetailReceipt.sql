@@ -48,6 +48,7 @@ CREATE TABLE #tempBillDetail (
 	[intAccountId]    				INT             NULL ,
 	[dblTotal]        				DECIMAL (18, 6) NOT NULL DEFAULT 0,
     [dblCost] 						DECIMAL(18, 6) NOT NULL DEFAULT 0, 
+	[dblOldCost] 					DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[dblNetWeight] 					DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[dblNetShippedWeight] 			DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[dblWeightLoss] 				DECIMAL(18, 6) NOT NULL DEFAULT 0, 
@@ -128,6 +129,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[intAccountId],
 			[dblTotal],
 			[dblCost],
+			[dblOldCost],
 			[dblNetWeight],
 			[dblWeightLoss],
 			[intUnitOfMeasureId],
@@ -185,6 +187,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 													END)
 												END),0),
 			[dblCost]						=	voucherDetailReceipt.dblCost,
+			[dblOldCost]					=	CASE WHEN voucherDetailReceipt.dblCost != B.dblUnitCost THEN B.dblUnitCost ELSE 0 END,
 			[dblNetWeight]					=	CASE WHEN B.intWeightUOMId > 0 THEN  
 													(CASE WHEN B.dblBillQty > 0 
 															THEN voucherDetailReceipt.dblQtyReceived * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1)) --THIS IS FOR PARTIAL
@@ -248,6 +251,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[intAccountId],
 			[dblTotal],
 			[dblCost],
+			[dblOldCost],
 			[dblNetWeight],
 			[dblNetShippedWeight],
 			[dblWeightLoss],
@@ -310,6 +314,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 													END)
 												END),0),
 			[dblCost]						=	voucherDetailReceipt.dblCost,
+			[dblOldCost]					=	CASE WHEN voucherDetailReceipt.dblCost != B.dblUnitCost THEN B.dblUnitCost ELSE 0 END,
 			[dblNetWeight]					=	CASE WHEN B.intWeightUOMId > 0 THEN  
 													-- voucherDetailReceipt.dblQtyReceived * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1))
 													(CASE WHEN B.dblBillQty > 0 
@@ -339,7 +344,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 											ELSE 0
 											END,
 			[int1099Category]			=	ISNULL((SELECT TOP 1 int1099CategoryId FROM tblAP1099Category WHERE strCategory = D2.str1099Type),0),
-			[intLoadDetailId]			=	B.intSourceId,
+			[intLoadDetailId]			=	CASE WHEN A.strReceiptType = 'Purchase Contract' AND A.intSourceType = 2 THEN B.intSourceId ELSE NULL END,
 			[strBillOfLading]			= 	A.strBillOfLading
 		FROM tblICInventoryReceipt A
 		INNER JOIN tblICInventoryReceiptItem B
@@ -388,6 +393,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[intAccountId],
 			[dblTotal],
 			[dblCost],
+			[dblOldCost],
 			[dblNetWeight],
 			[dblNetShippedWeight],
 			[dblWeightLoss],
@@ -451,6 +457,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 													END)
 												END),0),
 			[dblCost]						=	voucherDetailReceipt.dblCost,
+			[dblOldCost]					=	CASE WHEN voucherDetailReceipt.dblCost != B.dblUnitCost THEN B.dblUnitCost ELSE 0 END,
 			[dblNetWeight]					=	CASE WHEN B.intWeightUOMId > 0 THEN  
 													-- voucherDetailReceipt.dblQtyReceived * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1))
 													(CASE WHEN B.dblBillQty > 0 

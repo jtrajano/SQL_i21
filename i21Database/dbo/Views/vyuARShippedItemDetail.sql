@@ -2,11 +2,11 @@
 AS
 
 SELECT
-	 [strShippedItemId]				= 'lgis:' + CAST(LGSPS.[intLoadId] AS NVARCHAR(250))
-	,[strShippedItemDetailId]		= 'lgis:' + CAST(LGSPS.[intLoadDetailId] AS NVARCHAR(250))
-	,[intShipmentId]				= LGSPS.[intLoadId]
+	 [strShippedItemId]				= 'lgis:' + CAST(L.[intLoadId] AS NVARCHAR(250))
+	,[strShippedItemDetailId]		= 'lgis:' + CAST(LD.[intLoadDetailId] AS NVARCHAR(250))
+	,[intShipmentId]				= L.[intLoadId]
 	,[intShipmentPurchaseSalesContractId] = NULL 
-	,[intLoadDetailId]				= LGSPS.[intLoadDetailId] 
+	,[intLoadDetailId]				= LD.[intLoadDetailId] 
 	,[intCurrencyId]				= ISNULL(ARCC.[intCurrencyId], (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0))
 	,[intSalesOrderDetailId]		= NULL
 	,[intInventoryShipmentId]		= NULL	
@@ -15,24 +15,25 @@ SELECT
 	,[strContractNumber]			= ARCC.[strContractNumber] 
 	,[intContractDetailId]			= ARCC.[intContractDetailId] 
 	,[intContractSeq]				= ARCC.[intContractSeq] 
-	,[intItemId]					= LGSPS.[intSItemId]
+	,[intItemId]					= LD.[intItemId]
 	,[strItemNo]					= ICI.[strItemNo]
 	,[strItemDescription]			= ICI.[strDescription]
-	,[intItemUOMId]					= ICUOM.[intItemUOMId]
-	,[strUnitMeasure]				= ICUM.[strUnitMeasure]
-	,[intShipmentItemUOMId]			= ICUOM.[intItemUOMId] 
-	,[strShipmentUnitMeasure]		= ICUM.[strUnitMeasure]
-	,[dblQtyShipped]				= LGSPS.[dblSAllocatedQty]
-	,[dblQtyOrdered]				= LGSPS.[dblSAllocatedQty]
-	,[dblShipmentQuantity]			= LGSPS.[dblSAllocatedQty]	
-	,[dblShipmentQtyShippedTotal]	= LGSPS.[dblSAllocatedQty]
-	,[dblQtyRemaining]				= LGSPS.[dblSAllocatedQty]
+	,[intItemUOMId]					= ARCC.intOrderUOMId
+	,[strUnitMeasure]				= UOM.[strUnitMeasure]
+	,[intShipmentItemUOMId]			= ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId)
+	,[strShipmentUnitMeasure]		= SUOM.[strUnitMeasure]
+	,[dblQtyShipped]				= dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intOrderUOMId, LD.intWeightItemUOMId), ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), LD.dblQuantity)
+	,[dblQtyOrdered]				= ISNULL(LD.dblQuantity, 0)
+	,[dblShipmentQuantity]			= dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intItemUOMId, ARCC.intItemUOMId), ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId), ISNULL(LD.dblQuantity, ARCC.dblShipQuantity))
+	,[dblShipmentQtyShippedTotal]	= dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intItemUOMId, ARCC.intItemUOMId), ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId), ISNULL(LD.dblQuantity, ARCC.dblShipQuantity))
+	,[dblQtyRemaining]				= dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intItemUOMId, ARCC.intItemUOMId), ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId), ISNULL(LD.dblQuantity, ARCC.dblShipQuantity))
 	,[dblDiscount]					= 0.00
-	,[dblPrice]						= ARCC.[dblCashPrice]
-	,[dblShipmentUnitPrice]			= ARCC.[dblCashPrice]
+	,[dblPrice]						= ARCC.dblOrderPrice
+	,[dblShipmentUnitPrice]			= (ARCC.dblOrderPrice / dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId), ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), 1))
 	,[strPricing]					= ''
 	,[dblTotalTax]					= 0.00
-	,[dblTotal]						= LGSPS.[dblSAllocatedQty] * ARCC.[dblCashPrice]
+	,[dblTotal]						= ((ARCC.dblOrderPrice * ISNULL(ARCC.dblSubCurrencyRate, 1.000000)) * dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId), ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), 1))
+									* dbo.fnCalculateQtyBetweenUOM(ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), LDL.dblNet)
 	,[intLotId]						= NULL
 	,[intAccountId]					= ARIA.[intAccountId]
 	,[intCOGSAccountId]				= ARIA.[intCOGSAccountId]
@@ -42,12 +43,12 @@ SELECT
 	,[strStorageLocationName]		= CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS	
 	,[intTaxGroupId]				= NULL
 	,[strTaxGroup]					= NULL
-	,[dblWeight]					= [dbo].[fnCalculateQtyBetweenUOM](ARCC.intItemWeightUOMId,ICUOM.[intItemUOMId],1) --ICUOM.[dblWeight]
-	,[intWeightUOMId]				= ARCC.intPriceItemUOMId
+	,[dblWeight]					= dbo.fnCalculateQtyBetweenUOM(LD.intWeightItemUOMId, ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), 1.000000)
+	,[intWeightUOMId]				= LD.intWeightItemUOMId
 	,[strWeightUnitMeasure]			= ARCC.strUnitMeasure
-	,[dblGrossWt]					= LGSPS.[dblGrossWt] 
-	,[dblTareWt]					= LGSPS.[dblTareWt] 
-	,[dblNetWt]						= LGSPS.[dblNetWt]
+	,[dblGrossWt]					= dbo.fnCalculateQtyBetweenUOM(ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), LDL.dblGross)
+	,[dblTareWt]					= dbo.fnCalculateQtyBetweenUOM(ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), LDL.dblTare)
+	,[dblNetWt]						= dbo.fnCalculateQtyBetweenUOM(ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), LDL.dblNet)
 	,[intCurrencyExchangeRateTypeId]= ARCC.[intCurrencyExchangeRateTypeId]
 	,[strCurrencyExchangeRateType]	= ARCC.[strCurrencyExchangeRateType]
 	,[intCurrencyExchangeRateId]	= ARCC.[intCurrencyExchangeRateId]
@@ -60,34 +61,111 @@ SELECT
 	,[intDestinationWeightId]		= ARCC.[intDestinationWeightId]
 	,[strDestinationWeight]			= ARCC.[strDestinationWeight]
 FROM
-	vyuLGDropShipmentDetailsView LGSPS
-INNER JOIN
-	vyuARCustomerContract ARCC
-		ON LGSPS.intSContractDetailId = ARCC.intContractDetailId
+	(
+		SELECT intLoadId
+			 , strLoadNumber
+			 , dtmScheduledDate
+		FROM dbo.tblLGLoad WITH (NOLOCK)
+		WHERE ysnPosted = 1
+	) L
+	JOIN (
+		SELECT intLoadId
+			 , intLoadDetailId
+			 , intCustomerEntityId
+			 , intItemId
+			 , intSContractDetailId
+			 , intItemUOMId
+			 , intWeightItemUOMId
+			 , intSCompanyLocationId
+			 , intPContractDetailId
+			 , dblQuantity			 
+		FROM 
+			dbo.tblLGLoadDetail WITH (NOLOCK)		
+
+	) LD ON L.intLoadId  = LD.intLoadId
+	LEFT JOIN (
+		SELECT intLoadDetailId
+			 , intWeightUOMId
+			 , dblGross	= SUM(dblGross)
+			 , dblTare	= SUM(dblTare)
+			 , dblNet	= SUM(dblNet)
+		FROM dbo.tblLGLoadDetailLot WITH (NOLOCK) 
+		GROUP BY
+			 intLoadDetailId
+			,intWeightUOMId
+	) LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
+LEFT OUTER JOIN (
+	SELECT intContractHeaderId
+		 , intContractDetailId
+		 , strContractNumber
+		 , intContractSeq
+		 , intDestinationGradeId
+		 , strDestinationGrade
+		 , intDestinationWeightId
+		 , strDestinationWeight
+		 , intSubCurrencyId
+		 , intCurrencyId
+		 , strUnitMeasure
+		 , intOrderUOMId
+		 , intPriceItemUOMId
+		 , intItemUOMId
+		 , strOrderUnitMeasure
+		 , intItemWeightUOMId	 
+		 , dblCashPrice
+		 , dblOrderPrice
+		 , dblDetailQuantity
+		 , intFreightTermId			 
+		 , dblShipQuantity
+		 , dblOrderQuantity
+		 , dblSubCurrencyRate
+		 , strSubCurrency
+		 , intCurrencyExchangeRateTypeId
+		 , strCurrencyExchangeRateType
+		 , intCurrencyExchangeRateId
+		 , dblCurrencyExchangeRate
+		 , intCompanyLocationId
+		 , intTermId
+		 , intShipViaId
+	 FROM dbo.vyuARCustomerContract WITH (NOLOCK)
+	) ARCC ON LD.intSContractDetailId = ARCC.intContractDetailId
 INNER JOIN
 	tblICItem ICI
-		ON LGSPS.[intSItemId] = ICI.[intItemId]
-LEFT JOIN
-	tblICUnitMeasure ICUM
-		ON LGSPS.[intSUnitMeasureId] = ICUM.[intUnitMeasureId]
-LEFT OUTER JOIN
-	tblICItemUOM ICUOM
-		ON 	LGSPS.[intSItemId] = ICUOM.[intItemId] 
-		AND LGSPS.[intSUnitMeasureId] = ICUOM.[intUnitMeasureId] 
-LEFT JOIN
-	tblICItemUOM ICIU1
-		ON ARCC.[intPriceItemUOMId] = ICIU1.[intItemUOMId]	
-LEFT OUTER JOIN
-	tblICItemUOM ICUOM2
-		ON 	LGSPS.[intSItemId] = ICUOM2.[intItemId] 
-		AND LGSPS.[intWeightUnitMeasureId] = ICUOM2.[intUnitMeasureId]							
+		ON LD.[intItemId] = ICI.[intItemId]
+LEFT JOIN(
+	SELECT intItemUOMId
+		 , intItemId
+		 , IU.intUnitMeasureId
+		 , UM.strUnitMeasure
+	FROM dbo.tblICItemUOM IU WITH (NOLOCK)
+	INNER JOIN (
+		SELECT intUnitMeasureId
+			 , strUnitMeasure
+		FROM dbo.tblICUnitMeasure WITH (NOLOCK)
+	) UM ON IU.intUnitMeasureId = UM.intUnitMeasureId) UOM
+		ON ARCC.intOrderUOMId = UOM.intItemUOMId
+LEFT JOIN(
+	SELECT intItemUOMId
+		 , intItemId
+		 , IU.intUnitMeasureId
+		 , UM.strUnitMeasure
+	FROM dbo.tblICItemUOM IU WITH (NOLOCK)
+	INNER JOIN (
+		SELECT intUnitMeasureId
+			 , strUnitMeasure
+		FROM dbo.tblICUnitMeasure WITH (NOLOCK)
+	) UM ON IU.intUnitMeasureId = UM.intUnitMeasureId) SUOM
+		ON ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId) = SUOM.intItemUOMId							
 LEFT OUTER JOIN
 	vyuARGetItemAccount ARIA
-		ON LGSPS.[intSItemId] = ARIA.[intItemId]
+		ON LD.[intItemId] = ARIA.[intItemId]
 		AND ARCC.[intCompanyLocationId] = ARIA.[intLocationId]
-LEFT OUTER JOIN
-	tblSMTerm SMT
+LEFT OUTER JOIN(
+	SELECT intTermID
+		 , strTerm
+	FROM dbo.tblSMTerm WITH (NOLOCK)) SMT
 		ON ARCC.[intTermId] = SMT.[intTermID]	
-LEFT OUTER JOIN
-	tblSMShipVia SMSV
+LEFT OUTER JOIN(
+	SELECT intEntityId
+		 , strShipVia
+	FROM dbo.tblSMShipVia WITH (NOLOCK)) SMSV
 		ON ARCC.[intShipViaId] = SMSV.[intEntityId]

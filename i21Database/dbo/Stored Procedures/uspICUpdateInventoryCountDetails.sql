@@ -67,6 +67,7 @@ BEGIN
 		AND (intSubLocationId = @intSubLocationId OR ISNULL(@intSubLocationId, 0) = 0)
 		AND (intStorageLocationId = @intStorageLocationId OR ISNULL(@intStorageLocationId, 0) = 0)
 		AND ((dblOnHand > 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
+		AND strLotTracking <> 'No'		
 END
 ELSE
 BEGIN
@@ -107,5 +108,6 @@ BEGIN
 		AND (intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
 		AND (intSubLocationId = @intSubLocationId OR ISNULL(@intSubLocationId, 0) = 0)
 		AND (intStorageLocationId = @intStorageLocationId OR ISNULL(@intStorageLocationId, 0) = 0)
+		AND strLotTracking = 'No'
 		AND ((dblOnHand > 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
 END

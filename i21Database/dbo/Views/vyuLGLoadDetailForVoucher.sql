@@ -34,6 +34,8 @@ SELECT L.intLoadId
 	,ISNULL(MSC.strCurrency,SC.strCurrency) AS strCurrency
 	,SubCurrency.strCurrency AS strSubCurrency
 	,ISNULL(SubCurrency.intCent, 0) intCent
+	,receiptItem.intInventoryReceiptItemId
+	,receipt.ysnPosted
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	AND L.intPurchaseSale = 1
@@ -44,6 +46,8 @@ JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
 JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
 JOIN tblICItem I ON I.intItemId = LD.intItemId
+LEFT JOIN (tblICInventoryReceipt receipt INNER JOIN tblICInventoryReceiptItem receiptItem ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId)
+	ON LD.intLoadDetailId = receiptItem.intSourceId AND receipt.intSourceType = 2
 LEFT JOIN tblICItemUOM WeightUOM ON WeightUOM.intItemUOMId = LD.intWeightItemUOMId
 LEFT JOIN tblICUnitMeasure U ON U.intUnitMeasureId = WeightUOM.intUnitMeasureId
 CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD

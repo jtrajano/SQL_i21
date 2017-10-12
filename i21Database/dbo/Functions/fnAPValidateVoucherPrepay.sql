@@ -66,7 +66,8 @@ BEGIN
 			A.intBillId,
 			27
 		FROM tblAPBill A 
-		WHERE EXISTS(SELECT * FROM tblAPBillDetail B WHERE B.intBillId = A.intBillId AND B.dblCost = 0.000000)
+		INNER JOIN @voucherPrepayIds B ON A.intBillId = B.intId
+		WHERE EXISTS(SELECT TOP 1 1 FROM tblAPBillDetail C WHERE C.intBillId = A.intBillId AND C.dblCost = 0)
 	END
 	
 	RETURN;

@@ -2117,7 +2117,6 @@
     <Build Include="dbo\Tables\tblLGWarehouseInstructionCost.sql" />
     <Build Include="dbo\Tables\tblLGWarehouseInstructionDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostStockReservation.sql" />
-    <Build Include="dbo\Stored Procedures\uspARUpdateSOStatusFromInvoice.sql" />
     <Build Include="dbo\Views\vyuGRGetStorageCommodity.sql" />
     <Build Include="dbo\Views\vyuGRGetStorageCustomer.sql" />
     <Build Include="dbo\Views\vyuGRGetStorageLocation.sql" />
@@ -4442,6 +4441,8 @@
     <Build Include="dbo\Tables\tblMFHandheldMenuItem.sql" />
     <Build Include="dbo\Tables\tblMFHaldheldUserMenuItemMap.sql" />
     <Build Include="dbo\Views\vyuICGetItemStockUOMTotals.sql" />
+    <Build Include="dbo\Views\vyuICGetItemStockUOMTotalsAllLocations.sql" />
+    <Build Include="dbo\Views\vyuICGetItemStockUOMTotalsAllStorageUnits.sql" />
     <Build Include="dbo\Tables\tblLGLoadStorageCost.sql" />
     <Build Include="dbo\Views\vyuMFGetWorkOrderItem.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099PATRTwoPart.sql" />
@@ -5355,7 +5356,6 @@
     <Build Include="dbo\Stored Procedures\uspARGenerateEntriesForAccrualNew.sql" />
     <Build Include="dbo\Stored Procedures\uspARPostInvoiceNew.sql" />
     <Build Include="dbo\Stored Procedures\uspARPostInvoicesIntegrationsNew.sql" />
-    <Build Include="dbo\Stored Procedures\uspARPostSOStatusFromInvoices.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdatePrepaymentsAndCreditMemos.sql" />
     <Build Include="dbo\Stored Procedures\uspARCreateCustomerPayments.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertPaymentIntegrationLog.sql" />
@@ -5696,6 +5696,48 @@
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentRetroactiveAvg.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateGLEntriesOnCostAdjustment.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentEscalate.sql" />
+    <Build Include="dbo\Views\vyuAPOriginPayables.sql" />
+    <Build Include="dbo\Views\vyuAPPaidOriginPrepaid.sql" />
+    <None Include="Scripts\Post-Deployment\AP\UpdateBillDetailRate.sql" />
+    <Build Include="dbo\Tables\tblQMSampleImportSampleType.sql" />
+    <Build Include="dbo\Tables\tblARGLSummaryStagingTable.sql" />
+    <Build Include="dbo\Tables\tblARCustomerAgingStagingTable.sql" />
+    <Build Include="dbo\Views\vyuSCTicketScreenView.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1710_to_1730_UpdateHomePanelDashboard.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCUnpostDeliverySheet.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCUpdateDeliverySheetStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCReverseScheduleQty.sql" />
+    <Build Include="dbo\Tables\tblAPSearchRecordVoucher.sql" />
+    <Build Include="dbo\Views\vyuAPGetInventoryReceiptVoucher.sql" />
+    <Build Include="dbo\Views\vyuAPGetInventoryReceiptVoucher2.sql" />
+    <Build Include="dbo\Views\vyuAPGetInventoryReceiptVoucherCharges.sql" />
+    <Build Include="dbo\Views\vyuAPGetInventoryReceiptVoucherItems.sql" />
+    <Build Include="dbo\Views\vyuAPGetInventoryReceiptVoucherPriceCharges.sql" />
+    <Build Include="dbo\Views\vyuAPGetShipmentChargesForBilling.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPPopulateRecordVoucher.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPGetStatusUnitCost.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPProcessToBill.sql" />
+    <Build Include="dbo\Views\vyuAPShipmentChargesForBilling.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreateBillFromShipmentCharge.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPProcessShipmentChargeToBill.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateCost.sql" />
+    <Build Include="dbo\Tables\tblVRUOMXref.sql" />
+    <Build Include="dbo\Tables\tblVRVendorSetup.sql" />
+    <Build Include="dbo\Tables\tblSMIdentityRoles.sql" />
+    <Build Include="dbo\Tables\tblSMIdentityUserClaims.sql" />
+    <Build Include="dbo\Tables\tblSMIdentityUserLogins.sql" />
+    <Build Include="dbo\Tables\tblSMIdentityUserRoles.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetYieldViewTransaction.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutShiftPhysical.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutShiftPhysicalDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGenerateWhereClause.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSampleImportErrors.sql" />
+    <Build Include="dbo\Tables\tblVRProgram.sql" />
+    <Build Include="dbo\Tables\tblVRCustomerXref.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLSyncGLAccountDescription.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRpt1099DIVTwoPart.sql" />
+    <Build Include="dbo\Views\vyuAP1099DIV.sql" />
+    <Build Include="dbo\Views\vyuPATDividends.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -5839,6 +5881,8 @@
     <None Include="Scripts\Post-Deployment\HD\RemoveHDObsoleteScreen.sql" />
     <None Include="Scripts\Post-Deployment\HD\RenameHDScreen.sql" />
     <None Include="Scripts\Post-Deployment\CRM\RenameCRMScreen.sql" />
+    <Build Include="dbo\Functions\fnHDCoalesceJiraKey.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\32_UpdateCommissionScheduleEntity.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

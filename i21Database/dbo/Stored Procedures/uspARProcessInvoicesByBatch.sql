@@ -40,6 +40,11 @@ DECLARE @CurrentErrorMessage	NVARCHAR(250)
 SET @ZeroDecimal = 0.000000
 SET @DateNow = CAST(GETDATE() AS DATE)
 
+--#mark modification 101
+DECLARE @NewBathId NVARCHAR(40)
+EXEC dbo.uspSMGetStartingNumber 3, @NewBathId OUT
+--#mark modification 101
+
 DECLARE @SourceColumn AS NVARCHAR (500)
 		,@SourceTable AS NVARCHAR (500)	
 		
@@ -239,6 +244,7 @@ BEGIN
 		,[dblItemTermDiscount]
 		,[strItemTermDiscountBy]
 		,[dblPrice]
+		,[dblUnitPrice]
 		,[strPricing]
 		,[strVFDDocumentNumber]
 		,[ysnRefreshPrice]
@@ -369,6 +375,7 @@ BEGIN
 		,[dblItemTermDiscount]				= (CASE WHEN @GroupingOption = 0 THEN IE.[dblItemTermDiscount] ELSE NULL END)
 		,[strItemTermDiscountBy]			= (CASE WHEN @GroupingOption = 0 THEN IE.[strItemTermDiscountBy] ELSE NULL END)
 		,[dblPrice]							= (CASE WHEN @GroupingOption = 0 THEN IE.[dblPrice] ELSE NULL END)
+		,[dblUnitPrice]						= (CASE WHEN @GroupingOption = 0 THEN IE.[dblUnitPrice] ELSE NULL END)
 		,[strPricing]						= (CASE WHEN @GroupingOption = 0 THEN IE.[strPricing] ELSE NULL END)
 		,[strVFDDocumentNumber]				= (CASE WHEN @GroupingOption = 0 THEN IE.[strVFDDocumentNumber] ELSE NULL END)
 		,[ysnRefreshPrice]					= (CASE WHEN @GroupingOption = 0 THEN IE.[ysnRefreshPrice] ELSE 0 END)
@@ -552,6 +559,7 @@ BEGIN
 			,[dblItemWeight]
 			,[intItemWeightUOMId]
 			,[dblPrice]
+			,[dblUnitPrice]
 			,[strPricing]
 			,[strVFDDocumentNumber]
 			,[ysnRefreshPrice]
@@ -688,6 +696,7 @@ BEGIN
 			,[dblItemWeight]						= ITG.[dblItemWeight]
 			,[intItemWeightUOMId]					= ITG.[intItemWeightUOMId]
 			,[dblPrice]								= ITG.[dblPrice]
+			,[dblUnitPrice]							= ITG.[dblUnitPrice]
 			,[strPricing]							= ITG.[strPricing]
 			,[strVFDDocumentNumber]					= ITG.[strVFDDocumentNumber]
 			,[ysnRefreshPrice]						= ITG.[ysnRefreshPrice]
@@ -1020,7 +1029,7 @@ BEGIN TRY
 		
 	IF EXISTS(SELECT TOP 1 NULL FROM @IdsForUnPosting)
 		EXEC [dbo].[uspARPostInvoiceNew]
-			 @BatchId			= NULL
+			 @BatchId			= @NewBathId --NULL #mark 101
 			,@Post				= 0
 			,@Recap				= 0
 			,@UserId			= @UserId
@@ -1119,6 +1128,7 @@ BEGIN
 		,[dblItemTermDiscount]
 		,[strItemTermDiscountBy]
 		,[dblPrice]
+		,[dblUnitPrice]
 		,[strPricing]
 		,[strVFDDocumentNumber]
 		,[ysnRefreshPrice]
@@ -1250,6 +1260,7 @@ BEGIN
 		,[dblItemTermDiscount]				= IE.[dblItemTermDiscount]
 		,[strItemTermDiscountBy]			= IE.[strItemTermDiscountBy]
 		,[dblPrice]							= IE.[dblPrice]
+		,[dblUnitPrice]						= IE.[dblUnitPrice]
 		,[strPricing]						= IE.[strPricing]
 		,[strVFDDocumentNumber]				= IE.[strVFDDocumentNumber]
 		,[ysnRefreshPrice]					= IE.[ysnRefreshPrice]
@@ -1531,7 +1542,7 @@ BEGIN TRY
 		
 	IF EXISTS(SELECT TOP 1 NULL FROM @NewIdsForPosting)
 		EXEC [dbo].[uspARPostInvoiceNew]
-			 @BatchId			= NULL
+			 @BatchId			= @NewBathId --NULL #mark 101
 			,@Post				= 1
 			,@Recap				= 0
 			,@UserId			= @UserId
@@ -1575,7 +1586,7 @@ BEGIN TRY
 		
 	IF EXISTS(SELECT TOP 1 NULL FROM @NewIdsForPostingRecap)
 		EXEC [dbo].[uspARPostInvoiceNew]
-			 @BatchId			= NULL
+			 @BatchId			= @NewBathId --NULL #mark 101
 			,@Post				= 1
 			,@Recap				= 1
 			,@UserId			= @UserId
@@ -1631,7 +1642,7 @@ BEGIN TRY
 		
 	IF EXISTS(SELECT TOP 1 NULL FROM @UpdatedIdsForPosting)
 		EXEC [dbo].[uspARPostInvoiceNew]
-			 @BatchId			= NULL
+			 @BatchId			= @NewBathId --NULL #mark 101
 			,@Post				= 1
 			,@Recap				= 0
 			,@UserId			= @UserId
@@ -1675,7 +1686,7 @@ BEGIN TRY
 		
 	IF EXISTS(SELECT TOP 1 NULL FROM @UpdatedIdsForPostingRecap)
 		EXEC [dbo].[uspARPostInvoiceNew]
-			 @BatchId			= NULL
+			 @BatchId			= @NewBathId --NULL #mark 101
 			,@Post				= 1
 			,@Recap				= 1
 			,@UserId			= @UserId
@@ -1809,7 +1820,7 @@ BEGIN TRY
 		
 	IF EXISTS(SELECT TOP 1 NULL FROM @UpdatedIdsForUnPosting)
 		EXEC [dbo].[uspARPostInvoiceNew]
-			 @BatchId			= NULL
+			 @BatchId			= @NewBathId --NULL #mark 101
 			,@Post				= 0
 			,@Recap				= 0
 			,@UserId			= @UserId
@@ -1853,7 +1864,7 @@ BEGIN TRY
 		
 	IF EXISTS(SELECT TOP 1 NULL FROM @UpdatedIdsForUnPostingRecap)
 		EXEC [dbo].[uspARPostInvoiceNew]
-			 @BatchId			= NULL
+			 @BatchId			= @NewBathId --NULL #mark 101
 			,@Post				= 0
 			,@Recap				= 1
 			,@UserId			= @UserId

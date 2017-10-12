@@ -192,7 +192,7 @@ SET @Recap = ISNULL(@Recap, 0)
 IF (@TransType IS NULL OR RTRIM(LTRIM(@TransType)) = '')
 	SET @TransType = 'all'
 
-IF @IntegrationLogId IS NOT NULL
+IF @IntegrationLogId IS NOT NULL AND NOT EXISTS(SELECT TOP 1 NULL FROM @InvoiceIds)
 	BEGIN
         INSERT INTO @PostInvoiceData(
 			 [intInvoiceId]
@@ -302,6 +302,122 @@ IF @IntegrationLogId IS NOT NULL
             NOT EXISTS(SELECT NULL FROM @PostInvoiceData PID WHERE PID.[intInvoiceId] = ARI.[intInvoiceId])
             AND (ARI.[strTransactionType] = @TransType OR ISNULL(@TransType,'all') = 'all')
 	END
+
+
+IF @IntegrationLogId IS NOT NULL AND EXISTS(SELECT TOP 1 NULL FROM @InvoiceIds)
+	BEGIN
+        INSERT INTO @PostInvoiceData(
+			 [intInvoiceId]
+			,[strInvoiceNumber]
+			,[strTransactionType]
+			,[strType]
+			,[dtmDate]
+			,[dtmPostDate]
+			,[dtmShipDate]
+			,[intEntityCustomerId]
+			,[intCompanyLocationId]
+			,[intAccountId]
+			,[intDeferredRevenueAccountId]
+			,[intCurrencyId]
+			,[intTermId]
+			,[dblInvoiceTotal]
+			,[dblShipping]
+			,[dblTax]
+			,[strImportFormat]
+			,[intDistributionHeaderId]
+			,[intLoadDistributionHeaderId]
+			,[intLoadId]
+			,[intFreightTermId]
+			,[strActualCostId]
+			,[intPeriodsToAccrue]
+			,[ysnAccrueLicense]
+			,[intSplitId]
+			,[dblSplitPercent]
+			,[ysnSplitted]
+			,[ysnImpactInventory]
+			,[intEntityId]
+			,[ysnPost]
+			,[intInvoiceDetailId]
+			,[intItemId]
+			,[intItemUOMId]
+			,[intDiscountAccountId]
+			,[intCustomerStorageId]
+			,[intStorageScheduleTypeId]
+			,[intSubLocationId]
+			,[intStorageLocationId]
+			,[dblQuantity]
+			,[dblMaxQuantity]
+			,[strOptionType]
+			,[strSourceType]
+			,[strBatchId]
+			,[strPostingMessage]
+			,[intUserId]
+			,[ysnAllowOtherUserToPost]
+			)
+		SELECT DISTINCT
+			 [intInvoiceId]					= ARI.[intInvoiceId]
+			,[strInvoiceNumber]				= ARI.[strInvoiceNumber]
+			,[strTransactionType]			= ARI.[strTransactionType]
+			,[strType]						= ARI.[strType]
+			,[dtmDate]						= ARI.[dtmDate]
+			,[dtmPostDate]					= ARI.[dtmPostDate]
+			,[dtmShipDate]					= ARI.[dtmShipDate]
+			,[intEntityCustomerId]			= ARI.[intEntityCustomerId]
+			,[intCompanyLocationId]			= ARI.[intCompanyLocationId]
+			,[intAccountId]					= ARI.[intAccountId]
+			,[intDeferredRevenueAccountId]	= @DeferredRevenueAccountId
+			,[intCurrencyId]				= ARI.[intCurrencyId]
+			,[intTermId]					= ARI.[intTermId]
+			,[dblInvoiceTotal]				= ARI.[dblInvoiceTotal]
+			,[dblShipping]					= ARI.[dblShipping]
+			,[dblTax]						= ARI.[dblTax]
+			,[strImportFormat]				= ARI.[strImportFormat]
+			,[intDistributionHeaderId]		= ARI.[intDistributionHeaderId]
+			,[intLoadDistributionHeaderId]	= ARI.[intLoadDistributionHeaderId]
+			,[intLoadId]					= ARI.[intLoadId]
+			,[intFreightTermId]				= ARI.[intFreightTermId]
+			,[strActualCostId]				= ARI.[strActualCostId]
+			,[intPeriodsToAccrue]			= ARI.[intPeriodsToAccrue]
+			,[ysnAccrueLicense]				= ARIILD.[ysnAccrueLicense]
+			,[intSplitId]					= ARI.[intSplitId]
+			,[dblSplitPercent]				= ARI.[dblSplitPercent]			
+			,[ysnSplitted]					= ARI.[ysnSplitted]
+			,[ysnImpactInventory]			= ARI.[ysnImpactInventory]
+			,[intEntityId]					= ARI.[intEntityId]
+			,[ysnPost]						= @Post
+			,[intInvoiceDetailId]			= NULL
+			,[intItemId]					= NULL
+			,[intItemUOMId]					= NULL
+			,[intDiscountAccountId]			= @DiscountAccountId
+			,[intCustomerStorageId]			= NULL
+			,[intStorageScheduleTypeId]		= NULL
+			,[intSubLocationId]				= NULL
+			,[intStorageLocationId]			= NULL
+			,[dblQuantity]					= @ZeroDecimal
+			,[dblMaxQuantity]				= @ZeroDecimal
+			,[strOptionType]				= NULL
+			,[strSourceType]				= NULL
+			,[strBatchId]					= @BatchIdUsed
+			,[strPostingMessage]			= ''
+			,[intUserId]					= @UserEntityID
+			,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost		
+        FROM
+            dbo.tblARInvoice ARI WITH (NOLOCK) 
+        INNER JOIN
+            tblARInvoiceIntegrationLogDetail ARIILD
+                ON ARI.[intInvoiceId] = ARIILD.[intInvoiceId]
+                AND ARIILD.[ysnPost] IS NOT NULL 
+                AND ARIILD.[ysnPost] = @Post
+                AND ARIILD.[ysnHeader] = 1
+                AND ARIILD.[intIntegrationLogId] = @IntegrationLogId
+		INNER JOIN
+			@InvoiceIds II
+				ON ARIILD.[intInvoiceId] = II.[intHeaderId]
+        WHERE
+            NOT EXISTS(SELECT NULL FROM @PostInvoiceData PID WHERE PID.[intInvoiceId] = ARI.[intInvoiceId])
+            AND (ARI.[strTransactionType] = @TransType OR ISNULL(@TransType,'all') = 'all')
+	END
+
 
 IF(@BeginDate IS NOT NULL)
 	BEGIN
@@ -2433,179 +2549,179 @@ IF @Post = 1
 			WHERE
 				((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) <> @ZeroDecimal
 			
-			UNION ALL 
-			--DEBIT COGS - Inbound Shipment
-			SELECT			
-				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
-				,strBatchID					= @BatchId
-				,intAccountId				= IST.intCOGSAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) ELSE 0 END
-				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) END
-				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] ELSE 0 END
-				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] END								
-				,strDescription				= A.strComments
-				,strCode					= @CODE
-				,strReference				= C.strCustomerNumber
-				,intCurrencyId				= A.intCurrencyId 
-				,dblExchangeRate			= D.dblCurrencyExchangeRate
-				,dtmDateEntered				= @PostDate
-				,dtmTransactionDate			= A.dtmDate
-				,strJournalLineDescription	= D.strItemDescription
-				,intJournalLineNo			= D.intInvoiceDetailId
-				,ysnIsUnposted				= 0
-				,intUserId					= @UserId
-				,intEntityId				= @UserEntityID				
-				,strTransactionId			= A.strInvoiceNumber
-				,intTransactionId			= A.intInvoiceId
-				,strTransactionType			= A.strTransactionType
-				,strTransactionForm			= @SCREEN_NAME
-				,strModuleName				= @MODULE_NAME
-				,intConcurrencyId			= 1
-				,[dblDebitForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) ELSE 0 END
-				,[dblDebitReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) ELSE 0 END
-				,[dblCreditForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) END
-				,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) END
-				,[dblReportingRate]			= D.dblCurrencyExchangeRate
-				,[dblForeignRate]			= D.dblCurrencyExchangeRate
-				,[strRateType]				= SMCERT.strCurrencyExchangeRateType 
-			FROM
-				(SELECT intInvoiceId, intInvoiceDetailId, intItemId, dblQtyShipped, intItemUOMId, strItemDescription, intLoadDetailId, dblTotal,
-						intCurrencyExchangeRateTypeId, dblPrice, dblCurrencyExchangeRate, dblBasePrice
-				 FROM tblARInvoiceDetail WITH (NOLOCK)) D
-			INNER JOIN			
-				(SELECT intInvoiceId, dtmDate, dtmPostDate, intEntityCustomerId, intCurrencyId, strComments, strTransactionType, strInvoiceNumber, intCompanyLocationId, intPeriodsToAccrue
-					FROM tblARInvoice WITH (NOLOCK)) A 
-					ON D.intInvoiceId = A.intInvoiceId AND ISNULL(intPeriodsToAccrue,0) <= 1				 
-			INNER JOIN
-				(SELECT intItemUOMId FROM tblICItemUOM) ItemUOM 
-					ON ItemUOM.intItemUOMId = D.intItemUOMId
-			LEFT OUTER JOIN
-				(SELECT intItemId, intLocationId, intCOGSAccountId, strType FROM vyuARGetItemAccount WITH (NOLOCK)) IST
-					ON D.intItemId = IST.intItemId 
-					AND A.intCompanyLocationId = IST.intLocationId 
-			INNER JOIN
-				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
-					ON A.intEntityCustomerId = C.[intEntityId]					
-			INNER JOIN 
-				(SELECT intInvoiceId FROM @PostInvoiceData)	P
-					ON A.intInvoiceId = P.intInvoiceId				
-			INNER JOIN
-				(SELECT intLoadId, intLoadDetailId FROM tblLGLoadDetail WITH (NOLOCK)) ISD
-					ON 	D.intLoadDetailId = ISD.intLoadDetailId
-			INNER JOIN
-				(SELECT intLoadId, strLoadNumber FROM tblLGLoad WITH (NOLOCK)) ISH
-					ON ISD.intLoadId = ISH.intLoadId
-			INNER JOIN (SELECT [intItemId], [intTransactionId], [dblQty], [intTransactionDetailId], [dblUOMQty], [dblCost], [strTransactionId], [ysnIsUnposted] FROM tblICInventoryTransaction WITH (NOLOCK)) ICIT
-					ON ICIT.[intTransactionId] = ISH.[intLoadId] 
-					AND ICIT.[intTransactionDetailId] = ISD.[intLoadDetailId] 
-					AND ICIT.[strTransactionId] = ISH.strLoadNumber 
-					AND ICIT.[ysnIsUnposted] = 0	 
-			LEFT OUTER JOIN
-				(SELECT intItemId, intLocationId, intStockUOMId FROM vyuICGetItemStock WITH (NOLOCK)) ICIS
-					ON D.intItemId = ICIS.intItemId 
-					AND A.intCompanyLocationId = ICIS.intLocationId
-			LEFT OUTER JOIN
-				(
-					SELECT
-						intCurrencyExchangeRateTypeId 
-						,strCurrencyExchangeRateType 
-					FROM
-						tblSMCurrencyExchangeRateType
-				)	SMCERT
-					ON D.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId	
-			WHERE
-				D.dblTotal <> @ZeroDecimal
-				AND D.intLoadDetailId IS NOT NULL AND D.intLoadDetailId <> 0				
-				AND D.intItemId IS NOT NULL AND D.intItemId <> 0
-				AND ISNULL(IST.strType,'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle')
-				AND A.strTransactionType <> 'Debit Memo'
+			--UNION ALL 
+			----DEBIT COGS - Inbound Shipment
+			--SELECT			
+			--	 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
+			--	,strBatchID					= @BatchId
+			--	,intAccountId				= IST.intCOGSAccountId
+			--	,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) ELSE 0 END
+			--	,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) END
+			--	,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] ELSE 0 END
+			--	,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] END								
+			--	,strDescription				= A.strComments
+			--	,strCode					= @CODE
+			--	,strReference				= C.strCustomerNumber
+			--	,intCurrencyId				= A.intCurrencyId 
+			--	,dblExchangeRate			= D.dblCurrencyExchangeRate
+			--	,dtmDateEntered				= @PostDate
+			--	,dtmTransactionDate			= A.dtmDate
+			--	,strJournalLineDescription	= D.strItemDescription
+			--	,intJournalLineNo			= D.intInvoiceDetailId
+			--	,ysnIsUnposted				= 0
+			--	,intUserId					= @UserId
+			--	,intEntityId				= @UserEntityID				
+			--	,strTransactionId			= A.strInvoiceNumber
+			--	,intTransactionId			= A.intInvoiceId
+			--	,strTransactionType			= A.strTransactionType
+			--	,strTransactionForm			= @SCREEN_NAME
+			--	,strModuleName				= @MODULE_NAME
+			--	,intConcurrencyId			= 1
+			--	,[dblDebitForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) ELSE 0 END
+			--	,[dblDebitReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) ELSE 0 END
+			--	,[dblCreditForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) END
+			--	,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) END
+			--	,[dblReportingRate]			= D.dblCurrencyExchangeRate
+			--	,[dblForeignRate]			= D.dblCurrencyExchangeRate
+			--	,[strRateType]				= SMCERT.strCurrencyExchangeRateType 
+			--FROM
+			--	(SELECT intInvoiceId, intInvoiceDetailId, intItemId, dblQtyShipped, intItemUOMId, strItemDescription, intLoadDetailId, dblTotal,
+			--			intCurrencyExchangeRateTypeId, dblPrice, dblCurrencyExchangeRate, dblBasePrice
+			--	 FROM tblARInvoiceDetail WITH (NOLOCK)) D
+			--INNER JOIN			
+			--	(SELECT intInvoiceId, dtmDate, dtmPostDate, intEntityCustomerId, intCurrencyId, strComments, strTransactionType, strInvoiceNumber, intCompanyLocationId, intPeriodsToAccrue
+			--		FROM tblARInvoice WITH (NOLOCK)) A 
+			--		ON D.intInvoiceId = A.intInvoiceId AND ISNULL(intPeriodsToAccrue,0) <= 1				 
+			--INNER JOIN
+			--	(SELECT intItemUOMId FROM tblICItemUOM) ItemUOM 
+			--		ON ItemUOM.intItemUOMId = D.intItemUOMId
+			--LEFT OUTER JOIN
+			--	(SELECT intItemId, intLocationId, intCOGSAccountId, strType FROM vyuARGetItemAccount WITH (NOLOCK)) IST
+			--		ON D.intItemId = IST.intItemId 
+			--		AND A.intCompanyLocationId = IST.intLocationId 
+			--INNER JOIN
+			--	(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
+			--		ON A.intEntityCustomerId = C.[intEntityId]					
+			--INNER JOIN 
+			--	(SELECT intInvoiceId FROM @PostInvoiceData)	P
+			--		ON A.intInvoiceId = P.intInvoiceId				
+			--INNER JOIN
+			--	(SELECT intLoadId, intLoadDetailId FROM tblLGLoadDetail WITH (NOLOCK)) ISD
+			--		ON 	D.intLoadDetailId = ISD.intLoadDetailId
+			--INNER JOIN
+			--	(SELECT intLoadId, strLoadNumber FROM tblLGLoad WITH (NOLOCK)) ISH
+			--		ON ISD.intLoadId = ISH.intLoadId
+			--INNER JOIN (SELECT [intItemId], [intTransactionId], [dblQty], [intTransactionDetailId], [dblUOMQty], [dblCost], [strTransactionId], [ysnIsUnposted] FROM tblICInventoryTransaction WITH (NOLOCK)) ICIT
+			--		ON ICIT.[intTransactionId] = ISH.[intLoadId] 
+			--		AND ICIT.[intTransactionDetailId] = ISD.[intLoadDetailId] 
+			--		AND ICIT.[strTransactionId] = ISH.strLoadNumber 
+			--		AND ICIT.[ysnIsUnposted] = 0	 
+			--LEFT OUTER JOIN
+			--	(SELECT intItemId, intLocationId, intStockUOMId FROM vyuICGetItemStock WITH (NOLOCK)) ICIS
+			--		ON D.intItemId = ICIS.intItemId 
+			--		AND A.intCompanyLocationId = ICIS.intLocationId
+			--LEFT OUTER JOIN
+			--	(
+			--		SELECT
+			--			intCurrencyExchangeRateTypeId 
+			--			,strCurrencyExchangeRateType 
+			--		FROM
+			--			tblSMCurrencyExchangeRateType
+			--	)	SMCERT
+			--		ON D.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId	
+			--WHERE
+			--	D.dblTotal <> @ZeroDecimal
+			--	AND D.intLoadDetailId IS NOT NULL AND D.intLoadDetailId <> 0				
+			--	AND D.intItemId IS NOT NULL AND D.intItemId <> 0
+			--	AND ISNULL(IST.strType,'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle')
+			--	AND A.strTransactionType <> 'Debit Memo'
 				
-			UNION ALL 
-			--CREDIT Inventory In-Transit - Inbound Shipment
-			SELECT			
-				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
-				,strBatchID					= @BatchId
-				,intAccountId				= IST.intInventoryInTransitAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) END
-				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) ELSE 0 END
-				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] END
-				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] ELSE 0 END								
-				,strDescription				= A.strComments
-				,strCode					= @CODE
-				,strReference				= C.strCustomerNumber
-				,intCurrencyId				= A.intCurrencyId 
-				,dblExchangeRate			= 1
-				,dtmDateEntered				= @PostDate
-				,dtmTransactionDate			= A.dtmDate
-				,strJournalLineDescription	= D.strItemDescription
-				,intJournalLineNo			= D.intInvoiceDetailId
-				,ysnIsUnposted				= 0
-				,intUserId					= @UserId
-				,intEntityId				= @UserEntityID				
-				,strTransactionId			= A.strInvoiceNumber
-				,intTransactionId			= A.intInvoiceId
-				,strTransactionType			= A.strTransactionType
-				,strTransactionForm			= @SCREEN_NAME
-				,strModuleName				= @MODULE_NAME
-				,intConcurrencyId			= 1
-				,[dblDebitForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) END
-				,[dblDebitReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) END
-				,[dblCreditForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) ELSE 0 END
-				,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) ELSE 0 END
-				,[dblReportingRate]			= D.dblCurrencyExchangeRate
-				,[dblForeignRate]			= D.dblCurrencyExchangeRate
-				,[strRateType]				= SMCERT.strCurrencyExchangeRateType 
-			FROM
-				(SELECT intInvoiceId, intInvoiceDetailId, intItemId, strItemDescription, dblQtyShipped,  intItemUOMId, intLoadDetailId, dblTotal,
-						intCurrencyExchangeRateTypeId, dblPrice, dblCurrencyExchangeRate
-				 FROM tblARInvoiceDetail WITH (NOLOCK)) D
-			INNER JOIN			
-				(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, strComments, intCurrencyId, dtmDate, dtmPostDate, intCompanyLocationId, intEntityCustomerId, intPeriodsToAccrue
-				 FROM tblARInvoice WITH (NOLOCK)) A 
-					ON D.intInvoiceId = A.intInvoiceId AND ISNULL(intPeriodsToAccrue,0) <= 1			  
-			INNER JOIN
-				(SELECT intItemUOMId FROM tblICItemUOM) ItemUOM 
-					ON ItemUOM.intItemUOMId = D.intItemUOMId
-			LEFT OUTER JOIN
-				(SELECT intItemId, intLocationId, intInventoryInTransitAccountId, strType FROM vyuARGetItemAccount WITH (NOLOCK)) IST
-					ON D.intItemId = IST.intItemId 
-					AND A.intCompanyLocationId = IST.intLocationId 
-			INNER JOIN
-				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
-					ON A.intEntityCustomerId = C.[intEntityId]					
-			INNER JOIN 
-				(SELECT intInvoiceId FROM @PostInvoiceData)	P
-					ON A.intInvoiceId = P.intInvoiceId				
-			INNER JOIN
-				(SELECT intLoadId, intLoadDetailId FROM tblLGLoadDetail WITH (NOLOCK)) ISD
-					ON 	D.intLoadDetailId = ISD.intLoadDetailId
-			INNER JOIN
-				(SELECT intLoadId, strLoadNumber FROM tblLGLoad WITH (NOLOCK)) ISH
-					ON ISD.intLoadId = ISH.intLoadId
-			INNER JOIN (SELECT [intItemId], [intTransactionId], [dblQty], [intTransactionDetailId], [dblUOMQty], [dblCost], [strTransactionId], [ysnIsUnposted] FROM tblICInventoryTransaction WITH (NOLOCK)) ICIT
-					ON ICIT.[intTransactionId] = ISH.[intLoadId] 
-					AND ICIT.[intTransactionDetailId] = ISD.[intLoadDetailId] 
-					AND ICIT.[strTransactionId] = ISH.strLoadNumber 
-					AND ICIT.[ysnIsUnposted] = 0
-			LEFT OUTER JOIN
-				(SELECT intItemId, intLocationId, intStockUOMId FROM vyuICGetItemStock WITH (NOLOCK)) ICIS
-					ON D.intItemId = ICIS.intItemId 
-					AND A.intCompanyLocationId = ICIS.intLocationId
-			LEFT OUTER JOIN
-				(
-					SELECT
-						intCurrencyExchangeRateTypeId 
-						,strCurrencyExchangeRateType 
-					FROM
-						tblSMCurrencyExchangeRateType
-				)	SMCERT
-					ON D.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId
-			WHERE
-				D.dblTotal <> @ZeroDecimal
-				AND D.intLoadDetailId IS NOT NULL AND D.intLoadDetailId <> 0				
-				AND D.intItemId IS NOT NULL AND D.intItemId <> 0
-				AND ISNULL(IST.strType,'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle')
-				AND A.strTransactionType <> 'Debit Memo'
+			--UNION ALL 
+			----CREDIT Inventory In-Transit - Inbound Shipment
+			--SELECT			
+			--	 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
+			--	,strBatchID					= @BatchId
+			--	,intAccountId				= IST.intInventoryInTransitAccountId
+			--	,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) END
+			--	,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) ELSE 0 END
+			--	,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] END
+			--	,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] ELSE 0 END								
+			--	,strDescription				= A.strComments
+			--	,strCode					= @CODE
+			--	,strReference				= C.strCustomerNumber
+			--	,intCurrencyId				= A.intCurrencyId 
+			--	,dblExchangeRate			= 1
+			--	,dtmDateEntered				= @PostDate
+			--	,dtmTransactionDate			= A.dtmDate
+			--	,strJournalLineDescription	= D.strItemDescription
+			--	,intJournalLineNo			= D.intInvoiceDetailId
+			--	,ysnIsUnposted				= 0
+			--	,intUserId					= @UserId
+			--	,intEntityId				= @UserEntityID				
+			--	,strTransactionId			= A.strInvoiceNumber
+			--	,intTransactionId			= A.intInvoiceId
+			--	,strTransactionType			= A.strTransactionType
+			--	,strTransactionForm			= @SCREEN_NAME
+			--	,strModuleName				= @MODULE_NAME
+			--	,intConcurrencyId			= 1
+			--	,[dblDebitForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) END
+			--	,[dblDebitReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) END
+			--	,[dblCreditForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) ELSE 0 END
+			--	,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) ELSE 0 END
+			--	,[dblReportingRate]			= D.dblCurrencyExchangeRate
+			--	,[dblForeignRate]			= D.dblCurrencyExchangeRate
+			--	,[strRateType]				= SMCERT.strCurrencyExchangeRateType 
+			--FROM
+			--	(SELECT intInvoiceId, intInvoiceDetailId, intItemId, strItemDescription, dblQtyShipped,  intItemUOMId, intLoadDetailId, dblTotal,
+			--			intCurrencyExchangeRateTypeId, dblPrice, dblCurrencyExchangeRate
+			--	 FROM tblARInvoiceDetail WITH (NOLOCK)) D
+			--INNER JOIN			
+			--	(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, strComments, intCurrencyId, dtmDate, dtmPostDate, intCompanyLocationId, intEntityCustomerId, intPeriodsToAccrue
+			--	 FROM tblARInvoice WITH (NOLOCK)) A 
+			--		ON D.intInvoiceId = A.intInvoiceId AND ISNULL(intPeriodsToAccrue,0) <= 1			  
+			--INNER JOIN
+			--	(SELECT intItemUOMId FROM tblICItemUOM) ItemUOM 
+			--		ON ItemUOM.intItemUOMId = D.intItemUOMId
+			--LEFT OUTER JOIN
+			--	(SELECT intItemId, intLocationId, intInventoryInTransitAccountId, strType FROM vyuARGetItemAccount WITH (NOLOCK)) IST
+			--		ON D.intItemId = IST.intItemId 
+			--		AND A.intCompanyLocationId = IST.intLocationId 
+			--INNER JOIN
+			--	(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
+			--		ON A.intEntityCustomerId = C.[intEntityId]					
+			--INNER JOIN 
+			--	(SELECT intInvoiceId FROM @PostInvoiceData)	P
+			--		ON A.intInvoiceId = P.intInvoiceId				
+			--INNER JOIN
+			--	(SELECT intLoadId, intLoadDetailId FROM tblLGLoadDetail WITH (NOLOCK)) ISD
+			--		ON 	D.intLoadDetailId = ISD.intLoadDetailId
+			--INNER JOIN
+			--	(SELECT intLoadId, strLoadNumber FROM tblLGLoad WITH (NOLOCK)) ISH
+			--		ON ISD.intLoadId = ISH.intLoadId
+			--INNER JOIN (SELECT [intItemId], [intTransactionId], [dblQty], [intTransactionDetailId], [dblUOMQty], [dblCost], [strTransactionId], [ysnIsUnposted] FROM tblICInventoryTransaction WITH (NOLOCK)) ICIT
+			--		ON ICIT.[intTransactionId] = ISH.[intLoadId] 
+			--		AND ICIT.[intTransactionDetailId] = ISD.[intLoadDetailId] 
+			--		AND ICIT.[strTransactionId] = ISH.strLoadNumber 
+			--		AND ICIT.[ysnIsUnposted] = 0
+			--LEFT OUTER JOIN
+			--	(SELECT intItemId, intLocationId, intStockUOMId FROM vyuICGetItemStock WITH (NOLOCK)) ICIS
+			--		ON D.intItemId = ICIS.intItemId 
+			--		AND A.intCompanyLocationId = ICIS.intLocationId
+			--LEFT OUTER JOIN
+			--	(
+			--		SELECT
+			--			intCurrencyExchangeRateTypeId 
+			--			,strCurrencyExchangeRateType 
+			--		FROM
+			--			tblSMCurrencyExchangeRateType
+			--	)	SMCERT
+			--		ON D.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId
+			--WHERE
+			--	D.dblTotal <> @ZeroDecimal
+			--	AND D.intLoadDetailId IS NOT NULL AND D.intLoadDetailId <> 0				
+			--	AND D.intItemId IS NOT NULL AND D.intItemId <> 0
+			--	AND ISNULL(IST.strType,'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle')
+			--	AND A.strTransactionType <> 'Debit Memo'
 		END TRY
 		BEGIN CATCH
 			SELECT @ErrorMerssage = ERROR_MESSAGE()										
@@ -3380,8 +3496,8 @@ IF @Recap = 1
 			,A.[dtmTransactionDate]
 			,Debit.Value
 			,Credit.Value
-			,A.[dblDebitUnit]
-			,A.[dblCreditUnit]
+			,DebitUnit.Value
+			,CreditUnit.Value
 			,A.[dblDebitForeign]
 			,A.[dblCreditForeign]			
 			,A.[intCurrencyId]

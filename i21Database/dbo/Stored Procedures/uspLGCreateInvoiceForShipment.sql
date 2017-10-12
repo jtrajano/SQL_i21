@@ -102,7 +102,8 @@ DECLARE
 		,@EntityCustomerId			= LD.intCustomerEntityId
 		,@CompanyLocationId			= LD.intSCompanyLocationId 	
 		,@AccountId					= NULL
-		,@CurrencyId				= ISNULL(ARC.[intCurrencyId], (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0))
+		,@CurrencyId				= ISNULL((CASE WHEN CD.ysnUseFXPrice = 1 AND GETDATE() BETWEEN CD.dtmFXValidFrom AND CD.dtmFXValidTo THEN ISNULL(CD.intInvoiceCurrencyId, ISNULL(CD.intCurrencyId, ISNULL(CD.intBasisCurrencyId, CD.intConvPriceCurrencyId))) ELSE ISNULL(CD.intCurrencyId, ISNULL(CD.intBasisCurrencyId, CD.intConvPriceCurrencyId)) END),
+									  ISNULL(ARC.[intCurrencyId], (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0)))
 		,@TermId					= NULL
 		,@SourceId					= @intLoadId
 		,@PeriodsToAccrue			= 1
@@ -220,6 +221,7 @@ DECLARE
 		,[dblItemWeight]
 		,[intItemWeightUOMId]
 		,[dblPrice]
+		,[dblUnitPrice]
 		,[strPricing]
 		,[ysnRefreshPrice]
 		,[strMaintenanceType]
@@ -262,6 +264,9 @@ DECLARE
 		,[ysnVirtualMeterReading]
 		,[ysnClearDetailTaxes]
 		,[intTempDetailIdForTaxes]
+		,[intCurrencyExchangeRateTypeId]
+		,[intCurrencyExchangeRateId]
+		,[dblCurrencyExchangeRate]
 		,[intSubCurrencyId]
 		,[dblSubCurrencyRate])
 	SELECT
@@ -311,11 +316,12 @@ DECLARE
 		,[intOrderUOMId]						= ARSI.[intOrderUOMId] 
 		,[dblQtyOrdered]						= ARSI.[dblQtyOrdered] 
 		,[intItemUOMId]							= ARSI.[intItemUOMId] 
-		,[dblQtyShipped]						= ARSI.[dblQtyShipped] 
+		,[dblQtyShipped]						= ARSI.[dblShipmentQuantity] 
 		,[dblDiscount]							= ARSI.[dblDiscount] 
 		,[dblItemWeight]						= ARSI.[dblWeight]  
 		,[intItemWeightUOMId]					= ARSI.[intWeightUOMId] 
-		,[dblPrice]								= ARSI.[dblShipmentUnitPrice] 
+		,[dblPrice]								= ARSI.[dblPrice] 
+		,[dblUnitPrice]							= ARSI.[dblShipmentUnitPrice]
 		,[strPricing]							= 'Inventory Shipment Item Price'
 		,[ysnRefreshPrice]						= 0
 		,[strMaintenanceType]					= NULL
@@ -358,6 +364,9 @@ DECLARE
 		,[ysnVirtualMeterReading]				= 0
 		,[ysnClearDetailTaxes]					= 0
 		,[intTempDetailIdForTaxes]				= NULL
+		,[intCurrencyExchangeRateTypeId]		= ARSI.[intCurrencyExchangeRateTypeId] 
+		,[intCurrencyExchangeRateId]			= ARSI.[intCurrencyExchangeRateId] 
+		,[dblCurrencyExchangeRate]				= ARSI.[dblCurrencyExchangeRate] 
 		,[intSubCurrencyId]						= ARSI.intSubCurrencyId 
 		,[dblSubCurrencyRate]					= ARSI.dblSubCurrencyRate 
 	FROM vyuARShippedItems ARSI

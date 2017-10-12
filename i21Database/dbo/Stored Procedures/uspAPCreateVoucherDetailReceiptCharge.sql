@@ -94,8 +94,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[dblTotal]						=	CASE WHEN A.ysnPrice > 0 THEN  (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END) * -1 
 													ELSE (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END)
 											END,
-		[dblCost]						=	ABS(A.dblUnitCost),
-		[dblOldCost]					=	NULL,
+		[dblCost]						=	CASE WHEN charges.dblCost > 0 THEN charges.dblCost ELSE ABS(A.dblUnitCost) END,
+		[dblOldCost]					=	CASE WHEN charges.dblCost != A.dblUnitCost THEN A.dblUnitCost ELSE NULL END,
 		[dblClaimAmount]				=	0,
 		[dblNetWeight]					=	0,
 		[dblNetShippedWeight]			=	0,

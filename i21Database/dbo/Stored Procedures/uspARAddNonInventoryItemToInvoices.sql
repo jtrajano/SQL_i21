@@ -214,6 +214,7 @@ CREATE TABLE #Pricing(
 	,[intInvoiceId]			INT
 	,[intInvoiceDetailId]	INT
 	,[dblPrice]				NUMERIC(18,6)
+	,[dblUnitPrice]			NUMERIC(18,6)
 	,[dblTermDiscount]		NUMERIC(18,6)
 	,[strTermDiscountBy]	NVARCHAR(50)
 	,[strPricing]			NVARCHAR(250)
@@ -240,6 +241,7 @@ BEGIN TRY
 		,[intInvoiceId]
 		,[intInvoiceDetailId]
 		,[dblPrice]
+		,[dblUnitPrice]
 		,[dblTermDiscount]
 		,[strTermDiscountBy]
 		,[strPricing]
@@ -264,6 +266,7 @@ BEGIN TRY
 		,[intInvoiceId]			= IE.[intInvoiceId] 
 		,[intInvoiceDetailId]	= IE.[intInvoiceDetailId]
 		,[dblPrice]				= IP.[dblPrice]
+		,[dblUnitPrice]			= IP.[dblPrice]
 		,[dblTermDiscount]		= IP.[dblTermDiscount]
 		,[strTermDiscountBy]	= IP.[strTermDiscountBy]
 		,[strPricing]			= IP.[strPricing]
@@ -349,6 +352,8 @@ USING
 		,[strItemTermDiscountBy]				= ISNULL(IP.[strTermDiscountBy], IE.[strItemTermDiscountBy])
 		,[dblPrice]								= (CASE WHEN (ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]),0) <> 0) THEN ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) * ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]), 1) ELSE ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) END)
 		,[dblBasePrice]							= (CASE WHEN (ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]),0) <> 0) THEN ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) * ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]), 1) ELSE ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) END) * (CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], 0) = 0 THEN 1 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1) END)
+		,[dblUnitPrice]							= (CASE WHEN (ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]),0) <> 0) THEN ISNULL(ISNULL(IP.[dblUnitPrice], IE.[dblUnitPrice]), @ZeroDecimal) * ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]), 1) ELSE ISNULL(ISNULL(IP.[dblUnitPrice], IE.[dblUnitPrice]), @ZeroDecimal) END)
+		,[dblBaseUnitPrice]						= (CASE WHEN (ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]),0) <> 0) THEN ISNULL(ISNULL(IP.[dblUnitPrice], IE.[dblUnitPrice]), @ZeroDecimal) * ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]), 1) ELSE ISNULL(ISNULL(IP.[dblUnitPrice], IE.[dblUnitPrice]), @ZeroDecimal) END) * (CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], 0) = 0 THEN 1 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1) END)
 		,[strPricing]							= ISNULL(IP.[strPricing], CASE WHEN ISNULL(IE.[strPricing],'') = '' THEN 'Subsystem - ' COLLATE Latin1_General_CI_AS + IE.[strSourceTransaction] COLLATE Latin1_General_CI_AS ELSE IE.[strPricing] COLLATE Latin1_General_CI_AS END)
 		,[dblTotalTax]							= @ZeroDecimal
 		,[dblBaseTotalTax]						= @ZeroDecimal
@@ -465,6 +470,7 @@ USING
 			,[intInvoiceId]
 			,[intInvoiceDetailId]
 			,[dblPrice]
+			,[dblUnitPrice]
 			,[dblTermDiscount]
 			,[strTermDiscountBy]
 			,[strPricing]
@@ -519,6 +525,8 @@ INSERT(
 	,[strItemTermDiscountBy]
 	,[dblPrice]
 	,[dblBasePrice]
+	,[dblUnitPrice]
+	,[dblBaseUnitPrice]
 	,[strPricing]
 	,[dblTotalTax]
 	,[dblBaseTotalTax]
@@ -617,6 +625,8 @@ VALUES(
 	,[strItemTermDiscountBy]
 	,[dblPrice]
 	,[dblBasePrice]
+	,[dblUnitPrice]
+	,[dblBaseUnitPrice]
 	,[strPricing]
 	,[dblTotalTax]
 	,[dblBaseTotalTax]

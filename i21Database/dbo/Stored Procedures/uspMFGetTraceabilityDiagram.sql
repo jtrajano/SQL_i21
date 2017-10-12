@@ -200,8 +200,9 @@ Begin
 		Select TOP 1 @intContractId=ISNULL(ri.intOrderId,0),@intShipmentId=ISNULL(ld.intLoadId,0),@intContainerId=ISNULL(ri.intContainerId,0)  
 		From tblICInventoryReceiptItem ri Join tblICInventoryReceiptItemLot rl on ri.intInventoryReceiptItemId=rl.intInventoryReceiptItemId 
 		Join tblICInventoryReceipt rh on ri.intInventoryReceiptId=rh.intInventoryReceiptId 
-		Join tblLGLoadDetail ld on ri.intSourceId=ld.intLoadDetailId
-		Where rl.intLotId=@intLotId And rh.strReceiptType='Purchase Contract'
+		Left Join tblLGLoadDetail ld on ri.intSourceId=ld.intLoadDetailId
+		join tblICLot l on rl.intLotId=l.intLotId
+		Where l.strLotNumber=(select top 1 strLotNumber from tblICLot where intLotId=@intLotId) And rh.strReceiptType='Purchase Contract'
 
 		--Contract
 		If @intContractId > 0
@@ -394,9 +395,15 @@ Begin
 
 				-- From Lot to WorkOrders
 				If @strType='L'
-					Insert Into @tblData(strTransactionName,intLotId,strLotNumber,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
-					dblQuantity,strUOM,dtmTransactionDate,strProcessName,strType,intAttributeTypeId)
-					Exec uspMFGetTraceabilityWorkOrderDetail @intId,@intDirectionId,@ysnParentLot
+					Begin
+						Insert Into @tblData(strTransactionName,intLotId,strLotNumber,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+						dblQuantity,strUOM,dtmTransactionDate,strProcessName,strType,intAttributeTypeId)
+						Exec uspMFGetTraceabilityWorkOrderDetail @intId,@intDirectionId,@ysnParentLot
+
+						--Remove circular Reference, Remove the WO if exists
+						If Exists (Select 1 from @tblData Where  intLotId in (Select intLotId from @tblNodeData Where strType='W'))
+							Delete From @tblData
+					End
 
 				-- WorkOrder Output details
 				If @strType='W'  			
@@ -535,9 +542,15 @@ Begin
 
 				-- From Lot to WorkOrders
 				If @strType='L'
-					Insert Into @tblData(strTransactionName,intLotId,strLotNumber,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
-					dblQuantity,strUOM,dtmTransactionDate,strProcessName,strType,intAttributeTypeId)
-					Exec uspMFGetTraceabilityWorkOrderDetail @intId,@intDirectionId,@ysnParentLot
+					Begin
+						Insert Into @tblData(strTransactionName,intLotId,strLotNumber,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+						dblQuantity,strUOM,dtmTransactionDate,strProcessName,strType,intAttributeTypeId)
+						Exec uspMFGetTraceabilityWorkOrderDetail @intId,@intDirectionId,@ysnParentLot
+
+						--Remove circular Reference, Remove the WO if exists
+						If Exists (Select 1 from @tblData Where  intLotId in (Select intLotId from @tblNodeData Where strType='W'))
+							Delete From @tblData
+					End
 
 				-- WorkOrder Input details
 				If @strType='W'  			
@@ -672,7 +685,7 @@ End
 	--Generate Group Row No
 	Update f set f.ysnExcludedNode=1,f.intGroupRowNo=t.intRowNo From @tblNodeDataFinal f Join
 	(
-	Select ROW_NUMBER() over (partition by (convert(varchar,strTransactionName) + convert(varchar,intLotId)) order by [key]) intRowNo,[key]
+	Select ROW_NUMBER() over (partition by (convert(varchar,strType) + convert(varchar,strTransactionName) + convert(varchar,intLotId)) order by [key]) intRowNo,[key]
 	From @tblNodeDataFinal
 	) t on f.[key]=t.[key]
 	Where intRowNo>1
@@ -680,9 +693,9 @@ End
 	--Update Duplicate Rows
 	Update f set f.intRecordId=t.intMinRecordId From @tblNodeDataFinal f Join
 	(
-	Select MIN(intRecordId) intMinRecordId,(convert(varchar,strTransactionName) + convert(varchar,intLotId)) AS strKey
-	From @tblNodeDataFinal group by (convert(varchar,strTransactionName) + convert(varchar,intLotId))
-	) t on (convert(varchar,f.strTransactionName) + convert(varchar,f.intLotId))=t.strKey
+	Select MIN(intRecordId) intMinRecordId,(convert(varchar,strType) + convert(varchar,strTransactionName) + convert(varchar,intLotId)) AS strKey
+	From @tblNodeDataFinal group by (convert(varchar,strType) + convert(varchar,strTransactionName) + convert(varchar,intLotId))
+	) t on (convert(varchar,strType) + convert(varchar,f.strTransactionName) + convert(varchar,f.intLotId))=t.strKey
 	Where f.intGroupRowNo is not null
 
 	Select * from @tblNodeDataFinal

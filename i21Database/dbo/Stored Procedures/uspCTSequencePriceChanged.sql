@@ -29,7 +29,16 @@ BEGIN TRY
 			@intNewBillId					INT,
 			@ysnSuccess						BIT,
 			@voucherDetailReceipt			VoucherDetailReceipt,
-			@voucherDetailReceiptCharge		VoucherDetailReceiptCharge
+			@voucherDetailReceiptCharge		VoucherDetailReceiptCharge,
+			@InvoiceEntries					InvoiceIntegrationStagingTable,
+			@LineItemTaxEntries				LineItemTaxDetailStagingTable,
+			@ErrorMessage					NVARCHAR(250),
+			@CreatedIvoices					NVARCHAR(MAX),
+			@UpdatedIvoices					NVARCHAR(MAX),
+			@strShipmentNumber				NVARCHAR(50),
+			@intBillDetailId				INT,
+			@strVendorOrderNumber			NVARCHAR(50),
+			@ysnBillPosted					BIT
 
 	SELECT	@dblCashPrice			=	dblCashPrice, 
 			@intPricingTypeId		=	intPricingTypeId, 
@@ -75,18 +84,22 @@ BEGIN TRY
 		IF OBJECT_ID('tempdb..#tblReceipt') IS NOT NULL  								
 		DROP TABLE #tblReceipt								
 
-		SELECT	DISTINCT ISNULL(IR.ysnPosted,0) ysnPosted, strReceiptNumber, RI.intInventoryReceiptItemId, RI.intInventoryReceiptId,BD.intBillId
+		SELECT	DISTINCT ISNULL(IR.ysnPosted,0) ysnPosted, strReceiptNumber, RI.intInventoryReceiptItemId, RI.intInventoryReceiptId,BD.intBillId,BD.intBillDetailId,ISNULL(BL.ysnPosted,0) AS ysnBillPosted
 		INTO	#tblReceipt
 		FROM	tblICInventoryReceipt		IR
 		JOIN	tblICInventoryReceiptItem	RI	ON	RI.intInventoryReceiptId		=	IR.intInventoryReceiptId
    LEFT	JOIN	tblAPBillDetail				BD	ON	BD.intInventoryReceiptItemId	=	RI.intInventoryReceiptItemId
+   LEFT	JOIN	tblAPBill					BL	ON	BL.intBillId					=	BD.intBillId
 		WHERE	RI.intLineNo = @intContractDetailId AND IR.strReceiptType = 'Purchase Contract' --AND RI.dblUnitCost <> ISNULL(@dblCashPrice,0) 
 
 		SELECT	@intInventoryReceiptId = MIN(intInventoryReceiptId) FROM #tblReceipt
 
 		WHILE ISNULL(@intInventoryReceiptId,0) > 0
 		BEGIN
-			SELECT	@intBillId = intBillId FROM #tblReceipt WHERE intInventoryReceiptId = @intInventoryReceiptId
+			SELECT	@intBillId = NULL, @intBillDetailId = NULL
+
+			SELECT	@intBillId = intBillId, @intBillDetailId = intBillDetailId,@strVendorOrderNumber = strReceiptNumber,@ysnBillPosted = ysnBillPosted FROM #tblReceipt WHERE intInventoryReceiptId = @intInventoryReceiptId
+
 			IF ISNULL(@intBillId,0) = 0
 			BEGIN
 				INSERT	INTO @voucherDetailReceipt (intInventoryReceiptType,intInventoryReceiptItemId,dblCost)
@@ -99,11 +112,14 @@ BEGIN TRY
 				INSERT INTO @voucherDetailReceiptCharge(intInventoryReceiptChargeId)
 				SELECT intInventoryReceiptChargeId FROM tblICInventoryReceiptCharge WHERE intInventoryReceiptId = @intInventoryReceiptId
 
+				SELECT @strVendorOrderNumber = strTicketNumber FROM tblSCTicket WHERE intContractId = @intContractDetailId
+
 				EXEC [dbo].[uspAPCreateBillData] 
 					 @userId						=	@intUserId
 					,@vendorId						=	@intEntityId
 					,@voucherDetailReceipt			=	@voucherDetailReceipt
 					,@voucherDetailReceiptCharge	=	@voucherDetailReceiptCharge
+					,@vendorOrderNumber				=	@strVendorOrderNumber
 					,@billId						=	@intNewBillId OUTPUT
 
 				EXEC [dbo].[uspAPPostBill] 
@@ -114,6 +130,21 @@ BEGIN TRY
 					,@userId = @intUserId
 					,@success = @ysnSuccess OUTPUT
 			END
+			ELSE
+			BEGIN
+				IF ISNULL(@ysnBillPosted,0) = 1
+				BEGIN
+					EXEC [dbo].[uspAPPostBill] @post = 0,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
+				END
+
+				EXEC uspAPUpdateCost @intBillDetailId,@dblCashPrice,1
+
+				IF ISNULL(@ysnBillPosted,0) = 1
+				BEGIN
+					EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
+				END
+			END
+
 			SELECT	@intInventoryReceiptId = MIN(intInventoryReceiptId) FROM #tblReceipt WHERE intInventoryReceiptId > @intInventoryReceiptId
 		END
 		
@@ -125,7 +156,7 @@ BEGIN TRY
 		IF OBJECT_ID('tempdb..#tblShipment') IS NOT NULL  								
 			DROP TABLE #tblShipment
 
-		SELECT	DISTINCT SH.intInventoryShipmentId,ISNULL(ID.intInvoiceId ,0) intInvoiceId
+		SELECT	DISTINCT SH.intInventoryShipmentId,ISNULL(ID.intInvoiceId ,0) intInvoiceId,SH.strShipmentNumber
 		INTO	#tblShipment
 		FROM	tblICInventoryShipment		SH 
 		JOIN	tblICInventoryShipmentItem	SI	ON	SI.intInventoryShipmentId		=	SH.intInventoryShipmentId 
@@ -139,7 +170,7 @@ BEGIN TRY
 		WHILE ISNULL(@intInventoryShipmentId,0) > 0
 		BEGIN
 
-			SELECT	@intInvoiceId = intInvoiceId FROM #tblShipment WHERE intInventoryShipmentId = @intInventoryShipmentId
+			SELECT	@intInvoiceId = intInvoiceId,@strShipmentNumber = strShipmentNumber FROM #tblShipment WHERE intInventoryShipmentId = @intInventoryShipmentId
 
 			IF	ISNULL(@intInvoiceId,0)	=	0
 			BEGIN
@@ -148,7 +179,193 @@ BEGIN TRY
 						,@UserId			= @intUserId
 						,@NewInvoiceId		= @intNewInvoiceId	OUTPUT
 			END
+			ELSE
+			BEGIN
+				INSERT INTO @InvoiceEntries
+				(
+						strTransactionType,		strType,				intSourceId,					intInvoiceId,
+						intEntityCustomerId,	intCompanyLocationId,	intAccountId,					intCurrencyId,
+						intTermId,				intPeriodsToAccrue,		dtmDate,						dtmDueDate,
+						dtmShipDate,			dtmPostDate,			intEntitySalespersonId,			intFreightTermId,
+						intShipViaId,			intPaymentMethodId,		strInvoiceOriginId,				strPONumber,
+						strBOLNumber,			strDeliverPickup,		strComments,					intShipToLocationId,
+						intBillToLocationId,	ysnForgiven,			ysnCalculated,					ysnSplitted,
+						intPaymentId,			intSplitId,				intLoadDistributionHeaderId,	strActualCostId,
+						intShipmentId,			intTransactionId,		intMeterReadingId,				intContractHeaderId,
+						intLoadId,				intOriginalInvoiceId,	intEntityId,					intTruckDriverId,	
+						strSourceTransaction,	strSourceId,			intTruckDriverReferenceId,      ysnUpdateAvailableDiscount,
 
+						intInvoiceDetailId,				intItemId,						intPrepayTypeId,			dblPrepayRate
+						,strDocumentNumber,				strItemDescription,				intOrderUOMId,				dblQtyOrdered
+						,intItemUOMId,					dblQtyShipped,					dblDiscount,				dblItemTermDiscount
+						,strItemTermDiscountBy,			dblItemWeight,					intItemWeightUOMId,			dblPrice
+						,dblUnitPrice,					strPricing,						strVFDDocumentNumber,		strMaintenanceType
+						,strFrequency,					dtmMaintenanceDate,				dblMaintenanceAmount,		dblLicenseAmount
+						,intTaxGroupId,					intStorageLocationId,			intCompanyLocationSubLocationId,intSCInvoiceId
+						,strSCInvoiceNumber,			intSCBudgetId,					strSCBudgetDescription,		intInventoryShipmentItemId
+						,intInventoryShipmentChargeId,	strShipmentNumber,				intRecipeItemId,			intRecipeId
+						,intSubLocationId,				intCostTypeId,					intMarginById,				intCommentTypeId
+						,dblMargin,						dblRecipeQuantity,				intSalesOrderDetailId,		strSalesOrderNumber
+						,intContractDetailId,			intShipmentPurchaseSalesContractId,dblShipmentGrossWt,		dblShipmentTareWt
+						,dblShipmentNetWt,				intTicketId,					intTicketHoursWorkedId,		intCustomerStorageId
+						,intSiteDetailId,				intLoadDetailId,				intLotId,					intOriginalInvoiceDetailId
+						,intSiteId,						strBillingBy,					dblPercentFull,				dblNewMeterReading
+						,dblPreviousMeterReading,		dblConversionFactor,			intPerformerId,				ysnLeaseBilling
+						,ysnVirtualMeterReading,		intCurrencyExchangeRateTypeId,	intCurrencyExchangeRateId,	dblCurrencyExchangeRate
+						,intSubCurrencyId,				dblSubCurrencyRate,ysnBlended,	intConversionAccountId,		intSalesAccountId
+						,intStorageScheduleTypeId,		intDestinationGradeId,			intDestinationWeightId
+				)
+
+				SELECT	IV.strTransactionType,
+						IV.strType,
+						@intInventoryShipmentId,
+						IV.intInvoiceId,
+						IV.intEntityCustomerId,
+						IV.intCompanyLocationId,
+						IV.intAccountId,
+						IV.intCurrencyId,
+						IV.intTermId,
+						IV.intPeriodsToAccrue,
+						IV.dtmDate,
+						IV.dtmDueDate,
+						IV.dtmShipDate,
+						IV.dtmPostDate,
+						IV.intEntitySalespersonId,
+						IV.intFreightTermId,
+						IV.intShipViaId,
+						IV.intPaymentMethodId,
+						IV.strInvoiceOriginId,
+						--ysnUseOriginIdAsInvoiceNumber,
+						IV.strPONumber,
+						IV.strBOLNumber,
+						IV.strDeliverPickup,
+						IV.strComments,
+						IV.intShipToLocationId,
+						IV.intBillToLocationId,
+						--ysnTemplate,
+						IV.ysnForgiven,
+						IV.ysnCalculated,
+						IV.ysnSplitted,
+						IV.intPaymentId,
+						IV.intSplitId,
+						IV.intLoadDistributionHeaderId,
+						IV.strActualCostId,
+						IV.intShipmentId,
+						IV.intTransactionId,
+						IV.intMeterReadingId,
+						IV.intContractHeaderId,
+						IV.intLoadId,
+						IV.intOriginalInvoiceId,
+						IV.intEntityId,
+						IV.intTruckDriverId,
+						'Inventory Shipment',
+						@strShipmentNumber,
+						IV.intTruckDriverReferenceId,
+						0
+						--ysnResetDetails,
+						--ysnRecap,
+						--ysnPost,
+
+						,ID.intInvoiceDetailId
+						,ID.intItemId
+						,ID.intPrepayTypeId
+						,ID.dblPrepayRate
+						--,ID.ysnInventory
+						,ID.strDocumentNumber
+						,ID.strItemDescription
+						,ID.intOrderUOMId
+						,ID.dblQtyOrdered
+						,ID.intItemUOMId
+						,ID.dblQtyShipped
+						,ID.dblDiscount
+						,ID.dblItemTermDiscount
+						,ID.strItemTermDiscountBy
+						,ID.dblItemWeight
+						,ID.intItemWeightUOMId
+						,@dblCashPrice
+						,ID.dblUnitPrice
+						,ID.strPricing
+						,ID.strVFDDocumentNumber
+						--,ID.ysnRefreshPrice
+						,ID.strMaintenanceType
+						,ID.strFrequency
+						,ID.dtmMaintenanceDate
+						,ID.dblMaintenanceAmount
+						,ID.dblLicenseAmount
+						,ID.intTaxGroupId
+						,ID.intStorageLocationId
+						,ID.intCompanyLocationSubLocationId
+						--,ID.ysnRecomputeTax
+						,ID.intSCInvoiceId
+						,ID.strSCInvoiceNumber
+						,ID.intSCBudgetId
+						,ID.strSCBudgetDescription
+						,ID.intInventoryShipmentItemId
+						,ID.intInventoryShipmentChargeId
+						,ID.strShipmentNumber
+						,ID.intRecipeItemId
+						,ID.intRecipeId
+						,ID.intSubLocationId
+						,ID.intCostTypeId
+						,ID.intMarginById
+						,ID.intCommentTypeId
+						,ID.dblMargin
+						,ID.dblRecipeQuantity
+						,ID.intSalesOrderDetailId
+						,ID.strSalesOrderNumber
+						,ID.intContractDetailId
+						,ID.intShipmentPurchaseSalesContractId
+						,ID.dblShipmentGrossWt
+						,ID.dblShipmentTareWt
+						,ID.dblShipmentNetWt
+						,ID.intTicketId
+						,ID.intTicketHoursWorkedId
+						,ID.intCustomerStorageId
+						,ID.intSiteDetailId
+						,ID.intLoadDetailId
+						,ID.intLotId
+						,ID.intOriginalInvoiceDetailId
+						,ID.intSiteId
+						,ID.strBillingBy
+						,ID.dblPercentFull
+						,ID.dblNewMeterReading
+						,ID.dblPreviousMeterReading
+						,ID.dblConversionFactor
+						,ID.intPerformerId
+						,ID.ysnLeaseBilling
+						,ID.ysnVirtualMeterReading
+						--,ID.ysnClearDetailTaxes
+						--,ID.intTempDetailIdForTaxes
+						,ID.intCurrencyExchangeRateTypeId
+						,ID.intCurrencyExchangeRateId
+						,ID.dblCurrencyExchangeRate
+						,ID.intSubCurrencyId
+						,ID.dblSubCurrencyRate
+						,ID.ysnBlended
+						--,ID.strImportFormat
+						--,ID.dblCOGSAmount
+						,ID.intConversionAccountId
+						,ID.intSalesAccountId
+						,ID.intStorageScheduleTypeId
+						,ID.intDestinationGradeId
+						,ID.intDestinationWeightId
+
+				FROM	tblARInvoice		IV
+				JOIN	tblARInvoiceDetail	ID	ON	ID.intInvoiceId	=	IV.intInvoiceId
+				WHERE	IV.intInvoiceId	=	@intInvoiceId
+
+			
+
+				 EXEC [dbo].[uspARProcessInvoices]
+						@InvoiceEntries			=	@InvoiceEntries
+					   ,@LineItemTaxEntries		=	@LineItemTaxEntries
+					   ,@UserId					=	@intUserId
+					   ,@GroupingOption			=	8
+					   ,@RaiseError				=	1
+					   ,@ErrorMessage			=	@ErrorMessage	OUTPUT
+					   ,@CreatedIvoices			=	@CreatedIvoices OUTPUT
+					   ,@UpdatedIvoices			=	@UpdatedIvoices OUTPUT
+			END
 			SELECT	@intInventoryShipmentId = MIN(intInventoryShipmentId) FROM #tblShipment WHERE intInventoryShipmentId > @intInventoryShipmentId
 		END
 	END

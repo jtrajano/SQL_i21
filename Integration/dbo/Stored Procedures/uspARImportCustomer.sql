@@ -83,7 +83,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				agcus_mkt_sign_yn = CASE WHEN Cus.ysnMarketAgreementSigned = 1 THEN ''Y'' ELSE ''N'' END,
 				agcus_ga_hold_pay_yn = CASE WHEN Cus.ysnHoldBatchGrainPayment = 1 THEN ''Y'' ELSE ''N'' END,
 				agcus_ga_wthhld_yn = CASE WHEN Cus.ysnFederalWithholding = 1 THEN ''Y'' ELSE ''N'' END,
-				agcus_acct_stat_x_1 = (SELECT strAccountStatusCode FROM tblARAccountStatus WHERE intAccountStatusId = Cus.intAccountStatusId),
+				agcus_acct_stat_x_1 = (SELECT strAccountStatusCode FROM tblARAccountStatus WHERE intAccountStatusId = (SELECT TOP 1 intAccountStatusId FROM tblARCustomerAccountStatus WHERE intEntityCustomerId = Cus.intEntityId)),
 				agcus_slsmn_id		= (SELECT strSalespersonId FROM tblARSalesperson WHERE intEntityId = Cus.intSalespersonId),
 				agcus_srvchr_cd		= (SELECT strServiceChargeCode FROM tblARServiceCharge WHERE intServiceChargeId = Cus.intServiceChargeId),
 				agcus_dflt_mkt_zone = (SELECT strMarketZoneCode FROM tblARMarketZone WHERE intMarketZoneId = Cus.intMarketZoneId)	
@@ -227,8 +227,9 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				
 				-- INSERT Contact to ssonmst
 				DECLARE @ContactNumber nvarchar(20)
-			
-				select top 1 @ContactNumber = substring(Con.strContactNumber,1,20)
+				DECLARE @ContactID	INT
+				select top 1 @ContactNumber = substring(Con.strContactNumber,1,20),
+				@ContactID = Con.intEntityId
 				FROM tblEMEntity Ent
 				INNER JOIN tblARCustomer Cus 
 					ON Ent.intEntityId = Cus.intEntityId
@@ -239,7 +240,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					ON CusToCon.intEntityContactId = Con.intEntityId									
 				WHERE Cus.strCustomerNumber = @CustomerId
 								
-				EXEC uspARContactOriginSync @ContactNumber
+				EXEC uspARContactOriginSync @ContactNumber, @ContactID
 				
 				
 
@@ -328,7 +329,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			DECLARE @dblBudgetAmountForBudgetBilling NUMERIC(18,6)
 			DECLARE @strBudgetBillingBeginMonth	NVARCHAR(50)
 			DECLARE @strBudgetBillingEndMonth	NVARCHAR(50)
-		
+			DECLARE @OriginCurrency				NVARCHAR(50)
+			DECLARE @intCurrencyId				INT
 			--Grain Tab
 			DECLARE @strDPAContract				NVARCHAR(50)
 			DECLARE @dtmDPADate					DATETIME
@@ -355,6 +357,9 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			BEGIN
 		
 				SELECT @originCustomer = agcus_key FROM #tmpagcusmst
+				
+				SET @OriginCurrency = ''''
+
 				BEGIN TRY
 					BEGIN TRANSACTION @TransName
 					SAVE TRAN @TransName
@@ -438,6 +443,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 						@dblBudgetAmountForBudgetBilling = agcus_budget_amt,
 						@strBudgetBillingBeginMonth	= agcus_budget_beg_mm,	
 						@strBudgetBillingEndMonth	= agcus_budget_end_mm,
+						@OriginCurrency 			= agcus_dflt_currency,
 						--Grain Tab
 						@strDPAContract = agcus_dpa_cnt,				
 						@dtmDPADate = (CASE WHEN agcus_dpa_rev_dt = 0 THEN NULL ELSE CONVERT(datetime,SUBSTRING(CONVERT(nvarchar,agcus_dpa_rev_dt),0,5) + ''-'' + SUBSTRING(CONVERT(nvarchar,agcus_dpa_rev_dt),5,2) + ''-'' + SUBSTRING(CONVERT(nvarchar,agcus_dpa_rev_dt),7,2)) END),					
@@ -458,7 +464,14 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 
 					DECLARE @EntityId INT
 					SET @EntityId = SCOPE_IDENTITY()
-				
+
+					SET @intCurrencyId = null
+					IF @OriginCurrency <> ''''
+					BEGIN
+						select @intCurrencyId = intCurrencyID from tblSMCurrency where strCurrency = @OriginCurrency
+					END
+
+
 					INSERT INTO [dbo].[tblEMEntityType]([intEntityId],[strType], [intConcurrencyId]) values( @EntityId, ''Customer'', 1 )
 					--INSERT into Customer
 					INSERT [dbo].[tblARCustomer](
@@ -498,7 +511,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					[intMarketZoneId],			
 					[ysnHoldBatchGrainPayment],	
 					[ysnFederalWithholding], 
-					[intTermsId])
+					[intTermsId],
+					[intCurrencyId])
 					VALUES						
 					(@EntityId,
 					 NULL, 
@@ -535,7 +549,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					 @intMarketZoneId,			
 					 @ysnHoldBatchGrainPayment,	
 					 @ysnFederalWithholding, 
-					 @intTermsId)
+					 @intTermsId,
+					 @intCurrencyId)
 				 
 					 --Get intEntityCustomerId
 					 SELECT @intEntityCustomerId = intEntityId FROM tblARCustomer WHERE intEntityId = @EntityId
@@ -556,12 +571,25 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 													UPPER(CASE WHEN @strContactName IS NOT NULL THEN SUBSTRING(@strContactName, 1, 20) ELSE SUBSTRING(@strName, 1, 20) END), 
 													@strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes)
 				
-					
-
 					DECLARE @ContactEntityId INT
 			
 					SET @ContactEntityId = SCOPE_IDENTITY()
+
+					DECLARE @AccountStatusId INT
+					SET @AccountStatusId = NULL
+
+					SELECT @AccountStatusId = intAccountStatusId FROM tblARAccountStatus
+						WHERE strAccountStatusCode COLLATE Latin1_General_CI_AS = (SELECT agcus_acct_stat_x_1 COLLATE Latin1_General_CI_AS
+							FROM agcusmst WHERE agcus_key = @originCustomer)
+
+					IF @AccountStatusId IS NOT NULL
+					BEGIN			
+						INSERT INTO tblARCustomerAccountStatus (intEntityCustomerId, intAccountStatusId, intConcurrencyId)
+						SELECT @EntityId, @AccountStatusId, 1
+					END
 					
+					if @strPhone <> ''''
+						INSERT INTO tblEMEntityPhoneNumber(intEntityId, strPhone) VALUES (@ContactEntityId, @strPhone)
 					
 					-- RULE: when creating a default contact from agcusmst.agcus_contact, trim tblEMEntityContact.strContactNumber to 20 characters				
 							
@@ -745,7 +773,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				ptcus_budget_amt = Cus.dblBudgetAmountForBudgetBilling,
 				ptcus_budget_beg_mm = SUBSTRING(Cus.strBudgetBillingBeginMonth,1,2),
 				ptcus_budget_end_mm = SUBSTRING(Cus.strBudgetBillingEndMonth,1,2),
-				ptcus_acct_stat_x_1 = (SELECT strAccountStatusCode FROM tblARAccountStatus WHERE intAccountStatusId = Cus.intAccountStatusId),
+				ptcus_acct_stat_x_1 = (SELECT strAccountStatusCode FROM tblARAccountStatus WHERE intAccountStatusId = (SELECT TOP 1 intAccountStatusId FROM tblARCustomerAccountStatus WHERE intEntityCustomerId = Cus.intEntityId)),
 				ptcus_slsmn_id		= (SELECT strSalespersonId FROM tblARSalesperson WHERE intEntityId = Cus.intSalespersonId),
 				ptcus_srv_cd		= (SELECT strServiceChargeCode FROM tblARServiceCharge WHERE intServiceChargeId = Cus.intServiceChargeId),
 				ptcus_terms_code = (SELECT case when ISNUMERIC(strTermCode) = 0 then null else strTermCode end  FROM tblSMTerm WHERE intTermID = Cus.intTermsId and cast( (case when isnumeric(strTermCode) = 1 then  strTermCode else 266 end ) as bigint) <= 255 )
@@ -977,6 +1005,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			DECLARE @dblBudgetAmountForBudgetBilling NUMERIC(18,6)
 			DECLARE @strBudgetBillingBeginMonth	NVARCHAR(50)
 			DECLARE @strBudgetBillingEndMonth	NVARCHAR(50)
+			DECLARE @OriginCurrency				NVARCHAR(50)
+			DECLARE @intCurrencyId				INT
 			--Grain Tab
 			DECLARE @strDPAContract				NVARCHAR(50)
 			DECLARE @dtmDPADate					DATETIME
@@ -1005,6 +1035,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				BEGIN TRY
 					
 					SELECT @originCustomer = ptcus_cus_no FROM #tmpptcusmst
+					SET @OriginCurrency = ''''
 					BEGIN TRANSACTION @TransName
 					SAVE TRAN @TransName
 					SELECT TOP 1
@@ -1108,6 +1139,11 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					DECLARE @EntityId INT
 					SET @EntityId = SCOPE_IDENTITY()
 
+
+					SET @intCurrencyId = null
+					select @intCurrencyId = intDefaultCurrencyId from tblSMCompanyPreference
+
+					
 					INSERT INTO [dbo].[tblEMEntityType]([intEntityId],[strType],[intConcurrencyId]) values( @EntityId, ''Customer'', 0 )
 
 					--INSERT into Customer
@@ -1137,7 +1173,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					[dblBudgetAmountForBudgetBilling],
 					[strBudgetBillingBeginMonth],
 					[strBudgetBillingEndMonth], 
-					[intTermsId]
+					[intTermsId],
+					[intCurrencyId]
 					--Grain Tab
 					--[strDPAContract],
 					--[dtmDPADate],
@@ -1176,7 +1213,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					 @dblBudgetAmountForBudgetBilling,
 					 @strBudgetBillingBeginMonth,
 					 @strBudgetBillingEndMonth, 
-					 @intTermsId
+					 @intTermsId,
+					 @intCurrencyId
 					 --@strDPAContract,
 					 --@dtmDPADate,
 					 --@strGBReceiptNumber,
@@ -1215,6 +1253,21 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 
 					SET @ContactEntityId = SCOPE_IDENTITY()
 
+					DECLARE @AccountStatusId INT
+					SET @AccountStatusId = NULL
+
+					SELECT @AccountStatusId = intAccountStatusId FROM tblARAccountStatus
+						WHERE strAccountStatusCode COLLATE Latin1_General_CI_AS = (SELECT ptcus_acct_stat_x_1 COLLATE Latin1_General_CI_AS
+							FROM ptcusmst WHERE ptcus_cus_no = @originCustomer)
+
+					IF @AccountStatusId IS NOT NULL
+					BEGIN			
+						INSERT INTO tblARCustomerAccountStatus (intEntityCustomerId, intAccountStatusId, intConcurrencyId)
+						SELECT @EntityId, @AccountStatusId, 1
+					END
+
+					if @strPhone <> ''''
+						INSERT INTO tblEMEntityPhoneNumber(intEntityId, strPhone) VALUES (@ContactEntityId, @strPhone)
 					-- RULE: when creating a default contact from agcusmst.agcus_contact, trim tblEMEntityContact.strContactNumber to 20 characters				
 
 					--Get intContactId				

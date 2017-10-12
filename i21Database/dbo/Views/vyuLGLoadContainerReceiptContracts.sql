@@ -66,6 +66,8 @@ SELECT
 	,strStorageLocationName = SL.strName 
 	, LD.strPSubLocationName
 	, LD.strSSubLocationName
+	,dblGrossWtPerQty = LD.dblGross / LD.dblQuantity 
+	,dblTareWtPerQty =  LD.dblTare / LD.dblQuantity
 
 FROM vyuLGLoadDetailView LD
 LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadId = LD.intLoadId
@@ -141,4 +143,7 @@ SELECT
 	,strStorageLocationName = strStorageLocationName COLLATE Latin1_General_CI_AS
 	,strPSubLocationName
 	,strSSubLocationName
+	,dblGrossWtPerQty = dblGrossWt / dblQuantity 
+	,dblTareWtPerQty =  dblTareWt / dblQuantity
+
 FROM vyuLGLoadContainerPurchaseContracts

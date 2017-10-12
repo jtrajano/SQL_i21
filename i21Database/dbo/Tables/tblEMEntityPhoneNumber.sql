@@ -13,13 +13,13 @@ CREATE TABLE [dbo].[tblEMEntityPhoneNumber] (
     [strFormatCountry]              NVARCHAR (50)   COLLATE Latin1_General_CI_AS  NULL,
     [strFormatArea]                 NVARCHAR (50)   COLLATE Latin1_General_CI_AS  NULL,
     [strFormatLocal]                NVARCHAR (50)   COLLATE Latin1_General_CI_AS  NULL,
-    [intCountryId]                  INT NULL DEFAULT(0),
+    [intCountryId]                  INT NULL,
 	[intAreaCityLength]				INT NOT NULL DEFAULT 3,
     [ysnDisplayCountryCode]         BIT NULL,
     [intConcurrencyId]              INT CONSTRAINT [DF_tblEMEntityPhoneNumber_intConcurrencyId] DEFAULT ((0)) NOT NULL,
 
 	CONSTRAINT [FK_tblEMEntityPhoneNumber_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [tblEMEntity]([intEntityId]) ON DELETE CASCADE,
-	CONSTRAINT [FK_tblEMEntityPhoneNumber_tblSMCountry] FOREIGN KEY ([intCountryId]) REFERENCES [tblSMCountry]([intCountryID]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblEMEntityPhoneNumber_tblSMCountry] FOREIGN KEY ([intCountryId]) REFERENCES [tblSMCountry]([intCountryID]),
     CONSTRAINT [PK_tblEMEntityPhoneNumber] PRIMARY KEY CLUSTERED ([intEntityPhoneNumberId] ASC)
 );
 

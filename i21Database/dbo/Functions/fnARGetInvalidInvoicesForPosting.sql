@@ -168,7 +168,7 @@ IF(ISNULL(@Post,0)) = 1
 		FROM 
 			@Invoices I	
 		INNER JOIN
-			(SELECT [intInvoiceId], [intItemId], [strItemDescription], [intItemUOMId], [intInventoryShipmentItemId], [intSalesOrderDetailId], [intShipmentPurchaseSalesContractId] FROM dbo.tblARInvoiceDetail WITH (NOLOCK)) ARID
+			(SELECT [intInvoiceId], [intItemId], [strItemDescription], [intItemUOMId], [intInventoryShipmentItemId], [intSalesOrderDetailId], [intLoadDetailId] FROM dbo.tblARInvoiceDetail WITH (NOLOCK)) ARID
 				ON I.[intInvoiceId] = ARID.[intInvoiceId]
 		LEFT OUTER JOIN
 			(SELECT [intItemId], [intLocationId], [strType] FROM dbo.vyuICGetItemStock WITH (NOLOCK)) IST
@@ -179,7 +179,7 @@ IF(ISNULL(@Post,0)) = 1
 			AND (ARID.[intItemUOMId] IS NULL OR ARID.[intItemUOMId] = 0) 
 			AND (ARID.[intInventoryShipmentItemId] IS NULL OR ARID.[intInventoryShipmentItemId] = 0)
 			AND (ARID.[intSalesOrderDetailId] IS NULL OR ARID.[intSalesOrderDetailId] = 0)
-			AND (ARID.[intShipmentPurchaseSalesContractId] IS NULL OR ARID.[intShipmentPurchaseSalesContractId] = 0)
+			AND (ARID.[intLoadDetailId] IS NULL OR ARID.[intLoadDetailId] = 0)
 			AND (ARID.[intItemId] IS NOT NULL OR ARID.[intItemId] <> 0)
 			AND ISNULL(IST.[strType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software', 'Comment', '')	
 
@@ -854,7 +854,7 @@ IF(ISNULL(@Post,0)) = 1
 			,[strBatchId]			= I.[strBatchId]
 			,[strPostingError]		= CASE WHEN GLA.[intAccountId] IS NULL THEN 'The COGS Account of item - ' + ICI.[strItemNo] + ' is not valid.' ELSE 'The COGS Account of item - ' + ICI.[strItemNo] + ' was not specified.' END
 		FROM 			
-			(SELECT [intInvoiceId], [intItemId], [intItemUOMId], [intInventoryShipmentItemId], [dblTotal], [intShipmentPurchaseSalesContractId] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
+			(SELECT [intInvoiceId], [intItemId], [intItemUOMId], [intInventoryShipmentItemId], [dblTotal], [intLoadDetailId] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 		INNER JOIN			
 			@Invoices I
 				ON ARID.[intInvoiceId] = I.[intInvoiceId]					
@@ -884,7 +884,7 @@ IF(ISNULL(@Post,0)) = 1
 				ON IST.[intCOGSAccountId] = GLA.[intAccountId]
 		WHERE
 			ARID.dblTotal <> @ZeroDecimal
-			AND (ISNULL(ARID.[intInventoryShipmentItemId],0) <> 0 OR ISNULL(ARID.[intShipmentPurchaseSalesContractId],0) <> 0)
+			AND (ISNULL(ARID.[intInventoryShipmentItemId],0) <> 0 OR ISNULL(ARID.[intLoadDetailId],0) <> 0)
 			AND (ISNULL(IST.[intCOGSAccountId],0) = 0 OR GLA.[intAccountId] IS NULL)
 			AND ISNULL(ARID.[intItemId], 0) <> 0
 			AND ISNULL(IST.[strType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment')
@@ -901,7 +901,7 @@ IF(ISNULL(@Post,0)) = 1
 			,[strBatchId]			= I.[strBatchId]
 			,[strPostingError]		= CASE WHEN GLA.[intAccountId] IS NULL THEN 'The Inventory In-Transit Account of item - ' + ICI.[strItemNo] + ' is not valid.' ELSE 'The Inventory In-Transit Account of item - ' + ICI.[strItemNo] + ' was not specified.' END
 		FROM 			
-			(SELECT [intInvoiceId], [intItemId], intItemUOMId, [intInventoryShipmentItemId], [dblTotal], [intShipmentPurchaseSalesContractId] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
+			(SELECT [intInvoiceId], [intItemId], intItemUOMId, [intInventoryShipmentItemId], [dblTotal], [intLoadDetailId] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 		INNER JOIN			
 			@Invoices I
 				ON ARID.[intInvoiceId] = I.[intInvoiceId]						  
@@ -931,7 +931,7 @@ IF(ISNULL(@Post,0)) = 1
 				ON IST.[intInventoryInTransitAccountId] = GLA.[intAccountId]				
 		WHERE
 			ARID.dblTotal <> @ZeroDecimal
-			AND (ISNULL(ARID.[intInventoryShipmentItemId],0) <> 0 OR ISNULL(ARID.[intShipmentPurchaseSalesContractId],0) <> 0)
+			AND (ISNULL(ARID.[intInventoryShipmentItemId],0) <> 0 OR ISNULL(ARID.[intLoadDetailId],0) <> 0)
 			AND ISNULL(ARID.[intItemId], 0) <> 0
 			AND ISNULL(IST.[strType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment')
 			AND I.[strTransactionType] <> 'Debit Memo'	
@@ -949,7 +949,7 @@ IF(ISNULL(@Post,0)) = 1
 			,[strBatchId]			= I.[strBatchId]
 			,[strPostingError]		= CASE WHEN GLA.[intAccountId] IS NULL THEN 'The COGS Account of item - ' + ICI.[strItemNo] + ' is not valid.' ELSE 'The COGS Account of item - ' + ICI.[strItemNo] + ' was not specified.' END
 		FROM 			
-			(SELECT [intInvoiceId], [intItemId], [dblTotal], [intInventoryShipmentItemId], [intShipmentPurchaseSalesContractId] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID				 
+			(SELECT [intInvoiceId], [intItemId], [dblTotal], [intInventoryShipmentItemId], [intLoadDetailId] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID				 
 		INNER JOIN			
 			@Invoices I
 				ON ARID.[intInvoiceId] = I.[intInvoiceId]	
@@ -965,7 +965,7 @@ IF(ISNULL(@Post,0)) = 1
 				ON ARIA.[intCOGSAccountId] = GLA.[intAccountId]	
 		WHERE
 			ARID.dblTotal <> @ZeroDecimal
-			AND (ISNULL(ARID.[intInventoryShipmentItemId],0) <> 0 OR ISNULL(ARID.[intShipmentPurchaseSalesContractId],0) <> 0)
+			AND (ISNULL(ARID.[intInventoryShipmentItemId],0) <> 0 OR ISNULL(ARID.[intLoadDetailId],0) <> 0)
 			AND ISNULL(ARID.[intItemId], 0) <> 0
 			AND (ISNULL(ARIA.[intCOGSAccountId], 0) = 0 OR GLA.[intAccountId] IS NULL)
 			AND ISNULL(ICI.[strType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment')
@@ -985,7 +985,7 @@ IF(ISNULL(@Post,0)) = 1
 		FROM 			
 			(SELECT [intItemId], [intComponentItemId], [intItemUnitMeasureId], [intCompanyLocationId], [strType] FROM vyuARGetItemComponents WITH (NOLOCK)) ARIC
 		INNER JOIN
-			(SELECT [intInvoiceId], [intItemId], [dblTotal], [intInventoryShipmentItemId], [intShipmentPurchaseSalesContractId] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
+			(SELECT [intInvoiceId], [intItemId], [dblTotal], [intInventoryShipmentItemId], [intLoadDetailId] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 				ON ARIC.[intItemId] = ARID.[intItemId]
 		INNER JOIN			
 			@Invoices I
@@ -1002,7 +1002,7 @@ IF(ISNULL(@Post,0)) = 1
 				ON ARIA.[intCOGSAccountId] = GLA.[intAccountId]	 
 		WHERE
 			ARID.[dblTotal] <> @ZeroDecimal
-			AND (ISNULL(ARID.[intInventoryShipmentItemId],0) <> 0 OR ISNULL(ARID.[intShipmentPurchaseSalesContractId],0) <> 0)
+			AND (ISNULL(ARID.[intInventoryShipmentItemId],0) <> 0 OR ISNULL(ARID.[intLoadDetailId],0) <> 0)
 			AND ISNULL(ARID.[intItemId],0) <> 0
 			AND ISNULL(ARIC.[intComponentItemId],0) <> 0
 			AND (ISNULL(ARIA.[intCOGSAccountId], 0) = 0 OR GLA.[intAccountId] IS NULL)
@@ -1021,7 +1021,7 @@ IF(ISNULL(@Post,0)) = 1
 			,[strBatchId]			= I.[strBatchId]
 			,[strPostingError]		= CASE WHEN GLA.[intAccountId] IS NULL THEN 'The Inventory In-Transit Account of item - ' + ICI.[strItemNo] + ' is not valid.' ELSE 'The Inventory In-Transit Account of item - ' + ICI.[strItemNo] + ' was not specified.' END
 		FROM 			
-			(SELECT [intInvoiceId], [intItemId], [dblTotal], [intInventoryShipmentItemId], [intShipmentPurchaseSalesContractId] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
+			(SELECT [intInvoiceId], [intItemId], [dblTotal], [intInventoryShipmentItemId], [intLoadDetailId] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 		INNER JOIN			
 			@Invoices I
 				ON ARID.[intInvoiceId] = I.[intInvoiceId]
@@ -1037,7 +1037,7 @@ IF(ISNULL(@Post,0)) = 1
 				ON ARIA.[intInventoryInTransitAccountId] = GLA.[intAccountId]
 		WHERE
 			ARID.dblTotal <> @ZeroDecimal
-			AND (ISNULL(ARID.[intInventoryShipmentItemId],0) <> 0 OR ISNULL(ARID.[intShipmentPurchaseSalesContractId],0) <> 0)
+			AND (ISNULL(ARID.[intInventoryShipmentItemId],0) <> 0 OR ISNULL(ARID.[intLoadDetailId],0) <> 0)
 			AND ISNULL(ARID.[intItemId], 0) <> 0
 			AND (ISNULL(ARIA.[intInventoryInTransitAccountId], 0) = 0 OR GLA.[intAccountId] IS NULL)
 			AND ISNULL(ICI.[strType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment')
@@ -1057,7 +1057,7 @@ IF(ISNULL(@Post,0)) = 1
 		FROM 			
 			(SELECT [intCompanyLocationId], [intItemId], [intComponentItemId], [intItemUnitMeasureId], [strType] FROM vyuARGetItemComponents WITH (NOLOCK)) ARIC
 		INNER JOIN
-			(SELECT [intInvoiceId], [intItemId], [dblTotal], [intInventoryShipmentItemId], [intShipmentPurchaseSalesContractId] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
+			(SELECT [intInvoiceId], [intItemId], [dblTotal], [intInventoryShipmentItemId], [intLoadDetailId] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 				ON ARIC.[intItemId] = ARID.[intItemId]
 		INNER JOIN			
 			@Invoices I
@@ -1077,7 +1077,7 @@ IF(ISNULL(@Post,0)) = 1
 				ON ARIA.[intInventoryInTransitAccountId] = GLA.[intAccountId] 		 
 		WHERE
 			ARID.[dblTotal] <> @ZeroDecimal
-			AND (ISNULL(ARID.[intInventoryShipmentItemId],0) <> 0 OR ISNULL(ARID.[intShipmentPurchaseSalesContractId],0) <> 0)
+			AND (ISNULL(ARID.[intInventoryShipmentItemId],0) <> 0 OR ISNULL(ARID.[intLoadDetailId],0) <> 0)
 			AND ISNULL(ARID.[intItemId],0) <> 0
 			AND ISNULL(ARIC.[intComponentItemId],0) <> 0
 			AND (ISNULL(ARIA.[intInventoryInTransitAccountId], 0) = 0 OR GLA.[intAccountId] IS NULL)
@@ -1098,7 +1098,7 @@ IF(ISNULL(@Post,0)) = 1
 		FROM 					
 			@Invoices I
 		INNER JOIN
-			(SELECT [intInvoiceId], [intItemId], [intContractHeaderId], [intContractDetailId], [dblPrice] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
+			(SELECT [intInvoiceId], [intItemId], [intContractHeaderId], [intContractDetailId], [dblPrice], [intLoadDetailId] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 				ON I.[intInvoiceId] = ARID.[intInvoiceId]
 		INNER JOIN
 			(SELECT [intItemId], [strItemNo] FROM tblICItem WITH (NOLOCK) WHERE strType NOT IN ('Other Charge') ) ICI
@@ -1110,6 +1110,7 @@ IF(ISNULL(@Post,0)) = 1
 		WHERE
 			ARID.[dblPrice] = @ZeroDecimal
 			AND CTCD.[strPricingType] <> 'Index'
+			AND ISNULL(ARID.[intLoadDetailId],0) = 0
 
 
 		UNION
@@ -1125,7 +1126,7 @@ IF(ISNULL(@Post,0)) = 1
 		FROM 					
 			@Invoices I
 		INNER JOIN
-			(SELECT [intInvoiceId], [intItemId], [intContractHeaderId], [intContractDetailId], [dblPrice] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
+			(SELECT [intInvoiceId], [intItemId], [intContractHeaderId], [intContractDetailId], [dblPrice], [intLoadDetailId] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 				ON I.[intInvoiceId] = ARID.[intInvoiceId]
 		INNER JOIN
 			(SELECT [intItemId], [strItemNo] FROM tblICItem WITH (NOLOCK) WHERE strType NOT IN ('Other Charge')) ICI
@@ -1141,6 +1142,31 @@ IF(ISNULL(@Post,0)) = 1
 			ARID.[dblPrice] <> @ZeroDecimal				
 			AND CAST(ISNULL(ARCC.[dblCashPrice], @ZeroDecimal) AS MONEY) <> CAST(ISNULL(ARID.[dblPrice], @ZeroDecimal) AS MONEY)
 			AND ARCC.[strPricingType] <> 'Index'
+			AND ISNULL(ARID.[intLoadDetailId],0) = 0
+
+		UNION
+		--Lot Tracked Item - Direct Invoice
+		SELECT
+			 [intInvoiceId]			= I.[intInvoiceId]
+			,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+			,[strTransactionType]	= I.[strTransactionType]
+			,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+			,[intItemId]			= I.[intItemId]
+			,[strBatchId]			= I.[strBatchId]
+			,[strPostingError]		= 'Direct Invoice - Posting lot tracked item(' + ARID.[strItemDescription] + ') is not allowed.'
+		FROM 
+			@Invoices I	
+		INNER JOIN
+			(SELECT [intInvoiceId], [intItemId], [strItemDescription], [intInventoryShipmentItemId], [intLoadDetailId], [ysnBlended], [intTicketId] FROM dbo.tblARInvoiceDetail WITH (NOLOCK)) ARID
+				ON I.[intInvoiceId] = ARID.[intInvoiceId]		 
+		WHERE
+			ISNULL(ARID.[intItemId],0) <> 0
+			AND [dbo].[fnGetItemLotType](ARID.[intItemId]) <> 0
+			AND ISNULL(ARID.[intInventoryShipmentItemId],0) = 0
+			AND ISNULL(ARID.[intLoadDetailId],0) = 0
+			AND ISNULL(ARID.[intTicketId],0) = 0
+			AND ISNULL(ARID.[ysnBlended],0) = 0
+			AND ISNULL(I.[intLoadDistributionHeaderId],0) = 0
 																																			
 	END
 ELSE
@@ -1204,6 +1230,7 @@ ELSE
 
 		UNION
 		--ALREADY HAVE PAYMENTS
+		--AR-5542 added the additional comment for have payments
 		SELECT
 			 [intInvoiceId]			= I.[intInvoiceId]
 			,[strInvoiceNumber]		= I.[strInvoiceNumber]		
@@ -1211,7 +1238,7 @@ ELSE
 			,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
 			,[intItemId]			= I.[intItemId]
 			,[strBatchId]			= I.[strBatchId]
-			,[strPostingError]		= ARP.[strRecordNumber] + ' payment was already made on this ' + I.strTransactionType + '.'
+			,[strPostingError]		= ARP.[strRecordNumber] + ' payment was already made on this ' + I.strTransactionType + '.' + CASE WHEN I.strTransactionType = 'Credit Memo' THEN ' Please remove payment record and try again.' ELSE '' END
 		FROM 
 			(SELECT [intPaymentId], [strRecordNumber] FROM tblARPayment WITH (NOLOCK)) ARP
 		INNER JOIN 
@@ -1876,6 +1903,17 @@ SELECT
 	,[strPostingError] -- + '[fnICGetInvalidInvoicesForItemStoragePosting]'
 FROM 
 	[dbo].[fnICGetInvalidInvoicesForItemStoragePosting](@ItemsForStoragePosting, @Post)
+
+
+UPDATE RT
+SET RT.[strBatchId] = I.[strBatchId]
+FROM
+	@returntable RT
+INNER JOIN
+	@Invoices I
+		ON RT.[intInvoiceId] = I.[intInvoiceId]
+WHERE 
+	LTRIM(RTRIM(ISNULL(RT.[strBatchId],''))) = ''
 
 RETURN
 

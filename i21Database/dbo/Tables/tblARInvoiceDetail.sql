@@ -17,6 +17,8 @@
 	[strItemTermDiscountBy]					NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL,
     [dblPrice]								NUMERIC(18, 6)	CONSTRAINT [DF_tblARInvoiceDetail_dblPrice] DEFAULT ((0)) NULL,
 	[dblBasePrice]							NUMERIC(18, 6)	CONSTRAINT [DF_tblARInvoiceDetail_dblBasePrice] DEFAULT ((0)) NULL,
+	[dblUnitPrice]							NUMERIC(18, 6)	CONSTRAINT [DF_tblARInvoiceDetail_dblUnitPrice] DEFAULT ((0)) NULL,
+	[dblBaseUnitPrice]						NUMERIC(18, 6)	CONSTRAINT [DF_tblARInvoiceDetail_dblBaseUnitPrice] DEFAULT ((0)) NULL,
 	[strPricing]							NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL,
 	[dblTotalTax]							NUMERIC(18, 6)	CONSTRAINT [DF_tblARInvoiceDetail_dblTotalTax] DEFAULT ((0)) NULL,
 	[dblBaseTotalTax]						NUMERIC(18, 6)	CONSTRAINT [DF_tblARInvoiceDetail_dblBaseTotalTax] DEFAULT ((0)) NULL,
@@ -138,31 +140,3 @@ CREATE NONCLUSTERED INDEX [PIndex]
     ON [dbo].[tblARInvoiceDetail]([intInvoiceId] ASC, [intItemId] ASC, [strItemDescription] ASC, [dblQtyOrdered] ASC, [dblQtyShipped] ASC, [dblPrice] ASC, [dblTotal] ASC);
 
 GO
-CREATE TRIGGER [dbo].[trgUpdateOrderStatus]
-    ON [dbo].[tblARInvoiceDetail]
-    FOR DELETE
-    AS
-    BEGIN
-        DECLARE @deleted TABLE(intInvoiceDetailId INT, intSalesOrderDetailId INT)
-
-		INSERT INTO @deleted
-		SELECT intInvoiceDetailId, intSalesOrderDetailId FROM DELETED ORDER BY intInvoiceDetailId
-
-		WHILE EXISTS(SELECT NULL FROM @deleted)
-			BEGIN
-				DECLARE @invoiceDetailId INT,
-						@orderDetailId INT,
-						@orderId INT
-
-				SELECT TOP 1 @invoiceDetailId = intInvoiceDetailId
-				           , @orderDetailId = intSalesOrderDetailId FROM @deleted
-
-				IF ISNULL(@orderDetailId, 0) > 0
-					BEGIN
-						SELECT TOP 1 @orderId = intSalesOrderId FROM tblSOSalesOrderDetail WHERE intSalesOrderDetailId = @orderDetailId
-						EXEC uspSOUpdateOrderShipmentStatus @orderId, 0 , 1
-					END				
-
-				DELETE FROM @deleted WHERE intInvoiceDetailId = @invoiceDetailId
-			END
-    END

@@ -84,13 +84,13 @@ BEGIN
 				,[ysnAgroguideInterface]
 				,[ysnLocationActive]
 				,[intProfitCenter]
-				,[intCashAccount]
-				,[intDepositAccount]
-				,[intARAccount]
-				,[intAPAccount]
-				,[intSalesAdvAcct]
-				,[intPurchaseAdvAccount]
-				,[intFreightAPAccount]
+				--,[intCashAccount]
+				--,[intDepositAccount]
+				--,[intARAccount]
+				--,[intAPAccount]
+				--,[intSalesAdvAcct]
+				--,[intPurchaseAdvAccount]
+				--,[intFreightAPAccount]
 				,[intFreightExpenses]
 				,[intFreightIncome]
 				,[intServiceCharges]
@@ -98,9 +98,10 @@ BEGIN
 				,[intCashOverShort]
 				,[intWriteOff]
 				,[intCreditCardFee]
-				,[intSalesAccount]
-				,[intCostofGoodsSold]
-				,[intInventory]
+				--,[intSalesAccount]
+				--,[intCostofGoodsSold]
+				--,[intInventory]
+				,[intUndepositedFundsId]
 				,[strInvoiceType]
 				,[strDefaultInvoicePrinter]
 				,[strPickTicketType]
@@ -282,13 +283,13 @@ BEGIN
 					ELSE 
 						GL.intAccountSegmentId 
 					END --AG.[agloc_gl_profit_center]		--<intProfitCenter, int,>				--TODO
-				,CA.[inti21Id]						--<agloc_cash, int,>
-				,0									--<intDepositAccount, int,>
-				,0									--<intARAccount, int,>
-				,0									--<intAPAccount, int,>
-				,0									--<intSalesAdvAcct, int,>
-				,0									--<intPurchaseAdvAccount, int,>
-				,0									--<intFreightAPAccount, int,>
+				--,CA.[inti21Id]						--<agloc_cash, int,>
+				--,0									--<intDepositAccount, int,>
+				--,0									--<intARAccount, int,>
+				--,0									--<intAPAccount, int,>
+				--,0									--<intSalesAdvAcct, int,>
+				--,0									--<intPurchaseAdvAccount, int,>
+				--,0									--<intFreightAPAccount, int,>
 				,FE.[inti21Id]						--<intFreightExpenses, int,>
 				,FI.[inti21Id]						--<intFreightIncome, int,>
 				,SC.[inti21Id]						--<intServiceCharges, int,>
@@ -296,9 +297,10 @@ BEGIN
 				,OS.[inti21Id]						--<intCashOverShort, int,>
 				,WO.[inti21Id]						--<intWriteOff, int,>
 				,CF.[inti21Id]						--<intCreditCardFee, int,>
-				,0									--<intSalesAccount, int,>
-				,0									--<intCostofGoodsSold, int,>
-				,0									--<intInventory, int,>
+				--,0									--<intSalesAccount, int,>
+				--,0									--<intCostofGoodsSold, int,>
+				--,0									--<intInventory, int,>
+				,CA.[inti21Id]						--[intUndepositedFundsId] <agloc_cash, int,> 
 				,(CASE UPPER(AG.[agloc_ivc_type_phs7])
 					WHEN ''P''	THEN	''Plain full page''
 					WHEN ''H''	THEN	''Plain half page''
@@ -500,23 +502,24 @@ BEGIN
 				,[ysnAgroguideInterface]
 				,[ysnLocationActive]
 				,[intProfitCenter]
-				,[intCashAccount]
+				--,[intCashAccount]
 				,[intDepositAccount]
 				,[intARAccount]
 				,[intAPAccount]
 				,[intSalesAdvAcct]
 				,[intPurchaseAdvAccount]
 				,[intFreightAPAccount]
-				,[intFreightExpenses]
-				,[intFreightIncome]
-				,[intServiceCharges]
-				,[intSalesDiscounts]
-				,[intCashOverShort]
-				,[intWriteOff]
-				,[intCreditCardFee]
-				,[intSalesAccount]
-				,[intCostofGoodsSold]
-				,[intInventory]
+				--,[intFreightExpenses]
+				--,[intFreightIncome]
+				--,[intServiceCharges]
+				--,[intSalesDiscounts]
+				--,[intCashOverShort]
+				--,[intWriteOff]
+				--,[intCreditCardFee]
+				--,[intSalesAccount]
+				--,[intCostofGoodsSold]
+				--,[intInventory]
+				,[intUndepositedFundsId]
 				,[strInvoiceType]
 				,[strPickTicketType]
 				,[strPrintonInvoice]
@@ -582,23 +585,24 @@ BEGIN
 					ELSE 0
 				  END)								--<ysnLocationActive, bit,>
 				,GL.intAccountSegmentId AS intProfitCenter --GA.[galoc_gl_profit_center]		--<intProfitCenter, int,>				--TODO
-				,CA.[inti21Id]						--<[galoc_gl_cash], int,>
+				--,CA.[inti21Id]						--<[galoc_gl_cash], int,>
 				,DA.[inti21Id]						--<intDepositAccount, int,>
 				,ARA.[inti21Id]						--<intARAccount, int,>
 				,APA.[inti21Id]						--<intAPAccount, int,>
 				,SAA.[inti21Id]						--<intSalesAdvAcct, int,>
 				,PAA.[inti21Id]						--<intPurchaseAdvAccount, int,>
 				,FAP.[inti21Id]						--<intFreightAPAccount, int,>
-				,0									--<intFreightExpenses, int,>
-				,0									--<intFreightIncome, int,>
-				,0									--<intServiceCharges, int,>
-				,0									--<intSalesDiscounts, int,>
-				,0									--<intCashOverShort, int,>
-				,0									--<intWriteOff, int,>
-				,0									--<intCreditCardFee, int,>
-				,0									--<intSalesAccount, int,>
-				,0									--<intCostofGoodsSold, int,>
-				,0									--<intInventory, int,>
+				--,0									--<intFreightExpenses, int,>
+				--,0									--<intFreightIncome, int,>
+				--,0									--<intServiceCharges, int,>
+				--,0									--<intSalesDiscounts, int,>
+				--,0									--<intCashOverShort, int,>
+				--,0									--<intWriteOff, int,>
+				--,0									--<intCreditCardFee, int,>
+				--,0									--<intSalesAccount, int,>
+				--,0									--<intCostofGoodsSold, int,>
+				--,0									--<intInventory, int,>
+				,CA.[inti21Id]						--[intUndepositedFundsId] <[galoc_gl_cash], int,>
 				,''''									--<strInvoiceType, nvarchar(50),>
 				,''''									--<strPickTicketType, nvarchar(50),>
 				,''''									--<strPrintonInvoice, nvarchar(50),>
@@ -898,23 +902,24 @@ BEGIN
     ,[ysnAgroguideInterface]  
     ,[ysnLocationActive]  
     ,[intProfitCenter]  
-    ,[intCashAccount]  
-    ,[intDepositAccount]  
-    ,[intARAccount]  
-    ,[intAPAccount]  
-    ,[intSalesAdvAcct]  
-    ,[intPurchaseAdvAccount]  
-    ,[intFreightAPAccount]  
+    --,[intCashAccount]  
+    --,[intDepositAccount]  
+    --,[intARAccount]  
+    --,[intAPAccount]  
+    --,[intSalesAdvAcct]  
+    --,[intPurchaseAdvAccount]  
+    --,[intFreightAPAccount]  
     ,[intFreightExpenses]  
     ,[intFreightIncome]  
-    ,[intServiceCharges]  
-    ,[intSalesDiscounts]  
-    ,[intCashOverShort]  
-    ,[intWriteOff]  
-    ,[intCreditCardFee]  
-    ,[intSalesAccount]  
-    ,[intCostofGoodsSold]  
-    ,[intInventory]  
+ --   ,[intServiceCharges]  
+ --   ,[intSalesDiscounts]  
+ --   ,[intCashOverShort]  
+ --   ,[intWriteOff]  
+ --   ,[intCreditCardFee]  
+ --   ,[intSalesAccount]  
+ --   ,[intCostofGoodsSold]  
+ --   ,[intInventory]  
+	--,[intUndepositedFundsId]
     ,[strInvoiceType]  
     ,[strDefaultInvoicePrinter]  
     ,[strPickTicketType]  
@@ -1025,24 +1030,25 @@ BEGIN
     ,0        --<ysnDefaultCustomBlend, bit,>  
     ,0        --<ysnAgroguideInterface, bit,>  
     ,1        --<ysnLocationActive, bit,>  
-    ,GL.intAccountSegmentId AS intProfitCenter --PT.[ptloc_gl_profit_center]  --<intProfitCenter, int,>    --TODO  
-    ,0      --<ptloc_cash, int,>  
-    ,0         --<intDepositAccount, int,>  
-    ,0         --<intARAccount, int,>  
-    ,0         --<intAPAccount, int,>  
-    ,0         --<intSalesAdvAcct, int,>  
-    ,0         --<intPurchaseAdvAccount, int,>  
-    ,0         --<intFreightAPAccount, int,>  
+    ,GL.intAccountSegmentId AS intProfitCenter --PT.[ptloc_gl_profit_center]  --<intProfitCenter, int,>    --TODO      
+    --,0      --<ptloc_cash, int,>  
+    --,0         --<intDepositAccount, int,>  
+    --,0         --<intARAccount, int,>  
+    --,0         --<intAPAccount, int,>  
+    --,0         --<intSalesAdvAcct, int,>  
+    --,0         --<intPurchaseAdvAccount, int,>  
+    --,0         --<intFreightAPAccount, int,>  
     ,FE.[inti21Id]      --<intFreightExpenses, int,>  
     ,FI.[inti21Id]      --<intFreightIncome, int,>  
-    ,0      --<intServiceCharges, int,>  
-    ,0      --<intSalesDiscounts, int,>  
-    ,0      --<intCashOverShort, int,>  
-    ,0      --<intWriteOff, int,>  
-    ,0      --<intCreditCardFee, int,>  
-    ,0         --<intSalesAccount, int,>  
-    ,0         --<intCostofGoodsSold, int,>  
-    ,0         --<intInventory, int,>  
+ --   ,0      --<intServiceCharges, int,>  
+ --   ,0      --<intSalesDiscounts, int,>  
+ --   ,0      --<intCashOverShort, int,>  
+ --   ,0      --<intWriteOff, int,>  
+ --   ,0      --<intCreditCardFee, int,>  
+ --   ,0         --<intSalesAccount, int,>  
+ --   ,0         --<intCostofGoodsSold, int,>  
+ --   ,0         --<intInventory, int,>  
+	--,0		-- [intUndepositedFundsId] <ptloc_cash, int,>  
     ,(CASE UPPER(PT.[ptloc_ivc_type_fpl])  
      WHEN ''F'' THEN ''Forms''  
      WHEN ''L'' THEN ''Laser''  
@@ -1058,7 +1064,7 @@ BEGIN
     ,0        --<ysnPrintContractBalance, bit,>  
     ,PT.[ptloc_merchant]     --<strJohnDeereMerchant, nvarchar(50),>  
     ,''''        --<strInvoiceComments, nvarchar(50),>  
-    ,0        --<ysnUseOrderNumberforInvoiceNumber, bit,>  
+    ,0        --<ysnUseOrderNumberforInvoiceNumber, bitint  
     ,0       --<ysnOverrideOrderInvoiceNumber, bit,>  
     ,0        --<ysnPrintInvoiceMedTags, bit,>  
     ,0        --<ysnPrintPickTicketMedTags, bit,>  

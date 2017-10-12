@@ -42,6 +42,7 @@ GO
 :r "..\Scripts\SM\FixCompanyLocationNumber.sql"
 :r "..\Scripts\SM\SetDefaultValues.sql"
 :r "..\Scripts\SM\InsertOriginTaxClassXRef.sql"
+:r "..\Scripts\SM\CopyCashToUndepositedFund.sql"
 
 --Patronage
 :r "..\Scripts\PAT\DropStoredProcedures.sql"
@@ -97,4 +98,6 @@ GO
 :r "..\Scripts\IC\uspICDCUomMigrationGr.sql"
 GO
 :r "..\Scripts\IC\uspICDCUomMigrationPt.sql"
+GO
+:r "..\Scripts\IC\uspICDCRecipeFormulaMigrationPt.sql"
 GO

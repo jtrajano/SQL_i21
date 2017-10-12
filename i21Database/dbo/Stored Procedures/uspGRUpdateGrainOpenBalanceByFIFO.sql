@@ -401,6 +401,28 @@ BEGIN TRY
 		FROM @StorageTicketInfoByFIFO
 		WHERE strItemType = 'Inventory'
 
+		IF @strSourceType = 'InventoryShipment'
+		BEGIN
+		      IF EXISTS( SELECT 1 FROM 
+						 tblICInventoryShipmentItem ShipmentItem 
+						 JOIN tblICInventoryShipment Shipment ON Shipment.intInventoryShipmentId=ShipmentItem.intInventoryShipmentId
+						 WHERE Shipment.intSourceType=1 AND ShipmentItem.intStorageScheduleTypeId IS NOT NULL AND Shipment.intInventoryShipmentId=@IntSourceKey
+						)
+			 BEGIN
+				 UPDATE SH 
+				 SET 
+				 SH.intTicketId			  = ShipmentItem.intSourceId
+				,SH.intTransactionTypeId  = 1
+				FROM [tblGRStorageHistory] SH
+				JOIN tblICInventoryShipment Shipment ON Shipment.intInventoryShipmentId = SH.intInventoryShipmentId
+				JOIN tblICInventoryShipmentItem ShipmentItem  ON ShipmentItem.intInventoryShipmentId = Shipment.intInventoryShipmentId
+				WHERE 
+				SH.intInventoryShipmentId=@IntSourceKey 
+				AND [strType]='Reduced By Inventory Shipment'  
+				AND ShipmentItem.intStorageScheduleTypeId IS NOT NULL
+			 END
+		END
+
 		SELECT 
 			 [intCustomerStorageId]
 			,[strStorageTicketNumber]

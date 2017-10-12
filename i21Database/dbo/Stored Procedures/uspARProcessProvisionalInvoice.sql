@@ -118,6 +118,7 @@ BEGIN TRY
 		,[dblQtyShipped]
 		,[dblDiscount]
 		,[dblPrice]
+		,[dblUnitPrice]
 		,[ysnRefreshPrice]
 		,[strMaintenanceType]
 		,[strFrequency]
@@ -206,12 +207,13 @@ BEGIN TRY
 		,[ysnInventory]						= 1
 		,[strDocumentNumber]				= @InvoiceNumber
 		,[strItemDescription]				= ARSID.[strItemDescription] 
-		,[intOrderUOMId]					= ARSID.[intShipmentItemUOMId]
-		,[dblQtyOrdered]					= ARSID.dblShipmentQuantity 
-		,[intItemUOMId]						= ARSID.[intShipmentItemUOMId]
-		,[dblQtyShipped]					= ARSID.dblShipmentQuantity
+		,[intOrderUOMId]					= ARSID.[intItemUOMId]
+		,[dblQtyOrdered]					= ARSID.[dblQtyOrdered] 
+		,[intItemUOMId]						= ARSID.[intItemUOMId]
+		,[dblQtyShipped]					= ARSID.[dblShipmentQuantity]
 		,[dblDiscount]						= ARSID.[dblDiscount]
-		,[dblPrice]							= ISNULL(ARID.[dblPrice], ARSID.[dblPrice]) 
+		,[dblPrice]							= ISNULL(ARSID.[dblPrice], ARID.[dblPrice]) 
+		,[dblUnitPrice]						= ISNULL(ARSID.[dblShipmentUnitPrice], ARID.[dblUnitPrice]) 
 		,[ysnRefreshPrice]					= 0
 		,[strMaintenanceType]				= ARID.[strMaintenanceType]
 		,[strFrequency]						= ARID.[strFrequency]
@@ -324,6 +326,7 @@ SELECT
 		,[dblQtyShipped]					= ISI.[dblQuantity]  
 		,[dblDiscount]						= 0.00
 		,[dblPrice]							= ISNULL(ARID.[dblPrice], ISI.[dblUnitPrice])
+		,[dblUnitPrice]						= ISNULL(ARID.[dblUnitPrice], ISI.[dblUnitPrice])
 		,[ysnRefreshPrice]					= 0
 		,[strMaintenanceType]				= ARID.[strMaintenanceType]
 		,[strFrequency]						= ARID.[strFrequency]

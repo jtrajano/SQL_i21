@@ -22,6 +22,7 @@ BEGIN TRY
 		,@strAttributeValue NVARCHAR(50)
 		,@intBlendAttributeId INT
 		,@strBlendAttributeValue NVARCHAR(50)
+		,@intMachineId INT
 
 	SELECT @intBlendAttributeId = intAttributeId
 	FROM tblMFAttribute
@@ -729,7 +730,7 @@ BEGIN TRY
 
 					SELECT @intWODuration = @intNoOfUnit / @dblMachineCapacity
 
-					IF Convert(datetime,Convert(char,@dtmShiftStartTime,101)) > @dtmExpectedDate
+					IF Convert(DATETIME, Convert(CHAR, @dtmShiftStartTime, 101)) > @dtmExpectedDate
 						AND NOT EXISTS (
 							SELECT *
 							FROM @tblMFScheduleWorkOrderDetail
@@ -1352,7 +1353,8 @@ BEGIN TRY
 						AND S.intStatusId <> 1
 						AND intManufacturingCellId = @intManufacturingCellId2
 						AND ysnUnableToSchedule = 0
-					) AND @ysnScheduleByManufacturingCell = 1
+					)
+				AND @ysnScheduleByManufacturingCell = 1
 			BEGIN
 				SELECT @intWorkOrderId = intWorkOrderId
 				FROM @tblMFScheduleWorkOrder S
@@ -1374,14 +1376,19 @@ BEGIN TRY
 
 				RETURN
 			END
+
 			IF EXISTS (
 					SELECT *
 					FROM @tblMFScheduleWorkOrder S
 					WHERE intNoOfUnit > 0
-						AND S.intStatusId NOt in (1,3)
+						AND S.intStatusId NOT IN (
+							1
+							,3
+							)
 						AND intManufacturingCellId = @intManufacturingCellId2
 						AND ysnUnableToSchedule = 0
-					) AND @ysnScheduleByManufacturingCell = 0
+					)
+				AND @ysnScheduleByManufacturingCell = 0
 			BEGIN
 				SELECT @intWorkOrderId = intWorkOrderId
 				FROM @tblMFScheduleWorkOrder S
@@ -1403,6 +1410,7 @@ BEGIN TRY
 
 				RETURN
 			END
+
 			IF EXISTS (
 					SELECT *
 					FROM @tblMFScheduleWorkOrder S
@@ -1410,24 +1418,24 @@ BEGIN TRY
 						AND S.intStatusId <> 1
 						AND intManufacturingCellId = @intManufacturingCellId2
 						AND ysnUnableToSchedule = 0
-					) AND @ysnScheduleByManufacturingCell = 0
+					)
+				AND @ysnScheduleByManufacturingCell = 0
 			BEGIN
-
-						UPDATE @tblMFScheduleWorkOrder
-						SET ysnUnableToSchedule = 1
-							,intCalendarDetailId = 0
-							,intRequiredDuration = 1
-							,dtmPlannedStartDate = NULL
-							,intPlannedShiftId = NULL
-							,dtmPlannedEndDate = NULL
-							,intDuration = NULL
-							,strNote = 'Unable to Schedule'
-						WHERE intNoOfUnit > 0
-						AND intStatusId = 3
-						AND intManufacturingCellId = @intManufacturingCellId2
-						AND ysnUnableToSchedule = 0
-
+				UPDATE @tblMFScheduleWorkOrder
+				SET ysnUnableToSchedule = 1
+					,intCalendarDetailId = 0
+					,intRequiredDuration = 1
+					,dtmPlannedStartDate = NULL
+					,intPlannedShiftId = NULL
+					,dtmPlannedEndDate = NULL
+					,intDuration = NULL
+					,strNote = 'Unable to Schedule'
+				WHERE intNoOfUnit > 0
+					AND intStatusId = 3
+					AND intManufacturingCellId = @intManufacturingCellId2
+					AND ysnUnableToSchedule = 0
 			END
+
 			IF @intPreferenceId = 1
 			BEGIN
 				SELECT @intManufacturingCellId2 = MIN(intManufacturingCellId)
@@ -1512,9 +1520,9 @@ BEGIN TRY
 
 					IF @dtmPlannedStartDate IS NULL
 					BEGIN
-						SELECT @dtmPlannedStartDate = IsNULL(MIN(dtmPlannedStartDate),GETDATE())
-							,@intExecutionOrder = ISNULL(MIN(intExecutionOrder),0)
-							,@dtmExpectedDate = IsNULL(MIN(dtmExpectedDate),@dtmExpectedDate)
+						SELECT @dtmPlannedStartDate = IsNULL(MIN(dtmPlannedStartDate), GETDATE())
+							,@intExecutionOrder = ISNULL(MIN(intExecutionOrder), 0)
+							,@dtmExpectedDate = IsNULL(MIN(dtmExpectedDate), @dtmExpectedDate)
 						FROM @tblMFScheduleWorkOrder
 						WHERE intManufacturingCellId = @intNextManufacturingCellId
 							AND dtmExpectedDate >= @dtmExpectedDate
@@ -2057,6 +2065,14 @@ BEGIN TRY
 				,@dtmToDate AS dtmToDate
 		END
 
+		SELECT @intMachineId = P1.intMachineId
+		FROM tblMFMachinePackType P1
+		WHERE P1.intPackTypeId IN (
+				SELECT P2.intPackTypeId
+				FROM tblMFManufacturingCellPackType P2
+				WHERE P2.intManufacturingCellId = @intManufacturingCellId
+				)
+
 		SELECT C.intManufacturingCellId
 			,C.strCellName
 			,W.intWorkOrderId
@@ -2123,6 +2139,15 @@ BEGIN TRY
 			,CONVERT(BIT, 0) AS ysnEOModified
 			,SL.intDemandRatio
 			,ISNULL(SL.intNoOfFlushes, 0) AS intNoOfFlushes
+			,M.dblBatchSize
+			,U1.strUnitMeasure AS strBatchUOM
+			,W.dblQuantity / (
+				CASE 
+					WHEN IsNULL(M.dblBatchSize, 0) = 0
+						THEN 1
+					ELSE M.dblBatchSize
+					END
+				) dblNoofBatches
 		FROM tblMFWorkOrder W
 		JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 			AND W.intManufacturingCellId = @intManufacturingCellId
@@ -2138,6 +2163,8 @@ BEGIN TRY
 		JOIN dbo.tblMFRecipe R ON R.intItemId = W.intItemId
 			AND R.intLocationId = W.intLocationId
 			AND R.ysnActive = 1
+		LEFT JOIN tblMFMachine M ON M.intMachineId = @intMachineId
+		LEFT JOIN dbo.tblICUnitMeasure U1 ON U1.intUnitMeasureId = M.intBatchSizeUOMId
 		ORDER BY WS.intSequenceNo DESC
 			,SL.intExecutionOrder
 

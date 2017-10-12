@@ -1,156 +1,104 @@
 ﻿CREATE PROCEDURE [dbo].[uspSOUpdateOrderShipmentStatus]
-	@SalesOrderId			INT,
-	@ysnOpenStatus			BIT = 0,
-	@ForDelete				BIT = 0
+	  @intTransactionId			INT
+	, @strTransactionType		NVARCHAR(100) = 'Sales Order'
+	, @ysnForDelete				BIT = 0
 AS
 BEGIN
 
-DECLARE	@OrderStatus NVARCHAR(50)
-, @ShipmentPosted BIT
-SET @OrderStatus = 'Open'
+DECLARE	@strOrderStatus			NVARCHAR(50) = 'Open'	  
+	  , @dblTotalQtyOrdered		NUMERIC(18,6) = 0
+	  , @dblTotalQtyShipped		NUMERIC(18,6) = 0
+	  , @intSalesOrderId		INT = NULL
 
-IF @ysnOpenStatus = 1
-	BEGIN		
-		GOTO SET_ORDER_STATUS;
-	END	
+IF @strTransactionType = 'Sales Order' 
+	SET @intSalesOrderId = @intTransactionId
 
-DECLARE @IsOpen BIT = 0
-SET @IsOpen = (	SELECT COUNT(1) 
-					FROM
-						tblSOSalesOrderDetail					
-					WHERE
-						[intSalesOrderId] = @SalesOrderId 
-						AND (NOT EXISTS(	SELECT NULL 
-											FROM
-												tblICInventoryShipmentItem
-											WHERE
-												intLineNo = tblSOSalesOrderDetail.[intSalesOrderDetailId]
-												AND intOrderId = @SalesOrderId
-											)
-							AND
-							EXISTS(			SELECT NULL 
-											FROM 
-												tblICItem 
-											WHERE
-												tblICItem.[intItemId] = tblSOSalesOrderDetail.[intSalesOrderDetailId]
-												AND ISNULL(tblICItem.strLotTracking, 'No') <> 'No'
-											)
-						)
-						AND (NOT EXISTS(	SELECT NULL 
-										FROM
-											tblARInvoiceDetail 
-										WHERE
-											intSalesOrderDetailId = tblSOSalesOrderDetail.intSalesOrderDetailId
-										)
-							AND
-							EXISTS(			SELECT NULL 
-											FROM 
-												tblICItem 
-											WHERE
-												tblICItem.[intItemId] = tblSOSalesOrderDetail.[intSalesOrderDetailId]												
-												AND ISNULL(tblICItem.strLotTracking, 'No') = 'No'
-											)										
-						)										
-					)
-					
-IF(NOT EXISTS(SELECT NULL FROM tblICInventoryShipmentItem ISHI 
-					INNER JOIN tblICInventoryShipment ISH
-						ON ISHI.intInventoryShipmentId = ISH.intInventoryShipmentId
-					INNER JOIN tblSOSalesOrderDetail SOD
-						ON ISHI.intLineNo = SOD.intSalesOrderDetailId
-				WHERE SOD.intSalesOrderId = @SalesOrderId) 
-AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ISD
-					INNER JOIN tblARInvoice ISH
-						ON ISD.intInvoiceId = ISH.intInvoiceId
-					INNER JOIN tblSOSalesOrderDetail SOD
-						ON ISD.intSalesOrderDetailId = SOD.intSalesOrderDetailId
-					WHERE SOD.intSalesOrderId = @SalesOrderId
-					  AND ISNULL(ISD.[intSalesOrderDetailId], 0) <> 0	
-		GROUP BY
-			ISD.[intSalesOrderDetailId]))
-	SET @IsOpen = 1
-			
-IF (@IsOpen <> 0)
+IF @strTransactionType = 'Invoice'
 	BEGIN
-		SET @OrderStatus = 'Open'
-		GOTO SET_ORDER_STATUS;
-	END					
-	
-UPDATE
-	tblSOSalesOrderDetail
-SET
-	dblQtyShipped = ISNULL(SHP.[dblQuantity], 0.00)
-FROM
-	(
-		SELECT SOD.intSalesOrderDetailId
-			 , dblQuantity			= SUM(ISNULL(CASE WHEN ID.intItemUOMId IS NOT NULL AND SOD.intItemUOMId IS NOT NULL THEN ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, SOD.intItemUOMId, ISNULL(ID.dblQtyShipped,0)), ISNULL(ID.dblQtyShipped,0)) ELSE ISNULL(ID.dblQtyShipped,0) END, 0)) + SUM(ISNULL(dbo.fnCalculateQtyBetweenUOM(ISHI.intItemUOMId, SOD.intItemUOMId, ISNULL(ISHI.dblQuantity,0)), 0))			 
+		UPDATE SOD
+		SET dblQtyShipped  = CASE WHEN @ysnForDelete = 0 
+								  THEN SOD.dblQtyShipped + CONVERT(NUMERIC(18, 6), dbo.fnCalculateQtyBetweenUOM(SOD.intItemUOMId, ISNULL(UOM.intItemUOMId, SOD.intItemUOMId), ISNULL(INVOICEITEMS.dblQtyShipped, 0)))
+								  ELSE SOD.dblQtyShipped - CONVERT(NUMERIC(18, 6), dbo.fnCalculateQtyBetweenUOM(SOD.intItemUOMId, ISNULL(UOM.intItemUOMId, SOD.intItemUOMId), ISNULL(INVOICEITEMS.dblQtyShipped, 0)))
+							 END
+		  , @intSalesOrderId = SOD.intSalesOrderId
 		FROM tblSOSalesOrderDetail SOD
-			LEFT JOIN (SELECT ID.intSalesOrderDetailId
-							, ID.intItemUOMId
-							, dblQtyShipped	= CASE WHEN ISNULL(ISHI.dblQuantity, 0) = 0 THEN ID.dblQtyShipped ELSE ID.dblQtyShipped - ISNULL(ISHI.dblQuantity, 0) END
-						FROM tblARInvoiceDetail ID 
-								INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
-								LEFT JOIN (tblICInventoryShipmentItem ISHI INNER JOIN tblICInventoryShipment ISH 
-											ON ISHI.intInventoryShipmentId = ISH.intInventoryShipmentId)
-												ON ISHI.intLineNo = ID.intSalesOrderDetailId
-							) ID
-				ON SOD.intSalesOrderDetailId = ID.intSalesOrderDetailId
-			LEFT JOIN (tblICInventoryShipmentItem ISHI INNER JOIN tblICInventoryShipment ISH 
-							ON ISHI.intInventoryShipmentId = ISH.intInventoryShipmentId)
-				ON SOD.intSalesOrderDetailId = ISHI.intLineNo AND SOD.intSalesOrderId = ISHI.intOrderId
-		WHERE SOD.dblQtyOrdered > 0
-		GROUP BY SOD.intSalesOrderDetailId
-	) SHP
-WHERE
-	[intSalesOrderId] = @SalesOrderId
-	AND tblSOSalesOrderDetail.[intSalesOrderDetailId] = SHP.[intSalesOrderDetailId]
-	
-DECLARE @TotalQtyOrdered	NUMERIC(18,6) = 0,
-		@TotalQtyShipped	NUMERIC(18,6) = 0
+		LEFT JOIN tblICItemUOM UOM ON SOD.intItemId = UOM.intItemId AND UOM.ysnStockUnit = 1
+		CROSS APPLY (
+			SELECT dblQtyShipped = ISNULL(dbo.fnCalculateQtyBetweenUOM(ISNULL(UOM.intItemUOMId, ID.intItemUOMId), ID.intItemUOMId, SUM(ID.dblQtyShipped)), 0)
+			FROM tblARInvoiceDetail ID
+			LEFT JOIN tblICItemUOM UOM ON ID.intItemId = UOM.intItemId AND UOM.ysnStockUnit = 1
+			WHERE ISNULL(ID.intSalesOrderDetailId, 0) = SOD.intSalesOrderDetailId
+			  AND ISNULL(ID.intInventoryShipmentItemId, 0) = 0
+			  AND ID.intInvoiceId = @intTransactionId
+			GROUP BY ID.intItemUOMId, UOM.intItemUOMId 
+		) INVOICEITEMS
+	END
+ELSE IF @strTransactionType = 'Inventory'
+	BEGIN
+		UPDATE SOD
+		SET dblQtyShipped  = CASE WHEN @ysnForDelete = 0 
+								  THEN SOD.dblQtyShipped + CONVERT(NUMERIC(18, 6), dbo.fnCalculateQtyBetweenUOM(SOD.intItemUOMId, ISNULL(UOM.intItemUOMId, SOD.intItemUOMId), ISNULL(SHIPPEDITEMS.dblQuantity, 0)))
+								  ELSE SOD.dblQtyShipped - CONVERT(NUMERIC(18, 6), dbo.fnCalculateQtyBetweenUOM(SOD.intItemUOMId, ISNULL(UOM.intItemUOMId, SOD.intItemUOMId), ISNULL(SHIPPEDITEMS.dblQuantity, 0)))
+							 END
+		  , @intSalesOrderId = SOD.intSalesOrderId
+		FROM tblSOSalesOrderDetail SOD
+		LEFT JOIN tblICItemUOM UOM ON SOD.intItemId = UOM.intItemId AND UOM.ysnStockUnit = 1
+		CROSS APPLY (
+			SELECT dblQuantity = ISNULL(dbo.fnCalculateQtyBetweenUOM(ISNULL(UOM.intItemUOMId, ISI.intItemUOMId), ISI.intItemUOMId, SUM(ISI.dblQuantity)), 0)
+			FROM tblICInventoryShipmentItem ISI
+			LEFT JOIN tblICItemUOM UOM ON ISI.intItemId = UOM.intItemId AND UOM.ysnStockUnit = 1
+			WHERE ISNULL(ISI.intOrderId, 0) = SOD.intSalesOrderId
+			  AND ISNULL(ISI.intLineNo, 0) = SOD.intSalesOrderDetailId
+			  AND ISI.intInventoryShipmentId = @intTransactionId
+			GROUP BY ISI.intItemUOMId, UOM.intItemUOMId  
+		) SHIPPEDITEMS		
+	END
+ELSE
+	BEGIN
+		UPDATE SOD
+		SET dblQtyShipped  = CASE WHEN @ysnForDelete = 0 
+								  THEN CONVERT(NUMERIC(18, 6), dbo.fnCalculateQtyBetweenUOM(SOD.intItemUOMId, ISNULL(UOM.intItemUOMId, SOD.intItemUOMId), (ISNULL(INVOICEITEMS.dblQtyShipped, 0) + ISNULL(SHIPPEDITEMS.dblQuantity, 0))))
+								  ELSE SOD.dblQtyShipped - CONVERT(NUMERIC(18, 6), dbo.fnCalculateQtyBetweenUOM(SOD.intItemUOMId, ISNULL(UOM.intItemUOMId, SOD.intItemUOMId), (ISNULL(INVOICEITEMS.dblQtyShipped, 0) + ISNULL(SHIPPEDITEMS.dblQuantity, 0))))
+							 END		  
+		FROM tblSOSalesOrderDetail SOD
+		LEFT JOIN tblICItemUOM UOM ON SOD.intItemId = UOM.intItemId AND UOM.ysnStockUnit = 1
+		OUTER APPLY (
+			SELECT dblQtyShipped = ISNULL(dbo.fnCalculateQtyBetweenUOM(ISNULL(UOM.intItemUOMId, ID.intItemUOMId), ID.intItemUOMId, SUM(ID.dblQtyShipped)), 0)
+			FROM tblARInvoiceDetail ID
+			LEFT JOIN tblICItemUOM UOM ON ID.intItemId = UOM.intItemId AND UOM.ysnStockUnit = 1
+			WHERE ISNULL(ID.intSalesOrderDetailId, 0) = SOD.intSalesOrderDetailId
+			  AND ISNULL(ID.intInventoryShipmentItemId, 0) = 0
+			GROUP BY ID.intItemUOMId, UOM.intItemUOMId 
+		) INVOICEITEMS
+		OUTER APPLY (
+			SELECT dblQuantity = ISNULL(dbo.fnCalculateQtyBetweenUOM(ISNULL(UOM.intItemUOMId, ISI.intItemUOMId), ISI.intItemUOMId, SUM(ISI.dblQuantity)), 0)
+			FROM tblICInventoryShipmentItem ISI
+			LEFT JOIN tblICItemUOM UOM ON ISI.intItemId = UOM.intItemId AND UOM.ysnStockUnit = 1
+			WHERE ISNULL(ISI.intOrderId, 0) = SOD.intSalesOrderId
+			  AND ISNULL(ISI.intLineNo, 0) = SOD.intSalesOrderDetailId
+			GROUP BY ISI.intItemUOMId, UOM.intItemUOMId  
+		) SHIPPEDITEMS
+		WHERE intSalesOrderId = @intTransactionId
+	END
 
-SELECT @TotalQtyOrdered = SUM(dblQtyOrdered)
-     , @TotalQtyShipped = SUM(CASE WHEN dblQtyShipped > dblQtyOrdered THEN dblQtyOrdered ELSE dblQtyShipped END) 
-FROM tblSOSalesOrderDetail WHERE intSalesOrderId = @SalesOrderId 
+SELECT @dblTotalQtyOrdered = SUM(dblQtyOrdered)
+     , @dblTotalQtyShipped = SUM(CASE WHEN dblQtyShipped > dblQtyOrdered THEN dblQtyOrdered ELSE dblQtyShipped END) 
+FROM tblSOSalesOrderDetail WHERE intSalesOrderId = @intSalesOrderId 
 GROUP BY intSalesOrderId
 
-SELECT 
-	@ShipmentPosted = ysnPosted 
-FROM 
-	tblICInventoryShipment 
-WHERE 
-	intInventoryShipmentId IN (SELECT 
-								intInventoryShipmentId 
-							   FROM 
-								tblICInventoryShipmentItem 
-							   WHERE 
-								intOrderId = @SalesOrderId)
-IF (@ShipmentPosted = 0)
-	BEGIN
-		SET @OrderStatus = 'Pending'
-		GOTO SET_ORDER_STATUS;
-	END	
+IF (@dblTotalQtyShipped = 0)
+	SET @strOrderStatus = 'Open'
+ELSE IF @dblTotalQtyShipped < @dblTotalQtyOrdered
+	SET @strOrderStatus = 'Partial'
+ELSE IF @dblTotalQtyShipped = @dblTotalQtyOrdered OR @dblTotalQtyShipped > @dblTotalQtyOrdered
+	SET @strOrderStatus = 'Closed'
 
-IF (@TotalQtyShipped = 0)
-	BEGIN
-		SET @OrderStatus = 'Pending'
-		GOTO SET_ORDER_STATUS;
-	END	
-
-IF (@TotalQtyShipped < @TotalQtyOrdered)
-	BEGIN
-		SET @OrderStatus = 'Partial'
-		GOTO SET_ORDER_STATUS;
-	END	
-
-SET @OrderStatus = 'Closed'
-		
-SET_ORDER_STATUS:	
-	UPDATE tblSOSalesOrder
-	SET [strOrderStatus] = @OrderStatus
-	  , [dtmProcessDate] = GETDATE()
-	  , [ysnProcessed]   = CASE WHEN @OrderStatus <> 'Open' THEN 1 ELSE 0 END
-	  , [ysnShipped]     = CASE WHEN @OrderStatus = 'Open' THEN 0 ELSE ysnShipped END
-	WHERE [intSalesOrderId] = @SalesOrderId
+UPDATE tblSOSalesOrder
+SET strOrderStatus = @strOrderStatus
+	, dtmProcessDate = GETDATE()
+	, ysnProcessed   = CASE WHEN @strOrderStatus <> 'Open' THEN 1 ELSE 0 END
+	, ysnShipped     = CASE WHEN @strOrderStatus = 'Open' THEN 0 ELSE ysnShipped END
+WHERE intSalesOrderId = @intSalesOrderId
 		
 	RETURN;
 END

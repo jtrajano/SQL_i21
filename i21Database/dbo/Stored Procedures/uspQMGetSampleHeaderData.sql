@@ -44,11 +44,13 @@ BEGIN
 					THEN NULL
 				ELSE C.intItemId
 				END AS INT) AS intItemId
-		,CAST(CASE 
+		,(
+			CASE 
 				WHEN I.strType = 'Bundle'
 					THEN NULL
 				ELSE C.strItemNo
-				END AS INT) AS strItemNo
+				END
+			) AS strItemNo
 		,(
 			CASE 
 				WHEN I.strType = 'Bundle'
@@ -61,11 +63,13 @@ BEGIN
 					THEN C.intItemId
 				ELSE NULL
 				END AS INT) AS intItemBundleId
-		,CAST(CASE 
+		,(
+			CASE 
 				WHEN I.strType = 'Bundle'
 					THEN C.strItemNo
 				ELSE NULL
-				END AS INT) AS strBundleItemNo
+				END
+			) AS strBundleItemNo
 		,C.dblDetailQuantity AS dblRepresentingQty
 		,C.intUnitMeasureId AS intRepresentingUOMId
 		,C.strItemUOM AS strRepresentingUOM

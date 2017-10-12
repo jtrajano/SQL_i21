@@ -7,3 +7,4 @@ CREATE procedure uspGLSyncGLACTMST
 @strDescriptionLookup NVARCHAR(8),
 @strUnit NVARCHAR(20)
 AS
+RAISERROR('Sync GLACTMST Procedure is not available', 16, 1);

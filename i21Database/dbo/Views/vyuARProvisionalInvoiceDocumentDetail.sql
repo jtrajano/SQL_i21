@@ -41,6 +41,17 @@ SELECT
 	,[dblGrossWt]							= ARSI.[dblGrossWt] 
 	,[dblTareWt]							= ARSI.[dblTareWt]
 	,[dblNetWt]								= ARSI.[dblNetWt]
+	,[intCurrencyExchangeRateTypeId]		= ARSI.[intCurrencyExchangeRateTypeId]
+	,[strCurrencyExchangeRateType]			= ARSI.[strCurrencyExchangeRateType]
+	,[intCurrencyExchangeRateId]			= ARSI.[intCurrencyExchangeRateId]
+	,[dblCurrencyExchangeRate]				= ARSI.[dblCurrencyExchangeRate]
+	,[intSubCurrencyId]						= ARSI.[intSubCurrencyId]
+	,[dblSubCurrencyRate]					= ARSI.[dblSubCurrencyRate]
+	,[strSubCurrency]						= ARSI.[strSubCurrency]
+	,[intDestinationGradeId]				= ARSI.[intDestinationGradeId]
+	,[strDestinationGrade]					= ARSI.[strDestinationGrade]
+	,[intDestinationWeightId]				= ARSI.[intDestinationWeightId]
+	,[strDestinationWeight]					= ARSI.[strDestinationWeight]
 FROM
 	vyuARShippedItems ARSI
 WHERE
@@ -90,6 +101,17 @@ SELECT
 	,[dblGrossWt]							= ARSID.[dblGrossWt] 
 	,[dblTareWt]							= ARSID.[dblTareWt]
 	,[dblNetWt]								= ARSID.[dblNetWt]
+	,[intCurrencyExchangeRateTypeId]		= ARSID.[intCurrencyExchangeRateTypeId]
+	,[strCurrencyExchangeRateType]			= ARSID.[strCurrencyExchangeRateType]
+	,[intCurrencyExchangeRateId]			= ARSID.[intCurrencyExchangeRateId]
+	,[dblCurrencyExchangeRate]				= ARSID.[dblCurrencyExchangeRate]
+	,[intSubCurrencyId]						= ARSID.[intSubCurrencyId]
+	,[dblSubCurrencyRate]					= ARSID.[dblSubCurrencyRate]
+	,[strSubCurrency]						= ARSID.[strSubCurrency]
+	,[intDestinationGradeId]				= ARSID.[intDestinationGradeId]
+	,[strDestinationGrade]					= ARSID.[strDestinationGrade]
+	,[intDestinationWeightId]				= ARSID.[intDestinationWeightId]
+	,[strDestinationWeight]					= ARSID.[strDestinationWeight]
 FROM
 	vyuARShippedItemDetail ARSID
 	
