@@ -6,7 +6,7 @@
 	,@intUserId INT
 	,@blnValidateLotReservation BIT = 0
 	,@blnInventoryMove BIT = 0
-	,@dtmDate datetime=NULL
+	,@dtmDate DATETIME = NULL
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -42,6 +42,7 @@ BEGIN TRY
 		,@ysnAllowMultipleItems INT
 		,@intDestinationLotStatusId INT
 		,@intCategoryId INT
+		,@dblDestinationLotQty NUMERIC(38, 20)
 
 	SELECT @intItemId = intItemId
 		,@intLocationId = intLocationId
@@ -59,6 +60,7 @@ BEGIN TRY
 	WHERE intLotId = @intLotId
 
 	SELECT @intDestinationLotStatusId = intLotStatusId
+		,@dblDestinationLotQty = dblQty
 	FROM tblICLot
 	WHERE strLotNumber = @strLotNumber
 		AND intStorageLocationId = @intNewStorageLocationId
@@ -184,8 +186,8 @@ BEGIN TRY
 	END
 
 	SELECT @strNewLotNumber = @strLotNumber
-	
-	If @dtmDate Is NULL
+
+	IF @dtmDate IS NULL
 		SELECT @dtmDate = GETDATE()
 
 	SELECT @intSourceId = 1
@@ -203,6 +205,7 @@ BEGIN TRY
 	IF (ISNULL(@intDestinationLotStatusId, 0) <> 0)
 	BEGIN
 		IF ISNULL(@intLotStatusId, 0) <> ISNULL(@intDestinationLotStatusId, 0)
+			AND @dblDestinationLotQty > 0
 		BEGIN
 			SET @ErrMsg = 'The status of the source and the destination lot differs. Cannot move.'
 
@@ -214,12 +217,14 @@ BEGIN TRY
 		END
 	END
 
-	IF (CASE 
-					WHEN @intItemUOMId = @intMoveItemUOMId
-						AND @intWeightUOMId IS NOT NULL
-						THEN @dblMoveQty * @dblWeightPerQty
-					ELSE @dblMoveQty
-					END) = @dblLotAvailableQty
+	IF (
+			CASE 
+				WHEN @intItemUOMId = @intMoveItemUOMId
+					AND @intWeightUOMId IS NOT NULL
+					THEN @dblMoveQty * @dblWeightPerQty
+				ELSE @dblMoveQty
+				END
+			) = @dblLotAvailableQty
 	BEGIN
 		SET @blnIsPartialMove = 0
 	END
@@ -228,7 +233,8 @@ BEGIN TRY
 		SET @blnIsPartialMove = 1
 	END
 
-	IF @intNewStorageLocationId = @intStorageLocationId and @intNewSubLocationId=@intSubLocationId
+	IF @intNewStorageLocationId = @intStorageLocationId
+		AND @intNewSubLocationId = @intSubLocationId
 	BEGIN
 		RAISERROR (
 				'The Lot already exists in the selected destination storage location. Please select a different destination storage location.'
@@ -341,6 +347,19 @@ BEGIN TRY
 		,@strReason = NULL
 		,@intLocationId = @intLocationId
 		,@intInventoryAdjustmentId = @intInventoryAdjustmentId
+
+	IF ISNULL(@intLotStatusId, 0) <> ISNULL(@intDestinationLotStatusId, 0)
+		AND @dblDestinationLotQty = 0
+		AND NOT EXISTS (
+					SELECT *
+					FROM dbo.tblICLot
+					WHERE intLotId = @intNewLotId
+						AND intLotStatusId = @intLotStatusId)
+	BEGIN
+		EXEC uspMFSetLotStatus @intNewLotId
+			,@intLotStatusId
+			,@intUserId
+	END
 
 	IF EXISTS (
 			SELECT *
