@@ -415,12 +415,8 @@ BEGIN
 				,[intInventoryTransactionId] = @DummyInventoryTransactionId 
 				,[intInventoryCostAdjustmentTypeId] = 
 						CASE	WHEN @t_dblQty > 0 THEN 
-									CASE	WHEN @t_intTransactionTypeId = @InventoryTransactionStartId AND @t_intLocationId IS NOT NULL THEN 
-												@COST_ADJ_TYPE_Adjust_Value
-											WHEN @t_intTransactionTypeId = @INV_TRANS_TYPE_Produce THEN 
+									CASE	WHEN @t_intTransactionTypeId = @INV_TRANS_TYPE_Produce THEN 
 												@COST_ADJ_TYPE_Adjust_WIP
-											WHEN @t_intLocationId IS NULL THEN 
-												@COST_ADJ_TYPE_Adjust_InTransit
 											WHEN @t_intTransactionTypeId IN (
 													@INV_TRANS_TYPE_ADJ_Item_Change
 													,@INV_TRANS_TYPE_ADJ_Split_Lot
@@ -428,9 +424,13 @@ BEGIN
 													,@INV_TRANS_TYPE_ADJ_Lot_Move
 												) THEN 
 													@COST_ADJ_TYPE_Adjust_InventoryAdjustment
+											WHEN @t_intTransactionTypeId = @InventoryTransactionStartId AND @t_intLocationId IS NOT NULL THEN 
+												@COST_ADJ_TYPE_Adjust_Value
+											WHEN @t_intLocationId IS NULL THEN 
+												@COST_ADJ_TYPE_Adjust_InTransit
 											ELSE 
 												@COST_ADJ_TYPE_Adjust_Value
-									END 
+									END
 								WHEN @t_dblQty < 0 THEN 
 									CASE	WHEN @t_intTransactionTypeId = @INV_TRANS_TYPE_Consume THEN 
 												@COST_ADJ_TYPE_Adjust_WIP
