@@ -88,8 +88,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 readOnly: '{isOriginOrPosted}'
             },
             cboCurrency: {
-                origValueField: 'intCurrencyID',
-                origUpdateField: 'intCurrencyId',
+                origValueField: 'strCurrency',
+                origUpdateField: 'strCurrency',
                 value: '{current.strCurrency}',
                 disabled: '{current.ysnOrigin}',
                 store: '{currency}',
