@@ -9,6 +9,8 @@ A.intBillId
 ,CASE WHEN A.intTransactionType = 1 THEN 'Bill'
 	WHEN A.intTransactionType = 2 THEN 'Vendor Prepayment'
 	WHEN A.intTransactionType = 3 THEN 'Debit Memo'
+	WHEN A.intTransactionType = 12 THEN 'Prepayment Reversal'
+	WHEN A.intTransactionType = 13 THEN 'Basis Advance'
 	ELSE 'Unknown Type' END AS TransactionType
 ,A.ysnOrigin
 ,A.ysnPosted

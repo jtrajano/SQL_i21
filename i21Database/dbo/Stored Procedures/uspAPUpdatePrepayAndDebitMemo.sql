@@ -44,11 +44,11 @@ CROSS APPLY
 	INNER JOIN tblAPBillDetail E ON D.intContractDetailId = E.intContractDetailId AND D.intContractHeaderId = E.intContractHeaderId --prepayment
 	INNER JOIN tblAPBill F ON E.intBillId = F.intBillId --prepayment
 	WHERE C.intBillId IN (SELECT intBillId FROM #tmpBillsId)
-	AND F.intTransactionType = 2 --prepayment
+	AND F.intTransactionType IN (2, 13) --prepayment
 	AND F.intBillId = A.intBillId
 	AND C.intTransactionType = 11 --Claims
 ) AppliedPayments
-WHERE A.intTransactionType IN (2,3,8)
+WHERE A.intTransactionType IN (2, 13, 3,8)
 
 -- IF @post = 0
 -- BEGIN

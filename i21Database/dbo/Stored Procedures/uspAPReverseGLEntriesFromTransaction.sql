@@ -90,6 +90,8 @@ BEGIN
 		[strTransactionType]			=	CASE WHEN intTransactionType = 1 THEN 'Bill'
 												WHEN intTransactionType = 2 THEN 'Vendor Prepayment'
 												WHEN intTransactionType = 3 THEN 'Debit Memo'
+												WHEN intTransactionType = 12 THEN 'Prepayment Reversal'
+												WHEN intTransactionType = 13 THEN 'Basis Advance'
 											ELSE 'NONE' END,
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,
@@ -130,6 +132,8 @@ BEGIN
 		[strTransactionType]			=	CASE WHEN intTransactionType = 1 THEN 'Bill'
 												WHEN intTransactionType = 2 THEN 'Vendor Prepayment'
 												WHEN intTransactionType = 3 THEN 'Debit Memo'
+												WHEN intTransactionType = 12 THEN 'Prepayment Reversal'
+												WHEN intTransactionType = 13 THEN 'Basis Advance'
 											ELSE 'NONE' END,
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,

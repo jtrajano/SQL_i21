@@ -9,7 +9,9 @@ SELECT
 		,intTransactionId = APB.intBillId 
 		,CASE WHEN APB.intTransactionType = 1	THEN 'Bill' 
 			  WHEN APB.intTransactionType = 2	THEN 'Vendor Prepayment' 
+			  WHEN APB.intTransactionType = 12	THEN 'Prepayment Reversal' 
 			  WHEN APB.intTransactionType = 3	THEN 'Debit Memo' 
+			  WHEN APB.intTransactionType = 13	THEN 'Basis Advance' 
 		 ELSE 'Not Bill Type'
 		 END AS strTransactionType 
 		,strBillId = APB.strBillId

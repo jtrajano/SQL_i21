@@ -56,3 +56,16 @@ SELECT 'Vendor Prepayment' AS strTransactionType,
        NULL AS intCompanyLocationId
 FROM tblAPBill
 WHERE intTransactionType = 2
+  UNION ALL
+SELECT 'Basis Advance' AS strTransactionType,
+       intBillId,
+       strBillId,
+       dblTotal,
+       strVendorOrderNumber,
+       intEntityVendorId,
+       intEntityId,
+       dtmDate,
+       strComment AS strReference,
+       NULL AS intCompanyLocationId
+FROM tblAPBill
+WHERE intTransactionType = 13

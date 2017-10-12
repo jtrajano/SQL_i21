@@ -34,6 +34,8 @@ AS
 								WHEN APB.intTransactionType = 8 THEN 'Overpayment'
 								WHEN APB.intTransactionType = 9 THEN '1099 Adjustment'
 								WHEN APB.intTransactionType = 10 THEN 'Patronage'
+								WHEN APB.intTransactionType = 12 THEN 'Prepayment Reversal'
+								WHEN APB.intTransactionType = 13 THEN 'Basis Advance'
 							ELSE ''
 						  END) AS strTransactionType
 	,'' AS dblAmountPaid

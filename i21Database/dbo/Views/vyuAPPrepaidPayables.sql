@@ -28,7 +28,7 @@ FROM dbo.tblAPBill A
 LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] = C2.intEntityId)
 	ON C1.[intEntityId] = A.[intEntityVendorId]
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId
-WHERE A.intTransactionType = 2 AND A.ysnPosted = 1
+WHERE A.intTransactionType IN (2, 13) AND A.ysnPosted = 1
 AND NOT EXISTS (
 	SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = A.intBillId
 )
@@ -62,7 +62,7 @@ LEFT JOIN dbo.tblCMBankTransaction E
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
  WHERE A.ysnPosted = 1  
 	AND C.ysnPosted = 1
-	AND C.intTransactionType = 2
+	AND C.intTransactionType IN (2, 13)
 	AND A.ysnPrepay = 1
 	AND NOT EXISTS (
 	SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = C.intBillId
@@ -91,7 +91,7 @@ FROM dbo.tblAPBill A
 LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] = C2.intEntityId)
 	ON C1.[intEntityId] = A.[intEntityVendorId]
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId
-WHERE A.intTransactionType = 2 AND A.ysnPosted = 1
+WHERE A.intTransactionType IN (2, 13) AND A.ysnPosted = 1
 AND NOT EXISTS (
 	SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = A.intBillId
 )
@@ -125,7 +125,7 @@ LEFT JOIN dbo.tblCMBankTransaction E
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
  WHERE A.ysnPosted = 1  
 	AND C.ysnPosted = 1
-	AND C.intTransactionType = 2
+	AND C.intTransactionType IN (2, 13)
 	AND A.ysnPrepay = 0
 	AND NOT EXISTS (
 	SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = B.intBillId
@@ -154,7 +154,7 @@ INNER JOIN dbo.tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intBillId
 INNER JOIN dbo.tblAPBill C ON B.intTransactionId = C.intBillId
 INNER JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId) ON A.intEntityVendorId = D.[intEntityId]
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
-WHERE A.ysnPosted = 1 AND C.intTransactionType = 2
+WHERE A.ysnPosted = 1 AND C.intTransactionType IN (2, 13)
 AND NOT EXISTS (
 	SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = A.intBillId
 )

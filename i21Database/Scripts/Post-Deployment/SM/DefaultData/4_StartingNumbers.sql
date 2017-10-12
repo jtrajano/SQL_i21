@@ -1191,6 +1191,16 @@ GO
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Credit Note')
 
+	UNION ALL
+	SELECT	 [intStartingNumberId]	= 124
+			,[strTransactionType]	= N'Basis Advance'
+			,[strPrefix]			= N'BA-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Accounts Payable'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Basis Advance')
+
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
 	PRINT N'END INSERT DEFAULT STARTING NUMBERS'
