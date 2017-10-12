@@ -5853,6 +5853,8 @@
     <None Include="Scripts\Post-Deployment\CCR\RemoveCCRObsoleteScreen.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateBillDetailRate.sql" />
     <Build Include="dbo\Functions\fnHDCoalesceJiraKey.sql" />
+    <Build Include="dbo\Views\vyuAP1099Summary.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRpt1099Summary.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
