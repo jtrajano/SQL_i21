@@ -58,6 +58,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1730_UpdateTicketManagementMenus.sql
 :r .\SM\1730_UpdatePayrollMenus.sql
 :r .\SM\1730_UpdateGeneralLedgerMenus.sql
+:r .\SM\1730_UpdateManufacturingMenus.sql
 
 -- Canned Report
 :r .\Reports\1_ReportDisableConstraints.sql
