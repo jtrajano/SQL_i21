@@ -547,7 +547,7 @@ BEGIN
 			,@Forgiven						= @Forgiven
 			,@Calculated					= @Calculated
 			,@Splitted						= @Splitted
-			,@ImpactInventory				= [ysnImpactInventory]
+			,@ImpactInventory				= @ImpactInventory
 			,@PaymentId						= @PaymentId
 			,@SplitId						= @SplitId
 			,@LoadDistributionHeaderId		= @LoadDistributionHeaderId
