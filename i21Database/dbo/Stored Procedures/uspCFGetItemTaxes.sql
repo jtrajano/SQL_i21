@@ -99,6 +99,27 @@ FROM
 	,@intARItemLocationId			
 	,@intCustomerId				
 	,@intCustomerLocationId		
-	,@dtmTransactionDate)
+	,@dtmTransactionDate
+	,@DisregardExemptionSetup	
+	,@Tax1						
+	,@Tax2						
+	,@Tax3						
+	,@Tax4						
+	,@Tax5						
+	,@Tax6						
+	,@Tax7						
+	,@Tax8						
+	,@Tax9						
+	,@Tax10						
+	,@TaxValue1					
+	,@TaxValue2					
+	,@TaxValue3					
+	,@TaxValue4					
+	,@TaxValue5					
+	,@TaxValue6					
+	,@TaxValue7					
+	,@TaxValue8					
+	,@TaxValue9					
+	,@TaxValue10)
 
 	RETURN
