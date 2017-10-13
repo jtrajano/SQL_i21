@@ -55,6 +55,7 @@ BEGIN
         ,[ysnRecomputeTax]
         ,[intSiteDetailId]
         ,[ysnInventory]
+		,[intSalesAccountId]
 		,[strComments]
     )
     SELECT [strTransactionType] = 'Credit Memo' 
@@ -70,14 +71,15 @@ BEGIN
         ,[intEntitySalespersonId] = ccCustomer.intSalespersonId
         ,[intEntityId] = @UserId
         ,[ysnPost] = @Post
-        ,[intItemId] =  CASE WHEN ccItem.strItem = 'Dealer Site Credits' THEN @intDealerSiteCreditItem ELSE (CASE WHEN ccSite.ysnPostNetToArCustomer = 0 THEN @intDealerSiteFeeItem ELSE -1 END) END
+        ,[intItemId] = NULL--CASE WHEN ccItem.strItem = 'Dealer Site Credits' THEN @intDealerSiteCreditItem ELSE (CASE WHEN ccSite.ysnPostNetToArCustomer = 0 THEN @intDealerSiteFeeItem ELSE -1 END) END
         ,[strItemDescription] = ccItem.strItem
         ,[dblQtyShipped] = CASE WHEN ccItem.strItem = 'Dealer Site Fees' THEN -1 ELSE 1 END
         ,[dblPrice] = CASE WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 1 THEN ccSiteDetail.dblNet WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 0 THEN ccSiteDetail.dblGross ELSE (CASE WHEN ccSite.ysnPostNetToArCustomer = 0 THEN ccSiteDetail.dblFees ELSE 0 END) END
         ,[intTaxGroupId] = null
         ,[ysnRecomputeTax] = 0
         ,[intSiteDetailId] = ccSiteDetail.intSiteDetailId
-        ,[ysnInventory] = 1
+        ,[ysnInventory] = 0
+		,[intSalesAccountId] = CompLoc.intSalesAccount
 		,[strComments] = ccSiteHeader.strCcdReference
     FROM tblCCSiteHeader ccSiteHeader 
     INNER JOIN vyuCCVendor ccVendor ON ccSiteHeader.intVendorDefaultId = ccVendor.intVendorDefaultId 
@@ -85,7 +87,8 @@ BEGIN
     LEFT JOIN tblCCSiteDetail ccSiteDetail ON  ccSiteDetail.intSiteHeaderId = ccSiteHeader.intSiteHeaderId
     LEFT JOIN vyuCCSite ccSite ON ccSite.intSiteId = ccSiteDetail.intSiteId
     LEFT JOIN vyuCCCustomer ccCustomer ON ccCustomer.intCustomerId = ccSite.intCustomerId AND ccCustomer.intSiteId = ccSite.intSiteId
-    WHERE ccSiteHeader.intSiteHeaderId = @intSiteHeaderId AND ccSite.intDealerSiteId IS NOT NULL
+	INNER JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = ccVendor.intCompanyLocationId
+    WHERE ccSiteHeader.intSiteHeaderId = @intSiteHeaderId AND ccSite.intSiteId IS NOT NULL
 
     --REMOVE -1 items
     DELETE FROM @EntriesForInvoice WHERE intItemId = -1	
