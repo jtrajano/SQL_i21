@@ -220,7 +220,7 @@ BEGIN
 	/* Update Paycheck Taxes Bill Id */
 	UPDATE tblPRPaycheckTax SET intBillId = @intBillId 
 	FROM tblPRTypeTax TT INNER JOIN tblPRPaycheckTax ON TT.intTypeTaxId = tblPRPaycheckTax.intTypeTaxId
-	WHERE dblTotal > 0 AND intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TT.intExpenseAccountId IS NOT NULL AND TT.intVendorId = @intVendorEntityId
+	WHERE dblTotal > 0 AND intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TT.intVendorId = @intVendorEntityId
 	  AND ((@isVoid = 0 AND tblPRPaycheckTax.intBillId IS NULL) OR (@isVoid = 1 AND tblPRPaycheckTax.intBillId IS NOT NULL))
 
 	/* Update Paycheck Deductions Bill Id */
