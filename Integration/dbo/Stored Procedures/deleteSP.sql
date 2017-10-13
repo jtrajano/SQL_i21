@@ -50,5 +50,9 @@ IF EXISTS (select top 1 1 from sys.procedures where name = 'uspEMImportPTTermina
 	DROP PROCEDURE uspEMImportPTTerminalToCustomer
 GO
 
+IF EXISTS (select top 1 1 from sys.procedures where name = 'uspARImportPTTaxExemption')
+	DROP PROCEDURE uspARImportPTTaxExemption
+GO
+
 
 
