@@ -317,6 +317,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			DECLARE @intEntitySalespersonId			INT
 			DECLARE	@strPricing					NVARCHAR(MAX)
 			DECLARE @ysnActive					BIT
+			DECLARE @dtmOriginationDate			DATETIME			
 			DECLARE @ysnPORequired				BIT
 			DECLARE @ysnStatementDetail			BIT
 			DECLARE @strStatementFormat			NVARCHAR(50)
@@ -431,7 +432,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 						@intAccountStatusId		= (SELECT intAccountStatusId FROM tblARAccountStatus WHERE strAccountStatusCode COLLATE Latin1_General_CI_AS = agcus_acct_stat_x_1 COLLATE Latin1_General_CI_AS),			
 						@intEntitySalespersonId		= (SELECT intEntityId FROM tblARSalesperson WHERE strSalespersonId COLLATE Latin1_General_CI_AS = agcus_slsmn_id COLLATE Latin1_General_CI_AS),			
     					@strPricing				= agcus_prc_lvl,					
-						@ysnActive				= CASE WHEN agcus_active_yn = ''Y'' THEN 1 ELSE 0 END,					
+						@ysnActive				= CASE WHEN agcus_active_yn = ''Y'' THEN 1 ELSE 0 END,	
+						@dtmOriginationDate		= (CASE WHEN agcus_orig_rev_dt = 0 THEN NULL ELSE CONVERT(datetime,SUBSTRING(CONVERT(nvarchar,agcus_orig_rev_dt),0,5) + ''-'' + SUBSTRING(CONVERT(nvarchar,agcus_orig_rev_dt),5,2) + ''-'' + SUBSTRING(CONVERT(nvarchar,agcus_orig_rev_dt),7,2)) END),
 						@ysnPORequired			= CASE WHEN agcus_req_po_yn = ''Y'' THEN 1 ELSE 0 END,									
 						@ysnStatementDetail		= CASE WHEN agcus_stmt_dtl_yn = ''Y'' THEN 1 ELSE 0 END,			
 						@strStatementFormat		= CASE WHEN agcus_stmt_fmt = ''O'' THEN ''Open Item'' WHEN agcus_stmt_fmt = ''B'' THEN ''Balance Forward'' WHEN agcus_stmt_fmt = ''R'' THEN ''Budget Reminder'' WHEN agcus_stmt_fmt = ''N'' THEN ''None'' WHEN agcus_stmt_fmt IS NULL THEN Null Else '''' END ,			
@@ -461,8 +463,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					FROM agcusmst
 					WHERE agcus_key = @originCustomer
 					--INSERT Entity record for Customer
-					INSERT [dbo].[tblEMEntity]	([strName],[strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed],[imgPhoto],[strContactNumber], [strEntityNo])
-					VALUES						(@strName, @strEmail, @strWebsite, @strInternalNotes, @ysnPrint1099, @str1099Name, @str1099Form, @str1099Type, @strFederalTaxId, @dtmW9Signed, @imgPhoto,'''', @originCustomer)
+					INSERT [dbo].[tblEMEntity]	([strName],[strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed],[imgPhoto],[strContactNumber], [strEntityNo],[dtmOriginationDate])
+					VALUES						(@strName, @strEmail, @strWebsite, @strInternalNotes, @ysnPrint1099, @str1099Name, @str1099Form, @str1099Type, @strFederalTaxId, @dtmW9Signed, @imgPhoto,'''', @originCustomer,@dtmOriginationDate)
 
 					DECLARE @EntityId INT
 					SET @EntityId = SCOPE_IDENTITY()
@@ -1023,6 +1025,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			DECLARE @intEntitySalespersonId			INT
 			DECLARE	@strPricing					NVARCHAR(MAX)
 			DECLARE @ysnActive					BIT
+			DECLARE @dtmOriginationDate			DATETIME
 			DECLARE @ysnPORequired				BIT
 			DECLARE @ysnStatementDetail			BIT
 			DECLARE @strStatementFormat			NVARCHAR(50)
@@ -1136,6 +1139,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 						@intEntitySalespersonId		= (SELECT intEntityId FROM tblARSalesperson WHERE strSalespersonId COLLATE Latin1_General_CI_AS = ptcus_slsmn_id COLLATE Latin1_General_CI_AS),
     					@strPricing				= NULL, --agcus_prc_lvl
 						@ysnActive				= CASE WHEN ptcus_active_yn = ''Y'' THEN 1 ELSE 0 END,
+						@dtmOriginationDate		= (CASE WHEN ptcus_origin_rev_dt = 0 THEN NULL ELSE CONVERT(datetime,SUBSTRING(CONVERT(nvarchar,ptcus_origin_rev_dt),0,5) + ''-'' + SUBSTRING(CONVERT(nvarchar,ptcus_origin_rev_dt),5,2) + ''-'' + SUBSTRING(CONVERT(nvarchar,ptcus_origin_rev_dt),7,2)) END),
 						@ysnPORequired			= 0, --there is no source field for PT  --CASE WHEN ptcus_req_po_yn = ''Y'' THEN 1 ELSE 0 END,
 						@ysnStatementDetail		= CASE WHEN ptcus_prt_stmnt_dtl_yn = ''Y'' THEN 1 ELSE 0 END,
 						@strStatementFormat		= CASE WHEN ptcus_stmt_fmt = ''O'' THEN ''Open Item'' WHEN ptcus_stmt_fmt = ''B'' THEN ''Balance Forward'' WHEN ptcus_stmt_fmt = ''R'' THEN ''Budget Reminder'' WHEN ptcus_stmt_fmt = ''N'' THEN ''None'' WHEN ptcus_stmt_fmt IS NULL THEN Null Else '''' END ,
@@ -1165,8 +1169,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					WHERE ptcus_cus_no = @originCustomer
 
 					--INSERT Entity record for Customer
-					INSERT [dbo].[tblEMEntity]	([strName],[strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed],[imgPhoto],[strContactNumber], [strEntityNo])
-					VALUES						(@strName, @strEmail, @strWebsite, @strInternalNotes, @ysnPrint1099, @str1099Name, @str1099Form, @str1099Type, @strFederalTaxId, @dtmW9Signed, @imgPhoto,'''', @strCustomerNumber)
+					INSERT [dbo].[tblEMEntity]	([strName],[strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed],[imgPhoto],[strContactNumber], [strEntityNo],[dtmOriginationDate])
+					VALUES						(@strName, @strEmail, @strWebsite, @strInternalNotes, @ysnPrint1099, @str1099Name, @str1099Form, @str1099Type, @strFederalTaxId, @dtmW9Signed, @imgPhoto,'''', @strCustomerNumber,@dtmOriginationDate)
 
 					DECLARE @EntityId INT
 					SET @EntityId = SCOPE_IDENTITY()
