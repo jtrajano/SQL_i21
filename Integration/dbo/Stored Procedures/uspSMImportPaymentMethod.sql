@@ -188,7 +188,7 @@ BEGIN
 				   ,[strPrintOption]
 				   ,[intConcurrencyId])
 		SELECT
-			P.[strPaymentMethod]
+			RTRIM(P.[strPaymentMethod])
 			,1
 			,P.[strPaymentMethodCode]
 			,P.[strPaymentMethodCode]
@@ -248,7 +248,7 @@ BEGIN
 				,[strPrintOption]
 				,[intConcurrencyId])
 			SELECT 
-				 [pttyp_desc]		--[strPaymentMethod]
+				 RTRIM(P.[pttyp_desc])		--[strPaymentMethod]
 				,1					--[ysnActive]
 				,1					--[intSort]
 				,[pttyp_pay_type]	--[strPaymentMethodCode]
