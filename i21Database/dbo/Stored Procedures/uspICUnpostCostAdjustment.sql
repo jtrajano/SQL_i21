@@ -80,6 +80,7 @@ BEGIN
 			,[intSourceTransactionDetailId] 
 			,[strSourceTransactionId] 
 	)
+	-- AVG and FIFO:
 	SELECT 
 			[intItemId]	= t.intItemId 
 			,[intItemLocationId] = t.intItemLocationId
@@ -123,6 +124,7 @@ BEGIN
 			AND t.intTransactionTypeId = @INV_TRANS_TYPE_Cost_Adjustment
 			AND cbLog.intInventoryCostAdjustmentTypeId IN (@COST_ADJ_TYPE_Adjust_Value, @COST_ADJ_TYPE_New_Cost)
 			AND cbLog.ysnIsUnposted = 0 
+	-- LIFO: 
 	UNION ALL 
 	SELECT 
 			[intItemId]	= t.intItemId 
@@ -167,6 +169,7 @@ BEGIN
 			AND t.intTransactionTypeId = @INV_TRANS_TYPE_Cost_Adjustment
 			AND cbLog.intInventoryCostAdjustmentTypeId IN (@COST_ADJ_TYPE_Adjust_Value, @COST_ADJ_TYPE_New_Cost)
 			AND cbLog.ysnIsUnposted = 0 
+	-- LOT: 
 	UNION ALL 
 	SELECT 
 			[intItemId]	= t.intItemId 
