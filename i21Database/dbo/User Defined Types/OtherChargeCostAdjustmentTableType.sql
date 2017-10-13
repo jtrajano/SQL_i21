@@ -9,5 +9,5 @@ CREATE TYPE [dbo].[OtherChargeCostAdjustmentTableType] AS TABLE
 	,[dtmDate] DATETIME 
 	,[intTransactionId] INT
 	,[intTransactionDetailId] INT
-	,[strTransactionId] INT 
+	,[strTransactionId] NVARCHAR(50)  
 )

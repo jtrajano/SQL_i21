@@ -541,8 +541,8 @@ BEGIN
 		,@intTransactionTypeId					= @INV_TRANS_TYPE_Cost_Adjustment 
 		,@intLotId								= NULL  
 		,@intRelatedInventoryTransactionId		= @intRelatedInventoryTransactionId 
-		,@intRelatedTransactionId				= @t_intTransactionId 
-		,@strRelatedTransactionId				= @t_strTransactionId
+		,@intRelatedTransactionId				= @intSourceTransactionId
+		,@strRelatedTransactionId				= @strSourceTransactionId
 		,@strTransactionForm					= @strTransactionForm
 		,@intEntityUserSecurityId				= @intEntityUserSecurityId
 		,@intCostingMethod						= @ACTUALCOST -- TODO: Double check the costing method. Make sure it matches with the SP. 

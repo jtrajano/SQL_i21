@@ -70,9 +70,17 @@ BEGIN
 	INSERT INTO @ApprovedChargesToAdjust(
 		intInventoryReceiptChargeId
 		,dblNewValue
+		,dtmDate
+		,intTransactionId
+		,intTransactionDetailId
+		,strTransactionId
 	)
 	SELECT  c.intInventoryReceiptChargeId
 			,c.dblNewValue
+			,c.dtmDate
+			,c.intTransactionId
+			,c.intTransactionDetailId
+			,c.strTransactionId
 	FROM	tblICInventoryReceiptCharge rc INNER JOIN @ChargesToAdjust c
 				ON rc.intInventoryReceiptChargeId = c.intInventoryReceiptChargeId
 	WHERE	rc.ysnInventoryCost = 1	
@@ -376,8 +384,10 @@ BEGIN
 					FROM	dbo.tblICInventoryReceiptItem ReceiptItemWithNoContract INNER JOIN dbo.tblICItemUOM ItemUOM
 								ON ItemUOM.intItemUOMId = ReceiptItemWithNoContract.intUnitMeasureId 
 					WHERE	ReceiptItemWithNoContract.intInventoryReceiptId = Receipt.intInventoryReceiptId
-							AND ReceiptItemWithNoContract.intOrderId = ReceiptItem.intOrderId
-							AND ReceiptItemWithNoContract.intLineNo = ReceiptItem.intLineNo
+							AND 1 = CASE WHEN Receipt.strReceiptType = @RECEIPT_TYPE_PurchaseContract AND ReceiptItemWithNoContract.intOrderId IS NULL THEN 1
+										 WHEN Receipt.strReceiptType <> @RECEIPT_TYPE_PurchaseContract THEN 1
+										 ELSE 0
+									END 
 
 				) TotalUnitsPerContract
 				LEFT JOIN tblICInventoryTransactionType invType
@@ -449,8 +459,10 @@ BEGIN
 					FROM	dbo.tblICInventoryReceiptItem ReceiptItemWithNoContract INNER JOIN dbo.tblICItemUOM ItemUOM
 								ON ItemUOM.intItemUOMId = ReceiptItemWithNoContract.intUnitMeasureId 
 					WHERE	ReceiptItemWithNoContract.intInventoryReceiptId = Receipt.intInventoryReceiptId
-							AND ReceiptItemWithNoContract.intOrderId = ReceiptItem.intOrderId
-							AND ReceiptItemWithNoContract.intLineNo = ReceiptItem.intLineNo
+							AND 1 = CASE WHEN Receipt.strReceiptType = @RECEIPT_TYPE_PurchaseContract AND ReceiptItemWithNoContract.intOrderId IS NULL THEN 1
+										 WHEN Receipt.strReceiptType <> @RECEIPT_TYPE_PurchaseContract THEN 1
+										 ELSE 0
+									END 
 
 				) TotalCostPerContract
 				LEFT JOIN tblICInventoryTransactionType invType
@@ -512,8 +524,10 @@ BEGIN
 							LEFT JOIN  dbo.tblICItemUOM GrossNetUOM2
 								ON GrossNetUOM2.intItemUOMId = ReceiptItemWithNoContract.intWeightUOMId
 					WHERE	ReceiptItemWithNoContract.intInventoryReceiptId = Receipt.intInventoryReceiptId
-							AND ReceiptItemWithNoContract.intOrderId = ReceiptItem.intOrderId
-							AND ReceiptItemWithNoContract.intLineNo = ReceiptItem.intLineNo
+							AND 1 = CASE WHEN Receipt.strReceiptType = @RECEIPT_TYPE_PurchaseContract AND ReceiptItemWithNoContract.intOrderId IS NULL THEN 1
+										 WHEN Receipt.strReceiptType <> @RECEIPT_TYPE_PurchaseContract THEN 1
+										 ELSE 0
+									END 
 
 				) TotalUnitsPerContract
 				LEFT JOIN dbo.tblICItemUOM GrossNetUOM
