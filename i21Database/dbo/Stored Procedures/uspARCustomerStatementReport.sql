@@ -34,6 +34,8 @@ DECLARE @dtmDateToLocal				AS DATETIME			= NULL
 	  , @query						AS NVARCHAR(MAX)
 	  , @queryBudget				AS NVARCHAR(MAX)
 	  , @filter						AS NVARCHAR(MAX)	= ''
+	  , @queryRunningBalance		AS NVARCHAR(MAX)	= ''
+	  , @queryRunningBalanceBudget	AS NVARCHAR(MAX)	= ''
 
 DECLARE @temp_statement_table TABLE(
 	 [strReferenceNumber]			NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -144,6 +146,12 @@ IF @strAccountStatusCodeLocal IS NOT NULL
 IF @strLocationNameLocal IS NOT NULL
 	SET @filter = CASE WHEN ISNULL(@filter, '') <> '' THEN @filter + ' AND ' ELSE @filter + '' END + 'strLocationName = ''' + @strLocationNameLocal + ''''
 
+IF (@@version NOT LIKE '%2008%')
+	BEGIN
+		SET @queryRunningBalance = ' ORDER BY I.dtmPostDate ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW'
+		SET @queryRunningBalanceBudget = ' ORDER BY intCustomerBudgetId ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW'
+	END
+
 TRUNCATE TABLE tblARCustomerAgingStagingTable
 INSERT INTO tblARCustomerAgingStagingTable (
 		strCustomerName
@@ -192,7 +200,7 @@ FROM (
 											   ELSE 0
 										  END
 		 , dblMonthlyBudget				= ISNULL([dbo].[fnARGetCustomerBudget](C.intEntityId, I.dtmDate), 0)
-		 , dblRunningBalance			= SUM(CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN I.dblInvoiceTotal * -1 ELSE (CASE WHEN I.strType = ''CF Tran'' THEN 0 ELSE I.dblInvoiceTotal END) END - ISNULL(TOTALPAYMENT.dblPayment, 0)) OVER (PARTITION BY I.intEntityCustomerId ORDER BY I.dtmPostDate ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
+		 , dblRunningBalance			= SUM(CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN I.dblInvoiceTotal * -1 ELSE (CASE WHEN I.strType = ''CF Tran'' THEN 0 ELSE I.dblInvoiceTotal END) END - ISNULL(TOTALPAYMENT.dblPayment, 0)) OVER (PARTITION BY I.intEntityCustomerId'+ @queryRunningBalance +')
 		 , strCustomerNumber			= C.strCustomerNumber
 		 , strDisplayName				= CASE WHEN C.strStatementFormat <> ''Running Balance'' THEN C.strName ELSE ISNULL(C.strCheckPayeeName, C.strName) END
 		 , strName						= C.strName
@@ -322,7 +330,7 @@ IF @ysnIncludeBudgetLocal = 1
 				  , dblAmountDue				= dblBudgetAmount - dblAmountPaid
 				  , dblPastDue					= dblBudgetAmount - dblAmountPaid
 				  , dblMonthlyBudget			= dblBudgetAmount
-				  , dblRunningBalance			= SUM(dblBudgetAmount - dblAmountPaid) OVER (PARTITION BY C.intEntityId ORDER BY intCustomerBudgetId ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
+				  , dblRunningBalance			= SUM(dblBudgetAmount - dblAmountPaid) OVER (PARTITION BY C.intEntityId'+ @queryRunningBalanceBudget +')
 				  , strCustomerNumber			= C.strCustomerNumber
 				  , strDisplayName				= CASE WHEN C.strStatementFormat <> ''Running Balance'' THEN C.strCustomerName ELSE ISNULL(CC.strCheckPayeeName, C.strCustomerName) END
 				  , strName						= C.strCustomerName
