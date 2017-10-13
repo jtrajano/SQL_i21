@@ -4,46 +4,19 @@ GO
 
 EXEC('
 	CREATE PROCEDURE [dbo].[uspPRImportOriginEmployeeTaxes]
-		@strEmployeeId NVARCHAR(50) = NULL
+		@ysnDoImport BIT = 0,
+		@intRecordCount INT = 0 OUTPUT
 	AS
 	BEGIN
-		INSERT INTO tblPREmployeeTax
-			(intEntityEmployeeId
-			,intTypeTaxId
-			,strCalculationType
-			,strFilingStatus
-			,intTypeTaxStateId
-			,intTypeTaxLocalId
-			,intSupplementalCalc
-			,dblAmount
-			,dblExtraWithholding
-			,dblLimit
-			,intAccountId
-			,intExpenseAccountId
-			,intAllowance
-			,strPaidBy
-			,strVal1
-			,strVal2
-			,strVal3
-			,strVal4
-			,strVal5
-			,strVal6
-			,ysnDefault
-			,intSort
-			,intConcurrencyId)
+	SET QUOTED_IDENTIFIER OFF
+	SET ANSI_NULLS ON
+	SET NOCOUNT ON
+	SET XACT_ABORT ON
+
 		SELECT DISTINCT
 			intEntityEmployeeId = iEMP.intEntityEmployeeId
 			,intTypeTaxId = iTAX.intTypeTaxId
-			,strCalculationType = CASE (oEMT.premt_tax_type)
-									WHEN 1 THEN ''USA Social Security''
-									WHEN 2 THEN ''USA Medicare''
-									WHEN 3 THEN ''USA FUTA''
-									WHEN 4 THEN ''USA SUTA''
-									WHEN 5 THEN ''USA Federal Tax''
-									WHEN 6 THEN ''USA State''
-									WHEN 7 THEN ''USA Local''
-									WHEN 9 THEN ''USA State''
-									ELSE ''Fixed Amount'' END
+			,strCalculationType = iTAX.strCalculationType
 			,strFilingStatus = CASE (oEMP.premp_tax_ms)
 								WHEN ''M'' THEN ''Married''
 								WHEN ''S'' THEN ''Single''
@@ -53,23 +26,23 @@ EXEC('
 			,intSupplementalCalc = 1
 			,dblAmount = 0
 			,dblExtraWithholding = CASE (CAST(oEMT.premt_tax_type AS VARCHAR(2)) + oEMT.premt_code)
-									WHEN premp_tax_id_1 THEN premp_tax_addl_pct_amt_1
-									WHEN premp_tax_id_2 THEN premp_tax_addl_pct_amt_2
-									WHEN premp_tax_id_3 THEN premp_tax_addl_pct_amt_3
-									WHEN premp_tax_id_4 THEN premp_tax_addl_pct_amt_4
-									WHEN premp_tax_id_5 THEN premp_tax_addl_pct_amt_5
-									WHEN premp_tax_id_6 THEN premp_tax_addl_pct_amt_6
-									WHEN premp_tax_id_7 THEN premp_tax_addl_pct_amt_7
-									WHEN premp_tax_id_8 THEN premp_tax_addl_pct_amt_8
-									WHEN premp_tax_id_9 THEN premp_tax_addl_pct_amt_9
-									WHEN premp_tax_id_10 THEN premp_tax_addl_pct_amt_10
-									WHEN premp_tax_id_11 THEN premp_tax_addl_pct_amt_11
-									WHEN premp_tax_id_12 THEN premp_tax_addl_pct_amt_12
-									WHEN premp_tax_id_13 THEN premp_tax_addl_pct_amt_13
-									WHEN premp_tax_id_14 THEN premp_tax_addl_pct_amt_14
-									WHEN premp_tax_id_15 THEN premp_tax_addl_pct_amt_15
-									WHEN premp_tax_id_16 THEN premp_tax_addl_pct_amt_16
-								ELSE 0 END
+										WHEN premp_tax_id_1 THEN premp_tax_addl_pct_amt_1
+										WHEN premp_tax_id_2 THEN premp_tax_addl_pct_amt_2
+										WHEN premp_tax_id_3 THEN premp_tax_addl_pct_amt_3
+										WHEN premp_tax_id_4 THEN premp_tax_addl_pct_amt_4
+										WHEN premp_tax_id_5 THEN premp_tax_addl_pct_amt_5
+										WHEN premp_tax_id_6 THEN premp_tax_addl_pct_amt_6
+										WHEN premp_tax_id_7 THEN premp_tax_addl_pct_amt_7
+										WHEN premp_tax_id_8 THEN premp_tax_addl_pct_amt_8
+										WHEN premp_tax_id_9 THEN premp_tax_addl_pct_amt_9
+										WHEN premp_tax_id_10 THEN premp_tax_addl_pct_amt_10
+										WHEN premp_tax_id_11 THEN premp_tax_addl_pct_amt_11
+										WHEN premp_tax_id_12 THEN premp_tax_addl_pct_amt_12
+										WHEN premp_tax_id_13 THEN premp_tax_addl_pct_amt_13
+										WHEN premp_tax_id_14 THEN premp_tax_addl_pct_amt_14
+										WHEN premp_tax_id_15 THEN premp_tax_addl_pct_amt_15
+										WHEN premp_tax_id_16 THEN premp_tax_addl_pct_amt_16
+									ELSE 0 END
 			,dblLimit = CASE WHEN (oTAX.prtax_tax_type IN (3, 4)) THEN prtax_wage_cutoff ELSE ISNULL(iTAX.dblLimit, 0) END
 			,intAccountId = dbo.fnGetGLAccountIdFromOriginToi21(oTAX.prtax_gl_bs)
 			,intExpenseAccountId = dbo.fnGetGLAccountIdFromOriginToi21(oTAX.prtax_gl_exp)
@@ -118,14 +91,18 @@ EXEC('
 								ELSE 0 END
 			,intSort = iTAX.intSort
 			,intConcurrencyId = 1
+		INTO
+			#tmpEmployeeTaxes
 		FROM
-			premtmst oEMT
+			(select premt_emp, premt_code, premt_tax_type from premtmst
+				where premt_year = (select max(premt_year) from premtmst)) oEMT
 			INNER JOIN prempmst oEMP
 				ON oEMP.premp_emp = oEMT.premt_emp
 			INNER JOIN (select distinct prtax_tax_type, prtax_code, prtax_gl_bs, 
-						prtax_gl_exp, prtax_wage_cutoff from prtaxmst) oTAX
+							prtax_gl_exp, prtax_wage_cutoff from prtaxmst
+						where prtax_year = (select max(prtax_year) from prtaxmst)) oTAX
 				ON oEMT.premt_code = oTAX.prtax_code
-			INNER JOIN tblPREmployee iEMP
+			INNER JOIN (select intEntityEmployeeId, strEmployeeId, strMaritalStatus from tblPREmployee) iEMP
 				ON iEMP.strEmployeeId = oEMT.premt_emp COLLATE Latin1_General_CI_AS
 			INNER JOIN tblPRTypeTax iTAX
 				ON iTAX.strTax = premt_code COLLATE Latin1_General_CI_AS
@@ -133,8 +110,61 @@ EXEC('
 				SELECT 1 FROM tblPREmployeeTax 
 				WHERE intEntityEmployeeId = iEMP.intEntityEmployeeId 
 				AND intTypeTaxId = iTAX.intTypeTaxId)
-			AND strEmployeeId = ISNULL(@strEmployeeId, strEmployeeId)
 
+		SELECT @intRecordCount = COUNT(1) FROM #tmpEmployeeTaxes
+
+		IF (@ysnDoImport = 1)
+		BEGIN
+			INSERT INTO tblPREmployeeTax
+				(intEntityEmployeeId
+				,intTypeTaxId
+				,strCalculationType
+				,strFilingStatus
+				,intTypeTaxStateId
+				,intTypeTaxLocalId
+				,intSupplementalCalc
+				,dblAmount
+				,dblExtraWithholding
+				,dblLimit
+				,intAccountId
+				,intExpenseAccountId
+				,intAllowance
+				,strPaidBy
+				,strVal1
+				,strVal2
+				,strVal3
+				,strVal4
+				,strVal5
+				,strVal6
+				,ysnDefault
+				,intSort
+				,intConcurrencyId)
+			SELECT
+				intEntityEmployeeId
+				,intTypeTaxId
+				,strCalculationType
+				,strFilingStatus
+				,intTypeTaxStateId
+				,intTypeTaxLocalId
+				,intSupplementalCalc
+				,dblAmount
+				,dblExtraWithholding
+				,dblLimit
+				,intAccountId
+				,intExpenseAccountId
+				,intAllowance
+				,strPaidBy
+				,strVal1
+				,strVal2
+				,strVal3
+				,strVal4
+				,strVal5
+				,strVal6
+				,ysnDefault
+				,intSort
+				,intConcurrencyId
+			FROM #tmpEmployeeTaxes
+		END
 	END
 ')
 

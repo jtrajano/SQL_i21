@@ -4,25 +4,15 @@ GO
 
 EXEC('
 	CREATE PROCEDURE [dbo].[uspPRImportOriginTaxTypes]
+		@ysnDoImport BIT = 0,
+		@intRecordCount INT = 0 OUTPUT
 	AS
 	BEGIN
-		INSERT INTO tblPRTypeTax
-			(strTax
-			,strDescription
-			,strCalculationType
-			,dblAmount
-			,ysnRoundToDollar
-			,dblLimit
-			,strPaidBy
-			,intTypeTaxStateId
-			,intTypeTaxLocalId
-			,intAccountId
-			,intExpenseAccountId
-			,intSupplementalCalc
-			,strCheckLiteral
-			,intVendorId
-			,intSort
-			,intConcurrencyId)
+	SET QUOTED_IDENTIFIER OFF
+	SET ANSI_NULLS ON
+	SET NOCOUNT ON
+	SET XACT_ABORT ON
+
 		SELECT DISTINCT
 			strTax = prtax_code COLLATE Latin1_General_CI_AS
 			,strDescription = prtax_desc COLLATE Latin1_General_CI_AS
@@ -34,6 +24,7 @@ EXEC('
 									WHEN 5 THEN ''USA Federal Tax''
 									WHEN 6 THEN ''USA State''
 									WHEN 7 THEN ''USA Local''
+									WHEN 8 THEN ''USA Local''
 									WHEN 9 THEN ''USA State''
 									ELSE ''Fixed Amount'' END
 			,dblAmount = 0
@@ -47,13 +38,55 @@ EXEC('
 			,intSupplementalCalc = 1
 			,strCheckLiteral = prtax_literal COLLATE Latin1_General_CI_AS
 			,intVendorId = (SELECT TOP 1 intEntityId FROM tblEMEntity WHERE strEntityNo = prtax_vendor COLLATE Latin1_General_CI_AS)
-			,intSort = (SELECT MAX(intSort) FROM tblPRTypeTax)
+			,intSort = DENSE_RANK() OVER(PARTITION BY prtax_year ORDER BY A4GLIdentity)
 			,intConcurrencyId = 1
+		INTO #tmpTaxes
 		FROM
 			prtaxmst
 		WHERE
 			prtax_code COLLATE Latin1_General_CI_AS NOT IN (SELECT strTax FROM tblPRTypeTax)
+			AND prtax_year = (SELECT MAX(prtax_year) FROM prtaxmst)
 
+		SELECT @intRecordCount = COUNT(1) FROM #tmpTaxes
+
+		IF (@ysnDoImport = 1)
+		BEGIN
+			INSERT INTO tblPRTypeTax
+				(strTax
+				,strDescription
+				,strCalculationType
+				,dblAmount
+				,ysnRoundToDollar
+				,dblLimit
+				,strPaidBy
+				,intTypeTaxStateId
+				,intTypeTaxLocalId
+				,intAccountId
+				,intExpenseAccountId
+				,intSupplementalCalc
+				,strCheckLiteral
+				,intVendorId
+				,intSort
+				,intConcurrencyId)
+			SELECT
+				strTax
+				,strDescription
+				,strCalculationType
+				,dblAmount
+				,ysnRoundToDollar
+				,dblLimit
+				,strPaidBy
+				,intTypeTaxStateId
+				,intTypeTaxLocalId
+				,intAccountId
+				,intExpenseAccountId
+				,intSupplementalCalc
+				,strCheckLiteral
+				,intVendorId
+				,intSort
+				,intConcurrencyId
+			FROM #tmpTaxes
+		END
 	END
 ')
 
