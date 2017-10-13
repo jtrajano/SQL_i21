@@ -239,7 +239,7 @@ BEGIN
 		END as InboundNetDue,
 	0 as OutboundNetDue,
 	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND (intInventoryReceiptItemId IS NULL AND intInventoryReceiptChargeId IS NULL)),0) AS VoucherAdjustment,
-	0 as SalesAdjustment,
+	Invoice.dblPayment as SalesAdjustment,
 	PYMT.dblAmountPaid as CheckAmount,
 	CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN
 		'True'
@@ -267,12 +267,20 @@ BEGIN
 	LEFT JOIN tblICItemUOM ItemUOM ON BillDtl.intUnitOfMeasureId = ItemUOM.intItemUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 	--LEFT JOIN tblEMEntitySplit SPLIT ON TICKET.intSplitId = SPLIT.intSplitId AND TICKET.intSplitId <> 0
+	LEFT JOIN (  SELECT 
+				  intPaymentId
+				 ,SUM(dblPayment) dblPayment 
+				  FROM tblAPPaymentDetail
+				  WHERE intInvoiceId IS NOT NULL
+				  GROUP BY intPaymentId
+			    ) Invoice ON Invoice.intPaymentId=PYMT.intPaymentId
 	WHERE BNKTRN.intBankAccountId = @intBankAccountId  --AND BNKTRN.strTransactionId = @strTransactionId
 	AND( intInventoryReceiptChargeId IS NOT NULL or BillDtl.intInventoryReceiptItemId IS NOT NULL)
 
 	--------------------------------------------------------
 	-- FROM INVENTORY SHIPMENT
 	--------------------------------------------------------
+	/*
 	UNION ALL 
 	SELECT  DISTINCT 
 	BNKTRN.intBankAccountId,
@@ -445,7 +453,7 @@ BEGIN
 	LEFT JOIN tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 	--LEFT JOIN tblEMEntitySplit SPLIT ON TICKET.intSplitId = SPLIT.intSplitId AND TICKET.intSplitId <> 0
 	WHERE BNKTRN.intBankAccountId = @intBankAccountId  --AND BNKTRN.strTransactionId = @strTransactionId
-
+	*/
 	--------------------------------------------------------
 	-- FROM SETTLE STORAGE
 	--------------------------------------------------------
@@ -520,12 +528,12 @@ BEGIN
 	0 as OutboundGrossDollars,
 	BillDtl.dblTax as InboundTax,
 	0 as OutboundTax,
-	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail A INNER JOIN tblICItem B ON A.intItemId = B.intItemId WHERE intBillId = BillDtl.intBillId AND B.strType = 'Other Charge'),0) as InboundDiscount,
+	ISNULL((SELECT CASE WHEN A.dblCost<0 THEN SUM(-A.dblTotal) ELSE SUM(A.dblTotal) END FROM tblAPBillDetail A INNER JOIN tblICItem B ON A.intItemId = B.intItemId WHERE intBillId = BillDtl.intBillId AND B.strType = 'Other Charge' GROUP BY  A.dblCost),0) as InboundDiscount,
 	0 as OutboundDiscount,
-	(BillDtl.dblTotal + BillDtl.dblTax + ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail A INNER JOIN tblICItem B ON A.intItemId = B.intItemId WHERE intBillId = BillDtl.intBillId AND B.strType = 'Other Charge'),0)) as InboundNetDue,
+	(BillDtl.dblTotal + BillDtl.dblTax + ISNULL((SELECT CASE WHEN A.dblCost<0 THEN SUM(-A.dblTotal) ELSE SUM(A.dblTotal) END FROM tblAPBillDetail A INNER JOIN tblICItem B ON A.intItemId = B.intItemId WHERE intBillId = BillDtl.intBillId AND B.strType = 'Other Charge' GROUP BY  A.dblCost),0)) as InboundNetDue,
 	0 as OutboundNetDue,
 	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail A INNER JOIN tblICItem B ON A.intItemId = B.intItemId WHERE intBillId = BillDtl.intBillId AND (strType NOT IN('Other Charge','Inventory'))),0) AS VoucherAdjustment,
-	0 as SalesAdjustment,
+	Invoice.dblPayment as SalesAdjustment,
 	PYMT.dblAmountPaid as CheckAmount,
 	CASE WHEN Item.strType <> 'Inventory' THEN
 		'True'
@@ -554,6 +562,13 @@ BEGIN
 	LEFT JOIN tblICItemUOM ItemUOM ON BillDtl.intUnitOfMeasureId = ItemUOM.intItemUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 	--LEFT JOIN tblEMEntitySplit SPLIT ON TICKET.intSplitId = SPLIT.intSplitId AND TICKET.intSplitId <> 0
+	LEFT JOIN (  SELECT 
+				  intPaymentId
+				 ,SUM(dblPayment) dblPayment 
+				  FROM tblAPPaymentDetail
+				  WHERE intInvoiceId IS NOT NULL
+				  GROUP BY intPaymentId
+			    ) Invoice ON Invoice.intPaymentId=PYMT.intPaymentId
 	WHERE BNKTRN.intBankAccountId = @intBankAccountId  --AND BNKTRN.strTransactionId = @strTransactionId
 END
 BEGIN
@@ -702,7 +717,7 @@ BEGIN
 		END as InboundNetDue,
 	0 as OutboundNetDue,
 	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND (intInventoryReceiptItemId IS NULL AND intInventoryReceiptChargeId IS NULL)),0) AS VoucherAdjustment,
-	0 as SalesAdjustment,
+	Invoice.dblPayment as SalesAdjustment,
 	PYMT.dblAmountPaid as CheckAmount,
 	CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN
 		'True'
@@ -730,12 +745,20 @@ BEGIN
 	LEFT JOIN tblICItemUOM ItemUOM ON BillDtl.intUnitOfMeasureId = ItemUOM.intItemUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 	--LEFT JOIN tblEMEntitySplit SPLIT ON TICKET.intSplitId = SPLIT.intSplitId AND TICKET.intSplitId <> 0
+	LEFT JOIN (  SELECT 
+				  intPaymentId
+				 ,SUM(dblPayment) dblPayment 
+				  FROM tblAPPaymentDetail
+				  WHERE intInvoiceId IS NOT NULL
+				  GROUP BY intPaymentId
+			    ) Invoice ON Invoice.intPaymentId=PYMT.intPaymentId
 	WHERE BNKTRN.intBankAccountId = @intBankAccountId  AND BNKTRN.strTransactionId = @strTransactionId
 	AND( intInventoryReceiptChargeId IS NOT NULL or BillDtl.intInventoryReceiptItemId IS NOT NULL)
 
 	--------------------------------------------------------
 	-- FROM INVENTORY SHIPMENT
 	--------------------------------------------------------
+	/*
 	UNION ALL 
 	SELECT   DISTINCT 
 	BNKTRN.intBankAccountId,
@@ -908,7 +931,7 @@ BEGIN
 	LEFT JOIN tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 	--LEFT JOIN tblEMEntitySplit SPLIT ON TICKET.intSplitId = SPLIT.intSplitId AND TICKET.intSplitId <> 0
 	WHERE BNKTRN.intBankAccountId = @intBankAccountId  AND BNKTRN.strTransactionId = @strTransactionId
-
+	*/
 	--------------------------------------------------------
 	-- FROM SETTLE STORAGE
 	--------------------------------------------------------
@@ -983,12 +1006,12 @@ BEGIN
 	0 as OutboundGrossDollars,
 	BillDtl.dblTax as InboundTax,
 	0 as OutboundTax,
-	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail A INNER JOIN tblICItem B ON A.intItemId = B.intItemId WHERE intBillId = BillDtl.intBillId AND B.strType = 'Other Charge'),0) as InboundDiscount,
+	ISNULL((SELECT CASE WHEN A.dblCost<0 THEN SUM(-A.dblTotal) ELSE SUM(A.dblTotal) END FROM tblAPBillDetail A INNER JOIN tblICItem B ON A.intItemId = B.intItemId WHERE intBillId = BillDtl.intBillId AND B.strType = 'Other Charge' GROUP BY  A.dblCost),0) as InboundDiscount,
 	0 as OutboundDiscount,
-	(BillDtl.dblTotal + BillDtl.dblTax + ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail A INNER JOIN tblICItem B ON A.intItemId = B.intItemId WHERE intBillId = BillDtl.intBillId AND B.strType = 'Other Charge'),0)) as InboundNetDue,
+	(BillDtl.dblTotal + BillDtl.dblTax + ISNULL((SELECT CASE WHEN A.dblCost<0 THEN SUM(-A.dblTotal) ELSE SUM(A.dblTotal) END FROM tblAPBillDetail A INNER JOIN tblICItem B ON A.intItemId = B.intItemId WHERE intBillId = BillDtl.intBillId AND B.strType = 'Other Charge' GROUP BY  A.dblCost),0)) as InboundNetDue,
 	0 as OutboundNetDue,
 	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail A INNER JOIN tblICItem B ON A.intItemId = B.intItemId WHERE intBillId = BillDtl.intBillId AND (strType NOT IN('Other Charge','Inventory'))),0) AS VoucherAdjustment,
-	0 as SalesAdjustment,
+	Invoice.dblPayment as SalesAdjustment,
 	PYMT.dblAmountPaid as CheckAmount,
 	CASE WHEN Item.strType <> 'Inventory' THEN
 		'True'
@@ -1016,6 +1039,13 @@ BEGIN
 	LEFT JOIN tblSMCompanySetup COMPANY ON COMPANY.intCompanySetupID = (SElECT TOP 1 intCompanySetupID FROM tblSMCompanySetup)
 	LEFT JOIN tblICItemUOM ItemUOM ON BillDtl.intUnitOfMeasureId = ItemUOM.intItemUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
+	LEFT JOIN (  SELECT 
+				  intPaymentId
+				 ,SUM(dblPayment) dblPayment 
+				  FROM tblAPPaymentDetail
+				  WHERE intInvoiceId IS NOT NULL
+				  GROUP BY intPaymentId
+			    ) Invoice ON Invoice.intPaymentId=PYMT.intPaymentId
 	--LEFT JOIN tblEMEntitySplit SPLIT ON TICKET.intSplitId = SPLIT.intSplitId AND TICKET.intSplitId <> 0
 	WHERE BNKTRN.intBankAccountId = @intBankAccountId  AND BNKTRN.strTransactionId = @strTransactionId
 END
