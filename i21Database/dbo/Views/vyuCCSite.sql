@@ -31,9 +31,9 @@ WITH SCHEMABINDING
 			ON F.[intEntityId] = C.intCustomerId
 		LEFT JOIN dbo.tblEMEntity H
 			ON H.intEntityId = F.[intEntityId]
-		INNER JOIN dbo.tblEMEntityToContact I 
+		LEFT JOIN dbo.tblEMEntityToContact I 
 			ON I.intEntityId = H.intEntityId AND I.ysnDefaultContact = 1
-		INNER JOIN dbo.tblEMEntity J 
+		LEFT JOIN dbo.tblEMEntity J 
 			ON J.intEntityId = I.intEntityContactId
 	UNION ALL
 	SELECT
