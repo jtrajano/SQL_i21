@@ -5738,6 +5738,8 @@
     <Build Include="dbo\Stored Procedures\uspAPRpt1099DIVTwoPart.sql" />
     <Build Include="dbo\Views\vyuAP1099DIV.sql" />
     <Build Include="dbo\Views\vyuPATDividends.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentFromOtherCharge.sql" />
+    <Build Include="dbo\User Defined Types\OtherChargeCostAdjustmentTableType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
