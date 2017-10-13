@@ -287,7 +287,14 @@ BEGIN
 
 					END
 					ELSE IF @strLetterName = '30 Day Overdue Collection Letter'					
-					BEGIN				
+					BEGIN
+						DECLARE @Unpaid30Invoice TABLE
+						(
+							snum NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						)
+						INSERT INTO @Unpaid30Invoice 
+						SELECT strInvoiceNumber FROM tblARInvoice where ysnPaid = 0
+				
 						INSERT INTO #TransactionLetterDetail
 						(
 							intEntityCustomerId 
@@ -333,6 +340,7 @@ BEGIN
 							WHERE intEntityCustomerId = @CustomerId
 							AND dbl121Days  <> 0
 						) ABC
+							WHERE strInvoiceNumber IN ( SELECT snum FROM @Unpaid30Invoice)
 
 						UPDATE 
 							tblARCollectionOverdue SET dbl30DaysSum = ABC.dblTotalDueSum
