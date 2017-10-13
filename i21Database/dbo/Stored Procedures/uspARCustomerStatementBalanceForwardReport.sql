@@ -235,6 +235,7 @@ INSERT INTO @temp_aging_table
 SELECT strCustomerName
 		, strCustomerNumber
         , intEntityCustomerId
+		, strCustomerInfo
         , dblCreditLimit
         , dblTotalAR
         , dblFuture
