@@ -41,7 +41,7 @@ BEGIN
 	 FROM ssvndmst  
 	 INNER JOIN tblEMEntity ENT ON ENT.strEntityNo COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
 	 INNER JOIN tblEMEntityType ETYP ON ETYP.intEntityId = ENT.intEntityId
-	 INNER JOIN tblAPVendor APVND ON APVND.intEntityId = ENT.intEntityId
+	 INNER JOIN tblAPVendor APVND ON APVND.intEntityVendorId = ENT.intEntityId
 	 WHERE APVND.ysnTransportTerminal = 1 AND ETYP.strType = 'Vendor'	 
 		
 	IF(@Checking = 0)
@@ -56,7 +56,7 @@ BEGIN
 			 INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no = DVP.trdvp_vnd_no
 			 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN #tmpvnd tmp ON tmp.ssvnd_vnd_no = DVP.trdvp_vnd_no  
-			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityId 
+			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityVendorId 
 			 AND ELOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = tmp.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN tblTRSupplyPoint SUP ON SUP.intEntityLocationId = ELOC.intEntityLocationId	
 			 INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = trdvp_pt_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -68,12 +68,12 @@ BEGIN
 				   ,[strSearchValue]
 				   ,[intConcurrencyId])
 		SELECT	PHDR.intSupplyPointProductSearchHeaderId
-			   ,DVP.trdvp_search1,1
+			   ,RTRIM(DVP.trdvp_search1),1
 		FROM trdvpmst DVP
 			 INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no = DVP.trdvp_vnd_no
 			 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN #tmpvnd tmp ON tmp.ssvnd_vnd_no = DVP.trdvp_vnd_no  
-			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityId 
+			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityVendorId 
 			 AND ELOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = tmp.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN tblTRSupplyPoint SUP ON SUP.intEntityLocationId = ELOC.intEntityLocationId	
 			 INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = trdvp_pt_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -81,7 +81,7 @@ BEGIN
 			 AND PHDR.intItemId = ITM.intItemId
 		WHERE DVP.trdvp_search1 IS NOT NULL AND DVP.trdvp_search1 <> ''
 		AND NOT EXISTS (SELECT [intSupplyPointProductSearchDetailId] FROM [tblTRSupplyPointProductSearchDetail] DET WHERE PHDR.intSupplyPointProductSearchHeaderId =DET.intSupplyPointProductSearchHeaderId 
-		AND [strSearchValue] COLLATE SQL_Latin1_General_CP1_CS_AS = DVP.trdvp_search1 COLLATE SQL_Latin1_General_CP1_CS_AS) 
+		AND [strSearchValue] COLLATE SQL_Latin1_General_CP1_CS_AS = RTRIM(DVP.trdvp_search1) COLLATE SQL_Latin1_General_CP1_CS_AS) 
 
 		--PRODUCT SEARCH 2--
 		INSERT INTO [dbo].[tblTRSupplyPointProductSearchDetail]
@@ -89,12 +89,12 @@ BEGIN
 				   ,[strSearchValue]
 				   ,[intConcurrencyId])
 		SELECT	PHDR.intSupplyPointProductSearchHeaderId
-			   ,DVP.trdvp_search2,1
+			   ,RTRIM(DVP.trdvp_search2),1
 		FROM trdvpmst DVP
 			 INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no = DVP.trdvp_vnd_no
 			 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN #tmpvnd tmp ON tmp.ssvnd_vnd_no = DVP.trdvp_vnd_no  
-			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityId 
+			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityVendorId 
 			 AND ELOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = tmp.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN tblTRSupplyPoint SUP ON SUP.intEntityLocationId = ELOC.intEntityLocationId	
 			 INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = trdvp_pt_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -102,7 +102,7 @@ BEGIN
 			 AND PHDR.intItemId = ITM.intItemId
 		WHERE DVP.trdvp_search2 IS NOT NULL AND DVP.trdvp_search2 <> ''
 		AND NOT EXISTS (SELECT [intSupplyPointProductSearchDetailId] FROM [tblTRSupplyPointProductSearchDetail] DET WHERE PHDR.intSupplyPointProductSearchHeaderId =DET.intSupplyPointProductSearchHeaderId 
-		AND [strSearchValue] COLLATE SQL_Latin1_General_CP1_CS_AS = DVP.trdvp_search2 COLLATE SQL_Latin1_General_CP1_CS_AS)
+		AND [strSearchValue] COLLATE SQL_Latin1_General_CP1_CS_AS = RTRIM(DVP.trdvp_search2) COLLATE SQL_Latin1_General_CP1_CS_AS)
 
 		--PRODUCT SEARCH 3--
 		INSERT INTO [dbo].[tblTRSupplyPointProductSearchDetail]
@@ -110,12 +110,12 @@ BEGIN
 				   ,[strSearchValue]
 				   ,[intConcurrencyId])
 		SELECT	PHDR.intSupplyPointProductSearchHeaderId
-			   ,DVP.trdvp_search3,1
+			   ,RTRIM(DVP.trdvp_search3),1
 		FROM trdvpmst DVP
 			 INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no = DVP.trdvp_vnd_no
 			 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN #tmpvnd tmp ON tmp.ssvnd_vnd_no = DVP.trdvp_vnd_no  
-			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityId 
+			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityVendorId 
 			 AND ELOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = tmp.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN tblTRSupplyPoint SUP ON SUP.intEntityLocationId = ELOC.intEntityLocationId	
 			 INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = trdvp_pt_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -123,7 +123,7 @@ BEGIN
 			 AND PHDR.intItemId = ITM.intItemId
 		WHERE DVP.trdvp_search3 IS NOT NULL AND DVP.trdvp_search3 <> ''
 		AND NOT EXISTS (SELECT [intSupplyPointProductSearchDetailId] FROM [tblTRSupplyPointProductSearchDetail] DET WHERE PHDR.intSupplyPointProductSearchHeaderId =DET.intSupplyPointProductSearchHeaderId 
-		AND [strSearchValue] COLLATE SQL_Latin1_General_CP1_CS_AS = DVP.trdvp_search3 COLLATE SQL_Latin1_General_CP1_CS_AS) 
+		AND [strSearchValue] COLLATE SQL_Latin1_General_CP1_CS_AS = RTRIM(DVP.trdvp_search3) COLLATE SQL_Latin1_General_CP1_CS_AS) 
 
 		--PRODUCT SEARCH 4--
 		INSERT INTO [dbo].[tblTRSupplyPointProductSearchDetail]
@@ -131,12 +131,12 @@ BEGIN
 				   ,[strSearchValue]
 				   ,[intConcurrencyId])
 		SELECT	PHDR.intSupplyPointProductSearchHeaderId
-			   ,DVP.trdvp_search4,1
+			   ,RTRIM(DVP.trdvp_search4),1
 		FROM trdvpmst DVP
 			 INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no = DVP.trdvp_vnd_no
 			 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN #tmpvnd tmp ON tmp.ssvnd_vnd_no = DVP.trdvp_vnd_no  
-			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityId 
+			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityVendorId 
 			 AND ELOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = tmp.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN tblTRSupplyPoint SUP ON SUP.intEntityLocationId = ELOC.intEntityLocationId	
 			 INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = trdvp_pt_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -144,7 +144,7 @@ BEGIN
 			 AND PHDR.intItemId = ITM.intItemId
 		WHERE DVP.trdvp_search4 IS NOT NULL AND DVP.trdvp_search4 <> ''
 		AND NOT EXISTS (SELECT [intSupplyPointProductSearchDetailId] FROM [tblTRSupplyPointProductSearchDetail] DET WHERE PHDR.intSupplyPointProductSearchHeaderId =DET.intSupplyPointProductSearchHeaderId 
-		AND [strSearchValue] COLLATE SQL_Latin1_General_CP1_CS_AS = DVP.trdvp_search4 COLLATE SQL_Latin1_General_CP1_CS_AS) 
+		AND [strSearchValue] COLLATE SQL_Latin1_General_CP1_CS_AS = RTRIM(DVP.trdvp_search4) COLLATE SQL_Latin1_General_CP1_CS_AS) 
 
 		--PRODUCT SEARCH 5--
 		INSERT INTO [dbo].[tblTRSupplyPointProductSearchDetail]
@@ -152,12 +152,12 @@ BEGIN
 				   ,[strSearchValue]
 				   ,[intConcurrencyId])
 		SELECT	PHDR.intSupplyPointProductSearchHeaderId
-			   ,DVP.trdvp_search5,1
+			   ,RTRIM(DVP.trdvp_search5),1
 		FROM trdvpmst DVP
 			 INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no = DVP.trdvp_vnd_no
 			 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN #tmpvnd tmp ON tmp.ssvnd_vnd_no = DVP.trdvp_vnd_no  
-			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityId 
+			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityVendorId 
 			 AND ELOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = tmp.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN tblTRSupplyPoint SUP ON SUP.intEntityLocationId = ELOC.intEntityLocationId	
 			 INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = trdvp_pt_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -165,7 +165,7 @@ BEGIN
 			 AND PHDR.intItemId = ITM.intItemId
 		WHERE DVP.trdvp_search5 IS NOT NULL AND DVP.trdvp_search5 <> ''
 		AND NOT EXISTS (SELECT [intSupplyPointProductSearchDetailId] FROM [tblTRSupplyPointProductSearchDetail] DET WHERE PHDR.intSupplyPointProductSearchHeaderId =DET.intSupplyPointProductSearchHeaderId 
-		AND [strSearchValue] COLLATE SQL_Latin1_General_CP1_CS_AS = DVP.trdvp_search5 COLLATE SQL_Latin1_General_CP1_CS_AS) 
+		AND [strSearchValue] COLLATE SQL_Latin1_General_CP1_CS_AS = RTRIM(DVP.trdvp_search5) COLLATE SQL_Latin1_General_CP1_CS_AS) 
 		 
 		--PRODUCT SEARCH 6--
 		INSERT INTO [dbo].[tblTRSupplyPointProductSearchDetail]
@@ -173,12 +173,12 @@ BEGIN
 				   ,[strSearchValue]
 				   ,[intConcurrencyId])
 		SELECT	PHDR.intSupplyPointProductSearchHeaderId
-			   ,DVP.trdvp_search6,1
+			   ,RTRIM(DVP.trdvp_search6),1
 		FROM trdvpmst DVP
 			 INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no = DVP.trdvp_vnd_no
 			 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN #tmpvnd tmp ON tmp.ssvnd_vnd_no = DVP.trdvp_vnd_no  
-			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityId 
+			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityVendorId 
 			 AND ELOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = tmp.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN tblTRSupplyPoint SUP ON SUP.intEntityLocationId = ELOC.intEntityLocationId	
 			 INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = trdvp_pt_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -186,7 +186,7 @@ BEGIN
 			 AND PHDR.intItemId = ITM.intItemId
 		WHERE DVP.trdvp_search6 IS NOT NULL AND DVP.trdvp_search6 <> ''
 		AND NOT EXISTS (SELECT [intSupplyPointProductSearchDetailId] FROM [tblTRSupplyPointProductSearchDetail] DET WHERE PHDR.intSupplyPointProductSearchHeaderId =DET.intSupplyPointProductSearchHeaderId 
-		AND [strSearchValue] COLLATE SQL_Latin1_General_CP1_CS_AS = DVP.trdvp_search6 COLLATE SQL_Latin1_General_CP1_CS_AS) 
+		AND [strSearchValue] COLLATE SQL_Latin1_General_CP1_CS_AS = RTRIM(DVP.trdvp_search6) COLLATE SQL_Latin1_General_CP1_CS_AS) 
 	END
 
 	IF(@Checking = 1)
@@ -196,7 +196,7 @@ BEGIN
 			 INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no = DVP.trdvp_vnd_no
 			 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN #tmpvnd tmp ON tmp.ssvnd_vnd_no = DVP.trdvp_vnd_no  
-			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityId 
+			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityVendorId 
 			 AND ELOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = tmp.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN tblTRSupplyPoint SUP ON SUP.intEntityLocationId = ELOC.intEntityLocationId	
 			 INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = trdvp_pt_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS
