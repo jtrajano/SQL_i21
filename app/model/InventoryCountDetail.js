@@ -99,9 +99,7 @@ Ext.define('Inventory.model.InventoryCountDetail', {
 
     validators: [
         { type: 'presence', field: 'intItemId' },
-        { type: 'presence', field: 'intItemUOMId' },
-        { type: 'presence', field: 'strUnitMeasure' },
-        { type: 'presence', field: 'strItemNo' }
+        { type: 'presence', field: 'intItemUOMId' }
     ],
 
     validate: function(options) {
@@ -111,12 +109,12 @@ Ext.define('Inventory.model.InventoryCountDetail', {
             if (this.get('intSubLocationId') === null || this.get('intSubLocationId') === 0) {
                 errors.add({
                     field: 'strSubLocationName',
-                    message: "Please select a storage location."
+                    message: "Please select a sub location."
                 });   
             } else if (this.get('intStorageLocationId') === null || this.get('intStorageLocationId') === 0) {
                 errors.add({
                     field: 'strStorageLocationName',
-                    message: "Please select a storage unit."
+                    message: "Please select a storage location."
                 });
             }
         }
@@ -125,14 +123,14 @@ Ext.define('Inventory.model.InventoryCountDetail', {
             if(this.get('intSubLocationId') === null || this.get('intSubLocationId') === 0) {
                 errors.add({
                     field: 'strSubLocationName',
-                    message: "Please select a storage location."
+                    message: "Please select a sub location."
                 });   
             }
 
             if(this.get('intStorageLocationId') === null || this.get('intStorageLocationId') === 0) {
                 errors.add({
                     field: 'strStorageLocationName',
-                    message: "Please select a storage unit."
+                    message: "Please select a storage location."
                 });   
             }
 

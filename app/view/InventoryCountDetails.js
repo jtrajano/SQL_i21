@@ -366,6 +366,7 @@ Ext.define('Inventory.view.InventoryCountDetails', {
                                                     hidden: true
                                                 }
                                             ],
+                                            reference: 'cboLotId',
                                             itemId: 'cboLotNo',
                                             modelValidation: true,
                                             fieldLabel: 'Lot Id',

@@ -1819,6 +1819,32 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "icon": null,
+                                                        "iconCls": "small-folder",
+                                                        "itemId": "btnShowRow",
+                                                        "layout|flex": null,
+                                                        "tabIndex": -1,
+                                                        "text": "Open"
+                                                    },
+                                                    "configAlternates": {
+                                                        "icon": "string",
+                                                        "iconCls": "string",
+                                                        "itemId": "string",
+                                                        "layout|flex": "number",
+                                                        "tabIndex": "number",
+                                                        "text": "string"
+                                                    },
+                                                    "name": "MyButton48",
+                                                    "designerId": "76f33746-c489-4bc9-adc0-12d3b4c0a37b"
+                                                },
+                                                {
+                                                    "type": "Ext.button.Button",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "icon": null,
                                                         "iconCls": "small-insert",
                                                         "itemId": "btnAttachNewRow",
                                                         "layout|flex": null,

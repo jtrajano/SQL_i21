@@ -11,6 +11,7 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
                 store: '{items}',
                 value: '{current.strItemNo}',
                 origValueField: 'intItemId',
+                origUpdateField: 'intItemId',
                 defaultFilters: [
                     {
                         column: 'intLocationId',
@@ -51,7 +52,6 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
                 store: '{storageLocations}',
                 value: '{current.strSubLocationName}',
                 origValueField: 'intSubLocationId',
-                origUpdateField: 'intSubLocationId',
                 hidden: '{isCountByGroupOrNotLotted}',
                 defaultFilters: [
                     {
@@ -124,8 +124,9 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
                 ]
             },
             cboParentLotNo: {
-                value: '{current.strParentLotNo}',
+                value: '{current.strParentLotNo}',   
                 store: '{parentLots}',
+                origValueField: 'intParentLotId',
                 defaultFilters: [
                     {
                         column: 'intItemId',
@@ -317,6 +318,11 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
             vm = me.getViewModel(),
             //valid = true,
             message = "";
+        var current = vm.get('current');
+        if(!current.get('intLotId') && current.get('ysnLotted')) {
+            var combo = win.down('#cboLotNo');
+            current.set('strLotNo', combo.getValue());
+        }
 
         if(!vm.get('inventoryCount.strCountBy') === 'Pack') {
             if (!vm.get('current.intItemId')) {
@@ -462,7 +468,7 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
         vm.set('current.strLotAlias', null);
         vm.set('selectedLot', null);
         vm.set('current.intWeightUOMId', null);
-        vm.set('current.intItemId', rec.get('intItemId'));
+        //vm.set('current.intItemId', rec.get('intItemId'));
         vm.set('current.ysnLotWeightsRequired', rec.get('ysnLotWeightsRequired'));
         vm.set('current.dblWeightQty', null);
         vm.set('current.dblNetQty', null);
@@ -499,12 +505,12 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
         var rec = _.first(records);    
 
         vm.set('current.strLotAlias', rec.get('strLotAlias'));
+        vm.set('current.strLotNo', rec.get('strLotNumber'));
         vm.set('current.dblSystemCount', rec.get('dblQty'));
         vm.set('current.strUnitMeasure', rec.get('strItemUOM'));
         vm.set('current.intItemUOMId', rec.get('intItemUOMId'));
         vm.set('current.intWeightUOMId', null);
         vm.set('current.dblWeightQty', null);
-        vm.set('current.intLotId', rec.get('intLotId'));
         vm.set('current.dblNetQty', null);
         vm.set('current.strWeightUOM', null);
         vm.set('current.dblItemUOMConversionFactor', rec.get('dblItemUOMConv'));
@@ -749,8 +755,18 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
         }
     },
 
+    onLotNoChange: function(combo, newValue, oldValue, eOpts) {
+        var me = this,
+            vm = me.getViewModel(),
+            current = vm.get('current');
+        var value = combo.findRecordByValue(newValue);
 
-    init: function(application) {
+        if(!value && !newValue) {
+            current.set('strLotNo', newValue);
+        }
+    },
+
+    init: function (application) {
         this.control({
             "#btnAdd": {
                 click: this.onAddClick
@@ -772,7 +788,8 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
                 select: this.onGrossUOMSelect
             },
             "#cboLotNo": {
-                select: this.onLotSelect
+                select: this.onLotSelect,
+                //change: this.onLotNoChange
             },
             "#cboStorageLocation": {
                 select: this.onSubLocationSelect

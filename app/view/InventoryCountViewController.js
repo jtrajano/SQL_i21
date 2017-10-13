@@ -20,6 +20,10 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 value: '{pageSize}',
                 store: '{pageSize}'
             },
+            btnShowRow: {
+                hidden: '{hasSelection}',
+                hidden: true
+            },
             btnDelete: {
                 disabled: '{disableBtnDelete}'
             },
@@ -402,7 +406,6 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     dataIndex: 'strUnitMeasure',
                     hidden: '{hasCountGroup}',
                     editor: {
-                        readOnly: '{disableCountGridFields}',
                         readOnly: '{disableCountUOM}',
                         origValueField: 'intItemUOMId',
                         origUpdateField: 'intItemUOMId',
@@ -979,7 +982,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         iRely.Functions.showCustomDialog('question', 'yesno', 'Are you sure you want to delete all record(s)?', msgAction);
     },
 
-    onOpenRow: function (e) {
+    onShowRow: function (e) {
         var me = this;
         var win = e.up('window');
         var vm = win.getViewModel();
@@ -2110,6 +2113,9 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             },
             "#tabInventoryCount": {
                 tabChange: this.onInventoryCountTabChange
+            },
+            "#btnShowRow": {
+                click: this.onShowRow
             }
         });
     }

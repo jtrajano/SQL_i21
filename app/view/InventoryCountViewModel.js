@@ -227,6 +227,11 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
                 return false;
             }
         },
+
+        hasSelection: function(get) {
+            return !get('grdPhysicalCount.selection');
+        },
+
         readOnly: function(get) { return true; },
         
         disablePhysicalCount: function(get) {
@@ -234,7 +239,15 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
         },
 
         disableCountUOM: function(get) {
-            return !iRely.Functions.isEmpty(get('grdPhysicalCount.selection.intLotId')) || !get('grdPhysicalCount.selection.intLotId') === 0;
+            var readOnly = false;
+            if(get('grdPhysicalCount.selection.strItemNo') || get('current.ysnPosted')) {
+                readOnly = true;
+            }
+            else {
+                readOnly = false;
+            }
+            readOnly = !get('grdPhysicalCount.selection.intLotId') || !get('grdPhysicalCount.selection.intLotId') === 0;
+            return readOnly;
         },
 
         isAutoLot: function(get) {
