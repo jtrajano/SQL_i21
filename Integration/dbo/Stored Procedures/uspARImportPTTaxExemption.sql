@@ -287,10 +287,10 @@ BEGIN
 			   ,[strException]
 			   ,[dtmStartDate]
 			   ,[dtmEndDate]
-			   ,[intEntityCustomerLocationId]
+			   --,[intEntityCustomerLocationId]
 			   ,[intConcurrencyId])
 			SELECT 
-				CUS.intEntityId--[intEntityCustomerId]
+				CUS.intEntityId--[intEntityCustomerId]
 			   ,CAT.intCategoryId--[intCategoryId]
 			   ,TCD.intTaxCodeId--[intTaxCodeId]
 			   ,TCD.intTaxClassId--[intTaxClassId]
@@ -298,7 +298,7 @@ BEGIN
 			   ,''--[strException]
 			   ,(CASE WHEN ISDATE(PDV.ptpdv_begin_rev_dt) = 1 THEN CONVERT(DATE,CAST(PDV.ptpdv_begin_rev_dt AS CHAR(12)), 112) ELSE ' ' END) --[dtmStartDate]
 			   ,(CASE WHEN ISDATE(PDV.ptpdv_end_rev_dt) = 1 THEN CONVERT(DATE,CAST(PDV.ptpdv_end_rev_dt AS CHAR(12)), 112) ELSE ' ' END) --[dtmEndDate]
-			   ,CLOC.intEntityLocationId--[intEntityCustomerLocationId]
+			   --,CLOC.intEntityLocationId--[intEntityCustomerLocationId]
 			   ,1	
 			FROM ptpdvmst PDV
 			INNER JOIN tmpptcusname OCUS ON OCUS.ptcus_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -324,7 +324,7 @@ BEGIN
 			   ,[strException]
 			   ,[dtmStartDate]
 			   ,[dtmEndDate]
-			   ,[intEntityCustomerLocationId]
+			   --,[intEntityCustomerLocationId]
 			   ,[intConcurrencyId])
 			SELECT 
 				CUS.intEntityId--[intEntityCustomerId]
@@ -335,7 +335,7 @@ BEGIN
 			   ,''--[strException]
 			   ,(CASE WHEN ISDATE(PDV.ptpdv_begin_rev_dt) = 1 THEN CONVERT(DATE,CAST(PDV.ptpdv_begin_rev_dt AS CHAR(12)), 112) ELSE ' ' END) --[dtmStartDate]
 			   ,(CASE WHEN ISDATE(PDV.ptpdv_end_rev_dt) = 1 THEN CONVERT(DATE,CAST(PDV.ptpdv_end_rev_dt AS CHAR(12)), 112) ELSE ' ' END) --[dtmEndDate]
-			   ,CLOC.intEntityLocationId--[intEntityCustomerLocationId]
+			   --,CLOC.intEntityLocationId--[intEntityCustomerLocationId]
 			   ,1	
 			FROM ptpdvmst PDV
 			INNER JOIN tmpptcusname OCUS ON OCUS.ptcus_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -361,7 +361,7 @@ BEGIN
 			   ,[strException]
 			   ,[dtmStartDate]
 			   ,[dtmEndDate]
-			   ,[intEntityCustomerLocationId]
+			   --,[intEntityCustomerLocationId]
 			   ,[intConcurrencyId])
 			SELECT 
 				CUS.intEntityId--[intEntityCustomerId]
@@ -372,7 +372,7 @@ BEGIN
 			   ,(CASE WHEN OCUS.ptcus_sales_tax_yn = 'Y' THEN OCUS.ptcus_sales_tax_id ELSE '' END)--[strException]
 			   ,(CASE WHEN ISDATE(PDV.ptpdv_begin_rev_dt) = 1 THEN CONVERT(DATE,CAST(PDV.ptpdv_begin_rev_dt AS CHAR(12)), 112) ELSE ' ' END) --[dtmStartDate]
 			   ,(CASE WHEN ISDATE(PDV.ptpdv_end_rev_dt) = 1 THEN CONVERT(DATE,CAST(PDV.ptpdv_end_rev_dt AS CHAR(12)), 112) ELSE ' ' END) --[dtmEndDate]
-			   ,CLOC.intEntityLocationId--[intEntityCustomerLocationId]
+			   --,CLOC.intEntityLocationId--[intEntityCustomerLocationId]
 			   ,1	
 			FROM ptpdvmst PDV
 			INNER JOIN tmpptcusname OCUS ON OCUS.ptcus_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -399,7 +399,7 @@ BEGIN
 			   ,[strException]
 			   ,[dtmStartDate]
 			   ,[dtmEndDate]
-			   ,[intEntityCustomerLocationId]
+			   --,[intEntityCustomerLocationId]
 			   ,[intConcurrencyId])
 			SELECT 
 				CUS.intEntityId--[intEntityCustomerId]
@@ -411,7 +411,7 @@ BEGIN
 			   ,''--[strException]
 			   ,(CASE WHEN ISDATE(PDV.ptpdv_begin_rev_dt) = 1 THEN CONVERT(DATE,CAST(PDV.ptpdv_begin_rev_dt AS CHAR(12)), 112) ELSE ' ' END) --[dtmStartDate]
 			   ,(CASE WHEN ISDATE(PDV.ptpdv_end_rev_dt) = 1 THEN CONVERT(DATE,CAST(PDV.ptpdv_end_rev_dt AS CHAR(12)), 112) ELSE ' ' END) --[dtmEndDate]
-			   ,CLOC.intEntityLocationId--[intEntityCustomerLocationId]
+			   --,CLOC.intEntityLocationId--[intEntityCustomerLocationId]
 			   ,1	
 			FROM ptpdvmst PDV
 			INNER JOIN tmpptcusname OCUS ON OCUS.ptcus_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -438,7 +438,7 @@ BEGIN
 			   ,[strException]
 			   ,[dtmStartDate]
 			   ,[dtmEndDate]
-			   ,[intEntityCustomerLocationId]
+			   --,[intEntityCustomerLocationId]
 			   ,[intConcurrencyId])
 			SELECT 
 				CUS.intEntityId--[intEntityCustomerId]
@@ -450,7 +450,7 @@ BEGIN
 			   ,''--[strException]
 			   ,(CASE WHEN ISDATE(PDV.ptpdv_begin_rev_dt) = 1 THEN CONVERT(DATE,CAST(PDV.ptpdv_begin_rev_dt AS CHAR(12)), 112) ELSE ' ' END) --[dtmStartDate]
 			   ,(CASE WHEN ISDATE(PDV.ptpdv_end_rev_dt) = 1 THEN CONVERT(DATE,CAST(PDV.ptpdv_end_rev_dt AS CHAR(12)), 112) ELSE ' ' END) --[dtmEndDate]
-			   ,CLOC.intEntityLocationId--[intEntityCustomerLocationId]
+			   --,CLOC.intEntityLocationId--[intEntityCustomerLocationId]
 			   ,1	
 			FROM ptpdvmst PDV
 			INNER JOIN tmpptcusname OCUS ON OCUS.ptcus_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -477,7 +477,7 @@ BEGIN
 			   ,[strException]
 			   ,[dtmStartDate]
 			   ,[dtmEndDate]
-			   ,[intEntityCustomerLocationId]
+			   --,[intEntityCustomerLocationId]
 			   ,[intConcurrencyId])
 			SELECT 
 				CUS.intEntityId--[intEntityCustomerId]
@@ -489,7 +489,7 @@ BEGIN
 			   ,(CASE WHEN OCUS.ptcus_sales_tax_yn = 'Y' THEN OCUS.ptcus_sales_tax_id ELSE '' END)--[strException]
 			   ,(CASE WHEN ISDATE(PDV.ptpdv_begin_rev_dt) = 1 THEN CONVERT(DATE,CAST(PDV.ptpdv_begin_rev_dt AS CHAR(12)), 112) ELSE ' ' END) --[dtmStartDate]
 			   ,(CASE WHEN ISDATE(PDV.ptpdv_end_rev_dt) = 1 THEN CONVERT(DATE,CAST(PDV.ptpdv_end_rev_dt AS CHAR(12)), 112) ELSE ' ' END) --[dtmEndDate]
-			   ,CLOC.intEntityLocationId--[intEntityCustomerLocationId]
+			   --,CLOC.intEntityLocationId--[intEntityCustomerLocationId]
 			   ,1	
 			FROM ptpdvmst PDV
 			INNER JOIN tmpptcusname OCUS ON OCUS.ptcus_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -519,7 +519,7 @@ BEGIN
 							,[strException]
 							,[dtmStartDate]
 							,[dtmEndDate]
-							,[intEntityCustomerLocationId]
+							--,[intEntityCustomerLocationId]
 							,[intConcurrencyId])
 							SELECT 
 								CUS.intEntityId--[intEntityCustomerId]
@@ -530,7 +530,7 @@ BEGIN
 							   ,''''--[strException]
 							   ,(CASE WHEN ISDATE(PDV.ptpdv_begin_rev_dt) = 1 THEN CONVERT(DATE,CAST(PDV.ptpdv_begin_rev_dt AS CHAR(12)), 112) ELSE '' '' END) --[dtmStartDate]
 							   ,(CASE WHEN ISDATE(PDV.ptpdv_end_rev_dt) = 1 THEN CONVERT(DATE,CAST(PDV.ptpdv_end_rev_dt AS CHAR(12)), 112) ELSE '' '' END) --[dtmEndDate]
-							   ,CLOC.intEntityLocationId--[intEntityCustomerLocationId]
+							   --,CLOC.intEntityLocationId--[intEntityCustomerLocationId]
 							   ,1	
 							FROM ptpdvmst PDV
 							INNER JOIN tmpptcusname OCUS ON OCUS.ptcus_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -559,7 +559,7 @@ BEGIN
 								,[strException]
 								,[dtmStartDate]
 								,[dtmEndDate]
-								,[intEntityCustomerLocationId]
+								--,[intEntityCustomerLocationId]
 								,[intConcurrencyId])
 							SELECT 
 								CUS.intEntityId--[intEntityCustomerId]
@@ -571,7 +571,7 @@ BEGIN
 							   ,''''--[strException]
 							   ,(CASE WHEN ISDATE(PDV.ptpdv_begin_rev_dt) = 1 THEN CONVERT(DATE,CAST(PDV.ptpdv_begin_rev_dt AS CHAR(12)), 112) ELSE '' '' END) --[dtmStartDate]
 							   ,(CASE WHEN ISDATE(PDV.ptpdv_end_rev_dt) = 1 THEN CONVERT(DATE,CAST(PDV.ptpdv_end_rev_dt AS CHAR(12)), 112) ELSE '' '' END) --[dtmEndDate]
-							   ,CLOC.intEntityLocationId--[intEntityCustomerLocationId]
+							   --,CLOC.intEntityLocationId--[intEntityCustomerLocationId]
 							   ,1	
 							FROM ptpdvmst PDV
 							INNER JOIN tmpptcusname OCUS ON OCUS.ptcus_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
