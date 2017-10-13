@@ -199,6 +199,8 @@ BEGIN
 					   ,[ysnMinorIngredient]
 					   ,[ysnOutputItemMandatory]
 					   ,[dblScrap]
+					   ,dtmValidFrom
+					   ,dtmValidTo
 					   ,[ysnConsumptionRequired]
 					   ,[ysnCostAppliedAtInvoice]
 					   ,[intSequenceNo]
@@ -226,6 +228,8 @@ BEGIN
 					   ,0  --[ysnMinorIngredient]
 					   ,0  --[ysnOutputItemMandatory]
 					   ,0  --[dblScrap]
+					   ,''1900-01-01 00:00:00.000'' --dtmValidFrom
+					   ,''9999-12-31 00:00:00.000'' --dtmValidTo,					   
 					   ,0  --[ysnConsumptionRequired]
 					   ,0  --[ysnCostAppliedAtInvoice]
 					   ,1  --[intSequenceNo]
@@ -241,7 +245,7 @@ BEGIN
 			INNER JOIN tblSMCompanyLocation LOC ON LOC.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS = FRMI.ptfrm_loc_no  COLLATE SQL_Latin1_General_CP1_CS_AS
 			INNER JOIN tblMFRecipe RCP ON RCP.intItemId = ITM.intItemId AND RCP.intLocationId = LOC.intCompanyLocationId
 			INNER JOIN tblICUnitMeasure UM ON Upper(UM.strSymbol) COLLATE SQL_Latin1_General_CP1_CS_AS = Upper(OITM.ptitm_unit) COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblICItemUOM UOM ON UOM.intItemId = ITM.intItemId AND UOM.intUnitMeasureId = UM.intUnitMeasureId  
+			INNER JOIN tblICItemUOM UOM ON UOM.intItemId = ITM1.intItemId AND UOM.intUnitMeasureId = UM.intUnitMeasureId  
 			WHERE FRMI.ptfrm_ingr_itm_no_'+CAST(@cnt AS NVARCHAR)+' IS NOT NULL AND NOT EXISTS (SELECT * FROM tblMFRecipeItem WHERE intRecipeId = RCP.intRecipeId  AND intItemId = ITM1.intItemId )' 
 			
 			   EXEC (@SQLCMD)
