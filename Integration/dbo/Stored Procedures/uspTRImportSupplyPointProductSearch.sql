@@ -68,7 +68,7 @@ BEGIN
 				   ,[strSearchValue]
 				   ,[intConcurrencyId])
 		SELECT	PHDR.intSupplyPointProductSearchHeaderId
-			   ,DVP.trdvp_search1,1
+			   ,RTRIM(DVP.trdvp_search1),1
 		FROM trdvpmst DVP
 			 INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no = DVP.trdvp_vnd_no
 			 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -81,7 +81,7 @@ BEGIN
 			 AND PHDR.intItemId = ITM.intItemId
 		WHERE DVP.trdvp_search1 IS NOT NULL AND DVP.trdvp_search1 <> ''
 		AND NOT EXISTS (SELECT [intSupplyPointProductSearchDetailId] FROM [tblTRSupplyPointProductSearchDetail] DET WHERE PHDR.intSupplyPointProductSearchHeaderId =DET.intSupplyPointProductSearchHeaderId 
-		AND [strSearchValue] COLLATE SQL_Latin1_General_CP1_CS_AS = DVP.trdvp_search1 COLLATE SQL_Latin1_General_CP1_CS_AS) 
+		AND [strSearchValue] COLLATE SQL_Latin1_General_CP1_CS_AS = RTRIM(DVP.trdvp_search1) COLLATE SQL_Latin1_General_CP1_CS_AS) 
 
 		--PRODUCT SEARCH 2--
 		INSERT INTO [dbo].[tblTRSupplyPointProductSearchDetail]
@@ -89,7 +89,7 @@ BEGIN
 				   ,[strSearchValue]
 				   ,[intConcurrencyId])
 		SELECT	PHDR.intSupplyPointProductSearchHeaderId
-			   ,DVP.trdvp_search2,1
+			   ,RTRIM(DVP.trdvp_search2),1
 		FROM trdvpmst DVP
 			 INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no = DVP.trdvp_vnd_no
 			 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -102,7 +102,7 @@ BEGIN
 			 AND PHDR.intItemId = ITM.intItemId
 		WHERE DVP.trdvp_search2 IS NOT NULL AND DVP.trdvp_search2 <> ''
 		AND NOT EXISTS (SELECT [intSupplyPointProductSearchDetailId] FROM [tblTRSupplyPointProductSearchDetail] DET WHERE PHDR.intSupplyPointProductSearchHeaderId =DET.intSupplyPointProductSearchHeaderId 
-		AND [strSearchValue] COLLATE SQL_Latin1_General_CP1_CS_AS = DVP.trdvp_search2 COLLATE SQL_Latin1_General_CP1_CS_AS)
+		AND [strSearchValue] COLLATE SQL_Latin1_General_CP1_CS_AS = RTRIM(DVP.trdvp_search2) COLLATE SQL_Latin1_General_CP1_CS_AS)
 
 		--PRODUCT SEARCH 3--
 		INSERT INTO [dbo].[tblTRSupplyPointProductSearchDetail]
@@ -110,7 +110,7 @@ BEGIN
 				   ,[strSearchValue]
 				   ,[intConcurrencyId])
 		SELECT	PHDR.intSupplyPointProductSearchHeaderId
-			   ,DVP.trdvp_search3,1
+			   ,RTRIM(DVP.trdvp_search3),1
 		FROM trdvpmst DVP
 			 INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no = DVP.trdvp_vnd_no
 			 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -123,7 +123,7 @@ BEGIN
 			 AND PHDR.intItemId = ITM.intItemId
 		WHERE DVP.trdvp_search3 IS NOT NULL AND DVP.trdvp_search3 <> ''
 		AND NOT EXISTS (SELECT [intSupplyPointProductSearchDetailId] FROM [tblTRSupplyPointProductSearchDetail] DET WHERE PHDR.intSupplyPointProductSearchHeaderId =DET.intSupplyPointProductSearchHeaderId 
-		AND [strSearchValue] COLLATE SQL_Latin1_General_CP1_CS_AS = DVP.trdvp_search3 COLLATE SQL_Latin1_General_CP1_CS_AS) 
+		AND [strSearchValue] COLLATE SQL_Latin1_General_CP1_CS_AS = RTRIM(DVP.trdvp_search3) COLLATE SQL_Latin1_General_CP1_CS_AS) 
 
 		--PRODUCT SEARCH 4--
 		INSERT INTO [dbo].[tblTRSupplyPointProductSearchDetail]
@@ -131,7 +131,7 @@ BEGIN
 				   ,[strSearchValue]
 				   ,[intConcurrencyId])
 		SELECT	PHDR.intSupplyPointProductSearchHeaderId
-			   ,DVP.trdvp_search4,1
+			   ,RTRIM(DVP.trdvp_search4),1
 		FROM trdvpmst DVP
 			 INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no = DVP.trdvp_vnd_no
 			 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -144,7 +144,7 @@ BEGIN
 			 AND PHDR.intItemId = ITM.intItemId
 		WHERE DVP.trdvp_search4 IS NOT NULL AND DVP.trdvp_search4 <> ''
 		AND NOT EXISTS (SELECT [intSupplyPointProductSearchDetailId] FROM [tblTRSupplyPointProductSearchDetail] DET WHERE PHDR.intSupplyPointProductSearchHeaderId =DET.intSupplyPointProductSearchHeaderId 
-		AND [strSearchValue] COLLATE SQL_Latin1_General_CP1_CS_AS = DVP.trdvp_search4 COLLATE SQL_Latin1_General_CP1_CS_AS) 
+		AND [strSearchValue] COLLATE SQL_Latin1_General_CP1_CS_AS = RTRIM(DVP.trdvp_search4) COLLATE SQL_Latin1_General_CP1_CS_AS) 
 
 		--PRODUCT SEARCH 5--
 		INSERT INTO [dbo].[tblTRSupplyPointProductSearchDetail]
@@ -152,7 +152,7 @@ BEGIN
 				   ,[strSearchValue]
 				   ,[intConcurrencyId])
 		SELECT	PHDR.intSupplyPointProductSearchHeaderId
-			   ,DVP.trdvp_search5,1
+			   ,RTRIM(DVP.trdvp_search5),1
 		FROM trdvpmst DVP
 			 INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no = DVP.trdvp_vnd_no
 			 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -165,7 +165,7 @@ BEGIN
 			 AND PHDR.intItemId = ITM.intItemId
 		WHERE DVP.trdvp_search5 IS NOT NULL AND DVP.trdvp_search5 <> ''
 		AND NOT EXISTS (SELECT [intSupplyPointProductSearchDetailId] FROM [tblTRSupplyPointProductSearchDetail] DET WHERE PHDR.intSupplyPointProductSearchHeaderId =DET.intSupplyPointProductSearchHeaderId 
-		AND [strSearchValue] COLLATE SQL_Latin1_General_CP1_CS_AS = DVP.trdvp_search5 COLLATE SQL_Latin1_General_CP1_CS_AS) 
+		AND [strSearchValue] COLLATE SQL_Latin1_General_CP1_CS_AS = RTRIM(DVP.trdvp_search5) COLLATE SQL_Latin1_General_CP1_CS_AS) 
 		 
 		--PRODUCT SEARCH 6--
 		INSERT INTO [dbo].[tblTRSupplyPointProductSearchDetail]
@@ -173,7 +173,7 @@ BEGIN
 				   ,[strSearchValue]
 				   ,[intConcurrencyId])
 		SELECT	PHDR.intSupplyPointProductSearchHeaderId
-			   ,DVP.trdvp_search6,1
+			   ,RTRIM(DVP.trdvp_search6),1
 		FROM trdvpmst DVP
 			 INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no = DVP.trdvp_vnd_no
 			 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -186,7 +186,7 @@ BEGIN
 			 AND PHDR.intItemId = ITM.intItemId
 		WHERE DVP.trdvp_search6 IS NOT NULL AND DVP.trdvp_search6 <> ''
 		AND NOT EXISTS (SELECT [intSupplyPointProductSearchDetailId] FROM [tblTRSupplyPointProductSearchDetail] DET WHERE PHDR.intSupplyPointProductSearchHeaderId =DET.intSupplyPointProductSearchHeaderId 
-		AND [strSearchValue] COLLATE SQL_Latin1_General_CP1_CS_AS = DVP.trdvp_search6 COLLATE SQL_Latin1_General_CP1_CS_AS) 
+		AND [strSearchValue] COLLATE SQL_Latin1_General_CP1_CS_AS = RTRIM(DVP.trdvp_search6) COLLATE SQL_Latin1_General_CP1_CS_AS) 
 	END
 
 	IF(@Checking = 1)
