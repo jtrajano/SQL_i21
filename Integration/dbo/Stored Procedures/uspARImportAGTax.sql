@@ -1346,9 +1346,9 @@ BEGIN
 	from #temp_agstm stm
 	INNER JOIN  tblARInvoiceDetail IVCD ON IVCD.intInvoiceId = stm.intInvoiceId and IVCD.intItemId = stm.intItemId
 	INNER JOIN  tblSMTaxXRef XREF ON XREF.strOrgItemNo COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.agstm_tax_key ,1 , 10 ) COLLATE Latin1_General_CI_AS and
-				 XREF.strOrgState = SUBSTRING ( stm.agstm_tax_key ,11 , 2 ) and
-				 XREF.strOrgLocal1 = SUBSTRING ( stm.agstm_tax_key ,13 , 3 ) and
-				 XREF.strOrgLocal2 = SUBSTRING ( stm.agstm_tax_key ,16 , 3 )	
+				 XREF.strOrgState COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.agstm_tax_key ,11 , 2 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgLocal1 COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.agstm_tax_key ,13 , 3 ) COLLATE Latin1_General_CI_AS and
+				 XREF.strOrgLocal2 COLLATE Latin1_General_CI_AS = SUBSTRING ( stm.agstm_tax_key ,16 , 3 ) COLLATE Latin1_General_CI_AS	
 	where XREF.strOrgTaxType COLLATE Latin1_General_CI_AS = 'LC6' COLLATE Latin1_General_CI_AS and IVCD.strDocumentNumber is null	
 	group by IVCD.intInvoiceDetailId,XREF.intTaxGroupId,XREF.intTaxCodeId, 
 	XREF.intTaxClassId,XREF.[strOrgCalcMethod],stm.agstm_lc6_rt, stm.agstm_lc6_amt

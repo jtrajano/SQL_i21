@@ -107,7 +107,8 @@ BEGIN TRY
 			END	AS	dblNoOfLots,
 			AM.strAmendedColumns,
 			CO.strCommodityCode,
-			CD.strERPBatchNumber
+			CD.strERPBatchNumber,
+			CD.strItemSpecification
 
 	FROM	tblCTContractDetail CD	
 	JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId	

@@ -5740,6 +5740,9 @@
     <Build Include="dbo\Views\vyuPATDividends.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentFromOtherCharge.sql" />
     <Build Include="dbo\User Defined Types\OtherChargeCostAdjustmentTableType.sql" />
+	<Build Include="dbo\Views\vyuGLRetainedEarnings.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1730_UpdateManufacturingMenus.sql" />
+    <Build Include="dbo\Views\vyuCMMultiCurrencyRevalue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -5885,6 +5888,8 @@
     <None Include="Scripts\Post-Deployment\CRM\RenameCRMScreen.sql" />
     <Build Include="dbo\Functions\fnHDCoalesceJiraKey.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\32_UpdateCommissionScheduleEntity.sql" />
+    <Build Include="dbo\Views\vyuAP1099Summary.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRpt1099Summary.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

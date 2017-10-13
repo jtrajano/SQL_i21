@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspARValidations]
 	@UserId INT = 0 ,
 	@Sucess BIT = 0 OUTPUT,
-	@Message NVARCHAR(100) = '' OUTPUT,
+	@Message NVARCHAR(MAX) = '' OUTPUT,
 	@StartDate DATETIME = NULL,
 	@EndDate DATETIME = NULL,
 	@LogKey NVARCHAR(100) = NULL OUTPUT
@@ -110,7 +110,38 @@
 	IF(@originCustomerCount <> @customerCount)
 	BEGIN
 		SET @Sucess = 0
-		SET @Message = 'There is a discrepancy on Customer records.'
+		DECLARE @CustomerNumber NVARCHAR(MAX)
+
+		IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agivcmst')
+			AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agcusmst')
+		BEGIN
+			select @CustomerNumber = COALESCE(@CustomerNumber + ', ', '') + cus_no from (
+				select distinct 
+					cus_no = RTRIM(LTRIM(agivc_bill_to_cus )) 
+				from agivcmst 
+					where agivc_bill_to_cus not in ( select agcus_key from agcusmst )
+
+				) missing_table	
+		END
+		ELSE IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptivcmst')
+		AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptcusmst')
+		BEGIN
+			select @CustomerNumber = COALESCE(@CustomerNumber + ', ', '') + cus_no from (
+				select distinct 
+					cus_no = RTRIM(LTRIM(ptivc_sold_to )) 
+				from ptivcmst 
+					where ptivc_sold_to not in ( select ptcus_cus_no from ptcusmst )
+
+				) missing_table	
+		END
+
+		IF @CustomerNumber <> ''
+		BEGIN 
+			SET @CustomerNumber = 'There are customer records that are not existing in the table.' + @CustomerNumber
+		END
+
+		SET @Message = 'There is a discrepancy on Customer records.' + @CustomerNumber
+
 		IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agivcmst')
 		 BEGIN
 			INSERT INTO tblARImportInvoiceLog

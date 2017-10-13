@@ -38,9 +38,12 @@ BEGIN TRY
 		,@dblSourceOldQty NUMERIC(38, 20)
 		,@intLotItemUOMId INT
 		,@intCategoryId INT
-		,@dblDefaultResidueQty NUMERIC(38,20)
+		,@dblDefaultResidueQty NUMERIC(38, 20)
+		,@intDestinationLotStatusId INT
+		,@dblDestinationLotQty NUMERIC(38, 20)
 
-		SELECT TOP 1 @dblDefaultResidueQty=ISNULL(dblDefaultResidueQty,0.00001) FROM tblMFCompanyPreference
+	SELECT TOP 1 @dblDefaultResidueQty = ISNULL(dblDefaultResidueQty, 0.00001)
+	FROM tblMFCompanyPreference
 
 	SELECT @intItemId = intItemId
 		,@intLocationId = intLocationId
@@ -62,18 +65,24 @@ BEGIN TRY
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
+	SELECT @intDestinationLotStatusId = intLotStatusId
+		,@dblDestinationLotQty = dblQty
+	FROM tblICLot
+	WHERE strLotNumber = @strLotNumber
+		AND intStorageLocationId = @intNewStorageLocationId
+
 	IF (@intItemUOMId = @intWeightUOMId)
 	BEGIN
 		SELECT @dblMoveQty = @dblMoveQty / @dblWeightPerQty
 			,@intItemUOMId = @intLotItemUOMId
 	END
-	
+
 	SELECT @strStorageLocationName = strName
 	FROM tblICStorageLocation
 	WHERE intStorageLocationId = @intStorageLocationId
 
 	SELECT @strItemNumber = strItemNo
-		,@intCategoryId=intCategoryId
+		,@intCategoryId = intCategoryId
 	FROM tblICItem
 	WHERE intItemId = @intItemId
 
@@ -89,20 +98,20 @@ BEGIN TRY
 
 	SELECT @dblLotAvailableQty = (
 			CASE 
-				WHEN @intWeightUOMId is null
+				WHEN @intWeightUOMId IS NULL
 					THEN ISNULL(@dblLotQty, 0)
 				ELSE ISNULL(@dblWeight, 0)
 				END
 			)
 
-	IF Convert(decimal(24,3),(
-			CASE 
-				WHEN @intLotItemUOMId = @intItemUOMId
-					AND @intWeightUOMId IS NOT NULL
-					THEN @dblMoveQty * @dblWeightPerQty
-				ELSE @dblMoveQty
-				END
-			)) > Convert(decimal(24,3),@dblLotAvailableQty)
+	IF Convert(DECIMAL(24, 3), (
+				CASE 
+					WHEN @intLotItemUOMId = @intItemUOMId
+						AND @intWeightUOMId IS NOT NULL
+						THEN @dblMoveQty * @dblWeightPerQty
+					ELSE @dblMoveQty
+					END
+				)) > Convert(DECIMAL(24, 3), @dblLotAvailableQty)
 	BEGIN
 		SET @ErrMsg = 'Move qty ' + LTRIM(CONVERT(NUMERIC(38, 4), @dblMoveQty)) + ' ' + @strUnitMeasure + ' is not available for lot ''' + @strLotNumber + ''' having item ''' + @strItemNumber + ''' in location ''' + @strStorageLocationName + '''.'
 
@@ -113,17 +122,17 @@ BEGIN TRY
 				)
 	END
 
-	if Convert(decimal(24,3),(
-			CASE 
-				WHEN @intLotItemUOMId = @intItemUOMId
-					AND @intWeightUOMId IS NOT NULL
-					THEN @dblMoveQty * @dblWeightPerQty
-				ELSE @dblMoveQty
-				END
-			)) = Convert(decimal(24,3),@dblLotAvailableQty)
-	Begin
-		Select @dblMoveQty=Convert(decimal(24,3),@dblMoveQty)
-	End
+	IF Convert(DECIMAL(24, 3), (
+				CASE 
+					WHEN @intLotItemUOMId = @intItemUOMId
+						AND @intWeightUOMId IS NOT NULL
+						THEN @dblMoveQty * @dblWeightPerQty
+					ELSE @dblMoveQty
+					END
+				)) = Convert(DECIMAL(24, 3), @dblLotAvailableQty)
+	BEGIN
+		SELECT @dblMoveQty = Convert(DECIMAL(24, 3), @dblMoveQty)
+	END
 
 	SELECT @strNewLotNumber = @strLotNumber
 
@@ -141,12 +150,29 @@ BEGIN TRY
 				)
 	END
 
-	IF (CASE 
+	IF (ISNULL(@intDestinationLotStatusId, 0) <> 0)
+	BEGIN
+		IF ISNULL(@intLotStatusId, 0) <> ISNULL(@intDestinationLotStatusId, 0)
+			AND @dblDestinationLotQty > 0
+		BEGIN
+			SET @ErrMsg = 'The status of the source and the destination lot differs. Cannot move.'
+
+			RAISERROR (
+					@ErrMsg
+					,11
+					,1
+					)
+		END
+	END
+
+	IF (
+			CASE 
 				WHEN @intLotItemUOMId = @intItemUOMId
 					AND @intWeightUOMId IS NOT NULL
 					THEN @dblMoveQty * @dblWeightPerQty
 				ELSE @dblMoveQty
-				END) = @dblLotAvailableQty
+				END
+			) = @dblLotAvailableQty
 	BEGIN
 		SET @blnIsPartialMove = 0
 	END
@@ -155,7 +181,8 @@ BEGIN TRY
 		SET @blnIsPartialMove = 1
 	END
 
-	IF @intNewStorageLocationId = @intStorageLocationId and @intNewSubLocationId=@intSubLocationId
+	IF @intNewStorageLocationId = @intStorageLocationId
+		AND @intNewSubLocationId = @intSubLocationId
 	BEGIN
 		RAISERROR (
 				'The Lot already exists in the selected destination storage location. Please select a different destination storage location.'
@@ -216,7 +243,6 @@ BEGIN TRY
 		END
 	END
 
-
 	BEGIN TRANSACTION
 
 	EXEC uspICInventoryAdjustment_CreatePostLotMove @intItemId
@@ -258,6 +284,20 @@ BEGIN TRY
 		,@strReason = NULL
 		,@intLocationId = @intLocationId
 		,@intInventoryAdjustmentId = @intInventoryAdjustmentId
+
+	IF ISNULL(@intLotStatusId, 0) <> ISNULL(@intDestinationLotStatusId, 0)
+		AND @dblDestinationLotQty = 0
+		AND NOT EXISTS (
+			SELECT *
+			FROM dbo.tblICLot
+			WHERE intLotId = @intNewLotId
+				AND intLotStatusId = @intLotStatusId
+			)
+	BEGIN
+		EXEC uspMFSetLotStatus @intNewLotId
+			,@intLotStatusId
+			,@intUserId
+	END
 
 	IF EXISTS (
 			SELECT *

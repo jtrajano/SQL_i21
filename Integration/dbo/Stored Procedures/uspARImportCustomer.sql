@@ -70,7 +70,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				agcus_tax_auth_id1 = SUBSTRING(Cus.strTaxAuthority1,1,3),
 				agcus_tax_auth_id2 = SUBSTRING(Cus.strTaxAuthority2,1,3),
 				agcus_pic_prc_yn = CASE WHEN Cus.ysnPrintPriceOnPrintTicket = 1 THEN ''Y'' ELSE ''N'' END,
-				agcus_tax_ynp = CASE WHEN Cus.ysnApplyPrepaidTax = 1 THEN ''Y'' ELSE ''N'' END,
+				agcus_tax_ynp = (CASE WHEN Cus.ysnApplyPrepaidTax = 1 THEN ''P'' ELSE  CASE WHEN Cus.ysnApplySalesTax = 1 THEN ''Y'' ELSE ''N'' END END),
 				agcus_budget_amt = Cus.dblBudgetAmountForBudgetBilling,
 				agcus_budget_beg_mm = SUBSTRING(Cus.strBudgetBillingBeginMonth,1,2),
 				agcus_budget_end_mm = SUBSTRING(Cus.strBudgetBillingEndMonth,1,2),
@@ -192,7 +192,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				SUBSTRING(Cus.strTaxAuthority1,1,3) as strTaxAuthority1,
 				SUBSTRING(Cus.strTaxAuthority2,1,3) as strTaxAuthority2,
 				(CASE WHEN Cus.ysnPrintPriceOnPrintTicket = 1 THEN ''Y'' ELSE ''N'' END) AS ysnPrintPriceOnPrintTicket,
-				(CASE WHEN Cus.ysnApplyPrepaidTax = 1 THEN ''Y'' ELSE ''N'' END) AS ysnApplyPrepaidTax,
+				(CASE WHEN Cus.ysnApplyPrepaidTax = 1 THEN ''P'' ELSE  CASE WHEN Cus.ysnApplySalesTax = 1 THEN ''Y'' ELSE ''N'' END END) AS ysnApplyPrepaidTax,
 				Cus.dblBudgetAmountForBudgetBilling,
 				SUBSTRING(Cus.strBudgetBillingBeginMonth,1,2) as strBudgetBillingBeginMonth,
 				SUBSTRING(Cus.strBudgetBillingEndMonth,1,2) as strBudgetBillingEndMonth,
@@ -326,6 +326,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			DECLARE @ysnPrintPriceOnPrintTicket	BIT
 			DECLARE @intServiceChargeId			INT
 			DECLARE @ysnApplySalesTax			BIT
+			DECLARE @ysnApplyPrepaidTax			BIT
 			DECLARE @dblBudgetAmountForBudgetBilling NUMERIC(18,6)
 			DECLARE @strBudgetBillingBeginMonth	NVARCHAR(50)
 			DECLARE @strBudgetBillingEndMonth	NVARCHAR(50)
@@ -440,6 +441,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 						@ysnPrintPriceOnPrintTicket = CASE WHEN agcus_pic_prc_yn = ''Y'' THEN 1 ELSE 0 END,	
 						@intServiceChargeId		= (SELECT intServiceChargeId FROM tblARServiceCharge WHERE strServiceChargeCode = agcus_srvchr_cd),			
 						@ysnApplySalesTax		= CASE WHEN agcus_tax_ynp = ''Y'' THEN 1 ELSE 0 END,			
+						@ysnApplyPrepaidTax		= CASE WHEN agcus_tax_ynp = ''P'' THEN 1 ELSE 0 END,			
 						@dblBudgetAmountForBudgetBilling = agcus_budget_amt,
 						@strBudgetBillingBeginMonth	= agcus_budget_beg_mm,	
 						@strBudgetBillingEndMonth	= agcus_budget_end_mm,
@@ -497,6 +499,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					[ysnPrintPriceOnPrintTicket],	
 					[intServiceChargeId],		
 					[ysnApplySalesTax],		
+					[ysnApplyPrepaidTax],		
 					[dblBudgetAmountForBudgetBilling],
 					[strBudgetBillingBeginMonth],
 					[strBudgetBillingEndMonth],
@@ -536,6 +539,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					 @ysnPrintPriceOnPrintTicket,	
 					 @intServiceChargeId,		
 					 @ysnApplySalesTax,		
+					 @ysnApplyPrepaidTax,		
 					 @dblBudgetAmountForBudgetBilling,
 					 @strBudgetBillingBeginMonth,
 					 @strBudgetBillingEndMonth,
@@ -566,10 +570,36 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 													@strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes)
 					END
 					ELSE
-						INSERT [dbo].[tblEMEntity] ([strName], [strEmail], [strWebsite], [strInternalNotes],[strContactNumber],[strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes])
-						VALUES					 (@strName, @strEmail, @strWebsite, @strInternalNotes, 
-													UPPER(CASE WHEN @strContactName IS NOT NULL THEN SUBSTRING(@strContactName, 1, 20) ELSE SUBSTRING(@strName, 1, 20) END), 
-													@strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes)
+						IF NOT EXISTS(SELECT TOP 1 1 FROM ssconmst WHERE sscon_cus_no COLLATE Latin1_General_CI_AS = @originCustomer)
+						BEGIN
+							INSERT [dbo].[tblEMEntity] ([strName], [strEmail], [strWebsite], [strInternalNotes],[strContactNumber],[strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes])
+							VALUES					 (@strName, @strEmail, @strWebsite, @strInternalNotes, 
+														UPPER(CASE WHEN @strContactName IS NOT NULL THEN SUBSTRING(@strContactName, 1, 20) ELSE SUBSTRING(@strName, 1, 20) END), 
+														@strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes)
+						END
+						ELSE
+						BEGIN
+							SELECT 
+								@strContactName = isnull(sscon_contact_id, '''')								
+								, @strTitle = isnull(sscon_contact_title, '''')
+								, @strEmail = isnull(sscon_email, '''')
+								, @strName = RTRIM(LTRIM(sscon_last_name)) + '', '' + RTRIM(LTRIM(sscon_first_name)) 
+								, @strPhone = (CASE	
+											WHEN sscon_work_ext IS NULL OR sscon_work_ext = '''' THEN
+												RTRIM(LTRIM(sscon_work_no))
+											WHEN sscon_work_no IS NULL OR sscon_work_no = '''' AND sscon_work_ext IS NOT NULL AND sscon_work_ext <> '''' THEN
+												''x'' + RTRIM(LTRIM(sscon_work_ext))
+											ELSE
+												RTRIM(LTRIM(sscon_work_no)) + '' x'' + RTRIM(LTRIM(sscon_work_ext))
+										 END)
+							FROM ssconmst sscon WHERE sscon_cus_no COLLATE Latin1_General_CI_AS = @originCustomer
+
+							INSERT [dbo].[tblEMEntity] ([strName], [strEmail], [strWebsite], [strInternalNotes],[strContactNumber],[strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes])
+							VALUES					 (@strName, @strEmail, @strWebsite, @strInternalNotes, 
+														UPPER(CASE WHEN @strContactName IS NOT NULL THEN SUBSTRING(@strContactName, 1, 20) ELSE SUBSTRING(@strName, 1, 20) END), 
+														@strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes)
+						END
+						
 				
 					DECLARE @ContactEntityId INT
 			
@@ -769,7 +799,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				ptcus_local1 = SUBSTRING(Cus.strTaxAuthority1,1,3),
 				ptcus_local2 = SUBSTRING(Cus.strTaxAuthority2,1,3),
 				ptcus_pic_prc_yn = CASE WHEN Cus.ysnPrintPriceOnPrintTicket = 1 THEN ''Y'' ELSE ''N'' END,
-				ptcus_sales_tax_yn = CASE WHEN Cus.ysnApplyPrepaidTax = 1 THEN ''Y'' ELSE ''N'' END,
+				ptcus_sales_tax_yn = (CASE WHEN Cus.ysnApplyPrepaidTax = 1 THEN ''P'' ELSE  CASE WHEN Cus.ysnApplySalesTax = 1 THEN ''Y'' ELSE ''N'' END END),
 				ptcus_budget_amt = Cus.dblBudgetAmountForBudgetBilling,
 				ptcus_budget_beg_mm = SUBSTRING(Cus.strBudgetBillingBeginMonth,1,2),
 				ptcus_budget_end_mm = SUBSTRING(Cus.strBudgetBillingEndMonth,1,2),
@@ -888,7 +918,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				SUBSTRING(Cus.strTaxAuthority1,1,3) as strTaxAuthority1,
 				SUBSTRING(Cus.strTaxAuthority2,1,3) as strTaxAuthority2,
 				(CASE WHEN Cus.ysnPrintPriceOnPrintTicket = 1 THEN ''Y'' ELSE ''N'' END) AS ysnPrintPriceOnPrintTicket,
-				(CASE WHEN Cus.ysnApplyPrepaidTax = 1 THEN ''Y'' ELSE ''N'' END) AS ysnApplyPrepaidTax,
+				(CASE WHEN Cus.ysnApplyPrepaidTax = 1 THEN ''P'' ELSE  CASE WHEN Cus.ysnApplySalesTax = 1 THEN ''Y'' ELSE ''N'' END END) AS ysnApplyPrepaidTax,
 				Cus.dblBudgetAmountForBudgetBilling,
 				SUBSTRING(Cus.strBudgetBillingBeginMonth,1,2) as strBudgetBillingBeginMonth,
 				SUBSTRING(Cus.strBudgetBillingEndMonth,1,2) as strBudgetBillingEndMonth,
@@ -1002,6 +1032,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			DECLARE @ysnPrintPriceOnPrintTicket	BIT
 			DECLARE @intServiceChargeId			INT
 			DECLARE @ysnApplySalesTax			BIT
+			DECLARE @ysnApplyPrepaidTax			BIT
 			DECLARE @dblBudgetAmountForBudgetBilling NUMERIC(18,6)
 			DECLARE @strBudgetBillingBeginMonth	NVARCHAR(50)
 			DECLARE @strBudgetBillingEndMonth	NVARCHAR(50)
@@ -1113,7 +1144,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 						@strTaxAuthority2		= ptcus_local2,
 						@ysnPrintPriceOnPrintTicket = CASE WHEN ptcus_pic_prc_yn = ''Y'' THEN 1 ELSE 0 END,
 						@intServiceChargeId		= (SELECT intServiceChargeId FROM tblARServiceCharge WHERE strServiceChargeCode COLLATE Latin1_General_CI_AS = ptcus_srv_cd COLLATE Latin1_General_CI_AS),
-						@ysnApplySalesTax		= CASE WHEN ptcus_sales_tax_yn = ''Y'' THEN 1 ELSE 0 END,
+						@ysnApplySalesTax		= CASE WHEN ptcus_sales_tax_yn = ''Y'' THEN 1 ELSE 0 END,			
+						@ysnApplyPrepaidTax		= CASE WHEN ptcus_sales_tax_yn = ''P'' THEN 1 ELSE 0 END,
 						@dblBudgetAmountForBudgetBilling = ptcus_budget_amt,
 						@strBudgetBillingBeginMonth	= ptcus_budget_beg_mm,
 						@strBudgetBillingEndMonth	= ptcus_budget_end_mm
@@ -1170,6 +1202,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					[ysnPrintPriceOnPrintTicket],
 					[intServiceChargeId],
 					[ysnApplySalesTax],
+					[ysnApplyPrepaidTax],
 					[dblBudgetAmountForBudgetBilling],
 					[strBudgetBillingBeginMonth],
 					[strBudgetBillingEndMonth], 
@@ -1210,6 +1243,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					 @ysnPrintPriceOnPrintTicket,
 					 @intServiceChargeId,
 					 @ysnApplySalesTax,
+					 @ysnApplyPrepaidTax,
 					 @dblBudgetAmountForBudgetBilling,
 					 @strBudgetBillingBeginMonth,
 					 @strBudgetBillingEndMonth, 
@@ -1243,10 +1277,39 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 						@strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes)
 					END
 					ELSE
-						INSERT [dbo].[tblEMEntity] ([strName], [strEmail], [strWebsite], [strInternalNotes],[strContactNumber],[strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes])
-						VALUES					 (@strName, @strEmail, @strWebsite, @strInternalNotes,
-						UPPER(CASE WHEN @strContactName IS NOT NULL THEN SUBSTRING(@strContactName, 1, 20) ELSE SUBSTRING(@strName, 1, 20) END), 
-						@strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes)
+						IF NOT EXISTS(SELECT TOP 1 1 FROM ssconmst WHERE sscon_cus_no COLLATE Latin1_General_CI_AS = @originCustomer)
+						BEGIN
+							INSERT [dbo].[tblEMEntity] ([strName], [strEmail], [strWebsite], [strInternalNotes],[strContactNumber],[strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes])
+							VALUES					 (@strName, @strEmail, @strWebsite, @strInternalNotes, 
+														UPPER(CASE WHEN @strContactName IS NOT NULL THEN SUBSTRING(@strContactName, 1, 20) ELSE SUBSTRING(@strName, 1, 20) END), 
+														@strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes)
+						END
+						ELSE
+						BEGIN
+							SELECT 
+								@strContactName = isnull(sscon_contact_id, '''')								
+								, @strTitle = isnull(sscon_contact_title, '''')
+								, @strEmail = isnull(sscon_email, '''')
+								, @strName = RTRIM(LTRIM(sscon_last_name)) + '', '' + RTRIM(LTRIM(sscon_first_name)) 
+								, @strPhone = (CASE	
+											WHEN sscon_work_ext IS NULL OR sscon_work_ext = '''' THEN
+												RTRIM(LTRIM(sscon_work_no))
+											WHEN sscon_work_no IS NULL OR sscon_work_no = '''' AND sscon_work_ext IS NOT NULL AND sscon_work_ext <> '''' THEN
+												''x'' + RTRIM(LTRIM(sscon_work_ext))
+											ELSE
+												RTRIM(LTRIM(sscon_work_no)) + '' x'' + RTRIM(LTRIM(sscon_work_ext))
+										 END)
+							FROM ssconmst sscon WHERE sscon_cus_no COLLATE Latin1_General_CI_AS = @originCustomer
+
+							INSERT [dbo].[tblEMEntity] ([strName], [strEmail], [strWebsite], [strInternalNotes],[strContactNumber],[strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes])
+							VALUES					 (@strName, @strEmail, @strWebsite, @strInternalNotes, 
+														UPPER(CASE WHEN @strContactName IS NOT NULL THEN SUBSTRING(@strContactName, 1, 20) ELSE SUBSTRING(@strName, 1, 20) END), 
+														@strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes)
+						END
+						-- INSERT [dbo].[tblEMEntity] ([strName], [strEmail], [strWebsite], [strInternalNotes],[strContactNumber],[strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes])
+						-- VALUES					 (@strName, @strEmail, @strWebsite, @strInternalNotes,
+						-- UPPER(CASE WHEN @strContactName IS NOT NULL THEN SUBSTRING(@strContactName, 1, 20) ELSE SUBSTRING(@strName, 1, 20) END), 
+						-- @strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes)
 				
 
 					DECLARE @ContactEntityId INT

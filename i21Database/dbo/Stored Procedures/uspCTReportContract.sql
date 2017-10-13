@@ -189,6 +189,7 @@ BEGIN TRY
 
 			TP.strContractType + ' Contract:- ' + CH.strContractNumber AS strCaption,
 			@strCompanyName + ' - '+TP.strContractType+' Contract' AS strTeaCaption,
+			'We confirm having'+CASE WHEN CH.intContractTypeId = 1 THEN ' bought from ' ELSE ' sold to ' END + 'you as follows:' AS strAtlasDeclaration,
 			TP.strContractType + ' Order:- ' + CASE WHEN CM.strCommodityCode = 'Tea' THEN SQ.strERPPONumber ELSE NULL END AS strPurchaseOrder,
 			CH.dtmContractDate,
 			'The contract has been closed on the conditions of the '+ AN.strComment + ' ('+AN.strName+')'+' latest edition.' strAssociation,
@@ -242,6 +243,7 @@ BEGIN TRY
 			PR.strName AS strProducer,
 			PO.strPosition,
 			CASE WHEN LTRIM(RTRIM(SQ.strFixationBy)) = '' THEN NULL ELSE SQ.strFixationBy END+'''s Call ('+SQ.strFutMarketName+')' strCaller,
+			CASE WHEN ISNULL(SQ.strFixationBy,'') <> '' AND CH.intPricingTypeId = 2 THEN SQ.strFixationBy +'''s Call vs '+dbo.fnRemoveTrailingZeroes(SQ.dblTotalNoOfLots)+' lots(s) of '+SQ.strFutMarketName + ' futures' ELSE NULL END strAtlasCaller,
 			CASE WHEN LTRIM(RTRIM(SQ.strFixationBy)) = '' THEN NULL 
 			ELSE 
 				CASE WHEN CH.intPricingTypeId=2 THEN SQ.strFixationBy +'''s Call ('+SQ.strFutMarketName+')'
@@ -316,8 +318,8 @@ BEGIN TRY
 							CD.strPackingDescription				AS strPackingDescription,
 							CL.strContractCompanyName				AS strContractCompanyName,
 						    CL.strContractPrintSignOff              AS strContractPrintSignOff,
-							CD.strERPPONumber
-
+							CD.strERPPONumber,
+							(SELECT SUM(dblNoOfLots) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId) AS dblTotalNoOfLots
 				FROM		tblCTContractDetail		CD
 				JOIN		tblSMCompanyLocation	CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId		LEFT
 				JOIN		tblSMCity				LP	ON	LP.intCityId				=	CD.intLoadingPortId			LEFT
