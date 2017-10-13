@@ -76,7 +76,7 @@ BEGIN
 		WHEN @msgId = 80060 THEN 'Data not found. Unable to create the Inventory Transfer.'
 		WHEN @msgId = 80061 THEN 'Unable to generate the Inventory Transfer. An error stopped the creation of the inventory transfer.'
 		WHEN @msgId = 80062 THEN 'Cost adjustment cannot continue. Unable to find the cost bucket for %s that was posted in %s.'
-		WHEN @msgId = 80063 THEN 'Unable to unpost because %s has a cost adjustment from %s.'
+		WHEN @msgId = 80063 THEN 'There is a cost adjustment for %s. You need to unpost %s first before you can continue.'
 		WHEN @msgId = 80064 THEN 'The %s is both a payable and deductible to the bill of the same vendor. Please correct the Accrue or Price checkbox.'
 		WHEN @msgId = 80065 THEN 'The %s is shouldered by the receipt vendor and can''t be added to the item cost. Please correct the Price or Inventory Cost checkbox.'
 		WHEN @msgId = 80066 THEN 'Inventory Count is ongoing for Item %s and is locked under Location %s.'

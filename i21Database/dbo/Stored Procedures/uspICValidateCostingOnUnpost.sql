@@ -35,10 +35,14 @@ DECLARE @AUTO_NEGATIVE AS INT = 1
 		,@REVALUE_SOLD AS INT = 3
 
 		,@INV_TRANS_TYPE_Cost_Adjustment AS INT = 26
-		,@INV_TRANS_TYPE_Revalue_WIP AS INT = 28
-		,@INV_TRANS_TYPE_Revalue_Produced AS INT = 29
+		,@INV_TRANS_TYPE_Revalue_Consume AS INT = 28
+		,@INV_TRANS_TYPE_Revalue_Produce AS INT = 29
 		,@INV_TRANS_TYPE_Revalue_Transfer AS INT = 30
-		,@INV_TRANS_TYPE_Revalue_Build_Assembly AS INT = 31
+		,@INV_TRANS_TYPE_Revalue_Item_Change AS INT = 36
+		,@INV_TRANS_TYPE_Revalue_Split_Lot AS INT = 37
+		,@INV_TRANS_TYPE_Revalue_Lot_Merge AS INT = 38
+		,@INV_TRANS_TYPE_Revalue_Lot_Move AS INT = 39
+		,@INV_TRANS_TYPE_Revalue_Shipment AS INT = 40
 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#FoundErrors')) 
 	DROP TABLE #FoundErrors
@@ -111,22 +115,33 @@ BEGIN
 	RETURN -1
 END 
 
--- Validate the unpost of the stock in. Do not allow unpost if it has cost adjustments. 
+-- Do not allow unpost if it has cost adjustments. 
 BEGIN 
+	SET @strRelatedTransactionId = NULL 
 	SELECT TOP 1 
-			@strItemNo = Item.strItemNo
-			,@strRelatedTransactionId = InvTrans.strTransactionId
-	FROM	dbo.tblICInventoryTransaction InvTrans INNER JOIN dbo.tblICItem Item
-				ON InvTrans.intItemId = Item.intItemId
-	WHERE	InvTrans.intRelatedTransactionId = @intTransactionId
-			AND InvTrans.strRelatedTransactionId = @strTransactionId
-			AND InvTrans.intTransactionTypeId = @INV_TRANS_TYPE_Cost_Adjustment
-			AND ISNULL(InvTrans.ysnIsUnposted, 0) = 0 
+			@strItemNo = i.strItemNo
+			,@strRelatedTransactionId = t.strTransactionId
+	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICItem i
+				ON t.intItemId = i.intItemId
+	WHERE	t.intRelatedTransactionId = @intTransactionId
+			AND t.strRelatedTransactionId = @strTransactionId
+			AND t.intTransactionTypeId IN (
+				@INV_TRANS_TYPE_Cost_Adjustment
+				,@INV_TRANS_TYPE_Revalue_Consume
+				,@INV_TRANS_TYPE_Revalue_Produce
+				,@INV_TRANS_TYPE_Revalue_Transfer
+				,@INV_TRANS_TYPE_Revalue_Item_Change
+				,@INV_TRANS_TYPE_Revalue_Split_Lot
+				,@INV_TRANS_TYPE_Revalue_Lot_Merge
+				,@INV_TRANS_TYPE_Revalue_Lot_Move
+				,@INV_TRANS_TYPE_Revalue_Shipment			
+			)
+			AND ISNULL(t.ysnIsUnposted, 0) = 0 
 			AND ISNULL(@ysnRecap, 0) = 0
 
 	IF @strRelatedTransactionId IS NOT NULL 
 	BEGIN 
-		-- 'Unable to unpost because {Item} has a cost adjustment from {Transaction Id}.'
+		-- 'Unable to unpost because {Item} has a cost adjustment in {Cost Adj Transaction}. Post it first before you can unpost this transaction.'
 		EXEC uspICRaiseError 80063, @strItemNo, @strRelatedTransactionId;  
 		RETURN -1
 	END 

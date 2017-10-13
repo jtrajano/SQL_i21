@@ -143,6 +143,8 @@ BEGIN
 	EXEC @returnValue = dbo.uspICValidateCostingOnUnpost 
 		@ValidateItemsToUnpost
 		,@ysnRecap
+		,@intTransactionId
+		,@strTransactionId
 
 	IF @returnValue < 0 RETURN -1;
 END 
