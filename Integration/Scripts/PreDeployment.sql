@@ -236,6 +236,9 @@
 
 :r "..\dbo\Stored Procedures\deleteSP.sql"
 
+:r "..\dbo\Stored Procedures\uspARImportPTTaxExemption.sql" 
+:r "..\dbo\Stored Procedures\uspEMImportPTTerminalToCustomer.sql" 
+
 --GRAIN
 :r "..\dbo\Stored Procedures\uspGRImportStorageType.sql"
 :r "..\dbo\Stored Procedures\uspGRImportWeightGrades.sql"
