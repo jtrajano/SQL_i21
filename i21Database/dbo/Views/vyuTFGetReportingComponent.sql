@@ -27,6 +27,8 @@ SELECT RC.intReportingComponentId
 	, dbo.fnTFCoalesceAccountStatusCode(RC.intReportingComponentId, 0) strExcludeAccountStatusCodes
 	, dbo.fnTFCoalesceVendor(RC.intReportingComponentId, 1) strIncludeVendors
 	, dbo.fnTFCoalesceVendor(RC.intReportingComponentId, 0) strExcludeVendors
+	, dbo.fnTFCoalesceCustomer(RC.intReportingComponentId, 1) strIncludeCustomers
+	, dbo.fnTFCoalesceCustomer(RC.intReportingComponentId, 0) strExcludeCustomers
 FROM tblTFReportingComponent RC
 LEFT JOIN tblTFTaxAuthority TA ON TA.intTaxAuthorityId = RC.intTaxAuthorityId
 LEFT JOIN tblTFComponentType CType ON CType.intComponentTypeId = RC.intComponentTypeId
