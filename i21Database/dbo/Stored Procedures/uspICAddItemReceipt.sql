@@ -1587,7 +1587,7 @@ BEGIN
 							AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(ItemLot.intShipFromId,0)
 							AND ISNULL(RawHeaderData.Currency, @intFunctionalCurrencyId) = ISNULL(ItemLot.intCurrencyId, @intFunctionalCurrencyId)
 							AND ISNULL(RawHeaderData.intSourceType,0) = ISNULL(ItemLot.intSourceType, 0)
-							AND RawHeaderData.BillOfLadding = ItemLot.strBillOfLadding 
+							AND ISNULL(RawHeaderData.BillOfLadding, '') = ISNULL(ItemLot.strBillOfLadding , '')
 						LEFT JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
 							ON ReceiptItem.intItemId = ItemLot.intItemId
 							AND ReceiptItem.intSubLocationId = ItemLot.intSubLocationId
