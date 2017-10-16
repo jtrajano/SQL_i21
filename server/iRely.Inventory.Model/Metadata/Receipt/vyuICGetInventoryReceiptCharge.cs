@@ -39,6 +39,7 @@ namespace iRely.Inventory.Model
         public string strBillOfLading { get; set; }
         public string strReceiptVendor { get; set; }
         public string strForexRateType { get; set; }
+        public string strCostType { get; set; }
 
         public tblICInventoryReceiptCharge tblICInventoryReceiptCharge { get; set; }
     }

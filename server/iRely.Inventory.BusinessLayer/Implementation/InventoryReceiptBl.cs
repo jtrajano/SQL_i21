@@ -290,6 +290,7 @@ namespace iRely.Inventory.BusinessLayer
                     , strCurrency = s.vyuICGetInventoryReceiptCharge.strCurrency
                     , strTaxGroup = s.vyuICGetInventoryReceiptCharge.strTaxGroup
                     , strForexRateType = s.vyuICGetInventoryReceiptCharge.strForexRateType
+                    , strCostType = s.vyuICGetInventoryReceiptCharge.strCostType
                     , tblICInventoryReceiptChargeTaxes = s.tblICInventoryReceiptChargeTaxes
                 }).AsNoTracking().ToListAsync(param.cancellationToken);
 

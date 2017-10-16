@@ -73,7 +73,8 @@ Ext.define('Inventory.model.ReceiptCharge', {
         { name: 'strTaxGroup', type: 'string'},
         { name: 'intForexRateTypeId', type: 'int', allowNull: true },
         { name: 'strForexRateType', type: 'string'},
-        { name: 'dblForexRate', type: 'float', allowNull: true }        
+        { name: 'dblForexRate', type: 'float', allowNull: true }, 
+        { name: 'strCostType', type: 'string' }
     ],
 
     validators: [
@@ -145,7 +146,9 @@ Ext.define('Inventory.model.ReceiptCharge', {
                 this.get('ysnPrice') === true &&
                 this.get('ysnAccrue') === true &&
                 iRely.Functions.isEmpty(this.get('intEntityVendorId')) !== true &&
-                this.get('intEntityVendorId') !== ReceiptVendorId) {
+                this.get('intEntityVendorId') !== ReceiptVendorId 
+            ) 
+            {
                 errors.add({
                     field: 'ysnPrice',
                     message: 'Cannot add expense ' + this.get('strItemNo') + ' to Inventory and pass it on to the vendor.<br>Change Inventory Cost or Price setup.'
@@ -155,10 +158,13 @@ Ext.define('Inventory.model.ReceiptCharge', {
                     message: 'Cannot add expense ' + this.get('strItemNo') + ' to Inventory and pass it on to the vendor.<br>Change Inventory Cost or Price setup.'
                 })
             }
+
             if (this.get('ysnInventoryCost') === true &&
                 this.get('ysnPrice') === true &&
                 this.get('ysnAccrue') === false &&
-                iRely.Functions.isEmpty(this.get('intEntityVendorId')) === true) {
+                iRely.Functions.isEmpty(this.get('intEntityVendorId')) === true &&
+                this.get('strCostType') !== 'Discount'
+            ) {
                 errors.add({
                     field: 'ysnAccrue',
                     message: 'Cannot add expense ' + this.get('strItemNo') + ' to Inventory and pass it on to the vendor.<br>Change Inventory Cost or Price setup.'

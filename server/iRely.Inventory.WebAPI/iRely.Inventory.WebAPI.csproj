@@ -557,6 +557,7 @@
     <None Include="Properties\PublishProfiles\17.3.pubxml" />
     <None Include="Properties\PublishProfiles\1710.pubxml" />
     <None Include="Properties\PublishProfiles\1730.pubxml" />
+    <None Include="Properties\PublishProfiles\1740.pubxml" />
     <None Include="Scripts\jquery-1.7.1.intellisense.js" />
     <Content Include="Scripts\jquery-1.7.1.js" />
     <Content Include="Scripts\jquery-1.7.1.min.js" />

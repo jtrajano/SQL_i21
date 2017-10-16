@@ -255,6 +255,26 @@ namespace iRely.Inventory.Model
             }
         }
 
+        private string _costType;
+        [NotMapped]
+        public string strCostType
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_costType))
+                    if (vyuICGetInventoryReceiptCharge != null)
+                        return vyuICGetInventoryReceiptCharge.strCostType;
+                    else
+                        return null;
+                else
+                    return _costType;
+            }
+            set
+            {
+                _costType = value;
+            }
+        }
+
         public tblICInventoryReceipt tblICInventoryReceipt { get; set; }
         public vyuICGetInventoryReceiptCharge vyuICGetInventoryReceiptCharge { get; set; }
         public ICollection<tblICInventoryReceiptChargeTax> tblICInventoryReceiptChargeTaxes { get; set; }
