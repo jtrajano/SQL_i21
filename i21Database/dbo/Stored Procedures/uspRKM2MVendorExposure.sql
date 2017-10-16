@@ -12,7 +12,6 @@
                   @ysnVendorProducer bit = null
 AS
 
-
 DECLARE @tblFinalDetail TABLE (
        intRowNum INT
        ,intConcurrencyId INT
@@ -131,13 +130,15 @@ BEGIN
 
                                   dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,
                            fd.intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId,isnull(intPriceUOMId,fd.intCommodityUnitMeasureId),
-                                  fd.dblOpenQty*((isnull(fd.dblContractBasis,0))+(isnull(fd.dblFutures,0)))))/
-                                  case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end dblQtyPrice
+                                  fd.dblOpenQty*((isnull(fd.dblContractBasis,0))+(isnull(fd.dblFutures,0)))))
+                                  --/case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end 
+								  dblQtyPrice
        
                                   ,dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,
                                   fd.intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId,isnull(intPriceUOMId,fd.intCommodityUnitMeasureId),
-                                  fd.dblOpenQty*((isnull(fd.dblContractBasis,0))+(isnull(fd.dblFuturePrice,0)))))/
-                                  case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end dblQtyUnFixedPrice                       
+                                  fd.dblOpenQty*((isnull(fd.dblContractBasis,0))+(isnull(fd.dblFuturePrice,0)))))
+                                 -- /case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end 
+								 dblQtyUnFixedPrice                       
 
                                                 ,CASE WHEN strPriOrNotPriOrParPriced = 'Partially Priced' THEN 'Unpriced' 
                                                 WHEN  ISNULL(strPriOrNotPriOrParPriced,'') = '' THEN 'Priced'
@@ -224,13 +225,15 @@ BEGIN
 
                                   dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,
                                                        fd.intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId,isnull(intPriceUOMId,fd.intCommodityUnitMeasureId),
-                                  fd.dblOpenQty*((isnull(fd.dblContractBasis,0))+(isnull(fd.dblFutures,0)))))/
-                                  case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end dblQtyPrice
+                                  fd.dblOpenQty*((isnull(fd.dblContractBasis,0))+(isnull(fd.dblFutures,0)))))
+								  --/case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end 
+								  dblQtyPrice
        
                                   ,dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,
                                                          fd.intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId,isnull(intPriceUOMId,fd.intCommodityUnitMeasureId),
-                                  fd.dblOpenQty*((isnull(fd.dblContractBasis,0))+(isnull(fd.dblFuturePrice,0)))))/
-                                  case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end dblQtyUnFixedPrice   
+                                  fd.dblOpenQty*((isnull(fd.dblContractBasis,0))+(isnull(fd.dblFuturePrice,0)))))
+                                  --/case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end 
+								  dblQtyUnFixedPrice   
                                   
                                   ,CASE WHEN strPriOrNotPriOrParPriced = 'Partially Priced' THEN 'Unpriced' 
                                                 WHEN  ISNULL(strPriOrNotPriOrParPriced,'') = '' THEN 'Priced'

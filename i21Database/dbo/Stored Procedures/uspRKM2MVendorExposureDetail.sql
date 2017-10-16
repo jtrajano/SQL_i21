@@ -71,7 +71,7 @@ EXEC [uspRKM2MInquiryTransaction]   @intM2MBasisId  = @intM2MBasisId,
                   @intLocationId = @intLocationId,
                   @intMarketZoneId = @intMarketZoneId
 
-SELECT Distinct cd.*,case when isnull(ysnClaimsToProducer,0)=1 then e.strName else null end as strProducer,
+SELECT distinct cd.*,case when isnull(ysnClaimsToProducer,0)=1 then e.strName else null end as strProducer,
 			case when isnull(ysnClaimsToProducer,0)=1 then ch.intProducerId  else null end intProducerId into #temp FROM @tblFinalDetail cd
 JOIN tblCTContractDetail ch on ch.intContractHeaderId=cd.intContractHeaderId
 LEFT JOIN tblEMEntity e on e.intEntityId=ch.intProducerId
@@ -137,8 +137,9 @@ FROM(
 				ISNULL(fd.dblFutures,0) dblPFutures,
 				dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,
                 fd.intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId,isnull(intPriceUOMId,fd.intCommodityUnitMeasureId),
-                        fd.dblOpenQty*((isnull(fd.dblContractBasis,0))+(isnull(fd.dblFutures,0)))))/
-                        case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end dblQtyPrice,  
+                        fd.dblOpenQty*((isnull(fd.dblContractBasis,0))+(isnull(fd.dblFutures,0)))))
+                        --/case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end 
+						dblQtyPrice,  
 							
 				(dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,
                 fd.intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId,isnull(intPriceUOMId,fd.intCommodityUnitMeasureId),
@@ -150,8 +151,9 @@ FROM(
 								       
                 dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,
                 fd.intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId,isnull(intPriceUOMId,fd.intCommodityUnitMeasureId),
-                        fd.dblOpenQty*((isnull(fd.dblContractBasis,0))+(isnull(fd.dblFuturePrice,0)))))/
-                        case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end dblQtyUnFixedPrice  
+                        fd.dblOpenQty*((isnull(fd.dblContractBasis,0))+(isnull(fd.dblFuturePrice,0)))))
+						--/case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end 
+						dblQtyUnFixedPrice  
 	FROM #temp  fd
 	JOIN tblCTContractDetail det on fd.intContractDetailId=det.intContractDetailId
 	join tblCTContractHeader ch on ch.intContractHeaderId=det.intContractHeaderId
@@ -210,8 +212,9 @@ INSERT INTO @tblDerivative (intRowNum,intContractHeaderId,strContractSeq,strEnti
 
 				           dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,
                            fd.intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId,isnull(intPriceUOMId,fd.intCommodityUnitMeasureId),
-                                  fd.dblOpenQty*((isnull(fd.dblContractBasis,0))+(isnull(fd.dblFutures,0)))))/
-                                  case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end dblQtyPrice,  
+                                  fd.dblOpenQty*((isnull(fd.dblContractBasis,0))+(isnull(fd.dblFutures,0)))))
+                                  --/case when isnull(ysnSubCurrency,0) = 1 then 100 else 1 end 
+								  dblQtyPrice,  
 							
 							(dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,
                            fd.intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId,isnull(intPriceUOMId,fd.intCommodityUnitMeasureId),
@@ -220,8 +223,9 @@ INSERT INTO @tblDerivative (intRowNum,intContractHeaderId,strContractSeq,strEnti
 							isnull(fd.dblFuturePrice,0) dblUPFutures,								       
                            dbo.fnCTConvertQuantityToTargetCommodityUOM(case when isnull(intQuantityUOMId,0)=0 then fd.intCommodityUnitMeasureId else intQuantityUOMId end,
                            fd.intCommodityUnitMeasureId,dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId,isnull(intPriceUOMId,fd.intCommodityUnitMeasureId),
-                                  fd.dblOpenQty*((isnull(fd.dblContractBasis,0))+(isnull(fd.dblFuturePrice,0)))))/
-                                CASE WHEN isnull(ysnSubCurrency,0) = 1 then 100 else 1 end dblQtyUnFixedPrice  
+                                  fd.dblOpenQty*((isnull(fd.dblContractBasis,0))+(isnull(fd.dblFuturePrice,0)))))
+                                --/CASE WHEN isnull(ysnSubCurrency,0) = 1 then 100 else 1 end 
+								dblQtyUnFixedPrice  
 						FROM #temp  fd
                         JOIN tblCTContractDetail det on fd.intContractDetailId=det.intContractDetailId
 						join tblCTContractHeader ch on ch.intContractHeaderId=det.intContractHeaderId
