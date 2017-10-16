@@ -9,7 +9,8 @@ SET ANSI_WARNINGS OFF
 SELECT intSampleImportErrorId
 	,intSampleImportId
 	,intConcurrencyId
-	,CONVERT(DATETIME, dtmSampleReceivedDate, 101) dtmSampleReceivedDate
+	--,CONVERT(DATETIME, dtmSampleReceivedDate, 101) dtmSampleReceivedDate
+	,dtmSampleReceivedDate
 	,strSampleNumber
 	,strItemShortName
 	,strSampleTypeName
