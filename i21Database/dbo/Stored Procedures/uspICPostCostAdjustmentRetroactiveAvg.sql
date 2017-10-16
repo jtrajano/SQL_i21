@@ -299,7 +299,7 @@ BEGIN
 					)
 		END 		
 	SET @OriginalAverageCost = ISNULL(@OriginalAverageCost, 0) 
-	SET @NewAverageCost = @OriginalAverageCost 			
+	SET @NewAverageCost = @OriginalAverageCost 		
 END 
 
 -- Loop to perform the retroactive computation
@@ -378,12 +378,12 @@ BEGIN
 			CASE	WHEN 
 						@t_dblQty > 0 
 						AND @t_intInventoryTransactionId = @InventoryTransactionStartId THEN 
-							@CostBucketOriginalValue
-
+							@CostBucketOriginalValue 
+				
 					WHEN 
 						@t_dblQty < 0 AND @t_intTransactionTypeId = @INV_TRANS_TYPE_NegativeStock THEN 
-							@t_dblValue 
-					
+							@t_dblValue 				
+
 					ELSE 
 						@CurrentValue
 			END 
@@ -408,13 +408,10 @@ BEGIN
 						@CurrentValue
 			END 
 
-		-- Calculate the running qty. 
-		SET @RunningQty += dbo.fnCalculateQtyBetweenUOM(@t_intItemUOMId, @StockItemUOMId, @t_dblQty)
-
 		-- Calculate the Original Average Cost 
 		SET @OriginalAverageCost = 
 			CASE	WHEN @t_dblQty > 0 AND @RunningQty > 0 THEN 
-						@OriginalRunningValue / @RunningQty
+						@OriginalRunningValue / (@RunningQty + @t_dblQty) 
 					WHEN @t_dblQty > 0 AND @RunningQty <= 0 THEN 
 						CASE 
 							WHEN @t_intTransactionId = @intSourceTransactionId
@@ -426,13 +423,13 @@ BEGIN
 						END 
 					ELSE 
 						@OriginalAverageCost
-			END 		
+			END 
 
 		-- Calculate the New Average Cost 
 		SET @NewAverageCost = 
 			CASE	WHEN 
 						@t_dblQty > 0 AND @RunningQty > 0 THEN 
-							@NewRunningValue / @RunningQty
+							@NewRunningValue / (@RunningQty + @t_dblQty) 
 					WHEN 
 						@t_dblQty > 0 AND @RunningQty <= 0 THEN 
 							CASE 
@@ -446,6 +443,9 @@ BEGIN
 					ELSE 
 						@NewAverageCost
 			END	 
+
+		-- Calculate the running qty. 
+		SET @RunningQty += dbo.fnCalculateQtyBetweenUOM(@t_intItemUOMId, @StockItemUOMId, @t_dblQty)
 
 		-- Update the cost bucket cost. 
 		IF	@t_dblQty > 0 
