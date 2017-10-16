@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE uspICPostInventoryAdjustmentQtyChange  
-	@intTransactionId INT = NULL   
+	@intTransactionId INT = NULL,
+	@intEntityUserSecurityId INT = NULL
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -86,6 +87,12 @@ BEGIN
 		RETURN -1
 	END
 END 
+
+DECLARE @intCreateUpdateLotError AS INT 
+
+EXEC @intCreateUpdateLotError = dbo.uspICCreateLotNumberOnInventoryAdjustmentQtyChange
+		@intTransactionId
+		,@intEntityUserSecurityId
 
 --------------------------------------------------------------------------------
 -- Qty Only
@@ -180,3 +187,5 @@ SELECT	intItemId
 		,intSubLocationId
 		,intStorageLocationId
 FROM	@ItemsForQtyChange
+
+Post_Exit:

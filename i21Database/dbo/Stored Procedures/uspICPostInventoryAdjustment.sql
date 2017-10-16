@@ -227,7 +227,7 @@ BEGIN
 				,intStorageLocationId
 		)  	
 		EXEC	dbo.uspICPostInventoryAdjustmentQtyChange
-				@intTransactionId
+				@intTransactionId, @intEntityUserSecurityId
 	END 
 
 	-----------------------------------
