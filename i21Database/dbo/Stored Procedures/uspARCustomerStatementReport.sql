@@ -10,6 +10,7 @@
 	, @strLocationName			AS NVARCHAR(MAX)	= NULL
 	, @strStatementFormat		AS NVARCHAR(MAX)	= 'Open Item'
 	, @strCustomerName			AS NVARCHAR(MAX)	= NULL
+	, @ysnEmailOnly			    AS BIT				= NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -150,6 +151,20 @@ IF (@@version NOT LIKE '%2008%')
 	BEGIN
 		SET @queryRunningBalance = ' ORDER BY I.dtmPostDate ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW'
 		SET @queryRunningBalanceBudget = ' ORDER BY intCustomerBudgetId ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW'
+	END
+
+IF @ysnEmailOnly IS NOT NULL
+	BEGIN
+		DELETE C
+		FROM #CUSTOMERS C
+		OUTER APPLY (
+			SELECT intEmailSetupCount = COUNT(*) 
+			FROM dbo.vyuARCustomerContacts CC WITH (NOLOCK)
+			WHERE CC.intCustomerEntityId = C.intEntityCustomerId 
+				AND ISNULL(CC.strEmail, '') <> '' 
+				AND CC.strEmailDistributionOption LIKE '%Statements%'
+		) EMAILSETUP
+		WHERE CASE WHEN ISNULL(EMAILSETUP.intEmailSetupCount, 0) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END <> @ysnEmailOnly
 	END
 
 TRUNCATE TABLE tblARCustomerAgingStagingTable

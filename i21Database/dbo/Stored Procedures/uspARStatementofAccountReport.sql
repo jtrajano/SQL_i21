@@ -26,6 +26,7 @@ DECLARE  @dtmDateTo					AS DATETIME
 		,@ysnPrintCreditBalance		AS BIT
 		,@ysnIncludeBudget			AS BIT
 		,@ysnPrintOnlyPastDue		AS BIT
+		,@ysnEmailOnly				AS BIT
 		,@xmlDocumentId				AS INT
 		,@query						AS NVARCHAR(MAX)
 		,@filter					AS NVARCHAR(MAX) = ''
@@ -118,6 +119,10 @@ SELECT @ysnPrintOnlyPastDue = [from]
 FROM @temp_xml_table
 WHERE [fieldname] = 'ysnPrintOnlyPastDue'
 
+SELECT @ysnEmailOnly = [from] 
+FROM @temp_xml_table
+WHERE [fieldname] = 'ysnHasEmailSetup'
+
 SELECT @strStatementFormat = CASE WHEN ISNULL([from], '') = '' THEN 'Open Item' ELSE [from] END
 FROM @temp_xml_table
 WHERE [fieldname] = 'strStatementFormat'
@@ -156,6 +161,7 @@ IF @strStatementFormat = 'Balance Forward'
 			, @strAccountStatusCode		= @strAccountStatusCode
 			, @strLocationName			= @strLocationName
 			, @strCustomerName			= @strCustomerName
+			, @ysnEmailOnly				= @ysnEmailOnly
 	END
 ELSE IF ISNULL(@strStatementFormat, 'Open Item') IN ('Open Item', 'Running Balance')
 	BEGIN
@@ -171,6 +177,7 @@ ELSE IF ISNULL(@strStatementFormat, 'Open Item') IN ('Open Item', 'Running Balan
 		    , @strLocationName			= @strLocationName
 		    , @strStatementFormat		= @strStatementFormat
 			, @strCustomerName			= @strCustomerName
+			, @ysnEmailOnly				= @ysnEmailOnly
 	END
 ELSE IF @strStatementFormat = 'Payment Activity'
 	BEGIN
@@ -185,6 +192,7 @@ ELSE IF @strStatementFormat = 'Payment Activity'
 		    , @strAccountStatusCode		= @strAccountStatusCode
 		    , @strLocationName			= @strLocationName
 			, @strCustomerName			= @strCustomerName
+			, @ysnEmailOnly				= @ysnEmailOnly
 	END
 
 INSERT INTO @temp_SOA_table
