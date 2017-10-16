@@ -117,13 +117,18 @@ SELECT	CHK.dtmDate
 		,CHK.dblAmount
 		,strPayee = CASE
 					WHEN (SELECT COUNT(intEntityLienId) FROM tblAPVendorLien L WHERE intEntityVendorId = VENDOR.[intEntityId]) > 0 THEN
-						CHK.strPayee + ' ' + (STUFF( (SELECT ' and ' + strName 
+						ISNULL(CHK.strPayee + ' ' + (STUFF( (SELECT ' and ' + strName
                              FROM tblAPVendorLien LIEN
 							 INNER JOIN tblEMEntity ENT ON LIEN.intEntityLienId = ENT.intEntityId
-							 WHERE LIEN.ysnActive = 1 AND GETDATE() BETWEEN LIEN.dtmStartDate AND LIEN.dtmEndDate
+							 WHERE LIEN.intEntityVendorId = VENDOR.intEntityId AND LIEN.ysnActive = 1 AND CHK.dtmDate BETWEEN LIEN.dtmStartDate AND LIEN.dtmEndDate
+							 AND LIEN.intCommodityId IN (SELECT intCommodityId FROM
+															tblAPPayment Pay 
+															INNER JOIN tblAPPaymentDetail PayDtl ON Pay.intPaymentId = PayDtl.intPaymentId
+															INNER JOIN vyuAPVoucherCommodity VC ON PayDtl.intBillId = VC.intBillId
+															WHERE strPaymentRecordNum = PYMT.strPaymentRecordNum)
                              ORDER BY intEntityVendorLienId
                              FOR XML PATH('')), 
-                            1, 1, ''))
+                            1, 1, '')),CHK.strPayee)
 					ELSE
 						CHK.strPayee
 					END
