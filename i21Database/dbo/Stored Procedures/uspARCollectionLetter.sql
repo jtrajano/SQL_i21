@@ -210,7 +210,13 @@ BEGIN
 					ORDER BY intEntityCustomerId
  
 					IF @strLetterName = 'Recent Overdue Collection Letter'
-					BEGIN		
+					BEGIN	
+						DECLARE @UnpaidRecent TABLE
+						(
+							snum NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						)
+						INSERT INTO @UnpaidRecent 
+						SELECT strInvoiceNumber FROM tblARInvoice where ysnPaid = 0	
 						INSERT INTO #TransactionLetterDetail
 						(	
 							intEntityCustomerId		
@@ -242,27 +248,27 @@ BEGIN
 						FROM
 						( 
 							SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
-							WHERE intEntityCustomerId = @CustomerId
+							WHERE intEntityCustomerId = @CustomerId AND strInvoiceNumber IN ( SELECT snum FROM @UnpaidRecent)
 							AND dbl10Days <> 0
 							UNION ALL 
 							SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
-							WHERE intEntityCustomerId = @CustomerId
+							WHERE intEntityCustomerId = @CustomerId AND strInvoiceNumber IN ( SELECT snum FROM @UnpaidRecent)
 							AND dbl30Days  <> 0
 							UNION ALL
 							SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
-							WHERE intEntityCustomerId = @CustomerId
+							WHERE intEntityCustomerId = @CustomerId AND strInvoiceNumber IN ( SELECT snum FROM @UnpaidRecent)
 							AND dbl60Days  <> 0
 							UNION ALL
 							SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
-							WHERE intEntityCustomerId = @CustomerId
+							WHERE intEntityCustomerId = @CustomerId AND strInvoiceNumber IN ( SELECT snum FROM @UnpaidRecent)
 							AND dbl90Days  <> 0
 							UNION ALL
 							SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
-							WHERE intEntityCustomerId = @CustomerId
+							WHERE intEntityCustomerId = @CustomerId AND strInvoiceNumber IN ( SELECT snum FROM @UnpaidRecent)
 							AND dbl120Days  <> 0
 							UNION ALL
 							SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
-							WHERE intEntityCustomerId = @CustomerId
+							WHERE intEntityCustomerId = @CustomerId AND strInvoiceNumber IN ( SELECT snum FROM @UnpaidRecent)
 							AND dbl121Days  <> 0
 						) ABC
 
@@ -275,7 +281,14 @@ BEGIN
 
 					END
 					ELSE IF @strLetterName = '30 Day Overdue Collection Letter'					
-					BEGIN				
+					BEGIN
+						DECLARE @Unpaid30Invoice TABLE
+						(
+							snum NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						)
+						INSERT INTO @Unpaid30Invoice 
+						SELECT strInvoiceNumber FROM tblARInvoice where ysnPaid = 0
+				
 						INSERT INTO #TransactionLetterDetail
 						(
 							intEntityCustomerId 
@@ -321,6 +334,7 @@ BEGIN
 							WHERE intEntityCustomerId = @CustomerId
 							AND dbl121Days  <> 0
 						) ABC
+							WHERE strInvoiceNumber IN ( SELECT snum FROM @Unpaid30Invoice)
 
 						UPDATE 
 							tblARCollectionOverdue SET dbl30DaysSum = ABC.dblTotalDueSum
@@ -331,7 +345,13 @@ BEGIN
 
 					END
 					ELSE IF @strLetterName = '60 Day Overdue Collection Letter'					
-					BEGIN		
+					BEGIN
+						DECLARE @Unpaid60Invoice TABLE
+						(
+							snum NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						)
+						INSERT INTO @Unpaid60Invoice 
+						SELECT strInvoiceNumber FROM tblARInvoice where ysnPaid = 0		
 						INSERT INTO #TransactionLetterDetail
 						(
 							intEntityCustomerId
@@ -362,15 +382,15 @@ BEGIN
 						FROM
 						( 
 							SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
-							WHERE intEntityCustomerId = @CustomerId
+							WHERE intEntityCustomerId = @CustomerId AND strInvoiceNumber IN ( SELECT snum FROM @Unpaid60Invoice)
 							AND dbl90Days  <> 0
 							UNION ALL
 							SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
-							WHERE intEntityCustomerId = @CustomerId
+							WHERE intEntityCustomerId = @CustomerId AND strInvoiceNumber IN ( SELECT snum FROM @Unpaid60Invoice)
 							AND dbl120Days  <> 0
 							UNION ALL
 							SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
-							WHERE intEntityCustomerId = @CustomerId
+							WHERE intEntityCustomerId = @CustomerId AND strInvoiceNumber IN ( SELECT snum FROM @Unpaid60Invoice)
 							AND dbl121Days  <> 0
 						) ABC
 
@@ -383,6 +403,13 @@ BEGIN
 					END
 					ELSE IF @strLetterName = '90 Day Overdue Collection Letter'					
 					BEGIN				
+						DECLARE @UnpaidInvoice TABLE
+						(
+							id int
+						)
+						INSERT INTO @UnpaidInvoice 
+						SELECT intInvoiceId FROM tblARInvoice where ysnPaid = 0
+
 						INSERT INTO #TransactionLetterDetail
 						(
 							intEntityCustomerId
@@ -413,11 +440,11 @@ BEGIN
 						FROM
 						( 
 							SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
-							WHERE intEntityCustomerId = @CustomerId
+							WHERE intEntityCustomerId = @CustomerId AND intInvoiceId in (SELECT id FROM @UnpaidInvoice)
 							AND dbl120Days  <> 0
 							UNION ALL
 							SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
-							WHERE intEntityCustomerId = @CustomerId
+							WHERE intEntityCustomerId = @CustomerId AND intInvoiceId in (SELECT id FROM @UnpaidInvoice)
 							AND dbl121Days  <> 0
 						) ABC
 
@@ -429,7 +456,13 @@ BEGIN
 							intEntityCustomerId = @CustomerId 
 					END
 					ELSE IF @strLetterName = 'Final Overdue Collection Letter'					
-					BEGIN		
+					BEGIN
+						DECLARE @UnpaidFinal TABLE
+						(
+							snum NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						)
+						INSERT INTO @UnpaidFinal 
+						SELECT strInvoiceNumber FROM tblARInvoice where ysnPaid = 0			
 						INSERT INTO #TransactionLetterDetail
 						(
 							intEntityCustomerId
@@ -460,7 +493,7 @@ BEGIN
 						FROM
 						( 
 							SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
-							WHERE intEntityCustomerId = @CustomerId
+							WHERE intEntityCustomerId = @CustomerId AND strInvoiceNumber IN ( SELECT snum FROM @UnpaidFinal)
 							AND dbl121Days  <> 0
 						) ABC
 

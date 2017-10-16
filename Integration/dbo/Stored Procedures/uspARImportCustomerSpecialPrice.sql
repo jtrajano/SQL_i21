@@ -94,7 +94,7 @@ BEGIN
 				   ,[strLineNote]
 				   ,[dtmBeginDate]
 				   ,[dtmEndDate]
-				   ,[intCustomerLocationId]
+				   --,[intCustomerLocationId]
 				   ,[strInvoiceType]
 				   ,[intCategoryId]
 				   ,[intConcurrencyId])
@@ -115,7 +115,7 @@ BEGIN
 			  ,SP.spprc_comment
 			  ,(CASE WHEN ISDATE(SP.spprc_begin_rev_dt) = 1 THEN CONVERT(DATE,CAST(SP.spprc_begin_rev_dt AS CHAR(12)), 112) ELSE ' ' END)
 			  ,(CASE WHEN ISDATE(SP.spprc_end_rev_dt) = 1 THEN CONVERT(DATE,CAST(SP.spprc_end_rev_dt AS CHAR(12)), 112) ELSE ' ' END)
-			  ,CLOC.intEntityLocationId
+			  --,CLOC.intEntityLocationId
 			  ,'Standard' 
 			  ,(CASE WHEN SP.spprc_class > ' ' THEN 
 							(SELECT CAT.intCategoryId FROM tblICCategory CAT
@@ -128,6 +128,10 @@ BEGIN
 		INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.agcus_bill_to COLLATE SQL_Latin1_General_CP1_CS_AS
 		INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityId 
 				   AND CLOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.agcus_name COLLATE SQL_Latin1_General_CP1_CS_AS
+		INNER JOIN tblICItem ITM ON strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = SP.spprc_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS
+		INNER JOIN tblICCategory CAT ON strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = SP.spprc_class COLLATE SQL_Latin1_General_CP1_CS_AS
+		WHERE NOT EXISTS (SELECT * FROM tblARCustomerSpecialPrice WHERE intEntityCustomerId = CUS.intEntityId AND intItemId = ITM.intItemId AND intCategoryId = CAT.intCategoryId)		 						   
+				   
 		--WHERE SP.spprc_cus_no = @CustomerId
 	END
 
@@ -152,7 +156,7 @@ BEGIN
 				   ,[intRackItemId]
 				   ,[intEntityLocationId]
 				   ,[intRackLocationId]
-				   ,[intCustomerLocationId]
+				   --,[intCustomerLocationId]
 				   ,[strInvoiceType]
 				   ,[intCategoryId]
 				   ,[intConcurrencyId])
@@ -206,7 +210,7 @@ BEGIN
 							 WHERE OVND.ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_rack_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS)
 					 ELSE NULL 
 				END)
-			  ,CLOC.intEntityLocationId
+			  --,CLOC.intEntityLocationId
 			  ,'Standard' 
 			  ,(CASE WHEN PDV.ptpdv_class > ' ' THEN 
 							(SELECT CAT.intCategoryId FROM tblICCategory CAT
@@ -219,6 +223,9 @@ BEGIN
 		INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.ptcus_bill_to COLLATE SQL_Latin1_General_CP1_CS_AS
 		INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityId 
 				   AND CLOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.ptcus_name COLLATE SQL_Latin1_General_CP1_CS_AS
+		INNER JOIN tblICItem ITM ON strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS
+		INNER JOIN tblICCategory CAT ON strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_class COLLATE SQL_Latin1_General_CP1_CS_AS
+		WHERE NOT EXISTS (SELECT * FROM tblARCustomerSpecialPrice WHERE intEntityCustomerId = CUS.intEntityId AND intItemId = ITM.intItemId AND intCategoryId = CAT.intCategoryId)		 						   
 		--WHERE PDV.ptpdv_cus_no = @CustomerId
 	END
 	
@@ -230,6 +237,9 @@ BEGIN
 		INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.agcus_bill_to COLLATE SQL_Latin1_General_CP1_CS_AS
 		INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityId 
 				   AND CLOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.agcus_name COLLATE SQL_Latin1_General_CP1_CS_AS
+		INNER JOIN tblICItem ITM ON strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = SP.spprc_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS
+		INNER JOIN tblICCategory CAT ON strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = SP.spprc_class COLLATE SQL_Latin1_General_CP1_CS_AS
+		WHERE NOT EXISTS (SELECT * FROM tblARCustomerSpecialPrice WHERE intEntityCustomerId = CUS.intEntityId AND intItemId = ITM.intItemId AND intCategoryId = CAT.intCategoryId)		 						   
 		
 	END
 	
@@ -241,7 +251,10 @@ BEGIN
 		INNER JOIN tmpptcusname OCUS ON OCUS.ptcus_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
 		INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.ptcus_bill_to COLLATE SQL_Latin1_General_CP1_CS_AS
 		INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = CUS.intEntityId 
-				   AND CLOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.ptcus_name COLLATE SQL_Latin1_General_CP1_CS_AS		
+				 AND CLOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.ptcus_name COLLATE SQL_Latin1_General_CP1_CS_AS
+		INNER JOIN tblICItem ITM ON strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS
+		INNER JOIN tblICCategory CAT ON strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_class COLLATE SQL_Latin1_General_CP1_CS_AS
+		WHERE NOT EXISTS (SELECT * FROM tblARCustomerSpecialPrice WHERE intEntityCustomerId = CUS.intEntityId AND intItemId = ITM.intItemId AND intCategoryId = CAT.intCategoryId)		 		
 	END
 
 		IF  EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'tmpagcusname')

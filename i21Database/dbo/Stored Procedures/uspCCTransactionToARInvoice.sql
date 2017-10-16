@@ -3,7 +3,7 @@
 	,@UserId			INT	
 	,@Post				BIT
 	,@Recap				BIT = NULL
-	,@ErrorMessage		NVARCHAR(250) OUTPUT
+	,@ErrorMessage		NVARCHAR(250) = NULL OUTPUT
 	,@CreatedIvoices	NVARCHAR(MAX)  = NULL OUTPUT
 	,@UpdatedIvoices	NVARCHAR(MAX)  = NULL OUTPUT
 	,@success			BIT = NULL OUTPUT
@@ -22,16 +22,26 @@ BEGIN
 
     DECLARE @CCRItemToARItem TABLE
     (
-        intSiteHeaderId int, 
+        intSiteHeaderId int,
+		intItemId int,
         strItem nvarchar(100)
     )
-    DECLARE @intDealerSiteCreditItem INT, @intDealerSiteFeeItem INT
+    DECLARE @intDealerSiteCreditItem INT, @intDealerSiteFeeItem INT, @intSalesAccountCategory INT;
     SELECT TOP 1 @intDealerSiteCreditItem = intDealerSiteCreditItem, @intDealerSiteFeeItem = intDealerSiteFeeItem FROM tblCCCompanyPreferenceOption
+	SELECT TOP 1 @intSalesAccountCategory = intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = 'Sales Account'
 
-    INSERT INTO @CCRItemToARItem VALUES (@intSiteHeaderId,'Dealer Site Credits')
-    INSERT INTO @CCRItemToARItem VALUES (@intSiteHeaderId,'Dealer Site Fees')
+	IF(@intDealerSiteCreditItem IS NULL OR @intDealerSiteFeeItem IS NULL)
+	BEGIN
+		SET @ErrorMessage = 'Please setup Dealer Site Credit & Fee Item from Company Configuration.';
+		SET @success = 0;
+		RAISERROR(@ErrorMessage, 16, 1);
+	END
+
+    INSERT INTO @CCRItemToARItem VALUES (@intSiteHeaderId, @intDealerSiteCreditItem, 'Dealer Site Credits');
+    INSERT INTO @CCRItemToARItem VALUES (@intSiteHeaderId, @intDealerSiteFeeItem, 'Dealer Site Fees');
 
     SET @success = 0
+    
 
     INSERT INTO @EntriesForInvoice(
         [strTransactionType]
@@ -55,6 +65,7 @@ BEGIN
         ,[ysnRecomputeTax]
         ,[intSiteDetailId]
         ,[ysnInventory]
+		,[intSalesAccountId]
 		,[strComments]
     )
     SELECT [strTransactionType] = 'Credit Memo' 
@@ -70,7 +81,7 @@ BEGIN
         ,[intEntitySalespersonId] = ccCustomer.intSalespersonId
         ,[intEntityId] = @UserId
         ,[ysnPost] = @Post
-        ,[intItemId] =  CASE WHEN ccItem.strItem = 'Dealer Site Credits' THEN @intDealerSiteCreditItem ELSE (CASE WHEN ccSite.ysnPostNetToArCustomer = 0 THEN @intDealerSiteFeeItem ELSE -1 END) END
+        ,[intItemId] = CASE WHEN ccItem.strItem = 'Dealer Site Credits' THEN @intDealerSiteCreditItem ELSE (CASE WHEN ccSite.ysnPostNetToArCustomer = 0 THEN @intDealerSiteFeeItem ELSE -1 END) END
         ,[strItemDescription] = ccItem.strItem
         ,[dblQtyShipped] = CASE WHEN ccItem.strItem = 'Dealer Site Fees' THEN -1 ELSE 1 END
         ,[dblPrice] = CASE WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 1 THEN ccSiteDetail.dblNet WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 0 THEN ccSiteDetail.dblGross ELSE (CASE WHEN ccSite.ysnPostNetToArCustomer = 0 THEN ccSiteDetail.dblFees ELSE 0 END) END
@@ -78,14 +89,17 @@ BEGIN
         ,[ysnRecomputeTax] = 0
         ,[intSiteDetailId] = ccSiteDetail.intSiteDetailId
         ,[ysnInventory] = 1
+		,[intSalesAccountId] = ItemAcc.intAccountId
 		,[strComments] = ccSiteHeader.strCcdReference
     FROM tblCCSiteHeader ccSiteHeader 
     INNER JOIN vyuCCVendor ccVendor ON ccSiteHeader.intVendorDefaultId = ccVendor.intVendorDefaultId 
-    INNER JOIN @CCRItemToARItem  ccItem ON ccItem.intSiteHeaderId = ccSiteHeader.intSiteHeaderId
+    INNER JOIN @CCRItemToARItem ccItem ON ccItem.intSiteHeaderId = ccSiteHeader.intSiteHeaderId
     LEFT JOIN tblCCSiteDetail ccSiteDetail ON  ccSiteDetail.intSiteHeaderId = ccSiteHeader.intSiteHeaderId
     LEFT JOIN vyuCCSite ccSite ON ccSite.intSiteId = ccSiteDetail.intSiteId
     LEFT JOIN vyuCCCustomer ccCustomer ON ccCustomer.intCustomerId = ccSite.intCustomerId AND ccCustomer.intSiteId = ccSite.intSiteId
-    WHERE ccSiteHeader.intSiteHeaderId = @intSiteHeaderId AND ccSite.intDealerSiteId IS NOT NULL
+	INNER JOIN tblICItemAccount ItemAcc ON ItemAcc.intItemId = ccItem.intItemId AND ItemAcc.intAccountCategoryId = @intSalesAccountCategory
+    WHERE ccSiteHeader.intSiteHeaderId = @intSiteHeaderId AND ccSite.intSiteId IS NOT NULL
+
 
     --REMOVE -1 items
     DELETE FROM @EntriesForInvoice WHERE intItemId = -1	
