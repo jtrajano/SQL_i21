@@ -42,7 +42,8 @@
 			c.strDefaultOrigin,
 			c.ysnMultipleDueDates,
 			a.intTaxGroupId,
-			h.strTaxGroup
+			h.strTaxGroup,
+			c.intSupplyPointId
 			--End of Added by Jayson
 		from tblEMEntityLocation a
 			join vyuEMEntityType b
