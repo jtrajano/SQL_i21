@@ -758,14 +758,14 @@ SELECT *,isnull(dblContractBasis,0) + isnull(dblFutures,0) as dblContractPrice,
             else dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when isnull(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,isnull(dblContractBasis,0)) end end)
             as dblCanadianContractBasis,
 
+ 			case when @ysnCanadianCustomer= 1 then dblFutures else 
             convert(decimal(24,6), case when isnull(dblRate,0)=0 then 
             dbo.fnRKGetCurrencyConvertion(case when ysnSubCurrency = 1 then intMainCurrencyId else intCurrencyId end,@intCurrencyUOMId)* dblFutures
             else
             case when case when ysnSubCurrency = 1 then intMainCurrencyId else intCurrencyId end<>@intCurrencyUOMId THEN dblFutures*dblRate 
             else dblFutures end 
-            end)
-            as
-			 dblFutures,             
+            end) end
+            as 	dblFutures,          
             convert(decimal(24,6),dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when isnull(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,dblCash)) as dblCash, 
                      dblCosts,
                      dbo.fnRKGetCurrencyConvertion(CASE WHEN ysnSubCurrency = 1 then intMainCurrencyId else intCurrencyId end,@intCurrencyUOMId)* 
@@ -784,7 +784,13 @@ SELECT *,isnull(dblContractBasis,0) + isnull(dblFutures,0) as dblContractPrice,
                      dblResult as dblResult1,
                      case when isnull(@ysnIncludeBasisDifferentialsInResults,0) =0 then 0 else  dblResultBasis  end as dblResultBasis1,
                      dblMarketFuturesResult  as dblMarketFuturesResult1            
-                                   ,intQuantityUOMId,intCommodityUnitMeasureId,intPriceUOMId,intCent,dtmPlannedAvailabilityDate
+                                   ,intQuantityUOMId,intCommodityUnitMeasureId,intPriceUOMId,intCent,dtmPlannedAvailabilityDate,
+					CONVERT(decimal(24,6), case when isnull(dblRate,0)=0 then 
+					dbo.fnRKGetCurrencyConvertion(case when ysnSubCurrency = 1 then intMainCurrencyId else intCurrencyId end,@intCurrencyUOMId)* dblFutures
+					else
+					case when case when ysnSubCurrency = 1 then intMainCurrencyId else intCurrencyId end<>@intCurrencyUOMId THEN dblFutures*dblRate 
+					else dblFutures end 
+					end) dblCanadianFutures	
       FROM @tblFinalDetail )t 
       ORDER BY intCommodityId,strContractSeq desc    
 
