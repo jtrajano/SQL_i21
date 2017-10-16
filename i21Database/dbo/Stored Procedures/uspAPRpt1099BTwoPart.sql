@@ -1,9 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPRpt1099BTwoPart]
 	@xmlParam NVARCHAR(MAX) = NULL
-	--@vendorFrom NVARCHAR(100) = NULL,
-	--@vendorTo NVARCHAR(100) = NULL,
-	--@year INT,
-	--@corrected BIT = 0
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -11,47 +7,6 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
-
--- Sample XML string structure:
---DECLARE @xmlParam NVARCHAR(MAX)
---SET @xmlParam = '
---<xmlparam>
---	<filters>
---		<filter>
---			<fieldname>vendorFrom</fieldname>
---			<condition>Equal To</condition>
---			<from></from>
---			<to></to>
---			<join>And</join>
---			<datatype>Int</datatype>
---		</filter>
---		<filter>
---			<fieldname>vendorTo</fieldname>
---			<condition>Equal To</condition>
---			<from></from>
---			<to />
---			<join>And</join>
---			<datatype>Int</datatype>
---		</filter>
---		<filter>
---			<fieldname>year</fieldname>
---			<condition>Equal To</condition>
---			<from>2015</from>
---			<to />
---			<join>And</join>
---			<datatype>Int</datatype>
---		</filter>
---		<filter>
---			<fieldname>corrected</fieldname>
---			<condition>Equal To</condition>
---			<from>0</from>
---			<to />
---			<join>And</join>
---			<datatype>Boolean</datatype>
---		</filter>
---	</filters>
---	<options />
---</xmlparam>'
 
 DECLARE @vendorFromParam NVARCHAR(100) = NULL;
 DECLARE @vendorToParam NVARCHAR(100) = NULL;
@@ -133,10 +88,6 @@ BEGIN
 	FROM @temp_xml_table WHERE [fieldname] = 'corrected'
 END;
 
---SET @vendorFromParam = @vendorFrom;
---SET @vendorToParam = @vendorTo;
---SET @yearParam = @year;
---SET @correctedParam = @corrected;
 
 WITH B1099 (
 	int1099BId
@@ -145,11 +96,8 @@ WITH B1099 (
 	,strEIN
 	,strAddress
 	,strVendorCompanyName
-	,strPayeeName
 	,strVendorId
 	,strZip
-	,strCity
-	,strState
 	,strZipState
 	,strFederalTaxId
 	,intYear
@@ -162,7 +110,18 @@ AS
 (
 	SELECT 
 	int1099BId = ROW_NUMBER() OVER(ORDER BY (SELECT 1))
-	,A.* 
+	,strEmployerAddress
+	,strCompanyName
+	,strEIN
+	,strAddress
+	,strVendorCompanyName
+	,A.strVendorId
+	,strZip
+	,strZipState
+	,strFederalTaxId
+	,A.intYear
+	,dbl1099B
+	,A.intEntityId
 	,(CASE WHEN ISNULL(@correctedParam,0) = 0 THEN NULL ELSE 'X' END) AS strCorrected
 	,(SELECT RIGHT(@yearParam,2)) AS strYear
 	FROM vyuAP1099B A
