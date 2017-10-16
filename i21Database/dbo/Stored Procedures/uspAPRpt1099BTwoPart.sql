@@ -121,7 +121,7 @@ AS
 	,strFederalTaxId
 	,A.intYear
 	,dbl1099B
-	,A.intEntityVendorId
+	,A.intEntityId
 	,(CASE WHEN ISNULL(@correctedParam,0) = 0 THEN NULL ELSE 'X' END) AS strCorrected
 	,(SELECT RIGHT(@yearParam,2)) AS strYear
 	FROM vyuAP1099B A
