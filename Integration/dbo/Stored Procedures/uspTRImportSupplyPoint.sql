@@ -56,7 +56,6 @@ BEGIN
 				   ,[strFuelDealerId1]
 				   ,[strFuelDealerId2]
 				   ,[strDefaultOrigin]
-				   ,[intTaxGroupId]
 				   ,[ysnMultipleDueDates]
 				   ,[ysnMultipleBolInvoiced]
 				   ,[intConcurrencyId])		   
@@ -74,7 +73,6 @@ BEGIN
 			   ,VNC.ssvnc_tx_fuel_dlr_id
 			   ,VNC.ssvnc_tx_fuel_dlr_id2
 			   ,VNC.ssvnc_tx_dflt_origin
-			   ,ELOC.intTaxGroupId
 			   ,(CASE WHEN VNC.ssvnc_tx_multi_pay_yn = 'Y' THEN 1 ELSE 0 END)
 			   ,(CASE WHEN VNC.ssvnc_tx_multi_bol_ivc_yn = 'Y' THEN 1 ELSE 0 END)
 			   ,1
@@ -94,7 +92,6 @@ BEGIN
 					   ,[strFuelDealerId1]
 					   ,[strFuelDealerId2]
 					   ,[strDefaultOrigin]
-					   ,[intTaxGroupId]
 					   ,[ysnMultipleDueDates]
 					   ,[ysnMultipleBolInvoiced]
 					   ,[intConcurrencyId])		   
@@ -112,7 +109,6 @@ BEGIN
 				   ,VNC.ssvnc_tx_fuel_dlr_id
 				   ,VNC.ssvnc_tx_fuel_dlr_id2
 				   ,VNC.ssvnc_tx_dflt_origin
-				   ,ELOC.intTaxGroupId
 				   ,(CASE WHEN VNC.ssvnc_tx_multi_pay_yn = 'Y' THEN 1 ELSE 0 END)
 				   ,(CASE WHEN VNC.ssvnc_tx_multi_bol_ivc_yn = 'Y' THEN 1 ELSE 0 END)
 				   ,1
