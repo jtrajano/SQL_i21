@@ -56,7 +56,7 @@ BEGIN
 			SET @calculatedValue =  @dblDiscountAmount * @dblTicketWetUnits
 		END
 	ELSE 
-		SET @dblQtyToDistribute = @dblTicketNetUnits * @dblSplitPercent
+		SET @dblQtyToDistribute = @dblTicketGrossUnit * @dblSplitPercent
 		SET @calculatedValue =  (@dblQtyToDistribute / @dblUOMQty) * @dblDiscountAmount
 	RETURN @calculatedValue
 END
