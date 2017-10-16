@@ -14,7 +14,7 @@
 	ysnEnableSampleTypeByUserRole BIT NULL CONSTRAINT [DF_tblQMCompanyPreference_ysnEnableSampleTypeByUserRole] DEFAULT 0,
 	ysnShowSampleFromAllLocation BIT NULL CONSTRAINT [DF_tblQMCompanyPreference_ysnShowSampleFromAllLocation] DEFAULT 0,
 	ysnValidateMultipleValuesInTestResult BIT NULL CONSTRAINT [DF_tblQMCompanyPreference_ysnValidateMultipleValuesInTestResult] DEFAULT 0,
-	dtmSampleImportDateTimeFormat DATETIME,
+	strSampleImportDateTimeFormat NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 
     CONSTRAINT [PK_tblQMCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]),
 	CONSTRAINT [FK_tblQMCompanyPreference_tblICLotStatus_intApproveLotStatus] FOREIGN KEY ([intApproveLotStatus]) REFERENCES [tblICLotStatus]([intLotStatusId]),

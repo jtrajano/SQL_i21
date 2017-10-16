@@ -34,11 +34,29 @@ BEGIN TRY
 		,@intSampleTypeId INT
 		,@intProductId INT
 		,@intContractDetailId INT
+		,@strSampleImportDateTimeFormat NVARCHAR(50)
+		,@intConvertYear INT
 
 	BEGIN TRANSACTION
 
 	DELETE
 	FROM tblQMSampleImportError
+
+	SELECT @strSampleImportDateTimeFormat = strSampleImportDateTimeFormat
+	FROM tblQMCompanyPreference
+
+	SELECT @intConvertYear = 101
+
+	IF (
+			@strSampleImportDateTimeFormat = 'MM DD YYYY HH:MI'
+			OR @strSampleImportDateTimeFormat = 'YYYY MM DD HH:MI'
+			)
+		SELECT @intConvertYear = 101
+	ELSE IF (
+			@strSampleImportDateTimeFormat = 'DD MM YYYY HH:MI'
+			OR @strSampleImportDateTimeFormat = 'YYYY DD MM HH:MI'
+			)
+		SELECT @intConvertYear = 103
 
 	SELECT @intSampleImportId = MIN(intSampleImportId)
 	FROM tblQMSampleImport
@@ -69,8 +87,9 @@ BEGIN TRY
 			,@intSampleTypeId = NULL
 			,@intProductId = NULL
 			,@intContractDetailId = NULL
+			,@strPreviousErrMsg = ''
 
-		SELECT @dtmSampleReceivedDate = CONVERT(DATETIME, dtmSampleReceivedDate, 101)
+		SELECT @dtmSampleReceivedDate = CONVERT(DATETIME, dtmSampleReceivedDate, @intConvertYear)
 			,@strSampleNumber = strSampleNumber
 			,@strSampleRefNo = strSampleNumber
 			,@strItemShortName = strItemShortName
@@ -89,8 +108,6 @@ BEGIN TRY
 			,@dtmCreated = dtmCreated
 		FROM tblQMSampleImport
 		WHERE intSampleImportId = @intSampleImportId
-
-		SELECT @strPreviousErrMsg = ''
 
 		-- Sample No
 		IF ISNULL(@strSampleRefNo, '') = ''
@@ -431,7 +448,7 @@ BEGIN TRY
 				(
 					SELECT COUNT(1) AS intCount
 					FROM (
-						SELECT DISTINCT CONVERT(DATETIME, dtmSampleReceivedDate, 101) dtmSampleReceivedDate
+						SELECT DISTINCT CONVERT(DATETIME, dtmSampleReceivedDate, @intConvertYear) dtmSampleReceivedDate
 							,strItemShortName
 							,strSampleTypeName
 							,strVendorName
@@ -490,7 +507,7 @@ BEGIN TRY
 					)
 				SELECT intSampleImportId
 					,intConcurrencyId
-					,CONVERT(DATETIME, dtmSampleReceivedDate, 101)
+					,dtmSampleReceivedDate
 					,strSampleNumber
 					,strItemShortName
 					,strSampleTypeName
@@ -526,7 +543,7 @@ BEGIN TRY
 	SELECT intSampleImportErrorId
 		,intSampleImportId
 		,intConcurrencyId
-		,CONVERT(DATETIME, dtmSampleReceivedDate, 101) dtmSampleReceivedDate
+		,dtmSampleReceivedDate
 		,strSampleNumber
 		,strItemShortName
 		,strSampleTypeName
