@@ -2,13 +2,13 @@
 AS 
 
 SELECT 
-    ROW_NUMBER() OVER (ORDER BY (SELECT 1)) AS intBasisAdvanceId --generate identity without sorting
+    CAST(ROW_NUMBER() OVER (ORDER BY (SELECT 1)) AS INT) AS intBasisAdvanceId --generate identity without sorting
     ,ticket.intTicketId
     ,entity.strName
-    ,customer.dblARBalance
+    ,ISNULL(customer.dblARBalance,0) AS dblARBalance
     ,strSplit = ''
     ,ct.strContractNumber
-    ,ticket.strTicketNumber
+    ,ticket.strTicketNumber 
     ,ticket.dtmTicketDateTime
     ,loc.strLocationName
     ,receipt.intInventoryReceiptId
@@ -16,12 +16,12 @@ SELECT
     ,receipt.strBillOfLading
     ,commodity.strDescription
     ,cur.strCurrency
-    ,ticket.dblUnitPrice AS dblFuture
-    ,ticket.dblNetUnits AS dblQuantity
+    ,ISNULL(ticket.dblUnitPrice,0) AS dblFuture
+    ,ISNULL(ticket.dblNetUnits,0) AS dblQuantity
     ,uom.strUnitMeasure
-    ,ticket.dblUnitBasis AS dblUnitBasis
-    ,ticket.dblUnitPrice + ticket.dblUnitBasis AS dblFuturesPrice
-    ,discounts.dblAmount AS dblDiscountAmount
+    ,ISNULL(ticket.dblUnitBasis,0) AS dblUnitBasis
+    ,ISNULL(ticket.dblUnitPrice,0) + ISNULL(ticket.dblUnitBasis,0) AS dblFuturesPrice
+    ,ISNULL(discounts.dblAmount,0) AS dblDiscountAmount
 FROM tblSCTicket ticket
 INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)
      ON ticket.intEntityId = vendor.intEntityId
