@@ -133,6 +133,7 @@ BEGIN
 		,strUnitMeasure = UOM.strUnitMeasure
 		,dblTotal = BillDtl.dblTotal
 		,dblTax = BillDtl.dblTax
+		,dblNetTotal = BillDtl.dblTotal+ BillDtl.dblTax
 		,strContractNumber = CNTRCT.strContractNumber
 		,TotalDiscount = ISNULL(BillByReceipt.dblTotal, 0) 
 		,NetDue = BillDtl.dblTotal + BillDtl.dblTax + ISNULL(BillByReceipt.dblTotal, 0)
@@ -623,7 +624,8 @@ BEGIN
 		,Net = BillDtl.dblQtyOrdered 
 		,strUnitMeasure = UOM.strUnitMeasure
 		,dblTotal = BillDtl.dblTotal
-		,dblTax = BillDtl.dblTax 
+		,dblTax = BillDtl.dblTax
+		,dblNetTotal = BillDtl.dblTotal + BillDtl.dblTax 
 		,strContractNumber = CNTRCT.strContractNumber
 		,TotalDiscount =  ISNULL(tblOtherCharge.dblTotal, 0)
 		,NetDue = BillDtl.dblTotal + ISNULL(tblTax.dblTax, 0) + ISNULL(tblOtherCharge.dblTotal, 0) 
@@ -783,6 +785,7 @@ BEGIN
 		,strUnitMeasure = UOM.strUnitMeasure
 		,dblTotal = BillDtl.dblTotal
 		,dblTax = BillDtl.dblTax
+		,dblNetTotal = BillDtl.dblTotal+ BillDtl.dblTax
 		,strContractNumber = CNTRCT.strContractNumber
 		,TotalDiscount = ISNULL(BillByReceipt.dblTotal, 0) 
 		,NetDue = BillDtl.dblTotal + BillDtl.dblTax + ISNULL(BillByReceipt.dblTotal, 0)
@@ -1249,7 +1252,8 @@ BEGIN
 		,Net = BillDtl.dblQtyOrdered 
 		,strUnitMeasure = UOM.strUnitMeasure
 		,dblTotal = BillDtl.dblTotal
-		,dblTax = BillDtl.dblTax 
+		,dblTax = BillDtl.dblTax
+		,dblNetTotal = BillDtl.dblTotal+ BillDtl.dblTax 
 		,strContractNumber = CNTRCT.strContractNumber
 		,TotalDiscount = ISNULL(tblOtherCharge.dblTotal, 0) 
 		,NetDue = BillDtl.dblTotal + ISNULL(tblTax.dblTax, 0) + ISNULL(tblOtherCharge.dblTotal, 0)
@@ -1360,3 +1364,4 @@ BEGIN
 	LEFT JOIN tblEMEntityFarm EntityFarm ON EntityFarm.intEntityId=VENDOR.intEntityId AND EntityFarm.intFarmFieldId=ISNULL(SC.intFarmFieldId, 0)	
 	WHERE BNKTRN.intBankAccountId = @intBankAccountId AND BNKTRN.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionId))
 END
+
