@@ -32,6 +32,7 @@ DECLARE  @dtmDateTo					AS DATETIME
 		,@endgroup					AS NVARCHAR(50)
 		,@datatype					AS NVARCHAR(50)
 		,@strCustomerName			AS NVARCHAR(MAX)
+		,@ysnEmailOnly				AS BIT
 		
 -- Create a table variable to hold the XML data. 		
 DECLARE @temp_xml_table TABLE (
@@ -176,6 +177,24 @@ ELSE
 		) EC ON C.intEntityId = EC.intEntityId
 		WHERE C.ysnActive = 1
 END
+
+SELECT @ysnEmailOnly = [from] 
+FROM @temp_xml_table
+WHERE [fieldname] = 'ysnHasEmailSetup'
+
+IF @ysnEmailOnly IS NOT NULL
+	BEGIN
+		DELETE C
+		FROM #CUSTOMERS C
+		OUTER APPLY (
+			SELECT intEmailSetupCount = COUNT(*) 
+			FROM dbo.vyuARCustomerContacts CC WITH (NOLOCK)
+			WHERE CC.intCustomerEntityId = C.intEntityCustomerId 
+				AND ISNULL(CC.strEmail, '') <> '' 
+				AND CC.strEmailDistributionOption LIKE '%Statements%'
+		) EMAILSETUP
+		WHERE CASE WHEN ISNULL(EMAILSETUP.intEmailSetupCount, 0) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END <> @ysnEmailOnly
+	END
 
 TRUNCATE TABLE tblARCustomerAgingStagingTable
 INSERT INTO tblARCustomerAgingStagingTable (
