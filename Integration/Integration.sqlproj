@@ -434,5 +434,6 @@
     <None Include="dbo\Stored Procedures\deleteSP.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateETExportTankManagementSiteView.sql" />
     <None Include="Scripts\SM\CopyCashToUndepositedFund.sql" />
+    <None Include="dbo\Stored Procedures\uspAPImportVendorTaxExemption.sql" />
   </ItemGroup>
 </Project>
