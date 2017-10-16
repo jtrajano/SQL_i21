@@ -18,10 +18,13 @@ BEGIN
 				CASE 
 					WHEN ISNULL(Charge.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(Charge.dblForexRate, 0) <> 0 THEN 
 						-- Other charge is using a foreign currency. Convert the other charge to functional currency. 
-						dbo.fnMultiply(ItemOtherCharges.dblAmount, ISNULL(Charge.dblForexRate, 0)) 
+						dbo.fnMultiply(
+							CASE WHEN ItemOtherCharges.ysnPrice = 1 THEN -ItemOtherCharges.dblAmount ELSE ItemOtherCharges.dblAmount END 
+							, ISNULL(Charge.dblForexRate, 0)
+						) 
 					ELSE 
 						-- No conversion. Other charge is already in functional currency. 
-						ItemOtherCharges.dblAmount 
+						CASE WHEN ItemOtherCharges.ysnPrice = 1 THEN -ItemOtherCharges.dblAmount ELSE ItemOtherCharges.dblAmount END 
 				END 
 			)
 	FROM	tblICInventoryReceiptItem ReceiptItems INNER JOIN tblICInventoryReceiptItemAllocatedCharge ItemOtherCharges 
