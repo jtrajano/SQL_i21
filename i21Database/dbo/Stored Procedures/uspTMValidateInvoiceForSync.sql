@@ -14,6 +14,7 @@ BEGIN
 	DECLARE @strSiteBillingBy NVARCHAR(10)
 	DECLARE @strClassFill NVARCHAR(15)
 	DECLARE @intSiteItemId INT
+	DECLARE @strItemType NVARCHAR(50)
 
 	SET @ResultLog = ''
 
@@ -22,9 +23,13 @@ BEGIN
 	FROM tblARInvoice
 	WHERE intInvoiceId = @InvoiceId 
 	
-	SELECT *
-	INTO #tmpInvoiceDetail
-	FROM tblARInvoiceDetail
+	SELECT 
+		A.*
+		,strItemType = B.strType
+	INTO #tmpInvoiceDetail 
+	FROM tblARInvoiceDetail A
+	INNER JOIN tblICItem B
+		ON A.intItemId = B.intItemId	
 	WHERE intInvoiceId = @InvoiceId
 		AND intSiteId IS NOT NULL
 	
@@ -45,6 +50,7 @@ BEGIN
 			,@intItemId = intItemId
 			,@intInvoiceDetailId = intInvoiceDetailId
 			,@intPerformerId = intPerformerId
+			,@strItemType = strItemType
 		FROM #tmpInvoiceDetail
 		
 		SELECT 
@@ -84,15 +90,21 @@ BEGIN
 		BEGIN
 			IF(@strClassFill = 'No')
 			BEGIN
-				SET @ResultLog = @ResultLog + 'Exception:The Invoice item is different than the site item.' + CHAR(10)
-				GOTO DONEVALIDATING
+				IF(@strItemType <> 'Service')
+				BEGIN
+					SET @ResultLog = @ResultLog + 'Exception:The Invoice item is different than the site item.' + CHAR(10)
+					GOTO DONEVALIDATING
+				END
 			END
 
 			IF(@strClassFill = 'Product Class')
 			BEGIN
 				IF((SELECT TOP 1 intCategoryId FROM tblICItem WHERE intItemId = @intItemId) <> (SELECT TOP 1 intCategoryId FROM tblICItem WHERE intItemId = @intSiteItemId) )
 				BEGIN
-					SET @ResultLog = @ResultLog + 'Exception:The Invoice item class is different than the site item class.' + CHAR(10)
+					IF(@strItemType <> 'Service')
+					BEGIN
+						SET @ResultLog = @ResultLog + 'Exception:The Invoice item class is different than the site item class.' + CHAR(10)
+					END
 				GOTO DONEVALIDATING
 				END
 			END
