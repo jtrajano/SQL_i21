@@ -73,7 +73,7 @@ Begin
 	From @tblInputItemCopy ti 
 	Left Join (Select pld.intItemId,SUM(pld.dblPickQuantity) AS dblQty From tblMFPickListDetail pld Where intPickListId=@intPickListId Group By pld.intItemId) t ON ti.intItemId=t.intItemId
 
-	Delete From @tblInputItem Where ISNULL(dblQty,0)=0
+	Delete From @tblInputItem Where ISNULL(dblQty,0)<=0
 End
 
 Select @intLocationId=intCompanyLocationId From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId
