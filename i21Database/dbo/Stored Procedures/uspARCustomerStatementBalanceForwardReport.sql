@@ -11,6 +11,7 @@
 	, @strAccountStatusCode		AS NVARCHAR(MAX)	= NULL
 	, @strLocationName			AS NVARCHAR(MAX)	= NULL
 	, @strCustomerName			AS NVARCHAR(MAX)	= NULL
+	, @ysnEmailOnly			    AS BIT				= NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -197,6 +198,20 @@ IF @strAccountStatusCodeLocal IS NOT NULL
 
 IF @strLocationNameLocal IS NOT NULL
 	SET @filter = CASE WHEN ISNULL(@filter, '') <> '' THEN @filter + ' AND ' ELSE @filter + '' END + 'strLocationName = ''' + @strLocationNameLocal + ''''
+
+IF @ysnEmailOnly IS NOT NULL
+	BEGIN
+		DELETE C
+		FROM #CUSTOMERS C
+		OUTER APPLY (
+			SELECT intEmailSetupCount = COUNT(*) 
+			FROM dbo.vyuARCustomerContacts CC WITH (NOLOCK)
+			WHERE CC.intCustomerEntityId = C.intEntityCustomerId 
+				AND ISNULL(CC.strEmail, '') <> '' 
+				AND CC.strEmailDistributionOption LIKE '%Statements%'
+		) EMAILSETUP
+		WHERE CASE WHEN ISNULL(EMAILSETUP.intEmailSetupCount, 0) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END <> @ysnEmailOnly
+	END
 
 TRUNCATE TABLE tblARCustomerAgingStagingTable
 INSERT INTO tblARCustomerAgingStagingTable (
