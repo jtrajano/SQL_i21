@@ -95,7 +95,7 @@ BEGIN
 				   ,[dtmBeginDate]
 				   ,[dtmEndDate]
 				   --,[intCustomerLocationId]
-				   ,[strInvoiceType]
+				   --,[strInvoiceType]
 				   ,[intCategoryId]
 				   ,[intConcurrencyId])
 
@@ -116,7 +116,7 @@ BEGIN
 			  ,(CASE WHEN ISDATE(SP.spprc_begin_rev_dt) = 1 THEN CONVERT(DATE,CAST(SP.spprc_begin_rev_dt AS CHAR(12)), 112) ELSE ' ' END)
 			  ,(CASE WHEN ISDATE(SP.spprc_end_rev_dt) = 1 THEN CONVERT(DATE,CAST(SP.spprc_end_rev_dt AS CHAR(12)), 112) ELSE ' ' END)
 			  --,CLOC.intEntityLocationId
-			  ,'Standard' 
+			  --,'Standard' 
 			  ,(CASE WHEN SP.spprc_class > ' ' THEN 
 							(SELECT CAT.intCategoryId FROM tblICCategory CAT
 							 WHERE CAT.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = SP.spprc_class COLLATE SQL_Latin1_General_CP1_CS_AS)
@@ -154,7 +154,7 @@ BEGIN
 				   ,[intEntityLocationId]
 				   ,[intRackLocationId]
 				   --,[intCustomerLocationId]
-				   ,[strInvoiceType]
+				   --,[strInvoiceType]
 				   ,[intCategoryId]
 				   ,[intConcurrencyId])
 		SELECT CUS.intEntityId
@@ -208,7 +208,7 @@ BEGIN
 					 ELSE NULL 
 				END)
 			  --,CLOC.intEntityLocationId
-			  ,'Standard' 
+			  --,'Standard' 
 			  ,(CASE WHEN PDV.ptpdv_class > ' ' THEN 
 							(SELECT CAT.intCategoryId FROM tblICCategory CAT
 							 WHERE CAT.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_class COLLATE SQL_Latin1_General_CP1_CS_AS)
