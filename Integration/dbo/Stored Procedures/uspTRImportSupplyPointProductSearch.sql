@@ -41,7 +41,7 @@ BEGIN
 	 FROM ssvndmst  
 	 INNER JOIN tblEMEntity ENT ON ENT.strEntityNo COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
 	 INNER JOIN tblEMEntityType ETYP ON ETYP.intEntityId = ENT.intEntityId
-	 INNER JOIN tblAPVendor APVND ON APVND.intEntityVendorId = ENT.intEntityId
+	 INNER JOIN tblAPVendor APVND ON APVND.intEntityId = ENT.intEntityId
 	 WHERE APVND.ysnTransportTerminal = 1 AND ETYP.strType = 'Vendor'	 
 		
 	IF(@Checking = 0)
