@@ -56,6 +56,12 @@ SELECT
 	,strCustomerReferences			= dbo.fnARGetCustomerReferencesFromInvoice(I.intInvoiceId)
 	,ysnHasEmailSetup				= CASE WHEN EMAILSETUP.intEmailSetupCount > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END	
 	,strCurrencyDescription			= CUR.strDescription
+	,dblWithholdingTax				= CASE WHEN (I.strTransactionType  IN ('Invoice','Debit Memo', 'Cash'))
+								      THEN
+								      CASE WHEN ysnPaid = 1 THEN dblPayment - (dblPayment - (dblPayment * (dblWithholdPercent / 100))) ELSE dblAmountDue - (dblAmountDue - (dblAmountDue * (dblWithholdPercent / 100))) END
+								      ELSE
+								      CASE WHEN ysnPaid = 1 THEN (dblPayment - (dblPayment - (dblPayment * (dblWithholdPercent / 100)))) * -1 ELSE (dblAmountDue - (dblAmountDue - (dblAmountDue * (dblWithholdPercent / 100)))) * -1 END
+								      END
 	,ysnMailSent					= CASE WHEN (SELECT COUNT(1) FROM tblSMTransaction trans INNER JOIN tblSMActivity tsa on tsa.intTransactionId = trans.intTransactionId WHERE trans.intRecordId = intInvoiceId AND tsa.strType = 'Email' AND tsa.strStatus = 'Sent') > 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT)  END 
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (
