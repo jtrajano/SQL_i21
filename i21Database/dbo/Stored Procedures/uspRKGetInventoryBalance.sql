@@ -20,7 +20,6 @@ dblCountQty NUMERIC(24,10),
 tranInvoiceNumber  nvarchar(50),
 dblInvoiceQty  NUMERIC(24,10)
 )
-
 --Previous value start 
 INSERT INTO @tblResultInventory (BalanceForward)
 SELECT  sum(dblQty*dblUOMQty) BalanceForward
@@ -69,7 +68,7 @@ JOIN tblICItem i on i.intItemId=it.intItemId and it.ysnIsUnposted=0 and it.intTr
 JOIN tblICItemLocation il on it.intItemLocationId=il.intItemLocationId and isnull(il.strDescription,'') <> 'In-Transit' 
 WHERE intCommodityId=@intCommodityId AND convert(datetime,CONVERT(VARCHAR(10),dtmDate,110),110)  
 	BETWEEN convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110)  and convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110) 
-and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end 
+and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and strTransactionId not like'%IS%'
 
 union
 SELECT dtmDate,'' tranShipmentNumber,0.0 tranShipQty,strReceiptNumber tranReceiptNumber,dblInQty tranRecQty,''  tranAdjNumber,
@@ -119,4 +118,3 @@ and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItem
 SELECT *
  FROM(SELECT dtmDate,sum(tranShipQty) tranShipQty,sum(tranRecQty) tranRecQty,sum(dblAdjustmentQty) dblAdjustmentQty,sum(dblCountQty) dblCountQty,sum(dblInvoiceQty) dblInvoiceQty,sum(BalanceForward) BalanceForward
 FROM @tblResultInventory T1 group by dtmDate)t
-

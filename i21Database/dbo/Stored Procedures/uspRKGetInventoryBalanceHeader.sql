@@ -114,7 +114,7 @@ SELECT CONVERT(INT,ROW_NUMBER() OVER (ORDER BY dtmDate)) intRowNum,* into #final
 SELECT DISTINCT dtmDate,[Receive In] as [dblReceiveIn],isnull([Ship Out],0) + isnull(dblInvoiceQty,0) as [dblShipOut],Adjustments as dblAdjustments,dblCount,dblInvoiceQty,isnull([InventoryBalance],0) as [dblInventoryBalance],
 [Unpaid In] as dblUnpaidIn,[Unpaid Out] dblUnpaidOut,[Balance] dblBalance,    
           ISNULL([InventoryBalance],0) - isnull( [Balance] ,0) [dblPaidBalance], 
-          ISNULL([Balance],0) + (isnull([InventoryBalance],0) - isnull( [Balance] ,0)) [dblTotalCompanyOwned],
+          isnull([Balance],0)  [dblTotalCompanyOwned],--------
            isnull(isnull([Unpaid In],0)-isnull([Unpaid Out],0),0) dblUnpaidBalance
 FROM (
 SELECT dtmDate ,[Receive In],[Ship Out],[Adjustments],dblCount,dblInvoiceQty,BalanceForward, InventoryBalanceCarryForward,
@@ -132,8 +132,18 @@ FROM @tblConsolidatedResult T1
 FULL JOIN @tblDateList list on T1.dtmDate=list.DateData
   )t )t1)t2 order by dtmDate
 
-
-  SELECT intRowNum,list.dtmDate,dblReceiveIn,dblShipOut,dblAdjustments,dblCount,dblInvoiceQty,dblInventoryBalance,  
+  SELECT intRowNum,dtmDate,dblReceiveIn,dblShipOut,dblAdjustments,dblCount,dblInvoiceQty,dblInventoryBalance,
+strDistributionA,[dblAIn],[dblAOut], [dblANet],strDistributionB,[dblBIn],[dblBOut], [dblBNet],strDistributionC,[dblCIn],[dblCOut], [dblCNet],
+strDistributionD,[dblDIn],[dblDOut], [dblDNet],strDistributionE,[dblEIn],[dblEOut], [dblENet],strDistributionF,[dblFIn],[dblFOut], [dblFNet],
+strDistributionG,[dblGIn],[dblGOut], [dblGNet],strDistributionH,[dblHIn],[dblHOut], [dblHNet],strDistributionI,[dblIIn],[dblIOut], [dblINet],
+strDistributionJ,[dblJIn],[dblJOut], [dblJNet]
+,dblUnpaidIn,dblUnpaidOut,dblBalance,isnull(dblPaidBalance,0)-(isnull(dblANet,0)+isnull(dblBNet,0)+isnull(dblCNet,0)+isnull(dblDNet,0)+isnull(dblENet,0)+isnull(dblFNet,0)+
+isnull(dblGNet,0)+isnull(dblHNet,0)+isnull(dblINet,0)+isnull(dblJNet,0)) dblPaidBalance,
+isnull(dblPaidBalance,0)-(isnull(dblANet,0)+isnull(dblBNet,0)+isnull(dblCNet,0)+isnull(dblDNet,0)+isnull(dblENet,0)+isnull(dblFNet,0)+
+isnull(dblGNet,0)+isnull(dblHNet,0)+isnull(dblINet,0)+isnull(dblJNet,0)) + dblTotalCompanyOwned dblTotalCompanyOwned 
+,dblUnpaidBalance from
+  (
+  SELECT intRowNum,list.dtmDate dtmDate,dblReceiveIn,abs(dblShipOut) dblShipOut,dblAdjustments,dblCount,dblInvoiceQty,dblInventoryBalance,  
     (CASE WHEN strDistributionA is null then (SELECT DISTINCT TOP 1 strDistributionA FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionA,'') <>'') else strDistributionA end) strDistributionA, 	
 	[dblAIn],[dblAOut],(SELECT SUM(dblANet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblANet],
 	(CASE WHEN strDistributionB is null then (SELECT DISTINCT TOP 1 strDistributionB FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionB,'') <>'') else strDistributionB end) strDistributionB,
@@ -156,4 +166,4 @@ FULL JOIN @tblDateList list on T1.dtmDate=list.DateData
 	[dblJIn],[dblJOut],(SELECT SUM(dblJNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblJNet]
    ,dblUnpaidIn,dblUnpaidOut,dblBalance,dblPaidBalance,dblTotalCompanyOwned,dblUnpaidBalance
   FROM #final list
-  FULL JOIN tblRKDailyPositionForCustomer t ON ISNULL(t.dtmDate,'1900-01-01')=isnull(list.dtmDate,'1900-01-01') order by list.dtmDate
+  FULL JOIN tblRKDailyPositionForCustomer t ON ISNULL(t.dtmDate,'1900-01-01')=isnull(list.dtmDate,'1900-01-01'))t order by dtmDate
