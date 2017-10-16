@@ -18,6 +18,8 @@ FROM (
 		,intInventoryReceiptItemId = ISNULL(BillDtl.intInventoryReceiptItemId, 0)
 		,intInventoryReceiptChargeId = ISNULL(BillDtl.intInventoryReceiptChargeId, 0)
 		,intContractDetailId = ISNULL(BillDtl.intContractDetailId, 0)
+		,dblTax = BillDtl.dblTax
+		,dblNetTotal = BillDtl.dblTotal+ BillDtl.dblTax
 	FROM tblAPBillDetail BillDtl
 	JOIN tblAPBill Bill ON BillDtl.intBillId = Bill.intBillId
 	JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId
@@ -109,6 +111,8 @@ FROM (
 		,0
 		,0
 		,0
+		,0
+		,0
 	FROM tblARInvoiceDetail InvDtl
 	JOIN tblARInvoice Inv ON InvDtl.intInvoiceId = Inv.intInvoiceId
 	JOIN tblICInventoryShipmentCharge INVSHIPCHR ON InvDtl.intInventoryShipmentChargeId = INVSHIPCHR.intInventoryShipmentChargeId
@@ -133,6 +137,8 @@ FROM (
 		,intInventoryReceiptItemId = 0 
 		,intInventoryReceiptChargeId = 0 
 		,intContractDetailId = ISNULL(BillDtl.intContractDetailId, 0)
+		,dblTax = BillDtl.dblTax
+		,dblNetTotal = BillDtl.dblTotal+ BillDtl.dblTax
 	FROM tblAPBillDetail BillDtl
 	JOIN tblAPBill Bill ON BillDtl.intBillId = Bill.intBillId
 	JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId AND Item.strType = 'Other Charge'
@@ -161,3 +167,5 @@ GROUP BY strId
 	,intInventoryReceiptItemId
 	,intInventoryReceiptChargeId
 	,intContractDetailId
+	,dblTax
+	,dblNetTotal
