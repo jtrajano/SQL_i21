@@ -20,13 +20,16 @@
 	[strInvoiceType]    NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
 	[intCategoryId]		INT				NULL,
 	[intCurrencyId] INT NULL,
+    [intProgramId] INT NULL,
+    [strProgramType] NVARCHAR(100) NULL,
     [intConcurrencyId]  INT             NOT NULL,
     CONSTRAINT [PK_tblARCustomerSpecialPrice] PRIMARY KEY CLUSTERED ([intSpecialPriceId] ASC),
 	CONSTRAINT [FK_tblARCustomerSpecialPrice_tblEMEntityLocation] FOREIGN KEY ([intEntityLocationId]) REFERENCES [tblEMEntityLocation]([intEntityLocationId]),
 	CONSTRAINT [FK_tblARCustomerSpecialPrice_tblEMEntityLocation_Rack] FOREIGN KEY ([intRackLocationId]) REFERENCES [tblEMEntityLocation]([intEntityLocationId]),
 	CONSTRAINT [FK_tblARCustomerSpecialPrice_tblEMEntityLocation_Customer] FOREIGN KEY ([intCustomerLocationId]) REFERENCES [tblEMEntityLocation]([intEntityLocationId]),	
 	CONSTRAINT [FK_tblARCustomerSpecialPrice_tblARCustomer] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]) ON DELETE CASCADE,
-	CONSTRAINT [FK_tblARCustomerSpecialPrice_tblSMCurrency_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID])
+	CONSTRAINT [FK_tblARCustomerSpecialPrice_tblSMCurrency_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
+    CONSTRAINT [FK_tblARCustomerSpecialPrice_tblVRProgram] FOREIGN KEY ([intProgramId]) REFERENCES [dbo].[tblVRProgram] ([intProgramId]) ON DELETE CASCADE,
 );
 
 
