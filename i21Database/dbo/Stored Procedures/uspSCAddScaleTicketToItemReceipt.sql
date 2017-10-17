@@ -18,34 +18,36 @@ DECLARE @dblTicketFreightRate AS DECIMAL (9, 5)
 DECLARE @dblTicketGross AS DECIMAL (38, 20)
 DECLARE @dblTicketTare AS DECIMAL (38, 20)
 DECLARE @intScaleStationId AS INT
---DECLARE @intFreightItemId AS INT
-DECLARE @intFreightVendorId AS INT
-DECLARE @ysnDeductFreightFarmer AS BIT
-		,@ysnDeductFeesCusVen AS BIT;
-DECLARE @strTicketNumber AS NVARCHAR(40)
-DECLARE @dblTicketFees AS DECIMAL(7, 2)
-DECLARE @checkContract AS INT
-DECLARE @intContractDetailId AS INT,
-		@intLoadContractId AS INT,
-		@intLoadId AS INT,
-		@intLoadCostId AS INT,
-		@intHaulerId AS INT,
-		@ysnAccrue AS BIT,
-		@ysnPrice AS BIT,
-		@batchId AS NVARCHAR(40),
-		@ticketBatchId AS NVARCHAR(40),
-		@splitDistribution AS NVARCHAR(40),
-		@ticketStatus AS NVARCHAR(10);
+		,@intFreightVendorId AS INT
+		,@intItemId AS INT
+		,@intLotType AS INT
+		,@ysnDeductFreightFarmer AS BIT
+		,@ysnDeductFeesCusVen AS BIT
+		,@strTicketNumber AS NVARCHAR(40)
+		,@dblTicketFees AS DECIMAL(7, 2)
+		,@checkContract AS INT
+		,@intContractDetailId AS INT
+		,@intLoadContractId AS INT
+		,@intLoadId AS INT
+		,@intLoadCostId AS INT
+		,@intHaulerId AS INT
+		,@ysnAccrue AS BIT
+		,@ysnPrice AS BIT
+		,@batchId AS NVARCHAR(40)
+		,@ticketBatchId AS NVARCHAR(40)
+		,@splitDistribution AS NVARCHAR(40)
+		,@ticketStatus AS NVARCHAR(10);
 		
 BEGIN 
 	SELECT @intTicketItemUOMId = UM.intItemUOMId, @intLoadId = SC.intLoadId
 	, @intContractDetailId = SC.intContractId, @splitDistribution = SC.strDistributionOption
-	, @ticketStatus = SC.strTicketStatus
+	, @intItemId = SC.intItemId , @ticketStatus = SC.strTicketStatus
 	FROM	dbo.tblICItemUOM UM	JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
 	WHERE	UM.ysnStockUnit = 1 AND SC.intTicketId = @intTicketId
 END
 
 DECLARE @ReceiptStagingTable AS ReceiptStagingTable,
+		@ReceiptItemLotStagingTable AS ReceiptItemLotStagingTable,
 		@OtherCharges AS ReceiptOtherChargesTableType, 
         @total as int,
 		@intSurchargeItemId as int,
@@ -152,7 +154,7 @@ SELECT
 										ELSE LI.dblCost
 									END
 		,dblExchangeRate			= 1 -- Need to check this
-		,intLotId					= NULL --No LOTS from scale
+		,intLotId					= SC.intLotId
 		,intSubLocationId			= SC.intSubLocationId
 		,intStorageLocationId		= SC.intStorageLocationId
 		,ysnIsStorage				= CASE 
@@ -1042,10 +1044,70 @@ SELECT @total = COUNT(*) FROM @ReceiptStagingTable;
 IF (@total = 0)
 	RETURN;
 
+SELECT @intLotType = dbo.fnGetItemLotType(@intItemId)
+IF @intLotType != 0
+BEGIN 
+	INSERT INTO @ReceiptItemLotStagingTable(
+		[strReceiptType]
+		,[intItemId]
+		,[intLotId]
+		,[strLotNumber]
+		,[intLocationId]
+		,[intShipFromId]
+		,[intShipViaId]	
+		,[intSubLocationId]
+		,[intStorageLocationId] 
+		,[intCurrencyId]
+		,[intItemUnitMeasureId]
+		,[dblQuantity]
+		,[dblGrossWeight]
+		,[dblTareWeight]
+		,[dblCost]
+		,[intEntityVendorId]
+		,[dtmManufacturedDate]
+		,[strBillOfLadding]
+		,[intSourceType]
+	)
+	SELECT 
+		[strReceiptType]		= RE.strReceiptType
+		,[intItemId]			= RE.intItemId
+		,[intLotId]				= RE.intLotId
+		,[strLotNumber]			= SC.strLotNumber
+		,[intLocationId]		= RE.intLocationId
+		,[intShipFromId]		= RE.intShipFromId
+		,[intShipViaId]			= RE.intShipViaId
+		,[intSubLocationId]		= RE.intSubLocationId
+		,[intStorageLocationId] = RE.intStorageLocationId
+		,[intCurrencyId]		= RE.intCurrencyId
+		,[intItemUnitMeasureId] = CASE
+									WHEN IC.ysnLotWeightsRequired = 1 THEN SC.intItemUOMIdFrom
+									ELSE RE.intItemUOMId
+								END
+		,[dblQuantity]			= RE.dblQty
+		,[dblGrossWeight]		= CASE
+									WHEN IC.ysnLotWeightsRequired = 1 THEN SC.dblGrossWeight
+									ELSE NULL
+								END
+		,[dblTareWeight]		= CASE
+									WHEN IC.ysnLotWeightsRequired = 1 THEN SC.dblTareWeight
+									ELSE NULL
+								END
+		,[dblCost]				= RE.dblCost
+		,[intEntityVendorId]	= RE.intEntityVendorId
+		,[dtmManufacturedDate]	= RE.dtmDate
+		,[strBillOfLadding]		= ''
+		,[intSourceType]		= RE.intSourceType
+		FROM @ReceiptStagingTable RE 
+		INNER JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
+		INNER JOIN tblSCScaleSetup SCS ON SCS.intScaleSetupId = SC.intScaleSetupId
+		INNER JOIN tblICItem IC ON IC.intItemId = RE.intItemId
+END
+
 EXEC dbo.uspICAddItemReceipt 
 		@ReceiptStagingTable
 		,@OtherCharges
-		,@intUserId;
+		,@intUserId
+		,@ReceiptItemLotStagingTable;
 
 -- Update the Inventory Receipt Key to the Transaction Table
 UPDATE	SC
@@ -1076,43 +1138,6 @@ BEGIN
 	WHERE SH.[strType] = 'From Scale' AND IR.intInventoryReceiptId=@InventoryReceiptId 
 	AND ISNULL(SH.intInventoryReceiptId,0) = 0
 
-	--DECLARE @intInventoryReceiptItemId	INT = NULL,
-	--		@dblQty						NUMERIC(18,6) = 0
-
-	--SELECT	@intInventoryReceiptItemId = MIN(intInventoryReceiptItemId) 
-	--FROM	tblICInventoryReceiptItem
-	--WHERE	intInventoryReceiptId = @InventoryReceiptId
-
-	--WHILE ISNULL(@intInventoryReceiptItemId,0) > 0
-	--BEGIN
-	--	SELECT	@dblQty						=	dblOpenReceive,
-	--			@intContractDetailId		=	intLineNo
-	--	FROM	tblICInventoryReceiptItem 
-	--	WHERE	intInventoryReceiptItemId	=	 @intInventoryReceiptItemId
-
-	--	IF @intContractDetailId > 0
-	--	BEGIN
-	--		EXEC uspCTUpdateScheduleQuantityUsingUOM @intContractDetailId, @dblQty, @intUserId, @intInventoryReceiptItemId, 'Scale', @intTicketItemUOMId
-	--	END
-
-	--	SELECT	@intInventoryReceiptItemId = MIN(intInventoryReceiptItemId) 
-	--	FROM	tblICInventoryReceiptItem
-	--	WHERE	intInventoryReceiptId = @InventoryReceiptId	AND
-	--			intInventoryReceiptItemId > @intInventoryReceiptItemId
-	--END
-
-	-- Post the Inventory Receipt that was created
-	--SELECT	@strTransactionId = strReceiptNumber 
-	--FROM	tblICInventoryReceipt 
-	--WHERE	intInventoryReceiptId = @ReceiptId
-
-	--SELECT	TOP 1 @intEntityId = [intEntityUserSecurityId] 
-	--FROM	dbo.tblSMUserSecurity 
-	--WHERE	[intEntityUserSecurityId] = @intEntityId
-	--BEGIN
-	--EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intEntityId;			
-	--END
-		
 	DELETE	FROM #tmpAddItemReceiptResult 
 	WHERE	intInventoryReceiptId = @ReceiptId
 END
@@ -1170,95 +1195,3 @@ BEGIN
 	ON ISH.intSourceId = SD.intTicketId AND SD.strSourceType = 'Scale' AND
 	SD.intTicketFileId = @intTicketId WHERE	ISH.intSourceId = @intTicketId AND ISH.intInventoryReceiptId = @InventoryReceiptId
 END
-
-DECLARE @intLoopReceiptItemId INT;
-DECLARE @LotType_Manual AS INT = 1
-		,@LotType_Serial AS INT = 2
-DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
-FOR
-SELECT  IRI.intInventoryReceiptItemId
-FROM tblICInventoryReceiptItem IRI WHERE 
-IRI.intInventoryReceiptId = @InventoryReceiptId AND dbo.fnGetItemLotType(IRI.intItemId) <> 0;
-
-OPEN intListCursor;
-
--- Initial fetch attempt
-FETCH NEXT FROM intListCursor INTO @intLoopReceiptItemId;
-
-WHILE @@FETCH_STATUS = 0
-BEGIN
-   -- Here we do some kind of action that requires us to 
-   -- process the table variable row-by-row. This example simply
-   -- uses a PRINT statement as that action (not a very good
-   -- example).
-   IF	ISNULL(@intLoopReceiptItemId,0) != 0
-   BEGIN
-   INSERT INTO [dbo].[tblICInventoryReceiptItemLot]
-           ([intInventoryReceiptItemId]
-           ,[intLotId]
-           ,[strLotNumber]
-           ,[strLotAlias]
-           ,[intSubLocationId]
-           ,[intStorageLocationId]
-           ,[intItemUnitMeasureId]
-           ,[dblQuantity]
-           ,[dblGrossWeight]
-           ,[dblTareWeight]
-           ,[dblCost]
-           ,[intUnitPallet]
-           ,[dblStatedGrossPerUnit]
-           ,[dblStatedTarePerUnit]
-           ,[strContainerNo]
-           ,[intEntityVendorId]
-           ,[strGarden]
-           ,[strMarkings]
-           ,[intOriginId]
-           ,[intSeasonCropYear]
-           ,[strVendorLotId]
-           ,[dtmManufacturedDate]
-           ,[strRemarks]
-           ,[strCondition]
-           ,[dtmCertified]
-           ,[dtmExpiryDate]
-           ,[intSort]
-           ,[intConcurrencyId])
-     SELECT
-            [intInventoryReceiptItemId] = @intLoopReceiptItemId
-           ,[intLotId] = NULL
-           ,[strLotNumber]  = @strTicketNumber 
-           ,[strLotAlias] = RCT.intSourceId 
-           ,[intSubLocationId] = RCT.intSubLocationId
-           ,[intStorageLocationId] = RCT.intStorageLocationId
-           ,[intItemUnitMeasureId] = RCT.intUnitMeasureId
-           ,[dblQuantity] = RCT.dblReceived
-           ,[dblGrossWeight] = RCT.dblGross
-           ,[dblTareWeight] = RCT.dblGross - RCT.dblNet
-           ,[dblCost] = RCT.dblUnitCost
-           ,[intUnitPallet] = NULL
-           ,[dblStatedGrossPerUnit] = NULL
-           ,[dblStatedTarePerUnit] = NULL
-           ,[strContainerNo] = NULL
-           ,[intEntityVendorId] = NULL
-           ,[strGarden] = NULL
-           ,[strMarkings] = NULL 
-           ,[intOriginId] = NULL
-           ,[intSeasonCropYear] = NULL
-           ,[strVendorLotId] = NULL
-           ,[dtmManufacturedDate] = NULL
-           ,[strRemarks] = NULL
-           ,[strCondition] = NULL
-           ,[dtmCertified] = NULL
-           ,[dtmExpiryDate] = DATEADD(YEAR, 2, ICIR.dtmReceiptDate)
-           ,[intSort] = NULL
-           ,[intConcurrencyId] = 1
-		   FROM	dbo.tblICInventoryReceiptItem RCT
-				INNER JOIN dbo.tblICInventoryReceipt ICIR ON RCT.intInventoryReceiptId = ICIR.intInventoryReceiptId
-		   WHERE RCT.intInventoryReceiptItemId = @intLoopReceiptItemId
-   END
-
-   -- Attempt to fetch next row from cursor
-   FETCH NEXT FROM intListCursor INTO @intLoopReceiptItemId;
-END;
-
-CLOSE intListCursor;
-DEALLOCATE intListCursor;

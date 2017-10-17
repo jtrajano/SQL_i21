@@ -130,7 +130,9 @@
 	,SCListTicket.strTicketType
 	,SCT.ysnDeliverySheetPost
 	,(SELECT SCMatch.strTicketNumber FROM tblSCTicket SCMatch WHERE SCMatch.intMatchTicketId = SCT.intMatchTicketId) AS strMatchTicketNumber
-    
+    ,SCT.intLotId
+    ,SCT.strLotNumber
+
 	,SMC.strLocationName AS strProcessingLocationName
 	,SMC.strDiscountScheduleType AS strDefaultLocationSchedule
 	,SMCSubLocation.strSubLocationName
