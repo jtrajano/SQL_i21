@@ -380,7 +380,7 @@ BEGIN
 
 			--IMPORT LOCALE TAX DETAILS 			
 
-			WHILE @cnt < 13
+			WHILE @cnt < 7
 					BEGIN
 					   SET @SQLCMD = ' INSERT INTO [dbo].[tblARInvoiceDetail]
 					   ([intInvoiceId]
