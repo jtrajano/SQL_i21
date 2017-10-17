@@ -1,19 +1,14 @@
 ﻿CREATE VIEW [dbo].[vyuGLTrialBalance_RE]
 AS
-WITH REAccount as(
-	select top 1 intRetainAccount intAccountId 
-	from tblGLFiscalYear order by dtmDateFrom desc
-),
-DETAIL as (
+WITH DETAIL as (
 
-	SELECT RE.intAccountId,
+	SELECT F.intRetainAccount intAccountId,
 		F.intFiscalYearId, 
 		P.intGLFiscalYearPeriodId,
 		P.dtmEndDate PeriodEnd, 
 		P.dtmStartDate PeriodStart, 
 		F.dtmDateFrom FiscalStart
 	FROM 
-		REAccount RE,
 		tblGLFiscalYear F JOIN
 		tblGLFiscalYearPeriod P on F.intFiscalYearId = P.intFiscalYearId
 )
