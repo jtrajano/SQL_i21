@@ -28,6 +28,14 @@ Ext.define('Inventory.view.InventoryCountDetailsViewModel', {
         selectedLot: null
     },
     formulas: {
+        isCountByGroup: function(get) {
+            var count = get('inventoryCount');
+            return count && count.get('strCountBy') === 'Pack';
+        },
+        isCountByGroupOrNotLotted: function(get) {
+            var count = get('inventoryCount');
+            return count && (count.get('strCountBy') === 'Pack' || !count.get('ysnCountByLots'));
+        },
         lotAliasReadOnly: function(get) {
             return get('current.intLotId');
         },
@@ -39,6 +47,11 @@ Ext.define('Inventory.view.InventoryCountDetailsViewModel', {
         },
         disableGrossUOM: function(get) {
             return get('current.ysnLotWeightsRequired') === false && get('current.strLotTracking') !== 'No';
+        },
+        hidePalletFields: function(get) {
+            var count = get('inventoryCount');
+            var hidden = count && (count.get('strCountBy') === 'Pack' || !count.get('ysnCountByLots'));
+            return hidden || (!get('isLotted') || (get('isLotted') && !get('inventoryCount.ysnCountByPallets')));            
         },
         setWeightUOMFieldLabel: function(get) {
             var win = this.getView();
@@ -72,17 +85,6 @@ Ext.define('Inventory.view.InventoryCountDetailsViewModel', {
         },
         itemUOMs: {
             type: "icbuffereditemunitmeasure"
-        }
-    },
-
-    formulas: {
-        isCountByGroup: function(get) {
-            var count = get('inventoryCount');
-            return count && count.get('strCountBy') === 'Pack';
-        },
-        isCountByGroupOrNotLotted: function(get) {
-            var count = get('inventoryCount');
-            return count && (count.get('strCountBy') === 'Pack' || !count.get('ysnCountByLots'));
         }
     }
 });

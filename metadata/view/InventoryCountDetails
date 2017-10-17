@@ -247,12 +247,14 @@
                                             "userConfig": {
                                                 "fieldLabel": "Count Line #",
                                                 "itemId": "txtCountLineNo",
-                                                "readOnly": true
+                                                "readOnly": true,
+                                                "tabIndex": -1
                                             },
                                             "configAlternates": {
                                                 "fieldLabel": "string",
                                                 "itemId": "string",
-                                                "readOnly": "boolean"
+                                                "readOnly": "boolean",
+                                                "tabIndex": "number"
                                             },
                                             "name": "MyTextField5",
                                             "designerId": "6de6f6c6-6bff-4048-9763-0b56009e128e"
@@ -344,6 +346,7 @@
                                                 "itemId": "cboItem",
                                                 "modelValidation": true,
                                                 "reference": "cboItem",
+                                                "tabIndex": 0,
                                                 "valueField": "strItemNo"
                                             },
                                             "configAlternates": {
@@ -354,7 +357,8 @@
                                                 "itemId": "string",
                                                 "reference": "string",
                                                 "valueField": "datafield",
-                                                "modelValidation": "boolean"
+                                                "modelValidation": "boolean",
+                                                "tabIndex": "number"
                                             },
                                             "name": "MyComboBox3",
                                             "designerId": "a8c9fda6-4bf7-44b7-ab0a-23cad6b50198",
@@ -426,12 +430,14 @@
                                             "userConfig": {
                                                 "fieldLabel": "Description",
                                                 "itemId": "txtDescription",
-                                                "readOnly": true
+                                                "readOnly": true,
+                                                "tabIndex": -1
                                             },
                                             "configAlternates": {
                                                 "fieldLabel": "string",
                                                 "itemId": "string",
-                                                "readOnly": "boolean"
+                                                "readOnly": "boolean",
+                                                "tabIndex": "number"
                                             },
                                             "name": "MyTextField",
                                             "designerId": "5133b47b-c0ca-4e1f-9536-de643724737e"
@@ -446,12 +452,14 @@
                                             "userConfig": {
                                                 "fieldLabel": "Category",
                                                 "itemId": "txtCategory",
-                                                "readOnly": true
+                                                "readOnly": true,
+                                                "tabIndex": -1
                                             },
                                             "configAlternates": {
                                                 "fieldLabel": "string",
                                                 "itemId": "string",
-                                                "readOnly": "boolean"
+                                                "readOnly": "boolean",
+                                                "tabIndex": "number"
                                             },
                                             "name": "MyTextField1",
                                             "designerId": "f7705343-2b4e-4edf-a6eb-a02bc2d85de0"
@@ -786,12 +794,14 @@
                                             "userConfig": {
                                                 "fieldLabel": "UOM",
                                                 "itemId": "txtStockUOM",
-                                                "readOnly": true
+                                                "readOnly": true,
+                                                "tabIndex": -1
                                             },
                                             "configAlternates": {
                                                 "fieldLabel": "string",
                                                 "itemId": "string",
-                                                "readOnly": "boolean"
+                                                "readOnly": "boolean",
+                                                "tabIndex": "number"
                                             },
                                             "name": "MyTextField14",
                                             "designerId": "48967425-3044-407a-80d5-e50075980fbd"
@@ -806,12 +816,14 @@
                                             "userConfig": {
                                                 "fieldLabel": "On Hand",
                                                 "itemId": "txtSystemCount",
-                                                "readOnly": true
+                                                "readOnly": true,
+                                                "tabIndex": -1
                                             },
                                             "configAlternates": {
                                                 "fieldLabel": "string",
                                                 "itemId": "string",
-                                                "readOnly": "boolean"
+                                                "readOnly": "boolean",
+                                                "tabIndex": "number"
                                             },
                                             "name": "MyNumberField7",
                                             "designerId": "4b8a9f1f-fdd6-43e3-bf4e-c3421f175f6b"
@@ -826,12 +838,14 @@
                                             "userConfig": {
                                                 "fieldLabel": "Last Cost",
                                                 "itemId": "txtCost",
-                                                "readOnly": true
+                                                "readOnly": true,
+                                                "tabIndex": -1
                                             },
                                             "configAlternates": {
                                                 "fieldLabel": "string",
                                                 "itemId": "string",
-                                                "readOnly": "boolean"
+                                                "readOnly": "boolean",
+                                                "tabIndex": "number"
                                             },
                                             "name": "MyNumberField6",
                                             "designerId": "19f5b9e8-43c2-49ba-acfa-b98369a7ade7"
@@ -1114,12 +1128,14 @@
                                             "userConfig": {
                                                 "fieldLabel": "Physical Count in Stock Unit",
                                                 "itemId": "txtPhysicalCountInStockUnit",
-                                                "readOnly": true
+                                                "readOnly": true,
+                                                "tabIndex": -1
                                             },
                                             "configAlternates": {
                                                 "fieldLabel": "string",
                                                 "itemId": "string",
-                                                "readOnly": "boolean"
+                                                "readOnly": "boolean",
+                                                "tabIndex": "number"
                                             },
                                             "name": "MyNumberField4",
                                             "designerId": "5d635b80-78fe-4dac-8749-6bbaf0d4c0ec"
@@ -1134,12 +1150,14 @@
                                             "userConfig": {
                                                 "fieldLabel": "Variance",
                                                 "itemId": "txtVariance",
-                                                "readOnly": true
+                                                "readOnly": true,
+                                                "tabIndex": -1
                                             },
                                             "configAlternates": {
                                                 "fieldLabel": "string",
                                                 "itemId": "string",
-                                                "readOnly": "boolean"
+                                                "readOnly": "boolean",
+                                                "tabIndex": "number"
                                             },
                                             "name": "MyNumberField5",
                                             "designerId": "e2c69390-026b-404e-86bc-6d9a3a5f2c1f"

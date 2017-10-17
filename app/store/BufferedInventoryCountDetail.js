@@ -28,6 +28,7 @@ Ext.define('Inventory.store.BufferedInventoryCountDetail', {
             update: './inventory/api/inventorycountdetail/updatedetail',
             destroy: './inventory/api/inventorycountdetail/deletedetail',
         },
+        writer: { writeAllFields: true },
         reader: {
             type: 'json',
             rootProperty: 'data',

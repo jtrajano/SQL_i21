@@ -383,14 +383,14 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 },
                 colNoPallets: {
                     dataIndex: 'dblPallets',
-                    hidden: '{isCountByGroupOrNotLotted}',
+                    hidden: '{hidePalletFields}',
                     editor: {
                         readOnly: '{disableCountGridFields}',
                     }
                 },
                 colQtyPerPallet: {
                     dataIndex: 'dblQtyPerPallet',
-                    hidden: '{isCountByGroupOrNotLotted}',
+                    hidden: '{hidePalletFields}',
                     editor: {
                         readOnly: '{disableCountGridFields}',
                     }

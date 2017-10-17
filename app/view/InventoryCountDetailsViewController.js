@@ -24,11 +24,11 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
             txtStockUOM: '{current.strStockUOM}',
             txtNoOfPallets: {
                 value: '{current.dblPallets}',
-                hidden: '{isCountByGroupOrNotLotted}'
+                hidden: '{hidePalletFields}'
             },
             txtQtyPerPallet: {
                 value: '{current.dblQtyPerPallet}',
-                hidden: '{isCountByGroupOrNotLotted}'
+                hidden: '{hidePalletFields}'
             },
             cboCountGroup: {
                 store: '{countGroup}',
@@ -171,7 +171,6 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
                 value: '{current.strWeightUOM}',
                 hidden: '{isCountByGroupOrNotLotted}',
                 fieldLabel: '{setWeightUOMFieldLabel}',
-                readOnly: '{disableGrossUOM}',
                 origValueField: 'intItemUOMId',
                 origUpdateField: 'intWeightUOMId',
                 defaultFilters: [
@@ -260,6 +259,12 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
                 win.context.data.addRecord();
             }
         }
+
+        var task = new Ext.utl.DelayedTask(function() {
+            var cboItem = win.down('#cboItem');
+            if(cboItem) cboItem.focus();
+        });
+        task.delay(500);
     },
 
     setupContext: function(options) {

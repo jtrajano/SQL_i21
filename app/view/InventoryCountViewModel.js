@@ -288,6 +288,10 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
         isCountByGroupOrNotLotted: function(get) {
             return get('current.strCountBy') === 'Pack' || !get('current.ysnCountByLots');
         },
+        hidePalletFields: function(get) {
+            var hidden = get('current.strCountBy') === 'Pack' || !get('current.ysnCountByLots');
+            return hidden || (get('current.ysnCountByLots') && !get('current.ysnCountByPallets'));            
+        },
         isPack: function(get) {
             return get('current.strCountBy') === 'Pack';
         },

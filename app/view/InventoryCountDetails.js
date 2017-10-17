@@ -97,6 +97,7 @@ Ext.define('Inventory.view.InventoryCountDetails', {
                                     items: [
                                         {
                                             xtype: 'textfield',
+                                            tabIndex: -1,
                                             itemId: 'txtCountLineNo',
                                             fieldLabel: 'Count Line #',
                                             readOnly: true
@@ -175,6 +176,7 @@ Ext.define('Inventory.view.InventoryCountDetails', {
                                                 }
                                             ],
                                             reference: 'cboItem',
+                                            tabIndex: 0,
                                             itemId: 'cboItem',
                                             modelValidation: true,
                                             fieldLabel: 'Item No',
@@ -205,12 +207,14 @@ Ext.define('Inventory.view.InventoryCountDetails', {
                                         },
                                         {
                                             xtype: 'textfield',
+                                            tabIndex: -1,
                                             itemId: 'txtDescription',
                                             fieldLabel: 'Description',
                                             readOnly: true
                                         },
                                         {
                                             xtype: 'textfield',
+                                            tabIndex: -1,
                                             itemId: 'txtCategory',
                                             fieldLabel: 'Category',
                                             readOnly: true
@@ -408,18 +412,21 @@ Ext.define('Inventory.view.InventoryCountDetails', {
                                         },
                                         {
                                             xtype: 'textfield',
+                                            tabIndex: -1,
                                             itemId: 'txtStockUOM',
                                             fieldLabel: 'UOM',
                                             readOnly: true
                                         },
                                         {
                                             xtype: 'numberfield',
+                                            tabIndex: -1,
                                             itemId: 'txtSystemCount',
                                             fieldLabel: 'On Hand',
                                             readOnly: true
                                         },
                                         {
                                             xtype: 'numberfield',
+                                            tabIndex: -1,
                                             itemId: 'txtCost',
                                             fieldLabel: 'Last Cost',
                                             readOnly: true
@@ -544,12 +551,14 @@ Ext.define('Inventory.view.InventoryCountDetails', {
                                         },
                                         {
                                             xtype: 'numberfield',
+                                            tabIndex: -1,
                                             itemId: 'txtPhysicalCountInStockUnit',
                                             fieldLabel: 'Physical Count in Stock Unit',
                                             readOnly: true
                                         },
                                         {
                                             xtype: 'numberfield',
+                                            tabIndex: -1,
                                             itemId: 'txtVariance',
                                             fieldLabel: 'Variance',
                                             readOnly: true
