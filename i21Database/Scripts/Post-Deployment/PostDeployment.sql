@@ -266,6 +266,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\21_Update_LotWeightsRequired_tblICItem.sql
 :r .\IC\22_Update_tblICTransferDetail_Description.sql
 :r .\IC\PopulateLotContainerNoAndCondition.sql
+:r .\IC\1740_DataFix_FixIntTransactionDetailId.sql
 
 -- Patronage
 :r .\PAT\DefaultData\1_AddDefaultLetters.sql 

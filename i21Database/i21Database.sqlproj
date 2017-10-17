@@ -5740,9 +5740,10 @@
     <Build Include="dbo\Views\vyuPATDividends.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentFromOtherCharge.sql" />
     <Build Include="dbo\User Defined Types\OtherChargeCostAdjustmentTableType.sql" />
-	<Build Include="dbo\Views\vyuGLRetainedEarnings.sql" />
+    <Build Include="dbo\Views\vyuGLRetainedEarnings.sql" />
     <None Include="Scripts\Post-Deployment\SM\1730_UpdateManufacturingMenus.sql" />
     <Build Include="dbo\Views\vyuCMMultiCurrencyRevalue.sql" />
+    <None Include="Scripts\Post-Deployment\IC\1740_DataFix_FixIntTransactionDetailId.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
