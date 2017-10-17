@@ -2,6 +2,7 @@
 (
 	[intImportRackPriceDetailId] INT NOT NULL IDENTITY, 
     [intImportRackPriceId] INT NOT NULL, 
+	[strSupplierName] NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	[strSupplyPoint] NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intSupplyPointId] INT NULL,
     [dtmEffectiveDate] DATETIME NOT NULL, 

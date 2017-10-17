@@ -3,6 +3,7 @@
 
 SELECT Detail.intImportRackPriceDetailId
 	, Detail.intImportRackPriceId
+	, Detail.strSupplierName
 	, Detail.strSupplyPoint
 	, Detail.intSupplyPointId
 	, Detail.dtmEffectiveDate

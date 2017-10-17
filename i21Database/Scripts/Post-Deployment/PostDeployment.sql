@@ -46,6 +46,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\27_Language.sql
 :r .\SM\DefaultData\28_MultiCompany.sql
 :r .\SM\DefaultData\29_TransportationMode.sql
+:r .\SM\DefaultData\30_ImportFileHeader.sql
 :r .\SM\DefaultData\31_Calendar.sql
 :r .\SM\CreateEncryptionCertificateAndSymmetricKey.sql
 :r .\SM\CustomField.sql
