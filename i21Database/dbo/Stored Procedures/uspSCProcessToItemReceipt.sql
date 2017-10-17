@@ -482,70 +482,68 @@ BEGIN TRY
 		EXEC dbo.uspSCAddScaleTicketToItemReceipt @intTicketId, @intUserId, @ItemsForItemReceipt, @intEntityId, @strReceiptType, @InventoryReceiptId OUTPUT; 
 	END
 
-	BEGIN 
 	SELECT	@strTransactionId = IR.strReceiptNumber
 	FROM	dbo.tblICInventoryReceipt IR	        
 	WHERE	IR.intInventoryReceiptId = @InventoryReceiptId		
-	END
 
-	SELECT @strLotTracking = strLotTracking FROM tblICItem WHERE intItemId = @intItemId
-	IF @strLotTracking != 'Yes - Manual'
-		BEGIN
-			EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intEntityId;
+	EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intEntityId;
+		
+	UPDATE	SC
+	SET		SC.intLotId = ICLot.intLotId
+	FROM	dbo.tblSCTicket SC 
+	INNER JOIN tblICInventoryReceiptItem IRI ON SC.intTicketId = IRI.intSourceId
+	INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId AND intSourceType = 1
+	INNER JOIN tblICInventoryReceiptItemLot ICLot ON ICLot.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId
 			
-			--VOUCHER intergration
-			CREATE TABLE #tmpItemReceiptIds (
-				[intInventoryReceiptItemId] [INT] PRIMARY KEY,
-				[intOrderId] [INT],
-				[intOwnershipType] [INT],
-				UNIQUE ([intInventoryReceiptItemId])
-			);
-			INSERT INTO #tmpItemReceiptIds(intInventoryReceiptItemId,intOrderId,intOwnershipType) SELECT intInventoryReceiptItemId,intOrderId,intOwnershipType FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId = @InventoryReceiptId AND dblUnitCost > 0
+	--VOUCHER intergration
+	CREATE TABLE #tmpItemReceiptIds (
+		[intInventoryReceiptItemId] [INT] PRIMARY KEY,
+		[intOrderId] [INT],
+		[intOwnershipType] [INT],
+		UNIQUE ([intInventoryReceiptItemId])
+	);
+	INSERT INTO #tmpItemReceiptIds(intInventoryReceiptItemId,intOrderId,intOwnershipType) SELECT intInventoryReceiptItemId,intOrderId,intOwnershipType FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId = @InventoryReceiptId AND dblUnitCost > 0
 
-			DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
-			FOR
-			SELECT TOP 1 intInventoryReceiptItemId, intOrderId, intOwnershipType
-			FROM #tmpItemReceiptIds WHERE intOwnershipType = 1;
+	DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
+	FOR
+	SELECT TOP 1 intInventoryReceiptItemId, intOrderId, intOwnershipType
+	FROM #tmpItemReceiptIds WHERE intOwnershipType = 1;
 
-			OPEN intListCursor;
+	OPEN intListCursor;
 
-			-- Initial fetch attempt
-			FETCH NEXT FROM intListCursor INTO @intInventoryReceiptItemId, @intOrderId , @intOwnershipType;
+	-- Initial fetch attempt
+	FETCH NEXT FROM intListCursor INTO @intInventoryReceiptItemId, @intOrderId , @intOwnershipType;
 
-			WHILE @@FETCH_STATUS = 0
+	WHILE @@FETCH_STATUS = 0
+	BEGIN
+		SELECT @intPricingTypeId = intPricingTypeId FROM vyuCTContractDetailView where intContractHeaderId = @intOrderId; 
+		IF ISNULL(@intInventoryReceiptItemId , 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6) AND ISNULL(@intOwnershipType,0) = 1
+		BEGIN
+			EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intEntityId;
+			SELECT @intBillId = intBillId, @dblTotal = SUM(dblTotal) FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId GROUP BY intBillId
+
+			EXEC [dbo].[uspSMTransactionCheckIfRequiredApproval]
+			@type = N'AccountsPayable.view.Voucher',
+			@transactionEntityId = @intEntityId,
+			@currentUserEntityId = @intUserId,
+			@locationId = @intLocationId,
+			@amount = @dblTotal,
+			@requireApproval = @requireApproval OUTPUT
+
+			IF ISNULL(@intBillId , 0) != 0 AND ISNULL(@dblTotal,0) > 0 AND ISNULL(@requireApproval , 0) = 0
 			BEGIN
-				SELECT @intPricingTypeId = intPricingTypeId FROM vyuCTContractDetailView where intContractHeaderId = @intOrderId; 
-				IF ISNULL(@intInventoryReceiptItemId , 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6) AND ISNULL(@intOwnershipType,0) = 1
-				BEGIN
-					EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intEntityId;
-					SELECT @intBillId = intBillId, @dblTotal = SUM(dblTotal) FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId GROUP BY intBillId
-
-					EXEC [dbo].[uspSMTransactionCheckIfRequiredApproval]
-					@type = N'AccountsPayable.view.Voucher',
-					@transactionEntityId = @intEntityId,
-					@currentUserEntityId = @intUserId,
-					@locationId = @intLocationId,
-					@amount = @dblTotal,
-					@requireApproval = @requireApproval OUTPUT
-
-					IF ISNULL(@intBillId , 0) != 0 AND ISNULL(@dblTotal,0) > 0 AND ISNULL(@requireApproval , 0) = 0
-					BEGIN
-						EXEC [dbo].[uspAPPostBill]
-						@post = 1
-						,@recap = 0
-						,@isBatch = 0
-						,@param = @intBillId
-						,@userId = @intUserId
-						,@success = @success OUTPUT
-					END
-				END
-				FETCH NEXT FROM intListCursor INTO @intInventoryReceiptItemId, @intOrderId, @intOwnershipType;
+				EXEC [dbo].[uspAPPostBill]
+				@post = 1
+				,@recap = 0
+				,@isBatch = 0
+				,@param = @intBillId
+				,@userId = @intUserId
+				,@success = @success OUTPUT
 			END
 		END
-	--EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intUserId, @intEntityId;
-	--EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intUserId;
-
-	_Exit:
+		FETCH NEXT FROM intListCursor INTO @intInventoryReceiptItemId, @intOrderId, @intOwnershipType;
+	END
+_Exit:
 
 END TRY
 BEGIN CATCH
