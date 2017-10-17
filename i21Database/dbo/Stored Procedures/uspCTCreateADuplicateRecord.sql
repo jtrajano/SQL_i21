@@ -20,14 +20,27 @@
 	SET @strXML +=			'</tblCTPriceFixationDetail>' 
 	SET @strXML +=		'</child>' 
 	SET @strXML += '</root>' 
+
+	DECLARE @strTagRelaceXML NVARCHAR(MAX) =  
+	'<root>
+		<tags>
+			<toFind>&lt;tblCTContractDetail&gt;130&lt;/tblCTContractDetail&gt;</toFind>
+			<toReplace>&lt;tblCTContractDetail&gt;666&lt;/tblCTContractDetail&gt;</toReplace>
+		</tags>
+		<tags>
+			<toFind>&lt;tblCTContractHeader&gt;114&lt;/tblCTContractHeader&gt;</toFind>
+			<toReplace>&lt;tblCTContractHeader&gt;555&lt;/tblCTContractHeader&gt;</toReplace>
+		</tags>
+	</root>'
 */
 ------------------------------------------------------------------
 CREATE PROCEDURE [dbo].[uspCTCreateADuplicateRecord]
 	
-		@strTblName		NVARCHAR(MAX),
-		@intId			INT,
-		@intNewRecId	INT OUTPUT,
-		@strXML			NVARCHAR(MAX) = NULL
+		@strTblName			NVARCHAR(MAX),
+		@intId				INT,
+		@intNewRecId		INT OUTPUT,
+		@strXML				NVARCHAR(MAX) = NULL,
+		@strTagRelaceXML	NVARCHAR(MAX) = NULL
 
 AS
 
@@ -37,9 +50,8 @@ DECLARE
 		@idoc			INT,			@varXML			XML,			@strPrimaryColumn		NVARCHAR(50),		@strCondition			NVARCHAR(MAX),
 		@strGetXML		NVARCHAR(MAX),	@intUniqueId	INT,			@strSetColumn			NVARCHAR(MAX),		@strSQL					NVARCHAR(MAX),
 		@intChildRecId	INT,			@strChildTable	NVARCHAR(MAX),	@strForeignKeyColumn	NVARCHAR(MAX),		@ErrMsg					NVARCHAR(MAX),
-		@strColName		NVARCHAR(100),	@strColValue	NVARCHAR(MAX)
+		@strColName		NVARCHAR(100),	@strColValue	NVARCHAR(MAX),	@toFind					NVARCHAR(MAX),		@toReplace				NVARCHAR(MAX)
 		
-
 		
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @strXML
 
@@ -68,6 +80,20 @@ DECLARE
 				FROM	@varXML.nodes('/root/child/*') AS T(C)
 			)t
 	
+	EXEC sp_xml_preparedocument @idoc OUTPUT, @strTagRelaceXML
+
+	IF OBJECT_ID('tempdb..#TagsTable') IS NOT NULL  	
+		DROP TABLE #TagsTable
+
+	SELECT	ROW_NUMBER() OVER (ORDER BY toFind ASC) intUniqueId,*
+	INTO	#TagsTable
+	FROM	OPENXML(@idoc, 'root/tags',2)
+	WITH
+	(
+			toFind			NVARCHAR(MAX),
+			toReplace		NVARCHAR(MAX)
+	)  
+
 	SELECT	@strPrimaryColumn	=	USG.COLUMN_NAME 
 	FROM	INFORMATION_SCHEMA.TABLE_CONSTRAINTS CST, 
 			INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE USG 
@@ -100,6 +126,16 @@ DECLARE
 	FROM #ParentTableColUpdate CH
     
     EXEC	uspCTGetTableDataInXML		@strTblName,	@strCondition,	@strGetXML OUTPUT,	''
+
+	SELECT @intUniqueId= MIN(intUniqueId) FROM #TagsTable
+	
+	WHILE	ISNULL(@intUniqueId,0) > 0
+	BEGIN
+			SELECT	@toFind = toFind, @toReplace = toReplace FROM #TagsTable WHERE intUniqueId = @intUniqueId
+			SELECT	@strGetXML = REPLACE(@strGetXML,@toFind,@toReplace)
+			
+			SELECT	@intUniqueId= MIN(intUniqueId) FROM #TagsTable WHERE intUniqueId > @intUniqueId
+	END
 
 	SELECT @varXML = @strGetXML
 	SELECT @intUniqueId= MIN(intUniqueId) FROM #ParentTableColUpdate

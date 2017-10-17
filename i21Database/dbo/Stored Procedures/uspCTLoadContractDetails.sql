@@ -49,6 +49,8 @@ BEGIN TRY
 			THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT)END AS ysnSpreadAvailable, 
 			CASE WHEN intPFDCount > 0
 			THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT)END AS ysnFixationDetailAvailable,
+			CASE WHEN intPFDCount > 1
+			THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT)END AS ysnMultiPricingDetail,
 			CASE	WHEN	CH.ysnCategory = 1
 					THEN	dbo.fnCTConvertQtyToTargetCategoryUOM(CD.intCategoryUOMId,GU.intCategoryUOMId,1)
 					ELSE	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CM.intItemUOMId,1) 
