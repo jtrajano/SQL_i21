@@ -5429,6 +5429,9 @@
     <Build Include="dbo\Views\vyuAP1099Summary.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099Summary.sql" />
     <Build Include="dbo\Views\vyuGLRetainedEarnings.sql" />
+    <Build Include="dbo\Views\vyuGLTrialBalance_NonRE.sql" />
+    <Build Include="dbo\Views\vyuGLTrialBalance_RE.sql" />
+    <Build Include="dbo\Views\vyuGLTrialBalance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
