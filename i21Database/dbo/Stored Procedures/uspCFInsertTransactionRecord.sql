@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspCFInsertTransactionRecord]
+﻿
+CREATE PROCEDURE [dbo].[uspCFInsertTransactionRecord]
 	
 	 @strGUID						NVARCHAR(MAX)
 	,@strProcessDate				NVARCHAR(MAX)
@@ -1206,6 +1207,9 @@ BEGIN
 		,@TaxValue10					=	@TaxValue10
 
 
+		DECLARE @dblGrossTransferCost	NUMERIC(18,6)	
+		DECLARE @dblNetTransferCost		NUMERIC(18,6)	
+
 		------------------------------------------------------------
 		--			UPDATE TRANSACTION DEPENDS ON PRICING		  --
 		------------------------------------------------------------
@@ -1237,6 +1241,8 @@ BEGIN
 		,@ysnRecalculateInvalid			= ysnInvalid
 		,@dblInventoryCost				= dblInventoryCost
 		,@dblMargin						= dblMargin
+		,@dblGrossTransferCost			= dblGrossTransferCost
+		,@dblNetTransferCost			= dblNetTransferCost
 		FROM ##tblCFTransactionPricingType
 
 		--IF(@ysnDuplicate = 1)
@@ -1270,6 +1276,8 @@ BEGIN
 				,dtmPriceIndexDate		= null
 				,ysnDuplicate			= @ysnDuplicate
 				,ysnInvalid				= @ysnInvalid
+				,dblGrossTransferCost	= @dblGrossTransferCost
+				,dblNetTransferCost		= @dblNetTransferCost
 				WHERE intTransactionId = @Pk
 		END
 		IF (@strPriceMethod = 'Import File Price')
@@ -1291,6 +1299,8 @@ BEGIN
 				,dtmPriceIndexDate		= null
 				,ysnDuplicate			= @ysnDuplicate
 				,ysnInvalid				= @ysnInvalid
+				,dblGrossTransferCost	= @dblGrossTransferCost
+				,dblNetTransferCost		= @dblNetTransferCost
 				WHERE intTransactionId = @Pk
 		END
 		IF (@strPriceMethod = 'Network Cost')
@@ -1312,6 +1322,8 @@ BEGIN
 				,dtmPriceIndexDate		= null
 				,ysnDuplicate			= @ysnDuplicate
 				,ysnInvalid				= @ysnInvalid
+				,dblGrossTransferCost	= @dblGrossTransferCost
+				,dblNetTransferCost		= @dblNetTransferCost
 				WHERE intTransactionId = @Pk
 		END
 		ELSE IF (@strPriceMethod = 'Special Pricing')
@@ -1333,6 +1345,8 @@ BEGIN
 				,dtmPriceIndexDate		= null
 				,ysnDuplicate			= @ysnDuplicate
 				,ysnInvalid				= @ysnInvalid
+				,dblGrossTransferCost	= @dblGrossTransferCost
+				,dblNetTransferCost		= @dblNetTransferCost
 				WHERE intTransactionId = @Pk
 		END
 		ELSE IF (@strPriceMethod = 'Price Profile')
@@ -1363,6 +1377,8 @@ BEGIN
 				,dtmPriceIndexDate		= @dtmPriceIndexDate	
 				,ysnDuplicate			= @ysnDuplicate
 				,ysnInvalid				= @ysnInvalid
+				,dblGrossTransferCost	= @dblGrossTransferCost
+				,dblNetTransferCost		= @dblNetTransferCost
 				WHERE intTransactionId = @Pk
 					
 		END
@@ -1402,6 +1418,8 @@ BEGIN
 				,dtmPriceIndexDate		= null
 				,ysnDuplicate			= @ysnDuplicate
 				,ysnInvalid				= @ysnInvalid
+				,dblGrossTransferCost	= @dblGrossTransferCost
+				,dblNetTransferCost		= @dblNetTransferCost
 				WHERE intTransactionId = @Pk
 
 				------------------------------------------------------------
@@ -1438,6 +1456,8 @@ BEGIN
 				,dtmPriceIndexDate		= null
 				,ysnDuplicate			= @ysnDuplicate
 				,ysnInvalid				= @ysnInvalid
+				,dblGrossTransferCost	= @dblGrossTransferCost
+				,dblNetTransferCost		= @dblNetTransferCost
 				WHERE intTransactionId = @Pk
 		END
 
