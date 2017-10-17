@@ -26,6 +26,7 @@
     [dblNetQty] NUMERIC(38, 20) NULL DEFAULT((0)),
     [ysnRecount] BIT NOT NULL DEFAULT ((0)), 
     [intEntityUserSecurityId] INT NOT NULL, 
+    [ysnFetched] BIT NULL,
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICInventoryCountDetail] PRIMARY KEY ([intInventoryCountDetailId]), 

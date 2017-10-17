@@ -142,7 +142,7 @@ SELECT TOP 1 @iItemNo = i.strItemNo
 FROM tblICInventoryCount c
 	INNER JOIN tblICInventoryCountDetail cd ON cd.intInventoryCountId = c.intInventoryCountId
 	INNER JOIN tblICItem i ON i.intItemId = cd.intItemId
-WHERE (cd.intWeightUOMId IS NULL OR (cd.dblWeightQty = 0 AND cd.dblNetQty = 0))
+WHERE (cd.intWeightUOMId IS NULL OR (cd.dblPhysicalCount <> 0 AND cd.dblWeightQty = 0 AND cd.dblNetQty = 0))
 	AND i.ysnLotWeightsRequired = 1
 	AND i.strLotTracking <> 'No'
 	AND c.intInventoryCountId = @intTransactionId

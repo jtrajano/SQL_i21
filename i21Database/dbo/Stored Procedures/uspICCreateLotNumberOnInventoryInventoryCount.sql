@@ -63,7 +63,7 @@ BEGIN
 			,[intWeightUOMId]           = Detail.intWeightUOMId
 			,[dblWeightQty]             = Detail.dblWeightQty
 			,[dblGrossWeight]           = Detail.dblWeightQty
-			,[dblWeightPerQty]          = Detail.dblWeightQty / Detail.dblPhysicalCount
+			,[dblWeightPerQty]          = CASE WHEN Detail.intWeightUOMId IS NOT NULL AND Detail.dblPhysicalCount <> 0 THEN Detail.dblWeightQty / Detail.dblPhysicalCount ELSE 0 END
 			,[dtmExpiryDate]			= dbo.fnICCalculateExpiryDate(Detail.intItemId, Header.dtmCountDate, Header.dtmCountDate)
 			,[strParentLotNumber]		= Detail.strParentLotNo
 			,[strParentLotAlias]		= Detail.strParentLotAlias

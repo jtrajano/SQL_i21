@@ -41,6 +41,7 @@ BEGIN
 		, intItemUOMId
 		, intWeightUOMId
 		, ysnRecount
+		, ysnFetched
 		, intEntityUserSecurityId
 		, intConcurrencyId
 		, intSort)
@@ -62,6 +63,7 @@ BEGIN
 		, intItemUOMId
 		, intWeightUOMId
 		, ysnRecount = 0
+		, ysnFetched = 1
 		, intEntityUserSecurityId = @intEntityUserSecurityId
 		, intConcurrencyId = 1
 		, intSort = 1
@@ -89,6 +91,7 @@ BEGIN
 		, strCountLine
 		, intItemUOMId
 		, ysnRecount
+		, ysnFetched
 		, intEntityUserSecurityId
 		, intConcurrencyId
 		, intSort)
@@ -104,6 +107,7 @@ BEGIN
 		, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY il.intItemId ASC, il.intItemLocationId ASC, uom.intItemUOMId ASC) AS NVARCHAR(50))
 		, intItemUOMId = COALESCE(stock.intItemUOMId, uom.intItemUOMId)
 		, ysnRecount = 0
+		, ysnFetched = 1
 		, intEntityUserSecurityId = @intEntityUserSecurityId
 		, intConcurrencyId = 1
 		, intSort = 1
