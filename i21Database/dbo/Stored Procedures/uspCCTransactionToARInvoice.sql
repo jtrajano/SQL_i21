@@ -37,6 +37,20 @@ BEGIN
 		RAISERROR(@ErrorMessage, 16, 1);
 	END
 
+	if not exists (select * from tblICItemAccount where intItemId = @intDealerSiteCreditItem AND intAccountCategoryId = @intSalesAccountCategory)
+	begin
+		SET @ErrorMessage = 'Please setup GL Sales Account category for Dealer Site Credit item.';
+		SET @success = 0;
+		RAISERROR(@ErrorMessage, 16, 1);
+	end
+
+	if not exists (select * from tblICItemAccount where intItemId = @intDealerSiteFeeItem AND intAccountCategoryId = @intSalesAccountCategory)
+	begin
+		SET @ErrorMessage = 'Please setup GL Sales Account category for Dealer Site Fee item.';
+		SET @success = 0;
+		RAISERROR(@ErrorMessage, 16, 1);
+	end
+
     INSERT INTO @CCRItemToARItem VALUES (@intSiteHeaderId, @intDealerSiteCreditItem, 'Dealer Site Credits');
     INSERT INTO @CCRItemToARItem VALUES (@intSiteHeaderId, @intDealerSiteFeeItem, 'Dealer Site Fees');
 
