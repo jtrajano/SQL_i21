@@ -189,7 +189,8 @@ BEGIN
 			WHERE
 				Id <> @Id 
 				AND @TaxCodeId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(strTaxableByOtherTaxes))						
-			
+				AND ysnTaxExempt = 0
+
 			--Calculate Taxable Amount	
 			WHILE EXISTS(SELECT NULL FROM @TaxableByOtherTaxes)
 				BEGIN
