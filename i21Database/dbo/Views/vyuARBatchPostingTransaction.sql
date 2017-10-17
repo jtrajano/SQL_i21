@@ -2,7 +2,7 @@
 AS
 SELECT
 	 GL.strBatchId
-	,GL.dtmDate
+	,dtmDate					= GL.dtmDateEntered
 	,GL.strTransactionType
 	,dblEntriesCount			= COUNT(AR.intTransactionId)  
 	,dblTotalAmount				= SUM(AR.dblTotal) 
@@ -18,6 +18,7 @@ FROM
 		, intTransactionId
 		, strTransactionId
 		, dtmDate
+		, dtmDateEntered
 		, strTransactionType
 		, intAccountId
 	 FROM
@@ -122,6 +123,7 @@ AND GL.intAccountId = AR.intAccountId
 GROUP BY
 	 GL.strBatchId
 	,GL.dtmDate
+	,GL.dtmDateEntered
 	,GL.strTransactionType 
 	,AR.strUserName
 	,AR.strLocationName
