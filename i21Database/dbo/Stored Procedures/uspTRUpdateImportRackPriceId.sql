@@ -10,6 +10,7 @@ BEGIN
 
 	SELECT Detail.intImportRackPriceDetailId
 		, Detail.intImportRackPriceId
+		, Detail.strSupplierName
 		, Detail.strSupplyPoint
 		, Detail.intSupplyPointId
 		, Detail.dtmEffectiveDate
@@ -26,7 +27,7 @@ BEGIN
 		, strStatus = CASE WHEN Detail.ysnValid = 0 THEN Detail.strSupplyPoint
 							WHEN DetailItem.ysnValid = 0 THEN DetailItem.strItemNo
 							ELSE 'Success!' END
-		, intKeyId = dbo.fnTRSearchItemId(Detail.strSupplyPoint, DetailItem.strItemNo)	
+		, intKeyId = dbo.fnTRSearchItemId(Detail.strSupplierName, Detail.strSupplyPoint, DetailItem.strItemNo)	
 	INTO #tmpRackPrice
 	FROM tblTRImportRackPriceDetail Detail
 	LEFT JOIN tblTRImportRackPriceDetailItem DetailItem ON DetailItem.intImportRackPriceDetailId = Detail.intImportRackPriceDetailId
