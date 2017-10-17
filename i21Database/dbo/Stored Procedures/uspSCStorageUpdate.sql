@@ -296,7 +296,7 @@ BEGIN TRY
 			,[dblInsuranceRate]= 0 
 			,[strOriginState]= NULL 
 			,[strInsuranceState]= NULL
-			,[dblFeesDue]= 0 
+			,[dblFeesDue]=ROUND(SC.dblTicketFees,6) 
 			,[dblFeesPaid]= 0 
 			,[dblFreightDueRate]= 0 
 			,[ysnPrinted]= 0 

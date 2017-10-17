@@ -5744,6 +5744,8 @@
     <None Include="Scripts\Post-Deployment\SM\1730_UpdateManufacturingMenus.sql" />
     <Build Include="dbo\Views\vyuCMMultiCurrencyRevalue.sql" />
     <None Include="Scripts\Post-Deployment\IC\1740_DataFix_FixIntTransactionDetailId.sql" />
+    <Build Include="dbo\Views\vyuGRGetUnpaidStorageFees.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRProcessUnpaidStorageFees.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
