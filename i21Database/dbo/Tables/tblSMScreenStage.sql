@@ -8,6 +8,7 @@
 	[strChange]		   NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intConcurrencyId] INT NOT NULL,
 
+    [strGroupName] NVARCHAR(100) NULL, 
     CONSTRAINT [PK_tblSMScreenStage] PRIMARY KEY CLUSTERED ([intScreenStageId] ASC)
 );
 

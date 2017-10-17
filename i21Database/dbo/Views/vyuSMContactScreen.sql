@@ -2,9 +2,11 @@
 AS
 SELECT intScreenId
 ,strScreenId
-,strScreenName
+--,strScreenName
+--,strModule
+,REPLACE(mm.strMenuName, '(Portal)', '' )AS strScreenName
+,sc.strGroupName AS strModule
 ,strNamespace
-,strModule
 ,strTableName
 ,ysnApproval
 ,ysnActivity
