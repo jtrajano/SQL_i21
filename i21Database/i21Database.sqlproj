@@ -5737,11 +5737,14 @@
     <Build Include="dbo\Tables\tblVRCustomerXref.sql" />
     <Build Include="dbo\Stored Procedures\uspGLSyncGLAccountDescription.sql" />
     <Build Include="dbo\Views\vyuAPBasisAdvance.sql" />
-    <Build Include="dbo\Views\vyuAPCommodityByContract.sql" />
-    <Build Include="dbo\Views\vyuAPFuturesByContract.sql" />
     <Build Include="dbo\Tables\tblAPBasisAdvanceCommodityPercentage.sql" />
     <Build Include="dbo\Tables\tblAPBasisAdvanceContractFuturesPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspAPShowBalanceDifference.sql" />
+    <Build Include="dbo\Tables\tblAPBasisAdvanceDummyHeader.sql" />
+    <Build Include="dbo\Tables\tblAPBasisAdvanceCommodity.sql" />
+    <Build Include="dbo\Tables\tblAPBasisAdvanceFuture.sql" />
+    <Build Include="dbo\Tables\tblAPBasisAdvanceStaging.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreateBasisAdvance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
