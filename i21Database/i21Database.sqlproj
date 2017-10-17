@@ -5708,7 +5708,7 @@
     <Build Include="dbo\Stored Procedures\uspAPRpt1099DIVTwoPart.sql" />
     <Build Include="dbo\Views\vyuAP1099DIV.sql" />
     <Build Include="dbo\Views\vyuPATDividends.sql" />
-	<Build Include="dbo\Views\vyuGLRetainedEarnings.sql" />
+    <Build Include="dbo\Views\vyuGLRetainedEarnings.sql" />
     <None Include="Scripts\Post-Deployment\SM\1730_UpdateManufacturingMenus.sql" />
     <Build Include="dbo\Functions\fnTFCoalesceProductCode.sql" />
     <Build Include="dbo\Functions\fnTFCoalesceDestinationOriginState.sql" />
@@ -5719,6 +5719,9 @@
     <Build Include="dbo\Tables\tblCFSpecialTaxingRuleHeader.sql" />
     <Build Include="dbo\Tables\tblCFSpecialTaxingRuleSite.sql" />
     <Build Include="dbo\Tables\tblCFSpecialTaxingRuleTax.sql" />
+    <Build Include="dbo\Views\vyuGLTrialBalance_NonRE.sql" />
+    <Build Include="dbo\Views\vyuGLTrialBalance_RE.sql" />
+    <Build Include="dbo\Views\vyuGLTrialBalance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
