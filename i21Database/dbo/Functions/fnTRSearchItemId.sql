@@ -1,5 +1,6 @@
 CREATE FUNCTION [dbo].[fnTRSearchItemId]
 (
+	@SupplierName AS NVARCHAR(100),
 	@SupplyPoint AS NVARCHAR(100),
 	@Item AS NVARCHAR(100)
 )
@@ -24,7 +25,8 @@ BEGIN
 			AND SearchValue.strItemNo = Total.strItemNo
 		GROUP BY Total.strLocation, Total.strSupplier, Total.strItemNo
 	) Total
-	WHERE @SupplyPoint LIKE '%' + SearchValue.strSearchValue + '%'
+	WHERE @SupplierName LIKE '%' + SearchValue.strSearchValue + '%'
+			OR @SupplyPoint LIKE '%' + SearchValue.strSearchValue + '%'
 			OR @Item LIKE '%' + SearchValue.strSearchValue + '%'
 	GROUP BY SearchValue.strLocation, SearchValue.strSupplier, SearchValue.strItemNo, Total.dblTotal
 	HAVING COUNT(*) = Total.dblTotal

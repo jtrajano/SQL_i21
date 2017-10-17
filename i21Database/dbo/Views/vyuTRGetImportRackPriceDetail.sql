@@ -3,6 +3,7 @@
 
 SELECT Detail.intImportRackPriceDetailId
 	, Detail.intImportRackPriceId
+	, Detail.strSupplierName
 	, strImportSupplyPoint = Detail.strSupplyPoint
 	, Detail.intSupplyPointId
 	, SupplyPoint.strFuelSupplier
