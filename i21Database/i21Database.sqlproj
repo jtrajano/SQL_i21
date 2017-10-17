@@ -5695,6 +5695,8 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\32_UpdateCommissionScheduleEntity.sql" />
     <None Include="Scripts\Post-Deployment\SM\1730_UpdateManufacturingMenus.sql" />
     <Build Include="dbo\Views\vyuCMMultiCurrencyRevalue.sql" />
+    <Build Include="dbo\Views\vyuGRGetUnpaidStorageFees.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRProcessUnpaidStorageFees.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
