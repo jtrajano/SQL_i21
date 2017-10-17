@@ -5716,6 +5716,9 @@
     <Build Include="dbo\Functions\fnTFCoalesceVendor.sql" />
     <Build Include="dbo\Functions\fnTFCoalesceAccountStatusCode.sql" />
     <Build Include="dbo\Functions\fnTFCoalesceCustomer.sql" />
+    <Build Include="dbo\Tables\tblCFSpecialTaxingRuleHeader.sql" />
+    <Build Include="dbo\Tables\tblCFSpecialTaxingRuleSite.sql" />
+    <Build Include="dbo\Tables\tblCFSpecialTaxingRuleTax.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
