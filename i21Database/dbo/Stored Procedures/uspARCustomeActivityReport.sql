@@ -296,7 +296,7 @@ INNER JOIN (
 		 , intItemId				= NULL
 		 , intInvoiceDetailId		= NULL
 		 , intInvoiceDetailTaxId	= NULL
-		 , strNotes					= CONCAT(ISNULL(P.strPaymentInfo, ''), '', CASE WHEN ISNULL(P.strNotes, '') <> '' THEN ' - ' + P.strNotes ELSE '' END)
+		 , strNotes					= ISNULL(P.strPaymentInfo, '') + CASE WHEN ISNULL(P.strNotes, '') <> '' THEN ' - ' + P.strNotes ELSE '' END
 		 , strPaymentMethod			= P.strPaymentMethod
 		 , strTaxCode				= NULL
 		 , strTaxGroup				= NULL
