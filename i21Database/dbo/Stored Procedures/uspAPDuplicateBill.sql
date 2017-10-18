@@ -34,7 +34,7 @@ BEGIN
 	SELECT TOP 1 @tranType = intTransactionType FROM #tmpDuplicateBill
 END
 
-SET @tranRecordId = CASE @tranType WHEN 1 THEN 9 WHEN 2 THEN 20 WHEN 3 THEN 18 WHEN 8 THEN 66 WHEN 9 THEN 77 WHEN 12 THEN 122 END
+SET @tranRecordId = CASE @tranType WHEN 1 THEN 9 WHEN 2 THEN 20 WHEN 3 THEN 18 WHEN 8 THEN 66 WHEN 9 THEN 77 WHEN 12 THEN 122 WHEN 13 THEN 124 END
 
 IF (EXISTS(SELECT 1 FROM [tblEMEntityToContact] A INNER JOIN [tblEMEntityType] B ON A.intEntityId = B.intEntityId WHERE intEntityContactId = @userId AND strType = 'Vendor'))
 BEGIN

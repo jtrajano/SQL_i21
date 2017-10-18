@@ -7,7 +7,9 @@ AS
 BEGIN
     DECLARE @payment NUMERIC(18,6)
     SELECT @payment = 
-        CASE WHEN B.intTransactionType = 3 OR B.intTransactionType = 2 OR B.intTransactionType = 8 --DEBIT MEMO
+        CASE WHEN B.intTransactionType = 3 OR B.intTransactionType = 2 
+        OR B.intTransactionType = 13
+        OR B.intTransactionType = 8 --DEBIT MEMO
         THEN
             (CASE WHEN A.dblPayment < 0
                     THEN A.dblPayment

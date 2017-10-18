@@ -334,7 +334,7 @@ BEGIN
 		FROM tblAPPayment A
 		WHERE A.dblAmountPaid < 0 
 		AND (SELECT TOP 1 strPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID = A.intPaymentMethodId) != 'Refund'
-		AND (NOT EXISTS(SELECT 1 FROM tblAPPaymentDetail B INNER JOIN tblAPBill C ON B.intBillId = C.intBillId WHERE C.intTransactionType = 2 AND B.intPaymentId IN (SELECT intId FROM @paymentIds))
+		AND (NOT EXISTS(SELECT 1 FROM tblAPPaymentDetail B INNER JOIN tblAPBill C ON B.intBillId = C.intBillId WHERE (C.intTransactionType = 2 OR C.intTransactionType = 13) AND B.intPaymentId IN (SELECT intId FROM @paymentIds))
 				AND (SELECT COUNT(*) FROM tblAPPaymentDetail WHERE intPaymentId IN (SELECT intId FROM @paymentIds)) = 1)
 		AND A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 		
@@ -369,7 +369,7 @@ BEGIN
 		--DO NOT ALLOW TO POST PAYMENT IF IT HAS ASSOCIATED PREPAYMENT FOR CONTRACT OR IT IS RESTRICTED
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT DISTINCT
-			'Payment ' + A.strPaymentRecordNum + ' has prepayment for contract associated. Please use Prepaid tab of voucher to offset.',
+			'Payment ' + A.strPaymentRecordNum + ' has prepayment for contract/ticket associated. Please use Prepaid tab of voucher to offset.',
 			'Payable',
 			A.strPaymentRecordNum,
 			A.intPaymentId
@@ -378,7 +378,9 @@ BEGIN
 		INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
 		INNER JOIN tblAPBillDetail D ON C.intBillId = D.intBillId
 		WHERE A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
-		AND C.intTransactionType = 2 AND D.ysnRestricted = 1 AND D.intContractDetailId > 0
+		AND ((C.intTransactionType = 2 AND D.intContractDetailId > 0) 
+				OR (C.intTransactionType = 13 AND D.intScaleTicketId > 0) ) 
+		AND D.ysnRestricted = 1 
 		AND B.dblPayment > 0 
 
 		--DO NOT ALLOW TO POST NOT PAY TO ADDRESS SPECIFIED AND MULTIPLE PAY TO HAS BEEN ON THE DETAILS

@@ -90,8 +90,8 @@ BEGIN
 											--		 ELSE A.dblAmountDue END))
 											--END AS DECIMAL(18,2)),
 											--Subtract the payment on detail total using percentage
-											CAST(((CASE WHEN A.intTransactionType IN (2, 3, 11) AND Details.dblTotal <> 0 THEN Details.dblTotal * -1 
-													 ELSE Details.dblTotal END) - (CASE WHEN A.intTransactionType IN (2, 3, 11) 
+											CAST(((CASE WHEN A.intTransactionType IN (2, 3, 11, 13) AND Details.dblTotal <> 0 THEN Details.dblTotal * -1 
+													 ELSE Details.dblTotal END) - (CASE WHEN A.intTransactionType IN (2, 3, 11, 13) 
 																							THEN (ISNULL(A.dblPayment,0) / A.dblTotal) * Details.dblTotal * -1 
 																							ELSE (ISNULL(A.dblPayment,0) / A.dblTotal) * Details.dblTotal END)) * ISNULL(NULLIF(Details.dblRate,0),1) AS DECIMAL(18,2)),
 		[dblDebitUnit]					=	0,
@@ -121,8 +121,8 @@ BEGIN
 		[strModuleName]					=	@MODULE_NAME,
 		[dblDebitForeign]				=	0,      
 		[dblDebitReport]				=	0,
-		[dblCreditForeign]				=	CAST(((CASE WHEN A.intTransactionType IN (2, 3, 11) AND Details.dblTotal <> 0 THEN Details.dblTotal * -1 
-													 ELSE Details.dblTotal END) - (CASE WHEN A.intTransactionType IN (2, 3, 11) 
+		[dblCreditForeign]				=	CAST(((CASE WHEN A.intTransactionType IN (2, 3, 11, 13) AND Details.dblTotal <> 0 THEN Details.dblTotal * -1 
+													 ELSE Details.dblTotal END) - (CASE WHEN A.intTransactionType IN (2, 3, 11, 13) 
 																							THEN (ISNULL(A.dblPayment,0) / A.dblTotal) * Details.dblTotal * -1 
 																							ELSE (ISNULL(A.dblPayment,0) / A.dblTotal) * Details.dblTotal END)) AS DECIMAL(18,2)),
 		[dblCreditReport]				=	0,
@@ -214,6 +214,7 @@ BEGIN
 		[dtmTransactionDate]			=	A.dtmDate,
 		[strJournalLineDescription]		=	CASE WHEN C.intTransactionType = 2 THEN 'Applied Vendor Prepayment'
 												WHEN C.intTransactionType = 3 THEN 'Applied Debit Memo'
+												WHEN C.intTransactionType = 13 THEN 'Applied Basis Advance'
 											ELSE 'NONE' END,
 		[intJournalLineNo]				=	B.intTransactionId,
 		[ysnIsUnposted]					=	0,
@@ -223,6 +224,7 @@ BEGIN
 		[intTransactionId]				=	A.intBillId, 
 		[strTransactionType]			=	CASE WHEN C.intTransactionType = 2 THEN 'Vendor Prepayment'
 												WHEN C.intTransactionType = 3 THEN 'Debit Memo'
+												WHEN C.intTransactionType = 13 THEN 'Basis Advance'
 											ELSE 'NONE' END,
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,
@@ -259,7 +261,7 @@ BEGIN
 											END,
 		[dblDebit]						=	CAST(
 												
-												CASE	WHEN A.intTransactionType IN (2, 3, 11) THEN -B.dblTotal /*- CAST(ISNULL(Taxes.dblTotalTax + ISNULL(@OtherChargeTaxes,0), 0) AS DECIMAL(18,2))*/ --IC Tax Commented AP-3485
+												CASE	WHEN A.intTransactionType IN (2, 3, 11, 13) THEN -B.dblTotal /*- CAST(ISNULL(Taxes.dblTotalTax + ISNULL(@OtherChargeTaxes,0), 0) AS DECIMAL(18,2))*/ --IC Tax Commented AP-3485
 														ELSE
 															CASE	WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal 
 																	ELSE 
@@ -300,12 +302,13 @@ BEGIN
 												WHEN intTransactionType = 11 THEN 'Claim'
 												WHEN intTransactionType = 8 THEN 'Overpayment'
 												WHEN intTransactionType = 9 THEN '1099 Adjustment'
+												WHEN intTransactionType = 13 THEN 'Basis Advance'
 											ELSE 'NONE' END,
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,
 		[dblDebitForeign]				=	CAST(
 												
-												CASE	WHEN A.intTransactionType IN (2, 3, 11) THEN -B.dblTotal /*- CAST(ISNULL(Taxes.dblTotalTax + ISNULL(@OtherChargeTaxes,0), 0) AS DECIMAL(18,2))*/ --IC Tax Commented AP-3485
+												CASE	WHEN A.intTransactionType IN (2, 3, 11, 13) THEN -B.dblTotal /*- CAST(ISNULL(Taxes.dblTotalTax + ISNULL(@OtherChargeTaxes,0), 0) AS DECIMAL(18,2))*/ --IC Tax Commented AP-3485
 														ELSE
 															CASE	WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal 
 																	ELSE 
@@ -496,7 +499,7 @@ BEGIN
 		--[intAccountId]					=	dbo.[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'AP Clearing'), --AP-3227 always use the AP Clearing Account
 		[intAccountId]					=	B.intAccountId, --NO NEED TO GET THE ACCOUNT WHEN CREATING GL ENTRIES, ACCOUNT ON TRANSACTION DETAIL SHOULD BE THE ONE TO USE
 		[dblDebit]						=	CAST(CASE WHEN D.[intInventoryReceiptChargeId] IS NULL THEN B.dblTotal 
-												 ELSE (CASE WHEN A.intTransactionType IN (2, 3) THEN D.dblAmount * (-1) 
+												 ELSE (CASE WHEN A.intTransactionType IN (2, 3, 13) THEN D.dblAmount * (-1) 
 														ELSE 
 															(CASE WHEN D.ysnInventoryCost = 0 
 																THEN B.dblTotal  --Get the amount from voucher if NOT inventory cost
@@ -525,11 +528,12 @@ BEGIN
 		[strTransactionType]			=	CASE WHEN intTransactionType = 1 THEN 'Bill'
 												WHEN intTransactionType = 2 THEN 'Vendor Prepayment'
 												WHEN intTransactionType = 3 THEN 'Debit Memo'
+												WHEN intTransactionType = 13 THEN 'Basis Advance'
 											ELSE 'NONE' END,
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,
 		[dblDebitForeign]				=	CAST(CASE WHEN D.[intInventoryReceiptChargeId] IS NULL THEN B.dblTotal 
-												 ELSE (CASE WHEN A.intTransactionType IN (2, 3) THEN D.dblAmount * (-1) 
+												 ELSE (CASE WHEN A.intTransactionType IN (2, 3, 13) THEN D.dblAmount * (-1) 
 														ELSE 
 															(CASE WHEN D.ysnInventoryCost = 0 
 																THEN B.dblTotal  --Get the amount from voucher if NOT inventory cost

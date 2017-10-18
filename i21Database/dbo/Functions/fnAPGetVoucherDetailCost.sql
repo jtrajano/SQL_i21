@@ -8,7 +8,7 @@ BEGIN
 	DECLARE @cost DECIMAL(18,6);
 
 	SELECT
-		@cost = CASE WHEN B.intTransactionType = 2
+		@cost = CASE WHEN B.intTransactionType = 2 OR B.intTransactionType = 13
 					THEN	(A.dblCost / 
 								(CASE WHEN A.ysnSubCurrency = 1 THEN B.intSubCurrencyCents ELSE 1 END) --check if sub currency
 							) 

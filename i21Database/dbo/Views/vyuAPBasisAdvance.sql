@@ -83,15 +83,17 @@ SELECT TOP 100 PERCENT * FROM (
     ) taxes
     OUTER APPLY (
         SELECT
-            SUM(voucherDetail.dblTotal) AS dblPriorAdvance
+            SUM(voucherDetail.dblTotal) AS dblPriorAdvance,
+			COALESCE(CONVERT(VARCHAR(12),voucherDetail.intBillId) + ',', '') +  CONVERT(VARCHAR(12),voucherDetail.intBillId) AS strBillIds
         FROM tblAPBill voucher
         INNER JOIN tblAPBillDetail voucherDetail ON voucher.intBillId = voucherDetail.intBillId
         WHERE voucherDetail.intScaleTicketId = ticket.intTicketId
+		GROUP BY voucherDetail.intBillId
     ) priorAdvances
     LEFT JOIN tblAPBasisAdvanceFuture basisFutures 
         ON basisFutures.intFutureMarketId = futureMarket.intFutureMarketId AND basisFutures.intMonthId = futureMonth.intFutureMonthId
     LEFT JOIN tblAPBasisAdvanceCommodity basisCommodity ON basisCommodity.intCommodityId = ticket.intCommodityId
     WHERE ct.intPricingTypeId = 2
 ) basisAdvance
-ORDER BY intTicketId DESC, dblPriorAdvance ASC
+ORDER BY intTicketId DESC
 
