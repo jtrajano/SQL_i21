@@ -1,5 +1,8 @@
 ﻿CREATE TABLE [dbo].[tblAPBasisAdvanceStaging]
 (
-	[intTicketId] INT NOT NULL PRIMARY KEY,
-	[intContractDetailId] INT NOT NULL
+	[intBasisAdvanceStagingId] INT IDENTITY (1, 1) NOT NULL PRIMARY KEY,
+	[intBasisAdvanceDummyHeaderId] INT NOT NULL,
+	[intTicketId] INT NOT NULL,
+	[intContractDetailId] INT NOT NULL,
+	[intConcurrencyId] INT DEFAULT(0) NOT NULL
 )

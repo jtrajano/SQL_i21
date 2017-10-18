@@ -10,6 +10,7 @@ SELECT TOP 100 PERCENT * FROM (
         ,ISNULL(customer.dblARBalance,0) AS dblARBalance
         ,strSplit = ''
         ,ct.strContractNumber
+        ,ct.intContractHeaderId
         ,ctd.intContractDetailId
         ,ctd.intContractSeq
         ,ticket.strTicketNumber 
