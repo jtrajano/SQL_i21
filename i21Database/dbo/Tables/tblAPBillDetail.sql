@@ -20,6 +20,7 @@
 	[intLocationId] INT             NULL,
 	[intLoadDetailId]    INT             NULL,
 	[intLoadId]    INT             NULL,
+	[intScaleTicketId]    INT             NULL,
 	[intCCSiteDetailId]    INT             NULL,
 	[intPrepayTypeId]    INT             NULL,
     [dblTotal]        DECIMAL (18, 6) NOT NULL DEFAULT 0,
