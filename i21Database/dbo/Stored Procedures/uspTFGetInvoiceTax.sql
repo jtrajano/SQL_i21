@@ -181,7 +181,7 @@ BEGIN TRY
 					, tblARInvoice.strBOLNumber
 					, tblARInvoice.dtmDate
 					, (CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strCity ELSE tblARInvoice.strShipToCity END) AS strDestinationCity
-					, (CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMTaxCode.strCounty ELSE NULL END) AS strDestinationCounty
+					, (CASE WHEN tblARInvoice.intFreightTermId = 3 THEN NULL ELSE tblSMTaxCode.strCounty END) AS strDestinationCounty
 					, (CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strStateProvince ELSE tblARInvoice.strShipToState END) AS strDestinationState
 					, tblSMCompanyLocation.strCity AS strOriginCity
 					, NULL AS strOriginCounty
@@ -234,7 +234,7 @@ BEGIN TRY
 				INNER JOIN tblSMCompanyLocation ON tblARInvoice.intCompanyLocationId = tblSMCompanyLocation.intCompanyLocationId
 				INNER JOIN tblARCustomer ON tblARInvoice.intEntityCustomerId = tblARCustomer.intEntityId
 				INNER JOIN tblEMEntity ON tblARCustomer.intEntityId = tblEMEntity.intEntityId 
-				LEFT JOIN tblEMEntityLocation ON tblEMEntityLocation.intEntityId = tblARCustomer.intEntityId AND tblEMEntityLocation.ysnDefaultLocation = 1
+				LEFT JOIN tblEMEntityLocation ON tblEMEntityLocation.intEntityId = tblARInvoice.intShipToLocationId
 				LEFT JOIN tblARAccountStatus ON tblARAccountStatus.intAccountStatusId = tblARCustomer.intAccountStatusId
 				LEFT JOIN tblTFTaxAuthorityCustomerLicense ON tblTFTaxAuthorityCustomerLicense.intEntityId = tblARInvoice.intEntityCustomerId
 				CROSS JOIN tblSMCompanySetup
@@ -338,17 +338,17 @@ BEGIN TRY
 					, tblARInvoiceDetail.dblQtyShipped AS dblNet
 					, tblARInvoiceDetail.dblQtyShipped AS dblGross
 					, tblARInvoiceDetail.dblQtyShipped AS dblBillQty
-					, ISNULL(TaxDetail.dblTax, 0.000000) dblTax
+					, ISNULL(tblARInvoiceDetailTax.dblTax, 0.000000) dblTax
 					, NULL AS dblTaxExempt
 					, tblARInvoice.strInvoiceNumber
 					, tblARInvoice.strPONumber
 					, tblARInvoice.strBOLNumber
 					, tblARInvoice.dtmDate
 					, (CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strCity ELSE tblARInvoice.strShipToCity END) AS strDestinationCity
-					, (CASE WHEN tblARInvoice.intFreightTermId = 3 THEN '' ELSE '' END) AS strDestinationCounty
+					, (CASE WHEN tblARInvoice.intFreightTermId = 3 THEN NULL ELSE tblSMTaxCode.strCounty END) AS strDestinationCounty
 					, (CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strStateProvince ELSE tblARInvoice.strShipToState END) AS strDestinationState
 					, tblSMCompanyLocation.strCity AS strOriginCity
-					, tblSMCompanyLocation.strCountry AS strOriginCountry
+					, NULL AS strOriginCountry
 					, tblSMCompanyLocation.strStateProvince AS strOriginState
 					, tblEMEntity.strName
 					, tblEMEntity.strFederalTaxId AS strCustomerFEIN
@@ -388,26 +388,27 @@ BEGIN TRY
 				INNER JOIN tblSMShipVia ON tblEMEntity_Transporter.intEntityId = tblSMShipVia.intEntityId
 				INNER JOIN tblARInvoice ON tblSMShipVia.intEntityId = tblARInvoice.intShipViaId
 				INNER JOIN tblARInvoiceDetail ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId
-				--INNER JOIN tblARInvoiceDetailTax ON tblARInvoiceDetail.intInvoiceDetailId = tblARInvoiceDetailTax.intInvoiceDetailId			
 				INNER JOIN tblICItemMotorFuelTax ON tblICItemMotorFuelTax.intItemId = tblARInvoiceDetail.intItemId
 				INNER JOIN vyuTFGetReportingComponentProductCode RCProductCode ON tblICItemMotorFuelTax.intProductCodeId = RCProductCode.intProductCodeId
 				INNER JOIN tblTFReportingComponent ON RCProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
-				--INNER JOIN tblSMTaxCode ON tblSMTaxCode.intTaxCodeId = tblARInvoiceDetailTax.intTaxCodeId
-				--INNER JOIN tblTFTaxCategory ON tblSMTaxCode.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId
+				INNER JOIN tblARInvoiceDetailTax ON tblARInvoiceDetail.intInvoiceDetailId = tblARInvoiceDetailTax.intInvoiceDetailId
+				INNER JOIN tblSMTaxCode ON tblSMTaxCode.intTaxCodeId = tblARInvoiceDetailTax.intTaxCodeId	
+				INNER JOIN tblTFTaxCategory ON tblSMTaxCode.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId
 				INNER JOIN tblSMCompanyLocation ON tblARInvoice.intCompanyLocationId = tblSMCompanyLocation.intCompanyLocationId
 				INNER JOIN tblARCustomer ON tblARInvoice.intEntityCustomerId = tblARCustomer.intEntityId
 				INNER JOIN tblEMEntity ON tblARCustomer.intEntityId = tblEMEntity.intEntityId
-				LEFT JOIN tblEMEntityLocation ON tblEMEntityLocation.intEntityId = tblARCustomer.intEntityId AND tblEMEntityLocation.ysnDefaultLocation = 1
-				LEFT JOIN tblARAccountStatus ON tblARAccountStatus.intAccountStatusId = tblARCustomer.intAccountStatusId
+				LEFT JOIN tblEMEntityLocation ON tblEMEntityLocation.intEntityLocationId = tblARInvoice.intShipToLocationId
 				LEFT JOIN tblTFTaxAuthorityCustomerLicense ON tblTFTaxAuthorityCustomerLicense.intEntityId = tblARInvoice.intEntityCustomerId
+				LEFT JOIN tblARAccountStatus ON tblARAccountStatus.intAccountStatusId = tblARCustomer.intAccountStatusId
+				--LEFT JOIN tblTFTaxAuthorityCustomerLicense ON tblTFTaxAuthorityCustomerLicense.intEntityId = tblARInvoice.intEntityCustomerId
 				CROSS JOIN tblSMCompanySetup
-				CROSS JOIN tblSMTaxCode
-				LEFT JOIN  (
-					SELECT tblARInvoiceDetailTax.intInvoiceDetailId, tblARInvoiceDetailTax.intTaxCodeId, tblARInvoiceDetailTax.dblTax 
-					FROM tblARInvoiceDetailTax 
-					INNER JOIN tblSMTaxCode as TaxCode ON TaxCode.intTaxCodeId = tblARInvoiceDetailTax.intTaxCodeId
-				) TaxDetail ON TaxDetail.intInvoiceDetailId = tblARInvoiceDetail.intInvoiceDetailId AND TaxDetail.intTaxCodeId = tblSMTaxCode.intTaxCodeId
-				INNER JOIN tblTFTaxCategory ON tblTFTaxCategory.intTaxCategoryId =  tblSMTaxCode.intTaxCategoryId 
+				--CROSS JOIN tblSMTaxCode
+				--LEFT JOIN  (
+				--	SELECT tblARInvoiceDetailTax.intInvoiceDetailId, tblARInvoiceDetailTax.intTaxCodeId, tblARInvoiceDetailTax.dblTax 
+				--	FROM tblARInvoiceDetailTax 
+				--	INNER JOIN tblSMTaxCode as TaxCode ON TaxCode.intTaxCodeId = tblARInvoiceDetailTax.intTaxCodeId
+				--) TaxDetail ON TaxDetail.intInvoiceDetailId = tblARInvoiceDetail.intInvoiceDetailId AND TaxDetail.intTaxCodeId = tblSMTaxCode.intTaxCodeId
+				--INNER JOIN tblTFTaxCategory ON tblTFTaxCategory.intTaxCategoryId =  tblSMTaxCode.intTaxCategoryId 
 				WHERE tblARInvoice.ysnPosted = 1
 					AND tblTFReportingComponent.intReportingComponentId = @RCId
 					AND CAST(FLOOR(CAST(tblARInvoice.dtmDate AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)
@@ -555,10 +556,10 @@ BEGIN TRY
 					, tblTRLoadReceipt.strBillOfLading AS strBOLNumber
 					, tblTRLoadHeader.dtmLoadDateTime AS dtmDate
 					, tblSMCompanyLocation.strCity AS strDestinationCity
-					, '' AS strDestinationCounty
+					, NULL AS strDestinationCounty
 					, tblSMCompanyLocation.strStateProvince AS strDestinationState
 					, tblEMEntityLocation.strCity AS strOriginCity
-					, '' AS strOriginCounty
+					, tblSMTaxCode.strCounty AS strOriginCounty
 					, tblEMEntityLocation.strState AS strOriginState
 					, tblSMCompanyLocation.strLocationName AS strCustomerName
 					, tblSMCompanySetup.strEin AS strCustomerFEIN

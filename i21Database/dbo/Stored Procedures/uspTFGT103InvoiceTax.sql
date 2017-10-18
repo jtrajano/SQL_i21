@@ -88,8 +88,10 @@ BEGIN TRY
 			, strBillOfLading
 			, dtmDate
 			, strDestinationCity
+			, strDestinationCounty
 			, strDestinationState
 			, strOriginCity
+			, strOriginCounty
 			, strOriginState
 			, strCustomerName
 			, strCustomerFEIN
@@ -143,8 +145,10 @@ BEGIN TRY
 			, tblARInvoice.strBOLNumber
 			, tblARInvoice.dtmDate
 			, (CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strCity ELSE tblARInvoice.strShipToCity END) AS strDestinationCity
+			, (CASE WHEN tblARInvoice.intFreightTermId = 3 THEN NULL ELSE tblSMTaxCode.strCounty END) AS strDestinationCounty 
 			, (CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strStateProvince ELSE tblARInvoice.strShipToState END) AS strDestinationState
 			, tblSMCompanyLocation.strCity AS strOriginCity
+			, NULL AS strOriginCounty
 			, tblSMCompanyLocation.strStateProvince AS strOriginState
 			, tblEMEntity.strName AS strCustomerName
 			, tblEMEntity.strFederalTaxId AS strCustomerFEIN
@@ -187,7 +191,7 @@ BEGIN TRY
 		INNER JOIN tblSMCompanyLocation ON tblARInvoice.intCompanyLocationId = tblSMCompanyLocation.intCompanyLocationId
 		INNER JOIN tblARCustomer ON tblARInvoice.intEntityCustomerId = tblARCustomer.intEntityId
 		INNER JOIN tblEMEntity ON tblARCustomer.intEntityId = tblEMEntity.intEntityId
-		LEFT JOIN tblEMEntityLocation ON tblEMEntityLocation.intEntityId = tblARCustomer.intEntityId AND tblEMEntityLocation.ysnDefaultLocation = 1
+		LEFT JOIN tblEMEntityLocation ON tblEMEntityLocation.intEntityId = tblARInvoice.intShipToLocationId
 		INNER JOIN tblTFReportingComponent ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 			ON tblTFProductCode.intProductCodeId = tblICItemMotorFuelTax.intProductCodeId
 		FULL OUTER JOIN tblEMEntity AS tblEMEntity_Transporter
