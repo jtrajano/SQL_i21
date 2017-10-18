@@ -6,31 +6,6 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
 
-DECLARE @temp_aging_table TABLE(	
-	 [strCustomerName]			NVARCHAR(100)
-	,[strEntityNo]				NVARCHAR(100)
-	,[intEntityCustomerId]		INT
-	,[dblCreditLimit]			NUMERIC(18,6)
-	,[dblTotalAR]				NUMERIC(18,6)
-	,[dblFuture]				NUMERIC(18,6)
-	,[dbl0Days]					NUMERIC(18,6)
-	,[dbl10Days]				NUMERIC(18,6)
-	,[dbl30Days]				NUMERIC(18,6)
-	,[dbl60Days]				NUMERIC(18,6)
-	,[dbl90Days]				NUMERIC(18,6)
-	,[dbl91Days]				NUMERIC(18,6)
-	,[dblTotalDue]				NUMERIC(18,6)
-	,[dblAmountPaid]			NUMERIC(18,6)
-	,[dblCredits]				NUMERIC(18,6)
-	,[dblPrepayments]			NUMERIC(18,6)
-	,[dblPrepaids]				NUMERIC(18,6)
-	,[dtmAsOfDate]				DATETIME
-	,[strSalespersonName]		NVARCHAR(100)
-	,[strSourceTransaction]		NVARCHAR(100)
-	,[strCompanyName]			NVARCHAR(MAX)
-	,[strCompanyAddress]		NVARCHAR(MAX)
-)
-
 -- Declare the variables.
 DECLARE  @dtmDateTo						AS DATETIME
 		,@dtmDateFrom					AS DATETIME
@@ -40,6 +15,9 @@ DECLARE  @dtmDateTo						AS DATETIME
 		,@strInvoiceNumber				AS NVARCHAR(100)
 		,@strRecordNumber				AS NVARCHAR(100)
 		,@strPaymentMethod				AS NVARCHAR(100)
+		,@strAccountStatusCode			AS NVARCHAR(100)
+		,@ysnPrintRecap					AS BIT
+		,@ysnPrintDetail				AS BIT
 		,@intEntityCustomerId			AS INT
 
 -- Create a table variable to hold the XML data. 		
@@ -95,51 +73,91 @@ SELECT @strPaymentMethod = [from]
 FROM @temp_xml_table
 WHERE [fieldname] IN ('strPaymentMethod')
 
+SELECT @strAccountStatusCode = [from]
+FROM @temp_xml_table
+WHERE [fieldname] IN ('strAccountStatusCode')
+
+SELECT @ysnPrintRecap = CASE WHEN ISNULL([from], 'True') = 'True' THEN 1 ELSE 0 END
+FROM @temp_xml_table
+WHERE [fieldname] IN ('ysnPrintRecap')
+
+SELECT @ysnPrintDetail = CASE WHEN ISNULL([from], 'True') = 'True' THEN 1 ELSE 0 END
+FROM @temp_xml_table
+WHERE [fieldname] IN ('ysnPrintDetail')
+
+SET @strCustomerName = NULLIF(@strCustomerName, '')
+SET @strInvoiceNumber = NULLIF(@strInvoiceNumber, '')
+SET @strRecordNumber = NULLIF(@strRecordNumber, '')
+SET @strPaymentMethod = NULLIF(@strPaymentMethod, '')
+SET @strAccountStatusCode = NULLIF(@strAccountStatusCode, '')
+
 IF @dtmDateFrom IS NULL
     SET @dtmDateFrom = CAST(-53690 AS DATETIME)
 
 IF @dtmDateTo IS NULL
     SET @dtmDateTo = GETDATE()
-
-INSERT INTO @temp_aging_table
+	
+TRUNCATE TABLE tblARCustomerAgingStagingTable
+INSERT INTO tblARCustomerAgingStagingTable (
+	   strCustomerName
+	 , strCustomerNumber
+	 , intEntityCustomerId
+	 , dblCreditLimit
+	 , dblTotalAR
+	 , dblFuture
+	 , dbl0Days
+	 , dbl10Days
+	 , dbl30Days
+	 , dbl60Days
+	 , dbl90Days
+	 , dbl91Days
+	 , dblTotalDue
+	 , dblAmountPaid
+	 , dblCredits
+	 , dblPrepayments
+	 , dblPrepaids
+	 , dtmAsOfDate
+	 , strSalespersonName
+	 , strSourceTransaction
+	 , strCompanyName
+	 , strCompanyAddress
+)
 EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateFrom = @dtmDateFrom
 									    , @dtmDateTo = @dtmDateTo
 									    , @strCustomerName	= @strCustomerName
- 
+
 SELECT strReportDateRange	= 'From ' + CONVERT(NVARCHAR(50), @dtmDateFrom, 101) + ' To ' + CONVERT(NVARCHAR(50), @dtmDateTo, 101)
 	, dtmLastPaymentDate	= PAYMENT.dtmDatePaid
-	, intEntityCustomerId	= I.intEntityCustomerId
-	, intInvoiceDetailId	= ID.intInvoiceDetailId
-	, strCustomerNumber		= CUSTOMER.strCustomerNumber
-	, strCustomerName		= CUSTOMER.strName	 
+	, dblLastPayment		= ISNULL(PAYMENT.dblAmountPaid, 0)
+	, intEntityCustomerId	= AGING.intEntityCustomerId
+	, intInvoiceDetailId	= TRANSACTIONS.intInvoiceDetailId
+	, strCustomerNumber		= AGING.strCustomerNumber
+	, strCustomerName		= AGING.strCustomerName	 
 	, strCustomerAddress	= CUSTOMER.strFullAddress
 	, strCompanyName		= AGING.strCompanyName
 	, strCompanyAddress		= AGING.strCompanyAddress
-	, intPaymentId			= PAYMENTS.intPaymentId	 
-	, strRecordNumber		= PAYMENTS.strRecordNumber	
-	, intInvoiceId			= I.intInvoiceId	 
-	, strInvoiceNumber		= I.strInvoiceNumber
-	, strTransactionType	= I.strTransactionType
-	, strInvoice			= 'Invoice'
-	, strType				= I.strType
-	, dtmInvoiceDate		= I.dtmDate
-	, dtmPostDate			= I.dtmPostDate
-	, dtmDatePaid			= PAYMENTS.dtmDatePaid	 
-	, dblPayments			= ISNULL(PAYMENTS.dblPayment, 0)
-	, dblInvoices			= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblInvoiceSubtotal, 0) * -1 ELSE ISNULL(I.dblInvoiceSubtotal, 0) END
-	, dblDiscount			= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblDiscount, 0) * -1 ELSE ISNULL(I.dblDiscount, 0) END
-	, dblInterest			= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblInterest, 0) * -1 ELSE ISNULL(I.dblInterest, 0) END		
-	, strPaymentMethod		= PAYMENTS.strPaymentMethod
-	, intItemId				= ID.intItemId
-	, strItemDescription	= ID.strItemDescription
-	, dblQtyShipped			= ID.dblQtyShipped
-	, strUnitMeasure		= ID.strUnitMeasure		 
-	, dblTax				= ID.dblTotalTax
-	, strTaxGroup			= ID.strTaxGroup
-	, intInvoiceDetailTaxId	= ID.intInvoiceDetailTaxId 
-	, strTaxCode			= ID.strTaxCode
-	, dblAdjustedTax		= ID.dblAdjustedTax
-	, strNotes				= PAYMENTS.strNotes
+	, strTransactionNumber	= TRANSACTIONS.strTransactionNumber
+	, intTransactionId		= TRANSACTIONS.intTransactionId
+	, strInvoiceNumber		= TRANSACTIONS.strTransactionType
+	, strTransactionType	= TRANSACTIONS.strTransactionType
+	, strActivityType		= TRANSACTIONS.strActivityType	
+	, dtmTransactionDate	= TRANSACTIONS.dtmTransactionDate
+	, dblPayment			= TRANSACTIONS.dblPayment
+	, dblInvoiceTotal		= CASE WHEN @ysnPrintDetail = 0 THEN TRANSACTIONS.dblInvoiceTotal ELSE NULL END	
+	, dblInvoiceSubtotal	= TRANSACTIONS.dblInvoiceSubtotal
+	, dblInvoiceLineTotal	= TRANSACTIONS.dblInvoiceLineTotal
+	, dblDiscount			= NULLIF(TRANSACTIONS.dblDiscount, 0)
+	, dblInterest			= NULLIF(TRANSACTIONS.dblInterest, 0)
+	, intItemId				= TRANSACTIONS.intItemId
+	, strItemDescription	= TRANSACTIONS.strItemDescription
+	, dblQtyShipped			= TRANSACTIONS.dblQtyShipped
+	, strUnitMeasure		= TRANSACTIONS.strUnitMeasure		 
+	, dblTax				= TRANSACTIONS.dblTotalTax
+	, strTaxGroup			= TRANSACTIONS.strTaxGroup
+	, intInvoiceDetailTaxId	= TRANSACTIONS.intInvoiceDetailTaxId 
+	, strTaxCode			= TRANSACTIONS.strTaxCode
+	, dblAdjustedTax		= TRANSACTIONS.dblAdjustedTax
+	, strNotes				= TRANSACTIONS.strNotes
  	, dblCreditLimit		= AGING.dblCreditLimit
 	, dblTotalAR			= AGING.dblTotalAR
 	, dblFuture				= AGING.dblFuture
@@ -155,50 +173,9 @@ SELECT strReportDateRange	= 'From ' + CONVERT(NVARCHAR(50), @dtmDateFrom, 101) +
 	, dblPrepayments		= AGING.dblPrepayments
 	, dblPrepaids			= AGING.dblPrepaids
 	, dtmAsOfDate			= AGING.dtmAsOfDate
-FROM tblARInvoice I WITH (NOLOCK)
-LEFT JOIN @temp_aging_table AGING ON I.intEntityCustomerId = AGING.intEntityCustomerId
-LEFT JOIN (
-	SELECT ARID.intInvoiceId
-		 , ARID.intInvoiceDetailId
-		 , IDT.intInvoiceDetailTaxId 
-		 , IDT.strTaxCode
-		 , IDT.dblAdjustedTax
-		 , ARID.intItemId
-		 , ARID.strItemDescription
-		 , dblQtyShipped
-		 , ICUM.strUnitMeasure
-		 , dblTotalTax
-		 , SMTG.strTaxGroup
-	FROM dbo.tblARInvoiceDetail ARID WITH (NOLOCK)
-	LEFT JOIN (
-		SELECT intInvoiceDetailId	 = intTransactionDetailId
-			 , intInvoiceDetailTaxId = intTransactionDetailTaxId
-			 , strTaxCode
-			 , dblAdjustedTax
-		FROM dbo.vyuARTaxDetailReport WITH (NOLOCK)
-		WHERE strTaxTransactionType = 'Invoice'
-	) IDT ON ARID.intInvoiceDetailId = IDT.intInvoiceDetailId
-	LEFT JOIN (
-		SELECT intItemUOMId
-			 , intUnitMeasureId 
-		FROM dbo.tblICItemUOM WITH (NOLOCK)
-	) ICIUOM ON ARID.intItemUOMId = ICIUOM.intItemUOMId
-	INNER JOIN (
-		SELECT intUnitMeasureId
-			 , strUnitMeasure 
-		FROM dbo.tblICUnitMeasure WITH (NOLOCK)
-	) ICUM ON ICIUOM.intUnitMeasureId = ICUM.intUnitMeasureId
-	LEFT JOIN (
-		SELECT intTaxGroupId
-			 , strTaxGroup
-			 , strDescription
-		FROM dbo.tblSMTaxGroup WITH (NOLOCK)
-	) SMTG ON ARID.intTaxGroupId = SMTG.intTaxGroupId
-) ID ON I.intInvoiceId = ID.intInvoiceId
+FROM tblARCustomerAgingStagingTable AGING WITH (NOLOCK)
 INNER JOIN (
 	SELECT C.intEntityId
-		 , strCustomerNumber
-		 , strName 
 		 , strFullAddress = dbo.fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, 0)
 	FROM dbo.vyuARCustomer C WITH (NOLOCK)
 	INNER JOIN (
@@ -209,117 +186,157 @@ INNER JOIN (
 		FROM vyuARCustomerContacts WITH (NOLOCK)
 	) CC ON C.intEntityId = CC.intEntityId
 	    AND CC.ysnDefaultContact = 1
-) CUSTOMER ON I.intEntityCustomerId = CUSTOMER.intEntityId
-OUTER APPLY (
-	SELECT P.intPaymentId
-		 , P.strRecordNumber
-		 , P.dtmDatePaid
-		 , dblPayment = ISNULL(dblPayment, 0) + ISNULL(dblDiscount, 0) - ISNULL(dblInterest, 0)
-		 , PD.intInvoiceId
-		 , P.strNotes
-		 , P.strPaymentMethod
-	FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
-	INNER JOIN (
-		SELECT intPaymentId
-			 , strRecordNumber
-			 , dtmDatePaid
-			 , strPaymentMethod
-			 , ysnPosted
-			 , strNotes = CASE WHEN ISNULL(strPaymentInfo, '') = ''
-							THEN ISNULL(strNotes, '')
-						  ELSE
-							CASE WHEN ISNULL(strNotes, '') = '' THEN strPaymentInfo ELSE strPaymentInfo + ' - ' +  ISNULL(strNotes, '') END
-						  END
-		FROM dbo.tblARPayment WITH (NOLOCK)
-		WHERE ysnPosted = 1
-		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN @dtmDateFrom AND @dtmDateTo
-	) P ON P.intPaymentId = PD.intPaymentId 
-	WHERE PD.intInvoiceId = I.intInvoiceId
+) CUSTOMER ON AGING.intEntityCustomerId = CUSTOMER.intEntityId
+INNER JOIN (
+	SELECT intTransactionId			= I.intInvoiceId
+		 , strTransactionNumber		= I.strInvoiceNumber
+		 , strTransactionType		= I.strTransactionType
+		 , strActivityType			= 'Invoice'
+		 , dtmTransactionDate		= I.dtmDate
+		 , dblInvoiceTotal			= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblInvoiceTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceTotal, 0) END
+		 , dblInvoiceSubtotal		= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblInvoiceSubtotal, 0) * -1 ELSE ISNULL(I.dblInvoiceSubtotal, 0) END
+		 , dblInvoiceLineTotal		= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(ID.dblInvoiceLineTotal, 0) * -1 ELSE ISNULL(ID.dblInvoiceLineTotal, 0) END
+		 , dblPayment				= NULL
+		 , dblDiscount				= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblDiscount, 0) * -1 ELSE ISNULL(I.dblDiscount, 0) END
+		 , dblInterest				= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblInterest, 0) * -1 ELSE ISNULL(I.dblInterest, 0) END
+		 , intEntityCustomerId		= I.intEntityCustomerId
+		 , intItemId				= ID.intItemId
+		 , intInvoiceDetailId		= ID.intInvoiceDetailId
+		 , intInvoiceDetailTaxId	= ID.intInvoiceDetailTaxId
+		 , strNotes					= NULL
+		 , strPaymentMethod			= NULL
+		 , strTaxCode				= ID.strTaxCode
+		 , strTaxGroup				= ID.strTaxGroup
+		 , strItemDescription		= ID.strItemDescription
+		 , strUnitMeasure			= ID.strUnitMeasure
+		 , dblAdjustedTax			= ID.dblAdjustedTax
+		 , dblQtyShipped			= ID.dblQtyShipped
+		 , dblTotalTax				= ID.dblTotalTax
+	FROM dbo.tblARInvoice I WITH (NOLOCK)
+	LEFT JOIN (
+		SELECT ARID.intInvoiceId
+			 , ARID.intInvoiceDetailId
+			 , IDT.intInvoiceDetailTaxId 
+			 , IDT.strTaxCode
+			 , IDT.dblAdjustedTax
+			 , ARID.intItemId
+			 , ARID.strItemDescription
+			 , dblQtyShipped
+			 , dblInvoiceLineTotal	= dbo.fnRoundBanker(ARID.dblQtyShipped * ARID.dblPrice, dbo.fnARGetDefaultDecimal())
+			 , ICUM.strUnitMeasure
+			 , dblTotalTax
+			 , SMTG.strTaxGroup
+		FROM dbo.tblARInvoiceDetail ARID WITH (NOLOCK)
+		LEFT JOIN (
+			SELECT intInvoiceDetailId	 = intTransactionDetailId
+				 , intInvoiceDetailTaxId = intTransactionDetailTaxId
+				 , strTaxCode
+				 , dblAdjustedTax
+			FROM dbo.vyuARTaxDetailReport WITH (NOLOCK)
+			WHERE strTaxTransactionType = 'Invoice'
+		) IDT ON ARID.intInvoiceDetailId = IDT.intInvoiceDetailId
+		LEFT JOIN (
+			SELECT intItemUOMId
+				 , intUnitMeasureId 
+			FROM dbo.tblICItemUOM WITH (NOLOCK)
+		) ICIUOM ON ARID.intItemUOMId = ICIUOM.intItemUOMId
+		LEFT JOIN (
+			SELECT intUnitMeasureId
+				 , strUnitMeasure 
+			FROM dbo.tblICUnitMeasure WITH (NOLOCK)
+		) ICUM ON ICIUOM.intUnitMeasureId = ICUM.intUnitMeasureId
+		LEFT JOIN (
+			SELECT intTaxGroupId
+				 , strTaxGroup
+				 , strDescription
+			FROM dbo.tblSMTaxGroup WITH (NOLOCK)
+		) SMTG ON ARID.intTaxGroupId = SMTG.intTaxGroupId
+		WHERE @ysnPrintDetail = 1
+	) ID ON I.intInvoiceId = ID.intInvoiceId
+	WHERE I.ysnPosted = 1
+	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
+	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
+	AND I.intAccountId IN (
+		SELECT A.intAccountId
+		FROM dbo.tblGLAccount A WITH (NOLOCK)
+		INNER JOIN (SELECT intAccountSegmentId
+							, intAccountId
+					FROM dbo.tblGLAccountSegmentMapping WITH (NOLOCK)
+		) ASM ON A.intAccountId = ASM.intAccountId
+		INNER JOIN (SELECT intAccountSegmentId
+							, intAccountCategoryId
+							, intAccountStructureId
+					FROM dbo.tblGLAccountSegment WITH (NOLOCK)
+		) GLAS ON ASM.intAccountSegmentId = GLAS.intAccountSegmentId
+		INNER JOIN (SELECT intAccountStructureId                 
+					FROM dbo.tblGLAccountStructure WITH (NOLOCK)
+					WHERE strType = 'Primary'
+		) AST ON GLAS.intAccountStructureId = AST.intAccountStructureId
+		INNER JOIN (SELECT intAccountCategoryId
+							, strAccountCategory 
+					FROM dbo.tblGLAccountCategory WITH (NOLOCK)
+					WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments')
+		) AC ON GLAS.intAccountCategoryId = AC.intAccountCategoryId
+	)
 
 	UNION ALL
 
-	SELECT APP.intPaymentId		 
-		 , APP.strPaymentRecordNum
-		 , APP.dtmDatePaid
-		 , dblPayment = ISNULL(dblPayment, 0) + ISNULL(dblDiscount, 0) - ISNULL(dblInterest, 0)
-		 , APPD.intInvoiceId 
-		 , APP.strNotes
-		 , strPaymentMethod	 = NULL
-	FROM dbo.tblAPPaymentDetail APPD WITH (NOLOCK)
-	INNER JOIN (
-		SELECT intPaymentId
-			 , strPaymentRecordNum
-			 , dtmDatePaid
-			 , ysnPosted
-			 , strNotes = CASE WHEN ISNULL(strPaymentInfo, '') = ''
-							THEN ISNULL(strNotes, '')
-						  ELSE
-							CASE WHEN ISNULL(strNotes, '') = '' THEN strPaymentInfo ELSE strPaymentInfo + ' - ' +  ISNULL(strNotes, '') END
-						  END
-		FROM dbo.tblAPPayment WITH (NOLOCK)
-		WHERE ysnPosted = 1
-		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN @dtmDateFrom AND @dtmDateTo
-	) APP ON APP.intPaymentId = APPD.intPaymentId		 
-	WHERE APPD.intInvoiceId = I.intInvoiceId
-
-	UNION ALL
-
-	SELECT intPaymentId = PC.intPrepaymentId		 
-		 , strRecordNumber = PCI.strInvoiceNumber
-		 , dtmDatePaid = PCI.dtmPostDate
-		 , PC.dblAppliedInvoiceAmount
-		 , PC.intInvoiceId
-		 , strNotes = ''
-		 , strPaymentMethod = NULL
-	FROM dbo.tblARPrepaidAndCredit PC WITH (NOLOCK)
-	INNER JOIN (
-		SELECT intInvoiceId
-			 , strInvoiceNumber
-			 , dtmPostDate
-		FROM dbo.tblARInvoice WITH (NOLOCK)
-		WHERE ysnPosted = 1
-		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmPostDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
-	) PCI ON PC.intPrepaymentId = PCI.intInvoiceId 
-	     AND PC.ysnApplied = 1
-	WHERE PC.intInvoiceId = I.intInvoiceId
-) PAYMENTS
+	SELECT intTransactionId			= P.intPaymentId
+		 , strTransactionNumber		= P.strRecordNumber
+		 , strTransactionType		= 'Payment'
+		 , strActivityType			= 'Payment'
+		 , dtmTransactionDate		= P.dtmDatePaid
+		 , dblInvoiceTotal			= NULL		 
+		 , dblInvoiceSubtotal		= NULL
+		 , dblInvoiceLineTotal		= NULL
+		 , dblPayment				= P.dblAmountPaid		 
+		 , dblDiscount				= NULL
+		 , dblInterest				= NULL
+		 , intEntityCustomerId		= P.intEntityCustomerId
+		 , intItemId				= NULL
+		 , intInvoiceDetailId		= NULL
+		 , intInvoiceDetailTaxId	= NULL
+		 , strNotes					= CONCAT(ISNULL(P.strPaymentInfo, ''), '', CASE WHEN ISNULL(P.strNotes, '') <> '' THEN ' - ' + P.strNotes ELSE '' END)
+		 , strPaymentMethod			= P.strPaymentMethod
+		 , strTaxCode				= NULL
+		 , strTaxGroup				= NULL
+		 , strItemDescription		= NULL
+		 , strUnitMeasure			= NULL
+		 , dblAdjustedTax			= NULL
+		 , dblQtyShipped			= NULL
+		 , dblTotalTax				= NULL
+	FROM dbo.tblARPayment P WITH (NOLOCK)
+	WHERE ysnPosted = 1
+	  AND ysnInvoicePrepayment = 0
+	  AND ISNULL(dblAmountPaid, 0) <> 0
+	  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN @dtmDateFrom AND @dtmDateTo
+) TRANSACTIONS ON AGING.intEntityCustomerId = TRANSACTIONS.intEntityCustomerId
 OUTER APPLY (
 	SELECT TOP 1 P.intEntityCustomerId
-			   , P.dtmDatePaid 
+			   , P.dtmDatePaid
+			   , P.dblAmountPaid
     FROM dbo.tblARPayment P WITH (NOLOCK)
-	WHERE P.intEntityCustomerId = I.intEntityCustomerId
+	WHERE P.intEntityCustomerId = AGING.intEntityCustomerId
 		AND P.ysnPosted = 1 
 		AND P.strPaymentMethod != 'CF Invoice'
 	ORDER BY P.intPaymentId DESC
 ) PAYMENT
-WHERE I.ysnPosted = 1
-AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
-AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
-AND I.intAccountId IN (
-	SELECT A.intAccountId
-	FROM dbo.tblGLAccount A WITH (NOLOCK)
-	INNER JOIN (SELECT intAccountSegmentId
-						, intAccountId
-				FROM dbo.tblGLAccountSegmentMapping WITH (NOLOCK)
-	) ASM ON A.intAccountId = ASM.intAccountId
-	INNER JOIN (SELECT intAccountSegmentId
-						, intAccountCategoryId
-						, intAccountStructureId
-				FROM dbo.tblGLAccountSegment WITH (NOLOCK)
-	) GLAS ON ASM.intAccountSegmentId = GLAS.intAccountSegmentId
-	INNER JOIN (SELECT intAccountStructureId                 
-				FROM dbo.tblGLAccountStructure WITH (NOLOCK)
-				WHERE strType = 'Primary'
-	) AST ON GLAS.intAccountStructureId = AST.intAccountStructureId
-	INNER JOIN (SELECT intAccountCategoryId
-						, strAccountCategory 
-				FROM dbo.tblGLAccountCategory WITH (NOLOCK)
-				WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments')
-	) AC ON GLAS.intAccountCategoryId = AC.intAccountCategoryId
-)
-AND (@strCustomerName IS NULL OR CUSTOMER.strName LIKE '%'+@strCustomerName+'%')
-AND (@strInvoiceNumber IS NULL OR I.strInvoiceNumber LIKE '%'+@strInvoiceNumber+'%')
-AND (@strRecordNumber IS NULL OR PAYMENTS.strRecordNumber LIKE '%'+@strRecordNumber+'%')
-AND (@strPaymentMethod IS NULL OR PAYMENTS.strPaymentMethod LIKE '%'+@strPaymentMethod+'%')
-ORDER BY 
-	intEntityCustomerId, dtmDatePaid DESC, intInvoiceId, strTransactionType, strType, intItemId
+OUTER APPLY (
+	SELECT strAccountStatusCode = LEFT(strAccountStatusCode, LEN(strAccountStatusCode) - 1)
+	FROM (
+		SELECT CAST(ARAS.strAccountStatusCode AS VARCHAR(200))  + ', '
+		FROM dbo.tblARCustomerAccountStatus CAS WITH(NOLOCK)
+		INNER JOIN (
+			SELECT intAccountStatusId
+					, strAccountStatusCode
+			FROM dbo.tblARAccountStatus WITH (NOLOCK)
+		) ARAS ON CAS.intAccountStatusId = ARAS.intAccountStatusId
+		WHERE CAS.intEntityCustomerId = AGING.intEntityCustomerId
+		FOR XML PATH ('')
+	) SC (strAccountStatusCode)
+) STATUSCODES
+WHERE (@strInvoiceNumber IS NULL OR TRANSACTIONS.strTransactionNumber LIKE '%'+@strInvoiceNumber+'%')
+  AND (@strRecordNumber IS NULL OR TRANSACTIONS.strTransactionNumber LIKE '%'+@strRecordNumber+'%')
+  AND (@strPaymentMethod IS NULL OR TRANSACTIONS.strPaymentMethod LIKE '%'+@strPaymentMethod+'%')
+  AND (@strAccountStatusCode IS NULL OR STATUSCODES.strAccountStatusCode LIKE '%'+@strAccountStatusCode+'%')
+ORDER BY AGING.strCustomerName, TRANSACTIONS.dtmTransactionDate

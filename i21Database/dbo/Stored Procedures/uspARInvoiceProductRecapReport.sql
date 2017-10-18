@@ -73,7 +73,7 @@ FROM
 			 , intCompanyLocationId		=	ARI.intCompanyLocationId
 			 , strTransactionType		=	'Items'
 			 , strType					=	NULL
-			 , dblInvoiceTotal			=	0.000000
+			 , dblInvoiceTotal			=	SUM(ARID.dblQtyShipped) * SUM(ARID.dblPrice)
 			 , intItemId				=	ARID.intItemId
 			 , strItemDescription		=	ARID.strItemDescription
 			 , dblQtyShipped			=	SUM(ARID.dblQtyShipped)
@@ -85,6 +85,7 @@ FROM
 				 , intItemId
 				 , strItemDescription	= CASE WHEN ISNULL(strItemDescription,'') = '' THEN 'MISC' ELSE strItemDescription END
 				 , dblQtyShipped
+				 , dblPrice
 				 , intTaxGroupId
 			 FROM dbo.tblARInvoiceDetail 
 		) ARID ON ARI.intInvoiceId = ARID.intInvoiceId
@@ -122,7 +123,7 @@ FROM
 			 , strType					= NULL
 		     , dblInvoiceTotal			= SUM(ARIDT.dblAdjustedTax)
 			 , intItemId				= NULL
-			 , dblQtyShipped			= CASE WHEN SUM(ISNULL(ARIDT.dblRate, 0)) > 0 THEN SUM(ISNULL(ARIDT.dblAdjustedTax, 0)) / SUM(ISNULL(ARIDT.dblRate, 0)) ELSE 0 END
+			 , dblQtyShipped			= 0.000000
 			 , intTaxCodeId				= ARIDT.intTaxCodeId
 		FROM dbo.tblARInvoice ARI WITH (NOLOCK)
 		INNER JOIN (
