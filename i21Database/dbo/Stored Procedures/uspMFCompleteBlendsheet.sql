@@ -4,6 +4,8 @@
 	,@strLotNumber NVARCHAR(50) = '' OUT
 	,@intLoadDistributionDetailId INT = NULL
 	,@dtmCurrentDate DATETIME = NULL 
+	,@ysnRecap BIT = 0
+    ,@strBatchId NVARCHAR(50)='' OUT
 )
 AS
 BEGIN TRY
@@ -290,7 +292,7 @@ BEGIN TRY
 		SELECT @strXml = REPLACE(@strXml, '<intWorkOrderId>0</intWorkOrderId>', '<intWorkOrderId>' + CONVERT(VARCHAR, @intWorkOrderId) + '</intWorkOrderId>')
 
 		--Consume Lots
-		EXEC [uspMFEndBlendSheet] @strXml
+		EXEC [uspMFEndBlendSheet] @strXml,@ysnRecap,''
 	END
 
 	IF @strLotTracking = 'No'
@@ -367,7 +369,7 @@ BEGIN TRY
 		SET @strProduceXml = @strProduceXml + '</root>'
 
 		EXEC uspMFCompleteWorkOrder @strXML = @strProduceXml
-			,@strOutputLotNumber = @strOutputLotNumber OUT
+			,@strOutputLotNumber = @strOutputLotNumber OUT,@ysnRecap=@ysnRecap,@strRetBatchId=@strBatchId OUT
 	END
 
 	UPDATE tblMFWorkOrder

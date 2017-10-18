@@ -30,6 +30,7 @@
 	,@intInputStorageLocationId INT = NULL
 	,@ysnFillPartialPallet BIT = 0
 	,@intSpecialPalletLotId INT = NULL
+	,@ysnRecap BIT = 0
 	)
 AS
 BEGIN
@@ -355,7 +356,7 @@ BEGIN
 		END
 
 		EXEC uspMFPostProduction 1
-			,0
+			,@ysnRecap
 			,@intWorkOrderId
 			,@intItemId
 			,@intUserId

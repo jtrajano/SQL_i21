@@ -5756,6 +5756,7 @@
     <Build Include="dbo\Tables\tblAPBasisAdvanceFuture.sql" />
     <Build Include="dbo\Tables\tblAPBasisAdvanceStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateBasisAdvance.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFPostRecap.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -1,8 +1,8 @@
-﻿CREATE PROCEDURE uspMFUnpostProducedLot (@strXML NVARCHAR(MAX))
+﻿CREATE PROCEDURE uspMFUnpostProducedLot (@strXML NVARCHAR(MAX),@ysnRecap BIT = 0,@strBatchId NVARCHAR(50)='' OUT)
 AS
 BEGIN TRY
 	DECLARE @intWorkOrderId INT
-		,@strBatchId NVARCHAR(50)
+		--,@strBatchId NVARCHAR(50)
 		,@strWorkOrderNo NVARCHAR(50)
 		,@dtmDate DATETIME
 		,@dblWeightPerUnit NUMERIC(38, 20)
@@ -139,8 +139,9 @@ BEGIN TRY
 		,@intUserId
 		,0
 
-	EXEC dbo.uspGLBookEntries @GLEntries
-		,0
+	If ISNULL(@ysnRecap,0)=0
+		EXEC dbo.uspGLBookEntries @GLEntries
+			,0
 
 	IF @intAttributeTypeId = 2
 	BEGIN
@@ -196,6 +197,17 @@ BEGIN TRY
 			,@intStorageLocationId = @intStorageLocationId
 			,@dtmProductionDate = @dtmDate
 	END
+
+	If ISNULL(@ysnRecap,0)=1
+	Begin
+		--Create Temp Table if not exists, so that insert statement for the temp table will not fail.
+		IF OBJECT_ID('tempdb..#tblRecap') IS NULL
+			Select * into #tblRecap from @GLEntries Where 1=2
+
+		--Insert Recap Data to temp table
+		Insert Into #tblRecap
+		Select * from @GLEntries
+	End
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION
