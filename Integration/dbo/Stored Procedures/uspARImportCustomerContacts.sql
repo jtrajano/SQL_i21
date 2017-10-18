@@ -88,20 +88,20 @@ SELECT ED.coefd_contact_id, ED.coefd_cus_no,
 		FROM ssconmst sscon
 		WHERE 
 			sscon_cus_no LIKE '%[a-z0-9]%'
-			AND 
-				(
-					sscon_email not in 
-					(
-						select isnull(G.strEmail, '') COLLATE SQL_Latin1_General_CP1_CS_AS 
-						from tblEMEntity E
-							join tblEMEntityToContact F
-								on E.intEntityId = F.intEntityId
-							join tblEMEntity G
-								on F.intEntityContactId = G.intEntityId
-						WHERE isnull(G.strEmail, '') like '%[a-z0-9]%' 
-					) 
-					OR isnull(sscon_email, '') = ''
-				)
+			-- AND 
+			-- 	(
+			-- 		sscon_email not in 
+			-- 		(
+			-- 			select isnull(G.strEmail, '') COLLATE SQL_Latin1_General_CP1_CS_AS 
+			-- 			from tblEMEntity E
+			-- 				join tblEMEntityToContact F
+			-- 					on E.intEntityId = F.intEntityId
+			-- 				join tblEMEntity G
+			-- 					on F.intEntityContactId = G.intEntityId
+			-- 			WHERE isnull(G.strEmail, '') like '%[a-z0-9]%' 
+			-- 		) 
+			-- 		OR isnull(sscon_email, '') = ''
+			-- 	)
 			AND sscon_cus_no in (select strCustomerNumber collate SQL_Latin1_General_CP1_CS_AS from tblARCustomer)
 			-- AND rtrim(ltrim(sscon_last_name)) + ', ' + rtrim(ltrim(sscon_first_name))
 			-- not in (
@@ -197,8 +197,17 @@ SELECT ED.coefd_contact_id, ED.coefd_cus_no,
 					--exec [uspEntityCreateEntityContact] @EntityContact, @intContactId OUT
 			END
 			BEGIN --LOCATION
+
+				DECLARE @EntityLocationName NVARCHAR(50)
+				SET @EntityLocationName = @Name +'_'+@ContactNumber+ 'Loc'
+				DECLARE @LoopCounter INT
+				set @LoopCounter = 1
+				WHILE EXISTS(SELECT TOP 1 1 FROM tblEMEntityLocation where strLocationName = @EntityLocationName)
+				BEGIN
+					SET @EntityLocationName = CAST(@LoopCounter AS NVARCHAR) + @EntityLocationName
+				END
 				insert into tblEMEntityLocation(intEntityId, strLocationName, ysnDefaultLocation)
-				select @intEntityId, @Name +'_'+@ContactNumber+ 'Loc', 0
+				select @intEntityId, @EntityLocationName, 0
 			END
 			BEGIN -- Create Customer to Contact
 
@@ -243,15 +252,18 @@ BEGIN
 	LEFT JOIN tblEMEntity Con 
 		ON ssconmst.sscon_contact_id COLLATE Latin1_General_CI_AS = Con.strContactNumber COLLATE Latin1_General_CI_AS
 	WHERE Con.strContactNumber IS NULL AND ssconmst.sscon_contact_id  = UPPER(ssconmst.sscon_contact_id ) COLLATE Latin1_General_CS_AS
-		and sscon_contact_id not in (select strContactNumber collate SQL_Latin1_General_CP1_CS_AS  
+		and sscon_cus_no LIKE '%[a-z0-9]%'			
+		AND sscon_cus_no in (select strCustomerNumber collate SQL_Latin1_General_CP1_CS_AS from tblARCustomer)
+			-- AND rtrim(ltrim(sscon_last_name)) + ', ' + rtrim(ltrim(sscon_first_name))
+			-- not in (
+			-- 	select G.strName COLLATE SQL_Latin1_General_CP1_CS_AS from tblEMEntity E
+			-- 		join tblEMEntityToContact F
+			-- 			on E.intEntityId = F.intEntityId
+			-- 		join tblEMEntity G
+			-- 			on F.intEntityContactId = G.intEntityId
+			-- )
+			and sscon_contact_id not in (select strContactNumber collate SQL_Latin1_General_CP1_CS_AS  
 											from tblEMEntity where isnull(strContactMethod,'') <> '')
-	-- AND rtrim(ltrim(sscon_last_name)) + ', ' + rtrim(ltrim(sscon_first_name))
-	-- NOT IN (select G.strName COLLATE SQL_Latin1_General_CP1_CS_AS 
-	-- 			from tblEMEntity E 
-	-- 			join tblEMEntityToContact F
-	-- 				on E.intEntityId = F.intEntityId
-	-- 			join tblEMEntity G
-	-- 				on F.intEntityContactId = G.intEntityId)
 	
 END
 END
