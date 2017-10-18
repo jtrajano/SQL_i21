@@ -5697,6 +5697,7 @@
     <Build Include="dbo\Views\vyuCMMultiCurrencyRevalue.sql" />
     <Build Include="dbo\Views\vyuGRGetUnpaidStorageFees.sql" />
     <Build Include="dbo\Stored Procedures\uspGRProcessUnpaidStorageFees.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFPostRecap.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

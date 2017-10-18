@@ -7,7 +7,7 @@ CREATE PROCEDURE [dbo].[uspMFPostConsumption] @ysnPost BIT = 0
 	,@intBatchId INT = NULL
 	,@ysnPostGL BIT=1
 	,@intLoadDistributionDetailId INT = NULL
-	,@dtmDate DATETIME = NULL 
+	,@dtmDate DATETIME = NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -354,7 +354,7 @@ BEGIN
 		,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 		,@intUserId
 
-	IF @ysnPostGL=1 AND EXISTS(Select *from @GLEntries)
+	IF @ysnPostGL=1 AND EXISTS(Select *from @GLEntries) AND ISNULL(@ysnRecap,0)=0
 	BEGIN
 		EXEC dbo.uspGLBookEntries @GLEntries
 			,@ysnPost
@@ -572,7 +572,7 @@ BEGIN
 			AND ISNULL(GLEntriesForOtherCost.ysnInventoryCost, 0) = 0
 			AND ISNULL(GLEntriesForOtherCost.ysnPrice, 0) = 0
 
-		IF EXISTS(SELECT *FROM @GLEntries)
+		IF EXISTS(SELECT *FROM @GLEntries) AND ISNULL(@ysnRecap,0)=0
 		BEGIN
 			EXEC dbo.uspGLBookEntries @GLEntries
 				,@ysnPost
@@ -868,4 +868,15 @@ BEGIN
 		FROM @tblMFLot
 		WHERE intRecordId > @intRecordId
 	END
+
+	If ISNULL(@ysnRecap,0)=1
+	Begin
+		--Create Temp Table if not exists, so that insert statement for the temp table will not fail.
+		IF OBJECT_ID('tempdb..#tblRecap') IS NULL
+			Select * into #tblRecap from @GLEntries Where 1=2
+
+		--Insert Recap Data to temp table
+		Insert Into #tblRecap
+		Select * from @GLEntries
+	End
 END

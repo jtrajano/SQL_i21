@@ -2,7 +2,9 @@
 	@strXML NVARCHAR(MAX)
 	,@strOutputLotNumber NVARCHAR(50) = '' OUTPUT
 	,@intParentLotId INT = 0 OUTPUT
-	,@dtmCurrentDate DATETIME = NULL 
+	,@dtmCurrentDate DATETIME = NULL
+	,@ysnRecap BIT = 0 
+	,@strRetBatchId NVARCHAR(40) = '' OUTPUT
 )
 AS
 BEGIN TRY
@@ -40,7 +42,7 @@ BEGIN TRY
 		,@intSubLocationId INT
 		,@ysnNegativeQtyAllowed BIT
 		,@ysnSubLotAllowed BIT
-		,@strRetBatchId NVARCHAR(40)
+		--,@strRetBatchId NVARCHAR(40)
 		,@intLotId INT
 		,@strLotTracking NVARCHAR(50)
 		,@intProductionTypeId INT
@@ -727,6 +729,7 @@ BEGIN TRY
 				,@strRetBatchId = @strRetBatchId OUTPUT
 				,@intBatchId = @intBatchId
 				,@ysnPostConsumption = @ysnPostConsumption
+				,@ysnRecap = @ysnRecap
 		END
 		ELSE
 		BEGIN
@@ -747,6 +750,7 @@ BEGIN TRY
 				,@strRetBatchId = @strRetBatchId OUTPUT
 				,@intBatchId = @intBatchId
 				,@ysnPostConsumption = @ysnPostConsumption
+				,@ysnRecap = @ysnRecap
 				
 		END
 
@@ -845,6 +849,7 @@ BEGIN TRY
 					,@intInputStorageLocationId = @intInputLotStorageLocationId
 					,@ysnFillPartialPallet=@ysnFillPartialPallet
 					,@intSpecialPalletLotId=@intSpecialPalletLotId
+					,@ysnRecap = @ysnRecap
 
 				IF @intLotStatusId IS NOT NULL
 					AND NOT EXISTS (
@@ -921,6 +926,7 @@ BEGIN TRY
 				,@intInputStorageLocationId = @intInputLotStorageLocationId
 				,@ysnFillPartialPallet=@ysnFillPartialPallet
 				,@intSpecialPalletLotId=@intSpecialPalletLotId
+				,@ysnRecap = @ysnRecap
 
 			IF @intLotStatusId IS NOT NULL
 				AND NOT EXISTS (

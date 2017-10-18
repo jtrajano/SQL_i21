@@ -482,8 +482,9 @@ BEGIN
 		AND ISNULL(GLEntriesForOtherCost.ysnInventoryCost, 0) = 0
 		AND ISNULL(GLEntriesForOtherCost.ysnPrice, 0) = 0
 
-	EXEC dbo.uspGLBookEntries @GLEntries
-		,@ysnPost
+	IF ISNULL(@ysnRecap,0)=0
+		EXEC dbo.uspGLBookEntries @GLEntries
+			,@ysnPost
 END
 
 --------------------------------------------------------------------------------------------  
@@ -668,8 +669,9 @@ BEGIN
 	FROM @GLEntries
 	WHERE strTransactionType NOT IN ('Produce') 
 
-	EXEC dbo.uspGLBookEntries @GLEntries
-		,@ysnPost
+	IF ISNULL(@ysnRecap,0)=0
+		EXEC dbo.uspGLBookEntries @GLEntries
+			,@ysnPost
 
 	DROP TABLE #tmpBlendIngredients
 
@@ -680,4 +682,15 @@ BEGIN
 		WHERE intWorkOrderId = @intWorkOrderId
 			AND intBatchId = @intBatchId
 	END
+
+	If ISNULL(@ysnRecap,0)=1
+	Begin
+		--Create Temp Table if not exists, so that insert statement for the temp table will not fail.
+		IF OBJECT_ID('tempdb..#tblRecap') IS NULL
+			Select * into #tblRecap from @GLEntries Where 1=2
+
+		--Insert Recap Data to temp table
+		Insert Into #tblRecap
+		Select * from @GLEntries
+	End
 END

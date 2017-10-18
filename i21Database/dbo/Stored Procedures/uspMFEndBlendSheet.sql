@@ -1,6 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFEndBlendSheet] 
 (
 	@strXml NVARCHAR(MAX)
+   ,@ysnRecap BIT = 0
+   ,@strBatchId NVARCHAR(50)='' OUT
 )
 AS
 BEGIN TRY
@@ -108,7 +110,9 @@ End
 		Set @strConsumeXml=@strConsumeXml + '<intProduceUnitMeasureId>' + convert(varchar,@intItemUOMId) + '</intProduceUnitMeasureId>'
 		Set @strConsumeXml=@strConsumeXml + '</root>'
 
-		Exec uspMFCompleteWorkOrder @strXML=@strConsumeXml,@strOutputLotNumber=@strOutputLotNumber OUT
+		Exec uspMFCompleteWorkOrder @strXML=@strConsumeXml,@strOutputLotNumber=@strOutputLotNumber OUT,@ysnRecap=@ysnRecap,@strRetBatchId=@strRetBatchId OUT
+
+		Set @strBatchId=@strRetBatchId
 
 		Update tblMFWorkOrder 
 		Set dblQuantity=(Select sum(dblQuantity) From tblMFWorkOrderConsumedLot Where intWorkOrderId=@intWorkOrderId)
