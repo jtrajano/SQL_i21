@@ -68,7 +68,9 @@ SELECT	Total.intFiscalYear,
 			INNER JOIN tblPATRefundRate RR
 				ON RR.intRefundTypeId = RRD.intRefundTypeId
 			INNER JOIN tblARCustomer ARC
-				ON ARC.intEntityCustomerId = B.intCustomerPatronId
+				ON ARC.intEntityId = B.intCustomerPatronId
+			INNER JOIN vyuEMEntityType EMT
+				ON EMT.intEntityId = B.intCustomerPatronId AND EMT.Customer = 1 AND EMT.Vendor = 1
 			CROSS APPLY tblPATCompanyPreference ComPref
 			WHERE B.ysnRefundProcessed <> 1 AND B.dblVolume <> 0 AND ARC.strStockStatus IN (SELECT strStockStatus FROM @tblEligibleStockStatus) 
 			AND B.intFiscalYear = @intFiscalYearId
@@ -81,7 +83,7 @@ SELECT	Total.intFiscalYear,
 INNER JOIN tblPATRefundRate RR
             ON RR.intRefundTypeId = Total.intRefundTypeId
 LEFT OUTER JOIN tblAPVendor APV
-	ON APV.intEntityVendorId = Total.intCustomerPatronId
+	ON APV.intEntityId = Total.intCustomerPatronId
 CROSS APPLY tblPATCompanyPreference ComPref
 CROSS APPLY tblSMCompanyLocation CompLoc WHERE CompLoc.intCompanyLocationId = @intCompanyLocationId
 GROUP BY Total.intFiscalYear,
@@ -119,7 +121,7 @@ SELECT	Total.intFiscalYear,
 			INNER JOIN tblPATRefundRate RR
 					ON RR.intRefundTypeId = RRD.intRefundTypeId
 			INNER JOIN tblARCustomer ARC
-					ON ARC.intEntityCustomerId = B.intCustomerPatronId
+					ON ARC.intEntityId = B.intCustomerPatronId
 			CROSS APPLY tblPATCompanyPreference ComPref
 			WHERE B.ysnRefundProcessed <> 1 AND B.dblVolume <> 0 AND ARC.strStockStatus NOT IN (SELECT strStockStatus FROM @tblEligibleStockStatus) 
 			AND B.intFiscalYear = @intFiscalYearId
