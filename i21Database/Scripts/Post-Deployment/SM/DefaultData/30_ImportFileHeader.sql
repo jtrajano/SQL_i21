@@ -232,9 +232,9 @@ BEGIN
 	END
 	ELSE
 	BEGIN
-		DECLARE @importFileRecordMarkerId INT
+		DECLARE @importFileRecordMarkerId2 INT
 
-		SELECT TOP 1 @importFileRecordMarkerId = intImportFileRecordMarkerId
+		SELECT TOP 1 @importFileRecordMarkerId2 = intImportFileRecordMarkerId
 		FROM tblSMImportFileRecordMarker
 		WHERE intImportFileHeaderId = @FileHeaderId
 			AND strRecordMarker = 'Effective Time'
@@ -242,13 +242,13 @@ BEGIN
 		UPDATE tblSMImportFileRecordMarker
 		SET strFormat = 'HHMM'
 			, intPosition = 9
-		WHERE intImportFileRecordMarkerId = @importFileRecordMarkerId
+		WHERE intImportFileRecordMarkerId = @importFileRecordMarkerId2
 
 		UPDATE tblSMImportFileColumnDetail
 		SET intPosition = 4
 			, intLevel = 4
 		WHERE intImportFileHeaderId = @FileHeaderId
-			AND intImportFileRecordMarkerId = @importFileRecordMarkerId
+			AND intImportFileRecordMarkerId = @importFileRecordMarkerId2
 	END
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMImportFileRecordMarker WHERE strRecordMarker = 'Item Id' AND intImportFileHeaderId = @FileHeaderId)
