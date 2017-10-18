@@ -86,19 +86,31 @@ FROM
 	, SSTMethod				= (SELECT TOP 1 CASE ISNULL(strCalculationMethod, 'Percentage') WHEN 'Percentage' THEN 'P' ELSE 'U' END FROM tblSMTaxCodeRate a WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'SST' ORDER BY dtmEffectiveDate DESC)
 	, SSTOnFET				= 
 	(
-		SELECT c.strTaxCodeReference
+		SELECT TOP 1 'Y'
 		FROM tblSMTaxCode a 
 		CROSS APPLY fnGetRowsFromDelimitedValues(a.strTaxableByOtherTaxes) b 
-		INNER JOIN tblETExportTaxCodeMapping c ON b.intID = c.intTaxCodeId 
-		WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'SST' AND c.strTaxCodeReference = 'FET'
+		INNER JOIN tblETExportTaxCodeMapping c ON b.intID = c.intTaxCodeId AND c.strTaxCodeReference = 'SST' 
+		INNER JOIN tblETExportTaxCodeMapping d ON a.intTaxCodeId = d.intTaxCodeId AND d.strTaxCodeReference = 'FET'
+		WHERE a.intTaxCodeId = TaxCode.intTaxCodeId 
+		--SELECT c.strTaxCodeReference
+		--FROM tblSMTaxCode a 
+		--CROSS APPLY fnGetRowsFromDelimitedValues(a.strTaxableByOtherTaxes) b 
+		--INNER JOIN tblETExportTaxCodeMapping c ON b.intID = c.intTaxCodeId 
+		--WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'SST' AND c.strTaxCodeReference = 'FET'		
 	)
 	, SSTOnSET				= 
 	(
-		SELECT c.strTaxCodeReference
+		SELECT TOP 1 'Y'
 		FROM tblSMTaxCode a 
 		CROSS APPLY fnGetRowsFromDelimitedValues(a.strTaxableByOtherTaxes) b 
-		INNER JOIN tblETExportTaxCodeMapping c ON b.intID = c.intTaxCodeId 
-		WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'SST' AND c.strTaxCodeReference = 'SET'
+		INNER JOIN tblETExportTaxCodeMapping c ON b.intID = c.intTaxCodeId AND c.strTaxCodeReference = 'SST' 
+		INNER JOIN tblETExportTaxCodeMapping d ON a.intTaxCodeId = d.intTaxCodeId AND d.strTaxCodeReference = 'SET'
+		WHERE a.intTaxCodeId = TaxCode.intTaxCodeId 
+		--SELECT c.strTaxCodeReference
+		--FROM tblSMTaxCode a 
+		--CROSS APPLY fnGetRowsFromDelimitedValues(a.strTaxableByOtherTaxes) b 
+		--INNER JOIN tblETExportTaxCodeMapping c ON b.intID = c.intTaxCodeId 
+		--WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'SST' AND c.strTaxCodeReference = 'SET'
 	)
 	, EFTOnSST				= 'N'
 	, PSTRatePerUnit		= (SELECT TOP 1 dblRate FROM tblSMTaxCodeRate a WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'PST' ORDER BY dtmEffectiveDate DESC)
@@ -111,11 +123,17 @@ FROM
 	, Locale1EFT			= 'N'
 	, Locale1SSTOnLC1		= 
 	(
-		SELECT c.strTaxCodeReference
+		SELECT TOP 1 'Y'
 		FROM tblSMTaxCode a 
 		CROSS APPLY fnGetRowsFromDelimitedValues(a.strTaxableByOtherTaxes) b 
-		INNER JOIN tblETExportTaxCodeMapping c ON b.intID = c.intTaxCodeId 
-		WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'SST' AND c.strTaxCodeReference = 'LC1'
+		INNER JOIN tblETExportTaxCodeMapping c ON b.intID = c.intTaxCodeId AND c.strTaxCodeReference = 'SST' 
+		INNER JOIN tblETExportTaxCodeMapping d ON a.intTaxCodeId = d.intTaxCodeId AND d.strTaxCodeReference = 'LC1'
+		WHERE a.intTaxCodeId = TaxCode.intTaxCodeId 
+		--SELECT c.strTaxCodeReference
+		--FROM tblSMTaxCode a 
+		--CROSS APPLY fnGetRowsFromDelimitedValues(a.strTaxableByOtherTaxes) b 
+		--INNER JOIN tblETExportTaxCodeMapping c ON b.intID = c.intTaxCodeId 
+		--WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'SST' AND c.strTaxCodeReference = 'LC1'
 	)
 	, Locale1LC1OnFET		= 'N'
 	, Locale2Description	= (SELECT strDescription FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC2')
@@ -125,11 +143,17 @@ FROM
 	, Locale2EFT			= 'N'
 	, Locale2SSTOnLC2		=  
 	(
-		SELECT c.strTaxCodeReference
+		SELECT TOP 1 'Y'
 		FROM tblSMTaxCode a 
 		CROSS APPLY fnGetRowsFromDelimitedValues(a.strTaxableByOtherTaxes) b 
-		INNER JOIN tblETExportTaxCodeMapping c ON b.intID = c.intTaxCodeId 
-		WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'SST' AND c.strTaxCodeReference = 'LC2'
+		INNER JOIN tblETExportTaxCodeMapping c ON b.intID = c.intTaxCodeId AND c.strTaxCodeReference = 'SST' 
+		INNER JOIN tblETExportTaxCodeMapping d ON a.intTaxCodeId = d.intTaxCodeId AND d.strTaxCodeReference = 'LC2'
+		WHERE a.intTaxCodeId = TaxCode.intTaxCodeId 
+		--SELECT c.strTaxCodeReference
+		--FROM tblSMTaxCode a 
+		--CROSS APPLY fnGetRowsFromDelimitedValues(a.strTaxableByOtherTaxes) b 
+		--INNER JOIN tblETExportTaxCodeMapping c ON b.intID = c.intTaxCodeId 
+		--WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'SST' AND c.strTaxCodeReference = 'LC2'
 	)
 	, Locale2LC2OnFET		= 'N'	
 	, Locale3Description	= (SELECT strDescription FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC3')
@@ -139,12 +163,18 @@ FROM
 	, Locale3EFT			= 'N'
 	, Locale3SSTOnLC3		= 
 	(
-			SELECT c.strTaxCodeReference
-			FROM tblSMTaxCode a 
-			CROSS APPLY fnGetRowsFromDelimitedValues(a.strTaxableByOtherTaxes) b 
-			INNER JOIN tblETExportTaxCodeMapping c ON b.intID = c.intTaxCodeId 
-			WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'SST' AND c.strTaxCodeReference = 'LC3'
-		) 	
+		SELECT TOP 1 'Y'
+		FROM tblSMTaxCode a 
+		CROSS APPLY fnGetRowsFromDelimitedValues(a.strTaxableByOtherTaxes) b 
+		INNER JOIN tblETExportTaxCodeMapping c ON b.intID = c.intTaxCodeId AND c.strTaxCodeReference = 'SST' 
+		INNER JOIN tblETExportTaxCodeMapping d ON a.intTaxCodeId = d.intTaxCodeId AND d.strTaxCodeReference = 'LC3'
+		WHERE a.intTaxCodeId = TaxCode.intTaxCodeId 
+		--SELECT c.strTaxCodeReference
+		--FROM tblSMTaxCode a 
+		--CROSS APPLY fnGetRowsFromDelimitedValues(a.strTaxableByOtherTaxes) b 
+		--INNER JOIN tblETExportTaxCodeMapping c ON b.intID = c.intTaxCodeId 
+		--WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'SST' AND c.strTaxCodeReference = 'LC3'
+	) 	
 	, Locale3LC3OnFET		= 'N'
 	, Locale4Description	= (SELECT strDescription FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC4')
 	, Locale4Rate			= (SELECT TOP 1 dblRate FROM tblSMTaxCodeRate a WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC4' ORDER BY dtmEffectiveDate DESC)
@@ -153,11 +183,17 @@ FROM
 	, Locale4EFT			= 'N'	
 	, Locale4SSTOnLC4		= 
 	(
-		SELECT c.strTaxCodeReference
+		SELECT TOP 1 'Y'
 		FROM tblSMTaxCode a 
 		CROSS APPLY fnGetRowsFromDelimitedValues(a.strTaxableByOtherTaxes) b 
-		INNER JOIN tblETExportTaxCodeMapping c ON b.intID = c.intTaxCodeId 
-		WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'SST' AND c.strTaxCodeReference = 'LC4'
+		INNER JOIN tblETExportTaxCodeMapping c ON b.intID = c.intTaxCodeId AND c.strTaxCodeReference = 'SST' 
+		INNER JOIN tblETExportTaxCodeMapping d ON a.intTaxCodeId = d.intTaxCodeId AND d.strTaxCodeReference = 'LC4'
+		WHERE a.intTaxCodeId = TaxCode.intTaxCodeId 
+		--SELECT c.strTaxCodeReference
+		--FROM tblSMTaxCode a 
+		--CROSS APPLY fnGetRowsFromDelimitedValues(a.strTaxableByOtherTaxes) b 
+		--INNER JOIN tblETExportTaxCodeMapping c ON b.intID = c.intTaxCodeId 
+		--WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'SST' AND c.strTaxCodeReference = 'LC4'
 	)
 	, Locale4LC4OnFET		= 'N'	
 	, Locale5Description	= (SELECT strDescription FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC5')
@@ -167,11 +203,17 @@ FROM
 	, Locale5EFT			= 'N'	
 	, Locale5SSTOnLC5		= 
 	(
-			SELECT c.strTaxCodeReference
-			FROM tblSMTaxCode a 
-			CROSS APPLY fnGetRowsFromDelimitedValues(a.strTaxableByOtherTaxes) b 
-			INNER JOIN tblETExportTaxCodeMapping c ON b.intID = c.intTaxCodeId 
-			WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'SST' AND c.strTaxCodeReference = 'LC5'
+		SELECT TOP 1 'Y'
+		FROM tblSMTaxCode a 
+		CROSS APPLY fnGetRowsFromDelimitedValues(a.strTaxableByOtherTaxes) b 
+		INNER JOIN tblETExportTaxCodeMapping c ON b.intID = c.intTaxCodeId AND c.strTaxCodeReference = 'SST' 
+		INNER JOIN tblETExportTaxCodeMapping d ON a.intTaxCodeId = d.intTaxCodeId AND d.strTaxCodeReference = 'LC5'
+		WHERE a.intTaxCodeId = TaxCode.intTaxCodeId 
+		--SELECT c.strTaxCodeReference
+		--FROM tblSMTaxCode a 
+		--CROSS APPLY fnGetRowsFromDelimitedValues(a.strTaxableByOtherTaxes) b 
+		--INNER JOIN tblETExportTaxCodeMapping c ON b.intID = c.intTaxCodeId 
+		--WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'SST' AND c.strTaxCodeReference = 'LC5'
 	)
 	, Locale5LC5OnFET		= 'N'	
 	, Locale6Description	= (SELECT strDescription FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC6')
@@ -181,11 +223,17 @@ FROM
 	, Locale6EFT			= 'N'	
 	, Locale6SSTOnLC6		= 
 	(
-		SELECT c.strTaxCodeReference
+		SELECT TOP 1 'Y'
 		FROM tblSMTaxCode a 
 		CROSS APPLY fnGetRowsFromDelimitedValues(a.strTaxableByOtherTaxes) b 
-		INNER JOIN tblETExportTaxCodeMapping c ON b.intID = c.intTaxCodeId 
-		WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'SST' AND c.strTaxCodeReference = 'LC6'
+		INNER JOIN tblETExportTaxCodeMapping c ON b.intID = c.intTaxCodeId AND c.strTaxCodeReference = 'SST' 
+		INNER JOIN tblETExportTaxCodeMapping d ON a.intTaxCodeId = d.intTaxCodeId AND d.strTaxCodeReference = 'LC6'
+		WHERE a.intTaxCodeId = TaxCode.intTaxCodeId 
+		--SELECT c.strTaxCodeReference
+		--FROM tblSMTaxCode a 
+		--CROSS APPLY fnGetRowsFromDelimitedValues(a.strTaxableByOtherTaxes) b 
+		--INNER JOIN tblETExportTaxCodeMapping c ON b.intID = c.intTaxCodeId 
+		--WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'SST' AND c.strTaxCodeReference = 'LC6'
 	)
 	, Locale6LC6OnFET		= 'N'
 	FROM tblICItem Item 
@@ -197,8 +245,8 @@ FROM
 	INNER JOIN tblSMTaxGroupCode TaxGroupCode ON TaxCode.intTaxCodeId = TaxGroupCode.intTaxCodeId 
 	INNER JOIN tblETExportFilterTaxGroup ExportFilterTaxGroup ON TaxGroupCode.intTaxGroupId = ExportFilterTaxGroup.intTaxGroupId
 	INNER JOIN tblSMTaxGroup TaxGroup ON ExportFilterTaxGroup.intTaxGroupId = TaxGroup.intTaxGroupId
+	WHERE Item.intItemId IN (SELECT intItemId FROM tblETExportFilterItem) OR Category.intCategoryId IN (SELECT intCategoryId FROM tblETExportFilterCategory)
 ) tbl
-GROUP BY ItemNumber, [state], Authority1, Authority1Description, Authority2, Authority2Description, [Description], FETGLAccount, 
-EFTonFET, SETGLAccount, EFTonSET, SSTGLAccount, SSTOnFET, SSTOnSET, EFTOnSST, PSTGLAccount, Locale1GLAccount, Locale1EFT, 
-Locale1SSTOnLC1, Locale1LC1OnFET, Locale2GLAccount, Locale2EFT, Locale2LC2OnFET, Locale3GLAccount, Locale3EFT, Locale3LC3OnFET, 
-Locale4GLAccount, Locale4EFT, Locale4LC4OnFET, Locale5GLAccount, Locale5EFT, Locale5LC5OnFET, Locale6GLAccount, Locale6EFT, Locale6LC6OnFET
+GROUP BY ItemNumber, [state], Authority1, Authority1Description, Authority2, Authority2Description, [Description], FETGLAccount, EFTonFET, SETGLAccount, 
+EFTonSET, SSTGLAccount, EFTOnSST, PSTGLAccount, Locale1GLAccount, Locale1EFT, Locale1LC1OnFET, Locale2GLAccount, Locale2EFT, Locale2LC2OnFET, Locale3GLAccount, 
+Locale3EFT, Locale3LC3OnFET, Locale4GLAccount, Locale4EFT, Locale4LC4OnFET, Locale5GLAccount, Locale5EFT, Locale5LC5OnFET, Locale6GLAccount, Locale6EFT, Locale6LC6OnFET
