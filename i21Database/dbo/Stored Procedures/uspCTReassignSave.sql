@@ -16,6 +16,7 @@ BEGIN TRY
 			@intRecipientId					INT,
 			@intRecipientHeaderId			INT,
 			@intDonorId						INT,
+			@intDonorHeaderId				INT,
 			@dblRecipientBasis				NUMERIC(18,6),
 			@intNewPriceFixationId			INT,
 			@strTradeNo						NVARCHAR(100),
@@ -40,9 +41,10 @@ BEGIN TRY
 			@dblReassignAllocation			NUMERIC(18,6),
 			@ysnFullyAllocation				INT,
 			@intContractTypeId				INT,
-			@dblReassignRecipientUOM			NUMERIC(18,6),
+			@dblReassignRecipientUOM		NUMERIC(18,6),
 			@intUnitMeasureId				INT,
-			@intNewAllocationDetailId		INT
+			@intNewAllocationDetailId		INT,
+			@strTagRelaceXML				NVARCHAR(MAX)
 
 	DECLARE	@tblPricing TABLE
 	(
@@ -79,15 +81,16 @@ BEGIN TRY
 	)
 
 	SELECT	@intRecipientId			=	RE.intRecipientId,
-			@intRecipientHeaderId	=	HR.intContractHeaderId,
+			@intRecipientHeaderId	=	DR.intContractHeaderId,
 			@intDonorId				=	RE.intDonorId,
+			@intDonorHeaderId		=	DD.intContractHeaderId,
 			@dblRecipientBasis		=	DR.dblBasis,
 			@dblRecipientNoOfLots	=	DR.dblNoOfLots,
 			@intRecipientBookId		=	DR.intBookId,
 			@intRecipientSubBookId	=	DR.intSubBookId
 	FROM	tblCTReassign		RE
 	JOIN	tblCTContractDetail	DR	ON	DR.intContractDetailId	=	RE.intRecipientId
-	JOIN	tblCTContractHeader HR	ON	HR.intContractHeaderId	=	DR.intContractHeaderId
+	JOIN	tblCTContractDetail DD	ON	DD.intContractDetailId	=	RE.intDonorId
 	WHERE	RE.intReassignId	=	@intReassignId
 	
 	INSERT	INTO @tblPricing
@@ -151,182 +154,174 @@ BEGIN TRY
 	JOIN	@tblPricing					PR	ON	PR.intPriceFixationDetailId = FD.intPriceFixationDetailId
 	WHERE	PR.ysnFullyPricingReassign = 0
 		
-	SELECT	@ysnFullyPricingReassign = MIN(ysnFullyPricingReassign),@intPriceFixationId = MIN(intPriceFixationId),@intReassignPricingId = MIN(intReassignPricingId) FROM @tblPricing
+	
+
+	SET @strTagRelaceXML =  
+	'<root>
+		<tags>
+			<toFind>&lt;intContractDetailId&gt;'+LTRIM(@intDonorId)+'&lt;/intContractDetailId&gt;</toFind>
+			<toReplace>&lt;intContractDetailId&gt;'+LTRIM(@intRecipientId)+'&lt;/intContractDetailId&gt;</toReplace>
+		</tags>
+		<tags>
+			<toFind>&lt;intContractHeaderId&gt;'+LTRIM(@intDonorHeaderId)+'&lt;/intContractHeaderId&gt;</toFind>
+			<toReplace>&lt;intContractHeaderId&gt;'+LTRIM(@intRecipientHeaderId)+'&lt;/intContractHeaderId&gt;</toReplace>
+		</tags>
+	</root>'
 
 	IF ISNULL(@intPriceFixationId,0) > 0
-		EXEC uspCTCreateADuplicateRecord 'tblCTPriceFixation',@intPriceFixationId,@intNewPriceFixationId OUTPUT
+		EXEC uspCTCreateADuplicateRecord 'tblCTPriceFixation',@intPriceFixationId,@intNewPriceFixationId OUTPUT,NULL,@strTagRelaceXML
 
 	UPDATE	tblCTPriceFixation 
-	SET		intContractDetailId =	@intRecipientId,
-			intContractHeaderId	=	@intRecipientHeaderId,
-			dblOriginalBasis	=	@dblRecipientBasis,
+	SET		dblOriginalBasis	=	@dblRecipientBasis,
 			dblFinalPrice		=	dblPriceWORollArb - dblOriginalBasis - ISNULL(dblRollArb,0) - ISNULL(dblAdditionalCost,0) + @dblRecipientBasis,
 			dblRollArb			=	NULL,
 			dblAdditionalCost	=	NULL
 	WHERE	intPriceFixationId	=	@intNewPriceFixationId
 
-	IF	@ysnFullyPricingReassign = 1
+	SELECT	@intReassignPricingId = MIN(intReassignPricingId) FROM @tblPricing
+
+	WHILE	ISNULL(@intReassignPricingId,0) > 0
 	BEGIN
 
-		UPDATE	tblCTPriceFixationDetail 
-		SET		intPriceFixationId	=	@intNewPriceFixationId
-		WHERE	intPriceFixationId	=	@intPriceFixationId
+			
+		SELECT	@intPriceFixationDetailId = NULL,
+				@intFutOptTransactionId = NULL,
+				@intAssignFuturesToContractSummaryId = NULL,
+				@ysnFullyPricingReassign = NULL,
+				@intNewPriceFixationDetailId = NULL
 
-		IF EXISTS(SELECT TOP 1 1 FROM tblCTSpreadArbitrage WHERE intPriceFixationId = @intPriceFixationId)
+		SELECT	@intPriceFixationDetailId = intPriceFixationDetailId,
+				@dblReassignPricing = dblReassign,
+				@intPriceFixationId = intPriceFixationId,
+				@ysnFullyPricingReassign = ysnFullyPricingReassign,
+				@intFutOptTransactionId  = intFutOptTransactionId
+		FROM	@tblPricing
+		WHERE	intReassignPricingId = @intReassignPricingId
+
+		IF ISNULL(@intFutOptTransactionId,0) > 0
 		BEGIN
-			EXEC uspCTPriceFixationSave	@intPriceFixationId, 'Save', @intUserId
+			SELECT @intAssignFuturesToContractSummaryId = intAssignFuturesToContractSummaryId FROM tblRKAssignFuturesToContractSummary WHERE intFutOptTransactionId = @intFutOptTransactionId AND ysnIsHedged = 1 		
+		END
+
+		IF @ysnFullyPricingReassign = 1
+		BEGIN
+			UPDATE	tblCTPriceFixationDetail
+			SET		intPriceFixationId = @intNewPriceFixationId
+			WHERE	intPriceFixationDetailId = @intPriceFixationDetailId
+
+			IF	NOT EXISTS(SELECT TOP 1 1 FROM tblCTSpreadArbitrage WHERE intPriceFixationId = @intPriceFixationId) AND
+				NOT EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId)
+			BEGIN
+				EXEC uspCTPriceFixationSave	@intPriceFixationId, 'Delete', @intUserId
+				DELETE FROM tblCTPriceFixation WHERE intPriceFixationId = @intPriceFixationId
+			END
+
+			UPDATE	SY
+			SET		intContractHeaderId = @intRecipientHeaderId,
+					intContractDetailId = @intRecipientId
+			FROM	tblRKAssignFuturesToContractSummary SY
+			WHERE	intAssignFuturesToContractSummaryId = @intAssignFuturesToContractSummaryId
 		END
 		ELSE
 		BEGIN
-			EXEC uspCTPriceFixationSave	@intPriceFixationId, 'Delete', @intUserId
-			DELETE FROM tblCTPriceFixation WHERE intPriceFixationId = @intPriceFixationId
-		END
 
-		EXEC uspCTPriceFixationSave	@intNewPriceFixationId, 'Save', @intUserId
-		EXEC uspCTUpdateAdditionalCost @intRecipientHeaderId
+			EXEC  @strTradeNo =  uspCTGetStartingNumber 'Price Fixation Trade No'
 
-		UPDATE	SY
-		SET		intContractHeaderId = @intRecipientHeaderId,
-				intContractDetailId = @intRecipientId
-		FROM	tblRKAssignFuturesToContractSummary SY
-		JOIN	@tblPricing PR	ON	PR.intFutOptTransactionId	=	SY.intFutOptTransactionId AND
-									SY.intContractDetailId		=	@intDonorId
-	END
-	ELSE
-	BEGIN
-		WHILE	ISNULL(@intReassignPricingId,0) > 0
-		BEGIN
-			SELECT	@intPriceFixationDetailId = NULL,
-					@intFutOptTransactionId = NULL,
-					@intAssignFuturesToContractSummaryId = NULL,
-					@ysnFullyPricingReassign = NULL,
-					@intNewPriceFixationDetailId = NULL
+			SET @strXML = '<root>'
+			SET @strXML +=		'<toUpdate>' 
+			SET @strXML +=			'<strTradeNo>'+@strTradeNo+'</strTradeNo>' 
+			SET @strXML +=		'</toUpdate>' 
+			SET @strXML += '</root>' 
 
-			SELECT	@intPriceFixationDetailId = intPriceFixationDetailId,
-					@dblReassignPricing = dblReassign,
-					@intPriceFixationId = intPriceFixationId,
-					@ysnFullyPricingReassign = ysnFullyPricingReassign,
-					@intFutOptTransactionId  = intFutOptTransactionId
-			FROM	@tblPricing
-			WHERE	intReassignPricingId = @intReassignPricingId
+			EXEC  uspCTCreateADuplicateRecord 'tblCTPriceFixationDetail',@intPriceFixationDetailId,@intNewPriceFixationDetailId OUTPUT,@strXML
 
-			IF ISNULL(@intFutOptTransactionId,0) > 0
+			UPDATE	tblCTPriceFixationDetail
+			SET		intPriceFixationId = @intNewPriceFixationId,
+					[dblNoOfLots] = @dblReassignPricing
+			WHERE	intPriceFixationDetailId = @intNewPriceFixationDetailId
+
+			IF ISNULL(@intAssignFuturesToContractSummaryId,0) > 0
 			BEGIN
-				SELECT @intAssignFuturesToContractSummaryId = intAssignFuturesToContractSummaryId FROM tblRKAssignFuturesToContractSummary WHERE intFutOptTransactionId = @intFutOptTransactionId AND ysnIsHedged = 1 		
-			END
-
-			IF @ysnFullyPricingReassign = 1
-			BEGIN
-				UPDATE	tblCTPriceFixationDetail
-				SET		intPriceFixationId = @intNewPriceFixationId
-				WHERE	intPriceFixationDetailId = @intPriceFixationDetailId
-
 				UPDATE	SY
-				SET		intContractHeaderId = @intRecipientHeaderId,
-						intContractDetailId = @intRecipientId
+				SET		intHedgedLots = intHedgedLots - @dblReassignPricing
 				FROM	tblRKAssignFuturesToContractSummary SY
 				WHERE	intAssignFuturesToContractSummaryId = @intAssignFuturesToContractSummaryId
-			END
-			ELSE
-			BEGIN
 
-				EXEC  @strTradeNo =  uspCTGetStartingNumber 'Price Fixation Trade No'
+				SELECT	@strCondition = 'intFutOptTransactionId = ' + LTRIM(@intFutOptTransactionId)
+				EXEC	uspCTGetTableDataInXML 'tblRKFutOptTransaction', @strCondition,@strXML OUTPUT
+				SELECT	@XML = @strXML
+				SET		@XML.modify('delete (/tblRKFutOptTransactions/tblRKFutOptTransaction/intFutOptTransactionId)[1]')
+				SET		@XML.modify('delete (/tblRKFutOptTransactions/tblRKFutOptTransaction/strInternalTradeNo)[1]')
+				SET		@XML.modify('delete (/tblRKFutOptTransactions/tblRKFutOptTransaction/intBookId)[1]')
+				SET		@XML.modify('delete (/tblRKFutOptTransactions/tblRKFutOptTransaction/intSubBookId)[1]')
+				SET		@XML.modify('replace value of (/tblRKFutOptTransactions/tblRKFutOptTransaction/dtmTransactionDate/text())[1] with sql:variable("@dtmCurrentDate")')
+				SET		@XML.modify('replace value of (/tblRKFutOptTransactions/tblRKFutOptTransaction/dtmFilledDate/text())[1] with sql:variable("@dtmCurrentDate")')
+				SET		@XML.modify('replace value of (/tblRKFutOptTransactions/tblRKFutOptTransaction/intNoOfContract/text())[1] with sql:variable("@dblReassignPricing")')
+				SET		@XML.modify('insert <intContractHeaderId>{ xs:string(sql:variable("@intRecipientHeaderId")) }</intContractHeaderId> into (/tblRKFutOptTransactions/tblRKFutOptTransaction)[1]')
+				SET		@XML.modify('insert <intContractDetailId>{ xs:string(sql:variable("@intRecipientId")) }</intContractDetailId> into (/tblRKFutOptTransactions/tblRKFutOptTransaction)[1]')
 
-				SET @strXML = '<root>'
-				SET @strXML +=		'<toUpdate>' 
-				SET @strXML +=			'<strTradeNo>'+@strTradeNo+'</strTradeNo>' 
-				SET @strXML +=		'</toUpdate>' 
-				SET @strXML += '</root>' 
-
-				EXEC  uspCTCreateADuplicateRecord 'tblCTPriceFixationDetail',@intPriceFixationDetailId,@intNewPriceFixationDetailId OUTPUT,@strXML
-
-				UPDATE	tblCTPriceFixationDetail
-				SET		intPriceFixationId = @intNewPriceFixationId,
-						[dblNoOfLots] = @dblReassignPricing
-				WHERE	intPriceFixationDetailId = @intNewPriceFixationDetailId
-
-				IF ISNULL(@intAssignFuturesToContractSummaryId,0) > 0
-				BEGIN
-					UPDATE	SY
-					SET		intHedgedLots = intHedgedLots - @dblReassignPricing
-					FROM	tblRKAssignFuturesToContractSummary SY
-					WHERE	intAssignFuturesToContractSummaryId = @intAssignFuturesToContractSummaryId
-
-					SELECT	@strCondition = 'intFutOptTransactionId = ' + LTRIM(@intFutOptTransactionId)
-					EXEC	uspCTGetTableDataInXML 'tblRKFutOptTransaction', @strCondition,@strXML OUTPUT
-					SELECT	@XML = @strXML
-					SET		@XML.modify('delete (/tblRKFutOptTransactions/tblRKFutOptTransaction/intFutOptTransactionId)[1]')
-					SET		@XML.modify('delete (/tblRKFutOptTransactions/tblRKFutOptTransaction/strInternalTradeNo)[1]')
-					SET		@XML.modify('delete (/tblRKFutOptTransactions/tblRKFutOptTransaction/intBookId)[1]')
-					SET		@XML.modify('delete (/tblRKFutOptTransactions/tblRKFutOptTransaction/intSubBookId)[1]')
-					SET		@XML.modify('replace value of (/tblRKFutOptTransactions/tblRKFutOptTransaction/dtmTransactionDate/text())[1] with sql:variable("@dtmCurrentDate")')
-					SET		@XML.modify('replace value of (/tblRKFutOptTransactions/tblRKFutOptTransaction/dtmFilledDate/text())[1] with sql:variable("@dtmCurrentDate")')
-					SET		@XML.modify('replace value of (/tblRKFutOptTransactions/tblRKFutOptTransaction/intNoOfContract/text())[1] with sql:variable("@dblReassignPricing")')
-					SET		@XML.modify('insert <intContractHeaderId>{ xs:string(sql:variable("@intRecipientHeaderId")) }</intContractHeaderId> into (/tblRKFutOptTransactions/tblRKFutOptTransaction)[1]')
-					SET		@XML.modify('insert <intContractDetailId>{ xs:string(sql:variable("@intRecipientId")) }</intContractDetailId> into (/tblRKFutOptTransactions/tblRKFutOptTransaction)[1]')
-
-					IF ISNULL(@intRecipientBookId,0) > 0
-						SET		@XML.modify('insert <intBookId>{ xs:string(sql:variable("@intRecipientBookId")) }</intBookId> into (/tblRKFutOptTransactions/tblRKFutOptTransaction)[1]')
-					IF ISNULL(@intRecipientSubBookId,0) > 0
-						SET		@XML.modify('insert <intSubBookId>{ xs:string(sql:variable("@intRecipientSubBookId")) }</intSubBookId> into (/tblRKFutOptTransactions/tblRKFutOptTransaction)[1]')
+				IF ISNULL(@intRecipientBookId,0) > 0
+					SET		@XML.modify('insert <intBookId>{ xs:string(sql:variable("@intRecipientBookId")) }</intBookId> into (/tblRKFutOptTransactions/tblRKFutOptTransaction)[1]')
+				IF ISNULL(@intRecipientSubBookId,0) > 0
+					SET		@XML.modify('insert <intSubBookId>{ xs:string(sql:variable("@intRecipientSubBookId")) }</intSubBookId> into (/tblRKFutOptTransactions/tblRKFutOptTransaction)[1]')
 					
-					SELECT	@strXML = CAST(@XML AS NVARCHAR(MAX))
+				SELECT	@strXML = CAST(@XML AS NVARCHAR(MAX))
 					
-					SELECT @strXML = REPLACE(@strXML,'<tblRKFutOptTransactions>','')
-					SELECT @strXML = REPLACE(@strXML,'</tblRKFutOptTransactions>','')
-					SELECT @strXML = REPLACE(@strXML,'tblRKFutOptTransaction','root')
+				SELECT @strXML = REPLACE(@strXML,'<tblRKFutOptTransactions>','')
+				SELECT @strXML = REPLACE(@strXML,'</tblRKFutOptTransactions>','')
+				SELECT @strXML = REPLACE(@strXML,'tblRKFutOptTransaction','root')
 
-					EXEC uspRKAutoHedge @strXML,@intNewFutOptTransactionId OUTPUT
+				EXEC uspRKAutoHedge @strXML,@intNewFutOptTransactionId OUTPUT
 
-					UPDATE tblCTPriceFixationDetail SET intFutOptTransactionId = @intNewFutOptTransactionId WHERE intPriceFixationDetailId = @intNewPriceFixationDetailId
-				END
+				UPDATE tblCTPriceFixationDetail SET intFutOptTransactionId = @intNewFutOptTransactionId WHERE intPriceFixationDetailId = @intNewPriceFixationDetailId
 			END
-
-			SELECT	@intReassignPricingId = MIN(intReassignPricingId) FROM @tblPricing WHERE intReassignPricingId > @intReassignPricingId
 		END
 
-		UPDATE	PF
-		SET		PF.dblPriceWORollArb	=	FD.dblPriceWORollArb,
-				PF.[dblLotsFixed]			=	FD.intLotsFixed,
-				PF.dblFinalPrice		=	PF.dblFinalPrice - ISNULL(PF.dblPriceWORollArb,0) +  ISNULL(FD.dblPriceWORollArb,0)
-		FROM	tblCTPriceFixation			PF
-		CROSS APPLY(
-				SELECT	intPriceFixationId,
-						SUM([dblNoOfLots] * dblFutures)/SUM([dblNoOfLots]) dblPriceWORollArb,
-						SUM([dblNoOfLots]) intLotsFixed
-		
-				FROM	tblCTPriceFixationDetail
-				GROUP BY intPriceFixationId
-		)	FD		
-		WHERE	FD.intPriceFixationId	=	PF.intPriceFixationId AND PF.intPriceFixationId	= @intPriceFixationId
-
-		SELECT	@intLotsHedged	= SUM([dblNoOfLots]) FROM tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId AND ysnHedge = 1
-		UPDATE	tblCTPriceFixation SET intLotsHedged = @intLotsHedged  WHERE intPriceFixationId = @intPriceFixationId
-
-		UPDATE	PF
-		SET		PF.dblPriceWORollArb	=	FD.dblPriceWORollArb,
-				PF.[dblTotalLots]			=	@dblRecipientNoOfLots,
-				PF.[dblLotsFixed]			=	FD.intLotsFixed,
-				PF.dblFinalPrice		=	FD.dblPriceWORollArb +  PF.dblOriginalBasis
-		FROM	tblCTPriceFixation			PF
-		CROSS APPLY(
-				SELECT	intPriceFixationId,
-						SUM([dblNoOfLots] * dblFutures)/SUM([dblNoOfLots]) dblPriceWORollArb,
-						SUM([dblNoOfLots]) intLotsFixed
-		
-				FROM	tblCTPriceFixationDetail
-				GROUP BY intPriceFixationId
-		)	FD		
-		WHERE	FD.intPriceFixationId	=	PF.intPriceFixationId AND PF.intPriceFixationId	=	@intNewPriceFixationId
-		
-		SELECT	@intLotsHedged	= SUM([dblNoOfLots]) FROM tblCTPriceFixationDetail WHERE intPriceFixationId = @intNewPriceFixationId AND ysnHedge = 1
-		UPDATE	tblCTPriceFixation SET intLotsHedged = @intLotsHedged  WHERE intPriceFixationId = @intNewPriceFixationId
-
-		EXEC uspCTPriceFixationSave	@intPriceFixationId, 'Save', @intUserId
-		EXEC uspCTPriceFixationSave	@intNewPriceFixationId, 'Save', @intUserId
-
-		EXEC uspCTUpdateAdditionalCost @intRecipientHeaderId
+		SELECT	@intReassignPricingId = MIN(intReassignPricingId) FROM @tblPricing WHERE intReassignPricingId > @intReassignPricingId
 	END
+
+	UPDATE	PF
+	SET		PF.dblPriceWORollArb	=	FD.dblPriceWORollArb,
+			PF.[dblLotsFixed]		=	FD.intLotsFixed,
+			PF.dblFinalPrice		=	PF.dblFinalPrice - ISNULL(PF.dblPriceWORollArb,0) +  ISNULL(FD.dblPriceWORollArb,0)
+	FROM	tblCTPriceFixation			PF
+	CROSS APPLY(
+			SELECT	intPriceFixationId,
+					SUM([dblNoOfLots] * dblFutures)/SUM([dblNoOfLots]) dblPriceWORollArb,
+					SUM([dblNoOfLots]) intLotsFixed
+		
+			FROM	tblCTPriceFixationDetail
+			GROUP BY intPriceFixationId
+	)	FD		
+	WHERE	FD.intPriceFixationId	=	PF.intPriceFixationId AND PF.intPriceFixationId	= @intPriceFixationId
+
+	SELECT	@intLotsHedged	= SUM([dblNoOfLots]) FROM tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId AND ysnHedge = 1
+	UPDATE	tblCTPriceFixation SET intLotsHedged = @intLotsHedged  WHERE intPriceFixationId = @intPriceFixationId
+
+	UPDATE	PF
+	SET		PF.dblPriceWORollArb	=	FD.dblPriceWORollArb,
+			PF.[dblTotalLots]		=	@dblRecipientNoOfLots,
+			PF.[dblLotsFixed]		=	FD.intLotsFixed,
+			PF.dblFinalPrice		=	FD.dblPriceWORollArb +  PF.dblOriginalBasis
+	FROM	tblCTPriceFixation			PF
+	CROSS APPLY(
+			SELECT	intPriceFixationId,
+					SUM([dblNoOfLots] * dblFutures)/SUM([dblNoOfLots]) dblPriceWORollArb,
+					SUM([dblNoOfLots]) intLotsFixed
+		
+			FROM	tblCTPriceFixationDetail
+			GROUP BY intPriceFixationId
+	)	FD		
+	WHERE	FD.intPriceFixationId	=	PF.intPriceFixationId AND PF.intPriceFixationId	=	@intNewPriceFixationId
+		
+	SELECT	@intLotsHedged	= SUM([dblNoOfLots]) FROM tblCTPriceFixationDetail WHERE intPriceFixationId = @intNewPriceFixationId AND ysnHedge = 1
+	UPDATE	tblCTPriceFixation SET intLotsHedged = @intLotsHedged  WHERE intPriceFixationId = @intNewPriceFixationId
+
+	EXEC uspCTPriceFixationSave	@intPriceFixationId, 'Save', @intUserId
+	EXEC uspCTPriceFixationSave	@intNewPriceFixationId, 'Save', @intUserId
+
+	EXEC uspCTUpdateAdditionalCost @intRecipientHeaderId
+	
 	
 	---------------------------------------End Pricing---------------------------
 
