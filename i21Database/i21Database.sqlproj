@@ -5746,6 +5746,8 @@
     <None Include="Scripts\Post-Deployment\IC\1740_DataFix_FixIntTransactionDetailId.sql" />
     <Build Include="dbo\Views\vyuGRGetUnpaidStorageFees.sql" />
     <Build Include="dbo\Stored Procedures\uspGRProcessUnpaidStorageFees.sql" />
+    <Build Include="dbo\Views\vyuSMUserRoleMenuLocationMVC.sql" />
+    <Build Include="dbo\Views\vyuSMUserRoleMenuSubRoleMVC.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
