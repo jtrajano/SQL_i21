@@ -191,18 +191,23 @@ BEGIN
 	END
 	ELSE
 	BEGIN
+		DECLARE @importFileRecordMarkerId INT
+
+		SELECT TOP 1 @importFileRecordMarkerId = intImportFileRecordMarkerId
+		FROM tblSMImportFileRecordMarker
+		WHERE intImportFileHeaderId = @FileHeaderId
+			AND strRecordMarker = 'Effective Date'
+
 		UPDATE tblSMImportFileRecordMarker
 		SET strFormat = 'YYYYMMDD'
 			, intPosition = 7
-		WHERE intImportFileHeaderId = @FileHeaderId
-			AND strRecordMarker = 'Effective Date'
+		WHERE intImportFileRecordMarkerId = @importFileRecordMarkerId
 
 		UPDATE tblSMImportFileColumnDetail
 		SET intPosition = 3
 			, intLevel = 3
 		WHERE intImportFileHeaderId = @FileHeaderId
-			AND strTable = 'tblTRRackPriceHeader'
-			AND strColumnName = 'dtmEffectiveDateTime'
+			AND intImportFileRecordMarkerId = @importFileRecordMarkerId
 	END
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMImportFileRecordMarker WHERE strRecordMarker = 'Effective Time' AND intImportFileHeaderId = @FileHeaderId)
@@ -215,18 +220,23 @@ BEGIN
 	END
 	ELSE
 	BEGIN
-		UPDATE tblSMImportFileRecordMarker
-		SET strFormat = 'HHMM'
-			, intPosition = 8
+		DECLARE @importFileRecordMarkerId INT
+
+		SELECT TOP 1 @importFileRecordMarkerId = intImportFileRecordMarkerId
+		FROM tblSMImportFileRecordMarker
 		WHERE intImportFileHeaderId = @FileHeaderId
 			AND strRecordMarker = 'Effective Time'
+
+		UPDATE tblSMImportFileRecordMarker
+		SET strFormat = 'HHMM'
+			, intPosition = 9
+		WHERE intImportFileRecordMarkerId = @importFileRecordMarkerId
 
 		UPDATE tblSMImportFileColumnDetail
 		SET intPosition = 4
 			, intLevel = 4
 		WHERE intImportFileHeaderId = @FileHeaderId
-			AND strTable = 'tblTRRackPriceHeader'
-			AND strColumnName = 'intSupplyPointId'
+			AND intImportFileRecordMarkerId = @importFileRecordMarkerId
 	END
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMImportFileRecordMarker WHERE strRecordMarker = 'Item Id' AND intImportFileHeaderId = @FileHeaderId)
