@@ -204,14 +204,14 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             var intAdjustmentTypeId = get('current.intAdjustmentType');
 
             switch (intAdjustmentTypeId) {
-                case me.adjustmentTypes.QuantityChange:
                 case me.adjustmentTypes.LotStatusChange:
                 case me.adjustmentTypes.UOMChange:
                 case me.adjustmentTypes.ItemChange:
                 case me.adjustmentTypes.ExpiryDateChange:
                 case me.adjustmentTypes.LotOwnerChange:
-                    return me.hide;
-                    break;
+                return me.hide;
+                break;
+                case me.adjustmentTypes.QuantityChange:
                 case me.adjustmentTypes.SplitLot:
                 case me.adjustmentTypes.LotMerge:
                 case me.adjustmentTypes.LotMove:

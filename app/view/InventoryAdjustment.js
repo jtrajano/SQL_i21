@@ -634,18 +634,6 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        itemId: 'colNewLotNumber',
-                                                        width: 90,
-                                                        dataIndex: 'strNewLotNumber',
-                                                        tdCls: 'blue-text-column',
-                                                        text: 'New Lot ID',
-                                                        editor: {
-                                                            xtype: 'textfield',
-                                                            itemId: 'txtNewLotId'
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
                                                         itemId: 'colUOM',
                                                         width: 70,
                                                         dataIndex: 'strItemUOM',
@@ -909,6 +897,18 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         dataIndex: 'dblNewWeightPerQty',
                                                         tdCls: 'blue-text-column',
                                                         text: 'New Wgt Per Qty'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colNewLotNumber',
+                                                        width: 90,
+                                                        dataIndex: 'strNewLotNumber',
+                                                        tdCls: 'blue-text-column',
+                                                        text: 'New Lot ID',
+                                                        editor: {
+                                                            xtype: 'textfield',
+                                                            itemId: 'txtNewLotId'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',

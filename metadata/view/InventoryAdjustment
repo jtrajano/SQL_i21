@@ -1590,50 +1590,6 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "dataIndex": "strNewLotNumber",
-                                                "itemId": "colNewLotNumber",
-                                                "tdCls": "blue-text-column",
-                                                "text": "New Lot ID",
-                                                "width": 90
-                                            },
-                                            "configAlternates": {
-                                                "dataIndex": "datafield",
-                                                "itemId": "string",
-                                                "tdCls": "string",
-                                                "text": "string",
-                                                "width": "auto",
-                                                "scrollable": "boolean"
-                                            },
-                                            "name": "MyColumn35",
-                                            "designerId": "5ab6e288-6d15-42ca-bc35-9ac2e542a4ef",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.Text",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "itemId": "txtNewLotId"
-                                                    },
-                                                    "configAlternates": {
-                                                        "itemId": "string",
-                                                        "scrollable": "boolean"
-                                                    },
-                                                    "name": "MyTextField1",
-                                                    "designerId": "74d4eaa4-5acf-49c8-9196-dd73bc826a56"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
                                                 "dataIndex": "strItemUOM",
                                                 "itemId": "colUOM",
                                                 "text": "UOM",
@@ -2359,6 +2315,50 @@
                                                     "group": "(Custom Properties)",
                                                     "name": "dataType",
                                                     "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "strNewLotNumber",
+                                                "itemId": "colNewLotNumber",
+                                                "tdCls": "blue-text-column",
+                                                "text": "New Lot ID",
+                                                "width": 90
+                                            },
+                                            "configAlternates": {
+                                                "dataIndex": "datafield",
+                                                "itemId": "string",
+                                                "tdCls": "string",
+                                                "text": "string",
+                                                "width": "auto",
+                                                "scrollable": "boolean"
+                                            },
+                                            "name": "MyColumn35",
+                                            "designerId": "5ab6e288-6d15-42ca-bc35-9ac2e542a4ef",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Text",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "itemId": "txtNewLotId"
+                                                    },
+                                                    "configAlternates": {
+                                                        "itemId": "string",
+                                                        "scrollable": "boolean"
+                                                    },
+                                                    "name": "MyTextField1",
+                                                    "designerId": "74d4eaa4-5acf-49c8-9196-dd73bc826a56"
                                                 }
                                             ]
                                         },
