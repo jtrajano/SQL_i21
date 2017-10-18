@@ -37,6 +37,20 @@ BEGIN
 		RAISERROR(@ErrorMessage, 16, 1);
 	END
 
+	if not exists (select * from tblICItemAccount where intItemId = @intDealerSiteCreditItem AND intAccountCategoryId = @intSalesAccountCategory)
+	begin
+		SET @ErrorMessage = 'Please setup GL Sales Account category for Dealer Site Credit item.';
+		SET @success = 0;
+		RAISERROR(@ErrorMessage, 16, 1);
+	end
+
+	if not exists (select * from tblICItemAccount where intItemId = @intDealerSiteFeeItem AND intAccountCategoryId = @intSalesAccountCategory)
+	begin
+		SET @ErrorMessage = 'Please setup GL Sales Account category for Dealer Site Fee item.';
+		SET @success = 0;
+		RAISERROR(@ErrorMessage, 16, 1);
+	end
+
     INSERT INTO @CCRItemToARItem VALUES (@intSiteHeaderId, @intDealerSiteCreditItem, 'Dealer Site Credits');
     INSERT INTO @CCRItemToARItem VALUES (@intSiteHeaderId, @intDealerSiteFeeItem, 'Dealer Site Fees');
 
@@ -98,57 +112,61 @@ BEGIN
     LEFT JOIN vyuCCSite ccSite ON ccSite.intSiteId = ccSiteDetail.intSiteId
     LEFT JOIN vyuCCCustomer ccCustomer ON ccCustomer.intCustomerId = ccSite.intCustomerId AND ccCustomer.intSiteId = ccSite.intSiteId
 	INNER JOIN tblICItemAccount ItemAcc ON ItemAcc.intItemId = ccItem.intItemId AND ItemAcc.intAccountCategoryId = @intSalesAccountCategory
-    WHERE ccSiteHeader.intSiteHeaderId = @intSiteHeaderId AND ccSite.intSiteId IS NOT NULL
+    WHERE ccSiteHeader.intSiteHeaderId = @intSiteHeaderId AND ccSite.intSiteId IS NOT NULL and ccSite.intCustomerId is not null and ccSite.ysnPostNetToArCustomer = 1
 
 
     --REMOVE -1 items
-    DELETE FROM @EntriesForInvoice WHERE intItemId = -1	
+	--and those sites that does not have customer
+    DELETE FROM @EntriesForInvoice WHERE intItemId = -1	or intEntityCustomerId is null;
 
-	IF(@Post = 1)
-	BEGIN
-		EXEC [dbo].[uspARProcessInvoices]
-				 @InvoiceEntries	= @EntriesForInvoice
-				,@LineItemTaxEntries = @TaxDetails
-				,@UserId			= @UserId
-				,@GroupingOption	= 7
-				,@RaiseError		= 1
-				,@ErrorMessage		= @ErrorMessage OUTPUT
-				,@CreatedIvoices	= @CreatedIvoices OUTPUT
-				,@UpdatedIvoices	= @UpdatedIvoices OUTPUT
-
-		IF(ISNULL(@ErrorMessage,'') = '') SET @success = 1
-	END
-	ELSE IF (@Post = 0)
-	BEGIN		
-		DECLARE @intInvoiceId INT = NULL
-		
-		SELECT @intInvoiceId = arInvoiceDetail.intInvoiceId FROM tblCCSiteDetail ccSiteDetail 
-			INNER JOIN tblARInvoiceDetail arInvoiceDetail ON arInvoiceDetail.intSiteDetailId = ccSiteDetail.intSiteDetailId
-		WHERE ccSiteDetail.intSiteHeaderId = @intSiteHeaderId
-		GROUP BY arInvoiceDetail.intInvoiceId
-		IF(@intInvoiceId IS NOT NULL)
+	if ((select count(*) from @EntriesForInvoice) > 0)
+	begin
+		IF(@Post = 1)
 		BEGIN
-		UPDATE @EntriesForInvoice SET intInvoiceId = @intInvoiceId
+			EXEC [dbo].[uspARProcessInvoices]
+					 @InvoiceEntries	= @EntriesForInvoice
+					,@LineItemTaxEntries = @TaxDetails
+					,@UserId			= @UserId
+					,@GroupingOption	= 7
+					,@RaiseError		= 1
+					,@ErrorMessage		= @ErrorMessage OUTPUT
+					,@CreatedIvoices	= @CreatedIvoices OUTPUT
+					,@UpdatedIvoices	= @UpdatedIvoices OUTPUT
 
-		EXEC [dbo].[uspARProcessInvoices]
-				 @InvoiceEntries	= @EntriesForInvoice
-				,@LineItemTaxEntries = @TaxDetails
-				,@UserId			= @UserId
-				,@GroupingOption	= 7
-				,@RaiseError		= 1
-				,@ErrorMessage		= @ErrorMessage OUTPUT
-				,@CreatedIvoices	= @CreatedIvoices OUTPUT
-				,@UpdatedIvoices	= @UpdatedIvoices OUTPUT
+			IF(ISNULL(@ErrorMessage,'') = '') SET @success = 1
+		END
+		ELSE IF (@Post = 0)
+		BEGIN		
+			DECLARE @intInvoiceId1 INT = NULL
+		
+			SELECT @intInvoiceId1 = arInvoiceDetail.intInvoiceId FROM tblCCSiteDetail ccSiteDetail 
+				INNER JOIN tblARInvoiceDetail arInvoiceDetail ON arInvoiceDetail.intSiteDetailId = ccSiteDetail.intSiteDetailId
+			WHERE ccSiteDetail.intSiteHeaderId = @intSiteHeaderId
+			GROUP BY arInvoiceDetail.intInvoiceId
+			IF(@intInvoiceId1 IS NOT NULL)
+			BEGIN
+			UPDATE @EntriesForInvoice SET intInvoiceId = @intInvoiceId1
 
-		--DELETE Invoice Transaction
-		DELETE FROM tblARInvoice WHERE intInvoiceId IN (
-			SELECT DISTINCT C.intInvoiceId 
-				FROM tblCCSiteHeader A 
-			JOIN tblCCSiteDetail B ON B.intSiteHeaderId = A.intSiteHeaderId
-			JOIN tblARInvoiceDetail C ON C.intSiteDetailId = B.intSiteDetailId
-				WHERE A.intSiteHeaderId = @intSiteHeaderId)
+			EXEC [dbo].[uspARProcessInvoices]
+					 @InvoiceEntries	= @EntriesForInvoice
+					,@LineItemTaxEntries = @TaxDetails
+					,@UserId			= @UserId
+					,@GroupingOption	= 7
+					,@RaiseError		= 1
+					,@ErrorMessage		= @ErrorMessage OUTPUT
+					,@CreatedIvoices	= @CreatedIvoices OUTPUT
+					,@UpdatedIvoices	= @UpdatedIvoices OUTPUT
+
+			--DELETE Invoice Transaction
+			DELETE FROM tblARInvoice WHERE intInvoiceId IN (
+				SELECT DISTINCT C.intInvoiceId 
+					FROM tblCCSiteHeader A 
+				JOIN tblCCSiteDetail B ON B.intSiteHeaderId = A.intSiteHeaderId
+				JOIN tblARInvoiceDetail C ON C.intSiteDetailId = B.intSiteDetailId
+					WHERE A.intSiteHeaderId = @intSiteHeaderId)
+
+			END
 
 		END
-
-	END
+	end
 END
