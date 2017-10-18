@@ -140,8 +140,8 @@ BEGIN TRY
 		,[dblSurcharge]							= DD.dblDistSurcharge
 		,DD.dblFreightRate
 		,DD.ysnFreightInPrice
-		,intTruckDriverId = TL.intDriverId
-		,intTruckDriverReferenceId = SC.intTruckDriverReferenceId
+		,intTruckDriverId = CASE WHEN TL.intDriverId IS NULL THEN NULL ELSE TL.intDriverId END
+		,intTruckDriverReferenceId = CASE WHEN SC.intTruckDriverReferenceId IS NULL THEN NULL ELSE SC.intTruckDriverReferenceId END
 	INTO #tmpSourceTable
 	FROM tblTRLoadHeader TL
 	LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
