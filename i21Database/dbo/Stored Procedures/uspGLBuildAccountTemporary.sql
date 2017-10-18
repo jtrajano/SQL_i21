@@ -179,7 +179,7 @@ BEGIN TRY
 
 	-- removed here the glactmst referencing
 	DECLARE @accountLength  INT 
-	SELECT TOP 1 @accountLength = sum(intLength) FROM tblGLAccountStructure
+	SELECT TOP 1 @accountLength = sum(intLength) FROM tblGLAccountStructure WHERE strType <> 'Divider'
 	IF EXISTS (SELECT TOP 1 1 FROM #ConstructAccount WHERE @accountLength <> LEN(REPLACE(strCode,@strDivider,'')))
 	BEGIN
 		IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
