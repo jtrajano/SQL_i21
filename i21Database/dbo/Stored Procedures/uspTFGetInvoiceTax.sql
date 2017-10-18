@@ -44,6 +44,8 @@ BEGIN TRY
 	SELECT intReportingComponentId = Item COLLATE Latin1_General_CI_AS
 	INTO #tmpRC
 	FROM dbo.fnSplitStringWithTrim(@ReportingComponentId, ',')
+
+	DELETE #tmpRC where intReportingComponentId = ''
 	
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpRC)
 	BEGIN
@@ -209,7 +211,7 @@ BEGIN TRY
 					, strVendorIdType = 'FEIN'
 					, strCustomerIdType = 'FEIN'
 					, strVendorInvoiceNumber = NULL
-					, strCustomerLicenseNumber = NULL
+					, strCustomerLicenseNumber = tblTFTaxAuthorityCustomerLicense.strLicenseNumber
 					, strCustomerAccountStatusCode = tblARAccountStatus.strAccountStatusCode
 					, strCustomerStreetAddress = tblEMEntityLocation.strAddress
 					, strCustomerZipCode = tblEMEntityLocation.strZipCode
@@ -234,6 +236,7 @@ BEGIN TRY
 				INNER JOIN tblEMEntity ON tblARCustomer.intEntityId = tblEMEntity.intEntityId 
 				LEFT JOIN tblEMEntityLocation ON tblEMEntityLocation.intEntityId = tblARCustomer.intEntityId AND tblEMEntityLocation.ysnDefaultLocation = 1
 				LEFT JOIN tblARAccountStatus ON tblARAccountStatus.intAccountStatusId = tblARCustomer.intAccountStatusId
+				LEFT JOIN tblTFTaxAuthorityCustomerLicense ON tblTFTaxAuthorityCustomerLicense.intEntityId = tblARInvoice.intEntityCustomerId
 				CROSS JOIN tblSMCompanySetup
 				WHERE tblARInvoice.ysnPosted = 1 
 					AND tblTFReportingComponent.intReportingComponentId = @RCId
@@ -372,7 +375,7 @@ BEGIN TRY
 					, strVendorIdType = 'FEIN'
 					, strCustomerIdType = 'FEIN'
 					, strVendorInvoiceNumber = NULL
-					, strCustomerLicenseNumber = NULL
+					, strCustomerLicenseNumber = tblTFTaxAuthorityCustomerLicense.strLicenseNumber
 					, strCustomerAccountStatusCode = tblARAccountStatus.strAccountStatusCode
 					, strCustomerStreetAddress = tblEMEntityLocation.strAddress
 					, strCustomerZipCode = tblEMEntityLocation.strZipCode
@@ -396,6 +399,7 @@ BEGIN TRY
 				INNER JOIN tblEMEntity ON tblARCustomer.intEntityId = tblEMEntity.intEntityId
 				LEFT JOIN tblEMEntityLocation ON tblEMEntityLocation.intEntityId = tblARCustomer.intEntityId AND tblEMEntityLocation.ysnDefaultLocation = 1
 				LEFT JOIN tblARAccountStatus ON tblARAccountStatus.intAccountStatusId = tblARCustomer.intAccountStatusId
+				LEFT JOIN tblTFTaxAuthorityCustomerLicense ON tblTFTaxAuthorityCustomerLicense.intEntityId = tblARInvoice.intEntityCustomerId
 				CROSS JOIN tblSMCompanySetup
 				CROSS JOIN tblSMTaxCode
 				LEFT JOIN  (
@@ -581,7 +585,7 @@ BEGIN TRY
 					, strVendorIdType = 'FEIN'
 					, strCustomerIdType = 'FEIN'
 					, strVendorInvoiceNumber = NULL
-					, strCustomerLicenseNumber = NULL
+					, strCustomerLicenseNumber = tblTFTaxAuthorityCustomerLicense.strLicenseNumber
 					, strCustomerAccountStatusCode = NULL
 					, strCustomerStreetAddress = NULL
 					, strCustomerZipCode = NULL
@@ -616,7 +620,8 @@ BEGIN TRY
 				LEFT OUTER JOIN tblTFTerminalControlNumber ON tblTRSupplyPoint.intTerminalControlNumberId = tblTFTerminalControlNumber.intTerminalControlNumberId 
 				LEFT OUTER JOIN tblARInvoice ON tblTRLoadDistributionHeader.intInvoiceId = tblARInvoice.intInvoiceId 
 				LEFT OUTER JOIN tblARCustomerAccountStatus ON tblARCustomerAccountStatus.intEntityCustomerId = tblARInvoice.intEntityCustomerId 
-				LEFT OUTER JOIN tblARAccountStatus AS AccountStatus ON tblARCustomerAccountStatus.intAccountStatusId = AccountStatus.intAccountStatusId 
+				LEFT OUTER JOIN tblARAccountStatus AS AccountStatus ON tblARCustomerAccountStatus.intAccountStatusId = AccountStatus.intAccountStatusId
+				LEFT JOIN tblTFTaxAuthorityCustomerLicense ON tblTFTaxAuthorityCustomerLicense.intEntityId = tblARInvoice.intEntityCustomerId 
 				CROSS JOIN tblSMCompanySetup
 				WHERE tblICInventoryTransfer.intSourceType = 3
 					AND tblTFReportingComponent.intReportingComponentId = @RCId
@@ -752,26 +757,26 @@ BEGIN TRY
 			FROM @tmpInvoiceTransaction ORDER BY strProductCode
 		END
 		
+		IF(NOT EXISTS (SELECT TOP 1 1 FROM @tmpInvoiceTransaction WHERE intReportingComponentId = @Guid) AND @IsEdi = 0)
+		BEGIN
+			INSERT INTO tblTFTransaction (uniqTransactionGuid
+				, intReportingComponentId
+				, strProductCode
+				, dtmDate
+				, dtmReportingPeriodBegin
+				, dtmReportingPeriodEnd
+				, strTransactionType)
+			VALUES (@Guid
+				, @RCId
+				, 'No record found.'
+				, GETDATE()
+				, @DateFrom
+				, @DateTo
+				, 'Invoice')
+		END
+
 		DELETE FROM @tmpInvoiceTransaction
 		DELETE FROM #tmpRC WHERE intReportingComponentId = @RCId
-	END
-
-	IF(NOT EXISTS (SELECT TOP 1 1 FROM tblTFTransaction WHERE uniqTransactionGuid = @Guid) AND @IsEdi = 0)
-	BEGIN
-		INSERT INTO tblTFTransaction (uniqTransactionGuid
-			, intReportingComponentId
-			, strProductCode
-			, dtmDate
-			, dtmReportingPeriodBegin
-			, dtmReportingPeriodEnd
-			, strTransactionType)
-		VALUES (@Guid
-			, @RCId
-			, 'No record found.'
-			, GETDATE()
-			, @DateFrom
-			, @DateTo
-			, 'Invoice')
 	END
 
 	EXEC uspTFProcessBeforePreview @Guid = @Guid
