@@ -53,7 +53,7 @@ SELECT	Total.intFiscalYear,
 		dblNonRefundAmount = SUM(CASE WHEN Total.ysnEligibleRefund = 1 THEN 0 ELSE Total.dblRefundAmount END),
 		dblCashRefund = SUM(CASE WHEN Total.ysnEligibleRefund = 1 THEN (Total.dblRefundAmount * (RR.dblCashPayout/100)) ELSE 0 END),
 		dblEquityRefund = SUM(CASE WHEN Total.ysnEligibleRefund = 1 THEN (Total.dblRefundAmount - (Total.dblRefundAmount * (RR.dblCashPayout/100))) ELSE 0 END),
-		dblLessFWTPercentage = CASE WHEN Total.ysnEligibleRefund = 1 AND APV.ysnWithholding = 1 THEN CompLoc.dblWithholdPercent ELSE 0 END
+		dblLessFWTPercentage = CASE WHEN Total.ysnEligibleRefund = 1 AND ISNULL(APV.ysnWithholding, 0) = 1 THEN CompLoc.dblWithholdPercent ELSE 0 END
 		FROM (
 			SELECT	B.intCustomerPatronId,
 					RRD.intRefundTypeId,
@@ -68,23 +68,20 @@ SELECT	Total.intFiscalYear,
 			INNER JOIN tblPATRefundRate RR
 				ON RR.intRefundTypeId = RRD.intRefundTypeId
 			INNER JOIN tblARCustomer ARC
-				ON ARC.intEntityId = B.intCustomerPatronId
-			INNER JOIN vyuEMEntityType EMT
-				ON EMT.intEntityId = B.intCustomerPatronId AND EMT.Customer = 1 AND EMT.Vendor = 1
+				ON ARC.intEntityCustomerId = B.intCustomerPatronId
 			CROSS APPLY tblPATCompanyPreference ComPref
 			WHERE B.ysnRefundProcessed <> 1 AND B.dblVolume <> 0 AND ARC.strStockStatus IN (SELECT strStockStatus FROM @tblEligibleStockStatus) 
 			AND B.intFiscalYear = @intFiscalYearId
 			GROUP BY	B.intCustomerPatronId,
 						ARC.strStockStatus,
-						B.dblVolume,
 						B.intFiscalYear,
 						RRD.intRefundTypeId,
 						ComPref.dblMinimumRefund
 		) Total
 INNER JOIN tblPATRefundRate RR
             ON RR.intRefundTypeId = Total.intRefundTypeId
-INNER JOIN tblAPVendor APV
-	ON APV.intEntityId = Total.intCustomerPatronId
+LEFT OUTER JOIN tblAPVendor APV
+	ON APV.intEntityVendorId = Total.intCustomerPatronId
 CROSS APPLY tblPATCompanyPreference ComPref
 CROSS APPLY tblSMCompanyLocation CompLoc WHERE CompLoc.intCompanyLocationId = @intCompanyLocationId
 GROUP BY Total.intFiscalYear,
@@ -122,13 +119,12 @@ SELECT	Total.intFiscalYear,
 			INNER JOIN tblPATRefundRate RR
 					ON RR.intRefundTypeId = RRD.intRefundTypeId
 			INNER JOIN tblARCustomer ARC
-					ON ARC.intEntityId = B.intCustomerPatronId
+					ON ARC.intEntityCustomerId = B.intCustomerPatronId
 			CROSS APPLY tblPATCompanyPreference ComPref
 			WHERE B.ysnRefundProcessed <> 1 AND B.dblVolume <> 0 AND ARC.strStockStatus NOT IN (SELECT strStockStatus FROM @tblEligibleStockStatus) 
 			AND B.intFiscalYear = @intFiscalYearId
 			GROUP BY	B.intCustomerPatronId,
 						ARC.strStockStatus,
-						B.dblVolume,
 						B.intFiscalYear,
 						RRD.intRefundTypeId,
 						ComPref.dblMinimumRefund
@@ -143,13 +139,13 @@ SELECT	id = CAST(ROW_NUMBER() OVER(ORDER BY intFiscalYear) AS INT),
 		intFiscalYear AS intFiscalYearId,
 		intCompanyLocationId,
 		dblVolume = SUM(dblVolume), 
-		dblRefundAmount = SUM(dblRefundAmount),
-		dblNonRefundAmount = SUM(dblNonRefundAmount),
-		dblCashRefund = SUM(dblCashRefund),
-		dblLessFWT = SUM(dblLessFWT),
-		dblLessServiceFee = SUM(dblLessServiceFee),
-		dblCheckAmount = SUM(CASE WHEN dblCheckAmount > 0 THEN dblCheckAmount ELSE 0 END),
-		dblEquityRefund = SUM(dblEquityRefund),
+		dblRefundAmount = ROUND(SUM(dblRefundAmount),2),
+		dblNonRefundAmount = ROUND(SUM(dblNonRefundAmount),2),
+		dblCashRefund = ROUND(SUM(dblCashRefund),2),
+		dblLessFWT = ROUND(SUM(dblLessFWT),2),
+		dblLessServiceFee = ROUND(SUM(dblLessServiceFee),2),
+		dblCheckAmount = ROUND(SUM(CASE WHEN dblCheckAmount > 0 THEN dblCheckAmount ELSE 0 END),2),
+		dblEquityRefund = ROUND(SUM(dblEquityRefund),2),
 		intVoting,
 		intNonVoting,
 		intProducers,
@@ -163,11 +159,11 @@ SELECT intFiscalYear,
 		dblNonRefundAmount,
 		dblCashRefund,
 		dblEquityRefund,
-		dblLessFWT = CASE WHEN dblRefundAmount >= ComPref.dblMinimumRefund THEN ROUND(dblCashRefund * (dblLessFWTPercentage/100), 2) ELSE 0 END,
+		dblLessFWT = CASE WHEN dblRefundAmount >= ComPref.dblMinimumRefund THEN (dblCashRefund * (dblLessFWTPercentage/100)) ELSE 0 END,
 		dblLessServiceFee = CASE WHEN dblRefundAmount >= ComPref.dblMinimumRefund OR (dblCashRefund <= ComPref.dblCutoffAmount AND ComPref.strCutoffTo = 'Cash') THEN ComPref.dblServiceFee ELSE 0 END,
 		dblCheckAmount = CASE WHEN dblRefundAmount >= ComPref.dblMinimumRefund THEN 
-								ROUND(dblCashRefund - ROUND(dblCashRefund * (dblLessFWTPercentage/100), 2) - 
-								(CASE WHEN dblRefundAmount >= ComPref.dblServiceFee OR (dblCashRefund <= ComPref.dblCutoffAmount AND ComPref.strCutoffTo = 'Cash') THEN ComPref.dblServiceFee ELSE 0 END), 2)
+								(dblCashRefund - (dblCashRefund * (dblLessFWTPercentage/100)) - 
+								(CASE WHEN dblRefundAmount >= ComPref.dblServiceFee OR (dblCashRefund <= ComPref.dblCutoffAmount AND ComPref.strCutoffTo = 'Cash') THEN ComPref.dblServiceFee ELSE 0 END))
 							ELSE 0 END,
 		intVoting,
 		intNonVoting,
