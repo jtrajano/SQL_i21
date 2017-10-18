@@ -1,38 +1,34 @@
 ﻿CREATE VIEW [dbo].[vyuICGetItemStockUOMForAdjustment]
 AS 
 
-SELECT	StockUOM.intItemStockUOMId
-		,Item.intItemId
-		,Item.strItemNo
-		,strItemDescription		= Item.strDescription
-		,Item.strType
-		,strLotTracking			= Item.strLotTracking
-		,intLocationId			= Location.intCompanyLocationId
-		,StockUOM.intItemLocationId
-		,Location.strLocationName
-		,ItemUOM.intItemUOMId
-		,UOM.strUnitMeasure
-		,UOM.strUnitType
-		,intSubLocationId		= SubLocation.intCompanyLocationSubLocationId
-		,SubLocation.strSubLocationName
-		,StorageLocation.intStorageLocationId
-		,strStorageLocationName	= StorageLocation.strName
-		,dblOnHand				= CAST(ISNULL(StockUOM.dblOnHand, 0) AS NUMERIC(18, 6)) 
-		,dblOnOrder				= CAST(ISNULL(StockUOM.dblOnOrder, 0) AS NUMERIC(18, 6)) 
-		,dblUnitQty				= CAST(ISNULL(ItemUOM.dblUnitQty, 0) AS NUMERIC(18, 6)) 
-		,ysnStockUnit			= CAST(ISNULL(ItemUOM.ysnStockUnit, 0) AS BIT)
-FROM	tblICItem Item INNER JOIN tblICItemUOM ItemUOM
-			ON Item.intItemId = ItemUOM.intItemId
-		LEFT JOIN tblICItemStockUOM StockUOM
-			ON ItemUOM.intItemUOMId = StockUOM.intItemUOMId
-		LEFT JOIN tblICItemLocation ItemLoc
-			ON ItemLoc.intItemLocationId = StockUOM.intItemLocationId
-				AND ItemLoc.intItemId = Item.intItemId
-		LEFT JOIN tblSMCompanyLocation Location 
-			ON Location.intCompanyLocationId = ItemLoc.intLocationId
-		LEFT JOIN tblICUnitMeasure UOM 
-			ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
-		LEFT JOIN tblSMCompanyLocationSubLocation SubLocation
-			ON SubLocation.intCompanyLocationSubLocationId = StockUOM.intSubLocationId
-		LEFT JOIN tblICStorageLocation StorageLocation 
-			ON StorageLocation.intStorageLocationId = StockUOM.intStorageLocationId
+SELECT
+	  intItemStockUOMId = ISNULL(suom.intItemStockUOMId, 0)
+	, intItemId = i.intItemId
+	, strItemNo = i.strItemNo
+	, strItemDescription = i.strDescription
+	, strType = i.strType
+	, strLotTracking = i.strLotTracking
+	, intLocationId = cl.intCompanyLocationId
+	, strLocationName = cl.strLocationName
+	, intItemLocationId = COALESCE(suom.intItemLocationId, il.intItemLocationId)
+	, intItemUOMId = uom.intItemUOMId
+	, strUnitMeasure = um.strUnitMeasure
+	, strUnitType = um.strUnitType
+	, intSubLocationId = suom.intSubLocationId
+	, strSubLocationName = sl.strSubLocationName
+	, intStorageLocationId = suom.intStorageLocationId
+	, strStorageLocationName = su.strName
+	, dblOnHand = CAST(ISNULL(suom.dblOnHand, 0.00) AS NUMERIC(18, 6))
+	, dblOnOrder = CAST(ISNULL(suom.dblOnOrder, 0.00) AS NUMERIC(18, 6))
+	, dblUnitQty = CAST(ISNULL(uom.dblUnitQty, 0.00) AS NUMERIC(18, 6))
+	, ysnStockUnit = CAST(ISNULL(uom.ysnStockUnit, 0) AS BIT)
+FROM tblICItemUOM uom
+	INNER JOIN tblICItemLocation il ON il.intItemId = uom.intItemId
+	INNER JOIN tblICItem i ON i.intItemId = uom.intItemId
+	INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = il.intLocationId
+	INNER JOIN tblICUnitMeasure um ON um.intUnitMeasureId = uom.intUnitMeasureId
+	LEFT JOIN tblICItemStockUOM suom ON suom.intItemId = uom.intItemId
+		AND suom.intItemLocationId = il.intItemLocationId
+		AND suom.intItemUOMId = uom.intItemUOMId
+	LEFT JOIN tblSMCompanyLocationSubLocation sl ON sl.intCompanyLocationSubLocationId = suom.intSubLocationId
+	LEFT JOIN tblICStorageLocation su ON su.intStorageLocationId = suom.intStorageLocationId
