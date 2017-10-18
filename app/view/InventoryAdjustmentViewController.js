@@ -211,13 +211,13 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                                 column: 'intItemId',
                                 value: '{grdInventoryAdjustment.selection.intItemId}',
                                 conjunction: 'and'
-                            },
-                            {
-                                column: 'dblOnHand',
-                                value: '{getOnHandFilterValue}',
-                                conjunction: 'and',
-                                condition: 'gt'
-                            }
+                            }//,
+                            // {
+                            //     column: 'dblOnHand',
+                            //     value: '{getOnHandFilterValue}',
+                            //     conjunction: 'and',
+                            //     condition: 'gt'
+                            // }
                         ],
                         readOnly: '{formulaShowItemUOMEditor}'
                     }
