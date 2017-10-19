@@ -1382,7 +1382,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         action(record);
     },
 
-    validateRequiredGrossWeight(receiptItems, result) {
+    validateRequiredGrossWeight:function(receiptItems, result) {
         var ri = _.filter(receiptItems, function(x) { return x.phantom === false; });
         ri = _.map(ri, function(x) { return x.data; });
         ri = _.filter(ri, function(x) { return x.strLotTracking !== 'No' && x.ysnLotWeightsRequired === true && ((x.intWeightUOMId === null) || (x.dblGross === 0 && x.dblNet === 0)); })
