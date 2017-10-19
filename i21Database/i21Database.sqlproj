@@ -5432,6 +5432,7 @@
     <Build Include="dbo\Views\vyuGLTrialBalance_NonRE.sql" />
     <Build Include="dbo\Views\vyuGLTrialBalance_RE.sql" />
     <Build Include="dbo\Views\vyuGLTrialBalance.sql" />
+    <Build Include="dbo\Functions\fnFormatDate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
