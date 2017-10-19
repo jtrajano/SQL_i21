@@ -17,9 +17,6 @@ BEGIN
         ON (Target.intEntityId = Source.intEntityId)
         WHEN MATCHED THEN
             UPDATE SET Target.intUserRoleID = Source.intUserRoleID, Target.intCompanyLocationId = Source.intCompanyLocationId, Target.intSecurityPolicyId = Source.intSecurityPolicyId, Target.strUserName = Source.strUserName, Target.strJIRAUserName = Source.strJIRAUserName, Target.strFullName = Source.strFullName, Target.strPassword = Source.strPassword, Target.strOverridePassword = Source.strOverridePassword, Target.strDashboardRole = Source.strDashboardRole, Target.strFirstName = Source.strFirstName, Target.strMiddleName = Source.strMiddleName, Target.strLastName = Source.strLastName, Target.strPhone = Source.strPhone, Target.strDepartment = Source.strDepartment, Target.strLocation = Source.strLocation, Target.strEmail = Source.strEmail, Target.strMenuPermission = Source.strMenuPermission, Target.strMenu = Source.strMenu, Target.strForm = Source.strForm, Target.strFavorite = Source.strFavorite, Target.ysnDisabled = Source.ysnDisabled, Target.ysnAdmin = Source.ysnAdmin, Target.ysnRequirePurchasingApproval = Source.ysnRequirePurchasingApproval, Target.strDateFormat = Source.strDateFormat, Target.strNumberFormat = Source.strNumberFormat, Target.intInvalidAttempt = Source.intInvalidAttempt, Target.ysnLockedOut = Source.ysnLockedOut, Target.dtmLockOutTime = Source.dtmLockOutTime, Target.intConcurrencyId = Source.intConcurrencyId, Target.intEntityIdOld = Source.intEntityIdOld, Target.intUserSecurityIdOld = Source.intUserSecurityIdOld
-        WHEN NOT MATCHED BY TARGET THEN
-            INSERT (intEntityId, intUserRoleID, intCompanyLocationId, intSecurityPolicyId, strUserName, strJIRAUserName, strFullName, strPassword, strOverridePassword, strDashboardRole, strFirstName, strMiddleName, strLastName, strPhone, strDepartment, strLocation, strEmail, strMenuPermission, strMenu, strForm, strFavorite, ysnDisabled, ysnAdmin, ysnRequirePurchasingApproval, strDateFormat, strNumberFormat, intInvalidAttempt, ysnLockedOut, dtmLockOutTime, intConcurrencyId, intEntityIdOld, intUserSecurityIdOld)
-            VALUES (Source.intEntityId, Source.intUserRoleID, Source.intCompanyLocationId, Source.intSecurityPolicyId, Source.strUserName, Source.strJIRAUserName, Source.strFullName, Source.strPassword, Source.strOverridePassword, Source.strDashboardRole, Source.strFirstName, Source.strMiddleName, Source.strLastName, Source.strPhone, Source.strDepartment, Source.strLocation, Source.strEmail, Source.strMenuPermission, Source.strMenu, Source.strForm, Source.strFavorite, Source.ysnDisabled, Source.ysnAdmin, Source.ysnRequirePurchasingApproval, Source.strDateFormat, Source.strNumberFormat, Source.intInvalidAttempt, Source.ysnLockedOut, Source.dtmLockOutTime, Source.intConcurrencyId, Source.intEntityIdOld, Source.intUserSecurityIdOld)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
@@ -32,15 +29,10 @@ BEGIN
         ON (Target.intStartingNumberId = Source.intStartingNumberId)
         WHEN MATCHED THEN
             UPDATE SET Target.strTransactionType = Source.strTransactionType, Target.strPrefix = Source.strPrefix, Target.intNumber = Source.intNumber, Target.strModule = Source.strModule, Target.ysnUseLocation = Source.ysnUseLocation, Target.ysnEnable = Source.ysnEnable, Target.intConcurrencyId = Source.intConcurrencyId
-        WHEN NOT MATCHED BY TARGET THEN
-            INSERT (intStartingNumberId, strTransactionType, strPrefix, intNumber, strModule, ysnUseLocation, ysnEnable, intConcurrencyId)
-            VALUES (Source.intStartingNumberId, Source.strTransactionType, Source.strPrefix, Source.intNumber, Source.strModule, Source.ysnUseLocation, Source.ysnEnable, Source.intConcurrencyId)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
     SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
-    SET IDENTITY_INSERT tblSMStartingNumber ON
     EXECUTE sp_executesql @SQLString;
-    SET IDENTITY_INSERT tblSMStartingNumber OFF
 
 END
