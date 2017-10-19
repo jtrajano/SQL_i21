@@ -4,7 +4,7 @@ WITH c AS (
 SELECT
 'ExRev' strType,
 0 as intGLDetailId,
-dbo.fnFormatDate(dtmDate,'Month YYYY')  + ' ' +  strAccountType strTransactionId,
+DATENAME (MM, dtmDate) + ' ' + DATENAME(YY,dtmDate) + ' ' +  strAccountType strTransactionId,
 dateadd(day,-1, dateadd(month, datediff(month,0,dtmDate) +1,0)) dtmDate,
 sum(dblDebit)dblDebit,
 sum(dblCredit)dblCredit,
@@ -15,7 +15,7 @@ sum(dblCreditForeign) dblCreditForeign
 FROM vyuGLDetail a
 WHERE ysnIsUnposted = 0
 and strAccountType in ('Expense', 'Revenue')
-GROUP BY strAccountType, dbo.fnFormatDate(dtmDate,'Month YYYY') ,   dateadd(day,-1, dateadd(month, datediff(month,0,dtmDate) +1,0))
+GROUP BY strAccountType, DATENAME (MM, dtmDate), DATENAME(YY,dtmDate),  dateadd(day,-1, dateadd(month, datediff(month,0,dtmDate) +1,0))
 ),
 d AS (
 SELECT 
@@ -61,4 +61,3 @@ ISNULL(c.strUserName,'') strUserName
 FROM u a LEFT JOIN
 vyuGLDetail c ON a.intGLDetailId = c.intGLDetailId
 GO
-
