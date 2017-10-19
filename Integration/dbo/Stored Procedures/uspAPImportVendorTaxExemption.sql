@@ -9,18 +9,18 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 
-		IF  EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'tmpvndname')
-			DROP TABLE tmpvndname
+		IF  EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = '#tmpvnd')
+			DROP TABLE #tmpvnd
 
 	SELECT	ssvnd_vnd_no, ssvnd_pay_to,
 			(RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = 'C' THEN ssvnd_name
 			ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name)))
 						+ ' ' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
 					END,''))) as ssvnd_name,ssvnd_st
-	INTO tmpvndname
+	INTO #tmpvnd
 	FROM ssvndmst  WHERE ssvnd_vnd_no = ssvnd_pay_to OR ssvnd_pay_to is null
 
-	INSERT INTO tmpvndname (ssvnd_vnd_no,ssvnd_pay_to,ssvnd_name,ssvnd_st)
+	INSERT INTO #tmpvnd (ssvnd_vnd_no,ssvnd_pay_to,ssvnd_name,ssvnd_st)
 	SELECT	ssvnd_vnd_no, ssvnd_pay_to,
 			(RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = 'C' THEN ssvnd_name
 			ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name)))
@@ -31,7 +31,7 @@ BEGIN
 IF (@Checking = 1)	
 BEGIN
 		SELECT @Total = COUNT (*) FROM ptvtxmst PDV	
-		INNER JOIN tmpvndname OVND ON OVND.ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptvtx_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
+		INNER JOIN #tmpvnd OVND ON OVND.ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptvtx_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
 		INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = OVND.ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 		INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = VND.intEntityId 
 				   AND CLOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = OVND.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS	   
@@ -41,7 +41,7 @@ BEGIN
 		AND [intItemId] IS NULL AND [intCategoryId] = CAT.[intCategoryId])
 
 		SELECT @Total = @Total + COUNT (*) FROM ptvtxmst PDV	
-		INNER JOIN tmpvndname OVND ON OVND.ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptvtx_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
+		INNER JOIN #tmpvnd OVND ON OVND.ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptvtx_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
 		INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = OVND.ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 		INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = VND.intEntityId 
 				   AND CLOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = OVND.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS	   
@@ -51,7 +51,7 @@ BEGIN
 		AND [intItemId] = ITM.intItemId AND [intCategoryId] IS NULL)
 
 		SELECT @Total = @Total + COUNT (*) FROM ptvtxmst PDV	
-		INNER JOIN tmpvndname OVND ON OVND.ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptvtx_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
+		INNER JOIN #tmpvnd OVND ON OVND.ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptvtx_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
 		INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = OVND.ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 		INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = VND.intEntityId 
 				   AND CLOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = OVND.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS	   
@@ -84,7 +84,7 @@ INSERT INTO [dbo].[tblAPVendorTaxException]
            ,CLOC.intEntityLocationId--[intEntityVendorLocationId]
            ,1	
 		FROM ptvtxmst PDV
-		INNER JOIN tmpvndname OVND ON OVND.ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptvtx_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
+		INNER JOIN #tmpvnd OVND ON OVND.ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptvtx_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
 		INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = OVND.ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 		INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = VND.intEntityId 
 				   AND CLOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = OVND.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS	   
@@ -117,7 +117,7 @@ INSERT INTO [dbo].[tblAPVendorTaxException]
            ,CLOC.intEntityLocationId--[intEntityVendorLocationId]
            ,1	
 		FROM ptvtxmst PDV
-		INNER JOIN tmpvndname OVND ON OVND.ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptvtx_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
+		INNER JOIN #tmpvnd OVND ON OVND.ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptvtx_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
 		INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = OVND.ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 		INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = VND.intEntityId 
 				   AND CLOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = OVND.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS	   
@@ -150,7 +150,7 @@ INSERT INTO [dbo].[tblAPVendorTaxException]
            ,CLOC.intEntityLocationId--[intEntityVendorLocationId]
            ,1	
 		FROM ptvtxmst PDV
-		INNER JOIN tmpvndname OVND ON OVND.ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptvtx_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
+		INNER JOIN #tmpvnd OVND ON OVND.ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptvtx_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
 		INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = OVND.ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 		INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = VND.intEntityId 
 				   AND CLOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = OVND.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS	   
@@ -185,7 +185,7 @@ INSERT INTO [dbo].[tblAPVendorTaxException]
            ,CLOC.intEntityLocationId--[intEntityVendorLocationId]
            ,1	
 		FROM ptvtxmst PDV
-		INNER JOIN tmpvndname OVND ON OVND.ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptvtx_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
+		INNER JOIN #tmpvnd OVND ON OVND.ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptvtx_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
 		INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = OVND.ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 		INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = VND.intEntityId 
 				   AND CLOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = OVND.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -220,7 +220,7 @@ INSERT INTO [dbo].[tblAPVendorTaxException]
            ,CLOC.intEntityLocationId--[intEntityVendorLocationId]
            ,1	
 		FROM ptvtxmst PDV
-		INNER JOIN tmpvndname OVND ON OVND.ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptvtx_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
+		INNER JOIN #tmpvnd OVND ON OVND.ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptvtx_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
 		INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = OVND.ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 		INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = VND.intEntityId 
 				   AND CLOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = OVND.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -255,7 +255,7 @@ INSERT INTO [dbo].[tblAPVendorTaxException]
            ,CLOC.intEntityLocationId--[intEntityVendorLocationId]
            ,1	
 		FROM ptvtxmst PDV
-		INNER JOIN tmpvndname OVND ON OVND.ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptvtx_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
+		INNER JOIN #tmpvnd OVND ON OVND.ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptvtx_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
 		INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = OVND.ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 		INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = VND.intEntityId 
 				   AND CLOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = OVND.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -292,7 +292,7 @@ WHILE @cnt < 12
 						   ,CLOC.intEntityLocationId--[intEntityVendorLocationId]
 						   ,1	
 						FROM ptvtxmst PDV
-						INNER JOIN tmpvndname OVND ON OVND.ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptvtx_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
+						INNER JOIN #tmpvnd OVND ON OVND.ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptvtx_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
 						INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = OVND.ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 						INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = VND.intEntityId 
 								   AND CLOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = OVND.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS	   
@@ -329,7 +329,7 @@ WHILE @cnt < 12
 						   ,CLOC.intEntityLocationId--[intEntityVendorLocationId]
 						   ,1	
 						FROM ptvtxmst PDV
-						INNER JOIN tmpvndname OVND ON OVND.ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptvtx_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
+						INNER JOIN #tmpvnd OVND ON OVND.ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptvtx_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
 						INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = OVND.ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 						INNER JOIN tblEMEntityLocation CLOC ON CLOC.intEntityId = VND.intEntityId 
 								   AND CLOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = OVND.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS
