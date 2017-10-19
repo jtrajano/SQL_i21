@@ -108,41 +108,32 @@ BEGIN
 END
 ELSE
 BEGIN
-	DECLARE @DetailCount INT
+	DECLARE @importFileRecordMarkerId INT
+
 	SELECT @FileHeaderId = intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = @LayoutTitle
-	SELECT @DetailCount = COUNT(*) FROM tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @FileHeaderId
-	IF (@DetailCount <> 6)
-	BEGIN
-		DELETE FROM tblSMImportFileHeader WHERE strLayoutTitle = @LayoutTitle
-
-		INSERT INTO tblSMImportFileHeader(strLayoutTitle
-			, strFileType
-			, strFieldDelimiter
-			, ysnActive
-			, intConcurrencyId)
-		SELECT @LayoutTitle
-			, 'Delimiter'
-			, 'Comma'
-			, 1
-			, 1
-
-		SET @FileHeaderId = SCOPE_IDENTITY()
-	END
-
+	
+	UPDATE tblSMImportFileHeader
+	SET strLayoutTitle = @LayoutTitle
+		, strFileType = 'Delimiter'
+		, strFieldDelimiter = 'Comma'
+	WHERE intImportFileHeaderId = @FileHeaderId
+	
+	-- Temporarily Update levels to eliminate duplicates
 	UPDATE tblSMImportFileColumnDetail
 	SET intLevel = intImportFileColumnDetailId
 	WHERE intImportFileHeaderId = @FileHeaderId
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMImportFileRecordMarker WHERE strRecordMarker = 'Supply Point' AND intImportFileHeaderId = @FileHeaderId)
 	BEGIN
+		INSERT INTO tblSMImportFileRecordMarker(intImportFileHeaderId, strRecordMarker, strFormat, intPosition, intConcurrencyId)
+		SELECT @FileHeaderId, 'Supply Point', NULL, 1, 1
+		SET @DetailId = SCOPE_IDENTITY()
+
 		IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @FileHeaderId AND intLevel = 1)
-		begin
-			INSERT INTO tblSMImportFileRecordMarker(intImportFileHeaderId, strRecordMarker, strFormat, intPosition, intConcurrencyId)
-			SELECT @FileHeaderId, 'Supply Point', NULL, 1, 1
-			SET @DetailId = SCOPE_IDENTITY()
+		BEGIN			
 			INSERT INTO tblSMImportFileColumnDetail(intImportFileHeaderId, intImportFileRecordMarkerId, intPosition, strTable, strColumnName, ysnActive, intLevel, intConcurrencyId)
 			SELECT @FileHeaderId, @DetailId, 1, 'tblTRRackPriceHeader', 'intSupplyPointId', 1, 1, 1
-		end
+		END
 	END
 	ELSE
 	BEGIN
@@ -162,14 +153,15 @@ BEGIN
 	
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMImportFileRecordMarker WHERE strRecordMarker = 'Supplier Name' AND intImportFileHeaderId = @FileHeaderId)
 	BEGIN
+		INSERT INTO tblSMImportFileRecordMarker(intImportFileHeaderId, strRecordMarker, strFormat, intPosition, intConcurrencyId)
+		SELECT @FileHeaderId, 'Supplier Name', NULL, 0, 1
+		SET @DetailId = SCOPE_IDENTITY()
+
 		IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @FileHeaderId AND intLevel = 2)
-		begin
-			INSERT INTO tblSMImportFileRecordMarker(intImportFileHeaderId, strRecordMarker, strFormat, intPosition, intConcurrencyId)
-			SELECT @FileHeaderId, 'Supplier Name', NULL, 0, 1
-			SET @DetailId = SCOPE_IDENTITY()
+		BEGIN	
 			INSERT INTO tblSMImportFileColumnDetail(intImportFileHeaderId, intImportFileRecordMarkerId, intPosition, strTable, strColumnName, ysnActive, intLevel, intConcurrencyId)
 			SELECT @FileHeaderId, @DetailId, 2, 'tblTRImportRackPriceDetail', 'strSupplierName', 1, 2, 1
-		end
+		END
 	END
 	ELSE
 	BEGIN
@@ -189,19 +181,18 @@ BEGIN
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMImportFileRecordMarker WHERE strRecordMarker = 'Effective Date' AND intImportFileHeaderId = @FileHeaderId)
 	BEGIN
+		INSERT INTO tblSMImportFileRecordMarker(intImportFileHeaderId, strRecordMarker, strFormat, intPosition, intConcurrencyId)
+		SELECT @FileHeaderId, 'Effective Date', 'YYYYMMDD', 7, 1
+		SET @DetailId = SCOPE_IDENTITY()
+
 		IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @FileHeaderId AND intLevel = 3)
-		begin
-			INSERT INTO tblSMImportFileRecordMarker(intImportFileHeaderId, strRecordMarker, strFormat, intPosition, intConcurrencyId)
-			SELECT @FileHeaderId, 'Effective Date', 'YYYYMMDD', 7, 1
-			SET @DetailId = SCOPE_IDENTITY()
+		BEGIN
 			INSERT INTO tblSMImportFileColumnDetail(intImportFileHeaderId, intImportFileRecordMarkerId, intPosition, strTable, strColumnName, ysnActive, intLevel, intConcurrencyId)
 			SELECT @FileHeaderId, @DetailId, 3, 'tblTRRackPriceHeader', 'dtmEffectiveDateTime', 1, 3, 1
-		end
+		END
 	END
 	ELSE
 	BEGIN
-		DECLARE @importFileRecordMarkerId INT
-
 		SELECT TOP 1 @importFileRecordMarkerId = intImportFileRecordMarkerId
 		FROM tblSMImportFileRecordMarker
 		WHERE intImportFileHeaderId = @FileHeaderId
@@ -221,20 +212,19 @@ BEGIN
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMImportFileRecordMarker WHERE strRecordMarker = 'Effective Time' AND intImportFileHeaderId = @FileHeaderId)
 	BEGIN
+		INSERT INTO tblSMImportFileRecordMarker(intImportFileHeaderId, strRecordMarker, strFormat, intPosition, intConcurrencyId)
+		SELECT @FileHeaderId, 'Effective Time', 'HHMM', 8, 1
+		SET @DetailId = SCOPE_IDENTITY()
+
 		IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @FileHeaderId AND intLevel = 4)
-		begin
-			INSERT INTO tblSMImportFileRecordMarker(intImportFileHeaderId, strRecordMarker, strFormat, intPosition, intConcurrencyId)
-			SELECT @FileHeaderId, 'Effective Time', 'HHMM', 8, 1
-			SET @DetailId = SCOPE_IDENTITY()
+		BEGIN
 			INSERT INTO tblSMImportFileColumnDetail(intImportFileHeaderId, intImportFileRecordMarkerId, intPosition, strTable, strColumnName, ysnActive, intLevel, intConcurrencyId)
 			SELECT @FileHeaderId, @DetailId, 4, 'tblTRRackPriceHeader', 'dtmEffectiveDateTime', 1, 4, 1
-		end
+		END
 	END
 	ELSE
 	BEGIN
-		DECLARE @importFileRecordMarkerId2 INT
-
-		SELECT TOP 1 @importFileRecordMarkerId2 = intImportFileRecordMarkerId
+		SELECT TOP 1 @importFileRecordMarkerId = intImportFileRecordMarkerId
 		FROM tblSMImportFileRecordMarker
 		WHERE intImportFileHeaderId = @FileHeaderId
 			AND strRecordMarker = 'Effective Time'
@@ -242,25 +232,26 @@ BEGIN
 		UPDATE tblSMImportFileRecordMarker
 		SET strFormat = 'HHMM'
 			, intPosition = 9
-		WHERE intImportFileRecordMarkerId = @importFileRecordMarkerId2
+		WHERE intImportFileRecordMarkerId = @importFileRecordMarkerId
 
 		UPDATE tblSMImportFileColumnDetail
 		SET intPosition = 4
 			, intLevel = 4
 		WHERE intImportFileHeaderId = @FileHeaderId
-			AND intImportFileRecordMarkerId = @importFileRecordMarkerId2
+			AND intImportFileRecordMarkerId = @importFileRecordMarkerId
 	END
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMImportFileRecordMarker WHERE strRecordMarker = 'Item Id' AND intImportFileHeaderId = @FileHeaderId)
 	BEGIN
+		INSERT INTO tblSMImportFileRecordMarker(intImportFileHeaderId, strRecordMarker, strFormat, intPosition, intConcurrencyId)
+		SELECT @FileHeaderId, 'Item Id', NULL, 5, 1
+		SET @DetailId = SCOPE_IDENTITY()
+			
 		IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @FileHeaderId AND intLevel = 5)
-		begin
-			INSERT INTO tblSMImportFileRecordMarker(intImportFileHeaderId, strRecordMarker, strFormat, intPosition, intConcurrencyId)
-			SELECT @FileHeaderId, 'Item Id', NULL, 5, 1
-			SET @DetailId = SCOPE_IDENTITY()
+		BEGIN
 			INSERT INTO tblSMImportFileColumnDetail(intImportFileHeaderId, intImportFileRecordMarkerId, intPosition, strTable, strColumnName, ysnActive, intLevel, intConcurrencyId)
 			SELECT @FileHeaderId, @DetailId, 5, 'tblTRRackPriceDetail', 'intItemId', 1, 5, 1
-		end
+		END
 	END
 	ELSE
 	BEGIN
@@ -280,14 +271,15 @@ BEGIN
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMImportFileRecordMarker WHERE strRecordMarker = 'Vendor Price' AND intImportFileHeaderId = @FileHeaderId)
 	BEGIN
+		INSERT INTO tblSMImportFileRecordMarker(intImportFileHeaderId, strRecordMarker, strFormat, intPosition, intConcurrencyId)
+		SELECT @FileHeaderId, 'Vendor Price', 'Explicit Decimals', 9, 1
+		SET @DetailId = SCOPE_IDENTITY()
+
 		IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @FileHeaderId AND intLevel = 6)
-		begin
-			INSERT INTO tblSMImportFileRecordMarker(intImportFileHeaderId, strRecordMarker, strFormat, intPosition, intConcurrencyId)
-			SELECT @FileHeaderId, 'Vendor Price', 'Explicit Decimals', 9, 1
-			SET @DetailId = SCOPE_IDENTITY()
+		BEGIN	
 			INSERT INTO tblSMImportFileColumnDetail(intImportFileHeaderId, intImportFileRecordMarkerId, intPosition, strTable, strColumnName, ysnActive, intLevel, intConcurrencyId)
 			SELECT @FileHeaderId, @DetailId, 6, 'tblTRRackPriceDetail', 'dblVendorRack', 1, 6, 1
-		end
+		END
 	END
 	ELSE
 	BEGIN
