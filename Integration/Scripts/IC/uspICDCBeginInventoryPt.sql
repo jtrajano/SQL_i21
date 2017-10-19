@@ -125,15 +125,31 @@ BEGIN
 				,ptitm_on_hand
 				,uom.intItemUOMId
 				,case when @strAvgLast = 'A' then ptitm_avg_cost else ptitm_cost1 end
-				,sl.intSubLocationId
-				,sl.intStorageLocationId
+				,(select sl.intSubLocationId 
+					from 
+						tblICStorageLocation sl 
+						join tblSMCompanyLocationSubLocation cls on sl.intSubLocationId = cls.intCompanyLocationSubLocationId 
+						join tblSMCompanyLocation cl on cl.intCompanyLocationId = cls.intCompanyLocationId
+						where sl.strName COLLATE Latin1_General_CI_AS = itm.ptitm_binloc COLLATE Latin1_General_CI_AS 
+						and cl.strLocationNumber COLLATE Latin1_General_CI_AS = itm.ptitm_loc_no COLLATE Latin1_General_CI_AS) intSubLocationId
+				,(select sl.intSubLocationId 
+					from 
+						tblICStorageLocation sl 
+						join tblSMCompanyLocationSubLocation cls on sl.intSubLocationId = cls.intCompanyLocationSubLocationId 
+						join tblSMCompanyLocation cl on cl.intCompanyLocationId = cls.intCompanyLocationId
+						where sl.strName COLLATE Latin1_General_CI_AS = itm.ptitm_binloc COLLATE Latin1_General_CI_AS 
+						and cl.strLocationNumber COLLATE Latin1_General_CI_AS = itm.ptitm_loc_no COLLATE Latin1_General_CI_AS) intStorageLocationId	
+
+				--,sl.intSubLocationId
+				--,sl.intStorageLocationId
 				,1
 			FROM	tblICItem inv INNER JOIN ptitmmst itm 
 						ON  inv.strItemNo COLLATE Latin1_General_CI_AS = itm.ptitm_itm_no COLLATE Latin1_General_CI_AS
 					LEFT JOIN tblICItemUOM uom 
 						on uom.intItemId = inv.intItemId 
-					left join tblICStorageLocation sl 
-						on sl.strName COLLATE Latin1_General_CI_AS = itm.ptitm_binloc COLLATE Latin1_General_CI_AS	
+					--created duplicate storage location entries. converted into an inline sub query.	
+					--left join tblICStorageLocation sl 
+					--	on sl.strName COLLATE Latin1_General_CI_AS = itm.ptitm_binloc COLLATE Latin1_General_CI_AS	
 			WHERE	ptitm_on_hand <> 0 
 			AND ptitm_loc_no = @adjLoc
 			AND inv.strType in ('Inventory', 'Finished Good', 'Raw Material')
@@ -166,14 +182,34 @@ BEGIN
 
 			--------------------------------------------------------------------------------------------------------------------------------------------
 			-- Auto post the inventory adjustment
-			BEGIN 
-
+			BEGIN TRY
 				EXEC dbo.uspICPostInventoryAdjustment
 					@ysnPost = 1
 					,@ysnRecap = 0
 					,@strTransactionId = @strAdjustmentNo
 					,@intEntityUserSecurityId = @intEntityUserSecurityId
-			END 
+			END TRY
+			BEGIN CATCH
+				DECLARE @ErrorMessage NVARCHAR(4000);
+				DECLARE @ErrorSeverity INT;
+				DECLARE @ErrorState INT;
+
+				SELECT 
+					@ErrorMessage = ERROR_MESSAGE(),
+					@ErrorSeverity = ERROR_SEVERITY(),
+					@ErrorState = ERROR_STATE();
+
+				-- Use RAISERROR inside the CATCH block to return error
+				-- information about the original error that caused
+				-- execution to jump to the CATCH block.
+				RAISERROR (
+					@ErrorMessage, -- Message text.
+					@ErrorSeverity, -- Severity.
+					@ErrorState -- State.
+				);
+
+				GOTO BreakLoopWithError
+			END CATCH 
 
 			-- Tweak the contra-gl account used. 
 			BEGIN 
@@ -196,8 +232,15 @@ BEGIN
 		INTO @adjLoc
 
 	END
-	CLOSE loc_cursor
+	GOTO CloseLoop
 
+	BreakLoopWithError:  
+	CLOSE loc_cursor
+	DEALLOCATE loc_cursor
+	GOTO Post_Exit 
+
+	CloseLoop:
+	CLOSE loc_cursor
 	DEALLOCATE loc_cursor
 END
 	--ELSE
@@ -256,4 +299,6 @@ BEGIN
 			AND dbo.fnDateEquals(dtmDate, @adjdt) = 1	
 	GROUP BY intMultiCompanyId, intAccountId, dtmDate, strCode
 END
+
+Post_Exit:
 
