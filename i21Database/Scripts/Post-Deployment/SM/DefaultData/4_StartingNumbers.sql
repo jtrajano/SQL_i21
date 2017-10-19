@@ -1201,6 +1201,16 @@ GO
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Basis Advance')
 
+	UNION ALL
+	SELECT	 [intStartingNumberId]	= 125
+			,[strTransactionType]	= N'Vendor Rebate Program'
+			,[strPrefix]			= N'VRP-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Vendor Rebates'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Vendor Rebate Program')
+
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
 	PRINT N'END INSERT DEFAULT STARTING NUMBERS'
