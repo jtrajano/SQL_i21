@@ -4063,11 +4063,11 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Checkout'
 ELSE 
 	UPDATE tblSMMasterMenu SET  intSort = 6, strCommand = N'Store.view.CheckoutHeader?showSearch=true&searchCommand=SearchCheckoutHeader', ysnVisible = 1 WHERE strMenuName = 'Checkout' AND strModuleName = 'Store' AND intParentMenuID = @StoreActivitiesParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Generate Vendor Rebate File' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Generate  Vendor Rebates File' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Generate Vendor Rebate File', N'Store', @StoreMaintenanceParentMenuId, N'Generate Vendor Rebate File', N'Maintenance', N'Screen', N'Store.view.GenerateVendorRebateFile', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
+	VALUES (N'Generate  Vendor Rebates File', N'Store', @StoreMaintenanceParentMenuId, N'Generate  Vendor Rebates File', N'Maintenance', N'Screen', N'Store.view.GenerateVendorRebateFile', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Store.view.GenerateVendorRebateFile' WHERE strMenuName = 'Generate Vendor Rebate File' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Store.view.GenerateVendorRebateFile' WHERE strMenuName = 'Generate  Vendor Rebates File' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Promotions' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
@@ -5014,7 +5014,7 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Proce
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Integration.view.ProcessSetup?action=new' WHERE strMenuName = 'New Process' AND strModuleName = 'Integration' AND intParentMenuID = @IntegrationCreateParentMenuId
 
-/* Fixed Assets */
+/* FIXED ASSETS */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Fixed Assets' AND strModuleName = 'Fixed Assets' AND intParentMenuID = 0)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 	VALUES (N'Fixed Assets', N'Fixed Assets', 0, N'Fixed Assets', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 32, 0)
@@ -5042,6 +5042,57 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Fixed Ass
 	VALUES (N'Fixed Assets', N'Fixed Assets', @FixedAssetsActivitiesParentMenuId, N'Fixed Assets', N'Activity', N'Screen', N'FixedAssets.view.FixedAssets?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'FixedAssets.view.FixedAssets?showSearch=true' WHERE strMenuName = 'Fixed Assets' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsActivitiesParentMenuId
+	
+/* VENDOR REBATES */
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Vendor Rebates' AND strModuleName = 'Vendor Rebates' AND intParentMenuID = 0)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Vendor Rebates', N'Vendor Rebates', 0, N'Vendor Rebates', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 33, 0)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 32 WHERE strMenuName = 'Vendor Rebates' AND strModuleName = 'Vendor Rebates' AND intParentMenuID = 0
+
+DECLARE @VendorRebatesParentMenuId INT
+SELECT @VendorRebatesParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Vendor Rebates' AND strModuleName = 'Vendor Rebates' AND intParentMenuID = 0
+
+/* CATEGORY FOLDERS */
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Vendor Rebates' AND intParentMenuID = @VendorRebatesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Activities', N'Vendor Rebates', @VendorRebatesParentMenuId, N'Activities', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 0, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 0 WHERE strMenuName = 'Activities' AND strModuleName = 'Vendor Rebates' AND intParentMenuID = @VendorRebatesParentMenuId
+
+DECLARE @VendorRebatesActivitiesParentMenuId INT
+SELECT @VendorRebatesActivitiesParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Vendor Rebates' AND intParentMenuID = @VendorRebatesParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Vendor Rebates' AND intParentMenuID = @VendorRebatesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Maintenance', N'Vendor Rebates', @VendorRebatesParentMenuId, N'Maintenance', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 1 WHERE strMenuName = 'Maintenance' AND strModuleName = 'Vendor Rebates' AND intParentMenuID = @VendorRebatesParentMenuId
+
+DECLARE @VendorRebatesMaintenanceParentMenuId INT
+SELECT @VendorRebatesMaintenanceParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Vendor Rebates' AND intParentMenuID = @VendorRebatesParentMenuId
+
+/* ADD TO RESPECTIVE CATEGORY */ 
+UPDATE tblSMMasterMenu SET intParentMenuID = @VendorRebatesActivitiesParentMenuId WHERE intParentMenuID =  @VendorRebatesParentMenuId AND strCategory = 'Activity'
+UPDATE tblSMMasterMenu SET intParentMenuID = @VendorRebatesMaintenanceParentMenuId WHERE intParentMenuID =  @VendorRebatesParentMenuId AND strCategory = 'Maintenance'
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Rebates' AND strModuleName = 'Vendor Rebates' AND intParentMenuID = @VendorRebatesActivitiesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Rebates', N'Vendor Rebates', @VendorRebatesActivitiesParentMenuId, N'Rebates', N'Activity', N'Screen', N'VendorRebates.view.RebateProgram?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'VendorRebates.view.RebateProgram?showSearch=true' WHERE strMenuName = 'Rebates' AND strModuleName = 'Vendor Rebates' AND intParentMenuID = @VendorRebatesActivitiesParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Setup' AND strModuleName = 'Vendor Rebates' AND intParentMenuID = @VendorRebatesMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Setup', N'Vendor Rebates', @VendorRebatesMaintenanceParentMenuId, N'Setup', N'Maintenance', N'Screen', N'VendorRebates.view.RebateSetup?showSearch=true', N'small-menu-maintenance', 1, 0, 0, 1, 0, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'VendorRebates.view.RebateSetup?showSearch=true' WHERE strMenuName = 'Setup' AND strModuleName = 'Vendor Rebates' AND intParentMenuID = @VendorRebatesMaintenanceParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Cross Reference' AND strModuleName = 'Vendor Rebates' AND intParentMenuID = @VendorRebatesMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Cross Reference', N'Vendor Rebates', @VendorRebatesMaintenanceParentMenuId, N'Cross Reference', N'Maintenance', N'Screen', N'VendorRebates.view.CrossReference?showSearch=true', N'small-menu-maintenance', 1, 0, 0, 1, 1, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'VendorRebates.view.CrossReference?showSearch=true' WHERE strMenuName = 'Cross Reference' AND strModuleName = 'Vendor Rebates' AND intParentMenuID = @VendorRebatesMaintenanceParentMenuId
 ----------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------ CONTACT MENUS -------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------------------------------

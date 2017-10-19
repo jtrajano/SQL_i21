@@ -1199,6 +1199,16 @@ GO
 	       [intSort]						=		115,
 		   [strPrefix]						=		N'C'
 
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Vendor Rebates')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
+	SELECT [intModuleId]					=		116,
+		   [strApplicationName]				=		N'i21',
+		   [strModule]						=		N'Vendor Rebates',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		1,
+	       [intSort]						=		116,
+		   [strPrefix]						=		N'VR'
+
 	SET IDENTITY_INSERT [dbo].[tblSMModule] OFF
 
 GO
