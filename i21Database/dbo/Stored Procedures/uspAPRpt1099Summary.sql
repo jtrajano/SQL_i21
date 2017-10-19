@@ -107,7 +107,7 @@ AS
 		,strPayeeName
 		,CASE WHEN SUM(dbl1099Amount)	!= 0 THEN  SUM(dbl1099Amount) ELSE 0 END  AS dbl1099Amount 
 		,CASE WHEN SUM(dbl1099AmountPaid)	!= 0 THEN  SUM(dbl1099AmountPaid) ELSE 0 END  AS dbl1099Amount 
-		,CASE WHEN SUM(dblDifference)	!= 0 THEN  SUM(dblDifference) ELSE 0 END  AS dbl1099Amount 
+		,CASE WHEN SUM(dbl1099Amount) - SUM(dbl1099AmountPaid)	!= 0 THEN  SUM(dbl1099Amount) - SUM(dbl1099AmountPaid) ELSE 0 END  AS dblDifference 
 		,A.strVendorId
 		,A.intYear 
 		,@yearParam AS strYear
