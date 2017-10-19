@@ -30,9 +30,5 @@ Ext.define('Inventory.model.CategoryTax', {
         { name: 'intTaxClassId', type: 'int', allowNull: true },
 
         { name: 'strTaxClass', type: 'string' }
-    ],
-
-    validators: [
-        {type: 'presence', field: 'strTaxClass'}
     ]
 });
