@@ -111,7 +111,7 @@ BEGIN
 					WHEN SP.spprc_cost_to_use_las = 'A' THEN 'Average'
 					ELSE 'Standard'
 			   END 
-			  ,SP.spprc_factor
+			  ,(CASE WHEN SP.spprc_basis_ind = 'M' THEN SP.spprc_factor * -1 ELSE SP.spprc_factor END) 
 			  ,SP.spprc_comment
 			  ,(CASE WHEN ISDATE(SP.spprc_begin_rev_dt) = 1 THEN CONVERT(DATE,CAST(SP.spprc_begin_rev_dt AS CHAR(12)), 112) ELSE ' ' END)
 			  ,(CASE WHEN ISDATE(SP.spprc_end_rev_dt) = 1 THEN CONVERT(DATE,CAST(SP.spprc_end_rev_dt AS CHAR(12)), 112) ELSE ' ' END)
@@ -175,7 +175,7 @@ BEGIN
 					WHEN PDV.ptpdv_cost_to_use_las = 'A' THEN 'Average'
 					ELSE 'Standard'
 			   END 
-			  ,PDV.ptpdv_factor
+			  ,(CASE WHEN PDV.ptpdv_basis_ind = 'M' THEN PDV.ptpdv_factor * -1 ELSE PDV.ptpdv_factor END) 
 			  ,PDV.ptpdv_comment
 			  ,(CASE WHEN ISDATE(PDV.ptpdv_begin_rev_dt) = 1 THEN CONVERT(DATE,CAST(PDV.ptpdv_begin_rev_dt AS CHAR(12)), 112) ELSE ' ' END)
 			  ,(CASE WHEN ISDATE(PDV.ptpdv_end_rev_dt) = 1 THEN CONVERT(DATE,CAST(PDV.ptpdv_end_rev_dt AS CHAR(12)), 112) ELSE ' ' END)
