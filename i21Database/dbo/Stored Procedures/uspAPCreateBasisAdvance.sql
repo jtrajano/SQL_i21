@@ -30,7 +30,7 @@ SELECT
     [intEntityVendorId]		=	A.[intEntityVendorId],
     [intTransactionType]	=	A.[intTransactionType],
     [strVendorOrderNumber]	=	NULL,
-    [strBillId]				=	NULL,
+    [strBillId]				=	CAST('' AS NVARCHAR(50)),
     [strShipToAttention]	=	A.[strShipToAttention],
     [strShipToAddress]		=	A.[strShipToAddress],
     [strShipToCity]			=	A.[strShipToCity],
@@ -54,7 +54,8 @@ SELECT
     [intOrderById]			=	A.[intOrderById],
     [intCurrencyId]			=	A.[intCurrencyId],
     [intTicketId]           =   basisAdvance.intTicketId,
-    [intContractDetailId]   =   basisAdvance.intContractDetailId
+    [intContractDetailId]   =   basisAdvance.intContractDetailId,
+    [intKey]                =   ROW_NUMBER() OVER(ORDER BY (SELECT 1))
 INTO #tmpBillData
 FROM tblAPBasisAdvanceStaging basisStaging
 INNER JOIN vyuAPBasisAdvance basisAdvance 
@@ -74,6 +75,25 @@ OUTER APPLY (
         ,basisAdvance.intCompanyLocationId
     ) voucherData
 ) A
+WHERE basisAdvance.dblFuturesPrice + basisAdvance.dblUnitBasis > 0;
+
+--GENERATE RECORD NUMBER
+DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
+FOR
+    SELECT intKey FROM #tmpBillData
+OPEN c;
+FETCH NEXT FROM c INTO @billId
+
+WHILE @@FETCH_STATUS = 0 
+BEGIN
+    EXEC uspSMGetStartingNumber 124, @billRecordNumber OUTPUT
+    UPDATE A
+        SET A.strBillId = @billRecordNumber
+    FROM #tmpBillData A
+    WHERE A.intKey = @billId
+    FETCH NEXT FROM c INTO @billId
+END
+CLOSE c; DEALLOCATE c;
 
 MERGE 
 INTO tblAPBill
@@ -150,23 +170,6 @@ VALUES (
 )
 OUTPUT inserted.intBillId, Source.intTicketId, Source.intContractDetailId INTO #tmpVoucherCreated;
 
---GENERATE RECORD NUMBER
-DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
-FOR
-    SELECT intBillId FROM #tmpVoucherCreated
-OPEN c;
-FETCH c INTO @billId
-WHILE @@FETCH_STATUS = 0 
-BEGIN
-    EXEC uspSMGetStartingNumber 124, @billRecordNumber OUTPUT
-    UPDATE A
-        SET A.strBillId = @billRecordNumber
-    FROM tblAPBill A
-    WHERE A.intBillId = @billId
-    FETCH c INTO @billId
-END
-CLOSE c; DEALLOCATE c;
-
 IF OBJECT_ID('tempdb..#tmpBillDetailData') IS NOT NULL DROP TABLE #tmpBillDetailData
 SELECT
     [intBillId]                         = voucherCreated.intBillId,
@@ -177,15 +180,16 @@ SELECT
     [intContractSeq]                    = basisAdvance.intContractSeq,
     [intItemId]                         = receiptItem.intItemId,
     [intInventoryReceiptItemId]         = receiptItem.intInventoryReceiptItemId,
-    [dblQtyOrdered]                     = receiptItem.dblOpenReceive,
-    [dblQtyReceived]                    = receiptItem.dblOpenReceive,
+    [dblQtyOrdered]                     = 1,--receiptItem.dblOpenReceive,
+    [dblQtyReceived]                    = 1,--receiptItem.dblOpenReceive,
     [dblRate]                           = ISNULL(receiptItem.dblForexRate,1),
     [intCurrencyExchangeRateTypeId]     = receiptItem.intForexRateTypeId,
     [ysnSubCurrency]                    = receiptItem.ysnSubCurrency,
     [intTaxGroupId]                     = receiptItem.intTaxGroupId,
     [intAccountId]                      = loc.intAPAccount,
     [dblTotal]                          = basisAdvance.dblAmountToAdvance,
-    [dblCost]                           = basisAdvance.dblFuturesPrice + basisAdvance.dblUnitBasis,
+    [dblContractCost]                   = basisAdvance.dblFuturesPrice + basisAdvance.dblUnitBasis,
+    [dblCost]                           = basisAdvance.dblAmountToAdvance,
     [dblOldCost]                        = NULL,
     [dblNetWeight]                      = 0,
     [dblWeightLoss]                     = 0,
@@ -231,7 +235,8 @@ WHEN NOT MATCHED THEN
         ,[intTaxGroupId]                    
         ,[intAccountId]                     
         ,[dblTotal]                         
-        ,[dblCost]                          
+        ,[dblCost]   
+        ,[dblContractCost]
         ,[dblOldCost]                       
         ,[dblNetWeight]                     
         ,[dblWeightLoss]                    
@@ -266,7 +271,8 @@ WHEN NOT MATCHED THEN
         ,[intTaxGroupId]                    
         ,[intAccountId]                     
         ,[dblTotal]                         
-        ,[dblCost]                          
+        ,[dblCost]     
+        ,[dblContractCost]                     
         ,[dblOldCost]                       
         ,[dblNetWeight]                     
         ,[dblWeightLoss]                    

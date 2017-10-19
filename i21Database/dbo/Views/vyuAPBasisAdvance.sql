@@ -28,10 +28,11 @@ SELECT TOP 100 PERCENT * FROM (
         ,0.00 AS dblFuture
         ,cur.strCurrency
         ,ISNULL(receiptItem.dblOpenReceive,0) AS dblQuantity
-        ,ISNULL(basisFutures.dblPrice, 0) + ISNULL(ctd.dblBasis,0) * ISNULL(receiptItem.dblOpenReceive,0) AS dblGross
+        ,(ISNULL(basisFutures.dblPrice, 0) + ISNULL(ctd.dblBasis,0)) * ISNULL(receiptItem.dblOpenReceive,0) AS dblGross
         ,ISNULL(taxes.dblTax,0.00) AS dblTax
         ,0.00 AS dblAdvance
-        ,((ISNULL(basisFutures.dblPrice, 0) + ISNULL(ctd.dblBasis,0) * ISNULL(receiptItem.dblOpenReceive,0)) 
+        ,(
+            ((ISNULL(basisFutures.dblPrice, 0) + ISNULL(ctd.dblBasis,0)) * ISNULL(receiptItem.dblOpenReceive,0)) 
             - ISNULL(discounts.dblAmount,0)
             + ISNULL(taxes.dblTax,0.00) 
             - ISNULL(priorAdvances.dblPriorAdvance,0.00))
