@@ -740,6 +740,10 @@ namespace iRely.Inventory.BusinessLayer
             decimal? dblRunningQty = 0;
             string locationFromPreviousPage = "";
             string itemFromPreviousPage = "";
+            string intInventoryTransactionIdFromPreviousPage = null;
+
+            // Create the filter for the Prior Balance Query
+            List<SearchFilter> priorBalanceFilter = new List<SearchFilter>();
 
             // If it is not the starting page, retrieve the previous page data. 
             if (param.start > 0)
@@ -748,14 +752,44 @@ namespace iRely.Inventory.BusinessLayer
                 var previousPage = query.OrderBySelector(sort).Skip(0).Take(param.start.Value).OrderBySelector(reverseSort).FirstOrDefault();
                 locationFromPreviousPage = previousPage.strLocationName;
                 itemFromPreviousPage = previousPage.strItemNo;
+                intInventoryTransactionIdFromPreviousPage = previousPage.intInventoryTransactionId.ToString();
+
+                priorBalanceFilter.RemoveAll(p => p.c == "strItemNo" || p.c == "strLocationName" || p.c == "intInventoryTransactionId");
+
+                priorBalanceFilter.Add(
+                    new SearchFilter()
+                    {
+                        c = "strItemNo",
+                        v = itemFromPreviousPage,
+                        cj = "And"
+                    }
+                );
+
+                priorBalanceFilter.Add(
+                    new SearchFilter()
+                    {
+                        c = "strLocationName",
+                        v = locationFromPreviousPage,
+                        cj = "And"
+                    }
+                );
+
+                priorBalanceFilter.Add(
+                    new SearchFilter()
+                    {
+                        c = "intInventoryTransactionId",
+                        v = intInventoryTransactionIdFromPreviousPage,
+                        co = "lte",
+                        cj = "And"
+                    }
+                );
 
                 // Get the beginning qty and balances
-                dblBeginningBalance += query.OrderBySelector(sort).Skip(0).Take(param.start.Value).Where(w => w.strLocationName == locationFromPreviousPage && w.strItemNo == itemFromPreviousPage).Sum(s => s.dblValue);
-                dblBeginningQty += query.OrderBySelector(sort).Skip(0).Take(param.start.Value).Where(w => w.strLocationName == locationFromPreviousPage && w.strItemNo == itemFromPreviousPage).Sum(s => s.dblQuantityInStockUOM); // Calculate the Qty using the Stock Qty. 
+                var openingBalanceQuery = GetOpeningBalances(priorBalanceFilter);
+                dblBeginningBalance = openingBalanceQuery.Sum(s => s.dblValue);
+                dblBeginningQty = openingBalanceQuery.Sum(s => s.dblQuantityInStockUOM); // Calculate the Qty using the Stock Qty. 
             }
 
-            // Create the filter for the Prior Balance Query
-            List<SearchFilter> priorBalanceFilter = new List<SearchFilter>();
 
             // Get the page. Convert it into a list for the loop below. 
             var paged_data = await query.PagingBySelector(param).ToListAsync();
