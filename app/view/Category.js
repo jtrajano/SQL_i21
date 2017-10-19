@@ -110,6 +110,13 @@ Ext.define('Inventory.view.Category', {
                                     },
                                     {
                                         xtype: 'button',
+                                        itemId: 'btnDuplicate',
+                                        tabIndex: -1,
+                                        ui: 'i21-button-toolbar-small',
+                                        text: 'Duplicate'
+                                    },
+                                    {
+                                        xtype: 'button',
                                         itemId: 'btnClose',
                                         tabIndex: -1,
                                         ui: 'i21-button-toolbar-small',

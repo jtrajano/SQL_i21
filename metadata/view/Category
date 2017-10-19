@@ -283,6 +283,37 @@
                             "userConfig": {
                                 "designer|displayName": null,
                                 "icon": null,
+                                "itemId": "btnDuplicate",
+                                "layout|flex": null,
+                                "tabIndex": -1,
+                                "text": "Duplicate",
+                                "ui": "i21-button-toolbar-small",
+                                "width": null
+                            },
+                            "configAlternates": {
+                                "designer|displayName": "string",
+                                "icon": "string",
+                                "itemId": "string",
+                                "layout|flex": "number",
+                                "tabIndex": "number",
+                                "text": "string",
+                                "ui": "string",
+                                "width": "auto",
+                                "scrollable": "boolean"
+                            },
+                            "name": "MyButton10",
+                            "designerId": "75f7752e-7f2b-40d3-a0f8-de9f08fb1d60"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "icon": null,
                                 "itemId": "btnClose",
                                 "layout|flex": null,
                                 "tabIndex": -1,
