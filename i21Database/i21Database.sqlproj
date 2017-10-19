@@ -5724,6 +5724,7 @@
     <Build Include="dbo\Views\vyuGLTrialBalance.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitTB.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitRETB.sql" />
+	<Build Include="dbo\Functions\fnFormatDate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
