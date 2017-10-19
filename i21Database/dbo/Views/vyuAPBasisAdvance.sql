@@ -8,7 +8,7 @@ SELECT TOP 100 PERCENT * FROM (
         ,entity.strName
         ,entity.intEntityId
         ,ISNULL(customer.dblARBalance,0) AS dblARBalance
-        ,strSplit = ''
+        ,split.strSplitNumber AS strSplit
         ,ct.strContractNumber
         ,ct.intContractHeaderId
         ,ctd.intContractDetailId
@@ -37,6 +37,7 @@ SELECT TOP 100 PERCENT * FROM (
             - ISNULL(priorAdvances.dblPriorAdvance,0.00))
             * (ISNULL(basisCommodity.dblPercentage,0.00) / 100) AS dblAmountToAdvance
         ,ISNULL(priorAdvances.dblPriorAdvance,0.00) AS dblPriorAdvance
+        ,priorAdvances.strBillIds
         ,uom.strUnitMeasure
         ,ISNULL(ctd.dblBasis,0) AS dblUnitBasis
         ,ISNULL(basisFutures.dblPrice, 0) AS dblFuturesPrice
@@ -51,7 +52,8 @@ SELECT TOP 100 PERCENT * FROM (
         ON ticket.intEntityId = vendor.intEntityId
     INNER JOIN tblSMCompanyLocation loc ON ticket.intProcessingLocationId = loc.intCompanyLocationId
     LEFT JOIN tblARCustomer customer ON ticket.intEntityId = customer.intEntityId
-    LEFT JOIN tblSCTicketSplit tcktSPlit ON ticket.intTicketId = tcktSPlit.intTicketId
+    LEFT JOIN tblEMEntitySplit split ON ticket.intSplitId = split.intSplitId
+    -- LEFT JOIN tblSCTicketSplit tcktSPlit ON ticket.intTicketId = tcktSPlit.intTicketId
     --Load basis ticket that is always have receipt or delivered
     INNER JOIN (tblICInventoryReceipt receipt INNER JOIN tblICInventoryReceiptItem receiptItem ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId)
         ON ticket.intTicketId = receiptItem.intSourceId AND receipt.intSourceType = 1
