@@ -730,7 +730,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,'Maintenance Only'			--[strMaintenanceType]
 					,[strFrequency]		        --[strFrequency]
 					,[dblMaintenanceAmount]		--[dblMaintenanceAmount]
-					,CASE WHEN strMaintenanceType IN ('License Only', 'License/Maintenance') THEN [dblLicenseAmount] ELSE 0 END	--[dblLicenseAmount]
+					,CASE WHEN strMaintenanceType = 'License Only' THEN [dblLicenseAmount] ELSE 0 END	--[dblLicenseAmount]
 					,[dtmMaintenanceDate]		--[dtmMaintenanceDate]
 					,[intTaxGroupId]			--[intTaxGroupId]
 					,0
