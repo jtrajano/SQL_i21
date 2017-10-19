@@ -558,7 +558,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         }
 
         if(id !== null) {
-          //  return "<a id=\"_drilldown-" + id.toString() + "\" style=\"color: #005FB2;text-decoration: none;\" onMouseOut=\"this.style.textDecoration='none'\" onMouseOver=\"this.style.textDecoration='underline'\" href=\"javascript:void(0);\">" + value + "</a>";
+            return "<a id=\"_drilldown-" + id.toString() + "\" style=\"color: #005FB2;text-decoration: none;\" onMouseOut=\"this.style.textDecoration='none'\" onMouseOver=\"this.style.textDecoration='underline'\" href=\"javascript:void(0);\">" + value + "</a>";
         }
         
         return value;
