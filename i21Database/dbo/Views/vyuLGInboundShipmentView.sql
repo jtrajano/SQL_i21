@@ -166,7 +166,7 @@ SELECT
 		LD.intWeightItemUOMId
 
 FROM tblLGLoad  L  --  tblLGShipmentBLContainerContract SC
-JOIN tblLGLoadDetail LD ON  L.intLoadId = LD.intLoadId  --tblLGShipmentContractQty SCQ ON SCQ.intShipmentContractQtyId = SC.intShipmentContractQtyId
+JOIN tblLGLoadDetail LD ON  L.intLoadId = LD.intLoadId AND L.intPurchaseSale=1 --tblLGShipmentContractQty SCQ ON SCQ.intShipmentContractQtyId = SC.intShipmentContractQtyId
 JOIN tblCTContractDetail PCT ON PCT.intContractDetailId = LD.intPContractDetailId
 JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = PCT.intContractHeaderId
 JOIN tblSMCompanyLocation CL ON	CL.intCompanyLocationId	= PCT.intCompanyLocationId

@@ -36,6 +36,6 @@ LEFT JOIN tblLGLoadDetailLot LoadDetailLot ON LoadDetailLot.intLoadDetailId = Lo
 LEFT JOIN tblICLot Lot ON Lot.intLotId = LoadDetailLot.intLotId
 LEFT JOIN tblLGPickLotDetail PLD ON PLD.intPickLotDetailId= LoadDetail.intPickLotDetailId
 LEFT JOIN tblLGPickLotHeader PLH ON PLH.intPickLotHeaderId = PLD.intPickLotHeaderId
-WHERE Load.intLoadId NOT IN (SELECT ISNULL(intLoadId,0) FROM tblARInvoice)
+WHERE LoadDetail.intLoadDetailId NOT IN (SELECT ISNULL(tblARInvoiceDetail.intLoadDetailId,0) FROM tblARInvoiceDetail)
   AND Load.intPurchaseSale IN (2,3)
   AND Load.intShipmentType = 1
