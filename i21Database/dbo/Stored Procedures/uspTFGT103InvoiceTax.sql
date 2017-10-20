@@ -65,6 +65,7 @@ BEGIN TRY
 	
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpRC)
 	BEGIN
+
 		SELECT TOP 1 @RCId = intReportingComponentId FROM #tmpRC
 		DELETE FROM @TFTransaction
 		INSERT INTO @TFTransaction(intId
@@ -260,7 +261,10 @@ BEGIN TRY
 		-- INVENTORY TRANSFERS --
 
 		DECLARE @ConfigGUTRate NUMERIC(18, 6)
-		SELECT TOP 1 @ConfigGUTRate = ISNULL(strConfiguration, 0) FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'GT-103-2DGasoline'	
+			
+		SELECT TOP 1 @ConfigGUTRate = ISNULL(strConfiguration, 0) FROM tblTFReportingComponentConfiguration 
+		INNER JOIN tblTFReportingComponent ON tblTFReportingComponent.intReportingComponentId = tblTFReportingComponentConfiguration.intReportingComponentId 
+		WHERE strTemplateItemId IN ('GT-103-2DGasohol', 'GT-103-2DGasoline') AND tblTFReportingComponent.intReportingComponentId = @RCId
 
 		INSERT INTO @TFTransaction(intId
 			, intInvoiceDetailId
