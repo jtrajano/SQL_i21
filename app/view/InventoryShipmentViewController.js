@@ -480,7 +480,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 },
                 colForexRate: {
                     dataIndex: 'dblForexRate' 
-                }                  
+                },
+                colDestinationQuantity: 'dblDestinationQuantity'                  
             },
 
             btnRemoveLot: {

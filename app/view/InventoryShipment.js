@@ -1621,6 +1621,15 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         }
                                                                     },
                                                                     {
+                                                                        xtype: 'numbercolumn',
+                                                                        dataType: 'numeric',
+                                                                        itemId: 'colDestinationQuantity',
+                                                                        width: 200,
+                                                                        align: 'right',
+                                                                        dataIndex: 'dblDestinationQuantity',
+                                                                        text: 'Destination Quantity'
+                                                                    },
+                                                                    {
                                                                         xtype: 'gridcolumn',
                                                                         itemId: 'colDiscountSchedule',
                                                                         width: 120,

@@ -4246,6 +4246,40 @@
                                                             ]
                                                         },
                                                         {
+                                                            "type": "Ext.grid.column.Number",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "align": "right",
+                                                                "dataIndex": "dblDestinationQuantity",
+                                                                "dataType": "numeric",
+                                                                "itemId": "colDestinationQuantity",
+                                                                "text": "Destination Quantity",
+                                                                "width": 200
+                                                            },
+                                                            "configAlternates": {
+                                                                "align": "string",
+                                                                "dataIndex": "datafield",
+                                                                "dataType": "string",
+                                                                "itemId": "string",
+                                                                "text": "string",
+                                                                "width": "auto",
+                                                                "scrollable": "boolean"
+                                                            },
+                                                            "name": "MyNumberColumn1",
+                                                            "designerId": "8d7e8318-c95d-4e0a-871b-a9a39850ea04",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "dataType",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
                                                             "type": "Ext.grid.column.Column",
                                                             "reference": {
                                                                 "name": "columns",

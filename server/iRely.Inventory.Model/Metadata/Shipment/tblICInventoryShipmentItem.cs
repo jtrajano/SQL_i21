@@ -37,6 +37,8 @@ namespace iRely.Inventory.Model
         public int? intStorageScheduleTypeId { get; set; }
         public int? intDestinationGradeId { get; set; }
         public int? intDestinationWeightId { get; set; }
+        public decimal? dblDestinationQuantity { get; set; }
+        
         // public int? intDestinationQtyUOMId { get; set; }
         // public decimal? dblDestinationGrossQty { get; set; }
         // public decimal? dblDestinationNetQty { get; set; }
