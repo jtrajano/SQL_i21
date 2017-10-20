@@ -5846,6 +5846,58 @@
                                             "userConfig": {
                                                 "flex": null,
                                                 "format": null,
+                                                "itemId": "colQuantity",
+                                                "text": "Quantity"
+                                            },
+                                            "configAlternates": {
+                                                "flex": "number",
+                                                "format": "string",
+                                                "itemId": "string",
+                                                "text": "string",
+                                                "scrollable": "boolean"
+                                            },
+                                            "name": "MyNumberColumn26",
+                                            "designerId": "66726572-7f95-47b7-af16-28252a0f76c2",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "designer|createAlias": "numericfield",
+                                                        "quantityField": true
+                                                    },
+                                                    "configAlternates": {
+                                                        "currencyField": "boolean",
+                                                        "quantityField": "boolean",
+                                                        "designer|createAlias": "string",
+                                                        "scrollable": "boolean"
+                                                    },
+                                                    "name": "MyNumberField60",
+                                                    "designerId": "00b04c2e-0833-4af2-81f9-334e0850d745",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "quantityField",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Number",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "flex": null,
+                                                "format": null,
                                                 "itemId": "colRate",
                                                 "text": "Rate"
                                             },

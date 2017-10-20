@@ -2781,6 +2781,12 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                     },
                                                                     {
                                                                         xtype: 'numbercolumn',
+                                                                        itemId: 'colQuantity',
+                                                                        modelValidation: true,
+                                                                        text: 'Quantity'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'numbercolumn',
                                                                         itemId: 'colRate',
                                                                         modelValidation: true,
                                                                         text: 'Rate',

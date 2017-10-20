@@ -41,6 +41,7 @@ namespace iRely.Inventory.Model
             // this.Property(t => t.intCent).HasColumnName("intCent");
 
             this.Property(t => t.dblForexRate).HasColumnName("dblForexRate").HasPrecision(18, 6);
+            this.Property(t => t.dblQuantity).HasColumnName("dblQuantity").HasPrecision(18, 6);
 
             this.HasOptional(p => p.vyuICGetInventoryReceiptCharge)
                 .WithRequired(p => p.tblICInventoryReceiptCharge);

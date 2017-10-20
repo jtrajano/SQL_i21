@@ -7757,6 +7757,31 @@
                                                             "userConfig": {
                                                                 "flex": null,
                                                                 "format": null,
+                                                                "itemId": "colQuantity",
+                                                                "modelValidation": true,
+                                                                "text": "Quantity"
+                                                            },
+                                                            "configAlternates": {
+                                                                "flex": "number",
+                                                                "format": "string",
+                                                                "itemId": "string",
+                                                                "modelValidation": "boolean",
+                                                                "text": "string",
+                                                                "scrollable": "boolean"
+                                                            },
+                                                            "name": "MyNumberColumn13",
+                                                            "designerId": "b82d5ba9-427b-45cf-b638-d1e1129dae4e"
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Number",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "flex": null,
+                                                                "format": null,
                                                                 "itemId": "colRate",
                                                                 "modelValidation": true,
                                                                 "text": "Rate"

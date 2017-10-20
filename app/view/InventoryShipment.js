@@ -2173,6 +2173,15 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
+                                                        itemId: 'colQuantity',
+                                                        text: 'Quantity',
+                                                        editor: {
+                                                            xtype: 'numericfield',
+                                                            quantityField: true
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
                                                         itemId: 'colRate',
                                                         text: 'Rate',
                                                         editor: {

@@ -827,6 +827,9 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             if (iRely.Functions.isEmpty(get('grdInventoryReceipt.selection.strItemNo'))) {
                return true;
             }
+            else if (get('grdInventoryReceipt.selection.strItemNo') == 'Amount') {
+                return true;
+            }               
             else {
                 switch (get('current.strReceiptType')) {       
                     case 'Purchase Contract':
@@ -937,7 +940,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             // }
         },
 
-       disableFieldInReceiptGrid: function (get) {
+        disableFieldInReceiptGrid: function (get) {
             if (iRely.Functions.isEmpty(get('grdInventoryReceipt.selection.strItemNo'))) {
                 return true;
             }
@@ -950,36 +953,36 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                         return false;
                 }
             }
-       },
-       readyOnlyChargeTaxGroup: function(get) {
-           if(get('grdCharges.selection.intEntityVendorId') || (get('grdCharges.selection.intEntityVendorId') == get('current.intEntityVendorId'))) {
-              return false;
+        },
+        readyOnlyChargeTaxGroup: function(get) {
+            if(get('grdCharges.selection.intEntityVendorId') || (get('grdCharges.selection.intEntityVendorId') == get('current.intEntityVendorId'))) {
+                return false;
             }
-           else {
+            else {
                 return true;
-           }
-       },
-       checkHideReturnButton: function (get){
-           if (get('current.strReceiptType') !== 'Inventory Return' && get('current.ysnPosted')){
+            }
+        },
+        checkHideReturnButton: function (get){
+            if (get('current.strReceiptType') !== 'Inventory Return' && get('current.ysnPosted')){
                 return false; 
-           }
-           return true; 
-       },
-       changeQtyToReceiveText: function (get){
+            }
+            return true; 
+        },
+        changeQtyToReceiveText: function (get){
             if (get('current.strReceiptType') == 'Inventory Return'){
                 return 'Qty to Return';
-           }
-           return 'Receipt Qty';
-       },
-       hideVoucherButton: function(get) {
+            }
+            return 'Receipt Qty';
+        },
+        hideVoucherButton: function(get) {
             if (get('current.strReceiptType') == 'Inventory Return') {
                 return true; 
             }
 
             var posted = get('current.ysnPosted');
             return !posted; 
-       },
-       hideDebitMemoButton: function(get) {
+        },
+        hideDebitMemoButton: function(get) {
             if (get('current.strReceiptType') != 'Inventory Return') 
             {
                 return true; 
@@ -987,6 +990,29 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
 
             var posted = get('current.ysnPosted');
             return !posted; 
-       }
+        },
+        readOnlyChargeRate: function (get) {
+            switch (get('grdCharges.selection.strCostMethod')) {
+                case 'Amount':
+                    return true;
+                    break;
+                default:
+                    return false;
+                    break;
+
+            }        
+        },       
+        readOnlyChargeUOM: function (get) {
+            switch (get('grdCharges.selection.strCostMethod')) {
+                case 'Percentage':
+                case 'Amount':
+                    return true;
+                    break;
+                default:
+                    return false;
+                    break;
+
+            }        
+        }
     }
 });

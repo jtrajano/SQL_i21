@@ -616,6 +616,29 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
 
                 //return AccountsReceivable.common.ARFunctions.composeAddress(data);
             }
-        }               
-    }
+        }, 
+        readOnlyChargeRate: function (get) {
+            switch (get('grdCharges.selection.strCostMethod')) {
+                case 'Amount':
+                    return true;
+                    break;
+                default:
+                    return false;
+                    break;
+
+            }        
+        },       
+        readOnlyChargeUOM: function (get) {
+            switch (get('grdCharges.selection.strCostMethod')) {
+                case 'Percentage':
+                case 'Amount':
+                    return true;
+                    break;
+                default:
+                    return false;
+                    break;
+
+            }        
+        }              
+    } 
 });

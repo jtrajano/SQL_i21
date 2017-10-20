@@ -40,6 +40,7 @@ namespace iRely.Inventory.Model
         public string strReceiptVendor { get; set; }
         public string strForexRateType { get; set; }
         public string strCostType { get; set; }
+        public decimal? dblQuantity { get; set; }
 
         public tblICInventoryReceiptCharge tblICInventoryReceiptCharge { get; set; }
     }

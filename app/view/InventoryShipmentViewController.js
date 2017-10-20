@@ -606,11 +606,17 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         ]
                     }
                 },
-                colRate: 'dblRate',
+                colQuantity: 'dblQuantity',
+                colRate: {
+                    dataIndex: 'dblRate',
+                    editor: {
+                        readOnly: '{readOnlyChargeRate}'
+                    }
+                },
                 colCostUOM: {
                     dataIndex: 'strCostUOM',
                     editor: {
-                        readOnly: '{readOnlyCostUOM}',
+                        readOnly: '{readOnlyChargeUOM}',
                         store: '{costUOM}',
                         origValueField: 'intItemUOMId',
                         origUpdateField: 'intCostUOMId',
@@ -2314,6 +2320,26 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             }
         }
 
+        if (combo.itemId === 'cboCostMethod') {
+            // If 'Per Unit'
+            // Do Nothing 
+
+            // If 'Percentage' 
+            if (record.get('strDescription') == 'Percentage'){
+                current.set('dblQuantity', 1);
+                current.set('intCostUOMId', null);
+                current.set('strCostUOM', null);
+            }            
+
+            // If 'Amount'
+            if (record.get('strDescription') == 'Amount'){
+                current.set('dblQuantity', 1);
+                current.set('dblRate', 0);
+                current.set('intCostUOMId', null);
+                current.set('strCostUOM', null);
+            }            
+        }
+
         if (combo.itemId === 'cboChargeCurrency') { 
             current.set('intCurrencyId', record.get('intCurrencyID'));
             current.set('strCurrency', record.get('strCurrency'));
@@ -3504,6 +3530,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             "#cboOtherCharge": {
                 select: this.onChargeSelect
             },
+            "#cboCostMethod": {
+                select: this.onChargeSelect
+            },            
             "#btnQuality": {
                 click: this.onQualityClick
             },

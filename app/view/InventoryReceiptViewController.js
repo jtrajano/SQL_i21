@@ -738,11 +738,18 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         origUpdateField: 'intCurrencyId'
                     }
                 },
-                colRate: 'dblRate',
+                colQuantity: 'dblQuantity',
+                colRate: {
+                    dataIndex: 'dblRate',
+                    editor: {
+                        readOnly: '{readOnlyChargeRate}'
+                    }
+                },
                 colChargeUOM: {
                     dataIndex: 'strCostUOM',
                     editor: {
                         store: '{chargeUOM}',
+                        readOnly: '{readOnlyChargeUOM}',
                         origValueField: 'intItemUOMId',
                         origUpdateField: 'intCostUOMId',
                         defaultFilters: [
@@ -4885,6 +4892,27 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             };
             me.getDefaultReceiptTaxGroupId(current, taxCfg);
         }
+        
+        if (combo.itemId === 'cboCostMethod') {
+            // If 'Per Unit'
+            // Do Nothing 
+
+            // If 'Percentage' 
+            if (record.get('strDescription') == 'Percentage'){
+                current.set('dblQuantity', 1);
+                current.set('intCostUOMId', null);
+                current.set('strCostUOM', null);
+            }            
+
+            // If 'Amount'
+            if (record.get('strDescription') == 'Amount'){
+                current.set('dblQuantity', 1);
+                current.set('dblRate', 0);
+                current.set('intCostUOMId', null);
+                current.set('strCostUOM', null);
+            }            
+
+        }
 
         if (combo.itemId === 'cboChargeCurrency') {
             current.set('intCurrencyId', record.get('intCurrencyID'));
@@ -7387,6 +7415,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 select: this.onReceiptItemSelect
             },
             "#cboOtherCharge": {
+                select: this.onChargeSelect
+            },
+            '#cboCostMethod': {
                 select: this.onChargeSelect
             },
             "#colAccrue": {

@@ -43,7 +43,8 @@ Ext.define('Inventory.model.ShipmentCharge', {
         { name: 'strCurrency', type: 'string'},
         { name: 'intForexRateTypeId', type: 'int', allowNull: true },
         { name: 'strForexRateType', type: 'string'},
-        { name: 'dblForexRate', type: 'float', allowNull: true }                
+        { name: 'dblForexRate', type: 'float', allowNull: true }, 
+        { name: 'dblQuantity', type: 'float', allowNull: true }          
     ],
 
     validators: [

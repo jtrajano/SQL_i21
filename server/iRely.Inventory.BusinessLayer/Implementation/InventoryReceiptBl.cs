@@ -279,6 +279,7 @@ namespace iRely.Inventory.BusinessLayer
                     , s.intTaxGroupId
                     , s.intForexRateTypeId
                     , s.dblForexRate
+                    , s.dblQuantity
                     , strContractNumber = s.vyuICGetInventoryReceiptCharge.strContractNumber
                     , strItemNo = s.vyuICGetInventoryReceiptCharge.strItemNo
                     , strItemDescription = s.vyuICGetInventoryReceiptCharge.strItemDescription

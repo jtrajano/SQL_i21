@@ -38,6 +38,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strVendorId).HasColumnName("strVendorId");
             this.Property(t => t.strVendorName).HasColumnName("strVendorName");
             this.Property(t => t.strForexRateType).HasColumnName("strForexRateType");
+            this.Property(t => t.dblQuantity).HasColumnName("dblQuantity");
         }
     }
 }
