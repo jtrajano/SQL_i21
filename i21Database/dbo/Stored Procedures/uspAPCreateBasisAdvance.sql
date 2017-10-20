@@ -179,7 +179,7 @@ SELECT
     [intContractDetailId]               = basisAdvance.intContractDetailId,
     [intContractSeq]                    = basisAdvance.intContractSeq,
     [intItemId]                         = receiptItem.intItemId,
-    [intInventoryReceiptItemId]         = receiptItem.intInventoryReceiptItemId,
+    -- [intInventoryReceiptItemId]         = receiptItem.intInventoryReceiptItemId,
     [dblQtyOrdered]                     = 1,--receiptItem.dblOpenReceive,
     [dblQtyReceived]                    = 1,--receiptItem.dblOpenReceive,
     [dblRate]                           = ISNULL(receiptItem.dblForexRate,1),
@@ -226,7 +226,7 @@ WHEN NOT MATCHED THEN
         ,[intContractDetailId]
         ,[intContractSeq]
         ,[intItemId]                        
-        ,[intInventoryReceiptItemId]        
+        -- ,[intInventoryReceiptItemId]        
         ,[dblQtyOrdered]                    
         ,[dblQtyReceived]                   
         ,[dblRate]                          
@@ -262,7 +262,7 @@ WHEN NOT MATCHED THEN
         ,[intContractDetailId]      
         ,[intContractSeq]  
         ,[intItemId]                        
-        ,[intInventoryReceiptItemId]        
+        -- ,[intInventoryReceiptItemId]        
         ,[dblQtyOrdered]                    
         ,[dblQtyReceived]                   
         ,[dblRate]                          
