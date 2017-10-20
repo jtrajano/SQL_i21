@@ -543,7 +543,7 @@ BEGIN TRY
 	SELECT intSampleImportErrorId
 		,intSampleImportId
 		,intConcurrencyId
-		,dtmSampleReceivedDate
+		,dtmSampleReceivedDate AS strSampleReceivedDate
 		,strSampleNumber
 		,strItemShortName
 		,strSampleTypeName
