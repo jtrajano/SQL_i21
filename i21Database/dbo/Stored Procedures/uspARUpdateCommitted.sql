@@ -992,13 +992,13 @@ BEGIN
 		,[intItemUOMId]				=	SOTD.[intItemUOMId]
 		,[dtmDate]					=	ARI.[dtmDate]
 		,[dblQty]					=	
-										--(CASE
-										--	WHEN dbo.fnCalculateQtyBetweenUOM(ARID.[intItemUOMId], SOTD.[intItemUOMId], ARID.[dblQtyShipped]) > SOTD.[dblQtyOrdered] AND @Negate = 0 
-										--		THEN  
+										(CASE
+											WHEN dbo.fnCalculateQtyBetweenUOM(ARID.[intItemUOMId], SOTD.[intItemUOMId], ARID.[dblQtyShipped]) > SOTD.[dblQtyOrdered] AND @Negate = 0 
+												THEN  
 													SOTD.[dblQtyOrdered]
-										--	ELSE
-										--		dbo.fnCalculateQtyBetweenUOM(ARID.[intItemUOMId], SOTD.[intItemUOMId], ARID.[dblQtyShipped])
-										--END)
+											ELSE
+												dbo.fnCalculateQtyBetweenUOM(ARID.[intItemUOMId], SOTD.[intItemUOMId], ARID.[dblQtyShipped])
+										END)
 		,[dblUOMQty]				=	ICIUOM.[dblUnitQty]
 		,[dblCost]					=	ICGIS.[dblLastCost]
 		,[dblValue]					=	0
@@ -1044,13 +1044,13 @@ BEGIN
 		,[intItemUOMId]				=	ARIDC.[intItemUOMId]
 		,[dtmDate]					=	ARI.[dtmDate]
 		,[dblQty]					=	
-										--(CASE
-										--	WHEN dbo.fnCalculateQtyBetweenUOM(ARID.[intItemUOMId], SOTD.[intItemUOMId], ARID.[dblQtyShipped]) > SOTD.[dblQtyOrdered] AND @Negate = 0 
-										--		THEN  
+										(CASE
+											WHEN dbo.fnCalculateQtyBetweenUOM(ARID.[intItemUOMId], SOTD.[intItemUOMId], ARID.[dblQtyShipped]) > SOTD.[dblQtyOrdered] AND @Negate = 0 
+												THEN  
 													SOTD.[dblQtyOrdered]
-										--	ELSE
-										--		dbo.fnCalculateQtyBetweenUOM(ARID.[intItemUOMId], SOTD.[intItemUOMId], ARID.[dblQtyShipped])
-										--END) 
+											ELSE
+												dbo.fnCalculateQtyBetweenUOM(ARID.[intItemUOMId], SOTD.[intItemUOMId], ARID.[dblQtyShipped])
+										END) 
 											* ARIDC.[dblQuantity] 
 		,[dblUOMQty]				=	ARIDC.[dblUnitQuantity] 
 		,[dblCost]					=	ICGIS.[dblLastCost]
