@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFKitItemMove]
 	@intPickListDetailId int,
 	@intToStorageLocationId int,
-	@intUserId int
+	@intUserId int,
+	@ysnMoveToOriginalLocation bit=0
 AS
 
 DECLARE @TransferEntries AS InventoryTransferStagingTable
@@ -15,12 +16,28 @@ DECLARE @intItemId int
 DECLARE @intItemUOMId int
 DECLARE @strPickListNo nvarchar(50)
 
-Select @strPickListNo=pl.strPickListNo,@intLocationId=pl.intLocationId,@intFromSubLocationId=pld.intSubLocationId,@intFromStorageLocationId=pld.intStorageLocationId,
-@intItemId=pld.intItemId,@intItemUOMId=pld.intItemUOMId,@dblQuantity=pld.dblQuantity 
-From tblMFPickListDetail pld Join tblMFPickList pl on pld.intPickListId=pl.intPickListId Where pld.intPickListDetailId=@intPickListDetailId
+If @ysnMoveToOriginalLocation=1
+Begin
+	Set @intFromStorageLocationId=@intToStorageLocationId
+	Set @intToSubLocationId=NULL
+	Set @intToStorageLocationId=NULL
 
-Select @intToSubLocationId=intSubLocationId 
-From tblICStorageLocation Where intStorageLocationId=@intToStorageLocationId
+	Select @strPickListNo=pl.strPickListNo,@intLocationId=pl.intLocationId,@intToSubLocationId=pld.intSubLocationId,@intToStorageLocationId=pld.intStorageLocationId,
+	@intItemId=pld.intItemId,@intItemUOMId=pld.intItemUOMId,@dblQuantity=pld.dblQuantity 
+	From tblMFPickListDetail pld Join tblMFPickList pl on pld.intPickListId=pl.intPickListId Where pld.intPickListDetailId=@intPickListDetailId
+
+	Select @intFromSubLocationId=intSubLocationId 
+	From tblICStorageLocation Where intStorageLocationId=@intFromStorageLocationId
+End
+Else
+Begin
+	Select @strPickListNo=pl.strPickListNo,@intLocationId=pl.intLocationId,@intFromSubLocationId=pld.intSubLocationId,@intFromStorageLocationId=pld.intStorageLocationId,
+	@intItemId=pld.intItemId,@intItemUOMId=pld.intItemUOMId,@dblQuantity=pld.dblQuantity 
+	From tblMFPickListDetail pld Join tblMFPickList pl on pld.intPickListId=pl.intPickListId Where pld.intPickListDetailId=@intPickListDetailId
+
+	Select @intToSubLocationId=intSubLocationId 
+	From tblICStorageLocation Where intStorageLocationId=@intToStorageLocationId
+End
 
 IF NOT EXISTS (
 		SELECT 1
