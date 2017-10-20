@@ -59,8 +59,10 @@ LEFT JOIN tblLGLoad L ON Shipment.intLoadId = L.intLoadId
 LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = Shipment.intContractDetailId
 LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CD.intCurrencyId			
 LEFT JOIN tblSMCurrency	CY ON CY.intCurrencyID = CU.intMainCurrencyId
-WHERE (Shipment.dblContainerContractQty - IsNull(Shipment.dblContainerContractReceivedQty, 0.0)) > 0.0 AND Shipment.ysnInventorized = 1
-AND Shipment.intLoadId NOT IN (SELECT ISNULL(intLoadId,0) FROM tblARInvoice)
+LEFT JOIN tblARInvoice INV ON ISNULL(Shipment.intLoadId,0) = ISNULL(INV.intLoadId,0) 
+WHERE (Shipment.dblContainerContractQty - IsNull(Shipment.dblContainerContractReceivedQty, 0.0)) > 0.0 
+   AND Shipment.ysnInventorized = 1
+   AND INV.intLoadId IS NULL
 
 UNION ALL
 
