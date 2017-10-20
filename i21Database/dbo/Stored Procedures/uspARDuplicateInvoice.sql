@@ -61,6 +61,7 @@ DECLARE	 @OriginalInvoiceId			INT
 		,@PaymentId					INT
 		,@SplitId					INT
 		,@LoadDistributionHeaderId	INT
+		,@LoadId					INT
 		,@ActualCostId				NVARCHAR(50)
 		,@ShipmentId				INT
 		,@TransactionId				INT
@@ -113,6 +114,7 @@ SELECT
 	,@PaymentId						= NULL	--[intPaymentId]
 	,@SplitId						= [intSplitId]
 	,@LoadDistributionHeaderId		= NULL	--[intLoadDistributionHeaderId]
+	,@LoadId						= CASE WHEN @IsCancel = 1 THEN [intLoadId] ELSE NULL END
 	,@ActualCostId					= NULL	--[strActualCostId]
 	,@ShipmentId					= NULL	--[intShipmentId]
 	,@TransactionId					= NULL	--[intTransactionId]
@@ -296,6 +298,7 @@ BEGIN TRY
 		,@PaymentId								= @PaymentId
 		,@SplitId								= @SplitId
 		,@LoadDistributionHeaderId				= @LoadDistributionHeaderId
+		,@LoadId								= @LoadId
 		,@ActualCostId							= @ActualCostId		
 		,@ShipmentId							= @ShipmentId
 		,@TransactionId							= @TransactionId
