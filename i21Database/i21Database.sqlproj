@@ -5759,6 +5759,7 @@
     <Build Include="dbo\Stored Procedures\uspMFPostRecap.sql" />
     <Build Include="dbo\Tables\tblVRProgramItem.sql" />
     <Build Include="dbo\Tables\tblVRProgramCustomer.sql" />
+    <Build Include="dbo\Views\vyuVRProgramItemDetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
