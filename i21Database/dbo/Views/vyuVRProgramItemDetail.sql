@@ -2,7 +2,7 @@
 AS  
 	---with Item Id query
 SELECT 
-	intRowId = ROW_NUMBER() OVER(ORDER BY intProgramId)
+	intRowId = CAST(ROW_NUMBER() OVER(ORDER BY intProgramId) AS INT)
 	,A.*
 FROM( 
 	SELECT 
