@@ -530,3 +530,21 @@ GO
 
 PRINT N'END INSERT DEFAULT SCREEN'
 GO
+
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Manufacturing.view.Recipe') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName],[ysnCustomTab],[ysnApproval], [ysnActivity], [ysnDocumentSource], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Recipe', N'Recipe', N'Manufacturing.view.Recipe', N'Manufacturing', N'tblMFRecipe', 1, 0,  1, 0,  0, N'Manufacturing')
+	END
+ELSE
+	BEGIN
+		UPDATE tblSMScreen
+		SET strTableName = 'tblMFRecipe',
+			ysnCustomTab = 1,
+			ysnApproval = 0,
+			ysnActivity = 1,
+			ysnDocumentSource = 0,
+			strGroupName = 'Manufacturing'
+		WHERE strNamespace = 'Manufacturing.view.Recipe'
+	END
+GO
