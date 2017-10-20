@@ -37,28 +37,28 @@ namespace iRely.Inventory.Model
         public int? intStorageScheduleTypeId { get; set; }
         public int? intDestinationGradeId { get; set; }
         public int? intDestinationWeightId { get; set; }
-        public int? intDestinationQtyUOMId { get; set; }
-        public decimal? dblDestinationGrossQty { get; set; }
-        public decimal? dblDestinationNetQty { get; set; }
-        private string _destinationQtyUOM;
-        [NotMapped]
-        public string strDestinationQtyUOM
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_destinationQtyUOM))
-                    if (vyuICGetInventoryShipmentItem != null)
-                        return vyuICGetInventoryShipmentItem.strDestinationQtyUOM;
-                    else
-                        return null;
-                else
-                    return _destinationQtyUOM;
-            }
-            set
-            {
-                _destinationQtyUOM = value;
-            }
-        }
+        // public int? intDestinationQtyUOMId { get; set; }
+        // public decimal? dblDestinationGrossQty { get; set; }
+        // public decimal? dblDestinationNetQty { get; set; }
+        // private string _destinationQtyUOM;
+        //[NotMapped]
+        //public string strDestinationQtyUOM
+        //{
+        //    get
+        //    {
+        //        if (string.IsNullOrEmpty(_destinationQtyUOM))
+        //            if (vyuICGetInventoryShipmentItem != null)
+        //                return vyuICGetInventoryShipmentItem.strDestinationQtyUOM;
+        //            else
+        //                return null;
+        //        else
+        //            return _destinationQtyUOM;
+        //    }
+        //    set
+        //    {
+        //        _destinationQtyUOM = value;
+        //    }
+        //}
         public int? intForexRateTypeId { get; set; }
         public decimal? dblForexRate { get; set; }
 

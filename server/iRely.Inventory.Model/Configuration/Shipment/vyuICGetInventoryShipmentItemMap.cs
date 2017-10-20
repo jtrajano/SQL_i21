@@ -66,10 +66,10 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strDestinationGrades).HasColumnName("strDestinationGrades");
             this.Property(t => t.intDestinationGradeId).HasColumnName("intDestinationGradeId");
             this.Property(t => t.intDestinationWeightId).HasColumnName("intDestinationWeightId");
-            this.Property(t => t.dblDestinationGrossQty).HasColumnName("dblDestinationGrossQty");
-            this.Property(t => t.dblDestinationNetQty).HasColumnName("dblDestinationNetQty");
-            this.Property(t => t.strDestinationQtyUOM).HasColumnName("strDestinationQtyUOM");
-            this.Property(t => t.intDestinationQtyUOMId).HasColumnName("intDestinationQtyUOMId");
+            // this.Property(t => t.dblDestinationGrossQty).HasColumnName("dblDestinationGrossQty");
+            // this.Property(t => t.dblDestinationNetQty).HasColumnName("dblDestinationNetQty");
+            // this.Property(t => t.strDestinationQtyUOM).HasColumnName("strDestinationQtyUOM");
+            // this.Property(t => t.intDestinationQtyUOMId).HasColumnName("intDestinationQtyUOMId");
             this.Property(t => t.intDiscountSchedule).HasColumnName("intDiscountSchedule");
             this.Property(t => t.strStorageTypeDescription).HasColumnName("strStorageTypeDescription");
             this.Property(t => t.strForexRateType).HasColumnName("strForexRateType");
