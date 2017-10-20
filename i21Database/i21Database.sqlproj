@@ -5827,11 +5827,6 @@
     <None Include="Scripts\Post-Deployment\PR\DataFixes\UpdateOldData.sql" />
     <Build Include="dbo\Stored Procedures\uspPRInsertElectronicFilingW2.sql" />
     <Build Include="dbo\Functions\fnGLGetAccountDetailSQL.sql" />
-<<<<<<< HEAD
-=======
-    <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitTB.sql" />
-    <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitRETB.sql" />
->>>>>>> 2406a74426... GL-3820
     <None Include="Scripts\Post-Deployment\PR\DefaultData\2_ElectronicFileFormats.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\21_UpdateFromPrepaymentToCustomerPrepayment.sql" />
     <Build Include="dbo\Views\vyuEMEntityCredentialContact2.sql" />
