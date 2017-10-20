@@ -1,5 +1,5 @@
 ﻿CREATE VIEW [dbo].[vyuICGetInventoryShipmentItem]
-	AS 
+AS 
 
 SELECT ShipmentItem.intInventoryShipmentId
 	, ShipmentItem.intInventoryShipmentItemId
@@ -60,6 +60,7 @@ SELECT ShipmentItem.intInventoryShipmentId
 	--, strDestinationQtyUOM = DestinationQtyUOM.strUnitMeasure
 	, strForexRateType = forexRateType.strCurrencyExchangeRateType
 	, strDockDoor = DockDoor.strName
+	, ShipmentItem.dblDestinationQuantity
 FROM tblICInventoryShipmentItem ShipmentItem
 	LEFT JOIN vyuICGetInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 	LEFT JOIN vyuICGetShipmentItemSource ShipmentItemSource ON ShipmentItemSource.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
