@@ -58,7 +58,7 @@ BEGIN
 		,strVendorOrderNumber = NULL
 		--,strBillId = @generatedBillRecordId
 		,strReference = A.strReference + ' Duplicate of ' + A.strBillId
-		--,intEntityId = @userId
+		,intEntityId = @userId
 		,ysnApproved = 0
 		,ysnForApprovalSubmitted = 0
 		,dtmApprovalDate = NULL
