@@ -2425,9 +2425,9 @@ BEGIN
 	---------------------------------------------------
 
 
-	SELECT * FROM @tblCFRemoteTax
-	SELECT * FROM @tblCFCalculatedTax
-	SELECT * FROM @tblCFOriginalTax
+	--SELECT * FROM @tblCFRemoteTax
+	--SELECT * FROM @tblCFCalculatedTax
+	--SELECT * FROM @tblCFOriginalTax
 
 
 
