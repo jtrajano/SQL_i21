@@ -34,6 +34,18 @@ BEGIN
 										1
 							END 
 						, 2)
+			,dblQuantity = 
+				CASE 
+					WHEN ReceiptCharge.strCostMethod = 'Per Unit' AND ISNULL(ReceiptCharge.dblRate, 0) <> 0 THEN
+						dbo.fnDivide(
+							ReceiptCharge.dblAmount
+							,ReceiptCharge.dblRate
+						)
+
+					ELSE 
+						1
+				END 
+
 	FROM	dbo.tblICInventoryReceiptCharge ReceiptCharge INNER JOIN  (
 				SELECT	intInventoryReceiptChargeId
 						, dblCalculatedAmount = SUM(dblCalculatedAmount) 

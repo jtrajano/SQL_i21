@@ -34,6 +34,7 @@ SELECT ReceiptCharge.intInventoryReceiptChargeId
 	, strReceiptVendor = ReceiptVendor.strName
 	, strForexRateType = forexRateType.strCurrencyExchangeRateType
 	, Charge.strCostType
+	, ReceiptCharge.dblQuantity
 FROM tblICInventoryReceiptCharge ReceiptCharge
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = ReceiptCharge.intCostUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId

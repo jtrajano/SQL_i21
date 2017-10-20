@@ -27,6 +27,8 @@
 	[intTaxGroupId] INT NULL,
 	[intForexRateTypeId] INT NULL, 
 	[dblForexRate] NUMERIC(18, 6) NULL,
+	[dblQuantity] NUMERIC(18, 6) NULL DEFAULT ((1)), 
+	[dblQuantityBilled] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICInventoryReceiptCharge] PRIMARY KEY ([intInventoryReceiptChargeId]), 
     CONSTRAINT [FK_tblICInventoryReceiptCharge_tblICInventoryReceipt] FOREIGN KEY ([intInventoryReceiptId]) REFERENCES [tblICInventoryReceipt]([intInventoryReceiptId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblICInventoryReceiptCharge_tblICItem] FOREIGN KEY ([intChargeId]) REFERENCES [tblICItem]([intItemId]), 

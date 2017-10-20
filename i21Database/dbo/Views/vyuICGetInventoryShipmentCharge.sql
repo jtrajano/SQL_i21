@@ -1,5 +1,5 @@
 ﻿CREATE VIEW [dbo].[vyuICGetInventoryShipmentCharge]
-	AS 
+AS 
 
 SELECT ShipmentCharge.intInventoryShipmentChargeId
 	, ShipmentCharge.intInventoryShipmentId
@@ -26,6 +26,7 @@ SELECT ShipmentCharge.intInventoryShipmentChargeId
 	, strForexRateType = forexRateType.strCurrencyExchangeRateType
 	, dblForexRate = ShipmentCharge.dblForexRate
 	, intForexRateTypeId = ShipmentCharge.intForexRateTypeId
+	, ShipmentCharge.dblQuantity
 FROM tblICInventoryShipmentCharge ShipmentCharge
 	LEFT JOIN vyuICGetOtherCharges Charge ON Charge.intItemId = ShipmentCharge.intChargeId
 	LEFT JOIN tblICItemUOM CostUOM ON CostUOM.intItemUOMId = ShipmentCharge.intCostUOMId
