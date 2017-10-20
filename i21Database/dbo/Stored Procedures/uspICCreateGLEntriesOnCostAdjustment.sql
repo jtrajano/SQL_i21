@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspICCreateGLEntriesOnCostAdjustment]
-	@strBatchId AS NVARCHAR(20)
+	@strBatchId AS NVARCHAR(40)
 	,@intEntityUserSecurityId AS INT
 	,@strGLDescription AS NVARCHAR(255) = NULL 
 	,@ysnPost AS INT = 1

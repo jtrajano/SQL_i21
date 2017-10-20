@@ -9,7 +9,7 @@ CREATE PROCEDURE [dbo].[uspICReturnStockInActualCost]
 	,@intItemId AS INT
 	,@intItemLocationId AS INT
 	,@intItemUOMId AS INT 
-	,@strBatchId AS NVARCHAR(20)
+	,@strBatchId AS NVARCHAR(40)
 	,@dtmDate AS DATETIME
 	,@dblQty NUMERIC(18,6) 
 	,@dblCost AS NUMERIC(38, 20)

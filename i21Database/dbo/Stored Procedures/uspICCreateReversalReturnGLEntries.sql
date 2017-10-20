@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspICCreateReversalReturnGLEntries]
-	@strBatchId AS NVARCHAR(20)
+	@strBatchId AS NVARCHAR(40)
 	,@intTransactionId AS INT
 	,@strTransactionId AS NVARCHAR(40)
 	,@intEntityUserSecurityId AS INT	
