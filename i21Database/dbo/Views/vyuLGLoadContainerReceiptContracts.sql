@@ -38,7 +38,7 @@ SELECT
 	,intStockUOM = intPStockUOM
 	,strStockUOM = strPStockUOM COLLATE Latin1_General_CI_AS
 	,strStockUOMType = strPStockUOMType COLLATE Latin1_General_CI_AS
-	,dblStockUOMCF = dblPStockUOMCF 
+	,dblStockUOMCF = ISNULL(dblPStockUOMCF,0.0)
 	,strBLNumber = NULL
 	,strContainerNumber = NULL
 	,strLotNumber = NULL
@@ -108,7 +108,7 @@ SELECT
 	, intStockUOM					= L.intStockUOM		
 	, strStockUOM					= L.strStockUOM		
 	, strStockUOMType				= L.strStockUOMType	
-	, dblStockUOMCF 				= L.dblStockUOMCF 	
+	, dblStockUOMCF 				= ISNULL(L.dblStockUOMCF,0.0)
 	, strBLNumber					= L.strBLNumber		
 	, strContainerNumber			= L.strContainerNumber
 	, strLotNumber					= strLotNumber	
