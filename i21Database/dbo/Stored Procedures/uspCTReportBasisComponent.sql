@@ -130,6 +130,7 @@ AS
 		JOIN	tblCTContractCost			CC	ON	CC.intContractDetailId	=	CD.intContractDetailId
 		JOIN	tblICItem					BI	ON	BI.intItemId			=	CC.intItemId
 		WHERE	CC.ysnBasis	=	1 
+		AND		CD.strContractStatus	<>	'Cancelled'
 
 		UNION ALL
 
@@ -165,6 +166,7 @@ AS
 				CD.strContractStatus
 
 		FROM	vyuCTSearchContractDetail	CD
+		WHERE	CD.strContractStatus	<>	'Cancelled'
 
 		UNION ALL
 
@@ -200,6 +202,7 @@ AS
 				CD.strContractStatus
 
 		FROM	vyuCTSearchContractDetail	CD
+		WHERE	CD.strContractStatus	<>	'Cancelled'
 	)t
 	
 	SELECT @strMappingXML = 
