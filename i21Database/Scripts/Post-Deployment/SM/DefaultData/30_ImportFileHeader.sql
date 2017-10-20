@@ -231,7 +231,7 @@ BEGIN
 
 		UPDATE tblSMImportFileRecordMarker
 		SET strFormat = 'HHMM'
-			, intPosition = 9
+			, intPosition = 8
 		WHERE intImportFileRecordMarkerId = @importFileRecordMarkerId
 
 		UPDATE tblSMImportFileColumnDetail
