@@ -593,7 +593,7 @@ END
 
 -- Execute the repost stored procedure
 BEGIN 
-	DECLARE @strBatchId AS NVARCHAR(20)
+	DECLARE @strBatchId AS NVARCHAR(40)
 			,@strAccountToCounterInventory AS NVARCHAR(255) = 'Cost of Goods'
 			,@intEntityUserSecurityId AS INT
 			,@strGLDescription AS NVARCHAR(255) = NULL 

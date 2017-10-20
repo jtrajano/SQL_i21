@@ -19,7 +19,7 @@
 	[intTransactionId] INT NOT NULL, 
 	[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
 	[intTransactionDetailId] INT NULL, 
-	[strBatchId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
+	[strBatchId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
 	[intTransactionTypeId] INT NOT NULL, 
 	[intLotId] INT NULL, 
 	[ysnIsUnposted] BIT NULL,

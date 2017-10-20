@@ -26,7 +26,7 @@ This table logs all inventory transactions related to Lot
 		[intTransactionId] INT NOT NULL, 
 		[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
 		[intTransactionTypeId] INT NOT NULL, 
-		[strBatchId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
+		[strBatchId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
 		[intLotStatusId] INT,
 		[strTransactionForm] NVARCHAR (255) COLLATE Latin1_General_CI_AS NULL,
 		[ysnIsUnposted] BIT,

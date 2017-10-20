@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspICRepostSettleStorageCostAdjustment]
 	@strSettleTicketId AS NVARCHAR(50)
-	,@strBatchId AS NVARCHAR(20)
+	,@strBatchId AS NVARCHAR(40)
 	,@intEntityUserSecurityId AS INT
 AS
 
