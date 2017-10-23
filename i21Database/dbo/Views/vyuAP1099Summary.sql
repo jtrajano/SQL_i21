@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuAP1099Summary]
 AS
-SELECT
+SELECT DISTINCT
       strVendorId = C.strVendorId
 	, intEntityVendorId = C.intEntityVendorId
 	, strCompanyAddress = (SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) 
