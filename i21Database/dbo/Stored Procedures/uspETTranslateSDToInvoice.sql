@@ -202,12 +202,16 @@ BEGIN
 			SET @intTermCode = (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTermCode = @strTermCode)
 			--Get Entity ID of the Driver
 			SET @intDriverEntityId = (SELECT TOP 1 intEntityId FROM tblEMEntity WHERE strEntityNo = @strDriverNumber)
+			
 			---GEt Tax Group Id
-			SET @intTaxGroupId = (SELECT TOP 1 B.intTaxGroupId 
-									FROM tblSMTaxCode A
-									INNER JOIN  tblSMTaxGroupCode B
-										ON A.intTaxCodeId = B.intTaxCodeId
-									WHERE A.strTaxCode = @strSalesTaxId)
+					--SET @intTaxGroupId = (SELECT TOP 1 B.intTaxGroupId 
+					--						FROM tblSMTaxCode A
+					--						INNER JOIN  tblSMTaxGroupCode B
+					--							ON A.intTaxCodeId = B.intTaxCodeId
+					--						WHERE A.strTaxCode = @strSalesTaxId)
+			IF(LEN(@strSalesTaxId) > 2) 
+			SET @intTaxGroupId = (SELECT SUBSTRING(@strSalesTaxId,3,LEN(@strSalesTaxId)-2))
+			
 			--get Item Unit Measure Id = ()
 			SET @intUnitMeasureId = (SELECT TOP 1 intUnitMeasureId FROM tblICUnitMeasure WHERE strSymbol = @strUOM)
 			---Get Uom ID
@@ -306,13 +310,13 @@ BEGIN
 						,@ItemPrice                = @dblPrice
 						,@ItemSiteId               = @intSiteId
 						,@ItemPercentFull		   = @dblPercentFullAfterDelivery
-						--,@ItemTaxGroupId		   = @intTaxGroupId	
+						,@ItemTaxGroupId		   = @intTaxGroupId	
 						,@ItemDescription		   = @strItemDescription
 						,@ItemUOMId				   = @intItemUOMId
 						,@ItemContractDetailId     = @intContractDetailId
 						,@ItemCurrencyExchangeRateTypeId = NULL            
                         ,@ItemCurrencyExchangeRateId = NULL            
-						,@RecomputeTax			   = 0
+						,@RecomputeTax			   = 1
 
 				LOGDETAILENTRY:
 				IF 	LTRIM(@strErrorMessage) != ''
@@ -326,102 +330,103 @@ BEGIN
 					END
 			END
 			
-			--CHECK  for taxes
-			IF EXISTS(SELECT TOP 1 1 FROM #tmpCustomerInvoiceTaxDetail)
-			BEGIN
-				--Check for Detail Tax
-				IF(@intLineItem <> 0)
-				BEGIN
-					IF EXISTS (SELECT TOP 1 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpLineTax')) 
-					BEGIN
-						DROP TABLE #tmpLineTax
-					END
+			----CHECK  for taxes
+			--IF EXISTS(SELECT TOP 1 1 FROM #tmpCustomerInvoiceTaxDetail)
+			--BEGIN
+			--	--Check for Detail Tax
+			--	IF(@intLineItem <> 0)
+			--	BEGIN
+			--		IF EXISTS (SELECT TOP 1 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpLineTax')) 
+			--		BEGIN
+			--			DROP TABLE #tmpLineTax
+			--		END
 
-					--Get Tax detail for the line item
-					SELECT * INTO #tmpLineTax FROM #tmpCustomerInvoiceTaxDetail	WHERE ((intLineItem / 100) = @intLineItem)
-					WHILE EXISTS(SELECT TOP 1 1 FROM #tmpLineTax)
-					BEGIN
-						SELECT TOP 1 
-							@strCustomerNumberTax			  = strCustomerNumber
-							,@strInvoiceNumberTax			  = strInvoiceNumber
-							,@dtmInvoiceDateTax				  = dtmDate
-							,@intLineItemTax				  = intLineItem
-							,@strSiteNumberTax				  = strSiteNumber	
-							,@strUOMTax						  =	strUOM
-							,@dblUnitPriceTax				  = dblUnitPrice
-							,@strItemDescriptionTax		      = strItemDescription
-							,@dblPercentFullAfterDeliveryTax  = dblPercentFullAfterDelivery
-							,@strLocationTax				  =	strLocation
-							,@strTermCodeTax				  =	strTermCode
-							,@strSalesAccountTax			  =	strSalesAccount
-							,@strItemNumberTax				  =	strItemNumber
-							,@strSalesTaxIdTax				  =	strSalesTaxId
-							,@strDriverNumberTax			  =	strDriverNumber
-							,@strTypeTax					  =	strType
-							,@dblQuantityTax				  =	dblQuantity
-							,@dblTotalTax					  =	dblTotal
-							,@intLineItemTax				  =	intLineItem
-							,@dblPriceTax					  =	dblPrice
-							,@strCommentTax					  =	strComment
-							,@intImportSDToInvoiceIdTax		  = intImportSDToInvoiceId
-							,@strDetailTypeTax				  = strDetailType
-							,@strContractNumberTax			  = strContractNumber
-						FROM #tmpCustomerInvoiceDetail
-						ORDER BY intLineItem ASC
+			--		--Get Tax detail for the line item
+			--		SELECT * INTO #tmpLineTax FROM #tmpCustomerInvoiceTaxDetail	WHERE ((intLineItem / 100) = @intLineItem)
+			--		WHILE EXISTS(SELECT TOP 1 1 FROM #tmpLineTax)
+			--		BEGIN
+			--			SELECT TOP 1 
+			--				@strCustomerNumberTax			  = strCustomerNumber
+			--				,@strInvoiceNumberTax			  = strInvoiceNumber
+			--				,@dtmInvoiceDateTax				  = dtmDate
+			--				,@intLineItemTax				  = intLineItem
+			--				,@strSiteNumberTax				  = strSiteNumber	
+			--				,@strUOMTax						  =	strUOM
+			--				,@dblUnitPriceTax				  = dblUnitPrice
+			--				,@strItemDescriptionTax		      = strItemDescription
+			--				,@dblPercentFullAfterDeliveryTax  = dblPercentFullAfterDelivery
+			--				,@strLocationTax				  =	strLocation
+			--				,@strTermCodeTax				  =	strTermCode
+			--				,@strSalesAccountTax			  =	strSalesAccount
+			--				,@strItemNumberTax				  =	strItemNumber
+			--				,@strSalesTaxIdTax				  =	strSalesTaxId
+			--				,@strDriverNumberTax			  =	strDriverNumber
+			--				,@strTypeTax					  =	strType
+			--				,@dblQuantityTax				  =	dblQuantity
+			--				,@dblTotalTax					  =	dblTotal
+			--				,@intLineItemTax				  =	intLineItem
+			--				,@dblPriceTax					  =	dblPrice
+			--				,@strCommentTax					  =	strComment
+			--				,@intImportSDToInvoiceIdTax		  = intImportSDToInvoiceId
+			--				,@strDetailTypeTax				  = strDetailType
+			--				,@strContractNumberTax			  = strContractNumber
+			--			FROM #tmpCustomerInvoiceDetail
+			--			ORDER BY intLineItem ASC
 						
-						--GetTaxcode detail
-						SET @intTaxCodeId = NULL
-						SET @intTaxClassId = NULL
-						SET @intTaxGroupId = NULL
+			--			--GetTaxcode detail
+			--			SET @intTaxCodeId = NULL
+			--			SET @intTaxClassId = NULL
+			--			SET @intTaxGroupId = NULL
 						
-						--DELETE FROM #tmpCustomerInvoiceDetail WHERE intImportSDToInvoiceId = @intImportSDToInvoiceIdTax
-						DELETE FROM #tmpLineTax WHERE ((intLineItem / 100) = @intLineItem)
+			--			--DELETE FROM #tmpCustomerInvoiceDetail WHERE intImportSDToInvoiceId = @intImportSDToInvoiceIdTax
+			--			DELETE FROM #tmpLineTax WHERE ((intLineItem / 100) = @intLineItem)
 												
-						IF (EXISTS(SELECT TOP 1 1 FROM tblSMTaxGroup WHERE intTaxGroupId = @strSalesTaxIdTax))
-							BEGIN
-								SET @strErrorMessage = 'Tax Code does not Exists!'
-								IF(@ysnHeader = 1)
-									BEGIN
-										GOTO LOGHEADERENTRY
-									END
-								ELSE
-									BEGIN
-										GOTO LOGDETAILENTRY
-									END
+			--			IF (EXISTS(SELECT TOP 1 1 FROM tblSMTaxGroup WHERE intTaxGroupId = @strSalesTaxIdTax))
+			--				BEGIN
+			--					SET @strErrorMessage = 'Tax Code does not Exists!'
+			--					IF(@ysnHeader = 1)
+			--						BEGIN
+			--							GOTO LOGHEADERENTRY
+			--						END
+			--					ELSE
+			--						BEGIN
+			--							GOTO LOGDETAILENTRY
+			--						END
 				
-							END
-						ELSE
-							BEGIN
-								EXEC [uspARAddInvoiceTaxDetail]
-									 @InvoiceDetailId		= @intNewInvoiceDetailId
-									,@TaxGroupId			= @intTaxGroupId
-									,@TaxCodeId				= @intTaxCodeId
-									,@TaxClassId			= @intTaxClassId
-									,@AdjustedTax			= @dblQuantityTax
-									,@Notes					= @strItemDescriptionTax
-									,@TaxAdjusted		    = 1
-									,@ErrorMessage			= @strErrorMessage OUTPUT
+			--				END
+			--			ELSE
+			--				BEGIN
+			--					EXEC [uspARAddInvoiceTaxDetail]
+			--						 @InvoiceDetailId		= @intNewInvoiceDetailId
+			--						,@TaxGroupId			= @intTaxGroupId
+			--						,@TaxCodeId				= @intTaxCodeId
+			--						,@TaxClassId			= @intTaxClassId
+			--						,@AdjustedTax			= @dblQuantityTax
+			--						,@Notes					= @strItemDescriptionTax
+			--						,@TaxAdjusted		    = 1
+			--						,@ErrorMessage			= @strErrorMessage OUTPUT
 
-								IF (ISNULL(@strErrorMessage,'') != '')
-									BEGIN
-										IF(@ysnHeader = 1)
-										BEGIN
-											GOTO LOGHEADERENTRY
-										END
-										ELSE
-										BEGIN
-											GOTO LOGDETAILENTRY
-										END
+			--					IF (ISNULL(@strErrorMessage,'') != '')
+			--						BEGIN
+			--							IF(@ysnHeader = 1)
+			--							BEGIN
+			--								GOTO LOGHEADERENTRY
+			--							END
+			--							ELSE
+			--							BEGIN
+			--								GOTO LOGDETAILENTRY
+			--							END
 				
-									END
-							END
+			--						END
+			--				END
 
-					END
+			--		END
 
-				END
-			END
+			--	END
+			--END
 
 			-- Check if there are more details left
+
 			IF((SELECT COUNT(1) FROM #tmpCustomerInvoiceDetail) = 1)
 			BEGIN
 				-- Insert the succes log to table 	
@@ -485,5 +490,6 @@ BEGIN
 	END
 
 	SELECT * FROM @ResultTableLog
+
 END
 GO
