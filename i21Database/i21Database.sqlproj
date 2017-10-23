@@ -5761,6 +5761,9 @@
     <Build Include="dbo\Tables\tblVRProgramItem.sql" />
     <Build Include="dbo\Tables\tblVRProgramCustomer.sql" />
     <Build Include="dbo\Views\vyuVRProgramItemDetail.sql" />
+    <Build Include="dbo\Views\vyuLGLoadContainerPurchaseContractsLookup.sql" />
+    <Build Include="dbo\Views\vyuCTContractAddOrdersLookup.sql" />
+    <Build Include="dbo\Views\vyuLGLoadDetailViewLookup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
