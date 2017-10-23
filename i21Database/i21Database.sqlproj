@@ -5762,6 +5762,8 @@
     <Build Include="dbo\Views\vyuVRProgramItemDetail.sql" />
     <Build Include="dbo\Views\vyuARDocumentMaintenanceMessageDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspCMImportBanksFromOrigin.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGCreateVoucherForWarehouseServices.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGCreateVoucherForOtherCharges.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
