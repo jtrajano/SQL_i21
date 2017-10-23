@@ -117,3 +117,4 @@ server/iRely.Inventory.WebAPI/Properties/PublishProfiles/1520.pubxml
 server/iRely.Inventory.WebAPI/Properties/PublishProfiles/1530.pubxml
 coverage/
 server/.vs/config/applicationhost.config
+server/.vs/
