@@ -35,40 +35,73 @@ BEGIN
 	SET @InvalidSetup = 0
 	SET @DisregardExemptionSetup = ISNULL(@DisregardExemptionSetup, 0)
 
-	IF @IsCustomerSiteTaxable IS NULL
-		BEGIN
-			--Customer
-			IF EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityId] = @CustomerId AND ISNULL([ysnTaxExempt],0) = 1)
-				SET @TaxCodeExemption = 'Customer is tax exempted; Date: ' + CONVERT(NVARCHAR(20), GETDATE(), 101) + ' ' + CONVERT(NVARCHAR(20), GETDATE(), 114)
+	--IF @IsCustomerSiteTaxable IS NULL
+	--	BEGIN
+	--Customer
+	IF EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityId] = @CustomerId AND ISNULL([ysnTaxExempt],0) = 1)
+		SET @TaxCodeExemption = 'Customer is tax exempted; Date: ' + CONVERT(NVARCHAR(20), GETDATE(), 101) + ' ' + CONVERT(NVARCHAR(20), GETDATE(), 114)
 		
-			IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0 AND @DisregardExemptionSetup <> 1
-				BEGIN
-					INSERT INTO @returntable
-					SELECT 
-						 [ysnTaxExempt] = 1
-						,[ysnInvalidSetup] = @InvalidSetup
-						,[strExemptionNotes] = @TaxCodeExemption
-						,[dblExemptionPercent] = @ExemptionPercent
-					RETURN 
-				END
-				
-		END
-	
-	IF @IsCustomerSiteTaxable IS NOT NULL
+	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0 AND @DisregardExemptionSetup <> 1
 		BEGIN
-			--Customer
-			IF ISNULL(@IsCustomerSiteTaxable,0) = 0 AND @DisregardExemptionSetup <> 1
-				SET @TaxCodeExemption = 'Customer Site is non taxable; Date: ' + CONVERT(NVARCHAR(20), GETDATE(), 101) + ' ' + CONVERT(NVARCHAR(20), GETDATE(), 114)
-		
-			IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
 			INSERT INTO @returntable
 			SELECT 
 				 [ysnTaxExempt] = 1
 				,[ysnInvalidSetup] = @InvalidSetup
 				,[strExemptionNotes] = @TaxCodeExemption
 				,[dblExemptionPercent] = @ExemptionPercent
-			RETURN 			 
+			RETURN 
 		END
+				
+		--END
+	
+	--IF @IsCustomerSiteTaxable IS NOT NULL
+	--	BEGIN
+	--		--Customer
+	--		IF ISNULL(@IsCustomerSiteTaxable,0) = 0 AND @DisregardExemptionSetup <> 1
+	--			SET @TaxCodeExemption = 'Customer Site is non taxable; Date: ' + CONVERT(NVARCHAR(20), GETDATE(), 101) + ' ' + CONVERT(NVARCHAR(20), GETDATE(), 114)
+		
+	--		IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
+	--		INSERT INTO @returntable
+	--		SELECT 
+	--			 [ysnTaxExempt] = 1
+	--			,[ysnInvalidSetup] = @InvalidSetup
+	--			,[strExemptionNotes] = @TaxCodeExemption
+	--			,[dblExemptionPercent] = @ExemptionPercent
+	--		RETURN 			 
+	--	END
+
+
+	SELECT TOP 1
+		@TaxCodeExemption =  'Customer Site is non sales-taxable; Date: ' + CONVERT(NVARCHAR(20), GETDATE(), 101) + ' ' + CONVERT(NVARCHAR(20), GETDATE(), 114)
+	FROM
+		tblSMTaxGroupCode SMTGC
+	INNER JOIN
+		tblSMTaxGroup SMTG
+			ON SMTGC.[intTaxGroupId] = SMTG.[intTaxGroupId] 
+	INNER JOIN
+		tblSMTaxCode SMTC
+			ON SMTGC.[intTaxCodeId] = SMTC.[intTaxCodeId] 
+	INNER JOIN
+		tblSMTaxClass SMTCL
+			ON SMTC.[intTaxClassId] = SMTCL.[intTaxClassId]
+	WHERE
+		@IsCustomerSiteTaxable IS NOT NULL
+		AND @IsCustomerSiteTaxable = 0
+		AND SMTCL.strTaxClass LIKE '%Sales Tax%'
+		AND SMTGC.[intTaxCodeId] = @TaxCodeId
+		AND SMTGC.[intTaxGroupId] = @TaxGroupId		
+
+	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0 AND @DisregardExemptionSetup <> 1
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = @ExemptionPercent
+			RETURN 	
+		END
+
 
 	SELECT TOP 1
 		@TaxCodeExemption =  'Tax Code - ' + SMTC.[strTaxCode] +  ' under Tax Group  ' + SMTG.strTaxGroup + ' has an exemption set for item category - ' + ICC.[strCategoryCode] 
