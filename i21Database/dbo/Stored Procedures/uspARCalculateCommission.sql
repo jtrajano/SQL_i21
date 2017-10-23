@@ -125,7 +125,8 @@ IF @strBasis = @BASIS_HOURS
 			 , (intHours - (@dblHurdle * (intHours/@dblTotalHrs))) * @dblCalculationAmount
 			 , 1
 		FROM @tmpHDTicketHoursWorkedTable
-		
+			where @dblTotalHrs > @dblHurdle
+			
 		IF @strCalculationType = @CALCTYPE_PERUNIT
 			SET @dblLineTotal = CASE WHEN  @dblTotalHrs > @dblHurdle THEN (@dblTotalHrs - @dblHurdle) * @dblCalculationAmount ELSE 0 END
 		ELSE IF @strCalculationType = @CALCTYPE_FLAT
