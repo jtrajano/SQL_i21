@@ -5724,6 +5724,9 @@
     <Build Include="dbo\Views\vyuGLTrialBalance.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitTB.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitRETB.sql" />
+    <Build Include="dbo\Views\vyuLGLoadContainerPurchaseContractsLookup.sql" />
+    <Build Include="dbo\Views\vyuCTContractAddOrdersLookup.sql" />
+    <Build Include="dbo\Views\vyuLGLoadDetailViewLookup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
