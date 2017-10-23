@@ -192,7 +192,7 @@ SELECT distinct c.intCommodityId, strLocationName, intLocationId,
      SELECT
      dbo.fnCTConvertQuantityToTargetCommodityUOM(CH.intCommodityUnitMeasureId,um.intCommodityUnitMeasureId,isnull(Balance,0)) dblTotal
 	 FROM vyuGRGetStorageDetail CH  
-	 WHERE CH.intCommodityId = c.intCommodityId AND ysnCustomerStorage <> 1 and CH.intCompanyLocationId=cl.intCompanyLocationId
+	 WHERE CH.intCommodityId = c.intCommodityId  and CH.intCompanyLocationId=cl.intCompanyLocationId
 	 and  intEntityId= CASE WHEN ISNULL(@intVendorId,0)=0 then intEntityId else @intVendorId end 	 
 	 )t) as dblGrainBalance 
 
