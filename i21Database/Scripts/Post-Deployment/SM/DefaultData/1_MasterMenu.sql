@@ -5079,9 +5079,9 @@ UPDATE tblSMMasterMenu SET intParentMenuID = @VendorRebatesMaintenanceParentMenu
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Rebates' AND strModuleName = 'Vendor Rebates' AND intParentMenuID = @VendorRebatesActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Rebates', N'Vendor Rebates', @VendorRebatesActivitiesParentMenuId, N'Rebates', N'Activity', N'Screen', N'VendorRebates.view.RebateProgram?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
+	VALUES (N'Rebates', N'Vendor Rebates', @VendorRebatesActivitiesParentMenuId, N'Rebates', N'Activity', N'Screen', N'VendorRebates.view.Rebates?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'VendorRebates.view.RebateProgram?showSearch=true' WHERE strMenuName = 'Rebates' AND strModuleName = 'Vendor Rebates' AND intParentMenuID = @VendorRebatesActivitiesParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'VendorRebates.view.Rebates?showSearch=true' WHERE strMenuName = 'Rebates' AND strModuleName = 'Vendor Rebates' AND intParentMenuID = @VendorRebatesActivitiesParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Setup' AND strModuleName = 'Vendor Rebates' AND intParentMenuID = @VendorRebatesMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
