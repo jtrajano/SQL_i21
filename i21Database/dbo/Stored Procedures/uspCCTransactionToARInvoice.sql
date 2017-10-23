@@ -17,8 +17,11 @@ SET ANSI_WARNINGS ON
 
 BEGIN
 
-	DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
-	DECLARE @TaxDetails AS LineItemTaxDetailStagingTable 
+	DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable;
+	DECLARE @EntriesForInvoicePerSite AS InvoiceIntegrationStagingTable;
+	DECLARE @TaxDetails AS LineItemTaxDetailStagingTable;
+	DECLARE @EntriesForInvoiceCount INT;
+	DECLARE @EntriesForInvoiceActiveId INT;
 
     DECLARE @CCRItemToARItem TABLE
     (
@@ -119,21 +122,85 @@ BEGIN
 	--and those sites that does not have customer
     DELETE FROM @EntriesForInvoice WHERE intItemId = -1	or intEntityCustomerId is null;
 
-	if ((select count(*) from @EntriesForInvoice) > 0)
+	set @EntriesForInvoiceCount = (select count(*) from @EntriesForInvoice);
+
+	if (@EntriesForInvoiceCount > 0)
 	begin
+
 		IF(@Post = 1)
 		BEGIN
-			EXEC [dbo].[uspARProcessInvoices]
-					 @InvoiceEntries	= @EntriesForInvoice
-					,@LineItemTaxEntries = @TaxDetails
-					,@UserId			= @UserId
-					,@GroupingOption	= 7
-					,@RaiseError		= 1
-					,@ErrorMessage		= @ErrorMessage OUTPUT
-					,@CreatedIvoices	= @CreatedIvoices OUTPUT
-					,@UpdatedIvoices	= @UpdatedIvoices OUTPUT
 
-			IF(ISNULL(@ErrorMessage,'') = '') SET @success = 1
+			While (Select Count(*) From @EntriesForInvoice) > 0
+			Begin
+				Select Top 1 @EntriesForInvoiceActiveId = intId From @EntriesForInvoice;
+				delete from @EntriesForInvoicePerSite;
+				insert into @EntriesForInvoicePerSite
+				(
+					[strTransactionType]
+					,[strSourceTransaction]
+					,[intSourceId]
+					,[strSourceId]
+					,[intEntityCustomerId]
+					,[intCompanyLocationId]
+					,[intCurrencyId]
+					,[intTermId]
+					,[dtmDate]
+					,[dtmShipDate]
+					,[intEntitySalespersonId]
+					,[intEntityId]
+					,[ysnPost]
+					,[intItemId]
+					,[strItemDescription]
+					,[dblQtyShipped]
+					,[dblPrice]
+					,[intTaxGroupId]
+					,[ysnRecomputeTax]
+					,[intSiteDetailId]
+					,[ysnInventory]
+					,[intSalesAccountId]
+					,[strComments]
+				)
+				select top 1
+					[strTransactionType]
+					,[strSourceTransaction]
+					,[intSourceId]
+					,[strSourceId]
+					,[intEntityCustomerId]
+					,[intCompanyLocationId]
+					,[intCurrencyId]
+					,[intTermId]
+					,[dtmDate]
+					,[dtmShipDate]
+					,[intEntitySalespersonId]
+					,[intEntityId]
+					,[ysnPost]
+					,[intItemId]
+					,[strItemDescription]
+					,[dblQtyShipped]
+					,[dblPrice]
+					,[intTaxGroupId]
+					,[ysnRecomputeTax]
+					,[intSiteDetailId]
+					,[ysnInventory]
+					,[intSalesAccountId]
+					,[strComments]
+				from @EntriesForInvoice;
+
+				EXEC [dbo].[uspARProcessInvoices]
+						 @InvoiceEntries	= @EntriesForInvoicePerSite
+						,@LineItemTaxEntries = @TaxDetails
+						,@UserId			= @UserId
+						,@GroupingOption	= 7
+						,@RaiseError		= 1
+						,@ErrorMessage		= @ErrorMessage OUTPUT
+						,@CreatedIvoices	= @CreatedIvoices OUTPUT
+						,@UpdatedIvoices	= @UpdatedIvoices OUTPUT
+
+				IF(ISNULL(@ErrorMessage,'') = '') SET @success = 1
+
+				Delete @EntriesForInvoice Where intId = @EntriesForInvoiceActiveId;
+			End
+
 		END
 		ELSE IF (@Post = 0)
 		BEGIN		
@@ -145,28 +212,29 @@ BEGIN
 			GROUP BY arInvoiceDetail.intInvoiceId
 			IF(@intInvoiceId1 IS NOT NULL)
 			BEGIN
-			UPDATE @EntriesForInvoice SET intInvoiceId = @intInvoiceId1
+				UPDATE @EntriesForInvoice SET intInvoiceId = @intInvoiceId1
 
-			EXEC [dbo].[uspARProcessInvoices]
-					 @InvoiceEntries	= @EntriesForInvoice
-					,@LineItemTaxEntries = @TaxDetails
-					,@UserId			= @UserId
-					,@GroupingOption	= 7
-					,@RaiseError		= 1
-					,@ErrorMessage		= @ErrorMessage OUTPUT
-					,@CreatedIvoices	= @CreatedIvoices OUTPUT
-					,@UpdatedIvoices	= @UpdatedIvoices OUTPUT
+				EXEC [dbo].[uspARProcessInvoices]
+						 @InvoiceEntries	= @EntriesForInvoice
+						,@LineItemTaxEntries = @TaxDetails
+						,@UserId			= @UserId
+						,@GroupingOption	= 7
+						,@RaiseError		= 1
+						,@ErrorMessage		= @ErrorMessage OUTPUT
+						,@CreatedIvoices	= @CreatedIvoices OUTPUT
+						,@UpdatedIvoices	= @UpdatedIvoices OUTPUT
 
-			--DELETE Invoice Transaction
-			DELETE FROM tblARInvoice WHERE intInvoiceId IN (
-				SELECT DISTINCT C.intInvoiceId 
-					FROM tblCCSiteHeader A 
-				JOIN tblCCSiteDetail B ON B.intSiteHeaderId = A.intSiteHeaderId
-				JOIN tblARInvoiceDetail C ON C.intSiteDetailId = B.intSiteDetailId
-					WHERE A.intSiteHeaderId = @intSiteHeaderId)
+				--DELETE Invoice Transaction
+				DELETE FROM tblARInvoice WHERE intInvoiceId IN (
+					SELECT DISTINCT C.intInvoiceId 
+						FROM tblCCSiteHeader A 
+					JOIN tblCCSiteDetail B ON B.intSiteHeaderId = A.intSiteHeaderId
+					JOIN tblARInvoiceDetail C ON C.intSiteDetailId = B.intSiteDetailId
+						WHERE A.intSiteHeaderId = @intSiteHeaderId)
 
 			END
 
 		END
+
 	end
 END
