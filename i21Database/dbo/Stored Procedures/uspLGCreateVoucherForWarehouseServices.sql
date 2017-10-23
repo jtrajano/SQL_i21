@@ -1,21 +1,18 @@
-﻿CREATE PROCEDURE uspLGCreateVoucherForInbound 
-	 @intLoadId INT
+﻿CREATE PROCEDURE uspLGCreateVoucherForWarehouseServices 
+     @intLoadId INT
 	,@intEntityUserSecurityId INT
 	,@intBillId INT OUTPUT
 AS
 BEGIN TRY
-	DECLARE @strErrorMessage NVARCHAR(4000);
-	DECLARE @intErrorSeverity INT;
-	DECLARE @intErrorState INT;
+	DECLARE @strErrorMessage NVARCHAR(MAX);
 	DECLARE @total AS INT
 	DECLARE @intVendorEntityId AS INT;
 	DECLARE @intMinRecord AS INT
 	DECLARE @VoucherDetailLoadNonInv AS VoucherDetailLoadNonInv
 	DECLARE @intAPAccount INT
 	DECLARE @strLoadNumber NVARCHAR(100)
-
-	DECLARE @voucherDetailData TABLE 
-		(intItemRecordId INT Identity(1, 1)
+	DECLARE @voucherDetailData TABLE (
+		intItemRecordId INT Identity(1, 1)
 		,intVendorEntityId INT
 		,intLoadId INT
 		,intLoadDetailId INT
@@ -24,31 +21,38 @@ BEGIN TRY
 		,intItemId INT
 		,intAccountId INT
 		,dblQtyReceived NUMERIC(18, 6)
-		,dblCost NUMERIC(18, 6))
+		,dblCost NUMERIC(18, 6)
+		)
+	DECLARE @distinctVendor TABLE (
+		intRecordId INT Identity(1, 1)
+		,intVendorEntityId INT
+		)
+	DECLARE @distinctItem TABLE (
+		intItemRecordId INT Identity(1, 1)
+		,intItemId INT
+		)
 
-	DECLARE @distinctVendor TABLE 
-		(intRecordId INT Identity(1, 1)
-		,intVendorEntityId INT)
+	SELECT @strLoadNumber = strLoadNumber
+	FROM tblLGLoad
+	WHERE intLoadId = @intLoadId
 
-	DECLARE @distinctItem TABLE 
-		(intItemRecordId INT Identity(1, 1)
-		,intItemId INT)
-
-	SELECT @strLoadNumber = strLoadNumber FROM tblLGLoad WHERE intLoadId = @intLoadId
-
-	IF EXISTS(SELECT TOP 1 1 FROM tblAPBillDetail BD 
-	JOIN tblLGLoadDetail LD ON BD.intLoadDetailId = LD.intLoadDetailId
-	WHERE LD.intLoadId = @intLoadId)
+	IF EXISTS (
+			SELECT TOP 1 1
+			FROM tblAPBillDetail BD
+			JOIN tblLGLoadDetail LD ON BD.intLoadDetailId = LD.intLoadDetailId
+			WHERE LD.intLoadId = @intLoadId
+			)
 	BEGIN
 		DECLARE @ErrorMessage NVARCHAR(250)
 
 		SET @ErrorMessage = 'Voucher was already created for ' + @strLoadNumber;
 
-		RAISERROR(@ErrorMessage, 16, 1);
+		RAISERROR (@ErrorMessage,16,1);
+
 		RETURN 0;
 	END
 
-	SELECT @intAPAccount = ISNULL(intAPAccount,0)
+	SELECT @intAPAccount = ISNULL(intAPAccount, 0)
 	FROM tblSMCompanyLocation CL
 	JOIN (
 		SELECT TOP 1 ISNULL(LD.intPCompanyLocationId, intSCompanyLocationId) intCompanyLocationId
@@ -59,7 +63,7 @@ BEGIN TRY
 
 	IF @intAPAccount = 0
 	BEGIN
-		RAISERROR('Please configure ''AP Account'' for the company location.',16,1)
+		RAISERROR ('Please configure ''AP Account'' for the company location.',16,1)
 	END
 
 	INSERT INTO @voucherDetailData (
@@ -73,42 +77,43 @@ BEGIN TRY
 		,dblQtyReceived
 		,dblCost
 		)
-	SELECT LD.intVendorEntityId
-		,L.intLoadId
+	SELECT V.intEntityVendorId
+		,LD.intLoadId
 		,LD.intLoadDetailId
 		,CH.intContractHeaderId
 		,CD.intContractDetailId
-		,LD.intItemId
-		,intAccountId = [dbo].[fnGetItemGLAccount](LD.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
-		,dblQtyReceived = LD.dblQuantity
-		,dblCost = CASE 
-			WHEN AD.ysnSeqSubCurrency = 1
-				THEN AD.dblQtyToPriceUOMConvFactor * ISNULL(AD.dblSeqPrice, 0) / 100
-			ELSE AD.dblQtyToPriceUOMConvFactor * ISNULL(AD.dblSeqPrice, 0)
+		,V.intItemId
+		,intAccountId = [dbo].[fnGetItemGLAccount](V.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
+		,dblQtyReceived = 1
+		,dblCost = (
+			CONVERT(NUMERIC(18, 6), Sum(V.dblPrice)) / (
+				CONVERT(NUMERIC(18, 6), (
+						SELECT SUM(dblNet)
+						FROM vyuLGLoadCostForVendor VN
+						WHERE VN.intLoadId = V.intLoadId
+						))
+				)
+			) * CONVERT(NUMERIC(18, 6), V.dblNet)
+	FROM vyuLGLoadCostForVendor V
+	JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = V.intLoadDetailId
+	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
+			WHEN ISNULL(LD.intPContractDetailId, 0) = 0
+				THEN LD.intSContractDetailId
+			ELSE LD.intPContractDetailId
 			END
-	FROM tblLGLoad L
-	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
-	JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-	CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
-	JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = LD.intItemId
-		AND ItemLoc.intLocationId = CD.intCompanyLocationId
-	LEFT JOIN tblSMCompanyLocationSubLocation SLCL ON SLCL.intCompanyLocationSubLocationId = LD.intPSubLocationId
-		AND ItemLoc.intLocationId = SLCL.intCompanyLocationId
-	WHERE L.intLoadId = @intLoadId
-	GROUP BY LD.intVendorEntityId
+	JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = V.intItemId
+	WHERE V.intLoadId = @intLoadId
+	GROUP BY V.intEntityVendorId
 		,CH.intContractHeaderId
 		,CD.intContractDetailId
-		,LD.intItemId
+		,V.intItemId
 		,ItemLoc.intItemLocationId
-		,LD.dblNet
-		,L.intLoadId
-		,L.strLoadNumber
+		,V.intLoadId
+		,V.strLoadNumber
+		,V.dblNet
+		,LD.intLoadId
 		,LD.intLoadDetailId
-		,AD.ysnSeqSubCurrency
-		,AD.dblQtyToPriceUOMConvFactor
-		,AD.dblSeqPrice
-		,LD.dblQuantity
 
 	INSERT INTO @distinctVendor
 	SELECT DISTINCT intVendorEntityId
@@ -118,12 +123,12 @@ BEGIN TRY
 	SELECT DISTINCT intItemId
 	FROM @voucherDetailData
 
-	IF EXISTS (SELECT 1 
-		   FROM tblICItem I
-		   LEFT JOIN tblICItemAccount IA ON IA.intItemId = I.intItemId
-		   LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = IA.intAccountCategoryId
-		   WHERE strAccountCategory IS NULL
-			  AND I.intItemId IN (SELECT intItemId FROM @distinctItem))
+	IF EXISTS (SELECT 1
+			   FROM tblICItem I
+			   LEFT JOIN tblICItemAccount IA ON IA.intItemId = I.intItemId
+			   LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = IA.intAccountCategoryId
+			   WHERE strAccountCategory IS NULL
+					AND I.intItemId IN (SELECT intItemId FROM @distinctItem))
 	BEGIN
 		RAISERROR ('''AP Clearing'' is not configured for one or more item(s).',11,1);
 	END
@@ -137,7 +142,8 @@ BEGIN TRY
 		RETURN;
 	END
 
-	SELECT @intMinRecord = MIN(intRecordId) FROM @distinctVendor
+	SELECT @intMinRecord = MIN(intRecordId)
+	FROM @distinctVendor
 
 	WHILE ISNULL(@intMinRecord, 0) <> 0
 	BEGIN
@@ -181,6 +187,6 @@ BEGIN TRY
 END TRY
 
 BEGIN CATCH
-	SELECT @strErrorMessage = ERROR_MESSAGE(),@intErrorSeverity = ERROR_SEVERITY(),@intErrorState = ERROR_STATE();
-	RAISERROR (@strErrorMessage,@intErrorSeverity,@intErrorState)
+	SELECT @strErrorMessage = ERROR_MESSAGE();
+	RAISERROR (@strErrorMessage,16,1)
 END CATCH

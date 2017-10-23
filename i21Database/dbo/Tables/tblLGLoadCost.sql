@@ -14,11 +14,13 @@ CREATE TABLE [dbo].[tblLGLoadCost]
 	[ysnAccrue] [bit] NOT NULL CONSTRAINT [DF_tblLGLoadCost_ysnAccrue]  DEFAULT ((1)),
 	[ysnMTM] [bit] NULL,
 	[ysnPrice] [bit] NULL,
+	[intBillId] [int] NULL,
 
 	CONSTRAINT [PK_tblLGLoadCost] PRIMARY KEY ([intLoadCostId]), 
 	CONSTRAINT [FK_tblLGLoadCost_tblLGLoad_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES [tblLGLoad]([intLoadId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblLGLoadCost_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblLGLoadCost_tblAPVendor_intVendorId] FOREIGN KEY ([intVendorId]) REFERENCES [tblEMEntity]([intEntityId]),
 	CONSTRAINT [FK_tblLGLoadCost_tblICItemUOM_intItemUOMId] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
+	CONSTRAINT [FK_tblLGLoadCost_tblAPBill_intBillId] FOREIGN KEY ([intBillId]) REFERENCES [tblAPBill]([intBillId]),
 	CONSTRAINT [FK_tblLGLoadCost_tblSMCurrency_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID])
 )

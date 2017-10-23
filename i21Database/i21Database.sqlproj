@@ -5766,6 +5766,8 @@
     <Build Include="dbo\Views\vyuLGLoadDetailViewLookup.sql" />
     <Build Include="dbo\Stored Procedures\uspCMImportBanksFromOrigin.sql" />
     <Build Include="dbo\Tables\tblBBCustomerLocationXref.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGCreateVoucherForWarehouseServices.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGCreateVoucherForOtherCharges.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
