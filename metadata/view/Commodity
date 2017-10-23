@@ -10,12 +10,12 @@
         "defaultFocus": null,
         "designer|userAlias": "iccommodity",
         "designer|userClassName": "Commodity",
-        "height": 635,
+        "height": 620,
         "hidden": false,
         "icon": null,
         "layout": "fit",
         "maximizable": true,
-        "minHeight": 635,
+        "minHeight": 620,
         "minWidth": 1000,
         "minimizable": null,
         "mixins": null,
@@ -1301,171 +1301,7 @@
                                                                 "scrollable": "boolean"
                                                             },
                                                             "name": "MyFieldSet",
-                                                            "designerId": "27cabde5-d320-45ba-a46a-c748f78b0033",
-                                                            "cn": [
-                                                                {
-                                                                    "type": "Ext.form.field.ComboBox",
-                                                                    "reference": {
-                                                                        "name": "items",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "columns": [
-                                                                            "[",
-                                                                            "\t{",
-                                                                            "\t\tdataIndex: 'intId',",
-                                                                            "\t\tdataType: 'numeric',",
-                                                                            "\t\thidden: true",
-                                                                            "\t},",
-                                                                            "\t{",
-                                                                            "\t\tdataIndex: 'strName',",
-                                                                            "\t\tdataType: 'string',",
-                                                                            "\t\ttext: 'Adjust By',",
-                                                                            "\t\tflex: 1",
-                                                                            "\t}",
-                                                                            "]"
-                                                                        ],
-                                                                        "designer|createAlias": "gridcombobox",
-                                                                        "displayField": "strName",
-                                                                        "fieldLabel": "Sales",
-                                                                        "itemId": "cboAdjustInventorySalesBy",
-                                                                        "labelWidth": 170,
-                                                                        "layout|flex": null,
-                                                                        "layout|margins": null,
-                                                                        "valueField": "strName"
-                                                                    },
-                                                                    "configAlternates": {
-                                                                        "columns": "array",
-                                                                        "designer|createAlias": "string",
-                                                                        "displayField": "datafield",
-                                                                        "fieldLabel": "string",
-                                                                        "itemId": "string",
-                                                                        "labelWidth": "number",
-                                                                        "layout|flex": "number",
-                                                                        "layout|margins": "string",
-                                                                        "valueField": "datafield",
-                                                                        "scrollable": "boolean"
-                                                                    },
-                                                                    "name": "MyComboBox13",
-                                                                    "designerId": "fa35e64a-327a-480b-9901-91190c9b0c0b",
-                                                                    "customConfigs": [
-                                                                        {
-                                                                            "group": "(Custom Properties)",
-                                                                            "name": "columns",
-                                                                            "type": "string"
-                                                                        }
-                                                                    ]
-                                                                },
-                                                                {
-                                                                    "type": "Ext.form.field.ComboBox",
-                                                                    "reference": {
-                                                                        "name": "items",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "columns": [
-                                                                            "[",
-                                                                            "\t{",
-                                                                            "\t\tdataIndex: 'intId',",
-                                                                            "\t\tdataType: 'numeric',",
-                                                                            "\t\thidden: true",
-                                                                            "\t},",
-                                                                            "\t{",
-                                                                            "\t\tdataIndex: 'strName',",
-                                                                            "\t\tdataType: 'string',",
-                                                                            "\t\ttext: 'Adjust By',",
-                                                                            "\t\tflex: 1",
-                                                                            "\t}",
-                                                                            "]"
-                                                                        ],
-                                                                        "designer|createAlias": "gridcombobox",
-                                                                        "displayField": "strName",
-                                                                        "fieldLabel": "Purchase",
-                                                                        "itemId": "cboAdjustInventoryPurchaseBy",
-                                                                        "labelWidth": 170,
-                                                                        "layout|flex": null,
-                                                                        "layout|margins": null,
-                                                                        "valueField": "strName"
-                                                                    },
-                                                                    "configAlternates": {
-                                                                        "columns": "array",
-                                                                        "designer|createAlias": "string",
-                                                                        "displayField": "datafield",
-                                                                        "fieldLabel": "string",
-                                                                        "itemId": "string",
-                                                                        "labelWidth": "number",
-                                                                        "layout|flex": "number",
-                                                                        "layout|margins": "string",
-                                                                        "valueField": "datafield",
-                                                                        "scrollable": "boolean"
-                                                                    },
-                                                                    "name": "MyComboBox19",
-                                                                    "designerId": "f8973874-a654-4d35-9157-e0e79fa6964d",
-                                                                    "customConfigs": [
-                                                                        {
-                                                                            "group": "(Custom Properties)",
-                                                                            "name": "columns",
-                                                                            "type": "string"
-                                                                        }
-                                                                    ]
-                                                                },
-                                                                {
-                                                                    "type": "Ext.form.field.ComboBox",
-                                                                    "reference": {
-                                                                        "name": "items",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "columns": [
-                                                                            "[",
-                                                                            "\t{",
-                                                                            "\t\tdataIndex: 'intId',",
-                                                                            "\t\tdataType: 'numeric',",
-                                                                            "\t\thidden: true",
-                                                                            "\t},",
-                                                                            "\t{",
-                                                                            "\t\tdataIndex: 'strName',",
-                                                                            "\t\tdataType: 'string',",
-                                                                            "\t\ttext: 'Adjust By',",
-                                                                            "\t\tflex: 1",
-                                                                            "\t}",
-                                                                            "]"
-                                                                        ],
-                                                                        "designer|createAlias": "gridcombobox",
-                                                                        "displayField": "strName",
-                                                                        "fieldLabel": "Transfer",
-                                                                        "itemId": "cboAdjustInventoryTransfersBy",
-                                                                        "labelWidth": 170,
-                                                                        "layout|flex": null,
-                                                                        "layout|margins": null,
-                                                                        "valueField": "strName"
-                                                                    },
-                                                                    "configAlternates": {
-                                                                        "columns": "array",
-                                                                        "designer|createAlias": "string",
-                                                                        "displayField": "datafield",
-                                                                        "fieldLabel": "string",
-                                                                        "itemId": "string",
-                                                                        "labelWidth": "number",
-                                                                        "layout|flex": "number",
-                                                                        "layout|margins": "string",
-                                                                        "valueField": "datafield",
-                                                                        "scrollable": "boolean"
-                                                                    },
-                                                                    "name": "MyComboBox21",
-                                                                    "designerId": "25995dcf-159a-4d30-b0ae-9b8cee86e1b0",
-                                                                    "customConfigs": [
-                                                                        {
-                                                                            "group": "(Custom Properties)",
-                                                                            "name": "columns",
-                                                                            "type": "string"
-                                                                        }
-                                                                    ]
-                                                                }
-                                                            ]
+                                                            "designerId": "27cabde5-d320-45ba-a46a-c748f78b0033"
                                                         },
                                                         {
                                                             "type": "Ext.container.Container",
@@ -1642,37 +1478,29 @@
                                                                 "columns": [
                                                                     "[",
                                                                     "\t{",
-                                                                    "\t\tdataIndex: 'intStorageScheduleRuleId',",
-                                                                    "\t\tdataType: 'numeric',",
-                                                                    "\t\thidden: true",
-                                                                    "\t},",
-                                                                    "    {",
-                                                                    "\t\tdataIndex: 'intCommodity',",
+                                                                    "\t\tdataIndex: 'intId',",
                                                                     "\t\tdataType: 'numeric',",
                                                                     "\t\thidden: true",
                                                                     "\t},",
                                                                     "\t{",
-                                                                    "\t\tdataIndex: 'strScheduleId',",
+                                                                    "\t\tdataIndex: 'strName',",
                                                                     "\t\tdataType: 'string',",
-                                                                    "\t\ttext: 'Storage Type',",
-                                                                    "\t\tflex: 1",
-                                                                    "\t},",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'strScheduleDescription',",
-                                                                    "\t\tdataType: 'string',",
-                                                                    "\t\ttext: 'Description',",
+                                                                    "\t\ttext: 'Adjust By',",
                                                                     "\t\tflex: 1",
                                                                     "\t}",
                                                                     "]"
                                                                 ],
                                                                 "designer|createAlias": "gridcombobox",
+                                                                "displayField": "strName",
                                                                 "fieldLabel": "Sales",
-                                                                "itemId": "cboAdjustInventorySales",
-                                                                "labelWidth": 180,
-                                                                "layout|flex": null
+                                                                "itemId": "cboAdjustInventorySalesBy",
+                                                                "labelWidth": 170,
+                                                                "layout|flex": null,
+                                                                "layout|margins": null,
+                                                                "queryMode": "local",
+                                                                "valueField": "strName"
                                                             },
                                                             "configAlternates": {
-                                                                "column": "array",
                                                                 "columns": "array",
                                                                 "designer|createAlias": "string",
                                                                 "displayField": "datafield",
@@ -1680,11 +1508,13 @@
                                                                 "itemId": "string",
                                                                 "labelWidth": "number",
                                                                 "layout|flex": "number",
+                                                                "layout|margins": "string",
                                                                 "valueField": "datafield",
-                                                                "scrollable": "boolean"
+                                                                "scrollable": "boolean",
+                                                                "queryMode": "string"
                                                             },
-                                                            "name": "MyComboBox81",
-                                                            "designerId": "e0b5abec-1af6-4332-9af6-1d99976e4deb",
+                                                            "name": "MyComboBox13",
+                                                            "designerId": "fa35e64a-327a-480b-9901-91190c9b0c0b",
                                                             "customConfigs": [
                                                                 {
                                                                     "group": "(Custom Properties)",
@@ -1704,37 +1534,29 @@
                                                                 "columns": [
                                                                     "[",
                                                                     "\t{",
-                                                                    "\t\tdataIndex: 'intStorageScheduleRuleId',",
-                                                                    "\t\tdataType: 'numeric',",
-                                                                    "\t\thidden: true",
-                                                                    "\t},",
-                                                                    "    {",
-                                                                    "\t\tdataIndex: 'intCommodity',",
+                                                                    "\t\tdataIndex: 'intId',",
                                                                     "\t\tdataType: 'numeric',",
                                                                     "\t\thidden: true",
                                                                     "\t},",
                                                                     "\t{",
-                                                                    "\t\tdataIndex: 'strScheduleId',",
+                                                                    "\t\tdataIndex: 'strName',",
                                                                     "\t\tdataType: 'string',",
-                                                                    "\t\ttext: 'Storage Type',",
-                                                                    "\t\tflex: 1",
-                                                                    "\t},",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'strScheduleDescription',",
-                                                                    "\t\tdataType: 'string',",
-                                                                    "\t\ttext: 'Description',",
+                                                                    "\t\ttext: 'Adjust By',",
                                                                     "\t\tflex: 1",
                                                                     "\t}",
                                                                     "]"
                                                                 ],
                                                                 "designer|createAlias": "gridcombobox",
+                                                                "displayField": "strName",
                                                                 "fieldLabel": "Transfer",
-                                                                "itemId": "cboAdjustInventoryTransfer",
-                                                                "labelWidth": 180,
-                                                                "layout|flex": null
+                                                                "itemId": "cboAdjustInventoryTransfersBy",
+                                                                "labelWidth": 170,
+                                                                "layout|flex": null,
+                                                                "layout|margins": null,
+                                                                "queryMode": "local",
+                                                                "valueField": "strName"
                                                             },
                                                             "configAlternates": {
-                                                                "column": "array",
                                                                 "columns": "array",
                                                                 "designer|createAlias": "string",
                                                                 "displayField": "datafield",
@@ -1742,11 +1564,13 @@
                                                                 "itemId": "string",
                                                                 "labelWidth": "number",
                                                                 "layout|flex": "number",
+                                                                "layout|margins": "string",
                                                                 "valueField": "datafield",
-                                                                "scrollable": "boolean"
+                                                                "scrollable": "boolean",
+                                                                "queryMode": "string"
                                                             },
-                                                            "name": "MyComboBox82",
-                                                            "designerId": "63582da6-fbc8-45e1-91e9-19a243ed35b2",
+                                                            "name": "MyComboBox21",
+                                                            "designerId": "25995dcf-159a-4d30-b0ae-9b8cee86e1b0",
                                                             "customConfigs": [
                                                                 {
                                                                     "group": "(Custom Properties)",

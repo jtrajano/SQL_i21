@@ -49,32 +49,45 @@ namespace iRely.Inventory.Model
         public bool? ysnAllowLoadContracts { get; set; }
         public decimal? dblMaxUnder { get; set; }
         public decimal? dblMaxOver { get; set; }
-        public int? intSalesWeightsGradesId { get; set; }
-        public int? intPurchaseWeightsGradesId { get; set; }
-        public int? intTransferWeightsGradesId { get; set; }
+        public int? intAdjustInventorySales { get; set; }
+        public int? intAdjustInventoryTransfer { get; set; }
 
+        private string _adjustInventorySales;
         [NotMapped]
-        public string strSalesWeightsGrades
+        public string strAdjustInventorySales
         {
             get
             {
-                return intSalesWeightsGradesId == 2 ? "Shipped" : "Destination";
+                if (string.IsNullOrEmpty(_adjustInventorySales))
+                    if (vyuICCommodityLookUp != null)
+                        return vyuICCommodityLookUp.strAdjustInventorySales;
+                    else
+                        return null;
+                else
+                    return _adjustInventorySales;
+            }
+            set
+            {
+                _adjustInventorySales = value;
             }
         }
+        private string _adjustInventoryTransfer;
         [NotMapped]
-        public string strPurchaseWeightsGrades
+        public string strAdjustInventoryTransfer
         {
             get
             {
-                return intPurchaseWeightsGradesId == 2 ? "Received" : "Origin";
+                if (string.IsNullOrEmpty(_adjustInventoryTransfer))
+                    if (vyuICCommodityLookUp != null)
+                        return vyuICCommodityLookUp.strAdjustInventoryTransfer;
+                    else
+                        return null;
+                else
+                    return _adjustInventoryTransfer;
             }
-        }
-        [NotMapped]
-        public string strTransferWeightsGrades
-        {
-            get
+            set
             {
-                return intTransferWeightsGradesId == 2 ? "Shipped" : "Destination";
+                _adjustInventoryTransfer = value;
             }
         }
 
@@ -446,6 +459,8 @@ namespace iRely.Inventory.Model
         public string strScheduleId { get; set; }
         public string strDiscountId { get; set; }
         public string strStorageTypeCode { get; set; }
+        public string strAdjustInventorySales { get; set; }
+        public string strAdjustInventoryTransfer { get; set; }
         public tblICCommodity tblICCommodity { get; set; }
     }
 

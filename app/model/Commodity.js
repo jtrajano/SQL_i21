@@ -43,12 +43,10 @@ Ext.define('Inventory.model.Commodity', {
         { name: 'ysnAllowLoadContracts', type: 'boolean' },
         { name: 'dblMaxUnder', type: 'float' },
         { name: 'dblMaxOver', type: 'float' },
-        { name: 'intSalesWeightsGradesId', type: 'int', allowNull: true, defaultValue: 2 },
-        { name: 'intPurchaseWeightsGradesId', type: 'int', allowNull: true, defaultValue: 2 },
-        { name: 'intTransferWeightsGradesId', type: 'int', allowNull: true, defaultValue: 2 },
-        { name: 'strSalesWeightsGrades', type: 'string', defaultValue: 'Shipped' },
-        { name: 'strPurchaseWeightsGrades', type: 'string', defaultValue: 'Shipped' },
-        { name: 'strTransferWeightsGrades', type: 'string', defaultValue: 'Received' }
+        { name: 'intAdjustInventorySales', type: 'int', allowNull: true, defaultValue: 1 },
+        { name: 'intAdjustInventoryTransfer', type: 'int', allowNull: true, defaultValue: 1 },
+        { name: 'strAdjustInventorySales', type: 'string', defaultValue: 'Origin'},
+        { name: 'strAdjustInventoryTransfer', type: 'string', defaultValue: 'Origin'}
     ],
 
     validators: [

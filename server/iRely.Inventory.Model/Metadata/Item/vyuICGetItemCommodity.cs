@@ -40,5 +40,9 @@ namespace iRely.Inventory.Model
         public string strProductLine { get; set; }
         public int? intGradeId { get; set; }
         public string strGrade { get; set; }
+        public int? intAdjustInventorySales { get; set; }
+        public string strAdjustInventorySales { get; set; }
+        public int? intAdjustInventoryTransfer { get; set; }
+        public string strAdjustInventoryTransfer { get; set; }
     }
 }

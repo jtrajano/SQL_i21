@@ -24,21 +24,15 @@ Ext.define('Inventory.view.CommodityViewController', {
             },
             cboAdjustInventorySalesBy: {
                 origValueField: 'intId',
-                origUpdateField: 'intSalesWeightsGradesId',
-                store: '{adjInvSalesOrTransfersBy}',
-                value: '{current.strSalesWeightsGrades}'
-            },
-            cboAdjustInventoryPurchaseBy: {
-                origValueField: 'intId',
-                origUpdateField: 'intPurchaseWeightsGradesId',
-                store: '{adjInvPurchaseBy}',
-                value: '{current.strPurchaseWeightsGrades}'
+                origUpdateField: 'intAdjustInventorySales',
+                store: '{adjustInventorySales}',
+                value: '{current.strAdjustInventorySales}'
             },
             cboAdjustInventoryTransfersBy: {
                 origValueField: 'intId',
-                origUpdateField: 'intTransferWeightsGradesId',
-                store: '{adjInvSalesOrTransfersBy}',
-                value: '{current.strTransferWeightsGrades}'
+                origUpdateField: 'intAdjustInventoryTransfer',
+                store: '{adjustInventoryTransfer}',
+                value: '{current.strAdjustInventoryTransfer}'
             },
             txtCommodityCode: '{current.strCommodityCode}',
             txtDescription: '{current.strDescription}',
@@ -498,6 +492,26 @@ Ext.define('Inventory.view.CommodityViewController', {
         
     },
 
+    onAdjustInventorySelect: function (combo, records, eOpts) {
+        if (!combo || !records || records.length <= 0)
+        return;
+
+        var win = combo.up('window');
+        var current = win ? win.viewModel.data.current : null;
+
+        if (!current) return;  
+
+        if (combo.itemId === 'cboAdjustInventorySalesBy'){
+            current.set('intAdjustInventorySales', records[0].get('intId'));
+            current.set('strAdjustInventorySales', records[0].get('strName'));
+            
+        }
+        else if (combo.itemId === 'cboAdjustInventoryTransfersBy') {
+            current.set('intAdjustInventoryTransfer', records[0].get('intId'));
+            current.set('strAdjustInventoryTransfer', records[0].get('strName'));
+        }        
+    },      
+
     init: function(application) {
         this.control({
             "#cboUOM": {
@@ -524,6 +538,12 @@ Ext.define('Inventory.view.CommodityViewController', {
              "#cboFutureMarket": {
                 drilldown: this.onFutureMarketDrilldown
             },
+            "#cboAdjustInventorySalesBy": {
+                select: this.onAdjustInventorySelect
+            },            
+            "#cboAdjustInventoryTransfersBy": {
+                select: this.onAdjustInventorySelect
+            }
         });
     }
 });

@@ -55,18 +55,7 @@ Ext.define('Inventory.view.CommodityViewModel', {
         packinguoms: {
             type: 'icbuffereduom'
         },
-        adjInvSalesOrTransfersBy: {
-            autoLoad: true,
-            fields: [
-                { name: 'intId', type: 'int' },
-                { name: 'strName', type: 'string' }
-            ],
-            data: [
-                { intId: 1, strName: 'Destination' },
-                { intId: 2, strName: 'Shipped' }
-            ]
-        },
-        adjInvPurchaseBy: {
+        adjustInventorySales: {
             autoLoad: true,
             fields: [
                 { name: 'intId', type: 'int' },
@@ -74,7 +63,18 @@ Ext.define('Inventory.view.CommodityViewModel', {
             ],
             data: [
                 { intId: 1, strName: 'Origin' },
-                { intId: 2, strName: 'Received' }
+                { intId: 2, strName: 'Destination' }
+            ]
+        },
+        adjustInventoryTransfer: {
+            autoLoad: true,
+            fields: [
+                { name: 'intId', type: 'int' },
+                { name: 'strName', type: 'string' }
+            ],
+            data: [
+                { intId: 1, strName: 'Origin' },
+                { intId: 2, strName: 'Destination' }
             ]
         },
         states: {

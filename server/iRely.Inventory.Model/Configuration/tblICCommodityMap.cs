@@ -35,9 +35,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnAllowLoadContracts).HasColumnName("ysnAllowLoadContracts");
             this.Property(t => t.dblMaxUnder).HasColumnName("dblMaxUnder").HasPrecision(18, 6);
             this.Property(t => t.dblMaxOver).HasColumnName("dblMaxOver").HasPrecision(18, 6);
-            this.Property(t => t.intSalesWeightsGradesId).HasColumnName("intSalesWeightsGradesId");
-            this.Property(t => t.intPurchaseWeightsGradesId).HasColumnName("intPurchaseWeightsGradesId");
-            this.Property(t => t.intTransferWeightsGradesId).HasColumnName("intTransferWeightsGradesId");
+            this.Property(t => t.intAdjustInventorySales).HasColumnName("intAdjustInventorySales");
+            this.Property(t => t.intAdjustInventoryTransfer).HasColumnName("intAdjustInventoryTransfer");
 
             this.HasMany(p => p.tblICCommodityAccounts)
                 .WithRequired(p => p.tblICCommodity)
@@ -259,6 +258,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strScheduleId).HasColumnName("strScheduleId");
             this.Property(t => t.strDiscountId).HasColumnName("strDiscountId");
             this.Property(t => t.strStorageTypeCode).HasColumnName("strStorageTypeCode");
+            this.Property(t => t.strAdjustInventorySales).HasColumnName("strAdjustInventorySales");
+            this.Property(t => t.strAdjustInventoryTransfer).HasColumnName("strAdjustInventoryTransfer");
         }
     }
 

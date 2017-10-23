@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets744089c1ee50d97eb5294ef0881bf54b9e6581b1ba678220353d837eead871ad))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetse24780a6e091c84c7198e16f019cdc2fbb04414e470738aedc7296ba17077698))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets744089c1ee50d97eb5294ef0881bf54b9e6581b1ba678220353d837eead871ad : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetse24780a6e091c84c7198e16f019cdc2fbb04414e470738aedc7296ba17077698 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "744089c1ee50d97eb5294ef0881bf54b9e6581b1ba678220353d837eead871ad"; }
+            get { return "e24780a6e091c84c7198e16f019cdc2fbb04414e470738aedc7296ba17077698"; }
         }
 
         /// <summary>
@@ -2876,7 +2876,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICCommodity
-        [CodeFirstDatabaseSchema.tblICCommodity](T1.tblICCommodity_intCommodityId, T1.tblICCommodity_strCommodityCode, T1.tblICCommodity_strDescription, T1.tblICCommodity_ysnExchangeTraded, T1.tblICCommodity_intFutureMarketId, T1.tblICCommodity_intDecimalDPR, T1.tblICCommodity_dblConsolidateFactor, T1.tblICCommodity_ysnFXExposure, T1.tblICCommodity_dblPriceCheckMin, T1.tblICCommodity_dblPriceCheckMax, T1.tblICCommodity_strCheckoffTaxDesc, T1.tblICCommodity_strCheckoffAllState, T1.tblICCommodity_strInsuranceTaxDesc, T1.tblICCommodity_strInsuranceAllState, T1.tblICCommodity_dtmCropEndDateCurrent, T1.tblICCommodity_dtmCropEndDateNew, T1.tblICCommodity_strEDICode, T1.tblICCommodity_intScheduleStoreId, T1.tblICCommodity_intScheduleDiscountId, T1.tblICCommodity_intScaleAutoDistId, T1.tblICCommodity_ysnAllowLoadContracts, T1.tblICCommodity_dblMaxUnder, T1.tblICCommodity_dblMaxOver, T1.tblICCommodity_intSalesWeightsGradesId, T1.tblICCommodity_intPurchaseWeightsGradesId, T1.tblICCommodity_intTransferWeightsGradesId, T1.tblICCommodity_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICCommodity](T1.tblICCommodity_intCommodityId, T1.tblICCommodity_strCommodityCode, T1.tblICCommodity_strDescription, T1.tblICCommodity_ysnExchangeTraded, T1.tblICCommodity_intFutureMarketId, T1.tblICCommodity_intDecimalDPR, T1.tblICCommodity_dblConsolidateFactor, T1.tblICCommodity_ysnFXExposure, T1.tblICCommodity_dblPriceCheckMin, T1.tblICCommodity_dblPriceCheckMax, T1.tblICCommodity_strCheckoffTaxDesc, T1.tblICCommodity_strCheckoffAllState, T1.tblICCommodity_strInsuranceTaxDesc, T1.tblICCommodity_strInsuranceAllState, T1.tblICCommodity_dtmCropEndDateCurrent, T1.tblICCommodity_dtmCropEndDateNew, T1.tblICCommodity_strEDICode, T1.tblICCommodity_intScheduleStoreId, T1.tblICCommodity_intScheduleDiscountId, T1.tblICCommodity_intScaleAutoDistId, T1.tblICCommodity_ysnAllowLoadContracts, T1.tblICCommodity_dblMaxUnder, T1.tblICCommodity_dblMaxOver, T1.tblICCommodity_intAdjustInventorySales, T1.tblICCommodity_intAdjustInventoryTransfer, T1.tblICCommodity_intConcurrencyId)
     FROM (
         SELECT 
             T.intCommodityId AS tblICCommodity_intCommodityId, 
@@ -2902,9 +2902,8 @@ namespace Edm_EntityMappingGeneratedViews
             T.ysnAllowLoadContracts AS tblICCommodity_ysnAllowLoadContracts, 
             T.dblMaxUnder AS tblICCommodity_dblMaxUnder, 
             T.dblMaxOver AS tblICCommodity_dblMaxOver, 
-            T.intSalesWeightsGradesId AS tblICCommodity_intSalesWeightsGradesId, 
-            T.intPurchaseWeightsGradesId AS tblICCommodity_intPurchaseWeightsGradesId, 
-            T.intTransferWeightsGradesId AS tblICCommodity_intTransferWeightsGradesId, 
+            T.intAdjustInventorySales AS tblICCommodity_intAdjustInventorySales, 
+            T.intAdjustInventoryTransfer AS tblICCommodity_intAdjustInventoryTransfer, 
             T.intConcurrencyId AS tblICCommodity_intConcurrencyId, 
             True AS _from0
         FROM InventoryEntities.tblICCommodities AS T
@@ -5309,7 +5308,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICCommodityLookUp
-        [CodeFirstDatabaseSchema.vyuICCommodityLookUp](T1.vyuICCommodityLookUp_intCommodityId, T1.vyuICCommodityLookUp_strFutMarketName, T1.vyuICCommodityLookUp_strScheduleId, T1.vyuICCommodityLookUp_strDiscountId, T1.vyuICCommodityLookUp_strStorageTypeCode)
+        [CodeFirstDatabaseSchema.vyuICCommodityLookUp](T1.vyuICCommodityLookUp_intCommodityId, T1.vyuICCommodityLookUp_strFutMarketName, T1.vyuICCommodityLookUp_strScheduleId, T1.vyuICCommodityLookUp_strDiscountId, T1.vyuICCommodityLookUp_strStorageTypeCode, T1.vyuICCommodityLookUp_strAdjustInventorySales, T1.vyuICCommodityLookUp_strAdjustInventoryTransfer)
     FROM (
         SELECT 
             T.intCommodityId AS vyuICCommodityLookUp_intCommodityId, 
@@ -5317,6 +5316,8 @@ namespace Edm_EntityMappingGeneratedViews
             T.strScheduleId AS vyuICCommodityLookUp_strScheduleId, 
             T.strDiscountId AS vyuICCommodityLookUp_strDiscountId, 
             T.strStorageTypeCode AS vyuICCommodityLookUp_strStorageTypeCode, 
+            T.strAdjustInventorySales AS vyuICCommodityLookUp_strAdjustInventorySales, 
+            T.strAdjustInventoryTransfer AS vyuICCommodityLookUp_strAdjustInventoryTransfer, 
             True AS _from0
         FROM InventoryEntities.vyuICCommodityLookUps AS T
     ) AS T1");
@@ -6775,7 +6776,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICCommodities
-        [iRely.Inventory.Model.tblICCommodity](T1.tblICCommodity_intCommodityId, T1.tblICCommodity_strCommodityCode, T1.tblICCommodity_strDescription, T1.tblICCommodity_ysnExchangeTraded, T1.tblICCommodity_intFutureMarketId, T1.tblICCommodity_intDecimalDPR, T1.tblICCommodity_dblConsolidateFactor, T1.tblICCommodity_ysnFXExposure, T1.tblICCommodity_dblPriceCheckMin, T1.tblICCommodity_dblPriceCheckMax, T1.tblICCommodity_strCheckoffTaxDesc, T1.tblICCommodity_strCheckoffAllState, T1.tblICCommodity_strInsuranceTaxDesc, T1.tblICCommodity_strInsuranceAllState, T1.tblICCommodity_dtmCropEndDateCurrent, T1.tblICCommodity_dtmCropEndDateNew, T1.tblICCommodity_strEDICode, T1.tblICCommodity_intScheduleStoreId, T1.tblICCommodity_intScheduleDiscountId, T1.tblICCommodity_intScaleAutoDistId, T1.tblICCommodity_ysnAllowLoadContracts, T1.tblICCommodity_dblMaxUnder, T1.tblICCommodity_dblMaxOver, T1.tblICCommodity_intSalesWeightsGradesId, T1.tblICCommodity_intPurchaseWeightsGradesId, T1.tblICCommodity_intTransferWeightsGradesId, T1.tblICCommodity_intConcurrencyId)
+        [iRely.Inventory.Model.tblICCommodity](T1.tblICCommodity_intCommodityId, T1.tblICCommodity_strCommodityCode, T1.tblICCommodity_strDescription, T1.tblICCommodity_ysnExchangeTraded, T1.tblICCommodity_intFutureMarketId, T1.tblICCommodity_intDecimalDPR, T1.tblICCommodity_dblConsolidateFactor, T1.tblICCommodity_ysnFXExposure, T1.tblICCommodity_dblPriceCheckMin, T1.tblICCommodity_dblPriceCheckMax, T1.tblICCommodity_strCheckoffTaxDesc, T1.tblICCommodity_strCheckoffAllState, T1.tblICCommodity_strInsuranceTaxDesc, T1.tblICCommodity_strInsuranceAllState, T1.tblICCommodity_dtmCropEndDateCurrent, T1.tblICCommodity_dtmCropEndDateNew, T1.tblICCommodity_strEDICode, T1.tblICCommodity_intScheduleStoreId, T1.tblICCommodity_intScheduleDiscountId, T1.tblICCommodity_intScaleAutoDistId, T1.tblICCommodity_ysnAllowLoadContracts, T1.tblICCommodity_dblMaxUnder, T1.tblICCommodity_dblMaxOver, T1.tblICCommodity_intAdjustInventorySales, T1.tblICCommodity_intAdjustInventoryTransfer, T1.tblICCommodity_intConcurrencyId)
     FROM (
         SELECT 
             T.intCommodityId AS tblICCommodity_intCommodityId, 
@@ -6801,9 +6802,8 @@ namespace Edm_EntityMappingGeneratedViews
             T.ysnAllowLoadContracts AS tblICCommodity_ysnAllowLoadContracts, 
             T.dblMaxUnder AS tblICCommodity_dblMaxUnder, 
             T.dblMaxOver AS tblICCommodity_dblMaxOver, 
-            T.intSalesWeightsGradesId AS tblICCommodity_intSalesWeightsGradesId, 
-            T.intPurchaseWeightsGradesId AS tblICCommodity_intPurchaseWeightsGradesId, 
-            T.intTransferWeightsGradesId AS tblICCommodity_intTransferWeightsGradesId, 
+            T.intAdjustInventorySales AS tblICCommodity_intAdjustInventorySales, 
+            T.intAdjustInventoryTransfer AS tblICCommodity_intAdjustInventoryTransfer, 
             T.intConcurrencyId AS tblICCommodity_intConcurrencyId, 
             True AS _from0
         FROM CodeFirstDatabase.tblICCommodity AS T
@@ -9141,7 +9141,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICCommodityLookUps
-        [iRely.Inventory.Model.vyuICCommodityLookUp](T1.vyuICCommodityLookUp_intCommodityId, T1.vyuICCommodityLookUp_strFutMarketName, T1.vyuICCommodityLookUp_strScheduleId, T1.vyuICCommodityLookUp_strDiscountId, T1.vyuICCommodityLookUp_strStorageTypeCode)
+        [iRely.Inventory.Model.vyuICCommodityLookUp](T1.vyuICCommodityLookUp_intCommodityId, T1.vyuICCommodityLookUp_strFutMarketName, T1.vyuICCommodityLookUp_strScheduleId, T1.vyuICCommodityLookUp_strDiscountId, T1.vyuICCommodityLookUp_strStorageTypeCode, T1.vyuICCommodityLookUp_strAdjustInventorySales, T1.vyuICCommodityLookUp_strAdjustInventoryTransfer)
     FROM (
         SELECT 
             T.intCommodityId AS vyuICCommodityLookUp_intCommodityId, 
@@ -9149,6 +9149,8 @@ namespace Edm_EntityMappingGeneratedViews
             T.strScheduleId AS vyuICCommodityLookUp_strScheduleId, 
             T.strDiscountId AS vyuICCommodityLookUp_strDiscountId, 
             T.strStorageTypeCode AS vyuICCommodityLookUp_strStorageTypeCode, 
+            T.strAdjustInventorySales AS vyuICCommodityLookUp_strAdjustInventorySales, 
+            T.strAdjustInventoryTransfer AS vyuICCommodityLookUp_strAdjustInventoryTransfer, 
             True AS _from0
         FROM CodeFirstDatabase.vyuICCommodityLookUp AS T
     ) AS T1");
@@ -13572,7 +13574,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemCommodity
-        [CodeFirstDatabaseSchema.vyuICGetItemCommodity](T1.vyuICGetItemCommodity_intItemId, T1.vyuICGetItemCommodity_strItemNo, T1.vyuICGetItemCommodity_strType, T1.vyuICGetItemCommodity_strDescription, T1.vyuICGetItemCommodity_strStatus, T1.vyuICGetItemCommodity_strModelNo, T1.vyuICGetItemCommodity_strLotTracking, T1.vyuICGetItemCommodity_intBrandId, T1.vyuICGetItemCommodity_strBrand, T1.vyuICGetItemCommodity_intManufacturerId, T1.vyuICGetItemCommodity_strManufacturer, T1.vyuICGetItemCommodity_intCategoryId, T1.vyuICGetItemCommodity_strCategory, T1.vyuICGetItemCommodity_intItemLocationId, T1.vyuICGetItemCommodity_intLocationId, T1.vyuICGetItemCommodity_strTracking, T1.vyuICGetItemCommodity_intCommodityId, T1.vyuICGetItemCommodity_strCommodityCode, T1.vyuICGetItemCommodity_intOriginId, T1.vyuICGetItemCommodity_strOrigin, T1.vyuICGetItemCommodity_intProductTypeId, T1.vyuICGetItemCommodity_strProductType, T1.vyuICGetItemCommodity_intRegionId, T1.vyuICGetItemCommodity_strRegion, T1.vyuICGetItemCommodity_intSeasonId, T1.vyuICGetItemCommodity_strSeason, T1.vyuICGetItemCommodity_intClassVarietyId, T1.vyuICGetItemCommodity_strClassVariety, T1.vyuICGetItemCommodity_intProductLineId, T1.vyuICGetItemCommodity_strProductLine, T1.vyuICGetItemCommodity_intGradeId, T1.vyuICGetItemCommodity_strGrade)
+        [CodeFirstDatabaseSchema.vyuICGetItemCommodity](T1.vyuICGetItemCommodity_intItemId, T1.vyuICGetItemCommodity_strItemNo, T1.vyuICGetItemCommodity_strType, T1.vyuICGetItemCommodity_strDescription, T1.vyuICGetItemCommodity_strStatus, T1.vyuICGetItemCommodity_strModelNo, T1.vyuICGetItemCommodity_strLotTracking, T1.vyuICGetItemCommodity_intBrandId, T1.vyuICGetItemCommodity_strBrand, T1.vyuICGetItemCommodity_intManufacturerId, T1.vyuICGetItemCommodity_strManufacturer, T1.vyuICGetItemCommodity_intCategoryId, T1.vyuICGetItemCommodity_strCategory, T1.vyuICGetItemCommodity_intItemLocationId, T1.vyuICGetItemCommodity_intLocationId, T1.vyuICGetItemCommodity_strTracking, T1.vyuICGetItemCommodity_intCommodityId, T1.vyuICGetItemCommodity_strCommodityCode, T1.vyuICGetItemCommodity_intOriginId, T1.vyuICGetItemCommodity_strOrigin, T1.vyuICGetItemCommodity_intProductTypeId, T1.vyuICGetItemCommodity_strProductType, T1.vyuICGetItemCommodity_intRegionId, T1.vyuICGetItemCommodity_strRegion, T1.vyuICGetItemCommodity_intSeasonId, T1.vyuICGetItemCommodity_strSeason, T1.vyuICGetItemCommodity_intClassVarietyId, T1.vyuICGetItemCommodity_strClassVariety, T1.vyuICGetItemCommodity_intProductLineId, T1.vyuICGetItemCommodity_strProductLine, T1.vyuICGetItemCommodity_intGradeId, T1.vyuICGetItemCommodity_strGrade, T1.vyuICGetItemCommodity_intAdjustInventorySales, T1.vyuICGetItemCommodity_strAdjustInventorySales, T1.vyuICGetItemCommodity_intAdjustInventoryTransfer, T1.vyuICGetItemCommodity_strAdjustInventoryTransfer)
     FROM (
         SELECT 
             T.intItemId AS vyuICGetItemCommodity_intItemId, 
@@ -13607,6 +13609,10 @@ namespace Edm_EntityMappingGeneratedViews
             T.strProductLine AS vyuICGetItemCommodity_strProductLine, 
             T.intGradeId AS vyuICGetItemCommodity_intGradeId, 
             T.strGrade AS vyuICGetItemCommodity_strGrade, 
+            T.intAdjustInventorySales AS vyuICGetItemCommodity_intAdjustInventorySales, 
+            T.strAdjustInventorySales AS vyuICGetItemCommodity_strAdjustInventorySales, 
+            T.intAdjustInventoryTransfer AS vyuICGetItemCommodity_intAdjustInventoryTransfer, 
+            T.strAdjustInventoryTransfer AS vyuICGetItemCommodity_strAdjustInventoryTransfer, 
             True AS _from0
         FROM InventoryEntities.vyuICGetItemCommodities AS T
     ) AS T1");
@@ -13620,7 +13626,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemCommodities
-        [iRely.Inventory.Model.vyuICGetItemCommodity](T1.vyuICGetItemCommodity_intItemId, T1.vyuICGetItemCommodity_strItemNo, T1.vyuICGetItemCommodity_strType, T1.vyuICGetItemCommodity_strDescription, T1.vyuICGetItemCommodity_strStatus, T1.vyuICGetItemCommodity_strModelNo, T1.vyuICGetItemCommodity_strLotTracking, T1.vyuICGetItemCommodity_intBrandId, T1.vyuICGetItemCommodity_strBrand, T1.vyuICGetItemCommodity_intManufacturerId, T1.vyuICGetItemCommodity_strManufacturer, T1.vyuICGetItemCommodity_intCategoryId, T1.vyuICGetItemCommodity_strCategory, T1.vyuICGetItemCommodity_intItemLocationId, T1.vyuICGetItemCommodity_intLocationId, T1.vyuICGetItemCommodity_strTracking, T1.vyuICGetItemCommodity_intCommodityId, T1.vyuICGetItemCommodity_strCommodityCode, T1.vyuICGetItemCommodity_intOriginId, T1.vyuICGetItemCommodity_strOrigin, T1.vyuICGetItemCommodity_intProductTypeId, T1.vyuICGetItemCommodity_strProductType, T1.vyuICGetItemCommodity_intRegionId, T1.vyuICGetItemCommodity_strRegion, T1.vyuICGetItemCommodity_intSeasonId, T1.vyuICGetItemCommodity_strSeason, T1.vyuICGetItemCommodity_intClassVarietyId, T1.vyuICGetItemCommodity_strClassVariety, T1.vyuICGetItemCommodity_intProductLineId, T1.vyuICGetItemCommodity_strProductLine, T1.vyuICGetItemCommodity_intGradeId, T1.vyuICGetItemCommodity_strGrade)
+        [iRely.Inventory.Model.vyuICGetItemCommodity](T1.vyuICGetItemCommodity_intItemId, T1.vyuICGetItemCommodity_strItemNo, T1.vyuICGetItemCommodity_strType, T1.vyuICGetItemCommodity_strDescription, T1.vyuICGetItemCommodity_strStatus, T1.vyuICGetItemCommodity_strModelNo, T1.vyuICGetItemCommodity_strLotTracking, T1.vyuICGetItemCommodity_intBrandId, T1.vyuICGetItemCommodity_strBrand, T1.vyuICGetItemCommodity_intManufacturerId, T1.vyuICGetItemCommodity_strManufacturer, T1.vyuICGetItemCommodity_intCategoryId, T1.vyuICGetItemCommodity_strCategory, T1.vyuICGetItemCommodity_intItemLocationId, T1.vyuICGetItemCommodity_intLocationId, T1.vyuICGetItemCommodity_strTracking, T1.vyuICGetItemCommodity_intCommodityId, T1.vyuICGetItemCommodity_strCommodityCode, T1.vyuICGetItemCommodity_intOriginId, T1.vyuICGetItemCommodity_strOrigin, T1.vyuICGetItemCommodity_intProductTypeId, T1.vyuICGetItemCommodity_strProductType, T1.vyuICGetItemCommodity_intRegionId, T1.vyuICGetItemCommodity_strRegion, T1.vyuICGetItemCommodity_intSeasonId, T1.vyuICGetItemCommodity_strSeason, T1.vyuICGetItemCommodity_intClassVarietyId, T1.vyuICGetItemCommodity_strClassVariety, T1.vyuICGetItemCommodity_intProductLineId, T1.vyuICGetItemCommodity_strProductLine, T1.vyuICGetItemCommodity_intGradeId, T1.vyuICGetItemCommodity_strGrade, T1.vyuICGetItemCommodity_intAdjustInventorySales, T1.vyuICGetItemCommodity_strAdjustInventorySales, T1.vyuICGetItemCommodity_intAdjustInventoryTransfer, T1.vyuICGetItemCommodity_strAdjustInventoryTransfer)
     FROM (
         SELECT 
             T.intItemId AS vyuICGetItemCommodity_intItemId, 
@@ -13655,6 +13661,10 @@ namespace Edm_EntityMappingGeneratedViews
             T.strProductLine AS vyuICGetItemCommodity_strProductLine, 
             T.intGradeId AS vyuICGetItemCommodity_intGradeId, 
             T.strGrade AS vyuICGetItemCommodity_strGrade, 
+            T.intAdjustInventorySales AS vyuICGetItemCommodity_intAdjustInventorySales, 
+            T.strAdjustInventorySales AS vyuICGetItemCommodity_strAdjustInventorySales, 
+            T.intAdjustInventoryTransfer AS vyuICGetItemCommodity_intAdjustInventoryTransfer, 
+            T.strAdjustInventoryTransfer AS vyuICGetItemCommodity_strAdjustInventoryTransfer, 
             True AS _from0
         FROM CodeFirstDatabase.vyuICGetItemCommodity AS T
     ) AS T1");
