@@ -1189,7 +1189,7 @@
     <Build Include="dbo\Tables\tblSMCurrencyExchangeRate.sql" />
     <Build Include="dbo\Tables\tblSMCurrencyExchangeRateDetail.sql" />
     <Build Include="dbo\Index\IX_tblGLIjemst_0_1_2_3_4_5_19.sql" />
-	<Build Include="dbo\Index\IX_tblGLAccountReallocation_strName.sql" />
+    <Build Include="dbo\Index\IX_tblGLAccountReallocation_strName.sql" />
     <Build Include="dbo\Stored Procedures\uspGLExportAccountToCSV.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDoRoll.sql" />
     <Build Include="dbo\Tables\tblRKTradersbyBrokersAccountMapping.sql" />
@@ -5764,6 +5764,7 @@
     <Build Include="dbo\Views\vyuLGLoadContainerPurchaseContractsLookup.sql" />
     <Build Include="dbo\Views\vyuCTContractAddOrdersLookup.sql" />
     <Build Include="dbo\Views\vyuLGLoadDetailViewLookup.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMImportBanksFromOrigin.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
