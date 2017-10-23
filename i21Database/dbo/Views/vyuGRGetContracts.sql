@@ -1,31 +1,31 @@
 ﻿CREATE VIEW [dbo].[vyuGRGetContracts]
 AS
 SELECT 
-	 CH.intContractTypeId
-	,TP.strContractType
-	,CH.intContractHeaderId 
-	,CD.intContractDetailId
-	,CH.strContractNumber
-	,CD.intContractSeq
-	,CH.intEntityId
-	,EY.strName AS strEntityName
-	,CD.intItemId
-	,IM.strItemNo
-	,CD.intCompanyLocationId
-	,CL.strLocationName
-	,CD.dblCashPrice
-	,dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,PU.intUnitMeasureId,CD.dblCashPrice) AS dblCashPriceInCommodityStockUOM
-	,ISNULL(CD.dblBalance,0)-ISNULL(CD.dblScheduleQty,0) AS dblAvailableQty
-	,dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,C1.intUnitMeasureId,ISNULL(CD.dblBalance,0)-ISNULL(CD.dblScheduleQty,0)) AS dblAvailableQtyInCommodityStockUOM	
-	,CD.intPricingTypeId
-	,PT.strPricingType
-	,CD.dtmStartDate
-	,CD.intContractStatusId
-	,CS.strContractStatus
-	,CH.ysnUnlimitedQuantity
-	,CD.dblFutures
-	,CD.dblBasis
-	,dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,BU.intUnitMeasureId,dblBasis) AS dblBasisInCommodityStockUOM
+	 intContractTypeId					= CH.intContractTypeId
+	,strContractType					= TP.strContractType
+	,intContractHeaderId				= CH.intContractHeaderId 
+	,intContractDetailId				= CD.intContractDetailId
+	,strContractNumber					= CH.strContractNumber
+	,intContractSeq						= CD.intContractSeq
+	,intEntityId						= CH.intEntityId
+	,strEntityName						= EY.strName
+	,intItemId							= CD.intItemId
+	,strItemNo							= IM.strItemNo
+	,intCompanyLocationId				= CD.intCompanyLocationId
+	,strLocationName					= CL.strLocationName
+	,dblCashPrice						= CD.dblCashPrice
+	,dblCashPriceInCommodityStockUOM	= dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,C1.intUnitMeasureId,PU.intUnitMeasureId,CD.dblCashPrice)
+	,dblAvailableQty					= ISNULL(CD.dblBalance,0)-ISNULL(CD.dblScheduleQty,0)
+	,dblAvailableQtyInCommodityStockUOM = dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,C1.intUnitMeasureId,ISNULL(CD.dblBalance,0)-ISNULL(CD.dblScheduleQty,0))
+	,intPricingTypeId					= CD.intPricingTypeId
+	,strPricingType						= PT.strPricingType
+	,dtmStartDate						= CD.dtmStartDate
+	,intContractStatusId				= CD.intContractStatusId
+	,strContractStatus					= CS.strContractStatus
+	,ysnUnlimitedQuantity				= CH.ysnUnlimitedQuantity
+	,dblFutures							= CD.dblFutures
+	,dblBasis							= CD.dblBasis
+	,dblBasisInCommodityStockUOM		= dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,C1.intUnitMeasureId,BU.intUnitMeasureId,dblBasis)
 	FROM	tblCTContractDetail			CD
 	CROSS   JOIN	tblCTCompanyPreference			CP	
 	JOIN	tblSMCompanyLocation		CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId
@@ -45,4 +45,3 @@ SELECT
      AND CD.intContractStatusId IN (1,4) 
 	 AND ((ISNULL(CD.dblBalance,0)-ISNULL(CD.dblScheduleQty,0)>0) OR CH.ysnUnlimitedQuantity=1)
 	 AND ((DATEADD(d, 0, DATEDIFF(d, 0, GETDATE())) >= DATEADD(dd,-ISNULL(CP.intEarlyDaysPurchase,0),CD.dtmStartDate) AND CH.intContractTypeId = 1) OR (DATEADD(d, 0, DATEDIFF(d, 0, GETDATE())) >= DATEADD(dd,-ISNULL(CP.intEarlyDaysSales,0),CD.dtmStartDate) AND CH.intContractTypeId = 2))
-
