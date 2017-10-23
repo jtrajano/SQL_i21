@@ -39,6 +39,13 @@ BEGIN
 			,[intOwnershipType]
 			,[intDetailId]
 			,[strTransactionId]
+			,[intWeightUOMId]
+			,[dblWeight]
+			,[dblGrossWeight]
+			,[dblWeightPerQty]
+			,[dtmExpiryDate]
+			,[strParentLotNumber]
+			,[strParentLotAlias]
 	)
 	SELECT	[intLotId]					= Detail.intLotId 
 			,[intItemId]				= Detail.intItemId
@@ -53,13 +60,20 @@ BEGIN
 			,[intOwnershipType]			= 1
 			,[intDetailId]				= Detail.intInventoryCountDetailId
 			,[strTransactionId]			= Header.strCountNo
+			,[intWeightUOMId]           = Detail.intWeightUOMId
+			,[dblWeightQty]             = Detail.dblWeightQty
+			,[dblGrossWeight]           = Detail.dblWeightQty
+			,[dblWeightPerQty]          = Detail.dblWeightQty / Detail.dblPhysicalCount
+			,[dtmExpiryDate]			= dbo.fnICCalculateExpiryDate(Detail.intItemId, Header.dtmCountDate, Header.dtmCountDate)
+			,[strParentLotNumber]		= Detail.strParentLotNo
+			,[strParentLotAlias]		= Detail.strParentLotAlias
 
 	FROM tblICInventoryCount Header
 		INNER JOIN tblICInventoryCountDetail Detail ON Detail.intInventoryCountId = Header.intInventoryCountId
 		LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = Detail.intItemId
 			AND ItemLocation.intLocationId = Header.intLocationId
 	WHERE Header.intInventoryCountId = @intTransactionId
-		AND Detail.intLotId IS NULL
+		--AND Detail.intLotId IS NULL
 END 
 
 -- Call the common stored procedure that will create or update the lot master table
@@ -81,6 +95,8 @@ BEGIN
 	UPDATE	dbo.tblICInventoryCountDetail
 	SET		intLotId = LotNumbers.intLotId
 			,strLotNo = LotNumbers.strLotNumber
+			,intParentLotId = LotNumbers.intParentLotId
+			,strParentLotNo = LotNumbers.strParentLotNumber
 	FROM	dbo.tblICInventoryCountDetail Detail INNER JOIN #GeneratedLotItems LotNumbers
 				ON Detail.intInventoryCountDetailId = LotNumbers.intDetailId
 END 

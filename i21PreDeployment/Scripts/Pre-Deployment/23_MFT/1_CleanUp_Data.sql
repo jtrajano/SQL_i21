@@ -15,23 +15,27 @@ BEGIN
     EXEC('DROP TABLE tblTFValidProductCode')
 END
 
-IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFTransactionSummary') 
+IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFTaxCriteria') 
 BEGIN
-	PRINT('Truncate tblTFTransactionSummary')
-    EXEC('TRUNCATE TABLE tblTFTransactionSummary')
-END	
-
-IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFTransaction') 
-BEGIN
-	PRINT('Truncate tblTFTransaction')
-    EXEC('TRUNCATE TABLE tblTFTransaction')
+	-- Old table
+	PRINT('Drop tblTFTaxCriteria')
+    EXEC('DROP TABLE tblTFTaxCriteria')
 END
 
--- Update Component Type from 5(EFile Main) to 4(EFile). EFile Main is obsolete
-IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFReportingComponent' AND COLUMN_NAME = 'intComponentTypeId') 
+-- Old Table that rename to tblTFReportingComponentVendor
+IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFValidVendor') 
 BEGIN
-	PRINT('Update obsolete Component Type')
-    EXEC('UPDATE tblTFReportingComponent SET intComponentTypeId = 4 WHERE intComponentTypeId = 5')
+	-- Old table
+	PRINT('Drop tblTFValidVendor')
+	EXEC('DROP TABLE tblTFValidVendor')
+END
+
+-- Old Table that rename to tblTFReportingComponentField
+IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFScheduleFields') 
+BEGIN
+	-- Old table
+	PRINT('Drop tblTFScheduleFields')
+	EXEC('DROP TABLE tblTFScheduleFields')
 END
 
 -- Reporting Component Criteria
@@ -69,6 +73,25 @@ BEGIN
 	EXEC('TRUNCATE TABLE tblTFReportingComponentProductCode')
 END
 
+IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFTransactionSummary') 
+BEGIN
+	PRINT('Truncate tblTFTransactionSummary')
+    EXEC('TRUNCATE TABLE tblTFTransactionSummary')
+END	
+
+IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFTransaction') 
+BEGIN
+	PRINT('Truncate tblTFTransaction')
+    EXEC('TRUNCATE TABLE tblTFTransaction')
+END
+
+-- Update Component Type from 5(EFile Main) to 4(EFile). EFile Main is obsolete
+IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFReportingComponent' AND COLUMN_NAME = 'intComponentTypeId') 
+BEGIN
+	PRINT('Update obsolete Component Type')
+    EXEC('UPDATE tblTFReportingComponent SET intComponentTypeId = 4 WHERE intComponentTypeId = 5')
+END
+
 IF NOT EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSMCleanupLog') 
 BEGIN
 	PRINT('Create tblSMCleanupLog')
@@ -85,7 +108,6 @@ END
 
 IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSMCleanupLog') 
 BEGIN
-	
 	IF NOT EXISTS(SELECT * FROM  tblSMCleanupLog WHERE strModuleName = 'MFT' AND strDesription = 'Overall-Cleanup' AND ysnActive = 1) 
 	BEGIN
 		
@@ -111,29 +133,11 @@ BEGIN
 		BEGIN
 			EXEC('DELETE FROM tblTFReportingComponentConfiguration')
 		END
-	
+
 		-- Origin Destination State
 		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFOriginDestinationState') 
 		BEGIN
 			EXEC('DELETE FROM tblTFOriginDestinationState')
-		END
-		
-		-- Old Table that rename to tblTFReportingComponentProductCode
-		IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFValidProductCode') 
-		BEGIN
-			EXEC('TRUNCATE TABLE tblTFValidProductCode')
-		END
-
-		-- Old Table that rename to tblTFReportingComponentVendor
-		IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFValidVendor') 
-		BEGIN
-			EXEC('TRUNCATE TABLE tblTFValidVendor')
-		END
-
-		-- Old Table that rename to tblTFReportingComponentField
-		IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFScheduleFields') 
-		BEGIN
-			EXEC('TRUNCATE TABLE tblTFScheduleFields')
 		END
 
 		-- Tax Category
@@ -172,6 +176,13 @@ BEGIN
 			EXEC('UPDATE tblTFTerminalControlNumber SET intMasterId = NULL')
 		END
 
+		-- Filing Packet
+		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFFilingPacket') 
+		BEGIN
+			PRINT('Truncate tblTFFilingPacket')
+			EXEC('TRUNCATE TABLE tblTFFilingPacket')
+		END
+
 		-- Reporting Component
 		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFReportingComponent') 
 		BEGIN
@@ -183,16 +194,12 @@ BEGIN
 			EXEC('UPDATE tblTFReportingComponent SET intMasterId = NULL')
 		END
 
-		-- Filing Packet
-		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFFilingPacket') 
-		BEGIN
-			PRINT('Truncate tblTFFilingPacket')
-			EXEC('TRUNCATE TABLE tblTFFilingPacket')
-		END
-
 		INSERT INTO tblSMCleanupLog VALUES('MFT', 'Overall-Cleanup', GETDATE(), GETUTCDATE(), 1)	
 
 	END
+
 END
 
 PRINT('MFT Cleanup - END')
+
+GO

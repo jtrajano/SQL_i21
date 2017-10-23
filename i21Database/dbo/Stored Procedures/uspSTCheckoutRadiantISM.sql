@@ -50,6 +50,35 @@ BEGIN
 	WHERE S.intStoreId = @intStoreId
 
 
+	-- Add Mark Up or Down
+    INSERT INTO dbo.tblSTCheckoutMarkUpDowns
+    SELECT @intCheckoutId
+         , IC.intCategoryId
+		 , UOM.intItemUOMId
+         , ISNULL(CAST(Chk.SalesQuantity as int),0)
+         , ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0)
+         , ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0)
+	     , (CASE 
+                WHEN ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0) > P.dblSalePrice THEN CAST((ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0) - P.dblSalePrice) * ISNULL(CAST(Chk.SalesQuantity as int),0) AS DECIMAL(18,6))
+                WHEN ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0) < P.dblSalePrice THEN CAST((P.dblSalePrice - ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0)) * ISNULL(CAST(Chk.SalesQuantity as int),0) AS DECIMAL(18,6))
+            END) AS dblShrink
+         , (CASE 
+                WHEN ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0) > P.dblSalePrice THEN 'U Promotion'
+                WHEN ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0) < P.dblSalePrice THEN 'D Promotion' 
+            END) AS strUpDownNotes
+         , 1
+    FROM #tempCheckoutInsert Chk
+    JOIN dbo.tblICItemUOM UOM ON Chk.POSCode COLLATE Latin1_General_CI_AS = UOM.strUpcCode
+    JOIN dbo.tblICItem I ON I.intItemId = UOM.intItemId
+    JOIN dbo.tblICItemLocation IL ON IL.intItemId = I.intItemId
+    JOIN dbo.tblICItemPricing P ON IL.intItemLocationId = P.intItemLocationId AND I.intItemId = P.intItemId
+    JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = IL.intLocationId
+    JOIN dbo.tblICCategory IC ON IC.intCategoryId = I.intCategoryId
+    JOIN dbo.tblSTStore S ON S.intCompanyLocationId = CL.intCompanyLocationId
+    WHERE S.intStoreId = @intStoreId
+    AND ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0) <> P.dblSalePrice
+
+
 	SELECT @strAllowRegisterMarkUpDown = strAllowRegisterMarkUpDown FROM dbo.tblSTStore Where intStoreId = @intStoreId
 	IF(@strAllowRegisterMarkUpDown <> 'None')
 	BEGIN

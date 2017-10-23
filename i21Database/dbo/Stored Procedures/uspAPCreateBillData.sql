@@ -17,13 +17,15 @@ CREATE PROCEDURE [dbo].[uspAPCreateBillData]
 	@type INT = 1,
 	@voucherPODetails AS VoucherPODetail READONLY,
 	@voucherNonInvDetails AS VoucherDetailNonInventory READONLY,
-	@voucherDetailReceiptPO AS VoucherDetailReceipt READONLY,
+	@voucherDetailReceipt AS VoucherDetailReceipt READONLY,
+	@voucherDetailReceiptCharge AS VoucherDetailReceiptCharge READONLY,
 	@voucherDetailNonInvContract AS VoucherDetailNonInvContract READONLY,
 	@voucherDetailStorage AS VoucherDetailStorage READONLY,
 	@voucherDetailCC AS VoucherDetailCC READONLY,
 	@voucherDetailClaim AS VoucherDetailClaim READONLY,
 	@voucherDetailLoadNonInv AS VoucherDetailLoadNonInv READONLY,
 	@shipTo INT= NULL,
+	@shipFrom INT = NULL,
 	@vendorOrderNumber NVARCHAR(50) = NULL,
 	@voucherDate DATETIME = NULL,
 	@billId INT OUTPUT
@@ -72,6 +74,10 @@ IF @transCount = 0 BEGIN TRANSACTION
 	BEGIN
 		SET @startingRecordId = 101;
 	END
+	ELSE IF @type = 13
+	BEGIN
+		SET @startingRecordId = 124;
+	END
 
 	EXEC uspSMGetStartingNumber @startingRecordId, @billRecordNumber OUTPUT
 
@@ -109,7 +115,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intOrderById]			=	A.[intOrderById],
 		[intCurrencyId]			=	A.[intCurrencyId]
 	INTO #tmpBillData
-	FROM dbo.fnAPCreateBillData(@vendorId, @userId, @type, DEFAULT, DEFAULT, DEFAULT, DEFAULT, @shipTo) A
+	FROM dbo.fnAPCreateBillData(@vendorId, @userId, @type, DEFAULT, DEFAULT, DEFAULT, @shipFrom, @shipTo) A
 
 	INSERT INTO tblAPBill
 	(
@@ -154,7 +160,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 	EXEC uspAPCreateVoucherDetail @billId,
 								 @voucherPODetails,
 								 @voucherNonInvDetails,
-								 @voucherDetailReceiptPO,
+								 @voucherDetailReceipt,
+								 @voucherDetailReceiptCharge,
 								 @voucherDetailNonInvContract,
 								 @voucherDetailCC,
 								 @voucherDetailStorage,

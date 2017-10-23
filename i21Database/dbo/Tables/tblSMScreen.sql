@@ -11,6 +11,8 @@
     [ysnDocumentSource] BIT NULL, 
     [strApprovalMessage]	NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId] INT CONSTRAINT [DF__tblSMScreen] DEFAULT ((1)) NOT NULL,
+    [ysnAvailable] BIT NOT NULL DEFAULT 1, 
+    [strGroupName] NVARCHAR(100) NULL, 
     CONSTRAINT [PK_tblSMScreen] PRIMARY KEY CLUSTERED ([intScreenId] ASC)
 );
 

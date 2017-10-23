@@ -15,8 +15,8 @@ SELECT	DISTINCT
 			,ExemptUnits = APBD.dblQtyReceived 
 			,dblTotal = Payment.dblAmountPaid --AP-4155
 			,strCompanyName = (SELECT TOP 1	strCompanyName FROM dbo.tblSMCompanySetup)
-			,strCompanyAddress = (SELECT TOP 1 ISNULL(RTRIM(strCompanyName) + CHAR(13) + char(10), '')
-				 + ISNULL(RTRIM(strAddress) + CHAR(13) + char(10), '')
+			,strCompanyAddress = (SELECT TOP 1 
+				   ISNULL(RTRIM(strAddress) + CHAR(13) + char(10), '')
 				 + ISNULL(RTRIM(strZip),'') + ' ' + ISNULL(RTRIM(strCity), '') + ' ' + ISNULL(RTRIM(strState), '') + CHAR(13) + char(10)
 				 + ISNULL('' + RTRIM(strCountry) + CHAR(13) + char(10), '')
 				 + ISNULL(RTRIM(strPhone)+ CHAR(13) + char(10), '') FROM tblSMCompanySetup)

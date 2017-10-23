@@ -43,7 +43,7 @@ BEGIN
 	 FROM ssvndmst  
 	 INNER JOIN tblEMEntity ENT ON ENT.strEntityNo COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
 	 INNER JOIN tblEMEntityType ETYP ON ETYP.intEntityId = ENT.intEntityId
-	 INNER JOIN tblAPVendor APVND ON APVND.intEntityVendorId = ENT.intEntityId
+	 INNER JOIN tblAPVendor APVND ON APVND.intEntityId = ENT.intEntityId
 	 WHERE APVND.ysnTransportTerminal = 1 AND ETYP.strType = 'Vendor'	 
  	
 	IF(@Checking = 0)
@@ -56,12 +56,11 @@ BEGIN
 				   ,[strFuelDealerId1]
 				   ,[strFuelDealerId2]
 				   ,[strDefaultOrigin]
-				   ,[intTaxGroupId]
 				   ,[ysnMultipleDueDates]
 				   ,[ysnMultipleBolInvoiced]
 				   ,[intConcurrencyId])		   
 		SELECT
-				VND.intEntityVendorId
+				VND.intEntityId
 			   ,ELOC.intEntityLocationId
 			   ,(CASE WHEN VNC.ssvnc_tx_terminal_no IS NOT NULL THEN (select TCN.intTerminalControlNumberId FROM tblTFTerminalControlNumber TCN 
 					  where TCN.strTerminalControlNumber COLLATE SQL_Latin1_General_CP1_CS_AS 
@@ -74,7 +73,6 @@ BEGIN
 			   ,VNC.ssvnc_tx_fuel_dlr_id
 			   ,VNC.ssvnc_tx_fuel_dlr_id2
 			   ,VNC.ssvnc_tx_dflt_origin
-			   ,ELOC.intTaxGroupId
 			   ,(CASE WHEN VNC.ssvnc_tx_multi_pay_yn = 'Y' THEN 1 ELSE 0 END)
 			   ,(CASE WHEN VNC.ssvnc_tx_multi_bol_ivc_yn = 'Y' THEN 1 ELSE 0 END)
 			   ,1
@@ -82,7 +80,7 @@ BEGIN
 			 INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no = VNC.ssvnc_vnd_no
 			 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN tempvnd tmp ON tmp.ssvnd_vnd_no = VNC.ssvnc_vnd_no AND SUBSTRING(VNC.ssvnc_seq_cd, 1, 2) = tmp.ssvnd_tax_st 
-			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityVendorId 
+			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityId 
 			 AND ELOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = tmp.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS
 			 WHERE VNC.ssvnc_type = 'TX' AND VND.ysnTransportTerminal = 1 and ELOC.intEntityLocationId not in (SELECT intEntityLocationId FROM tblTRSupplyPoint)
 
@@ -94,12 +92,11 @@ BEGIN
 					   ,[strFuelDealerId1]
 					   ,[strFuelDealerId2]
 					   ,[strDefaultOrigin]
-					   ,[intTaxGroupId]
 					   ,[ysnMultipleDueDates]
 					   ,[ysnMultipleBolInvoiced]
 					   ,[intConcurrencyId])		   
 			SELECT
-					VND.intEntityVendorId
+					VND.intEntityId
 				   ,ELOC.intEntityLocationId
 				   ,(CASE WHEN VNC.ssvnc_tx_terminal_no IS NOT NULL THEN (select TCN.intTerminalControlNumberId FROM tblTFTerminalControlNumber TCN 
 						  where TCN.strTerminalControlNumber COLLATE SQL_Latin1_General_CP1_CS_AS 
@@ -112,7 +109,6 @@ BEGIN
 				   ,VNC.ssvnc_tx_fuel_dlr_id
 				   ,VNC.ssvnc_tx_fuel_dlr_id2
 				   ,VNC.ssvnc_tx_dflt_origin
-				   ,ELOC.intTaxGroupId
 				   ,(CASE WHEN VNC.ssvnc_tx_multi_pay_yn = 'Y' THEN 1 ELSE 0 END)
 				   ,(CASE WHEN VNC.ssvnc_tx_multi_bol_ivc_yn = 'Y' THEN 1 ELSE 0 END)
 				   ,1
@@ -120,7 +116,7 @@ BEGIN
 				 INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no = VNC.ssvnc_vnd_no
 				 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 				 INNER JOIN tempvndloc tmp ON tmp.ssvnd_vnd_no = VNC.ssvnc_vnd_no  AND SUBSTRING(VNC.ssvnc_seq_cd, 1, 2) = tmp.ssvnd_tax_st
-				 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityVendorId 
+				 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityId 
 				 AND ELOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = tmp.LocName COLLATE SQL_Latin1_General_CP1_CS_AS
 				 where VNC.ssvnc_type = 'TX' AND VND.ysnTransportTerminal = 1 and ELOC.intEntityLocationId not in (SELECT intEntityLocationId FROM tblTRSupplyPoint)			 
 	END
@@ -132,7 +128,7 @@ BEGIN
 			 INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no = VNC.ssvnc_vnd_no
 			 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN tempvnd tmp ON tmp.ssvnd_vnd_no = VNC.ssvnc_vnd_no AND SUBSTRING(VNC.ssvnc_seq_cd, 1, 2) = tmp.ssvnd_tax_st 
-			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityVendorId 
+			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityId 
 			 AND ELOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = tmp.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS
 			 WHERE VNC.ssvnc_type = 'TX' AND VND.ysnTransportTerminal = 1 and ELOC.intEntityLocationId not in (SELECT intEntityLocationId FROM tblTRSupplyPoint)
 			 
@@ -141,7 +137,7 @@ BEGIN
 				 INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no = VNC.ssvnc_vnd_no
 				 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 				 INNER JOIN tempvndloc tmp ON tmp.ssvnd_vnd_no = VNC.ssvnc_vnd_no AND SUBSTRING(VNC.ssvnc_seq_cd, 1, 2) = tmp.ssvnd_tax_st 
-				 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityVendorId 
+				 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityId 
 				 AND ELOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = tmp.LocName COLLATE SQL_Latin1_General_CP1_CS_AS
 				 WHERE VNC.ssvnc_type = 'TX' AND VND.ysnTransportTerminal = 1 and ELOC.intEntityLocationId not in (SELECT intEntityLocationId FROM tblTRSupplyPoint)			 
 	END

@@ -69,7 +69,7 @@ SELECT
 						+ ISNULL(ItemStockUOM.dblConsignedSale, 0.00)
 				)
 	
-	,dblExtendedCost = ISNULL(ItemStockUOM.dblOnHand, 0.00) * ISNULL(ItemPricing.dblAverageCost, 0.00)
+	,dblExtended = (ISNULL(ItemStockUOM.dblOnHand, 0.00) + ISNULL(ItemStockUOM.dblUnitStorage,0.00) + ISNULL(ItemStockUOM.dblConsignedPurchase, 0.00))* ISNULL(ItemPricing.dblAverageCost, 0.00)
 	,dblMinOrder = ISNULL(ItemLocation.dblMinOrder, 0.00)
 	,dblReorderPoint = ISNULL(ItemLocation.dblReorderPoint, 0.00)
 	,dblNearingReorderBy = CAST(ISNULL(ItemStockUOM.dblOnHand, 0.00) - ISNULL(ItemLocation.dblReorderPoint, 0.00) AS NUMERIC(38, 7))

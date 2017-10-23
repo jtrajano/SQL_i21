@@ -146,7 +146,7 @@ BEGIN TRY
 
 		SELECT TOP 1@intStockUOMId = intStockUOMId
 			, @strItem = strItemNo
-			, @strDescription = strDescription
+			, @strDescription = REPLACE(strDescription, '%', '')
 		FROM vyuICGetItemStock
 		WHERE intItemId = @intItemId
 			AND intLocationId = @intCompanyLocation
@@ -252,6 +252,26 @@ BEGIN TRY
 			AND TR.intItemId = @intItemId
 		GROUP BY TR.intItemId
 
+		-- Blend Item Active Check
+		SELECT DISTINCT Recipe.intRecipeId, Recipe.strRecipeItemNo, Recipe.strLocationName
+		INTO #tmpInactiveRecipe
+		FROM tblTRLoadBlendIngredient BlendIngredient
+		LEFT JOIN tblTRLoadDistributionDetail DistDetail ON DistDetail.intLoadDistributionDetailId = BlendIngredient.intLoadDistributionDetailId
+		LEFT JOIN tblTRLoadDistributionHeader HeaderDistItem ON HeaderDistItem.intLoadDistributionHeaderId = DistDetail.intLoadDistributionHeaderId
+		LEFT JOIN vyuMFGetRecipeItem Recipe ON Recipe.intRecipeItemId = BlendIngredient.intRecipeItemId
+		WHERE HeaderDistItem.intLoadHeaderId = @intLoadHeaderId
+			AND Recipe.ysnActive = 0
+
+		IF EXISTS (SELECT TOP 1 1 FROM #tmpInactiveRecipe)
+		BEGIN
+			SELECT TOP 1 @strItem = strRecipeItemNo, @strItemLocation = strLocationName FROM #tmpInactiveRecipe
+
+			SET @strresult = 'Recipe ' + @strItem + ' from location ' + @strItemLocation + ' is not set to active.'
+			RAISERROR(@strresult, 16, 1)
+		END
+
+		DROP TABLE #tmpInactiveRecipe
+
 		-- Blend Item Quantity Check
 		SELECT BlendIngredient.intIngredientItemId
 			, dblQuantity = SUM(BlendIngredient.dblQuantity)
@@ -273,6 +293,18 @@ BEGIN TRY
 		WHERE Detail.intLoadDistributionDetailId NOT IN (SELECT DISTINCT intLoadDistributionDetailId FROM vyuTRGetLoadBlendIngredient)
 			AND Header.intLoadHeaderId = @intLoadHeaderId
 			AND Detail.intItemId = @intItemId
+
+		UNION ALL 
+
+		SELECT BlendIngredient.intSubstituteItemId
+			, dblQuantity = SUM(BlendIngredient.dblQuantity)
+		FROM vyuTRGetLoadBlendIngredient BlendIngredient
+		LEFT JOIN tblMFRecipe Recipe ON Recipe.intRecipeId = BlendIngredient.intRecipeId
+		LEFT JOIN tblTRLoadDistributionHeader HeaderDistItem ON HeaderDistItem.intLoadDistributionHeaderId = BlendIngredient.intLoadDistributionHeaderId
+		WHERE HeaderDistItem.intLoadHeaderId = @intLoadHeaderId
+			AND Recipe.ysnActive = 1
+			AND BlendIngredient.intSubstituteItemId = @intItemId
+		GROUP BY BlendIngredient.intSubstituteItemId
 
 		IF EXISTS (SELECT TOP 1 1 FROM #tmpBlendDistributionItems)
 		BEGIN

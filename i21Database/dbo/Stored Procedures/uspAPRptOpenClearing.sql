@@ -328,7 +328,7 @@ SELECT * FROM (
 
 
 
-SET @query = REPLACE(@query, 'GETDATE()', '''' + CONVERT(VARCHAR(10), @dateTo, 110) + '''');
+--SET @query = REPLACE(@query, 'GETDATE()', '''' + CONVERT(VARCHAR(10), @dateTo, 110) + '''');
 
 IF ISNULL(@filter,'') != ''
 BEGIN

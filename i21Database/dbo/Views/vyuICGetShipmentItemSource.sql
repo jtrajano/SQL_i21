@@ -22,6 +22,8 @@ SELECT
 				THEN CONVERT(NVARCHAR(100), LogisticView.intTrackingNumber)
 			WHEN Shipment.intSourceType = 3 -- Pick Lot
 				THEN CONVERT(NVARCHAR(100), PickLot.[strPickLotNumber])
+			WHEN Shipment.intSourceType = 4
+				THEN DeliverySheetView.strDeliverySheetNumber COLLATE Latin1_General_CI_AS
 			ELSE NULL
 			END,
 	strOrderUOM = 
@@ -136,6 +138,9 @@ FROM	tblICInventoryShipmentItem ShipmentItem LEFT JOIN tblICInventoryShipment Sh
 		LEFT JOIN tblSCTicket ScaleView
 			ON ScaleView.intTicketId = ShipmentItem.intSourceId
 			AND Shipment.intSourceType = 1
+		LEFT JOIN tblSCDeliverySheet DeliverySheetView
+			ON DeliverySheetView.intDeliverySheetId = ShipmentItem.intSourceId
+			AND Shipment.intSourceType = 4
 		LEFT JOIN tblLGShipment LogisticView
 			ON LogisticView.intShipmentId = ShipmentItem.intSourceId
 			AND Shipment.intSourceType = 2

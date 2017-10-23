@@ -3,7 +3,7 @@
 	[intTicketSplitId] INT NOT NULL IDENTITY, 
     [intTicketId] INT NOT NULL, 
     [intCustomerId] INT NOT NULL, 
-    [dblSplitPercent] DECIMAL(6, 3) NOT NULL, 
+    [dblSplitPercent] DECIMAL(18, 6) NOT NULL, 
 	[intStorageScheduleTypeId] INT NULL,
     [strDistributionOption] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL,
 	[intStorageScheduleId] INT NULL, 

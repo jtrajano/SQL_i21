@@ -44,11 +44,22 @@ CROSS APPLY
 	INNER JOIN tblAPBillDetail E ON D.intContractDetailId = E.intContractDetailId AND D.intContractHeaderId = E.intContractHeaderId --prepayment
 	INNER JOIN tblAPBill F ON E.intBillId = F.intBillId --prepayment
 	WHERE C.intBillId IN (SELECT intBillId FROM #tmpBillsId)
-	AND F.intTransactionType = 2 --prepayment
+	AND F.intTransactionType IN (2, 13) --prepayment
 	AND F.intBillId = A.intBillId
 	AND C.intTransactionType = 11 --Claims
 ) AppliedPayments
-WHERE A.intTransactionType IN (2,3,8)
+WHERE A.intTransactionType IN (2, 13, 3,8)
+
+-- IF @post = 0
+-- BEGIN
+-- 	--we need to reset this records to correctly compute on client side
+-- 	UPDATE A
+-- 		SET A.ysnApplied = 0
+-- 		,A.dblBalance = A.dblAmountApplied + A.dblBalance
+-- 		,A.dblAmountApplied = 0
+-- 	FROM tblAPAppliedPrepaidAndDebit A
+-- 	WHERE A.intBillId IN (SELECT intBillId FROM #tmpBillsId)
+-- END
 --removed to add performance improvement, we could only apply to posted transactions, unless it pulls the unposted transaction as well
 --AND 1 = CASE WHEN A.intTransactionType= 3 AND A.ysnPosted != 1 --DEBIT MEMO should be posted
 --			 THEN 0 ELSE 1 END

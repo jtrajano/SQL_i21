@@ -2,8 +2,8 @@
 	@ysnPost BIT  = 0  
 	,@ysnRecap BIT  = 0  
 	,@strTransactionId NVARCHAR(40) = NULL   
-	,@intEntityUserSecurityId AS INT = NULL,
-	@strBatchId NVARCHAR(40) = NULL OUTPUT
+	,@intEntityUserSecurityId AS INT = NULL
+	,@strBatchId NVARCHAR(40) = NULL OUTPUT
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -49,11 +49,12 @@ BEGIN
 			,@ysnTransactionPostedFlag AS BIT
 			,@strCountDescription AS NVARCHAR(255)
 			,@InventoryCount_TransactionType INT = 23
-			,@intLocationId AS INT 
-
+			,@intLocationId AS INT
+			,@intLockType INT
   
 	SELECT TOP 1   
 			@intTransactionId = intInventoryCountId
+			,@intLockType = intLockType
 			,@ysnTransactionPostedFlag = ysnPosted
 			,@dtmDate = dtmCountDate
 			,@intCreatedEntityId = intEntityId
@@ -117,6 +118,61 @@ BEGIN
 	END  
 END   
 
+DECLARE @iItemNo NVARCHAR(50)
+-- Validate blank storage location and sub location of lotted items
+DECLARE @LotNo NVARCHAR(50)
+SET @iItemNo = NULL
+
+SELECT TOP 1 @LotNo = cd.strLotNo, @iItemNo = i.strItemNo
+FROM tblICInventoryCountDetail cd
+	INNER JOIN tblICItem i ON i.intItemId = cd.intItemId
+WHERE cd.intInventoryCountId = @intTransactionId
+	AND i.strLotTracking <> 'No'
+	AND (cd.intSubLocationId IS NULL OR cd.intStorageLocationId IS NULL)
+
+IF(@iItemNo IS NOT NULL)
+BEGIN
+	-- Sub Location or Storage Location is missing for Item %s, Lot No. %s.
+	EXEC uspICRaiseError 80189, @iItemNo, @LotNo;
+	GOTO Post_Exit  
+END
+
+
+-- Check if lotted items have gross/net UOM and have gross qty and net qty when the items have lot weights required enabled in item setup.
+SET @iItemNo = NULL
+SELECT TOP 1 @iItemNo = i.strItemNo
+FROM tblICInventoryCount c
+	INNER JOIN tblICInventoryCountDetail cd ON cd.intInventoryCountId = c.intInventoryCountId
+	INNER JOIN tblICItem i ON i.intItemId = cd.intItemId
+WHERE (cd.intWeightUOMId IS NULL OR (cd.dblWeightQty = 0 AND cd.dblNetQty = 0))
+	AND i.ysnLotWeightsRequired = 1
+	AND i.strLotTracking <> 'No'
+	AND c.intInventoryCountId = @intTransactionId
+
+IF @iItemNo IS NOT NULL
+BEGIN
+	EXEC uspICRaiseError 80190, @iItemNo
+	GOTO Post_Exit
+END
+
+SET @iItemNo = NULL
+-- Validate blank lot number for autocreate
+
+SELECT TOP 1 @iItemNo = i.strItemNo
+FROM tblICInventoryCountDetail cd
+	INNER JOIN tblICItem i ON i.intItemId = cd.intItemId
+WHERE cd.intInventoryCountId = @intTransactionId
+	AND i.strLotTracking <> 'No'
+	AND cd.intLotId IS NULL AND NULLIF(cd.strLotNo, '') IS NULL
+
+IF(@iItemNo IS NOT NULL)
+BEGIN
+	BEGIN
+		EXEC uspICRaiseError 80130, @iItemNo;
+		GOTO Post_Exit  
+	END
+END
+
 --------------------------------------------------------------------------------------------  
 -- Begin a transaction and immediately create a save point 
 --------------------------------------------------------------------------------------------  
@@ -150,15 +206,15 @@ FROM tblICInventoryCount IC
 WHERE ISNULL(NULLIF(IC.strCountBy, ''), 'Item') = 'Item' AND IC.strCountNo = @strTransactionId AND Item.strLotTracking != 'No' AND (ICDetail.intLotId IS NULL OR ICDetail.intLotId NOT IN (SELECT intLotId FROM tblICLot WHERE intItemId = ICDetail.intItemId))
 
 IF @ItemNo IS NOT NULL
-	BEGIN
-		-- Lot Number is invalid or missing for item {Item No.}
-		EXEC uspICRaiseError 80130, @ItemNo;
-		GOTO Post_Exit  
-	END
+BEGIN
+	-- Lot Number is invalid or missing for item {Item No.}
+	EXEC uspICRaiseError 80130, @ItemNo;
+	GOTO Post_Exit  
+END
+
 -- Get the next batch number
 EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intLocationId
 IF @@ERROR <> 0 GOTO Post_Exit    
-
 
 --------------------------------------------------------------------------------------------  
 -- If POST, call the post routines  
@@ -192,11 +248,14 @@ BEGIN
 	)  	
 	SELECT 	intItemId				= Detail.intItemId
 			,intItemLocationId		= ItemLocation.intItemLocationId
-			,intItemUOMId			= CASE Item.strLotTracking WHEN 'No' THEN Detail.intItemUOMId ELSE ISNULL(ItemLot.intWeightUOMId, ItemLot.intItemUOMId) END
+			,intItemUOMId			= ISNULL(Detail.intWeightUOMId, Detail.intItemUOMId) --CASE Item.strLotTracking WHEN 'No' THEN Detail.intItemUOMId ELSE ItemLot.intItemUOMId END
 			,dtmDate				= Header.dtmCountDate
-			,dblQty					= ISNULL(Detail.dblPhysicalCount, 0) - CASE Item.strLotTracking WHEN 'No' THEN ISNULL(Detail.dblSystemCount, 0) ELSE ISNULL(CASE WHEN ItemLot.intWeightUOMId IS NULL THEN ItemLot.dblQty ELSE ItemLot.dblWeight END, 0) END
+			,dblQty					= CASE WHEN Detail.intWeightUOMId IS NULL THEN Detail.dblPhysicalCount - ISNULL(Detail.dblSystemCount, 0) ELSE Detail.dblWeightQty - dbo.fnCalculateQtyBetweenUOM(Detail.intItemUOMId, Detail.intWeightUOMId, ISNULL(Detail.dblSystemCount, 0)) END
+									--CASE Item.strLotTracking WHEN 'No' THEN ISNULL(Detail.dblPhysicalCount, 0) ELSE dbo.fnCalculateQtyBetweenUOM(ItemLot.intItemUOMId, Detail.intItemUOMId, ISNULL(Detail.dblPhysicalCount, 0)) END
+									--	- CASE Item.strLotTracking WHEN 'No' THEN ISNULL(Detail.dblSystemCount, 0) ELSE ItemLot.dblQty END
 			,dblUOMQty				= ItemUOM.dblUnitQty
-			,dblCost				= dbo.fnMultiply(ISNULL(Detail.dblLastCost, ItemPricing.dblLastCost), ItemUOM.dblUnitQty)
+			,dblCost				= dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, Detail.intItemUOMId, ISNULL(ItemLot.dblLastCost, ItemPricing.dblLastCost))
+									--dbo.fnMultiply(ISNULL(Detail.dblLastCost, ItemPricing.dblLastCost), ItemUOM.dblUnitQty)
 			,0
 			,dblSalesPrice			= 0
 			,intCurrencyId			= @DefaultCurrencyId 
@@ -208,21 +267,20 @@ BEGIN
 			,intLotId				= Detail.intLotId
 			,intSubLocationId		= Detail.intSubLocationId
 			,intStorageLocationId	= Detail.intStorageLocationId
-	FROM	dbo.tblICInventoryCount Header 
-			INNER JOIN dbo.tblICInventoryCountDetail Detail ON Header.intInventoryCountId = Detail.intInventoryCountId
-				AND Detail.ysnRecount = 0
-			INNER JOIN dbo.tblICItemLocation ItemLocation ON ItemLocation.intLocationId = Header.intLocationId 
-				AND ItemLocation.intItemId = Detail.intItemId
-			INNER JOIN dbo.tblICItemPricing ItemPricing ON ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
-			LEFT JOIN dbo.tblICItemUOM ItemUOM ON Detail.intItemUOMId = ItemUOM.intItemUOMId
-			LEFT JOIN dbo.tblICLot ItemLot ON ItemLot.intLotId = Detail.intLotId
-			LEFT JOIN dbo.tblICItem Item ON Item.intItemId = Detail.intItemId
-	WHERE	Header.intInventoryCountId = @intTransactionId
-			AND (ISNULL(Detail.dblPhysicalCount, 0) - CASE Item.strLotTracking WHEN 'No' THEN ISNULL(Detail.dblSystemCount, 0) ELSE ISNULL(CASE WHEN ItemLot.intWeightUOMId IS NULL THEN ItemLot.dblQty ELSE dbo.fnCalculateQtyBetweenUOM(ItemLot.intWeightUOMId, Detail.intItemUOMId, ItemLot.dblWeight) END, 0) END) <> 0
+	FROM dbo.tblICInventoryCount Header
+		INNER JOIN dbo.tblICInventoryCountDetail Detail ON Header.intInventoryCountId = Detail.intInventoryCountId
+			AND Detail.ysnRecount = 0
+		INNER JOIN dbo.tblICItemLocation ItemLocation ON ItemLocation.intLocationId = Header.intLocationId 
+			AND ItemLocation.intItemId = Detail.intItemId
+		LEFT JOIN dbo.tblICItemPricing ItemPricing ON ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
+		LEFT JOIN dbo.tblICItemUOM ItemUOM ON Detail.intItemUOMId = ItemUOM.intItemUOMId
+		LEFT JOIN dbo.tblICLot ItemLot ON ItemLot.intLotId = Detail.intLotId
+		LEFT JOIN dbo.tblICItem Item ON Item.intItemId = Detail.intItemId
+		LEFT JOIN dbo.tblICItemUOM StockUOM ON Detail.intItemId = StockUOM.intItemId AND StockUOM.ysnStockUnit = 1
+	WHERE Header.intInventoryCountId = @intTransactionId
+				--AND Detail.dblPhysicalCount - ISNULL(Detail.dblSystemCount, 0) <> 0
+			AND (CASE WHEN Detail.intWeightUOMId IS NULL THEN Detail.dblPhysicalCount - ISNULL(Detail.dblSystemCount, 0) ELSE Detail.dblWeightQty - dbo.fnCalculateQtyBetweenUOM(Detail.intItemUOMId, Detail.intWeightUOMId, ISNULL(Detail.dblSystemCount, 0)) END <> 0)
 			AND ISNULL(NULLIF(Header.strCountBy, ''), 'Item') = 'Item'
-	
-
-
 	-----------------------------------
 	--  Call the costing routine 
 	-----------------------------------
@@ -393,36 +451,8 @@ BEGIN
 END 
 
 -- Update Status & Inventory Lock
-IF EXISTS (SELECT 1 FROM dbo.tblICInventoryCount WHERE intInventoryCountId = @intTransactionId AND ysnPosted=1 AND ISNULL(NULLIF(strCountBy, ''), 'Item') = 'Item')
-    BEGIN
-        UPDATE dbo.tblICInventoryCount 
-        SET intStatus = 4 --Closed
-        WHERE intInventoryCountId=@intTransactionId
+EXEC dbo.[uspICLockInventoryLocation] @intLockType, @intTransactionId, 0, @intEntityUserSecurityId, 1
 
-		--Unlock Inventory
-		UPDATE il SET il.ysnLockedInventory = 0
-		FROM tblICItemLocation il
-			INNER JOIN tblICInventoryCount ic ON ic.intLocationId = il.intLocationId
-			INNER JOIN tblICInventoryCountDetail icd ON icd.intInventoryCountId = ic.intInventoryCountId
-				AND il.intItemId = icd.intItemId
-		WHERE ic.intInventoryCountId = @intTransactionId
-			AND ISNULL(NULLIF(ic.strCountBy, ''), 'Item') = 'Item'
-	END
-ELSE
-	BEGIN
-		UPDATE dbo.tblICInventoryCount 
-        SET intStatus = 3 --InventoryLocked
-        WHERE intInventoryCountId=@intTransactionId
-
-		--Lock Inventory
-		UPDATE il SET il.ysnLockedInventory = 1
-		FROM tblICItemLocation il
-			INNER JOIN tblICInventoryCount ic ON ic.intLocationId = il.intLocationId
-			INNER JOIN tblICInventoryCountDetail icd ON icd.intInventoryCountId = ic.intInventoryCountId
-				AND il.intItemId = icd.intItemId
-		WHERE ic.intInventoryCountId = @intTransactionId
-			AND ISNULL(NULLIF(ic.strCountBy, ''), 'Item') = 'Item'
-	END
 
 -- Create an Audit Log
 IF @ysnRecap = 0 

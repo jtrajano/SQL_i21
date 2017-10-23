@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspICPostInventoryReceiptOtherCharges]
 	@intInventoryReceiptId AS INT 
-	,@strBatchId AS NVARCHAR(20)
+	,@strBatchId AS NVARCHAR(40)
 	,@intEntityUserSecurityId AS INT
 	,@intTransactionTypeId AS INT 
 	,@intItemId AS INT = NULL -- Used when rebuilding the stocks. 
@@ -116,6 +116,7 @@ BEGIN
 				(
 					OtherCharge.ysnPrice = 1
 					AND OtherCharge.ysnInventoryCost = 1
+					AND ISNULL(Item.strCostType, '') <> 'Discount' 
 				)
 			)			
 			
@@ -163,6 +164,42 @@ BEGIN
 		RETURN -1
 	END 
 END 
+
+-- Validate
+BEGIN 
+	-- Check if Other charge is a price down. If yes, then Receipt currency and Other Charge currency must be the same. 
+	SELECT @strItemNo = NULL
+			,@intChargeItemId = NULL 
+			,@strTransactionId = NULL 
+			,@strCurrencyId = NULL 
+			,@strFunctionalCurrencyId = NULL 
+
+	SELECT TOP 1 
+			@strTransactionId = Receipt.strReceiptNumber
+			,@strItemNo = Item.strItemNo
+			,@intChargeItemId = Item.intItemId
+			,@strCurrencyId = cc.strCurrency
+			,@strFunctionalCurrencyId = rc.strCurrency
+	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge OtherCharge
+				ON Receipt.intInventoryReceiptId = OtherCharge.intInventoryReceiptId	
+			INNER JOIN tblICItem Item
+				ON Item.intItemId = OtherCharge.intChargeId
+			LEFT JOIN tblSMCurrency cc
+				ON cc.intCurrencyID =  OtherCharge.intCurrencyId
+			LEFT JOIN tblSMCurrency rc
+				ON rc.intCurrencyID =  Receipt.intCurrencyId
+	WHERE	ISNULL(OtherCharge.ysnPrice, 0) = 1 
+			AND OtherCharge.intCurrencyId IS NOT NULL 
+			AND OtherCharge.intCurrencyId <> Receipt.intCurrencyId
+
+	IF @intChargeItemId IS NOT NULL 
+	BEGIN 
+		-- '{Other Charge} is using {Other Charge currency}. Price down is only allowed for {Receipt Currency} currency. Please change the currency or uncheck the Price Down.'
+		EXEC uspICRaiseError 80191, @strItemNo, @strCurrencyId, @strFunctionalCurrencyId
+		RETURN -1
+	END 
+END 
+
 
 -- Calculate the other charges. 
 BEGIN
@@ -549,20 +586,20 @@ BEGIN
 				AND ForGLEntries_CTE.intItemLocationId = ItemGLAccounts.intItemLocationId
 			INNER JOIN dbo.tblGLAccount GLAccount
 				ON GLAccount.intAccountId = ItemGLAccounts.intInventoryId
-			CROSS APPLY dbo.fnGetDebitFunctional(
-				ForGLEntries_CTE.dblCost
+			CROSS APPLY dbo.fnGetDebitFunctional(				
+				CASE WHEN ForGLEntries_CTE.ysnPrice = 1 THEN -ForGLEntries_CTE.dblCost ELSE ForGLEntries_CTE.dblCost END 
 				,ForGLEntries_CTE.intCurrencyId
 				,@intFunctionalCurrencyId
 				,ForGLEntries_CTE.dblForexRate
 			) Debit
 			CROSS APPLY dbo.fnGetCreditFunctional(
-				ForGLEntries_CTE.dblCost
+				CASE WHEN ForGLEntries_CTE.ysnPrice = 1 THEN -ForGLEntries_CTE.dblCost ELSE ForGLEntries_CTE.dblCost END 
 				,ForGLEntries_CTE.intCurrencyId
 				,@intFunctionalCurrencyId
 				,ForGLEntries_CTE.dblForexRate
 			) Credit
-			CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblCost) DebitForeign
-			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) CreditForeign
+			CROSS APPLY dbo.fnGetDebit(CASE WHEN ForGLEntries_CTE.ysnPrice = 1 THEN -ForGLEntries_CTE.dblCost ELSE ForGLEntries_CTE.dblCost END) DebitForeign
+			CROSS APPLY dbo.fnGetCredit(CASE WHEN ForGLEntries_CTE.ysnPrice = 1 THEN -ForGLEntries_CTE.dblCost ELSE ForGLEntries_CTE.dblCost END) CreditForeign
 
 	WHERE	ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 0 
 			AND ISNULL(ForGLEntries_CTE.ysnInventoryCost, 0) = 1
@@ -607,19 +644,19 @@ BEGIN
 			INNER JOIN dbo.tblGLAccount GLAccount
 				ON GLAccount.intAccountId = OtherChargesGLAccounts.intOtherChargeExpense
 			CROSS APPLY dbo.fnGetDebitFunctional(
-				ForGLEntries_CTE.dblCost
+				CASE WHEN ForGLEntries_CTE.ysnPrice = 1 THEN -ForGLEntries_CTE.dblCost ELSE ForGLEntries_CTE.dblCost END 
 				,ForGLEntries_CTE.intCurrencyId
 				,@intFunctionalCurrencyId
 				,ForGLEntries_CTE.dblForexRate
 			) Debit
 			CROSS APPLY dbo.fnGetCreditFunctional(
-				ForGLEntries_CTE.dblCost
+				CASE WHEN ForGLEntries_CTE.ysnPrice = 1 THEN -ForGLEntries_CTE.dblCost ELSE ForGLEntries_CTE.dblCost END 
 				,ForGLEntries_CTE.intCurrencyId
 				,@intFunctionalCurrencyId
 				,ForGLEntries_CTE.dblForexRate
 			) Credit
-			CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblCost) DebitForeign
-			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) CreditForeign
+			CROSS APPLY dbo.fnGetDebit(CASE WHEN ForGLEntries_CTE.ysnPrice = 1 THEN -ForGLEntries_CTE.dblCost ELSE ForGLEntries_CTE.dblCost END) DebitForeign
+			CROSS APPLY dbo.fnGetCredit(CASE WHEN ForGLEntries_CTE.ysnPrice = 1 THEN -ForGLEntries_CTE.dblCost ELSE ForGLEntries_CTE.dblCost END) CreditForeign
 
 	WHERE	ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 0 
 			AND ISNULL(ForGLEntries_CTE.ysnInventoryCost, 0) = 1

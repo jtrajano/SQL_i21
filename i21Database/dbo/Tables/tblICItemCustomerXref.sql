@@ -14,7 +14,7 @@ Type the overview for the table here.
 	(
 		[intItemCustomerXrefId] INT NOT NULL IDENTITY , 
 		[intItemId] INT NOT NULL, 
-		[intItemLocationId] INT NOT NULL, 
+		[intItemLocationId] INT NULL, 
 		[intCustomerId] INT NOT NULL, 
 		[strCustomerProduct] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
 		[strProductDescription] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 

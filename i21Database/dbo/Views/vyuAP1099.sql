@@ -55,6 +55,54 @@ SELECT
 	, dbl1099B = CASE WHEN A.int1099Form = 3--1099 B
 	    THEN (A.dbl1099 + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099)
      ELSE 0 END   
+	, dblOrdinaryDividends = CASE WHEN A.int1099Form = 5 AND A.int1099Category = 0--'OrdinaryDividends'     
+		THEN  (A.dblTotal + A.dblTax)
+     ELSE 0 END  
+	 , dblQualified = CASE WHEN A.int1099Form = 5 AND A.int1099Category = 1--'Qualified'     
+		THEN (A.dblTotal + A.dblTax) 
+     ELSE 0 END  
+	 , dblCapitalGain = CASE WHEN A.int1099Form = 5 AND A.int1099Category = 2--'CapitalGain'     
+		THEN (A.dblTotal + A.dblTax)
+     ELSE 0 END  
+	 , dblUnrecapGain = CASE WHEN A.int1099Form = 5 AND A.int1099Category = 3--'UnrecapGain'     
+		THEN (A.dblTotal + A.dblTax) 
+     ELSE 0 END
+	, dblSection1202 = CASE WHEN A.int1099Form = 5 AND A.int1099Category = 4--'Section1202'     
+		THEN (A.dblTotal + A.dblTax) 
+     ELSE 0 END
+	, dblCollectibles = CASE WHEN A.int1099Form = 5 AND A.int1099Category = 5--'Collectibles'     
+		THEN (A.dblTotal + A.dblTax) 
+     ELSE 0 END
+	, dblNonDividends = CASE WHEN A.int1099Form = 5 AND A.int1099Category = 6--'NonDividends'     
+		THEN (A.dbl1099 + A.dblTax)
+     ELSE 0 END
+	, dblFITW = CASE WHEN A.int1099Form = 5 AND A.int1099Category = 7--'FITW'     
+		THEN (A.dblTotal + A.dblTax) 
+     ELSE 0 END
+	, dblInvestment = CASE WHEN A.int1099Form = 5 AND A.int1099Category = 8--'Investment'     
+		THEN (A.dblTotal + A.dblTax)
+     ELSE 0 END
+	, dblForeignTax = CASE WHEN A.int1099Form = 5 AND A.int1099Category = 9--'ForeignTax'     
+		THEN (A.dblTotal + A.dblTax) 
+     ELSE 0 END
+	, dblForeignCountry = CASE WHEN A.int1099Form = 5 AND A.int1099Category = 10--'ForeignCountry'     
+		THEN (A.dblTotal + A.dblTax) 
+     ELSE 0 END   
+	, dblCash = CASE WHEN A.int1099Form = 5 AND A.int1099Category = 11--'Cash Liquidation'     
+		THEN (A.dblTotal + A.dblTax)
+     ELSE 0 END 
+	, dblNonCash = CASE WHEN A.int1099Form = 5 AND A.int1099Category = 12--'Non Cash Liquidation'     
+		THEN (A.dblTotal + A.dblTax) 
+     ELSE 0 END      
+	, dblExempt = CASE WHEN A.int1099Form = 5 AND A.int1099Category = 13--'Exempt Interest Dividends'     
+		THEN (A.dblTotal + A.dblTax) 
+     ELSE 0 END
+	, dblPrivate = CASE WHEN A.int1099Form = 5 AND A.int1099Category = 14--'Private Activity Dividends'     
+		THEN (A.dblTotal + A.dblTax) 
+     ELSE 0 END 
+	, dblState = CASE WHEN A.int1099Form = 5 AND A.int1099Category = 15--'State Tax Withheld'     
+		THEN (A.dblTotal + A.dblTax) 
+     ELSE 0 END   
 	, dbl1099 = (A.dbl1099 + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099)
     , intYear = YEAR(ISNULL(B2.dtmDatePaid, B.dtmDate))
 	, A.int1099Form
@@ -70,4 +118,3 @@ LEFT JOIN [tblEMEntityLocation] D
 	ON C.[intEntityId] = D.intEntityId AND D.ysnDefaultLocation = 1     
 WHERE ((B.ysnPosted = 1 AND B2.dblPayment IS NOT NULL) OR B.intTransactionType = 9) AND A.int1099Form <> 0
 AND C2.ysnPrint1099 = 1
-

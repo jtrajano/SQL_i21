@@ -25,7 +25,7 @@ ELSE cfCard.strName
 END) AS strName
 
 ,cfTransaction.strTransactionType
-,cfTransaction.dtmTransactionDate
+,DATEADD(dd, DATEDIFF(dd, 0, cfTransaction.dtmTransactionDate ), 0) as dtmTransactionDate
 ,cfTransaction.dtmPostedDate
 ,cfTransaction.intTransactionId
 
@@ -54,16 +54,14 @@ END) AS strName
 ,ISNULL(cfTransaction.dblInventoryCost,0) AS dblInventoryCost
 ,ISNULL(cfTransaction.dblTransferCost,0) AS dblTransferCost
 
-,ROUND(ISNULL(cfTransGrossPrice.dblCalculatedAmount,0),2) AS dblSalesAmount
+,ROUND(ISNULL(cfTransPrice.dblCalculatedAmount,0),2) AS dblSalesAmount
 
---,ROUND(ISNULL(cfTransNetPrice.dblCalculatedAmount,0),2) AS dblCost
-
-,(CASE strTransactionType 
-
-		WHEN 'Local/Network' 
-		THEN ROUND(ISNULL(cfTransaction.dblInventoryCost,0) + (ISNULL(tblCFTransactionTax_1.dblTaxCalculatedAmount,0)),2)
+,(CASE  
+		WHEN strTransactionType='Local/Network'
+		THEN 
+			ROUND(ISNULL(cfTransaction.dblInventoryCost,0)* ROUND(cfTransaction.dblQuantity,3) + ISNULL(tblCFTransactionTax_1.dblTaxCalculatedAmount,0) ,2)
 		ELSE
-		ROUND(ISNULL(cfTransaction.dblTransferCost,0),2)
+			ROUND(ISNULL(cfTransaction.dblTransferCost,0)* ROUND(cfTransaction.dblQuantity,3),2) 
 
 END) AS dblCost
 

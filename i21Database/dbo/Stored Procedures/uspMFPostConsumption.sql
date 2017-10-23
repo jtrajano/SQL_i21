@@ -190,7 +190,19 @@ BEGIN
 	--PRINT @intLoadDistributionDetailId
 
 	SELECT DISTINCT DistItem.intLoadDistributionDetailId
-		, intItemId = BlendIngredient.intIngredientItemId
+		, intItemId = (
+			CASE 
+			WHEN BlendIngredient.ysnSubstituteItem = 1
+				THEN (
+						CASE 
+							WHEN BlendIngredient.intSubstituteItemId = Receipt.intItemId
+								THEN BlendIngredient.intSubstituteItemId
+							ELSE BlendIngredient.intIngredientItemId
+							END
+						)
+			ELSE BlendIngredient.intIngredientItemId
+			END
+		)
 		, dblQty = BlendIngredient.dblQuantity
 		, HeaderDistItem.intCompanyLocationId
 		, HeaderDistItem.dtmInvoiceDateTime

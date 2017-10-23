@@ -76,6 +76,42 @@ BEGIN
 	SET @Discount = 0.0
 END
 
+DECLARE @ysnPostForeignSales BIT = 0
+DECLARE @intForeignInvoiceId INT = 0
+DECLARE @strTransactionType NVARCHAR(MAX)
+--DECLARE @intForeignCustomerId NVARCHAR(MAX)
+
+SELECT 
+@ysnPostForeignSales = (SELECT TOP 1 ysnPostForeignSales FROM tblCFNetwork WHERE intNetworkId = cfT.intNetworkId)
+,@intForeignInvoiceId =cfT.intInvoiceId
+,@strTransactionType = cfT.strTransactionType
+FROM tblCFTransaction cfT
+WHERE cfT.intTransactionId = @TransactionId
+
+IF(@strTransactionType = 'Foreign Sale')
+BEGIN
+	IF(ISNULL(@Post,0) = 1)
+	BEGIN
+		IF(ISNULL(@ysnPostForeignSales,0) = 0)
+		BEGIN
+
+			UPDATE tblCFTransaction 
+			SET ysnPosted = 1 
+			WHERE intTransactionId = @TransactionId
+			RETURN 1;
+		END
+	END
+	ELSE IF(ISNULL(@Post,0) = 0)
+	BEGIN
+		IF(ISNULL(@ysnPostForeignSales,0) = 0 AND ISNULL(@intForeignInvoiceId,0) = 0)
+		BEGIN
+
+			UPDATE tblCFTransaction SET ysnPosted = 0 WHERE intTransactionId = @TransactionId
+			RETURN 1;
+		END
+	END
+END
+
 BEGIN TRANSACTION
 INSERT INTO @EntriesForInvoice(
 	 [strTransactionType]

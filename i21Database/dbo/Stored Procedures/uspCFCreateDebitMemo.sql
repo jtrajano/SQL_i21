@@ -180,7 +180,7 @@ BEGIN
 			,[dblQtyOrdered]						= NULL
 			,[dblQtyShipped]						= 1 -- DEFAULT TO 1
 			,[dblDiscount]							= NULL
-			,[dblPrice]								= dblAccountTotalAmount
+			,[dblPrice]								= SUM(dblTotalAmount) -- dblAccountTotalAmount
 			,[ysnRefreshPrice]						= 0
 			,[strMaintenanceType]					= ''
 			,[strFrequency]							= ''
@@ -213,14 +213,15 @@ BEGIN
 			,[strType]								= 'CF Invoice'
 			,[ysnUpdateAvailableDiscount]			= 1
 			,[strItemTermDiscountBy]				= 'Amount'
-			,[dblItemTermDiscount]					= dblAccountTotalDiscount
+			,[dblItemTermDiscount]					= SUM(dblDiscount)
 			,[strDocumentNumber]					= strTempInvoiceReportNumber
 		FROM tblCFInvoiceStagingTable
+		WHERE ISNULL(intInvoiceId,0) != 0
 		GROUP BY 
 		intCustomerId
 		,strTempInvoiceReportNumber
-		,dblAccountTotalAmount
-		,dblAccountTotalDiscount
+		--,dblAccountTotalAmount
+		--,dblAccountTotalDiscount
 		,intTermID
 		,dtmInvoiceDate
 		,intSalesPersonId
@@ -399,6 +400,7 @@ BEGIN
 			,[dblItemTermDiscount]					= 0
 			,[strDocumentNumber]					= strInvoiceReportNumber
 		FROM tblCFInvoiceFeeStagingTable
+
 		--GROUP BY 
 		--intCustomerId
 		--,strTempInvoiceReportNumber
@@ -599,6 +601,8 @@ BEGIN
 
 		----------CREATE DEBIT MEMOS------------
 
+		SELECT * FROM @InvoiceEntriesTEMP
+
 		DECLARE @LogId INT
 
 		--select * from @InvoiceEntriesTEMP
@@ -682,15 +686,15 @@ BEGIN
 			SELECT TOP 1 
 			 @strInvoiceReportNumber = strTempInvoiceReportNumber 
 			,@dblTotalQuantity = SUM(dblQuantity)
-			,@dblAccountTotalAmount = dblAccountTotalAmount
-			,@dblAccountTotalDiscount = dblAccountTotalDiscount
+			,@dblAccountTotalAmount = SUM(dblTotalAmount)
+			,@dblAccountTotalDiscount = SUM(dblDiscount)
 			FROM tblCFInvoiceStagingTable 
-			WHERE intCustomerId = @intEntityCustomerId
+			WHERE intCustomerId = @intEntityCustomerId AND ISNULL(intInvoiceId,0) != 0
 			GROUP BY
 			 intCustomerId
 			,strTempInvoiceReportNumber
-			,dblAccountTotalAmount
-			,dblAccountTotalDiscount
+			--,dblAccountTotalAmount
+			--,dblAccountTotalDiscount
 			,intTermID
 			,dtmInvoiceDate
 			,intSalesPersonId

@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspTFGenerateRMFT5US]
-	@XMLParam NVARCHAR(MAX) = NULL
+	@xmlParam NVARCHAR(MAX) = NULL
 
 AS
 	
@@ -15,86 +15,104 @@ DECLARE @ErrorState INT
 
 BEGIN TRY
 
-	DECLARE @Guid NVARCHAR(250)
-	, @FormCodeParam NVARCHAR(MAX)
-	, @ScheduleCodeParam NVARCHAR(MAX)
-	, @ReportingComponentId NVARCHAR(MAX)
-	, @Refresh BIT
+	DECLARE @Output TABLE(
+		dblLine1_Col1 NUMERIC
+		, dblLine1_Col2 NUMERIC
+		, dblLine2a_Col1 NUMERIC
+		, dblLine2a_Col2 NUMERIC
+		, dblLine2b_Col1 NUMERIC
+		, dblLine2b_Col2 NUMERIC
+		, dblLine3_Col1 NUMERIC
+		, dblLine3_Col2 NUMERIC
+		, dblLine4_Col1 NUMERIC
+		, dblLine4_Col2 NUMERIC
+		, dblLine5_Col1 NUMERIC
+		, dblLine5_Col2 NUMERIC
+		, dblLine6a_Col1 NUMERIC
+		, dblLine6b_Col1 NUMERIC
+		, dblLine6b_Col2 NUMERIC
+		, dblLine6c_Col1 NUMERIC
+		, dblLine7_Col1 NUMERIC
+		, dblLine7_Col2 NUMERIC
+		, dblLine8_Col1 NUMERIC
+		, dblLine8_Col2 NUMERIC
+		, dblLine9_Col1 NUMERIC
+		, dblLine9_Col2 NUMERIC
+		, dblLine10_Col1 NUMERIC
+		, dblLine10_Col2 NUMERIC
+		, dblLine11_Col1 NUMERIC
+		, dblLine11_Col2 NUMERIC
+		, dblLine12_Col1 NUMERIC
+		, dblLine12_Col2 NUMERIC
+		, dblLine13_Col1 NUMERIC
+		, dblLine13_Col2 NUMERIC
+		, dblLine14 NUMERIC
+		, dblLine15a NUMERIC(18,6)
+		, dblLine15b NUMERIC(18,6)
+		, dblLine15c NUMERIC(18,6)
+		, dblLine16 NUMERIC(18,6)
+		, dblLine17 NUMERIC(18,6)
+		, dblLine18 NUMERIC(18,6)
+		, dblLine19 NUMERIC(18,6)
+		, dblUstRate NUMERIC(18,6)
+		, dblEifRate NUMERIC(18,6)
+		, dblColDisc NUMERIC(18,6)
+		, strRecLicense NVARCHAR(50)
+		, dtmFrom DATE
+		, dtmTo DATE)
 
-	IF (ISNULL(@XMLParam,'') = '')
-	BEGIN 
-		SELECT dblColumn1_1 = 0.000000
-			, dblColumn2_1 = 0.000000
-			, dblColumn3_1 = 0.000000
-			, dblColumn1_2a = 0.000000
-			, dblColumn2_2a = 0.000000
-			, dblColumn3_2a = 0.000000
-			, dblColumn1_2b = 0.000000
-			, dblColumn2_2b = 0.000000
-			, dblColumn3_2b = 0.000000
-			, dblColumn1_3 = 0.000000
-			, dblColumn2_3 = 0.000000
-			, dblColumn3_3 = 0.000000
-			, dblColumn1_4 = 0.000000
-			, dblColumn2_4 = 0.000000
-			, dblColumn3_4 = 0.000000
-			, dblColumn1_5 = 0.000000
-			, dblColumn2_5 = 0.000000
-			, dblColumn3_5 = 0.000000
-			, dblColumn1_6a = 0.000000
-			, dblColumn2_6a = 0.000000
-			, dblColumn3_6a = 0.000000
-			, dblColumn1_6b = 0.000000
-			, dblColumn2_6b = 0.000000
-			, dblColumn3_6b = 0.000000
-			, dblColumn1_6c = 0.000000
-			, dblColumn2_6c = 0.000000
-			, dblColumn3_6c = 0.000000
-			, dblColumn1_7 = 0.000000
-			, dblColumn2_7 = 0.000000
-			, dblColumn3_7 = 0.000000
-			, dblColumn1_8 = 0.000000
-			, dblColumn2_8 = 0.000000
-			, dblColumn3_8 = 0.000000
-			, dblColumn1_9a = 0.000000
-			, dblColumn2_9a = 0.000000
-			, dblColumn3_9a = 0.000000
-			, dblColumn1_9b = 0.000000
-			, dblColumn2_9b = 0.000000
-			, dblColumn3_9b = 0.000000
-			, dblColumn1_10 = 0.000000
-			, dblColumn2_10 = 0.000000
-			, dblColumn3_10 = 0.000000
-			, dblColumn1_11 = 0.000000
-			, dblColumn2_11 = 0.000000
-			, dblColumn3_11 = 0.000000
-			, dblColumn1_12 = 0.000000
-			, dblColumn2_12 = 0.000000
-			, dblColumn3_12 = 0.000000
-			, dblColumn1_13 = 0.000000
-			, dblColumn2_13 = 0.000000
-			, dblColumn3_13 = 0.000000
-			, dblColumn1_14 = 0.000000
-			, dblColumn2_14 = 0.000000
-			, dblColumn3_14 = 0.000000
-			, [RMFT-5-US-Line1Col1] = NULL
-			, [RMFT-5-US-Line1Col2] = NULL
-			, [RMFT-5-US-Line4Col1] = NULL
-			, [RMFT-5-US-Line4Col2] = NULL
-			, [RMFT-5-US-Line9Col1] = NULL
-			, [RMFT-5-US-Line9Col2] = NULL
-			, [RMFT-5-US-USTRate] = NULL
-			, [RMFT-5-US-EIFRate] = NULL
-			, [RMFT-5-US-ColDisc] = NULL
-			, [RMFT-5-US-RecLicense] = NULL
-			, [RMFT-5-US-Line18] = NULL
-		RETURN;
-	END
-	ELSE
+	DECLARE @dblLine1_Col1 NUMERIC =0
+		, @dblLine1_Col2 NUMERIC = 0
+		, @dblLine2a_Col1 NUMERIC = 0
+		, @dblLine2a_Col2 NUMERIC = 0
+		, @dblLine2b_Col1 NUMERIC = 0
+		, @dblLine2b_Col2 NUMERIC = 0
+		, @dblLine3_Col1 NUMERIC = 0
+		, @dblLine3_Col2 NUMERIC = 0
+		, @dblLine4_Col1 NUMERIC = 0
+		, @dblLine4_Col2 NUMERIC = 0
+		, @dblLine5_Col1 NUMERIC = 0
+		, @dblLine5_Col2 NUMERIC = 0
+		, @dblLine6a_Col1 NUMERIC = 0
+		, @dblLine6b_Col1 NUMERIC = 0
+		, @dblLine6b_Col2 NUMERIC = 0
+		, @dblLine6c_Col1 NUMERIC = 0
+		, @dblLine7_Col1 NUMERIC = 0
+		, @dblLine7_Col2 NUMERIC = 0
+		, @dblLine8_Col1 NUMERIC = 0
+		, @dblLine8_Col2 NUMERIC = 0
+		, @dblLine9_Col1 NUMERIC = 0
+		, @dblLine9_Col2 NUMERIC = 0
+		, @dblLine10_Col1 NUMERIC = 0
+		, @dblLine10_Col2 NUMERIC = 0
+		, @dblLine11_Col1 NUMERIC = 0
+		, @dblLine11_Col2 NUMERIC = 0
+		, @dblLine12_Col1 NUMERIC = 0
+		, @dblLine12_Col2 NUMERIC = 0
+		, @dblLine13_Col1 NUMERIC = 0
+		, @dblLine13_Col2 NUMERIC = 0
+		, @dblLine14 NUMERIC = 0
+		, @dblLine15a NUMERIC(18,6) = 0
+		, @dblLine15b NUMERIC(18,6) = 0
+		, @dblLine15c NUMERIC(18,6) = 0
+		, @dblLine16 NUMERIC(18,6) = 0
+		, @dblLine17 NUMERIC(18,6) = 0
+		, @dblLine18 NUMERIC(18,6) = 0
+		, @dblLine19 NUMERIC(18,6) = 0
+		, @dblUstRate NUMERIC(18,6) = 0
+		, @dblEifRate NUMERIC(18,6) = 0
+		, @dblColDisc NUMERIC(18,6) = 0
+		, @strRecLicense NVARCHAR(50)
+		, @dtmFrom DATE 
+		, @dtmTo DATE
+ 
+	IF (ISNULL(@xmlParam,'') != '')
 	BEGIN
 
-		DECLARE @idoc INT
-		EXEC sp_xml_preparedocument @idoc OUTPUT, @XMLParam
+		DECLARE @Guid NVARCHAR(250),
+			@idoc INT
+
+		EXEC sp_xml_preparedocument @idoc OUTPUT, @xmlParam
 		
 		DECLARE @Params TABLE ([fieldname] NVARCHAR(50)
 				, condition NVARCHAR(20)      
@@ -104,7 +122,7 @@ BEGIN TRY
 				, [begingroup] NVARCHAR(50)
 				, [endgroup] NVARCHAR(50) 
 				, [datatype] NVARCHAR(50)) 
-        
+ 
 		INSERT INTO @Params
 		SELECT *
 		FROM OPENXML(@idoc, 'xmlparam/filters/filter',2)
@@ -117,14 +135,151 @@ BEGIN TRY
 			, [endgroup] NVARCHAR(50)
 			, [datatype] NVARCHAR(50))
 
-		SELECT TOP 1 @FormCodeParam = [from] FROM @Params WHERE [fieldname] = 'FormCodeParam'
-		SELECT TOP 1 @ScheduleCodeParam = [from] FROM @Params WHERE [fieldname] = 'ScheduleCodeParam'
-		SELECT TOP 1 @ReportingComponentId = [from] FROM @Params WHERE [fieldname] = 'ReportingComponentId'
-		SELECT TOP 1 @Refresh = [from] FROM @Params WHERE [fieldname] = 'Refresh'
+		SELECT TOP 1 @Guid = [from] FROM @Params WHERE [fieldname] = 'strGuid'
+
+
+		SELECT @dblUstRate = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(decimal(18,6), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RRMFT-5-US-USTRate'
+		SELECT @dblEifRate = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(decimal(18,6), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-US-EIFRate'
+		SELECT @dblColDisc = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(decimal(18,6), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-US-ColDisc'	
+		SELECT @strRecLicense = ISNULL(strConfiguration, '') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-US-RecLicense'
+		SELECT @dtmFrom = MIN(dtmReportingPeriodBegin) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid
+		SELECT @dtmTo = MAX(dtmReportingPeriodEnd) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid
+	
+		-- Line 1
+		SELECT @dblLine1_Col1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC, strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-US-Line1Col1'
+		SELECT @dblLine1_Col2 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC, strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-US-Line1Col2'
+
+		-- Line 2a
+		SELECT @dblLine2a_Col1 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode IN ('A','DA','SA')
+		SELECT @dblLine2a_Col2 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode = 'LA'
+
+		-- Line 2b
+		SELECT @dblLine2b_Col1 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode IN ('E','SE','LE') AND strType = 'Dyed Diesel'
+		SELECT @dblLine2b_Col2 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode = 'LE' AND strType = 'Dyed Diesel'
+
+		-- Line 3
+		SET @dblLine3_Col1 = ISNULL(@dblLine1_Col1, 0) +  ISNULL(@dblLine2a_Col1, 0) +  ISNULL(@dblLine2b_Col1, 0) 
+		SET @dblLine3_Col2 =  ISNULL(@dblLine1_Col2, 0) +  ISNULL(@dblLine2a_Col2, 0) +  ISNULL(@dblLine2b_Col2, 0)
+
+		-- Line 4
+		SELECT @dblLine4_Col1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC, strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-US-Line4Col1'
+		SELECT @dblLine4_Col2 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC, strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-US-Line4Col2'
+
+		-- Line 5
+		SET @dblLine5_Col1 = ISNULL(@dblLine4_Col1, 0) -  ISNULL(@dblLine3_Col1, 0)
+		SET @dblLine5_Col2 = ISNULL(@dblLine4_Col2, 0) -  ISNULL(@dblLine3_Col2, 0)
+
+		-- Line 6a
+		SELECT @dblLine6a_Col1 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode = 'LB' AND strType = 'Diesel Sold to Railroads'
 		
+		-- Line 6b
+		SELECT @dblLine6b_Col1 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode = 'LB' AND strType = 'Kerosene Sold to Air Carriers'
+		SELECT @dblLine6b_Col2 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode = 'LB' AND strType IN ('Aviation Fuel', '1-K Kerosene Sold to Air Carriers')
+	
+		-- Line 6c
+		SELECT @dblLine6c_Col1 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode = 'LB' AND strType = 'Diesel Sold to Ships'
+
+		-- Line 7
+		SELECT @dblLine7_Col1 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode IN ('C','DC','SC')
+		SELECT @dblLine7_Col2 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode = 'LC'
+
+		-- Line 8
+		SELECT @dblLine8_Col1 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode IN ('D','DD','SD')
+		SELECT @dblLine8_Col2 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode = 'LD'
+
+		-- Line 9
+		SELECT @dblLine9_Col1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC, strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-US-Line9Col1'
+		SELECT @dblLine9_Col2 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC, strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-US-Line9Col2'
+
+		-- Line 10
+		SET @dblLine10_Col1 = ISNULL(@dblLine6a_Col1, 0) + ISNULL(@dblLine6b_Col1, 0) + ISNULL(@dblLine6c_Col1, 0) + ISNULL(@dblLine7_Col1, 0) + ISNULL(@dblLine8_Col1, 0) + ISNULL(@dblLine9_Col1, 0)
+		SET @dblLine10_Col2 = ISNULL(@dblLine6b_Col2, 0) + ISNULL(@dblLine7_Col2, 0) + ISNULL(@dblLine8_Col2, 0) + ISNULL(@dblLine9_Col2, 0)
+
+		-- Line 11
+		SET @dblLine11_Col1 = ISNULL(@dblLine5_Col1, 0) - ISNULL(@dblLine10_Col1, 0)
+		SET @dblLine11_Col2 = ISNULL(@dblLine5_Col2, 0) + ISNULL(@dblLine10_Col2, 0)
+
+		-- Line 12
+		SET @dblLine12_Col1 = @dblLine2b_Col1
+		SET @dblLine12_Col2 = @dblLine2b_Col2
+
+		-- Line 13
+		SET @dblLine13_Col1 = ISNULL(@dblLine11_Col1, 0) - ISNULL(@dblLine12_Col1, 0)
+		SET @dblLine13_Col2 = ISNULL(@dblLine11_Col2, 0) + ISNULL(@dblLine12_Col2, 0)
+
+		-- Line 14
+		SET @dblLine14 = ISNULL(@dblLine13_Col1, 0) - ISNULL(@dblLine13_Col2, 0)
+
+		-- Line 15
+		IF  @dblLine14 > 0
+		BEGIN
+			SET @dblLine15a = @dblLine14 * @dblUstRate
+			SET @dblLine15b = @dblLine14 * @dblEifRate
+			SET @dblLine15c = @dblLine15a + @dblLine15b
+		END
+
+		-- Line 16
+		SET @dblLine16 = @dblLine15c * @dblColDisc
+
+		-- Line 17
+		SET @dblLine17 = @dblLine15c - @dblLine16
+
+		-- Line 18
+		SELECT @dblLine18 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC, strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-US-Line18'
+
+		-- Line 19
+		SET @dblLine19 = @dblLine17 - @dblLine18
 
 	END
 
+	INSERT INTO @Output VALUES(
+		@dblLine1_Col1
+		, @dblLine1_Col2
+		, @dblLine2a_Col1
+		, @dblLine2a_Col2
+		, @dblLine2b_Col1
+		, @dblLine2b_Col2
+		, @dblLine3_Col1
+		, @dblLine3_Col2
+		, @dblLine4_Col1
+		, @dblLine4_Col2
+		, @dblLine5_Col1
+		, @dblLine5_Col2
+		, @dblLine6a_Col1
+		, @dblLine6b_Col1
+		, @dblLine6b_Col2
+		, @dblLine6c_Col1
+		, @dblLine7_Col1
+		, @dblLine7_Col2
+		, @dblLine8_Col1
+		, @dblLine8_Col2
+		, @dblLine9_Col1
+		, @dblLine9_Col2
+		, @dblLine10_Col1
+		, @dblLine10_Col2
+		, @dblLine11_Col1
+		, @dblLine11_Col2
+		, @dblLine12_Col1
+		, @dblLine12_Col2
+		, @dblLine13_Col1
+		, @dblLine13_Col2
+		, @dblLine14
+		, @dblLine15a
+		, @dblLine15b
+		, @dblLine15c
+		, @dblLine16
+		, @dblLine17
+		, @dblLine18
+		, @dblLine19
+		, @dblUstRate
+		, @dblEifRate
+		, @dblColDisc
+		, @strRecLicense
+		, @dtmFrom 
+		, @dtmTo)
+
+	SELECT * FROM @Output
+	RETURN;
 
 END TRY
 BEGIN CATCH

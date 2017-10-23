@@ -24,13 +24,40 @@ IF OBJECT_ID(N'tempdb..#tmpAPAccountBalance') IS NOT NULL DROP TABLE #tmpAPAccou
 CREATE TABLE #tmpAPAccountBalance(strAccountId NVARCHAR(40), dblBalance DECIMAL(18,6))
 
 INSERT INTO #tmpAPAccountBalance
-SELECT
+/*SELECT
 	B.strAccountId,
 	--CAST(SUM(A.dblTotal) + SUM(A.dblInterest) - SUM(A.dblAmountPaid) - SUM(A.dblDiscount)AS DECIMAL(18,2)) AS dblBalance
 	CAST(SUM(A.dblAmountDue)AS DECIMAL(18,2)) as dblBalance
 FROM vyuAPPayables A
 INNER JOIN tblGLAccount B ON A.intAccountId = B.intAccountId
-GROUP BY B.strAccountId
+GROUP BY B.strAccountId*/
+
+SELECT * FROM (
+	SELECT 
+		 strAccountId
+		,SUM(dblAmountDue) dblBalance
+	FROM (
+		SELECT
+		A.intBillId
+		,A.intAccountId
+		,D.strAccountId
+		,tmpAgingSummaryTotal.dblAmountDue
+		FROM  
+		(
+			SELECT 
+			intBillId
+			,CAST((SUM(tmpAPPayables.dblTotal) + SUM(tmpAPPayables.dblInterest) - SUM(tmpAPPayables.dblAmountPaid) - SUM(tmpAPPayables.dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue
+			FROM (SELECT * FROM dbo.vyuAPPayables) tmpAPPayables 
+			GROUP BY intBillId
+		) AS tmpAgingSummaryTotal
+		LEFT JOIN dbo.tblAPBill A
+		ON A.intBillId = tmpAgingSummaryTotal.intBillId
+		LEFT JOIN dbo.tblGLAccount D ON  A.intAccountId = D.intAccountId
+		WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
+	) SubQuery
+	GROUP BY 
+	strAccountId
+) MainQuery	
 
 SELECT @balance = SUM(ISNULL(dblBalance, 0)) FROM #tmpAPAccountBalance
 

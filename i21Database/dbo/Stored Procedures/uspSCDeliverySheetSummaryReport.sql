@@ -5,6 +5,7 @@ BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
 	DECLARE @xmlDocumentId INT
 		,@intDeliverySheetId INT
+		,@intSplitId INT
 
 	SET @xmlParam = '  
 	<xmlparam>  
@@ -58,7 +59,9 @@ BEGIN TRY
 	FROM @temp_xml_table
 	WHERE [fieldname] = 'intDeliverySheetId'
 
-	EXEC uspSCDeliverySheetSummary @intDeliverySheetId
+	SELECT @intSplitId = intSplitId FROM tblSCDeliverySheet WHERE intDeliverySheetId = @intDeliverySheetId
+
+	EXEC uspSCDeliverySheetSummary @intDeliverySheetId, @intSplitId
 END TRY
 
 BEGIN CATCH

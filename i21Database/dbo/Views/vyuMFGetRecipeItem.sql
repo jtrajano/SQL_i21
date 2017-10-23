@@ -6,7 +6,7 @@ i.strItemNo,i.strDescription,ri.dblQuantity,um.strUnitMeasure strUOM,ri.dblLower
 sl.strName AS strStorageLocation,ct.strName AS strCommentType,ri.dtmValidFrom,ri.dtmValidTo,
 mg.strName AS strMarginBy,ri.dblMargin,ri.ysnCostAppliedAtInvoice,r.intLocationId,r.intItemId AS intRecipeHeaderItemId,ri.intItemId AS intRecipeIngredientItemId,ri.intRecipeItemTypeId,
 r.intCustomerId,r.ysnActive,
-RecipeSubItem.intItemId AS intSubstituteItemId
+RecipeSubItem.intSubstituteItemId AS intSubstituteItemId
 , SubstituteItem.strItemNo AS strSubstituteItemNo
 , SubstituteItem.strDescription AS strSubstituteItemDesc
 , ISNULL(RecipeSubItem.dblQuantity, 0) AS dblSubstituteItemQty

@@ -31,7 +31,7 @@ BEGIN
 			0 AS intReassignId,
 			0 AS intConcurrencyId
 			---------
-			
+
 	FROM	tblCTContractDetail	CD
 	JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId	
 	JOIn	tblEMEntity			EY	ON	EY.intEntityId			=	CH.intEntityId				LEFT
@@ -53,12 +53,12 @@ BEGIN
 				GROUP BY	intContractDetailId
 			)					SY	ON	SY.intContractDetailId	=	CD.intContractDetailId		LEFT
 	JOIN	(
-				SELECT		intPContractDetailId,ISNULL(SUM(dblPAllocatedQty),0)  AS dblAllocatedQty
+				SELECT		intPContractDetailId,ISNULL(SUM(dblPAllocatedQty),0)  AS dblAllocatedQty,MIN(intPUnitMeasureId) intAllocationUOMId
 				FROM		tblLGAllocationDetail 
 				Group By	intPContractDetailId
 			)					PA	ON	PA.intPContractDetailId		=	CD.intContractDetailId	LEFT	
 	JOIN	(
-				SELECT		intSContractDetailId,ISNULL(SUM(dblSAllocatedQty),0)  AS dblAllocatedQty
+				SELECT		intSContractDetailId,ISNULL(SUM(dblSAllocatedQty),0)  AS dblAllocatedQty,MIN(intPUnitMeasureId) intAllocationUOMId
 				FROM		tblLGAllocationDetail 
 				Group By	intSContractDetailId
 			)					SA	ON	SA.intSContractDetailId		=	CD.intContractDetailId	LEFT

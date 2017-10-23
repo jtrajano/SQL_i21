@@ -41,8 +41,9 @@ BEGIN TRY
 	INTO #tmpRC
 	FROM vyuTFGetReportingComponent
 	WHERE intReportingComponentId IN (SELECT Item COLLATE Latin1_General_CI_AS FROM dbo.fnSplitStringWithTrim(@ReportingComponentId, ','))
-		AND strScheduleName != 'Main Form'
-		AND strType != 'EDI'
+		AND intComponentTypeId = 1
+		--AND strScheduleName != 'Main Form'
+		--AND strType != 'EDI'
 	ORDER BY strFormCode, strScheduleCode, strType, strTransactionType
 
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpRC)
@@ -88,7 +89,8 @@ BEGIN TRY
 	INTO #tmpMain
 	FROM vyuTFGetReportingComponent
 	WHERE intReportingComponentId IN (SELECT Item COLLATE Latin1_General_CI_AS FROM dbo.fnSplitStringWithTrim(@ReportingComponentId, ','))
-		AND strScheduleName = 'Main Form'
+		AND intComponentTypeId = 2
+		AND strFormCode NOT IN ('RMFT-5')
 	ORDER BY strFormCode, strScheduleCode, strType, strTransactionType
 
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpMain)

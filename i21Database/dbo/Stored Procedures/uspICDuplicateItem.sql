@@ -163,6 +163,7 @@ BEGIN
 		dblFullContainerSize,
 		strCostType,
 		intM2MComputationId,
+		ysnUseWeighScales ,
 		intTonnageTaxUOMId)
 	SELECT @NewItemNo,
 		strType,
@@ -296,6 +297,7 @@ BEGIN
 		dblFullContainerSize,
 		strCostType,
 		intM2MComputationId,
+		ysnUseWeighScales ,
 		intTonnageTaxUOMId
 	FROM tblICItem
 	WHERE intItemId = @ItemId

@@ -245,7 +245,7 @@ BEGIN
 			AND G.apchk_cbk_no = A.apivc_cbk_no
 			--AND G.apchk_chk_amt <> 0
 	) PaymentInfo
-	WHERE 1 = CASE WHEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
+	WHERE 1 = CASE WHEN ISDATE(A.apivc_gl_rev_dt) = 1 AND CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
 	AND A.apivc_comment IN ('CCD Reconciliation', 'CCD Reconciliation Reversal') AND A.apivc_status_ind = 'U'
 	AND A.apivc_trans_type IN ('I', 'C', 'A')
 	AND NOT EXISTS(

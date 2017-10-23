@@ -25,9 +25,8 @@ FROM	tblICItem Item
 		OUTER APPLY (
 			SELECT 
 					t.intItemLocationId
-					, t.intInTransitSourceLocationId
+					, intInTransitSourceLocationId = CASE WHEN t.intItemLocationId <> t.intInTransitSourceLocationId THEN t.intInTransitSourceLocationId ELSE NULL END 
 					, t.intSubLocationId
-					--, t.intStorageLocationId
 					, dblQuantity = SUM(t.dblQty * t.dblUOMQty) 
 					, dblValue = SUM(ROUND(ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0), 2))
 					, strStockUOM = umStock.strUnitMeasure
@@ -42,9 +41,8 @@ FROM	tblICItem Item
 			WHERE	Item.intItemId = t.intItemId
 			GROUP BY 
 				t.intItemLocationId
-				,t.intInTransitSourceLocationId
+				,CASE WHEN t.intItemLocationId <> t.intInTransitSourceLocationId THEN t.intInTransitSourceLocationId ELSE NULL END  
 				,t.intSubLocationId
-				--,t.intStorageLocationId
 				,umStock.strUnitMeasure
 		) t							
 		LEFT JOIN (

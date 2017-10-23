@@ -2555,10 +2555,10 @@ IF @Post = 1
 			--	 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 			--	,strBatchID					= @BatchId
 			--	,intAccountId				= IST.intCOGSAccountId
-			--	,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (D.dblBasePrice * D.dblQtyShipped) ELSE 0 END
-			--	,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (D.dblBasePrice * D.dblQtyShipped) END
-			--	,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN [dbo].[fnCalculateQtyBetweenUOM](D.intItemUOMId, ICIS.intStockUOMId, D.dblQtyShipped) ELSE 0 END
-			--	,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE [dbo].[fnCalculateQtyBetweenUOM](D.intItemUOMId, ICIS.intStockUOMId, D.dblQtyShipped) END								
+			--	,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) ELSE 0 END
+			--	,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) END
+			--	,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] ELSE 0 END
+			--	,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] END								
 			--	,strDescription				= A.strComments
 			--	,strCode					= @CODE
 			--	,strReference				= C.strCustomerNumber
@@ -2577,15 +2577,15 @@ IF @Post = 1
 			--	,strTransactionForm			= @SCREEN_NAME
 			--	,strModuleName				= @MODULE_NAME
 			--	,intConcurrencyId			= 1
-			--	,[dblDebitForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (D.dblPrice * D.dblQtyShipped) ELSE 0 END
-			--	,[dblDebitReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (D.dblPrice * D.dblQtyShipped) ELSE 0 END
-			--	,[dblCreditForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (D.dblPrice * D.dblQtyShipped) END
-			--	,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (D.dblPrice * D.dblQtyShipped) END
+			--	,[dblDebitForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) ELSE 0 END
+			--	,[dblDebitReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) ELSE 0 END
+			--	,[dblCreditForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) END
+			--	,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) END
 			--	,[dblReportingRate]			= D.dblCurrencyExchangeRate
 			--	,[dblForeignRate]			= D.dblCurrencyExchangeRate
 			--	,[strRateType]				= SMCERT.strCurrencyExchangeRateType 
 			--FROM
-			--	(SELECT intInvoiceId, intInvoiceDetailId, intItemId, dblQtyShipped, intItemUOMId, strItemDescription, intShipmentPurchaseSalesContractId, dblTotal,
+			--	(SELECT intInvoiceId, intInvoiceDetailId, intItemId, dblQtyShipped, intItemUOMId, strItemDescription, intLoadDetailId, dblTotal,
 			--			intCurrencyExchangeRateTypeId, dblPrice, dblCurrencyExchangeRate, dblBasePrice
 			--	 FROM tblARInvoiceDetail WITH (NOLOCK)) D
 			--INNER JOIN			
@@ -2606,14 +2606,16 @@ IF @Post = 1
 			--	(SELECT intInvoiceId FROM @PostInvoiceData)	P
 			--		ON A.intInvoiceId = P.intInvoiceId				
 			--INNER JOIN
-			--	(SELECT intShipmentId, intPContractDetailId, intShipmentPurchaseSalesContractId FROM vyuLGDropShipmentDetails WITH (NOLOCK)) ISD
-			--		ON 	D.intShipmentPurchaseSalesContractId = ISD.intShipmentPurchaseSalesContractId
+			--	(SELECT intLoadId, intLoadDetailId FROM tblLGLoadDetail WITH (NOLOCK)) ISD
+			--		ON 	D.intLoadDetailId = ISD.intLoadDetailId
 			--INNER JOIN
-			--	(SELECT intShipmentId FROM vyuLGShipmentHeader WITH (NOLOCK)) ISH
-			--		ON ISD.intShipmentId = ISH.intShipmentId
-			--INNER JOIN
-			--	(SELECT intContractDetailId, dblCashPrice FROM vyuCTContractDetailView WITH (NOLOCK)) ICT
-			--		ON ISD.intPContractDetailId = ICT.intContractDetailId  
+			--	(SELECT intLoadId, strLoadNumber FROM tblLGLoad WITH (NOLOCK)) ISH
+			--		ON ISD.intLoadId = ISH.intLoadId
+			--INNER JOIN (SELECT [intItemId], [intTransactionId], [dblQty], [intTransactionDetailId], [dblUOMQty], [dblCost], [strTransactionId], [ysnIsUnposted] FROM tblICInventoryTransaction WITH (NOLOCK)) ICIT
+			--		ON ICIT.[intTransactionId] = ISH.[intLoadId] 
+			--		AND ICIT.[intTransactionDetailId] = ISD.[intLoadDetailId] 
+			--		AND ICIT.[strTransactionId] = ISH.strLoadNumber 
+			--		AND ICIT.[ysnIsUnposted] = 0	 
 			--LEFT OUTER JOIN
 			--	(SELECT intItemId, intLocationId, intStockUOMId FROM vyuICGetItemStock WITH (NOLOCK)) ICIS
 			--		ON D.intItemId = ICIS.intItemId 
@@ -2629,7 +2631,7 @@ IF @Post = 1
 			--		ON D.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId	
 			--WHERE
 			--	D.dblTotal <> @ZeroDecimal
-			--	AND D.intShipmentPurchaseSalesContractId IS NOT NULL AND D.intShipmentPurchaseSalesContractId <> 0				
+			--	AND D.intLoadDetailId IS NOT NULL AND D.intLoadDetailId <> 0				
 			--	AND D.intItemId IS NOT NULL AND D.intItemId <> 0
 			--	AND ISNULL(IST.strType,'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle')
 			--	AND A.strTransactionType <> 'Debit Memo'
@@ -2640,10 +2642,10 @@ IF @Post = 1
 			--	 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 			--	,strBatchID					= @BatchId
 			--	,intAccountId				= IST.intInventoryInTransitAccountId
-			--	,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (D.dblPrice * D.dblQtyShipped) END
-			--	,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (D.dblPrice * D.dblQtyShipped) ELSE 0 END
-			--	,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE [dbo].[fnCalculateQtyBetweenUOM](D.intItemUOMId, ICIS.intStockUOMId, D.dblQtyShipped) END
-			--	,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN [dbo].[fnCalculateQtyBetweenUOM](D.intItemUOMId, ICIS.intStockUOMId, D.dblQtyShipped) ELSE 0 END								
+			--	,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) END
+			--	,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) ELSE 0 END
+			--	,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] END
+			--	,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] ELSE 0 END								
 			--	,strDescription				= A.strComments
 			--	,strCode					= @CODE
 			--	,strReference				= C.strCustomerNumber
@@ -2662,15 +2664,15 @@ IF @Post = 1
 			--	,strTransactionForm			= @SCREEN_NAME
 			--	,strModuleName				= @MODULE_NAME
 			--	,intConcurrencyId			= 1
-			--	,[dblDebitForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (D.dblPrice * D.dblQtyShipped) END
-			--	,[dblDebitReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (D.dblPrice * D.dblQtyShipped) END
-			--	,[dblCreditForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (D.dblPrice * D.dblQtyShipped) ELSE 0 END
-			--	,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (D.dblPrice * D.dblQtyShipped) ELSE 0 END
+			--	,[dblDebitForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) END
+			--	,[dblDebitReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) END
+			--	,[dblCreditForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) ELSE 0 END
+			--	,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) ELSE 0 END
 			--	,[dblReportingRate]			= D.dblCurrencyExchangeRate
 			--	,[dblForeignRate]			= D.dblCurrencyExchangeRate
 			--	,[strRateType]				= SMCERT.strCurrencyExchangeRateType 
 			--FROM
-			--	(SELECT intInvoiceId, intInvoiceDetailId, intItemId, strItemDescription, dblQtyShipped,  intItemUOMId, intShipmentPurchaseSalesContractId, dblTotal,
+			--	(SELECT intInvoiceId, intInvoiceDetailId, intItemId, strItemDescription, dblQtyShipped,  intItemUOMId, intLoadDetailId, dblTotal,
 			--			intCurrencyExchangeRateTypeId, dblPrice, dblCurrencyExchangeRate
 			--	 FROM tblARInvoiceDetail WITH (NOLOCK)) D
 			--INNER JOIN			
@@ -2691,14 +2693,16 @@ IF @Post = 1
 			--	(SELECT intInvoiceId FROM @PostInvoiceData)	P
 			--		ON A.intInvoiceId = P.intInvoiceId				
 			--INNER JOIN
-			--	(SELECT intShipmentId, intPContractDetailId, intShipmentPurchaseSalesContractId FROM vyuLGDropShipmentDetails WITH (NOLOCK)) ISD
-			--		ON 	D.intShipmentPurchaseSalesContractId = ISD.intShipmentPurchaseSalesContractId
+			--	(SELECT intLoadId, intLoadDetailId FROM tblLGLoadDetail WITH (NOLOCK)) ISD
+			--		ON 	D.intLoadDetailId = ISD.intLoadDetailId
 			--INNER JOIN
-			--	(SELECT intShipmentId FROM vyuLGShipmentHeader WITH (NOLOCK)) ISH
-			--		ON ISD.intShipmentId = ISH.intShipmentId
-			--INNER JOIN
-			--	(SELECT intContractDetailId, dblCashPrice FROM vyuCTContractDetailView WITH (NOLOCK)) ICT
-			--		ON ISD.intPContractDetailId = ICT.intContractDetailId  
+			--	(SELECT intLoadId, strLoadNumber FROM tblLGLoad WITH (NOLOCK)) ISH
+			--		ON ISD.intLoadId = ISH.intLoadId
+			--INNER JOIN (SELECT [intItemId], [intTransactionId], [dblQty], [intTransactionDetailId], [dblUOMQty], [dblCost], [strTransactionId], [ysnIsUnposted] FROM tblICInventoryTransaction WITH (NOLOCK)) ICIT
+			--		ON ICIT.[intTransactionId] = ISH.[intLoadId] 
+			--		AND ICIT.[intTransactionDetailId] = ISD.[intLoadDetailId] 
+			--		AND ICIT.[strTransactionId] = ISH.strLoadNumber 
+			--		AND ICIT.[ysnIsUnposted] = 0
 			--LEFT OUTER JOIN
 			--	(SELECT intItemId, intLocationId, intStockUOMId FROM vyuICGetItemStock WITH (NOLOCK)) ICIS
 			--		ON D.intItemId = ICIS.intItemId 
@@ -2714,7 +2718,7 @@ IF @Post = 1
 			--		ON D.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId
 			--WHERE
 			--	D.dblTotal <> @ZeroDecimal
-			--	AND D.intShipmentPurchaseSalesContractId IS NOT NULL AND D.intShipmentPurchaseSalesContractId <> 0				
+			--	AND D.intLoadDetailId IS NOT NULL AND D.intLoadDetailId <> 0				
 			--	AND D.intItemId IS NOT NULL AND D.intItemId <> 0
 			--	AND ISNULL(IST.strType,'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle')
 			--	AND A.strTransactionType <> 'Debit Memo'

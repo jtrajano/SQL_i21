@@ -137,7 +137,7 @@ SELECT
 	A.intPaymentId
 FROM #tmpPayablePostData A
 INNER JOIN tblAPPayment B ON A.intPaymentId = B.intPaymentId
-WHERE B.ysnPrepay = 1
+WHERE B.ysnPrepay = 1 
 
 --GET ALL PAYMENTS
 INSERT INTO @payments
@@ -214,17 +214,213 @@ IF @transCount = 0 BEGIN TRANSACTION
 
 IF ISNULL(@post,0) = 1
 BEGIN
-	INSERT INTO @GLEntries
-	SELECT * FROM dbo.[fnAPCreatePaymentGLEntries](@payments, @userId, @batchId)
+	INSERT INTO @GLEntries(
+	[dtmDate],
+	[strBatchId],
+	[intAccountId],
+	[dblDebit],
+	[dblCredit],
+	[dblDebitUnit],
+	[dblCreditUnit],
+	[strDescription],
+	[strCode],    
+	[strReference],
+	[intCurrencyId],
+	[dblExchangeRate],
+	[dtmDateEntered] ,
+	[dtmTransactionDate],
+	[strJournalLineDescription],
+	[intJournalLineNo],
+	[ysnIsUnposted],    
+	[intUserId],
+	[intEntityId],
+	[strTransactionId],
+	[intTransactionId],
+	[strTransactionType],
+	[strTransactionForm],
+	[strModuleName],
+	[intConcurrencyId],
+	[dblDebitForeign],
+    [dblDebitReport],
+    [dblCreditForeign],
+    [dblCreditReport],
+    [dblReportingRate],
+    [dblForeignRate],
+	[strRateType])	
+	SELECT 
+	[dtmDate]     ,
+	[strBatchId]  ,
+	[intAccountId],
+	[dblDebit]  ,
+	[dblCredit] ,
+	[dblDebitUnit],
+	[dblCreditUnit],
+	[strDescription],
+	[strCode],    
+	[strReference],
+	[intCurrencyId],
+	[dblExchangeRate],
+	[dtmDateEntered] ,
+	[dtmTransactionDate],
+	[strJournalLineDescription],
+	[intJournalLineNo],
+	[ysnIsUnposted],    
+	[intUserId],
+	[intEntityId],
+	[strTransactionId],
+	[intTransactionId],
+	[strTransactionType],
+	[strTransactionForm],
+	[strModuleName],
+	[intConcurrencyId],
+	[dblDebitForeign],
+    [dblDebitReport],
+    [dblCreditForeign],
+    [dblCreditReport],
+    [dblReportingRate],
+    [dblForeignRate],
+	[strRateType]
+	FROM dbo.[fnAPCreatePaymentGLEntries](@payments, @userId, @batchId)
 	UNION ALL
-	SELECT * FROM dbo.[fnAPCreatePaymentGLEntries](@prepayIds, @userId, @batchId) ORDER BY intTransactionId
+	SELECT 
+	[dtmDate],
+	[strBatchId],
+	[intAccountId],
+	[dblDebit],
+	[dblCredit],
+	[dblDebitUnit],
+	[dblCreditUnit],
+	[strDescription],
+	[strCode],    
+	[strReference],
+	[intCurrencyId],
+	[dblExchangeRate],
+	[dtmDateEntered] ,
+	[dtmTransactionDate],
+	[strJournalLineDescription],
+	[intJournalLineNo],
+	[ysnIsUnposted],    
+	[intUserId],
+	[intEntityId],
+	[strTransactionId],
+	[intTransactionId],
+	[strTransactionType],
+	[strTransactionForm],
+	[strModuleName],
+	[intConcurrencyId],
+	[dblDebitForeign],
+    [dblDebitReport],
+    [dblCreditForeign],
+    [dblCreditReport],
+    [dblReportingRate],
+    [dblForeignRate],
+	[strRateType]
+	FROM dbo.[fnAPCreatePaymentGLEntries](@prepayIds, @userId, @batchId) ORDER BY intTransactionId
 END
 ELSE
 BEGIN
-	INSERT INTO @GLEntries
-	SELECT * FROM dbo.fnAPReverseGLEntries(@payments, 'Payable', DEFAULT, @userId, @batchId)
+	INSERT INTO @GLEntries(
+	[dtmDate],
+	[strBatchId],
+	[intAccountId],
+	[dblDebit]  ,
+	[dblCredit] ,
+	[dblDebitUnit],
+	[dblCreditUnit],
+	[strDescription],
+	[strCode],    
+	[strReference],
+	[intCurrencyId],
+	[dblExchangeRate],
+	[dtmDateEntered] ,
+	[dtmTransactionDate],
+	[strJournalLineDescription],
+	[intJournalLineNo],
+	[ysnIsUnposted],    
+	[intUserId],
+	[intEntityId],
+	[strTransactionId],
+	[intTransactionId],
+	[strTransactionType],
+	[strTransactionForm],
+	[strModuleName],
+	[intConcurrencyId],
+	[dblDebitForeign],
+    [dblDebitReport],
+    [dblCreditForeign],
+    [dblCreditReport],
+    [dblReportingRate],
+    [dblForeignRate],
+	[strRateType])
+	SELECT 
+	[dtmDate],
+	[strBatchId]  ,
+	[intAccountId],
+	[dblDebit]  ,
+	[dblCredit] ,
+	[dblDebitUnit],
+	[dblCreditUnit],
+	[strDescription],
+	[strCode],    
+	[strReference],
+	[intCurrencyId],
+	[dblExchangeRate],
+	[dtmDateEntered] ,
+	[dtmTransactionDate],
+	[strJournalLineDescription],
+	[intJournalLineNo],
+	[ysnIsUnposted],    
+	[intUserId],
+	[intEntityId],
+	[strTransactionId],
+	[intTransactionId],
+	[strTransactionType],
+	[strTransactionForm],
+	[strModuleName],
+	[intConcurrencyId],
+	[dblDebitForeign],
+    [dblDebitReport],
+    [dblCreditForeign],
+    [dblCreditReport],
+    [dblReportingRate],
+    [dblForeignRate],
+	[strRateType]
+	FROM dbo.fnAPReverseGLEntries(@payments, 'Payable', DEFAULT, @userId, @batchId)
 	UNION ALL
-	SELECT * FROM dbo.fnAPReverseGLEntries(@prepayIds, 'Payable', DEFAULT, @userId, @batchId)
+	SELECT 
+	[dtmDate],
+	[strBatchId],
+	[intAccountId],
+	[dblDebit],
+	[dblCredit],
+	[dblDebitUnit],
+	[dblCreditUnit],
+	[strDescription],
+	[strCode],    
+	[strReference],
+	[intCurrencyId],
+	[dblExchangeRate],
+	[dtmDateEntered] ,
+	[dtmTransactionDate],
+	[strJournalLineDescription],
+	[intJournalLineNo],
+	[ysnIsUnposted],    
+	[intUserId],
+	[intEntityId],
+	[strTransactionId],
+	[intTransactionId],
+	[strTransactionType],
+	[strTransactionForm],
+	[strModuleName],
+	[intConcurrencyId],
+	[dblDebitForeign],
+    [dblDebitReport],
+    [dblCreditForeign],
+    [dblCreditReport],
+    [dblReportingRate],
+    [dblForeignRate],
+	[strRateType]
+	 FROM dbo.fnAPReverseGLEntries(@prepayIds, 'Payable', DEFAULT, @userId, @batchId)
 END
 
 --=====================================================================================================================================
@@ -277,28 +473,17 @@ BEGIN
 		--UPDATE BILL RECORDS
 		EXEC uspAPUpdateBillPayment @paymentIds = @payments, @post = @post
 	END
-
-	IF @lenOfSuccessPrePay > 0
-	BEGIN
-		--UPDATE tblAPPaymentDetail
-		EXEC uspAPUpdatePaymentAmountDue @paymentIds = @prepayIds, @post = @post
-		--UPDATE BILL RECORDS
-		EXEC uspAPUpdateBillPayment @paymentIds = @prepayIds, @post = @post
-	END
 	
 	--Update posted status
 	UPDATE tblAPPayment
 		SET		ysnPosted = @post
 	WHERE	intPaymentId IN (SELECT intId FROM @payments UNION ALL SELECT intId FROM @prepayIds)
 
-	--IF @lenOfSuccessPrePay > 0
-	--BEGIN
-	--	UPDATE A
-	--		SET A.ysnPosted = @post
-	--	FROM tblAPBill A
-	--	INNER JOIN tblAPPaymentDetail B ON A.intBillId = B.intBillId
-	--	WHERE B.intPaymentId IN (SELECT intId FROM @prepayIds)
-	--END
+	UPDATE A
+		SET A.ysnPrepayHasPayment = @post
+	FROM tblAPBill A
+	INNER JOIN tblAPPaymentDetail B ON A.intBillId = B.intBillId
+	WHERE B.intPaymentId IN (SELECT intId FROM @prepayIds)
 
 	--CREATE BANK TRANSACTION
 	DECLARE @paymentForBankTransaction AS Id

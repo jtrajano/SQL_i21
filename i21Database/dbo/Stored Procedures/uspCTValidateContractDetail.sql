@@ -133,7 +133,23 @@ BEGIN TRY
 				@dblNewScheduleQty		=	ISNULL(@dblNewScheduleQty,CD.dblScheduleQty),
 				@intNewNoOfLoad			=	ISNULL(@intNewNoOfLoad,CD.intNoOfLoad),
 				@intNewPricingTypeId	=	ISNULL(@intNewPricingTypeId,CD.intPricingTypeId),
-				@ysnLoad				=	ysnLoad
+				@ysnLoad				=	ysnLoad,
+				@intContractSeq			=	ISNULL(@intContractSeq,CD.intContractSeq),
+				@intNewItemId			=	ISNULL(@intNewItemId,CD.intItemId),			
+				@intNewCompanyLocationId=	ISNULL(@intNewCompanyLocationId,CD.intCompanyLocationId),
+				@dtmNewStartDate		=	ISNULL(@dtmNewStartDate,CD.dtmStartDate),
+				@dtmNewEndDate			=	ISNULL(@dtmNewEndDate,CD.dtmEndDate),
+				@intCreatedById			=	ISNULL(@intCreatedById,CD.intCreatedById),
+				@dtmCreated				=	ISNULL(@dtmCreated,CD.dtmCreated),
+				@intConcurrencyId		=	ISNULL(@intConcurrencyId,CD.intConcurrencyId),			
+				@intNewScheduleRuleId	=	ISNULL(@intNewScheduleRuleId,CD.intStorageScheduleRuleId),
+				@intNewSubLocationId	=	ISNULL(@intNewSubLocationId,CD.intSubLocationId),
+				@intNewItemContractId	=	ISNULL(@intNewItemContractId,CD.intItemContractId),
+				@intNewFutureMonthId	=	ISNULL(@intNewFutureMonthId,CD.intFutureMonthId),
+				@intNewProducerId		=	ISNULL(@intNewProducerId,CD.intProducerId),
+				@ysnSlice				=	ISNULL(@ysnSlice,CD.ysnSlice),
+				@intNewShipperId		=	ISNULL(@intNewShipperId,CD.intShipperId),
+				@intNewShippingLineId	=	ISNULL(@intNewShippingLineId,CD.intShippingLineId)
 
 		FROM	tblCTContractDetail	CD
 		JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId	LEFT

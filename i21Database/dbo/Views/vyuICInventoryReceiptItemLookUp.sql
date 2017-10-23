@@ -66,6 +66,9 @@ SELECT	ReceiptItem.intInventoryReceiptId
 				WHEN Receipt.intSourceType = 4 -- Settle Storage
 					THEN ISNULL(GrainStorageView.strStorageTicketNumber, '') 					
 
+				WHEN Receipt.intSourceType = 5
+					THEN SCDeliverySheet.strDeliverySheetNumber COLLATE Latin1_General_CI_AS
+
 				ELSE CAST(NULL AS NVARCHAR(50)) 
 				END
 			)
@@ -195,6 +198,7 @@ SELECT	ReceiptItem.intInventoryReceiptId
 		, strForexRateType = forexType.strCurrencyExchangeRateType
 		, intContainerWeightUOMId = LogisticsView.intWeightUOMId
 		, dblContainerWeightUOMConvFactor = LogisticsView.dblWeightUOMConvFactor
+		, Item.ysnLotWeightsRequired
 
 FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 			ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
@@ -342,3 +346,11 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 			WHERE	intCustomerStorageId = ReceiptItem.intSourceId 
 					AND Receipt.intSourceType = 4
 		) GrainStorageView
+
+		-- 8. Delivery Sheets
+		OUTER APPLY (
+			SELECT	strDeliverySheetNumber
+			FROM	tblSCDeliverySheet SCDeliverySheet
+			WHERE	SCDeliverySheet.intDeliverySheetId = ReceiptItem.intSourceId 
+					AND Receipt.intSourceType = 5 -- Delivery Sheets 		
+		) SCDeliverySheet

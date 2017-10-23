@@ -5,6 +5,11 @@ SELECT ItemLocation.intItemLocationId
 	, ItemLocation.intItemId
 	, Item.strItemNo
 	, strItemDescription = Item.strDescription
+	, Item.strType
+	, ItemCommodity.strCommodityCode
+	, ItemCategory.strCategoryCode
+	, ItemManufacturer.strManufacturer
+	, ItemBrand.strBrandName
 	, ItemLocation.intLocationId
 	, Location.strLocationName
 	, Location.strLocationType
@@ -13,9 +18,9 @@ SELECT ItemLocation.intItemLocationId
 	, strVendorName = Vendor.strName
 	, ItemLocation.strDescription
 	, ItemLocation.intCostingMethod
-	, strCostingMethod = (CASE WHEN intCostingMethod = 1 THEN 'AVG'
-								WHEN intCostingMethod = 2 THEN 'FIFO'
-								WHEN intCostingMethod = 3 THEN 'LIFO' END)
+	, strCostingMethod = (CASE WHEN ItemLocation.intCostingMethod = 1 THEN 'AVG'
+								WHEN ItemLocation.intCostingMethod = 2 THEN 'FIFO'
+								WHEN ItemLocation.intCostingMethod = 3 THEN 'LIFO' END)
 	, ItemLocation.intAllowNegativeInventory
 	, strAllowNegativeInventory = (CASE WHEN intAllowNegativeInventory = 1 THEN 'Yes'
 								WHEN intAllowNegativeInventory = 2 THEN 'Yes with Auto Write-Off'
@@ -90,6 +95,10 @@ SELECT ItemLocation.intItemLocationId
 FROM tblICItemLocation ItemLocation
 	INNER JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = ItemLocation.intLocationId
 	INNER JOIN tblICItem Item ON Item.intItemId = ItemLocation.intItemId
+	LEFT JOIN tblICCommodity ItemCommodity ON Item.intCommodityId = ItemCommodity.intCommodityId
+	LEFT JOIN tblICCategory ItemCategory ON Item.intCategoryId = ItemCategory.intCategoryId
+	LEFT JOIN tblICManufacturer ItemManufacturer ON Item.intManufacturerId = ItemManufacturer.intManufacturerId
+	LEFT JOIN tblICBrand ItemBrand ON Item.intBrandId = ItemBrand.intBrandId
 	LEFT JOIN vyuAPVendor Vendor ON Vendor.[intEntityId] = ItemLocation.intVendorId
 	LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = ItemLocation.intSubLocationId
 	LEFT JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLocationId = ItemLocation.intStorageLocationId

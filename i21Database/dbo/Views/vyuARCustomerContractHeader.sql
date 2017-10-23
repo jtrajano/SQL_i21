@@ -9,6 +9,9 @@ SELECT intContractHeaderId
 	 , dblAvailableQty	 = SUM(ISNULL(dblAvailableQty, 0))
 	 , ysnUnlimitedQuantity
 	 , strPricingType
+	 , intCurrencyId
+     , strCurrency
+
 FROM vyuARCustomerContract
 GROUP BY intContractHeaderId
        , intCompanyLocationId
@@ -19,4 +22,7 @@ GROUP BY intContractHeaderId
 	   , ysnUnlimitedQuantity
 	   , strPricingType
 	   , dblAvailableQty
+	   , intCurrencyId
+	   , strCurrency    
+
 HAVING dblAvailableQty > 0

@@ -29,4 +29,5 @@ CREATE TYPE [dbo].[ItemCostingTableType] AS TABLE
 	,[intInTransitSourceLocationId] INT NULL				-- If has value, it indicates where the item was coming from. 
 	,[intForexRateTypeId] INT NULL							-- Forex Rate Type used in the transaction. 
 	,[dblForexRate] NUMERIC(38, 20) NULL DEFAULT 1			-- Forex Rate used to convert the dblCost, dblValue, and dblSalesPirce to the foreign currency. All number fields here are assumed to be in functional currency value. 
+	,[intStorageScheduleTypeId] INT NULL					-- Storage schedule use for inventory shipment. 
 )

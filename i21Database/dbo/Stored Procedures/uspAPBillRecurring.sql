@@ -159,6 +159,8 @@ BEGIN
 		EXEC uspSMGetStartingNumber 18, @billRecordId OUT
 	ELSE IF @type = 2
 		EXEC uspSMGetStartingNumber 20, @billRecordId OUT
+	ELSE IF @type = 13
+		EXEC uspSMGetStartingNumber 124, @billRecordId OUT
 
 	UPDATE A
 		SET A.strBillId = @billRecordId

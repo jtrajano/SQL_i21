@@ -122,7 +122,7 @@ SELECT @intTimeOffRequestId = @intTransactionId
 			@udtSMEventsIn 
 		SELECT
 			@intUserId
-			,NULL
+			,intCalendarId = (SELECT TOP 1 intCalendarId from tblSMCalendars WHERE strCalendarName = 'Time Off' and strCalendarType = 'System')
 			,'Time Off - ' + ENT.strName
 			,'<table style="font-size: 14px;"><tbody>'
 				+ '<tr><td><strong>Time Off Type</strong></td><td>' + REPLACE(TTO.strTimeOff, '''', '''''') +'</td></tr>'

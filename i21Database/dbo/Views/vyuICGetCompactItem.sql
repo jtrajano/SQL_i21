@@ -54,6 +54,7 @@ SELECT
 	, ysnIsBasket			= Item.ysnIsBasket
 	, strDimensionUOM		= mfgDimensionUOM.strUnitMeasure
 	, strWeightUOM			= mfgWeightUOM.strUnitMeasure
+	, Item.ysnLotWeightsRequired
 FROM tblICItem Item
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId

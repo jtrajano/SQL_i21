@@ -46,6 +46,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\27_Language.sql
 :r .\SM\DefaultData\28_MultiCompany.sql
 :r .\SM\DefaultData\29_TransportationMode.sql
+:r .\SM\DefaultData\30_ImportFileHeader.sql
+:r .\SM\DefaultData\31_Calendar.sql
 :r .\SM\CreateEncryptionCertificateAndSymmetricKey.sql
 :r .\SM\CustomField.sql
 :r .\SM\1730_UpdateOriginSubMenusSorting.sql
@@ -58,6 +60,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1730_UpdateTicketManagementMenus.sql
 :r .\SM\1730_UpdatePayrollMenus.sql
 :r .\SM\1730_UpdateGeneralLedgerMenus.sql
+:r .\SM\1710_to_1730_UpdateHomePanelDashboard.sql
 :r .\SM\1730_UpdateManufacturingMenus.sql
 
 -- Canned Report
@@ -248,6 +251,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\DefaultDataBalance.sql
 :r .\AP\UpdatePrepayVoucherStatus.sql
 :r .\AP\UpdateTaxGroupId.sql
+:r .\AP\UpdateBillDetailRate.sql
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 
@@ -261,7 +265,10 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\18_FOBPointTypes.sql
 :r .\IC\19_M2MComputations.sql
 :r .\IC\20_UpdateContractItemStatuses.sql
+:r .\IC\21_Update_LotWeightsRequired_tblICItem.sql
+:r .\IC\22_Update_tblICTransferDetail_Description.sql
 :r .\IC\PopulateLotContainerNoAndCondition.sql
+:r .\IC\1740_DataFix_FixIntTransactionDetailId.sql
 
 -- Patronage
 :r .\PAT\DefaultData\1_AddDefaultLetters.sql 
@@ -271,6 +278,8 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\HD\DefaultData\2_Screen.sql
 :R .\HD\HDEntryDataFix.sql
 :R .\HD\CustomField.sql
+:R .\HD\RemoveHDObsoleteScreen.sql
+:R .\HD\RenameHDScreen.sql
 
 --CRM
 :R .\CRM\SplitCRMData.sql
@@ -384,6 +393,11 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\IL_Illinois.sql
 :r .\TF\DefaultData\NE_Nebraska.sql
 :r .\TF\DefaultData\MS_Mississippi.sql
+:r .\TF\DefaultData\LA_Louisiana.sql
+:r .\TF\DefaultData\MI_Michigan.sql
+:r .\TF\DefaultData\NC_NorthCarolina.sql
+:r .\TF\DefaultData\OR_Oregon.sql
+:r .\TF\DefaultData\WA_Washington.sql
 :r .\TF\DefaultData\AfterUpgradeCleanup.sql
 
 --Integration
@@ -404,5 +418,8 @@ print 'BEGIN POST DEPLOYMENT'
 
 --CCR
 :r .\CCR\SiteDataFix.sql
+
+--TR
+:r .\TR\RemoveObsoleteScreen.sql
 
 print 'END POST DEPLOYMENT'

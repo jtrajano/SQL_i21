@@ -190,6 +190,22 @@ BEGIN
 	) --MAKE SURE TO IMPORT CCD IF NOT YET IMPORTED
 END
 
+--GET ALL EXISTING INVOICE NUMBER IN apivcmst
+BEGIN
+INSERT INTO @log
+SELECT DISTINCT
+	 'Invoice no ' + CAST(A.aptrx_ivc_no AS NVARCHAR)  + ' found in origin table apivcmst.'
+FROM aptrxmst A WHERE
+aptrx_trans_type IN ('I', 'C', 'A')
+AND EXISTS (
+		SELECT 1 FROM apivcmst B
+	WHERE A.aptrx_ivc_no = B.apivc_ivc_no AND A.aptrx_vnd_no = B.apivc_vnd_no 
+)
+AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
+		 THEN CASE WHEN ISDATE(A.aptrx_gl_rev_dt) = 1 AND CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
+		 ELSE 1 END)
+END
+
 ----VERIFY IF VOUCHER'S VENDOR ORDER NUMBER HAVEN'T USED IN i21
 --INSERT INTO @log
 --SELECT
@@ -221,7 +237,7 @@ END
 --) Vouchers
 --WHERE 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
 --		THEN
---			CASE WHEN ISDATE(A.apivc_gl_rev_dt) = 1 AND CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo 
+--			CASE WHEN ISDATE(A.apivc_gl_rev_dt) = 1 AND `(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo 
 --				AND A.apivc_comment IN ('CCD Reconciliation', 'CCD Reconciliation Reversal') AND A.apivc_status_ind = 'U' THEN 1 ELSE 0 END
 --		ELSE 1 END)
 --AND A.apivc_trans_type IN ('I', 'C', 'A')

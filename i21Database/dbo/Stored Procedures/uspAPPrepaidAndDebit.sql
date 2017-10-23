@@ -205,13 +205,20 @@ CROSS APPLY
 	FROM tblAPBillDetail C
 	INNER JOIN tblCTContractHeader D ON C.intContractHeaderId = D.intContractHeaderId
 	CROSS APPLY (
-		SELECT SUM(dblTotal + dblTax) AS dblDetailTotal, SUM(dbo.fnAPGetVoucherDetailQty(C2.intBillDetailId)) AS dblTotalQtyReceived FROM dbo.tblAPBillDetail C2
-		WHERE C2.intContractHeaderId = C.intContractHeaderId AND C2.intItemId = C.intItemId and intBillId = @billId AND C2.intContractDetailId = C.intContractDetailId
+		SELECT SUM(dblTotal + dblTax) AS dblDetailTotal 
+			,SUM(dbo.fnAPGetVoucherDetailQty(C2.intBillDetailId)) AS dblTotalQtyReceived 
+		FROM dbo.tblAPBillDetail C2
+		WHERE C2.intContractHeaderId = C.intContractHeaderId AND C2.intItemId = C.intItemId 
+		AND intBillId = @billId AND C2.intContractDetailId = C.intContractDetailId
+		AND C2.intScaleTicketId = C.intScaleTicketId
 	) Total
 	WHERE intBillId = @billId 
-	AND C.intContractHeaderId = B.intContractHeaderId AND C.intItemId = B.intItemId AND B.intContractDetailId = C.intContractDetailId--FOR CONTRACT W/ ITEM
+	AND C.intContractHeaderId = B.intContractHeaderId 
+	AND C.intItemId = B.intItemId 
+	AND B.intContractDetailId = C.intContractDetailId--FOR CONTRACT W/ ITEM
+	AND B.intScaleTicketId = C.intScaleTicketId
 ) CurrentBill 
-WHERE A.intTransactionType IN (2)
+WHERE A.intTransactionType IN (2, 13)
 AND A.intEntityVendorId = @vendorId
 AND A.dblAmountDue != 0 --EXCLUDE THOSE FULLY APPLIED
 AND B.intContractHeaderId IS NOT NULL AND B.intItemId IS NOT NULL --GET ONLY THE PREPAYMENT FOR CONTRACT W/ ITEM
@@ -393,8 +400,11 @@ CROSS APPLY
 	FROM tblAPBillDetail C
 	LEFT JOIN tblCTContractHeader D ON C.intContractHeaderId = D.intContractHeaderId
 	CROSS APPLY (
-		SELECT SUM(dblTotal + dblTax) AS dblDetailTotal, SUM(dbo.fnAPGetVoucherDetailQty(C2.intBillDetailId)) AS dblTotalQtyReceived FROM dbo.tblAPBillDetail C2
-		WHERE /*C2.intContractHeaderId = C.intContractHeaderId AND C2.intItemId = C.intItemId and*/ intBillId = @billId
+		SELECT SUM(dblTotal + dblTax) AS dblDetailTotal
+			,SUM(dbo.fnAPGetVoucherDetailQty(C2.intBillDetailId)) AS dblTotalQtyReceived 
+			FROM dbo.tblAPBillDetail C2
+		WHERE /*C2.intContractHeaderId = C.intContractHeaderId AND C2.intItemId = C.intItemId and*/ 
+		intBillId = @billId
 	) Total
 	WHERE intBillId = @billId 
 	/*AND C.intContractHeaderId = B.intContractHeaderId  AND C.intItemId = B.intItemId*/ --FOR CONTRACT W/ ITEM

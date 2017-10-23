@@ -207,58 +207,79 @@ BEGIN
 			END
 		END
 
+		IF OBJECT_ID('tempdb..#tblCFTempInvoiceReportSummary') IS NOT NULL
+			BEGIN
+				DROP TABLE #tblCFTempInvoiceReportSummary
+			END
 
-		EXEC('
-		INSERT INTO tblCFInvoiceSummaryTempTable
-		(
-			 intDiscountScheduleId
-			,intTermsCode
-			,intTermsId
-			,intARItemId
-			,strDepartmentDescription
-			,strShortName
-			,strProductDescription
-			,strItemNumber
-			,strItemDescription
-			,dblTotalQuantity
-			,dblTotalGrossAmount
-			,dblTotalNetAmount
-			,dblTotalAmount
-			,dblTotalTaxAmount
-			,TotalFET
-			,TotalSET
-			,TotalSST
-			,TotalLC
-			,ysnIncludeInQuantityDiscount
-			,intAccountId
-			,intTransactionId
-		)
-		SELECT 
-			intDiscountScheduleId
-			,intTermsCode
-			,intTermsId
-			,intARItemId
-			,strDepartmentDescription
-			,strShortName
-			,strProductDescription
-			,strItemNumber
-			,strItemDescription
-			,dblTotalQuantity
-			,dblTotalGrossAmount
-			,dblTotalNetAmount
-			,dblTotalAmount
-			,dblTotalTaxAmount
-			,TotalFET
-			,TotalSET
-			,TotalSST
-			,TotalLC
-			,ysnIncludeInQuantityDiscount
-			,intAccountId
-			,intTransactionId
-		FROM vyuCFInvoiceReportSummary ' + @whereClause)
+		SELECT * INTO #tblCFTempInvoiceReportSummary FROM vyuCFInvoiceReportSummary
 
-		--SELECT  * FROM tblCFInvoiceSummaryTempTable
-		---EXEC('SELECT * FROM vyuCFInvoiceReportSummary ' + @whereClause)
+		BEGIN TRY
+			EXEC('
+			INSERT INTO tblCFInvoiceSummaryTempTable
+			(
+				 intDiscountScheduleId
+				,intTermsCode
+				,intTermsId
+				,intARItemId
+				,strDepartmentDescription
+				,strShortName
+				,strProductDescription
+				,strItemNumber
+				,strItemDescription
+				,dblTotalQuantity
+				,dblTotalGrossAmount
+				,dblTotalNetAmount
+				,dblTotalAmount
+				,dblTotalTaxAmount
+				,TotalFET
+				,TotalSET
+				,TotalSST
+				,TotalLC
+				,ysnIncludeInQuantityDiscount
+				,intAccountId
+				,intTransactionId
+			)
+			SELECT 
+				intDiscountScheduleId
+				,intTermsCode
+				,intTermsId
+				,intARItemId
+				,strDepartmentDescription
+				,strShortName
+				,strProductDescription
+				,strItemNumber
+				,strItemDescription
+				,dblTotalQuantity
+				,dblTotalGrossAmount
+				,dblTotalNetAmount
+				,dblTotalAmount
+				,dblTotalTaxAmount
+				,TotalFET
+				,TotalSET
+				,TotalSST
+				,TotalLC
+				,ysnIncludeInQuantityDiscount
+				,intAccountId
+				,intTransactionId
+			FROM #tblCFTempInvoiceReportSummary ' + @whereClause)
+
+			IF OBJECT_ID('tempdb..#tblCFTempInvoiceReportSummary') IS NOT NULL
+			BEGIN
+				DROP TABLE #tblCFTempInvoiceReportSummary
+			END
+
+		END TRY 
+		BEGIN CATCH
+
+			IF OBJECT_ID('tempdb..#tblCFTempInvoiceReportSummary') IS NOT NULL
+			BEGIN
+				DROP TABLE #tblCFTempInvoiceReportSummary
+			END
+			
+		END CATCH
+
+		
 	END
     
 END

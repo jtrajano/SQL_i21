@@ -11,14 +11,14 @@
 
 	@intEntityUserSecurityId - The user who is initiating the unpost. 
 
-	@intEntityUserSecurityId - A flag on whether to do a generate the recap information (@ysnRecap = 1) or not (@ysnRecap = 0). 
+	@AccountCategory_Cost_Adjustment - What contr-account GL account id to use when doing the unpost. 
 */
 CREATE PROCEDURE [dbo].[uspICUnpostCostAdjustment]
 	@intTransactionId AS INT
 	,@strTransactionId AS NVARCHAR(40)
-	,@strBatchId AS NVARCHAR(20)
+	,@strBatchId AS NVARCHAR(40)
 	,@intEntityUserSecurityId AS INT
-	,@ysnRecap AS BIT = 0 
+	,@AccountCategory_Cost_Adjustment AS NVARCHAR(50) = 'AP Clearing' 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -27,360 +27,294 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
--- Declare the cost types
-DECLARE @COST_ADJ_TYPE_Original_Cost AS INT = 1
-		,@COST_ADJ_TYPE_New_Cost AS INT = 2
-
--- Create the variables for transaction types used by costing. 
-DECLARE @INV_TRANS_TYPE_Auto_Negative AS INT = 1
-		,@INV_TRANS_TYPE_Write_Off_Sold AS INT = 2
-		,@INV_TRANS_TYPE_Revalue_Sold AS INT = 3
-
-		,@INV_TRANS_TYPE_Consume AS INT = 8
-		,@INV_TRANS_TYPE_Produce AS INT = 9
-		,@INV_TRANS_TYPE_Build_Assembly AS INT = 11
-		,@INV_TRANS_Inventory_Transfer AS INT = 12
-
-		,@INV_TRANS_TYPE_Cost_Adjustment AS INT = 26
-		,@INV_TRANS_TYPE_Revalue_WIP AS INT = 28
-		,@INV_TRANS_TYPE_Revalue_Produced AS INT = 29
-		,@INV_TRANS_TYPE_Revalue_Transfer AS INT = 30
-		,@INV_TRANS_TYPE_Revalue_Build_Assembly AS INT = 31
-
-		,@INV_TRANS_TYPE_Revalue_Item_Change AS INT = 36
-		,@INV_TRANS_TYPE_Revalue_Split_Lot AS INT = 37
-		,@INV_TRANS_TYPE_Revalue_Lot_Merge AS INT = 38
-		,@INV_TRANS_TYPE_Revalue_Lot_Move AS INT = 39
-		,@INV_TRANS_TYPE_Revalue_Shipment AS INT = 40
-
-
-DECLARE	@intItemId AS INT
-		,@intItemLocationId AS INT 
-
--- Create the temp table if it does not exists. 
-IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInvCostAdjustmentToReverse')) 
 BEGIN 
-	CREATE TABLE #tmpInvCostAdjustmentToReverse (
-		intInventoryTransactionId INT NOT NULL 
-		,intTransactionId INT NULL 
-		,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
-		,strRelatedTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
-		,intRelatedTransactionId INT NULL 
-		,intTransactionTypeId INT NOT NULL 
-		,intCostingMethod INT 
-		,intFobPointId TINYINT 
-	)
+	-- Create the variables for the internal transaction types used by costing. 
+	DECLARE	@INV_TRANS_TYPE_Cost_Adjustment AS INT = 26
+
+	-- Declare the cost types
+	DECLARE @COST_ADJ_TYPE_Original_Cost AS INT = 1
+			,@COST_ADJ_TYPE_New_Cost AS INT = 2
+			,@COST_ADJ_TYPE_Adjust_Value AS INT = 3
+			,@COST_ADJ_TYPE_Adjust_Sold AS INT = 4
+			,@COST_ADJ_TYPE_Adjust_WIP AS INT = 5
+			,@COST_ADJ_TYPE_Adjust_InTransit AS INT = 6
+			,@COST_ADJ_TYPE_Adjust_InTransit_Inventory AS INT = 7
+			,@COST_ADJ_TYPE_Adjust_InTransit_Sold AS INT = 8
+			,@COST_ADJ_TYPE_Adjust_InventoryAdjustment AS INT = 9
+END
+
+-- Validate 
+IF NOT EXISTS (
+	SELECT	TOP 1 1  
+	FROM	tblICInventoryTransaction t 
+	WHERE	t.intTransactionId = @intTransactionId
+			AND t.strTransactionId = @strTransactionId
+			AND t.ysnIsUnposted = 0 
+			AND t.intTransactionTypeId = @INV_TRANS_TYPE_Cost_Adjustment
+)
+BEGIN 
+	RETURN; 
 END 
 
--- Get all the inventory transaction related to the Unpost. 
--- While at it, update the ysnIsUnposted to true. 
--- Then grab the updated records and store it in #tmpInvCostAdjustmentToReverse 
-INSERT INTO #tmpInvCostAdjustmentToReverse (
-	intInventoryTransactionId
-	,intTransactionId
-	,strTransactionId
-	,intRelatedTransactionId
-	,strRelatedTransactionId
-	,intTransactionTypeId
-	,intCostingMethod
-	,intFobPointId
-)
-SELECT	Changes.intInventoryTransactionId
-		,Changes.intTransactionId
-		,Changes.strTransactionId
-		,Changes.intRelatedTransactionId
-		,Changes.strRelatedTransactionId
-		,Changes.intTransactionTypeId
-		,Changes.intCostingMethod 
-		,Changes.intFobPointId
 
-FROM	(
-			-- Merge will help us get the records we need to unpost and update it at the same time. 
-			MERGE	
-			INTO	dbo.tblICInventoryTransaction 
-			WITH	(HOLDLOCK) 
-			AS		inventory_transaction	
-			USING (
-				SELECT	strTransactionId = @strTransactionId
-						,intTransactionId = @intTransactionId
-			) AS Source_Query  
-				ON ISNULL(inventory_transaction.ysnIsUnposted, 0) = 0					
-				AND inventory_transaction.intTransactionTypeId IN (
-						@INV_TRANS_TYPE_Cost_Adjustment
-						, @INV_TRANS_TYPE_Revalue_Sold
-						, @INV_TRANS_TYPE_Revalue_WIP
-						, @INV_TRANS_TYPE_Revalue_Produced
-						, @INV_TRANS_TYPE_Revalue_Transfer
-						, @INV_TRANS_TYPE_Revalue_Build_Assembly
-						, @INV_TRANS_TYPE_Revalue_Item_Change 
-						, @INV_TRANS_TYPE_Revalue_Split_Lot 
-						, @INV_TRANS_TYPE_Revalue_Lot_Merge 
-						, @INV_TRANS_TYPE_Revalue_Lot_Move 
-						, @INV_TRANS_TYPE_Revalue_Shipment
-				)
-				AND 1 = 
-					CASE	WHEN	inventory_transaction.strTransactionId = Source_Query.strTransactionId 
-									AND inventory_transaction.intTransactionId = Source_Query.intTransactionId THEN 
-										1
-							WHEN	inventory_transaction.strRelatedTransactionId = Source_Query.strTransactionId 
-									AND inventory_transaction.intRelatedTransactionId = Source_Query.intTransactionId THEN	
-										1
-							ELSE 
-										0
-					END 					
-
-			-- If matched, update the ysnIsUnposted and set it to true (1) 
-			WHEN MATCHED THEN 
-				UPDATE 
-				SET		ysnIsUnposted = 1
-
-			OUTPUT	$action
-					, Inserted.intInventoryTransactionId
-					, Inserted.intTransactionId
-					, Inserted.strTransactionId
-					, Inserted.intRelatedTransactionId
-					, Inserted.strRelatedTransactionId
-					, Inserted.intTransactionTypeId
-					, Inserted.intCostingMethod
-					, Inserted.intFobPointId 
-		) AS Changes (
-			Action
-			, intInventoryTransactionId
-			, intTransactionId
-			, strTransactionId
-			, intRelatedTransactionId
-			, strRelatedTransactionId
-			, intTransactionTypeId
-			, intCostingMethod
-			, intFobPointId  
-		)
-WHERE	Changes.Action = 'UPDATE'
-;
-
-IF EXISTS (SELECT TOP 1 1 FROM #tmpInvCostAdjustmentToReverse) 
+-- Get the original cost adjustment value. 
 BEGIN 
-
-	-------------------------------------------------
-	-- Update the cost buckets. Reverse the cost. 
-	-------------------------------------------------
-	BEGIN 
-		-- Unpost the cost buckets for FIFO or Average Costing 
-		EXEC dbo.uspICUnpostCostAdjustmentOnFIFO
-
-		-- Unpost the cost buckets for LIFO
-		EXEC dbo.uspICUnpostCostAdjustmentOnLIFO
-
-		-- Unpost the cost buckets for Lot Costing 
-		EXEC dbo.uspICUnpostCostAdjustmentOnLot 
-
-		-- Unpost the cost buckets for Actual Costing
-		EXEC dbo.uspICUnpostCostAdjustmentOnActualCost
-	END 
-	
-	-------------------------------------------------
-	-- Create reversal of the inventory transactions
-	-------------------------------------------------
-	INSERT INTO dbo.tblICInventoryTransaction (
-			[intItemId]
-			,[intItemLocationId]
+	DECLARE @ReverseCostAdjustment as ItemCostAdjustmentTableType
+	INSERT INTO @ReverseCostAdjustment 
+	(
+			[intItemId] 
+			,[intItemLocationId] 
 			,[intItemUOMId]
-			,[intSubLocationId]
-			,[intStorageLocationId]
-			,[dtmDate]
-			,[dblQty]
-			,[dblUOMQty]
-			,[dblCost]
-			,[dblValue]
-			,[dblSalesPrice]
-			,[intCurrencyId]
-			,[dblExchangeRate]
+			,[dtmDate] 
+			,[dblNewValue]
 			,[intTransactionId]
-			,[intTransactionDetailId]
-			,[strTransactionId]
-			,[strBatchId]
-			,[intTransactionTypeId]
-			,[intLotId]
-			,[ysnIsUnposted]
-			,[intRelatedInventoryTransactionId]
-			,[intRelatedTransactionId]
-			,[strRelatedTransactionId]
-			,[strTransactionForm]
-			,[dtmCreated]
-			,[intCreatedUserId]
-			,[intConcurrencyId]
-			,[intCostingMethod]
-			,[intFobPointId]
-			,[intInTransitSourceLocationId]
-	)			
-	SELECT	
-			[intItemId]								= ActualTransaction.intItemId
-			,[intItemLocationId]					= ActualTransaction.intItemLocationId
-			,[intItemUOMId]							= ActualTransaction.intItemUOMId
-			,[intSubLocationId]						= ActualTransaction.intSubLocationId
-			,[intStorageLocationId]					= ActualTransaction.intStorageLocationId
-			,[dtmDate]								= ActualTransaction.dtmDate
-			,[dblQty]								= -ActualTransaction.dblQty
-			,[dblUOMQty]							= ActualTransaction.dblUOMQty
-			,[dblCost]								= ActualTransaction.dblCost
-			,[dblValue]								= -ActualTransaction.dblValue
-			,[dblSalesPrice]						= ActualTransaction.dblSalesPrice
-			,[intCurrencyId]						= ActualTransaction.intCurrencyId
-			,[dblExchangeRate]						= ActualTransaction.dblExchangeRate
-			,[intTransactionId]						= ActualTransaction.intTransactionId
-			,[intTransactionDetailId]				= ActualTransaction.intTransactionDetailId
-			,[strTransactionId]						= ActualTransaction.strTransactionId
-			,[strBatchId]							= @strBatchId
-			,[intTransactionTypeId]					= ActualTransaction.intTransactionTypeId
-			,[intLotId]								= ActualTransaction.intLotId
-			,[ysnIsUnposted]						= 1
-			,[intRelatedInventoryTransactionId]		= ItemTransactionsToReverse.intInventoryTransactionId
-			,[intRelatedTransactionId]				= ActualTransaction.intRelatedTransactionId
-			,[strRelatedTransactionId]				= ActualTransaction.strRelatedTransactionId
-			,[strTransactionForm]					= ActualTransaction.strTransactionForm
-			,[dtmCreated]							= GETDATE()
-			,[intCreatedEntityId]					= @intEntityUserSecurityId
-			,[intConcurrencyId]						= 1
-			,[intCostingMethod]						= ActualTransaction.intCostingMethod
-			,[intFobPointId]						= ActualTransaction.intFobPointId
-			,[intInTransitSourceLocationId]			= ActualTransaction.intInTransitSourceLocationId
-	FROM	#tmpInvCostAdjustmentToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
-				ON ItemTransactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
-
-	----------------------------------------------------
-	-- Create reversal of the inventory LOT transactions
-	----------------------------------------------------
-	DECLARE @ActiveLotStatus AS INT = 1
-	INSERT INTO dbo.tblICInventoryLotTransaction (		
-		[intItemId]
-		,[intLotId]
-		,[intLocationId]
-		,[intItemLocationId]
-		,[intSubLocationId]
-		,[intStorageLocationId]
-		,[dtmDate]
-		,[dblQty]
-		,[intItemUOMId]
-		,[dblCost]
-		,[intTransactionId]
-		,[strTransactionId]
-		,[intTransactionTypeId]
-		,[strBatchId]
-		,[intLotStatusId] 
-		,[strTransactionForm]
-		,[ysnIsUnposted]
-		,[dtmCreated] 
-		,[intCreatedUserId] 
-		,[intConcurrencyId] 
+			,[intTransactionDetailId] 
+			,[strTransactionId] 
+			,[intTransactionTypeId] 
+			,[intLotId] 
+			,[intSubLocationId] 
+			,[intStorageLocationId] 
+			,[ysnIsStorage] 
+			,[strActualCostId] 
+			,[intSourceTransactionId] 
+			,[intSourceTransactionDetailId] 
+			,[strSourceTransactionId] 
 	)
-	SELECT	[intItemId]					= ActualTransaction.intItemId
-			,[intLotId]					= ActualTransaction.intLotId
-			,[intLocationId]			= ItemLocation.intLocationId
-			,[intItemLocationId]		= ActualTransaction.intItemLocationId
-			,[intSubLocationId]			= ActualTransaction.intSubLocationId
-			,[intStorageLocationId]		= ActualTransaction.intStorageLocationId
-			,[dtmDate]					= ActualTransaction.dtmDate
-			,[dblQty]					= -ActualTransaction.dblQty
-			,[intItemUOMId]				= ActualTransaction.intItemUOMId
-			,[dblCost]					= ActualTransaction.dblCost
-			,[intTransactionId]			= ActualTransaction.intTransactionId
-			,[strTransactionId]			= ActualTransaction.strTransactionId
-			,[intTransactionTypeId]		= ActualTransaction.intTransactionTypeId
-			,[strBatchId]				= @strBatchId
-			,[intLotStatusId]			= @ActiveLotStatus 
-			,[strTransactionForm]		= ActualTransaction.strTransactionForm
-			,[ysnIsUnposted]			= 1
-			,[dtmCreated]				= GETDATE()
-			,[intCreatedEntityId]		= @intEntityUserSecurityId
-			,[intConcurrencyId]			= 1
-	FROM	#tmpInvCostAdjustmentToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
-				ON ItemTransactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
-				AND ActualTransaction.intLotId IS NOT NULL 
-				AND ActualTransaction.intItemUOMId IS NOT NULL
-			INNER JOIN tblICItemLocation ItemLocation
-				ON ActualTransaction.intItemLocationId = ItemLocation.intItemLocationId
-				AND ItemLocation.intLocationId IS NOT NULL 
+	-- AVG and FIFO:
+	SELECT 
+			[intItemId]	= t.intItemId 
+			,[intItemLocationId] = t.intItemLocationId
+			,[intItemUOMId] = t.intItemUOMId 
+			,[dtmDate] = t.dtmDate
+			,[dblNewValue] = 
+					CASE	WHEN cbLog.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_New_Cost THEN -- {New Value} - {Original Value}								
+								(cbLog.dblQty * cbLog.dblCost) 
+								- (ISNULL(cbLog.dblQty, 0) * ISNULL(cbOriginalCost.dblCost, 0))
+							WHEN cbLog.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Value THEN 
+								cbLog.dblValue
+					END 
+			,[intTransactionId] = t.intTransactionId
+			,[intTransactionDetailId] = t.intTransactionDetailId
+			,[strTransactionId] = t.strTransactionId
+			,[intTransactionTypeId] = t.intTransactionTypeId
+			,[intLotId] = t.intLotId
+			,[intSubLocationId] = t.intSubLocationId 
+			,[intStorageLocationId] = t.intStorageLocationId
+			,[ysnIsStorage] = 0
+			,[strActualCostId] = NULL 
+			,[intSourceTransactionId] = t.intRelatedTransactionId
+			,[intSourceTransactionDetailId] = COALESCE(bd.intInventoryReceiptItemId, NULL)  
+			,[strSourceTransactionId] = t.strRelatedTransactionId
+	FROM	tblICInventoryTransaction t INNER JOIN tblICInventoryFIFOCostAdjustmentLog cbLog
+				ON t.intInventoryTransactionId = cbLog.intInventoryTransactionId
+			LEFT JOIN tblICInventoryFIFOCostAdjustmentLog cbOriginalCost
+				ON cbOriginalCost.intInventoryFIFOId = cbLog.intInventoryFIFOId
+				AND cbOriginalCost.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Original_Cost
+			LEFT JOIN (
+				tblAPBillDetail bd INNER JOIN tblAPBill b
+					ON bd.intBillId = b.intBillId
+			)
+				ON bd.intBillId = t.intTransactionId
+				AND bd.intBillDetailId = t.intTransactionDetailId
+				AND b.strBillId = t.strTransactionId				
 
-	--------------------------------------------------------------
-	-- Update the ysnIsUnposted flag for related transactions 
-	--------------------------------------------------------------
-	UPDATE	RelatedItemTransactions
+	WHERE	t.intTransactionId = @intTransactionId
+			AND t.strTransactionId = @strTransactionId
+			AND t.ysnIsUnposted = 0 
+			AND t.intTransactionTypeId = @INV_TRANS_TYPE_Cost_Adjustment
+			AND cbLog.intInventoryCostAdjustmentTypeId IN (@COST_ADJ_TYPE_Adjust_Value, @COST_ADJ_TYPE_New_Cost)
+			AND cbLog.ysnIsUnposted = 0 
+	-- LIFO: 
+	UNION ALL 
+	SELECT 
+			[intItemId]	= t.intItemId 
+			,[intItemLocationId] = t.intItemLocationId
+			,[intItemUOMId] = t.intItemUOMId 
+			,[dtmDate] = t.dtmDate
+			,[dblNewValue] = 
+					CASE	WHEN cbLog.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_New_Cost THEN -- {New Value} - {Original Value}								
+								(cbLog.dblQty * cbLog.dblCost) 
+								- (ISNULL(cbLog.dblQty, 0) * ISNULL(cbOriginalCost.dblCost, 0))
+							WHEN cbLog.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Value THEN 
+								cbLog.dblValue
+					END 
+			,[intTransactionId] = t.intTransactionId
+			,[intTransactionDetailId] = t.intTransactionDetailId
+			,[strTransactionId] = t.strTransactionId
+			,[intTransactionTypeId] = t.intTransactionTypeId
+			,[intLotId] = t.intLotId
+			,[intSubLocationId] = t.intSubLocationId 
+			,[intStorageLocationId] = t.intStorageLocationId
+			,[ysnIsStorage] = 0
+			,[strActualCostId] = NULL 
+			,[intSourceTransactionId] = t.intRelatedTransactionId
+			,[intSourceTransactionDetailId] = COALESCE(bd.intInventoryReceiptItemId, NULL)  
+			,[strSourceTransactionId] = t.strRelatedTransactionId
+	FROM	tblICInventoryTransaction t INNER JOIN tblICInventoryLIFOCostAdjustmentLog cbLog
+				ON t.intInventoryTransactionId = cbLog.intInventoryTransactionId
+			LEFT JOIN tblICInventoryLIFOCostAdjustmentLog cbOriginalCost
+				ON cbOriginalCost.intInventoryLIFOId = cbLog.intInventoryLIFOId
+				AND cbOriginalCost.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Original_Cost
+			LEFT JOIN (
+				tblAPBillDetail bd INNER JOIN tblAPBill b
+					ON bd.intBillId = b.intBillId
+			)
+				ON bd.intBillId = t.intTransactionId
+				AND bd.intBillDetailId = t.intTransactionDetailId
+				AND b.strBillId = t.strTransactionId
+
+	WHERE	t.intTransactionId = @intTransactionId
+			AND t.strTransactionId = @strTransactionId
+			AND t.ysnIsUnposted = 0 
+			AND t.intTransactionTypeId = @INV_TRANS_TYPE_Cost_Adjustment
+			AND cbLog.intInventoryCostAdjustmentTypeId IN (@COST_ADJ_TYPE_Adjust_Value, @COST_ADJ_TYPE_New_Cost)
+			AND cbLog.ysnIsUnposted = 0 
+	-- LOT: 
+	UNION ALL 
+	SELECT 
+			[intItemId]	= t.intItemId 
+			,[intItemLocationId] = t.intItemLocationId
+			,[intItemUOMId] = t.intItemUOMId 
+			,[dtmDate] = t.dtmDate
+			,[dblNewValue] = 
+					CASE	WHEN cbLog.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_New_Cost THEN -- {New Value} - {Original Value}								
+								(cbLog.dblQty * cbLog.dblCost) 
+								- (ISNULL(cbLog.dblQty, 0) * ISNULL(cbOriginalCost.dblCost, 0))
+							WHEN cbLog.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Value THEN 
+								cbLog.dblValue
+					END 
+			,[intTransactionId] = t.intTransactionId
+			,[intTransactionDetailId] = t.intTransactionDetailId
+			,[strTransactionId] = t.strTransactionId
+			,[intTransactionTypeId] = t.intTransactionTypeId
+			,[intLotId] = t.intLotId
+			,[intSubLocationId] = t.intSubLocationId 
+			,[intStorageLocationId] = t.intStorageLocationId
+			,[ysnIsStorage] = 0
+			,[strActualCostId] = NULL 
+			,[intSourceTransactionId] = t.intRelatedTransactionId
+			,[intSourceTransactionDetailId] = COALESCE(bd.intInventoryReceiptItemId, NULL)  
+			,[strSourceTransactionId] = t.strRelatedTransactionId
+	FROM	tblICInventoryTransaction t INNER JOIN tblICInventoryLotCostAdjustmentLog cbLog
+				ON t.intInventoryTransactionId = cbLog.intInventoryTransactionId
+			LEFT JOIN tblICInventoryLotCostAdjustmentLog cbOriginalCost
+				ON cbOriginalCost.intInventoryLotId = cbLog.intInventoryLotId
+				AND cbOriginalCost.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Original_Cost
+			LEFT JOIN (
+				tblAPBillDetail bd INNER JOIN tblAPBill b
+					ON bd.intBillId = b.intBillId
+			)
+				ON bd.intBillId = t.intTransactionId
+				AND bd.intBillDetailId = t.intTransactionDetailId
+				AND b.strBillId = t.strTransactionId
+
+	WHERE	t.intTransactionId = @intTransactionId
+			AND t.strTransactionId = @strTransactionId
+			AND t.ysnIsUnposted = 0 
+			AND t.intTransactionTypeId = @INV_TRANS_TYPE_Cost_Adjustment
+			AND cbLog.intInventoryCostAdjustmentTypeId IN (@COST_ADJ_TYPE_Adjust_Value, @COST_ADJ_TYPE_New_Cost)
+			AND cbLog.ysnIsUnposted = 0 
+	UNION ALL 
+	SELECT 
+			[intItemId]	= t.intItemId 
+			,[intItemLocationId] = t.intItemLocationId
+			,[intItemUOMId] = t.intItemUOMId 
+			,[dtmDate] = t.dtmDate
+			,[dblNewValue] = 
+					CASE	WHEN cbLog.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_New_Cost THEN -- {New Value} - {Original Value}								
+								(cbLog.dblQty * cbLog.dblCost) 
+								- (ISNULL(cbLog.dblQty, 0) * ISNULL(cbOriginalCost.dblCost, 0))
+							WHEN cbLog.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Value THEN 
+								cbLog.dblValue
+					END 
+			,[intTransactionId] = t.intTransactionId
+			,[intTransactionDetailId] = t.intTransactionDetailId
+			,[strTransactionId] = t.strTransactionId
+			,[intTransactionTypeId] = t.intTransactionTypeId
+			,[intLotId] = t.intLotId
+			,[intSubLocationId] = t.intSubLocationId 
+			,[intStorageLocationId] = t.intStorageLocationId
+			,[ysnIsStorage] = 0
+			,[strActualCostId] = NULL 
+			,[intSourceTransactionId] = t.intRelatedTransactionId
+			,[intSourceTransactionDetailId] = COALESCE(bd.intInventoryReceiptItemId, NULL)  
+			,[strSourceTransactionId] = t.strRelatedTransactionId
+	FROM	tblICInventoryTransaction t INNER JOIN tblICInventoryActualCostAdjustmentLog cbLog
+				ON t.intInventoryTransactionId = cbLog.intInventoryTransactionId
+			LEFT JOIN tblICInventoryActualCostAdjustmentLog cbOriginalCost
+				ON cbOriginalCost.intInventoryActualCostId = cbLog.intInventoryActualCostId
+				AND cbOriginalCost.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Original_Cost
+			LEFT JOIN (
+				tblAPBillDetail bd INNER JOIN tblAPBill b
+					ON bd.intBillId = b.intBillId
+			)
+				ON bd.intBillId = t.intTransactionId
+				AND bd.intBillDetailId = t.intTransactionDetailId
+				AND b.strBillId = t.strTransactionId
+
+	WHERE	t.intTransactionId = @intTransactionId
+			AND t.strTransactionId = @strTransactionId
+			AND t.ysnIsUnposted = 0 
+			AND t.intTransactionTypeId = @INV_TRANS_TYPE_Cost_Adjustment
+			AND cbLog.intInventoryCostAdjustmentTypeId IN (@COST_ADJ_TYPE_Adjust_Value, @COST_ADJ_TYPE_New_Cost)
+			AND cbLog.ysnIsUnposted = 0 
+END 
+
+-- Reverse the cost adjustment by calling the same sp that posted it. 
+IF EXISTS (SELECT TOP 1 1 FROM @ReverseCostAdjustment) 
+BEGIN 
+	-- Reverse the qty and value. 
+	UPDATE @ReverseCostAdjustment
+	SET dblNewValue = -dblNewValue
+
+	EXEC uspICPostCostAdjustment 
+		@ReverseCostAdjustment
+		,@strBatchId
+		,@intEntityUserSecurityId
+		,0
+END 
+
+-- Update the flags
+BEGIN 
+	-------------------------------------------------------------------
+	-- Update the ysnIsUnposted flag for the inventory transactions 
+	-------------------------------------------------------------------
+	UPDATE	t
 	SET		ysnIsUnposted = 1
-	FROM	dbo.tblICInventoryTransaction RelatedItemTransactions 
-	WHERE	RelatedItemTransactions.intRelatedTransactionId = @intTransactionId
-			AND RelatedItemTransactions.strRelatedTransactionId = @strTransactionId
-			AND RelatedItemTransactions.ysnIsUnposted = 0
+	FROM	tblICInventoryTransaction t
+	WHERE	t.intTransactionId = @intTransactionId
+			AND t.strTransactionId = @strTransactionId
+			AND t.ysnIsUnposted = 0
 
-	--------------------------------------------------------------
-	-- Update the ysnIsUnposted flag for related LOT transactions 
-	--------------------------------------------------------------
-	UPDATE	RelatedLotTransactions
+	-------------------------------------------------------------------
+	-- Update the ysnIsUnposted flag for the LOT transactions 
+	-------------------------------------------------------------------
+	UPDATE	t
 	SET		ysnIsUnposted = 1
-	FROM	dbo.tblICInventoryLotTransaction RelatedLotTransactions 
-	WHERE	RelatedLotTransactions.intTransactionId = @intTransactionId
-			AND RelatedLotTransactions.strTransactionId = @strTransactionId
-			AND RelatedLotTransactions.ysnIsUnposted = 0
+	FROM	dbo.tblICInventoryLotTransaction t
+	WHERE	t.intTransactionId = @intTransactionId
+			AND t.strTransactionId = @strTransactionId
+			AND t.ysnIsUnposted = 0
 
-	------------------------------------------------------------
-	-- Update the Average Cost
-	------------------------------------------------------------
-	BEGIN 
-		BEGIN 
-			DECLARE loopUpdateAverageCost CURSOR LOCAL FAST_FORWARD
-			FOR 
-			SELECT  DISTINCT 
-					InvTrans.intItemId 					
-					,InvTrans.intItemLocationId 
-			FROM	dbo.tblICInventoryTransaction InvTrans INNER JOIN #tmpInvCostAdjustmentToReverse ItemToUnpost
-						ON ItemToUnpost.intInventoryTransactionId = InvTrans.intInventoryTransactionId
-						
-			OPEN loopUpdateAverageCost;	
-
-			-- Initial fetch attempt
-			FETCH NEXT FROM loopUpdateAverageCost INTO 
-				@intItemId
-				,@intItemLocationId 
-			;
-
-			-----------------------------------------------------------------------------------------------------------------------------
-			-- Start of the loop
-			-----------------------------------------------------------------------------------------------------------------------------
-			WHILE @@FETCH_STATUS = 0
-			BEGIN 
-
-				-- Recalculate the average cost from the inventory transaction table. 
-				UPDATE	ItemPricing
-				SET		dblAverageCost = ISNULL(
-							dbo.fnRecalculateAverageCost(intItemId, intItemLocationId)
-							, dblAverageCost
-						) 
-				FROM	dbo.tblICItemPricing AS ItemPricing 
-				WHERE	ItemPricing.intItemId = @intItemId
-						AND ItemPricing.intItemLocationId = @intItemLocationId			
-				
-				FETCH NEXT FROM loopUpdateAverageCost INTO 
-					@intItemId
-					,@intItemLocationId 
-				;
-			END;
-
-			-----------------------------------------------------------------------------------------------------------------------------
-			-- End of the loop
-			-----------------------------------------------------------------------------------------------------------------------------
-			CLOSE loopUpdateAverageCost;
-			DEALLOCATE loopUpdateAverageCost;
-		END
-	END
+	-------------------------------------------------------------------
+	-- Update the ysnIsUnposted flag in the GL Detail 
+	-------------------------------------------------------------------
+	UPDATE	gd
+	SET		ysnIsUnposted = 1
+	FROM	tblGLDetail gd INNER JOIN tblICInventoryTransaction t
+				ON gd.intJournalLineNo = t.intInventoryTransactionId
+	WHERE	t.intTransactionId = @intTransactionId
+			AND t.strTransactionId = @strTransactionId
+			AND gd.ysnIsUnposted = 0 
 END
 
 -----------------------------------------
 -- Generate the g/l entries
 -----------------------------------------
-EXEC dbo.uspICCreateReversalGLEntries 
-	@strBatchId
-	,@intTransactionId
-	,@strTransactionId
-	,@intEntityUserSecurityId
+EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
+	@strBatchId 
+	,@intEntityUserSecurityId 
+	,NULL 
+	,0
+	,@AccountCategory_Cost_Adjustment 
 ;
-
-IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInvCostAdjustmentToReverse')) 
-	DROP TABLE #tmpInvCostAdjustmentToReverse

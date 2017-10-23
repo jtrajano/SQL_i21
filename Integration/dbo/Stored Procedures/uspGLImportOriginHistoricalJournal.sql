@@ -105,7 +105,6 @@ SELECT @result = REPLACE(@result , ''SUCCESS '','''')
 			dtmReverseDate,
 			strJournalId,
 			strTransactionType,
-			strTransactionType, 
 			CAST((dbo.[fnGeti21PeriodFromOriginPeriod](SUBSTRING(dtmDate,1,4), SUBSTRING(dtmDate,5,2))) as DATETIME) as dtmDate,
 			strReverseLink,
 			intCurrencyId,
@@ -255,10 +254,12 @@ SELECT @result = REPLACE(@result , ''SUCCESS '','''')
 	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
 
 COMMIT_INSERT:
-	COMMIT TRANSACTION
+	IF @@TRANCOUNT > 0
+		COMMIT TRANSACTION
 	GOTO IMPORT_EXIT
 ROLLBACK_INSERT:
-	ROLLBACK TRANSACTION
+	IF @@TRANCOUNT > 0
+		ROLLBACK TRANSACTION
 	SELECT ''Importing Historical Journal error :'' + ERROR_MESSAGE()
 	GOTO IMPORT_EXIT
 

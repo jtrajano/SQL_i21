@@ -285,7 +285,7 @@ BEGIN
 		FROM @DataForReceiptHeader RawHeaderData
 		WHERE RawHeaderData.intId = @intId
 
-		IF @valueSourceTypeId IS NULL OR @valueSourceTypeId > 4 OR @valueSourceTypeId < 0
+		IF @valueSourceTypeId IS NULL OR @valueSourceTypeId > 5 OR @valueSourceTypeId < 0
 			BEGIN
 				-- Source Type Id is invalid or missing.
 				EXEC uspICRaiseError 80115; 
@@ -749,6 +749,8 @@ BEGIN
 																	ISNULL(LogisticsView.dblQuantity, 0)
 																WHEN RawData.intSourceType = 3 THEN -- Transport
 																	ISNULL(TransportView.dblOrderedQuantity, 0) 
+																WHEN RawData.intSourceType = 5 THEN -- Delivery Sheet
+																	0
 																ELSE 
 																	NULL
 														END
@@ -1347,7 +1349,7 @@ BEGIN
 
 						SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
 						FROM @LotEntries ItemLot
-						WHERE ItemLot.intSourceType IS NULL OR ItemLot.intSourceType > 4 OR ItemLot.intSourceType < 0
+						WHERE ItemLot.intSourceType IS NULL OR ItemLot.intSourceType > 5 OR ItemLot.intSourceType < 0
 
 						IF @valueLotRecordNo IS NOT NULL
 							BEGIN
@@ -1585,7 +1587,7 @@ BEGIN
 							AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(ItemLot.intShipFromId,0)
 							AND ISNULL(RawHeaderData.Currency, @intFunctionalCurrencyId) = ISNULL(ItemLot.intCurrencyId, @intFunctionalCurrencyId)
 							AND ISNULL(RawHeaderData.intSourceType,0) = ISNULL(ItemLot.intSourceType, 0)
-							AND RawHeaderData.BillOfLadding = ItemLot.strBillOfLadding 
+							AND ISNULL(RawHeaderData.BillOfLadding, '') = ISNULL(ItemLot.strBillOfLadding , '')
 						LEFT JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
 							ON ReceiptItem.intItemId = ItemLot.intItemId
 							AND ReceiptItem.intSubLocationId = ItemLot.intSubLocationId

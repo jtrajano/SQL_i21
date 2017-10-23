@@ -107,7 +107,7 @@ BEGIN
 		@term = ISNULL((CASE WHEN ISNULL(@termId,0) > 0 THEN @termId ELSE B.intTermsId END),
 						(SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm like '%due on receipt%')),
 		@contact = C.intEntityContactId,
-		@shipFrom = B.intEntityLocationId,
+		@shipFrom = ISNULL(@shipFromId, B.intEntityLocationId),
 		@shipVia = B.intShipViaId,
 		@shipFromAddress = B.strAddress,
 		@shipFromCity = B.strCity,
@@ -120,8 +120,8 @@ BEGIN
 	LEFT JOIN [tblEMEntityLocation] B ON A.[intEntityId] = B.intEntityId
 	LEFT JOIN [tblEMEntityToContact] C ON A.[intEntityId] = C.intEntityId 
 	WHERE A.[intEntityId]= @vendorId 
-	AND 1 = (CASE WHEN @shipFrom IS NOT NULL THEN 
-					(CASE WHEN B.intEntityLocationId = @shipFrom THEN 1 ELSE 0 END)
+	AND 1 = (CASE WHEN @shipFromId IS NOT NULL THEN 
+					(CASE WHEN B.intEntityLocationId = @shipFromId THEN 1 ELSE 0 END)
 				ELSE (CASE WHEN B.ysnDefaultLocation = 1 THEN 1 ELSE 0 END) END)
 	AND C.ysnDefaultContact = 1
 

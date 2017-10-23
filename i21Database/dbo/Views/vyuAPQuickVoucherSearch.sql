@@ -3,9 +3,9 @@ AS
 SELECT
 	A.strBillId,
 	A.intBillId,
-	CASE WHEN (A.intTransactionType IN (3,8,11)) OR (A.intTransactionType = 2 AND A.ysnPosted = 1) THEN A.dblTotal * -1 ELSE A.dblTotal END AS dblTotal,
-	CASE WHEN (A.intTransactionType IN (3,8,11)) OR (A.intTransactionType = 2 AND A.ysnPosted = 1) THEN A.dblAmountDue * -1 ELSE A.dblAmountDue END AS dblAmountDue,
-	CASE WHEN (A.intTransactionType IN (3,8,11)) OR (A.intTransactionType = 2 AND A.ysnPosted = 1) THEN A.dblPayment * -1 ELSE A.dblPayment END AS dblPayment,
+	CASE WHEN (A.intTransactionType IN (3,8,11)) OR (A.intTransactionType IN (2,13) AND A.ysnPrepayHasPayment = 1) THEN A.dblTotal * -1 ELSE A.dblTotal END AS dblTotal,
+	CASE WHEN (A.intTransactionType IN (3,8,11)) OR (A.intTransactionType IN (2,13) AND A.ysnPrepayHasPayment = 1) THEN A.dblAmountDue * -1 ELSE A.dblAmountDue END AS dblAmountDue,
+	CASE WHEN (A.intTransactionType IN (3,8,11)) OR (A.intTransactionType IN (2,13) AND A.ysnPrepayHasPayment = 1) THEN A.dblPayment * -1 ELSE A.dblPayment END AS dblPayment,
 	A.dtmDate,
 	A.dtmBillDate,
 	A.dtmDueDate,
@@ -21,14 +21,28 @@ SELECT
 	F.strUserName AS strUserId,
 	G.strLocationName AS strUserLocation,
 	A.ysnPosted,
-	EL.strCheckPayeeName AS strPayeeName
+	EL.strCheckPayeeName AS strPayeeName,
+	ISNULL(commodity.strCommodityCode, 'None') AS strCommodityCode
 FROM
 	dbo.tblAPBill A
 	INNER JOIN 
 		(dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity B1 ON B.[intEntityId] = B1.intEntityId)
 		ON A.[intEntityVendorId] = B.[intEntityId]
+	CROSS APPLY (
+		SELECT TOP 1
+			COUNT(commodity.intCommodityId) intCount, 
+			commodity.intCommodityId,
+			commodity.strCommodityCode
+		FROM tblAPBillDetail detail
+		LEFT JOIN tblICItem item ON detail.intItemId = item.intItemId
+		LEFT JOIN tblICCommodity commodity ON item.intCommodityId = commodity.intCommodityId
+		WHERE detail.intBillId = A.intBillId
+		GROUP BY commodity.intCommodityId, commodity.strCommodityCode
+		ORDER BY COUNT(commodity.intCommodityId) DESC
+	) commodity
 	LEFT JOIN dbo.[tblEMEntityCredential] F ON A.intEntityId = F.intEntityId
 	LEFT JOIN dbo.tblSMCompanyLocation G
 		ON A.intStoreLocationId = G.intCompanyLocationId
 	LEFT JOIN dbo.tblEMEntityLocation EL 
 		ON EL.intEntityLocationId = A.intPayToAddressId
+	

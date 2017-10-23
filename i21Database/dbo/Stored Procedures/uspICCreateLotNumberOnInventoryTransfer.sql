@@ -137,8 +137,6 @@ BEGIN
 			,intStorageLocationId
 			,dblQty
 			,intItemUOMId
-			,dblWeight
-			,intWeightUOMId
 			,dtmExpiryDate
 			,dtmManufacturedDate
 			,intOriginId
@@ -154,7 +152,6 @@ BEGIN
 			,intDetailId
 			,intSplitFromLotId
 			,intOwnershipType
-			,dblGrossWeight
 			,strParentLotNumber
 			,strParentLotAlias
 			,strTransactionId
@@ -162,7 +159,10 @@ BEGIN
 			,intSourceTransactionTypeId
 			,strContainerNo
 			,strCondition
-
+			,[intWeightUOMId]
+			,[dblWeight]
+			,[dblGrossWeight]
+			,[dblWeightPerQty]
 	)
 	SELECT	intLotId				= TransferItem.intNewLotId
 			,strLotNumber			= CASE WHEN ISNULL(TransferItem.strNewLotId, '') = '' THEN SourceLot.strLotNumber ELSE TransferItem.strNewLotId END 
@@ -171,23 +171,8 @@ BEGIN
 			,intItemLocationId		= ItemLocation.intItemLocationId
 			,intSubLocationId		= TransferItem.intToSubLocationId
 			,intStorageLocationId	= TransferItem.intToStorageLocationId
-			,dblQty					=	CASE WHEN @ysnPost = 0 THEN -1 ELSE 1 END 
-										* TransferItem.dblQuantity 
+			,dblQty					= CASE WHEN @ysnPost = 0 THEN -1 ELSE 1 END * TransferItem.dblQuantity
 			,intItemUOMId			= TransferItem.intItemUOMId
-			,dblWeight				= CASE WHEN @ysnPost = 0 THEN -1 ELSE 1 END
-										* CASE	WHEN SourceLot.intWeightUOMId IS NOT NULL AND SourceLot.intWeightUOMId <> TransferItem.intItemUOMId THEN 
-													-- Transfer qty is in bags. Convert it to wgt. 
-													dbo.fnMultiply(
-														ISNULL(TransferItem.dblQuantity, 0)
-														, ISNULL(SourceLot.dblWeightPerQty, 0) 
-													) 
-												WHEN SourceLot.intWeightUOMId IS NOT NULL AND SourceLot.intWeightUOMId = TransferItem.intItemUOMId THEN 
-													-- Transfer qty is in wgt. No need to convert it. 
-													ISNULL(TransferItem.dblQuantity, 0)
-												ELSE 
-													0
-										END 
-			,intWeightUOMId			= SourceLot.intWeightUOMId
 			,dtmExpiryDate			= SourceLot.dtmExpiryDate
 			,dtmManufacturedDate	= SourceLot.dtmManufacturedDate
 			,intOriginId			= SourceLot.intOriginId
@@ -203,7 +188,6 @@ BEGIN
 			,intDetailId			= TransferItem.intInventoryTransferDetailId
 			,intSplitFromLotId		= SourceLot.intLotId
 			,intOwnershipType		= TransferItem.intOwnershipType
-			,dblGrossWeight			= SourceLot.dblGrossWeight
 			,strParentLotNumber		= ParentLotSourceLot.strParentLotNumber
 			,strParentLotAlias		= ParentLotSourceLot.strParentLotAlias
 			,strTransactionId			= [Transfer].strTransferNo
@@ -211,7 +195,10 @@ BEGIN
 			,intSourceTransactionTypeId = SourceLot.intSourceTransactionTypeId
 			,strContainerNo			= SourceLot.strContainerNo
 			,strCondition			= SourceLot.strCondition
-
+			,[intWeightUOMId] 		= TransferItem.intGrossNetUOMId
+			,[dblWeight]   			= CASE WHEN @ysnPost = 0 THEN -1 ELSE 1 END * TransferItem.dblNet
+			,[dblGrossWeight] 		= CASE WHEN TransferItem.intGrossNetUOMId IS NOT NULL THEN TransferItem.dblGross ELSE NULL END
+			,[dblWeightPerQty]		= CASE WHEN TransferItem.intGrossNetUOMId IS NOT NULL THEN CASE WHEN ISNULL(NULLIF(TransferItem.dblNet, 0), 0) = 0 THEN 0 ELSE TransferItem.dblQuantity / TransferItem.dblNet END ELSE NULL END
 	FROM	dbo.tblICInventoryTransfer [Transfer] INNER JOIN dbo.tblICInventoryTransferDetail TransferItem
 				ON [Transfer].intInventoryTransferId = TransferItem.intInventoryTransferId
 			INNER JOIN dbo.tblICItem Item

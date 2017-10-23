@@ -1,5 +1,4 @@
 ﻿CREATE PROCEDURE [dbo].[uspPATComputeEquityPaymentDetail]
-	@equityIds AS NVARCHAR(MAX) = NULL,
 	@customerId AS INT = NULL,
 	@qualified AS BIT = 0,
 	@distributionMethod AS INT = NULL, -- 1 = Equally to Each Year, 2 = To Oldest Year Onwards
@@ -12,11 +11,6 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
-
-	DECLARE @customerIdsTable TABLE (
-		[intTransactionId] INT PRIMARY KEY,
-		UNIQUE([intTransactionId])
-	);
 
 	DECLARE @tempEquityDetail TABLE (
 		[intId] INT PRIMARY KEY IDENTITY,
@@ -38,21 +32,25 @@ SET ANSI_WARNINGS OFF
 		[dblEquityAvailable] NUMERIC(18,6) DEFAULT 0,
 		[dblEquityPay] NUMERIC(18,6) DEFAULT 0
 	);
-
-	INSERT INTO @customerIdsTable SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@equityIds);
-
+	
 	INSERT INTO @tempEquityDetail
 	SELECT	CE.intCustomerEquityId,
 			CE.intFiscalYearId,
 			CE.strEquityType,
 			CE.intRefundTypeId,
-			dblEquityAvailable = CE.dblEquity - CE.dblEquityPaid
-	FROM tblPATCustomerEquity CE
+			CE.dblEquityAvailable
+	FROM (SELECT intCustomerEquityId, 
+				intCustomerId,
+				intFiscalYearId, 
+				strEquityType, 
+				intRefundTypeId, 
+				dblEquityAvailable = dblEquity - dblEquityPaid
+			FROM tblPATCustomerEquity) CE
 	INNER JOIN tblGLFiscalYear FY
 		ON FY.intFiscalYearId = CE.intFiscalYearId
 	INNER JOIN tblPATRefundRate RR
 		ON RR.intRefundTypeId = CE.intRefundTypeId
-	WHERE CE.intCustomerEquityId IN (SELECT intTransactionId FROM @customerIdsTable) AND CE.intCustomerId = @customerId AND RR.ysnQualified = @qualified
+	WHERE CE.intCustomerId = @customerId AND RR.ysnQualified = @qualified AND CE.dblEquityAvailable > 0
 	ORDER BY dtmDateFrom ASC;
 	
 

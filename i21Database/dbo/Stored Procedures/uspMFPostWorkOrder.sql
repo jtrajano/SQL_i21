@@ -623,7 +623,7 @@ BEGIN TRY
 			,[intCostUOMId]
 			,[dblVoucherCost]
 			,[intCurrencyId]
-			,[dblExchangeRate]
+			--,[dblExchangeRate]
 			,[intTransactionId]
 			,[intTransactionDetailId]
 			,[strTransactionId]
@@ -650,7 +650,7 @@ BEGIN TRY
 				SELECT TOP 1 intDefaultReportingCurrencyId
 				FROM tblSMCompanyPreference
 				)
-			,[dblExchangeRate] = 0
+			--,[dblExchangeRate] = 0
 			,[intTransactionId] = @intBatchId
 			,[intTransactionDetailId] = PL.intWorkOrderProducedLotId
 			,[strTransactionId] = W.strWorkOrderNo
@@ -741,7 +741,8 @@ BEGIN TRY
 				)
 				EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
 					@strBatchId = @strBatchId
-					,@intEntityUserSecurityId = @userId		
+					,@intEntityUserSecurityId = @userId	
+					,@AccountCategory_Cost_Adjustment='Work In Progress' 
 			END 
 
 			IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)

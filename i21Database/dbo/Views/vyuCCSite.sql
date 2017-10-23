@@ -14,7 +14,7 @@ WITH SCHEMABINDING
 		case when C.ysnPassedThruArCustomer is null then 'Company Owned' 
 			 when C.ysnPassedThruArCustomer = 1 then 'Company Owned Pass Thru' else 'Company Owned' 		 
 			 end strSiteType,
-		 convert(bit,0)  as ysnPostNetToArCustomer,
+		 ysnPostNetToArCustomer = C.ysnPassedThruArCustomer,
 		 0  as dblSharedFeePercentage,
 		 C.intCompanyOwnedSiteId,
 		 C.intDealerSiteId,

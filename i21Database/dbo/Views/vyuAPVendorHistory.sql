@@ -10,7 +10,10 @@ SELECT
 	,intTransactionId = A.intBillId 
 	,strTransactionType = (CASE WHEN A.intTransactionType = 1	THEN 'Bill' 
 								WHEN A.intTransactionType = 2	THEN 'Vendor Prepayment' 
+								WHEN A.intTransactionType = 12	THEN 'Prepayment Reversal' 
 								WHEN A.intTransactionType = 3	THEN 'Debit Memo' 
+								WHEN A.intTransactionType = 9	THEN '1099 Adjustment' 
+								WHEN A.intTransactionType = 13	THEN 'Basis Advance'
 								ELSE 'Not Bill Type'
 						   END)
 	,strBillId = A.strBillId

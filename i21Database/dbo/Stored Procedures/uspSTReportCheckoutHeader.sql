@@ -63,9 +63,18 @@ BEGIN TRY
 			@strCountry		=	CASE WHEN LTRIM(RTRIM(strCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(strCountry)) END
 	FROM	tblSMCompanySetup
 
-   select @strCompanyName as CompanyName, B.intStoreNo, CONVERT(VARCHAR(50),A.dtmCheckoutDate,101) as checkoutDate, 
-   A.intShiftNo, A.intCheckoutId  from tblSTCheckoutHeader A JOIN tblSTStore B ON A.intStoreId = B.intStoreId 
-   where intCheckoutId = @intCheckoutId 
+   SELECT
+   @strCompanyName as CompanyName
+   , @strAddress as strAddress
+   , S.intStoreNo
+   , CONVERT(VARCHAR(50), CH.dtmCheckoutDate,101) as checkoutDate
+   , CH.intShiftNo
+   , CH.intCheckoutId 
+   , CAST(GETDATE() AS DATE) AS dtmDateToday
+   FROM tblSTCheckoutHeader CH
+   JOIN tblSTStore S ON CH.intStoreId = S.intStoreId
+   WHERE intCheckoutId = @intCheckoutId
+ 
   
     
 END TRY

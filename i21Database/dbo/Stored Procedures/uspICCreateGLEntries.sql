@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspICCreateGLEntries]
-	@strBatchId AS NVARCHAR(20)
+	@strBatchId AS NVARCHAR(40)
 	,@AccountCategory_ContraInventory AS NVARCHAR(255) = 'Cost of Goods'
 	,@intEntityUserSecurityId AS INT
 	,@strGLDescription AS NVARCHAR(255) = NULL 	
@@ -16,7 +16,7 @@ SET ANSI_WARNINGS OFF
 
 -- Create the variables used by fnGetItemGLAccount
 DECLARE @AccountCategory_Inventory AS NVARCHAR(30) = 'Inventory'
-DECLARE @AccountCategory_Auto_Variance AS NVARCHAR(30) = 'Inventory Adjustment' --'Auto-Variance' -- Auto-variance will no longer be used. It will not use Inventory Adjustment. 
+DECLARE @AccountCategory_Auto_Variance AS NVARCHAR(30) = 'Inventory Adjustment' --'Auto-Variance' -- Auto-variance will no longer be used. It will now use Inventory Adjustment. 
 
 -- Get the default currency ID
 DECLARE @DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')

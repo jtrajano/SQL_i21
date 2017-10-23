@@ -37,7 +37,7 @@ SET ANSI_WARNINGS OFF
 --	<options />
 --</xmlparam>'
 
-DECLARE @query NVARCHAR(MAX), @innerQuery NVARCHAR(MAX), @filter NVARCHAR(MAX) = '';
+DECLARE @query NVARCHAR(MAX), @innerQuery NVARCHAR(MAX), @prepaidInnerQuery NVARCHAR(MAX), @filter NVARCHAR(MAX) = '';
 DECLARE @dateFrom DATETIME = NULL;
 DECLARE @dateTo DATETIME = NULL;
 DECLARE @dtmDueDate DATETIME = NULL;
@@ -123,8 +123,8 @@ WITH (
 
 --select * from @temp_xml_table
 --CREATE date filter
-SELECT @dateFrom = [from], @dateTo = [to] FROM @temp_xml_table WHERE [fieldname] = 'dtmDate';
-SELECT @dtmDueDate = [from], @dateTo = [to] FROM @temp_xml_table WHERE [fieldname] = 'dtmDueDate';
+SELECT @dateFrom = [from], @dateTo = [to],@condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDate';
+SELECT @dtmDueDate = [from], @dateTo = [to],@condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDueDate';
 SET @innerQuery = 'SELECT --DISTINCT
 			intBillId
 			,dblTotal
@@ -136,13 +136,44 @@ SET @innerQuery = 'SELECT --DISTINCT
 			,dtmDueDate
 		FROM dbo.vyuAPPayables'
 
+SET @prepaidInnerQuery = 'SELECT --DISTINCT 
+					intBillId
+					,dblTotal
+					,dblAmountDue
+					,dblAmountPaid
+					,dblDiscount
+					,dblInterest
+					,dtmDate
+					,intPrepaidRowType
+				  FROM dbo.vyuAPPrepaidPayables'
+
 IF @dateFrom IS NOT NULL
 BEGIN
-	SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''
+	IF @condition = 'Equal To'
+	BEGIN 
+		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
+		SET @prepaidInnerQuery = @prepaidInnerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
+	END
+	ELSE
+	BEGIN 
+		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''
+		SET @prepaidInnerQuery = @prepaidInnerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''
+	END  
+	
 END
 ELSE IF @dtmDueDate IS NOT NULL
 BEGIN
-	SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmDueDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''
+	IF @condition = 'Equal To'
+	BEGIN 
+		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmDueDate, 110) + ''''
+		SET @prepaidInnerQuery = @prepaidInnerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmDueDate, 110) + ''''
+	END
+	ELSE
+	BEGIN
+		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmDueDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''
+		SET @prepaidInnerQuery = @prepaidInnerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmDueDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''
+	END  
+	
 END
 ELSE
 BEGIN
@@ -260,6 +291,18 @@ SET @query = '
 				') tmpAPPayables
 			--WHERE dblAmountDue <> 0
 			GROUP BY intBillId
+			UNION ALL
+			SELECT 
+				intBillId
+				,SUM(tmpAPPrepaidPayables.dblTotal) AS dblTotal
+				,SUM(tmpAPPrepaidPayables.dblAmountPaid) AS dblAmountPaid
+				,SUM(tmpAPPrepaidPayables.dblDiscount)AS dblDiscount
+				,SUM(tmpAPPrepaidPayables.dblInterest) AS dblInterest
+				,CAST((SUM(tmpAPPrepaidPayables.dblTotal) + SUM(tmpAPPrepaidPayables.dblInterest) - SUM(tmpAPPrepaidPayables.dblAmountPaid) - SUM(tmpAPPrepaidPayables.dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue
+			FROM ('
+					+ @prepaidInnerQuery +
+				') tmpAPPrepaidPayables 
+			GROUP BY intBillId, intPrepaidRowType
 		) AS tmpAgingSummaryTotal
 		LEFT JOIN dbo.tblAPBill A
 		ON A.intBillId = tmpAgingSummaryTotal.intBillId
@@ -280,7 +323,7 @@ SET @query = '
 	) MainQuery 
 '
 
-SET @query = REPLACE(@query, 'GETDATE()', '''' + CONVERT(VARCHAR(10), @dateTo, 110) + '''');
+--SET @query = REPLACE(@query, 'GETDATE()', '''' + CONVERT(VARCHAR(10), @dateTo, 110) + '''');
 
 IF ISNULL(@filter,'') != ''
 BEGIN

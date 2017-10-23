@@ -93,6 +93,8 @@ BEGIN
 	DECLARE @strSiteGroup					NVARCHAR(MAX)
 	DECLARE @dblPriceProfileRate			NUMERIC(18,6)
 	DECLARE @dblPriceIndexRate				NUMERIC(18,6)
+	DECLARE @dblAdjustmentRate				NUMERIC(18,6)
+	
 	DECLARE	@dtmPriceIndexDate				DATETIME		
 	
 				
@@ -101,6 +103,9 @@ BEGIN
 	DECLARE @strItemId						NVARCHAR(MAX)
 
 	DECLARE @ysnBackoutDueToRouding			BIT	= 0
+
+	DECLARE @intPriceRuleGroup				INT
+	
 
 
 	-- IF RECALCULATE FROM IMPORTING--
@@ -146,6 +151,7 @@ BEGIN
 		,dblPriceIndexRate				NUMERIC(18,6)
 		,dtmPriceIndexDate				DATETIME
 		,dblMargin						NUMERIC(18,6)
+		,dblAdjustmentRate				NUMERIC(18,6)
 		,ysnDuplicate					BIT
 		,ysnInvalid						BIT
 	);
@@ -235,7 +241,8 @@ BEGIN
 	ELSE
 	BEGIN
 		SELECT TOP 1
-		@intCustomerId = cfAccount.intCustomerId
+		 @intCustomerId = cfAccount.intCustomerId
+		,@intPriceRuleGroup = cfAccount.intPriceRuleGroup
 		FROM tblCFCard as cfCard
 		INNER JOIN tblCFAccount as cfAccount
 		ON cfCard.intAccountId = cfAccount.intAccountId
@@ -360,21 +367,25 @@ BEGIN
 	@CFSiteId					=	@intSiteId,
 	@CFTransferCost				=	@dblTransferCost,
 	@CFOriginalPrice			=	@dblOriginalPrice,
-	@CFPriceOut					=	@dblPrice				output,
-	@CFPricingOut				=	@strPriceMethod			output,
-	@CFAvailableQuantity		=	@dblAvailableQuantity	output,
-	@CFContractHeaderId			=	@intContractHeaderId	output,
-	@CFContractDetailId			=	@intContractDetailId	output,
-	@CFContractNumber			=	@strContractNumber		output,
-	@CFContractSeq				=	@intContractSeq			output,
-	@CFPriceBasis				=	@strPriceBasis			output,
+	@CFPriceOut					=	@dblPrice					output,
+	@CFPricingOut				=	@strPriceMethod				output,
+	@CFAvailableQuantity		=	@dblAvailableQuantity		output,
+	@CFContractHeaderId			=	@intContractHeaderId		output,
+	@CFContractDetailId			=	@intContractDetailId		output,
+	@CFContractNumber			=	@strContractNumber			output,
+	@CFContractSeq				=	@intContractSeq				output,
+	@CFPriceBasis				=	@strPriceBasis				output,
 	@CFCreditCard				=	@ysnCreditCardUsed,      
 	@CFPostedOrigin				=	@ysnPostedOrigin,      
 	@CFPostedCSV				=	@ysnPostedCSV,      
-	@CFPriceProfileId			=	@intPriceProfileId		output,
-	@CFPriceProfileDetailId		=	@intPriceProfileDetailId		output,
-	@CFPriceIndexId				=	@intPriceIndexId 		output,
-	@CFSiteGroupId				= 	@intSiteGroupId 		
+	@CFPriceProfileId			=	@intPriceProfileId			output,
+	@CFPriceProfileDetailId		=	@intPriceProfileDetailId	output,
+	@CFPriceIndexId				=	@intPriceIndexId 			output,
+	@CFSiteGroupId				= 	@intSiteGroupId,				
+	@CFPriceRuleGroup			=	@intPriceRuleGroup,
+	@CFAdjustmentRate			=	@dblAdjustmentRate			output
+
+	
 
 	SELECT TOP 1 
 	@strPriceProfileId = cfPriceProfile.strPriceProfile
@@ -2407,6 +2418,7 @@ BEGIN
 			,dblPriceIndexRate	
 			,dtmPriceIndexDate
 			,dblMargin	
+			,dblAdjustmentRate
 			,ysnDuplicate
 			,ysnInvalid
 			)
@@ -2444,6 +2456,7 @@ BEGIN
 			,@dblPriceIndexRate			AS dblPriceIndexRate	
 			,@dtmPriceIndexDate			AS dtmPriceIndexDate	
 			,@dblMargin					AS dblMargin
+			,@dblAdjustmentRate			AS dblAdjustmentRate
 			,@ysnDuplicate				AS ysnDuplicate
 			,@ysnInvalid				AS ysnInvalid
 		END
@@ -2483,6 +2496,7 @@ BEGIN
 			,@dblPriceIndexRate			AS dblPriceIndexRate		
 			,@dtmPriceIndexDate			AS dtmPriceIndexDate	
 			,@dblMargin					AS dblMargin	
+			,@dblAdjustmentRate			AS dblAdjustmentRate
 			,@ysnDuplicate				AS ysnDuplicate
 			,@ysnInvalid				AS ysnInvalid
 		END

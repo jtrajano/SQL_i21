@@ -13,6 +13,7 @@ CREATE PROCEDURE [dbo].[uspICReduceStockInFIFO]
 	,@dblCost AS NUMERIC(38,20)
 	,@strTransactionId AS NVARCHAR(40)
 	,@intTransactionId AS INT
+	,@intTransactionDetailId AS INT
 	,@intEntityUserSecurityId AS INT
 	,@RemainingQty AS NUMERIC(38,20) OUTPUT
 	,@CostUsed AS NUMERIC(38,20) OUTPUT 
@@ -73,10 +74,24 @@ BEGIN
 
 	IF @CostBucketId IS NULL AND @AllowNegativeInventory = @ALLOW_NEGATIVE_NO
 	BEGIN 
-		IF @UnitsOnHand > 0 
+		-- Get the available stock in the cost bucket. 
+		DECLARE @strCostBucketDate AS VARCHAR(20) 
+		SELECT	TOP 1 
+				@strCostBucketDate = CONVERT(NVARCHAR(20), cb.dtmDate, 101)  
+		FROM	tblICInventoryFIFO cb
+		WHERE	cb.intItemId = @intItemId
+				AND cb.intItemLocationId = @intItemLocationId
+				AND cb.intItemUOMId = @intItemUOMId
+				AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0  
+		ORDER BY cb.dtmDate, cb.intItemId, cb.intItemLocationId, cb.intInventoryFIFOId ASC
+
+		IF @UnitsOnHand > 0 AND @strCostBucketDate IS NOT NULL 
 		BEGIN 
+			--'Stock is not available for {Item} at {Location} as of {Transaction Date}. Use the nearest stock available date of {Cost Bucket Date} or later.'
 			DECLARE @strDate AS VARCHAR(20) = CONVERT(NVARCHAR(20), @dtmDate, 101) 
-			EXEC uspICRaiseError 80096, @strDate, @strItemNo, @strLocationName;
+
+			--SET @strLocationName = dbo.fnFormatMsg80003(@intItemLocationId, @intSubLocationId, @intStorageLocationId)
+			EXEC uspICRaiseError 80096, @strItemNo, @strLocationName, @strDate, @strCostBucketDate;
 		END 
 		ELSE 
 		BEGIN 
@@ -143,6 +158,7 @@ WHEN NOT MATCHED THEN
 		,[dblCost]
 		,[strTransactionId]
 		,[intTransactionId]
+		,[intTransactionDetailId]
 		,[dtmCreated]
 		,[intCreatedEntityId]
 		,[intConcurrencyId]
@@ -157,6 +173,7 @@ WHEN NOT MATCHED THEN
 		,@dblCost
 		,@strTransactionId
 		,@intTransactionId
+		,@intTransactionDetailId
 		,GETDATE()
 		,@intEntityUserSecurityId
 		,1

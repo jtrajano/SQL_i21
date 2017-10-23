@@ -44,24 +44,31 @@ AS
             A.dblReportingRate,
             A.dblForeignRate,
 			A.intJournalLineNo,
-			J.strDocument,
+			A.strDocument,
 			A.ysnIsUnposted,
 			A.intTransactionId,
 			E.intEntityId,
-			J.strComments,
-			U.strUOMCode
+			A.strComments,
+			U.strUOMCode,
+            Loc.strLocationName,
+            ICUOM.strUnitMeasure,
+            ICCom.strCommodityCode,
+            ISNULL(dblSourceUnitDebit,0) dblSourceUnitDebit,
+            ISNULL(dblSourceUnitCredit,0) dblSourceUnitCredit
      FROM tblGLDetail AS A
 	 LEFT JOIN tblGLAccount AS B ON A.intAccountId = B.intAccountId
 	 LEFT JOIN tblGLAccountGroup AS C ON C.intAccountGroupId = B.intAccountGroupId
-	 OUTER APPLY(
-		SELECT TOP 1 strComments, strDocument FROM tblGLJournalDetail WHERE intJournalDetailId = A.intJournalLineNo
-	 ) J
+     LEFT JOIN tblSMCompanyLocation Loc ON A.intSourceLocationId = Loc.intCompanyLocationId
+     LEFT JOIN tblICUnitMeasure ICUOM ON ICUOM.intUnitMeasureId = A.intSourceUOMId
+     LEFT JOIN tblICCommodity ICCom ON ICCom.intCommodityId = A.intCommodityId
 	 OUTER APPLY (
 		SELECT TOP 1 dblLbsPerUnit,strUOMCode FROM tblGLAccountUnit WHERE intAccountUnitId = B.intAccountUnitId
 	 )U
 	 OUTER APPLY(
-		SELECT TOP 1 intEntityId,strUserName FROM [tblEMEntityCredential] WHERE intEntityId = A.intEntityId
+		SELECT TOP 1 intEntityId,strName strUserName FROM [tblEMEntity] WHERE intEntityId = A.intEntityId
 	 )E
 	 OUTER APPLY(
 		SELECT TOP 1 strCurrency FROM tblSMCurrency WHERE intCurrencyID = A.intCurrencyId
 	 )D
+
+	 

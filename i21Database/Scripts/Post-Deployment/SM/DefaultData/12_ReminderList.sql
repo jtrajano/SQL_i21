@@ -621,7 +621,8 @@ BEGIN
 			[strQuery]  		=        N'SELECT SI.intDeviceInterfaceFileId FROM tblSCDeviceInterfaceFile SI 
 											INNER JOIN tblSCScaleDevice SD ON SD.intPhysicalEquipmentId = SI.intScaleDeviceId
 											INNER JOIN tblSCScaleSetup SS ON SD.intScaleDeviceId = SS.intInScaleDeviceId
-											WHERE DATEDIFF(SECOND,dtmScaleTime,GETDATE()) >= 15 AND ISNULL(SI.intEntityId,0) != {0}',
+											OUTER APPLY( SELECT intEntityContactId FROM tblEMEntityToContact WHERE intEntityId = {0} AND ysnPortalAccess = 1) EM 
+											WHERE DATEDIFF(SECOND,dtmScaleTime,GETDATE()) >= 15 AND ISNULL(EM.intEntityContactId,0) = 0',
 			[strNamespace]      =        N'',
 			[intSort]           =        @intMaxSortOrder + 1
 	INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])	
@@ -631,7 +632,8 @@ BEGIN
 			[strQuery]  		=        N'SELECT SI.intDeviceInterfaceFileId FROM tblSCDeviceInterfaceFile SI 
 											INNER JOIN tblSCScaleDevice SD ON SD.intPhysicalEquipmentId = SI.intScaleDeviceId
 											INNER JOIN tblSCScaleSetup SS ON SD.intScaleDeviceId = SS.intOutScaleDeviceId
-											WHERE DATEDIFF(SECOND,dtmScaleTime,GETDATE()) >= 15 AND ISNULL(SI.intEntityId,0) != {0}',
+											OUTER APPLY( SELECT intEntityContactId FROM tblEMEntityToContact WHERE intEntityId = {0} AND ysnPortalAccess = 1) EM 
+											WHERE DATEDIFF(SECOND,dtmScaleTime,GETDATE()) >= 15 AND ISNULL(EM.intEntityContactId,0) = 0',
 			[strNamespace]      =        N'',
 			[intSort]           =        @intMaxSortOrder + 2
 END
@@ -646,7 +648,8 @@ BEGIN
 			[strQuery]  		=        N'SELECT SI.intDeviceInterfaceFileId FROM tblSCDeviceInterfaceFile SI 
 											INNER JOIN tblSCScaleDevice SD ON SD.intPhysicalEquipmentId = SI.intScaleDeviceId
 											INNER JOIN tblSCScaleSetup SS ON SD.intScaleDeviceId = SS.intInScaleDeviceId
-											WHERE DATEDIFF(SECOND,dtmScaleTime,GETDATE()) >= 15 AND ISNULL(SI.intEntityId,0) != {0}',
+											OUTER APPLY( SELECT intEntityContactId FROM tblEMEntityToContact WHERE intEntityId = {0} AND ysnPortalAccess = 1) EM 
+											WHERE DATEDIFF(SECOND,dtmScaleTime,GETDATE()) >= 15 AND ISNULL(EM.intEntityContactId,0) = 0',
 			[strNamespace]      =        N'',
 			[intSort]           =        @intMaxSortOrder + 1
 	INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])	
@@ -656,7 +659,8 @@ BEGIN
 			[strQuery]  		=        N'SELECT SI.intDeviceInterfaceFileId FROM tblSCDeviceInterfaceFile SI 
 											INNER JOIN tblSCScaleDevice SD ON SD.intPhysicalEquipmentId = SI.intScaleDeviceId
 											INNER JOIN tblSCScaleSetup SS ON SD.intScaleDeviceId = SS.intOutScaleDeviceId
-											WHERE DATEDIFF(SECOND,dtmScaleTime,GETDATE()) >= 15 AND ISNULL(SI.intEntityId,0) != {0}',
+											OUTER APPLY( SELECT intEntityContactId FROM tblEMEntityToContact WHERE intEntityId = {0} AND ysnPortalAccess = 1) EM 
+											WHERE DATEDIFF(SECOND,dtmScaleTime,GETDATE()) >= 15 AND ISNULL(EM.intEntityContactId,0) = 0',
 			[strNamespace]      =        N'',
 			[intSort]           =        @intMaxSortOrder + 2
 END

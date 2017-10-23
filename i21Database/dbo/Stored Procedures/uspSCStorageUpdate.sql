@@ -131,7 +131,7 @@ BEGIN TRY
 		FROM dbo.tblGRStorageType ST
 		WHERE ST.strStorageTypeCode = @strDistributionOption
 		
-		IF @intStorageTypeId is NULL
+		IF ISNULL(@intStorageTypeId,0) <= 0 
 		BEGIN
 	   		SELECT	@intStorageTypeId = ST.intDefaultStorageTypeId
 			FROM	dbo.tblSCScaleSetup ST	        
@@ -170,6 +170,7 @@ BEGIN TRY
 						,intSubLocationId = ScaleTicket.intSubLocationId
 						,intStorageLocationId = ScaleTicket.intStorageLocationId
 						,ysnIsStorage = 1
+						,intStorageScheduleTypeId = @intStorageTypeId
 				FROM	dbo.tblSCTicket ScaleTicket
 						INNER JOIN dbo.tblICItemUOM ItemUOM ON ScaleTicket.intItemId = ItemUOM.intItemId
 						INNER JOIN dbo.tblICItemLocation ItemLocation ON ScaleTicket.intItemId = ItemLocation.intItemId 
@@ -413,7 +414,7 @@ BEGIN TRY
 				,dblUOMQty = ItemUOM.dblUnitQty
 				,dblCost = 
 				CASE 
-					WHEN ISNULL(@intDPContractId,0) > 0 THEN ISNULL(dbo.fnRKGetFutureAndBasisPrice(1,ScaleTicket.intCommodityId,LEFT(DATENAME(MONTH, CNT.dtmEndDate), 3) + ' ' + RIGHT('0' + DATENAME(YEAR, CNT.dtmEndDate), 4),3,IC.intFutureMarketId,ScaleTicket.intProcessingLocationId,0),0)
+					WHEN ISNULL(@intDPContractId,0) > 0 THEN ISNULL(dbo.fnRKGetFutureAndBasisPriceForDate(ScaleTicket.intCommodityId,ScaleTicket.intProcessingLocationId,ScaleTicket.dtmTicketDateTime,3,0),0)
 					WHEN ISNULL(@intDPContractId,0) = 0 THEN 0
 				END
 				,dblSalesPrice = 0

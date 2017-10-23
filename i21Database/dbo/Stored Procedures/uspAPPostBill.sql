@@ -227,7 +227,7 @@ INSERT INTO @adjustedEntries (
 	,[intCostUOMId] 
 	,[dblVoucherCost] 
 	,[intCurrencyId] 
-	,[dblExchangeRate] 
+	--,[dblExchangeRate] 
 	,[intTransactionId] 
 	,[intTransactionDetailId] 
 	,[strTransactionId] 
@@ -251,14 +251,70 @@ SELECT
 		,[dblQty] 							=	CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END 
 		,[dblUOMQty] 						=	itemUOM.dblUnitQty
 		,[intCostUOMId]						=	voucherCostUOM.intItemUOMId 
-		,[dblNewCost] 						=	CASE WHEN A.intCurrencyId <> @intFunctionalCurrencyId THEN 
-														-- Convert the voucher cost to the functional currency. 
-														dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, receiptCostUOM.intItemUOMId, B.dblCost) * ISNULL(B.dblRate, 0) 
-													ELSE 
-														dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, receiptCostUOM.intItemUOMId, B.dblCost)
-												END 
+		-- ,[dblNewCost] 						=	CASE WHEN A.intCurrencyId <> @intFunctionalCurrencyId THEN 
+		-- 												-- Convert the voucher cost to the functional currency. 
+		-- 												dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, receiptCostUOM.intItemUOMId, B.dblCost) * ISNULL(B.dblRate, 0) 
+		-- 											ELSE 
+		-- 												dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, receiptCostUOM.intItemUOMId, B.dblCost)
+		-- 										END 
+		,[dblNewValue]						= 
+
+												/*
+													New Formula: 
+													Cost Adjustment Value = 
+													[Voucher Qty x Voucher Cost] - [Voucher Qty x Receipt Cost]												
+												*/
+												dbo.fnMultiply(
+													--[Voucher Qty]
+													CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END
+													--[Voucher Cost]
+													,CASE WHEN A.intCurrencyId <> @intFunctionalCurrencyId THEN 														
+															dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, receiptCostUOM.intItemUOMId, B.dblCost) * ISNULL(B.dblRate, 0) 
+														ELSE 
+															dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, receiptCostUOM.intItemUOMId, B.dblCost)
+													END 													
+												)
+												- dbo.fnMultiply(
+													--[Voucher Qty]
+													CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END
+													
+													,--[Receipt Cost]
+													CASE WHEN E2.ysnSubCurrency = 1 AND E1.intSubCurrencyCents <> 0 THEN 
+															CASE WHEN E1.intCurrencyId <> @intFunctionalCurrencyId THEN 	
+																	dbo.fnCalculateCostBetweenUOM(
+																		receiptCostUOM.intItemUOMId
+																		, COALESCE(E2.intWeightUOMId, E2.intUnitMeasureId) 
+																		, E2.dblUnitCost
+																	) 
+																	/ E1.intSubCurrencyCents
+																	* E2.dblForexRate
+																ELSE 
+																	dbo.fnCalculateCostBetweenUOM(
+																		receiptCostUOM.intItemUOMId
+																		, COALESCE(E2.intWeightUOMId, E2.intUnitMeasureId) 
+																		, E2.dblUnitCost
+																	) 
+																	/ E1.intSubCurrencyCents
+															END 
+														ELSE
+															CASE WHEN E1.intCurrencyId <> @intFunctionalCurrencyId THEN 	
+																dbo.fnCalculateCostBetweenUOM(
+																	receiptCostUOM.intItemUOMId
+																	, COALESCE(E2.intWeightUOMId, E2.intUnitMeasureId) 
+																	, E2.dblUnitCost
+																) 
+																* E2.dblForexRate
+															ELSE 
+																dbo.fnCalculateCostBetweenUOM(
+																	receiptCostUOM.intItemUOMId
+																	, COALESCE(E2.intWeightUOMId, E2.intUnitMeasureId) 
+																	, E2.dblUnitCost
+																) 
+														END 
+													END
+												)
 		,[intCurrencyId] 					=	@intFunctionalCurrencyId -- It is always in functional currency. 
-		,[dblExchangeRate] 					=	1 -- Exchange rate is always 1. 
+		--,[dblExchangeRate] 					=	1 -- Exchange rate is always 1. 
 		,[intTransactionId]					=	A.intBillId
 		,[intTransactionDetailId] 			=	B.intBillDetailId
 		,[strTransactionId] 				=	A.strBillId
@@ -310,6 +366,35 @@ WHERE	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 			OR E2.dblForexRate <> B.dblRate
 		) 
 
+--CHARGES COST ADJUSTMENT
+DECLARE @ChargesToAdjust as OtherChargeCostAdjustmentTableType
+INSERT INTO @ChargesToAdjust 
+(
+	[intInventoryReceiptChargeId] 
+	,[dblNewValue] 
+	,[dtmDate] 
+	,[intTransactionId] 
+	,[intTransactionDetailId] 
+	,[strTransactionId] 
+)
+SELECT 
+	[intInventoryReceiptChargeId]	= rc.intInventoryReceiptChargeId
+	,[dblNewValue]					= B.dblCost
+	,[dtmDate]						= A.dtmDate
+	,[intTransactionId]				= A.intBillId
+	,[intTransactionDetailId]		= B.intBillDetailId
+	,[strTransactionId]				= A.strBillId
+FROM tblAPBill A
+INNER JOIN tblAPBillDetail B
+		ON A.intBillId = B.intBillId
+INNER JOIN (tblICInventoryReceipt r 
+				-- INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+				INNER JOIN tblICInventoryReceiptCharge rc ON r.intInventoryReceiptId = rc.intInventoryReceiptId)
+		ON rc.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId
+WHERE	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
+		AND B.intInventoryReceiptChargeId IS NOT NULL 
+		AND (rc.dblUnitCost <> B.dblCost OR rc.dblForexRate <> B.dblRate)
+
 IF ISNULL(@post,0) = 1
 BEGIN	
 
@@ -344,7 +429,9 @@ BEGIN
 	    dblCreditReport ,
 	    dblReportingRate ,
 	    dblForeignRate ,
-	    strRateType 
+	    strRateType ,
+		strDocument,
+		strComments
 	)
 	SELECT     
 		dtmDate ,
@@ -377,7 +464,9 @@ BEGIN
 	    dblCreditReport ,
 	    dblReportingRate ,
 	    dblForeignRate ,
-	    strRateType 	 
+	    strRateType ,
+		strDocument,
+		strComments	 
 	FROM dbo.fnAPCreateBillGLEntries(@validBillIds, @userId, @batchId)
 	ORDER BY intTransactionId
 
@@ -385,39 +474,6 @@ BEGIN
 	BEGIN
 		DECLARE @intReturnValue AS INT 
 
-		--INSERT INTO @GLEntries (
-		--	dtmDate						
-		--	,strBatchId					
-		--	,intAccountId				
-		--	,dblDebit					
-		--	,dblCredit					
-		--	,dblDebitUnit				
-		--	,dblCreditUnit				
-		--	,strDescription				
-		--	,strCode					
-		--	,strReference				
-		--	,intCurrencyId				
-		--	,dblExchangeRate			
-		--	,dtmDateEntered				
-		--	,dtmTransactionDate			
-		--	,strJournalLineDescription  
-		--	,intJournalLineNo			
-		--	,ysnIsUnposted				
-		--	,intUserId					
-		--	,intEntityId				
-		--	,strTransactionId			
-		--	,intTransactionId			
-		--	,strTransactionType			
-		--	,strTransactionForm			
-		--	,strModuleName				
-		--	,intConcurrencyId			
-		--	,dblDebitForeign			
-		--	,dblDebitReport				
-		--	,dblCreditForeign			
-		--	,dblCreditReport			
-		--	,dblReportingRate			
-		--	,dblForeignRate						
-		--)
 		EXEC @intReturnValue = uspICPostCostAdjustment 
 				@adjustedEntries
 				, @batchId
@@ -478,6 +534,74 @@ BEGIN
 		SET @invalidCount = @invalidCount + @failedAdjustment;
 		SET @totalRecords = @totalRecords - @failedAdjustment;
 	END
+
+	IF EXISTS(SELECT 1 FROM @ChargesToAdjust)
+	BEGIN
+		EXEC uspICPostCostAdjustmentFromOtherCharge 
+			@ChargesToAdjust = @ChargesToAdjust 
+			,@strBatchId = @batchId 
+			,@intEntityUserSecurityId = @userId 
+			,@ysnPost = @post
+			,@strTransactionType = DEFAULT 
+
+		INSERT INTO @GLEntries (
+			dtmDate						
+			,strBatchId					
+			,intAccountId				
+			,dblDebit					
+			,dblCredit					
+			,dblDebitUnit				
+			,dblCreditUnit				
+			,strDescription				
+			,strCode					
+			,strReference				
+			,intCurrencyId				
+			,dblExchangeRate			
+			,dtmDateEntered				
+			,dtmTransactionDate			
+			,strJournalLineDescription  
+			,intJournalLineNo			
+			,ysnIsUnposted				
+			,intUserId					
+			,intEntityId				
+			,strTransactionId			
+			,intTransactionId			
+			,strTransactionType			
+			,strTransactionForm			
+			,strModuleName				
+			,intConcurrencyId			
+			,dblDebitForeign			
+			,dblDebitReport				
+			,dblCreditForeign			
+			,dblCreditReport			
+			,dblReportingRate			
+			,dblForeignRate						
+		)
+		EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
+			@strBatchId = @batchId
+			,@intEntityUserSecurityId = @userId
+			,@strGLDescription = 1
+			,@ysnPost = @post
+			,@AccountCategory_Cost_Adjustment = DEFAULT
+
+		--DELETE FAILED BILLS
+		DELETE A
+		FROM #tmpPostBillData A
+		WHERE EXISTS (
+			SELECT 1
+			FROM tblAPBill B
+			INNER JOIN tblAPBillDetail C ON B.intBillId = C.intBillId AND C.intInventoryReceiptItemId > 0
+			INNER JOIN @ChargesToAdjust D ON B.intBillId = D.intTransactionId AND B.strBillId = D.strTransactionId
+			WHERE A.intBillId = B.intBillId
+			AND EXISTS (
+				SELECT 1 FROM tblICPostResult E WHERE E.strBatchNumber = @batchId AND E.intTransactionId = C.intInventoryReceiptItemId
+			)
+		)
+
+		SET @failedAdjustment = @@ROWCOUNT;
+		SET @invalidCount = @invalidCount + @failedAdjustment;
+		SET @totalRecords = @totalRecords - @failedAdjustment;
+	END
 END
 ELSE
 BEGIN
@@ -486,8 +610,72 @@ BEGIN
 	INSERT INTO @Ids
 	SELECT intBillId FROM #tmpPostBillData
 
-	INSERT INTO @GLEntries
-	SELECT * FROM dbo.fnAPReverseGLEntries(@Ids, 'Bill', DEFAULT, @userId, @batchId)
+	INSERT INTO @GLEntries (
+		dtmDate						
+		,strBatchId					
+		,intAccountId				
+		,dblDebit					
+		,dblCredit					
+		,dblDebitUnit				
+		,dblCreditUnit				
+		,strDescription				
+		,strCode					
+		,strReference				
+		,intCurrencyId				
+		,dblExchangeRate			
+		,dtmDateEntered				
+		,dtmTransactionDate			
+		,strJournalLineDescription  
+		,intJournalLineNo			
+		,ysnIsUnposted				
+		,intUserId					
+		,intEntityId				
+		,strTransactionId			
+		,intTransactionId			
+		,strTransactionType			
+		,strTransactionForm			
+		,strModuleName				
+		,intConcurrencyId			
+		,dblDebitForeign			
+		,dblDebitReport				
+		,dblCreditForeign			
+		,dblCreditReport			
+		,dblReportingRate			
+		,dblForeignRate		
+	)
+	SELECT 
+		dtmDate						
+		,strBatchId					
+		,intAccountId				
+		,dblDebit					
+		,dblCredit					
+		,dblDebitUnit				
+		,dblCreditUnit				
+		,strDescription				
+		,strCode					
+		,strReference				
+		,intCurrencyId				
+		,dblExchangeRate			
+		,dtmDateEntered				
+		,dtmTransactionDate			
+		,strJournalLineDescription  
+		,intJournalLineNo			
+		,ysnIsUnposted				
+		,intUserId					
+		,intEntityId				
+		,strTransactionId			
+		,intTransactionId			
+		,strTransactionType			
+		,strTransactionForm			
+		,strModuleName				
+		,intConcurrencyId			
+		,dblDebitForeign			
+		,dblDebitReport				
+		,dblCreditForeign			
+		,dblCreditReport			
+		,dblReportingRate			
+		,dblForeignRate	
+	FROM dbo.fnAPReverseGLEntries(@Ids, 'Bill', DEFAULT, @userId, @batchId)
 END
 --=====================================================================================================================================
 -- 	CHECK IF THE PROCESS IS RECAP OR NOT

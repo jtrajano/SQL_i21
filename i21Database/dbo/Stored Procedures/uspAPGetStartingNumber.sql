@@ -17,6 +17,7 @@ BEGIN
 			 WHEN @intTransactionType = 3 THEN 'Debit Memo'
 			 WHEN @intTransactionType = 9 THEN '1099 Adjustment' 
 			 WHEN @intTransactionType = 11 THEN 'Claim' 
+			 WHEN @intTransactionType = 13 THEN 'Basis Advance' 
 		ELSE ''
 		END
 

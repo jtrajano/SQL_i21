@@ -30,6 +30,8 @@
 		,strCurrency = s.strCurrency
 		,strCurrencyExchangeRate = u.strCurrency + ' To ' + v.strCurrency
 		,strCurrencyExchangeRateType = w.strCurrencyExchangeRateType
+		,intMoveToStatusId = y.intTicketStatusId
+		,strMoveToStatus = y.strStatus
 	from tblHDTicket a
 		left join tblEMEntity b on b.intEntityId = a.intCustomerContactId
 		left join tblEMEntity c on c.intEntityId = a.intCustomerId
@@ -54,3 +56,5 @@
 		left join tblSMCurrency u on u.intCurrencyID = t.intFromCurrencyId
 		left join tblSMCurrency v on v.intCurrencyID = t.intToCurrencyId
 		left join tblSMCurrencyExchangeRateType w on w.intCurrencyExchangeRateTypeId = a.intCurrencyExchangeRateTypeId
+		left join tblHDTicketStatusWorkflow x on x.intFromStatusId = a.intTicketStatusId and x.ysnActive = convert(bit,1) and x.strTiggerBy = 'Customer Responds'
+		left join tblHDTicketStatus y on y.intTicketStatusId = x.intToStatusId

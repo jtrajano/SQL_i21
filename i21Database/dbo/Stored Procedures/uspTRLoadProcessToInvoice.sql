@@ -140,6 +140,8 @@ BEGIN TRY
 		,[dblSurcharge]							= DD.dblDistSurcharge
 		,DD.dblFreightRate
 		,DD.ysnFreightInPrice
+		,intTruckDriverId = CASE WHEN TL.intDriverId IS NULL THEN NULL ELSE TL.intDriverId END
+		,intTruckDriverReferenceId = CASE WHEN SC.intTruckDriverReferenceId IS NULL THEN NULL ELSE SC.intTruckDriverReferenceId END
 	INTO #tmpSourceTable
 	FROM tblTRLoadHeader TL
 	LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
@@ -149,6 +151,7 @@ BEGIN TRY
 	LEFT JOIN vyuICGetItemLocation Item ON Item.intItemId = DD.intItemId AND Item.intLocationId = DH.intCompanyLocationId
 	LEFT JOIN tblLGLoad LG ON LG.intLoadId = TL.intLoadId
 	LEFT JOIN vyuICGetItemStock IC ON IC.intItemId = DD.intItemId AND IC.intLocationId = DH.intCompanyLocationId
+	LEFT JOIN tblSCTruckDriverReference SC ON SC.strData = TL.strTractor
 	LEFT JOIN tblTRLoadReceipt TR ON TR.intLoadHeaderId = TL.intLoadHeaderId AND TR.strReceiptLine IN (
 		SELECT Item 
 		FROM dbo.fnTRSplit(DD.strReceiptLink,','))
@@ -790,6 +793,8 @@ BEGIN TRY
 		,[ysnClearDetailTaxes]					
 		,[intTempDetailIdForTaxes]
 		,[intLoadDistributionHeaderId]
+		,[intTruckDriverId]
+		,[intTruckDriverReferenceId]
 	)
 	SELECT
 		 [strSourceTransaction]					= TR.strSourceTransaction
@@ -867,6 +872,8 @@ BEGIN TRY
 		,[ysnClearDetailTaxes]					= TR.ysnClearDetailTaxes
 		,[intTempDetailIdForTaxes]				= TR.intTempDetailIdForTaxes
 		,[intLoadDistributionHeaderId]			= TR.intLoadDistributionHeaderId
+		,intTruckDriverId						= TR.intTruckDriverId
+		,intTruckDriverReferenceId				= TR.intTruckDriverReferenceId
 	FROM #tmpSourceTableFinal TR
 	ORDER BY TR.intLoadDistributionDetailId, intId DESC
 
@@ -1246,11 +1253,28 @@ BEGIN TRY
 	-- Unpost Blending Transaction
 	IF (ISNULL(@ysnPostOrUnPost, 0) = 0 AND @HasBlend = 1)
 	BEGIN
-		EXEC uspMFReverseAutoBlend
+		SELECT DISTINCT DistItem.intLoadDistributionDetailId
+		INTO #tmpBlendItems
+		FROM vyuTRGetLoadBlendIngredient DistItem
+		LEFT JOIN tblTRLoadDistributionHeader HeaderDistItem ON HeaderDistItem.intLoadDistributionHeaderId = DistItem.intLoadDistributionHeaderId
+		WHERE HeaderDistItem.intLoadHeaderId = @intLoadHeaderId
+
+		WHILE EXISTS (SELECT TOP 1 1 FROM #tmpBlendItems)
+		BEGIN
+		
+			SELECT TOP 1 @DistributionItemId = intLoadDistributionDetailId FROM #tmpBlendItems
+
+			EXEC uspMFReverseAutoBlend
 			@intSalesOrderDetailId = NULL
 			, @intInvoiceDetailId = NULL
 			, @intLoadDistributionDetailId = @DistributionItemId
-			, @intUserId = @intUserId
+			, @intUserId = @intUserId	
+
+			DELETE FROM #tmpBlendItems WHERE intLoadDistributionDetailId = @DistributionItemId
+			
+		END
+			
+		DROP TABLE #tmpBlendItems
 	END
 
 	IF (@ErrorMessage IS NULL)

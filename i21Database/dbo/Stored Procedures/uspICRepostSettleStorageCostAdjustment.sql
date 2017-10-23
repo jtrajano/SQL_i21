@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspICRepostSettleStorageCostAdjustment]
 	@strSettleTicketId AS NVARCHAR(50)
-	,@strBatchId AS NVARCHAR(20)
+	,@strBatchId AS NVARCHAR(40)
 	,@intEntityUserSecurityId AS INT
 AS
 
@@ -33,7 +33,7 @@ BEGIN
 		,[intCostUOMId] 
 		,[dblVoucherCost] 
 		,[intCurrencyId] 
-		,[dblExchangeRate] 
+		--,[dblExchangeRate] 
 		,[intTransactionId] 
 		,[intTransactionDetailId] 
 		,[strTransactionId] 
@@ -59,7 +59,7 @@ BEGIN
 			,[intCostUOMId]						=	vd.intCostUOMId 
 			,[dblNewCost] 						=	vd.dblCost
 			,[intCurrencyId] 					=	@intDefaultCurrencyId -- Always default to the functional currency. 
-			,[dblExchangeRate] 					=	1 -- Since it is using the default currency, the exchange rate is set to 1. 
+			--,[dblExchangeRate] 					=	1 -- Since it is using the default currency, the exchange rate is set to 1. 
 			,[intTransactionId]					=	SH.[intCustomerStorageId]
 			,[intTransactionDetailId] 			=	SH.[intCustomerStorageId]
 			,[strTransactionId] 				=	SH.strSettleTicket

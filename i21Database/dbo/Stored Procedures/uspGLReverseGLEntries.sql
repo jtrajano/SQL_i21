@@ -119,10 +119,12 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 -- 	FINALIZING STAGE
 ---------------------------------------------------------------------------------------------------------------------------------------
 Post_Commit:
+IF @@TRANCOUNT > 0
 	COMMIT TRANSACTION
 	GOTO Post_Exit
 
 Post_Rollback:
+IF @@TRANCOUNT > 0
 	ROLLBACK TRANSACTION		            
 	GOTO Post_Exit
 

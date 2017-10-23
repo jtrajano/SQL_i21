@@ -208,7 +208,7 @@ BEGIN
 		[A4GLIdentity]			=	A.[A4GLIdentity]		,
 		[ysnInsertedToAPIVC]	=	1
 	FROM aptrxmst A
-	WHERE 1 = (CASE WHEN CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END)
+	WHERE 1 = (CASE WHEN ISDATE(A.aptrx_gl_rev_dt) = 1 AND CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END)
 	AND A.aptrx_trans_type IN ('I', 'C', 'A')
 END
 

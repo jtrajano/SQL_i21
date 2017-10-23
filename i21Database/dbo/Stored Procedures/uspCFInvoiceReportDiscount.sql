@@ -432,7 +432,7 @@ BEGIN
 		
 		-------------GROUP VOLUME DISCOUNT---------------
 		INSERT @tblCFGroupVolumeDisctinct
-		SELECT DISTINCT intCustomerGroupId
+		SELECT DISTINCT ISNULL(intCustomerGroupId,0)
 		FROM ##tmpInvoiceDiscount
 		WHILE (EXISTS(SELECT 1 FROM @tblCFGroupVolumeDisctinct))
 		BEGIN
@@ -547,7 +547,7 @@ BEGIN
 
 		-------------ACCOUNT VOLUME DISCOUNT---------------
 		INSERT @tblCFAccountVolumeDisctinct
-		SELECT DISTINCT intAccountId
+		SELECT DISTINCT ISNULL(intAccountId,0)
 		FROM ##tmpInvoiceDiscount
 		WHILE (EXISTS(SELECT 1 FROM @tblCFAccountVolumeDisctinct))
 		BEGIN
@@ -667,7 +667,7 @@ BEGIN
 
 		-------------SET GROUP VOLUME TO OUTPUT---------------
 		INSERT @tblCFMergeVolumeDisctinct
-		SELECT DISTINCT intAccountId
+		SELECT DISTINCT ISNULL(intAccountId,0)
 		FROM @tblCFGroupVolumeTemp
 		WHILE (EXISTS(SELECT 1 FROM @tblCFMergeVolumeDisctinct))
 		BEGIN
@@ -783,7 +783,7 @@ BEGIN
 
 		-------------SET ACCOUNT VOLUME TO OUTPUT---------------
 		INSERT @tblCFMergeVolumeDisctinct
-		SELECT DISTINCT intAccountId
+		SELECT DISTINCT ISNULL(intAccountId,0)
 		FROM @tblCFAccountVolumeTemp
 		WHILE (EXISTS(SELECT 1 FROM @tblCFMergeVolumeDisctinct))
 		BEGIN

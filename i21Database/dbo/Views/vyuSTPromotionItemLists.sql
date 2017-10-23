@@ -1,24 +1,31 @@
 ﻿CREATE VIEW vyuSTPromotionItemLists
 AS
-SELECT 
-intKey = CAST(ROW_NUMBER() OVER(ORDER BY adj1.intItemUOMId, adj2.intLocationId) AS INT),
-adj3.strLocationName, 
-adj1.strUpcCode,
-adj1.strLongUPCCode,
-adj1.intItemUOMId,
-adj5.strItemNo,
-adj5.strDescription as strPumpItemDescription,
-adj6.intCategoryId,
-adj6.strCategoryCode,
-adj6.strDescription as categoryDesc,
-adj5.ysnFuelItem,
-adj4.dblSalePrice as dblPrice,
-adj2.intFamilyId,
-adj2.intClassId
-from tblICItemUOM adj1 JOIN tblICItemLocation adj2 ON adj1.intItemId = adj2.intItemId
-JOIN tblSMCompanyLocation adj3 ON adj3.intCompanyLocationId = adj2.intLocationId
-JOIN tblICItemPricing adj4 on adj4.intItemLocationId = adj2.intItemLocationId
-JOIN tblICItem adj5 ON adj5.intItemId = adj1.intItemId  
-JOIN tblICCategory adj6 ON adj5.intCategoryId = adj6.intCategoryId
-and adj5.strType = 'Inventory' and adj5.strStatus = 'Active'
+SELECT        
+intKey = CAST(ROW_NUMBER() OVER (ORDER BY UOM.intItemUOMId, IL.intLocationId) AS INT)
+, CL.strLocationName
+, UOM.strUpcCode
+, UOM.strLongUPCCode
+, UOM.intItemUOMId
+, I.strItemNo 
+, I.strDescription AS strPumpItemDescription
+, adj6.intCategoryId
+, adj6.strCategoryCode
+, adj6.strDescription AS categoryDesc
+, I.ysnFuelItem
+, IP.dblSalePrice AS dblPrice
+, IL.intFamilyId
+, IL.intClassId
+, Family.strSubcategoryId AS strFamily
+, Class.strSubcategoryId AS strClass
+, CL.intCompanyLocationId
+FROM            
+tblICItemUOM UOM JOIN
+tblICItemLocation IL ON UOM.intItemId = IL.intItemId LEFT JOIN
+tblSTSubcategory AS Family ON Family.intSubcategoryId = IL.intFamilyId LEFT JOIN
+tblSTSubcategory AS Class ON Class.intSubcategoryId = IL.intClassId JOIN
+tblSMCompanyLocation CL ON CL.intCompanyLocationId = IL.intLocationId JOIN
+tblICItemPricing IP ON IP.intItemLocationId = IL.intItemLocationId JOIN
+tblICItem I ON I.intItemId = UOM.intItemId JOIN
+tblICCategory adj6 ON I.intCategoryId = adj6.intCategoryId
+WHERE I.strType = 'Inventory' AND I.strStatus = 'Active'
 

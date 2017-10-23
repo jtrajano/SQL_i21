@@ -38,6 +38,11 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+BEGIN 
+	DECLARE @intFunctionalCurrencyId AS INT
+	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
+END 
+
 SET @InventoryTransactionIdentityId = NULL
 
 -- Initialize the UOM Qty
@@ -91,7 +96,7 @@ SELECT	[intItemId]							= @intItemId
 		,[dblCost]							= ISNULL(@dblCost, 0)
 		,[dblValue]							= ISNULL(@dblValue, 0)
 		,[dblSalesPrice]					= ISNULL(@dblSalesPrice, 0)
-		,[intCurrencyId]					= @intCurrencyId
+		,[intCurrencyId]					= ISNULL(@intCurrencyId, @intFunctionalCurrencyId) 
 		,[dblExchangeRate]					= ISNULL(@dblForexRate, 1)
 		,[intTransactionId]					= @intTransactionId
 		,[intTransactionDetailId]			= @intTransactionDetailId

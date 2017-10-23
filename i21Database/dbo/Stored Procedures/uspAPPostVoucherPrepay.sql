@@ -15,6 +15,8 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+BEGIN TRY
+
 DECLARE @user INT = @userId;
 DECLARE @GLEntries AS RecapTableType;
 DECLARE @voucherPrepayIdData AS Id;
@@ -41,15 +43,13 @@ SET @batchIdUsed = @batchId;
 INSERT INTO #tmpInvalidVoucherPrepayData
 SELECT * FROM dbo.fnAPValidateVoucherPrepay(@voucherPrepayIdData, @post)
 
-SELECT @totalInvalid = COUNT(*) FROM #tmpInvalidVoucherPrepayData
+SET @totalInvalid = @totalInvalid + @@ROWCOUNT;
 
 IF(@totalInvalid > 0)
 BEGIN
 	--Insert Invalid Post transaction result
 	INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 	SELECT strError, strTransactionType, strTransactionId, @batchId, intTransactionId FROM #tmpInvalidVoucherPrepayData
-
-	SET @invalidCount = @totalInvalid
 END
 
 --LISTS ALL VALID RECORDS
@@ -64,6 +64,7 @@ SELECT @totalRecords = COUNT(*) FROM @validVoucherPrepay
 
 IF @totalRecords = 0 
 BEGIN
+	SET @invalidCount = @totalInvalid;
 	SET @success = 0;
 	RETURN; --EXIT, NO VOUCHER PREPAY TO POST
 END
@@ -213,11 +214,6 @@ BEGIN
 	) AND A.ysnIsUnposted = 0
 END
 
-BEGIN TRY
---THIS IS FOR THE UNHANDLED EXCEPTION
-SET @transCount = @@TRANCOUNT;
-IF @transCount = 0 BEGIN TRANSACTION
-
 IF @recap = 0
 BEGIN
 
@@ -231,14 +227,26 @@ BEGIN
 	INNER JOIN tblGLPostResult postResult ON ids.intId = postResult.intTransactionId
 	WHERE postResult.strDescription NOT LIKE '%success%' AND postResult.strBatchId = @batchId
 
-	INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, intTransactionId)
+	--update invalid records
+	SET @totalInvalid = @totalInvalid + @@ROWCOUNT;
+	
+	INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 	SELECT 
 		A.strDescription
 		,A.strTransactionType
 		,A.strTransactionId
+		,@batchId
 		,A.intTransactionId
 	FROM tblGLPostResult A
 	WHERE A.strBatchId = @batchId
+
+	--EXIT IF NO RECORD TO POST/UNPOST
+	IF NOT EXISTS(SELECT TOP 1 1 FROM @validVoucherPrepay)
+	BEGIN
+		SET @invalidCount = @totalInvalid;
+		SET @success = 0;
+		RETURN;
+	END
 
 	IF @post = 0
 	BEGIN
@@ -252,6 +260,7 @@ BEGIN
 			AND B.strBillId = A.strTransactionId
 		) AND A.ysnIsUnposted = 0
 	END
+
 	UPDATE prepay
 		SET prepay.ysnPosted = @post
 	FROM tblAPBill prepay
@@ -332,11 +341,10 @@ BEGIN
 	CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebitForeign, 0) - ISNULL(A.dblCreditForeign, 0))  CreditForeign;
 END
 
-IF @transCount = 0 COMMIT TRANSACTION --COMMIT IF WE INITIATE THE TRANSACTION
+SET @invalidCount = @totalInvalid;
 SET @success = 1;
 END TRY
 BEGIN CATCH
-	ROLLBACK TRANSACTION
 	DECLARE @ErrorMessage NVARCHAR(4000);
 	SET @ErrorMessage  = ERROR_MESSAGE()
 	RAISERROR(@ErrorMessage, 16, 1);

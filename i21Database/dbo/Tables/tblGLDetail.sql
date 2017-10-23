@@ -37,15 +37,13 @@
     [dtmReconciled] DATETIME NULL, 
     [ysnReconciled] BIT NULL, 
 	[ysnRevalued] BIT NULL,
-	[ysnExported] BIT NULL,
-	[dtmExportedDate] DATETIME NULL,
-	intSourceEntityId INT NULL,
 	intSourceLocationId INT NULL,
-	intSourceUOM INT NULL,
+	intSourceUOMId INT NULL,
 	dblSourceUnitDebit NUMERIC(18,9) NULL,
 	dblSourceUnitCredit NUMERIC(18,9) NULL,
-	intCommodity INT NULL,
-	intSourceDocumentId INT NULL,
+	intCommodityId INT NULL,
+	[strDocument] NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL,
+	[strComments] NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL
     CONSTRAINT [PK_tblGL] PRIMARY KEY CLUSTERED ([intGLDetailId] ASC),
     CONSTRAINT [FK_tblGL_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
     CONSTRAINT [FK_tblGLDetail_tblSMMultiCompany] FOREIGN KEY([intMultiCompanyId]) REFERENCES [dbo].[tblSMMultiCompany] ([intMultiCompanyId])
@@ -182,19 +180,15 @@ EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Is Reconciled?
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Is Revalued?' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'ysnRevalued' 
 GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Is Exported?' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'ysnExported' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Entity used in the source transaction qucikly' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'intSourceEntityId' 
+--EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Is Exported?' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'ysnExported' 
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Location of the transaction for ease of reporting' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'intSourceLocationId' 
 GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Unit of measure from the source transaction and will allow us to long term eliminate the conversions in GL' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'intSourceUOM' 
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Unit of measure from the source transaction and will allow us to long term eliminate the conversions in GL' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'intSourceUOMId' 
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Debits in the source transaction uom' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'dblSourceUnitDebit' 
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Credits in the source transaction UOM' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'dblSourceUnitCredit' 
 GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Future use - to easily identify commodity in the GL' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'intCommodity' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'This is the enities document number for example it is the vendor invoice number on a voucher - a customer po number on an invoice.' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'intSourceDocumentId' 
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Future use - to easily identify commodity in the GL' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'intCommodityId' 
 GO

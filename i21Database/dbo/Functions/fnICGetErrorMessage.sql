@@ -76,7 +76,7 @@ BEGIN
 		WHEN @msgId = 80060 THEN 'Data not found. Unable to create the Inventory Transfer.'
 		WHEN @msgId = 80061 THEN 'Unable to generate the Inventory Transfer. An error stopped the creation of the inventory transfer.'
 		WHEN @msgId = 80062 THEN 'Cost adjustment cannot continue. Unable to find the cost bucket for %s that was posted in %s.'
-		WHEN @msgId = 80063 THEN 'Unable to unpost because %s has a cost adjustment from %s.'
+		WHEN @msgId = 80063 THEN 'There is a cost adjustment for %s. You need to unpost %s first before you can continue.'
 		WHEN @msgId = 80064 THEN 'The %s is both a payable and deductible to the bill of the same vendor. Please correct the Accrue or Price checkbox.'
 		WHEN @msgId = 80065 THEN 'The %s is shouldered by the receipt vendor and can''t be added to the item cost. Please correct the Price or Inventory Cost checkbox.'
 		WHEN @msgId = 80066 THEN 'Inventory Count is ongoing for Item %s and is locked under Location %s.'
@@ -109,7 +109,7 @@ BEGIN
 		WHEN @msgId = 80093 THEN 'Stock quantity is now zero on %s in %s. Auto variance is posted to zero out its inventory valuation.'
 		WHEN @msgId = 80094 THEN '%s costing method is Average Costing and it will be received in %s as Actual costing. This is not allowed to avoid bad computation of the average cost. Try receiving the stocks using Inventory Receipt instead of Transport Load.'
 		WHEN @msgId = 80095 THEN 'The %s cannot be accrued to the same Shipment Customer.'
-		WHEN @msgId = 80096 THEN 'Check the date on the transaction. As of %s, there is no stock available for %s in %s.'
+		WHEN @msgId = 80096 THEN 'Stock is not available for %s at %s as of %s. Use the nearest stock available date of %s or later.'
 		WHEN @msgId = 80097 THEN 'Sub Location is invalid or missing for item %s.'
 		WHEN @msgId = 80098 THEN 'Storage Unit is invalid or missing for item %s.'
 		WHEN @msgId = 80099 THEN 'New Quantity for item %s is required.'
@@ -202,6 +202,9 @@ BEGIN
 		WHEN @msgId = 80186 THEN 'The UOM %s is used for %s and not for %s. Please assign the correct UOM id.'
 		WHEN @msgId = 80187 THEN 'You are not allowed to change the Sub Location. Item %s still has stock at %s.'
 		WHEN @msgId = 80188 THEN 'You are not allowed to change the Sub Location. Item %s, plus %i more, still has stock at %s.'
+		WHEN @msgId = 80189 THEN 'Sub Location or Storage Location is missing for Item %s, Lot No. %s.'
+		WHEN @msgId = 80190 THEN 'Gross/Net UOM and weights are required for item %s.'
+		WHEN @msgId = 80191 THEN '%s is using %s. Price down is only allowed for %s currency. Please change the currency or uncheck the Price Down.'
 	END 
 
 	RETURN @msg

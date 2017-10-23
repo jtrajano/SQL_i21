@@ -7,7 +7,8 @@
     [ysnShowAllPeriods] BIT             DEFAULT ((0)) NOT NULL,
     [ysnDuplicates]     BIT             NOT NULL,
     [intConcurrencyId]  INT             DEFAULT 1 NOT NULL,
-    CONSTRAINT [PK_tblGLFiscalYear] PRIMARY KEY CLUSTERED ([cntId] ASC)
+    CONSTRAINT [PK_tblGLFiscalYear] PRIMARY KEY CLUSTERED ([cntId] ASC),
+	CONSTRAINT [FK_tblGLCurrentFiscal_tblGLFiscalYear] FOREIGN KEY ([intFiscalYearId]) REFERENCES [dbo].[tblGLFiscalYear] ([intFiscalYearId])
 );
 
 GO

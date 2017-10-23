@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspICRepostCostAdjustment]
 	@strBillId AS NVARCHAR(50)
-	,@strBatchId AS NVARCHAR(20)
+	,@strBatchId AS NVARCHAR(40)
 	,@intEntityUserSecurityId AS INT
 	,@ysnRegenerateBillGLEntries AS BIT = 0
 AS
@@ -53,8 +53,72 @@ BEGIN
 	FROM	tblAPBill b 
 	WHERE	b.strBillId = @strBillId
 
-	INSERT INTO @billGLEntries
-	SELECT	* 
+	INSERT INTO @billGLEntries(
+	[dtmDate],
+	[strBatchId],
+	[intAccountId],
+	[dblDebit],
+	[dblCredit],
+	[dblDebitUnit],
+	[dblCreditUnit],
+	[strDescription],
+	[strCode],    
+	[strReference],
+	[intCurrencyId],
+	[dblExchangeRate],
+	[dtmDateEntered] ,
+	[dtmTransactionDate],
+	[strJournalLineDescription],
+	[intJournalLineNo],
+	[ysnIsUnposted],    
+	[intUserId],
+	[intEntityId],
+	[strTransactionId],
+	[intTransactionId],
+	[strTransactionType],
+	[strTransactionForm],
+	[strModuleName],
+	[intConcurrencyId],
+	[dblDebitForeign],
+    [dblDebitReport],
+    [dblCreditForeign],
+    [dblCreditReport],
+    [dblReportingRate],
+    [dblForeignRate],
+	[strRateType])
+	SELECT	
+	[dtmDate],
+	[strBatchId],
+	[intAccountId],
+	[dblDebit],
+	[dblCredit],
+	[dblDebitUnit],
+	[dblCreditUnit],
+	[strDescription],
+	[strCode],    
+	[strReference],
+	[intCurrencyId],
+	[dblExchangeRate],
+	[dtmDateEntered] ,
+	[dtmTransactionDate],
+	[strJournalLineDescription],
+	[intJournalLineNo],
+	[ysnIsUnposted],    
+	[intUserId],
+	[intEntityId],
+	[strTransactionId],
+	[intTransactionId],
+	[strTransactionType],
+	[strTransactionForm],
+	[strModuleName],
+	[intConcurrencyId],
+	[dblDebitForeign],
+    [dblDebitReport],
+    [dblCreditForeign],
+    [dblCreditReport],
+    [dblReportingRate],
+    [dblForeignRate],
+	[strRateType]
 	FROM	dbo.[fnAPCreateBillGLEntries](
 				@intBillId
 				, @intEntityUserSecurityId
@@ -86,7 +150,7 @@ BEGIN
 		,[intCostUOMId] 
 		,[dblVoucherCost] 
 		,[intCurrencyId] 
-		,[dblExchangeRate] 
+		--,[dblExchangeRate] 
 		,[intTransactionId]
 		,[intTransactionDetailId]
 		,[strTransactionId]
@@ -110,7 +174,7 @@ BEGIN
 			,[intCostUOMId]						=	voucherCostUOM.intItemUOMId 
 			,[dblVoucherCost] 					=	B.dblCost 
 			,[intCurrencyId] 					=	A.intCurrencyId
-			,[dblExchangeRate] 					=	0
+			--,[dblExchangeRate] 					=	0
 			,[intTransactionId]					=	A.intBillId
 			,[intTransactionDetailId] 			=	B.intBillDetailId
 			,[strTransactionId] 				=	A.strBillId

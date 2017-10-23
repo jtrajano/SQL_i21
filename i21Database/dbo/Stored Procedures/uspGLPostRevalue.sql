@@ -517,13 +517,14 @@ BEGIN TRY
 
 			
 		END
-
-	COMMIT TRANSACTION
+	IF @@TRANCOUNT > 0
+		COMMIT TRANSACTION
 	SELECT @strPostBatchId PostBatchId--,	@strReversePostBatchId ReversePostBatchId
 END TRY
 BEGIN CATCH
-
+IF @@TRANCOUNT > 0
 	ROLLBACK TRANSACTION
+
 	DECLARE @ErrorMessage NVARCHAR(4000);  
     DECLARE @ErrorSeverity INT;  
     DECLARE @ErrorState INT;  

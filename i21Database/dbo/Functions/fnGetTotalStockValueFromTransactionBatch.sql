@@ -5,7 +5,7 @@
 CREATE FUNCTION [dbo].[fnGetTotalStockValueFromTransactionBatch]
 (
 	@intTransactionId AS INT	
-	,@strBatchId AS NVARCHAR(20)
+	,@strBatchId AS NVARCHAR(40)
 )
 RETURNS NUMERIC(18, 6)
 AS 

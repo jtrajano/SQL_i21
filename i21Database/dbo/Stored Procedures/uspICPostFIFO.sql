@@ -18,7 +18,7 @@ CREATE PROCEDURE [dbo].[uspICPostFIFO]
 	,@intTransactionId AS INT
 	,@intTransactionDetailId AS INT
 	,@strTransactionId AS NVARCHAR(20)
-	,@strBatchId AS NVARCHAR(20)
+	,@strBatchId AS NVARCHAR(40)
 	,@intTransactionTypeId AS INT
 	,@strTransactionForm AS NVARCHAR(255)
 	,@intEntityUserSecurityId AS INT
@@ -84,6 +84,7 @@ BEGIN
 				,@dblCost
 				,@strTransactionId
 				,@intTransactionId
+				,@intTransactionDetailId
 				,@intEntityUserSecurityId
 				,@RemainingQty OUTPUT
 				,@CostUsed OUTPUT 

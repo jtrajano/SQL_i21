@@ -112,6 +112,7 @@ BEGIN
 				AND td.intInventoryTransferDetailId = ri.intLineNo
 			INNER JOIN tblICItem i ON i.intItemId = td.intItemId
 		WHERE r.strReceiptType = 'Transfer Order'
+			AND i.strType <> 'Comment'
 			AND t.intInventoryTransferId = @intTransactionId
 	)
 	BEGIN
@@ -125,6 +126,7 @@ BEGIN
 				AND td.intInventoryTransferDetailId = ri.intLineNo
 			INNER JOIN tblICItem i ON i.intItemId = td.intItemId
 		WHERE r.strReceiptType = 'Transfer Order'
+			AND i.strType <> 'Comment'
 			AND t.intInventoryTransferId = @intTransactionId
 
 		EXEC uspICRaiseError 80107, @TR, @R;
@@ -139,14 +141,13 @@ SELECT TOP 1
 		Item.strItemNo, 
 		Location.strLocationName
 INTO	#tempValidateItemLocation
-FROM	tblICInventoryTransferDetail Detail	INNER JOIN tblICInventoryTransfer Header 
-			ON Header.intInventoryTransferId = Detail.intInventoryTransferId
-		INNER JOIN tblICItem Item 
-			ON Item.intItemId = Detail.intItemId
-		INNER JOIN tblSMCompanyLocation Location 
-			ON Location.intCompanyLocationId = Header.intToLocationId
-WHERE	Detail.intInventoryTransferId = @intTransactionId 
-		AND ISNULL(dbo.fnICGetItemLocation(Detail.intItemId, Header.intToLocationId), -1) = -1
+FROM tblICInventoryTransferDetail Detail
+	INNER JOIN tblICInventoryTransfer Header ON Header.intInventoryTransferId = Detail.intInventoryTransferId
+	INNER JOIN tblICItem Item ON Item.intItemId = Detail.intItemId
+	INNER JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = Header.intToLocationId
+WHERE Detail.intInventoryTransferId = @intTransactionId 
+	AND ISNULL(dbo.fnICGetItemLocation(Detail.intItemId, Header.intToLocationId), -1) = -1
+	AND Item.strType <> 'Comment'
 		 
 -- Check if all details with lotted items have lot numbers assigned.
 IF EXISTS(
@@ -156,6 +157,7 @@ IF EXISTS(
 		INNER JOIN tblICItem i ON i.intItemId = tfd.intItemId
 	WHERE tf.intInventoryTransferId = @intTransactionId
 		AND tfd.intLotId IS NULL
+		AND i.strType <> 'Comment'
 		AND ISNULL(i.strLotTracking, 'No') <> 'No')
 BEGIN
 	EXEC uspICRaiseError 80085, @strTransactionId;
@@ -291,21 +293,18 @@ BEGIN
 				,Detail.intFromSubLocationId
 				,Detail.intFromStorageLocationId
 				,strActualCostId = Detail.strFromLocationActualCostId
-		FROM	tblICInventoryTransferDetail Detail INNER JOIN tblICInventoryTransfer Header 
-					ON Header.intInventoryTransferId = Detail.intInventoryTransferId
-				LEFT JOIN dbo.tblICItemUOM ItemUOM
-					ON ItemUOM.intItemUOMId = Detail.intItemUOMId
-				LEFT JOIN dbo.tblICLot Lot
-					ON Lot.intLotId = Detail.intLotId
-					AND Lot.intItemId = Detail.intItemId
-				LEFT JOIN tblICItemUOM LotItemUOM
-					ON LotItemUOM.intItemUOMId = Lot.intItemUOMId
-				LEFT JOIN tblICItemUOM LotWeightUOM
-					ON LotWeightUOM.intItemUOMId = Lot.intWeightUOMId
-				LEFT JOIN tblICItemPricing ItemPricing
-					ON ItemPricing.intItemId = Detail.intItemId
-					AND ItemPricing.intItemLocationId = dbo.fnICGetItemLocation(Detail.intItemId, Header.intFromLocationId)
-		WHERE	Header.intInventoryTransferId = @intTransactionId
+		FROM tblICInventoryTransferDetail Detail 
+			INNER JOIN tblICItem Item ON Item.intItemId = Detail.intItemId
+			INNER JOIN tblICInventoryTransfer Header ON Header.intInventoryTransferId = Detail.intInventoryTransferId
+			LEFT JOIN dbo.tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = Detail.intItemUOMId
+			LEFT JOIN dbo.tblICLot Lot ON Lot.intLotId = Detail.intLotId
+				AND Lot.intItemId = Detail.intItemId
+			LEFT JOIN tblICItemUOM LotItemUOM ON LotItemUOM.intItemUOMId = Lot.intItemUOMId
+			LEFT JOIN tblICItemUOM LotWeightUOM ON LotWeightUOM.intItemUOMId = Lot.intWeightUOMId
+			LEFT JOIN tblICItemPricing ItemPricing ON ItemPricing.intItemId = Detail.intItemId
+				AND ItemPricing.intItemLocationId = dbo.fnICGetItemLocation(Detail.intItemId, Header.intFromLocationId)
+		WHERE Header.intInventoryTransferId = @intTransactionId
+			AND Item.strType <> 'Comment'
 
 		-------------------------------------------
 		-- Call the costing SP	
@@ -343,13 +342,13 @@ BEGIN
 				,intStorageLocationId
 				,strActualCostId
 		) 
-		SELECT Detail.intItemId  
+		SELECT Detail.intItemId
 				,dbo.fnICGetItemLocation(Detail.intItemId, Header.intToLocationId)
-				,FromStock.intItemUOMId  
+				,COALESCE(Detail.intGrossNetUOMId, FromStock.intItemUOMId)
 				,Header.dtmTransferDate
-				,-FromStock.dblQty
-				,FromStock.dblUOMQty
-				,ISNULL(FromStock.dblCost, 0)
+				,CASE WHEN Detail.intGrossNetUOMId IS NULL THEN -FromStock.dblQty ELSE Detail.dblNet END
+				,CASE WHEN Detail.intGrossNetUOMId IS NULL THEN FromStock.dblUOMQty ELSE Detail.dblGrossNetUnitQty END
+				,CASE WHEN Detail.intGrossNetUOMId IS NULL THEN ISNULL(FromStock.dblCost, 0) ELSE CASE WHEN ISNULL(NULLIF(Detail.dblNet, 0), 0) = 0 THEN 0 ELSE ((-FromStock.dblQty) * FromStock.dblCost) / Detail.dblNet END END
 				,0
 				,@DefaultCurrencyId
 				,1
@@ -361,17 +360,17 @@ BEGIN
 				,Detail.intToSubLocationId
 				,Detail.intToStorageLocationId
 				,strActualCostId = Detail.strToLocationActualCostId
-		FROM	tblICInventoryTransferDetail Detail INNER JOIN tblICInventoryTransfer Header 
-					ON Header.intInventoryTransferId = Detail.intInventoryTransferId
-				INNER JOIN dbo.tblICInventoryTransaction FromStock
-					ON Detail.intInventoryTransferDetailId = FromStock.intTransactionDetailId
-					AND Detail.intInventoryTransferId = FromStock.intTransactionId
-					AND FromStock.intItemId = Detail.intItemId
-				LEFT JOIN tblICItemUOM ItemUOM 
-					ON ItemUOM.intItemUOMId = Detail.intItemUOMId
-		WHERE	ISNULL(FromStock.ysnIsUnposted, 0) = 0
-				AND FromStock.strBatchId = @strBatchId
-				AND Header.intInventoryTransferId = @intTransactionId
+		FROM tblICInventoryTransferDetail Detail
+			INNER JOIN tblICItem Item ON Item.intItemId = Detail.intItemId
+			INNER JOIN tblICInventoryTransfer Header ON Header.intInventoryTransferId = Detail.intInventoryTransferId
+			INNER JOIN dbo.tblICInventoryTransaction FromStock ON Detail.intInventoryTransferDetailId = FromStock.intTransactionDetailId
+				AND Detail.intInventoryTransferId = FromStock.intTransactionId
+				AND FromStock.intItemId = Detail.intItemId
+			LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = Detail.intItemUOMId
+		WHERE ISNULL(FromStock.ysnIsUnposted, 0) = 0
+			AND FromStock.strBatchId = @strBatchId
+			AND Item.strType <> 'Comment'
+			AND Header.intInventoryTransferId = @intTransactionId
 
 		-- Clear the GL entries 
 		DELETE FROM @GLEntries
@@ -588,12 +587,13 @@ BEGIN
 					,[intTransactionId]		= h.intInventoryTransferId
 					,[strTransactionId]		= h.strTransferNo
 					,[intTransactionTypeId] = 12 -- Inventory Transfer
-			FROM	dbo.tblICInventoryTransfer h INNER JOIN dbo.tblICInventoryTransferDetail d
-						ON h.intInventoryTransferId = d.intInventoryTransferId
-					INNER JOIN dbo.tblICItemLocation itemLocation
-						ON itemLocation.intItemId = d.intItemId
-						AND itemLocation.intLocationId = h.intFromLocationId
-			WHERE	h.intInventoryTransferId = @intTransactionId
+			FROM dbo.tblICInventoryTransfer h
+				INNER JOIN dbo.tblICInventoryTransferDetail d ON h.intInventoryTransferId = d.intInventoryTransferId
+				INNER JOIN dbo.tblICItem Item ON Item.intItemId = d.intItemId
+				INNER JOIN dbo.tblICItemLocation itemLocation ON itemLocation.intItemId = d.intItemId
+					AND itemLocation.intLocationId = h.intFromLocationId
+			WHERE h.intInventoryTransferId = @intTransactionId
+				AND Item.strType <> 'Comment'
 
 			EXEC dbo.uspICIncreaseInTransitOutBoundQty @InTransit_Outbound
 		END
@@ -622,13 +622,14 @@ BEGIN
 					,[intTransactionId]		= h.intInventoryTransferId
 					,[strTransactionId]		= h.strTransferNo
 					,[intTransactionTypeId] = 12 -- Inventory Transfer
-			FROM	dbo.tblICInventoryTransfer h INNER JOIN dbo.tblICInventoryTransferDetail d
-						ON h.intInventoryTransferId = d.intInventoryTransferId
-					INNER JOIN dbo.tblICItemLocation itemLocation
-						ON itemLocation.intItemId = d.intItemId
-						AND itemLocation.intLocationId = h.intToLocationId
-			WHERE	h.intInventoryTransferId = @intTransactionId
-					AND ISNULL(h.ysnShipmentRequired, 0) = 1
+			FROM dbo.tblICInventoryTransfer h
+				INNER JOIN dbo.tblICInventoryTransferDetail d ON h.intInventoryTransferId = d.intInventoryTransferId
+				INNER JOIN dbo.tblICItem Item ON Item.intItemId = d.intItemId
+				INNER JOIN dbo.tblICItemLocation itemLocation ON itemLocation.intItemId = d.intItemId
+					AND itemLocation.intLocationId = h.intToLocationId
+			WHERE h.intInventoryTransferId = @intTransactionId
+				AND ISNULL(h.ysnShipmentRequired, 0) = 1
+				AND Item.strType <> 'Comment'
 
 			EXEC dbo.uspICIncreaseInTransitInBoundQty @InTransit_Inbound
 		END 		

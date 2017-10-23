@@ -144,7 +144,7 @@ INNER JOIN
 	 FROM @Invoices) ARI 
 		ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
 INNER JOIN
-    (SELECT [intLoadId], [intPurchaseSale] FROM tblLGLoad WITH (NOLOCK)) LGL
+    (SELECT [intLoadId], [intPurchaseSale], [strLoadNumber] FROM tblLGLoad WITH (NOLOCK)) LGL
 		ON LGL.[intLoadId] = ARI.[intLoadId]
 INNER JOIN
     (SELECT [intLoadId], [intLoadDetailId], [intSCompanyLocationId] FROM tblLGLoadDetail WITH (NOLOCK)) LGLD
@@ -153,7 +153,8 @@ INNER JOIN
 INNER JOIN (SELECT [intItemId], [intItemLocationId], [intItemUOMId], [intTransactionId], [dblQty], [intTransactionDetailId], [dblUOMQty], [dblCost], [intLotId], [strTransactionId], [intFobPointId],
 		[intInTransitSourceLocationId], [ysnIsUnposted]
 	FROM tblICInventoryTransaction WITH (NOLOCK)) ICIT
-		ON ICIT.[intTransactionId] = LGL.[intLoadId] AND ICIT.[intTransactionDetailId] = LGLD.[intLoadDetailId] AND ICIT.[ysnIsUnposted] = 0			 
+		ON ICIT.[intTransactionId] = LGL.[intLoadId] AND ICIT.[intTransactionDetailId] = LGLD.[intLoadDetailId] AND ICIT.[ysnIsUnposted] = 0
+		AND ICIT.[strTransactionId] = LGL.[strLoadNumber] 			 
 LEFT OUTER JOIN 
 	(SELECT [intInventoryShipmentId], [intInventoryShipmentItemId] FROM tblICInventoryShipmentItem WITH (NOLOCK)) ICISI
 		ON ARID.[intInventoryShipmentItemId] = ICISI.[intInventoryShipmentItemId]	

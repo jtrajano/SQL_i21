@@ -41,7 +41,7 @@ BEGIN
 	 FROM ssvndmst  
 	 INNER JOIN tblEMEntity ENT ON ENT.strEntityNo COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS
 	 INNER JOIN tblEMEntityType ETYP ON ETYP.intEntityId = ENT.intEntityId
-	 INNER JOIN tblAPVendor APVND ON APVND.intEntityVendorId = ENT.intEntityId
+	 INNER JOIN tblAPVendor APVND ON APVND.intEntityId = ENT.intEntityId
 	 WHERE APVND.ysnTransportTerminal = 1 AND ETYP.strType = 'Vendor'
 	 
 	 	 
@@ -63,7 +63,7 @@ BEGIN
 			 INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no = VPR.trvpr_vnd_no
 			 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN #tmpvnd tmp ON tmp.ssvnd_vnd_no = VPR.trvpr_vnd_no  
-			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityVendorId 
+			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityId 
 			 AND ELOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = tmp.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN tblTRSupplyPoint SUP ON SUP.intEntityLocationId = ELOC.intEntityLocationId
 			 INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = VPR.trvpr_pt_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -87,7 +87,7 @@ BEGIN
 			 INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no = VPR.trvpr_vnd_no
 			 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN #tmpvnd tmp ON tmp.ssvnd_vnd_no = VPR.trvpr_vnd_no  
-			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityVendorId 
+			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityId 
 			 AND ELOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = tmp.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN tblTRSupplyPoint SUP ON SUP.intEntityLocationId = ELOC.intEntityLocationId
 			 INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = VPR.trvpr_pt_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -111,7 +111,7 @@ BEGIN
 			 INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no = VPR.trvpr_vnd_no
 			 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN #tmpvnd tmp ON tmp.ssvnd_vnd_no = VPR.trvpr_vnd_no  
-			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityVendorId 
+			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityId 
 			 AND ELOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = tmp.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN tblTRSupplyPoint SUP ON SUP.intEntityLocationId = ELOC.intEntityLocationId
 			 INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = VPR.trvpr_pt_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -135,7 +135,7 @@ BEGIN
 			 INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no = VPR.trvpr_vnd_no
 			 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN #tmpvnd tmp ON tmp.ssvnd_vnd_no = VPR.trvpr_vnd_no  
-			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityVendorId 
+			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityId 
 			 AND ELOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = tmp.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN tblTRSupplyPoint SUP ON SUP.intEntityLocationId = ELOC.intEntityLocationId
 			 INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = VPR.trvpr_pt_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -159,7 +159,7 @@ BEGIN
 			 INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no = VPR.trvpr_vnd_no
 			 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN #tmpvnd tmp ON tmp.ssvnd_vnd_no = VPR.trvpr_vnd_no  
-			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityVendorId 
+			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityId 
 			 AND ELOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = tmp.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN tblTRSupplyPoint SUP ON SUP.intEntityLocationId = ELOC.intEntityLocationId
 			 INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = VPR.trvpr_pt_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -175,7 +175,7 @@ BEGIN
 			 INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no = VPR.trvpr_vnd_no
 			 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN #tmpvnd tmp ON tmp.ssvnd_vnd_no = VPR.trvpr_vnd_no  
-			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityVendorId 
+			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityId 
 			 AND ELOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = tmp.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN tblTRSupplyPoint SUP ON SUP.intEntityLocationId = ELOC.intEntityLocationId
 			 INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = VPR.trvpr_pt_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -188,7 +188,7 @@ BEGIN
 			 INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no = VPR.trvpr_vnd_no
 			 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN #tmpvnd tmp ON tmp.ssvnd_vnd_no = VPR.trvpr_vnd_no  
-			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityVendorId 
+			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityId 
 			 AND ELOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = tmp.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN tblTRSupplyPoint SUP ON SUP.intEntityLocationId = ELOC.intEntityLocationId
 			 INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = VPR.trvpr_pt_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -201,7 +201,7 @@ BEGIN
 			 INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no = VPR.trvpr_vnd_no
 			 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN #tmpvnd tmp ON tmp.ssvnd_vnd_no = VPR.trvpr_vnd_no  
-			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityVendorId 
+			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityId 
 			 AND ELOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = tmp.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN tblTRSupplyPoint SUP ON SUP.intEntityLocationId = ELOC.intEntityLocationId
 			 INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = VPR.trvpr_pt_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -214,7 +214,7 @@ BEGIN
 			 INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no = VPR.trvpr_vnd_no
 			 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN #tmpvnd tmp ON tmp.ssvnd_vnd_no = VPR.trvpr_vnd_no  
-			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityVendorId 
+			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityId 
 			 AND ELOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = tmp.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN tblTRSupplyPoint SUP ON SUP.intEntityLocationId = ELOC.intEntityLocationId
 			 INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = VPR.trvpr_pt_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -227,7 +227,7 @@ BEGIN
 			 INNER JOIN ssvndmst OVND ON OVND.ssvnd_vnd_no = VPR.trvpr_vnd_no
 			 INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN #tmpvnd tmp ON tmp.ssvnd_vnd_no = VPR.trvpr_vnd_no  
-			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityVendorId 
+			 INNER JOIN tblEMEntityLocation ELOC ON ELOC.intEntityId = VND.intEntityId 
 			 AND ELOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = tmp.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS
 			 INNER JOIN tblTRSupplyPoint SUP ON SUP.intEntityLocationId = ELOC.intEntityLocationId
 			 INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = VPR.trvpr_pt_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS

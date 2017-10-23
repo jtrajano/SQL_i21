@@ -58,7 +58,7 @@ BEGIN TRY
 		RETURN;
 	END
 
-	EXEC uspAPCreateBillData @intUserId, @intVendorEntityId, @voucherDetailNonInvContract = @voucherDetailNonInvContract, @billId=@intBillId OUTPUT
+	EXEC uspAPCreateBillData @userId = @intUserId, @vendorId = @intVendorEntityId, @voucherDetailNonInvContract = @voucherDetailNonInvContract, @billId=@intBillId OUTPUT
 
 	UPDATE tblLGWarehouseInstructionHeader SET intBillId = @intBillId WHERE intWarehouseInstructionHeaderId=@intWarehouseInstructionHeaderId
 

@@ -137,6 +137,8 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[intAccountId]
 			,[strDescription]
 			,[strReference]	
+			,[strDocument]
+			,[strComments]
 			,[dtmTransactionDate]
 			,[dblDebit]
 			,[dblCredit]
@@ -171,6 +173,8 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[intAccountId]			= A.[intAccountId]
 			,[strDescription]		= B.[strDescription]
 			,[strReference]			= A.[strReference]
+			,[strDocument]			= A.[strDocument]
+			,[strComments]			= A.[strComments]
 			,[dtmTransactionDate]	= A.[dtmDate]
 			,[dblDebit]				= CASE	WHEN [dblCredit] < 0 THEN ABS([dblCredit])
 											WHEN [dblDebit] < 0 THEN 0
@@ -198,7 +202,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intCurrencyId]		= B.intCurrencyId
-			,[dblExchangeRate]		= dblDebitRate
+			,[dblExchangeRate]		= ISNULL(ISNULL(dblDebitRate,dblCreditRate),1)
 			,[intUserId]			= 0
 			,[intEntityId]			= @intEntityId			
 			,[dtmDateEntered]		= @currentDateTime
@@ -235,6 +239,8 @@ ELSE
 			,[intAccountId]
 			,[strDescription]
 			,[strReference]	
+			,[strDocument]
+			,[strComments]
 			,[dtmTransactionDate]
 			,[dblDebit]
 			,[dblCredit]
@@ -262,6 +268,8 @@ ELSE
 			,[intAccountId]			= A.[intAccountId]
 			,[strDescription]		= A.[strDescription]
 			,[strReference]			= A.[strReference]
+			,[strDocument]			= A.[strDocument]
+			,[strComments]			= A.[strComments]
 			,[dtmTransactionDate]	= A.[dtmDate]
 			,[dblDebit]				
 			,[dblCredit]			
@@ -272,7 +280,7 @@ ELSE
 			,[dtmDate]				= ISNULL(B.[dtmDate], @currentDateTime)
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
-			,[dblExchangeRate]		= dblDebitRate
+			,[dblExchangeRate]		= ISNULL(ISNULL(dblDebitRate,dblCreditRate),1)
 			,[intUserId]			= 0
 			,[intEntityId]			= @intEntityId			
 			,[dtmDateEntered]		= @currentDateTime

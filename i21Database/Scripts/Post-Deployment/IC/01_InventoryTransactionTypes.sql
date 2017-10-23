@@ -184,15 +184,7 @@ USING	(
 				,form = 'Inventory Adjustment'
 		UNION ALL
 		SELECT id = 44
-				,name = 'Load/Shipment-Inbound'
-				,form = 'Load/Shipment Schedule'
-		UNION ALL
-		SELECT id = 45
-				,name = 'Load/Shipment-Outbound'
-				,form = 'Load/Shipment Schedule'
-		UNION ALL
-		SELECT id = 46
-				,name = 'Load/Shipment-Drop Ship'
+				,name = 'Shipment Schedule'
 				,form = 'Load/Shipment Schedule'
 
 ) AS InventoryTransactionTypeHardValues

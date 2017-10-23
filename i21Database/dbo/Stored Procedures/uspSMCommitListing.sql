@@ -15,13 +15,15 @@ BEGIN TRANSACTION
 		strScreenName,
 		strModule,
 		strNamespace,
-		intConcurrencyId
+		intConcurrencyId,
+		strGroupName
 	)
 	SELECT '',
 		strScreenName,
 		strModule,
 		strNamespace,
-		intConcurrencyId
+		intConcurrencyId,
+		strGroupName
 	FROM tblSMScreenStage
 	WHERE ISNULL(strChange, '') = 'Added'
 
@@ -69,5 +71,49 @@ BEGIN TRANSACTION
 	-- UPDATE Company Setup
 	UPDATE tblSMCompanySetup 
 	SET ysnScreenControlListingUpdated = 1
+
+	UPDATE tblSMScreen SET ysnAvailable = 0 WHERE strNamespace IN 
+	(	
+		'i21.view.UserRole',
+		'i21.view.Letters',
+		'i21.view.FileFieldMapping',
+		'i21.view.SecurityPolicy',
+		'i21.view.Signatures',
+		'i21.view.EntityUser'
+	)
+
+	--*************UPDATE tblSMScreen GroupName WHEN generating listing for contact user*************--
+	DECLARE @intScreenId INT,
+			@intMenuId INT,
+			@strMenuName NVARCHAR(50),
+			@intParentMenuId INT
+
+			SELECT sc.intScreenId,
+				   mm.intMenuID,
+				   mm.intParentMenuID,
+				   mm.strMenuName
+	   	  
+			INTO #Temp
+			FROM tblSMScreen sc
+			INNER JOIN tblSMMasterMenu mm ON sc.strNamespace = LEFT(mm.strCommand, (CASE WHEN (CHARINDEX('?', mm.strCommand) - 1) < 0 THEN 0 ELSE (CHARINDEX('?', mm.strCommand) - 1) END))
+			INNER JOIN tblSMContactMenu cm ON mm.intMenuID = cm.intMasterMenuId 
+
+			WHILE EXISTS(SELECT * FROM #Temp)
+				BEGIN
+					SELECT TOP 1 
+						@intScreenId = intScreenId,
+						@intMenuId = intMenuID,
+						@strMenuName = strMenuName,
+						@intParentMenuId = intParentMenuID
+					FROM #Temp ORDER BY intMenuID
+				
+				   UPDATE tblSMScreen SET strGroupName = (SELECT REPLACE(strMenuName,'(Portal)','') FROM tblSMMasterMenu WHERE intMenuID = @intParentMenuId) WHERE intScreenId  = @intScreenId
+	   
+				   DELETE FROM #Temp WHERE intMenuID = @intMenuId
+	   
+				END
+
+			DROP TABLE  #Temp
+
 
 COMMIT TRANSACTION

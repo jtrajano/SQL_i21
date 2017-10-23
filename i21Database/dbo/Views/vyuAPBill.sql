@@ -6,8 +6,8 @@ SELECT
 	A.strBillId,
 	A.intSubCurrencyCents,
 	CUR.strCurrency,
-	CASE WHEN (A.intTransactionType IN (3,8,11)) OR (A.intTransactionType = 2 AND A.ysnPosted = 1) THEN A.dblTotal * -1 ELSE A.dblTotal END AS dblTotal,
-	CASE WHEN (A.intTransactionType IN (3,8,11)) OR (A.intTransactionType = 2 AND A.ysnPosted = 1) THEN A.dblAmountDue * -1 ELSE A.dblAmountDue END AS dblAmountDue,
+	CASE WHEN (A.intTransactionType IN (3,8,11)) OR (A.intTransactionType IN (2, 13) AND A.ysnPrepayHasPayment = 1) THEN A.dblTotal * -1 ELSE A.dblTotal END AS dblTotal,
+	CASE WHEN (A.intTransactionType IN (3,8,11)) OR (A.intTransactionType IN (2, 13) AND A.ysnPrepayHasPayment = 1) THEN A.dblAmountDue * -1 ELSE A.dblAmountDue END AS dblAmountDue,
 	A.ysnPosted,
 	A.ysnPaid,
 	A.ysnReadyForPayment,
@@ -57,7 +57,9 @@ SELECT
 	EN.strName AS strContactName,
 	CL.strLocationName AS strReceivingLocation,
 	strStoreLocation = (SELECT SCL.strLocationName FROM dbo.tblSMCompanyLocation SCL WHERE SCL.intCompanyLocationId = A.intStoreLocationId),
-	strOrderedBy = (SELECT UEN.strName FROM dbo.tblEMEntity UEN WHERE UEN.intEntityId = A.intOrderById)
+	strOrderedBy = (SELECT UEN.strName FROM dbo.tblEMEntity UEN WHERE UEN.intEntityId = A.intOrderById),
+	B.strVendorId,
+	ISNULL(commodity.strCommodityCode, 'None') AS strCommodityCode
 FROM
 	dbo.tblAPBill A
 	INNER JOIN 
@@ -73,6 +75,18 @@ FROM
 		ON CL.intCompanyLocationId = A.intShipToId
 	INNER JOIN dbo.tblSMTerm ST
 		ON ST.intTermID = A.intTermsId
+	CROSS APPLY (
+		SELECT TOP 1
+			COUNT(commodity.intCommodityId) intCount, 
+			commodity.intCommodityId,
+			commodity.strCommodityCode
+		FROM dbo.tblAPBillDetail detail
+		LEFT JOIN dbo.tblICItem item ON detail.intItemId = item.intItemId
+		LEFT JOIN dbo.tblICCommodity commodity ON item.intCommodityId = commodity.intCommodityId
+		WHERE detail.intBillId = A.intBillId
+		GROUP BY commodity.intCommodityId, commodity.strCommodityCode
+		ORDER BY COUNT(commodity.intCommodityId) DESC
+	) commodity
 	LEFT JOIN dbo.tblSMShipVia SV
 		ON SV.intEntityId = A.intShipViaId
 	LEFT JOIN dbo.tblEMEntity EN

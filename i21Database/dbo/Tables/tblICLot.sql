@@ -67,6 +67,7 @@ Lot numbers are unique per item, lot number, location, sub location, and storage
 		[strTransactionId]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[strSourceTransactionId]	NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[intSourceTransactionTypeId] INT NULL,
+		[ysnLockedInventory]		BIT NULL DEFAULT(0),
 		[intItemOwnerId]			INT NULL,
 		[strContainerNo]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 		
 		[strCondition]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 		

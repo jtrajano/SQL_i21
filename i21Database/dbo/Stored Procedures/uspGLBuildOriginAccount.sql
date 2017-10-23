@@ -8,3 +8,5 @@
 CREATE PROCEDURE  [dbo].[uspGLBuildOriginAccount]
 	@intUserId INT
 AS
+RAISERROR('Build Origin Account Procedure is not available', 16, 1);
+

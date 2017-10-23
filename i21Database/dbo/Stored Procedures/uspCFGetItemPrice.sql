@@ -25,9 +25,11 @@ CREATE PROCEDURE [dbo].[uspCFGetItemPrice]
 ,@CFPostedOrigin		BIT				= 0
 ,@CFPostedCSV			BIT				= 0
 ,@CFPriceProfileId		INT				= NULL OUTPUT
-,@CFPriceProfileDetailId INT				= NULL OUTPUT
+,@CFPriceProfileDetailId INT			= NULL OUTPUT
 ,@CFPriceIndexId		INT				= NULL OUTPUT
 ,@CFSiteGroupId			INT				= NULL
+,@CFPriceRuleGroup		INT				= NULL
+,@CFAdjustmentRate		NUMERIC(18,6)	= NULL OUTPUT
 
 AS
 
@@ -1360,422 +1362,6 @@ DECLARE @cfPriceProfile TABLE
 
 		END
 
-
-	--OBSOLETE OBSOLETE OBSOLETE OBSOLETE OBSOLETE--
-	--OBSOLETE OBSOLETE OBSOLETE OBSOLETE OBSOLETE--
-	
-	------------------------------------------------
-	----   SITE | SITE GROUP | PRODUCT | NETWORK  --
-	------------------------------------------------
-	----   1    |		N/A    |	1	 |     1    --
-	------------------------------------------------
-	--IF (@cfMatchProfileCount = 0 AND @cfMatchProfileSkip = 0)
-	--	BEGIN
-	--		SELECT @cfMatchProfileCount = Count(*) 
-	--		FROM @cfPriceProfile 
-	--		WHERE intSiteId = @CFSiteId
-	--		AND intItemId = @CFItemId
-	--		AND intNetworkId = @CFNetworkId
-	--	END
-	--IF (@cfMatchProfileCount != 0 AND @cfMatchProfileSkip = 0)
-	--	BEGIN
-	--		print '1-n/a-1-1'
-	--		SET @cfMatchProfileSkip = 1
-	--		INSERT INTO @cfMatchPriceProfile 
-	--		(
-	--			intAccountId,			
-	--			intCustomerId,			
-	--			intDiscountDays,			
-	--			intDiscountScheduleId,	
-	--			intSalesPersonId,		
-	--			intPriceProfileDetailId,	
-	--			intPriceProfileHeaderId,	
-	--			intItemId,				
-	--			intNetworkId,			
-	--			intSiteGroupId,			
-	--			intSiteId,				
-	--			intLocalPricingIndex,	
-	--			dblRate,					
-	--			strBasis,				
-	--			strType					
-	--		)
-	--		SELECT TOP 1
-	--			intAccountId,			
-	--			intCustomerId,			
-	--			intDiscountDays,			
-	--			intDiscountScheduleId,	
-	--			intSalesPersonId,		
-	--			intPriceProfileDetailId,	
-	--			intPriceProfileHeaderId,	
-	--			intItemId,				
-	--			intNetworkId,			
-	--			intSiteGroupId,			
-	--			intSiteId,				
-	--			intLocalPricingIndex,	
-	--			dblRate,					
-	--			strBasis,				
-	--			strType		
-	--		FROM @cfPriceProfile 
-	--		WHERE intSiteId = @CFSiteId
-	--		AND intItemId = @CFItemId
-	--		AND intNetworkId = @CFNetworkId 
-	--	END
-	------------------------------------------------
-
-	------------------------------------------------
-	----   SITE | SITE GROUP | PRODUCT | NETWORK  --
-	------------------------------------------------
-	----   1    |		N/A    |   ALL	 |     1    --
-	------------------------------------------------
-	--IF (@cfMatchProfileCount = 0 AND @cfMatchProfileSkip = 0)
-	--	BEGIN
-	--		SELECT @cfMatchProfileCount = Count(*) 
-	--		FROM @cfPriceProfile 
-	--		WHERE intSiteId = @CFSiteId
-	--		AND intNetworkId = @CFNetworkId
-	--		AND (intItemId IS NULL OR intItemId = 0)          ------ADDED------
-	--	END
-	--IF (@cfMatchProfileCount != 0 AND @cfMatchProfileSkip = 0)
-	--	BEGIN
-	--		print '1-n/a-all-1'
-	--		SET @cfMatchProfileSkip = 1
-	--		INSERT INTO @cfMatchPriceProfile 
-	--		(
-	--			intAccountId,			
-	--			intCustomerId,			
-	--			intDiscountDays,			
-	--			intDiscountScheduleId,	
-	--			intSalesPersonId,		
-	--			intPriceProfileDetailId,	
-	--			intPriceProfileHeaderId,	
-	--			intItemId,				
-	--			intNetworkId,			
-	--			intSiteGroupId,			
-	--			intSiteId,				
-	--			intLocalPricingIndex,	
-	--			dblRate,					
-	--			strBasis,				
-	--			strType					
-	--		)
-	--		SELECT TOP 1
-	--			intAccountId,			
-	--			intCustomerId,			
-	--			intDiscountDays,			
-	--			intDiscountScheduleId,	
-	--			intSalesPersonId,		
-	--			intPriceProfileDetailId,	
-	--			intPriceProfileHeaderId,	
-	--			intItemId,				
-	--			intNetworkId,			
-	--			intSiteGroupId,			
-	--			intSiteId,				
-	--			intLocalPricingIndex,	
-	--			dblRate,					
-	--			strBasis,				
-	--			strType		
-	--		FROM @cfPriceProfile 
-	--		WHERE intSiteId = @CFSiteId
-	--		AND intNetworkId = @CFNetworkId 
-	--		AND (intItemId IS NULL OR intItemId = 0)                 ------ADDED------
-	--	END
-	------------------------------------------------
-
-	------------------------------------------------
-	----   SITE | SITE GROUP | PRODUCT | NETWORK  --
-	------------------------------------------------
-	----   N/A  |		 1     |    1	 |    N/A   --
-	------------------------------------------------
-	--IF (@cfMatchProfileCount = 0 AND @cfMatchProfileSkip = 0)
-	--	BEGIN
-	--		SELECT @cfMatchProfileCount = Count(*) 
-	--		FROM @cfPriceProfile 
-	--		WHERE intSiteGroupId = @TransactionSiteGroup
-	--		AND intItemId = @CFItemId
-	--	END
-	--IF (@cfMatchProfileCount != 0 AND @cfMatchProfileSkip = 0)
-	--	BEGIN
-	--		print 'n/a-1-1-n/a'
-	--		SET @cfMatchProfileSkip = 1
-	--		INSERT INTO @cfMatchPriceProfile 
-	--		(
-	--			intAccountId,			
-	--			intCustomerId,			
-	--			intDiscountDays,			
-	--			intDiscountScheduleId,	
-	--			intSalesPersonId,		
-	--			intPriceProfileDetailId,	
-	--			intPriceProfileHeaderId,	
-	--			intItemId,				
-	--			intNetworkId,			
-	--			intSiteGroupId,			
-	--			intSiteId,				
-	--			intLocalPricingIndex,	
-	--			dblRate,					
-	--			strBasis,				
-	--			strType					
-	--		)
-	--		SELECT TOP 1
-	--			intAccountId,			
-	--			intCustomerId,			
-	--			intDiscountDays,			
-	--			intDiscountScheduleId,	
-	--			intSalesPersonId,		
-	--			intPriceProfileDetailId,	
-	--			intPriceProfileHeaderId,	
-	--			intItemId,				
-	--			intNetworkId,			
-	--			intSiteGroupId,			
-	--			intSiteId,				
-	--			intLocalPricingIndex,	
-	--			dblRate,					
-	--			strBasis,				
-	--			strType		
-	--		FROM @cfPriceProfile 
-	--		WHERE intSiteGroupId = @TransactionSiteGroup
-	--		AND intItemId = @CFItemId
-	--	END
-	------------------------------------------------
-
-	------------------------------------------------
-	----   SITE | SITE GROUP | PRODUCT | NETWORK  --
-	------------------------------------------------
-	----   N/A  |		 1     |   ALL	 |    N/A   --
-	------------------------------------------------
-	--IF (@cfMatchProfileCount = 0 AND @cfMatchProfileSkip = 0)
-	--	BEGIN
-	--		SELECT @cfMatchProfileCount = Count(*) 
-	--		FROM @cfPriceProfile 
-	--		WHERE intSiteGroupId = @TransactionSiteGroup
-	--		AND (intItemId IS NULL OR intItemId = 0)             ------ADDED------
-	--	END
-	--IF (@cfMatchProfileCount != 0 AND @cfMatchProfileSkip = 0)
-	--	BEGIN
-	--		print 'n/a-1-all-n/a'
-	--		SET @cfMatchProfileSkip = 1
-	--		INSERT INTO @cfMatchPriceProfile 
-	--		(
-	--			intAccountId,			
-	--			intCustomerId,			
-	--			intDiscountDays,			
-	--			intDiscountScheduleId,	
-	--			intSalesPersonId,		
-	--			intPriceProfileDetailId,	
-	--			intPriceProfileHeaderId,	
-	--			intItemId,				
-	--			intNetworkId,			
-	--			intSiteGroupId,			
-	--			intSiteId,				
-	--			intLocalPricingIndex,	
-	--			dblRate,					
-	--			strBasis,				
-	--			strType					
-	--		)
-	--		SELECT TOP 1
-	--			intAccountId,			
-	--			intCustomerId,			
-	--			intDiscountDays,			
-	--			intDiscountScheduleId,	
-	--			intSalesPersonId,		
-	--			intPriceProfileDetailId,	
-	--			intPriceProfileHeaderId,	
-	--			intItemId,				
-	--			intNetworkId,			
-	--			intSiteGroupId,			
-	--			intSiteId,				
-	--			intLocalPricingIndex,	
-	--			dblRate,					
-	--			strBasis,				
-	--			strType		
-	--		FROM @cfPriceProfile 
-	--		WHERE intSiteGroupId = @TransactionSiteGroup
-	--		AND (intItemId IS NULL OR intItemId = 0)             ------ADDED------
-	--	END
-	------------------------------------------------
-
-	------------------------------------------------
-	----   SITE | SITE GROUP | PRODUCT | NETWORK  --
-	------------------------------------------------
-	----   ALL  |	   N/A     |    1	 |     1    --
-	------------------------------------------------
-	--IF (@cfMatchProfileCount = 0 AND @cfMatchProfileSkip = 0)
-	--	BEGIN
-	--		SELECT @cfMatchProfileCount = Count(*) 
-	--		FROM @cfPriceProfile 
-	--		WHERE intItemId = @CFItemId
-	--		AND intNetworkId = @CFNetworkId
-	--		AND (intSiteId IS NULL OR intSiteId = 0)               ------ADDED------
-	--	END
-	--IF (@cfMatchProfileCount != 0 AND @cfMatchProfileSkip = 0)
-	--	BEGIN
-	--		print 'n/a-n/a-1-1'
-	--		SET @cfMatchProfileSkip = 1
-	--		INSERT INTO @cfMatchPriceProfile 
-	--		(
-	--			intAccountId,			
-	--			intCustomerId,			
-	--			intDiscountDays,			
-	--			intDiscountScheduleId,	
-	--			intSalesPersonId,		
-	--			intPriceProfileDetailId,	
-	--			intPriceProfileHeaderId,	
-	--			intItemId,				
-	--			intNetworkId,			
-	--			intSiteGroupId,			
-	--			intSiteId,				
-	--			intLocalPricingIndex,	
-	--			dblRate,					
-	--			strBasis,				
-	--			strType					
-	--		)
-	--		SELECT TOP 1
-	--			intAccountId,			
-	--			intCustomerId,			
-	--			intDiscountDays,			
-	--			intDiscountScheduleId,	
-	--			intSalesPersonId,		
-	--			intPriceProfileDetailId,	
-	--			intPriceProfileHeaderId,	
-	--			intItemId,				
-	--			intNetworkId,			
-	--			intSiteGroupId,			
-	--			intSiteId,				
-	--			intLocalPricingIndex,	
-	--			dblRate,					
-	--			strBasis,				
-	--			strType		
-	--		FROM @cfPriceProfile 
-	--		WHERE intItemId = @CFItemId
-	--		AND intNetworkId = @CFNetworkId
-	--		AND (intSiteId IS NULL OR intSiteId = 0)            ------ADDED------
-	--	END
-	------------------------------------------------
-
-	------------------------------------------------
-	----   SITE | SITE GROUP | PRODUCT | NETWORK  --
-	------------------------------------------------
-	----   ALL  |	   N/A     |    1	 |    N/A   --
-	------------------------------------------------
-	--IF (@cfMatchProfileCount = 0 AND @cfMatchProfileSkip = 0)
-	--	BEGIN
-	--		SELECT @cfMatchProfileCount = Count(*) 
-	--		FROM @cfPriceProfile 
-	--		WHERE intItemId = @CFItemId
-	--		AND (intSiteId IS NULL OR intSiteId = 0)               ------ADDED------
-	--	END
-	--IF (@cfMatchProfileCount != 0 AND @cfMatchProfileSkip = 0)
-	--	BEGIN
-	--		print 'n/a-n/a-1-n/a'
-	--		SET @cfMatchProfileSkip = 1
-	--		INSERT INTO @cfMatchPriceProfile 
-	--		(
-	--			intAccountId,			
-	--			intCustomerId,			
-	--			intDiscountDays,			
-	--			intDiscountScheduleId,	
-	--			intSalesPersonId,		
-	--			intPriceProfileDetailId,	
-	--			intPriceProfileHeaderId,	
-	--			intItemId,				
-	--			intNetworkId,			
-	--			intSiteGroupId,			
-	--			intSiteId,				
-	--			intLocalPricingIndex,	
-	--			dblRate,					
-	--			strBasis,				
-	--			strType					
-	--		)
-	--		SELECT TOP 1
-	--			intAccountId,			
-	--			intCustomerId,			
-	--			intDiscountDays,			
-	--			intDiscountScheduleId,	
-	--			intSalesPersonId,		
-	--			intPriceProfileDetailId,	
-	--			intPriceProfileHeaderId,	
-	--			intItemId,				
-	--			intNetworkId,			
-	--			intSiteGroupId,			
-	--			intSiteId,				
-	--			intLocalPricingIndex,	
-	--			dblRate,					
-	--			strBasis,				
-	--			strType		
-	--		FROM @cfPriceProfile 
-	--		WHERE intItemId = @CFItemId
-	--		AND (intSiteId IS NULL OR intSiteId = 0)               ------ADDED------
-	--	END
-	------------------------------------------------
-
-	------------------------------------------------
-	----   SITE | SITE GROUP | PRODUCT | NETWORK  --
-	------------------------------------------------
-	----   ALL  |	   N/A     |   ALL	 |    N/A   --
-	------------------------------------------------
-	--IF (@cfMatchProfileCount = 0 AND @cfMatchProfileSkip = 0)
-	--	BEGIN
-	--		SELECT @cfMatchProfileCount = Count(*) 
-	--		FROM @cfPriceProfile 
-	--		WHERE (intItemId IS NULL OR intItemId = 0)               ------ADDED------
-	--		AND (intSiteId IS NULL OR intSiteId = 0)               ------ADDED------
-	--	END
-	--IF (@cfMatchProfileCount != 0 AND @cfMatchProfileSkip = 0)
-	--	BEGIN
-	--		print 'n/a-n/a-all-n/a'
-	--		SET @cfMatchProfileSkip = 1
-	--		INSERT INTO @cfMatchPriceProfile 
-	--		(
-	--			intAccountId,			
-	--			intCustomerId,			
-	--			intDiscountDays,			
-	--			intDiscountScheduleId,	
-	--			intSalesPersonId,		
-	--			intPriceProfileDetailId,	
-	--			intPriceProfileHeaderId,	
-	--			intItemId,				
-	--			intNetworkId,			
-	--			intSiteGroupId,			
-	--			intSiteId,				
-	--			intLocalPricingIndex,	
-	--			dblRate,					
-	--			strBasis,				
-	--			strType					
-	--		)
-	--		SELECT TOP 1
-	--			intAccountId,			
-	--			intCustomerId,			
-	--			intDiscountDays,			
-	--			intDiscountScheduleId,	
-	--			intSalesPersonId,		
-	--			intPriceProfileDetailId,	
-	--			intPriceProfileHeaderId,	
-	--			intItemId,				
-	--			intNetworkId,			
-	--			intSiteGroupId,			
-	--			intSiteId,				
-	--			intLocalPricingIndex,	
-	--			dblRate,					
-	--			strBasis,				
-	--			strType		
-	--		FROM @cfPriceProfile 
-	--		WHERE (intItemId IS NULL OR intItemId = 0)             ------ADDED------
-	--		AND (intSiteId IS NULL OR intSiteId = 0)               ------ADDED------
-	--	END
-	------------------------------------------------
-
-	--OBSOLETE OBSOLETE OBSOLETE OBSOLETE OBSOLETE--
-	--OBSOLETE OBSOLETE OBSOLETE OBSOLETE OBSOLETE--
-
-	
-	-------------------------------
-	-- Price Profile Computation --
-	-------------------------------
-
-	--select dblOriginalGrossPrice from tblCFTransaction
-	
-	--SET @Rate = (SELECT TOP 1 dblRate FROM @cfMatchPriceProfile) 
-
-	--SELECT * FROM @cfMatchPriceProfile
-
 	SELECT TOP 1
 	 @Rate = dblRate
 	,@CFPriceProfileId = intPriceProfileHeaderId
@@ -1796,7 +1382,7 @@ DECLARE @cfPriceProfile TABLE
 			BEGIN
 				SET @CFPriceOut = @CFStandardPrice + @Rate
 				SET @CFPricingOut = 'Price Profile' 
-				RETURN 1;    
+				--RETURN 1;    
 			END
 		ELSE IF(@CFPriceBasis = 'Transfer Cost')
 			BEGIN
@@ -1804,11 +1390,11 @@ DECLARE @cfPriceProfile TABLE
 					BEGIN
 						SET @CFPriceOut = @CFTransferCost + @Rate
 						SET @CFPricingOut = 'Price Profile' 
-						RETURN 1;    
+						--RETURN 1;    
 					END
 					
 				SET @CFPricingOut = 'Price Profile' 
-				RETURN 1;   
+				--RETURN 1;   
 		END
 		ELSE IF(@CFPriceBasis IS NOT NULL)
 			BEGIN 
@@ -1835,7 +1421,7 @@ DECLARE @cfPriceProfile TABLE
 					BEGIN
 						SET @CFPriceOut = @CFStandardPrice + @Rate
 						SET @CFPricingOut = 'Price Profile' 
-						RETURN 1;    
+						--RETURN 1;    
 					END
 					
 				SET @CFPricingOut = 'Price Profile' 
@@ -1869,7 +1455,7 @@ DECLARE @cfPriceProfile TABLE
 					BEGIN
 						SET @CFPriceOut = @CFStandardPrice + @Rate
 						SET @CFPricingOut = 'Price Profile' 
-						RETURN 1;    
+						--RETURN 1;    
 					END
 
 					
@@ -1882,7 +1468,7 @@ DECLARE @cfPriceProfile TABLE
 					BEGIN
 						SET @CFPriceOut = @CFTransferCost + @Rate
 						SET @CFPricingOut = 'Price Profile' 
-						RETURN 1;    
+						--RETURN 1;    
 					END
 					
 				SET @CFPricingOut = 'Price Profile' 
@@ -1896,7 +1482,7 @@ DECLARE @cfPriceProfile TABLE
 					BEGIN
 						SET @CFPriceOut = @CFTransferCost + @Rate
 						SET @CFPricingOut = 'Price Profile' 
-						RETURN 1;    
+						--RETURN 1;    
 					END
 					
 				SET @CFPricingOut = 'Price Profile' 
@@ -1907,7 +1493,7 @@ DECLARE @cfPriceProfile TABLE
 					BEGIN
 						SET @CFPriceOut = @CFStandardPrice + @Rate
 						SET @CFPricingOut = 'Price Profile' 
-						RETURN 1;    
+						--RETURN 1;    
 					END
 					
 				SET @CFPricingOut = 'Price Profile' 
@@ -1937,20 +1523,40 @@ DECLARE @cfPriceProfile TABLE
 					BEGIN
 						SET @CFPriceOut = @CFStandardPrice + @Rate
 						SET @CFPricingOut = 'Price Profile' 
-						RETURN 1;    
+						--RETURN 1;    
 					END
 					
 				SET @CFPricingOut = 'Price Profile' 
 			END
 END
 
----***PRICE PROFILE***---
 
 IF(@CFPricingOut != 'Price Profile' AND ISNULL(@intLinkedProfileId,0) > 0)
 BEGIN
 	SET @ysnGlobalProfile = 1
 	GOTO GLOBALPROFILE
 END
+
+IF(@CFPricingOut = 'Price Profile')
+BEGIN
+	DECLARE @dblPriceAdjustment NUMERIC(18,6)
+
+	SELECT TOP 1 @dblPriceAdjustment = ISNULL(dblRate,0) 
+	FROM tblCFSiteGroupPriceAdjustment ADJ
+	WHERE intSiteGroupId = @CFSiteGroupId
+	AND intARItemId = @CFItemId
+	AND ISNULL(intPriceGroupId,0) = ISNULL(@CFPriceRuleGroup,0)
+	AND dtmStartEffectiveDate <= @CFTransactionDate
+	ORDER BY ADJ.dtmStartEffectiveDate DESC
+
+	SET @CFPriceOut = @CFPriceOut + ISNULL(@dblPriceAdjustment,0)
+	SET @CFAdjustmentRate = @dblPriceAdjustment
+
+	RETURN	
+
+END
+
+---***PRICE PROFILE***---
 
 END
 
@@ -1960,4 +1566,4 @@ SET @CFPriceOut = @CFStandardPrice;
 
 ---***ITEM PRICING***---
 
-RETURN 1
+RETURN

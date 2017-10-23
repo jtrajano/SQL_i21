@@ -105,6 +105,7 @@ FROM (
 		,L.ysnPosted
 		,L.intCurrencyId
 		,strLoadCurrency = LCU.strCurrency
+		,receiptItem.intInventoryReceiptItemId
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblCTContractDetail CT ON CT.intContractDetailId = LD.intPContractDetailId
@@ -121,5 +122,7 @@ FROM (
 	LEFT JOIN tblSMCurrency CY ON CY.intCurrencyID = CT.intConvPriceCurrencyId
 --	LEFT JOIN tblSMCurrency LC ON LC.intCurrencyID = L.intCurrencyId
 	LEFT JOIN tblSMCurrency LCU ON LCU.intCurrencyID = L.intCurrencyId
+	LEFT JOIN (tblICInventoryReceipt receipt INNER JOIN tblICInventoryReceiptItem receiptItem ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId)
+	ON LD.intLoadDetailId = receiptItem.intSourceId AND receipt.intSourceType = 2
 	WHERE L.ysnPosted = 1 AND L.intPurchaseSale IN (1, 3) AND L.intShipmentStatus IN (1,3)
 ) t1

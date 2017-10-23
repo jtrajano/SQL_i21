@@ -354,16 +354,17 @@ EXEC('ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
     			END
     			CLOSE cursor_postdate
 				DEALLOCATE cursor_postdate
-
-	    		COMMIT TRANSACTION
+				IF @@TRANCOUNT > 0
+	    			COMMIT TRANSACTION
     		END TRY
 
     		BEGIN CATCH
-    			ROLLBACK TRANSACTION
-    				EXEC dbo.uspGLCreateImportLogHeader ''Failed Transaction'', @intUserId,@version,@importLogId OUTPUT
-    				DECLARE @errorMsg VARCHAR(MAX)
-    				SELECT @errorMsg = ERROR_MESSAGE()
-    				UPDATE tblGLCOAImportLog SET strEvent = @errorMsg WHERE intImportLogId = @importLogId
+				IF @@TRANCOUNT > 0
+    				ROLLBACK TRANSACTION
+    			EXEC dbo.uspGLCreateImportLogHeader ''Failed Transaction'', @intUserId,@version,@importLogId OUTPUT
+    			DECLARE @errorMsg VARCHAR(MAX)
+    			SELECT @errorMsg = ERROR_MESSAGE()
+    			UPDATE tblGLCOAImportLog SET strEvent = @errorMsg WHERE intImportLogId = @importLogId
     		END CATCH
     	END')
 END

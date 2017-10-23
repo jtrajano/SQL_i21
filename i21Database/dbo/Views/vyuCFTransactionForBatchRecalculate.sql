@@ -26,4 +26,5 @@
 FROM         dbo.tblCFTransactionPrice 
 WHERE     (strTransactionPriceId = 'Total Amount')) AS cfTransPrice 
 ON cfTrans.intTransactionId = cfTransPrice.intTransactionId
-WHERE ISNULL(ysnPosted,0) = 0 AND  ISNULL(ysnInvalid,0) = 0
+WHERE ISNULL(ysnPosted,0) = 0 
+--AND  ISNULL(ysnInvalid,0) = 0

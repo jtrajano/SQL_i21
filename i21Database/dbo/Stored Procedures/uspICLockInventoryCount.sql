@@ -3,30 +3,11 @@
 	@ysnLock BIT
 AS
 
-/*	UPDATE tblICItemLocation
-	SET ysnLockedInventory = @ysnLock
-	FROM (
-		SELECT DISTINCT intItemId, intItemLocationId
-		FROM tblICInventoryCountDetail
-		WHERE intInventoryCountId = @intInventoryCountId
-	) tblPatch
-	WHERE tblPatch.intItemId = tblICItemLocation.intItemId
-		AND tblPatch.intItemLocationId = tblICItemLocation.intItemLocationId
-		AND ysnLockedInventory <> @ysnLock*/
+DECLARE @intLockType INT
+DECLARE @intSecurityUserId INT
 
-	UPDATE il SET il.ysnLockedInventory = @ysnLock
-	FROM tblICItemLocation il
-		INNER JOIN tblICInventoryCount ic ON ic.intLocationId = il.intLocationId
-		INNER JOIN tblICInventoryCountDetail icd ON icd.intInventoryCountId = ic.intInventoryCountId
-			AND il.intItemId = icd.intItemId
-	WHERE ic.intInventoryCountId = @intInventoryCountId
+SELECT @intLockType = c.intLockType, @intSecurityUserId = c.intEntityId
+FROM tblICInventoryCount c
+WHERE c.intInventoryCountId = @intInventoryCountId
 
-
-	UPDATE tblICInventoryCount
-	SET intStatus = (
-		CASE WHEN @ysnLock = 1 THEN 3
-			ELSE 2
-		END)
-	WHERE intInventoryCountId = @intInventoryCountId
-
-RETURN 0
+EXEC dbo.[uspICLockInventoryLocation] @intLockType, @intInventoryCountId, @ysnLock, @intSecurityUserId, 0

@@ -23,12 +23,7 @@ SELECT DISTINCT I.intEntityCustomerId
 						(CASE WHEN TAXDETAIL.dblAdjustedTax > 0.000000 THEN  (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice) * (TAXDETAIL.dblAdjustedTax/ISNULL(TAXTOTAL.dblTotalAdjustedTax, 1.000000)) ELSE 0.000000 END)
 					   )
 					   * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType)
-
-	, dblTaxCollected  = ISNULL(I.dblTax, 0) * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType)
-	, strShipToLocationAddress = 'Ship to location - ' + (	select top 1 
-			[dbo].fnARFormatCustomerAddress(NULL, NULL, strLocationName, strAddress, strCity, strState, strZipCode, strCountry, NULL, NULL) from 
-			tblEMEntityLocation WITH(NOLOCK) where intEntityLocationId = I.intShipToLocationId
-		) 	
+	, dblTaxCollected  = ISNULL(I.dblTax, 0) * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType)	
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (SELECT DISTINCT TC.intTaxCodeId
 				 , TC.strTaxAgency
@@ -180,10 +175,6 @@ SELECT DISTINCT I.intEntityCustomerId
 					   * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType)*/
 
 	, dblTaxCollected  = ISNULL(I.dblTax, 0) * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType)
-	, strShipToLocationAddress = 'Ship to location - ' + (	select top 1 
-			[dbo].fnARFormatCustomerAddress(NULL, NULL, strLocationName, strAddress, strCity, strState, strZipCode, strCountry, NULL, NULL) from 
-			tblEMEntityLocation WITH(NOLOCK) where intEntityLocationId = I.intShipToLocationId
-		) 
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (
 

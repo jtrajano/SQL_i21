@@ -151,6 +151,7 @@
     <None Include="Scripts\Pre-Deployment\11_IC\CleanInvalidWeightVolumeGrossUOM.sql" />
     <None Include="Scripts\Pre-Deployment\8_AP\UpdatePaymentPayToAddress.sql" />
     <None Include="Scripts\Pre-Deployment\21_PR\3_1640_to_1710.sql" />
+    <None Include="Scripts\Pre-Deployment\11_IC\CleanUPCCodes.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />
@@ -286,7 +287,7 @@
     <None Include="Scripts\Pre-Deployment\21_PR\4_1710_to_1720.sql" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Scripts\Pre-Deployment\6_GL\AccountCategory.sql" />
+    <None Include="Scripts\Pre-Deployment\6_GL\1730.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\7_AR\3_fnARGetCustomerDefaultContact.sql" />
@@ -308,5 +309,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\7_AR\8_FixARPaymentData_applying_card_info_constraint.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\11_IC\DeleteObsoleteSP.sql" />
   </ItemGroup>
 </Project>

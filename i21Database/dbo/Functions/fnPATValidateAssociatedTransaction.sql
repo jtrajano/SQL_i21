@@ -77,6 +77,17 @@ BEGIN
 		INNER JOIN tblPATEquityPay EP
 			ON EP.intEquityPayId = EPS.intEquityPayId
 		WHERE APB.ysnPosted = 1 AND APB.intBillId IN (SELECT * FROM @tmpTransactions) AND @transaction != 'Patronage'
+		UNION ALL
+		SELECT	'This voucher was created from Refunds - <strong>'+ R.strRefundNo+'</strong>. Unpost it from there.',
+				'Voucher',
+				APB.strBillId,
+				APB.intBillId
+		FROM tblAPBill APB
+		INNER JOIN tblPATRefundCustomer RC
+			ON APB.intBillId = RC.intBillId
+		INNER JOIN tblPATRefund R
+			ON R.intRefundId = RC.intRefundId
+		WHERE APB.ysnPosted = 1 AND APB.intBillId IN (SELECT * FROM @tmpTransactions) AND @transaction != 'Patronage'
 	END
 	ELSE IF (@type = 5)
 	BEGIN

@@ -16,10 +16,15 @@
 		[intInventoryFIFOId] INT NOT NULL, 
 		[intInventoryTransactionId] INT NOT NULL, 
 		[intInventoryCostAdjustmentTypeId] INT NOT NULL, 
-		[dblQty] NUMERIC(38, 20) NOT NULL DEFAULT 0,
-		[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0,
+		[dblQty] NUMERIC(38, 20) NULL,
+		[dblCost] NUMERIC(38, 20) NULL,
+		[dblValue] NUMERIC(38, 20) NULL,
 		[ysnIsUnposted] BIT DEFAULT 0,
 		[dtmCreated] DATETIME NULL, 
+		[strRelatedTransactionId] NVARCHAR(50), 
+		[intRelatedTransactionId] INT,
+		[intRelatedTransactionDetailId] INT,
+		[intRelatedInventoryTransactionId] INT,
 		[intCreatedUserId] INT NULL, 
 		[intCreatedEntityUserId] INT NULL, 
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 
@@ -33,7 +38,11 @@ GO
 	--	INCLUDE (dblQty, dblCost);
 	--GO 
 
+	--CREATE NONCLUSTERED INDEX [IX_tblICInventoryFIFOCostAdjustmentLog]
+	--	ON [dbo].[tblICInventoryFIFOCostAdjustmentLog]([intInventoryFIFOId] ASC)
+	--	INCLUDE ([dblQty], [dblCost], [dblValue], [ysnIsUnposted], [intInventoryCostAdjustmentTypeId]);
+
 	CREATE NONCLUSTERED INDEX [IX_tblICInventoryFIFOCostAdjustmentLog]
-		ON [dbo].[tblICInventoryFIFOCostAdjustmentLog]([intInventoryFIFOId] ASC)
-		INCLUDE ([dblQty], [dblCost], [ysnIsUnposted], [intInventoryCostAdjustmentTypeId]);
+		ON [dbo].[tblICInventoryFIFOCostAdjustmentLog]([intInventoryTransactionId] ASC)
+		INCLUDE ([dblQty], [dblCost], [dblValue], [ysnIsUnposted], [intInventoryCostAdjustmentTypeId]);
 GO

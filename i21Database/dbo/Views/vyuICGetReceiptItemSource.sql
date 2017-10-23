@@ -12,6 +12,7 @@ SELECT
 			WHEN Receipt.intSourceType = 2 THEN 'Inbound Shipment'
 			WHEN Receipt.intSourceType = 3 THEN 'Transport'
 			WHEN Receipt.intSourceType = 4 THEN 'Settle Storage'
+			WHEN Receipt.intSourceType = 5 THEN 'Delivery Sheet'
 			WHEN Receipt.intSourceType = 0 THEN 'None'
 		END),
 	strOrderNumber = 
@@ -50,6 +51,8 @@ SELECT
 				THEN LoadReceipt.strTransaction 
 			WHEN Receipt.intSourceType = 4 -- Settle Storage
 				THEN ISNULL(vyuGRStorageSearchView.strStorageTicketNumber, '') 
+			WHEN Receipt.intSourceType = 5 -- Delivery Sheet
+				THEN (SELECT strDeliverySheetNumber FROM tblSCDeliverySheet WHERE intDeliverySheetId = ReceiptItem.intSourceId) COLLATE Latin1_General_CI_AS
 			ELSE NULL
 			END
 		),

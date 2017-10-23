@@ -20,6 +20,7 @@ SET ANSI_WARNINGS OFF
 DECLARE @PostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully posted.'
 DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.'
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Patronage'
+DECLARE @MODULE_CODE NVARCHAR(25) = 'PAT'
 DECLARE @SCREEN_NAME NVARCHAR(25) = 'Transfer Instrument'
 DECLARE @totalRecords INT
 DECLARE @GLEntries AS RecapTableType 
@@ -67,15 +68,438 @@ SET @batchIdUsed = @batchId;
 	---------------- BEGIN - GET GL ENTRIES ----------------
 	IF(@ysnPosted = 1)
 	BEGIN
-		INSERT INTO @GLEntries
-		SELECT * FROM [dbo].[fnPATCreateTransferInstrumentsGLEntries](@intTransferId, @batchId, @intUserId)
+		INSERT INTO @GLEntries(
+			[dtmDate], 
+			[strBatchId], 
+			[intAccountId],
+			[dblDebit],
+			[dblCredit],
+			[dblDebitUnit],
+			[dblCreditUnit],
+			[strDescription],
+			[strCode],
+			[strReference],
+			[intCurrencyId],
+			[dtmDateEntered],
+			[dtmTransactionDate],
+			[strJournalLineDescription],
+			[intJournalLineNo],
+			[ysnIsUnposted],
+			[intUserId],
+			[intEntityId],
+			[strTransactionId],
+			[intTransactionId],
+			[strTransactionType],
+			[strTransactionForm],
+			[strModuleName],
+			[dblDebitForeign],
+			[dblDebitReport],
+			[dblCreditForeign],
+			[dblCreditReport],
+			[dblReportingRate],
+			[dblForeignRate],
+			[strRateType]
+		)
+		--Voting Stock Issued(Transfer Stock to Equity)
+		SELECT	
+			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmTransferDate), 0),
+			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
+			[intAccountId]					=	ComPref.intVotingStockId,
+			[dblDebit]						=	B.dblQuantityTransferred,
+			[dblCredit]						=	0,
+			[dblDebitUnit]					=	0,
+			[dblCreditUnit]					=	0,
+			[strDescription]				=	'Voting Stock Issued',
+			[strCode]						=	@MODULE_CODE,
+			[strReference]					=	A.strTransferNo,
+			[intCurrencyId]					=	1,
+			[dtmDateEntered]				=	GETDATE(),
+			[dtmTransactionDate]			=	NULL,
+			[strJournalLineDescription]		=	C.strTransferType,
+			[intJournalLineNo]				=	1,
+			[ysnIsUnposted]					=	0,
+			[intUserId]						=	@intUserId,
+			[intEntityId]					=	@intUserId,
+			[strTransactionId]				=	A.strTransferNo, 
+			[intTransactionId]				=	A.intTransferId, 
+			[strTransactionType]			=	C.strTransferType,
+			[strTransactionForm]			=	@SCREEN_NAME,
+			[strModuleName]					=	@MODULE_NAME,
+			[dblDebitForeign]				=	0,      
+			[dblDebitReport]				=	0,
+			[dblCreditForeign]				=	0,
+			[dblCreditReport]				=	0,
+			[dblReportingRate]				=	0,
+			[dblForeignRate]				=	0,
+			[strRateType]					=	NULL
+		FROM	[dbo].[tblPATTransfer] A
+		INNER JOIN tblPATTransferDetail B ON
+			B.intTransferId = A.intTransferId 
+		INNER JOIN tblPATTransferType C ON
+			C.intTransferType = A.intTransferType
+		CROSS JOIN tblPATCompanyPreference ComPref
+		WHERE	A.intTransferId IN (SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@intTransferId)) AND A.intTransferType = 2
+		UNION ALL
+		--Undistributed Equity(Transfer Stock to Equity)
+		SELECT	
+			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmTransferDate), 0),
+			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
+			[intAccountId]					=	D.intUndistributedEquityId,
+			[dblDebit]						=	0,
+			[dblCredit]						=	B.dblQuantityTransferred,
+			[dblDebitUnit]					=	0,
+			[dblCreditUnit]					=	0,
+			[strDescription]				=	'Undistributed Equity',
+			[strCode]						=	@MODULE_CODE,
+			[strReference]					=	A.strTransferNo,
+			[intCurrencyId]					=	1,
+			[dtmDateEntered]				=	GETDATE(),
+			[dtmTransactionDate]			=	NULL,
+			[strJournalLineDescription]		=	C.strTransferType,
+			[intJournalLineNo]				=	1,
+			[ysnIsUnposted]					=	0,
+			[intUserId]						=	@intUserId,
+			[intEntityId]					=	@intUserId,
+			[strTransactionId]				=	A.strTransferNo, 
+			[intTransactionId]				=	A.intTransferId, 
+			[strTransactionType]			=	C.strTransferType,
+			[strTransactionForm]			=	@SCREEN_NAME,
+			[strModuleName]					=	@MODULE_NAME,
+			[dblDebitForeign]				=	0,      
+			[dblDebitReport]				=	0,
+			[dblCreditForeign]				=	0,
+			[dblCreditReport]				=	0,
+			[dblReportingRate]				=	0,
+			[dblForeignRate]				=	0,
+			[strRateType]					=	NULL
+		FROM	[dbo].[tblPATTransfer] A
+		INNER JOIN tblPATTransferDetail B
+			ON B.intTransferId = A.intTransferId 
+		INNER JOIN tblPATTransferType C
+			ON C.intTransferType = A.intTransferType
+		INNER JOIN tblPATRefundRate D
+			ON B.intToRefundTypeId = D.intRefundTypeId
+		WHERE	A.intTransferId IN (SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@intTransferId)) AND A.intTransferType = 2
+		UNION ALL
+		--Voting/Non-voting Stock Issued(Transfer Equity to Stock)
+		SELECT	
+			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmTransferDate), 0),
+			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
+			[intAccountId]					=	CASE WHEN D.strStockStatus = 'Voting' THEN ComPref.intVotingStockId ELSE ComPref.intNonVotingStockId END,
+			[dblDebit]						=	0,
+			[dblCredit]						=	B.dblQuantityTransferred,
+			[dblDebitUnit]					=	0,
+			[dblCreditUnit]					=	0,
+			[strDescription]				=	CASE WHEN D.strStockStatus = 'Voting' THEN 'Voting Stock Issue' ELSE 'Non-Voting Stock Issue' END ,
+			[strCode]						=	@MODULE_CODE,
+			[strReference]					=	A.strTransferNo,
+			[intCurrencyId]					=	1,
+			[dtmDateEntered]				=	GETDATE(),
+			[dtmTransactionDate]			=	NULL,
+			[strJournalLineDescription]		=	C.strTransferType,
+			[intJournalLineNo]				=	1,
+			[ysnIsUnposted]					=	0,
+			[intUserId]						=	@intUserId,
+			[intEntityId]					=	@intUserId,
+			[strTransactionId]				=	A.strTransferNo, 
+			[intTransactionId]				=	A.intTransferId, 
+			[strTransactionType]			=	C.strTransferType,
+			[strTransactionForm]			=	@SCREEN_NAME,
+			[strModuleName]					=	@MODULE_NAME,
+			[dblDebitForeign]				=	0,      
+			[dblDebitReport]				=	0,
+			[dblCreditForeign]				=	0,
+			[dblCreditReport]				=	0,
+			[dblReportingRate]				=	0,
+			[dblForeignRate]				=	0,
+			[strRateType]					=	NULL
+		FROM	[dbo].[tblPATTransfer] A
+		INNER JOIN tblPATTransferDetail B ON
+			B.intTransferId = A.intTransferId 
+		INNER JOIN tblPATTransferType C ON
+			C.intTransferType = A.intTransferType
+		INNER JOIN tblARCustomer D
+			ON D.intEntityId = B.intTransferorId
+		CROSS JOIN tblPATCompanyPreference ComPref
+		WHERE	A.intTransferId IN (SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@intTransferId)) AND A.intTransferType = 4
+		UNION ALL
+		--Undistributed Equity(Transfer Equity to Stock)
+		SELECT	
+			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmTransferDate), 0),
+			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
+			[intAccountId]					=	D.intUndistributedEquityId,
+			[dblDebit]						=	B.dblQuantityTransferred,
+			[dblCredit]						=	0,
+			[dblDebitUnit]					=	0,
+			[dblCreditUnit]					=	0,
+			[strDescription]				=	'Undistributed Equity',
+			[strCode]						=	@MODULE_CODE,
+			[strReference]					=	A.strTransferNo,
+			[intCurrencyId]					=	1,
+			[dtmDateEntered]				=	GETDATE(),
+			[dtmTransactionDate]			=	NULL,
+			[strJournalLineDescription]		=	C.strTransferType,
+			[intJournalLineNo]				=	1,
+			[ysnIsUnposted]					=	0,
+			[intUserId]						=	@intUserId,
+			[intEntityId]					=	@intUserId,
+			[strTransactionId]				=	A.strTransferNo, 
+			[intTransactionId]				=	A.intTransferId, 
+			[strTransactionType]			=	C.strTransferType,
+			[strTransactionForm]			=	@SCREEN_NAME,
+			[strModuleName]					=	@MODULE_NAME,
+			[dblDebitForeign]				=	0,      
+			[dblDebitReport]				=	0,
+			[dblCreditForeign]				=	0,
+			[dblCreditReport]				=	0,
+			[dblReportingRate]				=	0,
+			[dblForeignRate]				=	0,
+			[strRateType]					=	NULL
+		FROM	[dbo].[tblPATTransfer] A
+		INNER JOIN tblPATTransferDetail B
+			ON B.intTransferId = A.intTransferId 
+		INNER JOIN tblPATTransferType C
+			ON C.intTransferType = A.intTransferType
+		INNER JOIN tblPATRefundRate D
+			ON B.intRefundTypeId = D.intRefundTypeId
+		WHERE	A.intTransferId IN (SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@intTransferId)) AND A.intTransferType = 4
+		UNION ALL
+		--Undistributed Equity(Transfer Equity to Equity Reserve)
+		SELECT	
+			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmTransferDate), 0),
+			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
+			[intAccountId]					=	D.intUndistributedEquityId,
+			[dblDebit]						=	B.dblQuantityTransferred,
+			[dblCredit]						=	0,
+			[dblDebitUnit]					=	0,
+			[dblCreditUnit]					=	0,
+			[strDescription]				=	'Undistributed Equity',
+			[strCode]						=	@MODULE_CODE,
+			[strReference]					=	A.strTransferNo,
+			[intCurrencyId]					=	1,
+			[dtmDateEntered]				=	GETDATE(),
+			[dtmTransactionDate]			=	NULL,
+			[strJournalLineDescription]		=	C.strTransferType,
+			[intJournalLineNo]				=	1,
+			[ysnIsUnposted]					=	0,
+			[intUserId]						=	@intUserId,
+			[intEntityId]					=	@intUserId,
+			[strTransactionId]				=	A.strTransferNo, 
+			[intTransactionId]				=	A.intTransferId, 
+			[strTransactionType]			=	C.strTransferType,
+			[strTransactionForm]			=	@SCREEN_NAME,
+			[strModuleName]					=	@MODULE_NAME,
+			[dblDebitForeign]				=	0,      
+			[dblDebitReport]				=	0,
+			[dblCreditForeign]				=	0,
+			[dblCreditReport]				=	0,
+			[dblReportingRate]				=	0,
+			[dblForeignRate]				=	0,
+			[strRateType]					=	NULL
+		FROM	[dbo].[tblPATTransfer] A
+		INNER JOIN tblPATTransferDetail B
+			ON B.intTransferId = A.intTransferId 
+		INNER JOIN tblPATTransferType C
+			ON C.intTransferType = A.intTransferType
+		INNER JOIN tblPATRefundRate D
+			ON B.intRefundTypeId = D.intRefundTypeId
+		WHERE	A.intTransferId IN (SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@intTransferId)) AND A.intTransferType = 5
+		UNION ALL
+		--Allocated Reserve(Transfer Equity to Equity Reserve)
+		SELECT	
+			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmTransferDate), 0),
+			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
+			[intAccountId]					=	D.intAllocatedReserveId,
+			[dblDebit]						=	0,
+			[dblCredit]						=	B.dblQuantityTransferred,
+			[dblDebitUnit]					=	0,
+			[dblCreditUnit]					=	0,
+			[strDescription]				=	'Allocated Reserve',
+			[strCode]						=	@MODULE_CODE,
+			[strReference]					=	A.strTransferNo,
+			[intCurrencyId]					=	1,
+			[dtmDateEntered]				=	GETDATE(),
+			[dtmTransactionDate]			=	NULL,
+			[strJournalLineDescription]		=	C.strTransferType,
+			[intJournalLineNo]				=	1,
+			[ysnIsUnposted]					=	0,
+			[intUserId]						=	@intUserId,
+			[intEntityId]					=	@intUserId,
+			[strTransactionId]				=	A.strTransferNo, 
+			[intTransactionId]				=	A.intTransferId, 
+			[strTransactionType]			=	C.strTransferType,
+			[strTransactionForm]			=	@SCREEN_NAME,
+			[strModuleName]					=	@MODULE_NAME,
+			[dblDebitForeign]				=	0,      
+			[dblDebitReport]				=	0,
+			[dblCreditForeign]				=	0,
+			[dblCreditReport]				=	0,
+			[dblReportingRate]				=	0,
+			[dblForeignRate]				=	0,
+			[strRateType]					=	NULL
+		FROM	[dbo].[tblPATTransfer] A
+		INNER JOIN tblPATTransferDetail B
+			ON B.intTransferId = A.intTransferId 
+		INNER JOIN tblPATTransferType C
+			ON C.intTransferType = A.intTransferType
+		INNER JOIN tblPATRefundRate D
+			ON B.intRefundTypeId = D.intRefundTypeId
+		WHERE	A.intTransferId IN (SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@intTransferId)) AND A.intTransferType = 5
+		UNION ALL
+		--Undistributed Equity(Transfer Equity Reserve to Equity)
+		SELECT	
+			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmTransferDate), 0),
+			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
+			[intAccountId]					=	D.intUndistributedEquityId,
+			[dblDebit]						=	0,
+			[dblCredit]						=	B.dblQuantityTransferred,
+			[dblDebitUnit]					=	0,
+			[dblCreditUnit]					=	0,
+			[strDescription]				=	'Undistributed Equity',
+			[strCode]						=	@MODULE_CODE,
+			[strReference]					=	A.strTransferNo,
+			[intCurrencyId]					=	1,
+			[dtmDateEntered]				=	GETDATE(),
+			[dtmTransactionDate]			=	NULL,
+			[strJournalLineDescription]		=	C.strTransferType,
+			[intJournalLineNo]				=	1,
+			[ysnIsUnposted]					=	0,
+			[intUserId]						=	@intUserId,
+			[intEntityId]					=	@intUserId,
+			[strTransactionId]				=	A.strTransferNo, 
+			[intTransactionId]				=	A.intTransferId, 
+			[strTransactionType]			=	C.strTransferType,
+			[strTransactionForm]			=	@SCREEN_NAME,
+			[strModuleName]					=	@MODULE_NAME,
+			[dblDebitForeign]				=	0,      
+			[dblDebitReport]				=	0,
+			[dblCreditForeign]				=	0,
+			[dblCreditReport]				=	0,
+			[dblReportingRate]				=	0,
+			[dblForeignRate]				=	0,
+			[strRateType]					=	NULL
+		FROM	[dbo].[tblPATTransfer] A
+		INNER JOIN tblPATTransferDetail B
+			ON B.intTransferId = A.intTransferId 
+		INNER JOIN tblPATTransferType C
+			ON C.intTransferType = A.intTransferType
+		INNER JOIN tblPATRefundRate D
+			ON B.intToRefundTypeId = D.intRefundTypeId
+		WHERE	A.intTransferId IN (SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@intTransferId)) AND A.intTransferType = 6
+		UNION ALL
+		--Allocated Reserve(Transfer Equity Reserve to Equity)
+		SELECT	
+			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmTransferDate), 0),
+			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
+			[intAccountId]					=	D.intAllocatedReserveId,
+			[dblDebit]						=	B.dblQuantityTransferred,
+			[dblCredit]						=	0,
+			[dblDebitUnit]					=	0,
+			[dblCreditUnit]					=	0,
+			[strDescription]				=	'Allocated Reserve',
+			[strCode]						=	@MODULE_CODE,
+			[strReference]					=	A.strTransferNo,
+			[intCurrencyId]					=	1,
+			[dtmDateEntered]				=	GETDATE(),
+			[dtmTransactionDate]			=	NULL,
+			[strJournalLineDescription]		=	C.strTransferType,
+			[intJournalLineNo]				=	1,
+			[ysnIsUnposted]					=	0,
+			[intUserId]						=	@intUserId,
+			[intEntityId]					=	@intUserId,
+			[strTransactionId]				=	A.strTransferNo, 
+			[intTransactionId]				=	A.intTransferId, 
+			[strTransactionType]			=	C.strTransferType,
+			[strTransactionForm]			=	@SCREEN_NAME,
+			[strModuleName]					=	@MODULE_NAME,
+			[dblDebitForeign]				=	0,      
+			[dblDebitReport]				=	0,
+			[dblCreditForeign]				=	0,
+			[dblCreditReport]				=	0,
+			[dblReportingRate]				=	0,
+			[dblForeignRate]				=	0,
+			[strRateType]					=	NULL
+		FROM	[dbo].[tblPATTransfer] A
+		INNER JOIN tblPATTransferDetail B
+			ON B.intTransferId = A.intTransferId 
+		INNER JOIN tblPATTransferType C
+			ON C.intTransferType = A.intTransferType
+		INNER JOIN tblPATRefundRate D
+			ON B.intToRefundTypeId = D.intRefundTypeId
+		WHERE	A.intTransferId IN (SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@intTransferId)) AND A.intTransferType = 6
 	END
 	ELSE
 	BEGIN
-		INSERT INTO @GLEntries
-		SELECT * FROM [dbo].[fnPATReverseTransferInstrumentsGLEntries](@intTransferId, @dateToday, @batchId, @intUserId)
+		INSERT INTO @GLEntries(
+			[strTransactionId]
+			,[intTransactionId]
+			,[dtmDate]
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[dblDebitForeign]           
+			,[dblDebitReport]            
+			,[dblCreditForeign]          
+			,[dblCreditReport]           
+			,[dblReportingRate]          
+			,[dblForeignRate]
+			,[strRateType]
+		)
+		SELECT	
+			[strTransactionId]
+			,[intTransactionId]
+			,[dtmDate]
+			,strBatchId = @batchId COLLATE Latin1_General_CI_AS
+			,[intAccountId]
+			,[dblDebit] = [dblCredit]		-- (Debit -> Credit)
+			,[dblCredit] = [dblDebit]		-- (Debit <- Credit)
+			,[dblDebitUnit] = [dblCreditUnit]	-- (Debit Unit -> Credit Unit)
+			,[dblCreditUnit] = [dblDebitUnit]	-- (Debit Unit <- Credit Unit)
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,dtmDateEntered = GETDATE()
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,ysnIsUnposted = 1
+			,intUserId = @intUserId
+			,[intEntityId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[dblDebitForeign]           
+			,[dblDebitReport]            
+			,[dblCreditForeign]          
+			,[dblCreditReport]           
+			,[dblReportingRate]          
+			,[dblForeignRate]
+			,NULL
+		FROM	tblGLDetail 
+		WHERE	intTransactionId IN (SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@intTransferId))
+		AND ysnIsUnposted = 0 AND strTransactionForm = @SCREEN_NAME AND strModuleName = @MODULE_NAME
+		ORDER BY intGLDetailId
 
-		
 		UPDATE tblGLDetail SET ysnIsUnposted = 1
 		WHERE intTransactionId = @intTransferId 
 		AND strModuleName = @MODULE_NAME AND strTransactionForm = @SCREEN_NAME

@@ -38,6 +38,7 @@ SELECT
 	strIssueUOMType = COALESCE(iUOM.strUnitType, sUOM.strUnitType),
 	strReceiveUOM = COALESCE(rUOM.strUnitMeasure, sUOM.strUnitMeasure),
 	strReceiveUPC = COALESCE(ReceiveUOM.strUpcCode, StockUOM.strUpcCode, ''),
+	strReceieveLongUPC = COALESCE(ReceiveUOM.strLongUPCCode, StockUOM.strLongUPCCode, ''),
 	dblReceiveSalePrice = ISNULL(ItemPricing.dblSalePrice, 0) * COALESCE(ReceiveUOM.dblUnitQty, StockUOM.dblUnitQty, 0),
 	dblReceiveMSRPPrice = ISNULL(ItemPricing.dblMSRPPrice, 0) * COALESCE(ReceiveUOM.dblUnitQty, StockUOM.dblUnitQty, 0),
 	dblReceiveLastCost = ISNULL(ItemPricing.dblLastCost, 0) * COALESCE(ReceiveUOM.dblUnitQty, StockUOM.dblUnitQty, 0),
@@ -48,6 +49,7 @@ SELECT
 	ysnReceiveUOMAllowSale = COALESCE(ReceiveUOM.ysnAllowSale, StockUOM.ysnAllowSale), 
 	strIssueUOM = COALESCE(iUOM.strUnitMeasure, sUOM.strUnitMeasure),
 	strIssueUPC = COALESCE(IssueUOM.strUpcCode, StockUOM.strUpcCode, ''),
+	strIssueLongUPC = COALESCE(IssueUOM.strLongUPCCode, StockUOM.strLongUPCCode, ''),
 	dblIssueSalePrice = ISNULL(ItemPricing.dblSalePrice, 0) * COALESCE(IssueUOM.dblUnitQty, StockUOM.dblUnitQty, 0),
 	dblIssueMSRPPrice = ISNULL(ItemPricing.dblMSRPPrice, 0) * COALESCE(IssueUOM.dblUnitQty, StockUOM.dblUnitQty, 0),
 	dblIssueLastCost = ISNULL(ItemPricing.dblLastCost, 0) * COALESCE(IssueUOM.dblUnitQty, StockUOM.dblUnitQty, 0),
@@ -63,6 +65,7 @@ SELECT
 	strGrossUOMType = gUOM.strUnitType,
 	strGrossUOM = gUOM.strUnitMeasure,
 	strGrossUPC = GrossUOM.strUpcCode,
+	strGrossLongUPC = GrossUOM.strLongUPCCode,
 	dblGrossSalePrice = ISNULL(ItemPricing.dblSalePrice, 0) * GrossUOM.dblUnitQty,
 	dblGrossMSRPPrice = ISNULL(ItemPricing.dblMSRPPrice, 0) * GrossUOM.dblUnitQty,
 	dblGrossLastCost = ISNULL(ItemPricing.dblLastCost, 0) * GrossUOM.dblUnitQty,
@@ -135,8 +138,8 @@ SELECT
 	strTonnageTaxUOM = TonnageUOM.strUnitMeasure,
 	Item.intModuleId,
 	m.strModule,
-	Item.ysnUseWeighScales
-
+	Item.ysnUseWeighScales,
+	Item.ysnLotWeightsRequired
 FROM	
 	tblICItem Item 
 	LEFT JOIN (

@@ -10,7 +10,7 @@ SELECT intKeyId = Detail.intSupplyPointProductSearchHeaderId
 	, Header.intItemId
 	, Item.strItemNo
 	, strItemDescription = Item.strDescription
-	, strSearchValue
+	, strSearchValue = RTRIM(strSearchValue)
 FROM tblTRSupplyPointProductSearchHeader Header
 LEFT JOIN tblTRSupplyPointProductSearchDetail Detail ON Detail.intSupplyPointProductSearchHeaderId = Header.intSupplyPointProductSearchHeaderId
 LEFT JOIN tblTRSupplyPoint SupplyPoint ON SupplyPoint.intSupplyPointId = Header.intSupplyPointId

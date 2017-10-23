@@ -18,7 +18,7 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentOnLotCosting]
 	,@intSourceTransactionId AS INT
 	,@intSourceTransactionDetailId AS INT 
 	,@strSourceTransactionId AS NVARCHAR(20)
-	,@strBatchId AS NVARCHAR(20)
+	,@strBatchId AS NVARCHAR(40)
 	,@intTransactionTypeId AS INT
 	,@intCurrencyId AS INT 
 	,@dblExchangeRate AS NUMERIC(38,20)	

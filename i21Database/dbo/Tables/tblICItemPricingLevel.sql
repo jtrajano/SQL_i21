@@ -18,6 +18,7 @@ Type the overview for the table here.
 		[strPriceLevel] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[intItemUnitMeasureId] INT NULL, 
 		[dblUnit] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[dtmEffectiveDate] DATETIME NULL, 
 		[dblMin] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblMax] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[strPricingMethod] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
@@ -145,6 +146,15 @@ Type the overview for the table here.
 		@level1name = N'tblICItemPricingLevel',
 		@level2type = N'COLUMN',
 		@level2name = N'dblUnitPrice'
+	GO
+	EXEC sp_addextendedproperty @name = N'MS_Description',
+		@value = N'Effective Date',
+		@level0type = N'SCHEMA',
+		@level0name = N'dbo',
+		@level1type = N'TABLE',
+		@level1name = N'tblICItemPricingLevel',
+		@level2type = N'COLUMN',
+		@level2name = N'dtmEffectiveDate'
 	GO
 
 	GO

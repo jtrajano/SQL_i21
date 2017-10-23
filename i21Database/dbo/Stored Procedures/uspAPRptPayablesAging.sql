@@ -37,7 +37,7 @@ SET ANSI_WARNINGS OFF
 --	<options />
 --</xmlparam>'
 
-DECLARE @query NVARCHAR(MAX), @innerQuery NVARCHAR(MAX), @filter NVARCHAR(MAX) = '';
+DECLARE @query NVARCHAR(MAX), @innerQuery NVARCHAR(MAX),  @originInnerQuery NVARCHAR(MAX), @prepaidInnerQuery NVARCHAR(MAX), @filter NVARCHAR(MAX) = '';
 DECLARE @dateFrom DATETIME = NULL;
 DECLARE @dateTo DATETIME = NULL;
 DECLARE @dtmDateTo DATETIME = NULL;
@@ -148,15 +148,40 @@ SET @innerQuery = 'SELECT --DISTINCT
 					,dtmDate
 				  FROM dbo.vyuAPPayables'
 
+SET @prepaidInnerQuery = 'SELECT --DISTINCT 
+					intBillId
+					,dblTotal
+					,dblAmountDue
+					,dblAmountPaid
+					,dblDiscount
+					,dblInterest
+					,dtmDate
+					,intPrepaidRowType
+				  FROM dbo.vyuAPPrepaidPayables'
+
+SET @originInnerQuery = 'SELECT --DISTINCT 
+					intBillId
+					,dblTotal
+					,dblAmountDue
+					,dblAmountPaid
+					,dblDiscount
+					,dblInterest
+					,dtmDate
+				  FROM dbo.vyuAPOriginPayables'
+
 IF @dateFrom IS NOT NULL
 BEGIN	
 	IF @condition = 'Equal To'
 	BEGIN 
 		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
+		SET @prepaidInnerQuery = @prepaidInnerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
+		SET @originInnerQuery = @originInnerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
 	END
     ELSE 
 	BEGIN 
 		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''	
+		SET @prepaidInnerQuery = @prepaidInnerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''
+		SET @originInnerQuery = @originInnerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''
 	END  
 END
 
@@ -166,11 +191,15 @@ IF @dtmDate IS NOT NULL
 BEGIN	
 	IF @condition = 'Equal To'
 	BEGIN 
-		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''''
+		SET @innerQuery = @innerQuery +  (CASE WHEN @dateFrom IS NOT NULL AND @dtmDate IS NOT NULL THEN + ' AND ' ELSE +' WHERE ' END) +' DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''''
+		SET @prepaidInnerQuery = @prepaidInnerQuery +  (CASE WHEN @dateFrom IS NOT NULL AND @dtmDate IS NOT NULL THEN + ' AND ' ELSE +' WHERE ' END) +' DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''''
+		SET @originInnerQuery = @originInnerQuery +  (CASE WHEN @dateFrom IS NOT NULL AND @dtmDate IS NOT NULL THEN + ' AND ' ELSE +' WHERE ' END) +' DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''''
 	END
     ELSE 
 	BEGIN 
 		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dtmDateTo, 110) + ''''	
+		SET @prepaidInnerQuery = @prepaidInnerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dtmDateTo, 110) + ''''	
+		SET @originInnerQuery = @originInnerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dtmDateTo, 110) + ''''	
 	END  
 	SET @dateFrom = CONVERT(VARCHAR(10), @dtmDate, 110)
 	SET @dateTo = @dtmDateTo;
@@ -193,6 +222,24 @@ BEGIN
 		   @join = [join], 
 		   @datatype = [datatype] 
 	FROM @temp_xml_table
+
+	--THIS FILTER WILL GET THE CONNECTED BILL ID FROM SOURCE MODULE
+	IF (@fieldname = 'strReceiptNumber' OR @fieldname = 'strTicketNumber' OR @fieldname = 'strShipmentNumber' OR @fieldname = 'strContractNumber' OR @fieldname = 'strLoadNumber')
+	BEGIN 
+		SET @strBillId = (SELECT TOP 1 strBillId FROM vyuAPOpenPayableDetailsFields WHERE (CASE WHEN @fieldname = 'strReceiptNumber' THEN  strReceiptNumber 
+																							    WHEN @fieldname = 'strTicketNumber' THEN  strTicketNumber 
+																								WHEN @fieldname = 'strShipmentNumber' THEN  strShipmentNumber 
+																								WHEN @fieldname = 'strLoadNumber' THEN  strLoadNumber 
+																							ELSE strContractNumber END) = @from)
+		SET @fieldname = 'strBillId'
+		SET @from = @strBillId
+	END
+    
+	--IF @strBillId IS NOT NULL
+	--BEGIN
+	--	SET @filter = dbo.fnAPCreateFilter(@fieldname, @condition, @from, @to, @join, null, null, @datatype)				  
+	--END  
+
 	SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@fieldname, @condition, @from, @to, @join, null, null, @datatype)
 	
 	DELETE FROM @temp_xml_table WHERE id = @id
@@ -226,16 +273,16 @@ END
 		SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@strVendorIdName, @condition, @from, @to, @join, null, null, @datatype)				  
 	END
   
-   SELECT @strBillId = [fieldname], 
-		   @from = [from], 
-		   @to = [to], 
-		   @join = [join], 
-		   @datatype = [datatype] 
-	FROM @temp_xml_table WHERE [fieldname] = 'strBillId';
-	IF @strBillId IS NOT NULL
-	BEGIN
-		SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@strBillId, @condition, @from, @to, @join, null, null, @datatype)				  
-	END  
+ --  SELECT @strBillId = [fieldname], 
+	--	   @from = [from], 
+	--	   @to = [to], 
+	--	   @join = [join], 
+	--	   @datatype = [datatype] 
+	--FROM @temp_xml_table WHERE [fieldname] = 'strBillId';
+	--IF @strBillId IS NOT NULL
+	--BEGIN
+	--	SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@strBillId, @condition, @from, @to, @join, null, null, @datatype)				  
+	--END  
 
 	 SELECT @strAccountId = [fieldname], 
 		   @from = [from], 
@@ -270,22 +317,7 @@ END
 		SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@strTerm, @condition, @from, @to, @join, null, null, @datatype)				  
 	END  
 	
-	--THIS FILTER WILL GET THE CONNECTED BILL ID FROM SOURCE MODULE
-	IF (@fieldname = 'strReceiptNumber' OR @fieldname = 'strTicketNumber' OR @fieldname = 'strShipmentNumber' OR @fieldname = 'strContractNumber' OR @fieldname = 'strLoadNumber')
-	BEGIN 
-		SET @strBillId = (SELECT TOP 1 strBillId FROM vyuAPOpenPayableDetailsFields WHERE (CASE WHEN @fieldname = 'strReceiptNumber' THEN  strReceiptNumber 
-																							    WHEN @fieldname = 'strTicketNumber' THEN  strTicketNumber 
-																								WHEN @fieldname = 'strShipmentNumber' THEN  strShipmentNumber 
-																								WHEN @fieldname = 'strLoadNumber' THEN  strLoadNumber 
-																							ELSE strContractNumber END) = @from)
-		SET @fieldname = 'strBillId'
-		SET @from = @strBillId
-	END
-    
-	IF @strBillId IS NOT NULL
-	BEGIN
-		SET @filter = dbo.fnAPCreateFilter(@fieldname, @condition, @from, @to, @join, null, null, @datatype)				  
-	END  
+	
 
 SET @query = '
 	SELECT * FROM (
@@ -335,17 +367,28 @@ SET @query = '
 	FROM  
 	(
 		SELECT 
-		intBillId
-		,SUM(tmpAPPayables.dblTotal) AS dblTotal
-		,SUM(tmpAPPayables.dblAmountPaid) AS dblAmountPaid
-		,SUM(tmpAPPayables.dblDiscount)AS dblDiscount
-		,SUM(tmpAPPayables.dblInterest) AS dblInterest
-		,CAST((SUM(tmpAPPayables.dblTotal) + SUM(tmpAPPayables.dblInterest) - SUM(tmpAPPayables.dblAmountPaid) - SUM(tmpAPPayables.dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue
+			intBillId
+			,SUM(tmpAPPayables.dblTotal) AS dblTotal
+			,SUM(tmpAPPayables.dblAmountPaid) AS dblAmountPaid
+			,SUM(tmpAPPayables.dblDiscount)AS dblDiscount
+			,SUM(tmpAPPayables.dblInterest) AS dblInterest
+			,CAST((SUM(tmpAPPayables.dblTotal) + SUM(tmpAPPayables.dblInterest) - SUM(tmpAPPayables.dblAmountPaid) - SUM(tmpAPPayables.dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue
 		FROM ('
 				+ @innerQuery +
 			') tmpAPPayables 
-		--WHERE dblAmountDue <> 0
 		GROUP BY intBillId
+		UNION ALL
+		SELECT 
+			intBillId
+			,SUM(tmpAPPrepaidPayables.dblTotal) AS dblTotal
+			,SUM(tmpAPPrepaidPayables.dblAmountPaid) AS dblAmountPaid
+			,SUM(tmpAPPrepaidPayables.dblDiscount)AS dblDiscount
+			,SUM(tmpAPPrepaidPayables.dblInterest) AS dblInterest
+			,CAST((SUM(tmpAPPrepaidPayables.dblTotal) + SUM(tmpAPPrepaidPayables.dblInterest) - SUM(tmpAPPrepaidPayables.dblAmountPaid) - SUM(tmpAPPrepaidPayables.dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue
+		FROM ('
+				+ @prepaidInnerQuery +
+			') tmpAPPrepaidPayables 
+		GROUP BY intBillId, intPrepaidRowType
 	) AS tmpAgingSummaryTotal
 	LEFT JOIN dbo.tblAPBill A
 	ON A.intBillId = tmpAgingSummaryTotal.intBillId

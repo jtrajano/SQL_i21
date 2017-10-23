@@ -152,7 +152,7 @@ SELECT
 		,ysnIsStorage				= LI.ysnIsStorage
 		,dblFreightRate				= NULL -- no requirements yet for sublocation DS
 		,intSourceId				= LI.intTransactionId
-		,intSourceType		 		= 1 -- Source type for Delivery Sheet is 5 
+		,intSourceType		 		= 5 -- Source type for Delivery Sheet is 5 
 		,strSourceScreenName		= 'Delivery Sheet'
 FROM	@Items LI 
 		INNER JOIN tblSCDeliverySheet SCD ON SCD.intDeliverySheetId = LI.intTransactionId

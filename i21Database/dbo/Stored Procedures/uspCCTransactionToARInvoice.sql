@@ -3,7 +3,7 @@
 	,@UserId			INT	
 	,@Post				BIT
 	,@Recap				BIT = NULL
-	,@ErrorMessage		NVARCHAR(250) OUTPUT
+	,@ErrorMessage		NVARCHAR(250) = NULL OUTPUT
 	,@CreatedIvoices	NVARCHAR(MAX)  = NULL OUTPUT
 	,@UpdatedIvoices	NVARCHAR(MAX)  = NULL OUTPUT
 	,@success			BIT = NULL OUTPUT
@@ -22,16 +22,40 @@ BEGIN
 
     DECLARE @CCRItemToARItem TABLE
     (
-        intSiteHeaderId int, 
+        intSiteHeaderId int,
+		intItemId int,
         strItem nvarchar(100)
     )
-    DECLARE @intDealerSiteCreditItem INT, @intDealerSiteFeeItem INT
+    DECLARE @intDealerSiteCreditItem INT, @intDealerSiteFeeItem INT, @intSalesAccountCategory INT;
     SELECT TOP 1 @intDealerSiteCreditItem = intDealerSiteCreditItem, @intDealerSiteFeeItem = intDealerSiteFeeItem FROM tblCCCompanyPreferenceOption
+	SELECT TOP 1 @intSalesAccountCategory = intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = 'Sales Account'
 
-    INSERT INTO @CCRItemToARItem VALUES (@intSiteHeaderId,'Dealer Site Credits')
-    INSERT INTO @CCRItemToARItem VALUES (@intSiteHeaderId,'Dealer Site Fees')
+	IF(@intDealerSiteCreditItem IS NULL OR @intDealerSiteFeeItem IS NULL)
+	BEGIN
+		SET @ErrorMessage = 'Please setup Dealer Site Credit & Fee Item from Company Configuration.';
+		SET @success = 0;
+		RAISERROR(@ErrorMessage, 16, 1);
+	END
+
+	if not exists (select * from tblICItemAccount where intItemId = @intDealerSiteCreditItem AND intAccountCategoryId = @intSalesAccountCategory)
+	begin
+		SET @ErrorMessage = 'Please setup GL Sales Account category for Dealer Site Credit item.';
+		SET @success = 0;
+		RAISERROR(@ErrorMessage, 16, 1);
+	end
+
+	if not exists (select * from tblICItemAccount where intItemId = @intDealerSiteFeeItem AND intAccountCategoryId = @intSalesAccountCategory)
+	begin
+		SET @ErrorMessage = 'Please setup GL Sales Account category for Dealer Site Fee item.';
+		SET @success = 0;
+		RAISERROR(@ErrorMessage, 16, 1);
+	end
+
+    INSERT INTO @CCRItemToARItem VALUES (@intSiteHeaderId, @intDealerSiteCreditItem, 'Dealer Site Credits');
+    INSERT INTO @CCRItemToARItem VALUES (@intSiteHeaderId, @intDealerSiteFeeItem, 'Dealer Site Fees');
 
     SET @success = 0
+    
 
     INSERT INTO @EntriesForInvoice(
         [strTransactionType]
@@ -55,6 +79,7 @@ BEGIN
         ,[ysnRecomputeTax]
         ,[intSiteDetailId]
         ,[ysnInventory]
+		,[intSalesAccountId]
 		,[strComments]
     )
     SELECT [strTransactionType] = 'Credit Memo' 
@@ -70,7 +95,7 @@ BEGIN
         ,[intEntitySalespersonId] = ccCustomer.intSalespersonId
         ,[intEntityId] = @UserId
         ,[ysnPost] = @Post
-        ,[intItemId] =  CASE WHEN ccItem.strItem = 'Dealer Site Credits' THEN @intDealerSiteCreditItem ELSE (CASE WHEN ccSite.ysnPostNetToArCustomer = 0 THEN @intDealerSiteFeeItem ELSE -1 END) END
+        ,[intItemId] = CASE WHEN ccItem.strItem = 'Dealer Site Credits' THEN @intDealerSiteCreditItem ELSE (CASE WHEN ccSite.ysnPostNetToArCustomer = 0 THEN @intDealerSiteFeeItem ELSE -1 END) END
         ,[strItemDescription] = ccItem.strItem
         ,[dblQtyShipped] = CASE WHEN ccItem.strItem = 'Dealer Site Fees' THEN -1 ELSE 1 END
         ,[dblPrice] = CASE WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 1 THEN ccSiteDetail.dblNet WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 0 THEN ccSiteDetail.dblGross ELSE (CASE WHEN ccSite.ysnPostNetToArCustomer = 0 THEN ccSiteDetail.dblFees ELSE 0 END) END
@@ -78,63 +103,70 @@ BEGIN
         ,[ysnRecomputeTax] = 0
         ,[intSiteDetailId] = ccSiteDetail.intSiteDetailId
         ,[ysnInventory] = 1
+		,[intSalesAccountId] = ItemAcc.intAccountId
 		,[strComments] = ccSiteHeader.strCcdReference
     FROM tblCCSiteHeader ccSiteHeader 
     INNER JOIN vyuCCVendor ccVendor ON ccSiteHeader.intVendorDefaultId = ccVendor.intVendorDefaultId 
-    INNER JOIN @CCRItemToARItem  ccItem ON ccItem.intSiteHeaderId = ccSiteHeader.intSiteHeaderId
+    INNER JOIN @CCRItemToARItem ccItem ON ccItem.intSiteHeaderId = ccSiteHeader.intSiteHeaderId
     LEFT JOIN tblCCSiteDetail ccSiteDetail ON  ccSiteDetail.intSiteHeaderId = ccSiteHeader.intSiteHeaderId
     LEFT JOIN vyuCCSite ccSite ON ccSite.intSiteId = ccSiteDetail.intSiteId
     LEFT JOIN vyuCCCustomer ccCustomer ON ccCustomer.intCustomerId = ccSite.intCustomerId AND ccCustomer.intSiteId = ccSite.intSiteId
-    WHERE ccSiteHeader.intSiteHeaderId = @intSiteHeaderId AND ccSite.intDealerSiteId IS NOT NULL
+	INNER JOIN tblICItemAccount ItemAcc ON ItemAcc.intItemId = ccItem.intItemId AND ItemAcc.intAccountCategoryId = @intSalesAccountCategory
+    WHERE ccSiteHeader.intSiteHeaderId = @intSiteHeaderId AND ccSite.intSiteId IS NOT NULL and ccSite.intCustomerId is not null and ccSite.ysnPostNetToArCustomer = 1
+
 
     --REMOVE -1 items
-    DELETE FROM @EntriesForInvoice WHERE intItemId = -1	
+	--and those sites that does not have customer
+    DELETE FROM @EntriesForInvoice WHERE intItemId = -1	or intEntityCustomerId is null;
 
-	IF(@Post = 1)
-	BEGIN
-		EXEC [dbo].[uspARProcessInvoices]
-				 @InvoiceEntries	= @EntriesForInvoice
-				,@LineItemTaxEntries = @TaxDetails
-				,@UserId			= @UserId
-				,@GroupingOption	= 7
-				,@RaiseError		= 1
-				,@ErrorMessage		= @ErrorMessage OUTPUT
-				,@CreatedIvoices	= @CreatedIvoices OUTPUT
-				,@UpdatedIvoices	= @UpdatedIvoices OUTPUT
-
-		IF(ISNULL(@ErrorMessage,'') = '') SET @success = 1
-	END
-	ELSE IF (@Post = 0)
-	BEGIN		
-		DECLARE @intInvoiceId INT = NULL
-		
-		SELECT @intInvoiceId = arInvoiceDetail.intInvoiceId FROM tblCCSiteDetail ccSiteDetail 
-			INNER JOIN tblARInvoiceDetail arInvoiceDetail ON arInvoiceDetail.intSiteDetailId = ccSiteDetail.intSiteDetailId
-		WHERE ccSiteDetail.intSiteHeaderId = @intSiteHeaderId
-		GROUP BY arInvoiceDetail.intInvoiceId
-		IF(@intInvoiceId IS NOT NULL)
+	if ((select count(*) from @EntriesForInvoice) > 0)
+	begin
+		IF(@Post = 1)
 		BEGIN
-		UPDATE @EntriesForInvoice SET intInvoiceId = @intInvoiceId
+			EXEC [dbo].[uspARProcessInvoices]
+					 @InvoiceEntries	= @EntriesForInvoice
+					,@LineItemTaxEntries = @TaxDetails
+					,@UserId			= @UserId
+					,@GroupingOption	= 7
+					,@RaiseError		= 1
+					,@ErrorMessage		= @ErrorMessage OUTPUT
+					,@CreatedIvoices	= @CreatedIvoices OUTPUT
+					,@UpdatedIvoices	= @UpdatedIvoices OUTPUT
 
-		EXEC [dbo].[uspARProcessInvoices]
-				 @InvoiceEntries	= @EntriesForInvoice
-				,@LineItemTaxEntries = @TaxDetails
-				,@UserId			= @UserId
-				,@GroupingOption	= 7
-				,@RaiseError		= 1
-				,@ErrorMessage		= @ErrorMessage OUTPUT
-				,@CreatedIvoices	= @CreatedIvoices OUTPUT
-				,@UpdatedIvoices	= @UpdatedIvoices OUTPUT
+			IF(ISNULL(@ErrorMessage,'') = '') SET @success = 1
+		END
+		ELSE IF (@Post = 0)
+		BEGIN		
+			DECLARE @intInvoiceId1 INT = NULL
+		
+			SELECT @intInvoiceId1 = arInvoiceDetail.intInvoiceId FROM tblCCSiteDetail ccSiteDetail 
+				INNER JOIN tblARInvoiceDetail arInvoiceDetail ON arInvoiceDetail.intSiteDetailId = ccSiteDetail.intSiteDetailId
+			WHERE ccSiteDetail.intSiteHeaderId = @intSiteHeaderId
+			GROUP BY arInvoiceDetail.intInvoiceId
+			IF(@intInvoiceId1 IS NOT NULL)
+			BEGIN
+			UPDATE @EntriesForInvoice SET intInvoiceId = @intInvoiceId1
 
-		--DELETE Invoice Transaction
-		DELETE FROM tblARInvoice WHERE intInvoiceId IN (
-			SELECT DISTINCT C.intInvoiceId 
-				FROM tblCCSiteHeader A 
-			JOIN tblCCSiteDetail B ON B.intSiteHeaderId = A.intSiteHeaderId
-			JOIN tblARInvoiceDetail C ON C.intSiteDetailId = B.intSiteDetailId
-				WHERE A.intSiteHeaderId = @intSiteHeaderId)
+			EXEC [dbo].[uspARProcessInvoices]
+					 @InvoiceEntries	= @EntriesForInvoice
+					,@LineItemTaxEntries = @TaxDetails
+					,@UserId			= @UserId
+					,@GroupingOption	= 7
+					,@RaiseError		= 1
+					,@ErrorMessage		= @ErrorMessage OUTPUT
+					,@CreatedIvoices	= @CreatedIvoices OUTPUT
+					,@UpdatedIvoices	= @UpdatedIvoices OUTPUT
+
+			--DELETE Invoice Transaction
+			DELETE FROM tblARInvoice WHERE intInvoiceId IN (
+				SELECT DISTINCT C.intInvoiceId 
+					FROM tblCCSiteHeader A 
+				JOIN tblCCSiteDetail B ON B.intSiteHeaderId = A.intSiteHeaderId
+				JOIN tblARInvoiceDetail C ON C.intSiteDetailId = B.intSiteDetailId
+					WHERE A.intSiteHeaderId = @intSiteHeaderId)
+
+			END
 
 		END
-
-	END
+	end
 END

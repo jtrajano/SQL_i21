@@ -23,8 +23,10 @@ END
 --------------------------------------------------------------------------------------------------------------------------------------
 BEGIN 
 	-- Add the G/L entries from the temporary table to the permanent table (tblGLDetail)
-	DECLARE @intCompanyId INT
-	SELECT TOP 1 @intCompanyId=intMultiCompanyId from tblSMCompanySetup
+	DECLARE @intMultCompanyId INT
+	SELECT TOP 1 @intMultCompanyId = C.intMultiCompanyId FROM 
+	tblSMMultiCompany MC JOIN tblSMCompanySetup C ON C.intMultiCompanyId = MC.intMultiCompanyId
+
 	DECLARE @dtmDateEntered DATETIME
 	INSERT INTO dbo.tblGLDetail (
 			[dtmDate]
@@ -38,6 +40,8 @@ BEGIN
 			,[strDescription]
 			,[strCode]
 			,[strReference]
+			,[strDocument]
+			,[strComments]
 			,[intCurrencyId]
 			,[dblExchangeRate]
 			,[dtmDateEntered]
@@ -63,7 +67,7 @@ BEGIN
 	SELECT 
 			dbo.fnRemoveTimeOnDate([dtmDate])
 			,[strBatchId]
-			,@intCompanyId
+			,@intMultCompanyId
 			,[intAccountId]
 			,[dblDebit] = Debit.Value
 			,[dblCredit] = Credit.Value 
@@ -72,6 +76,8 @@ BEGIN
 			,[strDescription]
 			,[strCode]
 			,[strReference]
+			,[strDocument]
+			,[strComments]
 			,[intCurrencyId]
 			,[dblExchangeRate]
 			,dtmDateEntered
@@ -161,7 +167,7 @@ BEGIN
 		)
 		VALUES (
 			Source_Query.intAccountId
-			,@intCompanyId
+			,@intMultCompanyId
 			,Source_Query.dtmDate
 			,Source_Query.dblDebit
 			,Source_Query.dblCredit
