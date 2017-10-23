@@ -85,7 +85,8 @@ BEGIN
 		tblSMTaxClass SMTCL
 			ON SMTC.[intTaxClassId] = SMTCL.[intTaxClassId]
 	WHERE
-		ISNULL(@IsCustomerSiteTaxable,0) = 0
+		@IsCustomerSiteTaxable IS NOT NULL
+		AND @IsCustomerSiteTaxable = 0
 		AND SMTCL.strTaxClass LIKE '%Sales Tax%'
 		AND SMTGC.[intTaxCodeId] = @TaxCodeId
 		AND SMTGC.[intTaxGroupId] = @TaxGroupId		
