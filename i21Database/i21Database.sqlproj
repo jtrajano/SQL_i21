@@ -5761,6 +5761,7 @@
     <Build Include="dbo\Tables\tblVRProgramCustomer.sql" />
     <Build Include="dbo\Views\vyuVRProgramItemDetail.sql" />
     <Build Include="dbo\Views\vyuARDocumentMaintenanceMessageDetails.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMImportBanksFromOrigin.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
