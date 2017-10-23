@@ -5768,6 +5768,7 @@
     <Build Include="dbo\Tables\tblBBCustomerLocationXref.sql" />
     <Build Include="dbo\Stored Procedures\uspLGCreateVoucherForWarehouseServices.sql" />
     <Build Include="dbo\Stored Procedures\uspLGCreateVoucherForOtherCharges.sql" />
+    <Build Include="dbo\Tables\tblVRSubmitted.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
