@@ -142,10 +142,7 @@ SET @strDateFrom = ''''+ CONVERT(NVARCHAR(50),@dtmDateFrom, 110) + ''''
 
 IF CHARINDEX('''', @strCustomerName) > 0 
 	SET @strCustomerName = REPLACE(@strCustomerName, '''''', '''')
-
-IF ISNULL(@strCustomerName, '') <> ''
-	SELECT TOP 1 @strCustomerNumber = strCustomerNumber FROM vyuARCustomerSearch WHERE strName = @strCustomerName
-
+	
 IF @strStatementFormat = 'Balance Forward'
 	BEGIN
 		EXEC dbo.uspARCustomerStatementBalanceForwardReport 
