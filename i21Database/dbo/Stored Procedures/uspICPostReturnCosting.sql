@@ -22,7 +22,7 @@
 */
 CREATE PROCEDURE [dbo].[uspICPostReturnCosting]
 	@ItemsToReturn AS ItemCostingTableType READONLY
-	,@strBatchId AS NVARCHAR(20)
+	,@strBatchId AS NVARCHAR(40)
 	,@strAccountToCounterInventory AS NVARCHAR(255) = 'AP Clearing'
 	,@intEntityUserSecurityId AS INT
 	,@strGLDescription AS NVARCHAR(255) = NULL 

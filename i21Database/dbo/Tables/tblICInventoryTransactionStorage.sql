@@ -31,7 +31,7 @@ This tables holds all inventory transactions for storage/custody items (not comp
 		[intTransactionDetailId] INT NULL, 
 		[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
 		[intInventoryCostBucketStorageId] INT NULL, 
-		[strBatchId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
+		[strBatchId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
 		[intTransactionTypeId] INT NOT NULL, 		
 		[ysnIsUnposted] BIT NULL,
 		[strTransactionForm] NVARCHAR (255) COLLATE Latin1_General_CI_AS NULL,

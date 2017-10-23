@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspICPostInventoryReceiptOtherCharges]
 	@intInventoryReceiptId AS INT 
-	,@strBatchId AS NVARCHAR(20)
+	,@strBatchId AS NVARCHAR(40)
 	,@intEntityUserSecurityId AS INT
 	,@intTransactionTypeId AS INT 
 	,@intItemId AS INT = NULL -- Used when rebuilding the stocks. 

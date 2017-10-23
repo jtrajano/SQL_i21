@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspICCreateReceiptGLEntries]
-	@strBatchId AS NVARCHAR(20)
+	@strBatchId AS NVARCHAR(40)
 	,@AccountCategory_ContraInventory AS NVARCHAR(255) = 'AP Clearing'
 	,@intEntityUserSecurityId AS INT
 	,@strGLDescription AS NVARCHAR(255) = NULL 	

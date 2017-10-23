@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspICUnpostInventoryReceiptOtherCharges]
 
 	@intInventoryReceiptId AS INT 
-	,@strBatchId AS NVARCHAR(20)
+	,@strBatchId AS NVARCHAR(40)
 	,@intEntityUserSecurityId AS INT
 	,@intTransactionTypeId AS INT 
 AS
