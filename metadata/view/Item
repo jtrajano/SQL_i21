@@ -374,7 +374,7 @@
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "bodyPadding": 10,
+                                "bodyPadding": 5,
                                 "container|align": "stretch",
                                 "itemId": "pgeDetails",
                                 "layout": "vbox",
@@ -1217,6 +1217,7 @@
                                         "forceFit": false,
                                         "itemId": "grdUnitOfMeasure",
                                         "layout|flex": 3,
+                                        "margin": "3 0 0 0",
                                         "reference": "grdUnitOfMeasure",
                                         "title": "Unit of Measure"
                                     },
@@ -1228,7 +1229,8 @@
                                         "layout|flex": "number",
                                         "reference": "string",
                                         "title": "string",
-                                        "scrollable": "boolean"
+                                        "scrollable": "boolean",
+                                        "margin": "auto"
                                     },
                                     "name": "MyGridPanel",
                                     "designerId": "df2215b4-b740-46d4-802a-aa7123035bb6",

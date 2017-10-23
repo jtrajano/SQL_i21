@@ -146,7 +146,7 @@ Ext.define('Inventory.view.Item', {
                                     {
                                         xtype: 'panel',
                                         itemId: 'pgeDetails',
-                                        bodyPadding: 10,
+                                        bodyPadding: 5,
                                         title: 'Details',
                                         layout: {
                                             type: 'vbox',
@@ -440,6 +440,7 @@ Ext.define('Inventory.view.Item', {
                                                 flex: 3,
                                                 reference: 'grdUnitOfMeasure',
                                                 itemId: 'grdUnitOfMeasure',
+                                                margin: '3 0 0 0',
                                                 title: 'Unit of Measure',
                                                 columnLines: true,
                                                 forceFit: false,

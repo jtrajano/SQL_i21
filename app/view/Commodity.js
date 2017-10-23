@@ -138,7 +138,7 @@ Ext.define('Inventory.view.Commodity', {
                                 items: [
                                     {
                                         xtype: 'panel',
-                                        bodyPadding: 10,
+                                        bodyPadding: 5,
                                         title: 'Details',
                                         layout: {
                                             type: 'vbox',
@@ -147,15 +147,19 @@ Ext.define('Inventory.view.Commodity', {
                                         items: [
                                             {
                                                 xtype: 'container',
+                                                margin: '0 0 5 0',
                                                 layout: {
                                                     type: 'hbox',
                                                     align: 'stretch'
                                                 },
                                                 items: [
                                                     {
-                                                        xtype: 'container',
-                                                        flex: 1,
-                                                        margin: '0 5 0 0 ',
+                                                        xtype: 'panel',
+                                                        itemId: 'pnlBasic',
+                                                        margin: '0 5 0 0',
+                                                        bodyBorder: false,
+                                                        bodyPadding: 5,
+                                                        title: 'Basic',
                                                         layout: {
                                                             type: 'vbox',
                                                             align: 'stretch'
@@ -353,102 +357,224 @@ Ext.define('Inventory.view.Commodity', {
                                                     {
                                                         xtype: 'container',
                                                         flex: 1,
-                                                        margin: '0 1 0 10',
-                                                        layout: {
-                                                            type: 'vbox',
-                                                            align: 'stretch'
-                                                        },
                                                         items: [
                                                             {
-                                                                xtype: 'gridcombobox',
-                                                                columns: [
+                                                                xtype: 'panel',
+                                                                itemId: 'pnlScale',
+                                                                margin: '0 0 5 0',
+                                                                bodyPadding: 5,
+                                                                title: 'Scale',
+                                                                layout: {
+                                                                    type: 'vbox',
+                                                                    align: 'stretch'
+                                                                },
+                                                                items: [
                                                                     {
-                                                                        dataIndex: 'intStorageScheduleRuleId',
-                                                                        dataType: 'numeric',
-                                                                        hidden: true
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intStorageScheduleRuleId',
+                                                                                dataType: 'numeric',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'intCommodity',
+                                                                                dataType: 'numeric',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strScheduleId',
+                                                                                dataType: 'string',
+                                                                                text: 'Storage Type',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strScheduleDescription',
+                                                                                dataType: 'string',
+                                                                                text: 'Description',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
+                                                                        itemId: 'cboDefaultScheduleStore',
+                                                                        fieldLabel: 'Default Schedule Store',
+                                                                        labelWidth: 180,
+                                                                        displayField: 'strScheduleId',
+                                                                        valueField: 'strScheduleId'
                                                                     },
                                                                     {
-                                                                        dataIndex: 'intCommodity',
-                                                                        dataType: 'numeric',
-                                                                        hidden: true
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intDiscountId',
+                                                                                dataType: 'numeric',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strDiscountId',
+                                                                                dataType: 'string',
+                                                                                text: 'Discount Id',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strDiscountDescription',
+                                                                                dataType: 'string',
+                                                                                text: 'Description',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
+                                                                        itemId: 'cboDefaultScheduleDiscount',
+                                                                        fieldLabel: 'Discount',
+                                                                        labelWidth: 180,
+                                                                        displayField: 'strDiscountId',
+                                                                        valueField: 'strDiscountId'
                                                                     },
                                                                     {
-                                                                        dataIndex: 'strScheduleId',
-                                                                        dataType: 'string',
-                                                                        text: 'Storage Type',
-                                                                        flex: 1
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intStorageScheduleTypeId',
+                                                                                dataType: 'numeric',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strStorageTypeCode',
+                                                                                dataType: 'string',
+                                                                                text: 'Storage Type',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strStorageTypeDescription',
+                                                                                dataType: 'string',
+                                                                                text: 'Description',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
+                                                                        itemId: 'cboScaleAutoDistDefault',
+                                                                        fieldLabel: 'Scale Auto Dist Default',
+                                                                        labelWidth: 180,
+                                                                        displayField: 'strStorageTypeCode',
+                                                                        valueField: 'strStorageTypeCode'
                                                                     },
                                                                     {
-                                                                        dataIndex: 'strScheduleDescription',
-                                                                        dataType: 'string',
-                                                                        text: 'Description',
-                                                                        flex: 1
+                                                                        xtype: 'fieldset',
+                                                                        flex: 1,
+                                                                        hidden: true,
+                                                                        title: 'Adjust Inventory for Weights & Grades',
+                                                                        layout: {
+                                                                            type: 'vbox',
+                                                                            align: 'stretch'
+                                                                        },
+                                                                        items: [
+                                                                            {
+                                                                                xtype: 'gridcombobox',
+                                                                                columns: [
+                                                                                    {
+                                                                                        dataIndex: 'intId',
+                                                                                        dataType: 'numeric',
+                                                                                        hidden: true
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'strName',
+                                                                                        dataType: 'string',
+                                                                                        text: 'Adjust By',
+                                                                                        flex: 1
+                                                                                    }
+                                                                                ],
+                                                                                itemId: 'cboAdjustInventorySalesBy',
+                                                                                fieldLabel: 'Sales',
+                                                                                labelWidth: 170,
+                                                                                displayField: 'strName',
+                                                                                valueField: 'strName'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'gridcombobox',
+                                                                                columns: [
+                                                                                    {
+                                                                                        dataIndex: 'intId',
+                                                                                        dataType: 'numeric',
+                                                                                        hidden: true
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'strName',
+                                                                                        dataType: 'string',
+                                                                                        text: 'Adjust By',
+                                                                                        flex: 1
+                                                                                    }
+                                                                                ],
+                                                                                itemId: 'cboAdjustInventoryPurchaseBy',
+                                                                                fieldLabel: 'Purchase',
+                                                                                labelWidth: 170,
+                                                                                displayField: 'strName',
+                                                                                valueField: 'strName'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'gridcombobox',
+                                                                                columns: [
+                                                                                    {
+                                                                                        dataIndex: 'intId',
+                                                                                        dataType: 'numeric',
+                                                                                        hidden: true
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'strName',
+                                                                                        dataType: 'string',
+                                                                                        text: 'Adjust By',
+                                                                                        flex: 1
+                                                                                    }
+                                                                                ],
+                                                                                itemId: 'cboAdjustInventoryTransfersBy',
+                                                                                fieldLabel: 'Transfer',
+                                                                                labelWidth: 170,
+                                                                                displayField: 'strName',
+                                                                                valueField: 'strName'
+                                                                            }
+                                                                        ]
+                                                                    },
+                                                                    {
+                                                                        xtype: 'container',
+                                                                        hidden: true,
+                                                                        margin: '0 0 5 0',
+                                                                        layout: {
+                                                                            type: 'hbox',
+                                                                            align: 'stretch'
+                                                                        },
+                                                                        items: [
+                                                                            {
+                                                                                xtype: 'checkboxfield',
+                                                                                itemId: 'chkAllowLoadContracts',
+                                                                                fieldLabel: 'Allow Load Contracts',
+                                                                                labelWidth: 140
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numberfield',
+                                                                                quantityField: true,
+                                                                                flex: 1,
+                                                                                itemId: 'txtMaximumUnder',
+                                                                                margin: '0 0 0 15',
+                                                                                fieldLabel: 'Max Under',
+                                                                                labelWidth: 65,
+                                                                                fieldStyle: 'text-align:right',
+                                                                                hideTrigger: true
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numberfield',
+                                                                                quantityField: true,
+                                                                                flex: 1,
+                                                                                itemId: 'txtMaximumOver',
+                                                                                margin: '0 0 0 5',
+                                                                                fieldLabel: 'Max Over',
+                                                                                labelWidth: 55,
+                                                                                fieldStyle: 'text-align:right',
+                                                                                hideTrigger: true
+                                                                            }
+                                                                        ]
                                                                     }
-                                                                ],
-                                                                itemId: 'cboDefaultScheduleStore',
-                                                                fieldLabel: 'Default Schedule Store',
-                                                                labelWidth: 180,
-                                                                displayField: 'strScheduleId',
-                                                                valueField: 'strScheduleId'
+                                                                ]
                                                             },
                                                             {
-                                                                xtype: 'gridcombobox',
-                                                                columns: [
-                                                                    {
-                                                                        dataIndex: 'intDiscountId',
-                                                                        dataType: 'numeric',
-                                                                        hidden: true
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strDiscountId',
-                                                                        dataType: 'string',
-                                                                        text: 'Discount Id',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strDiscountDescription',
-                                                                        dataType: 'string',
-                                                                        text: 'Description',
-                                                                        flex: 1
-                                                                    }
-                                                                ],
-                                                                itemId: 'cboDefaultScheduleDiscount',
-                                                                fieldLabel: 'Discount',
-                                                                labelWidth: 180,
-                                                                displayField: 'strDiscountId',
-                                                                valueField: 'strDiscountId'
-                                                            },
-                                                            {
-                                                                xtype: 'gridcombobox',
-                                                                columns: [
-                                                                    {
-                                                                        dataIndex: 'intStorageScheduleTypeId',
-                                                                        dataType: 'numeric',
-                                                                        hidden: true
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strStorageTypeCode',
-                                                                        dataType: 'string',
-                                                                        text: 'Storage Type',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strStorageTypeDescription',
-                                                                        dataType: 'string',
-                                                                        text: 'Description',
-                                                                        flex: 1
-                                                                    }
-                                                                ],
-                                                                itemId: 'cboScaleAutoDistDefault',
-                                                                fieldLabel: 'Scale Auto Dist Default',
-                                                                labelWidth: 180,
-                                                                displayField: 'strStorageTypeCode',
-                                                                valueField: 'strStorageTypeCode'
-                                                            },
-                                                            {
-                                                                xtype: 'fieldset',
-                                                                flex: 1,
-                                                                hidden: true,
+                                                                xtype: 'panel',
+                                                                itemId: 'pnlAdjustInventory',
+                                                                bodyPadding: 5,
                                                                 title: 'Adjust Inventory for Weights & Grades',
                                                                 layout: {
                                                                     type: 'vbox',
@@ -459,103 +585,61 @@ Ext.define('Inventory.view.Commodity', {
                                                                         xtype: 'gridcombobox',
                                                                         columns: [
                                                                             {
-                                                                                dataIndex: 'intId',
+                                                                                dataIndex: 'intStorageScheduleRuleId',
                                                                                 dataType: 'numeric',
                                                                                 hidden: true
                                                                             },
                                                                             {
-                                                                                dataIndex: 'strName',
+                                                                                dataIndex: 'intCommodity',
+                                                                                dataType: 'numeric',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strScheduleId',
                                                                                 dataType: 'string',
-                                                                                text: 'Adjust By',
+                                                                                text: 'Storage Type',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strScheduleDescription',
+                                                                                dataType: 'string',
+                                                                                text: 'Description',
                                                                                 flex: 1
                                                                             }
                                                                         ],
-                                                                        itemId: 'cboAdjustInventorySalesBy',
+                                                                        itemId: 'cboAdjustInventorySales',
                                                                         fieldLabel: 'Sales',
-                                                                        labelWidth: 170,
-                                                                        displayField: 'strName',
-                                                                        valueField: 'strName'
+                                                                        labelWidth: 180
                                                                     },
                                                                     {
                                                                         xtype: 'gridcombobox',
                                                                         columns: [
                                                                             {
-                                                                                dataIndex: 'intId',
+                                                                                dataIndex: 'intStorageScheduleRuleId',
                                                                                 dataType: 'numeric',
                                                                                 hidden: true
                                                                             },
                                                                             {
-                                                                                dataIndex: 'strName',
-                                                                                dataType: 'string',
-                                                                                text: 'Adjust By',
-                                                                                flex: 1
-                                                                            }
-                                                                        ],
-                                                                        itemId: 'cboAdjustInventoryPurchaseBy',
-                                                                        fieldLabel: 'Purchase',
-                                                                        labelWidth: 170,
-                                                                        displayField: 'strName',
-                                                                        valueField: 'strName'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcombobox',
-                                                                        columns: [
-                                                                            {
-                                                                                dataIndex: 'intId',
+                                                                                dataIndex: 'intCommodity',
                                                                                 dataType: 'numeric',
                                                                                 hidden: true
                                                                             },
                                                                             {
-                                                                                dataIndex: 'strName',
+                                                                                dataIndex: 'strScheduleId',
                                                                                 dataType: 'string',
-                                                                                text: 'Adjust By',
+                                                                                text: 'Storage Type',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strScheduleDescription',
+                                                                                dataType: 'string',
+                                                                                text: 'Description',
                                                                                 flex: 1
                                                                             }
                                                                         ],
-                                                                        itemId: 'cboAdjustInventoryTransfersBy',
+                                                                        itemId: 'cboAdjustInventoryTransfer',
                                                                         fieldLabel: 'Transfer',
-                                                                        labelWidth: 170,
-                                                                        displayField: 'strName',
-                                                                        valueField: 'strName'
-                                                                    }
-                                                                ]
-                                                            },
-                                                            {
-                                                                xtype: 'container',
-                                                                hidden: true,
-                                                                margin: '0 0 5 0',
-                                                                layout: {
-                                                                    type: 'hbox',
-                                                                    align: 'stretch'
-                                                                },
-                                                                items: [
-                                                                    {
-                                                                        xtype: 'checkboxfield',
-                                                                        itemId: 'chkAllowLoadContracts',
-                                                                        fieldLabel: 'Allow Load Contracts',
-                                                                        labelWidth: 140
-                                                                    },
-                                                                    {
-                                                                        xtype: 'numberfield',
-                                                                        quantityField: true,
-                                                                        flex: 1,
-                                                                        itemId: 'txtMaximumUnder',
-                                                                        margin: '0 0 0 15',
-                                                                        fieldLabel: 'Max Under',
-                                                                        labelWidth: 65,
-                                                                        fieldStyle: 'text-align:right',
-                                                                        hideTrigger: true
-                                                                    },
-                                                                    {
-                                                                        xtype: 'numberfield',
-                                                                        quantityField: true,
-                                                                        flex: 1,
-                                                                        itemId: 'txtMaximumOver',
-                                                                        margin: '0 0 0 5',
-                                                                        fieldLabel: 'Max Over',
-                                                                        labelWidth: 55,
-                                                                        fieldStyle: 'text-align:right',
-                                                                        hideTrigger: true
+                                                                        labelWidth: 180
                                                                     }
                                                                 ]
                                                             }
@@ -564,120 +648,112 @@ Ext.define('Inventory.view.Commodity', {
                                                 ]
                                             },
                                             {
-                                                xtype: 'container',
+                                                xtype: 'advancefiltergrid',
                                                 flex: 1,
-                                                margin: 1,
-                                                layout: {
-                                                    type: 'vbox',
-                                                    align: 'stretch'
-                                                },
-                                                items: [
+                                                reference: 'grdUom',
+                                                itemId: 'grdUom',
+                                                margin: '3 0 0 0',
+                                                title: 'Unit of Measure',
+                                                columnLines: true,
+                                                dockedItems: [
                                                     {
-                                                        xtype: 'advancefiltergrid',
-                                                        flex: 1,
-                                                        itemId: 'grdUom',
-                                                        columnLines: true,
-                                                        dockedItems: [
-                                                            {
-                                                                xtype: 'toolbar',
-                                                                componentCls: 'i21-toolbar-grid',
-                                                                dock: 'top',
-                                                                itemId: 'tlbGridOptions',
-                                                                layout: {
-                                                                    type: 'hbox',
-                                                                    padding: '0 0 0 1'
-                                                                },
-                                                                items: [
-                                                                    {
-                                                                        xtype: 'button',
-                                                                        itemId: 'btnDeleteUom',
-                                                                        tabIndex: -1,
-                                                                        iconCls: 'small-remove',
-                                                                        text: 'Remove'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'filter1'
-                                                                    }
-                                                                ]
-                                                            }
-                                                        ],
-                                                        columns: [
-                                                            {
-                                                                xtype: 'gridcolumn',
-                                                                flex: 3,
-                                                                itemId: 'colUOMCode',
-                                                                dataIndex: 'strFieldName',
-                                                                text: 'UOM',
-                                                                editor: {
-                                                                    xtype: 'gridcombobox',
-                                                                    columns: [
-                                                                        {
-                                                                            dataIndex: 'intUnitMeasureId',
-                                                                            dataType: 'numeric',
-                                                                            text: 'Unit Of Measure ID',
-                                                                            hidden: true
-                                                                        },
-                                                                        {
-                                                                            dataIndex: 'strUnitMeasure',
-                                                                            dataType: 'string',
-                                                                            text: 'Unit Measure',
-                                                                            flex: 1
-                                                                        },
-                                                                        {
-                                                                            dataIndex: 'strUnitType',
-                                                                            dataType: 'string',
-                                                                            text: 'Unit Type',
-                                                                            flex: 1
-                                                                        }
-                                                                    ],
-                                                                    itemId: 'cboUOM',
-                                                                    displayField: 'strUnitMeasure',
-                                                                    valueField: 'strUnitMeasure'
-                                                                }
-                                                            },
-                                                            {
-                                                                xtype: 'numbercolumn',
-                                                                format: '0,000.000000##',
-                                                                flex: 3,
-                                                                itemId: 'colUOMUnitQty',
-                                                                align: 'right',
-                                                                dataIndex: 'strFieldName',
-                                                                text: 'Unit Qty',
-                                                                editor: {
-                                                                    xtype: 'numberfield',
-                                                                    quantityField: true,
-                                                                    fieldStyle: 'text-align:right',
-                                                                    hideTrigger: true
-                                                                }
-                                                            },
-                                                            {
-                                                                xtype: 'checkcolumn',
-                                                                flex: 1,
-                                                                itemId: 'colUOMStockUnit',
-                                                                text: 'Stock Unit',
-                                                                stopSelection: false
-                                                            },
-                                                            {
-                                                                xtype: 'checkcolumn',
-                                                                flex: 1,
-                                                                itemId: 'colUOMDefaultUOM',
-                                                                text: 'Default UOM',
-                                                                stopSelection: false
-                                                            }
-                                                        ],
-                                                        viewConfig: {
-                                                            itemId: 'grvUom'
+                                                        xtype: 'toolbar',
+                                                        componentCls: 'i21-toolbar-grid',
+                                                        dock: 'top',
+                                                        itemId: 'tlbGridOptions',
+                                                        layout: {
+                                                            type: 'hbox',
+                                                            padding: '0 0 0 1'
                                                         },
-                                                        selModel: Ext.create('Ext.selection.CheckboxModel', {
-                                                            selType: 'checkboxmodel'
-                                                        }),
-                                                        plugins: [
+                                                        items: [
                                                             {
-                                                                ptype: 'cellediting',
-                                                                pluginId: 'cepUOM',
-                                                                clicksToEdit: 1
+                                                                xtype: 'button',
+                                                                itemId: 'btnDeleteUom',
+                                                                tabIndex: -1,
+                                                                iconCls: 'small-remove',
+                                                                text: 'Remove'
+                                                            },
+                                                            {
+                                                                xtype: 'filter1'
                                                             }
                                                         ]
+                                                    }
+                                                ],
+                                                columns: [
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        flex: 1,
+                                                        itemId: 'colUOMCode',
+                                                        dataIndex: 'strFieldName',
+                                                        text: 'UOM',
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intUnitMeasureId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Unit Of Measure ID',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitMeasure',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Measure',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitType',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Type',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            itemId: 'cboUOM',
+                                                            displayField: 'strUnitMeasure',
+                                                            valueField: 'strUnitMeasure'
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        format: '0,000.000000##',
+                                                        flex: 1,
+                                                        itemId: 'colUOMUnitQty',
+                                                        align: 'right',
+                                                        dataIndex: 'strFieldName',
+                                                        text: 'Unit Qty',
+                                                        editor: {
+                                                            xtype: 'numberfield',
+                                                            quantityField: true,
+                                                            fieldStyle: 'text-align:right',
+                                                            hideTrigger: true
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'checkcolumn',
+                                                        flex: 1,
+                                                        itemId: 'colUOMStockUnit',
+                                                        text: 'Stock Unit',
+                                                        stopSelection: false
+                                                    },
+                                                    {
+                                                        xtype: 'checkcolumn',
+                                                        flex: 1,
+                                                        itemId: 'colUOMDefaultUOM',
+                                                        text: 'Default UOM',
+                                                        stopSelection: false
+                                                    }
+                                                ],
+                                                viewConfig: {
+                                                    itemId: 'grvUom'
+                                                },
+                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                                    selType: 'checkboxmodel'
+                                                }),
+                                                plugins: [
+                                                    {
+                                                        ptype: 'cellediting',
+                                                        pluginId: 'cepUOM',
+                                                        clicksToEdit: 1
                                                     }
                                                 ]
                                             }
