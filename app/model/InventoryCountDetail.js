@@ -140,13 +140,13 @@ Ext.define('Inventory.model.InventoryCountDetail', {
                     message: "Please type a lot number or select an existing lot from the Lot Id list."
                 });  
             }
+        }
 
-            if(this.get('ysnLotWeightsRequired') && ((this.get('intWeightUOMId') === null) || (this.get('dblWeightQty') === 0 && this.get('dblNetQty') === 0))) {
-                errors.add({
-                    field: this.get('intWeightUOMId') === null ? 'strWeightUOM' : this.get('dblWeightQty') === 0 ? 'dblWeightQty': 'strWeightUOM',
-                    message: "Gross/Net UOM and weights are required for item " + this.get('strItemNo')
-                });
-            }
+        if(this.get('ysnLotWeightsRequired') && ((this.get('intWeightUOMId') === null) || (this.get('dblPhysicalCount') > 0 && this.get('dblWeightQty') === 0 && this.get('dblNetQty') === 0))) {
+            errors.add({
+                field: this.get('intWeightUOMId') === null ? 'intWeightUOMId' : this.get('dblWeightQty') === 0 ? 'dblWeightQty': 'intWeightUOMId',
+                message: "Gross/Net UOM and weights are required for item " + this.get('strItemNo')
+            });
         }
 
         return errors;
