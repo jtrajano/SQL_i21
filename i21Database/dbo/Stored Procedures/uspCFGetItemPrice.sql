@@ -1429,7 +1429,7 @@ DECLARE @cfPriceProfile TABLE
 	END
 	ELSE IF (@CFTransactionType = 'Remote')
 	BEGIN
-		IF(@CFPriceBasis = 'Remote Pricing Index')
+		IF(@CFPriceBasis = 'Remote Index Cost')
 			BEGIN
 				
 				--SET @SiteGroupId = (SELECT TOP 1 intSiteGroupId 
