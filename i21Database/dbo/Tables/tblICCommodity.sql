@@ -35,14 +35,15 @@ Type the overview for the table here.
 		[ysnAllowLoadContracts] BIT NULL, 
 		[dblMaxUnder] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblMaxOver] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[intAdjustInventorySales] INT NULL,
+		[intAdjustInventoryTransfer] INT NULL,
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
-		[intSalesWeightsGradesId] INT NULL,
-		[intPurchaseWeightsGradesId] INT NULL,
-		[intTransferWeightsGradesId] INT NULL,
 		CONSTRAINT [PK_tblICCommodity] PRIMARY KEY ([intCommodityId]), 
 		CONSTRAINT [FK_tblICCommodity_tblRKFutureMarket] FOREIGN KEY ([intFutureMarketId]) REFERENCES [tblRKFutureMarket]([intFutureMarketId]), 
 		CONSTRAINT [FK_tblICCommodity_tblGRDiscount] FOREIGN KEY ([intScheduleDiscountId]) REFERENCES [tblGRDiscountId]([intDiscountId]), 
 		CONSTRAINT [FK_tblICCommodity_tblGRStorageSchedule] FOREIGN KEY ([intScheduleStoreId]) REFERENCES [tblGRStorageScheduleRule]([intStorageScheduleRuleId]), 
+		CONSTRAINT [FK_tblICCommodity_tblICAdjustInventoryTerms1] FOREIGN KEY ([intAdjustInventorySales]) REFERENCES [tblICAdjustInventoryTerms]([intAdjustInventoryTermsId]), 
+		CONSTRAINT [FK_tblICCommodity_tblICAdjustInventoryTerms2] FOREIGN KEY ([intAdjustInventoryTransfer]) REFERENCES [tblICAdjustInventoryTerms]([intAdjustInventoryTermsId]), 
 		CONSTRAINT [AK_tblICCommodity_strCommodityCode] UNIQUE ([strCommodityCode]) 
 	)
 
