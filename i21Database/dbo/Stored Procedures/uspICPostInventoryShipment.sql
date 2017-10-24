@@ -88,7 +88,6 @@ BEGIN
 			,@strChargeItem AS NVARCHAR(50)
 			,@strBillNumber AS NVARCHAR(50)
 
-
 	-- Validate if the Inventory Shipment exists   
 	IF @intTransactionId IS NULL  
 	BEGIN   

@@ -41,6 +41,8 @@ Type the overview for the table here.
 		[strReceivedBy] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[strComment] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 		[ysnPosted] BIT DEFAULT((0)),
+		[ysnDestinationPosted] BIT DEFAULT((0)),
+		[dtmDestinationDate] DATETIME NULL, 
 		[intEntityId] INT NULL,
 		[intCreatedUserId] INT NULL,
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 

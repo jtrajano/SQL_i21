@@ -310,6 +310,7 @@ IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#t
 BEGIN 
 	CREATE TABLE #tmpAddItemShipmentResult (
 		intInventoryShipmentId INT
+
 	)
 END 
 

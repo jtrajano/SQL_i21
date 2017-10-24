@@ -205,6 +205,9 @@ BEGIN
 		WHEN @msgId = 80189 THEN 'Sub Location or Storage Location is missing for Item %s, Lot No. %s.'
 		WHEN @msgId = 80190 THEN 'Gross/Net UOM and weights are required for item %s.'
 		WHEN @msgId = 80191 THEN '%s is using %s. Price down is only allowed for %s currency. Please change the currency or uncheck the Price Down.'
+		WHEN @msgId = 80192 THEN 'The %s is not posted. Destination Qty can only be updated on a posted shipment.'
+		WHEN @msgId = 80193 THEN 'Please unpost and delete %s first. Destination Qty in %s will not be updated if it has an invoice already.'
+		WHEN @msgId = 80194 THEN 'Unable to Post the Destination Qty because %s is already posted.'
 	END 
 
 	RETURN @msg

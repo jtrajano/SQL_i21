@@ -5771,6 +5771,8 @@
     <Build Include="dbo\Tables\tblVRSubmitted.sql" />
     <Build Include="dbo\Tables\tblICAdjustInventoryTerms.sql" />
     <None Include="Scripts\Post-Deployment\IC\21_AdjustmentInventoryTerms.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostDestinationInventoryShipment.sql" />
+    <Build Include="dbo\User Defined Types\DestinationShipmentItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
