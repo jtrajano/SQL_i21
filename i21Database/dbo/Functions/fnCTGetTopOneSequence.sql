@@ -39,7 +39,8 @@ RETURNS @returntable	TABLE
 	intBasisCurrencyId		INT,
 	ysnBasisSubCurrency		BIT,
 	intBasisUOMId			INT,
-	intBasisUnitMeasureId	INT
+	intBasisUnitMeasureId	INT,
+	intDiscountScheduleCodeId INT
 )
 AS
 BEGIN
@@ -54,7 +55,7 @@ BEGIN
 				strCurrency,					strFutureMonth,				strStorageLocation,				strSubLocation,
 				strItemDescription,				intContractDetailId,		strProductType,					ysnSubCurrency,
 				intContractStatusId,			strContractItemName,		strContractItemNo,				intBasisCurrencyId,
-				ysnBasisSubCurrency,			intBasisUOMId,				intBasisUnitMeasureId
+				ysnBasisSubCurrency,			intBasisUOMId,				intBasisUnitMeasureId,			intDiscountScheduleCodeId
 
 		FROM	vyuCTContractSequence WHERE intContractDetailId = @intContractDetailId
 	ELSE
@@ -67,7 +68,7 @@ BEGIN
 				strCurrency,					strFutureMonth,				strStorageLocation,				strSubLocation,
 				strItemDescription,				intContractDetailId,		strProductType,					ysnSubCurrency,
 				intContractStatusId,			strContractItemName,		strContractItemNo,				intBasisCurrencyId,
-				ysnBasisSubCurrency,			intBasisUOMId,				intBasisUnitMeasureId
+				ysnBasisSubCurrency,			intBasisUOMId,				intBasisUnitMeasureId,			intDiscountScheduleCodeId
 				
 		FROM	vyuCTContractSequence WHERE intContractHeaderId = @intContractHeaderId
 	RETURN;

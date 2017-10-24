@@ -61,7 +61,9 @@ AS
 				CY.ysnSubCurrency				AS	ysnMarketSubCurrency,
 				CD.intBasisCurrencyId,
 				CD.ysnBasisSubCurrency,
-				BU.intCommodityUnitMeasureId	AS	intBasisCommodityUOMId
+				BU.intCommodityUnitMeasureId	AS	intBasisCommodityUOMId,
+				CD.intDiscountScheduleCodeId,
+				SI.strDescription				AS	strDiscountScheduleCode
 
 		FROM	vyuCTContractSequence		CD
 		JOIN	tblICItemUOM				IM	ON	IM.intItemUOMId		=	CD.intPriceItemUOMId
@@ -75,6 +77,8 @@ AS
 		JOIN	tblICUnitMeasure			UM	ON	UM.intUnitMeasureId	=	MA.intUnitMeasureId	
 LEFT	JOIN	tblICCommodityUnitMeasure	BU	ON	BU.intCommodityId	=	CD.intCommodityId 
 												AND BU.intUnitMeasureId =	CD.intBasisUnitMeasureId
+LEFT    JOIN	tblGRDiscountScheduleCode	SC	ON	SC.intDiscountScheduleCodeId =	CD.intDiscountScheduleCodeId
+LEFT	JOIN	tblICItem					SI	ON	SI.intItemId		=	SC.intItemId
 
 		UNION ALL
 
@@ -105,7 +109,9 @@ LEFT	JOIN	tblICCommodityUnitMeasure	BU	ON	BU.intCommodityId	=	CD.intCommodityId
 				CY.ysnSubCurrency				AS	ysnMarketSubCurrency,
 				CD.intBasisCurrencyId,
 				CD.ysnBasisSubCurrency,
-				BU.intCommodityUnitMeasureId	AS	intBasisCommodityUOMId			
+				BU.intCommodityUnitMeasureId	AS	intBasisCommodityUOMId,			
+				CD.intDiscountScheduleCodeId,
+				SI.strDescription				AS	strDiscountScheduleCode
 
 		FROM	tblCTContractHeader			CH	
 		JOIN	tblCTContractType			CT	ON	CT.intContractTypeId	=	CH.intContractTypeId
@@ -123,4 +129,6 @@ LEFT	JOIN	tblICCommodityUnitMeasure	BU	ON	BU.intCommodityId	=	CD.intCommodityId
 		CROSS APPLY fnCTGetTopOneSequence(CH.intContractHeaderId,0)	CD	
 LEFT	JOIN	tblICCommodityUnitMeasure	BU	ON	BU.intCommodityId		=	CH.intCommodityId 
 												AND BU.intUnitMeasureId		=	CD.intBasisUnitMeasureId
+LEFT    JOIN	tblGRDiscountScheduleCode	SC	ON	SC.intDiscountScheduleCodeId =	CD.intDiscountScheduleCodeId
+LEFT	JOIN	tblICItem					SI	ON	SI.intItemId		=	SC.intItemId
 	)t
