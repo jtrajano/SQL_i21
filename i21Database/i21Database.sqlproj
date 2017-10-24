@@ -5764,6 +5764,7 @@
     <Build Include="dbo\Stored Procedures\uspCMImportBanksFromOrigin.sql" />
     <Build Include="dbo\Stored Procedures\uspLGCreateVoucherForWarehouseServices.sql" />
     <Build Include="dbo\Stored Procedures\uspLGCreateVoucherForOtherCharges.sql" />
+    <Build Include="dbo\Functions\fnMFGetTotalStockValueFromTransactionBatch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

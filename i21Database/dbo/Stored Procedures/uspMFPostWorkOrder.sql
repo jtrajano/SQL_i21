@@ -559,7 +559,7 @@ BEGIN TRY
 		FROM tblMFWorkOrderConsumedLot
 		WHERE intWorkOrderId = @intWorkOrderId
 
-		SELECT @dblNewCost = [dbo].[fnGetTotalStockValueFromTransactionBatch](@intTransactionId, @strBatchId)
+		SELECT @dblNewCost = [dbo].[fnMFGetTotalStockValueFromTransactionBatch](@intTransactionId, @strBatchId)
 
 		SELECT @intWorkOrderProducedLotId = MIN(intWorkOrderProducedLotId)
 		FROM tblMFWorkOrderProducedLot PL
@@ -583,7 +583,7 @@ BEGIN TRY
 			FROM tblMFWorkOrderProducedLot PL
 			WHERE intWorkOrderProducedLotId = @intWorkOrderProducedLotId
 
-			SELECT @dblOtherCost = @dblOtherCost + ISNULL([dbo].[fnGetTotalStockValueFromTransactionBatch](@intTransactionId, @strBatchId), 0)
+			SELECT @dblOtherCost = @dblOtherCost + ISNULL([dbo].[fnMFGetTotalStockValueFromTransactionBatch](@intTransactionId, @strBatchId), 0)
 
 			SELECT @intWorkOrderProducedLotId = MIN(intWorkOrderProducedLotId)
 			FROM tblMFWorkOrderProducedLot PL
