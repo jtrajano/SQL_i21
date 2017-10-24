@@ -10,6 +10,7 @@
 	[intFreightCostAllocationMethod] INT NULL DEFAULT ((3)),
 	[intRackPriceImportMappingId] INT NULL,
     [ysnImportSupplyPoint] BIT NULL default convert(bit,0),	
+    [ysnImportTrucks] BIT NULL default convert(bit,0),	
 	[intConcurrencyId] INT NOT NULL DEFAULT ((1)),
 	CONSTRAINT [PK_tblTRCompanyPreference_intCompanyPreferenceId] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC), 
     CONSTRAINT [FK_tblTRCompanyPreference_tblSMImportFileHeader] FOREIGN KEY ([intRackPriceImportMappingId]) REFERENCES [tblSMImportFileHeader]([intImportFileHeaderId]), 
