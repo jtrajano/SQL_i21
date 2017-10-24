@@ -168,6 +168,16 @@ BEGIN TRY
 		</tags>
 	</root>'
 
+	SELECT	@intReassignPricingId = MIN(intReassignPricingId) FROM @tblPricing
+
+	SELECT	@intPriceFixationDetailId	=	intPriceFixationDetailId,
+			@dblReassignPricing			=	dblReassign,
+			@intPriceFixationId			=	intPriceFixationId,
+			@ysnFullyPricingReassign	=	ysnFullyPricingReassign,
+			@intFutOptTransactionId		=	intFutOptTransactionId
+	FROM	@tblPricing
+	WHERE	intReassignPricingId = @intReassignPricingId
+
 	IF ISNULL(@intPriceFixationId,0) > 0
 		EXEC uspCTCreateADuplicateRecord 'tblCTPriceFixation',@intPriceFixationId,@intNewPriceFixationId OUTPUT,NULL,@strTagRelaceXML
 
@@ -178,23 +188,20 @@ BEGIN TRY
 			dblAdditionalCost	=	NULL
 	WHERE	intPriceFixationId	=	@intNewPriceFixationId
 
-	SELECT	@intReassignPricingId = MIN(intReassignPricingId) FROM @tblPricing
-
 	WHILE	ISNULL(@intReassignPricingId,0) > 0
 	BEGIN
 
-			
-		SELECT	@intPriceFixationDetailId = NULL,
-				@intFutOptTransactionId = NULL,
+		SELECT	@intPriceFixationDetailId		=	NULL,
+				@intFutOptTransactionId			=	NULL,
 				@intAssignFuturesToContractSummaryId = NULL,
-				@ysnFullyPricingReassign = NULL,
-				@intNewPriceFixationDetailId = NULL
+				@ysnFullyPricingReassign		=	NULL,
+				@intNewPriceFixationDetailId	=	NULL
 
-		SELECT	@intPriceFixationDetailId = intPriceFixationDetailId,
-				@dblReassignPricing = dblReassign,
-				@intPriceFixationId = intPriceFixationId,
-				@ysnFullyPricingReassign = ysnFullyPricingReassign,
-				@intFutOptTransactionId  = intFutOptTransactionId
+		SELECT	@intPriceFixationDetailId	=	intPriceFixationDetailId,
+				@dblReassignPricing			=	dblReassign,
+				@intPriceFixationId			=	intPriceFixationId,
+				@ysnFullyPricingReassign	=	ysnFullyPricingReassign,
+				@intFutOptTransactionId		=	intFutOptTransactionId
 		FROM	@tblPricing
 		WHERE	intReassignPricingId = @intReassignPricingId
 
@@ -296,7 +303,11 @@ BEGIN TRY
 	WHERE	FD.intPriceFixationId	=	PF.intPriceFixationId AND PF.intPriceFixationId	= @intPriceFixationId
 
 	SELECT	@intLotsHedged	= SUM([dblNoOfLots]) FROM tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId AND ysnHedge = 1
-	UPDATE	tblCTPriceFixation SET intLotsHedged = @intLotsHedged  WHERE intPriceFixationId = @intPriceFixationId
+
+	UPDATE	tblCTPriceFixation 
+	SET		intLotsHedged = @intLotsHedged,
+			dblTotalLots = (SELECT dblNoOfLots FROM tblCTContractDetail WHERE intContractDetailId = @intDonorId)  
+	WHERE intPriceFixationId = @intPriceFixationId
 
 	UPDATE	PF
 	SET		PF.dblPriceWORollArb	=	FD.dblPriceWORollArb,
