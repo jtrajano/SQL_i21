@@ -1,6 +1,7 @@
-﻿CREATE VIEW vyuRKFuturesPSHeaderNotMapping
+﻿CREATE VIEW [dbo].[vyuRKFuturesPSHeaderNotMapping]
 AS
-SELECT mh.intMatchFuturesPSHeaderId,cl.strLocationName,c.strCommodityCode,m.strFutMarketName,fm.strFutureMonth,e.strName,ba.strAccountNumber,b.strBook,sb.strSubBook,
+SELECT mh.*,
+cl.strLocationName,c.strCommodityCode,m.strFutMarketName,fm.strFutureMonth,e.strName,ba.strAccountNumber,b.strBook,sb.strSubBook,
 ert.strCurrencyExchangeRateType,bk.strBankName,bac.strBankAccountNo, 
 CASE WHEN ISNULL(intSelectedInstrumentTypeId,1) =1  then 'Exchange Traded' else 'OTC' end as strSelectedInstrumentType
 FROM tblRKMatchFuturesPSHeader mh
