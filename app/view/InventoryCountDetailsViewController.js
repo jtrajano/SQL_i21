@@ -771,6 +771,17 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
         }
     },
 
+    onParentLotSelect: function(combo, records, opts) {
+        if (records.length <= 0)
+        return;
+
+        var me = this;
+        var vm = me.getViewModel();
+        var rec = _.first(records);
+
+        vm.set('current.strParentLotNo', rec.get('strParentLotNumber'));
+    },
+
     init: function (application) {
         this.control({
             "#btnAdd": {
@@ -795,6 +806,9 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
             "#cboLotNo": {
                 select: this.onLotSelect,
                 //change: this.onLotNoChange
+            },
+            "#cboParentLotNo": {
+                select: this.onParentLotSelect,
             },
             "#cboStorageLocation": {
                 select: this.onSubLocationSelect
