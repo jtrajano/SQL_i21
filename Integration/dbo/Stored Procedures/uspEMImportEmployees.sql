@@ -237,10 +237,12 @@ BEGIN
 	DECLARE @ysnEmployeeActive        BIT
     SET @ysnEmployeeActive = 1
 
+	-- INSERT new records for tblCMBank, prerequisite for importing direct deposit information
+	exec uspCMImportBanksFromOrigin
 
 	SELECT premp_emp INTO #tmpprempmst 
 	FROM prempmst
-		where (premp_emp COLLATE Latin1_General_CI_AS not in (select strEmployeeOriginId from tblSMUserSecurity ) AND premp_emp COLLATE Latin1_General_CI_AS not in (select strEmployeeId from tblPREmployee))
+		where (premp_emp COLLATE Latin1_General_CI_AS not in (select isnull(strEmployeeOriginId, '''') from tblSMUserSecurity ) AND premp_emp COLLATE Latin1_General_CI_AS not in (select strEmployeeId from tblPREmployee))
 		and ( premp_term_dt = 0 or premp_term_dt > replace(convert(nvarchar, @TermDate, 102),''.'', '''') )
 		
 	WHILE (EXISTS(SELECT 1 FROM #tmpprempmst))
@@ -609,7 +611,7 @@ IF(@Update = 1 AND @EmployeId IS NULL)
 BEGIN
 	SELECT @Total = COUNT(premp_emp)  			
 	FROM prempmst
-	where (premp_emp COLLATE Latin1_General_CI_AS not in (select strEmployeeOriginId from tblSMUserSecurity ) AND premp_emp COLLATE Latin1_General_CI_AS not in (select strEmployeeId from tblPREmployee)) 	
+	where (premp_emp COLLATE Latin1_General_CI_AS not in (select isnull(strEmployeeOriginId, '''') from tblSMUserSecurity ) AND premp_emp COLLATE Latin1_General_CI_AS not in (select strEmployeeId from tblPREmployee)) 	
 	and ( premp_term_dt = 0 or premp_term_dt > replace(convert(nvarchar, @TermDate, 102),''.'', '''') )
 END
 
