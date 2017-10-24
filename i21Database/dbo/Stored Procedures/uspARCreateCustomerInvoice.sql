@@ -122,7 +122,7 @@
 	,@ItemDestinationGradeId		INT				= NULL
 	,@ItemDestinationWeightId		INT				= NULL
 	,@UseOriginIdAsInvoiceNumber    BIT				= 0
-	,@intEntityLineOfBusinessId		INT				= 0
+	,@intEntityLineOfBusinessId		INT				= NULL
 AS
 
 BEGIN
