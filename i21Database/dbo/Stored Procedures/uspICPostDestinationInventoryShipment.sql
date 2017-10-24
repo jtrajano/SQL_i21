@@ -3,14 +3,13 @@
 
 */
 CREATE PROCEDURE [uspICPostDestinationInventoryShipment]
-	@ysnPost BIT  = 0  
-	,@ysnRecap BIT  = 0  
+	@ysnPost AS BIT  = 0  
+	,@ysnRecap AS BIT  = 0  
 	,@dtmDate AS DATETIME 
-	,@DestinationItems DestinationShipmentItem READONLY
-	,@ShipmentCharges ShipmentChargeStagingTable READONLY
-	,@strTransactionId NVARCHAR(40) = NULL   
+	,@DestinationItems AS DestinationShipmentItem READONLY
+	,@ShipmentCharges AS DestinationShipmentCharge READONLY
 	,@intEntityUserSecurityId AS INT = NULL 
-	,@strBatchId NVARCHAR(40) = NULL OUTPUT
+	,@strBatchId AS NVARCHAR(40) = NULL OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -151,7 +150,7 @@ BEGIN
 	UPDATE	si
 	SET		si.dblDestinationQuantity = d.dblDestinationQty
 	FROM	tblICInventoryShipment s INNER JOIN tblICInventoryShipmentItem si
-				ON s.intInventoryShipmentId = si.intInventoryShipmentItemId
+				ON s.intInventoryShipmentId = si.intInventoryShipmentId
 			INNER JOIN tblICItemLocation l
 				ON l.intItemId = si.intItemId
 				AND l.intLocationId = s.intShipFromLocationId			
@@ -183,10 +182,11 @@ BEGIN
 			, intCurrencyId
 			, intForexRateTypeId 
 			, dblForexRate 
+			, strAllocatePriceBy
 			, intConcurrencyId
 	)
 	SELECT 
-			sc.intShipmentId
+			sc.intInventoryShipmentId
 			, sc.intEntityVendorId
 			, sc.intChargeId
 			, sc.strCostMethod
@@ -199,9 +199,10 @@ BEGIN
 			, ISNULL(sc.intCurrency, @intFunctionalCurrencyId)
 			, intForexRateTypeId = CASE WHEN ISNULL(sc.intCurrency, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId THEN ISNULL(sc.intForexRateTypeId, @intDefaultForexRateTypeId) ELSE NULL END  
 			, dblForexRate = CASE WHEN ISNULL(sc.intCurrency, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId THEN ISNULL(sc.dblForexRate, forexRate.dblRate) ELSE NULL END   
+			, ISNULL(sc.strAllocatePriceBy, 'Unit') 
 			, intConcurrencyId = 1
 	FROM	@ShipmentCharges sc INNER JOIN tblICInventoryShipment s
-				ON sc.intShipmentId = s.intInventoryShipmentId 
+				ON sc.intInventoryShipmentId = s.intInventoryShipmentId 
 			-- Get the SM forex rate. 
 			OUTER APPLY dbo.fnSMGetForexRate(
 				ISNULL(sc.intCurrency, @intFunctionalCurrencyId)
@@ -216,7 +217,7 @@ BEGIN
 			s.strShipmentNumber  
 			,s.intInventoryShipmentId
 	FROM	tblICInventoryShipment s INNER JOIN tblICInventoryShipmentItem si
-				ON s.intInventoryShipmentId = si.intInventoryShipmentItemId
+				ON s.intInventoryShipmentId = si.intInventoryShipmentId
 			INNER JOIN tblICItemLocation l
 				ON l.intItemId = si.intItemId
 				AND l.intLocationId = s.intShipFromLocationId			
@@ -307,7 +308,7 @@ BEGIN
 			s.strShipmentNumber  
 			,s.intInventoryShipmentId
 	FROM	tblICInventoryShipment s INNER JOIN tblICInventoryShipmentItem si
-				ON s.intInventoryShipmentId = si.intInventoryShipmentItemId
+				ON s.intInventoryShipmentId = si.intInventoryShipmentId
 			INNER JOIN tblICItemLocation l
 				ON l.intItemId = si.intItemId
 				AND l.intLocationId = s.intShipFromLocationId			
@@ -398,7 +399,7 @@ BEGIN
 	UPDATE	si
 	SET		si.dblDestinationQuantity = NULL 
 	FROM	tblICInventoryShipment s INNER JOIN tblICInventoryShipmentItem si
-				ON s.intInventoryShipmentId = si.intInventoryShipmentItemId
+				ON s.intInventoryShipmentId = si.intInventoryShipmentId
 			INNER JOIN @DestinationItems d
 				ON s.intInventoryShipmentId = d.intInventoryShipmentId
 
@@ -431,6 +432,9 @@ END
 --  a. Create an Inventory adjustment if there is a variance between the shipped qty and destination qty. 
 -- If it is set as 'Origin'
 --  a. No need to create an Inventory Adjustment. 
+
+-- TODO:
+-- Do not allow Shipment Posting to unpost if it has destination qty. 
 
 GOTO _Exit 
 
