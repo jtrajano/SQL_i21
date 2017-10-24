@@ -5773,6 +5773,7 @@
     <None Include="Scripts\Post-Deployment\IC\21_AdjustmentInventoryTerms.sql" />
     <Build Include="dbo\Views\vyuRKCompanyPreference.sql" />
     <Build Include="dbo\Views\vyuRKCurrencyContract.sql" />
+    <Build Include="dbo\Functions\fnMFGetTotalStockValueFromTransactionBatch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
