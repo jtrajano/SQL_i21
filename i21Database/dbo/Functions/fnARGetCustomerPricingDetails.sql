@@ -369,7 +369,7 @@ BEGIN
 								FROM vyuTRGetRackPriceDetail INNER JOIN tblTRSupplyPoint 
 									ON vyuTRGetRackPriceDetail.intSupplyPointId = ISNULL(tblTRSupplyPoint.intRackPriceSupplyPointId ,tblTRSupplyPoint.intSupplyPointId) 
 								WHERE tblTRSupplyPoint.intEntityLocationId = intVendorLocationId 
-									AND vyuTRGetRackPriceDetail.intItemId = intRackItemId
+									AND (vyuTRGetRackPriceDetail.intItemId = ISNULL(intRackItemId, @ItemId) OR (ISNULL(intItemId,0) = 0 AND ISNULL(intRackItemId,0) = 0))
 									AND ((vyuTRGetRackPriceDetail.intSupplyPointId = ISNULL(@SupplyPointId,0) AND ISNULL(@SupplyPointId,0) <> 0) OR tblTRSupplyPoint.intEntityLocationId = intRackItemLocationId)
 									AND CAST(@TransactionDate AS DATE) >= CAST(vyuTRGetRackPriceDetail.dtmEffectiveDateTime AS DATE)
 									ORDER BY vyuTRGetRackPriceDetail.dtmEffectiveDateTime DESC) + dblDeviation
