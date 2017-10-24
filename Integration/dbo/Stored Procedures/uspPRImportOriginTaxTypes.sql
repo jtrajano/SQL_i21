@@ -36,7 +36,7 @@ EXEC('
 			,intAccountId = dbo.fnGetGLAccountIdFromOriginToi21(prtax_gl_bs)
 			,intExpenseAccountId = dbo.fnGetGLAccountIdFromOriginToi21(prtax_gl_exp)
 			,intSupplementalCalc = 1
-			,strCheckLiteral = prtax_literal COLLATE Latin1_General_CI_AS
+			,strCheckLiteral = ISNULL(prtax_literal, '''') COLLATE Latin1_General_CI_AS
 			,intVendorId = (SELECT TOP 1 intEntityId FROM tblEMEntity WHERE strEntityNo = prtax_vendor COLLATE Latin1_General_CI_AS)
 			,intSort = DENSE_RANK() OVER(PARTITION BY prtax_year ORDER BY A4GLIdentity)
 			,intConcurrencyId = 1
