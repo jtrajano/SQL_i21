@@ -65,5 +65,7 @@
     [strCFEmail]                   NVARCHAR (MAX)  NULL,
 	[ysnCFShowDiscountOnInvoice]   BIT             NULL,
 	[ysnStatementCreditLimit]	   BIT			   NULL,
-	[blbLogo]					   VARBINARY (MAX) NULL
+	[blbLogo]					   VARBINARY (MAX) NULL, 
+    [strCFTerm]                    NVARCHAR(MAX)   NULL, 
+    [strCFTermCode]                NVARCHAR(MAX)   NULL
 );
