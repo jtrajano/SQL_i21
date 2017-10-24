@@ -479,7 +479,10 @@ BEGIN
 			--END
 
 		END
-		
+
+		EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @intNewInvoiceId, @ForDelete = 0, @UserId = @EntityUserId	
+ 		EXEC uspARReComputeInvoiceAmounts @intNewInvoiceId
+								
 		COMMIT TRANSACTION
 		CONTINUELOOP:
 		--Delete processed record
