@@ -7,8 +7,8 @@ From tblICItem i
 Join tblICItemUOM iu on i.intItemId=iu.intItemId
 Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 Left Join tblICCategory cg on i.intCategoryId=cg.intCategoryId
-Where  iu.ysnStockUnit=1 AND i.strStatus='Active'
+Where  iu.ysnStockUnit=1 AND i.strStatus='Active' AND i.strType not in ('Comment','Other Charge')
 UNION
 Select intItemId,strItemNo,strDescription,strType,
 0 intCategoryId,'' strStatus,'' strInventoryTracking,0 intStockItemUOMId,0 intStockUOMId,'' strStockUOM,'' strCategoryCode,'' strRequired
-From tblICItem Where strType='Comment'
+From tblICItem Where strType in ('Comment','Other Charge')
