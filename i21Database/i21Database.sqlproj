@@ -1189,6 +1189,7 @@
     <Build Include="dbo\Tables\tblSMCurrencyExchangeRate.sql" />
     <Build Include="dbo\Tables\tblSMCurrencyExchangeRateDetail.sql" />
     <Build Include="dbo\Index\IX_tblGLIjemst_0_1_2_3_4_5_19.sql" />
+    <Build Include="dbo\Index\IX_tblGLAccountReallocation_strName.sql" />
     <Build Include="dbo\Stored Procedures\uspGLExportAccountToCSV.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDoRoll.sql" />
     <Build Include="dbo\Tables\tblRKTradersbyBrokersAccountMapping.sql" />
@@ -5759,6 +5760,15 @@
     <Build Include="dbo\Stored Procedures\uspMFPostRecap.sql" />
     <Build Include="dbo\Tables\tblVRProgramItem.sql" />
     <Build Include="dbo\Tables\tblVRProgramCustomer.sql" />
+    <Build Include="dbo\Views\vyuVRProgramItemDetail.sql" />
+    <Build Include="dbo\Views\vyuLGLoadContainerPurchaseContractsLookup.sql" />
+    <Build Include="dbo\Views\vyuCTContractAddOrdersLookup.sql" />
+    <Build Include="dbo\Views\vyuLGLoadDetailViewLookup.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMImportBanksFromOrigin.sql" />
+    <Build Include="dbo\Tables\tblBBCustomerLocationXref.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGCreateVoucherForWarehouseServices.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGCreateVoucherForOtherCharges.sql" />
+    <Build Include="dbo\Tables\tblVRSubmitted.sql" />
     <Build Include="dbo\Tables\tblICAdjustInventoryTerms.sql" />
     <None Include="Scripts\Post-Deployment\IC\21_AdjustmentInventoryTerms.sql" />
   </ItemGroup>

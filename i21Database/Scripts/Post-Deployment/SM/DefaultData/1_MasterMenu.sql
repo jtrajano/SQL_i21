@@ -4214,9 +4214,9 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sales Entities' AND strModuleName = 'CRM' AND intParentMenuID = @CRMMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Sales Entities', N'CRM', @CRMMaintenanceParentMenuId, N'Sales Entities', N'Maintenance', N'Screen', N'EntityManagement.view.EntityDirect?showSearch=true&searchCommand=EntityProspect', N'small-menu-maintenance', 0, 0, 0, 1, 4, 1)
+	VALUES (N'Sales Entities', N'CRM', @CRMMaintenanceParentMenuId, N'Sales Entities', N'Maintenance', N'Screen', N'AccountsReceivable.view.EntityProspect?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 4, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'EntityManagement.view.EntityDirect?showSearch=true&searchCommand=EntityProspect' WHERE strMenuName = 'Sales Entities' AND strModuleName = 'CRM' AND intParentMenuID = @CRMMaintenanceParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'AccountsReceivable.view.EntityProspect?showSearch=true' WHERE strMenuName = 'Sales Entities' AND strModuleName = 'CRM' AND intParentMenuID = @CRMMaintenanceParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sales Pipe Statuses' AND strModuleName = 'CRM' AND intParentMenuID = @CRMMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
@@ -5079,9 +5079,9 @@ UPDATE tblSMMasterMenu SET intParentMenuID = @VendorRebatesMaintenanceParentMenu
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Rebates' AND strModuleName = 'Vendor Rebates' AND intParentMenuID = @VendorRebatesActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Rebates', N'Vendor Rebates', @VendorRebatesActivitiesParentMenuId, N'Rebates', N'Activity', N'Screen', N'VendorRebates.view.RebateProgram?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
+	VALUES (N'Rebates', N'Vendor Rebates', @VendorRebatesActivitiesParentMenuId, N'Rebates', N'Activity', N'Screen', N'VendorRebates.view.Rebates?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'VendorRebates.view.RebateProgram?showSearch=true' WHERE strMenuName = 'Rebates' AND strModuleName = 'Vendor Rebates' AND intParentMenuID = @VendorRebatesActivitiesParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'VendorRebates.view.Rebates?showSearch=true' WHERE strMenuName = 'Rebates' AND strModuleName = 'Vendor Rebates' AND intParentMenuID = @VendorRebatesActivitiesParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Setup' AND strModuleName = 'Vendor Rebates' AND intParentMenuID = @VendorRebatesMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
@@ -5433,9 +5433,9 @@ END
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sales Entities (Portal)' AND strModuleName = 'CRM' AND intParentMenuID = @CRMPortalParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Sales Entities (Portal)', N'CRM', @CRMPortalParentMenuId, N'Sales Entities (Portal)', N'Portal Menu', N'Screen', N'EntityManagement.view.EntityDirect?showSearch=true&searchCommand=EntityProspect', N'small-menu-portal', 1, 0, 0, 1, 5, 1)
+	VALUES (N'Sales Entities (Portal)', N'CRM', @CRMPortalParentMenuId, N'Sales Entities (Portal)', N'Portal Menu', N'Screen', N'AccountsReceivable.view.EntityProspect?showSearch=true', N'small-menu-portal', 1, 0, 0, 1, 5, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 5, strCommand = N'EntityManagement.view.EntityDirect?showSearch=true&searchCommand=EntityProspect' WHERE strMenuName = 'Sales Entities (Portal)' AND strModuleName = 'CRM' AND intParentMenuID = @CRMPortalParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 5, strCommand = N'AccountsReceivable.view.EntityProspect?showSearch=true' WHERE strMenuName = 'Sales Entities (Portal)' AND strModuleName = 'CRM' AND intParentMenuID = @CRMPortalParentMenuId
 
 DECLARE @CRMSalesEntitiesMenuId INT
 SELECT  @CRMSalesEntitiesMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Sales Entities (Portal)' AND strModuleName = 'CRM' AND intParentMenuID = @CRMPortalParentMenuId

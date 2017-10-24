@@ -32,6 +32,7 @@ compLoc.intCompanyLocationId
 ,compLoc.ysnOverridePatronage
 ,compLoc.ysnHostLocation
 ,compLoc.ysnTrackMFTActivity
+,compLoc.strOregonFacilityNumber 
 ,compLoc.strOutOfStockWarning
 ,compLoc.strLotOverdrawnWarning
 ,compLoc.strDefaultCarrier

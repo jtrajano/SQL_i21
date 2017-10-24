@@ -10,7 +10,7 @@ SELECT intSampleImportErrorId
 	,intSampleImportId
 	,intConcurrencyId
 	--,CONVERT(DATETIME, dtmSampleReceivedDate, 101) dtmSampleReceivedDate
-	,dtmSampleReceivedDate
+	,dtmSampleReceivedDate AS strSampleReceivedDate
 	,strSampleNumber
 	,strItemShortName
 	,strSampleTypeName

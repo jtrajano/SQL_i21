@@ -4,7 +4,7 @@ AS
 BEGIN
 	SELECT L.strLoadNumber
 		,L.intLoadId
-		,L.strLoadNumber AS strLot
+		,LOT.strLotNumber AS strLot
 		,LD.intLoadDetailId
 		,LDL.intLoadDetailLotId
 		,LDL.intLotId
