@@ -436,6 +436,6 @@
     <None Include="Scripts\IC\uspICDCRecipeFormulaMigrationPt.sql" />
     <None Include="Scripts\SM\CopyCashToUndepositedFund.sql" />
     <None Include="dbo\Stored Procedures\uspAPImportVendorTaxExemption.sql" />
-    <Build Include="dbo\Stored Procedures\uspCMImportBanksFromOrigin.sql" />
+    <None Include="dbo\Stored Procedures\uspCMImportBanksFromOrigin.sql" />
   </ItemGroup>
 </Project>
