@@ -119,7 +119,6 @@ SELECT	CHK.dtmDate
 		,CHK.strMemo
 		,CHK.strTransactionId
 		,CHK.intTransactionId
-		,PRINTSPOOL.strBatchId
 		,CHK.intBankAccountId
 		
 		-- Bank and company info related fields
@@ -140,9 +139,7 @@ SELECT	CHK.dtmDate
 							END
 		-- Used to change the sub-report during runtime. 
 		,CHK.intBankTransactionTypeId		
-FROM	dbo.tblCMBankTransaction CHK INNER JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL
-			ON CHK.strTransactionId = PRINTSPOOL.strTransactionId
-			AND CHK.intBankAccountId = PRINTSPOOL.intBankAccountId
+FROM	dbo.tblCMBankTransaction CHK
 		LEFT JOIN tblAPPayment PYMT
 			ON CHK.strTransactionId = PYMT.strPaymentRecordNum
 		LEFT JOIN tblAPVendor VENDOR
@@ -153,6 +150,5 @@ FROM	dbo.tblCMBankTransaction CHK INNER JOIN dbo.tblCMCheckPrintJobSpool PRINTSP
 			ON VENDOR.[intEntityId] = LOCATION.intEntityId AND ysnDefaultLocation = 1 
 WHERE	CHK.intBankAccountId = @intBankAccountId
 		AND CHK.strTransactionId = ISNULL(@strTransactionId, CHK.strTransactionId)
-		AND PRINTSPOOL.strBatchId = ISNULL(@strBatchId, PRINTSPOOL.strBatchId)
 		AND (SELECT COUNT(intPaymentId) FROM tblAPPaymentDetail WHERE intPaymentId = PYMT.intPaymentId) > 10
 ORDER BY CHK.strReferenceNo ASC
