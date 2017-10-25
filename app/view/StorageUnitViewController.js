@@ -287,11 +287,21 @@ Ext.define('Inventory.view.StorageUnitViewController', {
     },
 
     onUnitTypeDrilldown: function(combo) {
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+
         if (iRely.Functions.isEmpty(combo.getValue())) {
-            iRely.Functions.openScreen('Inventory.view.StorageUnitType', { action: 'new', viewConfig: { modal: true }});
+            iRely.Functions.openScreen('Inventory.view.StorageUnitType', { action: 'new', viewConfig: { modal: true } });
         }
         else {
-            iRely.Functions.openScreen('Inventory.view.StorageUnitType', combo.getValue());
+            iRely.Functions.openScreen('Inventory.view.StorageUnitType', {
+                filters: [
+                    {
+                        column: 'intStorageUnitTypeId',
+                        value: current.get('intStorageUnitTypeId')
+                    }
+                ]
+            });
         }
     },
 
