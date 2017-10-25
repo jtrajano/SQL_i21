@@ -5774,6 +5774,7 @@
     <Build Include="dbo\Views\vyuGRGetSpotZeroScaleTickets.sql" />
     <Build Include="dbo\Stored Procedures\uspGRPostUnPricedSpotTicket.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUnPostUnPricedSpotTicket.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTValidateContractAfterSave.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
