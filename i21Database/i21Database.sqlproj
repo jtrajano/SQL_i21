@@ -5777,6 +5777,16 @@
     <None Include="dbo\Views\vyuVROpenRebate.sql" />
     <None Include="dbo\Views\vyuVRRebate.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerPaymentHistoryReport.sql" />
+    <Build Include="dbo\Tables\tblGRUnPriced.sql" />
+    <Build Include="dbo\Tables\tblGRUnPricedSpotTicket.sql" />
+    <Build Include="dbo\Views\vyuGRGetUnPriced.sql" />
+    <Build Include="dbo\Views\vyuGRUnPricedNotMapped.sql" />
+    <Build Include="dbo\Views\vyuGRUnPricedSpotTicketNotMapped.sql" />
+    <Build Include="dbo\Views\vyuGRGetSpotZeroItems.sql" />
+    <Build Include="dbo\Views\vyuGRGetSpotZeroLocations.sql" />
+    <Build Include="dbo\Views\vyuGRGetSpotZeroScaleTickets.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRPostUnPricedSpotTicket.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRUnPostUnPricedSpotTicket.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
