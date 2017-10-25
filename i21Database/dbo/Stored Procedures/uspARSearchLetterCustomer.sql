@@ -32,36 +32,6 @@ SELECT TOP 1
 FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 SET NOCOUNT OFF;
 
-DECLARE @temp_aging_table TABLE(
-	 [strCustomerName]			NVARCHAR(100)	COLLATE Latin1_General_CI_AS
-	,[strCustomerNumber]		NVARCHAR(15)	COLLATE Latin1_General_CI_AS
-	,[strInvoiceNumber]			NVARCHAR(100)	COLLATE Latin1_General_CI_AS
-	,[strRecordNumber]			NVARCHAR(100)	COLLATE Latin1_General_CI_AS
-	,[intInvoiceId]				INT	
-	,[strBOLNumber]				NVARCHAR(100)	COLLATE Latin1_General_CI_AS
-	,[intEntityCustomerId]		INT				
-	,[dblCreditLimit]			NUMERIC(18,6)
-	,[dblTotalAR]				NUMERIC(18,6)
-	,[dblFuture]				NUMERIC(18,6)
-	,[dbl0Days]					NUMERIC(18,6)
-	,[dbl10Days]				NUMERIC(18,6)
-	,[dbl30Days]				NUMERIC(18,6)
-	,[dbl60Days]				NUMERIC(18,6)
-	,[dbl90Days]				NUMERIC(18,6)
-	,[dbl120Days]				NUMERIC(18,6) 
-	,[dbl121Days]				NUMERIC(18,6) 
-	,[dblTotalDue]				NUMERIC(18,6)
-	,[dblAmountPaid]			NUMERIC(18,6)
-	,[dblInvoiceTotal]			NUMERIC(18,6)
-	,[dblCredits]				NUMERIC(18,6)
-	,[dblPrepayments]			NUMERIC(18,6)
-	,[dblPrepaids]				NUMERIC(18,6)
-	,[dtmDate]					DATETIME
-	,[dtmDueDate]				DATETIME
-	,[dtmAsOfDate]				DATETIME
-	,[intCompanyLocationId]		INT
-)
-
 DECLARE @temp_availablecustomer_table TABLE(
 	 [intEntityCustomerId]		INT
 	,[strCustomerName]			NVARCHAR(200)	COLLATE Latin1_General_CI_AS
@@ -77,11 +47,44 @@ DECLARE @temp_return_table TABLE(
 
 IF @strLetterName NOT IN ('Credit Suspension', 'Expired Credit Card', 'Credit Review', 'Service Charge Invoices Letter') AND ISNULL(@ysnSystemDefined, 1) = 1
 BEGIN
-	INSERT INTO @temp_aging_table
-	EXEC uspARCollectionOverdueDetailReport NULL, NULL
+	TRUNCATE TABLE tblARCustomerAgingStagingTable
+	INSERT INTO tblARCustomerAgingStagingTable (
+		   strCustomerName
+		, strCustomerNumber
+		, strInvoiceNumber
+		, strRecordNumber
+		, intInvoiceId
+		, strBOLNumber
+		, intEntityCustomerId
+		, dblCreditLimit
+		, dblTotalAR
+		, dblFuture
+		, dbl0Days
+		, dbl10Days
+		, dbl30Days
+		, dbl60Days
+		, dbl90Days
+		, dbl120Days
+		, dbl121Days
+		, dblTotalDue
+		, dblAmountPaid
+		, dblInvoiceTotal
+		, dblCredits
+		, dblPrepayments
+		, dblPrepaids
+		, dtmDate
+		, dtmDueDate
+		, dtmAsOfDate
+		, strSalespersonName
+		, intCompanyLocationId
+		, strSourceTransaction
+		, strType
+		, strCompanyName
+		, strCompanyAddress
+	)
+	EXEC dbo.uspARCustomerAgingDetailAsOfDateReport @ysnInclude120Days = 1
 
-	DELETE FROM @temp_aging_table
-	WHERE [strInvoiceNumber] IN (SELECT [strInvoiceNumber] FROM tblARInvoice WITH (NOLOCK) WHERE strType IN ('CF Tran'))
+	DELETE FROM tblARCustomerAgingStagingTable WHERE strType = 'CF Tran'
 
 	DELETE FROM tblARCollectionOverdueDetail
 	INSERT INTO tblARCollectionOverdueDetail
@@ -151,7 +154,7 @@ BEGIN
 		, dblPrepaids				=	AGING.dblPrepaids					 	
 		, dtmDate					=	AGING.dtmDate						 
 		, dtmDueDate				=	AGING.dtmDueDate		 
-	FROM @temp_aging_table AGING
+	FROM tblARCustomerAgingStagingTable AGING
 	INNER JOIN (SELECT intEntityId
 					 , intTermsId
 					 , strName
@@ -205,10 +208,8 @@ BEGIN
 		,dblInvoiceTotalSum		= SUM(dblInvoiceTotal) 				 		 
 		,dblCreditsSum			= SUM(dblCredits) 						 	
 		,dblPrepaidsSum			= SUM(dblPrepaids) 					 	
-	FROM 
-		@temp_aging_table
-	GROUP BY 
-		intEntityCustomerId
+	FROM tblARCustomerAgingStagingTable
+	GROUP BY intEntityCustomerId
 END
 	
 IF @strLetterName = 'Recent Overdue Collection Letter'
