@@ -552,14 +552,14 @@ BEGIN
 			,[strMemo] = BT.strMemo
 			,[strReferenceNo] = BT.strReferenceNo
 			,[dtmCheckPrinted] = BT.dtmCheckPrinted
-			,[ysnCheckToBePrinted] = BT.ysnCheckToBePrinted
+			--,[ysnCheckToBePrinted] = BT.ysnCheckToBePrinted
 			,[ysnCheckVoid] = BT.ysnCheckVoid
 			,[ysnPosted] = BT.ysnPosted
 			,[strLink] = BT.strLink			
 			,[ysnClr] = BT.ysnClr			
 			,[dtmDateReconciled] = BT.dtmDateReconciled
 			,[intBankStatementImportId]	= BT.intBankStatementImportId
-			,[intBankFileAuditId] = BT.intBankFileAuditId
+			--,[intBankFileAuditId] = BT.intBankFileAuditId
 			,[strSourceSystem] = BT.strSourceSystem
 			,[intEntityId] = BT.intEntityId	
 			,[intCreatedUserId] = BT.intCreatedUserId	
