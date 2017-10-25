@@ -110,6 +110,7 @@ DECLARE @temp_statement_table TABLE(
 	,[strAccountStatusCode]			NVARCHAR(50)	
 	,[strLocationName]				NVARCHAR(100)
     ,[strFullAddress]				NVARCHAR(MAX)
+	,[strComment]					NVARCHAR(MAX)
 	,[strStatementFooterComment]	NVARCHAR(MAX)
     ,[strCompanyName]				NVARCHAR(MAX)
     ,[strCompanyAddress]			NVARCHAR(MAX)
@@ -341,6 +342,7 @@ SELECT intInvoiceId			= NULL
 	 , dtmShipDate			= NULL
 	 , dtmDatePaid			= P.dtmDatePaid
 	 , strType				= NULL
+	 , strComment			= ISNULL(P.strPaymentInfo, '''') + CASE WHEN ISNULL(P.strNotes, '''') <> '''' THEN '' - '' + P.strNotes ELSE '''' END
 FROM dbo.tblARPayment P WITH (NOLOCK)
 INNER JOIN (
 	SELECT intPaymentId
@@ -378,6 +380,7 @@ SELECT intInvoiceId			= NULL
 	 , dtmShipDate			= NULL
 	 , dtmDatePaid			= P.dtmDatePaid
 	 , strType				= NULL
+	 , strComment			= ISNULL(P.strPaymentInfo, '''') + CASE WHEN ISNULL(P.strNotes, '''') <> '''' THEN '' - '' + P.strNotes ELSE '''' END
 FROM dbo.tblARPayment P WITH (NOLOCK)
 INNER JOIN (
 	SELECT intPaymentId
@@ -417,6 +420,7 @@ SELECT intInvoiceId			= NULL
 	 , dtmShipDate			= NULL
 	 , dtmDatePaid			= P.dtmDatePaid
 	 , strType				= NULL
+	 , strComment			= ISNULL(P.strPaymentInfo, '''') + CASE WHEN ISNULL(P.strNotes, '''') <> '''' THEN '' - '' + P.strNotes ELSE '''' END
 FROM dbo.tblARPayment P WITH (NOLOCK)
 INNER JOIN (
 	SELECT PD.intPaymentId
@@ -464,6 +468,7 @@ SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
 	  , strAccountStatusCode = STATUSCODES.strAccountStatusCode
 	  , strLocationName		= CL.strLocationName
 	  , strFullAddress		= dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, NULL)
+	  , strComment			= TRANSACTIONS.strComment
 	  , strStatementFooterComment	= dbo.fnARGetDefaultComment(NULL, TRANSACTIONS.intEntityCustomerId, ''Statement Report'', NULL, ''Footer'', NULL)
 	  , strCompanyName		= COMPANY.strCompanyName
 	  , strCompanyAddress	= COMPANY.strCompanyAddress
@@ -498,6 +503,7 @@ FROM vyuARCustomerSearch C
 			 , dtmShipDate			= I.dtmShipDate
 			 , dtmDatePaid			= PCREDITS.dtmDatePaid
 			 , strType				= I.strType
+			 , strComment			= I.strComments
 		FROM dbo.tblARInvoice I WITH (NOLOCK)
 		LEFT JOIN (
 			SELECT dblPayment = SUM(dblPayment) + SUM(dblDiscount) - SUM(dblInterest)
@@ -616,6 +622,7 @@ IF @ysnIncludeBudgetLocal = 1
 				  , dblARBalance				= C.dblARBalance
 				  , ysnStatementCreditLimit		= C.ysnStatementCreditLimit
 				  , strType						= NULL
+				  , strComment					= NULL
             FROM tblARCustomerBudget CB
 				INNER JOIN #CUSTOMERS C ON CB.intEntityCustomerId = C.intEntityCustomerId
 				OUTER APPLY (
@@ -826,6 +833,7 @@ INSERT INTO tblARCustomerStatementStagingTable (
 	, strAccountStatusCode
 	, strLocationName
 	, strFullAddress
+	, strComment
 	, strStatementFooterComment
 	, strCompanyName
 	, strCompanyAddress
@@ -865,6 +873,7 @@ SELECT intEntityCustomerId		= MAINREPORT.intEntityCustomerId
 	, strAccountStatusCode		= MAINREPORT.strAccountStatusCode
 	, strLocationName			= MAINREPORT.strLocationName
 	, strFullAddress			= MAINREPORT.strFullAddress
+	, strComment				= MAINREPORT.strComment
 	, strStatementFooterComment	= MAINREPORT.strStatementFooterComment
 	, strCompanyName			= MAINREPORT.strCompanyName
 	, strCompanyAddress			= MAINREPORT.strCompanyAddress
@@ -909,6 +918,7 @@ FROM (
 		 , strAccountStatusCode
 		 , strLocationName
 		 , strFullAddress
+		 , strComment							= STATEMENTREPORT.strComment
 		 , strStatementFooterComment			= STATEMENTREPORT.strStatementFooterComment
 		 , strCompanyName
 		 , strCompanyAddress
@@ -941,6 +951,7 @@ FROM (
 		 , strAccountStatusCode
 		 , strLocationName   
 		 , strFullAddress
+		 , strComment							= STATEMENTREPORT.strComment
 		 , strStatementFooterComment			= STATEMENTREPORT.strStatementFooterComment
 		 , strCompanyName
 		 , strCompanyAddress
