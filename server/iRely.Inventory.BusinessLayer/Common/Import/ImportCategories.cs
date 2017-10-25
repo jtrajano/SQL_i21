@@ -38,7 +38,6 @@ namespace iRely.Inventory.BusinessLayer
 
                 string h = header.ToLower().Trim();
                 int? lu = null;
-                bool inserted = false;
                 string inventoryType = "";
 
                 switch (h)
@@ -57,30 +56,52 @@ namespace iRely.Inventory.BusinessLayer
                         break;
                     case "line of business":
                         // Get the default sales person
-                        int intEntitySalespersonId = 0; 
+                        //int intEntitySalespersonId = 0; 
 
-                        var query = "SELECT intEntitySalespersonId, strSalespersonId, strName FROM vyuEMSalesperson";
-                        IEnumerable<vyuEMSalesperson> salesReps = context.ContextManager.Database.SqlQuery<vyuEMSalesperson>(query);
-                        try
-                        {
-                            vyuEMSalesperson salesRep = salesReps.First();
+                        //var query = "SELECT intEntitySalespersonId, strSalespersonId, strName FROM vyuEMSalesperson";
+                        //IEnumerable<vyuEMSalesperson> salesReps = context.ContextManager.Database.SqlQuery<vyuEMSalesperson>(query);
+                        //try
+                        //{
+                        //    vyuEMSalesperson salesRep = salesReps.First();
 
-                            if (salesRep != null)
-                                intEntitySalespersonId = salesRep.intEntitySalespersonId;
-                            else
-                            {
-                                dr.Messages.Add(new ImportDataMessage()
-                                {
-                                    Column = header,
-                                    Row = row,
-                                    Type = TYPE_INNER_WARN,
-                                    Message = "Can't find default Sales Rep for Line of Business: " + value + '.',
-                                    Status = STAT_INNER_COL_SKIP
-                                });
-                                dr.Info = INFO_WARN;
-                            }
-                        }
-                        catch (Exception)
+                        //    if (salesRep != null)
+                        //        intEntitySalespersonId = salesRep.intEntitySalespersonId;
+                        //    else
+                        //    {
+                        //        dr.Messages.Add(new ImportDataMessage()
+                        //        {
+                        //            Column = header,
+                        //            Row = row,
+                        //            Type = TYPE_INNER_WARN,
+                        //            Message = "Can't find default Sales Rep for Line of Business: " + value + '.',
+                        //            Status = STAT_INNER_COL_SKIP
+                        //        });
+                        //        dr.Info = INFO_WARN;
+                        //    }
+                        //}
+                        //catch (Exception)
+                        //{
+                        //    dr.Messages.Add(new ImportDataMessage()
+                        //    {
+                        //        Column = header,
+                        //        Row = row,
+                        //        Type = TYPE_INNER_WARN,
+                        //        Message = "Can't find default Sales Rep for Line of Business: " + value + '.',
+                        //        Status = STAT_INNER_COL_SKIP
+                        //    });
+                        //    dr.Info = INFO_WARN;
+                        //}
+
+                        // Find or Insert a new Line of Business record. 
+                        if (string.IsNullOrEmpty(value))
+                            break;
+                        lu = GetLookUpId<tblSMLineOfBusiness>(
+                            context,
+                            m => m.strLineOfBusiness == value,
+                            e => e.intLineOfBusinessId);
+                        if (lu != null)
+                            fc.intLineOfBusinessId = (int)lu;
+                        else
                         {
                             dr.Messages.Add(new ImportDataMessage()
                             {
@@ -90,41 +111,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Message = "Can't find default Sales Rep for Line of Business: " + value + '.',
                                 Status = STAT_INNER_COL_SKIP
                             });
-                            dr.Info = INFO_WARN;
                         }
-
-                        // Find or Insert a new Line of Business record. 
-                        lu = InsertAndOrGetLookupId<tblSMLineOfBusiness>(
-                            context,
-                            m => m.strLineOfBusiness == value,
-                            e => e.intLineOfBusinessId,
-                            new tblSMLineOfBusiness()
-                            {
-                                strLineOfBusiness = value,
-                                intEntityId = intEntitySalespersonId
-                            }, out inserted);
-                        if (inserted)
-                        {
-                            dr.Messages.Add(new ImportDataMessage()
-                            {
-                                Column = header,
-                                Row = row,
-                                Type = TYPE_INNER_INFO,
-                                Message = "Created new Line of Business item."
-                            });
-                            if (lu != null)
-                            {
-                                LogItems.Add(new ImportLogItem()
-                                {
-                                    Description = "Created new Line of Business item.",
-                                    FromValue = "",
-                                    ToValue = value,
-                                    ActionIcon = ICON_ACTION_NEW
-                                });
-                            }
-                        }
-                        if (lu != null)
-                            fc.intLineOfBusinessId = (int)lu;
                         break;
                     case "costing method":
                         switch (value.ToUpper().Trim())
