@@ -59,7 +59,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
                                 Message = "Can't find Item with Item No.: " + value + '.',
-                                Status = REC_SKIP
+                                Status = STAT_REC_SKIP
                             });
                             dr.Info = INFO_WARN;
                         }
@@ -82,7 +82,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
                                 Message = "Can't find Unit of Measurement item: " + value + '.',
-                                Status = REC_SKIP
+                                Status = STAT_REC_SKIP
                             });
                             dr.Info = INFO_WARN;
                             valid = false;
@@ -208,7 +208,7 @@ namespace iRely.Inventory.BusinessLayer
                     dr.Messages.Add(new ImportDataMessage()
                     {
                         Type = TYPE_INNER_ERROR,
-                        Status = REC_SKIP,
+                        Status = STAT_REC_SKIP,
                         Column = headers[0],
                         Row = row,
                         Message = "The item uom already exists. The system does not allow existing records to be modified."

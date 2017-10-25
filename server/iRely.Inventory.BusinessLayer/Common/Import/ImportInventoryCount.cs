@@ -50,7 +50,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Column = header,
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
-                                Status = REC_SKIP,
+                                Status = STAT_REC_SKIP,
                                 Message = "Location should not be blank."
                             });
                             dr.Info = INFO_WARN;
@@ -70,7 +70,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Column = header,
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
-                                Status = REC_SKIP,
+                                Status = STAT_REC_SKIP,
                                 Message = string.Format("Invalid Location: {0}.", value)
                             });
                             dr.Info = INFO_WARN;

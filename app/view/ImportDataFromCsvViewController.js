@@ -29,7 +29,6 @@ Ext.define('Inventory.view.ImportDataFromCsvViewController', {
         var win = button.up('window');
         var params = me.formParams;
 
-        var dataToImport = '';
         var form = button.up('form').getForm();
         var txtBrowseFile = win.down("#txtBrowseFile");
         var fileInput = txtBrowseFile.extractFileInput();
@@ -47,6 +46,7 @@ Ext.define('Inventory.view.ImportDataFromCsvViewController', {
                         lineOfBusiness: params.lineOfBusiness,
                         params: params.params,
                         method: params.method,
+                        title: params.title,
                         callback: function(records, success, options) {
                             alert(success);
                         }
@@ -125,11 +125,12 @@ Ext.define('Inventory.view.ImportDataFromCsvViewController', {
                 }
 
                 i21.functions.showCustomDialog(type, 'ok', msg, function() {
-                    win.close();
+                    //win.close();
 
                     if (data.messages !== null && data.messages.length > 0) {
                         iRely.Functions.openScreen('Inventory.view.ImportLogMessageBox', {
-                            data: data
+                            data: data,
+                            title: p.title
                         });
                     }
                     if(!iRely.Functions.isEmpty(json.result.Description)) {
@@ -142,11 +143,12 @@ Ext.define('Inventory.view.ImportDataFromCsvViewController', {
                 var json = JSON.parse(jqXHR.responseText);
                 i21.functions.showCustomDialog('error', 'ok', 'Import failed! ' + json.info,
                     function() {
-                        win.close();
+                        //win.close();
 
                         if (json.messages && json.messages.length > 0) {
                             iRely.Functions.openScreen('Inventory.view.ImportLogMessageBox', {
-                                data: json
+                                data: json,
+                                title: p.title
                             });
                         }
                     }

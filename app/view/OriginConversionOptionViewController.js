@@ -447,7 +447,7 @@ function getTemplateColumns(name) {
                 "Sequence", "Active", "X Position", "Y Position", "Z Position", "Allow Consume", "Allow Multiple Items",
                 "Allow Multiple Lots", "Merge on Move", "Cycle Counted", "Default Warehouse Staging Unit"];
         case "lineofbusiness":
-            return ["Line of Business"];
+            return ["Line of Business", "Sales Person Id", "SIC Code", "Type", "Segment Code", "Visible on Web"];
         case "categories":
             return ["Category Code", "Description", "Inventory Type", "Line of Business", "Costing Method", "Inventory Valuation",
                 "GL Division No", "Sales Analysis"];

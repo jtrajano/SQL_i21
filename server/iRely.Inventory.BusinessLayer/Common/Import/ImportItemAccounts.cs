@@ -42,7 +42,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Column = header,
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
-                                Status = REC_SKIP,
+                                Status = STAT_REC_SKIP,
                                 Message = "Item No should not be blank."
                             });
                             dr.Info = INFO_WARN;
@@ -64,7 +64,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Column = header,
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
-                                Status = REC_SKIP,
+                                Status = STAT_REC_SKIP,
                                 Message = "Invalid Item No: " + value + ". The item does not exist"
                             });
                             dr.Info = INFO_WARN;
@@ -79,7 +79,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Column = header,
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
-                                Status = REC_SKIP,
+                                Status = STAT_REC_SKIP,
                                 Message = "Account Category should not be blank."
                             });
                             dr.Info = INFO_WARN;
@@ -101,7 +101,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Column = header,
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
-                                Status = REC_SKIP,
+                                Status = STAT_REC_SKIP,
                                 Message = "The Account Category " + value + " does not exist."
                             });
                             dr.Info = INFO_WARN;
@@ -116,7 +116,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Column = header,
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
-                                Status = REC_SKIP,
+                                Status = STAT_REC_SKIP,
                                 Message = "Account Id should not be blank."
                             });
                             dr.Info = INFO_WARN;
@@ -138,7 +138,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Column = header,
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
-                                Status = REC_SKIP,
+                                Status = STAT_REC_SKIP,
                                 Message = "The Account Id " + value + " does not exist."
                             });
                             dr.Info = INFO_WARN;
@@ -159,7 +159,7 @@ namespace iRely.Inventory.BusinessLayer
                     dr.Messages.Add(new ImportDataMessage()
                     {
                         Type = TYPE_INNER_ERROR,
-                        Status = REC_SKIP,
+                        Status = STAT_REC_SKIP,
                         Column = headers[0],
                         Row = row,
                         Message = "The account already exists. The system does not allow existing records to be modified."

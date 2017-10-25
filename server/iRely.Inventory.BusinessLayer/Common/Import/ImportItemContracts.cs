@@ -50,7 +50,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Column = header,
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
-                                Status = REC_SKIP,
+                                Status = STAT_REC_SKIP,
                                 Message = "Invalid Item No: " + value + ". The item does not exists"
                             });
                         }
@@ -84,7 +84,7 @@ namespace iRely.Inventory.BusinessLayer
                                         Column = header,
                                         Row = row,
                                         Type = TYPE_INNER_ERROR,
-                                        Status = REC_SKIP,
+                                        Status = STAT_REC_SKIP,
                                         Message = "The Location " + value + " does not exist."
                                     });
                                     dr.Info = INFO_WARN;
@@ -98,7 +98,7 @@ namespace iRely.Inventory.BusinessLayer
                                     Column = header,
                                     Row = row,
                                     Type = TYPE_INNER_ERROR,
-                                    Status = REC_SKIP,
+                                    Status = STAT_REC_SKIP,
                                     Message = "The Location " + value + " does not exist."
                                 });
                                 dr.Info = INFO_WARN;

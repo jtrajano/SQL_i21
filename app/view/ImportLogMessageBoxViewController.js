@@ -45,6 +45,7 @@ Ext.define('Inventory.view.ImportLogMessageBoxViewController', {
         var me = this;
         me.formParams = cfg.param;
         var win = me.getView();
+        me.getView().setTitle("Log Messages - " + cfg.param.title + ' from CSV File');
         var grid = win.down('#gridLogs');
         var store = Ext.create('Ext.data.ArrayStore', {
             extend: 'Ext.data.ArrayStore',

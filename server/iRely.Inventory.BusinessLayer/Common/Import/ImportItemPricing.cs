@@ -51,7 +51,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Column = header,
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
-                                Status = REC_SKIP,
+                                Status = STAT_REC_SKIP,
                                 Message = "Item No should not be blank."
                             });
                             dr.Info = INFO_WARN;
@@ -75,7 +75,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
                                 Message = "Can't find Item with Item No.: " + value + '.' + strItemNo,
-                                Status = REC_SKIP
+                                Status = STAT_REC_SKIP
                             });
                             dr.Info = TYPE_INNER_WARN;
                         }
@@ -89,7 +89,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Column = header,
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
-                                Status = REC_SKIP,
+                                Status = STAT_REC_SKIP,
                                 Message = "Location should not be blank."
                             });
                             dr.Info = INFO_WARN;
@@ -110,7 +110,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
                                 Message = "Can't find Item Location: " + value + '.',
-                                Status = REC_SKIP
+                                Status = STAT_REC_SKIP
                             });
                             dr.Info = TYPE_INNER_WARN;
                         }
@@ -177,7 +177,7 @@ namespace iRely.Inventory.BusinessLayer
                     dr.Messages.Add(new ImportDataMessage()
                     {
                         Type = TYPE_INNER_ERROR,
-                        Status = REC_SKIP,
+                        Status = STAT_REC_SKIP,
                         Column = headers[0],
                         Row = row,
                         Message = "The item pricing already exists. The system does not allow existing records to be modified."

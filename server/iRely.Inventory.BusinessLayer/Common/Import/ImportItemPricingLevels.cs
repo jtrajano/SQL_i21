@@ -51,7 +51,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
                                 Message = "Can't find Item with Item No.: " + value + '.',
-                                Status = REC_SKIP
+                                Status = STAT_REC_SKIP
                             });
                             dr.Info = INFO_WARN;
                             break;
@@ -75,7 +75,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
                                 Message = "Can't find Item with Item No.: " + value + '.',
-                                Status = REC_SKIP
+                                Status = STAT_REC_SKIP
                             });
                             dr.Info = INFO_WARN;
                         }
@@ -90,7 +90,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
                                 Message = "Can't find Location: " + value + '.',
-                                Status = REC_SKIP
+                                Status = STAT_REC_SKIP
                             });
                             dr.Info = INFO_WARN;
                             break;
@@ -106,7 +106,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
                                 Message = "Can't find Location: " + value + '.',
-                                Status = REC_SKIP
+                                Status = STAT_REC_SKIP
                             });
                             dr.Info = INFO_WARN;
                             break;
@@ -140,7 +140,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
                                 Message = "Can't find Location: " + value + '.',
-                                Status = REC_SKIP
+                                Status = STAT_REC_SKIP
                             });
                             dr.Info = INFO_WARN;
                         }
@@ -160,7 +160,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
                                 Message = "Invalid Price Level: " + value + '.',
-                                Status = REC_SKIP
+                                Status = STAT_REC_SKIP
                             });
                             dr.Info = INFO_WARN;
                         }
@@ -177,7 +177,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
                                 Message = "Invalid Item UOM: " + value + '.',
-                                Status = REC_SKIP
+                                Status = STAT_REC_SKIP
                             });
                             dr.Info = INFO_WARN;
                             break;
@@ -199,7 +199,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
                                 Message = "Invalid Item UOM: " + value + '.',
-                                Status = REC_SKIP
+                                Status = STAT_REC_SKIP
                             });
                             dr.Info = INFO_WARN;
                         }

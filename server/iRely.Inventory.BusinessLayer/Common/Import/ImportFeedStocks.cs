@@ -52,7 +52,7 @@ namespace iRely.Inventory.BusinessLayer
                     dr.Messages.Add(new ImportDataMessage()
                     {
                         Type = TYPE_INNER_ERROR,
-                        Status = REC_SKIP,
+                        Status = STAT_REC_SKIP,
                         Column = headers[0],
                         Row = row,
                         Message = "The record already exists: " + fc.strRinFeedStockCode + ". The system does not allow existing records to be modified."

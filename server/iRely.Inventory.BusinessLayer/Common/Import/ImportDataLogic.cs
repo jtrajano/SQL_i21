@@ -22,7 +22,7 @@ namespace iRely.Inventory.BusinessLayer
         }
 
         public const string STAT_INNER_COL_SKIP = "This optional field is ignored.";
-        public const string REC_SKIP = "Record skipped";
+        public const string STAT_REC_SKIP = "Record skipped";
         public const string STAT_INNER_DEF = "Set to default value";
         public const string STAT_INNER_AUTO = "Auto-created";
 
@@ -137,7 +137,7 @@ namespace iRely.Inventory.BusinessLayer
                 dr.Messages.Add(new ImportDataMessage()
                 {
                     Type = TYPE_INNER_ERROR,
-                    Status = REC_SKIP,
+                    Status = STAT_REC_SKIP,
                     Column = field,
                     Row = row,
                     Message = "Duplicate record(s) found: " + value
@@ -248,7 +248,7 @@ namespace iRely.Inventory.BusinessLayer
                                         Message = message + " Items that were auto created or modified in this record will be rolled back.",
                                         Exception = ex,
                                         Row = row,
-                                        Status = REC_SKIP,
+                                        Status = STAT_REC_SKIP,
                                         Type = TYPE_INNER_EXCEPTION
                                     });
                                     dr.Info = INFO_ERROR;
@@ -642,7 +642,7 @@ namespace iRely.Inventory.BusinessLayer
                     Column = header,
                     Row = row,
                     Type = required ? TYPE_INNER_ERROR : TYPE_INNER_WARN,
-                    Status = required ? REC_SKIP : STAT_INNER_COL_SKIP,
+                    Status = required ? STAT_REC_SKIP : STAT_INNER_COL_SKIP,
                     Message = string.Format(required ? "The value for {0} should not be blank." : "The value for {0} is blank.", caption)
                 });
                 dr.Info = required ? INFO_ERROR : INFO_WARN;
@@ -674,7 +674,7 @@ namespace iRely.Inventory.BusinessLayer
                     Column = header,
                     Row = row,
                     Type = required ? TYPE_INNER_ERROR : TYPE_INNER_WARN,
-                    Status = required ? REC_SKIP : STAT_INNER_COL_SKIP,
+                    Status = required ? STAT_REC_SKIP : STAT_INNER_COL_SKIP,
                     Message = string.Format("{0} is not a valid item in {1}.", value, caption)
                 });
                 dr.Info = required ? INFO_ERROR : INFO_WARN;
@@ -687,7 +687,7 @@ namespace iRely.Inventory.BusinessLayer
                     Column = header,
                     Row = row,
                     Type = required ? TYPE_INNER_ERROR : TYPE_INNER_WARN,
-                    Status = required ? REC_SKIP : STAT_INNER_COL_SKIP,
+                    Status = required ? STAT_REC_SKIP : STAT_INNER_COL_SKIP,
                     Message = string.Format(required ? "The value for {0} should not be blank." : "The value for {0} is blank.", caption)
                 });
                 dr.Info = required ? INFO_ERROR : INFO_WARN;

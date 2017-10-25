@@ -61,7 +61,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
                                 Message = "Invalid Fuel Category: " + value + '.',
-                                Status = REC_SKIP
+                                Status = STAT_REC_SKIP
                             });
                             dr.Info = INFO_WARN;
                         }
@@ -112,7 +112,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
                                 Message = "Invalid Feed Stock: " + value + '.',
-                                Status = REC_SKIP
+                                Status = STAT_REC_SKIP
                             });
                             dr.Info = INFO_WARN;
                         }
@@ -172,7 +172,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
                                 Message = "Invalid Fuel Code: " + value + '.',
-                                Status = REC_SKIP
+                                Status = STAT_REC_SKIP
                             });
                             dr.Info = INFO_WARN;
                         }
@@ -225,7 +225,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
                                 Message = "Invalid Production Process: " + value + '.',
-                                Status = REC_SKIP
+                                Status = STAT_REC_SKIP
                             });
                             dr.Info = INFO_WARN;
                         }

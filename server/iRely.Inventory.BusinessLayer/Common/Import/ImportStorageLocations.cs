@@ -70,7 +70,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Row = row,
                                 Type = TYPE_INNER_WARN,
                                 Message = "Location should not be blank.",
-                                Status = REC_SKIP
+                                Status = STAT_REC_SKIP
                             });
                             dr.Info = INFO_WARN;
                             break;
@@ -90,7 +90,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
                                 Message = string.Format("Invalid Location: {0}.", value),
-                                Status = REC_SKIP
+                                Status = STAT_REC_SKIP
                             });
                             dr.Info = INFO_WARN;
                         }
@@ -105,7 +105,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Row = row,
                                 Type = TYPE_INNER_WARN,
                                 Message = "Storage Location should not be blank.",
-                                Status = REC_SKIP
+                                Status = STAT_REC_SKIP
                             });
                             dr.Info = INFO_WARN;
                             break;
@@ -125,7 +125,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
                                 Message = string.Format("Invalid Storage Location: {0}.", value),
-                                Status = REC_SKIP
+                                Status = STAT_REC_SKIP
                             });
                             dr.Info = INFO_WARN;
                         }
@@ -303,7 +303,7 @@ namespace iRely.Inventory.BusinessLayer
                     dr.Messages.Add(new ImportDataMessage()
                     {
                         Type = TYPE_INNER_ERROR,
-                        Status = REC_SKIP,
+                        Status = STAT_REC_SKIP,
                         Column = headers[0],
                         Row = row,
                         Message = "The storage unit already exists. The system does not allow existing records to be modified."
