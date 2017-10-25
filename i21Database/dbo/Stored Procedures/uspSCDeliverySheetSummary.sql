@@ -65,17 +65,19 @@ ALTER TABLE #temp
 ADD EntityName NVARCHAR(MAX)
 
 ALTER TABLE #temp
-ADD SplitPercentage INT
+ADD SplitPercentage NUMERIC(38,6)
 
 DELETE FROM #temp
 
 --FOR ticket splits
 DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 FOR
-SELECT DISTINCT EMD.intEntityId,EM.strName,EMD.dblSplitPercent,EMD.intStorageScheduleTypeId FROM tblEMEntitySplit EMS
+
+SELECT EMD.intEntityId,EM.strName,EMD.dblSplitPercent,EMD.intStorageScheduleTypeId FROM tblSCDeliverySheet SCD
+INNER JOIN tblEMEntitySplit EMS ON SCD.intEntityId = EMS.intEntityId AND EMS.intSplitId = SCD.intSplitId
 INNER JOIN tblEMEntitySplitDetail EMD ON EMD.intSplitId = EMS.intSplitId 
-INNER JOIN tblEMEntity EM ON EM.intEntityId = EMD.intEntityId 
-WHERE EMS.intSplitId = @intSplitId
+INNER JOIN tblEMEntity EM ON EM.intEntityId = EMD.intEntityId
+WHERE EMS.intSplitId = @intSplitId  AND SCD.intDeliverySheetId = @intDeliverySheetId
 
 SELECT @intItemId = intItemId FROM tblSCDeliverySheet WHERE intDeliverySheetId = @intDeliverySheetId
 
