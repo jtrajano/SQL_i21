@@ -860,7 +860,7 @@ SELECT @strDescription, 'Sales Gross Dollars' [strType], 'Sales Gross Dollars',I
 		JOIN tblICInventoryShipmentItem si on s.intInventoryShipmentId=si.intInventoryShipmentId and intOrderType =4 and isnull(dblUnitPrice,0) <>0
 		JOIN tblICItem i on si.intItemId=i.intItemId 
 		JOIN vyuRKContractDetail cd on cd.intContractDetailId=si.intLineNo 
-		INNER JOIN tblSMCurrency cur on cur.intCurrencyID=cd.intCurrencyId
+		INNER JOIN tblSMCurrency cur on cur.intCurrencyID=s.intCurrencyId
 		WHERE i.intCommodityId=@intCommodityId and cd.intEntityId=@intVendorId  
 		AND cd.intCompanyLocationId = CASE WHEN ISNULL(@intLocationId,0)=0 then cd.intCompanyLocationId else @intLocationId end
 		UNION
@@ -877,7 +877,7 @@ SELECT @strDescription, 'Sales Gross Dollars' [strType], 'Sales Gross Dollars',I
 		FROM tblICInventoryShipment s
 		JOIN tblICInventoryShipmentItem si ON s.intInventoryShipmentId=si.intInventoryShipmentId 
 		JOIN vyuRKContractDetail cd ON cd.intContractDetailId=si.intLineNo and cd.intContractTypeId=2  
-		INNER JOIN tblSMCurrency cur on cur.intCurrencyID=cd.intCurrencyId
+		INNER JOIN tblSMCurrency cur on cur.intCurrencyID=s.intCurrencyId
 		AND cd.intCommodityId=@intCommodityId AND cd.intEntityId=@intVendorId 
 		AND cd.intCompanyLocationId = CASE WHEN ISNULL(@intLocationId,0)=0 then cd.intCompanyLocationId else @intLocationId end	
 
