@@ -91,7 +91,8 @@ AS
 				, dbl30Days
 				, dbl60Days
 				, dbl90Days
-				, dbl91Days
+				, dbl120Days
+				, dbl121Days
 				, dblTotalDue
 				, dblAmountPaid
 				, dblInvoiceTotal
@@ -108,7 +109,7 @@ AS
 				, strCompanyName
 				, strCompanyAddress
 			)
-			EXEC dbo.uspARCustomerAgingDetailAsOfDateReport NULL, @asOfDate, NULL
+			EXEC dbo.uspARCustomerAgingDetailAsOfDateReport @dtmDateTo = @asOfDate, @ysnInclude120Days = 0
 
 			IF ISNULL(@ysnChargeonCharge, 1) = 0
 				DELETE FROM tblARCustomerAgingStagingTable WHERE strType = 'Service Charge'
@@ -218,7 +219,7 @@ AS
 						BEGIN
 							DECLARE @dblTotalAR			NUMERIC(18, 6) = 0								  
 
-							SELECT @dblTotalAR = SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl91Days) + SUM(dblCredits) + SUM(dblPrepayments) 
+							SELECT @dblTotalAR = SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl120Days) + SUM(dbl121Days) + SUM(dblCredits) + SUM(dblPrepayments) 
 							FROM tblARCustomerAgingStagingTable
 							WHERE intEntityCustomerId = @entityId							
 							  AND dtmDueDate BETWEEN ISNULL(@dtmLastServiceCharge, '01/01/1900') AND @asOfDate
