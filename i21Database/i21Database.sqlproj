@@ -5774,6 +5774,8 @@
     <Build Include="dbo\Views\vyuRKCompanyPreference.sql" />
     <Build Include="dbo\Views\vyuRKCurrencyContract.sql" />
     <Build Include="dbo\Functions\fnMFGetTotalStockValueFromTransactionBatch.sql" />
+    <Build Include="dbo\Views\vyuICItemLicense.sql" />
+    <Build Include="dbo\Tables\tblICItemLicense.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
