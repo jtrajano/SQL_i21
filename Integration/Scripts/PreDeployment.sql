@@ -53,6 +53,7 @@
 :r "..\dbo\Stored Procedures\uspCMProcessUndepositedFunds.sql"
 :r "..\dbo\Stored Procedures\uspCMBankTransactionReversalOrigin.sql"
 :r "..\dbo\Stored Procedures\uspCMImportBankAccountsFromOrigin.sql"
+:r "..\dbo\Stored Procedures\uspCMImportBanksFromOrigin.sql"
 :r "..\dbo\Stored Procedures\uspCMImportBankReconciliationFromOrigin.sql"
 :r "..\dbo\Stored Procedures\uspCMImportBankTransactionsFromOrigin.sql"
 :r "..\dbo\Stored Procedures\uspCMImportValidations.sql"

@@ -166,6 +166,12 @@ LEFT OUTER JOIN
 		ON ISNULL(PE.[ysnFromAP], 0) = 1
 		AND PE.[intBillId] = APB.[intBillId]
 
+--Clear Discounts for Partial Payment AR-5721
+UPDATE @ItemEntries
+SET dblAmountDue = dblAmountDue + dblDiscount
+  , dblDiscount = 0
+WHERE ISNULL(dblAmountDue, 0) <> 0
+  AND ISNULL(dblDiscount, 0) <> 0
 
 DECLARE @InvalidRecords AS TABLE (
 	 [intId]				INT

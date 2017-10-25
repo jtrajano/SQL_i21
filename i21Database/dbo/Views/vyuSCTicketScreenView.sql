@@ -130,7 +130,9 @@
 	,SCListTicket.strTicketType
 	,SCT.ysnDeliverySheetPost
 	,(SELECT SCMatch.strTicketNumber FROM tblSCTicket SCMatch WHERE SCMatch.intMatchTicketId = SCT.intMatchTicketId) AS strMatchTicketNumber
-    
+    ,SCT.intLotId
+    ,SCT.strLotNumber
+
 	,SMC.strLocationName AS strProcessingLocationName
 	,SMC.strDiscountScheduleType AS strDefaultLocationSchedule
 	,SMCSubLocation.strSubLocationName
@@ -166,7 +168,7 @@
 		ELSE 0 END
 	 AS BIT) AS ysnLotItem
 	 ,CAST(
-		CASE WHEN (SELECT ISNULL(ICAttribute.intCommodityAttributeId,0) FROM tblICCommodityAttribute ICAttribute WHERE ICAttribute.intCommodityId = SCT.intCommodityId ) > 1 THEN 1
+		CASE WHEN (SELECT COUNT(ICAttribute.intCommodityAttributeId) FROM tblICCommodityAttribute ICAttribute WHERE ICAttribute.intCommodityId = SCT.intCommodityId ) > 1 THEN 1
 		ELSE 0 END
 	 AS BIT) AS ysnHasCommodityGrade
 	 ,ICIUOMFrom.dblUnitQty AS dblUnitQtyFrom

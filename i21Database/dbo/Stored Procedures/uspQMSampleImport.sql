@@ -60,14 +60,32 @@ BEGIN TRY
 		,@strCountry NVARCHAR(50)
 		,@intRepresentingUOMId INT
 		,@strItemNo NVARCHAR(50)
+		,@strSampleImportDateTimeFormat NVARCHAR(50)
+		,@intConvertYear INT
 
 	SELECT @intValidDate = (
 			SELECT DATEPART(dy, GETDATE())
 			)
 
+	SELECT @strSampleImportDateTimeFormat = strSampleImportDateTimeFormat
+	FROM tblQMCompanyPreference
+
+	SELECT @intConvertYear = 101
+
+	IF (
+			@strSampleImportDateTimeFormat = 'MM DD YYYY HH:MI'
+			OR @strSampleImportDateTimeFormat = 'YYYY MM DD HH:MI'
+			)
+		SELECT @intConvertYear = 101
+	ELSE IF (
+			@strSampleImportDateTimeFormat = 'DD MM YYYY HH:MI'
+			OR @strSampleImportDateTimeFormat = 'YYYY DD MM HH:MI'
+			)
+		SELECT @intConvertYear = 103
+
 	INSERT INTO @ImportHeader
 	SELECT MIN(intSampleImportId) AS intSampleImportId
-		,CONVERT(DATETIME, dtmSampleReceivedDate, 101) dtmSampleReceivedDate
+		,CONVERT(DATETIME, dtmSampleReceivedDate, @intConvertYear) dtmSampleReceivedDate
 		,strSampleNumber
 		,strItemShortName
 		,strSampleTypeName
@@ -80,7 +98,7 @@ BEGIN TRY
 		,MIN(intCreatedUserId) AS intCreatedUserId
 		,MIN(dtmCreated) AS dtmCreated
 	FROM tblQMSampleImport
-	GROUP BY CONVERT(DATETIME, dtmSampleReceivedDate, 101)
+	GROUP BY CONVERT(DATETIME, dtmSampleReceivedDate, @intConvertYear)
 		,strSampleNumber
 		,strItemShortName
 		,strSampleTypeName
@@ -620,8 +638,15 @@ BEGIN TRY
 		ORDER BY PP.intSequenceNo
 
 		-- Update Properties Value, Comment, Result for the available properties
+		-- Setting Bit to lower case then only in sencha client, it is recogonizing
 		UPDATE tblQMTestResult
-		SET strPropertyValue = SI.strPropertyValue
+		SET strPropertyValue = (
+				CASE P.intDataTypeId
+					WHEN 4
+						THEN LOWER(SI.strPropertyValue)
+					ELSE SI.strPropertyValue
+					END
+				)
 			,strComment = SI.strComment
 			,strResult = SI.strResult
 			,dtmPropertyValueCreated = (
@@ -636,6 +661,15 @@ BEGIN TRY
 			AND TR.intSampleId = @intSampleId
 		JOIN tblQMSampleImport SI ON SI.strPropertyName = P.strPropertyName
 			AND SI.strSampleNumber = @strSampleRefNo
+
+		-- Setting correct date format
+		UPDATE tblQMTestResult
+		SET strPropertyValue = CONVERT(DATETIME, TR.strPropertyValue, 120)
+		FROM tblQMTestResult TR
+		JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+			AND TR.intSampleId = @intSampleId
+			AND ISNULL(TR.strPropertyValue, '') <> ''
+			AND P.intDataTypeId = 12
 
 		SELECT @intSampleImportId = MIN(intSampleImportId)
 		FROM @ImportHeader

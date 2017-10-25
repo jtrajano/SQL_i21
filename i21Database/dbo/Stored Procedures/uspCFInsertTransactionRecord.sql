@@ -338,7 +338,7 @@ BEGIN
 		END
 		ELSE IF (@strTransactionType = 'F')
 		BEGIN
-			SET @strTransactionType = 'Foreign Sales'
+			SET @strTransactionType = 'Foreign Sale'
 		END
 		ELSE IF (@strTransactionType = 'E')
 		BEGIN

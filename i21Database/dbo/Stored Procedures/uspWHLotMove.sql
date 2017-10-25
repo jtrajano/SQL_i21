@@ -38,6 +38,8 @@ BEGIN TRY
 		,@dblSourceOldQty NUMERIC(38, 20)
 		,@intLotItemUOMId INT
 		,@intCategoryId INT
+		,@intDestinationLotStatusId INT
+		,@dblDestinationLotQty NUMERIC(38, 20)
 
 	SELECT @intItemId = intItemId
 		,@intLocationId = intLocationId
@@ -58,6 +60,12 @@ BEGIN TRY
 		,@intLotItemUOMId = intItemUOMId
 	FROM tblICLot
 	WHERE intLotId = @intLotId
+
+	SELECT @intDestinationLotStatusId = intLotStatusId
+		,@dblDestinationLotQty = dblQty
+	FROM tblICLot
+	WHERE strLotNumber = @strLotNumber
+		AND intStorageLocationId = @intNewStorageLocationId
 
 	IF (@intItemUOMId = @intWeightUOMId)
 	BEGIN
@@ -136,6 +144,21 @@ BEGIN TRY
 				,11
 				,1
 				)
+	END
+
+	IF (ISNULL(@intDestinationLotStatusId, 0) <> 0)
+	BEGIN
+		IF ISNULL(@intLotStatusId, 0) <> ISNULL(@intDestinationLotStatusId, 0)
+			AND @dblDestinationLotQty > 0
+		BEGIN
+			SET @ErrMsg = 'The status of the source and the destination lot differs. Cannot move.'
+
+			RAISERROR (
+					@ErrMsg
+					,11
+					,1
+					)
+		END
 	END
 
 	IF (CASE 
@@ -255,6 +278,19 @@ BEGIN TRY
 		,@strReason = NULL
 		,@intLocationId = @intLocationId
 		,@intInventoryAdjustmentId = @intInventoryAdjustmentId
+
+	IF ISNULL(@intLotStatusId, 0) <> ISNULL(@intDestinationLotStatusId, 0)
+		AND @dblDestinationLotQty = 0
+		AND NOT EXISTS (
+					SELECT *
+					FROM dbo.tblICLot
+					WHERE intLotId = @intNewLotId
+						AND intLotStatusId = @intLotStatusId)
+	BEGIN
+		EXEC uspMFSetLotStatus @intNewLotId
+			,@intLotStatusId
+			,@intUserId
+	END
 
 	IF EXISTS (
 			SELECT *

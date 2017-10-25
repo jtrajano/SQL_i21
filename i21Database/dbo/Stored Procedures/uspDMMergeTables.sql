@@ -49,12 +49,12 @@ BEGIN
     EXEC uspDMMergeICTables
 		@remoteDB = @remoteDB;
 
-    EXEC uspDMMergeQMTables
-        @remoteDB = @remoteDB;
-
     EXEC uspDMMergeSCTables
 		@remoteDB = @remoteDB;
 
-    EXEC uspDMAlterConstraint 'Check';
+    EXEC uspDMMergeQMTables
+        @remoteDB = @remoteDB;
+
+    --EXEC uspDMAlterConstraint 'Check';
 
 END

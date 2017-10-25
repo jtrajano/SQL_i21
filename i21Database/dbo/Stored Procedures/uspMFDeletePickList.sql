@@ -19,10 +19,23 @@ DECLARE @ysnEnableParentLot BIT = 0
 		,@intPickUOMId int
 		,@dblQuantity numeric(38,20)
 		,@intItemUOMId int
+		,@intItemId int
+		,@strLotTracking nvarchar(50)
+		,@intKitStagingLocationId int
+		,@intManufacturingProcessId int
+		,@intLocationId int
 
 SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0) FROM tblMFCompanyPreference
 
-Select @intKitStatusId=intKitStatusId,@strPickListNo=strPickListNo from tblMFPickList Where intPickListId = @intPickListId
+Select @intKitStatusId=intKitStatusId,@strPickListNo=strPickListNo,@intLocationId=intLocationId from tblMFPickList Where intPickListId = @intPickListId
+
+Select TOP 1 @intManufacturingProcessId=intManufacturingProcessId
+From tblMFWorkOrder Where intPickListId=@intPickListId
+
+Select @intKitStagingLocationId=pa.strAttributeValue 
+From tblMFManufacturingProcessAttribute pa Join tblMFAttribute at on pa.intAttributeId=at.intAttributeId
+Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId 
+and at.strAttributeName='Kit Staging Location'
 
 If @intKitStatusId not in (7,12)
 	RaisError('Pick List cannot be deleted as it is already transferred.',16,1)
@@ -45,7 +58,8 @@ End
 		dblPickQuantity numeric(18,6),
 		intPickUOMId int,
 		dblQuantity numeric(38,20),
-		intItemUOMId int
+		intItemUOMId int,
+		intItemId int
 	)
 
 Begin Tran
@@ -70,7 +84,7 @@ Begin Tran
 			SELECT @dblPickQuantity=NULL,@intPickUOMId=NULL,@dblQuantity=NULL,@intItemUOMId=NULL
 
 			Select @intPickListDetailId = pld.intPickListDetailId, @intStageLotId=pld.intStageLotId,
-			@intStorageLocationId=pld.intStorageLocationId,@dblPickQuantity=pld.dblPickQuantity,@intPickUOMId=intPickUOMId,@dblQuantity=pld.dblQuantity,@intItemUOMId=pld.intItemUOMId  
+			@intStorageLocationId=pld.intStorageLocationId,@dblPickQuantity=pld.dblPickQuantity,@intPickUOMId=intPickUOMId,@dblQuantity=pld.dblQuantity,@intItemUOMId=pld.intItemUOMId
 			From @tblPickListDetail pld
 			where intRowNo=@intMinPickDetail
 
@@ -117,23 +131,25 @@ Begin Tran
 		Exec [uspMFDeleteLotReservationByPickList] @intPickListId
 
 		--Move the Staged (Kitting Area) Lots back to Storage Location
-		Insert Into @tblPickListDetail(intPickListDetailId,intStageLotId,intStorageLocationId,dblPickQuantity,intPickUOMId,dblQuantity,intItemUOMId)
+		Insert Into @tblPickListDetail(intPickListDetailId,intStageLotId,intStorageLocationId,dblPickQuantity,intPickUOMId,dblQuantity,intItemUOMId,intItemId)
 		Select PL.intPickListDetailId,PL.intStageLotId,PL.intStorageLocationId,
-		PL.dblPickQuantity,PL.intPickUOMId,PL.dblQuantity,PL.intItemUOMId
+		PL.dblPickQuantity,PL.intPickUOMId,PL.dblQuantity,PL.intItemUOMId,PL.intItemId
 		From tblMFPickListDetail PL
-		JOIN dbo.tblICLot L on L.intLotId=PL.intStageLotId
-		Where intPickListId=@intPickListId AND PL.intStorageLocationId <> L.intStorageLocationId
+		LEFT JOIN dbo.tblICLot L on L.intLotId=PL.intStageLotId AND PL.intStorageLocationId <> L.intStorageLocationId
+		Where intPickListId=@intPickListId
 
 		Select @intMinPickDetail=Min(intRowNo) from @tblPickListDetail
 
 		While(@intMinPickDetail is not null) --Pick List Detail Loop
 		Begin
-			SELECT @dblPickQuantity=NULL,@intPickUOMId=NULL,@dblQuantity=NULL,@intItemUOMId=NULL
+			SELECT @dblPickQuantity=NULL,@intPickUOMId=NULL,@dblQuantity=NULL,@intItemUOMId=NULL,@intItemId=NULL
 
 			Select @intPickListDetailId = pld.intPickListDetailId, @intStageLotId=pld.intStageLotId,
-			@intStorageLocationId=pld.intStorageLocationId,@dblPickQuantity=pld.dblPickQuantity,@intPickUOMId=intPickUOMId,@dblQuantity=pld.dblQuantity,@intItemUOMId=pld.intItemUOMId   
+			@intStorageLocationId=pld.intStorageLocationId,@dblPickQuantity=pld.dblPickQuantity,@intPickUOMId=intPickUOMId,@dblQuantity=pld.dblQuantity,@intItemUOMId=pld.intItemUOMId,@intItemId=pld.intItemId   
 			From @tblPickListDetail pld
 			where intRowNo=@intMinPickDetail
+
+			Select @strLotTracking=strLotTracking From tblICItem Where intItemId=@intItemId
 
 			Select @intNewSubLocationId=intSubLocationId from tblICStorageLocation Where intStorageLocationId=@intStorageLocationId
 
@@ -143,12 +159,15 @@ Begin Tran
 				SELECT @intPickUOMId=@intItemUOMId
 			END
 
-			Exec [uspMFLotMove] @intLotId=@intStageLotId,
-					@intNewSubLocationId=@intNewSubLocationId,
-					@intNewStorageLocationId=@intStorageLocationId,
-					@dblMoveQty=@dblPickQuantity,
-					@intMoveItemUOMId=@intPickUOMId,
-					@intUserId=@intUserId
+			IF @strLotTracking = 'No' --@intKitStagingLocationId is the From Storage Location Id
+				Exec uspMFKitItemMove @intPickListDetailId,@intKitStagingLocationId,@intUserId,1
+			Else
+				Exec [uspMFLotMove] @intLotId=@intStageLotId,
+						@intNewSubLocationId=@intNewSubLocationId,
+						@intNewStorageLocationId=@intStorageLocationId,
+						@dblMoveQty=@dblPickQuantity,
+						@intMoveItemUOMId=@intPickUOMId,
+						@intUserId=@intUserId
 
 			Select @intMinPickDetail=Min(intRowNo) from @tblPickListDetail where intRowNo>@intMinPickDetail
 		End

@@ -236,7 +236,7 @@ BEGIN
 	FROM tblICItem
 	WHERE intItemId = @intItemId
 
-	SELECT @dblNewCost = [dbo].[fnGetTotalStockValueFromTransactionBatch](@intBatchId, @strBatchId)
+	SELECT @dblNewCost = [dbo].[fnMFGetTotalStockValueFromTransactionBatch](@intBatchId, @strBatchId)
 
 	SET @dblNewCost = ABS(@dblNewCost)
 	SET @dblNewUnitCost = ABS(@dblNewCost) / @dblQty

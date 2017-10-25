@@ -111,7 +111,7 @@ BEGIN TRY
 	INNER JOIN tblTFReportingComponent RC ON Config.intReportingComponentId = RC.intReportingComponentId
 	WHERE RC.strFormCode = @FormCodeParam 
 		AND Config.strSegment = 'Summary'
-	ORDER BY Config.intReportingComponentConfigurationId DESC
+	ORDER BY Config.intReportItemSequence DESC
 	
 	-- LOOP ON SUMMARY ITEMS AND INSERT INTO SUMMARY TABLE
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTransactionSummaryItem)
@@ -322,17 +322,17 @@ BEGIN TRY
 
 	DECLARE @ItemTotal NVARCHAR(MAX)
 
-	DECLARE @tblTempScheduleCodeParam TABLE(
-				Id INT IDENTITY(1,1),
-				strTempScheduleCode NVARCHAR(120))
+	--DECLARE @tblTempScheduleCodeParam TABLE(
+	--			Id INT IDENTITY(1,1),
+	--			strTempScheduleCode NVARCHAR(120))
 
 	DECLARE @itemQuery NVARCHAR(MAX)
 	DECLARE @Total NVARCHAR(MAX)
 
 	--SPLIT SCHEDULE CODE AND INSERT TO @tblTempScheduleCodeParam
-	SELECT @queryScheduleCodeParam = 'SELECT ''' + REPLACE (@ScheduleCodeParam,',',''' UNION SELECT ''') + ''''
-	INSERT INTO @tblTempScheduleCodeParam (strTempScheduleCode)
-	EXEC(@queryScheduleCodeParam)
+	--SELECT @queryScheduleCodeParam = 'SELECT ''' + REPLACE (@ScheduleCodeParam,',',''' UNION SELECT ''') + ''''
+	--INSERT INTO @tblTempScheduleCodeParam (strTempScheduleCode)
+	--EXEC(@queryScheduleCodeParam)
 	--END
 
 	--COUNT REPORT TEMPLATE AND LOOP
@@ -355,8 +355,8 @@ BEGIN TRY
 			AND rc.strFormCode = @FormCodeParam
 
 		-- GET SCHEDULE CODE BY PASSED PARAM
-		DECLARE @paramTempScheduleCode NVARCHAR(MAX)
-		SELECT @paramTempScheduleCode = strTempScheduleCode FROM @tblTempScheduleCodeParam WHERE strTempScheduleCode = @TemplateScheduleCode
+		--DECLARE @paramTempScheduleCode NVARCHAR(MAX)
+		--SELECT @paramTempScheduleCode = strTempScheduleCode FROM @tblTempScheduleCodeParam WHERE strTempScheduleCode = @TemplateScheduleCode
 
 		--INSERT CALCULATED VALUE INTO TRANSACTION TABLE
 		--Disbursements - Schedule 2
@@ -368,7 +368,7 @@ BEGIN TRY
 						@TotalExemptGallonsSold = ISNULL(SUM(dblTaxExempt), 0),
 						@GasolineUseTaxCollected = ISNULL(SUM(dblTax), 0)
 					FROM vyuTFGetTransaction 
-					WHERE strScheduleCode = @paramTempScheduleCode 
+					WHERE strScheduleCode = @TemplateScheduleCode 
 					AND uniqTransactionGuid = @Guid 
 					AND strFormCode = @FormCodeParam
 			END
@@ -378,7 +378,7 @@ BEGIN TRY
 						@TotalExemptGallonsSold = ISNULL(SUM(dblTaxExempt), 0),
 						@GasolineUseTaxCollected = ISNULL(SUM(dblTax), 0)
 					FROM vyuTFGetTransaction 
-					WHERE strScheduleCode = @paramTempScheduleCode 
+					WHERE strScheduleCode = @TemplateScheduleCode 
 					AND strType = @Type 
 					AND uniqTransactionGuid = @Guid 
 					AND strFormCode = @FormCodeParam
@@ -399,7 +399,7 @@ BEGIN TRY
 				SELECT @ReceiptTotalGallsPurchased = ISNULL(SUM(dblGross), 0),
 						@GasolineUseTaxPaid = ISNULL(SUM(dblTax), 0)
 					FROM vyuTFGetTransaction 
-					WHERE strScheduleCode = @paramTempScheduleCode 
+					WHERE strScheduleCode = @TemplateScheduleCode 
 					AND uniqTransactionGuid = @Guid 
 					AND strFormCode = @FormCodeParam
 			END
@@ -408,7 +408,7 @@ BEGIN TRY
 				SELECT @ReceiptTotalGallsPurchased = ISNULL(SUM(dblGross), 0),
 						@GasolineUseTaxPaid = ISNULL(SUM(dblTax), 0) 
 					FROM vyuTFGetTransaction 
-					WHERE strScheduleCode = @paramTempScheduleCode 
+					WHERE strScheduleCode = @TemplateScheduleCode 
 					AND strType = @Type 
 					AND uniqTransactionGuid = @Guid 
 					AND strFormCode = @FormCodeParam

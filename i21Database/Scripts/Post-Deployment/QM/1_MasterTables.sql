@@ -1119,3 +1119,8 @@ UPDATE tblQMCompanyPreference
 SET ysnValidateMultipleValuesInTestResult = 0
 WHERE ysnValidateMultipleValuesInTestResult IS NULL
 GO
+
+UPDATE tblQMCompanyPreference
+SET strSampleImportDateTimeFormat = 'MM DD YYYY HH:MI'
+WHERE strSampleImportDateTimeFormat IS NULL
+GO

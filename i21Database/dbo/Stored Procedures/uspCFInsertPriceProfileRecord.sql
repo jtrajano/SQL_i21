@@ -14,6 +14,8 @@
 	,@strLocalPricingIndex			NVARCHAR(MAX)	 =	 ''
 	,@dblRate						NUMERIC(18,6)	 =    0
 	,@ysnForceRounding				NVARCHAR(MAX)	 =	 ''
+	,@ysnGlobalProfile				NVARCHAR(MAX)	 =	 ''
+	,@strLinkedProfile				NVARCHAR(MAX)	 =	 ''
 
 	---------------------------------------------------------
 	 
@@ -31,12 +33,28 @@ BEGIN
 	DECLARE @intNetworkId							  INT = NULL
 	DECLARE @intSiteGroup							  INT = NULL
 	DECLARE @intSiteId								  INT = NULL
+	DECLARE @intLinkedProfileId						  INT = NULL
 	DECLARE @intLocalPricingIndex					  INT = NULL
 	---------------------------------------------------------
 
 	---------------------------------------------------------
 	----				    VALIDATION		   			 ----
 	---------------------------------------------------------
+	
+	IF (@ysnGlobalProfile = 'N')
+		BEGIN 
+			SET @ysnGlobalProfile = 0
+		END
+	ELSE IF (@ysnGlobalProfile = 'Y' OR @ysnGlobalProfile IS NULL OR @ysnGlobalProfile = '')
+		BEGIN
+			SET @ysnGlobalProfile = 1	
+		END
+	ELSE
+		BEGIN 
+			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+			VALUES (@ysnGlobalProfile,'Invalid Global Profile value'+ @ysnGlobalProfile +'. Value should be Y or N only')
+			SET @ysnHasError = 1
+		END
 
 	IF (@ysnForceRounding = 'N')
 		BEGIN 
@@ -126,6 +144,28 @@ BEGIN
 	--				VALID PREDEFINED VALUES			       --		
 	---------------------------------------------------------
 	
+	--strLinkedProfile
+	IF(@strLinkedProfile != '' AND @ysnGlobalProfile != 1)
+	BEGIN
+		SELECT @intLinkedProfileId = intPriceProfileHeaderId 
+		FROM tblCFPriceProfileHeader 
+		WHERE strPriceProfile = @strLinkedProfile
+		AND strType = @strType
+		AND ysnGlobalProfile = 1
+
+		IF (@intLinkedProfileId = 0)
+		BEGIN
+			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+			VALUES (@strPriceProfile,'Unable to find match for '+ @strLinkedProfile +' on price profile list')
+			SET @ysnHasError = 1
+		END
+	END
+	ELSE
+	BEGIN
+		SET @intLinkedProfileId = NULL;
+	END
+
+
 	--LocalPricingIndex
 	IF(@ysnCheckIndex = 1)
 	BEGIN
@@ -256,7 +296,8 @@ BEGIN
 				,intSiteId				
 				,intLocalPricingIndex	
 				,dblRate					
-				,strBasis				
+				,strBasis	
+				,ysnForceRounding				
 				)
 			VALUES(
 				 @intId
@@ -266,7 +307,8 @@ BEGIN
 				,@intSiteId				
 				,@intLocalPricingIndex	
 				,@dblRate					
-				,@strBasis		
+				,@strBasis	
+				,@ysnForceRounding	
 				)
 			COMMIT TRANSACTION
 			RETURN 1
@@ -282,7 +324,7 @@ BEGIN
 	ELSE
 	BEGIN
 		----------------------------------------------------------
-		--				INSERT DISCOUNT SCHEDULE RECORD			--		
+		--				INSERT PRICE PROFILE RECORD			--		
 		----------------------------------------------------------
 		BEGIN TRANSACTION
 		BEGIN TRY
@@ -291,11 +333,15 @@ BEGIN
 				 strPriceProfile
 				,strDescription
 				,strType	
+				,intLinkedProfile
+				,ysnGlobalProfile
 			 )
 			VALUES(
 				 @strPriceProfile
 				,@strDescription
 				,@strType
+				,@intLinkedProfileId
+				,@ysnGlobalProfile
 			 )
 
 			SET @intId = SCOPE_IDENTITY()
@@ -334,6 +380,3 @@ BEGIN
 		END CATCH
 	END
 END
-GO
-
-

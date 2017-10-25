@@ -9,8 +9,12 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 -- Sanitize the @xmlParam 
-IF LTRIM(RTRIM(@xmlParam)) = '' 
-	SET @xmlParam = NULL 
+IF LTRIM(RTRIM(@xmlParam)) = ''
+	BEGIN 
+		SET @xmlParam = NULL
+
+		SELECT * FROM tblARCustomerStatementStagingTable
+	END
 
 -- Declare the variables.
 DECLARE  @dtmDateTo					AS DATETIME
@@ -143,10 +147,7 @@ SET @strDateFrom = ''''+ CONVERT(NVARCHAR(50),@dtmDateFrom, 110) + ''''
 
 IF CHARINDEX('''', @strCustomerName) > 0 
 	SET @strCustomerName = REPLACE(@strCustomerName, '''''', '''')
-
-IF ISNULL(@strCustomerName, '') <> ''
-	SELECT TOP 1 @strCustomerNumber = strCustomerNumber FROM vyuARCustomerSearch WHERE strName = @strCustomerName
-
+	
 IF @strStatementFormat = 'Balance Forward'
 	BEGIN
 		EXEC dbo.uspARCustomerStatementBalanceForwardReport 

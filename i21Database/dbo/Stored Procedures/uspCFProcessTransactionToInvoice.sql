@@ -195,6 +195,7 @@ INSERT INTO @EntriesForInvoice(
 	,[strItemTermDiscountBy]
 	,[dblItemTermDiscount]
 	,[dtmPostDate]
+	,[ysnImpactInventory]
 )
 SELECT
 	 [strTransactionType]					= (case
@@ -292,6 +293,14 @@ SELECT
 	,[strItemTermDiscountBy]				= @strItemTermDiscountBy
 	,[dblItemTermDiscount]					= @Discount
 	,[dtmPostedDate]						= cfTrans.dtmPostedDate
+	,[ysnImpactInventory]					= 															
+											(case
+											when RTRIM(LTRIM(cfTrans.strTransactionType)) = 'Remote' 
+											OR  RTRIM(LTRIM(cfTrans.strTransactionType)) = 'Extended Remote'
+											OR ISNULL((SELECT TOP 1 ysnCaptiveSite FROM tblCFSite where intSiteId = cfTrans.intSiteId),0) = 1
+											then 0
+											else 1
+											end)
 	
 FROM tblCFTransaction cfTrans
 INNER JOIN tblCFNetwork cfNetwork
@@ -424,7 +433,8 @@ INSERT INTO @InvoiceEntriesTEMP(
 ,[ysnUpdateAvailableDiscount]
 ,[strItemTermDiscountBy]
 ,[dblItemTermDiscount]
-,[dtmPostDate])
+,[dtmPostDate]
+,[ysnImpactInventory])
 SELECT 
 ROW_NUMBER() OVER(ORDER BY intEntityCustomerId ASC)
 ,[strTransactionType]
@@ -508,6 +518,7 @@ ROW_NUMBER() OVER(ORDER BY intEntityCustomerId ASC)
 ,[strItemTermDiscountBy]
 ,[dblItemTermDiscount]
 ,[dtmPostDate]
+,[ysnImpactInventory]
 FROM @EntriesForInvoice
 
 --select intCurrencyId, * from @EntriesForInvoice

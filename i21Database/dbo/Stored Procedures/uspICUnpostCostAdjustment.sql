@@ -16,7 +16,7 @@
 CREATE PROCEDURE [dbo].[uspICUnpostCostAdjustment]
 	@intTransactionId AS INT
 	,@strTransactionId AS NVARCHAR(40)
-	,@strBatchId AS NVARCHAR(20)
+	,@strBatchId AS NVARCHAR(40)
 	,@intEntityUserSecurityId AS INT
 	,@ysnRecap AS BIT = 0 
 AS

@@ -1190,6 +1190,7 @@
     <Build Include="dbo\Tables\tblSMCurrencyExchangeRate.sql" />
     <Build Include="dbo\Tables\tblSMCurrencyExchangeRateDetail.sql" />
     <Build Include="dbo\Index\IX_tblGLIjemst_0_1_2_3_4_5_19.sql" />
+    <Build Include="dbo\Index\IX_tblGLAccountReallocation_strName.sql" />
     <Build Include="dbo\Stored Procedures\uspGLExportAccountToCSV.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDoRoll.sql" />
     <Build Include="dbo\Tables\tblRKTradersbyBrokersAccountMapping.sql" />
@@ -1680,7 +1681,6 @@
     <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\GasCheckLeakcheck.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\OpenCallEntries.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\DefaultCriteria\CustomerListByRoute.sql" />
-    <Build Include="dbo\Views\vyuARCustomerPaymentHistoryReport.sql" />
     <Build Include="dbo\Views\vyuARTaxReport.sql" />
     <Build Include="dbo\Views\vyuARGetLostQuoteReasons.sql" />
     <Build Include="dbo\Views\vyuARGetLostQuoteCompetitors.sql" />
@@ -1729,7 +1729,6 @@
     <Build Include="dbo\Stored Procedures\uspICValidateCostingOnUnpostStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateCostingOnPostStorage.sql" />
     <Build Include="dbo\Functions\fnGetItemCostingOnPostStorageErrors.sql" />
-    <Build Include="dbo\Views\vyuARCustomerPaymentHistoryReport.sql" />
     <Build Include="dbo\Views\vyuARSalesAnalysisReport.sql" />
     <Build Include="dbo\Views\vyuARUnappliedCreditsRegister.sql" />
     <Build Include="dbo\Views\vyuARGetLostQuoteCompetitors.sql" />
@@ -5708,10 +5707,29 @@
     <Build Include="dbo\Stored Procedures\uspAPRpt1099DIVTwoPart.sql" />
     <Build Include="dbo\Views\vyuAP1099DIV.sql" />
     <Build Include="dbo\Views\vyuPATDividends.sql" />
+    <Build Include="dbo\Views\vyuGLRetainedEarnings.sql" />
     <None Include="Scripts\Post-Deployment\SM\1730_UpdateManufacturingMenus.sql" />
+    <Build Include="dbo\Functions\fnTFCoalesceProductCode.sql" />
+    <Build Include="dbo\Functions\fnTFCoalesceDestinationOriginState.sql" />
+    <Build Include="dbo\Functions\fnTFCoalesceDestinationState.sql" />
+    <Build Include="dbo\Functions\fnTFCoalesceVendor.sql" />
+    <Build Include="dbo\Functions\fnTFCoalesceAccountStatusCode.sql" />
+    <Build Include="dbo\Functions\fnTFCoalesceCustomer.sql" />
     <Build Include="dbo\Tables\tblCFSpecialTaxingRuleHeader.sql" />
     <Build Include="dbo\Tables\tblCFSpecialTaxingRuleSite.sql" />
     <Build Include="dbo\Tables\tblCFSpecialTaxingRuleTax.sql" />
+    <Build Include="dbo\Views\vyuGLTrialBalance_NonRE.sql" />
+    <Build Include="dbo\Views\vyuGLTrialBalance_RE.sql" />
+    <Build Include="dbo\Views\vyuGLTrialBalance.sql" />
+    <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitTB.sql" />
+    <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitRETB.sql" />
+    <Build Include="dbo\Views\vyuLGLoadContainerPurchaseContractsLookup.sql" />
+    <Build Include="dbo\Views\vyuCTContractAddOrdersLookup.sql" />
+    <Build Include="dbo\Views\vyuLGLoadDetailViewLookup.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMImportBanksFromOrigin.sql" />
+    <Build Include="dbo\Functions\fnMFGetTotalStockValueFromTransactionBatch.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCustomerPaymentHistoryReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMValidateRemoteServerRole.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

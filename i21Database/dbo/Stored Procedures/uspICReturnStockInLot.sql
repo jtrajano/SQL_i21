@@ -8,7 +8,7 @@ CREATE PROCEDURE [dbo].[uspICReturnStockInLot]
 	@intItemId AS INT
 	,@intItemLocationId AS INT
 	,@intItemUOMId AS INT 
-	,@strBatchId AS NVARCHAR(20)
+	,@strBatchId AS NVARCHAR(40)
 	,@dtmDate AS DATETIME	
 	,@intLotId AS INT
 	,@intSubLocationId AS INT

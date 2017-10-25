@@ -34,11 +34,29 @@ BEGIN TRY
 		,@intSampleTypeId INT
 		,@intProductId INT
 		,@intContractDetailId INT
+		,@strSampleImportDateTimeFormat NVARCHAR(50)
+		,@intConvertYear INT
 
 	BEGIN TRANSACTION
 
 	DELETE
 	FROM tblQMSampleImportError
+
+	SELECT @strSampleImportDateTimeFormat = strSampleImportDateTimeFormat
+	FROM tblQMCompanyPreference
+
+	SELECT @intConvertYear = 101
+
+	IF (
+			@strSampleImportDateTimeFormat = 'MM DD YYYY HH:MI'
+			OR @strSampleImportDateTimeFormat = 'YYYY MM DD HH:MI'
+			)
+		SELECT @intConvertYear = 101
+	ELSE IF (
+			@strSampleImportDateTimeFormat = 'DD MM YYYY HH:MI'
+			OR @strSampleImportDateTimeFormat = 'YYYY DD MM HH:MI'
+			)
+		SELECT @intConvertYear = 103
 
 	SELECT @intSampleImportId = MIN(intSampleImportId)
 	FROM tblQMSampleImport
@@ -69,8 +87,9 @@ BEGIN TRY
 			,@intSampleTypeId = NULL
 			,@intProductId = NULL
 			,@intContractDetailId = NULL
+			,@strPreviousErrMsg = ''
 
-		SELECT @dtmSampleReceivedDate = CONVERT(DATETIME, dtmSampleReceivedDate, 101)
+		SELECT @dtmSampleReceivedDate = CONVERT(DATETIME, dtmSampleReceivedDate, @intConvertYear)
 			,@strSampleNumber = strSampleNumber
 			,@strSampleRefNo = strSampleNumber
 			,@strItemShortName = strItemShortName
@@ -89,8 +108,6 @@ BEGIN TRY
 			,@dtmCreated = dtmCreated
 		FROM tblQMSampleImport
 		WHERE intSampleImportId = @intSampleImportId
-
-		SELECT @strPreviousErrMsg = ''
 
 		-- Sample No
 		IF ISNULL(@strSampleRefNo, '') = ''
@@ -112,6 +129,11 @@ BEGIN TRY
 		BEGIN
 			IF ISDATE(@dtmSampleReceivedDate) = 0
 				SELECT @strPreviousErrMsg += 'Invalid Sample Date. '
+			ELSE
+			BEGIN
+				IF CONVERT(DATE, @dtmSampleReceivedDate) > CONVERT(DATE, GETDATE())
+					SELECT @strPreviousErrMsg += 'Sample Date cannot be Future Date. '
+			END
 		END
 
 		-- Item Short Name
@@ -218,7 +240,7 @@ BEGIN TRY
 			END
 		END
 
-		-- Property Name
+		-- Property Name and Value
 		IF ISNULL(@strPropertyName, '') = ''
 			SELECT @strPreviousErrMsg += 'Invalid Property Name. '
 		ELSE
@@ -229,6 +251,45 @@ BEGIN TRY
 					WHERE strPropertyName = @strPropertyName
 					)
 				SELECT @strPreviousErrMsg += 'Invalid Property Name. '
+			ELSE
+			BEGIN
+				IF ISNULL(@strPropertyValue, '') <> ''
+				BEGIN
+					DECLARE @intDataTypeId INT = 0
+
+					SELECT @intDataTypeId = intDataTypeId
+					FROM tblQMProperty
+					WHERE strPropertyName = @strPropertyName
+
+					IF @intDataTypeId = 1 -- Integer
+					BEGIN
+						IF (@strPropertyValue LIKE '%[^0-9]%')
+							SELECT @strPreviousErrMsg += 'Property Value should be Whole Number. '
+					END
+					ELSE IF @intDataTypeId = 2 -- Float
+					BEGIN
+						IF ISNUMERIC(@strPropertyValue) <> 1
+							SELECT @strPreviousErrMsg += 'Property Value should be Whole Number / Decimal Number. '
+						ELSE IF CONVERT(FLOAT, @strPropertyValue) < 0
+							SELECT @strPreviousErrMsg += 'Property Value cannot be Negative. '
+					END
+					ELSE IF @intDataTypeId = 4 -- Bit
+					BEGIN
+						IF (
+								LOWER(@strPropertyValue) NOT IN (
+									'true'
+									,'false'
+									)
+								)
+							SELECT @strPreviousErrMsg += 'Property Value should be true / false. '
+					END
+					ELSE IF @intDataTypeId = 12 -- DateTime
+					BEGIN
+						IF ISDATE(@strPropertyValue) = 0
+							SELECT @strPreviousErrMsg += 'Property Value should be a Date. '
+					END
+				END
+			END
 		END
 
 		-- Result
@@ -387,7 +448,7 @@ BEGIN TRY
 				(
 					SELECT COUNT(1) AS intCount
 					FROM (
-						SELECT DISTINCT CONVERT(DATETIME, dtmSampleReceivedDate, 101) dtmSampleReceivedDate
+						SELECT DISTINCT CONVERT(DATETIME, dtmSampleReceivedDate, @intConvertYear) dtmSampleReceivedDate
 							,strItemShortName
 							,strSampleTypeName
 							,strVendorName
@@ -446,7 +507,7 @@ BEGIN TRY
 					)
 				SELECT intSampleImportId
 					,intConcurrencyId
-					,CONVERT(DATETIME, dtmSampleReceivedDate, 101)
+					,dtmSampleReceivedDate
 					,strSampleNumber
 					,strItemShortName
 					,strSampleTypeName
@@ -482,7 +543,7 @@ BEGIN TRY
 	SELECT intSampleImportErrorId
 		,intSampleImportId
 		,intConcurrencyId
-		,CONVERT(DATETIME, dtmSampleReceivedDate, 101) dtmSampleReceivedDate
+		,dtmSampleReceivedDate AS strSampleReceivedDate
 		,strSampleNumber
 		,strItemShortName
 		,strSampleTypeName

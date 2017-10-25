@@ -8,9 +8,13 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
- -- Sanitize the @xmlParam 
-IF LTRIM(RTRIM(@xmlParam)) = '' 
-	SET @xmlParam = NULL 
+-- Sanitize the @xmlParam 
+IF LTRIM(RTRIM(@xmlParam)) = ''
+	BEGIN 
+		SET @xmlParam = NULL
+
+		SELECT * FROM tblARCustomerStatementStagingTable
+	END
 
 -- Declare the variables.
 DECLARE  @dtmDateTo					AS DATETIME

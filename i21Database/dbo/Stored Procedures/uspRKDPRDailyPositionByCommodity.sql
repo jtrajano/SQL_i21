@@ -64,7 +64,7 @@ SELECT strLocationName,intCommodityId,strCommodityCode,strUnitMeasure,intUnitMea
    
    CASE WHEN isnull(@intVendorId,0) = 0 THEN
    isnull(invQty,0) + isnull(dblGrainBalance ,0) +
-   isnull(OnHold,0) + isnull(DP ,0)
+   isnull(OnHold,0) --+ isnull(DP ,0)
    else
     isnull(CASE WHEN (SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1 then isnull(DPCustomer,0) else 0 end,0) + isnull(OnHold,0) end
    AS InHouse             
@@ -192,7 +192,7 @@ SELECT distinct c.intCommodityId, strLocationName, intLocationId,
      SELECT
      dbo.fnCTConvertQuantityToTargetCommodityUOM(CH.intCommodityUnitMeasureId,um.intCommodityUnitMeasureId,isnull(Balance,0)) dblTotal
 	 FROM vyuGRGetStorageDetail CH  
-	 WHERE CH.intCommodityId = c.intCommodityId AND ysnCustomerStorage <> 1 and CH.intCompanyLocationId=cl.intCompanyLocationId
+	 WHERE CH.intCommodityId = c.intCommodityId  and CH.intCompanyLocationId=cl.intCompanyLocationId
 	 and  intEntityId= CASE WHEN ISNULL(@intVendorId,0)=0 then intEntityId else @intVendorId end 	 
 	 )t) as dblGrainBalance 
 

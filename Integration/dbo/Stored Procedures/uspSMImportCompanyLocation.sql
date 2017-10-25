@@ -159,9 +159,9 @@ BEGIN
 					ELSE
 						RTRIM(LTRIM(ISNULL(AG.[agloc_addr],''''))) + (CHAR(13) + CHAR(10)) + RTRIM(LTRIM(ISNULL(AG.[agloc_addr2],'''')))
 				  END)								--<strAddress, nvarchar(max),>
-				,[agloc_zip]						--<strZipPostalCode, nvarchar(50),>
-				,[agloc_city]						--<strCity, nvarchar(50),>
-				,[agloc_state]						--<strStateProvince, nvarchar(50),>
+				,RTRIM([agloc_zip])						--<strZipPostalCode, nvarchar(50),>
+				,RTRIM([agloc_city])						--<strCity, nvarchar(50),>
+				,RTRIM([agloc_state])						--<strStateProvince, nvarchar(50),>
 				,[agloc_country]					--<strCountry, nvarchar(50),>
 				,(CASE 
 					WHEN CHARINDEX(''x'', AG.[agloc_phone]) > 0 
@@ -972,9 +972,9 @@ BEGIN
       END)        --<strLocationName, nvarchar(50),>  
     ,''Office''       --<strLocationType, nvarchar(50),>  
     ,RTRIM(LTRIM(ISNULL(PT.[ptloc_addr],'''')))        --<strAddress, nvarchar(max),>  
-    ,[ptloc_zip]      --<strZipPostalCode, nvarchar(50),>  
-    ,[ptloc_city]      --<strCity, nvarchar(50),>  
-    ,[ptloc_state]      --<strStateProvince, nvarchar(50),>  
+    ,RTRIM([ptloc_zip])      --<strZipPostalCode, nvarchar(50),>  
+    ,RTRIM([ptloc_city])      --<strCity, nvarchar(50),>  
+    ,RTRIM([ptloc_state])      --<strStateProvince, nvarchar(50),>  
     ,''''				     --<strCountry, nvarchar(50),>  
     ,(CASE   
      WHEN CHARINDEX(''x'', PT.[ptloc_phone]) > 0   

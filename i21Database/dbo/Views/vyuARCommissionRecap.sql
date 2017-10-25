@@ -8,11 +8,11 @@ FROM
 	tblARCommissionPlan CP
 INNER JOIN 
 	tblARCommissionRecap CR ON CP.intCommissionPlanId = CR.intCommissionPlanId 
-INNER JOIN 
-	(SELECT 
-		intCommissionRecapId 
-	 FROM 
-		tblARCommissionRecapDetail) CRD ON CR.intCommissionRecapId = CRD.intCommissionRecapId
+-- INNER JOIN 
+-- 	(SELECT 
+-- 		intCommissionRecapId 
+-- 	 FROM 
+-- 		tblARCommissionRecapDetail) CRD ON CR.intCommissionRecapId = CRD.intCommissionRecapId
 LEFT JOIN 
 	(SELECT
 		intCommissionScheduleId

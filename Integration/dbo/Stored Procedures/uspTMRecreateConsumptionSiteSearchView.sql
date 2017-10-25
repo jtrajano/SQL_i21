@@ -39,7 +39,7 @@ BEGIN
 				,strPhone = C.vwcus_phone COLLATE Latin1_General_CI_AS 
 				,intCustomerID = B.intCustomerID 
 				,strDescription = A.strDescription
-				,strLocation = A.strLocation
+				,strLocation = S.vwloc_loc_no COLLATE Latin1_General_CI_AS
 				,strAddress = A.strSiteAddress
 				,intSiteID = A.intSiteID
 				,intSiteNumber = A.intSiteNumber
@@ -110,6 +110,8 @@ BEGIN
 					ON A.intTaxStateID = Q.A4GLIdentity
 				LEFT JOIN tblTMGlobalJulianCalendar R
 					ON A.intGlobalJulianCalendarId = R.intGlobalJulianCalendarId
+				LEFT JOIN vwlocmst S
+					ON A.intLocationId = S.A4GLIdentity
 				
 		')
 	END

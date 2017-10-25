@@ -4,7 +4,6 @@ SELECT
 	intLoadDetailId
 	,LD.intLoadId
 	,strLoadNumber
-	,intContractTypeId
 	,intPContractDetailId
 	,intPContractHeaderId
 	,intPContractSeq
@@ -39,7 +38,7 @@ SELECT
 	,intStockUOM = intPStockUOM
 	,strStockUOM = strPStockUOM COLLATE Latin1_General_CI_AS
 	,strStockUOMType = strPStockUOMType COLLATE Latin1_General_CI_AS
-	,dblStockUOMCF = dblPStockUOMCF 
+	,dblStockUOMCF = ISNULL(dblPStockUOMCF,0.0)
 	,strBLNumber = NULL
 	,strContainerNumber = NULL
 	,strLotNumber = NULL
@@ -64,81 +63,74 @@ SELECT
 	,ysnPosted
 	,intStorageLocationId = SL.intStorageLocationId
 	,strStorageLocationName = SL.strName 
-	, LD.strPSubLocationName
-	, LD.strSSubLocationName
-
-FROM vyuLGLoadDetailView LD
-LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadId = LD.intLoadId
-LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = LW.intStorageLocationId
-WHERE intLoadDetailId NOT IN (Select intLoadDetailId FROM vyuLGLoadContainerPurchaseContracts)
+FROM vyuLGLoadDetailViewLookup LD
+	LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadId = LD.intLoadId
+	LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = LW.intStorageLocationId
+WHERE intLoadDetailId NOT IN (Select intLoadDetailId FROM vyuLGLoadContainerPurchaseContractsLookup)
 
 UNION ALL
 
-SELECT 
-
-	intLoadDetailId
-	,intLoadId
-	,strLoadNumber
-	,intContractTypeId
-	,intPContractDetailId
-	,intContractHeaderId
-	,intContractSeq
-	,strContractNumber COLLATE Latin1_General_CI_AS
-	,intPSubLocationId
-	,intCommodityId
-	,intItemId
-	,intLifeTime
-	,strLifeTimeType COLLATE Latin1_General_CI_AS
-	,intItemUOMId
-	,intLocationId
-	,dblQuantity
-	,dblReceivedQty
-	,dblBalanceToReceive = dblQuantity - dblReceivedQty
-	,dblGrossWt
-	,dblTareWt
-	,dblNetWt
-	,dblCost
-	,strCostUOM COLLATE Latin1_General_CI_AS
-	,intCostUOMId
-	,dblCostUOMCF
-	,intWeightUOMId
-	,strWeightUOM COLLATE Latin1_General_CI_AS
-	,intEntityVendorId
-	,strVendor COLLATE Latin1_General_CI_AS
-	,strItemNo COLLATE Latin1_General_CI_AS
-	,strItemDescription COLLATE Latin1_General_CI_AS
-	,strLotTracking COLLATE Latin1_General_CI_AS
-	,strType COLLATE Latin1_General_CI_AS
-	,strUnitMeasure COLLATE Latin1_General_CI_AS
-	,dblItemUOMCF
-	,intStockUOM
-	,strStockUOM COLLATE Latin1_General_CI_AS
-	,strStockUOMType COLLATE Latin1_General_CI_AS
-	,dblStockUOMCF
-	,strBLNumber COLLATE Latin1_General_CI_AS
-	,strContainerNumber COLLATE Latin1_General_CI_AS
-	,strLotNumber COLLATE Latin1_General_CI_AS
-	,strMarks COLLATE Latin1_General_CI_AS
-	,strOtherMarks COLLATE Latin1_General_CI_AS
-	,strSealNumber COLLATE Latin1_General_CI_AS
-	,strContainerType COLLATE Latin1_General_CI_AS
-	,intWeightItemUOMId
-	,strCurrency COLLATE Latin1_General_CI_AS
-	,strMainCurrency COLLATE Latin1_General_CI_AS
-	,ysnSubCurrency
-	,dblMainCashPrice
-	,dblFranchise
-	,dblContainerWeightPerQty
-	,intSubLocationId
-	,strSubLocationName
-	,intLoadContainerId
-	,intLoadDetailContainerLinkId
-	,intPurchaseSale
-	,intTransUsedBy
-	,intSourceType
-	,ysnPosted
-	,intStorageLocationId = intStorageLocationId 
-	,strStorageLocationName = strStorageLocationName COLLATE Latin1_General_CI_AS
-	,strPSubLocationName
-	,strSSubLocationName
-FROM vyuLGLoadContainerPurchaseContracts
+SELECT
+	  intLoadDetailId               = L.intLoadDetailId
+	, intLoadId						= L.intLoadId
+	, strLoadNumber					= L.strLoadNumber
+	, intPContractDetailId			= L.intPContractDetailId
+	, intPContractHeaderId			= L.intPContractHeaderId
+	, intPContractSeq				= L.intPContractSeq
+	, strPContractNumber			= L.strPContractNumber
+	, intPSubLocationId				= L.intPSubLocationId
+	, intPCommodityId				= L.intPCommodityId
+	, intItemId						= L.intItemId				
+	, intPLifeTime					= L.intPLifeTime			
+	, strPLifeTimeType				= L.strPLifeTimeType		
+	, intItemUOMId					= L.intItemUOMId			
+	, intCompanyLocationId			= L.intCompanyLocationId	
+	, dblQuantity					= L.dblQuantity			
+	, dblDeliveredQuantity			= L.dblDeliveredQuantity
+	, dblBalanceToReceive			= L.dblBalanceToReceive
+	, dblGross						= L.dblGross
+	, dblTare						= L.dblTare			
+	, dblNet						= L.dblNet			
+	, dblCost						= L.dblCost			
+	, strPCostUOM					= L.strPCostUOM				
+	, intPCostUOMId					= L.intPCostUOMId	
+	, dblPCostUOMCF 				= L.dblPCostUOMCF 		
+	, intWeightUOMId				= L.intWeightUOMId	
+	, strWeightItemUOM				= L.strWeightUOM
+	, intEntityVendorId				= L.intEntityVendorId	
+	, strVendor						= L.strVendor
+	, strItemNo						= L.strItemNo			
+	, strItemDescription			= L.strItemDescription
+	, strLotTracking				= L.strLotTracking	
+	, strType						= L.strType			
+	, strUnitMeasure				= L.strUnitMeasure	
+	, dblItemUOMCF					= L.dblItemUOMCF		
+	, intStockUOM					= L.intStockUOM		
+	, strStockUOM					= L.strStockUOM		
+	, strStockUOMType				= L.strStockUOMType	
+	, dblStockUOMCF 				= ISNULL(L.dblStockUOMCF,0.0)
+	, strBLNumber					= L.strBLNumber		
+	, strContainerNumber			= L.strContainerNumber
+	, strLotNumber					= strLotNumber	
+	, strMarks						= strMarks		
+	, strOtherMarks					= strOtherMarks
+	, strSealNumber					= strSealNumber
+	, strContainerType				= strContainerType				
+	, intWeightItemUOMId			= intWeightItemUOMId			
+	, strCurrency					= strCurrency					
+	, strMainCurrency				= strMainCurrency				
+	, ysnSubCurrency				= ysnSubCurrency				
+	, dblMainCashPrice				= dblMainCashPrice				
+	, dblFranchise					= dblFranchise					
+	, dblContainerWeightPerQty		= dblContainerWeightPerQty		
+	, intSubLocationId				= intSubLocationId				
+	, strSubLocationName			= strSubLocationName			
+	, intLoadContainerId			= intLoadContainerId			
+	, intLoadDetailContainerLinkId	= intLoadDetailContainerLinkId	
+	, intPurchaseSale				= intPurchaseSale				
+	, intTransUsedBy				= intTransUsedBy				
+	, intSourceType					= intSourceType					
+	, ysnPosted						= ysnPosted						
+	, intStorageLocationId			= intStorageLocationId			
+	, strStorageLocationName		= strStorageLocationName		
+FROM vyuLGLoadContainerPurchaseContractsLookup L

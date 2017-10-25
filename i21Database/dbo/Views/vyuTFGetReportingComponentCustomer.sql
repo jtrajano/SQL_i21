@@ -4,7 +4,8 @@
 SELECT RCC.intReportingComponentCustomerId,
 	   RC.intReportingComponentId,
 	   RCC.intEntityCustomerId,
-	   RCC.strCustomerNumber,
+	   EM.strEntityNo strCustomerNumber,
 	   RCC.ysnInclude
 FROM tblTFReportingComponentCustomer RCC
 LEFT JOIN tblTFReportingComponent RC ON RC.intReportingComponentId = RCC.intReportingComponentId
+INNER JOIN tblEMEntity EM ON EM.intEntityId  = RCC.intEntityCustomerId

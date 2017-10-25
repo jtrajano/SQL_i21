@@ -1,6 +1,4 @@
-﻿
-
-CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
+﻿CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
 
  @ProductId				INT							
 ,@CardId				INT	
@@ -129,10 +127,15 @@ BEGIN
 
 	DECLARE @intPriceRuleGroup				INT
 	
-	DECLARE @dblGrossTransferCost		NUMERIC(18,6)
-	DECLARE @dblNetTransferCost			NUMERIC(18,6)
-	DECLARE @dblAdjustments				NUMERIC(18,6)
-	DECLARE @dblAdjustmentWithIndex		NUMERIC(18,6)
+	DECLARE @dblGrossTransferCost			NUMERIC(18,6)
+	DECLARE @dblNetTransferCost				NUMERIC(18,6)
+	DECLARE @dblAdjustments					NUMERIC(18,6)
+	DECLARE @dblAdjustmentWithIndex			NUMERIC(18,6)
+
+	
+	DECLARE @ysnCaptiveSite					BIT
+
+
 	
 
 	-- IF RECALCULATE FROM IMPORTING--
@@ -252,6 +255,12 @@ BEGIN
 		SET @intTransactionId = NULL
 	END
 		
+
+
+	--GET CAPTIVE SITE--
+	SELECT TOP 1 
+	@ysnCaptiveSite = ysnCaptiveSite
+	FROM tblCFSite WHERE intSiteId = @intSiteId
 
 	--GET TAX GROUP ID--
 	SELECT TOP 1 
@@ -2753,23 +2762,28 @@ BEGIN
 	---------------------------------------------------
 	--					ZERO PRICING				 --
 	---------------------------------------------------
-	DECLARE @dblCalculatedPricing NUMERIC(18,6)
-	SELECT TOP 1 @dblCalculatedPricing = dblCalculatedAmount FROM @tblTransactionPrice WHERE strTransactionPriceId = 'Net Price'
-	IF (@dblCalculatedPricing IS NULL OR @dblCalculatedPricing <= 0)
-	BEGIN		
-		SET @ysnInvalid = 1
-		--UPDATE tblCFTransaction SET ysnInvalid = 1 WHERE intTransactionId = @intTransactionId
-		INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
-		VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Invalid calculated price.')
-	END
+	IF (ISNULL(@ysnCaptiveSite,0) = 0)
+	BEGIN
+
+		DECLARE @dblCalculatedPricing NUMERIC(18,6)
+		SELECT TOP 1 @dblCalculatedPricing = dblCalculatedAmount FROM @tblTransactionPrice WHERE strTransactionPriceId = 'Net Price'
+		IF (@dblCalculatedPricing IS NULL OR @dblCalculatedPricing <= 0)
+		BEGIN		
+			SET @ysnInvalid = 1
+			--UPDATE tblCFTransaction SET ysnInvalid = 1 WHERE intTransactionId = @intTransactionId
+			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Invalid calculated price.')
+		END
 
 	
-	DECLARE @dblOriginalPricing NUMERIC(18,6)
-	SELECT TOP 1 @dblOriginalPricing = dblOriginalAmount FROM @tblTransactionPrice WHERE strTransactionPriceId = 'Net Price'
-	IF (@dblOriginalPricing IS NULL OR @dblOriginalPricing <= 0)
-	BEGIN
-		INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
-		VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Invalid original price.')
+		DECLARE @dblOriginalPricing NUMERIC(18,6)
+		SELECT TOP 1 @dblOriginalPricing = dblOriginalAmount FROM @tblTransactionPrice WHERE strTransactionPriceId = 'Net Price'
+		IF (@dblOriginalPricing IS NULL OR @dblOriginalPricing <= 0)
+		BEGIN
+			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Invalid original price.')
+		END
+
 	END
 	---------------------------------------------------
 	--					ZERO PRICING				 --

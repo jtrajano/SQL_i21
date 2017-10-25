@@ -52,7 +52,7 @@ DECLARE @intItemId AS INT
 		,@intTransactionId AS INT
 		,@intTransactionDetailId AS INT 
 		,@strTransactionId AS NVARCHAR(20)
-		,@strBatchId AS NVARCHAR(20)
+		,@strBatchId AS NVARCHAR(40)
 		,@intTransactionTypeId AS INT
 		,@strTransactionForm AS NVARCHAR(255)
 		,@intEntityUserSecurityId AS INT

@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspICRepostCostAdjustment]
 	@strBillId AS NVARCHAR(50)
-	,@strBatchId AS NVARCHAR(20)
+	,@strBatchId AS NVARCHAR(40)
 	,@intEntityUserSecurityId AS INT
 	,@ysnRegenerateBillGLEntries AS BIT = 0
 AS

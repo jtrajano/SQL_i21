@@ -48,6 +48,8 @@ BEGIN TRY
 	INTO #tmpRC
 	FROM dbo.fnSplitStringWithTrim(@ReportingComponentId, ',')
 
+	DELETE #tmpRC where intReportingComponentId = ''
+
 	SELECT TOP 1 @CompanyName = strCompanyName, @CompanyEIN = strEin FROM tblSMCompanySetup
 
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpRC)
@@ -182,7 +184,7 @@ BEGIN TRY
 				, strVendorIdType = 'FEIN'
 				, strCustomerIdType = 'FEIN'
 				, strVendorInvoiceNumber = APBill.strVendorOrderNumber
-				, strCustomerLicenseNumber = NULL
+				, strCustomerLicenseNumber = tblTFTaxAuthorityCustomerLicense.strLicenseNumber
 				, strCustomerAccountStatusCode = NULL
 				, strCustomerStreetAddress = NULL
 				, strCustomerZipCode = NULL
@@ -211,6 +213,8 @@ BEGIN TRY
 			LEFT JOIN tblTRLoadReceipt ON tblTRLoadReceipt.intInventoryReceiptId = Receipt.intInventoryReceiptId
 			LEFT JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadReceipt.intLoadHeaderId
 			LEFT JOIN tblTRState ON tblTRState.intStateId = tblTRLoadHeader.intStateId
+			LEFT JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId
+			LEFT JOIN tblTFTaxAuthorityCustomerLicense ON tblTFTaxAuthorityCustomerLicense.intEntityId = tblTRLoadDistributionHeader.intEntityCustomerId
 			LEFT JOIN (
 				SELECT TOP 1 tblAPBillDetail.intInventoryReceiptItemId, tblAPBill.intBillId, tblAPBill.strVendorOrderNumber
 				FROM tblAPBillDetail 
@@ -331,7 +335,7 @@ BEGIN TRY
 				, strVendorIdType = 'FEIN'
 				, strCustomerIdType = 'FEIN'
 				, strVendorInvoiceNumber = APBill.strVendorOrderNumber
-				, strCustomerLicenseNumber = NULL
+				, strCustomerLicenseNumber = tblTFTaxAuthorityCustomerLicense.strLicenseNumber
 				, strCustomerAccountStatusCode = NULL
 				, strCustomerStreetAddress = NULL
 				, strCustomerZipCode = NULL
@@ -359,6 +363,8 @@ BEGIN TRY
 			LEFT JOIN tblTRLoadReceipt ON tblTRLoadReceipt.intInventoryReceiptId = Receipt.intInventoryReceiptId
 			LEFT JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadReceipt.intLoadHeaderId
 			LEFT JOIN tblTRState ON tblTRState.intStateId = tblTRLoadHeader.intStateId
+			LEFT JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId
+			LEFT JOIN tblTFTaxAuthorityCustomerLicense ON tblTFTaxAuthorityCustomerLicense.intEntityId = tblTRLoadDistributionHeader.intEntityCustomerId
 			LEFT JOIN (
 				SELECT TOP 1 tblAPBillDetail.intInventoryReceiptItemId, tblAPBill.intBillId, tblAPBill.strVendorOrderNumber
 				FROM tblAPBillDetail 
@@ -557,30 +563,33 @@ BEGIN TRY
 				, intTransactionNumberId
 			FROM @TFTransaction
 		END
+
+		IF (NOT EXISTS(SELECT TOP 1 1 FROM @TFTransaction WHERE intReportingComponentId = @RCId ) AND @IsEdi = 0)
+		BEGIN
+			INSERT INTO tblTFTransaction (uniqTransactionGuid
+				, intReportingComponentId
+				, strProductCode
+				, dtmDate
+				, dtmReportingPeriodBegin
+				, dtmReportingPeriodEnd
+				, strTransactionType)
+			VALUES(@Guid
+				, @RCId
+				, 'No record found.'
+				, GETDATE()
+				, @DateFrom
+				, @DateTo
+				, 'Receipt')
+		END
 		
 		DELETE FROM @TFTransaction
+		
 		DELETE FROM #tmpRC WHERE @RCId = intReportingComponentId
 	END
 
 	DROP TABLE #tmpRC
 	
-	IF (NOT EXISTS(SELECT TOP 1 1 FROM tblTFTransaction WHERE uniqTransactionGuid = @Guid) AND @IsEdi = 0)
-	BEGIN
-		INSERT INTO tblTFTransaction (uniqTransactionGuid
-			, intReportingComponentId
-			, strProductCode
-			, dtmDate
-			, dtmReportingPeriodBegin
-			, dtmReportingPeriodEnd
-			, strTransactionType)
-		VALUES(@Guid
-			, @RCId
-			, 'No record found.'
-			, GETDATE()
-			, @DateFrom
-			, @DateTo
-			, 'Receipt')
-	END
+	
 END TRY
 BEGIN CATCH
 	SELECT 

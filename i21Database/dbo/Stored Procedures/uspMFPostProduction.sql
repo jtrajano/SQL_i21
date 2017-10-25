@@ -132,7 +132,7 @@ BEGIN
 END
 ELSE
 BEGIN
-	SELECT @dblNewCost = [dbo].[fnGetTotalStockValueFromTransactionBatch](@intTransactionId, @strBatchId)
+	SELECT @dblNewCost = [dbo].[fnMFGetTotalStockValueFromTransactionBatch](@intTransactionId, @strBatchId)
 
 	SET @dblNewCost = ABS(@dblNewCost)
 	SET @dblNewUnitCost = ABS(@dblNewCost) / @dblProduceQty
