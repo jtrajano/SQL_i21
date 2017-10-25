@@ -27,6 +27,7 @@ Ext.define('Inventory.model.Item', {
         'Inventory.model.ItemOwner',
         'Inventory.model.ItemFactory',
         'Inventory.model.ItemMotorFuelTax',
+        'Inventory.model.ItemLicense',
         'Ext.data.Field'
     ],
 

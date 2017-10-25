@@ -568,4 +568,23 @@ namespace iRely.Inventory.Model
         }
     }
 
+    public class tblSMLicenseTypeMap : EntityTypeConfiguration<tblSMLicenseType>
+    {
+        public tblSMLicenseTypeMap()
+        {
+            //Primary Key
+            this.HasKey(t => t.intLicenseTypeId);
+
+            //Table & Column Mappings
+            this.ToTable("tblSMLicenseType");
+            this.Property(t => t.intLicenseTypeId).HasColumnName("intLicenseTypeId");
+            this.Property(t => t.strCode).HasColumnName("strCode");
+            this.Property(t => t.strDescription).HasColumnName("strDescription");
+            this.Property(t => t.ysnRequiredForApplication).HasColumnName("ysnRequiredForApplication");
+            this.Property(t => t.ysnRequiredForPurchase).HasColumnName("ysnRequiredForPurchase");
+
+            
+        }
+    }
+
 }

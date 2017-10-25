@@ -429,6 +429,15 @@ Ext.define('Inventory.view.ItemViewController', {
                 ]
             },
             txtVolumeRebateGroup: '{current.strVolumeRebateGroup}',
+            grdItemLicense: {
+                colItemLicenseCode: {
+                    dataIndex: 'strCode',
+                    editor: {
+                        origValueField: 'intLicenseTypeId'
+                    }
+                },
+                colItemLicenseTypeDescription: 'strCodeDescription'
+            },
             cboPhysicalItem: {
                 value: '{current.strPhysicalItem}',
                 origUpdateField: 'intPhysicalItem',
@@ -1303,7 +1312,8 @@ Ext.define('Inventory.view.ItemViewController', {
             grdAssembly = win.down('#grdAssembly'),
             grdBundle = win.down('#grdBundle'),
             grdKit = win.down('#grdKit'),
-            grdKitDetails = win.down('#grdKitDetails');
+            grdKitDetails = win.down('#grdKitDetails'),
+            grdItemLicense = win.down('#grdItemLicense');
 
         win.context = Ext.create('iRely.Engine', {
             window : win,
@@ -1322,10 +1332,10 @@ Ext.define('Inventory.view.ItemViewController', {
             
             
             onSaveClick: me.saveAndPokeGrid(win, grdUOM),
-            attachment: Ext.create('iRely.attachment.Manager', {
-                type: 'Inventory.Item',
-                window: win
-            }),
+            // attachment: Ext.create('iRely.attachment.Manager', {
+            //     type: 'Inventory.Item',
+            //     window: win
+            // }),
             include: 'vyuICGetCompactItem',
             details: [
                 {
@@ -1505,6 +1515,14 @@ Ext.define('Inventory.view.ItemViewController', {
                             })
                         }
                     ]
+                },
+                {
+                    key: 'tblICItemLicenses',
+                    component: Ext.create('iRely.grid.Manager', {
+                        grid: grdItemLicense,
+                        deleteButton: grdItemLicense.down('#btnRemoveLicense'),
+                        position: 'end'
+                    })
                 }
             ]
         });
@@ -4029,6 +4047,17 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },    
 
+    onItemLicenseCodeSelect: function (combo, record) {
+        "use strict";
+        var me = this,
+            win = me.getView(),
+            grid = win.down('#grdItemLicense'),
+            selectedRecord = record[0],
+            current = grid.getSelectionModel().selected.items[0];
+
+        current.set('strCodeDescription', selectedRecord.get('strDescription'));
+    },
+
     init: function(application) {
         this.control({
             "#cboType": {
@@ -4228,6 +4257,9 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#cboFuelCategory": {
                 drilldown: this.onFuelCategoryDrilldown
+            },
+            "#cboItemLicenseCode": {
+                select: this.onItemLicenseCodeSelect
             },
             "#cboPatronage": {
                 drilldown: this.onPatronageDrilldown,

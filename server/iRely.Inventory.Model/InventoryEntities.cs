@@ -111,6 +111,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICLotMap());
             modelBuilder.Configurations.Add(new vyuICItemLotMap());
             modelBuilder.Configurations.Add(new tblICParentLotMap());
+            modelBuilder.Configurations.Add(new tblICItemLicenseMap());
 
             modelBuilder.Entity<tblICCommodityAttribute>().Map<tblICCommodityClassVariant>(p => p.Requires("strType").HasValue("Class"));
             modelBuilder.Entity<tblICCommodityAttribute>().Map<tblICCommodityGrade>(p => p.Requires("strType").HasValue("Grade"));
@@ -171,6 +172,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblSMCompanyLocationSubLocationMap());
             modelBuilder.Configurations.Add(new tblSMTaxCodeMap());
             modelBuilder.Configurations.Add(new tblSMPurchasingGroupMap());
+            modelBuilder.Configurations.Add(new tblSMLicenseTypeMap());
 
             modelBuilder.Configurations.Add(new tblSTPaidOutMap());
             modelBuilder.Configurations.Add(new tblSTStoreMap());
@@ -280,6 +282,7 @@ namespace iRely.Inventory.Model
 
             modelBuilder.Configurations.Add(new vyuICSearchItemMap());
             modelBuilder.Configurations.Add(new vyuICGetItemUOMByTypeMap());
+            modelBuilder.Configurations.Add(new vyuICItemLicenseMap());
         }
     }
 }

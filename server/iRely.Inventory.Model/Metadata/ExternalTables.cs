@@ -393,4 +393,15 @@ namespace iRely.Inventory.Model
         public string strDescription { get; set; }
         public int intSort { get; set; }
     }
+
+    public class tblSMLicenseType : BaseEntity
+    {
+        public int intLicenseTypeId { get; set; }
+        public string strCode { get; set; }
+        public string strDescription { get; set; }
+        public bool ysnRequiredForApplication { get; set; }
+        public bool ysnRequiredForPurchase { get; set; }
+
+        public ICollection<tblICItemLicense> tblICItemLicenses { get; set; }
+    }
 }

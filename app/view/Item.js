@@ -37,7 +37,8 @@ Ext.define('Inventory.view.Item', {
         'Ext.form.field.Date',
         'Ext.grid.column.Date',
         'Ext.grid.feature.Summary',
-        'Ext.toolbar.Paging'
+        'Ext.toolbar.Paging',
+        'EntityManagement.common.combo.LicenseType'
     ],
 
     height: 650,
@@ -1414,6 +1415,66 @@ Ext.define('Inventory.view.Item', {
                                                                                 labelWidth: 115
                                                                             }
                                                                         ]
+                                                                    },
+                                                                    {
+                                                                        xtype: 'frmadvancesearchgrid',
+                                                                        flex: 1,
+                                                                        reference: 'grdItemLicense',
+                                                                        itemId: 'grdItemLicense',
+                                                                        margin: '5 0 15 0',
+                                                                        title: 'License',
+                                                                        dockedItems: [
+                                                                            {
+                                                                                xtype: 'toolbar',
+                                                                                dock: 'top',
+                                                                                itemId: 'tlbGridOptions',
+                                                                                padding: '0 0 0 1',
+                                                                                items: [
+                                                                                    {
+                                                                                        xtype: 'button',
+                                                                                        itemId: 'btnRemoveLicense',
+                                                                                        iconCls: 'small-remove',
+                                                                                        text: 'Remove'
+                                                                                    }
+                                                                                ]
+                                                                            }
+                                                                        ],
+                                                                        columns: [
+                                                                            {
+                                                                                xtype: 'gridcolumn',
+                                                                                reference: 'colItemLicenseCode',
+                                                                                flex: 1,
+                                                                                itemId: 'colItemLicenseCode',
+                                                                                dataIndex: 'strCode',
+                                                                                text: 'License Code',
+                                                                                editor: {
+                                                                                    xtype: 'emlicensetypecombo',
+                                                                                    reference: 'cboItemLicenseCode',
+                                                                                    itemId: 'cboItemLicenseCode'
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'gridcolumn',
+                                                                                reference: 'colItemLicenseTypeDescription',
+                                                                                flex: 1,
+                                                                                itemId: 'colItemLicenseTypeDescription',
+                                                                                dataIndex: 'strLicenseTypeDescription',
+                                                                                text: 'Description'
+                                                                            }
+                                                                        ],
+                                                                        viewConfig: {
+                                                                            itemId: 'grvLicense'
+                                                                        },
+                                                                        plugins: [
+                                                                            {
+                                                                                ptype: 'cellediting',
+                                                                                pluginId: 'cepLicense',
+                                                                                clicksToEdit: 1
+                                                                            }
+                                                                        ],
+                                                                        selModel: {
+                                                                            selType: 'checkboxmodel'
+                                                                        }
                                                                     }
                                                                 ]
                                                             },

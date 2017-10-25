@@ -21,6 +21,9 @@
         "minimizable": null,
         "mixins": null,
         "reference": null,
+        "requires": [
+            "EntityManagement.common.combo.LicenseType"
+        ],
         "title": "Inventory Items",
         "width": 935
     },
@@ -42,7 +45,8 @@
         "reference": "string",
         "title": "string",
         "width": "auto",
-        "scrollable": "boolean"
+        "scrollable": "boolean",
+        "requires": "typedarray"
     },
     "designerId": "d7ef9c4d-9fa7-40a9-ac40-8922ff13c54c",
     "viewControllerInstanceId": "abc8e5bd-9f19-4822-8f07-d500a821f35d",
@@ -4224,6 +4228,200 @@
                                                                     },
                                                                     "name": "MyTextField6",
                                                                     "designerId": "01b11927-708f-4e72-80e9-2ec703fbde30"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.Panel",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "designer|createAlias": "frmadvancesearchgrid",
+                                                                "itemId": "grdItemLicense",
+                                                                "layout|flex": 1,
+                                                                "margin": "5 0 15 0",
+                                                                "reference": "grdItemLicense",
+                                                                "title": "License"
+                                                            },
+                                                            "configAlternates": {
+                                                                "designer|createAlias": "string",
+                                                                "itemId": "string",
+                                                                "layout|flex": "number",
+                                                                "margin": "auto",
+                                                                "title": "string",
+                                                                "reference": "string"
+                                                            },
+                                                            "name": "MyGridPanel1",
+                                                            "designerId": "ede4cb5d-e8ea-4f4e-9aa9-bb40eb0832e3",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.toolbar.Toolbar",
+                                                                    "reference": {
+                                                                        "name": "dockedItems",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "dock": "top",
+                                                                        "itemId": "tlbGridOptions",
+                                                                        "padding": "0 0 0 1"
+                                                                    },
+                                                                    "configAlternates": {
+                                                                        "dock": "string",
+                                                                        "itemId": "string",
+                                                                        "padding": "auto"
+                                                                    },
+                                                                    "name": "MyToolbar16",
+                                                                    "designerId": "ac16b0f9-7f68-4ada-abe5-820a53a74640",
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.button.Button",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "iconCls": "small-remove",
+                                                                                "itemId": "btnRemoveLicense",
+                                                                                "layout|flex": null,
+                                                                                "text": "Remove"
+                                                                            },
+                                                                            "configAlternates": {
+                                                                                "iconCls": "string",
+                                                                                "itemId": "string",
+                                                                                "layout|flex": "number",
+                                                                                "text": "string"
+                                                                            },
+                                                                            "name": "MyButton45",
+                                                                            "designerId": "dee94ced-456f-49df-b66c-8394a58e14d7"
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    "type": "Ext.grid.column.Column",
+                                                                    "reference": {
+                                                                        "name": "columns",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "dataIndex": "strCode",
+                                                                        "flex": 1,
+                                                                        "itemId": "colItemLicenseCode",
+                                                                        "reference": "colItemLicenseCode",
+                                                                        "text": "License Code"
+                                                                    },
+                                                                    "configAlternates": {
+                                                                        "dataIndex": "datafield",
+                                                                        "flex": "number",
+                                                                        "itemId": "string",
+                                                                        "reference": "string",
+                                                                        "text": "string"
+                                                                    },
+                                                                    "name": "MyColumn25",
+                                                                    "designerId": "a4ea686a-c779-4b09-ba4c-b22adaaf9723",
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.ComboBox",
+                                                                            "reference": {
+                                                                                "name": "editor",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "designer|createAlias": "emlicensetypecombo",
+                                                                                "itemId": "cboItemLicenseCode",
+                                                                                "reference": "cboItemLicenseCode"
+                                                                            },
+                                                                            "configAlternates": {
+                                                                                "designer|createAlias": "string",
+                                                                                "itemId": "string",
+                                                                                "reference": "string"
+                                                                            },
+                                                                            "name": "MyComboBox83",
+                                                                            "designerId": "011a20cd-8f33-4d1c-9395-06e26cef66fe"
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    "type": "Ext.grid.column.Column",
+                                                                    "reference": {
+                                                                        "name": "columns",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "dataIndex": "strLicenseTypeDescription",
+                                                                        "flex": 1,
+                                                                        "itemId": "colItemLicenseTypeDescription",
+                                                                        "reference": "colItemLicenseTypeDescription",
+                                                                        "text": "Description"
+                                                                    },
+                                                                    "configAlternates": {
+                                                                        "dataIndex": "datafield",
+                                                                        "flex": "number",
+                                                                        "itemId": "string",
+                                                                        "reference": "string",
+                                                                        "text": "string"
+                                                                    },
+                                                                    "name": "MyColumn29",
+                                                                    "designerId": "debae8ec-8247-4b3d-a943-d33481a42d56"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.view.Table",
+                                                                    "reference": {
+                                                                        "name": "viewConfig",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "itemId": "grvLicense"
+                                                                    },
+                                                                    "configAlternates": {
+                                                                        "itemId": "string"
+                                                                    },
+                                                                    "name": "MyTable",
+                                                                    "designerId": "a4d2e5dd-1853-4ca5-995c-3697dfbd45a3"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.grid.plugin.CellEditing",
+                                                                    "reference": {
+                                                                        "name": "plugins",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "clicksToEdit": 1,
+                                                                        "designer|displayName": "cepLicense",
+                                                                        "pluginId": "cepLicense"
+                                                                    },
+                                                                    "configAlternates": {
+                                                                        "designer|displayName": "string",
+                                                                        "clicksToEdit": "number",
+                                                                        "pluginId": "string"
+                                                                    },
+                                                                    "name": "MyCellEditingPlugin23",
+                                                                    "designerId": "51f4fed8-c08d-461d-a527-a0b3f1cf77be"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.selection.CheckboxModel",
+                                                                    "reference": {
+                                                                        "name": "selModel",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "designer|displayName": "checkboxmodel"
+                                                                    },
+                                                                    "configAlternates": {
+                                                                        "designer|displayName": "string"
+                                                                    },
+                                                                    "name": "MyCheckboxSelectionModel12",
+                                                                    "designerId": "70bb3aef-a0d2-460e-8625-6efd16138fff"
                                                                 }
                                                             ]
                                                         }
