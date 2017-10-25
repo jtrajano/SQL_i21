@@ -105,7 +105,9 @@ BEGIN TRY
 			CC.strCurrency					AS	strConvertedCurrency,
 			CC.ysnSubCurrency				AS	ysnConvertedSubCurrency,
 			BM.strUnitMeasure				AS	strBasisUOM,
-			VM.strUnitMeasure				AS	strConvertedUOM
+			VM.strUnitMeasure				AS	strConvertedUOM,
+			CASE WHEN ISNULL((SELECT COUNT(1) from tblLGAllocationDetail WHERE 6891 IN (intPContractDetailId,intSContractDetailId)),0) > 1 
+			THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT)END AS ysnMultiAllocation
 
 	FROM			tblCTContractDetail				CD
 			JOIN	tblCTContractHeader				CH	ON	CH.intContractHeaderId				=		CD.intContractHeaderId	

@@ -44,7 +44,10 @@ BEGIN TRY
 			@dblReassignRecipientUOM		NUMERIC(18,6),
 			@intUnitMeasureId				INT,
 			@intNewAllocationDetailId		INT,
-			@strTagRelaceXML				NVARCHAR(MAX)
+			@strTagRelaceXML				NVARCHAR(MAX),
+			@intItemId						INT
+
+	SELECT @intContractTypeId = intContractTypeId FROM tblCTReassign WHERE intReassignId = @intReassignId
 
 	DECLARE	@tblPricing TABLE
 	(
@@ -460,6 +463,31 @@ BEGIN TRY
 	JOIN	@tblAllocation			AN	ON	AD.intAllocationDetailId = AN.intAllocationDetailId
 	WHERE	AN.ysnFullyAllocation	=	0
 
+	IF @intContractTypeId = 1 
+	BEGIN
+		SELECT @intUnitMeasureId = intUnitMeasureId,@intItemId = intItemId FROM vyuCTContractSequence WHERE intContractDetailId = @intDonorId
+		UPDATE tblCTContractDetail 
+		SET dblAllocatedQty = (SELECT SUM(dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,intPUnitMeasureId,@intUnitMeasureId,dblPAllocatedQty)) FROM tblLGAllocationDetail WHERE intPContractDetailId = @intDonorId)	
+		WHERE intContractDetailId = @intDonorId
+
+		SELECT @intUnitMeasureId = intUnitMeasureId,@intItemId = intItemId FROM vyuCTContractSequence WHERE intContractDetailId = @intRecipientId
+		UPDATE tblCTContractDetail 
+		SET dblAllocatedQty = (SELECT SUM(dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,intPUnitMeasureId,@intUnitMeasureId,dblPAllocatedQty)) FROM tblLGAllocationDetail WHERE intPContractDetailId = @intRecipientId)	
+		WHERE intContractDetailId = @intRecipientId
+	END
+	ELSE
+	BEGIN
+		SELECT @intUnitMeasureId = intUnitMeasureId,@intItemId = intItemId FROM vyuCTContractSequence WHERE intContractDetailId = @intDonorId
+		UPDATE tblCTContractDetail 
+		SET dblAllocatedQty = (SELECT SUM(dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,intSUnitMeasureId,@intUnitMeasureId,dblSAllocatedQty)) FROM tblLGAllocationDetail WHERE intSContractDetailId = @intDonorId)	
+		WHERE intContractDetailId = @intDonorId
+
+		SELECT @intUnitMeasureId = intUnitMeasureId,@intItemId = intItemId FROM vyuCTContractSequence WHERE intContractDetailId = @intRecipientId
+		UPDATE tblCTContractDetail 
+		SET dblAllocatedQty = (SELECT SUM(dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,intSUnitMeasureId,@intUnitMeasureId,dblSAllocatedQty)) FROM tblLGAllocationDetail WHERE intSContractDetailId = @intRecipientId)	
+		WHERE intContractDetailId = @intRecipientId
+	END
+	
 	---------------------------------------End Allocation-------------------------
 
 	

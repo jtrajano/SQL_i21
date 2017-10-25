@@ -12,6 +12,7 @@ AS
 			CL.strLocationName,
 			CH.intCommodityId,
 			CO.strCommodityCode,
+			CH.intContractTypeId,
 
 			QM.strUnitMeasure AS strItemUOM,
 			ISNULL(CD.dblQuantity,0) - ISNULL(PA.dblAllocatedQty,0) - ISNULL(SA.dblAllocatedQty,0)							AS	dblUnAllocatedQty,
