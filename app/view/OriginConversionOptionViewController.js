@@ -22,67 +22,77 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
     },
     load: function(component, con) {
         var me = this || con;
-        this.initializePreferences(me);
+
+        Ext.Loader.loadScript("./Inventory/app/lib/underscore.js");
+        Ext.Loader.loadScript("./Inventory/app/lib/numeraljs/numeral.js");
+        Ext.Loader.loadScript({
+            url: "./Inventory/app/lib/rx.all.js",
+            onLoad: function() {
+                me.initializePreferences(me);
+            } 
+        });        
     },
 
     initializePreferences: function(me) {
         var win = me.getView();
                 
-        jQuery.ajax({
+        ic.utils.ajax({
             url: './Inventory/api/CompanyPreference/Get',
             method: 'get',
             params: {
                 page: 1,
                 start: 0,
                 limit: 50
-            },
-            success: function(response) {
-                var json = JSON.parse(res.responseText);
-                var pref = {};
-                if(json.data && json.data.length > 0) {
-                    pref =  { task: json.data[0].strOriginLastTask, lob: json.data[0].strOriginLineOfBusiness };
+            }
+        })
+        .subscribe(function(response) {
+            var json = JSON.parse(response.responseText);
+            var pref = {};
+            if(json.data && json.data.length > 0) {
+                pref =  { task: json.data[0].strOriginLastTask, lob: json.data[0].strOriginLineOfBusiness };
+            }
+            
+            if(pref) {
+                var lastLob = pref.lob;
+                if (lastLob && lastLob !== '')
+                    me.getViewModel().set('lineOfBusiness', lastLob);
+                else {
+                    if (me.getViewModel().get('lineOfBusiness') !== '')
+                        me.getViewModel().set('lineOfBusiness', '');
                 }
-                
-                if(pref) {
-                    var lastLob = pref.lob;
-                    if (lastLob && lastLob !== '')
-                        me.getViewModel().set('lineOfBusiness', lastLob);
-                    else {
-                        if (me.getViewModel().get('lineOfBusiness') !== '')
-                            me.getViewModel().set('lineOfBusiness', '');
-                    }
 
-                    var lastTask = pref.task;
-                    if (lastTask && lastTask !== '')
-                        me.getViewModel().set('currentTask', lastTask);
-                    else {
-                        if (me.getViewModel().get('currentTask') !== '')
-                            me.getViewModel().set('currentTask', 'LOB');
-                    }
+                var lastTask = pref.task;
+                if (lastTask && lastTask !== '')
+                    me.getViewModel().set('currentTask', lastTask);
+                else {
+                    if (me.getViewModel().get('currentTask') !== '')
+                        me.getViewModel().set('currentTask', 'LOB');
+                }
 
-                    var lob = me.getViewModel().get('lineOfBusiness');
-                    var currentTask = me.getViewModel().get('currentTask');
+                var lob = me.getViewModel().get('lineOfBusiness');
+                var currentTask = me.getViewModel().get('currentTask');
 
-                    if (lob)
-                        win.up('window').down('#cboLOB').setValue(me.getViewModel().get('lineOfBusiness'));
-                    else
-                        win.up('window').down('#cboLOB').setValue(null);
+                if (lob)
+                    win.up('window').down('#cboLOB').setValue(me.getViewModel().get('lineOfBusiness'));
+                else
+                    win.up('window').down('#cboLOB').setValue(null);
 
-                    var originTypes = ["UOM", "Locations", "CategoryClass", "CategoryGLAccts", "AdditionalGLAccts", "Items", "ItemGLAccts", "Balance"];
-                    var grains = ["UOM", "Locations", "Commodity", "AdditionalGLAccts"];
+                var originTypes = ["UOM", "Locations", "CategoryClass", "CategoryGLAccts", "AdditionalGLAccts", "Items", "ItemGLAccts", "Balance"];
+                var grains = ["UOM", "Locations", "Commodity", "AdditionalGLAccts"];
 
-                    if (currentTask && currentTask !== 'LOB') {
-                        if (lob === 'Grain')
-                            originTypes = grains;
-                        var index = _.indexOf(originTypes, currentTask);
-                        if (index !== -1) {
-                            me.getViewModel().set('currentTask', originTypes[index + 1]);
-                        } else
-                            me.getViewModel().set('currentTask', "LOB");
-                    }
+                if (currentTask && currentTask !== 'LOB') {
+                    if (lob === 'Grain')
+                        originTypes = grains;
+                    var index = _.indexOf(originTypes, currentTask);
+                    if (index !== -1) {
+                        me.getViewModel().set('currentTask', originTypes[index + 1]);
+                    } else
+                        me.getViewModel().set('currentTask', "LOB");
                 }
             }
         });
+
+        
         // .map(function(res) {
         //     var json = JSON.parse(res.responseText);
         //     if(json.data && json.data.length > 0) {
@@ -244,7 +254,8 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
     },
 
     ajaxRequest: function (viewModel, originTypes, type, lineOfBusiness, win) {
-        jQuery.ajax({
+        iRely.Msg.showWait('Importing in progress...');
+        ic.utils.ajax({
             url: './Inventory/api/ImportData/ImportOrigins',
             method: 'post',
             headers: {
@@ -252,53 +263,48 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
                 'Authorization': iRely.Configuration.Security.AuthToken,
                 'X-Import-Type': originTypes[type],
                 'X-Import-LineOfBusiness': lineOfBusiness
-            },
-            beforeSend: function(jqXHR, settings) {
-                iRely.Msg.showWait('Importing in progress...');
-            },
+            }
+        })
+        .subscribe(function(response) {
+            iRely.Msg.close();
+            var msgtype = 'info';
+            var msg = "File imported successfully.";
+            var json = JSON.parse(response.responseText);
+            if (json.result.Info == "warning") {
+                msgtype = "warning";
+                msg = "File imported successfully with warnings.";
+            }
+            if(json.result.Info == "error") {
+                msgtype = "warning";
+                msg = "File imported successfully with errors.";
+            }
+            viewModel.set('lineOfBusiness', lineOfBusiness);
+            viewModel.set('currentTask', originTypes[type+1]);
 
-            success: function(data, status, jqXHR) {
-                iRely.Msg.close();
-                var msgtype = 'info';
-                var msg = "File imported successfully.";
-                var json = JSON.parse(jqXHR.responseText);
-                if (json.result.Info == "warning") {
-                    msgtype = "warning";
-                    msg = "File imported successfully with warnings.";
-                }
-                if(json.result.Info == "error") {
-                    msgtype = "warning";
-                    msg = "File imported successfully with errors.";
-                }
-                viewModel.set('lineOfBusiness', lineOfBusiness);
-                viewModel.set('currentTask', originTypes[type+1]);
+            i21.functions.showCustomDialog(msgtype, 'ok', msg, function() {
+                //win.close();
 
-                i21.functions.showCustomDialog(msgtype, 'ok', msg, function() {
+                if (json.result.Messages !== null && json.result.Messages.length > 0) {
+                    iRely.Functions.openScreen('Inventory.view.ImportLogMessageBox', {
+                        data: json
+                    });
+                }
+            });
+        }, function(response) {
+            iRely.Msg.close();
+            var json = JSON.parse(response.responseText);
+            i21.functions.showCustomDialog('error', 'ok', 'Import failed! ' + json.info,
+                function() {
                     //win.close();
 
-                    if (data.result.Messages !== null && data.result.Messages.length > 0) {
+                    if (json.messages && json.messages.length > 0) {
                         iRely.Functions.openScreen('Inventory.view.ImportLogMessageBox', {
-                            data: data
+                            data: json
                         });
                     }
-                });
-            },
-            error: function(jqXHR, status, error) {
-                iRely.Msg.close();
-                var json = JSON.parse(jqXHR.responseText);
-                i21.functions.showCustomDialog('error', 'ok', 'Import failed! ' + json.info,
-                    function() {
-                        //win.close();
-
-                        if (json.messages && json.messages.length > 0) {
-                            iRely.Functions.openScreen('Inventory.view.ImportLogMessageBox', {
-                                data: json
-                            });
-                        }
-                    }
-                );
-            }
-        });
+                }
+            );
+        })
     },
 
     init: function(application) {
