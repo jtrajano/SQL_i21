@@ -211,7 +211,7 @@ BEGIN
 			,[ysnClearDetailTaxes]					= 1
 			,[intTempDetailIdForTaxes]				= NULL
 			,[strType]								= 'CF Invoice'
-			,[ysnUpdateAvailableDiscount]			= 1
+			,[ysnUpdateAvailableDiscount]			= 0
 			,[strItemTermDiscountBy]				= 'Amount'
 			,[dblItemTermDiscount]					= SUM(dblDiscount)
 			,[strDocumentNumber]					= strTempInvoiceReportNumber
@@ -395,7 +395,7 @@ BEGIN
 			,[ysnClearDetailTaxes]					= 1
 			,[intTempDetailIdForTaxes]				= NULL
 			,[strType]								= 'CF Invoice'
-			,[ysnUpdateAvailableDiscount]			= 1
+			,[ysnUpdateAvailableDiscount]			= 0
 			,[strItemTermDiscountBy]				= ''
 			,[dblItemTermDiscount]					= 0
 			,[strDocumentNumber]					= strInvoiceReportNumber
