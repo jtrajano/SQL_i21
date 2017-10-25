@@ -396,7 +396,7 @@ INNER JOIN (tblICInventoryReceipt r
 		ON rc.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId
 WHERE	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 		AND B.intInventoryReceiptChargeId IS NOT NULL 
-		AND (rc.dblAmountPriced <> B.dblCost OR rc.dblForexRate <> B.dblRate)
+		AND (rc.dblAmountPriced <> B.dblCost OR ISNULL(NULLIF(rc.dblForexRate,0),1) <> B.dblRate)
 
 IF ISNULL(@post,0) = 1
 BEGIN	
