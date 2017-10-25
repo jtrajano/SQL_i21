@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspIPProcessLSPShipmentETA]
 @strSessionId NVARCHAR(50)='',
 @strInfo1 NVARCHAR(MAX)='' OUT,
-@strInfo2 NVARCHAR(MAX)='' OUT
+@strInfo2 NVARCHAR(MAX)='' OUT,
+@intNoOfRowsAffected INT=0 OUT
 AS
 BEGIN TRY
 
@@ -34,6 +35,7 @@ Else
 While(@intMinRowNo is not null)
 Begin
 	BEGIN TRY
+		Set @intNoOfRowsAffected=1
 		Set @intLoadId=NULL
 		Set @intLoadStgId=NULL
 
@@ -128,7 +130,7 @@ Begin
 	END CATCH
 
 	If ISNULL(@strSessionId,'')=''
-		Select @intMinRowNo=Min(intStageShipmentETAId) From tblIPShipmentETAStage Where intStageShipmentETAId>@intMinRowNo
+		Select @intMinRowNo=NULL
 	Else
 		Select @intMinRowNo=Min(intStageShipmentETAId) From tblIPShipmentETAStage Where intStageShipmentETAId>@intMinRowNo AND intStageShipmentETAId=@strSessionId
 End
