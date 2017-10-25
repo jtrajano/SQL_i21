@@ -72,6 +72,13 @@ Begin
 	If Not Exists (Select 1 From tblMFWorkOrder Where intLoadDistributionDetailId=@intLoadDistributionDetailId)
 		RaisError('No blends produced using the Load Distribution Detail.',16,1)
 
+	If (Select COUNT(1) From tblMFWorkOrderConsumedLot wcl join tblMFWorkOrder w on wcl.intWorkOrderId=w.intWorkOrderId 
+		Where intLoadDistributionDetailId=@intLoadDistributionDetailId)=0
+		OR
+		(Select COUNT(1) From tblMFWorkOrderProducedLot wpl join tblMFWorkOrder w on wpl.intWorkOrderId=w.intWorkOrderId 
+		Where intLoadDistributionDetailId=@intLoadDistributionDetailId)=0
+			RaisError('There is no Blend Sheet transaction available to unpost.',16,1)
+
 	If Not Exists (Select 1 From tblMFWorkOrderProducedLot Where intWorkOrderId IN 
 	(Select intWorkOrderId From tblMFWorkOrder Where intLoadDistributionDetailId=@intLoadDistributionDetailId) AND ISNULL(ysnProductionReversed,0)=0)
 		RaisError('Load Distribution Line is already reversed.',16,1)
