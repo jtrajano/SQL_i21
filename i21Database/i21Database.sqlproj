@@ -1681,7 +1681,6 @@
     <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\GasCheckLeakcheck.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\OpenCallEntries.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\DefaultCriteria\CustomerListByRoute.sql" />
-    <Build Include="dbo\Views\vyuARCustomerPaymentHistoryReport.sql" />
     <Build Include="dbo\Views\vyuARTaxReport.sql" />
     <Build Include="dbo\Views\vyuARGetLostQuoteReasons.sql" />
     <Build Include="dbo\Views\vyuARGetLostQuoteCompetitors.sql" />
@@ -1730,7 +1729,6 @@
     <Build Include="dbo\Stored Procedures\uspICValidateCostingOnUnpostStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateCostingOnPostStorage.sql" />
     <Build Include="dbo\Functions\fnGetItemCostingOnPostStorageErrors.sql" />
-    <Build Include="dbo\Views\vyuARCustomerPaymentHistoryReport.sql" />
     <Build Include="dbo\Views\vyuARSalesAnalysisReport.sql" />
     <Build Include="dbo\Views\vyuARUnappliedCreditsRegister.sql" />
     <Build Include="dbo\Views\vyuARGetLostQuoteCompetitors.sql" />
@@ -5730,6 +5728,7 @@
     <Build Include="dbo\Views\vyuLGLoadDetailViewLookup.sql" />
     <Build Include="dbo\Stored Procedures\uspCMImportBanksFromOrigin.sql" />
     <Build Include="dbo\Functions\fnMFGetTotalStockValueFromTransactionBatch.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCustomerPaymentHistoryReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
