@@ -17,11 +17,11 @@ CREATE TYPE [dbo].[ItemInTransitCostingTableType] AS TABLE
 	,[dblExchangeRate] NUMERIC (38, 20) DEFAULT 1 NOT NULL	-- OBSOLETE, use dblForexRate instead. 
     ,[intTransactionId] INT NOT NULL						-- The integer id of the source transaction (e.g. Sales Invoice, Inventory Adjustment id, etc. ). 
 	,[intTransactionDetailId] INT NULL						-- Link id to the transaction detail. 
-	,[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL -- The string id of the source transaction. 
+	,[strTransactionId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL -- The string id of the source transaction. 
 	,[intTransactionTypeId] INT NOT NULL					-- The transaction type. Source table for the types are found in tblICInventoryTransactionType
 	,[intLotId] INT NULL									-- Place holder field for lot numbers
     ,[intSourceTransactionId] INT NULL						-- The int id of the Inventory Shipment
-	,[strSourceTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL -- The string id of the Inventory Shipment
+	,[strSourceTransactionId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL -- The string id of the Inventory Shipment
     ,[intSourceTransactionDetailId] INT NULL				-- The int id of the Inventory Shipment detail. 
 	,[intFobPointId] TINYINT NULL 
 	,[intInTransitSourceLocationId] INT NULL 

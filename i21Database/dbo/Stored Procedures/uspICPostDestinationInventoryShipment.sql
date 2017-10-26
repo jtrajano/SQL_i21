@@ -27,8 +27,10 @@ DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 DECLARE @intLocationId AS INT 
 
 DECLARE @INVENTORY_SHIPMENT_TYPE AS INT = 5
+
 DECLARE @strDescription AS NVARCHAR(100) 
 		,@actionType AS NVARCHAR(50)
+		,@strTransactionType AS NVARCHAR(50) = 'Inventory Shipment at Destination'
 
 /************************************************************************************************************
 	VALIDATIONS 
@@ -364,22 +366,34 @@ BEGIN
 			,@strBatchId
 			,@intEntityUserSecurityId
 			,@INVENTORY_SHIPMENT_TYPE	
-
 		IF @intReturnValue < 0 GOTO _ExitWithError
 
+		-- Update the ysnPostedFlag gl entries posted for the destination. 
+		BEGIN 			
+			UPDATE	GLEntries
+			SET		ysnIsUnposted = 1
+			FROM	dbo.tblGLDetail GLEntries
+			WHERE	GLEntries.intTransactionId = @intShipmentId
+					AND GLEntries.strTransactionId = @strShipmentNumber
+					AND GLEntries.strTransactionType = @strTransactionType
+					AND ISNULL(GLEntries.ysnIsUnposted, 0) = 0
+		END 
+		
 		-- Create the audit log. 
-		SELECT @actionType = 'Destination Unposted'
+		BEGIN 
+			SELECT @actionType = 'Destination Unposted'
 			
-		EXEC	dbo.uspSMAuditLog 
-				@keyValue = @intShipmentId								-- Primary Key Value of the Inventory Shipment. 
-				,@screenName = 'Inventory.view.InventoryShipment'       -- Screen Namespace
-				,@entityId = @intEntityUserSecurityId				    -- Entity Id.
-				,@actionType = @actionType                              -- Action Type
-				,@changeDescription = @strDescription					-- Description
-				,@fromValue = ''										-- Previous Value
-				,@toValue = ''											-- New Value
+			EXEC	dbo.uspSMAuditLog 
+					@keyValue = @intShipmentId								-- Primary Key Value of the Inventory Shipment. 
+					,@screenName = 'Inventory.view.InventoryShipment'       -- Screen Namespace
+					,@entityId = @intEntityUserSecurityId				    -- Entity Id.
+					,@actionType = @actionType                              -- Action Type
+					,@changeDescription = @strDescription					-- Description
+					,@fromValue = ''										-- Previous Value
+					,@toValue = ''											-- New Value
+		END
 
-
+		-- Get the next shipment in the loop. 
 		FETCH NEXT FROM unpostShipment 
 		INTO	@strShipmentNumber
 				, @intShipmentId
@@ -407,9 +421,11 @@ END
 
 IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 BEGIN 
+	-- Update the date and transaction type. 
 	UPDATE @GLEntries
 	SET dtmDate = @dtmDate
-
+		,strTransactionType = @strTransactionType
+		
 	EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
 END 
 

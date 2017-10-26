@@ -2,8 +2,7 @@
 	This is a user-defined table type used in the inventory costing stored procedures. 
 */
 CREATE TYPE [dbo].[DestinationShipmentItem] AS TABLE
-(
-	
+(	
 	 [intId] INT IDENTITY PRIMARY KEY CLUSTERED
 
 	-- Detail 
