@@ -1726,6 +1726,11 @@ IF @post = 1
 					ON A.[intInvoiceId] = CM.[intInvoiceId]
 			WHERE
 				ISNULL(A.intPeriodsToAccrue,0) <= 1
+				AND (
+						A.dblInvoiceTotal <> @ZeroDecimal
+						OR
+						EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID INNER JOIN (SELECT intItemId, strType FROM tblICItem) ICI ON ARID.intItemId = ICI.intItemId AND ICI.strType <> 'Comment' WHERE ARID.intInvoiceId  = A.[intInvoiceId])
+					)
 
 
 			UNION ALL
