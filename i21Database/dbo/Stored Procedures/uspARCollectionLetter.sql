@@ -95,7 +95,7 @@ BEGIN
 	);
 
 	DECLARE @SelectedPlaceHolderTable TABLE  (
-		intPlaceHolderId				INT
+		  intPlaceHolderId				INT
 		, strPlaceHolder				VARCHAR(MAX)
 		, strSourceColumn				NVARCHAR(200)	COLLATE Latin1_General_CI_AS
 		, strPlaceHolderDescription		NVARCHAR(200)	COLLATE Latin1_General_CI_AS
@@ -137,38 +137,30 @@ BEGIN
 			IF @strLetterName IN ('Credit Suspension', 'Expired Credit Card')
 				BEGIN
 					INSERT INTO @SelectedCustomer
-					SELECT intEntityId
-					FROM tblARCustomer WITH (NOLOCK)
-					WHERE ysnActive = 1
-					  AND dblCreditLimit = 0
+					SELECT intEntityId FROM tblARCustomer WITH (NOLOCK)
+					WHERE ysnActive = 1 AND dblCreditLimit = 0
 				END
 			ELSE IF @strLetterName = 'Credit Review'
 				BEGIN
 					INSERT INTO @SelectedCustomer
-					SELECT intEntityId
-					FROM tblARCustomer WITH (NOLOCK)
-					WHERE ysnActive = 1
-					  AND dblCreditLimit > 0
+					SELECT intEntityId FROM tblARCustomer WITH (NOLOCK)
+					WHERE ysnActive = 1 AND dblCreditLimit > 0
 				END
 			ELSE
 				BEGIN
 					INSERT INTO @SelectedCustomer
-					SELECT * 
-					FROM fnGetRowsFromDelimitedValues(@strCustomerIds)
+					SELECT * FROM fnGetRowsFromDelimitedValues(@strCustomerIds)
 				END
 		END
 	ELSE IF ISNULL(@strCustomerIds, '') = '' AND ISNULL(@ysnSystemDefined, 1) = 0
 		BEGIN
 			INSERT INTO @SelectedCustomer
-			SELECT intEntityId
-			FROM tblARCustomer WITH (NOLOCK)
-			WHERE ysnActive = 1
+			SELECT intEntityId FROM tblARCustomer WITH (NOLOCK) WHERE ysnActive = 1
 		END
 	ELSE IF ISNULL(@strCustomerIds, '') <> ''
 		BEGIN
 			INSERT INTO @SelectedCustomer
-			SELECT * 
-			FROM fnGetRowsFromDelimitedValues(@strCustomerIds)
+			SELECT * FROM fnGetRowsFromDelimitedValues(@strCustomerIds)
 		END
 
 	INSERT INTO @OriginalMsgInHTMLTable
@@ -177,366 +169,136 @@ BEGIN
 	SELECT @originalMsgInHTML = msgAsHTML 
 	FROM @OriginalMsgInHTMLTable
 	 
-	INSERT INTO @SelectedPlaceHolderTable
-	(
-		intPlaceHolderId
-		, strPlaceHolder
-		, strSourceColumn 
-		, strPlaceHolderDescription
-		, strSourceTable
-		, ysnTable
-		, strDataType
+	INSERT INTO @SelectedPlaceHolderTable (
+		   intPlaceHolderId
+		 , strPlaceHolder
+		 , strSourceColumn 
+		 , strPlaceHolderDescription
+		 , strSourceTable
+		 , ysnTable
+		 , strDataType
 	)			
-	SELECT 
-		intPlaceHolderId
-		, strPlaceHolder
-		, strSourceColumn
-		,strPlaceHolderDescription
-		, strSourceTable
-		, ysnTable
-		, strDataType
-	FROM 
-		tblARLetterPlaceHolder WITH(NOLOCK)
-	WHERE 
-		CHARINDEX ( dbo.fnARRemoveWhiteSpace(strPlaceHolder), dbo.fnARRemoveWhiteSpace(@originalMsgInHTML) ) <> 0
+	SELECT intPlaceHolderId
+		 , strPlaceHolder
+		 , strSourceColumn
+		 , strPlaceHolderDescription
+		 , strSourceTable
+		 , ysnTable
+		 , strDataType
+	FROM dbo.tblARLetterPlaceHolder WITH(NOLOCK)
+	WHERE CHARINDEX (dbo.fnARRemoveWhiteSpace(strPlaceHolder), dbo.fnARRemoveWhiteSpace(@originalMsgInHTML)) <> 0
+
+	IF @strLetterName = 'Recent Overdue Collection Letter'
+		BEGIN
+			DELETE FROM tblARCustomerAgingStagingTable
+			WHERE ISNULL(dbl10Days, 0) = 0 AND ISNULL(dbl30Days, 0) = 0
+		END
+	ELSE IF @strLetterName = '30 Day Overdue Collection Letter'					
+		BEGIN
+			DELETE FROM tblARCustomerAgingStagingTable
+			WHERE ISNULL(dbl60Days, 0) = 0 AND ISNULL(dbl90Days, 0) = 0 AND ISNULL(dbl120Days, 0) = 0 AND ISNULL(dbl121Days, 0) = 0
+		END
+	ELSE IF @strLetterName = '60 Day Overdue Collection Letter'					
+		BEGIN						
+			DELETE FROM tblARCustomerAgingStagingTable
+			WHERE ISNULL(dbl90Days, 0) = 0 AND ISNULL(dbl120Days, 0) = 0 AND ISNULL(dbl121Days, 0) = 0
+		END
+	ELSE IF @strLetterName = '90 Day Overdue Collection Letter'					
+		BEGIN
+			DELETE FROM tblARCustomerAgingStagingTable
+			WHERE ISNULL(dbl120Days, 0) = 0 AND ISNULL(dbl121Days, 0) = 0
+		END
+	ELSE IF @strLetterName = 'Final Overdue Collection Letter'					
+		BEGIN						
+			DELETE FROM tblARCustomerAgingStagingTable
+			WHERE ISNULL(dbl121Days, 0) = 0
+		END	
+	ELSE IF @strLetterName = 'Service Charge Invoices Letter'
+		BEGIN
+			INSERT INTO #TransactionLetterDetail (
+				  intEntityCustomerId
+				, strInvoiceNumber	 
+				, dtmDate				 
+				, dbl10Days			 
+				, dbl30Days			 
+				, dbl60Days			  
+				, dbl90Days			 
+				, dbl120Days			 
+				, dbl121Days		
+				, dblAmount	 
+				, dtmDueDate
+				, strTerm
+			)
+			SELECT intEntityCustomerId
+				, strInvoiceNumber
+				, dtmDate							 
+				, 0	dbl10Days		 
+				, 0	dbl30Days		 
+				, 0	dbl60Days		  
+				, 0 dbl90Days			 
+				, 0 dbl120Days			 
+				, 0	dbl121Days		
+				, dblTotalDue
+				, dtmDueDate
+				, strTerm
+			FROM vyuARServiceChargeInvoiceReport WITH(NOLOCK)
+		END
+
+	IF @strLetterName NOT IN ('Credit Suspension', 'Expired Credit Card', 'Credit Review', 'Service Charge Invoices Letter')
+		BEGIN
+			DELETE FROM tblARCustomerAgingStagingTable
+			WHERE intInvoiceId IN (SELECT intInvoiceId FROM tblARCustomerAgingStagingTable GROUP BY intInvoiceId HAVING SUM(ISNULL(dblTotalAR, 0)) = 0)			
+
+			INSERT INTO #TransactionLetterDetail (	
+				  intEntityCustomerId
+				, strInvoiceNumber
+				, dtmDate
+				, dbl10Days
+				, dbl30Days
+				, dbl60Days
+				, dbl90Days
+				, dbl120Days
+				, dbl121Days
+				, dblAmount
+				, dtmDueDate
+				, strTerm
+			)
+			SELECT intEntityCustomerId 
+				, strInvoiceNumber
+				, dtmDate
+				, dbl10Days
+				, dbl30Days
+				, dbl60Days
+				, dbl90Days
+				, dbl120Days
+				, dbl121Days
+				, dblTotalAR
+				, dtmDueDate
+				, NULL
+			FROM dbo.tblARCustomerAgingStagingTable WITH (NOLOCK)
+
+			UPDATE tblARCollectionOverdue 
+			SET dbl10DaysSum = ABC.dblTotalDueSum
+			  , dbl30DaysSum = ABC.dblTotalDueSum
+			  , dbl60DaysSum = ABC.dblTotalDueSum
+			  , dbl90DaysSum = ABC.dblTotalDueSum
+			  , dbl121DaysSum = ABC.dblTotalDueSum
+			FROM tblARCollectionOverdue CO
+			INNER JOIN (
+				SELECT dblTotalDueSum = SUM(dblAmount)
+					 , intEntityCustomerId
+				FROM #TransactionLetterDetail
+				GROUP BY intEntityCustomerId) ABC
+			ON CO.intEntityCustomerId = ABC.intEntityCustomerId
+		END
 	
 	IF ISNULL(@ysnSystemDefined, 1) = 1
 		BEGIN
 			WHILE EXISTS(SELECT NULL FROM @SelectedCustomer)
 				BEGIN
 					DECLARE @CustomerId INT
-					SELECT TOP 1 @CustomerId = intEntityCustomerId 
-					FROM @SelectedCustomer 
-					ORDER BY intEntityCustomerId
- 
-					IF @strLetterName = 'Recent Overdue Collection Letter'
-					BEGIN	
-						DECLARE @UnpaidRecent TABLE
-						(
-							snum NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						)
-						INSERT INTO @UnpaidRecent 
-						SELECT strInvoiceNumber FROM tblARInvoice where ysnPaid = 0	
-						INSERT INTO #TransactionLetterDetail
-						(	
-							intEntityCustomerId		
-							,strInvoiceNumber	 
-							,dtmDate				 
-							,dbl10Days			 
-							,dbl30Days			 
-							,dbl60Days			  
-							,dbl90Days			 
-							,dbl120Days			 
-							,dbl121Days	
-							,dblAmount		 
-							,dtmDueDate
-							,strTerm 
-						)
-						SELECT 
-							intEntityCustomerId 
-							, strInvoiceNumber
-							, dtmDate
-							, dbl10Days
-							, dbl30Days
-							, dbl60Days
-							, dbl90Days
-							, dbl120Days
-							, dbl121Days
-							, 0
-							, GETDATE()
-							, NULL
-						FROM
-						( 
-							SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
-							WHERE intEntityCustomerId = @CustomerId AND strInvoiceNumber IN ( SELECT snum FROM @UnpaidRecent)
-							AND dbl10Days <> 0
-							UNION ALL 
-							SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
-							WHERE intEntityCustomerId = @CustomerId AND strInvoiceNumber IN ( SELECT snum FROM @UnpaidRecent)
-							AND dbl30Days  <> 0
-							UNION ALL
-							SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
-							WHERE intEntityCustomerId = @CustomerId AND strInvoiceNumber IN ( SELECT snum FROM @UnpaidRecent)
-							AND dbl60Days  <> 0
-							UNION ALL
-							SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
-							WHERE intEntityCustomerId = @CustomerId AND strInvoiceNumber IN ( SELECT snum FROM @UnpaidRecent)
-							AND dbl90Days  <> 0
-							UNION ALL
-							SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
-							WHERE intEntityCustomerId = @CustomerId AND strInvoiceNumber IN ( SELECT snum FROM @UnpaidRecent)
-							AND dbl120Days  <> 0
-							UNION ALL
-							SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
-							WHERE intEntityCustomerId = @CustomerId AND strInvoiceNumber IN ( SELECT snum FROM @UnpaidRecent)
-							AND dbl121Days  <> 0
-						) ABC
-
-						UPDATE 
-							tblARCollectionOverdue SET dbl10DaysSum = ABC.dblTotalDueSum
-						FROM 
-							(SELECT dblTotalDueSum = (SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl120Days) + SUM(dbl121Days)) FROM #TransactionLetterDetail WHERE intEntityCustomerId = @CustomerId) ABC
- 						WHERE 
-							intEntityCustomerId = @CustomerId 
-
-					END
-					ELSE IF @strLetterName = '30 Day Overdue Collection Letter'					
-					BEGIN
-						DECLARE @Unpaid30Invoice TABLE
-						(
-							snum NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						)
-						INSERT INTO @Unpaid30Invoice 
-						SELECT strInvoiceNumber FROM tblARInvoice where ysnPaid = 0
-				
-						INSERT INTO #TransactionLetterDetail
-						(
-							intEntityCustomerId 
-							,strInvoiceNumber	 
-							,dtmDate				 
-							,dbl10Days			 
-							,dbl30Days			 
-							,dbl60Days			  
-							,dbl90Days			 
-							,dbl120Days			 
-							,dbl121Days	
-							,dblAmount		 
-							,dtmDueDate
-							,strTerm
-						)
-						SELECT intEntityCustomerId 
-							, strInvoiceNumber
-							, dtmDate
-							, dbl10Days
-							, dbl30Days
-							, dbl60Days
-							, dbl90Days
-							, dbl120Days
-							, dbl121Days
-							, 0
-							, GETDATE()
-							, NULL
-						FROM
-						( 
-							SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
-							WHERE intEntityCustomerId = @CustomerId
-							AND dbl60Days  <> 0
-							UNION ALL
-							SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
-							WHERE intEntityCustomerId = @CustomerId
-							AND dbl90Days  <> 0
-							UNION ALL
-							SELECT intEntityCustomerId,strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
-							WHERE intEntityCustomerId = @CustomerId
-							AND dbl120Days  <> 0
-							UNION ALL
-							SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
-							WHERE intEntityCustomerId = @CustomerId
-							AND dbl121Days  <> 0
-						) ABC
-							WHERE strInvoiceNumber IN ( SELECT snum FROM @Unpaid30Invoice)
-
-						UPDATE 
-							tblARCollectionOverdue SET dbl30DaysSum = ABC.dblTotalDueSum
-						FROM 
-							(SELECT dblTotalDueSum = (SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl120Days) + SUM(dbl121Days)) FROM #TransactionLetterDetail WHERE intEntityCustomerId = @CustomerId) ABC
- 						WHERE 
-							intEntityCustomerId = @CustomerId 
-
-					END
-					ELSE IF @strLetterName = '60 Day Overdue Collection Letter'					
-					BEGIN
-						DECLARE @Unpaid60Invoice TABLE
-						(
-							snum NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						)
-						INSERT INTO @Unpaid60Invoice 
-						SELECT strInvoiceNumber FROM tblARInvoice where ysnPaid = 0		
-						INSERT INTO #TransactionLetterDetail
-						(
-							intEntityCustomerId
-							,strInvoiceNumber	 
-							,dtmDate				 
-							,dbl10Days			 
-							,dbl30Days			 
-							,dbl60Days			  
-							,dbl90Days			 
-							,dbl120Days			 
-							,dbl121Days	
-							,dblAmount		
-							,dtmDueDate
-							,strTerm 
-						)
-						SELECT intEntityCustomerId
-							, strInvoiceNumber
-							, dtmDate
-							, dbl10Days
-							, dbl30Days
-							, dbl60Days
-							, dbl90Days
-							, dbl120Days
-							, dbl121Days
-							, 0
-							, GETDATE()
-							, NULL
-						FROM
-						( 
-							SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
-							WHERE intEntityCustomerId = @CustomerId AND strInvoiceNumber IN ( SELECT snum FROM @Unpaid60Invoice)
-							AND dbl90Days  <> 0
-							UNION ALL
-							SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
-							WHERE intEntityCustomerId = @CustomerId AND strInvoiceNumber IN ( SELECT snum FROM @Unpaid60Invoice)
-							AND dbl120Days  <> 0
-							UNION ALL
-							SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
-							WHERE intEntityCustomerId = @CustomerId AND strInvoiceNumber IN ( SELECT snum FROM @Unpaid60Invoice)
-							AND dbl121Days  <> 0
-						) ABC
-
-						UPDATE 
-							tblARCollectionOverdue SET dbl60DaysSum = ABC.dblTotalDueSum
-						FROM 
-							(SELECT dblTotalDueSum = (SUM(dbl90Days) + SUM(dbl120Days) + SUM(dbl121Days)) FROM #TransactionLetterDetail WHERE intEntityCustomerId = @CustomerId) ABC
- 						WHERE 
-							intEntityCustomerId = @CustomerId 
-					END
-					ELSE IF @strLetterName = '90 Day Overdue Collection Letter'					
-					BEGIN				
-						DECLARE @UnpaidInvoice TABLE
-						(
-							id int
-						)
-						INSERT INTO @UnpaidInvoice 
-						SELECT intInvoiceId FROM tblARInvoice where ysnPaid = 0
-
-						INSERT INTO #TransactionLetterDetail
-						(
-							intEntityCustomerId
-							,strInvoiceNumber	 
-							,dtmDate				 
-							,dbl10Days			 
-							,dbl30Days			 
-							,dbl60Days			  
-							,dbl90Days			 
-							,dbl120Days			 
-							,dbl121Days		
-							,dblAmount	 
-							,dtmDueDate
-							,strTerm
-						)
-						SELECT intEntityCustomerId
-							, strInvoiceNumber
-							, dtmDate
-							, dbl10Days
-							, dbl30Days
-							, dbl60Days
-							, dbl90Days
-							, dbl120Days
-							, dbl121Days
-							, 0
-							, GETDATE()
-							, NULL
-						FROM
-						( 
-							SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
-							WHERE intEntityCustomerId = @CustomerId AND intInvoiceId in (SELECT id FROM @UnpaidInvoice)
-							AND dbl120Days  <> 0
-							UNION ALL
-							SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
-							WHERE intEntityCustomerId = @CustomerId AND intInvoiceId in (SELECT id FROM @UnpaidInvoice)
-							AND dbl121Days  <> 0
-						) ABC
-
-						UPDATE 
-							tblARCollectionOverdue SET dbl90DaysSum = ABC.dblTotalDueSum
-						FROM 
-							(SELECT dblTotalDueSum = (SUM(dbl120Days) + SUM(dbl121Days)) FROM #TransactionLetterDetail WHERE intEntityCustomerId = @CustomerId) ABC
- 						WHERE 
-							intEntityCustomerId = @CustomerId 
-					END
-					ELSE IF @strLetterName = 'Final Overdue Collection Letter'					
-					BEGIN
-						DECLARE @UnpaidFinal TABLE
-						(
-							snum NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						)
-						INSERT INTO @UnpaidFinal 
-						SELECT strInvoiceNumber FROM tblARInvoice where ysnPaid = 0			
-						INSERT INTO #TransactionLetterDetail
-						(
-							intEntityCustomerId
-							,strInvoiceNumber	 
-							,dtmDate				 
-							,dbl10Days			 
-							,dbl30Days			 
-							,dbl60Days			  
-							,dbl90Days			 
-							,dbl120Days			 
-							,dbl121Days		
-							,dblAmount	 
-							,dtmDueDate
-							,strTerm
-						)
-						SELECT intEntityCustomerId
-							, strInvoiceNumber
-							, dtmDate
-							, dbl10Days
-							, dbl30Days
-							, dbl60Days
-							, dbl90Days
-							, dbl120Days
-							, dbl121Days
-							, 0
-							, GETDATE()
-							, NULL
-						FROM
-						( 
-							SELECT intEntityCustomerId, strInvoiceNumber, dtmDate, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl120Days, dbl121Days FROM tblARCollectionOverdueDetail WITH(NOLOCK)
-							WHERE intEntityCustomerId = @CustomerId AND strInvoiceNumber IN ( SELECT snum FROM @UnpaidFinal)
-							AND dbl121Days  <> 0
-						) ABC
-
-						UPDATE 
-							tblARCollectionOverdue SET dbl121DaysSum = ABC.dblTotalDueSum
-						FROM 
-							(SELECT dblTotalDueSum = (SUM(dbl121Days)) FROM #TransactionLetterDetail WHERE intEntityCustomerId = @CustomerId) ABC
- 						WHERE 
-							intEntityCustomerId = @CustomerId 
-					END	
-					ELSE IF @strLetterName = 'Service Charge Invoices Letter'
-						BEGIN
-							INSERT INTO #TransactionLetterDetail
-							(
-								intEntityCustomerId
-								,strInvoiceNumber	 
-								,dtmDate				 
-								,dbl10Days			 
-								,dbl30Days			 
-								,dbl60Days			  
-								,dbl90Days			 
-								,dbl120Days			 
-								,dbl121Days		
-								,dblAmount	 
-								,dtmDueDate
-								,strTerm
-							)
-							SELECT intEntityCustomerId
-								, strInvoiceNumber
-								, dtmDate							 
-								, 0	dbl10Days		 
-								, 0	dbl30Days		 
-								, 0	dbl60Days		  
-								, 0 dbl90Days			 
-								, 0 dbl120Days			 
-								, 0	dbl121Days		
-								, dblTotalDue
-								, dtmDueDate
-								, strTerm
-							FROM 
-								vyuARServiceChargeInvoiceReport WITH(NOLOCK)
-						END
-								
+					SELECT TOP 1 @CustomerId = intEntityCustomerId FROM @SelectedCustomer ORDER BY intEntityCustomerId
+							
 					WHILE EXISTS(SELECT NULL FROM @SelectedPlaceHolderTable)
 					BEGIN
 						DECLARE @PlaceHolderId				INT
@@ -549,17 +311,15 @@ BEGIN
 								,@DataType					VARCHAR(MAX)
 
 						SELECT TOP 1 
-							@PlaceHolderId				= [intPlaceHolderId]
+							 @PlaceHolderId				= [intPlaceHolderId]
 							,@PlaceHolder				= [strPlaceHolder]
 							,@SourceColumn				= [strSourceColumn]
 							,@PlaceHolderDescription	= [strPlaceHolderDescription]
 							,@SourceTable				= [strSourceTable]
 							,@Table						= [ysnTable]
 							,@DataType					= [strDataType]
-						FROM
-							@SelectedPlaceHolderTable 
+						FROM @SelectedPlaceHolderTable 
 						ORDER BY [intPlaceHolderId]				
-		 
 
 						IF @Table = 0
 						BEGIN
@@ -1120,7 +880,7 @@ BEGIN
 
 					INSERT INTO @SelectedPlaceHolderTable
 					(
-						intPlaceHolderId
+						  intPlaceHolderId
 						, strPlaceHolder
 						, strSourceColumn 
 						, strPlaceHolderDescription
@@ -1128,18 +888,15 @@ BEGIN
 						, ysnTable
 						, strDataType
 					)			
-					SELECT 
-						intPlaceHolderId
-						, strPlaceHolder
-						, strSourceColumn
-						,strPlaceHolderDescription
-						, strSourceTable
-						, ysnTable
-						, strDataType
-					FROM 
-						tblARLetterPlaceHolder WITH(NOLOCK)
-					WHERE 
-						CHARINDEX ( dbo.fnARRemoveWhiteSpace(strPlaceHolder), dbo.fnARRemoveWhiteSpace(@originalMsgInHTML) ) <> 0
+					SELECT intPlaceHolderId
+						 , strPlaceHolder
+						 , strSourceColumn
+						 , strPlaceHolderDescription
+						 , strSourceTable
+						 , ysnTable
+						 , strDataType
+					FROM dbo.tblARLetterPlaceHolder WITH(NOLOCK)
+					WHERE CHARINDEX ( dbo.fnARRemoveWhiteSpace(strPlaceHolder), dbo.fnARRemoveWhiteSpace(@originalMsgInHTML) ) <> 0
 				END
 		END
 
