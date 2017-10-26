@@ -5786,6 +5786,7 @@
     <Build Include="dbo\Stored Procedures\uspSMIncreaseECConcurrency.sql" />
     <Build Include="dbo\Views\vyuMFInventoryViewAsonDate.sql" />
     <Build Include="dbo\Views\vyuLGLoadWarehouseServices.sql" />
+    <Build Include="dbo\Views\vyuCTGetContractForScaleTicket.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
