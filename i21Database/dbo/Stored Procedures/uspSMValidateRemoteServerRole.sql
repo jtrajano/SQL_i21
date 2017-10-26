@@ -10,10 +10,9 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
 
+DECLARE @SQLString NVARCHAR(MAX) = '';
 
-BEGIN
-SELECT @count=  COUNT(*) FROM REMOTEDBSERVER.[master].sys.syslogins
-WHERE name = @remoteDBUserId AND sysadmin =1
-	
-	
-END
+SET @SQLString = N'SELECT @count =  COUNT(*) FROM REMOTEDBSERVER.[master].sys.syslogins
+WHERE name = @remoteDBUserId AND sysadmin = 1'
+
+EXECUTE sp_executesql @SQLString, N'@count INT OUT, @remoteDBUserId NVARCHAR(MAX)', @remoteDBUserId =@remoteDBUserId,@count = @count OUT
