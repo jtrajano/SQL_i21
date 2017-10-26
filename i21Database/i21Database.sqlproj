@@ -5796,7 +5796,7 @@
     <None Include="Scripts\Post-Deployment\SM\1740_UpdatePurchasingMenus.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostQtyChangeFromInvShipmentDestination.sql" />
     <Build Include="dbo\Stored Procedures\uspSMUpdateEntityCredentialGridLayout.sql" />
-	<Build Include="dbo\Tables\tblGRSellOffsite.sql" />
+    <Build Include="dbo\Tables\tblGRSellOffsite.sql" />
     <Build Include="dbo\Tables\tblGRSellOffsiteTicket.sql" />
     <Build Include="dbo\Tables\tblGRSellContract.sql" />
     <Build Include="dbo\Views\vyuGRGetSellOffsite.sql" />
@@ -5804,6 +5804,7 @@
     <Build Include="dbo\Views\vyuGRSellOffsiteTicketNotMapped.sql" />
     <Build Include="dbo\Views\vyuGRSellOffsiteContractNotMapped.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRemovePaymentAndCreatePrepay.sql" />
+    <Build Include="dbo\Views\vyuCTGetContractForScaleTicket.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
