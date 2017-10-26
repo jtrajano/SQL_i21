@@ -147,6 +147,7 @@ BEGIN
 					,@CalculationMethod	NVARCHAR(30)
 					,@CheckoffTax		BIT
 					,@TaxExempt			BIT
+					,@TaxOnly			BIT
 				
 					
 			SELECT TOP 1 
@@ -167,6 +168,8 @@ BEGIN
 				,@CalculationMethod	= [strCalculationMethod]
 				,@CheckoffTax		= ISNULL([ysnCheckoffTax],0)
 				,@TaxExempt			= ISNULL([ysnTaxExempt],0)
+				,@TaxOnly			= ISNULL([ysnTaxOnly],0)
+				,@OtherTaxAmount	= @ZeroDecimal
 			FROM
 				@ItemTaxes
 			WHERE [Id] = @Id
@@ -221,8 +224,7 @@ BEGIN
 							,@TaxAdjustedTax			NUMERIC(18,6)
 							,@TaxRate					NUMERIC(18,6)
 							,@TaxCalculationMethod		NVARCHAR(30)
-							,@TaxTaxExempt				BIT
-							,@TaxOnly					BIT
+							,@TaxTaxExempt				BIT							
 							
 					SELECT TOP 1 @TaxId	= [Id] FROM @TaxableByOtherTaxes
 								
@@ -232,9 +234,7 @@ BEGIN
 						,@TaxAdjustedTax			= [dblAdjustedTax]
 						,@TaxRate					= [dblRate]
 						,@TaxCalculationMethod		= [strCalculationMethod]
-						,@TaxTaxExempt				= ISNULL([ysnTaxExempt],0)
-						,@OtherTaxAmount			= @ZeroDecimal
-						,@TaxOnly					= ISNULL([ysnTaxOnly],0)
+						,@TaxTaxExempt				= ISNULL([ysnTaxExempt],0)						
 					FROM
 						@TaxableByOtherTaxes
 					WHERE
@@ -244,11 +244,6 @@ BEGIN
 						
 					IF(@TaxTaxableByOtherTaxes IS NOT NULL AND RTRIM(LTRIM(@TaxTaxableByOtherTaxes)) <> '')
 					BEGIN
-						IF @TaxOnly = 1
-							SET @TaxableAmount = @ZeroDecimal
-						ELSE
-							SET @TaxableAmount	= ISNULL(@ItemPrice, @ZeroDecimal) * ISNULL(@QtyShipped, @ZeroDecimal)
-
 						IF(@TaxAdjustedTax = 1)
 						BEGIN
 							SET @OtherTaxAmount = @OtherTaxAmount + @TaxAdjustedTax
@@ -264,14 +259,18 @@ BEGIN
 										SET @OtherTaxAmount = @OtherTaxAmount + ((CASE WHEN (@TaxTaxExempt = 1 OR (@ExcludeCheckOff = 1 AND @CheckoffTax = 1)) THEN 0.000000 ELSE (@QtyShipped * @TaxRate) END))
 									END
 							END
-					END 
-
-					SET @TaxableAmount = @TaxableAmount + @OtherTaxAmount
+					END 					
 						
 					DELETE FROM @TaxableByOtherTaxes WHERE [Id] = @TaxId
 				END
-				
-			
+
+			IF @TaxOnly = 1
+				SET @TaxableAmount = @ZeroDecimal
+			ELSE
+				SET @TaxableAmount	= ISNULL(@ItemPrice, @ZeroDecimal) * ISNULL(@QtyShipped, @ZeroDecimal)	
+							
+			SET @TaxableAmount = @TaxableAmount + @OtherTaxAmount
+
 			DECLARE @ItemTaxAmount NUMERIC(18,6) = 0.00
 			IF(@CalculationMethod = 'Percentage')
 				SET @ItemTaxAmount = (@TaxableAmount * (@Rate/100));
