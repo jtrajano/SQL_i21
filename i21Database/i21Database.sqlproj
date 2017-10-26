@@ -4462,7 +4462,6 @@
     <Build Include="dbo\Tables\tblTFIntegrationError.sql" />
     <Build Include="dbo\Stored Procedures\uspTFOriginDataIntegration.sql" />
     <Build Include="dbo\Stored Procedures\uspSCManualDistributionOutbound.sql" />
-    <Build Include="dbo\Stored Procedures\uspARCollectionOverdueDetailReport.sql" />
     <Build Include="dbo\Stored Procedures\uspARSearchLetterCustomer.sql" />
     <Build Include="dbo\Tables\tblARCollectionOverdue.sql" />
     <Build Include="dbo\Tables\tblARCollectionOverdueDetail.sql" />

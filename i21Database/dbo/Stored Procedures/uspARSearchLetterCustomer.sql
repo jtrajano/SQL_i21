@@ -224,7 +224,7 @@ BEGIN
 				FROM dbo.vyuARCustomer WITH (NOLOCK) 
 				WHERE ysnActive = 1
 	) ENTITY ON ARCO.intEntityCustomerId = ENTITY.intEntityId
-	WHERE (ISNULL(dbl10DaysSum,0) <> 0 OR ISNULL(dbl30DaysSum,0) <> 0 OR ISNULL(dbl60DaysSum,0) <> 0 OR  ISNULL(dbl90DaysSum,0) <> 0 OR  ISNULL(dbl120DaysSum,0) <> 0 OR  ISNULL(dbl121DaysSum,0) <> 0)
+	WHERE (ISNULL(dbl10DaysSum,0) <> 0 OR ISNULL(dbl30DaysSum,0) <> 0)
 END
 
 ELSE IF @strLetterName = '30 Day Overdue Collection Letter'
@@ -240,7 +240,7 @@ BEGIN
 				FROM dbo.vyuARCustomer WITH (NOLOCK) 
 				WHERE ysnActive = 1
 	) ENTITY ON ARCO.intEntityCustomerId = ENTITY.intEntityId
-	WHERE (ISNULL(dbl60DaysSum,0) <> 0 OR  ISNULL(dbl90DaysSum,0) <> 0 OR  ISNULL(dbl120DaysSum,0) <> 0 OR  ISNULL(dbl121DaysSum,0) <> 0)
+	WHERE (ISNULL(dbl60DaysSum,0) <> 0 OR ISNULL(dbl90DaysSum,0) <> 0 OR ISNULL(dbl120DaysSum,0) <> 0 OR ISNULL(dbl121DaysSum,0) <> 0)
 END
 
 ELSE IF @strLetterName = '60 Day Overdue Collection Letter'
@@ -256,7 +256,7 @@ BEGIN
 				FROM dbo.vyuARCustomer WITH (NOLOCK) 
 				WHERE ysnActive = 1
 	) ENTITY ON ARCO.intEntityCustomerId = ENTITY.intEntityId
-	WHERE (ISNULL(dbl90DaysSum,0) <> 0 OR  ISNULL(dbl120DaysSum,0) <> 0 OR  ISNULL(dbl121DaysSum,0) <> 0)
+	WHERE (ISNULL(dbl90DaysSum,0) <> 0 OR ISNULL(dbl120DaysSum,0) <> 0 OR ISNULL(dbl121DaysSum,0) <> 0)
 END
 
 ELSE IF @strLetterName = '90 Day Overdue Collection Letter'
@@ -272,7 +272,7 @@ BEGIN
 				FROM dbo.vyuARCustomer WITH (NOLOCK) 
 				WHERE ysnActive = 1
 	) ENTITY ON ARCO.intEntityCustomerId = ENTITY.intEntityId
-	WHERE (ISNULL(dbl120DaysSum,0) <> 0 OR  ISNULL(dbl121DaysSum,0) <> 0)
+	WHERE (ISNULL(dbl120DaysSum,0) <> 0 OR ISNULL(dbl121DaysSum,0) <> 0)
 END
 
 ELSE IF @strLetterName = 'Final Overdue Collection Letter'
