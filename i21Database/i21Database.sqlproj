@@ -5805,6 +5805,7 @@
     <Build Include="dbo\Views\vyuGRSellOffsiteContractNotMapped.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRemovePaymentAndCreatePrepay.sql" />
     <Build Include="dbo\Views\vyuCTGetContractForScaleTicket.sql" />
+    <Build Include="dbo\Views\vyuRKGetSequenceMonthNotMapping.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
