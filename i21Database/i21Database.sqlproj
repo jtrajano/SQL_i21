@@ -5582,6 +5582,7 @@
     <Build Include="dbo\Views\vyuHDCurrencyRate.sql" />
     <Build Include="dbo\Views\vyuHDCurrencyRateType.sql" />
     <Build Include="dbo\Views\vyuCFSearchAccountVehicle.sql" />
+    <Build Include="dbo\Views\vyuICInventoryReceiptTotals.sql" />
     <Build Include="dbo\Stored Procedures\uspSTReportPurgePromotionsPreview.sql" />
     <Build Include="dbo\Stored Procedures\uspMFAutoBlendBatchEntry.sql" />
     <Build Include="dbo\Tables\tblCFPostForeignTransResult.sql" />
