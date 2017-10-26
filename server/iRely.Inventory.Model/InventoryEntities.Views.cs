@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets4167437691e68738d04b6f4b3716f2351c26d9f6e316f14860e9d32fede09b5f))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetse03ef4a7b266e40dce0f5f2a5d8b7c4e5d1b1cd3430b2202afa020293b3279eb))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -22,15 +22,15 @@ namespace Edm_EntityMappingGeneratedViews
     /// <summary>
     /// Implements a mapping view cache.
     /// </summary>
-    [GeneratedCode("Entity Framework 6 Power Tools", "0.9.2.0")]
-    internal sealed class ViewsForBaseEntitySets4167437691e68738d04b6f4b3716f2351c26d9f6e316f14860e9d32fede09b5f : DbMappingViewCache
+    [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
+    internal sealed class ViewsForBaseEntitySetse03ef4a7b266e40dce0f5f2a5d8b7c4e5d1b1cd3430b2202afa020293b3279eb : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "4167437691e68738d04b6f4b3716f2351c26d9f6e316f14860e9d32fede09b5f"; }
+            get { return "e03ef4a7b266e40dce0f5f2a5d8b7c4e5d1b1cd3430b2202afa020293b3279eb"; }
         }
 
         /// <summary>
@@ -5102,12 +5102,16 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblSMLineOfBusiness
-        [CodeFirstDatabaseSchema.tblSMLineOfBusiness](T1.tblSMLineOfBusiness_intLineOfBusinessId, T1.tblSMLineOfBusiness_strLineOfBusiness, T1.tblSMLineOfBusiness_intEntityId, T1.tblSMLineOfBusiness_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblSMLineOfBusiness](T1.tblSMLineOfBusiness_intLineOfBusinessId, T1.tblSMLineOfBusiness_strLineOfBusiness, T1.tblSMLineOfBusiness_intEntityId, T1.tblSMLineOfBusiness_ysnVisibleOnWeb, T1.tblSMLineOfBusiness_strSICCode, T1.tblSMLineOfBusiness_strType, T1.tblSMLineOfBusiness_intSegmentCodeId, T1.tblSMLineOfBusiness_intConcurrencyId)
     FROM (
         SELECT 
             T.intLineOfBusinessId AS tblSMLineOfBusiness_intLineOfBusinessId, 
             T.strLineOfBusiness AS tblSMLineOfBusiness_strLineOfBusiness, 
             T.intEntityId AS tblSMLineOfBusiness_intEntityId, 
+            T.ysnVisibleOnWeb AS tblSMLineOfBusiness_ysnVisibleOnWeb, 
+            T.strSICCode AS tblSMLineOfBusiness_strSICCode, 
+            T.strType AS tblSMLineOfBusiness_strType, 
+            T.intSegmentCodeId AS tblSMLineOfBusiness_intSegmentCodeId, 
             T.intConcurrencyId AS tblSMLineOfBusiness_intConcurrencyId, 
             True AS _from0
         FROM InventoryEntities.tblSMLineOfBusinesses AS T
@@ -8997,12 +9001,16 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblSMLineOfBusinesses
-        [iRely.Inventory.Model.tblSMLineOfBusiness](T1.tblSMLineOfBusiness_intLineOfBusinessId, T1.tblSMLineOfBusiness_strLineOfBusiness, T1.tblSMLineOfBusiness_intEntityId, T1.tblSMLineOfBusiness_intConcurrencyId)
+        [iRely.Inventory.Model.tblSMLineOfBusiness](T1.tblSMLineOfBusiness_intLineOfBusinessId, T1.tblSMLineOfBusiness_strLineOfBusiness, T1.tblSMLineOfBusiness_intEntityId, T1.tblSMLineOfBusiness_ysnVisibleOnWeb, T1.tblSMLineOfBusiness_strSICCode, T1.tblSMLineOfBusiness_strType, T1.tblSMLineOfBusiness_intSegmentCodeId, T1.tblSMLineOfBusiness_intConcurrencyId)
     FROM (
         SELECT 
             T.intLineOfBusinessId AS tblSMLineOfBusiness_intLineOfBusinessId, 
             T.strLineOfBusiness AS tblSMLineOfBusiness_strLineOfBusiness, 
             T.intEntityId AS tblSMLineOfBusiness_intEntityId, 
+            T.ysnVisibleOnWeb AS tblSMLineOfBusiness_ysnVisibleOnWeb, 
+            T.strSICCode AS tblSMLineOfBusiness_strSICCode, 
+            T.strType AS tblSMLineOfBusiness_strType, 
+            T.intSegmentCodeId AS tblSMLineOfBusiness_intSegmentCodeId, 
             T.intConcurrencyId AS tblSMLineOfBusiness_intConcurrencyId, 
             True AS _from0
         FROM CodeFirstDatabase.tblSMLineOfBusiness AS T
