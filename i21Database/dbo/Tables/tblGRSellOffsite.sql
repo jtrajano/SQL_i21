@@ -1,0 +1,28 @@
+﻿CREATE TABLE [dbo].[tblGRSellOffsite]
+(
+	[intSellOffsiteId] INT NOT NULL  IDENTITY, 
+    [intConcurrencyId] INT NOT NULL, 
+	[intItemId] INT NULL,
+	[intCompanyLocationId] INT NULL, 
+	[intCompanyLocationSubLocationId] INT NULL, 	
+    [intEntityId] INT NULL,
+	[dblSpotUnits] NUMERIC(18, 6) NULL,
+	[dblFuturesPrice] NUMERIC(18, 6) NULL,     
+	[dblFuturesBasis] NUMERIC(18, 6) NULL,
+	[dblCashPrice] NUMERIC(18, 6) NULL,
+	[strOffsiteTicket] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
+	[dblSelectedUnits] NUMERIC(18, 6) NULL,
+	[dblContractUnits] NUMERIC(18, 6) NULL,
+	[ysnPosted] [bit] NULL DEFAULT ((0)),
+	[intCommodityId] INT NULL,
+	[intCommodityStockUomId] INT NULL,
+	[intCreatedUserId] INT NULL,
+	[intInvoiceId] INT NULL,
+	[dtmCreated] DATETIME NULL,
+    CONSTRAINT [PK_tblGRSellOffsite_intCustomerStorageId] PRIMARY KEY ([intSellOffsiteId]),
+	CONSTRAINT [FK_tblGRSellOffsite_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),	
+	CONSTRAINT [FK_tblGRSellOffsite_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
+	CONSTRAINT [FK_tblGRSellOffsite_tblSMCompanyLocationSubLocation_intCompanyLocationSubLocationId] FOREIGN KEY ([intCompanyLocationSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]),
+	CONSTRAINT [FK_tblGRSellOffsite_tblARInvoice_intInvoiceId] FOREIGN KEY ([intInvoiceId]) REFERENCES [dbo].[tblARInvoice] ([intInvoiceId]),
+	CONSTRAINT [FK_tblGRSellOffsite_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId])
+)

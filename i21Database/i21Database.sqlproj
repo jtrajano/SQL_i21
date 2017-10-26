@@ -5790,6 +5790,13 @@
     <Build Include="dbo\Stored Procedures\uspSMValidateRemoteServerRole.sql" />
     <Build Include="dbo\Stored Procedures\uspCTValidateContractAfterSave.sql" />
     <None Include="Scripts\Post-Deployment\SM\1740_UpdatePurchasingMenus.sql" />
+	<Build Include="dbo\Tables\tblGRSellOffsite.sql" />
+    <Build Include="dbo\Tables\tblGRSellOffsiteTicket.sql" />
+    <Build Include="dbo\Tables\tblGRSellContract.sql" />
+    <Build Include="dbo\Views\vyuGRGetSellOffsite.sql" />
+    <Build Include="dbo\Views\vyuGRSellOffsiteNotMapped.sql" />
+    <Build Include="dbo\Views\vyuGRSellOffsiteTicketNotMapped.sql" />
+    <Build Include="dbo\Views\vyuGRSellOffsiteContractNotMapped.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
