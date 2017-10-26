@@ -70,25 +70,26 @@ FROM
 		 , strTaxCode						= NULL
 	FROM (
 		SELECT intEntityCustomerId		=	ARI.intEntityCustomerId
-			 , intCompanyLocationId		=	ARI.intCompanyLocationId
-			 , strTransactionType		=	'Items'
-			 , strType					=	NULL
-			 , dblInvoiceTotal			=	SUM(ARID.dblQtyShipped) * SUM(ARID.dblPrice)
-			 , intItemId				=	ARID.intItemId
-			 , strItemDescription		=	ARID.strItemDescription
-			 , dblQtyShipped			=	SUM(ARID.dblQtyShipped)
-			 , intTaxCodeId				=	NULL
+			  , intCompanyLocationId	=	ARI.intCompanyLocationId
+			  , strTransactionType		=	'Items'
+			  , strType					=	NULL
+			  , dblInvoiceTotal			=	SUM(dblLineItemTotal)
+			  , intItemId				=	ARID.intItemId
+			  , strItemDescription		=	ARID.strItemDescription
+			  , dblQtyShipped			=	SUM(ARID.dblQtyShipped)
+			  , intTaxCodeId			=	NULL
 		FROM dbo.tblARInvoice ARI WITH (NOLOCK)
-		INNER JOIN (
+		CROSS APPLY (
 			SELECT intInvoiceId
-				 , intInvoiceDetailId
-				 , intItemId
-				 , strItemDescription	= CASE WHEN ISNULL(strItemDescription,'') = '' THEN 'MISC' ELSE strItemDescription END
-				 , dblQtyShipped
-				 , dblPrice
-				 , intTaxGroupId
-			 FROM dbo.tblARInvoiceDetail 
-		) ARID ON ARI.intInvoiceId = ARID.intInvoiceId
+				, intInvoiceDetailId
+				, intItemId
+				, strItemDescription	= CASE WHEN ISNULL(strItemDescription,'') = '' THEN 'MISC' ELSE strItemDescription END
+				, dblLineItemTotal		= (dblQtyShipped * dblPrice) * dbo.fnARGetInvoiceAmountMultiplier(ARI.strTransactionType)
+				, dblQtyShipped			= dblQtyShipped  * dbo.fnARGetInvoiceAmountMultiplier(ARI.strTransactionType)
+				, intTaxGroupId
+			FROM dbo.tblARInvoiceDetail ID
+			WHERE ID.intInvoiceId = ARI.intInvoiceId
+		) ARID
 		WHERE ARI.ysnPosted = 1
 		GROUP BY ARI.intEntityCustomerId
 			   , ARI.intCompanyLocationId
