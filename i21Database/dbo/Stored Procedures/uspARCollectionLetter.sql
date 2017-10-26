@@ -13,9 +13,10 @@ BEGIN
 		  , @strCustomerIds			NVARCHAR(MAX)		
 		  , @intLetterId			INT
 		  , @strLetterId			NVARCHAR(10)
-		  , @ysnSystemDefined		BIT  
+		  , @ysnSystemDefined		BIT
+		  , @ysnEmailOnly			BIT
 		  , @strLetterName			NVARCHAR(MAX)
-		  , @strMessage				NVARCHAR(MAX)				
+		  , @strMessage				NVARCHAR(MAX)
 		  , @query					NVARCHAR(MAX)
 		  , @intEntityCustomerId	INT
 		  , @blb					VARBINARY(MAX)
@@ -55,6 +56,10 @@ BEGIN
 	SELECT @intLetterId = [from]
 	FROM @temp_params 
 	WHERE [fieldname] = 'intLetterId'
+
+	SELECT @ysnEmailOnly = [from]
+	FROM @temp_params 
+	WHERE [fieldname] = 'ysnHasEmailSetup'
 		
 	SET @strLetterId = CAST(@intLetterId AS NVARCHAR(10))
 
@@ -64,28 +69,6 @@ BEGIN
 		 , @ysnSystemDefined	= ysnSystemDefined 
 	FROM tblSMLetter WITH(NOLOCK) 
 	WHERE intLetterId = @intLetterId
-
-	IF ISNULL(@strCustomerIds, '') = '' AND ISNULL(@ysnSystemDefined, 1) = 1
-		BEGIN
-			IF @strLetterName NOT IN ('Credit Suspension', 'Expired Credit Card', 'Credit Review', 'Service Charge Invoices Letter')
-				BEGIN
-					SELECT @strCustomerIds = LEFT(intEntityCustomerId, LEN(intEntityCustomerId) - 1)
-					FROM (
-						SELECT CAST(intEntityCustomerId AS VARCHAR(200))  + ', '
-						FROM tblARCollectionOverdue WITH(NOLOCK)
-						FOR XML PATH ('')
-					) c (intEntityCustomerId)
-				END
-			ELSE IF @strLetterName = 'Service Charge Invoices Letter' 
-				BEGIN
-					SELECT @strCustomerIds = LEFT(intEntityCustomerId, LEN(intEntityCustomerId) - 1)
-					FROM (
-						SELECT DISTINCT CAST(intEntityCustomerId AS VARCHAR(200))  + ', '
-						FROM vyuARServiceChargeInvoiceReport WITH(NOLOCK)
-						FOR XML PATH ('')
-					) c (intEntityCustomerId)
-				END
-		END
 	
 	SET @strCustomerIds = REPLACE (@strCustomerIds, '|^|', ',')
 	SET @strCustomerIds = REVERSE(SUBSTRING(REVERSE(@strCustomerIds),PATINDEX('%[A-Za-z0-9]%',REVERSE(@strCustomerIds)),LEN(@strCustomerIds) - (PATINDEX('%[A-Za-z0-9]%',REVERSE(@strCustomerIds)) - 1)	) )
@@ -105,7 +88,15 @@ BEGIN
 	);
 				
  	DECLARE @SelectedCustomer TABLE  (
-		intEntityCustomerId		INT
+		  intEntityCustomerId	INT
+		, ysnHasEmailSetup		BIT
+		, dblCreditLimit		NUMERIC(18, 6)
+	);
+
+	DECLARE @temp_SelectedCustomer TABLE  (
+		  intEntityCustomerId	INT
+		, ysnHasEmailSetup		BIT
+		, dblCreditLimit		NUMERIC(18, 6)
 	);
 	
 	IF OBJECT_ID('tempdb..#CustomerPlaceHolder') IS NOT NULL DROP TABLE #CustomerPlaceHolder	
@@ -132,36 +123,53 @@ BEGIN
 		strTerm				NVARCHAR(100)	COLLATE Latin1_General_CI_AS
 	)
 
-	IF ISNULL(@strCustomerIds, '') = '' AND ISNULL(@ysnSystemDefined, 1) = 1
-		BEGIN
-			IF @strLetterName IN ('Credit Suspension', 'Expired Credit Card')
-				BEGIN
-					INSERT INTO @SelectedCustomer
-					SELECT intEntityId FROM tblARCustomer WITH (NOLOCK)
-					WHERE ysnActive = 1 AND dblCreditLimit = 0
-				END
-			ELSE IF @strLetterName = 'Credit Review'
-				BEGIN
-					INSERT INTO @SelectedCustomer
-					SELECT intEntityId FROM tblARCustomer WITH (NOLOCK)
-					WHERE ysnActive = 1 AND dblCreditLimit > 0
-				END
-			ELSE
-				BEGIN
-					INSERT INTO @SelectedCustomer
-					SELECT * FROM fnGetRowsFromDelimitedValues(@strCustomerIds)
-				END
-		END
-	ELSE IF ISNULL(@strCustomerIds, '') = '' AND ISNULL(@ysnSystemDefined, 1) = 0
+	IF ISNULL(@strCustomerIds, '') = ''
 		BEGIN
 			INSERT INTO @SelectedCustomer
-			SELECT intEntityId FROM tblARCustomer WITH (NOLOCK) WHERE ysnActive = 1
-		END
-	ELSE IF ISNULL(@strCustomerIds, '') <> ''
+			SELECT intEntityId 
+				 , ysnHasEmailSetup = CASE WHEN ISNULL(EMAILSETUP.intEmailSetupCount, 0) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
+				 , dblCreditLimit
+			FROM tblARCustomer C WITH (NOLOCK)
+			OUTER APPLY (
+				SELECT intEmailSetupCount = COUNT(*) 
+				FROM dbo.vyuARCustomerContacts CC WITH (NOLOCK)
+				WHERE CC.intCustomerEntityId = C.intEntityId 
+					AND ISNULL(CC.strEmail, '') <> '' 
+					AND CC.strEmailDistributionOption LIKE '%Letter%'
+			) EMAILSETUP
+			WHERE C.ysnActive = 1
+		END	
+	ELSE
 		BEGIN
 			INSERT INTO @SelectedCustomer
-			SELECT * FROM fnGetRowsFromDelimitedValues(@strCustomerIds)
+			SELECT C.intEntityId
+			     , ysnHasEmailSetup = CASE WHEN ISNULL(EMAILSETUP.intEmailSetupCount, 0) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
+				 , C.dblCreditLimit
+			FROM dbo.fnGetRowsFromDelimitedValues(@strCustomerIds) CUSTOMERS
+			INNER JOIN (
+				SELECT intEntityId
+					 , dblCreditLimit
+				FROM dbo.tblARCustomer WITH (NOLOCK)
+				WHERE ysnActive = 1
+			) C ON CUSTOMERS.intID = C.intEntityId
+			OUTER APPLY (
+				SELECT intEmailSetupCount = COUNT(*) 
+				FROM dbo.vyuARCustomerContacts CC WITH (NOLOCK)
+				WHERE CC.intCustomerEntityId = C.intEntityId 
+					AND ISNULL(CC.strEmail, '') <> '' 
+					AND CC.strEmailDistributionOption LIKE '%Letter%'
+			) EMAILSETUP
 		END
+
+	IF @strLetterName IN ('Credit Suspension', 'Expired Credit Card')
+		DELETE FROM @SelectedCustomer WHERE ISNULL(dblCreditLimit, 0) <> 0
+	ELSE IF @strLetterName = 'Credit Review'
+		DELETE FROM @SelectedCustomer WHERE ISNULL(dblCreditLimit, 0) = 0
+
+	IF @ysnEmailOnly = 1
+		DELETE FROM @SelectedCustomer WHERE ysnHasEmailSetup = 0
+	ELSE
+		DELETE FROM @SelectedCustomer WHERE ysnHasEmailSetup = 1
 
 	INSERT INTO @OriginalMsgInHTMLTable
 	SELECT CONVERT(VARCHAR(MAX), @blb) 
@@ -188,66 +196,74 @@ BEGIN
 	FROM dbo.tblARLetterPlaceHolder WITH(NOLOCK)
 	WHERE CHARINDEX (dbo.fnARRemoveWhiteSpace(strPlaceHolder), dbo.fnARRemoveWhiteSpace(@originalMsgInHTML)) <> 0
 
-	IF @strLetterName = 'Recent Overdue Collection Letter'
+	IF @strLetterName IN ('Recent Overdue Collection Letter', '30 Day Overdue Collection Letter', '60 Day Overdue Collection Letter', '90 Day Overdue Collection Letter', 'Final Overdue Collection Letter')
 		BEGIN
-			DELETE FROM tblARCustomerAgingStagingTable
-			WHERE ISNULL(dbl10Days, 0) = 0 AND ISNULL(dbl30Days, 0) = 0
-		END
-	ELSE IF @strLetterName = '30 Day Overdue Collection Letter'					
-		BEGIN
-			DELETE FROM tblARCustomerAgingStagingTable
-			WHERE ISNULL(dbl60Days, 0) = 0 AND ISNULL(dbl90Days, 0) = 0 AND ISNULL(dbl120Days, 0) = 0 AND ISNULL(dbl121Days, 0) = 0
-		END
-	ELSE IF @strLetterName = '60 Day Overdue Collection Letter'					
-		BEGIN						
-			DELETE FROM tblARCustomerAgingStagingTable
-			WHERE ISNULL(dbl90Days, 0) = 0 AND ISNULL(dbl120Days, 0) = 0 AND ISNULL(dbl121Days, 0) = 0
-		END
-	ELSE IF @strLetterName = '90 Day Overdue Collection Letter'					
-		BEGIN
-			DELETE FROM tblARCustomerAgingStagingTable
-			WHERE ISNULL(dbl120Days, 0) = 0 AND ISNULL(dbl121Days, 0) = 0
-		END
-	ELSE IF @strLetterName = 'Final Overdue Collection Letter'					
-		BEGIN						
-			DELETE FROM tblARCustomerAgingStagingTable
-			WHERE ISNULL(dbl121Days, 0) = 0
-		END	
-	ELSE IF @strLetterName = 'Service Charge Invoices Letter'
-		BEGIN
-			INSERT INTO #TransactionLetterDetail (
-				  intEntityCustomerId
-				, strInvoiceNumber	 
-				, dtmDate				 
-				, dbl10Days			 
-				, dbl30Days			 
-				, dbl60Days			  
-				, dbl90Days			 
-				, dbl120Days			 
-				, dbl121Days		
-				, dblAmount	 
-				, dtmDueDate
-				, strTerm
-			)
-			SELECT intEntityCustomerId
+			TRUNCATE TABLE tblARCustomerAgingStagingTable
+			INSERT INTO tblARCustomerAgingStagingTable (
+				  strCustomerName
+				, strCustomerNumber
 				, strInvoiceNumber
-				, dtmDate							 
-				, 0	dbl10Days		 
-				, 0	dbl30Days		 
-				, 0	dbl60Days		  
-				, 0 dbl90Days			 
-				, 0 dbl120Days			 
-				, 0	dbl121Days		
+				, strRecordNumber
+				, intInvoiceId
+				, strBOLNumber
+				, intEntityCustomerId
+				, dblCreditLimit
+				, dblTotalAR
+				, dblFuture
+				, dbl0Days
+				, dbl10Days
+				, dbl30Days
+				, dbl60Days
+				, dbl90Days
+				, dbl120Days
+				, dbl121Days
 				, dblTotalDue
+				, dblAmountPaid
+				, dblInvoiceTotal
+				, dblCredits
+				, dblPrepayments
+				, dblPrepaids
+				, dtmDate
 				, dtmDueDate
-				, strTerm
-			FROM vyuARServiceChargeInvoiceReport WITH(NOLOCK)
-		END
+				, dtmAsOfDate
+				, strSalespersonName
+				, intCompanyLocationId
+				, strSourceTransaction
+				, strType
+				, strCompanyName
+				, strCompanyAddress
+			)
+			EXEC dbo.uspARCustomerAgingDetailAsOfDateReport @ysnInclude120Days = 1
 
-	IF @strLetterName NOT IN ('Credit Suspension', 'Expired Credit Card', 'Credit Review', 'Service Charge Invoices Letter')
-		BEGIN
-			DELETE FROM tblARCustomerAgingStagingTable
-			WHERE intInvoiceId IN (SELECT intInvoiceId FROM tblARCustomerAgingStagingTable GROUP BY intInvoiceId HAVING SUM(ISNULL(dblTotalAR, 0)) = 0)			
+			DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @SelectedCustomer)
+			DELETE FROM tblARCustomerAgingStagingTable WHERE intInvoiceId IN (SELECT intInvoiceId FROM tblARCustomerAgingStagingTable GROUP BY intInvoiceId HAVING SUM(ISNULL(dblTotalAR, 0)) = 0)
+			DELETE FROM tblARCustomerAgingStagingTable WHERE strType = 'CF Tran'
+
+			IF @strLetterName = 'Recent Overdue Collection Letter'
+				BEGIN
+					DELETE FROM tblARCustomerAgingStagingTable
+					WHERE ISNULL(dbl10Days, 0) = 0 AND ISNULL(dbl30Days, 0) = 0
+				END
+			ELSE IF @strLetterName = '30 Day Overdue Collection Letter'
+				BEGIN
+					DELETE FROM tblARCustomerAgingStagingTable
+					WHERE ISNULL(dbl60Days, 0) = 0 AND ISNULL(dbl90Days, 0) = 0 AND ISNULL(dbl120Days, 0) = 0 AND ISNULL(dbl121Days, 0) = 0
+				END
+			ELSE IF @strLetterName = '60 Day Overdue Collection Letter'
+				BEGIN						
+					DELETE FROM tblARCustomerAgingStagingTable
+					WHERE ISNULL(dbl90Days, 0) = 0 AND ISNULL(dbl120Days, 0) = 0 AND ISNULL(dbl121Days, 0) = 0
+				END
+			ELSE IF @strLetterName = '90 Day Overdue Collection Letter'
+				BEGIN
+					DELETE FROM tblARCustomerAgingStagingTable
+					WHERE ISNULL(dbl120Days, 0) = 0 AND ISNULL(dbl121Days, 0) = 0
+				END
+			ELSE IF @strLetterName = 'Final Overdue Collection Letter'
+				BEGIN						
+					DELETE FROM tblARCustomerAgingStagingTable
+					WHERE ISNULL(dbl121Days, 0) = 0
+				END
 
 			INSERT INTO #TransactionLetterDetail (	
 				  intEntityCustomerId
@@ -277,38 +293,167 @@ BEGIN
 				, NULL
 			FROM dbo.tblARCustomerAgingStagingTable WITH (NOLOCK)
 
-			UPDATE tblARCollectionOverdue 
-			SET dbl10DaysSum = ABC.dblTotalDueSum
-			  , dbl30DaysSum = ABC.dblTotalDueSum
-			  , dbl60DaysSum = ABC.dblTotalDueSum
-			  , dbl90DaysSum = ABC.dblTotalDueSum
-			  , dbl121DaysSum = ABC.dblTotalDueSum
-			FROM tblARCollectionOverdue CO
+			TRUNCATE TABLE tblARCollectionOverdueDetail
+			INSERT INTO tblARCollectionOverdueDetail
+			(
+				intCompanyLocationId         
+				,strCompanyName                 
+				,strCompanyAddress             
+				,strCompanyPhone             
+				,intEntityCustomerId         
+				,strCustomerNumber             
+				,strCustomerName             
+				,strCustomerAddress             
+				,strCustomerPhone             
+				,strAccountNumber             
+				,intInvoiceId                 
+				,strInvoiceNumber             
+				,strBOLNumber                 
+				,dblCreditLimit                 
+				,intTermId                     
+				,strTerm                     
+				,dblTotalAR                     
+				,dblFuture                     
+				,dbl0Days                     
+				,dbl10Days                     
+				,dbl30Days                     
+				,dbl60Days                     
+				,dbl90Days                     
+				,dbl120Days                     
+				,dbl121Days                     
+				,dblTotalDue                 
+				,dblAmountPaid                 
+				,dblInvoiceTotal                      
+				,dblCredits                         
+				,dblPrepaids                     
+				,dtmDate                     
+				,dtmDueDate                     
+			)
+			SELECT intCompanyLocationId     =    AGING.intCompanyLocationId
+				 , strCompanyName           =    AGING.strCompanyName
+				 , strCompanyAddress        =    AGING.strCompanyAddress
+				 , strCompanyPhone          =    ''
+				 , intEntityCustomerId      =    AGING.intEntityCustomerId
+				 , strCustomerNumber        =    AGING.strCustomerName
+				 , strCustomerName          =    CUSTOMER.strName
+				 , strCustomerAddress       =    [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, CUSTOMER.strBillToAddress, CUSTOMER.strBillToCity, CUSTOMER.strBillToState, CUSTOMER.strBillToZipCode, CUSTOMER.strBillToCountry, CUSTOMER.strName, NULL)
+				 , strCustomerPhone         =    CUSTOMER.strPhone
+				 , strAccountNumber         =    CUSTOMER.strAccountNumber
+				 , intInvoiceId             =    AGING.intInvoiceId    
+				 , strInvoiceNumber         =    AGING.strInvoiceNumber         
+				 , strBOLNumber             =    AGING.strBOLNumber
+				 , dblCreditLimit           =    AGING.dblCreditLimit                 
+				 , intTermId                =    CUSTOMER.intTermsId             
+				 , strTerm                  =    CUSTOMER.strTerm
+				 , dblTotalAR               =    AGING.dblTotalAR     
+				 , dblFuture                =    AGING.dblFuture                          
+				 , dbl0Days                 =    AGING.dbl0Days                          
+				 , dbl10Days                =    AGING.dbl10Days                          
+				 , dbl30Days                =    AGING.dbl30Days                          
+				 , dbl60Days                =    AGING.dbl60Days                          
+				 , dbl90Days                =    AGING.dbl90Days                      
+				 , dbl120Days               =    AGING.dbl120Days                          
+				 , dbl121Days               =    AGING.dbl121Days                          
+				 , dblTotalDue              =    AGING.dblTotalDue                  
+				 , dblAmountPaid            =    AGING.dblAmountPaid                 
+				 , dblInvoiceTotal          =    AGING.dblInvoiceTotal         
+				 , dblCredits               =    AGING.dblCredits                             
+				 , dblPrepaids              =    AGING.dblPrepaids                         
+				 , dtmDate                  =    AGING.dtmDate                         
+				 , dtmDueDate				=    AGING.dtmDueDate         
+			FROM tblARCustomerAgingStagingTable AGING WITH (NOLOCK)
 			INNER JOIN (
-				SELECT dblTotalDueSum = SUM(dblAmount)
-					 , intEntityCustomerId
-				FROM #TransactionLetterDetail
-				GROUP BY intEntityCustomerId) ABC
-			ON CO.intEntityCustomerId = ABC.intEntityCustomerId
+				SELECT intEntityId
+					 , intTermsId
+					 , strTerm
+					 , strName
+					 , strBillToAddress
+					 , strBillToCity
+					 , strBillToState
+					 , strBillToZipCode
+					 , strBillToCountry
+					 , strPhone
+					 , strAccountNumber
+				FROM dbo.vyuARCustomerSearch WITH (NOLOCK)
+			) CUSTOMER ON AGING.intEntityCustomerId = CUSTOMER.intEntityId
+            
+			TRUNCATE TABLE tblARCollectionOverdue                
+			INSERT INTO tblARCollectionOverdue (
+				  intEntityCustomerId
+				, dbl10DaysSum
+				, dbl30DaysSum
+				, dbl60DaysSum
+				, dbl90DaysSum
+				, dbl121DaysSum
+			)
+			SELECT C.intEntityCustomerId
+				 , dbl10DaysSum = ABC.dblTotalDueSum
+                 , dbl30DaysSum = ABC.dblTotalDueSum
+                 , dbl60DaysSum = ABC.dblTotalDueSum
+                 , dbl90DaysSum = ABC.dblTotalDueSum
+                 , dbl121DaysSum = ABC.dblTotalDueSum
+            FROM @SelectedCustomer C
+            INNER JOIN (
+                SELECT dblTotalDueSum = SUM(dblAmount)
+                     , intEntityCustomerId
+                FROM #TransactionLetterDetail
+                GROUP BY intEntityCustomerId) ABC
+            ON C.intEntityCustomerId = ABC.intEntityCustomerId
+			
+			DELETE FROM @SelectedCustomer WHERE intEntityCustomerId NOT IN (SELECT DISTINCT intEntityCustomerId FROM tblARCustomerAgingStagingTable)
+		END	
+	ELSE IF @strLetterName = 'Service Charge Invoices Letter'
+		BEGIN
+			INSERT INTO #TransactionLetterDetail (
+				  intEntityCustomerId
+				, strInvoiceNumber	 
+				, dtmDate				 
+				, dbl10Days			 
+				, dbl30Days			 
+				, dbl60Days			  
+				, dbl90Days			 
+				, dbl120Days			 
+				, dbl121Days		
+				, dblAmount	 
+				, dtmDueDate
+				, strTerm
+			)
+			SELECT SC.intEntityCustomerId
+				, strInvoiceNumber
+				, dtmDate							 
+				, 0	dbl10Days		 
+				, 0	dbl30Days		 
+				, 0	dbl60Days		  
+				, 0 dbl90Days			 
+				, 0 dbl120Days			 
+				, 0	dbl121Days		
+				, dblTotalDue
+				, dtmDueDate
+				, strTerm
+			FROM vyuARServiceChargeInvoiceReport SC WITH(NOLOCK)
+			INNER JOIN @SelectedCustomer C ON SC.intEntityCustomerId = C.intEntityCustomerId
 		END
-	
+
+	INSERT INTO @temp_SelectedCustomer
+	SELECT * FROM @SelectedCustomer
+		
 	IF ISNULL(@ysnSystemDefined, 1) = 1
 		BEGIN
-			WHILE EXISTS(SELECT NULL FROM @SelectedCustomer)
+			WHILE EXISTS(SELECT NULL FROM @temp_SelectedCustomer)
 				BEGIN
 					DECLARE @CustomerId INT
-					SELECT TOP 1 @CustomerId = intEntityCustomerId FROM @SelectedCustomer ORDER BY intEntityCustomerId
+					SELECT TOP 1 @CustomerId = intEntityCustomerId FROM @temp_SelectedCustomer ORDER BY intEntityCustomerId
 							
 					WHILE EXISTS(SELECT NULL FROM @SelectedPlaceHolderTable)
 					BEGIN
 						DECLARE @PlaceHolderId				INT
-								,@PlaceHolder				VARCHAR(MAX)	 
-								,@SourceColumn				VARCHAR(MAX)	 
-								,@PlaceHolderDescription	VARCHAR(MAX)
-								,@SourceTable				VARCHAR(MAX)
-								,@Table						BIT
-								,@PlaceHolderValue			VARCHAR(MAX)
-								,@DataType					VARCHAR(MAX)
+							  , @PlaceHolder				VARCHAR(MAX)	 
+							  , @SourceColumn				VARCHAR(MAX)	 
+							  , @PlaceHolderDescription		VARCHAR(MAX)
+							  , @SourceTable				VARCHAR(MAX)
+							  , @Table						BIT
+							  , @PlaceHolderValue			VARCHAR(MAX)
+							  , @DataType					VARCHAR(MAX)
 
 						SELECT TOP 1 
 							 @PlaceHolderId				= [intPlaceHolderId]
@@ -324,8 +469,8 @@ BEGIN
 						IF @Table = 0
 						BEGIN
 							DECLARE @PHQuery		VARCHAR(MAX)  
-									,@InsertQuery	VARCHAR(MAX)
-									,@NotTableQuery	VARCHAR(MAX)
+								  , @InsertQuery	VARCHAR(MAX)
+								  , @NotTableQuery	VARCHAR(MAX)
 
 							SET @NotTableQuery = 'DECLARE @SetQuery				VARCHAR(MAX)
 															,@InsertQuery		VARCHAR(MAX)							 						
@@ -420,44 +565,32 @@ BEGIN
 					ELSE
 						BEGIN
 							DECLARE @PHQueryTable		VARCHAR(MAX)
-									,@InsertQueryTable	VARCHAR(MAX)
-									,@HTMLTable			VARCHAR(MAX)
-									,@ColumnCount		INT
-									,@ColumnCounter		INT							
+								  , @InsertQueryTable	VARCHAR(MAX)
+								  , @HTMLTable			VARCHAR(MAX)
+								  , @ColumnCount		INT
+								  , @ColumnCounter		INT							
  										
 							IF OBJECT_ID('tempdb..#TempTableColumnHeaders') IS NOT NULL DROP TABLE #TempTableColumnHeaders
-							SELECT 
-								RowId = ROW_NUMBER() OVER (ORDER BY (SELECT NULL))
-								,strValues 
-							INTO 
-								#TempTableColumnHeaders
-							FROM 
-								fnARGetRowsFromDelimitedValues(@PlaceHolderDescription)											
+							SELECT RowId = ROW_NUMBER() OVER (ORDER BY (SELECT NULL))
+								 , strValues 
+							INTO #TempTableColumnHeaders
+							FROM dbo.fnARGetRowsFromDelimitedValues(@PlaceHolderDescription)											
 
 							SET @HTMLTable = '<table  id="t01" style="width:100%" border="1"><tbody><tr>'
-								
 							SET @ColumnCounter = 1
-				
 							SELECT @ColumnCount = COUNT(RowId) FROM #TempTableColumnHeaders
 
 							WHILE (@ColumnCount >= @ColumnCounter)
 							BEGIN
 								DECLARE @Header VARCHAR(MAX)
-								SELECT TOP 1
-									@Header = strValues
-								FROM
-									#TempTableColumnHeaders
-								WHERE
-									RowId = @ColumnCounter					 
+								SELECT TOP 1 @Header = strValues
+								FROM #TempTableColumnHeaders
+								WHERE RowId = @ColumnCounter					 
 							
 								IF (@Header = 'Amount Due')
-								BEGIN
 									SET @HTMLTable = @HTMLTable + '<th style="text-align:right"> <span style="font-family: Arial; font-size:9">' + @Header + ' </span> </th> '
-								END
 								ELSE
-								BEGIN
 									SET @HTMLTable = @HTMLTable + '<th> <span style="font-family: Arial; font-size:9">' + @Header + ' </span> </th> '
-								END
 	
 								SET @ColumnCounter = @ColumnCounter + 1
 							END
@@ -465,23 +598,17 @@ BEGIN
 							SET @HTMLTable = @HTMLTable + '</tr> '
 
 							IF OBJECT_ID('tempdb..#TempTableColumns') IS NOT NULL DROP TABLE #TempTableColumns
-							SELECT 
-								RowId			= ROW_NUMBER() OVER (ORDER BY (SELECT NULL))
-								,strValues 
-								,strDataType	= @DataType
-							INTO 
-								#TempTableColumns
-							FROM 
-								fnARGetRowsFromDelimitedValues(@SourceColumn)						
+							SELECT RowId		= ROW_NUMBER() OVER (ORDER BY (SELECT NULL))
+								 , strValues 
+								 , strDataType	= @DataType
+							INTO #TempTableColumns
+							FROM fnARGetRowsFromDelimitedValues(@SourceColumn)						
  
 							IF OBJECT_ID('tempdb..#TempDataType') IS NOT NULL DROP TABLE #TempDataType
-							SELECT 
-								RowId	= ROW_NUMBER() OVER (ORDER BY (SELECT NULL))			
-								, * 
-							INTO  
-								#TempDataType 
-							FROM  
-								dbo.fnARSplitValues(@DataType, ',')			
+							SELECT RowId	= ROW_NUMBER() OVER (ORDER BY (SELECT NULL))			
+								 , * 
+							INTO #TempDataType 
+							FROM dbo.fnARSplitValues(@DataType, ',')			
 				 
 							UPDATE #TempDataType  
 							SET strDataType = 'datetime'
@@ -491,35 +618,25 @@ BEGIN
 							SET strDataType = 'nvarchar'
 							WHERE strDataType LIKE '%char%'
 
-							UPDATE 
-								#TempTableColumns 
-							SET 
-								strDataType = TDT.strDataType  
-							FROM 
-								#TempDataType TDT
-							INNER JOIN 
-								#TempTableColumns TDC ON TDT.RowId = TDC.RowId				 
+							UPDATE #TempTableColumns 
+							SET strDataType = TDT.strDataType  
+							FROM #TempDataType TDT
+							INNER JOIN #TempTableColumns TDC ON TDT.RowId = TDC.RowId				 
 				
-							DECLARE @Declaration	VARCHAR(MAX)
-									,@Select		VARCHAR(MAX)
-							SET @Declaration = ''
-							SET @Select = ''
+							DECLARE @Declaration	VARCHAR(MAX) = ''
+								  , @Select			VARCHAR(MAX) = ''
+							
 							SET @ColumnCounter = 1
 
-							SELECT 
-								@ColumnCount = COUNT(RowId) 
-							FROM 
-								#TempTableColumns
+							SELECT @ColumnCount = COUNT(RowId) 
+							FROM #TempTableColumns
 					 
 							WHILE (@ColumnCount >= @ColumnCounter)
 							BEGIN
 								DECLARE @Colunm VARCHAR(MAX)
-								SELECT TOP 1
-									@Colunm = strValues
-								FROM
-									#TempTableColumns
-								WHERE
-									RowId = @ColumnCounter
+								SELECT TOP 1 @Colunm = strValues
+								FROM #TempTableColumns
+								WHERE RowId = @ColumnCounter
 							
 								SET @Declaration = @Declaration + '@' + @Colunm + ' AS NVARCHAR(200)'  + (CASE WHEN @ColumnCount = @ColumnCounter THEN '' ELSE ',' END)
 								SET @Select = @Select + '@' + @Colunm + '= CONVERT(NVARCHAR(200), ' + @Colunm + ')'  + (CASE WHEN @ColumnCount = @ColumnCounter THEN '' ELSE ',' END)					 
@@ -527,14 +644,10 @@ BEGIN
 							END
 				 					
 							IF OBJECT_ID('tempdb..#TempTable') IS NOT NULL DROP TABLE #TempTable
-							CREATE TABLE #TempTable(
-								strTableBody VARCHAR(MAX)
-							)
+							CREATE TABLE #TempTable(strTableBody VARCHAR(MAX))
 
-							INSERT INTO 
-								#TempTable
-							SELECT 
-								@HTMLTable		
+							INSERT INTO #TempTable
+							SELECT @HTMLTable		
 					
 							IF @strLetterName = 'Service Charge Invoices Letter'  									 
 							BEGIN
@@ -868,14 +981,11 @@ BEGIN
  							EXEC sp_sqlexec @InsertQueryTable 				
 						END
 				
-						DELETE 
-						FROM 
-							@SelectedPlaceHolderTable 
-						WHERE
-							[intPlaceHolderId] = @PlaceHolderId
+						DELETE FROM @SelectedPlaceHolderTable 
+						WHERE intPlaceHolderId = @PlaceHolderId
 					END
 
-					DELETE FROM @SelectedCustomer 
+					DELETE FROM @temp_SelectedCustomer 
 					WHERE intEntityCustomerId = @CustomerId 
 
 					INSERT INTO @SelectedPlaceHolderTable
@@ -913,46 +1023,7 @@ BEGIN
 		 , intEntityCustomerId	= [intEntityCustomerId]
 		 , strPlaceValue		= [strValue]
 	FROM #CustomerPlaceHolder
-
-	IF ISNULL(@strCustomerIds, '') = '' AND ISNULL(@ysnSystemDefined, 1) = 1
-		BEGIN
-			IF @strLetterName IN ('Credit Suspension', 'Expired Credit Card')
-				BEGIN
-					INSERT INTO @SelectedCustomer
-					SELECT intEntityId
-					FROM tblARCustomer WITH (NOLOCK)
-					WHERE ysnActive = 1
-					  AND dblCreditLimit = 0
-				END
-			ELSE IF @strLetterName = 'Credit Review'
-				BEGIN
-					INSERT INTO @SelectedCustomer
-					SELECT intEntityId
-					FROM tblARCustomer WITH (NOLOCK)
-					WHERE ysnActive = 1
-					  AND dblCreditLimit > 0
-				END
-			ELSE
-				BEGIN
-					INSERT INTO @SelectedCustomer
-					SELECT * 
-					FROM fnGetRowsFromDelimitedValues(@strCustomerIds)
-				END
-		END
-	ELSE IF ISNULL(@strCustomerIds, '') = '' AND (ISNULL(@ysnSystemDefined, 1) = 0 OR @strLetterName IN ('Credit Suspension', 'Expired Credit Card', 'Credit Review'))
-		BEGIN
-			INSERT INTO @SelectedCustomer
-			SELECT intEntityId
-			FROM tblARCustomer WITH (NOLOCK)
-			WHERE ysnActive = 1
-		END
-	ELSE IF ISNULL(@strCustomerIds, '') <> ''
-		BEGIN
-			INSERT INTO @SelectedCustomer
-			SELECT * 
-			FROM fnGetRowsFromDelimitedValues(@strCustomerIds)
-		END
-
+	
 	SELECT SC.*
 		, blbMessage			= dbo.[fnARConvertLetterMessage](@strMessage, SC.intEntityCustomerId , @PlaceHolderTable)
 		, strCompanyName		= COMPANY.strCompanyName
