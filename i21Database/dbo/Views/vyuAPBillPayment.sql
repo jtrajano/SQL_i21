@@ -35,7 +35,7 @@ FROM dbo.tblAPBill A
 			,B.[intEntityVendorId]
 			,B.intPaymentId
 			,B.ysnPosted
-			,C.intBillId
+			,ISNULL(C.intBillId,C.intOrigBillId) AS intBillId
 			,SUM(dblPayment) dblPayment
 			,SUM(dblDiscount) dblDiscount
 			,SUM(dblInterest) dblInterest
@@ -54,7 +54,7 @@ FROM dbo.tblAPBill A
 		LEFT JOIN dbo.tblCMBankAccount G ON B.intBankAccountId = G.intBankAccountId
 		LEFT JOIN dbo.tblCMBankTransaction H ON B.strPaymentRecordNum = H.strTransactionId
 		--WHERE B.ysnPosted = 1
-		GROUP BY [intEntityVendorId], intBillId, H.dtmCheckPrinted, H.ysnCheckVoid, H.ysnClr,
+		GROUP BY [intEntityVendorId], intBillId, intOrigBillId, H.dtmCheckPrinted, H.ysnCheckVoid, H.ysnClr,
 		 G.strBankAccountNo, B.strPaymentInfo, B.intPaymentId, B.dtmDatePaid, H.dtmDateReconciled, B.ysnPosted
 		 ,H.strLink, B.ysnPrepay
 	) Payments

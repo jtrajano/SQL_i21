@@ -11,6 +11,8 @@
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
     [dblWithheld] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
     [intInvoiceId] INT NULL , 
+	[intOrigBillId] INT NULL , 
+	[intOrigInvoiceId] INT NULL,
     CONSTRAINT [PK_dbo.tblAPPaymentDetail] PRIMARY KEY CLUSTERED ([intPaymentDetailId] ASC),
     CONSTRAINT [FK_dbo.tblAPPaymentDetail_dbo.tblAPPayments_intPaymentId] FOREIGN KEY ([intPaymentId]) REFERENCES [dbo].[tblAPPayment] ([intPaymentId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblAPPaymentDetail_tblAPBill] FOREIGN KEY ([intBillId]) REFERENCES [tblAPBill]([intBillId]),
@@ -48,7 +50,9 @@ INSERT INTO tblAPPaymentDetailDeleted
 	[dblTotal] 				,
 	[intConcurrencyId] 		,
 	[dblWithheld] 			,
-	[intInvoiceId]
+	[intInvoiceId]			,
+	[intOrigBillId]			,
+	[intOrigInvoiceId]
 )
 SELECT 
 	[intPaymentDetailId]	,
@@ -62,7 +66,9 @@ SELECT
 	[dblTotal] 				,
 	[intConcurrencyId] 		,
 	[dblWithheld] 			,
-	[intInvoiceId]
+	[intInvoiceId]			,
+	[intOrigBillId]			,
+	[intOrigInvoiceId]
 FROM DELETED
 END
 GO

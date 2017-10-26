@@ -4463,7 +4463,6 @@
     <Build Include="dbo\Tables\tblTFIntegrationError.sql" />
     <Build Include="dbo\Stored Procedures\uspTFOriginDataIntegration.sql" />
     <Build Include="dbo\Stored Procedures\uspSCManualDistributionOutbound.sql" />
-    <Build Include="dbo\Stored Procedures\uspARCollectionOverdueDetailReport.sql" />
     <Build Include="dbo\Stored Procedures\uspARSearchLetterCustomer.sql" />
     <Build Include="dbo\Tables\tblARCollectionOverdue.sql" />
     <Build Include="dbo\Tables\tblARCollectionOverdueDetail.sql" />
@@ -5796,6 +5795,15 @@
     <Build Include="dbo\Tables\tblVRSubmitted.sql" />
     <None Include="Scripts\Post-Deployment\SM\1740_UpdatePurchasingMenus.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostQtyChangeFromInvShipmentDestination.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMUpdateEntityCredentialGridLayout.sql" />
+	<Build Include="dbo\Tables\tblGRSellOffsite.sql" />
+    <Build Include="dbo\Tables\tblGRSellOffsiteTicket.sql" />
+    <Build Include="dbo\Tables\tblGRSellContract.sql" />
+    <Build Include="dbo\Views\vyuGRGetSellOffsite.sql" />
+    <Build Include="dbo\Views\vyuGRSellOffsiteNotMapped.sql" />
+    <Build Include="dbo\Views\vyuGRSellOffsiteTicketNotMapped.sql" />
+    <Build Include="dbo\Views\vyuGRSellOffsiteContractNotMapped.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRemovePaymentAndCreatePrepay.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -5945,6 +5953,7 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\32_UpdateCommissionScheduleEntity.sql" />
     <Build Include="dbo\Views\vyuAP1099Summary.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099Summary.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMUpdateEntityCredentialCompanyGridLayout.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
