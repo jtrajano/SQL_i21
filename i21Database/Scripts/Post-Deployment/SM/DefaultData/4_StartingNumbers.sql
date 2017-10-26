@@ -1211,6 +1211,36 @@ GO
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Vendor Rebate Program')
 
+	UNION ALL
+	SELECT	 [intStartingNumberId]	= 126
+			,[strTransactionType]	= N'Issue Stock'
+			,[strPrefix]			= N'ISTK-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Patronage'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Issue Stock')
+
+	UNION ALL
+	SELECT	 [intStartingNumberId]	= 127
+			,[strTransactionType]	= N'Retire Stock'
+			,[strPrefix]			= N'RSTK-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Patronage'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Retire Stock')
+
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 128
+			,[strTransactionType]	= N'ZeroPriceTicket'
+			,[strPrefix]			= N'ZPT-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Ticket Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'ZeroPriceTicket')
+
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
 	PRINT N'END INSERT DEFAULT STARTING NUMBERS'

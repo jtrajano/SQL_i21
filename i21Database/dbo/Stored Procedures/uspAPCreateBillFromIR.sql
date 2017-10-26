@@ -962,7 +962,7 @@ BEGIN
 															 WHEN @ysnThirdPartyVendor = 1 AND ysnCheckoffTax = 1 THEN A.dblTax --IN THIS CASE IF IT TE TAX IS NEGATIVE, IT SHOULD RETAIN AS NEGATIVE
 															 WHEN ysnCheckoffTax = 1 THEN A.dblTax * -1
 															ELSE ISNULL(A.dblTax,0) END),
-						[dblForexRate]				=	ISNULL(A.dblForexRate,0),
+						[dblForexRate]				=	ISNULL(A.dblForexRate,1),
 						[intForexRateTypeId]		=   A.intForexRateTypeId,
 						[ysnSubCurrency]			=	ISNULL(A.ysnSubCurrency,0),
 						[intTaxGroupId]				=	NULL,

@@ -269,9 +269,11 @@ SELECT
 													CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END
 													--[Voucher Cost]
 													,CASE WHEN A.intCurrencyId <> @intFunctionalCurrencyId THEN 														
-															dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, receiptCostUOM.intItemUOMId, B.dblCost) * ISNULL(B.dblRate, 0) 
+															dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, receiptCostUOM.intItemUOMId, 
+																(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100)))) * ISNULL(B.dblRate, 0) 
 														ELSE 
-															dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, receiptCostUOM.intItemUOMId, B.dblCost)
+															dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, receiptCostUOM.intItemUOMId, 
+																(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100))))
 													END 													
 												)
 												- dbo.fnMultiply(
@@ -364,6 +366,7 @@ WHERE	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 		AND (
 			dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, receiptCostUOM.intItemUOMId, B.dblCost) <> E2.dblUnitCost
 			OR E2.dblForexRate <> B.dblRate
+			OR B.dblDiscount <> 0
 		) 
 
 --CHARGES COST ADJUSTMENT
@@ -393,7 +396,7 @@ INNER JOIN (tblICInventoryReceipt r
 		ON rc.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId
 WHERE	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 		AND B.intInventoryReceiptChargeId IS NOT NULL 
-		AND (rc.dblAmountPriced <> B.dblCost OR rc.dblForexRate <> B.dblRate)
+		AND (rc.dblAmountPriced <> B.dblCost OR ISNULL(NULLIF(rc.dblForexRate,0),1) <> B.dblRate)
 
 IF ISNULL(@post,0) = 1
 BEGIN	

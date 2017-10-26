@@ -1679,7 +1679,6 @@
     <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\GasCheckLeakcheck.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\OpenCallEntries.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\DefaultCriteria\CustomerListByRoute.sql" />
-    <Build Include="dbo\Views\vyuARCustomerPaymentHistoryReport.sql" />
     <Build Include="dbo\Views\vyuARTaxReport.sql" />
     <Build Include="dbo\Views\vyuARGetLostQuoteReasons.sql" />
     <Build Include="dbo\Views\vyuARGetLostQuoteCompetitors.sql" />
@@ -1728,7 +1727,6 @@
     <Build Include="dbo\Stored Procedures\uspICValidateCostingOnUnpostStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateCostingOnPostStorage.sql" />
     <Build Include="dbo\Functions\fnGetItemCostingOnPostStorageErrors.sql" />
-    <Build Include="dbo\Views\vyuARCustomerPaymentHistoryReport.sql" />
     <Build Include="dbo\Views\vyuARSalesAnalysisReport.sql" />
     <Build Include="dbo\Views\vyuARUnappliedCreditsRegister.sql" />
     <Build Include="dbo\Views\vyuARGetLostQuoteCompetitors.sql" />
@@ -5768,12 +5766,34 @@
     <Build Include="dbo\Tables\tblBBCustomerLocationXref.sql" />
     <Build Include="dbo\Stored Procedures\uspLGCreateVoucherForWarehouseServices.sql" />
     <Build Include="dbo\Stored Procedures\uspLGCreateVoucherForOtherCharges.sql" />
-    <Build Include="dbo\Tables\tblVRSubmitted.sql" />
     <Build Include="dbo\Tables\tblICAdjustInventoryTerms.sql" />
     <None Include="Scripts\Post-Deployment\IC\21_AdjustmentInventoryTerms.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostDestinationInventoryShipment.sql" />
     <Build Include="dbo\User Defined Types\DestinationShipmentItem.sql" />
     <Build Include="dbo\User Defined Types\DestinationShipmentCharge.sql" />
+    <Build Include="dbo\Views\vyuRKCompanyPreference.sql" />
+    <Build Include="dbo\Views\vyuRKCurrencyContract.sql" />
+    <Build Include="dbo\Functions\fnMFGetTotalStockValueFromTransactionBatch.sql" />
+    <Build Include="dbo\Views\vyuICItemLicense.sql" />
+    <Build Include="dbo\Tables\tblICItemLicense.sql" />
+    <Build Include="dbo\Tables\tblVRRebate.sql" />
+    <None Include="dbo\Views\vyuVROpenRebate.sql" />
+    <None Include="dbo\Views\vyuVRRebate.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCustomerPaymentHistoryReport.sql" />
+    <Build Include="dbo\Tables\tblGRUnPriced.sql" />
+    <Build Include="dbo\Tables\tblGRUnPricedSpotTicket.sql" />
+    <Build Include="dbo\Views\vyuGRGetUnPriced.sql" />
+    <Build Include="dbo\Views\vyuGRUnPricedNotMapped.sql" />
+    <Build Include="dbo\Views\vyuGRUnPricedSpotTicketNotMapped.sql" />
+    <Build Include="dbo\Views\vyuGRGetSpotZeroItems.sql" />
+    <Build Include="dbo\Views\vyuGRGetSpotZeroLocations.sql" />
+    <Build Include="dbo\Views\vyuGRGetSpotZeroScaleTickets.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRPostUnPricedSpotTicket.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRUnPostUnPricedSpotTicket.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMValidateRemoteServerRole.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTValidateContractAfterSave.sql" />
+    <Build Include="dbo\Views\vyuARCustomerPaymentHistoryReport.sql" />
+    <Build Include="dbo\Tables\tblVRSubmitted.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -124,7 +124,8 @@ INSERT INTO tblARCustomerAgingStagingTable (
 	, dbl30Days
 	, dbl60Days
 	, dbl90Days
-	, dbl91Days
+	, dbl120Days
+	, dbl121Days
 	, dblTotalDue
 	, dblAmountPaid
 	, dblInvoiceTotal
@@ -146,6 +147,7 @@ EXEC dbo.uspARCustomerAgingDetailAsOfDateReport @dtmDateFrom = @dtmDateFrom
 											  , @strSalesperson = @strSalesperson
 											  , @strSourceTransaction = @strSourceTransaction
 											  , @strCustomerName = @strCustomerName
+											  , @ysnInclude120Days = 0
 
 DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityCustomerId IN (SELECT intEntityCustomerId FROM tblARCustomerAgingStagingTable GROUP BY intEntityCustomerId HAVING SUM(ISNULL(dblTotalAR, 0)) = 0)
 
@@ -165,7 +167,7 @@ ELSE IF @strAgedBalances = '61-90 Days'
 	BEGIN DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityCustomerId IN (SELECT intEntityCustomerId FROM tblARCustomerAgingStagingTable GROUP BY intEntityCustomerId HAVING SUM(ISNULL(dbl90Days, 0)) = 0)
 END
 ELSE IF @strAgedBalances = 'Over 90 Days'
-	BEGIN DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityCustomerId IN (SELECT intEntityCustomerId FROM tblARCustomerAgingStagingTable GROUP BY intEntityCustomerId HAVING SUM(ISNULL(dbl91Days, 0)) = 0)
+	BEGIN DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityCustomerId IN (SELECT intEntityCustomerId FROM tblARCustomerAgingStagingTable GROUP BY intEntityCustomerId HAVING SUM(ISNULL(dbl120Days, 0)) = 0)
 END
 
 IF ISNULL(@ysnPrintOnlyOverCreditLimit, 0) = 1

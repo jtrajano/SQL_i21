@@ -38,9 +38,7 @@ DECLARE @BANK_DEPOSIT INT = 1
 --Check if there are any check overflow
 SELECT TOP 1
 @ysnCheckOverflow = 1		
-FROM	dbo.tblCMBankTransaction CHK INNER JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL
-			ON CHK.strTransactionId = PRINTSPOOL.strTransactionId
-			AND CHK.intBankAccountId = PRINTSPOOL.intBankAccountId
+FROM	dbo.tblCMBankTransaction CHK
 		LEFT JOIN tblAPPayment PYMT
 			ON CHK.strTransactionId = PYMT.strPaymentRecordNum			
 WHERE	CHK.intBankAccountId = @intBankAccountId
