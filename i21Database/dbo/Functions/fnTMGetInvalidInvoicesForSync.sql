@@ -33,9 +33,9 @@ BEGIN
 										'Site total capacity is Zero.'
 									WHEN E.intClockID IS NULL THEN
 										'The Site Clock Location does not exists in Tank Management.'
-									WHEN D.strClassFillOption = 'No' AND D.intProduct <> B.intItemId THEN
+									WHEN D.strClassFillOption = 'No' AND D.intProduct <> B.intItemId AND G.strType <> 'Service'  THEN
 										'The Invoice item is different than the site item.'
-									WHEN D.strClassFillOption = 'Product Class' AND F.intCategoryId <> G.intCategoryId THEN
+									WHEN D.strClassFillOption = 'Product Class' AND F.intCategoryId <> G.intCategoryId AND G.strType <> 'Service' THEN
 										'The Invoice item class is different than the site item class.'
 									WHEN G.strType = 'Service' AND B.intPerformerId IS NULL THEN
 										'Performer is not specified for item'
