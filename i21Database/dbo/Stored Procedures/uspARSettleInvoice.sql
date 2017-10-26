@@ -2,6 +2,7 @@
 	 @PaymentDetailId	Id READONLY
 	,@userId			INT
 	,@post				BIT
+	,@void				BIT
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -20,7 +21,6 @@ SET @ZeroDecimal = 0.000000
 SET @UserEntityID = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @userId),@userId) 
 SET @ActionType = CASE WHEN @post = 1 THEN 'Post Settlement' ELSE 'UnPost Settlement' END
 
-
 UPDATE ARI						
 SET	
 	 ARI.[dblPayment]		= ISNULL(ARI.[dblPayment], @ZeroDecimal) + (APPD.[dblPayment] * (CASE WHEN @post = 1 THEN 1 ELSE -1 END)) 
@@ -33,7 +33,7 @@ INNER JOIN
 		ON PID.[intId] = APPD.[intPaymentDetailId]
 INNER JOIN
 	tblARInvoice ARI
-		ON APPD.intInvoiceId = ARI.intInvoiceId
+		ON ARI.intInvoiceId = (CASE WHEN @void = 0 THEN APPD.intInvoiceId ELSE APPD.intOrigInvoiceId END)
 INNER JOIN
 	tblAPPayment APP
 		ON APPD.[intPaymentId] = APP.[intPaymentId]
@@ -56,7 +56,7 @@ INNER JOIN
 		ON PID.[intId] = APPD.[intPaymentDetailId]
 INNER JOIN
 	tblARInvoice ARI
-		ON APPD.intInvoiceId = ARI.intInvoiceId
+		ON ARI.intInvoiceId = (CASE WHEN @void = 0 THEN APPD.intInvoiceId ELSE APPD.intOrigInvoiceId END)
 INNER JOIN
 	tblAPPayment APP
 		ON APPD.[intPaymentId] = APP.[intPaymentId]
@@ -78,7 +78,7 @@ INNER JOIN
 		ON PID.[intId] = APPD.[intPaymentDetailId]
 INNER JOIN
 	tblARInvoice ARI
-		ON APPD.intInvoiceId = ARI.intInvoiceId
+		ON ARI.intInvoiceId = (CASE WHEN @void = 0 THEN APPD.intInvoiceId ELSE APPD.intOrigInvoiceId END)
 INNER JOIN
 	tblAPPayment APP
 		ON APPD.[intPaymentId] = APP.[intPaymentId]
@@ -98,7 +98,7 @@ INNER JOIN (SELECT intEntityCustomerId
 				INNER JOIN (SELECT intInvoiceId
 								 , intEntityCustomerId
 							FROM dbo.tblARInvoice WITH (NOLOCK)
-				) I ON PD.intInvoiceId = I.intInvoiceId
+				) I ON I.intInvoiceId = (CASE WHEN @void = 0 THEN PD.intInvoiceId ELSE PD.intOrigInvoiceId END)
 			WHERE PD.intPaymentDetailId IN (SELECT intId FROM @PaymentDetailId)
 			GROUP BY intEntityCustomerId
 ) PAYMENT ON CUSTOMER.intEntityId = PAYMENT.intEntityCustomerId
@@ -112,7 +112,7 @@ INNER JOIN
 		ON PID.[intId] = APPD.[intPaymentDetailId]
 INNER JOIN
 	tblARInvoice ARI
-		ON APPD.intInvoiceId = ARI.intInvoiceId
+		ON ARI.intInvoiceId = (CASE WHEN @void = 0 THEN APPD.intInvoiceId ELSE APPD.intOrigInvoiceId END)
 INNER JOIN
 	tblAPPayment APP
 		ON APPD.[intPaymentId] = APP.[intPaymentId]

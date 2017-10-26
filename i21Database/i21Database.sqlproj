@@ -5797,6 +5797,7 @@
     <Build Include="dbo\Views\vyuGRSellOffsiteNotMapped.sql" />
     <Build Include="dbo\Views\vyuGRSellOffsiteTicketNotMapped.sql" />
     <Build Include="dbo\Views\vyuGRSellOffsiteContractNotMapped.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRemovePaymentAndCreatePrepay.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

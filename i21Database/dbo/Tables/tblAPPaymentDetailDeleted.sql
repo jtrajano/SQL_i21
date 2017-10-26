@@ -11,5 +11,7 @@
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
     [dblWithheld] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
     [intInvoiceId] INT NULL,
+    [intOrigBillId] INT NULL,
+    [intOrigInvoiceId] INT NULL,
 	[dtmDateDeleted] DATETIME DEFAULT GETDATE()
 )
