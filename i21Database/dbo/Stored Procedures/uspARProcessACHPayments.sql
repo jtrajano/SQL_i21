@@ -23,6 +23,8 @@ DECLARE @tblACHPayments TABLE (
 DECLARE @strTransactionId					NVARCHAR(100)
 	  , @STARTING_NUMBER_BANK_DEPOSIT AS	NVARCHAR(100) = 'Bank Deposit'
 	  , @BankTransaction					BankTransactionTable
+	  , @BankTransactionDup					BankTransactionTable
+	  , @BankTransactionCur					BankTransactionTable
 	  , @BankTransactionDetail				BankTransactionDetailTable
 	  , @ysnSuccess							BIT
 	  , @intEntityId						INT
@@ -81,14 +83,7 @@ IF ISNULL(@intUserId, 0) = 0
 -- 		RETURN;
 -- 	END
 
-BEGIN TRANSACTION
-
 EXEC dbo.uspCMRefreshUndepositedFundsFromOrigin @intBankAccountId, @intUserId
-
---Get the Bank Deposit strTransactionId by using this script.
-SELECT	@intStartingNumberId = intStartingNumberId FROM	dbo.tblSMStartingNumber WHERE strTransactionType = @STARTING_NUMBER_BANK_DEPOSIT
-EXEC uspSMGetStartingNumber @intStartingNumberId, @strTransactionId OUT
- 
 
 --Payment Header
 INSERT INTO @BankTransaction (
@@ -102,7 +97,7 @@ INSERT INTO @BankTransaction (
 	, [intCompanyLocationId])
 SELECT 
 	 [intBankAccountId]				= UF.intBankAccountId
-	,[strTransactionId]				= @strTransactionId
+	,[strTransactionId]				= 'temp'
 	,[intCurrencyId]				= P.intCurrencyId
 	,[intBankTransactionTypeId]		= 1
 	,[dtmDate]						= P.dtmDatePaid
@@ -119,86 +114,155 @@ GROUP BY UF.intBankAccountId
 	   , P.dtmDatePaid
 	   , UF.intLocationId
 
---Payment Detail
-INSERT INTO @BankTransactionDetail(
-	  [intTransactionId]
-	, [intUndepositedFundId]
-	, [dtmDate]
-	, [intGLAccountId]
-	, [strDescription]
-	, [dblDebit]
-	, [dblCredit]
-	, [intEntityId])
-SELECT 
-	  [intTransactionId]	= 0
-	, [intUndepositedFundId] = UF.intUndepositedFundId
-	, [dtmDate]				= UF.dtmDate
-	, [intGLAccountId]		= PAYMENTS.intAccountId
-	, [strDescription]		= PAYMENTS.strDescription
-	, [dblDebit]			= 0
-	, [dblCredit]			= ISNULL(PAYMENTS.dblAmountPaid, 0)
-	, [intEntityId]			= PAYMENTS.intEntityCustomerId
-FROM dbo.tblCMUndepositedFund UF WITH (NOLOCK)
-	CROSS APPLY (
-		SELECT P.*
-			 , GL.strDescription 
-		FROM @tblACHPayments P
-			LEFT JOIN (SELECT intAccountId
-							, strDescription 
-					   FROM dbo.tblGLAccount WITH (NOLOCK)
-			) GL ON GL.intAccountId = P.intPaymentId
-		WHERE UF.intSourceTransactionId = intPaymentId
-	) PAYMENTS
 
-SELECT TOP 1 @intEntityId = intEntityCustomerId FROM @tblACHPayments
+--PaymentDup
+INSERT INTO @BankTransactionDup([intBankAccountId], [strTransactionId], [intCurrencyId], [intBankTransactionTypeId] , [dtmDate], [dblAmount], [strMemo], [intCompanyLocationId]) 
+SELECT [intBankAccountId], [strTransactionId], [intCurrencyId], [intBankTransactionTypeId] , [dtmDate], [dblAmount], [strMemo]	, [intCompanyLocationId] FROM @BankTransaction
 
-BEGIN TRY
-	EXEC dbo.uspCMCreateBankTransactionEntries @BankTransactionEntries			= @BankTransaction
-											 , @BankTransactionDetailEntries	= @BankTransactionDetail
-											 , @intTransactionId				= @intNewTransactionId OUT
-	IF ISNULL(@intNewTransactionId, 0) > 0
-		COMMIT TRANSACTION
-	ELSE
-		BEGIN
-			ROLLBACK TRANSACTION
-			RAISERROR('Failed to Create Bank Transaction Entry', 11, 1)
-			RETURN;
-		END
-END TRY
-BEGIN CATCH
-	SELECT @strErrorMsg = ERROR_MESSAGE()
-	ROLLBACK TRANSACTION
-	RAISERROR(@strErrorMsg, 11, 1)
-	RETURN;
-END CATCH
+DECLARE @DupBankId INT
+,@DupCurrency INT
+,@DupDatePaid DATETIME
+,@DupLocation INT
 
-BEGIN TRANSACTION
+DECLARE @COUNTER INT
+SET @COUNTER = 1
 
-BEGIN TRY
-	EXEC dbo.uspCMPostBankDeposit @ysnPost			= 1
-								, @ysnRecap			= 0
-								, @strTransactionId = @strTransactionId
-								, @strBatchId		= NULL
-								, @intUserId		= @intUserId
-								, @intEntityId		= @intEntityId
-								, @isSuccessful		= @ysnSuccess OUT
-								, @message_id		= @intMessageId OUT
+WHILE EXISTS(SELECT TOP 1 1 FROM @BankTransactionDup)
+BEGIN
+	
+	
+	BEGIN TRANSACTION
 
-	IF ISNULL(@ysnSuccess, 0) = 1
-		BEGIN
-			COMMIT TRANSACTION
-			SET @strNewTransactionId = @strTransactionId
-		END
-	ELSE
-		BEGIN
+	
+
+	--Get the Bank Deposit strTransactionId by using this script.
+	SELECT	@intStartingNumberId = intStartingNumberId FROM	dbo.tblSMStartingNumber WHERE strTransactionType = @STARTING_NUMBER_BANK_DEPOSIT
+	EXEC uspSMGetStartingNumber @intStartingNumberId, @strTransactionId OUT
+ 
+
+	SELECT 
+		@DupBankId = NULL,
+		@DupCurrency = NULL,
+		@DupDatePaid = NULL,
+		@DupLocation = NULL
+	
+	DELETE FROM @BankTransactionDetail
+	DELETE FROM @BankTransactionCur
+
+
+	SELECT TOP 1 
+		@DupBankId = [intBankAccountId],
+		@DupCurrency = [intCurrencyId],
+		@DupDatePaid = [dtmDate],
+		@DupLocation = [intCompanyLocationId]
+	FROM @BankTransactionDup
+	
+	--Payment Current
+	INSERT INTO @BankTransactionCur([intBankAccountId], [strTransactionId], [intCurrencyId], [intBankTransactionTypeId] , [dtmDate], [dblAmount], [strMemo], [intCompanyLocationId]) 
+	SELECT [intBankAccountId], @strTransactionId, [intCurrencyId], [intBankTransactionTypeId] , [dtmDate], [dblAmount], [strMemo]	, [intCompanyLocationId] 
+		FROM @BankTransaction 
+			WHERE [intBankAccountId] = @DupBankId 
+				AND [intCurrencyId] = @DupCurrency
+				AND [dtmDate] = @DupDatePaid
+				AND [intCompanyLocationId] = @DupLocation 
+	
+	
+	--GETTING THE DETAIL
+	INSERT INTO @BankTransactionDetail(
+			  [intTransactionId]
+			, [intUndepositedFundId]
+			, [dtmDate]
+			, [intGLAccountId]
+			, [strDescription]
+			, [dblDebit]
+			, [dblCredit]
+			, [intEntityId])
+	SELECT 
+		  [intTransactionId]	= 0
+		, [intUndepositedFundId] = UF.intUndepositedFundId
+		, [dtmDate]				= UF.dtmDate
+		, [intGLAccountId]		= PAYMENTS.intAccountId
+		, [strDescription]		= PAYMENTS.strDescription
+		, [dblDebit]			= 0
+		, [dblCredit]			= ISNULL(PAYMENTS.dblAmountPaid, 0)
+		, [intEntityId]			= PAYMENTS.intEntityCustomerId
+	FROM dbo.tblCMUndepositedFund UF WITH (NOLOCK)
+		CROSS APPLY (
+			SELECT P.*
+				 , GL.strDescription 
+			FROM @tblACHPayments P
+				LEFT JOIN (SELECT intAccountId
+								, strDescription 
+						   FROM dbo.tblGLAccount WITH (NOLOCK)
+				) GL ON GL.intAccountId = P.intPaymentId
+			WHERE UF.intSourceTransactionId = intPaymentId
+		) PAYMENTS 
+			WHERE  UF.intBankAccountId = @DupBankId 
+			AND PAYMENTS.intCurrencyId = @DupCurrency
+			AND PAYMENTS.dtmDatePaid = @DupDatePaid
+			AND UF.intLocationId = @DupLocation 
+
+	
+
+		SELECT TOP 1 @intEntityId = intEntityCustomerId FROM @tblACHPayments
+
+		BEGIN TRY
+			EXEC dbo.uspCMCreateBankTransactionEntries @BankTransactionEntries			= @BankTransactionCur
+													 , @BankTransactionDetailEntries	= @BankTransactionDetail
+													 , @intTransactionId				= @intNewTransactionId OUT
+			IF ISNULL(@intNewTransactionId, 0) > 0
+				COMMIT TRANSACTION
+			ELSE
+				BEGIN
+					ROLLBACK TRANSACTION
+					RAISERROR('Failed to Create Bank Transaction Entry', 11, 1)
+					RETURN;
+				END
+		END TRY
+		BEGIN CATCH
 			SELECT @strErrorMsg = ERROR_MESSAGE()
 			ROLLBACK TRANSACTION
 			RAISERROR(@strErrorMsg, 11, 1)
-		END
-END TRY
-BEGIN CATCH
-	SELECT @strErrorMsg = ERROR_MESSAGE()
-	ROLLBACK TRANSACTION
-	RAISERROR(@strErrorMsg, 11, 1)
-	RETURN;
-END CATCH
+			RETURN;
+		END CATCH
+
+		BEGIN TRANSACTION
+
+		BEGIN TRY
+			EXEC dbo.uspCMPostBankDeposit @ysnPost			= 1
+										, @ysnRecap			= 0
+										, @strTransactionId = @strTransactionId
+										, @strBatchId		= NULL
+										, @intUserId		= @intUserId
+										, @intEntityId		= @intEntityId
+										, @isSuccessful		= @ysnSuccess OUT
+										, @message_id		= @intMessageId OUT
+
+			IF ISNULL(@ysnSuccess, 0) = 1
+				BEGIN
+					COMMIT TRANSACTION
+					SET @strNewTransactionId = @strTransactionId
+				END
+			ELSE
+				BEGIN
+					SELECT @strErrorMsg = ERROR_MESSAGE()
+					ROLLBACK TRANSACTION
+					RAISERROR(@strErrorMsg, 11, 1)
+				END
+		END TRY
+		BEGIN CATCH
+			SELECT @strErrorMsg = ERROR_MESSAGE()
+			ROLLBACK TRANSACTION
+			RAISERROR(@strErrorMsg, 11, 1)
+			RETURN;
+		END CATCH
+		
+
+
+	DELETE FROM @BankTransactionDup WHERE [intBankAccountId] = @DupBankId 
+		AND [intCurrencyId] = @DupCurrency
+		AND [dtmDate] = @DupDatePaid
+		AND [intCompanyLocationId] = @DupLocation 
+
+	SET @COUNTER = @COUNTER + 1
+END
