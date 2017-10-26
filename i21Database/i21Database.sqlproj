@@ -5795,6 +5795,7 @@
     <Build Include="dbo\Views\vyuARCustomerPaymentHistoryReport.sql" />
     <Build Include="dbo\Tables\tblVRSubmitted.sql" />
     <None Include="Scripts\Post-Deployment\SM\1740_UpdatePurchasingMenus.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostQtyChangeFromInvShipmentDestination.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

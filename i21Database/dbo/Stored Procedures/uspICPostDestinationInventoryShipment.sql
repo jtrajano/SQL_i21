@@ -236,47 +236,62 @@ BEGIN
 
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
-		INSERT INTO @GLEntries (
-			[dtmDate] 
-			,[strBatchId]
-			,[intAccountId]
-			,[dblDebit]
-			,[dblCredit]
-			,[dblDebitUnit]
-			,[dblCreditUnit]
-			,[strDescription]
-			,[strCode]
-			,[strReference]
-			,[intCurrencyId]
-			,[dblExchangeRate]
-			,[dtmDateEntered]
-			,[dtmTransactionDate]
-			,[strJournalLineDescription]
-			,[intJournalLineNo]
-			,[ysnIsUnposted]
-			,[intUserId]
-			,[intEntityId]
-			,[strTransactionId]
-			,[intTransactionId]
-			,[strTransactionType]
-			,[strTransactionForm]
-			,[strModuleName]
-			,[intConcurrencyId]
-			,[dblDebitForeign]	
-			,[dblDebitReport]	
-			,[dblCreditForeign]	
-			,[dblCreditReport]	
-			,[dblReportingRate]	
-			,[dblForeignRate]
-			,[strRateType]
-		)	
-		EXEC @intReturnValue = dbo.uspICPostInventoryShipmentOtherCharges 
-			@intShipmentId
-			,@strBatchId
-			,@intEntityUserSecurityId
-			,@INVENTORY_SHIPMENT_TYPE
+		--Post the other charges for the shipment
+		BEGIN 
+			INSERT INTO @GLEntries (
+				[dtmDate] 
+				,[strBatchId]
+				,[intAccountId]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[strDescription]
+				,[strCode]
+				,[strReference]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[dtmDateEntered]
+				,[dtmTransactionDate]
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[ysnIsUnposted]
+				,[intUserId]
+				,[intEntityId]
+				,[strTransactionId]
+				,[intTransactionId]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]
+				,[intConcurrencyId]
+				,[dblDebitForeign]	
+				,[dblDebitReport]	
+				,[dblCreditForeign]	
+				,[dblCreditReport]	
+				,[dblReportingRate]	
+				,[dblForeignRate]
+				,[strRateType]
+			)	
+			EXEC @intReturnValue = dbo.uspICPostInventoryShipmentOtherCharges 
+				@intShipmentId
+				,@strBatchId
+				,@intEntityUserSecurityId
+				,@INVENTORY_SHIPMENT_TYPE
 
-		IF @intReturnValue < 0 GOTO _ExitWithError
+			IF @intReturnValue < 0 GOTO _ExitWithError
+		END 
+
+		-- Create and post the inventory adjustment
+		IF @ysnRecap = 0 
+		BEGIN 
+			EXEC @intReturnValue = uspICInventoryAdjustment_CreatePostQtyChangeFromInvShipmentDestination
+				@intShipmentId
+				,@dtmDate
+				,@intEntityUserSecurityId
+				,@ysnPost
+
+			IF @intReturnValue < 0 GOTO _ExitWithError
+		END 
 
 		-- Create the audit log. 
 		SELECT @actionType = 'Destination Posted'
@@ -327,47 +342,62 @@ BEGIN
 
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
-		INSERT INTO @GLEntries (
-			[dtmDate] 
-			,[strBatchId]
-			,[intAccountId]
-			,[dblDebit]
-			,[dblCredit]
-			,[dblDebitUnit]
-			,[dblCreditUnit]
-			,[strDescription]
-			,[strCode]
-			,[strReference]
-			,[intCurrencyId]
-			,[dblExchangeRate]
-			,[dtmDateEntered]
-			,[dtmTransactionDate]
-			,[strJournalLineDescription]
-			,[intJournalLineNo]
-			,[ysnIsUnposted]
-			,[intUserId]
-			,[intEntityId]
-			,[strTransactionId]
-			,[intTransactionId]
-			,[strTransactionType]
-			,[strTransactionForm]
-			,[strModuleName]
-			,[intConcurrencyId]
-			,[dblDebitForeign]	
-			,[dblDebitReport]	
-			,[dblCreditForeign]	
-			,[dblCreditReport]	
-			,[dblReportingRate]	
-			,[dblForeignRate]
-			,[strRateType]
-		)	
-		EXEC @intReturnValue = dbo.uspICUnpostInventoryShipmentOtherCharges 
-			@intShipmentId
-			,@strBatchId
-			,@intEntityUserSecurityId
-			,@INVENTORY_SHIPMENT_TYPE	
-		IF @intReturnValue < 0 GOTO _ExitWithError
+		--Unpost the other charges for the shipment
+		BEGIN 
+			INSERT INTO @GLEntries (
+				[dtmDate] 
+				,[strBatchId]
+				,[intAccountId]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[strDescription]
+				,[strCode]
+				,[strReference]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[dtmDateEntered]
+				,[dtmTransactionDate]
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[ysnIsUnposted]
+				,[intUserId]
+				,[intEntityId]
+				,[strTransactionId]
+				,[intTransactionId]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]
+				,[intConcurrencyId]
+				,[dblDebitForeign]	
+				,[dblDebitReport]	
+				,[dblCreditForeign]	
+				,[dblCreditReport]	
+				,[dblReportingRate]	
+				,[dblForeignRate]
+				,[strRateType]
+			)	
+			EXEC @intReturnValue = dbo.uspICUnpostInventoryShipmentOtherCharges 
+				@intShipmentId
+				,@strBatchId
+				,@intEntityUserSecurityId
+				,@INVENTORY_SHIPMENT_TYPE	
+			IF @intReturnValue < 0 GOTO _ExitWithError
+		END 
 
+		-- Even on unpost, create and post a new inventory adjustment
+		IF @ysnRecap = 0 
+		BEGIN 
+			EXEC @intReturnValue = uspICInventoryAdjustment_CreatePostQtyChangeFromInvShipmentDestination
+				@intShipmentId
+				,@dtmDate
+				,@intEntityUserSecurityId
+				,@ysnPost
+
+			IF @intReturnValue < 0 GOTO _ExitWithError
+		END 
+		
 		-- Update the ysnPostedFlag gl entries posted for the destination. 
 		BEGIN 			
 			UPDATE	GLEntries
