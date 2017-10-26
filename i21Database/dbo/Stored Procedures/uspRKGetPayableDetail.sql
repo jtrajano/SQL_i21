@@ -344,11 +344,13 @@ BEGIN
 				,strDistributionOption
 				,isi.dblQuantity * isi.dblUnitPrice AS dblUnitCost
 				,(
-					SELECT isnull(SUM(R.dblAmountApplied), 0)
-					FROM vyuARCustomerPaymentHistoryReport R
+					SELECT isnull(SUM(R.dblPayment), 0)
+					FROM tblARPaymentDetail R
 					LEFT JOIN tblARInvoiceDetail I ON R.intInvoiceId = I.intInvoiceId
+					LEFT JOIN tblARInvoice ic on ic.intInvoiceId=I.intInvoiceId
 					WHERE isi.intInventoryShipmentItemId = I.intInventoryShipmentItemId
-						AND R.intCompanyLocationId = @intLocationId
+					
+						AND ic.intCompanyLocationId = @intLocationId
 					) dblQtyReceived
 				,st.intCommodityId
 			FROM tblICInventoryShipment ici
@@ -386,11 +388,12 @@ BEGIN
 				,isi.dblQuantity * isi.dblUnitPrice AS dblUnitCost
 				,st.intCommodityId
 				,(
-					SELECT isnull(SUM(R.dblAmountApplied), 0)
-					FROM vyuARCustomerPaymentHistoryReport R
+					SELECT isnull(SUM(R.dblPayment), 0)
+					FROM tblARPaymentDetail R
 					LEFT JOIN tblARInvoiceDetail I ON R.intInvoiceId = I.intInvoiceId
+					LEFT JOIN tblARInvoice ic on ic.intInvoiceId=I.intInvoiceId
 					WHERE isi.intInventoryShipmentItemId = I.intInventoryShipmentItemId
-						AND R.intCompanyLocationId = @intLocationId
+						AND ic.intCompanyLocationId = @intLocationId
 					) dblQtyReceived
 			FROM tblICInventoryShipment ici
 			INNER JOIN tblICInventoryShipmentItem isi ON isi.intInventoryShipmentId = ici.intInventoryShipmentId
@@ -436,8 +439,8 @@ BEGIN
 				,isi.dblQuantity * isi.dblUnitPrice AS dblUnitCost
 				,st.intCommodityId
 				,(
-					SELECT isnull(SUM(R.dblAmountApplied), 0)
-					FROM vyuARCustomerPaymentHistoryReport R
+					SELECT isnull(SUM(R.dblPayment), 0)
+					FROM tblARPaymentDetail R
 					LEFT JOIN tblARInvoiceDetail I ON R.intInvoiceId = I.intInvoiceId
 					WHERE isi.intInventoryShipmentItemId = I.intInventoryShipmentItemId
 					) dblQtyReceived
@@ -475,8 +478,8 @@ BEGIN
 				,isi.dblQuantity * isi.dblUnitPrice AS dblUnitCost
 				,st.intCommodityId
 				,(
-					SELECT isnull(SUM(R.dblAmountApplied), 0)
-					FROM vyuARCustomerPaymentHistoryReport R
+					SELECT isnull(SUM(R.dblPayment), 0)
+					FROM tblARPaymentDetail R
 					LEFT JOIN tblARInvoiceDetail I ON R.intInvoiceId = I.intInvoiceId
 					WHERE isi.intInventoryShipmentItemId = I.intInventoryShipmentItemId
 					) dblQtyReceived
@@ -527,10 +530,12 @@ BEGIN
 				,st.intCommodityId
 				,(
 					SELECT isnull(SUM(I.dblQtyShipped), 0)
-					FROM vyuARCustomerPaymentHistoryReport R
+					FROM tblARPaymentDetail R
 					LEFT JOIN tblARInvoiceDetail I ON R.intInvoiceId = I.intInvoiceId
+						LEFT JOIN tblARInvoice ic on ic.intInvoiceId=I.intInvoiceId
 					WHERE isi.intInventoryShipmentItemId = I.intInventoryShipmentItemId
-						AND R.intCompanyLocationId = @intLocationId
+
+						AND ic.intCompanyLocationId = @intLocationId
 					) dblQtyReceived
 			FROM tblICInventoryShipment ici
 			INNER JOIN tblICInventoryShipmentItem isi ON isi.intInventoryShipmentId = ici.intInventoryShipmentId
@@ -568,10 +573,11 @@ BEGIN
 				,st.intCommodityId
 				,(
 					SELECT isnull(SUM(I.dblQtyShipped), 0)
-					FROM vyuARCustomerPaymentHistoryReport R
+					FROM tblARPaymentDetail R
 					LEFT JOIN tblARInvoiceDetail I ON R.intInvoiceId = I.intInvoiceId
+						LEFT JOIN tblARInvoice ic on ic.intInvoiceId=I.intInvoiceId
 					WHERE isi.intInventoryShipmentItemId = I.intInventoryShipmentItemId
-						AND R.intCompanyLocationId = @intLocationId
+						AND ic.intCompanyLocationId = @intLocationId
 					) dblQtyReceived
 			FROM tblICInventoryShipment ici
 			INNER JOIN tblICInventoryShipmentItem isi ON isi.intInventoryShipmentId = ici.intInventoryShipmentId
@@ -618,7 +624,7 @@ BEGIN
 				,st.intCommodityId
 				,(
 					SELECT isnull(SUM(I.dblQtyShipped), 0)
-					FROM vyuARCustomerPaymentHistoryReport R
+					FROM tblARPaymentDetail R
 					LEFT JOIN tblARInvoiceDetail I ON R.intInvoiceId = I.intInvoiceId
 					WHERE isi.intInventoryShipmentItemId = I.intInventoryShipmentItemId
 					) dblQtyReceived
@@ -657,7 +663,7 @@ BEGIN
 				,st.intCommodityId
 				,(
 					SELECT isnull(SUM(I.dblQtyShipped), 0)
-					FROM vyuARCustomerPaymentHistoryReport R
+					FROM tblARPaymentDetail R
 					LEFT JOIN tblARInvoiceDetail I ON R.intInvoiceId = I.intInvoiceId
 					WHERE isi.intInventoryShipmentItemId = I.intInventoryShipmentItemId
 					) dblQtyReceived
