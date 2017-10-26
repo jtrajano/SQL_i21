@@ -5794,6 +5794,7 @@
     <Build Include="dbo\Stored Procedures\uspCTValidateContractAfterSave.sql" />
     <Build Include="dbo\Views\vyuARCustomerPaymentHistoryReport.sql" />
     <Build Include="dbo\Tables\tblVRSubmitted.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1740_UpdatePurchasingMenus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
