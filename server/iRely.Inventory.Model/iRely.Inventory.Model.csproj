@@ -175,6 +175,8 @@
     <Compile Include="Configuration\Receipt\vyuICGetReceiptAddTransferOrderMap.cs" />
     <Compile Include="Configuration\Receipt\vyuICInventoryReceiptItemLookUpMap.cs" />
     <Compile Include="Configuration\Receipt\vyuICInventoryReceiptLookUpMap.cs" />
+    <Compile Include="Configuration\Receipt\vyuICInventoryReceiptTotals.cs" />
+    <Compile Include="Configuration\Receipt\vyuICInventoryReceiptTotalsMap.cs" />
     <Compile Include="Configuration\Shipment\tblICInventoryShipmentChargeMap.cs" />
     <Compile Include="Configuration\Shipment\tblICInventoryShipmentItemLotMap.cs" />
     <Compile Include="Configuration\Shipment\tblICInventoryShipmentItemMap.cs" />

@@ -70,6 +70,14 @@ Ext.define('Inventory.view.InventoryBaseViewController', {
         return this.getView().getViewModel().data.current;
     },
 
+    getData: function(key) {
+        return this.getView().getViewModel().get(key);
+    },
+
+    setData: function(key, value) {
+        this.getView().getViewModel().set('key', value);
+    },
+
     getCurrentValue: function(key) {
         return this.getCurrent().get(key);
     }

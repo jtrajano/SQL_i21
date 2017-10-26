@@ -131,6 +131,8 @@ namespace iRely.Inventory.BusinessLayer
                             , strShipFrom = t.vyuICInventoryReceiptLookUp.strShipFrom
                             , strShipVia = t.vyuICInventoryReceiptLookUp.strShipVia
                             , strFreightTerm = t.vyuICInventoryReceiptLookUp.strFreightTerm
+                            , dblTotalCharge = t.vyuICInventoryReceiptTotals.dblTotalCharge
+                            , dblTotalChargeTax = t.vyuICInventoryReceiptTotals.dblTotalChargeTax
                         }).ToListAsync(param.cancellationToken);
 
             return new GetObjectResult()

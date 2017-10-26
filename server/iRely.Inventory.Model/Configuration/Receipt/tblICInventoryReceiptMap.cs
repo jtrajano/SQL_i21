@@ -60,7 +60,8 @@ namespace iRely.Inventory.Model
             this.HasMany(p => p.tblICInventoryReceiptCharges)
                 .WithRequired(p => p.tblICInventoryReceipt)
                 .HasForeignKey(p => p.intInventoryReceiptId);
-                
+            this.HasOptional(p => p.vyuICInventoryReceiptTotals)
+                .WithRequired(p => p.tblICInventoryReceipt);
         }
     }
 }

@@ -261,5 +261,6 @@ namespace iRely.Inventory.Model
         public ICollection<tblICInventoryReceiptCharge> tblICInventoryReceiptCharges { get; set; }
 
         public vyuICInventoryReceiptLookUp vyuICInventoryReceiptLookUp { get; set; }
+        public vyuICInventoryReceiptTotals vyuICInventoryReceiptTotals { get; set; }
     }
 }

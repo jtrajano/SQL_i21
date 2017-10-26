@@ -32,6 +32,7 @@ namespace iRely.Inventory.Model
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
+            modelBuilder.Configurations.Add(new vyuICInventoryReceiptTotalsMap());
             modelBuilder.Configurations.Add(new vyuICGetItemStorageLocationMap());
             modelBuilder.Configurations.Add(new vyuICLotHistoryMap());
             modelBuilder.Configurations.Add(new vyuICGetStorageUnitStockMap());

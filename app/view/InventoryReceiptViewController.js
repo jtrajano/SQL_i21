@@ -2505,7 +2505,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
     calculateOtherCharges: function (win) {
         var current = win.viewModel.data.current;
+        var me = win;
         var totalCharges = 0;
+        
         //var txtCharges = win.down('#txtCharges');
         var intDefaultCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
         var transactionCurrencyId = current.get('intCurrencyId');
@@ -2534,6 +2536,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         }
                     }
                 });
+
+                if(!current.phantom && charges.data.items.length === 0) {
+                    totalCharges = current.get('dblTotalCharge');
+                }
             }
         }
 
@@ -2545,7 +2551,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var me = this;
         var txtCharges = win.down('#txtCharges');
         var totalCharges = me.calculateOtherCharges(win);
-
         if (txtCharges) { txtCharges.setValue(totalCharges); }
     },
     /*

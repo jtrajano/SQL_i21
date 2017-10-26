@@ -140,6 +140,11 @@ Ext.define('Inventory.Utils', {
             } else {
                 // Handle error.
             }
+        },
+
+        baseUrl: '../Inventory/api',
+        getEndpoint(resource) {
+            return ic.utils.baseUrl + '/' + resource;
         }
     }
 });
