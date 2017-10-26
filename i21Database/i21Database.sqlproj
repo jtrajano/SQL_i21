@@ -5789,6 +5789,7 @@
     <Build Include="dbo\Stored Procedures\uspGRUnPostUnPricedSpotTicket.sql" />
     <Build Include="dbo\Stored Procedures\uspSMValidateRemoteServerRole.sql" />
     <Build Include="dbo\Stored Procedures\uspCTValidateContractAfterSave.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1740_UpdatePurchasingMenus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
