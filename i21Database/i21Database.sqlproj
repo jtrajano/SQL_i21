@@ -5730,6 +5730,7 @@
     <Build Include="dbo\Functions\fnMFGetTotalStockValueFromTransactionBatch.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerPaymentHistoryReport.sql" />
     <Build Include="dbo\Stored Procedures\uspSMValidateRemoteServerRole.sql" />
+    <Build Include="dbo\Views\vyuRKGetSequenceMonthNotMapping.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
