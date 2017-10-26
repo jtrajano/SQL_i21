@@ -546,7 +546,7 @@ END CATCH
 BEGIN TRY
 	IF ISNULL(@ForRecurring, 0) = 1
 		BEGIN
-			UPDATE tblARInvoiceDetail SET intTaxGroupId = NULL WHERE intInvoiceId = @CreatedInvoiceId
+			--UPDATE tblARInvoiceDetail SET intTaxGroupId = NULL WHERE intInvoiceId = @CreatedInvoiceId
 			EXEC [dbo].[uspARReComputeInvoiceTaxes]
 				 @InvoiceId	= @CreatedInvoiceId
 				,@DetailId	= NULL
