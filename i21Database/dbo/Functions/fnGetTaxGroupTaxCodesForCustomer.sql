@@ -10,6 +10,7 @@
 	,@CardId					INT
 	,@VehicleId					INT
 	,@DisregardExemptionSetup	BIT
+	,@ItemUOMId					INT = NULL
 )
 RETURNS @returntable TABLE
 (
@@ -33,6 +34,7 @@ RETURNS @returntable TABLE
 	,[ysnInvalidSetup]				BIT
 	,[strTaxGroup]					NVARCHAR(100)
 	,[strNotes]						NVARCHAR(500)
+	,[intUnitMeasureId]				INT NULL
 )
 AS
 BEGIN
@@ -64,6 +66,7 @@ BEGIN
 		,[ysnInvalidSetup]
 		,[strTaxGroup]
 		,[strNotes]
+		,[intUnitMeasureId]
 		)
 	SELECT
 		 [intTransactionDetailTaxId]	= 0
@@ -86,6 +89,7 @@ BEGIN
 		,[ysnInvalidSetup]				= E.[ysnInvalidSetup]
 		,[strTaxGroup]					= TG.[strTaxGroup]
 		,[strNotes]						= E.[strExemptionNotes]
+		,[intUnitMeasureId]				= R.[intUnitMeasureId]
 	FROM
 		tblSMTaxCode TC
 	INNER JOIN
@@ -97,7 +101,7 @@ BEGIN
 	CROSS APPLY
 		[dbo].[fnGetCustomerTaxCodeExemptionDetails](@CustomerId, @TransactionDate, TG.[intTaxGroupId], TC.[intTaxCodeId], TC.[intTaxClassId], TC.[strState], @ItemId, @ItemCategoryId, @ShipToLocationId, @IsCustomerSiteTaxable, @CardId, @VehicleId, @DisregardExemptionSetup) E
 	CROSS APPLY
-		[dbo].[fnGetTaxCodeRateDetails](TC.[intTaxCodeId], @TransactionDate) R			
+		[dbo].[fnGetTaxCodeRateDetails](TC.[intTaxCodeId], @TransactionDate, @ItemUOMId) R			
 	WHERE
 		TG.intTaxGroupId = @TaxGroupId
 		AND (ISNULL(E.ysnTaxExempt,0) = 0 OR ISNULL(@IncludeExemptedCodes,0) = 1)

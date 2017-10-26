@@ -10,7 +10,10 @@
 	,@CardId					INT				= NULL
 	,@VehicleId					INT				= NULL
 	,@DisregardExemptionSetup	BIT				= 0
+	,@ItemUOMId					INT				= NULL
 AS
+	DECLARE @UOMId INT = 0;
+	SELECT @UOMId = intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = @ItemUOMId
 
 	IF(ISNULL(@TaxGroupId,0) = 0)
 		SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForCustomer](@CustomerId, @LocationId, @ItemId, @CustomerLocationId, @SiteId, @FreightTermId)			
@@ -47,8 +50,9 @@ AS
 				,[ysnInvalidSetup] 
 				,[strTaxGroup]
 				,[strNotes]
+				,ISNULL([intUnitMeasureId],0)	AS [intUnitMeasureId]
 			FROM
-				[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @CustomerId, @TransactionDate, @ItemId, @CustomerLocationId, 1, @IsCustomerSiteTaxable, @CardId, @VehicleId, @DisregardExemptionSetup)
+				[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @CustomerId, @TransactionDate, @ItemId, @CustomerLocationId, 1, @IsCustomerSiteTaxable, @CardId, @VehicleId, @DisregardExemptionSetup, @UOMId)
 				
 			RETURN 1
 		END
