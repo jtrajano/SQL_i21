@@ -63,7 +63,7 @@ SELECT l.intLotId
 	,'' AS strCurrency
 	,'' AS strCostUOM
 	,0 AS intContainerId
-	,(Select Top 1 RL.strContainerNo from tblICInventoryReceiptItemLot RL Where RL.strLotNumber =l.strLotNumber) AS strContainerNo
+	,l.strContainerNo AS strContainerNo
 	,ISNULL(S.dblQty, 0) AS dblReservedQty
 	,Convert(DECIMAL(18, 4), ISNULL(S.dblQty, 0) / CASE 
 			WHEN ISNULL(l.dblWeightPerQty, 0) = 0
