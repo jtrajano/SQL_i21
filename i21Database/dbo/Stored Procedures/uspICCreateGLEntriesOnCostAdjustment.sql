@@ -467,7 +467,7 @@ AS
 			,t.dblExchangeRate
 			,t.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName
-			,TransType.strTransactionForm
+			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
 			,t.intInTransitSourceLocationId
 			,i.strItemNo
 			,cbLog.intRelatedTransactionId  -- t.intRelatedTransactionId
@@ -498,7 +498,7 @@ AS
 			,t.dblExchangeRate
 			,t.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName
-			,TransType.strTransactionForm
+			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
 			,t.intInTransitSourceLocationId
 			,i.strItemNo
 			,cbLog.intRelatedTransactionId  -- t.intRelatedTransactionId
@@ -529,7 +529,7 @@ AS
 			,t.dblExchangeRate
 			,t.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName
-			,TransType.strTransactionForm
+			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
 			,t.intInTransitSourceLocationId
 			,i.strItemNo
 			,cbLog.intRelatedTransactionId  -- t.intRelatedTransactionId
@@ -560,7 +560,7 @@ AS
 			,t.dblExchangeRate
 			,t.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName
-			,TransType.strTransactionForm
+			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
 			,t.intInTransitSourceLocationId
 			,i.strItemNo
 			,cbLog.intRelatedTransactionId  -- t.intRelatedTransactionId
@@ -592,7 +592,7 @@ AS
 			,t.dblExchangeRate
 			,t.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName
-			,TransType.strTransactionForm
+			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
 			,t.intInTransitSourceLocationId
 			,i.strItemNo
 			,t.intRelatedTransactionId
