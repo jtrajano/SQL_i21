@@ -5817,6 +5817,7 @@
     <Build Include="dbo\Views\vyuGRGetSaleEntity.sql" />
     <Build Include="dbo\Stored Procedures\uspGRPostSellOffsite.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUnPostSellOffsite.sql" />
+    <Build Include="dbo\Views\vyuMFInventoryViewAsonDate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
