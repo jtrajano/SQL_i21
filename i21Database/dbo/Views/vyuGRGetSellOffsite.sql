@@ -16,6 +16,7 @@ AS
 ,dblCashPrice						= SO.dblCashPrice
 ,strOffsiteTicket					= SO.strOffsiteTicket
 ,dblSelectedUnits					= SO.dblSelectedUnits
+,dblContractUnits					= SO.dblContractUnits
 ,intCreatedUserId					= SO.intCreatedUserId
 ,strUserName						= Entity.strUserName
 ,dtmCreated							= SO.dtmCreated
@@ -29,3 +30,4 @@ JOIN tblSMCompanyLocationSubLocation SLOC ON SLOC.intCompanyLocationSubLocationI
 JOIN tblEMEntity E ON E.intEntityId = SO.intEntityId
 JOIN tblSMUserSecurity Entity ON Entity.intEntityId=SO.intCreatedUserId
 JOIN tblARInvoice Invoice ON Invoice.intInvoiceId=SO.intInvoiceId
+

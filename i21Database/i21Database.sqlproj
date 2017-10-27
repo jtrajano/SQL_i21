@@ -5814,6 +5814,9 @@
     <Build Include="dbo\Tables\tblSMCacheVersion.sql" />
     <Build Include="dbo\Views\vyuSTDepartmentTotalsPreload.sql" />
     <Build Include="dbo\Functions\fnGRGetDiscountCodeReadings.sql" />
+    <Build Include="dbo\Views\vyuGRGetSaleEntity.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRPostSellOffsite.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRUnPostSellOffsite.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
