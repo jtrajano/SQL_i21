@@ -61,7 +61,7 @@ BEGIN
 				,ysnCallEntryPrinted = ISNULL(A.ysnCallEntryPrinted,0)
 				,intOpenWorkOrder = ISNULL(M.intOpenCount,0)
 				,strFillMethod = N.strFillMethod
-			,strLocation = B.strLocation
+				,strLocation = O.vwloc_loc_no
 			FROM tblTMDispatch A
 			INNER JOIN tblTMSite B
 				ON A.intSiteID = B.intSiteID
@@ -90,6 +90,8 @@ BEGIN
 					ON A.intSiteID = M.intSiteId
 			LEFT JOIN tblTMFillMethod N
 				ON B.intFillMethodId = N.intFillMethodId
+			LEFT JOIN vwlocmst O
+				ON B.intLocationId = O.A4GLIdentity
 		')
 	END
 	ELSE
@@ -123,11 +125,12 @@ BEGIN
 				,intDispatchId = A.intDispatchID
 				,intCustomerID = B.intCustomerID
 				,intLocationId = B.intLocationId
-				,strLocation = B.strLocation
+				,strLocation = O.strLocationName
 				,ysnLeakCheckRequired = A.ysnLeakCheckRequired
 				,ysnCallEntryPrinted = ISNULL(A.ysnCallEntryPrinted,0)
 				,intOpenWorkOrder = ISNULL(M.intOpenCount,0)
 				,strFillMethod = N.strFillMethod
+
 			FROM tblTMDispatch A
 			INNER JOIN tblTMSite B
 				ON A.intSiteID = B.intSiteID
@@ -156,6 +159,8 @@ BEGIN
 					ON A.intSiteID = M.intSiteId
 			LEFT JOIN tblTMFillMethod N
 				ON B.intFillMethodId = N.intFillMethodId
+			LEFT JOIN tblSMCompanyLocation O
+				ON B.intLocationId = O.intCompanyLocationId
 		')
 	END
 END
