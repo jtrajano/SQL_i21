@@ -21,8 +21,8 @@ SELECT
 FROM dbo.tblAPPaymentDetail A
 	INNER JOIN dbo.tblAPPayment B
 		ON A.intPaymentId = B.intPaymentId
-	INNER JOIN dbo.tblAPBill C
-		ON A.intBillId = C.intBillId
+	LEFT JOIN dbo.tblAPBill C
+		ON ISNULL(A.intBillId,A.intOrigBillId) = C.intBillId
 	INNER JOIN dbo.tblAPVendor D
 		ON B.[intEntityVendorId] = D.[intEntityId]
 	INNER JOIN dbo.tblEMEntity E
