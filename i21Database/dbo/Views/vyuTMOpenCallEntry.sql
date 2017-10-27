@@ -26,7 +26,7 @@ AS
 		,intDispatchId = A.intDispatchID
 		,intCustomerID = B.intCustomerID
 		,intLocationId = B.intLocationId
-		,strLocation = B.strLocation
+		,strLocation = O.strLocationName
 		,ysnLeakCheckRequired = A.ysnLeakCheckRequired
 		,ysnCallEntryPrinted = ISNULL(A.ysnCallEntryPrinted,0)
 		,intOpenWorkOrder = ISNULL(M.intOpenCount,0)
@@ -59,4 +59,6 @@ AS
 		ON A.intSiteID = M.intSiteId
 	LEFT JOIN tblTMFillMethod N
 		ON B.intFillMethodId = N.intFillMethodId
+	LEFT JOIN tblSMCompanyLocation O
+		ON B.intLocationId = O.intCompanyLocationId
 GO

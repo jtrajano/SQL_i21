@@ -35,7 +35,7 @@ BEGIN
 									END) COLLATE Latin1_General_CI_AS 
 				,strWorkStatus = C.strWorkStatus
 				,strSiteNumber = RIGHT(''000''+ CAST(A.intSiteNumber AS NVARCHAR(4)),4)
-				,strLocation = A.strLocation
+				,strLocation = M.vwloc_loc_no
 				,strWorkOrderCategory = D.strWorkOrderCategory
 				,dtmDateCreated = DATEADD(dd, DATEDIFF(dd, 0, B.dtmDateCreated),0)
 				,dtmDateScheduled = DATEADD(dd, DATEDIFF(dd, 0, B.dtmDateScheduled),0)
@@ -76,6 +76,8 @@ BEGIN
 				ON J.intEntityId = K.intEntityId
 			LEFT JOIN vwitmmst L
 				ON A.intProduct = L.A4GLIdentity
+			LEFT JOIN vwlocmst M
+				ON A.intLocationId = M.A4GLIdentity
 			
 		')
 	END
