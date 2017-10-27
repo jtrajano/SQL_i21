@@ -5806,6 +5806,9 @@
     <Build Include="dbo\Stored Procedures\uspAPRemovePaymentAndCreatePrepay.sql" />
     <Build Include="dbo\Views\vyuCTGetContractForScaleTicket.sql" />
     <Build Include="dbo\Views\vyuRKGetSequenceMonthNotMapping.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherLatestPayment.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherCommodity.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherApprovalStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
