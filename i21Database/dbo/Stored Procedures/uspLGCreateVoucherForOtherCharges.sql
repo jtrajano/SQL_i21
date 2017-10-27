@@ -29,6 +29,7 @@ BEGIN TRY
 		,intAccountId INT
 		,dblQtyReceived NUMERIC(18, 6)
 		,dblCost NUMERIC(18, 6)
+		,intLoadCostId INT
 		)
 	DECLARE @distinctVendor TABLE (
 		intRecordId INT Identity(1, 1)
@@ -106,6 +107,7 @@ BEGIN TRY
 		,intAccountId
 		,dblQtyReceived
 		,dblCost
+		,intLoadCostId
 		)
 	SELECT V.intEntityVendorId
 		,LD.intLoadId
@@ -124,6 +126,7 @@ BEGIN TRY
 						))
 				)
 			) * CONVERT(NUMERIC(18, 6), V.dblNet)
+		,V.intLoadCostId
 	FROM vyuLGLoadCostForVendor V
 	JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = V.intLoadDetailId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
@@ -144,6 +147,7 @@ BEGIN TRY
 		,V.dblNet
 		,LD.intLoadId
 		,LD.intLoadDetailId
+		,V.intLoadCostId
 
 	INSERT INTO @distinctVendor
 	SELECT DISTINCT intVendorEntityId
@@ -266,6 +270,12 @@ BEGIN TRY
 						,@voucherDetailLoadNonInv = @VoucherDetailLoadNonInv
 						,@billId = @intBillId OUTPUT
 
+					UPDATE tblLGLoadCost
+					SET intBillId = @intBillId
+					WHERE intLoadCostId IN (
+							SELECT intLoadCostId
+							FROM @voucherDetailData)
+
 					DELETE
 					FROM @VoucherDetailLoadNonInv
 
@@ -284,6 +294,12 @@ BEGIN TRY
 					,@vendorId = @intVendorEntityId
 					,@voucherDetailLoadNonInv = @VoucherDetailLoadNonInv
 					,@billId = @intBillId OUTPUT
+
+				UPDATE tblLGLoadCost
+				SET intBillId = @intBillId
+				WHERE intLoadCostId IN (
+						SELECT intLoadCostId
+						FROM @voucherDetailData)
 
 				DELETE
 				FROM @VoucherDetailLoadNonInv

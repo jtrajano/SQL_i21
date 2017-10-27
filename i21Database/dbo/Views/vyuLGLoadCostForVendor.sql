@@ -5,6 +5,7 @@ AS
 			,[strShippedItemId] = 'ld:' + CAST(LD.intLoadDetailId AS NVARCHAR(250))
 			,[intEntityVendorId] = LC.intVendorId
 			,[strCustomerName] = EME.[strName]
+			,[intLoadCostId] = LC.intLoadCostId
 			,[intCurrencyId] = ISNULL(ISNULL(LC.[intCurrencyId], ARC.[intCurrencyId]), (
 					SELECT TOP 1 intDefaultCurrencyId
 					FROM tblSMCompanyPreference
@@ -70,4 +71,4 @@ AS
 			 LC.dblRate,LD.[intWeightItemUOMId],ARIA.[intAccountId],
 			 ARIA.[intCOGSAccountId],ARIA.[intSalesAccountId],ARIA.[intInventoryAccountId],
 			 LC.[intCurrencyId],LD.intItemUOMId,LC.intItemUOMId,LD.dblGross,LD.dblTare,
-			 LD.dblNet, str1099Form, str1099Type,CU.strCurrency,UOM.strUnitMeasure,L.ysnPosted
+			 LD.dblNet, str1099Form, str1099Type,CU.strCurrency,UOM.strUnitMeasure,L.ysnPosted,LC.intLoadCostId
