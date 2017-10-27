@@ -5783,6 +5783,7 @@
     <Build Include="dbo\Views\vyuGRSellOffsiteTicketNotMapped.sql" />
     <Build Include="dbo\Views\vyuGRSellOffsiteContractNotMapped.sql" />
     <Build Include="dbo\Views\vyuRKGetSequenceMonthNotMapping.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMIncreaseECConcurrency.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
