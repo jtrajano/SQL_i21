@@ -376,7 +376,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		WHERE A.ysnPosted = 1 AND voucherDetailReceipt.intInventoryReceiptType = 2
 	END
 
-	--PURCHASE CONTRACT
+	--PURCHASE ORDER
 	IF EXISTS(SELECT TOP 1 1 FROM @receiptItems WHERE intInventoryReceiptType = 3)
 	BEGIN
 		INSERT INTO #tempBillDetail(
