@@ -22,7 +22,7 @@ namespace Edm_EntityMappingGeneratedViews
     /// <summary>
     /// Implements a mapping view cache.
     /// </summary>
-    [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
+    [GeneratedCode("Entity Framework 6 Power Tools", "0.9.2.0")]
     internal sealed class ViewsForBaseEntitySetse03ef4a7b266e40dce0f5f2a5d8b7c4e5d1b1cd3430b2202afa020293b3279eb : DbMappingViewCache
     {
         /// <summary>
