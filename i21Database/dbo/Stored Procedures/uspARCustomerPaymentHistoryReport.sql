@@ -70,7 +70,7 @@ WITH (
 )
 
 -- Gather the variables values from the xml table.
-SELECT  @strCustomerName = ISNULL([from], '')
+SELECT  @strCustomerName = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM	@temp_xml_table
 WHERE	[fieldname] IN ('strName', 'strCustomerName')
 
