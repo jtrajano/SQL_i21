@@ -266,6 +266,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\19_M2MComputations.sql
 :r .\IC\20_UpdateContractItemStatuses.sql
 :r .\IC\21_AdjustmentInventoryTerms.sql 
+:r .\IC\22_StockTypes.sql 
 :r .\IC\PopulateLotContainerNoAndCondition.sql
 :r .\IC\1740_DataFix_FixIntTransactionDetailId.sql
 

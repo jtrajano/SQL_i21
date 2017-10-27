@@ -70,6 +70,7 @@ This table holds stock information like quantity on hand and etc.
 		[dblUnitReserved] NUMERIC(38, 20) NULL DEFAULT ((0)),
 		--[dblOnStorage] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[dblLastCountRetail] NUMERIC(38, 20) NULL DEFAULT ((0)), 
+		[dblInTransitDirect] NUMERIC(38, 20) NULL DEFAULT ((0)),
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICItemStock] PRIMARY KEY ([intItemStockId]), 

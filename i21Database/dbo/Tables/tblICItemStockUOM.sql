@@ -49,6 +49,7 @@ It only tracks the qty of those non-'Stock UOM's.
 		[dblUnitReserved] NUMERIC(38, 20) NULL DEFAULT ((0)),
 		[dblInTransitInbound] NUMERIC(38, 20) NULL DEFAULT ((0)),
 		[dblInTransitOutbound] NUMERIC(38, 20) NULL DEFAULT ((0)),
+		[dblInTransitDirect] NUMERIC(38, 20) NULL DEFAULT ((0)),
 		[dblUnitStorage] NUMERIC(38, 20) NULL DEFAULT ((0)),
 		[dblConsignedPurchase] NUMERIC(38, 20) NULL DEFAULT ((0)),
 		[dblConsignedSale] NUMERIC(38, 20) NULL DEFAULT ((0)),
