@@ -36,6 +36,9 @@ USING	(
 		UNION ALL 
 		SELECT	id = 8
 				,strName = 'Consigned Sale'
+		UNION ALL 
+		SELECT	id = 9
+				,strName = 'Reserved'
 
 
 ) AS ValuesForItemStockType
