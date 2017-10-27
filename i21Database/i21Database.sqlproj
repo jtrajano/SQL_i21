@@ -5809,6 +5809,7 @@
     <Build Include="dbo\Functions\fnAPGetVoucherLatestPayment.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherCommodity.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherApprovalStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMIncreaseECConcurrency.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
