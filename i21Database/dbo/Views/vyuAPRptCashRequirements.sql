@@ -20,8 +20,8 @@ SELECT
 		ON APP.intEntityVendorId = APV.[intEntityId]
 	INNER JOIN dbo.tblAPPaymentDetail APPD
 		ON APP.intPaymentId = APPD.intPaymentId
-	INNER JOIN dbo.tblAPBill APB
-		ON APB.intBillId = APPD.intBillId
+	LEFT JOIN dbo.tblAPBill APB
+		ON APB.intBillId = ISNULL(APPD.intBillId,APPD.intOrigBillId)
 	LEFT JOIN dbo.tblEMEntity E
 		ON E.intEntityId = APV.[intEntityId]
 	WHERE 

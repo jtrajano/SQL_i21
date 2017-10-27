@@ -54,7 +54,7 @@ SELECT
 	, 1
 FROM dbo.tblAPPayment  A
  LEFT JOIN dbo.tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
- LEFT JOIN dbo.tblAPBill C ON B.intBillId = C.intBillId
+ LEFT JOIN dbo.tblAPBill C ON ISNULL(B.intBillId,B.intOrigBillId) = C.intBillId
  LEFT JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId)
  	ON A.[intEntityVendorId] = D.[intEntityId]
 LEFT JOIN dbo.tblCMBankTransaction E
