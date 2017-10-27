@@ -6,6 +6,8 @@ SELECT TOP 100 PERCENT
 ,strStorageTicketNumber		    = CS.strStorageTicketNumber
 ,intCompanyLocationId			= CS.intCompanyLocationId
 ,strLocationName		        = LOC.strLocationName
+,intCompanyLocationSubLocationId = ISNULL(CS.intCompanyLocationSubLocationId,0) 
+,strSubLocationName				 = ISNULL(SLOC.strSubLocationName,'') 
 ,intStorageTypeId				= CS.intStorageTypeId
 ,strStorageTypeDescription		= ST.strStorageTypeDescription
 ,intStorageScheduleId			= CS.intStorageScheduleId
@@ -24,7 +26,8 @@ JOIN tblICItem Item on Item.intItemId=CS.intItemId
 JOIN tblEMEntity E ON E.intEntityId = CS.intEntityId
 JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId=CS.intStorageTypeId
 JOIN tblGRStorageScheduleRule SR ON SR.intStorageScheduleRuleId=CS.intStorageScheduleId  
-JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityId=CS.intCommodityId AND CU.ysnStockUnit=1 
+JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityId=CS.intCommodityId AND CU.ysnStockUnit=1
+JOIN tblSMCompanyLocationSubLocation SLOC ON SLOC.intCompanyLocationSubLocationId=CS.intCompanyLocationSubLocationId 
 LEFT JOIN tblGRStorageHistory SH ON SH.intCustomerStorageId=CS.intCustomerStorageId
 LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId=SH.intContractHeaderId 
 WHERE ISNULL(CS.strStorageType,'') <> 'ITR' AND ST.ysnCustomerStorage=1 AND SH.strType IN('From Scale','From Transfer') 

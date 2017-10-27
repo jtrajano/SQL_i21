@@ -31,12 +31,12 @@ SELECT TOP 100 PERCENT * FROM (
         ,(ISNULL(basisFutures.dblPrice, 0) + ISNULL(ctd.dblBasis,0)) * ISNULL(receiptItem.dblOpenReceive,0) AS dblGross
         ,ISNULL(taxes.dblTax,0.00) AS dblTax
         ,0.00 AS dblAdvance
-        ,(
+        ,CAST((
             ((ISNULL(basisFutures.dblPrice, 0) + ISNULL(ctd.dblBasis,0)) * ISNULL(receiptItem.dblOpenReceive,0)) 
             - ISNULL(discounts.dblAmount,0)
             + ISNULL(taxes.dblTax,0.00) 
             - ISNULL(priorAdvances.dblPriorAdvance,0.00))
-            * (ISNULL(basisCommodity.dblPercentage,0.00) / 100) AS dblAmountToAdvance
+            * (ISNULL(basisCommodity.dblPercentage,0.00) / 100) AS DECIMAL(18,2)) AS dblAmountToAdvance
         ,ISNULL(priorAdvances.dblPriorAdvance,0.00) AS dblPriorAdvance
         ,priorAdvances.strBillIds
         ,uom.strUnitMeasure
@@ -96,7 +96,7 @@ SELECT TOP 100 PERCENT * FROM (
     LEFT JOIN tblAPBasisAdvanceFuture basisFutures 
         ON basisFutures.intFutureMarketId = futureMarket.intFutureMarketId AND basisFutures.intMonthId = futureMonth.intFutureMonthId
     LEFT JOIN tblAPBasisAdvanceCommodity basisCommodity ON basisCommodity.intCommodityId = ticket.intCommodityId
-    WHERE ct.intPricingTypeId = 2
+    WHERE ctd.intPricingTypeId = 2
 ) basisAdvance
 ORDER BY intTicketId DESC
 

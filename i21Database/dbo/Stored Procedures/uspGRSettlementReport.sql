@@ -99,6 +99,7 @@ BEGIN
 		,strCompanyName = COMPANY.strCompanyName
 		,strCompanyAddress = dbo.fnConvertToFullAddress(COMPANY.strAddress, COMPANY.strCity, COMPANY.strState, COMPANY.strZip)
 		,strItemNo = Item.strItemNo
+		,strGrade  = Attribute.strDescription
 		,strCommodity = Commodity.strCommodityCode
 		,strDate = CONVERT(VARCHAR(10), GETDATE(), 110)
 		,strTime = CONVERT(VARCHAR(8), GETDATE(), 108)
@@ -123,11 +124,13 @@ BEGIN
 		,strSplitNumber = EM.strSplitNumber
 		,strCustomerReference = SC.strCustomerReference 
 		,strTicketComment = SC.strTicketComment
+		,strDiscountReadings =[dbo].[fnGRGetDiscountCodeReadings](SC.intTicketId,'Scale')
 		,strFarmField = EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber 
 		,dtmDate = Bill.dtmDate
 		,dblGrossWeight = ISNULL(SC.dblGrossWeight, 0) 		
 		,dblTareWeight = ISNULL(SC.dblTareWeight, 0) 		
-		,dblNetWeight= ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)		 
+		,dblNetWeight= ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
+		,dblDockage = ROUND(SC.dblShrink,3)		 
 		,dblCost = BillDtl.dblCost
 		,Net = BillDtl.dblQtyOrdered
 		,strUnitMeasure = UOM.strUnitMeasure
@@ -203,6 +206,7 @@ BEGIN
 	LEFT JOIN tblGRCustomerStorage CS ON CS.intTicketId = SC.intTicketId
 	LEFT JOIN tblEMEntitySplit EM ON EM.intSplitId = SC.intSplitId AND SC.intSplitId <> 0
 	LEFT JOIN tblEMEntityFarm EntityFarm ON EntityFarm.intEntityId=VENDOR.intEntityId AND EntityFarm.intFarmFieldId=ISNULL(SC.intFarmFieldId, 0)
+	LEFT JOIN tblICCommodityAttribute Attribute ON Attribute.intCommodityAttributeId=SC.intCommodityAttributeId
 	
 	LEFT JOIN (
 				SELECT intBillId,SUM(dblTotal) dblTotal
@@ -591,6 +595,7 @@ BEGIN
 		,strCompanyName = COMPANY.strCompanyName
 		,strCompanyAddress = dbo.fnConvertToFullAddress(COMPANY.strAddress, COMPANY.strCity, COMPANY.strState, COMPANY.strZip)
 		,strItemNo= Item.strItemNo
+		,strGrade  = Attribute.strDescription
 		,strCommodity = Commodity.strCommodityCode
 		,strDate = CONVERT(VARCHAR(10), GETDATE(), 110)
 		,strTime = CONVERT(VARCHAR(8), GETDATE(), 108)
@@ -615,11 +620,13 @@ BEGIN
 		,strSplitNumber = '' 
 		,strCustomerReference = SC.strCustomerReference
 		,strTicketComment = SC.strTicketComment
+		,strDiscountReadings =[dbo].[fnGRGetDiscountCodeReadings](CS.intCustomerStorageId,'Storage')
 		,strFarmField = EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber
 		,dtmDate = Bill.dtmDate		
 		,dblGrossWeight = ISNULL(SC.dblGrossWeight, 0)		
 		,dblTareWeight = ISNULL(SC.dblTareWeight, 0)		
 		,dblNetWeight = ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
+		,dblDockage = [dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblShrink,3))
 		,dblCost = BillDtl.dblCost
 		,Net = BillDtl.dblQtyOrdered 
 		,strUnitMeasure = UOM.strUnitMeasure
@@ -737,6 +744,7 @@ BEGIN
 	LEFT JOIN tblICItemUOM ItemUOM ON BillDtl.intUnitOfMeasureId = ItemUOM.intItemUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 	LEFT JOIN tblEMEntityFarm EntityFarm ON EntityFarm.intEntityId=VENDOR.intEntityId AND EntityFarm.intFarmFieldId=ISNULL(SC.intFarmFieldId, 0)
+	LEFT JOIN tblICCommodityAttribute Attribute ON Attribute.intCommodityAttributeId=SC.intCommodityAttributeId
 	WHERE BNKTRN.intBankAccountId = @intBankAccountId 
 END
 ELSE
@@ -751,6 +759,7 @@ BEGIN
 		,strCompanyName = COMPANY.strCompanyName
 		,strCompanyAddress = dbo.fnConvertToFullAddress(COMPANY.strAddress, COMPANY.strCity, COMPANY.strState, COMPANY.strZip)
 		,strItemNo = Item.strItemNo
+		,strGrade  = Attribute.strDescription
 		,strCommodity = Commodity.strCommodityCode
 		,strDate = CONVERT(VARCHAR(10), GETDATE(), 110)
 		,strTime = CONVERT(VARCHAR(8), GETDATE(), 108)
@@ -775,11 +784,13 @@ BEGIN
 		,strSplitNumber = EM.strSplitNumber
 		,strCustomerReference = SC.strCustomerReference 
 		,strTicketComment = SC.strTicketComment
+		,strDiscountReadings =[dbo].[fnGRGetDiscountCodeReadings](SC.intTicketId,'Scale')
 		,strFarmField = EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber 
 		,dtmDate = Bill.dtmDate
 		,dblGrossWeight = ISNULL(SC.dblGrossWeight, 0) 		
 		,dblTareWeight = ISNULL(SC.dblTareWeight, 0) 		
-		,dblNetWeight= ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)		 
+		,dblNetWeight = ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
+		,dblDockage = [dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblShrink,3))		 
 		,dblCost = BillDtl.dblCost
 		,Net = BillDtl.dblQtyOrdered
 		,strUnitMeasure = UOM.strUnitMeasure
@@ -853,6 +864,7 @@ BEGIN
 	LEFT JOIN tblGRCustomerStorage CS ON CS.intTicketId = SC.intTicketId
 	LEFT JOIN tblEMEntitySplit EM ON EM.intSplitId = SC.intSplitId AND SC.intSplitId <> 0
 	LEFT JOIN tblEMEntityFarm EntityFarm ON EntityFarm.intEntityId=VENDOR.intEntityId AND EntityFarm.intFarmFieldId=ISNULL(SC.intFarmFieldId, 0)
+	LEFT JOIN tblICCommodityAttribute Attribute ON Attribute.intCommodityAttributeId=SC.intCommodityAttributeId
 	LEFT JOIN (
 				SELECT intBillId,SUM(dblTotal) dblTotal
 				FROM tblAPBillDetail
@@ -1219,6 +1231,7 @@ BEGIN
 		,strCompanyName = COMPANY.strCompanyName
 		,strCompanyAddress = dbo.fnConvertToFullAddress(COMPANY.strAddress, COMPANY.strCity, COMPANY.strState, COMPANY.strZip)
 		,strItemNo = Item.strItemNo
+		,strGrade  = Attribute.strDescription
 		,strCommodity = Commodity.strCommodityCode
 		,strDate = CONVERT(VARCHAR(10), GETDATE(), 110)
 		,strTime = CONVERT(VARCHAR(8), GETDATE(), 108)
@@ -1243,11 +1256,13 @@ BEGIN
 		,strSplitNumber = '' 
 		,strCustomerReference = SC.strCustomerReference
 		,strTicketComment = SC.strTicketComment
+		,strDiscountReadings =[dbo].[fnGRGetDiscountCodeReadings](CS.intCustomerStorageId,'Storage')
 		,strFarmField = EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber
 		,dtmDate = Bill.dtmDate
 		,dblGrossWeight = ISNULL(SC.dblGrossWeight, 0)
 		,dblTareWeight =  ISNULL(SC.dblTareWeight, 0)
 		,dblNetWeight = ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
+		,dblDockage = [dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblShrink,3))
 		,dblCost = BillDtl.dblCost
 		,Net = BillDtl.dblQtyOrdered 
 		,strUnitMeasure = UOM.strUnitMeasure
@@ -1362,6 +1377,7 @@ BEGIN
 	LEFT JOIN tblICItemUOM ItemUOM ON BillDtl.intUnitOfMeasureId = ItemUOM.intItemUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 	LEFT JOIN tblEMEntityFarm EntityFarm ON EntityFarm.intEntityId=VENDOR.intEntityId AND EntityFarm.intFarmFieldId=ISNULL(SC.intFarmFieldId, 0)	
+	LEFT JOIN tblICCommodityAttribute Attribute ON Attribute.intCommodityAttributeId=SC.intCommodityAttributeId
 	WHERE BNKTRN.intBankAccountId = @intBankAccountId AND BNKTRN.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionId))
 END
 

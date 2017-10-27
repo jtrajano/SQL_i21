@@ -2,7 +2,7 @@ CREATE VIEW vyuICGetItemStockUOMTotalsAllStorageUnits
 AS
 SELECT xl.*
 FROM (
-	SELECT
+	SELECT DISTINCT
 		  intLocationId = sl.intCompanyLocationId
 		, i.intItemId
 		, i.strItemNo

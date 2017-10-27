@@ -489,6 +489,7 @@ BEGIN
 			[dblQtyOrdered],
 			[dblQtyReceived],
 			[dblTax],
+			[dblDiscount],
 			[dblRate],
 			[intCurrencyExchangeRateTypeId],
 			[ysnSubCurrency],
@@ -528,6 +529,7 @@ BEGIN
 			[dblQtyOrdered]				=	ABS(B.dblOpenReceive - B.dblBillQty),--CASE WHEN A.strReceiptType = 'Inventory Return' THEN ABS(B.dblOpenReceive) ELSE ABS(B.dblOpenReceive - B.dblBillQty) END,
 			[dblQtyReceived]			=	ABS(B.dblOpenReceive - B.dblBillQty),--CASE WHEN A.strReceiptType = 'Inventory Return' THEN ABS(B.dblOpenReceive) ELSE ABS(B.dblOpenReceive - B.dblBillQty) END,
 			[dblTax]					=	ISNULL(B.dblTax,0),
+			[dblDiscount]				=	CASE WHEN A.strReceiptType = 'Purchase Order' THEN POContractItems.dblDiscount ELSE 0 END,
 			[dblForexRate]				=	ISNULL(B.dblForexRate,1),
 			[intForexRateTypeId]		=	B.intForexRateTypeId,
 			[ysnSubCurrency]			=	CASE WHEN B.ysnSubCurrency > 0 THEN 1 ELSE 0 END,
@@ -567,7 +569,12 @@ BEGIN
 			[dblCost]					=	CASE WHEN (B.dblUnitCost IS NULL OR B.dblUnitCost = 0)
 													THEN (CASE WHEN E1.dblCashPrice IS NOT NULL THEN E1.dblCashPrice ELSE B.dblUnitCost END)
 													ELSE B.dblUnitCost
-											END,
+											END
+											+ CASE WHEN A.strReceiptType = 'Purchase Order' 
+												THEN (
+													POContractItems.dblCost * (POContractItems.dblDiscount / 100)
+												)
+												ELSE 0 END,
 			[dblOldCost]				=	NULL,
 			[dblClaimAmount]			=	ISNULL(CASE WHEN ISNULL(B.dblGross - B.dblNet,0) > 0 THEN  
 											(
@@ -645,13 +652,16 @@ BEGIN
 							THEN 1
 							ELSE 0 END)
 		) Loads
-		OUTER APPLY (
+		LEFT JOIN (
 			SELECT
 				PODetails.intContractDetailId
 				,PODetails.intContractHeaderId
+				,PODetails.dblDiscount
+				,PODetails.dblCost
+				,PODetails.intPurchaseDetailId
 			FROM tblPOPurchaseDetail PODetails
-			WHERE intPurchaseDetailId = B.intLineNo
-		) POContractItems
+			-- WHERE intPurchaseDetailId = B.intLineNo
+		) POContractItems ON POContractItems.intPurchaseDetailId = (CASE WHEN A.strReceiptType = 'Purchase Order' THEN B.intLineNo ELSE NULL END)
 		OUTER APPLY (
 			SELECT
 				TOP 1 ReturnReceipt.strReceiptType

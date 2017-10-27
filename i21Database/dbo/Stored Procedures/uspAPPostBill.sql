@@ -364,9 +364,12 @@ WHERE	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 		-- Compare the ForexRate use in Voucher against IR Rate
 		-- If there is a difference, add it to @adjustedEntries table variable. 
 		AND (
-			dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, receiptCostUOM.intItemUOMId, B.dblCost) <> E2.dblUnitCost
+			dbo.fnCalculateCostBetweenUOM(
+				voucherCostUOM.intItemUOMId
+				,receiptCostUOM.intItemUOMId
+				,B.dblCost - (B.dblCost * (B.dblDiscount / 100))
+				) <> E2.dblUnitCost
 			OR E2.dblForexRate <> B.dblRate
-			OR B.dblDiscount <> 0
 		) 
 
 --CHARGES COST ADJUSTMENT

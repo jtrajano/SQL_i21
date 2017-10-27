@@ -19,3 +19,8 @@ BEGIN
 	SET IDENTITY_INSERT [dbo].[tblSMMultiCompany] OFF
 
 END
+
+
+GO
+UPDATE tblSMCompanySetup SET intMultiCompanyId = 1 where intMultiCompanyId  is null
+GO

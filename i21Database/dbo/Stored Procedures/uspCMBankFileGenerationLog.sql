@@ -161,7 +161,64 @@ BEGIN
 		WHERE B.intBankAccountId = @intBankAccountId 
 			AND B.intBankTransactionTypeId = 21
 			AND B.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionIds))
-		
+
+		--Insert to audit log
+		INSERT INTO tblSMAuditLog (
+			strActionType,
+			strDescription,
+			strJsonData,
+			strRecordNo,
+			strTransactionType,
+			intEntityId,
+			intConcurrencyId,
+			dtmDate
+		)	SELECT 
+			(CASE WHEN intBankTransactionTypeId = 16 THEN  
+					'Printed'
+					WHEN intBankTransactionTypeId = 22 THEN
+					'Generated'
+					END)
+			,''
+			,'{"action":"'+ 
+					(CASE WHEN intBankTransactionTypeId = 16 THEN  
+					'Printed'
+					WHEN intBankTransactionTypeId = 22 THEN
+					'Generated'
+					END) 
+				+'","iconCls":"small-gear","children":[]}' 
+			,intPaymentId
+			,'AccountsPayable.view.PayVouchersDetail'
+			,@intEntityId
+			,1
+			,GETUTCDATE()
+		FROM tblAPPayment A
+		INNER JOIN tblCMBankTransaction B ON A.strPaymentRecordNum = B.strTransactionId
+		WHERE B.intBankAccountId = @intBankAccountId 
+			AND B.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionIds))
+
+		UNION ALL SELECT 
+			(CASE WHEN intBankTransactionTypeId = 21 THEN  
+					'Printed'
+					WHEN intBankTransactionTypeId = 23 THEN
+					'Generated'
+					END)
+			,''
+			,'{"action":"'+ 
+					(CASE WHEN intBankTransactionTypeId = 21 THEN  
+					'Printed'
+					WHEN intBankTransactionTypeId = 23 THEN
+					'Generated'
+					END) 
+				+'","iconCls":"small-gear","children":[]}' 
+			,intPaycheckId
+			,'Payroll.view.Paycheck'
+			,@intEntityId
+			,1
+			,GETUTCDATE()
+		FROM tblPRPaycheck A
+		INNER JOIN tblCMBankTransaction B ON A.strPaycheckId = B.strTransactionId
+		WHERE B.intBankAccountId = @intBankAccountId 
+			AND B.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionIds))
 
 	END
 END

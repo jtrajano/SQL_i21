@@ -32,7 +32,7 @@ FROM dbo.tblAPBill A
 			B.[intEntityVendorId]
 			,B.intPaymentId
 			,B.ysnPosted
-			,C.intBillId
+			,ISNULL(C.intBillId,C.intOrigBillId) AS intBillId
 			,SUM(dblPayment) dblPayment
 			,SUM(dblDiscount) dblDiscount
 			,SUM(dblInterest) dblInterest

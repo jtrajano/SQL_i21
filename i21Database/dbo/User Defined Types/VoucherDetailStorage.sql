@@ -1,6 +1,7 @@
 ﻿CREATE TYPE [dbo].[VoucherDetailStorage] AS TABLE
 (
-	[intCustomerStorageId]		INT NOT NULL,
+	[intCustomerStorageId]		INT NULL,
+	[intScaleTicketId]			INT NULL,
 	[intItemId]					INT	NOT NULL,
 	[intAccountId]				INT	NULL,
 	[dblQtyReceived]			DECIMAL(18, 6)	NOT NULL, 
