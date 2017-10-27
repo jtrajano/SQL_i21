@@ -1003,6 +1003,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 colStockInTransitInbound: 'dblInTransitInbound',
                 colStockOnHand: 'dblUnitOnHand',
                 colStockInTransitOutbound: 'dblInTransitOutbound',
+                colStockInTransitDirect: 'dblInTransitDirect',
                 colStockBackOrder: {
                     dataIndex: 'dblCalculatedBackOrder', // formerly, this is: colStockBackOrder: 'dblBackOrder',
                     hidden: true
@@ -1567,19 +1568,21 @@ Ext.define('Inventory.view.ItemViewController', {
         colStockOnHand.summaryRenderer = this.StockSummaryRenderer
         var colStockInTransitOutbound = grdStock.columns[5];
         colStockInTransitOutbound.summaryRenderer = this.StockSummaryRenderer
-        var colStockBackOrder = grdStock.columns[6];
+        var colStockInTransitDirect = grdStock.columns[6];
+        colStockInTransitDirect.summaryRenderer = this.StockSummaryRenderer        
+        var colStockBackOrder = grdStock.columns[7];
         colStockBackOrder.summaryRenderer = this.StockSummaryRenderer
-        var colStockCommitted = grdStock.columns[7];
+        var colStockCommitted = grdStock.columns[8];
         colStockCommitted.summaryRenderer = this.StockSummaryRenderer
-        var colStockOnStorage = grdStock.columns[8];
+        var colStockOnStorage = grdStock.columns[9];
         colStockOnStorage.summaryRenderer = this.StockSummaryRenderer
-        var colStockConsignedPurchase = grdStock.columns[9];
+        var colStockConsignedPurchase = grdStock.columns[10];
         colStockConsignedPurchase.summaryRenderer = this.StockSummaryRenderer
-        var colStockConsignedSale = grdStock.columns[10];
+        var colStockConsignedSale = grdStock.columns[11];
         colStockConsignedSale.summaryRenderer = this.StockSummaryRenderer
-        var colStockReserved = grdStock.columns[11];
+        var colStockReserved = grdStock.columns[12];
         colStockReserved.summaryRenderer = this.StockSummaryRenderer
-        var colStockAvailable = grdStock.columns[12];
+        var colStockAvailable = grdStock.columns[13];
         colStockAvailable.summaryRenderer = this.StockSummaryRenderer
 
         return win.context;

@@ -16099,6 +16099,31 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "align": "right",
+                                                "itemId": "colStockInTransitDirect",
+                                                "summaryType": "sum",
+                                                "text": "In Transit Direct",
+                                                "width": 130
+                                            },
+                                            "configAlternates": {
+                                                "align": "string",
+                                                "itemId": "string",
+                                                "summaryType": "string",
+                                                "text": "string",
+                                                "width": "auto",
+                                                "scrollable": "boolean"
+                                            },
+                                            "name": "MyNumberColumn17",
+                                            "designerId": "72fa4d39-6dcc-4f59-acc1-0e0cc8c01514"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Number",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "align": "right",
                                                 "itemId": "colStockBackOrder",
                                                 "summaryType": "sum",
                                                 "text": "Back Order",

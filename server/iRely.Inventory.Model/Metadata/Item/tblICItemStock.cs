@@ -18,6 +18,7 @@ namespace iRely.Inventory.Model
         public decimal? dblInTransitInbound { get; set; }
         public decimal? dblUnitOnHand { get; set; }
         public decimal? dblInTransitOutbound { get; set; }
+        public decimal? dblInTransitDirect { get; set; }
         public decimal? dblBackOrder { get; set; }
         public decimal? dblOrderCommitted { get; set; }
         public decimal? dblUnitStorage { get; set; }

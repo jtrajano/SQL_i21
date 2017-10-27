@@ -5303,6 +5303,14 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         summaryType: 'sum',
+                                                        itemId: 'colStockInTransitDirect',
+                                                        width: 130,
+                                                        align: 'right',
+                                                        text: 'In Transit Direct'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        summaryType: 'sum',
                                                         itemId: 'colStockBackOrder',
                                                         width: 100,
                                                         align: 'right',

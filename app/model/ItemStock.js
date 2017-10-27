@@ -45,6 +45,7 @@ Ext.define('Inventory.model.ItemStock', {
         { name: 'dblInTransitInbound', type: 'float' },
         { name: 'dblUnitOnHand', type: 'float' },
         { name: 'dblInTransitOutbound', type: 'float' },
+        { name: 'dblInTransitDirect', type: 'float' },
         { name: 'dblBackOrder', type: 'float' },
         { name: 'dblOrderCommitted', type: 'float' },
         { name: 'dblUnitStorage', type: 'float' },
