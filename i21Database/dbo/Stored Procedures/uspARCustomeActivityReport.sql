@@ -57,7 +57,7 @@ SELECT  @dtmDateFrom = CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE 
 FROM	@temp_xml_table 
 WHERE	[fieldname] = 'dtmAsOfDate'
 
-SELECT @strCustomerName = [from]
+SELECT @strCustomerName = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM @temp_xml_table
 WHERE [fieldname] IN ('strName', 'strCustomerName')
 

@@ -95,7 +95,7 @@ SELECT  @dtmDateFrom = CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE 
 FROM	@temp_xml_table 
 WHERE	[fieldname] = 'dtmAsOfDate'
 
-SELECT @strCustomerName = [from]
+SELECT @strCustomerName = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM @temp_xml_table
 WHERE [fieldname] = 'strCustomerName'
 
@@ -103,7 +103,7 @@ SELECT @strAccountStatusCode = [from]
 FROM @temp_xml_table
 WHERE [fieldname] = 'strAccountStatusCode'
 
-SELECT @strLocationName = [from]
+SELECT @strLocationName = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM @temp_xml_table
 WHERE [fieldname] = 'strLocationName'
 
