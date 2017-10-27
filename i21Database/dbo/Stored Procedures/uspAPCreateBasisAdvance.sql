@@ -13,6 +13,7 @@ BEGIN TRY
 
 DECLARE @billId INT;
 DECLARE @billRecordNumber NVARCHAR(50);
+DECLARE @voucherIds AS Id;
 
 CREATE TABLE #tmpVoucherCreated(intBillId INT, intTicketId INT, intContractDetailId INT)
 
@@ -289,6 +290,11 @@ WHEN NOT MATCHED THEN
         ,[int1099Category]                  
         ,[strBillOfLading]      
     );
+
+INSERT INTO @voucherIds
+SELECT intBillId FROM #tmpVoucherCreated
+
+EXEC uspAPUpdateVoucherTotal @voucherIds
 
 DELETE A
 FROM tblAPBasisAdvanceStaging A
