@@ -5,6 +5,7 @@
     [intTicketFormatSelection] INT NOT NULL, 
     [ysnSuppressCompanyName] BIT NULL, 
     [ysnFormFeedEachCopy] BIT NULL, 
+    [ysnSuppressDiscountReading] BIT NULL, 
     [strTicketHeader] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
     [strTicketFooter] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
@@ -57,6 +58,15 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSCTicketFormat',
     @level2type = N'COLUMN',
     @level2name = N'ysnFormFeedEachCopy'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Discount and Reading in all report',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicketFormat',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnSuppressDiscountReading'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Ticket Header',
