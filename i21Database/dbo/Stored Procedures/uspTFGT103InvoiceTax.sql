@@ -282,8 +282,10 @@ BEGIN TRY
 			, strBillOfLading
 			, dtmDate
 			, strDestinationCity
+			, strDestinationCounty
 			, strDestinationState
 			, strOriginCity
+			, strOriginCounty
 			, strOriginState
 			, strCustomerName
 			, strCustomerFEIN
@@ -341,8 +343,10 @@ BEGIN TRY
 			, tblTRLoadReceipt.strBillOfLading AS strBOLNumber
 			, tblICInventoryTransfer.dtmTransferDate AS dtmDate
 			, tblSMCompanyLocation.strCity AS strDestinationCity
+			, NULL AS strDestinationCounty
 			, tblSMCompanyLocation.strStateProvince AS strDestinationState
 			, tblEMEntityLocation.strCity AS strOriginCity
+			, CountyTaxCode.strCounty AS strOriginCounty
 			, tblEMEntityLocation.strState AS strOriginState
 			, tblSMCompanyLocation.strLocationName AS strCustomerName
 			, tblSMCompanySetup.strEin AS strCustomerFEIN
@@ -398,6 +402,7 @@ BEGIN TRY
 		INNER JOIN tblEMEntity AS EntityAPVendor ON tblAPVendor.intEntityId = EntityAPVendor.intEntityId
 		INNER JOIN tblTRSupplyPoint ON tblTRLoadReceipt.intSupplyPointId = tblTRSupplyPoint.intSupplyPointId
 		INNER JOIN tblEMEntityLocation ON tblTRSupplyPoint.intEntityLocationId = tblEMEntityLocation.intEntityLocationId
+		LEFT JOIN tblSMTaxCode AS CountyTaxCode ON CountyTaxCode.intTaxCodeId = tblEMEntityLocation.intCountyTaxCodeId
 		INNER JOIN tblSMCompanyLocation ON tblTRLoadDistributionHeader.intCompanyLocationId = tblSMCompanyLocation.intCompanyLocationId
 			ON tblTFProductCode.intProductCodeId = tblICItemMotorFuelTax.intProductCodeId
 		LEFT JOIN tblTFReportingComponentCriteria ON tblTFReportingComponent.intReportingComponentId = tblTFReportingComponentCriteria.intReportingComponentId
@@ -551,8 +556,10 @@ BEGIN TRY
 				, strBillOfLading
 				, dtmDate
 				, strDestinationCity
+				, strDestinationCounty
 				, strDestinationState
 				, strOriginCity
+				, strOriginCounty
 				, strOriginState
 				, strCustomerName
 				, strCustomerFederalTaxId
@@ -606,8 +613,10 @@ BEGIN TRY
 				, strBillOfLading
 				, dtmDate
 				, strDestinationCity
+				, strDestinationCounty
 				, strDestinationState
 				, strOriginCity
+				, strOriginCounty
 				, strOriginState
 				, strCustomerName
 				, strCustomerFEIN
