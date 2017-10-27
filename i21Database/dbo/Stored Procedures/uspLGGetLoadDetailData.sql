@@ -44,6 +44,7 @@ BEGIN
 		,CA.intCommodityAttributeId
 		,Item.intCommodityId
 		,strExternalShipmentNumber
+		,B.strBillId
 	FROM tblLGLoadDetail LoadDetail
 		 JOIN tblLGLoad							LOAD			ON		LOAD.intLoadId = LoadDetail.intLoadId AND LOAD.intLoadId = @intLoadId
 	LEFT JOIN tblSMCompanyLocation				PCL				ON		PCL.intCompanyLocationId = LoadDetail.intPCompanyLocationId
@@ -67,6 +68,8 @@ BEGIN
 	LEFT JOIN tblICItemUOM						WeightItemUOM	ON		WeightItemUOM.intItemUOMId = LoadDetail.intWeightItemUOMId
 	LEFT JOIN tblICUnitMeasure					WeightUOM		ON		WeightUOM.intUnitMeasureId = WeightItemUOM.intUnitMeasureId
 	LEFT JOIN tblICCommodityAttribute			CA				ON		CA.intCommodityAttributeId = Item.intOriginId
+	LEFT JOIN tblAPBillDetail					BD				ON		BD.intLoadDetailId = LoadDetail.intLoadDetailId AND BD.intItemId = LoadDetail.intItemId
+	LEFT JOIN tblAPBill							B				ON		B.intBillId = BD.intBillId
 	LEFT JOIN tblICItemContract					ICI				ON		ICI.intItemId = Item.intItemId AND PDetail.intItemContractId = ICI.intItemContractId
 	LEFT JOIN tblSMCountry						CO				ON		CO.intCountryID = (CASE 
 																							WHEN ISNULL(ICI.intCountryId, 0) = 0
