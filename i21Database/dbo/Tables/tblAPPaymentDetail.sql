@@ -30,7 +30,14 @@ CREATE NONCLUSTERED INDEX [IX_tblAPPaymentDetail_intPaymentId_intBillId] ON [dbo
 	[intPaymentId] ASC
 )
 WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+GO
 
+
+CREATE NONCLUSTERED INDEX [IX_tblAPPaymentDetail_intBillId] ON [dbo].[tblAPPaymentDetail] 
+(
+	[intBillId] ASC
+)
+WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
 GO
 
 CREATE TRIGGER trg_tblAPPaymentDetail
