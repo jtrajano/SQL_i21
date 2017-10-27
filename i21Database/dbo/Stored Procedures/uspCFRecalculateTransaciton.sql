@@ -717,21 +717,28 @@ BEGIN
 	SELECT TOP 1 @strSiteApplyExemption		= strAllowExemptionsOnExtAndRetailTrans FROM tblCFSite	  WHERE intSiteId	 = @intSiteId
 	SELECT TOP 1 @strNetworkApplyExemption	= strAllowExemptionsOnExtAndRetailTrans FROM tblCFNetwork WHERE intNetworkId = @intNetworkId
 
-	IF(LOWER(ISNULL(@strNetworkApplyExemption,'no')) = 'yes' AND LOWER(ISNULL(@strSiteApplyExemption,'no')) = 'yes')
+	IF(LOWER(@strTransactionType) = 'extended remote')
+	BEGIN
+		IF(LOWER(ISNULL(@strNetworkApplyExemption,'no')) = 'yes' AND LOWER(ISNULL(@strSiteApplyExemption,'no')) = 'yes')
+		BEGIN
+			SET @ysnApplyTaxExemption = 0
+		END
+		ELSE IF(LOWER(ISNULL(@strNetworkApplyExemption,'no')) = 'no' AND LOWER(ISNULL(@strSiteApplyExemption,'no')) = 'yes')
+		BEGIN
+			SET @ysnApplyTaxExemption = 0
+		END
+		ELSE IF(LOWER(ISNULL(@strNetworkApplyExemption,'no')) = 'no' AND LOWER(ISNULL(@strSiteApplyExemption,'no')) = 'no')
+		BEGIN
+			SET @ysnApplyTaxExemption = 1
+		END
+		ELSE IF(LOWER(ISNULL(@strNetworkApplyExemption,'no')) = 'yes' AND LOWER(ISNULL(@strSiteApplyExemption,'no')) = 'no')
+		BEGIN
+			SET @ysnApplyTaxExemption = 1
+		END
+	END
+	ELSE
 	BEGIN
 		SET @ysnApplyTaxExemption = 0
-	END
-	ELSE IF(LOWER(ISNULL(@strNetworkApplyExemption,'no')) = 'no' AND LOWER(ISNULL(@strSiteApplyExemption,'no')) = 'yes')
-	BEGIN
-		SET @ysnApplyTaxExemption = 0
-	END
-	ELSE IF(LOWER(ISNULL(@strNetworkApplyExemption,'no')) = 'no' AND LOWER(ISNULL(@strSiteApplyExemption,'no')) = 'no')
-	BEGIN
-		SET @ysnApplyTaxExemption = 1
-	END
-	ELSE IF(LOWER(ISNULL(@strNetworkApplyExemption,'no')) = 'yes' AND LOWER(ISNULL(@strSiteApplyExemption,'no')) = 'no')
-	BEGIN
-		SET @ysnApplyTaxExemption = 1
 	END
 
 	IF((@ysnPostedCSV IS NULL OR @ysnPostedCSV = 0 ) AND (@ysnPostedOrigin = 0 OR @ysnPostedCSV IS NULL))
@@ -938,6 +945,67 @@ BEGIN
 						SELECT @dblPrice = dbo.fnCFForceRounding(@dblPrice)
 					END
 
+
+					IF(ISNULL(@ysnApplyTaxExemption,0) = 1)
+					BEGIN
+						update @LineItemTaxDetailStagingTable set ysnTaxExempt = 0
+					END
+
+					INSERT INTO @tblCFCalculatedTax	
+					(
+					 [intTaxGroupId]				
+					,[intTaxCodeId]					
+					,[intTaxClassId]				
+					,[strTaxableByOtherTaxes]		
+					,[strCalculationMethod]			
+					,[dblRate]			
+					,[dblExemptionPercent]			
+					,[dblTax]						
+					,[dblAdjustedTax]				
+					,[intSalesTaxAccountId]    			
+					,[ysnCheckoffTax]
+					,[ysnTaxExempt]
+					,[ysnInvalidSetup]				
+					,[strNotes]							
+					)	
+					SELECT 
+					 [intTaxGroupId]			
+					,[intTaxCodeId]				
+					,[intTaxClassId]			
+					,[strTaxableByOtherTaxes]	
+					,[strCalculationMethod]		
+					,[dblRate]					
+					,[dblExemptionPercent]		
+					,[dblTax]					
+					,[dblAdjustedTax]			
+					,[intTaxAccountId]			
+					,[ysnCheckoffTax]				
+					,[ysnTaxExempt]					
+					,[ysnInvalidSetup]				
+					,[strNotes]						
+					FROM [fnConstructLineItemTaxDetail] 
+					(
+						 @dblQuantity
+						,(@dblPrice * @dblQuantity)
+						,@LineItemTaxDetailStagingTable
+						,1
+						,@intItemId
+						,@intCustomerId
+						,@intLocationId
+						,NULL
+						,0
+						,@dtmTransactionDate
+						,NULL
+						,1
+						,NULL
+						,NULL
+						,@intCardId		
+						,@intVehicleId
+						,@ysnApplyTaxExemption -- @DisregardExemptionSetup
+						,0
+					)
+
+					update @LineItemTaxDetailStagingTable set ysnTaxExempt = 0
 					INSERT INTO @tblCFOriginalTax	
 					(
 					 [intTaxGroupId]				
@@ -992,8 +1060,19 @@ BEGIN
 						, 0													 
 					)
 
-					INSERT INTO @tblCFCalculatedTax	
-					(
+				END
+
+				ELSE
+				--Normal calc--
+				BEGIN
+
+
+				IF(ISNULL(@ysnApplyTaxExemption,0) = 1)
+					BEGIN
+						update @LineItemTaxDetailStagingTable set ysnTaxExempt = 0
+					END
+				INSERT INTO @tblCFCalculatedTax	
+			(
 					 [intTaxGroupId]				
 					,[intTaxCodeId]					
 					,[intTaxClassId]				
@@ -1008,8 +1087,8 @@ BEGIN
 					,[ysnTaxExempt]
 					,[ysnInvalidSetup]				
 					,[strNotes]							
-					)	
-					SELECT 
+				)	
+				SELECT 
 					 [intTaxGroupId]			
 					,[intTaxCodeId]				
 					,[intTaxClassId]			
@@ -1024,33 +1103,30 @@ BEGIN
 					,[ysnTaxExempt]					
 					,[ysnInvalidSetup]				
 					,[strNotes]						
-					FROM [fnConstructLineItemTaxDetail] 
-					(
-						 @dblQuantity
-						,(@dblPrice * @dblQuantity)
-						,@LineItemTaxDetailStagingTable
-						,1
-						,@intItemId
-						,@intCustomerId
-						,@intLocationId
-						,NULL
-						,0
-						,@dtmTransactionDate
-						,NULL
-						,1
-						,NULL
-						,NULL
-						,@intCardId		
-						,@intVehicleId
-						,0 -- @DisregardExemptionSetup
-						,0
-					)
-				END
+				FROM [fnConstructLineItemTaxDetail] 
+				(
+					 @dblQuantity
+					,0
+					,@LineItemTaxDetailStagingTable
+					,0
+					,@intItemId
+					,@intCustomerId
+					,@intLocationId
+					,NULL
+					,@dblPrice
+					,@dtmTransactionDate
+					,NULL
+					,1
+					,NULL
+					,NULL
+					,@intCardId		
+					,@intVehicleId
+					,@ysnApplyTaxExemption --@DisregardExemptionSetup
+					,0
+				)
 
-				ELSE
-				--Normal calc--
-				BEGIN
-
+				
+				update @LineItemTaxDetailStagingTable set ysnTaxExempt = 0
 				INSERT INTO @tblCFOriginalTax	
 				(
 					 [intTaxGroupId]				
@@ -1102,60 +1178,6 @@ BEGIN
 					,@intCardId		
 					,@intVehicleId
 					,1 --@DisregardExemptionSetup
-					,0
-				)
-
-				INSERT INTO @tblCFCalculatedTax	
-			(
-					 [intTaxGroupId]				
-					,[intTaxCodeId]					
-					,[intTaxClassId]				
-					,[strTaxableByOtherTaxes]		
-					,[strCalculationMethod]			
-					,[dblRate]			
-					,[dblExemptionPercent]			
-					,[dblTax]						
-					,[dblAdjustedTax]				
-					,[intSalesTaxAccountId]    			
-					,[ysnCheckoffTax]
-					,[ysnTaxExempt]
-					,[ysnInvalidSetup]				
-					,[strNotes]							
-				)	
-				SELECT 
-					 [intTaxGroupId]			
-					,[intTaxCodeId]				
-					,[intTaxClassId]			
-					,[strTaxableByOtherTaxes]	
-					,[strCalculationMethod]		
-					,[dblRate]					
-					,[dblExemptionPercent]		
-					,[dblTax]					
-					,[dblAdjustedTax]			
-					,[intTaxAccountId]			
-					,[ysnCheckoffTax]				
-					,[ysnTaxExempt]					
-					,[ysnInvalidSetup]				
-					,[strNotes]						
-				FROM [fnConstructLineItemTaxDetail] 
-				(
-					 @dblQuantity
-					,0
-					,@LineItemTaxDetailStagingTable
-					,0
-					,@intItemId
-					,@intCustomerId
-					,@intLocationId
-					,NULL
-					,@dblPrice
-					,@dtmTransactionDate
-					,NULL
-					,1
-					,NULL
-					,NULL
-					,@intCardId		
-					,@intVehicleId
-					,0 --@DisregardExemptionSetup
 					,0
 				)
 
