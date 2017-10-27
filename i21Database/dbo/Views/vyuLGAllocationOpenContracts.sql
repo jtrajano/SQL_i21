@@ -41,7 +41,8 @@ AS
 			CD.dblCashPrice,
 			CD.dblAdjustment,
 			CD.dblScheduleQty,
-			CD.dblBalance
+			CD.dblBalance,
+			CD.strItemSpecification
 
 	FROM tblCTContractDetail CD
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
