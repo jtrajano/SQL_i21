@@ -18,6 +18,7 @@
 	[intSort] INT NOT NULL,
     [strComments] NVARCHAR(300) COLLATE Latin1_General_CI_AS NULL,
 	[intBillId] [int] NULL,
+	[intWarehouseRateMatrixDetailId] [int] NULL,
 		
     CONSTRAINT [PK_tblLGLoadWarehouseServices] PRIMARY KEY ([intLoadWarehouseServicesId]),
     CONSTRAINT [FK_tblLGLoadWarehouseServices_tblLGLoadWarehouse_intLoadWarehouseId] FOREIGN KEY ([intLoadWarehouseId]) REFERENCES [tblLGLoadWarehouse]([intLoadWarehouseId]) ON DELETE CASCADE, 

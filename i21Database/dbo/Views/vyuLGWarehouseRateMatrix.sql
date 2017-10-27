@@ -13,11 +13,14 @@ SELECT
 		,WMD.intItemId
 		,WMD.intCalculateQty
 		,strCalculateQty = CASE WMD.intCalculateQty 
-							WHEN 1 THEN 'By Shipped Wt'
-							WHEN 2 THEN 'By Received Wt'
-							WHEN 3 THEN 'By Delivered Wt'
-							WHEN 4 THEN 'By Quantity'
-							WHEN 5 THEN 'Manual Entry' 
+							WHEN 1 THEN 'By Shipped Net Wt'
+							WHEN 2 THEN 'By Shipped Gross Wt'
+							WHEN 3 THEN 'By Received Net Wt'
+							WHEN 4 THEN 'By Received Gross Wt'
+							WHEN 5 THEN 'By Delivered Net Wt'
+							WHEN 6 THEN 'By Delivered Gross Wt'
+							WHEN 7 THEN 'By Quantity'
+							WHEN 8 THEN 'Manual Entry' 
 						   END
 		,Item.strItemNo
 		,WMH.intWarehouseRateMatrixHeaderId
