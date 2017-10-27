@@ -123,10 +123,10 @@ BEGIN TRY
 			, tblSMShipVia.strShipVia
 			, tblSMShipVia.strTransporterLicense
 			, tblSMShipVia.strTransportationMode
-			, tblEMEntity.strName AS strVendorName
-			, tblEMEntity_Transporter.strName AS strTransporterName
-			, tblEMEntity.strFederalTaxId AS strVendorFEIN
-			, tblEMEntity_Transporter.strFederalTaxId AS strTransporterFEIN
+			, Vendor.strName AS strVendorName
+			, Transporter.strName AS strTransporterName
+			, Vendor.strFederalTaxId AS strVendorFEIN
+			, Transporter.strFederalTaxId AS strTransporterFEIN
 			, tblSMCompanySetup.strCompanyName
 			, tblSMCompanySetup.strAddress
 			, tblSMCompanySetup.strCity
@@ -137,7 +137,7 @@ BEGIN TRY
 			, tblSMCompanySetup.strFederalTaxID
 			, tblEMEntityLocation.strState AS strOriginState
 			, tblEMEntityLocation.strCity AS strOriginCity
-			, tblSMTaxCode.strCounty AS strOriginCounty
+			, CountyTaxCode.strCounty AS strOriginCounty
 			, tblSMCompanyLocation.strStateProvince AS strDestinationState
 			, tblSMCompanyLocation.strCity AS strDestinationCity
 			, NULL AS strDestinationCounty
@@ -155,30 +155,23 @@ BEGIN TRY
 			, strDiversionOriginalDestinationState = tblTRState.strStateAbbreviation
 			, strTransactionType = 'Receipt'
 			, intTransactionNumberId = tblICInventoryReceiptItem.intInventoryReceiptItemId
-		FROM tblTFProductCode
-		INNER JOIN tblEMEntityLocation
-		INNER JOIN tblEMEntity
-		INNER JOIN tblSMTaxCode
-		INNER JOIN tblICItemMotorFuelTax
-		INNER JOIN tblTFReportingComponentProductCode ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
-		INNER JOIN tblICInventoryReceiptItem
-		INNER JOIN tblICInventoryReceipt ON tblICInventoryReceiptItem.intInventoryReceiptId = tblICInventoryReceipt.intInventoryReceiptId
-		INNER JOIN tblICInventoryReceiptItemTax ON tblICInventoryReceiptItem.intInventoryReceiptItemId = tblICInventoryReceiptItemTax.intInventoryReceiptItemId
-		INNER JOIN tblSMCompanyLocation ON tblICInventoryReceipt.intLocationId = tblSMCompanyLocation.intCompanyLocationId
-			ON tblICItemMotorFuelTax.intItemId = tblICInventoryReceiptItem.intItemId
-			ON tblSMTaxCode.intTaxCodeId = tblICInventoryReceiptItemTax.intTaxCodeId
-			ON tblEMEntity.intEntityId = tblICInventoryReceipt.intEntityVendorId
-			ON tblEMEntityLocation.intEntityLocationId = tblICInventoryReceipt.intShipFromId
-		INNER JOIN tblTFReportingComponent ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
-			ON tblTFProductCode.intProductCodeId = tblICItemMotorFuelTax.intProductCodeId
-		LEFT OUTER JOIN tblTRSupplyPoint
-		INNER JOIN tblTFTerminalControlNumber ON tblTRSupplyPoint.intTerminalControlNumberId = tblTFTerminalControlNumber.intTerminalControlNumberId
-			ON tblICInventoryReceipt.intShipFromId = tblTRSupplyPoint.intEntityLocationId
-		FULL OUTER JOIN tblSMShipVia
-		FULL OUTER JOIN tblEMEntity AS tblEMEntity_Transporter ON tblSMShipVia.intEntityId = tblEMEntity_Transporter.intEntityId
-			ON tblICInventoryReceipt.intShipViaId = tblSMShipVia.intEntityId
-		LEFT JOIN tblTRLoadReceipt ON tblTRLoadReceipt.intInventoryReceiptId = tblICInventoryReceipt.intInventoryReceiptId
-		LEFT JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadReceipt.intLoadHeaderId
+		FROM tblTFReportingComponent 
+		INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
+		INNER JOIN tblICItemMotorFuelTax ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
+			INNER JOIN tblTFProductCode ON tblTFProductCode.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
+		INNER JOIN tblICInventoryReceiptItem  ON tblICInventoryReceiptItem.intItemId =  tblICItemMotorFuelTax.intItemId
+			INNER JOIN tblICInventoryReceiptItemTax ON tblICInventoryReceiptItemTax.intInventoryReceiptItemId = tblICInventoryReceiptItem.intInventoryReceiptItemId
+		INNER JOIN tblICInventoryReceipt ON tblICInventoryReceipt.intInventoryReceiptId = tblICInventoryReceiptItem.intInventoryReceiptId 
+			INNER JOIN tblEMEntity AS Vendor ON Vendor.intEntityId = tblICInventoryReceipt.intEntityVendorId
+			INNER JOIN tblEMEntityLocation ON tblEMEntityLocation.intEntityLocationId = tblICInventoryReceipt.intShipFromId
+			LEFT JOIN tblSMTaxCode AS CountyTaxCode ON CountyTaxCode.intTaxCodeId = tblEMEntityLocation.intCountyTaxCodeId
+			INNER JOIN tblSMShipVia ON tblSMShipVia.intEntityId = tblICInventoryReceipt.intShipViaId
+				INNER JOIN tblEMEntity AS Transporter ON Transporter.intEntityId = tblSMShipVia.intEntityId 
+			INNER JOIN tblTRSupplyPoint ON tblTRSupplyPoint.intEntityLocationId = tblICInventoryReceipt.intShipFromId 
+				INNER JOIN tblTFTerminalControlNumber ON tblTFTerminalControlNumber.intTerminalControlNumberId = tblTRSupplyPoint.intTerminalControlNumberId
+			INNER JOIN tblSMCompanyLocation ON tblICInventoryReceipt.intLocationId = tblSMCompanyLocation.intCompanyLocationId
+		INNER JOIN tblTRLoadReceipt ON  tblTRLoadReceipt.intInventoryReceiptId  = tblICInventoryReceipt.intInventoryReceiptId
+		INNER JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadReceipt.intLoadHeaderId
 		LEFT JOIN tblTRState ON tblTRState.intStateId = tblTRLoadHeader.intStateId
 		CROSS JOIN tblSMCompanySetup
 		WHERE tblTFReportingComponent.intReportingComponentId = @RCId
@@ -193,9 +186,9 @@ BEGIN TRY
 			AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude') = 0
 				OR tblEMEntityLocation.strState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude'))
 			AND ((SELECT COUNT(*) FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0
-				OR tblEMEntity.intEntityId IN (SELECT intVendorId FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId AND ysnInclude = 1))
+				OR Vendor.intEntityId IN (SELECT intVendorId FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId AND ysnInclude = 1))
 			AND ((SELECT COUNT(*) FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0
-				OR tblEMEntity.intEntityId NOT IN (SELECT intVendorId FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId AND ysnInclude = 0))
+				OR Vendor.intEntityId NOT IN (SELECT intVendorId FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId AND ysnInclude = 0))
 			AND tblICInventoryReceipt.ysnPosted = 1
 		)tblTransactions
 		
