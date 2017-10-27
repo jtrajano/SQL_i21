@@ -14,7 +14,7 @@ BEGIN
 
 	SELECT	CONVERT(int,ROW_NUMBER() OVER (ORDER BY strContractType)) intRowNum,
 			*,
-			ISNULL(dblAllocatedQty,dblBooked) * dblPrice	AS	dblTransactionValue,
+			CASE WHEN strDescription = 'Invoice' THEN dblAccounting ELSE ISNULL(dblAllocatedQty,dblBooked) * dblPrice	END AS	dblTransactionValue,
 			ISNULL(dblAllocatedQty,dblBooked) * dblPrice * dblFX	AS	dblForecast
 	FROM
 	(
@@ -43,7 +43,7 @@ BEGIN
 				NUll AS dblBooked,
 				NULL AS dblAccounting,
 				AD.dtmAllocatedDate AS dtmDate,
-				3 AS intSort
+				999999 AS intSort
 
 		FROM	tblLGAllocationDetail	AD 
 		JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId	=	AD.intPContractDetailId 
@@ -68,7 +68,7 @@ BEGIN
 
 		UNION ALL
 
-		SELECT	NULL AS strContractType,
+		SELECT	DISTINCT NULL AS strContractType,
 				IV.strInvoiceNumber,
 				'Invoice' AS strDescription,
 				NULL AS strConfirmed,
@@ -80,7 +80,7 @@ BEGIN
 				dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId,QU.intUnitMeasureId,@intUnitMeasureId, ID.dblQtyShipped) AS dblBooked,
 				ID.dblTotal AS dblAccounting,
 				IV.dtmDate AS dtmDate,
-				2 AS intSort
+				AD.intPContractDetailId AS intSort
 
 		FROM	tblARInvoiceDetail		ID 
 		JOIN	tblARInvoice			IV	ON	IV.intInvoiceId			=	ID.intInvoiceId
@@ -90,6 +90,7 @@ BEGIN
 		JOIN	tblICItemUOM			QU	ON	QU.intItemUOMId			=	ID.intItemUOMId	
 		JOIN	tblICItemUOM			PU	ON	PU.intItemUOMId			=	CD.intPriceItemUOMId	
 		JOIN	tblSMCurrency			CY	ON	CY.intCurrencyID		=	IV.intCurrencyId
+		JOIN	tblLGAllocationDetail	AD	ON	AD.intSContractDetailId	=	ID.intContractDetailId
 		WHERE	ID.intContractDetailId	=	@intSContractDetailId
 
 		UNION ALL
@@ -117,7 +118,7 @@ BEGIN
 				NUll AS dblBooked,
 				NULL AS dblAccounting,
 				AD.dtmAllocatedDate AS dtmDate,
-				1 AS intSort
+				AD.intPContractDetailId  AS intSort
 
 		FROM	tblLGAllocationDetail	AD 
 		JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId	=	@intSContractDetailId
@@ -159,7 +160,7 @@ BEGIN
 					BL.dblBooked,
 					BL.dblAccounting,
 					CH.dtmContractDate,
-					CC.intItemId  AS intSort
+					CC.intItemId * 999999 AS intSort
 
 			FROM	tblLGAllocationDetail	AD 
 			JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId	IN	(AD.intPContractDetailId, AD.intSContractDetailId)
@@ -188,5 +189,5 @@ BEGIN
 		)d
 		GROUP BY strItemNo, strContractNumber, strDescription, strConfirmed, dblPrice, strCurrency, dblFX, dblBooked, dblAccounting, dtmContractDate, intSort
 	)t
-
+	ORDER by intSort,strDescription
 END
