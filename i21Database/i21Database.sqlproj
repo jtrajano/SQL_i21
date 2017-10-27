@@ -5788,7 +5788,8 @@
     <Build Include="dbo\Views\vyuLGLoadWarehouseServices.sql" />
     <Build Include="dbo\Views\vyuCTGetContractForScaleTicket.sql" />
     <Build Include="dbo\Stored Procedures\uspARReturnInvoice.sql" />
-    <Build Include="dbo\Stored Procedures\uspARUpdateReturnedInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateReturnedInvoice.sql" />   
+    <Build Include="dbo\Functions\fnGRGetDiscountCodeReadings.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
