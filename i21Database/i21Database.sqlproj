@@ -5790,6 +5790,9 @@
     <Build Include="dbo\Stored Procedures\uspARReturnInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateReturnedInvoice.sql" />   
     <Build Include="dbo\Functions\fnGRGetDiscountCodeReadings.sql" />
+    <Build Include="dbo\Views\vyuGRGetSaleEntity.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRPostSellOffsite.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRUnPostSellOffsite.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
