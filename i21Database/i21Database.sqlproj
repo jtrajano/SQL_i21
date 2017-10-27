@@ -5810,6 +5810,7 @@
     <Build Include="dbo\Functions\fnAPGetVoucherCommodity.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherApprovalStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspSMIncreaseECConcurrency.sql" />
+    <Build Include="dbo\Tables\tblSMCacheVersion.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
