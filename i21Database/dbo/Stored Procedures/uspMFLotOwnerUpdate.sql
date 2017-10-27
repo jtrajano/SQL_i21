@@ -4,6 +4,8 @@
 	,@strParentLotNumber NVARCHAR(50)
 	,@strVendorRefNo NVARCHAR(50)
 	,@strWarehouseRefNo NVARCHAR(50)
+	,@strContainerNo NVARCHAR(50)
+	,@strNotes NVARCHAR(MAX)
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -27,6 +29,8 @@ BEGIN TRY
 		,@strOldWarehouseRefNo NVARCHAR(50)
 		,@intOldLotItemOwnerId INT
 		,@strReceiptNumber NVARCHAR(50)
+		,@strOldContainerNo NVARCHAR(50)
+		,@strOldNotes NVARCHAR(MAX)
 
 	SELECT @strLotNumber = strLotNumber
 		,@intItemId = intItemId
@@ -261,6 +265,26 @@ BEGIN TRY
 			SET strWarehouseRefNo = @strWarehouseRefNo
 			WHERE strReceiptNumber = @strReceiptNumber
 		END
+	END
+
+	-- Container No & Notes(Remarks) update
+	SELECT @strOldNotes = strNotes
+		,@strOldContainerNo = strContainerNo
+	FROM tblICLot
+	WHERE intLotId = @intLotId
+
+	IF ISNULL(@strOldNotes, '') <> ISNULL(@strNotes, '')
+	BEGIN
+		UPDATE tblICLot
+		SET strNotes = @strNotes
+		WHERE intLotId = @intLotId
+	END
+
+	IF ISNULL(@strOldContainerNo, '') <> ISNULL(@strContainerNo, '')
+	BEGIN
+		UPDATE tblICLot
+		SET strContainerNo = @strContainerNo
+		WHERE intLotId = @intLotId
 	END
 END TRY
 
