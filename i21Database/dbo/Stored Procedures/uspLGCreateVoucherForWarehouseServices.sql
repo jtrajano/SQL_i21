@@ -285,8 +285,10 @@ BEGIN TRY
 				UPDATE tblLGLoadWarehouseServices
 				SET intBillId = @intBillId
 				WHERE intLoadWarehouseServicesId IN (
-						SELECT intLoadWarehouseServicesId
-						FROM @VoucherDetailLoadNonInvAll)
+						SELECT intWarehouseServicesId
+						FROM @voucherDetailData
+						WHERE intVendorEntityId = @intVendorEntityId
+					)
 				
 				DELETE
 				FROM @VoucherDetailLoadNonInvAll
@@ -306,8 +308,10 @@ BEGIN TRY
 			UPDATE tblLGLoadWarehouseServices
 			SET intBillId = @intBillId
 			WHERE intLoadWarehouseServicesId IN (
-					SELECT intLoadWarehouseServicesId
-					FROM @VoucherDetailLoadNonInvAll)
+					SELECT intWarehouseServicesId
+					FROM @voucherDetailData
+					WHERE intVendorEntityId = @intVendorEntityId
+				)
 
 			DELETE
 			FROM @VoucherDetailLoadNonInvAll
