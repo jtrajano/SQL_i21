@@ -230,11 +230,11 @@ BEGIN TRY
 				INNER JOIN tblTFReportingComponent ON RCProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 				INNER JOIN tblTFReportingComponentCriteria ON tblTFReportingComponentCriteria.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 				INNER JOIN tblTFTaxCategory ON tblTFReportingComponentCriteria.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId
-				INNER JOIN tblSMTaxCode ON tblARInvoiceDetailTax.intTaxCodeId = tblSMTaxCode.intTaxCodeId AND tblTFTaxCategory.intTaxCategoryId = tblSMTaxCode.intTaxCategoryId
 				INNER JOIN tblSMCompanyLocation ON tblARInvoice.intCompanyLocationId = tblSMCompanyLocation.intCompanyLocationId
 				INNER JOIN tblARCustomer ON tblARInvoice.intEntityCustomerId = tblARCustomer.intEntityId
 				INNER JOIN tblEMEntity ON tblARCustomer.intEntityId = tblEMEntity.intEntityId 
 				LEFT JOIN tblEMEntityLocation ON tblEMEntityLocation.intEntityId = tblARInvoice.intShipToLocationId
+				LEFT JOIN tblSMTaxCode ON tblSMTaxCode.intTaxCodeId = tblEMEntityLocation.intCountyTaxCodeId
 				LEFT JOIN tblARAccountStatus ON tblARAccountStatus.intAccountStatusId = tblARCustomer.intAccountStatusId
 				LEFT JOIN tblTFTaxAuthorityCustomerLicense ON tblTFTaxAuthorityCustomerLicense.intEntityId = tblARInvoice.intEntityCustomerId
 				CROSS JOIN tblSMCompanySetup
@@ -392,12 +392,12 @@ BEGIN TRY
 				INNER JOIN vyuTFGetReportingComponentProductCode RCProductCode ON tblICItemMotorFuelTax.intProductCodeId = RCProductCode.intProductCodeId
 				INNER JOIN tblTFReportingComponent ON RCProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 				INNER JOIN tblARInvoiceDetailTax ON tblARInvoiceDetail.intInvoiceDetailId = tblARInvoiceDetailTax.intInvoiceDetailId
-				INNER JOIN tblSMTaxCode ON tblSMTaxCode.intTaxCodeId = tblARInvoiceDetailTax.intTaxCodeId	
-				INNER JOIN tblTFTaxCategory ON tblSMTaxCode.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId
+				--INNER JOIN tblTFTaxCategory ON tblSMTaxCode.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId
 				INNER JOIN tblSMCompanyLocation ON tblARInvoice.intCompanyLocationId = tblSMCompanyLocation.intCompanyLocationId
 				INNER JOIN tblARCustomer ON tblARInvoice.intEntityCustomerId = tblARCustomer.intEntityId
 				INNER JOIN tblEMEntity ON tblARCustomer.intEntityId = tblEMEntity.intEntityId
 				LEFT JOIN tblEMEntityLocation ON tblEMEntityLocation.intEntityLocationId = tblARInvoice.intShipToLocationId
+				LEFT JOIN tblSMTaxCode ON tblSMTaxCode.intTaxCodeId = tblEMEntityLocation.intCountyTaxCodeId
 				LEFT JOIN tblTFTaxAuthorityCustomerLicense ON tblTFTaxAuthorityCustomerLicense.intEntityId = tblARInvoice.intEntityCustomerId
 				LEFT JOIN tblARAccountStatus ON tblARAccountStatus.intAccountStatusId = tblARCustomer.intAccountStatusId
 				--LEFT JOIN tblTFTaxAuthorityCustomerLicense ON tblTFTaxAuthorityCustomerLicense.intEntityId = tblARInvoice.intEntityCustomerId
@@ -612,9 +612,9 @@ BEGIN TRY
 				INNER JOIN tblEMEntity AS EntityAPVendor ON tblAPVendor.intEntityId = EntityAPVendor.intEntityId 
 				INNER JOIN tblTRSupplyPoint ON tblTRLoadReceipt.intSupplyPointId = tblTRSupplyPoint.intSupplyPointId 
 				INNER JOIN tblEMEntityLocation ON tblTRSupplyPoint.intEntityLocationId = tblEMEntityLocation.intEntityLocationId 
+				LEFT JOIN tblSMTaxCode ON tblSMTaxCode.intTaxCodeId = tblEMEntityLocation.intCountyTaxCodeId
 				LEFT JOIN tblTFTaxCategory 
 				LEFT JOIN tblTFReportingComponentCriteria ON tblTFTaxCategory.intTaxCategoryId = tblTFReportingComponentCriteria.intTaxCategoryId 
-				LEFT JOIN tblSMTaxCode ON tblTFTaxCategory.intTaxCategoryId = tblSMTaxCode.intTaxCategoryId 
 					ON tblTFReportingComponent.intReportingComponentId = tblTFReportingComponentCriteria.intReportingComponentId
 				INNER JOIN tblICItem ON tblICItem.intItemId = tblICInventoryTransferDetail.intItemId
 				INNER JOIN tblICCategoryTax ON tblICCategoryTax.intCategoryId = tblICItem.intCategoryId AND tblICCategoryTax.intTaxClassId = tblSMTaxCode.intTaxClassId 

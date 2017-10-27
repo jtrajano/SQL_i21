@@ -181,11 +181,9 @@ BEGIN TRY
 			, strTransactionType = 'Invoice'
 			, intTransactionNumberId = tblARInvoiceDetail.intInvoiceDetailId
 		FROM tblTFProductCode
-		INNER JOIN tblSMTaxCode
 		INNER JOIN tblARInvoiceDetail
 		INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId
 		INNER JOIN tblARInvoiceDetailTax ON tblARInvoiceDetail.intInvoiceDetailId = tblARInvoiceDetailTax.intInvoiceDetailId
-			ON tblSMTaxCode.intTaxCodeId = tblARInvoiceDetailTax.intTaxCodeId
 		INNER JOIN tblICItemMotorFuelTax
 		INNER JOIN tblTFReportingComponentProductCode ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
 			ON tblARInvoiceDetail.intItemId = tblICItemMotorFuelTax.intItemId
@@ -193,6 +191,7 @@ BEGIN TRY
 		INNER JOIN tblARCustomer ON tblARInvoice.intEntityCustomerId = tblARCustomer.intEntityId
 		INNER JOIN tblEMEntity ON tblARCustomer.intEntityId = tblEMEntity.intEntityId
 		LEFT JOIN tblEMEntityLocation ON tblEMEntityLocation.intEntityId = tblARInvoice.intShipToLocationId
+		LEFT JOIN tblSMTaxCode ON tblSMTaxCode.intTaxCodeId = tblEMEntityLocation.intCountyTaxCodeId
 		INNER JOIN tblTFReportingComponent ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 			ON tblTFProductCode.intProductCodeId = tblICItemMotorFuelTax.intProductCodeId
 		FULL OUTER JOIN tblEMEntity AS tblEMEntity_Transporter
