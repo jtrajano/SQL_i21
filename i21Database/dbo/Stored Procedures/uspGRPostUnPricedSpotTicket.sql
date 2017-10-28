@@ -85,7 +85,7 @@ BEGIN TRY
 				FROM @voucherDetailStorage
 
 				INSERT INTO @voucherDetailStorage (
-					[intCustomerStorageId]
+					 [intScaleTicketId]
 					,[intItemId]
 					,[intAccountId]
 					,[dblQtyReceived]
@@ -101,7 +101,7 @@ BEGIN TRY
 					)
 				--Inventory Item
 				SELECT 
-					 [intCustomerStorageId] = SpotTicket.intTicketId
+					 [intScaleTicketId] = SpotTicket.intTicketId
 					,[intItemId] = @intItemId
 					,[intAccountId] = NULL
 					,[dblQtyReceived] = SpotTicket.dblUnits
@@ -124,7 +124,7 @@ BEGIN TRY
 				
 				--Discount Item
 				SELECT 
-					 [intCustomerStorageId] = SpotTicket.intTicketId
+					 [intScaleTicketId] = SpotTicket.intTicketId
 					,[intItemId] = DItem.intItemId
 					,[intAccountId] = NULL
 					,[dblQtyReceived] = SpotTicket.dblUnits
@@ -151,7 +151,7 @@ BEGIN TRY
 				UNION
 				
 				--Fee Item
-				SELECT [intCustomerStorageId] = SpotTicket.intTicketId
+				SELECT [intScaleTicketId] = SpotTicket.intTicketId
 					,[intItemId] = Item.intItemId
 					,[intAccountId] = NULL
 					,[dblQtyReceived] = SpotTicket.dblUnits
