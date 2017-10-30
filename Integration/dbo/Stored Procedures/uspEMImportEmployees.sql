@@ -522,6 +522,12 @@ BEGIN
 					if @i21_bank_id is not null
 					begin
 						SET @Bank_type = LTRIM(RTRIM(@Bank_type))
+
+						--======================Open symmetric code snipet=====================
+						OPEN SYMMETRIC KEY i21EncryptionSymKeyByASym
+						 DECRYPTION BY ASYMMETRIC KEY i21EncryptionASymKeyPwd 
+						 WITH PASSWORD = ''neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY=''
+
 						INSERT INTO tblEMEntityEFTInformation(
 							intEntityId, 
 							intBankId, 
@@ -543,7 +549,7 @@ BEGIN
 							@EntityId,
 							@i21_bank_id,
 							@i21_bank_name,
-							@Bank_account,
+							dbo.fnAESEncryptASym(@Bank_account),
 							CASE WHEN @Bank_type = ''C'' OR @Bank_type = '''' THEN ''Checking''
 								WHEN @Bank_type = ''S'' THEN ''Savings'' END,
 							''Personal'',
@@ -551,6 +557,9 @@ BEGIN
 							1,
 							1,
 							1, 0, 0, 0, 0 ,0, ''Remainder''
+
+						--======================Close symmetric code snnipet=====================
+						CLOSE SYMMETRIC KEY i21EncryptionSymKeyByASym
 					end
 				END
 				
