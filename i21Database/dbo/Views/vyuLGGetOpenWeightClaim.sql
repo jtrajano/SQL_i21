@@ -145,19 +145,29 @@ FROM (
 									END * dblFranchise / 100
 								) > 0.0
 							THEN (
-									CASE 
-										WHEN (
-												SELECT COUNT(*)
-												FROM tblLGLoadDetailContainerLink
-												WHERE intLoadDetailId = LD.intLoadDetailId
-												) > 0
-											THEN (
-													SELECT SUM(dblLinkNetWt)
+									(
+										CASE 
+											WHEN (
+													SELECT COUNT(*)
 													FROM tblLGLoadDetailContainerLink
 													WHERE intLoadDetailId = LD.intLoadDetailId
-													)
-										ELSE LD.dblNet
-										END * dblFranchise / 100
+													) > 0
+												THEN (
+														SELECT SUM(dblLinkNetWt)
+														FROM tblLGLoadDetailContainerLink
+														WHERE intLoadDetailId = LD.intLoadDetailId
+														)
+											ELSE LD.dblNet
+											END - ISNULL((
+												SELECT SUM(IRI.dblNet)
+												FROM tblICInventoryReceipt IR
+												JOIN tblICInventoryReceiptItem IRI ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
+												WHERE IRI.intSourceId = LD.intLoadDetailId
+													AND IRI.intLineNo = CD.intContractDetailId
+													AND IRI.intOrderId = CH.intContractHeaderId
+													AND IR.strReceiptType = 'Inventory Return'
+												), 0)
+										) * dblFranchise / 100
 									)
 						ELSE 0.0
 						END
