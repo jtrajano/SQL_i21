@@ -8,8 +8,8 @@ SELECT strShipmentNumber as strTicket,strContractNumber,
 		dblInvoiceQty,
 		(isnull(dblShipmentQty,0)-isnull(dblInvoiceQty,0)) dblBalanceToInvoice,intCommodityId,strContractItemName as  strItemName, intCommodityUnitMeasureId as intUnitMeasureId
 		,intEntityId,strName as strCustomerReference	
-from(
-		SELECT b.strShipmentNumber,d.strContractNumber +'-' +Convert(nvarchar,intContractSeq) strContractNumber,
+FROM(
+				SELECT b.strShipmentNumber,d1.strContractNumber +'-' +Convert(nvarchar,d.intContractSeq) strContractNumber,
 				c.dblQuantity dblShipmentQty,
 				il.intLocationId intCompanyLocationId,
 				cl.strLocationName strLocationName,
@@ -25,11 +25,11 @@ from(
 		FROM tblICInventoryShipment b
 		JOIN tblICInventoryShipmentItem c on c.intInventoryShipmentId=b.intInventoryShipmentId and b.ysnPosted=1 
 		join tblICItem i on c.intItemId=i.intItemId
-		JOIN tblICItemStock it1 ON it1.intItemId = i.intItemId
 		JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and ysnStockUnit=1 
 		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId 
-		JOIN tblICItemLocation il ON il.intItemLocationId = it1.intItemLocationId
-		JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId=il.intLocationId
+		JOIN tblICItemLocation il ON il.intItemId = i.intItemId and b.intShipFromLocationId=il.intLocationId  
+		JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId=il.intLocationId 
 		JOIN tblEMEntity e on b.intEntityCustomerId=e.intEntityId
-		LEFT JOIN vyuCTContractDetailView d on d.intContractDetailId=c.intLineNo		
-		)t
+		LEFT JOIN tblCTContractDetail d on d.intContractDetailId=c.intLineNo		
+		LEFT JOIN tblCTContractHeader d1 on d1.intContractHeaderId=d.intContractHeaderId
+	)t
