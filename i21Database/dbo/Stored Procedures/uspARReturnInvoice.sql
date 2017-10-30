@@ -200,7 +200,7 @@ BEGIN TRY
 		,[intContractHeaderId]					= ARI.[intContractHeaderId]
 		,[intLoadId]							= ARI.[intLoadId]
 		,[intOriginalInvoiceId]					= ARI.[intInvoiceId]
-		,[intEntityId]							= @ZeroDecimal
+		,[intEntityId]							= @UserId
 		,[intTruckDriverId]						= ARI.[intTruckDriverId]
 		,[intTruckDriverReferenceId]			= ARI.[intTruckDriverReferenceId]
 		,[ysnResetDetails]						= 0
