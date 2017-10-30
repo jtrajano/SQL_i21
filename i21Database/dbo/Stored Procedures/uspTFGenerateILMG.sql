@@ -109,8 +109,8 @@ BEGIN TRY
 				WHERE intTaxAuthorityId = @TaxAuthorityId
 					AND (strProductCode LIKE 'E%'
 					OR strProductCode IN ('124', '999')))
-			AND (PrimaryItem.intProductCodeId IN (SELECT intProductCodeId FROM @RawMaterialCode)
-			OR AgentItem.intProductCodeId IN (SELECT intProductCodeId FROM @RawMaterialCode))
+			AND PrimaryItem.intProductCodeId IN (SELECT intProductCodeId FROM @RawMaterialCode)
+			AND AgentItem.intProductCodeId IN (SELECT intProductCodeId FROM @RawMaterialCode)
 	END
 
 	SELECT * FROM @Output

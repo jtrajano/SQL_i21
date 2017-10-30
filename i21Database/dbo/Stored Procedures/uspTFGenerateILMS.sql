@@ -110,8 +110,8 @@ BEGIN TRY
 					AND (strProductCode LIKE 'B%'
 					OR strProductCode LIKE 'D%'
 					OR strProductCode IN ('999')))
-			AND (PrimaryItem.intProductCodeId IN (SELECT intProductCodeId FROM @RawMaterialCode)
-			OR AgentItem.intProductCodeId IN (SELECT intProductCodeId FROM @RawMaterialCode))
+			AND PrimaryItem.intProductCodeId IN (SELECT intProductCodeId FROM @RawMaterialCode)
+			AND AgentItem.intProductCodeId IN (SELECT intProductCodeId FROM @RawMaterialCode)
 
 	END
 
