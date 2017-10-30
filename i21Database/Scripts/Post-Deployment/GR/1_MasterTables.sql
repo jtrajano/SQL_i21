@@ -251,3 +251,8 @@ BEGIN
 	UPDATE tblSCTicketType set intNextTicketNumber = 1 WHERE intNextTicketNumber = 0
 END
 GO
+BEGIN
+	PRINT 'BEGIN checking item use in weigh scale'
+	UPDATE tblICItem set ysnLotWeightsRequired = 0 where ISNULL(ysnLotWeightsRequired,0) = 0 AND ysnUseWeighScales = 1
+END
+GO
