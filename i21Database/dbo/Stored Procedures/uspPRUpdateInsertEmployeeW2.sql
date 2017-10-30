@@ -63,7 +63,13 @@ BEGIN
 		,dblBox12d = 0
 		,strState = ISNULL(STATETAX.strState, '')
 		,strLocality = CASE WHEN (ISNULL(LOCALTAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN ISNULL(LOCALTAX.strLocal, '') ELSE '' END
-		,strStateTaxID = ISNULL((SELECT TOP 1 strStateTaxID FROM tblSMCompanySetup), '')
+		,strStateTaxID = CASE WHEN (ISNULL(LOCALTAX.strEmployerStateTaxID, '') <> '') THEN
+								ISNULL(LOCALTAX.strEmployerStateTaxID, '')
+							WHEN (ISNULL(STATETAX.strEmployerStateTaxID, '') <> '') THEN
+								ISNULL(STATETAX.strEmployerStateTaxID, '')
+							ELSE
+								ISNULL((SELECT TOP 1 strStateTaxID FROM tblSMCompanySetup), '')
+							END
 		,dblTaxableState = ISNULL(TXBLSTATE.dblTotal, 0)
 		,dblStateTax = ISNULL(STATETAX.dblTotal, 0)
 		,dblTaxableLocal = CASE WHEN (ISNULL(LOCALTAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN ISNULL(TXBLLOCAL.dblTotal, 0) ELSE 0 END
@@ -88,15 +94,18 @@ BEGIN
 			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Social Security' AND ysnVoid = 0) SSTAX OUTER APPLY
 		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckTax
 			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Medicare' AND ysnVoid = 0) MEDTAX OUTER APPLY
-		(SELECT strState = st.strCode, dblTotal = SUM(tax.dblTotal) 
-			FROM vyuPRPaycheckTax tax INNER JOIN tblPRTypeTaxState st ON tax.intTypeTaxStateId = st.intTypeTaxStateId
+		(SELECT strState = st.strCode, strEmployerStateTaxID, dblTotal = SUM(tax.dblTotal) 
+			FROM vyuPRPaycheckTax tax 
+			INNER JOIN tblPRTypeTaxState st ON tax.intTypeTaxStateId = st.intTypeTaxStateId
+			INNER JOIN tblPRTypeTax tt ON tax.intTypeTaxId = tt.intTypeTaxId
 			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId 
-			AND strPaidBy = 'Employee' AND strCalculationType = 'USA State' AND ysnVoid = 0 GROUP BY st.strCode) STATETAX OUTER APPLY
-		(SELECT strState = st.strCode, strLocal = lc.strLocalName, dblTotal = SUM(tax.dblTotal) 
+			AND tax.strPaidBy = 'Employee' AND tax.strCalculationType = 'USA State' AND ysnVoid = 0 GROUP BY st.strCode, strEmployerStateTaxID) STATETAX OUTER APPLY
+		(SELECT strState = st.strCode, strLocal = lc.strLocalName, strEmployerStateTaxID, dblTotal = SUM(tax.dblTotal) 
 			FROM vyuPRPaycheckTax tax INNER JOIN tblPRTypeTaxState st ON tax.intTypeTaxStateId = st.intTypeTaxStateId
+				INNER JOIN tblPRTypeTax tt ON tax.intTypeTaxId = tt.intTypeTaxId
 				LEFT JOIN tblPRTypeTaxLocal lc ON tax.intTypeTaxLocalId = lc.intTypeTaxLocalId
 			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId 
-			AND strPaidBy = 'Employee' AND strCalculationType = 'USA Local' AND ysnVoid = 0 GROUP BY st.strCode, lc.strLocalName) LOCALTAX OUTER APPLY
+			AND tax.strPaidBy = 'Employee' AND tax.strCalculationType = 'USA Local' AND ysnVoid = 0 GROUP BY st.strCode, strEmployerStateTaxID, lc.strLocalName) LOCALTAX OUTER APPLY
 		(SELECT intEmployees = COUNT(DISTINCT intEntityEmployeeId),
 				dblGrossSum = SUM(dblGross) 
 		FROM tblPRPaycheck 
@@ -118,7 +127,13 @@ BEGIN
 		,dblMedTax = ISNULL(MEDTAX.dblTotal, 0)
 		,strState = ISNULL(STATETAX.strState, '')
 		,strLocality = CASE WHEN (ISNULL(LOCALTAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN ISNULL(LOCALTAX.strLocal, '') ELSE '' END
-		,strStateTaxID = ISNULL((SELECT TOP 1 strStateTaxID FROM tblSMCompanySetup), '')
+		,strStateTaxID = CASE WHEN (ISNULL(LOCALTAX.strEmployerStateTaxID, '') <> '') THEN
+								ISNULL(LOCALTAX.strEmployerStateTaxID, '')
+							WHEN (ISNULL(STATETAX.strEmployerStateTaxID, '') <> '') THEN
+								ISNULL(STATETAX.strEmployerStateTaxID, '')
+							ELSE
+								ISNULL((SELECT TOP 1 strStateTaxID FROM tblSMCompanySetup), '')
+							END
 		,dblTaxableState = ISNULL(TXBLSTATE.dblTotal, 0)
 		,dblStateTax = ISNULL(STATETAX.dblTotal, 0)
 		,dblTaxableLocal = CASE WHEN (ISNULL(LOCALTAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN ISNULL(TXBLLOCAL.dblTotal, 0) ELSE 0 END
@@ -143,15 +158,18 @@ BEGIN
 			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Social Security' AND ysnVoid = 0) SSTAX OUTER APPLY
 		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckTax
 			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Medicare' AND ysnVoid = 0) MEDTAX OUTER APPLY
-		(SELECT strState = st.strCode, dblTotal = SUM(tax.dblTotal) 
-			FROM vyuPRPaycheckTax tax INNER JOIN tblPRTypeTaxState st ON tax.intTypeTaxStateId = st.intTypeTaxStateId
+		(SELECT strState = st.strCode, strEmployerStateTaxID, dblTotal = SUM(tax.dblTotal) 
+			FROM vyuPRPaycheckTax tax 
+			INNER JOIN tblPRTypeTaxState st ON tax.intTypeTaxStateId = st.intTypeTaxStateId
+			INNER JOIN tblPRTypeTax tt ON tax.intTypeTaxId = tt.intTypeTaxId
 			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId 
-			AND strPaidBy = 'Employee' AND strCalculationType = 'USA State' AND ysnVoid = 0 GROUP BY st.strCode) STATETAX OUTER APPLY
-		(SELECT strState = st.strCode, strLocal = lc.strLocalName, dblTotal = SUM(tax.dblTotal) 
+			AND tax.strPaidBy = 'Employee' AND tax.strCalculationType = 'USA State' AND ysnVoid = 0 GROUP BY st.strCode, strEmployerStateTaxID) STATETAX OUTER APPLY
+		(SELECT strState = st.strCode, strLocal = lc.strLocalName, strEmployerStateTaxID, dblTotal = SUM(tax.dblTotal) 
 			FROM vyuPRPaycheckTax tax INNER JOIN tblPRTypeTaxState st ON tax.intTypeTaxStateId = st.intTypeTaxStateId
+				INNER JOIN tblPRTypeTax tt ON tax.intTypeTaxId = tt.intTypeTaxId
 				LEFT JOIN tblPRTypeTaxLocal lc ON tax.intTypeTaxLocalId = lc.intTypeTaxLocalId
 			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId 
-			AND strPaidBy = 'Employee' AND strCalculationType = 'USA Local' AND ysnVoid = 0 GROUP BY st.strCode, lc.strLocalName) LOCALTAX OUTER APPLY
+			AND tax.strPaidBy = 'Employee' AND tax.strCalculationType = 'USA Local' AND ysnVoid = 0 GROUP BY st.strCode, strEmployerStateTaxID, lc.strLocalName) LOCALTAX OUTER APPLY
 		(SELECT intEmployees = COUNT(DISTINCT intEntityEmployeeId),
 				dblGrossSum = SUM(dblGross) 
 		FROM tblPRPaycheck 
