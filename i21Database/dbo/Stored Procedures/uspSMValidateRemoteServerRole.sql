@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspSMValidateRemoteServerRole]
     @remoteDBUserId NVARCHAR(MAX),
     @remoteDB NVARCHAR(MAX),
-    @count INT
+    @count INT OUT
     
 AS
 
