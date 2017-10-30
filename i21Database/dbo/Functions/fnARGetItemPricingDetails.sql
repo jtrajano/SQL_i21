@@ -49,6 +49,7 @@ RETURNS @returntable TABLE
 	,strPricingType			NVARCHAR(50)
 	,intTermId				INT NULL
 	,intSort				INT
+	,intSpecialPriceId		INT NULL
 )
 AS
 BEGIN
@@ -65,7 +66,7 @@ DECLARE	 @Price				NUMERIC(18,6)
 		,@PriceUOM			NVARCHAR(50)
 		,@OriginalItemUOMId	INT
 		,@termIdOut			INT = NULL
-
+		,@SpecialPriceId	INT = NULL
 	SET @OriginalItemUOMId = @ItemUOMId
 
 	SET @TransactionDate = ISNULL(@TransactionDate,GETDATE())
@@ -145,9 +146,10 @@ DECLARE	 @Price				NUMERIC(18,6)
 		IF @GetAllAvailablePricing = 0 
 			BEGIN
 				SELECT TOP 1
-					 @Price		= dblPrice
-					,@Pricing	= strPricing
-					,@Deviation	= dblDeviation
+					 @Price				= dblPrice
+					,@Pricing			= strPricing
+					,@Deviation			= dblDeviation
+					,@SpecialPriceId 	= intSpecialPriceId
 				FROM
 					[dbo].[fnARGetCustomerPricingDetails](
 						 @ItemId
@@ -169,8 +171,8 @@ DECLARE	 @Price				NUMERIC(18,6)
 			
 				IF(@Price IS NOT NULL)
 				BEGIN
-					INSERT @returntable(dblPrice, dblTermDiscount, strTermDiscountBy, strPricing, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblAvailableQty, ysnUnlimitedQty, strPricingType)
-					SELECT @Price, @TermDiscount, @TermDiscountBy, @Pricing, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity, @PricingType
+					INSERT @returntable(dblPrice, dblTermDiscount, strTermDiscountBy, strPricing, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblAvailableQty, ysnUnlimitedQty, strPricingType, intSpecialPriceId)
+					SELECT @Price, @TermDiscount, @TermDiscountBy, @Pricing, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity, @PricingType, @SpecialPriceId
 					RETURN
 				END	
 			END
@@ -188,7 +190,8 @@ DECLARE	 @Price				NUMERIC(18,6)
 					,dblAvailableQty
 					,ysnUnlimitedQty
 					,strPricingType
-					,intSort)
+					,intSort
+					,intSpecialPriceId)
 				SELECT 
 					 dblPrice				= dblPrice 
 					,dblTermDiscount		= 0
@@ -202,6 +205,7 @@ DECLARE	 @Price				NUMERIC(18,6)
 					,ysnUnlimitedQty		= 0
 					,strPricingType			= ''
 					,intSort				= intSort + 10
+					,intSpecialPriceId 		= intSpecialPriceId
 				FROM
 					[dbo].[fnARGetCustomerPricingDetails](
 						 @ItemId
