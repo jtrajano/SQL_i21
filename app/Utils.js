@@ -143,7 +143,7 @@ Ext.define('Inventory.Utils', {
         },
 
         baseUrl: './inventory/api',
-        getEndpoint(resource) {
+        getEndpoint: function(resource) {
             return ic.utils.baseUrl + '/' + resource;
         }
     }
