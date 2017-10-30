@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspQMSampleImport
+﻿CREATE PROCEDURE uspQMSampleImport @intLoggedOnLocationId INT = NULL
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF
@@ -192,11 +192,15 @@ BEGIN TRY
 		FROM tblQMSampleStatus
 		WHERE strStatus = @strSampleStatus
 
-		SELECT @intContractHeaderId = CH.intContractHeaderId
-			,@intEntityId = CH.intEntityId
-		FROM tblCTContractHeader CH
-		WHERE CH.strContractNumber = @strContractNumber
+		IF ISNULL(@strContractNumber, '') <> ''
+		BEGIN
+			SELECT @intContractHeaderId = CH.intContractHeaderId
+				,@intEntityId = CH.intEntityId
+			FROM tblCTContractHeader CH
+			WHERE CH.strContractNumber = @strContractNumber
+		END
 
+		-- Template
 		IF (
 				ISNULL(@intItemId, 0) > 0
 				AND ISNULL(@intSampleTypeId, 0) > 0
@@ -286,32 +290,11 @@ BEGIN TRY
 			END
 		END
 
-		IF ISNULL(@intContractDetailId, 0) = 0
+		IF ISNULL(@intContractHeaderId, 0) > 0
 		BEGIN
-			SET @ErrMsg = 'Sample No(' + @strSampleRefNo + ') - Contract already contains Sample. '
-
-			RAISERROR (
-					@ErrMsg
-					,16
-					,1
-					)
-		END
-		ELSE
-		BEGIN
-			DECLARE @dblCQuantity NUMERIC(18, 6)
-			DECLARE @intSeqItemId INT
-			DECLARE @strCItemNo NVARCHAR(50)
-
-			SELECT @dblCQuantity = CD.dblQuantity
-				,@intSeqItemId = CD.intItemId
-				,@strCItemNo = I.strItemNo
-			FROM tblCTContractDetail CD
-			JOIN tblICItem I ON I.intItemId = CD.intItemId
-			WHERE CD.intContractDetailId = @intContractDetailId
-
-			IF @intItemId <> @intSeqItemId
+			IF ISNULL(@intContractDetailId, 0) = 0
 			BEGIN
-				SET @ErrMsg = 'Sample No(' + @strSampleRefNo + ') - Item is not matching with Contract Sequence Item(' + @strCItemNo + '). '
+				SET @ErrMsg = 'Sample No(' + @strSampleRefNo + ') - Contract already contains Sample. '
 
 				RAISERROR (
 						@ErrMsg
@@ -319,12 +302,22 @@ BEGIN TRY
 						,1
 						)
 			END
-
-			IF ISNUMERIC(@dblSequenceQuantity) = 1
+			ELSE
 			BEGIN
-				IF @dblSequenceQuantity > @dblCQuantity
+				DECLARE @dblCQuantity NUMERIC(18, 6)
+				DECLARE @intSeqItemId INT
+				DECLARE @strCItemNo NVARCHAR(50)
+
+				SELECT @dblCQuantity = CD.dblQuantity
+					,@intSeqItemId = CD.intItemId
+					,@strCItemNo = I.strItemNo
+				FROM tblCTContractDetail CD
+				JOIN tblICItem I ON I.intItemId = CD.intItemId
+				WHERE CD.intContractDetailId = @intContractDetailId
+
+				IF @intItemId <> @intSeqItemId
 				BEGIN
-					SET @ErrMsg = 'Sample No(' + @strSampleRefNo + ') - Quantity cannot be greater than Contract Sequence Quantity(' + LTRIM(@dblCQuantity) + '). '
+					SET @ErrMsg = 'Sample No(' + @strSampleRefNo + ') - Item is not matching with Contract Sequence Item(' + @strCItemNo + '). '
 
 					RAISERROR (
 							@ErrMsg
@@ -332,23 +325,71 @@ BEGIN TRY
 							,1
 							)
 				END
+
+				IF ISNUMERIC(@dblSequenceQuantity) = 1
+				BEGIN
+					IF @dblSequenceQuantity > @dblCQuantity
+					BEGIN
+						SET @ErrMsg = 'Sample No(' + @strSampleRefNo + ') - Quantity cannot be greater than Contract Sequence Quantity(' + LTRIM(@dblCQuantity) + '). '
+
+						RAISERROR (
+								@ErrMsg
+								,16
+								,1
+								)
+					END
+				END
 			END
 		END
 
 		-- Contract details
-		SELECT @intProductTypeId = 8 -- Contract Line Item
-			,@intProductValueId = CD.intContractDetailId
-			,@intItemContractId = CD.intItemContractId
-			,@intCountryID = ISNULL(IM.intOriginId, IC.intCountryId)
-			,@strCountry = ISNULL(CA.strDescription, CG.strCountry)
-			,@intLocationId = CD.intCompanyLocationId
-			,@intRepresentingUOMId = CD.intUnitMeasureId
-		FROM tblCTContractDetail CD
-		JOIN tblICItem IM ON IM.intItemId = CD.intItemId
-		LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = IM.intOriginId
-		LEFT JOIN tblICItemContract IC ON IC.intItemContractId = CD.intItemContractId
-		LEFT JOIN tblSMCountry CG ON CG.intCountryID = IC.intCountryId
-		WHERE CD.intContractDetailId = @intContractDetailId
+		IF ISNULL(@intContractDetailId, 0) > 0
+		BEGIN
+			SELECT @intProductTypeId = 8 -- Contract Line Item
+				,@intProductValueId = CD.intContractDetailId
+				,@intItemContractId = CD.intItemContractId
+				,@intCountryID = ISNULL(IM.intOriginId, IC.intCountryId)
+				,@strCountry = ISNULL(CA.strDescription, CG.strCountry)
+				,@intLocationId = CD.intCompanyLocationId
+				,@intRepresentingUOMId = CD.intUnitMeasureId
+			FROM tblCTContractDetail CD
+			JOIN tblICItem IM ON IM.intItemId = CD.intItemId
+			LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = IM.intOriginId
+			LEFT JOIN tblICItemContract IC ON IC.intItemContractId = CD.intItemContractId
+			LEFT JOIN tblSMCountry CG ON CG.intCountryID = IC.intCountryId
+			WHERE CD.intContractDetailId = @intContractDetailId
+		END
+		ELSE
+		BEGIN
+			SELECT @intProductTypeId = 2 -- Item
+				,@intProductValueId = IM.intItemId
+				,@intLocationId = @intLoggedOnLocationId
+				,@intContractHeaderId = NULL
+				,@intContractDetailId = NULL
+				,@intItemContractId = NULL
+				,@intCountryID = IM.intOriginId
+				,@strCountry = CA.strDescription
+			FROM tblICItem IM
+			LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = IM.intOriginId
+			WHERE IM.intItemId = @intItemId
+
+			SELECT @intEntityId = intEntityId
+			FROM tblEMEntity
+			WHERE strName = @strVendorName
+
+			-- Take the template UOM. If not avail, take stock UOM
+			SELECT @intRepresentingUOMId = P.intUnitMeasureId
+			FROM tblQMProduct P
+			WHERE P.intProductId = @intProductId
+
+			IF ISNULL(@intRepresentingUOMId, 0) = 0
+			BEGIN
+				SELECT @intRepresentingUOMId = IU.intUnitMeasureId
+				FROM tblICItemUOM IU
+				WHERE IU.intItemId = @intItemId
+					AND IU.ysnStockUnit = 1
+			END
+		END
 
 		-- Business Date and Shift Id
 		SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDate, @intLocationId)
