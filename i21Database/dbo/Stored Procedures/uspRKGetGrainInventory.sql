@@ -3,7 +3,8 @@
 		@dtmFromTransactionDate datetime = null,
 		@dtmToTransactionDate datetime = null,
 		@intCommodityId int =  null,
-		@intItemId int= null
+		@intItemId int= null,
+		  @strPositionIncludes nvarchar(100) = NULL
 
 AS
 
@@ -78,6 +79,11 @@ ROUND((SELECT top 1 ia.intInvoiceId FROM tblARInvoice ia
 FROM tblICInventoryTransaction it 
 JOIN tblICItem i on i.intItemId=it.intItemId and it.ysnIsUnposted=0 and it.intTransactionTypeId in(33,4,5,10,23)
 JOIN tblICItemLocation il on it.intItemLocationId=il.intItemLocationId and isnull(il.strDescription,'') <> 'In-Transit' 
+										AND  il.intLocationId  IN (
+													SELECT intCompanyLocationId FROM tblSMCompanyLocation
+													WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+													WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+													ELSE isnull(ysnLicensed, 0) END)
 WHERE intCommodityId=@intCommodityId
 AND i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end 
 AND convert(datetime,CONVERT(VARCHAR(10),dtmDate,110),110) BETWEEN convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) 
@@ -108,6 +114,11 @@ SELECT  CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,CASE WHEN strInOut
 FROM tblSCTicket st
 		JOIN tblICItem i on i.intItemId=st.intItemId 
 		JOIN tblICInventoryReceiptItem ri on ri.intSourceId=st.intTicketId
+									AND  st.intProcessingLocationId  IN (
+													SELECT intCompanyLocationId FROM tblSMCompanyLocation
+													WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+													WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+													ELSE isnull(ysnLicensed, 0) END)
 		join tblICInventoryReceipt r on r.intInventoryReceiptId=ri.intInventoryReceiptId
 		JOIN tblGRStorageType gs on gs.intStorageScheduleTypeId=st.intStorageScheduleTypeId  
 WHERE convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEEN
@@ -141,6 +152,11 @@ SELECT  CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,CASE WHEN strInOut
 		strDistributionOption ,r.intInventoryShipmentId
 FROM tblSCTicket st
 		JOIN tblICItem i on i.intItemId=st.intItemId 
+									AND  st.intProcessingLocationId  IN (
+													SELECT intCompanyLocationId FROM tblSMCompanyLocation
+													WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+													WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+													ELSE isnull(ysnLicensed, 0) END)
 		JOIN tblICInventoryShipmentItem ri on ri.intSourceId=st.intTicketId
 		join tblICInventoryShipment r on r.intInventoryShipmentId=ri.intInventoryShipmentId
 		JOIN tblGRStorageType gs on gs.intStorageScheduleTypeId=st.intStorageScheduleTypeId  
@@ -160,7 +176,11 @@ FROM
  tblICInventoryReceiptItem ir 
  JOIN tblICInventoryReceipt r on r.intInventoryReceiptId=ir.intInventoryReceiptId  and ysnPosted=1
 JOIN tblICItem i on i.intItemId=ir.intItemId 
- JOIN tblSCTicket st ON st.intTicketId = ir.intSourceId 
+ JOIN tblSCTicket st ON st.intTicketId = ir.intSourceId 							AND  st.intProcessingLocationId  IN (
+													SELECT intCompanyLocationId FROM tblSMCompanyLocation
+													WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+													WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+													ELSE isnull(ysnLicensed, 0) END)
  JOIN tblGRStorageType s ON st.intStorageScheduleTypeId=s.intStorageScheduleTypeId AND isnull(ysnDPOwnedType,0) = 1
 WHERE convert(datetime,CONVERT(VARCHAR(10),dtmTicketDateTime,110)) between convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110))  and convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110)) and i.intCommodityId= @intCommodityId
 and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
@@ -168,7 +188,7 @@ and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItem
  )t
 
 SELECT convert(int,ROW_NUMBER() OVER (ORDER BY dtmDate)) intRowNum,
-    dtmDate [dtmDate],case when isnull(tranReceiptNumber,'') <> '' then tranReceiptNumber
+    dtmDate [dtmDate],case when isnull(tranReceiptNumber,'') <> '' then tranReceiptNumber	
                                             when isnull(tranShipmentNumber,'') <> '' then tranShipmentNumber
                                             when isnull(tranAdjNumber,'') <> '' then tranAdjNumber
 											when isnull(tranInvoiceNumber,'') <> '' then tranInvoiceNumber
