@@ -1,9 +1,9 @@
 ﻿CREATE PROC [dbo].[uspRKGetCompanyOwnership]
-
-       @dtmFromTransactionDate datetime = null,
+          @dtmFromTransactionDate datetime = null,
           @dtmToTransactionDate datetime = null,
           @intCommodityId int =  null,
-          @intItemId int= null
+          @intItemId int= null,
+		  @strPositionIncludes nvarchar(100) = NULL
 
 AS
 
@@ -27,6 +27,11 @@ SELECT sum(dblUnpaidIn)-sum(dblUnpaidIn-dblUnpaidOut) dblUnpaidBalance,
                            FROM tblICInventoryTransaction it 
                            join tblICItem i on i.intItemId=it.intItemId and it.intTransactionTypeId in(4,5,10,23)
                            JOIN tblICItemLocation il on it.intItemLocationId=il.intItemLocationId and isnull(il.strDescription,'') <> 'In-Transit' 
+										AND  il.intLocationId  IN (
+													SELECT intCompanyLocationId FROM tblSMCompanyLocation
+													WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+													WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+													ELSE isnull(ysnLicensed, 0) END)
                            WHERE intCommodityId=@intCommodityId and 
                            convert(datetime,CONVERT(VARCHAR(10),dtmDate,110),110)
                            < convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) and i.intCommodityId=@intCommodityId
@@ -36,7 +41,7 @@ from (
        SELECT dblInQty  dblUnpaidIn,
        dblOutQty dblUnpaidOut
        FROM (
-      SELECT       CONVERT(VARCHAR(10),b.dtmDate,110) dtmDate, dblUnitCost dblUnitCost1,
+      SELECT  distinct     CONVERT(VARCHAR(10),b.dtmDate,110) dtmDate, dblUnitCost dblUnitCost1,
                            ir.intInventoryReceiptItemId ,i.strItemNo,
                            isnull(bd.dblQtyReceived,0) dblInQty,
                            (bd.dblTotal - isnull((select case when sum(pd.dblPayment)- max(dblTotal) = 0 then bd.dblTotal else sum(pd.dblPayment) end 
@@ -46,20 +51,30 @@ from (
          FROM tblAPBill b
          JOIN tblAPBillDetail bd on b.intBillId=bd.intBillId
          JOIN tblICInventoryReceiptItem ir on bd.intInventoryReceiptItemId=ir.intInventoryReceiptItemId
-         JOIN tblICItem i on i.intItemId=bd.intItemId 
+							AND  b.intShipToId  IN (
+													SELECT intCompanyLocationId FROM tblSMCompanyLocation
+													WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+													WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+													ELSE isnull(ysnLicensed, 0) END)
+         JOIN tblICItem i on i.intItemId=bd.intItemId  
          LEFT JOIN tblSCTicket st ON st.intTicketId = ir.intSourceId
-         WHERE 
-              convert(datetime,CONVERT(VARCHAR(10),dtmDate,110),110)
+         WHERE CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmDate,110),110)
                            < convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) and i.intCommodityId= @intCommodityId
           and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
          )t   
   
   )t2
-   union
+UNION
 SELECT sum(dblGrossUnits) as dblUnpaidBalance, NULL InventoryBalanceCarryForward
 FROM 
  tblICInventoryReceiptItem ir 
  JOIN tblICInventoryReceipt r on r.intInventoryReceiptId=ir.intInventoryReceiptId  and ysnPosted=1
+ JOIN tblSMCompanyLocationSubLocation sl on ir.intSubLocationId=sl.intCompanyLocationSubLocationId 
+							AND  sl.intCompanyLocationId  IN (
+													SELECT intCompanyLocationId FROM tblSMCompanyLocation
+													WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+													WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+													ELSE isnull(ysnLicensed, 0) END)
 JOIN tblICItem i on i.intItemId=ir.intItemId 
  JOIN tblSCTicket st ON st.intTicketId = ir.intSourceId 
  JOIN tblGRStorageType s ON st.intStorageScheduleTypeId=s.intStorageScheduleTypeId AND isnull(ysnDPOwnedType,0) = 1
@@ -86,6 +101,12 @@ SELECT CONVERT(VARCHAR(10),b.dtmDate,110) dtmDate, dblUnitCost dblUnitCost1,
   
   FROM tblAPBill b
   JOIN tblAPBillDetail bd on b.intBillId=bd.intBillId
+											AND  b.intShipToId  IN (
+													SELECT intCompanyLocationId FROM tblSMCompanyLocation
+													WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+													WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+													ELSE isnull(ysnLicensed, 0) END)
+				
   JOIN tblICInventoryReceiptItem ir on bd.intInventoryReceiptItemId=ir.intInventoryReceiptItemId
   JOIN tblICItem i on i.intItemId=bd.intItemId 
   LEFT JOIN tblSCTicket st ON st.intTicketId = ir.intSourceId
@@ -104,6 +125,12 @@ SELECT  i.strItemNo,CONVERT(VARCHAR(10),dtmTicketDateTime,110) AS dtmDate,
 FROM 
  tblICInventoryReceiptItem ir 
  JOIN tblICInventoryReceipt r on r.intInventoryReceiptId=ir.intInventoryReceiptId  and ysnPosted=1
+  JOIN tblSMCompanyLocationSubLocation sl on ir.intSubLocationId=sl.intCompanyLocationSubLocationId 
+							AND  sl.intCompanyLocationId  IN (
+													SELECT intCompanyLocationId FROM tblSMCompanyLocation
+													WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+													WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+													ELSE isnull(ysnLicensed, 0) END)
 JOIN tblICItem i on i.intItemId=ir.intItemId 
  JOIN tblSCTicket st ON st.intTicketId = ir.intSourceId 
  JOIN tblGRStorageType s ON st.intStorageScheduleTypeId=s.intStorageScheduleTypeId AND isnull(ysnDPOwnedType,0) = 1

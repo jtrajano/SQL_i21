@@ -3,7 +3,8 @@
 		  @dtmFromTransactionDate DATETIME = null,
           @dtmToTransactionDate DATETIME = NULL,
           @intCommodityId int =  NULL,
-	      @intItemId int= null
+	      @intItemId int= null,
+		  @strPositionIncludes nvarchar(100) = NULL
 AS 
 
 DECLARE @tblDateList TABLE
@@ -66,14 +67,14 @@ DECLARE @tblResultFinal TABLE
 )
 
 -- Customer Ownership START
-EXEC uspRKGetCustomerOwnership @dtmFromTransactionDate=@dtmFromTransactionDate,@dtmToTransactionDate=@dtmToTransactionDate, @intCommodityId =  @intCommodityId, @intItemId=@intItemId
+EXEC uspRKGetCustomerOwnership @dtmFromTransactionDate=@dtmFromTransactionDate,@dtmToTransactionDate=@dtmToTransactionDate, @intCommodityId =  @intCommodityId, @intItemId=@intItemId,@strPositionIncludes=@strPositionIncludes
 -- Custoemr ownershiip END
 
 INSERT INTO @tblResult (intRowNum ,dtmDate ,    [Distribution] ,     [Unpaid IN] , [Unpaid Out] ,       [Unpaid Balance],InventoryBalanceCarryForward,strReceiptNumber,intReceiptId )
-EXEC uspRKGetCompanyOwnership @dtmFromTransactionDate=@dtmFromTransactionDate,@dtmToTransactionDate=@dtmToTransactionDate, @intCommodityId =  @intCommodityId, @intItemId=@intItemId
+EXEC uspRKGetCompanyOwnership @dtmFromTransactionDate=@dtmFromTransactionDate,@dtmToTransactionDate=@dtmToTransactionDate, @intCommodityId =  @intCommodityId, @intItemId=@intItemId,@strPositionIncludes=@strPositionIncludes
 
 INSERT INTO @tblFirstResult (dtmDate ,   tranShipQty , tranRecQty ,  dblAdjustmentQty ,dblCountQty,dblInvoiceQty, BalanceForward )
-EXEC uspRKGetInventoryBalance @dtmFromTransactionDate=@dtmFromTransactionDate,@dtmToTransactionDate=@dtmToTransactionDate, @intCommodityId =  @intCommodityId, @intItemId=@intItemId
+EXEC uspRKGetInventoryBalance @dtmFromTransactionDate=@dtmFromTransactionDate,@dtmToTransactionDate=@dtmToTransactionDate, @intCommodityId =  @intCommodityId, @intItemId=@intItemId,@strPositionIncludes=@strPositionIncludes
 
 
 INSERT INTO @tblResultFinal (dtmDate,dblUnpaidIn,dblUnpaidOut,BalanceForward,dblUnpaidBalance,InventoryBalanceCarryForward)
