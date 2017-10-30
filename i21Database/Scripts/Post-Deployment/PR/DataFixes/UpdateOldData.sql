@@ -84,3 +84,20 @@ EXEC('
 						ON tblPREmployeeEarning.intEmployeeEarningId = tblPREmployeeEarning_Ranked.intEmployeeEarningId')
 
 END
+
+/*
+* Tax Types
+* 1. Add default Employer State Tax ID to USA State and USA Local types
+* 2...
+*/
+
+IF EXISTS(SELECT * FROM sys.tables WHERE object_id = object_id('tblPRTypeTax'))
+BEGIN
+
+EXEC('
+	UPDATE tblPRTypeTax
+	SET strEmployerStateTaxID = ISNULL((SELECT TOP 1 strStateTaxID FROM tblSMCompanySetup), '''')
+	WHERE strCalculationType IN (''USA State'', ''USA Local'') AND ISNULL(strEmployerStateTaxID, '''') = ''''
+')
+
+END
