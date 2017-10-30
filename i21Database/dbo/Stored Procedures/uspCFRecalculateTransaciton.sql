@@ -2367,8 +2367,7 @@ BEGIN
 	IF (@strPriceMethod = 'Import File Price' 
 	OR @strPriceMethod = 'Credit Card' 
 	OR @strPriceMethod = 'Posted Trans from CSV'
-	OR @strPriceMethod = 'Origin History'
-	OR @strPriceMethod = 'Network Cost')
+	OR @strPriceMethod = 'Origin History')
 		BEGIN
 
 			DECLARE @dblImportFileGrossPrice NUMERIC(18,6)
@@ -2401,6 +2400,39 @@ BEGIN
 			)
 
 		END
+	ELSE IF @strPriceMethod = 'Network Cost'
+		BEGIN
+
+			DECLARE @dblNetworkCostGrossPrice NUMERIC(18,6)
+			SET @dblNetworkCostGrossPrice = ISNULL(@TransferCost,0)
+
+			IF(ISNULL(@ysnForceRounding,0) = 1) 
+			BEGIN
+				SELECT @dblImportFileGrossPrice = dbo.fnCFForceRounding(@dblNetworkCostGrossPrice)
+			END
+
+			INSERT INTO @tblTransactionPrice (strTransactionPriceId	
+				,dblOriginalAmount		
+				,dblCalculatedAmount	
+			)
+			VALUES
+			(
+				 'Gross Price'
+				,@dblNetworkCostGrossPrice
+				,@dblNetworkCostGrossPrice
+			),
+			(
+				 'Net Price'
+				,@dblOriginalPrice - (@totalOriginalTax / @dblQuantity)
+				,ROUND((((@dblNetworkCostGrossPrice * @dblQuantity) - (@totalCalculatedTaxExempt + @totalCalculatedTax) ) / @dblQuantity),6)
+			),
+			(
+				 'Total Amount'
+				,ROUND(@dblOriginalPrice * @dblQuantity,2)
+				,ROUND((@dblNetworkCostGrossPrice * @dblQuantity),2)
+			)
+
+		END
 	ELSE IF (LOWER(@strPriceBasis) = 'local index cost' OR LOWER(@strPriceBasis) = 'remote index cost'  )
 		BEGIN
 
@@ -2426,7 +2458,8 @@ BEGIN
 		(
 			 'Net Price'
 			,Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6) 
-			,Round(((@dblLocalIndexCostGrossPrice * @dblQuantity) -  (ISNULL(@totalCalculatedTaxExempt,0) + ISNULL(@totalCalculatedTax,0))) / @dblQuantity,6)
+			,Round(((@dblLocalIndexCostGrossPrice * @dblQuantity) -  (ISNULL(@totalCalculatedTax,0))) / @dblQuantity,6)
+			--,Round(((@dblLocalIndexCostGrossPrice * @dblQuantity) -  (ISNULL(@totalCalculatedTaxExempt,0) + ISNULL(@totalCalculatedTax,0))) / @dblQuantity,6)
 		),
 		(
 			 'Total Amount'
