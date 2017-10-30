@@ -860,6 +860,8 @@ BEGIN
 		DECLARE @dtmPriceIndexDate			DATETIME
 		DECLARE @dblMargin					NUMERIC(18,6)
 		DECLARE @dblInventoryCost			NUMERIC(18,6)
+		DECLARE @dblAdjustmentRate			NUMERIC(18,6)
+		
 	------------------------------------------------------------
 
 
@@ -1243,6 +1245,7 @@ BEGIN
 		,@dblMargin						= dblMargin
 		,@dblGrossTransferCost			= dblGrossTransferCost
 		,@dblNetTransferCost			= dblNetTransferCost
+		,@dblAdjustmentRate				= dblAdjustmentRate
 		FROM ##tblCFTransactionPricingType
 
 		--IF(@ysnDuplicate = 1)
@@ -1278,6 +1281,7 @@ BEGIN
 				,ysnInvalid				= @ysnInvalid
 				,dblGrossTransferCost	= @dblGrossTransferCost
 				,dblNetTransferCost		= @dblNetTransferCost
+				,dblAdjustmentRate		= @dblAdjustmentRate
 				WHERE intTransactionId = @Pk
 		END
 		IF (@strPriceMethod = 'Import File Price')
@@ -1301,6 +1305,7 @@ BEGIN
 				,ysnInvalid				= @ysnInvalid
 				,dblGrossTransferCost	= @dblGrossTransferCost
 				,dblNetTransferCost		= @dblNetTransferCost
+				,dblAdjustmentRate		= @dblAdjustmentRate
 				WHERE intTransactionId = @Pk
 		END
 		IF (@strPriceMethod = 'Network Cost')
@@ -1324,6 +1329,7 @@ BEGIN
 				,ysnInvalid				= @ysnInvalid
 				,dblGrossTransferCost	= @dblGrossTransferCost
 				,dblNetTransferCost		= @dblNetTransferCost
+				,dblAdjustmentRate		= @dblAdjustmentRate
 				WHERE intTransactionId = @Pk
 		END
 		ELSE IF (@strPriceMethod = 'Special Pricing')
@@ -1347,6 +1353,7 @@ BEGIN
 				,ysnInvalid				= @ysnInvalid
 				,dblGrossTransferCost	= @dblGrossTransferCost
 				,dblNetTransferCost		= @dblNetTransferCost
+				,dblAdjustmentRate		= @dblAdjustmentRate
 				WHERE intTransactionId = @Pk
 		END
 		ELSE IF (@strPriceMethod = 'Price Profile')
@@ -1379,6 +1386,7 @@ BEGIN
 				,ysnInvalid				= @ysnInvalid
 				,dblGrossTransferCost	= @dblGrossTransferCost
 				,dblNetTransferCost		= @dblNetTransferCost
+				,dblAdjustmentRate		= @dblAdjustmentRate
 				WHERE intTransactionId = @Pk
 					
 		END
@@ -1420,6 +1428,7 @@ BEGIN
 				,ysnInvalid				= @ysnInvalid
 				,dblGrossTransferCost	= @dblGrossTransferCost
 				,dblNetTransferCost		= @dblNetTransferCost
+				,dblAdjustmentRate		= @dblAdjustmentRate
 				WHERE intTransactionId = @Pk
 
 				------------------------------------------------------------
@@ -1458,6 +1467,7 @@ BEGIN
 				,ysnInvalid				= @ysnInvalid
 				,dblGrossTransferCost	= @dblGrossTransferCost
 				,dblNetTransferCost		= @dblNetTransferCost
+				,dblAdjustmentRate		= @dblAdjustmentRate
 				WHERE intTransactionId = @Pk
 		END
 
