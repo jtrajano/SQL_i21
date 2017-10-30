@@ -5793,6 +5793,7 @@
     <Build Include="dbo\Views\vyuGRGetSaleEntity.sql" />
     <Build Include="dbo\Stored Procedures\uspGRPostSellOffsite.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUnPostSellOffsite.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1740_UpdateSalesMenus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
