@@ -98,6 +98,12 @@
 	[intStorageScheduleTypeId]				INT												NULL,
 	[intDestinationGradeId]					INT												NULL,
 	[intDestinationWeightId]				INT												NULL,
+
+	[intSpecialPriceId]						INT												NULL,
+	[intProgramId]							INT												NULL,
+	[strProgramType]						NVARCHAR(100)									NULL,
+
+
     CONSTRAINT [PK_tblARInvoiceDetail_intInvoiceDetailId] PRIMARY KEY CLUSTERED ([intInvoiceDetailId] ASC),
     CONSTRAINT [FK_tblARInvoiceDetail_tblARInvoice] FOREIGN KEY ([intInvoiceId]) REFERENCES [dbo].[tblARInvoice] ([intInvoiceId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblARInvoiceDetail_tblGLAccount_intAccountId] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),

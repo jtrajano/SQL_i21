@@ -36,6 +36,10 @@
 	,@PricingType				NVARCHAR(50)	= NULL OUTPUT
 	,@TermIdOut					INT				= NULL OUTPUT
 	,@GetAllAvailablePricing	BIT				= 0	
+	,@SpecialPriceId			INT				= NULL OUTPUT
+	,@ProgramId					INT				= NULL OUTPUT
+	,@ProgramType				NVARCHAR(100)	= NULL OUTPUT
+	
 AS	
 
 	SELECT
@@ -55,6 +59,7 @@ AS
 		,@SubCurrencyId		= intSubCurrencyId
 		,@SubCurrency		= strSubCurrency
 		,@SubCurrencyRate	= dblSubCurrencyRate
+		,@SpecialPriceId	= intSpecialPriceId
 	FROM
 		[dbo].[fnARGetItemPricingDetails](
 			 @ItemId
@@ -85,5 +90,10 @@ AS
 			,@TermId
 			,@GetAllAvailablePricing
 		)
+
+		IF @SpecialPriceId is not null or @SpecialPriceId > 0
+		BEGIN
+			SELECT top 1 @ProgramId=intProgramId  ,@ProgramType=strProgramType  from tblARCustomerSpecialPrice
+		END
 
 RETURN 0
