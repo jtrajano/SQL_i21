@@ -138,7 +138,7 @@ BEGIN TRY
 		SELECT TOP 1 @Guid = [from] FROM @Params WHERE [fieldname] = 'strGuid'
 
 
-		SELECT @dblUstRate = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(decimal(18,2), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RRMFT-5-US-USTRate'
+		SELECT @dblUstRate = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(decimal(18,2), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-US-USTRate'
 		SELECT @dblEifRate = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(decimal(18,2), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-US-EIFRate'
 		SELECT @dblColDisc = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(decimal(18,2), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-US-ColDisc'	
 		SELECT @strRecLicense = ISNULL(strConfiguration, '') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-US-RecLicense'
