@@ -5788,12 +5788,13 @@
     <Build Include="dbo\Views\vyuLGLoadWarehouseServices.sql" />
     <Build Include="dbo\Views\vyuCTGetContractForScaleTicket.sql" />
     <Build Include="dbo\Stored Procedures\uspARReturnInvoice.sql" />
-    <Build Include="dbo\Stored Procedures\uspARUpdateReturnedInvoice.sql" />   
+    <Build Include="dbo\Stored Procedures\uspARUpdateReturnedInvoice.sql" />
     <Build Include="dbo\Functions\fnGRGetDiscountCodeReadings.sql" />
     <Build Include="dbo\Views\vyuGRGetSaleEntity.sql" />
     <Build Include="dbo\Stored Procedures\uspGRPostSellOffsite.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUnPostSellOffsite.sql" />
     <None Include="Scripts\Post-Deployment\SM\1740_UpdateSalesMenus.sql" />
+    <None Include="Scripts\Post-Deployment\PAT\DefaultData\2_DefaultCompanyPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

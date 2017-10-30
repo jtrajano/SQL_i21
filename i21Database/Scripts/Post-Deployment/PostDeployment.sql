@@ -274,6 +274,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 -- Patronage
 :r .\PAT\DefaultData\1_AddDefaultLetters.sql 
+:r .\PAT\DefaultData\2_DefaultCompanyPreference.sql 
 
 --Help Desk
 :R .\HD\DefaultData\1_StatusData.sql
