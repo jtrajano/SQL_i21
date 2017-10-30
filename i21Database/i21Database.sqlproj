@@ -5821,9 +5821,10 @@
     <Build Include="dbo\Views\vyuGRGetSaleEntity.sql" />
     <Build Include="dbo\Stored Procedures\uspGRPostSellOffsite.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUnPostSellOffsite.sql" />
-	<Build Include="dbo\Views\vyuMFInventoryViewAsonDate.sql" />
+    <Build Include="dbo\Views\vyuMFInventoryViewAsonDate.sql" />
     <Build Include="dbo\Views\vyuLGLoadWarehouseServices.sql" />
     <None Include="Scripts\Post-Deployment\SM\1740_UpdateSalesMenus.sql" />
+    <None Include="Scripts\Post-Deployment\PAT\DefaultData\2_DefaultCompanyPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
