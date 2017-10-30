@@ -187,14 +187,16 @@ Ext.define('Inventory.model.ReceiptItem', {
         }
     },
     
-    validateGrossNetUOM: function(errors) {
-        if ((this.get('strWeightUOM') === '' && this.get('dblNet') !== 0) || (this.get('strWeightUOM') === '' && this.get('dblGross') !== 0)) {
+    validateGrossNetUOM: function(errors) {        
+        if (this.get('strLotTracking') !== 'No') {
+            if ((this.get('strWeightUOM') === '' && this.get('dblNet') !== 0) || (this.get('strWeightUOM') === '' && this.get('dblGross') !== 0)) {
                 errors.add({
                     field: 'strWeightUOM',
                     message: 'Gross/Net UOM must be present since value is specified in Gross or Net.'
                 });
+            }
         }
-    },
+    },	
     
     validate: function(options) {
         var errors = this.callParent(arguments);
