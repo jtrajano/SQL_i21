@@ -59,7 +59,7 @@ BEGIN TRY
 		tblSMTaxCode SMTC
 			ON TD.[intTaxCodeId] = SMTC.[intTaxCodeId]
 	CROSS APPLY
-		[dbo].[fnGetTaxCodeRateDetails](SMTC.[intTaxCodeId], TD.[dtmDate]) TRD		
+		[dbo].[fnGetTaxCodeRateDetails](SMTC.[intTaxCodeId], TD.[dtmDate], NULL) TRD		
 			
 END TRY
 BEGIN CATCH

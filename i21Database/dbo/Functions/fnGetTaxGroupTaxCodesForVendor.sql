@@ -70,7 +70,7 @@ BEGIN
 	CROSS APPLY
 		[dbo].[fnGetVendorTaxCodeExemptionDetails](@VendorId, @TransactionDate, TG.[intTaxGroupId], TC.[intTaxCodeId], TC.[intTaxClassId], TC.[strState], @ItemId, @ItemCategoryId, @ShipFromLocationId) E
 	CROSS APPLY
-		[dbo].[fnGetTaxCodeRateDetails](TC.[intTaxCodeId], @TransactionDate) R		
+		[dbo].[fnGetTaxCodeRateDetails](TC.[intTaxCodeId], @TransactionDate, NULL) R		
 	WHERE
 		TG.intTaxGroupId = @TaxGroupId
 		AND (ISNULL(E.ysnTaxExempt,0) = 0 OR ISNULL(@IncludeExemptedCodes,0) = 1)

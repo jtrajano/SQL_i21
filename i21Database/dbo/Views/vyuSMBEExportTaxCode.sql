@@ -7,6 +7,6 @@ SELECT
 	 ,header = ''
 	 ,"type" = A.strTaxCode
 FROM tblSMTaxCode A
-CROSS APPLY (SELECT * FROM fnGetTaxCodeRateDetails(A.intTaxCodeId,GETDATE()))B
+CROSS APPLY (SELECT * FROM fnGetTaxCodeRateDetails(A.intTaxCodeId,GETDATE(), NULL))B
 
 GO

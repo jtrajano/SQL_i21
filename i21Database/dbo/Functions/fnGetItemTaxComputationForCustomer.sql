@@ -129,7 +129,7 @@ BEGIN
 		,[strTaxGroup]
 		,[strNotes]
 	FROM
-		[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @CustomerId, @TransactionDate, @ItemId, @CustomerLocationId, @IncludeExemptedCodes, @IsCustomerSiteTaxable, @CardId, @VehicleId, @DisregardExemptionSetup)
+		[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @CustomerId, @TransactionDate, @ItemId, @CustomerLocationId, @IncludeExemptedCodes, @IsCustomerSiteTaxable, @CardId, @VehicleId, @DisregardExemptionSetup, NULL)
 															
 			
 	-- Calculate Item Tax

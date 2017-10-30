@@ -80,7 +80,7 @@ SELECT TOP 1
 FROM
 	tblSMTaxCode
 	CROSS APPLY
-		[dbo].[fnGetTaxCodeRateDetails]([intTaxCodeId], @InvoiceDate) TRD		
+		[dbo].[fnGetTaxCodeRateDetails]([intTaxCodeId], @InvoiceDate, NULL) TRD		
 WHERE
 	[intTaxCodeId] = @TaxCodeId
 
@@ -147,7 +147,7 @@ BEGIN TRY
 	FROM
 		tblSMTaxCode
 	CROSS APPLY
-		[dbo].[fnGetTaxCodeRateDetails]([intTaxCodeId], @InvoiceDate) TRD		
+		[dbo].[fnGetTaxCodeRateDetails]([intTaxCodeId], @InvoiceDate, NULL) TRD		
 	WHERE
 		[intTaxCodeId] = @TaxCodeId 
 			
