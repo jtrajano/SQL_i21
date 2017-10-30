@@ -3,7 +3,8 @@
        @dtmFromTransactionDate datetime = null,
 	   @dtmToTransactionDate datetime = null,
 	   @intCommodityId int =  null,
-	   @intItemId int= null
+	   @intItemId int= null,
+		  @strPositionIncludes nvarchar(100) = NULL
 
 AS
 
@@ -20,7 +21,12 @@ SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intR
 		SELECT CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,strStorageTypeDescription,	CASE WHEN strInOutFlag='I' THEN dblNetUnits ELSE 0 END dblInQty,
 																								CASE WHEN strInOutFlag='O' THEN dblNetUnits ELSE 0 END dblOutQty  				
 		FROM tblSCTicket st
-		JOIN tblICItem i on i.intItemId=st.intItemId 
+		JOIN tblICItem i on i.intItemId=st.intItemId 		
+							AND  st.intProcessingLocationId  IN (
+													SELECT intCompanyLocationId FROM tblSMCompanyLocation
+													WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+													WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+													ELSE isnull(ysnLicensed, 0) END)
 		JOIN tblGRStorageType gs on gs.intStorageScheduleTypeId=st.intStorageScheduleTypeId 
 		WHERE convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEEN
 		 convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
