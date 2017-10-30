@@ -269,6 +269,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 -- Patronage
 :r .\PAT\DefaultData\1_AddDefaultLetters.sql 
+:r .\PAT\DefaultData\2_DefaultCompanyPreference.sql 
 
 --Contract Management
 :R .\CT\1_MasterTables.sql
