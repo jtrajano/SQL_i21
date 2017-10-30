@@ -105,6 +105,8 @@
 	tblSCScaleSetup.strWeightDescription,
 	tblEMEntitySplit.strSplitNumber,
 	tblSCTicketFormat.intTicketFormatId,
+	tblSCTicketFormat.ysnSuppressCompanyName,
+	tblSCTicketFormat.intSuppressDiscountOptionId,
 	(SELECT intCurrencyDecimal FROM tblSMCompanyPreference) AS intDecimalPrecision
   from dbo.tblSCTicket tblSCTicket
   LEFT JOIN dbo.tblEMEntity tblEMEntity on tblEMEntity.intEntityId = tblSCTicket.intEntityId

@@ -153,7 +153,7 @@ AS SELECT SC.intTicketId, (CASE WHEN
 	tblSCTicketFormat.strTicketFooter,
 	tblSCTicketFormat.strTicketHeader,
 	tblSCTicketFormat.ysnSuppressCompanyName,
-	tblSCTicketFormat.ysnSuppressDiscountReading
+	tblSCTicketFormat.intSuppressDiscountOptionId
   FROM tblSCTicket SC
   LEFT JOIN tblEMEntity tblEMEntity on tblEMEntity.intEntityId = SC.intEntityId
   LEFT JOIN vyuEMSearchShipVia vyuEMSearchShipVia on vyuEMSearchShipVia.intEntityId = SC.intHaulerId

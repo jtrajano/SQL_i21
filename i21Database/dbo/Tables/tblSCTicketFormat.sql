@@ -5,7 +5,7 @@
     [intTicketFormatSelection] INT NOT NULL, 
     [ysnSuppressCompanyName] BIT NULL, 
     [ysnFormFeedEachCopy] BIT NULL, 
-    [ysnSuppressDiscountReading] BIT NULL, 
+    [intSuppressDiscountOptionId] INT NULL, 
     [strTicketHeader] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
     [strTicketFooter] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
@@ -66,7 +66,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblSCTicketFormat',
     @level2type = N'COLUMN',
-    @level2name = N'ysnSuppressDiscountReading'
+    @level2name = 'intSuppressDiscountOptionId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Ticket Header',
