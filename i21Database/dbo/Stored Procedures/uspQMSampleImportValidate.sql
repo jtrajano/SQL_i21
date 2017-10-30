@@ -28,7 +28,6 @@ BEGIN TRY
 	DECLARE @strPreviousErrMsg NVARCHAR(MAX) = ''
 		,@strSampleRefNo NVARCHAR(30)
 		,@intContractHeaderId INT
-		,@strEntityName NVARCHAR(100)
 		,@intItemId INT
 		,@intCategoryId INT
 		,@intSampleTypeId INT
@@ -81,7 +80,6 @@ BEGIN TRY
 			,@dtmCreated = NULL
 			,@strSampleRefNo = NULL
 			,@intContractHeaderId = NULL
-			,@strEntityName = NULL
 			,@intItemId = NULL
 			,@intCategoryId = NULL
 			,@intSampleTypeId = NULL
@@ -198,9 +196,7 @@ BEGIN TRY
 		END
 
 		-- Contract No
-		IF ISNULL(@strContractNumber, '') = ''
-			SELECT @strPreviousErrMsg += 'Invalid Contract No. '
-		ELSE
+		IF ISNULL(@strContractNumber, '') <> ''
 		BEGIN
 			IF NOT EXISTS (
 					SELECT 1
@@ -211,32 +207,28 @@ BEGIN TRY
 			ELSE
 			BEGIN
 				SELECT @intContractHeaderId = CH.intContractHeaderId
-					,@strEntityName = E.strName
 				FROM tblCTContractHeader CH
-				JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
 				WHERE CH.strContractNumber = @strContractNumber
 			END
 		END
 
 		-- Vendor
-		IF ISNULL(@strVendorName, '') = ''
-			SELECT @strPreviousErrMsg += 'Invalid Vendor. '
-		ELSE
+		IF ISNULL(@intContractHeaderId, 0) = 0
 		BEGIN
-			IF NOT EXISTS (
-					SELECT 1
-					FROM vyuCTEntity
-					WHERE (
-							strEntityType = 'Vendor'
-							OR strEntityType = 'Customer'
-							)
-						AND strEntityName = @strVendorName
-					)
+			IF ISNULL(@strVendorName, '') = ''
 				SELECT @strPreviousErrMsg += 'Invalid Vendor. '
 			ELSE
 			BEGIN
-				IF @strVendorName <> @strEntityName
-					SELECT @strPreviousErrMsg += 'Vendor does not belongs to the Contract. '
+				IF NOT EXISTS (
+						SELECT 1
+						FROM vyuCTEntity
+						WHERE (
+								strEntityType = 'Vendor'
+								OR strEntityType = 'Customer'
+								)
+							AND strEntityName = @strVendorName
+						)
+					SELECT @strPreviousErrMsg += 'Invalid Vendor. '
 			END
 		END
 
