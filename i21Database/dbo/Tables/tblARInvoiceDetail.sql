@@ -101,7 +101,9 @@
 
 	[intSpecialPriceId]						INT												NULL,
 	[intProgramId]							INT												NULL,
-	[strProgramType]						NVARCHAR(100)									NULL,
+	[strPriceSource]						NVARCHAR(100)									NULL,
+	[ysnRebateSubmitted]					BIT												DEFAULT(0) NULL,
+	[ysnRebateExcluded]						BIT												DEFAULT(0) NULL,
 
 
     CONSTRAINT [PK_tblARInvoiceDetail_intInvoiceDetailId] PRIMARY KEY CLUSTERED ([intInvoiceDetailId] ASC),
@@ -137,8 +139,8 @@
 	--CONSTRAINT [FK_tblARInvoiceDetail_tblSMCurrencyExchangeRate_intCurrencyExchangeRateId] FOREIGN KEY ([intCurrencyExchangeRateId]) REFERENCES [tblSMCurrencyExchangeRate]([intCurrencyExchangeRateId]),
 	CONSTRAINT [FK_tblARInvoiceDetail_tblSMCurrency_intSubCurrencyId] FOREIGN KEY ([intSubCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
 	CONSTRAINT [FK_tblARInvoiceDetail_tblCTWeightGrade_intDestinationGradeId] FOREIGN KEY ([intDestinationGradeId]) REFERENCES [tblCTWeightGrade]([intWeightGradeId]),
-    CONSTRAINT [FK_tblARInvoiceDetail_tblCTWeightGrade_intDestinationWeightId] FOREIGN KEY ([intDestinationWeightId]) REFERENCES [tblCTWeightGrade]([intWeightGradeId])
-
+    CONSTRAINT [FK_tblARInvoiceDetail_tblCTWeightGrade_intDestinationWeightId] FOREIGN KEY ([intDestinationWeightId]) REFERENCES [tblCTWeightGrade]([intWeightGradeId]),	
+    CONSTRAINT [FK_tblARInvoiceDetail_tblVRProgram] FOREIGN KEY ([intProgramId]) REFERENCES [dbo].[tblVRProgram] ([intProgramId]) ON DELETE CASCADE,
 );
 
 GO
