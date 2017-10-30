@@ -758,7 +758,7 @@ BEGIN TRY
 			FROM @tmpInvoiceTransaction ORDER BY strProductCode
 		END
 		
-		IF(NOT EXISTS (SELECT TOP 1 1 FROM @tmpInvoiceTransaction WHERE intReportingComponentId = @Guid) AND @IsEdi = 0)
+		IF(NOT EXISTS (SELECT TOP 1 1 FROM @tmpInvoiceTransaction WHERE intReportingComponentId = @RCId) AND @IsEdi = 0)
 		BEGIN
 			INSERT INTO tblTFTransaction (uniqTransactionGuid
 				, intReportingComponentId
