@@ -348,7 +348,7 @@ INNER JOIN
 		ON EFI.[intTempDetailIdForTaxes] = ARIDT.[intInvoiceDetailId] 
 ORDER BY 
 	 EFI.[intInvoiceDetailId] ASC
-	,SOSODT.[intInvoiceDetailTaxId] ASC
+	,ARIDT.[intInvoiceDetailTaxId] ASC
 									
 	
 DECLARE	@CurrentErrorMessage NVARCHAR(250)
