@@ -5852,7 +5852,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         strParentLotAlias: currentLot.get('strParentLotAlias'),
                         strStorageLocation: currentLot.get('strStorageLocation'),
                         strSubLocationName: currentLot.get('strSubLocationName'),
-                        dblLotUOMConvFactor: currentLot.get('dblLotUOMConvFactor')
+                        dblLotUOMConvFactor: currentLot.get('dblLotUOMConvFactor'),
+                        strLotAlias: currentLot.get('strLotAlias')
                     });
 
                     grdLotTracking.suspendEvents(true);
@@ -5934,7 +5935,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 strParentLotAlias: currentLot.get('strParentLotAlias'),
                                 strStorageLocation: currentLot.get('strStorageLocation'),
                                 strSubLocationName: currentLot.get('strSubLocationName'),
-                                dblLotUOMConvFactor: currentLot.get('dblLotUOMConvFactor')
+                                dblLotUOMConvFactor: currentLot.get('dblLotUOMConvFactor'),
+                                strLotAlias: currentLot.get('strLotAlias')
                             });
 
                             lastNewLot.set('dblStatedNetPerUnit', me.calculateStatedNetPerUnit(currentReceipt, currentReceiptItem, lastNewLot));
