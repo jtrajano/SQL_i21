@@ -11,7 +11,7 @@ BEGIN TRY
 	DECLARE @intSampleImportId INT
 		,@dtmSampleReceivedDate DATETIME
 		,@strSampleNumber NVARCHAR(30)
-		,@strItemShortName NVARCHAR(50)
+		,@strItemNumber NVARCHAR(50)
 		,@strSampleTypeName NVARCHAR(50)
 		,@strVendorName NVARCHAR(100)
 		,@strContractNumber NVARCHAR(50)
@@ -65,7 +65,7 @@ BEGIN TRY
 	BEGIN
 		SELECT @dtmSampleReceivedDate = NULL
 			,@strSampleNumber = NULL
-			,@strItemShortName = NULL
+			,@strItemNumber = NULL
 			,@strSampleTypeName = NULL
 			,@strVendorName = NULL
 			,@strContractNumber = NULL
@@ -92,7 +92,7 @@ BEGIN TRY
 		SELECT @dtmSampleReceivedDate = CONVERT(DATETIME, dtmSampleReceivedDate, @intConvertYear)
 			,@strSampleNumber = strSampleNumber
 			,@strSampleRefNo = strSampleNumber
-			,@strItemShortName = strItemShortName
+			,@strItemNumber = strItemNumber
 			,@strSampleTypeName = strSampleTypeName
 			,@strVendorName = strVendorName
 			,@strContractNumber = strContractNumber
@@ -136,23 +136,23 @@ BEGIN TRY
 			END
 		END
 
-		-- Item Short Name
-		IF ISNULL(@strItemShortName, '') = ''
-			SELECT @strPreviousErrMsg += 'Invalid Item Short Name. '
+		-- Item No
+		IF ISNULL(@strItemNumber, '') = ''
+			SELECT @strPreviousErrMsg += 'Invalid Item No. '
 		ELSE
 		BEGIN
 			IF NOT EXISTS (
 					SELECT 1
 					FROM tblICItem
-					WHERE strShortName = @strItemShortName
+					WHERE strItemNo = @strItemNumber
 					)
-				SELECT @strPreviousErrMsg += 'Invalid Item Short Name. '
+				SELECT @strPreviousErrMsg += 'Invalid Item No. '
 			ELSE
 			BEGIN
 				SELECT @intItemId = intItemId
 					,@intCategoryId = intCategoryId
 				FROM tblICItem
-				WHERE strShortName = @strItemShortName
+				WHERE strItemNo = @strItemNumber
 			END
 		END
 
@@ -449,12 +449,14 @@ BEGIN TRY
 					SELECT COUNT(1) AS intCount
 					FROM (
 						SELECT DISTINCT CONVERT(DATETIME, dtmSampleReceivedDate, @intConvertYear) dtmSampleReceivedDate
-							,strItemShortName
+							,strItemNumber
 							,strSampleTypeName
 							,strVendorName
 							,strContractNumber
 							,strContainerNumber
 							,strMarks
+							,strSampleNote
+							,strHeaderComment
 							,dblSequenceQuantity
 							,strSampleStatus
 						FROM tblQMSampleImport
@@ -489,12 +491,14 @@ BEGIN TRY
 					,intConcurrencyId
 					,dtmSampleReceivedDate
 					,strSampleNumber
-					,strItemShortName
+					,strItemNumber
 					,strSampleTypeName
 					,strVendorName
 					,strContractNumber
 					,strContainerNumber
 					,strMarks
+					,strSampleNote
+					,strHeaderComment
 					,dblSequenceQuantity
 					,strSampleStatus
 					,strPropertyName
@@ -509,12 +513,14 @@ BEGIN TRY
 					,intConcurrencyId
 					,dtmSampleReceivedDate
 					,strSampleNumber
-					,strItemShortName
+					,strItemNumber
 					,strSampleTypeName
 					,strVendorName
 					,strContractNumber
 					,strContainerNumber
 					,strMarks
+					,strSampleNote
+					,strHeaderComment
 					,dblSequenceQuantity
 					,strSampleStatus
 					,strPropertyName
@@ -545,12 +551,14 @@ BEGIN TRY
 		,intConcurrencyId
 		,dtmSampleReceivedDate AS strSampleReceivedDate
 		,strSampleNumber
-		,strItemShortName
+		,strItemNumber
 		,strSampleTypeName
 		,strVendorName
 		,strContractNumber
 		,strContainerNumber
 		,strMarks
+		,strSampleNote
+		,strHeaderComment
 		,dblSequenceQuantity
 		,strSampleStatus
 		,strPropertyName

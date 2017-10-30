@@ -13,12 +13,14 @@ BEGIN TRY
 		,intSampleImportId INT
 		,dtmSampleReceivedDate DATETIME
 		,strSampleNumber NVARCHAR(30)
-		,strItemShortName NVARCHAR(50)
+		,strItemNumber NVARCHAR(50)
 		,strSampleTypeName NVARCHAR(50)
 		,strVendorName NVARCHAR(100)
 		,strContractNumber NVARCHAR(50)
 		,strContainerNumber NVARCHAR(100)
 		,strMarks NVARCHAR(100)
+		,strSampleNote NVARCHAR(512)
+		,strHeaderComment NVARCHAR(MAX)
 		,dblSequenceQuantity NUMERIC(18, 6)
 		,strSampleStatus NVARCHAR(30)
 		,intCreatedUserId INT
@@ -26,12 +28,14 @@ BEGIN TRY
 		)
 	DECLARE @intSampleImportId INT
 		,@dtmSampleReceivedDate DATETIME
-		,@strItemShortName NVARCHAR(50)
+		,@strItemNumber NVARCHAR(50)
 		,@strSampleTypeName NVARCHAR(50)
 		,@strVendorName NVARCHAR(100)
 		,@strContractNumber NVARCHAR(50)
 		,@strContainerNumber NVARCHAR(100)
 		,@strMarks NVARCHAR(100)
+		,@strSampleNote NVARCHAR(512)
+		,@strHeaderComment NVARCHAR(MAX)
 		,@dblSequenceQuantity NUMERIC(18, 6)
 		,@strSampleStatus NVARCHAR(30)
 		,@intCreatedUserId INT
@@ -87,12 +91,14 @@ BEGIN TRY
 	SELECT MIN(intSampleImportId) AS intSampleImportId
 		,CONVERT(DATETIME, dtmSampleReceivedDate, @intConvertYear) dtmSampleReceivedDate
 		,strSampleNumber
-		,strItemShortName
+		,strItemNumber
 		,strSampleTypeName
 		,strVendorName
 		,strContractNumber
 		,strContainerNumber
 		,strMarks
+		,strSampleNote
+		,strHeaderComment
 		,dblSequenceQuantity
 		,strSampleStatus
 		,MIN(intCreatedUserId) AS intCreatedUserId
@@ -100,12 +106,14 @@ BEGIN TRY
 	FROM tblQMSampleImport
 	GROUP BY CONVERT(DATETIME, dtmSampleReceivedDate, @intConvertYear)
 		,strSampleNumber
-		,strItemShortName
+		,strItemNumber
 		,strSampleTypeName
 		,strVendorName
 		,strContractNumber
 		,strContainerNumber
 		,strMarks
+		,strSampleNote
+		,strHeaderComment
 		,dblSequenceQuantity
 		,strSampleStatus
 	ORDER BY intSampleImportId
@@ -118,12 +126,14 @@ BEGIN TRY
 	WHILE (ISNULL(@intSampleImportId, 0) > 0)
 	BEGIN
 		SELECT @dtmSampleReceivedDate = NULL
-			,@strItemShortName = NULL
+			,@strItemNumber = NULL
 			,@strSampleTypeName = NULL
 			,@strVendorName = NULL
 			,@strContractNumber = NULL
 			,@strContainerNumber = NULL
 			,@strMarks = NULL
+			,@strSampleNote = NULL
+			,@strHeaderComment = NULL
 			,@dblSequenceQuantity = NULL
 			,@strSampleStatus = NULL
 			,@intCreatedUserId = NULL
@@ -153,12 +163,14 @@ BEGIN TRY
 
 		SELECT @dtmSampleReceivedDate = dtmSampleReceivedDate
 			,@strSampleRefNo = strSampleNumber
-			,@strItemShortName = strItemShortName
+			,@strItemNumber = strItemNumber
 			,@strSampleTypeName = strSampleTypeName
 			,@strVendorName = strVendorName
 			,@strContractNumber = strContractNumber
 			,@strContainerNumber = strContainerNumber
 			,@strMarks = strMarks
+			,@strSampleNote = strSampleNote
+			,@strHeaderComment = strHeaderComment
 			,@dblSequenceQuantity = dblSequenceQuantity
 			,@strSampleStatus = strSampleStatus
 			,@intCreatedUserId = intCreatedUserId
@@ -170,7 +182,7 @@ BEGIN TRY
 			,@intCategoryId = intCategoryId
 			,@strItemNo = strItemNo
 		FROM tblICItem
-		WHERE strShortName = @strItemShortName
+		WHERE strItemNo = @strItemNumber
 
 		SELECT @intSampleTypeId = intSampleTypeId
 		FROM tblQMSampleType
@@ -478,7 +490,7 @@ BEGIN TRY
 			,@intShipperEntityId
 			,NULL
 			,NULL
-			,NULL
+			,@strSampleNote
 			,@dtmSampleReceivedDate
 			,@dtmCurrentDate
 			,@intCreatedUserId
@@ -505,7 +517,7 @@ BEGIN TRY
 			,@intLocationId
 			,NULL
 			,NULL
-			,NULL
+			,@strHeaderComment
 			,@intCreatedUserId
 			,@dtmCurrentDate
 			,@intCreatedUserId
