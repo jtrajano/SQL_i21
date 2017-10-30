@@ -84,23 +84,3 @@ EXEC('
 						ON tblPREmployeeEarning.intEmployeeEarningId = tblPREmployeeEarning_Ranked.intEmployeeEarningId')
 
 END
-
-/*
-* Employees
-* 1. Populate strEmployerStateTaxID (Run Once)
-* 2...
-*/
-
-IF EXISTS(SELECT * FROM sys.tables WHERE object_id = object_id('tblPREmployee'))
-BEGIN
-
-EXEC('
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblPREmployee WHERE strEmployerStateTaxID IS NOT NULL)
-	BEGIN
-		UPDATE tblPREmployee 
-		SET strEmployerStateTaxID = ISNULL((SELECT TOP 1 strStateTaxID FROM tblSMCompanySetup), '''')
-		WHERE ISNULL(strEmployerStateTaxID, '''') = ''''
-	END
-')
-
-END
