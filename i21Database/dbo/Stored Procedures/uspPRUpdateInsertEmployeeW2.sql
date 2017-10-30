@@ -63,9 +63,7 @@ BEGIN
 		,dblBox12d = 0
 		,strState = ISNULL(STATETAX.strState, '')
 		,strLocality = CASE WHEN (ISNULL(LOCALTAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN ISNULL(LOCALTAX.strLocal, '') ELSE '' END
-		,strStateTaxID = CASE WHEN (ISNULL((SELECT TOP 1 strEmployerStateTaxID FROM tblPREmployee WHERE intEntityEmployeeId = @intEntityEmployeeId), '') = '') 
-							THEN ISNULL((SELECT TOP 1 strStateTaxID FROM tblSMCompanySetup), '') 
-							ELSE ISNULL((SELECT TOP 1 strEmployerStateTaxID FROM tblPREmployee WHERE intEntityEmployeeId = @intEntityEmployeeId), '') END
+		,strStateTaxID = ISNULL((SELECT TOP 1 strStateTaxID FROM tblSMCompanySetup), '')
 		,dblTaxableState = ISNULL(TXBLSTATE.dblTotal, 0)
 		,dblStateTax = ISNULL(STATETAX.dblTotal, 0)
 		,dblTaxableLocal = CASE WHEN (ISNULL(LOCALTAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN ISNULL(TXBLLOCAL.dblTotal, 0) ELSE 0 END
@@ -120,9 +118,7 @@ BEGIN
 		,dblMedTax = ISNULL(MEDTAX.dblTotal, 0)
 		,strState = ISNULL(STATETAX.strState, '')
 		,strLocality = CASE WHEN (ISNULL(LOCALTAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN ISNULL(LOCALTAX.strLocal, '') ELSE '' END
-		,strStateTaxID = CASE WHEN (ISNULL((SELECT TOP 1 strEmployerStateTaxID FROM tblPREmployee WHERE intEntityEmployeeId = @intEntityEmployeeId), '') = '') 
-							THEN ISNULL((SELECT TOP 1 strStateTaxID FROM tblSMCompanySetup), '') 
-							ELSE ISNULL((SELECT TOP 1 strEmployerStateTaxID FROM tblPREmployee WHERE intEntityEmployeeId = @intEntityEmployeeId), '') END
+		,strStateTaxID = ISNULL((SELECT TOP 1 strStateTaxID FROM tblSMCompanySetup), '')
 		,dblTaxableState = ISNULL(TXBLSTATE.dblTotal, 0)
 		,dblStateTax = ISNULL(STATETAX.dblTotal, 0)
 		,dblTaxableLocal = CASE WHEN (ISNULL(LOCALTAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN ISNULL(TXBLLOCAL.dblTotal, 0) ELSE 0 END
