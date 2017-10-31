@@ -309,4 +309,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\7_AR\8_FixARPaymentData_applying_card_info_constraint.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\4_SM\1740_FixMasterMenu.sql" />
+  </ItemGroup>
 </Project>
