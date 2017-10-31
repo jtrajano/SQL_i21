@@ -29,14 +29,22 @@
 	l1.dtmDateCreated dtmLotProducedDate,
 	e1.strName as strUserName,
 	w.intBlendRequirementId,
-	wp.dtmBusinessDate
+	wp.dtmBusinessDate,
+	w.strERPOrderNo,
+	w.dtmExpectedDate,
+	m.strName AS strMachineName,
+	LTRIM(STR(DATEDIFF(MINUTE,w.dtmStartedDate,w.dtmCompletedDate) / 60) )+ ':' + REPLACE(STR(LTRIM(STR( DATEDIFF(MINUTE,w.dtmStartedDate,w.dtmCompletedDate) % 60)),2), ' ', '0' ) AS dtmStageDuration,
+	LTRIM(STR(DATEDIFF(MINUTE,w.dtmStartedDate,w.dtmActualProductionEndDate) / 60) )+ ':' + REPLACE(STR(LTRIM(STR(DATEDIFF(MINUTE,w.dtmStartedDate,w.dtmActualProductionEndDate) % 60)),2), ' ', '0') AS dtmBlendDuration,
+	wc1.dblStagedQty,
+	((wp.dblQuantity - w.dblQuantity) / w.dblQuantity) * 100 AS dblWeightDiff,
+	pl.strParentLotNumber strConsumedParentLotNumber
 	from tblMFWorkOrder w
 	JOIN tblMFBlendRequirement br ON br.intBlendRequirementId=w.intBlendRequirementId
 	JOIN tblMFWorkOrderConsumedLot wc ON wc.intWorkOrderId=w.intWorkOrderId
 	JOIN tblICItem i ON i.intItemId=w.intItemId
 	JOIN tblICLot l on l.intLotId=wc.intLotId
 	JOIN tblICItem i1 ON i1.intItemId=l.intItemId
-	JOIN tblMFWorkOrderProducedLot wp on wp.intWorkOrderId=w.intWorkOrderId
+	JOIN tblMFWorkOrderProducedLot wp on wp.intWorkOrderId=w.intWorkOrderId AND ISNULL(wp.ysnProductionReversed,0)=0
 	JOIN tblICLot l1 on l1.intLotId=wp.intLotId
 	LEFT JOIN tblICCategory cg on cg.intCategoryId=i.intCategoryId
 	JOIN tblICItemUOM iu on iu.intItemUOMId=wc.intItemUOMId
@@ -48,4 +56,7 @@
 	JOIN tblICUnitMeasure um2 on iu2.intUnitMeasureId=um2.intUnitMeasureId
 	LEFT JOIN tblEMEntity e1 ON l1.intCreatedEntityId=e1.intEntityId
 	LEFT JOIN [tblEMEntityType] et1 ON e1.intEntityId=et1.intEntityId AND et1.strType='User'
+	LEFT JOIN tblMFMachine m on w.intMachineId=m.intMachineId
+	LEFT JOIN (Select intWorkOrderId,SUM(dblQuantity) AS dblStagedQty From tblMFWorkOrderConsumedLot Group By intWorkOrderId) wc1 on wc1.intWorkOrderId=w.intWorkOrderId
+	LEFT JOIN tblICParentLot pl on l.intParentLotId=pl.intParentLotId
 	WHERE w.intStatusId=13

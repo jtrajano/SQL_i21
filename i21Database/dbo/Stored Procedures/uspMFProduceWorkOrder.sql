@@ -200,7 +200,6 @@ BEGIN
 				END
 			)
 		,dtmActualProductionEndDate = @dtmCreated
-		,dtmCompletedDate = @dtmCreated
 		,intStatusId = @intStatusId
 		,intStorageLocationId = @intStorageLocationId
 	WHERE intWorkOrderId = @intWorkOrderId
