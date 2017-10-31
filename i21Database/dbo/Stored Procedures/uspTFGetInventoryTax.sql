@@ -184,7 +184,7 @@ BEGIN TRY
 				, strTransporterIdType = 'FEIN'
 				, strVendorIdType = 'FEIN'
 				, strCustomerIdType = 'FEIN'
-				, strVendorInvoiceNumber = APBill.strVendorOrderNumber
+				, strVendorInvoiceNumber = tblTRLoadReceipt.strBillOfLading
 				, strCustomerLicenseNumber = tblTFTaxAuthorityCustomerLicense.strLicenseNumber
 				, strCustomerAccountStatusCode = NULL
 				, strCustomerStreetAddress = NULL
@@ -215,11 +215,11 @@ BEGIN TRY
 			INNER JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId
 			LEFT JOIN tblTFTaxAuthorityCustomerLicense ON tblTFTaxAuthorityCustomerLicense.intEntityId = tblTRLoadDistributionHeader.intEntityCustomerId
 			LEFT JOIN tblTRState ON tblTRState.intStateId = tblTRLoadHeader.intStateId
-			LEFT JOIN (
-					SELECT TOP 1 tblAPBillDetail.intInventoryReceiptItemId, tblAPBill.intBillId, tblAPBill.strVendorOrderNumber
-					FROM tblAPBillDetail 
-					INNER JOIN tblAPBill ON tblAPBillDetail.intBillId = tblAPBill.intBillId
-				) APBill ON APBill.intInventoryReceiptItemId = tblICInventoryReceiptItem.intInventoryReceiptItemId
+			--LEFT JOIN (
+			--		SELECT TOP 1 tblAPBillDetail.intInventoryReceiptItemId, tblAPBill.intBillId, tblAPBill.strVendorOrderNumber
+			--		FROM tblAPBillDetail 
+			--		INNER JOIN tblAPBill ON tblAPBillDetail.intBillId = tblAPBill.intBillId
+			--	) APBill ON APBill.intInventoryReceiptItemId = tblICInventoryReceiptItem.intInventoryReceiptItemId
 			CROSS JOIN tblSMCompanySetup
 			WHERE  tblTFReportingComponent.intReportingComponentId = @RCId
 				AND tblICInventoryReceipt.ysnPosted = 1
@@ -336,7 +336,7 @@ BEGIN TRY
 				, strTransporterIdType = 'FEIN'
 				, strVendorIdType = 'FEIN'
 				, strCustomerIdType = 'FEIN'
-				, strVendorInvoiceNumber = APBill.strVendorOrderNumber
+				, strVendorInvoiceNumber = tblTRLoadReceipt.strBillOfLading
 				, strCustomerLicenseNumber = tblTFTaxAuthorityCustomerLicense.strLicenseNumber
 				, strCustomerAccountStatusCode = NULL
 				, strCustomerStreetAddress = NULL
@@ -367,11 +367,11 @@ BEGIN TRY
 			INNER JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId
 			LEFT JOIN tblTFTaxAuthorityCustomerLicense ON tblTFTaxAuthorityCustomerLicense.intEntityId = tblTRLoadDistributionHeader.intEntityCustomerId
 			LEFT JOIN tblTRState ON tblTRState.intStateId = tblTRLoadHeader.intStateId
-			LEFT JOIN (
-					SELECT TOP 1 tblAPBillDetail.intInventoryReceiptItemId, tblAPBill.intBillId, tblAPBill.strVendorOrderNumber
-					FROM tblAPBillDetail 
-					INNER JOIN tblAPBill ON tblAPBillDetail.intBillId = tblAPBill.intBillId
-				) APBill ON APBill.intInventoryReceiptItemId = tblICInventoryReceiptItem.intInventoryReceiptItemId
+			--LEFT JOIN (
+			--		SELECT TOP 1 tblAPBillDetail.intInventoryReceiptItemId, tblAPBill.intBillId, tblAPBill.strVendorOrderNumber
+			--		FROM tblAPBillDetail 
+			--		INNER JOIN tblAPBill ON tblAPBillDetail.intBillId = tblAPBill.intBillId
+			--	) APBill ON APBill.intInventoryReceiptItemId = tblICInventoryReceiptItem.intInventoryReceiptItemId
 			CROSS JOIN tblSMCompanySetup
 			WHERE tblTFReportingComponent.intReportingComponentId = @RCId 
 				AND tblICInventoryReceipt.ysnPosted = 1
