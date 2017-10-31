@@ -142,6 +142,7 @@ BEGIN TRY
 		FROM vyuGRGetStorageTransferTicket
 		WHERE intEntityId = @intEntityId
 			AND intItemId = @intItemId
+			AND intCompanyLocationId = @intStorageLocationId
 			AND intStorageTypeId = @intStorageTypeId
 			AND ysnDPOwnedType = 0
 			AND ysnCustomerStorage = 0
