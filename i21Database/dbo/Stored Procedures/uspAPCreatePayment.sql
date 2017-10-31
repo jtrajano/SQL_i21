@@ -337,6 +337,7 @@ BEGIN
 	 @rateType INT,
 	 @rate DECIMAL(18,6),
 	 @currency INT,
+	 @location INT,
 	 @paymentId INT OUTPUT',
 	 @location = @location,
 	 @userId = @userId,
