@@ -26,6 +26,8 @@ BEGIN TRY
 		,@ysnIsNegativeQuantityAllowed bit
 		,@strIsNegativeQuantityAllowed nvarchar(50)
 		,@dtmCurrentDate datetime=GetDate()
+		,@ysnEnableParentLot bit=0
+		,@strXmlRecipeComputation nvarchar(Max)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT,@strXml
 
@@ -121,6 +123,79 @@ End
 		Update tblMFWorkOrderConsumedLot Set ysnStaged=1 Where intWorkOrderId=@intWorkOrderId
 
 		Exec [uspMFDeleteLotReservation] @intWorkOrderId=@intWorkOrderId
+
+		--Recipe Computation for Actual Qty Consumed
+		If (Select COUNT(1) From tblMFWorkOrderRecipeComputation Where intWorkOrderId=@intWorkOrderId AND intTypeId=1)>0
+		Begin
+			DECLARE @tblBlendProduction AS TABLE
+			   (
+				 intRowNo INT
+				,intTestId INT
+				,strTestName NVARCHAR(50)
+				,intPropertyId INT
+				,strPropertyName NVARCHAR(100)
+				,dblComputedValue NUMERIC(18,6)
+				,dblMinValue NUMERIC(18,6)
+				,dblMaxValue NUMERIC(18,6)
+				,strMethodName NVARCHAR(50)
+				,intMethodId INT
+			   )
+
+			Select TOP 1 @ysnEnableParentLot=ISNULL(ysnEnableParentLot,0) From tblMFCompanyPreference
+
+			Set @strXmlRecipeComputation=''
+			If @ysnEnableParentLot=0
+			Begin
+				Select @strXmlRecipeComputation=@strXmlRecipeComputation 
+				+ '<lot>'   
+				+  '<intLotId>' + CONVERT(VARCHAR(500),intLotId) + '</intLotId>'	
+				+  '<dblQty>' + CONVERT(VARCHAR(500),dblQuantity) + '</dblQty>'	
+				+ '</lot>' 
+				From tblMFWorkOrderConsumedLot Where intWorkOrderId=@intWorkOrderId
+			End
+			Else
+			Begin
+				Select @strXmlRecipeComputation=@strXmlRecipeComputation 
+				+ '<lot>'   
+				+  '<intLotId>' + CONVERT(VARCHAR(500),l.intParentLotId) + '</intLotId>'	
+				+  '<dblQty>' + CONVERT(VARCHAR(500),SUM(cl.dblQuantity)) + '</dblQty>'	
+				+ '</lot>' 
+				From tblMFWorkOrderConsumedLot cl Join tblICLot l on cl.intLotId=l.intLotId
+				Where intWorkOrderId=@intWorkOrderId
+				Group By l.intParentLotId 
+			End
+
+			If ISNULL(@strXmlRecipeComputation,'')<>''
+			Begin
+				Set @strXmlRecipeComputation='<root>' + @strXmlRecipeComputation  + '</root>'
+
+				--Get the computation values based on actual Qty consumed
+				Insert Into @tblBlendProduction
+				Exec uspMFGetBlendRecipeComputation @strXml=@strXmlRecipeComputation,@intTypeId=2,@intProductId=@intItemId
+	
+				--insert the values to tblMFWorkOrderRecipeComputation
+				If (Select count(1) From @tblBlendProduction) > 0
+				Begin
+					Set @strXmlRecipeComputation=''
+
+					Select @strXmlRecipeComputation=@strXmlRecipeComputation
+					+ '<computation>'
+                    + '<intTestId>' + CONVERT(VARCHAR(500),intTestId) + '</intTestId>'
+                    + '<intPropertyId>' + CONVERT(VARCHAR(500),intPropertyId) + '</intPropertyId>'
+                    + '<dblComputedValue>' + CONVERT(VARCHAR(500),dblComputedValue) + '</dblComputedValue>'
+                    + '<dblMinValue>' + CONVERT(VARCHAR(500),dblMinValue) + '</dblMinValue>'
+                    + '<dblMaxValue>' + CONVERT(VARCHAR(500),dblMaxValue) + '</dblMaxValue>'
+                    + '<intMethodId>' + CONVERT(VARCHAR(500),intMethodId) + '</intMethodId>'
+                    + '</computation>'
+					From @tblBlendProduction
+
+					Set @strXmlRecipeComputation='<root>' + @strXmlRecipeComputation  + '</root>'
+
+					Exec [uspMFCreateBlendRecipeComputation] @intWorkOrderId=@intWorkOrderId,@intTypeId=2,@strXml=@strXmlRecipeComputation	
+
+				End
+			End
+		End
 	End
 
 	Update tblMFWorkOrder Set intStatusId=12,dtmCompletedDate=@dtmCurrentDate,intLastModifiedUserId=@intUserId,dtmLastModified=@dtmCurrentDate 
