@@ -313,4 +313,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\11_IC\DeleteObsoleteSP.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\4_SM\1740_FixMasterMenu.sql" />
+  </ItemGroup>
 </Project>
