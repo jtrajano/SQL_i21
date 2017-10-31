@@ -496,7 +496,8 @@ SELECT
 	,[intOrderUOMId]						= NULL
 	,[dblQtyOrdered]						= @ZeroDecimal
 	,[intItemUOMId]							= ICISI.intItemUOMId
-	,[dblQtyShipped]						= (CASE WHEN ISNULL(ICISI.dblDestinationQuantity,0) = 0 THEN ISNULL(ICISI.dblQuantity,0) ELSE ICISI.dblDestinationQuantity END)
+	--,[dblQtyShipped]						= (CASE WHEN ISNULL(ICISI.dblDestinationQuantity,0) = 0 THEN ISNULL(ICISI.dblQuantity,0) ELSE ICISI.dblDestinationQuantity END)
+	,[dblQtyShipped]						= ISNULL(ICISI.dblQuantity,0)
 	,[dblDiscount]							= @ZeroDecimal
 	,[dblItemWeight]						= @ZeroDecimal
 	,[intItemWeightUOMId]					= @ZeroDecimal
