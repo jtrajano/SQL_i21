@@ -511,7 +511,8 @@ BEGIN TRY
 				, strDiversionOriginalDestinationState
 				, strTransactionType
 				, intTransactionNumberId
-				, strVendorLicenseNumber)
+				, strVendorLicenseNumber
+				, dblQtyShipped)
 			SELECT DISTINCT @Guid
 				, intItemId
 				, intReportingComponentId
@@ -566,6 +567,7 @@ BEGIN TRY
 				, strTransactionType
 				, intTransactionNumberId
 				, strVendorLicenseNumber
+				, dblGross
 			FROM @TFTransaction
 		END
 
