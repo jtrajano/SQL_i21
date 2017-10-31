@@ -68,7 +68,8 @@ AS
 			CH.strSalesperson,
 			CH.strCPContract,
 			CH.strCounterParty,
-			ISNULL(TR.ysnOnceApproved,0) AS ysnApproved
+			ISNULL(TR.ysnOnceApproved,0) AS ysnApproved,
+			CH.intDefaultCommodityUnitMeasureId
 
 	FROM	[vyuCTSearchContractHeader] CH	LEFT
 	JOIN

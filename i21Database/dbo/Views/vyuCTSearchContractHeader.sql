@@ -64,7 +64,8 @@ SELECT	CH.intContractHeaderId,
 		dbo.fnCTGetContractStatuses(CH.intContractHeaderId)	AS	strStatuses,
 		CS.intUnitMeasureId AS intStockCommodityUnitMeasureId,
 		U1.strUnitMeasure AS strStockCommodityUnitMeasure,
-		PY.strName AS strCounterParty
+		PY.strName AS strCounterParty,
+		CD.intUnitMeasureId	AS	intDefaultCommodityUnitMeasureId
 
 FROM	tblCTContractHeader					CH	
 JOIN	tblCTContractType					TP	ON	TP.intContractTypeId				=		CH.intContractTypeId
@@ -74,6 +75,8 @@ JOIN	tblEMEntity							ES	ON	ES.intEntityId						=		CH.intSalespersonId					LEFT
 JOIN	tblEMEntity							PY	ON	PY.intEntityId						=		CH.intCounterPartyId				LEFT
 JOIN	tblICCommodityUnitMeasure			CS	ON	CS.intCommodityId					=		CH.intCommodityId				
 												AND	CS.ysnStockUnit						=		1									LEFT
+JOIN	tblICCommodityUnitMeasure			CD	ON	CD.intCommodityId					=		CH.intCommodityId				
+												AND	CD.ysnDefault						=		1									LEFT
 JOIN	tblICUnitMeasure					U1	ON	U1.intUnitMeasureId					=		CS.intUnitMeasureId					LEFT
 JOIN	tblICCommodityUnitMeasure			CM	ON	CM.intCommodityUnitMeasureId		=		CH.intCommodityUOMId				LEFT
 JOIN	tblICUnitMeasure					U2	ON	U2.intUnitMeasureId					=		CM.intUnitMeasureId					LEFT
