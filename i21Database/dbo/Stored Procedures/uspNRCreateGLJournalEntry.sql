@@ -52,7 +52,7 @@ BEGIN
 	WHERE N.intNoteId = @intNoteId  
 	
 	-- Get Note Transaction user Id, trans amount
-	SELECT @intUserId = intLastModifiedUserId, @dblTransAmt = dblTransAmount, @intLocationId = ISNULL(strLocation,0) 
+	SELECT @intUserId = intEntityId, @dblTransAmt = dblTransAmount, @intLocationId = ISNULL(strLocation,0) 
 	, @dtmExpectedPayDate = dtmNoteTranDate
 	FROM dbo.tblNRNoteTransaction WHERE intNoteTransId = @NoteTransId                
 

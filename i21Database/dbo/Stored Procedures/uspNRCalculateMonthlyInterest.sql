@@ -78,10 +78,8 @@ BEGIN TRY
 			if @dblLastPrincipal =0 AND DATEPART(MM, @dtmLastTransactionDate)  = DATEPART(MM, @dtmCurrentDate)
 			BEGIN	
 				SET @dblInterestToDate = dbo.fnCalculateInterestToDate(@intNoteId, @dtmCurrentDate,3,'')
-				INSERT into dbo.tblNRNoteTransaction  
-				SELECT   
-				@intNoteId,@dtmCurrentDate,3,@intDaysDiff,ISNULL(@dblIterestAmount,0)+ isnull(@dblInterestToDate,0), @dblLastPrincipal
-				, isnull(@dblInterestToDate,0), 0, 0, '', null, '', '', '', '', 0, 0, '', @dtmCurrentDate, '', '', '', '', null, @intUserID, 1
+				INSERT into dbo.tblNRNoteTransaction (intNoteId, dtmNoteTranDate, dtmInvoiceDate, dtmAsOfDate, intNoteTransTypeId, intTransDays, dblTransAmount, dblPrincipal, dblInterestToDate, intEntityId, intConcurrencyId)
+				SELECT @intNoteId, @dtmCurrentDate, @dtmCurrentDate, @dtmCurrentDate, 3, @intDaysDiff, ISNULL(@dblIterestAmount,0)+ ISNULL(@dblInterestToDate,0), @dblLastPrincipal, ISNULL(@dblInterestToDate,0), @intUserID, 1
 				
 				SET @intNoteTransId = @@IDENTITY
 				
@@ -90,10 +88,8 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
-				INSERT into dbo.tblNRNoteTransaction  
-				SELECT   
-				@intNoteId, @dtmCurrentDate, 3, @intDaysDiff, 0, @dblLastPrincipal, 0, 0, 0, '', null, '', '', '', '', 0, 0, ''
-				, @dtmCurrentDate, '', '', '', '', null, @intUserID, 1 
+				INSERT into dbo.tblNRNoteTransaction (intNoteId, dtmNoteTranDate, dtmInvoiceDate, dtmAsOfDate, intNoteTransTypeId, intTransDays, dblPrincipal, intEntityId, intConcurrencyId)
+				SELECT @intNoteId, @dtmCurrentDate, @dtmCurrentDate, @dtmCurrentDate, 3, @intDaysDiff, @dblLastPrincipal, @intUserID, 1
 				 
 				SET @intNoteTransId = @@IDENTITY
 				
@@ -122,23 +118,18 @@ BEGIN TRY
 				if @dblLastPrincipal =0 AND DATEPART(MM, @dtmLastTransactionDate)  = DATEPART(MM, @dtmCurrentDate)
 				BEGIN				
 					SELECT @dblTotalInterestAdj = SUM(dblTransAmount) FROM dbo.tblNRNoteTransaction WHERE intNoteId = @intNoteId AND intNoteTransTypeId = 7 AND strAdjOnPrincOrInt = 'Interest'
-					INSERT into dbo.tblNRNoteTransaction  
-					SELECT   
-					@intNoteId,@dtmCurrentDate,3, @intDaysDiff
-					,ISNULL(@dblIterestAmount,0)+ isnull(@dblInterestToDate,0), @dblLastPrincipal, @dblInterestToDate
-					, 0, IsNuLl(@dblLastPrincipal,0) + ISNULL(@dblInterestToDate,0) + ISNULL(@dblLastInterestToDate,0)+ ISNULL(@dblTotalInterestAdj,0)- ISNULL(@dblAmtAppInterest,0) 
-					, '', null, '', '', '', '', 0, 0, '', @dtmCurrentDate, '', '', '', '', null, @intUserID, 1
-					
+					INSERT into dbo.tblNRNoteTransaction (intNoteId, dtmNoteTranDate, dtmAsOfDate, dtmInvoiceDate, intNoteTransTypeId, intTransDays, dblTransAmount, dblPrincipal, dblInterestToDate, 
+					dblUnpaidInterest, dblPayOffBalance , intEntityId, intConcurrencyId) 
+					SELECT @intNoteId, @dtmCurrentDate, @dtmCurrentDate, @dtmCurrentDate, 3, @intDaysDiff, ISNULL(@dblIterestAmount,0)+ isnull(@dblInterestToDate,0), @dblLastPrincipal, @dblInterestToDate
+					, ISNULL(@dblLastPrincipal,0) + ISNULL(@dblInterestToDate,0), ISNULL(@dblLastInterestToDate,0)+ ISNULL(@dblTotalInterestAdj,0)- ISNULL(@dblAmtAppInterest,0) , @intUserID, 1
 					
 				END
 				ELSE
 				BEGIN
-					INSERT into dbo.tblNRNoteTransaction  
-					SELECT   
-					@intNoteId,@dtmCurrentDate,3, @intDaysDiff,ISNULL(@dblIterestAmount,0)+ isnull(@dblInterestToDate,0)
-					, @dblLastPrincipal, @dblInterestToDate, 0, 
-					IsNuLl(@dblLastPrincipal,0) + ISNULL(@dblInterestToDate,0) + ISNULL(@dblLastInterestToDate,0)+ ISNULL(@dblInterestAdjustment,0)- ISNULL(@dblAmtAppInterest,0) 
-					, '', null, '', '', '', '', 0, 0, '', @dtmCurrentDate, '', '', '', '', null, @intUserID, 1
+					INSERT into dbo.tblNRNoteTransaction (intNoteId, dtmNoteTranDate, dtmAsOfDate, dtmInvoiceDate, intNoteTransTypeId, intTransDays, dblTransAmount, dblPrincipal, dblInterestToDate
+					, dblUnpaidInterest, intEntityId, intConcurrencyId) 
+					SELECT @intNoteId, @dtmCurrentDate, @dtmCurrentDate, @dtmCurrentDate, 3, @intDaysDiff, ISNULL(@dblIterestAmount,0)+ isnull(@dblInterestToDate,0), @dblLastPrincipal, @dblInterestToDate
+					, IsNuLl(@dblLastPrincipal,0) + ISNULL(@dblInterestToDate,0) + ISNULL(@dblLastInterestToDate,0)+ ISNULL(@dblInterestAdjustment,0)- ISNULL(@dblAmtAppInterest,0), @intUserID, 1
 					
 				END
 				 
