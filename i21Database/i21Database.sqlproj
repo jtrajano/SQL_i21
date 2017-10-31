@@ -5825,6 +5825,7 @@
     <Build Include="dbo\Views\vyuLGLoadWarehouseServices.sql" />
     <None Include="Scripts\Post-Deployment\SM\1740_UpdateSalesMenus.sql" />
     <None Include="Scripts\Post-Deployment\PAT\DefaultData\2_DefaultCompanyPreference.sql" />
+    <Build Include="dbo\Views\vyuMFGetQualityComparison.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

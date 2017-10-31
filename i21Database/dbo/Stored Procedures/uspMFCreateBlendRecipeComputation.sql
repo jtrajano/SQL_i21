@@ -40,7 +40,7 @@ INSERT INTO @tblRecipeComputation(
 	intMethodId int
 	)
 
-Delete From tblMFWorkOrderRecipeComputation Where intWorkOrderId=@intWorkOrderId
+Delete From tblMFWorkOrderRecipeComputation Where intWorkOrderId=@intWorkOrderId AND intTypeId=@intTypeId
 
 Insert Into tblMFWorkOrderRecipeComputation(intWorkOrderId,intTestId,intPropertyId,dblComputedValue,dblMinValue,dblMaxValue,intTypeId,intMethodId)
 Select @intWorkOrderId,intTestId,intPropertyId,dblComputedValue,dblMinValue,dblMaxValue,@intTypeId,intMethodId From @tblRecipeComputation
