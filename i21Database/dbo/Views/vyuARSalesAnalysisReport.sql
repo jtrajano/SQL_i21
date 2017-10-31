@@ -27,19 +27,20 @@ SELECT
 									END
 	 , dblMargin				= (ISNULL(SAR.dblPrice, 0) - ISNULL(SAR.dblStandardCost, 0)) * 
 									CASE WHEN SAR.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund') 
-										THEN CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN -ISNULL(SAR.dblQtyShipped, 0) ELSE ISNULL(SAR.dblQtyShipped, 0) END
+										THEN CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') 
+											THEN -ISNULL(SAR.dblQtyShipped, 0) ELSE ISNULL(SAR.dblQtyShipped, 0) END
 										ELSE ISNULL(SAR.dblQtyOrdered, 0)
-									END
+									END + ISNULL(ISNULL(VPRGITM.dblRebateRate, VPRGITMCAT.dblRebateRate) , 0 )
 	 , dblMarginPercentage		= CASE WHEN (ISNULL(SAR.dblPrice, 0) - ISNULL(SAR.dblStandardCost, 0)) * 
 											CASE WHEN SAR.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund') 
 												THEN ISNULL(SAR.dblQtyShipped, 0)
 												ELSE ISNULL(SAR.dblQtyOrdered, 0)
 											END > 0 AND ISNULL(SAR.dblLineTotal, 0) > 0
-									THEN ((ISNULL(SAR.dblPrice, 0) - ISNULL(SAR.dblStandardCost, 0)) * 
+									THEN ( ( (ISNULL(SAR.dblPrice, 0) - ISNULL(SAR.dblStandardCost, 0)) * 
 											CASE WHEN SAR.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund') 
 												THEN CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN -ISNULL(SAR.dblQtyShipped, 0) ELSE ISNULL(SAR.dblQtyShipped, 0) END
 												ELSE ISNULL(SAR.dblQtyOrdered, 0)
-											END / ISNULL(SAR.dblLineTotal, 0)) * 100 
+											END + ISNULL(ISNULL(VPRGITM.dblRebateRate, VPRGITMCAT.dblRebateRate) , 0 ))/ ISNULL(SAR.dblLineTotal, 0)) * 100 
 									ELSE 0 
 								  END
 	 , dblPrice					= ISNULL(SAR.dblPrice, 0)
@@ -74,6 +75,9 @@ SELECT
 	 , intCurrencyId			= SAR.intCurrencyId
 	 , strCurrency				= SAR.strCurrency
 	 , strCurrencyDescription	= SAR.strCurrencyDescription
+	 , intInvoiceDetailId 		= SAR.intInvoiceDetailId
+	 , intProgramId				= SAR.intProgramId
+	 , dblVendorRebate			= ISNULL(ISNULL(VPRGITM.dblRebateRate, VPRGITMCAT.dblRebateRate) , 0 )
 FROM
 (
 --NON SOftware
@@ -115,6 +119,8 @@ SELECT strRecordNumber				= ARI.strInvoiceNumber
 	  , intCurrencyId				= ARI.intCurrencyId
 	  , strCurrency					= SMC.strCurrency
 	  , strCurrencyDescription		= SMC.strDescription
+	  , intInvoiceDetailId			= ARID.intInvoiceDetailId
+	  , intProgramId				= ARID.intProgramId
 FROM
 			tblARInvoiceDetail ARID 
 		INNER JOIN
@@ -244,6 +250,8 @@ SELECT strRecordNumber				= SO.strSalesOrderNumber
 	 , intCurrencyId				= SO.intCurrencyId
 	 , strCurrency					= SMC.strCurrency
 	 , strCurrencyDescription		= SMC.strDescription
+	 , intInvoiceDetailId			= NULL	 
+	 , intProgramId					= NULL
 FROM
 		tblSOSalesOrder SO 
 	LEFT OUTER JOIN 
@@ -393,6 +401,8 @@ SELECT strRecordNumber				= ARI.strInvoiceNumber
 	  , intCurrencyId				= ARI.intCurrencyId
 	  , strCurrency					= SMC.strCurrency
 	  , strCurrencyDescription		= SMC.strDescription
+	  , intInvoiceDetailId			= ARID.intInvoiceDetailId
+	  , intProgramId				= ARID.intProgramId
 FROM
 			tblARInvoiceDetail ARID 
 		INNER JOIN
@@ -523,6 +533,8 @@ SELECT strRecordNumber				= SO.strSalesOrderNumber
 	 , intCurrencyId				= SO.intCurrencyId
 	 , strCurrency					= SMC.strCurrency
 	 , strCurrencyDescription		= SMC.strDescription
+	 , intInvoiceDetailId			= NULL
+	 , intProgramId					= NULL
 FROM
 		tblSOSalesOrder SO 
 	LEFT OUTER JOIN 
@@ -671,6 +683,8 @@ SELECT strRecordNumber				= ARI.strInvoiceNumber
 	 , intCurrencyId				= ARI.intCurrencyId
 	 , strCurrency					= SMC.strCurrency
 	 , strCurrencyDescription		= SMC.strDescription
+	 , intInvoiceDetailId			= ARID.intInvoiceDetailId
+ 	 , intProgramId					= ARID.intProgramId
 FROM
 			tblARInvoiceDetail ARID 
 		INNER JOIN
@@ -801,6 +815,8 @@ SELECT strRecordNumber				= SO.strSalesOrderNumber
 	 , intCurrencyId				= SO.intCurrencyId
 	 , strCurrency					= SMC.strCurrency
 	 , strCurrencyDescription		= SMC.strDescription
+	 , intInvoiceDetailId			= NULL
+	 , intProgramId					= NULL
 FROM
 		tblSOSalesOrder SO 
 	LEFT OUTER JOIN 
@@ -949,6 +965,8 @@ SELECT strRecordNumber				= ARI.strInvoiceNumber
 	 , intCurrencyId				= ARI.intCurrencyId
 	 , strCurrency					= SMC.strCurrency
 	 , strCurrencyDescription		= SMC.strDescription
+	 , intInvoiceDetailId			= ARID.intInvoiceDetailId
+	 , intProgramId					= ARID.intProgramId
 FROM
 			tblARInvoiceDetail ARID 
 		INNER JOIN
@@ -1083,3 +1101,13 @@ LEFT JOIN
 	tblTMSite TMS ON SAR.intSiteId = TMS.intSiteID
 LEFT JOIN
 	tblSCTicket SCT ON SAR.intTicketId = SCT.intTicketId
+LEFT JOIN tblVRProgram VPRG
+		on SAR.intProgramId = VPRG.intProgramId
+left join tblVRProgramItem VPRGITM on
+	VPRG.intProgramId = VPRGITM.intProgramId
+		and SAR.intItemId = VPRGITM.intItemId
+		AND SAR.dtmDate between VPRGITM.dtmBeginDate and VPRGITM.dtmEndDate
+left join tblVRProgramItem VPRGITMCAT
+	on VPRG.intProgramId = VPRGITMCAT.intProgramId 
+		and IC.intCategoryId = VPRGITMCAT.intCategoryId
+		AND SAR.dtmDate between VPRGITMCAT.dtmBeginDate and VPRGITMCAT.dtmEndDate
