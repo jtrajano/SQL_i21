@@ -200,7 +200,9 @@ BEGIN TRY
 		END
 		
 				
-		INSERT INTO dbo.tblNRNoteTransaction
+		INSERT INTO dbo.tblNRNoteTransaction (intNoteId, dtmNoteTranDate, intNoteTransTypeId, intTransDays, dblTransAmount, dblPrincipal, dblInterestToDate, dblUnpaidInterest, dblPayOffBalance
+		, strInvoiceNo, dtmInvoiceDate, strInvoiceLocation, strLocation, strRefNo, strBatchNumber, dblAmtAppToPrincipal, dblAmtAppToInterest, strPayType, dtmAsOfDate, strCheckNumber
+		, strTransComments, strAdjOnPrincOrInt, strAdjAccountAffected, intEntityId, intConcurrencyId)
 		SELECT 
 		 @intNoteId 
 		,@TransDate 
@@ -224,8 +226,7 @@ BEGIN TRY
 		,@CheckNumber 
 		,@Comments
 		,@OnPrincipalOrInterest
-		,@AccountAffected
-		,@AdjustmentType
+		,@AccountAffected		
 		,@UserId 
 		,@ConcurrencyId
 		--,@dtmPrevAsOfDate 

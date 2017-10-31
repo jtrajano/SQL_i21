@@ -5,7 +5,7 @@ BEGIN
 
 	DECLARE @strParam NVARCHAR(MAX), @strCheckNumber nvarchar(100), @dblTransAmount decimal(18,6), @intNotePaymentId Int, @userId Int
 	, @intEntityId int, @intNoteId int, @strTransactionId nvarchar(50)
-	SELECT @strCheckNumber = strCheckNumber, @dblTransAmount = dblTransAmount, @userId = intLastModifiedUserId , @intNoteId = intNoteId
+	SELECT @strCheckNumber = strCheckNumber, @dblTransAmount = dblTransAmount, @userId = intEntityId , @intNoteId = intNoteId
 	FROM dbo.tblNRNoteTransaction Where intNoteTransId = @intNoteTransId
 	SELECT @strParam = strTransComments FROM dbo.tblNRNoteTransaction Where strCheckNumber = @strCheckNumber AND intNoteTransTypeId = 4 AND dblTransAmount = (@dblTransAmount * (-1))
 	

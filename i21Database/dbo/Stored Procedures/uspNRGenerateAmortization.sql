@@ -36,7 +36,7 @@ BEGIN TRY
 		, @ExpectedPayDate = dtmSchdStartDate
 		, @Schd_Months = intSchdMonthFreq
 		, @ForcePaymentAmount = ISNULL(dblSchdForcePaymentAmt,0)
-		, @UserId = intLastModifiedUserId
+		, @UserId = intEntityId
 		, @NoteType = strNoteType
 	FROM  dbo.tblNRNote WHERE intNoteId = @NoteId
 	
@@ -45,8 +45,8 @@ BEGIN TRY
 	SELECT @Fee = dblFee FROM dbo.tblNRCompanyPreference 
 	
 	-- Fee transaction one time entry when note is created
-	INSERT into dbo.tblNRNoteTransaction
-	SELECT @NoteId, GETDATE(), 2, 0, @Fee,@Fee, 0, 0, @Fee, '', NULL, '', '', '', '', @Fee, 0, '', GETDATE(), '', '', '', '', NULL, @UserId, 1
+	INSERT into dbo.tblNRNoteTransaction (intNoteId, dtmNoteTranDate, dtmAsOfDate, dtmInvoiceDate, intNoteTransTypeId, intTransDays, dblTransAmount, dblPrincipal, dblInterestToDate, dblUnpaidInterest, dblPayOffBalance, dblAmtAppToInterest, dblAmtAppToPrincipal, intEntityId ,intConcurrencyId)
+	SELECT @NoteId, GETDATE(), GETDATE(), GETDATE(), 2, 0, @Fee,@Fee, 0, 0, @Fee, @Fee, 0, @UserId, 1
 	SET @NoteTransId = @@IDENTITY
 	EXEC dbo.uspNRCreateGLJournalEntry @NoteId, 2, @NoteTransId, @UserId
 		

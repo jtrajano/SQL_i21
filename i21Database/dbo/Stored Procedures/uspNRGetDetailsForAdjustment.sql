@@ -16,6 +16,6 @@ BEGIN
 	) as 'dblInterestSum' ,ISNULL (@AmtAppInt,0)AS 'dblAmtAppInt',dblUnpaidInterest  
 	FROM dbo.tblNRNoteTransaction WHERE intNoteId= @intNoteId Order By intNoteTransId DESC      
 	
-	Select dtmCreated from dbo.tblNRNote Where intNoteId = @intNoteId
+	Select dtmMaturityDate from dbo.tblNRNote Where intNoteId = @intNoteId
 	
 END

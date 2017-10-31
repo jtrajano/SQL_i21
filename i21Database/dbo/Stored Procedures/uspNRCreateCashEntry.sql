@@ -66,7 +66,7 @@ BEGIN
               
             -- Get Note Receive payment transaction related details
             SELECT @dtmDate = dtmNoteTranDate--, @dblAmount = dblTransAmount
-            , @intEntityId = intLastModifiedUserId    , @dtmTranCreated = dtmNoteTranDate
+            , @intEntityId = intEntityId    , @dtmTranCreated = dtmNoteTranDate
             FROM dbo.tblNRNoteTransaction 
             WHERE intNoteTransId = @intNoteTransId
             
