@@ -144,7 +144,8 @@ FROM (
 				 , dblDiscount
 				 , dblInterest
 			FROM dbo.tblARPaymentDetail 
-		) PD ON P.intPaymentId = PD.intPaymentId 
+		) PD ON P.intPaymentId = PD.intPaymentId
+			AND P.strPaymentMethod <> 'CF Invoice'
 		WHERE P.ysnPosted = 1
 		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN @dtmDateFrom AND @dtmDateTo
 		  AND (@strPaymentMethod IS NULL OR strPaymentMethod LIKE '%'+@strPaymentMethod+'%')
