@@ -191,16 +191,16 @@ BEGIN
 					ON charges.intInventoryReceiptId = receipts.intInventoryReceiptId
                 LEFT JOIN dbo.tblSMCurrencyExchangeRateType exRates ON R.intCurrencyExchangeRateTypeId = exRates.intCurrencyExchangeRateTypeId
                 WHERE R.intBillId = A.intBillId AND R.dblTax != 0 AND CAST(R2.dblTax AS DECIMAL(18,2)) != 0
-				UNION ALL --discount
-				SELECT
-					(R.dblTotal * (ISNULL(R.dblDiscount,0) / 100)) AS dblTotal
-					,R.dblRate
-					,exRates.intCurrencyExchangeRateTypeId
-					,exRates.strCurrencyExchangeRateType
-					,0
-				FROM tblAPBillDetail R
-				LEFT JOIN dbo.tblSMCurrencyExchangeRateType exRates ON R.intCurrencyExchangeRateTypeId = exRates.intCurrencyExchangeRateTypeId
-				WHERE R.dblDiscount <> 0 AND R.intBillId = A.intBillId
+				-- UNION ALL --discount
+				-- SELECT
+				-- 	(R.dblTotal * (ISNULL(R.dblDiscount,0) / 100)) AS dblTotal
+				-- 	,R.dblRate
+				-- 	,exRates.intCurrencyExchangeRateTypeId
+				-- 	,exRates.strCurrencyExchangeRateType
+				-- 	,0
+				-- FROM tblAPBillDetail R
+				-- LEFT JOIN dbo.tblSMCurrencyExchangeRateType exRates ON R.intCurrencyExchangeRateTypeId = exRates.intCurrencyExchangeRateTypeId
+				-- WHERE R.dblDiscount <> 0 AND R.intBillId = A.intBillId
             ) Details
 
 			
@@ -414,59 +414,59 @@ BEGIN
 
 	WHERE	A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	AND B.intInventoryReceiptChargeId IS NULL --EXCLUDE CHARGES
-	UNION ALL
-	--DISCOUNT
-	SELECT
-		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
-		[strBatchID]					=	@batchId,
-		[intAccountId]					=	B.intAccountId,
-		[dblDebit]						=	CAST((B.dblTotal + B.dblTax)* (ISNULL(B.dblDiscount,0) / 100) AS DECIMAL(18,2)) * ISNULL(NULLIF(ForexRate.dblRate,0),1),
-		[dblCredit]						=	0,
-		[dblDebitUnit]					=	0,
-		[dblCreditUnit]					=	0,--ISNULL(A.[dblTotal], 0)  * ISNULL(Units.dblLbsPerUnit, 0),
-		[strDescription]				=	A.strReference,
-		[strCode]						=	'AP',
-		[strReference]					=	D.strVendorId,
-		[intCurrencyId]					=	A.intCurrencyId,
-		[dblExchangeRate]				=	ISNULL(NULLIF(ForexRate.dblRate,0),1),
-		[dtmDateEntered]				=	GETDATE(),
-		[dtmTransactionDate]			=	A.dtmDate,
-		[strJournalLineDescription]		=	'Discount',
-		[intJournalLineNo]				=	B.intBillDetailId,
-		[ysnIsUnposted]					=	0,
-		[intUserId]						=	@intUserId,
-		[intEntityId]					=	@intUserId,
-		[strTransactionId]				=	A.strBillId, 
-		[intTransactionId]				=	A.intBillId, 
-		[strTransactionType]			=	CASE WHEN A.intTransactionType = 2 THEN 'Vendor Prepayment'
-												WHEN A.intTransactionType = 3 THEN 'Debit Memo'
-												WHEN A.intTransactionType = 13 THEN 'Basis Advance'
-												WHEN A.intTransactionType = 1 THEN 'Voucher'
-											ELSE 'NONE' END,
-		[strTransactionForm]			=	@SCREEN_NAME,
-		[strModuleName]					=	@MODULE_NAME,
-		[dblDebitForeign]				=	0,      
-		[dblDebitReport]				=	0,
-		[dblCreditForeign]				=	CAST((B.dblTotal + B.dblTax)* (ISNULL(B.dblDiscount,0) / 100) AS DECIMAL(18,2)),
-		[dblCreditReport]				=	0,
-		[dblReportingRate]				=	0,
-		[dblForeignRate]				=	ISNULL(NULLIF(ForexRate.dblRate,0),1),
-		[strRateType]					=	ForexRate.strCurrencyExchangeRateType,
-		[strDocument]					=	A.strVendorOrderNumber,
-		[strComments]					=	A.strReference,
-		[intConcurrencyId]				=	1
-	FROM tblAPBill A
-	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
-	LEFT JOIN tblAPVendor D ON A.intEntityVendorId = D.[intEntityId]
-	CROSS APPLY
-	(
-		SELECT TOP 1 A.intCurrencyExchangeRateTypeId,B.strCurrencyExchangeRateType,A.dblRate,A.ysnSubCurrency
-		FROM dbo.tblAPBillDetail A 
-		LEFT JOIN dbo.tblSMCurrencyExchangeRateType B ON A.intCurrencyExchangeRateTypeId = B.intCurrencyExchangeRateTypeId
-		WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
-	) ForexRate
-	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
-	AND B.dblDiscount <> 0
+	-- UNION ALL
+	-- --DISCOUNT
+	-- SELECT
+	-- 	[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
+	-- 	[strBatchID]					=	@batchId,
+	-- 	[intAccountId]					=	B.intAccountId,
+	-- 	[dblDebit]						=	CAST((B.dblTotal + B.dblTax)* (ISNULL(B.dblDiscount,0) / 100) AS DECIMAL(18,2)) * ISNULL(NULLIF(ForexRate.dblRate,0),1),
+	-- 	[dblCredit]						=	0,
+	-- 	[dblDebitUnit]					=	0,
+	-- 	[dblCreditUnit]					=	0,--ISNULL(A.[dblTotal], 0)  * ISNULL(Units.dblLbsPerUnit, 0),
+	-- 	[strDescription]				=	A.strReference,
+	-- 	[strCode]						=	'AP',
+	-- 	[strReference]					=	D.strVendorId,
+	-- 	[intCurrencyId]					=	A.intCurrencyId,
+	-- 	[dblExchangeRate]				=	ISNULL(NULLIF(ForexRate.dblRate,0),1),
+	-- 	[dtmDateEntered]				=	GETDATE(),
+	-- 	[dtmTransactionDate]			=	A.dtmDate,
+	-- 	[strJournalLineDescription]		=	'Discount',
+	-- 	[intJournalLineNo]				=	B.intBillDetailId,
+	-- 	[ysnIsUnposted]					=	0,
+	-- 	[intUserId]						=	@intUserId,
+	-- 	[intEntityId]					=	@intUserId,
+	-- 	[strTransactionId]				=	A.strBillId, 
+	-- 	[intTransactionId]				=	A.intBillId, 
+	-- 	[strTransactionType]			=	CASE WHEN A.intTransactionType = 2 THEN 'Vendor Prepayment'
+	-- 											WHEN A.intTransactionType = 3 THEN 'Debit Memo'
+	-- 											WHEN A.intTransactionType = 13 THEN 'Basis Advance'
+	-- 											WHEN A.intTransactionType = 1 THEN 'Voucher'
+	-- 										ELSE 'NONE' END,
+	-- 	[strTransactionForm]			=	@SCREEN_NAME,
+	-- 	[strModuleName]					=	@MODULE_NAME,
+	-- 	[dblDebitForeign]				=	0,      
+	-- 	[dblDebitReport]				=	0,
+	-- 	[dblCreditForeign]				=	CAST((B.dblTotal + B.dblTax)* (ISNULL(B.dblDiscount,0) / 100) AS DECIMAL(18,2)),
+	-- 	[dblCreditReport]				=	0,
+	-- 	[dblReportingRate]				=	0,
+	-- 	[dblForeignRate]				=	ISNULL(NULLIF(ForexRate.dblRate,0),1),
+	-- 	[strRateType]					=	ForexRate.strCurrencyExchangeRateType,
+	-- 	[strDocument]					=	A.strVendorOrderNumber,
+	-- 	[strComments]					=	A.strReference,
+	-- 	[intConcurrencyId]				=	1
+	-- FROM tblAPBill A
+	-- INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+	-- LEFT JOIN tblAPVendor D ON A.intEntityVendorId = D.[intEntityId]
+	-- CROSS APPLY
+	-- (
+	-- 	SELECT TOP 1 A.intCurrencyExchangeRateTypeId,B.strCurrencyExchangeRateType,A.dblRate,A.ysnSubCurrency
+	-- 	FROM dbo.tblAPBillDetail A 
+	-- 	LEFT JOIN dbo.tblSMCurrencyExchangeRateType B ON A.intCurrencyExchangeRateTypeId = B.intCurrencyExchangeRateTypeId
+	-- 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+	-- ) ForexRate
+	-- WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+	-- AND B.dblDiscount <> 0
 	--COST ADJUSTMENT
 	UNION ALL 
 	SELECT	
