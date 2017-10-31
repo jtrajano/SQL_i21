@@ -66,6 +66,15 @@ BEGIN TRY
 		,@strItemNo NVARCHAR(50)
 		,@strSampleImportDateTimeFormat NVARCHAR(50)
 		,@intConvertYear INT
+	DECLARE @FormulaProperty TABLE (
+		intTestResultId INT
+		,strFormula NVARCHAR(MAX)
+		,strFormulaParser NVARCHAR(MAX)
+		)
+	DECLARE @intTestResultId INT
+		,@strFormula NVARCHAR(MAX) = ''
+		,@strFormulaParser NVARCHAR(MAX)
+	DECLARE @strPropertyValue NVARCHAR(MAX) = ''
 
 	SELECT @intValidDate = (
 			SELECT DATEPART(dy, GETDATE())
@@ -697,11 +706,23 @@ BEGIN TRY
 				CASE P.intDataTypeId
 					WHEN 4
 						THEN LOWER(SI.strPropertyValue)
-					ELSE SI.strPropertyValue
+					ELSE (
+							CASE 
+								WHEN ISNULL(TR.strFormula, '') <> ''
+									THEN ''
+								ELSE SI.strPropertyValue
+								END
+							)
 					END
 				)
 			,strComment = SI.strComment
-			,strResult = SI.strResult
+			,strResult = (
+				CASE 
+					WHEN ISNULL(TR.strFormula, '') <> ''
+						THEN ''
+					ELSE SI.strResult
+					END
+				)
 			,dtmPropertyValueCreated = (
 				CASE 
 					WHEN SI.strPropertyValue <> ''
@@ -714,6 +735,113 @@ BEGIN TRY
 			AND TR.intSampleId = @intSampleId
 		JOIN tblQMSampleImport SI ON SI.strPropertyName = P.strPropertyName
 			AND SI.strSampleNumber = @strSampleRefNo
+
+		-- Calculate and update formula property value
+		INSERT INTO @FormulaProperty
+		SELECT intTestResultId
+			,strFormula
+			,strFormulaParser
+		FROM tblQMTestResult
+		WHERE intSampleId = @intSampleId
+			AND ISNULL(strFormula, '') <> ''
+			AND ISNULL(strFormulaParser, '') <> ''
+		ORDER BY intTestResultId
+
+		SELECT @intTestResultId = MIN(intTestResultId)
+		FROM @FormulaProperty
+
+		WHILE (ISNULL(@intTestResultId, 0) > 0)
+		BEGIN
+			SELECT @strFormula = NULL
+				,@strFormulaParser = NULL
+				,@strPropertyValue = ''
+
+			SELECT @strFormula = strFormula
+				,@strFormulaParser = strFormulaParser
+			FROM @FormulaProperty
+			WHERE intTestResultId = @intTestResultId
+
+			SELECT @strFormula = REPLACE(REPLACE(REPLACE(@strFormula, @strFormulaParser, ''), '{', ''), '}', '')
+
+			IF @strFormulaParser = 'MAX'
+			BEGIN
+				SELECT @strPropertyValue = MAX(CONVERT(NUMERIC(18, 6), strPropertyValue))
+				FROM tblQMTestResult
+				WHERE intSampleId = @intSampleId
+					AND ISNULL(strPropertyValue, '') <> ''
+					AND intPropertyId IN (
+						SELECT intPropertyId
+						FROM tblQMProperty
+						WHERE strPropertyName IN (
+								SELECT Item COLLATE Latin1_General_CI_AS
+								FROM dbo.fnSplitStringWithTrim(@strFormula, ',')
+								)
+						)
+			END
+			ELSE IF @strFormulaParser = 'MIN'
+			BEGIN
+				SELECT @strPropertyValue = MIN(CONVERT(NUMERIC(18, 6), strPropertyValue))
+				FROM tblQMTestResult
+				WHERE intSampleId = @intSampleId
+					AND ISNULL(strPropertyValue, '') <> ''
+					AND intPropertyId IN (
+						SELECT intPropertyId
+						FROM tblQMProperty
+						WHERE strPropertyName IN (
+								SELECT Item COLLATE Latin1_General_CI_AS
+								FROM dbo.fnSplitStringWithTrim(@strFormula, ',')
+								)
+						)
+			END
+			ELSE IF @strFormulaParser = 'AVG'
+			BEGIN
+				SELECT @strPropertyValue = AVG(CONVERT(NUMERIC(18, 6), strPropertyValue))
+				FROM tblQMTestResult
+				WHERE intSampleId = @intSampleId
+					AND ISNULL(strPropertyValue, '') <> ''
+					AND intPropertyId IN (
+						SELECT intPropertyId
+						FROM tblQMProperty
+						WHERE strPropertyName IN (
+								SELECT Item COLLATE Latin1_General_CI_AS
+								FROM dbo.fnSplitStringWithTrim(@strFormula, ',')
+								)
+						)
+			END
+			ELSE IF @strFormulaParser = 'SUM'
+			BEGIN
+				SELECT @strPropertyValue = SUM(CONVERT(NUMERIC(18, 6), strPropertyValue))
+				FROM tblQMTestResult
+				WHERE intSampleId = @intSampleId
+					AND ISNULL(strPropertyValue, '') <> ''
+					AND intPropertyId IN (
+						SELECT intPropertyId
+						FROM tblQMProperty
+						WHERE strPropertyName IN (
+								SELECT Item COLLATE Latin1_General_CI_AS
+								FROM dbo.fnSplitStringWithTrim(@strFormula, ',')
+								)
+						)
+			END
+
+			IF @strPropertyValue <> ''
+			BEGIN
+				UPDATE tblQMTestResult
+				SET strPropertyValue = dbo.fnRemoveTrailingZeroes(@strPropertyValue)
+				WHERE intTestResultId = @intTestResultId
+			END
+
+			SELECT @intTestResultId = MIN(intTestResultId)
+			FROM @FormulaProperty
+			WHERE intTestResultId > @intTestResultId
+		END
+
+		-- Setting result for formula properties and the result which is not sent in excel
+		UPDATE tblQMTestResult
+		SET strResult = dbo.fnQMGetPropertyTestResult(TR.intTestResultId)
+		FROM tblQMTestResult TR
+		WHERE TR.intSampleId = @intSampleId
+			AND ISNULL(TR.strResult, '') = ''
 
 		-- Setting correct date format
 		UPDATE tblQMTestResult
