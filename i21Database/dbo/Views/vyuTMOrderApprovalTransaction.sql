@@ -4,7 +4,7 @@ AS
 	SELECT 
 		A.intTransactionId
 		,A.intRecordId
-		,ysnApproved = CAST((CASE WHEN (A.strApprovalStatus = '' OR A.strApprovalStatus = 'No Need for Approval' OR A.strApprovalStatus = 'Approved')
+		,ysnApproved = CAST((CASE WHEN (ISNULL(A.strApprovalStatus,'') = '' OR A.strApprovalStatus = 'No Need for Approval' OR A.strApprovalStatus = 'Approved')
 							THEN
 								1
 							ELSE
