@@ -15,7 +15,48 @@ BEGIN TRY
 		END
 		IF  @strSourceType = 'Invoice'
 		BEGIN
+			IF NOT EXISTS (
+							SELECT 1
+							FROM tblARInvoiceDetail ARD
+							JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = ARD.intInvoiceId
+							JOIN tblICItem Item ON Item.intItemId = ARD.intItemId
+							WHERE ARD.intInvoiceId = @IntSourceKey
+							AND ARD.intCustomerStorageId IS NULL
+							AND Item.strCostType <> 'Discount'
+							AND Item.strType <> 'Other Charge'
+					      )
+			BEGIN
+					UPDATE QM
+					SET QM.dblDiscountPaid = 0
+					FROM tblGRCustomerStorage CS
+					JOIN tblQMTicketDiscount QM ON QM.intTicketFileId = CS.intCustomerStorageId
+					JOIN tblGRDiscountScheduleCode GSC ON GSC.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
+					JOIN tblARInvoiceDetail ARD ON ARD.intCustomerStorageId = CS.intCustomerStorageId AND ARD.intItemId = GSC.intItemId
+					WHERE ARD.intInvoiceId = @IntSourceKey AND QM.strSourceType = 'Storage'
+				
+					;WITH SRC
+					AS (
+						SELECT 
+							 CS.intCustomerStorageId
+							,SUM(QM.dblDiscountPaid) AS Discountpaid
+						FROM tblGRCustomerStorage CS
+						JOIN tblQMTicketDiscount QM ON QM.intTicketFileId = CS.intCustomerStorageId
+						JOIN tblGRDiscountScheduleCode GSC ON GSC.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
+						JOIN tblARInvoiceDetail ARD ON ARD.intCustomerStorageId = CS.intCustomerStorageId AND ARD.intItemId = GSC.intItemId
+						WHERE ARD.intInvoiceId = @IntSourceKey AND QM.strSourceType = 'Storage'
+						GROUP BY CS.intCustomerStorageId
+						)
+													
+					UPDATE CS
+					SET CS.dblDiscountsPaid = Q.Discountpaid
+					FROM tblGRCustomerStorage CS
+					JOIN SRC Q ON Q.intCustomerStorageId = CS.intCustomerStorageId
+					JOIN tblARInvoiceDetail ARD ON ARD.intCustomerStorageId = CS.intCustomerStorageId 
+				    WHERE ARD.intInvoiceId = @IntSourceKey
+			END
+
 			DELETE FROM tblGRStorageHistory Where intInvoiceId=@IntSourceKey 
+
 		END 
 
 END TRY
