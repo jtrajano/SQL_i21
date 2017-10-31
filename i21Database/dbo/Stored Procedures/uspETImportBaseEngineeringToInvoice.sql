@@ -182,14 +182,15 @@ BEGIN
 			 BEGIN
 				SET @strErrorMessage = REPLACE(@strErrorMessage,'.',', ') + 'Invalid Date.'
 				END
-			IF (ISNULL(@dblPrice,0) = 0) 
- 			BEGIN
- 			    SET @strErrorMessage = REPLACE(@strErrorMessage,'.',', ') + 'Price must have a value.'
- 			END
-			IF (ISNULL(@dblQuantity,0) = 0) 
- 			BEGIN
- 				SET @strErrorMessage = REPLACE(@strErrorMessage,'.',', ') + 'Quantity must have a value.'
- 			END
+			--IET-211
+			--IF (ISNULL(@dblPrice,0) = 0) 
+ 		--	BEGIN
+ 		--	    SET @strErrorMessage = REPLACE(@strErrorMessage,'.',', ') + 'Price must have a value.'
+ 		--	END
+			--IF (ISNULL(@dblQuantity,0) = 0) 
+ 		--	BEGIN
+ 		--		SET @strErrorMessage = REPLACE(@strErrorMessage,'.',', ') + 'Quantity must have a value.'
+ 		--	END
 			IF (ISNULL(@intCustomerEntityId,0) = 0)
 			BEGIN
 				SET @strErrorMessage =  REPLACE(@strErrorMessage,'.',', ') + 'Invalid Customer.'
