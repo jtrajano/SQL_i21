@@ -111,7 +111,7 @@ BEGIN TRY
 	INNER JOIN tblTFReportingComponent RC ON Config.intReportingComponentId = RC.intReportingComponentId
 	WHERE RC.strFormCode = @FormCodeParam 
 		AND Config.strSegment = 'Summary'
-	ORDER BY Config.intReportItemSequence DESC
+	ORDER BY Config.intReportItemSequence ASC
 	
 	-- LOOP ON SUMMARY ITEMS AND INSERT INTO SUMMARY TABLE
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTransactionSummaryItem)

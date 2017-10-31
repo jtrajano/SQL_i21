@@ -228,21 +228,6 @@ BEGIN TRY
 			DECLARE @TaxAmount NUMERIC(18, 6)
 			DECLARE @TaxExempt NUMERIC(18, 6)
 
-			-- GASOLINE USE TAX COLLECTED
-			SELECT @TaxAmount = tblARInvoiceDetailTax.dblTax
-			FROM tblSMTaxCode
-			INNER JOIN tblTFTaxCategory ON tblSMTaxCode.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId
-			INNER JOIN tblARInvoiceDetailTax ON tblSMTaxCode.intTaxCodeId = tblARInvoiceDetailTax.intTaxCodeId
-			INNER JOIN tblARInvoiceDetail ON tblARInvoiceDetailTax.intInvoiceDetailId = tblARInvoiceDetail.intInvoiceDetailId
-			INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId
-			WHERE tblARInvoiceDetailTax.intInvoiceDetailId = @InvoiceDetailId
-				AND (tblTFTaxCategory.strTaxCategory = @GasolineUseTax)
-
-			UPDATE @TFTransaction
-			SET dblTax = ISNULL(@TaxAmount, 0)
-				, strTaxCode = @GasolineUseTax
-			WHERE intInvoiceDetailId = @InvoiceDetailId
-						
 			--EXEMPT GALLONS SOLD
 			SELECT @TaxExempt = tblARInvoiceDetail.dblQtyShipped
 			FROM tblSMTaxCode
@@ -253,7 +238,22 @@ BEGIN TRY
 			WHERE tblARInvoiceDetailTax.intInvoiceDetailId = @InvoiceDetailId
 				AND (tblTFTaxCategory.strTaxCategory = 'IN Gasoline Use Tax (GUT)')
 
-			UPDATE @TFTransaction SET dblTaxExempt = CASE WHEN @TaxExempt IS NULL THEN dblQtyShipped ELSE 0 END, strTaxCode = @ExemptGallSold WHERE intInvoiceDetailId = @InvoiceDetailId
+			UPDATE @TFTransaction SET dblTaxExempt = ISNULL(@TaxExempt, 0), strTaxCode = @ExemptGallSold WHERE intInvoiceDetailId = @InvoiceDetailId
+			
+			-- GASOLINE USE TAX COLLECTED
+			SELECT @TaxAmount = tblARInvoiceDetailTax.dblTax
+			FROM tblSMTaxCode
+			INNER JOIN tblTFTaxCategory ON tblSMTaxCode.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId
+			INNER JOIN tblARInvoiceDetailTax ON tblSMTaxCode.intTaxCodeId = tblARInvoiceDetailTax.intTaxCodeId
+			INNER JOIN tblARInvoiceDetail ON tblARInvoiceDetailTax.intInvoiceDetailId = tblARInvoiceDetail.intInvoiceDetailId
+			INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId
+			WHERE tblARInvoiceDetailTax.intInvoiceDetailId = @InvoiceDetailId
+				AND (tblTFTaxCategory.strTaxCategory = @GasolineUseTax)
+	
+			UPDATE @TFTransaction SET dblTax = ISNULL(@TaxAmount, 0), strTaxCode = @GasolineUseTax WHERE intInvoiceDetailId = @InvoiceDetailId
+	
+			--UPDATE @TFTransaction SET dblTaxExempt = CASE WHEN @TaxExempt IS NULL THEN dblQtyShipped ELSE 0 END, strTaxCode = @ExemptGallSold WHERE intInvoiceDetailId = @InvoiceDetailId
+
 			SET @Count = @Count - 1
 		END
 
