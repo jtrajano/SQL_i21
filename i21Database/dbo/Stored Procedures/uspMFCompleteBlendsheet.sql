@@ -374,9 +374,9 @@ BEGIN TRY
 
 	UPDATE tblMFWorkOrder
 	SET intStatusId = 13
-		,dtmActualProductionEndDate = @dtmCurrentDate
+		,dtmActualProductionEndDate = GETDATE()
 		,intLastModifiedUserId = @intUserId
-		,dtmLastModified = @dtmCurrentDate
+		,dtmLastModified = GETDATE()
 	WHERE intWorkOrderId = @intWorkOrderId
 
 	SELECT @intBatchId = intBatchId
