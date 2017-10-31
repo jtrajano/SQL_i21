@@ -7,6 +7,7 @@
 	,@dblUnitsConsumed NUMERIC(24, 10) = 0
 	,@IntSourceKey INT
 	,@intUserId INT
+	,@intCompanyLocationId INT = 0
 	
 AS
 BEGIN TRY
@@ -81,6 +82,10 @@ BEGIN TRY
 		AND intStorageTypeId = @intStorageTypeId
 		AND ysnDPOwnedType = 0
 		AND ysnCustomerStorage = 0
+		AND intCompanyLocationId = CASE 
+										WHEN @intCompanyLocationId >0 THEN @intCompanyLocationId 
+										ELSE intCompanyLocationId 
+								   END
 
 	IF @strOptionType = 'Inquiry'
 	BEGIN
@@ -88,7 +93,12 @@ BEGIN TRY
 	END
 	ELSE IF @dblUnitsConsumed > 0 AND @dblAvailableGrainOpenBalance > 0
 	BEGIN
-		IF NOT EXISTS (SELECT 1 FROM vyuGRGetStorageTransferTicket WHERE intEntityId = @intEntityId AND intItemId = @intItemId AND intStorageTypeId = @intStorageTypeId AND dblOpenBalance > 0)
+		IF NOT EXISTS (SELECT 1 FROM vyuGRGetStorageTransferTicket WHERE intEntityId = @intEntityId AND intItemId = @intItemId AND intStorageTypeId = @intStorageTypeId AND dblOpenBalance > 0 
+																		AND intCompanyLocationId = CASE 
+																										WHEN @intCompanyLocationId >0 THEN @intCompanyLocationId 
+																										ELSE intCompanyLocationId 
+																								   END
+				      )
 		BEGIN
 			RAISERROR ('There is no available grain balance for this Entity,Item and Storage Type.',16,1);
 		END
@@ -133,6 +143,10 @@ BEGIN TRY
 			WHERE intEntityId = @intEntityId
 				AND intItemId = @intItemId
 				AND intStorageTypeId = @intStorageTypeId
+				AND intCompanyLocationId = CASE 
+												WHEN @intCompanyLocationId >0 THEN @intCompanyLocationId 
+												ELSE intCompanyLocationId 
+										   END
 				AND ysnDPOwnedType = 0
 				AND ysnCustomerStorage = 0
 				AND dtmDeliveryDate IS NOT NULL
