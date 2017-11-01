@@ -5777,8 +5777,8 @@
     <Build Include="dbo\Views\vyuICItemLicense.sql" />
     <Build Include="dbo\Tables\tblICItemLicense.sql" />
     <Build Include="dbo\Tables\tblVRRebate.sql" />
-    <None Include="dbo\Views\vyuVROpenRebate.sql" />
-    <None Include="dbo\Views\vyuVRRebate.sql" />
+    <Build Include="dbo\Views\vyuVROpenRebate.sql" />
+    <Build Include="dbo\Views\vyuVRRebate.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerPaymentHistoryReport.sql" />
     <Build Include="dbo\Tables\tblGRUnPriced.sql" />
     <Build Include="dbo\Tables\tblGRUnPricedSpotTicket.sql" />

@@ -38,7 +38,7 @@ AS
 	INNER JOIN tblEMEntity H
 		ON G.intEntityId = H.intEntityId
 	INNER JOIN tblVRProgram I
-		ON B.intRebateProgramId = I.intProgramId
+		ON B.intProgramId = I.intProgramId
 	INNER JOIN tblVRVendorSetup J
 		ON I.intVendorSetupId = J.intVendorSetupId
 	INNER JOIN tblAPVendor K 
@@ -48,10 +48,10 @@ AS
 		AND J.intEntityId = L.intVendorEntityId
 	LEFT JOIN tblVRProgramItem M
 		ON B.intItemId = M.intItemId
-		AND B.intRebateProgramId = M.intProgramId
+		AND B.intProgramId = M.intProgramId
 	LEFT JOIN tblVRProgramItem N
 		ON D.intCategoryId = N.intCategoryId
-		AND B.intRebateProgramId = M.intProgramId
+		AND B.intProgramId = N.intProgramId
 	INNER JOIN tblVRRebate O
 		ON B.intInvoiceDetailId = O.intInvoiceDetailId
 	
