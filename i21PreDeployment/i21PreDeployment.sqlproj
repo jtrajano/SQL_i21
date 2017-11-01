@@ -152,6 +152,7 @@
     <None Include="Scripts\Pre-Deployment\8_AP\UpdatePaymentPayToAddress.sql" />
     <None Include="Scripts\Pre-Deployment\21_PR\3_1640_to_1710.sql" />
     <None Include="Scripts\Pre-Deployment\11_IC\CleanUPCCodes.sql" />
+    <None Include="Scripts\Pre-Deployment\7_AR\9_FixNRCompanyPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />

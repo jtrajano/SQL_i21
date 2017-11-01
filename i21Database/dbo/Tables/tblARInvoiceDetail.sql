@@ -102,8 +102,8 @@
 	[intSpecialPriceId]						INT												NULL,
 	[intProgramId]							INT												NULL,
 	[strPriceSource]						NVARCHAR(100)									NULL,
-	[ysnRebateSubmitted]					BIT												DEFAULT(0) NULL,
-	[ysnRebateExcluded]						BIT												DEFAULT(0) NULL,
+	[ysnRebateSubmitted]					BIT												DEFAULT((0)) NULL,
+	[ysnRebateExcluded]						BIT												DEFAULT((0)) NULL,
 
 
     CONSTRAINT [PK_tblARInvoiceDetail_intInvoiceDetailId] PRIMARY KEY CLUSTERED ([intInvoiceDetailId] ASC),
