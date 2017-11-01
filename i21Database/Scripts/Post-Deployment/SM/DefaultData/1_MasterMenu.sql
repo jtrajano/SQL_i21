@@ -1955,9 +1955,9 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Notes Receivables' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Notes Receivables', N'Accounts Receivable', @AccountsReceivableActivitiesParentMenuId, N'Notes Receivables', N'Activity', N'Screen', N'AccountsReceivable.view.NotesReceivable', N'small-menu-activity', 1, 0, 0, 1, 10, 1)
+	VALUES (N'Notes Receivables', N'Accounts Receivable', @AccountsReceivableActivitiesParentMenuId, N'Notes Receivables', N'Activity', N'Screen', N'AccountsReceivable.view.NotesReceivable?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 10, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 10, strCommand = N'AccountsReceivable.view.NotesReceivable' WHERE strMenuName = 'Notes Receivables' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 10, strCommand = N'AccountsReceivable.view.NotesReceivable?showSearch=true' WHERE strMenuName = 'Notes Receivables' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Calculate Monthly Interest' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
