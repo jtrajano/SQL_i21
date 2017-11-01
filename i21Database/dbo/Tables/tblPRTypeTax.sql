@@ -13,6 +13,7 @@
 	[intExpenseAccountId] INT NULL,
 	[intSupplementalCalc] INT NULL DEFAULT ((1)),
 	[strCheckLiteral] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strEmployerStateTaxID] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intVendorId] INT NULL,
 	[intSort] INT NULL,
 	[intConcurrencyId] INT NULL DEFAULT ((1)), 

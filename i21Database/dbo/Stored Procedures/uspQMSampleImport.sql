@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspQMSampleImport
+﻿CREATE PROCEDURE uspQMSampleImport @intLoggedOnLocationId INT = NULL
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF
@@ -13,12 +13,14 @@ BEGIN TRY
 		,intSampleImportId INT
 		,dtmSampleReceivedDate DATETIME
 		,strSampleNumber NVARCHAR(30)
-		,strItemShortName NVARCHAR(50)
+		,strItemNumber NVARCHAR(50)
 		,strSampleTypeName NVARCHAR(50)
 		,strVendorName NVARCHAR(100)
 		,strContractNumber NVARCHAR(50)
 		,strContainerNumber NVARCHAR(100)
 		,strMarks NVARCHAR(100)
+		,strSampleNote NVARCHAR(512)
+		,strHeaderComment NVARCHAR(MAX)
 		,dblSequenceQuantity NUMERIC(18, 6)
 		,strSampleStatus NVARCHAR(30)
 		,intCreatedUserId INT
@@ -26,12 +28,14 @@ BEGIN TRY
 		)
 	DECLARE @intSampleImportId INT
 		,@dtmSampleReceivedDate DATETIME
-		,@strItemShortName NVARCHAR(50)
+		,@strItemNumber NVARCHAR(50)
 		,@strSampleTypeName NVARCHAR(50)
 		,@strVendorName NVARCHAR(100)
 		,@strContractNumber NVARCHAR(50)
 		,@strContainerNumber NVARCHAR(100)
 		,@strMarks NVARCHAR(100)
+		,@strSampleNote NVARCHAR(512)
+		,@strHeaderComment NVARCHAR(MAX)
 		,@dblSequenceQuantity NUMERIC(18, 6)
 		,@strSampleStatus NVARCHAR(30)
 		,@intCreatedUserId INT
@@ -62,6 +66,15 @@ BEGIN TRY
 		,@strItemNo NVARCHAR(50)
 		,@strSampleImportDateTimeFormat NVARCHAR(50)
 		,@intConvertYear INT
+	DECLARE @FormulaProperty TABLE (
+		intTestResultId INT
+		,strFormula NVARCHAR(MAX)
+		,strFormulaParser NVARCHAR(MAX)
+		)
+	DECLARE @intTestResultId INT
+		,@strFormula NVARCHAR(MAX) = ''
+		,@strFormulaParser NVARCHAR(MAX)
+	DECLARE @strPropertyValue NVARCHAR(MAX) = ''
 
 	SELECT @intValidDate = (
 			SELECT DATEPART(dy, GETDATE())
@@ -87,12 +100,14 @@ BEGIN TRY
 	SELECT MIN(intSampleImportId) AS intSampleImportId
 		,CONVERT(DATETIME, dtmSampleReceivedDate, @intConvertYear) dtmSampleReceivedDate
 		,strSampleNumber
-		,strItemShortName
+		,strItemNumber
 		,strSampleTypeName
 		,strVendorName
 		,strContractNumber
 		,strContainerNumber
 		,strMarks
+		,strSampleNote
+		,strHeaderComment
 		,dblSequenceQuantity
 		,strSampleStatus
 		,MIN(intCreatedUserId) AS intCreatedUserId
@@ -100,12 +115,14 @@ BEGIN TRY
 	FROM tblQMSampleImport
 	GROUP BY CONVERT(DATETIME, dtmSampleReceivedDate, @intConvertYear)
 		,strSampleNumber
-		,strItemShortName
+		,strItemNumber
 		,strSampleTypeName
 		,strVendorName
 		,strContractNumber
 		,strContainerNumber
 		,strMarks
+		,strSampleNote
+		,strHeaderComment
 		,dblSequenceQuantity
 		,strSampleStatus
 	ORDER BY intSampleImportId
@@ -118,12 +135,14 @@ BEGIN TRY
 	WHILE (ISNULL(@intSampleImportId, 0) > 0)
 	BEGIN
 		SELECT @dtmSampleReceivedDate = NULL
-			,@strItemShortName = NULL
+			,@strItemNumber = NULL
 			,@strSampleTypeName = NULL
 			,@strVendorName = NULL
 			,@strContractNumber = NULL
 			,@strContainerNumber = NULL
 			,@strMarks = NULL
+			,@strSampleNote = NULL
+			,@strHeaderComment = NULL
 			,@dblSequenceQuantity = NULL
 			,@strSampleStatus = NULL
 			,@intCreatedUserId = NULL
@@ -153,12 +172,14 @@ BEGIN TRY
 
 		SELECT @dtmSampleReceivedDate = dtmSampleReceivedDate
 			,@strSampleRefNo = strSampleNumber
-			,@strItemShortName = strItemShortName
+			,@strItemNumber = strItemNumber
 			,@strSampleTypeName = strSampleTypeName
 			,@strVendorName = strVendorName
 			,@strContractNumber = strContractNumber
 			,@strContainerNumber = strContainerNumber
 			,@strMarks = strMarks
+			,@strSampleNote = strSampleNote
+			,@strHeaderComment = strHeaderComment
 			,@dblSequenceQuantity = dblSequenceQuantity
 			,@strSampleStatus = strSampleStatus
 			,@intCreatedUserId = intCreatedUserId
@@ -170,7 +191,7 @@ BEGIN TRY
 			,@intCategoryId = intCategoryId
 			,@strItemNo = strItemNo
 		FROM tblICItem
-		WHERE strShortName = @strItemShortName
+		WHERE strItemNo = @strItemNumber
 
 		SELECT @intSampleTypeId = intSampleTypeId
 		FROM tblQMSampleType
@@ -180,11 +201,15 @@ BEGIN TRY
 		FROM tblQMSampleStatus
 		WHERE strStatus = @strSampleStatus
 
-		SELECT @intContractHeaderId = CH.intContractHeaderId
-			,@intEntityId = CH.intEntityId
-		FROM tblCTContractHeader CH
-		WHERE CH.strContractNumber = @strContractNumber
+		IF ISNULL(@strContractNumber, '') <> ''
+		BEGIN
+			SELECT @intContractHeaderId = CH.intContractHeaderId
+				,@intEntityId = CH.intEntityId
+			FROM tblCTContractHeader CH
+			WHERE CH.strContractNumber = @strContractNumber
+		END
 
+		-- Template
 		IF (
 				ISNULL(@intItemId, 0) > 0
 				AND ISNULL(@intSampleTypeId, 0) > 0
@@ -274,32 +299,11 @@ BEGIN TRY
 			END
 		END
 
-		IF ISNULL(@intContractDetailId, 0) = 0
+		IF ISNULL(@intContractHeaderId, 0) > 0
 		BEGIN
-			SET @ErrMsg = 'Sample No(' + @strSampleRefNo + ') - Contract already contains Sample. '
-
-			RAISERROR (
-					@ErrMsg
-					,16
-					,1
-					)
-		END
-		ELSE
-		BEGIN
-			DECLARE @dblCQuantity NUMERIC(18, 6)
-			DECLARE @intSeqItemId INT
-			DECLARE @strCItemNo NVARCHAR(50)
-
-			SELECT @dblCQuantity = CD.dblQuantity
-				,@intSeqItemId = CD.intItemId
-				,@strCItemNo = I.strItemNo
-			FROM tblCTContractDetail CD
-			JOIN tblICItem I ON I.intItemId = CD.intItemId
-			WHERE CD.intContractDetailId = @intContractDetailId
-
-			IF @intItemId <> @intSeqItemId
+			IF ISNULL(@intContractDetailId, 0) = 0
 			BEGIN
-				SET @ErrMsg = 'Sample No(' + @strSampleRefNo + ') - Item is not matching with Contract Sequence Item(' + @strCItemNo + '). '
+				SET @ErrMsg = 'Sample No(' + @strSampleRefNo + ') - Contract already contains Sample. '
 
 				RAISERROR (
 						@ErrMsg
@@ -307,12 +311,22 @@ BEGIN TRY
 						,1
 						)
 			END
-
-			IF ISNUMERIC(@dblSequenceQuantity) = 1
+			ELSE
 			BEGIN
-				IF @dblSequenceQuantity > @dblCQuantity
+				DECLARE @dblCQuantity NUMERIC(18, 6)
+				DECLARE @intSeqItemId INT
+				DECLARE @strCItemNo NVARCHAR(50)
+
+				SELECT @dblCQuantity = CD.dblQuantity
+					,@intSeqItemId = CD.intItemId
+					,@strCItemNo = I.strItemNo
+				FROM tblCTContractDetail CD
+				JOIN tblICItem I ON I.intItemId = CD.intItemId
+				WHERE CD.intContractDetailId = @intContractDetailId
+
+				IF @intItemId <> @intSeqItemId
 				BEGIN
-					SET @ErrMsg = 'Sample No(' + @strSampleRefNo + ') - Quantity cannot be greater than Contract Sequence Quantity(' + LTRIM(@dblCQuantity) + '). '
+					SET @ErrMsg = 'Sample No(' + @strSampleRefNo + ') - Item is not matching with Contract Sequence Item(' + @strCItemNo + '). '
 
 					RAISERROR (
 							@ErrMsg
@@ -320,23 +334,71 @@ BEGIN TRY
 							,1
 							)
 				END
+
+				IF ISNUMERIC(@dblSequenceQuantity) = 1
+				BEGIN
+					IF @dblSequenceQuantity > @dblCQuantity
+					BEGIN
+						SET @ErrMsg = 'Sample No(' + @strSampleRefNo + ') - Quantity cannot be greater than Contract Sequence Quantity(' + LTRIM(@dblCQuantity) + '). '
+
+						RAISERROR (
+								@ErrMsg
+								,16
+								,1
+								)
+					END
+				END
 			END
 		END
 
 		-- Contract details
-		SELECT @intProductTypeId = 8 -- Contract Line Item
-			,@intProductValueId = CD.intContractDetailId
-			,@intItemContractId = CD.intItemContractId
-			,@intCountryID = ISNULL(IM.intOriginId, IC.intCountryId)
-			,@strCountry = ISNULL(CA.strDescription, CG.strCountry)
-			,@intLocationId = CD.intCompanyLocationId
-			,@intRepresentingUOMId = CD.intUnitMeasureId
-		FROM tblCTContractDetail CD
-		JOIN tblICItem IM ON IM.intItemId = CD.intItemId
-		LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = IM.intOriginId
-		LEFT JOIN tblICItemContract IC ON IC.intItemContractId = CD.intItemContractId
-		LEFT JOIN tblSMCountry CG ON CG.intCountryID = IC.intCountryId
-		WHERE CD.intContractDetailId = @intContractDetailId
+		IF ISNULL(@intContractDetailId, 0) > 0
+		BEGIN
+			SELECT @intProductTypeId = 8 -- Contract Line Item
+				,@intProductValueId = CD.intContractDetailId
+				,@intItemContractId = CD.intItemContractId
+				,@intCountryID = ISNULL(IM.intOriginId, IC.intCountryId)
+				,@strCountry = ISNULL(CA.strDescription, CG.strCountry)
+				,@intLocationId = CD.intCompanyLocationId
+				,@intRepresentingUOMId = CD.intUnitMeasureId
+			FROM tblCTContractDetail CD
+			JOIN tblICItem IM ON IM.intItemId = CD.intItemId
+			LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = IM.intOriginId
+			LEFT JOIN tblICItemContract IC ON IC.intItemContractId = CD.intItemContractId
+			LEFT JOIN tblSMCountry CG ON CG.intCountryID = IC.intCountryId
+			WHERE CD.intContractDetailId = @intContractDetailId
+		END
+		ELSE
+		BEGIN
+			SELECT @intProductTypeId = 2 -- Item
+				,@intProductValueId = IM.intItemId
+				,@intLocationId = @intLoggedOnLocationId
+				,@intContractHeaderId = NULL
+				,@intContractDetailId = NULL
+				,@intItemContractId = NULL
+				,@intCountryID = IM.intOriginId
+				,@strCountry = CA.strDescription
+			FROM tblICItem IM
+			LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = IM.intOriginId
+			WHERE IM.intItemId = @intItemId
+
+			SELECT @intEntityId = intEntityId
+			FROM tblEMEntity
+			WHERE strName = @strVendorName
+
+			-- Take the template UOM. If not avail, take stock UOM
+			SELECT @intRepresentingUOMId = P.intUnitMeasureId
+			FROM tblQMProduct P
+			WHERE P.intProductId = @intProductId
+
+			IF ISNULL(@intRepresentingUOMId, 0) = 0
+			BEGIN
+				SELECT @intRepresentingUOMId = IU.intUnitMeasureId
+				FROM tblICItemUOM IU
+				WHERE IU.intItemId = @intItemId
+					AND IU.ysnStockUnit = 1
+			END
+		END
 
 		-- Business Date and Shift Id
 		SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDate, @intLocationId)
@@ -478,7 +540,7 @@ BEGIN TRY
 			,@intShipperEntityId
 			,NULL
 			,NULL
-			,NULL
+			,@strSampleNote
 			,@dtmSampleReceivedDate
 			,@dtmCurrentDate
 			,@intCreatedUserId
@@ -505,7 +567,7 @@ BEGIN TRY
 			,@intLocationId
 			,NULL
 			,NULL
-			,NULL
+			,@strHeaderComment
 			,@intCreatedUserId
 			,@dtmCurrentDate
 			,@intCreatedUserId
@@ -644,11 +706,23 @@ BEGIN TRY
 				CASE P.intDataTypeId
 					WHEN 4
 						THEN LOWER(SI.strPropertyValue)
-					ELSE SI.strPropertyValue
+					ELSE (
+							CASE 
+								WHEN ISNULL(TR.strFormula, '') <> ''
+									THEN ''
+								ELSE SI.strPropertyValue
+								END
+							)
 					END
 				)
 			,strComment = SI.strComment
-			,strResult = SI.strResult
+			,strResult = (
+				CASE 
+					WHEN ISNULL(TR.strFormula, '') <> ''
+						THEN ''
+					ELSE SI.strResult
+					END
+				)
 			,dtmPropertyValueCreated = (
 				CASE 
 					WHEN SI.strPropertyValue <> ''
@@ -661,6 +735,113 @@ BEGIN TRY
 			AND TR.intSampleId = @intSampleId
 		JOIN tblQMSampleImport SI ON SI.strPropertyName = P.strPropertyName
 			AND SI.strSampleNumber = @strSampleRefNo
+
+		-- Calculate and update formula property value
+		INSERT INTO @FormulaProperty
+		SELECT intTestResultId
+			,strFormula
+			,strFormulaParser
+		FROM tblQMTestResult
+		WHERE intSampleId = @intSampleId
+			AND ISNULL(strFormula, '') <> ''
+			AND ISNULL(strFormulaParser, '') <> ''
+		ORDER BY intTestResultId
+
+		SELECT @intTestResultId = MIN(intTestResultId)
+		FROM @FormulaProperty
+
+		WHILE (ISNULL(@intTestResultId, 0) > 0)
+		BEGIN
+			SELECT @strFormula = NULL
+				,@strFormulaParser = NULL
+				,@strPropertyValue = ''
+
+			SELECT @strFormula = strFormula
+				,@strFormulaParser = strFormulaParser
+			FROM @FormulaProperty
+			WHERE intTestResultId = @intTestResultId
+
+			SELECT @strFormula = REPLACE(REPLACE(REPLACE(@strFormula, @strFormulaParser, ''), '{', ''), '}', '')
+
+			IF @strFormulaParser = 'MAX'
+			BEGIN
+				SELECT @strPropertyValue = MAX(CONVERT(NUMERIC(18, 6), strPropertyValue))
+				FROM tblQMTestResult
+				WHERE intSampleId = @intSampleId
+					AND ISNULL(strPropertyValue, '') <> ''
+					AND intPropertyId IN (
+						SELECT intPropertyId
+						FROM tblQMProperty
+						WHERE strPropertyName IN (
+								SELECT Item COLLATE Latin1_General_CI_AS
+								FROM dbo.fnSplitStringWithTrim(@strFormula, ',')
+								)
+						)
+			END
+			ELSE IF @strFormulaParser = 'MIN'
+			BEGIN
+				SELECT @strPropertyValue = MIN(CONVERT(NUMERIC(18, 6), strPropertyValue))
+				FROM tblQMTestResult
+				WHERE intSampleId = @intSampleId
+					AND ISNULL(strPropertyValue, '') <> ''
+					AND intPropertyId IN (
+						SELECT intPropertyId
+						FROM tblQMProperty
+						WHERE strPropertyName IN (
+								SELECT Item COLLATE Latin1_General_CI_AS
+								FROM dbo.fnSplitStringWithTrim(@strFormula, ',')
+								)
+						)
+			END
+			ELSE IF @strFormulaParser = 'AVG'
+			BEGIN
+				SELECT @strPropertyValue = AVG(CONVERT(NUMERIC(18, 6), strPropertyValue))
+				FROM tblQMTestResult
+				WHERE intSampleId = @intSampleId
+					AND ISNULL(strPropertyValue, '') <> ''
+					AND intPropertyId IN (
+						SELECT intPropertyId
+						FROM tblQMProperty
+						WHERE strPropertyName IN (
+								SELECT Item COLLATE Latin1_General_CI_AS
+								FROM dbo.fnSplitStringWithTrim(@strFormula, ',')
+								)
+						)
+			END
+			ELSE IF @strFormulaParser = 'SUM'
+			BEGIN
+				SELECT @strPropertyValue = SUM(CONVERT(NUMERIC(18, 6), strPropertyValue))
+				FROM tblQMTestResult
+				WHERE intSampleId = @intSampleId
+					AND ISNULL(strPropertyValue, '') <> ''
+					AND intPropertyId IN (
+						SELECT intPropertyId
+						FROM tblQMProperty
+						WHERE strPropertyName IN (
+								SELECT Item COLLATE Latin1_General_CI_AS
+								FROM dbo.fnSplitStringWithTrim(@strFormula, ',')
+								)
+						)
+			END
+
+			IF @strPropertyValue <> ''
+			BEGIN
+				UPDATE tblQMTestResult
+				SET strPropertyValue = dbo.fnRemoveTrailingZeroes(@strPropertyValue)
+				WHERE intTestResultId = @intTestResultId
+			END
+
+			SELECT @intTestResultId = MIN(intTestResultId)
+			FROM @FormulaProperty
+			WHERE intTestResultId > @intTestResultId
+		END
+
+		-- Setting result for formula properties and the result which is not sent in excel
+		UPDATE tblQMTestResult
+		SET strResult = dbo.fnQMGetPropertyTestResult(TR.intTestResultId)
+		FROM tblQMTestResult TR
+		WHERE TR.intSampleId = @intSampleId
+			AND ISNULL(TR.strResult, '') = ''
 
 		-- Setting correct date format
 		UPDATE tblQMTestResult

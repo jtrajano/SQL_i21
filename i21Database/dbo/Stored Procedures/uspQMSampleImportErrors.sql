@@ -12,12 +12,14 @@ SELECT intSampleImportErrorId
 	--,CONVERT(DATETIME, dtmSampleReceivedDate, 101) dtmSampleReceivedDate
 	,dtmSampleReceivedDate AS strSampleReceivedDate
 	,strSampleNumber
-	,strItemShortName
+	,strItemNumber
 	,strSampleTypeName
 	,strVendorName
 	,strContractNumber
 	,strContainerNumber
 	,strMarks
+	,strSampleNote
+	,strHeaderComment
 	,dblSequenceQuantity
 	,strSampleStatus
 	,strPropertyName

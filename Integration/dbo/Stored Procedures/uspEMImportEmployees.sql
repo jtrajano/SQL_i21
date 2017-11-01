@@ -237,6 +237,48 @@ BEGIN
 	DECLARE @ysnEmployeeActive        BIT
     SET @ysnEmployeeActive = 1
 
+	-- INSERT new records for tblCMBank, prerequisite for importing direct deposit information
+	INSERT INTO tblCMBank (
+			strBankName
+			,strContact
+			,strAddress
+			,strZipCode
+			,strCity
+			,strState
+			,strCountry
+			,strPhone
+			,strFax
+			,strWebsite
+			,strEmail
+			,strRTN
+			,intCreatedUserId
+			,dtmCreated
+			,intLastModifiedUserId
+			,dtmLastModified
+			,intConcurrencyId
+		)
+	SELECT 
+			strBankName				= LTRIM(RTRIM(ISNULL(Q.ssbnk_name, '''')))
+			,strContact				= (SELECT TOP 1 LTRIM(RTRIM(ISNULL(ssbnk_contact,''''))) FROM ssbnkmst WHERE ssbnk_name = Q.ssbnk_name)
+			,strAddress				= (SELECT TOP 1 LTRIM(RTRIM(ISNULL(ssbnk_addr1,''''))) + char(13) + LTRIM(RTRIM(ISNULL(ssbnk_addr2,''''))) FROM ssbnkmst WHERE ssbnk_name = Q.ssbnk_name)
+			,strZipCode				= (SELECT TOP 1 LTRIM(RTRIM(ISNULL(ssbnk_zip,''''))) FROM ssbnkmst WHERE ssbnk_name = Q.ssbnk_name)
+			,strCity				= (SELECT TOP 1 LTRIM(RTRIM(ISNULL(ssbnk_city,''''))) FROM ssbnkmst WHERE ssbnk_name = Q.ssbnk_name)
+			,strState				= (SELECT TOP 1 LTRIM(RTRIM(ISNULL(ssbnk_state,''''))) FROM ssbnkmst WHERE ssbnk_name = Q.ssbnk_name)
+			,strCountry				= ''''
+			,strPhone				= (SELECT TOP 1 LTRIM(RTRIM(ISNULL(ssbnk_phone,''''))) FROM ssbnkmst WHERE ssbnk_name = Q.ssbnk_name)
+			,strFax					= ''''
+			,strWebsite				= ''''	
+			,strEmail				= (SELECT TOP 1 LTRIM(RTRIM(ISNULL(ssbnk_email_addr,''''))) FROM ssbnkmst WHERE ssbnk_name = Q.ssbnk_name)
+			,strRTN					= (SELECT TOP 1 ISNULL(CAST(ssbnk_transit_route AS NVARCHAR(12)), '''') FROM ssbnkmst WHERE ssbnk_name = Q.ssbnk_name)
+			,intCreatedUserId		= (SELECT TOP 1  dbo.fnConvertOriginUserIdtoi21(ssbnk_user_id) FROM ssbnkmst WHERE ssbnk_name = Q.ssbnk_name)
+			,dtmCreated				= GETDATE()
+			,intLastModifiedUserId	= (SELECT TOP 1  dbo.fnConvertOriginUserIdtoi21(ssbnk_user_id) FROM ssbnkmst WHERE ssbnk_name = Q.ssbnk_name)
+			,dtmLastModified		= GETDATE()
+			,intConcurrencyId		= 1
+	FROM(
+			SELECT DISTINCT ssbnk_name FROM ssbnkmst
+		) Q
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblCMBank WHERE strBankName = LTRIM(RTRIM(ISNULL(Q.ssbnk_name, ''''))) COLLATE Latin1_General_CI_AS)
 
 	SELECT premp_emp INTO #tmpprempmst 
 	FROM prempmst
@@ -480,6 +522,12 @@ BEGIN
 					if @i21_bank_id is not null
 					begin
 						SET @Bank_type = LTRIM(RTRIM(@Bank_type))
+
+						--======================Open symmetric code snipet=====================
+						OPEN SYMMETRIC KEY i21EncryptionSymKeyByASym
+						 DECRYPTION BY ASYMMETRIC KEY i21EncryptionASymKeyPwd 
+						 WITH PASSWORD = ''neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY=''
+
 						INSERT INTO tblEMEntityEFTInformation(
 							intEntityId, 
 							intBankId, 
@@ -501,7 +549,7 @@ BEGIN
 							@EntityId,
 							@i21_bank_id,
 							@i21_bank_name,
-							@Bank_account,
+							dbo.fnAESEncryptASym(@Bank_account),
 							CASE WHEN @Bank_type = ''C'' OR @Bank_type = '''' THEN ''Checking''
 								WHEN @Bank_type = ''S'' THEN ''Savings'' END,
 							''Personal'',
@@ -509,6 +557,9 @@ BEGIN
 							1,
 							1,
 							1, 0, 0, 0, 0 ,0, ''Remainder''
+
+						--======================Close symmetric code snnipet=====================
+						CLOSE SYMMETRIC KEY i21EncryptionSymKeyByASym
 					end
 				END
 				
@@ -550,6 +601,12 @@ BEGIN
 					if @i21_bank_id is not null
 					begin
 						SET @Bank_type = LTRIM(RTRIM(@Bank_type))
+
+						--======================Open symmetric code snipet=====================
+						OPEN SYMMETRIC KEY i21EncryptionSymKeyByASym
+						 DECRYPTION BY ASYMMETRIC KEY i21EncryptionASymKeyPwd 
+						 WITH PASSWORD = ''neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY=''
+
 						INSERT INTO tblEMEntityEFTInformation(
 							intEntityId, 
 							intBankId, 
@@ -571,7 +628,7 @@ BEGIN
 							@EntityId,
 							@i21_bank_id,
 							@i21_bank_name,
-							@Bank_account,
+							dbo.fnAESEncryptASym(@Bank_account),
 							CASE WHEN @Bank_type = ''C'' OR @Bank_type = '''' THEN ''Checking''
 								WHEN @Bank_type = ''S'' THEN ''Savings'' END,
 							''Personal'',
@@ -579,6 +636,9 @@ BEGIN
 							1,
 							1,
 							1, 0, @Bank_amount, 1, 0 ,0, ''Fixed Amount''
+
+						--======================Close symmetric code snnipet=====================
+						CLOSE SYMMETRIC KEY i21EncryptionSymKeyByASym
 					end
 				END
 				

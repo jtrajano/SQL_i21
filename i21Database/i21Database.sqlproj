@@ -5434,6 +5434,7 @@
     <Build Include="dbo\Views\vyuGLTrialBalance.sql" />
     <Build Include="dbo\Functions\fnFormatDate.sql" />
 	<Build Include="dbo\Index\IX_tblGLAccountReallocation_strName.sql" />
+    <Build Include="dbo\Functions\fnQMGetPropertyTestResult.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
