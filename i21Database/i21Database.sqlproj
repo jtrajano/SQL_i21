@@ -5828,6 +5828,8 @@
     <Build Include="dbo\Views\vyuMFGetQualityComparison.sql" />
     <Build Include="dbo\Functions\fnQMGetPropertyTestResult.sql" />
     <Build Include="dbo\Views\vyuNRNotesReceivableSearch.sql" />
+    <Build Include="dbo\Views\vyuARInventoryUnitMeasureDetailReport.sql" />
+    <Build Include="dbo\Views\vyuARInventoryUnitMeasureReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
