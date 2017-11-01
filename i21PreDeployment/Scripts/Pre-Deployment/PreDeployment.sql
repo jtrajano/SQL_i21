@@ -65,6 +65,7 @@
 :r .\7_AR\6_PaymentDetailInvoiceCleanUp.sql
 :r .\7_AR\7_CompanyPreferenceCleanUp.sql
 :r .\7_AR\8_FixARPaymentData_applying_card_info_constraint.sql
+:r .\7_AR\9_FixNRCompanyPreference.sql
 
 -- AP
 :r .\8_AP\DropAPViews.sql
