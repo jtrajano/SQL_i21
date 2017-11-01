@@ -5827,6 +5827,7 @@
     <None Include="Scripts\Post-Deployment\PAT\DefaultData\2_DefaultCompanyPreference.sql" />
     <Build Include="dbo\Views\vyuMFGetQualityComparison.sql" />
     <Build Include="dbo\Functions\fnQMGetPropertyTestResult.sql" />
+    <Build Include="dbo\Views\vyuNRNotesReceivableSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
