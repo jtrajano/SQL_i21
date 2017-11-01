@@ -55,7 +55,7 @@ BEGIN
 		BEGIN
 			DECLARE @totalptticmst int
 			EXEC [uspARImportInvoiceBackupPTTICMST] @StartDate ,@EndDate ,@totalptticmst OUTPUT
-			EXEC [uspARImportInvoiceFromPTTICMST] @UserId ,@StartDate ,@EndDate ,@Total OUTPUT ,@totalDetailImported OUTPUT 			
+			EXEC [uspARImportInvoiceFromPTTICMST] @UserId ,@StartDate ,@EndDate ,@Total OUTPUT ,@totalDetailImported OUTPUT		
 		END
 		
 	END
@@ -579,7 +579,7 @@ BEGIN
 	--     GET TO BE IMPORTED RECORDS
 	--	This is checking if there are still records need to be import	
 	--================================================
-	IF(@Checking = 1)
+	IF(@Checking = 1 AND @Posted = 1)
 	BEGIN
 		IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agivcmst')
 		 BEGIN
@@ -604,6 +604,38 @@ BEGIN
 			WHERE tblARInvoice.strInvoiceOriginId IS NULL AND ptivcmst.ptivc_invc_no = UPPER(ptivcmst.ptivc_invc_no) COLLATE Latin1_General_CS_AS
 			AND (
 					((CASE WHEN ISDATE(ptivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+					OR
+					((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
+				)
+		 END		 
+		
+	END
+
+	IF(@Checking = 1 AND @Posted = 0)
+	BEGIN
+		IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agordmst')
+		 BEGIN
+		 --Check first on agivcmst
+			SELECT @Total = COUNT(agord_ivc_no)  
+				FROM agordmst
+			LEFT JOIN tblARInvoice ON agordmst.agord_ivc_no COLLATE Latin1_General_CI_AS = tblARInvoice.strInvoiceOriginId COLLATE Latin1_General_CI_AS
+			WHERE tblARInvoice.strInvoiceOriginId IS NULL AND agordmst.agord_ivc_no = UPPER(agordmst.agord_ivc_no) COLLATE Latin1_General_CS_AS
+			AND (
+					((CASE WHEN ISDATE(agord_ord_rev_dt) = 1 THEN CONVERT(DATE, CAST(agord_ord_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+					OR
+					((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
+				)
+		 END
+
+		IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptticmst')
+		 BEGIN
+		--Check first on ptivcmst
+			SELECT @Total = COUNT(pttic_ivc_no)  
+				FROM ptticmst
+			LEFT JOIN tblARInvoice ON ptticmst.pttic_ivc_no COLLATE Latin1_General_CI_AS = tblARInvoice.strInvoiceOriginId COLLATE Latin1_General_CI_AS
+			WHERE tblARInvoice.strInvoiceOriginId IS NULL AND ptticmst.pttic_ivc_no = UPPER(ptticmst.pttic_ivc_no) COLLATE Latin1_General_CS_AS
+			AND (
+					((CASE WHEN ISDATE(pttic_rev_dt) = 1 THEN CONVERT(DATE, CAST(pttic_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
 					OR
 					((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
 				)
