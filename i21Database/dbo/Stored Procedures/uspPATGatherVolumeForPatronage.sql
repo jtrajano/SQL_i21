@@ -10,18 +10,34 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
-
+	
 	DECLARE @totalRecords INT = 0;
 	DECLARE @error NVARCHAR(MAX);
 	DECLARE @TYPE_PURCHASE NVARCHAR(10) = 'Purchase' COLLATE Latin1_General_CI_AS;
 	DECLARE @TYPE_SALE NVARCHAR(10) = 'Sale' COLLATE Latin1_General_CI_AS;
 	DECLARE @TYPE_AMOUNT NVARCHAR(10) = 'Amount' COLLATE Latin1_General_CI_AS;
 
+	DECLARE @TransactionName AS VARCHAR(500) = 'GATHERING PATRONAGE VOLUME' + CAST(NEWID() AS NVARCHAR(100));
+
 	DECLARE @tempTransactionIds TABLE(
         [intID] INT
     );
 
-	DECLARE @TransactionName AS VARCHAR(500) = 'GATHERING PATRONAGE VOLUME' + CAST(NEWID() AS NVARCHAR(100));
+	DECLARE @patronageVolumeStaging TABLE(
+		[intTransactionDetailId] INT,
+		[intTransactionId] INT,
+		[dtmDate] DATETIME,
+		[intFiscalYearId] INT,
+		[intCustomerPatronId] INT,
+		[intItemId] INT,
+		[intPatronageCategoryId] INT,
+		[strPurchaseSale] NVARCHAR(25),
+		[strUnitAmount] NVARCHAR(25),
+		[dblQuantity] NUMERIC(18,6),
+		[dblCost] NUMERIC(18,6),
+		[dblUnitQty] NUMERIC(18,6),
+		[ysnDirectCategory] BIT
+	);
 
 	DECLARE @tempPatronageVolumes TABLE(
 		[intCustomerPatronId] INT,
@@ -29,7 +45,7 @@ SET ANSI_WARNINGS OFF
 		[ysnPosted] BIT,
 		[intFiscalYearId] INT,
 		[dblVolume] NUMERIC(18,6)
-	)
+	);
 
 	INSERT INTO @tempTransactionIds
 	SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@transactionIds)
@@ -37,173 +53,240 @@ SET ANSI_WARNINGS OFF
 	BEGIN TRAN @TransactionName;
 	SAVE TRAN @TransactionName;
 
-	BEGIN TRY
-	IF(@type = 1)
+	-----====== Begin - Build Patronage Staging Table ======-----
+	IF(@type = 1) -- PURCHASE / DIRECT IN
 	BEGIN
-			INSERT INTO @tempPatronageVolumes
-			SELECT	intCustomerPatronId = AB.intEntityVendorId,
-			IC.intPatronageCategoryId,
-			ysnPosted = @post,
-			FY.intFiscalYearId,
-			dblVolume = ROUND(SUM(CASE WHEN PC.strUnitAmount = @TYPE_AMOUNT THEN (CASE WHEN ABD.dblQtyReceived <= 0 THEN 0 ELSE (ABD.dblQtyReceived * ABD.dblCost) END) 
-						ELSE ABD.dblQtyReceived * UOM.dblUnitQty END),2)
-			FROM tblAPBill AB
-			INNER JOIN tblAPBillDetail ABD
-					ON ABD.intBillId = AB.intBillId
-			INNER JOIN tblARCustomer ARC
-					ON ARC.intEntityId = AB.intEntityVendorId AND ARC.strStockStatus != ''
-			INNER JOIN tblICItem IC
-					ON IC.intItemId = ABD.intItemId
-			INNER JOIN tblICItemUOM UOM
-					ON UOM.intItemUOMId = ABD.intUnitOfMeasureId AND UOM.intItemId = IC.intItemId
-			INNER JOIN tblPATPatronageCategory PC
-				ON PC.intPatronageCategoryId = IC.intPatronageCategoryId AND PC.strPurchaseSale = @TYPE_PURCHASE
-			CROSS APPLY tblGLFiscalYear FY
-			WHERE AB.intBillId IN (SELECT [intID] FROM @tempTransactionIds) AND AB.dtmDate BETWEEN FY.dtmDateFrom AND FY.dtmDateTo
-			AND IC.intPatronageCategoryId IS NOT NULL
-			GROUP BY AB.intEntityVendorId,
-			IC.intPatronageCategoryId,
-			FY.intFiscalYearId,
-			AB.ysnPosted
-	END
-	ELSE IF(@type = 2)
-	BEGIN
-		INSERT INTO @tempPatronageVolumes
-		SELECT	intCustomerPatronId = AR.intEntityCustomerId,
-				IC.intPatronageCategoryId,
-				ysnPosted = @post,
-				FY.intFiscalYearId,
-				dblVolume =	ROUND(SUM(CASE WHEN PC.strUnitAmount = @TYPE_AMOUNT THEN (CASE WHEN ARD.dblQtyShipped <= 0 THEN 0 ELSE (ARD.dblQtyShipped * ARD.dblPrice) END)
-							ELSE (CASE WHEN ICU.dblUnitQty <= 0 THEN ARD.dblQtyShipped ELSE (ARD.dblQtyShipped * ICU.dblUnitQty) END ) END),2)
-			FROM tblARInvoice AR
-			INNER JOIN tblARInvoiceDetail ARD
-					ON ARD.intInvoiceId = AR.intInvoiceId
-			INNER JOIN tblARCustomer ARC
-					ON ARC.intEntityId = AR.intEntityCustomerId AND ARC.strStockStatus != ''
-			INNER JOIN tblICItem IC
-					ON IC.intItemId = ARD.intItemId
-			INNER JOIN tblICItemUOM ICU
-					ON ICU.intItemId = IC.intItemId AND ICU.intItemUOMId = ARD.intItemUOMId
-			INNER JOIN tblPATPatronageCategory PC
-					ON PC.intPatronageCategoryId = IC.intPatronageCategoryId AND PC.strPurchaseSale = @TYPE_SALE
-			CROSS APPLY tblGLFiscalYear FY
-		WHERE AR.intInvoiceId IN (SELECT [intID] FROM @tempTransactionIds) AND AR.dtmDate BETWEEN FY.dtmDateFrom AND FY.dtmDateTo 
-		AND IC.intPatronageCategoryId IS NOT NULL
-		GROUP BY AR.intEntityCustomerId,
-			IC.intPatronageCategoryId,
-			FY.intFiscalYearId,
-			AR.ysnPosted
-	END
-
-	SELECT @totalRecords = COUNT(*) FROM @tempPatronageVolumes
-	IF (@totalRecords = 0)
-	BEGIN
-		GOTO Post_Commit;
-	END
-
-
-	MERGE tblPATCustomerVolume AS PAT
-	USING @tempPatronageVolumes AS B
-		ON (PAT.intCustomerPatronId = B.intCustomerPatronId AND PAT.intPatronageCategoryId = B.intPatronageCategoryId AND PAT.intFiscalYear = B.intFiscalYearId AND PAT.ysnRefundProcessed <> 1)
-		WHEN MATCHED
-			THEN UPDATE SET PAT.dblVolume = CASE WHEN B.ysnPosted = 1 THEN (PAT.dblVolume + B.dblVolume) 
-												ELSE (PAT.dblVolume - B.dblVolume) END
-		WHEN NOT MATCHED BY TARGET
-			THEN INSERT (intCustomerPatronId, intPatronageCategoryId, intFiscalYear, dblVolume, intConcurrencyId)
-				VALUES (B.intCustomerPatronId, B.intPatronageCategoryId, B.intFiscalYearId, CASE WHEN B.ysnPosted = 1 THEN B.dblVolume ELSE 0 END, 1);
-
-	IF(@type = 1)
-	BEGIN
-		UPDATE ARC
-		SET dtmLastActivityDate = APB.dtmDate
-		FROM tblARCustomer ARC
-		INNER JOIN ( 
-				SELECT DISTINCT AB.intEntityVendorId, MAX(AB.dtmDate) OVER (PARTITION BY AB.intEntityVendorId) AS dtmDate
-				FROM tblAPBill AB
-				INNER JOIN tblAPBillDetail ABD
-					ON ABD.intBillId = AB.intBillId
-				INNER JOIN tblARCustomer ARC
-					ON ARC.intEntityId = AB.intEntityVendorId AND ARC.strStockStatus != ''
-				INNER JOIN tblICItem IC
-					ON IC.intItemId = ABD.intItemId
-				INNER JOIN tblPATPatronageCategory PC
-					ON PC.intPatronageCategoryId = IC.intPatronageCategoryId AND PC.strPurchaseSale = @TYPE_PURCHASE
-				WHERE AB.intBillId IN (SELECT [intID] FROM @tempTransactionIds)
-		) APB ON APB.intEntityVendorId = ARC.intEntityId
-
-		IF(@post = 1)
-		BEGIN
-			INSERT INTO tblPATCustomerVolumeLog([intBillId],[dtmTransactionDate],[intItemId],[dblVolume])
-			SELECT	AB.intBillId,
-					AB.dtmDate,
+			INSERT INTO @patronageVolumeStaging
+			SELECT	ABD.intBillDetailId,
+					AB.intBillId,
+					dtmDate = DATEADD(dd, DATEDIFF(dd, 0, AB.dtmDate), 0),
+					FY.intFiscalYearId,
+					intCustomerPatronId = AB.intEntityVendorId,
 					IC.intItemId,
-					dblVolume = ROUND((CASE WHEN PC.strUnitAmount = @TYPE_AMOUNT THEN (CASE WHEN ABD.dblQtyReceived <= 0 THEN 0 ELSE (ABD.dblQtyReceived * ABD.dblCost) END) 
-						ELSE ABD.dblQtyReceived * UOM.dblUnitQty END),2)
+					IC.intPatronageCategoryId,
+					PC.strPurchaseSale,
+					PC.strUnitAmount,
+					ABD.dblQtyReceived,
+					ABD.dblCost,
+					UOM.dblUnitQty,
+					ysnDirectCategory = 0
 			FROM tblAPBill AB
 			INNER JOIN tblAPBillDetail ABD
-				ON ABD.intBillId = AB.intBillId
+					ON ABD.intBillId = AB.intBillId
 			INNER JOIN tblARCustomer ARC
 				ON ARC.intEntityId = AB.intEntityVendorId AND ARC.strStockStatus != ''
 			INNER JOIN tblICItem IC
 				ON IC.intItemId = ABD.intItemId
 			INNER JOIN tblICItemUOM UOM
-				ON UOM.intItemUOMId = ABD.intUnitOfMeasureId AND UOM.intItemId = IC.intItemId			
+				ON UOM.intItemUOMId = ABD.intUnitOfMeasureId AND UOM.intItemId = IC.intItemId
 			INNER JOIN tblPATPatronageCategory PC
 				ON PC.intPatronageCategoryId = IC.intPatronageCategoryId AND PC.strPurchaseSale = @TYPE_PURCHASE
-			WHERE AB.intBillId IN (SELECT [intID] FROM @tempTransactionIds)
-		END
-		ELSE
-		BEGIN
-			UPDATE tblPATCustomerVolumeLog
-			SET ysnIsUnposted = 1
-			WHERE ysnIsUnposted <> 1 AND intBillId IN (SELECT [intID] FROM @tempTransactionIds)
-		END
-	END
-	ELSE IF(@type = 2)
-	BEGIN
-		UPDATE ARC
-		SET dtmLastActivityDate = ARI.dtmDate
-		FROM tblARCustomer ARC
-		INNER JOIN (
-			SELECT DISTINCT ARI.intEntityCustomerId, MAX(ARI.dtmDate) OVER (PARTITION BY ARI.intEntityCustomerId) AS dtmDate FROM tblARInvoice ARI
-			INNER JOIN tblARInvoiceDetail ARD
-				ON ARD.intInvoiceId = ARI.intInvoiceId
-			INNER JOIN tblICItem IC
-				ON IC.intItemId = ARD.intItemId
-			INNER JOIN tblPATPatronageCategory PC
-				ON PC.intPatronageCategoryId = IC.intPatronageCategoryId AND PC.strPurchaseSale = @TYPE_SALE
-			WHERE ARI.intInvoiceId IN (SELECT [intID] FROM @tempTransactionIds)
-		) ARI ON ARI.intEntityCustomerId = ARC.intEntityId
-
-		IF(@post = 1)
-		BEGIN
-			INSERT INTO tblPATCustomerVolumeLog([intInvoiceId],[dtmTransactionDate],[intItemId],[dblVolume])
-			SELECT	AR.intInvoiceId,
-					AR.dtmDate,
-					ARD.intItemId,
-					dblVolume = ROUND((CASE WHEN PC.strUnitAmount = @TYPE_AMOUNT THEN (CASE WHEN ARD.dblQtyShipped <= 0 THEN 0 ELSE (ARD.dblQtyShipped * ARD.dblPrice) END)
-							ELSE (CASE WHEN ICU.dblUnitQty <= 0 THEN ARD.dblQtyShipped ELSE (ARD.dblQtyShipped * ICU.dblUnitQty) END ) END),2)
-			FROM tblARInvoice AR
-			INNER JOIN tblARInvoiceDetail ARD
-					ON ARD.intInvoiceId = AR.intInvoiceId
+			CROSS APPLY tblGLFiscalYear FY
+			WHERE AB.intBillId IN (SELECT [intID] FROM @tempTransactionIds) AND AB.dtmDate BETWEEN FY.dtmDateFrom AND FY.dtmDateTo
+			AND IC.intPatronageCategoryId IS NOT NULL
+			UNION 
+			SELECT	ABD.intBillDetailId,
+					AB.intBillId,
+					dtmDate = DATEADD(dd, DATEDIFF(dd, 0, AB.dtmDate), 0),
+					FY.intFiscalYearId,
+					intCustomerPatronId = AB.intEntityVendorId,
+					IC.intItemId,
+					IC.intPatronageCategoryDirectId, 
+					PC.strPurchaseSale,
+					PC.strUnitAmount,
+					ABD.dblQtyReceived,
+					ABD.dblCost,
+					UOM.dblUnitQty,
+					ysnDirectCategory = 1
+			FROM tblAPBill AB
+			INNER JOIN tblAPBillDetail ABD
+				ON ABD.intBillId = AB.intBillId
+			INNER JOIN tblICInventoryReceiptItem IRItem
+				ON IRItem.intInventoryReceiptItemId = ABD.intInventoryReceiptItemId 
+			INNER JOIN tblICInventoryReceipt IR
+				ON IR.intInventoryReceiptId = IRItem.intInventoryReceiptId AND IR.intSourceType = 1
+			INNER JOIN tblSCTicket SC
+				ON SC.intTicketId = IRItem.intSourceId AND SC.intTicketTypeId = 8
 			INNER JOIN tblARCustomer ARC
-					ON ARC.intEntityId = AR.intEntityCustomerId AND ARC.strStockStatus != ''
+				ON ARC.intEntityId = AB.intEntityVendorId AND ARC.strStockStatus != ''
 			INNER JOIN tblICItem IC
-					ON IC.intItemId = ARD.intItemId
-			INNER JOIN tblICItemUOM ICU
-					ON ICU.intItemId = IC.intItemId AND ICU.intItemUOMId = ARD.intItemUOMId
+				ON IC.intItemId = ABD.intItemId
+			INNER JOIN tblICItemUOM UOM
+				ON UOM.intItemUOMId = ABD.intUnitOfMeasureId AND UOM.intItemId = IC.intItemId
 			INNER JOIN tblPATPatronageCategory PC
-					ON PC.intPatronageCategoryId = IC.intPatronageCategoryId AND PC.strPurchaseSale = @TYPE_SALE
-			WHERE AR.intInvoiceId IN (SELECT [intID] FROM @tempTransactionIds)
+				ON PC.intPatronageCategoryId = IC.intPatronageCategoryDirectId AND PC.strPurchaseSale = @TYPE_PURCHASE
+			CROSS APPLY tblGLFiscalYear FY
+			WHERE AB.intBillId IN (SELECT [intID] FROM @tempTransactionIds) AND AB.dtmDate BETWEEN FY.dtmDateFrom AND FY.dtmDateTo
+			AND IC.intPatronageCategoryDirectId IS NOT NULL
+	END
+	ELSE IF(@type = 2) -- SALE / DIRECT OUT
+	BEGIN
+		INSERT INTO @patronageVolumeStaging
+		SELECT		ARID.intInvoiceDetailId,
+					ARI.intInvoiceId,
+					dtmDate = DATEADD(dd, DATEDIFF(dd, 0, ARI.dtmDate), 0),
+					FY.intFiscalYearId,
+					intCustomerPatronId = ARI.intEntityCustomerId,
+					IC.intItemId,
+					IC.intPatronageCategoryId,
+					PC.strPurchaseSale,
+					PC.strUnitAmount,
+					ARID.dblQtyShipped,
+					ARID.dblPrice,
+					UOM.dblUnitQty,
+					ysnDirectCategory = 0
+			FROM tblARInvoice ARI
+			INNER JOIN tblARInvoiceDetail ARID
+					ON ARID.intInvoiceId = ARI.intInvoiceId
+			INNER JOIN tblARCustomer ARC
+				ON ARC.intEntityId = ARI.intEntityId AND ARC.strStockStatus != ''
+			INNER JOIN tblICItem IC
+				ON IC.intItemId = ARID.intItemId
+			INNER JOIN tblICItemUOM UOM
+				ON UOM.intItemId = IC.intItemId AND UOM.intItemUOMId = ARID.intItemUOMId
+			INNER JOIN tblPATPatronageCategory PC
+				ON PC.intPatronageCategoryId = IC.intPatronageCategoryId AND PC.strPurchaseSale = @TYPE_PURCHASE
+			CROSS APPLY tblGLFiscalYear FY
+			WHERE ARI.intInvoiceId IN (SELECT [intID] FROM @tempTransactionIds) AND ARI.dtmDate BETWEEN FY.dtmDateFrom AND FY.dtmDateTo
+			AND IC.intPatronageCategoryId IS NOT NULL
+			UNION 
+			SELECT	ARID.intInvoiceDetailId,
+					ARI.intInvoiceId,
+					dtmDate = DATEADD(dd, DATEDIFF(dd, 0, ARI.dtmDate), 0),
+					FY.intFiscalYearId,
+					intCustomerPatronId = ARI.intEntityCustomerId,
+					IC.intItemId,
+					IC.intPatronageCategoryId,
+					PC.strPurchaseSale,
+					PC.strUnitAmount,
+					ARID.dblQtyShipped,
+					ARID.dblPrice,
+					UOM.dblUnitQty,
+					ysnDirectCategory = 1
+			FROM tblARInvoice ARI
+			INNER JOIN tblARInvoiceDetail ARID
+				ON ARID.intInvoiceId = ARI.intInvoiceId
+			INNER JOIN tblICInventoryShipmentItem ISItem
+				ON ISItem.intInventoryShipmentId = ARID.intInventoryShipmentItemId
+			INNER JOIN tblICInventoryShipment InvShip
+				ON InvShip.intInventoryShipmentId = ISItem.intInventoryShipmentId AND InvShip.intSourceType = 1
+			INNER JOIN tblSCTicket SC
+				ON SC.intTicketId = ISItem.intSourceId AND SC.intTicketTypeId = 9
+			INNER JOIN tblARCustomer ARC
+				ON ARC.intEntityId = ARI.intEntityCustomerId AND ARC.strStockStatus != ''
+			INNER JOIN tblICItem IC
+				ON IC.intItemId = ARID.intItemId
+			INNER JOIN tblICItemUOM UOM
+				ON UOM.intItemId = IC.intItemId AND UOM.intItemUOMId = ARID.intItemUOMId
+			INNER JOIN tblPATPatronageCategory PC
+				ON PC.intPatronageCategoryId = IC.intPatronageCategoryDirectId AND PC.strPurchaseSale = @TYPE_PURCHASE
+			CROSS APPLY tblGLFiscalYear FY
+			WHERE ARI.intInvoiceId IN (SELECT [intID] FROM @tempTransactionIds) AND ARI.dtmDate BETWEEN FY.dtmDateFrom AND FY.dtmDateTo
+			AND IC.intPatronageCategoryDirectId IS NOT NULL
+	END
+	-----====== END - Build Patronage Staging Table ======-----
+	
+	-----====== BEGIN - Filter Customer Volume with Direct Sale ======-----
+	IF EXISTS(SELECT COUNT(*) FROM @patronageVolumeStaging GROUP BY intTransactionDetailId HAVING COUNT(intTransactionDetailId) > 1)
+	BEGIN
+		DELETE FROM @patronageVolumeStaging WHERE intTransactionDetailId IN 
+			(SELECT intTransactionDetailId FROM @patronageVolumeStaging GROUP BY intTransactionDetailId, strPurchaseSale HAVING COUNT(intTransactionDetailId) > 1) AND ysnDirectCategory <> 1;
+	END
+	-----====== END - Filter Customer Volume with Direct Sale ======-----
+	SELECT * FROM @patronageVolumeStaging;
+	-----====== BEGIN - Count Eligible Customer Volume ======-----
+	SELECT @totalRecords = COUNT(*) FROM @patronageVolumeStaging;
+	IF (@totalRecords = 0)
+	BEGIN
+		GOTO Post_Commit;
+	END
+	-----====== END - Count Eligible Customer Volume ======-----
+
+	-----====== BEGIN - Compute Patronage Volume ======-----
+	INSERT INTO @tempPatronageVolumes
+	SELECT	PVS.intCustomerPatronId,
+			PVS.intPatronageCategoryId,
+			ysnPosted = @post,
+			PVS.intFiscalYearId,
+			dblVolume = ROUND(SUM(CASE WHEN PVS.strUnitAmount = @TYPE_AMOUNT THEN (CASE WHEN PVS.dblQuantity <= 0 THEN 0 ELSE (PVS.dblQuantity * PVS.dblCost) END) 
+						ELSE PVS.dblQuantity * PVS.dblUnitQty END), 2)
+	FROM @patronageVolumeStaging PVS
+	GROUP BY	PVS.intCustomerPatronId,
+				PVS.intPatronageCategoryId,
+				PVS.ysnDirectCategory,
+				PVS.intFiscalYearId
+	-----====== END - Compute Patronage Volume ======-----
+				
+				
+	BEGIN TRY
+	-----====== BEGIN - Merge Patronage Volume ======-----
+	MERGE tblPATCustomerVolume AS CustVol
+	USING @tempPatronageVolumes AS PatVol
+		ON (CustVol.intCustomerPatronId = PatVol.intCustomerPatronId AND CustVol.intPatronageCategoryId = PatVol.intPatronageCategoryId 
+			AND CustVol.intFiscalYear = PatVol.intFiscalYearId AND CustVol.ysnRefundProcessed <> 1)
+		WHEN MATCHED
+			THEN UPDATE SET CustVol.dblVolume = CASE WHEN PatVol.ysnPosted = 1 THEN (CustVol.dblVolume + PatVol.dblVolume) 
+												ELSE (CustVol.dblVolume - PatVol.dblVolume) END
+		WHEN NOT MATCHED BY TARGET
+			THEN INSERT (intCustomerPatronId, intPatronageCategoryId, intFiscalYear, dblVolume, intConcurrencyId)
+				VALUES (PatVol.intCustomerPatronId, PatVol.intPatronageCategoryId, PatVol.intFiscalYearId, CASE WHEN PatVol.ysnPosted = 1 THEN PatVol.dblVolume ELSE 0 END, 1);
+	-----====== END - Merge Patronage Volume ======-----
+
+
+	
+	-----====== BEGIN - Update Customer Volume Log ======-----
+	IF(@post = 1)
+	BEGIN
+		INSERT INTO tblPATCustomerVolumeLog(intInvoiceId,intBillId,dtmTransactionDate,ysnDirectSale,intItemId,dblVolume)
+		SELECT	intInvoiceId = NULL,
+				intBillId = PVS.intTransactionId,
+				dtmTransactionDate = PVS.dtmDate,
+				ysnDirectSale = PVS.ysnDirectCategory,
+				intItemId = PVS.intItemId,
+				dblVolume = ROUND((CASE WHEN PVS.strUnitAmount = @TYPE_AMOUNT THEN (CASE WHEN PVS.dblQuantity <= 0 THEN 0 ELSE (PVS.dblQuantity * PVS.dblCost) END) 
+						ELSE PVS.dblQuantity * PVS.dblUnitQty END),2)
+		FROM @patronageVolumeStaging PVS
+		WHERE PVS.strPurchaseSale = @TYPE_PURCHASE
+		UNION ALL
+		SELECT	intInvoiceId = PVS.intTransactionId,
+				intBillId = NULL,
+				dtmTransactionDate = PVS.dtmDate,
+				ysnDirectSale = PVS.ysnDirectCategory,
+				intItemId = PVS.intItemId,
+				dblVolume = ROUND((CASE WHEN PVS.strUnitAmount = @TYPE_AMOUNT THEN (CASE WHEN PVS.dblQuantity <= 0 THEN 0 ELSE (PVS.dblQuantity * PVS.dblCost) END) 
+						ELSE PVS.dblQuantity * PVS.dblUnitQty END),2)
+		FROM @patronageVolumeStaging PVS
+		WHERE PVS.strPurchaseSale = @TYPE_SALE
+	END
+	ELSE
+	BEGIN
+		IF(@type = 1)
+		BEGIN
+			UPDATE tblPATCustomerVolumeLog
+			SET ysnIsUnposted = 1
+			WHERE ysnIsUnposted <> 1 AND intBillId IN (SELECT intTransactionId FROM @patronageVolumeStaging WHERE strPurchaseSale = @TYPE_PURCHASE)
 		END
 		ELSE
 		BEGIN
 			UPDATE tblPATCustomerVolumeLog
 			SET ysnIsUnposted = 1
-			WHERE ysnIsUnposted <> 1 AND intInvoiceId IN (SELECT [intID] FROM @tempTransactionIds)
+			WHERE ysnIsUnposted <> 1 AND intInvoiceId IN (SELECT intTransactionId FROM @patronageVolumeStaging WHERE strPurchaseSale = @TYPE_SALE)
 		END
 	END
-	
+	-----====== END - Update Customer Volume Log ======-----
+
+
+	-----====== BEGIN - Update Customer Last Activity Date ======-----
+	UPDATE ARC
+	SET dtmLastActivityDate = PVS.dtmDate
+	FROM tblARCustomer ARC
+	INNER JOIN (
+		SELECT DISTINCT PVS.intCustomerPatronId, MAX(PVS.dtmDate) OVER(PARTITION BY PVS.intCustomerPatronId) AS dtmDate
+		FROM @patronageVolumeStaging PVS
+	) PVS ON PVS.intCustomerPatronId = ARC.intEntityId
+	-----====== END - Update Customer Last Activity Date ======-----
+
+
 	END TRY
 	BEGIN CATCH
 		GOTO Post_Rollback;

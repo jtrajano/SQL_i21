@@ -5,15 +5,17 @@ SELECT  CVL.intCustomerVolumeLogId,
 		CVL.intInvoiceId,
 		CVL.intItemId,
 		IC.strItemNo,
-		PC.strCategoryCode,
-		PC.strPurchaseSale,
-		PC.strUnitAmount,
+		strCategoryCode = CASE WHEN ysnDirectSale = 1 THEN DirectPC.strCategoryCode ELSE PC.strCategoryCode END,
+		strPurchaseSale = CASE WHEN ysnDirectSale = 1 THEN DirectPC.strPurchaseSale ELSE PC.strPurchaseSale END, 
+		strUnitAmount = CASE WHEN ysnDirectSale = 1 THEN DirectPC.strUnitAmount ELSE PC.strUnitAmount END,
 		ysnDirectSale,
 		ysnIsUnposted,
 		dblVolume
 FROM tblPATCustomerVolumeLog CVL
 INNER JOIN tblICItem IC
 	ON IC.intItemId = CVL.intItemId
-INNER JOIN tblPATPatronageCategory PC
+LEFT JOIN tblPATPatronageCategory PC
 	ON PC.intPatronageCategoryId = IC.intPatronageCategoryId
-WHERE CVL.ysnIsUnposted <> 1
+LEFT JOIN tblPATPatronageCategory DirectPC
+	ON DirectPC.intPatronageCategoryId = IC.intPatronageCategoryDirectId
+WHERE CVL.ysnIsUnposted <> 1 
