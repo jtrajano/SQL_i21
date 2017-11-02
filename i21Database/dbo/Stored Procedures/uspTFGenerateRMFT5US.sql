@@ -225,7 +225,7 @@ BEGIN TRY
 		SET @dblLine17 = @dblLine15c - @dblLine16
 
 		-- Line 18
-		SELECT @dblLine18 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC, strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-US-Line18'
+		SELECT @dblLine18 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-US-Line18'
 
 		-- Line 19
 		SET @dblLine19 = @dblLine17 - @dblLine18
