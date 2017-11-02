@@ -361,6 +361,26 @@ BEGIN
 	AND A.intTransactionType = 8
 
 	ALTER TABLE tblAPPayment ADD CONSTRAINT [UK_dbo.tblAPPayment_strPaymentRecordNum] UNIQUE (strPaymentRecordNum);
+	
+	DECLARE @strDescription AS NVARCHAR(100),@PaymentId AS NVARCHAR(50);
+	DECLARE @paymentCounter INT = 0, @totalRecords INT = 0, @Id NVARCHAR(50);
+
+	SET @totalRecords = (SELECT COUNT(*) FROM #tmpPayables)
+	WHILE(@paymentCounter != (@totalRecords))
+	BEGIN
+		SELECT @Id = CAST((SELECT TOP(1) intPaymentId FROM #tmpPayables) AS NVARCHAR(50))
+		
+		EXEC dbo.uspSMAuditLog 
+		   @screenName = 'AccountsPayable.view.PayVouchersDetail'		-- Screen Namespace
+		  ,@keyValue = @Id								-- Primary Key Value of the Voucher. 
+		  ,@entityId = @intUserId									-- Entity Id.
+		  ,@actionType = 'Voided'                        -- Action Type
+		  ,@changeDescription = @strDescription				-- Description
+		  ,@fromValue = ''									-- Previous Value
+		  ,@toValue = ''
+		SET @paymentCounter = @paymentCounter + 1
+		DELETE FROM #tmpPayables WHERE intPaymentId = @Id
+	END
 
 	IF @transCount = 0 COMMIT TRANSACTION
 

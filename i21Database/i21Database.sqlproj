@@ -1535,6 +1535,7 @@
     <Build Include="dbo\Functions\fnAPCreatePaymentBankTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspSOUpdateOrderShipmentStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateLotNumberOnInventoryAdjustmentSplitLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateLotNumberOnInventoryAdjustmentQtyChange.sql" />
     <Build Include="dbo\Stored Procedures\uspSCStorageUpdate.sql" />
     <Build Include="dbo\Stored Procedures\uspMFStartCycleCount.sql" />
     <Build Include="dbo\Stored Procedures\uspPRPostPaycheck.sql" />
@@ -5834,6 +5835,23 @@
     <Build Include="dbo\Views\vyuAPVendorInquiry.sql" />
     <Build Include="dbo\Views\vyuAPSearchVendorInquiry.sql" />
     <Build Include="dbo\Views\vyuCRMHoursWorked.sql" />
+    <Build Include="dbo\Views\vyuMFGetBlendTransactions.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCDeliverySheetReceived.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInsertSiteRecord.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInsertItemRecord.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\32_UpdateCommissionScheduleEntity.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMDropSubsidiary.sql" />
+    <Build Include="dbo\Functions\fnTFCoalesceProductCode.sql" />
+    <Build Include="dbo\Functions\fnTFCoalesceDestinationOriginState.sql" />
+    <Build Include="dbo\Functions\fnTFCoalesceDestinationState.sql" />
+    <Build Include="dbo\Functions\fnTFCoalesceVendor.sql" />
+    <Build Include="dbo\Functions\fnTFCoalesceAccountStatusCode.sql" />
+    <Build Include="dbo\Functions\fnTFCoalesceCustomer.sql" />
+    <Build Include="dbo\Tables\tblCFSpecialTaxingRuleHeader.sql" />
+    <Build Include="dbo\Tables\tblCFSpecialTaxingRuleSite.sql" />
+    <Build Include="dbo\Tables\tblCFSpecialTaxingRuleTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMImportBanksFromOrigin.sql" />
+    <Build Include="dbo\Functions\fnMFGetTotalStockValueFromTransactionBatch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -5984,6 +6002,7 @@
     <Build Include="dbo\Views\vyuAP1099Summary.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099Summary.sql" />
     <Build Include="dbo\Stored Procedures\uspSMUpdateEntityCredentialCompanyGridLayout.sql" />
+    <None Include="Scripts\Post-Deployment\CCR\RemoveCCRObsoleteScreen.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

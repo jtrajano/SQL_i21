@@ -837,7 +837,7 @@ BEGIN
 						)C
 						CROSS APPLY (
 							SELECT TOP 1 dblPrice, strPricing, intContractDetailId FROM dbo.fnTMGetItemPricingDetails(
-								A.intProductId
+								A.intProductID
 								,A.intCustomerNumber
 								,A.intLocationId
 								,C.Value

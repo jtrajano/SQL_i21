@@ -34,8 +34,10 @@
 	[strHeaderFederalTaxID] NVARCHAR(50) NULL,
 	[strOriginState] NVARCHAR(250) NULL,
 	[strOriginCity] NVARCHAR(100) NULL,
+	[strOriginCounty] NVARCHAR(100) NULL,
 	[strDestinationState] NVARCHAR(250) NULL,
 	[strDestinationCity] NVARCHAR(100) NULL,
+	[strDestinationCounty] NVARCHAR(100) NULL,
 	[strTerminalControlNumber] NVARCHAR(30) NULL,
 	[strTransporterIdType] NVARCHAR(50) NULL,
 	[strVendorIdType] NVARCHAR(50) NULL,
@@ -49,6 +51,7 @@
 	[strDiversionNumber] NVARCHAR(50) NULL,
 	[strDiversionOriginalDestinationState] NVARCHAR(50) NULL,
 	[strTransactionType] NVARCHAR(50) NULL,
-	[intTransactionNumberId] INT NULL
+	[intTransactionNumberId] INT NULL,
+	[strVendorLicenseNumber] NVARCHAR(50) NULL
 )
 GO

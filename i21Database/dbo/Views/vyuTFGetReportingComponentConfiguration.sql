@@ -5,6 +5,7 @@ SELECT intReportingComponentConfigurationId
 	, RC.intTaxAuthorityId
 	, RC.intReportingComponentId
 	, RC.strFormCode
+	, RC.strScheduleCode strReportingScheduleCode
 	, RC.strType
 	, strTemplateItemId
 	, strReportSection

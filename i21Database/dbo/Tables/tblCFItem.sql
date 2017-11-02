@@ -27,7 +27,7 @@
     [dtmLastModified]               DATETIME        NULL,
     [intConcurrencyId]              INT             CONSTRAINT [DF_tblCFItem_intConcurrencyId] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblCFItem] PRIMARY KEY CLUSTERED ([intItemId] ASC),
-    CONSTRAINT [FK_tblCFItem_tblCFSite] FOREIGN KEY ([intSiteId]) REFERENCES [dbo].[tblCFSite] ([intSiteId]) ON DELETE CASCADE,
+    CONSTRAINT [FK_tblCFItem_tblCFSite] FOREIGN KEY ([intSiteId]) REFERENCES [dbo].[tblCFSite] ([intSiteId]),
     CONSTRAINT [FK_tblCFItem_tblICItem] FOREIGN KEY ([intARItemId]) REFERENCES [dbo].[tblICItem] ([intItemId])
 );
 

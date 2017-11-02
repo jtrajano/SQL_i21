@@ -55,7 +55,7 @@ BEGIN
 		BEGIN
 			DECLARE @totalptticmst int
 			EXEC [uspARImportInvoiceBackupPTTICMST] @StartDate ,@EndDate ,@totalptticmst OUTPUT
-			EXEC [uspARImportInvoiceFromPTTICMST] @UserId ,@StartDate ,@EndDate ,@Total OUTPUT ,@totalDetailImported OUTPUT 			
+			EXEC [uspARImportInvoiceFromPTTICMST] @UserId ,@StartDate ,@EndDate ,@Total OUTPUT ,@totalDetailImported OUTPUT		
 		END
 		
 	END
@@ -164,17 +164,23 @@ BEGIN
 				@EntityId,
 				LTRIM(RTRIM(agivc_ivc_no)) + LTRIM(RTRIM(agivc_bill_to_cus))		
 			FROM agivcmst
-			LEFT JOIN tblARInvoice Inv ON agivcmst.agivc_ivc_no COLLATE Latin1_General_CI_AS = Inv.strInvoiceOriginId COLLATE Latin1_General_CI_AS
+			LEFT JOIN tblARInvoice Inv 
+				ON agivcmst.agivc_ivc_no COLLATE Latin1_General_CI_AS = Inv.strInvoiceOriginId COLLATE Latin1_General_CI_AS
+				AND Inv.[dtmDate] = CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112)
+				AND Inv.[dblInvoiceTotal] = ROUND(ISNULL(agivc_slsmn_tot, 0), [dbo].[fnARGetDefaultDecimal]())
+				AND ISNULL(Inv.[ysnImportedFromOrigin],0) = 1 AND ISNULL(Inv.[ysnImportedAsPosted],0) = 1
 			INNER JOIN tblARCustomer Cus ON  strCustomerNumber COLLATE Latin1_General_CI_AS = agivc_bill_to_cus COLLATE Latin1_General_CI_AS
 			INNER JOIN tblARSalesperson Salesperson ON strSalespersonId COLLATE Latin1_General_CI_AS = agivc_slsmn_no COLLATE Latin1_General_CI_AS
 			LEFT JOIN tblSMCurrency Cur ON Cur.strCurrency COLLATE Latin1_General_CI_AS = agivc_currency COLLATE Latin1_General_CI_AS
 			LEFT JOIN tblSMTerm Term ON Term.strTermCode COLLATE Latin1_General_CI_AS = CONVERT(NVARCHAR(10),CONVERT(INT,agivc_terms_code)) COLLATE Latin1_General_CI_AS
-			WHERE Inv.strInvoiceNumber IS NULL AND agivcmst.agivc_ivc_no = UPPER(agivcmst.agivc_ivc_no) COLLATE Latin1_General_CS_AS
-			AND (
-					((CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
-					OR
-					((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
-			    )
+			WHERE 
+				Inv.strInvoiceNumber IS NULL 
+				AND (
+						((CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+						OR
+						((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
+					)
+				AND agivc_type NOT IN ('O','X')
 
 			UPDATE  IVC SET ysnPaid = 0 FROM tblARInvoice IVC
 			INNER JOIN agcrdmst CRD ON CRD.agcrd_ref_no COLLATE SQL_Latin1_General_CP1_CS_AS = IVC.strInvoiceOriginId COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -265,17 +271,23 @@ BEGIN
 				@EntityId,
 				LTRIM(RTRIM(ptivc_invc_no)) + LTRIM(RTRIM(ptivc_sold_to))		
 			FROM ptivcmst
-			LEFT JOIN tblARInvoice Inv ON ptivcmst.ptivc_invc_no COLLATE Latin1_General_CI_AS = Inv.strInvoiceOriginId COLLATE Latin1_General_CI_AS
+			LEFT JOIN tblARInvoice Inv 
+				ON ptivcmst.ptivc_invc_no COLLATE Latin1_General_CI_AS = Inv.strInvoiceOriginId COLLATE Latin1_General_CI_AS
+				AND Inv.[dtmDate] = CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112)
+				AND Inv.[dblInvoiceTotal] = ROUND(ISNULL(ptivc_sold_by_tot, 0), [dbo].[fnARGetDefaultDecimal]())
+				AND ISNULL(Inv.[ysnImportedFromOrigin],0) = 1 AND ISNULL(Inv.[ysnImportedAsPosted],0) = 1
 			INNER JOIN tblARCustomer Cus ON  strCustomerNumber COLLATE Latin1_General_CI_AS = ptivc_sold_to COLLATE Latin1_General_CI_AS
 			INNER JOIN tblARSalesperson Salesperson ON strSalespersonId COLLATE Latin1_General_CI_AS = ptivc_sold_by COLLATE Latin1_General_CI_AS
 			LEFT JOIN tblSMTerm Term ON Term.strTermCode COLLATE Latin1_General_CI_AS = CONVERT(NVARCHAR(10),CONVERT(INT,ptivc_terms_code)) COLLATE Latin1_General_CI_AS
             --LEFT JOIN tblSMCurrency Cur ON Cur.strCurrency COLLATE Latin1_General_CI_AS = ptivc_currency COLLATE Latin1_General_CI_AS			
-			WHERE Inv.strInvoiceNumber IS NULL AND ptivcmst.ptivc_invc_no = UPPER(ptivcmst.ptivc_invc_no) COLLATE Latin1_General_CS_AS
-			AND (
-					((CASE WHEN ISDATE(ptivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
-					OR
-					((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
-			    )
+			WHERE 
+				Inv.strInvoiceNumber IS NULL 
+				AND (
+						((CASE WHEN ISDATE(ptivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+						OR
+						((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
+					)
+				AND ptivc_type NOT IN ('O','X')
 				
 			UPDATE  IVC SET ysnPaid = 0 FROM tblARInvoice IVC
 			INNER JOIN ptcrdmst CRD ON CRD.ptcrd_invc_no COLLATE SQL_Latin1_General_CP1_CS_AS = IVC.strInvoiceOriginId COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -579,7 +591,7 @@ BEGIN
 	--     GET TO BE IMPORTED RECORDS
 	--	This is checking if there are still records need to be import	
 	--================================================
-	IF(@Checking = 1)
+	IF(@Checking = 1 AND @Posted = 1)
 	BEGIN
 		IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agivcmst')
 		 BEGIN
@@ -587,12 +599,18 @@ BEGIN
 			SELECT @Total = COUNT(agivc_ivc_no)  
 				FROM agivcmst
 			LEFT JOIN tblARInvoice ON agivcmst.agivc_ivc_no COLLATE Latin1_General_CI_AS = tblARInvoice.strInvoiceOriginId COLLATE Latin1_General_CI_AS
-			WHERE tblARInvoice.strInvoiceOriginId IS NULL AND agivcmst.agivc_ivc_no = UPPER(agivcmst.agivc_ivc_no) COLLATE Latin1_General_CS_AS
-			AND (
-					((CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
-					OR
-					((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
-				)
+				AND tblARInvoice.[dtmDate] = CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112)
+				AND tblARInvoice.[dblInvoiceTotal] = ROUND(ISNULL(agivc_slsmn_tot, 0), [dbo].[fnARGetDefaultDecimal]())
+				AND ISNULL(tblARInvoice.[ysnImportedFromOrigin],0) = 1 AND ISNULL(tblARInvoice.[ysnImportedAsPosted],0) = 1
+			WHERE 
+				tblARInvoice.strInvoiceOriginId IS NULL 
+				AND agivc_type NOT IN ('O','X')
+				AND (
+						((CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+						OR
+						((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
+					)
+				
 		 END
 
 		IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptivcmst')
@@ -601,12 +619,59 @@ BEGIN
 			SELECT @Total = COUNT(ptivc_invc_no)  
 				FROM ptivcmst
 			LEFT JOIN tblARInvoice ON ptivcmst.ptivc_invc_no COLLATE Latin1_General_CI_AS = tblARInvoice.strInvoiceOriginId COLLATE Latin1_General_CI_AS
-			WHERE tblARInvoice.strInvoiceOriginId IS NULL AND ptivcmst.ptivc_invc_no = UPPER(ptivcmst.ptivc_invc_no) COLLATE Latin1_General_CS_AS
-			AND (
-					((CASE WHEN ISDATE(ptivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
-					OR
-					((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
-				)
+				AND tblARInvoice.[dtmDate] = CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112)
+				AND tblARInvoice.[dblInvoiceTotal] = ROUND(ISNULL(ptivc_sold_by_tot, 0), [dbo].[fnARGetDefaultDecimal]())
+				AND ISNULL(tblARInvoice.[ysnImportedFromOrigin],0) = 1 AND ISNULL(tblARInvoice.[ysnImportedAsPosted],0) = 1
+			WHERE 
+				tblARInvoice.strInvoiceOriginId IS NULL 
+				AND ptivc_type NOT IN ('O','X')
+				AND (
+						((CASE WHEN ISDATE(ptivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+						OR
+						((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
+					)			
+		 END		 
+		
+	END
+
+	IF(@Checking = 1 AND @Posted = 0)
+	BEGIN
+		IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agordmst')
+		 BEGIN
+		 --Check first on agivcmst
+			SELECT @Total = COUNT(agord_ivc_no)  
+				FROM agordmst
+			LEFT JOIN tblARInvoice ON agordmst.agord_ivc_no COLLATE Latin1_General_CI_AS = tblARInvoice.strInvoiceOriginId COLLATE Latin1_General_CI_AS
+				AND tblARInvoice.[dtmDate] = CONVERT(DATE, CAST(agord_ord_rev_dt AS CHAR(12)), 112)
+				AND tblARInvoice.[dblInvoiceTotal] = ROUND(ISNULL(agord_order_total, 0), [dbo].[fnARGetDefaultDecimal]())
+				AND ISNULL(tblARInvoice.[ysnImportedFromOrigin],0) = 1 AND ISNULL(tblARInvoice.[ysnImportedAsPosted],0) = 0
+			WHERE 
+				tblARInvoice.strInvoiceOriginId IS NULL 
+				AND agord_type NOT IN ('O','X')
+				AND (
+						((CASE WHEN ISDATE(agord_ord_rev_dt) = 1 THEN CONVERT(DATE, CAST(agord_ord_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+						OR
+						((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
+					)
+		 END
+
+		IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptticmst')
+		 BEGIN
+		--Check first on ptivcmst
+			SELECT @Total = COUNT(pttic_ivc_no)  
+				FROM ptticmst
+			LEFT JOIN tblARInvoice ON ptticmst.pttic_ivc_no COLLATE Latin1_General_CI_AS = tblARInvoice.strInvoiceOriginId COLLATE Latin1_General_CI_AS
+				AND tblARInvoice.[dtmDate] = CONVERT(DATE, CAST(pttic_rev_dt AS CHAR(12)), 112)
+				AND tblARInvoice.[dblInvoiceTotal] = ROUND(ISNULL(pttic_actual_total, 0), [dbo].[fnARGetDefaultDecimal]())
+				AND ISNULL(tblARInvoice.[ysnImportedFromOrigin],0) = 1 AND ISNULL(tblARInvoice.[ysnImportedAsPosted],0) = 0
+			WHERE 
+				tblARInvoice.strInvoiceOriginId IS NULL 
+				AND pttic_type NOT IN ('O','X')				
+				AND (
+						((CASE WHEN ISDATE(pttic_rev_dt) = 1 THEN CONVERT(DATE, CAST(pttic_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+						OR
+						((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
+					)
 		 END		 
 		
 	END

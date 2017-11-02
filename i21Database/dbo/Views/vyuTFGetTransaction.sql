@@ -58,9 +58,11 @@ SELECT Trans.intTransactionId
 	, strConsignorFederalTaxId = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strConsignorFederalTaxId ELSE Exception.strConsignorFederalTaxId END
 	, strDestinationState = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strDestinationState ELSE Exception.strDestinationState END
 	, strDestinationCity = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strDestinationCity ELSE Exception.strDestinationCity END
+	, strDestinationCounty = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strDestinationCounty ELSE Exception.strDestinationCounty END
 	, strDestinationTCN = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strDestinationTCN ELSE Exception.strDestinationTCN END
 	, strOriginState = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strOriginState ELSE Exception.strOriginState END
 	, strOriginCity = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strOriginCity ELSE Exception.strOriginCity END
+	, strOriginCounty = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strOriginCounty ELSE Exception.strOriginCounty END
 	, strOriginTCN = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strOriginTCN ELSE Exception.strOriginTCN END
 	, strFuelType = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strFuelType ELSE Exception.strFuelType END
 	, strTaxPayerName = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strTaxPayerName ELSE Exception.strTaxPayerName END
@@ -154,9 +156,11 @@ SELECT intTransactionId = NULL
 	, Exception.strConsignorFederalTaxId
 	, Exception.strDestinationState
 	, Exception.strDestinationCity
+	, Exception.strDestinationCounty
 	, Exception.strDestinationTCN
 	, Exception.strOriginState
 	, Exception.strOriginCity
+	, Exception.strOriginCounty
 	, Exception.strOriginTCN
 	, Exception.strFuelType
 	, Exception.strTaxPayerName

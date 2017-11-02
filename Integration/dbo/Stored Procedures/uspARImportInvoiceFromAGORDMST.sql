@@ -111,7 +111,7 @@ SELECT
 							WHEN agord_type = 'I' THEN 'Invoice' 
 							WHEN agord_type = 'C' THEN 'Credit Memo' 
 							WHEN agord_type = 'D' THEN 'Debit Memo' 
-							WHEN agord_type = 'S' THEN 'Cash Sale'
+							WHEN agord_type = 'S' THEN 'Cash'
 							WHEN agord_type = 'R' THEN 'Cash Refund' 
 							WHEN agord_type = 'X' THEN 'Transfer'
 							END),
@@ -120,7 +120,7 @@ SELECT
 	[intAccountId] = @ARAccount, 
 	[ysnPosted] = 0,
 	[ysnPaid] = 0,
-	[ysnImportedFromOrigin] = 0,
+	[ysnImportedFromOrigin] = 1,
 	[ysnImportedAsPosted] = 0,
 	[intEntityId] = @UserId,
 	[intBackupId] =	A.intBackupId
@@ -128,7 +128,15 @@ SELECT
 	INNER JOIN tblARCustomer Cus ON  strCustomerNumber COLLATE Latin1_General_CI_AS = A.agord_cus_no COLLATE Latin1_General_CI_AS
 	INNER JOIN tblARSalesperson Salesperson ON strSalespersonId COLLATE Latin1_General_CI_AS = A.agord_slsmn_id COLLATE Latin1_General_CI_AS
 	LEFT JOIN tblSMTerm Term ON Term.strTermCode COLLATE Latin1_General_CI_AS = CONVERT(NVARCHAR(10),CONVERT(INT,A.agord_terms_cd)) COLLATE Latin1_General_CI_AS
-	WHERE agord_type <> 'O' AND agord_line_no = 1
+	LEFT JOIN tblARInvoice 
+		ON agord_ivc_no COLLATE Latin1_General_CI_AS = tblARInvoice.strInvoiceOriginId COLLATE Latin1_General_CI_AS
+		AND tblARInvoice.[dtmDate] = CONVERT(DATE, CAST(agord_ord_rev_dt AS CHAR(12)), 112)
+		AND tblARInvoice.[dblInvoiceTotal] = ROUND(ISNULL(agord_order_total, 0), [dbo].[fnARGetDefaultDecimal]())
+		AND ISNULL(tblARInvoice.[ysnImportedFromOrigin],0) = 1 AND ISNULL(tblARInvoice.[ysnImportedAsPosted],0) = 0
+	WHERE
+		agord_type NOT IN ('O','X') 
+		AND agord_line_no = 1
+		AND tblARInvoice.strInvoiceOriginId IS NULL 
 ) AS SourceData
 ON (1=0)
 WHEN NOT MATCHED THEN

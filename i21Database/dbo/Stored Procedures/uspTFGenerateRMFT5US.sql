@@ -47,16 +47,16 @@ BEGIN TRY
 		, dblLine13_Col1 NUMERIC
 		, dblLine13_Col2 NUMERIC
 		, dblLine14 NUMERIC
-		, dblLine15a NUMERIC(18,6)
-		, dblLine15b NUMERIC(18,6)
-		, dblLine15c NUMERIC(18,6)
-		, dblLine16 NUMERIC(18,6)
-		, dblLine17 NUMERIC(18,6)
-		, dblLine18 NUMERIC(18,6)
-		, dblLine19 NUMERIC(18,6)
-		, dblUstRate NUMERIC(18,6)
-		, dblEifRate NUMERIC(18,6)
-		, dblColDisc NUMERIC(18,6)
+		, dblLine15a NUMERIC(18,2)
+		, dblLine15b NUMERIC(18,2)
+		, dblLine15c NUMERIC(18,2)
+		, dblLine16 NUMERIC(18,2)
+		, dblLine17 NUMERIC(18,2)
+		, dblLine18 NUMERIC(18,2)
+		, dblLine19 NUMERIC(18,2)
+		, dblUstRate NUMERIC(18,2)
+		, dblEifRate NUMERIC(18,2)
+		, dblColDisc NUMERIC(18,2)
 		, strRecLicense NVARCHAR(50)
 		, dtmFrom DATE
 		, dtmTo DATE)
@@ -92,16 +92,16 @@ BEGIN TRY
 		, @dblLine13_Col1 NUMERIC = 0
 		, @dblLine13_Col2 NUMERIC = 0
 		, @dblLine14 NUMERIC = 0
-		, @dblLine15a NUMERIC(18,6) = 0
-		, @dblLine15b NUMERIC(18,6) = 0
-		, @dblLine15c NUMERIC(18,6) = 0
-		, @dblLine16 NUMERIC(18,6) = 0
-		, @dblLine17 NUMERIC(18,6) = 0
-		, @dblLine18 NUMERIC(18,6) = 0
-		, @dblLine19 NUMERIC(18,6) = 0
-		, @dblUstRate NUMERIC(18,6) = 0
-		, @dblEifRate NUMERIC(18,6) = 0
-		, @dblColDisc NUMERIC(18,6) = 0
+		, @dblLine15a NUMERIC(18,2) = 0
+		, @dblLine15b NUMERIC(18,2) = 0
+		, @dblLine15c NUMERIC(18,2) = 0
+		, @dblLine16 NUMERIC(18,2) = 0
+		, @dblLine17 NUMERIC(18,2) = 0
+		, @dblLine18 NUMERIC(18,2) = 0
+		, @dblLine19 NUMERIC(18,2) = 0
+		, @dblUstRate NUMERIC(18,2) = 0
+		, @dblEifRate NUMERIC(18,2) = 0
+		, @dblColDisc NUMERIC(18,2) = 0
 		, @strRecLicense NVARCHAR(50)
 		, @dtmFrom DATE 
 		, @dtmTo DATE
@@ -138,9 +138,9 @@ BEGIN TRY
 		SELECT TOP 1 @Guid = [from] FROM @Params WHERE [fieldname] = 'strGuid'
 
 
-		SELECT @dblUstRate = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(decimal(18,6), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RRMFT-5-US-USTRate'
-		SELECT @dblEifRate = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(decimal(18,6), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-US-EIFRate'
-		SELECT @dblColDisc = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(decimal(18,6), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-US-ColDisc'	
+		SELECT @dblUstRate = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(decimal(18,2), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-US-USTRate'
+		SELECT @dblEifRate = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(decimal(18,2), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-US-EIFRate'
+		SELECT @dblColDisc = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(decimal(18,2), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-US-ColDisc'	
 		SELECT @strRecLicense = ISNULL(strConfiguration, '') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-US-RecLicense'
 		SELECT @dtmFrom = MIN(dtmReportingPeriodBegin) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid
 		SELECT @dtmTo = MAX(dtmReportingPeriodEnd) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid
@@ -225,7 +225,7 @@ BEGIN TRY
 		SET @dblLine17 = @dblLine15c - @dblLine16
 
 		-- Line 18
-		SELECT @dblLine18 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC, strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-US-Line18'
+		SELECT @dblLine18 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-US-Line18'
 
 		-- Line 19
 		SET @dblLine19 = @dblLine17 - @dblLine18

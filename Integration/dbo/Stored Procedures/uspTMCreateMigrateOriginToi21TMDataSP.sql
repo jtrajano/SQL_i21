@@ -133,6 +133,12 @@ BEGIN
 				FROM #tmpLocationTable A
 				WHERE tblTMDevice.intLocationId = A.intOriginId
 
+				--Update tblTMDeliveryHistory
+				UPDATE tblTMDeliveryHistory
+				SET strBulkPlantNumber = A.strLocationName
+				FROM tblSMCompanyLocation A
+				WHERE tblTMDeliveryHistory.strBulkPlantNumber = A.strLocationNumber
+
 				PRINT ''END UPDATE LOCATION RELATED RECORDS''
 
 				PRINT ''START UPDATE TERM RELATED RECORDS''

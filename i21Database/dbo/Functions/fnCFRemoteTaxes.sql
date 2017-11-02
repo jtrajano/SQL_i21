@@ -1,5 +1,4 @@
-﻿
-CREATE FUNCTION [dbo].[fnCFRemoteTaxes] 
+﻿CREATE FUNCTION [dbo].[fnCFRemoteTaxes] 
     (   
 		 @strTaxState					NVARCHAR(MAX)   = ''
 		,@strTaxCodeId					NVARCHAR(MAX)	= ''
@@ -30,6 +29,28 @@ CREATE FUNCTION [dbo].[fnCFRemoteTaxes]
 		,@intCustomerId					INT			
 		,@intCustomerLocationId			INT			
 		,@dtmTransactionDate			DATETIME	
+		,@DisregardExemptionSetup		BIT				= 0
+
+		,@Tax1							NVARCHAR(MAX)   = ''
+		,@Tax2							NVARCHAR(MAX)   = ''
+		,@Tax3							NVARCHAR(MAX)   = ''
+		,@Tax4							NVARCHAR(MAX)   = ''
+		,@Tax5							NVARCHAR(MAX)   = ''
+		,@Tax6							NVARCHAR(MAX)   = ''
+		,@Tax7							NVARCHAR(MAX)   = ''
+		,@Tax8							NVARCHAR(MAX)   = ''
+		,@Tax9							NVARCHAR(MAX)   = ''
+		,@Tax10							NVARCHAR(MAX)   = ''
+		,@TaxValue1						NUMERIC(18,6)	= 0.000000
+		,@TaxValue2						NUMERIC(18,6)	= 0.000000
+		,@TaxValue3						NUMERIC(18,6)	= 0.000000
+		,@TaxValue4						NUMERIC(18,6)	= 0.000000
+		,@TaxValue5						NUMERIC(18,6)	= 0.000000
+		,@TaxValue6						NUMERIC(18,6)	= 0.000000
+		,@TaxValue7						NUMERIC(18,6)	= 0.000000
+		,@TaxValue8						NUMERIC(18,6)	= 0.000000
+		,@TaxValue9						NUMERIC(18,6)	= 0.000000
+		,@TaxValue10					NUMERIC(18,6)	= 0.000000
     )
 RETURNS @tblTaxTable TABLE
     (
@@ -99,8 +120,59 @@ BEGIN
 
 	SET @ZeroDecimal = 0.000000
 	SELECT @intItemCategoryId = intCategoryId FROM tblICItem WHERE intItemId = @intItemId 
-	DECLARE @DisregardExemptionSetup BIT
+	--DECLARE @DisregardExemptionSetup BIT
 
+
+	IF (ISNUMERIC(@Tax1) = 1)
+	BEGIN
+		SET @Tax1 =  substring(@Tax1, patindex('%[^0]%',@Tax1), 10)
+	END
+
+	IF (ISNUMERIC(@Tax2) = 1)
+	BEGIN
+		SET @Tax2 =  substring(@Tax2, patindex('%[^0]%',@Tax2), 10)
+	END
+
+	IF (ISNUMERIC(@Tax3) = 1)
+	BEGIN
+		SET @Tax3 =  substring(@Tax3, patindex('%[^0]%',@Tax3), 10)
+	END
+
+	IF (ISNUMERIC(@Tax4) = 1)
+	BEGIN
+		SET @Tax4 =  substring(@Tax4, patindex('%[^0]%',@Tax4), 10)
+	END
+
+	IF (ISNUMERIC(@Tax5) = 1)
+	BEGIN
+		SET @Tax5 =  substring(@Tax5, patindex('%[^0]%',@Tax5), 10)
+	END
+
+	IF (ISNUMERIC(@Tax6) = 1)
+	BEGIN
+		SET @Tax6 =  substring(@Tax6, patindex('%[^0]%',@Tax6), 10)
+	END
+
+	IF (ISNUMERIC(@Tax7) = 1)
+	BEGIN
+		SET @Tax7 =  substring(@Tax7, patindex('%[^0]%',@Tax7), 10)
+	END
+
+	IF (ISNUMERIC(@Tax8) = 1)
+	BEGIN
+		SET @Tax8 =  substring(@Tax8, patindex('%[^0]%',@Tax8), 10)
+	END
+
+	IF (ISNUMERIC(@Tax9) = 1)
+	BEGIN
+		SET @Tax9 =  substring(@Tax9, patindex('%[^0]%',@Tax9), 10)
+	END
+
+	IF (ISNUMERIC(@Tax10) = 1)
+	BEGIN
+		SET @Tax10 =  substring(@Tax10, patindex('%[^0]%',@Tax10), 10)
+	END
+	
 	INSERT INTO @tblNetworkTaxMapping
 	SELECT
 		 cfNetwork.strNetwork				
@@ -144,6 +216,1126 @@ BEGIN
 	DECLARE @intSecondLevelMatch INT
 	DECLARE @intThirdLevelMatch INT
 	DECLARE @intFourthLevelMatch INT
+
+	-------------
+	-- Tax1    --
+	-------------
+
+	IF(@TaxValue1 != 0)
+	BEGIN
+		-- STATE AND CATEGORY
+		SET @intFirstLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax1 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState 
+									AND intItemCategoryId = @intItemCategoryId)
+
+		-- NO STATE AND CATEGORY
+		SET @intSecondLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax1 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND (strState IS NULL OR strState = '')
+									AND intItemCategoryId = @intItemCategoryId)
+									
+		-- STATE AND NO CATEGORY
+		SET @intThirdLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax1 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)) 
+
+		-- NO STATE AND NO CATEGORY							
+		SET @intFourthLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax1 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)
+									AND (strState IS NULL OR strState = ''))
+
+
+		IF(@intFirstLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue1,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax1 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState 
+									AND intItemCategoryId = @intItemCategoryId
+		END
+		ELSE IF (@intSecondLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue1,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax1 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND (strState IS NULL OR strState = '')
+									AND intItemCategoryId = @intItemCategoryId
+		END
+		ELSE IF (@intThirdLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue1,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax1 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)
+		END
+		ELSE IF (@intFourthLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue1,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax1 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)
+									AND (strState IS NULL OR strState = '')
+		END
+		ELSE
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				 [ysnInvalidSetup]
+				,[strReason]
+			)
+			VALUES(
+				 1
+				,'Unable to find match for ' + @strTaxState + ' state tax ' + @Tax1
+			)
+		END
+	END
+
+	-------------
+	-- Tax1    --
+	-------------
+
+	-------------
+	-- Tax2    --
+	-------------
+
+	IF(@TaxValue2 != 0)
+	BEGIN
+		-- STATE AND CATEGORY
+		SET @intFirstLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax2 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState 
+									AND intItemCategoryId = @intItemCategoryId)
+
+		-- NO STATE AND CATEGORY
+		SET @intSecondLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax2 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND (strState IS NULL OR strState = '')
+									AND intItemCategoryId = @intItemCategoryId)
+									
+		-- STATE AND NO CATEGORY
+		SET @intThirdLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax2 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)) 
+
+		-- NO STATE AND NO CATEGORY							
+		SET @intFourthLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax2 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)
+									AND (strState IS NULL OR strState = ''))
+
+
+		IF(@intFirstLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue2,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax2 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState 
+									AND intItemCategoryId = @intItemCategoryId
+		END
+		ELSE IF (@intSecondLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue2,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax2 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND (strState IS NULL OR strState = '')
+									AND intItemCategoryId = @intItemCategoryId
+		END
+		ELSE IF (@intThirdLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue2,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax2 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)
+		END
+		ELSE IF (@intFourthLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue2,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax2 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)
+									AND (strState IS NULL OR strState = '')
+		END
+		ELSE
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				 [ysnInvalidSetup]
+				,[strReason]
+			)
+			VALUES(
+				 1
+				,'Unable to find match for ' + @strTaxState + ' state tax ' + @Tax2
+			)
+		END
+	END
+
+	-------------
+	-- Tax2    --
+	-------------
+
+	-------------
+	-- Tax3    --
+	-------------
+
+	IF(@TaxValue3 != 0)
+	BEGIN
+		-- STATE AND CATEGORY
+		SET @intFirstLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax3 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState 
+									AND intItemCategoryId = @intItemCategoryId)
+
+		-- NO STATE AND CATEGORY
+		SET @intSecondLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax3 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND (strState IS NULL OR strState = '')
+									AND intItemCategoryId = @intItemCategoryId)
+									
+		-- STATE AND NO CATEGORY
+		SET @intThirdLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax3 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)) 
+
+		-- NO STATE AND NO CATEGORY							
+		SET @intFourthLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax3 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)
+									AND (strState IS NULL OR strState = ''))
+
+
+		IF(@intFirstLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue3,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax3 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState 
+									AND intItemCategoryId = @intItemCategoryId
+		END
+		ELSE IF (@intSecondLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue3,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax3 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND (strState IS NULL OR strState = '')
+									AND intItemCategoryId = @intItemCategoryId
+		END
+		ELSE IF (@intThirdLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue3,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax3 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)
+		END
+		ELSE IF (@intFourthLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue3,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax3 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)
+									AND (strState IS NULL OR strState = '')
+		END
+		ELSE
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				 [ysnInvalidSetup]
+				,[strReason]
+			)
+			VALUES(
+				 1
+				,'Unable to find match for ' + @strTaxState + ' state tax ' + @Tax3
+			)
+		END
+	END
+
+	-------------
+	-- Tax3    --
+	-------------
+
+	-------------
+	-- Tax4    --
+	-------------
+
+	IF(@TaxValue4 != 0)
+	BEGIN
+		-- STATE AND CATEGORY
+		SET @intFirstLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax4 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState 
+									AND intItemCategoryId = @intItemCategoryId)
+
+		-- NO STATE AND CATEGORY
+		SET @intSecondLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax4 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND (strState IS NULL OR strState = '')
+									AND intItemCategoryId = @intItemCategoryId)
+									
+		-- STATE AND NO CATEGORY
+		SET @intThirdLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax4 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)) 
+
+		-- NO STATE AND NO CATEGORY							
+		SET @intFourthLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax4 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)
+									AND (strState IS NULL OR strState = ''))
+
+
+		IF(@intFirstLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue4,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax4 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState 
+									AND intItemCategoryId = @intItemCategoryId
+		END
+		ELSE IF (@intSecondLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue4,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax4 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND (strState IS NULL OR strState = '')
+									AND intItemCategoryId = @intItemCategoryId
+		END
+		ELSE IF (@intThirdLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue4,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax4 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)
+		END
+		ELSE IF (@intFourthLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue4,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax4 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)
+									AND (strState IS NULL OR strState = '')
+		END
+		ELSE
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				 [ysnInvalidSetup]
+				,[strReason]
+			)
+			VALUES(
+				 1
+				,'Unable to find match for ' + @strTaxState + ' state tax ' + @Tax4
+			)
+		END
+	END
+
+	-------------
+	-- Tax4    --
+	-------------
+
+	-------------
+	-- Tax5    --
+	-------------
+
+	IF(@TaxValue5 != 0)
+	BEGIN
+		-- STATE AND CATEGORY
+		SET @intFirstLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax5 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState 
+									AND intItemCategoryId = @intItemCategoryId)
+
+		-- NO STATE AND CATEGORY
+		SET @intSecondLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax5 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND (strState IS NULL OR strState = '')
+									AND intItemCategoryId = @intItemCategoryId)
+									
+		-- STATE AND NO CATEGORY
+		SET @intThirdLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax5 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)) 
+
+		-- NO STATE AND NO CATEGORY							
+		SET @intFourthLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax5 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)
+									AND (strState IS NULL OR strState = ''))
+
+
+		IF(@intFirstLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue5,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax5 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState 
+									AND intItemCategoryId = @intItemCategoryId
+		END
+		ELSE IF (@intSecondLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue5,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax5 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND (strState IS NULL OR strState = '')
+									AND intItemCategoryId = @intItemCategoryId
+		END
+		ELSE IF (@intThirdLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue5,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax5 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)
+		END
+		ELSE IF (@intFourthLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue5,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax5 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)
+									AND (strState IS NULL OR strState = '')
+		END
+		ELSE
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				 [ysnInvalidSetup]
+				,[strReason]
+			)
+			VALUES(
+				 1
+				,'Unable to find match for ' + @strTaxState + ' state tax ' + @Tax5
+			)
+		END
+	END
+
+	-------------
+	-- Tax5    --
+	-------------
+
+	-------------
+	-- Tax6    --
+	-------------
+
+	IF(@TaxValue6 != 0)
+	BEGIN
+		-- STATE AND CATEGORY
+		SET @intFirstLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax6 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState 
+									AND intItemCategoryId = @intItemCategoryId)
+
+		-- NO STATE AND CATEGORY
+		SET @intSecondLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax6 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND (strState IS NULL OR strState = '')
+									AND intItemCategoryId = @intItemCategoryId)
+									
+		-- STATE AND NO CATEGORY
+		SET @intThirdLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax6 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)) 
+
+		-- NO STATE AND NO CATEGORY							
+		SET @intFourthLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax6 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)
+									AND (strState IS NULL OR strState = ''))
+
+
+		IF(@intFirstLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue6,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax6 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState 
+									AND intItemCategoryId = @intItemCategoryId
+		END
+		ELSE IF (@intSecondLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue6,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax6 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND (strState IS NULL OR strState = '')
+									AND intItemCategoryId = @intItemCategoryId
+		END
+		ELSE IF (@intThirdLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue6,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax6 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)
+		END
+		ELSE IF (@intFourthLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue6,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax6 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)
+									AND (strState IS NULL OR strState = '')
+		END
+		ELSE
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				 [ysnInvalidSetup]
+				,[strReason]
+			)
+			VALUES(
+				 1
+				,'Unable to find match for ' + @strTaxState + ' state tax ' + @Tax6
+			)
+		END
+	END
+
+	-------------
+	-- Tax6    --
+	-------------
+
+	-------------
+	-- Tax7    --
+	-------------
+
+	IF(@TaxValue7 != 0)
+	BEGIN
+		-- STATE AND CATEGORY
+		SET @intFirstLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax7 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState 
+									AND intItemCategoryId = @intItemCategoryId)
+
+		-- NO STATE AND CATEGORY
+		SET @intSecondLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax7 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND (strState IS NULL OR strState = '')
+									AND intItemCategoryId = @intItemCategoryId)
+									
+		-- STATE AND NO CATEGORY
+		SET @intThirdLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax7 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)) 
+
+		-- NO STATE AND NO CATEGORY							
+		SET @intFourthLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax7 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)
+									AND (strState IS NULL OR strState = ''))
+
+
+		IF(@intFirstLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue7,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax7 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState 
+									AND intItemCategoryId = @intItemCategoryId
+		END
+		ELSE IF (@intSecondLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue7,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax7 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND (strState IS NULL OR strState = '')
+									AND intItemCategoryId = @intItemCategoryId
+		END
+		ELSE IF (@intThirdLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue7,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax7 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)
+		END
+		ELSE IF (@intFourthLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue7,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax7 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)
+									AND (strState IS NULL OR strState = '')
+		END
+		ELSE
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				 [ysnInvalidSetup]
+				,[strReason]
+			)
+			VALUES(
+				 1
+				,'Unable to find match for ' + @strTaxState + ' state tax ' + @Tax7
+			)
+		END
+	END
+
+	-------------
+	-- Tax7    --
+	-------------
+
+	-------------
+	-- Tax8    --
+	-------------
+
+	IF(@TaxValue8 != 0)
+	BEGIN
+		-- STATE AND CATEGORY
+		SET @intFirstLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax8 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState 
+									AND intItemCategoryId = @intItemCategoryId)
+
+		-- NO STATE AND CATEGORY
+		SET @intSecondLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax8 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND (strState IS NULL OR strState = '')
+									AND intItemCategoryId = @intItemCategoryId)
+									
+		-- STATE AND NO CATEGORY
+		SET @intThirdLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax8 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)) 
+
+		-- NO STATE AND NO CATEGORY							
+		SET @intFourthLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax8 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)
+									AND (strState IS NULL OR strState = ''))
+
+
+		IF(@intFirstLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue8,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax8 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState 
+									AND intItemCategoryId = @intItemCategoryId
+		END
+		ELSE IF (@intSecondLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue8,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax8 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND (strState IS NULL OR strState = '')
+									AND intItemCategoryId = @intItemCategoryId
+		END
+		ELSE IF (@intThirdLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue8,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax8 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)
+		END
+		ELSE IF (@intFourthLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue8,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax8 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)
+									AND (strState IS NULL OR strState = '')
+		END
+		ELSE
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				 [ysnInvalidSetup]
+				,[strReason]
+			)
+			VALUES(
+				 1
+				,'Unable to find match for ' + @strTaxState + ' state tax ' + @Tax8
+			)
+		END
+	END
+
+	-------------
+	-- Tax8    --
+	-------------
+
+	-------------
+	-- Tax9    --
+	-------------
+
+	IF(@TaxValue9 != 0)
+	BEGIN
+		-- STATE AND CATEGORY
+		SET @intFirstLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax9 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState 
+									AND intItemCategoryId = @intItemCategoryId)
+
+		-- NO STATE AND CATEGORY
+		SET @intSecondLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax9 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND (strState IS NULL OR strState = '')
+									AND intItemCategoryId = @intItemCategoryId)
+									
+		-- STATE AND NO CATEGORY
+		SET @intThirdLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax9 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)) 
+
+		-- NO STATE AND NO CATEGORY							
+		SET @intFourthLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax9 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)
+									AND (strState IS NULL OR strState = ''))
+
+
+		IF(@intFirstLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue9,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax9 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState 
+									AND intItemCategoryId = @intItemCategoryId
+		END
+		ELSE IF (@intSecondLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue9,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax9 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND (strState IS NULL OR strState = '')
+									AND intItemCategoryId = @intItemCategoryId
+		END
+		ELSE IF (@intThirdLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue9,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax9 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)
+		END
+		ELSE IF (@intFourthLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue9,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax9 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)
+									AND (strState IS NULL OR strState = '')
+		END
+		ELSE
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				 [ysnInvalidSetup]
+				,[strReason]
+			)
+			VALUES(
+				 1
+				,'Unable to find match for ' + @strTaxState + ' state tax ' + @Tax9
+			)
+		END
+	END
+
+	-------------
+	-- Tax9    --
+	-------------
+
+	-------------
+	-- Tax10    --
+	-------------
+
+	IF(@TaxValue10 != 0)
+	BEGIN
+		-- STATE AND CATEGORY
+		SET @intFirstLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax10 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState 
+									AND intItemCategoryId = @intItemCategoryId)
+
+		-- NO STATE AND CATEGORY
+		SET @intSecondLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax10 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND (strState IS NULL OR strState = '')
+									AND intItemCategoryId = @intItemCategoryId)
+									
+		-- STATE AND NO CATEGORY
+		SET @intThirdLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax10 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)) 
+
+		-- NO STATE AND NO CATEGORY							
+		SET @intFourthLevelMatch = (SELECT COUNT(*) 
+									FROM @tblNetworkTaxMapping 
+									WHERE strNetworkTaxCode = @Tax10 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)
+									AND (strState IS NULL OR strState = ''))
+
+
+		IF(@intFirstLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue10,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax10 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState 
+									AND intItemCategoryId = @intItemCategoryId
+		END
+		ELSE IF (@intSecondLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue10,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax10 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND (strState IS NULL OR strState = '')
+									AND intItemCategoryId = @intItemCategoryId
+		END
+		ELSE IF (@intThirdLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue10,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax10 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  
+									AND strState = @strTaxState
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)
+		END
+		ELSE IF (@intFourthLevelMatch > 0)
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
+			)
+			SELECT TOP 1
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@TaxValue10,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+			FROM
+				@tblNetworkTaxMapping
+			WHERE strNetworkTaxCode = @Tax10 
+									AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)
+									AND (intItemCategoryId IS NULL OR intItemCategoryId = 0)
+									AND (strState IS NULL OR strState = '')
+		END
+		ELSE
+		BEGIN
+			INSERT INTO @tblTaxTable(
+				 [ysnInvalidSetup]
+				,[strReason]
+			)
+			VALUES(
+				 1
+				,'Unable to find match for ' + @strTaxState + ' state tax ' + @Tax10
+			)
+		END
+	END
+
+	-------------
+	-- Tax10    --
+	-------------
 
 
 	------------------------------

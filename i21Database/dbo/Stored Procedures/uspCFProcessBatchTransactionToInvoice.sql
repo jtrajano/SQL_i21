@@ -154,6 +154,7 @@ SELECT * FROM #tmpForeignTransactionId
 					,[intTempDetailIdForTaxes]
 					,[strType]	
 					,[dtmPostDate]
+					,[ysnImpactInventory]
 				)
 				SELECT
 					[intId]						= TI.RecordKey
@@ -249,6 +250,14 @@ SELECT * FROM #tmpForeignTransactionId
 					,[intTempDetailIdForTaxes]				= cfTrans.intTransactionId
 					,[strType]								= 'CF Tran'
 					,[dtmPostDate]							= cfTrans.dtmPostedDate
+					,[ysnImpactInventory]					= 
+															(case
+															when RTRIM(LTRIM(cfTrans.strTransactionType)) = 'Remote' 
+															OR  RTRIM(LTRIM(cfTrans.strTransactionType)) = 'Extended Remote'
+															OR ISNULL((SELECT TOP 1 ysnCaptiveSite FROM tblCFSite where intSiteId = cfTrans.intSiteId),0) = 1
+															then 0
+															else 1
+															end)
 				FROM tblCFTransaction cfTrans
 				INNER JOIN #tmpTransactionId TI
 					ON cfTrans.intTransactionId = TI.RecordKey

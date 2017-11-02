@@ -845,7 +845,7 @@ BEGIN TRY
 					SELECT 
 						@intWorkOrderId
 						,@intLotId
-						,@intRawItemId
+						,intItemId
 						,@dblRequiredQty
 						,intItemUOMId
 						,intLocationId
@@ -875,7 +875,7 @@ BEGIN TRY
 					SELECT 
 							@intWorkOrderId
 							,@intLotId
-							,@intRawItemId
+							,intItemId
 							,@dblAvailableQty
 							,intItemUOMId
 							,intLocationId

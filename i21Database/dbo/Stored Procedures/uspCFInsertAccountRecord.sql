@@ -708,6 +708,7 @@ BEGIN
 			,ysnSummaryByDeptCardProd	
 			,ysnDepartmentGrouping 
 			,ysnSummaryByDeptVehicleProd
+			,intImportMapperId
 			)
 			VALUES(
 			 @intCustomerId
@@ -747,6 +748,7 @@ BEGIN
 			,@ysnSummaryByDeptCardProduct	
 			,@ysnDepartmentGrouping	
 			,@ysnSummaryByDeptVehicleProduct
+			,@intImportFileHeaderId
 			)
 
 			COMMIT TRANSACTION

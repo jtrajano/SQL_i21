@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspCFInsertTransactionRecord]
+﻿
+CREATE PROCEDURE [dbo].[uspCFInsertTransactionRecord]
 	
 	 @strGUID						NVARCHAR(MAX)
 	,@strProcessDate				NVARCHAR(MAX)
@@ -40,6 +41,26 @@
 	,@StateSalesTax					NUMERIC(18,6)	= 0.000000
 	,@CountySalesTax				NUMERIC(18,6)	= 0.000000
 	,@CitySalesTax					NUMERIC(18,6)	= 0.000000
+	,@Tax1							NVARCHAR(MAX)	= NULL
+	,@Tax2							NVARCHAR(MAX)	= NULL
+	,@Tax3							NVARCHAR(MAX)	= NULL
+	,@Tax4							NVARCHAR(MAX)	= NULL
+	,@Tax5							NVARCHAR(MAX)	= NULL
+	,@Tax6							NVARCHAR(MAX)	= NULL
+	,@Tax7							NVARCHAR(MAX)	= NULL
+	,@Tax8							NVARCHAR(MAX)	= NULL
+	,@Tax9							NVARCHAR(MAX)	= NULL
+	,@Tax10							NVARCHAR(MAX)	= NULL
+	,@TaxValue1						NUMERIC(18,6)	= 0.000000
+	,@TaxValue2						NUMERIC(18,6)	= 0.000000
+	,@TaxValue3						NUMERIC(18,6)	= 0.000000
+	,@TaxValue4						NUMERIC(18,6)	= 0.000000
+	,@TaxValue5						NUMERIC(18,6)	= 0.000000
+	,@TaxValue6						NUMERIC(18,6)	= 0.000000
+	,@TaxValue7						NUMERIC(18,6)	= 0.000000
+	,@TaxValue8						NUMERIC(18,6)	= 0.000000
+	,@TaxValue9						NUMERIC(18,6)	= 0.000000
+	,@TaxValue10					NUMERIC(18,6)	= 0.000000
 
 	-------------SITE RELATED-------------
 	,@strSiteId						NVARCHAR(MAX)
@@ -70,6 +91,16 @@
 	,@CountySalesTaxPercentageRate		NUMERIC(18,6)	= 0.000000
 	,@CitySalesTaxPercentageRate  		NUMERIC(18,6)	= 0.000000
 	,@OtherSalesTaxPercentageRate 		NUMERIC(18,6)	= 0.000000
+
+	,@FederalExciseTaxRateReference        	  NVARCHAR(MAX)	= NULL
+	,@StateExciseTaxRate1Reference         	  NVARCHAR(MAX)	= NULL
+	,@StateExciseTaxRate2Reference         	  NVARCHAR(MAX)	= NULL
+	,@CountyExciseTaxRateReference         	  NVARCHAR(MAX)	= NULL
+	,@CityExciseTaxRateReference           	  NVARCHAR(MAX)	= NULL
+	,@StateSalesTaxPercentageRateReference 	  NVARCHAR(MAX)	= NULL
+	,@CountySalesTaxPercentageRateReference	  NVARCHAR(MAX)	= NULL
+	,@CitySalesTaxPercentageRateReference  	  NVARCHAR(MAX)	= NULL
+	,@OtherSalesTaxPercentageRateReference 	  NVARCHAR(MAX)	= NULL
 	
 	,@ysnOriginHistory					BIT				= 0
 	,@ysnPostedCSV						BIT				= 0
@@ -77,6 +108,12 @@
 	,@intSellingHost					INT				= 0
 	,@intBuyingHost						INT				= 0
 	,@intForeignCustomerId				INT				= 0
+
+
+	,@strInvoiceReportNumber			NVARCHAR(MAX)	= NULL
+	,@dtmInvoiceDate					DATETIME		= NULL		
+	
+	,@strSiteTaxLocation				NVARCHAR(MAX)	= NULL
 
 	
 	
@@ -217,6 +254,8 @@ BEGIN
 			WHERE intNetworkId = @intNetworkId
 		END
 
+	
+
 	IF(@strNetworkType = 'PacPride' AND ISNULL(@ysnPosted,0) = 0)
 	BEGIN
 
@@ -287,6 +326,84 @@ BEGIN
 	BEGIN 
 		SET @strTransactionType = 'Local/Network'
 	END
+	ELSE IF (@strNetworkType = 'CFN')
+	BEGIN
+		IF(@strTransactionType = 'R')
+		BEGIN
+			SET @strTransactionType = 'Remote'
+		END
+		ELSE IF (@strTransactionType = 'D' OR @strTransactionType = 'C' OR @strTransactionType = 'N')
+		BEGIN
+			SET @strTransactionType = 'Local/Network'
+		END
+		ELSE IF (@strTransactionType = 'F')
+		BEGIN
+			SET @strTransactionType = 'Foreign Sale'
+		END
+		ELSE IF (@strTransactionType = 'E')
+		BEGIN
+			SET @strTransactionType = 'Extended Remote'
+		END
+	END
+
+
+	--TAX REFERENCE--
+	IF(@strNetworkType = 'PacPride')
+	BEGIN
+		IF(@strTransactionType = 'Remote' OR @strTransactionType = 'Extended Remote')
+		BEGIN
+
+			IF(ISNULL(@FederalExciseTaxRateReference,'') = '' OR @FederalExciseTaxRateReference = 'R')
+			BEGIN
+				SET @FederalExciseTaxRate = 0.000000
+			END
+
+			IF(ISNULL(@StateExciseTaxRate1Reference,'') = '' OR @StateExciseTaxRate1Reference = 'R')
+			BEGIN
+				SET @StateExciseTaxRate1 = 0.000000
+			END
+
+			IF(ISNULL(@StateExciseTaxRate2Reference,'') = '' OR @StateExciseTaxRate2Reference = 'R')
+			BEGIN
+				SET @StateExciseTaxRate2 = 0.000000
+			END
+
+			IF(ISNULL(@CountyExciseTaxRateReference,'') = '' OR @CountyExciseTaxRateReference = 'R')
+			BEGIN
+				SET @CountyExciseTaxRate = 0.000000
+			END
+			
+			IF(ISNULL(@CityExciseTaxRateReference,'') = '' OR @CityExciseTaxRateReference = 'R')
+			BEGIN
+				SET @CityExciseTaxRate = 0.000000
+			END
+			
+			IF(ISNULL(@StateSalesTaxPercentageRateReference,'') = '' OR @StateSalesTaxPercentageRateReference = 'R')
+			BEGIN
+				SET @StateSalesTaxPercentageRate = 0.000000
+			END
+
+			IF(ISNULL(@CountySalesTaxPercentageRateReference,'') = '' OR @CountySalesTaxPercentageRateReference = 'R')
+			BEGIN
+				SET @CountySalesTaxPercentageRate = 0.000000
+			END
+
+			IF(ISNULL(@CitySalesTaxPercentageRateReference,'') = '' OR @CitySalesTaxPercentageRateReference = 'R')
+			BEGIN
+				SET @CitySalesTaxPercentageRate = 0.000000
+			END
+
+			IF(ISNULL(@OtherSalesTaxPercentageRateReference,'') = '' OR @OtherSalesTaxPercentageRateReference = 'R')
+			BEGIN
+				SET @OtherSalesTaxPercentageRate = 0.000000
+			END
+			
+
+		END
+	END
+
+	
+	--TAX REFERENCE--
 
 
 	IF(@dblOriginalGrossPrice < 0)
@@ -299,6 +416,22 @@ BEGIN
 	END
 
 	DECLARE @ysnCreateSite BIT 
+	DECLARE @strAllowExemptionsOnExtAndRetailTrans NVARCHAR(MAX)
+
+
+	---------------------------------------------------------
+	----				    DEFAULT			   			 ----
+	---------------------------------------------------------
+
+	SELECT TOP 1 
+	@strAllowExemptionsOnExtAndRetailTrans = strAllowExemptionsOnExtAndRetailTrans
+	FROM tblCFNetwork
+	WHERE intNetworkId = @intNetworkId
+
+	
+	---------------------------------------------------------
+
+
 	------------------------------------------------------------
 	--					AUTO CREATE SITE
 	-- if transaction is remote or ext remote				  --
@@ -320,6 +453,7 @@ BEGIN
 				,intPPHostId		
 				,strPPSiteType		
 				,strSiteType
+				,strAllowExemptionsOnExtAndRetailTrans
 			)
 			SELECT
 				intNetworkId			= @intNetworkId
@@ -350,6 +484,7 @@ BEGIN
 											WHEN 'R' 
 												THEN 'Extended Remote'
 											END)
+				,@strAllowExemptionsOnExtAndRetailTrans
 
 			SET @intSiteId = SCOPE_IDENTITY();
 			SET @ysnSiteCreated = 1;
@@ -395,6 +530,41 @@ BEGIN
 				,strSiteCity			= @strSiteCity	
 				,strSiteType			= 'Extended Remote'
 				,intTaxGroupId			= @intTaxGroupByState
+				
+
+			SET @intSiteId = SCOPE_IDENTITY();
+			SET @ysnSiteCreated = 1;
+	END
+	ELSE IF ((@intSiteId IS NULL OR @intSiteId = 0) AND @intNetworkId != 0 AND @strNetworkType = 'CFN')
+	BEGIN
+
+		DECLARE @CFNState	NVARCHAR(MAX) = NULL
+		SELECT TOP 1 @CFNState = strPostalCode FROM tblCFStateCode where strStateName = @strSiteTaxLocation
+
+		INSERT INTO tblCFSite
+			(
+				 intNetworkId		
+				,strSiteNumber	
+				,strSiteName
+				,strDeliveryPickup	
+				,intARLocationId	
+				,strControllerType	
+				,strTaxState			
+				,strSiteType
+			)
+			SELECT
+				intNetworkId			= @intNetworkId
+				,strSiteNumber			= @strSiteId
+				,strSiteName			= @strSiteId
+				,strDeliveryPickup		= 'Pickup'
+				,intARLocationId		= @intNetworkLocation
+				,strControllerType		= 'CFN'
+				,strTaxState			= @CFNState
+				,strSiteType			= (CASE @strTransactionType 
+											WHEN 'Foreign Sale' 
+												THEN 'Local/Network'
+											ELSE @strTransactionType
+											END)
 				
 
 			SET @intSiteId = SCOPE_IDENTITY();
@@ -690,6 +860,8 @@ BEGIN
 		DECLARE @dtmPriceIndexDate			DATETIME
 		DECLARE @dblMargin					NUMERIC(18,6)
 		DECLARE @dblInventoryCost			NUMERIC(18,6)
+		DECLARE @dblAdjustmentRate			NUMERIC(18,6)
+		
 	------------------------------------------------------------
 
 
@@ -825,6 +997,8 @@ BEGIN
 			,[ysnDuplicate]
 			,[strOriginalProductNumber]
 			,[intOverFilledTransactionId]
+			,[dtmInvoiceDate]
+			,[strInvoiceReportNumber]
 		)
 		VALUES
 		(
@@ -869,6 +1043,8 @@ BEGIN
 			,@ysnDuplicate
 			,@strProductId
 			,@intOverFilledTransactionId
+			,@dtmInvoiceDate
+			,@strInvoiceReportNumber
 		)			
 	
 		DECLARE @Pk	INT		
@@ -1011,6 +1187,30 @@ BEGIN
 		,@CitySalesTax					=   @CitySalesTax		
 		,@strGUID						=   @strGUID		
 		,@strProcessDate				=	@strProcessDate
+		,@Tax1							=	@Tax1		
+		,@Tax2							=	@Tax2		
+		,@Tax3							=	@Tax3		
+		,@Tax4							=	@Tax4		
+		,@Tax5							=	@Tax5		
+		,@Tax6							=	@Tax6		
+		,@Tax7							=	@Tax7		
+		,@Tax8							=	@Tax8		
+		,@Tax9							=	@Tax9		
+		,@Tax10							=	@Tax10		
+		,@TaxValue1						=	@TaxValue1	
+		,@TaxValue2						=	@TaxValue2	
+		,@TaxValue3						=	@TaxValue3	
+		,@TaxValue4						=	@TaxValue4	
+		,@TaxValue5						=	@TaxValue5	
+		,@TaxValue6						=	@TaxValue6	
+		,@TaxValue7						=	@TaxValue7	
+		,@TaxValue8						=	@TaxValue8	
+		,@TaxValue9						=	@TaxValue9	
+		,@TaxValue10					=	@TaxValue10
+
+
+		DECLARE @dblGrossTransferCost	NUMERIC(18,6)	
+		DECLARE @dblNetTransferCost		NUMERIC(18,6)	
 
 		------------------------------------------------------------
 		--			UPDATE TRANSACTION DEPENDS ON PRICING		  --
@@ -1043,6 +1243,9 @@ BEGIN
 		,@ysnRecalculateInvalid			= ysnInvalid
 		,@dblInventoryCost				= dblInventoryCost
 		,@dblMargin						= dblMargin
+		,@dblGrossTransferCost			= dblGrossTransferCost
+		,@dblNetTransferCost			= dblNetTransferCost
+		,@dblAdjustmentRate				= dblAdjustmentRate
 		FROM ##tblCFTransactionPricingType
 
 		--IF(@ysnDuplicate = 1)
@@ -1076,6 +1279,9 @@ BEGIN
 				,dtmPriceIndexDate		= null
 				,ysnDuplicate			= @ysnDuplicate
 				,ysnInvalid				= @ysnInvalid
+				,dblGrossTransferCost	= @dblGrossTransferCost
+				,dblNetTransferCost		= @dblNetTransferCost
+				,dblAdjustmentRate		= @dblAdjustmentRate
 				WHERE intTransactionId = @Pk
 		END
 		IF (@strPriceMethod = 'Import File Price')
@@ -1097,6 +1303,9 @@ BEGIN
 				,dtmPriceIndexDate		= null
 				,ysnDuplicate			= @ysnDuplicate
 				,ysnInvalid				= @ysnInvalid
+				,dblGrossTransferCost	= @dblGrossTransferCost
+				,dblNetTransferCost		= @dblNetTransferCost
+				,dblAdjustmentRate		= @dblAdjustmentRate
 				WHERE intTransactionId = @Pk
 		END
 		IF (@strPriceMethod = 'Network Cost')
@@ -1118,6 +1327,9 @@ BEGIN
 				,dtmPriceIndexDate		= null
 				,ysnDuplicate			= @ysnDuplicate
 				,ysnInvalid				= @ysnInvalid
+				,dblGrossTransferCost	= @dblGrossTransferCost
+				,dblNetTransferCost		= @dblNetTransferCost
+				,dblAdjustmentRate		= @dblAdjustmentRate
 				WHERE intTransactionId = @Pk
 		END
 		ELSE IF (@strPriceMethod = 'Special Pricing')
@@ -1139,6 +1351,9 @@ BEGIN
 				,dtmPriceIndexDate		= null
 				,ysnDuplicate			= @ysnDuplicate
 				,ysnInvalid				= @ysnInvalid
+				,dblGrossTransferCost	= @dblGrossTransferCost
+				,dblNetTransferCost		= @dblNetTransferCost
+				,dblAdjustmentRate		= @dblAdjustmentRate
 				WHERE intTransactionId = @Pk
 		END
 		ELSE IF (@strPriceMethod = 'Price Profile')
@@ -1169,6 +1384,9 @@ BEGIN
 				,dtmPriceIndexDate		= @dtmPriceIndexDate	
 				,ysnDuplicate			= @ysnDuplicate
 				,ysnInvalid				= @ysnInvalid
+				,dblGrossTransferCost	= @dblGrossTransferCost
+				,dblNetTransferCost		= @dblNetTransferCost
+				,dblAdjustmentRate		= @dblAdjustmentRate
 				WHERE intTransactionId = @Pk
 					
 		END
@@ -1208,6 +1426,9 @@ BEGIN
 				,dtmPriceIndexDate		= null
 				,ysnDuplicate			= @ysnDuplicate
 				,ysnInvalid				= @ysnInvalid
+				,dblGrossTransferCost	= @dblGrossTransferCost
+				,dblNetTransferCost		= @dblNetTransferCost
+				,dblAdjustmentRate		= @dblAdjustmentRate
 				WHERE intTransactionId = @Pk
 
 				------------------------------------------------------------
@@ -1244,6 +1465,9 @@ BEGIN
 				,dtmPriceIndexDate		= null
 				,ysnDuplicate			= @ysnDuplicate
 				,ysnInvalid				= @ysnInvalid
+				,dblGrossTransferCost	= @dblGrossTransferCost
+				,dblNetTransferCost		= @dblNetTransferCost
+				,dblAdjustmentRate		= @dblAdjustmentRate
 				WHERE intTransactionId = @Pk
 		END
 

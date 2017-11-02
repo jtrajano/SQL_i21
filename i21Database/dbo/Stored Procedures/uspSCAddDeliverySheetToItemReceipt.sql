@@ -112,11 +112,11 @@ SELECT
 										WHEN ISNULL(CNT.intContractDetailId,0) = 0 THEN SCD.intCurrencyId 
 										WHEN ISNULL(CNT.intContractDetailId,0) > 0 THEN CNT.intCurrencyId
 									END
-		,intLocationId				= LI.intItemLocationId
+		,intLocationId				= SCD.intCompanyLocationId
 		,intShipFromId				= (select top 1 intShipFromId from tblAPVendor where intEntityId = @intEntityId)
 		,intShipViaId				= NULL
 		,intDiscountSchedule		= SCD.intDiscountId
-		,strVendorRefNo				= 'TKT-' + SCD.strDeliverySheetNumber
+		,strVendorRefNo				= 'DS-' + SCD.strDeliverySheetNumber
 		,intForexRateTypeId			= CASE
 										WHEN ISNULL(LI.intTransactionDetailId ,0) > 0 THEN CNT.intRateTypeId
 										WHEN ISNULL(LI.intTransactionDetailId ,0) = 0 THEN NULL
@@ -157,7 +157,7 @@ SELECT
 FROM	@Items LI 
 		INNER JOIN tblSCDeliverySheet SCD ON SCD.intDeliverySheetId = LI.intTransactionId
 		INNER JOIN tblICItem IC ON IC.intItemId = SCD.intItemId
-		INNER JOIN dbo.vyuCTContractDetailView CNT ON CNT.intContractDetailId = LI.intTransactionDetailId
+		LEFT JOIN dbo.vyuCTContractDetailView CNT ON CNT.intContractDetailId = LI.intTransactionDetailId
 WHERE	SCD.intDeliverySheetId = @intDeliverySheetId
 
 -- Get the identity value from tblICInventoryReceipt
@@ -380,76 +380,9 @@ IF ISNULL(@intFreightItemId,0) = 0
 
 	BEGIN
 		IF ISNULL(@intFreightItemId,0) != 0
-			BEGIN
-				INSERT INTO @OtherCharges
-				(
-						[intEntityVendorId] 
-						,[strBillOfLadding] 
-						,[strReceiptType] 
-						,[intLocationId] 
-						,[intShipViaId] 
-						,[intShipFromId] 
-						,[intCurrencyId]
-						,[intCostCurrencyId]  	
-						,[intChargeId]
-						,[intForexRateTypeId]
-						,[dblForexRate] 
-						,[ysnInventoryCost] 
-						,[strCostMethod] 
-						,[dblRate] 
-						,[intCostUOMId] 
-						,[intOtherChargeEntityVendorId] 
-						,[dblAmount] 
-						,[intContractHeaderId]
-						,[intContractDetailId] 
-						,[ysnAccrue]
-						,[ysnPrice]
-				)
-				SELECT	
-				[intEntityVendorId]					= RE.intEntityVendorId
-				,[strBillOfLadding]					= RE.strBillOfLadding
-				,[strReceiptType]					= RE.strReceiptType
-				,[intLocationId]					= RE.intLocationId
-				,[intShipViaId]						= RE.intShipViaId
-				,[intShipFromId]					= RE.intShipFromId
-				,[intCurrencyId]  					= RE.intCurrencyId
-				,[intCostCurrencyId]				= RE.intCurrencyId
-				,[intChargeId]						= ContractCost.intItemId
-				,[intForexRateTypeId]				= RE.intForexRateTypeId
-				,[dblForexRate]						= RE.dblForexRate
-				,[ysnInventoryCost]					= 0
-				,[strCostMethod]					= IC.strCostMethod
-				,[dblRate]							= CASE
-														WHEN IC.strCostMethod = 'Per Unit' THEN ContractCost.dblRate
-														WHEN IC.strCostMethod = 'Amount' THEN 0
-													END
-				,[intCostUOMId]						= dbo.fnGetMatchingItemUOMId(@intFreightItemId, ContractCost.intItemUOMId)
-				,[intOtherChargeEntityVendorId]		= ContractCost.intVendorId
-				,[dblAmount]						= CASE
-														WHEN IC.strCostMethod = 'Per Unit' THEN 0
-														WHEN IC.strCostMethod = 'Amount' THEN 
-														CASE
-															WHEN RE.ysnIsStorage = 1 THEN 0
-															WHEN RE.ysnIsStorage = 0 THEN ROUND (ContractCost.dblRate  * dbo.fnCalculateQtyBetweenUOM(ContractCost.intItemUOMId, dbo.fnGetMatchingItemUOMId(RE.intItemId, ContractCost.intItemUOMId), SC.dblGrossUnits), 2)
-														END
-													END
-				,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ContractCost.intContractDetailId)
-				,[intContractDetailId]				= ContractCost.intContractDetailId
-				,[ysnAccrue]						= @ysnAccrue
-				,[ysnPrice]							= @ysnPrice
-				FROM tblCTContractCost ContractCost
-				LEFT JOIN @ReceiptStagingTable RE ON RE.intContractDetailId = ContractCost.intContractDetailId
-				OUTER APPLY(
-					SELECT DISTINCT SUM(dblGrossUnits) AS dblGrossUnits,intScaleSetupId FROM tblSCTicket WHERE intDeliverySheetId = RE.intSourceId GROUP BY intScaleSetupId
-				) SC
-				LEFT JOIN tblSCScaleSetup SCS ON SCS.intScaleSetupId = SC.intScaleSetupId
-				LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
-				WHERE ContractCost.intItemId = @intFreightItemId AND RE.intContractDetailId IS NOT NULL AND ContractCost.dblRate != 0
-			END
-		ELSE
-			BEGIN
-				INSERT INTO @OtherCharges
-				(
+		BEGIN
+			INSERT INTO @OtherCharges
+			(
 					[intEntityVendorId] 
 					,[strBillOfLadding] 
 					,[strReceiptType] 
@@ -471,43 +404,48 @@ IF ISNULL(@intFreightItemId,0) = 0
 					,[intContractDetailId] 
 					,[ysnAccrue]
 					,[ysnPrice]
-				)
-				SELECT	
-				[intEntityVendorId]					= RE.intEntityVendorId
-				,[strBillOfLadding]					= RE.strBillOfLadding
-				,[strReceiptType]					= RE.strReceiptType
-				,[intLocationId]					= RE.intLocationId
-				,[intShipViaId]						= RE.intShipViaId
-				,[intShipFromId]					= RE.intShipFromId
-				,[intCurrencyId]  					= RE.intCurrencyId
-				,[intCostCurrencyId]				= RE.intCurrencyId
-				,[intChargeId]						= ContractCost.intItemId
-				,[intForexRateTypeId]				= RE.intForexRateTypeId
-				,[dblForexRate]						= RE.dblForexRate
-				,[ysnInventoryCost]					= 0
-				,[strCostMethod]					= ContractCost.strCostMethod
-				,[dblRate]							= CASE
-														WHEN ContractCost.strCostMethod = 'Per Unit' THEN ContractCost.dblRate
-														WHEN ContractCost.strCostMethod = 'Amount' THEN 0
+			)
+			SELECT	
+			[intEntityVendorId]					= RE.intEntityVendorId
+			,[strBillOfLadding]					= RE.strBillOfLadding
+			,[strReceiptType]					= RE.strReceiptType
+			,[intLocationId]					= RE.intLocationId
+			,[intShipViaId]						= RE.intShipViaId
+			,[intShipFromId]					= RE.intShipFromId
+			,[intCurrencyId]  					= RE.intCurrencyId
+			,[intCostCurrencyId]				= RE.intCurrencyId
+			,[intChargeId]						= ContractCost.intItemId
+			,[intForexRateTypeId]				= RE.intForexRateTypeId
+			,[dblForexRate]						= RE.dblForexRate
+			,[ysnInventoryCost]					= 0
+			,[strCostMethod]					= IC.strCostMethod
+			,[dblRate]							= CASE
+													WHEN IC.strCostMethod = 'Per Unit' THEN ContractCost.dblRate
+													WHEN IC.strCostMethod = 'Amount' THEN 0
+												END
+			,[intCostUOMId]						= dbo.fnGetMatchingItemUOMId(@intFreightItemId, ContractCost.intItemUOMId)
+			,[intOtherChargeEntityVendorId]		= ContractCost.intVendorId
+			,[dblAmount]						= CASE
+													WHEN IC.strCostMethod = 'Per Unit' THEN 0
+													WHEN IC.strCostMethod = 'Amount' THEN 
+													CASE
+														WHEN RE.ysnIsStorage = 1 THEN 0
+														WHEN RE.ysnIsStorage = 0 THEN ROUND (ContractCost.dblRate  * dbo.fnCalculateQtyBetweenUOM(ContractCost.intItemUOMId, dbo.fnGetMatchingItemUOMId(RE.intItemId, ContractCost.intItemUOMId), SC.dblGrossUnits), 2)
 													END
-				,[intCostUOMId]						= ContractCost.intItemUOMId
-				,[intOtherChargeEntityVendorId]		= ContractCost.intVendorId
-				,[dblAmount]						= CASE
-														WHEN ContractCost.strCostMethod = 'Per Unit' THEN 0
-														WHEN ContractCost.strCostMethod = 'Amount' THEN 
-														CASE
-															WHEN RE.ysnIsStorage = 1 THEN 0
-															WHEN RE.ysnIsStorage = 0 THEN ContractCost.dblRate
-														END
-													END
-				,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ContractCost.intContractDetailId)
-				,[intContractDetailId]				= ContractCost.intContractDetailId
-				,[ysnAccrue]						= ContractCost.ysnAccrue
-				,[ysnPrice]							= ContractCost.ysnPrice
-				FROM tblCTContractCost ContractCost
-				LEFT JOIN @ReceiptStagingTable RE ON RE.intContractDetailId = ContractCost.intContractDetailId
-				WHERE ContractCost.intItemId = @intFreightItemId AND RE.intContractDetailId IS NOT NULL AND ContractCost.dblRate != 0
-			END
+												END
+			,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ContractCost.intContractDetailId)
+			,[intContractDetailId]				= ContractCost.intContractDetailId
+			,[ysnAccrue]						= ContractCost.ysnAccrue
+			,[ysnPrice]							= ContractCost.ysnPrice
+			FROM tblCTContractCost ContractCost
+			LEFT JOIN @ReceiptStagingTable RE ON RE.intContractDetailId = ContractCost.intContractDetailId
+			OUTER APPLY(
+				SELECT DISTINCT SUM(dblGrossUnits) AS dblGrossUnits,intScaleSetupId FROM tblSCTicket WHERE intDeliverySheetId = RE.intSourceId GROUP BY intScaleSetupId
+			) SC
+			LEFT JOIN tblSCScaleSetup SCS ON SCS.intScaleSetupId = SC.intScaleSetupId
+			LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
+			WHERE ContractCost.intItemId = @intFreightItemId AND RE.intContractDetailId IS NOT NULL AND ContractCost.dblRate != 0
+		END
 		INSERT INTO @OtherCharges
 			(
 					[intEntityVendorId] 
@@ -728,8 +666,7 @@ BEGIN
            ,[dtmExpiryDate] = DATEADD(YEAR, 2, ICIR.dtmReceiptDate)
            ,[intSort] = NULL
            ,[intConcurrencyId] = 1
-		   FROM	dbo.tblICInventoryReceiptItem RCT
-				INNER JOIN dbo.tblICInventoryReceipt ICIR ON RCT.intInventoryReceiptId = ICIR.intInventoryReceiptId
+		   FROM	dbo.tblICInventoryReceiptItem RCT INNER JOIN dbo.tblICInventoryReceipt ICIR ON RCT.intInventoryReceiptId = ICIR.intInventoryReceiptId
 		   WHERE RCT.intInventoryReceiptItemId = @intLoopReceiptItemId
    END
 

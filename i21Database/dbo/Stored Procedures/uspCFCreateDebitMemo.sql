@@ -612,7 +612,7 @@ BEGIN
 		 @InvoiceEntries	= @InvoiceEntriesTEMP
 		,@LineItemTaxEntries = @TaxDetails
 		,@UserId			= 1
-		,@GroupingOption	= 0
+		,@GroupingOption	= 1
 		,@RaiseError		= 1
 		,@ErrorMessage		= @ErrorMessage OUTPUT
 		,@LogId				= @LogId OUTPUT

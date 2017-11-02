@@ -73,9 +73,9 @@ SELECT
 	,strProductID = ISNULL (M.strItemNo, G.strItemNo)
 	,strProductDescription = ISNULL(M.strDescription, G.strDescription)
 	,strRouteId =P.strRouteId
-	,strLocation = (CASE WHEN ISNUMERIC (C.strLocation) = 1 
-						THEN C.strLocation 
-						ELSE SUBSTRING (C.strLocation, PATINDEX ('%[^0]%', C.strLocation), 50) 
+	,strLocation = (CASE WHEN ISNUMERIC (L.strLocationName) = 1 
+						THEN L.strLocationName 
+						ELSE SUBSTRING (L.strLocationName, PATINDEX ('%[^0]%', L.strLocationName), 50) 
 					END)
     ,F.dtmCallInDate
 	,strEnteredBy = N.strUserName 

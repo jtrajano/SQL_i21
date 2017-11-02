@@ -26,6 +26,11 @@ BEGIN TRY
 	WHERE intInvoiceId = @InvoiceId
 		AND ISNULL(ysnPosted, 0) <> 1
 
+	/*Update the tblMBMeterReading > intInvoiceId=null to delete the Invoice (coz this will cause constraint error)*/
+	update tblMBMeterReading
+	set intInvoiceId = null
+	where intMeterReadingId = @MeterReadingId
+
 	EXEC uspARDeleteInvoice @InvoiceId, @UserId
 
 END TRY
