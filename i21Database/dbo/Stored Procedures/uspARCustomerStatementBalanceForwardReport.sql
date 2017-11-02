@@ -239,11 +239,8 @@ INSERT INTO tblARCustomerAgingStagingTable (
 		, strCompanyName
 		, strCompanyAddress
 )		
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo = @dtmDateToLocal
-											, @strCompanyLocation = @strLocationNameLocal
-											, @ysnIncludeBudget = @ysnIncludeBudgetLocal
-											, @ysnIncludeCredits = @ysnPrintCreditBalanceLocal
-											, @strCustomerName = @strCustomerNameLocal
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] @strCompanyLocation = @strLocationNameLocal
+										  , @strCustomerName = @strCustomerNameLocal
 
 INSERT INTO @temp_aging_table
 SELECT strCustomerName
@@ -294,10 +291,8 @@ INSERT INTO tblARCustomerAgingStagingTable (
 		, strCompanyAddress
 )
 EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo = @dtmBalanceForwardDateLocal
-											, @strCompanyLocation = @strLocationNameLocal
-											, @ysnIncludeBudget = @ysnIncludeBudgetLocal
-											, @ysnIncludeCredits = @ysnPrintCreditBalanceLocal
-											, @strCustomerName = @strCustomerNameLocal
+										  , @strCompanyLocation = @strLocationNameLocal											
+										  , @strCustomerName = @strCustomerNameLocal
 
 INSERT INTO @temp_balanceforward_table
 SELECT strCustomerName
@@ -751,20 +746,17 @@ VALUES (strCustomerNumber, dtmLastStatementDate, dblLastStatement);
 
 IF @ysnPrintOnlyPastDueLocal = 1
     BEGIN
-        DELETE FROM @temp_statement_table WHERE DATEDIFF(DAYOFYEAR, dtmDueDate, @dtmDateToLocal) > 0 AND strTransactionType <> 'Balance Forward'
-        UPDATE @temp_aging_table SET dblTotalAR = dblTotalAR - dbl0Days , dbl0Days = 0
+        DELETE FROM @temp_statement_table WHERE DATEDIFF(DAYOFYEAR, dtmDueDate, @dtmDateToLocal) > 0 AND strTransactionType <> 'Balance Forward'        
     END
 
 IF @ysnPrintZeroBalanceLocal = 0
     BEGIN
-        DELETE FROM @temp_statement_table WHERE ISNULL(dblBalance, 0) = 0 AND ISNULL(strTransactionType, '') <> 'Balance Forward'
-        DELETE FROM @temp_aging_table WHERE dblTotalAR = 0
+        DELETE FROM @temp_statement_table WHERE ISNULL(dblBalance, 0) = 0 AND ISNULL(strTransactionType, '') <> 'Balance Forward'        
     END
 
 IF @ysnPrintCreditBalanceLocal = 0
 	BEGIN
-		DELETE FROM @temp_statement_table WHERE strTransactionType IN ('Credit Memo', 'Customer Prepayment', 'Overpayment')
-		DELETE FROM @temp_aging_table WHERE dblTotalAR < 0
+		DELETE FROM @temp_statement_table WHERE strTransactionType IN ('Credit Memo', 'Customer Prepayment', 'Overpayment')		
 	END
 
 INSERT INTO @temp_cf_table (
