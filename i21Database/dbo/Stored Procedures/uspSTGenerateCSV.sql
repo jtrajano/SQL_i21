@@ -46,6 +46,7 @@ BEGIN
 
 		SELECT * FROM @tblStoreIdList
 
+
 		--START Loop to all store Id
 		DECLARE @intStoreIdMin int, @intStoreIdMax int
 		SELECT @intStoreIdMin = MIN(intStoreId), @intStoreIdMax = MAX(intStoreId)
@@ -257,7 +258,7 @@ BEGIN
 						SELECT
 								ST.strDescription as strOutletName
 								, ST.intStoreNo as intOutletNumber
-								, ST.strAddress as strOutletAddressOne
+								, CASE WHEN ST.strAddress IS NULL THEN '' ELSE ST.strAddress END as strOutletAddressOne
 								, 'Second address' as strOutletAddressTwo
 								, ST.strCity as strOutletCity
 								, UPPER(LEFT(ST.strState, 2)) as strOutletState
@@ -276,24 +277,28 @@ BEGIN
 								, 'N' as strOutletMultipackFlag
 								, 0 as intOutletMultipackQuantity
 								, 0 as dblOutletMultipackDiscountAmount
-								, 'None' as strAccountPromotionName
+								, '' as strAccountPromotionName
 								, 0 as dblAccountDiscountAmount
-								, 0 as dblManufacturerDiscountAmount
-								, 21 as intCouponPid
+								, CASE WHEN strTrpPaycode = 'COUPONS' THEN dblTrpAmt ELSE 0 END as dblManufacturerDiscountAmount
+								, CASE WHEN strTrpPaycode = 'COUPONS' THEN 1234 ELSE 0 END as intCouponPid
 								, CASE WHEN strTrpPaycode = 'COUPONS' THEN dblTrpAmt ELSE 0 END as dblCouponAmount
 
 								, 'N' as strManufacturerMultipackFlag
 								, 0 as intManufacturerMultipackQuantity
 								, 0 as dblManufacturerMultipackDiscountAmount
-								, strTrpPaycode as strManufacturerPromotionDescription
-								, 'Buy down desc' as strManufacturerBuydownDescription
+								, CASE WHEN strTrpPaycode IN ('COUPONS', 'LOTTERY PO') THEN strTrpPaycode ELSE '' END as strManufacturerPromotionDescription
+								, '' as strManufacturerBuydownDescription
 								, 0 as dblManufacturerBuydownAmount
 								, 'Multi pack desc' as strManufacturerMultiPackDescription
 								, '123789' as strAccountLoyaltyIDNumber
 								, 'Loyalty coupon desc' as strCouponDescription
 							FROM tblSTTranslogRebates TR
 							JOIN tblSTStore ST ON ST.intStoreId = TR.intStoreId
-							WHERE TR.intStoreId = @intStoreIdMin AND CAST(TR.dtmOpenedTime as DATE) >= @dtmBeginningDate AND CAST(TR.dtmClosedTime as DATE) <= @dtmEndingDate AND ysnSubmitted = 0
+							WHERE TR.intStoreId = @intStoreIdMin 
+							AND CAST(TR.dtmOpenedTime as DATE) >= @dtmBeginningDate 
+							AND CAST(TR.dtmClosedTime as DATE) <= @dtmEndingDate 
+							AND ysnSubmitted = 0
+							AND strTrLinetype = 'plu'
 					) x
 				END
 				--END Insert data from tblSTstgRebatesRJReynolds
@@ -306,7 +311,6 @@ BEGIN
 			SET @intStoreIdMin = @intStoreIdMin + 1
 		END
 		--END Loop to all store Id
-
 
 		--CHECK IF table has values
 		DECLARE @Count int
@@ -547,7 +551,7 @@ BEGIN
 														+ ',' + CAST(@dblAccountDiscountAmount as NVARCHAR(50)) + ',' + CAST(@dblManufacturerDiscountAmount as NVARCHAR(50))+ ',' + CAST(@intCouponPid as NVARCHAR(20)) + ',' + CAST(@dblCouponAmount as NVARCHAR(50))
 														+ ',' + @strManufacturerMultipackFlag + ',' + CAST(@intManufacturerMultipackQuantity AS NVARCHAR(50)) + ',' + CAST(@dblManufacturerMultipackDiscountAmount AS NVARCHAR(50)) + ',' + @strManufacturerPromotionDescription
 														+ ',' + @strManufacturerBuydownDescription + ',' + CAST(@dblManufacturerBuydownAmount AS NVARCHAR(50)) + ',' + @strManufacturerMultiPackDescription + ',' + @strAccountLoyaltyIDNumber + ',' + @strCouponDescription
-
+							
 							SET @intLoopCount = @intLoopCount + 1
 						END
 
