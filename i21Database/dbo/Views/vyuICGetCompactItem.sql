@@ -43,6 +43,7 @@ SELECT
 	, strPhysicalItem 		= PhysicalItem.strItemNo
 	, strPatronageCategory 	= PatronageCategory.strCategoryCode
 	, strPatronageDirect 	= PatronageDirect.strCategoryCode
+	, strGrade				= Grade.strDescription
 	, strOrigin 			= Origin.strDescription
 	, strProductType		= ProductType.strDescription
 	, strRegion 			= Region.strDescription
@@ -73,6 +74,7 @@ LEFT JOIN tblICTag HazMat ON HazMat.intTagId = Item.intHazmatMessage
 LEFT JOIN tblICItem PhysicalItem ON PhysicalItem.intItemId = Item.intPhysicalItem
 LEFT JOIN tblPATPatronageCategory PatronageCategory ON PatronageCategory.intPatronageCategoryId = Item.intPatronageCategoryId
 LEFT JOIN tblPATPatronageCategory PatronageDirect ON PatronageDirect.intPatronageCategoryId = Item.intPatronageCategoryDirectId
+LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = Item.intGradeId
 LEFT JOIN tblICCommodityAttribute Origin ON Origin.intCommodityAttributeId = Item.intOriginId
 LEFT JOIN tblICCommodityAttribute ProductType ON ProductType.intCommodityAttributeId = Item.intProductTypeId
 LEFT JOIN tblICCommodityAttribute Region ON Region.intCommodityAttributeId = Item.intRegionId
