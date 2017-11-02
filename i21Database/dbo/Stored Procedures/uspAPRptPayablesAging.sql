@@ -86,6 +86,7 @@ BEGIN
 		NULL AS strContractNumber,
 		NULL AS strLoadNumber,
 		NULL AS strClass,
+		NULL AS strCommodityCode,
 		0 AS intAccountId,
 		0 AS dblTotal,
 		0 AS dblAmountPaid,
@@ -342,6 +343,7 @@ SET @query = '
 	,tmpAgingSummaryTotal.dblAmountDue
 	,ISNULL(B.strVendorId,'''') + '' - '' + isnull(C.strName,'''') as strVendorIdName 
 	,EC.strClass
+	,F.strCommodityCode
 	,CASE WHEN tmpAgingSummaryTotal.dblAmountDue>=0 THEN 0 
 			ELSE tmpAgingSummaryTotal.dblAmountDue END AS dblUnappliedAmount
 	,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=0 THEN 0
@@ -397,6 +399,7 @@ SET @query = '
 	LEFT JOIN dbo.tblGLAccount D ON  A.intAccountId = D.intAccountId
 	LEFT JOIN dbo.tblSMTerm T ON A.intTermsId = T.intTermID
 	LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C.intEntityClassId
+	LEFT JOIN vyuAPVoucherCommodity F ON F.intBillId = tmpAgingSummaryTotal.intBillId
 	WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 ) MainQuery'
 
