@@ -20,6 +20,7 @@ AS
 		,dblRebateAmount = CAST((B.dblQtyShipped * ISNULL(M.dblRebateRate,ISNULL(N.dblRebateRate,0.0))) AS NUMERIC(18,6))
 		,B.intInvoiceDetailId
 		,B.intConcurrencyId 
+		,B.intProgramId
 	FROM tblARInvoiceDetail B
 	INNER JOIN tblARInvoice A
 		ON A.intInvoiceId = B.intInvoiceId
@@ -52,6 +53,7 @@ AS
 		AND B.intProgramId = N.intProgramId
 	WHERE (N.dblRebateRate IS NOT NULL OR M.dblRebateRate IS NOT NULL)
 		AND NOT EXISTS(SELECT TOP 1 1 FROM tblVRRebate WHERE intInvoiceDetailId = B.intInvoiceDetailId)
+		AND A.ysnPosted = 1
 
 GO
 

@@ -15,13 +15,14 @@ AS
 		,F.strUnitMeasure
 		,E.dblUnitQty
 		,dblCost = B.dblPrice
-		,dblRebateRate = ISNULL(M.dblRebateRate,ISNULL(N.dblRebateRate,0.0))
-		,dblRebateAmount = CAST((B.dblQtyShipped * ISNULL(M.dblRebateRate,ISNULL(N.dblRebateRate,0.0))) AS NUMERIC(18,6))
+		,dblRebateRate = O.dblRebateRate
+		,dblRebateAmount = O.dblRebateAmount
 		,B.intInvoiceDetailId
 		,O.intConcurrencyId 
 		,O.intRebateId
 		,O.ysnSubmitted
 		,O.ysnExcluded
+		,O.intProgramId
 	FROM tblARInvoiceDetail B
 	INNER JOIN tblARInvoice A
 		ON A.intInvoiceId = B.intInvoiceId
