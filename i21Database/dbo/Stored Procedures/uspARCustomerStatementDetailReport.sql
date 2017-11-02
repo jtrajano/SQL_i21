@@ -226,9 +226,7 @@ INSERT INTO tblARCustomerAgingStagingTable (
 	 , strCompanyName
 	 , strCompanyAddress
 )
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateFrom = @dtmDateFrom
-										  , @dtmDateTo = @dtmDateTo
-										  , @strCustomerName = @strCustomerName
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] @strCustomerName = @strCustomerName
  
 SET @query = 'SELECT * FROM
 (SELECT I.strInvoiceNumber AS strReferenceNumber

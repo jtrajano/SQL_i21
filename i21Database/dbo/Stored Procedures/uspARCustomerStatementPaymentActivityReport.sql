@@ -106,6 +106,7 @@ SET @ysnPrintOnlyPastDueLocal	= ISNULL(@ysnPrintOnlyPastDue, 0)
 SET @strCustomerNumberLocal		= NULLIF(@strCustomerNumber, '')
 SET @strAccountStatusCodeLocal	= NULLIF(@strAccountStatusCode, '')
 SET @strLocationNameLocal		= NULLIF(@strLocationName, '')
+SET @strCustomerNameLocal       = NULLIF(@strCustomerName, '')
 SET @strDateTo					= ''''+ CONVERT(NVARCHAR(50),@dtmDateToLocal, 110) + ''''
 SET @strDateFrom				= ''''+ CONVERT(NVARCHAR(50),@dtmDateFromLocal, 110) + ''''
 
@@ -192,12 +193,7 @@ INSERT INTO tblARCustomerAgingStagingTable (
 		, strCompanyName
 		, strCompanyAddress
 )
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] 
-										 --@dtmDateTo = @dtmDateToLocal
-										  --, 
-										  @strCompanyLocation = @strLocationNameLocal
-										  --, @ysnIncludeBudget = @ysnIncludeBudgetLocal
-										  --, @ysnIncludeCredits = @ysnPrintCreditBalanceLocal
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] @strCompanyLocation = @strLocationNameLocal
 										  , @strCustomerName = @strCustomerNameLocal
 
 SET @query = CAST('' AS NVARCHAR(MAX)) + 
@@ -408,20 +404,17 @@ IF @ysnIncludeBudgetLocal = 1
 
 IF @ysnPrintOnlyPastDueLocal = 1
     BEGIN        
-		DELETE FROM @temp_statement_table WHERE DATEDIFF(DAYOFYEAR, dtmDueDate, @dtmDateToLocal) > 0
-        --UPDATE tblARCustomerAgingStagingTable SET dblTotalAR = dblTotalAR - dbl0Days , dbl0Days = 0
+		DELETE FROM @temp_statement_table WHERE DATEDIFF(DAYOFYEAR, dtmDueDate, @dtmDateToLocal) > 0        
     END
 
 IF @ysnPrintZeroBalanceLocal = 0
     BEGIN
         DELETE FROM @temp_statement_table WHERE ISNULL(dblBalance, 0) = 0
-        --DELETE FROM tblARCustomerAgingStagingTable WHERE dblTotalAR = 0
     END
 
 IF @ysnPrintCreditBalanceLocal = 0
 	BEGIN
-		DELETE FROM @temp_statement_table WHERE strTransactionType IN ('Credit Memo', 'Customer Prepayment', 'Overpayment')
-		--DELETE FROM tblARCustomerAgingStagingTable WHERE dblTotalAR < 0 
+		DELETE FROM @temp_statement_table WHERE strTransactionType IN ('Credit Memo', 'Customer Prepayment', 'Overpayment')		 
 	END
 
 INSERT INTO @temp_cf_table (
