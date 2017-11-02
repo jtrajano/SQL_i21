@@ -2371,7 +2371,7 @@ BEGIN
 		BEGIN
 
 			DECLARE @dblImportFileGrossPrice NUMERIC(18,6)
-			SET @dblImportFileGrossPrice =  ROUND (Round((Round(@dblOriginalPrice * Quantity,2) - @totalOriginalTax) / Quantity, 6) + ISNULL(@dblAdjustments,0) + ROUND((ISNULL(@totalCalculatedTax,0) / @dblQuantity),6),6)
+			SET @dblImportFileGrossPrice =  ROUND (Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6) + ISNULL(@dblAdjustments,0) + ROUND((ISNULL(@totalCalculatedTax,0) / @dblQuantity),6),6)
 
 			IF(ISNULL(@ysnForceRounding,0) = 1) 
 			BEGIN
@@ -2390,7 +2390,7 @@ BEGIN
 			),
 			(
 				 'Net Price'
-				 ,Round((Round(@dblOriginalPrice * Quantity,2) - @totalOriginalTax) / Quantity, 6)
+				 ,Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6)
 				 ,ROUND(((Round((@dblImportFileGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0)) ) / @dblQuantity),6)
 				--,ROUND((((@dblImportFileGrossPrice * @dblQuantity) - (@totalCalculatedTaxExempt + @totalCalculatedTax) ) / @dblQuantity),6)
 			),
@@ -2405,7 +2405,7 @@ BEGIN
 		BEGIN
  
 			DECLARE @dblNetworkCostGrossPrice NUMERIC(18,6)
-			SET @dblNetworkCostGrossPrice =  ROUND (Round((Round(@dblOriginalPrice * Quantity,2) - @totalOriginalTax) / Quantity, 6) + ISNULL(@dblAdjustments,0) + ROUND((ISNULL(@totalCalculatedTax,0) / @dblQuantity),6),6)
+			SET @dblNetworkCostGrossPrice =  ROUND (Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6) + ISNULL(@dblAdjustments,0) + ROUND((ISNULL(@totalCalculatedTax,0) / @dblQuantity),6),6)
 
 			IF(ISNULL(@ysnForceRounding,0) = 1) 
 			BEGIN
@@ -2424,7 +2424,7 @@ BEGIN
 			),
 			(
 				 'Net Price'
-				 ,Round((Round(@dblOriginalPrice * Quantity,2) - @totalOriginalTax) / Quantity, 6)
+				 ,Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6)
 				 ,ROUND(((Round((@dblNetworkCostGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0)) ) / @dblQuantity),6)
 				--,ROUND((((@dblNetworkCostGrossPrice * @dblQuantity) - (@totalCalculatedTaxExempt + @totalCalculatedTax) ) / @dblQuantity),6)
 			),
@@ -2559,7 +2559,7 @@ BEGIN
 		BEGIN
 
 			DECLARE @dblPumpPriceAdjustmentGrossPrice NUMERIC(18,6)
-			SET @dblPumpPriceAdjustmentGrossPrice =  ROUND (Round((Round(@dblOriginalPrice * Quantity,2) - @totalOriginalTax) / Quantity, 6) + ISNULL(@dblAdjustments,0) + ROUND((ISNULL(@totalCalculatedTax,0) / @dblQuantity),6),6)
+			SET @dblPumpPriceAdjustmentGrossPrice =  ROUND (Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6) + ISNULL(@dblAdjustments,0) + ROUND((ISNULL(@totalCalculatedTax,0) / @dblQuantity),6),6)
 
 			IF(ISNULL(@ysnForceRounding,0) = 1) 
 			BEGIN
@@ -2578,7 +2578,7 @@ BEGIN
 			),
 			(
 				 'Net Price'
-				 ,Round((Round(@dblOriginalPrice * Quantity,2) - @totalOriginalTax) / Quantity, 6)
+				 ,Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6)
 				 ,ROUND(((Round((@dblPumpPriceAdjustmentGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0)) ) / @dblQuantity),6)
 				--,ROUND((((@dblPumpPriceAdjustmentGrossPrice * @dblQuantity) - (@totalCalculatedTaxExempt + @totalCalculatedTax) ) / @dblQuantity),6)
 			),
@@ -2686,7 +2686,9 @@ BEGIN
 			(
 				 'Total Amount'
 				,ROUND(@dblOriginalPrice * @dblQuantity,2)
-				,ROUND((@dblPrice + Round((@totalCalculatedTax / @dblQuantity) ,6)) * @dblQuantity,2)
+				--,ROUND((@dblPrice + Round((@totalCalculatedTax / @dblQuantity) ,6)) * @dblQuantity,2)
+
+				,ROUND(@dblPrice * @dblQuantity,2) + @totalCalculatedTax
 			)
 		END
 	END
