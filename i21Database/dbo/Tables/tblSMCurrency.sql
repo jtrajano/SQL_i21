@@ -2,6 +2,7 @@
     [intCurrencyID]       INT             IDENTITY (1, 1) NOT NULL,
     [strCurrency]         NVARCHAR (40)   COLLATE Latin1_General_CI_AS NOT NULL,
     [strDescription]      NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
+	[strSymbol]			  NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strFormat]		      NVARCHAR (50)   COLLATE Latin1_General_CI_AS NOT NULL DEFAULT '', 
 	[ysnSubCurrency]	  BIT			  NOT NULL DEFAULT 0, 
 	[intMainCurrencyId]   INT			  NULL,
