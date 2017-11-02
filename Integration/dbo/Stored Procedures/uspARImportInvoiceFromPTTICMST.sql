@@ -111,7 +111,7 @@ SELECT
 							WHEN pttic_type = 'I' THEN 'Invoice' 
 							WHEN pttic_type = 'C' THEN 'Credit Memo' 
 							WHEN pttic_type = 'D' THEN 'Debit Memo' 
-							WHEN pttic_type = 'S' THEN 'Cash Sale'
+							WHEN pttic_type = 'S' THEN 'Cash'
 							WHEN pttic_type = 'R' THEN 'Cash Refund' 
 							WHEN pttic_type = 'X' THEN 'Transfer'
 							END),
@@ -128,7 +128,15 @@ SELECT
 	INNER JOIN tblARCustomer Cus ON  strCustomerNumber COLLATE Latin1_General_CI_AS = A.pttic_bill_to_cus_no COLLATE Latin1_General_CI_AS
 	INNER JOIN tblARSalesperson Salesperson ON strSalespersonId COLLATE Latin1_General_CI_AS = A.pttic_slsmn_id COLLATE Latin1_General_CI_AS
 	LEFT JOIN tblSMTerm Term ON Term.strTermCode COLLATE Latin1_General_CI_AS = CONVERT(NVARCHAR(10),CONVERT(INT,A.pttic_terms_code)) COLLATE Latin1_General_CI_AS
-	WHERE pttic_type <> 'O' AND pttic_line_no = 1
+	LEFT JOIN tblARInvoice 
+		ON A.pttic_ivc_no COLLATE Latin1_General_CI_AS = tblARInvoice.strInvoiceOriginId COLLATE Latin1_General_CI_AS
+		AND tblARInvoice.[dtmDate] = CONVERT(DATE, CAST(A.pttic_rev_dt AS CHAR(12)), 112)
+		AND tblARInvoice.[dblInvoiceTotal] = ROUND(ISNULL(pttic_actual_total, 0), [dbo].[fnARGetDefaultDecimal]())
+		AND ISNULL(tblARInvoice.[ysnImportedFromOrigin],0) = 1 AND ISNULL(tblARInvoice.[ysnImportedAsPosted],0) = 0
+	WHERE 
+		pttic_type NOT IN ('O','X')
+		AND pttic_line_no = 1
+		AND tblARInvoice.strInvoiceOriginId IS NULL 
 ) AS SourceData
 ON (1=0)
 WHEN NOT MATCHED THEN
