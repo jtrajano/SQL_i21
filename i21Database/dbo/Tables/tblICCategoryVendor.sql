@@ -16,6 +16,7 @@ Type the overview for the table here.
 		[intCategoryId] INT NOT NULL, 
 		[intCategoryLocationId] INT NULL, 
 		[intVendorId] INT NULL, 
+		[intVendorSetupId] INT NOT NULL,
 		[strVendorDepartment] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL  , 
 		[ysnAddOrderingUPC] BIT NULL, 
 		[ysnUpdateExistingRecords] BIT NULL, 
@@ -30,7 +31,8 @@ Type the overview for the table here.
 		CONSTRAINT [PK_tblICCategoryVendor] PRIMARY KEY ([intCategoryVendorId]), 
 		CONSTRAINT [FK_tblICCategoryVendor_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICCategoryVendor_tblAPVendor] FOREIGN KEY ([intVendorId]) REFERENCES [tblAPVendor]([intEntityId]), 
-		CONSTRAINT [FK_tblICCategoryVendor_tblICCategoryLocation] FOREIGN KEY ([intCategoryLocationId]) REFERENCES [tblICCategoryLocation]([intCategoryLocationId])
+		CONSTRAINT [FK_tblICCategoryVendor_tblICCategoryLocation] FOREIGN KEY ([intCategoryLocationId]) REFERENCES [tblICCategoryLocation]([intCategoryLocationId]),
+		CONSTRAINT [FK_tblICCategoryVendor_tblVRVendorSetup] FOREIGN KEY ([intVendorSetupId]) REFERENCES [tblVRVendorSetup]([intVendorSetupId])
 	)
 
 	GO
