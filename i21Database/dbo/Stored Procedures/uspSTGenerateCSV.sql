@@ -256,13 +256,13 @@ BEGIN
 					FROM
 					(
 						SELECT
-								ST.strDescription as strOutletName
+								CASE WHEN ST.strDescription IS NULL THEN '' ELSE ST.strDescription END as strOutletName
 								, ST.intStoreNo as intOutletNumber
 								, CASE WHEN ST.strAddress IS NULL THEN '' ELSE ST.strAddress END as strOutletAddressOne
-								, 'Second address' as strOutletAddressTwo
-								, ST.strCity as strOutletCity
+								, '' as strOutletAddressTwo
+								, CASE WHEN ST.strCity IS NULL THEN '' ELSE ST.strCity END as strOutletCity
 								, UPPER(LEFT(ST.strState, 2)) as strOutletState
-								, ST.strZipCode as strOutletZipCode
+								,  CASE WHEN ST.strZipCode IS NULL THEN '' ELSE ST.strZipCode END as strOutletZipCode
 								--, FORMAT(CAST(dtmDate AS datetime), 'yyyy-MM-dd-HH:mm:ss') as strTransactionDateTime
 								, replace(convert(NVARCHAR, dtmDate, 120), ' ', '-') as strTransactionDateTime
 								, intTermMsgSN as strMarketBasketTransactionId
