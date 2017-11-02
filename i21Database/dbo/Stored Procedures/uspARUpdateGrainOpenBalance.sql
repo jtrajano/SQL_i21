@@ -227,8 +227,8 @@ BEGIN
 		,@intStorageTypeId	= @StorageScheduleTypeId
 		,@dblUnitsConsumed	= @Quantity
 		,@IntSourceKey		= @InvoiceId
-		,@intUserId			= @UserId								
-																																																									
+		,@intUserId			= @UserId
+		,@intCompanyLocationId	= @LocationId																																																									
 
 	DELETE FROM @GrainItems WHERE intInvoiceDetailId = @InvoiceDetailId
 END
