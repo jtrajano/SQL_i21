@@ -261,8 +261,27 @@ namespace iRely.Inventory.Model
             }
         }
 
+        private string _Grade;
+        [NotMapped]
+        public string strGrade
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_Grade))
+                    if (vyuICGetCompactItem != null)
+                        return vyuICGetCompactItem.strGrade;
+                    else
+                        return null;
+                else
+                    return _Grade;
+            }
+            set
+            {
+                _Grade = value;
+            }
+        }
+
         private string _fuelCategory;
-        
         [NotMapped]
         public string strFuelCategory
         {

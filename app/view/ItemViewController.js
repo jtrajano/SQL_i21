@@ -1084,8 +1084,10 @@ Ext.define('Inventory.view.ItemViewController', {
                 }]
             },
             cboGrade: {
-                value: '{current.intGradeId}',
+                value: '{current.strGrade}',
                 store: '{gradeAttribute}',
+                origValueField: 'intCommodityAttributeId',
+                origUpdateField: 'intGradeId',
                 defaultFilters: [{
                     column: 'intCommodityId',
                     value: '{current.intCommodityId}'

@@ -51,6 +51,7 @@ namespace iRely.Inventory.Model
         public string strPhysicalItem { get; set; }
         public string strPatronageCategory { get; set; }
         public string strPatronageDirect { get; set; }
+        public string strGrade { get; set; }
         public string strOrigin { get; set; }
         public string strProductType { get; set; }
         public string strRegion { get; set; }

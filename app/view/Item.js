@@ -5495,6 +5495,33 @@ Ext.define('Inventory.view.Item', {
                                                                                 hidden: true
                                                                             },
                                                                             {
+                                                                                dataIndex: 'strGrade',
+                                                                                dataType: 'string',
+                                                                                text: 'Attribute',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
+                                                                        itemId: 'cboGrade',
+                                                                        fieldLabel: 'Grade',
+                                                                        displayField: 'strGrade',
+                                                                        valueField: 'strGrade'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intCommodityAttributeId',
+                                                                                dataType: 'numeric',
+                                                                                text: 'Commodity Attribute Id',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'intCommodityId',
+                                                                                dataType: 'numeric',
+                                                                                text: 'Commodity Id',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
                                                                                 dataIndex: 'strDescription',
                                                                                 dataType: 'string',
                                                                                 text: 'Attribute',
@@ -5586,34 +5613,6 @@ Ext.define('Inventory.view.Item', {
                                                                         fieldLabel: 'Product Line',
                                                                         displayField: 'strDescription',
                                                                         valueField: 'intCommodityProductLineId'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcombobox',
-                                                                        columns: [
-                                                                            {
-                                                                                dataIndex: 'intCommodityAttributeId',
-                                                                                dataType: 'numeric',
-                                                                                text: 'Commodity Attribute Id',
-                                                                                hidden: true
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'intCommodityId',
-                                                                                dataType: 'numeric',
-                                                                                text: 'Commodity Id',
-                                                                                hidden: true
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strDescription',
-                                                                                dataType: 'string',
-                                                                                text: 'Attribute',
-                                                                                flex: 1
-                                                                            }
-                                                                        ],
-                                                                        hidden: true,
-                                                                        itemId: 'cboGrade',
-                                                                        fieldLabel: 'Grade',
-                                                                        displayField: 'strDescription',
-                                                                        valueField: 'intCommodityAttributeId'
                                                                     },
                                                                     {
                                                                         xtype: 'combobox',

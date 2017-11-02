@@ -16615,6 +16615,64 @@
                                                                     "\t\thidden: true",
                                                                     "\t},",
                                                                     "\t{",
+                                                                    "\t\tdataIndex: 'strGrade',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Attribute',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t}",
+                                                                    "]"
+                                                                ],
+                                                                "designer|createAlias": "gridcombobox",
+                                                                "displayField": "strGrade",
+                                                                "fieldLabel": "Grade",
+                                                                "itemId": "cboGrade",
+                                                                "layout|flex": null,
+                                                                "valueField": "strGrade"
+                                                            },
+                                                            "configAlternates": {
+                                                                "columns": "array",
+                                                                "designer|createAlias": "string",
+                                                                "displayField": "datafield",
+                                                                "fieldLabel": "string",
+                                                                "hidden": "boolean",
+                                                                "itemId": "string",
+                                                                "layout|flex": "number",
+                                                                "valueField": "datafield",
+                                                                "scrollable": "boolean"
+                                                            },
+                                                            "name": "MyComboBox87",
+                                                            "designerId": "0d8483ba-f328-411b-859c-b8c85b94b57d",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "columns",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.field.ComboBox",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "columns": [
+                                                                    "[",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'intCommodityAttributeId',",
+                                                                    "\t\tdataType: 'numeric',",
+                                                                    "\t\ttext: 'Commodity Attribute Id',",
+                                                                    "\t\thidden: true",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'intCommodityId',",
+                                                                    "\t\tdataType: 'numeric',",
+                                                                    "\t\ttext: 'Commodity Id',",
+                                                                    "\t\thidden: true",
+                                                                    "\t},",
+                                                                    "\t{",
                                                                     "\t\tdataIndex: 'strDescription',",
                                                                     "\t\tdataType: 'string',",
                                                                     "\t\ttext: 'Attribute',",
@@ -16812,65 +16870,6 @@
                                                             },
                                                             "name": "MyComboBox43",
                                                             "designerId": "5d1f49b1-a905-4d49-91a0-63241fa6d161",
-                                                            "customConfigs": [
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "columns",
-                                                                    "type": "string"
-                                                                }
-                                                            ]
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.ComboBox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "columns": [
-                                                                    "[",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'intCommodityAttributeId',",
-                                                                    "\t\tdataType: 'numeric',",
-                                                                    "\t\ttext: 'Commodity Attribute Id',",
-                                                                    "\t\thidden: true",
-                                                                    "\t},",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'intCommodityId',",
-                                                                    "\t\tdataType: 'numeric',",
-                                                                    "\t\ttext: 'Commodity Id',",
-                                                                    "\t\thidden: true",
-                                                                    "\t},",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'strDescription',",
-                                                                    "\t\tdataType: 'string',",
-                                                                    "\t\ttext: 'Attribute',",
-                                                                    "\t\tflex: 1",
-                                                                    "\t}",
-                                                                    "]"
-                                                                ],
-                                                                "designer|createAlias": "gridcombobox",
-                                                                "displayField": "strDescription",
-                                                                "fieldLabel": "Grade",
-                                                                "hidden": true,
-                                                                "itemId": "cboGrade",
-                                                                "layout|flex": null,
-                                                                "valueField": "intCommodityAttributeId"
-                                                            },
-                                                            "configAlternates": {
-                                                                "columns": "array",
-                                                                "designer|createAlias": "string",
-                                                                "displayField": "datafield",
-                                                                "fieldLabel": "string",
-                                                                "hidden": "boolean",
-                                                                "itemId": "string",
-                                                                "layout|flex": "number",
-                                                                "valueField": "datafield",
-                                                                "scrollable": "boolean"
-                                                            },
-                                                            "name": "MyComboBox87",
-                                                            "designerId": "0d8483ba-f328-411b-859c-b8c85b94b57d",
                                                             "customConfigs": [
                                                                 {
                                                                     "group": "(Custom Properties)",

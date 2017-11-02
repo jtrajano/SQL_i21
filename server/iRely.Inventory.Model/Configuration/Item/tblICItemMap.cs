@@ -305,6 +305,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strHazmatMessage).HasColumnName("strHazmatMessage");
             this.Property(t => t.strPatronageCategory).HasColumnName("strPatronageCategory");
             this.Property(t => t.strPatronageDirect).HasColumnName("strPatronageDirect");
+            this.Property(t => t.strGrade).HasColumnName("strGrade");
             this.Property(t => t.strOrigin).HasColumnName("strOrigin");
             this.Property(t => t.strProductType).HasColumnName("strProductType");
             this.Property(t => t.strRegion).HasColumnName("strRegion");
