@@ -2149,3 +2149,24 @@ BEGIN
         ,1
         ,'Select  convert(varchar,intSampleTypeId) as ValueMember,strSampleTypeName as DisplayMember From tblQMSampleType Order by strSampleTypeName'
 END
+GO
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFAttribute
+		WHERE intAttributeId = 98
+		)
+BEGIN
+	INSERT INTO tblMFAttribute (
+		intAttributeId
+		,strAttributeName
+		,intAttributeDataTypeId
+		,intAttributeTypeId
+		,strSQL
+		)
+	SELECT 98
+		,'Is Lot No Editable'
+		,5
+		,3
+		,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
+END
+GO
