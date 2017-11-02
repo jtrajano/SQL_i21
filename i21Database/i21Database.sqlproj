@@ -5732,6 +5732,7 @@
     <Build Include="dbo\Stored Procedures\uspSMValidateRemoteServerRole.sql" />
     <Build Include="dbo\Views\vyuRKGetSequenceMonthNotMapping.sql" />
     <Build Include="dbo\Functions\fnQMGetPropertyTestResult.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGetTransporterInvoiceTax.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
