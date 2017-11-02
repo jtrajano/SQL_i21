@@ -130,7 +130,7 @@ BEGIN
 					
 					SET @eftrx_effect_date = CONVERT(nvarchar(10), Getdate(), 112)
 					
-					SELECT @eftrx_ivc_rev_dt = CONVERT(nvarchar(10), dtmCreated, 112) FROM dbo.tblNRNote Where intNoteId = @intNoteId
+					SELECT @eftrx_ivc_rev_dt = CONVERT(nvarchar(10), GETDATE(), 112) FROM dbo.tblNRNote Where intNoteId = @intNoteId
 					
 					-- INSERT into eft transaction table
 					INSERT INTO [dbo].[eftrxmst]
