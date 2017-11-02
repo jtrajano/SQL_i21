@@ -3434,7 +3434,10 @@ BEGIN
 	---------------------------------------------------
 	--					INDEX PRICING				 --
 	---------------------------------------------------
-	IF((@intPriceIndexId > 0 AND @intPriceIndexId IS NOT NULL) AND (@strPriceIndexId IS NOT NULL) AND (@dblPriceIndexRate <=0 OR @dblPriceIndexRate IS NULL))
+	IF((@intPriceIndexId > 0 AND @intPriceIndexId IS NOT NULL) 
+	AND (@strPriceIndexId IS NOT NULL) 
+	AND (@dblPriceIndexRate <=0 OR @dblPriceIndexRate IS NULL)
+	AND (ISNULL(@ysnCaptiveSite,0) = 0))
 	BEGIN
 		INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
 		VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'No index price found.')
