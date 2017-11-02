@@ -51,6 +51,8 @@ Ext.define('Inventory.search.StockDetail', {
                         click: function (e) {
                             var win = e.up('window');
                             var grid = e.up('panel');
+
+                            
                             if(grid.url === './inventory/api/item/searchstockdetail') {
                                 var selection = _.first(grid.getSelectionModel().selected.items);
 
@@ -68,14 +70,12 @@ Ext.define('Inventory.search.StockDetail', {
                                         conjunction: 'And'
                                     }];
                                     
-                                    if(!gl)
-                                        app.getController('GeneralLedger.controller.Global')
+                                    var date = new Date(), 
+                                        firstDayOfMonth = Ext.Date.getFirstDateOfMonth(date),
+                                        lastDayOfMonth = Ext.Date.getLastDateOfMonth(date);
 
-                                    if(gl.getPostRemind().StartDate && gl.getPostRemind().EndDate &&
-                                        gl.getPostRemind().StartDate != "" && gl.getPostRemind().EndDate != ""){
-                                            filters.push({ column: 'dtmDate', condition: 'gte', conjunction: 'And', value: Ext.Date.format(gl.getPostRemind().StartDate, "m/d/Y"), displayCondition: 'Between', group: 'ValuationFiscal' },
-                                            { column: 'dtmDate', condition: 'lte', conjunction: 'And', value: Ext.Date.format(gl.getPostRemind().EndDate, "m/d/Y"), displayCondition: 'Between', group: 'ValuationFiscal' })
-                                    }
+                                    filters.push({ column: 'dtmDate', condition: 'gte', conjunction: 'And', value: Ext.Date.format(firstDayOfMonth, "m/d/Y"), displayCondition: 'Between', group: 'ValuationFiscal' },
+                                    { column: 'dtmDate', condition: 'lte', conjunction: 'And', value: Ext.Date.format(lastDayOfMonth, "m/d/Y"), displayCondition: 'Between', group: 'ValuationFiscal' })
                                         
                                     iRely.Functions.openScreen('Inventory.view.InventoryValuation', {
                                         showSearch: true,
