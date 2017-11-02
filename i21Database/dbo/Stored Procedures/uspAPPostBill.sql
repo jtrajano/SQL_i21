@@ -437,7 +437,11 @@ BEGIN
 	    dblForeignRate ,
 	    strRateType ,
 		strDocument,
-		strComments
+		strComments,
+		dblSourceUnitCredit,
+		dblSourceUnitDebit,
+		intCommodityId,
+		intSourceLocationId	
 	)
 	SELECT     
 		dtmDate ,
@@ -472,7 +476,11 @@ BEGIN
 	    dblForeignRate ,
 	    strRateType ,
 		strDocument,
-		strComments	 
+		strComments,
+		dblSourceUnitCredit,
+		dblSourceUnitDebit,
+		intCommodityId,
+		intSourceLocationId	
 	FROM dbo.fnAPCreateBillGLEntries(@validBillIds, @userId, @batchId)
 	ORDER BY intTransactionId
 
@@ -648,6 +656,10 @@ BEGIN
 		,dblCreditReport			
 		,dblReportingRate			
 		,dblForeignRate		
+		,dblSourceUnitCredit
+		,dblSourceUnitDebit
+		,intCommodityId
+		,intSourceLocationId	
 	)
 	SELECT 
 		dtmDate						
@@ -680,7 +692,11 @@ BEGIN
 		,dblCreditForeign			
 		,dblCreditReport			
 		,dblReportingRate			
-		,dblForeignRate	
+		,dblForeignRate
+		,dblSourceUnitCredit
+		,dblSourceUnitDebit
+		,intCommodityId
+		,intSourceLocationId	
 	FROM dbo.fnAPReverseGLEntries(@Ids, 'Bill', DEFAULT, @userId, @batchId)
 END
 --=====================================================================================================================================
