@@ -2,7 +2,8 @@
 (
     [intEntityMenuFavoriteId] INT NOT NULL PRIMARY KEY IDENTITY, 
 	[strMenuName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,  
-    [intMenuId] INT NULL, 
+    [intMenuId] INT NULL,
+	[intCustomId] INT NULL, 
 	[intEntityId] INT NOT NULL, 
 	[intCompanyLocationId] INT NULL, 
 	[intParentEntityMenuFavoriteId] INT NULL,
