@@ -1,5 +1,5 @@
 ﻿CREATE VIEW [dbo].[vyuICGetInventoryShipmentItem]
-	AS 
+AS 
 
 SELECT ShipmentItem.intInventoryShipmentId
 	, ShipmentItem.intInventoryShipmentItemId
@@ -54,12 +54,13 @@ SELECT ShipmentItem.intInventoryShipmentId
 	, strDestinationWeights = DestWeights.strWeightGradeDesc
 	, intDestinationGradeId = ShipmentItem.intDestinationGradeId
 	, strDestinationGrades = DestGrades.strWeightGradeDesc
-	, ShipmentItem.dblDestinationGrossQty
-	, ShipmentItem.dblDestinationNetQty
-	, ShipmentItem.intDestinationQtyUOMId
-	, strDestinationQtyUOM = DestinationQtyUOM.strUnitMeasure
+	--, ShipmentItem.dblDestinationGrossQty
+	--, ShipmentItem.dblDestinationNetQty
+	--, ShipmentItem.intDestinationQtyUOMId
+	--, strDestinationQtyUOM = DestinationQtyUOM.strUnitMeasure
 	, strForexRateType = forexRateType.strCurrencyExchangeRateType
 	, strDockDoor = DockDoor.strName
+	, ShipmentItem.dblDestinationQuantity
 FROM tblICInventoryShipmentItem ShipmentItem
 	LEFT JOIN vyuICGetInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 	LEFT JOIN vyuICGetShipmentItemSource ShipmentItemSource ON ShipmentItemSource.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
@@ -70,7 +71,7 @@ FROM tblICInventoryShipmentItem ShipmentItem
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = ShipmentItem.intWeightUOMId
 	LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId    
-	LEFT JOIN tblICUnitMeasure DestinationQtyUOM ON DestinationQtyUOM.intUnitMeasureId = ShipmentItem.intDestinationQtyUOMId
+	--LEFT JOIN tblICUnitMeasure DestinationQtyUOM ON DestinationQtyUOM.intUnitMeasureId = ShipmentItem.intDestinationQtyUOMId
 	LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = ShipmentItem.intGradeId
 	LEFT JOIN tblGRDiscountId DiscountSchedule ON DiscountSchedule.intDiscountId = ShipmentItem.intDiscountSchedule
 	LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = Shipment.intCurrencyId

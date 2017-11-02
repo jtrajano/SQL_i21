@@ -49,6 +49,12 @@ SELECT * FROM (
 			,CAST((SUM(tmpAPPayables.dblTotal) + SUM(tmpAPPayables.dblInterest) - SUM(tmpAPPayables.dblAmountPaid) - SUM(tmpAPPayables.dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue
 			FROM (SELECT * FROM dbo.vyuAPPayables) tmpAPPayables 
 			GROUP BY intBillId
+			UNION ALL
+			SELECT 
+			intBillId
+			,CAST((SUM(tmpAPPayables2.dblTotal) + SUM(tmpAPPayables2.dblInterest) - SUM(tmpAPPayables2.dblAmountPaid) - SUM(tmpAPPayables2.dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue
+			FROM (SELECT * FROM dbo.vyuAPPrepaidPayables) tmpAPPayables2 
+			GROUP BY intBillId
 		) AS tmpAgingSummaryTotal
 		LEFT JOIN dbo.tblAPBill A
 		ON A.intBillId = tmpAgingSummaryTotal.intBillId

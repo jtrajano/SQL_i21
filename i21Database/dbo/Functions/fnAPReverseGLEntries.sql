@@ -42,7 +42,11 @@ RETURNS @returntable TABLE
     [dblForeignRate]            NUMERIC (18, 6) NULL,
 	[strRateType]				NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
 	[strDocument]               NVARCHAR(255)   COLLATE Latin1_General_CI_AS NULL,
-	[strComments]               NVARCHAR(255)   COLLATE Latin1_General_CI_AS NULL
+	[strComments]               NVARCHAR(255)   COLLATE Latin1_General_CI_AS NULL,
+	[dblSourceUnitCredit]		NUMERIC(18, 9)	NULL,
+	[dblSourceUnitDebit]		NUMERIC(18, 9)	NULL,
+	[intCommodityId]			INT				NULL,
+	[intSourceLocationId]		INT				NULL
 )
 AS
 BEGIN
@@ -88,6 +92,10 @@ BEGIN
 		,[strRateType]
 		,[strDocument]
 		,[strComments]
+		,[dblSourceUnitCredit]
+		,[dblSourceUnitDebit]
+		,[intCommodityId]
+		,[intSourceLocationId]
 	)
 	SELECT	
 		[strTransactionId]
@@ -124,6 +132,10 @@ BEGIN
 		,NULL
 		,strDocument
 		,strComments
+		,dblSourceUnitCredit
+		,dblSourceUnitDebit
+		,intCommodityId
+		,intSourceLocationId
 	FROM	tblGLDetail 
 	WHERE	intTransactionId IN (SELECT intId FROM @transactionIds)
 	AND strTransactionForm = @transactionType

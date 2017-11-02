@@ -124,7 +124,7 @@ BEGIN
 			,intGrossNetUOMId		= NULL 
 			,dblGross				= PODetail.dblQtyOrdered
 			,dblNet					= PODetail.dblQtyOrdered
-			,dblCost				= PODetail.dblCost
+			,dblCost				= PODetail.dblCost - (PODetail.dblCost * (ISNULL(PODetail.dblDiscount,0) / 100))
 			,intCostUOMId			= ItemUOM.intItemUOMId
 			,intCurrencyId			= PO.intCurrencyId
 			,intSubCurrencyCents	= (CASE WHEN PODetail.ysnSubCurrency > 0 THEN PO.intSubCurrencyCents ELSE 1 END)

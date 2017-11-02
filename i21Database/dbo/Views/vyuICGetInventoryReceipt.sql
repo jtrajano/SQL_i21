@@ -8,6 +8,7 @@ SELECT Receipt.intInventoryReceiptId
 		CASE WHEN Receipt.intSourceType = 1 THEN 'Scale'
 			WHEN Receipt.intSourceType = 2 THEN 'Inbound Shipment'
 			WHEN Receipt.intSourceType = 3 THEN 'Transport'
+			WHEN Receipt.intSourceType = 5 THEN 'Delivery Sheet'
 			WHEN Receipt.intSourceType = 0 THEN 'None'
 		END)
 	, Receipt.intEntityVendorId

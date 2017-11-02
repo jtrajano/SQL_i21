@@ -40,7 +40,7 @@ BEGIN
 				,intLocationId = A.intLocationId
 				,intItemId = CASE WHEN M.A4GLIdentity IS NULL THEN F.A4GLIdentity ELSE M.A4GLIdentity END
 				,intRouteId = A.intRouteId
-				,intDriverID = E.intDriverID
+				,intDriverId = E.intDriverID
 				,intConcurrencyId = E.intConcurrencyId
 				,intClockId = K.intClockID
 				,intEntityUserSecurityId = E.intUserID

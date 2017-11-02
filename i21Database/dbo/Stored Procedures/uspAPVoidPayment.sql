@@ -153,6 +153,8 @@ BEGIN
 	) OldPayments
 	WHERE B.intNewPaymentId IS NOT NULL
 
+	IF OBJECT_ID(N'tempdb..#tmpPaymentDetail') IS NOT NULL DROP TABLE #tmpPaymentDetail
+
 	SELECT
 	*
 	INTO #tmpPaymentDetail
@@ -166,9 +168,13 @@ BEGIN
 		,A.dblPayment = A.dblPayment * -1
 		,A.dblDiscount = A.dblDiscount * -1
 		,A.dblTotal = A.dblTotal * -1
+		,A.intOrigBillId = A.intBillId
+		,A.intBillId = NULL
+		,A.intOrigInvoiceId = A.intInvoiceId
+		,A.intInvoiceId = NULL
 	FROM #tmpPaymentDetail A
-		INNER JOIN #tmpPayables B
-			ON A.intPaymentId = B.intPaymentId
+	INNER JOIN #tmpPayables B
+		ON A.intPaymentId = B.intPaymentId
 
 	--Insert new payment detail records
 	INSERT INTO tblAPPaymentDetail
@@ -302,11 +308,15 @@ BEGIN
 	WHERE B.intNewPaymentId IS NULL
 
 	--Unposting Process
-	UPDATE tblAPPaymentDetail
-	SET tblAPPaymentDetail.dblAmountDue = CASE WHEN A.ysnPrepay = 1 THEN B.dblAmountDue --DO NOTHING IF PREPAYMENT VOIDING
+	UPDATE B
+	SET B.dblAmountDue = CASE WHEN A.ysnPrepay = 1 THEN B.dblAmountDue --DO NOTHING IF PREPAYMENT VOIDING
 												ELSE 
 											(CASE WHEN B.dblAmountDue = 0 THEN CAST(B.dblDiscount + B.dblPayment - B.dblInterest AS DECIMAL(18,2)) ELSE (B.dblAmountDue + B.dblPayment) END)
 											END
+		,B.intOrigBillId = B.intBillId
+		,B.intBillId = NULL
+		,B.intOrigInvoiceId = B.intInvoiceId
+		,B.intInvoiceId = NULL
 	FROM tblAPPayment A
 		LEFT JOIN tblAPPaymentDetail B
 			ON A.intPaymentId = B.intPaymentId
@@ -327,7 +337,7 @@ BEGIN
 				INNER JOIN tblAPPaymentDetail B 
 						ON A.intPaymentId = B.intPaymentId
 				INNER JOIN tblAPBill C
-						ON B.intBillId = C.intBillId
+						ON B.intOrigBillId = C.intBillId
 				WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables)
 
 	--UPDATE INVOICES
@@ -338,10 +348,10 @@ BEGIN
 	FROM #tmpPayables A
 	INNER JOIN tblAPPaymentDetail B
 		ON A.intPaymentId = B.intPaymentId
-	WHERE B.intInvoiceId > 0
+	WHERE B.intOrigInvoiceId > 0
 	IF EXISTS(SELECT 1 FROM @invoices)
 	BEGIN
-		EXEC [uspARSettleInvoice] @PaymentDetailId = @invoices, @userId = @intUserId, @post = 0
+		EXEC [uspARSettleInvoice] @PaymentDetailId = @invoices, @userId = @intUserId, @post = 0, @void = 1
 	END
 
 	--REMOVE OVERPAYMENT CREATED
@@ -351,6 +361,26 @@ BEGIN
 	AND A.intTransactionType = 8
 
 	ALTER TABLE tblAPPayment ADD CONSTRAINT [UK_dbo.tblAPPayment_strPaymentRecordNum] UNIQUE (strPaymentRecordNum);
+	
+	DECLARE @strDescription AS NVARCHAR(100),@PaymentId AS NVARCHAR(50);
+	DECLARE @paymentCounter INT = 0, @totalRecords INT = 0, @Id NVARCHAR(50);
+
+	SET @totalRecords = (SELECT COUNT(*) FROM #tmpPayables)
+	WHILE(@paymentCounter != (@totalRecords))
+	BEGIN
+		SELECT @Id = CAST((SELECT TOP(1) intPaymentId FROM #tmpPayables) AS NVARCHAR(50))
+		
+		EXEC dbo.uspSMAuditLog 
+		   @screenName = 'AccountsPayable.view.PayVouchersDetail'		-- Screen Namespace
+		  ,@keyValue = @Id								-- Primary Key Value of the Voucher. 
+		  ,@entityId = @intUserId									-- Entity Id.
+		  ,@actionType = 'Voided'                        -- Action Type
+		  ,@changeDescription = @strDescription				-- Description
+		  ,@fromValue = ''									-- Previous Value
+		  ,@toValue = ''
+		SET @paymentCounter = @paymentCounter + 1
+		DELETE FROM #tmpPayables WHERE intPaymentId = @Id
+	END
 
 	IF @transCount = 0 COMMIT TRANSACTION
 

@@ -5,6 +5,7 @@
 	,@intUserId AS INT
 	,@strInOutFlag AS NVARCHAR(2)
 	,@ysnPost AS BIT
+	,@ysnDeliverySheet AS BIT = 0
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -21,31 +22,64 @@ DECLARE @ErrMsg	NVARCHAR(MAX)
 	,@InTransitTableType AS InTransitTableType;
 
 BEGIN
-	INSERT INTO @InTransitTableType (
-		[intItemId]
-		,[intItemLocationId]
-		,[intItemUOMId]
-		,[intLotId]
-		,[intSubLocationId]
-		,[intStorageLocationId]
-		,[dblQty]
-		,[intTransactionId]
-		,[strTransactionId]
-		,[intTransactionTypeId]
-	)
-	SELECT	[intItemId]				= SC.intItemId
-			,[intItemLocationId]	= ICIL.intItemLocationId
-			,[intItemUOMId]			= SC.intItemUOMIdTo
-			,[intLotId]				= NULL
-			,[intSubLocationId]		= SC.intSubLocationId
-			,[intStorageLocationId]	= SC.intStorageLocationId
-			,[dblQty]				= CASE WHEN @ysnPost = 1 THEN SC.dblNetUnits ELSE SC.dblNetUnits * -1 END
-			,[intTransactionId]		= @intTicketId
-			,[strTransactionId]		= SC.strTicketNumber
-			,[intTransactionTypeId] = 1
-	FROM	tblSCTicket SC 
-	INNER JOIN dbo.tblICItemLocation ICIL ON ICIL.intItemId = SC.intItemId AND ICIL.intLocationId = SC.intProcessingLocationId
-	WHERE SC.intTicketId = @intTicketId
+	IF @ysnDeliverySheet = 0
+	BEGIN
+		INSERT INTO @InTransitTableType (
+			[intItemId]
+			,[intItemLocationId]
+			,[intItemUOMId]
+			,[intLotId]
+			,[intSubLocationId]
+			,[intStorageLocationId]
+			,[dblQty]
+			,[intTransactionId]
+			,[strTransactionId]
+			,[intTransactionTypeId]
+		)
+		SELECT	[intItemId]				= SC.intItemId
+				,[intItemLocationId]	= ICIL.intItemLocationId
+				,[intItemUOMId]			= SC.intItemUOMIdTo
+				,[intLotId]				= NULL
+				,[intSubLocationId]		= SC.intSubLocationId
+				,[intStorageLocationId]	= SC.intStorageLocationId
+				,[dblQty]				= CASE WHEN @ysnPost = 1 THEN SC.dblNetUnits ELSE SC.dblNetUnits * -1 END
+				,[intTransactionId]		= @intTicketId
+				,[strTransactionId]		= SC.strTicketNumber
+				,[intTransactionTypeId] = 1
+		FROM	tblSCTicket SC 
+		INNER JOIN dbo.tblICItemLocation ICIL ON ICIL.intItemId = SC.intItemId AND ICIL.intLocationId = SC.intProcessingLocationId
+		WHERE SC.intTicketId = @intTicketId
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @InTransitTableType (
+			[intItemId]
+			,[intItemLocationId]
+			,[intItemUOMId]
+			,[intLotId]
+			,[intSubLocationId]
+			,[intStorageLocationId]
+			,[dblQty]
+			,[intTransactionId]
+			,[strTransactionId]
+			,[intTransactionTypeId]
+		)
+		SELECT	DISTINCT
+				[intItemId]				= SC.intItemId
+				,[intItemLocationId]	= ICIL.intItemLocationId
+				,[intItemUOMId]			= SC.intItemUOMIdTo
+				,[intLotId]				= NULL
+				,[intSubLocationId]		= SC.intSubLocationId
+				,[intStorageLocationId]	= SC.intStorageLocationId
+				,[dblQty]				= CASE WHEN @ysnPost = 1 THEN SC.dblNetUnits ELSE SC.dblNetUnits * -1 END
+				,[intTransactionId]		= @intTicketId
+				,[strTransactionId]		= SC.strTicketNumber
+				,[intTransactionTypeId] = 1
+		FROM	tblSCDeliverySheet SCD 
+		INNER JOIN dbo.tblICItemLocation ICIL ON ICIL.intItemId = SCD.intItemId AND ICIL.intLocationId = SCD.intCompanyLocationId
+		INNER JOIN tblSCTicket SC ON SC.intDeliverySheetId = SCD.intDeliverySheetId
+		WHERE  SC.intDeliverySheetId = @intTicketId
+	END
 END
 
 BEGIN TRY

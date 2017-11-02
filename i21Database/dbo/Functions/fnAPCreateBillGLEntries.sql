@@ -39,7 +39,11 @@ RETURNS @returntable TABLE
 	[strRateType]				NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
 	[strDocument]               NVARCHAR(255)   COLLATE Latin1_General_CI_AS NULL,
 	[strComments]               NVARCHAR(255)   COLLATE Latin1_General_CI_AS NULL,
-	[intConcurrencyId]          INT              DEFAULT 1 NOT NULL
+	[intConcurrencyId]          INT              DEFAULT 1 NOT NULL,
+	[dblSourceUnitCredit]		NUMERIC(18, 9)	NULL,
+	[dblSourceUnitDebit]		NUMERIC(18, 9)	NULL,
+	[intCommodityId]			INT				NULL,
+	[intSourceLocationId]		INT				NULL
 )
 AS
 BEGIN
@@ -131,7 +135,11 @@ BEGIN
 		[strRateType]                   =    Details.strCurrencyExchangeRateType,
 		[strDocument]					=	A.strVendorOrderNumber,
 		[strComments]					=	A.strReference,
-		[intConcurrencyId]				=	1
+		[intConcurrencyId]				=	1,
+		[dblSourceUnitCredit]			=	Details.dblUnits,
+		[dblSourceUnitDebit]			=	0,
+		[intCommodityId]				=	A.intCommodityId,
+		[intSourceLocationId]			=	A.intStoreLocationId
 	FROM	[dbo].tblAPBill A
 			CROSS APPLY dbo.fnAPCalculateVoucherUnits(A.intBillId) units	
 			LEFT JOIN tblAPVendor C
@@ -176,8 +184,8 @@ BEGIN
 				UNION ALL --taxes
 				SELECT CASE WHEN charges.intInventoryReceiptChargeId > 0 
 									THEN (CASE WHEN A.intEntityVendorId = receipts.intEntityVendorId AND charges.ysnPrice = 1 
-												THEN R2.dblTax * -1 ELSE R2.dblTax END) 
-							ELSE R2.dblTax
+												THEN R2.dblAdjustedTax * -1 ELSE R2.dblAdjustedTax END) 
+							ELSE R2.dblAdjustedTax
 						END AS dblTotal ,
 				 R.dblRate  AS dblRate, 
 				 exRates.intCurrencyExchangeRateTypeId,
@@ -191,6 +199,16 @@ BEGIN
 					ON charges.intInventoryReceiptId = receipts.intInventoryReceiptId
                 LEFT JOIN dbo.tblSMCurrencyExchangeRateType exRates ON R.intCurrencyExchangeRateTypeId = exRates.intCurrencyExchangeRateTypeId
                 WHERE R.intBillId = A.intBillId AND R.dblTax != 0 AND CAST(R2.dblTax AS DECIMAL(18,2)) != 0
+				-- UNION ALL --discount
+				-- SELECT
+				-- 	(R.dblTotal * (ISNULL(R.dblDiscount,0) / 100)) AS dblTotal
+				-- 	,R.dblRate
+				-- 	,exRates.intCurrencyExchangeRateTypeId
+				-- 	,exRates.strCurrencyExchangeRateType
+				-- 	,0
+				-- FROM tblAPBillDetail R
+				-- LEFT JOIN dbo.tblSMCurrencyExchangeRateType exRates ON R.intCurrencyExchangeRateTypeId = exRates.intCurrencyExchangeRateTypeId
+				-- WHERE R.dblDiscount <> 0 AND R.intBillId = A.intBillId
             ) Details
 
 			
@@ -237,7 +255,11 @@ BEGIN
 		[strRateType]					=	ForexRate.strCurrencyExchangeRateType,
 		[strDocument]					=	A.strVendorOrderNumber,
 		[strComments]					=	A.strReference,
-		[intConcurrencyId]				=	1
+		[intConcurrencyId]				=	1,
+		[dblSourceUnitCredit]			=	0,
+		[dblSourceUnitDebit]			=	0,
+		[intCommodityId]				=	A.intCommodityId,
+		[intSourceLocationId]			=	A.intStoreLocationId
 	FROM tblAPBill A
 	INNER JOIN tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intBillId
 	INNER JOIN tblAPBill C ON B.intTransactionId = C.intBillId
@@ -333,7 +355,11 @@ BEGIN
 		[strRateType]					=	G.strCurrencyExchangeRateType,
 		[strDocument]					=	A.strVendorOrderNumber,
 		[strComments]					=	A.strReference,
-		[intConcurrencyId]				=	1
+		[intConcurrencyId]				=	1,
+		[dblSourceUnitCredit]			=	0,
+		[dblSourceUnitDebit]			=	ISNULL(units.dblTotalUnits,0),
+		[intCommodityId]				=	A.intCommodityId,
+		[intSourceLocationId]			=	A.intStoreLocationId
 	FROM	[dbo].tblAPBill A 
 			LEFT JOIN [dbo].tblAPBillDetail B
 				ON A.intBillId = B.intBillId
@@ -404,6 +430,63 @@ BEGIN
 
 	WHERE	A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	AND B.intInventoryReceiptChargeId IS NULL --EXCLUDE CHARGES
+	-- UNION ALL
+	-- --DISCOUNT
+	-- SELECT
+	-- 	[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
+	-- 	[strBatchID]					=	@batchId,
+	-- 	[intAccountId]					=	B.intAccountId,
+	-- 	[dblDebit]						=	CAST((B.dblTotal + B.dblTax)* (ISNULL(B.dblDiscount,0) / 100) AS DECIMAL(18,2)) * ISNULL(NULLIF(ForexRate.dblRate,0),1),
+	-- 	[dblCredit]						=	0,
+	-- 	[dblDebitUnit]					=	0,
+	-- 	[dblCreditUnit]					=	0,--ISNULL(A.[dblTotal], 0)  * ISNULL(Units.dblLbsPerUnit, 0),
+	-- 	[strDescription]				=	A.strReference,
+	-- 	[strCode]						=	'AP',
+	-- 	[strReference]					=	D.strVendorId,
+	-- 	[intCurrencyId]					=	A.intCurrencyId,
+	-- 	[dblExchangeRate]				=	ISNULL(NULLIF(ForexRate.dblRate,0),1),
+	-- 	[dtmDateEntered]				=	GETDATE(),
+	-- 	[dtmTransactionDate]			=	A.dtmDate,
+	-- 	[strJournalLineDescription]		=	'Discount',
+	-- 	[intJournalLineNo]				=	B.intBillDetailId,
+	-- 	[ysnIsUnposted]					=	0,
+	-- 	[intUserId]						=	@intUserId,
+	-- 	[intEntityId]					=	@intUserId,
+	-- 	[strTransactionId]				=	A.strBillId, 
+	-- 	[intTransactionId]				=	A.intBillId, 
+	-- 	[strTransactionType]			=	CASE WHEN A.intTransactionType = 2 THEN 'Vendor Prepayment'
+	-- 											WHEN A.intTransactionType = 3 THEN 'Debit Memo'
+	-- 											WHEN A.intTransactionType = 13 THEN 'Basis Advance'
+	-- 											WHEN A.intTransactionType = 1 THEN 'Voucher'
+	-- 										ELSE 'NONE' END,
+	-- 	[strTransactionForm]			=	@SCREEN_NAME,
+	-- 	[strModuleName]					=	@MODULE_NAME,
+	-- 	[dblDebitForeign]				=	0,      
+	-- 	[dblDebitReport]				=	0,
+	-- 	[dblCreditForeign]				=	CAST((B.dblTotal + B.dblTax)* (ISNULL(B.dblDiscount,0) / 100) AS DECIMAL(18,2)),
+	-- 	[dblCreditReport]				=	0,
+	-- 	[dblReportingRate]				=	0,
+	-- 	[dblForeignRate]				=	ISNULL(NULLIF(ForexRate.dblRate,0),1),
+	-- 	[strRateType]					=	ForexRate.strCurrencyExchangeRateType,
+	-- 	[strDocument]					=	A.strVendorOrderNumber,
+	-- 	[strComments]					=	A.strReference,
+	-- 	[intConcurrencyId]				=	1
+	-- [dblSourceUnitCredit]			=	0,
+	-- [dblSourceUnitDebit]			=	0,
+	-- [intCommodityId]				=	A.intCommodityId,
+	-- [intSourceLocationId]			=	A.intStoreLocationId
+	-- FROM tblAPBill A
+	-- INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+	-- LEFT JOIN tblAPVendor D ON A.intEntityVendorId = D.[intEntityId]
+	-- CROSS APPLY
+	-- (
+	-- 	SELECT TOP 1 A.intCurrencyExchangeRateTypeId,B.strCurrencyExchangeRateType,A.dblRate,A.ysnSubCurrency
+	-- 	FROM dbo.tblAPBillDetail A 
+	-- 	LEFT JOIN dbo.tblSMCurrencyExchangeRateType B ON A.intCurrencyExchangeRateTypeId = B.intCurrencyExchangeRateTypeId
+	-- 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+	-- ) ForexRate
+	-- WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+	-- AND B.dblDiscount <> 0
 	--COST ADJUSTMENT
 	UNION ALL 
 	SELECT	
@@ -445,7 +528,11 @@ BEGIN
 		[strRateType]					=	G.strCurrencyExchangeRateType,
 		[strDocument]					=	A.strVendorOrderNumber,
 		[strComments]					=	NULL,
-		[intConcurrencyId]				=	1
+		[intConcurrencyId]				=	1,
+		[dblSourceUnitCredit]			=	0,
+		[dblSourceUnitDebit]			=	0,
+		[intCommodityId]				=	A.intCommodityId,
+		[intSourceLocationId]			=	A.intStoreLocationId
 	FROM	[dbo].tblAPBill A 
 			INNER JOIN [dbo].tblAPBillDetail B
 				ON A.intBillId = B.intBillId
@@ -548,7 +635,11 @@ BEGIN
 		[strRateType]					=	G.strCurrencyExchangeRateType,
 		[strDocument]					=	A.strVendorOrderNumber,
 		[strComments]					=	NULL,
-		[intConcurrencyId]				=	1
+		[intConcurrencyId]				=	1,
+		[dblSourceUnitCredit]			=	0,
+		[dblSourceUnitDebit]			=	ISNULL(units.dblTotalUnits,0),
+		[intCommodityId]				=	A.intCommodityId,
+		[intSourceLocationId]			=	A.intStoreLocationId
 	FROM	[dbo].tblAPBill A 
 			INNER JOIN [dbo].tblAPBillDetail B
 				ON A.intBillId = B.intBillId
@@ -596,9 +687,9 @@ BEGIN
 		--																				   ELSE CAST((Taxes.dblTotalTax - SUM(D.dblTax)) AS DECIMAL(18,2)) END) 
 		--										  ELSE 0 END),--COST ADJUSTMENT,  --AP-2792
 		[dblDebit]						=	ROUND(CASE WHEN charges.intInventoryReceiptChargeId > 0 
-													THEN (D.dblAdjustedTax / B.dblTax) * B.dblTax
+													THEN (D.dblTax / B.dblTax) * B.dblTax
 														* (CASE WHEN A.intEntityVendorId = receipts.intEntityVendorId AND charges.ysnPrice = 1 THEN -1 ELSE 1 END)
-											ELSE (D.dblAdjustedTax / B.dblTax) * B.dblTax END * ISNULL(NULLIF(B.dblRate,0),1) * (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END), 2),
+											ELSE (D.dblTax / B.dblTax) * B.dblTax END * ISNULL(NULLIF(B.dblRate,0),1) * (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END), 2),
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
@@ -620,11 +711,11 @@ BEGIN
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,
 		[dblDebitForeign]				=	ROUND(CASE WHEN charges.intInventoryReceiptChargeId > 0 
-													THEN (CASE WHEN A.intEntityVendorId = receipts.intEntityVendorId AND charges.ysnPrice = 1 THEN D.dblAdjustedTax * -1 
+													THEN (CASE WHEN A.intEntityVendorId = receipts.intEntityVendorId AND charges.ysnPrice = 1 THEN D.dblTax * -1 
 															--WHEN A.intEntityVendorId != receipts.intEntityVendorId --THIRD PARTY
-																ELSE D.dblAdjustedTax
+																ELSE D.dblTax
 													END) 
-											ELSE D.dblAdjustedTax END * (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END), 2),
+											ELSE D.dblTax END * (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END), 2),
 		-- [dblDebitForeign]				=	SUM(D.dblTax) * (CASE WHEN A.intTransactionType = 3 THEN -1 ELSE 1 END),
 		--[dblDebitForeign]				=	(CASE WHEN B.dblOldCost IS NOT NULL 
 		--										 THEN  																				
@@ -642,7 +733,11 @@ BEGIN
 		[strRateType]					=	G.strCurrencyExchangeRateType,
 		[strDocument]					=	A.strVendorOrderNumber,
 		[strComments]					=	NULL,
-		[intConcurrencyId]				=	1
+		[intConcurrencyId]				=	1,
+		[dblSourceUnitCredit]			=	0,
+		[dblSourceUnitDebit]			=	0,
+		[intCommodityId]				=	A.intCommodityId,
+		[intSourceLocationId]			=	A.intStoreLocationId
 	FROM	[dbo].tblAPBill A 
 			INNER JOIN [dbo].tblAPBillDetail B
 				ON A.intBillId = B.intBillId
@@ -671,11 +766,11 @@ BEGIN
 			--) Taxes
 	WHERE	A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	AND A.intTransactionType IN (1,3)
-	AND D.dblAdjustedTax != 0
+	AND D.dblTax != 0
 	AND ROUND(CASE WHEN charges.intInventoryReceiptChargeId > 0 
-													THEN (D.dblAdjustedTax / B.dblTax) * B.dblTax
+													THEN (D.dblTax / B.dblTax) * B.dblTax
 														* (CASE WHEN A.intEntityVendorId = receipts.intEntityVendorId AND charges.ysnPrice = 1 THEN -1 ELSE 1 END)
-											ELSE (D.dblAdjustedTax / B.dblTax) * B.dblTax END * ISNULL(NULLIF(B.dblRate,0),1) * (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END), 2) != 0
+											ELSE (D.dblTax / B.dblTax) * B.dblTax END * ISNULL(NULLIF(B.dblRate,0),1) * (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END), 2) != 0
 	/*AND 1 = (
 		--create tax only from item receipt if it is adjusted / Cost is Adjusted  / third party vendor tax in other charge of receipt (AP-3227) // third party inv shipment vendor tax // PO Tax
 		CASE WHEN B.intInventoryReceiptItemId IS NULL AND D.ysnTaxAdjusted = 0 AND B.dblOldCost IS NULL AND B.intInventoryReceiptChargeId IS NULL AND B.intInventoryShipmentChargeId IS NULL AND B.intPurchaseDetailId IS NULL --Commented for AP-3461 
@@ -711,11 +806,11 @@ BEGIN
 		[intAccountId]					=	D.intAccountId,
 		[dblDebit]						=	CAST(CASE WHEN charges.intInventoryReceiptChargeId > 0 
 													THEN (CASE WHEN A.intEntityVendorId = receipts.intEntityVendorId AND charges.ysnPrice = 1 
-																	THEN (SUM(D.dblTax) - SUM(ISNULL(NULLIF(D.dblAdjustedTax,0), D.dblTax))) * -1
+																	THEN (SUM(ISNULL(NULLIF(D.dblAdjustedTax,0), D.dblTax)) - SUM(D.dblTax)) * -1
 														WHEN A.intEntityVendorId != receipts.intEntityVendorId --THIRD PARTY
-															THEN (SUM(D.dblTax) - SUM(ISNULL(NULLIF(D.dblAdjustedTax,0), D.dblTax)))
+															THEN (SUM(ISNULL(NULLIF(D.dblAdjustedTax,0), D.dblTax)) - SUM(D.dblTax))
 													END) * ISNULL(NULLIF(B.dblRate,0),1) 
-											ELSE (SUM(D.dblTax) - SUM(ISNULL(NULLIF(D.dblAdjustedTax,0), D.dblTax))) * ISNULL(NULLIF(B.dblRate,0),1) END
+											ELSE (SUM(ISNULL(NULLIF(D.dblAdjustedTax,0), D.dblTax)) - SUM(D.dblTax)) * ISNULL(NULLIF(B.dblRate,0),1) END
 											* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END) AS DECIMAL(18,2)),
 		--[dblDebit]						=	(SUM(ISNULL(NULLIF(D.dblAdjustedTax,0), D.dblTax)) - SUM(D.dblTax)) * ISNULL(NULLIF(B.dblRate,0),1),
 		[dblCredit]						=	0,
@@ -738,7 +833,7 @@ BEGIN
 		[strTransactionType]			=	'Bill',
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,
-		[dblDebitForeign]				=	(SUM(D.dblTax) - SUM(ISNULL(NULLIF(D.dblAdjustedTax,0), D.dblTax))),
+		[dblDebitForeign]				=	(SUM(ISNULL(NULLIF(D.dblAdjustedTax,0), D.dblTax)) - SUM(D.dblTax)),
 		--[dblDebitForeign]				=	(CASE WHEN B.dblOldCost IS NOT NULL 
 		--										 THEN  																				
 		--										    CASE WHEN B.dblOldCost = 0 THEN 0 
@@ -755,7 +850,11 @@ BEGIN
 		[strRateType]					=	G.strCurrencyExchangeRateType,
 		[strDocument]					=	A.strVendorOrderNumber,
 		[strComments]					=	NULL,
-		[intConcurrencyId]				=	1
+		[intConcurrencyId]				=	1,
+		[dblSourceUnitCredit]			=	0,
+		[dblSourceUnitDebit]			=	0,
+		[intCommodityId]				=	A.intCommodityId,
+		[intSourceLocationId]			=	A.intStoreLocationId
 	FROM	[dbo].tblAPBill A 
 			INNER JOIN [dbo].tblAPBillDetail B
 				ON A.intBillId = B.intBillId
@@ -801,7 +900,8 @@ BEGIN
 	,loc.intItemLocationId
 	,B.intInventoryReceiptItemId
 	,B.intInventoryReceiptChargeId
-
+	,A.intCommodityId
+	,A.intStoreLocationId
 	UPDATE A
 		SET A.strDescription = B.strDescription
 	FROM @returntable A

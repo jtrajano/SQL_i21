@@ -436,6 +436,13 @@ BEGIN TRY
 				RAISERROR('Receipt Link can only be blank for Blended, Service, Other Charge, and Non-Inventory items', 16, 1)
 			END
 		END
+		ELSE IF (@BlendedItem = 1)
+		BEGIN
+			IF EXISTS(SELECT TOP 1 1 FROM tblTRLoadBlendIngredient WHERE intLoadDistributionDetailId = @intLoadDistributionDetailId AND ISNULL(strReceiptLink, '') = '')
+			BEGIN
+				RAISERROR('Receipt Link is required for Auto Blend raw materials', 16, 1)
+			END
+		END
 		
 		SELECT @intStockUOMId = intIssueUOMId
 			, @strItem = strItemNo

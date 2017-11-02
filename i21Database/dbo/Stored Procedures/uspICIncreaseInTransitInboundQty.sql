@@ -164,4 +164,42 @@ WHEN NOT MATCHED THEN
 	)
 ;
 
+-- Create the Item Stock Detail 
+BEGIN 
+	DECLARE		
+		@stockType_OnOrder AS INT = 1
+		,@stockType_OnStorage AS INT = 2
+		,@stockType_OrderCommitted AS INT = 3
+		,@stockType_InTransitInbound AS INT = 4
+		,@stockType_InTransitOutbound AS INT = 5
+		,@stockType_InTransitDirect AS INT = 6
+		,@stockType_ConsignedPurchase AS INT = 7
+		,@stockType_ConsignedSale AS INT = 8
+		,@stockType_Reserved AS INT = 9
+
+	INSERT INTO tblICItemStockDetail (
+			intItemStockTypeId 
+			,intItemId   
+			,intItemLocationId 
+			,intItemUOMId 
+			,intSubLocationId 
+			,intStorageLocationId 
+			,strTransactionId
+			,dblQty
+			,intConcurrencyId
+	)
+	SELECT 
+			intItemStockTypeId	= @stockType_InTransitInbound
+			,intItemId			= intItemId
+			,intItemLocationId  = intItemLocationId
+			,intItemUOMId		= intItemUOMId
+			,intSubLocationId	= intSubLocationId
+			,intStorageLocationId = intStorageLocationId 
+			,strTransactionId	= strTransactionId
+			,dblQty				= dblQty
+			,intConcurrencyId	= 1
+	FROM	@ItemsToIncreaseInTransitInBound cp 
+	WHERE	ISNULL(dblQty, 0) <> 0 
+END 
+
 _Exit:

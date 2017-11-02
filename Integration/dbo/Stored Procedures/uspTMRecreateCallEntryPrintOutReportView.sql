@@ -129,9 +129,9 @@ BEGIN
 					,strProductID = ISNULL (M.vwitm_no, G.vwitm_no)
 					,strProductDescription = ISNULL(M.vwitm_desc, G.vwitm_desc)
 					,strRouteId =P.strRouteId
-					,strLocation = (CASE WHEN ISNUMERIC (C.strLocation) = 1 
-										THEN C.strLocation 
-										ELSE SUBSTRING (C.strLocation, PATINDEX (''%[^0]%'', C.strLocation), 50) 
+					,strLocation = (CASE WHEN ISNUMERIC (L.vwloc_loc_no) = 1 
+										THEN L.vwloc_loc_no
+										ELSE SUBSTRING (L.vwloc_loc_no, PATINDEX (''%[^0]%'', L.vwloc_loc_no), 50) 
 									END)
 					,F.dtmCallInDate
 					,strEnteredBy = N.strUserName 
@@ -266,9 +266,9 @@ BEGIN
 					,strProductID = ISNULL (M.strItemNo, G.strItemNo)
 					,strProductDescription = ISNULL(M.strDescription, G.strDescription)
 					,strRouteId =P.strRouteId
-					,strLocation = (CASE WHEN ISNUMERIC (C.strLocation) = 1 
-										THEN C.strLocation 
-										ELSE SUBSTRING (C.strLocation, PATINDEX (''%[^0]%'', C.strLocation), 50) 
+					,strLocation = (CASE WHEN ISNUMERIC (L.strLocationName) = 1 
+										THEN L.strLocationName
+										ELSE SUBSTRING (L.strLocationName, PATINDEX (''%[^0]%'', L.strLocationName), 50) 
 									END)
 					,F.dtmCallInDate
 					,strEnteredBy = N.strUserName 

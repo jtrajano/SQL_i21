@@ -124,6 +124,7 @@ BEGIN
 			,@intId AS INT 
 			,@intInventoryShipmentId AS INT 
 			,@intInventoryShipmentItemId AS INT 
+			,@intCompanyLocationId AS INT 
 
 	WHILE EXISTS (SELECT TOP 1 1 FROM @StorageItems)
 	BEGIN 
@@ -140,6 +141,7 @@ BEGIN
 				,@intStorageTypeId = intStorageScheduleTypeId
 				,@intInventoryShipmentId = intShipmentId
 				,@intEntityCustomerId = intEntityCustomerId
+				,@intCompanyLocationId = intLocationId
 		FROM	@StorageItems storageItem 
 
 		-- Call the Grain sp. 
@@ -166,6 +168,7 @@ BEGIN
 				, @dblUnits
 				, @intInventoryShipmentId
 				, @intEntityUserSecurityId
+				, @intCompanyLocationId
 
 			-- Populate the link ids for the shipment and shipment detail id. 
 			UPDATE	@StorageTicketInfoByFIFO

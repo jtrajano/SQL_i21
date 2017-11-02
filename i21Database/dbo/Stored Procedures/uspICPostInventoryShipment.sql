@@ -88,7 +88,6 @@ BEGIN
 			,@strChargeItem AS NVARCHAR(50)
 			,@strBillNumber AS NVARCHAR(50)
 
-
 	-- Validate if the Inventory Shipment exists   
 	IF @intTransactionId IS NULL  
 	BEGIN   
@@ -307,6 +306,23 @@ BEGIN
 			RETURN -1; 
 		END 
 	END 
+
+	-- Do not allow unpost shipment has destination qty. 
+	IF @ysnPost = 0 AND @ysnRecap = 0 
+	BEGIN 
+		IF EXISTS (
+			SELECT	TOP 1 1 
+			FROM	tblICInventoryShipment s
+			WHERE	s.strShipmentNumber = @strTransactionId
+					AND dtmDestinationDate IS NOT NULL 
+					AND ysnDestinationPosted = 1
+		)
+		BEGIN 
+			-- 'Unable to unpost {Shipment Number} because you need to unpost the Destination Qty first.'
+			EXEC uspICRaiseError 80195, @strTransactionId;
+			GOTO Post_Exit    
+		END 
+	END
 END
 
 -- Get the next batch number

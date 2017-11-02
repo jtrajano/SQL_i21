@@ -11,6 +11,8 @@
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
     [dblWithheld] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
     [intInvoiceId] INT NULL , 
+	[intOrigBillId] INT NULL , 
+	[intOrigInvoiceId] INT NULL,
     CONSTRAINT [PK_dbo.tblAPPaymentDetail] PRIMARY KEY CLUSTERED ([intPaymentDetailId] ASC),
     CONSTRAINT [FK_dbo.tblAPPaymentDetail_dbo.tblAPPayments_intPaymentId] FOREIGN KEY ([intPaymentId]) REFERENCES [dbo].[tblAPPayment] ([intPaymentId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblAPPaymentDetail_tblAPBill] FOREIGN KEY ([intBillId]) REFERENCES [tblAPBill]([intBillId]),
@@ -28,7 +30,14 @@ CREATE NONCLUSTERED INDEX [IX_tblAPPaymentDetail_intPaymentId_intBillId] ON [dbo
 	[intPaymentId] ASC
 )
 WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+GO
 
+
+CREATE NONCLUSTERED INDEX [IX_tblAPPaymentDetail_intBillId] ON [dbo].[tblAPPaymentDetail] 
+(
+	[intBillId] ASC
+)
+WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
 GO
 
 CREATE TRIGGER trg_tblAPPaymentDetail
@@ -48,7 +57,9 @@ INSERT INTO tblAPPaymentDetailDeleted
 	[dblTotal] 				,
 	[intConcurrencyId] 		,
 	[dblWithheld] 			,
-	[intInvoiceId]
+	[intInvoiceId]			,
+	[intOrigBillId]			,
+	[intOrigInvoiceId]
 )
 SELECT 
 	[intPaymentDetailId]	,
@@ -62,7 +73,9 @@ SELECT
 	[dblTotal] 				,
 	[intConcurrencyId] 		,
 	[dblWithheld] 			,
-	[intInvoiceId]
+	[intInvoiceId]			,
+	[intOrigBillId]			,
+	[intOrigInvoiceId]
 FROM DELETED
 END
 GO

@@ -60,7 +60,9 @@
     [intOverFilledTransactionId] INT             NULL,
     [dblInventoryCost]           NUMERIC (18, 6) NULL,
     [dblMargin]                  NUMERIC (18, 6) NULL,
-    [dblAdjustmentRate] NUMERIC(18, 6) NULL, 
+    [dblAdjustmentRate]          NUMERIC (18, 6) NULL,
+    [dblGrossTransferCost]       NUMERIC (18, 6) NULL,
+    [dblNetTransferCost]         NUMERIC (18, 6) NULL,
     CONSTRAINT [PK_tblCFTransaction] PRIMARY KEY CLUSTERED ([intTransactionId] ASC),
     CONSTRAINT [FK_tblCFTransaction_tblARSalesperson] FOREIGN KEY ([intSalesPersonId]) REFERENCES [dbo].[tblARSalesperson] ([intEntityId]),
     CONSTRAINT [FK_tblCFTransaction_tblCFCard] FOREIGN KEY ([intCardId]) REFERENCES [dbo].[tblCFCard] ([intCardId]),
@@ -71,6 +73,8 @@
     CONSTRAINT [FK_tblCFTransaction_tblCTContractHeader] FOREIGN KEY ([intContractId]) REFERENCES [dbo].[tblCTContractHeader] ([intContractHeaderId]),
     CONSTRAINT [FK_tblCFTransaction_tblICItem] FOREIGN KEY ([intARItemId]) REFERENCES [dbo].[tblICItem] ([intItemId])
 );
+
+
 
 
 

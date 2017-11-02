@@ -108,6 +108,7 @@
 :r .\11_IC\CleanInvalidWeightVolumeGrossUOM.sql
 :r .\11_IC\CleanUPCCodes.sql
 :r .\11_IC\DeleteObsoleteSP.sql
+:r .\11_IC\DeleteObsoleteColumns.sql
 
 -- EM
 :r .\12_EM\01_EntitySchemaUpdate.sql

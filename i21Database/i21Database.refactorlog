@@ -6685,4 +6685,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intAccountId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="00f2703e-75de-4c6a-ab74-6460efe6d8ab" ChangeDateTime="10/30/2017 06:01:48">
+    <Property Name="ElementName" Value="[dbo].[tblSCTicketFormat].[ysnSuppressDiscountReading]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSCTicketFormat]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intDiscountReadingOption" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="e5eaa7f7-6acf-4658-b8bb-c7eac2a45d8a" ChangeDateTime="10/30/2017 06:12:20">
+    <Property Name="ElementName" Value="[dbo].[tblSCTicketFormat].[strSuppressDiscountOption]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSCTicketFormat]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intSuppressDiscountOptionId" />
+  </Operation>
 </Operations>

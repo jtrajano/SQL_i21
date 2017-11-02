@@ -16,3 +16,8 @@ IF EXISTS(SELECT * FROM sys.columns WHERE name = 'strTerminalNumber' AND object_
 			DROP COLUMN strTerminalNumber
 		')
 	END
+
+IF EXISTS(SELECT * FROM sys.columns WHERE name = 'intTaxGroupId' AND object_id = OBJECT_ID('tblTRSupplyPoint'))
+	BEGIN
+		exec('alter table tblTRSupplyPoint alter column intTaxGroupId int null');
+	END

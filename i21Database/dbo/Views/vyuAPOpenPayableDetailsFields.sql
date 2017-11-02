@@ -28,6 +28,7 @@ FROM (
 		,NULL AS strContractNumber
 		,NULL AS strLoadNumber
 		,EC.strClass
+		,E.strCommodityCode
 	FROM (
 		SELECT intBillId
 			,SUM(tmpAPPayables.dblTotal) AS dblTotal
@@ -73,6 +74,7 @@ FROM (
 	LEFT JOIN dbo.tblGLAccount D ON A.intAccountId = D.intAccountId
 	LEFT JOIN dbo.tblSMTerm T ON A.intTermsId = T.intTermID
 	LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C.intEntityClassId
+	LEFT JOIN vyuAPVoucherCommodity E ON E.intBillId = tmpAgingSummaryTotal.intBillId
 	WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 	) MainQuery
 
@@ -104,6 +106,7 @@ FROM (
 			,CH.strContractNumber
 			,LG.strLoadNumber
 			,NULL AS strClass
+			,E.strCommodityCode
 		FROM (
 			SELECT intBillId
 				,(SUM(tmpAPPayables.dblTotal) + SUM(tmpAPPayables.dblInterest) - SUM(tmpAPPayables.dblAmountPaid) - SUM(tmpAPPayables.dblDiscount)) AS dblAmountDue
@@ -126,6 +129,7 @@ FROM (
 		LEFT JOIN dbo.tblSCTicket SC ON IRE.intSourceId = SC.intTicketId
 		LEFT JOIN dbo.tblCTContractHeader CH ON CH.intContractHeaderId = IRE.intOrderId
 		LEFT JOIN dbo.tblLGLoad LG ON LG.intLoadId = APD.intLoadId
+		LEFT JOIN vyuAPVoucherCommodity E ON E.intBillId = tmpAgingSummaryTotal.intBillId
 		WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 		) MainQuery    
 

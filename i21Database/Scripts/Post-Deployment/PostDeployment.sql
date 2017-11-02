@@ -267,25 +267,14 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\18_FOBPointTypes.sql
 :r .\IC\19_M2MComputations.sql
 :r .\IC\20_UpdateContractItemStatuses.sql
-:r .\IC\21_Update_LotWeightsRequired_tblICItem.sql
-:r .\IC\22_Update_tblICTransferDetail_Description.sql
+:r .\IC\21_AdjustmentInventoryTerms.sql
+:r .\IC\22_StockTypes.sql
 :r .\IC\PopulateLotContainerNoAndCondition.sql
 :r .\IC\1740_DataFix_FixIntTransactionDetailId.sql
 
 -- Patronage
 :r .\PAT\DefaultData\1_AddDefaultLetters.sql 
-:r .\PAT\DefaultData\2_DefaultCompanyPreference.sql 
-
---Help Desk
-:R .\HD\DefaultData\1_StatusData.sql
-:R .\HD\DefaultData\2_Screen.sql
-:R .\HD\HDEntryDataFix.sql
-:R .\HD\CustomField.sql
-:R .\HD\RemoveHDObsoleteScreen.sql
-:R .\HD\RenameHDScreen.sql
-
---CRM
-:R .\CRM\SplitCRMData.sql
+:r .\PAT\DefaultData\2_DefaultCompanyPreference.sql
 
 --Contract Management
 :R .\CT\1_MasterTables.sql
@@ -421,8 +410,21 @@ print 'BEGIN POST DEPLOYMENT'
 
 --CCR
 :r .\CCR\SiteDataFix.sql
+:r .\CCR\RemoveCCRObsoleteScreen.sql
 
 --TR
 :r .\TR\RemoveObsoleteScreen.sql
+
+--Help Desk
+:R .\HD\DefaultData\1_StatusData.sql
+:R .\HD\DefaultData\2_Screen.sql
+:R .\HD\HDEntryDataFix.sql
+:R .\HD\CustomField.sql
+:R .\HD\RemoveHDObsoleteScreen.sql
+:R .\HD\RenameHDScreen.sql
+
+--CRM
+:R .\CRM\SplitCRMData.sql
+:R .\CRM\RenameCRMScreen.sql
 
 print 'END POST DEPLOYMENT'

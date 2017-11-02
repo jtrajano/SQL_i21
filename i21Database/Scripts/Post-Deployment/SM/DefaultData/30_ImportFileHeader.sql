@@ -137,18 +137,22 @@ BEGIN
 	END
 	ELSE
 	BEGIN
+
+		SELECT TOP 1 @importFileRecordMarkerId = intImportFileRecordMarkerId
+		FROM tblSMImportFileRecordMarker
+		WHERE intImportFileHeaderId = @FileHeaderId
+			AND strRecordMarker = 'Supply Point'
+
 		UPDATE tblSMImportFileRecordMarker
 		SET strFormat = NULL
 			, intPosition = 1
-		WHERE intImportFileHeaderId = @FileHeaderId
-			AND strRecordMarker = 'Supply Point'
+		WHERE intImportFileRecordMarkerId = @importFileRecordMarkerId
 
 		UPDATE tblSMImportFileColumnDetail
 		SET intPosition = 1
 			, intLevel = 1
 		WHERE intImportFileHeaderId = @FileHeaderId
-			AND strTable = 'tblTRRackPriceHeader'
-			AND strColumnName = 'intSupplyPointId'
+			AND intImportFileRecordMarkerId = @importFileRecordMarkerId
 	END
 	
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMImportFileRecordMarker WHERE strRecordMarker = 'Supplier Name' AND intImportFileHeaderId = @FileHeaderId)
@@ -165,18 +169,22 @@ BEGIN
 	END
 	ELSE
 	BEGIN
+
+		SELECT TOP 1 @importFileRecordMarkerId = intImportFileRecordMarkerId
+		FROM tblSMImportFileRecordMarker
+		WHERE intImportFileHeaderId = @FileHeaderId
+			AND strRecordMarker = 'Supplier Name'
+
 		UPDATE tblSMImportFileRecordMarker
 		SET strFormat = NULL
 			, intPosition = 0
-		WHERE intImportFileHeaderId = @FileHeaderId
-			AND strRecordMarker = 'Supplier Name'
+		WHERE intImportFileRecordMarkerId = @importFileRecordMarkerId
 
 		UPDATE tblSMImportFileColumnDetail
 		SET intPosition = 2
 			, intLevel = 2
 		WHERE intImportFileHeaderId = @FileHeaderId
-			AND strTable = 'tblTRImportRackPriceDetail'
-			AND strColumnName = 'strSupplierName'
+			AND intImportFileRecordMarkerId = @importFileRecordMarkerId
 	END
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMImportFileRecordMarker WHERE strRecordMarker = 'Effective Date' AND intImportFileHeaderId = @FileHeaderId)
@@ -255,18 +263,22 @@ BEGIN
 	END
 	ELSE
 	BEGIN
+		SELECT TOP 1 @importFileRecordMarkerId = intImportFileRecordMarkerId
+		FROM tblSMImportFileRecordMarker
+		WHERE intImportFileHeaderId = @FileHeaderId
+			AND strRecordMarker = 'Item Id'
+
 		UPDATE tblSMImportFileRecordMarker
 		SET strFormat = NULL
 			, intPosition = 5
-		WHERE intImportFileHeaderId = @FileHeaderId
-			AND strRecordMarker = 'Item Id'
+		WHERE intImportFileRecordMarkerId = @importFileRecordMarkerId
 
 		UPDATE tblSMImportFileColumnDetail
 		SET intPosition = 5
 			, intLevel = 5
 		WHERE intImportFileHeaderId = @FileHeaderId
-			AND strTable = 'tblTRRackPriceDetail'
-			AND strColumnName = 'intItemId'
+			AND intImportFileRecordMarkerId = @importFileRecordMarkerId
+
 	END
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMImportFileRecordMarker WHERE strRecordMarker = 'Vendor Price' AND intImportFileHeaderId = @FileHeaderId)
@@ -283,17 +295,21 @@ BEGIN
 	END
 	ELSE
 	BEGIN
+
+		SELECT TOP 1 @importFileRecordMarkerId = intImportFileRecordMarkerId
+		FROM tblSMImportFileRecordMarker
+		WHERE intImportFileHeaderId = @FileHeaderId
+			AND strRecordMarker = 'Vendor Price'
+
 		UPDATE tblSMImportFileRecordMarker
 		SET strFormat = 'Explicit Decimals'
 			, intPosition = 9
-		WHERE intImportFileHeaderId = @FileHeaderId
-			AND strRecordMarker = 'Vendor Price'
+		WHERE intImportFileRecordMarkerId = @importFileRecordMarkerId
 
 		UPDATE tblSMImportFileColumnDetail
 		SET intPosition = 6
 			, intLevel = 6
 		WHERE intImportFileHeaderId = @FileHeaderId
-			AND strTable = 'tblTRRackPriceDetail'
-			AND strColumnName = 'dblVendorRack'
+			AND intImportFileRecordMarkerId = @importFileRecordMarkerId
 	END
 END

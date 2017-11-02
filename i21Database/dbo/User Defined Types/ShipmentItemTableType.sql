@@ -7,7 +7,7 @@ CREATE TYPE [dbo].[ShipmentItemTableType] AS TABLE
 	
 	-- Header
     ,[intShipmentId] INT NOT NULL										-- The integer id of the source transaction. Required.
-	,[strShipmentId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL -- The string id of the source transaction. Required.
+	,[strShipmentId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL -- The string id of the source transaction. Required.
 	,[intOrderType] INT NOT NULL							-- The sales order type. Required.
 	,[intSourceType] INT NOT NULL DEFAULT ((0))				-- The source type id. Required.
 	,[dtmDate] DATETIME NOT NULL							-- The date of the transaction. Required. 

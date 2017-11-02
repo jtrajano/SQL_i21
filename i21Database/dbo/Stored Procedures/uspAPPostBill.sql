@@ -269,9 +269,11 @@ SELECT
 													CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END
 													--[Voucher Cost]
 													,CASE WHEN A.intCurrencyId <> @intFunctionalCurrencyId THEN 														
-															dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, receiptCostUOM.intItemUOMId, B.dblCost) * ISNULL(B.dblRate, 0) 
+															dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, receiptCostUOM.intItemUOMId, 
+																(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100)))) * ISNULL(B.dblRate, 0) 
 														ELSE 
-															dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, receiptCostUOM.intItemUOMId, B.dblCost)
+															dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, receiptCostUOM.intItemUOMId, 
+																(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100))))
 													END 													
 												)
 												- dbo.fnMultiply(
@@ -362,7 +364,11 @@ WHERE	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 		-- Compare the ForexRate use in Voucher against IR Rate
 		-- If there is a difference, add it to @adjustedEntries table variable. 
 		AND (
-			dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, receiptCostUOM.intItemUOMId, B.dblCost) <> E2.dblUnitCost
+			dbo.fnCalculateCostBetweenUOM(
+				voucherCostUOM.intItemUOMId
+				,receiptCostUOM.intItemUOMId
+				,B.dblCost - (B.dblCost * (B.dblDiscount / 100))
+				) <> E2.dblUnitCost
 			OR E2.dblForexRate <> B.dblRate
 		) 
 
@@ -393,7 +399,7 @@ INNER JOIN (tblICInventoryReceipt r
 		ON rc.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId
 WHERE	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 		AND B.intInventoryReceiptChargeId IS NOT NULL 
-		AND (rc.dblUnitCost <> B.dblCost OR rc.dblForexRate <> B.dblRate)
+		AND (rc.dblAmountPriced <> B.dblCost OR ISNULL(NULLIF(rc.dblForexRate,0),1) <> B.dblRate)
 
 IF ISNULL(@post,0) = 1
 BEGIN	
@@ -431,7 +437,11 @@ BEGIN
 	    dblForeignRate ,
 	    strRateType ,
 		strDocument,
-		strComments
+		strComments,
+		dblSourceUnitCredit,
+		dblSourceUnitDebit,
+		intCommodityId,
+		intSourceLocationId	
 	)
 	SELECT     
 		dtmDate ,
@@ -466,7 +476,11 @@ BEGIN
 	    dblForeignRate ,
 	    strRateType ,
 		strDocument,
-		strComments	 
+		strComments,
+		dblSourceUnitCredit,
+		dblSourceUnitDebit,
+		intCommodityId,
+		intSourceLocationId	
 	FROM dbo.fnAPCreateBillGLEntries(@validBillIds, @userId, @batchId)
 	ORDER BY intTransactionId
 
@@ -642,6 +656,10 @@ BEGIN
 		,dblCreditReport			
 		,dblReportingRate			
 		,dblForeignRate		
+		,dblSourceUnitCredit
+		,dblSourceUnitDebit
+		,intCommodityId
+		,intSourceLocationId	
 	)
 	SELECT 
 		dtmDate						
@@ -674,7 +692,11 @@ BEGIN
 		,dblCreditForeign			
 		,dblCreditReport			
 		,dblReportingRate			
-		,dblForeignRate	
+		,dblForeignRate
+		,dblSourceUnitCredit
+		,dblSourceUnitDebit
+		,intCommodityId
+		,intSourceLocationId	
 	FROM dbo.fnAPReverseGLEntries(@Ids, 'Bill', DEFAULT, @userId, @batchId)
 END
 --=====================================================================================================================================

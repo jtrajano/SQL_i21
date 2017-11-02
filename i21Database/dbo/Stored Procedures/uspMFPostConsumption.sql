@@ -212,8 +212,8 @@ BEGIN
 									THEN NULL
 								WHEN Receipt.strOrigin = 'Location' AND HeaderDistItem.strDestination = 'Customer' AND Receipt.intCompanyLocationId != HeaderDistItem.intCompanyLocationId
 									THEN LoadHeader.strTransaction
-								WHEN Receipt.strOrigin = 'Location' AND HeaderDistItem.strDestination = 'Location'
-									THEN NULL
+								WHEN Receipt.strOrigin = 'Location' AND HeaderDistItem.strDestination = 'Location' AND Receipt.intCompanyLocationId != HeaderDistItem.intCompanyLocationId
+									THEN LoadHeader.strTransaction
 								END)
 	INTO #tmpBlendIngredients
 	FROM tblTRLoadDistributionDetail DistItem

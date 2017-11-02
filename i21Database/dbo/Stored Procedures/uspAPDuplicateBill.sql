@@ -43,8 +43,9 @@ END
 
 EXEC uspSMGetStartingNumber @tranRecordId, @generatedBillRecordId OUT
 UPDATE A
-	SET A.strBillId = @generatedBillRecordId,
-	A.intEntityId = @userId
+	SET A.strBillId = @generatedBillRecordId
+	,A.intTransactionType = @tranType
+	,A.intEntityId = @userId
 FROM #tmpDuplicateBill A
 
 IF @reset = 1

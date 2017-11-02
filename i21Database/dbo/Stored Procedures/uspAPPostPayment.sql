@@ -566,7 +566,7 @@ BEGIN
 	WHERE B.intInvoiceId > 0
 	IF EXISTS(SELECT 1 FROM @invoices)
 	BEGIN
-		EXEC [uspARSettleInvoice] @PaymentDetailId = @invoices, @userId = @userId, @post = @post
+		EXEC [uspARSettleInvoice] @PaymentDetailId = @invoices, @userId = @userId, @post = @post, @void = 0
 	END
 
 	DECLARE @strDescription AS NVARCHAR(100),@actionType AS NVARCHAR(50),@PaymentId AS NVARCHAR(50);

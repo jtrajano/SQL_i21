@@ -413,7 +413,8 @@ BEGIN TRY
 			SELECT @strDistributionOption = GR.strStorageTypeCode FROM tblGRStorageType GR WHERE intStorageScheduleTypeId = @intGRStorageId
 		END
 
-		SELECT intItemId = SCD.intItemId
+		SELECT
+		intItemId = SCD.intItemId
 		,intLocationId = ItemLocation.intItemLocationId 
 		,intItemUOMId = ItemUOM.intItemUOMId
 		,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
@@ -448,7 +449,7 @@ BEGIN TRY
 		OUTER APPLY(
 			SELECT * FROM dbo.vyuCTContractDetailView WHERE intContractDetailId = @intDPContractId
 		) CNT
-		WHERE SCD.intDeliverySheetId = @intDeliverySheetId
+		WHERE SCD.intDeliverySheetId = @intDeliverySheetId AND ItemUOM.ysnStockUnit = 1
 	
 	CONTINUEISH:
 

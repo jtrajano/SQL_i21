@@ -1189,6 +1189,7 @@
     <Build Include="dbo\Tables\tblSMCurrencyExchangeRate.sql" />
     <Build Include="dbo\Tables\tblSMCurrencyExchangeRateDetail.sql" />
     <Build Include="dbo\Index\IX_tblGLIjemst_0_1_2_3_4_5_19.sql" />
+    <Build Include="dbo\Index\IX_tblGLAccountReallocation_strName.sql" />
     <Build Include="dbo\Stored Procedures\uspGLExportAccountToCSV.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDoRoll.sql" />
     <Build Include="dbo\Tables\tblRKTradersbyBrokersAccountMapping.sql" />
@@ -1534,6 +1535,7 @@
     <Build Include="dbo\Functions\fnAPCreatePaymentBankTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspSOUpdateOrderShipmentStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateLotNumberOnInventoryAdjustmentSplitLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateLotNumberOnInventoryAdjustmentQtyChange.sql" />
     <Build Include="dbo\Stored Procedures\uspSCStorageUpdate.sql" />
     <Build Include="dbo\Stored Procedures\uspMFStartCycleCount.sql" />
     <Build Include="dbo\Stored Procedures\uspPRPostPaycheck.sql" />
@@ -5565,6 +5567,7 @@
     <Build Include="dbo\Views\vyuHDCurrencyRate.sql" />
     <Build Include="dbo\Views\vyuHDCurrencyRateType.sql" />
     <Build Include="dbo\Views\vyuCFSearchAccountVehicle.sql" />
+    <Build Include="dbo\Views\vyuICInventoryReceiptTotals.sql" />
     <Build Include="dbo\Stored Procedures\uspSTReportPurgePromotionsPreview.sql" />
     <Build Include="dbo\Stored Procedures\uspMFAutoBlendBatchEntry.sql" />
     <Build Include="dbo\Tables\tblCFPostForeignTransResult.sql" />
@@ -5800,6 +5803,56 @@
     <Build Include="dbo\Views\vyuNRNotesReceivableSearch.sql" />
     <Build Include="dbo\Views\vyuARInventoryUnitMeasureDetailReport.sql" />
     <Build Include="dbo\Views\vyuARInventoryUnitMeasureReport.sql" />
+    <Build Include="dbo\Views\vyuLGLoadContainerPurchaseContractsLookup.sql" />
+    <Build Include="dbo\Views\vyuCTContractAddOrdersLookup.sql" />
+    <Build Include="dbo\Views\vyuLGLoadDetailViewLookup.sql" />
+    <Build Include="dbo\Tables\tblBBCustomerLocationXref.sql" />
+    <Build Include="dbo\Tables\tblICAdjustInventoryTerms.sql" />
+    <None Include="Scripts\Post-Deployment\IC\21_AdjustmentInventoryTerms.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostDestinationInventoryShipment.sql" />
+    <Build Include="dbo\User Defined Types\DestinationShipmentItem.sql" />
+    <Build Include="dbo\User Defined Types\DestinationShipmentCharge.sql" />
+    <Build Include="dbo\Views\vyuRKCompanyPreference.sql" />
+    <Build Include="dbo\Views\vyuRKCurrencyContract.sql" />
+    <Build Include="dbo\Views\vyuICItemLicense.sql" />
+    <Build Include="dbo\Tables\tblICItemLicense.sql" />
+    <Build Include="dbo\Tables\tblVRRebate.sql" />
+    <Build Include="dbo\Views\vyuVROpenRebate.sql" />
+    <Build Include="dbo\Views\vyuVRRebate.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMValidateRemoteServerRole.sql" />
+    <Build Include="dbo\Views\vyuARCustomerPaymentHistoryReport.sql" />
+    <Build Include="dbo\Tables\tblVRSubmitted.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostQtyChangeFromInvShipmentDestination.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMUpdateEntityCredentialGridLayout.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRemovePaymentAndCreatePrepay.sql" />
+    <Build Include="dbo\Stored Procedures\uspICIncreaseInTransitDirectQty.sql" />
+    <Build Include="dbo\Tables\tblICItemStockDetail.sql" />
+    <Build Include="dbo\Tables\tblICItemStockType.sql" />
+    <None Include="Scripts\Post-Deployment\IC\22_StockTypes.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherLatestPayment.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherCommodity.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherApprovalStatus.sql" />
+    <Build Include="dbo\Tables\tblSMCacheVersion.sql" />
+    <Build Include="dbo\Views\vyuSTDepartmentTotalsPreload.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGetTransporterInvoiceTax.sql" />
+    <Build Include="dbo\Views\vyuAPVendorInquiry.sql" />
+    <Build Include="dbo\Views\vyuAPSearchVendorInquiry.sql" />
+    <Build Include="dbo\Views\vyuCRMHoursWorked.sql" />
+    <Build Include="dbo\Views\vyuMFGetBlendTransactions.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInsertSiteRecord.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInsertItemRecord.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMDropSubsidiary.sql" />
+    <Build Include="dbo\Functions\fnTFCoalesceProductCode.sql" />
+    <Build Include="dbo\Functions\fnTFCoalesceDestinationOriginState.sql" />
+    <Build Include="dbo\Functions\fnTFCoalesceDestinationState.sql" />
+    <Build Include="dbo\Functions\fnTFCoalesceVendor.sql" />
+    <Build Include="dbo\Functions\fnTFCoalesceAccountStatusCode.sql" />
+    <Build Include="dbo\Functions\fnTFCoalesceCustomer.sql" />
+    <Build Include="dbo\Tables\tblCFSpecialTaxingRuleHeader.sql" />
+    <Build Include="dbo\Tables\tblCFSpecialTaxingRuleSite.sql" />
+    <Build Include="dbo\Tables\tblCFSpecialTaxingRuleTax.sql" />
+        
+        
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -5949,6 +6002,8 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\32_UpdateCommissionScheduleEntity.sql" />
     <Build Include="dbo\Views\vyuAP1099Summary.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099Summary.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMUpdateEntityCredentialCompanyGridLayout.sql" />
+    <None Include="Scripts\Post-Deployment\CCR\RemoveCCRObsoleteScreen.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

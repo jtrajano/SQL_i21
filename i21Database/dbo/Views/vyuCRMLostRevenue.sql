@@ -66,14 +66,14 @@
 						case
 							when tblSOSalesOrderDetail.dblQtyShipped < 1
 							then 0
-							else round((tblSOSalesOrderDetail.dblQtyShipped * tblSOSalesOrderDetail.dblPrice) * (1 - (tblSOSalesOrderDetail.dblDiscount/100)), 0)
+							else round((tblSOSalesOrderDetail.dblQtyShipped * tblSOSalesOrderDetail.dblPrice) * (1 - (tblSOSalesOrderDetail.dblDiscount/100)), 2)
 						end
 					 )
 			,dblSalesOrderTotalUnShip = sum(
 						   case
 							   when ((case when tblSOSalesOrderDetail.dblQtyOrdered < 1 then 0 else tblSOSalesOrderDetail.dblQtyOrdered end) - tblSOSalesOrderDetail.dblQtyShipped) < 1
 							   then 0
-							   else round((((case when tblSOSalesOrderDetail.dblQtyOrdered < 1 then 0 else tblSOSalesOrderDetail.dblQtyOrdered end) - tblSOSalesOrderDetail.dblQtyShipped) * tblSOSalesOrderDetail.dblPrice) * (1 - (tblSOSalesOrderDetail.dblDiscount/100)), 0)
+							   else round((((case when tblSOSalesOrderDetail.dblQtyOrdered < 1 then 0 else tblSOSalesOrderDetail.dblQtyOrdered end) - tblSOSalesOrderDetail.dblQtyShipped) * tblSOSalesOrderDetail.dblPrice) * (1 - (tblSOSalesOrderDetail.dblDiscount/100)), 2)
 						   end
 					   )
 			,dblSalesOrderTotalUnits = sum(case when tblSOSalesOrderDetail.dblQtyOrdered < 1 then 0 else tblSOSalesOrderDetail.dblQtyOrdered end)

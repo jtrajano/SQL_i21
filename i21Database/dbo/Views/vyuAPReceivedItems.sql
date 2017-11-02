@@ -30,6 +30,7 @@ FROM
 		,[intInventoryReceiptItemAllocatedChargeId]	= NULL
 		,[intContractChargeId]		=	NULL
 		,[dblUnitCost]				=	tblReceived.dblUnitCost
+		,[dblDiscount]				=	B.dblDiscount
 		,[dblTax]					=	tblReceived.dblTax
 		,[dblRate]					=	tblReceived.dblRate
 		,[strRateType]				=	tblReceived.strCurrencyExchangeRateType
@@ -228,6 +229,7 @@ FROM
 	,[intInventoryReceiptChargeId]	= NULL
 	,[intContractChargeId]		=	NULL  
 	,[dblUnitCost]				=	B.dblCost
+	,[dblDiscount]				=	B.dblDiscount
 	,[dblTax]					=	ISNULL(B.dblTax,0)
 	,[dblRate]					=	ISNULL(NULLIF(B.dblForexRate,0),1)
 	,[strRateType]				=	RT.strCurrencyExchangeRateType
@@ -333,6 +335,7 @@ FROM
 												 THEN (CASE WHEN CD.dblCashPrice IS NOT NULL THEN CD.dblCashPrice ELSE B.dblUnitCost END)
 												 ELSE B.dblUnitCost
 											END  	
+	,[dblDiscount]				=	0
 	,[dblTax]					=	ISNULL(B.dblTax,0)
 	,[dblRate]					=	ISNULL(NULLIF(B.dblForexRate,0),1)
 	,[strRateType]				=	RT.strCurrencyExchangeRateType
@@ -474,6 +477,7 @@ FROM
 		,[intInventoryReceiptChargeId]				=	A.intInventoryReceiptChargeId
 		,[intContractChargeId]						=	NULL
 		,[dblUnitCost]								=	A.dblUnitCost
+		,[dblDiscount]								=	0
 		,[dblTax]									=	ISNULL((CASE WHEN ISNULL(A.intEntityVendorId, IR.intEntityVendorId) != IR.intEntityVendorId
 																		THEN (CASE WHEN IRCT.ysnCheckoffTax = 0 THEN ABS(A.dblTax) 
 																				ELSE A.dblTax END) --THIRD PARTY TAX SHOULD RETAIN NEGATIVE IF CHECK OFF
@@ -595,6 +599,7 @@ FROM
 																		CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END
 																ELSE	ISNULL(NULLIF(CC.dblRate,0),1) 
 														END,0)
+		,[dblDiscount]								=	0
 		,[dblTax]									=	0
 		,[dblRate]									=	CASE WHEN CY.ysnSubCurrency > 0  THEN  ISNULL(RateDetail.dblRate,1) ELSE ISNULL(G1.dblRate,1) END
 		,[strRateType]								=	NULL
@@ -699,6 +704,7 @@ FROM
 																		CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END
 																ELSE	ISNULL(CC.dblRate,1) 
 														END,0)
+		,[dblDiscount]								=	0
 		,[dblTax]									=	0
 		,[dblRate]									=	CASE WHEN CY.ysnSubCurrency > 0  THEN  ISNULL(RateDetail.dblRate,1) ELSE ISNULL(G1.dblRate,1) END
 		,[strRateType]								=	NULL
@@ -798,11 +804,12 @@ FROM
 		,[intInventoryReceiptChargeId]				=	NULL
 		,[intContractChargeId]						=	NULL
 		,[dblUnitCost]								=	ISNULL(A.dblCashPrice,0)
+		,[dblDiscount]								=	0
 		,[dblTax]									=	0
 		,[dblRate]									=	1
 		,[strRateType]								=	NULL
 		,[intCurrencyExchangeRateTypeId]			=	NULL
-		,[ysnSubCurrency]							=	A.ysnSubCurrency
+		,[ysnSubCurrency]							=	CASE WHEN ISNULL(A.intSubCurrencyCents,0) > 0 THEN 1 ELSE 0 END --A.ysnSubCurrency
 		,[intSubCurrencyCents]						=	ISNULL(A.intSubCurrencyCents,0)
 		,[intAccountId]								=	[dbo].[fnGetItemGLAccount](A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
 		,[strAccountId]								=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
@@ -855,7 +862,7 @@ FROM
 	LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = A.intItemId and ItemLoc.intLocationId = A.intCompanyLocationId
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = A.intItemUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
-	LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = A.intWeightUOMId
+	LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = A.intWeightItemUOMId
 	LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId
 	LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = A.intCostUOMId
 	LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
@@ -891,6 +898,7 @@ FROM
 		,[intInventoryReceiptChargeId]				=	NULL
 		,[intContractChargeId]						=	NULL
 		,[dblUnitCost]								=	A.dblUnitCost
+		,[dblDiscount]								=	0
 		,[dblTax]									=	ISNULL(Taxes.dblTax,0)
 		,[dblRate]									=	ISNULL(NULLIF(A.dblForexRate,0),1)
 		,[strRateType]								=	RT.strCurrencyExchangeRateType

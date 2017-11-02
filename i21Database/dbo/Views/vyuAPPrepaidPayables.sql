@@ -15,7 +15,8 @@ SELECT
 	, A.dblAmountDue AS dblAmountDue 
 	, dblWithheld = 0
 	, dblDiscount = 0 
-	, dblInterest = 0 
+	, dblInterest = 0
+	, dblPrepaidAmount = 0  
 	, C1.strVendorId 
 	, isnull(C1.strVendorId,'') + ' - ' + isnull(C2.strName,'') as strVendorIdName 
 	, A.dtmDueDate
@@ -44,6 +45,7 @@ SELECT
 	, dblWithheld = B.dblWithheld
 	, B.dblDiscount AS dblDiscount
 	, B.dblInterest AS dblInterest 
+	, dblPrepaidAmount = 0  
 	, D.strVendorId 
 	, isnull(D.strVendorId,'') + ' - ' + isnull(D2.strName,'') as strVendorIdName 
 	, C.dtmDueDate 
@@ -54,7 +56,7 @@ SELECT
 	, 1
 FROM dbo.tblAPPayment  A
  LEFT JOIN dbo.tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
- LEFT JOIN dbo.tblAPBill C ON B.intBillId = C.intBillId
+ LEFT JOIN dbo.tblAPBill C ON ISNULL(B.intBillId,B.intOrigBillId) = C.intBillId
  LEFT JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId)
  	ON A.[intEntityVendorId] = D.[intEntityId]
 LEFT JOIN dbo.tblCMBankTransaction E
@@ -78,7 +80,8 @@ SELECT
 	, A.dblAmountDue * -1 AS dblAmountDue 
 	, dblWithheld = 0
 	, dblDiscount = 0 
-	, dblInterest = 0 
+	, dblInterest = 0
+	, dblPrepaidAmount = 0   
 	, C1.strVendorId 
 	, isnull(C1.strVendorId,'') + ' - ' + isnull(C2.strName,'') as strVendorIdName 
 	, A.dtmDueDate
@@ -106,7 +109,8 @@ SELECT
 	, dblAmountDue = 0 
 	, dblWithheld = B.dblWithheld
 	, B.dblDiscount * -1 AS dblDiscount
-	, B.dblInterest * -1 AS dblInterest 
+	, B.dblInterest * -1 AS dblInterest
+	, dblPrepaidAmount = 0   
 	, D.strVendorId 
 	, isnull(D.strVendorId,'') + ' - ' + isnull(D2.strName,'') as strVendorIdName 
 	, C.dtmDueDate 
@@ -141,6 +145,7 @@ SELECT
 	,0 AS dblWithheld
 	,0 AS dblDiscount
 	,0 AS dblInterest
+	, dblPrepaidAmount = 0  
 	,ISNULL(D.strVendorId,'') + ' - ' + ISNULL(D2.strName,'') as strVendorIdName 
 	,D.strVendorId
 	,A.dtmDueDate

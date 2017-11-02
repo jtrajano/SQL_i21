@@ -60,20 +60,19 @@ BEGIN
 			,[intOwnershipType]			= 1
 			,[intDetailId]				= Detail.intInventoryCountDetailId
 			,[strTransactionId]			= Header.strCountNo
-			,[intWeightUOMId]           = Detail.intWeightUOMId
-			,[dblWeightQty]             = Detail.dblWeightQty
-			,[dblGrossWeight]           = Detail.dblWeightQty
-			,[dblWeightPerQty]          = Detail.dblWeightQty / Detail.dblPhysicalCount
+			,[intWeightUOMId]           = CASE WHEN Detail.intWeightUOMId IS NOT NULL AND Detail.dblPhysicalCount <> 0 THEN Detail.intWeightUOMId ELSE NULL END
+			,[dblWeightQty]             = CASE WHEN Detail.intWeightUOMId IS NOT NULL AND Detail.dblPhysicalCount <> 0 THEN Detail.dblWeightQty ELSE NULL END
+			,[dblGrossWeight]           = CASE WHEN Detail.intWeightUOMId IS NOT NULL AND Detail.dblPhysicalCount <> 0 THEN Detail.dblWeightQty ELSE NULL END
+			,[dblWeightPerQty]          = CASE WHEN Detail.intWeightUOMId IS NOT NULL AND Detail.dblPhysicalCount <> 0 THEN Detail.dblWeightQty / Detail.dblPhysicalCount ELSE 0 END
 			,[dtmExpiryDate]			= dbo.fnICCalculateExpiryDate(Detail.intItemId, Header.dtmCountDate, Header.dtmCountDate)
 			,[strParentLotNumber]		= Detail.strParentLotNo
 			,[strParentLotAlias]		= Detail.strParentLotAlias
-
 	FROM tblICInventoryCount Header
 		INNER JOIN tblICInventoryCountDetail Detail ON Detail.intInventoryCountId = Header.intInventoryCountId
 		LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = Detail.intItemId
 			AND ItemLocation.intLocationId = Header.intLocationId
 	WHERE Header.intInventoryCountId = @intTransactionId
-		--AND Detail.intLotId IS NULL
+		AND Detail.intLotId IS NULL
 END 
 
 -- Call the common stored procedure that will create or update the lot master table

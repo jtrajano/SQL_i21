@@ -24,13 +24,15 @@ SELECT
 	B1.strName,
 	C.strAccountId,
 	Payment.strPaymentInfo,
-	dbo.fnAPMaskBankAccountNos(dbo.fnAESDecryptASym(Payment.strBankAccountNo)) AS strBankAccountNo,
+	Payment.strBankAccountNo,
 	Payment.ysnCleared,
 	Payment.dtmDateReconciled,
-	F.strUserName AS strUserId,
 	Payment.ysnPrinted,
 	Payment.ysnVoid,
 	Payment.intPaymentId,
+	ISNULL(Payment.dblWithheld,0) AS dblWithheld,
+	ISNULL(Payment.dblDiscount,0) AS dblDiscount,
+	F.strUserName AS strUserId,
 	--strApprovalStatus = CASE WHEN (A.ysnForApproval = 1 OR A.dtmApprovalDate IS NOT NULL) AND A.ysnForApprovalSubmitted = 1
 	--						THEN (
 	--							CASE WHEN A.dtmApprovalDate IS NOT NULL AND A.ysnApproved = 1 THEN 'Approved'
@@ -48,8 +50,6 @@ SELECT
 	Approvals.dtmApprovalDate,
 	GL.strBatchId,
 	EL.strLocationName AS strVendorLocation,
-	ISNULL(Payment.dblWithheld,0) AS dblWithheld,
-	ISNULL(Payment.dblDiscount,0) AS dblDiscount,
 	strPayeeName = (SELECT EL2.strCheckPayeeName FROM dbo.tblEMEntityLocation EL2 WHERE EL2.intEntityLocationId = A.intPayToAddressId),
 	A.strComment,
 	ST.strTerm,
@@ -75,53 +75,43 @@ FROM
 		ON CL.intCompanyLocationId = A.intShipToId
 	INNER JOIN dbo.tblSMTerm ST
 		ON ST.intTermID = A.intTermsId
-	CROSS APPLY (
-		SELECT TOP 1
-			COUNT(commodity.intCommodityId) intCount, 
-			commodity.intCommodityId,
-			commodity.strCommodityCode
-		FROM dbo.tblAPBillDetail detail
-		LEFT JOIN dbo.tblICItem item ON detail.intItemId = item.intItemId
-		LEFT JOIN dbo.tblICCommodity commodity ON item.intCommodityId = commodity.intCommodityId
-		WHERE detail.intBillId = A.intBillId
-		GROUP BY commodity.intCommodityId, commodity.strCommodityCode
-		ORDER BY COUNT(commodity.intCommodityId) DESC
-	) commodity
+	CROSS APPLY [dbo].[fnAPGetVoucherCommodity](A.intBillId) commodity
 	LEFT JOIN dbo.tblSMShipVia SV
 		ON SV.intEntityId = A.intShipViaId
 	LEFT JOIN dbo.tblEMEntity EN
 		ON EN.intEntityId = A.intContactId	
-	OUTER APPLY
-	(
-		SELECT TOP 1
-			D.intBillId
-			,D.intPaymentId
-			,D.strPaymentInfo
-			,D.strBankAccountNo
-			,D.ysnPrinted
-			,D.ysnVoid
-			,D.ysnCleared
-			,D.dtmDateReconciled
-			,D.dblWithheld
-			,D.dblDiscount
-		FROM dbo.vyuAPBillPayment D
-		WHERE A.intBillId = D.intBillId
-		ORDER BY D.intPaymentId DESC --get only the latest payment
-	) Payment
+	OUTER APPLY dbo.fnAPGetVoucherLatestPayment(A.intBillId) Payment
+	-- LEFT JOIN
+	-- (
+	-- 	SELECT TOP 1
+	-- 		D.intBillId
+	-- 		,D.intPaymentId
+	-- 		,D.strPaymentInfo
+	-- 		,dbo.fnAPMaskBankAccountNos(dbo.fnAESDecryptASym(D.strBankAccountNo)) AS strBankAccountNo
+	-- 		,D.ysnPrinted
+	-- 		,D.ysnVoid
+	-- 		,D.ysnCleared
+	-- 		,D.dtmDateReconciled
+	-- 		,D.dblWithheld
+	-- 		,D.dblDiscount
+	-- 	FROM dbo.vyuAPBillPayment D
+	-- 	-- WHERE A.intBillId = D.intBillId
+	-- 	ORDER BY D.intPaymentId DESC --get only the latest payment
+	-- ) Payment ON Payment.intBillId = A.intBillId
 	LEFT JOIN dbo.[tblEMEntityCredential] F ON A.intEntityId = F.intEntityId
 	--LEFT JOIN dbo.tblSMApprovalList G ON G.intApprovalListId = ISNULL(B.intApprovalListId , (SELECT intApprovalListId FROM dbo.tblAPCompanyPreference))
-	OUTER APPLY (
-		SELECT TOP 1
-			I.strApprovalStatus
-			,K.strName
-			,CASE WHEN I.strApprovalStatus = 'Approved' THEN J.dtmDate ELSE NULL END AS dtmApprovalDate
-		FROM dbo.tblSMScreen H
-		INNER JOIN dbo.tblSMTransaction I ON H.intScreenId = I.intScreenId
-		INNER JOIN dbo.tblSMApproval J ON I.intTransactionId = J.intTransactionId
-		LEFT JOIN dbo.tblEMEntity K ON J.intApproverId = K.intEntityId
-		WHERE H.strScreenName = 'Voucher' AND H.strModule = 'Accounts Payable' AND J.ysnCurrent = 1
-		AND A.intBillId = I.intRecordId
-	) Approvals
+	-- OUTER APPLY (
+	-- 	SELECT TOP 1
+	-- 		I.strApprovalStatus
+	-- 		,K.strName
+	-- 		,CASE WHEN I.strApprovalStatus = 'Approved' THEN J.dtmDate ELSE NULL END AS dtmApprovalDate
+	-- 	FROM dbo.tblSMScreen H
+	-- 	INNER JOIN dbo.tblSMTransaction I ON H.intScreenId = I.intScreenId
+	-- 	INNER JOIN dbo.tblSMApproval J ON I.intTransactionId = J.intTransactionId
+	-- 	LEFT JOIN dbo.tblEMEntity K ON J.intApproverId = K.intEntityId
+	-- 	WHERE H.strScreenName = 'Voucher' AND H.strModule = 'Accounts Payable' AND J.ysnCurrent = 1
+	-- 	AND A.intBillId = I.intRecordId
+	OUTER APPLY [dbo].[fnAPGetVoucherApprovalStatus](A.intBillId) Approvals
 	OUTER APPLY 
 	(
 		SELECT TOP 1 strBatchId FROM dbo.tblGLDetail H WHERE A.intBillId = H.intTransactionId AND A.strBillId = H.strTransactionId AND H.ysnIsUnposted = 0

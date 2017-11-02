@@ -46,7 +46,7 @@ BEGIN
 			AND ((TR.strOrigin = 'Location' AND DH.strDestination = 'Location') 
 			or (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Location' and TR.intCompanyLocationId != DH.intCompanyLocationId)
 			or (TR.strOrigin = 'Location' AND DH.strDestination = 'Customer' and TR.intCompanyLocationId != DH.intCompanyLocationId)
-			or (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Customer' and TR.intCompanyLocationId != DH.intCompanyLocationId AND (TR.dblUnitCost != 0 or TR.dblFreightRate != 0 or TR.dblPurSurcharge != 0)))
+			or (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Customer' and TR.intCompanyLocationId != DH.intCompanyLocationId))
 			AND ISNULL(intInventoryTransferId, '') <> ''
 	
 	SELECT @total = COUNT(*) FROM #tmpAddInventoryTransferResult;
@@ -148,7 +148,7 @@ END
 			AND ((TR.strOrigin = 'Location' AND DH.strDestination = 'Location') 
 			OR (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Location' AND TR.intCompanyLocationId != DH.intCompanyLocationId)
 			OR (TR.strOrigin = 'Location' AND DH.strDestination = 'Customer' AND TR.intCompanyLocationId != DH.intCompanyLocationId)
-			OR (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Customer' AND TR.intCompanyLocationId != DH.intCompanyLocationId AND (TR.dblUnitCost != 0 OR TR.dblFreightRate != 0 OR TR.dblPurSurcharge != 0)))
+			OR (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Customer' AND TR.intCompanyLocationId != DH.intCompanyLocationId))
 			AND TR.intItemId = DD.intItemId /* If distribution item is different from the received item, then this is an auto-blend scenario where received items are blended together to be distributed as a new item (ex. E10 is 10% ethanol and 90% gasoline). */
 	GROUP BY TR.intLoadReceiptId, TR.intCompanyLocationId, DH.intCompanyLocationId
 
@@ -181,8 +181,8 @@ END
 												THEN NULL
 											WHEN MIN(TR.strOrigin) = 'Location' AND MIN(DH.strDestination) = 'Customer' AND MIN(TR.intCompanyLocationId) != MIN(DH.intCompanyLocationId)
 												THEN MIN(TL.strTransaction)
-											WHEN MIN(TR.strOrigin) = 'Location' AND MIN(DH.strDestination) = 'Location'
-												THEN NULL
+											WHEN MIN(TR.strOrigin) = 'Location' AND MIN(DH.strDestination) = 'Location' AND MIN(TR.intCompanyLocationId) != MIN(DH.intCompanyLocationId)
+												THEN MIN(TL.strTransaction)
 											END)
 		,[intItemId]                = MIN(TR.intItemId)
 		,[intLotId]                 = NULL
@@ -210,8 +210,7 @@ END
     WHERE	TL.intLoadHeaderId = @intLoadHeaderId
 		AND ISNULL(DD.strReceiptLink, '') = ''
 	    AND IC.strType != 'Non-Inventory'
-		AND TR.intCompanyLocationId != DH.intCompanyLocationId 
-		AND (TR.dblUnitCost != 0 OR TR.dblFreightRate != 0 OR TR.dblPurSurcharge != 0)
+		AND TR.intCompanyLocationId != DH.intCompanyLocationId
 	GROUP BY TR.intLoadReceiptId, TR.intCompanyLocationId, DH.intCompanyLocationId
 
 

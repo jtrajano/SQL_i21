@@ -262,6 +262,7 @@ BEGIN
 	 @rate DECIMAL(18,6),
 	 @payToAddress INT,
 	 @currency INT,
+	 @location INT,
 	 @paymentId INT OUTPUT',
 	 @location = @location,
 	 @userId = @userId,
