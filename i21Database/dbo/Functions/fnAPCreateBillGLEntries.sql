@@ -39,7 +39,11 @@ RETURNS @returntable TABLE
 	[strRateType]				NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
 	[strDocument]               NVARCHAR(255)   COLLATE Latin1_General_CI_AS NULL,
 	[strComments]               NVARCHAR(255)   COLLATE Latin1_General_CI_AS NULL,
-	[intConcurrencyId]          INT              DEFAULT 1 NOT NULL
+	[intConcurrencyId]          INT              DEFAULT 1 NOT NULL,
+	[dblSourceUnitCredit]		NUMERIC(18, 9)	NULL,
+	[dblSourceUnitDebit]		NUMERIC(18, 9)	NULL,
+	[intCommodityId]			INT				NULL,
+	[intSourceLocationId]		INT				NULL
 )
 AS
 BEGIN
@@ -131,7 +135,11 @@ BEGIN
 		[strRateType]                   =    Details.strCurrencyExchangeRateType,
 		[strDocument]					=	A.strVendorOrderNumber,
 		[strComments]					=	A.strReference,
-		[intConcurrencyId]				=	1
+		[intConcurrencyId]				=	1,
+		[dblSourceUnitCredit]			=	Details.dblUnits,
+		[dblSourceUnitDebit]			=	0,
+		[intCommodityId]				=	A.intCommodityId,
+		[intSourceLocationId]			=	A.intStoreLocationId
 	FROM	[dbo].tblAPBill A
 			CROSS APPLY dbo.fnAPCalculateVoucherUnits(A.intBillId) units	
 			LEFT JOIN tblAPVendor C
@@ -247,7 +255,11 @@ BEGIN
 		[strRateType]					=	ForexRate.strCurrencyExchangeRateType,
 		[strDocument]					=	A.strVendorOrderNumber,
 		[strComments]					=	A.strReference,
-		[intConcurrencyId]				=	1
+		[intConcurrencyId]				=	1,
+		[dblSourceUnitCredit]			=	0,
+		[dblSourceUnitDebit]			=	0,
+		[intCommodityId]				=	A.intCommodityId,
+		[intSourceLocationId]			=	A.intStoreLocationId
 	FROM tblAPBill A
 	INNER JOIN tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intBillId
 	INNER JOIN tblAPBill C ON B.intTransactionId = C.intBillId
@@ -343,7 +355,11 @@ BEGIN
 		[strRateType]					=	G.strCurrencyExchangeRateType,
 		[strDocument]					=	A.strVendorOrderNumber,
 		[strComments]					=	A.strReference,
-		[intConcurrencyId]				=	1
+		[intConcurrencyId]				=	1,
+		[dblSourceUnitCredit]			=	0,
+		[dblSourceUnitDebit]			=	ISNULL(units.dblTotalUnits,0),
+		[intCommodityId]				=	A.intCommodityId,
+		[intSourceLocationId]			=	A.intStoreLocationId
 	FROM	[dbo].tblAPBill A 
 			LEFT JOIN [dbo].tblAPBillDetail B
 				ON A.intBillId = B.intBillId
@@ -455,6 +471,10 @@ BEGIN
 	-- 	[strDocument]					=	A.strVendorOrderNumber,
 	-- 	[strComments]					=	A.strReference,
 	-- 	[intConcurrencyId]				=	1
+	-- [dblSourceUnitCredit]			=	0,
+	-- [dblSourceUnitDebit]			=	0,
+	-- [intCommodityId]				=	A.intCommodityId,
+	-- [intSourceLocationId]			=	A.intStoreLocationId
 	-- FROM tblAPBill A
 	-- INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 	-- LEFT JOIN tblAPVendor D ON A.intEntityVendorId = D.[intEntityId]
@@ -508,7 +528,11 @@ BEGIN
 		[strRateType]					=	G.strCurrencyExchangeRateType,
 		[strDocument]					=	A.strVendorOrderNumber,
 		[strComments]					=	NULL,
-		[intConcurrencyId]				=	1
+		[intConcurrencyId]				=	1,
+		[dblSourceUnitCredit]			=	0,
+		[dblSourceUnitDebit]			=	0,
+		[intCommodityId]				=	A.intCommodityId,
+		[intSourceLocationId]			=	A.intStoreLocationId
 	FROM	[dbo].tblAPBill A 
 			INNER JOIN [dbo].tblAPBillDetail B
 				ON A.intBillId = B.intBillId
@@ -611,7 +635,11 @@ BEGIN
 		[strRateType]					=	G.strCurrencyExchangeRateType,
 		[strDocument]					=	A.strVendorOrderNumber,
 		[strComments]					=	NULL,
-		[intConcurrencyId]				=	1
+		[intConcurrencyId]				=	1,
+		[dblSourceUnitCredit]			=	0,
+		[dblSourceUnitDebit]			=	ISNULL(units.dblTotalUnits,0),
+		[intCommodityId]				=	A.intCommodityId,
+		[intSourceLocationId]			=	A.intStoreLocationId
 	FROM	[dbo].tblAPBill A 
 			INNER JOIN [dbo].tblAPBillDetail B
 				ON A.intBillId = B.intBillId
@@ -705,7 +733,11 @@ BEGIN
 		[strRateType]					=	G.strCurrencyExchangeRateType,
 		[strDocument]					=	A.strVendorOrderNumber,
 		[strComments]					=	NULL,
-		[intConcurrencyId]				=	1
+		[intConcurrencyId]				=	1,
+		[dblSourceUnitCredit]			=	0,
+		[dblSourceUnitDebit]			=	0,
+		[intCommodityId]				=	A.intCommodityId,
+		[intSourceLocationId]			=	A.intStoreLocationId
 	FROM	[dbo].tblAPBill A 
 			INNER JOIN [dbo].tblAPBillDetail B
 				ON A.intBillId = B.intBillId
@@ -818,7 +850,11 @@ BEGIN
 		[strRateType]					=	G.strCurrencyExchangeRateType,
 		[strDocument]					=	A.strVendorOrderNumber,
 		[strComments]					=	NULL,
-		[intConcurrencyId]				=	1
+		[intConcurrencyId]				=	1,
+		[dblSourceUnitCredit]			=	0,
+		[dblSourceUnitDebit]			=	0,
+		[intCommodityId]				=	A.intCommodityId,
+		[intSourceLocationId]			=	A.intStoreLocationId
 	FROM	[dbo].tblAPBill A 
 			INNER JOIN [dbo].tblAPBillDetail B
 				ON A.intBillId = B.intBillId
@@ -864,7 +900,8 @@ BEGIN
 	,loc.intItemLocationId
 	,B.intInventoryReceiptItemId
 	,B.intInventoryReceiptChargeId
-
+	,A.intCommodityId
+	,A.intStoreLocationId
 	UPDATE A
 		SET A.strDescription = B.strDescription
 	FROM @returntable A
