@@ -561,7 +561,7 @@ BEGIN
 				,strControllerType		= 'CFN'
 				,strTaxState			= @CFNState
 				,strSiteType			= (CASE @strTransactionType 
-											WHEN 'Foreign Sales' 
+											WHEN 'Foreign Sale' 
 												THEN 'Local/Network'
 											ELSE @strTransactionType
 											END)
