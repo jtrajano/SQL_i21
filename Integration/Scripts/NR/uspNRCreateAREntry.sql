@@ -33,7 +33,7 @@ BEGIN
 			, @strBatchNo = strBatchNumber
 			, @strLocation = strLocation
 			, @strPayType = strPayType
-			, @strUserID = intLastModifiedUserId 
+			, @strUserID = intEntityId 
 			, @dblAmount = dblTransAmount
 			FROM dbo.tblNRNoteTransaction Where intNoteTransId = @intNoteTransId
 			SELECT @blnSwitchOrigini21 = ysnOriginCompatible FROM dbo.tblNRCompanyPreference 
