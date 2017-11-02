@@ -137,7 +137,9 @@ EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateFrom = @dtmDateFrom
 										, @strCustomerName	= @strCustomerName
 EXEC dbo.uspARGLAccountReport @dtmDateTo
 
-DELETE FROM tblARCustomerAgingStagingTable WHERE dblTotalAR = 0
+DELETE FROM tblARCustomerAgingStagingTable WHERE dbo.fnRoundBanker(dblTotalAR, 2) = 0.00 
+											 AND dbo.fnRoundBanker(dblCredits, 2) = 0.00 
+											 AND dbo.fnRoundBanker(dblPrepayments, 2) = 0.00
 
 IF @strAgedBalances = 'Current'
 	BEGIN DELETE FROM tblARCustomerAgingStagingTable WHERE ISNULL(dbl0Days, 0) = 0
