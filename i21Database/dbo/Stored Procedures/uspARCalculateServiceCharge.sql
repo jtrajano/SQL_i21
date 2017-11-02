@@ -182,6 +182,10 @@ AS
 						 								ELSE 
 						 									SC.dblPercentage
 						 							END, dbo.fnARGetDefaultDecimal())
+									, DATEDIFF(DAYOFYEAR, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 AND ISNULL(I.ysnCalculated, 0) = 0
+														THEN I.dtmDueDate 
+														ELSE I.dtmCalculated 
+												END, ISNULL(ISNULL(PAYMENT.dtmDatePaid, PAYMENT2.dtmDatePaid), @asOfDate))
 							FROM tblARInvoice I
 								INNER JOIN tblARCustomer C ON I.intEntityCustomerId = C.[intEntityId]
 								INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId
@@ -248,6 +252,7 @@ AS
 																		ELSE
 																			SC.dblPercentage
 						 											END, dbo.fnARGetDefaultDecimal())
+										, 0
 									FROM tblARCustomerAgingStagingTable AGING
 										INNER JOIN tblARCustomer C ON AGING.intEntityCustomerId = C.[intEntityId]
 										INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId										
@@ -291,6 +296,7 @@ AS
 								 						ELSE 
 								 							dblPercentage
 								 					END, dbo.fnARGetDefaultDecimal())
+								, DATEDIFF(DAY, dbo.fnGetDueDateBasedOnTerm(CASE WHEN ISNULL(CB.ysnForgiven, 0) = 0 THEN CB.dtmBudgetDate ELSE CB.dtmCalculated END, C.intTermsId), @asOfDate)
 							FROM tblARCustomerBudget CB
 								INNER JOIN tblARCustomer C ON CB.intEntityCustomerId = C.[intEntityId]	
 								INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId
@@ -311,7 +317,8 @@ AS
 								 , strInvoiceNumber
 								 , strBudgetDesciption
 								 , dblAmountDue
-								 , dblTotalAmount 
+								 , dblTotalAmount
+								 , intServiceChargeDays 
 							FROM @tempTblTypeServiceCharge 
 							WHERE ISNULL(dblAmountDue, @zeroDecimal) <> @zeroDecimal 
 							  AND ISNULL(dblTotalAmount, @zeroDecimal) <> @zeroDecimal							  
@@ -338,8 +345,9 @@ AS
 												 ELSE AVG(dblTotalAmount)
 											END
 								   END
+								 , intServiceChargeDays
 							FROM @tempTblTypeServiceCharge 
-								GROUP BY intEntityCustomerId 
+								GROUP BY intEntityCustomerId, intServiceChargeDays 
 								HAVING AVG(dblAmountDue) > @zeroDecimal 
 								   AND AVG(dblTotalAmount) > @zeroDecimal
 						END

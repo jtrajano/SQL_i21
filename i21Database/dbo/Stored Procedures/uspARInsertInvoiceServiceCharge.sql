@@ -34,7 +34,8 @@ AS
 		,[strInvoiceNumber]		NVARCHAR(25)
 		,[strBudgetDescription] NVARCHAR(100)
 		,[dblAmountDue]			NUMERIC(18,6)
-		,[dblTotalAmount]		NUMERIC(18,6))
+		,[dblTotalAmount]		NUMERIC(18,6)
+		,[intServiceChargeDays]	INT NULL)
 
 	DECLARE @tempServiceChargeTableByCB TABLE (
 		 [intServiceChargeId]	INT
@@ -44,7 +45,8 @@ AS
 		,[strInvoiceNumber]		NVARCHAR(25)
 		,[strBudgetDescription] NVARCHAR(100)
 		,[dblAmountDue]			NUMERIC(18,6)
-		,[dblTotalAmount]		NUMERIC(18,6))
+		,[dblTotalAmount]		NUMERIC(18,6)
+		,[intServiceChargeDays]	INT NULL)
 
 	INSERT INTO @tempServiceChargeTable
 	SELECT * FROM @tblTypeServiceCharge 
@@ -247,15 +249,19 @@ AS
 
 				INSERT INTO [tblARServiceChargeRecapDetail]
 					([intSCRecapId]
+					,[intInvoiceId]
 					,[strInvoiceNumber]
 					,[strBudgetDescription]
 					,[dblAmount]
+					,[intServiceChargeDays]
 					,[intConcurrencyId])
 				SELECT 	
 					 @newRecapId
+					,[intInvoiceId]
 					,[strInvoiceNumber]
 					,[strBudgetDescription]				
 					,[dblTotalAmount]
+					,[intServiceChargeDays]
 					,0
 				FROM @tempServiceChargeTable 
 				WHERE intServiceChargeId = @intServiceChargeId
