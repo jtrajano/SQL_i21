@@ -47,12 +47,38 @@ BEGIN
 			WHERE tblPatch.intUserRoleMenuId = tblSMUserRoleMenu.intUserRoleMenuId
 			AND intUserRoleId = @contactAdminRoleId
 
+			-- Delete Contact Admin Menu
+			DELETE RoleMenu FROM tblSMUserRoleMenu RoleMenu
+			INNER JOIN tblSMUserRole UserRole ON RoleMenu.intUserRoleId = UserRole.intUserRoleID
+			WHERE intUserRoleId = @contactAdminRoleId AND strRoleType in ('Contact Admin') AND intMenuId IN 
+			(
+				SELECT intMenuId from tblSMUserRoleMenu RoleMenu
+				INNER JOIN tblSMUserRole UserRole ON RoleMenu.intUserRoleId = UserRole.intUserRoleID
+				WHERE UserRole.strRoleType = 'Portal Default' AND ysnVisible = 0
+			)
+
+			UPDATE tblSMUserRoleMenu
+			SET ysnVisible = tblPatch.ysnVisible
+			FROM (
+				SELECT 
+					RoleMenu.intUserRoleMenuId,
+					ysnVisible = (CASE WHEN EXISTS((SELECT TOP 1 1 FROM tblSMUserRoleMenu tmpA WHERE tmpA.intParentMenuId = RoleMenu.intUserRoleMenuId AND tmpA.intUserRoleId = @contactAdminRoleId AND ysnVisible = 1)) THEN 1 
+										WHEN Menu.ysnLeaf = 1 THEN RoleMenu.ysnVisible
+										ELSE 0 END)
+				FROM tblSMUserRoleMenu RoleMenu
+				LEFT JOIN tblSMMasterMenu Menu ON Menu.intMenuID = RoleMenu.intMenuId
+				WHERE RoleMenu.intUserRoleId = @contactAdminRoleId
+				) tblPatch
+			WHERE tblPatch.intUserRoleMenuId = tblSMUserRoleMenu.intUserRoleMenuId
+			AND intUserRoleId = @contactAdminRoleId
+
 			DELETE FROM #TempContacts WHERE intUserRoleID = @contactAdminRoleId
 		END
 
+		-- Delete Contact Menu
 		DELETE RoleMenu FROM tblSMUserRoleMenu RoleMenu
 		INNER JOIN tblSMUserRole UserRole ON RoleMenu.intUserRoleId = UserRole.intUserRoleID
-		WHERE strRoleType in ('Contact', 'Contact Admin') AND intMenuId IN 
+		WHERE strRoleType in ('Contact') AND intMenuId IN 
 		(
 			SELECT intMenuId from tblSMUserRoleMenu RoleMenu
 			INNER JOIN tblSMUserRole UserRole ON RoleMenu.intUserRoleId = UserRole.intUserRoleID
