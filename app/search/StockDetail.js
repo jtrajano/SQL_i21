@@ -85,9 +85,7 @@ Ext.define('Inventory.search.StockDetail', {
 
                                     //iRely.Functions.openScreen('Inventory.view.InventoryValuation', { isMenuClick: true });
                                 }
-
-                                // Auto-Close                     
-                                if (win) win.close();                    
+                
                             }
                         }
                     }
