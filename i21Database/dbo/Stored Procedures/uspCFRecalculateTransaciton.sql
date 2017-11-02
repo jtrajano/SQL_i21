@@ -2391,7 +2391,8 @@ BEGIN
 			(
 				 'Net Price'
 				,@dblOriginalPrice - (@totalOriginalTax / @dblQuantity)
-				,ROUND((((@dblImportFileGrossPrice * @dblQuantity) - (@totalCalculatedTaxExempt + @totalCalculatedTax) ) / @dblQuantity),6)
+				,ROUND((((@dblImportFileGrossPrice * @dblQuantity) - (ISNULL(@totalCalculatedTax,0)) ) / @dblQuantity),6)
+				--,ROUND((((@dblImportFileGrossPrice * @dblQuantity) - (@totalCalculatedTaxExempt + @totalCalculatedTax) ) / @dblQuantity),6)
 			),
 			(
 				 'Total Amount'
@@ -2401,40 +2402,40 @@ BEGIN
 
 		END
 	ELSE IF @strPriceMethod = 'Network Cost'
-	BEGIN
+		BEGIN
  
-	DECLARE @dblNetworkCostGrossPrice NUMERIC(18,6)
-	SET @dblNetworkCostGrossPrice = ISNULL(@TransferCost,0)
-	SET @dblImportFileGrossPrice = ROUND((ISNULL(@TransferCost,0) - (ISNULL(@totalOriginalTax,0) / @dblQuantity)) + ISNULL(@dblAdjustments,0) + (ISNULL(@totalCalculatedTax,0) / @dblQuantity) , 6)
+			DECLARE @dblNetworkCostGrossPrice NUMERIC(18,6)
+			SET @dblNetworkCostGrossPrice = ISNULL(@TransferCost,0)
+			SET @dblImportFileGrossPrice = ROUND((ISNULL(@TransferCost,0) - (ISNULL(@totalOriginalTax,0) / @dblQuantity)) + ISNULL(@dblAdjustments,0) + (ISNULL(@totalCalculatedTax,0) / @dblQuantity) , 6)
  
-	IF(ISNULL(@ysnForceRounding,0) = 1) 
-	BEGIN
-	SELECT @dblImportFileGrossPrice = dbo.fnCFForceRounding(@dblImportFileGrossPrice)
-	END
+			IF(ISNULL(@ysnForceRounding,0) = 1) 
+			BEGIN
+			SELECT @dblImportFileGrossPrice = dbo.fnCFForceRounding(@dblImportFileGrossPrice)
+			END
  
-	INSERT INTO @tblTransactionPrice (strTransactionPriceId 
-	,dblOriginalAmount 
-	,dblCalculatedAmount 
-	)
-	VALUES
-	(
-	'Gross Price'
-	,@dblNetworkCostGrossPrice
-	,@dblImportFileGrossPrice
-	),
-	(
-	'Net Price'
-	,ROUND((((@dblNetworkCostGrossPrice * @dblQuantity) - (@totalOriginalTax) ) / @dblQuantity),6)
-	--,ROUND((((@dblImportFileGrossPrice * @dblQuantity) - (@totalCalculatedTaxExempt + @totalCalculatedTax) ) / @dblQuantity),6)
-	,ROUND((((@dblImportFileGrossPrice * @dblQuantity) - (ISNULL(@totalCalculatedTax,0))) / @dblQuantity),6)
-	),
-	(
-	'Total Amount'
-	,ROUND(@dblNetworkCostGrossPrice * @dblQuantity,2)
-	,ROUND((@dblImportFileGrossPrice * @dblQuantity),2)
-	)
+			INSERT INTO @tblTransactionPrice (strTransactionPriceId 
+			,dblOriginalAmount 
+			,dblCalculatedAmount 
+			)
+			VALUES
+			(
+			'Gross Price'
+			,@dblNetworkCostGrossPrice
+			,@dblImportFileGrossPrice
+			),
+			(
+			'Net Price'
+			,ROUND((((@dblNetworkCostGrossPrice * @dblQuantity) - (@totalOriginalTax) ) / @dblQuantity),6)
+			--,ROUND((((@dblImportFileGrossPrice * @dblQuantity) - (@totalCalculatedTaxExempt + @totalCalculatedTax) ) / @dblQuantity),6)
+			,ROUND((((@dblImportFileGrossPrice * @dblQuantity) - (ISNULL(@totalCalculatedTax,0))) / @dblQuantity),6)
+			),
+			(
+			'Total Amount'
+			,ROUND(@dblNetworkCostGrossPrice * @dblQuantity,2)
+			,ROUND((@dblImportFileGrossPrice * @dblQuantity),2)
+			)
  
-	END
+		END
 	ELSE IF (LOWER(@strPriceBasis) = 'local index cost' OR LOWER(@strPriceBasis) = 'remote index cost'  )
 		BEGIN
 
@@ -2495,7 +2496,8 @@ BEGIN
 		(
 			 'Net Price'
 			,Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6) 
-			,Round(((@dblLocalIndexRetailGrossPrice * @dblQuantity) -  (ISNULL(@totalCalculatedTaxExempt,0) + ISNULL(@totalCalculatedTax,0))) / @dblQuantity,6)
+			,Round(((@dblLocalIndexRetailGrossPrice * @dblQuantity) -  (ISNULL(@totalCalculatedTax,0))) / @dblQuantity,6)
+			--,Round(((@dblLocalIndexRetailGrossPrice * @dblQuantity) -  (ISNULL(@totalCalculatedTaxExempt,0) + ISNULL(@totalCalculatedTax,0))) / @dblQuantity,6)
 		),
 		(
 			 'Total Amount'
@@ -2530,7 +2532,8 @@ BEGIN
 		(
 			 'Net Price'
 			,Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6) 
-			,Round(((@dblLocalIndexFixedGrossPrice * @dblQuantity) -  (ISNULL(@totalCalculatedTaxExempt,0) + ISNULL(@totalCalculatedTax,0))) / @dblQuantity,6)
+			,Round(((@dblLocalIndexFixedGrossPrice * @dblQuantity) -  (ISNULL(@totalCalculatedTax,0))) / @dblQuantity,6)
+			--,Round(((@dblLocalIndexFixedGrossPrice * @dblQuantity) -  (ISNULL(@totalCalculatedTaxExempt,0) + ISNULL(@totalCalculatedTax,0))) / @dblQuantity,6)
 		),
 		(
 			 'Total Amount'
@@ -2564,7 +2567,8 @@ BEGIN
 			(
 				 'Net Price'
 				,@dblOriginalPrice - (@totalOriginalTax / @dblQuantity)
-				,ROUND((((@dblPumpPriceAdjustmentGrossPrice * @dblQuantity) - (@totalCalculatedTaxExempt + @totalCalculatedTax) ) / @dblQuantity),6)
+				,ROUND((((@dblPumpPriceAdjustmentGrossPrice * @dblQuantity) - (ISNULL(@totalCalculatedTax,0)) ) / @dblQuantity),6)
+				--,ROUND((((@dblPumpPriceAdjustmentGrossPrice * @dblQuantity) - (@totalCalculatedTaxExempt + @totalCalculatedTax) ) / @dblQuantity),6)
 			),
 			(
 				 'Total Amount'
@@ -2601,7 +2605,8 @@ BEGIN
 			(
 				 'Net Price'
 				,@dblNetTransferCost
-				,ROUND((((@dblTransferCostGrossPrice * @dblQuantity) - (@totalCalculatedTaxExempt + @totalCalculatedTax) ) / @dblQuantity),6)
+				,ROUND((((@dblTransferCostGrossPrice * @dblQuantity) - (ISNULL(@totalCalculatedTax,0)) ) / @dblQuantity),6)
+				--,ROUND((((@dblTransferCostGrossPrice * @dblQuantity) - (@totalCalculatedTaxExempt + @totalCalculatedTax) ) / @dblQuantity),6)
 					
 			),
 			(
