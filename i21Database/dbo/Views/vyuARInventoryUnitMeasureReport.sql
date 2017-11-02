@@ -3,10 +3,12 @@ AS
 SELECT DETAIL.intItemId
 	 , DETAIL.intItemUOMId	 
 	 , dblTotalQtyShipped	= SUM(ISNULL(DETAIL.dblQtyShipped, 0))
-	 , dblTotal				= SUM(ISNULL(DETAIL.dblTotal, 0))
+	 , dblTotal				= SUM(ISNULL(DETAIL.dblQtyShipped, 0)) * SUM(ISNULL(DETAIL.dblPrice, 0))
 	 , ITEM.strItemNo
 	 , ITEM.strItemDescription
 	 , UOM.strUnitMeasure
+	 , COMPANY.strCompanyName
+	 , COMPANY.strCompanyAddress
 FROM dbo.tblARInvoiceDetail DETAIL WITH (NOLOCK)
 INNER JOIN (
 	SELECT intItemId
@@ -26,5 +28,10 @@ INNER JOIN (
 		 , strUnitMeasure
 	FROM dbo.tblICUnitMeasure WITH (NOLOCK)
 ) UOM ON ITEMUOM.intUnitMeasureId = UOM.intUnitMeasureId
+OUTER APPLY (
+	SELECT TOP 1 strCompanyName
+			   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
+	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
+) COMPANY
 WHERE ISNULL(DETAIL.intItemUOMId, 0) <> 0
-GROUP BY DETAIL.intItemId, DETAIL.intItemUOMId, ITEM.strItemNo, ITEM.strItemDescription, UOM.strUnitMeasure
+GROUP BY DETAIL.intItemId, DETAIL.intItemUOMId, ITEM.strItemNo, ITEM.strItemDescription, UOM.strUnitMeasure, COMPANY.strCompanyName, COMPANY.strCompanyAddress

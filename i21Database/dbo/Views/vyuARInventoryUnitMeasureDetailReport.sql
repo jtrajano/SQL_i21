@@ -14,10 +14,12 @@ SELECT INVOICE.intInvoiceId
 	 , ITEM.strItemNo
 	 , ITEM.strItemDescription
 	 , UOM.strUnitMeasure
+	 , COMPANY.strCompanyName
+	 , COMPANY.strCompanyAddress
 FROM dbo.tblARInvoice INVOICE WITH (NOLOCK)
 INNER JOIN (
 	SELECT intEntityId			= C.intEntityId
-		 , strCustomerNumber	= C.strCustomerNumber
+		 , strCustomerNumber	= ISNULL(C.strCustomerNumber, '') + ' - ' + ISNULL(E.strName , '')
 		 , strCustomerName		= E.strName
 	FROM dbo.tblARCustomer C WITH (NOLOCK)
 	INNER JOIN (
@@ -33,13 +35,13 @@ INNER JOIN (
 		 , intItemUOMId
 		 , dblQtyShipped
 		 , dblPrice
-		 , dblTotal
+		 , dblTotal		= ISNULL(dblQtyShipped, 0) * ISNULL(dblPrice, 0)
 	FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
 	WHERE ISNULL(intItemUOMId, 0) <> 0
 ) DETAIL ON INVOICE.intInvoiceId = DETAIL.intInvoiceId
 INNER JOIN (
 	SELECT intItemId
-		 , strItemNo
+		 , strItemNo		  = ISNULL(strItemNo, '') + ' - ' + ISNULL(strDescription, '')
 		 , strItemDescription = strDescription
 	FROM dbo.tblICItem WITH (NOLOCK)
 ) ITEM ON DETAIL.intItemId = ITEM.intItemId
@@ -55,4 +57,9 @@ INNER JOIN (
 		 , strUnitMeasure
 	FROM dbo.tblICUnitMeasure WITH (NOLOCK)
 ) UOM ON ITEMUOM.intUnitMeasureId = UOM.intUnitMeasureId
+OUTER APPLY (
+	SELECT TOP 1 strCompanyName
+			   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
+	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
+) COMPANY
 WHERE INVOICE.ysnPosted = 1
