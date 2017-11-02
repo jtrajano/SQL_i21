@@ -5830,6 +5830,8 @@
     <Build Include="dbo\Views\vyuNRNotesReceivableSearch.sql" />
     <Build Include="dbo\Views\vyuARInventoryUnitMeasureDetailReport.sql" />
     <Build Include="dbo\Views\vyuARInventoryUnitMeasureReport.sql" />
+    <Build Include="dbo\Views\vyuAPVendorInquiry.sql" />
+    <Build Include="dbo\Views\vyuAPSearchVendorInquiry.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
