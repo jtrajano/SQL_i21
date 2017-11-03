@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE uspICReportInventoryShipment 
+﻿CREATE PROCEDURE uspICReportInventoryShipment 
 	@xmlParam NVARCHAR(MAX) = NULL
 AS
 SET QUOTED_IDENTIFIER OFF
@@ -65,6 +64,8 @@ BEGIN TRY
 			,'' [Pallets]
 			, EN.strName
 			, S.dtmShipDate
+			, SubLocation.strSubLocationName [SubLocation]
+			, StorageLocation.strName [StorageLocation]
 		FROM tblICInventoryShipment S
 		LEFT JOIN tblICInventoryShipmentItem SI ON S.intInventoryShipmentId = SI.intInventoryShipmentId
 		LEFT JOIN tblICItem I ON I.intItemId = SI.intItemId
@@ -72,9 +73,11 @@ BEGIN TRY
 		LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = U.intUnitMeasureId
 		LEFT JOIN tblEMEntityLocation E ON E.intEntityLocationId = S.intShipToLocationId
 		LEFT JOIN tblSMCompanyLocation SM ON SM.intCompanyLocationId = S.intShipToCompanyLocationId
+		LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = SI.intSubLocationId
+		LEFT JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLocationId = SI.intStorageLocationId
 		LEFT JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = SI.intOrderId
 		LEFT JOIN tblEMEntity EN ON S.intEntityCustomerId = EN.intEntityId
-		WHERE S.strShipmentNumber =@strShipmentNo
+		WHERE S.strShipmentNumber = @strShipmentNo
 	END
 END TRY
 
