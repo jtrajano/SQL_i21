@@ -203,8 +203,10 @@ BEGIN TRY
 	JOIN @tblMFWorkOrder W ON W.intWorkOrderId = WLT.intWorkOrderId
 	JOIN dbo.tblICItem I ON I.intItemId = WLT.intItemId
 
-		SELECT 
-		W.strWorkOrderNo 
+		SELECT CONVERT(INT, ROW_NUMBER() OVER (
+					ORDER BY T.dtmDate DESC
+					)) AS intRowId
+		,W.strWorkOrderNo 
 		,T.dtmDate
 		,S.strShiftName 
 		,T.strTransactionType
