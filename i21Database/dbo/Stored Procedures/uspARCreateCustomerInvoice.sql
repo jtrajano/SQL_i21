@@ -419,8 +419,8 @@ BEGIN TRY
 		,[strPONumber]					= @PONumber
 		,[strBOLNumber]					= @BOLNumber
 		,[strDeliverPickup]				= @DeliverPickUp
-		,[strComments]					= CASE WHEN ISNULL(@Comment, '') = '' THEN dbo.fnARGetDefaultComment(@CompanyLocationId, C.[intEntityId], @TransactionType, @Type, 'Header', NULL) ELSE @Comment END
-		,[strFooterComments]			= dbo.fnARGetDefaultComment(@CompanyLocationId, C.[intEntityId], @TransactionType, @Type, 'Footer', NULL)
+		,[strComments]					= CASE WHEN ISNULL(@Comment, '') = '' THEN dbo.fnARGetDefaultComment(@CompanyLocationId, C.[intEntityId], @TransactionType, @Type, 'Header', NULL, 0) ELSE @Comment END
+		,[strFooterComments]			= dbo.fnARGetDefaultComment(@CompanyLocationId, C.[intEntityId], @TransactionType, @Type, 'Footer', NULL, 0)
 		,[intShipToLocationId]			= ISNULL(@ShipToLocationId, ISNULL(SL1.[intEntityLocationId], EL.[intEntityLocationId]))
 		,[strShipToLocationName]		= ISNULL(SL.[strLocationName], ISNULL(SL1.[strLocationName], EL.[strLocationName]))
 		,[strShipToAddress]				= ISNULL(SL.[strAddress], ISNULL(SL1.[strAddress], EL.[strAddress]))

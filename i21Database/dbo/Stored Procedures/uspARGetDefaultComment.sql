@@ -8,5 +8,5 @@
 	@DocumentMaintenanceId	INT = NULL
 AS
 
-SET @strHeaderComment = [dbo].[fnARGetDefaultComment](@intCompanyLocationId, @intEntityCustomerId, @strTransactionType, @strType, 'Header', @DocumentMaintenanceId)
-SET @strFooterComment = [dbo].[fnARGetDefaultComment](@intCompanyLocationId, @intEntityCustomerId, @strTransactionType, NULL, 'Footer', @DocumentMaintenanceId)
+SET @strHeaderComment = [dbo].[fnARGetDefaultComment](@intCompanyLocationId, @intEntityCustomerId, @strTransactionType, @strType, 'Header', @DocumentMaintenanceId, 0)
+SET @strFooterComment = [dbo].[fnARGetDefaultComment](@intCompanyLocationId, @intEntityCustomerId, @strTransactionType, NULL, 'Footer', @DocumentMaintenanceId, 0)
