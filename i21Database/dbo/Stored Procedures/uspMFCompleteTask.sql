@@ -29,7 +29,6 @@ BEGIN TRY
 		,@intTransactionId INT
 		,@strTransactionId NVARCHAR(50)
 		,@intInventoryShipmentId INT
-
 	DECLARE @tblTasks TABLE (
 		intTaskRecordId INT Identity(1, 1)
 		,intTaskId INT
@@ -45,8 +44,9 @@ BEGIN TRY
 		,@intDefaultShipmentDockDoorLocation INT
 		,@intCustomerLabelTypeId INT
 		,@intEntityCustomerId INT
-		,@strReferenceNo nvarchar(50)
+		,@strReferenceNo NVARCHAR(50)
 		,@dblWeightPerQty NUMERIC(18, 6)
+		,@intOrderId INT
 
 	SELECT @ysnLoadProcessEnabled = ysnLoadProcessEnabled
 		,@intDefaultShipmentDockDoorLocation = intDefaultShipmentDockDoorLocation
@@ -68,11 +68,13 @@ BEGIN TRY
 		,@strOrderType = OT.strOrderType
 		,@intStagingLocationId = OH.intStagingLocationId
 		,@strReferenceNo = strReferenceNo
+		,@intOrderId = intOrderHeaderId
 	FROM tblMFOrderHeader OH
 	JOIN tblMFOrderType OT ON OT.intOrderTypeId = OH.intOrderTypeId
 	WHERE intOrderHeaderId = @intOrderHeaderId
 
-	SELECT @intEntityCustomerId = intEntityCustomerId,@intInventoryShipmentId=intInventoryShipmentId
+	SELECT @intEntityCustomerId = intEntityCustomerId
+		,@intInventoryShipmentId = intInventoryShipmentId
 	FROM tblICInventoryShipment
 	WHERE strShipmentNumber = @strReferenceNo
 
@@ -81,7 +83,7 @@ BEGIN TRY
 	WHERE intOwnerId = @intEntityCustomerId
 		AND intCustomerLabelTypeId IS NOT NULL
 
-		IF @intCustomerLabelTypeId IS NULL
+	IF @intCustomerLabelTypeId IS NULL
 	BEGIN
 		SELECT @intCustomerLabelTypeId = 0
 	END
@@ -187,7 +189,11 @@ BEGIN TRY
 				,intFromStorageLocationId = @intNewStorageLocationId
 			WHERE intTaskId = @intTaskId
 
-			Update tblMFOrderManifest Set intLotId=@intNewLotId Where intOrderHeaderId=@intOrderHeaderId and intOrderDetailId=@intOrderDetailId and intLotId=@intLotId
+			UPDATE tblMFOrderManifest
+			SET intLotId = @intNewLotId
+			WHERE intOrderHeaderId = @intOrderHeaderId
+				AND intOrderDetailId = @intOrderDetailId
+				AND intLotId = @intLotId
 		END
 
 		INSERT INTO tblMFPickForWOStaging (
@@ -237,9 +243,13 @@ BEGIN TRY
 				,GetDate()
 				)
 		END
-		Else IF @intCustomerLabelTypeId = 2
+		ELSE IF @intCustomerLabelTypeId = 2
 		BEGIN
-			Update tblMFOrderManifest Set intLotId=@intNewLotId Where intOrderHeaderId=@intOrderHeaderId and intOrderDetailId=@intOrderDetailId and intLotId=@intLotId
+			UPDATE tblMFOrderManifest
+			SET intLotId = @intNewLotId
+			WHERE intOrderHeaderId = @intOrderHeaderId
+				AND intOrderDetailId = @intOrderDetailId
+				AND intLotId = @intLotId
 		END
 
 		IF @strOrderType = 'INVENTORY SHIPMENT STAGING'
@@ -259,10 +269,10 @@ BEGIN TRY
 				,@intLotItemId = NULL
 				,@dblLotQty = NULL
 				,@dblLotWeight = NULL
-				,@dblWeightPerQty=NULL
+				,@dblWeightPerQty = NULL
 
 			SELECT @intLotItemId = intItemId
-				,@dblWeightPerQty=dblWeightPerQty 
+				,@dblWeightPerQty = dblWeightPerQty
 			FROM tblICLot
 			WHERE intLotId = @intNewLotId
 
@@ -289,20 +299,22 @@ BEGIN TRY
 					,dblQuantityShipped
 					,dblGrossWeight
 					,dblTareWeight
+					,intConcurrencyId
 					)
 				VALUES (
 					@intShipmentItemId
 					,@intNewLotId
 					,@dblMoveQty
-					,@dblMoveQty*@dblWeightPerQty
+					,@dblMoveQty * @dblWeightPerQty
 					,0
+					,1
 					)
 			END
 			ELSE
 			BEGIN
 				UPDATE tblICInventoryShipmentItemLot
 				SET dblQuantityShipped = dblQuantityShipped + @dblMoveQty
-					,dblGrossWeight = dblGrossWeight + (@dblMoveQty*@dblWeightPerQty)
+					,dblGrossWeight = dblGrossWeight + (@dblMoveQty * @dblWeightPerQty)
 				WHERE intInventoryShipmentItemId = @intShipmentItemId
 					AND intLotId = @intNewLotId
 			END
@@ -478,7 +490,11 @@ BEGIN TRY
 					,intFromStorageLocationId = @intNewStorageLocationId
 				WHERE intTaskId = @intTaskId
 
-				Update tblMFOrderManifest Set intLotId=@intNewLotId Where intOrderHeaderId=@intOrderHeaderId and intOrderDetailId=@intOrderDetailId and intLotId=@intLotId
+				UPDATE tblMFOrderManifest
+				SET intLotId = @intNewLotId
+				WHERE intOrderHeaderId = @intOrderHeaderId
+					AND intOrderDetailId = @intOrderDetailId
+					AND intLotId = @intLotId
 			END
 
 			INSERT INTO tblMFPickForWOStaging (
@@ -528,10 +544,15 @@ BEGIN TRY
 					,GetDate()
 					)
 			END
-			Else IF @intCustomerLabelTypeId = 2
+			ELSE IF @intCustomerLabelTypeId = 2
 			BEGIN
-				Update tblMFOrderManifest Set intLotId=@intNewLotId Where intOrderHeaderId=@intOrderHeaderId and intOrderDetailId=@intOrderDetailId and intLotId=@intLotId
+				UPDATE tblMFOrderManifest
+				SET intLotId = @intNewLotId
+				WHERE intOrderHeaderId = @intOrderHeaderId
+					AND intOrderDetailId = @intOrderDetailId
+					AND intLotId = @intLotId
 			END
+
 			IF @strOrderType = 'INVENTORY SHIPMENT STAGING'
 				AND (
 					(
@@ -551,7 +572,7 @@ BEGIN TRY
 					,@dblLotWeight = NULL
 
 				SELECT @intLotItemId = intItemId
-					,@dblWeightPerQty =dblWeightPerQty 
+					,@dblWeightPerQty = dblWeightPerQty
 				FROM tblICLot
 				WHERE intLotId = @intNewLotId
 
@@ -578,20 +599,22 @@ BEGIN TRY
 						,dblQuantityShipped
 						,dblGrossWeight
 						,dblTareWeight
+						,intConcurrencyId
 						)
 					VALUES (
 						@intShipmentItemId
 						,@intNewLotId
 						,@dblMoveQty
-						,@dblMoveQty*@dblWeightPerQty
+						,@dblMoveQty * @dblWeightPerQty
 						,0
+						,1
 						)
 				END
 				ELSE
 				BEGIN
 					UPDATE tblICInventoryShipmentItemLot
 					SET dblQuantityShipped = dblQuantityShipped + @dblMoveQty
-						,dblGrossWeight = dblGrossWeight + (@dblMoveQty*@dblWeightPerQty)
+						,dblGrossWeight = dblGrossWeight + (@dblMoveQty * @dblWeightPerQty)
 					WHERE intInventoryShipmentItemId = @intShipmentItemId
 						AND intLotId = @intNewLotId
 				END
@@ -680,6 +703,7 @@ BEGIN TRY
 		SET intOrderStatusId = 7
 		WHERE intOrderHeaderId = @intOrderHeaderId
 	END
+
 	IF @strOrderType = 'INVENTORY SHIPMENT STAGING'
 	BEGIN
 		SELECT @intTransactionId = @intInventoryShipmentId
@@ -707,7 +731,7 @@ BEGIN TRY
 			,intItemUOMId = T.intItemUOMId
 			,intLotId = T.intLotId
 			,intSubLocationId = SL.intSubLocationId
-			,intStorageLocationId = T.intFromStorageLocationId
+			,intStorageLocationId = NULL --We need to set this to NULL otherwise available Qty becomes zero in the inventoryshipment screen
 			,dblQty = T.dblPickQty
 			,intTransactionId = @intTransactionId
 			,strTransactionId = @strTransactionId
@@ -716,12 +740,54 @@ BEGIN TRY
 		JOIN tblICStorageLocation SL ON SL.intStorageLocationId = T.intFromStorageLocationId
 		JOIN tblICItemLocation IL ON IL.intItemId = T.intItemId
 			AND IL.intLocationId = SL.intLocationId
-		WHERE T.intOrderHeaderId =@intOrderHeaderId 
+		WHERE T.intOrderHeaderId = @intOrderHeaderId
+			AND T.intTaskStateId = 4
 
 		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
 			,@intTransactionId
 			,@intInventoryTransactionType
+
+		DELETE
+		FROM @ItemsToReserve
+
+		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+			,@intOrderId
+			,34
+
+		INSERT INTO @ItemsToReserve (
+			intItemId
+			,intItemLocationId
+			,intItemUOMId
+			,intLotId
+			,intSubLocationId
+			,intStorageLocationId
+			,dblQty
+			,intTransactionId
+			,strTransactionId
+			,intTransactionTypeId
+			)
+		SELECT intItemId = T.intItemId
+			,intItemLocationId = IL.intItemLocationId
+			,intItemUOMId = T.intItemUOMId
+			,intLotId = T.intLotId
+			,intSubLocationId = SL.intSubLocationId
+			,intStorageLocationId = T.intFromStorageLocationId
+			,dblQty = T.dblPickQty
+			,intTransactionId = @intOrderId
+			,strTransactionId = @strReferenceNo + ' / ' + @strOrderNo
+			,intTransactionTypeId = 34
+		FROM tblMFTask T
+		JOIN tblICStorageLocation SL ON SL.intStorageLocationId = T.intFromStorageLocationId
+		JOIN tblICItemLocation IL ON IL.intItemId = T.intItemId
+			AND IL.intLocationId = SL.intLocationId
+		WHERE T.intOrderHeaderId = @intOrderHeaderId
+			AND T.intTaskStateId <> 4
+
+		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+			,@intOrderId
+			,34
 	END
+
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION
 END TRY
