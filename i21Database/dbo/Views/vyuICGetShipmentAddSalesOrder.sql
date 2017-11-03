@@ -1,7 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuICGetShipmentAddSalesOrder]
 AS
-SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY SODetail.intCompanyLocationId, SODetail.intEntityCustomerId, intSalesOrderDetailId) AS INT)
-	, strOrderType = 'Sales Order'
+SELECT 
+	--intKey = CAST(ROW_NUMBER() OVER(ORDER BY SODetail.intCompanyLocationId, SODetail.intEntityCustomerId, intSalesOrderDetailId) AS INT)
+	 strOrderType = 'Sales Order'
 	, strSourceType = 'None'
 	, intLocationId = SODetail.intCompanyLocationId
 	, strShipFromLocation = SODetail.strLocationName
@@ -18,10 +19,10 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY SODetail.intCompanyLocationId, S
 	, strItemDescription
 	, strLotTracking
 	, SODetail.intCommodityId
-	,DefaultFromItemLocation.intSubLocationId
-	,SubLocation.strSubLocationName
-	,DefaultFromItemLocation.intStorageLocationId
-	,strStorageLocationName = StorageLocation.strName
+	, DefaultFromItemLocation.intSubLocationId
+	, SubLocation.strSubLocationName
+	, DefaultFromItemLocation.intStorageLocationId
+	, strStorageLocationName = StorageLocation.strName
 	, intOrderUOMId = intItemUOMId
 	, strOrderUOM = strUnitMeasure
 	, dblOrderUOMConvFactor = dblUOMConversion
@@ -63,7 +64,6 @@ FROM vyuSOSalesOrderDetail SODetail
 		ON StorageLocation.intStorageLocationId = DefaultFromItemLocation.intStorageLocationId
 	LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
 		ON currencyRateType.intCurrencyExchangeRateTypeId = SODetail.intCurrencyExchangeRateTypeId
---WHERE ysnProcessed = 0
 WHERE	ISNULL(SODetail.dblQtyShipped, 0) < ISNULL(SODetail.dblQtyOrdered, 0) 
 		AND ISNULL(SO.strOrderStatus, '') IN ('Open', 'Partial', 'Pending')
 

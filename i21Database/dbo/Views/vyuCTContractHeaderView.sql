@@ -42,7 +42,17 @@ AS
 	FROM	tblCTContractHeader					CH	
 	jOIN	vyuCTContractHeaderNotMapped		NM	ON	NM.intContractHeaderId				=		CH.intContractHeaderId
 	JOIN	vyuCTEntity							EY	ON	EY.intEntityId						=		CH.intEntityId			AND
-														EY.strEntityType					=		(CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END) LEFT
+														-------------------------------------------------------------------------------------------
+														--Comment this code and replaced it with a CASE-WHEN statement to improve cardinality. 
+														--EY.strEntityType					=		(CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END) LEFT
+														-------------------------------------------------------------------------------------------
+														1 = (
+															CASE 
+																WHEN CH.intContractTypeId = 1 AND EY.strEntityType = 'Vendor' THEN 1 
+																WHEN CH.intContractTypeId <> 1 AND EY.strEntityType = 'Customer' THEN 1 
+																ELSE 0
+															END
+														) LEFT
 	JOIN	tblARSalesperson					SP	ON	SP.intEntityId						=		CH.intSalespersonId					LEFT
 	JOIN	tblCTApprovalBasis					AB	ON	AB.intApprovalBasisId				=		CH.intApprovalBasisId				LEFT
 	JOIN	tblEMEntity							CE	ON	CE.intEntityId						=		CH.intCreatedById					LEFT
