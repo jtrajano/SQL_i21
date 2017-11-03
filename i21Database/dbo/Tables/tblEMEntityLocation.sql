@@ -37,7 +37,14 @@
     [strFarmSplitType]			NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [dblFarmAcres]				NUMERIC(18, 6)  DEFAULT ((0)) NULL,
     --End Farm Fields
-
+	--Start 1099 Override
+    [ysnPrint1099]     BIT             NULL,
+    [str1099Name]      NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
+    [str1099Form]      NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
+    [str1099Type]      NVARCHAR (100)   COLLATE Latin1_General_CI_AS NULL,
+    [strFederalTaxId]  NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
+    [dtmW9Signed]      DATETIME        NULL,
+	--End 1099 Override
     [intConcurrencyId]    INT            CONSTRAINT [DF_tblEMEntityLocation_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_dbo.tblEMEntityLocation] PRIMARY KEY CLUSTERED ([intEntityLocationId] ASC),
     CONSTRAINT [FK_dbo.tblEMEntityLocation_dbo.tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE,
