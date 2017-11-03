@@ -1476,7 +1476,7 @@ DECLARE @cfPriceProfile TABLE
 	END
 	ELSE IF (@CFTransactionType = 'Extended Remote')
 	BEGIN
-		IF(@CFPriceBasis = 'Discounted Price')
+		IF(@CFPriceBasis = 'Transfer Cost')
 			BEGIN
 				IF(@CFTransferCost IS NOT NULL)
 					BEGIN
@@ -1487,7 +1487,7 @@ DECLARE @cfPriceProfile TABLE
 					
 				SET @CFPricingOut = 'Price Profile' 
 			END
-		ELSE IF(@CFPriceBasis = 'Full Retail')
+		ELSE IF(@CFPriceBasis = 'Pump Price Adjustment')
 			BEGIN
 				IF(@CFTransferCost IS NOT NULL)
 					BEGIN
