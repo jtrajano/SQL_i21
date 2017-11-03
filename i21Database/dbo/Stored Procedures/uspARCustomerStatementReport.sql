@@ -222,7 +222,7 @@ FROM (
 		 , strAccountStatusCode			= STATUSCODES.strAccountStatusCode
 		 , strLocationName				= CL.strLocationName
 		 , strFullAddress				= [dbo].fnARFormatCustomerAddress(NULL, NULL, CASE WHEN C.strStatementFormat <> ''Running Balance'' THEN C.strBillToLocationName ELSE NULL END, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, NULL)
-		 , strStatementFooterComment	= dbo.fnARGetDefaultComment(NULL, I.intEntityCustomerId, ''Statement Report'', NULL, ''Footer'', NULL)
+		 , strStatementFooterComment	= dbo.fnARGetDefaultComment(NULL, I.intEntityCustomerId, ''Statement Report'', NULL, ''Footer'', NULL, 1)
 		 , strCompanyName				= COMPANY.strCompanyName
 		 , strCompanyAddress			= COMPANY.strCompanyAddress
 		 , dblARBalance					= C.dblARBalance

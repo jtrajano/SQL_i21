@@ -255,7 +255,7 @@ SET @query = 'SELECT * FROM
 		, I.strBOLNumber
 		, C.dblCreditLimit
 		, strFullAddress = [dbo].fnARFormatCustomerAddress(NULL, NULL, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, 0)
-		, strStatementFooterComment = [dbo].fnARGetFooterComment(I.intCompanyLocationId, I.intEntityCustomerId, ''Statement Footer'')	 
+		, strStatementFooterComment = dbo.fnARGetDefaultComment(I.intCompanyLocationId, I.intEntityCustomerId, ''Statement Report'', NULL, ''Footer'', NULL, 1)
 		, strCompanyName = (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
 		, strCompanyAddress = (SELECT TOP 1 dbo.[fnARFormatCustomerAddress]('''', '''', '''', strAddress, strCity, strState, strZip, strCountry, '''', 0) FROM tblSMCompanySetup)
 		, C.ysnStatementCreditLimit
