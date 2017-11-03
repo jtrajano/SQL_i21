@@ -42,11 +42,11 @@ ELSE
 	SAVE TRANSACTION uspARImportInvoiceFromAGORDMST
 
 --SET STARTING RECORD NUMBER PREFIX
-SELECT
-	@invoice = strPrefix,
-	@nextInvoiceNumber = A.intNumber
-FROM tblSMStartingNumber A
-WHERE A.intStartingNumberId = 19
+--SELECT
+--	@invoice = strPrefix,
+--	@nextInvoiceNumber = A.intNumber
+--FROM tblSMStartingNumber A
+--WHERE A.intStartingNumberId = 19
 
 
 --GET THE USER LOCATION
@@ -206,29 +206,29 @@ OUTPUT inserted.intInvoiceId, SourceData.intBackupId INTO #tmpInvoice;
 
 SET @totalInsertedInvoice = @@ROWCOUNT
 
-IF OBJECT_ID('tempdb..#tmpInvoicesWithRecordNumber') IS NOT NULL DROP TABLE #tmpInvoicesWithRecordNumber
+--IF OBJECT_ID('tempdb..#tmpInvoicesWithRecordNumber') IS NOT NULL DROP TABLE #tmpInvoicesWithRecordNumber
 
---UPDATE strBillId
-CREATE TABLE #tmpInvoicesWithRecordNumber
-(
-	intInvoiceId INT NOT NULL,
-	[strTransactionType] [nvarchar](25) NOT NULL,
-	intRecordNumber INT NOT NULL
-)
+----UPDATE strBillId
+--CREATE TABLE #tmpInvoicesWithRecordNumber
+--(
+--	intInvoiceId INT NOT NULL,
+--	[strTransactionType] [nvarchar](25) NOT NULL,
+--	intRecordNumber INT NOT NULL
+--)
 
-INSERT INTO #tmpInvoicesWithRecordNumber
-SELECT
-	A.intInvoiceId,
-	A.[strTransactionType],
-	  @nextInvoiceNumber +
-		ROW_NUMBER() OVER(PARTITION BY A.strTransactionType ORDER BY A.intInvoiceId)
-FROM tblARInvoice A
-INNER JOIN #tmpInvoice B ON A.intInvoiceId = B.intInvoiceId
+--INSERT INTO #tmpInvoicesWithRecordNumber
+--SELECT
+--	A.intInvoiceId,
+--	A.[strTransactionType],
+--	  @nextInvoiceNumber +
+--		ROW_NUMBER() OVER(PARTITION BY A.strTransactionType ORDER BY A.intInvoiceId)
+--FROM tblARInvoice A
+--INNER JOIN #tmpInvoice B ON A.intInvoiceId = B.intInvoiceId
 
-UPDATE A
-	SET A.strInvoiceNumber = @invoice + (CAST(B.intRecordNumber AS NVARCHAR))
-FROM tblARInvoice A
-INNER JOIN #tmpInvoicesWithRecordNumber B ON A.intInvoiceId = B.intInvoiceId
+--UPDATE A
+--	SET A.strInvoiceNumber = @invoice + (CAST(B.intRecordNumber AS NVARCHAR))
+--FROM tblARInvoice A
+--INNER JOIN #tmpInvoicesWithRecordNumber B ON A.intInvoiceId = B.intInvoiceId
 
 --ALTER TABLE tblARInvoice ADD CONSTRAINT [UK_dbo.tblARInvoice_strBillId] UNIQUE (strBillId);
 
