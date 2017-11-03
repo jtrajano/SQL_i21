@@ -22,6 +22,26 @@ AS
 		Where wi.intWorkOrderId=@intWorkOrderId) t
 		group by t.strTransactionName,t.intItemId,t.strItemNo,t.strDescription,intCategoryId,t.strCategoryCode,t.intLotId,t.strLotNumber,
 		t.strLotAlias,t.intParentLotId,t.intAttributeTypeId,t.intImageTypeId
+		UNION --Item Tracked
+		Select 'Consume' AS strTransactionName,t.intLotId,t.strLotNumber,'' strLotAlias,t.intItemId,t.strItemNo,t.strDescription,
+		t.intCategoryId,t.strCategoryCode,SUM(t.dblQuantity) AS dblQuantity,MAX(t.strUOM) AS strUOM,
+		MAX(t.dtmTransactionDate) AS dtmTransactionDate,'' intParentLotId,'IT' AS strType,t.intAttributeTypeId,t.intImageTypeId
+		FROM (  
+		Select DISTINCT 'Consume' AS strTransactionName,wi.intWorkOrderConsumedLotId AS intLotId,i.strItemNo AS strLotNumber,'' strLotAlias,
+		i.intItemId,i.strItemNo,i.strDescription,
+		mt.intCategoryId,mt.strCategoryCode,wi.dblQuantity,um.strUnitMeasure AS strUOM,
+		wi.dtmCreated AS dtmTransactionDate,null intParentLotId,ps.intAttributeTypeId,
+		2 AS intImageTypeId
+		from tblMFWorkOrder w 
+		Join tblMFWorkOrderConsumedLot wi on w.intWorkOrderId=wi.intWorkOrderId
+		Join tblMFManufacturingProcess ps on ps.intManufacturingProcessId=w.intManufacturingProcessId
+		Left Join tblICItem i on wi.intItemId=i.intItemId
+		Left Join tblICCategory mt on mt.intCategoryId=i.intCategoryId
+		Left Join tblICItemUOM iu on wi.intItemUOMId=iu.intItemUOMId
+		Left Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
+		Where wi.intWorkOrderId=@intWorkOrderId AND ISNULL(wi.intLotId,0)=0) t
+		group by t.strTransactionName,t.intItemId,t.strItemNo,t.strDescription,intCategoryId,t.strCategoryCode,t.intLotId,t.strLotNumber,
+		t.intAttributeTypeId,t.intImageTypeId
 
 	If @ysnParentLot=1
 		Select 'Consume' AS strTransactionName,t.intLotId,t.strLotNumber,t.strLotAlias,t.intItemId,t.strItemNo,t.strDescription,
