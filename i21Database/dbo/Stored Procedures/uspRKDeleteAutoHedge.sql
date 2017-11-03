@@ -16,13 +16,18 @@ END
 
 IF (@TransId = 1)
 BEGIN
-      RAISERROR('The selected transaction is used for match PnS.',16,1)
+      RAISERROR('The selected transaction is used for match PnS. Cannot delete this transaction.',16,1)
 END
-ELSE
+
+IF EXISTS
+(SELECT 1 FROM  tblRKFutOptTransaction t WHERE intFutOptTransactionId=@intFutOptTransactionId  AND ISNULL(ysnFreezed,0) = 1)
 BEGIN
+RAISERROR('The selected transaction is already reconciled. Cannot delete this transaction.',16,1)
+END
+
       DELETE FROM tblRKAssignFuturesToContractSummary WHERE intFutOptTransactionId=@intFutOptTransactionId 
       DELETE FROM tblRKFutOptTransaction WHERE intFutOptTransactionId=@intFutOptTransactionId 
-END
+
 
 END TRY
 BEGIN CATCH
