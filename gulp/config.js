@@ -1,7 +1,7 @@
-var env = 'prod';
+var env = 'dev';
 var src = './app';
 var dest_prod = '../../../artifacts/17.4.owa/app/Inventory';
-var dest_dev = '../../../artifacts/17.4.owa/app/Inventory/debug';
+var dest_dev = '../../../artifacts/17.4.owa/debug/app/Inventory';
 var test_ui_dest = '../../../QC1730/Inventory/test-ui';
 
 module.exports = {
