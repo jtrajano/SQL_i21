@@ -167,8 +167,7 @@ END           AS strPricingStatus, CA.strDescription as strOrgin,isnull(ysnMulti
 INTO #tempContract 
 FROM   tblCTContractHeader                             CH         
        JOIN   tblCTContractDetail                      CD     ON     CH.intContractHeaderId            =      CD.intContractHeaderId 
-																 AND intContractStatusId NOT IN(2,3,6)   
-																  AND isnull(CD.dblQuantity,0) <> (SELECT sum(dblSalesInvoiceQty) FROM vyuRKGetInvoicedQty inv WHERE inv.intSContractDetailId=CD.intContractDetailId)
+																 AND intContractStatusId NOT IN(2,3,6)   																
        JOIN   tblICCommodity                           CY     ON     CY.intCommodityId                 =      CH.intCommodityId        
        JOIN   tblCTContractType                        TP     ON     TP.intContractTypeId              =      CH.intContractTypeId    
        JOIN   tblEMEntity                              EY     ON     EY.intEntityId                    =      CH.intEntityId                                                                                                           
@@ -201,14 +200,15 @@ strContractNumber,strEntityName,intEntityId,strCommodityCode,intCommodityId,strP
 intPricingTypeId,dblBasis,dblFutures,intContractStatusId,dblCashPrice,intContractDetailId,intFutureMarketId,intFutureMonthId,intItemId,dblBalance,intCurrencyId,dblRate,
 intMarketZoneId,dtmPlannedAvailabilityDate,strItemNo,strPricingType,intPriceUnitMeasureId,intUnitMeasureId,strFutureMonth,strFutMarketName,intOriginId,strLotTracking,
 dblNoOfLots,dblHeaderNoOfLots,ysnSubCurrency,intCompanyLocationId,ysnExpired,strPricingStatus, strOrgin,ysnMultiplePriceFixation,intMarketUOMId,intMarketCurrencyId  
-FROM #tempContract WHERE dblBalance > 0 and intContractTypeId=1
+FROM #tempContract WHERE intContractTypeId=1
 UNION
 SELECT intCommodityUnitMeasureId, strLocationName,strCommodityDescription,intMainCurrencyId,intCent,dblDetailQuantity,intContractTypeId,intContractHeaderId,strContractType,
 strContractNumber,strEntityName,intEntityId,strCommodityCode,intCommodityId,strPosition,dtmContractDate,intContractBasisId,intContractSeq,dtmStartDate,dtmEndDate,
 intPricingTypeId,dblBasis,dblFutures,intContractStatusId,dblCashPrice,intContractDetailId,intFutureMarketId,intFutureMonthId,intItemId,dblBalance,intCurrencyId,dblRate,
 intMarketZoneId,dtmPlannedAvailabilityDate,strItemNo,strPricingType,intPriceUnitMeasureId,intUnitMeasureId,strFutureMonth,strFutMarketName,intOriginId,strLotTracking,
 dblNoOfLots,dblHeaderNoOfLots,ysnSubCurrency,intCompanyLocationId,ysnExpired,strPricingStatus, strOrgin,ysnMultiplePriceFixation,intMarketUOMId,intMarketCurrencyId  
-FROM #tempContract CD WHERE intContractTypeId=2 AND isnull(dblDetailQuantity,0) <> (SELECT sum(dblSalesInvoiceQty) FROM vyuRKGetInvoicedQty inv WHERE inv.intSContractDetailId=CD.intContractDetailId)
+FROM #tempContract CD WHERE intContractTypeId=2 
+AND isnull(dblDetailQuantity,0) <> (SELECT isnull(sum(dblSalesInvoiceQty),0) FROM vyuRKGetInvoicedQty inv WHERE inv.intSContractDetailId=CD.intContractDetailId)
 
 
 
@@ -576,11 +576,13 @@ convert(decimal(24,6),
 FROM tblICInventoryReceiptItem ri
 JOIN tblICItem i on ri.intItemId= i.intItemId and i.strLotTracking<>'No'
 JOIN tblICInventoryReceipt ir on ir.intInventoryReceiptId=ri.intInventoryReceiptId
-JOIN @tblOpenContractList  cd on ri.intLineNo=cd.intContractDetailId and cd.intContractHeaderId = ri.intOrderId  AND cd.intCommodityId= @intCommodityId
+JOIN @tblOpenContractList  cd on ri.intLineNo=cd.intContractDetailId and cd.intContractHeaderId = ri.intOrderId  
 LEFT JOIN vyuRKGetInventoryAdjustQty ia on ia.intContractDetailId=cd.intContractDetailId
 LEFT JOIN vyuRKPurchaseIntransitView si on si.intPContractDetailId=cd.intContractDetailId
+where cd.intCommodityId= @intCommodityId
 )t 
 )t1)t2 WHERE strContractOrInventoryType= case when @ysnIncludeInventoryM2M = 1 then 'Inventory (P)' else '' end 
+
 
 END
 -- contract
