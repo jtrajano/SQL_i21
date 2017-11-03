@@ -5851,6 +5851,8 @@
     <Build Include="dbo\Tables\tblCFSpecialTaxingRuleTax.sql" />
     <Build Include="dbo\Stored Procedures\uspCMImportBanksFromOrigin.sql" />
     <Build Include="dbo\Functions\fnMFGetTotalStockValueFromTransactionBatch.sql" />
+    <Build Include="dbo\Functions\fnAPVendorInquiryFinancialInfo.sql" />
+    <Build Include="dbo\Functions\fnAPGetVendorBalances.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
