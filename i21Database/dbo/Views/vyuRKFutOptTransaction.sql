@@ -7,7 +7,7 @@ SELECT 	ft.[intFutOptTransactionId] AS [intFutOptTransactionId],
 			ft.[intFutOptTransactionHeaderId] AS [intFutOptTransactionHeaderId], 
 			fom.[strFutMarketName] AS [strFutMarketName], 
 			ft.[dtmTransactionDate] AS [dtmTransactionDate], 
-			fm.[strFutureMonth] AS [strFutureMonthYear], 
+			Left(CONVERT(DATE,'01 '+fm.strFutureMonth),7)+' ('+fm.strFutureMonth+')'   AS [strFutureMonthYear], 
 			om.[strOptionMonth] AS [strOptionMonthYear], 
 			ft.[strOptionType] AS [strOptionType], 
 			CASE WHEN (ft.[intInstrumentTypeId]=1) THEN N'Futures'
