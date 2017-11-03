@@ -988,6 +988,33 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
         }
     },
 
+    onPrintClick: function(btnPrint, e, eOpts) {
+        var win = btnPrint.up('window');
+        
+        // Save has data changes first before doing the post.
+        win.context.data.saveRecord({
+            callbackFn: function() {
+                var vm = win.viewModel;
+                var current = vm.data.current;
+
+                var filters = [{
+                    Name: 'strTransferNo',
+                    Type: 'string',
+                    Condition: 'EQUAL TO',
+                    From: current.get('strTransferNo'),
+                    Operator: 'AND'
+                }];
+
+                iRely.Functions.openScreen('Reporting.view.ReportViewer', {
+                    selectedReport: 'TransferOrderReport',
+                    selectedGroup: 'Inventory',
+                    selectedParameters: filters,
+                    viewConfig: { maximized: true }
+                });
+            }
+        });
+    },
+
     init: function(application) {
         this.control({
             "#cboItem": {
@@ -1037,6 +1064,9 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             },
             "#btnUnpost": {
                 click: this.onPostClick
+            },
+            "#btnPrint": {
+                click: this.onPrintClick
             },
             "#btnViewItem": {
                 click: this.onViewItemClick
