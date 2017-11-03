@@ -28,7 +28,7 @@ BEGIN
 	JOIN tblICItemUOM IU ON IU.intItemUOMId = LOT.intItemUOMId
 	JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 	JOIN tblICItemUOM WU ON WU.intItemUOMId = LOT.intWeightUOMId
-	JOIN tblICUnitMeasure WUM ON WUM.intUnitMeasureId = WU.intUnitMeasureId
+	JOIN tblICUnitMeasure WUM ON WUM.intUnitMeasureId = L.intWeightUnitMeasureId
 	LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intParentLotId = LOT.intParentLotId
 	LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
 	LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId

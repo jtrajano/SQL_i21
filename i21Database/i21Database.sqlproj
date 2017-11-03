@@ -5855,6 +5855,7 @@
     <Build Include="dbo\Functions\fnAPGetVendorBalances.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdateShiftPhysical.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdateShiftPhysicalCount.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGCreateLoadForPickLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
