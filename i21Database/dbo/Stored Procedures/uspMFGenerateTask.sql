@@ -69,6 +69,7 @@ BEGIN TRY
 		,@intPMCategoryId INT
 		,@strPickByFullPallet NVARCHAR(50)
 		,@intCustomerLabelTypeId INT
+		,@intOrderId INT
 
 	SELECT @intPackagingCategoryId = intAttributeId
 	FROM tblMFAttribute
@@ -125,6 +126,7 @@ BEGIN TRY
 		,@strOrderNo = OH.strOrderNo
 		,@strOrderDirection = OD.strOrderDirection
 		,@strReferenceNo = OH.strReferenceNo
+		,@intOrderId = intOrderHeaderId
 	FROM tblMFOrderHeader OH
 	JOIN tblMFOrderType OT ON OT.intOrderTypeId = OH.intOrderTypeId
 	JOIN tblMFOrderDirection OD ON OD.intOrderDirectionId = OH.intOrderDirectionId
@@ -284,7 +286,8 @@ BEGIN TRY
 
 			IF @strOrderType = 'INVENTORY SHIPMENT STAGING'
 			BEGIN
-				SELECT @intEntityCustomerId = intEntityCustomerId,@intInventoryShipmentId=intInventoryShipmentId
+				SELECT @intEntityCustomerId = intEntityCustomerId
+					,@intInventoryShipmentId = intInventoryShipmentId
 				FROM tblICInventoryShipment
 				WHERE strShipmentNumber = @strReferenceNo
 
@@ -1467,7 +1470,7 @@ BEGIN TRY
 					WHERE intOrderHeaderId = @intOrderHeaderId
 						AND intTaskStateId <> 4
 					)
-				OR NOT EXISTS (
+				AND NOT EXISTS (
 					SELECT *
 					FROM tblMFOrderManifestLabel M1
 					WHERE M1.intOrderManifestId = M.intOrderManifestId
@@ -1490,9 +1493,15 @@ BEGIN TRY
 			,'Order Staged'
 			,@intEntityUserSecurityId
 			,GetDate()
-		FROM tblMFTask
+		FROM tblMFTask T
 		WHERE intOrderHeaderId = @intOrderHeaderId
 			AND intTaskStateId <> 4
+			AND NOT EXISTS (
+				SELECT *
+				FROM tblMFOrderManifest OM
+				WHERE OM.intLotId = T.intLotId
+					AND OM.intOrderHeaderId = T.intOrderHeaderId
+				)
 	END
 
 	IF @strOrderType = 'INVENTORY SHIPMENT STAGING'
@@ -1522,7 +1531,7 @@ BEGIN TRY
 			,intItemUOMId = T.intItemUOMId
 			,intLotId = T.intLotId
 			,intSubLocationId = SL.intSubLocationId
-			,intStorageLocationId = T.intFromStorageLocationId
+			,intStorageLocationId = NULL --We need to set this to NULL otherwise available Qty becomes zero in the inventoryshipment screen
 			,dblQty = T.dblPickQty
 			,intTransactionId = @intTransactionId
 			,strTransactionId = @strTransactionId
@@ -1531,11 +1540,54 @@ BEGIN TRY
 		JOIN tblICStorageLocation SL ON SL.intStorageLocationId = T.intFromStorageLocationId
 		JOIN tblICItemLocation IL ON IL.intItemId = T.intItemId
 			AND IL.intLocationId = SL.intLocationId
-		WHERE T.intOrderHeaderId =@intOrderHeaderId 
+		WHERE T.intOrderHeaderId = @intOrderHeaderId
+			AND T.intTaskStateId = 4
 
 		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
 			,@intTransactionId
 			,@intInventoryTransactionType
+
+
+
+		DELETE
+		FROM @ItemsToReserve
+
+		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+			,@intOrderId
+			,34
+
+		INSERT INTO @ItemsToReserve (
+			intItemId
+			,intItemLocationId
+			,intItemUOMId
+			,intLotId
+			,intSubLocationId
+			,intStorageLocationId
+			,dblQty
+			,intTransactionId
+			,strTransactionId
+			,intTransactionTypeId
+			)
+		SELECT intItemId = T.intItemId
+			,intItemLocationId = IL.intItemLocationId
+			,intItemUOMId = T.intItemUOMId
+			,intLotId = T.intLotId
+			,intSubLocationId = SL.intSubLocationId
+			,intStorageLocationId = T.intFromStorageLocationId
+			,dblQty = T.dblPickQty
+			,intTransactionId = @intOrderId
+			,strTransactionId = @strReferenceNo + ' / ' + @strOrderNo
+			,intTransactionTypeId = 34
+		FROM tblMFTask T
+		JOIN tblICStorageLocation SL ON SL.intStorageLocationId = T.intFromStorageLocationId
+		JOIN tblICItemLocation IL ON IL.intItemId = T.intItemId
+			AND IL.intLocationId = SL.intLocationId
+		WHERE T.intOrderHeaderId = @intOrderHeaderId
+			AND T.intTaskStateId <> 4
+
+		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+			,@intOrderId
+			,34
 	END
 END TRY
 
