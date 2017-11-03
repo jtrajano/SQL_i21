@@ -16,7 +16,7 @@ Type the overview for the table here.
 		[intCategoryId] INT NOT NULL, 
 		[intCategoryLocationId] INT NULL, 
 		[intVendorId] INT NULL, 
-		[intVendorSetupId] INT NOT NULL,
+		[intVendorSetupId] INT NULL,
 		[strVendorDepartment] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL  , 
 		[ysnAddOrderingUPC] BIT NULL, 
 		[ysnUpdateExistingRecords] BIT NULL, 
