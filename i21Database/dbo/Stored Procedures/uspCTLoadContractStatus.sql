@@ -257,15 +257,15 @@ BEGIN TRY
 					RL.strLotNumber, 
 					CASE	WHEN IR.strReceiptType = 'Inventory Return' 
 								THEN -1*ISNULL(RL.dblQuantity,RI.dblNetReturned)
-								ELSE	ISNULL(RL.dblQuantity,RI.dblNetReturned)
+								ELSE	ISNULL(RL.dblQuantity,ISNULL(RI.dblNet,RI.dblReceived))
 					END AS dblQuantity,
 					dbo.fnCTConvertQuantityToTargetItemUOM(RI.intItemId,IU.intUnitMeasureId,LP.intWeightUOMId,
 						CASE	WHEN IR.strReceiptType = 'Inventory Return' 
 								THEN -1*ISNULL((RL.dblGrossWeight - RL.dblTareWeight),RI.dblNet) 
-								ELSE	ISNULL((RL.dblGrossWeight - RL.dblTareWeight),RI.dblNet)
+								ELSE	ISNULL((RL.dblGrossWeight - RL.dblTareWeight),ISNULL(RI.dblNet,RI.dblReceived))
 						END
 					) AS dblNetWeight,
-					RI.intWeightUOMId intItemUOMId,
+					ISNULL(RI.intWeightUOMId,RI.intUnitMeasureId) intItemUOMId,
 					IM.strUnitMeasure,
 					SL.strSubLocationName,
 					IR.intInventoryReceiptId
@@ -274,9 +274,9 @@ BEGIN TRY
 			JOIN	tblICInventoryReceipt			IR	ON	IR.intInventoryReceiptId			=	RI.intInventoryReceiptId 
 														AND	RI.intLineNo						=	@intContractDetailId
 														AND IR.strReceiptType					IN	('Purchase Contract','Inventory Return')
-			JOIN	tblSMCompanyLocationSubLocation SL	ON	SL.intCompanyLocationSubLocationId	=	RI.intSubLocationId
-			JOIN	tblICItemUOM					IU	ON	IU.intItemUOMId						=	RI.intWeightUOMId
+			JOIN	tblICItemUOM					IU	ON	IU.intItemUOMId						=	ISNULL(RI.intWeightUOMId,RI.intUnitMeasureId)
 			JOIN	tblICUnitMeasure				IM	ON	IM.intUnitMeasureId					=	IU.intUnitMeasureId		
+	LEFT	JOIN	tblSMCompanyLocationSubLocation SL	ON	SL.intCompanyLocationSubLocationId	=	RI.intSubLocationId
 	LEFT	JOIN	tblICInventoryReceiptItemLot	RL	ON	RI.intInventoryReceiptItemId		=	RL.intInventoryReceiptItemId	CROSS	
 			APPLY	tblLGCompanyPreference			LP 	
 
@@ -295,7 +295,7 @@ BEGIN TRY
 								ELSE	(RL.dblGrossWeight - RL.dblTareWeight) 
 						END
 					) AS dblNetWeight,
-					RI.intWeightUOMId intItemUOMId,
+					ISNULL(RI.intWeightUOMId,RI.intUnitMeasureId) intItemUOMId,
 					IM.strUnitMeasure,
 					SL.strSubLocationName,
 					IR.intInventoryReceiptId
@@ -305,10 +305,10 @@ BEGIN TRY
 														AND	RI.intLineNo						=	@intContractDetailId
 			JOIN	tblICInventoryReceipt			IR	ON	IR.intInventoryReceiptId			=	RI.intInventoryReceiptId 
 														AND IR.strReceiptType					=	'Purchase Contract'
-			JOIN	tblSMCompanyLocationSubLocation SL	ON	SL.intCompanyLocationSubLocationId	=	RI.intSubLocationId
-			JOIN	tblICItemUOM					IU	ON	IU.intItemUOMId						=	RI.intWeightUOMId
+			JOIN	tblICItemUOM					IU	ON	IU.intItemUOMId						=	ISNULL(RI.intWeightUOMId,RI.intUnitMeasureId)
 			JOIN	tblICUnitMeasure				IM	ON	IM.intUnitMeasureId					=	IU.intUnitMeasureId
-			JOIN	tblLGAllocationDetail			AD	ON	AD.intPContractDetailId				=	RI.intLineNo		CROSS	
+			JOIN	tblLGAllocationDetail			AD	ON	AD.intPContractDetailId				=	RI.intLineNo		
+	LEFT	JOIN	tblSMCompanyLocationSubLocation SL	ON	SL.intCompanyLocationSubLocationId	=	RI.intSubLocationId	CROSS	
 			APPLY	tblLGCompanyPreference			LP 	
 		)t
 	END
@@ -321,9 +321,9 @@ BEGIN TRY
 		FROM	(
 					SELECT	CD.intContractDetailId,
 							CAST(dbo.fnRemoveTrailingZeroes(GS.dblNetWeight) AS NVARCHAR(100)) collate Latin1_General_CI_AS						[Shipped],
-							CAST(dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,GS.intItemUOMId, CD.dblQuantity)) - GS.dblNetWeight AS NVARCHAR(100)) collate Latin1_General_CI_AS		[To be Shipped],
+							CAST(dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,ISNULL(GS.intItemUOMId,CD.intItemUOMId), CD.dblQuantity)) - GS.dblNetWeight AS NVARCHAR(100)) collate Latin1_General_CI_AS		[To be Shipped],
 							CAST(dbo.fnRemoveTrailingZeroes(CR.dblShippedWeight) AS NVARCHAR(100)) collate Latin1_General_CI_AS					[Recd Wt in Wh],
-							CAST(dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,GS.intItemUOMId, CD.dblQuantity)) - CR.dblShippedWeight AS NVARCHAR(100)) collate Latin1_General_CI_AS	[To be Received]
+							CAST(dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,ISNULL(GS.intItemUOMId,CD.intItemUOMId), CD.dblQuantity)) - CR.dblShippedWeight AS NVARCHAR(100)) collate Latin1_General_CI_AS	[To be Received]
 					FROM	tblCTContractDetail			CD								LEFT
 					JOIN	(
 								SELECT	intContractDetailId,
@@ -338,7 +338,7 @@ BEGIN TRY
 					AND		CD.intContractDetailId	=	@intContractDetailId LEFT
 					JOIN	(
 								SELECT	intContractDetailId,
-										CAST(SUM(dblNetWeight) AS NUMERIC(18, 6)) dblShippedWeight,
+										CAST(SUM(ISNULL(dblNetWeight,dblQuantity)) AS NUMERIC(18, 6)) dblShippedWeight,
 										MIN(intItemUOMId) intItemUOMId 
 								FROM	vyuCTContStsInventoryReceipt	
 								WHERE	intContractDetailId	=	@intContractDetailId
