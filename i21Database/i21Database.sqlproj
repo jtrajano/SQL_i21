@@ -5851,8 +5851,7 @@
     <Build Include="dbo\Tables\tblCFSpecialTaxingRuleHeader.sql" />
     <Build Include="dbo\Tables\tblCFSpecialTaxingRuleSite.sql" />
     <Build Include="dbo\Tables\tblCFSpecialTaxingRuleTax.sql" />
-        
-        
+    <Build Include="dbo\Stored Procedures\uspLGCreateLoadForPickLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
