@@ -2557,10 +2557,12 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         var me = this;
         var showAddScreen = function () {
             var search = i21.ModuleMgr.Search;
-            search.scope = me;
+            //search.scope = me;
             search.url = './Inventory/api/InventoryShipment/GetAddOrders?CustomerId=' + CustomerId + '&OrderType=' + OrderType + '&SourceType=' + SourceType;
             search.columns = [
-                { dataIndex: 'intKey', text: 'Key', flex: 1, dataType: 'numeric', defaultSort: true, sortOrder: 'DESC', key: true, hidden: true },
+                //{ dataIndex: 'intKey', text: 'Key', flex: 1, dataType: 'numeric', defaultSort: true, sortOrder: 'DESC', key: true, hidden: true },
+                {dataIndex: 'intLineNo', text: 'intLineNo', width: 100, dataType: 'numeric', defaultSort: true, sortOrder: 'DESC', key: true, hidden: true },
+
                 { dataIndex: 'strOrderNumber', text: 'Order Number', width: 100, dataType: 'string' },
                 { dataIndex: 'strSourceNumber', text: 'Source Number', width: 100, dataType: 'string' },
                 { dataIndex: 'strShipFromLocation', text: 'Ship From Location', width: 100, dataType: 'string' },
@@ -2606,7 +2608,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 { dataIndex: 'strForexRateType', text: 'Forex Rate Type', width: 100, dataType: 'string', hidden: true },
                 { xtype: 'numbercolumn', dataIndex: 'dblForexRate', text: 'Forex Rate', width: 100, dataType: 'float', hidden: true },               
 
-                {dataIndex: 'intLineNo', text: 'intLineNo', width: 100, dataType: 'numeric', hidden: true },
+                
                 {dataIndex: 'intOrderId', text: 'intOrderId', width: 100, dataType: 'numeric', hidden: true },
                 {dataIndex: 'intSourceId', text: 'intSourceId', width: 100, dataType: 'numeric', hidden: true },
                 { dataIndex: 'intCurrencyId', text: 'Currency Id', hidden: true, dataType: 'numeric' },

@@ -8,7 +8,7 @@ namespace iRely.Inventory.Model
 {
     public class vyuICGetShipmentAddSalesContractPickLot
     {
-        public int intKey { get; set; }
+        //public int intKey { get; set; }
         public string strOrderType { get; set; }
         public string strSourceType { get; set; }
         public int? intLocationId { get; set; }

@@ -306,7 +306,7 @@ namespace iRely.Inventory.BusinessLayer
                 var query = _db.GetQuery<vyuICGetShipmentAddSalesContract>()
                     .Where(p => p.intEntityCustomerId == CustomerId && p.strOrderType == OrderType && p.strSourceType == SourceType)
                     .Filter(param, true);
-                var data = await query.ExecuteProjection(param, "intKey").ToListAsync(param.cancellationToken);
+                var data = await query.ExecuteProjection(param, "intLineNo").ToListAsync(param.cancellationToken);
 
                 return new SearchResult()
                 {
@@ -320,7 +320,7 @@ namespace iRely.Inventory.BusinessLayer
                 var query = _db.GetQuery<vyuICGetShipmentAddSalesContractPickLot>()
                     .Where(p => p.intEntityCustomerId == CustomerId && p.strOrderType == OrderType && p.strSourceType == SourceType)
                     .Filter(param, true);
-                var data = await query.ExecuteProjection(param, "intKey").ToListAsync(param.cancellationToken);
+                var data = await query.ExecuteProjection(param, "intLineNo").ToListAsync(param.cancellationToken);
 
                 return new SearchResult()
                 {
@@ -334,7 +334,7 @@ namespace iRely.Inventory.BusinessLayer
                 var query = _db.GetQuery<vyuICGetShipmentAddSalesOrder>()
                     .Where(p => p.intEntityCustomerId == CustomerId && p.strOrderType == OrderType && p.strSourceType == SourceType)
                     .Filter(param, true);
-                var data = await query.ExecuteProjection(param, "intKey").ToListAsync(param.cancellationToken);
+                var data = await query.ExecuteProjection(param, "intLineNo").ToListAsync(param.cancellationToken);
 
                 return new SearchResult()
                 {

@@ -12,11 +12,11 @@ namespace iRely.Inventory.Model
         public vyuICGetShipmentAddSalesContractPickLotMap()
         {
             // Primary Key
-            this.HasKey(p => p.intKey);
+            this.HasKey(p => p.intLineNo);
 
             // Table & Column Mappings
             this.ToTable("vyuICGetShipmentAddSalesContractPickLot");
-            this.Property(t => t.intKey).HasColumnName("intKey");
+            //this.Property(t => t.intKey).HasColumnName("intKey");
             this.Property(t => t.strOrderType).HasColumnName("strOrderType");
             this.Property(t => t.strSourceType).HasColumnName("strSourceType");
             this.Property(t => t.intLocationId).HasColumnName("intLocationId");
