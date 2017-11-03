@@ -5852,6 +5852,8 @@
     <Build Include="dbo\Tables\tblCFSpecialTaxingRuleSite.sql" />
     <Build Include="dbo\Tables\tblCFSpecialTaxingRuleTax.sql" />
     <Build Include="dbo\Stored Procedures\uspLGCreateLoadForPickLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityInvoiceFromShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilitySalesOrderFromShipment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

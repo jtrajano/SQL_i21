@@ -423,6 +423,20 @@ Begin
 					dblQuantity,strUOM,dtmTransactionDate,strCustomer,strType)
 					Exec uspMFGetTraceabilityLotShipDetail @intId,@ysnParentLot
 
+				-- Sales Order & Invoice from Shipment
+				If @strType='S'
+					Begin
+						--SO
+						Insert Into @tblData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+						dblQuantity,strUOM,dtmTransactionDate,strCustomer,strType)
+						Exec uspMFGetTraceabilitySalesOrderFromShipment @intId
+
+						--Invoice
+						Insert Into @tblData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+						dblQuantity,strUOM,dtmTransactionDate,strCustomer,strType)
+						Exec uspMFGetTraceabilityInvoiceFromShipment @intId
+					End
+
 				UPDATE @tblData SET intParentId = @intParentId WHERE  intParentId IS NULL        
 
 			FETCH NEXT FROM @FCUR INTO @intId,@intParentId,@strType      
@@ -448,11 +462,25 @@ Begin
 
 		SELECT @intMaxRecordCount = Max(intRecordId) FROM @tblTemp     
 
-		Delete From @tblTemp Where strTransactionName='Ship'
+		--Delete From @tblTemp Where strTransactionName='Ship'
 
 		SELECT @intRowCount = COUNT(1) FROM @tblTemp      
 	END
 
+	--Duplicate Shipments for linking if SO exists
+	If Exists (Select 1 From @tblNodeData Where strType='SO')
+	Begin
+		SELECT @intMaxRecordCount = Max(intRecordId) FROM @tblNodeData 
+
+		--Get the Corresponding Ship records for the SO and add it again
+		Insert Into @tblNodeData(intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+		dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strVendor,strCustomer,strProcessName,strType,intAttributeTypeId,intImageTypeId)
+		Select (@intMaxRecordCount + ROW_NUMBER() OVER (ORDER BY n1.intLotId ASC)) AS intRecordId,n2.intRecordId,n1.strTransactionName,n1.intLotId,n1.strLotNumber,n1.strLotAlias,n1.intItemId,n1.strItemNo,n1.strItemDesc,n1.intCategoryId,n1.strCategoryCode,
+		n1.dblQuantity,n1.strUOM,n1.dtmTransactionDate,n1.intParentLotId,n1.strVendor,n1.strCustomer,n1.strProcessName,n1.strType,n1.intAttributeTypeId,n1.intImageTypeId 
+		From @tblNodeData n1 Join (Select * From @tblNodeData Where strType='SO') n2 on n1.intRecordId=n2.intParentId
+
+		Update @tblNodeData Set intParentId=0 Where strType='SO'
+	End
 End
 
 --Reverse
@@ -489,20 +517,112 @@ Begin
 
 			Update @tblNodeData Set intRecordId=(Select case when count(1)=1 then 2 else count(1) end from @tblNodeData),intParentId=@intNoOfShipRecordParentCounter,strType='L' Where intParentId is null
 
+			-- Invoice from Shipment
+			Begin
+				--Get ShipmentId to find if invoice exists
+				If @intId is null
+					Select TOP 1 @intId=intLotId From @tblNodeData
+				Else
+					Select TOP 1 @intId=intLotId From @tblNodeData Where intLotId<>@intId
+
+				--Invoice
+				Insert Into @tblData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+				dblQuantity,strUOM,dtmTransactionDate,strCustomer,strType)
+				Exec uspMFGetTraceabilityInvoiceFromShipment @intId
+			
+				--update ShipmentId in intParentLotId for Invoice used in getting ParentId in case Invoice exists
+				Update @tblData Set intParentLotId=@intId Where intParentLotId is null
+
+				--update ShipmentId in intAttributeTypeId for Lot used in getting ParentId in case Invoice exists
+				Update @tblNodeData Set intAttributeTypeId=@intId Where ISNULL(intAttributeTypeId,0)=0
+			End
+
 			Set @intNoOfShipRecordCounter=@intNoOfShipRecordCounter-1
 			Set @intNoOfShipRecordParentCounter=@intNoOfShipRecordParentCounter+1
+		End
+
+		--Invoice if exists adjust the sequence
+		If Exists (Select 1 From @tblData Where strType='IN')
+		Begin
+			--Generate RecordId for all the Invoices
+			UPDATE t
+				SET t.intRecordId = t.intRowNo,t.intParentId=0
+				FROM (
+					  SELECT intRecordId,intParentId,ROW_NUMBER() OVER (ORDER BY intLotId) AS intRowNo
+					  FROM @tblData
+					  ) t	
+				  
+			--Copy the Shipments/Lots to temp
+			Insert Into @tblTemp(intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+							dblQuantity,strUOM,dtmTransactionDate,strCustomer,strType,intParentLotId,intImageTypeId,intAttributeTypeId)
+			Select intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+							dblQuantity,strUOM,dtmTransactionDate,strCustomer,strType,intParentLotId,intImageTypeId,intAttributeTypeId From @tblNodeData
+
+			Delete From @tblNodeData
+		
+			--Insert Invoices to @tblNodeData
+			Insert Into @tblNodeData(intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+			dblQuantity,strUOM,dtmTransactionDate,strCustomer,strType,intParentLotId)
+			Select intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+			dblQuantity,strUOM,dtmTransactionDate,strCustomer,strType,intParentLotId From @tblData
+
+			Delete From @tblData
+
+			Select @intMaxRecordCount=COUNT(1) From @tblNodeData
+
+			--Adjust the intRecordId, intParentId for Shipments/Lots in @tblTemp
+			UPDATE t
+				SET t.intRecordId = @intMaxRecordCount + t.intRowNo
+				FROM (
+					  SELECT intRecordId,intParentId,ROW_NUMBER() OVER (ORDER BY intLotId) AS intRowNo
+					  FROM @tblTemp
+					  ) t	
+
+			--Update intParentId for Shipments
+			Update t Set t.intParentId=n.intRecordId
+				From @tblTemp t	Join @tblNodeData n on t.intLotId=n.intParentLotId
+				Where t.strType='S'			  
+
+			--Update intParentId for Lots 			
+			Update t Set t.intParentId=n.intRecordId
+				From @tblTemp t	Join (Select * from @tblTemp Where strType='S') n on t.intAttributeTypeId=n.intLotId
+				Where t.strType='L'	
+			
+			--Copy the Shipments/Lots from temp to @tblNodeData
+			Insert Into @tblNodeData(intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+							dblQuantity,strUOM,dtmTransactionDate,strCustomer,strType,intParentLotId,intImageTypeId)
+			Select intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+							dblQuantity,strUOM,dtmTransactionDate,strCustomer,strType,intParentLotId,intImageTypeId From @tblTemp		
+						
+			Delete From @tblTemp						
 		End
 	End
 
 	--Shipment
 	If @intObjectTypeId = 7
 	Begin
+		Declare @ysnInvoiceExist bit=0
+
+		--Invoice if exists
+		Insert Into @tblNodeData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+		dblQuantity,strUOM,dtmTransactionDate,strCustomer,strType)
+		Exec uspMFGetTraceabilityInvoiceFromShipment @intLotId
+
+		If Exists (Select 1 From @tblNodeData Where strType='IN')
+			Set @ysnInvoiceExist=1
+
+		If @ysnInvoiceExist=1
+			Update @tblNodeData Set intRecordId=1,intParentId=0
+
 		--Ship
 		Insert Into @tblNodeData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
 						dblQuantity,strUOM,dtmTransactionDate,strCustomer,strType)
 		Exec uspMFGetTraceabilityShipmentDetail @intLotId
 
-		Update @tblNodeData Set intRecordId=1,intParentId=0
+		If @ysnInvoiceExist=1
+			Update @tblNodeData Set intRecordId=2,intParentId=1 Where strType='S'
+		Else
+			Update @tblNodeData Set intRecordId=1,intParentId=0 Where strType='S'
 
 		--Lots From Shipment
 		Insert Into @tblNodeData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
@@ -511,9 +631,33 @@ Begin
 
 		--Update @tblNodeData Set intRecordId=2,intParentId=1,strType='L' Where intParentId is null
 
-		DECLARE @intRecCounter INT = 1
-		Update @tblNodeData Set @intRecCounter = intRecordId = @intRecCounter + 1 ,intParentId=1,strType='L' Where intParentId is null
+		DECLARE @intRecCounter INT = CASE WHEN @ysnInvoiceExist=1 THEN 2 ELSE 1 END
+		Update @tblNodeData Set @intRecCounter = intRecordId = @intRecCounter + 1 ,intParentId=(CASE WHEN @ysnInvoiceExist=1 THEN 2 ELSE 1 END),strType='L' Where intParentId is null
 	End
+
+	-- Sales Order from Shipment if exists
+	If Exists (Select 1 From @tblNodeData Where strType='S')
+		Begin
+			Set @intNoOfShipRecordCounter=null
+
+			Select @intNoOfShipRecordCounter=MIN(intRecordId) From @tblNodeData Where strType='S'
+
+			While (@intNoOfShipRecordCounter is not null)
+			Begin
+				Select @intId=intLotId From @tblNodeData Where intRecordId=@intNoOfShipRecordCounter
+
+				SELECT @intMaxRecordCount = Max(intRecordId) FROM @tblNodeData
+
+				--SO
+				Insert Into @tblNodeData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+				dblQuantity,strUOM,dtmTransactionDate,strCustomer,strType)
+				Exec uspMFGetTraceabilitySalesOrderFromShipment @intId
+
+				Update @tblNodeData Set intRecordId=@intMaxRecordCount+1,intParentId=@intNoOfShipRecordCounter Where intRecordId is null
+
+				Select @intNoOfShipRecordCounter=MIN(intRecordId) From @tblNodeData Where strType='S' And intRecordId>@intNoOfShipRecordCounter
+			End
+		End
 
 	--Counter Data for the while loop
 	SELECT @intMaxRecordCount = Max(intRecordId),@intParentId = Max(intRecordId) FROM @tblNodeData
@@ -522,7 +666,7 @@ Begin
 	Insert Into @tblTemp(intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
 	dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strType)
 	Select TOP 1 intRecordId-(Case When @intNoOfShipRecord>0 Then (@intNoOfShipRecord-1) Else 0 End),intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
-	dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strType From @tblNodeData Order By intRecordId Desc
+	dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strType From @tblNodeData Where strType not in ('SO') Order By intRecordId Desc
 
 	Set @intRowCount=1
 
@@ -651,20 +795,22 @@ End
 	Select intRecordId AS [key],
 	intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
 	dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strVendor,strCustomer,strProcessName,strType,intAttributeTypeId,intImageTypeId,
-	Case When strType='L' Then 
-		Case When intImageTypeId = 2 Then '../resources/images/graphics/traceability-raw-material.png' 
-			When intImageTypeId = 4 Then '../resources/images/graphics/traceability-wip-material.png' 
-			When intImageTypeId = 6 Then '../resources/images/graphics/traceability-finished-goods.png' 
-			Else '../resources/images/graphics/traceability-wip-material.png'
+	Case When strType IN ('L','IT') Then 
+		Case When intImageTypeId = 2 Then './resources/images/graphics/traceability-raw-material.png' 
+			When intImageTypeId = 4 Then './resources/images/graphics/traceability-wip-material.png' 
+			When intImageTypeId = 6 Then './resources/images/graphics/traceability-finished-goods.png' 
+			Else './resources/images/graphics/traceability-wip-material.png'
 		End
 	When strType='W' Then 
-		Case When intAttributeTypeId=3 Then '../resources/images/graphics/traceability-packaging.png' 
-		Else '../resources/images/graphics/traceability-wip-process.png' End
-	When strType='R' Then '../resources/images/graphics/traceability-receipt.png'
-	When strType='S' Then '../resources/images/graphics/traceability-shipment.png'
-	When strType='C' Then '../resources/images/graphics/traceability-wip-process.png'
-	When strType='IS' Then '../resources/images/graphics/traceability-shipment.png'
-	When strType='CN' Then '../resources/images/graphics/traceability-finished-goods.png'
+		Case When intAttributeTypeId=3 Then './resources/images/graphics/traceability-packaging.png' 
+		Else './resources/images/graphics/traceability-wip-process.png' End
+	When strType='R' Then './resources/images/graphics/traceability-receipt.png'
+	When strType='S' Then './resources/images/graphics/traceability-shipment.png'
+	When strType='C' Then './resources/images/graphics/traceability-wip-process.png'
+	When strType='IS' Then './resources/images/graphics/traceability-shipment.png'
+	When strType='CN' Then './resources/images/graphics/traceability-finished-goods.png'
+	When strType='SO' Then './resources/images/graphics/traceability-finished-goods.png'
+	When strType='IN' Then './resources/images/graphics/traceability-finished-goods.png'
 	End AS strImage,
 	CASE When ISNULL(strProcessName,'')='' THEN  strLotNumber Else strLotNumber + CHAR(13) + '(' + strProcessName + ')' End AS strNodeText,
 	'Item No.	  : ' + ISNULL(strItemNo,'') + CHAR(13) +
@@ -697,5 +843,13 @@ End
 	From @tblNodeDataFinal group by (convert(varchar,strType) + convert(varchar,strTransactionName) + convert(varchar,intLotId))
 	) t on (convert(varchar,strType) + convert(varchar,f.strTransactionName) + convert(varchar,f.intLotId))=t.strKey
 	Where f.intGroupRowNo is not null
+
+	--Update the transaction for SO Link for forward
+	If @intDirectionId=1
+		Update @tblNodeDataFinal set strTransactionName='Sales Order' Where strType='S' and ysnExcludedNode=1
+
+	--Update the transaction for Shipment Link for reverse
+	If @intDirectionId=2 And Exists (Select 1 From @tblNodeDataFinal Where strType='IN')
+		Update @tblNodeDataFinal set strTransactionName='Invoice' Where strType='S'
 
 	Select * from @tblNodeDataFinal
