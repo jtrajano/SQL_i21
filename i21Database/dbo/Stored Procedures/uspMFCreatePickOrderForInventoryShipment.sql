@@ -113,6 +113,30 @@ BEGIN TRY
 
 	EXEC dbo.uspMFCreateStagingOrderDetail @OrderDetailInformation = @OrderDetailInformation
 
+	DELETE
+	FROM tblMFOrderHeader
+	WHERE intOrderTypeId = 5
+		AND strReferenceNo NOT IN (
+			SELECT S.strShipmentNumber
+			FROM tblICInventoryShipment S
+			)
+
+	DELETE T
+	FROM tblMFTask T
+	JOIN tblMFOrderHeader OH ON OH.intOrderHeaderId = T.intOrderHeaderId
+		AND OH.intOrderTypeId = 5
+		AND T.intTaskStateId <> 4
+	JOIN tblICInventoryShipment S ON S.strShipmentNumber = OH.strReferenceNo
+		AND S.ysnPosted = 1
+
+	DELETE T
+	FROM tblMFTask T
+	JOIN tblMFOrderHeader OH ON OH.intOrderHeaderId = T.intOrderHeaderId
+		AND OH.intOrderTypeId = 1
+		AND T.intTaskStateId <> 4
+	JOIN tblMFStageWorkOrder SW ON SW.intOrderHeaderId = T.intOrderHeaderId
+	JOIN tblMFWorkOrder W ON W.intWorkOrderId = SW.intWorkOrderId
+		AND W.intStatusId = 13
 END TRY
 
 BEGIN CATCH
