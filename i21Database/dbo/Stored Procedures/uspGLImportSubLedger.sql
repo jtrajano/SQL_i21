@@ -14,4 +14,5 @@ CREATE PROCEDURE  [dbo].[uspGLImportSubLedger]
 	 @version			VARCHAR(20),
 	 @importLogId		INT OUTPUT
 AS
-RAISERROR('Import Subledger Procedure is not available', 16, 1);
+IF EXISTS (SELECT TOP 1 1 FROM tblSMCompanyPreference WHERE ysnLegacyIntegration = 1)
+	RAISERROR('Import Subledger Procedure is not available', 16, 1);
