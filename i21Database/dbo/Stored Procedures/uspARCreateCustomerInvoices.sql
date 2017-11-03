@@ -638,7 +638,7 @@ WHERE
 UPDATE
 	@InvoicesToGenerate
 SET
-	[strComments] = [dbo].[fnARGetDefaultComment](intCompanyLocationId, intEntityCustomerId, strTransactionType, strType, 'Header', intDocumentMaintenanceId)
+	[strComments] = [dbo].[fnARGetDefaultComment](intCompanyLocationId, intEntityCustomerId, strTransactionType, strType, 'Header', intDocumentMaintenanceId, 0)
 WHERE
 	[strComments] IS NULL 
 	OR LTRIM(RTRIM([strComments])) = ''
@@ -968,8 +968,8 @@ USING
 		,[strPONumber]					= ITG.strPONumber
 		,[strBOLNumber]					= ITG.strBOLNumber
 		,[strDeliverPickup]				= ITG.strDeliverPickup
-		,[strComments]					= CASE WHEN ISNULL(ITG.strComments, '') = '' THEN dbo.fnARGetDefaultComment(ITG.intCompanyLocationId, ARC.intEntityId, ITG.strTransactionType, ITG.strType, 'Header', NULL) ELSE ITG.strComments END
-		,[strFooterComments]			= dbo.fnARGetDefaultComment(ITG.intCompanyLocationId, ARC.intEntityId, ITG.strTransactionType, ITG.strType, 'Footer', NULL)
+		,[strComments]					= CASE WHEN ISNULL(ITG.strComments, '') = '' THEN dbo.fnARGetDefaultComment(ITG.intCompanyLocationId, ARC.intEntityId, ITG.strTransactionType, ITG.strType, 'Header', NULL, 0) ELSE ITG.strComments END
+		,[strFooterComments]			= dbo.fnARGetDefaultComment(ITG.intCompanyLocationId, ARC.intEntityId, ITG.strTransactionType, ITG.strType, 'Footer', NULL, 0)
 		,[intShipToLocationId]			= ISNULL(ITG.intShipToLocationId, ISNULL(SL1.[intEntityLocationId], EL.[intEntityLocationId]))
 		,[strShipToLocationName]		= ISNULL(SL.[strLocationName], ISNULL(SL1.[strLocationName], EL.[strLocationName]))
 		,[strShipToAddress]				= ISNULL(SL.[strAddress], ISNULL(SL1.[strAddress], EL.[strAddress]))
