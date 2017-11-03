@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuICGetInventoryTransferDetail]
-	AS 
+AS
 
-SELECT TransferDetail.intInventoryTransferId
+	SELECT TransferDetail.intInventoryTransferId
 	, TransferDetail.intInventoryTransferDetailId
 	, [Transfer].intFromLocationId
 	, [Transfer].intToLocationId
@@ -9,11 +9,20 @@ SELECT TransferDetail.intInventoryTransferId
 	, TransferDetail.intSourceId
 	, strSourceNumber = (
 		CASE WHEN [Transfer].intSourceType = 1 -- Scale
-				THEN (SELECT TOP 1 strTicketNumber FROM tblSCTicket WHERE intTicketId = TransferDetail.intSourceId)
+				THEN (SELECT TOP 1
+			strTicketNumber
+		FROM tblSCTicket
+		WHERE intTicketId = TransferDetail.intSourceId)
 			WHEN [Transfer].intSourceType = 2 -- Inbound Shipment
-				THEN (SELECT TOP 1 CAST(ISNULL(intTrackingNumber, 'Inbound Shipment not found!')AS NVARCHAR(50)) FROM tblLGShipment WHERE intShipmentId = TransferDetail.intSourceId)
+				THEN (SELECT TOP 1
+			CAST(ISNULL(intTrackingNumber, 'Inbound Shipment not found!')AS NVARCHAR(50))
+		FROM tblLGShipment
+		WHERE intShipmentId = TransferDetail.intSourceId)
 			WHEN [Transfer].intSourceType = 3 -- Transports
-				THEN (SELECT TOP 1 CAST(ISNULL(TransportView.strTransaction, 'Transport not found!')AS NVARCHAR(50)) FROM vyuTRGetLoadReceipt TransportView WHERE TransportView.intLoadReceiptId = TransferDetail.intSourceId)
+				THEN (SELECT TOP 1
+			CAST(ISNULL(TransportView.strTransaction, 'Transport not found!')AS NVARCHAR(50))
+		FROM vyuTRGetLoadReceipt TransportView
+		WHERE TransportView.intLoadReceiptId = TransferDetail.intSourceId)
 			ELSE NULL
 			END
 	)
@@ -35,6 +44,7 @@ SELECT TransferDetail.intInventoryTransferId
 	, strToStorageLocationName = ToStorageLocation.strName
 	, TransferDetail.intItemUOMId
 	, strUnitMeasure = ItemUOM.strUnitMeasure
+	, strUnitMeasureSymbol = COALESCE(ItemUOM.strSymbol, ItemUOM.strUnitMeasure)
 	, dblItemUOMCF = ItemUOM.dblUnitQty
 	, intWeightUOMId = TransferDetail.intItemWeightUOMId
 	, strWeightUOM = ItemWeightUOM.strUnitMeasure
@@ -73,7 +83,7 @@ SELECT TransferDetail.intInventoryTransferId
 								ELSE NULL END)
 	, ysnPosted
 	, ysnWeights
-	, TransferDetail.strDescription
+	, Transfer.strDescription
 	, TransferDetail.strItemType
 	, TransferDetail.dblGross
 	, TransferDetail.dblNet
@@ -81,22 +91,57 @@ SELECT TransferDetail.intInventoryTransferId
 	, TransferDetail.intNewLotStatusId
 	, TransferDetail.intGrossNetUOMId
 	, strGrossNetUOM = GrossNetUOM.strUnitMeasure
+	, strGrossNetUOMSymbol = COALESCE(GrossNetUOM.strSymbol, GrossNetUOM.strUnitMeasure)
 	, TransferDetail.dblGrossNetUnitQty
 	, TransferDetail.dblItemUnitQty
-FROM tblICInventoryTransferDetail TransferDetail
-	LEFT JOIN tblICInventoryTransfer [Transfer] ON [Transfer].intInventoryTransferId = TransferDetail.intInventoryTransferId
-	LEFT JOIN tblICItem Item ON Item.intItemId = TransferDetail.intItemId
-	LEFT JOIN vyuICGetLot Lot ON Lot.intLotId = TransferDetail.intLotId
-	LEFT JOIN tblSMCompanyLocationSubLocation FromSubLocation ON FromSubLocation.intCompanyLocationSubLocationId = TransferDetail.intFromSubLocationId
-	LEFT JOIN tblSMCompanyLocationSubLocation ToSubLocation ON ToSubLocation.intCompanyLocationSubLocationId = TransferDetail.intToSubLocationId
-	LEFT JOIN tblICStorageLocation FromStorageLocation ON FromStorageLocation.intStorageLocationId = TransferDetail.intFromStorageLocationId
-	LEFT JOIN tblICStorageLocation ToStorageLocation ON ToStorageLocation.intStorageLocationId = TransferDetail.intToStorageLocationId
-	LEFT JOIN vyuICGetItemUOM ItemUOM ON ItemUOM.intItemUOMId = TransferDetail.intItemUOMId
-	LEFT JOIN vyuICGetItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = TransferDetail.intItemWeightUOMId
-	LEFT JOIN vyuICGetItemUOM GrossNetUOM ON GrossNetUOM.intItemUOMId = TransferDetail.intGrossNetUOMId	
-	LEFT JOIN tblSMTaxCode TaxCode ON TaxCode.intTaxCodeId = TransferDetail.intTaxCodeId
-	LEFT JOIN vyuICGetItemStockUOM StockFrom ON StockFrom.intItemId = TransferDetail.intItemId
-		AND StockFrom.intLocationId = [Transfer].intFromLocationId
-		AND StockFrom.intItemUOMId = TransferDetail.intItemUOMId
-		AND ISNULL(StockFrom.intSubLocationId, 0) = ISNULL(TransferDetail.intFromSubLocationId, 0)
-		AND ISNULL(StockFrom.intStorageLocationId, 0) = ISNULL(TransferDetail.intFromStorageLocationId, 0)
+	, Transfer.dtmTransferDate
+	, Transfer.ysnShipmentRequired
+	, strTransferredBy = e.strName
+	, strFromLocationName = FromLoc.strLocationName
+	, strToLocationName = ToLoc.strLocationName
+	, stat.strStatus
+	, strTransferFromAddress = [dbo].[fnARFormatCustomerAddress](
+		DEFAULT
+		,DEFAULT 
+		,DEFAULT 
+		,FromLoc.strAddress
+		,FromLoc.strCity
+		,FromLoc.strStateProvince
+		,FromLoc.strZipPostalCode
+		,FromLoc.strCountry
+		,DEFAULT 
+		,DEFAULT 
+	)
+	, strTransferToAddress = [dbo].[fnARFormatCustomerAddress](
+		DEFAULT
+		,DEFAULT 
+		,DEFAULT 
+		,ToLoc.strAddress
+		,ToLoc.strCity
+		,ToLoc.strStateProvince
+		,ToLoc.strZipPostalCode
+		,ToLoc.strCountry
+		,DEFAULT 
+		,DEFAULT 
+	)
+	FROM tblICInventoryTransferDetail TransferDetail
+		LEFT JOIN tblICInventoryTransfer [Transfer] ON [Transfer].intInventoryTransferId = TransferDetail.intInventoryTransferId
+		LEFT JOIN tblEMEntity e ON e.intEntityId = Transfer.intTransferredById
+		LEFT JOIN tblICItem Item ON Item.intItemId = TransferDetail.intItemId
+		LEFT JOIN tblICStatus stat ON stat.intStatusId = Transfer.intStatusId
+		LEFT JOIN vyuICGetLot Lot ON Lot.intLotId = TransferDetail.intLotId
+		LEFT JOIN tblSMCompanyLocation FromLoc ON FromLoc.intCompanyLocationId = Transfer.intFromLocationId
+		LEFT JOIN tblSMCompanyLocation ToLoc ON ToLoc.intCompanyLocationId = Transfer.intToLocationId
+		LEFT JOIN tblSMCompanyLocationSubLocation FromSubLocation ON FromSubLocation.intCompanyLocationSubLocationId = TransferDetail.intFromSubLocationId
+		LEFT JOIN tblSMCompanyLocationSubLocation ToSubLocation ON ToSubLocation.intCompanyLocationSubLocationId = TransferDetail.intToSubLocationId
+		LEFT JOIN tblICStorageLocation FromStorageLocation ON FromStorageLocation.intStorageLocationId = TransferDetail.intFromStorageLocationId
+		LEFT JOIN tblICStorageLocation ToStorageLocation ON ToStorageLocation.intStorageLocationId = TransferDetail.intToStorageLocationId
+		LEFT JOIN vyuICGetItemUOM ItemUOM ON ItemUOM.intItemUOMId = TransferDetail.intItemUOMId
+		LEFT JOIN vyuICGetItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = TransferDetail.intItemWeightUOMId
+		LEFT JOIN vyuICGetItemUOM GrossNetUOM ON GrossNetUOM.intItemUOMId = TransferDetail.intGrossNetUOMId
+		LEFT JOIN tblSMTaxCode TaxCode ON TaxCode.intTaxCodeId = TransferDetail.intTaxCodeId
+		LEFT JOIN vyuICGetItemStockUOM StockFrom ON StockFrom.intItemId = TransferDetail.intItemId
+			AND StockFrom.intLocationId = [Transfer].intFromLocationId
+			AND StockFrom.intItemUOMId = TransferDetail.intItemUOMId
+			AND ISNULL(StockFrom.intSubLocationId, 0) = ISNULL(TransferDetail.intFromSubLocationId, 0)
+			AND ISNULL(StockFrom.intStorageLocationId, 0) = ISNULL(TransferDetail.intFromStorageLocationId, 0)
