@@ -383,8 +383,12 @@ BEGIN TRY
 			WHERE IM.intItemId = @intItemId
 
 			SELECT @intEntityId = intEntityId
-			FROM tblEMEntity
-			WHERE strName = @strVendorName
+			FROM vyuCTEntity
+			WHERE strEntityName = @strVendorName
+				AND (
+					strEntityType = 'Vendor'
+					OR strEntityType = 'Customer'
+					)
 
 			-- Take the template UOM. If not avail, take stock UOM
 			SELECT @intRepresentingUOMId = P.intUnitMeasureId
