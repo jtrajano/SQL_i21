@@ -5859,6 +5859,10 @@
     <Build Include="dbo\Stored Procedures\uspLGCreateLoadForPickLot.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityInvoiceFromShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilitySalesOrderFromShipment.sql" />
+    <Build Include="dbo\Tables\tblBBProgram.sql" />
+    <Build Include="dbo\Tables\tblBBProgramCharge.sql" />
+    <Build Include="dbo\Tables\tblBBProgramCustomer.sql" />
+    <Build Include="dbo\Tables\tblBBRate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

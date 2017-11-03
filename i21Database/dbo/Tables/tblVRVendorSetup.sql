@@ -3,6 +3,8 @@
 	[intEntityId] [int] NOT NULL,
 	[strExportFileType] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL,
 	[strExportFilePath] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	[strBuybackExportFileType] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL,
+	[strBuybackExportFilePath] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[strCompany1Id] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
 	[strCompany2Id] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] INT DEFAULT 0 NOT NULL ,
