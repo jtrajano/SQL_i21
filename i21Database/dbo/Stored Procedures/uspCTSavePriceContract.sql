@@ -34,7 +34,8 @@ BEGIN TRY
 			@ysnHedge					BIT,
 			@strAction					NVARCHAR(50) = '',
 			@intOutputId				INT,
-			@dtmFixationDate			DATETIME
+			@dtmFixationDate			DATETIME,
+			@ysnFreezed					BIT
 
 	SELECT @intUserId = ISNULL(intLastModifiedById,intCreatedById) FROM tblCTPriceContract WHERE intPriceContractId = @intPriceContractId
 
@@ -49,7 +50,7 @@ BEGIN TRY
 		WHILE	ISNULL(@intPriceFixationDetailId,0) > 0
 		BEGIN
 		
-			SELECT	@intFutOptTransactionId = 0,@ysnHedge = 0
+			SELECT	@intFutOptTransactionId = 0,@ysnHedge = 0,@ysnFreezed = 0
 
 			SELECT	@intFutOptTransactionId	=	FD.intFutOptTransactionId,	
 					@intBrokerId			=	FD.intBrokerId,
@@ -80,41 +81,46 @@ BEGIN TRY
 			APPLY	fnCTGetTopOneSequence(PF.intContractHeaderId,PF.intContractDetailId) TS
 			WHERE	FD.intPriceFixationDetailId	=	@intPriceFixationDetailId
 
-			IF @ysnHedge = 1
+			SELECT @ysnFreezed = ysnFreezed FROM tblRKFutOptTransaction WHERE intFutOptTransactionId = ISNULL(@intFutOptTransactionId,0)
+			
+			IF @ysnHedge = 1 
 			BEGIN
-				SET @strXML = '<root>'
-				IF ISNULL(@intFutOptTransactionId,0) > 0
-					SET @strXML = @strXML +  '<intFutOptTransactionId>' + LTRIM(@intFutOptTransactionId) + '</intFutOptTransactionId>'
-				SET @strXML = @strXML +  '<intFutOptTransactionHeaderId>1</intFutOptTransactionHeaderId>'
-				SET @strXML = @strXML +  '<intContractHeaderId>' + LTRIM(@intContractHeaderId) + '</intContractHeaderId>'
-				IF ISNULL(@intContractDetailId,0) > 0
-					SET @strXML = @strXML +  '<intContractDetailId>' + LTRIM(@intContractDetailId) + '</intContractDetailId>'
-				SET @strXML = @strXML +  '<dtmTransactionDate>' + LTRIM(GETDATE()) + '</dtmTransactionDate>'
-				SET @strXML = @strXML +  '<intEntityId>' + LTRIM(@intBrokerId) + '</intEntityId>'
-				SET @strXML = @strXML +  '<intBrokerageAccountId>' + LTRIM(@intBrokerageAccountId) + '</intBrokerageAccountId>'
-				SET @strXML = @strXML +  '<intFutureMarketId>' + LTRIM(@intFutureMarketId) + '</intFutureMarketId>'
-				SET @strXML = @strXML +  '<intInstrumentTypeId>1</intInstrumentTypeId>'
-				SET @strXML = @strXML +  '<intCommodityId>' + LTRIM(@intCommodityId) + '</intCommodityId>'
-				SET @strXML = @strXML +  '<intLocationId>' + LTRIM(@intLocationId) + '</intLocationId>'
-				SET @strXML = @strXML +  '<intTraderId>' + LTRIM(@intTraderId) + '</intTraderId>'
-				SET @strXML = @strXML +  '<intCurrencyId>' + LTRIM(@intCurrencyId) + '</intCurrencyId>'
-				SET @strXML = @strXML +  '<intSelectedInstrumentTypeId>1</intSelectedInstrumentTypeId>'
-				SET @strXML = @strXML +  '<strBuySell>' + @strBuySell + '</strBuySell>'
-				SET @strXML = @strXML +  '<intNoOfContract>' + LTRIM(@intNoOfContract) + '</intNoOfContract>'
-				SET @strXML = @strXML +  '<intFutureMonthId>' + LTRIM(@intHedgeFutureMonthId) + '</intFutureMonthId>'
-				SET @strXML = @strXML +  '<dblPrice>' + LTRIM(@dblHedgePrice) + '</dblPrice>'
-				SET @strXML = @strXML +  '<strStatus>' + 'Filled' + '</strStatus>'
-				SET @strXML = @strXML +  '<dtmFilledDate>' + LTRIM(@dtmFixationDate) + '</dtmFilledDate>'
-				if ISNULL(@intBookId,0) > 0
-					SET @strXML = @strXML +  '<intBookId>' + LTRIM(@intBookId) + '</intBookId>'
-				if ISNULL(@intSubBookId,0) > 0
-					SET @strXML = @strXML +  '<intSubBookId>' + LTRIM(@intSubBookId) + '</intSubBookId>'
-				SET @strXML = @strXML +  '</root>'
+				IF ISNULL(@ysnFreezed,0) = 0
+				BEGIN
+					SET @strXML = '<root>'
+					IF ISNULL(@intFutOptTransactionId,0) > 0
+						SET @strXML = @strXML +  '<intFutOptTransactionId>' + LTRIM(@intFutOptTransactionId) + '</intFutOptTransactionId>'
+					SET @strXML = @strXML +  '<intFutOptTransactionHeaderId>1</intFutOptTransactionHeaderId>'
+					SET @strXML = @strXML +  '<intContractHeaderId>' + LTRIM(@intContractHeaderId) + '</intContractHeaderId>'
+					IF ISNULL(@intContractDetailId,0) > 0
+						SET @strXML = @strXML +  '<intContractDetailId>' + LTRIM(@intContractDetailId) + '</intContractDetailId>'
+					SET @strXML = @strXML +  '<dtmTransactionDate>' + LTRIM(GETDATE()) + '</dtmTransactionDate>'
+					SET @strXML = @strXML +  '<intEntityId>' + LTRIM(@intBrokerId) + '</intEntityId>'
+					SET @strXML = @strXML +  '<intBrokerageAccountId>' + LTRIM(@intBrokerageAccountId) + '</intBrokerageAccountId>'
+					SET @strXML = @strXML +  '<intFutureMarketId>' + LTRIM(@intFutureMarketId) + '</intFutureMarketId>'
+					SET @strXML = @strXML +  '<intInstrumentTypeId>1</intInstrumentTypeId>'
+					SET @strXML = @strXML +  '<intCommodityId>' + LTRIM(@intCommodityId) + '</intCommodityId>'
+					SET @strXML = @strXML +  '<intLocationId>' + LTRIM(@intLocationId) + '</intLocationId>'
+					SET @strXML = @strXML +  '<intTraderId>' + LTRIM(@intTraderId) + '</intTraderId>'
+					SET @strXML = @strXML +  '<intCurrencyId>' + LTRIM(@intCurrencyId) + '</intCurrencyId>'
+					SET @strXML = @strXML +  '<intSelectedInstrumentTypeId>1</intSelectedInstrumentTypeId>'
+					SET @strXML = @strXML +  '<strBuySell>' + @strBuySell + '</strBuySell>'
+					SET @strXML = @strXML +  '<intNoOfContract>' + LTRIM(@intNoOfContract) + '</intNoOfContract>'
+					SET @strXML = @strXML +  '<intFutureMonthId>' + LTRIM(@intHedgeFutureMonthId) + '</intFutureMonthId>'
+					SET @strXML = @strXML +  '<dblPrice>' + LTRIM(@dblHedgePrice) + '</dblPrice>'
+					SET @strXML = @strXML +  '<strStatus>' + 'Filled' + '</strStatus>'
+					SET @strXML = @strXML +  '<dtmFilledDate>' + LTRIM(@dtmFixationDate) + '</dtmFilledDate>'
+					if ISNULL(@intBookId,0) > 0
+						SET @strXML = @strXML +  '<intBookId>' + LTRIM(@intBookId) + '</intBookId>'
+					if ISNULL(@intSubBookId,0) > 0
+						SET @strXML = @strXML +  '<intSubBookId>' + LTRIM(@intSubBookId) + '</intSubBookId>'
+					SET @strXML = @strXML +  '</root>'
 
-				EXEC uspRKAutoHedge @strXML,@intOutputId OUTPUT
+					EXEC uspRKAutoHedge @strXML,@intOutputId OUTPUT
 
-				IF ISNULL(@intFutOptTransactionId,0) = 0
-					UPDATE tblCTPriceFixationDetail SET intFutOptTransactionId = @intOutputId WHERE intPriceFixationDetailId = @intPriceFixationDetailId
+					IF ISNULL(@intFutOptTransactionId,0) = 0
+						UPDATE tblCTPriceFixationDetail SET intFutOptTransactionId = @intOutputId WHERE intPriceFixationDetailId = @intPriceFixationDetailId
+				END
 			END
 			ELSE
 			BEGIN

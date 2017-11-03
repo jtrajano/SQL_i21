@@ -34,7 +34,8 @@ AS
 			UM.strUnitMeasure	AS strHedgeUOM,
 			REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') ') AS strHedgeMonth,
 			EY.strName			AS strBroker,
-			BA.strAccountNumber AS strBrokerAccount
+			BA.strAccountNumber AS strBrokerAccount,
+			TR.ysnFreezed
 
 	FROM	tblCTPriceFixationDetail	FD
 	JOIN	tblICCommodityUnitMeasure	PU	ON	PU.intCommodityUnitMeasureId	=	FD.intPricingUOMId
@@ -44,4 +45,5 @@ AS
 	JOIN	tblICUnitMeasure			UM	ON	UM.intUnitMeasureId				=	MA.intUnitMeasureId			LEFT
 	JOIN	tblRKFuturesMonth			MO	ON	MO.intFutureMonthId				=	FD.intHedgeFutureMonthId	LEFT
 	JOIN	tblEMEntity					EY	ON	EY.intEntityId					=	FD.intBrokerId				LEFT
-	JOIN	tblRKBrokerageAccount		BA	ON	BA.intBrokerageAccountId		=	FD.intBrokerageAccountId		
+	JOIN	tblRKBrokerageAccount		BA	ON	BA.intBrokerageAccountId		=	FD.intBrokerageAccountId	LEFT
+	JOIN	tblRKFutOptTransaction		TR	ON	TR.intFutOptTransactionId		=	FD.intFutOptTransactionId
