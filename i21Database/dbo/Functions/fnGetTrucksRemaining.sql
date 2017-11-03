@@ -20,6 +20,8 @@ BEGIN
 		AND CD.intItemId = @intItemId
 	GROUP BY CH.intContractHeaderId
 		,CD.intItemId
+		,CD.dtmStartDate
+		,CD.dtmEndDate
 
 	RETURN ISNULL(@intTrucksRemaining, 0)
 END
