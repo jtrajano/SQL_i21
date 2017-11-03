@@ -417,7 +417,7 @@ BEGIN TRY
 		,[strBOLNumber]					= @BOLNumber
 		,[strDeliverPickup]				= @DeliverPickUp
 		,[strComments]					= CASE WHEN (@Comment IS NULL OR @Comment = '') THEN (SELECT TOP 1 strMessage FROM tblSMDocumentMaintenanceMessage WHERE intDocumentMaintenanceId = @DocumentMaintenanceId AND strHeaderFooter NOT IN ('Footer')) ELSE @Comment END
-		,[strFooterComments]			= dbo.fnARGetFooterComment(@CompanyLocationId, C.intEntityCustomerId, 'Invoice Footer')
+		,[strFooterComments]			= dbo.fnARGetFooterComment(@CompanyLocationId, C.intEntityCustomerId, 'Invoice Footer', 0)
 		,[intShipToLocationId]			= ISNULL(@ShipToLocationId, ISNULL(SL1.[intEntityLocationId], EL.[intEntityLocationId]))
 		,[strShipToLocationName]		= ISNULL(SL.[strLocationName], ISNULL(SL1.[strLocationName], EL.[strLocationName]))
 		,[strShipToAddress]				= ISNULL(SL.[strAddress], ISNULL(SL1.[strAddress], EL.[strAddress]))

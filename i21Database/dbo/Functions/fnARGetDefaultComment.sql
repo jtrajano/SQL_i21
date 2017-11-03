@@ -5,7 +5,8 @@
 	@strTransactionType     NVARCHAR(50) = NULL,
 	@strType                NVARCHAR(50) = NULL,
 	@strHeaderFooter		NVARCHAR(50) = NULL,
-	@DocumentMaintenanceId	INT = NULL
+	@DocumentMaintenanceId	INT = NULL,
+	@ysnPrintAsHTML			BIT = 0
 )
 RETURNS NVARCHAR(MAX) AS
 BEGIN
@@ -23,7 +24,7 @@ BEGIN
 	SELECT TOP 1 @strDefaultComment = B.strMessage --strMessageDesc
 		FROM [tblSMDocumentMaintenance] A
 		INNER JOIN (SELECT intDocumentMaintenanceId
-						 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
+						 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
 					FROM tblSMDocumentMaintenanceMessage
 					WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 		WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
@@ -36,7 +37,7 @@ BEGIN
 			SELECT TOP 1 @strDefaultComment = B.strMessage --strMessageDesc
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
-								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
+								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
@@ -52,7 +53,7 @@ BEGIN
 			SELECT TOP 1 @strDefaultComment = B.strMessage --strMessageDesc
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
-								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
+								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
@@ -68,7 +69,7 @@ BEGIN
 			SELECT TOP 1 @strDefaultComment = B.strMessage --strMessageDesc
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
-								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
+								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
@@ -84,7 +85,7 @@ BEGIN
 			SELECT TOP 1 @strDefaultComment = B.strMessage--strMessageDesc
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
-								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
+								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
@@ -100,7 +101,7 @@ BEGIN
 			SELECT TOP 1 @strDefaultComment = B.strMessage --strMessageDesc
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
-								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
+								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
@@ -116,7 +117,7 @@ BEGIN
 			SELECT TOP 1 @strDefaultComment = B.strMessage --strMessageDesc
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
-								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
+								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
@@ -132,7 +133,7 @@ BEGIN
 			SELECT TOP 1 @strDefaultComment = B.strMessage --strMessageDesc
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
-								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
+								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
@@ -148,7 +149,7 @@ BEGIN
 			SELECT TOP 1 @strDefaultComment = B.strMessage --strMessageDesc
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
-								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
+								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE [strSource] IS NULL AND A.intDocumentMaintenanceId = @DocumentMaintenanceId
@@ -164,7 +165,7 @@ BEGIN
 	SELECT TOP 1 @strDefaultComment = B.strMessage --strMessageDesc
 		FROM [tblSMDocumentMaintenance] A
 		INNER JOIN (SELECT intDocumentMaintenanceId
-						 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
+						 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
 					FROM tblSMDocumentMaintenanceMessage
 					WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 		WHERE [strSource] = @strTransactionType
@@ -180,7 +181,7 @@ BEGIN
 			SELECT TOP 1 @strDefaultComment = B.strMessage --strMessageDesc
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
-								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
+								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE [strSource] = @strTransactionType
@@ -198,7 +199,7 @@ BEGIN
 			SELECT TOP 1 @strDefaultComment = B.strMessage --strMessageDesc
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
-								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
+								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE [strSource] = @strTransactionType
@@ -217,7 +218,7 @@ BEGIN
 			SELECT TOP 1 @strDefaultComment = B.strMessage --strMessageDesc
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
-								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
+								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE [strSource] = @strTransactionType
@@ -235,7 +236,7 @@ BEGIN
 			SELECT TOP 1 @strDefaultComment = B.strMessage--strMessageDesc
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
-								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
+								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE [strSource] = @strTransactionType
@@ -254,7 +255,7 @@ BEGIN
 			SELECT TOP 1 @strDefaultComment = B.strMessage --strMessageDesc
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
-								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
+								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE [strSource] = @strTransactionType
@@ -272,7 +273,7 @@ BEGIN
 			SELECT TOP 1 @strDefaultComment = B.strMessage --strMessageDesc
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
-								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
+								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE [strSource] = @strTransactionType
@@ -291,7 +292,7 @@ BEGIN
 			SELECT TOP 1 @strDefaultComment = B.strMessage --strMessageDesc
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
-								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
+								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE [strSource] = @strTransactionType
@@ -309,7 +310,7 @@ BEGIN
 			SELECT TOP 1 @strDefaultComment = B.strMessage --strMessageDesc
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
-								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
+								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE [strSource] IS NULL

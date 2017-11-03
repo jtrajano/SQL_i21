@@ -2,7 +2,8 @@
 (
 	@intCompanyLocationId	INT = NULL,
 	@intEntityCustomerId	INT = NULL,
-	@strTransactionType     NVARCHAR(50) = NULL
+	@strTransactionType     NVARCHAR(50) = NULL,
+	@ysnPrintAsHTML			BIT = 0
 )
 RETURNS NVARCHAR(MAX) AS
 BEGIN
@@ -14,7 +15,7 @@ BEGIN
 			FROM [tblSMDocumentMaintenance] A
 			INNER JOIN (SELECT intDocumentMaintenanceId
 							 , strHeaderFooter
-						     , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
+						     , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
 						FROM tblSMDocumentMaintenanceMessage
 						WHERE strHeaderFooter = 'Footer') B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 			WHERE strSource = @strTransactionType
@@ -28,7 +29,7 @@ BEGIN
 					FROM [tblSMDocumentMaintenance] A
 					INNER JOIN (SELECT intDocumentMaintenanceId
 									 , strHeaderFooter
-									 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
+									 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
 								FROM tblSMDocumentMaintenanceMessage
 								WHERE strHeaderFooter = 'Footer') B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 					WHERE strSource = @strTransactionType
@@ -43,7 +44,7 @@ BEGIN
 					FROM [tblSMDocumentMaintenance]	A
 					INNER JOIN (SELECT intDocumentMaintenanceId
 									 , strHeaderFooter 
-									 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
+									 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
 								FROM tblSMDocumentMaintenanceMessage
 								WHERE strHeaderFooter = 'Footer') B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 					WHERE strSource = @strTransactionType
@@ -58,7 +59,7 @@ BEGIN
 					FROM [tblSMDocumentMaintenance] A
 					INNER JOIN (SELECT intDocumentMaintenanceId
 									 , strHeaderFooter
-									 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
+									 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
 								FROM tblSMDocumentMaintenanceMessage
 								WHERE strHeaderFooter = 'Footer') B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 					WHERE strSource = @strTransactionType

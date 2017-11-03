@@ -198,7 +198,7 @@ SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
 	 , strAccountStatusCode = STATUSCODES.strAccountStatusCode
 	 , CL.strLocationName
 	 , strFullAddress = [dbo].fnARFormatCustomerAddress(NULL, NULL, CASE WHEN CUST.strStatementFormat <> ''Running Balance'' THEN C.strBillToLocationName ELSE NULL END, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, NULL)
-	 , strStatementFooterComment = [dbo].fnARGetFooterComment(I.intCompanyLocationId, I.intEntityCustomerId, ''Statement Footer'')	 
+	 , strStatementFooterComment = [dbo].fnARGetFooterComment(I.intCompanyLocationId, I.intEntityCustomerId, ''Statement Footer'', 1)	 
 	 , strCompanyName = (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
 	 , strCompanyAddress = (SELECT TOP 1 dbo.[fnARFormatCustomerAddress](strPhone, '''', '''', strAddress, strCity, strState, strZip, strCountry, '''', NULL) FROM tblSMCompanySetup)
 	 , dblARBalance = CUST.dblARBalance
