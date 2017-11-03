@@ -621,7 +621,7 @@ BEGIN TRY
 			,[dblQty]
 			,[dblUOMQty]
 			,[intCostUOMId]
-			,[dblVoucherCost]
+			,[dblNewValue]
 			,[intCurrencyId]
 			--,[dblExchangeRate]
 			,[intTransactionId]
