@@ -177,28 +177,14 @@ namespace iRely.Inventory.BusinessLayer
                     return null;
                 }
 
-                //var ca = context.GetQuery<tblICCategoryAccount>().FirstOrDefault(t => t.intCategoryId == fc.intCategoryId && t.intAccountCategoryId == fc.intAccountCategoryId);
-                //if (ca != null)
-                //{
-                //    var entry = context.ContextManager.Entry<tblICCategoryAccount>(ca);
-                //    entry.Property(e => e.intAccountCategoryId).CurrentValue = intNewAccountCategoryId == null ? fc.intAccountCategoryId : (int)intNewAccountCategoryId;
-                //    entry.Property(e => e.intCategoryId).CurrentValue = intNewCategoryId == null ? fc.intCategoryId : (int)intNewCategoryId;
-                //    entry.Property(e => e.intAccountId).CurrentValue = fc.intAccountId;
-                //    entry.State = System.Data.Entity.EntityState.Modified;
-                //}
-
-                if (GlobalSettings.Instance.AllowOverwriteOnImport)
+                var ca = context.GetQuery<tblICCategoryAccount>().FirstOrDefault(t => t.intCategoryId == fc.intCategoryId && t.intAccountCategoryId == fc.intAccountCategoryId);
+                if (ca != null)
                 {
-                    dr.Info = INFO_WARN;
-                    dr.Messages.Add(new ImportDataMessage()
-                    {
-                        Type = TYPE_INNER_WARN,
-                        Status = STAT_REC_SKIP,
-                        Column = headers[1] + "/" + headers[2],
-                        Row = row,
-                        Message = "This feature doesn't support overriding existing records. Record skipped."
-                    });
-                    return null;
+                    var entry = context.ContextManager.Entry<tblICCategoryAccount>(ca);
+                    entry.Property(e => e.intAccountCategoryId).CurrentValue = fc.intAccountCategoryId;
+                    entry.Property(e => e.intCategoryId).CurrentValue = fc.intCategoryId;
+                    entry.Property(e => e.intAccountId).CurrentValue = fc.intAccountId;
+                    entry.State = System.Data.Entity.EntityState.Modified;
                 }
             }
             else
