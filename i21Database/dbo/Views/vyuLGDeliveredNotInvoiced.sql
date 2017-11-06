@@ -20,6 +20,8 @@ SELECT   Load.intLoadId
 		,UOM.strUnitMeasure AS strItemUOM
 		,WeightUOM.strUnitMeasure AS strWeightItemUOM
 		,PLH.strPickLotNumber 
+		,CLSL.strSubLocationName
+		,CLSL.strSubLocationDescription
 FROM tblLGLoadDetail LoadDetail
 JOIN tblLGLoad Load ON Load.intLoadId = LoadDetail.intLoadId
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = Load.intGenerateLoadId
@@ -36,6 +38,8 @@ LEFT JOIN tblLGLoadDetailLot LoadDetailLot ON LoadDetailLot.intLoadDetailId = Lo
 LEFT JOIN tblICLot Lot ON Lot.intLotId = LoadDetailLot.intLotId
 LEFT JOIN tblLGPickLotDetail PLD ON PLD.intPickLotDetailId= LoadDetail.intPickLotDetailId
 LEFT JOIN tblLGPickLotHeader PLH ON PLH.intPickLotHeaderId = PLD.intPickLotHeaderId
+LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadId = Load.intLoadId
+LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
 WHERE LoadDetail.intLoadDetailId NOT IN (SELECT ISNULL(tblARInvoiceDetail.intLoadDetailId,0) FROM tblARInvoiceDetail)
   AND Load.intPurchaseSale IN (2,3)
   AND Load.intShipmentType = 1
