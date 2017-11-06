@@ -31,6 +31,8 @@
             DevExpress.XtraReports.UI.XRSummary xrSummary1 = new DevExpress.XtraReports.UI.XRSummary();
             DevExpress.DataAccess.Sql.StoredProcQuery storedProcQuery1 = new DevExpress.DataAccess.Sql.StoredProcQuery();
             DevExpress.DataAccess.Sql.QueryParameter queryParameter1 = new DevExpress.DataAccess.Sql.QueryParameter();
+            DevExpress.DataAccess.Sql.StoredProcQuery storedProcQuery2 = new DevExpress.DataAccess.Sql.StoredProcQuery();
+            DevExpress.DataAccess.Sql.QueryParameter queryParameter2 = new DevExpress.DataAccess.Sql.QueryParameter();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TransferOrderReport));
             this.Detail = new DevExpress.XtraReports.UI.DetailBand();
             this.xrTable3 = new DevExpress.XtraReports.UI.XRTable();
@@ -46,12 +48,15 @@
             this.xrTableCell22 = new DevExpress.XtraReports.UI.XRTableCell();
             this.TopMargin = new DevExpress.XtraReports.UI.TopMarginBand();
             this.lblTransferOrderNo = new DevExpress.XtraReports.UI.XRLabel();
+            this.frHasHeaderLogo = new DevExpress.XtraReports.UI.FormattingRule();
             this.lblTransferOrderNoLabel = new DevExpress.XtraReports.UI.XRLabel();
             this.BottomMargin = new DevExpress.XtraReports.UI.BottomMarginBand();
             this.pageHeaderBand1 = new DevExpress.XtraReports.UI.PageHeaderBand();
+            this.xrPictureBox1 = new DevExpress.XtraReports.UI.XRPictureBox();
             this.SrCompanyLogo = new DevExpress.XtraReports.UI.XRPictureBox();
-            this.labelCompanyName = new DevExpress.XtraReports.UI.XRLabel();
-            this.label3 = new DevExpress.XtraReports.UI.XRLabel();
+            this.frHasNoHeaderLogo = new DevExpress.XtraReports.UI.FormattingRule();
+            this.SrCompanyName = new DevExpress.XtraReports.UI.XRLabel();
+            this.SrCompanyAddress = new DevExpress.XtraReports.UI.XRLabel();
             this.xrTable1 = new DevExpress.XtraReports.UI.XRTable();
             this.xrTableRow1 = new DevExpress.XtraReports.UI.XRTableRow();
             this.xrTableCell2 = new DevExpress.XtraReports.UI.XRTableCell();
@@ -192,6 +197,8 @@
             // 
             // xrTableCell14
             // 
+            this.xrTableCell14.DataBindings.AddRange(new DevExpress.XtraReports.UI.XRBinding[] {
+            new DevExpress.XtraReports.UI.XRBinding("Text", null, "uspICInventoryTransferReport.strWarehouseRefNo")});
             this.xrTableCell14.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.xrTableCell14.FormattingRules.Add(this.frHideWhenComment);
             this.xrTableCell14.Name = "xrTableCell14";
@@ -235,7 +242,6 @@
             this.xrTableCell18.StylePriority.UseBorders = false;
             this.xrTableCell18.StylePriority.UseFont = false;
             this.xrTableCell18.StylePriority.UseTextAlignment = false;
-            this.xrTableCell18.Text = "UOM";
             this.xrTableCell18.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
             this.xrTableCell18.Weight = 0.44680403108544564D;
             // 
@@ -279,21 +285,33 @@
             // 
             this.lblTransferOrderNo.DataBindings.AddRange(new DevExpress.XtraReports.UI.XRBinding[] {
             new DevExpress.XtraReports.UI.XRBinding("Text", null, "uspICInventoryTransferReport.strTransferNo")});
-            this.lblTransferOrderNo.Font = new System.Drawing.Font("Arial", 14F, System.Drawing.FontStyle.Bold);
-            this.lblTransferOrderNo.LocationFloat = new DevExpress.Utils.PointFloat(632.3332F, 24.58334F);
+            this.lblTransferOrderNo.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Bold);
+            this.lblTransferOrderNo.FormattingRules.Add(this.frHasHeaderLogo);
+            this.lblTransferOrderNo.LocationFloat = new DevExpress.Utils.PointFloat(662.5414F, 150.3333F);
             this.lblTransferOrderNo.Name = "lblTransferOrderNo";
             this.lblTransferOrderNo.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
-            this.lblTransferOrderNo.SizeF = new System.Drawing.SizeF(134.6667F, 23F);
+            this.lblTransferOrderNo.SizeF = new System.Drawing.SizeF(104.4584F, 23F);
             this.lblTransferOrderNo.StylePriority.UseFont = false;
             this.lblTransferOrderNo.Text = "Transfer Order No.:";
             // 
+            // frHasHeaderLogo
+            // 
+            this.frHasHeaderLogo.Condition = "[ysnHasHeaderLogo] == True";
+            this.frHasHeaderLogo.DataMember = "uspICInventoryTransferReport";
+            // 
+            // 
+            // 
+            this.frHasHeaderLogo.Formatting.Visible = DevExpress.Utils.DefaultBoolean.True;
+            this.frHasHeaderLogo.Name = "frHasHeaderLogo";
+            // 
             // lblTransferOrderNoLabel
             // 
-            this.lblTransferOrderNoLabel.Font = new System.Drawing.Font("Arial", 14F, System.Drawing.FontStyle.Bold);
-            this.lblTransferOrderNoLabel.LocationFloat = new DevExpress.Utils.PointFloat(483.9897F, 24.58334F);
+            this.lblTransferOrderNoLabel.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Bold);
+            this.lblTransferOrderNoLabel.FormattingRules.Add(this.frHasHeaderLogo);
+            this.lblTransferOrderNoLabel.LocationFloat = new DevExpress.Utils.PointFloat(536.0728F, 150.3333F);
             this.lblTransferOrderNoLabel.Name = "lblTransferOrderNoLabel";
             this.lblTransferOrderNoLabel.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
-            this.lblTransferOrderNoLabel.SizeF = new System.Drawing.SizeF(148.3435F, 23F);
+            this.lblTransferOrderNoLabel.SizeF = new System.Drawing.SizeF(126.4685F, 23F);
             this.lblTransferOrderNoLabel.StylePriority.UseFont = false;
             this.lblTransferOrderNoLabel.Text = "Transfer Order:";
             // 
@@ -307,52 +325,77 @@
             // pageHeaderBand1
             // 
             this.pageHeaderBand1.Controls.AddRange(new DevExpress.XtraReports.UI.XRControl[] {
+            this.xrPictureBox1,
             this.SrCompanyLogo,
-            this.labelCompanyName,
+            this.SrCompanyName,
             this.lblTransferOrderNoLabel,
             this.lblTransferOrderNo,
-            this.label3});
-            this.pageHeaderBand1.HeightF = 134.375F;
+            this.SrCompanyAddress});
+            this.pageHeaderBand1.HeightF = 216.6667F;
             this.pageHeaderBand1.Name = "pageHeaderBand1";
+            // 
+            // xrPictureBox1
+            // 
+            this.xrPictureBox1.BorderColor = System.Drawing.Color.Black;
+            this.xrPictureBox1.BorderWidth = 100F;
+            this.xrPictureBox1.DataBindings.AddRange(new DevExpress.XtraReports.UI.XRBinding[] {
+            new DevExpress.XtraReports.UI.XRBinding("Image", null, "uspICInventoryTransferReportLogo.blbFile")});
+            this.xrPictureBox1.FormattingRules.Add(this.frHasHeaderLogo);
+            this.xrPictureBox1.LocationFloat = new DevExpress.Utils.PointFloat(25.6251F, 0F);
+            this.xrPictureBox1.Name = "xrPictureBox1";
+            this.xrPictureBox1.Scripts.OnBeforePrint = "xrPictureBox1_BeforePrint";
+            this.xrPictureBox1.SizeF = new System.Drawing.SizeF(721.1248F, 72.91667F);
+            this.xrPictureBox1.Sizing = DevExpress.XtraPrinting.ImageSizeMode.ZoomImage;
+            this.xrPictureBox1.StylePriority.UseBorderColor = false;
+            this.xrPictureBox1.StylePriority.UseBorderWidth = false;
             // 
             // SrCompanyLogo
             // 
             this.SrCompanyLogo.BorderColor = System.Drawing.Color.Black;
             this.SrCompanyLogo.BorderWidth = 100F;
-            this.SrCompanyLogo.LocationFloat = new DevExpress.Utils.PointFloat(0F, 10.00001F);
+            this.SrCompanyLogo.FormattingRules.Add(this.frHasNoHeaderLogo);
+            this.SrCompanyLogo.LocationFloat = new DevExpress.Utils.PointFloat(12.08344F, 72.91666F);
             this.SrCompanyLogo.Name = "SrCompanyLogo";
-            this.SrCompanyLogo.SizeF = new System.Drawing.SizeF(115F, 115F);
+            this.SrCompanyLogo.SizeF = new System.Drawing.SizeF(114.9999F, 100.4167F);
             this.SrCompanyLogo.Sizing = DevExpress.XtraPrinting.ImageSizeMode.StretchImage;
             this.SrCompanyLogo.StylePriority.UseBorderColor = false;
             this.SrCompanyLogo.StylePriority.UseBorderWidth = false;
             // 
-            // labelCompanyName
+            // frHasNoHeaderLogo
             // 
-            this.labelCompanyName.DataBindings.AddRange(new DevExpress.XtraReports.UI.XRBinding[] {
-            new DevExpress.XtraReports.UI.XRBinding("Text", null, "uspICInventoryTransferReport.strFromLocationName")});
-            this.labelCompanyName.Font = new System.Drawing.Font("Arial", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelCompanyName.LocationFloat = new DevExpress.Utils.PointFloat(115F, 24.58334F);
-            this.labelCompanyName.Name = "labelCompanyName";
-            this.labelCompanyName.Padding = new DevExpress.XtraPrinting.PaddingInfo(5, 0, 0, 0, 100F);
-            this.labelCompanyName.SizeF = new System.Drawing.SizeF(243.5417F, 30F);
-            this.labelCompanyName.StylePriority.UseFont = false;
-            this.labelCompanyName.StylePriority.UsePadding = false;
-            this.labelCompanyName.StylePriority.UseTextAlignment = false;
-            this.labelCompanyName.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
+            this.frHasNoHeaderLogo.Condition = "[ysnHasHeaderLogo] == True";
+            this.frHasNoHeaderLogo.DataMember = "uspICInventoryTransferReport";
             // 
-            // label3
             // 
-            this.label3.CanGrow = false;
-            this.label3.DataBindings.AddRange(new DevExpress.XtraReports.UI.XRBinding[] {
-            new DevExpress.XtraReports.UI.XRBinding("Text", null, "uspICInventoryTransferReport.strCompanyAddress")});
-            this.label3.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.LocationFloat = new DevExpress.Utils.PointFloat(115F, 54.58333F);
-            this.label3.Multiline = true;
-            this.label3.Name = "label3";
-            this.label3.Padding = new DevExpress.XtraPrinting.PaddingInfo(5, 0, 5, 0, 100F);
-            this.label3.SizeF = new System.Drawing.SizeF(243.5417F, 70.41669F);
-            this.label3.StylePriority.UseFont = false;
-            this.label3.StylePriority.UsePadding = false;
+            // 
+            this.frHasNoHeaderLogo.Formatting.Visible = DevExpress.Utils.DefaultBoolean.False;
+            this.frHasNoHeaderLogo.Name = "frHasNoHeaderLogo";
+            // 
+            // SrCompanyName
+            // 
+            this.SrCompanyName.Font = new System.Drawing.Font("Arial", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.SrCompanyName.FormattingRules.Add(this.frHasNoHeaderLogo);
+            this.SrCompanyName.LocationFloat = new DevExpress.Utils.PointFloat(127.0833F, 72.91666F);
+            this.SrCompanyName.Name = "SrCompanyName";
+            this.SrCompanyName.Padding = new DevExpress.XtraPrinting.PaddingInfo(5, 0, 0, 0, 100F);
+            this.SrCompanyName.SizeF = new System.Drawing.SizeF(243.5417F, 30F);
+            this.SrCompanyName.StylePriority.UseFont = false;
+            this.SrCompanyName.StylePriority.UsePadding = false;
+            this.SrCompanyName.StylePriority.UseTextAlignment = false;
+            this.SrCompanyName.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
+            // 
+            // SrCompanyAddress
+            // 
+            this.SrCompanyAddress.CanGrow = false;
+            this.SrCompanyAddress.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.SrCompanyAddress.FormattingRules.Add(this.frHasNoHeaderLogo);
+            this.SrCompanyAddress.LocationFloat = new DevExpress.Utils.PointFloat(127.0833F, 102.9167F);
+            this.SrCompanyAddress.Multiline = true;
+            this.SrCompanyAddress.Name = "SrCompanyAddress";
+            this.SrCompanyAddress.Padding = new DevExpress.XtraPrinting.PaddingInfo(5, 0, 5, 0, 100F);
+            this.SrCompanyAddress.SizeF = new System.Drawing.SizeF(243.5417F, 70.41669F);
+            this.SrCompanyAddress.StylePriority.UseFont = false;
+            this.SrCompanyAddress.StylePriority.UsePadding = false;
             // 
             // xrTable1
             // 
@@ -406,7 +449,7 @@
             // 
             this.xrTableCell13.Name = "xrTableCell13";
             this.xrTableCell13.StylePriority.UseTextAlignment = false;
-            this.xrTableCell13.Text = "Container";
+            this.xrTableCell13.Text = "Whse. Ref #";
             this.xrTableCell13.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
             this.xrTableCell13.Weight = 0.44294261232489118D;
             // 
@@ -857,8 +900,14 @@
             queryParameter1.Type = typeof(string);
             storedProcQuery1.Parameters.Add(queryParameter1);
             storedProcQuery1.StoredProcName = "uspICInventoryTransferReport";
+            storedProcQuery2.Name = "uspICInventoryTransferReportLogo";
+            queryParameter2.Name = "@xmlParam";
+            queryParameter2.Type = typeof(string);
+            storedProcQuery2.Parameters.Add(queryParameter2);
+            storedProcQuery2.StoredProcName = "uspICInventoryTransferReportLogo";
             this.sqlDataSource1.Queries.AddRange(new DevExpress.DataAccess.Sql.SqlQuery[] {
-            storedProcQuery1});
+            storedProcQuery1,
+            storedProcQuery2});
             this.sqlDataSource1.ResultSchemaSerializable = resources.GetString("sqlDataSource1.ResultSchemaSerializable");
             // 
             // ynShipmentRequired
@@ -888,13 +937,18 @@
             this.DataSource = this.sqlDataSource1;
             this.FormattingRuleSheet.AddRange(new DevExpress.XtraReports.UI.FormattingRule[] {
             this.frHideWhenComment,
-            this.frWashoutWhenComment});
+            this.frWashoutWhenComment,
+            this.frHasHeaderLogo,
+            this.frHasNoHeaderLogo});
             this.Margins = new System.Drawing.Printing.Margins(25, 25, 35, 40);
             this.PageHeight = 1169;
             this.PageWidth = 827;
             this.PaperKind = System.Drawing.Printing.PaperKind.A4;
             this.Parameters.AddRange(new DevExpress.XtraReports.Parameters.Parameter[] {
             this.xmlparam});
+            this.Scripts.OnBeforePrint = "TransferOrderReport_BeforePrint";
+            this.Scripts.OnDataSourceDemanded = "TransferOrderReport_DataSourceDemanded";
+            this.ScriptsSource = resources.GetString("$this.ScriptsSource");
             this.StyleSheet.AddRange(new DevExpress.XtraReports.UI.XRControlStyle[] {
             this.Title,
             this.FieldCaption,
@@ -929,8 +983,8 @@
         private DevExpress.XtraReports.UI.XRLabel lblTransferOrderNoLabel;
         private DevExpress.XtraReports.UI.XRLabel lblTransferOrderNo;
         private DevExpress.XtraReports.UI.XRPictureBox SrCompanyLogo;
-        private DevExpress.XtraReports.UI.XRLabel label3;
-        private DevExpress.XtraReports.UI.XRLabel labelCompanyName;
+        private DevExpress.XtraReports.UI.XRLabel SrCompanyAddress;
+        private DevExpress.XtraReports.UI.XRLabel SrCompanyName;
         private DevExpress.XtraReports.UI.XRTable xrTable1;
         private DevExpress.XtraReports.UI.XRTableRow xrTableRow1;
         private DevExpress.XtraReports.UI.XRTableCell xrTableCell3;
@@ -976,5 +1030,8 @@
         private DevExpress.XtraReports.UI.XRLabel xrLabel3;
         private DevExpress.XtraReports.UI.XRLabel xrLabel2;
         private DevExpress.XtraReports.UI.XRTableCell xrTableCell14;
+        private DevExpress.XtraReports.UI.XRPictureBox xrPictureBox1;
+        private DevExpress.XtraReports.UI.FormattingRule frHasHeaderLogo;
+        private DevExpress.XtraReports.UI.FormattingRule frHasNoHeaderLogo;
     }
 }
