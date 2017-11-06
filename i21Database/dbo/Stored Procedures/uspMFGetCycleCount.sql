@@ -3,9 +3,13 @@ AS
 BEGIN 
 SELECT CC.intCycleCountSessionId
 		,CC.intCycleCountId
-		,CC.intMachineId
-		,M.strName AS strMachineName
-		,M.intSubLocationId
+		,0 As intMachineId
+		,(SELECT STUFF((SELECT ',' + M.strName 
+            FROM tblMFMachine M 
+			JOIN tblMFProcessCycleCountMachine CM on M.intMachineId =CM.intMachineId 
+			Where CM.intCycleCountId =CC.intCycleCountId
+            FOR XML PATH('')) ,1,1,''))  AS strMachineName
+		,SL1.intSubLocationId
 		,SL.strSubLocationName 
 		,CC.intLotId
 		,CC.intItemId
@@ -26,13 +30,12 @@ SELECT CC.intCycleCountSessionId
 		,CC.intConcurrencyId
 	FROM dbo.tblMFProcessCycleCount CC
 	JOIN dbo.tblMFProcessCycleCountSession CS on CS.intCycleCountSessionId=CC.intCycleCountSessionId
-	JOIN dbo.tblMFMachine M ON M.intMachineId = CC.intMachineId
+	JOIN dbo.tblICStorageLocation SL1 on SL1.intStorageLocationId=CC.intProductionStagingLocationId
 	JOIN dbo.tblICItem I ON I.intItemId = CC.intItemId
 	JOIN dbo.tblSMUserSecurity U ON U.[intEntityId] = CC.intCreatedUserId
 	JOIN dbo.tblSMUserSecurity U1 ON U1.[intEntityId] = CC.intCreatedUserId
-	JOIN dbo.tblSMCompanyLocationSubLocation SL on SL.intCompanyLocationSubLocationId =M.intSubLocationId
-	JOIN dbo.tblICStorageLocation SL1 on SL1.intStorageLocationId=CC.intProductionStagingLocationId 
-	WHERE CS.intWorkOrderId=@intWorkOrderId
+	JOIN dbo.tblSMCompanyLocationSubLocation SL on SL.intCompanyLocationSubLocationId =SL1.intSubLocationId
+ 	WHERE CS.intWorkOrderId=@intWorkOrderId
 	ORDER BY CC.intCycleCountId
 END 
 GO

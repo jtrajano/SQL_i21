@@ -1,7 +1,7 @@
 ﻿CREATE TABLE dbo.tblMFProcessCycleCount (
 	intCycleCountId INT IDENTITY(1, 1) NOT NULL
 	,intCycleCountSessionId INT NOT NULL
-	,intMachineId INT NOT NULL
+	,intMachineId INT NULL
 	,intLotId INT NULL
 	,intItemId INT NOT NULL
 	,dblQuantity NUMERIC(18, 6) NULL

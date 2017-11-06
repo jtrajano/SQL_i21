@@ -148,26 +148,29 @@ BEGIN TRY
 		WHERE intWorkOrderId = @intWorkOrderId
 			AND ysnConsumptionReversed = 0
 	END
+	DECLARE @tblMFRMProductionStageLocation TABLE (intRMProductionStageLocationId INT)
 
-	IF @intProductionStageLocationId IS NULL
-	BEGIN
-		SELECT @intProductionStageLocationId = intProductionStagingLocationId
-		FROM tblMFManufacturingProcessMachine
-		WHERE intManufacturingProcessId = @intManufacturingProcessId
-			AND intMachineId IN (
-				SELECT intMachineId
-				FROM @tblMFMachine
-				)
-			AND intProductionStagingLocationId IS NOT NULL
-	END
+	DECLARE @tblMFProductionStageLocation TABLE (intProductionStageLocationId INT)
 
-	IF @intProductionStageLocationId IS NULL
+	Insert into @tblMFRMProductionStageLocation(intRMProductionStageLocationId)
+	SELECT intProductionStagingLocationId
+	FROM tblMFManufacturingProcessMachine
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intMachineId IN (
+			SELECT intMachineId
+			FROM @tblMFMachine
+			)
+		AND intProductionStagingLocationId IS NOT NULL
+
+
+	IF not exists(Select *from @tblMFRMProductionStageLocation)
 	BEGIN
 		SELECT @intProductionStagingId = intAttributeId
 		FROM tblMFAttribute
 		WHERE strAttributeName = 'Production Staging Location'
 
-		SELECT @intProductionStageLocationId = strAttributeValue
+		Insert into @tblMFRMProductionStageLocation(intRMProductionStageLocationId)
+		SELECT strAttributeValue
 		FROM tblMFManufacturingProcessAttribute
 		WHERE intManufacturingProcessId = @intManufacturingProcessId
 			AND intLocationId = @intLocationId
@@ -224,6 +227,7 @@ BEGIN TRY
 		,strLotTracking NVARCHAR(50)
 		,dblLowerToleranceReqQty NUMERIC(18, 6)
 		,intMainItemId INT
+		,intCategoryId int
 		)
 	DECLARE @tblSubstituteItem TABLE (
 		intItemRecordId INT Identity(1, 1)
@@ -284,6 +288,7 @@ BEGIN TRY
 		,strLotTracking
 		,dblLowerToleranceReqQty
 		,intMainItemId
+		,intCategoryId
 		)
 	SELECT ri.intItemId
 		,CASE 
@@ -373,6 +378,7 @@ BEGIN TRY
 					)
 			END
 		,ri.intItemId
+		,I.intCategoryId
 	FROM dbo.tblMFWorkOrderRecipeItem ri
 	JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
 		AND r.intWorkOrderId = ri.intWorkOrderId
@@ -501,6 +507,7 @@ BEGIN TRY
 				END
 			) - WC.dblQuantity / rs.dblSubstituteRatio AS RequiredQty
 		,ri.intItemId
+		,I.intCategoryId
 	FROM dbo.tblMFWorkOrderRecipeItem ri
 	JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
 		AND r.intWorkOrderId = ri.intWorkOrderId
@@ -735,6 +742,7 @@ BEGIN TRY
 	WHILE (@intItemRecordId IS NOT NULL)
 	BEGIN
 		SET @intLotRecordId = NULL
+		Select @intCategoryId=NULL
 
 		SELECT @intItemId = intItemId
 			,@dblReqQty = dblReqQty
@@ -743,11 +751,35 @@ BEGIN TRY
 			,@intConsumptionMethodId = intConsumptionMethodId
 			,@strLotTracking = strLotTracking
 			,@dblLowerToleranceReqQty = dblLowerToleranceReqQty
+			,@intCategoryId=intCategoryId
 		FROM @tblItem
 		WHERE intItemRecordId = @intItemRecordId
 
 		DELETE
 		FROM @tblLot
+
+		Delete from @tblMFProductionStageLocation
+
+		If @intConsumptionMethodId=1 and @intCategoryId=@intPMCategoryId --By Lot
+		Begin
+			Insert into @tblMFProductionStageLocation(intProductionStageLocationId)  
+			Select @intPMStageLocationId 
+		End
+		else If @intConsumptionMethodId=1 and @intCategoryId<>@intPMCategoryId --By Lot
+		Begin
+			Insert into @tblMFProductionStageLocation(intProductionStageLocationId) 
+			Select intRMProductionStageLocationId from @tblMFRMProductionStageLocation
+		End
+		else If @intConsumptionMethodId=2 --By Location
+		Begin
+			Insert into @tblMFProductionStageLocation(intProductionStageLocationId)  
+			Select @intStorageLocationId
+		End
+		else If @intConsumptionMethodId=3 --By FIFO
+		Begin
+			Insert into @tblMFProductionStageLocation(intProductionStageLocationId)  
+			Select 0
+		End
 
 		IF @strLotTracking = 'No'
 		BEGIN
@@ -780,17 +812,18 @@ BEGIN TRY
 			JOIN dbo.tblICItem I on I.intItemId =S.intItemId
 			WHERE S.intItemId = @intItemId
 				AND IL.intLocationId = @intLocationId
-				AND (
-					S.intStorageLocationId = (
-						CASE 
-							WHEN @intConsumptionMethodId = 1
-								THEN ISNULL((Case When I.intCategoryId =@intPMCategoryId Then @intPMStageLocationId Else @intProductionStageLocationId End), S.intStorageLocationId)
-							WHEN @intConsumptionMethodId = 2
-								THEN ISNULL(@intStorageLocationId, S.intStorageLocationId)
-							ELSE S.intStorageLocationId
-							END
-						)
-					)
+				--AND (
+				--	S.intStorageLocationId = (
+				--		CASE 
+				--			WHEN @intConsumptionMethodId = 1
+				--				THEN ISNULL((Case When I.intCategoryId =@intPMCategoryId Then @intPMStageLocationId Else @intProductionStageLocationId End), S.intStorageLocationId)
+				--			WHEN @intConsumptionMethodId = 2
+				--				THEN ISNULL(@intStorageLocationId, S.intStorageLocationId)
+				--			ELSE S.intStorageLocationId
+				--			END
+				--		)
+				--	)
+				and  exists(Select *from @tblMFProductionStageLocation PS Where PS.intProductionStageLocationId=(Case When @intConsumptionMethodId =3 Then 0 else S.intStorageLocationId End)) 
 				AND S.dblOnHand - S.dblUnitReserved > 0
 		END
 		ELSE
@@ -894,17 +927,18 @@ BEGIN TRY
 					AND L.intLocationId = @intLocationId
 					AND LS.strPrimaryStatus = 'Active'
 					AND ISNULL(L.dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
-					AND (
-						L.intStorageLocationId = (
-							CASE 
-								WHEN @intConsumptionMethodId = 1
-									THEN ISNULL((Case When I.intCategoryId =@intPMCategoryId Then @intPMStageLocationId Else @intProductionStageLocationId End), L.intStorageLocationId)
-								WHEN @intConsumptionMethodId = 2
-									THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
-								ELSE L.intStorageLocationId
-								END
-							)
-						)
+					--AND (
+					--	L.intStorageLocationId = (
+					--		CASE 
+					--			WHEN @intConsumptionMethodId = 1
+					--				THEN ISNULL((Case When I.intCategoryId =@intPMCategoryId Then @intPMStageLocationId Else @intProductionStageLocationId End), L.intStorageLocationId)
+					--			WHEN @intConsumptionMethodId = 2
+					--				THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
+					--			ELSE L.intStorageLocationId
+					--			END
+					--		)
+					--	)
+					and  exists(Select *from @tblMFProductionStageLocation PS Where PS.intProductionStageLocationId=(Case When @intConsumptionMethodId =3 Then 0 else L.intStorageLocationId End)) 
 					AND L.dblQty > 0
 					AND L.strLotNumber IN (
 						SELECT WI.strLotNumber
@@ -1008,17 +1042,18 @@ BEGIN TRY
 				AND L.intLocationId = @intLocationId
 				AND LS.strPrimaryStatus = 'Active'
 				AND ISNULL(L.dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
-				AND (
-					L.intStorageLocationId = (
-						CASE 
-							WHEN @intConsumptionMethodId = 1
-								THEN ISNULL((Case When I.intCategoryId =@intPMCategoryId Then @intPMStageLocationId Else @intProductionStageLocationId End), L.intStorageLocationId)
-							WHEN @intConsumptionMethodId = 2
-								THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
-							ELSE L.intStorageLocationId
-							END
-						)
-					)
+				--AND (
+				--	L.intStorageLocationId = (
+				--		CASE 
+				--			WHEN @intConsumptionMethodId = 1
+				--				THEN ISNULL((Case When I.intCategoryId =@intPMCategoryId Then @intPMStageLocationId Else @intProductionStageLocationId End), L.intStorageLocationId)
+				--			WHEN @intConsumptionMethodId = 2
+				--				THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
+				--			ELSE L.intStorageLocationId
+				--			END
+				--		)
+				--	)
+				and  exists(Select *from @tblMFProductionStageLocation PS Where PS.intProductionStageLocationId=(Case When @intConsumptionMethodId =3 Then 0 else L.intStorageLocationId End)) 
 				AND L.dblQty > 0
 				AND L.strLotNumber IN (
 					SELECT WI.strLotNumber
@@ -1129,17 +1164,18 @@ BEGIN TRY
 					AND L.intLocationId = @intLocationId
 					AND LS.strPrimaryStatus = 'Active'
 					AND ISNULL(L.dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
-					AND (
-						L.intStorageLocationId = (
-							CASE 
-								WHEN @intConsumptionMethodId = 1
-									THEN ISNULL((Case When I.intCategoryId =@intPMCategoryId Then @intPMStageLocationId Else @intProductionStageLocationId End), L.intStorageLocationId)
-								WHEN @intConsumptionMethodId = 2
-									THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
-								ELSE L.intStorageLocationId
-								END
-							)
-						)
+					--AND (
+					--	L.intStorageLocationId = (
+					--		CASE 
+					--			WHEN @intConsumptionMethodId = 1
+					--				THEN ISNULL((Case When I.intCategoryId =@intPMCategoryId Then @intPMStageLocationId Else @intProductionStageLocationId End), L.intStorageLocationId)
+					--			WHEN @intConsumptionMethodId = 2
+					--				THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
+					--			ELSE L.intStorageLocationId
+					--			END
+					--		)
+					--	)
+					and  exists(Select *from @tblMFProductionStageLocation PS Where PS.intProductionStageLocationId=(Case When @intConsumptionMethodId =3 Then 0 else L.intStorageLocationId End)) 
 					AND L.dblQty > 0
 					AND L.strLotNumber NOT IN (
 						SELECT WI.strLotNumber
@@ -1243,17 +1279,18 @@ BEGIN TRY
 				AND L.intLocationId = @intLocationId
 				AND LS.strPrimaryStatus = 'Active'
 				AND ISNULL(L.dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
-				AND (
-					L.intStorageLocationId = (
-						CASE 
-							WHEN @intConsumptionMethodId = 1
-								THEN ISNULL((Case When I.intCategoryId =@intPMCategoryId Then @intPMStageLocationId Else @intProductionStageLocationId End), L.intStorageLocationId)
-							WHEN @intConsumptionMethodId = 2
-								THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
-							ELSE L.intStorageLocationId
-							END
-						)
-					)
+				--AND (
+				--	L.intStorageLocationId = (
+				--		CASE 
+				--			WHEN @intConsumptionMethodId = 1
+				--				THEN ISNULL((Case When I.intCategoryId =@intPMCategoryId Then @intPMStageLocationId Else @intProductionStageLocationId End), L.intStorageLocationId)
+				--			WHEN @intConsumptionMethodId = 2
+				--				THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
+				--			ELSE L.intStorageLocationId
+				--			END
+				--		)
+				--	)
+				and  exists(Select *from @tblMFProductionStageLocation PS Where PS.intProductionStageLocationId=(Case When @intConsumptionMethodId =3 Then 0 else L.intStorageLocationId End)) 
 				AND L.dblQty > 0
 				AND L.strLotNumber NOT IN (
 					SELECT WI.strLotNumber
@@ -1361,17 +1398,18 @@ BEGIN TRY
 					AND L.intLocationId = @intLocationId
 					AND LS.strPrimaryStatus = 'Active'
 					AND ISNULL(L.dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
-					AND (
-						L.intStorageLocationId = (
-							CASE 
-								WHEN @intConsumptionMethodId = 1
-									THEN ISNULL((Case When I.intCategoryId =@intPMCategoryId Then @intPMStageLocationId Else @intProductionStageLocationId End), L.intStorageLocationId)
-								WHEN @intConsumptionMethodId = 2
-									THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
-								ELSE L.intStorageLocationId
-								END
-							)
-						)
+					--AND (
+					--	L.intStorageLocationId = (
+					--		CASE 
+					--			WHEN @intConsumptionMethodId = 1
+					--				THEN ISNULL((Case When I.intCategoryId =@intPMCategoryId Then @intPMStageLocationId Else @intProductionStageLocationId End), L.intStorageLocationId)
+					--			WHEN @intConsumptionMethodId = 2
+					--				THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
+					--			ELSE L.intStorageLocationId
+					--			END
+					--		)
+					--	)
+					and  exists(Select *from @tblMFProductionStageLocation PS Where PS.intProductionStageLocationId=(Case When @intConsumptionMethodId =3 Then 0 else L.intStorageLocationId End)) 
 					AND L.dblQty = 0
 				ORDER BY IsNULL(L.dtmManufacturedDate, L.dtmDateCreated) DESC
 
@@ -1670,17 +1708,18 @@ BEGIN TRY
 					AND L.intLocationId = @intLocationId
 					AND LS.strPrimaryStatus = 'Active'
 					AND ISNULL(L.dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
-					AND (
-						L.intStorageLocationId = (
-							CASE 
-								WHEN @intConsumptionMethodId = 1
-									THEN ISNULL((Case When I.intCategoryId =@intPMCategoryId Then @intPMStageLocationId Else @intProductionStageLocationId End), L.intStorageLocationId)
-								WHEN @intConsumptionMethodId = 2
-									THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
-								ELSE L.intStorageLocationId
-								END
-							)
-						)
+					--AND (
+					--	L.intStorageLocationId = (
+					--		CASE 
+					--			WHEN @intConsumptionMethodId = 1
+					--				THEN ISNULL((Case When I.intCategoryId =@intPMCategoryId Then @intPMStageLocationId Else @intProductionStageLocationId End), L.intStorageLocationId)
+					--			WHEN @intConsumptionMethodId = 2
+					--				THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
+					--			ELSE L.intStorageLocationId
+					--			END
+					--		)
+					--	)
+					and  exists(Select *from @tblMFProductionStageLocation PS Where PS.intProductionStageLocationId=(Case When @intConsumptionMethodId =3 Then 0 else L.intStorageLocationId End)) 
 					AND L.dblQty > 0
 				ORDER BY CASE 
 						WHEN @ysnPickByLotCode = 0
