@@ -36,7 +36,7 @@ JOIN dbo.tblICItem I ON I.intItemId = IRI.intItemId
 JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = IRL.intItemUnitMeasureId
 JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 JOIN dbo.tblMFLotInventory LI ON LI.intLotId = IRL.intLotId
-JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = IRL.intStorageLocationId
+JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = IRI.intStorageLocationId
 LEFT JOIN tblSMCountry C ON C.intCountryID = IRL.intOriginId
 JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = IR.intLocationId
 
