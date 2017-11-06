@@ -160,7 +160,7 @@ BEGIN TRY
 		,@dtmDate
 		,NULL
 		,NULL
-		,@dblUnitCost
+		,@dblCostPerUnit
 
 	IF @intLotStatusId IS NOT NULL
 		AND NOT EXISTS (
