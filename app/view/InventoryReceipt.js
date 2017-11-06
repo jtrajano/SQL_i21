@@ -671,7 +671,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         itemId: 'txtFobPoint',
                                                                         fieldLabel: 'FOB Point',
                                                                         labelWidth: 85,
-                                                                        readOnly: false
+                                                                        readOnly: true
                                                                     },
                                                                     {
                                                                         xtype: 'textfield',

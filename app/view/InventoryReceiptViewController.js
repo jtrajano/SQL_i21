@@ -172,8 +172,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 readOnly: '{isFreightTermsReadonly}'
             },
             txtFobPoint: {
-                value: '{current.strFobPoint}',
-                readOnly: '{isReceiptReadonly}'
+                value: '{current.strFobPoint}'
             },
             /*cboTaxGroup: {
                 value: '{current.intTaxGroupId}',

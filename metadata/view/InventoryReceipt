@@ -1846,7 +1846,7 @@
                                                                 "layout|flex": null,
                                                                 "layout|margins": null,
                                                                 "name": null,
-                                                                "readOnly": false,
+                                                                "readOnly": true,
                                                                 "width": null
                                                             },
                                                             "configAlternates": {
