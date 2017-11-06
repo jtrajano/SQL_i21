@@ -190,7 +190,7 @@ BEGIN TRY
 		INNER JOIN tblSMCompanyLocation ON tblARInvoice.intCompanyLocationId = tblSMCompanyLocation.intCompanyLocationId
 		INNER JOIN tblARCustomer ON tblARInvoice.intEntityCustomerId = tblARCustomer.intEntityId
 		INNER JOIN tblEMEntity ON tblARCustomer.intEntityId = tblEMEntity.intEntityId
-		LEFT JOIN tblEMEntityLocation ON tblEMEntityLocation.intEntityId = tblARInvoice.intShipToLocationId
+		LEFT JOIN tblEMEntityLocation ON tblEMEntityLocation.intEntityLocationId = tblARInvoice.intShipToLocationId
 		LEFT JOIN tblSMTaxCode ON tblSMTaxCode.intTaxCodeId = tblEMEntityLocation.intCountyTaxCodeId
 		INNER JOIN tblTFReportingComponent ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 			ON tblTFProductCode.intProductCodeId = tblICItemMotorFuelTax.intProductCodeId
