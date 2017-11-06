@@ -29,6 +29,7 @@ UPDATE A
 	,A.dblPayment = 0
 	,A.strBillId = @debitMemoRecordNum
 	,A.strReference = null
+	,A.dblDiscount = CASE WHEN A.intTransactionType > 1 THEN 0 ELSE A.dblDiscount END
 FROM tblAPBill A
 WHERE A.intBillId = @createdReversal
 

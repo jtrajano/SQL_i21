@@ -46,6 +46,7 @@ UPDATE A
 	SET A.strBillId = @generatedBillRecordId
 	,A.intTransactionType = @tranType
 	,A.intEntityId = @userId
+	,A.dblDiscount = CASE WHEN A.intTransactionType > 1 THEN 0 ELSE A.dblDiscount END
 FROM #tmpDuplicateBill A
 
 IF @reset = 1
