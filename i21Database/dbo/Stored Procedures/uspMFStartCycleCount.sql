@@ -777,15 +777,6 @@ BEGIN TRY
 		,intRecipeItemId
 		,intMachineId
 	FROM @tblICItem
-	GROUP BY intItemId
-		,intConsumptionMethodId
-		,intStorageLocationId
-		,ysnMainItem
-		,intItemUOMId
-		,intCategoryId
-		,intMainItemId
-		,intRecipeItemId
-		,intMachineId
 
 	DELETE t1
 	FROM @tblICFinalItem t1
