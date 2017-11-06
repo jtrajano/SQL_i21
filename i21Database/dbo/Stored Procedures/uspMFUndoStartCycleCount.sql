@@ -8,6 +8,18 @@ BEGIN TRY
 	BEGIN TRAN
 
 	DELETE
+	FROM tblMFProcessCycleCountMachine
+	WHERE intCycleCountId IN (
+			SELECT intCycleCountId
+			FROM tblMFProcessCycleCount
+			WHERE intCycleCountSessionId IN (
+					SELECT intCycleCountSessionId
+					FROM tblMFProcessCycleCountSession
+					WHERE intWorkOrderId = @intWorkOrderId
+					)
+			)
+
+	DELETE
 	FROM tblMFProcessCycleCount
 	WHERE intCycleCountSessionId IN (
 			SELECT intCycleCountSessionId

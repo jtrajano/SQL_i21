@@ -202,6 +202,7 @@ BEGIN
 		,dtmActualProductionEndDate = @dtmCreated
 		,intStatusId = @intStatusId
 		,intStorageLocationId = @intStorageLocationId
+		,intActualShiftId=@intBusinessShiftId
 	WHERE intWorkOrderId = @intWorkOrderId
 
 	UPDATE dbo.tblMFWorkOrder
