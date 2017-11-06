@@ -150,7 +150,10 @@ FROM
 			,[strInvoiceNumber]			= ''
 			,[intBillId]				= APB.[intBillId]
 			,[strBillId]				= APB.[strBillId]
-			,[strTransactionType]		= (CASE WHEN APB.[intTransactionType] = 11 THEN 'Weight Claim' WHEN APB.[intTransactionType] = 3 THEN 'Debit Memo' ELSE '' END)
+			,[strTransactionType]		= (CASE WHEN APB.[intTransactionType] = 11 THEN 'Weight Claim' 
+												WHEN APB.[intTransactionType] = 3 THEN 'Debit Memo' 
+												WHEN APB.[intTransactionType] = 2 THEN 'Vendor Prepayment' 
+											ELSE '' END)
 			,[strType]					= 'Voucher'
 			,[intEntityCustomerId]		= APB.[intEntityVendorId]
 			,[strCustomerName]			= CE.[strName]
@@ -210,8 +213,9 @@ FROM
 			 FROM
 				dbo.tblSMPaymentMethod) AS SMP ON APV.intPaymentMethodId = SMP.intPaymentMethodID								
 		WHERE
-			[intTransactionType] IN (11,3)
-			AND [ysnPosted] = 1
+			(([ysnPosted] = 1 AND APB.intTransactionType IN (11,3)) 
+				OR 
+				(ysnPosted = 1 AND APB.intTransactionType = 2))
 	) ARIFP
 LEFT OUTER JOIN 
 	(
