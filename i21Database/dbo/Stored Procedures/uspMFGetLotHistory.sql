@@ -206,7 +206,7 @@ BEGIN
 	SELECT @intPrevLotId = @intLotId
 
 	WHILE @intSplitFromLotId IS NOT NULL
-		AND @ysnLotHistoryByStorageLocation = 0
+		AND @ysnLotHistoryByStorageLocation = 0 and @intPrevLotId>@intSplitFromLotId
 	BEGIN
 		SELECT @intLotId1 = NULL
 
