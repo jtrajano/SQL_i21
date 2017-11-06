@@ -1,4 +1,6 @@
-﻿IF NOT EXISTS (SELECT 1 FROM dbo.tblNRNoteTransType WHERE intNoteTransTypeId = 1)
+﻿SET IDENTITY_INSERT tblNRNoteTransType ON
+
+IF NOT EXISTS (SELECT 1 FROM dbo.tblNRNoteTransType WHERE intNoteTransTypeId = 1)
 INSERT INTO [dbo].[tblNRNoteTransType]
            ([intNoteTransTypeId]
            ,[strNoteTransTypeName]
@@ -74,4 +76,4 @@ INSERT INTO [dbo].[tblNRNoteTransType]
            ,0)
 GO
 
-
+SET IDENTITY_INSERT tblNRNoteTransType OFF
