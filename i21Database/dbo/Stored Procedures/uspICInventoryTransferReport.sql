@@ -1,4 +1,4 @@
-CREATE PROCEDURE uspICInventoryTransferReport @xmlParam NVARCHAR(MAX) = NULL
+ALTER PROCEDURE uspICInventoryTransferReport @xmlParam NVARCHAR(MAX) = NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -15,7 +15,7 @@ DECLARE @xmlDocumentId AS INT;
 IF LTRIM(RTRIM(@xmlParam)) = '' 
 BEGIN
 --SET @xmlParam = NULL 
-	SELECT * FROM [vyuICGetInventoryTransferDetail] WHERE intInventoryTransferId = 1 --RETURN NOTHING TO RETURN SCHEMA
+	SELECT *, CAST(0 AS BIT) ysnHasHeaderLogo FROM [vyuICGetInventoryTransferDetail] WHERE intInventoryTransferId = 1 --RETURN NOTHING TO RETURN SCHEMA
 END
 
 -- Create a table variable to hold the XML data. 		
@@ -57,6 +57,14 @@ BEGIN
 		@intInventoryTransferId = CASE WHEN ISNULL([from],'') = '' THEN NULL ELSE [from] END
 	FROM @temp_xml_table WHERE [fieldname] = 'intInventoryTransferId'
 END
+
+DECLARE @HasHeaderLogo BIT
+
+IF EXISTS(SELECT TOP 1 1 FROM vyuSMCompanyLogo WHERE strComment = 'HeaderLogo')
+	SET @HasHeaderLogo = 1
+ELSE
+	SET @HasHeaderLogo = 0
+
 SELECT 
 	v.*
 	, CASE WHEN Location.strUseLocationAddress IS NULL OR
@@ -125,6 +133,7 @@ SELECT
 	
 	WHEN Location.strUseLocationAddress = 'Letterhead' 
 	THEN '' END AS strCompanyAddress
+	, ysnHasHeaderLogo = CAST(@HasHeaderLogo AS BIT)
 FROM [vyuICGetInventoryTransferDetail] v
 	LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = v.intFromLocationId
 WHERE v.strTransferNo = @strTransferNo

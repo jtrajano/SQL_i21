@@ -44,7 +44,7 @@ AS
 	, strToStorageLocationName = ToStorageLocation.strName
 	, TransferDetail.intItemUOMId
 	, strUnitMeasure = ItemUOM.strUnitMeasure
-	, strUnitMeasureSymbol = COALESCE(ItemUOM.strSymbol, ItemUOM.strUnitMeasure)
+	, strUnitMeasureSymbol = COALESCE(NULLIF(ItemUOM.strSymbol, ''), NULLIF(ItemUOM.strUnitMeasure, ''))
 	, dblItemUOMCF = ItemUOM.dblUnitQty
 	, intWeightUOMId = TransferDetail.intItemWeightUOMId
 	, strWeightUOM = ItemWeightUOM.strUnitMeasure
@@ -81,10 +81,10 @@ AS
 								WHEN TransferDetail.intOwnershipType = 2 THEN 'Storage'
 								WHEN TransferDetail.intOwnershipType = 3 THEN 'Consigned Purchase'
 								ELSE NULL END)
-	, ysnPosted
+	, Transfer.ysnPosted
 	, ysnWeights
 	, Transfer.strDescription
-	, TransferDetail.strItemType
+	, COALESCE(TransferDetail.strItemType, Item.strType) AS strItemType
 	, TransferDetail.dblGross
 	, TransferDetail.dblNet
 	, TransferDetail.dblTare
@@ -124,6 +124,7 @@ AS
 		,DEFAULT 
 		,DEFAULT 
 	)
+	, Receipt.strWarehouseRefNo
 	FROM tblICInventoryTransferDetail TransferDetail
 		LEFT JOIN tblICInventoryTransfer [Transfer] ON [Transfer].intInventoryTransferId = TransferDetail.intInventoryTransferId
 		LEFT JOIN tblEMEntity e ON e.intEntityId = Transfer.intTransferredById
@@ -145,3 +146,5 @@ AS
 			AND StockFrom.intItemUOMId = TransferDetail.intItemUOMId
 			AND ISNULL(StockFrom.intSubLocationId, 0) = ISNULL(TransferDetail.intFromSubLocationId, 0)
 			AND ISNULL(StockFrom.intStorageLocationId, 0) = ISNULL(TransferDetail.intFromStorageLocationId, 0)
+		LEFT JOIN (tblICInventoryReceiptItem ReceiptItem INNER JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId)
+			ON ReceiptItem.intOrderId = Transfer.intInventoryTransferId AND Receipt.strReceiptType = 'Transfer Order'

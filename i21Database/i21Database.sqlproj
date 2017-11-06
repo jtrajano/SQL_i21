@@ -3617,6 +3617,7 @@
     <Build Include="dbo\Views\vyuHDCustomerProspectType.sql" />
     <Build Include="dbo\Stored Procedures\uspICBillOfLadingReport.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryTransferReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryTransferReportLogo.sql" />
     <Build Include="dbo\Stored Procedures\uspLGReserveStockForInventoryShipment.sql" />
     <Build Include="dbo\Tables\tblARCommission.sql" />
     <Build Include="dbo\Tables\tblARCommissionDetail.sql" />
