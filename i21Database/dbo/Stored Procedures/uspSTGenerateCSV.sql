@@ -280,7 +280,7 @@ BEGIN
 								, '' as strAccountPromotionName
 								, 0 as dblAccountDiscountAmount
 								, CASE WHEN strTrpPaycode = 'COUPONS' THEN dblTrpAmt ELSE 0 END as dblManufacturerDiscountAmount
-								, CASE WHEN strTrpPaycode = 'COUPONS' THEN 1234 ELSE 0 END as intCouponPid
+								, CASE WHEN strTrpPaycode = 'COUPONS' THEN 1234 ELSE NULL END as intCouponPid
 								, CASE WHEN strTrpPaycode = 'COUPONS' THEN dblTrpAmt ELSE 0 END as dblCouponAmount
 
 								, 'N' as strManufacturerMultipackFlag
@@ -548,7 +548,7 @@ BEGIN
 														+ ',' + @strTransactionDateTime + ',' + @strMarketBasketTransactionId + ',' + @strScanTransactionId + ',' + @strRegisterId
 														+ ',' + CAST(@intQuantity as NVARCHAR(50)) + ',' + CAST(@dblPrice as NVARCHAR(50)) + ',' + @strUpcCode + ',' + @strUpcDescription + ',' + @strUnitOfMeasure + ',' + @strPromotionFlag
 														+ ',' + @strOutletMultipackFlag + ',' + CAST(@intOutletMultipackQuantity as NVARCHAR(50)) + ',' + CAST(@dblOutletMultipackDiscountAmount as NVARCHAR(50)) + ',' + @strAccountPromotionName
-														+ ',' + CAST(@dblAccountDiscountAmount as NVARCHAR(50)) + ',' + CAST(@dblManufacturerDiscountAmount as NVARCHAR(50))+ ',' + CAST(@intCouponPid as NVARCHAR(20)) + ',' + CAST(@dblCouponAmount as NVARCHAR(50))
+														+ ',' + CAST(@dblAccountDiscountAmount as NVARCHAR(50)) + ',' + CAST(@dblManufacturerDiscountAmount as NVARCHAR(50))+ ',' + ISNULL(CAST(@intCouponPid as NVARCHAR(20)) ,'') + ',' + CAST(@dblCouponAmount as NVARCHAR(50))
 														+ ',' + @strManufacturerMultipackFlag + ',' + CAST(@intManufacturerMultipackQuantity AS NVARCHAR(50)) + ',' + CAST(@dblManufacturerMultipackDiscountAmount AS NVARCHAR(50)) + ',' + @strManufacturerPromotionDescription
 														+ ',' + @strManufacturerBuydownDescription + ',' + CAST(@dblManufacturerBuydownAmount AS NVARCHAR(50)) + ',' + @strManufacturerMultiPackDescription + ',' + @strAccountLoyaltyIDNumber + ',' + @strCouponDescription
 							
