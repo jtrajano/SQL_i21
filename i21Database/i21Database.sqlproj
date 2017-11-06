@@ -5863,6 +5863,9 @@
     <Build Include="dbo\Tables\tblBBProgramCharge.sql" />
     <Build Include="dbo\Tables\tblBBProgramCustomer.sql" />
     <Build Include="dbo\Tables\tblBBRate.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGetTransporterInvoiceTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateMSSpeicalFuel.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateMSGas.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
