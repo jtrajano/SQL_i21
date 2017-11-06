@@ -5733,6 +5733,8 @@
     <Build Include="dbo\Views\vyuRKGetSequenceMonthNotMapping.sql" />
     <Build Include="dbo\Functions\fnQMGetPropertyTestResult.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGetTransporterInvoiceTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateMSSpeicalFuel.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateMSGas.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
