@@ -37,6 +37,7 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 													WHEN 42 THEN receipt.strBillOfLading 
 													WHEN 5 THEN shipment.strBOLNumber 
 													WHEN 33 THEN invoice.strBOLNumber 
+													WHEN 44 THEN loadShipmentSchedule.strBLNumber
 													ELSE NULL 
 											END
 										AS NVARCHAR(100)
@@ -95,19 +96,23 @@ FROM 	tblICItem i
 		LEFT JOIN tblARInvoice invoice
 			ON invoice.intInvoiceId = t.intTransactionId
 			AND invoice.strInvoiceNumber = t.strTransactionId
+			AND ty.intTransactionTypeId = 33
 		LEFT JOIN tblAPBill bill
 			ON bill.intBillId = t.intTransactionId
 			AND bill.strBillId = t.strTransactionId
+			AND ty.intTransactionTypeId IN (26, 27) 
 		OUTER APPLY (
 			SELECT	TOP 1 
 					ld.intVendorEntityId
 					,ld.intCustomerEntityId
+					,l.strBLNumber
 			FROM	tblLGLoad l INNER JOIN tblLGLoadDetail ld
 						ON l.intLoadId = ld.intLoadId
-			where	l.strLoadNumber = t.strTransactionId
+			WHERE	l.strLoadNumber = t.strTransactionId
 					AND ld.intLoadDetailId = t.intTransactionDetailId
 					AND l.intLoadId = t.intTransactionId
 					AND ld.intItemId = t.intItemId		
+					AND ty.intTransactionTypeId = 44
 		) loadShipmentSchedule 
 		LEFT JOIN tblEMEntity e 
 			ON e.intEntityId = COALESCE(
