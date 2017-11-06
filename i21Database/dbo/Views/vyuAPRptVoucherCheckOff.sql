@@ -1,19 +1,24 @@
-﻿CREATE VIEW [dbo].vyuAPRptVoucherCheckOff
+﻿CREATE VIEW [dbo].[vyuAPRptVoucherCheckOff]
 
 AS
 SELECT	DISTINCT	 
-			 VendorId = V.strVendorId
+			 APB.intBillId
+			,VendorId = V.strVendorId
 			,VendorName =  V.strVendorId + ' ' + E.strName
 			,strDescription = C.strCommodityCode 
 			,strItem = IE.strItemNo 
+			,intTicketId
 			,strTicketNumber = SC.strTicketNumber
 			,APB.strVendorOrderNumber
-			,StateOfOrigin = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](NULL,NULL,NULL,NULL, APB.strShipFromCity, APB.strShipFromState, NULL, NULL, NULL))
+			,StateOfOrigin = ISNULL((SELECT strFullAddress = [dbo].[fnAPFormatAddress](NULL,NULL,NULL,NULL, APB.strShipFromCity, APB.strShipFromState, NULL, NULL, NULL)),'N/A')
 			,Location = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](NULL,NULL, NULL, NULL, APB.strShipToCity, APB.strShipToState,NULL, NULL, NULL))
 			,BillDate = APB.dtmBillDate
+			,PostDate = APB.dtmBillDate
 			,PaymentDate = Payment.dtmDatePaid
 			,ExemptUnits = APBD.dblQtyReceived 
-			,dblTotal = Payment.dblAmountPaid --AP-4155
+			,APBD.dblTotal --AP-4155
+			,APBD.dblTax
+			,0 AS dblCommodityTotal
 			,strCompanyName = (SELECT TOP 1	strCompanyName FROM dbo.tblSMCompanySetup)
 			,strCompanyAddress = (SELECT TOP 1 
 				   ISNULL(RTRIM(strAddress) + CHAR(13) + char(10), '')
@@ -45,7 +50,4 @@ SELECT	DISTINCT
 	WHERE APB.ysnPosted = 1 
 		  AND Payment.ysnPaid = 1 
 		  AND APBDT.ysnCheckOffTax = 1 --SHOW ONLY ALL THE CHECK OFF TAX REGARDLESS OF SOURCE TRANSACTION
-
 GO
-
-

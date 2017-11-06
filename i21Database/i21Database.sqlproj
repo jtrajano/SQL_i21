@@ -5867,6 +5867,8 @@
     <Build Include="dbo\Stored Procedures\uspTFGenerateMSSpeicalFuel.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateMSGas.sql" />
     <Build Include="dbo\Tables\tblMFProcessCycleCountMachine.sql" />
+    <Build Include="dbo\Views\vyuAPRptVoucherCheckOffCommodity.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptVoucherCheckOffCommodity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

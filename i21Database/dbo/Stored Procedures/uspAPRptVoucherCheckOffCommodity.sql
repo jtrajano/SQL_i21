@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspAPRptVoucherCheckOff]
+﻿CREATE PROCEDURE [dbo].[uspAPRptVoucherCheckOffCommodity]
 	@xmlParam NVARCHAR(MAX) = NULL
 AS
 
@@ -28,7 +28,7 @@ DECLARE @datatype NVARCHAR(50)
 IF LTRIM(RTRIM(@xmlParam)) = '' 
 BEGIN
 --SET @xmlParam = NULL 
-	SELECT * FROM vyuAPRptVoucherCheckOff WHERE VendorId = '' --RETURN NOTHING TO RETURN SCHEMA
+	SELECT * FROM [vyuAPRptVoucherCheckOffCommodity] WHERE strDescription = '' --RETURN NOTHING TO RETURN SCHEMA
 END
 
 DECLARE @xmlDocumentId AS INT;
@@ -64,34 +64,34 @@ WITH (
 
 --select * from @temp_xml_table
 --CREATE date filter
-SELECT @dateFrom = [from], @dateTo = [to], @condition = [condition] FROM @temp_xml_table WHERE [fieldname] = 'PaymentDate';
-SELECT @dtmBillDate = [from], @dateTo = [to], @condition = [condition] FROM @temp_xml_table WHERE [fieldname] = 'dtmBillDate'; 
-IF @dateFrom IS NOT NULL
-BEGIN	
-	IF @condition = 'Equal To'
-	BEGIN 
-		SET @innerQuery = ' DATEADD(dd, DATEDIFF(dd, 0,PaymentDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
-	END
-    ELSE 
-	BEGIN 
-		SET @innerQuery = ' DATEADD(dd, DATEDIFF(dd, 0,PaymentDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''	
-	END  
-END
+--SELECT @dateFrom = [from], @dateTo = [to], @condition = [condition] FROM @temp_xml_table WHERE [fieldname] = 'PaymentDate';
+--SELECT @dtmBillDate = [from], @dateTo = [to], @condition = [condition] FROM @temp_xml_table WHERE [fieldname] = 'dtmBillDate'; 
+--IF @dateFrom IS NOT NULL
+--BEGIN	
+--	IF @condition = 'Equal To'
+--	BEGIN 
+--		SET @innerQuery = ' DATEADD(dd, DATEDIFF(dd, 0,PaymentDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
+--	END
+--    ELSE 
+--	BEGIN 
+--		SET @innerQuery = ' DATEADD(dd, DATEDIFF(dd, 0,PaymentDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''	
+--	END  
+--END
 
-DELETE FROM @temp_xml_table WHERE [fieldname] = 'PaymentDate'
+--DELETE FROM @temp_xml_table WHERE [fieldname] = 'PaymentDate'
 
-IF @dtmBillDate IS NOT NULL
-BEGIN	
-	IF @condition = 'Equal To'
-	BEGIN 
-		SET @innerQuery =  ' DATEADD(dd, DATEDIFF(dd, 0,dtmBillDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmBillDate, 110) + ''''
-	END
-    ELSE 
-	BEGIN 
-		SET @innerQuery =  ' DATEADD(dd, DATEDIFF(dd, 0,dtmBillDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmBillDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''	
-	END  
-END
-DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmBillDate'
+--IF @dtmBillDate IS NOT NULL
+--BEGIN	
+--	IF @condition = 'Equal To'
+--	BEGIN 
+--		SET @innerQuery =  ' DATEADD(dd, DATEDIFF(dd, 0,dtmBillDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmBillDate, 110) + ''''
+--	END
+--    ELSE 
+--	BEGIN 
+--		SET @innerQuery =  ' DATEADD(dd, DATEDIFF(dd, 0,dtmBillDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmBillDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''	
+--	END  
+--END
+--DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmBillDate'
 
 WHILE EXISTS(SELECT 1 FROM @temp_xml_table)
 BEGIN
@@ -105,27 +105,10 @@ BEGIN
 END
 
 SET @query = 'SELECT  
-				intBillId,
-				VendorId ,
-				VendorName ,
-				strDescription ,
-				strItem , 
-				intTicketId ,
-				strTicketNumber ,
-				strVendorOrderNumber ,
-				StateOfOrigin ,
-				Location ,
-				BillDate ,
-				PostDate ,
-				PaymentDate ,
-				ExemptUnits ,
-				dblTotal ,
-				dblTax ,
-				strCompanyName ,
-				strCompanyAddress
+				dblCommodityTotal,
+				strDescription
 				FROM 
-			 [vyuAPRptVoucherCheckOff]
-			 ORDER BY StateOfOrigin DESC
+			 [vyuAPRptVoucherCheckOffCommodity]
 '
 
 	  
