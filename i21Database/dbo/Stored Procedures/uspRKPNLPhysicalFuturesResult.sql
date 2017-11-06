@@ -9,7 +9,44 @@ BEGIN
 	--		,@intSContractDetailId INT = 14604
 	--		,@intUnitMeasureId INT = 10
 
-	SELECT @strPContractDetailId = COALESCE(@strPContractDetailId + ',', '') + CAST(intPContractDetailId AS NVARCHAR(50)) FROM   tblLGAllocationDetail WHERE intSContractDetailId	=	@intSContractDetailId
+	DECLARE @tblLGAllocationDetail TABLE
+	(
+		intPUnitMeasureId		INT,
+		dblPAllocatedQty		NUMERIC(18,6),
+		dtmAllocatedDate		DATETIME,
+		intPContractDetailId	INT,
+		intSContractDetailId	INT
+	)
+
+	IF EXISTS(SELECT * FROM   tblLGAllocationDetail WHERE intSContractDetailId	=	@intSContractDetailId) -- Replace this condition with Risk setting
+	BEGIN
+		INSERT	INTO @tblLGAllocationDetail
+		SELECT	AD.intPUnitMeasureId,
+				AD.dblPAllocatedQty,
+				AD.dtmAllocatedDate,
+				AD.intPContractDetailId,
+				AD.intSContractDetailId
+		FROM	tblLGAllocationDetail	AD
+		WHERE	AD.intSContractDetailId = @intSContractDetailId
+	END
+	ELSE
+	BEGIN
+		INSERT	INTO @tblLGAllocationDetail
+		SELECT	DISTINCT
+				IU.intUnitMeasureId		AS	intPUnitMeasureId,
+				DL.dblLotQuantity		AS	dblPAllocatedQty,
+				LD.dtmProductionDate	AS	dtmAllocatedDate,
+				RI.intLineNo			AS	intPContractDetailId,
+				LD.intSContractDetailId
+		FROM	tblLGLoadDetail					LD
+		JOIN	tblLGLoadDetailLot				DL	ON	LD.intLoadDetailId				=	DL.intLoadDetailId
+		JOIN	tblICItemUOM					IU	ON	IU.intItemUOMId					=	DL.intItemUOMId
+		JOIN	tblICInventoryReceiptItemLot	IL	ON	IL.intLotId						=	DL.intLotId
+		JOIN	tblICInventoryReceiptItem		RI	ON	RI.intInventoryReceiptItemId	=	IL.intInventoryReceiptItemId
+		WHERE	LD.intSContractDetailId = @intSContractDetailId
+	END
+
+	SELECT @strPContractDetailId = COALESCE(@strPContractDetailId + ',', '') + CAST(intPContractDetailId AS NVARCHAR(50)) FROM   @tblLGAllocationDetail WHERE intSContractDetailId	=	@intSContractDetailId
 	SELECT @strDetailIds = @strPContractDetailId + ',' + LTRIM(@intSContractDetailId)
 
 	SELECT	CONVERT(int,ROW_NUMBER() OVER (ORDER BY strContractType)) intRowNum,
@@ -45,7 +82,7 @@ BEGIN
 				AD.dtmAllocatedDate AS dtmDate,
 				999999 AS intSort
 
-		FROM	tblLGAllocationDetail	AD 
+		FROM	@tblLGAllocationDetail	AD 
 		JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId	=	AD.intPContractDetailId 
 											AND intSContractDetailId	=	@intSContractDetailId
 		JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
@@ -90,7 +127,7 @@ BEGIN
 		JOIN	tblICItemUOM			QU	ON	QU.intItemUOMId			=	ID.intItemUOMId	
 		JOIN	tblICItemUOM			PU	ON	PU.intItemUOMId			=	CD.intPriceItemUOMId	
 		JOIN	tblSMCurrency			CY	ON	CY.intCurrencyID		=	IV.intCurrencyId
-		JOIN	tblLGAllocationDetail	AD	ON	AD.intSContractDetailId	=	ID.intContractDetailId
+		JOIN	@tblLGAllocationDetail	AD	ON	AD.intSContractDetailId	=	ID.intContractDetailId
 		WHERE	ID.intContractDetailId	=	@intSContractDetailId
 
 		UNION ALL
@@ -120,7 +157,7 @@ BEGIN
 				AD.dtmAllocatedDate AS dtmDate,
 				AD.intPContractDetailId  AS intSort
 
-		FROM	tblLGAllocationDetail	AD 
+		FROM	@tblLGAllocationDetail	AD 
 		JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId	=	@intSContractDetailId
 		JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 		JOIN	tblCTContractType		TP	ON	TP.intContractTypeId	=	CH.intContractTypeId
@@ -162,7 +199,7 @@ BEGIN
 					CH.dtmContractDate,
 					CC.intItemId * 999999 AS intSort
 
-			FROM	tblLGAllocationDetail	AD 
+			FROM	@tblLGAllocationDetail	AD 
 			JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId	IN	(AD.intPContractDetailId, AD.intSContractDetailId)
 			JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 			JOIN	tblCTContractCost		CC	ON	CC.intContractDetailId	=	CD.intContractDetailId AND ISNULL(ysnBasis,0) = 0
