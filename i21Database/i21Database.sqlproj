@@ -5872,6 +5872,7 @@
     <Build Include="dbo\Stored Procedures\uspAPRptVoucherCheckOffCommodity.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateVendorRefund.sql" />
     <Build Include="dbo\Stored Procedures\uspLGSplitPickedLotBatch.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFLotCreate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
