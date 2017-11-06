@@ -5858,6 +5858,7 @@
     <Build Include="dbo\Tables\tblARCreditBalancePayOut.sql" />
     <Build Include="dbo\Tables\tblARCreditBalancePayOutDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspLGSplitPickedLotBatch.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFLotCreate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

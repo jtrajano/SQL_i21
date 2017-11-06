@@ -1,5 +1,4 @@
-CREATE PROCEDURE [dbo].[uspMFPostProduction] 
-	@ysnPost BIT = 0
+CREATE PROCEDURE [dbo].[uspMFPostProduction] @ysnPost BIT = 0
 	,@ysnRecap BIT = 0
 	,@intWorkOrderId INT = NULL
 	,@intItemId INT
@@ -22,8 +21,9 @@ CREATE PROCEDURE [dbo].[uspMFPostProduction]
 	,@dtmProductionDate DATETIME = NULL
 	,@intTransactionDetailId INT = NULL
 	,@strShiftActivityNo NVARCHAR(50) = NULL
-	,@intShiftId int=NULL
+	,@intShiftId INT = NULL
 	,@intLoadDistributionDetailId INT = NULL
+	,@dblUnitCost NUMERIC(38, 20) = NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -58,7 +58,6 @@ DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 	,@strItemNo1 NVARCHAR(50)
 	,@intRecipeItemUOMId INT
 	,@strLocationName NVARCHAR(50)
-
 DECLARE @GLEntriesForOtherCost TABLE (
 	dtmDate DATETIME
 	,intItemId INT
@@ -84,7 +83,7 @@ SET @ysnPost = ISNULL(@ysnPost, 0)
 IF @strShiftActivityNo IS NOT NULL
 BEGIN
 	SELECT @intTransactionId = @intBatchId
-		,@dtmDate = IsNULL(@dtmProductionDate,GetDate())
+		,@dtmDate = IsNULL(@dtmProductionDate, GetDate())
 		,@strTransactionId = @strShiftActivityNo
 
 	SELECT @intLocationId = intLocationId
@@ -93,12 +92,25 @@ BEGIN
 END
 ELSE
 BEGIN
-	SELECT TOP 1 @intTransactionId = @intBatchId
-		,@dtmDate = IsNULL(@dtmProductionDate,GetDate())
-		,@strTransactionId = strWorkOrderNo
-		,@intLocationId = intLocationId
-	FROM dbo.tblMFWorkOrder
-	WHERE intWorkOrderId = @intWorkOrderId
+	IF @intWorkOrderId IS NULL
+	BEGIN
+		SELECT @intTransactionId = @intBatchId
+			,@dtmDate = IsNULL(@dtmProductionDate, GetDate())
+			,@strTransactionId = 'Manual Lot'
+
+		SELECT @intLocationId = intLocationId
+		FROM tblICStorageLocation
+		WHERE intStorageLocationId = @intStorageLocationId
+	END
+	ELSE
+	BEGIN
+		SELECT TOP 1 @intTransactionId = @intBatchId
+			,@dtmDate = IsNULL(@dtmProductionDate, GetDate())
+			,@strTransactionId = strWorkOrderNo
+			,@intLocationId = intLocationId
+		FROM dbo.tblMFWorkOrder
+		WHERE intWorkOrderId = @intWorkOrderId
+	END
 END
 
 IF @dtmProductionDate > @dtmDate
@@ -122,20 +134,27 @@ WHERE intItemId = @intItemId
 
 IF @strShiftActivityNo IS NOT NULL
 BEGIN
-	
-	SELECT @dblNewUnitCost=dblStandardCost
+	SELECT @dblNewUnitCost = dblStandardCost
 	FROM dbo.tblICItemPricing
-	WHERE intItemId=@intItemId AND intItemLocationId=@intItemLocationId
+	WHERE intItemId = @intItemId
+		AND intItemLocationId = @intItemLocationId
 
-	If @dblNewUnitCost is null
-	Select @dblNewUnitCost=0
+	IF @dblNewUnitCost IS NULL
+		SELECT @dblNewUnitCost = 0
 END
 ELSE
 BEGIN
-	SELECT @dblNewCost = [dbo].[fnMFGetTotalStockValueFromTransactionBatch](@intTransactionId, @strBatchId)
+	IF @intWorkOrderId IS NULL
+	BEGIN
+		SELECT @dblNewUnitCost = @dblUnitCost
+	END
+	ELSE
+	BEGIN
+		SELECT @dblNewCost = [dbo].[fnMFGetTotalStockValueFromTransactionBatch](@intTransactionId, @strBatchId)
 
-	SET @dblNewCost = ABS(@dblNewCost)
-	SET @dblNewUnitCost = ABS(@dblNewCost) / @dblProduceQty
+		SET @dblNewCost = ABS(@dblNewCost)
+		SET @dblNewUnitCost = ABS(@dblNewCost) / @dblProduceQty
+	END
 END
 
 DECLARE @dblOtherCharges NUMERIC(18, 6)
@@ -269,7 +288,7 @@ BEGIN
 		,strTransactionId = @strTransactionId
 		,strSourceTransactionId = @strTransactionId
 		,intSourceTransactionTypeId = @INVENTORY_PRODUCE
-		,intShiftId=@intShiftId
+		,intShiftId = @intShiftId
 
 	EXEC dbo.uspICCreateUpdateLotNumber @ItemsThatNeedLotId
 		,@intUserId
@@ -288,7 +307,7 @@ BEGIN
 		,@intSubLocationId = @intSubLocationId
 		,@intLocationId = @intLocationId
 		,@dtmDate = @dtmProductionDate
-		,@intShiftId  = @intShiftId
+		,@intShiftId = @intShiftId
 END
 
 IF @dblOtherCharges IS NOT NULL
@@ -313,20 +332,22 @@ BEGIN
 	INNER JOIN @OtherChargesGLAccounts ChargesGLAccounts ON Item.intItemId = ChargesGLAccounts.intChargeId
 	WHERE ChargesGLAccounts.intOtherChargeExpense IS NULL
 
-	SELECT	TOP 1 
-			@strLocationName = c.strLocationName
-	FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
-				ON il.intLocationId = c.intCompanyLocationId
-			INNER JOIN @OtherChargesGLAccounts ChargesGLAccounts
-				ON ChargesGLAccounts.intChargeId = il.intItemId
-				AND ChargesGLAccounts.intItemLocationId = il.intItemLocationId
-	WHERE	il.intItemId = @intItemId1
-			AND ChargesGLAccounts.intOtherChargeExpense IS NULL
+	SELECT TOP 1 @strLocationName = c.strLocationName
+	FROM tblICItemLocation il
+	INNER JOIN tblSMCompanyLocation c ON il.intLocationId = c.intCompanyLocationId
+	INNER JOIN @OtherChargesGLAccounts ChargesGLAccounts ON ChargesGLAccounts.intChargeId = il.intItemId
+		AND ChargesGLAccounts.intItemLocationId = il.intItemLocationId
+	WHERE il.intItemId = @intItemId1
+		AND ChargesGLAccounts.intOtherChargeExpense IS NULL
 
 	IF @intItemId1 IS NOT NULL
 	BEGIN
 		-- {Item} in {Location} is missing a GL account setup for {Account Category} account category.
-		EXEC uspICRaiseError 80008, @strItemNo1, @strLocationName, @ACCOUNT_CATEGORY_OtherChargeExpense;
+		EXEC uspICRaiseError 80008
+			,@strItemNo1
+			,@strLocationName
+			,@ACCOUNT_CATEGORY_OtherChargeExpense;
+
 		RETURN;
 	END
 
@@ -482,7 +503,7 @@ BEGIN
 		AND ISNULL(GLEntriesForOtherCost.ysnInventoryCost, 0) = 0
 		AND ISNULL(GLEntriesForOtherCost.ysnPrice, 0) = 0
 
-	IF ISNULL(@ysnRecap,0)=0
+	IF ISNULL(@ysnRecap, 0) = 0
 		EXEC dbo.uspGLBookEntries @GLEntries
 			,@ysnPost
 END
@@ -494,23 +515,34 @@ IF @ysnPost = 1
 BEGIN
 	DECLARE @strActualCost NVARCHAR(50) = NULL
 
-	SELECT strActualCost = (CASE WHEN Receipt.strOrigin = 'Terminal' AND HeaderDistItem.strDestination = 'Customer'
-									THEN LoadHeader.strTransaction
-								WHEN Receipt.strOrigin = 'Terminal' AND HeaderDistItem.strDestination = 'Location'
-									THEN NULL
-								WHEN Receipt.strOrigin = 'Location' AND HeaderDistItem.strDestination = 'Customer' AND Receipt.intCompanyLocationId = HeaderDistItem.intCompanyLocationId
-									THEN NULL
-								WHEN Receipt.strOrigin = 'Location' AND HeaderDistItem.strDestination = 'Customer' AND Receipt.intCompanyLocationId != HeaderDistItem.intCompanyLocationId
-									THEN LoadHeader.strTransaction
-								WHEN Receipt.strOrigin = 'Location' AND HeaderDistItem.strDestination = 'Location'
-									THEN NULL
-								END)
+	SELECT strActualCost = (
+			CASE 
+				WHEN Receipt.strOrigin = 'Terminal'
+					AND HeaderDistItem.strDestination = 'Customer'
+					THEN LoadHeader.strTransaction
+				WHEN Receipt.strOrigin = 'Terminal'
+					AND HeaderDistItem.strDestination = 'Location'
+					THEN NULL
+				WHEN Receipt.strOrigin = 'Location'
+					AND HeaderDistItem.strDestination = 'Customer'
+					AND Receipt.intCompanyLocationId = HeaderDistItem.intCompanyLocationId
+					THEN NULL
+				WHEN Receipt.strOrigin = 'Location'
+					AND HeaderDistItem.strDestination = 'Customer'
+					AND Receipt.intCompanyLocationId != HeaderDistItem.intCompanyLocationId
+					THEN LoadHeader.strTransaction
+				WHEN Receipt.strOrigin = 'Location'
+					AND HeaderDistItem.strDestination = 'Location'
+					THEN NULL
+				END
+			)
 	INTO #tmpBlendIngredients
 	FROM tblTRLoadDistributionDetail DistItem
 	LEFT JOIN tblTRLoadDistributionHeader HeaderDistItem ON HeaderDistItem.intLoadDistributionHeaderId = DistItem.intLoadDistributionHeaderId
 	LEFT JOIN tblTRLoadHeader LoadHeader ON LoadHeader.intLoadHeaderId = HeaderDistItem.intLoadHeaderId
 	LEFT JOIN vyuTRGetLoadBlendIngredient BlendIngredient ON BlendIngredient.intLoadDistributionDetailId = DistItem.intLoadDistributionDetailId
-	LEFT JOIN tblTRLoadReceipt Receipt ON Receipt.intLoadHeaderId = LoadHeader.intLoadHeaderId AND Receipt.strReceiptLine = BlendIngredient.strReceiptLink
+	LEFT JOIN tblTRLoadReceipt Receipt ON Receipt.intLoadHeaderId = LoadHeader.intLoadHeaderId
+		AND Receipt.strReceiptLine = BlendIngredient.strReceiptLink
 	WHERE DistItem.intLoadDistributionDetailId = @intLoadDistributionDetailId
 		AND ISNULL(DistItem.strReceiptLink, '') = ''
 
@@ -547,15 +579,23 @@ BEGIN
 			,dtmDate = @dtmProductionDate
 			,dblQty = @dblProduceQty
 			-- Get the unit qty of the Weight UOM or qty UOM
-			,dblUOMQty = CASE WHEN (@intWeightUOMId = @intProduceUOMKey)
-								THEN (SELECT 1)
-							ELSE (CASE WHEN @dblUnitQty IS NOT NULL
-										THEN @dblUnitQty
-									ELSE (SELECT TOP 1 dblUnitQty
-										FROM dbo.tblICItemUOM
-										WHERE intItemUOMId = @intProduceUOMKey)
-									END)
+			,dblUOMQty = CASE 
+				WHEN (@intWeightUOMId = @intProduceUOMKey)
+					THEN (
+							SELECT 1
+							)
+				ELSE (
+						CASE 
+							WHEN @dblUnitQty IS NOT NULL
+								THEN @dblUnitQty
+							ELSE (
+									SELECT TOP 1 dblUnitQty
+									FROM dbo.tblICItemUOM
+									WHERE intItemUOMId = @intProduceUOMKey
+									)
 							END
+						)
+				END
 			,dblCost = @dblNewUnitCost
 			,dblSalesPrice = 0
 			,intCurrencyId = NULL
@@ -599,15 +639,23 @@ BEGIN
 			,dtmDate = @dtmProductionDate
 			,dblQty = @dblProduceQty
 			-- Get the unit qty of the Weight UOM or qty UOM
-			,dblUOMQty = CASE WHEN (@intWeightUOMId = @intProduceUOMKey)
-								THEN (SELECT 1)
-							ELSE (CASE WHEN @dblUnitQty IS NOT NULL
-										THEN @dblUnitQty
-									ELSE (SELECT TOP 1 dblUnitQty
-										FROM dbo.tblICItemUOM
-										WHERE intItemUOMId = @intProduceUOMKey)
-							END)
-						END
+			,dblUOMQty = CASE 
+				WHEN (@intWeightUOMId = @intProduceUOMKey)
+					THEN (
+							SELECT 1
+							)
+				ELSE (
+						CASE 
+							WHEN @dblUnitQty IS NOT NULL
+								THEN @dblUnitQty
+							ELSE (
+									SELECT TOP 1 dblUnitQty
+									FROM dbo.tblICItemUOM
+									WHERE intItemUOMId = @intProduceUOMKey
+									)
+							END
+						)
+				END
 			,dblCost = @dblNewUnitCost
 			,dblSalesPrice = 0
 			,intCurrencyId = NULL
@@ -622,6 +670,7 @@ BEGIN
 			,intSourceTransactionId = @INVENTORY_PRODUCE
 			,strSourceTransactionId = @strTransactionId
 			,strActualCostId = @strActualCost
+
 	DELETE
 	FROM @GLEntries
 
@@ -667,9 +716,9 @@ BEGIN
 
 	DELETE
 	FROM @GLEntries
-	WHERE strTransactionType NOT IN ('Produce') 
+	WHERE strTransactionType NOT IN ('Produce')
 
-	IF ISNULL(@ysnRecap,0)=0
+	IF ISNULL(@ysnRecap, 0) = 0
 		EXEC dbo.uspGLBookEntries @GLEntries
 			,@ysnPost
 
@@ -683,14 +732,18 @@ BEGIN
 			AND intBatchId = @intBatchId
 	END
 
-	If ISNULL(@ysnRecap,0)=1
-	Begin
+	IF ISNULL(@ysnRecap, 0) = 1
+	BEGIN
 		--Create Temp Table if not exists, so that insert statement for the temp table will not fail.
 		IF OBJECT_ID('tempdb..#tblRecap') IS NULL
-			Select * into #tblRecap from @GLEntries Where 1=2
+			SELECT *
+			INTO #tblRecap
+			FROM @GLEntries
+			WHERE 1 = 2
 
 		--Insert Recap Data to temp table
-		Insert Into #tblRecap
-		Select * from @GLEntries
-	End
+		INSERT INTO #tblRecap
+		SELECT *
+		FROM @GLEntries
+	END
 END
