@@ -75,6 +75,6 @@
 		[dtmFeedCreated] DATETIME,
 		[dblTotalGross] NUMERIC(18,6),
 		[dblTotalNet] NUMERIC(18,6),
-		[strWeightUOM] NVARCHAR(10) COLLATE Latin1_General_CI_AS,
+		[strWeightUOM] NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 		[strMessage] NVARCHAR(50) COLLATE Latin1_General_CI_AS, 
 	)
