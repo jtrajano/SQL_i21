@@ -5857,6 +5857,7 @@
     <Build Include="dbo\Tables\tblMFProcessCycleCountMachine.sql" />
     <Build Include="dbo\Tables\tblARCreditBalancePayOut.sql" />
     <Build Include="dbo\Tables\tblARCreditBalancePayOutDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGSplitPickedLotBatch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
