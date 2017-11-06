@@ -66,6 +66,7 @@ CROSS APPLY
 		,NULL
 		,NULL
 		,0
+		,NULL
 		) TC
 ) T
 GROUP BY 

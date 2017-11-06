@@ -5855,6 +5855,8 @@
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityInvoiceFromShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilitySalesOrderFromShipment.sql" />
     <Build Include="dbo\Tables\tblMFProcessCycleCountMachine.sql" />
+    <Build Include="dbo\Tables\tblARCreditBalancePayOut.sql" />
+    <Build Include="dbo\Tables\tblARCreditBalancePayOutDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
