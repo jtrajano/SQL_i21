@@ -378,6 +378,30 @@ SET @batchIdUsed = @batchId
 					ISNULL(A.ysnInvoicePrepayment, 0) = 1
 					AND (B.dblInvoiceTotal <> B.dblPayment OR B.dblInvoiceTotal <> A.dblAmountPaid)
 					
+				--Forgiven Invoice(s)
+				INSERT INTO   
+					@ARReceivableInvalidData  
+				SELECT  
+					'Invoice ' + ARI.strInvoiceNumber + ' has been forgiven!'  
+					,'Receivable'  
+					,ARP.strRecordNumber  
+					,@batchId  
+					,ARP.intPaymentId  
+				FROM  
+					tblARPaymentDetail ARPD   
+				INNER JOIN   
+					tblARPayment ARP  
+						ON ARPD.intPaymentId = ARP.intPaymentId  
+				INNER JOIN
+					tblARInvoice ARI
+						ON ARPD.intInvoiceId = ARI.intInvoiceId
+				INNER JOIN  
+					@ARReceivablePostData P  
+						ON ARP.intPaymentId = ARP.intPaymentId
+				WHERE
+					ISNULL(ARPD.dblPayment,0.00) <> 0.00
+					AND ARI.strType = 'Service Charge'
+					AND ARI.ysnForgiven = 1
 					
 				--Return Payment not allowed
 				INSERT INTO

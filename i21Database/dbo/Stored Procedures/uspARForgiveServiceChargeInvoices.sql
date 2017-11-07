@@ -13,6 +13,7 @@ SET ANSI_WARNINGS OFF
 IF ISNULL(@InvoiceIds, '') <> ''
 	BEGIN
 		DECLARE @ServiceChargeToForgive TABLE (intInvoiceId INT, strInvoiceNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS)
+		DECLARE @ServiceChargeHasPayments NVARCHAR(MAX)
 
 		INSERT INTO @ServiceChargeToForgive
 		SELECT SCI.intInvoiceId
@@ -30,7 +31,26 @@ IF ISNULL(@InvoiceIds, '') <> ''
 		) SCI ON DV.intID = SCI.intInvoiceId
 
 		IF EXISTS(SELECT NULL FROM @ServiceChargeToForgive)
-		BEGIN
+		BEGIN			
+			SELECT @ServiceChargeHasPayments = COALESCE(@ServiceChargeHasPayments + ', ', '') + RTRIM(LTRIM(I.strInvoiceNumber)) 
+			FROM @ServiceChargeToForgive I
+			INNER JOIN (
+				SELECT PD.intPaymentId
+					 , PD.intInvoiceId
+				FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
+				INNER JOIN (
+					SELECT intPaymentId
+					FROM dbo.tblARPayment WITH (NOLOCK)
+				) P ON PD.intPaymentId = P.intPaymentId
+			) P ON I.intInvoiceId = P.intInvoiceId
+
+			IF ISNULL(@ServiceChargeHasPayments, '') <> ''
+				BEGIN
+					SET @ServiceChargeHasPayments = 'These Service Charges Invoice has payments: ' + @ServiceChargeHasPayments
+					RAISERROR(@ServiceChargeHasPayments, 16, 1)
+					RETURN;
+				END
+
 			UPDATE INV
 			SET INV.ysnForgiven = CASE WHEN @isForgive = 1 THEN 1 ELSE 0 END
 			FROM tblARInvoice INV
