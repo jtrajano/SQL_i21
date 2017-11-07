@@ -32,7 +32,7 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICCategoryVendor_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICCategoryVendor_tblAPVendor] FOREIGN KEY ([intVendorId]) REFERENCES [tblAPVendor]([intEntityId]), 
 		CONSTRAINT [FK_tblICCategoryVendor_tblICCategoryLocation] FOREIGN KEY ([intCategoryLocationId]) REFERENCES [tblICCategoryLocation]([intCategoryLocationId]),
-		CONSTRAINT [FK_tblICCategoryVendor_tblVRVendorSetup] FOREIGN KEY ([intVendorSetupId]) REFERENCES [tblVRVendorSetup]([intVendorSetupId])
+		CONSTRAINT [FK_tblICCategoryVendor_tblVRVendorSetup] FOREIGN KEY ([intVendorSetupId]) REFERENCES [tblVRVendorSetup]([intVendorSetupId]) ON DELETE CASCADE
 	)
 
 	GO
