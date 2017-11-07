@@ -440,6 +440,31 @@ SET @BatchIdUsed = @BatchId
 				WHERE
 					ISNULL(ARPD.[dblPayment], @ZeroDecimal) <> @ZeroDecimal
 					AND ISNULL(ARI.[ysnPosted],0) = 0
+
+				--Forgiven Invoice(s)
+				INSERT INTO   
+					@ARPaymentInvalidData  
+				SELECT  
+					'Invoice ' + ARI.strInvoiceNumber + ' has been forgiven!'  
+					,'Receivable'  
+					,ARP.[strRecordNumber]  
+					,@BatchId  
+					,ARP.[intPaymentId]  
+				FROM  
+					tblARPaymentDetail ARPD WITH (NOLOCK)
+				INNER JOIN   
+					(SELECT [intPaymentId], [strRecordNumber] FROM tblARPayment  WITH (NOLOCK)) ARP
+						ON ARPD.[intPaymentId] = ARP.[intPaymentId]  
+				INNER JOIN
+					(SELECT [intInvoiceId], [strType], [strInvoiceNumber], [ysnPosted], [ysnForgiven] FROM tblARInvoice WITH (NOLOCK)) ARI
+						ON ARPD.[intInvoiceId] = ARI.[intInvoiceId]
+				INNER JOIN  
+					@ARPaymentPostData PPD  
+						ON ARP.[intPaymentId] = PPD.[intPaymentId]
+				WHERE
+					ISNULL(ARPD.[dblPayment], @ZeroDecimal) <> @ZeroDecimal
+					AND ARI.strType = 'Service Charge'
+					AND ARI.ysnForgiven = 1
 					
 				--Return Payment not allowed
 				INSERT INTO
