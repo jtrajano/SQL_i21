@@ -11,6 +11,6 @@
 	CONSTRAINT [PK_tblVRProgramItem] PRIMARY KEY CLUSTERED ([intProgramItemId] ASC),
 	CONSTRAINT [FK_tblVRProgramItem_tblICCategory] FOREIGN KEY([intCategoryId]) REFERENCES [dbo].[tblICCategory] ([intCategoryId]),
 	CONSTRAINT [FK_tblVRProgramItem_tblICItem] FOREIGN KEY([intItemId]) REFERENCES [dbo].[tblICItem] ([intItemId]),
-	CONSTRAINT [FK_tblVRProgramItem_tblVRProgram] FOREIGN KEY([intProgramId])REFERENCES [dbo].[tblVRProgram] ([intProgramId]) 
+	CONSTRAINT [FK_tblVRProgramItem_tblVRProgram] FOREIGN KEY([intProgramId])REFERENCES [dbo].[tblVRProgram] ([intProgramId]) ON DELETE CASCADE, 
 )
 GO
