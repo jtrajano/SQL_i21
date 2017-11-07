@@ -5879,6 +5879,7 @@
     <Build Include="dbo\Stored Procedures\uspVRInsertCustomerSpecialPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspVRUpdateCustomerSpecialPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateBillPaymentFromAR.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFValidateInventoryShipment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
