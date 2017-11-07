@@ -8,8 +8,7 @@ BEGIN
 		BEGIN
 			SELECT @defaultCurrency = 
 					CASE 
-						WHEN ContractDetail.ysnUseFXPrice = 1
-						THEN ContractDetail.intSeqCurrencyId			
+						WHEN ContractDetail.ysnUseFXPrice = 1 THEN ContractDetail.intSeqCurrencyId			
 						ELSE ISNULL(ISNULL(ContractDetail.intCurrencyId, ContractDetail.intMainCurrencyId), dbo.fnSMGetDefaultCurrency('FUNCTIONAL'))
 					END
 			FROM vyuCTContractDetailView ContractDetail 

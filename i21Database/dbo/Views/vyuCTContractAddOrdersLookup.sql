@@ -24,51 +24,9 @@ SELECT	  CD.intContractDetailId
 		, CH.intContractHeaderId
 		, Item.strItemNo
 		, Item.strDescription AS strItemDescription
-		--, AD.dblSeqPrice
-		--, AD.intSeqPriceUOMId
-		--, AD.strSeqPriceUOM
-		, dblSeqPrice = 
-			CASE 
-				WHEN	CD.ysnUseFXPrice = 1 
-						AND CD.intCurrencyExchangeRateId IS NOT NULL 
-						AND CD.dblRate IS NOT NULL 
-						AND CD.intFXPriceUOMId IS NOT NULL 
-				THEN 
-					dbo.fnCTConvertQtyToTargetItemUOM(
-						CD.intFXPriceUOMId
-						,ISNULL(CD.intPriceItemUOMId,CD.intAdjItemUOMId)
-						,(
-							CD.dblCashPrice / CASE WHEN CU.ysnSubCurrency = 1 THEN CASE WHEN ISNULL(intCent,0) = 0 THEN 1 ELSE intCent END ELSE 1 END			
-						)
-					) * CD.dblRate
-
-				ELSE
-					CD.dblCashPrice
-			END 
-		, intSeqPriceUOMId = 
-			CASE 
-				WHEN	CD.ysnUseFXPrice = 1 
-						AND CD.intCurrencyExchangeRateId IS NOT NULL 
-						AND CD.dblRate IS NOT NULL 
-						AND CD.intFXPriceUOMId IS NOT NULL 
-				THEN 
-					CD.intFXPriceUOMId
-				ELSE
-					ISNULL(CD.intPriceItemUOMId,CD.intAdjItemUOMId)
-			END 
-
-		,strSeqPriceUOM = 
-			CASE 
-				WHEN	CD.ysnUseFXPrice = 1 
-						AND CD.intCurrencyExchangeRateId IS NOT NULL 
-						AND CD.dblRate IS NOT NULL 
-						AND CD.intFXPriceUOMId IS NOT NULL 
-				THEN 
-					FM.strUnitMeasure
-				ELSE
-					UM.strUnitMeasure
-			END 
-
+		, AD.dblSeqPrice
+		, AD.intSeqPriceUOMId
+		, AD.strSeqPriceUOM
 		, Item.intLifeTime
 		, Item.strLifeTimeType
 		, Item.strLotTracking
@@ -82,47 +40,48 @@ SELECT	  CD.intContractDetailId
 		, CD.intRateTypeId
 		, RT.strCurrencyExchangeRateType
 		, CD.dblRate
+		, ysnBundleItem = CAST(CASE WHEN Item.strType = 'Bundle' THEN 1 ELSE 0 END AS BIT) 
+		, Item.ysnIsBasket
+		, CL.strLocationName
+		, CH.strEntityNumber
+		, dblItemUOMCF = ISNULL(IU.dblUnitQty, 0)
+		, dblAllocatedQty = ISNULL(PA.dblAllocatedQty,0) + ISNULL(SA.dblAllocatedQty,0)	
+		, dblPricePerUnit = 
+					-- AD.dblSeqPrice
+					CASE 
+						WHEN	CD.ysnUseFXPrice = 1 
+								AND CD.intCurrencyExchangeRateId IS NOT NULL 
+								AND CD.dblRate IS NOT NULL 
+								AND CD.intFXPriceUOMId IS NOT NULL 
+						THEN 
+							dbo.fnCTConvertQtyToTargetItemUOM(
+								CD.intFXPriceUOMId
+								,ISNULL(CD.intPriceItemUOMId,CD.intAdjItemUOMId)
+								,(
+									CD.dblCashPrice / CASE WHEN CU.ysnSubCurrency = 1 THEN CASE WHEN ISNULL(intCent,0) = 0 THEN 1 ELSE intCent END ELSE 1 END			
+								)
+							) * CD.dblRate
+
+						ELSE
+							CD.dblCashPrice
+					END 
+					* 
+					-- AD.dblQtyToPriceUOMConvFactor
+					CASE 
+						WHEN	CD.ysnUseFXPrice = 1 
+								AND CD.intCurrencyExchangeRateId IS NOT NULL 
+								AND CD.dblRate IS NOT NULL 
+								AND CD.intFXPriceUOMId IS NOT NULL 
+						THEN 
+							dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intFXPriceUOMId,1)
+						ELSE
+							dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,ISNULL(CD.intPriceItemUOMId,CD.intAdjItemUOMId),1)
+					END 
 		, CH.strGrade
 		, CH.intGradeId
 		, CH.strWeight
 		, CH.intWeightId
 		, CD.intCurrencyId
-		, CL.strLocationName 	
-		, CH.strEntityNumber	
-		, dblItemUOMCF = ISNULL(IU.dblUnitQty, 0)		
-		, dblAllocatedQty = ISNULL(PA.dblAllocatedQty,0) + ISNULL(SA.dblAllocatedQty,0)	
-		--, dblPricePerUnit = AD.dblSeqPrice * AD.dblQtyToPriceUOMConvFactor 					
-		,dblPricePerUnit = 
-			-- AD.dblSeqPrice
-			CASE 
-				WHEN	CD.ysnUseFXPrice = 1 
-						AND CD.intCurrencyExchangeRateId IS NOT NULL 
-						AND CD.dblRate IS NOT NULL 
-						AND CD.intFXPriceUOMId IS NOT NULL 
-				THEN 
-					dbo.fnCTConvertQtyToTargetItemUOM(
-						CD.intFXPriceUOMId
-						,ISNULL(CD.intPriceItemUOMId,CD.intAdjItemUOMId)
-						,(
-							CD.dblCashPrice / CASE WHEN CU.ysnSubCurrency = 1 THEN CASE WHEN ISNULL(intCent,0) = 0 THEN 1 ELSE intCent END ELSE 1 END			
-						)
-					) * CD.dblRate
-
-				ELSE
-					CD.dblCashPrice
-			END 
-			* 
-			-- AD.dblQtyToPriceUOMConvFactor
-			CASE 
-				WHEN	CD.ysnUseFXPrice = 1 
-						AND CD.intCurrencyExchangeRateId IS NOT NULL 
-						AND CD.dblRate IS NOT NULL 
-						AND CD.intFXPriceUOMId IS NOT NULL 
-				THEN 
-					dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intFXPriceUOMId,1)
-				ELSE
-					dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,ISNULL(CD.intPriceItemUOMId,CD.intAdjItemUOMId),1)
-			END 
 
 FROM	tblCTContractDetail CD	
 	CROSS APPLY tblCTCompanyPreference CP
@@ -138,18 +97,14 @@ FROM	tblCTContractDetail CD
 	LEFT JOIN tblICStorageLocation STL ON STL.intStorageLocationId = IL.intStorageLocationId
 	LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CD.intCurrencyId
 	LEFT JOIN tblSMCurrencyExchangeRateType	RT ON RT.intCurrencyExchangeRateTypeId = CD.intRateTypeId
-	LEFT JOIN tblICItemUOM FU ON FU.intItemUOMId = CD.intFXPriceUOMId
-	LEFT JOIN tblICUnitMeasure FM ON FM.intUnitMeasureId = FU.intUnitMeasureId
-	LEFT JOIN tblICItemUOM IUP ON IU.intItemUOMId = CD.intPriceItemUOMId
-	LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IUP.intUnitMeasureId
-	--CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
+	CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 	OUTER APPLY (
-		SELECT		ISNULL(SUM(dblPAllocatedQty),0) AS dblAllocatedQty
-		FROM		tblLGAllocationDetail 
-		WHERE		intPContractDetailId = CD.intContractDetailId
-	) PA 
-	OUTER APPLY (
-		SELECT		ISNULL(SUM(dblSAllocatedQty),0) AS dblAllocatedQty
-		FROM		tblLGAllocationDetail 
-		WHERE		intSContractDetailId = CD.intContractDetailId
-	) SA 
+			SELECT		ISNULL(SUM(dblPAllocatedQty),0) AS dblAllocatedQty
+			FROM		tblLGAllocationDetail 
+			WHERE		intPContractDetailId = CD.intContractDetailId
+		) PA 
+		OUTER APPLY (
+			SELECT		ISNULL(SUM(dblSAllocatedQty),0) AS dblAllocatedQty
+			FROM		tblLGAllocationDetail 
+			WHERE		intSContractDetailId = CD.intContractDetailId
+		) SA 
