@@ -26,6 +26,11 @@ BEGIN TRY
 		, @AutomotiveGas_7 NUMERIC(18, 6) = 0.00
 		, @AutomotiveGas_8 NUMERIC(18, 6) = 0.00
 		, @AutomotiveGas_13H NUMERIC(18, 6) = 0.00
+		, @AutomotiveGas_11 NUMERIC(18, 6) = 0.00
+		, @AutomotiveGas_17 NUMERIC(18, 6) = 0.00
+		, @AutomotiveGas_19 NUMERIC(18, 6) = 0.00
+		, @AutomotiveGas_22 NUMERIC(18, 6) = 0.00
+		, @AutomotiveGas_24 NUMERIC(18, 6) = 0.00
 
 		, @AviationGas_6D NUMERIC(18, 6) = 0.00
 		, @AviationGas_1 NUMERIC(18, 6) = 0.00
@@ -39,6 +44,11 @@ BEGIN TRY
 		, @AviationGas_7 NUMERIC(18, 6) = 0.00
 		, @AviationGas_8 NUMERIC(18, 6) = 0.00
 		, @AviationGas_13H NUMERIC(18, 6) = 0.00
+		, @AviationGas_11 NUMERIC(18, 6) = 0.00
+		, @AviationGas_17 NUMERIC(18, 6) = 0.00
+		, @AviationGas_19 NUMERIC(18, 6) = 0.00
+		, @AviationGas_22 NUMERIC(18, 6) = 0.00
+		, @AviationGas_24 NUMERIC(18, 6) = 0.00
 
 		, @TaxCredit NUMERIC(18, 6) = 0.00
 		, @Penalty NUMERIC(18, 6) = 0.00
@@ -100,11 +110,11 @@ BEGIN TRY
 			, @AutomotiveGas_2B = CASE WHEN strFormCode = 'Gas' AND strScheduleCode = '2B' AND strType = 'Automotive Gas' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @AutomotiveGas_2C = CASE WHEN strFormCode = 'Gas' AND strScheduleCode = '2C' AND strType = 'Automotive Gas' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @AutomotiveGas_2X = CASE WHEN strFormCode = 'Gas' AND strScheduleCode = '2X' AND strType = 'Automotive Gas' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @AutomotiveGas_5B = CASE WHEN strFormCode = 'Gas' AND strScheduleCode = '5B' AND strType = 'Automotive Gas' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @AutomotiveGas_5D = CASE WHEN strFormCode = 'Gas' AND strScheduleCode = '5D' AND strType = 'Automotive Gas' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @AutomotiveGas_7 = CASE WHEN strFormCode = 'Gas' AND strScheduleCode = '7' AND strType = 'Automotive Gas' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @AutomotiveGas_8 = CASE WHEN strFormCode = 'Gas' AND strScheduleCode = '8' AND strType = 'Automotive Gas' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @AutomotiveGas_13H = CASE WHEN strFormCode = 'Gas' AND strScheduleCode = '13H' AND strType = 'Automotive Gas' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
+			, @AutomotiveGas_5B = CASE WHEN strFormCode = 'Gas' AND strScheduleCode = '5B' AND strType = 'Automotive Gas' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
+			, @AutomotiveGas_5D = CASE WHEN strFormCode = 'Gas' AND strScheduleCode = '5D' AND strType = 'Automotive Gas' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
+			, @AutomotiveGas_7 = CASE WHEN strFormCode = 'Gas' AND strScheduleCode = '7' AND strType = 'Automotive Gas' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
+			, @AutomotiveGas_8 = CASE WHEN strFormCode = 'Gas' AND strScheduleCode = '8' AND strType = 'Automotive Gas' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
+			, @AutomotiveGas_13H = CASE WHEN strFormCode = 'Gas' AND strScheduleCode = '13H' AND strType = 'Automotive Gas' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
 
 			, @AviationGas_6D = CASE WHEN strFormCode = 'Gas' AND strScheduleCode = '6D' AND strType = 'Aviation Gas' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @AviationGas_1 = CASE WHEN strFormCode = 'Gas' AND strScheduleCode = '1' AND strType = 'Aviation Gas' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
@@ -113,12 +123,26 @@ BEGIN TRY
 			, @AviationGas_2B = CASE WHEN strFormCode = 'Gas' AND strScheduleCode = '2B' AND strType = 'Aviation Gas' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @AviationGas_2C = CASE WHEN strFormCode = 'Gas' AND strScheduleCode = '2C' AND strType = 'Aviation Gas' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @AviationGas_2X = CASE WHEN strFormCode = 'Gas' AND strScheduleCode = '2X' AND strType = 'Aviation Gas' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @AviationGas_5B = CASE WHEN strFormCode = 'Gas' AND strScheduleCode = '5B' AND strType = 'Aviation Gas' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @AviationGas_5D = CASE WHEN strFormCode = 'Gas' AND strScheduleCode = '5D' AND strType = 'Aviation Gas' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @AviationGas_7 = CASE WHEN strFormCode = 'Gas' AND strScheduleCode = '7' AND strType = 'Aviation Gas' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @AviationGas_8 = CASE WHEN strFormCode = 'Gas' AND strScheduleCode = '8' AND strType = 'Aviation Gas' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @AviationGas_13H = CASE WHEN strFormCode = 'Gas' AND strScheduleCode = '13H' AND strType = 'Aviation Gas' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-		FROM #tmpTotals		
+			, @AviationGas_5B = CASE WHEN strFormCode = 'Gas' AND strScheduleCode = '5B' AND strType = 'Aviation Gas' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
+			, @AviationGas_5D = CASE WHEN strFormCode = 'Gas' AND strScheduleCode = '5D' AND strType = 'Aviation Gas' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
+			, @AviationGas_7 = CASE WHEN strFormCode = 'Gas' AND strScheduleCode = '7' AND strType = 'Aviation Gas' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
+			, @AviationGas_8 = CASE WHEN strFormCode = 'Gas' AND strScheduleCode = '8' AND strType = 'Aviation Gas' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
+			, @AviationGas_13H = CASE WHEN strFormCode = 'Gas' AND strScheduleCode = '13H' AND strType = 'Aviation Gas' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
+		FROM #tmpTotals
+
+		SELECT @AutomotiveGas_11 = CASE WHEN strFormCode = 'Gas' AND strTemplateItemId = '' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @AutomotiveGas_17 = CASE WHEN strFormCode = 'Gas' AND strTemplateItemId = '' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @AutomotiveGas_19 = CASE WHEN strFormCode = 'Gas' AND strTemplateItemId = '' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @AutomotiveGas_22 = CASE WHEN strFormCode = 'Gas' AND strTemplateItemId = '' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @AutomotiveGas_24 = CASE WHEN strFormCode = 'Gas' AND strTemplateItemId = '' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+
+			, @AviationGas_11 = CASE WHEN strFormCode = 'Gas' AND strTemplateItemId = '' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @AviationGas_17 = CASE WHEN strFormCode = 'Gas' AND strTemplateItemId = '' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @AviationGas_19 = CASE WHEN strFormCode = 'Gas' AND strTemplateItemId = '' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @AviationGas_22 = CASE WHEN strFormCode = 'Gas' AND strTemplateItemId = '' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @AviationGas_24 = CASE WHEN strFormCode = 'Gas' AND strTemplateItemId = '' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+		FROM vyuTFGetReportingComponentConfiguration
+		WHERE intTaxAuthorityId = @TaxAuthorityId
 
 		DROP TABLE #tmpTotals
 		DROP TABLE #tmpTransactions
@@ -149,6 +173,18 @@ BEGIN TRY
 		, AviationGas_7 = @AviationGas_7
 		, AviationGas_8 = @AviationGas_8
 		, AviationGas_13H = @AviationGas_13H
+
+		, AutomotiveGas_11 = @AutomotiveGas_11
+		, AutomotiveGas_17 = @AutomotiveGas_17
+		, AutomotiveGas_19 = @AutomotiveGas_19
+		, AutomotiveGas_22 = @AutomotiveGas_22
+		, AutomotiveGas_24 = @AutomotiveGas_24
+
+		, AviationGas_11 = @AviationGas_11
+		, AviationGas_17 = @AviationGas_17
+		, AviationGas_19 = @AviationGas_19
+		, AviationGas_22 = @AviationGas_22
+		, AviationGas_24 = @AviationGas_24
 			  
 		, TaxCredit = ISNULL(@TaxCredit, 0.00)
 		, Penalty = ISNULL(@Penalty, 0.00)
