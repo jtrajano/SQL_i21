@@ -303,3 +303,19 @@ GO
 	PRINT N'SET application/pdf for pdf files'
 	UPDATE tblSMAttachment SET strFileType = 'application/pdf' WHERE strName LIKE '%.pdf' and strFileType = ''
 GO
+
+	PRINT N'FIX EIN FORMAT'
+
+	DECLARE @first NVARCHAR(2)
+	DECLARE @last NVARCHAR(7)
+	DECLARE @ein NVARCHAR(10)
+
+	SELECT @ein = REPLACE(strEin,'-','') FROM tblSMCompanySetup
+	SELECT @first = SUBSTRING(@ein, 1, 2)
+	SELECT @last = SUBSTRING(@ein, 3, 7)
+
+	SET @ein = @first + '-' + @last
+
+	UPDATE tblSMCompanySetup SET strEin = @ein
+
+GO
