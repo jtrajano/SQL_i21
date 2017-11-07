@@ -14,6 +14,7 @@
     [dblOverpayment]		NUMERIC (18, 6) NULL,
 	[dblBaseOverpayment]	NUMERIC (18, 6) NULL,
     [dblBalance]			NUMERIC (18, 6) NULL,
+	[strReceivePaymentType]	NVARCHAR (25)   COLLATE Latin1_General_CI_AS NULL,
     [strRecordNumber]		NVARCHAR (25)   COLLATE Latin1_General_CI_AS NULL,
     [strPaymentInfo]		NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strNotes]				NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
