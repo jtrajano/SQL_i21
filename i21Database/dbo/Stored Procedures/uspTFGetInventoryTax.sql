@@ -594,6 +594,11 @@ BEGIN TRY
 		DELETE FROM #tmpRC WHERE @RCId = intReportingComponentId
 	END
 
+	EXEC uspTFProcessBeforePreview @Guid = @Guid
+		, @ReportingComponentId = @ReportingComponentId
+		, @DateFrom = @DateFrom
+		, @DateTo = @DateTo
+
 	DROP TABLE #tmpRC
 	
 	
