@@ -5166,12 +5166,6 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Setup' AN
 	VALUES (N'Setup', N'Vendor Rebates', @VendorRebatesMaintenanceParentMenuId, N'Setup', N'Maintenance', N'Screen', N'VendorRebates.view.RebateSetup?showSearch=true', N'small-menu-maintenance', 1, 0, 0, 1, 0, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'VendorRebates.view.RebateSetup?showSearch=true' WHERE strMenuName = 'Setup' AND strModuleName = 'Vendor Rebates' AND intParentMenuID = @VendorRebatesMaintenanceParentMenuId
-
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Cross Reference' AND strModuleName = 'Vendor Rebates' AND intParentMenuID = @VendorRebatesMaintenanceParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Cross Reference', N'Vendor Rebates', @VendorRebatesMaintenanceParentMenuId, N'Cross Reference', N'Maintenance', N'Screen', N'VendorRebates.view.CrossReference?showSearch=true', N'small-menu-maintenance', 1, 0, 0, 1, 1, 1)
-ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'VendorRebates.view.CrossReference?showSearch=true' WHERE strMenuName = 'Cross Reference' AND strModuleName = 'Vendor Rebates' AND intParentMenuID = @VendorRebatesMaintenanceParentMenuId
 ----------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------ CONTACT MENUS -------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------------------------------
