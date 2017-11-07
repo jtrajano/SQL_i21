@@ -719,6 +719,24 @@ BEGIN
 	GOTO Post_Rollback
 END
 
+-- Validate the date against the FY Periods per module
+IF EXISTS (SELECT 1 WHERE [dbo].isOpenAccountingDateByModule(@dtmDate,@MODULE_NAME) = 0) AND @ysnRecap = 0
+BEGIN 
+	-- Unable to find an open fiscal year period to match the transaction date and the given module.
+	IF @ysnPost = 1
+	BEGIN
+		--You cannot %s transaction under a closed module.
+		RAISERROR('You cannot %s transaction under a closed module.', 11, 1, 'Post')
+		GOTO Post_Rollback
+	END
+	ELSE
+	BEGIN
+		--You cannot %s transaction under a closed module.
+		RAISERROR('You cannot %s transaction under a closed module.', 11, 1, 'Unpost')
+		GOTO Post_Rollback
+	END
+END
+
 -- Check the amount in Paycheck. See if it is balanced. 
 IF ISNULL(@dblAmountDetailTotal, 0) <> ISNULL(@dblAmount, 0) AND @ysnRecap = 0
 BEGIN
