@@ -140,7 +140,7 @@
 	CONSTRAINT [FK_tblARInvoiceDetail_tblSMCurrency_intSubCurrencyId] FOREIGN KEY ([intSubCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
 	CONSTRAINT [FK_tblARInvoiceDetail_tblCTWeightGrade_intDestinationGradeId] FOREIGN KEY ([intDestinationGradeId]) REFERENCES [tblCTWeightGrade]([intWeightGradeId]),
     CONSTRAINT [FK_tblARInvoiceDetail_tblCTWeightGrade_intDestinationWeightId] FOREIGN KEY ([intDestinationWeightId]) REFERENCES [tblCTWeightGrade]([intWeightGradeId]),	
-    CONSTRAINT [FK_tblARInvoiceDetail_tblVRProgram] FOREIGN KEY ([intProgramId]) REFERENCES [dbo].[tblVRProgram] ([intProgramId]) ON DELETE CASCADE,
+    CONSTRAINT [FK_tblARInvoiceDetail_tblVRProgram] FOREIGN KEY ([intProgramId]) REFERENCES [dbo].[tblVRProgram] ([intProgramId]),
 );
 
 GO
