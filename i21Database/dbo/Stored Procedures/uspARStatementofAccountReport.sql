@@ -43,6 +43,7 @@ DECLARE  @dtmDateTo					AS DATETIME
 		,@begingroup				AS NVARCHAR(50)
 		,@endgroup					AS NVARCHAR(50)
 		,@datatype					AS NVARCHAR(50)
+		,@strPaymentMethod			AS NVARCHAR(100)
 		
 -- Create a table variable to hold the XML data. 		
 DECLARE @temp_xml_table TABLE (
@@ -131,6 +132,10 @@ SELECT @strStatementFormat = CASE WHEN ISNULL([from], '') = '' THEN 'Open Item' 
 FROM @temp_xml_table
 WHERE [fieldname] = 'strStatementFormat'
 
+SELECT @strPaymentMethod = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM @temp_xml_table
+WHERE [fieldname] = 'strPaymentMethod'
+
 -- SANITIZE THE DATE AND REMOVE THE TIME.
 IF @dtmDateTo IS NOT NULL
 	SET @dtmDateTo = CAST(FLOOR(CAST(@dtmDateTo AS FLOAT)) AS DATETIME)	
@@ -163,6 +168,7 @@ IF @strStatementFormat = 'Balance Forward'
 			, @strLocationName			= @strLocationName
 			, @strCustomerName			= @strCustomerName
 			, @ysnEmailOnly				= @ysnEmailOnly
+			, @strPaymentMethod			= @strPaymentMethod
 	END
 ELSE IF ISNULL(@strStatementFormat, 'Open Item') IN ('Open Item', 'Running Balance')
 	BEGIN
@@ -179,6 +185,7 @@ ELSE IF ISNULL(@strStatementFormat, 'Open Item') IN ('Open Item', 'Running Balan
 		    , @strStatementFormat		= @strStatementFormat
 			, @strCustomerName			= @strCustomerName
 			, @ysnEmailOnly				= @ysnEmailOnly
+			, @strPaymentMethod			= @strPaymentMethod
 	END
 ELSE IF @strStatementFormat = 'Payment Activity'
 	BEGIN
@@ -194,6 +201,7 @@ ELSE IF @strStatementFormat = 'Payment Activity'
 		    , @strLocationName			= @strLocationName
 			, @strCustomerName			= @strCustomerName
 			, @ysnEmailOnly				= @ysnEmailOnly
+			, @strPaymentMethod			= @strPaymentMethod
 	END
 
 INSERT INTO @temp_SOA_table

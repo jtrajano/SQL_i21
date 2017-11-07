@@ -10,6 +10,7 @@
 	, @strLocationName			AS NVARCHAR(MAX)	= NULL
 	, @strCustomerName			AS NVARCHAR(MAX)	= NULL
 	, @ysnEmailOnly			    AS BIT				= NULL
+	, @strPaymentMethod			AS NVARCHAR(100)	= NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -255,6 +256,7 @@ FROM vyuARCustomerSearch C
 																SELECT intPaymentId
 																FROM dbo.tblARPayment WITH (NOLOCK)
 																WHERE ysnPosted = 1
+																	AND intPaymentMethodId IN (select intPaymentMethodID from tblSMPaymentMethod where strPaymentMethod = ''' + @strPaymentMethod + ''')
 																  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
 														  ) P ON PD.intPaymentId = P.intPaymentId))
 				OR (I.ysnPaid = 1 AND I.intInvoiceId IN (SELECT intInvoiceId 
@@ -263,6 +265,7 @@ FROM vyuARCustomerSearch C
 																SELECT intPaymentId
 																FROM dbo.tblARPayment WITH (NOLOCK)
 																WHERE ysnPosted = 1
+																	AND intPaymentMethodId IN (select intPaymentMethodID from tblSMPaymentMethod where strPaymentMethod = ''' + @strPaymentMethod + ''')
 																  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) > '+ @strDateTo +'
 														 ) P ON PD.intPaymentId = P.intPaymentId))))
 		AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN (''AR Account'', ''Customer Prepayments''))			
@@ -280,6 +283,7 @@ FROM vyuARCustomerSearch C
 						 , dtmDatePaid
 					FROM dbo.tblARPayment WITH (NOLOCK)
 					WHERE ysnPosted = 1
+						AND intPaymentMethodId IN (select intPaymentMethodID from tblSMPaymentMethod where strPaymentMethod = ''' + @strPaymentMethod + ''')
 					  AND ysnInvoicePrepayment = 0
 					  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) <= '+ @strDateTo +'
 		) P ON PD.intPaymentId = P.intPaymentId
@@ -291,6 +295,7 @@ FROM vyuARCustomerSearch C
 			 , dtmDatePaid
 		FROM dbo.tblARPayment WITH (NOLOCK)
 		WHERE ysnPosted = 1
+			AND intPaymentMethodId IN (select intPaymentMethodID from tblSMPaymentMethod where strPaymentMethod = ''' + @strPaymentMethod + ''')
 		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
 	) PCREDITS ON I.intPaymentId = PCREDITS.intPaymentId
 	LEFT JOIN (
@@ -300,6 +305,7 @@ FROM vyuARCustomerSearch C
 		INNER JOIN (SELECT intPaymentId
 					FROM dbo.tblARPayment WITH (NOLOCK)
 					WHERE ysnPosted = 1
+						AND intPaymentMethodId IN (select intPaymentMethodID from tblSMPaymentMethod where strPaymentMethod = ''' + @strPaymentMethod + ''')
 					  AND ysnInvoicePrepayment = 0 
 					  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) <= '+ @strDateTo +'
 		) P ON PD.intPaymentId = P.intPaymentId

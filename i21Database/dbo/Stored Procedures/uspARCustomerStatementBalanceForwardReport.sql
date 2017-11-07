@@ -12,6 +12,7 @@
 	, @strLocationName			AS NVARCHAR(MAX)	= NULL
 	, @strCustomerName			AS NVARCHAR(MAX)	= NULL
 	, @ysnEmailOnly			    AS BIT				= NULL
+	, @strPaymentMethod			AS NVARCHAR(100)	= NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -354,6 +355,7 @@ INNER JOIN (
 	) I ON I.intInvoiceId = PD.intInvoiceId
 ) PD ON P.intPaymentId = PD.intPaymentId
 WHERE ysnInvoicePrepayment = 0
+	AND P.intPaymentMethodId IN (select intPaymentMethodID from tblSMPaymentMethod where strPaymentMethod = ''' + @strPaymentMethod + ''')
   AND ysnPosted = 1
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
 GROUP BY P.intPaymentId, intEntityCustomerId, intLocationId, strRecordNumber, strPaymentInfo, dblAmountPaid, dtmDatePaid, strNotes
@@ -395,6 +397,7 @@ INNER JOIN (
 	GROUP BY intPaymentId
 ) PD ON P.intPaymentId = PD.intPaymentId
 WHERE ysnInvoicePrepayment = 0
+	AND P.intPaymentMethodId IN (select intPaymentMethodID from tblSMPaymentMethod where strPaymentMethod = ''' + @strPaymentMethod + ''')
   AND ysnPosted = 1
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
 GROUP BY P.intPaymentId, intEntityCustomerId, intLocationId, strRecordNumber, strPaymentInfo, dblAmountPaid, dtmDatePaid, PD.dblDiscountTaken, strNotes'
@@ -441,6 +444,7 @@ INNER JOIN (
 ) PD ON P.intPaymentId = PD.intPaymentId AND PD.dblInvoiceTotal - PD.dblPayment <> 0
 WHERE ysnInvoicePrepayment = 0
   AND ysnPosted = 1
+	AND P.intPaymentMethodId IN (select intPaymentMethodID from tblSMPaymentMethod where strPaymentMethod = ''' + @strPaymentMethod + ''')
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
 GROUP BY P.intPaymentId, intEntityCustomerId, intLocationId, strRecordNumber, strPaymentInfo, dblAmountPaid, dtmDatePaid, PD.intInvoiceId, strInvoiceNumber, strNotes'
 
@@ -524,6 +528,7 @@ FROM vyuARCustomerSearch C
 			FROM dbo.tblARPayment WITH (NOLOCK)
 			WHERE ysnPosted = 1
 				AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
+				AND intPaymentMethodId IN (select intPaymentMethodID from tblSMPaymentMethod where strPaymentMethod = ''' + @strPaymentMethod + ''')
 		) PCREDITS ON I.intPaymentId = PCREDITS.intPaymentId
 		WHERE ysnPosted = 1
 			AND ((I.strType = ''Service Charge'' AND I.ysnForgiven = 0) OR ((I.strType <> ''Service Charge'' AND I.ysnForgiven = 1) OR (I.strType <> ''Service Charge'' AND I.ysnForgiven = 0)))		
