@@ -21,6 +21,7 @@ BEGIN TRY
 	DECLARE @FormCode NVARCHAR(50)
 		, @ScheduleCode NVARCHAR(50)
 		, @TransactionType NVARCHAR(50)
+		, @TaxAuthorityCode NVARCHAR(50)
 		, @RCId INT
 
 	SELECT intReportingComponentId = Item COLLATE Latin1_General_CI_AS
@@ -42,8 +43,11 @@ BEGIN TRY
 		SELECT TOP 1 @FormCode = strFormCode
 			, @ScheduleCode = strScheduleCode
 			, @TransactionType = strTransactionType
+			, @TaxAuthorityCode = tblTFTaxAuthority.strTaxAuthorityCode
 		FROM tblTFReportingComponent
+		LEFT JOIN tblTFTaxAuthority ON tblTFTaxAuthority.intTaxAuthorityId = tblTFReportingComponent.intTaxAuthorityId
 		WHERE intReportingComponentId = @RCId
+
 
 		IF (@FormCode = 'MF-360' OR @FormCode = 'SF-900')
 		BEGIN
@@ -54,6 +58,15 @@ BEGIN TRY
 				SET strTerminalControlNumber = 'BULK   '
 				WHERE intTransactionId IN (SELECT DISTINCT intTransactionId FROM #tmpTransaction)
 			END			
+		END
+
+		IF (@TaxAuthorityCode = 'MS')
+		BEGIN
+			UPDATE tblTFTransaction
+			SET strOriginTCN = ''
+				, strDestinationTCN = ''
+			WHERE intTransactionId IN (SELECT DISTINCT intTransactionId FROM #tmpTransaction)
+				AND (ISNULL(strOriginTCN, '') <> '' OR ISNULL(strDestinationTCN, '') <> '')
 		END
 
 		DELETE FROM #tmpRC WHERE intReportingComponentId = @RCId
