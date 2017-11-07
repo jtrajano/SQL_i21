@@ -23,74 +23,68 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
     load: function(component, con) {
         var me = this || con;
 
-        Ext.Loader.loadScript("./Inventory/app/lib/underscore.js");
-        Ext.Loader.loadScript("./Inventory/app/lib/numeraljs/numeral.js");
-        Ext.Loader.loadScript({
-            url: "./Inventory/app/lib/rx.all.js",
-            onLoad: function() {
-                me.initializePreferences(me);
-            } 
-        });        
+        me.initializePreferences(me);      
     },
 
     initializePreferences: function(me) {
         var win = me.getView();
                 
-        ic.utils.ajax({
+        Ext.Ajax.request({
             url: './Inventory/api/CompanyPreference/Get',
             method: 'get',
             params: {
                 page: 1,
                 start: 0,
                 limit: 50
+            },
+
+            success: function(response) {
+                var json = JSON.parse(response.responseText);
+                var pref = {};
+                if(json.data && json.data.length > 0) {
+                    pref =  { task: json.data[0].strOriginLastTask, lob: json.data[0].strOriginLineOfBusiness };
+                }
+                
+                if(pref) {
+                    var lastLob = pref.lob;
+                    if (lastLob && lastLob !== '')
+                        me.getViewModel().set('lineOfBusiness', lastLob);
+                    else {
+                        if (me.getViewModel().get('lineOfBusiness') !== '')
+                            me.getViewModel().set('lineOfBusiness', '');
+                    }
+    
+                    var lastTask = pref.task;
+                    if (lastTask && lastTask !== '')
+                        me.getViewModel().set('currentTask', lastTask);
+                    else {
+                        if (me.getViewModel().get('currentTask') !== '')
+                            me.getViewModel().set('currentTask', 'LOB');
+                    }
+    
+                    var lob = me.getViewModel().get('lineOfBusiness');
+                    var currentTask = me.getViewModel().get('currentTask');
+    
+                    if (lob)
+                        win.up('window').down('#cboLOB').setValue(me.getViewModel().get('lineOfBusiness'));
+                    else
+                        win.up('window').down('#cboLOB').setValue(null);
+    
+                    var originTypes = ["UOM", "Locations", "CategoryClass", "CategoryGLAccts", "AdditionalGLAccts", "Items", "ItemGLAccts", "Balance"];
+                    var grains = ["UOM", "Locations", "Commodity", "AdditionalGLAccts"];
+    
+                    if (currentTask && currentTask !== 'LOB') {
+                        if (lob === 'Grain')
+                            originTypes = grains;
+                        var index = originTypes.indexOf(currentTask);
+                        if (index !== -1) {
+                            me.getViewModel().set('currentTask', originTypes[index + 1]);
+                        } else
+                            me.getViewModel().set('currentTask', "LOB");
+                    }
+                }
             }
         })
-        .subscribe(function(response) {
-            var json = JSON.parse(response.responseText);
-            var pref = {};
-            if(json.data && json.data.length > 0) {
-                pref =  { task: json.data[0].strOriginLastTask, lob: json.data[0].strOriginLineOfBusiness };
-            }
-            
-            if(pref) {
-                var lastLob = pref.lob;
-                if (lastLob && lastLob !== '')
-                    me.getViewModel().set('lineOfBusiness', lastLob);
-                else {
-                    if (me.getViewModel().get('lineOfBusiness') !== '')
-                        me.getViewModel().set('lineOfBusiness', '');
-                }
-
-                var lastTask = pref.task;
-                if (lastTask && lastTask !== '')
-                    me.getViewModel().set('currentTask', lastTask);
-                else {
-                    if (me.getViewModel().get('currentTask') !== '')
-                        me.getViewModel().set('currentTask', 'LOB');
-                }
-
-                var lob = me.getViewModel().get('lineOfBusiness');
-                var currentTask = me.getViewModel().get('currentTask');
-
-                if (lob)
-                    win.up('window').down('#cboLOB').setValue(me.getViewModel().get('lineOfBusiness'));
-                else
-                    win.up('window').down('#cboLOB').setValue(null);
-
-                var originTypes = ["UOM", "Locations", "CategoryClass", "CategoryGLAccts", "AdditionalGLAccts", "Items", "ItemGLAccts", "Balance"];
-                var grains = ["UOM", "Locations", "Commodity", "AdditionalGLAccts"];
-
-                if (currentTask && currentTask !== 'LOB') {
-                    if (lob === 'Grain')
-                        originTypes = grains;
-                    var index = _.indexOf(originTypes, currentTask);
-                    if (index !== -1) {
-                        me.getViewModel().set('currentTask', originTypes[index + 1]);
-                    } else
-                        me.getViewModel().set('currentTask', "LOB");
-                }
-            }
-        });
 
         
         // .map(function(res) {
@@ -255,7 +249,7 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
 
     ajaxRequest: function (viewModel, originTypes, type, lineOfBusiness, win) {
         iRely.Msg.showWait('Importing in progress...');
-        ic.utils.ajax({
+        Ext.Ajax.request({
             url: './Inventory/api/ImportData/ImportOrigins',
             method: 'post',
             headers: {
@@ -263,47 +257,48 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
                 'Authorization': iRely.Configuration.Security.AuthToken,
                 'X-Import-Type': originTypes[type],
                 'X-Import-LineOfBusiness': lineOfBusiness
-            }
-        })
-        .subscribe(function(response) {
-            iRely.Msg.close();
-            var msgtype = 'info';
-            var msg = "File imported successfully.";
-            var json = JSON.parse(response.responseText);
-            if (json.result.Info == "warning") {
-                msgtype = "warning";
-                msg = "File imported successfully with warnings.";
-            }
-            if(json.result.Info == "error") {
-                msgtype = "warning";
-                msg = "File imported successfully with errors.";
-            }
-            viewModel.set('lineOfBusiness', lineOfBusiness);
-            viewModel.set('currentTask', originTypes[type+1]);
-
-            i21.functions.showCustomDialog(msgtype, 'ok', msg, function() {
-                //win.close();
-
-                if (json.result.Messages !== null && json.result.Messages.length > 0) {
-                    iRely.Functions.openScreen('Inventory.view.ImportLogMessageBox', {
-                        data: json
-                    });
+            },
+            success: function(response) {
+                iRely.Msg.close();
+                var msgtype = 'info';
+                var msg = "File imported successfully.";
+                var json = JSON.parse(response.responseText);
+                if (json.result.Info == "warning") {
+                    msgtype = "warning";
+                    msg = "File imported successfully with warnings.";
                 }
-            });
-        }, function(response) {
-            iRely.Msg.close();
-            var json = JSON.parse(response.responseText);
-            i21.functions.showCustomDialog('error', 'ok', 'Import failed! ' + json.info,
-                function() {
+                if(json.result.Info == "error") {
+                    msgtype = "warning";
+                    msg = "File imported successfully with errors.";
+                }
+                viewModel.set('lineOfBusiness', lineOfBusiness);
+                viewModel.set('currentTask', originTypes[type+1]);
+    
+                i21.functions.showCustomDialog(msgtype, 'ok', msg, function() {
                     //win.close();
-
-                    if (json.messages && json.messages.length > 0) {
+    
+                    if (json.result.Messages !== null && json.result.Messages.length > 0) {
                         iRely.Functions.openScreen('Inventory.view.ImportLogMessageBox', {
                             data: json
                         });
                     }
-                }
-            );
+                });
+            },
+            failure: function(response) {
+                iRely.Msg.close();
+                var json = JSON.parse(response.responseText);
+                i21.functions.showCustomDialog('error', 'ok', 'Import failed! ' + json.info,
+                    function() {
+                        //win.close();
+    
+                        if (json.messages && json.messages.length > 0) {
+                            iRely.Functions.openScreen('Inventory.view.ImportLogMessageBox', {
+                                data: json
+                            });
+                        }
+                    }
+                );
+            }
         })
     },
 
