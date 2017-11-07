@@ -67,10 +67,5 @@ BEGIN
 			)
 		END
 	END
-	ELSE IF @id = 0
-	BEGIN
-		UPDATE t SET intConcurrencyId = (t.intConcurrencyId + 1)
-		FROM tblEMEntityCredential t
-	END
 
 END
