@@ -5170,6 +5170,55 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Setup' AN
 	VALUES (N'Setup', N'Vendor Rebates', @VendorRebatesMaintenanceParentMenuId, N'Setup', N'Maintenance', N'Screen', N'VendorRebates.view.RebateSetup?showSearch=true', N'small-menu-maintenance', 1, 0, 0, 1, 0, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'VendorRebates.view.RebateSetup?showSearch=true' WHERE strMenuName = 'Setup' AND strModuleName = 'Vendor Rebates' AND intParentMenuID = @VendorRebatesMaintenanceParentMenuId
+
+/* BUYBACKS */
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Buybacks' AND strModuleName = 'Buybacks' AND intParentMenuID = 0)
+BEGIN
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Buybacks', N'Buybacks', 0, N'Buybacks', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 33, 0)
+
+	EXEC uspSMUpdateUserRoleMenus 0
+END
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 33 WHERE strMenuName = 'Buybacks' AND strModuleName = 'Buybacks' AND intParentMenuID = 0
+
+DECLARE @BuybacksParentMenuId INT
+SELECT @BuybacksParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Buybacks' AND strModuleName = 'Buybacks' AND intParentMenuID = 0
+
+/* CATEGORY FOLDERS */
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Buybacks' AND intParentMenuID = @BuybacksParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Activities', N'Buybacks', @BuybacksParentMenuId, N'Activities', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 0, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 0 WHERE strMenuName = 'Activities' AND strModuleName = 'Buybacks' AND intParentMenuID = @BuybacksParentMenuId
+
+DECLARE @BuybacksActivitiesParentMenuId INT
+SELECT @BuybacksActivitiesParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Buybacks' AND intParentMenuID = @BuybacksParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Buybacks' AND intParentMenuID = @BuybacksParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Maintenance', N'Buybacks', @BuybacksParentMenuId, N'Maintenance', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 1 WHERE strMenuName = 'Maintenance' AND strModuleName = 'Buybacks' AND intParentMenuID = @BuybacksParentMenuId
+
+DECLARE @BuybacksMaintenanceParentMenuId INT
+SELECT @BuybacksMaintenanceParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Buybacks' AND intParentMenuID = @BuybacksParentMenuId
+
+/* ADD TO RESPECTIVE CATEGORY */ 
+UPDATE tblSMMasterMenu SET intParentMenuID = @BuybacksActivitiesParentMenuId WHERE intParentMenuID =  @BuybacksParentMenuId AND strCategory = 'Activity'
+UPDATE tblSMMasterMenu SET intParentMenuID = @BuybacksMaintenanceParentMenuId WHERE intParentMenuID =  @BuybacksParentMenuId AND strCategory = 'Maintenance'
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Buybacks' AND strModuleName = 'Buybacks' AND intParentMenuID = @BuybacksActivitiesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Buybacks', N'Buybacks', @BuybacksActivitiesParentMenuId, N'Buybacks', N'Activity', N'Screen', N'Buybacks.view.BuybackSetup?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'Buybacks.view.BuybackSetup?showSearch=true' WHERE strMenuName = 'Buybacks' AND strModuleName = 'Buybacks' AND intParentMenuID = @BuybacksActivitiesParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Setup' AND strModuleName = 'Buybacks' AND intParentMenuID = @BuybacksMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Setup', N'Buybacks', @BuybacksMaintenanceParentMenuId, N'Setup', N'Maintenance', N'Screen', N'Buybacks.view.Buybacks?showSearch=true', N'small-menu-maintenance', 1, 0, 0, 1, 0, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'Buybacks.view.Buybacks?showSearch=true' WHERE strMenuName = 'Setup' AND strModuleName = 'Buybacks' AND intParentMenuID = @BuybacksMaintenanceParentMenuId
 ----------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------ CONTACT MENUS -------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------------------------------
