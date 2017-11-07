@@ -2317,80 +2317,103 @@ Ext.define('Inventory.view.ItemViewController', {
         me.getDefaultUOM(win);
 
         var showAddScreen = function() {
-            var search = i21.ModuleMgr.Search;
-            search.scope = me;
-            search.url = './i21/api/CompanyLocation/Search';
-            search.columns = [
-                { dataIndex : 'intCompanyLocationId', text: 'Location Id', dataType: 'numeric', defaultSort : true, hidden : true, key : true},
-                { dataIndex : 'strLocationName',text: 'Location Name', dataType: 'string', flex: 1 },
-                { dataIndex : 'strLocationType',text: 'Location Type', dataType: 'string', flex: 1 }
-            ];
-            search.title = "Add Item Locations";
-            search.showNew = false;
-            search.on({
-                scope: me,
-                openselectedclick: function(button, e, result) {
-                    var currentVM = this.getViewModel().data.current;
-                    var win = this.getView();
-
-                    Ext.each(result, function(location) {
-                        var exists = Ext.Array.findBy(currentVM.tblICItemLocations().data.items, function (row) {
-                            if (location.get('intCompanyLocationId') === row.get('intCompanyLocationId')) {
-                                return true;
-                            }
-                        });
-                        if (!exists) {
-                            var defaultUOMId = null;
-                            if (win.defaultUOM) {
-                                defaultUOMId = win.defaultUOM.intItemUOMId;
-                            }
-                            var newRecord = {
-                                intItemId: location.data.intItemId,
-                                intLocationId: location.data.intCompanyLocationId,
-                                intIssueUOMId: defaultUOMId,
-                                intReceiveUOMId: defaultUOMId,
-                                strLocationName: location.data.strLocationName,
-                                intAllowNegativeInventory: 3,
-                                intCostingMethod: 1,
-                            };
-                            currentVM.tblICItemLocations().add(newRecord);
-
-                            var prices = currentVM.tblICItemPricings().data.items;
-                            var exists = Ext.Array.findBy(prices, function (row) {
-                                if (newRecord.intItemLocationId === row.get('intItemLocationId')) {
-                                    return true;
-                                }
-                            });
-                            if (!exists) {
-                                var newPrice = Ext.create('Inventory.model.ItemPricing', {
-                                    intItemId: newRecord.intItemId,
-                                    intItemLocationId: newRecord.intItemLocationId,
-                                    strLocationName: newRecord.strLocationName,
-                                    dblAmountPercent: 0.00,
-                                    dblSalePrice: 0.00,
-                                    dblMSRPPrice: 0.00,
-                                    strPricingMethod: 'None',
-                                    dblLastCost: 0.00,
-                                    dblStandardCost: 0.00,
-                                    dblAverageCost: 0.00,
-                                    dblEndMonthCost: 0.00,
-                                    intAllowNegativeInventory: newRecord.intAllowNegativeInventory,
-                                    intCostingMethod: newRecord.intCostingMethod,
-                                    intSort: newRecord.intSort
-                                });
-                                currentVM.tblICItemPricings().add(newPrice);
-                            }
+            iRely.Functions.openScreen('GlobalComponentEngine.view.FloatingSearch',{
+                searchSettings: {
+                    type: 'Inventory.view.Item',
+                    url: './i21/api/CompanyLocation/Search',
+                    title: 'Add Item Locations',
+                    showNew: false,
+                    showOpenSelected: false,
+                    controller: me,
+                    columns: [
+                            { dataIndex : 'intCompanyLocationId', text: 'Location Id', dataType: 'numeric', defaultSort : true, hidden : true, key : true},
+                            { dataIndex : 'strLocationName',text: 'Location Name', dataType: 'string', flex: 1 },
+                            { dataIndex : 'strLocationType',text: 'Location Type', dataType: 'string', flex: 1 }
+                    ],
+                    buttons: [
+                        {
+                            text: 'Open Selected',
+                            clickHandler: 'onOpenSelectedClick',
+                            itemId: 'btnOpenSelected',
+                            width: 100
                         }
-                    });
-                    search.close();
-                    //win.context.data.saveRecord();
-                    me.saveRecord(win);
-                },
-                openallclick: function() {
-                    search.close();
+                    ]
                 }
             });
-            search.show();
+            // var search = i21.ModuleMgr.Search;
+            // search.scope = me;
+            // search.url = './i21/api/CompanyLocation/Search';
+            // search.columns = [
+            //     { dataIndex : 'intCompanyLocationId', text: 'Location Id', dataType: 'numeric', defaultSort : true, hidden : true, key : true},
+            //     { dataIndex : 'strLocationName',text: 'Location Name', dataType: 'string', flex: 1 },
+            //     { dataIndex : 'strLocationType',text: 'Location Type', dataType: 'string', flex: 1 }
+            // ];
+            // search.title = "Add Item Locations";
+            // search.showNew = false;
+            // search.on({
+            //     scope: me,
+            //     openselectedclick: function(button, e, result) {
+            //         var currentVM = this.getViewModel().data.current;
+            //         var win = this.getView();
+
+            //         Ext.each(result, function(location) {
+            //             var exists = Ext.Array.findBy(currentVM.tblICItemLocations().data.items, function (row) {
+            //                 if (location.get('intCompanyLocationId') === row.get('intCompanyLocationId')) {
+            //                     return true;
+            //                 }
+            //             });
+            //             if (!exists) {
+            //                 var defaultUOMId = null;
+            //                 if (win.defaultUOM) {
+            //                     defaultUOMId = win.defaultUOM.intItemUOMId;
+            //                 }
+            //                 var newRecord = {
+            //                     intItemId: location.data.intItemId,
+            //                     intLocationId: location.data.intCompanyLocationId,
+            //                     intIssueUOMId: defaultUOMId,
+            //                     intReceiveUOMId: defaultUOMId,
+            //                     strLocationName: location.data.strLocationName,
+            //                     intAllowNegativeInventory: 3,
+            //                     intCostingMethod: 1,
+            //                 };
+            //                 currentVM.tblICItemLocations().add(newRecord);
+
+            //                 var prices = currentVM.tblICItemPricings().data.items;
+            //                 var exists = Ext.Array.findBy(prices, function (row) {
+            //                     if (newRecord.intItemLocationId === row.get('intItemLocationId')) {
+            //                         return true;
+            //                     }
+            //                 });
+            //                 if (!exists) {
+            //                     var newPrice = Ext.create('Inventory.model.ItemPricing', {
+            //                         intItemId: newRecord.intItemId,
+            //                         intItemLocationId: newRecord.intItemLocationId,
+            //                         strLocationName: newRecord.strLocationName,
+            //                         dblAmountPercent: 0.00,
+            //                         dblSalePrice: 0.00,
+            //                         dblMSRPPrice: 0.00,
+            //                         strPricingMethod: 'None',
+            //                         dblLastCost: 0.00,
+            //                         dblStandardCost: 0.00,
+            //                         dblAverageCost: 0.00,
+            //                         dblEndMonthCost: 0.00,
+            //                         intAllowNegativeInventory: newRecord.intAllowNegativeInventory,
+            //                         intCostingMethod: newRecord.intCostingMethod,
+            //                         intSort: newRecord.intSort
+            //                     });
+            //                     currentVM.tblICItemPricings().add(newPrice);
+            //                 }
+            //             }
+            //         });
+            //         search.close();
+            //         //win.context.data.saveRecord();
+            //         me.saveRecord(win);
+            //     },
+            //     openallclick: function() {
+            //         search.close();
+            //     }
+            // });
+            // search.show();
         };
 
         // win.context.data.saveRecord({
@@ -2405,6 +2428,64 @@ Ext.define('Inventory.view.ItemViewController', {
                 showAddScreen();
             }            
         );        
+    },
+
+    onOpenSelectedClick: function(button, e, result) {
+        var currentVM = this.getViewModel().data.current;
+        var win = this.getView();
+
+        Ext.each(result, function(location) {
+            var exists = Ext.Array.findBy(currentVM.tblICItemLocations().data.items, function (row) {
+                if (location.get('intCompanyLocationId') === row.get('intCompanyLocationId')) {
+                    return true;
+                }
+            });
+            if (!exists) {
+                var defaultUOMId = null;
+                if (win.defaultUOM) {
+                    defaultUOMId = win.defaultUOM.intItemUOMId;
+                }
+                var newRecord = {
+                    intItemId: location.data.intItemId,
+                    intLocationId: location.data.intCompanyLocationId,
+                    intIssueUOMId: defaultUOMId,
+                    intReceiveUOMId: defaultUOMId,
+                    strLocationName: location.data.strLocationName,
+                    intAllowNegativeInventory: 3,
+                    intCostingMethod: 1,
+                };
+                currentVM.tblICItemLocations().add(newRecord);
+
+                var prices = currentVM.tblICItemPricings().data.items;
+                var exists = Ext.Array.findBy(prices, function (row) {
+                    if (newRecord.intItemLocationId === row.get('intItemLocationId')) {
+                        return true;
+                    }
+                });
+                if (!exists) {
+                    var newPrice = Ext.create('Inventory.model.ItemPricing', {
+                        intItemId: newRecord.intItemId,
+                        intItemLocationId: newRecord.intItemLocationId,
+                        strLocationName: newRecord.strLocationName,
+                        dblAmountPercent: 0.00,
+                        dblSalePrice: 0.00,
+                        dblMSRPPrice: 0.00,
+                        strPricingMethod: 'None',
+                        dblLastCost: 0.00,
+                        dblStandardCost: 0.00,
+                        dblAverageCost: 0.00,
+                        dblEndMonthCost: 0.00,
+                        intAllowNegativeInventory: newRecord.intAllowNegativeInventory,
+                        intCostingMethod: newRecord.intCostingMethod,
+                        intSort: newRecord.intSort
+                    });
+                    currentVM.tblICItemPricings().add(newPrice);
+                }
+            }
+        });
+        search.close();
+        //win.context.data.saveRecord();
+        me.saveRecord(win);
     },
 
     beforeSave: function(win){
