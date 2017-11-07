@@ -4,7 +4,7 @@
 	[intCategoryId] [int] NULL,
 	[strRebateBy] [nvarchar](15) COLLATE Latin1_General_CI_AS NOT NULL CONSTRAINT [DF_tblVRProgramItem_strRebateBy]  DEFAULT (N'Amount'),
 	[dblRebateRate] [numeric](18, 6) NULL,
-	[dtmBeginDate] [datetime] NULL,
+	[dtmBeginDate] [datetime] NOT NULL,
 	[dtmEndDate] [datetime] NULL,
 	[intProgramId] [int] NOT NULL,
 	[intConcurrencyId] [int] NOT NULL CONSTRAINT [DF_tblVRProgramItem_intConcurrencyId]  DEFAULT ((0)),
