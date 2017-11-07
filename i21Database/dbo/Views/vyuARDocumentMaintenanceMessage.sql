@@ -12,7 +12,7 @@ SELECT A.intDocumentMaintenanceId
 	 , B.intDocumentMaintenanceMessageId
 	 , B.strHeaderFooter
 	 , B.intCharacterLimit
-	 , strMessage							= dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)))
+	 , strMessage							= dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), 0)
 	 , B.ysnRecipe
 	 , B.ysnQuote
 	 , B.ysnSalesOrder
