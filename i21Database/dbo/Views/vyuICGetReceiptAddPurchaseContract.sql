@@ -1,12 +1,12 @@
 ﻿CREATE  VIEW [dbo].[vyuICGetReceiptAddPurchaseContract]
 AS
 
-SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityId, intItemId, intLineNo) AS INT)
+SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId, intItemId, intLineNo) AS INT)
 , * 
 FROM (
 	SELECT 	
 		intLocationId				= ContractView.intCompanyLocationId			
-		, intEntityId				= ContractView.intEntityId
+		, intEntityVendorId			= ContractView.intEntityId
 		, strVendorId				= ContractView.strVendorId
 		, strVendorName				= ContractView.strEntityName
 		, strReceiptType			= 'Purchase Contract'
