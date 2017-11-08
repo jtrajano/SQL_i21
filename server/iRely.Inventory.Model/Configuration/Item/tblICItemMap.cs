@@ -316,6 +316,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnIsBasket).HasColumnName("ysnIsBasket");
             this.Property(t => t.strDimensionUOM).HasColumnName("strDimensionUOM");
             this.Property(t => t.strWeightUOM).HasColumnName("strWeightUOM");
+            this.Property(t => t.ysnLotWeightsRequired).HasColumnName("ysnLotWeightsRequired");
         }
     }
 

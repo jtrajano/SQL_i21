@@ -62,6 +62,7 @@ namespace iRely.Inventory.Model
         public bool? ysnIsBasket { get; set; }
         public string strDimensionUOM { get; set; }
         public string strWeightUOM { get; set; }
+        public bool? ysnLotWeightsRequired { get; set; }
 
         public tblICItem tblICItem { get; set; }        
     }
