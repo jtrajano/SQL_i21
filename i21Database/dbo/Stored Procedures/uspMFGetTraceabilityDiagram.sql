@@ -806,11 +806,11 @@ End
 		Else './resources/images/graphics/traceability-wip-process.png' End
 	When strType='R' Then './resources/images/graphics/traceability-receipt.png'
 	When strType='S' Then './resources/images/graphics/traceability-shipment.png'
-	When strType='C' Then './resources/images/graphics/traceability-wip-process.png'
+	When strType='C' Then './resources/images/graphics/contract.png'
 	When strType='IS' Then './resources/images/graphics/traceability-shipment.png'
-	When strType='CN' Then './resources/images/graphics/traceability-finished-goods.png'
-	When strType='SO' Then './resources/images/graphics/traceability-finished-goods.png'
-	When strType='IN' Then './resources/images/graphics/traceability-finished-goods.png'
+	When strType='CN' Then './resources/images/graphics/container.png'
+	When strType='SO' Then './resources/images/graphics/sales-order.png'
+	When strType='IN' Then './resources/images/graphics/invoice.png'
 	End AS strImage,
 	CASE When ISNULL(strProcessName,'')='' THEN  strLotNumber Else strLotNumber + CHAR(13) + '(' + strProcessName + ')' End AS strNodeText,
 	'Item No.	  : ' + ISNULL(strItemNo,'') + CHAR(13) +
