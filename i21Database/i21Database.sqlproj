@@ -5865,6 +5865,8 @@
     <Build Include="dbo\Stored Procedures\uspEMConvertCustomerToVendor.sql" />
     <Build Include="dbo\Stored Procedures\uspARApplyScaleTicketWeight.sql" />
     <Build Include="dbo\Views\vyuARGetSalesOrdersToWeight.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGCreateDebitCreditMemo.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGCreateInvoiceForWeightClaims.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
