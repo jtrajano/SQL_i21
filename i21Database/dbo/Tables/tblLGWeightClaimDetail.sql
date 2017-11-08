@@ -16,6 +16,7 @@
 [intCurrencyId] INT NULL,
 [dblClaimAmount] NUMERIC(18, 6) NULL,
 [intPriceItemUOMId] INT NULL,
+[dblAdditionalCost] NUMERIC(18, 6) NULL,
 [ysnNoClaim] [bit] NULL,
 [intContractDetailId] INT NULL,
 [intBillId] INT NULL,

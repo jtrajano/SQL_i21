@@ -5880,6 +5880,8 @@
     <Build Include="dbo\Stored Procedures\uspVRUpdateCustomerSpecialPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateBillPaymentFromAR.sql" />
     <Build Include="dbo\Stored Procedures\uspMFValidateInventoryShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGCreateDebitCreditMemo.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGCreateInvoiceForWeightClaims.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
