@@ -1282,7 +1282,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                             processForexRateOnSuccess(successResponse, isItemRetailPrice);
                         },
                         function(failureResponse){
-                            var jsonData = Ext.decode(failureResponse.responseText);
+                            //var jsonData = Ext.decode(failureResponse.responseText);
                             //iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
                             iRely.Functions.showErrorDialog('Something went wrong while getting the forex data.');
                         }
@@ -1428,8 +1428,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     }
                 },
                 function(failureResponse){
-                    var jsonData = Ext.decode(failureResponse.responseText);
-                    iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
+                    //var jsonData = Ext.decode(failureResponse.responseText);
+                    iRely.Functions.showErrorDialog(failureResponse);                    
                 }
             );                       
         }        
@@ -2313,7 +2313,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         processForexRateOnSuccess(successResponse);
                     },
                     function(failureResponse){
-                        var jsonData = Ext.decode(failureResponse.responseText);
+                        //var jsonData = Ext.decode(failureResponse.responseText);
                         //iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
                         iRely.Functions.showErrorDialog('Something went wrong while getting the forex data.');
                     }
@@ -2361,7 +2361,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     }
                 },
                 function(failureResponse){
-                    var jsonData = Ext.decode(failureResponse.responseText);
+                    //var jsonData = Ext.decode(failureResponse.responseText);
                     //iRely.Functions.showErrorDialog(jsonData.message.statusText);      
                     iRely.Functions.showErrorDialog('Something went wrong while getting the forex data.');                                  
                 }
