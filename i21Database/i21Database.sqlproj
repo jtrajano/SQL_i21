@@ -5860,6 +5860,7 @@
     <Build Include="dbo\Stored Procedures\uspLGSplitPickedLotBatch.sql" />
     <Build Include="dbo\Stored Procedures\uspMFLotCreate.sql" />
     <Build Include="dbo\Stored Procedures\uspMFValidateInventoryShipment.sql" />
+    <Build Include="dbo\Views\vyuEMEntityCustomerSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
