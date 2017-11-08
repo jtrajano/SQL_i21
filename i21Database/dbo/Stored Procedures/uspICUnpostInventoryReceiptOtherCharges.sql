@@ -352,7 +352,7 @@ BEGIN
 				ON ForGLEntries_CTE.intItemId = ItemGLAccounts.intItemId
 				AND ForGLEntries_CTE.intItemLocationId = ItemGLAccounts.intItemLocationId
 			INNER JOIN dbo.tblGLAccount GLAccount
-				ON GLAccount.intAccountId = ItemGLAccounts.intContraInventoryId -- AP Clearing 
+				ON GLAccount.intAccountId = ItemGLAccounts.intInventoryId
 			CROSS APPLY dbo.fnGetDebitFunctional(
 				ForGLEntries_CTE.dblCost
 				,ForGLEntries_CTE.intCurrencyId
