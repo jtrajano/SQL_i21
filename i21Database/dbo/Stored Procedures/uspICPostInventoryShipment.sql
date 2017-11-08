@@ -307,6 +307,13 @@ BEGIN
 			RETURN -1; 
 		END 
 	END 
+
+	-- Do not allow post if Lot bond is not yet released. 
+	IF @ysnPost = 1 AND @ysnRecap = 0 
+	BEGIN 
+		EXEC uspMFValidateInventoryShipment @intTransactionId
+		IF @@ERROR <> 0 GOTO Post_Exit    
+	END 
 END
 
 -- Get the next batch number
