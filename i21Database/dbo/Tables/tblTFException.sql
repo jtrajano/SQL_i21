@@ -5,6 +5,7 @@
 	[strExceptionType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strTransactionType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intTransactionNumberId] INT NULL,
+	[strReason] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[dtmDate] DATETIME NULL,
 	[intProductCodeId] INT NULL,
 	[strProductCode] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
