@@ -55,7 +55,8 @@ BEGIN
 				where  A.intAccountId = C.intAccountId
 				and St.strType = 'Primary'
 		) accountCategory
-		WHERE accountCategory.intAccountCategoryId != 1 --Vendor Prepayments
+		WHERE (accountCategory.intAccountCategoryId != 1 --Vendor Prepayments
+		OR accountCategory.intAccountCategoryId IS NULL) 
 
 		--Do not allow posting with 0 cost in one of the details
 		INSERT INTO @returntable
