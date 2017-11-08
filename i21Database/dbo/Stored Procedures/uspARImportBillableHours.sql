@@ -25,10 +25,7 @@ SET @ZeroDecimal = 0.000000
 SET @DateOnly = CAST(GETDATE() AS DATE)
 SET @CompanyLocationId = (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE ysnLocationActive = 1)
 
-DECLARE @TicketHoursWorked TABLE(
-		intTicketHoursWorkedId INT,
-		intEntityCustomerId INT,
-		intTicketId INT)
+DECLARE @TicketHoursWorked TABLE(intTicketHoursWorkedId INT, intEntityCustomerId INT, intTicketId INT)
 		
 IF (@HoursWorkedIDs IS NOT NULL) 
 BEGIN
@@ -43,54 +40,41 @@ BEGIN
 END
 
 --VALIDATE NULL TERMS
-
-DECLARE @NullTermsTable TABLE(intEntityCustomerId INT)
-INSERT INTO @NullTermsTable 
-SELECT
-	THW.intEntityCustomerId 
-FROM
-	@TicketHoursWorked THW
-INNER JOIN
-	(SELECT [intEntityId], intTermsId FROM tblARCustomer) ARC ON THW.intEntityCustomerId = ARC.[intEntityId] 
-WHERE ARC.intTermsId IS NULL
-
-
-IF EXISTS(SELECT * FROM @NullTermsTable)
+IF EXISTS(SELECT THW.intEntityCustomerId 
+		  FROM @TicketHoursWorked THW
+		  INNER JOIN (
+				SELECT intEntityId
+					 , intTermsId 
+				FROM dbo.tblARCustomer WITH (NOLOCK)
+		  ) ARC ON THW.intEntityCustomerId = ARC.intEntityId
+		  WHERE ARC.intTermsId IS NULL)
 BEGIN
 	RAISERROR('Some of the customers doesn''t have Terms setup.', 16, 1) 
 	RETURN 0
 END
 
-DECLARE @NewInvoices AS TABLE (intEntityCustomerId INT, intCompanyLocationId INT)
-DECLARE @NewlyCreatedInvoices AS TABLE (intInvoiceId INT)
+DECLARE @NewInvoices TABLE(intEntityCustomerId INT, intCompanyLocationId INT)
+DECLARE @NewlyCreatedInvoices TABLE(intInvoiceId INT)
 
 INSERT INTO @NewInvoices
-SELECT DISTINCT
-	V.[intEntityId]
-	,ISNULL(V.[intCompanyLocationId], @CompanyLocationId)
-FROM
-	vyuARBillableHoursForImport V
-INNER JOIN
-	@TicketHoursWorked HW
-		ON V.[intTicketId] = HW.[intTicketId]
-INNER JOIN
-	tblARCustomer C
-		ON V.[intEntityId] = C.[intEntityId]		
-GROUP BY
-	V.[intEntityId]
-	,ISNULL(V.[intCompanyLocationId], @CompanyLocationId)
+SELECT DISTINCT V.intEntityId
+			  , ISNULL(V.intCompanyLocationId, @CompanyLocationId)
+FROM vyuARBillableHoursForImport V
+INNER JOIN @TicketHoursWorked HW ON V.intTicketId = HW.intTicketId
+INNER JOIN tblARCustomer C ON V.intEntityId = C.intEntityId
+GROUP BY V.intEntityId, ISNULL(V.intCompanyLocationId, @CompanyLocationId)
 
 WHILE EXISTS(SELECT TOP 1 NULL FROM @NewInvoices)
 	BEGIN
-		DECLARE @EntityCustomerId AS INT
-				,@ComLocationId AS INT
-				,@NewInvoiceId AS INT
-				,@ErrorMessage nvarchar(250)
+		DECLARE @EntityCustomerId INT
+			  , @ComLocationId INT
+			  , @NewInvoiceId INT
+			  , @ErrorMessage NVARCHAR(250)
+			  , @CustomerName NVARCHAR(250)
 				
-		SELECT TOP 1 @EntityCustomerId = intEntityCustomerId, @ComLocationId = intCompanyLocationId FROM @NewInvoices
- 
- 
-
+		SELECT TOP 1 @EntityCustomerId = intEntityCustomerId
+		           , @ComLocationId = intCompanyLocationId 
+		FROM @NewInvoices
 				
 		EXEC [dbo].[uspARCreateCustomerInvoice]
 			@EntityCustomerId = @EntityCustomerId,
@@ -101,8 +85,14 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @NewInvoices)
 			@ErrorMessage = @ErrorMessage OUTPUT,
 			@DocumentMaintenanceId = @DocumentMaintenanceId
 			
-		IF @NewInvoiceId IS NULL 
+		IF ISNULL(@NewInvoiceId, 0) = 0 OR ISNULL(@ErrorMessage, '') <> ''
 		BEGIN
+			IF NOT EXISTS (SELECT NULL FROM tblSMCompanyLocation WHERE intCompanyLocationId = @ComLocationId AND ysnLocationActive = 1)
+				BEGIN
+					SELECT TOP 1 @CustomerName = strName FROM tblEMEntity WHERE intEntityId = @EntityCustomerId
+					SET @ErrorMessage = 'The Company Location provided for Customer: ' + @CustomerName + ' is not active!'
+				END
+
 			RAISERROR(@ErrorMessage, 11, 1) 
 			RETURN 0
 		END
@@ -139,24 +129,14 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @NewInvoices)
 			,Acct.[intInventoryAccountId]								--[intInventoryAccountId]
 			,V.[intTicketHoursWorkedId]									--[intTicketHoursWorkedId]
 			,1															--[intConcurrencyId]
-		FROM
-			vyuARBillableHoursForImport V
-		INNER JOIN
-			@TicketHoursWorked HW
-				ON V.[intTicketHoursWorkedId] = HW.[intTicketHoursWorkedId]
-		INNER JOIN
-			tblICItem IC
-				ON V.[intItemId] = IC.[intItemId]
-		INNER JOIN
-			tblICItemLocation IL
-				ON V.intItemId = IL.intItemId
-				AND V.intCompanyLocationId = IL.intLocationId
-		LEFT OUTER JOIN
-			vyuARGetItemAccount Acct
-				ON V.[intItemId] = Acct.[intItemId]
-					AND V.[intCompanyLocationId] = Acct.[intLocationId]
-		WHERE
-			V.[intEntityId] = @EntityCustomerId
+		FROM vyuARBillableHoursForImport V
+		INNER JOIN @TicketHoursWorked HW ON V.intTicketHoursWorkedId = HW.intTicketHoursWorkedId
+		INNER JOIN tblICItem IC ON V.intItemId = IC.intItemId
+		INNER JOIN tblICItemLocation IL ON V.intItemId = IL.intItemId
+									   AND V.intCompanyLocationId = IL.intLocationId
+		LEFT OUTER JOIN vyuARGetItemAccount Acct ON V.intItemId = Acct.intItemId
+									  AND V.intCompanyLocationId = Acct.intLocationId
+		WHERE V.intEntityId = @EntityCustomerId
 			AND ISNULL(V.intCompanyLocationId,@CompanyLocationId) = @ComLocationId
 		
 		EXEC dbo.uspARReComputeInvoiceTaxes @InvoiceId = @NewInvoiceId
@@ -167,22 +147,13 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @NewInvoices)
 		DELETE FROM @NewInvoices WHERE intEntityCustomerId = @EntityCustomerId AND intCompanyLocationId = @ComLocationId
 	END
 							
-UPDATE
-	tblHDTicketHoursWorked
-SET
-	tblHDTicketHoursWorked.[intInvoiceId] = I.[intInvoiceId]
-FROM
-	[tblARInvoice] I
-INNER JOIN
-	[tblARInvoiceDetail] D
-		ON I.[intInvoiceId] = D.[intInvoiceId]
-INNER JOIN
-	tblHDTicketHoursWorked V
-		ON D.[intTicketHoursWorkedId] = V.[intTicketHoursWorkedId]
-INNER JOIN
-	@TicketHoursWorked HW
-		ON V.[intTicketId] = HW.[intTicketId]
-		AND V.[intTicketHoursWorkedId] = HW.[intTicketHoursWorkedId] 
+UPDATE tblHDTicketHoursWorked
+SET tblHDTicketHoursWorked.intInvoiceId = I.intInvoiceId
+FROM tblARInvoice I
+INNER JOIN tblARInvoiceDetail D ON I.intInvoiceId = D.intInvoiceId
+INNER JOIN tblHDTicketHoursWorked V ON D.intTicketHoursWorkedId = V.intTicketHoursWorkedId
+INNER JOIN @TicketHoursWorked HW ON V.intTicketId = HW.intTicketId
+							    AND V.intTicketHoursWorkedId = HW.intTicketHoursWorkedId
 		                    
 IF @Post = 1
 	BEGIN
