@@ -344,6 +344,20 @@ BEGIN
 		BEGIN
 			SET @strTransactionType = 'Extended Remote'
 		END
+
+		--TAXES--
+		SET @TaxValue1	= ISNULL(@TaxValue1,0)  / ISNULL(@dblQuantity,0)					
+		SET @TaxValue2	= ISNULL(@TaxValue2,0)  / ISNULL(@dblQuantity,0)					
+		SET @TaxValue3	= ISNULL(@TaxValue3,0)  / ISNULL(@dblQuantity,0)					
+		SET @TaxValue4	= ISNULL(@TaxValue4,0)  / ISNULL(@dblQuantity,0)					
+		SET @TaxValue5	= ISNULL(@TaxValue5,0)  / ISNULL(@dblQuantity,0)					
+		SET @TaxValue6	= ISNULL(@TaxValue6,0)  / ISNULL(@dblQuantity,0)					
+		SET @TaxValue7	= ISNULL(@TaxValue7,0)  / ISNULL(@dblQuantity,0)					
+		SET @TaxValue8	= ISNULL(@TaxValue8,0)  / ISNULL(@dblQuantity,0)					
+		SET @TaxValue9	= ISNULL(@TaxValue9,0)  / ISNULL(@dblQuantity,0)					
+		SET @TaxValue10	= ISNULL(@TaxValue10,0) / ISNULL(@dblQuantity,0)				
+
+
 	END
 
 
