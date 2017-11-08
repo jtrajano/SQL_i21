@@ -107,12 +107,12 @@ GO
 			SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Sales Analysis Reports' AND strModuleName = 'Accounts Receivable'
 		)
 	END
-GO
+--GO
 
-	/* Update Search command in Master Menu to replace colon to ?searchCommand*/
-	update tblSMMasterMenu
-	set strCommand = REPLACE(strCommand, ':', '?searchCommand=')
-	where strCommand like '%:%'
+--	/* Update Search command in Master Menu to replace colon to ?searchCommand*/
+--	update tblSMMasterMenu
+--	set strCommand = REPLACE(strCommand, ':', '?searchCommand=')
+--	where strCommand like '%:%'
 GO
 	DECLARE @ScaleInterfaceParentMenuId INT
 	SELECT TOP 1 @ScaleInterfaceParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Scale' AND strModuleName = 'Scale'
