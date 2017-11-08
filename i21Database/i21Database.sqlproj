@@ -5820,7 +5820,6 @@
     <Build Include="dbo\Views\vyuVROpenRebate.sql" />
     <Build Include="dbo\Views\vyuVRRebate.sql" />
     <Build Include="dbo\Stored Procedures\uspSMValidateRemoteServerRole.sql" />
-    <Build Include="dbo\Views\vyuARCustomerPaymentHistoryReport.sql" />
     <Build Include="dbo\Tables\tblVRSubmitted.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostQtyChangeFromInvShipmentDestination.sql" />
     <Build Include="dbo\Stored Procedures\uspSMUpdateEntityCredentialGridLayout.sql" />
@@ -5861,6 +5860,9 @@
     <Build Include="dbo\Stored Procedures\uspMFLotCreate.sql" />
     <Build Include="dbo\Stored Procedures\uspMFValidateInventoryShipment.sql" />
     <Build Include="dbo\Views\vyuEMEntityCustomerSearch.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPayOutCreditBalance.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMInserAuditLogs.sql" />
+    <Build Include="dbo\Stored Procedures\uspEMConvertCustomerToVendor.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

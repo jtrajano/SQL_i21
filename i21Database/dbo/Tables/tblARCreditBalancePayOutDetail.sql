@@ -5,6 +5,7 @@
 	[intEntityCustomerId]               INT             NULL,
 	[intPaymentId]                      INT             NULL,
 	[intBillId]                         INT             NULL,
+	[ysnProcess]                        BIT             CONSTRAINT [DF_tblARCreditBalancePayOutDetail_ysnProcess] DEFAULT ((0)) NOT NULL,
 	[ysnSuccess]                        BIT             CONSTRAINT [DF_tblARCreditBalancePayOutDetail_ysnSuccess] DEFAULT ((0)) NOT NULL,
 	[strMessage]                        NVARCHAR(500)   COLLATE Latin1_General_CI_AS	NULL,
 	[intConcurrencyId]                  INT             NOT NULL CONSTRAINT [DF_tblARCreditBalancePayOutDetail_intConcurrencyId] DEFAULT ((0)),
