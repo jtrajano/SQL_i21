@@ -289,7 +289,7 @@ BEGIN
 		DELETE FROM @OrderDetails WHERE [intSalesOrderDetailId] = @SalesOrderDetailId
 	END
 
-	UPDATE tblSOSalesOrder SET ysnProcessed = 1 WHERE intSalesOrderId = @SalesOrderId
+	UPDATE tblSOSalesOrder SET ysnProcessed = 1, strOrderStatus = 'Won' WHERE intSalesOrderId = @SalesOrderId
 
 	SET @NewSalesOrderId = @NewTransactionId
 
