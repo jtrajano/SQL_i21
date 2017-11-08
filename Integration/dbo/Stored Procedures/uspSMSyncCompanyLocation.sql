@@ -144,8 +144,8 @@ BEGIN
       ,[agloc_pic_prtr_name]  
       ,[agloc_ivc_prtr_name]  
       ,[agloc_cnt_prtr_name]  
-      ,[agloc_last_ivc_no]  
-      ,[agloc_last_ord_no]  
+      --,[agloc_last_ivc_no]  
+      --,[agloc_last_ord_no]  
       ,[agloc_ord_for_ivc_yn]  
       ,[agloc_override_ord_ivc_yn]  
       ,[agloc_ivc_type_phs7]  
@@ -277,8 +277,8 @@ BEGIN
       ,CL.[strDefaultTicketPrinter] --[agloc_pic_prtr_name]  
       ,CL.[strDefaultInvoicePrinter] --[agloc_ivc_prtr_name]  
       ,NULL       --[agloc_cnt_prtr_name]  
-      ,dbo.fnGetNumericValueFromString(CL.[strLastInvoiceNumber])  --[agloc_last_ivc_no]  
-      ,dbo.fnGetNumericValueFromString(CL.[strLastOrderNumber])  --[agloc_last_ord_no]  
+      --,dbo.fnGetNumericValueFromString(CL.[strLastInvoiceNumber])  --[agloc_last_ivc_no]  
+      --,dbo.fnGetNumericValueFromString(CL.[strLastOrderNumber])  --[agloc_last_ord_no]  
       ,(CASE CL.[ysnUseOrderNumberforInvoiceNumber]  
            WHEN 1 THEN ''Y''  
            WHEN 0 THEN ''N''  
@@ -960,8 +960,8 @@ BEGIN
       ,[strDefaultInvoicePrinter]  
       ,[strPickTicketType]  
       ,[strDefaultTicketPrinter]  
-      ,[strLastOrderNumber]  
-      ,[strLastInvoiceNumber]  
+      --,[strLastOrderNumber]  
+      --,[strLastInvoiceNumber]  
       ,[strPrintonInvoice]  
       ,[ysnPrintContractBalance]  
       ,[strJohnDeereMerchant]  
@@ -1170,8 +1170,8 @@ BEGIN
        ELSE ''''  
         END)        --<strPickTicketType, nvarchar(50),>  
       ,AG.[agloc_pic_prtr_name]   --<strDefaultTicketPrinter, nvarchar(50),>  
-      ,AG.[agloc_last_ord_no]    --<strLastOrderNumber, nvarchar(50),>  
-      ,AG.[agloc_last_ivc_no]    --<strLastInvoiceNumber, nvarchar(50),>  
+      --,AG.[agloc_last_ord_no]    --<strLastOrderNumber, nvarchar(50),>  
+      --,AG.[agloc_last_ivc_no]    --<strLastInvoiceNumber, nvarchar(50),>  
       ,(CASE UPPER(AG.[agloc_ivc_prt_ipo])  
        WHEN ''I'' THEN ''Item''  
        WHEN ''P'' THEN ''Package''  
@@ -1522,8 +1522,8 @@ BEGIN
          ELSE ''''  
           END)  
       ,[strDefaultTicketPrinter] = AG.[agloc_pic_prtr_name]  
-      ,[strLastOrderNumber] = AG.[agloc_last_ord_no]  
-      ,[strLastInvoiceNumber] = AG.[agloc_last_ivc_no]  
+      --,[strLastOrderNumber] = AG.[agloc_last_ord_no]  
+      --,[strLastInvoiceNumber] = AG.[agloc_last_ivc_no]  
       ,[strPrintonInvoice] =   
         (CASE UPPER(AG.[agloc_ivc_prt_ipo])  
          WHEN ''I'' THEN ''Item''  
@@ -1879,11 +1879,11 @@ BEGIN
 			--,ptloc_season_chng_rev_dt				
 			--,ptloc_dd_ivc_pgm_name		
 			--,ptloc_purch_default_carrier
-			,ptloc_last_ord_no
+			--,ptloc_last_ord_no
 			--,ptloc_ivc_prt_prompt_yn
 			--,ptloc_ivc_type_fpl
 			--,ptloc_use_ord_for_ivc_yn
-			,ptloc_last_ivc_no
+			--,ptloc_last_ivc_no
 			--,ptloc_last_po_no
 			,ptloc_ivc_prtr_name
 			,ptloc_upc_rct_yn
@@ -1951,11 +1951,11 @@ BEGIN
 		  --,ptloc_season_chng_rev_dt				
 		  --,ptloc_dd_ivc_pgm_name		
 		  --,ptloc_purch_default_carrier
-		  ,dbo.fnGetNumericValueFromString(CL.[strLastOrderNumber])		--[ptloc_last_ord_no] 
+		  --,dbo.fnGetNumericValueFromString(CL.[strLastOrderNumber])		--[ptloc_last_ord_no] 
 		  --,ptloc_ivc_prt_prompt_yn
 		  --,ptloc_ivc_type_fpl
 		  --,ptloc_use_ord_for_ivc_yn 
-		  ,dbo.fnGetNumericValueFromString(CL.[strLastInvoiceNumber])	--[ptloc_last_ivc_no]  
+		  --,dbo.fnGetNumericValueFromString(CL.[strLastInvoiceNumber])	--[ptloc_last_ivc_no]  
 		  --,ptloc_last_po_no
 		  ,CL.[strDefaultInvoicePrinter]								--[ptloc_ivc_prtr_name]
 		  ,NULL															--[ptloc_upc_rct_yn]  
@@ -2212,8 +2212,8 @@ BEGIN
 			,[strDefaultInvoicePrinter]  
 			,[strPickTicketType]  
 			,[strDefaultTicketPrinter]  
-			,[strLastOrderNumber]  
-			,[strLastInvoiceNumber]  
+			--,[strLastOrderNumber]  
+			--,[strLastInvoiceNumber]  
 			,[strPrintonInvoice]  
 			,[ysnPrintContractBalance]  
 			,[strJohnDeereMerchant]  
@@ -2346,8 +2346,8 @@ BEGIN
 			,PT.[ptloc_ivc_prtr_name]					--<strDefaultInvoicePrinter, nvarchar(50),>  
 			,''''											--<strPickTicketType, nvarchar(50),>  
 			,PT.[ptloc_pik_prtr_name]					--<strDefaultTicketPrinter, nvarchar(50),>  
-			,PT.[ptloc_last_ord_no]					    --<strLastOrderNumber, nvarchar(50),>  
-			,PT.[ptloc_last_ivc_no]					    --<strLastInvoiceNumber, nvarchar(50),>  
+			--,PT.[ptloc_last_ord_no]					    --<strLastOrderNumber, nvarchar(50),>  
+			--,PT.[ptloc_last_ivc_no]					    --<strLastInvoiceNumber, nvarchar(50),>  
 			,''''										    --<strPrintonInvoice, nvarchar(50),>  
 			,0										    --<ysnPrintContractBalance, bit,>  
 			,PT.[ptloc_merchant]						--<strJohnDeereMerchant, nvarchar(50),>  
@@ -2489,8 +2489,8 @@ BEGIN
 		  ,[intCostofGoodsSold] = ISNULL([intCostofGoodsSold],0)  
 		  ,[intInventory] = ISNULL([intInventory],0)      
 		  ,[strDefaultInvoicePrinter] = PT.[ptloc_ivc_prtr_name]  
-		  ,[strLastOrderNumber] = PT.[ptloc_last_ord_no]  
-		  ,[strLastInvoiceNumber] = PT.[ptloc_last_ivc_no]       
+		  --,[strLastOrderNumber] = PT.[ptloc_last_ord_no]  
+		  --,[strLastInvoiceNumber] = PT.[ptloc_last_ivc_no]       
 		  ,[strJohnDeereMerchant] = PT.[ptloc_merchant]       
 		  ,[ysnSendtoEnergyTrac] =   
 			(CASE UPPER(PT.[ptloc_send_to_et_yn])  
