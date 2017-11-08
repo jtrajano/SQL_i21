@@ -100,9 +100,10 @@ Ext.define('Inventory.controller.Inventory', {
     },
 
     init: function() {
-        Ext.Loader.loadScript("./app/Inventory/lib/underscore.js");
-        Ext.Loader.loadScript("./app/Inventory/lib/rx.all.js");
-        Ext.Loader.loadScript("./app/Inventory/lib/numeraljs/numeral.js");
+        var env = iRely.Debug ? 'debug' : '';
+        Ext.Loader.loadScript("./".concat(env).concat("/app/Inventory/lib/underscore.js"));
+        Ext.Loader.loadScript("./".concat(env).concat("/app/Inventory/lib/rx.all.js"));
+        Ext.Loader.loadScript("./".concat(env).concat("/app/Inventory/lib/numeraljs/numeral.js"));
         
         // Ext.Ajax.request({
         //     timeout: 120000,
