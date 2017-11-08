@@ -43,6 +43,7 @@ BEGIN TRY
 		,@STARTING_NUMBER_BATCH AS INT = 3
 		,@strRetBatchId NVARCHAR(40)
 		,@intBatchId INT
+		,@strReasonCode NVARCHAR(50)
 
 	SELECT @intItemId = intItemId
 		,@intCategoryId = intCategoryId
@@ -86,6 +87,16 @@ BEGIN TRY
 			,intLocationId INT
 			,intUserId INT
 			)
+
+	SELECT @strReasonCode = strReasonCode
+	FROM tblMFReasonCode
+	WHERE intReasonCodeId = @intReasonCodeId
+
+	IF @intReasonCodeId IS NOT NULL
+		SELECT @strNotes = @strReasonCode + ' ' + @strNotes
+
+	IF @dblCostPerUnit IS NULL
+		SELECT @dblCostPerUnit = 0
 
 	SELECT @strLotTracking = strLotTracking
 	FROM tblICItem
@@ -160,7 +171,10 @@ BEGIN TRY
 		,@dtmDate
 		,NULL
 		,NULL
+		,NULL
+		,NULL
 		,@dblCostPerUnit
+		,@strNotes
 
 	IF @intLotStatusId IS NOT NULL
 		AND NOT EXISTS (

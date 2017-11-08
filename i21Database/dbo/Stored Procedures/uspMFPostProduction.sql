@@ -24,6 +24,7 @@ CREATE PROCEDURE [dbo].[uspMFPostProduction] @ysnPost BIT = 0
 	,@intShiftId INT = NULL
 	,@intLoadDistributionDetailId INT = NULL
 	,@dblUnitCost NUMERIC(38, 20) = NULL
+	,@strNotes nvarchar(MAX)=NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -279,7 +280,7 @@ BEGIN
 		,strVessel = @strVessel
 		,strReceiptNumber = NULL
 		,strMarkings = NULL
-		,strNotes = NULL
+		,strNotes = @strNotes
 		,intEntityVendorId = NULL
 		,strVendorLotNo = @strVendorLotNo
 		,strGarden = NULL
@@ -297,17 +298,17 @@ BEGIN
 	FROM #GeneratedLotItems
 	WHERE intDetailId = @intTransactionId
 
-	EXEC dbo.uspMFCreateUpdateParentLotNumber @strParentLotNumber = @strParentLotNumber
-		,@strParentLotAlias = ''
-		,@intItemId = @intItemId
-		,@dtmExpiryDate = @dtmExpiryDate
-		,@intLotStatusId = 1
-		,@intEntityUserSecurityId = @intUserId
-		,@intLotId = @intLotId
-		,@intSubLocationId = @intSubLocationId
-		,@intLocationId = @intLocationId
-		,@dtmDate = @dtmProductionDate
-		,@intShiftId = @intShiftId
+	--EXEC dbo.uspMFCreateUpdateParentLotNumber @strParentLotNumber = @strParentLotNumber
+	--	,@strParentLotAlias = ''
+	--	,@intItemId = @intItemId
+	--	,@dtmExpiryDate = @dtmExpiryDate
+	--	,@intLotStatusId = 1
+	--	,@intEntityUserSecurityId = @intUserId
+	--	,@intLotId = @intLotId
+	--	,@intSubLocationId = @intSubLocationId
+	--	,@intLocationId = @intLocationId
+	--	,@dtmDate = @dtmProductionDate
+	--	,@intShiftId = @intShiftId
 END
 
 IF @dblOtherCharges IS NOT NULL
