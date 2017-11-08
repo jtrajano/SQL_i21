@@ -38,7 +38,7 @@ SELECT
 	, strOtherMarks					= LC.strOtherMarks
 	, strSealNumber					= LC.strSealNumber
 	, strContainerType				= ContType.strContainerType
-	, strMainCurrency				= CY.strCurrency
+	, strMainCurrency				= ISNULL(AD.strSeqCurrency,CY.strCurrency)
 	, dblMainCashPrice				= CT.dblCashPrice / CASE WHEN ISNULL(CU.intCent,0) = 0 THEN 1 ELSE CU.intCent END
 	, dblFranchise					= CASE WHEN WG.dblFranchise > 0 THEN WG.dblFranchise / 100 ELSE 0 END
 	, dblContainerWeightPerQty		= (LC.dblNetWt / CASE WHEN ISNULL(LC.dblQuantity,0) = 0 THEN 1 ELSE LC.dblQuantity END)
