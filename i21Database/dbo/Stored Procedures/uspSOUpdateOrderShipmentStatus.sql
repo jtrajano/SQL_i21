@@ -17,7 +17,7 @@ IF @strTransactionType = 'Invoice'
 	BEGIN
 		UPDATE SOD
 		SET dblQtyShipped  = CASE WHEN @ysnForDelete = 0 
-								  THEN CONVERT(NUMERIC(18, 6), dbo.fnCalculateQtyBetweenUOM(SOD.intItemUOMId, ISNULL(UOM.intItemUOMId, SOD.intItemUOMId), ISNULL(INVOICEITEMS.dblQtyShipped, 0)))
+								  THEN ISNULL(OTHERITEMS.dblQtyShipped, 0) + CONVERT(NUMERIC(18, 6), dbo.fnCalculateQtyBetweenUOM(SOD.intItemUOMId, ISNULL(UOM.intItemUOMId, SOD.intItemUOMId), ISNULL(INVOICEITEMS.dblQtyShipped, 0)))
 								  ELSE SOD.dblQtyShipped - CONVERT(NUMERIC(18, 6), dbo.fnCalculateQtyBetweenUOM(SOD.intItemUOMId, ISNULL(UOM.intItemUOMId, SOD.intItemUOMId), ISNULL(INVOICEITEMS.dblQtyShipped, 0)))
 							 END
 		  , @intSalesOrderId = SOD.intSalesOrderId
@@ -32,12 +32,35 @@ IF @strTransactionType = 'Invoice'
 			  AND ID.intInvoiceId = @intTransactionId
 			GROUP BY ID.intItemUOMId, UOM.intItemUOMId 
 		) INVOICEITEMS
+		OUTER APPLY (
+			SELECT dblQtyShipped = SUM(ISNULL(ITEMS.dblQtyShipped, 0))
+			FROM (
+
+				SELECT dblQtyShipped = ISNULL(dbo.fnCalculateQtyBetweenUOM(ISNULL(UOM.intItemUOMId, ID.intItemUOMId), ID.intItemUOMId, SUM(ID.dblQtyShipped)), 0)
+				FROM tblARInvoiceDetail ID
+				LEFT JOIN tblICItemUOM UOM ON ID.intItemId = UOM.intItemId AND UOM.ysnStockUnit = 1
+				WHERE ISNULL(ID.intSalesOrderDetailId, 0) = SOD.intSalesOrderDetailId
+				  AND ISNULL(ID.intInventoryShipmentItemId, 0) = 0
+				  AND ID.intInvoiceId <> @intTransactionId
+				GROUP BY ID.intItemUOMId, UOM.intItemUOMId 
+
+				UNION ALL
+
+				SELECT dblQtyShipped = ISNULL(dbo.fnCalculateQtyBetweenUOM(ISNULL(UOM.intItemUOMId, ISI.intItemUOMId), ISI.intItemUOMId, SUM(ISI.dblQuantity)), 0)
+				FROM tblICInventoryShipmentItem ISI
+				LEFT JOIN tblICItemUOM UOM ON ISI.intItemId = UOM.intItemId AND UOM.ysnStockUnit = 1
+				WHERE ISNULL(ISI.intOrderId, 0) = SOD.intSalesOrderId
+				  AND ISNULL(ISI.intLineNo, 0) = SOD.intSalesOrderDetailId
+				  AND ISI.intInventoryShipmentId <> @intTransactionId
+				GROUP BY ISI.intItemUOMId, UOM.intItemUOMId
+			) ITEMS
+		) OTHERITEMS
 	END
 ELSE IF @strTransactionType = 'Inventory'
 	BEGIN
 		UPDATE SOD
 		SET dblQtyShipped  = CASE WHEN @ysnForDelete = 0 
-								  THEN CONVERT(NUMERIC(18, 6), dbo.fnCalculateQtyBetweenUOM(SOD.intItemUOMId, ISNULL(UOM.intItemUOMId, SOD.intItemUOMId), ISNULL(SHIPPEDITEMS.dblQuantity, 0)))
+								  THEN ISNULL(OTHERITEMS.dblQuantity, 0) + CONVERT(NUMERIC(18, 6), dbo.fnCalculateQtyBetweenUOM(SOD.intItemUOMId, ISNULL(UOM.intItemUOMId, SOD.intItemUOMId), ISNULL(SHIPPEDITEMS.dblQuantity, 0)))
 								  ELSE SOD.dblQtyShipped - CONVERT(NUMERIC(18, 6), dbo.fnCalculateQtyBetweenUOM(SOD.intItemUOMId, ISNULL(UOM.intItemUOMId, SOD.intItemUOMId), ISNULL(SHIPPEDITEMS.dblQuantity, 0)))
 							 END
 		  , @intSalesOrderId = SOD.intSalesOrderId
@@ -51,7 +74,29 @@ ELSE IF @strTransactionType = 'Inventory'
 			  AND ISNULL(ISI.intLineNo, 0) = SOD.intSalesOrderDetailId
 			  AND ISI.intInventoryShipmentId = @intTransactionId
 			GROUP BY ISI.intItemUOMId, UOM.intItemUOMId  
-		) SHIPPEDITEMS		
+		) SHIPPEDITEMS	
+		OUTER APPLY (
+			SELECT dblQuantity = SUM(ISNULL(ITEMS.dblQuantity, 0))
+			FROM (
+				SELECT dblQuantity = ISNULL(dbo.fnCalculateQtyBetweenUOM(ISNULL(UOM.intItemUOMId, ISI.intItemUOMId), ISI.intItemUOMId, SUM(ISI.dblQuantity)), 0)
+				FROM tblICInventoryShipmentItem ISI
+				LEFT JOIN tblICItemUOM UOM ON ISI.intItemId = UOM.intItemId AND UOM.ysnStockUnit = 1
+				WHERE ISNULL(ISI.intOrderId, 0) = SOD.intSalesOrderId
+				  AND ISNULL(ISI.intLineNo, 0) = SOD.intSalesOrderDetailId
+				  AND ISI.intInventoryShipmentId <> @intTransactionId
+				GROUP BY ISI.intItemUOMId, UOM.intItemUOMId
+			
+				UNION ALL
+			
+				SELECT dblQuantity = ISNULL(dbo.fnCalculateQtyBetweenUOM(ISNULL(UOM.intItemUOMId, ID.intItemUOMId), ID.intItemUOMId, SUM(ID.dblQtyShipped)), 0)
+				FROM tblARInvoiceDetail ID
+				LEFT JOIN tblICItemUOM UOM ON ID.intItemId = UOM.intItemId AND UOM.ysnStockUnit = 1
+				WHERE ISNULL(ID.intSalesOrderDetailId, 0) = SOD.intSalesOrderDetailId
+				  AND ISNULL(ID.intInventoryShipmentItemId, 0) = 0
+				  AND ID.intInvoiceId <> @intTransactionId
+				GROUP BY ID.intItemUOMId, UOM.intItemUOMId
+			) ITEMS
+		) OTHERITEMS		
 	END
 ELSE
 	BEGIN
