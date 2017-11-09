@@ -284,6 +284,7 @@ BEGIN TRY
 			,intLastModifiedUserId
 			,intConcurrencyId
 			,intManufacturingProcessId
+			,intTransactionFrom
 			)
 		SELECT @strNextWONo
 			,intItemId
@@ -308,6 +309,7 @@ BEGIN TRY
 			,intUserId
 			,intConcurrencyId + 1
 			,@intManufacturingProcessId
+			,1
 		FROM @tblBlendSheet
 
 		SET @intWorkOrderId = SCOPE_IDENTITY()
