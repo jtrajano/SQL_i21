@@ -133,8 +133,7 @@ AS
 				[intLocationId],
 				[ysnPrice],
 				[ysnSubCurrency],
-				[intCostCurrencyId],
-				[ysnInventoryCost]
+				[intCostCurrencyId]
 		) 
 		
 		SELECT	CC.intVendorId,
@@ -154,8 +153,7 @@ AS
 				CD.intCompanyLocationId,
 				CC.ysnPrice,
 				CY.ysnSubCurrency,
-				CY.intCurrencyID,
-				CC.ysnInventoryCost
+				CY.intCurrencyID
 								
 		FROM	vyuCTContractCostView	CC
 		JOIN	vyuCTContractDetailView	CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
