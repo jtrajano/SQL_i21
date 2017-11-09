@@ -93,8 +93,10 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @NewInvoices)
 					SET @ErrorMessage = 'The Company Location provided for Customer: ' + @CustomerName + ' is not active!'
 				END
 
+			DELETE FROM @TicketHoursWorked WHERE intEntityCustomerId = @EntityCustomerId
+			SET @NewInvoiceId = NULL
 			RAISERROR(@ErrorMessage, 11, 1) 
-			RETURN 0
+			BREAK
 		END
 		
 		INSERT INTO [tblARInvoiceDetail]
@@ -141,8 +143,11 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @NewInvoices)
 		
 		EXEC dbo.uspARReComputeInvoiceTaxes @InvoiceId = @NewInvoiceId
 		
-		INSERT INTO @NewlyCreatedInvoices
-		SELECT @NewInvoiceId
+		IF ISNULL(@NewInvoiceId, 0) <> 0
+			BEGIN
+				INSERT INTO @NewlyCreatedInvoices
+				SELECT @NewInvoiceId
+			END
 		
 		DELETE FROM @NewInvoices WHERE intEntityCustomerId = @EntityCustomerId AND intCompanyLocationId = @ComLocationId
 	END
