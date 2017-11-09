@@ -238,8 +238,7 @@
 	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount19] FOREIGN KEY([intDeferredRevenueId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount20] FOREIGN KEY([intFreightIncome]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount21] FOREIGN KEY([intFreightAPAccount]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
-	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount22] FOREIGN KEY([intFreightExpenses]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]), 
-    CONSTRAINT [FK_tblSMCompanyLocation_tblSMTaxGroup] FOREIGN KEY (intTaxGroupId) REFERENCES tblSMTaxGroup(intTaxGroupId)
+	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount22] FOREIGN KEY([intFreightExpenses]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])
 )
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [AK_tblSMCompanyLocation_strLocationNumber] ON [tblSMCompanyLocation]([strLocationNumber]) WHERE [strLocationNumber] IS NOT NULL
