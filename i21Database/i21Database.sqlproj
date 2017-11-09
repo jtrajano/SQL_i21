@@ -5882,6 +5882,8 @@
     <Build Include="dbo\Stored Procedures\uspMFValidateInventoryShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspLGCreateDebitCreditMemo.sql" />
     <Build Include="dbo\Stored Procedures\uspLGCreateInvoiceForWeightClaims.sql" />
+    <Build Include="dbo\Views\vyuTFGetOutputDesignerField.sql" />
+    <Build Include="dbo\Views\vyuTFGetReportingComponentField.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
