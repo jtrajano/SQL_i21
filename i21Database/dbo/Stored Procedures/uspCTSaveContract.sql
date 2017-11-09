@@ -33,10 +33,13 @@ BEGIN TRY
 			@intCompanyLocationId		INT,
 			@ysnSlice					BIT,
 			@dblLotsFixed				NUMERIC(18,6),
-			@dblNoOfLots				NUMERIC(18,6)
+			@dblNoOfLots				NUMERIC(18,6),
+			@dblHeaderNoOfLots			NUMERIC(18,6),
+			@intPriceFixationId			INT
 
 	SELECT	@ysnMultiplePriceFixation	=	ysnMultiplePriceFixation,
-			@strContractNumber			=	strContractNumber
+			@strContractNumber			=	strContractNumber,
+			@dblHeaderNoOfLots			=	dblNoOfLots
 	FROM	tblCTContractHeader 
 	WHERE	intContractHeaderId			=	@intContractHeaderId
 
@@ -196,7 +199,17 @@ BEGIN TRY
 		JOIN	tblCTContractDetail CD ON CD.intContractDetailId = PF.intContractDetailId
 		WHERE	CD.intContractHeaderId = @intContractHeaderId
 	END
-	
+	ELSE
+	BEGIN
+		SELECT @dblLotsFixed = dblLotsFixed,@intPriceFixationId = intPriceFixationId FROM tblCTPriceFixation WHERE intContractHeaderId = @intContractHeaderId
+		IF	@dblLotsFixed IS NOT NULL AND @dblHeaderNoOfLots IS NOT NULL AND @dblHeaderNoOfLots = @dblLotsFixed AND
+			EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId AND intPricingTypeId = 2 )
+		BEGIN
+			UPDATE tblCTPriceFixation SET dblTotalLots = @dblHeaderNoOfLots WHERE intPriceFixationId = @intPriceFixationId
+			EXEC	[uspCTPriceFixationSave] @intPriceFixationId, '', @intLastModifiedById
+		END
+	END
+
 	EXEC uspCTUpdateAdditionalCost @intContractHeaderId
 
 	IF EXISTS(SELECT * FROM tblCTContractImport WHERE strContractNumber = @strContractNumber AND ysnImported = 0)

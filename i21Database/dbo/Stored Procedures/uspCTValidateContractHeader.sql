@@ -32,7 +32,10 @@ BEGIN TRY
 			@intGradeId				INT,
 			@intCropYearId			INT,
 			@intAssociationId		INT,
-			@intProducerId			INT
+			@intProducerId			INT,
+			@ysnMultiplePriceFixation	BIT,
+			@dblNoOfLots			NUMERIC(18,6),
+			@dblLotsFixed			NUMERIC(18,6)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @XML 
 	
@@ -57,7 +60,9 @@ BEGIN TRY
 			@intGradeId			=	intGradeId,
 			@intCropYearId		=	intCropYearId,
 			@intAssociationId	=	intAssociationId,
-			@intProducerId		=	intProducerId
+			@intProducerId		=	intProducerId,
+			@ysnMultiplePriceFixation		=	ysnMultiplePriceFixation,
+			@dblNoOfLots		=	dblNoOfLots
 
 	FROM	OPENXML(@idoc, 'tblCTContractHeaders/tblCTContractHeader',2)
 	WITH
@@ -83,7 +88,9 @@ BEGIN TRY
 			intGradeId			INT,
 			intCropYearId		INT,
 			intAssociationId	INT,
-			intProducerId		INT
+			intProducerId		INT,
+			ysnMultiplePriceFixation	BIT,
+			dblNoOfLots			NUMERIC(18,6)
 	);  
 
 	IF @RowState = 'Added'
@@ -233,6 +240,18 @@ BEGIN TRY
 			RAISERROR(@ErrMsg,16,1)
 		END
 		--End Active check
+	END
+	IF @RowState = 'Modified'
+	BEGIN
+		IF @ysnMultiplePriceFixation = 1
+		BEGIN
+			SELECT @dblLotsFixed = dblLotsFixed FROM tblCTPriceFixation WHERE intContractHeaderId = @intContractHeaderId
+			IF @dblLotsFixed IS NOT NULL AND @dblNoOfLots IS NOT NULL AND @dblNoOfLots < @dblLotsFixed 
+			BEGIN
+				SET @ErrMsg = 'Cannot reduce number of lots to '+LTRIM(CAST(@dblNoOfLots AS INT)) + '. As '+LTRIM(CAST(@dblLotsFixed AS INT)) + ' lots are price fixed.'
+				RAISERROR(@ErrMsg,16,1)
+			END
+		END
 	END
 
 END TRY
