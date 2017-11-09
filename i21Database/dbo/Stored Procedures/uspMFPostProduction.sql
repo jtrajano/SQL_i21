@@ -261,6 +261,7 @@ BEGIN
 		,strSourceTransactionId
 		,intSourceTransactionTypeId
 		,intShiftId
+		,strParentLotNumber
 		)
 	SELECT intLotId = NULL
 		,strLotNumber = @strLotNumber
@@ -290,6 +291,7 @@ BEGIN
 		,strSourceTransactionId = @strTransactionId
 		,intSourceTransactionTypeId = @INVENTORY_PRODUCE
 		,intShiftId = @intShiftId
+		,strParentLotNumber=@strParentLotNumber
 
 	EXEC dbo.uspICCreateUpdateLotNumber @ItemsThatNeedLotId
 		,@intUserId
