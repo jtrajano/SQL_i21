@@ -174,6 +174,11 @@ SELECT LoadDetail.intLoadDetailId
 													THEN NULL
 												END
 	, LoadDetail.intNumberOfContainers
+
+	,intForexRateTypeId		= PDetail.intRateTypeId
+	,strForexRateType		= RT.strCurrencyExchangeRateType
+	,dblForexRate			= PDetail.dblRate
+
 FROM tblLGLoadDetail LoadDetail
 	JOIN tblLGLoad Load ON Load.intLoadId = LoadDetail.intLoadId
 	LEFT JOIN tblICItem Item On Item.intItemId = LoadDetail.intItemId
@@ -206,8 +211,9 @@ FROM tblLGLoadDetail LoadDetail
 	LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = Load.intEquipmentTypeId
 	LEFT JOIN tblSMUserSecurity US ON US.[intEntityUserSecurityId]	= Load.intDispatcherId
 	LEFT JOIN tblCTWeightGrade PWG ON PWG.intWeightGradeId = PHeader.intWeightId
-		LEFT JOIN tblSMCompanyLocationSubLocation PCLSL ON PCLSL.intCompanyLocationSubLocationId = LoadDetail.intPSubLocationId
+	LEFT JOIN tblSMCompanyLocationSubLocation PCLSL ON PCLSL.intCompanyLocationSubLocationId = LoadDetail.intPSubLocationId
 	LEFT JOIN tblSMCompanyLocationSubLocation SCLSL ON SCLSL.intCompanyLocationSubLocationId = LoadDetail.intSSubLocationId
+	LEFT JOIN tblSMCurrencyExchangeRateType	RT	ON	RT.intCurrencyExchangeRateTypeId	=	PDetail.intRateTypeId	
 	OUTER APPLY (
 		SELECT TOP 1 intItemUOMId, strUnitMeasure, strUnitType, dblUnitQty
 		FROM tblICItemUOM ItemUOM 
