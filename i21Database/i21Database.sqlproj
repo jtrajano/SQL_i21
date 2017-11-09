@@ -5863,6 +5863,8 @@
     <Build Include="dbo\Stored Procedures\uspARPayOutCreditBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspSMInserAuditLogs.sql" />
     <Build Include="dbo\Stored Procedures\uspEMConvertCustomerToVendor.sql" />
+    <Build Include="dbo\Stored Procedures\uspARApplyScaleTicketWeight.sql" />
+    <Build Include="dbo\Views\vyuARGetSalesOrdersToWeight.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
