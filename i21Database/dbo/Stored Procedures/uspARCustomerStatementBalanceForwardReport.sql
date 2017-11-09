@@ -248,7 +248,8 @@ INSERT INTO tblARCustomerAgingStagingTable (
 		, strCompanyName
 		, strCompanyAddress
 )		
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] @strCompanyLocation = @strLocationNameLocal
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo = @dtmDateToLocal
+										  , @strCompanyLocation = @strLocationNameLocal
 										  , @strCustomerName = @strCustomerNameLocal
 
 INSERT INTO @temp_aging_table
