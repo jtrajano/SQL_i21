@@ -5884,6 +5884,8 @@
     <Build Include="dbo\Stored Procedures\uspLGCreateInvoiceForWeightClaims.sql" />
     <Build Include="dbo\Views\vyuTFGetOutputDesignerField.sql" />
     <Build Include="dbo\Views\vyuTFGetReportingComponentField.sql" />
+    <Build Include="dbo\Tables\tblRKFutOptTransactionHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKFutOptTransactionHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
