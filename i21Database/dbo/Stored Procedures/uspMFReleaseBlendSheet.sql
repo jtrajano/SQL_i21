@@ -712,6 +712,7 @@ End
 			,intLastModifiedUserId
 			,dtmReleasedDate
 			,intManufacturingProcessId
+			,intTransactionFrom
 			)
 		SELECT @strNextWONo
 			,intItemId
@@ -741,6 +742,7 @@ End
 			,intUserId
 			,GetDate()
 			,@intManufacturingProcessId
+			,1
 		FROM @tblBlendSheet
 
 		SET @intWorkOrderId = SCOPE_IDENTITY()
