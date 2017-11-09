@@ -373,6 +373,8 @@ BEGIN
 				IF(@CFID IS NOT NULL)
 				BEGIN
 					EXEC('UPDATE tblCFTransaction SET strPrintTimeStamp = ' + '''' + @strPrintTimeStamp + '''' + ',' + 'dtmInvoiceDate = ' + '''' + @InvoiceDate + '''' + ',' + 'strTempInvoiceReportNumber = ' + '''' + @strInvoiceNumber + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
+					EXEC('UPDATE #tblCFTempInvoiceReport SET strPrintTimeStamp = ' + '''' + @strPrintTimeStamp + '''' + ',' + 'dtmInvoiceDate = ' + '''' + @InvoiceDate + '''' + ',' + 'strTempInvoiceReportNumber = ' + '''' + @strInvoiceNumber + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
+					
 					--EXEC('UPDATE tblCFTransaction SET strPrintTimeStamp = ' + '''' + @strPrintTimeStamp + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
 					--EXEC('UPDATE tblCFTransaction SET dtmInvoiceDate = ' + '''' + @InvoiceDate + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
 				END
@@ -431,6 +433,7 @@ BEGIN
 
 					EXEC('UPDATE tblCFTransaction SET strPrintTimeStamp = ' + '''' + @strPrintTimeStamp + '''' + ',' + 'dtmInvoiceDate = ' + '''' + @InvoiceDate + '''' + ',' + 'strTempInvoiceReportNumber = ' + '''' + @strInvoiceNumber + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
 
+					EXEC('UPDATE #tblCFTempInvoiceReport SET strPrintTimeStamp = ' + '''' + @strPrintTimeStamp + '''' + ',' + 'dtmInvoiceDate = ' + '''' + @InvoiceDate + '''' + ',' + 'strTempInvoiceReportNumber = ' + '''' + @strInvoiceNumber + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
 
 				END
 				---------UPDATE INVOICE REPORT NUMBER ID---------
@@ -449,6 +452,7 @@ BEGIN
 			EXEC (@tblCFTempTableQuery)
 
 			UPDATE tblCFTransaction SET strTempInvoiceReportNumber = strInvoiceReportNumber where intTransactionId in (SELECT intTransactionId FROM @tblCFFilterIds)
+			UPDATE #tblCFTempInvoiceReport SET strTempInvoiceReportNumber = strInvoiceReportNumber where intTransactionId in (SELECT intTransactionId FROM @tblCFFilterIds)
 
 			---------GET DISTINCT TRANSACTION ID---------
 		END
