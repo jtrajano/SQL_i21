@@ -2062,7 +2062,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                         {
                                                                                             dataIndex: 'intStorageLocationId',
                                                                                             dataType: 'numeric',
-                                                                                            text: 'Country Id',
                                                                                             hidden: true
                                                                                         },
                                                                                         {
@@ -2076,6 +2075,16 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                             dataType: 'string',
                                                                                             text: 'Description',
                                                                                             flex: 1
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'intSubLocationId',
+                                                                                            dataType: 'numeric',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strSubLocationName',
+                                                                                            dataType: 'string',
+                                                                                            hidden: true
                                                                                         }
                                                                                     ],
                                                                                     itemId: 'cboLotStorageLocation',

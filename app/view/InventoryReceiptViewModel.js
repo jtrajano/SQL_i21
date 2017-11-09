@@ -653,13 +653,10 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             if (get('current.strReceiptType') == 'Inventory Return'){
                 return true;
             }
-            else if (iRely.Functions.isEmpty(get('grdInventoryReceipt.selection.intStorageLocationId'))) {
-                return false;
-            }
             else {
-                return true;
+                return false; 
             }
-        },
+        },	
         disableSourceType: function (get) {
             if (get('current.ysnPosted') === true) {
                 return true;
