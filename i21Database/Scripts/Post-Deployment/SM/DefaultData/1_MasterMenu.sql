@@ -5210,15 +5210,15 @@ UPDATE tblSMMasterMenu SET intParentMenuID = @BuybacksMaintenanceParentMenuId WH
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Buybacks' AND strModuleName = 'Buybacks' AND intParentMenuID = @BuybacksActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Buybacks', N'Buybacks', @BuybacksActivitiesParentMenuId, N'Buybacks', N'Activity', N'Screen', N'Buybacks.view.BuybackSetup?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
+	VALUES (N'Buybacks', N'Buybacks', @BuybacksActivitiesParentMenuId, N'Buybacks', N'Activity', N'Screen', N'Buybacks.view.Buybacks?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'Buybacks.view.BuybackSetup?showSearch=true' WHERE strMenuName = 'Buybacks' AND strModuleName = 'Buybacks' AND intParentMenuID = @BuybacksActivitiesParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'Buybacks.view.Buybacks?showSearch=true' WHERE strMenuName = 'Buybacks' AND strModuleName = 'Buybacks' AND intParentMenuID = @BuybacksActivitiesParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Setup' AND strModuleName = 'Buybacks' AND intParentMenuID = @BuybacksMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Setup', N'Buybacks', @BuybacksMaintenanceParentMenuId, N'Setup', N'Maintenance', N'Screen', N'Buybacks.view.Buybacks?showSearch=true', N'small-menu-maintenance', 1, 0, 0, 1, 0, 1)
+	VALUES (N'Setup', N'Buybacks', @BuybacksMaintenanceParentMenuId, N'Setup', N'Maintenance', N'Screen', N'Buybacks.view.BuybackSetup?showSearch=true', N'small-menu-maintenance', 1, 0, 0, 1, 0, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'Buybacks.view.Buybacks?showSearch=true' WHERE strMenuName = 'Setup' AND strModuleName = 'Buybacks' AND intParentMenuID = @BuybacksMaintenanceParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'Buybacks.view.BuybackSetup?showSearch=true' WHERE strMenuName = 'Setup' AND strModuleName = 'Buybacks' AND intParentMenuID = @BuybacksMaintenanceParentMenuId
 ----------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------ CONTACT MENUS -------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------------------------------
