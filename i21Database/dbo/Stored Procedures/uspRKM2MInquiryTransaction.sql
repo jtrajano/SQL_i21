@@ -170,14 +170,14 @@ FROM   tblCTContractHeader                             CH
 																 AND intContractStatusId NOT IN(2,3,6)   																
        JOIN   tblICCommodity                           CY     ON     CY.intCommodityId                 =      CH.intCommodityId        
        JOIN   tblCTContractType                        TP     ON     TP.intContractTypeId              =      CH.intContractTypeId    
-       JOIN   tblEMEntity                              EY     ON     EY.intEntityId                    =      CH.intEntityId                                                                                                           
-       JOIN   tblCTPosition                            PO     ON     PO.intPositionId                  =      CH.intPositionId    
+       JOIN   tblEMEntity                              EY     ON     EY.intEntityId                    =      CH.intEntityId   
        JOIN   tblICItem                                IM     ON     IM.intItemId                      =      CD.intItemId                          
        JOIN   tblICItemUOM                             IU     ON     IU.intItemUOMId                   =      CD.intItemUOMId          
        JOIN   tblSMCompanyLocation                     CL     ON     CL.intCompanyLocationId           =      CD.intCompanyLocationId     
        JOIN   tblCTPricingType                         PT     ON     PT.intPricingTypeId               =      CD.intPricingTypeId                   
        JOIN   tblSMCurrency                            CU     ON     CU.intCurrencyID                  =      CD.intCurrencyId                                    
        JOIN   tblICItemUOM                             PU     ON     PU.intItemUOMId                   =      CD.intPriceItemUOMId      
+	   LEFT JOIN     tblCTPosition                     PO     ON     PO.intPositionId                  =      CH.intPositionId   
        LEFT JOIN     tblICCommodityAttribute           CA     on  CA.intCommodityAttributeId           =      IM.intOriginId                 
        LEFT JOIN     tblRKFutureMarket                 FM     ON     FM.intFutureMarketId              =      CD.intFutureMarketId           
        LEFT JOIN     tblRKFuturesMonth                 MO     ON     MO.intFutureMonthId               =      CD.intFutureMonthId                                 
