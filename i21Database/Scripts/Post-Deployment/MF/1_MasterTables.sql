@@ -2506,3 +2506,13 @@ UPDATE tblMFWorkOrder SET intCustomerId = NULL WHERE intCustomerId = 0
 UPDATE tblMFWorkOrder SET intSalesRepresentativeId = NULL WHERE intSalesRepresentativeId = 0
 UPDATE tblMFWorkOrder SET intActualShiftId = NULL WHERE intActualShiftId = 0
 GO
+UPDATE W
+SET intTransactionFrom = CASE 
+		WHEN intAttributeTypeId = 2
+			THEN 1
+		ELSE 3
+		END
+FROM tblMFWorkOrder W
+JOIN tblMFManufacturingProcess MP ON W.intManufacturingProcessId = MP.intManufacturingProcessId
+WHERE intTransactionFrom IS NULL
+GO
