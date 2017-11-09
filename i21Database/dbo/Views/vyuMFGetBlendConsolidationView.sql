@@ -33,9 +33,12 @@
 	w.strERPOrderNo,
 	w.dtmExpectedDate,
 	m.strName AS strMachineName,
-	LTRIM(STR(DATEDIFF(MINUTE,w.dtmStartedDate,w.dtmCompletedDate) / 60) )+ ':' + REPLACE(STR(LTRIM(STR( DATEDIFF(MINUTE,w.dtmStartedDate,w.dtmCompletedDate) % 60)),2), ' ', '0' ) AS dtmStageDuration,
-	LTRIM(STR(DATEDIFF(MINUTE,w.dtmStartedDate,w.dtmActualProductionEndDate) / 60) )+ ':' + REPLACE(STR(LTRIM(STR(DATEDIFF(MINUTE,w.dtmStartedDate,w.dtmActualProductionEndDate) % 60)),2), ' ', '0') AS dtmBlendDuration,
-	wc1.dblStagedQty,
+	Case When w.dtmCompletedDate>w.dtmStartedDate THEN 
+			LTRIM(STR(DATEDIFF(MINUTE,w.dtmStartedDate,w.dtmCompletedDate) / 60) )+ ':' + REPLACE(STR(LTRIM(STR( DATEDIFF(MINUTE,w.dtmStartedDate,w.dtmCompletedDate) % 60)),2), ' ', '0' )
+	ELSE '' End dtmStageDuration,
+	Case When w.dtmActualProductionEndDate>w.dtmStartedDate THEN 
+			LTRIM(STR(DATEDIFF(MINUTE,w.dtmStartedDate,w.dtmActualProductionEndDate) / 60) )+ ':' + REPLACE(STR(LTRIM(STR(DATEDIFF(MINUTE,w.dtmStartedDate,w.dtmActualProductionEndDate) % 60)),2), ' ', '0')
+	ELSE '' End dtmBlendDuration,	wc1.dblStagedQty,
 	((wp.dblQuantity - w.dblQuantity) / w.dblQuantity) * 100 AS dblWeightDiff,
 	pl.strParentLotNumber strConsumedParentLotNumber
 	from tblMFWorkOrder w
