@@ -149,6 +149,12 @@ IF @transCount = 0 BEGIN TRANSACTION
 
 EXEC uspARProcessPayments @PaymentEntries = @paymentDetail, @UserId = @userId, @GroupingOption = 1, @RaiseError = 1, @ErrorMessage = @error OUTPUT, @LogId = @log OUTPUT
 
+IF @error IS NOT NULL
+BEGIN
+	RAISERROR(@error, 16, 1);
+	RETURN;
+END
+
 INSERT INTO @paymentIds
 SELECT
 	DISTINCT intPaymentId
@@ -157,39 +163,47 @@ WHERE intIntegrationLogId = @log
 
 SELECT @totalPaymentCreated = COUNT(*) FROM @paymentIds
 
-UPDATE A
-	SET A.strReceivePaymentType = 'Vendor Refund'
-FROM tblARPayment A
-INNER JOIN @paymentIds B ON A.intPaymentId = B.intId
-
-SELECT
-	@paymentCreated = COALESCE(@paymentCreated + ',', '') +  CONVERT(VARCHAR(12),intId)
-FROM @paymentIds
-
---POST AR PAYMENT CREATED
-EXEC uspARPostPayment 
-	@batchId = NULL,
-	@post = 1,
-	@recap = 0,
-	@param = @paymentCreated,
-	@userId = @userId,
-	@successfulCount = @totalPostedPayment OUTPUT,
-	@batchIdUsed = @batchIdUsed OUTPUT,
-	@invalidCount = @totalFailedPayment  OUTPUT,
-	@success = @successPostingPayment OUTPUT
-
-IF @successPostingPayment = 1 AND @totalPostedPayment = @totalPaymentCreated
+IF @totalPaymentCreated > 0
 BEGIN
-	EXEC uspARProcessACHPayments @strPaymentIds = @paymentCreated, @intBankAccountId = @bankAccountId, @intUserId = @userId, @strNewTransactionId = @bankDepositCreated OUTPUT
+	UPDATE A
+		SET A.strReceivePaymentType = 'Vendor Refund'
+	FROM tblARPayment A
+	INNER JOIN @paymentIds B ON A.intPaymentId = B.intId
+
+	SELECT
+		@paymentCreated = COALESCE(@paymentCreated + ',', '') +  CONVERT(VARCHAR(12),intId)
+	FROM @paymentIds
+
+	--POST AR PAYMENT CREATED
+	EXEC uspARPostPayment 
+		@batchId = NULL,
+		@post = 1,
+		@recap = 0,
+		@param = @paymentCreated,
+		@userId = @userId,
+		@successfulCount = @totalPostedPayment OUTPUT,
+		@batchIdUsed = @batchIdUsed OUTPUT,
+		@invalidCount = @totalFailedPayment  OUTPUT,
+		@success = @successPostingPayment OUTPUT
+
+	IF @successPostingPayment = 1 AND @totalPostedPayment = @totalPaymentCreated
+	BEGIN
+		EXEC uspARProcessACHPayments @strPaymentIds = @paymentCreated, @intBankAccountId = @bankAccountId, @intUserId = @userId, @strNewTransactionId = @bankDepositCreated OUTPUT
+	END
+	ELSE
+	BEGIN
+		SELECT TOP 1
+			@postingError = strMessage
+		FROM tblARPostResult
+		WHERE strBatchNumber = @batchIdUsed
+		AND strMessage NOT LIKE '%success%'
+		RAISERROR(@postingError, 16, 1);
+		RETURN;
+	END
 END
 ELSE
 BEGIN
-	SELECT TOP 1
-		@postingError = strMessage
-	FROM tblARPostResult
-	WHERE strBatchNumber = @batchIdUsed
-	AND strMessage NOT LIKE '%success%'
-	RAISERROR(@postingError, 16, 1);
+	RAISERROR('No receive payment created.', 16, 1);
 	RETURN;
 END
 
