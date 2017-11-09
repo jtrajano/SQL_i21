@@ -506,6 +506,8 @@ BEGIN TRY
 				UPDATE tblGLFiscalYearPeriod SET ysnINVRevalued = 1 WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
 			IF @strTransactionType = 'CT' 
 				UPDATE tblGLFiscalYearPeriod SET ysnCTRevalued = 1 WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
+			IF @strTransactionType = 'CM' 
+				UPDATE tblGLFiscalYearPeriod SET ysnCMRevalued = 1 WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
 
 			IF @strTransactionType = 'All' 
 				UPDATE tblGLFiscalYearPeriod SET 

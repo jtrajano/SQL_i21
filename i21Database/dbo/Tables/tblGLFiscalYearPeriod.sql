@@ -16,6 +16,7 @@
 	[ysnARRevalued]				BIT				DEFAULT 0 NULL,
 	[ysnINVRevalued]			BIT				DEFAULT 0 NULL,
 	[ysnCTRevalued]				BIT				DEFAULT 0 NULL,
+    [ysnCMRevalued]				BIT				DEFAULT 0 NULL,
 	[ysnConsolidated]			BIT				DEFAULT 0 NULL,
     [intConcurrencyId]			INT				DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblGLPeriod] PRIMARY KEY CLUSTERED ([intGLFiscalYearPeriodId] ASC, [intFiscalYearId] ASC),
