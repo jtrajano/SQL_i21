@@ -17,7 +17,7 @@ IF @strTransactionType = 'Invoice'
 	BEGIN
 		UPDATE SOD
 		SET dblQtyShipped  = CASE WHEN @ysnForDelete = 0 
-								  THEN SOD.dblQtyShipped + CONVERT(NUMERIC(18, 6), dbo.fnCalculateQtyBetweenUOM(SOD.intItemUOMId, ISNULL(UOM.intItemUOMId, SOD.intItemUOMId), ISNULL(INVOICEITEMS.dblQtyShipped, 0)))
+								  THEN CONVERT(NUMERIC(18, 6), dbo.fnCalculateQtyBetweenUOM(SOD.intItemUOMId, ISNULL(UOM.intItemUOMId, SOD.intItemUOMId), ISNULL(INVOICEITEMS.dblQtyShipped, 0)))
 								  ELSE SOD.dblQtyShipped - CONVERT(NUMERIC(18, 6), dbo.fnCalculateQtyBetweenUOM(SOD.intItemUOMId, ISNULL(UOM.intItemUOMId, SOD.intItemUOMId), ISNULL(INVOICEITEMS.dblQtyShipped, 0)))
 							 END
 		  , @intSalesOrderId = SOD.intSalesOrderId
@@ -37,7 +37,7 @@ ELSE IF @strTransactionType = 'Inventory'
 	BEGIN
 		UPDATE SOD
 		SET dblQtyShipped  = CASE WHEN @ysnForDelete = 0 
-								  THEN SOD.dblQtyShipped + CONVERT(NUMERIC(18, 6), dbo.fnCalculateQtyBetweenUOM(SOD.intItemUOMId, ISNULL(UOM.intItemUOMId, SOD.intItemUOMId), ISNULL(SHIPPEDITEMS.dblQuantity, 0)))
+								  THEN CONVERT(NUMERIC(18, 6), dbo.fnCalculateQtyBetweenUOM(SOD.intItemUOMId, ISNULL(UOM.intItemUOMId, SOD.intItemUOMId), ISNULL(SHIPPEDITEMS.dblQuantity, 0)))
 								  ELSE SOD.dblQtyShipped - CONVERT(NUMERIC(18, 6), dbo.fnCalculateQtyBetweenUOM(SOD.intItemUOMId, ISNULL(UOM.intItemUOMId, SOD.intItemUOMId), ISNULL(SHIPPEDITEMS.dblQuantity, 0)))
 							 END
 		  , @intSalesOrderId = SOD.intSalesOrderId
