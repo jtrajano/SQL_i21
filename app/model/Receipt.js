@@ -58,7 +58,8 @@ Ext.define('Inventory.model.Receipt', {
         { name: 'strWarehouseRefNo', type: 'string', allowNull: true  },
         { name: 'dtmLastFreeWhseDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },
         { name: 'dblTotalCharge', type: 'float' },
-        { name: 'dblTotalChargeTax', type: 'float'}
+        { name: 'dblTotalChargeTax', type: 'float'},
+        { name: 'intItemCount', type: 'int'}
     ],
 
     validators: [

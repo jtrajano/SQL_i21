@@ -701,12 +701,17 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         },
 
         isFreightTermsReadonly: function(get) {
-            return ( 
-                get('current.ysnOrigin') || 
-                get('current.ysnPosted') || 
-                get('current.strReceiptType') === 'Inventory Return' ||
-                get('current.intSourceType') === 2 // Inbound Shipment  
-            );
+            if (get('current.intSourceType') === 2 && get('current.intItemCount') <= 0) {
+                return false;
+            }
+            else {
+                return ( 
+                    get('current.ysnOrigin') || 
+                    get('current.ysnPosted') || 
+                    get('current.strReceiptType') === 'Inventory Return' ||
+                    get('current.intSourceType') === 2 // Inbound Shipment  
+                );                
+            }            
         },       
 
         isOriginOrInventoryReturn: function(get){
