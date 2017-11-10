@@ -13,7 +13,7 @@ Select @strLotNumber=strLotNumber From tblICLot Where intLotId=@intLotId
 if @intDirectionId=1
 Begin
 	If Exists(Select 1 from tblMFWorkOrderConsumedLot where intLotId IN (Select intLotId From tblICLot Where strLotNumber=@strLotNumber)) AND @ysnParentLot=0
-		Select 'Receipt' AS strTransactionName,t.intLotId,t.strLotNumber,t.strLotAlias,t.intItemId,t.strItemNo,t.strDescription,
+		Select TOP 1 'Receipt' AS strTransactionName,t.intLotId,t.strLotNumber,t.strLotAlias,t.intItemId,t.strItemNo,t.strDescription,
 		t.intCategoryId,t.strCategoryCode,SUM(t.dblQuantity) AS dblQuantity,MAX(t.strUOM) AS strUOM,
 		MAX(t.dtmTransactionDate) AS dtmTransactionDate,t.intParentLotId,2 AS intImageTypeId
 		FROM (  
