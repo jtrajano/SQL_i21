@@ -961,7 +961,15 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         },
         checkHideReturnButton: function (get){
             if (get('current.strReceiptType') !== 'Inventory Return' && get('current.ysnPosted')){
-                return false; 
+                switch (get('current.intSourceType')) {
+                    //case 1: // Scale  
+                    case 3: // Transport Load
+                    //case 4: // Settle Storage 
+                    //case 5: // Delivery Sheet                    
+                        return true;
+                    default:  
+                        return false;
+                }                
             }
             return true; 
         },
