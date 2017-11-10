@@ -24,7 +24,7 @@
 	[strAccountPromotionName] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[dblAccountDiscountAmount] decimal(18, 6) NULL,
 	[dblManufacturerDiscountAmount] decimal(18, 6) NULL,
-	[intCouponPid] int NULL,
+	[strCouponPid] nvarchar(20) COLLATE Latin1_General_CI_AS NULL,
 	[dblCouponAmount] decimal(18, 6) NULL,
 
 	[strManufacturerMultipackFlag] nvarchar(1) COLLATE Latin1_General_CI_AS NULL,
