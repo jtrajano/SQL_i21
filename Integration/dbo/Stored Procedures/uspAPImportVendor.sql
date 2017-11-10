@@ -489,12 +489,24 @@ BEGIN
 		IF(@continue = 1)
 		BEGIN
 		PRINT ''INSERT Entity Record''
-		--INSERT Entity record for Vendor
-		INSERT [dbo].[tblEMEntity]	([strName], [strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed],[strContactNumber], [strEntityNo])
-		VALUES						(@strName, @strEmail, @strWebsite, @strInternalNotes, @ysnPrint1099, @str1099Name, @str1099Form, @str1099Type, @strFederalTaxId, @dtmW9Signed,'''',  @originVendor)
-
+		
 		DECLARE @EntityId INT
-		SET @EntityId = SCOPE_IDENTITY()
+		DECLARE @ysnIsDefault BIT
+		
+		IF EXISTS(SELECT TOP 1 1 FROM tblEMEntity where LTRIM(RTRIM(strEntityNo)) = RTRIM(LTRIM(@originVendor))  )
+		BEGIN
+				SELECT TOP 1 @EntityId = intEntityId FROM tblEMEntity where LTRIM(RTRIM(strEntityNo)) = RTRIM(LTRIM(@originVendor)) 
+				SET @ysnIsDefault = 0
+		END
+		ELSE
+		BEGIN
+			--INSERT Entity record for Vendor
+			INSERT [dbo].[tblEMEntity]	([strName], [strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed],[strContactNumber], [strEntityNo])
+			VALUES						(@strName, @strEmail, @strWebsite, @strInternalNotes, @ysnPrint1099, @str1099Name, @str1099Form, @str1099Type, @strFederalTaxId, @dtmW9Signed,'''',  @originVendor)
+
+			SET @EntityId = SCOPE_IDENTITY()			
+			SET @ysnIsDefault = 1
+		END
 
 		PRINT ''INSERT Entity Contact Record''
 		--INSERT ENTITY record for Contact
@@ -525,14 +537,16 @@ BEGIN
 		VALUES (@EntityId, @ContactEntityId, 0, 1)*/
 
 
-		--insert into tblEMEntityType
-		INSERT INTO tblEMEntityType ( intEntityId, strType, intConcurrencyId)
-		VALUES (@EntityId, ''Vendor'', 0)
-
+		--insert into tblEMEntityType		
+		IF NOT EXISTS (SELECT TOP 1 1 From tblEMEntityType where strType = ''Vendor'' and intEntityId = @EntityId)
+		BEGIN
+			INSERT INTO tblEMEntityType ( intEntityId, strType, intConcurrencyId)
+			VALUES (@EntityId, ''Vendor'', 0)
+		END
 		
 
 		INSERT [dbo].[tblEMEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strCountry], [strState], [strZipCode], [strNotes],  [intShipViaId], [intTermsId], [intWarehouseId], [ysnDefaultLocation])
-		VALUES								(@EntityId, @strLocationName, @strAddress, @strCity, @strCountry, @strState, @strZipCode, @strLocationNotes,  @intLocationShipViaId, @intTermsId, @intWarehouseId, 1)
+		VALUES								(@EntityId, @strLocationName, @strAddress, @strCity, @strCountry, @strState, @strZipCode, @strLocationNotes,  @intLocationShipViaId, @intTermsId, @intWarehouseId, @ysnIsDefault)
 
 		DECLARE @EntityLocationId INT
 		SET @EntityLocationId = SCOPE_IDENTITY()
@@ -549,7 +563,7 @@ BEGIN
 		SET @VendorIdentityId = SCOPE_IDENTITY()		
 		
 		INSERT [dbo].[tblEMEntityToContact] ([intEntityId], [intEntityContactId], [intEntityLocationId],[ysnPortalAccess], ysnDefaultContact)
-		VALUES							  (@EntityId, @EntityContactId, @EntityLocationId, 0, 1)/**/
+		VALUES							  (@EntityId, @EntityContactId, @EntityLocationId, 0, @ysnIsDefault)/**/
 
 		INSERT INTO [dbo].[tblAPImportedVendors]
 			VALUES(@originVendor, 1)
