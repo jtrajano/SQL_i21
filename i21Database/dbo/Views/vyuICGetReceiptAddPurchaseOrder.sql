@@ -70,6 +70,8 @@ FROM (
 		, strBundledItemNo = CAST(NULL AS NVARCHAR(50))
 		, strBundledItemDescription = CAST(NULL AS NVARCHAR(50))
 		, ysnIsBasket = CAST(0 AS BIT)
+		, POView.intFreightTermId
+		, POView.strFreightTerm		
 	FROM	vyuPODetails POView LEFT JOIN dbo.tblICItemUOM ItemUOM
 				ON POView.intUnitOfMeasureId = ItemUOM.intItemUOMId
 			LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure

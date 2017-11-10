@@ -51,6 +51,8 @@ SELECT
 	 ,dblForexRate
 	 ,intForexRateTypeId
 	 ,dblQtyToReceive = CASE WHEN B.dblQtyReceived >= B.dblQtyOrdered THEN 0 ELSE B.dblQtyOrdered - B.dblQtyReceived END
+	 ,FreightTerm.intFreightTermId
+	 ,FreightTerm.strFreightTerm
 FROM tblPOPurchase A
  INNER JOIN  tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
  INNER JOIN (tblAPVendor C INNER JOIN tblEMEntity C2 ON C.[intEntityId] = C2.intEntityId) ON A.[intEntityVendorId] = C.[intEntityId]
@@ -61,5 +63,6 @@ FROM tblPOPurchase A
  LEFT JOIN tblICStorageLocation G ON B.intStorageLocationId = G.intStorageLocationId
  INNER JOIN dbo.tblSMCompanyLocation I ON A.intShipToId = I.intCompanyLocationId
  LEFT JOIN [tblEMEntityLocation] J ON A.intEntityVendorId = J.intEntityId AND J.intEntityLocationId = A.intShipFromId --Add Filter to avoid multuple PO on add Order
- --WHERE D.strType NOT IN ('Service','Software','Non-Inventory','Other Charge')
+ LEFT JOIN tblSMFreightTerms FreightTerm ON FreightTerm.intFreightTermId = A.intFreightTermId
+  --WHERE D.strType NOT IN ('Service','Software','Non-Inventory','Other Charge')
 GO
