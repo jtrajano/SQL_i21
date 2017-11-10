@@ -258,8 +258,11 @@ CREATE NONCLUSTERED INDEX [tblCFTransaction_intARLocationId]
 
 
 GO
+
 CREATE NONCLUSTERED INDEX [tblCFTransaction_intARItemId]
     ON [dbo].[tblCFTransaction]([intARItemId] ASC);
+
+GO
 
 CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_17_1326992154__K46_K31] ON [dbo].[tblCFTransaction]
 (
