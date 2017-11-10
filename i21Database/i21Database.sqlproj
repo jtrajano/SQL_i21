@@ -5886,6 +5886,7 @@
     <Build Include="dbo\Views\vyuTFGetReportingComponentField.sql" />
     <Build Include="dbo\Tables\tblRKFutOptTransactionHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspRKFutOptTransactionHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGRecalculatedWarehouseServiceCharges.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
