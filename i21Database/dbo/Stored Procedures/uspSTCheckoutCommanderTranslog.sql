@@ -102,6 +102,7 @@ BEGIN
 			, strTrpPaycodenacstendersubcode
 			, strTrpPaycode
 			, dblTrpAmt
+			, strTrpCouponEntryMethod
 			, intStoreId
 			, intCheckoutId
 			, ysnSubmitted
@@ -170,6 +171,7 @@ BEGIN
 			, chk.trpPaycodenacstendersubcode
 			, chk.trpPaycode
 			, chk.trpAmt
+			, chk.trpCouponEntryMethod
 			, @intStoreId
 			, @intCheckoutId
 			, 0
