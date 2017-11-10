@@ -471,11 +471,23 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					FROM agcusmst
 					WHERE agcus_key = @originCustomer
 					--INSERT Entity record for Customer
-					INSERT [dbo].[tblEMEntity]	([strName],[strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed],[imgPhoto],[strContactNumber], [strEntityNo],[dtmOriginationDate])
-					VALUES						(@strName, @strEmail, @strWebsite, @strInternalNotes, @ysnPrint1099, @str1099Name, @str1099Form, @str1099Type, @strFederalTaxId, @dtmW9Signed, @imgPhoto,'''', @originCustomer,@dtmOriginationDate)
+					
+					DECLARE @EntityId INT				
+					DECLARE @ysnIsDefault BIT
+					IF EXISTS(SELECT TOP 1 1 FROM tblEMEntity where LTRIM(RTRIM(strEntityNo)) = RTRIM(LTRIM(@originCustomer))  )
+					BEGIN
+							SELECT TOP 1 @EntityId = intEntityId FROM tblEMEntity where LTRIM(RTRIM(strEntityNo)) = RTRIM(LTRIM(@originCustomer)) 
+							SET @ysnIsDefault = 0
+					END
+					ELSE
+					BEGIN
+						INSERT [dbo].[tblEMEntity]	([strName],[strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed],[imgPhoto],[strContactNumber], [strEntityNo],[dtmOriginationDate])
+						VALUES						(@strName, @strEmail, @strWebsite, @strInternalNotes, @ysnPrint1099, @str1099Name, @str1099Form, @str1099Type, @strFederalTaxId, @dtmW9Signed, @imgPhoto,'''', @originCustomer,@dtmOriginationDate)
 
-					DECLARE @EntityId INT
-					SET @EntityId = SCOPE_IDENTITY()
+						SET @EntityId = SCOPE_IDENTITY()
+						SET @ysnIsDefault = 1
+					END
+					
 
 					SET @intCurrencyId = null
 					IF @OriginCurrency <> ''''
@@ -484,7 +496,11 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					END
 
 
-					INSERT INTO [dbo].[tblEMEntityType]([intEntityId],[strType], [intConcurrencyId]) values( @EntityId, ''Customer'', 1 )
+					-- INSERT INTO [dbo].[tblEMEntityType]([intEntityId],[strType], [intConcurrencyId]) values( @EntityId, ''Customer'', 1 )
+					IF NOT EXISTS (SELECT TOP 1 1 From tblEMEntityType where strType = ''Customer'' and intEntityId = @EntityId)
+					BEGIN
+						INSERT INTO [dbo].[tblEMEntityType]([intEntityId],[strType],[intConcurrencyId]) values( @EntityId, ''Customer'', 0 )
+					END
 					--INSERT into Customer
 					INSERT [dbo].[tblARCustomer](
 					[intEntityId], 
@@ -634,11 +650,18 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					-- RULE: when creating a default contact from agcusmst.agcus_contact, trim tblEMEntityContact.strContactNumber to 20 characters				
 							
 					--Get intContactId				
-					
+					DECLARE @LocCount INT
+					SET @LocCount = 1 
+					WHILE EXISTS(SELECT TOP 1 1 FROM tblEMEntityLocation where intEntityId = @EntityId and strLocationName = @strLocationName)
+					BEGIN
+						SET @LocCount = @LocCount + 1 
+						SET @strLocationName = @strLocationName + CAST(@LocCount as Nvarchar(2))
+						
+					END
 			
 					--INSERT into Location
 					INSERT [dbo].[tblEMEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strCountry], [strState], [strZipCode], [strNotes],  [intShipViaId], [intTermsId], [intWarehouseId], [ysnDefaultLocation])
-					VALUES								(@EntityId, @strLocationName, @strAddress, @strCity, @strCountry, @strState, @strZipCode, @strLocationNotes,  @intShipViaId, @intTermsId, @intWarehouseId, 1)
+					VALUES								(@EntityId, @strLocationName, @strAddress, @strCity, @strCountry, @strState, @strZipCode, @strLocationNotes,  @intShipViaId, @intTermsId, @intWarehouseId, @ysnIsDefault)
 
 					DECLARE @EntityLocationId INT
 					SET @EntityLocationId = SCOPE_IDENTITY()
@@ -659,11 +682,12 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 							 [ysnDefaultLocation])
 							select 				
 										ENT.intEntityId, 
+										
 										(RTRIM (CASE WHEN agcus_co_per_ind_cp = ''C'' THEN 
 												   agcus_last_name + agcus_first_name 
 											  WHEN agcus_co_per_ind_cp =''P'' THEN 
 													RTRIM(LTRIM(agcus_last_name)) + '', '' + RTRIM(LTRIM(agcus_first_name))
-										 END)) +''_'' + CAST(A4GLIdentity AS NVARCHAR),
+										 END)) + cast(cast(newid() as nvarchar(40)) as nvarchar(2))+ ''_'' + CAST(A4GLIdentity AS NVARCHAR),
 										ISNULL(agcus_addr,'''') + CHAR(10) + ISNULL(agcus_addr2,''''),
 										LTRIM(RTRIM(agcus_city)),
 										LTRIM(RTRIM(agcus_country)),
@@ -687,7 +711,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					--VALUES							  (@intEntityCustomerId, @intContactId, @EntityLocationId, ''User'', 0)
 
 					INSERT INTO [dbo].[tblEMEntityToContact]([intEntityId],[intEntityContactId],[intEntityLocationId],[ysnDefaultContact],[ysnPortalAccess],[strUserType])
-					VALUES( @EntityId, @ContactEntityId, @EntityLocationId, 1 ,0 , ''User'')
+					VALUES( @EntityId, @ContactEntityId, @EntityLocationId, @ysnIsDefault ,0 , ''User'')
 			
 					SET @CustomerToContactId = SCOPE_IDENTITY()
 					
@@ -1185,19 +1209,31 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					WHERE ptcus_cus_no = @originCustomer
 
 					--INSERT Entity record for Customer
-					INSERT [dbo].[tblEMEntity]	([strName],[strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed],[imgPhoto],[strContactNumber], [strEntityNo],[dtmOriginationDate])
-					VALUES						(@strName, @strEmail, @strWebsite, @strInternalNotes, @ysnPrint1099, @str1099Name, @str1099Form, @str1099Type, @strFederalTaxId, @dtmW9Signed, @imgPhoto,'''', @strCustomerNumber,@dtmOriginationDate)
+					
 
-					DECLARE @EntityId INT
-					SET @EntityId = SCOPE_IDENTITY()
+					DECLARE @EntityId INT					
+					DECLARE @ysnIsDefault BIT
 
+					IF EXISTS(SELECT TOP 1 1 FROM tblEMEntity where LTRIM(RTRIM(strEntityNo)) = RTRIM(LTRIM(@originCustomer))  )
+					BEGIN
+							SELECT TOP 1 @EntityId = intEntityId FROM tblEMEntity where LTRIM(RTRIM(strEntityNo)) = RTRIM(LTRIM(@originCustomer)) 
+							SET @ysnIsDefault = 0
+					END
+					ELSE
+					BEGIN
+							INSERT [dbo].[tblEMEntity]	([strName],[strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed],[imgPhoto],[strContactNumber], [strEntityNo],[dtmOriginationDate])
+							VALUES						(@strName, @strEmail, @strWebsite, @strInternalNotes, @ysnPrint1099, @str1099Name, @str1099Form, @str1099Type, @strFederalTaxId, @dtmW9Signed, @imgPhoto,'''', @strCustomerNumber,@dtmOriginationDate)
+							SET @EntityId = SCOPE_IDENTITY()
+							SET @ysnIsDefault = 1
+					END
 
 					SET @intCurrencyId = null
 					select @intCurrencyId = intDefaultCurrencyId from tblSMCompanyPreference
 
-					
-					INSERT INTO [dbo].[tblEMEntityType]([intEntityId],[strType],[intConcurrencyId]) values( @EntityId, ''Customer'', 0 )
-
+					IF NOT EXISTS (SELECT TOP 1 1 From tblEMEntityType where strType = ''Customer'' and intEntityId = @EntityId)
+					BEGIN
+						INSERT INTO [dbo].[tblEMEntityType]([intEntityId],[strType],[intConcurrencyId]) values( @EntityId, ''Customer'', 0 )
+					END
 					--INSERT into Customer
 					INSERT [dbo].[tblARCustomer](
 					[intEntityId],
@@ -1355,10 +1391,18 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 
 					--Get intContactId				
 
+					DECLARE @LocCount INT
+					SET @LocCount = 1 
+					WHILE EXISTS(SELECT TOP 1 1 FROM tblEMEntityLocation where intEntityId = @EntityId and strLocationName = @strLocationName)
+					BEGIN
+						SET @LocCount = @LocCount + 1 
+						SET @strLocationName = @strLocationName + CAST(@LocCount as Nvarchar(2))
+						
+					END
 
 					--INSERT into Location
 					INSERT [dbo].[tblEMEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strCountry], [strState], [strZipCode], [strNotes],  [intShipViaId], [intTermsId], [intWarehouseId], [ysnDefaultLocation])
-					VALUES								(@EntityId, @strLocationName, @strAddress, @strCity, @strCountry, @strState, @strZipCode, @strLocationNotes,  @intShipViaId, @intTermsId, @intWarehouseId, 1)
+					VALUES								(@EntityId, @strLocationName, @strAddress, @strCity, @strCountry, @strState, @strZipCode, @strLocationNotes,  @intShipViaId, @intTermsId, @intWarehouseId, @ysnIsDefault)
 
 					DECLARE @EntityLocationId INT
 					SET @EntityLocationId = SCOPE_IDENTITY()
@@ -1383,7 +1427,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 												   ptcus_last_name + ptcus_first_name 
 											  WHEN ptcus_co_per_ind_cp = ''P'' THEN 
 													RTRIM(LTRIM(ptcus_last_name)) + '', '' + RTRIM(LTRIM(ptcus_first_name))
-										 END)) +''_'' + CAST(A4GLIdentity AS NVARCHAR),
+										 END))  + cast(cast(newid() as nvarchar(40)) as nvarchar(2))+ ''_'' + CAST(A4GLIdentity AS NVARCHAR),
 										ISNULL(ptcus_addr,'''') + CHAR(10) + ISNULL(ptcus_addr2,''''),
 										LTRIM(RTRIM(ptcus_city)),
 										LTRIM(RTRIM(ptcus_country)),
@@ -1406,7 +1450,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					--INSERT [dbo].[tblARCustomerToContact] ([intEntityCustomerId],[intEntityContactId],[intEntityLocationId],[strUserType],[ysnPortalAccess])
 					--VALUES							  (@intEntityCustomerId, @intContactId, @EntityLocationId, ''User'', 0)
 					INSERT INTO [dbo].[tblEMEntityToContact]([intEntityId],[intEntityContactId],[intEntityLocationId],[ysnDefaultContact],[ysnPortalAccess],[strUserType])
-					VALUES( @EntityId, @ContactEntityId, @EntityLocationId, 1 ,0 , ''User'')
+					VALUES( @EntityId, @ContactEntityId, @EntityLocationId, @ysnIsDefault ,0 , ''User'')
 
 					SET @CustomerToContactId = SCOPE_IDENTITY()
 
