@@ -6124,4 +6124,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\OH_Ohio.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\SM\1740_RemoveLoadScheduleResources.sql" />
+  </ItemGroup>
 </Project>
