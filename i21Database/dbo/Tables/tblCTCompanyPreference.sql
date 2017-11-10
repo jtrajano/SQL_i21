@@ -41,7 +41,8 @@
 	ysnAllowChangePricing BIT,
 	ysnHideVendorWOAccNo BIT,
 	ysnReadOnlyStatusOnCancel BIT,
-	ysnBroker BIT,
+	ysnBrokerage BIT,
+	ysnDefaultBrokerage BIT,
 	ysnEnablePriceContractApproval BIT,
 	ysnAllowLocationChange BIT,
 
