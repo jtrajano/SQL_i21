@@ -67,6 +67,8 @@ SELECT
 	,LD.strForexRateType		
 	,LD.dblForexRate			
 	,LD.dtmScheduledDate
+	,LD.intFreightTermId
+	,LD.strFreightTerm
 FROM vyuLGLoadDetailViewLookup LD
 	LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadId = LD.intLoadId
 	LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = LW.intStorageLocationId
@@ -141,4 +143,6 @@ SELECT
 	, strForexRateType		
 	, dblForexRate		
 	, dtmScheduledDate		
+	, L.intFreightTermId
+	, L.strFreightTerm 
 FROM vyuLGLoadContainerPurchaseContractsLookup L
