@@ -119,19 +119,11 @@ BEGIN TRY
 		FROM #tmpTransactions
 		GROUP BY strFormCode, strScheduleCode, strType
 
-
-		--@Name NVARCHAR(100)
-		--, @Address NVARCHAR(250)
-		--, @City NVARCHAR(50)
-		--, @State NVARCHAR(50)
-		--, @ZipCode NVARCHAR(50)
-		--, @Email NVARCHAR(50)
-		--, @TIN NVARCHAR(50)
-		--, @OhioAccountNo NVARCHAR(50)
-		--, @Period DATETIME
-		--, @AmmendedReturn BIT
-
-
+		SELECT TOP 1 @Name = strTaxPayerName
+			, @TIN = strTaxPayerFEIN
+			, @Period = dtmReportingPeriodBegin
+		FROM #tmpTransactions
+		
 		SELECT @Gasoline_1B = CASE WHEN strFormCode = 'EX2' AND strScheduleCode = '1B' AND strType = 'Gasoline' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @Gasoline_2E = CASE WHEN strFormCode = 'EX2' AND strScheduleCode = '2E' AND strType = 'Gasoline' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @Gasoline_7A = CASE WHEN strFormCode = 'EX2' AND strScheduleCode = '7A' AND strType = 'Gasoline' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
@@ -181,7 +173,7 @@ BEGIN TRY
 		SELECT @OhioAccountNo = strConfiguration
 		FROM vyuTFGetReportingComponentConfiguration
 		WHERE intTaxAuthorityId = @TaxAuthorityId
-			AND strFormCode = 'EX2' AND strTemplateItemId = ''
+			AND strFormCode = 'EX2' AND strTemplateItemId = 'EX2-OHEX2AcctNumber'
 
 		DROP TABLE #tmpTotals
 		DROP TABLE #tmpTransactions

@@ -25,7 +25,8 @@ BEGIN TRY
 		, @Period DATETIME
 		, @AmmendedReturn BIT
 	
-		, @Gasoline_15C NUMERIC(18, 6) = 0.00
+		, @Gasoline_BeginInv NUMERIC(18, 6) = 0.00
+		, @Gasoline_EndInv NUMERIC(18, 6) = 0.00
 		, @Gasoline_1 NUMERIC(18, 6) = 0.00
 		, @Gasoline_2 NUMERIC(18, 6) = 0.00
 		, @Gasoline_3 NUMERIC(18, 6) = 0.00
@@ -42,10 +43,10 @@ BEGIN TRY
 		, @Gasoline_14C NUMERIC(18, 6) = 0.00
 		, @Gasoline_ShrinkageAllowanceRate NUMERIC(18, 6) = 0.00
 		, @Gasoline_RetailShrinkageRate NUMERIC(18, 6) = 0.00
-		, @Gasoline_TaxRate NUMERIC(18, 6) = 0.00
+		, @Gasoline_TaxRate NUMERIC(18, 6) = 0.00		
 		
-		
-		, @ClearDiesel_15C NUMERIC(18, 6) = 0.00
+		, @ClearDiesel_BeginInv NUMERIC(18, 6) = 0.00
+		, @ClearDiesel_EndInv NUMERIC(18, 6) = 0.00
 		, @ClearDiesel_1 NUMERIC(18, 6) = 0.00
 		, @ClearDiesel_2 NUMERIC(18, 6) = 0.00
 		, @ClearDiesel_3 NUMERIC(18, 6) = 0.00
@@ -64,7 +65,8 @@ BEGIN TRY
 		, @ClearDiesel_RetailShrinkageRate NUMERIC(18, 6) = 0.00
 		, @ClearDiesel_TaxRate NUMERIC(18, 6) = 0.00
 
-		, @LowSulfur_15C NUMERIC(18, 6) = 0.00
+		, @LowSulfur_BeginInv NUMERIC(18, 6) = 0.00
+		, @LowSulfur_EndInv NUMERIC(18, 6) = 0.00
 		, @LowSulfur_1 NUMERIC(18, 6) = 0.00
 		, @LowSulfur_2 NUMERIC(18, 6) = 0.00
 		, @LowSulfur_3 NUMERIC(18, 6) = 0.00
@@ -83,7 +85,8 @@ BEGIN TRY
 		, @LowSulfur_RetailShrinkageRate NUMERIC(18, 6) = 0.00
 		, @LowSulfur_TaxRate NUMERIC(18, 6) = 0.00
 
-		, @HighSulfur_15C NUMERIC(18, 6) = 0.00
+		, @HighSulfur_BeginInv NUMERIC(18, 6) = 0.00
+		, @HighSulfur_EndInv NUMERIC(18, 6) = 0.00
 		, @HighSulfur_1 NUMERIC(18, 6) = 0.00
 		, @HighSulfur_2 NUMERIC(18, 6) = 0.00
 		, @HighSulfur_3 NUMERIC(18, 6) = 0.00
@@ -102,7 +105,8 @@ BEGIN TRY
 		, @HighSulfur_RetailShrinkageRate NUMERIC(18, 6) = 0.00
 		, @HighSulfur_TaxRate NUMERIC(18, 6) = 0.00
 
-		, @Kerosene_15C NUMERIC(18, 6) = 0.00
+		, @Kerosene_BeginInv NUMERIC(18, 6) = 0.00
+		, @Kerosene_EndInv NUMERIC(18, 6) = 0.00
 		, @Kerosene_1 NUMERIC(18, 6) = 0.00
 		, @Kerosene_2 NUMERIC(18, 6) = 0.00
 		, @Kerosene_3 NUMERIC(18, 6) = 0.00
@@ -121,7 +125,8 @@ BEGIN TRY
 		, @Kerosene_RetailShrinkageRate NUMERIC(18, 6) = 0.00
 		, @Kerosene_TaxRate NUMERIC(18, 6) = 0.00
 
-		, @CNG_15C NUMERIC(18, 6) = 0.00
+		, @CNG_BeginInv NUMERIC(18, 6) = 0.00
+		, @CNG_EndInv NUMERIC(18, 6) = 0.00
 		, @CNG_1 NUMERIC(18, 6) = 0.00
 		, @CNG_2 NUMERIC(18, 6) = 0.00
 		, @CNG_3 NUMERIC(18, 6) = 0.00
@@ -140,7 +145,8 @@ BEGIN TRY
 		, @CNG_RetailShrinkageRate NUMERIC(18, 6) = 0.00
 		, @CNG_TaxRate NUMERIC(18, 6) = 0.00
 
-		, @LNG_15C NUMERIC(18, 6) = 0.00
+		, @LNG_BeginInv NUMERIC(18, 6) = 0.00
+		, @LNG_EndInv NUMERIC(18, 6) = 0.00
 		, @LNG_1 NUMERIC(18, 6) = 0.00
 		, @LNG_2 NUMERIC(18, 6) = 0.00
 		, @LNG_3 NUMERIC(18, 6) = 0.00
@@ -159,7 +165,8 @@ BEGIN TRY
 		, @LNG_RetailShrinkageRate NUMERIC(18, 6) = 0.00
 		, @LNG_TaxRate NUMERIC(18, 6) = 0.00
 
-		, @Propane_15C NUMERIC(18, 6) = 0.00
+		, @Propane_BeginInv NUMERIC(18, 6) = 0.00
+		, @Propane_EndInv NUMERIC(18, 6) = 0.00
 		, @Propane_1 NUMERIC(18, 6) = 0.00
 		, @Propane_2 NUMERIC(18, 6) = 0.00
 		, @Propane_3 NUMERIC(18, 6) = 0.00
@@ -178,7 +185,8 @@ BEGIN TRY
 		, @Propane_RetailShrinkageRate NUMERIC(18, 6) = 0.00
 		, @Propane_TaxRate NUMERIC(18, 6) = 0.00
 
-		, @Other_15C NUMERIC(18, 6) = 0.00
+		, @Other_BeginInv NUMERIC(18, 6) = 0.00
+		, @Other_EndInv NUMERIC(18, 6) = 0.00
 		, @Other_1 NUMERIC(18, 6) = 0.00
 		, @Other_2 NUMERIC(18, 6) = 0.00
 		, @Other_3 NUMERIC(18, 6) = 0.00
@@ -246,20 +254,12 @@ BEGIN TRY
 		FROM #tmpTransactions
 		GROUP BY strFormCode, strScheduleCode, strType
 
+		SELECT TOP 1 @Name = strTaxPayerName
+			, @TIN = strTaxPayerFEIN
+			, @Period = dtmReportingPeriodBegin
+		FROM #tmpTransactions
 
-		--@Name NVARCHAR(100)
-		--, @Address NVARCHAR(250)
-		--, @City NVARCHAR(50)
-		--, @State NVARCHAR(50)
-		--, @ZipCode NVARCHAR(50)
-		--, @Email NVARCHAR(50)
-		--, @TIN NVARCHAR(50)
-		--, @OhioAccountNo NVARCHAR(50)
-		--, @Period DATETIME
-		--, @AmmendedReturn BIT
-
-		SELECT @Gasoline_15C = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '15C' AND strType = 'Gasoline' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @Gasoline_1 = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '1' AND strType = 'Gasoline' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
+		SELECT @Gasoline_1 = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '1' AND strType = 'Gasoline' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @Gasoline_2 = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '2' AND strType = 'Gasoline' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @Gasoline_3 = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '3' AND strType = 'Gasoline' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @Gasoline_4 = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '4' AND strType = 'Gasoline' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
@@ -274,7 +274,6 @@ BEGIN TRY
 			, @Gasoline_14B = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '14B' AND strType = 'Gasoline' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @Gasoline_14C = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '14C' AND strType = 'Gasoline' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 
-			, @ClearDiesel_15C = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '15C' AND strType = 'Clear Diesel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @ClearDiesel_1 = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '1' AND strType = 'Clear Diesel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @ClearDiesel_2 = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '2' AND strType = 'Clear Diesel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @ClearDiesel_3 = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '3' AND strType = 'Clear Diesel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
@@ -290,7 +289,6 @@ BEGIN TRY
 			, @ClearDiesel_14B = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '14B' AND strType = 'Clear Diesel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @ClearDiesel_14C = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '14C' AND strType = 'Clear Diesel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 
-			, @LowSulfur_15C = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '15C' AND strType = 'Low Sulfur Dyed Diesel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @LowSulfur_1 = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '1' AND strType = 'Low Sulfur Dyed Diesel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @LowSulfur_2 = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '2' AND strType = 'Low Sulfur Dyed Diesel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @LowSulfur_3 = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '3' AND strType = 'Low Sulfur Dyed Diesel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
@@ -306,7 +304,6 @@ BEGIN TRY
 			, @LowSulfur_14B = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '14B' AND strType = 'Low Sulfur Dyed Diesel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @LowSulfur_14C = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '14C' AND strType = 'Low Sulfur Dyed Diesel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 
-			, @HighSulfur_15C = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '15C' AND strType = 'High Sulfur Dyed Diesel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @HighSulfur_1 = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '1' AND strType = 'High Sulfur Dyed Diesel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @HighSulfur_2 = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '2' AND strType = 'High Sulfur Dyed Diesel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @HighSulfur_3 = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '3' AND strType = 'High Sulfur Dyed Diesel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
@@ -322,7 +319,6 @@ BEGIN TRY
 			, @HighSulfur_14B = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '14B' AND strType = 'High Sulfur Dyed Diesel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @HighSulfur_14C = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '14C' AND strType = 'High Sulfur Dyed Diesel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 
-			, @Kerosene_15C = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '15C' AND strType = 'Kerosene' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @Kerosene_1 = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '1' AND strType = 'Kerosene' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @Kerosene_2 = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '2' AND strType = 'Kerosene' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @Kerosene_3 = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '3' AND strType = 'Kerosene' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
@@ -338,7 +334,6 @@ BEGIN TRY
 			, @Kerosene_14B = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '14B' AND strType = 'Kerosene' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @Kerosene_14C = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '14C' AND strType = 'Kerosene' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 
-			, @CNG_15C = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '15C' AND strType = 'CNG' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @CNG_1 = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '1' AND strType = 'CNG' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @CNG_2 = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '2' AND strType = 'CNG' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @CNG_3 = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '3' AND strType = 'CNG' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
@@ -354,7 +349,6 @@ BEGIN TRY
 			, @CNG_14B = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '14B' AND strType = 'CNG' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @CNG_14C = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '14C' AND strType = 'CNG' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 
-			, @LNG_15C = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '15C' AND strType = 'LNG' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @LNG_1 = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '1' AND strType = 'LNG' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @LNG_2 = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '2' AND strType = 'LNG' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @LNG_3 = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '3' AND strType = 'LNG' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
@@ -370,7 +364,6 @@ BEGIN TRY
 			, @LNG_14B = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '14B' AND strType = 'LNG' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @LNG_14C = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '14C' AND strType = 'LNG' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 
-			, @Propane_15C = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '15C' AND strType = 'Propane' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @Propane_1 = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '1' AND strType = 'Propane' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @Propane_2 = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '2' AND strType = 'Propane' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @Propane_3 = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '3' AND strType = 'Propane' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
@@ -386,7 +379,6 @@ BEGIN TRY
 			, @Propane_14B = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '14B' AND strType = 'Propane' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @Propane_14C = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '14C' AND strType = 'Propane' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 
-			, @Other_15C = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '15C' AND strType = 'Other' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @Other_1 = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '1' AND strType = 'Other' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @Other_2 = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '2' AND strType = 'Other' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 			, @Other_3 = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '3' AND strType = 'Other' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
@@ -403,42 +395,61 @@ BEGIN TRY
 			, @Other_14C = CASE WHEN strFormCode = 'MF2' AND strScheduleCode = '14C' AND strType = 'Other' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
 		FROM #tmpTotals
 
-		
-		SELECT @Gasoline_ShrinkageAllowanceRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = '' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
-			, @Gasoline_RetailShrinkageRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = '' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
-			, @Gasoline_TaxRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = '' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+		SELECT @Gasoline_ShrinkageAllowanceRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line19ColA' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @Gasoline_RetailShrinkageRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line21ColA' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @Gasoline_TaxRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line24ColA' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @Gasoline_BeginInv = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line1ColA' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @Gasoline_EndInv = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line16ColA' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
 
-			, @ClearDiesel_ShrinkageAllowanceRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = '' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
-			, @ClearDiesel_RetailShrinkageRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = '' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
-			, @ClearDiesel_TaxRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = '' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @ClearDiesel_ShrinkageAllowanceRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line19ColB' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @ClearDiesel_RetailShrinkageRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line21ColB' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @ClearDiesel_TaxRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line24ColB' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @ClearDiesel_BeginInv = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line1ColB' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @ClearDiesel_EndInv = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line16ColB' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
 
-			, @LowSulfur_ShrinkageAllowanceRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = '' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
-			, @LowSulfur_RetailShrinkageRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = '' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
-			, @LowSulfur_TaxRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = '' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @LowSulfur_ShrinkageAllowanceRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line19ColC' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @LowSulfur_RetailShrinkageRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line21ColC' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @LowSulfur_TaxRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line24ColC' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @LowSulfur_BeginInv = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line1ColC' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @LowSulfur_EndInv = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line16ColC' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
 
-			, @HighSulfur_ShrinkageAllowanceRate= CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = '' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
-			, @HighSulfur_RetailShrinkageRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = '' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
-			, @HighSulfur_TaxRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = '' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @HighSulfur_ShrinkageAllowanceRate= CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line19ColD' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @HighSulfur_RetailShrinkageRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line21ColD' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @HighSulfur_TaxRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line24ColD' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @HighSulfur_BeginInv = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line1ColD' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @HighSulfur_EndInv = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line16ColD' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
 
-			, @Kerosene_ShrinkageAllowanceRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = '' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
-			, @Kerosene_RetailShrinkageRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = '' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
-			, @Kerosene_TaxRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = '' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @Kerosene_ShrinkageAllowanceRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line19ColE' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @Kerosene_RetailShrinkageRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line21ColE' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @Kerosene_TaxRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line24ColE' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @Kerosene_BeginInv = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line1ColE' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @Kerosene_EndInv = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line16ColE' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
 
-			, @CNG_ShrinkageAllowanceRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = '' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
-			, @CNG_RetailShrinkageRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = '' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
-			, @CNG_TaxRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = '' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @CNG_ShrinkageAllowanceRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line19ColF' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @CNG_RetailShrinkageRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line21ColF' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @CNG_TaxRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line24ColF' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @CNG_BeginInv = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line1ColF' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @CNG_EndInv = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line16ColF' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
 
-			, @LNG_ShrinkageAllowanceRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = '' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
-			, @LNG_RetailShrinkageRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = '' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
-			, @LNG_TaxRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = '' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @LNG_ShrinkageAllowanceRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line19ColG' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @LNG_RetailShrinkageRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line21ColG' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @LNG_TaxRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line24ColG' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @LNG_BeginInv = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line1ColG' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @LNG_EndInv = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line16ColG' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
 
-			, @Propane_ShrinkageAllowanceRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = '' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
-			, @Propane_RetailShrinkageRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = '' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
-			, @Propane_TaxRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = '' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @Propane_ShrinkageAllowanceRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line19ColH' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @Propane_RetailShrinkageRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line21ColH' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @Propane_TaxRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line24ColH' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @Propane_BeginInv = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line1ColH' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @Propane_EndInv = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line16ColH' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
 
-			, @Other_ShrinkageAllowanceRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = '' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
-			, @Other_RetailShrinkageRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = '' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
-			, @Other_TaxRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = '' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @Other_ShrinkageAllowanceRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line19ColI' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @Other_RetailShrinkageRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line21ColI' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @Other_TaxRate = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line24ColI' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @Other_BeginInv = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line1ColI' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+			, @Other_EndInv = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-Line16ColI' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
+
+			, @OhioAccountNo = CASE WHEN strFormCode = 'MF2' AND strTemplateItemId = 'MF2-OHAcctNumber' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
 		FROM vyuTFGetReportingComponentConfiguration
 		WHERE intTaxAuthorityId = @TaxAuthorityId
 
@@ -457,7 +468,8 @@ BEGIN TRY
 		, Period = @Period
 		, AmmendedReturn = @AmmendedReturn
 	
-		, Gasoline_15C = @Gasoline_15C
+		, Gasoline_BeginInv = @Gasoline_BeginInv
+		, Gasoline_EndInv = @Gasoline_EndInv
 		, Gasoline_1 = @Gasoline_1
 		, Gasoline_2 = @Gasoline_2
 		, Gasoline_3 = @Gasoline_3
@@ -477,7 +489,8 @@ BEGIN TRY
 		, Gasoline_TaxRate = @Gasoline_TaxRate
 		
 		
-		, ClearDiesel_15C = @ClearDiesel_15C
+		, ClearDiesel_BeginInv = @ClearDiesel_BeginInv
+		, ClearDiesel_EndInv = @ClearDiesel_EndInv
 		, ClearDiesel_1 = @ClearDiesel_1
 		, ClearDiesel_2 = @ClearDiesel_2
 		, ClearDiesel_3 = @ClearDiesel_3
@@ -496,7 +509,8 @@ BEGIN TRY
 		, ClearDiesel_RetailShrinkageRate = @ClearDiesel_RetailShrinkageRate
 		, ClearDiesel_TaxRate = @ClearDiesel_TaxRate
 
-		, LowSulfur_15C = @LowSulfur_15C
+		, LowSulfur_BeginInv = @LowSulfur_BeginInv
+		, LowSulfur_EndInv = @LowSulfur_EndInv
 		, LowSulfur_1 = @LowSulfur_1
 		, LowSulfur_2 = @LowSulfur_2
 		, LowSulfur_3 = @LowSulfur_3
@@ -515,7 +529,8 @@ BEGIN TRY
 		, LowSulfur_RetailShrinkageRate = @LowSulfur_RetailShrinkageRate
 		, LowSulfur_TaxRate = @LowSulfur_TaxRate
 
-		, HighSulfur_15C = @HighSulfur_15C
+		, HighSulfur_BeginInv = @HighSulfur_BeginInv
+		, HighSulfur_EndInv = @HighSulfur_EndInv
 		, HighSulfur_1 = @HighSulfur_1
 		, HighSulfur_2 = @HighSulfur_2
 		, HighSulfur_3 = @HighSulfur_3
@@ -534,7 +549,8 @@ BEGIN TRY
 		, HighSulfur_RetailShrinkageRate = @HighSulfur_RetailShrinkageRate
 		, HighSulfur_TaxRate = @HighSulfur_TaxRate
 
-		, Kerosene_15C = @Kerosene_15C
+		, Kerosene_BeginInv = @Kerosene_BeginInv
+		, Kerosene_EndInv = @Kerosene_EndInv
 		, Kerosene_1 = @Kerosene_1
 		, Kerosene_2 = @Kerosene_2
 		, Kerosene_3 = @Kerosene_3
@@ -553,7 +569,8 @@ BEGIN TRY
 		, Kerosene_RetailShrinkageRate = @Kerosene_RetailShrinkageRate
 		, Kerosene_TaxRate = @Kerosene_TaxRate
 
-		, CNG_15C = @CNG_15C
+		, CNG_BeginInv = @CNG_BeginInv
+		, CNG_EndInv = @CNG_EndInv
 		, CNG_1 = @CNG_1
 		, CNG_2 = @CNG_2
 		, CNG_3 = @CNG_3
@@ -572,9 +589,10 @@ BEGIN TRY
 		, CNG_RetailShrinkageRate = @CNG_RetailShrinkageRate
 		, CNG_TaxRate = @CNG_TaxRate
 
-		, LNG_15C = @LNG_15C
+		, LNG_BeginInv = @LNG_BeginInv
+		, LNG_EndInv  = @LNG_EndInv
 		, LNG_1 = @LNG_1
-		, LNG_2 = @LNG_2
+		, L6NG_2 = @LNG_2
 		, LNG_3 = @LNG_3
 		, LNG_4 = @LNG_4
 		, LNG_5AD = @LNG_5AD
@@ -591,7 +609,8 @@ BEGIN TRY
 		, LNG_RetailShrinkageRate = @LNG_RetailShrinkageRate
 		, LNG_TaxRate = @LNG_TaxRate
 
-		, Propane_15C = @Propane_15C
+		, Propane_BeginInv = @Propane_BeginInv
+		, Propane_EndInvInv = @Propane_EndInv
 		, Propane_1 = @Propane_1
 		, Propane_2 = @Propane_2
 		, Propane_3 = @Propane_3
@@ -610,7 +629,8 @@ BEGIN TRY
 		, Propane_RetailShrinkageRate = @Propane_RetailShrinkageRate
 		, Propane_TaxRate = @Propane_TaxRate
 
-		, Other_15C = @Other_15C
+		, Other_15C = @Other_BeginInv
+		, Other_15C = @Other_BeginInv
 		, Other_1 = @Other_1
 		, Other_2 = @Other_2
 		, Other_3 = @Other_3
