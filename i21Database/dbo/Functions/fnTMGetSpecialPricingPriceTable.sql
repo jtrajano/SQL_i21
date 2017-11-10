@@ -9,7 +9,8 @@
 	,@intSiteId INT
 )
 RETURNS @tblSpecialPriceTableReturn TABLE(
-	dblPrice NUMERIC(18,6)
+	dblPrice NUMERIC(18,6),
+	strSpecialPricing NVARCHAR(100)
 )
 AS
 BEGIN 
@@ -35,8 +36,8 @@ BEGIN
 	
 
 
-	INSERT INTO @tblSpecialPriceTableReturn (dblPrice)
-	SELECT ISNULL(@dblPrice,0.0)
+	INSERT INTO @tblSpecialPriceTableReturn (dblPrice,strSpecialPricing)
+	SELECT ISNULL(@dblPrice,0.0), @strSpecialPricing
 
 	RETURN 
 
