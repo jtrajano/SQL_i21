@@ -110,7 +110,7 @@ FROM (
 						INNER JOIN tblSMCurrencyExchangeRateType ForexRateType
 							ON ForexRateType.intCurrencyExchangeRateTypeId = MultiCurrencyDefault.intContractRateTypeId
 						
-				WHERE	dbo.fnDateGreaterThanEquals(DefaultForexRateDetail.[dtmValidFromDate], LogisticsView.dtmScheduledDate) = 1						
+				WHERE	dbo.fnDateLessThanEquals(DefaultForexRateDetail.[dtmValidFromDate], LogisticsView.dtmScheduledDate) = 1						
 						AND ToCurrency.intCurrencyID <> FromCurrency.intCurrencyID -- Transaction Currency is not the functiona currency. 
 						AND LogisticsView.intForexRateTypeId IS NULL
 
