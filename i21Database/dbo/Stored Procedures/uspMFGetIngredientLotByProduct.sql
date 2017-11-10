@@ -6,6 +6,7 @@
 	,@strLotNumber NVARCHAR(MAX) = '%'
 	,@intWorkOrderId INT = 0
 	,@intLotId INT = 0
+	,@intInputItemId INT = 0
 	)
 AS
 BEGIN
@@ -57,12 +58,19 @@ BEGIN
 				OR L.intItemId = SI.intSubstituteItemId
 				)
 			AND L.intStorageLocationId = @intStorageLocationId
+			AND L.intItemId = (
+				CASE 
+					WHEN @intInputItemId = 0
+						THEN L.intItemId
+					ELSE @intInputItemId
+					END
+				)
 		JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
 			AND I.strInventoryTracking = 'Lot Level'
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = ISNULL(L.intWeightUOMId, L.intItemUOMId)
 		JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
 		JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
-		JOIN dbo.tblICRestriction R1 ON R1.intRestrictionId = IsNULL(SL.intRestrictionId,R1.intRestrictionId)
+		JOIN dbo.tblICRestriction R1 ON R1.intRestrictionId = IsNULL(SL.intRestrictionId, R1.intRestrictionId)
 			AND R1.strInternalCode = 'STOCK'
 		JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 		JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
@@ -121,6 +129,13 @@ BEGIN
 				OR S.intItemId = SI.intSubstituteItemId
 				)
 			AND S.intStorageLocationId = @intStorageLocationId
+			AND S.intItemId = (
+				CASE 
+					WHEN @intInputItemId = 0
+						THEN S.intItemId
+					ELSE @intInputItemId
+					END
+				)
 		JOIN dbo.tblICItem I ON I.intItemId = S.intItemId
 			AND I.strInventoryTracking = 'Item Level'
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = S.intItemUOMId
@@ -174,12 +189,19 @@ BEGIN
 				OR L.intItemId = SI.intSubstituteItemId
 				)
 			AND L.intStorageLocationId = @intStorageLocationId
+			AND L.intItemId = (
+				CASE 
+					WHEN @intInputItemId = 0
+						THEN L.intItemId
+					ELSE @intInputItemId
+					END
+				)
 		JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
 			AND I.strInventoryTracking = 'Lot Level'
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = ISNULL(L.intWeightUOMId, L.intItemUOMId)
 		JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
 		JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
-		JOIN dbo.tblICRestriction R1 ON R1.intRestrictionId = IsNULL(SL.intRestrictionId,R1.intRestrictionId)
+		JOIN dbo.tblICRestriction R1 ON R1.intRestrictionId = IsNULL(SL.intRestrictionId, R1.intRestrictionId)
 			AND R1.strInternalCode = 'STOCK'
 		JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 		JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
@@ -237,6 +259,13 @@ BEGIN
 				OR S.intItemId = SI.intSubstituteItemId
 				)
 			AND S.intStorageLocationId = @intStorageLocationId
+			AND S.intItemId = (
+				CASE 
+					WHEN @intInputItemId = 0
+						THEN S.intItemId
+					ELSE @intInputItemId
+					END
+				)
 		JOIN dbo.tblICItem I ON I.intItemId = S.intItemId
 			AND I.strInventoryTracking = 'Item Level'
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = S.intItemUOMId
