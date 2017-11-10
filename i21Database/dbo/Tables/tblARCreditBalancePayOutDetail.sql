@@ -5,6 +5,7 @@
 	[intEntityCustomerId]               INT             NULL,
 	[intPaymentId]                      INT             NULL,
 	[intBillId]                         INT             NULL,
+	[intInvoiceId]                      INT             NULL,
 	[ysnProcess]                        BIT             CONSTRAINT [DF_tblARCreditBalancePayOutDetail_ysnProcess] DEFAULT ((0)) NOT NULL,
 	[ysnSuccess]                        BIT             CONSTRAINT [DF_tblARCreditBalancePayOutDetail_ysnSuccess] DEFAULT ((0)) NOT NULL,
 	[strMessage]                        NVARCHAR(500)   COLLATE Latin1_General_CI_AS	NULL,
@@ -14,4 +15,5 @@
 	CONSTRAINT [FK_tblARCreditBalancePayOutDetail_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
 	CONSTRAINT [FK_tblARCreditBalancePayOutDetail_tblARPayment_intPaymentId] FOREIGN KEY ([intPaymentId]) REFERENCES [dbo].[tblARPayment] ([intPaymentId]),
 	CONSTRAINT [FK_tblARCreditBalancePayOutDetail_tblAPBill_intBillId] FOREIGN KEY ([intBillId]) REFERENCES [dbo].[tblAPBill] ([intBillId]),
+	CONSTRAINT [FK_tblARCreditBalancePayOutDetail_tblARInvoice_intInvoiceId] FOREIGN KEY ([intInvoiceId]) REFERENCES [dbo].[tblARInvoice] ([intInvoiceId])
 )

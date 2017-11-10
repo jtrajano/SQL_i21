@@ -6,7 +6,8 @@
     [dblQtyReceived]				DECIMAL(18, 6)	NULL, 
     [dblDiscount]					DECIMAL(18, 6)	NOT NULL DEFAULT 0, 
     [dblCost]						DECIMAL(18, 6)	NULL, 
-    [intTaxGroupId]					INT NULL
+    [intTaxGroupId]					INT             NULL,
+	[intInvoiceId]					INT             NULL
 )
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
@@ -71,4 +72,13 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
 	@level1name = N'VoucherDetailNonInventory',
 	@level2type = N'COLUMN',
 	@level2name = N'intTaxGroupId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+	@value = N'Invoice Id used for Pay Out.',
+	@level0type = N'SCHEMA',
+	@level0name = N'dbo',
+	@level1type = N'TYPE',
+	@level1name = N'VoucherDetailNonInventory',
+	@level2type = N'COLUMN',
+	@level2name = N'intInvoiceId'
 GO

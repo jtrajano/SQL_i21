@@ -31,7 +31,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[int1099Form]					,
 		[int1099Category]				,
 		[intLineNo]						,
-		[intTaxGroupId]					
+		[intTaxGroupId]					,
+		[intInvoiceId]
 	)
 	OUTPUT inserted.intBillDetailId INTO @detailCreated
 	SELECT
@@ -51,7 +52,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 												ELSE 0 END),
 		[int1099Category]				=	ISNULL(F.int1099CategoryId, 0),
 		[intLineNo]						=	ROW_NUMBER() OVER(ORDER BY (SELECT 1)),
-		[intTaxGroupId]					=	A.[intTaxGroupId]					
+		[intTaxGroupId]					=	A.[intTaxGroupId],
+		[intInvoiceId]					=	A.[intInvoiceId]										
 	FROM @voucherNonInvDetails A
 	CROSS APPLY tblAPBill B
 	INNER JOIN tblAPVendor D ON B.intEntityVendorId = D.[intEntityId]
