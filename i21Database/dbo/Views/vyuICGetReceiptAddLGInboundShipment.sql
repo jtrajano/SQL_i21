@@ -58,27 +58,59 @@ FROM (
 		, dblFranchise				= LogisticsView.dblFranchise
 		, dblContainerWeightPerQty	= LogisticsView.dblContainerWeightPerQty
 		, ysnSubCurrency			= CAST(LogisticsView.ysnSubCurrency AS BIT)
-		,intCurrencyId				= Currency.intCurrencyID
-		, strSubCurrency			= SubCurrency.strCurrency
+		, intCurrencyId				= dbo.fnICGetCurrency(LogisticsView.intPContractDetailId, 0) -- 0 indicates that value is not for Sub Currency
+		, strSubCurrency			= (SELECT strCurrency from tblSMCurrency where intCurrencyID = dbo.fnICGetCurrency(LogisticsView.intPContractDetailId, 1)) -- 1 indicates that value is for Sub Currency
 		, dblGross					= CAST(LogisticsView.dblGross AS NUMERIC(38, 20))
 		, dblNet					= CAST(LogisticsView.dblNet AS NUMERIC(38, 20))
 		, LC.ysnRejected
-		, intForexRateTypeId		= CAST(NULL AS INT) -- Add dummy fields for the meantime. 
-		, strForexRateType			= currencyType.strCurrencyExchangeRateType -- Add dummy fields for the meantime. 
-		, dblForexRate				= CAST(NULL AS NUMERIC(18, 6)) -- Add dummy fields for the meantime. 
-	from vyuLGLoadContainerReceiptContracts LogisticsView
-		LEFT JOIN dbo.tblSMCurrency Currency ON Currency.strCurrency = ISNULL(LogisticsView.strMainCurrency, LogisticsView.strCurrency) 
-		LEFT JOIN dbo.tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = Currency.intCurrencyID
-		LEFT JOIN dbo.tblICItemUOM ItemUOM ON LogisticsView.intItemUOMId = ItemUOM.intItemUOMId
-		LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure ON ItemUnitMeasure.intUnitMeasureId = ItemUOM.intUnitMeasureId
-		LEFT JOIN dbo.tblICItemUOM GrossNetUOM ON LogisticsView.intWeightItemUOMId = GrossNetUOM.intItemUOMId
-		LEFT JOIN dbo.tblICUnitMeasure GrossNetUnitMeasure ON GrossNetUnitMeasure.intUnitMeasureId = GrossNetUOM.intUnitMeasureId
-		LEFT JOIN dbo.tblICItemUOM CostUOM ON CostUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(LogisticsView.intItemId, LogisticsView.intPCostUOMId)
-		LEFT JOIN dbo.tblICUnitMeasure CostUnitMeasure ON CostUnitMeasure.intUnitMeasureId = CostUOM.intUnitMeasureId
-		LEFT JOIN dbo.tblICItemLocation ItemLocation ON ItemLocation.intItemId = LogisticsView.intItemId AND ItemLocation.intLocationId = LogisticsView.intCompanyLocationId
-		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LogisticsView.intLoadContainerId
-		LEFT JOIN tblSMCurrencyExchangeRateType currencyType ON currencyType.intCurrencyExchangeRateTypeId = NULL 
-		LEFT JOIN tblSMCompanyLocationSubLocation subLocation ON subLocation.intCompanyLocationSubLocationId = LogisticsView.intPSubLocationId
+		, intForexRateTypeId		= ISNULL(LogisticsView.intForexRateTypeId, CompanyPreferenceForex.intForexRateTypeId) 
+		, strForexRateType			= ISNULL(currencyType.strCurrencyExchangeRateType, CompanyPreferenceForex.strCurrencyExchangeRateType)
+		, dblForexRate				= ISNULL(LogisticsView.dblForexRate, CompanyPreferenceForex.dblForexRate) 
+	FROM	vyuLGLoadContainerReceiptContracts LogisticsView LEFT JOIN dbo.tblSMCurrency Currency 
+				ON Currency.strCurrency = ISNULL(LogisticsView.strCurrency, LogisticsView.strMainCurrency) 
+			LEFT JOIN dbo.tblICItemUOM ItemUOM 
+				ON LogisticsView.intItemUOMId = ItemUOM.intItemUOMId
+			LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure 
+				ON ItemUnitMeasure.intUnitMeasureId = ItemUOM.intUnitMeasureId
+			LEFT JOIN dbo.tblICItemUOM GrossNetUOM 
+				ON LogisticsView.intWeightItemUOMId = GrossNetUOM.intItemUOMId
+			LEFT JOIN dbo.tblICUnitMeasure GrossNetUnitMeasure 
+				ON GrossNetUnitMeasure.intUnitMeasureId = GrossNetUOM.intUnitMeasureId
+			LEFT JOIN dbo.tblICItemUOM CostUOM 
+				ON CostUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(LogisticsView.intItemId, LogisticsView.intPCostUOMId)
+			LEFT JOIN dbo.tblICUnitMeasure CostUnitMeasure 
+				ON CostUnitMeasure.intUnitMeasureId = CostUOM.intUnitMeasureId
+			LEFT JOIN dbo.tblICItemLocation ItemLocation
+				ON ItemLocation.intItemId = LogisticsView.intItemId AND ItemLocation.intLocationId = LogisticsView.intCompanyLocationId
+			LEFT JOIN tblLGLoadContainer LC 
+				ON LC.intLoadContainerId = LogisticsView.intLoadContainerId
+			LEFT JOIN tblSMCompanyLocationSubLocation subLocation ON subLocation.intCompanyLocationSubLocationId = LogisticsView.intPSubLocationId
+			LEFT JOIN tblSMCurrencyExchangeRateType currencyType ON currencyType.intCurrencyExchangeRateTypeId = LogisticsView.intForexRateTypeId
+
+			OUTER APPLY (
+				SELECT	dblForexRate = DefaultForexRateDetail.dblRate		
+						,intForexRateTypeId = MultiCurrencyDefault.intContractRateTypeId
+						,ForexRateType.strCurrencyExchangeRateType
+				FROM	tblSMCompanyPreference Company
+						INNER JOIN tblSMMultiCurrency MultiCurrencyDefault ON MultiCurrencyDefault.intMultiCurrencyId = Company.intMultiCurrencyId 												
+						INNER JOIN [dbo].[tblSMCurrency] AS FromCurrency ON FromCurrency.[intCurrencyID] = dbo.fnICGetCurrency(LogisticsView.intPContractDetailId, 0)
+						INNER JOIN [dbo].[tblSMCurrency] AS ToCurrency ON ToCurrency.[intCurrencyID] = Company.intDefaultCurrencyId 
+
+						INNER JOIN [dbo].[tblSMCurrencyExchangeRate] AS ForexPair
+							ON ForexPair.intFromCurrencyId = FromCurrency.intCurrencyID
+							AND ForexPair.intToCurrencyId = ToCurrency.intCurrencyID
+						INNER JOIN [dbo].[tblSMCurrencyExchangeRateDetail] AS DefaultForexRateDetail 
+							ON DefaultForexRateDetail.intCurrencyExchangeRateId = ForexPair.intCurrencyExchangeRateId
+							AND DefaultForexRateDetail.intRateTypeId = MultiCurrencyDefault.intContractRateTypeId
+						INNER JOIN tblSMCurrencyExchangeRateType ForexRateType
+							ON ForexRateType.intCurrencyExchangeRateTypeId = MultiCurrencyDefault.intContractRateTypeId
+						
+				WHERE	dbo.fnDateLessThanEquals(DefaultForexRateDetail.[dtmValidFromDate], LogisticsView.dtmScheduledDate) = 1						
+						AND ToCurrency.intCurrencyID <> FromCurrency.intCurrencyID -- Transaction Currency is not the functiona currency. 
+						AND LogisticsView.intForexRateTypeId IS NULL
+
+			) CompanyPreferenceForex 
+
 	WHERE LogisticsView.dblBalanceToReceive > 0 
 		  AND LogisticsView.intSourceType = 2 
 		  AND LogisticsView.intTransUsedBy = 1 
@@ -86,3 +118,4 @@ FROM (
 		  AND LogisticsView.ysnPosted = 1
 		  AND ISNULL(LC.ysnRejected,0) <> 1
 ) tblAddOrders
+
