@@ -63,6 +63,8 @@ SELECT
 	, strStockUOM					= oStockUOM.strUnitMeasure
 	, strStockUOMType				= oStockUOM.strUnitType
 	, dblStockUOMCF					= oStockUOM.dblUnitQty
+	, FreightTerm.intFreightTermId
+	, FreightTerm.strFreightTerm
 FROM tblLGLoad L
 	INNER JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 	INNER JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
@@ -101,3 +103,5 @@ FROM tblLGLoad L
 		WHERE WeightItem.intItemId=LD.intItemId
 			AND WeightItem.intUnitMeasureId=L.intWeightUnitMeasureId
 	) oWeightStock
+	LEFT JOIN tblSMFreightTerms FreightTerm
+		ON	FreightTerm.intFreightTermId = L.intFreightTermId

@@ -205,8 +205,15 @@ SELECT LoadDetail.intLoadDetailId
 														THEN NULL
 													END
 	, LoadDetail.intNumberOfContainers
+
+	,intForexRateTypeId		= PDetail.intRateTypeId
+	,strForexRateType		= RT.strCurrencyExchangeRateType
+	,dblForexRate			= PDetail.dblRate
+	,FreightTerms.intFreightTermId
+	,FreightTerms.strFreightTerm
+
 FROM tblLGLoadDetail LoadDetail
-	JOIN tblLGLoad Load ON Load.intLoadId = LoadDetail.intLoadId
+	JOIN tblLGLoad [Load] ON [Load].intLoadId = LoadDetail.intLoadId
 	LEFT JOIN tblICItem Item On Item.intItemId = LoadDetail.intItemId
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LoadDetail.intItemUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
@@ -261,3 +268,5 @@ FROM tblLGLoadDetail LoadDetail
 			LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 		WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = SDetail.intItemUOMId
 	) oSStockUOM
+	LEFT JOIN tblSMFreightTerms FreightTerms
+		ON FreightTerms.intFreightTermId = [Load].intFreightTermId

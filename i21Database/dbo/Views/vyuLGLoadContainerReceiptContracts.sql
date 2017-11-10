@@ -62,7 +62,13 @@ SELECT
 	,intSourceType
 	,ysnPosted
 	,intStorageLocationId = SL.intStorageLocationId
-	,strStorageLocationName = SL.strName 
+	,strStorageLocationName = SL.strName
+	,LD.intForexRateTypeId		
+	,LD.strForexRateType		
+	,LD.dblForexRate			
+	,LD.dtmScheduledDate
+	,LD.intFreightTermId
+	,LD.strFreightTerm
 FROM vyuLGLoadDetailViewLookup LD
 	LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadId = LD.intLoadId
 	LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = LW.intStorageLocationId
@@ -132,5 +138,11 @@ SELECT
 	, intSourceType					= intSourceType					
 	, ysnPosted						= ysnPosted						
 	, intStorageLocationId			= intStorageLocationId			
-	, strStorageLocationName		= strStorageLocationName		
+	, strStorageLocationName		= strStorageLocationName	
+	, intForexRateTypeId		
+	, strForexRateType		
+	, dblForexRate		
+	, dtmScheduledDate		
+	, L.intFreightTermId
+	, L.strFreightTerm 
 FROM vyuLGLoadContainerPurchaseContractsLookup L
