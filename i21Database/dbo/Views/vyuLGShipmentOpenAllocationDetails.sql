@@ -90,4 +90,4 @@ AS
 	LEFT JOIN	tblSMCountry			CS	ON	CS.intCountryID				= ITS.intOriginId
 	WHERE ((AD.dblPAllocatedQty - IsNull(LD.dblPShippedQuantity, 0) + IsNull(PL.dblLotPickedQty, 0)) > 0)
 	  AND ((AD.dblSAllocatedQty - IsNull(LD.dblSShippedQuantity, 0) - IsNull(PLS.dblSalePickedQty, 0)) > 0)
-	  AND AD.intAllocationDetailId NOT IN (SELECT ISNULL(intAllocationDetailId, 0) FROM tblLGLoadDetail)
+	 -- AND AD.intAllocationDetailId NOT IN (SELECT ISNULL(intAllocationDetailId, 0) FROM tblLGLoadDetail)
