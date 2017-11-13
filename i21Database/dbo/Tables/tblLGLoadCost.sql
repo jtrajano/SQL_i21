@@ -24,3 +24,13 @@ CREATE TABLE [dbo].[tblLGLoadCost]
 	CONSTRAINT [FK_tblLGLoadCost_tblAPBill_intBillId] FOREIGN KEY ([intBillId]) REFERENCES [tblAPBill]([intBillId]),
 	CONSTRAINT [FK_tblLGLoadCost_tblSMCurrency_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID])
 )
+GO
+CREATE NONCLUSTERED INDEX [IX_tblLGLoadCost_intLoadId] ON [dbo].[tblLGLoadCost]
+(
+ [intLoadId] ASC
+)
+INCLUDE (  
+ [intLoadCostId],
+ [intVendorId]
+) 
+GO
