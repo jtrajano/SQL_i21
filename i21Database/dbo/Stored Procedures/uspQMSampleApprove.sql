@@ -495,6 +495,17 @@ BEGIN TRY
 			) x
 	WHERE dbo.tblQMSample.intSampleId = @intSampleId
 
+	IF (@intSampleId > 0)
+	BEGIN
+		EXEC uspSMAuditLog @keyValue = @intSampleId
+			,@screenName = 'Quality.view.QualitySample'
+			,@entityId = @intLastModifiedUserId
+			,@actionType = 'Approved'
+			,@changeDescription = ''
+			,@fromValue = ''
+			,@toValue = ''
+	END
+
 	EXEC sp_xml_removedocument @idoc
 
 	COMMIT TRAN
