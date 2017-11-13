@@ -26,3 +26,14 @@ CONSTRAINT [FK_tblLGLoadWarehouse_tblICStorageLocation_intStorageLocationId] FOR
 CONSTRAINT [FK_tblLGLoadWarehouse_tblEMEntity_intHaulerEntityId] FOREIGN KEY ([intHaulerEntityId]) REFERENCES tblEMEntity([intEntityId]),
 CONSTRAINT [FK_tblLGLoadWarehouse_tblLGWarehouseRateMatrixHeader_intWarehouseRateMatrixHeaderId] FOREIGN KEY ([intWarehouseRateMatrixHeaderId]) REFERENCES [tblLGWarehouseRateMatrixHeader]([intWarehouseRateMatrixHeaderId])
 )
+GO
+CREATE NONCLUSTERED INDEX [IX_tblLGLoadWarehouse_intLoadId] ON [dbo].[tblLGLoadWarehouse]
+(
+ [intLoadId] ASC
+)
+INCLUDE (  
+ [intLoadWarehouseId],
+ [intHaulerEntityId]
+) 
+
+GO
