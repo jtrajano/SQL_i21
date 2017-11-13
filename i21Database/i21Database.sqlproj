@@ -5887,6 +5887,7 @@
     <Build Include="dbo\Tables\tblRKFutOptTransactionHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspRKFutOptTransactionHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspLGRecalculatedWarehouseServiceCharges.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTUpdateRetailPriceAdjustment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
