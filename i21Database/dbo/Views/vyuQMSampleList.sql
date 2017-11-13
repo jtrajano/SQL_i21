@@ -55,6 +55,7 @@ SELECT S.intSampleId
 	,WO.strWorkOrderNo
 	,S.strComment
 	,ISNULL(ito1.intOwnerId, ito2.intOwnerId) AS intEntityId
+	,S1.strSampleNumber AS strParentSampleNo
 FROM dbo.tblQMSample S
 JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 	AND S.ysnIsContractCompleted <> 1
@@ -83,3 +84,4 @@ LEFT JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocation
 LEFT JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = S.intInventoryReceiptId
 LEFT JOIN tblMFWorkOrder WO ON WO.intWorkOrderId = S.intWorkOrderId
 LEFT JOIN tblICCommodity CY ON CY.intCommodityId = CH.intCommodityId
+LEFT JOIN tblQMSample S1 ON S1.intSampleId = S.intParentSampleId

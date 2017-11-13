@@ -4,6 +4,7 @@
 	[intConcurrencyId] INT NULL CONSTRAINT [DF_tblQMSample_intConcurrencyId] DEFAULT 0, 
 	[intSampleTypeId] INT NOT NULL, 
 	[strSampleNumber] NVARCHAR(30) COLLATE Latin1_General_CI_AS NOT NULL, 
+	[intParentSampleId] INT, 
 	[strSampleRefNo] NVARCHAR(30) COLLATE Latin1_General_CI_AS, 
 	[intProductTypeId] INT NOT NULL, -- Transaction Type Id
 	[intProductValueId] INT, -- Transaction Object Id
