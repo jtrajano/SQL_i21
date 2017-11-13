@@ -38,6 +38,9 @@ BEGIN
 			,L.dblQty
 			,L.intItemUOMId AS intQtyUOMId
 			,U1.strUnitMeasure AS strQtyUOM
+			,ISNULL(RUOM.intItemUOMId, SUOM.intItemUOMId) AS intRecipeItemUOMId
+			,RU.intUnitMeasureId AS intRecipeUnitMeasureId
+			,RU.strUnitMeasure AS strRecipeUnitMeasure
 		FROM dbo.tblMFRecipe R
 		JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 			AND R.intItemId = @intItemId
@@ -78,6 +81,11 @@ BEGIN
 		JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 		JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = L.intItemUOMId
 		JOIN dbo.tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU1.intUnitMeasureId
+		LEFT JOIN dbo.tblICItemUOM RUOM ON RUOM.intItemUOMId = RI.intItemUOMId
+			AND RUOM.intItemId = RI.intItemId
+		LEFT JOIN dbo.tblICItemUOM SUOM ON SUOM.intItemUOMId = SI.intItemUOMId
+			AND SUOM.intItemId = I.intItemId
+		JOIN dbo.tblICUnitMeasure RU ON RU.intUnitMeasureId = ISNULL(RUOM.intUnitMeasureId, SUOM.intUnitMeasureId)
 		WHERE LS.strPrimaryStatus = 'Active'
 			AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
 			AND L.dblQty > 0
@@ -109,6 +117,9 @@ BEGIN
 			,S.dblOnHand - S.dblUnitReserved AS dblQty
 			,IU.intItemUOMId AS intQtyUOMId
 			,U.strUnitMeasure AS strQtyUOM
+			,ISNULL(RUOM.intItemUOMId, SUOM.intItemUOMId) AS intRecipeItemUOMId
+			,RU.intUnitMeasureId AS intRecipeUnitMeasureId
+			,RU.strUnitMeasure AS strRecipeUnitMeasure
 		FROM dbo.tblMFRecipe R
 		JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 			AND R.intItemId = @intItemId
@@ -142,6 +153,11 @@ BEGIN
 			AND IU.ysnStockUnit = 1
 		JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
 		JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = S.intStorageLocationId
+		LEFT JOIN dbo.tblICItemUOM RUOM ON RUOM.intItemUOMId = RI.intItemUOMId
+			AND RUOM.intItemId = RI.intItemId
+		LEFT JOIN dbo.tblICItemUOM SUOM ON SUOM.intItemUOMId = SI.intItemUOMId
+			AND SUOM.intItemId = I.intItemId
+		JOIN dbo.tblICUnitMeasure RU ON RU.intUnitMeasureId = ISNULL(RUOM.intUnitMeasureId, SUOM.intUnitMeasureId)
 		WHERE S.dblOnHand - S.dblUnitReserved > 0
 			AND I.strStatus = 'Active'
 		ORDER BY dtmDateCreated
@@ -170,6 +186,9 @@ BEGIN
 			,L.dblQty
 			,L.intItemUOMId AS intQtyUOMId
 			,U1.strUnitMeasure AS strQtyUOM
+			,ISNULL(RUOM.intItemUOMId, SUOM.intItemUOMId) AS intRecipeItemUOMId
+			,RU.intUnitMeasureId AS intRecipeUnitMeasureId
+			,RU.strUnitMeasure AS strRecipeUnitMeasure
 		FROM dbo.tblMFWorkOrderRecipe R
 		JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 			AND RI.intWorkOrderId = R.intWorkOrderId
@@ -209,6 +228,11 @@ BEGIN
 		JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 		JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = L.intItemUOMId
 		JOIN dbo.tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU1.intUnitMeasureId
+		LEFT JOIN dbo.tblICItemUOM RUOM ON RUOM.intItemUOMId = RI.intItemUOMId
+			AND RUOM.intItemId = RI.intItemId
+		LEFT JOIN dbo.tblICItemUOM SUOM ON SUOM.intItemUOMId = SI.intItemUOMId
+			AND SUOM.intItemId = I.intItemId
+		JOIN dbo.tblICUnitMeasure RU ON RU.intUnitMeasureId = ISNULL(RUOM.intUnitMeasureId, SUOM.intUnitMeasureId)
 		WHERE LS.strPrimaryStatus = 'Active'
 			AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
 			AND L.dblQty > 0
@@ -240,6 +264,9 @@ BEGIN
 			,S.dblOnHand - S.dblUnitReserved AS dblQty
 			,S.intItemUOMId AS intQtyUOMId
 			,U.strUnitMeasure AS strQtyUOM
+			,ISNULL(RUOM.intItemUOMId, SUOM.intItemUOMId) AS intRecipeItemUOMId
+			,RU.intUnitMeasureId AS intRecipeUnitMeasureId
+			,RU.strUnitMeasure AS strRecipeUnitMeasure
 		FROM dbo.tblMFWorkOrderRecipe R
 		JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 			AND RI.intWorkOrderId = R.intWorkOrderId
@@ -272,6 +299,11 @@ BEGIN
 			AND IU.ysnStockUnit = 1
 		JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
 		JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = S.intStorageLocationId
+		LEFT JOIN dbo.tblICItemUOM RUOM ON RUOM.intItemUOMId = RI.intItemUOMId
+			AND RUOM.intItemId = RI.intItemId
+		LEFT JOIN dbo.tblICItemUOM SUOM ON SUOM.intItemUOMId = SI.intItemUOMId
+			AND SUOM.intItemId = I.intItemId
+		JOIN dbo.tblICUnitMeasure RU ON RU.intUnitMeasureId = ISNULL(RUOM.intUnitMeasureId, SUOM.intUnitMeasureId)
 		WHERE S.dblOnHand - S.dblUnitReserved > 0
 			AND I.strStatus = 'Active'
 		ORDER BY dtmDateCreated ASC
