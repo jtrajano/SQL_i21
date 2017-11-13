@@ -39,6 +39,7 @@ AS
 			CD.strERPBatchNumber,
 			CD.dblNetWeight,
 			CD.dblTotalCost,
+			CD.dtmLastPricingDate,
 
 			IC.strContractItemName,
 			IC.strContractItemNo,

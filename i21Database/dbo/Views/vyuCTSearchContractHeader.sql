@@ -35,7 +35,8 @@ SELECT	CH.intContractHeaderId,
 		CH.ysnCategory,
 		CH.ysnMultiplePriceFixation,
 		CH.strCPContract,
-		
+		CH.ysnBrokerage,
+
 		PR.strName AS strProducer,
 		ES.strName AS strSalesperson,
 		CY.strDescription			AS	strCommodityDescription,

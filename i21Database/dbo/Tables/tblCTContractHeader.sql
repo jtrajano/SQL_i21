@@ -70,6 +70,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	dtmLastModified DATETIME,
 	ysnMailSent BIT,
 	strAmendmentLog  [nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
+	ysnBrokerage BIT,
 
     CONSTRAINT [PK_tblCTContractHeader_intContractHeaderId] PRIMARY KEY CLUSTERED ([intContractHeaderId] ASC), 	
 	CONSTRAINT [UQ_tblCTContractHeader_intContractTypeId_intContractNumber] UNIQUE ([intContractTypeId], [strContractNumber]), 

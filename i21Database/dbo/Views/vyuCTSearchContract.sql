@@ -69,7 +69,8 @@ AS
 			CH.strCPContract,
 			CH.strCounterParty,
 			ISNULL(TR.ysnOnceApproved,0) AS ysnApproved,
-			CH.intDefaultCommodityUnitMeasureId
+			CH.intDefaultCommodityUnitMeasureId,
+			CH.ysnBrokerage
 
 	FROM	[vyuCTSearchContractHeader] CH	LEFT
 	JOIN
