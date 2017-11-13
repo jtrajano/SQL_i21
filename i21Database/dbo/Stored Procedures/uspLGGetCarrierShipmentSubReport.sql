@@ -95,7 +95,7 @@ BEGIN
 			L.strLoadDirectionMsg,
 			L.ysnPrintLoadDirections,
 			Convert(NVarchar, Convert(decimal (16, 2), dblQuantity)) + ' - ' + L.strItemUOM as strQuantity,
-			L.strItemNo,
+			L.strItemDescription,
 			L.strItemUOM,
 			'' as strOrignFullAddress,
 			'' as strDestinationFullAddress
