@@ -5873,7 +5873,21 @@
     <Build Include="dbo\Stored Procedures\uspAPCreateVendorRefund.sql" />
     <Build Include="dbo\Stored Procedures\uspLGSplitPickedLotBatch.sql" />
     <Build Include="dbo\Stored Procedures\uspMFLotCreate.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateOHEx2.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateOHTR2.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateOHMF2.sql" />
+    <Build Include="dbo\Stored Procedures\uspVRInsertCustomerSpecialPrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspVRUpdateCustomerSpecialPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateBillPaymentFromAR.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFValidateInventoryShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGCreateDebitCreditMemo.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGCreateInvoiceForWeightClaims.sql" />
+    <Build Include="dbo\Views\vyuTFGetOutputDesignerField.sql" />
+    <Build Include="dbo\Views\vyuTFGetReportingComponentField.sql" />
+    <Build Include="dbo\Tables\tblRKFutOptTransactionHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKFutOptTransactionHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGRecalculatedWarehouseServiceCharges.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTUpdateRetailPriceAdjustment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -6025,6 +6039,7 @@
     <Build Include="dbo\Stored Procedures\uspAPRpt1099Summary.sql" />
     <Build Include="dbo\Stored Procedures\uspSMUpdateEntityCredentialCompanyGridLayout.sql" />
     <None Include="Scripts\Post-Deployment\CCR\RemoveCCRObsoleteScreen.sql" />
+    <Build Include="dbo\Stored Procedures\uspCRMGetPipelineForecast.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
@@ -6107,5 +6122,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\WA_Washington.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\OH_Ohio.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\SM\1740_RemoveLoadScheduleResources.sql" />
   </ItemGroup>
 </Project>
