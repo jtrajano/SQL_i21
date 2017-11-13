@@ -256,6 +256,7 @@ FROM tblLGLoadDetail LoadDetail
 	LEFT JOIN tblCTWeightGrade SWG ON SWG.intWeightGradeId = SHeader.intWeightId
 	LEFT JOIN tblSMCompanyLocationSubLocation PCLSL ON PCLSL.intCompanyLocationSubLocationId = LoadDetail.intPSubLocationId
 	LEFT JOIN tblSMCompanyLocationSubLocation SCLSL ON SCLSL.intCompanyLocationSubLocationId = LoadDetail.intSSubLocationId
+	LEFT JOIN tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = PDetail.intRateTypeId
 	OUTER APPLY (
 		SELECT TOP 1 intItemUOMId, strUnitMeasure, strUnitType, dblUnitQty
 		FROM tblICItemUOM ItemUOM 

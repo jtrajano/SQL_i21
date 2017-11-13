@@ -65,6 +65,10 @@ SELECT
 	, dblStockUOMCF					= oStockUOM.dblUnitQty
 	, FreightTerm.intFreightTermId
 	, FreightTerm.strFreightTerm
+    , dblForexRate                   = CT.dblRate
+    , intForexRateTypeId             = CT.intRateTypeId
+    , strForexRateType               = RT.strCurrencyExchangeRateType
+	, L.dtmScheduledDate
 FROM tblLGLoad L
 	INNER JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 	INNER JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
@@ -86,6 +90,7 @@ FROM tblLGLoad L
 	LEFT JOIN tblICItem Item ON Item.intItemId = LD.intItemId
 	LEFT JOIN tblLGContainerType ContType ON ContType.intContainerTypeId = L.intContainerTypeId
 	LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = LW.intSubLocationId
+	LEFT JOIN tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = CT.intRateTypeId
 	OUTER APPLY (
 		SELECT TOP 1 intItemUOMId, strUnitMeasure, strUnitType, dblUnitQty
 		FROM tblICItemUOM ItemUOM 
