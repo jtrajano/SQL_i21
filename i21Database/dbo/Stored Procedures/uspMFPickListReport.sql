@@ -116,7 +116,7 @@ Declare @tblItems AS TABLE
 	[strLotNumber] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strLotAlias] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strStorageLocationName] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
-	[strItemNo] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strItemNo] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[strDescription] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[dblPickQuantity] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strPickUOM] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
@@ -500,7 +500,7 @@ Begin --Sales Order Pick List
 
 	--Get Comments From SO	
 	INSERT INTO @tblItems(strItemNo,strDescription,intSalesOrderDetailId,strItemType)
-	Select '',sd.strItemDescription,sd.intSalesOrderDetailId,i.strType
+	Select sd.strItemDescription,'',sd.intSalesOrderDetailId,i.strType
 	From tblSOSalesOrderDetail sd Join tblICItem i on sd.intItemId=i.intItemId
 	Where sd.intSalesOrderId=@intSalesOrderId AND sd.intCommentTypeId IN (1,2)
 
@@ -595,7 +595,7 @@ Begin --Sales Order Pick List
 				DROP TABLE #tblTempItems
 
 			Select * into #tblTempItems from @tblItems Where intBatchId=0
-			Delete From #tblTempItems Where dblPickQuantity>0
+			Delete From #tblTempItems Where cast(dblPickQuantity as numeric(38,20))>0
 			Update #tblTempItems Set intBatchId=@intBatchCounter
 
 			Select @intMinItem = MIN(intRowNo) From @tblInputItem
