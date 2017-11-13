@@ -2681,12 +2681,18 @@ Ext.define('Inventory.view.ItemViewController', {
         var grid = combo.up('grid');
         var selection = grid.getSelectionModel().getSelection();
         var current = win.viewModel.data.current;
-        
+        var filters = [{
+            column: 'intItemLocationId',
+            value: records[0].get('intItemLocationId'),
+            condition: 'eq',
+            conjunction: 'And'
+        }];
+
         ic.utils.ajax({
                 timeout: 120000,
                 url: './Inventory/api/ItemLocation/Search',
                 params: {
-                    intItemLocationId: records[0].data.intItemLocationId
+                    filter: iRely.Functions.encodeFilters(filters)
                 },
                 method: 'Get'  
             })
