@@ -624,7 +624,8 @@ Ext.define('Inventory.view.ItemViewController', {
                         defaultFilters: [{
                             column: 'intItemId',
                             value: '{current.intItemId}'
-                        }]
+                        }],
+                        origValueField: 'intItemLocationId'
                     }
                 },
                 colCustomerXrefCustomer: {
@@ -648,7 +649,8 @@ Ext.define('Inventory.view.ItemViewController', {
                         defaultFilters: [{
                             column: 'intItemId',
                             value: '{current.intItemId}'
-                        }]
+                        }],
+                        origValueField: 'intItemLocationId'
                     }
                 },
                 colVendorXrefVendor: {
@@ -2914,56 +2916,16 @@ Ext.define('Inventory.view.ItemViewController', {
     // <editor-fold desc="Point Of Sale Tab Methods and Event Handlers">
 
     onPOSCategorySelect: function(combo, records, eOpts) {
-    if (records.length <= 0)
-        return;
-
-    var grid = combo.up('grid');
-    var plugin = grid.getPlugin('cepPOSCategory');
-    var current = plugin.getActiveRecord();
-
-    if (combo.column.itemId === 'colPOSCategoryName')
-    {
-        current.set('intCategoryId', records[0].get('intCategoryId'));
-    }
-},
-
-    // </editor-fold>
-
-    // <editor-fold desc="Cross Reference Tab Methods and Event Handlers">
-
-    onCustomerXrefSelect: function(combo, records, eOpts) {
         if (records.length <= 0)
             return;
 
         var grid = combo.up('grid');
-        var plugin = grid.getPlugin('cepCustomerXref');
+        var plugin = grid.getPlugin('cepPOSCategory');
         var current = plugin.getActiveRecord();
 
-        if (combo.column.itemId === 'colCustomerXrefLocation')
+        if (combo.column.itemId === 'colPOSCategoryName')
         {
-            current.set('intItemLocationId', records[0].get('intItemLocationId'));
-        }
-        else if (combo.column.itemId === 'colCustomerXrefCustomer') {
-            current.set('intCustomerId', records[0].get('intEntityCustomerId'));
-        }
-    },
-
-    onVendorXrefSelect: function(combo, records, eOpts) {
-        if (records.length <= 0)
-            return;
-
-        var grid = combo.up('grid');
-        var plugin = grid.getPlugin('cepVendorXref');
-        var current = plugin.getActiveRecord();
-
-        if (combo.column.itemId === 'colVendorXrefLocation'){
-            current.set('intItemLocationId', records[0].get('intItemLocationId'));
-        }
-        else if (combo.column.itemId === 'colVendorXrefVendor') {
-            current.set('intVendorId', records[0].get('intEntityVendorId'));
-        }
-        else if (combo.column.itemId === 'colVendorXrefUnitMeasure') {
-            current.set('intItemUnitMeasureId', records[0].get('intItemUOMId'));
+            current.set('intCategoryId', records[0].get('intCategoryId'));
         }
     },
 
@@ -4167,18 +4129,6 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#cboPOSCategoryId": {
                 select: this.onPOSCategorySelect
-            },
-            "#cboCustXrefLocation": {
-                select: this.onCustomerXrefSelect
-            },
-            "#cboCustXrefCustomer": {
-                select: this.onCustomerXrefSelect
-            },
-            "#cboVendorXrefLocation": {
-                select: this.onVendorXrefSelect
-            },
-            "#cboVendorXrefVendor": {
-                select: this.onVendorXrefSelect
             },
             "#cboVendorXrefUOM": {
                 select: this.onVendorXrefSelect
