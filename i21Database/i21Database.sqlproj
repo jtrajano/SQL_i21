@@ -5900,6 +5900,7 @@
     <Build Include="dbo\Stored Procedures\uspMFProcessEDI943.sql" />
     <Build Include="dbo\Stored Procedures\uspMFProcessEDI940.sql" />
     <Build Include="dbo\Stored Procedures\uspMFProcessEDI945.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRCreateSettleStorage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

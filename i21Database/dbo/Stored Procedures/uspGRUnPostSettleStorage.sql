@@ -26,6 +26,7 @@ BEGIN TRY
 	DECLARE @CommodityStockUomId INT
 	DECLARE @intInventoryItemStockUOMId INT
 	DECLARE @UserName NVARCHAR(100)
+	DECLARE @intParentSettleStorageId INT
 	
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXml
@@ -33,6 +34,8 @@ BEGIN TRY
 	SELECT @intSettleStorageId = intSettleStorageId,@UserId=intEntityUserSecurityId
 	FROM OPENXML(@idoc, 'root', 2) WITH (intSettleStorageId INT,intEntityUserSecurityId INT)
 	
+	SET @intParentSettleStorageId = @intSettleStorageId
+
 	SELECT @UserName = strUserName
 	FROM tblSMUserSecurity
 	WHERE [intEntityId] = @UserId
@@ -58,312 +61,338 @@ BEGIN TRY
 		FROM tblGRSettleStorage
 		WHERE intSettleStorageId = @intSettleStorageId
 
-		SELECT @dblUOMQty=dblUnitQty 
-		FROM tblICItemUOM 
-		WHERE intItemUOMId=@CommodityStockUomId
-
-		SELECT @ItemLocationId = intItemLocationId
-		FROM tblICItemLocation
-		WHERE intItemId = @ItemId AND intLocationId = @LocationId
-
-		SELECT @intInventoryItemStockUOMId = intItemUOMId
-		FROM tblICItemStockUOM
-		WHERE intItemId = @ItemId
-
-		IF EXISTS (
-					SELECT 1
-					FROM tblAPBill
-					WHERE intBillId = @BillId AND ISNULL(ysnPosted, 0) = 1
-				  )
+		IF ISNULL(@BillId,0) = 0
 		BEGIN
-			EXEC uspAPPostBill 
-				 @post = 0
-				,@recap = 0
-				,@isBatch = 0
-				,@param = @BillId
-				,@userId = @UserId
-		END
-
-		--2. DP Contract, Purchase Contract and Ticket Balance Increment
-		INSERT INTO @tblContractIncrement 
-		(
-			 intSettleStorageTicketId
-			,intPricingTypeId
-			,strDepletionType
-			,intContractHeaderId
-			,intContractDetailId
-			,dblUnits
-		)
-		SELECT 
-			 intSettleStorageTicketId = UH.intExternalId
-			,intPricingTypeId		  = 5 
-			,strDepletionType		  = 'DP Contract'
-			,intContractHeaderId	  = UH.intContractHeaderId 
-			,intContractDetailId	  = UH.intContractDetailId 
-			,dblUnits				  = UH.dblTransactionQuantity
-		FROM tblCTSequenceUsageHistory UH
-		JOIN tblGRSettleStorageTicket SST ON SST.intSettleStorageTicketId = UH.intExternalId AND SST.intSettleStorageId = UH.intExternalHeaderId
-		JOIN tblGRStorageHistory SH ON SH.intContractHeaderId = UH.intContractHeaderId AND SH.intCustomerStorageId = SST.intCustomerStorageId
-		WHERE UH.intExternalHeaderId = @intSettleStorageId AND UH.strScreenName = 'Settle Storage' AND UH.strFieldName = 'Balance' AND SH.strType IN ('From Scale','From Delivery Sheet')
-		
-		UNION ALL
-		
-		SELECT 
-			 intSettleStorageTicketId  = UH.intExternalId
-			,intPricingTypeId		   = 1 
-			,strDepletionType		   = 'Purchase Contract' 
-			,intContractHeaderId	   = UH.intContractHeaderId 
-			,intContractDetailId       = UH.intContractDetailId 
-			,dblUnits                  = UH.dblTransactionQuantity
-		FROM tblCTSequenceUsageHistory UH
-		JOIN tblGRSettleStorageTicket SST ON SST.intSettleStorageTicketId = UH.intExternalId AND SST.intSettleStorageId = UH.intExternalHeaderId
-		JOIN tblGRStorageHistory SH ON SH.intContractHeaderId = UH.intContractHeaderId AND SH.intCustomerStorageId = SST.intCustomerStorageId AND SH.intSettleStorageId = UH.intExternalHeaderId
-		WHERE UH.intExternalHeaderId = @intSettleStorageId AND UH.strScreenName = 'Settle Storage' AND UH.strFieldName = 'Balance' AND SH.strType = 'Settlement'
-
-		BEGIN
-			DECLARE @intDepletionKey INT
-			DECLARE @intPricingTypeId INT
-			DECLARE @intSettleStorageTicketId INT
-			DECLARE @intContractDetailId INT
-			DECLARE @intItemUOMId INT
-			DECLARE @dblCost DECIMAL(24, 10)
-
-			SELECT @intDepletionKey = MIN(intDepletionKey)
-			FROM @tblContractIncrement
-
-			WHILE @intDepletionKey > 0
+			SELECT @intSettleStorageId = MIN(intSettleStorageId)
+			FROM tblGRSettleStorage
+			WHERE intParentSettleStorageId =@intParentSettleStorageId
+			
+			WHILE @intSettleStorageId >0
 			BEGIN
-				SET @intSettleStorageTicketId = NULL
-				SET @intPricingTypeId = NULL
-				SET @intContractDetailId = NULL
 				
-				SET @dblUnits = NULL
-				SET @intItemUOMId = NULL
+				SET @strXml=NULL				
+				SET @strXml=N'<root><intSettleStorageId>'+LTRIM(@intSettleStorageId)+'</intSettleStorageId><intEntityUserSecurityId>'+LTRIM(@UserId)+'</intEntityUserSecurityId></root>'
+				EXEC uspGRUnPostSettleStorage @strXml
 
-				SELECT 
-					 @intSettleStorageTicketId = intSettleStorageTicketId
-					,@intPricingTypeId = intPricingTypeId
-					,@intContractDetailId = intContractDetailId
-					,@dblUnits = dblUnits
-				FROM @tblContractIncrement
-				WHERE intDepletionKey = @intDepletionKey
+				SELECT @intSettleStorageId = MIN(intSettleStorageId)
+				FROM tblGRSettleStorage
+				WHERE intParentSettleStorageId =@intParentSettleStorageId AND intSettleStorageId > @intSettleStorageId
+			END
+			DELETE tblGRSettleStorage WHERE intSettleStorageId=@intParentSettleStorageId
+		END
+		ELSE
+		BEGIN
 
-				IF @intPricingTypeId = 5
-				BEGIN
-					SELECT @intItemUOMId = intItemUOMId
-					FROM tblCTContractDetail
-					WHERE intContractDetailId = @intContractDetailId
-					
-					SET @dblUnits = -@dblUnits
+			SELECT @dblUOMQty=dblUnitQty 
+			FROM tblICItemUOM 
+			WHERE intItemUOMId=@CommodityStockUomId
 
-					EXEC uspCTUpdateSequenceQuantityUsingUOM 
-						 @intContractDetailId = @intContractDetailId
-						,@dblQuantityToUpdate = @dblUnits
-						,@intUserId = @UserId
-						,@intExternalId = @intSettleStorageTicketId
-						,@strScreenName = 'Settle Storage'
-						,@intSourceItemUOMId = @intItemUOMId
-				END
-				ELSE
-				BEGIN
-					EXEC uspCTUpdateSequenceBalance 
-						 @intContractDetailId = @intContractDetailId
-						,@dblQuantityToUpdate = @dblUnits
-						,@intUserId = @UserId
-						,@intExternalId = @intSettleStorageTicketId
-						,@strScreenName = 'Settle Storage'
-				END
+			SELECT @ItemLocationId = intItemLocationId
+			FROM tblICItemLocation
+			WHERE intItemId = @ItemId AND intLocationId = @LocationId
+
+			SELECT @intInventoryItemStockUOMId = intItemUOMId
+			FROM tblICItemUOM
+			WHERE intItemId = @ItemId AND ysnStockUnit=1
+
+			IF EXISTS (
+						SELECT 1
+						FROM tblAPBill
+						WHERE intBillId = @BillId AND ISNULL(ysnPosted, 0) = 1
+					  )
+			BEGIN
+				EXEC uspAPPostBill 
+					 @post = 0
+					,@recap = 0
+					,@isBatch = 0
+					,@param = @BillId
+					,@userId = @UserId
+			END
+
+			--2. DP Contract, Purchase Contract and Ticket Balance Increment
+			DELETE FROM @tblContractIncrement
+
+			INSERT INTO @tblContractIncrement 
+			(
+				 intSettleStorageTicketId
+				,intPricingTypeId
+				,strDepletionType
+				,intContractHeaderId
+				,intContractDetailId
+				,dblUnits
+			)
+			SELECT 
+				 intSettleStorageTicketId = UH.intExternalId
+				,intPricingTypeId		  = 5 
+				,strDepletionType		  = 'DP Contract'
+				,intContractHeaderId	  = UH.intContractHeaderId 
+				,intContractDetailId	  = UH.intContractDetailId 
+				,dblUnits				  = UH.dblTransactionQuantity
+			FROM tblCTSequenceUsageHistory UH
+			JOIN tblGRSettleStorageTicket SST ON SST.intSettleStorageTicketId = UH.intExternalId AND SST.intSettleStorageId = UH.intExternalHeaderId
+			JOIN tblGRStorageHistory SH ON SH.intContractHeaderId = UH.intContractHeaderId AND SH.intCustomerStorageId = SST.intCustomerStorageId
+			WHERE UH.intExternalHeaderId = @intSettleStorageId AND UH.strScreenName = 'Settle Storage' AND UH.strFieldName = 'Balance' AND SH.strType IN ('From Scale','From Delivery Sheet')
+		
+			UNION ALL
+		
+			SELECT 
+				 intSettleStorageTicketId  = UH.intExternalId
+				,intPricingTypeId		   = 1 
+				,strDepletionType		   = 'Purchase Contract' 
+				,intContractHeaderId	   = UH.intContractHeaderId 
+				,intContractDetailId       = UH.intContractDetailId 
+				,dblUnits                  = UH.dblTransactionQuantity
+			FROM tblCTSequenceUsageHistory UH
+			JOIN tblGRSettleStorageTicket SST ON SST.intSettleStorageTicketId = UH.intExternalId AND SST.intSettleStorageId = UH.intExternalHeaderId
+			JOIN tblGRStorageHistory SH ON SH.intContractHeaderId = UH.intContractHeaderId AND SH.intCustomerStorageId = SST.intCustomerStorageId AND SH.intSettleStorageId = UH.intExternalHeaderId
+			WHERE UH.intExternalHeaderId = @intSettleStorageId AND UH.strScreenName = 'Settle Storage' AND UH.strFieldName = 'Balance' AND SH.strType = 'Settlement'
+
+			BEGIN
+				DECLARE @intDepletionKey INT
+				DECLARE @intPricingTypeId INT
+				DECLARE @intSettleStorageTicketId INT
+				DECLARE @intContractDetailId INT
+				DECLARE @intItemUOMId INT
+				DECLARE @dblCost DECIMAL(24, 10)
 
 				SELECT @intDepletionKey = MIN(intDepletionKey)
 				FROM @tblContractIncrement
-				WHERE intDepletionKey > @intDepletionKey
+
+				WHILE @intDepletionKey > 0
+				BEGIN
+					SET @intSettleStorageTicketId = NULL
+					SET @intPricingTypeId = NULL
+					SET @intContractDetailId = NULL
+				
+					SET @dblUnits = NULL
+					SET @intItemUOMId = NULL
+
+					SELECT 
+						 @intSettleStorageTicketId = intSettleStorageTicketId
+						,@intPricingTypeId = intPricingTypeId
+						,@intContractDetailId = intContractDetailId
+						,@dblUnits = dblUnits
+					FROM @tblContractIncrement
+					WHERE intDepletionKey = @intDepletionKey
+
+					IF @intPricingTypeId = 5
+					BEGIN
+						SELECT @intItemUOMId = intItemUOMId
+						FROM tblCTContractDetail
+						WHERE intContractDetailId = @intContractDetailId
+					
+						SET @dblUnits = -@dblUnits
+
+						EXEC uspCTUpdateSequenceQuantityUsingUOM 
+							 @intContractDetailId = @intContractDetailId
+							,@dblQuantityToUpdate = @dblUnits
+							,@intUserId = @UserId
+							,@intExternalId = @intSettleStorageTicketId
+							,@strScreenName = 'Settle Storage'
+							,@intSourceItemUOMId = @intItemUOMId
+					END
+					ELSE
+					BEGIN
+						EXEC uspCTUpdateSequenceBalance 
+							 @intContractDetailId = @intContractDetailId
+							,@dblQuantityToUpdate = @dblUnits
+							,@intUserId = @UserId
+							,@intExternalId = @intSettleStorageTicketId
+							,@strScreenName = 'Settle Storage'
+					END
+
+					SELECT @intDepletionKey = MIN(intDepletionKey)
+					FROM @tblContractIncrement
+					WHERE intDepletionKey > @intDepletionKey
+				END
+
+				UPDATE CS
+				SET CS.dblOpenBalance = CS.dblOpenBalance + SH.dblUnit
+				FROM tblGRCustomerStorage CS
+				JOIN (
+						SELECT intCustomerStorageId
+							,SUM(dblUnits) dblUnit
+						FROM tblGRStorageHistory
+						WHERE intSettleStorageId = @intSettleStorageId
+						GROUP BY intCustomerStorageId
+					) SH ON SH.intCustomerStorageId = CS.intCustomerStorageId
 			END
 
-			UPDATE CS
-			SET CS.dblOpenBalance = CS.dblOpenBalance + SH.dblUnit
-			FROM tblGRCustomerStorage CS
-			JOIN (
-					SELECT intCustomerStorageId
-						,SUM(dblUnits) dblUnit
-					FROM tblGRStorageHistory
-					WHERE intSettleStorageId = @intSettleStorageId
-					GROUP BY intCustomerStorageId
-				) SH ON SH.intCustomerStorageId = CS.intCustomerStorageId
-		END
-
-		--3. OnHand and OnStore Increment
-		BEGIN
-			EXEC dbo.uspSMGetStartingNumber 
-				 @STARTING_NUMBER_BATCH
-				,@strBatchId OUTPUT
-
-			IF @@ERROR <> 0
-				GOTO SettleStorage_Exit;
-
-			DELETE
-			FROM @ItemsToStorage
-
-			DELETE
-			FROM @ItemsToPost
-
-			INSERT INTO @ItemsToStorage 
-			(
-				intItemId
-				,intItemLocationId
-				,intItemUOMId
-				,dtmDate
-				,dblQty
-				,dblUOMQty
-				,dblCost
-				,dblSalesPrice
-				,intCurrencyId
-				,dblExchangeRate
-				,intTransactionId
-				,intTransactionDetailId
-				,strTransactionId
-				,intTransactionTypeId
-				,intSubLocationId
-				,intStorageLocationId
-				,ysnIsStorage
-			)
-			SELECT 
-				 intItemId					= @ItemId
-				,intItemLocationId			= @ItemLocationId
-				,intItemUOMId				= @intInventoryItemStockUOMId
-				,dtmDate					= GETDATE()
-				,dblQty						= SH.dblUnits
-				,dblUOMQty					= @dblUOMQty
-				,dblCost					= SH.dblPaidAmount
-				,dblSalesPrice				= 0.00
-				,intCurrencyId				= @intCurrencyId
-				,dblExchangeRate			= 1
-				,intTransactionId			= @intSettleStorageId
-				,intTransactionDetailId		= @intSettleStorageId
-				,strTransactionId			= @TicketNo
-				,intTransactionTypeId		= 44
-				,intSubLocationId			= CS.intCompanyLocationSubLocationId
-				,intStorageLocationId		= CS.intStorageLocationId
-				,ysnIsStorage				= 1
-			FROM tblGRStorageHistory SH
-			JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SH.intCustomerStorageId
-			JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
-			WHERE SH.intSettleStorageId = @intSettleStorageId
-
-			INSERT INTO @ItemsToPost 
-			(
-				intItemId
-				,intItemLocationId
-				,intItemUOMId
-				,dtmDate
-				,dblQty
-				,dblUOMQty
-				,dblCost
-				,dblSalesPrice
-				,intCurrencyId
-				,dblExchangeRate
-				,intTransactionId
-				,intTransactionDetailId
-				,strTransactionId
-				,intTransactionTypeId
-				,intSubLocationId
-				,intStorageLocationId
-				,ysnIsStorage
-			)
-			SELECT 
-				 intItemId					= @ItemId
-				,intItemLocationId			= @ItemLocationId
-				,intItemUOMId				= @intInventoryItemStockUOMId
-				,dtmDate					= GETDATE()
-				,dblQty						= - SH.dblUnits
-				,dblUOMQty					= @dblUOMQty
-				,dblCost					= SH.dblPaidAmount
-				,dblSalesPrice				= 0.00
-				,intCurrencyId				= @intCurrencyId
-				,dblExchangeRate			= 1
-				,intTransactionId			= @intSettleStorageId
-				,intTransactionDetailId		= @intSettleStorageId
-				,strTransactionId			= @TicketNo
-				,intTransactionTypeId		= 44
-				,intSubLocationId			= CS.intCompanyLocationSubLocationId
-				,intStorageLocationId		= CS.intStorageLocationId
-				,ysnIsStorage = 0
-			FROM tblGRStorageHistory SH
-			JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SH.intCustomerStorageId
-			JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
-			WHERE SH.intSettleStorageId = @intSettleStorageId
-
+			--3. OnHand and OnStore Increment
 			BEGIN
-				EXEC uspICPostStorage 
-					 @ItemsToStorage
-					,@strBatchId
-					,@UserId
+				EXEC dbo.uspSMGetStartingNumber 
+					 @STARTING_NUMBER_BATCH
+					,@strBatchId OUTPUT
 
 				IF @@ERROR <> 0
 					GOTO SettleStorage_Exit;
+
+				DELETE
+				FROM @ItemsToStorage
+
+				DELETE
+				FROM @ItemsToPost
+
+				INSERT INTO @ItemsToStorage 
+				(
+					intItemId
+					,intItemLocationId
+					,intItemUOMId
+					,dtmDate
+					,dblQty
+					,dblUOMQty
+					,dblCost
+					,dblSalesPrice
+					,intCurrencyId
+					,dblExchangeRate
+					,intTransactionId
+					,intTransactionDetailId
+					,strTransactionId
+					,intTransactionTypeId
+					,intSubLocationId
+					,intStorageLocationId
+					,ysnIsStorage
+				)
+				SELECT 
+					 intItemId					= @ItemId
+					,intItemLocationId			= @ItemLocationId
+					,intItemUOMId				= @intInventoryItemStockUOMId
+					,dtmDate					= GETDATE()
+					,dblQty						= SH.dblUnits
+					,dblUOMQty					= @dblUOMQty
+					,dblCost					= SH.dblPaidAmount
+					,dblSalesPrice				= 0.00
+					,intCurrencyId				= @intCurrencyId
+					,dblExchangeRate			= 1
+					,intTransactionId			= @intSettleStorageId
+					,intTransactionDetailId		= @intSettleStorageId
+					,strTransactionId			= @TicketNo
+					,intTransactionTypeId		= 44
+					,intSubLocationId			= CS.intCompanyLocationSubLocationId
+					,intStorageLocationId		= CS.intStorageLocationId
+					,ysnIsStorage				= 1
+				FROM tblGRStorageHistory SH
+				JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SH.intCustomerStorageId
+				JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
+				WHERE SH.intSettleStorageId = @intSettleStorageId
+
+				INSERT INTO @ItemsToPost 
+				(
+					intItemId
+					,intItemLocationId
+					,intItemUOMId
+					,dtmDate
+					,dblQty
+					,dblUOMQty
+					,dblCost
+					,dblSalesPrice
+					,intCurrencyId
+					,dblExchangeRate
+					,intTransactionId
+					,intTransactionDetailId
+					,strTransactionId
+					,intTransactionTypeId
+					,intSubLocationId
+					,intStorageLocationId
+					,ysnIsStorage
+				)
+				SELECT 
+					 intItemId					= @ItemId
+					,intItemLocationId			= @ItemLocationId
+					,intItemUOMId				= @intInventoryItemStockUOMId
+					,dtmDate					= GETDATE()
+					,dblQty						= - SH.dblUnits
+					,dblUOMQty					= @dblUOMQty
+					,dblCost					= SH.dblPaidAmount
+					,dblSalesPrice				= 0.00
+					,intCurrencyId				= @intCurrencyId
+					,dblExchangeRate			= 1
+					,intTransactionId			= @intSettleStorageId
+					,intTransactionDetailId		= @intSettleStorageId
+					,strTransactionId			= @TicketNo
+					,intTransactionTypeId		= 44
+					,intSubLocationId			= CS.intCompanyLocationSubLocationId
+					,intStorageLocationId		= CS.intStorageLocationId
+					,ysnIsStorage = 0
+				FROM tblGRStorageHistory SH
+				JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SH.intCustomerStorageId
+				JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
+				WHERE SH.intSettleStorageId = @intSettleStorageId
+
+				BEGIN
+					EXEC uspICPostStorage 
+						 @ItemsToStorage
+						,@strBatchId
+						,@UserId
+
+					IF @@ERROR <> 0
+						GOTO SettleStorage_Exit;
+				END
+
+				BEGIN
+					EXEC uspICPostCosting 
+						 @ItemsToPost
+						,@strBatchId
+						,'Cost of Goods'
+						,@UserId
+
+					IF @@ERROR <> 0
+						GOTO SettleStorage_Exit;
+				END
 			END
 
+			--4. Deleting History
 			BEGIN
-				EXEC uspICPostCosting 
-					 @ItemsToPost
-					,@strBatchId
-					,'Cost of Goods'
-					,@UserId
+				--EXEC uspGRDeleteStorageHistory 
+				--	 'Voucher'
+				--	,@BillId			
+				INSERT INTO [dbo].[tblGRStorageHistory] 
+				(
+					 [intConcurrencyId]
+					,[intCustomerStorageId]
+					,[intContractHeaderId]
+					,[dblUnits]
+					,[dtmHistoryDate]
+					,[strType]
+					,[strUserName]
+					,[intEntityId]
+					,[strSettleTicket]
+					,[intTransactionTypeId]
+					,[dblPaidAmount]
+					,[intBillId]
+					,[intSettleStorageId]
+					,[strVoucher]
+				)
+				SELECT 
+					 [intConcurrencyId]		= 1 
+					,[intCustomerStorageId] = [intCustomerStorageId]
+					,[intContractHeaderId]  = [intContractHeaderId]
+					,[dblUnits]				= [dblUnits]
+					,[dtmHistoryDate]		= GETDATE()
+					,[strType]				= 'Reverse Settlement'
+					,[strUserName]			= @UserName
+					,[intEntityId]			= [intEntityId]
+					,[strSettleTicket]		= [strSettleTicket]
+					,[intTransactionTypeId]	= 4
+					,[dblPaidAmount]		= [dblPaidAmount]
+					,[intBillId]			= NULL
+					,[intSettleStorageId]   = NULL
+					,[strVoucher]           = strVoucher
+				FROM tblGRStorageHistory
+				WHERE intSettleStorageId=@intSettleStorageId
 
-				IF @@ERROR <> 0
-					GOTO SettleStorage_Exit;
+				UPDATE tblGRStorageHistory SET intSettleStorageId=NULL,intBillId=NULL WHERE intSettleStorageId=@intSettleStorageId
+
 			END
-		END
-
-		--4. Deleting History
-		BEGIN
-			--EXEC uspGRDeleteStorageHistory 
-			--	 'Voucher'
-			--	,@BillId			
-			INSERT INTO [dbo].[tblGRStorageHistory] 
-			(
-				 [intConcurrencyId]
-				,[intCustomerStorageId]
-				,[intContractHeaderId]
-				,[dblUnits]
-				,[dtmHistoryDate]
-				,[strType]
-				,[strUserName]
-				,[intEntityId]
-				,[strSettleTicket]
-				,[intTransactionTypeId]
-				,[dblPaidAmount]
-				,[intBillId]
-				,[intSettleStorageId]
-				,[strVoucher]
-			)
-			SELECT 
-				 [intConcurrencyId]		= 1 
-				,[intCustomerStorageId] = [intCustomerStorageId]
-				,[intContractHeaderId]  = [intContractHeaderId]
-				,[dblUnits]				= [dblUnits]
-				,[dtmHistoryDate]		= GETDATE()
-				,[strType]				= 'Reverse Settlement'
-				,[strUserName]			= @UserName
-				,[intEntityId]			= [intEntityId]
-				,[strSettleTicket]		= [strSettleTicket]
-				,[intTransactionTypeId]	= 4
-				,[dblPaidAmount]		= [dblPaidAmount]
-				,[intBillId]			= NULL
-				,[intSettleStorageId]   = NULL
-				,[strVoucher]           = strVoucher
-			FROM tblGRStorageHistory
-			WHERE intSettleStorageId=@intSettleStorageId
-
-			UPDATE tblGRStorageHistory SET intSettleStorageId=NULL,intBillId=NULL WHERE intSettleStorageId=@intSettleStorageId
-
-		END
-		DELETE tblGRSettleStorage WHERE intSettleStorageId=@intSettleStorageId
+			DELETE tblGRSettleStorage WHERE intSettleStorageId=@intSettleStorageId
 		
-		--5. Removing Voucher
-		BEGIN
-			EXEC uspAPDeleteVoucher 
-				 @BillId
-				,@UserId
+			--5. Removing Voucher
+			BEGIN
+				EXEC uspAPDeleteVoucher 
+					 @BillId
+					,@UserId
+			END
+		
 		END		
 	END
 
