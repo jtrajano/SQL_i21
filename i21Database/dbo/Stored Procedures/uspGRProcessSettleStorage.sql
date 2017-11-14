@@ -263,7 +263,7 @@ BEGIN TRY
 	JOIN	tblICItem b ON b.intCommodityId = a.intCommodityId
 	WHERE	b.intItemId = @ItemId AND a.ysnStockUnit = 1
 	
-	SELECT @intInventoryItemStockUOMId=intItemUOMId FROM tblICItemStockUOM Where intItemId=@ItemId
+	SELECT @intInventoryItemStockUOMId=intItemUOMId FROM tblICItemUOM Where intItemId=@ItemId AND ysnStockUnit=1
 
 	IF @intUnitMeasureId IS NULL
 	BEGIN
