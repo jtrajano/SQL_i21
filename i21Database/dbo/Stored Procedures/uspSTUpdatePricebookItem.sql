@@ -1,15 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTUpdatePricebookItem]
 @intUniqueId Int
 , @intEntityId Int
-, @intItemUOMId int
-, @intItemId int
-, @intItemLocationId int
-, @intItemPricingId int
 , @intCategoryId int
-
 , @intItemVendorXrefId INT
 , @strVendorProduct NVARCHAR(250)
-
 , @strDescription nvarchar(250)
 , @PosDescription nvarchar(250)
 , @dblSalePrice decimal(18,6)
@@ -24,6 +18,20 @@
 AS
 BEGIN
 	BEGIN TRY
+
+		DECLARE @intItemUOMId int
+		DECLARE @intItemId int
+		DECLARE @intItemLocationId int
+		DECLARE @intItemPricingId int
+
+		SELECT 
+		@intItemUOMId = intItemUOMId
+		, @intItemId = intItemId
+		, @intItemLocationId = intItemLocationId
+		, @intItemPricingId = intItemPricingId
+		FROM vyuSTPricebookMaster WHERE intUniqueId = @intUniqueId
+
+
 
 		IF EXISTS(SELECT * FROM dbo.tblSTSubcategory WHERE strSubcategoryType = 'C' AND strSubcategoryId = @Class AND intSubcategoryId <> @ClassId)
 		BEGIN
