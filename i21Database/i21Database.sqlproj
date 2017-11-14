@@ -5732,6 +5732,7 @@
     <Build Include="dbo\Stored Procedures\uspTFGetTransporterInvoiceTax.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateMSSpeicalFuel.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateMSGas.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRCreateSettleStorage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
