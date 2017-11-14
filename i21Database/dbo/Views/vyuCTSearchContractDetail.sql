@@ -52,7 +52,7 @@ AS
 			PT.strPricingType,				
 			U1.strUnitMeasure				AS	strItemUOM,
 			FM.strFutMarketName,				
-			MO.strFutureMonth,				
+			LEFT(CONVERT(DATE,'01 '+MO.strFutureMonth),7) + ' ('+MO.strFutureMonth+')' AS strFutureMonth,				
 			U2.strUnitMeasure				AS	strPriceUOM,
 			MZ.strMarketZoneCode,				
 			OH.strContractOptDesc,			

@@ -23,6 +23,7 @@ AS
 			CY.strCurrency			AS	strMainCurrency,	WM.strUnitMeasure			AS	strNetWeightUOM,
 			IC.strContractItemNo,	IC.strContractItemName,	SY.ysnSubCurrency			AS	ysnBasisSubCurrency,
 			REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') ')						AS	strFutureMonth,
+			LEFT(CONVERT(DATE,'01 '+MO.strFutureMonth),7) + ' ('+MO.strFutureMonth+')'	AS strFutureMonthYear,
 			SL.strName				AS strStorageLocation,	UL.strSubLocationName		AS	strSubLocation,
 			BK.strBook,				SB.strSubBook,			PG.strName					AS	strPurchasingGroup ,				
 			CE.strEntityNo			AS	strCreatedByNo,		PA.strDescription			AS	strProductType,
