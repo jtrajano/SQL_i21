@@ -76,7 +76,10 @@ BEGIN TRY
 		,@strOrderByFinal NVARCHAR(100) = ''
 
 	If @ysnFromPickList=0
-		SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0), @dblDefaultResidueQty=ISNULL(dblDefaultResidueQty,0.00001)
+		SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0)
+		FROM tblMFCompanyPreference
+
+		SELECT TOP 1 @dblDefaultResidueQty=ISNULL(dblDefaultResidueQty,0.00001)
 		FROM tblMFCompanyPreference
 
 	SELECT @strBlendItemNo = i.strItemNo
