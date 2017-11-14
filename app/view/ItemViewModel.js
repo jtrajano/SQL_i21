@@ -952,7 +952,8 @@ Ext.define('Inventory.view.ItemViewModel', {
         },
 
         isLotTracked: function(get) {
-            return get('current.strLotTracking') !== "No";
+            var strLotTracking = get('current.strLotTracking');
+            return strLotTracking && strLotTracking !== 'No';
         },
 
         checkLotTracking: function (get) {
@@ -1421,6 +1422,9 @@ Ext.define('Inventory.view.ItemViewModel', {
                     this.data.current.set('intBrandId', null);
                     this.data.current.set('strModelNo', null);
                     this.data.current.set('intCategoryId', null);
+                    this.data.current.set('intLotStatusId', null);
+                    this.data.current.set('ysnUseWeighScales', null);
+                    this.data.current.set('ysnLotWeightsRequired', 0);
                     return true;
                 }
             else {

@@ -94,10 +94,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 readOnly: '{readOnlyForOtherCharge}',
                 hidden: '{!isLotTracked}'
             },
-            chkUseWeighScales: { 
-                value: '{current.ysnUseWeighScales}',
-                readOnly: '{readOnlyForOtherCharge}'
-            },
 
             cfgStock: {
                 hidden: '{pgeStockHide}'
@@ -1936,6 +1932,8 @@ Ext.define('Inventory.view.ItemViewController', {
             }
             current.set('strCategory', null);
             current.set('intCategoryId', null);
+
+            current.get('HideDisableForComment');
         }
     },
 
