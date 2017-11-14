@@ -46,6 +46,7 @@ INNER JOIN (SELECT DISTINCT TC.intTaxCodeId
 				 , strItemNo			= ITEMDETAIL.strItemNo
 				 , dblUnitPrice			= ID.dblPrice
 				 , dblQtyShipped		= ID.dblQtyShipped
+				 , dblQtyTonShipped		= CASE WHEN ITEMDETAIL.intTonnageTaxUOMId IS NOT NULL THEN CONVERT(NUMERIC(18, 6), dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, ITEMDETAIL.intTonnageTaxUOMId, ID.dblQtyShipped)) ELSE ID.dblQtyShipped END
 				 , intCategoryId		= ITEMDETAIL.intCategoryId
 				 , strItemCategory		= ITEMDETAIL.strCategoryCode
 				 , IDT.dblAdjustedTax	 				 				 
@@ -76,6 +77,7 @@ INNER JOIN (SELECT DISTINCT TC.intTaxCodeId
 			) IDT ON TC.intTaxCodeId = IDT.intTaxCodeId 
 			INNER JOIN (SELECT intInvoiceId
 								, intItemId
+								, intItemUOMId
 								, intInvoiceDetailId
 								, dblPrice
 								, dblQtyShipped
@@ -84,6 +86,7 @@ INNER JOIN (SELECT DISTINCT TC.intTaxCodeId
 			) ID ON IDT.intInvoiceDetailId = ID.intInvoiceDetailId	
 			OUTER APPLY (SELECT TOP 1 intItemId
 									, ICI.intCategoryId
+									, intTonnageTaxUOMId = CASE WHEN ISNULL(ICI.ysnTonnageTax, 0) = 1 THEN ICI.intTonnageTaxUOMId ELSE NULL END
 									, strItemNo
 									, strCategoryCode
 							FROM dbo.tblICItem ICI WITH (NOLOCK)
@@ -116,9 +119,11 @@ INNER JOIN (SELECT DISTINCT TC.intTaxCodeId
 				,ID.dblPrice
 				,ID.dblQtyShipped
 				,ID.intInvoiceId
+				,ID.intItemUOMId
 				,ITEMDETAIL.strItemNo
 				,ITEMDETAIL.intCategoryId
 				,ITEMDETAIL.strCategoryCode
+				,ITEMDETAIL.intTonnageTaxUOMId
 ) TAXDETAIL ON I.intInvoiceId = TAXDETAIL.intInvoiceId
 LEFT OUTER JOIN (SELECT intInvoiceDetailId
 				      , dblTotalAdjustedTax	= SUM(CASE WHEN ysnTaxExempt = 1 then 0 else dblAdjustedTax end)
@@ -165,19 +170,12 @@ SELECT DISTINCT I.intEntityCustomerId
 	 , TAXDETAIL.*
 	 , dblTaxDifference = (TAXDETAIL.dblAdjustedTax - TAXDETAIL.dblTax) * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType)
 	 , dblTaxAmount     = TAXDETAIL.dblAdjustedTax * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType)
-	 , dblNonTaxable    = I.dblInvoiceTotal--(CASE WHEN TAXDETAIL.dblAdjustedTax = 0.000000 AND ISNULL(TAXTOTAL.dblTotalAdjustedTax, 0.000000) = 0.000000 THEN  (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice) / ISNULL(TAXTOTAL.intTaxCodeCount, 1.000000) ELSE 0.000000 END) * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType)
+	 , dblNonTaxable    = I.dblInvoiceTotal
 	 , dblTaxable       = (CASE WHEN TAXDETAIL.dblAdjustedTax > 0.000000 THEN  (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice) * (TAXDETAIL.dblAdjustedTax/ISNULL(TAXTOTAL.dblTotalAdjustedTax, 1.000000)) ELSE 0.000000 END) * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType)
-	 , dblTotalSales = I.dblInvoiceTotal/*(
-						(CASE WHEN TAXDETAIL.dblAdjustedTax = 0.000000 AND ISNULL(TAXTOTAL.dblTotalAdjustedTax, 0.000000) = 0.000000 THEN  (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice) / ISNULL(TAXTOTAL.intTaxCodeCount, 1.000000) ELSE 0.000000 END)
-						+
-						(CASE WHEN TAXDETAIL.dblAdjustedTax > 0.000000 THEN  (TAXDETAIL.dblQtyShipped * TAXDETAIL.dblUnitPrice) * (TAXDETAIL.dblAdjustedTax/ISNULL(TAXTOTAL.dblTotalAdjustedTax, 1.000000)) ELSE 0.000000 END)
-					   )
-					   * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType)*/
-
+	 , dblTotalSales = I.dblInvoiceTotal
 	, dblTaxCollected  = ISNULL(I.dblTax, 0) * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType)
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (
-
 			SELECT DISTINCT  TC.intTaxCodeId
 				 , TC.strTaxAgency
 				 , TC.strTaxCode
@@ -199,6 +197,7 @@ INNER JOIN (
 				 , strItemNo			= ITEMDETAIL.strItemNo
 				 , dblUnitPrice			= 0 -- ID.dblPrice
 				 , dblQtyShipped		= ID.dblQtyShipped
+				 , dblQtyTonShipped		= CASE WHEN ITEMDETAIL.intTonnageTaxUOMId IS NOT NULL THEN CONVERT(NUMERIC(18, 6), dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, ITEMDETAIL.intTonnageTaxUOMId, ID.dblQtyShipped)) ELSE ID.dblQtyShipped END
 				 , intCategoryId		= ITEMDETAIL.intCategoryId
 				 , strItemCategory		= ITEMDETAIL.strCategoryCode
 				 , IDT.dblAdjustedTax	 				 				 
@@ -206,17 +205,15 @@ INNER JOIN (
 				 , ID.intInvoiceDetailId
 				 , dblTotalAdjustedTax  = SUM(IDT.dblAdjustedTax)
 				 , dblTotalTax			= SUM(IDT.dblTax)
-			FROM 
-				tblARInvoiceDetail ID
-
+			FROM tblARInvoiceDetail ID WITH (NOLOCK)
 			JOIN (SELECT intInvoiceDetailId
-									, intTaxCodeId
-									, strCalculationMethod
-									, dblRate = 0
-									, dblAdjustedTax = 0 --case when ysnTaxExempt = 1 then 0 else dblAdjustedTax end
-									, dblTax = 0 
-								FROM dbo.tblARInvoiceDetailTax idx WITH (NOLOCK) 
-									where idx.intTaxCodeId = (select top 1 intTaxCodeId from tblARInvoiceDetailTax btx where btx.intInvoiceDetailId = idx.intInvoiceDetailId)
+					   , intTaxCodeId
+					   , strCalculationMethod
+					   , dblRate = 0
+					   , dblAdjustedTax = 0 --case when ysnTaxExempt = 1 then 0 else dblAdjustedTax end
+					   , dblTax = 0 
+				  FROM dbo.tblARInvoiceDetailTax idx WITH (NOLOCK) 
+				  WHERE idx.intTaxCodeId = (SELECT TOP 1 intTaxCodeId FROM tblARInvoiceDetailTax btx WHERE btx.intInvoiceDetailId = idx.intInvoiceDetailId)
 			) IDT ON ID.intInvoiceDetailId= IDT.intInvoiceDetailId
 
 			JOIN (
@@ -247,17 +244,9 @@ INNER JOIN (
 									, strAccountId 
 								FROM dbo.tblGLAccount WITH (NOLOCK)
 			) PA ON TC.intPurchaseTaxAccountId = PA.intAccountId
-			
-			--INNER JOIN (SELECT intInvoiceId
-			--					, intItemId
-			--					, intInvoiceDetailId
-			--					, dblPrice
-			--					, dblQtyShipped
-			--					, intTaxGroupId
-			--			FROM dbo.tblARInvoiceDetail vfp  WITH (NOLOCK)
-			--) ID ON IDT.intInvoiceDetailId = ID.intInvoiceDetailId	
 			OUTER APPLY (SELECT TOP 1 intItemId
 									, ICI.intCategoryId
+									, intTonnageTaxUOMId = CASE WHEN ISNULL(ICI.ysnTonnageTax, 0) = 1 THEN ICI.intTonnageTaxUOMId ELSE NULL END
 									, strItemNo
 									, strCategoryCode
 							FROM dbo.tblICItem ICI WITH (NOLOCK)
@@ -265,8 +254,7 @@ INNER JOIN (
 											, strCategoryCode 
 									FROM dbo.tblICCategory WITH (NOLOCK)
 							) ICC ON ICI.intCategoryId = ICC.intCategoryId
-							WHERE ID.intItemId = ICI.intItemId) ITEMDETAIL	
-			
+							WHERE ID.intItemId = ICI.intItemId) ITEMDETAIL
 			GROUP BY
 				 TC.intTaxCodeId
 				,TC.strTaxAgency
@@ -293,8 +281,9 @@ INNER JOIN (
 				,ITEMDETAIL.strItemNo
 				,ITEMDETAIL.intCategoryId
 				,ITEMDETAIL.strCategoryCode
-				, ID.intInvoiceDetailId
-
+				,ITEMDETAIL.intTonnageTaxUOMId
+				,ID.intInvoiceDetailId
+				,ID.intItemUOMId
 ) TAXDETAIL ON I.intInvoiceId = TAXDETAIL.intInvoiceId  and TAXDETAIL.intInvoiceDetailId = (SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail childDetail where childDetail.intInvoiceId = I.intInvoiceId )
 LEFT OUTER JOIN (SELECT intInvoiceDetailId
 				      , dblTotalAdjustedTax	= SUM(CASE WHEN ysnTaxExempt = 1 then 0 else dblAdjustedTax end)
