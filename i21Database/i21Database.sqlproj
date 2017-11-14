@@ -5736,6 +5736,18 @@
     <Build Include="dbo\Stored Procedures\uspTFGenerateMSSpeicalFuel.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateMSGas.sql" />
     <Build Include="dbo\Stored Procedures\uspMFValidateInventoryShipment.sql" />
+    <Build Include="dbo\Tables\tblMFEDI943.sql" />
+    <Build Include="dbo\Tables\tblMFEDI943Error.sql" />
+    <Build Include="dbo\Tables\tblMFEDI943Archive.sql" />
+    <Build Include="dbo\Tables\tblMFEDI944.sql" />
+    <Build Include="dbo\Tables\tblMFEDI940.sql" />
+    <Build Include="dbo\Tables\tblMFEDI940Error.sql" />
+    <Build Include="dbo\Tables\tblMFEDI940Archive.sql" />
+    <Build Include="dbo\Tables\tblMFEDI945.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFProcessEDI944.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFProcessEDI943.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFProcessEDI940.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFProcessEDI945.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
