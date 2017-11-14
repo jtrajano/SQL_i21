@@ -16,7 +16,7 @@ CREATE TABLE [dbo].[tblCTContractCost](
 	[ysnBasis] [bit] NULL,
 
 	[ysnReceivable] BIT,
-	[intPaidById] INT,
+	[strPaidBy] NVARCHAR(50),
 	[dtmDueDate] DATETIME,
 	[strReference] [nvarchar](200) COLLATE Latin1_General_CI_AS NULL,
 	[strRemarks] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
@@ -24,7 +24,6 @@ CREATE TABLE [dbo].[tblCTContractCost](
 	CONSTRAINT [PK_tblCTContractCost_intContractCostId] PRIMARY KEY CLUSTERED ([intContractCostId] ASC),
 	CONSTRAINT [FK_tblCTContractCost_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [tblCTContractDetail]([intContractDetailId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblCTContractCost_tblEMEntity_intVendorId_intEntityId] FOREIGN KEY ([intVendorId]) REFERENCES [tblEMEntity](intEntityId),
-	CONSTRAINT [FK_tblCTContractCost_tblEMEntity_intPaidById_intEntityId] FOREIGN KEY ([intPaidById]) REFERENCES [tblEMEntity](intEntityId),
 	CONSTRAINT [FK_tblCTContractCost_tblICItemUOM_intItemUOMId] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
 	CONSTRAINT [FK_tblCTContractCost_tblSMCurrency_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
 	CONSTRAINT [FK_tblCTContractCost_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId])

@@ -15,12 +15,12 @@ AS
 				CC.ysnMTM, 
 				CC.ysnPrice, 
 				CC.ysnAdditionalCost,
-				CC.intPaidById,
 				CC.ysnBasis,
 				CC.dtmDueDate,
 				CC.strReference,
 				CC.strRemarks,
 				CC.ysnReceivable,
+				CC.strPaidBy,
 
 				IM.strItemNo, 
 				IM.strDescription strItemDescription,
@@ -33,7 +33,6 @@ AS
 				CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) strContractSeq,
 				CAST(ISNULL((SELECT TOP 1 intBillDetailId FROM tblAPBillDetail WHERE intContractCostId = CC.intContractCostId),0) AS BIT) ysnBilled,
 				CH.intTermId,				
-				PY.strName AS strPaidBy,
 				IM.strCostType,
 				IM.ysnInventoryCost
 
@@ -47,4 +46,3 @@ AS
 	LEFT JOIN	tblEMEntity			EY ON EY.intEntityId			=	CC.intVendorId
 	LEFT JOIN	tblEMEntityType		ET ON ET.intEntityId			=	EY.intEntityId
 									  AND ET.strType = 'Vendor'
-	LEFT JOIN	tblEMEntity			PY ON PY.intEntityId			=	CC.intPaidById
