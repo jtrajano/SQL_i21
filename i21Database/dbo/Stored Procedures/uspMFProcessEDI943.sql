@@ -25,11 +25,11 @@ BEGIN TRY
 			FROM tblSMUserSecurity
 			WHERE strUserName = 'irelyadmin'
 			)
-		SELECT TOP 1 @intUserId = intEntityUserSecurityId
+		SELECT TOP 1 @intUserId = intEntityId
 		FROM tblSMUserSecurity
 		WHERE strUserName = 'irelyadmin'
 	ELSE
-		SELECT TOP 1 @intUserId = intEntityUserSecurityId
+		SELECT TOP 1 @intUserId = intEntityId
 		FROM tblSMUserSecurity
 
 	SELECT @intTransactionCount = @@TRANCOUNT
