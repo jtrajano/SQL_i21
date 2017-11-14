@@ -667,7 +667,13 @@ Ext.define('Inventory.view.ItemViewController', {
                 colVendorXrefUnitMeasure: {
                     dataIndex: 'strUnitMeasure',
                     editor: {
-                        store: '{vendorXrefUom}'
+                        store: '{vendorXrefUom}',
+                        defaultFilters: [{
+                            column: 'intItemId',
+                            value: '{current.intItemId}'
+                        }],
+                        origValueField: 'intItemUOMId',
+                        origUpdateField: 'intItemUnitMeasureId'
                     }
                 }
             },
@@ -4129,9 +4135,6 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#cboPOSCategoryId": {
                 select: this.onPOSCategorySelect
-            },
-            "#cboVendorXrefUOM": {
-                select: this.onVendorXrefSelect
             },
             "#cboContractLocation": {
                 select: this.onContractItemSelect
