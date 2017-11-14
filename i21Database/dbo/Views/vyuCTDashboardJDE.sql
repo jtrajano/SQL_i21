@@ -27,7 +27,7 @@ SELECT 	 SQ.intContractDetailId
 		,SQ.strPricingType					
 		,SQ.strCurrency					
 		,SQ.strFutMarketName				
-		,SQ.strFutureMonth					
+		,SQ.strFutureMonthYear AS strFutureMonth					
 		,SQ.dblFutures						
 		,SQ.dblBasis						
 		,SQ.dblCashPrice					
