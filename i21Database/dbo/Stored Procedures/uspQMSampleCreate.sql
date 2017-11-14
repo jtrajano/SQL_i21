@@ -200,6 +200,7 @@ BEGIN TRY
 		intConcurrencyId
 		,intSampleTypeId
 		,strSampleNumber
+		,intParentSampleId
 		,intProductTypeId
 		,intProductValueId
 		,intSampleStatusId
@@ -254,6 +255,7 @@ BEGIN TRY
 	SELECT 1
 		,intSampleTypeId
 		,@strSampleNumber
+		,intParentSampleId
 		,intProductTypeId
 		,intProductValueId
 		,intSampleStatusId
@@ -306,6 +308,7 @@ BEGIN TRY
 		,dtmLastModified
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intSampleTypeId INT
+			,intParentSampleId INT
 			,intProductTypeId INT
 			,intProductValueId INT
 			,intSampleStatusId INT
