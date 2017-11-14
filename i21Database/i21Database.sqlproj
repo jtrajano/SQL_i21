@@ -5871,6 +5871,8 @@
     <Build Include="dbo\Stored Procedures\uspRKFutOptTransactionHistory.sql" />
     <Build Include="dbo\Views\vyuARCreditBalancePayOut.sql" />
     <Build Include="dbo\Stored Procedures\uspLGRecalculatedWarehouseServiceCharges.sql" />
+    <Build Include="dbo\Functions\fnARGetMonthlyAccrual.sql" />
+    <Build Include="dbo\Stored Procedures\uspARAccrualBalanceReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
