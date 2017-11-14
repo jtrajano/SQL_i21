@@ -1,6 +1,7 @@
 ﻿CREATE VIEW vyuMFGetInventoryShipmentCustomField
 AS
 SELECT intRecordId
+	,[customer po no] AS strCustomerPONo
 	,[total pallets loaded] AS strTotalPalletsLoaded
 	,[airbags] AS strAirbags
 	,[case labels] AS strCaseLabels
@@ -18,7 +19,8 @@ FROM (
 	JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
 	JOIN tblSMCustomTabDetail TD ON TD.intCustomTabDetailId = FV.intCustomTabDetailId
 		AND LOWER(TD.strControlName) IN (
-			'total pallets loaded'
+			'customer po no'
+			,'total pallets loaded'
 			,'airbags'
 			,'case labels'
 			,'number of pallet labels'
@@ -33,7 +35,8 @@ FROM (
 		AND S.strNamespace = 'Inventory.view.InventoryShipment'
 	) AS SourceTable
 PIVOT(MAX(strValue) FOR strControlName IN (
-			[total pallets loaded]
+			[customer po no]
+			,[total pallets loaded]
 			,[airbags]
 			,[case labels]
 			,[number of pallet labels]
