@@ -9,11 +9,19 @@ BEGIN TRY
 
 	DECLARE @ErrMsg					NVARCHAR(MAX),
 			@intId					INT,
-			@intContractHeaderid	INT,
+			@intContractHeaderId	INT,
 			@details 				NVARCHAR(MAX),
 			@strOldStatus			NVARCHAR(50),
 			@strNewStatus			NVARCHAR(50),
-			@intOldContractStatusId	INT
+			@intOldContractStatusId	INT,
+			@dblQuantity			NUMERIC(18,6),
+			@dblBalance				NUMERIC(18,6),
+			@dblScheduleQty			NUMERIC(18,6),
+			@intItemId				INT,
+			@intItemUOMId			INT,
+			@intCommodityUnitMeasureId INT,
+			@IntFromUnitMeasureId	INT,
+			@intToUnitMeasureId		INT
 
 	DECLARE @ids TABLE (intId INT)
 
@@ -31,19 +39,48 @@ BEGIN TRY
 
 	WHILE ISNULL(@intId,0) > 0
 	BEGIN
-		SELECT	@intContractHeaderid = intContractHeaderId,@intOldContractStatusId = intContractStatusId FROM tblCTContractDetail WHERE intContractDetailId = @intId
+		SELECT	@intContractHeaderId	=	intContractHeaderId,
+				@intOldContractStatusId =	intContractStatusId,
+				@dblQuantity			=	dblQuantity,
+				@dblBalance				=	dblBalance,
+				@dblScheduleQty			=	dblScheduleQty,
+				@intItemId				=	intItemId,
+				@intItemUOMId			=	intItemUOMId
+		FROM	tblCTContractDetail 
+		WHERE	intContractDetailId		=	@intId
+
 		SELECT	@strNewStatus = strContractStatus FROM tblCTContractStatus WHERE intContractStatusId = @intContractStatusId
 		SELECT	@strOldStatus = strContractStatus FROM tblCTContractStatus WHERE intContractStatusId = @intOldContractStatusId
 
-		IF @strOldStatus NOT IN ('Open', 'Unconfirmed', 'Re-Open') AND @intContractStatusId = 3
+		IF  @intContractStatusId = 3
 		BEGIN
-			RAISERROR('Only Open, Unconfirmed and Re-Open contract can be changed to cancel.',16,1)
+			IF @strOldStatus NOT IN ('Open', 'Unconfirmed', 'Re-Open')
+			BEGIN
+				RAISERROR('Only Open, Unconfirmed and Re-Open contract can be changed to cancel.',16,1)
+			END
+			IF ISNULL(@dblQuantity,0) <> ISNULL(@dblBalance,0) OR ISNULL(@dblScheduleQty,0) > 0
+			BEGIN
+				RAISERROR('Cannot change status of the sequence to cancel as it is used.',16,1)
+			END
+
+			SELECT	@IntFromUnitMeasureId = intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId
+			SELECT	@intCommodityUnitMeasureId	=	intCommodityUnitMeasureId FROM vyuCTContractDetailView WHERE intContractDetailId	=	@intId
+			SELECT	@intToUnitMeasureId = intUnitMeasureId FROM tblICCommodityUnitMeasure WHERE intCommodityUnitMeasureId = @intCommodityUnitMeasureId
+			
+
+			SELECT	@dblQuantity = dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@IntFromUnitMeasureId,@intToUnitMeasureId,@dblQuantity * -1)
+
+			UPDATE	tblCTContractHeader
+			SET		dblQuantity			=	dblQuantity + @dblQuantity,
+					intConcurrencyId	=	intConcurrencyId + 1
+			WHERE	intContractHeaderId	=	@intContractHeaderId
 		END
+		
 
 		SET @details = '{"change": "tblCTContractDetails","children": [{"action": "Updated","change": "Updated - Record: ' + LTRIM(@intId)+ '","iconCls": "small-tree-modified","children": [{"change": "Contract Status","from": "' + @strOldStatus + '","to": "' + @strNewStatus + ' ","leaf": true,"iconCls": "small-gear"}]}],"iconCls":"small-tree-grid"}';
 
 		EXEC	dbo.uspSMAuditLog
-				@keyValue				= @intContractHeaderid,				
+				@keyValue				= @intContractHeaderId,				
 				@screenName				= 'ContractManagement.view.Contract', 
 				@entityId				= @intEntityId,	
 				@actionType				= 'Updated',
