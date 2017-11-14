@@ -3,7 +3,7 @@ AS
 SELECT DISTINCT
 	strTransactionType		=	'Cash Balances',
 	strTransactionId		=	BA.strBankAccountNo,
-	strTransactionDate		=	EOMONTH(dtmDate),
+	strTransactionDate		=	(SELECT CAST(DATEADD(MONTH,DATEDIFF(MONTH,0,dtmDate)+1,0)-1 AS DATE)),--EOMONTH(dtmDate),
 	strTransactionDueDate	=	'',
 	strVendorName			=	'',
 	strCommodity			=	'',
@@ -14,12 +14,12 @@ SELECT DISTINCT
 	strItemId				=	'',
 	dblQuantity				=	'',
 	dblUnitPrice			=	'',
-	dblAmount				=	[dbo].[fnGetBankBalance] (BT.intBankAccountId, EOMONTH(dtmDate)),
+	dblAmount				=	[dbo].[fnGetBankBalance] (BT.intBankAccountId, (SELECT CAST(DATEADD(MONTH,DATEDIFF(MONTH,0,dtmDate)+1,0)-1 AS DATE))),
 	intCurrencyId			=	BA.intCurrencyId,
 	intForexRateType		=	'',
 	strForexRateType		=	'',
-	dblForexRate			=	[dbo].[fnGetForexRate] (EOMONTH(dtmDate),BA.intCurrencyId,MC.intCashManagementRateTypeId),
-	dblHistoricAmount		=	[dbo].[fnGetBankBalance] (BT.intBankAccountId, EOMONTH(dtmDate)) * [dbo].[fnGetForexRate] (EOMONTH(dtmDate),BA.intCurrencyId,MC.intCashManagementRateTypeId),
+	dblForexRate			=	[dbo].[fnGetForexRate] ((SELECT CAST(DATEADD(MONTH,DATEDIFF(MONTH,0,dtmDate)+1,0)-1 AS DATE)),BA.intCurrencyId,MC.intCashManagementRateTypeId),
+	dblHistoricAmount		=	[dbo].[fnGetBankBalance] (BT.intBankAccountId, (SELECT CAST(DATEADD(MONTH,DATEDIFF(MONTH,0,dtmDate)+1,0)-1 AS DATE))) * [dbo].[fnGetForexRate] ((SELECT CAST(DATEADD(MONTH,DATEDIFF(MONTH,0,dtmDate)+1,0)-1 AS DATE)),BA.intCurrencyId,MC.intCashManagementRateTypeId),
 	dblNewForexRate         =    0, --Calcuate By GL
     dblNewAmount            =    0, --Calcuate By GL
     dblUnrealizedDebitGain  =    0, --Calcuate By GL
