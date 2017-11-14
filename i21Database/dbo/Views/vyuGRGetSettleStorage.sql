@@ -1,36 +1,37 @@
 ﻿CREATE VIEW [dbo].[vyuGRGetSettleStorage]
 AS     
  SELECT 
- SS.intSettleStorageId
-,SS.intEntityId
-,E.strName AS strEntityName 
-,SS.intCompanyLocationId
-,L.strLocationName
-,SS.intItemId
-,Item.strItemNo
-,dblSpotUnits
-,dblFuturesPrice
-,dblFuturesBasis
-,dblCashPrice
-,strStorageAdjustment
-,dtmCalculateStorageThrough
-,dblAdjustPerUnit
-,dblStorageDue
-,strStorageTicket
-,dblSelectedUnits
-,SS.dblUnpaidUnits
-,SS.dblSettleUnits
-,dblDiscountsDue
-,dblNetSettlement
-,SS.intCreatedUserId
-,Entity.strUserName
-,SS.dtmCreated
-,SS.ysnPosted
-,SS.intBillId
-,Bill.strBillId
+ intSettleStorageId			= SS.intSettleStorageId
+,intEntityId				= SS.intEntityId
+,strEntityName				= E.strName
+,intCompanyLocationId		= SS.intCompanyLocationId
+,strLocationName			= L.strLocationName
+,intItemId					= SS.intItemId
+,strItemNo					= Item.strItemNo
+,dblSpotUnits				= SS.dblSpotUnits
+,dblFuturesPrice			= SS.dblFuturesPrice
+,dblFuturesBasis			= SS.dblFuturesBasis
+,dblCashPrice				= SS.dblCashPrice
+,strStorageAdjustment		= SS.strStorageAdjustment
+,dtmCalculateStorageThrough = SS.dtmCalculateStorageThrough
+,dblAdjustPerUnit			= SS.dblAdjustPerUnit
+,dblStorageDue				= SS.dblStorageDue
+,strStorageTicket			= SS.strStorageTicket
+,dblSelectedUnits			= SS.dblSelectedUnits
+,dblUnpaidUnits				= SS.dblUnpaidUnits
+,dblSettleUnits				= SS.dblSettleUnits
+,dblDiscountsDue			= SS.dblDiscountsDue
+,dblNetSettlement			= SS.dblNetSettlement
+,intCreatedUserId			= SS.intCreatedUserId
+,strUserName				= Entity.strUserName
+,dtmCreated					= SS.dtmCreated
+,ysnPosted					= SS.ysnPosted
+,intBillId					= SS.intBillId
+,strBillId					= ISNULL(Bill.strBillId,'')
 FROM tblGRSettleStorage SS
 JOIN tblEMEntity E ON E.intEntityId = SS.intEntityId
 JOIN tblSMCompanyLocation L ON L.intCompanyLocationId= SS.intCompanyLocationId  
 JOIN tblICItem Item ON Item.intItemId = SS.intItemId
 JOIN tblSMUserSecurity Entity ON Entity.intEntityId=SS.intCreatedUserId
-JOIN tblAPBill Bill ON Bill.intBillId=SS.intBillId
+LEFT JOIN tblAPBill Bill ON Bill.intBillId=SS.intBillId
+
