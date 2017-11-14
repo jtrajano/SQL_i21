@@ -241,8 +241,8 @@ BEGIN TRY
 	END
 
 	SELECT @intInventoryItemStockUOMId = intItemUOMId
-	FROM tblICItemStockUOM
-	WHERE intItemId = @ItemId
+	FROM tblICItemUOM
+	WHERE intItemId = @ItemId AND ysnStockUnit=1
 
 	IF @ysnPosted = 1
 	BEGIN
