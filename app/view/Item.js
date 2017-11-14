@@ -3817,6 +3817,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 flex: 1
                                                                             }
                                                                         ],
+                                                                        hidden: true,
                                                                         itemId: 'cboM2M',
                                                                         fieldLabel: 'M2M',
                                                                         labelWidth: 150,

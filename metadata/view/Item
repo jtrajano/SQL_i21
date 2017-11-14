@@ -11567,6 +11567,7 @@
                                                                 "designer|createAlias": "gridcombobox",
                                                                 "displayField": "strM2MComputation",
                                                                 "fieldLabel": "M2M",
+                                                                "hidden": true,
                                                                 "itemId": "cboM2M",
                                                                 "labelWidth": 150,
                                                                 "layout|flex": null,
@@ -11581,7 +11582,8 @@
                                                                 "labelWidth": "number",
                                                                 "layout|flex": "number",
                                                                 "valueField": "datafield",
-                                                                "scrollable": "boolean"
+                                                                "scrollable": "boolean",
+                                                                "hidden": "boolean"
                                                             },
                                                             "name": "MyComboBox70",
                                                             "designerId": "26256ff6-20df-4e25-9d69-090cbc68cc37",
