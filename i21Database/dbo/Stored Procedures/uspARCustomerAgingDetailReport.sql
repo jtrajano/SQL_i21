@@ -150,7 +150,9 @@ EXEC dbo.uspARCustomerAgingDetailAsOfDateReport @dtmDateFrom = @dtmDateFrom
 											  , @strCustomerName = @strCustomerName
 											  , @ysnInclude120Days = 0
 
-DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityCustomerId IN (SELECT intEntityCustomerId FROM tblARCustomerAgingStagingTable GROUP BY intEntityCustomerId HAVING SUM(ISNULL(dblTotalAR, 0)) = 0)
+DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityCustomerId IN (SELECT intEntityCustomerId FROM tblARCustomerAgingStagingTable GROUP BY intEntityCustomerId HAVING SUM(ISNULL(dblTotalAR, 0)) = 0
+																																										AND SUM(ISNULL(dblCredits, 0)) = 0
+																																										AND SUM(ISNULL(dblPrepayments, 0)) = 0)
 
 IF @strAgedBalances = 'Current'
 	BEGIN DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityCustomerId IN (SELECT intEntityCustomerId FROM tblARCustomerAgingStagingTable GROUP BY intEntityCustomerId HAVING SUM(ISNULL(dbl0Days, 0)) = 0)
