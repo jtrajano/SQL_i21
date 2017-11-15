@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblBBRate](
 	[intRateId] [int] IDENTITY(1,1) NOT NULL,
-	
+	[intItemId] INT NULL, 
 	[intConcurrencyId] [int] NOT NULL CONSTRAINT [DF_tblBBRate_intConcurrencyId]  DEFAULT ((0)),
 	[intProgramChargeId] INT NOT NULL, 
     [strType] NVARCHAR(20) NOT NULL, 
