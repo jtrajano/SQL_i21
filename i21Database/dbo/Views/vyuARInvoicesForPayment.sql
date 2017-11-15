@@ -43,7 +43,7 @@ SELECT
 	,[strTerm]					= SMT.[strTerm]
 	,[strTermType]				= SMT.[strType] 
 	,[intTermDiscountDay]		= SMT.[intDiscountDay] 
-	,[dtmTermDiscountDate]		= SMT.[dtmDiscountDate]
+	,[dtmTermDiscountDate]		= SMT.[dtmDiscountDate]	
 	,[dblTermDiscountEP]		= SMT.[dblDiscountEP]
 	,[intTermBalanceDue]		= SMT.[intBalanceDue]
 	,[dtmTermDueDate]			= SMT.[dtmDueDate]
@@ -55,6 +55,13 @@ SELECT
 	,[strCurrencyExchangeRateType]		= DFR.[strCurrencyExchangeRateType]
 	,[intCurrencyExchangeRateId]		= DFR.[intCurrencyExchangeRateId]
 	,[dblCurrencyExchangeRate]			= DFR.[dblCurrencyExchangeRate]
+	,[dtmDiscountDate]			= CASE WHEN ISNULL(ARIFP.dblDiscountAvailable, 0) = 0
+										  THEN NULL
+										  ELSE CASE WHEN ISNULL(intDiscountDay, 0) = 0 OR ISNULL(intDiscountDay, 0) > DATEDIFF(DAY, DATEADD(DAY, 1-DAY(ARIFP.dtmDate), ARIFP.dtmDate), DATEADD(MONTH, 1, DATEADD(DAY, 1-DAY(ARIFP.dtmDate), ARIFP.dtmDate)))
+													THEN DATEADD(DAY, 1, ARIFP.dtmDate)
+											   ELSE DATEADD(DAY, intDiscountDay, ARIFP.dtmDate)
+										  END
+								  END
 FROM
 	(
 		SELECT 
@@ -79,8 +86,8 @@ FROM
 			,[dblBaseInvoiceTotal]		= ARI.[dblBaseInvoiceTotal]
 			,[dblDiscount]				= ARI.[dblDiscount]
 			,[dblBaseDiscount]			= ARI.[dblBaseDiscount]
-			,[dblDiscountAvailable]		= ARI.[dblDiscountAvailable]
-			,[dblBaseDiscountAvailable]	= ARI.[dblBaseDiscountAvailable]
+			,[dblDiscountAvailable]		= CASE WHEN ARI.[strTransactionType] IN ('Invoice', 'Debit Memo') THEN ARI.[dblDiscountAvailable] ELSE CAST(0 AS DECIMAL(18,6)) END
+			,[dblBaseDiscountAvailable]	= CASE WHEN ARI.[strTransactionType] IN ('Invoice', 'Debit Memo') THEN ARI.[dblBaseDiscountAvailable] ELSE CAST(0 AS DECIMAL(18,6)) END
 			,[dblInterest]				= ARI.[dblInterest]
 			,[dblBaseInterest]			= ARI.[dblBaseInterest]
 			,[dblAmountDue]				= ARI.[dblAmountDue]
