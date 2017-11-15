@@ -71,11 +71,12 @@ END
 
 
 -----------Pac Pride-------------
-DECLARE @pacpridePK INT
-IF ((SELECT COUNT(*) FROM tblSMImportFileHeader WHERE strLayoutTitle = 'Pac Pride') =  0)
-BEGIN
+	DECLARE @pacpridePK INT
+	IF ((SELECT COUNT(*) FROM tblSMImportFileHeader WHERE strLayoutTitle = 'Pac Pride') =  0)
+	BEGIN
 
-	INSERT [dbo].[tblSMImportFileHeader] ([strLayoutTitle], [strFileType], [strFieldDelimiter], [strXMLType], [strXMLInitiater], [ysnActive], [intConcurrencyId]) VALUES (N'Pac Pride', N'Delimiter', N'Comma', NULL, N'', 1, 1)
+	INSERT [dbo].[tblSMImportFileHeader] ([strLayoutTitle], [strFileType], [strFieldDelimiter], [strXMLType], [strXMLInitiater], [ysnActive], [intConcurrencyId]) 
+	VALUES (N'Pac Pride', N'Delimiter', N'Comma', NULL, N'', 1, 1)
 	SET @pacpridePK = SCOPE_IDENTITY();
 
 	
@@ -229,6 +230,50 @@ BEGIN
 	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) 
 	VALUES (@pacpridePK, SCOPE_IDENTITY(), 64, NULL, NULL, N'tblCFTransaction', N'strMiscellaneous', NULL, NULL, NULL, 1, 1)
 
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) 
+	VALUES (@pacpridePK, N'Federal Excise Tax Rate Reference', NULL, 59, NULL, NULL, 1, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) 
+	VALUES (@pacpridePK, SCOPE_IDENTITY(), 65, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 1)
+	
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) 
+	VALUES (@pacpridePK, N'State Excise Tax Rate 1 Reference', 0, 60, NULL, NULL, 1, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) 
+	VALUES (@pacpridePK, SCOPE_IDENTITY(), 66, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 1)	
+	
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) 
+	VALUES (@pacpridePK, N'State Excise Tax Rate 2 Reference', 0, 61, NULL, NULL, 1, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) 
+	VALUES (@pacpridePK, SCOPE_IDENTITY(), 67, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 1)
+	
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding])
+	VALUES (@pacpridePK, N'County Excise Tax Rate Reference', 0, 62, NULL, NULL, 1, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) 
+	VALUES (@pacpridePK, SCOPE_IDENTITY(), 68, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 1)	
+	
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) 
+	VALUES (@pacpridePK, N'City Excise Tax Rate Reference', 0, 63, NULL, NULL, 1, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) 
+	VALUES (@pacpridePK, SCOPE_IDENTITY(), 69, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 1)	
+	
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) 
+	VALUES (@pacpridePK, N'State Sales Tax Percentage Rate Reference', 0, 64, NULL, NULL, 1, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) 
+	VALUES (@pacpridePK, SCOPE_IDENTITY(), 70, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 1)	
+	
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) 
+	VALUES (@pacpridePK, N'County Sales Tax Percentage Rate Reference', 0, 65, NULL, NULL, 1, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) 
+	VALUES (@pacpridePK, SCOPE_IDENTITY(), 71, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 1)	
+	
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) 
+	VALUES (@pacpridePK, N'City Sales Tax Percentage Rate Reference', 0, 66, NULL, NULL, 1, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) 
+	VALUES (@pacpridePK, SCOPE_IDENTITY(), 72, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 1)	
+	
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) 
+	VALUES (@pacpridePK, N'Other Sales Tax Percentage Rate Reference', 0, 67, NULL, NULL, 1, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) 
+	VALUES (@pacpridePK, SCOPE_IDENTITY(), 73, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 1)	
 END
 	-----------Pac Pride-------------
 
