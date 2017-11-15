@@ -2708,39 +2708,32 @@ BEGIN
 	DECLARE @dblInventoryCost	NUMERIC(18,6)
 	DECLARE @dblMarginNetPrice	NUMERIC(18,6)
 
-	--SELECT @dblMargin = dblMargin , @dblInventoryCost = dblInventoryCost
-	--FROM [dbo].[fnCFGetTransactionMargin](
-	-- 0
-	--,@intItemId			
-	--,@intLocationId	
-	--,(SELECT TOP 1 dblCalculatedAmount FROM @tblTransactionPrice WHERE strTransactionPriceId = 'Net Price')
-	--,(SELECT TOP 1 dblCalculatedAmount FROM @tblTransactionPrice WHERE strTransactionPriceId = 'Gross Price')
-	--,(select SUM(dblCalculatedTax) FROM @tblCFTransactionTax WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL)
-	--,(select SUM(dblOriginalTax) FROM @tblCFTransactionTax WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL)
-	--,@dblQuantity
-	--,@dblTransferCost	
-	--,@strTransactionType
-	--,@strPriceBasis
-	--)
+	
 	SELECT TOP 1 @dblMarginNetPrice = dblCalculatedAmount 
 	FROM @tblTransactionPrice 
 	WHERE strTransactionPriceId = 'Net Price'
 
-	SELECT TOP 1 @dblInventoryCost = ISNULL(arSalesAnalysisReport.dblUnitCost ,0)
-	FROM tblCFTransaction AS cfTransaction
-			INNER JOIN tblARInvoice AS arInvoice
-			ON cfTransaction.intInvoiceId = arInvoice.intInvoiceId
-			INNER JOIN vyuARSalesAnalysisReport AS arSalesAnalysisReport
-			ON arInvoice.intInvoiceId = arSalesAnalysisReport.intTransactionId
-			WHERE cfTransaction.intTransactionId = @intTransactionId
 
-	
 	IF (@strTransactionType = 'Remote' OR @strTransactionType = 'Extended Remote')
 	BEGIN
 		SET @dblMargin = ISNULL(@dblMarginNetPrice,0) - ISNULL(@dblNetTransferCost,0)
 	END
 	ELSE
 	BEGIN
+		--SELECT TOP 1 @dblInventoryCost = ISNULL(arSalesAnalysisReport.dblUnitCost ,0)
+		--FROM tblCFTransaction AS cfTransaction
+		--		INNER JOIN tblARInvoice AS arInvoice
+		--		ON cfTransaction.intInvoiceId = arInvoice.intInvoiceId
+		--		INNER JOIN vyuARSalesAnalysisReport AS arSalesAnalysisReport
+		--		ON arInvoice.intInvoiceId = arSalesAnalysisReport.intTransactionId
+		--		WHERE cfTransaction.intTransactionId = @intTransactionId
+
+		SELECT
+		@dblInventoryCost = dblAverageCost
+		FROM vyuICGetItemPricing 
+		WHERE intItemId = @intItemId
+		AND intLocationId = @intLocationId
+
 		SET @dblMargin = ISNULL(@dblMarginNetPrice,0) - ISNULL(@dblInventoryCost,0)
 	END
 
