@@ -2186,7 +2186,7 @@ BEGIN
 	SELECT 99
 		,'Default consumption UOM'
 		,5
-		,3
+		,5
 		,'Select ''1'' as ValueMember,''Recipe UOM'' as DisplayMember UNION Select ''2'' as ValueMember,''Lot Qty UOM'' as DisplayMember UNION Select ''3'' as ValueMember,''Stock UOM'' as DisplayMember'
 END
 GO
