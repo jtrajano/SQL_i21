@@ -38,7 +38,7 @@ SELECT
 	, strOtherMarks					= LC.strOtherMarks
 	, strSealNumber					= LC.strSealNumber
 	, strContainerType				= ContType.strContainerType
-	, strMainCurrency				= CY.strCurrency
+	, strMainCurrency				= ISNULL(AD.strSeqCurrency,CY.strCurrency)
 	, dblMainCashPrice				= CT.dblCashPrice / CASE WHEN ISNULL(CU.intCent,0) = 0 THEN 1 ELSE CU.intCent END
 	, dblFranchise					= CASE WHEN WG.dblFranchise > 0 THEN WG.dblFranchise / 100 ELSE 0 END
 	, dblContainerWeightPerQty		= (LC.dblNetWt / CASE WHEN ISNULL(LC.dblQuantity,0) = 0 THEN 1 ELSE LC.dblQuantity END)
@@ -63,6 +63,12 @@ SELECT
 	, strStockUOM					= oStockUOM.strUnitMeasure
 	, strStockUOMType				= oStockUOM.strUnitType
 	, dblStockUOMCF					= oStockUOM.dblUnitQty
+	, intForexRateTypeId			= CT.intRateTypeId
+	, strForexRateType				= RT.strCurrencyExchangeRateType
+	, dblForexRate					= CT.dblRate
+	, L.dtmScheduledDate
+	, L.intFreightTermId
+	, FreightTerm.strFreightTerm
 FROM tblLGLoad L
 	INNER JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 	INNER JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
@@ -84,6 +90,7 @@ FROM tblLGLoad L
 	LEFT JOIN tblICItem Item ON Item.intItemId = LD.intItemId
 	LEFT JOIN tblLGContainerType ContType ON ContType.intContainerTypeId = L.intContainerTypeId
 	LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = LW.intSubLocationId
+	LEFT JOIN tblSMCurrencyExchangeRateType	RT	ON	RT.intCurrencyExchangeRateTypeId	=	CT.intRateTypeId	
 	OUTER APPLY (
 		SELECT TOP 1 intItemUOMId, strUnitMeasure, strUnitType, dblUnitQty
 		FROM tblICItemUOM ItemUOM 
@@ -101,3 +108,5 @@ FROM tblLGLoad L
 		WHERE WeightItem.intItemId=LD.intItemId
 			AND WeightItem.intUnitMeasureId=L.intWeightUnitMeasureId
 	) oWeightStock
+	LEFT JOIN tblSMFreightTerms FreightTerm
+		ON FreightTerm.intFreightTermId = L.intFreightTermId

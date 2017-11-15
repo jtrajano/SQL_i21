@@ -360,7 +360,12 @@ FROM
 	,[strUOM]					=	UOM.strUnitMeasure
 	,[intWeightUOMId]			=	B.intWeightUOMId
 	,[intCostUOMId]				=	B.intCostUOMId
-	,[dblNetWeight]				=	B.dblNet
+	,[dblNetWeight]				=	CASE WHEN B.intWeightUOMId > 0 THEN  
+													(CASE WHEN B.dblBillQty > 0 
+															THEN ABS(B.dblOpenReceive - B.dblBillQty) * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1)) --THIS IS FOR PARTIAL
+														ELSE B.dblNet --THIS IS FOR NO RECEIVED QTY YET BUT HAS NET WEIGHT DIFFERENT FROM GROSS
+											END)
+									ELSE 0 END
 	,[strCostUOM]				=	CostUOM.strUnitMeasure
 	,[strgrossNetUOM]			=	WeightUOM.strUnitMeasure
 	,[dblWeightUnitQty]			=	ISNULL(ItemWeightUOM.dblUnitQty,1)

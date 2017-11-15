@@ -221,7 +221,7 @@ FROM (
 		 , strAccountStatusCode			= STATUSCODES.strAccountStatusCode
 		 , strLocationName				= CL.strLocationName
 		 , strFullAddress				= [dbo].fnARFormatCustomerAddress(NULL, NULL, CASE WHEN C.strStatementFormat <> ''Running Balance'' THEN C.strBillToLocationName ELSE NULL END, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, NULL)
-		 , strStatementFooterComment	= dbo.fnARGetDefaultComment(NULL, I.intEntityCustomerId, ''Statement Report'', NULL, ''Footer'', NULL)
+		 , strStatementFooterComment	= dbo.fnARGetDefaultComment(NULL, I.intEntityCustomerId, ''Statement Report'', NULL, ''Footer'', NULL, 1)
 		 , strCompanyName				= COMPANY.strCompanyName
 		 , strCompanyAddress			= COMPANY.strCompanyAddress
 		 , dblARBalance					= C.dblARBalance
@@ -392,7 +392,8 @@ IF @ysnPrintOnlyPastDueLocal = 1
 
 IF @ysnPrintZeroBalanceLocal = 0
 	BEGIN
-		DELETE FROM @temp_statement_table WHERE ISNULL(dblARBalance, 0) = 0		
+		DELETE FROM @temp_statement_table WHERE (((ABS(dblAmountDue) * 10000) - CONVERT(INT, (ABS(dblAmountDue) * 10000))) <> 0) OR ISNULL(dblAmountDue, 0) = 0
+		DELETE FROM tblARCustomerAgingStagingTable WHERE (((ABS(dblTotalAR) * 10000) - CONVERT(INT, (ABS(dblTotalAR) * 10000))) <> 0) OR ISNULL(dblTotalAR, 0) = 0
 	END
 
 IF @ysnPrintCreditBalanceLocal = 0

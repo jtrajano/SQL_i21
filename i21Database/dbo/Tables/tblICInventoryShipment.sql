@@ -340,3 +340,4 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblICInventoryShipment',
     @level2type = N'COLUMN',
     @level2name = N'intSourceType'
+GO

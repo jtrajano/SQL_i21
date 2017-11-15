@@ -29,7 +29,7 @@ FROM (
 		,intNoOfApprovals = SUM(ISNULL(Samp.intApprovalCount, 0))
 		,intNoOfRejects = SUM(ISNULL(RSamp.intApprovalCount, 0))
 		,intNoOfIntegrationRequests = SUM(CAST(ISNULL(LDLink.ysnExported, 0) AS INT))
-		,intTrucksRemaining = dbo.fnGetTrucksRemaining(CH.intContractHeaderId,MAX(CD.intItemUOMId))
+		,intTrucksRemaining = dbo.fnGetTrucksRemaining(CH.intContractHeaderId,CD.intItemId,CD.dblBasis, CD.dtmStartDate, CD.dtmEndDate)
 		,strRemarks = CH.strInternalComment
 		,strDeliveryMonth = DATENAME(MM, MAX(CD.dtmEndDate)) + '-' + RIGHT(DATEPART(YY, MAX(CD.dtmEndDate)), 2)
 	FROM tblCTContractHeader CH
@@ -88,6 +88,6 @@ FROM (
 	WHERE ISNULL(LC.ysnRejected, 0) = 0
 	GROUP BY CD.intItemId,I.strItemNo,I.strDescription,CH.strContractNumber,CH.intContractHeaderId,CH.strCustomerContract
 		,Pos.strPosition,EY.strName,CB.strDescription,CH.dblQuantity
-		,CH.strInternalComment,CD.dblBasis
+		,CH.strInternalComment,CD.dblBasis, CD.dtmStartDate, CD.dtmEndDate
 	) tbl
 WHERE intTrucksRemaining > 0

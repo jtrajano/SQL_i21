@@ -9,18 +9,11 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 --SET ANSI_WARNINGS OFF
 
-DECLARE @intTransactionId INT , @strTransactionId NVARCHAR(50)
-SELECT TOP 1 @intTransactionId = intTransactionId, 
-	@strTransactionId = strTransactionId FROM @RecapTable 
+DECLARE @strTransactionId NVARCHAR(50), @strBatchId NVARCHAR(50)
+SELECT TOP 1 @strBatchId = strBatchId, @strTransactionId = strTransactionId FROM @RecapTable 
 -- DELETE OLD RECAP DATA (IF IT EXISTS)
 DELETE	FROM tblGLPostRecap 
-WHERE	strTransactionId = @strTransactionId
-		AND intTransactionId = @intTransactionId
-
--- DELETE Results 1 DAYS OLDER	
-DELETE	FROM tblGLPostRecap 
-WHERE	dbo.fnDateLessThan(dtmDateEntered, GETDATE()) = 1
-		AND intEntityId = @intEntityUserSecurityId;
+WHERE strBatchId = @strBatchId OR strTransactionId = @strTransactionId
 
 IF NOT EXISTS (SELECT TOP 1 1 FROM @RecapTable)
 BEGIN 

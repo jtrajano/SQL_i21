@@ -51,6 +51,7 @@
 	[strDiversionNumber] NVARCHAR(50) NULL,
 	[strDiversionOriginalDestinationState] NVARCHAR(50) NULL,
 	[strTransactionType] NVARCHAR(50) NULL,
-	[intTransactionNumberId] INT NULL
+	[intTransactionNumberId] INT NULL,
+	[strVendorLicenseNumber] NVARCHAR(50) NULL
 )
 GO

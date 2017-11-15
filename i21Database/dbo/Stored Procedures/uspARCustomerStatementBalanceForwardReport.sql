@@ -465,7 +465,7 @@ SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
 	  , strLocationName		= CL.strLocationName
 	  , strFullAddress		= dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, NULL)
 	  , strComment			= TRANSACTIONS.strComment
-	  , strStatementFooterComment	= dbo.fnARGetDefaultComment(NULL, TRANSACTIONS.intEntityCustomerId, ''Statement Report'', NULL, ''Footer'', NULL)
+	  , strStatementFooterComment	= dbo.fnARGetDefaultComment(NULL, TRANSACTIONS.intEntityCustomerId, ''Statement Report'', NULL, ''Footer'', NULL, 1)
 	  , strCompanyName		= COMPANY.strCompanyName
 	  , strCompanyAddress	= COMPANY.strCompanyAddress
 	  , dblARBalance		= C.dblARBalance
@@ -612,7 +612,7 @@ IF @ysnIncludeBudgetLocal = 1
 				  , strAccountStatusCode		= STATUSCODES.strAccountStatusCode
 				  , strLocationName				= NULL
 				  , strFullAddress				= NULL
-				  , strStatementFooterComment	= dbo.fnARGetDefaultComment(NULL, CB.intEntityCustomerId, ''Statement Report'', NULL, ''Footer'', NULL)
+				  , strStatementFooterComment	= dbo.fnARGetDefaultComment(NULL, CB.intEntityCustomerId, ''Statement Report'', NULL, ''Footer'', NULL, 1)
 				  , strCompanyName				= NULL
 				  , strCompanyAddress			= NULL
 				  , dblARBalance				= C.dblARBalance
@@ -752,7 +752,8 @@ IF @ysnPrintOnlyPastDueLocal = 1
 
 IF @ysnPrintZeroBalanceLocal = 0
     BEGIN
-        DELETE FROM @temp_statement_table WHERE ISNULL(dblBalance, 0) = 0 AND ISNULL(strTransactionType, '') <> 'Balance Forward'        
+        DELETE FROM @temp_statement_table WHERE ((((ABS(dblBalance) * 10000) - CONVERT(INT, (ABS(dblBalance) * 10000))) <> 0) OR ISNULL(dblBalance, 0) = 0) AND ISNULL(strTransactionType, '') <> 'Balance Forward'
+		DELETE FROM @temp_aging_table WHERE (((ABS(dblTotalAR) * 10000) - CONVERT(INT, (ABS(dblTotalAR) * 10000))) <> 0) OR ISNULL(dblTotalAR, 0) = 0
     END
 
 IF @ysnPrintCreditBalanceLocal = 0

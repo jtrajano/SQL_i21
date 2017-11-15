@@ -3,17 +3,20 @@ AS
 
 SELECT 
 	B.intSiteId
-	,dblProductCost = COALESCE(dblCallEntryPrice,A.dblPrice) 
+	,dblProductCost = COALESCE(B.dblCallEntryPrice
+								,(CASE WHEN A.strSpecialPricing LIKE '%Inventory - Standard Pricing%' THEN A.dblPrice + ISNULL(C. dblPriceAdjustment,0.) ELSE A.dblPrice END)) 
 FROM vyuTMDeliveryFillReport B
+INNER JOIN tblTMSite C
+	ON B.intSiteId = C.intSiteID
 CROSS APPLY (
-	SELECT TOP 1 dblPrice FROM dbo.[fnTMGetSpecialPricingPriceTable](
-							strCustomerNumber
-							,strProductId
-							,CAST(strLocation AS NVARCHAR(5))
-							,strItemClass
-							,(CASE WHEN dtmCallInDate IS NULL THEN GETDATE() ELSE dtmCallInDate END)
-							,dblQuantity
-							,NULL,intSiteId)
+	SELECT TOP 1 dblPrice,strSpecialPricing FROM dbo.[fnTMGetSpecialPricingPriceTable](
+							B.strCustomerNumber
+							,B.strProductId
+							,CAST(B.strLocation AS NVARCHAR(5))
+							,B.strItemClass
+							,(CASE WHEN B.dtmCallInDate IS NULL THEN GETDATE() ELSE B.dtmCallInDate END)
+							,B.dblQuantity
+							,NULL,B.intSiteId)
 ) A
 
 GO

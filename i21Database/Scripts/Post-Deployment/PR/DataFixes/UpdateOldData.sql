@@ -93,3 +93,27 @@ EXEC('UPDATE tblSMEvents
 			INNER JOIN tblPRTimeOffRequest
 			ON tblSMEvents.intEventId = tblPRTimeOffRequest.intEventId')
 END
+
+/*
+* Employee Earnings
+* 1. Add default sorting to Employee Earnings
+* 2...
+*/
+
+IF EXISTS(SELECT * FROM sys.tables WHERE object_id = object_id('tblPREmployeeEarning'))
+BEGIN
+
+EXEC('
+	--Check if Sorting has never been applied (no intSort greater than 1)
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblPREmployeeEarning WHERE intSort > 1)
+
+	UPDATE tblPREmployeeEarning
+		SET intSort = intRank
+	FROM 
+		tblPREmployeeEarning
+		INNER JOIN (SELECT intEmployeeEarningId, 
+						DENSE_RANK() OVER(PARTITION BY intEntityEmployeeId ORDER BY intTypeEarningId) intRank 
+					FROM tblPREmployeeEarning) tblPREmployeeEarning_Ranked
+						ON tblPREmployeeEarning.intEmployeeEarningId = tblPREmployeeEarning_Ranked.intEmployeeEarningId')
+
+END

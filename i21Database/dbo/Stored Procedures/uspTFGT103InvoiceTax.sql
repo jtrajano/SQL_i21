@@ -181,18 +181,17 @@ BEGIN TRY
 			, strTransactionType = 'Invoice'
 			, intTransactionNumberId = tblARInvoiceDetail.intInvoiceDetailId
 		FROM tblTFProductCode
-		INNER JOIN tblSMTaxCode
 		INNER JOIN tblARInvoiceDetail
 		INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId
 		INNER JOIN tblARInvoiceDetailTax ON tblARInvoiceDetail.intInvoiceDetailId = tblARInvoiceDetailTax.intInvoiceDetailId
-			ON tblSMTaxCode.intTaxCodeId = tblARInvoiceDetailTax.intTaxCodeId
 		INNER JOIN tblICItemMotorFuelTax
 		INNER JOIN tblTFReportingComponentProductCode ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
 			ON tblARInvoiceDetail.intItemId = tblICItemMotorFuelTax.intItemId
 		INNER JOIN tblSMCompanyLocation ON tblARInvoice.intCompanyLocationId = tblSMCompanyLocation.intCompanyLocationId
 		INNER JOIN tblARCustomer ON tblARInvoice.intEntityCustomerId = tblARCustomer.intEntityId
 		INNER JOIN tblEMEntity ON tblARCustomer.intEntityId = tblEMEntity.intEntityId
-		LEFT JOIN tblEMEntityLocation ON tblEMEntityLocation.intEntityId = tblARInvoice.intShipToLocationId
+		LEFT JOIN tblEMEntityLocation ON tblEMEntityLocation.intEntityLocationId = tblARInvoice.intShipToLocationId
+		LEFT JOIN tblSMTaxCode ON tblSMTaxCode.intTaxCodeId = tblEMEntityLocation.intCountyTaxCodeId
 		INNER JOIN tblTFReportingComponent ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 			ON tblTFProductCode.intProductCodeId = tblICItemMotorFuelTax.intProductCodeId
 		FULL OUTER JOIN tblEMEntity AS tblEMEntity_Transporter
@@ -229,21 +228,6 @@ BEGIN TRY
 			DECLARE @TaxAmount NUMERIC(18, 6)
 			DECLARE @TaxExempt NUMERIC(18, 6)
 
-			-- GASOLINE USE TAX COLLECTED
-			SELECT @TaxAmount = tblARInvoiceDetailTax.dblTax
-			FROM tblSMTaxCode
-			INNER JOIN tblTFTaxCategory ON tblSMTaxCode.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId
-			INNER JOIN tblARInvoiceDetailTax ON tblSMTaxCode.intTaxCodeId = tblARInvoiceDetailTax.intTaxCodeId
-			INNER JOIN tblARInvoiceDetail ON tblARInvoiceDetailTax.intInvoiceDetailId = tblARInvoiceDetail.intInvoiceDetailId
-			INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId
-			WHERE tblARInvoiceDetailTax.intInvoiceDetailId = @InvoiceDetailId
-				AND (tblTFTaxCategory.strTaxCategory = @GasolineUseTax)
-
-			UPDATE @TFTransaction
-			SET dblTax = ISNULL(@TaxAmount, 0)
-				, strTaxCode = @GasolineUseTax
-			WHERE intInvoiceDetailId = @InvoiceDetailId
-						
 			--EXEMPT GALLONS SOLD
 			SELECT @TaxExempt = tblARInvoiceDetail.dblQtyShipped
 			FROM tblSMTaxCode
@@ -254,7 +238,22 @@ BEGIN TRY
 			WHERE tblARInvoiceDetailTax.intInvoiceDetailId = @InvoiceDetailId
 				AND (tblTFTaxCategory.strTaxCategory = 'IN Gasoline Use Tax (GUT)')
 
-			UPDATE @TFTransaction SET dblTaxExempt = CASE WHEN @TaxExempt IS NULL THEN dblQtyShipped ELSE 0 END, strTaxCode = @ExemptGallSold WHERE intInvoiceDetailId = @InvoiceDetailId
+			UPDATE @TFTransaction SET dblTaxExempt = ISNULL(@TaxExempt, 0), strTaxCode = @ExemptGallSold WHERE intInvoiceDetailId = @InvoiceDetailId
+			
+			-- GASOLINE USE TAX COLLECTED
+			SELECT @TaxAmount = tblARInvoiceDetailTax.dblTax
+			FROM tblSMTaxCode
+			INNER JOIN tblTFTaxCategory ON tblSMTaxCode.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId
+			INNER JOIN tblARInvoiceDetailTax ON tblSMTaxCode.intTaxCodeId = tblARInvoiceDetailTax.intTaxCodeId
+			INNER JOIN tblARInvoiceDetail ON tblARInvoiceDetailTax.intInvoiceDetailId = tblARInvoiceDetail.intInvoiceDetailId
+			INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId
+			WHERE tblARInvoiceDetailTax.intInvoiceDetailId = @InvoiceDetailId
+				AND (tblTFTaxCategory.strTaxCategory = @GasolineUseTax)
+	
+			UPDATE @TFTransaction SET dblTax = ISNULL(@TaxAmount, 0), strTaxCode = @GasolineUseTax WHERE intInvoiceDetailId = @InvoiceDetailId
+	
+			--UPDATE @TFTransaction SET dblTaxExempt = CASE WHEN @TaxExempt IS NULL THEN dblQtyShipped ELSE 0 END, strTaxCode = @ExemptGallSold WHERE intInvoiceDetailId = @InvoiceDetailId
+
 			SET @Count = @Count - 1
 		END
 
@@ -283,8 +282,10 @@ BEGIN TRY
 			, strBillOfLading
 			, dtmDate
 			, strDestinationCity
+			, strDestinationCounty
 			, strDestinationState
 			, strOriginCity
+			, strOriginCounty
 			, strOriginState
 			, strCustomerName
 			, strCustomerFEIN
@@ -342,8 +343,10 @@ BEGIN TRY
 			, tblTRLoadReceipt.strBillOfLading AS strBOLNumber
 			, tblICInventoryTransfer.dtmTransferDate AS dtmDate
 			, tblSMCompanyLocation.strCity AS strDestinationCity
+			, NULL AS strDestinationCounty
 			, tblSMCompanyLocation.strStateProvince AS strDestinationState
 			, tblEMEntityLocation.strCity AS strOriginCity
+			, CountyTaxCode.strCounty AS strOriginCounty
 			, tblEMEntityLocation.strState AS strOriginState
 			, tblSMCompanyLocation.strLocationName AS strCustomerName
 			, tblSMCompanySetup.strEin AS strCustomerFEIN
@@ -399,6 +402,7 @@ BEGIN TRY
 		INNER JOIN tblEMEntity AS EntityAPVendor ON tblAPVendor.intEntityId = EntityAPVendor.intEntityId
 		INNER JOIN tblTRSupplyPoint ON tblTRLoadReceipt.intSupplyPointId = tblTRSupplyPoint.intSupplyPointId
 		INNER JOIN tblEMEntityLocation ON tblTRSupplyPoint.intEntityLocationId = tblEMEntityLocation.intEntityLocationId
+		LEFT JOIN tblSMTaxCode AS CountyTaxCode ON CountyTaxCode.intTaxCodeId = tblEMEntityLocation.intCountyTaxCodeId
 		INNER JOIN tblSMCompanyLocation ON tblTRLoadDistributionHeader.intCompanyLocationId = tblSMCompanyLocation.intCompanyLocationId
 			ON tblTFProductCode.intProductCodeId = tblICItemMotorFuelTax.intProductCodeId
 		LEFT JOIN tblTFReportingComponentCriteria ON tblTFReportingComponent.intReportingComponentId = tblTFReportingComponentCriteria.intReportingComponentId
@@ -552,8 +556,10 @@ BEGIN TRY
 				, strBillOfLading
 				, dtmDate
 				, strDestinationCity
+				, strDestinationCounty
 				, strDestinationState
 				, strOriginCity
+				, strOriginCounty
 				, strOriginState
 				, strCustomerName
 				, strCustomerFederalTaxId
@@ -607,8 +613,10 @@ BEGIN TRY
 				, strBillOfLading
 				, dtmDate
 				, strDestinationCity
+				, strDestinationCounty
 				, strDestinationState
 				, strOriginCity
+				, strOriginCounty
 				, strOriginState
 				, strCustomerName
 				, strCustomerFEIN

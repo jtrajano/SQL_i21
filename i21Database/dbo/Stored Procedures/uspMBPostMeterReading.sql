@@ -18,7 +18,9 @@ SET ANSI_WARNINGS OFF
 BEGIN
 
 	DECLARE @UserEntityId INT
+	DECLARE @DefaultCurrency INT
 	SET @UserEntityId = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @UserId), @UserId)
+	SELECT @DefaultCurrency = ISNULL(intDefaultCurrencyId, 1) FROM tblSMCompanyPreference
 
 	DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
 
@@ -110,7 +112,7 @@ BEGIN
 		,[intInvoiceId]							= @InvoiceId --NULL Value will create new invoice
 		,[intEntityCustomerId]					= MRDetail.intEntityCustomerId
 		,[intCompanyLocationId]					= MRDetail.intCompanyLocationId
-		,[intCurrencyId]						= 1
+		,[intCurrencyId]						= @DefaultCurrency
 		,[intTermId]							= MADetail.intTermId
 		,[dtmDate]								= MRDetail.dtmTransaction
 		,[dtmDueDate]							= NULL

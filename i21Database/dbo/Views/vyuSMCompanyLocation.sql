@@ -42,6 +42,7 @@ compLoc.intCompanyLocationId
 ,compLoc.ysnEvenBatches
 ,compLoc.ysnDefaultCustomBlend
 ,compLoc.ysnAgroguideInterface
+,compLoc.ysnLicensed
 ,compLoc.ysnLocationActive
 ,compLoc.intProfitCenter
 ,compLoc.intCashAccount

@@ -111,7 +111,7 @@ BEGIN TRY
 	INNER JOIN tblTFReportingComponent RC ON Config.intReportingComponentId = RC.intReportingComponentId
 	WHERE RC.strFormCode = @FormCodeParam 
 		AND Config.strSegment = 'Summary'
-	ORDER BY Config.intReportItemSequence DESC
+	ORDER BY Config.intReportItemSequence ASC
 	
 	-- LOOP ON SUMMARY ITEMS AND INSERT INTO SUMMARY TABLE
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTransactionSummaryItem)
@@ -124,7 +124,7 @@ BEGIN TRY
 			, @ReportItemSequence = intReportItemSequence
 			, @TemplateItemNumber = intTemplateItemNumber
 			, @ReportSection = strReportSection
-			, @TemplateConfiguration = strConfiguration
+			, @TemplateConfiguration = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0  ELSE CONVERT(NUMERIC(18,6), strConfiguration) END
 		FROM #tmpTransactionSummaryItem
 
 		SET @TemplateScheduleCodeParam = REPLACE(@TemplateScheduleCodeParam,',',''',''')
@@ -162,98 +162,46 @@ BEGIN TRY
 			ELSE IF @TemplateItemId = 'GT-103-Summary-005'
 			BEGIN
 			--5. Collection Allowance. Do not calculate this allowance if your return and payment are late. Collection allowance rate is 0.73%
-				IF(@ScheduleCodeParam <> '')
-				BEGIN
-					SET @QueryTransaction = 'SELECT strColumnValue * ' + CONVERT(NVARCHAR(50), @TemplateConfiguration) + ' FROM tblTFTransactionSummary WHERE intItemNumber IN (''' + @TemplateScheduleCodeParam + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
-					INSERT INTO @TFTransactionSummaryTotal
-					EXEC(@QueryTransaction)
-				END
-				ELSE
-				BEGIN
-					SET @QueryTransaction = 'SELECT TOP 1 0 FROM tblTFReportingComponentConfiguration'  
-					INSERT INTO @TFTransactionSummaryTotal
-					EXEC(@QueryTransaction)
-				END
+				--SET @QueryTransaction = 'SELECT ' + CONVERT(NVARCHAR(50), @TemplateConfiguration)
+				SET @QueryTransaction = 'SELECT strColumnValue * ' + CONVERT(NVARCHAR(50), @TemplateConfiguration) + ' FROM tblTFTransactionSummary WHERE intItemNumber IN (''' + @TemplateScheduleCodeParam + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
+				INSERT INTO @TFTransactionSummaryTotal
+				EXEC(@QueryTransaction)		
 			END
 			ELSE IF @TemplateItemId = 'GT-103-Summary-006'
 			BEGIN
 			--6. Net Gasoline Use Tax Due. Subtotal of use tax and collection allowance. (Line 4 minus Line 5)
-				IF(@ScheduleCodeParam <> '')
-				BEGIN
-					SET @QueryTransaction  = 'SELECT TOP 1 (a.strColumnValue) - ((SELECT SUM(b.strColumnValue) FROM tblTFTransactionSummary b WHERE b.intItemNumber IN (''' + @TemplateScheduleCodeParam + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''') - (a.strColumnValue)) FROM   tblTFTransactionSummary a WHERE a.intItemNumber IN (''' + @TemplateScheduleCodeParam + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''
-					INSERT INTO @TFTransactionSummaryTotal
-					EXEC(@QueryTransaction)
-				END
-				ELSE
-				BEGIN
-					SET @QueryTransaction = 'SELECT TOP 1 0 FROM tblTFReportingComponentConfiguration'  
-					INSERT INTO @TFTransactionSummaryTotal
-					EXEC(@QueryTransaction)
-				END
+				SET @QueryTransaction  = 'SELECT TOP 1 (a.strColumnValue) - ((SELECT SUM(b.strColumnValue) FROM tblTFTransactionSummary b WHERE b.intItemNumber IN (''' + @TemplateScheduleCodeParam + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''') - (a.strColumnValue)) FROM   tblTFTransactionSummary a WHERE a.intItemNumber IN (''' + @TemplateScheduleCodeParam + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''
+				INSERT INTO @TFTransactionSummaryTotal
+				EXEC(@QueryTransaction)
 			END
 			ELSE IF @TemplateItemId = 'GT-103-Summary-007'
 			BEGIN
 			--7. Penalty Due. If late, the penalty is 10% of the tax due on Line 6 or $5, whichever is greater.
-				IF(@ScheduleCodeParam <> '')
-				BEGIN
-					SET @QueryTransaction = 'SELECT strConfiguration FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = ''' + @TemplateItemId + ''''  
-					INSERT INTO @TFTransactionSummaryTotal
-					EXEC(@QueryTransaction)
-				END
-				ELSE
-				BEGIN
-					SET @QueryTransaction = 'SELECT TOP 1 0 FROM tblTFReportingComponentConfiguration'  
-					INSERT INTO @TFTransactionSummaryTotal
-					EXEC(@QueryTransaction)
-				END
+				SET @QueryTransaction = 'SELECT ' + CONVERT(NVARCHAR(50), @TemplateConfiguration)
+				INSERT INTO @TFTransactionSummaryTotal
+				EXEC(@QueryTransaction)
 			END
 			ELSE IF @TemplateItemId = 'GT-103-Summary-008'
 			BEGIN
 			--8. Interest Due. If late, multiply Line 6 by the interest rate (see Departmental Notice #3)
-				IF(@ScheduleCodeParam <> '')
-				BEGIN
-					SET @QueryTransaction = 'SELECT strConfiguration FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = ''' + @TemplateItemId + '''' 
-					INSERT INTO @TFTransactionSummaryTotal
-					EXEC(@QueryTransaction)
-				END
-				ELSE
-				BEGIN
-					SET @QueryTransaction = 'SELECT TOP 1 0 FROM tblTFReportingComponentConfiguration'  
-					INSERT INTO @TFTransactionSummaryTotal
-					EXEC(@QueryTransaction)
-				END
+				--IF(@ScheduleCodeParam <> '')
+				SET @QueryTransaction = 'SELECT strColumnValue * ' + CONVERT(NVARCHAR(50), @TemplateConfiguration) + ' FROM tblTFTransactionSummary WHERE intItemNumber IN (''' + @TemplateScheduleCodeParam + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + '''' 
+				INSERT INTO @TFTransactionSummaryTotal
+				EXEC(@QueryTransaction)
 			END
 			ELSE IF @TemplateItemId = 'GT-103-Summary-009'
 			BEGIN
 			--9. Electronic Funds Transfer Credit
-				IF(@ScheduleCodeParam <> '')
-				BEGIN
-					SET @QueryTransaction = 'SELECT strConfiguration FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = ''' + @TemplateItemId + '''' 
-					INSERT INTO @TFTransactionSummaryTotal
-					EXEC(@QueryTransaction)
-				END
-				ELSE
-				BEGIN
-					SET @QueryTransaction = 'SELECT TOP 1 0 FROM tblTFReportingComponentConfiguration'  
-					INSERT INTO @TFTransactionSummaryTotal
-					EXEC(@QueryTransaction)
-				END
+				SET @QueryTransaction = 'SELECT ' + CONVERT(NVARCHAR(50), @TemplateConfiguration)
+				INSERT INTO @TFTransactionSummaryTotal
+				EXEC(@QueryTransaction)
 			END
 			ELSE IF @TemplateItemId = 'GT-103-Summary-010'
 			BEGIN
 			--10. Adjustments. If negative entry, use a negative sign. (You must provide an explanation and
-				IF(@ScheduleCodeParam <> '')
-				BEGIN
-					SET @QueryTransaction = 'SELECT strConfiguration FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = ''' + @TemplateItemId + '''' 
-					INSERT INTO @TFTransactionSummaryTotal
-					EXEC(@QueryTransaction)
-				END
-				ELSE
-				BEGIN
-					SET @QueryTransaction = 'SELECT TOP 1 0 FROM tblTFReportingComponentConfiguration'  
-					INSERT INTO @TFTransactionSummaryTotal
-					EXEC(@QueryTransaction)
-				END
+				SET @QueryTransaction = 'SELECT ' + CONVERT(NVARCHAR(50), @TemplateConfiguration)
+				INSERT INTO @TFTransactionSummaryTotal
+				EXEC(@QueryTransaction)
 			END
 			ELSE IF @TemplateItemId = 'GT-103-Summary-011'
 			BEGIN
@@ -267,7 +215,6 @@ BEGIN TRY
 			END		
 
 			SET @TempComputedValue = (SELECT TOP 1 ISNULL(dbLColumnValue, 0) FROM @TFTransactionSummaryTotal)
-			PRINT @TempComputedValue
 
 			INSERT INTO tblTFTransactionSummary(
 				strSummaryGuid

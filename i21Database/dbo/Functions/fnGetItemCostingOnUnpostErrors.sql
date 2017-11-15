@@ -80,6 +80,81 @@ RETURN (
 								AND Location.intItemLocationId = @intItemLocationId
 							INNER JOIN dbo.tblICLot Lot
 								ON Lot.intItemLocationId = Location.intItemLocationId 
+								AND Lot.intWeightUOMId IS NOT NULL
+								AND Lot.intItemUOMId <> Lot.intWeightUOMId 
+								AND Lot.intItemUOMId = @intItemUOMId
+								AND ISNULL(Lot.intLotId, 0) = ISNULL(@intLotId, 0)	
+					WHERE	ROUND(ISNULL(@dblQty, 0) + ISNULL(Lot.dblQty, 0), 6) < 0
+							AND Location.intAllowNegativeInventory = 3													
+				)
+
+		-- Check for negative lot weight. 
+		UNION ALL 
+		SELECT	intItemId = @intItemId
+				,intItemLocationId = @intItemLocationId
+				,strText =	dbo.fnFormatMessage(
+								dbo.fnICGetErrorMessage(80003)
+								,(SELECT strItemNo FROM dbo.tblICItem WHERE intItemId = @intItemId)
+								,dbo.fnFormatMsg80003(
+									@intItemLocationId
+									,@intSubLocationId
+									,@intStorageLocationId
+								)
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+							)
+				,intErrorCode = 80003
+		WHERE	EXISTS (
+					SELECT	TOP 1 1
+					FROM	dbo.tblICItem Item INNER JOIN dbo.tblICItemLocation Location
+								ON Item.intItemId = @intItemId
+								AND Location.intItemLocationId = @intItemLocationId
+							INNER JOIN dbo.tblICLot Lot
+								ON Lot.intItemLocationId = Location.intItemLocationId 
+								AND Lot.intWeightUOMId IS NOT NULL
+								AND Lot.intItemUOMId <> Lot.intWeightUOMId 
+								AND Lot.intWeightUOMId = @intItemUOMId								 
+								AND ISNULL(Lot.intLotId, 0) = ISNULL(@intLotId, 0)	
+					WHERE	ROUND(ISNULL(@dblQty, 0) + ISNULL(Lot.dblWeight, 0), 6) < 0
+							AND Location.intAllowNegativeInventory = 3													
+				)
+
+		-- 'Negative stock quantity is not allowed for {Item Name} on {Location Name}, {Sub Location Name}, and {Storage Location Name}.'
+		UNION ALL 
+		SELECT	intItemId = @intItemId
+				,intItemLocationId = @intItemLocationId
+				,strText =	dbo.fnFormatMessage(
+								dbo.fnICGetErrorMessage(80003)
+								,(SELECT strItemNo FROM dbo.tblICItem WHERE intItemId = @intItemId)
+								,dbo.fnFormatMsg80003(
+									@intItemLocationId
+									,@intSubLocationId
+									,@intStorageLocationId
+								)
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+								, DEFAULT
+							)
+				,intErrorCode = 80003
+		WHERE	EXISTS (
+					SELECT	TOP 1 1
+					FROM	dbo.tblICItem Item INNER JOIN dbo.tblICItemLocation Location
+								ON Item.intItemId = @intItemId
+								AND Location.intItemLocationId = @intItemLocationId
+							INNER JOIN dbo.tblICLot Lot
+								ON Lot.intItemLocationId = Location.intItemLocationId 
+								AND Lot.intWeightUOMId IS NULL
 								AND Lot.intItemUOMId = @intItemUOMId
 								AND ISNULL(Lot.intLotId, 0) = ISNULL(@intLotId, 0)	
 					WHERE	ROUND(ISNULL(@dblQty, 0) + ISNULL(Lot.dblQty, 0), 6) < 0

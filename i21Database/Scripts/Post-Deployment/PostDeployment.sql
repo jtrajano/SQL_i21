@@ -13,8 +13,7 @@ Post-Deployment Script Template
 print 'BEGIN POST DEPLOYMENT'
 
 
--- Card Fueling
-:r .\CF\1_ImportMapping.sql
+
 
 -- System Manager Default Data
 :r .\SM\DefaultData\1_MasterMenu.sql
@@ -419,5 +418,9 @@ print 'BEGIN POST DEPLOYMENT'
 --CRM
 :R .\CRM\SplitCRMData.sql
 :R .\CRM\RenameCRMScreen.sql
+
+-- Card Fueling
+:r .\CF\1_ImportMapping.sql
+:r .\CF\2_DataFix.sql
 
 print 'END POST DEPLOYMENT'

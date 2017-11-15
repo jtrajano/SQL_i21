@@ -81,8 +81,8 @@ BEGIN
 		SELECT I.strItemNo AS [Item]
 			,I.strDescription AS [Item Desc]
 			,ISNULL(MLC.strParentLotNumber, PL.strParentLotNumber) AS [Lot No]
-			,Convert(DECIMAL(24, 0), ROUND(IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SD.intItemUOMId, IU.intItemUOMId, ISNULL(MLC.dblLotQty, SD.dblQty)), IsNULL((
-								SELECT TOP 1 dbo.fnMFConvertQuantityToTargetItemUOM(SD.intItemUOMId, IU1.intItemUOMId, ISNULL(MLC.dblLotQty, SD.dblQty))
+			,Convert(DECIMAL(24, 0), ROUND(IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SD.intItemUOMId, IU.intItemUOMId, ISNULL(MLC.dblWOQty, SD.dblQty)), IsNULL((
+								SELECT TOP 1 dbo.fnMFConvertQuantityToTargetItemUOM(SD.intItemUOMId, IU1.intItemUOMId, ISNULL(MLC.dblWOQty, SD.dblQty))
 								FROM tblICItemUOM IU1
 								JOIN tblICUnitMeasure UM1 ON UM1.intUnitMeasureId = IU1.intUnitMeasureId
 									AND IU1.intItemId = I.intItemId
@@ -172,8 +172,8 @@ BEGIN
 		SELECT I.strItemNo AS [Item]
 			,I.strDescription AS [Item Desc]
 			,ISNULL(MLC.strParentLotNumber, PL.strParentLotNumber) AS [Lot No]
-			,Convert(DECIMAL(24, 0), ROUND(IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SD.intItemUOMId, IU.intItemUOMId, ISNULL(MLC.dblLotQty, SD.dblQty)), IsNULL((
-								SELECT TOP 1 dbo.fnMFConvertQuantityToTargetItemUOM(SD.intItemUOMId, IU1.intItemUOMId, ISNULL(MLC.dblLotQty, SD.dblQty))
+			,Convert(DECIMAL(24, 0), ROUND(IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SD.intItemUOMId, IU.intItemUOMId, ISNULL(MLC.dblWOQty, SD.dblQty)), IsNULL((
+								SELECT TOP 1 dbo.fnMFConvertQuantityToTargetItemUOM(SD.intItemUOMId, IU1.intItemUOMId, ISNULL(MLC.dblWOQty, SD.dblQty))
 								FROM tblICItemUOM IU1
 								JOIN tblICUnitMeasure UM1 ON UM1.intUnitMeasureId = IU1.intUnitMeasureId
 									AND IU1.intItemId = I.intItemId

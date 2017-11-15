@@ -101,7 +101,6 @@ FROM (
 	LEFT JOIN tblSMCountry CP ON CP.intCountryID = ITP.intOriginId
 	LEFT JOIN tblSMCountry CS ON CS.intCountryID = ITS.intOriginId
 	WHERE ((AD.dblPAllocatedQty - IsNull(LD.dblPShippedQuantity, 0) + IsNull(PL.dblLotPickedQty, 0)) > 0)
-
-	  AND ((AD.dblSAllocatedQty - IsNull(LD.dblSShippedQuantity, 0) - IsNull(PLS.dblSalePickedQty, 0)) > 0)
-	  ) tbl 
-	WHERE dblAvailableAllocationQty > 0
+		AND ((AD.dblSAllocatedQty - IsNull(LD.dblSShippedQuantity, 0) - IsNull(PLS.dblSalePickedQty, 0)) > 0)
+	) tbl
+WHERE dblAvailableAllocationQty > 0

@@ -41,6 +41,7 @@
 	[ysnEvenBatches] BIT NULL DEFAULT (1),
 	[ysnDefaultCustomBlend] BIT NULL DEFAULT (1),
 	[ysnAgroguideInterface] BIT NULL DEFAULT (1),
+	[ysnLicensed] BIT NOT NULL DEFAULT (0),
 	[ysnLocationActive] BIT NULL DEFAULT (1),
 	[intProfitCenter] INT NULL,
 	[intCashAccount] INT NULL,

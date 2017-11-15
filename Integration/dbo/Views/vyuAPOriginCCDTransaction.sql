@@ -1,10 +1,18 @@
-﻿/*
+﻿GO
+
+
+IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAPOriginCCDTransaction')
+	DROP VIEW vyuAPOriginCCDTransaction
+GO
+
+IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
+BEGIN
+/*
 	Dependencies: uspGLImportSubledger
 	vyuAPOriginCCDTransaction stub is already in Database project. Alter command should be sufficient
 */
-GO
 EXEC ('
-	ALTER VIEW [dbo].[vyuAPOriginCCDTransaction]
+	CREATE VIEW [dbo].[vyuAPOriginCCDTransaction]
 	AS
 	
 	WITH APOriginCCDTransaction AS (
@@ -52,4 +60,5 @@ EXEC ('
 		LEFT JOIN Bill ON Bill.strVendorOrderNumber = APOriginCCDTransaction.strVendorOrderNumber COLLATE Latin1_General_CI_AS
 		WHERE intBillId IS NULL
 		')
+END
 GO

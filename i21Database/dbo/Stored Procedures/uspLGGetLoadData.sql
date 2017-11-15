@@ -61,6 +61,7 @@ BEGIN
 				,DespatchCurrency.strCurrency AS strDespatchCurrency
 				,LoadingUnit.strUnitMeasure AS strLoadingUnitMeasure
 				,DischargeUnit.strUnitMeasure AS strDischargeUnitMeasure
+				,Driver.strName AS strDriver
 				,DENSE_RANK() OVER (
 					ORDER BY L.intLoadId DESC
 					) intRankNo
@@ -148,6 +149,7 @@ BEGIN
 			,DespatchCurrency.strCurrency AS strDespatchCurrency
 			,LoadingUnit.strUnitMeasure AS strLoadingUnitMeasure
 			,DischargeUnit.strUnitMeasure AS strDischargeUnitMeasure
+			,Driver.strName AS strDriver
 		FROM tblLGLoad L
 		LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = L.intGenerateLoadId
 		LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId

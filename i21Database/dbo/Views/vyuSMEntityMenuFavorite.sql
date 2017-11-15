@@ -2,7 +2,7 @@
 AS
 SELECT DISTINCT
 Favorite.intEntityMenuFavoriteId,
-Favorite.intMenuId,
+ISNULL(Favorite.intMenuId, Favorite.intCustomId) AS intMenuId,
 UserSecurityCompanyLocationRolePermission.intEntityUserSecurityId AS intEntityId,
 ISNULL(UserSecurityCompanyLocationRolePermission.intCompanyLocationId, 0) AS intCompanyLocationId,
 Favorite.intSort,
@@ -10,7 +10,7 @@ ISNULL(MasterMenu.strMenuName, Favorite.strMenuName) AS strMenuName,
 MasterMenu.strModuleName,
 MasterMenu.strDescription,
 CASE WHEN Favorite.ysnCustomView = 1 THEN 'Custom View' ELSE ISNULL(MasterMenu.strType, 'Folder') END AS strType,
-CASE WHEN Favorite.ysnCustomView = 1 THEN ('GlobalComponentEngine.view.SystemDashboard?id=' + CAST(Favorite.intMenuId AS NVARCHAR)) ELSE MasterMenu.strCommand END AS strCommand,
+CASE WHEN Favorite.ysnCustomView = 1 THEN ('GlobalComponentEngine.view.SystemDashboard?id=' + CAST(Favorite.intCustomId AS NVARCHAR)) ELSE MasterMenu.strCommand END AS strCommand,
 MasterMenu.strIcon,
 CASE WHEN Favorite.ysnCustomView = 1 THEN CAST(1 AS BIT) ELSE ISNULL(MasterMenu.ysnLeaf, 0) END AS ysnLeaf,
 ISNULL(MasterMenu.ysnIsLegacy, 0) AS ysnIsLegacy,

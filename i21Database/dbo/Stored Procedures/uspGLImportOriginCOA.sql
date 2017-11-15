@@ -15,4 +15,5 @@ CREATE PROCEDURE  [dbo].[uspGLImportOriginCOA]
 	@ysnBuild		BIT = 0,
 	@result			NVARCHAR(500) = '' OUTPUT
 AS
+IF EXISTS (SELECT TOP 1 1 FROM tblSMCompanyPreference WHERE ysnLegacyIntegration = 1)
 RAISERROR('Import Origin Account Procedure is not available', 16, 1);

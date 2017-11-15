@@ -11,7 +11,7 @@ BEGIN TRY
 	DECLARE @intSampleImportId INT
 		,@dtmSampleReceivedDate DATETIME
 		,@strSampleNumber NVARCHAR(30)
-		,@strItemShortName NVARCHAR(50)
+		,@strItemNumber NVARCHAR(50)
 		,@strSampleTypeName NVARCHAR(50)
 		,@strVendorName NVARCHAR(100)
 		,@strContractNumber NVARCHAR(50)
@@ -28,7 +28,6 @@ BEGIN TRY
 	DECLARE @strPreviousErrMsg NVARCHAR(MAX) = ''
 		,@strSampleRefNo NVARCHAR(30)
 		,@intContractHeaderId INT
-		,@strEntityName NVARCHAR(100)
 		,@intItemId INT
 		,@intCategoryId INT
 		,@intSampleTypeId INT
@@ -65,7 +64,7 @@ BEGIN TRY
 	BEGIN
 		SELECT @dtmSampleReceivedDate = NULL
 			,@strSampleNumber = NULL
-			,@strItemShortName = NULL
+			,@strItemNumber = NULL
 			,@strSampleTypeName = NULL
 			,@strVendorName = NULL
 			,@strContractNumber = NULL
@@ -81,7 +80,6 @@ BEGIN TRY
 			,@dtmCreated = NULL
 			,@strSampleRefNo = NULL
 			,@intContractHeaderId = NULL
-			,@strEntityName = NULL
 			,@intItemId = NULL
 			,@intCategoryId = NULL
 			,@intSampleTypeId = NULL
@@ -92,7 +90,7 @@ BEGIN TRY
 		SELECT @dtmSampleReceivedDate = CONVERT(DATETIME, dtmSampleReceivedDate, @intConvertYear)
 			,@strSampleNumber = strSampleNumber
 			,@strSampleRefNo = strSampleNumber
-			,@strItemShortName = strItemShortName
+			,@strItemNumber = strItemNumber
 			,@strSampleTypeName = strSampleTypeName
 			,@strVendorName = strVendorName
 			,@strContractNumber = strContractNumber
@@ -136,23 +134,23 @@ BEGIN TRY
 			END
 		END
 
-		-- Item Short Name
-		IF ISNULL(@strItemShortName, '') = ''
-			SELECT @strPreviousErrMsg += 'Invalid Item Short Name. '
+		-- Item No
+		IF ISNULL(@strItemNumber, '') = ''
+			SELECT @strPreviousErrMsg += 'Invalid Item No. '
 		ELSE
 		BEGIN
 			IF NOT EXISTS (
 					SELECT 1
 					FROM tblICItem
-					WHERE strShortName = @strItemShortName
+					WHERE strItemNo = @strItemNumber
 					)
-				SELECT @strPreviousErrMsg += 'Invalid Item Short Name. '
+				SELECT @strPreviousErrMsg += 'Invalid Item No. '
 			ELSE
 			BEGIN
 				SELECT @intItemId = intItemId
 					,@intCategoryId = intCategoryId
 				FROM tblICItem
-				WHERE strShortName = @strItemShortName
+				WHERE strItemNo = @strItemNumber
 			END
 		END
 
@@ -198,9 +196,7 @@ BEGIN TRY
 		END
 
 		-- Contract No
-		IF ISNULL(@strContractNumber, '') = ''
-			SELECT @strPreviousErrMsg += 'Invalid Contract No. '
-		ELSE
+		IF ISNULL(@strContractNumber, '') <> ''
 		BEGIN
 			IF NOT EXISTS (
 					SELECT 1
@@ -211,32 +207,28 @@ BEGIN TRY
 			ELSE
 			BEGIN
 				SELECT @intContractHeaderId = CH.intContractHeaderId
-					,@strEntityName = E.strName
 				FROM tblCTContractHeader CH
-				JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
 				WHERE CH.strContractNumber = @strContractNumber
 			END
 		END
 
 		-- Vendor
-		IF ISNULL(@strVendorName, '') = ''
-			SELECT @strPreviousErrMsg += 'Invalid Vendor. '
-		ELSE
+		IF ISNULL(@intContractHeaderId, 0) = 0
 		BEGIN
-			IF NOT EXISTS (
-					SELECT 1
-					FROM vyuCTEntity
-					WHERE (
-							strEntityType = 'Vendor'
-							OR strEntityType = 'Customer'
-							)
-						AND strEntityName = @strVendorName
-					)
+			IF ISNULL(@strVendorName, '') = ''
 				SELECT @strPreviousErrMsg += 'Invalid Vendor. '
 			ELSE
 			BEGIN
-				IF @strVendorName <> @strEntityName
-					SELECT @strPreviousErrMsg += 'Vendor does not belongs to the Contract. '
+				IF NOT EXISTS (
+						SELECT 1
+						FROM vyuCTEntity
+						WHERE (
+								strEntityType = 'Vendor'
+								OR strEntityType = 'Customer'
+								)
+							AND strEntityName = @strVendorName
+						)
+					SELECT @strPreviousErrMsg += 'Invalid Vendor. '
 			END
 		END
 
@@ -449,12 +441,14 @@ BEGIN TRY
 					SELECT COUNT(1) AS intCount
 					FROM (
 						SELECT DISTINCT CONVERT(DATETIME, dtmSampleReceivedDate, @intConvertYear) dtmSampleReceivedDate
-							,strItemShortName
+							,strItemNumber
 							,strSampleTypeName
 							,strVendorName
 							,strContractNumber
 							,strContainerNumber
 							,strMarks
+							,strSampleNote
+							,strHeaderComment
 							,dblSequenceQuantity
 							,strSampleStatus
 						FROM tblQMSampleImport
@@ -489,12 +483,14 @@ BEGIN TRY
 					,intConcurrencyId
 					,dtmSampleReceivedDate
 					,strSampleNumber
-					,strItemShortName
+					,strItemNumber
 					,strSampleTypeName
 					,strVendorName
 					,strContractNumber
 					,strContainerNumber
 					,strMarks
+					,strSampleNote
+					,strHeaderComment
 					,dblSequenceQuantity
 					,strSampleStatus
 					,strPropertyName
@@ -509,12 +505,14 @@ BEGIN TRY
 					,intConcurrencyId
 					,dtmSampleReceivedDate
 					,strSampleNumber
-					,strItemShortName
+					,strItemNumber
 					,strSampleTypeName
 					,strVendorName
 					,strContractNumber
 					,strContainerNumber
 					,strMarks
+					,strSampleNote
+					,strHeaderComment
 					,dblSequenceQuantity
 					,strSampleStatus
 					,strPropertyName
@@ -545,12 +543,14 @@ BEGIN TRY
 		,intConcurrencyId
 		,dtmSampleReceivedDate AS strSampleReceivedDate
 		,strSampleNumber
-		,strItemShortName
+		,strItemNumber
 		,strSampleTypeName
 		,strVendorName
 		,strContractNumber
 		,strContainerNumber
 		,strMarks
+		,strSampleNote
+		,strHeaderComment
 		,dblSequenceQuantity
 		,strSampleStatus
 		,strPropertyName

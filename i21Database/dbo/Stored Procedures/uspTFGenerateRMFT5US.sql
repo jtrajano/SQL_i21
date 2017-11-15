@@ -138,7 +138,7 @@ BEGIN TRY
 		SELECT TOP 1 @Guid = [from] FROM @Params WHERE [fieldname] = 'strGuid'
 
 
-		SELECT @dblUstRate = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(decimal(18,2), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RRMFT-5-US-USTRate'
+		SELECT @dblUstRate = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(decimal(18,2), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-US-USTRate'
 		SELECT @dblEifRate = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(decimal(18,2), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-US-EIFRate'
 		SELECT @dblColDisc = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(decimal(18,2), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-US-ColDisc'	
 		SELECT @strRecLicense = ISNULL(strConfiguration, '') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-US-RecLicense'
@@ -166,8 +166,8 @@ BEGIN TRY
 		SELECT @dblLine4_Col2 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC, strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-US-Line4Col2'
 
 		-- Line 5
-		SET @dblLine5_Col1 = ISNULL(@dblLine4_Col1, 0) -  ISNULL(@dblLine3_Col1, 0)
-		SET @dblLine5_Col2 = ISNULL(@dblLine4_Col2, 0) -  ISNULL(@dblLine3_Col2, 0)
+		SET @dblLine5_Col1 = ISNULL(@dblLine3_Col1, 0) -  ISNULL(@dblLine4_Col1, 0)
+		SET @dblLine5_Col2 = ISNULL(@dblLine3_Col2, 0) -  ISNULL(@dblLine4_Col2, 0)
 
 		-- Line 6a
 		SELECT @dblLine6a_Col1 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode = 'LB' AND strType = 'Diesel Sold to Railroads'
@@ -197,7 +197,7 @@ BEGIN TRY
 
 		-- Line 11
 		SET @dblLine11_Col1 = ISNULL(@dblLine5_Col1, 0) - ISNULL(@dblLine10_Col1, 0)
-		SET @dblLine11_Col2 = ISNULL(@dblLine5_Col2, 0) + ISNULL(@dblLine10_Col2, 0)
+		SET @dblLine11_Col2 = ISNULL(@dblLine5_Col2, 0) - ISNULL(@dblLine10_Col2, 0)
 
 		-- Line 12
 		SET @dblLine12_Col1 = @dblLine2b_Col1
@@ -205,10 +205,10 @@ BEGIN TRY
 
 		-- Line 13
 		SET @dblLine13_Col1 = ISNULL(@dblLine11_Col1, 0) - ISNULL(@dblLine12_Col1, 0)
-		SET @dblLine13_Col2 = ISNULL(@dblLine11_Col2, 0) + ISNULL(@dblLine12_Col2, 0)
+		SET @dblLine13_Col2 = ISNULL(@dblLine11_Col2, 0) - ISNULL(@dblLine12_Col2, 0)
 
 		-- Line 14
-		SET @dblLine14 = ISNULL(@dblLine13_Col1, 0) - ISNULL(@dblLine13_Col2, 0)
+		SET @dblLine14 = ISNULL(@dblLine13_Col1, 0) + ISNULL(@dblLine13_Col2, 0)
 
 		-- Line 15
 		IF  @dblLine14 > 0
@@ -225,7 +225,7 @@ BEGIN TRY
 		SET @dblLine17 = @dblLine15c - @dblLine16
 
 		-- Line 18
-		SELECT @dblLine18 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC, strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-US-Line18'
+		SELECT @dblLine18 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'RMFT-5-US-Line18'
 
 		-- Line 19
 		SET @dblLine19 = @dblLine17 - @dblLine18
