@@ -22,6 +22,7 @@
 	[intCurrencyExchangeRateTypeId]	INT				NULL,
 	[intCurrencyExchangeRateId]		INT				NULL,
 	[dblCurrencyExchangeRate]		NUMERIC(18, 6)	CONSTRAINT [DF_tblARPaymentDetail_dblCurrencyExchangeRate] DEFAULT ((1)) NULL,
+	[dtmDiscountDate]				DATETIME		NULL,
     [intConcurrencyId]				INT             NOT NULL,
     CONSTRAINT [PK_tblARPaymentDetail_intPaymentDetailId] PRIMARY KEY CLUSTERED ([intPaymentDetailId] ASC),
     CONSTRAINT [FK_tblARPaymentDetail_tblARPayment_intPaymentId] FOREIGN KEY ([intPaymentId]) REFERENCES [dbo].[tblARPayment] ([intPaymentId]) ON DELETE CASCADE,
