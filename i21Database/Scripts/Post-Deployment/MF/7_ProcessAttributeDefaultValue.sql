@@ -3041,4 +3041,36 @@ BEGIN
 END
 GO
 
+IF NOT EXISTS (
+		SELECT 1
+		FROM tblMFAttributeDefaultValue
+		WHERE intAttributeId = 99
+			AND intAttributeTypeId = 5
+		)
+BEGIN
+	INSERT INTO tblMFAttributeDefaultValue (
+		intConcurrencyId
+		,intAttributeId
+		,intAttributeTypeId
+		,strAttributeDefaultValue
+		,strAttributeDisplayValue
+		,intCreatedUserId
+		,dtmCreated
+		,intLastModifiedUserId
+		,dtmLastModified
+		)
+	VALUES (
+		1
+		,99
+		,5
+		,'1'
+		,'Recipe UOM'
+		,1
+		,GETDATE()
+		,1
+		,GETDATE()
+		)
+END
+GO
+
 
