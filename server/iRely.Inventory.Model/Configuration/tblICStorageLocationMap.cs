@@ -224,9 +224,9 @@ namespace iRely.Inventory.Model
             this.ToTable("vyuICGetSubLocationBinDetails");
             this.Property(t => t.intItemId).HasColumnName("intItemId");
             this.Property(t => t.intItemLocationId).HasColumnName("intItemLocationId");
-            this.Property(t => t.intStorageLocationId).HasColumnName("intStorageLocationId");
+            //this.Property(t => t.intStorageLocationId).HasColumnName("intStorageLocationId");
             this.Property(t => t.intCompanyLocationId).HasColumnName("intCompanyLocationId");
-            this.Property(t => t.strStorageLocation).HasColumnName("strStorageLocation");
+            //this.Property(t => t.strStorageLocation).HasColumnName("strStorageLocation");
             //this.Property(t => t.strUOM).HasColumnName("strUOM");
             this.Property(t => t.strItemNo).HasColumnName("strItemNo");
             this.Property(t => t.strItemDescription).HasColumnName("strItemDescription");

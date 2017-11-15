@@ -477,14 +477,14 @@ namespace iRely.Inventory.Model
     {
         public int intItemId { get; set; }
         public int intItemLocationId { get; set; }
-        public int intStorageLocationId { get; set; }
+        //public int intStorageLocationId { get; set; }
         public int intCompanyLocationId { get; set; }
         public string strCommodityCode { get; set; }
         public string strItemDescription { get; set; }
         public string strItemNo { get; set; }
         //public string strUOM { get; set; }
         public string strLocation { get; set; }
-        public string strStorageLocation { get; set; }
+        //public string strStorageLocation { get; set; }
         //public string strDiscountCode { get; set; }
         //public string strDiscountDescription { get; set; }
         //public DateTime? dtmReadingDate { get; set; }
