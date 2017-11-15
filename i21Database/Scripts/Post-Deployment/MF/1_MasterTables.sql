@@ -2516,3 +2516,8 @@ FROM tblMFWorkOrder W
 JOIN tblMFManufacturingProcess MP ON W.intManufacturingProcessId = MP.intManufacturingProcessId
 WHERE intTransactionFrom IS NULL
 GO
+UPDATE tblMFWorkOrderInputLot
+SET dblEnteredQty = dblQuantity
+	,intEnteredItemUOMId = intItemUOMId
+WHERE dblEnteredQty IS NULL
+Go
