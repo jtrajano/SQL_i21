@@ -114,7 +114,7 @@ BEGIN
     ,strFax                  = i.strFax
     ,strWebsite              = i.strWebsite
     ,strEmail              = i.strEmail
-    ,strRTN                  = [dbo].fnAESEncryptASym(i.strRTN)
+    ,strRTN                  = CASE WHEN i.strRTN = tblCMBank.strRTN THEN i.strRTN ELSE [dbo].fnAESEncryptASym(i.strRTN) END
     ,intCreatedUserId      = i.intCreatedUserId
     ,dtmCreated              = i.dtmCreated
     ,intLastModifiedUserId= i.intLastModifiedUserId
@@ -136,7 +136,7 @@ BEGIN
     ,strFax       = i.strFax
     ,strWebsite = i.strWebsite
     ,strEmail   = i.strEmail
-	,strRTN		= [dbo].fnAESEncryptASym(i.strRTN)
+	,strRTN		= CASE WHEN i.strRTN = tblCMBankAccount.strRTN THEN i.strRTN ELSE [dbo].fnAESEncryptASym(i.strRTN) END
     FROM inserted i
     WHERE tblCMBankAccount.intBankId = i.intBankId
 
