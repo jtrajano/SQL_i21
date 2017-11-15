@@ -5873,9 +5873,6 @@
     <Build Include="dbo\Stored Procedures\uspAPCreateVendorRefund.sql" />
     <Build Include="dbo\Stored Procedures\uspLGSplitPickedLotBatch.sql" />
     <Build Include="dbo\Stored Procedures\uspMFLotCreate.sql" />
-    <Build Include="dbo\Stored Procedures\uspTFGenerateOHEx2.sql" />
-    <Build Include="dbo\Stored Procedures\uspTFGenerateOHTR2.sql" />
-    <Build Include="dbo\Stored Procedures\uspTFGenerateOHMF2.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateBillPaymentFromAR.sql" />
     <Build Include="dbo\Views\vyuTFGetOutputDesignerField.sql" />
     <Build Include="dbo\Views\vyuTFGetReportingComponentField.sql" />    
