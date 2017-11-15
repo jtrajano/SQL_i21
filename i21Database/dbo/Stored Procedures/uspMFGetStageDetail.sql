@@ -6,7 +6,7 @@ BEGIN
 		,L.strLotNumber
 		,I.strItemNo
 		,I.strDescription
-		,W.dblQuantity
+		,W.dblEnteredQty as dblQuantity
 		,IU.intItemUOMId
 		,U.intUnitMeasureId
 		,U.strUnitMeasure
@@ -30,7 +30,7 @@ BEGIN
 		,PL.strParentLotNumber
 	FROM dbo.tblMFWorkOrderInputLot W
 	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
-	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId
+	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intEnteredItemUOMId
 	JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
 	JOIN dbo.tblSMUserSecurity US ON US.[intEntityId] = W.intCreatedUserId
 	LEFT JOIN dbo.tblICLot L ON L.intLotId = W.intLotId

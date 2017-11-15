@@ -2170,3 +2170,23 @@ BEGIN
 		,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
 END
 GO
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFAttribute
+		WHERE intAttributeId = 99
+		)
+BEGIN
+	INSERT INTO tblMFAttribute (
+		intAttributeId
+		,strAttributeName
+		,intAttributeDataTypeId
+		,intAttributeTypeId
+		,strSQL
+		)
+	SELECT 99
+		,'Default consumption UOM'
+		,5
+		,3
+		,'Select ''1'' as ValueMember,''Recipe UOM'' as DisplayMember UNION Select ''2'' as ValueMember,''Lot Qty UOM'' as DisplayMember UNION Select ''3'' as ValueMember,''Stock UOM'' as DisplayMember'
+END
+GO

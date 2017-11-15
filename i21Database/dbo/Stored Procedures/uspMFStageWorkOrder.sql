@@ -62,6 +62,9 @@ BEGIN TRY
 		,@intInventoryTransactionType AS INT = 8
 		,@intAdjustItemUOMId INT
 		,@intRecipeItemUOMId INT
+		,@dblEnteredQty NUMERIC(38, 20)
+		,@intEnteredItemUOMId int
+		,@intItemStockUOMId int
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -119,6 +122,8 @@ BEGIN TRY
 			,dblDefaultResidueQty NUMERIC(38, 20)
 			)
 
+	Select @dblEnteredQty=@dblInputWeight,@intEnteredItemUOMId=@intInputWeightUOMId
+
 	SELECT @strInventoryTracking = strInventoryTracking
 		,@intCategoryId = intCategoryId
 	FROM dbo.tblICItem
@@ -157,6 +162,12 @@ BEGIN TRY
 			,@intWeightUOMId = intWeightUOMId
 		FROM tblICLot
 		WHERE intLotId = @intInputLotId
+
+		IF @intNewItemUOMId<>@intInputWeightUOMId and IsNULL(@intWeightUOMId,@intNewItemUOMId)<>@intInputWeightUOMId
+		BEGIN
+			Select @dblInputWeight=dbo.fnMFConvertQuantityToTargetItemUOM(@intInputWeightUOMId, @intNewItemUOMId, @dblInputWeight)
+			Select @intInputWeightUOMId=@intNewItemUOMId
+		END
 
 		IF @dblInputWeight > @dblWeight
 		BEGIN
@@ -403,12 +414,14 @@ BEGIN TRY
 		,intCreatedUserId
 		,dtmLastModified
 		,intLastModifiedUserId
+		,dblEnteredQty
+		,intEnteredItemUOMId
 		)
 	SELECT @intWorkOrderId
 		,@intInputItemId
 		,@intInputLotId
-		,@dblInputWeight
-		,@intInputWeightUOMId
+		,(Case When @intInputWeightUOMId=@intNewItemUOMId  Then @dblInputWeight*@dblWeightPerQty else @dblInputWeight  End)
+		,Isnull(@intWeightUOMId,@intNewItemUOMId)
 		,@dblInputWeight
 		,@intInputWeightUOMId
 		,1
@@ -426,6 +439,8 @@ BEGIN TRY
 		,@intUserId
 		,@dtmCurrentDateTime
 		,@intUserId
+		,@dblEnteredQty
+		,@intEnteredItemUOMId
 
 	SELECT @intWorkOrderInputLotId = SCOPE_IDENTITY()
 
@@ -544,6 +559,14 @@ BEGIN TRY
 
 	IF @strInventoryTracking = 'Item Level'
 	BEGIN
+		Select @intItemStockUOMId=intItemUOMId from tblICItemUOM Where intItemId=@intInputItemId and ysnStockUnit =1
+
+		IF @intItemStockUOMId<>@intInputWeightUOMId 
+		BEGIN
+			Select @dblInputWeight=dbo.fnMFConvertQuantityToTargetItemUOM(@intInputWeightUOMId, @intItemStockUOMId, @dblInputWeight)
+			Select @intInputWeightUOMId=@intItemStockUOMId
+		END
+
 		IF NOT EXISTS (
 				SELECT 1
 				FROM tempdb..sysobjects
