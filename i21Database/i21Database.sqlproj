@@ -5749,6 +5749,7 @@
     <Build Include="dbo\Stored Procedures\uspMFProcessEDI940.sql" />
     <Build Include="dbo\Stored Procedures\uspMFProcessEDI945.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCreateSettleStorage.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMValidateLocalServerRole.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
