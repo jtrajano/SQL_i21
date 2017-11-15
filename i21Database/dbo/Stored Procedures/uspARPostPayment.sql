@@ -234,7 +234,8 @@ SET @batchIdUsed = @batchId
 		GROUP BY
 			A.intPaymentId, A.strRecordNumber, A.intWriteOffAccountId, A.intEntityId, P.intInterestAccountId
 		HAVING
-			SUM(B.dblPayment) = 0			
+			SUM(B.dblPayment) = 0
+			AND SUM(B.dblDiscount) = 0
 		
 
 		--POST VALIDATIONS
@@ -1626,7 +1627,6 @@ IF @post = 1
 					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId
 		WHERE
 			B.dblDiscount <> 0
-			AND B.dblPayment <> 0
 			AND B.dblAmountDue = 0
 		--GROUP BY
 		--	A.intPaymentId
@@ -1905,7 +1905,6 @@ IF @post = 1
 					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId
 		WHERE
 			B.dblDiscount <> 0
-			AND B.dblPayment <> 0
 			AND B.dblAmountDue = 0
 		--GROUP BY
 		--	A.intPaymentId
@@ -2500,6 +2499,7 @@ IF @recap = 0
 			DELETE FROM tblARPaymentDetail
 			WHERE
 				dblPayment = 0
+				AND dblDiscount = 0
 				AND intInvoiceId IN (SELECT intInvoiceId FROM @ARReceivablePostData)	
 
 			-- Update the posted flag in the transaction table
