@@ -1,6 +1,19 @@
 ﻿CREATE VIEW [dbo].[vyuICGetSubLocationBinDetails]
 AS
-SELECT 
+SELECT  intCompanyLocationId
+	, strLocation			
+	, intSubLocationId		
+	, strSubLocationName	
+	, intItemId			
+	, strItemNo			
+	, strItemDescription
+	, intItemLocationId	
+	, strCommodityCode	
+	, dblStock = SUM(dblStock)
+	, dblCapacity = SUM(dblCapacity)
+	, dblAvailable = SUM(dblAvailable)
+FROM
+(SELECT 
 	  intCompanyLocationId		= companyLocation.intCompanyLocationId
 	, strLocation				= companyLocation.strLocationName
 	, intSubLocationId			= subLocation.intCompanyLocationSubLocationId
@@ -54,3 +67,13 @@ GROUP BY storageLocation.intStorageLocationId, stockUOM.intItemId, subLocation.i
 	--unitMeasure.strUnitMeasure, 
 	--mrc.dblAirSpaceReading, storageLocation.dblResidualUnit, 
 	--grd.strDiscountId, grd.strDiscountDescription, smr.dtmDate
+) storageLocationSummary
+GROUP BY intCompanyLocationId
+	, strLocation			
+	, intSubLocationId		
+	, strSubLocationName	
+	, intItemId			
+	, strItemNo			
+	, strItemDescription
+	, intItemLocationId	
+	, strCommodityCode	
