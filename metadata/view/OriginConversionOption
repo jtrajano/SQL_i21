@@ -4846,6 +4846,120 @@
                                                     ]
                                                 }
                                             ]
+                                        },
+                                        {
+                                            "type": "Ext.container.Container",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "container|align": "middle",
+                                                "height": 49,
+                                                "itemId": "cntOriginRecipeFormula",
+                                                "layout": "hbox",
+                                                "margin": "0 0 5 0"
+                                            },
+                                            "configAlternates": {
+                                                "container|align": "string",
+                                                "container|padding": "auto",
+                                                "height": "auto",
+                                                "itemId": "string",
+                                                "layout": "string",
+                                                "margin": "auto",
+                                                "scrollable": "boolean"
+                                            },
+                                            "name": "MyContainer47",
+                                            "designerId": "a7da0b54-80e3-4b8f-ba79-982226bd9a44",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.button.Button",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "bind": [
+                                                            "{",
+                                                            "    disabled: '{disableRecipeFormula}'",
+                                                            "}"
+                                                        ],
+                                                        "height": 40,
+                                                        "itemId": "btnOriginRecipeFormula",
+                                                        "layout|flex": 1,
+                                                        "text": "Recipe/Formula"
+                                                    },
+                                                    "configAlternates": {
+                                                        "bind": "object",
+                                                        "height": "auto",
+                                                        "itemId": "string",
+                                                        "layout|flex": "number",
+                                                        "text": "string",
+                                                        "scrollable": "boolean"
+                                                    },
+                                                    "name": "MyButton25",
+                                                    "designerId": "8b17367a-90aa-4d99-9edd-ed522dad294c",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "bind",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.container.Container",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "container|align": "middle",
+                                                        "height": 45,
+                                                        "layout": "hbox",
+                                                        "layout|flex": 2,
+                                                        "padding": null
+                                                    },
+                                                    "configAlternates": {
+                                                        "container|align": "string",
+                                                        "height": "auto",
+                                                        "layout": "string",
+                                                        "layout|flex": "number",
+                                                        "padding": "auto",
+                                                        "scrollable": "boolean"
+                                                    },
+                                                    "name": "MyContainer13",
+                                                    "designerId": "272c73c7-b44d-41f6-91f3-1fcfa11c75a1",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.form.Label",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "height": 59,
+                                                                "itemId": null,
+                                                                "padding": "0 0 0 10",
+                                                                "text": "\"Imports Recipe/Formula. Users should verify whether the Recipies and Formulas are correct before proceeding to next step.\""
+                                                            },
+                                                            "configAlternates": {
+                                                                "height": "auto",
+                                                                "itemId": "string",
+                                                                "padding": "auto",
+                                                                "text": "string",
+                                                                "scrollable": "boolean"
+                                                            },
+                                                            "name": "MyLabel9",
+                                                            "designerId": "d0b6814d-66e0-4671-a3bf-49a7cd486d41"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
                                         }
                                     ]
                                 }

@@ -1665,6 +1665,45 @@ Ext.define('Inventory.view.OriginConversionOption', {
                                                     ]
                                                 }
                                             ]
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            height: 49,
+                                            itemId: 'cntOriginRecipeFormula',
+                                            margin: '0 0 5 0',
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'middle'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'button',
+                                                    bind: {
+                                                        disabled: '{disableRecipeFormula}'
+                                                    },
+                                                    flex: 1,
+                                                    height: 40,
+                                                    itemId: 'btnOriginRecipeFormula',
+                                                    text: 'Recipe/Formula'
+                                                },
+                                                {
+                                                    xtype: 'container',
+                                                    flex: 2,
+                                                    height: 45,
+                                                    layout: {
+                                                        type: 'hbox',
+                                                        align: 'middle'
+                                                    },
+                                                    items: [
+                                                        {
+                                                            xtype: 'label',
+                                                            height: 59,
+                                                            padding: '0 0 0 10',
+                                                            text: '"Imports Recipe/Formula. Users should verify whether the Recipies and Formulas are correct before proceeding to next step."'
+                                                        }
+                                                    ]
+                                                }
+                                            ]
                                         }
                                     ]
                                 }
