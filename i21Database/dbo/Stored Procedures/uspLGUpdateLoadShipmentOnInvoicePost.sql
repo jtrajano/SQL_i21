@@ -20,6 +20,13 @@ BEGIN TRY
 	DECLARE @intPurchaseSale INT
 	DECLARE @strErrMsg NVARCHAR(MAX)
 	DECLARE @intSContractDetailId INT
+	DECLARE @dblInvoicedQty NUMERIC(18,6)
+	DECLARE @intAllocationDetailId INT
+	DECLARE @intAllocationPContractDetailId INT
+	DECLARE @dblPurchasedLotQty NUMERIC(18,6)
+	DECLARE @intOutboundLoadDetailId INT
+	DECLARE @intInboundLoadDetailId INT
+
 	DECLARE @tblInvoiceDetail TABLE (
 		intRecordId INT IDENTITY(1, 1)
 		,intInvoiceId INT
@@ -44,6 +51,7 @@ BEGIN TRY
 		SET @intLoadId = NULL
 		SET @intLoadDetailId = NULL
 		SET @intInvoiceDetailId = NULL
+		SET @intPurchaseSale = NULL
 
 		SELECT @intLoadDetailId = intLoadDetailId
 			,@intInvoiceDetailId = intInvoiceDetailId
@@ -61,33 +69,102 @@ BEGIN TRY
 		FROM tblLGLoad 
 		WHERE intLoadId = @intLoadId
 
-		IF (@intPurchaseSale = 3)
+		IF (@intPurchaseSale = 2)
 		BEGIN
-			EXEC uspCTUpdateSequenceBalance @intContractDetailId = @intPContractDetailId
-				,@dblQuantityToUpdate = @dblLoadDetailQty
-				,@intUserId = @UserId
-				,@intExternalId = @intInvoiceDetailId
-				,@strScreenName = 'Invoice'
+			IF @intSContractDetailId IS NOT NULL AND @dblLoadDetailQty IS NOT NULL
+            BEGIN
+				UPDATE tblCTContractDetail
+				SET dblInvoicedQty = ISNULL(dblInvoicedQty, 0) + @dblLoadDetailQty
+				WHERE intContractDetailId = @intSContractDetailId
 
+				SELECT @intAllocationDetailId = intAllocationDetailId
+					,@intOutboundLoadDetailId = intLoadDetailId
+				FROM tblLGLoadDetail
+				WHERE intSContractDetailId = @intSContractDetailId
+					AND intLoadId = @intLoadId
 
-			EXEC uspCTUpdateSequenceBalance @intContractDetailId = @intSContractDetailId
-				,@dblQuantityToUpdate	=	@dblLoadDetailQty
-				,@intUserId				=	@UserId
-				,@intExternalId			=	@intInvoiceDetailId
-				,@strScreenName			=	'Invoice' 
+				SELECT @intAllocationPContractDetailId = intPContractDetailId
+				FROM tblLGAllocationDetail
+				WHERE intAllocationDetailId = @intAllocationDetailId
+
+				SELECT @intInboundLoadDetailId = intLoadDetailId
+				FROM tblLGLoadDetail
+				WHERE intPContractDetailId = @intAllocationPContractDetailId
+
+				SELECT @dblPurchasedLotQty = SUM(IRIL.dblQuantity) FROM tblICInventoryReceipt IR
+				JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
+				JOIN tblICInventoryReceiptItemLot IRIL ON IRIL.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId
+				WHERE IRI.intSourceId = @intInboundLoadDetailId
+								
+				UPDATE tblCTContractDetail
+				SET dblInvoicedQty = ISNULL(dblInvoicedQty, 0) + CASE WHEN ISNULL(@Post,0) =  1 THEN @dblPurchasedLotQty ELSE @dblPurchasedLotQty *(-1) END
+				WHERE intContractDetailId = @intAllocationPContractDetailId
+			END
+		END
+		ELSE IF (@intPurchaseSale = 3)
+		BEGIN
+			IF @intPContractDetailId IS NOT NULL AND @dblLoadDetailQty IS NOT NULL
+            BEGIN
+				EXEC uspCTUpdateSequenceBalance @intContractDetailId = @intPContractDetailId
+					,@dblQuantityToUpdate = @dblLoadDetailQty
+					,@intUserId = @UserId
+					,@intExternalId = @intInvoiceDetailId
+					,@strScreenName = 'Invoice'
+			END
+
+			SET @dblInvoicedQty = NUll
+			IF @intSContractDetailId IS NOT NULL AND @dblLoadDetailQty IS NOT NULL
+			BEGIN
+				SELECT @dblInvoicedQty = CASE @Post
+						WHEN 1
+							THEN dblDeliveredQuantity
+						ELSE dblDeliveredQuantity * (- 1)
+						END
+				FROM tblLGLoadDetail
+				WHERE intSContractDetailId = @intSContractDetailId AND intLoadId = @intLoadId
+
+				EXEC uspCTUpdateSequenceBalance @intContractDetailId = @intSContractDetailId
+					,@dblQuantityToUpdate	=	@dblInvoicedQty
+					,@intUserId				=	@UserId
+					,@intExternalId			=	@intInvoiceDetailId
+					,@strScreenName			=	'Invoice' 
+			END
 
 			SET @dblLoadDetailQty = -@dblLoadDetailQty
-			EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intPContractDetailId
-				,@dblQuantityToUpdate =  @dblLoadDetailQty
-				,@intUserId = @UserId
-				,@intExternalId = @intInvoiceDetailId
-				,@strScreenName = 'Invoice'
+			SET @dblInvoicedQty = NUll
+            IF @intPContractDetailId IS NOT NULL AND @dblLoadDetailQty IS NOT NULL
+            BEGIN
+				EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intPContractDetailId
+					,@dblQuantityToUpdate =  @dblLoadDetailQty
+					,@intUserId = @UserId
+					,@intExternalId = @intInvoiceDetailId
+					,@strScreenName = 'Invoice'
+				
+				UPDATE tblCTContractDetail
+				SET dblInvoicedQty = ISNULL(dblInvoicedQty, 0) + + (@dblLoadDetailQty * -1)
+				WHERE intContractDetailId = @intPContractDetailId
+			END
 
-			EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intSContractDetailId
-				,@dblQuantityToUpdate	=	@dblLoadDetailQty
-				,@intUserId				=	@UserId
-				,@intExternalId			=	@intInvoiceDetailId
-				,@strScreenName			=	'Invoice' 
+            IF @intSContractDetailId IS NOT NULL AND @dblLoadDetailQty IS NOT NULL
+            BEGIN
+				SELECT @dblInvoicedQty = CASE ISNULL(@Post,0)
+						WHEN 0
+							THEN dblDeliveredQuantity
+						ELSE dblDeliveredQuantity * (- 1)
+						END
+				FROM tblLGLoadDetail
+				WHERE intSContractDetailId = @intSContractDetailId AND intLoadId = @intLoadId
+
+				EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intSContractDetailId
+					,@dblQuantityToUpdate	=	@dblInvoicedQty
+					,@intUserId				=	@UserId
+					,@intExternalId			=	@intInvoiceDetailId
+					,@strScreenName			=	'Invoice' 
+
+				UPDATE tblCTContractDetail
+				SET dblInvoicedQty = ISNULL(dblInvoicedQty, 0) + (@dblInvoicedQty * -1)
+				WHERE intContractDetailId = @intSContractDetailId
+			END
 		END
 
 		SELECT @intMinRecordId = MIN(intRecordId)
