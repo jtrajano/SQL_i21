@@ -7,7 +7,8 @@
 	[PostRemind_Days] INT NULL,
 	[OriginConversion_OffsetAccountId] INT NULL,
 	[ysnConsolidatingParent] [bit] NULL,
-	[intDefaultVisibleOldAccountSystemId] INT NULL
+	[intDefaultVisibleOldAccountSystemId] INT NULL,
+	[intDBVersion] INT NULL,
     CONSTRAINT [PK_tblGLCompanyPreferenceOption] PRIMARY KEY ([intCompanyPreferenceOptionId])
 )
 GO
