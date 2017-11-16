@@ -104,28 +104,30 @@ BEGIN
 	END
 END
 
-SET @query = 'SELECT  
-				intBillId,
-				VendorId ,
-				VendorName ,
-				strDescription ,
-				strItem , 
-				intTicketId ,
-				strTicketNumber ,
-				strVendorOrderNumber ,
-				StateOfOrigin ,
-				Location ,
-				BillDate ,
-				PostDate ,
-				PaymentDate ,
-				ExemptUnits ,
-				dblTotal ,
-				dblTax ,
-				strCompanyName ,
-				strCompanyAddress
-				FROM 
-			 [vyuAPRptVoucherCheckOff]
-			 ORDER BY StateOfOrigin DESC
+SET @query = 'SELECT * FROM (
+				SELECT  TOP 100 PERCENT
+					intBillId,
+					VendorId ,
+					VendorName ,
+					strDescription ,
+					strItem , 
+					intTicketId ,
+					strTicketNumber ,
+					strVendorOrderNumber ,
+					StateOfOrigin ,
+					Location ,
+					BillDate ,
+					PostDate ,
+					PaymentDate ,
+					ExemptUnits ,
+					dblTotal ,
+					dblTax ,
+					strCompanyName ,
+					strCompanyAddress
+					FROM 
+				[vyuAPRptVoucherCheckOff]
+				ORDER BY StateOfOrigin DESC
+			 ) tblAPCheckOffReportData
 '
 
 	  
