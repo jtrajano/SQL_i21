@@ -37,6 +37,7 @@
 	,@ItemStorageScheduleTypeId		INT				= NULL
 	,@ItemDestinationGradeId		INT				= NULL
 	,@ItemDestinationWeightId		INT				= NULL
+	,@ItemBOLNumber					NVARCHAR(100)	= NULL
 AS
 
 BEGIN
@@ -169,7 +170,8 @@ BEGIN TRY
 		,[intDestinationGradeId]
 		,[intDestinationWeightId]
 		,[dblItemTermDiscount]
-		,[strItemTermDiscountBy])
+		,[strItemTermDiscountBy]
+		,[strBOLNumber])
 	SELECT
 		 [intInvoiceId]						= @InvoiceId
 		,[intItemId]						= @ItemId
@@ -238,6 +240,7 @@ BEGIN TRY
 		,[intDestinationWeightId]			= @ItemDestinationWeightId
 		,[dblItemTermDiscount]				= @ItemTermDiscount
 		,[strItemTermDiscountBy]			= @ItemTermDiscountBy
+		,[strBOLNumber]						= @ItemBOLNumber
 			
 END TRY
 BEGIN CATCH

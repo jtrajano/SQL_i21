@@ -101,7 +101,8 @@
 
 	[intSpecialPriceId]						INT												NULL,
 	[intProgramId]							INT												NULL,
-	[strPriceSource]						NVARCHAR(100)									NULL,
+	[strPriceSource]						NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL,
+	[strBOLNumber]							NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL,     
 	[ysnRebateSubmitted]					BIT												DEFAULT((0)) NULL,
 	[ysnRebateExcluded]						BIT												DEFAULT((0)) NULL,
 

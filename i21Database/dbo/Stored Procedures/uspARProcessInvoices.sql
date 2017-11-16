@@ -240,6 +240,7 @@ DECLARE  @Id									INT
 		,@ItemOriginalInvoiceDetailId			INT			
 		,@ItemSiteId							INT
 		,@ItemBillingBy							NVARCHAR(100)
+		,@ItemBOLNumber							NVARCHAR(100)
 		,@ItemPercentFull						NUMERIC(18, 6)
 		,@ItemNewMeterReading					NUMERIC(18, 6)
 		,@ItemPreviousMeterReading				NUMERIC(18, 6)
@@ -401,6 +402,7 @@ BEGIN
 		,@ItemOriginalInvoiceDetailId	= (CASE WHEN @GroupingOption = 0 THEN [intOriginalInvoiceDetailId] ELSE NULL END)
 		,@ItemSiteId					= (CASE WHEN @GroupingOption = 0 THEN [intSiteId] ELSE NULL END)
 		,@ItemBillingBy					= (CASE WHEN @GroupingOption = 0 THEN [strBillingBy] ELSE NULL END)
+		,@ItemBOLNumber					= (CASE WHEN @GroupingOption = 0 THEN [strBOLNumberLineItem] ELSE NULL END)
 		,@ItemPercentFull				= (CASE WHEN @GroupingOption = 0 THEN [dblPercentFull] ELSE NULL END)
 		,@ItemNewMeterReading			= (CASE WHEN @GroupingOption = 0 THEN [dblNewMeterReading] ELSE NULL END)
 		,@ItemPreviousMeterReading		= (CASE WHEN @GroupingOption = 0 THEN [dblPreviousMeterReading] ELSE NULL END)
@@ -620,6 +622,7 @@ BEGIN
 			,@ItemOriginalInvoiceDetailId	= @ItemOriginalInvoiceDetailId
 			,@ItemSiteId					= @ItemSiteId
 			,@ItemBillingBy					= @ItemBillingBy
+			,@ItemBOLNumber					= @ItemBOLNumber
 			,@ItemPercentFull				= @ItemPercentFull
 			,@ItemNewMeterReading			= @ItemNewMeterReading
 			,@ItemPreviousMeterReading		= @ItemPreviousMeterReading
@@ -766,6 +769,7 @@ BEGIN
 					,@ItemOriginalInvoiceDetailId	= [intOriginalInvoiceDetailId]
 					,@ItemSiteId					= [intSiteId]
 					,@ItemBillingBy					= [strBillingBy]
+					,@ItemBOLNumber					= [strBOLNumberLineItem]
 					,@ItemPercentFull				= [dblPercentFull]
 					,@ItemNewMeterReading			= [dblNewMeterReading]
 					,@ItemPreviousMeterReading		= [dblPreviousMeterReading]
@@ -857,6 +861,7 @@ BEGIN
 						,@ItemLotId						= @ItemLotId
 						,@ItemSiteId					= @ItemSiteId
 						,@ItemBillingBy					= @ItemBillingBy
+						,@ItemBOLNumber					= @ItemBOLNumber
 						,@ItemPercentFull				= @ItemPercentFull
 						,@ItemNewMeterReading			= @ItemNewMeterReading
 						,@ItemPreviousMeterReading		= @ItemPreviousMeterReading
@@ -1396,6 +1401,7 @@ BEGIN TRY
 						,@ItemOriginalInvoiceDetailId	= [intOriginalInvoiceDetailId]
 						,@ItemSiteId					= [intSiteId]
 						,@ItemBillingBy					= [strBillingBy]
+						,@ItemBOLNumber					= [strBOLNumberLineItem]
 						,@ItemPercentFull				= [dblPercentFull]
 						,@ItemNewMeterReading			= [dblNewMeterReading]
 						,@ItemPreviousMeterReading		= [dblPreviousMeterReading]
@@ -1478,6 +1484,7 @@ BEGIN TRY
 							,@ItemOriginalInvoiceDetailId	= @ItemOriginalInvoiceDetailId
 							,@ItemSiteId					= @ItemSiteId
 							,@ItemBillingBy					= @ItemBillingBy
+							,@ItemBOLNumber					= @ItemBOLNumber
 							,@ItemPercentFull				= @ItemPercentFull
 							,@ItemNewMeterReading			= @ItemNewMeterReading
 							,@ItemPreviousMeterReading		= @ItemPreviousMeterReading
@@ -1669,6 +1676,7 @@ BEGIN TRY
 					,@ItemLotId						= [intLotId]
 					,@ItemSiteId					= [intSiteId]
 					,@ItemBillingBy					= [strBillingBy]
+					,@ItemBOLNumber					= [strBOLNumberLineItem]
 					,@ItemPercentFull				= [dblPercentFull]
 					,@ItemNewMeterReading			= [dblNewMeterReading]
 					,@ItemPreviousMeterReading		= [dblPreviousMeterReading]
@@ -1797,6 +1805,7 @@ BEGIN TRY
 						,[intOriginalInvoiceDetailId]			= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemOriginalInvoiceDetailId ELSE [intOriginalInvoiceDetailId] END
 						,[intSiteId]							= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemSiteId ELSE [intSiteId] END
 						,[strBillingBy]							= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemBillingBy ELSE [strBillingBy] END
+						,[strBOLNumber]							= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemBOLNumber ELSE [strBOLNumber] END
 						,[dblPercentFull]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemPercentFull ELSE [dblPercentFull] END
 						,[dblNewMeterReading]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemNewMeterReading ELSE [dblNewMeterReading] END
 						,[dblPreviousMeterReading]				= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemPreviousMeterReading ELSE [dblPreviousMeterReading] END
