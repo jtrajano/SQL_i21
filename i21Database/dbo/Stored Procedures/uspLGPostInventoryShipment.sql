@@ -1236,18 +1236,10 @@ BEGIN
 		,[intItemUOMId] = LD.intItemUOMId
 		,[intWeightUOMId] = LD.intWeightItemUOMId
 		,[dblQty] = CASE 
-			WHEN @ysnPost = 1
-				THEN - 1 * CASE 
-						WHEN LDL.intLoadDetailLotId > 0
-							THEN LDL.dblLotQuantity
-						ELSE LD.dblQuantity
-						END
-			ELSE CASE 
-					WHEN LDL.intLoadDetailLotId > 0
-						THEN LDL.dblLotQuantity
+					WHEN @ysnPost = 1
+						THEN - 1 * LD.dblQuantity
 					ELSE LD.dblQuantity
 					END
-			END
 		,[dblUOMQty] = IU.dblUnitQty
 		,[dblNetWeight] = LDL.dblGross - LDL.dblTare
 		,[dblSalesPrice] = ISNULL(CD.dblCashPrice, 0)
