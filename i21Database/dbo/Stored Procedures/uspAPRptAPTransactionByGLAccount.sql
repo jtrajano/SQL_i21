@@ -142,7 +142,9 @@ SET @query = 'SELECT [intEntityId]
 	  ,[strtPrepaidAccountId]
 	  ,[strDetailDescription]
 	  ,[strCompanyAddress]
-	  ,[ysnPaid] FROM [vyuAPRptAPTransactionByGLAccount]'
+	  ,[ysnPaid] 
+	  ,[strPaymentInfo]
+	  ,[dtmDatePaid] FROM [vyuAPRptAPTransactionByGLAccount]'
 
 	  
 IF ISNULL(@innerQuery,'') != ''
