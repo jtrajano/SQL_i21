@@ -37,13 +37,17 @@
     [dtmReconciled] DATETIME NULL, 
     [ysnReconciled] BIT NULL, 
 	[ysnRevalued] BIT NULL,
-	intSourceLocationId INT NULL,
-	intSourceUOMId INT NULL,
-	dblSourceUnitDebit NUMERIC(18,9) NULL,
+    -- new columns GL-3550
+    [strSourceDocumentId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+    intSourceLocationId INT NULL,
+    intSourceUOMId INT NULL,
+    dblSourceUnitDebit NUMERIC(18,9) NULL,
 	dblSourceUnitCredit NUMERIC(18,9) NULL,
-	intCommodityId INT NULL,
+    intCommodityId INT NULL,
+    intSourceEntityId INT NULL,
+	-- new columns GL-3550	
 	[strDocument] NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL,
-	[strComments] NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL
+	[strComments] NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblGL] PRIMARY KEY CLUSTERED ([intGLDetailId] ASC),
     CONSTRAINT [FK_tblGL_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
     CONSTRAINT [FK_tblGLDetail_tblSMMultiCompany] FOREIGN KEY([intMultiCompanyId]) REFERENCES [dbo].[tblSMMultiCompany] ([intMultiCompanyId])
@@ -180,7 +184,7 @@ EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Is Reconciled?
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Is Revalued?' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'ysnRevalued' 
 GO
---EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Is Exported?' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'ysnExported' 
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Give the entity that was used in the source transaction qucikly' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'intSourceEntityId' 
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Location of the transaction for ease of reporting' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'intSourceLocationId' 
 GO
