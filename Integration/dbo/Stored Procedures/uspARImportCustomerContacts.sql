@@ -111,15 +111,20 @@ SELECT ED.coefd_contact_id, ED.coefd_cus_no,
 			-- 		join tblEMEntity G
 			-- 			on F.intEntityContactId = G.intEntityId
 			-- )
-			and sscon_contact_id not in (select strContactNumber collate SQL_Latin1_General_CP1_CS_AS  
-											from tblEMEntity where isnull(strContactMethod,'') <> '')
+			-- and sscon_contact_id not in (select strContactNumber collate SQL_Latin1_General_CP1_CS_AS  
+			-- 								from tblEMEntity where isnull(strContactNumber,'') <> '')
 
 	END
 		-- LOOP Insertions
 		WHILE exists (select top 1 1 from @Contacts)
 		BEGIN
 			DECLARE @id int
-			select top 1 @id = id, @sscon_cus_no = sscon_cus_no from @Contacts
+			DECLARE @sscon_contact_id NVARCHAR(20)
+
+			select top 1 @id = id, 
+							@sscon_cus_no = sscon_cus_no,
+							@sscon_contact_id = sscon_contact_id
+			from @Contacts
 			declare @intEntityId int
 			declare @Name		nvarchar(200)
 
@@ -129,6 +134,15 @@ SELECT ED.coefd_contact_id, ED.coefd_cus_no,
 			
 			END
 
+			IF EXISTS(select TOP 1  1 from tblEMEntity A 
+						join tblEMEntityToContact B on A.intEntityId = B.intEntityId 
+						join tblEMEntity C on B.intEntityContactId = C.intEntityId
+							WHERE A.intEntityId = @intEntityId and 
+								C.strContactNumber = @sscon_contact_id 
+					)
+			BEGIN
+				goto ContinueLoop;
+			END
 			BEGIN -- Create Contact record
 				declare @EntityContact as EntityContact
 				declare @ContactNumber	nvarchar(200)
@@ -223,7 +237,7 @@ SELECT ED.coefd_contact_id, ED.coefd_cus_no,
 			END
 			
 
-
+			ContinueLoop:
 			--UPDATE E-DISTRIBUTION FORM TYPEs
 			UPDATE ENT SET ENT.strEmailDistributionOption = ED.Form_type from tblEMEntityToContact ETC 
 			INNER JOIN tblEMEntity ENT ON ENT.intEntityId = ETC.intEntityContactId
@@ -262,8 +276,8 @@ BEGIN
 			-- 		join tblEMEntity G
 			-- 			on F.intEntityContactId = G.intEntityId
 			-- )
-			and sscon_contact_id not in (select strContactNumber collate SQL_Latin1_General_CP1_CS_AS  
-											from tblEMEntity where isnull(strContactMethod,'') <> '')
+			-- and sscon_contact_id not in (select strContactNumber collate SQL_Latin1_General_CP1_CS_AS  
+			-- 								from tblEMEntity where isnull(strContactNumber,'') <> '')
 	
 END
 END
