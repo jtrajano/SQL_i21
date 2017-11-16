@@ -11,7 +11,7 @@ Ext.define('Inventory.view.InventoryValuationSummaryViewController', {
             win.modal = (!config.param || !config.param.modalMode) ? false : config.param.modalMode;
             win.show();
 
-            var context = win.context ? win.context.initialize() : me.setupContext({ window: win});
+            var context = win.context ? win.context.initialize() : me.setupContext();
 
             switch(config.action) {
                 case 'view':
@@ -25,7 +25,7 @@ Ext.define('Inventory.view.InventoryValuationSummaryViewController', {
 
     setupContext: function(options){
         var me = this,
-            win = options.window;
+            win = me.getView();
 
         var context =
             Ext.create('iRely.Engine', {

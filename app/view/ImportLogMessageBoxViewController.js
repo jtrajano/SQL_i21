@@ -29,7 +29,7 @@ Ext.define('Inventory.view.ImportLogMessageBoxViewController', {
     setupContext : function(options){
         "use strict";
         var me = this,
-            win = options.window,
+            win = me.getView(),
             store = Ext.create('Inventory.store.FuelType', { pageSize: 1 });
 
         win.context = Ext.create('iRely.Engine', {
@@ -66,7 +66,7 @@ Ext.define('Inventory.view.ImportLogMessageBoxViewController', {
         colColumn.renderer = this.fieldRenderer;
         colStatus.renderer = this.fieldRenderer;
         win.show();
-        var context = win.context ? win.context.initialize() : me.setupContext( {window : win} );
+        var context = win.context ? win.context.initialize() : me.setupContext();
     },
 
     fieldRenderer: function(value, metaData, record, rowIndex, colIndex, store, view) {

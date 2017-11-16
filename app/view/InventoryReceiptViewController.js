@@ -886,7 +886,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     setupContext: function (options) {
         "use strict";
         var me = this,
-            win = options.window,
+            win = me.getView(),
             store = Ext.create('Inventory.store.Receipt', { pageSize: 1 });
 
         var grdInventoryReceipt = win.down('#grdInventoryReceipt'),
@@ -1102,7 +1102,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
             win.show();
 
-            var context = win.context ? win.context.initialize() : me.setupContext({ window: win });
+            var context = win.context ? win.context.initialize() : me.setupContext();
 
             if (config.action === 'new') {
                 context.data.addRecord();

@@ -95,7 +95,7 @@ Ext.define('Inventory.view.CopyItemLocationViewController', {
 
     setupContext: function(config) {
         var me = this;
-        var win = config.window;
+        var win = me.getView();
         var store = Ext.create('Inventory.store.ItemLocation', { pageSize: 0 });
         
         store.getProxy().api.read = './inventory/api/itemlocation/getitemlocation';
@@ -121,7 +121,7 @@ Ext.define('Inventory.view.CopyItemLocationViewController', {
 
         if(config) {
             win.show();
-            var context = win.context ? win.context.initialize() : me.setupContext( { window : win } );
+            var context = win.context ? win.context.initialize() : me.setupContext();
             context.data.load();
         }
     }

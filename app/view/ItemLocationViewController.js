@@ -210,7 +210,7 @@ Ext.define('Inventory.view.ItemLocationViewController', {
 
     setupContext : function(options){
         var me = this,
-            win = options.window,
+            win = me.getView(),
             store = Ext.create('Inventory.store.ItemLocation', { pageSize: 1 });
 
 
@@ -243,7 +243,7 @@ Ext.define('Inventory.view.ItemLocationViewController', {
         if (config) {
             win.show();
 
-            var context = win.context ? win.context.initialize() : me.setupContext( { window : win } );
+            var context = win.context ? win.context.initialize() : me.setupContext();
             me.intItemId = config.param.itemId;
             me.defaultUOM = config.param.defaultUOM;
             if (config.action === 'new') {

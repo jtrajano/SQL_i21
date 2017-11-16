@@ -232,7 +232,7 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
         if (config) {
             win.show();
 
-            var context = win.context ? win.context.initialize() : me.setupContext({ window: win });
+            var context = win.context ? win.context.initialize() : me.setupContext();
             me.setupAdditionalBinding({ window: win, context: context, viewModel: vm });
             context.data.addRecord();
         }
@@ -282,7 +282,7 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
     setupContext: function (config) {
         "use strict";
         var me = this,
-            win = config.window,
+            win = me.getView(),
             store = Ext.create('Inventory.store.RebuildInventory', { pageSize: 1 });
 
         win.context = Ext.create('iRely.Engine', {

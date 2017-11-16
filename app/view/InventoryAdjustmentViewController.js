@@ -447,7 +447,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
     setupContext: function (options) {
         "use strict";
         var me = this,
-            win = options.window,
+            win = me.getView(),
             store = Ext.create('Inventory.store.Adjustment', { pageSize: 1 }),
             grdInventoryAdjustment = win.down('#grdInventoryAdjustment');
 
@@ -634,7 +634,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         if (config) {
             win.show();
 
-            var context = win.context ? win.context.initialize() : me.setupContext({window: win});
+            var context = win.context ? win.context.initialize() : me.setupContext();
 
             if (config.action === 'new') {
                 context.data.addRecord();

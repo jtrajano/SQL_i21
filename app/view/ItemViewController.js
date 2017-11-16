@@ -55,7 +55,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 hidden: '{HideDisableForComment}'
             },
             cboCategory: {
-                value: '{current.strCategory}',
+                value: '{current.strCategory}',                
                 origValueField: 'intCategoryId',
                 store: '{itemCategory}',
                 defaultFilters: [{
@@ -1292,7 +1292,7 @@ Ext.define('Inventory.view.ItemViewController', {
 
     setupContext : function(options){
         var me = this,
-            win = options.window,
+            win = me.getView(),
             store = Ext.create('Inventory.store.Item', { pageSize: 1 });
 
         var grdUOM = win.down('#grdUnitOfMeasure'),
@@ -1338,7 +1338,7 @@ Ext.define('Inventory.view.ItemViewController', {
             createTransaction: Ext.bind(me.createTransaction, me),
             
             
-            onSaveClick: me.saveAndPokeGrid(win, grdUOM),
+            //onSaveClick: me.saveAndPokeGrid(win, grdUOM),
             // attachment: Ext.create('iRely.attachment.Manager', {
             //     type: 'Inventory.Item',
             //     window: win
@@ -1636,7 +1636,7 @@ Ext.define('Inventory.view.ItemViewController', {
 
         if (config) {
             win.show();
-            var context = me.setupContext( {window : win} );
+            var context = win.context ? win.context.initialize() : me.setupContext();
 
             if (config.action === 'new') {
                 context.data.addRecord();

@@ -236,7 +236,7 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
 
         if (config) {
             win.show();
-            win.context = win.context ? win.context.initialize() : me.setupContext({ window: win });
+            win.context = win.context ? win.context.initialize() : me.setupContext();
 
             if(config.action === "edit") {
                 if (config.param.id) {

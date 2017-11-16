@@ -673,7 +673,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
     setupContext : function(options) {
         "use strict";
         var me = this,
-            win = options.window,
+            win = me.getView(),
             store = Ext.create('Inventory.store.Shipment', { pageSize: 1 });
 
         var grdInventoryShipment = win.down('#grdInventoryShipment'),
@@ -786,7 +786,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         if (config) {
             win.show();
 
-            var context = win.context ? win.context.initialize() : me.setupContext( {window : win} );
+            var context = win.context ? win.context.initialize() : me.setupContext();
 
             if (config.action === 'new') {
                 context.data.addRecord();

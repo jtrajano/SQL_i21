@@ -488,7 +488,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
 
     setupContext: function (options) {
         var me = this,
-            win = options.window,
+            win = me.getView(),
             store = Ext.create('Inventory.store.InventoryCount', { pageSize: 1 }),
             grdPhysicalCount = win.down('#grdPhysicalCount');
 
@@ -563,7 +563,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         if (config) {
             win.show();
 
-            var context = win.context ? win.context.initialize() : me.setupContext({window: win});
+            var context = win.context ? win.context.initialize() : me.setupContext();
 
             if (config.action === 'new') {
                 context.data.addRecord();

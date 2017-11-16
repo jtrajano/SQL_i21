@@ -12,7 +12,7 @@ Ext.define('Inventory.view.LotHistoryViewController', {
         "use strict";
 
         var me = this;
-        var win = options.window;
+        var win = me.getView();
         var store = Ext.create('Inventory.store.LotHistory', { pageSize: 50 });
 
         win.context = Ext.create('iRely.Engine', {
@@ -31,7 +31,7 @@ Ext.define('Inventory.view.LotHistoryViewController', {
 
         if(config) {
             win.show();
-            var context = win.context ? win.context.initialize() : me.setupContext({ window: win });
+            var context = win.context ? win.context.initialize() : me.setupContext();
 
             if (config.id) {
                 config.filters = [

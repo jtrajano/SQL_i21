@@ -63,7 +63,7 @@ Ext.define('Inventory.view.StorageUnitTypeViewController', {
 
     setupContext : function(options){
         var me = this,
-            win = options.window,
+            win = me.getView(),
             store = Ext.create('Inventory.store.StorageUnitType', { pageSize: 1 });
 
         win.context = Ext.create('iRely.Engine', {
@@ -90,7 +90,7 @@ Ext.define('Inventory.view.StorageUnitTypeViewController', {
         if (config) {
             win.show();
 
-            var context = win.context ? win.context.initialize() : me.setupContext( {window : win} );
+            var context = win.context ? win.context.initialize() : me.setupContext();
 
             if (config.action === 'new') {
                 context.data.addRecord();

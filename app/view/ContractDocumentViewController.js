@@ -62,7 +62,7 @@ Ext.define('Inventory.view.ContractDocumentViewController', {
     setupContext : function(options){
         "use strict";
         var me = this,
-            win = options.window,
+            win = me.getView(),
             store = Ext.create('Inventory.store.Document', { pageSize: 1 });
 
         win.context = Ext.create('iRely.Engine', {
@@ -91,7 +91,7 @@ Ext.define('Inventory.view.ContractDocumentViewController', {
         if (config) {
             win.show();
 
-            var context = win.context ? win.context.initialize() : me.setupContext( {window : win} );
+            var context = win.context ? win.context.initialize() : me.setupContext();
 
             if (config.action === 'new') {
                 context.data.addRecord();
