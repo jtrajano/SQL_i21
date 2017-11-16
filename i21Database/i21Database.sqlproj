@@ -5750,6 +5750,8 @@
     <Build Include="dbo\Stored Procedures\uspMFProcessEDI945.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCreateSettleStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspSMValidateLocalServerRole.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1p_CompanyPreferenceOption.sql" />
+    <Build Include="dbo\Functions\fnMBGetWeightedCostAverage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
