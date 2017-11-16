@@ -35,7 +35,8 @@ BEGIN TRY
 			@dblLotsFixed				NUMERIC(18,6),
 			@dblNoOfLots				NUMERIC(18,6),
 			@dblHeaderNoOfLots			NUMERIC(18,6),
-			@intPriceFixationId			INT
+			@intPriceFixationId			INT,
+			@ysnPriceChanged			BIT
 
 	SELECT	@ysnMultiplePriceFixation	=	ysnMultiplePriceFixation,
 			@strContractNumber			=	strContractNumber,
@@ -116,7 +117,9 @@ BEGIN TRY
 				@intContractStatusId=	intContractStatusId,
 				@intCompanyLocationId = intCompanyLocationId,
 				@ysnSlice			=	ysnSlice,
-				@dblNoOfLots		=	dblNoOfLots
+				@dblNoOfLots		=	dblNoOfLots,
+				@ysnPriceChanged	=	ysnPriceChanged
+
 		FROM	tblCTContractDetail 
 		WHERE	intContractDetailId =	@intContractDetailId 
 		
@@ -140,7 +143,11 @@ BEGIN TRY
 
 		END
 
-		EXEC	uspCTSequencePriceChanged @intContractDetailId,null,'Sequence'
+		IF @ysnPriceChanged = 1
+		BEGIN
+			EXEC	uspCTSequencePriceChanged @intContractDetailId,null,'Sequence'
+			UPDATE tblCTContractDetail SET ysnPriceChanged = 0 WHERE intContractDetailId = @intContractDetailId
+		END
 		
 		IF @intPricingTypeId = 2 AND @dblOriginalBasis IS NULL
 		BEGIN
