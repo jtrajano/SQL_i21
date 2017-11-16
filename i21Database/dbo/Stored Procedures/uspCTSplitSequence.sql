@@ -48,8 +48,7 @@ SET NOCOUNT ON
 				dblScheduleQty		=	NULL,
 				intConcurrencyId	=	1,
 				intContractStatusId =	1,
-				intContractSeq		=	@intNextSequence,
-				dblOriginalBasis	=	NULL
+				intContractSeq		=	@intNextSequence
 
 		EXEC	uspCTGetTableDataInXML '#tblCTContractDetail',null,@XML OUTPUT							
 		EXEC	uspCTInsertINTOTableFromXML 'tblCTContractDetail',@XML,@intNewContractDetailId OUTPUT
