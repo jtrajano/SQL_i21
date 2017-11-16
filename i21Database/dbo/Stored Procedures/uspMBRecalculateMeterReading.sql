@@ -33,7 +33,7 @@ BEGIN
 			, @TaxGroupId = intTaxGroupId
 			, @Amount = (CASE WHEN strPriceType = 'Gross' THEN ISNULL(dblGrossPrice, 0)
 							ELSE ISNULL(dblNetPrice, 0) END)
-			, @Price = (CASE WHEN strPriceType = 'Gross' THEN 0
+			, @Price = (CASE WHEN strPriceType = 'Gross' THEN ISNULL(dblGrossPrice, 0)
 							ELSE ISNULL(dblNetPrice, 0) END)
 			, @IsReversal = (CASE WHEN strPriceType = 'Gross' THEN 1
 							ELSE 0 END)
@@ -63,8 +63,9 @@ BEGIN
 			, 0
 		)
 
-		SELECT @TaxTotal = ISNULL(SUM(ISNULL(dblTax, 0)), 0)
+		SELECT @TaxTotal = ISNULL(SUM(ISNULL(dblRate, 0)), 0)
 		FROM #tmpTaxes 
+		WHERE ysnTaxExempt = 0
 
 		IF (@PriceType = 'Gross')
 		BEGIN
