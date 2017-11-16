@@ -5888,6 +5888,7 @@
     <Build Include="dbo\Stored Procedures\uspGRCreateSettleStorage.sql" />
     <Build Include="dbo\Views\vyuLGGetShipmentContainerContract.sql" />
     <Build Include="dbo\Views\vyuARInvoicePaymentDetail.sql" />
+    <Build Include="dbo\Tables\tblMFLotStatusException.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
