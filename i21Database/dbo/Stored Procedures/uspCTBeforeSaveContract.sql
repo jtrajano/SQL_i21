@@ -45,7 +45,7 @@ BEGIN TRY
 	SELECT  ROW_NUMBER() OVER(ORDER BY strRowState) intUniqueId,* 
 	INTO	#ProcessDetail
 	FROM	OPENXML(@idoc,'tblCTContractDetails/tblCTContractDetail',2)          
-	WITH	(intContractDetailId INT,strRowState NVARCHAR(50),ysnSlice BIT, intParentDetailId INT)      
+	WITH	(intContractDetailId INT,strRowState NVARCHAR(50),ysnSlice BIT, intParentDetailId INT, dblCashPrice NUMERIC(18,6))      
 
 	SELECT @intUniqueId = MIN(intUniqueId) FROM #ProcessDetail
 
@@ -54,7 +54,8 @@ BEGIN TRY
 		SELECT	@intContractDetailId	=	intContractDetailId, 
 				@strRowState			=	strRowState,
 				@ysnSlice				=	ysnSlice,
-				@intParentDetailId		=	intParentDetailId 
+				@intParentDetailId		=	intParentDetailId,
+				@dblCashPrice			=	dblCashPrice
 		FROM	#ProcessDetail 
 		WHERE	intUniqueId = @intUniqueId
 
@@ -72,14 +73,27 @@ BEGIN TRY
 			FROM	tblCTContractFeed
 			WHERE	intContractDetailId = @intContractDetailId
 			ORDER BY intContractFeedId DESC			
-		END
-		--Unslice
-		IF(@ysnSlice = 0)
-		BEGIN
-			UPDATE tblCTContractDetail SET intParentDetailId = @intParentDetailId,ysnSlice = 0 WHERE intContractDetailId = @intContractDetailId
-		END
 
-		UPDATE tblCTContractDetail SET intParentDetailId = NULL WHERE intParentDetailId = @intContractDetailId
+			--Unslice
+			IF(@ysnSlice = 0)
+			BEGIN
+				UPDATE tblCTContractDetail SET intParentDetailId = @intParentDetailId,ysnSlice = 0 WHERE intContractDetailId = @intContractDetailId
+			END
+
+			UPDATE tblCTContractDetail SET intParentDetailId = NULL WHERE intParentDetailId = @intContractDetailId
+		END
+		ELSE IF(@strRowState = 'Modified')
+		BEGIN
+			SELECT @intPricingTypeId = intPricingTypeId FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
+			IF @intPricingTypeId IN (1,6)
+			BEGIN
+				IF(SELECT dblCashPrice FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId) <> @dblCashPrice
+				BEGIN
+					UPDATE tblCTContractDetail SET ysnPriceChanged = 1 WHERE intContractDetailId = @intContractDetailId
+				END
+			END
+		END
+		
 
 		SELECT @intUniqueId = MIN(intUniqueId) FROM #ProcessDetail WHERE intUniqueId > @intUniqueId
 	END
