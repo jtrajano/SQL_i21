@@ -5903,6 +5903,7 @@
     <Build Include="dbo\Stored Procedures\uspGRCreateSettleStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspSMValidateLocalServerRole.sql" />
     <Build Include="dbo\Functions\fnMBGetWeightedCostAverage.sql" />
+    <Build Include="dbo\Views\vyuSMTaxableByOtherTaxes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
