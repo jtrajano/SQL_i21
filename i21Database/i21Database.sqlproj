@@ -5879,6 +5879,7 @@
     <Build Include="dbo\Views\vyuLGGetShipmentContainerContract.sql" />
     <Build Include="dbo\Stored Procedures\uspCRMGetPipelineForecast.sql" />
     <Build Include="dbo\Functions\fnVRGetRebateRate.sql" />
+	<None Include="Scripts\Post-Deployment\GL\DefaultData\1p_CompanyPreferenceOption.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
