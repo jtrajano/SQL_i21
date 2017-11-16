@@ -5887,6 +5887,7 @@
     <Build Include="dbo\Stored Procedures\uspMFProcessEDI945.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCreateSettleStorage.sql" />
     <Build Include="dbo\Views\vyuLGGetShipmentContainerContract.sql" />
+    <Build Include="dbo\Views\vyuARInvoicePaymentDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
