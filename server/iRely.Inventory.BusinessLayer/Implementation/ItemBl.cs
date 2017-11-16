@@ -146,6 +146,10 @@ namespace iRely.Inventory.BusinessLayer
                 {
                     msg = "Motor Fuel Taxes must be unique per Item.";
                 }
+                else if (result.BaseException.Message.Contains("unique index 'AK_tblICItemUOM_strUpcCode'"))
+                {
+                    msg = "UPC Code must be unique per item per UOM.";
+                }
                 else if (result.BaseException.Message.Contains("The DELETE statement conflicted with the REFERENCE constraint \"FK_tblICItemLocation_tblICUnitMeasure_Issue\""))
                 {
                     msg = "UOMs that are used as default Sale UOM in this Item's location(s) cannot be removed. To remove the UOMs, clear the Sale UOMs that were assigned to the Item's location(s).";
