@@ -520,8 +520,8 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,intBankAccountType					= i.intBankAccountType
 					,strContact							= i.strContact
 					,strBankAccountHolder				= i.strBankAccountHolder
-					,strBankAccountNo					= [dbo].fnAESEncryptASym(i.strBankAccountNo)
-					,strRTN								= [dbo].fnAESEncryptASym(i.strRTN)
+					,strBankAccountNo                    = CASE WHEN i.strBankAccountNo = B.strBankAccountNo THEN i.strBankAccountNo ELSE [dbo].fnAESEncryptASym(i.strBankAccountNo) END
+					,strRTN                                = CASE WHEN i.strRTN = B.strRTN THEN i.strRTN ELSE [dbo].fnAESEncryptASym(i.strRTN) END
 					,strAddress							= i.strAddress
 					,strZipCode							= i.strZipCode
 					,strCity							= i.strCity
@@ -550,8 +550,8 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,strEFTCompanyId					= i.strEFTCompanyId
 					,strEFTBankName						= i.strEFTBankName
 					,strMICRDescription					= i.strMICRDescription
-					,strMICRRoutingNo					= [dbo].fnAESEncryptASym(i.strMICRRoutingNo)
-					,strMICRBankAccountNo				= [dbo].fnAESEncryptASym(i.strMICRBankAccountNo)
+					,strMICRRoutingNo                    = CASE WHEN i.strMICRRoutingNo = B.strMICRRoutingNo THEN i.strMICRRoutingNo ELSE [dbo].fnAESEncryptASym(i.strMICRRoutingNo) END
+					,strMICRBankAccountNo                = CASE WHEN i.strMICRBankAccountNo = B.strMICRBankAccountNo THEN i.strMICRBankAccountNo ELSE [dbo].fnAESEncryptASym(i.strMICRBankAccountNo) END
 					,strMICRRoutingPrefix				= i.strMICRRoutingPrefix
 					,strMICRRoutingSuffix				= i.strMICRRoutingSuffix
 					,strMICRBankAccountPrefix			= i.strMICRBankAccountPrefix
