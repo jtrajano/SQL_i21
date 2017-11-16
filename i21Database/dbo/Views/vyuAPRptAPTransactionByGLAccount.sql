@@ -57,13 +57,28 @@ AS
 	,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
 	,APB.ysnPaid AS ysnPaid
 	--,strSegment = ISNULL((Select strSegmentCode from tblGLAccount where strAccountID = tblAPBatchDetail.strAccountID),'')
+	,Payment.strPaymentInfo	
+	,Payment.dtmDatePaid
 	FROM  tblAPBill APB
 	INNER JOIN dbo.tblAPBillDetail APD ON APB.intBillId = APD.intBillId
 	INNER JOIN tblAPVendor APV
 		ON APB.intEntityVendorId = APV.[intEntityId]
 	LEFT JOIN dbo.tblEMEntity E
 		ON E.intEntityId = APV.[intEntityId]
+	OUTER APPLY
+	(
+		SELECT TOP 1
+			B.strPaymentInfo,
+			B.dtmDatePaid,
+			B.intPaymentId
+		FROM dbo.tblAPPayment B 
+		LEFT JOIN dbo.tblAPPaymentDetail C 
+			ON B.intPaymentId = C.intPaymentId
+		WHERE C.intBillId = APB.intBillId
+			AND B.ysnPosted = 1
+		ORDER BY B.intPaymentId DESC
+	) Payment
 	WHERE 
 			APB.ysnForApproval != 1														   --Will not show For Approval Bills
 		AND APB.ysnPosted = 1 OR (APB.dtmApprovalDate IS NOT NULL AND APB.ysnApproved = 1) --Will not show Rejected approval bills but show old Posted Transactions.
-		AND APB.intTransactionType != 6													   --Will not show BillTemplate
+		AND APB.intTransactionType != 6													   --Will not show BillTemplate 
