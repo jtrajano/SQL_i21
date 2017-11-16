@@ -33,8 +33,8 @@ Ext.define('Inventory.view.CopyItemLocation', {
 
     height: 594,
     minHeight: 594,
-    minWidth: 780,
-    width: 780,
+    minWidth: 820,
+    width: 820,
     layout: 'fit',
     collapsible: true,
     title: 'Copy Item Location',
@@ -118,6 +118,13 @@ Ext.define('Inventory.view.CopyItemLocation', {
                                             itemId: 'colDescription',
                                             dataIndex: 'strDescription',
                                             text: 'Description'
+                                        },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            flex: 1.2,
+                                            itemId: 'colLocationName',
+                                            dataIndex: 'strLocationName',
+                                            text: 'Location Name'
                                         },
                                         {
                                             xtype: 'gridcolumn',

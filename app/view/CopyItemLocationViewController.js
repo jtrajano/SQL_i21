@@ -13,6 +13,7 @@ Ext.define('Inventory.view.CopyItemLocationViewController', {
             grdItems: {
                 colStrItemNo: 'strItemNo',
                 colDescription: 'strItemDescription',
+                colLocationName: 'strLocationName',
                 colType: 'strType',
                 colCommodity: 'strCommodityCode',
                 colCategory: 'strCategoryCode',
