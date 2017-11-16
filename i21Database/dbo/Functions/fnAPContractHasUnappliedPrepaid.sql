@@ -1,6 +1,6 @@
 ﻿CREATE FUNCTION [dbo].[fnAPContractHasUnappliedPrepaid]
 (
-	@contractHeaderId INT
+	@intContractDetailId INT
 )
 RETURNS BIT
 AS
@@ -10,7 +10,7 @@ BEGIN
 	IF EXISTS(SELECT 1 
 			FROM tblAPBill A
 			INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
-			WHERE A.intTransactionType = 2 AND A.dblAmountDue > 0 AND B.intContractHeaderId = @contractHeaderId)
+			WHERE A.intTransactionType = 2 AND A.dblAmountDue > 0 AND B.intContractDetailId = @intContractDetailId)
 	BEGIN
 		SET @hasUnapplied = 1;
 	END
