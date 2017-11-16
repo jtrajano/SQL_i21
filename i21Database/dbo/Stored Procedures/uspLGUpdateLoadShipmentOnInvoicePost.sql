@@ -86,16 +86,13 @@ BEGIN TRY
 				SELECT @intAllocationPContractDetailId = intPContractDetailId
 				FROM tblLGAllocationDetail
 				WHERE intAllocationDetailId = @intAllocationDetailId
-
-				SELECT @intInboundLoadDetailId = intLoadDetailId
-				FROM tblLGLoadDetail
-				WHERE intPContractDetailId = @intAllocationPContractDetailId
-
-				SELECT @dblPurchasedLotQty = SUM(IRIL.dblQuantity) FROM tblICInventoryReceipt IR
-				JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
-				JOIN tblICInventoryReceiptItemLot IRIL ON IRIL.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId
-				WHERE IRI.intSourceId = @intInboundLoadDetailId
-								
+				
+				SELECT @dblPurchasedLotQty = SUM(LDL.dblLotQuantity)
+				FROM tblLGLoad L
+				JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+				JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
+				WHERE LD.intLoadDetailId = @intOutboundLoadDetailId
+						
 				UPDATE tblCTContractDetail
 				SET dblInvoicedQty = ISNULL(dblInvoicedQty, 0) + CASE WHEN ISNULL(@Post,0) =  1 THEN @dblPurchasedLotQty ELSE @dblPurchasedLotQty *(-1) END
 				WHERE intContractDetailId = @intAllocationPContractDetailId
