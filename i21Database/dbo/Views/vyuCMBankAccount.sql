@@ -335,8 +335,8 @@ CREATE TRIGGER trg_update_vyuCMBankAccount
 					,intBankAccountType					= i.intBankAccountType
 					,strContact							= i.strContact
 					,strBankAccountHolder				= i.strBankAccountHolder
-					,strBankAccountNo					= CASE WHEN i.strBankAccountNo = tblCMBankAccount.strBankAccountNo THEN i.strBankAccountNo ELSE [dbo].fnAESEncryptASym(i.strBankAccountNo) END
-					,strRTN								= CASE WHEN i.strRTN = tblCMBankAccount.strRTN THEN i.strRTN ELSE [dbo].fnAESEncryptASym(i.strRTN) END
+					,strBankAccountNo                    = CASE WHEN i.strBankAccountNo = B.strBankAccountNo THEN i.strBankAccountNo ELSE [dbo].fnAESEncryptASym(i.strBankAccountNo) END
+					,strRTN                                = CASE WHEN i.strRTN = B.strRTN THEN i.strRTN ELSE [dbo].fnAESEncryptASym(i.strRTN) END
 					,strAddress							= i.strAddress
 					,strZipCode							= i.strZipCode
 					,strCity							= i.strCity
@@ -365,8 +365,8 @@ CREATE TRIGGER trg_update_vyuCMBankAccount
 					,strEFTCompanyId					= i.strEFTCompanyId
 					,strEFTBankName						= i.strEFTBankName
 					,strMICRDescription					= i.strMICRDescription
-					,strMICRRoutingNo					= CASE WHEN i.strMICRRoutingNo = tblCMBankAccount.strMICRRoutingNo THEN i.strMICRRoutingNo ELSE [dbo].fnAESEncryptASym(i.strMICRRoutingNo) END
-					,strMICRBankAccountNo				= CASE WHEN i.strMICRBankAccountNo = tblCMBankAccount.strMICRBankAccountNo THEN i.strMICRBankAccountNo ELSE [dbo].fnAESEncryptASym(i.strMICRBankAccountNo) END
+					,strMICRRoutingNo                    = CASE WHEN i.strMICRRoutingNo = B.strMICRRoutingNo THEN i.strMICRRoutingNo ELSE [dbo].fnAESEncryptASym(i.strMICRRoutingNo) END
+					,strMICRBankAccountNo                = CASE WHEN i.strMICRBankAccountNo = B.strMICRBankAccountNo THEN i.strMICRBankAccountNo ELSE [dbo].fnAESEncryptASym(i.strMICRBankAccountNo) END
 					,strMICRRoutingPrefix				= i.strMICRRoutingPrefix
 					,strMICRRoutingSuffix				= i.strMICRRoutingSuffix
 					,strMICRBankAccountPrefix			= i.strMICRBankAccountPrefix

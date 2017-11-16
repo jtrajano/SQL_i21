@@ -136,7 +136,7 @@ BEGIN
     ,strFax       = i.strFax
     ,strWebsite = i.strWebsite
     ,strEmail   = i.strEmail
-	,strRTN		= CASE WHEN i.strRTN = tblCMBankAccount.strRTN THEN i.strRTN ELSE [dbo].fnAESEncryptASym(i.strRTN) END
+	,strRTN        = CASE WHEN i.strRTN = tblCMBankAccount.strRTN THEN i.strRTN ELSE [dbo].fnAESEncryptASym(i.strRTN) END
     FROM inserted i
     WHERE tblCMBankAccount.intBankId = i.intBankId
 
