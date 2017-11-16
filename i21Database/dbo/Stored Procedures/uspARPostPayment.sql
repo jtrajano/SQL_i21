@@ -1121,6 +1121,59 @@ SET @batchIdUsed = @batchId
 						ON PC.intInvoiceId = I2.intInvoiceId 
 						AND I2.ysnPosted = 1
 
+				--Payment with associated Overpayment
+				INSERT INTO
+					@ARReceivableInvalidData
+				SELECT 
+					'There''s an overpayment(' + I.[strInvoiceNumber] + ') created from ' + A.[strRecordNumber] + '. Disassociate it from ' + ARP.[strRecordNumber] + ' first.' 
+					,'Receivable'
+					,A.strRecordNumber
+					,@batchId
+					,A.intPaymentId
+				FROM
+					tblARPayment A 
+				INNER JOIN
+					@ARReceivablePostData P
+						ON A.intPaymentId = P.intPaymentId
+				INNER JOIN
+					tblARInvoice I
+						ON (A.strRecordNumber = I.strComments OR A.intPaymentId = I.intPaymentId)
+						AND I.strTransactionType = 'Overpayment'
+				INNER JOIN
+					tblARPaymentDetail ARPD
+						ON I.[intInvoiceId] = ARPD.[intInvoiceId]
+						AND A.[intPaymentId] <> ARPD.[intPaymentId]
+				INNER JOIN
+					tblARPayment ARP
+						ON ARPD.[intPaymentId] = ARP.[intPaymentId]
+
+				--Payment with associated Prepayment
+				INSERT INTO
+					@ARReceivableInvalidData
+				SELECT 
+					'There''s a prepayment(' + I.[strInvoiceNumber] + ') created from ' + A.[strRecordNumber] + '. Disassociate it from ' + ARP.[strRecordNumber] + ' first.' 
+					,'Receivable'
+					,A.strRecordNumber
+					,@batchId
+					,A.intPaymentId
+				FROM
+					tblARPayment A 
+				INNER JOIN
+					@ARReceivablePostData P
+						ON A.intPaymentId = P.intPaymentId
+				INNER JOIN
+					tblARInvoice I
+						ON (A.strRecordNumber = I.strComments OR A.intPaymentId = I.intPaymentId)
+						AND I.strTransactionType = 'Customer Prepayment'
+				INNER JOIN
+					tblARPaymentDetail ARPD
+						ON I.[intInvoiceId] = ARPD.[intInvoiceId]
+						AND A.[intPaymentId] <> ARPD.[intPaymentId]
+				INNER JOIN
+					tblARPayment ARP
+						ON ARPD.[intPaymentId] = ARP.[intPaymentId]
+
+
 				--If ysnAllowUserSelfPost is True in User Role
 				IF (@AllowOtherUserToPost IS NOT NULL AND @AllowOtherUserToPost = 1)
 				BEGIN
