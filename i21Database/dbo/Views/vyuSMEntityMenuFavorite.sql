@@ -15,6 +15,7 @@ MasterMenu.strIcon,
 CASE WHEN Favorite.ysnCustomView = 1 THEN CAST(1 AS BIT) ELSE ISNULL(MasterMenu.ysnLeaf, 0) END AS ysnLeaf,
 ISNULL(MasterMenu.ysnIsLegacy, 0) AS ysnIsLegacy,
 ISNULL(Favorite.intParentEntityMenuFavoriteId, 0) AS intParentEntityMenuFavoriteId,
+Favorite.ysnCustomView as ysnCustomView,
 Favorite.intConcurrencyId
 FROM tblSMEntityMenuFavorite Favorite
 INNER JOIN
