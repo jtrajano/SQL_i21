@@ -17,9 +17,12 @@ BEGIN TRY
 			(SELECT TOP 1 intCurrencyId  FROM vyuCTAOP WHERE intItemId = IM.intItemId AND strYear = @strYear) AS intCurrencyId,
 			(SELECT TOP 1 intWeightUOMId FROM vyuCTAOP WHERE intItemId = IM.intItemId AND strYear = @strYear) AS intWeightUOMId,
 			--(SELECT TOP 1 intPriceUOMId  FROM vyuCTAOP WHERE intItemId = IM.intItemId AND strYear = @strYear) AS intPriceUOMId,
-			BI.strItemNo AS strBasisItemNo
+			BI.strItemNo AS strBasisItemNo,
+			CO.strCommodityCode,
+			IM.strItemNo
 
-	FROM	tblICItem			IM CROSS 
+	FROM	tblICItem			IM 
+	JOIN	tblICCommodity		CO	ON	CO.intCommodityId = IM.intCommodityId CROSS 
 	JOIN	(
 				SELECT	intItemId,strItemNo 
 				FROM	tblICItem			
