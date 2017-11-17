@@ -501,7 +501,7 @@ BEGIN TRY
 			AND I.intCommodityId = CA.intCommodityId
 		LEFT JOIN tblLGContainerTypeCommodityQty CTCQ ON CA.intCommodityAttributeId = CTCQ.intCommodityAttributeId
 			AND CTCQ.intContainerTypeId = CT.intContainerTypeId
-		WHERE CD.intContractHeaderId = @intContractHeaderId
+		WHERE CD.intContractHeaderId = @intContractHeaderId AND ISNULL(CD.dblNetWeight,0) > 0
 
 		DELETE
 		FROM @ParentLoad
