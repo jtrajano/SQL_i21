@@ -29,8 +29,7 @@ SELECT ''Storage Receivable''				COLLATE Latin1_General_CI_AS UNION
 SELECT ''Variance Account''				COLLATE Latin1_General_CI_AS UNION 
 SELECT ''Write-Off Sold''					COLLATE Latin1_General_CI_AS UNION 
 SELECT ''Fee Expense''					COLLATE Latin1_General_CI_AS UNION
-SELECT ''Auto-Variance''					COLLATE Latin1_General_CI_AS UNION
-SELECT ''Work In Progress''				COLLATE Latin1_General_CI_AS 
+SELECT ''Auto-Variance''					COLLATE Latin1_General_CI_AS
 
 IF(EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ''tblGLAccountCategory'') AND EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ''tblICCategoryAccount''))
 BEGIN
@@ -38,6 +37,14 @@ DELETE a
 FROM tblGLAccountCategory ac
 	INNER JOIN @tblRemovedCategory rc ON rc.strName COLLATE Latin1_General_CI_AS = ac.strAccountCategory COLLATE Latin1_General_CI_AS
 	INNER JOIN tblICCategoryAccount a ON a.intAccountCategoryId = ac.intAccountCategoryId
+END
+
+IF(EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ''tblGLAccountCategory'') AND EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ''tblICCommodityAccount''))
+BEGIN
+DELETE a
+FROM tblGLAccountCategory ac
+	INNER JOIN @tblRemovedCategory rc ON rc.strName COLLATE Latin1_General_CI_AS = ac.strAccountCategory COLLATE Latin1_General_CI_AS
+	INNER JOIN tblICCommodityAccount a ON a.intAccountCategoryId = ac.intAccountCategoryId
 END
 
 IF(EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ''tblGLAccountCategory'') AND EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ''tblICItemAccount''))
