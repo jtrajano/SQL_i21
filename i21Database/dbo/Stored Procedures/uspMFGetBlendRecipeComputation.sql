@@ -31,23 +31,9 @@ AS
 		,intSequenceNo INT
 	   )
 
-	DECLARE @tblBlendManagement AS TABLE
+	DECLARE @tblComputedValue AS TABLE
 	   (
 	     intWorkOrderRecipeComputationId INT IDENTITY(1, 1)
-	    ,intTestId INT
-		,strTestName NVARCHAR(50)
-		,intPropertyId INT
-		,strPropertyName NVARCHAR(100)
-		,dblComputedValue NUMERIC(18,6)
-		,dblMinValue NUMERIC(18,6)
-		,dblMaxValue NUMERIC(18,6)
-		,strMethodName NVARCHAR(50)
-		,intMethodId INT
-	   )
-
-	DECLARE @tblBlendProduction AS TABLE
-	   (
-	     intRowNo INT IDENTITY(1, 1)
 	    ,intTestId INT
 		,strTestName NVARCHAR(50)
 		,intPropertyId INT
@@ -62,6 +48,7 @@ AS
 		DECLARE @tblLot AS TABLE
 	   (
 		intLotId INT
+		,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,dblQty NUMERIC(18,6)
 	   )
 
@@ -90,16 +77,49 @@ AS
 	AND DATEPART(dy, PPV.dtmValidTo)
 	ORDER BY PP.intSequenceNo
 
-	INSERT INTO @tblLot(intLotId,dblQty)
-	SELECT intLotId,dblQty
-	FROM OPENXML(@idoc, 'root/lot', 2) WITH (intLotId INT,dblQty NUMERIC(18,6))
+	If @ysnEnableParentLot=0
+		INSERT INTO @tblLot(intLotId,strLotNumber,dblQty)
+		SELECT x.intLotId,l.strLotNumber,x.dblQty
+		FROM OPENXML(@idoc, 'root/lot', 2) WITH (intLotId INT,dblQty NUMERIC(18,6)) x Join tblICLot l on x.intLotId=l.intLotId
+	Else
+		INSERT INTO @tblLot(intLotId,dblQty)
+		SELECT intLotId,dblQty
+		FROM OPENXML(@idoc, 'root/lot', 2) WITH (intLotId INT,dblQty NUMERIC(18,6))
 
 	SELECT @strMethod=strName FROM tblMFWorkOrderRecipeComputationMethod WHERE intMethodId=1
 
-	--Blend Management
-	IF ( @intTypeId=1 )
+	--Blend Management/Production
+	IF ( @ysnEnableParentLot=0 )
 	BEGIN
-			INSERT INTO @tblBlendManagement(intTestId,strTestName,intPropertyId,strPropertyName,dblComputedValue,dblMinValue,dblMaxValue,strMethodName,intMethodId)
+			INSERT INTO @tblComputedValue(intTestId,strTestName,intPropertyId,strPropertyName,dblComputedValue,dblMinValue,dblMaxValue,strMethodName,intMethodId)
+			SELECT 
+				 PP.intTestId
+				,PP.strTestName
+				,PP.intPropertyId
+				,PP.strPropertyName
+				,SUM(L.dblQty * ISNULL(TR.strPropertyValue, 0)) / SUM(L.dblQty) AS dblComputedValue
+				,PP.dblMinValue
+				,PP.dblMaxValue
+				,MIN(@strMethod) AS strMethodName
+				,1 AS intMethodId
+			FROM @tblProductProperty PP
+			JOIN tblQMTestResult AS TR ON PP.intPropertyId = TR.intPropertyId AND ISNUMERIC(TR.strPropertyValue) = 1
+			JOIN tblICLot lt ON lt.intLotId=TR.intProductValueId
+			JOIN @tblLot AS L ON L.strLotNumber = lt.strLotNumber
+				AND TR.intProductTypeId = @intProductTypeId
+				AND TR.intSampleId = (SELECT MAX(intSampleId) 
+				FROM tblQMTestResult tr WHERE tr.intProductValueId = lt.intLotId AND tr.intProductTypeId = @intProductTypeId)
+			GROUP BY 
+				 PP.intPropertyId
+				,PP.strPropertyName
+				,PP.intTestId
+				,PP.strTestName
+				,PP.dblMinValue
+				,PP.dblMaxValue
+	END
+	Else
+	BEGIN
+			INSERT INTO @tblComputedValue(intTestId,strTestName,intPropertyId,strPropertyName,dblComputedValue,dblMinValue,dblMaxValue,strMethodName,intMethodId)
 			SELECT 
 				 PP.intTestId
 				,PP.strTestName
@@ -123,39 +143,8 @@ AS
 				,PP.strTestName
 				,PP.dblMinValue
 				,PP.dblMaxValue
-
-		SELECT * FROM @tblBlendManagement
 	END
 
-	--Blend Production
-	IF ( @intTypeId=2 )
-	BEGIN
-			INSERT INTO @tblBlendProduction(intTestId,strTestName,intPropertyId,strPropertyName,dblComputedValue,dblMinValue,dblMaxValue,strMethodName,intMethodId)
-			SELECT 
-				 PP.intTestId
-				,PP.strTestName
-				,PP.intPropertyId
-				,PP.strPropertyName
-				,SUM(L.dblQty * ISNULL(TR.strPropertyValue, 0)) / SUM(L.dblQty) AS dblComputedValue
-				,PP.dblMinValue
-				,PP.dblMaxValue
-				,MIN(@strMethod) AS strMethodName
-				,1 AS intMethodId
-			FROM @tblProductProperty PP
-			JOIN tblQMTestResult AS TR ON PP.intPropertyId = TR.intPropertyId AND ISNUMERIC(TR.strPropertyValue) = 1
-			JOIN @tblLot AS L ON L.intLotId = TR.intProductValueId
-				AND TR.intProductTypeId = @intProductTypeId
-				AND TR.intSampleId = (SELECT MAX(intSampleId) 
-				FROM tblQMTestResult tr WHERE tr.intProductValueId = L.intLotId AND tr.intProductTypeId = @intProductTypeId)
-			GROUP BY 
-				 PP.intPropertyId
-				,PP.strPropertyName
-				,PP.intTestId
-				,PP.strTestName
-				,PP.dblMinValue
-				,PP.dblMaxValue
-
-		SELECT * FROM @tblBlendProduction
-	END
+	SELECT * FROM @tblComputedValue
 
 	IF @idoc <> 0 EXEC sp_xml_removedocument @idoc  
