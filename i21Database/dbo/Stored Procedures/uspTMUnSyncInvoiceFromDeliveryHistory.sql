@@ -116,6 +116,7 @@ BEGIN
 		FROM #tmpDeliveryHistory A
 		INNER JOIN tblTMSite B
 			ON A.intSiteID = B.intSiteID
+		WHERE A.ysnProcessed = 0
 		
 		-----Get clock reading for the invoice date
 		SELECT TOP 1
