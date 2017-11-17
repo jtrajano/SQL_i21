@@ -637,7 +637,7 @@ BEGIN
 				END
 			)
 		,dblUOMQty = 1
-		,dblCost = Case When IsNULL(@dblPercentage,0)=0 then  @dblCostPerStockUOM Else @dblCostPerStockUOM*@dblPercentage/100 End 
+		,dblCost = @dblCostPerStockUOM
 		,dblSalesPrice = 0
 		,intCurrencyId = NULL
 		,dblExchangeRate = 1
