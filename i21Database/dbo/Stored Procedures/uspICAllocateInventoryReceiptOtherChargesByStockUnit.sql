@@ -74,6 +74,7 @@ BEGIN
 							,CalculatedCharge.intInventoryReceiptId
 							,CalculatedCharge.intInventoryReceiptChargeId
 							,CalculatedCharge.ysnPrice
+							,Charge.strChargesLink 
 					FROM	dbo.tblICInventoryReceiptChargePerItem CalculatedCharge	INNER JOIN tblICInventoryReceiptCharge Charge
 								ON CalculatedCharge.intInventoryReceiptChargeId = Charge.intInventoryReceiptChargeId		
 					WHERE	CalculatedCharge.intInventoryReceiptId = @intInventoryReceiptId
@@ -86,8 +87,12 @@ BEGIN
 						, CalculatedCharge.intInventoryReceiptId
 						, CalculatedCharge.intInventoryReceiptChargeId
 						, CalculatedCharge.ysnPrice
+						, Charge.strChargesLink 
 				) CalculatedCharges 
 					ON ReceiptItem.intInventoryReceiptId = CalculatedCharges.intInventoryReceiptId
+					AND (
+						ISNULL(CalculatedCharges.strChargesLink, '') = ISNULL(ReceiptItem.strChargesLink, '')
+					)
 				LEFT JOIN (
 					SELECT  dblTotalStockUnit = SUM(
 								CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
@@ -97,6 +102,7 @@ BEGIN
 								END 								
 							)
 							,ReceiptItem.intInventoryReceiptId 
+							,ReceiptItem.strChargesLink
 					FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
 								ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId	
 							INNER JOIN dbo.tblICItemUOM ItemUOM
@@ -109,9 +115,12 @@ BEGIN
 
 					WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
 							AND StockUOM.intItemUOMId IS NOT NULL 
-					GROUP BY ReceiptItem.intInventoryReceiptId
+					GROUP BY ReceiptItem.intInventoryReceiptId, ReceiptItem.strChargesLink
 				) TotalStockUnitOfItems 
 					ON TotalStockUnitOfItems.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId 
+					AND (
+						ISNULL(TotalStockUnitOfItems.strChargesLink, '') = ISNULL(ReceiptItem.strChargesLink, '')
+					)
 
 				LEFT JOIN dbo.tblICItemUOM ItemUOM	
 					ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId 
@@ -124,6 +133,7 @@ BEGIN
 		AND ReceiptItemAllocatedCharge.ysnInventoryCost = Source_Query.ysnInventoryCost
 		AND ReceiptItemAllocatedCharge.ysnPrice = Source_Query.ysnPrice
 		AND ReceiptItemAllocatedCharge.intInventoryReceiptChargeId = Source_Query.intInventoryReceiptChargeId
+		AND ISNULL(ReceiptItemAllocatedCharge.strChargesLink, '') = ISNULL(Source_Query.strChargesLink, '')
 
 	-- Add the other charge to an existing allocation. 
 	WHEN MATCHED AND ISNULL(Source_Query.dblTotalStockUnit, 0) <> 0 THEN 
@@ -149,6 +159,7 @@ BEGIN
 			,[ysnAccrue]
 			,[ysnInventoryCost]
 			,[ysnPrice]
+			,[strChargesLink]
 		)
 		VALUES (
 			Source_Query.intInventoryReceiptId
@@ -164,6 +175,7 @@ BEGIN
 			,Source_Query.ysnAccrue
 			,Source_Query.ysnInventoryCost
 			,Source_Query.ysnPrice
+			,Source_Query.strChargesLink
 		)
 	;
 END 

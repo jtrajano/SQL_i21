@@ -60,14 +60,10 @@ BEGIN
 					AND Receipt.strReceiptType = @RECEIPT_TYPE_PurchaseContract
 					AND ReceiptItem.intOrderId IS NOT NULL 
 					AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
-				--INNER JOIN dbo.tblICItemUOM ItemUOM	
-				--	ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId 
 				INNER JOIN (					
 					SELECT	dblTotalOtherCharge = 
-								-- Convert the other charge amount to functional currency. 
 								SUM(
 									dblCalculatedAmount
-									--* CASE WHEN ISNULL(Charge.dblForexRate, 0) = 0 AND ISNULL(Charge.intCurrencyId, @intFunctionalCurrencyId) = @intFunctionalCurrencyId THEN 1 ELSE Charge.dblForexRate END 
 								)
 							,CalculatedCharge.ysnAccrue
 							,CalculatedCharge.intContractId
@@ -77,6 +73,7 @@ BEGIN
 							,CalculatedCharge.intInventoryReceiptId
 							,CalculatedCharge.intInventoryReceiptChargeId
 							,CalculatedCharge.ysnPrice
+							,Charge.strChargesLink 
 					FROM	dbo.tblICInventoryReceiptChargePerItem CalculatedCharge	INNER JOIN tblICInventoryReceiptCharge Charge
 								ON CalculatedCharge.intInventoryReceiptChargeId = Charge.intInventoryReceiptChargeId	
 					WHERE	CalculatedCharge.intInventoryReceiptId = @intInventoryReceiptId
@@ -90,9 +87,13 @@ BEGIN
 							, CalculatedCharge.intInventoryReceiptId
 							, CalculatedCharge.intInventoryReceiptChargeId
 							, CalculatedCharge.ysnPrice
+							, Charge.strChargesLink 
 				) CalculatedCharges 
 					ON CalculatedCharges.intContractId = ReceiptItem.intOrderId 
 					AND CalculatedCharges.intContractDetailId = ReceiptItem.intLineNo
+					AND (
+						ISNULL(CalculatedCharges.strChargesLink, '') = ISNULL(ReceiptItem.strChargesLink, '')
+					)
 				LEFT JOIN (
 					SELECT	dblTotalUnits = SUM(
 								CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
@@ -103,6 +104,7 @@ BEGIN
 							)
 							,ReceiptItem.intOrderId 
 							,ReceiptItem.intLineNo
+							,ReceiptItem.strChargesLink
 					FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 								ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 								AND Receipt.strReceiptType = @RECEIPT_TYPE_PurchaseContract
@@ -110,11 +112,13 @@ BEGIN
 								ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId 
 					WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
 							AND ReceiptItem.intOrderId IS NOT NULL 
-					GROUP BY ReceiptItem.intOrderId, ReceiptItem.intLineNo
+					GROUP BY ReceiptItem.intOrderId, ReceiptItem.intLineNo, ReceiptItem.strChargesLink
 				) TotalUnitsOfItemsPerContract 
 					ON TotalUnitsOfItemsPerContract.intOrderId = ReceiptItem.intOrderId 
 					AND TotalUnitsOfItemsPerContract.intLineNo = ReceiptItem.intLineNo
-
+					AND (
+						ISNULL(TotalUnitsOfItemsPerContract.strChargesLink, '') = ISNULL(ReceiptItem.strChargesLink, '')
+					)
 	) AS Source_Query  
 		ON ReceiptItemAllocatedCharge.intInventoryReceiptId = Source_Query.intInventoryReceiptId
 		AND ReceiptItemAllocatedCharge.intEntityVendorId = Source_Query.intEntityVendorId
@@ -122,6 +126,7 @@ BEGIN
 		AND ReceiptItemAllocatedCharge.ysnInventoryCost = Source_Query.ysnInventoryCost
 		AND ReceiptItemAllocatedCharge.ysnPrice = Source_Query.ysnPrice
 		AND ReceiptItemAllocatedCharge.intInventoryReceiptChargeId = Source_Query.intInventoryReceiptChargeId
+		AND ISNULL(ReceiptItemAllocatedCharge.strChargesLink, '') = ISNULL(Source_Query.strChargesLink, '')
 
 	-- Add the other charge to an existing allocation. 
 	WHEN MATCHED AND ISNULL(Source_Query.dblTotalUnits, 0) <> 0 THEN 
@@ -146,6 +151,7 @@ BEGIN
 			,[ysnAccrue]
 			,[ysnInventoryCost]
 			,[ysnPrice]
+			,[strChargesLink]
 		)
 		VALUES (
 			Source_Query.intInventoryReceiptId
@@ -162,6 +168,7 @@ BEGIN
 			,Source_Query.ysnAccrue
 			,Source_Query.ysnInventoryCost
 			,Source_Query.ysnPrice
+			,Source_Query.strChargesLink
 		)
 	;
 END 
