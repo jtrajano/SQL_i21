@@ -1126,6 +1126,29 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 text: 'Description'
                                                                             },
                                                                             {
+                                                                                xtype: 'gridcolumn',
+                                                                                itemId: 'colItemChargesLink',
+                                                                                width: 80,
+                                                                                dataIndex: 'strChargesLink',
+                                                                                text: 'Charges Link',
+                                                                                editor: {
+                                                                                    xtype: 'gridcombobox',
+                                                                                    columns: [
+                                                                                        {
+                                                                                            dataIndex: 'strChargesLink',
+                                                                                            dataType: 'string',
+                                                                                            text: 'Link Id',
+                                                                                            flex: 1
+                                                                                        }
+                                                                                    ],
+                                                                                    pickerWidth: 80,
+                                                                                    itemId: 'cboItemChargesLink',
+                                                                                    displayField: 'strChargesLink',
+                                                                                    forceSelection: true,
+                                                                                    valueField: 'strChargesLink'
+                                                                                }
+                                                                            },
+                                                                            {
                                                                                 xtype: 'checkcolumn',
                                                                                 itemId: 'colLoadContract',
                                                                                 width: 100,
@@ -2678,6 +2701,28 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             itemId: 'cboOtherCharge',
                                                                             displayField: 'strItemNo',
                                                                             valueField: 'strItemNo'
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colChargesLink',
+                                                                        width: 80,
+                                                                        text: 'Charges Link',
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'strChargesLink',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Link Id',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            pickerWidth: 80,
+                                                                            itemId: 'cboChargesLink',
+                                                                            displayField: 'strChargesLink',
+                                                                            forceSelection: true,
+                                                                            valueField: 'strChargesLink'
                                                                         }
                                                                     },
                                                                     {

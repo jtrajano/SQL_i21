@@ -42,6 +42,7 @@ namespace iRely.Inventory.Model
         public int? intForexRateTypeId { get; set; }
         public decimal? dblForexRate { get; set; }
         public decimal? dblQuantity { get; set; }
+        public string strChargesLink { get; set; }
 
         private string _contractNo;
         [NotMapped]

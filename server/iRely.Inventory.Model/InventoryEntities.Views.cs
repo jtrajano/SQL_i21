@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets7daec23082df5c1fb43a42bd05dd46cd53059e15f17f5c45e0a5ad961e3d9e78))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets8fe1a60c90d16b5811a1d495e1a8c5840d090978564c433e177507a0625606be))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets7daec23082df5c1fb43a42bd05dd46cd53059e15f17f5c45e0a5ad961e3d9e78 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets8fe1a60c90d16b5811a1d495e1a8c5840d090978564c433e177507a0625606be : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "7daec23082df5c1fb43a42bd05dd46cd53059e15f17f5c45e0a5ad961e3d9e78"; }
+            get { return "8fe1a60c90d16b5811a1d495e1a8c5840d090978564c433e177507a0625606be"; }
         }
 
         /// <summary>
@@ -2259,7 +2259,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryReceiptCharge
-        [CodeFirstDatabaseSchema.tblICInventoryReceiptCharge](T1.tblICInventoryReceiptCharge_intInventoryReceiptChargeId, T1.tblICInventoryReceiptCharge_intInventoryReceiptId, T1.tblICInventoryReceiptCharge_intContractId, T1.tblICInventoryReceiptCharge_intContractDetailId, T1.tblICInventoryReceiptCharge_intChargeId, T1.tblICInventoryReceiptCharge_ysnInventoryCost, T1.tblICInventoryReceiptCharge_strCostMethod, T1.tblICInventoryReceiptCharge_dblRate, T1.tblICInventoryReceiptCharge_intCostUOMId, T1.tblICInventoryReceiptCharge_dblAmount, T1.tblICInventoryReceiptCharge_strAllocateCostBy, T1.tblICInventoryReceiptCharge_ysnAccrue, T1.tblICInventoryReceiptCharge_intEntityVendorId, T1.tblICInventoryReceiptCharge_ysnPrice, T1.tblICInventoryReceiptCharge_dblAmountBilled, T1.tblICInventoryReceiptCharge_dblAmountPaid, T1.tblICInventoryReceiptCharge_dblAmountPriced, T1.tblICInventoryReceiptCharge_intSort, T1.tblICInventoryReceiptCharge_intCurrencyId, T1.tblICInventoryReceiptCharge_ysnSubCurrency, T1.tblICInventoryReceiptCharge_dblTax, T1.tblICInventoryReceiptCharge_intTaxGroupId, T1.tblICInventoryReceiptCharge_intForexRateTypeId, T1.tblICInventoryReceiptCharge_dblForexRate, T1.tblICInventoryReceiptCharge_dblQuantity, T1.tblICInventoryReceiptCharge_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICInventoryReceiptCharge](T1.tblICInventoryReceiptCharge_intInventoryReceiptChargeId, T1.tblICInventoryReceiptCharge_intInventoryReceiptId, T1.tblICInventoryReceiptCharge_intContractId, T1.tblICInventoryReceiptCharge_intContractDetailId, T1.tblICInventoryReceiptCharge_intChargeId, T1.tblICInventoryReceiptCharge_ysnInventoryCost, T1.tblICInventoryReceiptCharge_strCostMethod, T1.tblICInventoryReceiptCharge_dblRate, T1.tblICInventoryReceiptCharge_intCostUOMId, T1.tblICInventoryReceiptCharge_dblAmount, T1.tblICInventoryReceiptCharge_strAllocateCostBy, T1.tblICInventoryReceiptCharge_ysnAccrue, T1.tblICInventoryReceiptCharge_intEntityVendorId, T1.tblICInventoryReceiptCharge_ysnPrice, T1.tblICInventoryReceiptCharge_dblAmountBilled, T1.tblICInventoryReceiptCharge_dblAmountPaid, T1.tblICInventoryReceiptCharge_dblAmountPriced, T1.tblICInventoryReceiptCharge_intSort, T1.tblICInventoryReceiptCharge_intCurrencyId, T1.tblICInventoryReceiptCharge_ysnSubCurrency, T1.tblICInventoryReceiptCharge_dblTax, T1.tblICInventoryReceiptCharge_intTaxGroupId, T1.tblICInventoryReceiptCharge_intForexRateTypeId, T1.tblICInventoryReceiptCharge_dblForexRate, T1.tblICInventoryReceiptCharge_dblQuantity, T1.tblICInventoryReceiptCharge_strChargesLink, T1.tblICInventoryReceiptCharge_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryReceiptChargeId AS tblICInventoryReceiptCharge_intInventoryReceiptChargeId, 
@@ -2287,6 +2287,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.intForexRateTypeId AS tblICInventoryReceiptCharge_intForexRateTypeId, 
             T.dblForexRate AS tblICInventoryReceiptCharge_dblForexRate, 
             T.dblQuantity AS tblICInventoryReceiptCharge_dblQuantity, 
+            T.strChargesLink AS tblICInventoryReceiptCharge_strChargesLink, 
             T.intConcurrencyId AS tblICInventoryReceiptCharge_intConcurrencyId, 
             True AS _from0
         FROM InventoryEntities.tblICInventoryReceiptCharges AS T
@@ -2405,7 +2406,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryReceiptItem
-        [CodeFirstDatabaseSchema.tblICInventoryReceiptItem](T1.tblICInventoryReceiptItem_intInventoryReceiptItemId, T1.tblICInventoryReceiptItem_intInventoryReceiptId, T1.tblICInventoryReceiptItem_intLineNo, T1.tblICInventoryReceiptItem_intOrderId, T1.tblICInventoryReceiptItem_intSourceId, T1.tblICInventoryReceiptItem_intItemId, T1.tblICInventoryReceiptItem_intContainerId, T1.tblICInventoryReceiptItem_intSubLocationId, T1.tblICInventoryReceiptItem_intStorageLocationId, T1.tblICInventoryReceiptItem_intOwnershipType, T1.tblICInventoryReceiptItem_dblOrderQty, T1.tblICInventoryReceiptItem_dblBillQty, T1.tblICInventoryReceiptItem_dblOpenReceive, T1.tblICInventoryReceiptItem_intLoadReceive, T1.tblICInventoryReceiptItem_intUnitMeasureId, T1.tblICInventoryReceiptItem_intWeightUOMId, T1.tblICInventoryReceiptItem_intCostUOMId, T1.tblICInventoryReceiptItem_dblUnitCost, T1.tblICInventoryReceiptItem_dblUnitRetail, T1.tblICInventoryReceiptItem_dblLineTotal, T1.tblICInventoryReceiptItem_intGradeId, T1.tblICInventoryReceiptItem_dblGross, T1.tblICInventoryReceiptItem_dblNet, T1.tblICInventoryReceiptItem_dblTax, T1.tblICInventoryReceiptItem_intDiscountSchedule, T1.tblICInventoryReceiptItem_ysnExported, T1.tblICInventoryReceiptItem_dtmExportedDate, T1.tblICInventoryReceiptItem_intSort, T1.tblICInventoryReceiptItem_ysnSubCurrency, T1.tblICInventoryReceiptItem_intTaxGroupId, T1.tblICInventoryReceiptItem_intForexRateTypeId, T1.tblICInventoryReceiptItem_dblForexRate, T1.tblICInventoryReceiptItem_ysnLotWeightsRequired, T1.tblICInventoryReceiptItem_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICInventoryReceiptItem](T1.tblICInventoryReceiptItem_intInventoryReceiptItemId, T1.tblICInventoryReceiptItem_intInventoryReceiptId, T1.tblICInventoryReceiptItem_intLineNo, T1.tblICInventoryReceiptItem_intOrderId, T1.tblICInventoryReceiptItem_intSourceId, T1.tblICInventoryReceiptItem_intItemId, T1.tblICInventoryReceiptItem_intContainerId, T1.tblICInventoryReceiptItem_intSubLocationId, T1.tblICInventoryReceiptItem_intStorageLocationId, T1.tblICInventoryReceiptItem_intOwnershipType, T1.tblICInventoryReceiptItem_dblOrderQty, T1.tblICInventoryReceiptItem_dblBillQty, T1.tblICInventoryReceiptItem_dblOpenReceive, T1.tblICInventoryReceiptItem_intLoadReceive, T1.tblICInventoryReceiptItem_intUnitMeasureId, T1.tblICInventoryReceiptItem_intWeightUOMId, T1.tblICInventoryReceiptItem_intCostUOMId, T1.tblICInventoryReceiptItem_dblUnitCost, T1.tblICInventoryReceiptItem_dblUnitRetail, T1.tblICInventoryReceiptItem_dblLineTotal, T1.tblICInventoryReceiptItem_intGradeId, T1.tblICInventoryReceiptItem_dblGross, T1.tblICInventoryReceiptItem_dblNet, T1.tblICInventoryReceiptItem_dblTax, T1.tblICInventoryReceiptItem_intDiscountSchedule, T1.tblICInventoryReceiptItem_ysnExported, T1.tblICInventoryReceiptItem_dtmExportedDate, T1.tblICInventoryReceiptItem_intSort, T1.tblICInventoryReceiptItem_ysnSubCurrency, T1.tblICInventoryReceiptItem_intTaxGroupId, T1.tblICInventoryReceiptItem_intForexRateTypeId, T1.tblICInventoryReceiptItem_dblForexRate, T1.tblICInventoryReceiptItem_ysnLotWeightsRequired, T1.tblICInventoryReceiptItem_strChargesLink, T1.tblICInventoryReceiptItem_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryReceiptItemId AS tblICInventoryReceiptItem_intInventoryReceiptItemId, 
@@ -2441,6 +2442,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.intForexRateTypeId AS tblICInventoryReceiptItem_intForexRateTypeId, 
             T.dblForexRate AS tblICInventoryReceiptItem_dblForexRate, 
             T.ysnLotWeightsRequired AS tblICInventoryReceiptItem_ysnLotWeightsRequired, 
+            T.strChargesLink AS tblICInventoryReceiptItem_strChargesLink, 
             T.intConcurrencyId AS tblICInventoryReceiptItem_intConcurrencyId, 
             True AS _from0
         FROM InventoryEntities.tblICInventoryReceiptItems AS T
@@ -6228,7 +6230,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryReceiptCharges
-        [iRely.Inventory.Model.tblICInventoryReceiptCharge](T1.tblICInventoryReceiptCharge_intInventoryReceiptChargeId, T1.tblICInventoryReceiptCharge_intInventoryReceiptId, T1.tblICInventoryReceiptCharge_intContractId, T1.tblICInventoryReceiptCharge_intContractDetailId, T1.tblICInventoryReceiptCharge_intChargeId, T1.tblICInventoryReceiptCharge_ysnInventoryCost, T1.tblICInventoryReceiptCharge_strCostMethod, T1.tblICInventoryReceiptCharge_dblRate, T1.tblICInventoryReceiptCharge_intCostUOMId, T1.tblICInventoryReceiptCharge_dblAmount, T1.tblICInventoryReceiptCharge_strAllocateCostBy, T1.tblICInventoryReceiptCharge_ysnAccrue, T1.tblICInventoryReceiptCharge_intEntityVendorId, T1.tblICInventoryReceiptCharge_ysnPrice, T1.tblICInventoryReceiptCharge_dblAmountBilled, T1.tblICInventoryReceiptCharge_dblAmountPaid, T1.tblICInventoryReceiptCharge_dblAmountPriced, T1.tblICInventoryReceiptCharge_intSort, T1.tblICInventoryReceiptCharge_intCurrencyId, T1.tblICInventoryReceiptCharge_ysnSubCurrency, T1.tblICInventoryReceiptCharge_dblTax, T1.tblICInventoryReceiptCharge_intTaxGroupId, T1.tblICInventoryReceiptCharge_intForexRateTypeId, T1.tblICInventoryReceiptCharge_dblForexRate, T1.tblICInventoryReceiptCharge_dblQuantity, T1.tblICInventoryReceiptCharge_intConcurrencyId)
+        [iRely.Inventory.Model.tblICInventoryReceiptCharge](T1.tblICInventoryReceiptCharge_intInventoryReceiptChargeId, T1.tblICInventoryReceiptCharge_intInventoryReceiptId, T1.tblICInventoryReceiptCharge_intContractId, T1.tblICInventoryReceiptCharge_intContractDetailId, T1.tblICInventoryReceiptCharge_intChargeId, T1.tblICInventoryReceiptCharge_ysnInventoryCost, T1.tblICInventoryReceiptCharge_strCostMethod, T1.tblICInventoryReceiptCharge_dblRate, T1.tblICInventoryReceiptCharge_intCostUOMId, T1.tblICInventoryReceiptCharge_dblAmount, T1.tblICInventoryReceiptCharge_strAllocateCostBy, T1.tblICInventoryReceiptCharge_ysnAccrue, T1.tblICInventoryReceiptCharge_intEntityVendorId, T1.tblICInventoryReceiptCharge_ysnPrice, T1.tblICInventoryReceiptCharge_dblAmountBilled, T1.tblICInventoryReceiptCharge_dblAmountPaid, T1.tblICInventoryReceiptCharge_dblAmountPriced, T1.tblICInventoryReceiptCharge_intSort, T1.tblICInventoryReceiptCharge_intCurrencyId, T1.tblICInventoryReceiptCharge_ysnSubCurrency, T1.tblICInventoryReceiptCharge_dblTax, T1.tblICInventoryReceiptCharge_intTaxGroupId, T1.tblICInventoryReceiptCharge_intForexRateTypeId, T1.tblICInventoryReceiptCharge_dblForexRate, T1.tblICInventoryReceiptCharge_dblQuantity, T1.tblICInventoryReceiptCharge_strChargesLink, T1.tblICInventoryReceiptCharge_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryReceiptChargeId AS tblICInventoryReceiptCharge_intInventoryReceiptChargeId, 
@@ -6256,6 +6258,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.intForexRateTypeId AS tblICInventoryReceiptCharge_intForexRateTypeId, 
             T.dblForexRate AS tblICInventoryReceiptCharge_dblForexRate, 
             T.dblQuantity AS tblICInventoryReceiptCharge_dblQuantity, 
+            T.strChargesLink AS tblICInventoryReceiptCharge_strChargesLink, 
             T.intConcurrencyId AS tblICInventoryReceiptCharge_intConcurrencyId, 
             True AS _from0
         FROM CodeFirstDatabase.tblICInventoryReceiptCharge AS T
@@ -6374,7 +6377,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryReceiptItems
-        [iRely.Inventory.Model.tblICInventoryReceiptItem](T1.tblICInventoryReceiptItem_intInventoryReceiptItemId, T1.tblICInventoryReceiptItem_intInventoryReceiptId, T1.tblICInventoryReceiptItem_intLineNo, T1.tblICInventoryReceiptItem_intOrderId, T1.tblICInventoryReceiptItem_intSourceId, T1.tblICInventoryReceiptItem_intItemId, T1.tblICInventoryReceiptItem_intContainerId, T1.tblICInventoryReceiptItem_intSubLocationId, T1.tblICInventoryReceiptItem_intStorageLocationId, T1.tblICInventoryReceiptItem_intOwnershipType, T1.tblICInventoryReceiptItem_dblOrderQty, T1.tblICInventoryReceiptItem_dblBillQty, T1.tblICInventoryReceiptItem_dblOpenReceive, T1.tblICInventoryReceiptItem_intLoadReceive, T1.tblICInventoryReceiptItem_intUnitMeasureId, T1.tblICInventoryReceiptItem_intWeightUOMId, T1.tblICInventoryReceiptItem_intCostUOMId, T1.tblICInventoryReceiptItem_dblUnitCost, T1.tblICInventoryReceiptItem_dblUnitRetail, T1.tblICInventoryReceiptItem_dblLineTotal, T1.tblICInventoryReceiptItem_intGradeId, T1.tblICInventoryReceiptItem_dblGross, T1.tblICInventoryReceiptItem_dblNet, T1.tblICInventoryReceiptItem_dblTax, T1.tblICInventoryReceiptItem_intDiscountSchedule, T1.tblICInventoryReceiptItem_ysnExported, T1.tblICInventoryReceiptItem_dtmExportedDate, T1.tblICInventoryReceiptItem_intSort, T1.tblICInventoryReceiptItem_ysnSubCurrency, T1.tblICInventoryReceiptItem_intTaxGroupId, T1.tblICInventoryReceiptItem_intForexRateTypeId, T1.tblICInventoryReceiptItem_dblForexRate, T1.tblICInventoryReceiptItem_ysnLotWeightsRequired, T1.tblICInventoryReceiptItem_intConcurrencyId)
+        [iRely.Inventory.Model.tblICInventoryReceiptItem](T1.tblICInventoryReceiptItem_intInventoryReceiptItemId, T1.tblICInventoryReceiptItem_intInventoryReceiptId, T1.tblICInventoryReceiptItem_intLineNo, T1.tblICInventoryReceiptItem_intOrderId, T1.tblICInventoryReceiptItem_intSourceId, T1.tblICInventoryReceiptItem_intItemId, T1.tblICInventoryReceiptItem_intContainerId, T1.tblICInventoryReceiptItem_intSubLocationId, T1.tblICInventoryReceiptItem_intStorageLocationId, T1.tblICInventoryReceiptItem_intOwnershipType, T1.tblICInventoryReceiptItem_dblOrderQty, T1.tblICInventoryReceiptItem_dblBillQty, T1.tblICInventoryReceiptItem_dblOpenReceive, T1.tblICInventoryReceiptItem_intLoadReceive, T1.tblICInventoryReceiptItem_intUnitMeasureId, T1.tblICInventoryReceiptItem_intWeightUOMId, T1.tblICInventoryReceiptItem_intCostUOMId, T1.tblICInventoryReceiptItem_dblUnitCost, T1.tblICInventoryReceiptItem_dblUnitRetail, T1.tblICInventoryReceiptItem_dblLineTotal, T1.tblICInventoryReceiptItem_intGradeId, T1.tblICInventoryReceiptItem_dblGross, T1.tblICInventoryReceiptItem_dblNet, T1.tblICInventoryReceiptItem_dblTax, T1.tblICInventoryReceiptItem_intDiscountSchedule, T1.tblICInventoryReceiptItem_ysnExported, T1.tblICInventoryReceiptItem_dtmExportedDate, T1.tblICInventoryReceiptItem_intSort, T1.tblICInventoryReceiptItem_ysnSubCurrency, T1.tblICInventoryReceiptItem_intTaxGroupId, T1.tblICInventoryReceiptItem_intForexRateTypeId, T1.tblICInventoryReceiptItem_dblForexRate, T1.tblICInventoryReceiptItem_ysnLotWeightsRequired, T1.tblICInventoryReceiptItem_strChargesLink, T1.tblICInventoryReceiptItem_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryReceiptItemId AS tblICInventoryReceiptItem_intInventoryReceiptItemId, 
@@ -6410,6 +6413,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.intForexRateTypeId AS tblICInventoryReceiptItem_intForexRateTypeId, 
             T.dblForexRate AS tblICInventoryReceiptItem_dblForexRate, 
             T.ysnLotWeightsRequired AS tblICInventoryReceiptItem_ysnLotWeightsRequired, 
+            T.strChargesLink AS tblICInventoryReceiptItem_strChargesLink, 
             T.intConcurrencyId AS tblICInventoryReceiptItem_intConcurrencyId, 
             True AS _from0
         FROM CodeFirstDatabase.tblICInventoryReceiptItem AS T

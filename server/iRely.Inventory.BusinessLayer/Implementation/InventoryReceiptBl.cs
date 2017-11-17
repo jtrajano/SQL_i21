@@ -183,6 +183,7 @@ namespace iRely.Inventory.BusinessLayer
                     s.intTaxGroupId,
                     s.intForexRateTypeId,
                     s.dblForexRate,
+                    s.strChargesLink,
 
                     // PROJECTED
                     strItemNo = s.tblICItem.strItemNo,
@@ -282,6 +283,7 @@ namespace iRely.Inventory.BusinessLayer
                     , s.intForexRateTypeId
                     , s.dblForexRate
                     , s.dblQuantity
+                    , s.strChargesLink
                     , strContractNumber = s.vyuICGetInventoryReceiptCharge.strContractNumber
                     , strItemNo = s.vyuICGetInventoryReceiptCharge.strItemNo
                     , strItemDescription = s.vyuICGetInventoryReceiptCharge.strItemDescription

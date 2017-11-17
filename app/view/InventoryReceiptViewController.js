@@ -488,7 +488,15 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 },
                 colForexRate: {
                     dataIndex: 'dblForexRate'
-                }
+                },
+                colItemChargesLink: {
+                    dataIndex: 'strChargesLink',
+                    editor: {
+                        origValueField: 'strChargesLink',
+                        origUpdateField: 'strChargesLink',
+                        store: '{chargesItemLink}'                        
+                    }
+                }                
             },
 
             /*pnlLotTracking: {
@@ -820,7 +828,15 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 },
                 colChargeForexRate: {
                     dataIndex: 'dblForexRate'
-                }
+                },
+                colChargesLink: {
+                    dataIndex: 'strChargesLink',
+                    editor: {
+                        origValueField: 'strChargesLink',
+                        origUpdateField: 'strChargesLink',
+                        store: '{chargesLink}'                        
+                    }
+                }                       
             },
 
             //            txtCalculatedAmount: '{current.strMessage}',

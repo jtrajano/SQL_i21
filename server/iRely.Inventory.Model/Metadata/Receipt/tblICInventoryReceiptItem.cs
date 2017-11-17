@@ -49,6 +49,7 @@ namespace iRely.Inventory.Model
         public tblICUnitMeasure tblICUnitMeasure { get; set; }
         public decimal? dblForexRate { get; set; }
         public bool? ysnLotWeightsRequired { get; set; }
+        public string strChargesLink { get; set; }
 
         //private string _ownershipType;
         //[NotMapped]

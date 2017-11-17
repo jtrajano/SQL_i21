@@ -2903,6 +2903,80 @@
                                                                     ]
                                                                 },
                                                                 {
+                                                                    "type": "Ext.grid.column.Column",
+                                                                    "reference": {
+                                                                        "name": "columns",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "dataIndex": "strChargesLink",
+                                                                        "itemId": "colItemChargesLink",
+                                                                        "text": "Charges Link",
+                                                                        "width": 80
+                                                                    },
+                                                                    "configAlternates": {
+                                                                        "dataIndex": "datafield",
+                                                                        "itemId": "string",
+                                                                        "text": "string",
+                                                                        "width": "auto"
+                                                                    },
+                                                                    "name": "MyColumn72",
+                                                                    "designerId": "7b331ed2-3009-4c72-b388-66607758d460",
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.ComboBox",
+                                                                            "reference": {
+                                                                                "name": "editor",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "columns": [
+                                                                                    "[",
+                                                                                    "    {",
+                                                                                    "        dataIndex: 'strChargesLink',",
+                                                                                    "        dataType: 'string',",
+                                                                                    "        text: 'Link Id',",
+                                                                                    "        flex: 1",
+                                                                                    "    }",
+                                                                                    "]"
+                                                                                ],
+                                                                                "designer|createAlias": "gridcombobox",
+                                                                                "displayField": "strChargesLink",
+                                                                                "forceSelection": true,
+                                                                                "itemId": "cboItemChargesLink",
+                                                                                "pickerWidth": 80,
+                                                                                "valueField": "strChargesLink"
+                                                                            },
+                                                                            "configAlternates": {
+                                                                                "columns": "array",
+                                                                                "designer|createAlias": "string",
+                                                                                "displayField": "datafield",
+                                                                                "itemId": "string",
+                                                                                "multiSelect": "boolean",
+                                                                                "valueField": "datafield",
+                                                                                "pickerWidth": "number",
+                                                                                "forceSelection": "boolean"
+                                                                            },
+                                                                            "name": "MyComboBox23",
+                                                                            "designerId": "9a7ff76c-3278-4d7f-b768-a71b24994fcc",
+                                                                            "customConfigs": [
+                                                                                {
+                                                                                    "group": "(Custom Properties)",
+                                                                                    "name": "columns",
+                                                                                    "type": "string"
+                                                                                },
+                                                                                {
+                                                                                    "group": "(Custom Properties)",
+                                                                                    "name": "pickerWidth",
+                                                                                    "type": "string"
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
                                                                     "type": "Ext.grid.column.Check",
                                                                     "reference": {
                                                                         "name": "columns",
@@ -7479,6 +7553,81 @@
                                                                         {
                                                                             "group": "(Custom Properties)",
                                                                             "name": "columns",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "defaultWidth": null,
+                                                                "flex": null,
+                                                                "itemId": "colChargesLink",
+                                                                "text": "Charges Link",
+                                                                "width": 80
+                                                            },
+                                                            "configAlternates": {
+                                                                "defaultWidth": "number",
+                                                                "flex": "number",
+                                                                "itemId": "string",
+                                                                "text": "string",
+                                                                "width": "auto"
+                                                            },
+                                                            "name": "MyColumn85",
+                                                            "designerId": "9559bb6d-083d-4ff9-9db7-1bc669663a7c",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "columns": [
+                                                                            "[",
+                                                                            "    {",
+                                                                            "        dataIndex: 'strChargesLink',",
+                                                                            "        dataType: 'string',",
+                                                                            "        text: 'Link Id',",
+                                                                            "        flex: 1",
+                                                                            "    }",
+                                                                            "]"
+                                                                        ],
+                                                                        "designer|createAlias": "gridcombobox",
+                                                                        "displayField": "strChargesLink",
+                                                                        "forceSelection": true,
+                                                                        "itemId": "cboChargesLink",
+                                                                        "pickerWidth": 80,
+                                                                        "valueField": "strChargesLink"
+                                                                    },
+                                                                    "configAlternates": {
+                                                                        "columns": "array",
+                                                                        "designer|createAlias": "string",
+                                                                        "displayField": "datafield",
+                                                                        "itemId": "string",
+                                                                        "valueField": "datafield",
+                                                                        "pickerWidth": "number",
+                                                                        "forceSelection": "boolean"
+                                                                    },
+                                                                    "name": "MyComboBox22",
+                                                                    "designerId": "2cb4a8ad-6456-4548-9fc2-ba6885f13d62",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "columns",
+                                                                            "type": "string"
+                                                                        },
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "pickerWidth",
                                                                             "type": "string"
                                                                         }
                                                                     ]
