@@ -105,6 +105,7 @@
 	[strBOLNumber]							NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL,     
 	[ysnRebateSubmitted]					BIT												DEFAULT((0)) NULL,
 	[ysnRebateExcluded]						BIT												DEFAULT((0)) NULL,
+	[dblRebateAmount]						NUMERIC(18, 6)	CONSTRAINT [DF_tblARInvoiceDetail_dblRebateAmount] DEFAULT ((0)) NULL,
 
 
     CONSTRAINT [PK_tblARInvoiceDetail_intInvoiceDetailId] PRIMARY KEY CLUSTERED ([intInvoiceDetailId] ASC),
