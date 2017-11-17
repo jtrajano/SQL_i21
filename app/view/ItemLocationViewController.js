@@ -243,7 +243,7 @@ Ext.define('Inventory.view.ItemLocationViewController', {
         if (config) {
             win.show();
 
-            var context = win.context ? win.context.initialize() : me.setupContext();
+            var context = win.context ? win.context.initialize() : me.setupContext(config);
             me.intItemId = config.param.itemId;
             me.defaultUOM = config.param.defaultUOM;
             if (config.action === 'new') {

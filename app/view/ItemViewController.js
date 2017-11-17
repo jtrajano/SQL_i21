@@ -2572,7 +2572,7 @@ Ext.define('Inventory.view.ItemViewController', {
             iRely.Functions.openScreen(screenName, {
                 viewConfig: {
                     listeners: {
-                        destroy: function() {
+                        close: function() {
                             var grdLocation = win.down('#grdLocationStore');
                             var vm = win.getViewModel();
                             var itemId = vm.data.current.get('intItemId');
@@ -2626,7 +2626,7 @@ Ext.define('Inventory.view.ItemViewController', {
             iRely.Functions.openScreen(screenName, {
                 viewConfig: {
                     listeners: {
-                        destroy: function() {
+                        close: function() {
                             var grdLocation = win.down('#grdLocationStore');
                             var vm = win.getViewModel();
                             var itemId = vm.data.current.get('intItemId');

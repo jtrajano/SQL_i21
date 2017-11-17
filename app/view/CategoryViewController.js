@@ -391,7 +391,7 @@ Ext.define('Inventory.view.CategoryViewController', {
             iRely.Functions.openScreen(screenName, {
                 viewConfig: {
                     listeners: {
-                        destroy: function() {
+                        close: function() {
                             var grdLocation = win.down('#grdLocation');
                             var vm = win.getViewModel();
                             var categoryId = vm.data.current.get('intCategoryId');
@@ -414,7 +414,7 @@ Ext.define('Inventory.view.CategoryViewController', {
             iRely.Functions.openScreen(screenName, {
                 viewConfig: {
                     listeners: {
-                        destroy: function() {
+                        close: function() {
                             var grdLocation = win.down('#grdLocation');
                             var vm = win.getViewModel();
                             var categoryId = vm.data.current.get('intCategoryId');
