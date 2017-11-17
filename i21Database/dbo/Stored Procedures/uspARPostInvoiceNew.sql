@@ -3904,6 +3904,14 @@ IF @Recap = 0
 						GROUP BY intEntityId
 			) INVOICE ON CUSTOMER.intEntityId = INVOICE.intEntityId
 
+						--UPDATE BatchIds Used
+			UPDATE tblARInvoice 
+			SET 
+				 [strBatchId]		= CASE WHEN @Post = 1 THEN @BatchId ELSE NULL END
+				,[dtmBatchDate]		= CASE WHEN @Post = 1 THEN @PostDate ELSE NULL END
+				,[intPostedById]	= CASE WHEN @Post = 1 THEN @UserEntityID ELSE NULL END
+			WHERE intInvoiceId IN (SELECT [intHeaderId] FROM @InvoiceToUpdate)
+
 		DELETE dbo.tblARPrepaidAndCredit  
 		FROM 
 			(SELECT intInvoiceId, ysnApplied FROM dbo.tblARPrepaidAndCredit WITH (NOLOCK)) A 
