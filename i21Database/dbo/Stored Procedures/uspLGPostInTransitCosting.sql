@@ -75,7 +75,7 @@ BEGIN TRY
 			,CASE WHEN AD.ysnSeqSubCurrency = 1 THEN AD.dblQtyToPriceUOMConvFactor*ISNULL(AD.dblSeqPrice, 0)/100 ELSE AD.dblQtyToPriceUOMConvFactor*ISNULL(AD.dblSeqPrice, 0) END * LD.dblQuantity dblValue
 			,0.0
 			,L.intCurrencyId
-			,AD.dblNetWtToPriceUOMConvFactor
+			,ISNULL(AD.dblNetWtToPriceUOMConvFactor,0)
 			,L.intLoadId
 			,intLoadDetailId
 			,L.strLoadNumber
@@ -293,7 +293,7 @@ BEGIN TRY
 			,[dblValue]
 			,[dblSalesPrice]
 			,[intCurrencyId]
-			,[dblExchangeRate]
+			,ISNULL([dblExchangeRate],0)
 			,[intTransactionId]
 			,[intTransactionDetailId]
 			,[strTransactionId]
