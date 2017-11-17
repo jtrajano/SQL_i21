@@ -1177,6 +1177,7 @@ BEGIN
 	SET ysnPosted = @ysnPost
 		,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
 		,intShipmentStatus = 6
+		,dtmPostedDate = GETDATE()
 	WHERE strLoadNumber = @strTransactionId
 
 	DECLARE @ItemsFromInventoryShipment AS dbo.ShipmentItemTableType
