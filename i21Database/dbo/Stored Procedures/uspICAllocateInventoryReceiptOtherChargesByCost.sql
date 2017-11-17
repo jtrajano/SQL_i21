@@ -76,6 +76,7 @@ BEGIN
 							,CalculatedCharge.intInventoryReceiptId
 							,CalculatedCharge.intInventoryReceiptChargeId
 							,CalculatedCharge.ysnPrice
+							,Charge.strChargesLink 
 					FROM	dbo.tblICInventoryReceiptChargePerItem CalculatedCharge INNER JOIN tblICInventoryReceiptCharge Charge
 								ON CalculatedCharge.intInventoryReceiptChargeId = Charge.intInventoryReceiptChargeId
 					WHERE	CalculatedCharge.intInventoryReceiptId = @intInventoryReceiptId
@@ -88,6 +89,7 @@ BEGIN
 						, CalculatedCharge.intInventoryReceiptId
 						, CalculatedCharge.intInventoryReceiptChargeId
 						, CalculatedCharge.ysnPrice
+						, Charge.strChargesLink 
 				) CalculatedCharges 
 					ON ReceiptItem.intInventoryReceiptId = CalculatedCharges.intInventoryReceiptId
 				LEFT JOIN (
@@ -105,18 +107,23 @@ BEGIN
 									)
 								)
 							,ReceiptItem.intInventoryReceiptId 
+							,ReceiptItem.strChargesLink
 					FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 								ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 					WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
-					GROUP BY ReceiptItem.intInventoryReceiptId 
+					GROUP BY ReceiptItem.intInventoryReceiptId, ReceiptItem.strChargesLink
 				) TotalCostOfItemsPerContract 
 					ON TotalCostOfItemsPerContract.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId 
+					AND (
+						ISNULL(TotalCostOfItemsPerContract.strChargesLink, '') = ISNULL(ReceiptItem.strChargesLink, '')
+					)
 	) AS Source_Query  
 		ON ReceiptItemAllocatedCharge.intInventoryReceiptId = Source_Query.intInventoryReceiptId
 		AND ReceiptItemAllocatedCharge.ysnAccrue = Source_Query.ysnAccrue
 		AND ReceiptItemAllocatedCharge.ysnInventoryCost = Source_Query.ysnInventoryCost		
 		AND ReceiptItemAllocatedCharge.ysnPrice = Source_Query.ysnPrice
 		AND ReceiptItemAllocatedCharge.intInventoryReceiptChargeId = Source_Query.intInventoryReceiptChargeId
+		AND ISNULL(ReceiptItemAllocatedCharge.strChargesLink, '') = ISNULL(Source_Query.strChargesLink, '')
 
 	-- Add the other charge to an existing allocation. 
 	WHEN MATCHED AND ISNULL(Source_Query.dblTotalCost, 0) <> 0 THEN 
@@ -143,6 +150,7 @@ BEGIN
 			,[ysnAccrue]
 			,[ysnInventoryCost]
 			,[ysnPrice]
+			,[strChargesLink]
 		)
 		VALUES (
 			Source_Query.intInventoryReceiptId
@@ -159,6 +167,7 @@ BEGIN
 			,Source_Query.ysnAccrue
 			,Source_Query.ysnInventoryCost
 			,Source_Query.ysnPrice
+			,Source_Query.strChargesLink
 		)
 	;
 END 

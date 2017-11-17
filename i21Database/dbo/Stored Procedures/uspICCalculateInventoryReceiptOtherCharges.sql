@@ -67,6 +67,7 @@ BEGIN
 			,[ysnAccrue]
 			,[ysnPrice]
 			,[ysnInventoryCost]
+			,[strChargesLink]
 	)
 	SELECT	[intInventoryReceiptId]			= ReceiptItem.intInventoryReceiptId
 			,[intInventoryReceiptChargeId]	= Charge.intInventoryReceiptChargeId
@@ -88,6 +89,7 @@ BEGIN
 			,[ysnAccrue]					= Charge.ysnAccrue
 			,[ysnPrice]						= Charge.ysnPrice
 			,[ysnInventoryCost]				= Charge.ysnInventoryCost
+			,[strChargesLink]				= Charge.strChargesLink
 	FROM	tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
@@ -103,6 +105,26 @@ BEGIN
 							Receipt.strReceiptType = 'Purchase Contract'
 							AND Charge.intContractId IS NULL 
 							AND ReceiptItem.intOrderId IS NULL 
+							AND Charge.strChargesLink IS NULL 
+							AND ReceiptItem.strChargesLink IS NULL 
+						THEN 
+							1
+						
+						WHEN 
+							Receipt.strReceiptType = 'Purchase Contract'
+							AND Charge.intContractId IS NULL 
+							AND ReceiptItem.intOrderId IS NULL 
+							AND Charge.strChargesLink = ReceiptItem.strChargesLink
+						THEN 
+							1
+
+						WHEN 
+							Receipt.strReceiptType = 'Purchase Contract'
+							AND Charge.intContractId IS NOT NULL 
+							AND ReceiptItem.intOrderId = Charge.intContractId
+							AND ReceiptItem.intLineNo = Charge.intContractDetailId
+							AND Charge.strChargesLink IS NULL 
+							AND ReceiptItem.strChargesLink IS NULL 
 						THEN 
 							1
 						
@@ -111,15 +133,25 @@ BEGIN
 							AND Charge.intContractId IS NOT NULL 
 							AND ReceiptItem.intOrderId = Charge.intContractId
 							AND ReceiptItem.intLineNo = Charge.intContractDetailId
+							AND Charge.strChargesLink = ReceiptItem.strChargesLink 
+						THEN 
+							1
+
+						WHEN 
+							ISNULL(Receipt.strReceiptType, 'Direct') <> 'Purchase Contract'
+							AND Charge.intContractId IS NULL 
+							AND Charge.strChargesLink IS NULL 
+							AND ReceiptItem.strChargesLink IS NULL 
 						THEN 
 							1
 						
 						WHEN 
 							ISNULL(Receipt.strReceiptType, 'Direct') <> 'Purchase Contract'
 							AND Charge.intContractId IS NULL 
+							AND Charge.strChargesLink = ReceiptItem.strChargesLink 
 						THEN 
 							1
-						
+
 						ELSE 
 							0
 				END 				
@@ -176,6 +208,7 @@ BEGIN
 			,[ysnAccrue]
 			,[ysnPrice]
 			,[ysnInventoryCost]
+			,[strChargesLink]
 	)
 	SELECT	[intInventoryReceiptId]			= ReceiptItem.intInventoryReceiptId
 			,[intInventoryReceiptChargeId]	= Charge.intInventoryReceiptChargeId
@@ -209,6 +242,7 @@ BEGIN
 			,[ysnAccrue]					= Charge.ysnAccrue
 			,[ysnPrice]						= Charge.ysnPrice
 			,[ysnInventoryCost]				= Charge.ysnInventoryCost
+			,[strChargesLink]				= Charge.strChargesLink
 	FROM	dbo.tblICInventoryReceiptItem ReceiptItem INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
 				ON ReceiptItem.intInventoryReceiptId = Charge.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item 
@@ -224,6 +258,26 @@ BEGIN
 							Receipt.strReceiptType = 'Purchase Contract'
 							AND Charge.intContractId IS NULL 
 							AND ReceiptItem.intOrderId IS NULL 
+							AND Charge.strChargesLink IS NULL 
+							AND ReceiptItem.strChargesLink IS NULL 
+						THEN 
+							1
+						
+						WHEN 
+							Receipt.strReceiptType = 'Purchase Contract'
+							AND Charge.intContractId IS NULL 
+							AND ReceiptItem.intOrderId IS NULL 
+							AND Charge.strChargesLink = ReceiptItem.strChargesLink
+						THEN 
+							1
+
+						WHEN 
+							Receipt.strReceiptType = 'Purchase Contract'
+							AND Charge.intContractId IS NOT NULL 
+							AND ReceiptItem.intOrderId = Charge.intContractId
+							AND ReceiptItem.intLineNo = Charge.intContractDetailId
+							AND Charge.strChargesLink IS NULL 
+							AND ReceiptItem.strChargesLink IS NULL 
 						THEN 
 							1
 						
@@ -232,15 +286,25 @@ BEGIN
 							AND Charge.intContractId IS NOT NULL 
 							AND ReceiptItem.intOrderId = Charge.intContractId
 							AND ReceiptItem.intLineNo = Charge.intContractDetailId
+							AND Charge.strChargesLink = ReceiptItem.strChargesLink 
+						THEN 
+							1
+
+						WHEN 
+							ISNULL(Receipt.strReceiptType, 'Direct') <> 'Purchase Contract'
+							AND Charge.intContractId IS NULL 
+							AND Charge.strChargesLink IS NULL 
+							AND ReceiptItem.strChargesLink IS NULL 
 						THEN 
 							1
 						
 						WHEN 
 							ISNULL(Receipt.strReceiptType, 'Direct') <> 'Purchase Contract'
 							AND Charge.intContractId IS NULL 
+							AND Charge.strChargesLink = ReceiptItem.strChargesLink 
 						THEN 
 							1
-						
+
 						ELSE 
 							0
 				END 				
@@ -264,6 +328,7 @@ BEGIN
 			,[ysnAccrue]
 			,[ysnPrice]
 			,[ysnInventoryCost]
+			,[strChargesLink]
 	)
 	SELECT	[intInventoryReceiptId]			= Receipt.intInventoryReceiptId
 			,[intInventoryReceiptChargeId]	= Charge.intInventoryReceiptChargeId
@@ -277,6 +342,7 @@ BEGIN
 			,[ysnAccrue]					= Charge.ysnAccrue
 			,[ysnPrice]						= Charge.ysnPrice
 			,[ysnInventoryCost]				= Charge.ysnInventoryCost
+			,[strChargesLink]				= Charge.strChargesLink
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
 				ON Receipt.intInventoryReceiptId = Charge.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item 
