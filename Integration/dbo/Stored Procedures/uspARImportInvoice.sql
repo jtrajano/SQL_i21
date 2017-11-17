@@ -8,8 +8,7 @@ CREATE PROCEDURE uspARImportInvoice
 	@Total INT = 0 OUTPUT,
 	@StartDate DATETIME = NULL,
 	@EndDate DATETIME = NULL,
-	@Posted INT = 0,
-	@LogKey NVARCHAR(100) = NULL OUTPUT
+	@Posted INT = 0
 	AS
 BEGIN
 	--================================================
@@ -66,7 +65,7 @@ BEGIN
 		
 		DECLARE @Sucess BIT
 		DECLARE @Message NVARCHAR(MAX)		
-		EXEC uspARValidations @UserId, @Sucess OUT, @Message OUT, @StartDate, @EndDate, @LogKey OUT
+		EXEC uspARValidations @UserId, @Sucess OUT, @Message OUT, @StartDate, @EndDate
 		
 		IF(@Sucess = 0)
 		BEGIN
