@@ -3620,12 +3620,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             });
 
                             if (!exists) {
+
+                                var inventoryCost = otherCharge.ysnInventoryCost ? true : false; 
                                 var newOtherCharge = Ext.create('Inventory.model.ReceiptCharge', {
                                     intInventoryReceiptId: receipt.get('intInventoryReceiptId'),
                                     intContractId: po.get('intContractHeaderId'),
                                     intContractDetailId: otherCharge.intContractDetailId,
                                     intChargeId: otherCharge.intItemId,
-                                    ysnInventoryCost: false,
+                                    ysnInventoryCost: inventoryCost,
                                     strCostMethod: otherCharge.strCostMethod,
                                     dblRate: otherCharge.dblRate,
                                     intCostUOMId: otherCharge.intItemUOMId,
@@ -5184,12 +5186,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 if(output && output.length > 0 && output[0].contract) {
                     var data = output[0];
                     _.each(data.contract.costs, function(cost) {
+                        var inventoryCost = cost.ysnInventoryCost ? true : false; 
                         var newReceiptCharge = Ext.create('Inventory.model.ReceiptCharge', {
                             intInventoryReceiptId: currentVM.get('intInventoryReceiptId'),
                             intContractId: data.order.intOrderId,
                             intContractDetailId: cost.intContractDetailId,
                             intChargeId: cost.intItemId,
-                            ysnInventoryCost: false,
+                            ysnInventoryCost: inventoryCost,
                             strCostMethod: cost.strCostMethod,
                             dblRate: cost.strCostMethod == "Amount" ? 0 : cost.dblRate,
                             intCostUOMId: cost.intItemUOMId,
@@ -5504,12 +5507,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                                             });
 
                                                             if (!exists) {
+                                                                var inventoryCost = otherCharge.ysnInventoryCost ? true : false; 
                                                                 var newReceiptCharge = Ext.create('Inventory.model.ReceiptCharge', {
                                                                     intInventoryReceiptId: currentVM.get('intInventoryReceiptId'),
                                                                     intContractId: order.get('intOrderId'),
                                                                     intContractDetailId: otherCharge.intContractDetailId,
                                                                     intChargeId: otherCharge.intItemId,
-                                                                    ysnInventoryCost: false,
+                                                                    ysnInventoryCost: inventoryCost,
                                                                     strCostMethod: otherCharge.strCostMethod,
                                                                     dblRate: otherCharge.strCostMethod == "Amount" ? 0 : otherCharge.dblRate,
                                                                     intCostUOMId: otherCharge.intItemUOMId,
