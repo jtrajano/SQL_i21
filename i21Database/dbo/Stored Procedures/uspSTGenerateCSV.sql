@@ -275,18 +275,22 @@ BEGIN
 								, 'PACK' as strUnitOfMeasure
 								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN 'Y' ELSE 'N' END as strPromotionFlag
 								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN 'Y' ELSE 'N' END as strOutletMultipackFlag
-								, 0 as intOutletMultipackQuantity
+
+								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN 
+									(CASE WHEN dblTrlQty > 1 THEN dblTrlQty ELSE 2 END)
+								  ELSE 0 END as intOutletMultipackQuantity
+
 								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN dblTrpAmt ELSE 0 END as dblOutletMultipackDiscountAmount
 								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN 'COUPONS' ELSE '' END as strAccountPromotionName
 								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN dblTrpAmt ELSE 0 END as dblAccountDiscountAmount
 								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN dblTrpAmt ELSE 0 END as dblManufacturerDiscountAmount
-								, CASE WHEN strTrpPaycode = 'COUPONS' THEN strTrpCouponEntryMethod ELSE '' END as strCouponPid
+								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN strTrpCouponEntryMethod ELSE '' END as strCouponPid
 								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN dblTrpAmt ELSE 0 END as dblCouponAmount
 
 								, 'N' as strManufacturerMultipackFlag
 								, 0 as intManufacturerMultipackQuantity
 								, 0 as dblManufacturerMultipackDiscountAmount
-								, CASE WHEN strTrpPaycode IN ('COUPONS', 'LOTTERY PO') THEN strTrpPaycode ELSE '' END as strManufacturerPromotionDescription
+								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN strTrpPaycode ELSE '' END as strManufacturerPromotionDescription
 								, '' as strManufacturerBuydownDescription
 								, 0 as dblManufacturerBuydownAmount
 								, '' as strManufacturerMultiPackDescription
