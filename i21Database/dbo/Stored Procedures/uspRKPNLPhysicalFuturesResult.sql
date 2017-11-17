@@ -80,7 +80,7 @@ BEGIN
 				NUll AS dblBooked,
 				NULL AS dblAccounting,
 				AD.dtmAllocatedDate AS dtmDate,
-				999999 AS intSort
+				9999999 + AD.intPContractDetailId AS intSort
 
 		FROM	@tblLGAllocationDetail	AD 
 		JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId	=	AD.intPContractDetailId 
@@ -105,77 +105,105 @@ BEGIN
 
 		UNION ALL
 
-		SELECT	DISTINCT NULL AS strContractType,
-				IV.strInvoiceNumber,
-				'Invoice' AS strDescription,
-				NULL AS strConfirmed,
-				NULL AS dblAllocatedQty,
-				ID.dblPrice /
-				CASE WHEN ID.intSubCurrencyId IS NOT NULL THEN 100 ELSE 1 END	AS	dblPrice,
-				CY.strCurrency AS strCurrency,
-				NULL AS dblFX,
-				dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId,QU.intUnitMeasureId,@intUnitMeasureId, ID.dblQtyShipped) AS dblBooked,
-				ID.dblTotal AS dblAccounting,
-				IV.dtmDate AS dtmDate,
-				AD.intPContractDetailId AS intSort
+		SELECT *,ROW_NUMBER() OVER (ORDER BY dblPrice ASC)  AS intSort FROM (
+			SELECT	DISTINCT NULL AS strContractType,
+					IV.strInvoiceNumber,
+					'Invoice' AS strDescription,
+					NULL AS strConfirmed,
+					NULL AS dblAllocatedQty,
+					ID.dblPrice /
+					CASE WHEN ID.intSubCurrencyId IS NOT NULL THEN 100 ELSE 1 END	AS	dblPrice,
+					CY.strCurrency AS strCurrency,
+					NULL AS dblFX,
+					dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId,QU.intUnitMeasureId,@intUnitMeasureId, ID.dblQtyShipped) AS dblBooked,
+					ID.dblTotal AS dblAccounting,
+					IV.dtmDate AS dtmDate
 
-		FROM	tblARInvoiceDetail		ID 
-		JOIN	tblARInvoice			IV	ON	IV.intInvoiceId			=	ID.intInvoiceId
-		JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId	=	ID.intContractDetailId 
-		JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
-		JOIN	tblCTContractType		TP	ON	TP.intContractTypeId	=	CH.intContractTypeId
-		JOIN	tblICItemUOM			QU	ON	QU.intItemUOMId			=	ID.intItemUOMId	
-		JOIN	tblICItemUOM			PU	ON	PU.intItemUOMId			=	CD.intPriceItemUOMId	
-		JOIN	tblSMCurrency			CY	ON	CY.intCurrencyID		=	IV.intCurrencyId
-		JOIN	@tblLGAllocationDetail	AD	ON	AD.intSContractDetailId	=	ID.intContractDetailId
-		WHERE	ID.intContractDetailId	=	@intSContractDetailId
+			FROM	tblARInvoiceDetail		ID 
+			JOIN	tblARInvoice			IV	ON	IV.intInvoiceId			=	ID.intInvoiceId
+			JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId	=	ID.intContractDetailId 
+			JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
+			JOIN	tblCTContractType		TP	ON	TP.intContractTypeId	=	CH.intContractTypeId
+			JOIN	tblICItemUOM			QU	ON	QU.intItemUOMId			=	ID.intItemUOMId	
+			JOIN	tblICItemUOM			PU	ON	PU.intItemUOMId			=	CD.intPriceItemUOMId	
+			JOIN	tblSMCurrency			CY	ON	CY.intCurrencyID		=	IV.intCurrencyId
+			JOIN	@tblLGAllocationDetail	AD	ON	AD.intSContractDetailId	=	ID.intContractDetailId
+			WHERE	ID.intContractDetailId	=	@intSContractDetailId
+		)d
 
 		UNION ALL
 
-		SELECT	TP.strContractType + ' - ' + CH.strContractNumber strContractType,
-				'Purchase - ' + PH.strContractNumber,
-				'Allocated' AS strDescription,
+		SELECT	DISTINCT NULL AS strContractType,
+				IV.strBillId,
+				'Supp. Invoice' AS strDescription,
 				NULL AS strConfirmed,
-				dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,AD.intPUnitMeasureId,@intUnitMeasureId, AD.dblPAllocatedQty) AS dblAllocatedQty,
-				CASE	WHEN CD.dblCashPrice IS NULL 
-						THEN	(
-									(
-										(ISNULL(PF.dblLotsFixed,0) * ISNULL(FD.dblFutures,0))+
-										(
-											(ISNULL(PF.dblTotalLots,ISNULL(CD.dblNoOfLots,ISNULL(CH.dblNoOfLots,0))) - ISNULL(PF.dblLotsFixed,0)) *
-											dbo.fnCTConvertQuantityToTargetItemUOM(	CD.intItemId,@intUnitMeasureId,MA.intUnitMeasureId,dbo.[fnCTGetLastSettlementPrice](CD.intFutureMarketId,CD.intFutureMonthId)))
-									)
-								)/ISNULL(PF.dblTotalLots,ISNULL(CD.dblNoOfLots,ISNULL(CH.dblNoOfLots,0))) +  
-								dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,@intUnitMeasureId,PU.intUnitMeasureId,CD.dblConvertedBasis)
-						ELSE	dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,@intUnitMeasureId,PU.intUnitMeasureId, CD.dblCashPrice)
-				END /
-				CASE WHEN CY.ysnSubCurrency = 1 THEN 100 ELSE 1 END	AS	dblPrice,
-				ISNULL(MY.strCurrency,CY.strCurrency) AS strCurrency,
-				ISNULL(dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0),1) AS dblFX,
-				NUll AS dblBooked,
-				NULL AS dblAccounting,
-				AD.dtmAllocatedDate AS dtmDate,
-				AD.intPContractDetailId  AS intSort
-
-		FROM	@tblLGAllocationDetail	AD 
-		JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId	=	@intSContractDetailId
+				NULL AS dblAllocatedQty,
+				ID.dblCost dblPrice,
+				CY.strCurrency AS strCurrency,
+				NULL AS dblFX,
+				dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId,QU.intUnitMeasureId,3, ID.dblQtyReceived) AS dblBooked,
+				ID.dblTotal AS dblAccounting,
+				IV.dtmDate AS dtmDate,
+				9999999 + AD.intPContractDetailId + 1 AS intSort
+				
+		FROM	@tblLGAllocationDetail	AD
+		JOIN	tblAPBillDetail			ID	ON	ID.intContractDetailId	=	AD.intPContractDetailId
+		JOIN	tblAPBill				IV	ON	IV.intBillId			=	ID.intBillId
+		JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId	=	ID.intContractDetailId 
 		JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 		JOIN	tblCTContractType		TP	ON	TP.intContractTypeId	=	CH.intContractTypeId
-		JOIN	tblCTContractDetail		PD	ON	PD.intContractDetailId	=	AD.intPContractDetailId
-		JOIN	tblCTContractHeader		PH	ON	PH.intContractHeaderId	=	PD.intContractHeaderId
+		JOIN	tblICItemUOM			QU	ON	QU.intItemUOMId			=	ID.intUnitOfMeasureId	
 		JOIN	tblICItemUOM			PU	ON	PU.intItemUOMId			=	CD.intPriceItemUOMId	
-		JOIN	tblRKFutureMarket		MA	ON	MA.intFutureMarketId	=	CD.intFutureMarketId
-		JOIN	tblSMCurrency			CY	ON	CY.intCurrencyID		=	CD.intCurrencyId		LEFT 
-		JOIN	tblSMCurrency			MY	ON	MY.intCurrencyID		=	CY.intMainCurrencyId	LEFT
-		JOIN	tblCTPriceFixation		PF	ON	PF.intContractDetailId	=	CASE	WHEN CH.ysnMultiplePriceFixation = 1 
-																					THEN PF.intContractDetailId
-																					ELSE CD.intContractDetailId	END	AND 
+		JOIN	tblSMCurrency			CY	ON	CY.intCurrencyID		=	IV.intCurrencyId
+		WHERE	AD.intSContractDetailId	=	@intSContractDetailId
+
+		UNION ALL
+
+		SELECT *,ROW_NUMBER() OVER (ORDER BY dblAllocatedQty ASC)  AS intSort FROM (
+			SELECT	TP.strContractType + ' - ' + CH.strContractNumber strContractType,
+					'Purchase - ' + PH.strContractNumber  AS strNumbe,
+					'Allocated' AS strDescription,
+					NULL AS strConfirmed,
+					dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,AD.intPUnitMeasureId,@intUnitMeasureId, AD.dblPAllocatedQty) AS dblAllocatedQty,
+					CASE	WHEN CD.dblCashPrice IS NULL 
+							THEN	(
+										(
+											(ISNULL(PF.dblLotsFixed,0) * ISNULL(FD.dblFutures,0))+
+											(
+												(ISNULL(PF.dblTotalLots,ISNULL(CD.dblNoOfLots,ISNULL(CH.dblNoOfLots,0))) - ISNULL(PF.dblLotsFixed,0)) *
+												dbo.fnCTConvertQuantityToTargetItemUOM(	CD.intItemId,@intUnitMeasureId,MA.intUnitMeasureId,dbo.[fnCTGetLastSettlementPrice](CD.intFutureMarketId,CD.intFutureMonthId)))
+										)
+									)/ISNULL(PF.dblTotalLots,ISNULL(CD.dblNoOfLots,ISNULL(CH.dblNoOfLots,0))) +  
+									dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,@intUnitMeasureId,PU.intUnitMeasureId,CD.dblConvertedBasis)
+							ELSE	dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,@intUnitMeasureId,PU.intUnitMeasureId, CD.dblCashPrice)
+					END /
+					CASE WHEN CY.ysnSubCurrency = 1 THEN 100 ELSE 1 END	AS	dblPrice,
+					ISNULL(MY.strCurrency,CY.strCurrency) AS strCurrency,
+					ISNULL(dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0),1) AS dblFX,
+					NUll AS dblBooked,
+					NULL AS dblAccounting,
+					AD.dtmAllocatedDate AS dtmDate
+
+			FROM	@tblLGAllocationDetail	AD 
+			JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId	=	@intSContractDetailId
+			JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
+			JOIN	tblCTContractType		TP	ON	TP.intContractTypeId	=	CH.intContractTypeId
+			JOIN	tblCTContractDetail		PD	ON	PD.intContractDetailId	=	AD.intPContractDetailId
+			JOIN	tblCTContractHeader		PH	ON	PH.intContractHeaderId	=	PD.intContractHeaderId
+			JOIN	tblICItemUOM			PU	ON	PU.intItemUOMId			=	CD.intPriceItemUOMId	
+			JOIN	tblRKFutureMarket		MA	ON	MA.intFutureMarketId	=	CD.intFutureMarketId
+			JOIN	tblSMCurrency			CY	ON	CY.intCurrencyID		=	CD.intCurrencyId		LEFT 
+			JOIN	tblSMCurrency			MY	ON	MY.intCurrencyID		=	CY.intMainCurrencyId	LEFT
+			JOIN	tblCTPriceFixation		PF	ON	PF.intContractDetailId	=	CASE	WHEN CH.ysnMultiplePriceFixation = 1 
+																						THEN PF.intContractDetailId
+																						ELSE CD.intContractDetailId	END	AND 
 		
-																			PF.intContractHeaderId	=	CD.intContractHeaderId	LEFT
-		JOIN	(
-					SELECT intPriceFixationId,SUM(dblFutures) dblFutures FROM tblCTPriceFixationDetail GROUP BY intPriceFixationId
-				)						FD	ON	FD.intPriceFixationId	=	PF.intPriceFixationId
-		WHERE	intSContractDetailId	=	@intSContractDetailId
+																				PF.intContractHeaderId	=	CD.intContractHeaderId	LEFT
+			JOIN	(
+						SELECT intPriceFixationId,SUM(dblFutures) dblFutures FROM tblCTPriceFixationDetail GROUP BY intPriceFixationId
+					)						FD	ON	FD.intPriceFixationId	=	PF.intPriceFixationId
+			WHERE	intSContractDetailId	=	@intSContractDetailId
+		)d
 
 		UNION ALL
 
