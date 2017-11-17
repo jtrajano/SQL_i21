@@ -99,4 +99,9 @@ AS
 			,@GetAllAvailablePricing
 		)
 
+		-- IF @SpecialPriceId is not null or @SpecialPriceId > 0
+		-- BEGIN
+		-- 	SELECT top 1 @ProgramId=intProgramId  ,@ProgramType=strProgramType  from tblARCustomerSpecialPrice
+		-- END
+
 RETURN 1
