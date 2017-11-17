@@ -141,7 +141,7 @@ BEGIN
 				ID.dblCost dblPrice,
 				CY.strCurrency AS strCurrency,
 				NULL AS dblFX,
-				dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId,QU.intUnitMeasureId,3, ID.dblQtyReceived) AS dblBooked,
+				dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId,QU.intUnitMeasureId,@intUnitMeasureId, ID.dblQtyReceived) AS dblBooked,
 				ID.dblTotal AS dblAccounting,
 				IV.dtmDate AS dtmDate,
 				9999999 + AD.intPContractDetailId + 1 AS intSort
