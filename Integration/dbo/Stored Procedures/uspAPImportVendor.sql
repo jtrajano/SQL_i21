@@ -395,7 +395,7 @@ BEGIN
                 @ysnPymtCtrlEFTActive     	= CASE WHEN ssvnd_pay_ctl_ind = ''E'' THEN 1 ELSE 0 END,
                 @ysnPymtCtrlHold          	= CASE WHEN ssvnd_pay_ctl_ind = ''H'' THEN 1 ELSE 0 END,
                 @ysnWithholding           	= CASE WHEN ssvnd_wthhld_yn = ''N'' THEN 0 ELSE 1 END,
-                @dblCreditLimit           	= ISNULL(ssvnd_future_bal,0),
+                @dblCreditLimit           	= 0,
                 @intCreatedUserId         	= NULL,
                 @intLastModifiedUserId    	= NULL,
                 @dtmLastModified          	= NULL,
