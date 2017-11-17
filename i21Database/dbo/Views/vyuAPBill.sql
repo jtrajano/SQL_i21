@@ -48,7 +48,8 @@ SELECT
 	GL.strBatchId,
 	EL.strLocationName AS strVendorLocation,
 	ISNULL(Payment.dblWithheld,0) AS dblWithheld,
-	ISNULL(Payment.dblDiscount,0) AS dblDiscount
+	ISNULL(Payment.dblDiscount,0) AS dblDiscount,
+	CASE WHEN (A.intTransactionType IN (3,8,11)) OR (A.intTransactionType = 2 AND A.ysnPosted = 1) THEN A.dblPayment * -1 ELSE A.dblPayment END AS dblPayment
 FROM
 	dbo.tblAPBill A
 	INNER JOIN 
