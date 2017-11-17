@@ -59,7 +59,8 @@ SELECT
 	strStoreLocation = (SELECT SCL.strLocationName FROM dbo.tblSMCompanyLocation SCL WHERE SCL.intCompanyLocationId = A.intStoreLocationId),
 	strOrderedBy = (SELECT UEN.strName FROM dbo.tblEMEntity UEN WHERE UEN.intEntityId = A.intOrderById),
 	B.strVendorId,
-	ISNULL(commodity.strCommodityCode, 'None') AS strCommodityCode
+	ISNULL(commodity.strCommodityCode, 'None') AS strCommodityCode,
+	CASE WHEN (A.intTransactionType IN (3,8,11)) OR (A.intTransactionType = 2 AND A.ysnPosted = 1) THEN A.dblPayment * -1 ELSE A.dblPayment END AS dblPayment
 FROM
 	dbo.tblAPBill A
 	INNER JOIN 
