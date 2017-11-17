@@ -10,7 +10,8 @@
 	@currencyId			INT = 0,
 	@locationId			INT = 0,
 	@batchId			NVARCHAR(100) = NULL OUTPUT,
-	@totalAmount		NUMERIC(18,6) = NULL OUTPUT
+	@totalAmount		NUMERIC(18,6) = NULL OUTPUT,
+	@upToDateCustomer 	BIT = 0
 AS
 	CREATE TABLE #tmpCustomers (intEntityId INT, intServiceChargeId INT, intTermId INT, dtmLastServiceCharge DATETIME)	
 	DECLARE @tblTypeServiceCharge	  [dbo].[ServiceChargeTableType]
@@ -373,3 +374,8 @@ AS
 		END
 
 	DROP TABLE #tmpCustomers
+
+	IF @isRecap = 0 and @upToDateCustomer = 1
+	BEGIN
+		UPDATE tblARCustomer set dtmLastServiceCharge = @asOfDate WHERE dtmLastServiceCharge is null or dtmLastServiceCharge < @asOfDate
+	END
