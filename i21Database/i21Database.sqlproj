@@ -5878,6 +5878,7 @@
     <Build Include="dbo\Stored Procedures\uspGRCreateSettleStorage.sql" />
     <Build Include="dbo\Views\vyuLGGetShipmentContainerContract.sql" />
     <Build Include="dbo\Stored Procedures\uspCRMGetPipelineForecast.sql" />
+    <Build Include="dbo\Functions\fnVRGetRebateRate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
