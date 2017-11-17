@@ -233,6 +233,12 @@ CREATE TABLE #Pricing(
 	,[strPricingType]		NVARCHAR(50)
 	,[intTermId]			INT NULL
 	,[intSort]				INT
+	,[intSpecialPriceId]	INT NULL
+	,[intProgramId]			INT NULL
+	,[strPriceSource]		NVARCHAR(100)
+	,[ysnRebateSubmitted]    BIT
+	,[ysnRebateExcluded]     BIT
+	,[dblRebateAmount]       NUMERIC(18,6)
 )
 BEGIN TRY
 	DELETE FROM #Pricing
@@ -260,6 +266,12 @@ BEGIN TRY
 		,[strPricingType]
 		,[intTermId]
 		,[intSort]
+		,[intSpecialPriceId]
+		,[intProgramId]
+		,[strPriceSource]
+		,[ysnRebateSubmitted]
+		,[ysnRebateExcluded]
+		,[dblRebateAmount]
 	)
 	SELECT
 		 [intId]				= IE.[intId]
@@ -285,6 +297,12 @@ BEGIN TRY
 		,[strPricingType]		= IP.[strPricingType]
 		,[intTermId]			= IP.[intTermId]
 		,[intSort]				= IP.[intSort]
+		,[intSpecialPriceId]	= IP.[intSpecialPriceId]
+		,[intProgramId]			= IP.[intProgramId]
+		,[strPriceSource]		= IP.[strPriceSource]
+		,[ysnRebateSubmitted]	= IP.[ysnRebateSubmitted]
+		,[ysnRebateExcluded]	= IP.[ysnRebateExcluded]
+		,[dblRebateAmount]		= IP.[dblRebateAmount]
 	FROM
 		@ItemEntries IE
 	CROSS APPLY
@@ -432,6 +450,12 @@ USING
 		,[intStorageScheduleTypeId]				= IE.[intStorageScheduleTypeId]
 		,[intDestinationGradeId]				= IE.[intDestinationGradeId]
 		,[intDestinationWeightId]				= IE.[intDestinationWeightId]
+		,[intSpecialPriceId]					= IP.[intSpecialPriceId]
+		,[intProgramId]							= IP.[intProgramId]
+		,[strPriceSource]						= IP.[strPriceSource]
+		,[ysnRebateSubmitted]					= IP.[ysnRebateSubmitted]
+		,[ysnRebateExcluded]					= IP.[ysnRebateExcluded]
+		,[dblRebateAmount]						= IP.[dblRebateAmount]
 		,[intConcurrencyId]						= 1
 		,[ysnRecomputeTax]						= IE.[ysnRecomputeTax]
 		,[intEntityId]							= IE.[intEntityId]
@@ -481,6 +505,12 @@ USING
 			,[intContractDetailId]
 			,[intContractSeq]
 			,[dblAvailableQty]
+			,[intSpecialPriceId]
+			,[intProgramId]
+			,[strPriceSource]
+			,[ysnRebateSubmitted]
+			,[ysnRebateExcluded]
+			,[dblRebateAmount]
 		FROM
 			#Pricing WITH (NOLOCK)
 		) IP
@@ -605,6 +635,12 @@ INSERT(
 	,[intStorageScheduleTypeId]
 	,[intDestinationGradeId]
 	,[intDestinationWeightId]
+	,[intSpecialPriceId]
+	,[intProgramId]
+	,[strPriceSource]
+	,[ysnRebateSubmitted]
+	,[ysnRebateExcluded]
+	,[dblRebateAmount]
 	,[intConcurrencyId]
 	)
 VALUES(
@@ -705,6 +741,12 @@ VALUES(
 	,[intStorageScheduleTypeId]
 	,[intDestinationGradeId]
 	,[intDestinationWeightId]
+	,[intSpecialPriceId]
+	,[intProgramId]
+	,[strPriceSource]
+	,[ysnRebateSubmitted]
+	,[ysnRebateExcluded]
+	,[dblRebateAmount]
 	,[intConcurrencyId]
 )
 	OUTPUT  
