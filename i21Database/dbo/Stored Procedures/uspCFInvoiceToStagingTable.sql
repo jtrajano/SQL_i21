@@ -33,15 +33,15 @@ BEGIN TRY
 	-----------------------------------------------------------
 	EXEC "dbo"."uspCFInvoiceReport"			@xmlParam	=	@xmlParam
 
-	--SELECT * FROM tblCFInvoiceReportTempTable
+	SELECT 'invoice report',* FROM tblCFInvoiceReportTempTable
 
 	EXEC "dbo"."uspCFInvoiceReportSummary"	@xmlParam	=	@xmlParam
 
-	--SELECT * FROM tblCFInvoiceSummaryTempTable
+	SELECT 'invoice summary',* FROM tblCFInvoiceSummaryTempTable
 
 	EXEC "dbo"."uspCFInvoiceReportDiscount" @xmlParam	=	@xmlParam
 
-	--SELECT * FROM tblCFInvoiceDiscountTempTable
+	SELECT 'invoice discount',* FROM tblCFInvoiceDiscountTempTable
 	
 
 	-- INSERT CALCULATED INVOICES TO STAGING TABLE --

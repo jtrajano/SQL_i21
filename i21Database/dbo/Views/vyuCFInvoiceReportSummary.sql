@@ -1,4 +1,5 @@
-﻿CREATE VIEW [dbo].[vyuCFInvoiceReportSummary]
+﻿
+CREATE VIEW [dbo].[vyuCFInvoiceReportSummary]
 AS
 SELECT intCustomerId = ( CASE cfTrans.strTransactionType 
                            WHEN 'Foreign Sale' THEN cfSiteItem.intCustomerId 
@@ -83,6 +84,8 @@ SELECT intCustomerId = ( CASE cfTrans.strTransactionType
        cfTrans.intProductId, 
        cfTrans.intARItemId, 
        cfSiteItem.ysnIncludeInQuantityDiscount, 
+	   Dateadd(dd, Datediff(dd, 0, cfTrans.dtmCreatedDate), 0)    AS 
+       dtmCreatedDate, 
        Dateadd(dd, Datediff(dd, 0, cfTrans.dtmInvoiceDate), 0)    AS 
        dtmInvoiceDate, 
        cfTrans.strInvoiceReportNumber                             AS 

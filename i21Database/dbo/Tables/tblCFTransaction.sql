@@ -56,6 +56,7 @@
     [ysnDuplicate]               BIT             NULL,
     [dtmInvoiceDate]             DATETIME        NULL,
     [dtmPostedDate]              DATETIME        NULL,
+	[dtmCreatedDate]             DATETIME        NULL,
     [strOriginalProductNumber]   NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [intOverFilledTransactionId] INT             NULL,
     [dblInventoryCost]           NUMERIC (18, 6) NULL,

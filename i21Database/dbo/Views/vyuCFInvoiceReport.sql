@@ -1,4 +1,5 @@
-﻿CREATE VIEW [dbo].[vyuCFInvoiceReport]
+﻿
+CREATE VIEW [dbo].[vyuCFInvoiceReport]
 AS
 
 SELECT intCustomerId = ( CASE cfTrans.strTransactionType 
@@ -248,6 +249,7 @@ cfTrans.strInvoiceReportNumber,
 cfTrans.strTempInvoiceReportNumber, 
 cfTrans.dblQuantity, 
 cfTrans.strMiscellaneous, 
+cfTrans.dtmCreatedDate, 
 cfCardAccount.strName, 
 cfCardAccount.strCardNumber, 
 cfCardAccount.strCardDescription, 

@@ -4,6 +4,8 @@ CREATE PROCEDURE [dbo].[uspCFInsertTransactionRecord]
 	 @strGUID						NVARCHAR(MAX)
 	,@strProcessDate				NVARCHAR(MAX)
 	,@strPostedDate					NVARCHAR(MAX)
+	,@strCreatedDate				NVARCHAR(MAX)
+	,@strLaggingDate				NVARCHAR(MAX)
 	,@strCardId						NVARCHAR(MAX)
 	,@strVehicleId					NVARCHAR(MAX)
 	,@strProductId					NVARCHAR(MAX)
@@ -948,8 +950,19 @@ BEGIN
 				SET @ysnInvalid = 1
 			END
 		END
-
 		
+		----------POSTED DATE----------
+		SELECT @strLaggingDate
+
+		IF (@dtmTransactionDate <= @strLaggingDate)
+		BEGIN
+			SET @strPostedDate = @strPostedDate
+		END
+		ELSE
+		BEGIN
+			SET @strPostedDate = @dtmTransactionDate
+		END
+		----------POSTED DATE----------
 
 		---- DUPLICATE CHECK -- 
 		--SELECT @intDupTransCount = COUNT(*)
@@ -983,7 +996,8 @@ BEGIN
 			,[intContractId]				
 			,[dblQuantity]				
 			,[dtmBillingDate]			
-			,[dtmPostedDate]
+			,[dtmPostedDate]		
+			,[dtmCreatedDate]
 			,[dtmTransactionDate]		
 			,[intTransTime]				
 			,[strSequenceNumber]		
@@ -1030,6 +1044,7 @@ BEGIN
 			,@dblQuantity				
 			,@dtmBillingDate		
 			,@strPostedDate	
+			,@strCreatedDate
 			,@dtmTransactionDate		
 			,@intTransTime				
 			,@strSequenceNumber	
