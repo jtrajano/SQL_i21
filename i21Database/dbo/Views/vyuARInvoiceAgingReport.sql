@@ -17,20 +17,20 @@ FROM
      , A.intInvoiceId
 	 , A.strBOLNumber
 	 , A.intEntityCustomerId     
-	 , dblTotalAR			= CASE WHEN A.strTransactionType IN ('Credit Memo', 'Customer Prepayment') THEN SUM(B.dblTotalDue) - SUM(B.dblAvailableCredit) - SUM(B.dblPrepayments) * -1 ELSE SUM(B.dblTotalDue) - SUM(B.dblAvailableCredit) - SUM(B.dblPrepayments) END
+	 , dblTotalAR			= CASE WHEN A.strTransactionType IN ('Credit Memo', 'Overpayment', 'Customer Prepayment') THEN (SUM(B.dblTotalDue) - SUM(B.dblAvailableCredit) - SUM(B.dblPrepayments)) * -1 ELSE SUM(B.dblTotalDue) - SUM(B.dblAvailableCredit) - SUM(B.dblPrepayments) END
 	 , dblFuture			= SUM(B.dblFuture)
-	 , dbl0Days				= CASE WHEN A.strTransactionType IN ('Credit Memo', 'Customer Prepayment') THEN SUM(B.dbl0Days) * -1 ELSE SUM(B.dbl0Days) END 
-	 , dbl10Days			= CASE WHEN A.strTransactionType IN ('Credit Memo', 'Customer Prepayment') THEN SUM(B.dbl10Days) * -1 ELSE SUM(B.dbl10Days) END 
-	 , dbl30Days			= CASE WHEN A.strTransactionType IN ('Credit Memo', 'Customer Prepayment') THEN SUM(B.dbl30Days) * -1 ELSE SUM(B.dbl30Days) END  
-	 , dbl60Days			= CASE WHEN A.strTransactionType IN ('Credit Memo', 'Customer Prepayment') THEN SUM(B.dbl60Days) * -1 ELSE SUM(B.dbl60Days) END 
-	 , dbl90Days			= CASE WHEN A.strTransactionType IN ('Credit Memo', 'Customer Prepayment') THEN SUM(B.dbl90Days) * -1 ELSE SUM(B.dbl90Days) END 
-	 , dbl91Days			= CASE WHEN A.strTransactionType IN ('Credit Memo', 'Customer Prepayment') THEN SUM(B.dbl91Days) * -1 ELSE SUM(B.dbl91Days) END 
-	 , dblTotalDue			= CASE WHEN A.strTransactionType IN ('Credit Memo', 'Customer Prepayment') THEN SUM(B.dblAvailableCredit) + SUM(B.dblPrepayments) * -1 ELSE SUM(B.dblTotalDue)- SUM(B.dblAvailableCredit) - SUM(B.dblPrepayments) END 
-	 , dblAmountPaid		= CASE WHEN A.strTransactionType IN ('Credit Memo', 'Customer Prepayment') THEN SUM(A.dblAmountPaid) * -1 ELSE SUM(A.dblAmountPaid) END 
-	 , dblInvoiceTotal		= CASE WHEN A.strTransactionType IN ('Credit Memo', 'Customer Prepayment') THEN SUM(B.dblAvailableCredit) + SUM(B.dblPrepayments) * -1 ELSE SUM(A.dblInvoiceTotal) END 
-	 , dblCredits			= CASE WHEN A.strTransactionType IN ('Credit Memo', 'Customer Prepayment') THEN SUM(B.dblAvailableCredit) * -1 ELSE SUM(B.dblAvailableCredit)  END 
-	 , dblPrepayments		= CASE WHEN A.strTransactionType IN ('Credit Memo', 'Customer Prepayment') THEN SUM(B.dblPrepayments) * -1 ELSE SUM(B.dblPrepayments) END 
-	 , dblPrepaids			= CASE WHEN A.strTransactionType IN ('Credit Memo', 'Customer Prepayment') THEN SUM(B.dblPrepayments) * -1 ELSE SUM(B.dblPrepayments) END 
+	 , dbl0Days				= CASE WHEN A.strTransactionType IN ('Credit Memo', 'Overpayment', 'Customer Prepayment') THEN SUM(B.dbl0Days) * -1 ELSE SUM(B.dbl0Days) END 
+	 , dbl10Days			= CASE WHEN A.strTransactionType IN ('Credit Memo', 'Overpayment', 'Customer Prepayment') THEN SUM(B.dbl10Days) * -1 ELSE SUM(B.dbl10Days) END 
+	 , dbl30Days			= CASE WHEN A.strTransactionType IN ('Credit Memo', 'Overpayment', 'Customer Prepayment') THEN SUM(B.dbl30Days) * -1 ELSE SUM(B.dbl30Days) END  
+	 , dbl60Days			= CASE WHEN A.strTransactionType IN ('Credit Memo', 'Overpayment', 'Customer Prepayment') THEN SUM(B.dbl60Days) * -1 ELSE SUM(B.dbl60Days) END 
+	 , dbl90Days			= CASE WHEN A.strTransactionType IN ('Credit Memo', 'Overpayment', 'Customer Prepayment') THEN SUM(B.dbl90Days) * -1 ELSE SUM(B.dbl90Days) END 
+	 , dbl91Days			= CASE WHEN A.strTransactionType IN ('Credit Memo', 'Overpayment', 'Customer Prepayment') THEN SUM(B.dbl91Days) * -1 ELSE SUM(B.dbl91Days) END 
+	 , dblTotalDue			= CASE WHEN A.strTransactionType IN ('Credit Memo', 'Overpayment', 'Customer Prepayment') THEN (SUM(B.dblAvailableCredit) + SUM(B.dblPrepayments)) * -1 ELSE SUM(B.dblTotalDue)- SUM(B.dblAvailableCredit) - SUM(B.dblPrepayments) END 
+	 , dblAmountPaid		= CASE WHEN A.strTransactionType IN ('Credit Memo', 'Overpayment', 'Customer Prepayment') THEN SUM(A.dblAmountPaid) * -1 ELSE SUM(A.dblAmountPaid) END 
+	 , dblInvoiceTotal		= CASE WHEN A.strTransactionType IN ('Credit Memo', 'Overpayment', 'Customer Prepayment') THEN (SUM(B.dblAvailableCredit) + SUM(B.dblPrepayments)) * -1 ELSE SUM(A.dblInvoiceTotal) END 
+	 , dblCredits			= CASE WHEN A.strTransactionType IN ('Credit Memo', 'Overpayment', 'Customer Prepayment') THEN SUM(B.dblAvailableCredit) * -1 ELSE SUM(B.dblAvailableCredit)  END 
+	 , dblPrepayments		= CASE WHEN A.strTransactionType IN ('Credit Memo', 'Overpayment', 'Customer Prepayment') THEN SUM(B.dblPrepayments) * -1 ELSE SUM(B.dblPrepayments) END 
+	 , dblPrepaids			= CASE WHEN A.strTransactionType IN ('Credit Memo', 'Overpayment', 'Customer Prepayment') THEN SUM(B.dblPrepayments) * -1 ELSE SUM(B.dblPrepayments) END 
 	 , A.dtmDate
 	 , A.dtmDueDate
 	 , A.intCompanyLocationId
