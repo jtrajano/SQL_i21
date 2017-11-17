@@ -685,7 +685,8 @@ BEGIN
 			[dblAdjustedTax]		, 
 			[ysnTaxAdjusted]		, 
 			[ysnSeparateOnBill]		, 
-			[ysnCheckOffTax]
+			[ysnCheckOffTax]		,
+			[ysnTaxOnly]
 		)
 		SELECT
 			[intBillDetailId]		=	B.intBillDetailId, 
@@ -700,7 +701,8 @@ BEGIN
 			[dblAdjustedTax]		=	CAST(((C.dblTax * B.dblTotal) / (D.dblLineTotal)) AS DECIMAL(18,2)), 
 			[ysnTaxAdjusted]		=	C.ysnTaxAdjusted, 
 			[ysnSeparateOnBill]		=	C.ysnSeparateOnInvoice, 
-			[ysnCheckOffTax]		=	C.ysnCheckoffTax
+			[ysnCheckOffTax]		=	C.ysnCheckoffTax,
+			[ysnTaxOnly]			=	C.ysnTaxOnly
 		FROM @billDetailIds A
 		INNER JOIN tblAPBillDetail B ON A.intId = B.intBillDetailId
 		INNER JOIN tblICInventoryReceiptItemTax C ON B.intInventoryReceiptItemId = C.intInventoryReceiptItemId
