@@ -5909,6 +5909,7 @@
     <Build Include="dbo\Tables\tblBBRateUOM.sql" />
     <Build Include="dbo\Tables\tblBBRateItem.sql" />
     <Build Include="dbo\Tables\tblBBRateCustomerLocation.sql" />
+    <Build Include="dbo\Functions\fnVRGetRebateRate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
