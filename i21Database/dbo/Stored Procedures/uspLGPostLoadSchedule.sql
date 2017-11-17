@@ -60,11 +60,11 @@ BEGIN TRY
 
 		IF(@ysnPost = 0)
 		BEGIN
-			UPDATE tblLGLoad SET intShipmentStatus = 2, ysnPosted = @ysnPost WHERE intLoadId = @intLoadId
+			UPDATE tblLGLoad SET intShipmentStatus = 2, ysnPosted = @ysnPost, dtmPostedDate = NULL WHERE intLoadId = @intLoadId
 		END
 		ELSE 
 		BEGIN
-			UPDATE tblLGLoad SET intShipmentStatus = 3, ysnPosted = @ysnPost WHERE intLoadId = @intLoadId
+			UPDATE tblLGLoad SET intShipmentStatus = 3, ysnPosted = @ysnPost, dtmPostedDate = GETDATE() WHERE intLoadId = @intLoadId
 		END
 	END
 	ELSE IF @intPurchaseSale = 2
@@ -76,7 +76,7 @@ BEGIN TRY
 
 			IF(@ysnPost = 0)
 			BEGIN
-				UPDATE tblLGLoad SET intShipmentStatus = 1, ysnPosted = @ysnPost WHERE intLoadId = @intLoadId
+				UPDATE tblLGLoad SET intShipmentStatus = 1, ysnPosted = @ysnPost, dtmPostedDate = GETDATE() WHERE intLoadId = @intLoadId
 			END
 	END
 	ELSE IF @intPurchaseSale = 3
