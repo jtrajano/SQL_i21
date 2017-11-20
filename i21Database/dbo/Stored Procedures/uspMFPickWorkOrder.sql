@@ -736,6 +736,8 @@ BEGIN TRY
 				)
 	END
 
+	Delete from @tblItem Where dblReqQty=0
+
 	SELECT @intItemRecordId = Min(intItemRecordId)
 	FROM @tblItem
 
