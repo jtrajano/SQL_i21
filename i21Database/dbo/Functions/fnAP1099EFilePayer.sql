@@ -65,7 +65,7 @@ BEGIN
 		+ CAST(@year AS NVARCHAR(10))  --Position 2-5
 		+ ' ' --CF/SF
 		+ SPACE(5) -- 7-11
-		+ ISNULL(NULLIF(LEFT(A.strEin,9),''), SPACE(9)) --Position 12-20 TIN
+		+ ISNULL(LEFT(REPLACE(A.strEin, '-', ''),9),SPACE(9)) --Position 12-20 TIN 00-0000000 Federal Tax Id format.
 		+ SPACE(4) --21-24
 		+ ' ' --25 Last Filing Indicator
 		+ CASE @form1099 WHEN 1 THEN 'A ' --1099 MISC
@@ -88,7 +88,7 @@ BEGIN
 		+ SPACE(8) --44-51
 		+ ' ' --Foreign Indicator
 		+ SPACE(40 - LEN(A.strCompanyName)) + dbo.fnTrimX(A.strCompanyName) --Position 53-92
-		+ SPACE(40)
+		+ SPACE(39)
 		+ ' '
 		+ LEFT(REPLACE(A.strAddress, CHAR(13) + CHAR(10), ' '), 40) + SPACE(40 - LEN(REPLACE(A.strAddress, CHAR(13) + CHAR(10), ' '))) --Position 134-173
 		+ LEFT(REPLACE(A.strCity, CHAR(13) + CHAR(10), ' '), 40) + SPACE(40 - LEN(REPLACE(A.strCity, CHAR(13) + CHAR(10), ' '))) 
