@@ -2327,6 +2327,17 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcolumn',
+                                                                                itemId: 'colLotMarkings',
+                                                                                width: 150,
+                                                                                dataIndex: 'string',
+                                                                                text: 'Markings',
+                                                                                editor: {
+                                                                                    xtype: 'textfield',
+                                                                                    itemId: 'txtLotMarkings'
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'gridcolumn',
                                                                                 itemId: 'colLotCondition',
                                                                                 width: 65,
                                                                                 dataIndex: 'string',

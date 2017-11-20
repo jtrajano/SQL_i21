@@ -6285,6 +6285,50 @@
                                                                     "userConfig": {
                                                                         "dataIndex": "string",
                                                                         "flex": null,
+                                                                        "itemId": "colLotMarkings",
+                                                                        "text": "Markings",
+                                                                        "width": 150
+                                                                    },
+                                                                    "configAlternates": {
+                                                                        "dataIndex": "datafield",
+                                                                        "flex": "number",
+                                                                        "itemId": "string",
+                                                                        "text": "string",
+                                                                        "width": "auto",
+                                                                        "scrollable": "boolean"
+                                                                    },
+                                                                    "name": "MyColumn72",
+                                                                    "designerId": "fae7de8f-f23b-45cc-855b-80cf5fa2c188",
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.Text",
+                                                                            "reference": {
+                                                                                "name": "editor",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "itemId": "txtLotMarkings"
+                                                                            },
+                                                                            "configAlternates": {
+                                                                                "itemId": "string",
+                                                                                "scrollable": "boolean"
+                                                                            },
+                                                                            "name": "MyTextField27",
+                                                                            "designerId": "0aefca50-cdb5-4fb2-b306-ecee2efeebb6"
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    "type": "Ext.grid.column.Column",
+                                                                    "reference": {
+                                                                        "name": "columns",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "dataIndex": "string",
+                                                                        "flex": null,
                                                                         "itemId": "colLotCondition",
                                                                         "text": "Condition",
                                                                         "width": 65

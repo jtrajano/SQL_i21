@@ -664,6 +664,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colLotVendorLotId: 'strVendorLotId',
                 colLotManufacturedDate: 'dtmManufacturedDate',
                 colLotRemarks: 'strRemarks',
+                colLotMarkings: 'strMarkings',
                 colLotCondition: {
                     dataIndex: 'strCondition',
                     editor: {
