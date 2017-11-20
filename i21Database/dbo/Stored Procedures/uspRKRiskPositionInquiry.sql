@@ -132,7 +132,7 @@ JOIN tblICCommodityUnitMeasure um1 ON um1.intCommodityId = cv.intCommodityId AND
 JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = cv.intFutureMonthId
 JOIN tblICItemUOM u ON cv.intItemUOMId = u.intItemUOMId
 JOIN tblICItem ic ON ic.intItemId = cv.intItemId
-JOIN tblICCommodityProductLine pl ON ic.intCommodityId = pl.intCommodityId AND ic.intProductLineId = pl.intCommodityProductLineId
+LEFT JOIN tblICCommodityProductLine pl ON ic.intCommodityId = pl.intCommodityId AND ic.intProductLineId = pl.intCommodityProductLineId
 LEFT JOIN tblICCommodityAttribute ca ON ca.intCommodityAttributeId = ic.intProductTypeId
 LEFT JOIN tblICCommodityUnitMeasure um ON um.intCommodityId = cv.intCommodityId AND um.intUnitMeasureId = cv.intUnitMeasureId
 WHERE cv.intCommodityId = @intCommodityId AND cv.intFutureMarketId = @intFutureMarketId AND cv.intContractStatusId NOT IN (2, 3) --AND cv.intPricingTypeId = 1
@@ -529,6 +529,50 @@ BEGIN
 		FROM (
 			SELECT DISTINCT 'Specialities & Low grades' AS Selection
 				,'a. Unfixed' AS PriceStatus
+				,'Previous' strFutureMonth
+				,strAccountNumber
+				,CASE WHEN strContractType = 'Purchase' THEN dblNoOfContract ELSE - (abs(dblNoOfContract)) END AS dblNoOfContract
+				,strTradeNo
+				,TransactionDate
+				,TranType
+				,CustVendor
+				,CASE WHEN strContractType = 'Purchase' THEN - (abs(dblNoOfLot)) ELSE dblNoOfLot END AS dblNoOfLot
+				,CASE WHEN strContractType = 'Purchase' THEN dblQuantity ELSE - (abs(dblQuantity)) END AS dblQuantity
+				,intContractHeaderId
+				,NULL AS intFutOptTransactionHeaderId
+			FROM #DeltaPrecent
+			WHERE ysnExpired = 0 AND intPricingTypeId <> 1 AND intCommodityId = @intCommodityId 
+				AND intCompanyLocationId = CASE WHEN isnull(@intCompanyLocationId, 0) = 0 THEN intCompanyLocationId ELSE @intCompanyLocationId END 
+				AND intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate < @dtmFutureMonthsDate
+			) T1
+		UNION
+			SELECT *
+		FROM (
+			SELECT DISTINCT 'Specialities & Low grades' AS Selection
+				,'b. fixed' AS PriceStatus
+				,'Previous' AS strFutureMonth
+				,strAccountNumber
+				,CASE WHEN strContractType = 'Purchase' THEN dblNoOfContract ELSE - (abs(dblNoOfContract)) END AS dblNoOfContract
+				,strTradeNo
+				,TransactionDate
+				,TranType
+				,CustVendor
+				,CASE WHEN strContractType = 'Purchase' THEN - (abs(dblNoOfLot)) ELSE dblNoOfLot END AS dblNoOfLot
+				,CASE WHEN strContractType = 'Purchase' THEN dblQuantity ELSE - (abs(dblQuantity)) END AS dblQuantity
+				,intContractHeaderId
+				,NULL AS intFutOptTransactionHeaderId
+			FROM #DeltaPrecent
+			WHERE ysnExpired = 0 AND intPricingTypeId = 1 AND intCommodityId = @intCommodityId 
+			AND intCompanyLocationId = CASE WHEN isnull(@intCompanyLocationId, 0) = 0 THEN intCompanyLocationId ELSE @intCompanyLocationId END 
+			AND intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate < @dtmFutureMonthsDate
+			) T1
+
+		UNION
+
+		SELECT *
+		FROM (
+			SELECT DISTINCT 'Specialities & Low grades' AS Selection
+				,'a. Unfixed' AS PriceStatus
 				,strFutureMonth
 				,strAccountNumber
 				,CASE WHEN strContractType = 'Purchase' THEN dblNoOfContract ELSE - (abs(dblNoOfContract)) END AS dblNoOfContract
@@ -541,7 +585,9 @@ BEGIN
 				,intContractHeaderId
 				,NULL AS intFutOptTransactionHeaderId
 			FROM #DeltaPrecent
-			WHERE ysnExpired = 0 AND intPricingTypeId <> 1 AND intCommodityId = @intCommodityId AND intCompanyLocationId = CASE WHEN isnull(@intCompanyLocationId, 0) = 0 THEN intCompanyLocationId ELSE @intCompanyLocationId END AND intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
+			WHERE ysnExpired = 0 AND intPricingTypeId <> 1 AND intCommodityId = @intCommodityId 
+				AND intCompanyLocationId = CASE WHEN isnull(@intCompanyLocationId, 0) = 0 THEN intCompanyLocationId ELSE @intCompanyLocationId END 
+				AND intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
 			) T1
 		
 		UNION
@@ -550,27 +596,6 @@ BEGIN
 		FROM (
 			SELECT DISTINCT 'Specialities & Low grades' AS Selection
 				,'b. fixed' AS PriceStatus
-				,strFutureMonth
-				,strAccountNumber
-				,CASE WHEN strContractType = 'Purchase' THEN dblNoOfContract ELSE - (abs(dblNoOfContract)) END AS dblNoOfContract
-				,strTradeNo
-				,TransactionDate
-				,TranType
-				,CustVendor
-				,CASE WHEN strContractType = 'Purchase' THEN - (abs(dblNoOfLot)) ELSE dblNoOfLot END AS dblNoOfLot
-				,CASE WHEN strContractType = 'Purchase' THEN dblQuantity ELSE - (abs(dblQuantity)) END AS dblQuantity
-				,intContractHeaderId
-				,NULL AS intFutOptTransactionHeaderId
-			FROM #DeltaPrecent
-			WHERE ysnExpired = 0 AND intPricingTypeId = 1 AND intCommodityId = @intCommodityId AND intCompanyLocationId = CASE WHEN isnull(@intCompanyLocationId, 0) = 0 THEN intCompanyLocationId ELSE @intCompanyLocationId END AND intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
-			) T1
-		
-		UNION
-		
-		SELECT *
-		FROM (
-			SELECT DISTINCT 'Total speciality delta fixed' AS Selection
-				,'a. Delta %' AS PriceStatus
 				,strFutureMonth
 				,strAccountNumber
 				,CASE WHEN strContractType = 'Purchase' THEN dblNoOfContract ELSE - (abs(dblNoOfContract)) END AS dblNoOfContract
@@ -979,7 +1004,7 @@ BEGIN
 			,intContractHeaderId
 			,intFutOptTransactionHeaderId
 		FROM @List
-		WHERE Selection = 'Physical position / Basis risk' AND PriceStatus = 'b. Priced / Outright - (Outright position)' AND dblQuantity <> 0
+		WHERE Selection = 'Physical position / Basis risk' AND PriceStatus = 'b. Priced / Outright - (Outright position)' 
 		GROUP BY strFutureMonth
 			,strTradeNo
 			,TransactionDate
@@ -1004,7 +1029,7 @@ BEGIN
 			,intContractHeaderId
 			,intFutOptTransactionHeaderId
 		FROM @List
-		WHERE PriceStatus = 'F&O' AND Selection LIKE ('Total F&O%') AND dblQuantity <> 0
+		WHERE PriceStatus = 'F&O' AND Selection LIKE ('Total F&O%')
 		GROUP BY strFutureMonth
 			,strAccountNumber
 			,strTradeNo
@@ -1030,7 +1055,7 @@ BEGIN
 			,intContractHeaderId
 			,intFutOptTransactionHeaderId
 		FROM @List
-		WHERE PriceStatus = 'a. Delta %' AND Selection = ('Total speciality delta fixed') AND dblQuantity <> 0
+		WHERE PriceStatus = 'b. fixed' AND Selection = ('Specialities & Low grades') 
 		GROUP BY strFutureMonth
 			,strAccountNumber
 			,strTradeNo
@@ -1095,8 +1120,8 @@ BEGIN
 			,intContractHeaderId
 			,intFutOptTransactionHeaderId
 		FROM @List
-		WHERE Selection = 'Physical position / Basis risk' AND PriceStatus = 'a. Unpriced - (Balance to be Priced)' AND strAccountNumber LIKE '%Purchase%'
-		
+		WHERE Selection = 'Physical position / Basis risk' AND PriceStatus = 'a. Unpriced - (Balance to be Priced)' AND strAccountNumber LIKE '%Purchase%'		
+
 		UNION
 		
 		SELECT 'Switch position' AS Selection
@@ -1114,7 +1139,23 @@ BEGIN
 			,intFutOptTransactionHeaderId
 		FROM @List
 		WHERE Selection = 'Physical position / Basis risk' AND PriceStatus = 'a. Unpriced - (Balance to be Priced)' AND strAccountNumber LIKE '%Sale%'
-		
+		--		UNION
+		--		SELECT 'Switch position' AS Selection
+		--	,'Switch position' AS PriceStatus
+		--	,strFutureMonth
+		--	,'Switch position' AS strAccountNumber
+		--	,(dblNoOfLot) dblNoOfContract
+		--	,strTradeNo
+		--	,TransactionDate
+		--	,TranType
+		--	,CustVendor
+		--	,(dblNoOfLot) dblNoOfLot
+		--	,(dblQuantity) dblQuantity
+		--	,intContractHeaderId
+		--	,intFutOptTransactionHeaderId
+		--FROM @List
+		--	WHERE PriceStatus = 'a. Unfixed' AND Selection = ('Specialities & Low grades') 
+
 		UNION
 		
 		SELECT 'Switch position' AS Selection
@@ -1291,4 +1332,4 @@ SELECT intRowNumber
 	,intContractHeaderId
 	,intFutOptTransactionHeaderId
 FROM @ListFinal
-WHERE Selection IN ('Physical position / Basis risk', 'Specialities & Low grades') --order by intRowNumber1 asc	   
+order by intRowNumber1 asc	   
