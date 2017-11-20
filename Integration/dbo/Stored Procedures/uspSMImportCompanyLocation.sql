@@ -462,8 +462,13 @@ BEGIN
 				tblSMCompanyLocation CL
 					ON RTRIM(LTRIM(AG.[agloc_loc_no] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationNumber] COLLATE Latin1_General_CI_AS))	
 			LEFT JOIN
-				tblGLAccountSegment GL
-					ON AG.agloc_gl_profit_center = CAST(GL.strCode AS INT)									
+			(
+				SELECT intAccountSegmentId, strCode FROM tblGLAccountSegment SG
+				INNER JOIN 
+					tblGLAccountStructure ST 
+					ON SG.intAccountStructureId = ST.intAccountStructureId AND ST.strStructureName = ''Location''
+			) GL
+				ON AG.agloc_gl_profit_center = CAST(GL.strCode AS INT)
 			WHERE
 				CL.[strLocationNumber] IS NULL
 				
@@ -1128,8 +1133,13 @@ BEGIN
     tblSMCompanyLocation CL  
      ON RTRIM(LTRIM(PT.[ptloc_loc_no] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationNumber] COLLATE Latin1_General_CI_AS))            
    LEFT JOIN
-	tblGLAccountSegment GL 
-	 ON PT.[ptloc_gl_profit_center] = CAST(GL.[strCode] AS INT)
+	(
+		SELECT intAccountSegmentId, strCode FROM tblGLAccountSegment SG
+		INNER JOIN 
+			tblGLAccountStructure ST 
+			ON SG.intAccountStructureId = ST.intAccountStructureId AND ST.strStructureName = ''Location''
+	) GL
+		ON PT.[ptloc_gl_profit_center] = CAST(GL.[strCode] AS INT)
    WHERE  
     CL.[strLocationNumber] IS NULL  
       
