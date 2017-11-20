@@ -33,10 +33,14 @@
 	[strRateType]			    NVARCHAR(50)	COLLATE Latin1_General_CI_AS,
 	[strDocument]               NVARCHAR(255)   COLLATE Latin1_General_CI_AS NULL,
 	[strComments]               NVARCHAR(255)   COLLATE Latin1_General_CI_AS NULL,
+	-- new columns GL-3550
+	[strSourceDocumentId] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	[intSourceLocationId]		INT NULL,
 	[intSourceUOMId]			INT NULL,
 	[dblSourceUnitDebit]		NUMERIC (18, 6)  NULL,
 	[dblSourceUnitCredit]		NUMERIC (18, 6)  NULL,
-	[intCommodityId]			INT NULL
+	[intCommodityId]			INT NULL,
+	intSourceEntityId INT NULL
+	-- new columns GL-3550
 )
 
