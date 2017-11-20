@@ -479,7 +479,7 @@ BEGIN TRY
 
 		END
 				
-		--INVENTORY TRANSFER
+		--INVENTORY TRANSFER - Track MFT Activity
 		INSERT INTO @tmpInvoiceTransaction(intId
 			, intInvoiceDetailId
 			, intTaxAuthorityId
@@ -620,10 +620,6 @@ BEGIN TRY
 				INNER JOIN tblEMEntity ON tblSMShipVia.intEntityId = tblEMEntity.intEntityId 
 			INNER JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId AND tblICInventoryTransfer.intToLocationId = tblTRLoadDistributionHeader.intCompanyLocationId
 				INNER JOIN tblSMCompanyLocation ON tblTRLoadDistributionHeader.intCompanyLocationId = tblSMCompanyLocation.intCompanyLocationId
-				--LEFT JOIN tblARInvoice ON tblARInvoice.intInvoiceId = tblTRLoadDistributionHeader.intInvoiceId
-				--LEFT JOIN tblTFTaxAuthorityCustomerLicense ON tblTFTaxAuthorityCustomerLicense.intEntityId = tblARInvoice.intEntityCustomerId AND tblTFTaxAuthorityCustomerLicense.intTaxAuthorityId = tblTFReportingComponent.intTaxAuthorityId
-				--LEFT JOIN tblARCustomerAccountStatus ON tblARCustomerAccountStatus.intEntityCustomerId = tblARInvoice.intEntityCustomerId 
-				--LEFT JOIN tblARAccountStatus AS AccountStatus ON tblARCustomerAccountStatus.intAccountStatusId = AccountStatus.intAccountStatusId 
 			LEFT JOIN tblTFReportingComponentCriteria ON tblTFReportingComponentCriteria.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 				LEFT JOIN tblTFTaxCategory ON tblTFTaxCategory.intTaxCategoryId = tblTFReportingComponentCriteria.intTaxCategoryId
 				LEFT JOIN tblSMTaxCode AS TaxCodeCategory ON TaxCodeCategory.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId
@@ -633,16 +629,11 @@ BEGIN TRY
 				AND tblTFReportingComponent.intReportingComponentId = @RCId
 				AND tblSMTaxCode.intTaxCategoryId IS NOT NULL
 				AND tblSMCompanyLocation.ysnTrackMFTActivity = 1
-				--AND ISNULL(tblARInvoice.strBOLNumber, '') = ''
 				AND CAST(FLOOR(CAST(tblTRLoadHeader.dtmLoadDateTime AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)
 				AND CAST(FLOOR(CAST(tblTRLoadHeader.dtmLoadDateTime AS FLOAT))AS DATETIME) <= CAST(FLOOR(CAST(@DateTo AS FLOAT))AS DATETIME)
 				AND tblICInventoryTransfer.ysnPosted = 1
-				--AND (tblARInvoice.intEntityCustomerId IN (SELECT intEntityCustomerId FROM tblTFReportingComponentCustomer WHERE intReportingComponentId = @RCId)
-				--	OR NOT EXISTS (SELECT TOP 1 1 FROM tblTFReportingComponentCustomer WHERE intReportingComponentId = @RCId))
-				--AND (tblARCustomerAccountStatus.intAccountStatusId IN (SELECT intAccountStatusId FROM tblTFReportingComponentAccountStatusCode WHERE intReportingComponentId = @RCId)
-				--	OR NOT EXISTS(SELECT TOP 1 1 FROM tblTFReportingComponentAccountStatusCode WHERE intReportingComponentId = @RCId))
 				AND (tblTFReportingComponentCriteria.strCriteria IS NULL 
-					OR (tblTFReportingComponentCriteria.strCriteria = '= 0' AND tblSMTaxCode.intTaxCodeId = TaxCodeCategory.intTaxCodeId ))
+					OR (tblTFReportingComponentCriteria.strCriteria = '<> 0' AND tblSMTaxCode.intTaxCodeId = TaxCodeCategory.intTaxCodeId ))
 		) tblTransactions
 		
 		IF (@ReportingComponentId <> '')
