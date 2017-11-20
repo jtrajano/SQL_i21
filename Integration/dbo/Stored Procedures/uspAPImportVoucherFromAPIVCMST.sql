@@ -422,6 +422,7 @@ SELECT
 FROM tblAPBill A
 INNER JOIN tblAPVendor B
 	ON A.intEntityVendorId = B.intEntityId
+INNER JOIN #tmpVouchersWithRecordNumber tmpCreatedVouchers ON A.intBillId = tmpCreatedVouchers.intBillId
 INNER JOIN (tmp_apivcmstImport C2 INNER JOIN tmp_aphglmstImport C 
 			ON C2.apivc_ivc_no = C.aphgl_ivc_no 
 			AND C2.apivc_vnd_no = C.aphgl_vnd_no)
