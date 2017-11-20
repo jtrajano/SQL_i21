@@ -32,7 +32,7 @@ SELECT	  CD.intContractDetailId
 		, Item.strLotTracking
 		, Item.intCommodityId
 		, CAST(ISNULL(CU.intMainCurrencyId,0) AS BIT) AS ysnSubCurrency
-		, SL.intCompanyLocationSubLocationId
+		, SL.intCompanyLocationSubLocationId 
 		, SL.strSubLocationName
 		, STL.intStorageLocationId
 		, STL.strName AS strStorageLocationName
