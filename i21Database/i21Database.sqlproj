@@ -5911,6 +5911,7 @@
     <Build Include="dbo\Tables\tblBBRateCustomerLocation.sql" />
     <Build Include="dbo\Functions\fnVRGetRebateRate.sql" />
     <Build Include="dbo\Views\vyuMFLotStatus.sql" />
+    <Build Include="dbo\Views\vyuSTCheckoutShiftPhysical.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
