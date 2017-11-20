@@ -50,6 +50,8 @@ SELECT	strOrderType = 'Sales Contract'
 		, intForexRateTypeId = ContractView.intRateTypeId
 		, strForexRateType = ContractView.strCurrencyExchangeRateType
 		, dblForexRate = ContractView.dblRate
+		, ContractView.intFreightTermId
+		, ContractView.strFreightTerm
 FROM	vyuCTContractAddOrdersLookup ContractView
 WHERE	ysnAllowedToShow = 1
 		AND strContractType = 'Sale'
