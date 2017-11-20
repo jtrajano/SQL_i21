@@ -5325,7 +5325,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     { xtype: 'numbercolumn', dataIndex: 'dblForexRate', text: 'Forex Rate', width: 100, dataType: 'float', hidden: true, required: true },
 
                     { xtype: 'numbercolumn', dataIndex: 'dblGross', text: 'Gross', width: 100, dataType: 'float' },
-                    { xtype: 'numbercolumn', dataIndex: 'dblNet', text: 'Net', width: 100, dataType: 'float' }
+                    { xtype: 'numbercolumn', dataIndex: 'dblNet', text: 'Net', width: 100, dataType: 'float' },
+                    { dataIndex: 'strMarkings', text: 'Markings', width: 100, dataType: 'string', hidden: true, required: true }
                 ],
                 title: "Add Orders",
                 showNew: false
@@ -5587,7 +5588,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                         strStorageLocation: newReceiptItem.get('strStorageLocationName'),
                                         strSubLocationName: newReceiptItem.get('strSubLocationName'),
                                         strUnitMeasure: newReceiptItem.get('strUnitMeasure'),
-                                        dblLotUOMConvFactor: newReceiptItem.get('dblItemUOMConvFactor')
+                                        dblLotUOMConvFactor: newReceiptItem.get('dblItemUOMConvFactor'),
+                                        strMarkings: order.get('strMarkings')
                                     });
                                     currentReceiptItemVM.tblICInventoryReceiptItemLots().add(newReceiptItemLot);
                                 }
