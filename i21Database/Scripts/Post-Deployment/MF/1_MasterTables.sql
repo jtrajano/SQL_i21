@@ -2521,3 +2521,24 @@ SET dblEnteredQty = dblQuantity
 	,intEnteredItemUOMId = intItemUOMId
 WHERE dblEnteredQty IS NULL
 Go
+UPDATE RS
+SET RS.intItemUOMId = IU.intItemUOMId
+FROM tblMFRecipeSubstituteItem RS
+JOIN tblMFRecipeItem RI ON RI.intRecipeItemId = RS.intRecipeItemId
+	AND RS.intItemUOMId = RI.intItemUOMId
+JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = RI.intItemUOMId
+JOIN dbo.tblICItemUOM IU ON IU.intItemId = RS.intSubstituteItemId
+	AND IU.intUnitMeasureId = IU1.intUnitMeasureId
+	and RI.intRecipeItemTypeId =1
+GO
+
+UPDATE RS
+SET RS.intItemUOMId = IU.intItemUOMId
+FROM tblMFWorkOrderRecipeSubstituteItem RS
+JOIN tblMFWorkOrderRecipeItem RI ON RI.intRecipeItemId = RS.intRecipeItemId
+	AND RS.intItemUOMId = RI.intItemUOMId
+JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = RI.intItemUOMId
+JOIN dbo.tblICItemUOM IU ON IU.intItemId = RS.intSubstituteItemId
+	AND IU.intUnitMeasureId = IU1.intUnitMeasureId
+	and RI.intRecipeItemTypeId =1
+GO
