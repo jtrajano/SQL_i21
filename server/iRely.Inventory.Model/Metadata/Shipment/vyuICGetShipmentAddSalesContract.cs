@@ -58,5 +58,7 @@ namespace iRely.Inventory.Model
         public int? intForexRateTypeId { get; set; }
         public string strForexRateType { get; set; }
         public decimal? dblForexRate { get; set; }
+        public int? intFreightTermId { get; set; }
+        public string strFreightTerm { get; set; }
     }
 }

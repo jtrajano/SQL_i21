@@ -1019,7 +1019,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         if (current && record){            
             current.set('intEntityCustomerId', record.get('intEntityId'));
             current.set('strCustomerName', record.get('strName'));
-
+            current.set('intFreightTermId', record.get('intFreightTermId'));
+            current.set('strFreightTerm', record.get('strFreightTerm'));
+            
             // If Order Type is a 'Transfer Order', do not populate the ship to. 
             if (current.get('intOrderType') != 3){
                 current.set('intShipToLocationId', record.get('intShipToId'));   
@@ -2549,6 +2551,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         var currentRecord = win.viewModel.data.current;
         var cboOrderType = win.down('#cboOrderType');
         var cboSourceType = win.down('#cboSourceType');
+        var txtShipToAddress = win.down('#txtShipToAddress');        
 
         var CustomerId = currentRecord.get('intEntityCustomerId').toString();
         var OrderType = cboOrderType.getRawValue().toString();
@@ -2580,6 +2583,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     { dataIndex: 'strSubLocationName', text: 'SubLocation Name', width: 100, dataType: 'string' },
                     { dataIndex: 'intStorageLocationId', text: 'Storage Location Id', width: 100, dataType: 'numeric', hidden: true },
                     { dataIndex: 'strStorageLocationName', text: 'Storage Location Name', width: 100, dataType: 'string' },
+    
+                    { dataIndex: 'intFreightTermId', text: 'Freight Terms Id', width: 100, dataType: 'numeric', hidden: true, required: true, allowNull: true },
+                    { dataIndex: 'strFreightTerm', text: 'Freight Terms', width: 100, dataType: 'string' },           
+                    
                     { dataIndex: 'intOrderUOMId', text: 'Order UOM Id', width: 100, dataType: 'numeric', hidden: true },
                     { dataIndex: 'strOrderUOM', text: 'Order UOM', width: 100, dataType: 'string' },
                     { xtype: 'numbercolumn', dataIndex: 'dblOrderUOMConvFactor', text: 'Order UOM Conversion Factor', width: 100, dataType: 'float', hidden: true },
@@ -2608,13 +2615,19 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     { dataIndex: 'intForexRateTypeId', text: 'Forex Rate Type Id', width: 100, dataType: 'numeric', hidden: true },
                     { dataIndex: 'strForexRateType', text: 'Forex Rate Type', width: 100, dataType: 'string', hidden: true },
                     { xtype: 'numbercolumn', dataIndex: 'dblForexRate', text: 'Forex Rate', width: 100, dataType: 'float', hidden: true },               
-    
                     
-                    {dataIndex: 'intOrderId', text: 'intOrderId', width: 100, dataType: 'numeric', hidden: true },
-                    {dataIndex: 'intSourceId', text: 'intSourceId', width: 100, dataType: 'numeric', hidden: true },
+                    { dataIndex: 'intOrderId', text: 'intOrderId', width: 100, dataType: 'numeric', hidden: true },
+                    { dataIndex: 'intSourceId', text: 'intSourceId', width: 100, dataType: 'numeric', hidden: true },
                     { dataIndex: 'intCurrencyId', text: 'Currency Id', hidden: true, dataType: 'numeric' },
-                    { dataIndex: 'intFreightTermId', text: 'Freight Term Id', hidden: true, dataType: 'numeric' },
-                    { dataIndex: 'intShipToLocationId', text: 'Ship To Location Id', hidden: true, dataType: 'numeric' }
+                    { dataIndex: 'strCurrency', text: 'Currency', hidden: true, dataType: 'numeric' },
+                    { dataIndex: 'intShipToLocationId', text: 'Ship To Location Id', hidden: true, dataType: 'numeric' },
+                    { dataIndex: 'strShipToLocation', text: 'Ship To Location', width: 100, dataType: 'string', hidden: true },
+                    { dataIndex: 'strShipToStreet', text: 'Ship To Street', width: 100, dataType: 'string', hidden: true },
+                    { dataIndex: 'strShipToCity', text: 'Ship To City', width: 100, dataType: 'string', hidden: true },
+                    { dataIndex: 'strShipToState', text: 'Ship To State', width: 100, dataType: 'string', hidden: true },
+                    { dataIndex: 'strShipToZipCode', text: 'Ship To Zip Code', width: 100, dataType: 'string', hidden: true },
+                    { dataIndex: 'strShipToCountry', text: 'Ship To Country', width: 100, dataType: 'string', hidden: true },
+                    { dataIndex: 'strShipToAddress', text: 'Ship To Address', width: 100, dataType: 'string', hidden: true }
                 ],
                 title: "Add Orders",
                 showNew: false
@@ -2627,6 +2640,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         var currentVM = me.getViewModel().data.current;
 
                         var pickLotList = win.viewModel.storeInfo.pickedLotList;
+
+                        var freightTermsError = [];
+                        var shipmentFreightTerms = currentVM.get('intFreightTermId');
+                        var isValidToAdd = true;                         
                         
                         Ext.each(result, function (order) {
                             if (SourceType === 'Pick Lot') {
@@ -2729,68 +2746,95 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                 });
                             }
                             else {
-                                if(!iRely.Functions.isEmpty(order.get('intCurrencyId'))) 
-                                    currentVM.set('intCurrencyId', order.get('intCurrencyId'));
-                                if(!iRely.Functions.isEmpty(order.get('intFreightTermId'))) 
-                                    currentVM.set('intFreightTermId', order.get('intFreightTermId'));
-                                if(!iRely.Functions.isEmpty(order.get('intShipToLocationId'))) 
-                                    currentVM.set('intShipToLocationId', order.get('intShipToLocationId'));
+                                // Check if the Order's Freight Terms is the same with the Receipt Freight Terms
+                                addOrderFreightTerms = order.get('intFreightTermId');                            
+                                if (shipmentFreightTerms != addOrderFreightTerms
+                                    && (
+                                        OrderType === 'Sales Order'
+                                        || (ReceiptType === 'Sales Contract') 
+                                    )
+                                ){
+                                    freightTermsError.push({
+                                        orderId: order.get('intOrderId'),
+                                        orderFreightTerm: addOrderFreightTerms
+                                    });
+                                    isValidToAdd = false; 
+                                }  
+
+                                if(isValidToAdd && !currentRecord.get('strCurrency')) {
+                                    currentRecord.set('intCurrencyId', order.get('intCurrencyId'));
+                                    currentRecord.set('strCurrency', order.get('strCurrency'));
+                                }                               
+
+                                if(isValidToAdd && !currentRecord.get('strShipToLocation')){
+                                    currentRecord.set('intShipToLocationId', order.get('intShipToLocationId'));
+                                    currentRecord.set('strShipToLocation', order.get('strShipToLocation'));
+                                    currentRecord.set('strShipToStreet', order.get('strShipToStreet'));                                
+                                    currentRecord.set('strShipToCity', order.get('strShipToCity'));
+                                    currentRecord.set('strShipToState', order.get('strShipToState'));
+                                    currentRecord.set('strShipToZipPostalCode', order.get('strShipToZipCode'));
+                                    currentRecord.set('strShipToCountry', order.get('strShipToCountry'));
+                                    if (txtShipToAddress) txtShipToAddress.setValue(order.get('strShipToAddress'));
+
+                                } 
     
-                                var newRecord = {
-                                    intInventoryShipmentId: currentVM.get('intInventoryShipmentId'),
-                                    intOrderId: order.get('intOrderId'),
-                                    intSourceId: order.get('intSourceId'),
-                                    intLineNo: order.get('intLineNo'),
-                                    intItemId: order.get('intItemId'),
-                                    intSubLocationId: order.get('intSubLocationId'),
-                                    intStorageLocationId: order.get('intStorageLocationId'),
-                                    dblQuantity: order.get('dblQtyToShip'),
-                                    intItemUOMId: order.get('intItemUOMId'),
-                                    intWeightUOMId: order.get('intWeightUOMId'),
-                                    dblUnitPrice: order.get('dblUnitPrice'),
-                                    strItemNo: order.get('strItemNo'),
-                                    strUnitMeasure: order.get('strItemUOM'),
-                                    strWeightUOM: order.get('strWeightUOM'),
-                                    strSubLocationName: order.get('strSubLocationName'),
-                                    strStorageLocationName: order.get('strStorageLocationName'),
-                                    strOrderNumber: order.get('strOrderNumber'),
-                                    strSourceNumber: order.get('strSourceNumber'),
-                                    strItemDescription: order.get('strItemDescription'),
-                                    strGrade: order.get('strGrade'),
-                                    dblQtyOrdered: order.get('dblQtyOrdered'),
-                                    strOrderUOM: order.get('strOrderUOM'),
-                                    dblLineTotal: order.get('dblLineTotal'),
-                                    dblQtyAllocated: order.get('dblQtyAllocated'),
-                                    dblOrderUnitPrice: order.get('dblPrice'),
-                                    dblOrderDiscount: order.get('dblDiscount'),
-                                    dblOrderTotal: order.get('dblTotal'),
-                                    strLotTracking: order.get('strLotTracking'),
-                                    dblItemUOMConv: order.get('dblItemUOMConv'),
-                                    dblWeightItemUOMConv: order.get('dblWeightItemUOMConv'),
-                                    intDestinationGradeId: order.get('intDestinationGradeId'),
-                                    strDestinationGrades: order.get('strDestinationGrades'),
-                                    intDestinationWeightId: order.get('intDestinationWeightId'),
-                                    strDestinationWeights: order.get('strDestinationWeights'),
-                                    strOwnershipType: 'Own',
-                                    intOwnershipType: 1,
-                                    intCommodityId: order.get('intCommodityId'),
-                                    intForexRateTypeId: order.get('intForexRateTypeId'),
-                                    strForexRateType: order.get('strForexRateType'),
-                                    dblForexRate: order.get('dblForexRate')                                
-                                };
-    
-                                // Check if the shipment location matches the location of the order.
-                                // If not, clear the sub and storage location.
-                                if (currentVM.get('intShipFromLocationId') != order.get('intLocationId') ){
-                                    newRecord.intSubLocationId = null;
-                                    newRecord.intStorageLocationId = null;
-                                    newRecord.strSubLocationName = null;
-                                    newRecord.strStorageLocationName = null;
-                                }
-                                currentVM.tblICInventoryShipmentItems().add(newRecord);
+                                if (isValidToAdd){
+                                    var newRecord = {
+                                        intInventoryShipmentId: currentVM.get('intInventoryShipmentId'),
+                                        intOrderId: order.get('intOrderId'),
+                                        intSourceId: order.get('intSourceId'),
+                                        intLineNo: order.get('intLineNo'),
+                                        intItemId: order.get('intItemId'),
+                                        intSubLocationId: order.get('intSubLocationId'),
+                                        intStorageLocationId: order.get('intStorageLocationId'),
+                                        dblQuantity: order.get('dblQtyToShip'),
+                                        intItemUOMId: order.get('intItemUOMId'),
+                                        intWeightUOMId: order.get('intWeightUOMId'),
+                                        dblUnitPrice: order.get('dblUnitPrice'),
+                                        strItemNo: order.get('strItemNo'),
+                                        strUnitMeasure: order.get('strItemUOM'),
+                                        strWeightUOM: order.get('strWeightUOM'),
+                                        strSubLocationName: order.get('strSubLocationName'),
+                                        strStorageLocationName: order.get('strStorageLocationName'),
+                                        strOrderNumber: order.get('strOrderNumber'),
+                                        strSourceNumber: order.get('strSourceNumber'),
+                                        strItemDescription: order.get('strItemDescription'),
+                                        strGrade: order.get('strGrade'),
+                                        dblQtyOrdered: order.get('dblQtyOrdered'),
+                                        strOrderUOM: order.get('strOrderUOM'),
+                                        dblLineTotal: order.get('dblLineTotal'),
+                                        dblQtyAllocated: order.get('dblQtyAllocated'),
+                                        dblOrderUnitPrice: order.get('dblPrice'),
+                                        dblOrderDiscount: order.get('dblDiscount'),
+                                        dblOrderTotal: order.get('dblTotal'),
+                                        strLotTracking: order.get('strLotTracking'),
+                                        dblItemUOMConv: order.get('dblItemUOMConv'),
+                                        dblWeightItemUOMConv: order.get('dblWeightItemUOMConv'),
+                                        intDestinationGradeId: order.get('intDestinationGradeId'),
+                                        strDestinationGrades: order.get('strDestinationGrades'),
+                                        intDestinationWeightId: order.get('intDestinationWeightId'),
+                                        strDestinationWeights: order.get('strDestinationWeights'),
+                                        strOwnershipType: 'Own',
+                                        intOwnershipType: 1,
+                                        intCommodityId: order.get('intCommodityId'),
+                                        intForexRateTypeId: order.get('intForexRateTypeId'),
+                                        strForexRateType: order.get('strForexRateType'),
+                                        dblForexRate: order.get('dblForexRate')                                
+                                    };
+
+                                    // Check if the shipment location matches the location of the order.
+                                    // If not, clear the sub and storage location.
+                                    if (currentVM.get('intShipFromLocationId') != order.get('intLocationId') ){
+                                        newRecord.intSubLocationId = null;
+                                        newRecord.intStorageLocationId = null;
+                                        newRecord.strSubLocationName = null;
+                                        newRecord.strStorageLocationName = null;
+                                    }
+                                    currentVM.tblICInventoryShipmentItems().add(newRecord);
+                                }        
                             }
     
-                            if (OrderType === 'Sales Contract') {
+                            if (OrderType === 'Sales Contract' && isValidToAdd) {
                                 ContractStore.load({
                                     filters: [
                                         {
@@ -2847,9 +2891,17 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                             });
                                         }
                                     }
-                                });
-    
+                                });    
                             }
+
+                            if(freightTermsError.length > 0){
+                                iRely.Functions.showCustomDialog(
+                                    iRely.Functions.dialogType.WARNING,
+                                    iRely.Functions.dialogButtonType.OK,
+                                    'Unable to add orders. Only orders of the same freight terms can be shipped.',
+                                    function(b) { }
+                                );                            
+                            }                               
                         });
                     }
                 }
@@ -2867,7 +2919,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         if (current){
             current.set('intShipToCompanyLocationId', null);
             current.set('intShipToLocationId', null);
-            current//.set('strShipToAddress', null);
+            current.set('strShipToAddress', null);
             
             current.set('strShipToLocation', null);
             current.set('strShipToStreet', null);

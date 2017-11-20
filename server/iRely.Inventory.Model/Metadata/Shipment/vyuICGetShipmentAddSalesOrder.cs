@@ -55,10 +55,19 @@ namespace iRely.Inventory.Model
         public string strDestinationWeights { get; set; }
         public string strDestinationGrades { get; set; }
         public int? intCurrencyId { get; set; }
-        public int? intFreightTermId { get; set; }
+        public string strCurrency { get; set; }
         public int? intShipToLocationId { get; set; }
         public int? intForexRateTypeId { get; set; }
         public string strForexRateType { get; set; }
         public decimal? dblForexRate { get; set; }
+        public int? intFreightTermId { get; set; }
+        public string strFreightTerm { get; set; }
+        public string strShipToLocation { get; set; }
+        public string strShipToStreet { get; set; }
+        public string strShipToCity { get; set; }
+        public string strShipToState { get; set; }
+        public string strShipToZipCode { get; set; }
+        public string strShipToCountry { get; set; }
+        public string strShipToAddress { get; set; }
     }
 }
