@@ -9,12 +9,37 @@
 	)
 AS
 BEGIN
+	DECLARE @intManufacturingProcessId INT
+		,@strDefaultConsumptionUOM NVARCHAR(50)
+
+	SELECT @intManufacturingProcessId = intManufacturingProcessId
+	FROM tblMFWorkOrder
+	WHERE intWorkOrderId = @intWorkOrderId
+
+	SELECT @strDefaultConsumptionUOM = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 99
+
 	SELECT I.intItemId
 		,I.strItemNo
 		,I.strDescription
-		,ISNULL(IU.intItemUOMId, IU1.intItemUOMId) AS intItemUOMId
-		,U.intUnitMeasureId
-		,U.strUnitMeasure
+		,CASE 
+			WHEN @strDefaultConsumptionUOM = 3
+				THEN SIU.intItemUOMId
+			ELSE ISNULL(IU.intItemUOMId, IU1.intItemUOMId)
+			END AS intItemUOMId
+		,CASE 
+			WHEN @strDefaultConsumptionUOM = 3
+				THEN SU.intUnitMeasureId
+			ELSE U.intUnitMeasureId
+			END AS intUnitMeasureId
+		,CASE 
+			WHEN @strDefaultConsumptionUOM = 3
+				THEN SU.strUnitMeasure
+			ELSE U.strUnitMeasure
+			END AS strUnitMeasure
 		,I.intLayerPerPallet
 		,I.intUnitPerLayer
 	FROM dbo.tblMFWorkOrderRecipe R
@@ -33,6 +58,9 @@ BEGIN
 	LEFT JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = SI.intItemUOMId
 		AND IU1.intItemId = I.intItemId
 	JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = ISNULL(IU.intUnitMeasureId, IU1.intUnitMeasureId)
+	JOIN dbo.tblICItemUOM SIU ON SIU.intItemId = I.intItemId
+		AND SIU.ysnStockUnit = 1
+	JOIN dbo.tblICUnitMeasure SU ON SU.intUnitMeasureId = SIU.intUnitMeasureId
 		AND R.intLocationId = @intLocationId
 		AND R.ysnActive = 1
 		AND R.intItemId = @intItemId

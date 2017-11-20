@@ -11,6 +11,18 @@
 AS
 BEGIN
 	DECLARE @dtmCurrentDate DATETIME
+		,@intManufacturingProcessId INT
+		,@strDefaultConsumptionUOM NVARCHAR(50)
+
+	SELECT @intManufacturingProcessId = intManufacturingProcessId
+	FROM tblMFWorkOrder
+	WHERE intWorkOrderId = @intWorkOrderId
+
+	SELECT @strDefaultConsumptionUOM = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 99
 
 	SELECT @dtmCurrentDate = Getdate()
 
@@ -38,9 +50,30 @@ BEGIN
 			,L.dblQty
 			,L.intItemUOMId AS intQtyUOMId
 			,U1.strUnitMeasure AS strQtyUOM
-			,ISNULL(RUOM.intItemUOMId, SUOM.intItemUOMId) AS intRecipeItemUOMId
-			,RU.intUnitMeasureId AS intRecipeUnitMeasureId
-			,RU.strUnitMeasure AS strRecipeUnitMeasure
+			,CASE 
+				WHEN @strDefaultConsumptionUOM = 1
+					THEN ISNULL(RUOM.intItemUOMId, SUOM.intItemUOMId)
+				WHEN @strDefaultConsumptionUOM = 2
+					THEN L.intItemUOMId
+				WHEN @strDefaultConsumptionUOM = 3
+					THEN SIU.intItemUOMId
+				END AS intRecipeItemUOMId
+			,CASE 
+				WHEN @strDefaultConsumptionUOM = 1
+					THEN RU.intUnitMeasureId
+				WHEN @strDefaultConsumptionUOM = 2
+					THEN U1.intUnitMeasureId
+				WHEN @strDefaultConsumptionUOM = 3
+					THEN SU.intUnitMeasureId
+				END AS intRecipeUnitMeasureId
+			,CASE 
+				WHEN @strDefaultConsumptionUOM = 1
+					THEN RU.strUnitMeasure
+				WHEN @strDefaultConsumptionUOM = 2
+					THEN U1.strUnitMeasure
+				WHEN @strDefaultConsumptionUOM = 3
+					THEN SU.strUnitMeasure
+				END AS strRecipeUnitMeasure
 		FROM dbo.tblMFRecipe R
 		JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 			AND R.intItemId = @intItemId
@@ -82,10 +115,13 @@ BEGIN
 		JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = L.intItemUOMId
 		JOIN dbo.tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU1.intUnitMeasureId
 		LEFT JOIN dbo.tblICItemUOM RUOM ON RUOM.intItemUOMId = RI.intItemUOMId
-			AND RUOM.intItemId = RI.intItemId
+			AND RUOM.intItemId = I.intItemId
 		LEFT JOIN dbo.tblICItemUOM SUOM ON SUOM.intItemUOMId = SI.intItemUOMId
 			AND SUOM.intItemId = I.intItemId
 		JOIN dbo.tblICUnitMeasure RU ON RU.intUnitMeasureId = ISNULL(RUOM.intUnitMeasureId, SUOM.intUnitMeasureId)
+		JOIN dbo.tblICItemUOM SIU ON SIU.intItemId = I.intItemId
+			AND SIU.ysnStockUnit = 1
+		JOIN dbo.tblICUnitMeasure SU ON SU.intUnitMeasureId = SIU.intUnitMeasureId
 		WHERE LS.strPrimaryStatus = 'Active'
 			AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
 			AND L.dblQty > 0
@@ -117,9 +153,21 @@ BEGIN
 			,S.dblOnHand - S.dblUnitReserved AS dblQty
 			,IU.intItemUOMId AS intQtyUOMId
 			,U.strUnitMeasure AS strQtyUOM
-			,ISNULL(RUOM.intItemUOMId, SUOM.intItemUOMId) AS intRecipeItemUOMId
-			,RU.intUnitMeasureId AS intRecipeUnitMeasureId
-			,RU.strUnitMeasure AS strRecipeUnitMeasure
+			,CASE 
+				WHEN @strDefaultConsumptionUOM = 3
+					THEN IU.intItemUOMId
+				ELSE ISNULL(RUOM.intItemUOMId, SUOM.intItemUOMId)
+				END AS intRecipeItemUOMId
+			,CASE 
+				WHEN @strDefaultConsumptionUOM = 3
+					THEN U.intUnitMeasureId
+				ELSE RU.intUnitMeasureId
+				END AS intRecipeUnitMeasureId
+			,CASE 
+				WHEN @strDefaultConsumptionUOM = 3
+					THEN U.strUnitMeasure
+				ELSE RU.strUnitMeasure
+				END AS strRecipeUnitMeasure
 		FROM dbo.tblMFRecipe R
 		JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 			AND R.intItemId = @intItemId
@@ -154,7 +202,7 @@ BEGIN
 		JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
 		JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = S.intStorageLocationId
 		LEFT JOIN dbo.tblICItemUOM RUOM ON RUOM.intItemUOMId = RI.intItemUOMId
-			AND RUOM.intItemId = RI.intItemId
+			AND RUOM.intItemId = I.intItemId
 		LEFT JOIN dbo.tblICItemUOM SUOM ON SUOM.intItemUOMId = SI.intItemUOMId
 			AND SUOM.intItemId = I.intItemId
 		JOIN dbo.tblICUnitMeasure RU ON RU.intUnitMeasureId = ISNULL(RUOM.intUnitMeasureId, SUOM.intUnitMeasureId)
@@ -186,9 +234,30 @@ BEGIN
 			,L.dblQty
 			,L.intItemUOMId AS intQtyUOMId
 			,U1.strUnitMeasure AS strQtyUOM
-			,ISNULL(RUOM.intItemUOMId, SUOM.intItemUOMId) AS intRecipeItemUOMId
-			,RU.intUnitMeasureId AS intRecipeUnitMeasureId
-			,RU.strUnitMeasure AS strRecipeUnitMeasure
+			,CASE 
+				WHEN @strDefaultConsumptionUOM = 1
+					THEN ISNULL(RUOM.intItemUOMId, SUOM.intItemUOMId)
+				WHEN @strDefaultConsumptionUOM = 2
+					THEN L.intItemUOMId
+				WHEN @strDefaultConsumptionUOM = 3
+					THEN SIU.intItemUOMId
+				END AS intRecipeItemUOMId
+			,CASE 
+				WHEN @strDefaultConsumptionUOM = 1
+					THEN RU.intUnitMeasureId
+				WHEN @strDefaultConsumptionUOM = 2
+					THEN U1.intUnitMeasureId
+				WHEN @strDefaultConsumptionUOM = 3
+					THEN SU.intUnitMeasureId
+				END AS intRecipeUnitMeasureId
+			,CASE 
+				WHEN @strDefaultConsumptionUOM = 1
+					THEN RU.strUnitMeasure
+				WHEN @strDefaultConsumptionUOM = 2
+					THEN U1.strUnitMeasure
+				WHEN @strDefaultConsumptionUOM = 3
+					THEN SU.strUnitMeasure
+				END AS strRecipeUnitMeasure
 		FROM dbo.tblMFWorkOrderRecipe R
 		JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 			AND RI.intWorkOrderId = R.intWorkOrderId
@@ -201,7 +270,7 @@ BEGIN
 					ELSE @intConsumptionMethodId
 					END
 				)
-		LEFT JOIN dbo.tblMFRecipeSubstituteItem SI ON SI.intRecipeItemId = RI.intRecipeItemId
+		LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem SI ON SI.intRecipeItemId = RI.intRecipeItemId
 			AND SI.intRecipeId = R.intRecipeId
 		JOIN dbo.tblICLot L ON (
 				L.intItemId = RI.intItemId
@@ -229,10 +298,13 @@ BEGIN
 		JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = L.intItemUOMId
 		JOIN dbo.tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU1.intUnitMeasureId
 		LEFT JOIN dbo.tblICItemUOM RUOM ON RUOM.intItemUOMId = RI.intItemUOMId
-			AND RUOM.intItemId = RI.intItemId
+			AND RUOM.intItemId = I.intItemId
 		LEFT JOIN dbo.tblICItemUOM SUOM ON SUOM.intItemUOMId = SI.intItemUOMId
 			AND SUOM.intItemId = I.intItemId
 		JOIN dbo.tblICUnitMeasure RU ON RU.intUnitMeasureId = ISNULL(RUOM.intUnitMeasureId, SUOM.intUnitMeasureId)
+		JOIN dbo.tblICItemUOM SIU ON SIU.intItemId = I.intItemId
+			AND SIU.ysnStockUnit = 1
+		JOIN dbo.tblICUnitMeasure SU ON SU.intUnitMeasureId = SIU.intUnitMeasureId
 		WHERE LS.strPrimaryStatus = 'Active'
 			AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
 			AND L.dblQty > 0
@@ -264,9 +336,21 @@ BEGIN
 			,S.dblOnHand - S.dblUnitReserved AS dblQty
 			,S.intItemUOMId AS intQtyUOMId
 			,U.strUnitMeasure AS strQtyUOM
-			,ISNULL(RUOM.intItemUOMId, SUOM.intItemUOMId) AS intRecipeItemUOMId
-			,RU.intUnitMeasureId AS intRecipeUnitMeasureId
-			,RU.strUnitMeasure AS strRecipeUnitMeasure
+			,CASE 
+				WHEN @strDefaultConsumptionUOM = 3
+					THEN IU.intItemUOMId
+				ELSE ISNULL(RUOM.intItemUOMId, SUOM.intItemUOMId)
+				END AS intRecipeItemUOMId
+			,CASE 
+				WHEN @strDefaultConsumptionUOM = 3
+					THEN U.intUnitMeasureId
+				ELSE RU.intUnitMeasureId
+				END AS intRecipeUnitMeasureId
+			,CASE 
+				WHEN @strDefaultConsumptionUOM = 3
+					THEN U.strUnitMeasure
+				ELSE RU.strUnitMeasure
+				END AS strRecipeUnitMeasure
 		FROM dbo.tblMFWorkOrderRecipe R
 		JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 			AND RI.intWorkOrderId = R.intWorkOrderId
@@ -300,7 +384,7 @@ BEGIN
 		JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
 		JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = S.intStorageLocationId
 		LEFT JOIN dbo.tblICItemUOM RUOM ON RUOM.intItemUOMId = RI.intItemUOMId
-			AND RUOM.intItemId = RI.intItemId
+			AND RUOM.intItemId = I.intItemId
 		LEFT JOIN dbo.tblICItemUOM SUOM ON SUOM.intItemUOMId = SI.intItemUOMId
 			AND SUOM.intItemId = I.intItemId
 		JOIN dbo.tblICUnitMeasure RU ON RU.intUnitMeasureId = ISNULL(RUOM.intUnitMeasureId, SUOM.intUnitMeasureId)
