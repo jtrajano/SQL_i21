@@ -40,7 +40,7 @@ BEGIN
 			--Check for Program
 			IF(@intProgramId IS NOT NULL)
 			BEGIN 
-				-- SEarch for the item program
+				-- SEarch for the item Id program
 				SELECT TOP 1 
 					@dblRebateRate = dblRebateRate
 				FROM tblVRProgramItem 
@@ -61,6 +61,37 @@ BEGIN
 						,intProgramId	= @intProgramId	
 						,strRebateBy	= @strRebateBy
 						
+				END
+				ELSE
+				BEGIN
+					
+					--Search for the Category of the Item
+					SELECT TOP 1 
+						@intCategoryId = intCategoryId
+					FROM tblICItem
+					WHERE intItemId = @intItemId
+
+					--SEarch for the CAtegory in the program
+					SELECT TOP 1 
+						@dblRebateRate = dblRebateRate
+					FROM tblVRProgramItem 
+					WHERE intProgramId = @intProgramId 
+						AND intCategoryId = @intCategoryId
+						AND dtmBeginDate <= @dtmDate
+						AND dtmEndDate >= @dtmDate
+
+					IF @dblRebateRate IS NOT NULL
+					BEGIN
+						INSERT INTO @returntable
+						(
+							 dblRate		
+							,intProgramId	
+							,strRebateBy	
+						)
+						SELECT  dblRate		= @dblRebateRate
+							,intProgramId	= @intProgramId	
+							,strRebateBy	= @strRebateBy
+					END
 				END
 			END
 		END
