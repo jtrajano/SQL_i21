@@ -36,17 +36,30 @@ Ext.define('Inventory.view.InventoryBaseViewController', {
         }, me);
     },
 
-    saveRecord: function(win, afterSaveFn) {
+    saveRecord: function(win, afterSaveFn, finallyFn) {
         var me = this;
         var context = win ? win.context : null; 
 
-        if (!context) return; 
+        if (!context) {
+            if(finallyFn) {
+                finallyFn(false, "No or invalid context.");
+            }
+            return;
+        } 
 
         // If there is no data change, return immediately. 
-        if (!context.data.hasChanges()) return; 
+        if (!context.data.hasChanges()) {
+            if(finallyFn) {
+                finallyFn(true, "No changes.");
+            }
+            return; 
+        }
 
         // Do not continue with Save if beforeSave returned false. 
         if (me.beforeSave && me.beforeSave(win) === false){
+            if(finallyFn) {
+                finallyFn(false, "Errors occurred before saving the record.");
+            }
             return; 
         }
 
@@ -60,8 +73,16 @@ Ext.define('Inventory.view.InventoryBaseViewController', {
                         if (afterSaveFn && Ext.isFunction(afterSaveFn)){
                             afterSaveFn(batch, options); 
                         }
+
+                        if(finallyFn) {
+                            finallyFn(true, "Record saved successfully.");
+                        }
                     }
                 });                    
+            } else {
+                if(finallyFn) {
+                    finallyFn(false, "Record has invalid data.");
+                }
             }
         });
     },    

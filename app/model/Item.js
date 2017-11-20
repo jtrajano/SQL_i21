@@ -235,10 +235,10 @@ Ext.define('Inventory.model.Item', {
         }
 
         if(this.get('strType') !== 'Bundle' && this.get('strType') !== 'Comment' 
-            && (this.get('intCategoryId') === null || this.get('intCategoryId') === ''))
+            && (this.get('strCategory') === null || this.get('strCategory') === ''))
         {
             errors.add({
-                field: 'intCategoryId',
+                field: 'strCategory',
                 message: 'Category must be present' 
             })
         }
