@@ -423,7 +423,7 @@ BEGIN TRY
 			AND CAST(FLOOR(CAST(tblTRLoadHeader.dtmLoadDateTime AS FLOAT))AS DATETIME) <= CAST(FLOOR(CAST(@DateTo AS FLOAT))AS DATETIME)
 			AND (tblICInventoryTransfer.ysnPosted = 1)
 			AND (tblTFReportingComponentCriteria.strCriteria IS NULL 
-				OR (tblTFReportingComponentCriteria.strCriteria = '= 0' AND tblSMTaxCode.intTaxCodeId = TaxCodeCategory.intTaxCodeId ))
+				OR (tblTFReportingComponentCriteria.strCriteria = '<> 0' AND tblSMTaxCode.intTaxCodeId = TaxCodeCategory.intTaxCodeId ))
 		)tblTransactions
 
 		-- INVENTORY TRANSFERS USING IC SCREEN --
@@ -545,7 +545,7 @@ BEGIN TRY
 				AND CAST(FLOOR(CAST(tblICInventoryTransfer.dtmTransferDate AS FLOAT))AS DATETIME) <= CAST(FLOOR(CAST(@DateTo AS FLOAT))AS DATETIME)
 				AND (tblICInventoryTransfer.ysnPosted = 1)
 				AND (tblTFReportingComponentCriteria.strCriteria IS NULL 
-					OR (tblTFReportingComponentCriteria.strCriteria = '= 0' AND tblSMTaxCode.intTaxCodeId = TaxCodeCategory.intTaxCodeId ))
+					OR (tblTFReportingComponentCriteria.strCriteria = '<> 0' AND tblSMTaxCode.intTaxCodeId = TaxCodeCategory.intTaxCodeId ))
 		)tblTransactions
 				
 		IF (@ReportingComponentId <> '')
