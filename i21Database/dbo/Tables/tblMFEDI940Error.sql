@@ -20,7 +20,7 @@
 	,strUPCCaseCode NVARCHAR(250) COLLATE Latin1_General_CI_AS
 	,strDescription NVARCHAR(250) COLLATE Latin1_General_CI_AS
 	,dblQtyOrdered NUMERIC(36, 20)
-	,strUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS, CONSTRAINT [PK_tblMFEDI940Error_intEDI940Id] PRIMARY KEY (intEDI940Id)
+	,strUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,dblInnerPacksPerOuterPack NUMERIC(36, 20)
 	,dblTotalQtyOrdered NUMERIC(36, 20)
 	,dtmCreated datetime CONSTRAINT [DF_tblMFEDI940Error_dtmCreated] DEFAULT GETDATE() 
