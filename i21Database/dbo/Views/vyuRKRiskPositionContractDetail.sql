@@ -29,4 +29,4 @@ JOIN tblRKFuturesMonth FM on FM.intFutureMonthId=CD.intFutureMonthId
 JOIN tblCTContractType CT ON CT.intContractTypeId = CH.intContractTypeId
 JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intItemUOMId
 JOIN tblEMEntity EY ON EY.intEntityId = CH.intEntityId 
-WHERE CD.dblQuantity > CD.dblInvoicedQty
+WHERE CD.dblQuantity > isnull(CD.dblInvoicedQty,0)
