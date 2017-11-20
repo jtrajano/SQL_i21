@@ -22,6 +22,9 @@ BEGIN
 		AND intLocationId = @intLocationId
 		AND intAttributeId = 99
 
+	IF ISNULL(@strDefaultConsumptionUOM, '') = ''
+		SELECT @strDefaultConsumptionUOM = '1'
+
 	SELECT I.intItemId
 		,I.strItemNo
 		,I.strDescription
