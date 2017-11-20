@@ -1,15 +1,16 @@
 ﻿CREATE PROCEDURE [dbo].[uspARCustomerStatementPaymentActivityReport]
-	  @dtmDateTo				AS DATETIME			= NULL
-	, @dtmDateFrom				AS DATETIME			= NULL
-	, @ysnPrintZeroBalance		AS BIT				= 0
-	, @ysnPrintCreditBalance	AS BIT				= 1
-	, @ysnIncludeBudget			AS BIT				= 0
-	, @ysnPrintOnlyPastDue		AS BIT				= 0
-	, @strCustomerNumber		AS NVARCHAR(MAX)	= NULL
-	, @strAccountStatusCode		AS NVARCHAR(MAX)	= NULL
-	, @strLocationName			AS NVARCHAR(MAX)	= NULL
-	, @strCustomerName			AS NVARCHAR(MAX)	= NULL
-	, @ysnEmailOnly			    AS BIT				= NULL
+	  @dtmDateTo						AS DATETIME			= NULL
+	, @dtmDateFrom						AS DATETIME			= NULL
+	, @ysnPrintZeroBalance				AS BIT				= 0
+	, @ysnPrintCreditBalance			AS BIT				= 1
+	, @ysnIncludeBudget					AS BIT				= 0
+	, @ysnPrintOnlyPastDue				AS BIT				= 0
+	, @ysnExcludeInactiveCustomers		AS BIT				= 0
+	, @strCustomerNumber				AS NVARCHAR(MAX)	= NULL
+	, @strAccountStatusCode				AS NVARCHAR(MAX)	= NULL
+	, @strLocationName					AS NVARCHAR(MAX)	= NULL
+	, @strCustomerName					AS NVARCHAR(MAX)	= NULL
+	, @ysnEmailOnly						AS BIT				= NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -18,21 +19,22 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @dtmDateToLocal				AS DATETIME			= NULL
-	  , @dtmDateFromLocal			AS DATETIME			= NULL
-	  , @ysnPrintZeroBalanceLocal	AS BIT				= 0
-	  , @ysnPrintCreditBalanceLocal	AS BIT				= 1
-	  , @ysnIncludeBudgetLocal		AS BIT				= 0
-	  , @ysnPrintOnlyPastDueLocal	AS BIT				= 0
-	  , @strCustomerNumberLocal		AS NVARCHAR(MAX)	= NULL
-	  , @strLocationNameLocal		AS NVARCHAR(MAX)	= NULL
-	  , @strAccountStatusCodeLocal	AS NVARCHAR(MAX)	= NULL
-	  , @strCustomerNameLocal		AS NVARCHAR(MAX)	= NULL
-	  , @strDateTo					AS NVARCHAR(50)
-	  , @strDateFrom				AS NVARCHAR(50)
-	  , @query						AS NVARCHAR(MAX)
-	  , @queryBudget				AS NVARCHAR(MAX)
-	  , @filter						AS NVARCHAR(MAX)	= ''
+DECLARE @dtmDateToLocal						AS DATETIME			= NULL
+	  , @dtmDateFromLocal					AS DATETIME			= NULL
+	  , @ysnPrintZeroBalanceLocal			AS BIT				= 0
+	  , @ysnPrintCreditBalanceLocal			AS BIT				= 1
+	  , @ysnIncludeBudgetLocal				AS BIT				= 0
+	  , @ysnPrintOnlyPastDueLocal			AS BIT				= 0
+	  , @ysnExcludeInactiveCustomersLocal	AS BIT				= 0
+	  , @strCustomerNumberLocal				AS NVARCHAR(MAX)	= NULL
+	  , @strLocationNameLocal				AS NVARCHAR(MAX)	= NULL
+	  , @strAccountStatusCodeLocal			AS NVARCHAR(MAX)	= NULL
+	  , @strCustomerNameLocal				AS NVARCHAR(MAX)	= NULL
+	  , @strDateTo							AS NVARCHAR(50)
+	  , @strDateFrom						AS NVARCHAR(50)
+	  , @query								AS NVARCHAR(MAX)
+	  , @queryBudget						AS NVARCHAR(MAX)
+	  , @filter								AS NVARCHAR(MAX)	= ''
 		
 DECLARE @temp_xml_table TABLE (
 	 [id]			INT IDENTITY(1,1)
@@ -97,18 +99,19 @@ INTO #CUSTOMERS
 FROM tblARCustomer
 WHERE 1 = 0
 
-SET @dtmDateToLocal				= ISNULL(@dtmDateTo, GETDATE())
-SET	@dtmDateFromLocal			= ISNULL(@dtmDateFrom, CAST(-53690 AS DATETIME))
-SET @ysnPrintZeroBalanceLocal	= ISNULL(@ysnPrintZeroBalance, 0)
-SET @ysnPrintCreditBalanceLocal	= ISNULL(@ysnPrintCreditBalance, 1)
-SET @ysnIncludeBudgetLocal		= ISNULL(@ysnIncludeBudget, 0)
-SET @ysnPrintOnlyPastDueLocal	= ISNULL(@ysnPrintOnlyPastDue, 0)
-SET @strCustomerNumberLocal		= NULLIF(@strCustomerNumber, '')
-SET @strAccountStatusCodeLocal	= NULLIF(@strAccountStatusCode, '')
-SET @strLocationNameLocal		= NULLIF(@strLocationName, '')
-SET @strCustomerNameLocal       = NULLIF(@strCustomerName, '')
-SET @strDateTo					= ''''+ CONVERT(NVARCHAR(50),@dtmDateToLocal, 110) + ''''
-SET @strDateFrom				= ''''+ CONVERT(NVARCHAR(50),@dtmDateFromLocal, 110) + ''''
+SET @dtmDateToLocal						= ISNULL(@dtmDateTo, GETDATE())
+SET	@dtmDateFromLocal					= ISNULL(@dtmDateFrom, CAST(-53690 AS DATETIME))
+SET @ysnPrintZeroBalanceLocal			= ISNULL(@ysnPrintZeroBalance, 0)
+SET @ysnPrintCreditBalanceLocal			= ISNULL(@ysnPrintCreditBalance, 1)
+SET @ysnIncludeBudgetLocal				= ISNULL(@ysnIncludeBudget, 0)
+SET @ysnPrintOnlyPastDueLocal			= ISNULL(@ysnPrintOnlyPastDue, 0)
+SET @ysnExcludeInactiveCustomersLocal	= ISNULL(@ysnExcludeInactiveCustomers, 0)
+SET @strCustomerNumberLocal				= NULLIF(@strCustomerNumber, '')
+SET @strAccountStatusCodeLocal			= NULLIF(@strAccountStatusCode, '')
+SET @strLocationNameLocal				= NULLIF(@strLocationName, '')
+SET @strCustomerNameLocal				= NULLIF(@strCustomerName, '')
+SET @strDateTo							= ''''+ CONVERT(NVARCHAR(50),@dtmDateToLocal, 110) + ''''
+SET @strDateFrom						= ''''+ CONVERT(NVARCHAR(50),@dtmDateFromLocal, 110) + ''''
 
 IF @strCustomerNumberLocal IS NOT NULL
 	BEGIN
@@ -125,7 +128,7 @@ IF @strCustomerNumberLocal IS NOT NULL
 			FROM dbo.tblEMEntity WITH (NOLOCK)
 			WHERE strEntityNo = @strCustomerNumberLocal
 		) EC ON C.intEntityId = EC.intEntityId
-		WHERE C.ysnActive = 1
+		WHERE ((@ysnExcludeInactiveCustomersLocal = 1 AND C.ysnActive = 1) OR @ysnExcludeInactiveCustomersLocal = 0)
 			AND C.strStatementFormat = 'Payment Activity'
 	END
 ELSE
@@ -143,7 +146,7 @@ ELSE
 			FROM dbo.tblEMEntity WITH (NOLOCK)
 			WHERE (@strCustomerNameLocal IS NULL OR strName LIKE '%'+ @strCustomerNameLocal +'%')
 		) EC ON C.intEntityId = EC.intEntityId
-		WHERE C.ysnActive = 1
+		WHERE ((@ysnExcludeInactiveCustomersLocal = 1 AND C.ysnActive = 1) OR @ysnExcludeInactiveCustomersLocal = 0)
 			AND C.strStatementFormat = 'Payment Activity'
 END
 
