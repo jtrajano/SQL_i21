@@ -73,6 +73,7 @@ FROM (
 		, ysnIsBasket = CAST(0 AS BIT)
 		, LogisticsView.intFreightTermId
 		, LogisticsView.strFreightTerm 
+		, strMarkings               = LogisticsView.strMarks
 	FROM	vyuLGLoadContainerReceiptContracts LogisticsView LEFT JOIN dbo.tblSMCurrency Currency 
 				ON Currency.strCurrency = ISNULL(LogisticsView.strCurrency, LogisticsView.strMainCurrency) 
 			LEFT JOIN dbo.tblICItemUOM ItemUOM 
