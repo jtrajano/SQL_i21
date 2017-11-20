@@ -82,6 +82,8 @@ SELECT	  CD.intContractDetailId
 		, CH.strWeight
 		, CH.intWeightId
 		, CD.intCurrencyId
+		, Terms.intFreightTermId
+		, Terms.strFreightTerm
 
 FROM	tblCTContractDetail CD	
 	CROSS APPLY tblCTCompanyPreference CP
@@ -108,3 +110,5 @@ FROM	tblCTContractDetail CD
 			FROM		tblLGAllocationDetail 
 			WHERE		intSContractDetailId = CD.intContractDetailId
 		) SA 
+	LEFT JOIN tblSMFreightTerms Terms
+		ON Terms.intFreightTermId = CD.intFreightTermId
