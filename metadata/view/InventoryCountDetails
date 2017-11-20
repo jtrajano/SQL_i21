@@ -108,36 +108,7 @@
                                 "ui": "string"
                             },
                             "name": "MyButton3",
-                            "designerId": "49ebf1f5-a17b-4188-86b3-7c3ce4e7ff73",
-                            "cn": [
-                                {
-                                    "type": "fixedfunction",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "designer|params": [
-                                            "button",
-                                            "e"
-                                        ],
-                                        "designer|viewControllerFn": "onSaveClick",
-                                        "fn": "handler",
-                                        "implHandler": [
-                                            "console.log(e);"
-                                        ]
-                                    },
-                                    "configAlternates": {
-                                        "designer|params": "typedarray",
-                                        "designer|viewControllerFn": "string",
-                                        "fn": "string",
-                                        "implHandler": "code"
-                                    },
-                                    "name": "handler",
-                                    "designerId": "b0278158-e3ca-478b-b54d-89bb2b1e8c5d"
-                                }
-                            ]
+                            "designerId": "49ebf1f5-a17b-4188-86b3-7c3ce4e7ff73"
                         },
                         {
                             "type": "Ext.button.Button",

@@ -260,7 +260,7 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
             }
         }
 
-        var task = new Ext.utl.DelayedTask(function() {
+        var task = new Ext.util.DelayedTask(function() {
             var cboItem = win.down('#cboItem');
             if(cboItem) cboItem.focus();
         });

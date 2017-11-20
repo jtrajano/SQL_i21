@@ -57,7 +57,6 @@ Ext.define('Inventory.view.InventoryCountDetails', {
                     items: [
                         {
                             xtype: 'button',
-                            handler: 'onSaveClick',
                             itemId: 'btnAdd',
                             ui: 'i21-button-toolbar-small',
                             text: 'Save'
@@ -97,8 +96,8 @@ Ext.define('Inventory.view.InventoryCountDetails', {
                                     items: [
                                         {
                                             xtype: 'textfield',
-                                            tabIndex: -1,
                                             itemId: 'txtCountLineNo',
+                                            tabIndex: -1,
                                             fieldLabel: 'Count Line #',
                                             readOnly: true
                                         },
@@ -176,9 +175,9 @@ Ext.define('Inventory.view.InventoryCountDetails', {
                                                 }
                                             ],
                                             reference: 'cboItem',
-                                            tabIndex: 0,
                                             itemId: 'cboItem',
                                             modelValidation: true,
+                                            tabIndex: 0,
                                             fieldLabel: 'Item No',
                                             displayField: 'strItemNo',
                                             valueField: 'strItemNo'
@@ -207,15 +206,15 @@ Ext.define('Inventory.view.InventoryCountDetails', {
                                         },
                                         {
                                             xtype: 'textfield',
-                                            tabIndex: -1,
                                             itemId: 'txtDescription',
+                                            tabIndex: -1,
                                             fieldLabel: 'Description',
                                             readOnly: true
                                         },
                                         {
                                             xtype: 'textfield',
-                                            tabIndex: -1,
                                             itemId: 'txtCategory',
+                                            tabIndex: -1,
                                             fieldLabel: 'Category',
                                             readOnly: true
                                         },
@@ -412,22 +411,22 @@ Ext.define('Inventory.view.InventoryCountDetails', {
                                         },
                                         {
                                             xtype: 'textfield',
-                                            tabIndex: -1,
                                             itemId: 'txtStockUOM',
+                                            tabIndex: -1,
                                             fieldLabel: 'UOM',
                                             readOnly: true
                                         },
                                         {
                                             xtype: 'numberfield',
-                                            tabIndex: -1,
                                             itemId: 'txtSystemCount',
+                                            tabIndex: -1,
                                             fieldLabel: 'On Hand',
                                             readOnly: true
                                         },
                                         {
                                             xtype: 'numberfield',
-                                            tabIndex: -1,
                                             itemId: 'txtCost',
+                                            tabIndex: -1,
                                             fieldLabel: 'Last Cost',
                                             readOnly: true
                                         },
@@ -551,15 +550,15 @@ Ext.define('Inventory.view.InventoryCountDetails', {
                                         },
                                         {
                                             xtype: 'numberfield',
-                                            tabIndex: -1,
                                             itemId: 'txtPhysicalCountInStockUnit',
+                                            tabIndex: -1,
                                             fieldLabel: 'Physical Count in Stock Unit',
                                             readOnly: true
                                         },
                                         {
                                             xtype: 'numberfield',
-                                            tabIndex: -1,
                                             itemId: 'txtVariance',
+                                            tabIndex: -1,
                                             fieldLabel: 'Variance',
                                             readOnly: true
                                         },
