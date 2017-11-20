@@ -519,9 +519,7 @@ BEGIN TRY
 		AND rs.intItemId = ri.intItemId
 	JOIN dbo.tblICItem I ON I.intItemId = ri.intItemId
 	JOIN dbo.tblICCategory C ON I.intCategoryId = C.intCategoryId
-	JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = ri.intItemUOMId
-	JOIN dbo.tblICItemUOM IU ON IU.intItemId = rs.intSubstituteItemId
-		AND IU.intUnitMeasureId = IU1.intUnitMeasureId
+	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = rs.intItemUOMId
 	JOIN dbo.tblICItem P ON r.intItemId = P.intItemId
 	WHERE r.intWorkOrderId = @intWorkOrderId
 		AND ri.intRecipeItemTypeId = 1
@@ -638,14 +636,6 @@ BEGIN TRY
 		FROM dbo.tblMFWorkOrderRecipeItem RI
 		JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RSI ON RSI.intRecipeItemId = RI.intRecipeItemId
 			AND RI.intWorkOrderId = RSI.intWorkOrderId
-		JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = RI.intRecipeId
-			AND r.intWorkOrderId = RI.intWorkOrderId
-		JOIN dbo.tblICItem I ON I.intItemId = RI.intItemId
-		JOIN dbo.tblICCategory C ON I.intCategoryId = C.intCategoryId
-		JOIN dbo.tblICItem P ON r.intItemId = P.intItemId
-		JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = RSI.intItemUOMId
-		JOIN dbo.tblICItemUOM IU ON IU.intItemId = RSI.intSubstituteItemId
-			AND IU.intUnitMeasureId = IU1.intUnitMeasureId
 		WHERE RI.intWorkOrderId = @intWorkOrderId
 			AND (
 				(
@@ -697,6 +687,7 @@ BEGIN TRY
 			,strLotTracking
 			,dblLowerToleranceReqQty
 			,intMainItemId
+			,intCategoryId
 			)
 		SELECT WI.intItemId
 			,Round(I.dblReqQty * WI.dblRatio / 100, @intNoOfDecimalPlacesOnConsumption)
@@ -706,6 +697,7 @@ BEGIN TRY
 			,I.strLotTracking
 			,Round(I.dblLowerToleranceReqQty * WI.dblRatio / 100, @intNoOfDecimalPlacesOnConsumption)
 			,I.intMainItemId
+			,I.intCategoryId 
 		FROM @tblMFWorkOrderInputItem WI
 		JOIN @tblItem I ON I.intItemId = WI.intMainItemId
 		WHERE NOT EXISTS (
