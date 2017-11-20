@@ -24,6 +24,9 @@ BEGIN
 		AND intLocationId = @intLocationId
 		AND intAttributeId = 99
 
+	IF ISNULL(@strDefaultConsumptionUOM, '') = ''
+		SELECT @strDefaultConsumptionUOM = '1'
+
 	SELECT @dtmCurrentDate = Getdate()
 
 	IF @intWorkOrderId = 0
