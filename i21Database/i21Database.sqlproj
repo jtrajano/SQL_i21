@@ -5448,6 +5448,7 @@
     <Build Include="dbo\Stored Procedures\uspMFProcessEDI940.sql" />
     <Build Include="dbo\Stored Procedures\uspMFProcessEDI945.sql" />
     <Build Include="dbo\Tables\tblMFLotStatusException.sql" />
+    <Build Include="dbo\Views\vyuMFLotStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
