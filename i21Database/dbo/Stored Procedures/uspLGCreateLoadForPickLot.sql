@@ -143,7 +143,7 @@ BEGIN TRY
 			)
 		SELECT PLD.dblGrossWt
 			,PLD.dblNetWt
-			,AD.dblSAllocatedQty
+			,PLD.dblSalePickedQty
 			,0
 			,AD.intAllocationDetailId
 			,1
@@ -161,6 +161,7 @@ BEGIN TRY
 		JOIN tblLGPickLotHeader PLH ON PLH.intPickLotHeaderId = PLD.intPickLotHeaderId
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = AD.intSContractDetailId
 		WHERE AD.intAllocationDetailId = @intAllocationDetailId
+			AND PLD.intPickLotHeaderId = @intPickLotHeaderId
 
 		SELECT @intLoadDetailId = SCOPE_IDENTITY()
 
@@ -203,6 +204,7 @@ BEGIN TRY
 		JOIN tblLGAllocationDetail AD ON PLD.intAllocationDetailId = AD.intAllocationDetailId
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = AD.intPContractDetailId
 		WHERE AD.intAllocationDetailId = @intAllocationDetailId
+			AND PLD.intPickLotHeaderId = @intPickLotHeaderId
 
 		SELECT @intMinAllocationRecordId = MIN(intAllocationRecordId)
 		FROM @tblAllocationInfo
