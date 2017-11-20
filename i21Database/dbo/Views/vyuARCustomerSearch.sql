@@ -56,13 +56,11 @@ SELECT intEntityId				= ENTITY.intEntityId
      , strBillToZipCode			= BILLTOLOCATION.strZipCode
      , strBillToCountry			= BILLTOLOCATION.strCountry
 	 , strBillToPhone			= BILLTOLOCATION.strPhone
-	 ,intServiceChargeId		= CUSTOMER.intServiceChargeId
-
-	 
-
-	, intWarehouseId = CUSTOMERLOCATION.intWarehouseId
-	, intPaymentMethodId = CUSTOMER.intPaymentMethodId
-	, strPaymentMethod = CUSTOMER.strPaymentMethod
+	 , intServiceChargeId		= CUSTOMER.intServiceChargeId
+	 , intWarehouseId = CUSTOMERLOCATION.intWarehouseId
+	 , intPaymentMethodId = CUSTOMER.intPaymentMethodId
+	 , strPaymentMethod = CUSTOMER.strPaymentMethod
+	 , ysnCreditHold
 FROM tblEMEntity ENTITY
 INNER JOIN (
 	SELECT C.intEntityId
@@ -91,9 +89,10 @@ INNER JOIN (
 		 , strSalesPersonName	= SALESPERSON.strSalesPersonName
 		 , strTerm				= TERM.strTerm
 		 , ysnHasBudgetSetup	= CAST(CASE WHEN (BUDGET.ysnHasBudgetSetup) = 1 THEN 1 ELSE 0 END AS BIT)
-		,intServiceChargeId		= C.intServiceChargeId
-		, intPaymentMethodId = C.intPaymentMethodId
-		, strPaymentMethod = PAYMENTMETHOD.strPaymentMethod
+		 , intServiceChargeId	= C.intServiceChargeId
+		 , intPaymentMethodId	= C.intPaymentMethodId
+		 , strPaymentMethod		= PAYMENTMETHOD.strPaymentMethod
+		 , ysnCreditHold
 	FROM dbo.tblARCustomer C WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT S.intEntityId
