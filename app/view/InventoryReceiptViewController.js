@@ -6883,26 +6883,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var newCF = current.get('dblItemUOMConvFactor');
         var received = current.get('dblReceived');
         var ordered = current.get('dblOrderQty');
-        var qtyToReceive = plugin.getActiveEditor().getValue();//ordered - received;
+        var qtyToReceive = plugin.getActiveEditor().getValue();
         if (origCF > 0 && newCF > 0) {
-            //qtyToReceive = (qtyToReceive * origCF) / newCF;
-            qtyToReceive = me.convertQtyBetweenUOM(origCF, newCF, qtyToReceive);
+            qtyToReceive = me.convertQtyBetweenUOM(origCF, newCF, qtyToReceive); //Ordered - Received;
             current.set('dblOpenReceive', qtyToReceive);
             plugin.getActiveEditor().field.setValue(qtyToReceive);
-        }
-
-        //current.tblICInventoryReceiptItemLots().store.load();
-
-        if (current.tblICInventoryReceiptItemLots()) {
-            Ext.Array.each(current.tblICInventoryReceiptItemLots().data.items, function (lot) {
-                if (!lot.dummy) {
-                    //Set Default Value for Lot Wgt UOM 
-                    if (lot.get('strWeightUOM') === null || lot.get('strWeightUOM') === '') {
-                        lot.set('strWeightUOM', records[0].get('strUnitMeasure'));
-                        lot.set('dblLotUOMConvFactor', records[0].get('dblUnitQty'));
-                    }
-                }
-            });
         }
 
         if (iRely.Functions.isEmpty(current.get('intCostUOMId'))) {
@@ -6934,6 +6919,41 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('intWeightUOMId', records[0].get('intItemUnitMeasureId'));
             current.set('dblWeightUOMConvFactor', current.get('dblItemUOMConvFactor'));
         }
+
+        // If there are lot records, update it. 
+        if (current && current.tblICInventoryReceiptItemLots()) {
+            // Loop 1: Check how may lot records already exists. 
+            var receiptLotCount = 0;
+            Ext.Array.each(current.tblICInventoryReceiptItemLots().data.items, function (lot) {
+                if (!lot.dummy) {
+                    receiptLotCount++;
+                    // Exit immediately if there is more than one lot record. 
+                    if (receiptLotCount > 1) {
+                        return false; 
+                    } 
+                }
+            });
+
+            // Loop 2: Update the lot records. 
+            Ext.Array.each(current.tblICInventoryReceiptItemLots().data.items, function (lot) {
+                if (!lot.dummy) {
+                    //If there is only one lot record, set the Lot UOM, Lot Qty, Lot Weight UOM, Gross, and Net, 
+                    if (receiptLotCount == 1){
+                        lot.set('dblQuantity', current.get('dblOpenReceive'));
+                        lot.set('intItemUnitMeasureId', current.get('intUnitMeasureId'));                        
+                        lot.set('strWeightUOM',  current.get('strWeightUOM'));
+                        lot.set('strUnitMeasure', records[0].get('strUnitMeasure'));
+                        lot.set('dblLotUOMConvFactor', records[0].get('dblUnitQty'));
+                    }
+
+                    //Set Default Value for Lot Wgt UOM 
+                    if (lot.get('strWeightUOM') === null || lot.get('strWeightUOM') === '') {
+                        lot.set('strWeightUOM', records[0].get('strUnitMeasure'));
+                        lot.set('dblLotUOMConvFactor', records[0].get('dblUnitQty'));
+                    }
+                }
+            });
+        }          
 
         me.calculateGrossNet(current, 1);
     },
