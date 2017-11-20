@@ -6,6 +6,8 @@
     [dtmBeginDate] DATETIME NOT NULL, 
     [dtmEndDate] DATETIME NULL, 
     [dblRatePerUnit] NUMERIC(18, 6) NOT NULL CONSTRAINT [DF_tblBBRateVendorLocation_dblRatePerUnit]  DEFAULT ((0)), 
+	[intVendorLocationId] INT NOT NULL,
+    [intUnitMeasureId] INT NULL, 
     CONSTRAINT [PK_tblBBRateVendorLocation] PRIMARY KEY CLUSTERED ([intRateVendorLocationId] ASC),
 	CONSTRAINT [FK_tblBBRateVendorLocation_tblBBProgramCharge] FOREIGN KEY (intProgramChargeId) REFERENCES [tblBBProgramCharge]([intProgramChargeId]), 
 )
