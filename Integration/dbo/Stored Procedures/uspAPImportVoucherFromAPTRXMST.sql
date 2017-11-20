@@ -357,7 +357,8 @@ SELECT
 	[intLineNo]				=	C.apegl_dist_no
 FROM tblAPBill A
 	INNER JOIN tblAPVendor B
-		ON A.intEntityVendorId = B.intEntityVendorId
+		ON A.intEntityVendorId = B.intEntityId
+	INNER JOIN #tmpVoucherTransactions tmpCreatedVouchers ON A.intBillId = tmpCreatedVouchers.intBillId
 	INNER JOIN (tmp_aptrxmstImport C2 INNER JOIN tmp_apeglmstImport C 
 					ON C2.aptrx_ivc_no = C.apegl_ivc_no 
 					AND C2.aptrx_vnd_no = C.apegl_vnd_no)
