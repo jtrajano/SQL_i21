@@ -3,12 +3,12 @@
 	,@strOutputLotNumber NVARCHAR(50) = '' OUTPUT
 	,@intParentLotId INT = 0 OUTPUT
 	,@dtmCurrentDate DATETIME = NULL
-	,@ysnRecap BIT = 0 
+	,@ysnRecap BIT = 0
 	,@strRetBatchId NVARCHAR(40) = '' OUTPUT
-)
+	)
 AS
 BEGIN TRY
-	SET @dtmCurrentDate = ISNULL(@dtmCurrentDate, GETDATE()) 
+	SET @dtmCurrentDate = ISNULL(@dtmCurrentDate, GETDATE())
 
 	DECLARE @idoc INT
 		,@ErrMsg NVARCHAR(MAX)
@@ -86,9 +86,10 @@ BEGIN TRY
 		,@intInputItemUOMId INT
 		,@strCreateMultipleLots NVARCHAR(50)
 		,@intBusinessShiftId INT
-		,@ysnFillPartialPallet bit
-		,@intSpecialPalletLotId int
-		,@strComputeGrossWeight nvarchar(50)
+		,@ysnFillPartialPallet BIT
+		,@intSpecialPalletLotId INT
+		,@strComputeGrossWeight NVARCHAR(50)
+		,@dblProducePartialQty NUMERIC(38, 20)
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -146,8 +147,8 @@ BEGIN TRY
 		,@strComment = strComment
 		,@strParentLotNumber = strParentLotNumber
 		,@ysnIgnoreTolerance = ysnIgnoreTolerance
-		,@ysnFillPartialPallet=ysnFillPartialPallet
-		,@intSpecialPalletLotId=intSpecialPalletLotId
+		,@ysnFillPartialPallet = ysnFillPartialPallet
+		,@intSpecialPalletLotId = intSpecialPalletLotId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intWorkOrderId INT
 			,intManufacturingProcessId INT
@@ -188,8 +189,8 @@ BEGIN TRY
 			,strComment NVARCHAR(MAX)
 			,strParentLotNumber NVARCHAR(50)
 			,ysnIgnoreTolerance BIT
-			,ysnFillPartialPallet bit
-			,intSpecialPalletLotId int
+			,ysnFillPartialPallet BIT
+			,intSpecialPalletLotId INT
 			)
 
 	SELECT @strComputeGrossWeight = strAttributeValue
@@ -198,11 +199,10 @@ BEGIN TRY
 		AND intLocationId = @intLocationId
 		AND intAttributeId = 89
 
-	if @strComputeGrossWeight='True'
-	Begin
-		Select @dblProduceQty =@dblPhysicalCount *@dblUnitQty 
-	end
-
+	IF @strComputeGrossWeight = 'True'
+	BEGIN
+		SELECT @dblProduceQty = @dblPhysicalCount * @dblUnitQty
+	END
 
 	IF @ysnIgnoreTolerance IS NULL
 		SELECT @ysnIgnoreTolerance = 1
@@ -227,7 +227,7 @@ BEGIN TRY
 	IF @intTransactionCount = 0
 		BEGIN TRANSACTION
 
-	SELECT @dtmBusinessDate = ISNULL(dbo.fnGetBusinessDate(@dtmCurrentDate, @intLocationId), GETDATE()) 
+	SELECT @dtmBusinessDate = ISNULL(dbo.fnGetBusinessDate(@dtmCurrentDate, @intLocationId), GETDATE())
 
 	SELECT @intBusinessShiftId = intShiftId
 	FROM dbo.tblMFShift
@@ -578,10 +578,10 @@ BEGIN TRY
 				,intCreatedUserId
 				,dtmLastModified
 				,intLastModifiedUserId
-				,intSubLocationId 
-				,intStorageLocationId 
-				,dtmActualInputDateTime 
-				,intShiftId 
+				,intSubLocationId
+				,intStorageLocationId
+				,dtmActualInputDateTime
+				,intShiftId
 				)
 			SELECT @intWorkOrderId
 				,intItemId
@@ -616,10 +616,10 @@ BEGIN TRY
 				,@intUserId
 				,@dtmCurrentDate
 				,@intUserId
-				,intSubLocationId 
-				,intStorageLocationId 
-				,@dtmPlannedDate 
-				,@intPlannedShiftId 
+				,intSubLocationId
+				,intStorageLocationId
+				,@dtmPlannedDate
+				,@intPlannedShiftId
 			FROM dbo.tblICLot L
 			WHERE intLotId = @intInputLotId
 		END
@@ -640,8 +640,8 @@ BEGIN TRY
 				,dtmLastModified
 				,intLastModifiedUserId
 				,intStorageLocationId
-				,dtmActualInputDateTime 
-				,intShiftId 
+				,dtmActualInputDateTime
+				,intShiftId
 				)
 			SELECT @intWorkOrderId
 				,@intInputItemId
@@ -657,8 +657,8 @@ BEGIN TRY
 				,@dtmCurrentDate
 				,@intUserId
 				,@intStorageLocationId
-				,@dtmPlannedDate 
-				,@intPlannedShiftId 
+				,@dtmPlannedDate
+				,@intPlannedShiftId
 		END
 
 		EXEC dbo.uspMFCopyRecipe @intItemId = @intItemId
@@ -712,14 +712,30 @@ BEGIN TRY
 					AND intItemUOMId = @intProduceUnitMeasureId
 				)
 		BEGIN
-			EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
-				,@dblProduceQty = @dblProduceQty
-				,@intProduceUOMId = @intProduceUnitMeasureId
-				,@intBatchId = @intBatchId
-				,@intUserId = @intUserId
-				,@dblUnitQty = @dblUnitQty
-				,@ysnProducedQtyByWeight = 1
-				,@ysnFillPartialPallet=@ysnFillPartialPallet
+			IF @ysnFillPartialPallet = 1
+			BEGIN
+				EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
+					,@dblProduceQty = 0
+					,@intProduceUOMId = @intProduceUnitMeasureId
+					,@intBatchId = @intBatchId
+					,@intUserId = @intUserId
+					,@dblUnitQty = @dblUnitQty
+					,@ysnProducedQtyByWeight = 1
+					,@ysnFillPartialPallet = @ysnFillPartialPallet
+					,@dblProducePartialQty = @dblProduceQty
+			END
+			ELSE
+			BEGIN
+				EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
+					,@dblProduceQty = @dblProduceQty
+					,@intProduceUOMId = @intProduceUnitMeasureId
+					,@intBatchId = @intBatchId
+					,@intUserId = @intUserId
+					,@dblUnitQty = @dblUnitQty
+					,@ysnProducedQtyByWeight = 1
+					,@ysnFillPartialPallet = @ysnFillPartialPallet
+					,@dblProducePartialQty = 0
+			END
 
 			EXEC dbo.uspMFConsumeWorkOrder @intWorkOrderId = @intWorkOrderId
 				,@dblProduceQty = @dblProduceQty
@@ -733,14 +749,30 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
-			EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
-				,@dblProduceQty = @dblPhysicalCount
-				,@intProduceUOMId = @intPhysicalItemUOMId
-				,@intBatchId = @intBatchId
-				,@intUserId = @intUserId
-				,@dblUnitQty = @dblUnitQty
-				,@ysnProducedQtyByWeight = 0
-				,@ysnFillPartialPallet=@ysnFillPartialPallet
+			IF @ysnFillPartialPallet = 1
+			BEGIN
+				EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
+					,@dblProduceQty = 0
+					,@intProduceUOMId = @intPhysicalItemUOMId
+					,@intBatchId = @intBatchId
+					,@intUserId = @intUserId
+					,@dblUnitQty = @dblUnitQty
+					,@ysnProducedQtyByWeight = 0
+					,@ysnFillPartialPallet = @ysnFillPartialPallet
+					,@dblProducePartialQty = @dblPhysicalCount
+			END
+			ELSE
+			BEGIN
+				EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
+					,@dblProduceQty = @dblPhysicalCount
+					,@intProduceUOMId = @intPhysicalItemUOMId
+					,@intBatchId = @intBatchId
+					,@intUserId = @intUserId
+					,@dblUnitQty = @dblUnitQty
+					,@ysnProducedQtyByWeight = 0
+					,@ysnFillPartialPallet = @ysnFillPartialPallet
+					,@dblProducePartialQty = 0
+			END
 
 			EXEC dbo.uspMFConsumeWorkOrder @intWorkOrderId = @intWorkOrderId
 				,@dblProduceQty = @dblPhysicalCount
@@ -751,7 +783,6 @@ BEGIN TRY
 				,@intBatchId = @intBatchId
 				,@ysnPostConsumption = @ysnPostConsumption
 				,@ysnRecap = @ysnRecap
-				
 		END
 
 		EXEC uspMFConsumeSKU @intWorkOrderId = @intWorkOrderId
@@ -798,7 +829,7 @@ BEGIN TRY
 			,@ysnLotAlias = @ysnLotAlias
 			,@strLotAlias = @strLotAlias
 			,@intProductionTypeId = @intProductionTypeId
-			,@ysnFillPartialPallet=@ysnFillPartialPallet
+			,@ysnFillPartialPallet = @ysnFillPartialPallet
 
 		SELECT @strCreateMultipleLots = strAttributeValue
 		FROM tblMFManufacturingProcessAttribute
@@ -847,8 +878,8 @@ BEGIN TRY
 					,@strParentLotNumber = @strParentLotNumber
 					,@intInputLotId = @intInputLotId
 					,@intInputStorageLocationId = @intInputLotStorageLocationId
-					,@ysnFillPartialPallet=@ysnFillPartialPallet
-					,@intSpecialPalletLotId=@intSpecialPalletLotId
+					,@ysnFillPartialPallet = @ysnFillPartialPallet
+					,@intSpecialPalletLotId = @intSpecialPalletLotId
 					,@ysnRecap = @ysnRecap
 
 				IF @intLotStatusId IS NOT NULL
@@ -924,8 +955,8 @@ BEGIN TRY
 				,@strParentLotNumber = @strParentLotNumber
 				,@intInputLotId = @intInputLotId
 				,@intInputStorageLocationId = @intInputLotStorageLocationId
-				,@ysnFillPartialPallet=@ysnFillPartialPallet
-				,@intSpecialPalletLotId=@intSpecialPalletLotId
+				,@ysnFillPartialPallet = @ysnFillPartialPallet
+				,@intSpecialPalletLotId = @intSpecialPalletLotId
 				,@ysnRecap = @ysnRecap
 
 			IF @intLotStatusId IS NOT NULL
