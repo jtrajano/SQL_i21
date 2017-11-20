@@ -730,9 +730,7 @@ BEGIN TRY
 		JOIN dbo.tblICItem I ON I.intItemId = RI.intItemId
 		JOIN dbo.tblICCategory C ON I.intCategoryId = C.intCategoryId
 		JOIN dbo.tblICItem P ON r.intItemId = P.intItemId
-		JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = RSI.intItemUOMId
-		JOIN dbo.tblICItemUOM IU ON IU.intItemId = RSI.intSubstituteItemId
-			AND IU.intUnitMeasureId = IU1.intUnitMeasureId
+		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = RSI.intItemUOMId
 		JOIN @tblMFFinalProducedQtyByMachine M ON 1 = 1
 		WHERE RI.intWorkOrderId = @intWorkOrderId
 			AND (
