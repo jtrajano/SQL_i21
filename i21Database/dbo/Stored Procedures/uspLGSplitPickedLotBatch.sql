@@ -28,6 +28,19 @@ BEGIN TRY
 	SELECT @intItemId = intItemId
 	FROM tblICLot
 	WHERE intLotId = @intPickedLotId
+	
+	IF (@dblNewPickedQty = @dblOldPickedQty)
+	BEGIN
+		RAISERROR ('Old and new qty are same. Cannot split.',16,1)
+	END
+
+	IF EXISTS (SELECT TOP 1 1
+			   FROM tblLGStockSalesHeader SSH
+			   JOIN tblLGPickLotDetail PLD ON PLD.intPickLotHeaderId = SSH.intPickLotHeaderId
+			   WHERE PLD.intPickLotDetailId = @intPickLotDetailId)
+	BEGIN
+		RAISERROR ('Pick lot batch was created from stock sale. Cannot split.',16,1)
+	END
 
 	IF (@dblOldPickedQty - @dblNewPickedQty < = 0.00 )
 		RETURN;
@@ -60,6 +73,7 @@ BEGIN TRY
 			,intWeightUnitMeasureId
 			,intUserSecurityId
 			,intDeliveryHeaderId
+			,intParentPickLotHeaderId
 			)
 		SELECT intConcurrencyId
 			,@strNewPickLotNumber
@@ -71,6 +85,7 @@ BEGIN TRY
 			,intWeightUnitMeasureId
 			,intUserSecurityId
 			,intDeliveryHeaderId
+			,@intPickLotHeaderId
 		FROM tblLGPickLotHeader
 		WHERE intPickLotHeaderId = @intPickLotHeaderId
 
@@ -185,6 +200,7 @@ BEGIN TRY
 			,intWeightUnitMeasureId
 			,intUserSecurityId
 			,intDeliveryHeaderId
+			,intParentPickLotHeaderId
 			)
 		SELECT intConcurrencyId
 			,@strNewPickLotNumber
@@ -196,6 +212,7 @@ BEGIN TRY
 			,intWeightUnitMeasureId
 			,intUserSecurityId
 			,intDeliveryHeaderId
+			,@intPickLotHeaderId
 		FROM tblLGPickLotHeader
 		WHERE intPickLotHeaderId = @intPickLotHeaderId
 
