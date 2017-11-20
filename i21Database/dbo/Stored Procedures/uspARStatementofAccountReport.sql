@@ -30,6 +30,7 @@ DECLARE  @dtmDateTo					AS DATETIME
 		,@ysnPrintCreditBalance		AS BIT
 		,@ysnIncludeBudget			AS BIT
 		,@ysnPrintOnlyPastDue		AS BIT
+		,@ysnExcludeInactiveCustomers AS BIT
 		,@xmlDocumentId				AS INT
 		,@query						AS NVARCHAR(MAX)
 		,@filter					AS NVARCHAR(MAX) = ''
@@ -122,6 +123,10 @@ SELECT @ysnPrintOnlyPastDue = [from]
 FROM @temp_xml_table
 WHERE [fieldname] = 'ysnPrintOnlyPastDue'
 
+SELECT @ysnExcludeInactiveCustomers = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'ysnExcludeInactiveCustomers'
+
 SELECT @strStatementFormat = CASE WHEN ISNULL([from], '') = '' THEN 'Open Item' ELSE [from] END
 FROM @temp_xml_table
 WHERE [fieldname] = 'strStatementFormat'
@@ -146,46 +151,49 @@ IF CHARINDEX('''', @strCustomerName) > 0
 IF @strStatementFormat = 'Balance Forward'
 	BEGIN
 		EXEC dbo.uspARCustomerStatementBalanceForwardReport 
-			  @dtmDateTo				= @dtmDateTo
-			, @dtmDateFrom				= @dtmDateFrom
-			, @ysnPrintZeroBalance		= @ysnPrintZeroBalance
-			, @ysnPrintCreditBalance	= @ysnPrintCreditBalance
-			, @ysnIncludeBudget			= @ysnIncludeBudget
-			, @ysnPrintOnlyPastDue		= @ysnPrintOnlyPastDue
-			, @ysnPrintFromCF			= 0
-			, @strCustomerNumber		= @strCustomerNumber
-			, @strAccountStatusCode		= @strAccountStatusCode
-			, @strLocationName			= @strLocationName
-			, @strCustomerName			= @strCustomerName
+			  @dtmDateTo					= @dtmDateTo
+			, @dtmDateFrom					= @dtmDateFrom
+			, @ysnPrintZeroBalance			= @ysnPrintZeroBalance
+			, @ysnPrintCreditBalance		= @ysnPrintCreditBalance
+			, @ysnIncludeBudget				= @ysnIncludeBudget
+			, @ysnPrintOnlyPastDue			= @ysnPrintOnlyPastDue
+			, @ysnExcludeInactiveCustomers	= @ysnExcludeInactiveCustomers
+			, @ysnPrintFromCF				= 0
+			, @strCustomerNumber			= @strCustomerNumber
+			, @strAccountStatusCode			= @strAccountStatusCode
+			, @strLocationName				= @strLocationName
+			, @strCustomerName				= @strCustomerName
 	END
 ELSE IF ISNULL(@strStatementFormat, 'Open Item') IN ('Open Item', 'Running Balance')
 	BEGIN
 		EXEC dbo.uspARCustomerStatementReport
-		      @dtmDateTo				= @dtmDateTo
-		    , @dtmDateFrom				= @dtmDateFrom
-		    , @ysnPrintZeroBalance		= @ysnPrintZeroBalance
-		    , @ysnPrintCreditBalance	= @ysnPrintCreditBalance
-		    , @ysnIncludeBudget			= @ysnIncludeBudget
-		    , @ysnPrintOnlyPastDue		= @ysnPrintOnlyPastDue
-		    , @strCustomerNumber		= @strCustomerNumber
-		    , @strAccountStatusCode		= @strAccountStatusCode
-		    , @strLocationName			= @strLocationName
-		    , @strStatementFormat		= @strStatementFormat
-			, @strCustomerName			= @strCustomerName
+		      @dtmDateTo					= @dtmDateTo
+		    , @dtmDateFrom					= @dtmDateFrom
+		    , @ysnPrintZeroBalance			= @ysnPrintZeroBalance
+		    , @ysnPrintCreditBalance		= @ysnPrintCreditBalance
+		    , @ysnIncludeBudget				= @ysnIncludeBudget
+		    , @ysnPrintOnlyPastDue			= @ysnPrintOnlyPastDue
+			, @ysnExcludeInactiveCustomers	= @ysnExcludeInactiveCustomers
+		    , @strCustomerNumber			= @strCustomerNumber
+		    , @strAccountStatusCode			= @strAccountStatusCode
+		    , @strLocationName				= @strLocationName
+		    , @strStatementFormat			= @strStatementFormat
+			, @strCustomerName				= @strCustomerName
 	END
 ELSE IF @strStatementFormat = 'Payment Activity'
 	BEGIN
 		EXEC dbo.uspARCustomerStatementPaymentActivityReport
-			  @dtmDateTo				= @dtmDateTo
-		    , @dtmDateFrom				= @dtmDateFrom
-		    , @ysnPrintZeroBalance		= @ysnPrintZeroBalance
-		    , @ysnPrintCreditBalance	= @ysnPrintCreditBalance
-		    , @ysnIncludeBudget			= @ysnIncludeBudget
-		    , @ysnPrintOnlyPastDue		= @ysnPrintOnlyPastDue
-		    , @strCustomerNumber		= @strCustomerNumber
-		    , @strAccountStatusCode		= @strAccountStatusCode
-		    , @strLocationName			= @strLocationName
-			, @strCustomerName			= @strCustomerName
+			  @dtmDateTo					= @dtmDateTo
+		    , @dtmDateFrom					= @dtmDateFrom
+		    , @ysnPrintZeroBalance			= @ysnPrintZeroBalance
+		    , @ysnPrintCreditBalance		= @ysnPrintCreditBalance
+		    , @ysnIncludeBudget				= @ysnIncludeBudget
+		    , @ysnPrintOnlyPastDue			= @ysnPrintOnlyPastDue
+			, @ysnExcludeInactiveCustomers	= @ysnExcludeInactiveCustomers
+		    , @strCustomerNumber			= @strCustomerNumber
+		    , @strAccountStatusCode			= @strAccountStatusCode
+		    , @strLocationName				= @strLocationName
+			, @strCustomerName				= @strCustomerName
 	END
 
 INSERT INTO @temp_SOA_table
