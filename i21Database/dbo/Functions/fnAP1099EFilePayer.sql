@@ -42,7 +42,7 @@ BEGIN
 				WHERE 1 = (CASE WHEN @vendorFrom IS NOT NULL THEN
 							(CASE WHEN A.strVendorId BETWEEN @vendorFrom AND @vendorTo THEN 1 ELSE 0 END)
 						ELSE 1 END)
-				AND A.intYear = 2016
+				AND A.intYear = @year
 			) tmpAmountCodes
 		) tblAmountCodes
 	END
@@ -56,7 +56,29 @@ BEGIN
 	END
 	ELSE IF @form1099 = 4
 	BEGIN
-		SET @amountCodes = ' ';
+		--SET @amountCodes = ' ';
+		SELECT @amountCodes = COALESCE(@amountCodes,'') + strAmountCodes FROM (
+			SELECT DISTINCT(strAmountCodes) strAmountCodes 
+			FROM (
+				SELECT 
+					CASE WHEN A.dblDividends > 0 THEN '1' --PAGE 63
+						WHEN A.dblNonpatronage > 0 THEN '2' --ELSE '' END,
+						WHEN A.dblPerUnit > 0 THEN '3' --ELSE '' END,
+						WHEN A.dblFederalTax > 0 THEN '4' --ELSE '' END,
+						WHEN A.dblRedemption > 0 THEN '5' --ELSE '' END,
+						WHEN A.dblDomestic > 0 THEN '6' --ELSE '' END,
+						WHEN A.dblInvestment > 0 THEN '7' --ELSE '' END, INVESTMENT CREDITS???
+						WHEN A.dblOpportunity > 0 THEN '8' --ELSE '' END,
+						WHEN A.dblAMT > 0 THEN '9' --ELSE '' END,
+						WHEN A.dblOther > 0 THEN 'A' --ELSE '' END,
+					ELSE '' END AS strAmountCodes
+				FROM vyuAP1099PATR A
+				WHERE 1 = (CASE WHEN @vendorFrom IS NOT NULL THEN
+							(CASE WHEN A.strVendorId BETWEEN @vendorFrom AND @vendorTo THEN 1 ELSE 0 END)
+						ELSE 1 END)
+				AND A.intYear = @year
+			) tmpAmountCodes
+		) tblAmountCodes
 	END
 
 	SELECT 
@@ -88,7 +110,9 @@ BEGIN
 		+ SPACE(8) --44-51
 		+ ' ' --Foreign Indicator
 		+ SPACE(40 - LEN(A.strCompanyName)) + dbo.fnTrimX(A.strCompanyName) --Position 53-92
-		+ SPACE(39)
+		+ CASE @form1099 WHEN 2 THEN SPACE(39) --1099 INT 
+			ELSE SPACE(40) --1099 MISC/PATR/B/DIV
+		END
 		+ ' '
 		+ LEFT(REPLACE(A.strAddress, CHAR(13) + CHAR(10), ' '), 40) + SPACE(40 - LEN(REPLACE(A.strAddress, CHAR(13) + CHAR(10), ' '))) --Position 134-173
 		+ LEFT(REPLACE(A.strCity, CHAR(13) + CHAR(10), ' '), 40) + SPACE(40 - LEN(REPLACE(A.strCity, CHAR(13) + CHAR(10), ' '))) 
