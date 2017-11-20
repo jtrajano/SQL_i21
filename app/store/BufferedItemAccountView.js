@@ -19,7 +19,7 @@ Ext.define('Inventory.store.BufferedItemAccountView', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/Item/SearchItemAccounts'
+                    read: './inventory/api/item/searchitemaccounts'
                 },
                 reader: {
                     type: 'json',
