@@ -83,6 +83,8 @@ FROM (
 		, strBundledItemNo			= CASE WHEN ISNULL(ContractView.ysnIsBasket, 0) = 1 THEN ContractView.strItemNo ELSE CAST(NULL AS NVARCHAR(50)) END 
 		, strBundledItemDescription = CASE WHEN ISNULL(ContractView.ysnIsBasket, 0) = 1 THEN ContractView.strItemDescription ELSE CAST(NULL AS NVARCHAR(50)) END 
 		, ysnIsBasket 				= ContractView.ysnIsBasket
+		, ContractView.intFreightTermId
+		, ContractView.strFreightTerm
 	FROM vyuCTContractAddOrdersLookup ContractView
 		LEFT JOIN dbo.tblICItemUOM ItemUOM ON ContractView.intItemUOMId = ItemUOM.intItemUOMId
 		LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure ON ItemUnitMeasure.intUnitMeasureId = ItemUOM.intUnitMeasureId
