@@ -48,6 +48,7 @@ BEGIN TRY
 		,@intMachineId INT
 		,@dblBlendBinSize NUMERIC(18, 6)
 		,@intBatchId INT
+		,@strLotAlias NVARCHAR(50)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXml
@@ -65,6 +66,8 @@ BEGIN TRY
 		,@strVesselNo = strVesselNo
 		,@intCellId = intManufacturingCellId
 		,@dblPlannedQuantity = dblPlannedQuantity
+		,@strLotNumber = strLotNumber
+		,@strLotAlias  = strLotAlias
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intWorkOrderId INT
 			,intItemId INT
@@ -79,6 +82,8 @@ BEGIN TRY
 			,strVesselNo NVARCHAR(50)
 			,intManufacturingCellId INT
 			,dblPlannedQuantity NUMERIC(18, 6)
+			,strLotNumber NVARCHAR(50)
+			,strLotAlias NVARCHAR(50)
 			)
 
 	SELECT @dtmCurrentDate = ISNULL(dbo.fnGetBusinessDate(@dtmCurrentDate, @intLocationId), GETDATE()) 
@@ -355,13 +360,13 @@ BEGIN TRY
 		--End
 		SET @strProduceXml = @strProduceXml + '<strVesselNo>' + convert(VARCHAR, @strVesselNo) + '</strVesselNo>'
 		SET @strProduceXml = @strProduceXml + '<intUserId>' + convert(VARCHAR, @intUserId) + '</intUserId>'
-		--Set @strProduceXml=@strProduceXml + '<strOutputLotNumber>' + convert(varchar,'') + '</strOutputLotNumber>'
+		Set @strProduceXml=@strProduceXml + '<strOutputLotNumber>' + ISNULL(@strLotNumber,'') + '</strOutputLotNumber>'
 		SET @strProduceXml = @strProduceXml + '<intLocationId>' + convert(VARCHAR, @intLocationId) + '</intLocationId>'
 		SET @strProduceXml = @strProduceXml + '<intSubLocationId>' + convert(VARCHAR, @intSubLocationId) + '</intSubLocationId>'
 		SET @strProduceXml = @strProduceXml + '<intStorageLocationId>' + convert(VARCHAR, @intStorageLocationId) + '</intStorageLocationId>'
 		--Set @strProduceXml=@strProduceXml + '<ysnSubLotAllowed>' + convert(varchar,@intWorkOrderId) + '</ysnSubLotAllowed>'
 		SET @strProduceXml = @strProduceXml + '<intProductionTypeId>' + convert(VARCHAR, 2) + '</intProductionTypeId>'
-		SET @strProduceXml = @strProduceXml + '<strLotAlias>' + convert(VARCHAR, @strWorkOrderNo) + '</strLotAlias>'
+		SET @strProduceXml = @strProduceXml + '<strLotAlias>' + convert(VARCHAR, CASE WHEN ISNULL(@strLotAlias,'')='' THEN @strWorkOrderNo ELSE @strLotAlias End) + '</strLotAlias>'
 		SET @strProduceXml = @strProduceXml + '<strVendorLotNo>' + convert(VARCHAR, @strVesselNo) + '</strVendorLotNo>'
 		SET @strProduceXml = @strProduceXml + '<intLotStatusId>' + convert(VARCHAR, @intLotStatusId) + '</intLotStatusId>'
 		SET @strProduceXml = @strProduceXml + '<dtmPlannedDate>' + convert(VARCHAR, @dtmCurrentDate) + '</dtmPlannedDate>'
