@@ -103,6 +103,7 @@ END
 			,strSourceId
 			,strSourceScreenName
 			,intPaymentOn
+			,strChargesLink
 	)	
 	SELECT 
 			strReceiptType				=	CASE	WHEN min(TR.intContractDetailId) IS NULL THEN 'Direct'
@@ -148,6 +149,7 @@ END
 			,strSourceId				= min(TL.strTransaction)
 			,strSourceScreenName		= 'Transport Loads'
 			,intPaymentOn				= 1 -- Compute on Qty to Receive
+			,strChargesLink				= MIN(TR.strReceiptLine)
 	FROM	tblTRLoadHeader TL
 	        JOIN tblTRLoadReceipt TR 
 				ON TR.intLoadHeaderId = TL.intLoadHeaderId			
@@ -224,6 +226,7 @@ END
 			,[intContractHeaderId]
 			,[intContractDetailId] 
 			,[ysnAccrue]
+			,[strChargesLink]
 	) 
    SELECT	[intEntityVendorId]					= min(RE.intEntityVendorId)
 			,[strBillOfLadding]					= min(RE.strBillOfLadding)
@@ -262,6 +265,7 @@ END
 														WHEN min(SM.strFreightBilledBy) = 'Other' THEN 
 															1
 												END
+			,strChargesLink						= MIN(RE.strChargesLink)
     FROM	@ReceiptStagingTable RE 
 	        LEFT JOIN tblSMShipVia SM on SM.intEntityId = RE.intShipViaId
 			LEFT JOIN (select TT.intLoadHeaderId, TT.strTransaction, RR.intLoadReceiptId from tblTRLoadHeader TT
@@ -310,6 +314,7 @@ END
 														WHEN min(SM.strFreightBilledBy) = 'Other' THEN 
 															1
 												END
+			,strChargesLink						= MIN(RE.strChargesLink)
     FROM	@ReceiptStagingTable RE 
 	LEFT JOIN tblSMShipVia SM on SM.intEntityId = RE.intShipViaId
 	LEFT JOIN (select TT.intLoadHeaderId, RR.intLoadReceiptId, TT.strTransaction from tblTRLoadHeader TT
