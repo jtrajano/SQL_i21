@@ -90,8 +90,8 @@ BEGIN
 
 	SELECT
 		@totalPayees = (SELECT COUNT(*) FROM PATR1099)		,
-		@controlTotal1 = REPLICATE('0',18 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblDividends,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-						+ dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblDividends,0)) AS DECIMAL(18,2)) AS NVARCHAR(100))),
+		@controlTotal1 = dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblDividends,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))
+						+ REPLICATE('0',18 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblDividends,0)) AS DECIMAL(18,2)) AS NVARCHAR(100))))),
 		@controlTotal2 = REPLICATE('0',18 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblNonpatronage,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
 						+ dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblNonpatronage,0)) AS DECIMAL(18,2)) AS NVARCHAR(100))),
 		@controlTotal3 = REPLICATE('0',18 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblPerUnit,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
