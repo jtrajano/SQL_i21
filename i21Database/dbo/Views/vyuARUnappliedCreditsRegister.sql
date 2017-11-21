@@ -5,6 +5,7 @@ SELECT * FROM
 (
 SELECT DISTINCT 
       C.strCustomerNumber
+	, strCustomerName = C.strName
 	, strName				= RTRIM(C.strCustomerNumber) + ' - ' + C.strName
 	, I.intEntityCustomerId
 	, strInvoiceNumber
@@ -38,6 +39,7 @@ UNION ALL
 
 SELECT DISTINCT 
       C.strCustomerNumber
+	, strCustomerName = C.strName
 	, strName				= RTRIM(C.strCustomerNumber) + ' - ' + C.strName
 	, I.intEntityCustomerId
 	, strInvoiceNumber
