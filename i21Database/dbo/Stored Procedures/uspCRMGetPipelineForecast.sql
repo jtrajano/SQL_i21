@@ -42,7 +42,7 @@ SET ANSI_WARNINGS OFF
 		else
 		begin
 			exec('insert into ##tmpCRMPipelineForecast (strSalesperson,'+@strLineOfBusinessColumnField+') select strSalesperson = ''' + @strSalesPerson + ''', ' + @strLineOfBusinessColumnFieldWithValue + '');
-			--exec('update ##tmpCRMPipelineForecast set '+@strLineOfBusinessColumn+' = '+@dblTotalNetOpportunityAmount+' where strSalesPerson = '''+@strSalesPerson+'''');
+			exec('update ##tmpCRMPipelineForecast set '+@strLineOfBusinessColumn+' = '+@dblTotalNetOpportunityAmount+' where strSalesPerson = '''+@strSalesPerson+'''');
 		end
 				
 		FETCH NEXT
