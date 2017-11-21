@@ -14,9 +14,9 @@ BEGIN
 			,@ReturnValue AS NVARCHAR(2000)
 
 
-	SELECT	@CompanyLocationName = tblSMCompanyLocation.strLocationName 
+	SELECT	@CompanyLocationName = ISNULL(tblSMCompanyLocation.strLocationName, tblICItemLocation.strDescription) 
 			,@intCompanyLocationId = tblSMCompanyLocation.intCompanyLocationId
-	FROM	dbo.tblICItemLocation INNER JOIN dbo.tblSMCompanyLocation 
+	FROM	dbo.tblICItemLocation LEFT JOIN dbo.tblSMCompanyLocation 
 				ON tblICItemLocation.intLocationId = tblSMCompanyLocation.intCompanyLocationId
 	WHERE	tblICItemLocation.intItemLocationId = @intItemLocationId
 
@@ -27,6 +27,8 @@ BEGIN
 	SELECT	@StorageLocationName = strName
 	FROM	dbo.tblICStorageLocation
 	WHERE	intStorageLocationId = @intStorageLocationId
+
+	SET @CompanyLocationName = CASE WHEN @CompanyLocationName = 'In-Transit' THEN 'In-Transit Location' ELSE @CompanyLocationName END 
 
 	SELECT	@ReturnValue = 
 				CASE	WHEN RTRIM(LTRIM(@CompanyLocationName)) = '' THEN 
