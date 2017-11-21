@@ -23,12 +23,10 @@ BEGIN TRY
 	DECLARE @RCId INT
 		, @CompanyName NVARCHAR(250)
 		, @CompanyEIN NVARCHAR(100)
-		, @intReceiptTransactionId INT
-		, @intTaxCategoryId INT
 
 	-- USER DEFINED TABLES
 	DECLARE @TFTransaction TFTransaction
-	DECLARE @tmpInventoryReceiptDetail TABLE (intInventoryReceiptItemId INT)
+	DECLARE @tmpInventoryReceiptDetail TABLE (intInventoryReceiptItemId INT, intTaxCodeId INT NULL, intTaxCategoryId INT NULL)
 	DECLARE @tmpRC TABLE (intReportingComponentId INT)
 
 	IF @Refresh = 1
@@ -54,14 +52,14 @@ BEGIN TRY
 
 		-- GET RECORDS WITH TAX CRITERIA
 		INSERT INTO @tmpInventoryReceiptDetail
-		SELECT DISTINCT tblICInventoryReceiptItem.intInventoryReceiptItemId
+		SELECT DISTINCT tblICInventoryReceiptItem.intInventoryReceiptItemId, tblICInventoryReceiptItemTax.intTaxCodeId, tblSMTaxCode.intTaxCategoryId
 			FROM tblTFReportingComponent 
 			INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 			INNER JOIN tblICItemMotorFuelTax ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
 				INNER JOIN tblTFProductCode ON tblTFProductCode.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
 			INNER JOIN tblICInventoryReceiptItem  ON tblICInventoryReceiptItem.intItemId = tblICItemMotorFuelTax.intItemId
-				INNER JOIN tblICInventoryReceiptItemTax ON tblICInventoryReceiptItemTax.intInventoryReceiptItemId = tblICInventoryReceiptItem.intInventoryReceiptItemId
-					INNER JOIN tblSMTaxCode ON tblSMTaxCode.intTaxCodeId = tblICInventoryReceiptItemTax.intTaxCodeId
+				LEFT JOIN tblICInventoryReceiptItemTax ON tblICInventoryReceiptItemTax.intInventoryReceiptItemId = tblICInventoryReceiptItem.intInventoryReceiptItemId
+					LEFT JOIN tblSMTaxCode ON tblSMTaxCode.intTaxCodeId = tblICInventoryReceiptItemTax.intTaxCodeId
 			INNER JOIN tblTFReportingComponentCriteria ON tblTFReportingComponentCriteria.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 			INNER JOIN tblICInventoryReceipt ON tblICInventoryReceipt.intInventoryReceiptId = tblICInventoryReceiptItem.intInventoryReceiptId 
 				INNER JOIN tblEMEntity AS Vendor ON Vendor.intEntityId = tblICInventoryReceipt.intEntityVendorId
@@ -74,7 +72,6 @@ BEGIN TRY
 			INNER JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId
 		WHERE tblICInventoryReceipt.ysnPosted = 1
 			AND tblTFReportingComponent.intReportingComponentId = @RCId
-			AND tblSMTaxCode.intTaxCategoryId IS NOT NULL
 			AND CAST(FLOOR(CAST(tblICInventoryReceipt.dtmReceiptDate AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)
 			AND CAST(FLOOR(CAST(tblICInventoryReceipt.dtmReceiptDate AS FLOAT))AS DATETIME) <= CAST(FLOOR(CAST(@DateTo AS FLOAT))AS DATETIME)
 			AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Include') = 0
@@ -202,8 +199,6 @@ BEGIN TRY
 				INNER JOIN tblICItemMotorFuelTax ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
 					INNER JOIN tblTFProductCode ON tblTFProductCode.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
 				INNER JOIN tblICInventoryReceiptItem  ON tblICInventoryReceiptItem.intItemId =  tblICItemMotorFuelTax.intItemId
-					INNER JOIN tblICInventoryReceiptItemTax ON tblICInventoryReceiptItemTax.intInventoryReceiptItemId = tblICInventoryReceiptItem.intInventoryReceiptItemId
-						INNER JOIN tblSMTaxCode ON tblSMTaxCode.intTaxCodeId = tblICInventoryReceiptItemTax.intTaxCodeId
 				INNER JOIN tblTFReportingComponentCriteria ON tblTFReportingComponentCriteria.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 				INNER JOIN tblICInventoryReceipt ON tblICInventoryReceipt.intInventoryReceiptId = tblICInventoryReceiptItem.intInventoryReceiptId 
 					INNER JOIN tblEMEntity AS Vendor ON Vendor.intEntityId = tblICInventoryReceipt.intEntityVendorId
@@ -222,7 +217,6 @@ BEGIN TRY
 				CROSS JOIN tblSMCompanySetup
 				WHERE  tblTFReportingComponent.intReportingComponentId = @RCId
 					AND tblICInventoryReceipt.ysnPosted = 1
-					AND tblSMTaxCode.intTaxCategoryId IS NOT NULL
 					AND CAST(FLOOR(CAST(tblICInventoryReceipt.dtmReceiptDate AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)
 					AND CAST(FLOOR(CAST(tblICInventoryReceipt.dtmReceiptDate AS FLOAT))AS DATETIME) <= CAST(FLOOR(CAST(@DateTo AS FLOAT))AS DATETIME)
 					AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Include') = 0
@@ -350,8 +344,6 @@ BEGIN TRY
 				INNER JOIN tblICItemMotorFuelTax ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
 					INNER JOIN tblTFProductCode ON tblTFProductCode.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
 				INNER JOIN tblICInventoryReceiptItem  ON tblICInventoryReceiptItem.intItemId =  tblICItemMotorFuelTax.intItemId
-					INNER JOIN tblICInventoryReceiptItemTax ON tblICInventoryReceiptItemTax.intInventoryReceiptItemId = tblICInventoryReceiptItem.intInventoryReceiptItemId			
-						INNER JOIN tblSMTaxCode ON tblSMTaxCode.intTaxCodeId = tblICInventoryReceiptItemTax.intTaxCodeId
 				INNER JOIN tblICInventoryReceipt ON tblICInventoryReceipt.intInventoryReceiptId = tblICInventoryReceiptItem.intInventoryReceiptId 
 					INNER JOIN tblEMEntity AS Vendor ON Vendor.intEntityId = tblICInventoryReceipt.intEntityVendorId
 					INNER JOIN tblEMEntityLocation ON tblEMEntityLocation.intEntityLocationId = tblICInventoryReceipt.intShipFromId
@@ -369,7 +361,6 @@ BEGIN TRY
 				CROSS JOIN tblSMCompanySetup
 				WHERE  tblTFReportingComponent.intReportingComponentId = @RCId
 					AND tblICInventoryReceipt.ysnPosted = 1
-					AND tblSMTaxCode.intTaxCategoryId IS NOT NULL
 					AND CAST(FLOOR(CAST(tblICInventoryReceipt.dtmReceiptDate AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)
 					AND CAST(FLOOR(CAST(tblICInventoryReceipt.dtmReceiptDate AS FLOAT))AS DATETIME) <= CAST(FLOOR(CAST(@DateTo AS FLOAT))AS DATETIME)
 					AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Include') = 0
@@ -390,9 +381,9 @@ BEGIN TRY
 		WHILE EXISTS(SELECT TOP 1 1 FROM @tmpInventoryReceiptDetail) -- LOOP ON INVENTORY RECEIPT ITEM ID/S
 		BEGIN
 
-			DECLARE @InventoryReceiptItemId NVARCHAR(30)
+			DECLARE @InventoryReceiptItemId NVARCHAR(30), @intDetailTaxCodeId INT, @intTaxCategoryId INT
 
-			SELECT TOP 1 @InventoryReceiptItemId = intInventoryReceiptItemId FROM @tmpInventoryReceiptDetail
+			SELECT TOP 1 @InventoryReceiptItemId = intInventoryReceiptItemId, @intDetailTaxCodeId = intTaxCodeId, @intTaxCategoryId = intTaxCategoryId FROM @tmpInventoryReceiptDetail
 
 			DECLARE @tblTaxCriteria TABLE (
 				intCriteriaId INT,
@@ -413,35 +404,42 @@ BEGIN TRY
 					WHERE tblTFReportingComponent.intReportingComponentId = @RCId
 				) Transactions
 
-			IF NOT EXISTS (SELECT TOP 1 1 FROM @tblTaxCriteria) -- CHECK IF HASTAX CRITERIA THAT MAPPED IN TAX CODE
-			BEGIN
-				DELETE FROM @TFTransaction
-			END
 
 			WHILE EXISTS (SELECT TOP 1 1 FROM @tblTaxCriteria) -- LOOP ON TAX CATEGORY
 			BEGIN
 
-				DECLARE @intCriteriaId INT, @strTaxCodeId NVARCHAR(10), @strCriteria NVARCHAR(10)
-				DECLARE @tblTempInventoryReceiptDetail TABLE (intInventoryReceiptItemId INT)
-				DECLARE @QueryrReceiptItem NVARCHAR(MAX)
+				DECLARE @intCriteriaId INT, @strCriteriaTaxCodeId NVARCHAR(10), @strCriteria NVARCHAR(10)
 
-				SELECT TOP 1 @intCriteriaId = intCriteriaId,  @strTaxCodeId = intTaxCodeId, @strCriteria = strCriteria FROM @tblTaxCriteria
-
-				-- Check if satisfy the tax criteria
-				SET @QueryrReceiptItem = 'SELECT DISTINCT tblICInventoryReceiptItemTax.intInventoryReceiptItemId FROM tblICInventoryReceiptItem' 
-						+ ' INNER JOIN tblICInventoryReceiptItemTax ON tblICInventoryReceiptItem.intInventoryReceiptItemId = tblICInventoryReceiptItemTax.intInventoryReceiptItemId'
-						+ '	WHERE  (tblICInventoryReceiptItem.intInventoryReceiptItemId IN(''' + @InventoryReceiptItemId + '''))' 
-						+ '	AND (tblICInventoryReceiptItemTax.intTaxCodeId = ''' + @strTaxCodeId + ''')'
-						+ '	AND (tblICInventoryReceiptItemTax.dblTax ' + @strCriteria + ')'
-
-				INSERT INTO @tblTempInventoryReceiptDetail
-				EXEC(@QueryrReceiptItem)
-
-				IF NOT EXISTS (SELECT TOP 1 1 FROM @tblTempInventoryReceiptDetail) -- IF CATEGORY DOES NOT EXIST, EXIT LOOP
+				SELECT TOP 1 @intCriteriaId = intCriteriaId,  @strCriteriaTaxCodeId = intTaxCodeId, @strCriteria = strCriteria FROM @tblTaxCriteria
+				
+				IF(@intDetailTaxCodeId IS NULL OR @intTaxCategoryId IS NULL) -- DOES NOT HAVE THE TAX CODE OR NOT MAPPED ON MFT TAX CATEGORY
 				BEGIN
-					DELETE FROM @TFTransaction WHERE intInventoryReceiptItemId = @InventoryReceiptItemId								 
-					BREAK
-				END	
+					IF(@strCriteria = '<> 0')
+					BEGIN
+						DELETE FROM @TFTransaction WHERE intInventoryReceiptItemId = @InventoryReceiptItemId								 
+						BREAK
+					END
+				END
+				ELSE
+				BEGIN
+					DECLARE @tblTempInventoryReceiptDetail TABLE (intInventoryReceiptItemId INT)
+					DECLARE @QueryrReceiptItem NVARCHAR(MAX)
+					-- Check if satisfy the tax criteria
+					SET @QueryrReceiptItem = 'SELECT DISTINCT tblICInventoryReceiptItemTax.intInventoryReceiptItemId FROM tblICInventoryReceiptItem' 
+							+ ' INNER JOIN tblICInventoryReceiptItemTax ON tblICInventoryReceiptItem.intInventoryReceiptItemId = tblICInventoryReceiptItemTax.intInventoryReceiptItemId'
+							+ '	WHERE  (tblICInventoryReceiptItem.intInventoryReceiptItemId IN(''' + @InventoryReceiptItemId + '''))' 
+							+ '	AND (tblICInventoryReceiptItemTax.intTaxCodeId = ''' + @strCriteriaTaxCodeId + ''')'
+							+ '	AND (tblICInventoryReceiptItemTax.dblTax ' + @strCriteria + ')'
+
+					INSERT INTO @tblTempInventoryReceiptDetail
+					EXEC(@QueryrReceiptItem)
+
+					IF NOT EXISTS (SELECT TOP 1 1 FROM @tblTempInventoryReceiptDetail) -- IF CATEGORY DOES NOT EXIST, EXIT LOOP
+					BEGIN
+						DELETE FROM @TFTransaction WHERE intInventoryReceiptItemId = @InventoryReceiptItemId								 
+						BREAK
+					END
+				END
 
 				DELETE FROM @tblTaxCriteria WHERE intCriteriaId = @intCriteriaId
 
