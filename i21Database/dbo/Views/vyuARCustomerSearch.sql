@@ -57,9 +57,10 @@ SELECT intEntityId				= ENTITY.intEntityId
      , strBillToCountry			= BILLTOLOCATION.strCountry
 	 , strBillToPhone			= BILLTOLOCATION.strPhone
 	 , intServiceChargeId		= CUSTOMER.intServiceChargeId
-	 , intWarehouseId = CUSTOMERLOCATION.intWarehouseId
-	 , intPaymentMethodId = CUSTOMER.intPaymentMethodId
-	 , strPaymentMethod = CUSTOMER.strPaymentMethod
+	 , intWarehouseId			= CUSTOMERLOCATION.intWarehouseId
+	 , strWarehouseName			= CUSTOMERLOCATION.strWarehouseName
+	 , intPaymentMethodId		= CUSTOMER.intPaymentMethodId
+	 , strPaymentMethod			= CUSTOMER.strPaymentMethod
 	 , ysnCreditHold
 FROM tblEMEntity ENTITY
 INNER JOIN (
@@ -151,7 +152,8 @@ LEFT JOIN (
 		 , strShipVia		= SHIPVIA.strName
 		 , strFreightTerm	= FREIGHTTERM.strFreightTerm
 		 , strCounty		= TAXCODE.strCounty
-		 , intWarehouseId = ISNULL(L.intWarehouseId, -99)
+		 , intWarehouseId	= ISNULL(L.intWarehouseId, -99)
+		 , strWarehouseName	= WH.strWarehouseName
 	FROM dbo.tblEMEntityLocation L WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intTaxGroupId
@@ -173,6 +175,11 @@ LEFT JOIN (
 			 , strCounty
 		FROM dbo.tblSMTaxCode
 	) TAXCODE ON L.intCountyTaxCodeId = TAXCODE.intTaxCodeId
+	LEFT JOIN (
+		SELECT intCompanyLocationId
+			 , strWarehouseName	= strLocationName
+		FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
+	) WH ON L.intWarehouseId = WH.intCompanyLocationId
 	WHERE ysnDefaultLocation = 1
 ) CUSTOMERLOCATION ON CUSTOMER.intEntityId = CUSTOMERLOCATION.intEntityId
 LEFT JOIN (
@@ -183,7 +190,7 @@ LEFT JOIN (
 		 , strState
 		 , strZipCode
 		 , strCountry
-	FROM dbo.tblEMEntityLocation WITH (NOLOCK)
+	FROM dbo.tblEMEntityLocation EL WITH (NOLOCK)
 ) SHIPTOLOCATION ON CUSTOMER.intShipToId = SHIPTOLOCATION.intEntityLocationId
 LEFT JOIN (
 	SELECT intEntityLocationId
