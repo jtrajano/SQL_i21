@@ -143,7 +143,7 @@ OUTER APPLY (
 	AND exchangeRateDetail.dtmValidFromDate <= @paymentDate
 	ORDER BY exchangeRateDetail.dtmValidFromDate DESC
 ) rateInfo
-WHERE A.intBillId IN (SELECT intId FROM #tmpBillsId)
+WHERE A.intBillId IN (SELECT intID FROM #tmpBillsId)
 
 IF @transCount = 0 BEGIN TRANSACTION
 
