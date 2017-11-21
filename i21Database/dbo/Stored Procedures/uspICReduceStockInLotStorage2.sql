@@ -76,7 +76,7 @@ BEGIN
 						AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1
 			) cb 
 
-	IF @CostBucketId IS NULL AND @AllowNegativeInventory = @ALLOW_NEGATIVE_NO
+	IF @CostBucketId IS NULL AND ISNULL(@AllowNegativeInventory, @ALLOW_NEGATIVE_NO) = @ALLOW_NEGATIVE_NO
 	BEGIN 
 		-- Get the available stock in the cost bucket. 
 		DECLARE @strCostBucketDate AS VARCHAR(20) 
@@ -100,6 +100,13 @@ BEGIN
 			EXEC uspICRaiseError 80096, @strItemNo, @strLocationName, @strDate, @strCostBucketDate;
 		END 
 		BEGIN 
+			SET @strLocationName = 
+					dbo.fnFormatMsg80003(
+						@intItemLocationId
+						,@intSubLocationId 
+						,@intStorageLocationId
+					)
+
 			--'Negative stock quantity is not allowed for {Item No} in {Location Name}.'
 			EXEC uspICRaiseError 80003, @strItemNo, @strLocationName; 
 		END 
