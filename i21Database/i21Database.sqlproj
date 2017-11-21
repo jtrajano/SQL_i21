@@ -5915,6 +5915,10 @@
 	<None Include="Scripts\Post-Deployment\GL\DefaultData\1p_CompanyPreferenceOption.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateInTransitCostingOnUnpost.sql" />
     <Build Include="dbo\Functions\fnGetItemInTransitCostingOnUnpostErrors.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetLotByOrderLineItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetOrderLineItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetUOMByLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFUpdateTask.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
