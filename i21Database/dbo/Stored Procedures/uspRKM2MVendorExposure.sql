@@ -12,6 +12,7 @@
                   @ysnVendorProducer bit = null
 AS
 
+
 DECLARE @tblFinalDetail TABLE (
        intRowNum INT
        ,intConcurrencyId INT
@@ -68,6 +69,7 @@ EXEC [uspRKM2MInquiryTransaction]   @intM2MBasisId  = @intM2MBasisId,
                   @intCommodityId =@intCommodityId,
                   @intLocationId = @intLocationId,
                   @intMarketZoneId = @intMarketZoneId
+
 
 SELECT distinct cd.*,case when isnull(ysnClaimsToProducer,0)=1 then e.strName else null end as strProducer,
 			case when isnull(ysnClaimsToProducer,0)=1 then ch.intProducerId  else null end intProducerId into #temp FROM @tblFinalDetail cd
@@ -157,7 +159,7 @@ BEGIN
                                   LEFT JOIN tblICCommodityUnitMeasure cum on cum.intCommodityId=@intCommodityId and cum.intUnitMeasureId=  e.intRiskUnitOfMeasureId
                                   LEFT JOIN tblRKVendorPriceFixationLimit pf on pf.intVendorPriceFixationLimitId=e.intRiskVendorPriceFixationLimitId
 
-                                  WHERE strContractOrInventoryType in('Contract(P)','In-transit(P)','Inventory(P)' )  )t
+                                  WHERE strContractOrInventoryType in('Contract(P)','In-transit(P)','Inventory (P)' )  )t
        GROUP BY strEntityName,strPriOrNotPriOrParPriced,strRiskIndicator,dblRiskTotalBusinessVolume,intRiskUnitOfMeasureId,dblCompanyExposurePercentage,dblSupplierSalesPercentage)t1
        GROUP BY strEntityName,strRiskIndicator,dblRiskTotalBusinessVolume,intRiskUnitOfMeasureId,dblCompanyExposurePercentage,dblSupplierSalesPercentage)t2)t2 
        )t3)t4
@@ -258,7 +260,7 @@ BEGIN
                                   LEFT JOIN tblAPVendor e1 on e1.intEntityId=fd.intEntityId 
                                                          LEFT join tblICCommodityUnitMeasure cum1 on cum1.intCommodityId=@intCommodityId and cum1.intUnitMeasureId=  e1.intRiskUnitOfMeasureId        
                                   LEFT JOIN tblRKVendorPriceFixationLimit pf1 on pf1.intVendorPriceFixationLimitId=e1.intRiskVendorPriceFixationLimitId
-                                  WHERE strContractOrInventoryType in('Contract(P)','In-transit(P)','Inventory(P)' ))t
+                                  WHERE strContractOrInventoryType in('Contract(P)','In-transit(P)','Inventory (P)' ))t
        GROUP BY strEntityName,strPriOrNotPriOrParPriced,strRiskIndicator,dblRiskTotalBusinessVolume,intRiskUnitOfMeasureId,dblCompanyExposurePercentage,dblSupplierSalesPercentage)t1
        GROUP BY strEntityName,strRiskIndicator,dblRiskTotalBusinessVolume,intRiskUnitOfMeasureId,dblCompanyExposurePercentage,dblSupplierSalesPercentage)t2)t2 
        )t3)t4
