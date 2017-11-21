@@ -59,7 +59,7 @@ BEGIN
 	FROM	tblICItem i INNER JOIN tblICItemLocation il
 				ON i.intItemId = il.intItemId
 				AND il.intItemLocationId = @intItemLocationId
-			INNER JOIN tblSMCompanyLocation cl
+			LEFT JOIN tblSMCompanyLocation cl
 				ON cl.intCompanyLocationId = il.intLocationId
 			OUTER APPLY (
 				SELECT	TOP 1 *
@@ -72,7 +72,7 @@ BEGIN
 						AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1
 			) cb 
 
-	IF @CostBucketId IS NULL AND @AllowNegativeInventory = @ALLOW_NEGATIVE_NO
+	IF @CostBucketId IS NULL AND ISNULL(@AllowNegativeInventory, @ALLOW_NEGATIVE_NO) = @ALLOW_NEGATIVE_NO
 	BEGIN 
 		-- Get the available stock in the cost bucket. 
 		DECLARE @strCostBucketDate AS VARCHAR(20) 
@@ -96,7 +96,14 @@ BEGIN
 		END 
 		ELSE 
 		BEGIN 
-			--'Negative stock quantity is not allowed for {Item No} in {Location Name}.'
+			SET @strLocationName = 
+					dbo.fnFormatMsg80003(
+						@intItemLocationId
+						,NULL 
+						,NULL
+					)
+
+			--'Negative stock quantity is not allowed for {Item No} at {Location Name}.'
 			EXEC uspICRaiseError 80003, @strItemNo, @strLocationName; 
 		END 
 		RETURN -1

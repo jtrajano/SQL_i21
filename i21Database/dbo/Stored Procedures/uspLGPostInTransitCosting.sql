@@ -172,15 +172,15 @@ BEGIN TRY
 			EXEC dbo.uspGLBookEntries @GLEntries
 				,@ysnPost
 
-			SELECT TOP 1 @intItemLocationId = intItemLocationId
-			FROM @ItemsToPost
-			WHERE strTransactionId = @strLoadNumber
-				AND intTransactionId = @intLoadId
+			--SELECT TOP 1 @intItemLocationId = intItemLocationId
+			--FROM @ItemsToPost
+			--WHERE strTransactionId = @strLoadNumber
+			--	AND intTransactionId = @intLoadId
 
-			UPDATE tblICInventoryTransaction
-			SET intItemLocationId = @intItemLocationId
-			WHERE intTransactionId = @intLoadId
-				AND strTransactionId = @strLoadNumber
+			--UPDATE tblICInventoryTransaction
+			--SET intItemLocationId = @intItemLocationId
+			--WHERE intTransactionId = @intLoadId
+			--	AND strTransactionId = @strLoadNumber
 		END
 
 	IF @intPurchaseSale = 3

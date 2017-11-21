@@ -5756,6 +5756,8 @@
     <Build Include="dbo\Tables\tblCFImportTransactionLagging.sql" />
     <Build Include="dbo\Stored Procedures\uspSCProcessMemoToInvoice.sql" />
     <Build Include="dbo\Views\vyuMFLotStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspICValidateInTransitCostingOnUnpost.sql" />
+    <Build Include="dbo\Functions\fnGetItemInTransitCostingOnUnpostErrors.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
