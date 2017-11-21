@@ -66,7 +66,8 @@ SELECT DISTINCT PL.intPickLotDetailId,
 						PL.dblNetWt * SCD.dblCashPrice * dbo.fnLGGetItemUnitConversion(SCD.intItemId, (SELECT Top(1) IU.intItemUOMId from tblICItemUOM IU WHERE IU.intItemId = SCD.intItemId AND IU.intUnitMeasureId=PL.intWeightUnitMeasureId), SUOM.intUnitMeasureId)
 					ELSE
 						PL.dblNetWt * SCD.dblCashPrice * dbo.fnLGGetItemUnitConversion(SCD.intItemId, (SELECT Top(1) IU.intItemUOMId from tblICItemUOM IU WHERE IU.intItemId = SCD.intItemId AND IU.intUnitMeasureId=PL.intWeightUnitMeasureId), SUOM.intUnitMeasureId) / 100
-					END
+					END,
+  strSplitFrom = PPL.strPickLotNumber
 FROM tblLGPickLotDetail  PL
 JOIN vyuLGDeliveryOpenPickLotHeader PLH ON PLH.intPickLotHeaderId  = PL.intPickLotHeaderId
 JOIN vyuICGetLot    Lot ON Lot.intLotId    = PL.intLotId
@@ -87,3 +88,4 @@ LEFT JOIN tblICInventoryReceiptItem	ReceiptItem ON ReceiptItem.intInventoryRecei
 LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 LEFT JOIN tblLGLoadDetail LD ON LD.intPickLotDetailId = PL.intPickLotDetailId
 LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+LEFT JOIN tblLGPickLotHeader PPL ON PPL.intPickLotHeaderId = PLH.intParentPickLotHeaderId
