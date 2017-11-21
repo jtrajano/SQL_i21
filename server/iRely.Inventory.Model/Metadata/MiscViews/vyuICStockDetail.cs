@@ -35,9 +35,9 @@ namespace iRely.Inventory.Model
         public string strStockUOM { get; set; }
         public string strStockUOMType { get; set; }
         public decimal? dblStockUnitQty { get; set; }
-        //public decimal? dblMinOrder { get; set; }
-        //public decimal? dblReorderPoint { get; set; }
-        //public decimal? dblNearingReorderBy { get; set; }
+        public decimal? dblMinOrder { get; set; }
+        public decimal? dblReorderPoint { get; set; }
+        public decimal? dblNearingReorderBy { get; set; }
         public int? intAllowNegativeInventory { get; set; }
         public string strAllowNegativeInventory { get; set; }
         public int? intCostingMethod { get; set; }
@@ -51,16 +51,16 @@ namespace iRely.Inventory.Model
         public decimal? dblAverageCost { get; set; }
         public decimal? dblEndMonthCost { get; set; }
         public decimal? dblOnOrder { get; set; }
-        //public decimal? dblInTransitInbound { get; set; }
+        public decimal? dblInTransitInbound { get; set; }
         public decimal? dblUnitOnHand { get; set; }
-        //public decimal? dblInTransitOutbound { get; set; }
-        //public decimal? dblBackOrder { get; set; }
+        public decimal? dblInTransitOutbound { get; set; }
+        public decimal? dblBackOrder { get; set; }
         public decimal? dblOrderCommitted { get; set; }
         public decimal? dblUnitStorage { get; set; }
-        //public decimal? dblConsignedPurchase { get; set; }
-        //public decimal? dblConsignedSale { get; set; }
+        public decimal? dblConsignedPurchase { get; set; }
+        public decimal? dblConsignedSale { get; set; }
         public decimal? dblUnitReserved { get; set; }
-        //public decimal? dblAvailable { get; set; }
-        //public decimal? dblExtended { get; set; }
+        public decimal? dblAvailable { get; set; }
+        public decimal? dblExtended { get; set; }
     }
 }
