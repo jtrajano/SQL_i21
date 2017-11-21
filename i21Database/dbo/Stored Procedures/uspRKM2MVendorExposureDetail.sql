@@ -162,7 +162,7 @@ FROM(
 	JOIN tblAPVendor e on e.intEntityId=fd.intEntityId
 	LEFT JOIN tblICCommodityUnitMeasure cum on cum.intCommodityId=@intCommodityId and cum.intUnitMeasureId=  e.intRiskUnitOfMeasureId
 	LEFT JOIN tblRKVendorPriceFixationLimit pf on pf.intVendorPriceFixationLimitId=e.intRiskVendorPriceFixationLimitId
-	WHERE strContractOrInventoryType in('Contract(P)','In-transit(P)','Inventory(P)') 
+	WHERE strContractOrInventoryType in('Contract(P)','In-transit(P)','Inventory (P)') 
 )t WHERE  strEntityName = @strVendorName 
 
 END
@@ -237,7 +237,7 @@ INSERT INTO @tblDerivative (intRowNum,intContractHeaderId,strContractSeq,strEnti
                         LEFT JOIN tblAPVendor e1 on e1.intEntityId=fd.intEntityId 
                         LEFT JOIN tblICCommodityUnitMeasure cum1 on cum1.intCommodityId=@intCommodityId and cum1.intUnitMeasureId=  e1.intRiskUnitOfMeasureId        
                         LEFT JOIN tblRKVendorPriceFixationLimit pf1 on pf1.intVendorPriceFixationLimitId=e1.intRiskVendorPriceFixationLimitId
-                        WHERE strContractOrInventoryType in('Contract(P)','In-transit(P)','Inventory(P)' ) 
+                        WHERE strContractOrInventoryType in('Contract(P)','In-transit(P)','Inventory (P)' ) 
 			)t WHERE  strEntityName = @strVendorName 
 
 END
