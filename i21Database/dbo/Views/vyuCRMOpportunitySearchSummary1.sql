@@ -3,8 +3,8 @@
 		select
 			intId = convert(int,ROW_NUMBER() over (order by strSalesPerson))
 			,strSalesPerson
-			,strLineOfBusiness
-			,strLineOfBusinessColumn = 'str'+replace(strLineOfBusiness, ' ', '')
+			,strLineOfBusiness = isnull(strLineOfBusiness, 'Undefined LOB')
+			,strLineOfBusinessColumn = 'str'+replace(isnull(strLineOfBusiness,'UndefinedLOB'), ' ', '')
 			,dblTotalNetOpportunityAmount = sum(dblTotalNetOpportunityAmount)
 		from
 		(
