@@ -20,13 +20,19 @@ FROM
 	SELECT intId as intResultId, strBatchNumber, intTransactionId, strTransactionId, strMessage, NULL, strTransactionType, NULL
 	FROM tblARPostResult
 	UNION ALL
-	SELECT intIntegrationLogDetailId as intResultId, strBatchId as strBatchNumber, intInvoiceId as intTransactionId, [strPostedTransactionId] as strTransactionId, strPostingMessage as strMessage, NULL, strTransactionType, NULL
-	FROM tblARInvoiceIntegrationLogDetail
-	WHERE ysnHeader = 1 AND ysnSuccess = 1 AND ysnPost IS NOT NULL AND (ysnPosted = 1 or ysnUnPosted = 1)
+	SELECT ARIILD.intIntegrationLogDetailId as intResultId, ARIILD.strBatchId as strBatchNumber, ARIILD.intInvoiceId as intTransactionId, ARIILD.[strPostedTransactionId] as strTransactionId, ARIILD.strPostingMessage as strMessage, ARIIL.dtmDate as dtmDate, ARIILD.strTransactionType, ARIIL.[intEntityId] as intEntityId
+	FROM tblARInvoiceIntegrationLogDetail ARIILD
+	INNER JOIN
+		tblARInvoiceIntegrationLog ARIIL
+			ON ARIILD.[intIntegrationLogId] = ARIIL.[intIntegrationLogId]
+	WHERE ARIILD.ysnHeader = 1 AND ARIILD.ysnSuccess = 1 AND ARIILD.ysnPost IS NOT NULL --AND (ARIILD.ysnPosted = 1 or ARIILD.ysnUnPosted = 1)
 	UNION ALL
-	SELECT intIntegrationLogDetailId as intResultId, strBatchId as strBatchNumber, intPaymentId as intTransactionId, [strPostedTransactionId] as strTransactionId, strPostingMessage as strMessage, NULL, 'Receivable' AS strTransactionType, NULL
-	FROM tblARPaymentIntegrationLogDetail
-	WHERE ysnHeader = 1 AND ysnSuccess = 1 AND ysnPost IS NOT NULL AND (ysnPosted = 1 or ysnUnPosted = 1)
+	SELECT ARPILD.intIntegrationLogDetailId as intResultId, ARPILD.strBatchId as strBatchNumber, ARPILD.intPaymentId as intTransactionId, ARPILD.[strPostedTransactionId] as strTransactionId, ARPILD.strPostingMessage as strMessage, ARPIL.[dtmDate] as dtmDate, 'Receivable' AS strTransactionType, ARPIL.[intEntityId] as intEntityId
+	FROM tblARPaymentIntegrationLogDetail ARPILD
+	INNER JOIN
+		tblARPaymentIntegrationLog ARPIL
+			ON ARPILD.[intIntegrationLogId] = ARPIL.[intIntegrationLogId] 
+	WHERE ARPILD.ysnHeader = 1 AND ARPILD.ysnSuccess = 1 AND ARPILD.ysnPost IS NOT NULL --AND (ysnPosted = 1 or ysnUnPosted = 1)
 	UNION ALL
 	SELECT intPostForeignTransResultId AS intResultId,strBatchId,intTransactionId,strTransactionId,strDescription,dtmDate,strTransactionType,intEntityId   
 	FROM tblCFPostForeignTransResult
