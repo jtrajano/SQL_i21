@@ -755,7 +755,10 @@ BEGIN TRY
 					,tblARCustomerStatementStagingTable.strCFTempInvoiceReportNumber	   = 		cfInv.strTempInvoiceReportNumber
 					,tblARCustomerStatementStagingTable.strCFEmailDistributionOption	   = 		cfInv.strEmailDistributionOption
 					,tblARCustomerStatementStagingTable.strCFEmail						   = 		cfInv.strEmail			
-					,tblARCustomerStatementStagingTable.ysnCFShowDiscountOnInvoice		   =		cfInv.ysnShowOnCFInvoice
+					,tblARCustomerStatementStagingTable.ysnCFShowDiscountOnInvoice		   =		cfInv.ysnShowOnCFInvoice	
+					,tblARCustomerStatementStagingTable.strCFTerm						   = 		cfInv.strTerm			
+					,tblARCustomerStatementStagingTable.strCFTermCode					   = 		cfInv.strTermCode	
+						
 			FROM tblCFInvoiceStagingTable cfInv
 			WHERE tblARCustomerStatementStagingTable.intEntityCustomerId = cfInv.intCustomerId
 
