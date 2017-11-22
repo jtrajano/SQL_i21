@@ -79,10 +79,13 @@
     [ysnPrintTimeOnReports]       BIT             NULL,
     [ysnInvalid]                  BIT             NULL,
     [ysnPosted]                   BIT             NULL,
+    [ysnPostedCSV]                BIT             NULL,
     [ysnPostForeignSales]         BIT             NULL,
     [ysnDepartmentGrouping]       BIT             NULL,
     [ysnSummaryByDeptVehicleProd] BIT             NULL
 );
+
+
 
 
 

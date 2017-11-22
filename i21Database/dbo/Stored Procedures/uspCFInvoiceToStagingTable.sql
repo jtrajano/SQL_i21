@@ -33,15 +33,15 @@ BEGIN TRY
 	-----------------------------------------------------------
 	EXEC "dbo"."uspCFInvoiceReport"			@xmlParam	=	@xmlParam
 
-	SELECT 'invoice report',* FROM tblCFInvoiceReportTempTable
+	--SELECT 'tblCFInvoiceReportTempTable',* FROM tblCFInvoiceReportTempTable
 
 	EXEC "dbo"."uspCFInvoiceReportSummary"	@xmlParam	=	@xmlParam
 
-	SELECT 'invoice summary',* FROM tblCFInvoiceSummaryTempTable
+	--SELECT 'tblCFInvoiceSummaryTempTable',* FROM tblCFInvoiceSummaryTempTable
 
 	EXEC "dbo"."uspCFInvoiceReportDiscount" @xmlParam	=	@xmlParam
 
-	SELECT 'invoice discount',* FROM tblCFInvoiceDiscountTempTable
+	--SELECT 'tblCFInvoiceDiscountTempTable',* FROM tblCFInvoiceDiscountTempTable
 	
 
 	-- INSERT CALCULATED INVOICES TO STAGING TABLE --
@@ -173,6 +173,7 @@ BEGIN TRY
 	,ysnPostForeignSales
 	,ysnSummaryByDeptVehicleProd
 	,ysnDepartmentGrouping
+	,ysnPostedCSV
 	)
 	SELECT 
 	 intCustomerGroupId
@@ -300,6 +301,7 @@ BEGIN TRY
 	,cfInvRpt.ysnPostForeignSales
 	,ysnSummaryByDeptVehicleProd
 	,ysnDepartmentGrouping
+	,ysnPostedCSV
 	FROM tblCFInvoiceReportTempTable AS cfInvRpt
 	INNER JOIN tblCFInvoiceSummaryTempTable AS cfInvRptSum
 	ON cfInvRpt.intTransactionId = cfInvRptSum.intTransactionId

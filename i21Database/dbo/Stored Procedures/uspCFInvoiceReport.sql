@@ -287,8 +287,13 @@ BEGIN
 		---------GET DISTINCT CARD ID---------
 		SET @tblCFTempTableQuery = 'SELECT DISTINCT ISNULL(intAccountId,0) FROM #tblCFTempInvoiceReport ' + @whereClause
 
+		--SELECT @tblCFTempTableQuery
+
 		INSERT INTO  @tblCFTableCardIds (intAccountId)
 		EXEC (@tblCFTempTableQuery)
+
+
+		--select '@tblCFTableCardIds',* from @tblCFTableCardIds ---------------------------------------------------------------------------------
 		---------GET DISTINCT CARD ID---------
 
 		---------CREATE ID WITH INVOICE NUMBER--------
@@ -329,16 +334,22 @@ BEGIN
 		IF (UPPER(@Condition) in ('EQUAL','EQUALS','EQUAL TO','EQUALS TO','=') AND (@From = 'FALSE' OR @From = 0))
 		BEGIN
 			SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-				' ( strInvoiceReportNumber  IS NULL )'
+				' ( strInvoiceReportNumber  IS NULL OR ysnPostedCSV = 1)'
 
 			---------GET DISTINCT TRANSACTION ID---------
 			SET @tblCFTempTableQuery = 'SELECT DISTINCT intTransactionId FROM #tblCFTempInvoiceReport ' + @whereClause
+
+			--SELECT @tblCFTempTableQuery
 
 			INSERT INTO  @tblCFTableTransationIds (intTransactionId)
 			EXEC (@tblCFTempTableQuery)
 
 			INSERT INTO  @tblCFFilterIds (intTransactionId)
 			EXEC (@tblCFTempTableQuery)
+
+			--SELECT '@tblCFTableTransationIds',* FROM @tblCFTableTransationIds
+			--SELECT '@tblCFFilterIds',* FROM @tblCFFilterIds
+
 			---------GET DISTINCT TRANSACTION ID---------
 
 
@@ -544,10 +555,14 @@ BEGIN
 		,ysnPostForeignSales	
 		,ysnDepartmentGrouping
 		,ysnSummaryByDeptVehicleProd	
+		,ysnPostedCSV
 		INTO #tblCFTempInvoiceReportSummary 
 		FROM #tblCFTempInvoiceReport AS main 
 		INNER JOIN @tblCFInvoiceNunber as cfInvRptNo
 		on main.intAccountId = cfInvRptNo.intAccountId
+
+
+		--SELECT '#tblCFTempInvoiceReportSummary',* FROM #tblCFTempInvoiceReportSummary 
 
 		INSERT INTO tblCFInvoiceReportTempTable (
 		intCustomerGroupId			
@@ -633,6 +648,7 @@ BEGIN
 		,ysnPostForeignSales
 		,ysnDepartmentGrouping
 		,ysnSummaryByDeptVehicleProd
+		,ysnPostedCSV
 		)
 		SELECT
 		 intCustomerGroupId			
@@ -718,6 +734,7 @@ BEGIN
 		,ysnPostForeignSales	
 		,ysnDepartmentGrouping
 		,ysnSummaryByDeptVehicleProd		
+		,ysnPostedCSV
 	    FROM #tblCFTempInvoiceReportSummary 
 		where intTransactionId in (SELECT intTransactionId FROM @tblCFFilterIds)
 
