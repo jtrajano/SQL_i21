@@ -202,7 +202,7 @@ FROM    tblCTContractHeader                        CH
                                
        LEFT JOIN     tblCTPriceFixation                PF     ON    PF.intContractDetailId			=  CD .intContractDetailId
 	   LEFT JOIN     tblCTPriceFixation                PFA     ON    PFA.intContractHeaderId			=  CD .intContractHeaderId
-WHERE  CH.intCommodityId= @intCommodityId and CD.dblQuantity > CD.dblInvoicedQty
+WHERE  CH.intCommodityId= @intCommodityId and CD.dblQuantity > isnull(CD.dblInvoicedQty,0)
             AND CL.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then CL.intCompanyLocationId else @intLocationId end
             AND isnull(intMarketZoneId,0)= case when isnull(@intMarketZoneId,0)=0 then isnull(intMarketZoneId,0) else @intMarketZoneId end
             AND intContractStatusId not in(2,3,6) and dtmContractDate <= @dtmTransactionDateUpTo
@@ -223,7 +223,7 @@ JOIN tblCTContractHeader ch on ch.intContractHeaderId=cd.intContractHeaderId
 JOIN tblRKM2MConfiguration M2M on dc.intItemId= M2M.intItemId and ch.intContractBasisId=M2M.intContractBasisId and dc.intItemId= M2M.intItemId 
 JOIN tblICCommodityUnitMeasure cu1 on cu1.intCommodityId=@intCommodityId and cu1.intUnitMeasureId=dc.intUnitMeasureId
 JOIN tblICCommodityUnitMeasure cu on cu.intCommodityId=@intCommodityId and cu.intUnitMeasureId=@intPriceUOMId  
-WHERE cd.dblQuantity > cd.dblInvoicedQty                 
+WHERE cd.dblQuantity > isnull(cd.dblInvoicedQty,0)
 GROUP BY cu.intCommodityUnitMeasureId,cu1.intCommodityUnitMeasureId,strAdjustmentType,dc.intContractDetailId
 )t group by intContractDetailId
 
@@ -704,7 +704,7 @@ JOIN tblICInventoryReceiptItem ri on ri.intInventoryReceiptId=ir.intInventoryRec
 JOIN tblCTContractDetail cd on cd.intContractDetailId=intLineNo AND intPricingTypeId in(2,5) and cd.intContractStatusId not in(2,3,6)
 JOIN tblCTPricingType pt on pt.intPricingTypeId=cd.intPricingTypeId
 JOIN tblICCommodityUnitMeasure cuc on c.intCommodityId=cuc.intCommodityId 
-WHERE  cd.dblQuantity > cd.dblInvoicedQty and convert(datetime,convert(varchar,iv.dtmDate, 101),101) <= left(convert(varchar, getdate(), 101),10) )sr WHERE RowNum=1
+WHERE  cd.dblQuantity > isnull(cd.dblInvoicedQty,0) and convert(datetime,convert(varchar,iv.dtmDate, 101),101) <= left(convert(varchar, getdate(), 101),10) )sr WHERE RowNum=1
 
 INSERT INTO @tblFinalDetail (
     strContractOrInventoryType 
@@ -767,7 +767,7 @@ JOIN tblCTContractDetail cd on cd.intContractDetailId=intLineNo AND intPricingTy
 JOIN tblCTPricingType pt on pt.intPricingTypeId=cd.intPricingTypeId
 JOIN tblICCommodity c on c.intCommodityId=i.intCommodityId
 JOIN tblICCommodityUnitMeasure cuc on c.intCommodityId=cuc.intCommodityId 
-WHERE cd.dblQuantity > cd.dblInvoicedQty and i.intCommodityId= @intCommodityId
+WHERE cd.dblQuantity > isnull(cd.dblInvoicedQty,0) and i.intCommodityId= @intCommodityId
 AND strLocationName= case when isnull(@strLocationName,'')='' then strLocationName else @strLocationName end)t1
 group by  strContractOrInventoryType,strCommodityCode,intCommodityId, strItemNo, intItemId,strPricingType,intltemPrice
 
