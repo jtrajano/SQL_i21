@@ -184,7 +184,6 @@ BEGIN TRY
 		INNER JOIN tblARInvoiceDetail
 		INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId
 		INNER JOIN tblARInvoiceDetailTax ON tblARInvoiceDetail.intInvoiceDetailId = tblARInvoiceDetailTax.intInvoiceDetailId
-			INNER JOIN tblSMTaxCode ON tblSMTaxCode.intTaxCodeId = tblARInvoiceDetailTax.intTaxCodeId
 		INNER JOIN tblICItemMotorFuelTax
 		INNER JOIN tblTFReportingComponentProductCode ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
 			ON tblARInvoiceDetail.intItemId = tblICItemMotorFuelTax.intItemId
@@ -201,7 +200,6 @@ BEGIN TRY
 		FULL OUTER JOIN tblARAccountStatus ON tblARCustomer.intAccountStatusId = tblARAccountStatus.intAccountStatusId
 		CROSS JOIN tblSMCompanySetup
 		WHERE tblTFReportingComponent.intReportingComponentId = @RCId
-			AND tblSMTaxCode.intTaxCategoryId IS NOT NULL
 			AND CAST(FLOOR(CAST(tblARInvoice.dtmDate AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)
 			AND CAST(FLOOR(CAST(tblARInvoice.dtmDate AS FLOAT))AS DATETIME) <= CAST(FLOOR(CAST(@DateTo AS FLOAT))AS DATETIME)
 			AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Include') = 0
@@ -524,6 +522,10 @@ BEGIN TRY
 				, intTransactionNumberId = tblICInventoryTransferDetail.intInventoryTransferDetailId
 			FROM tblTFProductCode
 			INNER JOIN tblICInventoryTransferDetail 
+				INNER JOIN tblICItem ON tblICItem.intItemId = tblICInventoryTransferDetail.intItemId
+					INNER JOIN tblICCategoryTax ON tblICCategoryTax.intCategoryId = tblICItem.intCategoryId 
+						INNER JOIN tblSMTaxClass ON tblSMTaxClass.intTaxClassId = tblICCategoryTax.intTaxClassId
+							INNER JOIN tblSMTaxCode ON tblSMTaxCode.intTaxClassId = tblSMTaxClass.intTaxClassId
 			INNER JOIN tblICInventoryTransfer ON tblICInventoryTransferDetail.intInventoryTransferId = tblICInventoryTransfer.intInventoryTransferId
 			INNER JOIN tblICItemMotorFuelTax
 			INNER JOIN tblTFReportingComponentProductCode ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
@@ -535,11 +537,9 @@ BEGIN TRY
 			LEFT JOIN tblTFReportingComponentCriteria ON tblTFReportingComponent.intReportingComponentId = tblTFReportingComponentCriteria.intReportingComponentId
 				LEFT JOIN tblTFTaxCategory ON tblTFTaxCategory.intTaxCategoryId = tblTFReportingComponentCriteria.intTaxCategoryId
 					LEFT JOIN tblSMTaxCode AS TaxCodeCategory ON TaxCodeCategory.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId
-			CROSS JOIN tblSMTaxCode
 			CROSS JOIN tblSMCompanySetup
 			WHERE  tblICInventoryTransfer.intSourceType IN (0,1,2)
 				AND tblTFReportingComponent.intReportingComponentId = @RCId
-				AND tblSMTaxCode.intTaxCategoryId IS NOT NULL
 				AND (tblSMCompanyLocation.ysnTrackMFTActivity = 1)
 				AND CAST(FLOOR(CAST(tblICInventoryTransfer.dtmTransferDate AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)
 				AND CAST(FLOOR(CAST(tblICInventoryTransfer.dtmTransferDate AS FLOAT))AS DATETIME) <= CAST(FLOOR(CAST(@DateTo AS FLOAT))AS DATETIME)
