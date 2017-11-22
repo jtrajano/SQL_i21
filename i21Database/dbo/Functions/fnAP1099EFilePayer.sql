@@ -111,7 +111,8 @@ BEGIN
 		+ ' ' --Foreign Indicator
 		+ SPACE(40 - LEN(A.strCompanyName)) + dbo.fnTrimX(A.strCompanyName) --Position 53-92
 		+ CASE @form1099 WHEN 2 THEN SPACE(39) --1099 INT 
-			ELSE SPACE(40) --1099 MISC/PATR/B/DIV
+			WHEN 3 THEN SPACE(39) --1099 B
+			ELSE SPACE(40) --1099 MISC/PATR/DIV
 		END
 		+ ' '
 		+ LEFT(REPLACE(A.strAddress, CHAR(13) + CHAR(10), ' '), 40) + SPACE(40 - LEN(REPLACE(A.strAddress, CHAR(13) + CHAR(10), ' '))) --Position 134-173
