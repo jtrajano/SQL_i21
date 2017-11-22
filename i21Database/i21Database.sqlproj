@@ -5919,6 +5919,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetUOMByLot.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUpdateTask.sql" />
     <Build Include="dbo\Tables\tblBBRateLocation.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1n_UpdateFiscalUpperBounds.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
