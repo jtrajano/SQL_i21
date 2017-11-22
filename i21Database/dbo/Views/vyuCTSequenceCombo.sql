@@ -7,15 +7,19 @@ AS
 			IM.strItemNo,
 			CH.strContractNumber + ' - ' +LTRIM(CD.intContractSeq)	AS	strSequenceNumber,	
 			CH.strContractNumber,
-			CD.intItemId,
-			CD.intCompanyLocationId,
-			CL.strLocationName,
+			CH.intEntityId,
 			CH.intCommodityId,
-			CO.strCommodityCode,
 			CH.intContractTypeId,
 
+			CO.strCommodityCode,
+
+			CD.intItemId,
+			CD.intCompanyLocationId,
+			CD.intContractStatusId,
+
+			CL.strLocationName,
 			QM.strUnitMeasure AS strItemUOM,
-			ISNULL(CD.dblQuantity,0) - ISNULL(PA.dblAllocatedQty,0) - ISNULL(SA.dblAllocatedQty,0)							AS	dblUnAllocatedQty,
+			ISNULL(CD.dblQuantity,0) - ISNULL(PA.dblAllocatedQty,0) - ISNULL(SA.dblAllocatedQty,0)							AS	dblUnallocatedQty,
 			ISNULL(PA.intAllocationUOMId,SA.intAllocationUOMId)																AS	intAllocationUOMId,
 			ISNULL(CAST(ISNULL(PF.[dblTotalLots] - ISNULL(PF.[dblLotsFixed],0),CD.dblNoOfLots)	AS NUMERIC(18, 6)),0)		AS	dblUnpricedLots,
 			ISNULL(CAST(ISNULL(PF.[dblTotalLots] - ISNULL(PF.intLotsHedged,0),CD.dblNoOfLots)	AS NUMERIC(18, 6)),0)		AS	dblUnhedgedLots
