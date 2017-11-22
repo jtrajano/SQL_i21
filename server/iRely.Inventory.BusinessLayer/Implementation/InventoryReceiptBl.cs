@@ -133,6 +133,7 @@ namespace iRely.Inventory.BusinessLayer
                             , strFreightTerm = t.vyuICInventoryReceiptLookUp.strFreightTerm
                             , dblTotalCharge = t.vyuICInventoryReceiptTotals.dblTotalCharge
                             , dblTotalChargeTax = t.vyuICInventoryReceiptTotals.dblTotalChargeTax
+                            , intItemCount = t.tblICInventoryReceiptItems.Count()
                         }).ToListAsync(param.cancellationToken);
 
             return new GetObjectResult()
