@@ -10,7 +10,9 @@ Post-Deployment Script Template
 --------------------------------------------------------------------------------------
 */
 
-
+GO
+PRINT 'Begin generating account structure'
+GO
 --GL=3146 Add line of business selection to chart of accounts
 MERGE 
 INTO	dbo.tblGLSegmentType
@@ -39,8 +41,10 @@ VALUES (
 	,SegmentTypeCodedValues.name
 	,1
 );
-GO
+
 
 --GL-31477 make segment type location which are named location in account structure
 
+GO
+PRINT 'Finished generating account structure'
 GO
