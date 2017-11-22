@@ -15,8 +15,13 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @ZeroDecimal NUMERIC(18, 6) = 0.000000
-		,@DateOnly DATETIME = CAST(GETDATE() AS DATE)
+DECLARE @ZeroDecimal	NUMERIC(18, 6) = 0.000000
+		,@DateOnly		DATETIME = CAST(GETDATE() AS DATE)
+		,@InitTranCount	INT
+		,@Savepoint		NVARCHAR(32)
+
+SET @InitTranCount = @@TRANCOUNT
+SET @Savepoint = SUBSTRING(('ARCreateCustomerInvoices' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
 
 DECLARE @InvoicesToGenerate AS InvoiceStagingTable
 DELETE FROM @InvoicesToGenerate
@@ -850,7 +855,12 @@ END
 
 
 IF ISNULL(@RaiseError,0) = 0	
-	BEGIN TRANSACTION
+BEGIN
+	IF @InitTranCount = 0
+		BEGIN TRANSACTION
+	ELSE
+		SAVE TRANSACTION @Savepoint
+END
 
 DECLARE  @AddDetailError NVARCHAR(MAX)
 		,@IntegrationLog InvoiceIntegrationLogStagingTable
@@ -1317,7 +1327,15 @@ VALUES(
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0
-		ROLLBACK TRANSACTION
+	BEGIN
+		IF @InitTranCount = 0
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION
+		ELSE
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION @Savepoint
+	END
+
 	SET @ErrorMessage = ERROR_MESSAGE();
 	IF ISNULL(@RaiseError,0) = 1
 		RAISERROR(@ErrorMessage, 16, 1);
@@ -1624,7 +1642,15 @@ BEGIN TRY
 		IF LEN(ISNULL(@AddDetailError,'')) > 0
 			BEGIN
 				IF ISNULL(@RaiseError,0) = 0
-					ROLLBACK TRANSACTION
+				BEGIN
+					IF @InitTranCount = 0
+						IF (XACT_STATE()) <> 0
+							ROLLBACK TRANSACTION
+					ELSE
+						IF (XACT_STATE()) <> 0
+							ROLLBACK TRANSACTION @Savepoint
+				END
+
 				SET @ErrorMessage = @AddDetailError;
 				IF ISNULL(@RaiseError,0) = 1
 					RAISERROR(@ErrorMessage, 16, 1);
@@ -1633,7 +1659,15 @@ BEGIN TRY
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0
-		ROLLBACK TRANSACTION
+	BEGIN
+		IF @InitTranCount = 0
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION
+		ELSE
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION @Savepoint
+	END
+
 	SET @ErrorMessage = ERROR_MESSAGE();
 	IF ISNULL(@RaiseError,0) = 1
 		RAISERROR(@ErrorMessage, 16, 1);
@@ -1696,7 +1730,15 @@ BEGIN TRY
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0
-		ROLLBACK TRANSACTION
+	BEGIN
+		IF @InitTranCount = 0
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION
+		ELSE
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION @Savepoint
+	END
+
 	SET @ErrorMessage = ERROR_MESSAGE();
 	IF ISNULL(@RaiseError,0) = 1
 		RAISERROR(@ErrorMessage, 16, 1);
@@ -1704,7 +1746,24 @@ BEGIN CATCH
 END CATCH
 
 IF ISNULL(@RaiseError,0) = 0
-	COMMIT TRANSACTION
+BEGIN
+
+	IF @InitTranCount = 0
+		BEGIN
+			IF (XACT_STATE()) = -1
+				ROLLBACK TRANSACTION
+			IF (XACT_STATE()) = 1
+				COMMIT TRANSACTION
+		END		
+	ELSE
+		BEGIN
+			IF (XACT_STATE()) = -1
+				ROLLBACK TRANSACTION  @Savepoint
+			--IF (XACT_STATE()) = 1
+			--	COMMIT TRANSACTION  @Savepoint
+		END	
+END
+
 SET @ErrorMessage = NULL;
 RETURN 1;
 	
