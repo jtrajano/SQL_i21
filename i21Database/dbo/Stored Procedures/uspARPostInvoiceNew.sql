@@ -61,6 +61,11 @@ BEGIN
 		SAVE TRANSACTION @Savepoint
 END
 
+IF(@BatchId IS NULL)
+	EXEC dbo.uspSMGetStartingNumber 3, @BatchId OUT
+
+SET @BatchIdUsed = @BatchId
+
 DECLARE @InvalidInvoiceData AS TABLE(
 	 [intInvoiceId]				INT				NOT NULL
 	,[strInvoiceNumber]			NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
@@ -520,12 +525,6 @@ IF(@Exclude IS NOT NULL)
 		WHERE EXISTS(SELECT NULL FROM @InvoicesExclude B WHERE A.[intInvoiceId] = B.[intInvoiceId])
 	END
 	
-
-IF(@BatchId IS NULL)
-	EXEC dbo.uspSMGetStartingNumber 3, @BatchId OUT
-
-SET @BatchIdUsed = @BatchId
-
 
 --Process Split Invoice
 BEGIN TRY
