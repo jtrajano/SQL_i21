@@ -287,11 +287,12 @@ BEGIN TRY
 		,[intShipViaId]
 		,[intCurrencyId]
 		,[intEntityVendorId]
-		,[intShipFromId]
 		,[intLocationId]
 		,[ysnPrice]
 		,[ysnSubCurrency]
 		,[intCostCurrencyId]
+		,[intShipFromId]
+		,[strBillOfLadding]
 		)
 	SELECT CV.intEntityId
 		,CV.intItemId
@@ -322,8 +323,11 @@ BEGIN TRY
 		,'Purchase Contract'
 		,NULL
 		,CV.intCurrencyId
-		,NULL
-		,NULL
+		,(
+			SELECT TOP 1 LOD.intVendorEntityId
+			FROM tblLGLoadDetail LOD
+			WHERE intLoadId = @intLoadId
+			)
 		,(
 			SELECT TOP 1 intPCompanyLocationId
 			FROM tblLGLoadDetail
@@ -332,6 +336,16 @@ BEGIN TRY
 		,CV.ysnPrice
 		,NULL
 		,CV.intCurrencyId
+		,(
+			SELECT TOP 1 EL.intEntityLocationId
+			FROM tblLGLoadDetail LD
+			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+			JOIN tblEMEntityLocation EL ON EL.intEntityId = CH.intEntityId
+				AND EL.ysnDefaultLocation = 1
+			WHERE LD.intLoadId = @intLoadId
+			)
+		,L.strBLNumber
 	FROM vyuLGLoadCostView CV
 	JOIN tblLGLoad L ON L.intLoadId = CV.intLoadId
 	WHERE L.intLoadId = @intLoadId
