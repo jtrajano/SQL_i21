@@ -2,6 +2,7 @@
 	AS
 SELECT	CS.intCustomerStockId,
 		CS.intCustomerPatronId,
+		CS.strIssueNo,
 		C.strName,
 		CS.intStockId,
 		PC.strStockName,

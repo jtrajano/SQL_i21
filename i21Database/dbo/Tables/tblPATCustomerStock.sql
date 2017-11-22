@@ -3,6 +3,7 @@
 	[intCustomerStockId] INT NOT NULL IDENTITY, 
     [intCustomerPatronId] INT NOT NULL, 
     [intStockId] INT NOT NULL, 
+    [strIssueNo] NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL,
     [strCertificateNo] NVARCHAR(25) COLLATE Latin1_General_CI_AS NOT NULL, 
     [strStockStatus] NVARCHAR(25) COLLATE Latin1_General_CI_AS NOT NULL, 
     [dblSharesNo] NUMERIC(18, 6) NOT NULL, 

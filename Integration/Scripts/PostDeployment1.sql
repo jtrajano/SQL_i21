@@ -44,8 +44,6 @@ GO
 :r "..\Scripts\SM\InsertOriginTaxClassXRef.sql"
 :r "..\Scripts\SM\CopyCashToUndepositedFund.sql"
 
---Patronage
-:r "..\Scripts\PAT\DropStoredProcedures.sql"
 
 --Inventory Receipt
 GO 

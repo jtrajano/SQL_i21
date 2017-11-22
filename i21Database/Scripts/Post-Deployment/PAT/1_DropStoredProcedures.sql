@@ -1,4 +1,4 @@
-﻿PRINT N'BEGIN Remove unused stored procedures in Patronage'
+﻿PRINT N'*** BEGIN - DROP UNUSED STORED PROCEDURES IN PATRONAGE ***'
 GO
 	IF EXISTS (SELECT 1 FROM sys.objects WHERE name = 'uspPATGetCustomerCalculation' and type = 'P') 
 		DROP PROCEDURE [dbo].[uspPATGetCustomerCalculation]
@@ -45,4 +45,4 @@ GO
 	IF EXISTS (SELECT 1 FROM sys.objects WHERE name = 'uspPATGetEquityRefundDetails' and type = 'P')
 		DROP PROCEDURE [dbo].[uspPATGetEquityRefundDetails]
 GO
-PRINT N'END Remove unused stored procedures in Patronage'
+PRINT N'*** END - DROP UNUSED STORED PROCEDURES IN PATRONAGE ***'

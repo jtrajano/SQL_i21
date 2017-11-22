@@ -70,7 +70,6 @@
     <Folder Include="Scripts\TM" />
     <Folder Include="Scripts\NR" />
     <Folder Include="Scripts\SM" />
-    <Folder Include="Scripts\PAT" />
     <Folder Include="Scripts\GL" />
     <Folder Include="Scripts\IC" />
   </ItemGroup>
@@ -151,7 +150,6 @@
     <None Include="Scripts\AP\BackupImportedUnpostedBillDetail.sql" />
     <None Include="dbo\Stored Procedures\uspEMRecreateCheckIfOriginVendor.sql" />
     <None Include="Scripts\AP\UpdateImportedBills1099.sql" />
-    <None Include="Scripts\PAT\DropStoredProcedures.sql" />
     <None Include="Scripts\SM\InsertOriginTaxClassXRef.sql" />
     <None Include="dbo\Stored Procedures\uspGLImportOriginHistoricalJournal.sql" />
     <None Include="dbo\Stored Procedures\uspCMImportBanksFromOrigin.sql" />

@@ -6047,6 +6047,8 @@
     <Build Include="dbo\Stored Procedures\uspAPRpt1099Summary.sql" />
     <Build Include="dbo\Stored Procedures\uspSMUpdateEntityCredentialCompanyGridLayout.sql" />
     <None Include="Scripts\Post-Deployment\CCR\RemoveCCRObsoleteScreen.sql" />
+    <None Include="Scripts\Post-Deployment\PAT\1_DropStoredProcedures.sql" />
+    <None Include="Scripts\Post-Deployment\PAT\2_UpdateIssueStockNo.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

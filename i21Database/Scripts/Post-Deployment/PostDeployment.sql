@@ -158,8 +158,6 @@ print 'BEGIN POST DEPLOYMENT'
 --:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateGetSpecialPricingPriceTableFn.sql"
 :r ".\TM\3_PopulateLocatioinIdOnSiteForOriginIntegrated.sql"
 
-
-
 -- Canned Panels
 :r .\DB\1_CannedPanels_Panel.sql
 :r .\DB\2_CannedPanels_Column.sql
@@ -275,6 +273,8 @@ print 'BEGIN POST DEPLOYMENT'
 -- Patronage
 :r .\PAT\DefaultData\1_AddDefaultLetters.sql 
 :r .\PAT\DefaultData\2_DefaultCompanyPreference.sql
+:r .\PAT\1_DropStoredProcedures.sql
+:r .\PAT\2_UpdateIssueStockNo.sql
 
 --Contract Management
 :R .\CT\1_MasterTables.sql
