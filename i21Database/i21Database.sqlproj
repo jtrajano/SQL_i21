@@ -5920,6 +5920,7 @@
     <Build Include="dbo\Stored Procedures\uspMFUpdateTask.sql" />
     <Build Include="dbo\Tables\tblBBRateLocation.sql" />
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1n_UpdateFiscalUpperBounds.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTaskDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

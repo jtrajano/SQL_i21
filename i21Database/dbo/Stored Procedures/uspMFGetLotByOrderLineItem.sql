@@ -1,10 +1,10 @@
 ﻿CREATE PROCEDURE uspMFGetLotByOrderLineItem (
 	@intOrderHeaderId INT
-	,@intLocationId int
+	,@intLocationId INT
 	,@intItemId INT
 	,@intTaskId INT = 0
-	,@intLotId int=0
-	,@strLotNumber nvarchar(50)='%'
+	,@intLotId INT = 0
+	,@strLotNumber NVARCHAR(50) = '%'
 	)
 AS
 DECLARE @ysnStrictTracking BIT
@@ -103,19 +103,17 @@ BEGIN
 		AND intItemId = @intItemId
 END
 
-SELECT 
-	I.strItemNo
-	,I.strDescription 
-	,PL.strParentLotNumber 
-	,L.strLotNumber 
-	,L.strLotAlias 
-	--,L.dblQty
-	,L.intItemUOMId
-	,UM.strUnitMeasure 
-	--,L.dblWeight
-	,L.intWeightUOMId 
-	,UM1.strUnitMeasure 
-	,SL.strName as 'Storage Location'
+SELECT L.intLotId
+	,I.strItemNo
+	,I.strDescription
+	,PL.strParentLotNumber
+	,L.strLotNumber
+	,L.strLotAlias
+	,L.intItemUOMId AS intQtyUOMId
+	,UM.strUnitMeasure AS strQtyUOM
+	,L.intWeightUOMId
+	,UM1.strUnitMeasure AS strWeightUOM
+	,SL.strName
 	,L.dblQty - (
 		SUM(ISNULL(CASE 
 					WHEN T.intTaskTypeId = 13
@@ -130,7 +128,6 @@ SELECT
 					ELSE T.dblWeight
 					END, 0))
 		) AS dblWeight
-	,L.dtmDateCreated
 FROM tblICLot L
 JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 JOIN tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
@@ -143,7 +140,8 @@ LEFT JOIN tblMFTask T ON T.intLotId = L.intLotId
 		,9
 		,10
 		,11
-		) and T.intTaskId <>@intTaskId 
+		)
+	AND T.intTaskId <> @intTaskId
 JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId, R.intRestrictionId)
 	AND R.strInternalCode = 'STOCK'
 LEFT JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
@@ -152,13 +150,13 @@ JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
 	AND BS.strPrimaryStatus = 'Active'
 JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
-JOIN tblICItemUOM IU on IU.intItemUOMId =L.intItemUOMId 
-JOIN tblICUnitMeasure UM on UM.intUnitMeasureId =IU.intUnitMeasureId
-JOIN tblICItemUOM IU1 on IU1.intItemUOMId =IsNULL(L.intWeightUOMId,L.intItemUOMId)
-JOIN tblICUnitMeasure UM1 on UM1.intUnitMeasureId =IU1.intUnitMeasureId  
+JOIN tblICItemUOM IU ON IU.intItemUOMId = L.intItemUOMId
+JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+JOIN tblICItemUOM IU1 ON IU1.intItemUOMId = IsNULL(L.intWeightUOMId, L.intItemUOMId)
+JOIN tblICUnitMeasure UM1 ON UM1.intUnitMeasureId = IU1.intUnitMeasureId
 WHERE L.intItemId = @intItemId
 	AND L.dblQty > 0
-	AND L.intLocationId=@intLocationId
+	AND L.intLocationId = @intLocationId
 	AND LS.strPrimaryStatus = 'Active'
 	AND ISNULL(L.dtmExpiryDate - @intReceivedLife, @dtmCurrentDateTime) >= @dtmCurrentDateTime
 	AND L.dtmDateCreated BETWEEN (
@@ -194,8 +192,14 @@ WHERE L.intItemId = @intItemId
 			ELSE IsNULL(L.intItemOwnerId, 0)
 			END
 		)
-		AND L.strLotNumber  LIKE @strLotNumber+'%'
-		AND L.intLotId =(Case When @intLotId >0 then @intLotId else L.intLotId end)
+	AND L.strLotNumber LIKE '%' + @strLotNumber + '%'
+	AND L.intLotId = (
+		CASE 
+			WHEN @intLotId > 0
+				THEN @intLotId
+			ELSE L.intLotId
+			END
+		)
 GROUP BY L.intLotId
 	,L.intItemId
 	,L.dblQty
@@ -209,13 +213,13 @@ GROUP BY L.intLotId
 	,I.intUnitPerLayer
 	,I.intLayerPerPallet
 	,I.strItemNo
-	,I.strDescription 
-	,PL.strParentLotNumber 
-	,L.strLotNumber 
-	,L.strLotAlias 
-	,UM.strUnitMeasure 
-	,UM1.strUnitMeasure 
-	,SL.strName 
+	,I.strDescription
+	,PL.strParentLotNumber
+	,L.strLotNumber
+	,L.strLotAlias
+	,UM.strUnitMeasure
+	,UM1.strUnitMeasure
+	,SL.strName
 HAVING (
 		CASE 
 			WHEN L.intWeightUOMId IS NULL
