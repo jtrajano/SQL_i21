@@ -2502,9 +2502,10 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
-    afterSave: function(me, win, batch, options) {
-        win.context.data.reload();
-    },
+    // Comment this code because it causing the Status indicator to show as "Ready". It should show as "Saved". See IC-4436. 
+    // afterSave: function(me, win, batch, options) {
+    //     win.context.data.reload();
+    // },
 
     onEditLocationClick: function(button, e, eOpts) {
         var win = button.up('window');
