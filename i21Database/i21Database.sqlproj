@@ -5896,6 +5896,7 @@
     <Build Include="dbo\Stored Procedures\uspMFUpdateTask.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutShiftPhysical.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTaskDetail.sql" />
+    <None Include="Scripts\Post-Deployment\PAT\3_UpdateRetiredStockNo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
