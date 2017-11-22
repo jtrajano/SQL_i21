@@ -38,6 +38,7 @@ BEGIN TRANSACTION
 	-- DELETE Screens
 	DELETE FROM tblSMScreen 
 	WHERE strNamespace IN (SELECT strNamespace FROM tblSMScreenStage WHERE strChange = 'Deleted') AND strNamespace <> 'ContractManagement.view.ContractAmendment' 
+	AND intScreenId NOT IN (SELECT intScreenId FROM tblSMTransaction)
 	
 	-- INSERT Controls
 	INSERT INTO tblSMControl (
