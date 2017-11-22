@@ -2161,7 +2161,6 @@
     <Build Include="dbo\Stored Procedures\uspARPostInvoiceIntegrations.sql" />
     <Build Include="dbo\Views\vyuLGAllocatedContracts.sql" />
     <Build Include="dbo\Views\vyuLGAllocationOpenContracts.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLGenerateAccountRange.sql" />
     <Build Include="dbo\Views\vyuLGInboundShipmentView.sql" />
     <Build Include="dbo\Views\vyuICGetUnpostedTransactions.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateContractOnReceiptSave.sql" />
