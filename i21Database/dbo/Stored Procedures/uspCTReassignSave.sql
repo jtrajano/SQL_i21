@@ -45,7 +45,10 @@ BEGIN TRY
 			@intUnitMeasureId				INT,
 			@intNewAllocationDetailId		INT,
 			@strTagRelaceXML				NVARCHAR(MAX),
-			@intItemId						INT
+			@intItemId						INT,
+			@dblRecipientQty				NUMERIC(18,6),
+			@dblDonorQty					NUMERIC(18,6),
+			@dblDonorNoOfLots				NUMERIC(18,6)
 
 	SELECT @intContractTypeId = intContractTypeId FROM tblCTReassign WHERE intReassignId = @intReassignId
 
@@ -90,7 +93,11 @@ BEGIN TRY
 			@dblRecipientBasis		=	DR.dblBasis,
 			@dblRecipientNoOfLots	=	DR.dblNoOfLots,
 			@intRecipientBookId		=	DR.intBookId,
-			@intRecipientSubBookId	=	DR.intSubBookId
+			@intRecipientSubBookId	=	DR.intSubBookId,
+			@dblRecipientQty		=	DR.dblQuantity,
+			@dblDonorQty			=	DD.dblQuantity,
+			@dblDonorNoOfLots		=	DD.dblNoOfLots
+
 	FROM	tblCTReassign		RE
 	JOIN	tblCTContractDetail	DR	ON	DR.intContractDetailId	=	RE.intRecipientId
 	JOIN	tblCTContractDetail DD	ON	DD.intContractDetailId	=	RE.intDonorId
@@ -152,7 +159,8 @@ BEGIN TRY
 
 	---------------------------------------Pircing------------------------------
 	UPDATE	FD
-	SET		FD.[dblNoOfLots] = FD.[dblNoOfLots] - PR.dblReassign
+	SET		FD.[dblNoOfLots]	=	FD.[dblNoOfLots] - PR.dblReassign,
+			FD.dblQuantity		=	(@dblDonorQty / @dblDonorNoOfLots) * (FD.dblNoOfLots - PR.dblReassign)
 	FROM	tblCTPriceFixationDetail	FD
 	JOIN	@tblPricing					PR	ON	PR.intPriceFixationDetailId = FD.intPriceFixationDetailId
 	WHERE	PR.ysnFullyPricingReassign = 0
@@ -246,10 +254,11 @@ BEGIN TRY
 			EXEC  uspCTCreateADuplicateRecord 'tblCTPriceFixationDetail',@intPriceFixationDetailId,@intNewPriceFixationDetailId OUTPUT,@strXML
 
 			UPDATE	tblCTPriceFixationDetail
-			SET		intPriceFixationId = @intNewPriceFixationId,
-					[dblNoOfLots] = @dblReassignPricing
+			SET		intPriceFixationId	=	@intNewPriceFixationId,
+					dblNoOfLots			=	@dblReassignPricing,
+					dblQuantity			=	(@dblRecipientQty / @dblRecipientNoOfLots) * @dblReassignPricing
 			WHERE	intPriceFixationDetailId = @intNewPriceFixationDetailId
-
+			
 			IF ISNULL(@intAssignFuturesToContractSummaryId,0) > 0
 			BEGIN
 				UPDATE	SY
