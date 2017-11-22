@@ -573,6 +573,8 @@ FROM
 	) Qty
 	WHERE A.[intEntityVendorId] NOT IN (Billed.intEntityVendorId) OR (Qty.dblQty IS NULL)
 	UNION ALL
+	
+	--CONTRACT
 	SELECT
 	DISTINCT  
 		[intEntityVendorId]							=	CC.intVendorId
@@ -598,7 +600,10 @@ FROM
 		,[dblUnitCost]								=	ISNULL(CASE	WHEN	CC.strCostMethod = 'Percentage' THEN
 																		dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice * (CC.dblRate / 100) *
 																		CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END
-																ELSE	ISNULL(NULLIF(CC.dblRate,0),1) 
+                                                               		WHEN	CC.strCostMethod = 'Per Unit' THEN       
+																		ROUND(dbo.fnCalculateCostBetweenUOM(CC.intItemUOMId,CD.intItemUOMId,CC.dblRate) * CD.dblQuantity *
+																		CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END,2)
+																ELSE	ISNULL(CC.dblRate,0) 
 														END,0)
 		,[dblTax]									=	0
 		,[dblRate]									=	CASE WHEN CY.ysnSubCurrency > 0  THEN  ISNULL(RateDetail.dblRate,1) ELSE ISNULL(G1.dblRate,1) END
@@ -676,7 +681,7 @@ FROM
 	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON CC.intVendorId = D1.[intEntityId]  
 	WHERE		RC.intInventoryReceiptChargeId IS NULL AND CC.ysnBasis = 0
 	AND ysnBilled = 0
-		UNION ALL
+	UNION ALL
 	SELECT
 	DISTINCT  
 		[intEntityVendorId]							=	CC.intVendorId
@@ -702,7 +707,10 @@ FROM
 		,[dblUnitCost]								=	ISNULL(CASE	WHEN	CC.strCostMethod = 'Percentage' THEN
 																		dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice * (CC.dblRate / 100) *
 																		CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END
-																ELSE	ISNULL(CC.dblRate,1) 
+                                                               		WHEN	CC.strCostMethod = 'Per Unit' THEN       
+																		ROUND(dbo.fnCalculateCostBetweenUOM(CC.intItemUOMId,CD.intItemUOMId,CC.dblRate) * CD.dblQuantity *
+																		CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END,2)
+																ELSE	ISNULL(CC.dblRate,0) 
 														END,0)
 		,[dblTax]									=	0
 		,[dblRate]									=	CASE WHEN CY.ysnSubCurrency > 0  THEN  ISNULL(RateDetail.dblRate,1) ELSE ISNULL(G1.dblRate,1) END
