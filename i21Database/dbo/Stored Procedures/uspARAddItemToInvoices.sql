@@ -15,11 +15,21 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 	
 DECLARE  @ZeroDecimal		NUMERIC(18, 6)
-		,@AddDetailError	NVARCHAR(MAX) 
+		,@AddDetailError	NVARCHAR(MAX)
+		,@InitTranCount		INT
+		,@Savepoint			NVARCHAR(32)
+
 SET @ZeroDecimal = 0.000000
+SET @InitTranCount = @@TRANCOUNT
+SET @Savepoint = SUBSTRING(('ARAddItemToInvoices' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
 
 IF ISNULL(@RaiseError,0) = 0
-	BEGIN TRANSACTION
+BEGIN
+	IF @InitTranCount = 0
+		BEGIN TRANSACTION
+	ELSE
+		SAVE TRANSACTION @Savepoint
+END
 
 DECLARE @Inventory InvoiceStagingTable
 DELETE FROM @Inventory
@@ -46,7 +56,15 @@ BEGIN
 	IF LEN(ISNULL(@AddDetailError,'')) > 0
 		BEGIN
 			IF ISNULL(@RaiseError,0) = 0
-				ROLLBACK TRANSACTION
+			BEGIN
+				IF @InitTranCount = 0
+					IF (XACT_STATE()) <> 0
+						ROLLBACK TRANSACTION
+				ELSE
+					IF (XACT_STATE()) <> 0
+						ROLLBACK TRANSACTION @Savepoint
+			END
+
 			SET @ErrorMessage = @AddDetailError;
 			IF ISNULL(@RaiseError,0) = 1
 				RAISERROR(@ErrorMessage, 16, 1);
@@ -55,7 +73,15 @@ BEGIN
 	END TRY
 	BEGIN CATCH
 		IF ISNULL(@RaiseError,0) = 0
-			ROLLBACK TRANSACTION
+		BEGIN
+			IF @InitTranCount = 0
+				IF (XACT_STATE()) <> 0
+					ROLLBACK TRANSACTION
+			ELSE
+				IF (XACT_STATE()) <> 0
+					ROLLBACK TRANSACTION @Savepoint
+		END
+
 		SET @ErrorMessage = ERROR_MESSAGE();
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(@ErrorMessage, 16, 1);
@@ -89,7 +115,15 @@ IF EXISTS(SELECT TOP 1 NULL FROM @NonInventory)
 		IF LEN(ISNULL(@AddDetailError,'')) > 0
 			BEGIN
 				IF ISNULL(@RaiseError,0) = 0
-					ROLLBACK TRANSACTION
+				BEGIN
+					IF @InitTranCount = 0
+						IF (XACT_STATE()) <> 0
+							ROLLBACK TRANSACTION
+					ELSE
+						IF (XACT_STATE()) <> 0
+							ROLLBACK TRANSACTION @Savepoint
+				END
+
 				SET @ErrorMessage = @AddDetailError;
 				IF ISNULL(@RaiseError,0) = 1
 					RAISERROR(@ErrorMessage, 16, 1);
@@ -98,7 +132,15 @@ IF EXISTS(SELECT TOP 1 NULL FROM @NonInventory)
 		END TRY
 		BEGIN CATCH
 			IF ISNULL(@RaiseError,0) = 0
-				ROLLBACK TRANSACTION
+			BEGIN
+				IF @InitTranCount = 0
+					IF (XACT_STATE()) <> 0
+						ROLLBACK TRANSACTION
+				ELSE
+					IF (XACT_STATE()) <> 0
+						ROLLBACK TRANSACTION @Savepoint
+			END
+
 			SET @ErrorMessage = ERROR_MESSAGE();
 			IF ISNULL(@RaiseError,0) = 1
 				RAISERROR(@ErrorMessage, 16, 1);
@@ -133,7 +175,15 @@ IF EXISTS(SELECT TOP 1 NULL FROM @MiscItem)
 			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN
 					IF ISNULL(@RaiseError,0) = 0
-						ROLLBACK TRANSACTION
+					BEGIN
+						IF @InitTranCount = 0
+							IF (XACT_STATE()) <> 0
+								ROLLBACK TRANSACTION
+						ELSE
+							IF (XACT_STATE()) <> 0
+								ROLLBACK TRANSACTION @Savepoint
+					END
+
 					SET @ErrorMessage = @AddDetailError;
 					IF ISNULL(@RaiseError,0) = 1
 						RAISERROR(@ErrorMessage, 16, 1);
@@ -142,7 +192,15 @@ IF EXISTS(SELECT TOP 1 NULL FROM @MiscItem)
 		END TRY
 		BEGIN CATCH
 			IF ISNULL(@RaiseError,0) = 0
-				ROLLBACK TRANSACTION
+			BEGIN
+				IF @InitTranCount = 0
+					IF (XACT_STATE()) <> 0
+						ROLLBACK TRANSACTION
+				ELSE
+					IF (XACT_STATE()) <> 0
+						ROLLBACK TRANSACTION @Savepoint
+			END
+
 			SET @ErrorMessage = ERROR_MESSAGE();
 			IF ISNULL(@RaiseError,0) = 1
 				RAISERROR(@ErrorMessage, 16, 1);
@@ -169,8 +227,25 @@ IF EXISTS(SELECT TOP 1 NULL FROM @MiscItem)
 
 --EXEC [dbo].[uspARReComputeInvoiceAmounts] @InvoiceId
 
+
 IF ISNULL(@RaiseError,0) = 0
-	COMMIT TRANSACTION
+BEGIN
+
+	IF @InitTranCount = 0
+		BEGIN
+			IF (XACT_STATE()) = -1
+				ROLLBACK TRANSACTION
+			IF (XACT_STATE()) = 1
+				COMMIT TRANSACTION
+		END		
+	ELSE
+		BEGIN
+			IF (XACT_STATE()) = -1
+				ROLLBACK TRANSACTION  @Savepoint
+			--IF (XACT_STATE()) = 1
+			--	COMMIT TRANSACTION  @Savepoint
+		END	
+END
 
 SET @ErrorMessage = NULL;
 RETURN 1;
