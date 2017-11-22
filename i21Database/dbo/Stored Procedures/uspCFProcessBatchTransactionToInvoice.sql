@@ -405,7 +405,7 @@ SELECT * FROM #tmpForeignTransactionId
 		,@LineItemTaxEntries = @TaxDetails
 		,@UserId			= @UserId
 		,@GroupingOption	= 11
-		,@RaiseError		= 1
+		,@RaiseError		= 0
 		,@ErrorMessage		= @ErrorMessage OUTPUT
 		,@LogId				= @LogId OUTPUT
 
