@@ -37,6 +37,8 @@ BEGIN TRY
 		,@strOrderNo NVARCHAR(50)
 		,@intTaskId INT
 		,@intConcurrencyId INT
+		,@intTaskItemUOMId INT
+		,@dblTaskQty NUMERIC(18, 6)
 
 	SELECT @dtmCurrentDate = GETDATE()
 
@@ -45,8 +47,8 @@ BEGIN TRY
 
 	SELECT @intTaskId = intTaskId
 		,@intLotId = intLotId
-		,@dblQty = dblQty
-		,@intItemUOMId = intItemUOMId
+		,@dblTaskQty = dblQty
+		,@intTaskItemUOMId = intItemUOMId
 		,@intOrderHeaderId = intOrderHeaderId
 		,@intLocationId = intLocationId
 		,@intUserId = intUserId
@@ -71,14 +73,29 @@ BEGIN TRY
 	WHERE intOrderHeaderId = @intOrderHeaderId
 
 	SELECT @intFromStorageLocationId = intStorageLocationId
-		,@dblLotQty = dblQty
 		,@intItemId = intItemId
-		,@dblLotWeight = dblWeight
 		,@intItemUOMId = intItemUOMId
 		,@intWeightUOMId = intWeightUOMId
-		,@dblWeightPerQty = dblWeightPerQty
+		,@dblWeightPerQty = CASE 
+			WHEN dblWeightPerQty = 0
+				THEN 1
+			ELSE dblWeightPerQty
+			END
 	FROM tblICLot
 	WHERE intLotId = @intLotId
+
+	IF @intTaskItemUOMId = @intItemUOMId
+	BEGIN
+		SELECT @dblLotQty = @dblTaskQty
+
+		SELECT @dblLotWeight = @dblTaskQty * @dblWeightPerQty
+	END
+	ELSE
+	BEGIN
+		SELECT @dblLotQty = @dblTaskQty / @dblWeightPerQty
+
+		SELECT @dblLotWeight = @dblTaskQty
+	END
 
 	SELECT @intToStorageLocationId = IsNULL(intStagingLocationId, @intToStorageLocationId)
 		,@intOrderDetailId = intOrderDetailId

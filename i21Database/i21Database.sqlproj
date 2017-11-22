@@ -5762,6 +5762,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetOrderLineItem.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetUOMByLot.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUpdateTask.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTaskDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
