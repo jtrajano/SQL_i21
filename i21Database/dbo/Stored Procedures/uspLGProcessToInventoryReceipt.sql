@@ -349,7 +349,6 @@ BEGIN TRY
 	FROM vyuLGLoadCostView CV
 	JOIN tblLGLoad L ON L.intLoadId = CV.intLoadId
 	WHERE L.intLoadId = @intLoadId
-		AND ysnAccrue = 1
 
 	IF NOT EXISTS (
 			SELECT 1
