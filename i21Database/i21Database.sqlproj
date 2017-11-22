@@ -5895,6 +5895,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetUOMByLot.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUpdateTask.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutShiftPhysical.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTaskDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
