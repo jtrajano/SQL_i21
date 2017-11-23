@@ -5923,6 +5923,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetTaskDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGetUncommonField.sql" />
     <Build Include="dbo\Stored Procedures\uspMFAddDefaultValuesToManufacturingProcess.sql" />
+    <Build Include="dbo\Views\vyuRKGetM2MConfigurationMapping.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
