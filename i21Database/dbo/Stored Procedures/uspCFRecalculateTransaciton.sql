@@ -134,6 +134,7 @@ BEGIN
 
 	
 	DECLARE @ysnCaptiveSite					BIT
+	DECLARE @ysnActive						BIT
 
 
 	
@@ -286,6 +287,18 @@ BEGIN
 		ON cfCard.intAccountId = cfAccount.intAccountId
 		WHERE cfCard.intCardId = @intCardId
 	END
+
+
+	--GET @ysnActive CUSTOMER--
+
+		SELECT TOP 1
+		@ysnActive = ysnActive
+		FROM tblARCustomer
+		WHERE intEntityId = @intCustomerId
+
+	--GET @ysnActive CUSTOMER--
+
+	
 	
 	--GET COMPANY LOCATION ID--
 	SELECT TOP 1
@@ -2868,6 +2881,18 @@ BEGIN
 	---------------------------------------------------
 	--					ZERO PRICING				 --
 	---------------------------------------------------
+
+
+	IF (ISNULL(@ysnActive,0) = 0)
+	BEGIN
+
+			SET @ysnInvalid = 1
+			--UPDATE tblCFTransaction SET ysnInvalid = 1 WHERE intTransactionId = @intTransactionId
+			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Customer is invalid.')
+
+	END
+
 
 	--IF (ISNULL(@ysnInvalid,0) = 0)
 	--BEGIN
