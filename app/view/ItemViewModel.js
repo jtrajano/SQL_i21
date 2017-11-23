@@ -421,6 +421,9 @@ Ext.define('Inventory.view.ItemViewModel', {
                 ,
                 {
                     strDescription: 'Storage Charge',
+                },
+                {
+                    strDescription: 'Commission'
                 }
             ],
             fields: [
