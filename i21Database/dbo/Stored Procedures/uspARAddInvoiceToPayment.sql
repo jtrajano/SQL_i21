@@ -26,7 +26,13 @@ DECLARE @ZeroDecimal NUMERIC(18, 6)
 		,@BasePayment NUMERIC(18, 6)
 		,@BaseDiscount NUMERIC(18, 6)
 		,@BaseInterest NUMERIC(18, 6)
-		,@DateOnly DATETIME			
+		,@DateOnly DATETIME
+		,@InitTranCount INT
+		,@Savepoint NVARCHAR(32)
+
+SET @InitTranCount = @@TRANCOUNT
+SET @Savepoint = SUBSTRING(('ARAddInvoiceToPayment' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
+		
 
 SET @ZeroDecimal = 0.000000	
 SELECT @DateOnly = CAST(GETDATE() AS DATE)
@@ -160,7 +166,12 @@ IF @TransactionType IN ('Credit Memo','Overpayment','Customer Prepayment')
 	END
 		
 IF ISNULL(@RaiseError,0) = 0	
-	BEGIN TRANSACTION
+BEGIN
+	IF @InitTranCount = 0
+		BEGIN TRANSACTION
+	ELSE
+		SAVE TRANSACTION @Savepoint
+END
 
 DECLARE  @NewId INT
 		,@NewDetailId INT
@@ -239,7 +250,15 @@ BEGIN TRY
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0
-		ROLLBACK TRANSACTION
+	BEGIN
+		IF @InitTranCount = 0
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION
+		ELSE
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION @Savepoint
+	END
+
 	SET @ErrorMessage = ERROR_MESSAGE();
 	IF ISNULL(@RaiseError,0) = 1
 		RAISERROR(@ErrorMessage, 16, 1);
@@ -249,7 +268,24 @@ END CATCH
 SET @NewPaymentDetailId = @NewId
 
 IF ISNULL(@RaiseError,0) = 0
-	COMMIT TRANSACTION
+BEGIN
+
+	IF @InitTranCount = 0
+		BEGIN
+			IF (XACT_STATE()) = -1
+				ROLLBACK TRANSACTION
+			IF (XACT_STATE()) = 1
+				COMMIT TRANSACTION
+		END		
+	ELSE
+		BEGIN
+			IF (XACT_STATE()) = -1
+				ROLLBACK TRANSACTION  @Savepoint
+			--IF (XACT_STATE()) = 1
+			--	COMMIT TRANSACTION  @Savepoint
+		END	
+END
+
 SET @ErrorMessage = NULL;
 RETURN 1;
 	

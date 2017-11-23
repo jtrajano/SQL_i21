@@ -15,19 +15,38 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @ZeroDecimal DECIMAL(18,6)
+		,@InitTranCount	INT
+		,@Savepoint		NVARCHAR(32)
+
+SET @InitTranCount = @@TRANCOUNT
+SET @Savepoint = SUBSTRING(('ARAddInventoryItemToInvoices' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
+
 SET @ZeroDecimal = 0.000000
 
 	
 IF ISNULL(@RaiseError,0) = 0	
-	BEGIN TRANSACTION
+BEGIN
+	IF @InitTranCount = 0
+		BEGIN TRANSACTION
+	ELSE
+		SAVE TRANSACTION @Savepoint
+END
 	
 	
 IF EXISTS(SELECT NULL FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId AND [intPaymentId] = @PaymentId) AND EXISTS(SELECT NULL FROM tblARPayment WHERE [intPaymentId] = @PaymentId)
 BEGIN
 	IF EXISTS(SELECT NULL FROM tblARPayment WHERE [intPaymentId] = @PaymentId AND [ysnPosted] = 1)
-		BEGIN
+	BEGIN
 		IF ISNULL(@RaiseError,0) = 0
-			ROLLBACK TRANSACTION		
+		BEGIN
+			IF @InitTranCount = 0
+				IF (XACT_STATE()) <> 0
+					ROLLBACK TRANSACTION
+			ELSE
+				IF (XACT_STATE()) <> 0
+					ROLLBACK TRANSACTION @Savepoint
+		END
+			
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR('Cannot delete posted payment!', 16, 1);
 		RETURN 0;
@@ -44,7 +63,15 @@ BEGIN
 	END TRY
 	BEGIN CATCH
 		IF ISNULL(@RaiseError,0) = 0
-			ROLLBACK TRANSACTION
+		BEGIN
+			IF @InitTranCount = 0
+				IF (XACT_STATE()) <> 0
+					ROLLBACK TRANSACTION
+			ELSE
+				IF (XACT_STATE()) <> 0
+					ROLLBACK TRANSACTION @Savepoint
+		END
+
 		SET @ErrorMessage = ERROR_MESSAGE();
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(@ErrorMessage, 16, 1);
@@ -56,7 +83,15 @@ BEGIN
 	END TRY
 	BEGIN CATCH
 		IF ISNULL(@RaiseError,0) = 0
-			ROLLBACK TRANSACTION
+		BEGIN
+			IF @InitTranCount = 0
+				IF (XACT_STATE()) <> 0
+					ROLLBACK TRANSACTION
+			ELSE
+				IF (XACT_STATE()) <> 0
+					ROLLBACK TRANSACTION @Savepoint
+		END
+
 		SET @ErrorMessage = ERROR_MESSAGE();
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(@ErrorMessage, 16, 1);
@@ -69,7 +104,15 @@ BEGIN
 	END TRY
 	BEGIN CATCH
 		IF ISNULL(@RaiseError,0) = 0
-			ROLLBACK TRANSACTION
+		BEGIN
+			IF @InitTranCount = 0
+				IF (XACT_STATE()) <> 0
+					ROLLBACK TRANSACTION
+			ELSE
+				IF (XACT_STATE()) <> 0
+					ROLLBACK TRANSACTION @Savepoint
+		END
+
 		SET @ErrorMessage = ERROR_MESSAGE();
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(@ErrorMessage, 16, 1);
@@ -85,7 +128,15 @@ END
 IF EXISTS(SELECT NULL FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId AND [intPaymentId] IS NOT NULL)
 BEGIN
 	IF ISNULL(@RaiseError,0) = 0
-		ROLLBACK TRANSACTION	
+	BEGIN
+		IF @InitTranCount = 0
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION
+		ELSE
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION @Savepoint
+	END
+		
 	IF ISNULL(@RaiseError,0) = 1
 		RAISERROR('Payment has already been created for this Invoice!', 16, 1);
 	RETURN 0;
@@ -143,7 +194,15 @@ BEGIN TRY
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0
-		ROLLBACK TRANSACTION
+	BEGIN
+		IF @InitTranCount = 0
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION
+		ELSE
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION @Savepoint
+	END
+
 	SET @ErrorMessage = ERROR_MESSAGE();
 	IF ISNULL(@RaiseError,0) = 1
 		RAISERROR(@ErrorMessage, 16, 1);
@@ -184,7 +243,15 @@ BEGIN TRY
 		IF LEN(ISNULL(@AddDetailError,'')) > 0
 			BEGIN
 				IF ISNULL(@RaiseError,0) = 0
-					ROLLBACK TRANSACTION
+				BEGIN
+					IF @InitTranCount = 0
+						IF (XACT_STATE()) <> 0
+							ROLLBACK TRANSACTION
+					ELSE
+						IF (XACT_STATE()) <> 0
+							ROLLBACK TRANSACTION @Savepoint
+				END
+
 				SET @ErrorMessage = @AddDetailError;
 				IF ISNULL(@RaiseError,0) = 1
 					RAISERROR(@ErrorMessage, 16, 1);
@@ -193,7 +260,15 @@ BEGIN TRY
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0
-		ROLLBACK TRANSACTION
+	BEGIN
+		IF @InitTranCount = 0
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION
+		ELSE
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION @Savepoint
+	END
+
 	SET @ErrorMessage = ERROR_MESSAGE();
 	IF ISNULL(@RaiseError,0) = 1
 		RAISERROR(@ErrorMessage, 16, 1);
@@ -209,10 +284,26 @@ WHERE
 	[intInvoiceId] = @InvoiceId 
 		  
 SET @PaymentId = @NewId		                 
-
 IF ISNULL(@RaiseError,0) = 0
-	COMMIT TRANSACTION
-	SET @ErrorMessage = NULL;
+BEGIN
+
+	IF @InitTranCount = 0
+		BEGIN
+			IF (XACT_STATE()) = -1
+				ROLLBACK TRANSACTION
+			IF (XACT_STATE()) = 1
+				COMMIT TRANSACTION
+		END		
+	ELSE
+		BEGIN
+			IF (XACT_STATE()) = -1
+				ROLLBACK TRANSACTION  @Savepoint
+			--IF (XACT_STATE()) = 1
+			--	COMMIT TRANSACTION  @Savepoint
+		END	
+END
+
+SET @ErrorMessage = NULL;
 RETURN @NewId
 
 END
