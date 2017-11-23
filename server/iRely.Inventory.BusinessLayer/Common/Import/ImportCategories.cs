@@ -21,7 +21,7 @@ namespace iRely.Inventory.BusinessLayer
 
         protected override string[] GetRequiredFields()
         {
-            return new string[] { "category code", "inventory type", "costing method" };
+            return new string[] { "category code", "inventory type" };
         }
 
         protected override tblICCategory ProcessRow(int row, int fieldCount, string[] headers, LumenWorks.Framework.IO.Csv.CsvReader csv, ImportDataResult dr)
@@ -113,45 +113,45 @@ namespace iRely.Inventory.BusinessLayer
                             });
                         }
                         break;
-                    case "costing method":
-                        switch (value.ToUpper().Trim())
-                        {
-                            case "AVG": fc.intCostingMethod = 1; break;
-                            case "FIFO": fc.intCostingMethod = 2; break;
-                            case "LIFO": fc.intCostingMethod = 3; break;
-                            default:
-                                if (string.IsNullOrEmpty(value.Trim()))
-                                {
-                                    if (inventoryType == "Inventory" || inventoryType == "Finished Good" || inventoryType == "Raw Material")
-                                    {
-                                        valid = false;
-                                        dr.Messages.Add(new ImportDataMessage()
-                                        {
-                                            Column = header,
-                                            Row = row,
-                                            Type = TYPE_INNER_ERROR,
-                                            Status = STAT_REC_SKIP,
-                                            Message = string.Format("The value for Costing Method should not be blank.")
-                                        });
-                                    }
-                                }
-                                break;
-                        }
-                        break;
-                    case "inventory valuation":
-                        switch (value.ToLower())
-                        {
-                            case "item level": fc.strInventoryTracking = "Item Level"; break;
-                            case "category level": fc.strInventoryTracking = "Category Level"; break;
-                            case "lot level": fc.strInventoryTracking = "Lot Level"; break;
-                        }
-                        break;
-                    case "gl division no":
-                        fc.strGLDivisionNumber = value;
-                        break;
-                    case "sales analysis":
-                        SetBoolean(value, flag => fc.ysnSalesAnalysisByTon = flag);
-                        break;
+                    //case "costing method":
+                    //    switch (value.ToUpper().Trim())
+                    //    {
+                    //        case "AVG": fc.intCostingMethod = 1; break;
+                    //        case "FIFO": fc.intCostingMethod = 2; break;
+                    //        case "LIFO": fc.intCostingMethod = 3; break;
+                    //        default:
+                    //            if (string.IsNullOrEmpty(value.Trim()))
+                    //            {
+                    //                if (inventoryType == "Inventory" || inventoryType == "Finished Good" || inventoryType == "Raw Material")
+                    //                {
+                    //                    valid = false;
+                    //                    dr.Messages.Add(new ImportDataMessage()
+                    //                    {
+                    //                        Column = header,
+                    //                        Row = row,
+                    //                        Type = TYPE_INNER_ERROR,
+                    //                        Status = STAT_REC_SKIP,
+                    //                        Message = string.Format("The value for Costing Method should not be blank.")
+                    //                    });
+                    //                }
+                    //            }
+                    //            break;
+                    //    }
+                    //    break;
+                    //case "inventory valuation":
+                    //    switch (value.ToLower())
+                    //    {
+                    //        case "item level": fc.strInventoryTracking = "Item Level"; break;
+                    //        case "category level": fc.strInventoryTracking = "Category Level"; break;
+                    //        case "lot level": fc.strInventoryTracking = "Lot Level"; break;
+                    //    }
+                    //    break;
+                    //case "gl division no":
+                    //    fc.strGLDivisionNumber = value;
+                    //    break;
+                    //case "sales analysis":
+                    //    SetBoolean(value, flag => fc.ysnSalesAnalysisByTon = flag);
+                    //    break;
                 }
             }
 
@@ -178,10 +178,10 @@ namespace iRely.Inventory.BusinessLayer
                 entry.Property(e => e.strDescription).CurrentValue = fc.strDescription;
                 entry.Property(e => e.strInventoryType).CurrentValue = fc.strInventoryType;
                 entry.Property(e => e.intCostingMethod).CurrentValue = fc.intCostingMethod;
-                entry.Property(e => e.intLineOfBusinessId).CurrentValue = fc.intLineOfBusinessId;
-                entry.Property(e => e.ysnSalesAnalysisByTon).CurrentValue = fc.ysnSalesAnalysisByTon;
-                entry.Property(e => e.strGLDivisionNumber).CurrentValue = fc.strGLDivisionNumber;
-                entry.Property(e => e.strInventoryTracking).CurrentValue = fc.strInventoryTracking;
+                //entry.Property(e => e.intLineOfBusinessId).CurrentValue = fc.intLineOfBusinessId;
+                //entry.Property(e => e.ysnSalesAnalysisByTon).CurrentValue = fc.ysnSalesAnalysisByTon;
+                //entry.Property(e => e.strGLDivisionNumber).CurrentValue = fc.strGLDivisionNumber;
+                //entry.Property(e => e.strInventoryTracking).CurrentValue = fc.strInventoryTracking;
                 entry.State = System.Data.Entity.EntityState.Modified;
                 entry.Property(e => e.strCategoryCode).IsModified = false;
             }

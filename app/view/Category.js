@@ -218,6 +218,7 @@ Ext.define('Inventory.view.Category', {
                                                             },
                                                             {
                                                                 xtype: 'combobox',
+                                                                hidden: true,
                                                                 itemId: 'cboCostingMethod',
                                                                 fieldLabel: 'Costing Method',
                                                                 labelWidth: 130,
@@ -227,6 +228,7 @@ Ext.define('Inventory.view.Category', {
                                                             },
                                                             {
                                                                 xtype: 'combobox',
+                                                                hidden: true,
                                                                 itemId: 'cboInventoryValuation',
                                                                 fieldLabel: 'Inventory Valuation',
                                                                 labelWidth: 130,
@@ -235,18 +237,21 @@ Ext.define('Inventory.view.Category', {
                                                             },
                                                             {
                                                                 xtype: 'textfield',
+                                                                hidden: true,
                                                                 itemId: 'txtGlDivisionNumber',
                                                                 fieldLabel: 'GL Division Number',
                                                                 labelWidth: 130
                                                             },
                                                             {
                                                                 xtype: 'checkboxfield',
+                                                                hidden: true,
                                                                 itemId: 'chkSalesAnalysisByTon',
                                                                 fieldLabel: 'Sales Analysis by Ton',
                                                                 labelWidth: 130
                                                             },
                                                             {
                                                                 xtype: 'numberfield',
+                                                                hidden: true,
                                                                 itemId: 'txtStandardQty',
                                                                 fieldLabel: 'Standard Qty',
                                                                 labelWidth: 130
@@ -284,6 +289,7 @@ Ext.define('Inventory.view.Category', {
                                                                         flex: 1
                                                                     }
                                                                 ],
+                                                                hidden: true,
                                                                 itemId: 'cboStandardUOM',
                                                                 fieldLabel: 'Standard UOM',
                                                                 labelWidth: 130,

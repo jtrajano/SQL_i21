@@ -450,8 +450,7 @@ function getTemplateColumns(name) {
         case "lineofbusiness":
             return ["Line of Business", "Sales Person Id", "SIC Code", "Type", "Segment Code", "Visible on Web"];
         case "categories":
-            return ["Category Code", "Description", "Inventory Type", "Line of Business", "Costing Method", "Inventory Valuation",
-                "GL Division No", "Sales Analysis"];
+            return ["Category Code", "Description", "Inventory Type", "Line of Business"];
         case "brands":
             return ["Brand Code", "Brand Name", "Manufacturer"];
         case "manufacturers":

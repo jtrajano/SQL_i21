@@ -59,20 +59,20 @@ Ext.define('Inventory.model.Category', {
         {type: 'presence', field: 'strInventoryType'}
     ],
 
-    validate: function(options) {
-        var errors = this.callParent(arguments);
-        if (this.get('strInventoryType') === 'Raw Material' || 
-            this.get('strInventoryType') === 'Finished Good' || 
-            this.get('strInventoryType') === 'Inventory') {
-            if (this.get('intCostingMethod') <= 0 || this.get('intCostingMethod') === '') {
-                errors.add({
-                    field: 'intCostingMethod',
-                    message: 'Costing Method is required.'
-                });
-            }
-        }
-        return errors;
-    },
+    // validate: function(options) {
+    //     var errors = this.callParent(arguments);
+    //     if (this.get('strInventoryType') === 'Raw Material' || 
+    //         this.get('strInventoryType') === 'Finished Good' || 
+    //         this.get('strInventoryType') === 'Inventory') {
+    //         if (this.get('intCostingMethod') <= 0 || this.get('intCostingMethod') === '') {
+    //             errors.add({
+    //                 field: 'intCostingMethod',
+    //                 message: 'Costing Method is required.'
+    //             });
+    //         }
+    //     }
+    //     return errors;
+    // },
 
     getDefaultUOM : function(){
         //get default uom

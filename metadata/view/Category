@@ -618,6 +618,7 @@
                                                         "displayField": "strDescription",
                                                         "fieldLabel": "Costing Method",
                                                         "forceSelection": true,
+                                                        "hidden": true,
                                                         "itemId": "cboCostingMethod",
                                                         "labelWidth": 130,
                                                         "layout|flex": null,
@@ -633,7 +634,8 @@
                                                         "layout|flex": "number",
                                                         "layout|margins": "string",
                                                         "valueField": "datafield",
-                                                        "scrollable": "boolean"
+                                                        "scrollable": "boolean",
+                                                        "hidden": "boolean"
                                                     },
                                                     "name": "MyComboBox46",
                                                     "designerId": "59274c24-26d9-416b-9f19-dc30d33250fa"
@@ -648,6 +650,7 @@
                                                     "userConfig": {
                                                         "displayField": "strDescription",
                                                         "fieldLabel": "Inventory Valuation",
+                                                        "hidden": true,
                                                         "itemId": "cboInventoryValuation",
                                                         "labelWidth": 130,
                                                         "layout|flex": null,
@@ -662,7 +665,8 @@
                                                         "layout|flex": "number",
                                                         "layout|margins": "string",
                                                         "valueField": "datafield",
-                                                        "scrollable": "boolean"
+                                                        "scrollable": "boolean",
+                                                        "hidden": "boolean"
                                                     },
                                                     "name": "MyComboBox47",
                                                     "designerId": "37e7f1d0-03b3-4119-bb62-22ead8e21bd3"
@@ -676,6 +680,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "GL Division Number",
+                                                        "hidden": true,
                                                         "itemId": "txtGlDivisionNumber",
                                                         "labelWidth": 130,
                                                         "layout|flex": null
@@ -685,7 +690,8 @@
                                                         "itemId": "string",
                                                         "labelWidth": "number",
                                                         "layout|flex": "number",
-                                                        "scrollable": "boolean"
+                                                        "scrollable": "boolean",
+                                                        "hidden": "boolean"
                                                     },
                                                     "name": "MyTextField62",
                                                     "designerId": "8fcd142f-a646-4459-9fe4-fe0f9932df87"
@@ -700,6 +706,7 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Sales Analysis by Ton",
+                                                        "hidden": true,
                                                         "itemId": "chkSalesAnalysisByTon",
                                                         "labelWidth": 130,
                                                         "layout|flex": null
@@ -710,7 +717,8 @@
                                                         "itemId": "string",
                                                         "labelWidth": "number",
                                                         "layout|flex": "number",
-                                                        "scrollable": "boolean"
+                                                        "scrollable": "boolean",
+                                                        "hidden": "boolean"
                                                     },
                                                     "name": "MyCheckbox43",
                                                     "designerId": "4b49a370-474e-49f5-9267-283a0eb444dd"
@@ -725,6 +733,7 @@
                                                     "userConfig": {
                                                         "designer|createAlias": "numberfield",
                                                         "fieldLabel": "Standard Qty",
+                                                        "hidden": true,
                                                         "itemId": "txtStandardQty",
                                                         "labelWidth": 130,
                                                         "layout|flex": null
@@ -735,7 +744,8 @@
                                                         "itemId": "string",
                                                         "labelWidth": "number",
                                                         "layout|flex": "number",
-                                                        "scrollable": "boolean"
+                                                        "scrollable": "boolean",
+                                                        "hidden": "boolean"
                                                     },
                                                     "name": "MyNumberField63",
                                                     "designerId": "de521c4c-46d4-4f16-9a2f-4dabeb531708"
@@ -784,6 +794,7 @@
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strUnitMeasure",
                                                         "fieldLabel": "Standard UOM",
+                                                        "hidden": true,
                                                         "itemId": "cboStandardUOM",
                                                         "labelWidth": 130,
                                                         "layout|flex": null,
@@ -800,7 +811,8 @@
                                                         "layout|flex": "number",
                                                         "layout|margins": "string",
                                                         "valueField": "datafield",
-                                                        "scrollable": "boolean"
+                                                        "scrollable": "boolean",
+                                                        "hidden": "boolean"
                                                     },
                                                     "name": "MyComboBox87",
                                                     "designerId": "976070e5-27ff-466b-8ecc-d544af40f3b3",
