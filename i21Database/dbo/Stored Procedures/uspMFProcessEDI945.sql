@@ -40,10 +40,26 @@ BEGIN
 		,0 AS strShipToCode
 		,strShipmentNumber strShipmentId
 		,dtmShipDate dtmShippedDate
-		,'' AS strTransportationMethod
-		,'' AS strSCAC
-		,'' AS strRouting
-		,'' AS strShipmentMethodOfPayment
+		,(
+			SELECT TOP 1 strTransportationMethod
+			FROM tblMFEDI940Archive EDI940
+			WHERE EDI940.intInventoryShipmentItemId = InvSI.intInventoryShipmentItemId
+			) AS strTransportationMethod
+		,(
+			SELECT TOP 1 strSCAC
+			FROM tblMFEDI940Archive EDI940
+			WHERE EDI940.intInventoryShipmentItemId = InvSI.intInventoryShipmentItemId
+			) AS strSCAC
+		,(
+			SELECT TOP 1 strRouting
+			FROM tblMFEDI940Archive EDI940
+			WHERE EDI940.intInventoryShipmentItemId = InvSI.intInventoryShipmentItemId
+			) AS strRouting
+		,(
+			SELECT TOP 1 strShipmentMethodOfPayment
+			FROM tblMFEDI940Archive EDI940
+			WHERE EDI940.intInventoryShipmentItemId = InvSI.intInventoryShipmentItemId
+			) AS strShipmentMethodOfPayment
 		,strTotalPalletsLoaded
 		,SUm(dblQuantityShipped) OVER (PARTITION BY InvS.intInventoryShipmentId) dblTotalUnitsShipped
 		,0 AS dblTotalWeight

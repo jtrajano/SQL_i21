@@ -9,12 +9,24 @@ BEGIN TRY
 		,@intUserId INT
 		,@strErrorMessage NVARCHAR(MAX)
 		,@strItemNo NVARCHAR(50)
+		,@intTabRowId INT
+		,@intTransactionId INT
+		,@intScreenId INT
+		,@intCustomTabId INT
+		,@intCustomTabDetailId INT
+		,@strShipmentNumber NVARCHAR(50)
+		,@strPONumber NVARCHAR(50)
 	DECLARE @ShipmentStagingTable ShipmentStagingTable
 	DECLARE @OtherCharges ShipmentChargeStagingTable
 	DECLARE @tblMFOrderNo TABLE (
 		intRecordId INT identity(1, 1)
 		,strOrderNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		)
+	DECLARE @tblMFSession TABLE (intEDI940Id INT)
+
+	INSERT INTO @tblMFSession (intEDI940Id)
+	SELECT intEDI940Id
+	FROM tblMFEDI940
 
 	INSERT INTO @tblMFOrderNo (strOrderNo)
 	SELECT DISTINCT strDepositorOrderNumber
@@ -186,7 +198,7 @@ BEGIN TRY
 					,strPONumber
 					,strShipToName
 					,strShipToAddress1
-					,SstrhipToAddress2
+					,strShipToAddress2
 					,strShipToCity
 					,strShipToState
 					,strShipToZip
@@ -205,6 +217,11 @@ BEGIN TRY
 					,dtmCreated
 					,strStatus
 					,strFileName
+									,strShipmentDate
+				,strTransportationMethod 
+				,strSCAC
+				,strRouting 
+				,strShipmentMethodOfPayment
 					)
 				SELECT intEDI940Id
 					,intTransactionId
@@ -214,7 +231,7 @@ BEGIN TRY
 					,strPONumber
 					,strShipToName
 					,strShipToAddress1
-					,SstrhipToAddress2
+					,strShipToAddress2
 					,strShipToCity
 					,strShipToState
 					,strShipToZip
@@ -233,6 +250,11 @@ BEGIN TRY
 					,dtmCreated
 					,'IGNORED'
 					,strFileName
+									,strShipmentDate
+				,strTransportationMethod 
+				,strSCAC
+				,strRouting 
+				,strShipmentMethodOfPayment
 				FROM tblMFEDI940
 				WHERE strDepositorOrderNumber = @strOrderNo
 
@@ -281,11 +303,12 @@ BEGIN TRY
 				,intCurrencyId
 				,intForexRateTypeId
 				,dblForexRate
+				,dtmRequestedArrivalDate 
 				)
 			SELECT intOrderType = 4
 				,intSourceType = 0
 				,intEntityCustomerId = E.intEntityId
-				,dtmShipDate = EDI.strDeliveryRequestedDate
+				,dtmShipDate = EDI.strShipmentDate
 				,intShipFromLocationId = IL.intLocationId
 				,intShipToLocationId = EL.intEntityLocationId
 				,intFreightTermId = (
@@ -307,6 +330,7 @@ BEGIN TRY
 				,intCurrencyId = NULL
 				,intForexRateTypeId = NULL
 				,dblForexRate = NULL
+				,dtmRequestedArrivalDate =EDI.strShipmentDate
 			FROM tblMFEDI940 EDI
 			JOIN tblICItem I ON I.strItemNo = EDI.strCustomerItemNumber
 			JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
@@ -315,6 +339,7 @@ BEGIN TRY
 			JOIN tblEMEntityType ET ON ET.intEntityId = E.intEntityId
 				AND ET.strType = 'Customer'
 			JOIN tblEMEntityLocation EL ON EL.intEntityId = E.intEntityId
+			--AND EL.strAddress = EDI.strShipToAddress1 + EDI.strShipToAddress2
 			LEFT JOIN dbo.tblICUnitMeasure UM ON UM.strUnitMeasure = I.strExternalGroup
 			LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
 				AND UM.intUnitMeasureId = IU.intUnitMeasureId
@@ -327,6 +352,71 @@ BEGIN TRY
 			SELECT TOP 1 @intInventoryShipmentId = intInventoryShipmentId
 			FROM #tmpAddItemShipmentResult
 
+			IF @intInventoryShipmentId > 0
+			BEGIN
+				SELECT @strShipmentNumber = strShipmentNumber
+				FROM tblICInventoryShipment
+				WHERE intInventoryShipmentId = @intInventoryShipmentId
+
+				SELECT @strPONumber = ''
+
+				SELECT @strPONumber = strPONumber
+				FROM tblMFEDI940 EDI940
+				WHERE strDepositorOrderNumber = @strOrderNo
+
+				SELECT @intScreenId = intScreenId
+				FROM tblSMScreen
+				WHERE strNamespace = 'Inventory.view.InventoryShipment'
+
+				SELECT @intCustomTabId = intCustomTabId
+				FROM tblSMCustomTab
+				WHERE intScreenId = @intScreenId
+
+				SELECT @intCustomTabDetailId = [Extent1].[intCustomTabDetailId]
+				FROM [dbo].[tblSMCustomTabDetail] AS [Extent1]
+				WHERE [Extent1].[intCustomTabId] = @intCustomTabId
+					AND strFieldName = 'CustomerPONo'
+
+				INSERT [dbo].[tblSMTransaction] (
+					[intScreenId]
+					,[strTransactionNo]
+					,[intEntityId]
+					,[intRecordId]
+					,[intConcurrencyId]
+					)
+				SELECT @intScreenId
+					,@strShipmentNumber
+					,1
+					,@intInventoryShipmentId
+					,1
+
+				SELECT @intTransactionId = scope_identity()
+
+				INSERT [dbo].[tblSMTabRow] (
+					[intCustomTabId]
+					,[intTransactionId]
+					,[intSort]
+					,[intConcurrencyId]
+					)
+				SELECT @intCustomTabId
+					,@intTransactionId
+					,0
+					,1
+
+				SELECT @intTabRowId = scope_identity()
+
+				INSERT [dbo].[tblSMFieldValue] (
+					[intTabRowId]
+					,[intCustomTabDetailId]
+					,[strValue]
+					,[intConcurrencyId]
+					)
+				SELECT @intTabRowId
+					,@intCustomTabDetailId
+					,@strPONumber
+					,1
+			END
+
 			INSERT INTO tblMFEDI940Archive (
 				intEDI940Id
 				,intTransactionId
@@ -336,7 +426,7 @@ BEGIN TRY
 				,strPONumber
 				,strShipToName
 				,strShipToAddress1
-				,SstrhipToAddress2
+				,strShipToAddress2
 				,strShipToCity
 				,strShipToState
 				,strShipToZip
@@ -357,6 +447,11 @@ BEGIN TRY
 				,intInventoryShipmentId
 				,intInventoryShipmentItemId
 				,strFileName
+								,strShipmentDate
+				,strTransportationMethod 
+				,strSCAC
+				,strRouting 
+				,strShipmentMethodOfPayment
 				)
 			SELECT intEDI940Id
 				,intTransactionId
@@ -366,7 +461,7 @@ BEGIN TRY
 				,strPONumber
 				,strShipToName
 				,strShipToAddress1
-				,SstrhipToAddress2
+				,strShipToAddress2
 				,strShipToCity
 				,strShipToState
 				,strShipToZip
@@ -387,6 +482,11 @@ BEGIN TRY
 				,@intInventoryShipmentId
 				,SI.intInventoryShipmentItemId
 				,strFileName
+								,strShipmentDate
+				,strTransportationMethod 
+				,strSCAC
+				,strRouting 
+				,strShipmentMethodOfPayment
 			FROM tblMFEDI940 EDI940
 			JOIN tblICItem I ON I.strItemNo = strCustomerItemNumber
 			JOIN tblICInventoryShipmentItem SI ON SI.intItemId = I.intItemId
@@ -411,7 +511,7 @@ BEGIN TRY
 				,strPONumber
 				,strShipToName
 				,strShipToAddress1
-				,SstrhipToAddress2
+				,strShipToAddress2
 				,strShipToCity
 				,strShipToState
 				,strShipToZip
@@ -430,6 +530,11 @@ BEGIN TRY
 				,dtmCreated
 				,strErrorMessage
 				,strFileName
+				,strShipmentDate
+				,strTransportationMethod 
+				,strSCAC
+				,strRouting 
+				,strShipmentMethodOfPayment
 				)
 			SELECT intEDI940Id
 				,intTransactionId
@@ -439,7 +544,7 @@ BEGIN TRY
 				,strPONumber
 				,strShipToName
 				,strShipToAddress1
-				,SstrhipToAddress2
+				,strShipToAddress2
 				,strShipToCity
 				,strShipToState
 				,strShipToZip
@@ -458,6 +563,11 @@ BEGIN TRY
 				,dtmCreated
 				,@ErrMsg
 				,strFileName
+				,strShipmentDate
+				,strTransportationMethod 
+				,strSCAC
+				,strRouting 
+				,strShipmentMethodOfPayment
 			FROM tblMFEDI940
 			WHERE strDepositorOrderNumber = @strOrderNo
 
@@ -479,29 +589,29 @@ BEGIN TRY
 	SELECT @strInfo1 = @strInfo1 + DT.strFileName + '; '
 	FROM (
 		SELECT DISTINCT strFileName
-		FROM tblMFEDI940Archive
-		WHERE strDepositorOrderNumber IN (
-				SELECT strOrderNo
-				FROM @tblMFOrderNo
+		FROM tblMFEDI940Archive A
+		WHERE A.intEDI940Id IN (
+				SELECT S.intEDI940Id
+				FROM @tblMFSession S
 				)
 		) AS DT
 
 	SELECT @strInfo1 = @strInfo1 + DT.strFileName + '; '
 	FROM (
 		SELECT DISTINCT strFileName
-		FROM tblMFEDI940Error
-		WHERE strDepositorOrderNumber IN (
-				SELECT strOrderNo
-				FROM @tblMFOrderNo
+		FROM tblMFEDI940Error E
+		WHERE E.intEDI940Id IN (
+				SELECT S.intEDI940Id
+				FROM @tblMFSession S
 				)
 		) AS DT
 
 	IF EXISTS (
 			SELECT *
-			FROM tblMFEDI940Error
-			WHERE strDepositorOrderNumber IN (
-					SELECT strOrderNo
-					FROM @tblMFOrderNo
+			FROM tblMFEDI940Error E
+			WHERE E.intEDI940Id IN (
+					SELECT S.intEDI940Id
+					FROM @tblMFSession S
 					)
 			)
 	BEGIN
@@ -510,10 +620,10 @@ BEGIN TRY
 		SELECT @ErrMsg = @ErrMsg + strErrorMessage + '; '
 		FROM (
 			SELECT DISTINCT strErrorMessage
-			FROM tblMFEDI940Error
-			WHERE strDepositorOrderNumber IN (
-					SELECT strOrderNo
-					FROM @tblMFOrderNo
+			FROM tblMFEDI940Error E
+			WHERE E.intEDI940Id IN (
+					SELECT S.intEDI940Id
+					FROM @tblMFSession S
 					)
 			) AS DT
 
@@ -540,4 +650,3 @@ BEGIN CATCH
 			,'WITH NOWAIT'
 			)
 END CATCH
-
