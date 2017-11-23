@@ -9,7 +9,7 @@
 	,strActionCode CHAR(1) COLLATE Latin1_General_CI_AS
 	,strShipFromName NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	,strShipFromAddress1 NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
-	,SstrhipFromAddress2 NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+	,strShipFromAddress2 NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	,strShipFromCity NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	,strShipFromState NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	,strShipFromZip NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
@@ -27,4 +27,6 @@
 	,strStatus nvarchar(50) COLLATE Latin1_General_CI_AS
 		,intInventoryReceiptId int
 		,strFileName nvarchar(MAX) COLLATE Latin1_General_CI_AS
+		,strParentLotNumber nvarchar(50) COLLATE Latin1_General_CI_AS
+		,intLineNumber int
 	)

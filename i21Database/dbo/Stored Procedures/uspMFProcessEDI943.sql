@@ -9,12 +9,26 @@ BEGIN TRY
 		,@intUserId INT
 		,@strItemNo NVARCHAR(MAX)
 		,@strErrorMessage NVARCHAR(MAX)
+		,@intItemId INT
+		,@dblQty NUMERIC(38, 20)
+		,@intUnitPerPallet INT
+		,@strParentLotNumber NVARCHAR(50)
+		,@ysnPickByLotCode BIT
+		,@intLotCodeStartingPosition INT
+		,@intLotCodeNoOfDigits INT
+		,@strLotCode NVARCHAR(50)
+		,@intLineNumber INT
 	DECLARE @ReceiptStagingTable ReceiptStagingTable
 	DECLARE @OtherCharges ReceiptOtherChargesTableType
 	DECLARE @tblMFOrderNo TABLE (
 		intRecordId INT identity(1, 1)
 		,strOrderNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		)
+	DECLARE @tblMFSession TABLE (intEDI943Id INT)
+
+	INSERT INTO @tblMFSession (intEDI943Id)
+	SELECT intEDI943Id
+	FROM tblMFEDI943
 
 	INSERT INTO @tblMFOrderNo (strOrderNo)
 	SELECT DISTINCT strDepositorOrderNumber
@@ -31,6 +45,11 @@ BEGIN TRY
 	ELSE
 		SELECT TOP 1 @intUserId = intEntityUserSecurityId
 		FROM tblSMUserSecurity
+
+	SELECT @ysnPickByLotCode = ysnPickByLotCode
+		,@intLotCodeStartingPosition = intLotCodeStartingPosition
+		,@intLotCodeNoOfDigits = intLotCodeNoOfDigits
+	FROM tblMFCompanyPreference
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -179,7 +198,7 @@ BEGIN TRY
 					,strActionCode
 					,strShipFromName
 					,strShipFromAddress1
-					,SstrhipFromAddress2
+					,strShipFromAddress2
 					,strShipFromCity
 					,strShipFromState
 					,strShipFromZip
@@ -196,6 +215,8 @@ BEGIN TRY
 					,dtmCreated
 					,strStatus
 					,strFileName
+					,strParentLotNumber
+					,intLineNumber
 					)
 				SELECT intEDI943Id
 					,intTransactionId
@@ -207,7 +228,7 @@ BEGIN TRY
 					,strActionCode
 					,strShipFromName
 					,strShipFromAddress1
-					,SstrhipFromAddress2
+					,strShipFromAddress2
 					,strShipFromCity
 					,strShipFromState
 					,strShipFromZip
@@ -224,6 +245,8 @@ BEGIN TRY
 					,dtmCreated
 					,'IGNORED'
 					,strFileName
+					,strParentLotNumber
+					,intLineNumber
 				FROM tblMFEDI943
 				WHERE strDepositorOrderNumber = @strOrderNo
 
@@ -249,6 +272,12 @@ BEGIN TRY
 					,intInventoryReceiptId INT
 					)
 			END
+
+			SELECT @intLineNumber = 0
+
+			UPDATE tblMFEDI943
+			SET @intLineNumber = intLineNumber = @intLineNumber + 1
+			WHERE strDepositorOrderNumber = @strOrderNo
 
 			INSERT INTO @ReceiptStagingTable (
 				strReceiptType
@@ -323,7 +352,7 @@ BEGIN TRY
 				,intSubLocationId = intSubLocationId
 				,intStorageLocationId = intStorageLocationId
 				,ysnIsStorage = 0
-				,intSourceId = EDI.intEDI943Id
+				,intSourceId = EDI.intLineNumber
 				,intSourceType = 0
 				,strSourceId = EDI.strDepositorOrderNumber
 				,strSourceScreenName = 'EDI943'
@@ -366,36 +395,147 @@ BEGIN TRY
 
 			WHILE @intMinInvRecItemId > 0
 			BEGIN
-				INSERT INTO dbo.tblICInventoryReceiptItemLot (
-					[intInventoryReceiptItemId]
-					,[intLotId]
-					,[strLotNumber]
-					,[strLotAlias]
-					,intSubLocationId
-					,intStorageLocationId
-					,[intItemUnitMeasureId]
-					,dblQuantity
-					,dblGrossWeight
-					,dblTareWeight
-					,strContainerNo
-					,[intSort]
-					,[intConcurrencyId]
-					)
-				SELECT intInventoryReceiptItemId
-					,NULL
-					,''
-					,''
-					,intSubLocationId
-					,intStorageLocationId
-					,RI.intUnitMeasureId
-					,RI.dblOpenReceive
-					,dblGross
-					,ISNULL(RI.dblGross, 0) - ISNULL(RI.dblNet, 0)
-					,''
-					,1
-					,1
+				SELECT @intItemId = NULL
+					,@dblQty = NULL
+
+				SELECT @intUnitPerPallet = NULL
+					,@strItemNo = NULL
+					,@strLotCode = NULL
+					,@intLineNumber = 0
+
+				SELECT @intItemId = intItemId
+					,@dblQty = RI.dblOpenReceive
+					,@intLineNumber = intSourceId
 				FROM tblICInventoryReceiptItem RI
 				WHERE intInventoryReceiptItemId = @intMinInvRecItemId
+
+				SELECT @intUnitPerPallet = intUnitPerLayer * intLayerPerPallet
+					,@strItemNo = strItemNo
+				FROM tblICItem
+				WHERE intItemId = @intItemId
+
+				SELECT @strParentLotNumber = strParentLotNumber
+				FROM tblMFEDI943
+				WHERE strDepositorOrderNumber = @strOrderNo
+					AND strVendorItemNumber = @strItemNo
+					AND intLineNumber = @intLineNumber
+
+				IF @ysnPickByLotCode = 1
+				BEGIN
+					SELECT @strLotCode = Substring(@strParentLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits)
+
+					IF ISNUMERIC(@strLotCode) = 0
+						AND len(@strLotCode) > 0
+					BEGIN
+						SELECT @strParentLotNumber = Replace(Left(@strParentLotNumber, 5), '-', '') + Right(@strParentLotNumber, CASE 
+									WHEN Len(@strParentLotNumber) < 5
+										THEN 0
+									ELSE Len(@strParentLotNumber) - 5
+									END)
+					END
+				END
+
+				IF @intUnitPerPallet = 0
+					OR @intUnitPerPallet IS NULL
+				BEGIN
+					INSERT INTO dbo.tblICInventoryReceiptItemLot (
+						[intInventoryReceiptItemId]
+						,strParentLotNumber
+						,[intLotId]
+						,[strLotNumber]
+						,[strLotAlias]
+						,intSubLocationId
+						,intStorageLocationId
+						,[intItemUnitMeasureId]
+						,dblQuantity
+						,dblGrossWeight
+						,dblTareWeight
+						,strContainerNo
+						,[intSort]
+						,[intConcurrencyId]
+						)
+					SELECT intInventoryReceiptItemId
+						,@strParentLotNumber
+						,NULL
+						,''
+						,''
+						,intSubLocationId
+						,intStorageLocationId
+						,RI.intUnitMeasureId
+						,RI.dblOpenReceive
+						,dblGross
+						,ISNULL(RI.dblGross, 0) - ISNULL(RI.dblNet, 0)
+						,''
+						,1
+						,1
+					FROM tblICInventoryReceiptItem RI
+					WHERE intInventoryReceiptItemId = @intMinInvRecItemId
+				END
+				ELSE
+				BEGIN
+					WHILE Ceiling(@dblQty / @intUnitPerPallet) > 0
+						AND @dblQty > 0
+					BEGIN
+						INSERT INTO dbo.tblICInventoryReceiptItemLot (
+							[intInventoryReceiptItemId]
+							,strParentLotNumber
+							,[intLotId]
+							,[strLotNumber]
+							,[strLotAlias]
+							,intSubLocationId
+							,intStorageLocationId
+							,[intItemUnitMeasureId]
+							,dblQuantity
+							,dblGrossWeight
+							,dblTareWeight
+							,strContainerNo
+							,[intSort]
+							,[intConcurrencyId]
+							)
+						SELECT intInventoryReceiptItemId
+							,@strParentLotNumber
+							,NULL
+							,''
+							,''
+							,intSubLocationId
+							,intStorageLocationId
+							,RI.intUnitMeasureId
+							,(
+								CASE 
+									WHEN @intUnitPerPallet > @dblQty
+										THEN @dblQty
+									ELSE @intUnitPerPallet
+									END
+								)
+							,(dblGross / dblOpenReceive) * (
+								CASE 
+									WHEN @intUnitPerPallet > @dblQty
+										THEN @dblQty
+									ELSE @intUnitPerPallet
+									END
+								)
+							,ISNULL((RI.dblGross / dblOpenReceive) * (
+									CASE 
+										WHEN @intUnitPerPallet > @dblQty
+											THEN @dblQty
+										ELSE @intUnitPerPallet
+										END
+									), 0) - ISNULL((RI.dblNet / dblOpenReceive) * (
+									CASE 
+										WHEN @intUnitPerPallet > @dblQty
+											THEN @dblQty
+										ELSE @intUnitPerPallet
+										END
+									), 0)
+							,''
+							,1
+							,1
+						FROM tblICInventoryReceiptItem RI
+						WHERE intInventoryReceiptItemId = @intMinInvRecItemId
+
+						SELECT @dblQty = @dblQty - @intUnitPerPallet
+					END
+				END
 
 				SELECT @intMinInvRecItemId = MIN(intInventoryReceiptItemId)
 				FROM tblICInventoryReceiptItem
@@ -414,7 +554,7 @@ BEGIN TRY
 				,strActionCode
 				,strShipFromName
 				,strShipFromAddress1
-				,SstrhipFromAddress2
+				,strShipFromAddress2
 				,strShipFromCity
 				,strShipFromState
 				,strShipFromZip
@@ -432,6 +572,8 @@ BEGIN TRY
 				,strStatus
 				,intInventoryReceiptId
 				,strFileName
+				,strParentLotNumber
+				,intLineNumber
 				)
 			SELECT intEDI943Id
 				,intTransactionId
@@ -443,7 +585,7 @@ BEGIN TRY
 				,strActionCode
 				,strShipFromName
 				,strShipFromAddress1
-				,SstrhipFromAddress2
+				,strShipFromAddress2
 				,strShipFromCity
 				,strShipFromState
 				,strShipFromZip
@@ -461,6 +603,8 @@ BEGIN TRY
 				,'SUCCESS'
 				,@intInventoryReceiptId
 				,strFileName
+				,strParentLotNumber
+				,intLineNumber
 			FROM tblMFEDI943
 			WHERE strDepositorOrderNumber = @strOrderNo
 
@@ -484,7 +628,7 @@ BEGIN TRY
 				,strActionCode
 				,strShipFromName
 				,strShipFromAddress1
-				,SstrhipFromAddress2
+				,strShipFromAddress2
 				,strShipFromCity
 				,strShipFromState
 				,strShipFromZip
@@ -501,6 +645,8 @@ BEGIN TRY
 				,dtmCreated
 				,strErrorMessage
 				,strFileName
+				,strParentLotNumber
+				,intLineNumber
 				)
 			SELECT intEDI943Id
 				,intTransactionId
@@ -512,7 +658,7 @@ BEGIN TRY
 				,strActionCode
 				,strShipFromName
 				,strShipFromAddress1
-				,SstrhipFromAddress2
+				,strShipFromAddress2
 				,strShipFromCity
 				,strShipFromState
 				,strShipFromZip
@@ -529,6 +675,8 @@ BEGIN TRY
 				,dtmCreated
 				,@ErrMsg
 				,strFileName
+				,strParentLotNumber
+				,intLineNumber
 			FROM tblMFEDI943
 			WHERE strDepositorOrderNumber = @strOrderNo
 
@@ -550,29 +698,29 @@ BEGIN TRY
 	SELECT @strInfo1 = @strInfo1 + DT.strFileName + '; '
 	FROM (
 		SELECT DISTINCT strFileName
-		FROM tblMFEDI943Archive
-		WHERE strDepositorOrderNumber IN (
-				SELECT strOrderNo
-				FROM @tblMFOrderNo
+		FROM tblMFEDI943Archive A
+		WHERE A.intEDI943Id IN (
+				SELECT S.intEDI943Id
+				FROM @tblMFSession S
 				)
 		) AS DT
 
 	SELECT @strInfo1 = @strInfo1 + DT.strFileName + '; '
 	FROM (
 		SELECT DISTINCT strFileName
-		FROM tblMFEDI943Error
-		WHERE strDepositorOrderNumber IN (
-				SELECT strOrderNo
-				FROM @tblMFOrderNo
+		FROM tblMFEDI943Error E
+		WHERE E.intEDI943Id IN (
+				SELECT S.intEDI943Id
+				FROM @tblMFSession S
 				)
 		) AS DT
 
 	IF EXISTS (
 			SELECT *
-			FROM tblMFEDI943Error
-			WHERE strDepositorOrderNumber IN (
-					SELECT strOrderNo
-					FROM @tblMFOrderNo
+			FROM tblMFEDI943Error E
+			WHERE E.intEDI943Id IN (
+					SELECT S.intEDI943Id
+					FROM @tblMFSession S
 					)
 			)
 	BEGIN
@@ -581,10 +729,10 @@ BEGIN TRY
 		SELECT @ErrMsg = @ErrMsg + ' ' + strErrorMessage + '; '
 		FROM (
 			SELECT DISTINCT strErrorMessage
-			FROM tblMFEDI943Error
-			WHERE strDepositorOrderNumber IN (
-					SELECT strOrderNo
-					FROM @tblMFOrderNo
+			FROM tblMFEDI943Error E
+			WHERE E.intEDI943Id IN (
+					SELECT S.intEDI943Id
+					FROM @tblMFSession S
 					)
 			) AS DT
 
