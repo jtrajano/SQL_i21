@@ -5922,6 +5922,7 @@
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1n_UpdateFiscalUpperBounds.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTaskDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGetUncommonField.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFAddDefaultValuesToManufacturingProcess.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
