@@ -5897,6 +5897,10 @@
     <Build Include="dbo\Views\vyuSTCheckoutShiftPhysical.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTaskDetail.sql" />
     <None Include="Scripts\Post-Deployment\PAT\3_UpdateRetiredStockNo.sql" />
+    <Build Include="dbo\Views\vyuARGetCustomerTaxException.sql" />
+    <Build Include="dbo\Views\vyuARGetCustomerSpecialTax.sql" />
+    <Build Include="dbo\Views\vyuARGetLocationTax.sql" />
+    <Build Include="dbo\Views\vyuARGetTaxDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
