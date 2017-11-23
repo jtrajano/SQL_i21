@@ -5901,6 +5901,8 @@
     <Build Include="dbo\Views\vyuARGetCustomerSpecialTax.sql" />
     <Build Include="dbo\Views\vyuARGetLocationTax.sql" />
     <Build Include="dbo\Views\vyuARGetTaxDetail.sql" />
+    <Build Include="dbo\Tables\tblCTBrkgCommn.sql" />
+    <Build Include="dbo\Tables\tblCTBrkgCommnDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
