@@ -20,12 +20,23 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @CurrentErrorMessage NVARCHAR(250)
 		,@ZeroDecimal NUMERIC(18, 6)
+		,@InitTranCount INT
+		,@Savepoint NVARCHAR(32)
+
+SET @InitTranCount = @@TRANCOUNT
+SET @Savepoint = SUBSTRING(('ARDuplicateInvoice' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
+
 		
 SET @ZeroDecimal = 0.000000
 
 		
-IF ISNULL(@RaiseError,0) = 0
-	BEGIN TRANSACTION
+IF ISNULL(@RaiseError,0) = 0	
+BEGIN
+	IF @InitTranCount = 0
+		BEGIN TRANSACTION
+	ELSE
+		SAVE TRANSACTION @Savepoint
+END
 	
 
 DECLARE	 @OriginalInvoiceId			INT
@@ -142,7 +153,15 @@ IF @TransactionType NOT IN ('Invoice', 'Credit Memo') AND @Type NOT IN ('Standar
 IF ISNULL(@LoadDistributionHeaderId, 0) > 0 OR @Type = 'Transport Delivery'
 	BEGIN	
 		IF ISNULL(@RaiseError,0) = 0
-			ROLLBACK TRANSACTION		
+		BEGIN
+			IF @InitTranCount = 0
+				IF (XACT_STATE()) <> 0
+					ROLLBACK TRANSACTION
+			ELSE
+				IF (XACT_STATE()) <> 0
+					ROLLBACK TRANSACTION @Savepoint
+		END
+		
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR('Duplicating of Transport Delivery Invoice type is not allowed.', 16, 1)
 		RETURN 0;
@@ -150,8 +169,16 @@ IF ISNULL(@LoadDistributionHeaderId, 0) > 0 OR @Type = 'Transport Delivery'
 	
 IF @Type = 'CF Tran'
     BEGIN    
-        IF ISNULL(@RaiseError,0) = 0
-            ROLLBACK TRANSACTION        
+		IF ISNULL(@RaiseError,0) = 0
+		BEGIN
+			IF @InitTranCount = 0
+				IF (XACT_STATE()) <> 0
+					ROLLBACK TRANSACTION
+			ELSE
+				IF (XACT_STATE()) <> 0
+					ROLLBACK TRANSACTION @Savepoint
+		END
+	      
         IF ISNULL(@RaiseError,0) = 1
             RAISERROR('Duplicating of CF Tran Invoice type is not allowed.', 16, 1)
         RETURN 0;
@@ -159,8 +186,16 @@ IF @Type = 'CF Tran'
       
 IF @Type = 'CF Invoice'
     BEGIN    
-        IF ISNULL(@RaiseError,0) = 0
-            ROLLBACK TRANSACTION        
+		IF ISNULL(@RaiseError,0) = 0
+		BEGIN
+			IF @InitTranCount = 0
+				IF (XACT_STATE()) <> 0
+					ROLLBACK TRANSACTION
+			ELSE
+				IF (XACT_STATE()) <> 0
+					ROLLBACK TRANSACTION @Savepoint
+		END
+	       
         IF ISNULL(@RaiseError,0) = 1
             RAISERROR('Duplicating of CF Invoice Invoice type is not allowed.', 16, 1)
         RETURN 0;
@@ -168,8 +203,16 @@ IF @Type = 'CF Invoice'
   
 IF @Type = 'Meter Billing'
     BEGIN    
-        IF ISNULL(@RaiseError,0) = 0
-            ROLLBACK TRANSACTION        
+		IF ISNULL(@RaiseError,0) = 0
+		BEGIN
+			IF @InitTranCount = 0
+				IF (XACT_STATE()) <> 0
+					ROLLBACK TRANSACTION
+			ELSE
+				IF (XACT_STATE()) <> 0
+					ROLLBACK TRANSACTION @Savepoint
+		END
+	     
         IF ISNULL(@RaiseError,0) = 1
             RAISERROR('Duplicating of Meter Billing Invoice type is not allowed.', 16, 1)
         RETURN 0;
@@ -196,7 +239,15 @@ IF @Type = 'CF Invoice'
 IF @Type = 'Meter Billing'
 	BEGIN	
 		IF ISNULL(@RaiseError,0) = 0
-			ROLLBACK TRANSACTION		
+		BEGIN
+			IF @InitTranCount = 0
+				IF (XACT_STATE()) <> 0
+					ROLLBACK TRANSACTION
+			ELSE
+				IF (XACT_STATE()) <> 0
+					ROLLBACK TRANSACTION @Savepoint
+		END
+			
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(120079, 16, 1)
 		RETURN 0;
@@ -353,7 +404,15 @@ BEGIN TRY
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0
-		ROLLBACK TRANSACTION
+	BEGIN
+		IF @InitTranCount = 0
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION
+		ELSE
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION @Savepoint
+	END
+
 	SET @ErrorMessage = @CurrentErrorMessage
 	IF ISNULL(@RaiseError,0) = 1
 		RAISERROR(@ErrorMessage, 16, 1);
@@ -535,7 +594,15 @@ BEGIN TRY
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0
-		ROLLBACK TRANSACTION
+	BEGIN
+		IF @InitTranCount = 0
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION
+		ELSE
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION @Savepoint
+	END
+
 	SET @ErrorMessage = ERROR_MESSAGE();
 	IF ISNULL(@RaiseError,0) = 1
 		RAISERROR(@ErrorMessage, 16, 1);
@@ -628,7 +695,15 @@ BEGIN TRY
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0
-		ROLLBACK TRANSACTION
+	BEGIN
+		IF @InitTranCount = 0
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION
+		ELSE
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION @Savepoint
+	END
+
 	SET @ErrorMessage = ERROR_MESSAGE();
 	IF ISNULL(@RaiseError,0) = 1
 		RAISERROR(@ErrorMessage, 16, 1);
@@ -645,7 +720,15 @@ BEGIN TRY
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0
-		ROLLBACK TRANSACTION
+	BEGIN
+		IF @InitTranCount = 0
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION
+		ELSE
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION @Savepoint
+	END
+
 	SET @ErrorMessage = @CurrentErrorMessage
 	IF ISNULL(@RaiseError,0) = 1
 		RAISERROR(@ErrorMessage, 16, 1);
@@ -670,7 +753,15 @@ BEGIN TRY
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0
-		ROLLBACK TRANSACTION
+	BEGIN
+		IF @InitTranCount = 0
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION
+		ELSE
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION @Savepoint
+	END
+
 	SET @ErrorMessage = @CurrentErrorMessage
 	IF ISNULL(@RaiseError,0) = 1
 		RAISERROR(@ErrorMessage, 16, 1);
@@ -682,7 +773,23 @@ IF @IsCancel = 1
 	UPDATE tblARInvoice SET ysnCancelled = 1 WHERE intInvoiceId = @InvoiceId
 
 IF ISNULL(@RaiseError,0) = 0
-	COMMIT TRANSACTION 
+BEGIN
+
+	IF @InitTranCount = 0
+		BEGIN
+			IF (XACT_STATE()) = -1
+				ROLLBACK TRANSACTION
+			IF (XACT_STATE()) = 1
+				COMMIT TRANSACTION
+		END		
+	ELSE
+		BEGIN
+			IF (XACT_STATE()) = -1
+				ROLLBACK TRANSACTION  @Savepoint
+			--IF (XACT_STATE()) = 1
+			--	COMMIT TRANSACTION  @Savepoint
+		END	
+END
 	
 RETURN 1;
 
