@@ -5911,7 +5911,7 @@
     <Build Include="dbo\Functions\fnVRGetRebateRate.sql" />
     <Build Include="dbo\Views\vyuMFLotStatus.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutShiftPhysical.sql" />
-	<None Include="Scripts\Post-Deployment\GL\DefaultData\1p_CompanyPreferenceOption.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1p_CompanyPreferenceOption.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateInTransitCostingOnUnpost.sql" />
     <Build Include="dbo\Functions\fnGetItemInTransitCostingOnUnpostErrors.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetLotByOrderLineItem.sql" />
@@ -5921,6 +5921,7 @@
     <Build Include="dbo\Tables\tblBBRateLocation.sql" />
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1n_UpdateFiscalUpperBounds.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTaskDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGetUncommonField.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

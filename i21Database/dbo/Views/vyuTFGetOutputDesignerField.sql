@@ -11,7 +11,7 @@ FROM tblTFOutputDesignerField
 
 UNION ALL
 
-SELECT ROW_NUMBER() OVER(ORDER BY intReportingComponentConfigurationId DESC) AS intOutputDesignerFieldId
+SELECT intReportingComponentConfigurationId AS intOutputDesignerFieldId
 	, strDescription
 	, NULL
 	, intReportingComponentId
