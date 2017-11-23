@@ -7,7 +7,7 @@
 	,strPONumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,strShipToName NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	,strShipToAddress1 NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
-	,SstrhipToAddress2 NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+	,strShipToAddress2 NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	,strShipToCity NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	,strShipToState NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	,strShipToZip NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
@@ -26,4 +26,9 @@
 	,dtmCreated datetime CONSTRAINT [DF_tblMFEDI940Error_dtmCreated] DEFAULT GETDATE() 
 	,strErrorMessage NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	,strFileName nvarchar(MAX) COLLATE Latin1_General_CI_AS
+	,strShipmentDate nvarchar(50) COLLATE Latin1_General_CI_AS
+	,strTransportationMethod nvarchar(50) COLLATE Latin1_General_CI_AS
+	,strSCAC nvarchar(50) COLLATE Latin1_General_CI_AS
+	,strRouting nvarchar(50) COLLATE Latin1_General_CI_AS
+	,strShipmentMethodOfPayment nvarchar(50) COLLATE Latin1_General_CI_AS
 	)
