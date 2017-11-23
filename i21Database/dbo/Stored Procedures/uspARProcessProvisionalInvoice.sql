@@ -8,11 +8,21 @@ AS
 
 SET NOCOUNT ON
 
-IF ISNULL(@RaiseError,0) = 0
-	BEGIN TRANSACTION
 
+DECLARE @UserEntityId	INT
+		,@InitTranCount	INT
+		,@Savepoint		NVARCHAR(32)
 
-DECLARE @UserEntityId				INT
+SET @InitTranCount = @@TRANCOUNT
+SET @Savepoint = SUBSTRING(('ARAddInventoryItemToInvoices' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
+
+IF ISNULL(@RaiseError,0) = 0	
+BEGIN
+	IF @InitTranCount = 0
+		BEGIN TRANSACTION
+	ELSE
+		SAVE TRANSACTION @Savepoint
+END
 
 SET @UserEntityId = ISNULL((SELECT TOP 1 intEntityId FROM dbo.tblSMUserSecurity WITH (NOLOCK) WHERE intEntityId = @UserId), @UserId)
 
@@ -395,7 +405,15 @@ SELECT
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0
-		ROLLBACK TRANSACTION
+	BEGIN
+		IF @InitTranCount = 0
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION
+		ELSE
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION @Savepoint
+	END
+
 	SET @ErrorMessage = ERROR_MESSAGE();
 	IF ISNULL(@RaiseError,0) = 1
 		RAISERROR(@ErrorMessage, 16, 1);
@@ -423,7 +441,15 @@ EXEC [dbo].[uspARProcessInvoices]
 	IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 		BEGIN
 			IF ISNULL(@RaiseError,0) = 0
-				ROLLBACK TRANSACTION
+			BEGIN
+				IF @InitTranCount = 0
+					IF (XACT_STATE()) <> 0
+						ROLLBACK TRANSACTION
+				ELSE
+					IF (XACT_STATE()) <> 0
+						ROLLBACK TRANSACTION @Savepoint
+			END
+
 			SET @ErrorMessage = @CurrentErrorMessage;
 			IF ISNULL(@RaiseError,0) = 1
 				RAISERROR(@ErrorMessage, 16, 1);
@@ -433,7 +459,15 @@ EXEC [dbo].[uspARProcessInvoices]
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0
-		ROLLBACK TRANSACTION
+	BEGIN
+		IF @InitTranCount = 0
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION
+		ELSE
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION @Savepoint
+	END
+
 	SET @ErrorMessage = ERROR_MESSAGE();
 	IF ISNULL(@RaiseError,0) = 1
 		RAISERROR(@ErrorMessage, 16, 1);
@@ -444,7 +478,23 @@ SELECT TOP 1 @NewInvoiceId = intInvoiceId FROM tblARInvoice WHERE intInvoiceId I
 UPDATE tblARInvoice SET ysnProcessed = 1 WHERE intInvoiceId = @InvoiceId
 
 IF ISNULL(@RaiseError,0) = 0
-	COMMIT TRANSACTION 
+BEGIN
+
+	IF @InitTranCount = 0
+		BEGIN
+			IF (XACT_STATE()) = -1
+				ROLLBACK TRANSACTION
+			IF (XACT_STATE()) = 1
+				COMMIT TRANSACTION
+		END		
+	ELSE
+		BEGIN
+			IF (XACT_STATE()) = -1
+				ROLLBACK TRANSACTION  @Savepoint
+			--IF (XACT_STATE()) = 1
+			--	COMMIT TRANSACTION  @Savepoint
+		END	
+END
 	
 RETURN 1;
 
