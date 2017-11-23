@@ -323,6 +323,14 @@ BEGIN
 		-----------ORIGINAL GROSS PRICE-------
 
 
+		--TAX PERCENTAGE CONVERSION--
+		SET @StateSalesTaxPercentageRate   = @StateSalesTaxPercentageRate  * 100
+		SET @CountySalesTaxPercentageRate  = @CountySalesTaxPercentageRate * 100
+		SET @CitySalesTaxPercentageRate    = @CitySalesTaxPercentageRate   * 100
+		SET @OtherSalesTaxPercentageRate   = @OtherSalesTaxPercentageRate  * 100
+		--TAX PERCENTAGE CONVERSION--
+
+
 	END
 	ELSE IF (@strNetworkType = 'Voyager')
 	BEGIN 
