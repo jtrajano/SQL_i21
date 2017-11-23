@@ -465,10 +465,13 @@ BEGIN
 		,[intDestinationGradeId]			= (CASE WHEN @GroupingOption = 0 THEN IE.[intDestinationGradeId] ELSE NULL END)
 		,[intDestinationWeightId]			= (CASE WHEN @GroupingOption = 0 THEN IE.[intDestinationWeightId] ELSE NULL END)
 	FROM
-		@InvoiceEntries IE
-	INNER JOIN
-		#EntriesForProcessing EFP WITH (NOLOCK)
-			ON IE.[intId] = EFP.[intId]
+		#EntriesForProcessing EFP
+	CROSS APPLY
+		(	SELECT TOP 1 * 
+			FROM @InvoiceEntries I
+			WHERE
+				I.[intId] = EFP.[intId]
+		)IE
 	WHERE
 		ISNULL(EFP.[ysnForInsert],0) = 1
 	ORDER BY
@@ -1402,10 +1405,13 @@ BEGIN
 		,[intDestinationWeightId]			= IE.[intDestinationWeightId]
 		,[intTempDetailIdForTaxes]			= IE.[intTempDetailIdForTaxes]
 	FROM
-		@InvoiceEntries IE
-	INNER JOIN
-			#EntriesForProcessing EFP WITH (NOLOCK)
-				ON IE.[intId] = EFP.[intId]
+		#EntriesForProcessing EFP
+	CROSS APPLY
+		(	SELECT TOP 1 * 
+			FROM @InvoiceEntries I
+			WHERE
+				I.[intId] = EFP.[intId]
+		)IE
 	WHERE
 		ISNULL(EFP.[ysnForUpdate],0) = 1		
 		AND ISNULL(IE.[intInvoiceId], 0) <> 0
