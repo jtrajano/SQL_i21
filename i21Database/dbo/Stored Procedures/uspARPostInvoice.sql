@@ -28,11 +28,7 @@ SET ANSI_WARNINGS OFF
 --------------------------------------------------------------------------------------------  
 -- Initialize   
 --------------------------------------------------------------------------------------------   
--- Create a unique transaction name. 
-DECLARE @TransactionName AS VARCHAR(500) = 'Invoice Transaction' + CAST(NEWID() AS NVARCHAR(100));
-IF @raiseError = 0
-	--BEGIN TRAN @TransactionName
-	BEGIN TRANSACTION
+
 DECLARE @totalRecords INT = 0
 DECLARE @totalInvalid INT = 0
  
@@ -66,6 +62,23 @@ DECLARE @UserEntityID				INT
 		,@DeferredRevenueAccountId	INT
 		,@AllowOtherUserToPost		BIT
 		,@DefaultCurrencyId			INT
+		,@InitTranCount				INT
+		,@CurrentTranCount			INT
+		,@Savepoint					NVARCHAR(32)
+		,@CurrentSavepoint			NVARCHAR(32)
+
+SET @InitTranCount = @@TRANCOUNT
+SET @Savepoint = SUBSTRING(('ARPostInvoice' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
+
+
+IF ISNULL(@raiseError,0) = 0	
+BEGIN
+	IF @InitTranCount = 0
+		BEGIN TRANSACTION
+	ELSE
+		SAVE TRANSACTION @Savepoint
+END
+
 
 SET @UserEntityID = ISNULL((SELECT [intEntityUserSecurityId] FROM dbo.tblSMUserSecurity WITH (NOLOCK) WHERE [intEntityUserSecurityId] = @userId),@userId)
 SET @DiscountAccountId = (SELECT TOP 1 [intDiscountAccountId] FROM dbo.tblARCompanyPreference WITH (NOLOCK) WHERE ISNULL([intDiscountAccountId],0) <> 0)
@@ -582,9 +595,24 @@ SELECT @totalRecords = COUNT(*) FROM @PostInvoiceData
 			
 IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 	BEGIN
-		IF @raiseError = 0 
-			COMMIT TRANSACTION
-			--COMMIT TRAN @TransactionName
+		IF @raiseError = 0
+		BEGIN
+			IF @InitTranCount = 0
+				BEGIN
+					IF (XACT_STATE()) = -1
+						ROLLBACK TRANSACTION
+					IF (XACT_STATE()) = 1
+						COMMIT TRANSACTION
+				END		
+			ELSE
+				BEGIN
+					IF (XACT_STATE()) = -1
+						ROLLBACK TRANSACTION  @Savepoint
+					--IF (XACT_STATE()) = 1
+					--	COMMIT TRANSACTION  @Savepoint
+				END	
+		END
+
 		IF @raiseError = 1
 			BEGIN
 				SELECT TOP 1 @ErrorMerssage = [strPostingError] FROM @InvalidInvoiceData
@@ -744,11 +772,39 @@ BEGIN CATCH
 	SELECT @ErrorMerssage = ERROR_MESSAGE()					
 	IF @raiseError = 0
 		BEGIN
-			ROLLBACK TRANSACTION							
-			BEGIN TRANSACTION						
+			IF @InitTranCount = 0
+				IF (XACT_STATE()) <> 0
+					ROLLBACK TRANSACTION
+			ELSE
+				IF (XACT_STATE()) <> 0
+					ROLLBACK TRANSACTION @Savepoint
+												
+			SET @CurrentTranCount = @@TRANCOUNT
+			SET @CurrentSavepoint = SUBSTRING(('uspARPostInvoiceNew' + CONVERT(VARCHAR, @CurrentTranCount)), 1, 32)										
+			
+			IF @CurrentTranCount = 0
+				BEGIN TRANSACTION
+			ELSE
+				SAVE TRANSACTION @CurrentSavepoint
+									
 			EXEC dbo.uspARInsertPostResult @batchId, 'Invoice', @ErrorMerssage, @param
-			COMMIT TRANSACTION
-		END						
+
+			IF @CurrentTranCount = 0
+				BEGIN
+					IF (XACT_STATE()) = -1
+						ROLLBACK TRANSACTION
+					IF (XACT_STATE()) = 1
+						COMMIT TRANSACTION
+				END		
+			ELSE
+				BEGIN
+					IF (XACT_STATE()) = -1
+						ROLLBACK TRANSACTION  @CurrentSavepoint
+					--IF (XACT_STATE()) = 1
+					--	COMMIT TRANSACTION  @Savepoint
+				END	
+		END	
+							
 	IF @raiseError = 1
 		RAISERROR(@ErrorMerssage, 11, 1)
 		
@@ -1039,7 +1095,8 @@ END CATCH
 --------------------------------------------------------------------------------------------  
 -- Begin a transaction and immediately create a save point 
 --------------------------------------------------------------------------------------------  
---BEGIN TRAN @TransactionName
+-- Create a unique transaction name for recap. 
+DECLARE @TransactionName AS VARCHAR(500) = 'Invoice Transaction' + CAST(NEWID() AS NVARCHAR(100));
 if @recap = 1 AND @raiseError = 0
 	SAVE TRAN @TransactionName
 
@@ -1136,11 +1193,37 @@ BEGIN TRY
 						SELECT @ErrorMerssage = ERROR_MESSAGE()
 						IF @raiseError = 0
 							BEGIN
-								IF (XACT_STATE()) = -1
-									ROLLBACK TRANSACTION							
-								BEGIN TRANSACTION						
+								IF @InitTranCount = 0
+									IF (XACT_STATE()) <> 0
+										ROLLBACK TRANSACTION
+								ELSE
+									IF (XACT_STATE()) <> 0
+										ROLLBACK TRANSACTION @Savepoint
+												
+								SET @CurrentTranCount = @@TRANCOUNT
+								SET @CurrentSavepoint = SUBSTRING(('uspARPostInvoiceNew' + CONVERT(VARCHAR, @CurrentTranCount)), 1, 32)										
+			
+								IF @CurrentTranCount = 0
+									BEGIN TRANSACTION
+								ELSE
+									SAVE TRANSACTION @CurrentSavepoint		
+												
 								EXEC dbo.uspARInsertPostResult @batchId, 'Invoice', @ErrorMerssage, @param
-								COMMIT TRANSACTION
+								
+								IF @CurrentTranCount = 0
+									BEGIN
+										IF (XACT_STATE()) = -1
+											ROLLBACK TRANSACTION
+										IF (XACT_STATE()) = 1
+											COMMIT TRANSACTION
+									END		
+								ELSE
+									BEGIN
+										IF (XACT_STATE()) = -1
+											ROLLBACK TRANSACTION  @CurrentSavepoint
+										--IF (XACT_STATE()) = 1
+										--	COMMIT TRANSACTION  @Savepoint
+									END
 							END						
 						IF @raiseError = 1
 							RAISERROR(@ErrorMerssage, 11, 1)
@@ -1159,11 +1242,38 @@ BEGIN CATCH
 	SELECT @ErrorMerssage = ERROR_MESSAGE()
 	IF @raiseError = 0
 		BEGIN
-			IF (XACT_STATE()) = -1
-				ROLLBACK TRANSACTION							
-			BEGIN TRANSACTION						
+
+			IF @InitTranCount = 0
+				IF (XACT_STATE()) <> 0
+					ROLLBACK TRANSACTION
+			ELSE
+				IF (XACT_STATE()) <> 0
+					ROLLBACK TRANSACTION @Savepoint
+												
+			SET @CurrentTranCount = @@TRANCOUNT
+			SET @CurrentSavepoint = SUBSTRING(('uspARPostInvoiceNew' + CONVERT(VARCHAR, @CurrentTranCount)), 1, 32)										
+			
+			IF @CurrentTranCount = 0
+				BEGIN TRANSACTION
+			ELSE
+				SAVE TRANSACTION @CurrentSavepoint
+																
 			EXEC dbo.uspARInsertPostResult @batchId, 'Invoice', @ErrorMerssage, @param
-			COMMIT TRANSACTION
+
+			IF @CurrentTranCount = 0
+				BEGIN
+					IF (XACT_STATE()) = -1
+						ROLLBACK TRANSACTION
+					IF (XACT_STATE()) = 1
+						COMMIT TRANSACTION
+				END		
+			ELSE
+				BEGIN
+					IF (XACT_STATE()) = -1
+						ROLLBACK TRANSACTION  @CurrentSavepoint
+					--IF (XACT_STATE()) = 1
+					--	COMMIT TRANSACTION  @Savepoint
+				END
 		END						
 	IF @raiseError = 1
 		RAISERROR(@ErrorMerssage, 11, 1)
@@ -3249,10 +3359,32 @@ IF @recap = 1
 			SELECT @ErrorMerssage = ERROR_MESSAGE()
 			IF @raiseError = 0
 				BEGIN
-					BEGIN TRANSACTION
+					SET @CurrentTranCount = @@TRANCOUNT
+					SET @CurrentSavepoint = SUBSTRING(('uspARPostInvoiceNew' + CONVERT(VARCHAR, @CurrentTranCount)), 1, 32)										
+			
+					IF @CurrentTranCount = 0
+						BEGIN TRANSACTION
+					ELSE
+						SAVE TRANSACTION @CurrentSavepoint
+
 					EXEC dbo.uspARInsertPostResult @batchId, 'Invoice', @ErrorMerssage, @param		
-					COMMIT TRANSACTION
-				END			
+
+				IF @CurrentTranCount = 0
+					BEGIN
+						IF (XACT_STATE()) = -1
+							ROLLBACK TRANSACTION
+						IF (XACT_STATE()) = 1
+							COMMIT TRANSACTION
+					END		
+				ELSE
+					BEGIN
+						IF (XACT_STATE()) = -1
+							ROLLBACK TRANSACTION  @CurrentSavepoint
+						--IF (XACT_STATE()) = 1
+						--	COMMIT TRANSACTION  @Savepoint
+					END
+				END	
+						
 			IF @raiseError = 1
 				RAISERROR(@ErrorMerssage, 11, 1)
 			GOTO Post_Exit
@@ -3555,8 +3687,25 @@ IF @recap = 0
 	
 SET @successfulCount = @totalRecords
 SET @invalidCount = @totalInvalid	
-IF @raiseError = 0
-	COMMIT TRANSACTION
+IF ISNULL(@raiseError,0) = 0
+BEGIN
+
+	IF @InitTranCount = 0
+		BEGIN
+			IF (XACT_STATE()) = -1
+				ROLLBACK TRANSACTION
+			IF (XACT_STATE()) = 1
+				COMMIT TRANSACTION
+		END		
+	ELSE
+		BEGIN
+			IF (XACT_STATE()) = -1
+				ROLLBACK TRANSACTION  @Savepoint
+			--IF (XACT_STATE()) = 1
+			--	COMMIT TRANSACTION  @Savepoint
+		END	
+END
+
 	RETURN 1;
 
 IF @post = 0
@@ -3634,15 +3783,38 @@ ELSE
 Do_Rollback:
 	IF @raiseError = 0
 		BEGIN
-		    IF (XACT_STATE()) = -1
-				ROLLBACK TRANSACTION
+			IF @InitTranCount = 0
+				IF (XACT_STATE()) <> 0
+					ROLLBACK TRANSACTION
+			ELSE
+				IF (XACT_STATE()) <> 0
+					ROLLBACK TRANSACTION @Savepoint
+												
+			SET @CurrentTranCount = @@TRANCOUNT
+			SET @CurrentSavepoint = SUBSTRING(('uspARPostInvoiceNew' + CONVERT(VARCHAR, @CurrentTranCount)), 1, 32)										
+			
+			IF @CurrentTranCount = 0
+				BEGIN TRANSACTION
+			ELSE
+				SAVE TRANSACTION @CurrentSavepoint
 
-			--IF (XACT_STATE()) = 1
-		 --       COMMIT TRANSACTION;
-										
-			BEGIN TRANSACTION
 			EXEC uspARInsertPostResult @batchId, 'Invoice', @ErrorMerssage, @param								
-			COMMIT TRANSACTION			
+
+			IF @CurrentTranCount = 0
+				BEGIN
+					IF (XACT_STATE()) = -1
+						ROLLBACK TRANSACTION
+					IF (XACT_STATE()) = 1
+						COMMIT TRANSACTION
+				END		
+			ELSE
+				BEGIN
+					IF (XACT_STATE()) = -1
+						ROLLBACK TRANSACTION  @CurrentSavepoint
+					--IF (XACT_STATE()) = 1
+					--	COMMIT TRANSACTION  @Savepoint
+				END	
+						
 		END
 	IF @raiseError = 1
 		RAISERROR(@ErrorMerssage, 11, 1)	

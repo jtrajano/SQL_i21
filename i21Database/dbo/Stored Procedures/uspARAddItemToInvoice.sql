@@ -97,8 +97,13 @@ DECLARE  @ZeroDecimal			NUMERIC(18, 6)
 		,@AddDetailError		NVARCHAR(MAX)
 		,@CompanyLocationId		INT
 		,@CurrencyId			INT
+		,@InitTranCount			INT
+		,@Savepoint				NVARCHAR(32)
 
-		 
+SET @InitTranCount = @@TRANCOUNT
+SET @Savepoint = SUBSTRING(('ARAddItemToInvoice' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
+
+	 
 SET @ZeroDecimal = 0.000000
 
 SELECT 
@@ -109,8 +114,13 @@ FROM
 WHERE
 	intInvoiceId = @InvoiceId
 
-IF ISNULL(@RaiseError,0) = 0
-	BEGIN TRANSACTION
+IF ISNULL(@RaiseError,0) = 0	
+BEGIN
+	IF @InitTranCount = 0
+		BEGIN TRANSACTION
+	ELSE
+		SAVE TRANSACTION @Savepoint
+END
 	
 
 IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 1
@@ -202,7 +212,15 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN
 					IF ISNULL(@RaiseError,0) = 0
-						ROLLBACK TRANSACTION
+					BEGIN
+						IF @InitTranCount = 0
+							IF (XACT_STATE()) <> 0
+								ROLLBACK TRANSACTION
+						ELSE
+							IF (XACT_STATE()) <> 0
+								ROLLBACK TRANSACTION @Savepoint
+					END
+
 					SET @ErrorMessage = @AddDetailError;
 					IF ISNULL(@RaiseError,0) = 1
 						RAISERROR(@ErrorMessage, 16, 1);
@@ -211,7 +229,15 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 		END TRY
 		BEGIN CATCH
 			IF ISNULL(@RaiseError,0) = 0
-				ROLLBACK TRANSACTION
+			BEGIN
+				IF @InitTranCount = 0
+					IF (XACT_STATE()) <> 0
+						ROLLBACK TRANSACTION
+				ELSE
+					IF (XACT_STATE()) <> 0
+						ROLLBACK TRANSACTION @Savepoint
+			END
+
 			SET @ErrorMessage = ERROR_MESSAGE();
 			IF ISNULL(@RaiseError,0) = 1
 				RAISERROR(@ErrorMessage, 16, 1);
@@ -333,8 +359,16 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 					EXEC dbo.[uspARReComputeInvoiceTaxes] @InvoiceId = @InvoiceId, @DetailId = @NewDetailId
 			END TRY
 			BEGIN CATCH
-				IF ISNULL(@RaiseError,0) = 0	
-					ROLLBACK TRANSACTION
+				IF ISNULL(@RaiseError,0) = 0
+				BEGIN
+					IF @InitTranCount = 0
+						IF (XACT_STATE()) <> 0
+							ROLLBACK TRANSACTION
+					ELSE
+						IF (XACT_STATE()) <> 0
+							ROLLBACK TRANSACTION @Savepoint
+				END
+
 				SET @ErrorMessage = ERROR_MESSAGE();
 				IF ISNULL(@RaiseError,0) = 1
 					RAISERROR(@ErrorMessage, 16, 1);
@@ -343,7 +377,15 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 		END TRY
 		BEGIN CATCH			
 			IF ISNULL(@RaiseError,0) = 0
-				ROLLBACK TRANSACTION
+			BEGIN
+				IF @InitTranCount = 0
+					IF (XACT_STATE()) <> 0
+						ROLLBACK TRANSACTION
+				ELSE
+					IF (XACT_STATE()) <> 0
+						ROLLBACK TRANSACTION @Savepoint
+			END
+
 			SET @ErrorMessage = ERROR_MESSAGE();
 			IF ISNULL(@RaiseError,0) = 1
 				RAISERROR(@ErrorMessage, 16, 1);
@@ -395,7 +437,15 @@ ELSE IF((LEN(RTRIM(LTRIM(@ItemDescription))) > 0 OR ISNULL(@ItemPrice,@ZeroDecim
 			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN
 					IF ISNULL(@RaiseError,0) = 0
-						ROLLBACK TRANSACTION
+					BEGIN
+						IF @InitTranCount = 0
+							IF (XACT_STATE()) <> 0
+								ROLLBACK TRANSACTION
+						ELSE
+							IF (XACT_STATE()) <> 0
+								ROLLBACK TRANSACTION @Savepoint
+					END
+
 					SET @ErrorMessage = @AddDetailError;
 					IF ISNULL(@RaiseError,0) = 1
 						RAISERROR(@ErrorMessage, 16, 1);
@@ -404,7 +454,15 @@ ELSE IF((LEN(RTRIM(LTRIM(@ItemDescription))) > 0 OR ISNULL(@ItemPrice,@ZeroDecim
 		END TRY
 		BEGIN CATCH
 			IF ISNULL(@RaiseError,0) = 0
-				ROLLBACK TRANSACTION
+			BEGIN
+				IF @InitTranCount = 0
+					IF (XACT_STATE()) <> 0
+						ROLLBACK TRANSACTION
+				ELSE
+					IF (XACT_STATE()) <> 0
+						ROLLBACK TRANSACTION @Savepoint
+			END
+
 			SET @ErrorMessage = ERROR_MESSAGE();
 			IF ISNULL(@RaiseError,0) = 1
 				RAISERROR(@ErrorMessage, 16, 1);
@@ -434,7 +492,24 @@ WHERE ARID.intInvoiceId = @InvoiceId
 EXEC [dbo].[uspARReComputeInvoiceAmounts] @InvoiceId
 
 IF ISNULL(@RaiseError,0) = 0
-	COMMIT TRANSACTION
+BEGIN
+
+	IF @InitTranCount = 0
+		BEGIN
+			IF (XACT_STATE()) = -1
+				ROLLBACK TRANSACTION
+			IF (XACT_STATE()) = 1
+				COMMIT TRANSACTION
+		END		
+	ELSE
+		BEGIN
+			IF (XACT_STATE()) = -1
+				ROLLBACK TRANSACTION  @Savepoint
+			--IF (XACT_STATE()) = 1
+			--	COMMIT TRANSACTION  @Savepoint
+		END	
+END
+
 SET @ErrorMessage = NULL;
 RETURN 1;
 	
