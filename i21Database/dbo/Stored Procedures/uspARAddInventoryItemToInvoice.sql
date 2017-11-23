@@ -97,7 +97,11 @@ DECLARE @ZeroDecimal			NUMERIC(18, 6)
 		,@InvoiceDate			DATETIME
 		,@existingInvoiceDetail INT
 		,@CurrencyId			INT
+		,@InitTranCount			INT
+		,@Savepoint				NVARCHAR(32)
 
+SET @InitTranCount = @@TRANCOUNT
+SET @Savepoint = SUBSTRING(('ARAddInventoryItemToInvoice' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
 SET @ZeroDecimal = 0.000000
 
 IF NOT EXISTS(SELECT NULL FROM tblARInvoice WHERE intInvoiceId = @InvoiceId)
@@ -156,7 +160,12 @@ IF NOT EXISTS(	SELECT NULL
 --	END
 	
 IF ISNULL(@RaiseError,0) = 0	
-	BEGIN TRANSACTION
+BEGIN
+	IF @InitTranCount = 0
+		BEGIN TRANSACTION
+	ELSE
+		SAVE TRANSACTION @Savepoint
+END
 	
 	
 IF (ISNULL(@RefreshPrice,0) = 1)
@@ -410,8 +419,16 @@ BEGIN TRY
 			
 END TRY
 BEGIN CATCH
-	IF ISNULL(@RaiseError,0) = 0	
-		ROLLBACK TRANSACTION
+	IF ISNULL(@RaiseError,0) = 0
+	BEGIN
+		IF @InitTranCount = 0
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION
+		ELSE
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION @Savepoint
+	END
+
 	SET @ErrorMessage = ERROR_MESSAGE();
 	IF ISNULL(@RaiseError,0) = 1
 		RAISERROR(@ErrorMessage, 16, 1);
@@ -428,8 +445,16 @@ BEGIN TRY
  		EXEC dbo.[uspARReComputeInvoiceAmounts] @InvoiceId = @InvoiceId
 END TRY
 BEGIN CATCH
-	IF ISNULL(@RaiseError,0) = 0	
-		ROLLBACK TRANSACTION
+	IF ISNULL(@RaiseError,0) = 0
+	BEGIN
+		IF @InitTranCount = 0
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION
+		ELSE
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION @Savepoint
+	END
+
 	SET @ErrorMessage = ERROR_MESSAGE();
 	IF ISNULL(@RaiseError,0) = 1
 		RAISERROR(@ErrorMessage, 16, 1);
@@ -438,8 +463,25 @@ END CATCH
 
 SET @NewInvoiceDetailId = ISNULL(@existingInvoiceDetail, @NewId)
 
-IF ISNULL(@RaiseError,0) = 0	
-	COMMIT TRANSACTION
+IF ISNULL(@RaiseError,0) = 0
+BEGIN
+
+	IF @InitTranCount = 0
+		BEGIN
+			IF (XACT_STATE()) = -1
+				ROLLBACK TRANSACTION
+			IF (XACT_STATE()) = 1
+				COMMIT TRANSACTION
+		END		
+	ELSE
+		BEGIN
+			IF (XACT_STATE()) = -1
+				ROLLBACK TRANSACTION  @Savepoint
+			--IF (XACT_STATE()) = 1
+			--	COMMIT TRANSACTION  @Savepoint
+		END	
+END
+
 SET @ErrorMessage = NULL;
 RETURN 1;
 	
