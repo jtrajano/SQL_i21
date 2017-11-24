@@ -30,9 +30,11 @@ BEGIN
 
 	ELSE 
 	BEGIN 
-		DECLARE @strQty AS NVARCHAR(50) = CONVERT(NVARCHAR, CAST(@dblQty AS MONEY), 1)
-		DECLARE @strCost AS NVARCHAR(50) = CONVERT(NVARCHAR, CAST(@dblCost AS MONEY), 1)
-
+		--DECLARE @strQty AS NVARCHAR(50) = CONVERT(NVARCHAR, CAST(@dblQty AS MONEY), 1)
+		--DECLARE @strCost AS NVARCHAR(50) = CONVERT(NVARCHAR, CAST(@dblCost AS MONEY), 1)		
+		DECLARE @strQty AS NVARCHAR(50) = dbo.fnFormatNumber(@dblQty) 
+		DECLARE @strCost AS NVARCHAR(50) = dbo.fnFormatNumber(@dblCost) 
+		
 		-- 'Item: %s, Qty: %s, Cost: %s'
 		SET @result = dbo.fnFormatMessage(
 						dbo.fnICGetErrorMessage(80159)
