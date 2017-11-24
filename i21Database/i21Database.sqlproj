@@ -2027,7 +2027,6 @@
     <Build Include="dbo\Stored Procedures\uspFRDImportOriginDesign.sql" />
     <Build Include="dbo\Views\vyuRKGetAssignFutureTransaction.sql" />
     <Build Include="dbo\Views\vyuRKGetAssignPhysicalTransaction.sql" />
-    <Build Include="dbo\Stored Procedures\uspICUnpostInventoryReceiptOtherCharges.sql" />
     <Build Include="dbo\Views\vyuTMLeaseBilling.sql" />
     <Build Include="dbo\Views\vyuTMFailedLeaseBilling.sql" />
     <None Include="Scripts\Post-Deployment\TM\DefaultData\11_ApplianceType.sql" />
@@ -4268,7 +4267,6 @@
     <Build Include="dbo\Stored Procedures\uspICCalculateInventoryShipmentOtherCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspICCalculateShipmentOtherCharges.sql" />
     <Build Include="dbo\Functions\fnGetOtherChargesFromInventoryShipment.sql" />
-    <Build Include="dbo\Stored Procedures\uspICUnpostInventoryShipmentOtherCharges.sql" />
     <Build Include="dbo\Functions\fnICGetScaleTicketIdForShipmentCharge.sql" />
     <Build Include="dbo\Views\vyuICShipmentChargesForBilling.sql" />
     <Build Include="dbo\Stored Procedures\uspICSaveReceiptInspection.sql" />
@@ -4322,9 +4320,6 @@
     <Build Include="dbo\vyuARTaxDetailReport.sql" />
     <Build Include="dbo\Tables\tblICInventoryShipmentChargePerItem.sql" />
     <Build Include="dbo\Stored Procedures\uspICCalculateInventoryShipmentSurchargeOnOtherCharges.sql" />
-    <Build Include="dbo\Stored Procedures\uspICUnpostInventoryShipmentOtherCharges.sql">
-      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
-    </Build>
     <Build Include="dbo\Tables\tblARLetterPlaceHolder.sql" />
     <Build Include="dbo\User Defined Types\PlaceHolderTable.sql" />
     <Build Include="dbo\Functions\fnARRemoveWhiteSpace.sql" />

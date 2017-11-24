@@ -3,6 +3,7 @@
 	,@strBatchId AS NVARCHAR(40)
 	,@intEntityUserSecurityId AS INT
 	,@intTransactionTypeId AS INT 
+	,@ysnPost AS BIT = 1
 AS
 
 -- Constant Variables
@@ -378,6 +379,8 @@ BEGIN
 	FROM	@OtherChargesGLAccounts
 	;
 
+	DECLARE @ChargesGLEntries AS RecapTableType;
+
 	-- Generate the G/L Entries here: 
 	WITH ForGLEntries_CTE (
 		dtmDate
@@ -444,7 +447,40 @@ BEGIN
 		WHERE	Shipment.intInventoryShipmentId = @intInventoryShipmentId
 				
 	)
-
+	INSERT INTO @ChargesGLEntries (
+		[dtmDate] 
+		,[strBatchId]
+		,[intAccountId]
+		,[dblDebit]
+		,[dblCredit]
+		,[dblDebitUnit]
+		,[dblCreditUnit]
+		,[strDescription]
+		,[strCode]
+		,[strReference]
+		,[intCurrencyId]
+		,[dblExchangeRate]
+		,[dtmDateEntered]
+		,[dtmTransactionDate]
+		,[strJournalLineDescription]
+		,[intJournalLineNo]
+		,[ysnIsUnposted]
+		,[intUserId]
+		,[intEntityId]
+		,[strTransactionId]
+		,[intTransactionId]
+		,[strTransactionType]
+		,[strTransactionForm]
+		,[strModuleName]
+		,[intConcurrencyId]
+		,[dblDebitForeign]	
+		,[dblDebitReport]	
+		,[dblCreditForeign]	
+		,[dblCreditReport]	
+		,[dblReportingRate]	
+		,[dblForeignRate]
+		,[strRateType]
+	)	
 	-------------------------------------------------------------------------------------------
 	-- Accrue: No
 	-- Vendor: Blank
@@ -685,6 +721,39 @@ BEGIN
 
 	WHERE	ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 1
 
+	SELECT	[dtmDate] 
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit] = CASE WHEN @ysnPost = 1 THEN [dblDebit] ELSE [dblCredit] END 
+			,[dblCredit] = CASE WHEN @ysnPost = 1 THEN [dblCredit] ELSE [dblDebit] END 
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted] = CAST(CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END AS BIT) 
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+			,[dblDebitForeign] = CASE WHEN @ysnPost = 1 THEN [dblDebitForeign] ELSE [dblCreditForeign] END 
+			,[dblDebitReport] 
+			,[dblCreditForeign]	= CASE WHEN @ysnPost = 1 THEN [dblCreditForeign] ELSE [dblDebitForeign] END 	
+			,[dblCreditReport]	
+			,[dblReportingRate]	
+			,[dblForeignRate]
+			,[strRateType]
+	FROM	@ChargesGLEntries
 END
 
 -- Exit point
