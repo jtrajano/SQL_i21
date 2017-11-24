@@ -1254,7 +1254,14 @@ Ext.define('Inventory.view.ItemViewController', {
                     editor: {
                         origValueField: 'intManufacturingCellId',
                         origUpdateField: 'intManufacturingCellId',
-                        store: '{factoryManufacturingCell}'
+                        store: '{factoryManufacturingCell}',
+                        defaultFilters: [
+                            {
+                                column: 'strLocationName',
+                                value: '{grdFactory.selection.strLocationName}',
+                                conjunction: 'and'
+                            }
+                        ]
                     }
                 },
                 colCellNameDefault: 'ysnDefault',
