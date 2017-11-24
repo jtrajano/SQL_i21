@@ -13,9 +13,10 @@ BEGIN
 	   SELECT  ' ' + @strDelimiter + ' ' +  RTRIM(S.strDescription)
 		FROM         dbo.tblGLAccountSegment S INNER JOIN
 						  dbo.tblGLAccountSegmentMapping M ON S.intAccountSegmentId = M.intAccountSegmentId 
-						  RIGHT OUTER JOIN
-						  dbo.tblGLAccount A2 ON M.intAccountId = A2.intAccountId 
+						  JOIN tblGLAccountStructure St on S.intAccountStructureId = St.intAccountStructureId
+						  RIGHT OUTER JOIN dbo.tblGLAccount A2 ON M.intAccountId = A2.intAccountId 
 						  WHERE A2.intAccountId = A1.intAccountId
+						  ORDER BY St.intAccountStructureId
 			FOR XML PATH('') )  
 		, 1, 2, '' ) AS strDescription
     FROM tblGLAccount A1  
