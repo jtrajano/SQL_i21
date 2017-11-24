@@ -63,5 +63,8 @@ BEGIN
 	IF @SourceTransaction = 'CF Invoice'
 		RETURN 17	
 
+	IF @SourceTransaction = 'Ticket Management'
+		RETURN 18	
+
 	RETURN @SourceIdOut
 END
