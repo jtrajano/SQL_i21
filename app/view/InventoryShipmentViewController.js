@@ -855,8 +855,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             });
         }
 
-        if (defaultCurrency){
-            record.set('intCurrencyId', defaultCurrency);
+        if (defaultCurrency){      
+            record.set('intCurrencyId', defaultCurrency);      
             Ext.create('i21.store.CurrencyBuffered', {
                 storeId: 'icShipmentCurrency',
                 autoLoad: {
@@ -868,16 +868,17 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         }
                     ],
                     params: {
-                        columns: 'strCurrency:'
+                        columns: 'strCurrency:intCurrencyID:'
                     },
                     callback: function(records, operation, success){
-                        var companyLocation; 
+                        var currency; 
                         if (records && records.length > 0) {
-                            companyLocation = records[0];
+                            currency = records[0];
                         }
 
-                        if(success && companyLocation){
-                            record.set('strCurrency', companyLocation.get('strCurrency'));
+                        if(success && currency){
+                            record.set('intCurrencyId', currency.get('intCurrencyID'));
+                            record.set('strCurrency', currency.get('strCurrency'));
                         }
                     }
                 }
