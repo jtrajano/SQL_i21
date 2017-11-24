@@ -713,6 +713,7 @@ FROM
 																			, dbo.fnGetMatchingItemUOMId(CD.intItemId, CC.intItemUOMId)
 																			, ISNULL(CD.dblQuantity,0)), 2)
 																ELSE	ISNULL(CC.dblRate,0) 
+														END,0)
 		,[dblTax]									=	0
 		,[dblRate]									=	CASE WHEN CY.ysnSubCurrency > 0  THEN  ISNULL(RateDetail.dblRate,1) ELSE ISNULL(G1.dblRate,1) END
 		,[strRateType]								=	NULL
