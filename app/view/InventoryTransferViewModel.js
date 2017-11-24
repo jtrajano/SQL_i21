@@ -35,7 +35,8 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
                 { intLotStatusId: 1, strSecondaryStatus: 'Active' },
                 { intLotStatusId: 2, strSecondaryStatus: 'On Hold' },
                 { intLotStatusId: 3, strSecondaryStatus: 'Quarantine' },
-                { intLotStatusId: 4, strSecondaryStatus: 'Pre-Sanitized' }
+                { intLotStatusId: 4, strSecondaryStatus: 'Pre-Sanitized' },
+                { intLotStatusId: 5, strSecondaryStatus: 'Reconditioned' }
             ],
             fields: [{ name: 'intLotStatusId' }, { name: 'strSecondaryStatus' }]
         },
