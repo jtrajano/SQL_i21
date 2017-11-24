@@ -578,9 +578,6 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 case 4:
                     strNewLotStatus = 'Pre-Sanitized';
                     break;
-                case 5:
-                    strNewLotStatus = 'Reconditioned';
-                    break;
             }
             current.set('strNewLotStatus', strNewLotStatus);
         }
