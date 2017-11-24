@@ -47,12 +47,24 @@ BEGIN TRY
 					)
 		END
 
-		INSERT INTO [dbo].[tblCTInvPlngReportMaster]
+		INSERT INTO [dbo].[tblCTInvPlngReportMaster] (
+			[strInvPlngReportName]
+			,[intReportMasterID]
+			,[intNoOfMonths]
+			,[ysnIncludeInventory]
+			,[intCategoryId]
+			,[intCompanyLocationId]
+			,[intCreatedUserId]
+			,[dtmCreated]
+			,[intLastModifiedUserId]
+			,[dtmLastModified]
+			)
 		SELECT [strInvPlngReportName]
 			,@intReportMasterID
 			,[intNoOfMonths]
 			,[ysnIncludeInventory]
 			,[intCategoryId]
+			,intCompanyLocationId
 			,[intCreatedUserId]
 			,GETDATE()
 			,[intLastModifiedUserId]
@@ -62,6 +74,7 @@ BEGIN TRY
 				,intNoOfMonths INT
 				,ysnIncludeInventory BIT
 				,intCategoryId INT
+				,intCompanyLocationId INT
 				,intCreatedUserId INT
 				,intLastModifiedUserId INT
 				)
@@ -123,6 +136,7 @@ BEGIN TRY
 			,[intNoOfMonths] = x.intNoOfMonths
 			,[ysnIncludeInventory] = x.ysnIncludeInventory
 			,[intCategoryId] = x.intCategoryId
+			,intCompanyLocationId = x.intCompanyLocationId
 			,[intLastModifiedUserId] = x.intLastModifiedUserId
 			,[dtmLastModified] = GETDATE()
 		FROM OPENXML(@idoc, 'root/InvPlngReportMaster', 2) WITH (
@@ -130,6 +144,7 @@ BEGIN TRY
 				,intNoOfMonths INT
 				,ysnIncludeInventory BIT
 				,intCategoryId INT
+				,intCompanyLocationId INT
 				,intLastModifiedUserId INT
 				) x
 		WHERE intInvPlngReportMasterID = @intInvPlngReportMasterID

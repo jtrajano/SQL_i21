@@ -3,6 +3,7 @@
 	,@MaterialKeyXML NVARCHAR(MAX)
 	,@intMonthsToView INT
 	,@ysnIncludeInventory BIT
+	,@intCompanyLocationId INT
 	,@PlannedPurchasesXML VARCHAR(MAX)
 	,@WeeksOfSupplyTargetXML VARCHAR(MAX)
 	,@ForecastedConsumptionXML VARCHAR(MAX)
@@ -226,22 +227,22 @@ BEGIN TRY
 			SET @OpeningInventory = (
 					--SELECT SUM(dblQty)
 					SELECT ISNULL(SUM(CASE 
-								  WHEN L.intWeightUOMId IS NOT NULL
+									WHEN L.intWeightUOMId IS NOT NULL
 										THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, IUOM.intUnitMeasureId, @TargetUOMKey, L.dblWeight)
-								  ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, IUOM1.intUnitMeasureId, @TargetUOMKey, L.dblQty)
-								  END), 0)
+									ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, IUOM1.intUnitMeasureId, @TargetUOMKey, L.dblQty)
+									END), 0)
 					FROM dbo.tblICLot L
 					JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
 						AND L.intItemId = @intItemId
 					LEFT JOIN dbo.tblICItemUOM IUOM ON IUOM.intItemUOMId = L.intWeightUOMId
 					JOIN dbo.tblICItemUOM IUOM1 ON IUOM1.intItemUOMId = L.intItemUOMId
-					--WHERE intItemId IN (
-					--		SELECT M.intItemId
-					--		FROM tblICItem M
-					--		WHERE M.intItemId = @intItemId
-					--			--JOIN tblICItemContract CMM ON CMM.intItemId = M.intItemId
-					--			--AND CMM.intItemContractId = @intItemId
-					--		)
+						--WHERE intItemId IN (
+						--		SELECT M.intItemId
+						--		FROM tblICItem M
+						--		WHERE M.intItemId = @intItemId
+						--			--JOIN tblICItemContract CMM ON CMM.intItemId = M.intItemId
+						--			--AND CMM.intItemContractId = @intItemId
+						--		)
 					)
 		ELSE
 			SET @OpeningInventory = 0
