@@ -5904,6 +5904,7 @@
     <Build Include="dbo\Tables\tblCTBrkgCommn.sql" />
     <Build Include="dbo\Tables\tblCTBrkgCommnDetail.sql" />
     <Build Include="dbo\Views\vyuRKGetM2MConfigurationMapping.sql" />
+    <Build Include="dbo\Views\vyuQMCompanyPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
