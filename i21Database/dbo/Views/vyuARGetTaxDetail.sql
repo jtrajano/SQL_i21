@@ -3,8 +3,10 @@ AS
 SELECT intCategoryId		= ITEM.intCategoryId
 	 , strItemNo			= ITEM.strItemNo
 	 , strCategoryCode		= ITEMCATEGORY.strCategoryCode	 
-	 , TRANSACTIONS.*
+	 , strTaxClass			= TAXCLASS.strTaxClass
+	 , strTaxCode			= TAXCODE.strTaxCode
 	 , ysnTaxMatched		= CONVERT(BIT, 1)
+	 , TRANSACTIONS.*
 FROM (
 	SELECT intTransactionId			= ID.intInvoiceId
 		 , intItemId				= ID.intItemId
