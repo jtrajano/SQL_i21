@@ -3,6 +3,7 @@
 	,@strBatchId AS NVARCHAR(40)
 	,@intEntityUserSecurityId AS INT
 	,@intTransactionTypeId AS INT 
+	,@ysnPost AS BIT = 1 	
 	,@intItemId AS INT = NULL -- Used when rebuilding the stocks. 
 AS
 
@@ -972,7 +973,6 @@ BEGIN
 			CROSS APPLY dbo.fnGetDebit(NonInventoryCostCharges.dblCost) DebitForeign
 			CROSS APPLY dbo.fnGetCredit(NonInventoryCostCharges.dblCost) CreditForeign
 
-
 	WHERE	ISNULL(NonInventoryCostCharges.ysnAccrue, 0) = 0 -- @COST_BILLED_BY_None 
 			AND ISNULL(NonInventoryCostCharges.ysnInventoryCost, 0) = 0
 			AND ISNULL(NonInventoryCostCharges.ysnPrice, 0) = 0
@@ -1270,14 +1270,13 @@ BEGIN
 			) Credit
 			CROSS APPLY dbo.fnGetDebit(NonInventoryCostCharges.dblCost) DebitForeign
 			CROSS APPLY dbo.fnGetCredit(NonInventoryCostCharges.dblCost) CreditForeign
-
 	WHERE	ISNULL(NonInventoryCostCharges.ysnPrice, 0) = 1	
 
 	SELECT	[dtmDate] 
 			,[strBatchId]
 			,[intAccountId]
-			,[dblDebit]
-			,[dblCredit]
+			,[dblDebit] = CASE WHEN @ysnPost = 1 THEN [dblDebit] ELSE [dblCredit] END 
+			,[dblCredit] = CASE WHEN @ysnPost = 1 THEN [dblCredit] ELSE [dblDebit] END 
 			,[dblDebitUnit]
 			,[dblCreditUnit]
 			,[strDescription]
@@ -1289,7 +1288,7 @@ BEGIN
 			,[dtmTransactionDate]
 			,[strJournalLineDescription]
 			,[intJournalLineNo]
-			,[ysnIsUnposted]
+			,[ysnIsUnposted] = CAST(CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END AS BIT) 
 			,[intUserId]
 			,[intEntityId]
 			,[strTransactionId]
@@ -1298,9 +1297,9 @@ BEGIN
 			,[strTransactionForm]
 			,[strModuleName]
 			,[intConcurrencyId]
-			,[dblDebitForeign]	
-			,[dblDebitReport]	
-			,[dblCreditForeign]	
+			,[dblDebitForeign] = CASE WHEN @ysnPost = 1 THEN [dblDebitForeign] ELSE [dblCreditForeign] END 
+			,[dblDebitReport] 
+			,[dblCreditForeign]	= CASE WHEN @ysnPost = 1 THEN [dblCreditForeign] ELSE [dblDebitForeign] END 	
 			,[dblCreditReport]	
 			,[dblReportingRate]	
 			,[dblForeignRate]

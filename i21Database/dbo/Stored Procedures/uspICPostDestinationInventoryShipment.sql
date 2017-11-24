@@ -277,6 +277,7 @@ BEGIN
 				,@strBatchId
 				,@intEntityUserSecurityId
 				,@INVENTORY_SHIPMENT_TYPE
+				,@ysnPost
 
 			IF @intReturnValue < 0 GOTO _ExitWithError
 		END 
@@ -378,11 +379,13 @@ BEGIN
 				,[dblForeignRate]
 				,[strRateType]
 			)	
-			EXEC @intReturnValue = dbo.uspICUnpostInventoryShipmentOtherCharges 
+			EXEC @intReturnValue = dbo.uspICPostInventoryShipmentOtherCharges 
 				@intShipmentId
 				,@strBatchId
 				,@intEntityUserSecurityId
 				,@INVENTORY_SHIPMENT_TYPE	
+				,@ysnPost 
+
 			IF @intReturnValue < 0 GOTO _ExitWithError
 		END 
 
