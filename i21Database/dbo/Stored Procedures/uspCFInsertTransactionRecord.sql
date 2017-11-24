@@ -183,6 +183,8 @@ BEGIN
 	DECLARE @intNetworkLocation			INT = 0
 	DECLARE @intDupTransCount			INT = 0
 	DECLARE @ysnDuplicate				BIT = 0
+
+	DECLARE @ysnOnHold					BIT = 0
 	  
 	------------------------------------------------------------
 
@@ -1038,6 +1040,7 @@ BEGIN
 			,[intOverFilledTransactionId]
 			,[dtmInvoiceDate]
 			,[strInvoiceReportNumber]
+			,[ysnOnHold]
 		)
 		VALUES
 		(
@@ -1085,6 +1088,7 @@ BEGIN
 			,@intOverFilledTransactionId
 			,@dtmInvoiceDate
 			,@strInvoiceReportNumber
+			,@ysnOnHold
 		)			
 	
 		DECLARE @Pk	INT		
