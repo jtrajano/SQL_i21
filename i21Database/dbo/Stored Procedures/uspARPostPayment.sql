@@ -471,6 +471,29 @@ SET @batchIdUsed = @batchId
 						ON A.intLocationId = L.intCompanyLocationId
 				WHERE L.intCompanyLocationId IS NULL
 				
+				--INACTIVE GL ACCOUNT
+				INSERT INTO 
+					@ARReceivableInvalidData
+				SELECT 
+					'Undeposited Funds Account : ' + CL.strUndepositedFundsId+ ' is not active.'
+					,'Receivable'
+					,A.strRecordNumber
+					,@batchId
+					,A.intPaymentId
+				FROM
+					tblARPayment A
+				INNER JOIN
+					@ARReceivablePostData P
+						ON A.intPaymentId = P.intPaymentId						 
+				LEFT OUTER JOIN
+					tblSMCompanyLocation L
+						ON A.intLocationId = L.intCompanyLocationId
+				LEFT OUTER JOIN vyuSMCompanyLocation CL
+					ON L.intCompanyLocationId = CL.intCompanyLocationId
+				INNER JOIN tblGLAccount GL
+					ON GL.strAccountId = CL.strUndepositedFundsId
+				WHERE GL.ysnActive != 1
+
 				----Bank Account
 				--INSERT INTO 
 				--	@ARReceivableInvalidData
