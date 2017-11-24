@@ -601,8 +601,9 @@ FROM
 																		dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice * (CC.dblRate / 100) *
 																		CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END
                                                                		WHEN	CC.strCostMethod = 'Per Unit' THEN       
-																		ROUND(dbo.fnCalculateCostBetweenUOM(CC.intItemUOMId,CD.intItemUOMId,CC.dblRate) * CD.dblQuantity *
-																		CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END,2)
+																			ROUND (CC.dblRate * dbo.fnCalculateQtyBetweenUOM(ISNULL(null,  CD.intItemUOMId)
+																			, dbo.fnGetMatchingItemUOMId(CD.intItemId, CC.intItemUOMId)
+																			, ISNULL(CD.dblQuantity,0)), 2)
 																ELSE	ISNULL(CC.dblRate,0) 
 														END,0)
 		,[dblTax]									=	0
@@ -708,10 +709,10 @@ FROM
 																		dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice * (CC.dblRate / 100) *
 																		CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END
                                                                		WHEN	CC.strCostMethod = 'Per Unit' THEN       
-																		ROUND(dbo.fnCalculateCostBetweenUOM(CC.intItemUOMId,CD.intItemUOMId,CC.dblRate) * CD.dblQuantity *
-																		CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END,2)
+																			ROUND (CC.dblRate * dbo.fnCalculateQtyBetweenUOM(ISNULL(null,  CD.intItemUOMId)
+																			, dbo.fnGetMatchingItemUOMId(CD.intItemId, CC.intItemUOMId)
+																			, ISNULL(CD.dblQuantity,0)), 2)
 																ELSE	ISNULL(CC.dblRate,0) 
-														END,0)
 		,[dblTax]									=	0
 		,[dblRate]									=	CASE WHEN CY.ysnSubCurrency > 0  THEN  ISNULL(RateDetail.dblRate,1) ELSE ISNULL(G1.dblRate,1) END
 		,[strRateType]								=	NULL
