@@ -125,6 +125,7 @@ AS
 		,DEFAULT 
 	)
 	, Receipt.strWarehouseRefNo
+	, TransferDetail.strLotCondition
 	FROM tblICInventoryTransferDetail TransferDetail
 		LEFT JOIN tblICInventoryTransfer [Transfer] ON [Transfer].intInventoryTransferId = TransferDetail.intInventoryTransferId
 		LEFT JOIN tblEMEntity e ON e.intEntityId = Transfer.intTransferredById
