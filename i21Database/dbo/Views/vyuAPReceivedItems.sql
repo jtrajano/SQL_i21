@@ -611,7 +611,11 @@ FROM
 		,[dblUnitCost]								=	ISNULL(CASE	WHEN	CC.strCostMethod = 'Percentage' THEN
 																		dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice * (CC.dblRate / 100) *
 																		CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END
-																ELSE	ISNULL(NULLIF(CC.dblRate,0),1) 
+                                                               		WHEN	CC.strCostMethod = 'Per Unit' THEN       
+																			ROUND (CC.dblRate * dbo.fnCalculateQtyBetweenUOM(ISNULL(null,  CD.intItemUOMId)
+																			, dbo.fnGetMatchingItemUOMId(CD.intItemId, CC.intItemUOMId)
+																			, ISNULL(CD.dblQuantity,0)), 2)
+																ELSE	ISNULL(CC.dblRate,0) 
 														END,0)
 		,[dblDiscount]								=	0
 		,[dblTax]									=	0
@@ -717,7 +721,11 @@ FROM
 		,[dblUnitCost]								=	ISNULL(CASE	WHEN	CC.strCostMethod = 'Percentage' THEN
 																		dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice * (CC.dblRate / 100) *
 																		CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END
-																ELSE	ISNULL(CC.dblRate,1) 
+                                                               		WHEN	CC.strCostMethod = 'Per Unit' THEN       
+																			ROUND (CC.dblRate * dbo.fnCalculateQtyBetweenUOM(ISNULL(null,  CD.intItemUOMId)
+																			, dbo.fnGetMatchingItemUOMId(CD.intItemId, CC.intItemUOMId)
+																			, ISNULL(CD.dblQuantity,0)), 2)
+																ELSE	ISNULL(CC.dblRate,0) 
 														END,0)
 		,[dblDiscount]								=	0
 		,[dblTax]									=	0
