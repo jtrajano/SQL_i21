@@ -2542,3 +2542,17 @@ JOIN dbo.tblICItemUOM IU ON IU.intItemId = RS.intSubstituteItemId
 	AND IU.intUnitMeasureId = IU1.intUnitMeasureId
 	and RI.intRecipeItemTypeId =1
 GO
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFSubPatternType
+		WHERE intSubPatternTypeId = 8
+		)
+BEGIN
+	INSERT INTO tblMFSubPatternType (
+		intSubPatternTypeId
+		,strSubPatternTypeName
+		)
+	SELECT 8
+		,'ALPHABETICAL SEQUENCE'
+END
+GO
