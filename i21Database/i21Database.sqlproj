@@ -2027,7 +2027,6 @@
     <Build Include="dbo\Stored Procedures\uspFRDImportOriginDesign.sql" />
     <Build Include="dbo\Views\vyuRKGetAssignFutureTransaction.sql" />
     <Build Include="dbo\Views\vyuRKGetAssignPhysicalTransaction.sql" />
-    <Build Include="dbo\Stored Procedures\uspICUnpostInventoryReceiptOtherCharges.sql" />
     <Build Include="dbo\Views\vyuTMLeaseBilling.sql" />
     <Build Include="dbo\Views\vyuTMFailedLeaseBilling.sql" />
     <None Include="Scripts\Post-Deployment\TM\DefaultData\11_ApplianceType.sql" />
@@ -2622,7 +2621,6 @@
     <Build Include="dbo\Stored Procedures\uspRKM2MGetClosingPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetM2MBasisOnDate.sql" />
     <Build Include="dbo\Stored Procedures\uspRKM2MInquirySummary.sql" />
-    <Build Include="dbo\Stored Procedures\uspRKM2MInquiryTransaction.sql" />
     <Build Include="dbo\Tables\tblRKM2MInquiryBasisDetail.sql" />
     <Build Include="dbo\Tables\tblRKM2MInquiryLatestMarketPrice.sql" />
     <Build Include="dbo\Views\vyuCTFuturesMonth.sql" />
@@ -4269,7 +4267,6 @@
     <Build Include="dbo\Stored Procedures\uspICCalculateInventoryShipmentOtherCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspICCalculateShipmentOtherCharges.sql" />
     <Build Include="dbo\Functions\fnGetOtherChargesFromInventoryShipment.sql" />
-    <Build Include="dbo\Stored Procedures\uspICUnpostInventoryShipmentOtherCharges.sql" />
     <Build Include="dbo\Functions\fnICGetScaleTicketIdForShipmentCharge.sql" />
     <Build Include="dbo\Views\vyuICShipmentChargesForBilling.sql" />
     <Build Include="dbo\Stored Procedures\uspICSaveReceiptInspection.sql" />
@@ -4323,9 +4320,6 @@
     <Build Include="dbo\vyuARTaxDetailReport.sql" />
     <Build Include="dbo\Tables\tblICInventoryShipmentChargePerItem.sql" />
     <Build Include="dbo\Stored Procedures\uspICCalculateInventoryShipmentSurchargeOnOtherCharges.sql" />
-    <Build Include="dbo\Stored Procedures\uspICUnpostInventoryShipmentOtherCharges.sql">
-      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
-    </Build>
     <Build Include="dbo\Tables\tblARLetterPlaceHolder.sql" />
     <Build Include="dbo\User Defined Types\PlaceHolderTable.sql" />
     <Build Include="dbo\Functions\fnARRemoveWhiteSpace.sql" />
@@ -5374,7 +5368,6 @@
     <Build Include="dbo\Views\vyuGRGetContracts.sql" />
     <Build Include="dbo\Stored Procedures\uspSTReportInventoryMassMaintenancePreview.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreatePickOrderValidation.sql" />
-    <Build Include="dbo\Views\vyuRKRiskPositionContractDetail.sql" />
     <Build Include="dbo\Views\vyuRKGetInvoicedQty.sql" />
     <Build Include="dbo\Views\vyuRKM2MGetContractDetailView.sql" />
     <None Include="Scripts\Post-Deployment\RM\01_MasterScript.sql" />
@@ -5873,38 +5866,15 @@
     <Build Include="dbo\Stored Procedures\uspAPCreateVendorRefund.sql" />
     <Build Include="dbo\Stored Procedures\uspLGSplitPickedLotBatch.sql" />
     <Build Include="dbo\Stored Procedures\uspMFLotCreate.sql" />
-    <Build Include="dbo\Stored Procedures\uspTFGenerateOHEx2.sql" />
-    <Build Include="dbo\Stored Procedures\uspTFGenerateOHTR2.sql" />
-    <Build Include="dbo\Stored Procedures\uspTFGenerateOHMF2.sql" />
     <Build Include="dbo\Stored Procedures\uspVRInsertCustomerSpecialPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspVRUpdateCustomerSpecialPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateBillPaymentFromAR.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFValidateInventoryShipment.sql" />
-    <Build Include="dbo\Stored Procedures\uspLGCreateDebitCreditMemo.sql" />
-    <Build Include="dbo\Stored Procedures\uspLGCreateInvoiceForWeightClaims.sql" />
-    <Build Include="dbo\Views\vyuTFGetOutputDesignerField.sql" />
-    <Build Include="dbo\Views\vyuTFGetReportingComponentField.sql" />
     <Build Include="dbo\Tables\tblRKFutOptTransactionHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspRKFutOptTransactionHistory.sql" />
-    <Build Include="dbo\Stored Procedures\uspLGRecalculatedWarehouseServiceCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdateRetailPriceAdjustment.sql" />
-    <Build Include="dbo\Tables\tblMFEDI943.sql" />
-    <Build Include="dbo\Tables\tblMFEDI943Error.sql" />
-    <Build Include="dbo\Tables\tblMFEDI943Archive.sql" />
-    <Build Include="dbo\Tables\tblMFEDI944.sql" />
-    <Build Include="dbo\Tables\tblMFEDI940.sql" />
-    <Build Include="dbo\Tables\tblMFEDI940Error.sql" />
-    <Build Include="dbo\Tables\tblMFEDI940Archive.sql" />
-    <Build Include="dbo\Tables\tblMFEDI945.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFProcessEDI944.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFProcessEDI943.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFProcessEDI940.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFProcessEDI945.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCreateSettleStorage.sql" />
-    <Build Include="dbo\Stored Procedures\uspSMValidateLocalServerRole.sql" />
-    <Build Include="dbo\Functions\fnMBGetWeightedCostAverage.sql" />
-    <Build Include="dbo\Views\vyuSMTaxableByOtherTaxes.sql" />
     <Build Include="dbo\Views\vyuRKGetM2MConfigurationMapping.sql" />
+    <Build Include="dbo\Views\vyuSMTaxableByOtherTaxes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
