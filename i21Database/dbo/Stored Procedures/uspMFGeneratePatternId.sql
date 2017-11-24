@@ -301,6 +301,7 @@ BEGIN
 		END
 
 		IF @intSubPatternTypeId = 6
+			OR @intSubPatternTypeId = 8
 		BEGIN
 			IF EXISTS (
 					SELECT *
@@ -329,7 +330,14 @@ BEGIN
 
 			IF @strSequence IS NULL
 			BEGIN
-				SELECT @strSequence = 0
+				IF @intSubPatternTypeId = 8
+				BEGIN
+					SELECT @strSequence = 64
+				END
+				ELSE
+				BEGIN
+					SELECT @strSequence = 0
+				END
 
 				IF @ysnPaddingZero = 1
 					AND @intSubPatternSize - len(convert(VARCHAR(32), (@strSequence + 1))) > 0
@@ -389,7 +397,21 @@ BEGIN
 				END
 			END
 
-			SET @strPatternString = @strPatternString + @strSequence
+			IF @intSubPatternTypeId = 8
+			BEGIN
+				SET @strPatternString = @strPatternString + (
+						CASE 
+							WHEN @strSequence BETWEEN 65
+									AND 90
+								THEN CHAR(@strSequence)
+							ELSE @strSequence
+							END
+						)
+			END
+			ELSE
+			BEGIN
+				SET @strPatternString = @strPatternString + @strSequence
+			END
 		END
 
 		SELECT @intRecordId = MIN(intRecordId)
