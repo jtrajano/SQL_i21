@@ -3122,6 +3122,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         column: 'excludePhasedOutZeroStockItem',
                         value: true,
                         conjunction: 'and'
+                    },
+                    {
+                        column: 'ysnIssueUOMAllowSale',
+                        value: true,
+                        conjunction: 'and'
                     }
                 ];
             }
