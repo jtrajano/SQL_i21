@@ -39,10 +39,12 @@ BEGIN
 
 	SELECT RM.*
 		,C.strCategoryCode
+		,CL.strLocationName
 		,@intItemIdList AS 'intItemIdList'
 		,@strItemNoList AS 'strItemNoList'
 	FROM dbo.tblCTInvPlngReportMaster RM
 	JOIN tblICCategory C ON C.intCategoryId = RM.intCategoryId
+	LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = RM.intCompanyLocationId
 	WHERE RM.intInvPlngReportMasterID = @intInvPlngReportMasterID
 
 	DECLARE @intReportMasterID INT

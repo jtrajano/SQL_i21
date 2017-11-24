@@ -6,6 +6,7 @@
 	[intNoOfMonths] INT NOT NULL,
 	[ysnIncludeInventory] BIT NOT NULL CONSTRAINT [DF_tblCTInvPlngReportMaster_ysnIncludeInventory] DEFAULT 0, 
 	[intCategoryId] INT NOT NULL,
+	intCompanyLocationId INT,
 
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblCTInvPlngReportMaster_dtmCreated] DEFAULT GetDate(),

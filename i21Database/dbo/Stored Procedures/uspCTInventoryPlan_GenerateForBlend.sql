@@ -3,6 +3,7 @@
 	,@MaterialKeyXML NVARCHAR(MAX)
 	,@intMonthsToView INT
 	,@ysnIncludeInventory BIT
+	,@intCompanyLocationId INT
 	,@PlannedPurchasesXML VARCHAR(MAX)
 	,@WeeksOfSupplyTargetXML VARCHAR(MAX)
 	,@ForecastedConsumptionXML VARCHAR(MAX)
