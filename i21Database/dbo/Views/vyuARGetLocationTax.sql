@@ -1,37 +1,27 @@
 ﻿CREATE VIEW [dbo].[vyuARGetLocationTax]
 AS
-SELECT intTransactionId					= INVOICE.intInvoiceId
-	 , intCompanyLocationId				= INVOICE.intCompanyLocationId
-	 , intFreightTermId					= INVOICE.intFreightTermId
-	 , intCompanyLocationTaxGroupId		= TAX.intTaxGroupId
-	 , strCompanyLocationName			= CASE WHEN ISNULL(FREIGHT.strFobPoint, '') = 'Destination' THEN EL.strLocationName ELSE COMPANY.strLocationName END
-	 , strFreightTerm					= FREIGHT.strFreightTerm
-	 , strFobPoint						= FREIGHT.strFobPoint
+SELECT intCompanyLocationId				= LOCATIONS.intCompanyLocationId
+	 , intShipToLocationId				= LOCATIONS.intShipToLocationId
+	 , intTaxGroupId					= TAX.intTaxGroupId
+	 , strCompanyLocationName			= LOCATIONS.strLocationName
 	 , strTaxGroup						= TAX.strTaxGroup
 	 , strTaxCode						= TAX.strTaxCode
 	 , strTaxClass						= TAX.strTaxClass
-	 , strTransactionType				= INVOICE.strTransactionType
-FROM dbo.tblARInvoice INVOICE WITH (NOLOCK)
-INNER JOIN (
+FROM (
 	SELECT intCompanyLocationId
+		 , intShipToLocationId		= NULL
 		 , intTaxGroupId
 		 , strLocationName
 	FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
-) COMPANY ON INVOICE.intCompanyLocationId = COMPANY.intCompanyLocationId
-LEFT JOIN (
-	SELECT intFreightTermId		 
-		 , strFreightTerm
-		 , strFobPoint
-	FROM dbo.tblSMFreightTerms FT WITH (NOLOCK)	
-) FREIGHT ON INVOICE.intFreightTermId = FREIGHT.intFreightTermId
-LEFT JOIN (
-	SELECT intEntityLocationId
+
+	UNION ALL
+
+	SELECT intCompanyLocationId		= -99
+		 , intEntityLocationId
 		 , intTaxGroupId
-		 , intEntityId
 		 , strLocationName
-	FROM dbo.tblEMEntityLocation WITH (NOLOCK)		
-) EL ON INVOICE.intShipToLocationId = EL.intEntityLocationId
-	AND INVOICE.intEntityCustomerId = EL.intEntityId
+	FROM dbo.tblEMEntityLocation WITH (NOLOCK)
+) LOCATIONS
 LEFT JOIN (
 	SELECT TG.intTaxGroupId
 		 , strTaxGroup		= TG.strDescription
@@ -55,4 +45,4 @@ LEFT JOIN (
 			 , strTaxClass			
 		FROM dbo.tblSMTaxClass WITH (NOLOCK)
 	) TCC ON TC.intTaxClassId = TCC.intTaxClassId
-) TAX ON TAX.intTaxGroupId = CASE WHEN ISNULL(INVOICE.intFreightTermId, 0) <> 0 AND ISNULL(FREIGHT.strFobPoint, '') = 'Destination' THEN EL.intTaxGroupId ELSE COMPANY.intTaxGroupId END
+) TAX ON TAX.intTaxGroupId = LOCATIONS.intTaxGroupId
