@@ -5919,6 +5919,8 @@
     <Build Include="dbo\Stored Procedures\uspTFGetUncommonField.sql" />
     <Build Include="dbo\Stored Procedures\uspMFAddDefaultValuesToManufacturingProcess.sql" />
     <Build Include="dbo\Views\vyuRKGetM2MConfigurationMapping.sql" />
+    <Build Include="dbo\Functions\fnFormatNumber.sql" />
+    <Build Include="dbo\Functions\fnRTrim.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
