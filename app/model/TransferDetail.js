@@ -69,6 +69,7 @@ Ext.define('Inventory.model.TransferDetail', {
         { name: 'dblTare', type: 'float', defaultValue: 0.00, allowNull: true },
         { name: 'intNewLotStatusId', type: 'int', allowNull: true },
         { name: 'strNewLotStatus', type: 'string' },
+        { name: 'strLotCondition', type: 'string' },
         { name: 'intGrossNetUOMId', type: 'int', allowNull: true },
         { name: 'strGrossNetUOM', type: 'string' },
         { name: 'dblGrossNetUnitQty', type: 'float', allowNull: true },

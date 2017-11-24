@@ -1163,6 +1163,18 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                             displayField: 'strSecondaryStatus',
                                                             valueField: 'strSecondaryStatus'
                                                         }
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colLotCondition',
+                                                        dataIndex: 'string',
+                                                        text: 'Condition',
+                                                        editor: {
+                                                            xtype: 'combobox',
+                                                            itemId: 'cboLotCondition',
+                                                            displayField: 'strDescription',
+                                                            valueField: 'strDescription'
+                                                        }
                                                     }
                                                 ],
                                                 plugins: [
