@@ -68,8 +68,11 @@ IF EXISTS(SELECT NULL FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId AND IS
 -- 16. "Load Schedule"
 IF EXISTS(SELECT NULL FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId AND ISNULL([intLoadId], 0) <> 0)
 	RETURN 16
-						
-	
+
+-- 18. "CF Invoice"						
+-- 18. "Ticket Management"
+IF EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE [intInvoiceId] = @InvoiceId AND ISNULL([intTicketId], 0) <> 0)
+	RETURN 18	
 
 	RETURN @SourceId
 END
