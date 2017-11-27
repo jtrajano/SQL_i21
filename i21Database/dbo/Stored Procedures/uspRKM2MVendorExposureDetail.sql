@@ -5,7 +5,7 @@
                   @intPriceUOMId int = null,
                   @intCurrencyUOMId int= null,
                   @dtmTransactionDateUpTo datetime= null,
-                  @strRateType nvarchar(50)= null,
+                  @strRateType nvarchar(200)= null,
                   @intCommodityId int=Null,
                   @intLocationId int= null,
                   @intMarketZoneId int= null,
@@ -19,25 +19,25 @@ DECLARE @tblFinalDetail TABLE (
        ,intConcurrencyId INT
        ,intContractHeaderId INT
        ,intContractDetailId INT
-       ,strContractOrInventoryType NVARCHAR(50) COLLATE Latin1_General_CI_AS
-       ,strContractSeq NVARCHAR(50) COLLATE Latin1_General_CI_AS
-       ,strEntityName NVARCHAR(50) COLLATE Latin1_General_CI_AS
+       ,strContractOrInventoryType NVARCHAR(200) COLLATE Latin1_General_CI_AS
+       ,strContractSeq NVARCHAR(200) COLLATE Latin1_General_CI_AS
+       ,strEntityName NVARCHAR(200) COLLATE Latin1_General_CI_AS
        ,intEntityId INT
        ,intFutureMarketId INT
-       ,strFutMarketName NVARCHAR(50) COLLATE Latin1_General_CI_AS
+       ,strFutMarketName NVARCHAR(200) COLLATE Latin1_General_CI_AS
        ,intFutureMonthId INT
-       ,strFutureMonth NVARCHAR(50) COLLATE Latin1_General_CI_AS
+       ,strFutureMonth NVARCHAR(200) COLLATE Latin1_General_CI_AS
        ,dblOpenQty NUMERIC(24, 10)
-       ,strCommodityCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
+       ,strCommodityCode NVARCHAR(200) COLLATE Latin1_General_CI_AS
        ,intCommodityId INT
        ,intItemId INT
-       ,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
-       ,strOrgin NVARCHAR(50) COLLATE Latin1_General_CI_AS
-       ,strPosition NVARCHAR(50) COLLATE Latin1_General_CI_AS
-       ,strPeriod NVARCHAR(50) COLLATE Latin1_General_CI_AS
-       ,strPriOrNotPriOrParPriced NVARCHAR(50) COLLATE Latin1_General_CI_AS
+       ,strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS
+       ,strOrgin NVARCHAR(200) COLLATE Latin1_General_CI_AS
+       ,strPosition NVARCHAR(200) COLLATE Latin1_General_CI_AS
+       ,strPeriod NVARCHAR(200) COLLATE Latin1_General_CI_AS
+       ,strPriOrNotPriOrParPriced NVARCHAR(200) COLLATE Latin1_General_CI_AS
        ,intPricingTypeId INT
-       ,strPricingType NVARCHAR(50) COLLATE Latin1_General_CI_AS
+       ,strPricingType NVARCHAR(200) COLLATE Latin1_General_CI_AS
        ,dblContractBasis NUMERIC(24, 10)
        ,dblFutures NUMERIC(24, 10)
        ,dblCash NUMERIC(24, 10)

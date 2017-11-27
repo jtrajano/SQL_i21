@@ -5908,6 +5908,7 @@
     <Build Include="dbo\Stored Procedures\uspICUpdateItemPricing.sql" />
     <Build Include="dbo\Stored Procedures\uspMFAddDefaultValuesToManufacturingProcess.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetBrokerageCommission.sql" />
+    <Build Include="dbo\Views\vyuRKGetPurchaseInventory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
