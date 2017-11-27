@@ -30,7 +30,7 @@ DECLARE  @dtmDateTo					AS DATETIME
 		,@ysnPrintCreditBalance		AS BIT
 		,@ysnIncludeBudget			AS BIT
 		,@ysnPrintOnlyPastDue		AS BIT
-		,@ysnExcludeInactiveCustomers AS BIT
+		,@ysnActiveCustomers AS BIT
 		,@xmlDocumentId				AS INT
 		,@query						AS NVARCHAR(MAX)
 		,@filter					AS NVARCHAR(MAX) = ''
@@ -123,9 +123,9 @@ SELECT @ysnPrintOnlyPastDue = [from]
 FROM @temp_xml_table
 WHERE [fieldname] = 'ysnPrintOnlyPastDue'
 
-SELECT @ysnExcludeInactiveCustomers = [from]
+SELECT @ysnActiveCustomers = [from]
 FROM @temp_xml_table
-WHERE [fieldname] = 'ysnExcludeInactiveCustomers'
+WHERE [fieldname] = 'ysnActiveCustomers'
 
 SELECT @strStatementFormat = CASE WHEN ISNULL([from], '') = '' THEN 'Open Item' ELSE [from] END
 FROM @temp_xml_table
@@ -157,7 +157,7 @@ IF @strStatementFormat = 'Balance Forward'
 			, @ysnPrintCreditBalance		= @ysnPrintCreditBalance
 			, @ysnIncludeBudget				= @ysnIncludeBudget
 			, @ysnPrintOnlyPastDue			= @ysnPrintOnlyPastDue
-			, @ysnExcludeInactiveCustomers	= @ysnExcludeInactiveCustomers
+			, @ysnActiveCustomers			= @ysnActiveCustomers
 			, @ysnPrintFromCF				= 0
 			, @strCustomerNumber			= @strCustomerNumber
 			, @strAccountStatusCode			= @strAccountStatusCode
@@ -173,7 +173,7 @@ ELSE IF ISNULL(@strStatementFormat, 'Open Item') IN ('Open Item', 'Running Balan
 		    , @ysnPrintCreditBalance		= @ysnPrintCreditBalance
 		    , @ysnIncludeBudget				= @ysnIncludeBudget
 		    , @ysnPrintOnlyPastDue			= @ysnPrintOnlyPastDue
-			, @ysnExcludeInactiveCustomers	= @ysnExcludeInactiveCustomers
+			, @ysnActiveCustomers			= @ysnActiveCustomers
 		    , @strCustomerNumber			= @strCustomerNumber
 		    , @strAccountStatusCode			= @strAccountStatusCode
 		    , @strLocationName				= @strLocationName
@@ -189,7 +189,7 @@ ELSE IF @strStatementFormat = 'Payment Activity'
 		    , @ysnPrintCreditBalance		= @ysnPrintCreditBalance
 		    , @ysnIncludeBudget				= @ysnIncludeBudget
 		    , @ysnPrintOnlyPastDue			= @ysnPrintOnlyPastDue
-			, @ysnExcludeInactiveCustomers	= @ysnExcludeInactiveCustomers
+			, @ysnActiveCustomers			= @ysnActiveCustomers
 		    , @strCustomerNumber			= @strCustomerNumber
 		    , @strAccountStatusCode			= @strAccountStatusCode
 		    , @strLocationName				= @strLocationName
