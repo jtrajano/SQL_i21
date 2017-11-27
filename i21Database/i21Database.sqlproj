@@ -5876,6 +5876,11 @@
     <Build Include="dbo\Views\vyuRKGetM2MConfigurationMapping.sql" />
     <Build Include="dbo\Views\vyuSMTaxableByOtherTaxes.sql" />
     <Build Include="dbo\Functions\fnFormatNumber.sql" />
+    <Build Include="dbo\Functions\fnRTrim.sql" />
+    <Build Include="dbo\Functions\fnGetItemInTransitCostingOnUnpostErrors.sql" />
+    <Build Include="dbo\Stored Procedures\uspICValidateInTransitCostingOnUnpost.sql" />
+    <Build Include="dbo\Functions\fnVRGetRebateRate.sql" />
+    <Build Include="dbo\Views\vyuLGGetShipmentContainerContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
