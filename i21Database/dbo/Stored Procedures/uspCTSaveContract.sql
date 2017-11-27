@@ -34,6 +34,7 @@ BEGIN TRY
 			@ysnSlice					BIT,
 			@dblLotsFixed				NUMERIC(18,6),
 			@dblNoOfLots				NUMERIC(18,6),
+			@dblCorrectNetWeight		NUMERIC(18,6),
 			@intPriceFixationId			INT
 
 	SELECT	@ysnMultiplePriceFixation	=	ysnMultiplePriceFixation,
@@ -118,9 +119,11 @@ BEGIN TRY
 		FROM	tblCTContractDetail 
 		WHERE	intContractDetailId =	@intContractDetailId 
 		
-		IF ISNULL(@intNetWeightUOMId,0) > 0 AND @dblNetWeight IS NULL
+		SELECT @dblCorrectNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId,intNetWeightUOMId,dblQuantity) FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
+
+		IF ISNULL(@intNetWeightUOMId,0) > 0 AND (@dblNetWeight IS NULL OR @dblNetWeight <> @dblCorrectNetWeight)
 		BEGIN
-			UPDATE tblCTContractDetail SET dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId,intNetWeightUOMId,dblQuantity) WHERE intContractDetailId = @intContractDetailId
+			UPDATE tblCTContractDetail SET dblNetWeight = @dblCorrectNetWeight WHERE intContractDetailId = @intContractDetailId
 		END
 
 		EXEC	uspCTSequencePriceChanged @intContractDetailId,null,'Sequence'
