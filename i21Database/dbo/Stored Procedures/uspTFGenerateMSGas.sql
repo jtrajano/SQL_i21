@@ -99,9 +99,7 @@ BEGIN TRY
 			, [endgroup] NVARCHAR(50)
 			, [datatype] NVARCHAR(50))
 
-		DECLARE @DateFrom DATETIME
-		, @DateTo DATETIME
-		, @TaxAuthorityId INT
+		DECLARE @TaxAuthorityId INT
 		, @Guid NVARCHAR(100)
 
 		DECLARE @transaction TABLE(
