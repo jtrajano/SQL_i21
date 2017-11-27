@@ -6,18 +6,14 @@
 AS
 BEGIN
 
-DECLARE @dtmBeginUtc DATETIME
-	   ,@dtmEndUtc DATETIME
-	   ,@dtmBeginLoc DATETIME
-	   ,@dtmEndLoc DATETIME
+DECLARE @dtmBegin DATETIME
+	   ,@dtmEnd DATETIME
 	   ,@dtmPay DATETIME
 	   ,@xmlDepartments XML
 
 /* Localize Parameters for Optimal Performance */
-SELECT @dtmBeginUtc		= @dtmBeginDate
-	  ,@dtmEndUtc		= @dtmEndDate
-	  ,@dtmBeginLoc		= DATEADD(mi, DATEDIFF(mi, GETUTCDATE(), GETDATE()), @dtmBeginDate)
-	  ,@dtmEndLoc		= DATEADD(mi, DATEDIFF(mi, GETUTCDATE(), GETDATE()), @dtmEndDate)
+SELECT @dtmBegin	= @dtmBeginDate
+	  ,@dtmEnd		= @dtmEndDate
 	  ,@xmlDepartments  = CAST('<A>'+ REPLACE(@strDepartmentIds, ',', '</A><A>')+ '</A>' AS XML)
 
 --Parse the Departments Parameter to Temporary Table
@@ -51,8 +47,8 @@ WHERE T.ysnApproved = 1
 	AND T.intPayGroupDetailId IS NULL
 	AND T.dblHours > 0
 	AND T.intEmployeeDepartmentId IN (SELECT intDepartmentId FROM #tmpDepartments)
-	AND CAST(FLOOR(CAST(T.dtmDateIn AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBeginUtc,T.dtmDateIn) AS FLOAT)) AS DATETIME)
-	AND CAST(FLOOR(CAST(T.dtmDateOut AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEndUtc,T.dtmDateOut) AS FLOAT)) AS DATETIME)
+	AND CAST(FLOOR(CAST(T.dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,T.dtmDate) AS FLOAT)) AS DATETIME)
+	AND CAST(FLOOR(CAST(T.dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,T.dtmDate) AS FLOAT)) AS DATETIME)
 GROUP BY
 	T.intEntityEmployeeId
 	,T.intEmployeeEarningId
@@ -80,8 +76,8 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 		WHERE (intEmployeeEarningId = @intEmployeeEarningId OR strCalculationType IN ('Overtime', 'Shift Differential'))
 			AND intDepartmentId = @intEmployeeDepartmentId
 			AND intEntityEmployeeId = @intEntityEmployeeId
-			AND dtmDateFrom >= CAST(FLOOR(CAST(@dtmBeginLoc AS FLOAT)) AS DATETIME) 
-			AND dtmDateFrom <= CAST(FLOOR(CAST(@dtmEndLoc AS FLOAT)) AS DATETIME)
+			AND dtmDateFrom >= CAST(FLOOR(CAST(@dtmBegin AS FLOAT)) AS DATETIME) 
+			AND dtmDateFrom <= CAST(FLOOR(CAST(@dtmEnd AS FLOAT)) AS DATETIME)
 			AND intSource = 0
 
 		/* Insert Regular Hours To Pay Group Detail */
@@ -114,8 +110,8 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 			,TC.dblRegularHours
 			,EE.dblRateAmount
 			,CASE WHEN (EE.strCalculationType IN ('Fixed Amount')) THEN EE.dblRateAmount ELSE ROUND(TC.dblRegularHours * EE.dblRateAmount, 2) END
-			,CAST(FLOOR(CAST(@dtmBeginLoc AS FLOAT)) AS DATETIME)
-			,CAST(FLOOR(CAST(@dtmEndLoc AS FLOAT)) AS DATETIME)
+			,CAST(FLOOR(CAST(@dtmBegin AS FLOAT)) AS DATETIME)
+			,CAST(FLOOR(CAST(@dtmEnd AS FLOAT)) AS DATETIME)
 			,3
 			,1
 			,1
@@ -163,8 +159,8 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 			,TCE.dblOvertimeHours
 			,EL.dblRateAmount 
 			,ROUND(TCE.dblOvertimeHours * EL.dblRateAmount, 2)
-			,CAST(FLOOR(CAST(@dtmBeginLoc AS FLOAT)) AS DATETIME)
-			,CAST(FLOOR(CAST(@dtmEndLoc AS FLOAT)) AS DATETIME)
+			,CAST(FLOOR(CAST(@dtmBegin AS FLOAT)) AS DATETIME)
+			,CAST(FLOOR(CAST(@dtmEnd AS FLOAT)) AS DATETIME)
 			,3
 			,1
 			,1
@@ -224,8 +220,8 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 										AND TCR.intEntityEmployeeId = TC.intEntityEmployeeId
 										AND TCR.intEmployeeEarningId = TC.intEmployeeEarningId
 										AND TCR.intEmployeeDepartmentId = TC.intEmployeeDepartmentId
-										AND CAST(FLOOR(CAST(TCR.dtmDateIn AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBeginUtc,TCR.dtmDateIn) AS FLOAT)) AS DATETIME)
-										AND CAST(FLOOR(CAST(TCR.dtmDateOut AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEndUtc,TCR.dtmDateOut) AS FLOAT)) AS DATETIME))
+										AND CAST(FLOOR(CAST(TCR.dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,TCR.dtmDate) AS FLOAT)) AS DATETIME)
+										AND CAST(FLOOR(CAST(TCR.dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,TCR.dtmDate) AS FLOAT)) AS DATETIME))
 			FROM
 				tblPRTimecard TC LEFT JOIN tblPREmployeeEarning EE
 				ON TC.intEmployeeEarningId = EE.intEmployeeEarningId
@@ -234,8 +230,8 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 				AND TC.dblHours > 0
 				AND TC.intEmployeeEarningId = @intEmployeeEarningId
 				AND TC.intEmployeeDepartmentId = @intEmployeeDepartmentId
-				AND CAST(FLOOR(CAST(TC.dtmDateIn AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBeginUtc,TC.dtmDateIn) AS FLOAT)) AS DATETIME)
-				AND CAST(FLOOR(CAST(TC.dtmDateOut AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEndUtc,TC.dtmDateOut) AS FLOAT)) AS DATETIME)
+				AND CAST(FLOOR(CAST(TC.dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,TC.dtmDate) AS FLOAT)) AS DATETIME)
+				AND CAST(FLOOR(CAST(TC.dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,TC.dtmDate) AS FLOAT)) AS DATETIME)
 			GROUP BY 
 				TC.intTimecardId
 				,TC.intEntityEmployeeId
