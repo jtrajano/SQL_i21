@@ -54,6 +54,7 @@ SELECT
 	,CD.strERPPONumber
 	,Shipment.strPosition
 	,Shipment.intLoadId
+	,CD.intCompanyLocationId
 FROM vyuLGInboundShipmentView Shipment
 LEFT JOIN tblLGLoad L ON Shipment.intLoadId = L.intLoadId
 LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = Shipment.intContractDetailId
@@ -102,6 +103,7 @@ SELECT
 	,CD.strERPPONumber
 	,Spot.strPosition
 	,L.intLoadId
+	,CD.intCompanyLocationId
 FROM vyuLGPickOpenInventoryLots Spot
 LEFT JOIN tblLGLoad L ON Spot.strLoadNumber = L.strLoadNumber
 LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = Spot.intContractDetailId
