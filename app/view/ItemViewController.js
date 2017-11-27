@@ -1945,9 +1945,11 @@ Ext.define('Inventory.view.ItemViewController', {
                     current.set('strCommodityCode', null);
                 }
             }
-            current.set('strCategory', null);
-            current.set('intCategoryId', null);
-
+            if(current.get('strType') !== record.get('strType')) {
+                current.set('strCategory', null);
+                current.set('intCategoryId', null);
+            }
+            
             current.get('HideDisableForComment');
         }
     },
