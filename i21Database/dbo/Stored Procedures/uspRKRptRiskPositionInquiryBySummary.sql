@@ -73,7 +73,7 @@ DECLARE @strRiskView nvarchar(100)
 SELECT TOP 1 @strRiskView = strRiskView from tblRKCompanyPreference
 if(@strRiskView='Trader/Elevator') 
 BEGIN
-INSERT INTO @temp (intRowNumber,strGroup,Selection,PriceStatus,strFutureMonth,strAccountNumber,dblNoOfContract,strTradeNo,TransactionDate,  
+INSERT INTO @temp (intRowNumber,Selection,PriceStatus,strFutureMonth,strAccountNumber,dblNoOfContract,strTradeNo,TransactionDate,  
      TranType, CustVendor,dblNoOfLot,dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId)
 Exec uspRKRiskPositionInquiry  @intCommodityId=@intCommodityId,  
         @intCompanyLocationId=@intCompanyLocationId,  
@@ -86,17 +86,17 @@ Exec uspRKRiskPositionInquiry  @intCommodityId=@intCommodityId,
 
 
 UPDATE @temp
-SET strGroup =  case when Selection IN ('Physical position / Differential cover', 'Physical position / Basis risk') then '01.'+ strGroup
-				     when Selection = 'Specialities & Low grades' then  '02.'+ strGroup 
-					 when Selection = 'Total speciality delta fixed' then  '03.'+ strGroup 
-					 when Selection = 'Terminal position (a. in lots )' then  '04.'+ strGroup 
-					 when Selection = 'Terminal position (Avg Long Price)' then  '05.'+ strGroup 
-					 when Selection LIKE ('%Terminal position (b.%') then  '06.'+ strGroup 
-					 when Selection = 'Delta options' then  '07.'+ strGroup 
-					 when Selection = 'F&O' then  '08.'+ strGroup 
-					 when Selection LIKE ('%Total F&O(b. in%') then  '09.'+ strGroup 
-					 when Selection IN ('Outright coverage', 'Net market risk') then  '10.'+ strGroup 
-					 when Selection IN ('Switch position', 'Futures required') then  '11.'+ strGroup 
+SET strGroup =  case when Selection IN ('Physical position / Differential cover', 'Physical position / Basis risk') then '01.'+ Selection
+				     when Selection = 'Specialities & Low grades' then  '02.'+ Selection 
+					 when Selection = 'Total speciality delta fixed' then  '03.'+ Selection 
+					 when Selection = 'Terminal position (a. in lots )' then  '04.'+ Selection 
+					 when Selection = 'Terminal position (Avg Long Price)' then  '05.'+ Selection 
+					 when Selection LIKE ('%Terminal position (b.%') then  '06.'+ Selection 
+					 when Selection = 'Delta options' then  '07.'+ Selection 
+					 when Selection = 'F&O' then  '08.'+ Selection 
+					 when Selection LIKE ('%Total F&O(b. in%') then  '09.'+ Selection 
+					 when Selection IN ('Outright coverage', 'Net market risk') then  '10.'+ Selection 
+					 when Selection IN ('Switch position', 'Futures required') then  '11.'+ Selection 
 					 end
 					 		
 SELECT  intRowNumber ,
