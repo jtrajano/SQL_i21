@@ -67,21 +67,17 @@ BEGIN TRY
 	FROM tblLGLoad
 	WHERE intLoadId = @intLoadId
 
-	--IF EXISTS (
-	--		SELECT TOP 1 1
-	--		FROM tblAPBillDetail BD
-	--		JOIN tblLGLoadDetail LD ON BD.intLoadDetailId = LD.intLoadDetailId
-	--		WHERE LD.intLoadId = @intLoadId
-	--		)
-	--BEGIN
-	--	DECLARE @ErrorMessage NVARCHAR(250)
-
-	--	SET @ErrorMessage = 'Voucher was already created for ' + @strLoadNumber;
-
-	--	RAISERROR (@ErrorMessage,16,1);
-
-	--	RETURN 0;
-	--END
+	IF EXISTS (
+			SELECT TOP 1 1
+			FROM tblAPBillDetail BD
+			JOIN tblLGLoadCost LC ON LC.intBillId = BD.intBillId
+			WHERE LC.intLoadId = @intLoadId
+			)
+	BEGIN
+		DECLARE @ErrorMessage NVARCHAR(250)
+		SET @ErrorMessage = 'Voucher was already created for other charges in ' + @strLoadNumber;
+		RAISERROR (@ErrorMessage,16,1);
+	END
 
 	SELECT @intAPAccount = ISNULL(intAPAccount, 0)
 	FROM tblSMCompanyLocation CL
@@ -234,39 +230,63 @@ BEGIN TRY
 
 			IF (@ysnInventoryCost = 1)
 			BEGIN
-				SELECT @intMinInventoryReceiptId = MIN(intInventoryReceiptId)
-				FROM @receiptData
-
-				WHILE ISNULL(@intMinInventoryReceiptId, 0) > 0
+				IF((SELECT COUNT(*) FROM @receiptData) > 0)
 				BEGIN
-					INSERT INTO @voucherDetailReceipt (
-						intInventoryReceiptType
-						,intInventoryReceiptItemId
-						,dblCost
-						)
-					SELECT intInventoryReceiptType = 2
-						,intInventoryReceiptItemId = intInventoryReceiptItemId
-						,dblCost = dblCost
+					SELECT @intMinInventoryReceiptId = MIN(intInventoryReceiptId)
 					FROM @receiptData
-					WHERE intInventoryReceiptId = @intMinInventoryReceiptId
 
-					INSERT INTO @voucherDetailReceiptCharge (intInventoryReceiptChargeId)
-					SELECT intInventoryReceiptChargeId
-					FROM tblICInventoryReceiptCharge
-					WHERE intInventoryReceiptId = @intMinInventoryReceiptId
+					WHILE ISNULL(@intMinInventoryReceiptId, 0) > 0
+					BEGIN
+						INSERT INTO @voucherDetailReceipt (
+							intInventoryReceiptType
+							,intInventoryReceiptItemId
+							,dblCost
+							)
+						SELECT intInventoryReceiptType = 2
+							,intInventoryReceiptItemId = intInventoryReceiptItemId
+							,dblCost = dblCost
+						FROM @receiptData
+						WHERE intInventoryReceiptId = @intMinInventoryReceiptId
+
+						INSERT INTO @voucherDetailReceiptCharge (intInventoryReceiptChargeId)
+						SELECT intInventoryReceiptChargeId
+						FROM tblICInventoryReceiptCharge
+						WHERE intInventoryReceiptId = @intMinInventoryReceiptId
+
+						INSERT INTO @VoucherDetailLoadNonInv
+						SELECT * FROM @VoucherDetailLoadNonInvAll WHERE intItemId = @intItemId
+
+						EXEC uspAPCreateBillData @userId = @intEntityUserSecurityId
+							,@vendorId = @intVendorEntityId
+							,@voucherDetailReceipt = @voucherDetailReceipt
+							--,@voucherDetailReceiptCharge = @voucherDetailReceiptCharge
+							,@voucherDetailLoadNonInv = @VoucherDetailLoadNonInv
+							,@billId = @intBillId OUTPUT
+
+						UPDATE tblLGLoadCost
+						SET intBillId = @intBillId
+						WHERE intLoadCostId IN (
+								SELECT intLoadCostId
+								FROM @voucherDetailData)
+
+						DELETE
+						FROM @VoucherDetailLoadNonInv
+
+						SELECT @intMinInventoryReceiptId = MIN(intInventoryReceiptId)
+						FROM @receiptData WHERE intInventoryReceiptId > @intMinInventoryReceiptId
+					END
+				END
+				ELSE 
+				BEGIN
+					DELETE FROM @VoucherDetailLoadNonInv
 
 					INSERT INTO @VoucherDetailLoadNonInv
 					SELECT * FROM @VoucherDetailLoadNonInvAll WHERE intItemId = @intItemId
-					
-					--SELECT * FROM @voucherDetailReceipt
-					--SELECT * FROM @voucherDetailReceiptCharge
-					--SELECT * FROM @VoucherDetailLoadNonInv
 
+					--SELECT * FROM @VoucherDetailLoadNonInv
 
 					EXEC uspAPCreateBillData @userId = @intEntityUserSecurityId
 						,@vendorId = @intVendorEntityId
-						,@voucherDetailReceipt = @voucherDetailReceipt
-						--,@voucherDetailReceiptCharge = @voucherDetailReceiptCharge
 						,@voucherDetailLoadNonInv = @VoucherDetailLoadNonInv
 						,@billId = @intBillId OUTPUT
 
@@ -276,19 +296,18 @@ BEGIN TRY
 							SELECT intLoadCostId
 							FROM @voucherDetailData)
 
+					UPDATE tblAPBillDetail 
+					SET intLoadId = @intLoadId 
+					WHERE intBillId = @intBillId
+
 					DELETE
 					FROM @VoucherDetailLoadNonInv
-
-					SELECT @intMinInventoryReceiptId = MIN(intInventoryReceiptId)
-					FROM @receiptData WHERE intInventoryReceiptId > @intMinInventoryReceiptId
 				END
 			END
 			ELSE
 			BEGIN
 				INSERT INTO @VoucherDetailLoadNonInv
 				SELECT * FROM @VoucherDetailLoadNonInvAll WHERE intItemId = @intItemId
-
-				--SELECT * FROM @VoucherDetailLoadNonInv
 
 				EXEC uspAPCreateBillData @userId = @intEntityUserSecurityId
 					,@vendorId = @intVendorEntityId
@@ -300,6 +319,10 @@ BEGIN TRY
 				WHERE intLoadCostId IN (
 						SELECT intLoadCostId
 						FROM @voucherDetailData)
+
+				UPDATE tblAPBillDetail 
+				SET intLoadId = @intLoadId 
+				WHERE intBillId = @intBillId
 
 				DELETE
 				FROM @VoucherDetailLoadNonInv
