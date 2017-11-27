@@ -5909,6 +5909,7 @@
     <Build Include="dbo\Stored Procedures\uspMFAddDefaultValuesToManufacturingProcess.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetBrokerageCommission.sql" />
     <Build Include="dbo\Views\vyuRKGetPurchaseInventory.sql" />
+    <Build Include="dbo\Tables\tblMFParentLotNumberPattern.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -2556,3 +2556,7 @@ BEGIN
 		,'ALPHABETICAL SEQUENCE'
 END
 GO
+UPDATE tblMFCompanyPreference
+SET intIRParentLotNumberPatternId = 0
+WHERE intIRParentLotNumberPatternId IS NULL
+GO
