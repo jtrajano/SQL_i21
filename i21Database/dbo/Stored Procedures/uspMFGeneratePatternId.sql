@@ -11,6 +11,11 @@
 	,@intEntityId INT = NULL
 	,@intShiftId INT = NULL
 	,@dtmDate DATETIME = NULL
+	,@strParentLotNumber NVARCHAR(50) = NULL
+	,@intInventoryReceiptId INT = NULL
+	,@intInventoryReceiptItemId INT = NULL
+	,@intInventoryReceiptItemLotId INT = NULL
+	,@intTransactionTypeId INT = NULL
 AS
 BEGIN
 	DECLARE @intSubPatternTypeId INT
@@ -39,6 +44,28 @@ BEGIN
 		,@dtmBusinessDate DATETIME
 		,@ysnPaddingZero BIT
 		,@ysnMaxSize BIT
+		,@intIRParentLotNumberPatternId INT
+
+	SELECT @intIRParentLotNumberPatternId = intIRParentLotNumberPatternId
+	FROM tblMFCompanyPreference
+
+	IF @intPatternCode = 78
+		AND @intTransactionTypeId = 4
+		AND @intIRParentLotNumberPatternId = 1
+	BEGIN
+		IF EXISTS (
+				SELECT *
+				FROM tblMFParentLotNumberPattern
+				WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
+				)
+		BEGIN
+			SELECT @strPatternString = strPatternString
+			FROM tblMFParentLotNumberPattern
+			WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
+
+			RETURN
+		END
+	END
 
 	IF OBJECT_ID('tempdb..##tblMFRecord') IS NOT NULL
 		DROP TABLE ##tblMFRecord
@@ -137,7 +164,7 @@ BEGIN
 				,5
 				)
 		BEGIN
-			SET @strPatternString = @strPatternString + @strSubPatternTypeDetail
+			SET @strPatternString = @strPatternString + Replace(@strSubPatternTypeDetail, '@strParentLotNumber', @strParentLotNumber)
 		END
 
 		IF @intSubPatternTypeId = 3
@@ -395,6 +422,22 @@ BEGIN
 		SELECT @intRecordId = MIN(intRecordId)
 		FROM @tblMFPatternDetail
 		WHERE intRecordId > @intRecordId
+	END
+
+	IF @intPatternCode = 78
+		AND @intTransactionTypeId = 4
+		AND @intIRParentLotNumberPatternId = 1
+	BEGIN
+		IF NOT EXISTS (
+				SELECT *
+				FROM tblMFParentLotNumberPattern
+				WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
+				)
+		BEGIN
+			INSERT INTO tblMFParentLotNumberPattern
+			SELECT @intInventoryReceiptItemId
+				,@strPatternString
+		END
 	END
 			--SELECT @strPatternString AS strPatternString
 END

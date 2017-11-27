@@ -2516,3 +2516,7 @@ FROM tblMFWorkOrder W
 JOIN tblMFManufacturingProcess MP ON W.intManufacturingProcessId = MP.intManufacturingProcessId
 WHERE intTransactionFrom IS NULL
 GO
+UPDATE tblMFCompanyPreference
+SET intIRParentLotNumberPatternId = 0
+WHERE intIRParentLotNumberPatternId IS NULL
+GO
