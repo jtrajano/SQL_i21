@@ -1,5 +1,5 @@
 ﻿DECLARE @strPatternString NVARCHAR(50)
-, @strPatternName NVARCHAR(50)
+	,@strPatternName NVARCHAR(50)
 	,@strDescription NVARCHAR(100)
 	,@intPatternId INT
 	,@strSubPatternTypeDetail0 NVARCHAR(50)
@@ -15,6 +15,7 @@
 	,@strSubPatternName3 NVARCHAR(50)
 	,@intSubPatternTypeId3 INT
 	,@intPatternCode INT
+	,@intCompanyLocationId INT
 
 SELECT @intSubPatternTypeId = 3
 
@@ -38,97 +39,112 @@ SELECT @strPatternName = N'Parent Lot Number'
 	,@strDescription = N'Parent Lot Number'
 	,@intPatternCode = 78
 
-INSERT dbo.tblMFPattern (
-	strPatternName
-	,strDescription
-	,intPatternCode
-	)
-SELECT strPatternName = @strPatternName
-	,strDescription = @strDescription
-	,strPatternCode = @intPatternCode
-WHERE NOT EXISTS (
-		SELECT *
-		FROM dbo.tblMFPattern
-		WHERE intPatternCode = @intPatternCode
-		)
+SELECT @intCompanyLocationId = MIN(intCompanyLocationId)
+FROM tblSMCompanyLocation
 
-SELECT @intPatternId = intPatternId
-FROM dbo.tblMFPattern
-WHERE intPatternCode = @intPatternCode
-
-INSERT dbo.tblMFPatternDetail (
-	intPatternId
-	,strSubPatternName
-	,intSubPatternTypeId
-	,intSubPatternSize
-	,strSubPatternTypeDetail
-	,strSubPatternFormat
-	,intOrdinalPosition
-	)
-SELECT intPatternId = @intPatternId
-	,strSubPatternName = @strSubPatternName
-	,intSubPatternTypeId = @intSubPatternTypeId
-	,intSubPatternSize = 1
-	,strSubPatternTypeDetail = @strSubPatternTypeDetail
-	,strSubPatternFormat = ''
-	,intOrdinalPosition = 1
-WHERE NOT EXISTS (
-		SELECT *
-		FROM dbo.tblMFPatternDetail
-		WHERE intPatternId = @intPatternId
-			AND strSubPatternName = @strSubPatternName
+WHILE @intCompanyLocationId IS NOT NULL
+BEGIN
+	INSERT dbo.tblMFPattern (
+		strPatternName
+		,strDescription
+		,intPatternCode
+		,intLocationId
 		)
+	SELECT strPatternName = @strPatternName
+		,strDescription = @strDescription
+		,strPatternCode = @intPatternCode
+		,intLocationId = @intCompanyLocationId
+	WHERE NOT EXISTS (
+			SELECT *
+			FROM dbo.tblMFPattern
+			WHERE intPatternCode = @intPatternCode
+				AND intLocationId = @intCompanyLocationId
+			)
 
-INSERT dbo.tblMFPatternDetail (
-	intPatternId
-	,strSubPatternName
-	,intSubPatternTypeId
-	,intSubPatternSize
-	,strSubPatternTypeDetail
-	,strSubPatternFormat
-	,intOrdinalPosition
-	)
-SELECT intPatternId = @intPatternId
-	,strSubPatternName = @strSubPatternName2
-	,intSubPatternTypeId = @intSubPatternTypeId2
-	,intSubPatternSize = 5
-	,strSubPatternTypeDetail = @strSubPatternTypeDetail2
-	,strSubPatternFormat = ''
-	,intOrdinalPosition = 2
-WHERE NOT EXISTS (
-		SELECT *
-		FROM dbo.tblMFPatternDetail
-		WHERE intPatternId = @intPatternId
-			AND strSubPatternName = @strSubPatternName2
-		)
+	SELECT @intPatternId = intPatternId
+	FROM dbo.tblMFPattern
+	WHERE intPatternCode = @intPatternCode
+		AND intLocationId = @intCompanyLocationId
 
-INSERT dbo.tblMFPatternDetail (
-	intPatternId
-	,strSubPatternName
-	,intSubPatternTypeId
-	,intSubPatternSize
-	,strSubPatternTypeDetail
-	,strSubPatternFormat
-	,intOrdinalPosition
-	,ysnPaddingZero
-	)
-SELECT intPatternId = @intPatternId
-	,strSubPatternName = @strSubPatternName3
-	,intSubPatternTypeId = @intSubPatternTypeId3
-	,intSubPatternSize = 3
-	,strSubPatternTypeDetail = @strSubPatternTypeDetail3
-	,strSubPatternFormat = ''
-	,intOrdinalPosition = 3
-	,ysnPaddingZero=0
-WHERE NOT EXISTS (
-		SELECT *
-		FROM dbo.tblMFPatternDetail
-		WHERE intPatternId = @intPatternId
-			AND strSubPatternName = @strSubPatternName3
+	INSERT dbo.tblMFPatternDetail (
+		intPatternId
+		,strSubPatternName
+		,intSubPatternTypeId
+		,intSubPatternSize
+		,strSubPatternTypeDetail
+		,strSubPatternFormat
+		,intOrdinalPosition
 		)
-Go
+	SELECT intPatternId = @intPatternId
+		,strSubPatternName = @strSubPatternName
+		,intSubPatternTypeId = @intSubPatternTypeId
+		,intSubPatternSize = 1
+		,strSubPatternTypeDetail = @strSubPatternTypeDetail
+		,strSubPatternFormat = ''
+		,intOrdinalPosition = 1
+	WHERE NOT EXISTS (
+			SELECT *
+			FROM dbo.tblMFPatternDetail
+			WHERE intPatternId = @intPatternId
+				AND strSubPatternName = @strSubPatternName
+			)
+
+	INSERT dbo.tblMFPatternDetail (
+		intPatternId
+		,strSubPatternName
+		,intSubPatternTypeId
+		,intSubPatternSize
+		,strSubPatternTypeDetail
+		,strSubPatternFormat
+		,intOrdinalPosition
+		)
+	SELECT intPatternId = @intPatternId
+		,strSubPatternName = @strSubPatternName2
+		,intSubPatternTypeId = @intSubPatternTypeId2
+		,intSubPatternSize = 5
+		,strSubPatternTypeDetail = @strSubPatternTypeDetail2
+		,strSubPatternFormat = ''
+		,intOrdinalPosition = 2
+	WHERE NOT EXISTS (
+			SELECT *
+			FROM dbo.tblMFPatternDetail
+			WHERE intPatternId = @intPatternId
+				AND strSubPatternName = @strSubPatternName2
+			)
+
+	INSERT dbo.tblMFPatternDetail (
+		intPatternId
+		,strSubPatternName
+		,intSubPatternTypeId
+		,intSubPatternSize
+		,strSubPatternTypeDetail
+		,strSubPatternFormat
+		,intOrdinalPosition
+		,ysnPaddingZero
+		)
+	SELECT intPatternId = @intPatternId
+		,strSubPatternName = @strSubPatternName3
+		,intSubPatternTypeId = @intSubPatternTypeId3
+		,intSubPatternSize = 3
+		,strSubPatternTypeDetail = @strSubPatternTypeDetail3
+		,strSubPatternFormat = ''
+		,intOrdinalPosition = 3
+		,ysnPaddingZero = 0
+	WHERE NOT EXISTS (
+			SELECT *
+			FROM dbo.tblMFPatternDetail
+			WHERE intPatternId = @intPatternId
+				AND strSubPatternName = @strSubPatternName3
+			)
+
+	SELECT @intCompanyLocationId = MIN(intCompanyLocationId)
+	FROM tblSMCompanyLocation
+	WHERE intCompanyLocationId > @intCompanyLocationId
+END
+GO
+
 DECLARE @strPatternString NVARCHAR(50)
-, @strPatternName NVARCHAR(50)
+	,@strPatternName NVARCHAR(50)
 	,@strDescription NVARCHAR(100)
 	,@intPatternId INT
 	,@strSubPatternTypeDetail0 NVARCHAR(50)
@@ -140,12 +156,13 @@ DECLARE @strPatternString NVARCHAR(50)
 	,@strSubPatternTypeDetail2 NVARCHAR(50)
 	,@strSubPatternName2 NVARCHAR(50)
 	,@intSubPatternTypeId2 INT
-		,@strSubPatternTypeDetail3 NVARCHAR(50)
+	,@strSubPatternTypeDetail3 NVARCHAR(50)
 	,@strSubPatternName3 NVARCHAR(50)
 	,@intSubPatternTypeId3 INT
 	,@intPatternCode INT
+	,@intCompanyLocationId INT
 
-SELECT @intSubPatternTypeId =1
+SELECT @intSubPatternTypeId = 1
 
 SELECT @strSubPatternName = 'Part1'
 
@@ -167,93 +184,105 @@ SELECT @strPatternName = N'Lot Number'
 	,@strDescription = N'Lot Number'
 	,@intPatternCode = 24
 
-INSERT dbo.tblMFPattern (
-	strPatternName
-	,strDescription
-	,intPatternCode
-	)
-SELECT strPatternName = @strPatternName
-	,strDescription = @strDescription
-	,strPatternCode = @intPatternCode
-WHERE NOT EXISTS (
-		SELECT *
-		FROM dbo.tblMFPattern
-		WHERE intPatternCode = @intPatternCode
+SELECT @intCompanyLocationId = MIN(intCompanyLocationId)
+FROM tblSMCompanyLocation
+
+WHILE @intCompanyLocationId IS NOT NULL
+BEGIN
+	INSERT dbo.tblMFPattern (
+		strPatternName
+		,strDescription
+		,intPatternCode
+		,intLocationId
 		)
+	SELECT strPatternName = @strPatternName
+		,strDescription = @strDescription
+		,strPatternCode = @intPatternCode
+		,intLocationId = @intCompanyLocationId
+	WHERE NOT EXISTS (
+			SELECT *
+			FROM dbo.tblMFPattern
+			WHERE intPatternCode = @intPatternCode
+				AND intLocationId = @intCompanyLocationId
+			)
 
-SELECT @intPatternId = intPatternId
-FROM dbo.tblMFPattern
-WHERE intPatternCode = @intPatternCode
+	SELECT @intPatternId = intPatternId
+	FROM dbo.tblMFPattern
+	WHERE intPatternCode = @intPatternCode
+		AND intLocationId = @intCompanyLocationId
 
-INSERT dbo.tblMFPatternDetail (
-	intPatternId
-	,strSubPatternName
-	,intSubPatternTypeId
-	,intSubPatternSize
-	,strSubPatternTypeDetail
-	,strSubPatternFormat
-	,intOrdinalPosition
-	)
-SELECT intPatternId = @intPatternId
-	,strSubPatternName = @strSubPatternName
-	,intSubPatternTypeId = @intSubPatternTypeId
-	,intSubPatternSize = 1
-	,strSubPatternTypeDetail = @strSubPatternTypeDetail
-	,strSubPatternFormat = ''
-	,intOrdinalPosition = 1
-WHERE NOT EXISTS (
-		SELECT *
-		FROM dbo.tblMFPatternDetail
-		WHERE intPatternId = @intPatternId
-			AND strSubPatternName = @strSubPatternName
+	INSERT dbo.tblMFPatternDetail (
+		intPatternId
+		,strSubPatternName
+		,intSubPatternTypeId
+		,intSubPatternSize
+		,strSubPatternTypeDetail
+		,strSubPatternFormat
+		,intOrdinalPosition
 		)
+	SELECT intPatternId = @intPatternId
+		,strSubPatternName = @strSubPatternName
+		,intSubPatternTypeId = @intSubPatternTypeId
+		,intSubPatternSize = 1
+		,strSubPatternTypeDetail = @strSubPatternTypeDetail
+		,strSubPatternFormat = ''
+		,intOrdinalPosition = 1
+	WHERE NOT EXISTS (
+			SELECT *
+			FROM dbo.tblMFPatternDetail
+			WHERE intPatternId = @intPatternId
+				AND strSubPatternName = @strSubPatternName
+			)
 
-INSERT dbo.tblMFPatternDetail (
-	intPatternId
-	,strSubPatternName
-	,intSubPatternTypeId
-	,intSubPatternSize
-	,strSubPatternTypeDetail
-	,strSubPatternFormat
-	,intOrdinalPosition
-	)
-SELECT intPatternId = @intPatternId
-	,strSubPatternName = @strSubPatternName3
-	,intSubPatternTypeId = @intSubPatternTypeId3
-	,intSubPatternSize = 1
-	,strSubPatternTypeDetail = @strSubPatternTypeDetail3
-	,strSubPatternFormat = ''
-	,intOrdinalPosition = 2
-WHERE NOT EXISTS (
-		SELECT *
-		FROM dbo.tblMFPatternDetail
-		WHERE intPatternId = @intPatternId
-			AND strSubPatternName = @strSubPatternName3
+	INSERT dbo.tblMFPatternDetail (
+		intPatternId
+		,strSubPatternName
+		,intSubPatternTypeId
+		,intSubPatternSize
+		,strSubPatternTypeDetail
+		,strSubPatternFormat
+		,intOrdinalPosition
 		)
+	SELECT intPatternId = @intPatternId
+		,strSubPatternName = @strSubPatternName3
+		,intSubPatternTypeId = @intSubPatternTypeId3
+		,intSubPatternSize = 1
+		,strSubPatternTypeDetail = @strSubPatternTypeDetail3
+		,strSubPatternFormat = ''
+		,intOrdinalPosition = 2
+	WHERE NOT EXISTS (
+			SELECT *
+			FROM dbo.tblMFPatternDetail
+			WHERE intPatternId = @intPatternId
+				AND strSubPatternName = @strSubPatternName3
+			)
 
-INSERT dbo.tblMFPatternDetail (
-	intPatternId
-	,strSubPatternName
-	,intSubPatternTypeId
-	,intSubPatternSize
-	,strSubPatternTypeDetail
-	,strSubPatternFormat
-	,intOrdinalPosition
-	,ysnPaddingZero 
-	)
-SELECT intPatternId = @intPatternId
-	,strSubPatternName = @strSubPatternName2
-	,intSubPatternTypeId = @intSubPatternTypeId2
-	,intSubPatternSize = 9
-	,strSubPatternTypeDetail = @strSubPatternTypeDetail2
-	,strSubPatternFormat = ''
-	,intOrdinalPosition = 3
-	,ysnPaddingZero=0
-WHERE NOT EXISTS (
-		SELECT *
-		FROM dbo.tblMFPatternDetail
-		WHERE intPatternId = @intPatternId
-			AND strSubPatternName = @strSubPatternName2
+	INSERT dbo.tblMFPatternDetail (
+		intPatternId
+		,strSubPatternName
+		,intSubPatternTypeId
+		,intSubPatternSize
+		,strSubPatternTypeDetail
+		,strSubPatternFormat
+		,intOrdinalPosition
+		,ysnPaddingZero
 		)
+	SELECT intPatternId = @intPatternId
+		,strSubPatternName = @strSubPatternName2
+		,intSubPatternTypeId = @intSubPatternTypeId2
+		,intSubPatternSize = 9
+		,strSubPatternTypeDetail = @strSubPatternTypeDetail2
+		,strSubPatternFormat = ''
+		,intOrdinalPosition = 3
+		,ysnPaddingZero = 0
+	WHERE NOT EXISTS (
+			SELECT *
+			FROM dbo.tblMFPatternDetail
+			WHERE intPatternId = @intPatternId
+				AND strSubPatternName = @strSubPatternName2
+			)
 
-
+	SELECT @intCompanyLocationId = MIN(intCompanyLocationId)
+	FROM tblSMCompanyLocation
+	WHERE intCompanyLocationId > @intCompanyLocationId
+END
