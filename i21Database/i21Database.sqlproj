@@ -5881,6 +5881,7 @@
     <Build Include="dbo\Stored Procedures\uspICValidateInTransitCostingOnUnpost.sql" />
     <Build Include="dbo\Functions\fnVRGetRebateRate.sql" />
     <Build Include="dbo\Views\vyuLGGetShipmentContainerContract.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1p_CompanyPreferenceOption.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
