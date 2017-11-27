@@ -16,7 +16,10 @@ AS
 			@NewInvoiceId			INT,
 			@newComment				NVARCHAR(500) = NULL,
 			@intServiceChargeId		INT,
-			@intServiceChargeIdByCB INT
+			@intServiceChargeIdByCB INT,
+			@intCompTermsId			INT
+
+	SELECT TOP 1 @intCompTermsId = intServiceChargeTermId FROM tblARCompanyPreference
 
 	EXEC [dbo].[uspARGetDefaultComment] @intCompanyLocationId, @intEntityCustomerId, 'Invoice', 'Service Charge', @newComment OUT
 
@@ -104,7 +107,7 @@ AS
 				 @intEntityCustomerId
 				,NULL --[strInvoiceOriginId]
 				,ISNULL(@dtmAsOfDate, @dateNow)
-				,[dbo].fnGetDueDateBasedOnTerm(ISNULL(@dtmAsOfDate, @dateNow), intTermsId)
+				,[dbo].fnGetDueDateBasedOnTerm(ISNULL(@dtmAsOfDate, @dateNow), ISNULL(@intCompTermsId, intTermsId))
 				,ISNULL(@dtmAsOfDate, @dateNow)
 				,@intCurrencyId
 				,@intCompanyLocationId
