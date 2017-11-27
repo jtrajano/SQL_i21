@@ -58,6 +58,8 @@ SELECT
 	 , B.strAdditionalInfo
 	 , O.strSource 
 	 , O.strFilterId
+	 , FreightTerms.intFreightTermId
+	 , FreightTerms.strFreightTerm
 FROM tblPOPurchase A
 INNER JOIN  tblPOPurchaseDetail B 
 	ON A.intPurchaseId = B.intPurchaseId
@@ -88,4 +90,6 @@ LEFT JOIN tblCTContractHeader N
 	ON M.intContractHeaderId = N.intContractHeaderId
 LEFT JOIN vyuPOPurchaseDetailReceiptNumber O 
 	ON B.intPurchaseDetailId = O.intPurchaseDetailId
+LEFT JOIN tblSMFreightTerms FreightTerms
+	ON FreightTerms.intFreightTermId = A.intFreightTermId
 GO

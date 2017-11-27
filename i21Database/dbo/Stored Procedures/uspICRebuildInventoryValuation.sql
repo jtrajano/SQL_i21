@@ -2323,7 +2323,8 @@ BEGIN
 						@intTransactionId
 						,@strBatchId
 						,@intEntityUserSecurityId
-						,@intTransactionTypeId			
+						,@intTransactionTypeId
+						,1
 						,@intItemId-- This is only used when rebuilding the stocks. 	
 				
 					IF @intReturnId <> 0 

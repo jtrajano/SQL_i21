@@ -51,6 +51,13 @@ SELECT	TOP 1
 FROM	tblICItemUOM ItemUOM
 WHERE	intItemUOMId = @intItemUOMId
 
+-- Validate Functional Currency
+IF ISNULL(@dblForexRate , 0) = 0
+BEGIN
+	EXEC uspICRaiseError 80196, @strTransactionId
+	GOTO _EXIT
+END
+
 INSERT INTO dbo.tblICInventoryTransaction (
 		[intItemId] 
 		,[intItemLocationId]
@@ -147,3 +154,5 @@ BEGIN
 		,@intEntityUserSecurityId 
 		,NULL  
 END
+
+_EXIT:

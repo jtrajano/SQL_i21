@@ -32,7 +32,7 @@ SELECT	  CD.intContractDetailId
 		, Item.strLotTracking
 		, Item.intCommodityId
 		, CAST(ISNULL(CU.intMainCurrencyId,0) AS BIT) AS ysnSubCurrency
-		, SL.intCompanyLocationSubLocationId
+		, SL.intCompanyLocationSubLocationId 
 		, SL.strSubLocationName
 		, STL.intStorageLocationId
 		, STL.strName AS strStorageLocationName
@@ -40,6 +40,51 @@ SELECT	  CD.intContractDetailId
 		, CD.intRateTypeId
 		, RT.strCurrencyExchangeRateType
 		, CD.dblRate
+		, ysnBundleItem = CAST(CASE WHEN Item.strType = 'Bundle' THEN 1 ELSE 0 END AS BIT) 
+		, Item.ysnIsBasket
+		, CL.strLocationName
+		, CH.strEntityNumber
+		, dblItemUOMCF = ISNULL(IU.dblUnitQty, 0)
+		, dblAllocatedQty = ISNULL(PA.dblAllocatedQty,0) + ISNULL(SA.dblAllocatedQty,0)	
+		, dblPricePerUnit = 
+					-- AD.dblSeqPrice
+					CASE 
+						WHEN	CD.ysnUseFXPrice = 1 
+								AND CD.intCurrencyExchangeRateId IS NOT NULL 
+								AND CD.dblRate IS NOT NULL 
+								AND CD.intFXPriceUOMId IS NOT NULL 
+						THEN 
+							dbo.fnCTConvertQtyToTargetItemUOM(
+								CD.intFXPriceUOMId
+								,ISNULL(CD.intPriceItemUOMId,CD.intAdjItemUOMId)
+								,(
+									CD.dblCashPrice / CASE WHEN CU.ysnSubCurrency = 1 THEN CASE WHEN ISNULL(intCent,0) = 0 THEN 1 ELSE intCent END ELSE 1 END			
+								)
+							) * CD.dblRate
+
+						ELSE
+							CD.dblCashPrice
+					END 
+					* 
+					-- AD.dblQtyToPriceUOMConvFactor
+					CASE 
+						WHEN	CD.ysnUseFXPrice = 1 
+								AND CD.intCurrencyExchangeRateId IS NOT NULL 
+								AND CD.dblRate IS NOT NULL 
+								AND CD.intFXPriceUOMId IS NOT NULL 
+						THEN 
+							dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intFXPriceUOMId,1)
+						ELSE
+							dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,ISNULL(CD.intPriceItemUOMId,CD.intAdjItemUOMId),1)
+					END 
+		, CH.strGrade
+		, CH.intGradeId
+		, CH.strWeight
+		, CH.intWeightId
+		, CD.intCurrencyId
+		, Terms.intFreightTermId
+		, Terms.strFreightTerm
+
 FROM	tblCTContractDetail CD	
 	CROSS APPLY tblCTCompanyPreference CP
 	LEFT JOIN vyuCTContractHeaderView CH ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -49,8 +94,21 @@ FROM	tblCTContractDetail CD
 	LEFT JOIN tblAPVendor VR ON VR.[intEntityId] = CD.intBillTo
 	LEFT JOIN tblICItem Item ON Item.intItemId = CD.intItemId
 	LEFT JOIN tblICItemLocation IL ON IL.intItemId = CD.intItemId AND IL.intLocationId = CD.intCompanyLocationId
+	LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = IL.intLocationId
 	LEFT JOIN tblSMCompanyLocationSubLocation SL ON SL.intCompanyLocationSubLocationId = IL.intSubLocationId
 	LEFT JOIN tblICStorageLocation STL ON STL.intStorageLocationId = IL.intStorageLocationId
 	LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CD.intCurrencyId
 	LEFT JOIN tblSMCurrencyExchangeRateType	RT ON RT.intCurrencyExchangeRateTypeId = CD.intRateTypeId
 	CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
+	OUTER APPLY (
+			SELECT		ISNULL(SUM(dblPAllocatedQty),0) AS dblAllocatedQty
+			FROM		tblLGAllocationDetail 
+			WHERE		intPContractDetailId = CD.intContractDetailId
+		) PA 
+		OUTER APPLY (
+			SELECT		ISNULL(SUM(dblSAllocatedQty),0) AS dblAllocatedQty
+			FROM		tblLGAllocationDetail 
+			WHERE		intSContractDetailId = CD.intContractDetailId
+		) SA 
+	LEFT JOIN tblSMFreightTerms Terms
+		ON Terms.intFreightTermId = CD.intFreightTermId

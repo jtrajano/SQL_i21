@@ -77,6 +77,7 @@ BEGIN
 			,intInventoryTransactionId
 			,intCostingMethod
 			,intFobPointId
+			,intInTransitSourceLocationId
 	)
 	SELECT	t.intItemId
 			,t.intItemLocationId
@@ -90,6 +91,7 @@ BEGIN
 			,t.intInventoryTransactionId
 			,t.intCostingMethod
 			,t.intFobPointId
+			,t.intInTransitSourceLocationId 
 	FROM	dbo.tblICInventoryTransaction t
 	WHERE	intTransactionId = @intTransactionId
 			AND strTransactionId = @strTransactionId
@@ -102,9 +104,10 @@ END
 -----------------------------------------------------------------------------------------------------------------------------
 BEGIN 
 	DECLARE @ValidateItemsToUnpost AS dbo.UnpostItemsTableType	
+	DECLARE @ValidateItemsInTransitToUnpost AS dbo.UnpostItemsTableType	
 	DECLARE @returnValue AS INT 
 
-	-- Aggregate the stock qty for a faster validation. 
+	-- Aggregate the stock qty for a faster validation. (Regular Item Costing)
 	INSERT INTO @ValidateItemsToUnpost (
 			intItemId
 			,intItemLocationId
@@ -113,7 +116,6 @@ BEGIN
 			,dblQty
 			,intSubLocationId
 			,intStorageLocationId
-			,intInventoryTransactionId		
 	)
 	SELECT	intItemId
 			,intItemLocationId
@@ -122,9 +124,8 @@ BEGIN
 			,SUM(ISNULL(dblQty, 0))				
 			,intSubLocationId
 			,intStorageLocationId
-			,intInventoryTransactionId
 	FROM	@ItemsToUnpost
-	WHERE	ISNULL(intFobPointId, @FOB_ORIGIN) <> @FOB_DESTINATION
+	WHERE	intInTransitSourceLocationId IS NULL 
 	GROUP BY 
 		intItemId
 		, intItemLocationId
@@ -132,13 +133,45 @@ BEGIN
 		, intLotId
 		, intSubLocationId
 		, intStorageLocationId
-		, intInventoryTransactionId
+
+	-- Aggregate the stock qty for a faster validation. (In-Transit Costing)
+	INSERT INTO @ValidateItemsInTransitToUnpost (
+			intItemId
+			,intItemLocationId
+			,intItemUOMId
+			,intLotId
+			,dblQty
+			,intSubLocationId
+			,intStorageLocationId
+	)
+	SELECT	intItemId
+			,intItemLocationId
+			,intItemUOMId
+			,intLotId
+			,SUM(ISNULL(dblQty, 0))				
+			,intSubLocationId
+			,intStorageLocationId
+	FROM	@ItemsToUnpost
+	WHERE	intInTransitSourceLocationId IS NOT NULL 
+	GROUP BY 
+		intItemId
+		, intItemLocationId
+		, intItemUOMId
+		, intLotId
+		, intSubLocationId
+		, intStorageLocationId
 
 	-- Fill-in the Unit qty from the UOM
 	UPDATE	ValidateItemsToUnpost
 	SET		dblUOMQty = ItemUOM.dblUnitQty
 	FROM	@ValidateItemsToUnpost ValidateItemsToUnpost INNER JOIN dbo.tblICItemUOM ItemUOM
 				ON ValidateItemsToUnpost.intItemUOMId = ItemUOM.intItemUOMId
+
+	-- Fill-in the Unit qty from the UOM
+	UPDATE	ValidateItemsInTransitToUnpost
+	SET		dblUOMQty = ItemUOM.dblUnitQty
+	FROM	@ValidateItemsInTransitToUnpost ValidateItemsInTransitToUnpost INNER JOIN dbo.tblICItemUOM ItemUOM
+				ON ValidateItemsInTransitToUnpost.intItemUOMId = ItemUOM.intItemUOMId
 
 	EXEC @returnValue = dbo.uspICValidateCostingOnUnpost 
 		@ValidateItemsToUnpost
@@ -147,6 +180,15 @@ BEGIN
 		,@strTransactionId
 
 	IF @returnValue < 0 RETURN -1;
+
+	EXEC @returnValue = dbo.uspICValidateInTransitCostingOnUnpost 
+		@ValidateItemsInTransitToUnpost
+		,@ysnRecap
+		,@intTransactionId
+		,@strTransactionId
+
+	IF @returnValue < 0 RETURN -1;
+
 END 
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -281,7 +323,7 @@ BEGIN
 			,[intTransactionTypeId]					= ActualTransaction.intTransactionTypeId
 			,[intLotId]								= ActualTransaction.intLotId
 			,[ysnIsUnposted]						= 1
-			,[intRelatedInventoryTransactionId]		= tactionsToReverse.intInventoryTransactionId
+			,[intRelatedInventoryTransactionId]		= transactionsToReverse.intInventoryTransactionId
 			,[intRelatedTransactionId]				= ActualTransaction.intRelatedTransactionId
 			,[strRelatedTransactionId]				= ActualTransaction.strRelatedTransactionId
 			,[strTransactionForm]					= ActualTransaction.strTransactionForm
@@ -295,8 +337,8 @@ BEGIN
 			,[intForexRateTypeId]					= ActualTransaction.intForexRateTypeId
 			,[dblForexRate]							= ActualTransaction.dblForexRate
 
-	FROM	#tmpInventoryTransactionStockToReverse tactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
-				ON tactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
+	FROM	#tmpInventoryTransactionStockToReverse transactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
+				ON transactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
 	
 	----------------------------------------------------
 	-- Create reversal of the inventory LOT transactions
@@ -342,10 +384,10 @@ BEGIN
 			,[strTransactionForm]		= ActualTransaction.strTransactionForm
 			,[ysnIsUnposted]			= 1
 			,[dtmCreated]				= GETDATE()
-			,[intCreatedEntityId]			= @intEntityUserSecurityId
+			,[intCreatedEntityId]		= @intEntityUserSecurityId
 			,[intConcurrencyId]			= 1
-	FROM	#tmpInventoryTransactionStockToReverse tactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
-				ON tactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
+	FROM	#tmpInventoryTransactionStockToReverse transactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
+				ON transactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
 				AND ActualTransaction.intLotId IS NOT NULL 
 				AND ActualTransaction.intItemUOMId IS NOT NULL
 			INNER JOIN tblICItemLocation ItemLocation
@@ -355,12 +397,12 @@ BEGIN
 	--------------------------------------------------------------
 	-- Update the ysnIsUnposted flag for related transactions 
 	--------------------------------------------------------------
-	UPDATE	Relatedtactions
+	UPDATE	RelatedTransactions
 	SET		ysnIsUnposted = 1
-	FROM	dbo.tblICInventoryTransaction Relatedtactions 
-	WHERE	Relatedtactions.intRelatedTransactionId = @intTransactionId
-			AND Relatedtactions.strRelatedTransactionId = @strTransactionId
-			AND Relatedtactions.ysnIsUnposted = 0
+	FROM	dbo.tblICInventoryTransaction RelatedTransactions 
+	WHERE	RelatedTransactions.intRelatedTransactionId = @intTransactionId
+			AND RelatedTransactions.strRelatedTransactionId = @strTransactionId
+			AND RelatedTransactions.ysnIsUnposted = 0
 
 	--------------------------------------------------------------
 	-- Update the ysnIsUnposted flag for related LOT transactions 

@@ -323,6 +323,13 @@ BEGIN
 			GOTO Post_Exit    
 		END 
 	END
+
+	-- Do not allow post if Lot bond is not yet released. 
+	IF @ysnPost = 1 AND @ysnRecap = 0 
+	BEGIN 
+		EXEC uspMFValidateInventoryShipment @intTransactionId
+		IF @@ERROR <> 0 GOTO Post_Exit    
+	END 
 END
 
 -- Get the next batch number
@@ -397,6 +404,7 @@ BEGIN
 			,@strBatchId
 			,@intEntityUserSecurityId
 			,@INVENTORY_SHIPMENT_TYPE
+			,@ysnPost
 
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 			
@@ -867,11 +875,12 @@ BEGIN
 				,[dblForeignRate]
 				,[strRateType]
 			)	
-			EXEC @intReturnValue = dbo.uspICUnpostInventoryShipmentOtherCharges 
+			EXEC @intReturnValue = dbo.uspICPostInventoryShipmentOtherCharges 
 				@intTransactionId
 				,@strBatchId
 				,@intEntityUserSecurityId
-				,@INVENTORY_SHIPMENT_TYPE	
+				,@INVENTORY_SHIPMENT_TYPE
+				,@ysnPost
 				
 			IF @intReturnValue < 0 GOTO With_Rollback_Exit
 		END

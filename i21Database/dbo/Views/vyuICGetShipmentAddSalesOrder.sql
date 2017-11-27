@@ -1,7 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuICGetShipmentAddSalesOrder]
 AS
-SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY SODetail.intCompanyLocationId, SODetail.intEntityCustomerId, intSalesOrderDetailId) AS INT)
-	, strOrderType = 'Sales Order'
+SELECT 
+	--intKey = CAST(ROW_NUMBER() OVER(ORDER BY SODetail.intCompanyLocationId, SODetail.intEntityCustomerId, intSalesOrderDetailId) AS INT)
+	 strOrderType = 'Sales Order'
 	, strSourceType = 'None'
 	, intLocationId = SODetail.intCompanyLocationId
 	, strShipFromLocation = SODetail.strLocationName
@@ -18,10 +19,10 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY SODetail.intCompanyLocationId, S
 	, strItemDescription
 	, strLotTracking
 	, SODetail.intCommodityId
-	,DefaultFromItemLocation.intSubLocationId
-	,SubLocation.strSubLocationName
-	,DefaultFromItemLocation.intStorageLocationId
-	,strStorageLocationName = StorageLocation.strName
+	, DefaultFromItemLocation.intSubLocationId
+	, SubLocation.strSubLocationName
+	, DefaultFromItemLocation.intStorageLocationId
+	, strStorageLocationName = StorageLocation.strName
 	, intOrderUOMId = intItemUOMId
 	, strOrderUOM = strUnitMeasure
 	, dblOrderUOMConvFactor = dblUOMConversion
@@ -46,12 +47,33 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY SODetail.intCompanyLocationId, S
 	, intDestinationGradeId = NULL
 	, strDestinationWeights = NULL
 	, intDestinationWeightId = NULL
-	, intCurrencyId = SO.intCurrencyId
-	, intFreightTermId = OSO.intFreightTermId
+	, intCurrencyId = SO.intCurrencyId	
+	, Currency.strCurrency
 	, intShipToLocationId = OSO.intShipToLocationId
 	, intForexRateTypeId = SODetail.intCurrencyExchangeRateTypeId
 	, strForexRateType = currencyRateType.strCurrencyExchangeRateType
 	, dblForexRate = SODetail.dblCurrencyExchangeRate
+	, FreightTerms.intFreightTermId
+	, FreightTerms.strFreightTerm
+	, strShipToLocation = ShipToLocation.strLocationName 
+	, strShipToStreet = ShipToLocation.strAddress
+	, strShipToCity = ShipToLocation.strCity
+	, strShipToState = ShipToLocation.strState
+	, strShipToZipCode = ShipToLocation.strZipCode
+	, strShipToCountry = ShipToLocation.strCountry
+	, strShipToAddress = 
+					[dbo].[fnARFormatCustomerAddress](
+						DEFAULT
+						,DEFAULT 
+						,DEFAULT 
+						,ShipToLocation.strAddress
+						,ShipToLocation.strCity
+						,ShipToLocation.strState
+						,ShipToLocation.strZipCode
+						,ShipToLocation.strCountry
+						,DEFAULT 
+						,DEFAULT 
+					)
 FROM vyuSOSalesOrderDetail SODetail
 	INNER JOIN vyuSOSalesOrderSearch SO ON SODetail.intSalesOrderId = SO.intSalesOrderId
 	INNER JOIN tblSOSalesOrder OSO ON OSO.intSalesOrderId = SO.intSalesOrderId
@@ -63,7 +85,13 @@ FROM vyuSOSalesOrderDetail SODetail
 		ON StorageLocation.intStorageLocationId = DefaultFromItemLocation.intStorageLocationId
 	LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
 		ON currencyRateType.intCurrencyExchangeRateTypeId = SODetail.intCurrencyExchangeRateTypeId
---WHERE ysnProcessed = 0
+	LEFT JOIN tblSMFreightTerms FreightTerms
+		ON FreightTerms.intFreightTermId = OSO.intFreightTermId
+	LEFT JOIN [tblEMEntityLocation] ShipToLocation 
+		ON ShipToLocation.intEntityLocationId = OSO.intShipToLocationId
+	LEFT JOIN tblSMCurrency Currency 
+		ON Currency.intCurrencyID = SO.intCurrencyId
+
 WHERE	ISNULL(SODetail.dblQtyShipped, 0) < ISNULL(SODetail.dblQtyOrdered, 0) 
 		AND ISNULL(SO.strOrderStatus, '') IN ('Open', 'Partial', 'Pending')
 

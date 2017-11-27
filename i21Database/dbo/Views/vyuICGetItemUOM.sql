@@ -6,6 +6,7 @@ ItemUOM.intItemUOMId
 , ItemUOM.intItemId
 , ItemUOM.intUnitMeasureId
 , UOM.strUnitMeasure
+, UOM.strSymbol
 , UOM.strUnitType
 , ItemUOM.dblUnitQty
 , ItemUOM.dblWeight

@@ -16,7 +16,7 @@ BEGIN
 	CASE	
 		WHEN @msgId = 80001 THEN 'Item id is invalid or missing.'
 		WHEN @msgId = 80002 THEN 'Item Location is invalid or missing for %s.'
-		WHEN @msgId = 80003 THEN 'Negative stock quantity is not allowed for %s in %s.'
+		WHEN @msgId = 80003 THEN 'Negative stock quantity is not allowed for %s at %s.'
 		WHEN @msgId = 80004 THEN 'Unable to generate the Inventory Receipt. An error stopped the process from Purchase Order to Inventory Receipt.'
 		WHEN @msgId = 80005 THEN 'Please specify the lot numbers for %s.'
 		WHEN @msgId = 80006 THEN 'The Qty to Receive for %s is %f. Total Lot Quantity is %f. The difference is %f.'
@@ -209,6 +209,7 @@ BEGIN
 		WHEN @msgId = 80193 THEN 'Please unpost and delete %s first. Destination Qty in %s will not be updated if it has an invoice already.'
 		WHEN @msgId = 80194 THEN 'Unable to Post the Destination Qty because %s is already posted.'
 		WHEN @msgId = 80195 THEN 'Unable to unpost %s because you need to unpost the Destination Qty first.'
+		WHEN @msgId = 80196 THEN 'Unable to post %s. Functional currency is not set for the company.'
 	END 
 
 	RETURN @msg

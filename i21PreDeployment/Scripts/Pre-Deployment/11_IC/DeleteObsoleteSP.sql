@@ -31,3 +31,9 @@ GO
 IF EXISTS(select top 1 1 from sys.procedures where name = 'uspICPostCostAdjustmentOnLotCosting')
 	EXEC('DROP PROCEDURE uspICPostCostAdjustmentOnLotCosting')
 GO
+IF EXISTS(select top 1 1 from sys.procedures where name = 'uspICUnpostInventoryReceiptOtherCharges')
+	EXEC('DROP PROCEDURE uspICUnpostInventoryReceiptOtherCharges')
+GO
+IF EXISTS(select top 1 1 from sys.procedures where name = 'uspICUnpostInventoryShipmentOtherCharges')
+	EXEC('DROP PROCEDURE uspICUnpostInventoryShipmentOtherCharges')
+GO

@@ -1,8 +1,9 @@
 ﻿CREATE VIEW [dbo].[vyuICGetShipmentAddSalesContractPickLot]
 AS
 -- intKey -intLocationId, intEntityCustomerId, intLineNo
-SELECT DISTINCT intKey = CAST(ROW_NUMBER() OVER(ORDER BY PickLot.intCompanyLocationId, PickLot.intCustomerEntityId, PickLotDetail.intSContractDetailId) AS INT)
-	, strOrderType = 'Sales Contract'
+SELECT DISTINCT 
+	--intKey = CAST(ROW_NUMBER() OVER(ORDER BY PickLot.intCompanyLocationId, PickLot.intCustomerEntityId, PickLotDetail.intSContractDetailId) AS INT)
+	strOrderType = 'Sales Contract'
 	, strSourceType = 'Pick Lot'
 	, intLocationId = PickLot.intCompanyLocationId
 	, strShipFromLocation = PickLot.strLocationName

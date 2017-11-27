@@ -40,15 +40,17 @@ FROM	tblICInventoryReceipt Receipt
 					,dblVoucherQty = ISNULL(voucher.QtyTotal, 0)
 					,dblReceiptLineTotal = ROUND(rc.dblAmount, 2)
 					,dblVoucherLineTotal = ISNULL(voucher.LineTotal, 0)
-					,dblReceiptTax = --ISNULL(CASE WHEN rc.ysnPrice = 1 THEN -rc.dblTax ELSE rc.dblTax END, 0)
+					,dblReceiptTax = 
 						CASE 
-							WHEN 
-								(ISNULL(rc.intEntityVendorId, Receipt.intEntityVendorId) <> Receipt.intEntityVendorId AND ISNULL(rc.ysnPrice, 0) = 1)
-								OR (ISNULL(rc.intEntityVendorId, Receipt.intEntityVendorId) = Receipt.intEntityVendorId AND ISNULL(rc.ysnPrice, 0) = 0) 							
-							THEN 
+							-- If 3rd party and price down = yes, then return +ve tax. 
+							WHEN (ISNULL(rc.intEntityVendorId, Receipt.intEntityVendorId) <> Receipt.intEntityVendorId AND ISNULL(rc.ysnPrice, 0) = 1) THEN 
 								ISNULL(rc.dblTax, 0)
-							ELSE 
+							-- If price down = yes, then return -ve tax. 
+							WHEN ISNULL(rc.ysnPrice, 0) = 1 THEN 
 								-ISNULL(rc.dblTax, 0)
+							-- Otherwise, return +ve tax. 
+							ELSE 
+								ISNULL(rc.dblTax, 0)
 						END 
 
 					,dblVoucherTax = ISNULL(voucher.TaxTotal, 0) 
@@ -59,13 +61,15 @@ FROM	tblICInventoryReceipt Receipt
 					,dblTaxesPayable = 
 						--ISNULL(CASE WHEN rc.ysnPrice = 1 THEN -rc.dblTax ELSE rc.dblTax END, 0)
 						CASE 
-							WHEN 
-								(ISNULL(rc.intEntityVendorId, Receipt.intEntityVendorId) <> Receipt.intEntityVendorId AND ISNULL(rc.ysnPrice, 0) = 1)
-								OR (ISNULL(rc.intEntityVendorId, Receipt.intEntityVendorId) = Receipt.intEntityVendorId AND ISNULL(rc.ysnPrice, 0) = 0) 							
-							THEN 
+							-- If 3rd party and price down = yes, then return +ve tax. 
+							WHEN (ISNULL(rc.intEntityVendorId, Receipt.intEntityVendorId) <> Receipt.intEntityVendorId AND ISNULL(rc.ysnPrice, 0) = 1) THEN 
 								ISNULL(rc.dblTax, 0)
-							ELSE 
+							-- If price down = yes, then return -ve tax. 
+							WHEN ISNULL(rc.ysnPrice, 0) = 1 THEN 
 								-ISNULL(rc.dblTax, 0)
+							-- Otherwise, return +ve tax. 
+							ELSE 
+								ISNULL(rc.dblTax, 0)
 						END 
 
 						- ISNULL(voucher.TaxTotal, 0) 

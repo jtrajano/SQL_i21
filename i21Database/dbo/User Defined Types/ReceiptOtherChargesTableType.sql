@@ -34,5 +34,5 @@ CREATE TYPE [dbo].[ReceiptOtherChargesTableType] AS TABLE
 	,[intTaxGroupId] INT NULL																-- Overriding Tax Group Id per other charge item.
 	,[intForexRateTypeId] INT NULL															-- Currency Forex Rate Type Id
 	,[dblForexRate] NUMERIC(18, 6) NULL														-- Forex Rate (Exchange Rate)
-
+	,[strChargesLink] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL 
 )

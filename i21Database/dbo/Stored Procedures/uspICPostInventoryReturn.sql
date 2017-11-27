@@ -499,6 +499,7 @@ BEGIN
 			,@strBatchId
 			,@intEntityUserSecurityId
 			,@INVENTORY_RETURN_TYPE
+			,@ysnPost
 
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END 
@@ -1232,12 +1233,13 @@ BEGIN
 				,[dblForeignRate]
 				,[strRateType]
 			)	
-			EXEC @intReturnValue = dbo.uspICUnpostInventoryReceiptOtherCharges 
+			EXEC @intReturnValue = dbo.uspICPostInventoryReceiptOtherCharges 
 				@intTransactionId
 				,@strBatchId
 				,@intEntityUserSecurityId
-				,@INVENTORY_RETURN_TYPE	
-				
+				,@INVENTORY_RETURN_TYPE					
+				,@ysnPost
+								
 			IF @intReturnValue < 0 GOTO With_Rollback_Exit
 		END
 

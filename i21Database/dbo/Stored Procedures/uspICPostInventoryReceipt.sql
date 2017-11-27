@@ -425,6 +425,7 @@ BEGIN
 			,@strBatchId
 			,@intEntityUserSecurityId
 			,@INVENTORY_RECEIPT_TYPE
+			,@ysnPost
 
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 			
@@ -616,7 +617,7 @@ BEGIN
 				,intTransactionTypeId = @INVENTORY_RECEIPT_TYPE  
 				,intLotId = DetailItemLot.intLotId 
 				,intSubLocationId = DetailItem.intSubLocationId --ISNULL(DetailItemLot.intSubLocationId, DetailItem.intSubLocationId) 
-				,intStorageLocationId = DetailItem.intStorageLocationId --ISNULL(DetailItemLot.intStorageLocationId, DetailItem.intStorageLocationId)
+				,intStorageLocationId = ISNULL(DetailItemLot.intStorageLocationId, DetailItem.intStorageLocationId)
 				,strActualCostId = Header.strActualCostId
 				,intInTransitSourceLocationId = InTransitSourceLocation.intItemLocationId
 				,intForexRateTypeId = DetailItem.intForexRateTypeId
@@ -1147,7 +1148,7 @@ BEGIN
 				,intTransactionTypeId = @INVENTORY_RECEIPT_TYPE  
 				,intLotId = DetailItemLot.intLotId 
 				,intSubLocationId = DetailItem.intSubLocationId -- ISNULL(DetailItemLot.intSubLocationId, DetailItem.intSubLocationId) 
-				,intStorageLocationId = DetailItem.intStorageLocationId -- ISNULL(DetailItemLot.intStorageLocationId, DetailItem.intStorageLocationId)
+				,intStorageLocationId = ISNULL(DetailItemLot.intStorageLocationId, DetailItem.intStorageLocationId)
 				,intInTransitSourceLocationId = InTransitSourceLocation.intItemLocationId
 				,intForexRateTypeId = DetailItem.intForexRateTypeId
 				,dblForexRate = DetailItem.dblForexRate
@@ -1357,12 +1358,13 @@ BEGIN
 				,[dblForeignRate]
 				,[strRateType]
 			)	
-			EXEC @intReturnValue = dbo.uspICUnpostInventoryReceiptOtherCharges 
+			EXEC @intReturnValue = dbo.uspICPostInventoryReceiptOtherCharges 
 				@intTransactionId
 				,@strBatchId
 				,@intEntityUserSecurityId
 				,@INVENTORY_RECEIPT_TYPE	
-				
+				,@ysnPost
+								
 			IF @intReturnValue < 0 GOTO With_Rollback_Exit
 		END
 
@@ -1468,7 +1470,7 @@ BEGIN
 						)
 			,[intLotId]				= ril.intLotId
 			,[intSubLocationId]		= ri.intSubLocationId
-			,[intStorageLocationId]	= ri.intStorageLocationId
+			,[intStorageLocationId]	= ISNULL(ril.intStorageLocationId, ri.intStorageLocationId) 
 			,[dblQty]				= 
 						-- New Hierarchy:
 						-- 1. If there is a Gross/Net UOM, use the Net Qty. 
@@ -1551,7 +1553,7 @@ BEGIN
 						)
 			,[intLotId]				= ril.intLotId
 			,[intSubLocationId]		= ri.intSubLocationId
-			,[intStorageLocationId]	= ri.intStorageLocationId
+			,[intStorageLocationId]	= ISNULL(ril.intStorageLocationId, ri.intStorageLocationId) 
 			,[dblQty]				= 
 						-- New Hierarchy:
 						-- 1. If there is a Gross/Net UOM, use the Net Qty. 
