@@ -6077,6 +6077,7 @@
     <Build Include="dbo\Stored Procedures\uspSMUpdateEntityCredentialCompanyGridLayout.sql" />
     <None Include="Scripts\Post-Deployment\CCR\RemoveCCRObsoleteScreen.sql" />
     <Build Include="dbo\Stored Procedures\uspCRMGetPipelineForecast.sql" />
+    <None Include="Scripts\Post-Deployment\MF\CBIPattern.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
