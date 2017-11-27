@@ -26,13 +26,13 @@ END
 	
 
 
-DECLARE @intNumber INT, @strPrefix NVARCHAR(10),@intStartingNumberId INT
+DECLARE @intNumber INT, @strPrefix NVARCHAR(10),@intStartingNumberId INT,@strJournalId NVARCHAR(100)
 
-DECLARE @strJournalId NVARCHAR(100)
 EXEC uspGLGetNewID 5, @strJournalId OUTPUT
 
 INSERT INTO [tblGLJournal]
-           ([strJournalId]
+           ([intCompanyId]
+		   ,[strJournalId]
            ,[strTransactionType]
            ,[dtmDate]
            ,[strReverseLink]
@@ -52,7 +52,8 @@ INSERT INTO [tblGLJournal]
            ,[intFiscalPeriodId]
            ,[intFiscalYearId]
            ,[intJournalIdToReverse])
-	SELECT @strJournalId
+	SELECT  intCompanyId
+		   ,@strJournalId
            ,[strTransactionType]
            ,GETDATE()
            ,[strReverseLink]

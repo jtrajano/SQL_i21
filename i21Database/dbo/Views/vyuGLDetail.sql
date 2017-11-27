@@ -50,11 +50,15 @@ AS
 			E.intEntityId,
 			A.strComments,
 			U.strUOMCode,
+
             Loc.strLocationName,
-            ICUOM.strUnitMeasure,
+            ICUOM.strUnitMeasure strSourceUOMId,
             ICCom.strCommodityCode,
             ISNULL(dblSourceUnitDebit,0) dblSourceUnitDebit,
-            ISNULL(dblSourceUnitCredit,0) dblSourceUnitCredit
+            ISNULL(dblSourceUnitCredit,0) dblSourceUnitCredit,
+			F.strUserName strSourceEntity,
+			strSourceDocumentId
+
      FROM tblGLDetail AS A
 	 LEFT JOIN tblGLAccount AS B ON A.intAccountId = B.intAccountId
 	 LEFT JOIN tblGLAccountGroup AS C ON C.intAccountGroupId = B.intAccountGroupId
@@ -70,5 +74,10 @@ AS
 	 OUTER APPLY(
 		SELECT TOP 1 strCurrency FROM tblSMCurrency WHERE intCurrencyID = A.intCurrencyId
 	 )D
-
+	  OUTER APPLY(
+		SELECT TOP 1 strName strUserName FROM [tblEMEntity] WHERE intEntityId = A.intSourceEntityId
+	 )F
 	 
+GO
+
+
