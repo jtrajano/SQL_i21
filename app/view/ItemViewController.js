@@ -3097,6 +3097,8 @@ Ext.define('Inventory.view.ItemViewController', {
         var unitPrice = price.salePrice;
         var msrpPrice = price.msrpPrice;
         var standardCost = price.standardCost;
+        var lastCost = price.lastCost;
+        var avgCost = price.avgCost;
         var amt = price.amount;
         var qty = 1 //This will now default to 1 based on IC-2642.
         var retailPrice = 0;
@@ -3129,11 +3131,22 @@ Ext.define('Inventory.view.ItemViewController', {
                 break;
             case 'None':
                 break;
+            case 'Markup Last Cost':
+                var markup = (lastCost * (amt / 100));
+                unitPrice = (lastCost + markup);
+                retailPrice = unitPrice * qty;
+                break;
+            case 'Markup Avg Cost':
+                var markup = (avgCost * (amt / 100));
+                unitPrice = (avgCost + markup);
+                retailPrice = unitPrice * qty;
+                break;
             default:
                 retailPrice = 0;
                 break;
         }
-        return retailPrice;
+        //return retailPrice;
+        return ic.utils.Math.round(retailPrice, 6);
     },
 
     /* TODO:Create unit test for getSalePrice */
@@ -3141,25 +3154,34 @@ Ext.define('Inventory.view.ItemViewController', {
         var salePrice = 0;
         switch (price.pricingMethod) {
             case "None":
-                salePrice = price.cost;
+                salePrice = price.standardCost;
                 break;
             case "Fixed Dollar Amount":
-                salePrice = price.cost + price.amount;
+                salePrice = price.standardCost + price.amount;
                 break;
             case "Markup Standard Cost":
-                salePrice = (price.cost * (price.amount / 100)) + price.cost;
+                salePrice = (price.standardCost * (price.amount / 100)) + price.standardCost;
                 break;
             case "Percent of Margin":
-                salePrice = price.amount < 100 ? (price.cost / (1 - (price.amount / 100))) : errorCallback();
+                salePrice = price.amount < 100 ? (price.standardCost / (1 - (price.amount / 100))) : errorCallback();
                 break;
-        }
-        return salePrice;
+            case "Markup Last Cost":
+                salePrice = (price.lastCost * (price.amount / 100)) + price.lastCost;
+                break;
+            case "Markup Avg Cost":
+                salePrice = (price.avgCost * (price.amount / 100)) + price.avgCost;
+                break;
+            }
+        //return salePrice;
+        return ic.utils.Math.round(salePrice, 6);
     },
 
     updatePricing: function (pricing, data, validationCallback) {
         var me = this;
         var salePrice = me.getSalePrice({
-            cost: data.standardCost,
+            standardCost: data.standardCost,
+            lastCost: data.lastCost,
+            avgCost: data.avgCost,
             amount: data.amount,
             pricingMethod: data.pricingMethod
         }, validationCallback);
@@ -3174,12 +3196,15 @@ Ext.define('Inventory.view.ItemViewController', {
         var me = this;
         _.each(item.tblICItemPricingLevels().data.items, function (p) {
             if (p.data.intItemLocationId === pricing.data.intItemLocationId 
-                && p.data.intCurrencyId === i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId')) {
+                && p.data.intCurrencyId === i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId')
+            ) {
                 var retailPrice = me.getPricingLevelUnitPrice({
                     pricingMethod: p.data.strPricingMethod,
                     salePrice: data.unitPrice,
                     msrpPrice: data.msrpPrice,
                     standardCost: data.standardCost,
+                    lastCost: data.lastCost,
+                    avgCost: data.avgCost,
                     amount: p.data.dblAmountRate,
                     qty: p.data.dblUnit
                 });
@@ -3201,6 +3226,8 @@ Ext.define('Inventory.view.ItemViewController', {
             unitPrice: currentPricing.data.dblSalePrice,
             msrpPrice: currentPricing.data.dblMSRPPrice,
             standardCost: newValue,
+            lastCost: currentPricing.data.dblLastCost,
+            avgCost: currentPricing.data.dblAverageCost,
             pricingMethod: currentPricing.data.strPricingMethod,
             amount: currentPricing.data.dblAmountPercent
         };
@@ -3209,6 +3236,54 @@ Ext.define('Inventory.view.ItemViewController', {
         });
         this.updatePricingLevel(currentItem, currentPricing, data);
     },
+
+    onPricingLastCostChange: function (e, newValue, oldValue) {
+        var vm = this.view.viewModel;
+        var currentItem = vm.data.current;
+        var cep = e.ownerCt.editingPlugin;
+        var currentPricing = cep.activeRecord;
+        var me = this;
+        var win = cep.grid.up('window');
+        var grdPricing = win.down('#grdPricing');
+
+        var data = {
+            unitPrice: currentPricing.data.dblSalePrice,
+            msrpPrice: currentPricing.data.dblMSRPPrice,
+            standardCost: currentPricing.data.dblStandardCost,
+            lastCost: newValue,
+            avgCost: currentPricing.data.dblAverageCost,
+            pricingMethod: currentPricing.data.strPricingMethod,
+            amount: currentPricing.data.dblAmountPercent
+        };
+        this.updatePricing(currentPricing, data, function () {
+            win.context.data.validator.validateGrid(grdPricing);
+        });
+        this.updatePricingLevel(currentItem, currentPricing, data);
+    },
+
+    onPricingAverageCostChange: function (e, newValue, oldValue) {
+        var vm = this.view.viewModel;
+        var currentItem = vm.data.current;
+        var cep = e.ownerCt.editingPlugin;
+        var currentPricing = cep.activeRecord;
+        var me = this;
+        var win = cep.grid.up('window');
+        var grdPricing = win.down('#grdPricing');
+
+        var data = {
+            unitPrice: currentPricing.data.dblSalePrice,
+            msrpPrice: currentPricing.data.dblMSRPPrice,
+            standardCost: currentPricing.data.dblStandardCost,
+            lastCost: currentPricing.data.dblLastcost,
+            avgCost: newValue,
+            pricingMethod: currentPricing.data.strPricingMethod,
+            amount: currentPricing.data.dblAmountPercent
+        };
+        this.updatePricing(currentPricing, data, function () {
+            win.context.data.validator.validateGrid(grdPricing);
+        });
+        this.updatePricingLevel(currentItem, currentPricing, data);
+    },    
 
     onEditPricingLevel: function (editor, context, eOpts) {
         var me = this;
@@ -3239,12 +3314,16 @@ Ext.define('Inventory.view.ItemViewController', {
                             var unitPrice = selectedLoc.get('dblSalePrice');
                             var msrpPrice = selectedLoc.get('dblMSRPPrice');
                             var standardCost = selectedLoc.get('dblStandardCost');
+                            var lastCost = selectedLoc.get('dblLastCost');
+                            var avgCost = selectedLoc.get('dblAverageCost');
                             var qty = context.record.get('dblUnit');
                             var retailPrice = me.getPricingLevelUnitPrice({
                                 pricingMethod: pricingMethod,
                                 salePrice: unitPrice,
                                 msrpPrice: msrpPrice,
                                 standardCost: standardCost,
+                                lastCost: lastCost,
+                                avgCost: avgCost,
                                 amount: amount,
                                 qty: qty
                             });
@@ -3284,7 +3363,9 @@ Ext.define('Inventory.view.ItemViewController', {
                 var grdPricing = win.down('#grdPricing');
                 var pricingMethod = context.record.get('strPricingMethod');
                 var amount = context.record.get('dblAmountPercent');
-                var cost = context.record.get('dblStandardCost');
+                var standardCost = context.record.get('dblStandardCost');
+                var lastCost = context.record.get('dblLastCost');
+                var avgCost = context.record.get('dblAverageCost');
 
                 if (context.field === 'strPricingMethod') {
                     pricingMethod = context.value;
@@ -3293,11 +3374,13 @@ Ext.define('Inventory.view.ItemViewController', {
                     amount = context.value;
                 }
                 else if (context.field === 'dblStandardCost') {
-                    cost = context.value;
+                    standardCost = context.value;
                 }
 
                 var data = {
-                    standardCost: cost,
+                    standardCost: standardCost,
+                    lastCost: lastCost,
+                    avgCost: avgCost,
                     pricingMethod: pricingMethod,
                     amount: amount
                 };
@@ -4187,6 +4270,12 @@ Ext.define('Inventory.view.ItemViewController', {
             "#txtStandardCost": {
                 change: this.onPricingStandardCostChange
             },
+            "#txtLastCost": {
+                change: this.onPricingLastCostChange
+            },            
+            "#txtAverageCost": {
+                change: this.onPricingAverageCostChange
+            },            
             "#txtShortUPCCode": {
                 specialKey: this.onUPCEnterTab,
                 keydown: this.onUPCShortKeyDown

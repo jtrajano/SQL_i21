@@ -4402,7 +4402,8 @@ Ext.define('Inventory.view.Item', {
                                                         text: 'Last Cost',
                                                         editor: {
                                                             xtype: 'numberfield',
-                                                            quantityField: true
+                                                            quantityField: true,
+                                                            itemId: 'txtLastCost'
                                                         }
                                                     },
                                                     {
@@ -4429,7 +4430,8 @@ Ext.define('Inventory.view.Item', {
                                                         text: 'Average Cost',
                                                         editor: {
                                                             xtype: 'numberfield',
-                                                            quantityField: true
+                                                            quantityField: true,
+                                                            itemId: 'txtAverageCost'
                                                         }
                                                     },
                                                     {

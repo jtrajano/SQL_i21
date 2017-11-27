@@ -13191,13 +13191,15 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "designer|createAlias": "numberfield",
+                                                        "itemId": "txtLastCost",
                                                         "quantityField": true
                                                     },
                                                     "configAlternates": {
                                                         "currencyField": "boolean",
                                                         "quantityField": "boolean",
                                                         "designer|createAlias": "string",
-                                                        "scrollable": "boolean"
+                                                        "scrollable": "boolean",
+                                                        "itemId": "string"
                                                     },
                                                     "name": "MyNumberField3",
                                                     "designerId": "13ca2953-fff4-4d2a-a24d-bcfa11599b16",
@@ -13309,13 +13311,15 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "designer|createAlias": "numberfield",
+                                                        "itemId": "txtAverageCost",
                                                         "quantityField": true
                                                     },
                                                     "configAlternates": {
                                                         "currencyField": "binding",
                                                         "quantityField": "boolean",
                                                         "designer|createAlias": "string",
-                                                        "scrollable": "boolean"
+                                                        "scrollable": "boolean",
+                                                        "itemId": "string"
                                                     },
                                                     "name": "MyNumberField54",
                                                     "designerId": "bc12049e-53ab-4b20-bd26-c5002d3ff8a4",
