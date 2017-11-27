@@ -5923,6 +5923,7 @@
     <Build Include="dbo\Functions\fnRTrim.sql" />
     <Build Include="dbo\Views\vyuQMCompanyPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateItemPricing.sql" />
+    <Build Include="dbo\Views\vyuRKGetPurchaseInventory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
