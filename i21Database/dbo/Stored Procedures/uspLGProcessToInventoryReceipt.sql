@@ -293,6 +293,7 @@ BEGIN TRY
 		,[intCostCurrencyId]
 		,[intShipFromId]
 		,[strBillOfLadding]
+		,[ysnInventoryCost]
 		)
 	SELECT CV.intEntityId
 		,CV.intItemId
@@ -346,8 +347,10 @@ BEGIN TRY
 			WHERE LD.intLoadId = @intLoadId
 			)
 		,L.strBLNumber
+		,I.ysnInventoryCost
 	FROM vyuLGLoadCostView CV
 	JOIN tblLGLoad L ON L.intLoadId = CV.intLoadId
+	JOIN tblICItem I ON I.intItemId = CV.intItemId
 	WHERE L.intLoadId = @intLoadId
 
 	IF NOT EXISTS (

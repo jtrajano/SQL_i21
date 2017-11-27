@@ -6,7 +6,7 @@ BEGIN
 		,C.strCurrency
 		,E.strName AS strVendorName
 		,L.strLoadNumber
-		,UM.strUnitMeasure
+		,UM.strUnitMeasure AS strUOM
 		,I.strItemNo
 		,B.strBillId
 	FROM tblLGLoadCost LC
