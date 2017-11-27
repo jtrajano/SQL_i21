@@ -5875,6 +5875,7 @@
     <Build Include="dbo\Stored Procedures\uspGRCreateSettleStorage.sql" />
     <Build Include="dbo\Views\vyuRKGetM2MConfigurationMapping.sql" />
     <Build Include="dbo\Views\vyuSMTaxableByOtherTaxes.sql" />
+    <Build Include="dbo\Functions\fnFormatNumber.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
