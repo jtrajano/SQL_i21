@@ -21,6 +21,9 @@ AS
 				CC.strRemarks,
 				CC.ysnReceivable,
 				CC.strPaidBy,
+				CC.strStatus,
+				CC.dblReqstdAmount,
+				CC.dblRcvdPaidAmount,
 
 				IM.strItemNo, 
 				IM.strDescription strItemDescription,

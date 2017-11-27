@@ -21,7 +21,8 @@ CREATE TABLE [dbo].[tblCTContractCost](
 	[strReference] [nvarchar](200) COLLATE Latin1_General_CI_AS NULL,
 	[strRemarks] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
 	strStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS, 
-    dblCommnAmount	NUMERIC(18,6),
+    dblReqstdAmount	NUMERIC(18,6),
+	dblRcvdPaidAmount	NUMERIC(18,6),
 
 	CONSTRAINT [PK_tblCTContractCost_intContractCostId] PRIMARY KEY CLUSTERED ([intContractCostId] ASC),
 	CONSTRAINT [FK_tblCTContractCost_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [tblCTContractDetail]([intContractDetailId]) ON DELETE CASCADE,
