@@ -46,7 +46,7 @@ AS
 		ON J.intEntityId = K.intEntityId
 	INNER JOIN tblVRCustomerXref L
 		ON J.intVendorSetupId = L.intVendorSetupId
-			AND A.intEntityId = L.intEntityId
+			AND A.intEntityCustomerId = L.intEntityId
 	LEFT JOIN tblVRProgramItem M
 		ON B.intItemId = M.intItemId
 		AND B.intProgramId = M.intProgramId
