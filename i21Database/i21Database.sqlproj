@@ -5924,6 +5924,7 @@
     <Build Include="dbo\Views\vyuQMCompanyPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateItemPricing.sql" />
     <Build Include="dbo\Views\vyuRKGetPurchaseInventory.sql" />
+    <Build Include="dbo\Tables\tblMFParentLotNumberPattern.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
