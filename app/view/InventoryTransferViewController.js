@@ -609,6 +609,10 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 default:
                     current.set('dblAvailableQty', current.get('dblOriginalAvailableQty'));
             }
+
+            current.set('intLotId', null);
+            current.set('strLotNumber', null);            
+            current.set('intNewLotStatusId', null);
         }
         else if (combo.itemId === 'cboFromStorage') {
             current.set('intFromSubLocationId', records[0].get('intSubLocationId'));
@@ -632,6 +636,10 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 default:
                     current.set('dblAvailableQty', current.get('dblOriginalAvailableQty'));
             }
+
+            current.set('intLotId', null);
+            current.set('strLotNumber', null);            
+            current.set('intNewLotStatusId', null);
         }
         else if (combo.itemId === 'cboOwnershipType'){
             switch (records[0].get('intOwnershipType')) {
