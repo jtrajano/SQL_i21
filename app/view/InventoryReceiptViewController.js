@@ -7062,7 +7062,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var orderScreen = [
             {
                 screen: 'AccountsPayable.view.PurchaseOrder',
-                orderType: 'PurchaseOrder',
+                orderType: 'Purchase Order',
                 keyColumn: 'intPurchaseId',
                 cellColumn: 'intOrderId'
             },
@@ -7099,7 +7099,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var sourceType = record.intInventoryReceipt.get('intSourceType');
 
         var order = _.findWhere(orderScreen, { orderType: orderType });
-        if(order.source && !isOrder) {
+        if(order && order.source && !isOrder) {
             var source = _.findWhere(order.source, { type: sourceType });
             order = source ? source : order;
         }
