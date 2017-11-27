@@ -118,6 +118,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intNewLotStatusId).HasColumnName("intNewLotStatusId");
             this.Property(t => t.dblGrossNetUnitQty).HasColumnName("dblGrossNetUnitQty");
             this.Property(t => t.dblItemUnitQty).HasColumnName("dblItemUnitQty");
+            this.Property(t => t.strLotCondition).HasColumnName("strLotCondition");
             this.HasOptional(p => p.vyuICGetInventoryTransferDetail)
                 .WithRequired(p => p.tblICInventoryTransferDetail);
             this.HasOptional(p => p.tblICLotStatus)
@@ -166,6 +167,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strGrossNetUOM).HasColumnName("strGrossNetUOM");
             this.Property(t => t.dblGrossNetUnitQty).HasColumnName("dblGrossNetUnitQty");
             this.Property(t => t.dblItemUnitQty).HasColumnName("dblItemUnitQty");
+            this.Property(t => t.strLotCondition).HasColumnName("strLotCondition");
         }
     }
 }

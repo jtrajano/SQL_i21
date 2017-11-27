@@ -149,8 +149,10 @@ Ext.define('Inventory.search.InventoryValuation', {
                 break;
             case 'Consume':
             case 'Produce':
-                transactionType = 'BlendSheet';
-                break;
+                // transactionType = 'BlendSheet';
+                // break;                
+                i21.ModuleMgr.Inventory.showMfgScreen(value);
+                return; 
             default:
                 iRely.Functions.showInfoDialog('This transaction is not viewable on a screen.');
                 break;

@@ -338,6 +338,54 @@ Ext.define('Inventory.controller.Inventory', {
         }
     },
 
+    showMfgScreen: function(recordId){
+        var action = 'view',
+        columnName = 'strWorkOrderNo';
+        
+        ic.utils.ajax({
+            url: './manufacturing/api/workordermanagement/getviewnamebyworkorderno',
+            params:{
+                strWorkOrderNo: recordId
+            },
+            method: 'get'  
+        })
+        .subscribe(
+            function(successResponse) {
+                var jsonData = Ext.decode(successResponse.responseText);
+                //var responseText = successResponse.responseText;
+
+                var screenName = jsonData ? jsonData : '';       
+                if (screenName != '') {
+                    var filter = [];
+                    if (recordId != 0 && recordId != 'undefined' && recordId) {
+                        filter.push({
+                            column: columnName,
+                            value: recordId,
+                            condition: 'eq',
+                            conjunction: ''
+                        });
+                    }
+
+                    iRely.Functions.openScreen(screenName, {
+                        modalMode: true,
+                        action: action,
+                        filters: filter
+                    });
+                }
+                else 
+                {
+                    iRely.Functions.showErrorDialog('Oops. Something went wrong while getting the mfg screen name..');   
+                }
+
+            }
+            ,function(failureResponse) {
+                var jsonData = Ext.decode(failureResponse.responseText);
+                var message = jsonData.message; 
+                iRely.Functions.showErrorDialog('Oops. Something went wrong while getting the mfg screen name.');   
+            }
+        );          
+    },
+
     showScreen: function(recordId, screenType) {
         var screenName = '',
             action = 'new',

@@ -308,7 +308,13 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
  
                     },
                     dataIndex: 'strNewLotStatus'
-                }
+                },
+                colLotCondition: {
+                    dataIndex: 'strLotCondition',
+                    editor: {
+                        store: '{condition}'
+                    }
+                },
                 // chkDestinationWeights: {
                 //     dataIndex: 'ysnWeights',
                 //     disabled: '{destinationWeightsDisabled}'

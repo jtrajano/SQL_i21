@@ -3044,6 +3044,53 @@
                                             ]
                                         },
                                         {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "string",
+                                                "designer|createAlias": "",
+                                                "itemId": "colLotCondition",
+                                                "text": "Condition"
+                                            },
+                                            "configAlternates": {
+                                                "itemId": "string",
+                                                "text": "string",
+                                                "designer|createAlias": "string",
+                                                "dataIndex": "datafield"
+                                            },
+                                            "name": "MyColumn86",
+                                            "designerId": "974aa620-e3e6-4bfe-97b8-c5db0d085f6c",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "designer|createAlias": "",
+                                                        "displayField": "strDescription",
+                                                        "itemId": "cboLotCondition",
+                                                        "valueField": "strDescription"
+                                                    },
+                                                    "configAlternates": {
+                                                        "columns": "array",
+                                                        "designer|createAlias": "string",
+                                                        "displayField": "datafield",
+                                                        "itemId": "string",
+                                                        "valueField": "datafield"
+                                                    },
+                                                    "name": "MyComboBox10",
+                                                    "designerId": "10749961-6c57-49e7-ad8f-b87a3a1f6919"
+                                                }
+                                            ]
+                                        },
+                                        {
                                             "type": "Ext.grid.plugin.CellEditing",
                                             "reference": {
                                                 "name": "plugins",

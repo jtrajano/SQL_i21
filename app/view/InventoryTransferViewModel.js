@@ -53,6 +53,29 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
                 }
             ]
         },
+        condition: {
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Sound/Full'
+                },
+                {
+                    strDescription: 'Slack'
+                },
+                {
+                    strDescription: 'Damaged'
+                },
+                {
+                    strDescription: 'Clean Wgt'
+                },
+                {
+                    strDescription: 'Reconditioned'
+                }
+            ],
+            fields: {
+                name: 'strDescription'
+            }
+        },
         sourceTypes: {
             autoLoad: true,
             data: [

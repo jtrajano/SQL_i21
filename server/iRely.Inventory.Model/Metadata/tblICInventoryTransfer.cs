@@ -163,6 +163,7 @@ namespace iRely.Inventory.Model
         public string strItemType { get; set; }
         public decimal? dblGrossNetUnitQty { get; set; }
         public decimal? dblItemUnitQty { get; set; }
+        public string strLotCondition { get; set; }
         private string _strNewLotStatus;
         [NotMapped]
         public string strNewLotStatus
@@ -526,6 +527,7 @@ namespace iRely.Inventory.Model
         public string strGrossNetUOM { get; set; }
         public decimal? dblGrossNetUnitQty { get; set; }
         public decimal? dblItemUnitQty { get; set; }
+        public string strLotCondition { get; set; }
 
         public tblICInventoryTransferDetail tblICInventoryTransferDetail { get; set; }
         public tblICLotStatus tblICLotStatus { get; set; }
