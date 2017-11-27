@@ -7,7 +7,7 @@ AS
 
 BEGIN TRY
 	
-	DECLARE @ErrMsg						NVARCHAR(MAX),
+	DECLARE	@ErrMsg					NVARCHAR(MAX),
 			@intContractDetailId		INT,
 			@dblCashPrice				NUMERIC(18,6),
 			@intPricingTypeId			INT,
@@ -16,9 +16,9 @@ BEGIN TRY
 			@strContractNumber			NVARCHAR(100),
 			@dblBasis					NUMERIC(18,6),
 			@dblOriginalBasis			NUMERIC(18,6),
-			@Action						NVARCHAR(100),
-			@Condition					NVARCHAR(100),
-			@idoc						INT,
+			@Action					NVARCHAR(100),
+			@Condition				NVARCHAR(100),
+			@idoc					INT,
 			@intUniqueId				INT,
 			@strRowState				NVARCHAR(100),
 			@intNetWeightUOMId			INT,
@@ -36,7 +36,8 @@ BEGIN TRY
 			@dblNoOfLots				NUMERIC(18,6),
 			@dblHeaderNoOfLots			NUMERIC(18,6),
 			@intPriceFixationId			INT,
-			@ysnPriceChanged			BIT
+			@ysnPriceChanged			BIT,
+			@dblCorrectNetWeight		NUMERIC(18,6)
 
 	SELECT	@ysnMultiplePriceFixation	=	ysnMultiplePriceFixation,
 			@strContractNumber			=	strContractNumber,
@@ -123,9 +124,11 @@ BEGIN TRY
 		FROM	tblCTContractDetail 
 		WHERE	intContractDetailId =	@intContractDetailId 
 		
-		IF ISNULL(@intNetWeightUOMId,0) > 0 AND @dblNetWeight IS NULL
+		SELECT @dblCorrectNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId,intNetWeightUOMId,dblQuantity) FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
+
+		IF ISNULL(@intNetWeightUOMId,0) > 0 AND (@dblNetWeight IS NULL OR @dblNetWeight <> @dblCorrectNetWeight)
 		BEGIN
-			UPDATE tblCTContractDetail SET dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId,intNetWeightUOMId,dblQuantity) WHERE intContractDetailId = @intContractDetailId
+			UPDATE tblCTContractDetail SET dblNetWeight = @dblCorrectNetWeight WHERE intContractDetailId = @intContractDetailId
 		END
 
 		IF EXISTS(SELECT * FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
