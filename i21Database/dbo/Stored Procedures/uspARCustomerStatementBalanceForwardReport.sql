@@ -6,7 +6,7 @@
 	, @ysnPrintCreditBalance		AS BIT				= 1
 	, @ysnIncludeBudget				AS BIT				= 0
 	, @ysnPrintOnlyPastDue			AS BIT				= 0
-	, @ysnExcludeInactiveCustomers	AS BIT				= 0
+	, @ysnActiveCustomers			AS BIT				= 0
 	, @ysnPrintFromCF				AS BIT				= 0
 	, @strCustomerNumber			AS NVARCHAR(MAX)	= NULL
 	, @strAccountStatusCode			AS NVARCHAR(MAX)	= NULL
@@ -34,7 +34,7 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @ysnPrintCreditBalanceLocal			AS BIT				= 1
 	  , @ysnIncludeBudgetLocal				AS BIT				= 0
 	  , @ysnPrintOnlyPastDueLocal			AS BIT				= 0
-	  , @ysnExcludeInactiveCustomersLocal	AS BIT				= 0
+	  , @ysnActiveCustomersLocal			AS BIT				= 0
 	  , @ysnPrintFromCFLocal				AS BIT				= 0
 	  , @strCustomerNumberLocal				AS NVARCHAR(MAX)	= NULL
 	  , @strAccountStatusCodeLocal			AS NVARCHAR(MAX)	= NULL
@@ -156,7 +156,7 @@ SET @ysnPrintZeroBalanceLocal			= ISNULL(@ysnPrintZeroBalance, 0)
 SET @ysnPrintCreditBalanceLocal			= ISNULL(@ysnPrintCreditBalance, 1)
 SET @ysnIncludeBudgetLocal				= ISNULL(@ysnIncludeBudget, 0)
 SET @ysnPrintOnlyPastDueLocal			= ISNULL(@ysnPrintOnlyPastDue, 0)
-SET @ysnExcludeInactiveCustomersLocal	= ISNULL(@ysnExcludeInactiveCustomers, 0)
+SET @ysnActiveCustomersLocal			= ISNULL(@ysnActiveCustomers, 0)
 SET @ysnPrintFromCFLocal				= ISNULL(@ysnPrintFromCF, 0)
 SET @strCustomerNumberLocal				= NULLIF(@strCustomerNumber, '')
 SET @strAccountStatusCodeLocal			= NULLIF(@strAccountStatusCode, '')
@@ -181,7 +181,7 @@ IF @strCustomerNumberLocal IS NOT NULL
 			FROM dbo.tblEMEntity WITH (NOLOCK)
 			WHERE strEntityNo = @strCustomerNumberLocal
 		) EC ON C.intEntityId = EC.intEntityId
-		WHERE ((@ysnExcludeInactiveCustomersLocal = 1 AND C.ysnActive = 1) OR @ysnExcludeInactiveCustomersLocal = 0)
+		WHERE ((@ysnActiveCustomersLocal = 1 AND (C.ysnActive = 1 or C.dblARBalance <> 0 )) OR @ysnActiveCustomersLocal = 0)
 		  AND C.strStatementFormat = 'Balance Forward'
 	END
 ELSE
@@ -199,7 +199,7 @@ ELSE
 			FROM dbo.tblEMEntity WITH (NOLOCK)
 			WHERE (@strCustomerNameLocal IS NULL OR strName LIKE '%'+ @strCustomerNameLocal +'%')
 		) EC ON C.intEntityId = EC.intEntityId
-		WHERE ((@ysnExcludeInactiveCustomersLocal = 1 AND C.ysnActive = 1) OR @ysnExcludeInactiveCustomersLocal = 0)
+		WHERE ((@ysnActiveCustomersLocal = 1 AND (C.ysnActive = 1 or C.dblARBalance <> 0 )) OR @ysnActiveCustomersLocal = 0)
 		  AND C.strStatementFormat = 'Balance Forward'
 	END
 
