@@ -5763,6 +5763,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetUOMByLot.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUpdateTask.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTaskDetail.sql" />
+    <Build Include="dbo\Views\vyuRKGetPurchaseInventory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
