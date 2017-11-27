@@ -488,11 +488,17 @@ BEGIN
 							dbo.fnRecalculateAverageCost(intItemId, intItemLocationId)
 							, dblAverageCost
 						) 
+						, ysnIsPendingUpdate = 1
 				FROM	dbo.tblICItemPricing ItemPricing	
 				WHERE	ItemPricing.intItemId = @intItemId
 						AND ItemPricing.intItemLocationId = @intItemLocationId
 						AND ISNULL(@intCostingMethod, dbo.fnGetCostingMethod(intItemId, intItemLocationId)) <> @ACTUALCOST
 						AND ISNULL(@intFobPointId, @FOB_ORIGIN) <> @FOB_DESTINATION
+
+				-- Recalculate the item pricing because of the new average cost. 
+				EXEC uspICUpdateItemPricing
+					@intItemId
+					,@intItemLocationId
 
 				-- Update the stock quantities on tblICItemStock and tblICItemStockUOM tables. 
 				IF ISNULL(@intFobPointId, @FOB_ORIGIN) <> @FOB_DESTINATION

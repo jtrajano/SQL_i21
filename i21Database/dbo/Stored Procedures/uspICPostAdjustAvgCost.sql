@@ -587,8 +587,14 @@ END
 BEGIN 
 	UPDATE	p
 	SET		p.dblAverageCost = @RetroactiveAverageCost
+			,p.ysnIsPendingUpdate = 1
 	FROM	tblICItemPricing p
 	WHERE	p.intItemId = @intItemId
 			AND p.intItemLocationId = @intItemLocationId
 			AND @RetroactiveAverageCost IS NOT NULL 
+
+	-- Update the Item Pricing
+	EXEC uspICUpdateItemPricing
+		@intItemId
+		,@intItemLocationId
 END

@@ -327,10 +327,16 @@ BEGIN
 					dbo.fnRecalculateAverageCost(intItemId, intItemLocationId)
 					, dblAverageCost
 				) 
+				,ysnIsPendingUpdate = 1
 		FROM	dbo.tblICItemPricing ItemPricing	
 		WHERE	ItemPricing.intItemId = @intItemId
 				AND ItemPricing.intItemLocationId = @intItemLocationId
 				AND @strActualCostId IS NULL 
+
+		-- Recalculate the sales price because of the new average cost. 
+		EXEC uspICUpdateItemPricing
+			@intItemId
+			,@intItemLocationId
 	END 
 
 	-- Attempt to fetch the next row from cursor. 

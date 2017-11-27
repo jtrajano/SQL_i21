@@ -5922,6 +5922,7 @@
     <Build Include="dbo\Functions\fnFormatNumber.sql" />
     <Build Include="dbo\Functions\fnRTrim.sql" />
     <Build Include="dbo\Views\vyuQMCompanyPreference.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateItemPricing.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
