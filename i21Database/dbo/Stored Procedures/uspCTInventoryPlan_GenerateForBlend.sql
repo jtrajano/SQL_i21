@@ -122,6 +122,13 @@ BEGIN TRY
 	INTO #OpeningInventory
 	FROM [dbo].[tblICLot] L
 	JOIN [dbo].[tblICItem] I ON I.intItemId = L.intItemId
+		AND ISNULL(L.intLocationId, 0) = (
+			CASE 
+				WHEN @intCompanyLocationId = 0
+					THEN ISNULL(L.intLocationId, 0)
+				ELSE @intCompanyLocationId
+				END
+			)
 	GROUP BY I.intItemId
 
 	--select * from #TempPlannedPurchases
@@ -241,9 +248,17 @@ BEGIN TRY
 					FROM [dbo].[tblMFRecipeItem] RI
 					JOIN [dbo].[tblMFRecipe] R ON R.intRecipeId = RI.intRecipeId
 						AND R.ysnActive = 1
+						AND ISNULL(R.intLocationId, 0) = (
+							CASE 
+								WHEN @intCompanyLocationId = 0
+									THEN ISNULL(R.intLocationId, 0)
+								ELSE @intCompanyLocationId
+								END
+							)
 						AND RI.intRecipeItemTypeId = 1
 					JOIN #OpeningInventory OI ON OI.intItemId = R.intItemId
-					JOIN [dbo].[tblICItemUOM] IUOM ON IUOM.intItemId = OI.intItemId AND IUOM.ysnStockUnit = 1
+					JOIN [dbo].[tblICItemUOM] IUOM ON IUOM.intItemId = OI.intItemId
+						AND IUOM.ysnStockUnit = 1
 					WHERE RI.intItemId = @intItemId
 					)
 		ELSE
@@ -264,6 +279,13 @@ BEGIN TRY
 		INTO #ExistingPurchases
 		FROM [dbo].[tblCTContractDetail] SS
 		JOIN [dbo].[tblICItemUOM] IUOM ON IUOM.intItemUOMId = SS.intItemUOMId
+			AND ISNULL(SS.intCompanyLocationId, 0) = (
+				CASE 
+					WHEN @intCompanyLocationId = 0
+						THEN ISNULL(SS.intCompanyLocationId, 0)
+					ELSE @intCompanyLocationId
+					END
+				)
 		WHERE SS.intContractStatusId = 1
 		GROUP BY SS.intItemId
 			,SS.dtmUpdatedAvailabilityDate
@@ -273,6 +295,13 @@ BEGIN TRY
 				FROM [dbo].[tblMFRecipeItem] RI
 				JOIN [dbo].[tblMFRecipe] R ON R.intRecipeId = RI.intRecipeId
 					AND R.ysnActive = 1
+					AND ISNULL(R.intLocationId, 0) = (
+						CASE 
+							WHEN @intCompanyLocationId = 0
+								THEN ISNULL(R.intLocationId, 0)
+							ELSE @intCompanyLocationId
+							END
+						)
 					AND RI.intRecipeItemTypeId = 1
 				JOIN #ExistingPurchases EP ON EP.intItemId = R.intItemId
 				WHERE RI.intItemId = @intItemId
@@ -294,6 +323,13 @@ BEGIN TRY
 		INTO #IntransitPurchases
 		FROM [dbo].[vyuLGInventoryView] IV
 		JOIN [dbo].[tblCTContractDetail] SS ON SS.intContractDetailId = IV.intContractDetailId
+			AND ISNULL(SS.intCompanyLocationId, 0) = (
+				CASE 
+					WHEN @intCompanyLocationId = 0
+						THEN ISNULL(SS.intCompanyLocationId, 0)
+					ELSE @intCompanyLocationId
+					END
+				)
 		JOIN [dbo].[tblICItemUOM] IUOM ON IUOM.intItemUOMId = IV.intWeightItemUOMId
 		WHERE SS.intContractStatusId = 1
 			AND IV.strStatus = 'In-transit'
@@ -305,6 +341,13 @@ BEGIN TRY
 				FROM [dbo].[tblMFRecipeItem] RI
 				JOIN [dbo].[tblMFRecipe] R ON R.intRecipeId = RI.intRecipeId
 					AND R.ysnActive = 1
+					AND ISNULL(R.intLocationId, 0) = (
+						CASE 
+							WHEN @intCompanyLocationId = 0
+								THEN ISNULL(R.intLocationId, 0)
+							ELSE @intCompanyLocationId
+							END
+						)
 					AND RI.intRecipeItemTypeId = 1
 				JOIN #IntransitPurchases IP ON IP.intItemId = R.intItemId
 				WHERE RI.intItemId = @intItemId
@@ -446,6 +489,13 @@ BEGIN TRY
 							WHERE BD.intItemId = @intItemId
 								AND RIGHT(RTRIM(LEFT(CONVERT(VARCHAR(11), BD.dtmDemandDate, 106), 7)), 3) = LEFT(CONVERT(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 3)
 								AND RIGHT(CONVERT(VARCHAR(11), RTRIM(BD.dtmDemandDate), 106), 4) = RIGHT(CONVERT(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 4)
+								AND ISNULL(BD.intCompanyLocationId, 0) = (
+									CASE 
+										WHEN @intCompanyLocationId = 0
+											THEN ISNULL(BD.intCompanyLocationId, 0)
+										ELSE @intCompanyLocationId
+										END
+									)
 							)
 						--SET @ForecastedConsumption = (
 						--		ISNULL((SELECT SUM(RI.dblCalculatedQuantity * BD.dblQuantity)
@@ -479,6 +529,13 @@ BEGIN TRY
 						WHERE BD.intItemId = @intItemId
 							AND RIGHT(RTRIM(LEFT(CONVERT(VARCHAR(11), BD.dtmDemandDate, 106), 7)), 3) = LEFT(CONVERT(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 3)
 							AND RIGHT(CONVERT(VARCHAR(11), RTRIM(BD.dtmDemandDate), 106), 4) = RIGHT(CONVERT(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 4)
+							AND ISNULL(BD.intCompanyLocationId, 0) = (
+								CASE 
+									WHEN @intCompanyLocationId = 0
+										THEN ISNULL(BD.intCompanyLocationId, 0)
+									ELSE @intCompanyLocationId
+									END
+								)
 						)
 					--SET @ForecastedConsumption = (
 					--			ISNULL((SELECT SUM(RI.dblCalculatedQuantity * BD.dblQuantity)
@@ -730,6 +787,13 @@ BEGIN TRY
 										FROM [dbo].[tblMFRecipeItem] RI
 										JOIN [dbo].[tblMFRecipe] R ON R.intRecipeId = RI.intRecipeId
 											AND R.ysnActive = 1
+											AND ISNULL(R.intLocationId, 0) = (
+												CASE 
+													WHEN @intCompanyLocationId = 0
+														THEN ISNULL(R.intLocationId, 0)
+													ELSE @intCompanyLocationId
+													END
+												)
 											AND RI.intRecipeItemTypeId = 1
 										JOIN #ExistingPurchases EP ON EP.intItemId = R.intItemId
 										WHERE RI.intItemId = @intItemId
@@ -771,6 +835,13 @@ BEGIN TRY
 										FROM [dbo].[tblMFRecipeItem] RI
 										JOIN [dbo].[tblMFRecipe] R ON R.intRecipeId = RI.intRecipeId
 											AND R.ysnActive = 1
+											AND ISNULL(R.intLocationId, 0) = (
+												CASE 
+													WHEN @intCompanyLocationId = 0
+														THEN ISNULL(R.intLocationId, 0)
+													ELSE @intCompanyLocationId
+													END
+												)
 											AND RI.intRecipeItemTypeId = 1
 										JOIN #IntransitPurchases IP ON IP.intItemId = R.intItemId
 										WHERE RI.intItemId = @intItemId
@@ -1250,6 +1321,13 @@ BEGIN TRY
 									FROM [dbo].[tblMFRecipeItem] RI
 									JOIN [dbo].[tblMFRecipe] R ON R.intRecipeId = RI.intRecipeId
 										AND R.ysnActive = 1
+										AND ISNULL(R.intLocationId, 0) = (
+											CASE 
+												WHEN @intCompanyLocationId = 0
+													THEN ISNULL(R.intLocationId, 0)
+												ELSE @intCompanyLocationId
+												END
+											)
 										AND RI.intRecipeItemTypeId = 1
 									JOIN #ExistingPurchases EP ON EP.intItemId = R.intItemId
 									WHERE RI.intItemId = @intItemId
@@ -1291,6 +1369,13 @@ BEGIN TRY
 									FROM [dbo].[tblMFRecipeItem] RI
 									JOIN [dbo].[tblMFRecipe] R ON R.intRecipeId = RI.intRecipeId
 										AND R.ysnActive = 1
+										AND ISNULL(R.intLocationId, 0) = (
+											CASE 
+												WHEN @intCompanyLocationId = 0
+													THEN ISNULL(R.intLocationId, 0)
+												ELSE @intCompanyLocationId
+												END
+											)
 										AND RI.intRecipeItemTypeId = 1
 									JOIN #IntransitPurchases IP ON IP.intItemId = R.intItemId
 									WHERE RI.intItemId = @intItemId

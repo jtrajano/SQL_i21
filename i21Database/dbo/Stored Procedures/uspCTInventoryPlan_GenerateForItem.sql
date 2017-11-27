@@ -234,6 +234,13 @@ BEGIN TRY
 					FROM dbo.tblICLot L
 					JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
 						AND L.intItemId = @intItemId
+						AND ISNULL(L.intLocationId, 0) = (
+							CASE 
+								WHEN @intCompanyLocationId = 0
+									THEN ISNULL(L.intLocationId, 0)
+								ELSE @intCompanyLocationId
+								END
+							)
 					LEFT JOIN dbo.tblICItemUOM IUOM ON IUOM.intItemUOMId = L.intWeightUOMId
 					JOIN dbo.tblICItemUOM IUOM1 ON IUOM1.intItemUOMId = L.intItemUOMId
 						--WHERE intItemId IN (
@@ -257,6 +264,13 @@ BEGIN TRY
 								END)
 					FROM [dbo].[tblCTContractDetail] SS
 					JOIN [dbo].[tblICItemUOM] IUOM ON IUOM.intItemUOMId = SS.intItemUOMId
+						AND ISNULL(SS.intCompanyLocationId, 0) = (
+							CASE 
+								WHEN @intCompanyLocationId = 0
+									THEN ISNULL(SS.intCompanyLocationId, 0)
+								ELSE @intCompanyLocationId
+								END
+							)
 					WHERE SS.intItemId = @intItemId
 						AND SS.intContractStatusId = 1
 						AND SS.dtmUpdatedAvailabilityDate <= (CAST((CONVERT(VARCHAR(25), DATEADD(dd, - (DAY(GETDATE())), GETDATE()), 101)) AS DATETIME)) -- previous month last date
@@ -272,6 +286,13 @@ BEGIN TRY
 								END)
 					FROM [dbo].[vyuLGInventoryView] IV
 					JOIN [dbo].[tblCTContractDetail] SS ON SS.intContractDetailId = IV.intContractDetailId
+						AND ISNULL(SS.intCompanyLocationId, 0) = (
+							CASE 
+								WHEN @intCompanyLocationId = 0
+									THEN ISNULL(SS.intCompanyLocationId, 0)
+								ELSE @intCompanyLocationId
+								END
+							)
 					JOIN [dbo].[tblICItemUOM] IUOM ON IUOM.intItemUOMId = IV.intWeightItemUOMId
 					WHERE IV.intItemId = @intItemId
 						AND IV.strStatus = 'In-transit'
@@ -406,8 +427,15 @@ BEGIN TRY
 			)
 
 		INSERT INTO #TempBlendDemandItem
-		SELECT DISTINCT intItemId
-		FROM tblCTBlendDemand
+		SELECT DISTINCT BD.intItemId
+		FROM tblCTBlendDemand BD
+		WHERE ISNULL(BD.intCompanyLocationId, 0) = (
+				CASE 
+					WHEN @intCompanyLocationId = 0
+						THEN ISNULL(BD.intCompanyLocationId, 0)
+					ELSE @intCompanyLocationId
+					END
+				)
 
 		SELECT @MinBlendDemandItemId = MIN(Id)
 		FROM #TempBlendDemandItem
@@ -421,10 +449,17 @@ BEGIN TRY
 			FROM #TempBlendDemandItem
 			WHERE Id = @MinBlendDemandItemId
 
-			SELECT @intBlendDemandItemRecipeId = intRecipeId
-			FROM tblMFRecipe
-			WHERE intItemId = @intBlendDemandItemId
-				AND ysnActive = 1
+			SELECT @intBlendDemandItemRecipeId = R.intRecipeId
+			FROM tblMFRecipe R
+			WHERE R.intItemId = @intBlendDemandItemId
+				AND R.ysnActive = 1
+				AND ISNULL(R.intLocationId, 0) = (
+					CASE 
+						WHEN @intCompanyLocationId = 0
+							THEN ISNULL(R.intLocationId, 0)
+						ELSE @intCompanyLocationId
+						END
+					)
 
 			INSERT INTO #TempInput (
 				intBlendDemandItemId
@@ -441,6 +476,13 @@ BEGIN TRY
 			FROM tblMFRecipeItem RI
 			JOIN tblMFRecipe R ON R.intRecipeId = RI.intRecipeId
 				AND ysnActive = 1
+				AND ISNULL(R.intLocationId, 0) = (
+					CASE 
+						WHEN @intCompanyLocationId = 0
+							THEN ISNULL(R.intLocationId, 0)
+						ELSE @intCompanyLocationId
+						END
+					)
 			WHERE RI.intRecipeId = @intBlendDemandItemRecipeId
 				AND intRecipeItemTypeId = 1
 
@@ -470,10 +512,17 @@ BEGIN TRY
 					FROM #TempInput
 					WHERE Id = @MinId
 
-					SELECT @intRecipeId = intRecipeId
-					FROM tblMFRecipe
-					WHERE intItemId = @intItemId1
-						AND ysnActive = 1
+					SELECT @intRecipeId = R.intRecipeId
+					FROM tblMFRecipe R
+					WHERE R.intItemId = @intItemId1
+						AND R.ysnActive = 1
+						AND ISNULL(R.intLocationId, 0) = (
+							CASE 
+								WHEN @intCompanyLocationId = 0
+									THEN ISNULL(R.intLocationId, 0)
+								ELSE @intCompanyLocationId
+								END
+							)
 
 					SELECT @MaxId = MAX(Id)
 					FROM #TempInput
@@ -497,13 +546,22 @@ BEGIN TRY
 						,intRecipeItemId
 						)
 					SELECT @intBlendDemandItemId
-						,intItemId
-						,(dblQuantity * @dblTotalRecipeItemQty)
-						,intRecipeId
-						,intRecipeItemId
-					FROM tblMFRecipeItem
-					WHERE intRecipeId = @intRecipeId
-						AND intRecipeItemTypeId = 1
+						,RI.intItemId
+						,(RI.dblQuantity * @dblTotalRecipeItemQty)
+						,RI.intRecipeId
+						,RI.intRecipeItemId
+					FROM tblMFRecipeItem RI
+					JOIN tblMFRecipe R ON R.intRecipeId = RI.intRecipeId
+						AND R.ysnActive = 1
+						AND ISNULL(R.intLocationId, 0) = (
+							CASE 
+								WHEN @intCompanyLocationId = 0
+									THEN ISNULL(R.intLocationId, 0)
+								ELSE @intCompanyLocationId
+								END
+							)
+					WHERE RI.intRecipeId = @intRecipeId
+						AND RI.intRecipeItemTypeId = 1
 
 					INSERT INTO #TempInputALL
 					SELECT *
@@ -589,6 +647,13 @@ BEGIN TRY
 							JOIN tblCTBlendDemand BD ON BD.intItemId = TIA.intBlendDemandItemId
 								AND RIGHT(RTRIM(LEFT(CONVERT(VARCHAR(11), BD.dtmDemandDate, 106), 7)), 3) = LEFT(CONVERT(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 3)
 								AND RIGHT(CONVERT(VARCHAR(11), RTRIM(BD.dtmDemandDate), 106), 4) = RIGHT(CONVERT(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 4)
+								AND ISNULL(BD.intCompanyLocationId, 0) = (
+									CASE 
+										WHEN @intCompanyLocationId = 0
+											THEN ISNULL(BD.intCompanyLocationId, 0)
+										ELSE @intCompanyLocationId
+										END
+									)
 							WHERE TIA.intItemId = @intItemId
 							)
 						--DROP TABLE #TempInput
@@ -626,6 +691,13 @@ BEGIN TRY
 						JOIN tblCTBlendDemand BD ON BD.intItemId = TIA.intBlendDemandItemId
 							AND RIGHT(RTRIM(LEFT(CONVERT(VARCHAR(11), BD.dtmDemandDate, 106), 7)), 3) = LEFT(CONVERT(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 3)
 							AND RIGHT(CONVERT(VARCHAR(11), RTRIM(BD.dtmDemandDate), 106), 4) = RIGHT(CONVERT(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 4)
+							AND ISNULL(BD.intCompanyLocationId, 0) = (
+								CASE 
+									WHEN @intCompanyLocationId = 0
+										THEN ISNULL(BD.intCompanyLocationId, 0)
+									ELSE @intCompanyLocationId
+									END
+								)
 						WHERE TIA.intItemId = @intItemId
 						)
 			END
@@ -869,6 +941,13 @@ BEGIN TRY
 														END)
 											FROM [dbo].[tblCTContractDetail] SS
 											JOIN [dbo].[tblICItemUOM] IUOM ON IUOM.intItemUOMId = SS.intItemUOMId
+												AND ISNULL(SS.intCompanyLocationId, 0) = (
+													CASE 
+														WHEN @intCompanyLocationId = 0
+															THEN ISNULL(SS.intCompanyLocationId, 0)
+														ELSE @intCompanyLocationId
+														END
+													)
 											WHERE SS.intItemId = @intItemId
 												AND SS.intContractStatusId = 1
 												AND left(convert(CHAR(12), SS.dtmUpdatedAvailabilityDate), 3) = left(convert(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 3)
@@ -899,6 +978,13 @@ BEGIN TRY
 														END)
 											FROM [dbo].[vyuLGInventoryView] IV
 											JOIN [dbo].[tblCTContractDetail] SS ON SS.intContractDetailId = IV.intContractDetailId
+												AND ISNULL(SS.intCompanyLocationId, 0) = (
+													CASE 
+														WHEN @intCompanyLocationId = 0
+															THEN ISNULL(SS.intCompanyLocationId, 0)
+														ELSE @intCompanyLocationId
+														END
+													)
 											JOIN [dbo].[tblICItemUOM] IUOM ON IUOM.intItemUOMId = IV.intWeightItemUOMId
 											WHERE IV.intItemId = @intItemId
 												AND IV.strStatus = 'In-transit'
@@ -1372,6 +1458,13 @@ BEGIN TRY
 													END)
 										FROM [dbo].[tblCTContractDetail] SS
 										JOIN [dbo].[tblICItemUOM] IUOM ON IUOM.intItemUOMId = SS.intItemUOMId
+											AND ISNULL(SS.intCompanyLocationId, 0) = (
+												CASE 
+													WHEN @intCompanyLocationId = 0
+														THEN ISNULL(SS.intCompanyLocationId, 0)
+													ELSE @intCompanyLocationId
+													END
+												)
 										WHERE SS.intItemId = @intItemId
 											AND SS.intContractStatusId = 1
 											AND left(convert(CHAR(12), SS.dtmUpdatedAvailabilityDate), 3) = left(convert(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 3)
@@ -1402,6 +1495,13 @@ BEGIN TRY
 													END)
 										FROM [dbo].[vyuLGInventoryView] IV
 										JOIN [dbo].[tblCTContractDetail] SS ON SS.intContractDetailId = IV.intContractDetailId
+											AND ISNULL(SS.intCompanyLocationId, 0) = (
+												CASE 
+													WHEN @intCompanyLocationId = 0
+														THEN ISNULL(SS.intCompanyLocationId, 0)
+													ELSE @intCompanyLocationId
+													END
+												)
 										JOIN [dbo].[tblICItemUOM] IUOM ON IUOM.intItemUOMId = IV.intWeightItemUOMId
 										WHERE IV.intItemId = @intItemId
 											AND IV.strStatus = 'In-transit'
