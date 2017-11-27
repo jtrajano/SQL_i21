@@ -10,6 +10,7 @@ SELECT CD.intContractDetailId
 	,CD.intUpdatedAvailabilityMonth
 	,CD.intUpdatedAvailabilityYear
 	,CD.dtmUpdatedAvailabilityDate
+	,CD.intCompanyLocationId
 FROM [dbo].[tblMFRecipeItem] RI
 JOIN [dbo].[tblMFRecipe] R ON R.intRecipeId = RI.intRecipeId
 	AND R.ysnActive = 1
