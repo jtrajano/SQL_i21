@@ -5905,6 +5905,7 @@
 	<Build Include="dbo\Functions\fnGetItemInTransitCostingOnUnpostErrors.sql" />
     <Build Include="dbo\Functions\fnFormatNumber.sql" />
     <Build Include="dbo\Functions\fnRTrim.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateItemPricing.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -24,14 +24,19 @@ Type the overview for the table here.
 		[dblAverageCost] NUMERIC(38, 20) NULL DEFAULT ((0)), 
 		[dblEndMonthCost] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[intSort] INT NULL, 
+		[ysnIsPendingUpdate] BIT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICItemPricing] PRIMARY KEY ([intItemPricingId]), 
 		CONSTRAINT [FK_tblICItemPricing_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICItemPricing_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]), 
 		CONSTRAINT [AK_tblICItemPricing] UNIQUE ([intItemId], [intItemLocationId])
 	)
-
 	GO
+	CREATE NONCLUSTERED INDEX [IX_tblICItemPricing_PendingUpdate]
+		ON [dbo].[tblICItemPricing]([ysnIsPendingUpdate] DESC)
+		INCLUDE ([intItemId], [intItemLocationId])
+	GO
+
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Identity Field',
 		@level0type = N'SCHEMA',
@@ -57,15 +62,7 @@ Type the overview for the table here.
 		@level1type = N'TABLE',
 		@level1name = N'tblICItemPricing',
 		@level2type = N'COLUMN',
-		@level2name = 'intItemLocationId'
-	GO
-
-	GO
-	
-	GO
-	
-	GO
-	
+		@level2name = 'intItemLocationId'	
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Sale Price',
@@ -156,9 +153,6 @@ Type the overview for the table here.
 		@level1name = N'tblICItemPricing',
 		@level2type = N'COLUMN',
 		@level2name = N'dblAmountPercent'
-	GO
-	
-	GO
 	
 	GO
 	

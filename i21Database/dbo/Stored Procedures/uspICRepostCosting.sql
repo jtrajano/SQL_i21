@@ -446,10 +446,21 @@ BEGIN
 										ELSE 
 											ItemPricing.dblStandardCost
 									END 
-					,dblSalePrice = 
-						CASE	WHEN StockToUpdate.Qty > 0 AND ISNULL(ItemPricing.dblStandardCost, 0) = 0 AND ItemPricing.strPricingMethod = 'Markup Standard Cost' THEN 
-									StockToUpdate.Cost + (StockToUpdate.Cost * (ItemPricing.dblAmountPercent / 100))
-								ELSE ItemPricing.dblSalePrice
+					,ysnIsPendingUpdate = 
+						CASE	WHEN 
+									dblAverageCost <> CASE WHEN @strActualCostId IS NULL THEN dbo.fnCalculateAverageCost(StockToUpdate.Qty, StockToUpdate.Cost, @CurrentStockQty, ItemPricing.dblAverageCost) ELSE ItemPricing.dblAverageCost END 
+									OR dblLastCost <> CASE WHEN StockToUpdate.Qty > 0 THEN StockToUpdate.Cost ELSE ItemPricing.dblLastCost END 
+									OR dblStandardCost <> (
+											CASE WHEN StockToUpdate.Qty > 0 THEN 
+												CASE WHEN ISNULL(ItemPricing.dblStandardCost, 0) = 0 THEN StockToUpdate.Cost ELSE ItemPricing.dblStandardCost END 
+											ELSE 
+												ItemPricing.dblStandardCost
+											END 									
+										)
+									THEN 
+									1 										
+								ELSE 
+									0
 						END 
 
 		-- If none found, insert a new item pricing record
@@ -460,6 +471,7 @@ BEGIN
 				,dblAverageCost 
 				,dblStandardCost
 				,dblLastCost 
+				,ysnIsPendingUpdate
 				,intConcurrencyId
 			)
 			VALUES (
@@ -469,8 +481,16 @@ BEGIN
 				,StockToUpdate.Cost
 				,StockToUpdate.Cost
 				,1
+				,1
 			)
 		;
+
+		------------------------------------------------------------
+		-- Update the Item Pricing
+		------------------------------------------------------------
+		EXEC uspICUpdateItemPricing
+			@intItemId
+			,@intItemLocationId
 
 		------------------------------------------------------------
 		-- Update the Stock Quantity
