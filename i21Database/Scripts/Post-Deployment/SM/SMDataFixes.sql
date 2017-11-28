@@ -303,3 +303,9 @@ GO
 	PRINT N'SET application/pdf for pdf files'
 	UPDATE tblSMAttachment SET strFileType = 'application/pdf' WHERE strName LIKE '%.pdf' and strFileType = ''
 GO
+	PRINT N'DISABLE ysnLegacyIntegration FOR NEW COMPANY'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE UPPER(TABLE_NAME) = 'COCTLMST')
+	BEGIN
+		UPDATE tblSMCompanyPreference SET ysnLegacyIntegration = 0
+	END
+GO
