@@ -192,6 +192,10 @@ UnitTestEngine.testModel({
         "type": "float",
         "allowNull": true
     }, {
+        "name": "ysnLotWeightsRequired",
+        "type": "boolean",
+        "allowNull": false
+    }, {
         "name": "dblOpenReceiveBeforeEdit",
         "type": "float",
         "allowNull": true

@@ -10,7 +10,7 @@ UnitTestEngine.testStore({
         "proxy": {
             "type": "rest",
             "api": {
-                "read": "./Inventory/api/InventoryReceipt/SearchReceiptItemView"
+                "read": "./inventory/api/inventoryreceipt/searchreceiptitemview"
             },
             "extraParams": [{
                 "name": "intInventoryReceiptId",

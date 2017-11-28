@@ -10,9 +10,9 @@ UnitTestEngine.testStore({
         "proxy": {
             "type": "rest",
             "api": {
-                "read": "./Inventory/api/ManufacturingCell/GetManufacturingCells",
-                "update": "./Inventory/api/ManufacturingCell/PutManufacturingCells",
-                "create": "./Inventory/api/ManufacturingCell/PostManufacturingCells"
+                "read": "./inventory/api/manufacturingcell/getmanufacturingcells",
+                "update": "./inventory/api/manufacturingcell/putmanufacturingcells",
+                "create": "./inventory/api/manufacturingcell/postmanufacturingcells"
             }
         }
     }

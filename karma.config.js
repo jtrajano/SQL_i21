@@ -2,7 +2,7 @@ var libFiles = [
     { pattern: 'app/lib/rx.all.js', watched: true },
     { pattern: 'app/lib/numeraljs/numeral.js', watched: true },
     { pattern: 'app/lib/underscore.js', watched: true },
-    { pattern: 'node_modules/extjs-spec-generator/src/UnitTestEngine.js', watched: true }
+    { pattern: 'node_modules/gulp-extjs-spec-generator/node_modules/extjs-spec-generator/src/UnitTestEngine.js', watched: true },
 ];
 
 var mainAppFiles = [

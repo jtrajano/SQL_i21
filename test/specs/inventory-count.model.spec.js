@@ -44,6 +44,14 @@ UnitTestEngine.testModel({
         "type": "string",
         "allowNull": false
     }, {
+        "name": "strSubLocation",
+        "type": "string",
+        "allowNull": false
+    }, {
+        "name": "strStorageLocation",
+        "type": "string",
+        "allowNull": false
+    }, {
         "name": "strShiftNo",
         "type": "string",
         "allowNull": false
@@ -101,6 +109,10 @@ UnitTestEngine.testModel({
         "allowNull": false
     }, {
         "name": "intEntityId",
+        "type": "int",
+        "allowNull": true
+    }, {
+        "name": "intLockType",
         "type": "int",
         "allowNull": true
     }, {

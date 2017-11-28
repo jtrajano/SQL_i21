@@ -80,22 +80,6 @@ UnitTestEngine.testModel({
         "type": "int",
         "allowNull": true
     }, {
-        "name": "intDestinationQtyUOMId",
-        "type": "int",
-        "allowNull": true
-    }, {
-        "name": "strDestinationQtyUOM",
-        "type": "string",
-        "allowNull": false
-    }, {
-        "name": "dblDestinationGrossQty",
-        "type": "float",
-        "allowNull": false
-    }, {
-        "name": "dblDestinationNetQty",
-        "type": "float",
-        "allowNull": false
-    }, {
         "name": "strItemNo",
         "type": "string",
         "allowNull": false
@@ -141,6 +125,10 @@ UnitTestEngine.testModel({
         "allowNull": false
     }, {
         "name": "dblForexRate",
+        "type": "float",
+        "allowNull": true
+    }, {
+        "name": "dblDestinationQuantity",
         "type": "float",
         "allowNull": true
     }],

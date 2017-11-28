@@ -16,7 +16,7 @@ var appFiles = [
 ];
 
 var testFiles = [
-    { pattern: 'node_modules/extjs-spec-generator/src/UnitTestEngine.js', watched: true },
+    { pattern: 'node_modules/gulp-extjs-spec-generator/node_modules/extjs-spec-generator/src/UnitTestEngine.js', watched: true },    
 
     { pattern: 'test/specs/**/*.spec.js', watched: true }
 ];

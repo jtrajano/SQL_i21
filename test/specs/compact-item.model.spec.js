@@ -131,6 +131,10 @@ UnitTestEngine.testModel({
         "name": "ysnIsBasket",
         "type": "boolean",
         "allowNull": false
+    }, {
+        "name": "ysnLotWeightsRequired",
+        "type": "boolean",
+        "allowNull": false
     }],
     validators: [
         []

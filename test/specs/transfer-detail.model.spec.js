@@ -107,6 +107,54 @@ UnitTestEngine.testModel({
         "name": "dblOriginalStorageQty",
         "type": "float",
         "allowNull": false
+    }, {
+        "name": "strToStorageLocationName",
+        "type": "string",
+        "allowNull": false
+    }, {
+        "name": "strItemType",
+        "type": "string",
+        "allowNull": false
+    }, {
+        "name": "dblGross",
+        "type": "float",
+        "allowNull": true
+    }, {
+        "name": "dblNet",
+        "type": "float",
+        "allowNull": true
+    }, {
+        "name": "dblTare",
+        "type": "float",
+        "allowNull": true
+    }, {
+        "name": "intNewLotStatusId",
+        "type": "int",
+        "allowNull": true
+    }, {
+        "name": "strNewLotStatus",
+        "type": "string",
+        "allowNull": false
+    }, {
+        "name": "strLotCondition",
+        "type": "string",
+        "allowNull": false
+    }, {
+        "name": "intGrossNetUOMId",
+        "type": "int",
+        "allowNull": true
+    }, {
+        "name": "strGrossNetUOM",
+        "type": "string",
+        "allowNull": false
+    }, {
+        "name": "dblGrossNetUnitQty",
+        "type": "float",
+        "allowNull": true
+    }, {
+        "name": "dblItemUnitQty",
+        "type": "float",
+        "allowNull": true
     }],
     validators: [
         [{

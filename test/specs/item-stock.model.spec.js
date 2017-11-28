@@ -32,6 +32,10 @@ UnitTestEngine.testModel({
         "type": "float",
         "allowNull": false
     }, {
+        "name": "dblInTransitDirect",
+        "type": "float",
+        "allowNull": false
+    }, {
         "name": "dblBackOrder",
         "type": "float",
         "allowNull": false

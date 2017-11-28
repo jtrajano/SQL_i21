@@ -2,9 +2,9 @@ UnitTestEngine.testStore({
     name: 'Inventory.store.BufferedItemSubLocations',
     alias: "store.icbuffereditemsublocations",
     base: 'Ext.data.BufferedStore',
-    dependencies: ["Inventory.model.ItemSubLocations"],
+    dependencies: ["Inventory.model.ItemSubLocation"],
     config: {
-        "model": "Inventory.model.ItemSubLocations",
+        "model": "Inventory.model.ItemSubLocation",
         "storeId": "BufferedItemSubLocationsStore",
         "pageSize": 50,
         "remoteFilter": true,
@@ -12,7 +12,7 @@ UnitTestEngine.testStore({
         "proxy": {
             "type": "rest",
             "api": {
-                "read": "./Inventory/api/Item/SearchItemSubLocations"
+                "read": "./inventory/api/item/searchitemsublocations"
             }
         }
     }

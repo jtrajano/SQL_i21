@@ -75,6 +75,10 @@ UnitTestEngine.testModel({
         "name": "dblForexRate",
         "type": "float",
         "allowNull": true
+    }, {
+        "name": "dblQuantity",
+        "type": "float",
+        "allowNull": true
     }],
     validators: [
         [{

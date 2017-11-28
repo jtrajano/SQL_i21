@@ -2,7 +2,7 @@ UnitTestEngine.testModel({
     name: 'Inventory.model.ItemUOM',
     base: 'iRely.BaseEntity',
     idProperty: 'intItemUOMId',
-    dependencies: ["Ext.data.Field", "AccountsPayable.common.validators.NotZero"],
+    dependencies: ["Ext.data.Field"],
     fields: [{
         "name": "intItemUOMId",
         "type": "int",
@@ -23,14 +23,6 @@ UnitTestEngine.testModel({
         "name": "dblSellQty",
         "type": "float",
         "allowNull": false
-    }, {
-        "name": "dblWeight",
-        "type": "float",
-        "allowNull": false
-    }, {
-        "name": "intWeightUOMId",
-        "type": "int",
-        "allowNull": true
     }, {
         "name": "strDescription",
         "type": "string",
@@ -68,17 +60,9 @@ UnitTestEngine.testModel({
         "type": "float",
         "allowNull": false
     }, {
-        "name": "intDimensionUOMId",
-        "type": "int",
-        "allowNull": true
-    }, {
         "name": "dblVolume",
         "type": "float",
         "allowNull": false
-    }, {
-        "name": "intVolumeUOMId",
-        "type": "int",
-        "allowNull": true
     }, {
         "name": "dblMaxQty",
         "type": "float",
@@ -96,9 +80,6 @@ UnitTestEngine.testModel({
         [{
             "field": "strUnitMeasure",
             "type": "presence"
-        }, {
-            "field": "dblUnitQty",
-            "type": "notzero"
         }]
     ]
 });

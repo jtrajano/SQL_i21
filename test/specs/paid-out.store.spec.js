@@ -11,7 +11,7 @@ UnitTestEngine.testStore({
         "proxy": {
             "type": "rest",
             "api": {
-                "read": "./Inventory/api/PaidOut/GetPaidOuts"
+                "read": "./inventory/api/paidout/getpaidouts"
             }
         }
     }

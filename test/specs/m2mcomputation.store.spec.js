@@ -10,9 +10,9 @@ UnitTestEngine.testStore({
         "proxy": {
             "type": "rest",
             "api": {
-                "read": "./Inventory/api/M2MComputation/Get",
-                "update": "./Inventory/api/M2MComputation/Put",
-                "create": "./Inventory/api/M2MComputation/Post"
+                "read": "./inventory/api/m2mcomputation/get",
+                "update": "./inventory/api/m2mcomputation/put",
+                "create": "./inventory/api/m2mcomputation/post"
             }
         }
     }

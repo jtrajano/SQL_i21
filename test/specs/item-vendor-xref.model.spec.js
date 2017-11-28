@@ -54,9 +54,6 @@ UnitTestEngine.testModel({
     }],
     validators: [
         [{
-            "field": "strLocationName",
-            "type": "presence"
-        }, {
             "field": "strVendorId",
             "type": "presence"
         }, {

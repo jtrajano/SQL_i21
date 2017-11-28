@@ -10,7 +10,7 @@ UnitTestEngine.testStore({
         "proxy": {
             "type": "rest",
             "api": {
-                "read": "./Inventory/api/InventoryValuation/GetFiscalMonths"
+                "read": "./inventory/api/inventoryvaluation/getfiscalmonths"
             }
         }
     }
