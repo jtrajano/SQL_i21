@@ -5928,6 +5928,7 @@
     <Build Include="dbo\Tables\tblCRMSalesRepSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspCRMGetSalesRepSummary.sql" />
     <Build Include="dbo\Views\vyuMFCompanyPreference.sql" />
+    <Build Include="dbo\Views\vyuVRRebateExport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
