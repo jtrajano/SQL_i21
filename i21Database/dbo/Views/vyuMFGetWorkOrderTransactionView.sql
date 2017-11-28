@@ -549,7 +549,7 @@ Left JOIN dbo.tblICItemOwner O on O.intItemOwnerId=L.intItemOwnerId
 LEFT JOIN dbo.tblICLot L1 ON L1.intLotId = WP.intSpecialPalletLotId
 WHERE WP.ysnProductionReversed = 1
 UNION
-SELECT NULL As  intWorkOrderId
+SELECT -1 As  intWorkOrderId
 	,NULL AS strWorkOrderNo
 	,IA.dtmDate AS [Transaction Date]
 	,NULL AS intTargetItemId
@@ -635,8 +635,8 @@ SELECT NULL As  intWorkOrderId
 	,IA.strReason AS [Reason]
 FROM tblMFInventoryAdjustment IA
 JOIN tblICItem I1 ON I1.intItemId = IA.intItemId
-JOIN tblICItemUOM IU ON IU.intItemUOMId = IA.intItemUOMId
-JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = IA.intItemUOMId
+LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 JOIN tblICStorageLocation SL1 ON SL1.intStorageLocationId = IA.intStorageLocationId
 JOIN tblICLot L1 ON L1.intLotId = IA.intSourceLotId
 JOIN tblICParentLot PL On PL.intParentLotId =L1.intParentLotId 
