@@ -5927,6 +5927,7 @@
     <Build Include="dbo\Tables\tblMFParentLotNumberPattern.sql" />
     <Build Include="dbo\Tables\tblCRMSalesRepSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspCRMGetSalesRepSummary.sql" />
+    <Build Include="dbo\Views\vyuMFCompanyPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
