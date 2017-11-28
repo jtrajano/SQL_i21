@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE uspMFGetProductBySubLocation (
 	@intSubLocationId INT
-	,@strItemNo NVARCHAR(50) = '%'
+	,@strItemNo NVARCHAR(50) = ''
 	,@intItemId INT = 0
 	,@intManufacturingProcessId INT = 0
 	)
@@ -35,7 +35,10 @@ BEGIN
 			AND R.ysnActive = 1
 			AND IU.ysnStockUnit = 1
 			AND I.strStatus = 'Active'
-			AND I.strItemNo LIKE @strItemNo + '%'
+			AND (
+				I.strItemNo LIKE '%' + @strItemNo + '%'
+				OR I.strDescription LIKE '%' + @strItemNo + '%'
+				)
 			AND I.intItemId = (
 				CASE 
 					WHEN @intItemId > 0
@@ -69,7 +72,10 @@ BEGIN
 			AND R.ysnActive = 1
 			AND IU.ysnStockUnit = 1
 			AND I.strStatus = 'Active'
-			AND I.strItemNo LIKE @strItemNo + '%'
+			AND (
+				I.strItemNo LIKE '%' + @strItemNo + '%'
+				OR I.strDescription LIKE '%' + @strItemNo + '%'
+				)
 			AND I.intItemId = (
 				CASE 
 					WHEN @intItemId > 0
