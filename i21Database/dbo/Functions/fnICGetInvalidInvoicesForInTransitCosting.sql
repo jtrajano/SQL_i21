@@ -42,6 +42,7 @@ BEGIN
 				-- , vi.intStorageLocationId
 				, vi.dblQty
 				, vi.intLotId
+				, vi.dblCost
 			) Errors
 																												
 	RETURN

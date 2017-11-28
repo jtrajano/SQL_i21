@@ -209,7 +209,8 @@ BEGIN
 		WHEN @msgId = 80193 THEN 'Please unpost and delete %s first. Destination Qty in %s will not be updated if it has an invoice already.'
 		WHEN @msgId = 80194 THEN 'Unable to Post the Destination Qty because %s is already posted.'
 		WHEN @msgId = 80195 THEN 'Unable to unpost %s because you need to unpost the Destination Qty first.'
-		WHEN @msgId = 80196 THEN 'Unable to post %s. Functional currency is not set for the company.'
+		WHEN @msgId = 80196 THEN '%s will have a negative cost. Negative cost is not allowed.'
+		WHEN @msgId = 80197 THEN 'Unable to post %s. Functional currency is not set for the company.'
 	END 
 
 	RETURN @msg

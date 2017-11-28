@@ -47,6 +47,7 @@ BEGIN
 				, vi.strTransactionId
 				, vi.intCurrencyId
 				, vi.dblForexRate
+				, vi.dblCost
 			) Errors
 																												
 	RETURN
