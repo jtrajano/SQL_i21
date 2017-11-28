@@ -2,6 +2,7 @@
     [intCompanySetupID] INT IDENTITY (1, 1) NOT NULL,
 	[imgCompanyLogo]	VARBINARY (MAX) NULL, 
 	[ysnGlobalLogo]		BIT NOT NULL DEFAULT 0, 
+	[strCompanyLogo]	NVARCHAR (50) NULL, 
 	[strEin]			NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strCompanyName]    NVARCHAR (100) COLLATE Latin1_General_CI_AS NOT NULL,
     [strContactName]    NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
