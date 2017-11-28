@@ -175,9 +175,9 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strComments).HasColumnName("strComments");
             this.Property(t => t.intSort).HasColumnName("intSort");
 
-            this.HasRequired(p => p.tblICCategoryLocation)
-                .WithMany(p => p.tblICCategoryVendors)
-                .HasForeignKey(p => p.intCategoryLocationId);
+            //this.HasRequired(p => p.tblICCategoryLocation)
+            //    .WithMany(p => p.tblICCategoryVendors)
+            //    .HasForeignKey(p => p.intCategoryLocationId);
             this.HasOptional(p => p.Family)
                 .WithMany(p => p.tblICCategoryVendorFamily)
                 .HasForeignKey(p => p.intFamilyId);
