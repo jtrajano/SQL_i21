@@ -306,10 +306,12 @@ BEGIN TRY
 			RAISERROR('Contract does not exist.',16,1)
 		END
 
-		IF ISNULL(@dblQty,0) = 0
-		BEGIN
-			RAISERROR('UOM does not exist.',16,1)
-		END
+		SET @dblQty = ISNULL(@dblQty,0)
+		-- IF ISNULL(@dblQty,0) = 0
+		-- BEGIN
+		-- 	--RAISERROR('UOM does not exist.',16,1)
+		-- 	SET @dblQty = 0
+		-- END
 					
 		EXEC	uspCTUpdateScheduleQuantity
 				@intContractDetailId	=	@intContractDetailId,
