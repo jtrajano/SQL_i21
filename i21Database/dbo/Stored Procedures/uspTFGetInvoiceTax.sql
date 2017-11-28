@@ -701,10 +701,10 @@ BEGIN TRY
 				, intProductCode
 				, strProductCode
 				, intItemId
-				, dblQtyShipped
-				, dblGross
-				, dblNet
-				, dblBillQty
+				, CONVERT(DECIMAL(18), dblQtyShipped)
+				, CONVERT(DECIMAL(18), dblGross)
+				, CONVERT(DECIMAL(18), dblNet)
+				, CONVERT(DECIMAL(18), dblBillQty)
 				, strInvoiceNumber
 				, strPONumber
 				, strBillOfLading
