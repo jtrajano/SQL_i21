@@ -68,23 +68,24 @@ ELSE
 			,[strTransactionType]
 			,[strTransactionForm]
 			,[strModuleName]
+			,strRateType
 		)
 		SELECT 
 			 [strTransactionId]
 			,[intTransactionId]
-			,[intAccountId]			
+			,A.[intAccountId]			
 			,[strDescription]		=  A.strJournalLineDescription
-			,[strReference]			
+			,A.[strReference]			
 			,[dtmTransactionDate]	
-			,[dblDebit]				= [dblCredit]
-			,[dblCredit]			= [dblDebit]	
-			,[dblDebitForeign]		= [dblCreditForeign]
-			,[dblCreditForeign]		= [dblDebitForeign]	
-			,[dblDebitUnit]			= [dblCreditUnit]
-			,[dblCreditUnit]		= [dblDebitUnit]
-			,[dtmDate]				
+			,[dblDebit]				= A.[dblCredit]
+			,[dblCredit]			= A.[dblDebit]	
+			,[dblDebitForeign]		= A.[dblCreditForeign]
+			,[dblCreditForeign]		= A.[dblDebitForeign]	
+			,[dblDebitUnit]			= A.[dblCreditUnit]
+			,[dblCreditUnit]		= A.[dblDebitUnit]
+			,A.[dtmDate]				
 			,[ysnIsUnposted]		
-			,[intConcurrencyId]		
+			,A.[intConcurrencyId]		
 			,[dblExchangeRate]		
 			,[intUserId]			= 0
 			,[intEntityId]			= @intEntityId
@@ -94,7 +95,10 @@ ELSE
 			,[strTransactionType]
 			,[strTransactionForm]
 			,[strModuleName]
+			, strCurrencyExchangeRateType
 		FROM	tblGLDetail A
+		LEFT JOIN tblGLJournalDetail D ON D.intJournalDetailId = A.intJournalLineNo AND D.intJournalId = A.intTransactionId
+		LEFT JOIN tblSMCurrencyExchangeRateType Rate on D.intCurrencyExchangeRateTypeId = Rate.intCurrencyExchangeRateTypeId
 		WHERE	strTransactionId = @strTransactionId and ysnIsUnposted = 0
 		ORDER BY intGLDetailId
 
@@ -129,6 +133,5 @@ IF @@TRANCOUNT > 0
 	GOTO Post_Exit
 
 Post_Exit:
-	
-GO
 
+GO
