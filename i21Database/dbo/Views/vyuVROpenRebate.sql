@@ -17,7 +17,11 @@ AS
 		,E.dblUnitQty
 		,dblCost = B.dblPrice
 		,dblRebateRate = ISNULL(M.dblRebateRate,ISNULL(N.dblRebateRate,0.0))
-		,dblRebateAmount = CAST((B.dblQtyShipped * ISNULL(M.dblRebateRate,ISNULL(N.dblRebateRate,0.0))) AS NUMERIC(18,6))
+		,dblRebateAmount = CASE WHEN M.strRebateBy = 'Percentage' THEN
+								 CAST((B.dblQtyShipped * dblPrice * ISNULL(M.dblRebateRate,ISNULL(N.dblRebateRate,0.0)) / 100) AS NUMERIC(18,6))
+							ELSE
+							  CAST((B.dblQtyShipped * ISNULL(M.dblRebateRate,ISNULL(N.dblRebateRate,0.0))) AS NUMERIC(18,6))
+							END
 		,B.intInvoiceDetailId
 		,B.intConcurrencyId 
 		,B.intProgramId
