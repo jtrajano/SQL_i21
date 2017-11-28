@@ -12,7 +12,7 @@ UnitTestEngine.testStore({
         "proxy": {
             "type": "rest",
             "api": {
-                "read": "./Inventory/api/CommodityAttribute/SearchSeasonAttributes"
+                "read": "./inventory/api/commodityattribute/searchseasonattributes"
             }
         }
     }

@@ -14,7 +14,7 @@ UnitTestEngine.testModel({
     }, {
         "name": "intItemId",
         "type": "int",
-        "allowNull": true
+        "allowNull": false
     }, {
         "name": "intItemLocationId",
         "type": "int",
@@ -61,6 +61,14 @@ UnitTestEngine.testModel({
         "allowNull": false
     }, {
         "name": "intItemUOMId",
+        "type": "int",
+        "allowNull": true
+    }, {
+        "name": "strStockUOM",
+        "type": "string",
+        "allowNull": false
+    }, {
+        "name": "intStockUOMId",
         "type": "int",
         "allowNull": true
     }, {
@@ -112,11 +120,47 @@ UnitTestEngine.testModel({
         "type": "string",
         "allowNull": false
     }, {
+        "name": "strParentLotAlias",
+        "type": "string",
+        "allowNull": false
+    }, {
+        "name": "strParentLotNo",
+        "type": "string",
+        "allowNull": false
+    }, {
+        "name": "intParentLotId",
+        "type": "int",
+        "allowNull": true
+    }, {
+        "name": "strWeightUOM",
+        "type": "string",
+        "allowNull": false
+    }, {
+        "name": "intWeightUOMId",
+        "type": "int",
+        "allowNull": true
+    }, {
+        "name": "dblWeightQty",
+        "type": "float",
+        "allowNull": false
+    }, {
+        "name": "dblNetQty",
+        "type": "float",
+        "allowNull": false
+    }, {
         "name": "strUnitMeasure",
         "type": "string",
         "allowNull": false
     }, {
         "name": "dblConversionFactor",
+        "type": "float",
+        "allowNull": false
+    }, {
+        "name": "dblItemUOMConversionFactor",
+        "type": "float",
+        "allowNull": false
+    }, {
+        "name": "dblWeightUOMConversionFactor",
         "type": "float",
         "allowNull": false
     }, {
@@ -139,16 +183,17 @@ UnitTestEngine.testModel({
         "name": "strUserName",
         "type": "string",
         "allowNull": false
+    }, {
+        "name": "ysnLotted",
+        "type": "boolean",
+        "allowNull": false
     }],
     validators: [
         [{
+            "field": "intItemId",
+            "type": "presence"
+        }, {
             "field": "intItemUOMId",
-            "type": "presence"
-        }, {
-            "field": "strUnitMeasure",
-            "type": "presence"
-        }, {
-            "field": "strItemNo",
             "type": "presence"
         }]
     ]

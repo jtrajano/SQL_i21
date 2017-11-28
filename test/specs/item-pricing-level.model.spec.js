@@ -48,6 +48,10 @@ UnitTestEngine.testModel({
         "type": "float",
         "allowNull": false
     }, {
+        "name": "dtmEffectiveDate",
+        "type": "date",
+        "allowNull": false
+    }, {
         "name": "strCommissionOn",
         "type": "string",
         "allowNull": false

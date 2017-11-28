@@ -10,9 +10,9 @@ UnitTestEngine.testStore({
         "proxy": {
             "type": "rest",
             "api": {
-                "read": "./Inventory/api/MaterialNMFC/GetMaterialNMFCs",
-                "update": "./Inventory/api/MaterialNMFC/PutMaterialNMFCs",
-                "create": "./Inventory/api/MaterialNMFC/PostMaterialNMFCs"
+                "read": "./inventory/api/materialnmfc/getmaterialnmfcs",
+                "update": "./inventory/api/materialnmfc/putmaterialnmfcs",
+                "create": "./inventory/api/materialnmfc/postmaterialnmfcs"
             }
         }
     }

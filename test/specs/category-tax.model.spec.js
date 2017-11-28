@@ -21,9 +21,6 @@ UnitTestEngine.testModel({
         "allowNull": false
     }],
     validators: [
-        [{
-            "field": "strTaxClass",
-            "type": "presence"
-        }]
+        []
     ]
 });

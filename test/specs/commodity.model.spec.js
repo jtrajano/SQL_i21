@@ -96,27 +96,19 @@ UnitTestEngine.testModel({
         "type": "float",
         "allowNull": false
     }, {
-        "name": "intSalesWeightsGradesId",
+        "name": "intAdjustInventorySales",
         "type": "int",
         "allowNull": true
     }, {
-        "name": "intPurchaseWeightsGradesId",
+        "name": "intAdjustInventoryTransfer",
         "type": "int",
         "allowNull": true
     }, {
-        "name": "intTransferWeightsGradesId",
-        "type": "int",
-        "allowNull": true
-    }, {
-        "name": "strSalesWeightsGrades",
+        "name": "strAdjustInventorySales",
         "type": "string",
         "allowNull": false
     }, {
-        "name": "strPurchaseWeightsGrades",
-        "type": "string",
-        "allowNull": false
-    }, {
-        "name": "strTransferWeightsGrades",
+        "name": "strAdjustInventoryTransfer",
         "type": "string",
         "allowNull": false
     }],

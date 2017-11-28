@@ -303,6 +303,10 @@ UnitTestEngine.testModel({
         "name": "strPurchaseTax",
         "type": "string",
         "allowNull": false
+    }, {
+        "name": "ysnLotWeightsRequired",
+        "type": "boolean",
+        "allowNull": false
     }],
     validators: [
         []

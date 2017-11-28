@@ -46,9 +46,6 @@ UnitTestEngine.testModel({
     }],
     validators: [
         [{
-            "field": "strLocationName",
-            "type": "presence"
-        }, {
             "field": "strCustomerNumber",
             "type": "presence"
         }, {

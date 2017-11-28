@@ -12,7 +12,7 @@ UnitTestEngine.testStore({
         "proxy": {
             "type": "rest",
             "api": {
-                "read": "./Inventory/api/ContainerType/Search"
+                "read": "./inventory/api/containertype/search"
             }
         }
     }

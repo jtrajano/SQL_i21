@@ -155,6 +155,18 @@ UnitTestEngine.testModel({
         "name": "dtmLastFreeWhseDate",
         "type": "date",
         "allowNull": false
+    }, {
+        "name": "dblTotalCharge",
+        "type": "float",
+        "allowNull": false
+    }, {
+        "name": "dblTotalChargeTax",
+        "type": "float",
+        "allowNull": false
+    }, {
+        "name": "intItemCount",
+        "type": "int",
+        "allowNull": false
     }],
     validators: [
         [{

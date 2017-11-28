@@ -6,10 +6,10 @@ Ext.define('Inventory.store.BufferedItemSubLocations', {
     alias: 'store.icbuffereditemsublocations',
 
     requires: [
-        'Inventory.model.ItemSubLocations'
+        'Inventory.model.ItemSubLocation'
     ],
 
-    model: 'Inventory.model.ItemSubLocations',
+    model: 'Inventory.model.ItemSubLocation',
     storeId: 'BufferedItemSubLocationsStore',
     pageSize: 50,
     batchActions: true,
