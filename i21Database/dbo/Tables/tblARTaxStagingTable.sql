@@ -36,6 +36,7 @@
 	[strShipToLocationAddress]			NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strItemNo]							NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strCategoryCode]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strTaxReportType]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[dblRate]							NUMERIC(18, 6)	NULL DEFAULT 0,
 	[dblUnitPrice]						NUMERIC(18, 6)	NULL DEFAULT 0,
 	[dblQtyShipped]						NUMERIC(18, 6)	NULL DEFAULT 0,

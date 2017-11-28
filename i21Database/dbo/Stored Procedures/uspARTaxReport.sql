@@ -113,6 +113,10 @@ SELECT @strLocationNameFrom = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM @temp_xml_table
 WHERE [fieldname] = 'strLocationName'
 
+SELECT @strTaxReportType = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM @temp_xml_table
+WHERE [fieldname] = 'strTaxReportType'
+
 SELECT @ysnTaxExemptOnly = [from] 
 FROM @temp_xml_table
 WHERE [fieldname] = 'ysnTaxExemptOnly'
@@ -152,7 +156,7 @@ IF (@conditionCustomer IS NOT NULL AND UPPER(@conditionCustomer) = 'BETWEEN' AND
 			WHERE strName BETWEEN @strCustomerNameFrom AND @strCustomerNameTo
 		) E ON C.intEntityId = E.intEntityId
 	END
-ELSE IF (@conditionCustomer IS NOT NULL AND ISNULL(@strCustomerNameTo, '') <> '')
+ELSE IF (@conditionCustomer IS NOT NULL AND ISNULL(@strCustomerNameFrom, '') <> '')
 	BEGIN
 		INSERT INTO #CUSTOMERS
 		SELECT C.intEntityId
@@ -160,7 +164,7 @@ ELSE IF (@conditionCustomer IS NOT NULL AND ISNULL(@strCustomerNameTo, '') <> ''
 		INNER JOIN (
 			SELECT intEntityId
 			FROM dbo.tblEMEntity WITH (NOLOCK)
-			WHERE strName = @strCustomerNameTo
+			WHERE strName = @strCustomerNameFrom
 		) E ON C.intEntityId = E.intEntityId
 	END
 ELSE
@@ -184,12 +188,12 @@ IF (@conditionLocation IS NOT NULL AND UPPER(@conditionLocation) = 'BETWEEN' AND
 		FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
 		WHERE strLocationName BETWEEN @strLocationNameFrom AND @strLocationNameTo
 	END
-ELSE IF (@conditionLocation IS NOT NULL AND ISNULL(@strLocationNameTo, '') <> '')
+ELSE IF (@conditionLocation IS NOT NULL AND ISNULL(@strLocationNameFrom, '') <> '')
 	BEGIN
 		INSERT INTO #COMPANYLOCATIONS
 		SELECT intCompanyLocationId
 		FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
-		WHERE strLocationName = @strLocationNameTo
+		WHERE strLocationName = @strLocationNameFrom
 	END
 ELSE
 	BEGIN
@@ -212,12 +216,12 @@ IF (@conditionInvoice IS NOT NULL AND UPPER(@conditionInvoice) = 'BETWEEN' AND I
 		FROM dbo.tblARInvoice WITH (NOLOCK)
 		WHERE strInvoiceNumber BETWEEN @strInvoiceNumberFrom AND @strInvoiceNumberTo
 	END
-ELSE IF (@conditionInvoice IS NOT NULL AND ISNULL(@strInvoiceNumberTo, '') <> '')
+ELSE IF (@conditionInvoice IS NOT NULL AND ISNULL(@strInvoiceNumberFrom, '') <> '')
 	BEGIN
 		INSERT INTO #INVOICES
 		SELECT intInvoiceId
 		FROM dbo.tblARInvoice WITH (NOLOCK)
-		WHERE strInvoiceNumber = @strInvoiceNumberTo
+		WHERE strInvoiceNumber = @strInvoiceNumberFrom
 	END
 ELSE
 	BEGIN
@@ -264,6 +268,7 @@ INSERT INTO tblARTaxStagingTable (
 	, strShipToLocationAddress
 	, strItemNo
 	, strCategoryCode
+	, strTaxReportType
 	, dblRate
 	, dblUnitPrice
 	, dblQtyShipped
@@ -316,6 +321,7 @@ SELECT TAX.intEntityCustomerId
 	, TAX.strShipToLocationAddress
 	, TAX.strItemNo
 	, TAX.strCategoryCode
+	, @strTaxReportType
 	, TAX.dblRate
 	, TAX.dblUnitPrice
 	, TAX.dblQtyShipped
@@ -343,3 +349,5 @@ AND (@strTaxGroup IS NULL OR TAX.strTaxGroup LIKE '%'+ @strTaxGroup +'%')
 
 IF ISNULL(@ysnTaxExemptOnly, 0) = 1 
 	DELETE FROM tblARTaxStagingTable WHERE ysnTaxExempt = 0
+
+SELECT strTaxReportType = ISNULL(@strTaxReportType, 'Tax Detail')
