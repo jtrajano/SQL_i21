@@ -2,7 +2,7 @@
 	@intItemId INT
 	,@intRecipeItemTypeId INT
 	,@intLocationId INT
-	,@strItemNo NVARCHAR(MAX) = '%'
+	,@strItemNo NVARCHAR(MAX) = ''
 	,@intWorkOrderId INT
 	,@intActualItemId INT = 0
 	,@intCategoryId INT = 0
@@ -67,7 +67,10 @@ BEGIN
 		AND R.intLocationId = @intLocationId
 		AND R.ysnActive = 1
 		AND R.intItemId = @intItemId
-		AND I.strItemNo LIKE @strItemNo + '%'
+		AND (
+			I.strItemNo LIKE '%' + @strItemNo + '%'
+			OR I.strDescription LIKE '%' + @strItemNo + '%'
+			)
 		AND I.intItemId = (
 			CASE 
 				WHEN @intActualItemId > 0
