@@ -102,7 +102,7 @@ INSERT INTO @tmpValidJournals
 	WHERE	A.[intJournalId] IN (SELECT B.intJournalId FROM @tmpPostJournals  B
 						WHERE B.intJournalId NOT IN (SELECT intTransactionId FROM tblGLPostResult WHERE strBatchId = @strBatchId GROUP BY intTransactionId)) 
 		AND
-		A.[ysnPosted] = 0 AND
+		ISNULL(A.[ysnPosted],0) = 0 AND
 		A.[strJournalType] = @strJournalType
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
