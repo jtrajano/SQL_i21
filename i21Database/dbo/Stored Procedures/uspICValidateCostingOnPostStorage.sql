@@ -55,7 +55,16 @@ SELECT	Errors.intItemId
 		,Errors.strText
 		,Errors.intErrorCode
 		,Item.intTransactionTypeId
-FROM	@ItemsToValidate Item CROSS APPLY dbo.fnGetItemCostingOnPostStorageErrors(Item.intItemId, Item.intItemLocationId, Item.intItemUOMId, Item.intSubLocationId, Item.intStorageLocationId, Item.dblQty, Item.intLotId) Errors
+FROM	@ItemsToValidate Item CROSS APPLY dbo.fnGetItemCostingOnPostStorageErrors(
+			Item.intItemId
+			, Item.intItemLocationId
+			, Item.intItemUOMId
+			, Item.intSubLocationId
+			, Item.intStorageLocationId
+			, Item.dblQty
+			, Item.intLotId
+			, Item.dblCost
+		) Errors
 
 -- Check for invalid items in the temp table. 
 -- If such error is found, raise the error to stop the costing and allow the caller code to do a rollback. 
@@ -149,4 +158,19 @@ BEGIN
 	EXEC uspICRaiseError 80066, @strItemNo, @strLocationName;
 	RETURN -1
 END 
-GO
+
+-- Check for negative cost. 
+SELECT @strItemNo = NULL, @intItemId = NULL
+SELECT TOP 1 
+		@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END 
+		,@intItemId = Item.intItemId
+FROM	#FoundErrors Errors INNER JOIN tblICItem Item
+			ON Errors.intItemId = Item.intItemId
+WHERE	intErrorCode = 80196
+
+IF @intItemId IS NOT NULL 
+BEGIN 
+	-- '{Item} will have a negative cost. Negative cost is not allowed.'
+	EXEC uspICRaiseError 80196, @strItemNo
+	RETURN -1
+END 

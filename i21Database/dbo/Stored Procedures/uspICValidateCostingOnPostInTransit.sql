@@ -62,6 +62,7 @@ FROM	@ItemsToValidate Item CROSS APPLY dbo.fnGetItemCostingOnPostInTransitErrors
 			--, Item.intStorageLocationId
 			, Item.dblQty
 			, Item.intLotId
+			, Item.dblCost
 		) Errors
 
 -- Check for invalid items in the temp table. 
@@ -123,4 +124,19 @@ BEGIN
 END 
 
 -- No need to check for locked Items. Once an item is in In-transit, it will not become part of the inventory count. 
-GO
+
+-- Check for negative cost. 
+SELECT @strItemNo = NULL, @intItemId = NULL
+SELECT TOP 1 
+		@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END 
+		,@intItemId = Item.intItemId
+FROM	#FoundErrors Errors INNER JOIN tblICItem Item
+			ON Errors.intItemId = Item.intItemId
+WHERE	intErrorCode = 80196
+
+IF @intItemId IS NOT NULL 
+BEGIN 
+	-- '{Item} will have a negative cost. Negative cost is not allowed.'
+	EXEC uspICRaiseError 80196, @strItemNo
+	RETURN -1
+END 

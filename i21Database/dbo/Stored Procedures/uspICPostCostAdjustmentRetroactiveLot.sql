@@ -106,7 +106,7 @@ BEGIN
 			,@strDescription AS NVARCHAR(255)
 			,@strNewCost AS NVARCHAR(50) 
 			,@IsSourceTransaction AS BIT 
-
+			,@strItemNo AS NVARCHAR(50) 
 END 
 
 -- Compute the cost adjustment
@@ -191,8 +191,6 @@ BEGIN
 	BEGIN 
 		IF @CostBucketId IS NULL
 		BEGIN 
-			DECLARE @strItemNo AS NVARCHAR(50)				
-
 			SELECT	@strItemNo = CASE WHEN ISNULL(strItemNo, '') = '' THEN 'id: ' + CAST(@intItemId AS NVARCHAR(20)) ELSE strItemNo END 
 			FROM	tblICItem 
 			WHERE	intItemId = @intItemId
@@ -450,6 +448,18 @@ BEGIN
 		-- Update the cost bucket and last cost from the lot table. 
 		IF  @IsSourceTransaction = 1
 		BEGIN 
+			-- Validate if the cost is going to be negative. 
+			IF (@CostBucketOriginalValue + @CostAdjustment) < 0 
+			BEGIN 
+				SELECT	@strItemNo = CASE WHEN ISNULL(strItemNo, '') = '' THEN 'id: ' + CAST(@intItemId AS NVARCHAR(20)) ELSE strItemNo END 
+				FROM	tblICItem 
+				WHERE	intItemId = @intItemId
+
+				-- '{Item} will have a negative cost. Negative cost is not allowed.'
+				EXEC uspICRaiseError 80196, @strItemNo
+				RETURN -80196;
+			END 
+
 			UPDATE  cb
 			SET		cb.dblCost = 
 						dbo.fnDivide(
