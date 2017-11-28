@@ -1,0 +1,1 @@
+Ext.define('TaxForm.store.BufferedProductCode', {{"extend":"Ext.app.ViewModel","alias":"'viewmodel.rm.store.bufferedproductcode'"}});

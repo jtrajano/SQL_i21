@@ -1,0 +1,1 @@
+Ext.define('Store.store.RadiantItemTypeCodeBuffered', {{"extend":"Ext.app.ViewModel","alias":"'viewmodel..store.radiantitemtypecodebuffered'"}});

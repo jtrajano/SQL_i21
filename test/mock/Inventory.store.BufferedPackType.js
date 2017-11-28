@@ -1,0 +1,1 @@
+Ext.define('Inventory.store.BufferedPackType', {"extend":"Ext.data.BufferedStore","alias":"store.icbufferedpacktype"});

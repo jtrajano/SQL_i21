@@ -1,0 +1,1 @@
+Ext.define('Store.store.SubcategoryRegProdBuffered', {{"extend":"Ext.app.ViewModel","alias":"'viewmodel..store.subcategoryregprodbuffered'"}});

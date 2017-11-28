@@ -44,7 +44,7 @@ UnitTestEngine.testViewController({
 
                 describe("amount >= 100", function() {
                     it('should be undefined', function () {
-                        var config = { cost: 100.5, amount: 130.5, pricingMethod: "Percent of Margin" };
+                        var config = { standardCost: 100.5, amount: 130.5, pricingMethod: "Percent of Margin" };
                         var salePrice = controller.getSalePrice(config, function () { });
                         should.not.exist(salePrice);
                     });

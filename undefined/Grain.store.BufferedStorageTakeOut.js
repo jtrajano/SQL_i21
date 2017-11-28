@@ -1,0 +1,1 @@
+Ext.define('Grain.store.BufferedStorageTakeOut', {{"extend":"Ext.app.ViewModel","alias":"'viewmodel..store.bufferedstoragetakeout'"}});

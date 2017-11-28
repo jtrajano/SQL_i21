@@ -1,0 +1,1 @@
+Ext.define('ContractManagement.store.WeightGradeBuffered', {{"extend":"Ext.app.ViewModel","alias":"'viewmodel.actmanagement.store.weightgradebuffered'"}});

@@ -1,0 +1,1 @@
+Ext.define('Manufacturing.store.BufferedManufacturingCell', {{"extend":"Ext.app.ViewModel","alias":"'viewmodel.acturing.store.bufferedmanufacturingcell'"}});

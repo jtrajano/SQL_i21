@@ -130,6 +130,8 @@ module.exports = {
     }, {
         "pattern": "app/store/BufferedItemStockSummaryByLot.js"
     }, {
+        "pattern": "app/model/ItemSubLocation.js"
+    }, {
         "pattern": "app/store/BufferedItemSubLocations.js"
     }, {
         "pattern": "app/model/LineOfBusiness.js"
@@ -245,8 +247,6 @@ module.exports = {
         "pattern": "app/model/InventoryTag.js"
     }, {
         "pattern": "app/store/InventoryTag.js"
-    }, {
-        "pattern": "app/model/ItemSubLocation.js"
     }, {
         "pattern": "app/model/ItemLocation.js"
     }, {

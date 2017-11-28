@@ -1,0 +1,1 @@
+Ext.define('Patronage.store.BufferedPatronageCategory', {{"extend":"Ext.app.ViewModel","alias":"'viewmodel.nage.store.bufferedpatronagecategory'"}});

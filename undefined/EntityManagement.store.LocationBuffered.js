@@ -1,0 +1,1 @@
+Ext.define('EntityManagement.store.LocationBuffered', {{"extend":"Ext.app.ViewModel","alias":"'viewmodel.ymanagement.store.locationbuffered'"}});

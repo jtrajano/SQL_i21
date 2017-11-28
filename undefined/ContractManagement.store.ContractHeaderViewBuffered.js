@@ -1,0 +1,1 @@
+Ext.define('ContractManagement.store.ContractHeaderViewBuffered', {{"extend":"Ext.app.ViewModel","alias":"'viewmodel.actmanagement.store.contractheaderviewbuffered'"}});

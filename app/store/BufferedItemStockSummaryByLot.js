@@ -1,13 +1,13 @@
 Ext.define('Inventory.store.BufferedItemStockSummaryByLot', {
     extend: 'Ext.data.BufferedStore',
-    alias: 'store.icbuffereditemstocksummary',
+    alias: 'store.icbuffereditemstocksummarybylot',
 
     requires: [
         'Inventory.model.ItemStockSummary'
     ],
 
     model: 'Inventory.model.ItemStockSummary',
-    storeId: 'BufferedItemStockSummary',
+    storeId: 'BufferedItemStockSummaryByLot',
     pageSize: 50,
     batchActions: true,
     remoteFilter: true,

@@ -1,0 +1,1 @@
+Ext.define('i21.store.LineOfBusinessBuffered', {{"extend":"Ext.app.ViewModel","alias":"'viewmodel.tore.lineofbusinessbuffered'"}});
