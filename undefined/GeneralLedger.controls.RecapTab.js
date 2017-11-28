@@ -1,0 +1,1 @@
+Ext.define('GeneralLedger.controls.RecapTab', {{"extend":"Ext.app.ViewModel","alias":"'viewmodel.alledger.controls.recaptab'"}});

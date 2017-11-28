@@ -1,0 +1,1 @@
+Ext.define('RiskManagement.store.FutureMarketBuffered', {{"extend":"Ext.app.ViewModel","alias":"'viewmodel.anagement.store.futuremarketbuffered'"}});

@@ -1,0 +1,1 @@
+Ext.define('Grain.store.BufferedUniqueDiscountId', {{"extend":"Ext.app.ViewModel","alias":"'viewmodel..store.buffereduniquediscountid'"}});

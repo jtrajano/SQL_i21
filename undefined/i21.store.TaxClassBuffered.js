@@ -1,0 +1,1 @@
+Ext.define('i21.store.TaxClassBuffered', {{"extend":"Ext.app.ViewModel","alias":"'viewmodel.tore.taxclassbuffered'"}});

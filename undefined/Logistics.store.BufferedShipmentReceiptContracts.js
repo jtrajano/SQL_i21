@@ -1,0 +1,1 @@
+Ext.define('Logistics.store.BufferedShipmentReceiptContracts', {{"extend":"Ext.app.ViewModel","alias":"'viewmodel.tics.store.bufferedshipmentreceiptcontracts'"}});

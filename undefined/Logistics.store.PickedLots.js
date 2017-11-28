@@ -1,0 +1,1 @@
+Ext.define('Logistics.store.PickedLots', {{"extend":"Ext.app.ViewModel","alias":"'viewmodel.tics.store.pickedlots'"}});

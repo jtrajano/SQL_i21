@@ -1,0 +1,1 @@
+Ext.define('TaxForm.store.BufferedTaxAuthority', {{"extend":"Ext.app.ViewModel","alias":"'viewmodel.rm.store.bufferedtaxauthority'"}});

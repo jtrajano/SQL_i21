@@ -1,0 +1,1 @@
+Ext.define('Grain.store.BufferedStorageSchedule', {{"extend":"Ext.app.ViewModel","alias":"'viewmodel..store.bufferedstorageschedule'"}});

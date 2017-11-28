@@ -1,0 +1,1 @@
+Ext.define('GeneralLedger.controls.PostHistory', {{"extend":"Ext.app.ViewModel","alias":"'viewmodel.alledger.controls.posthistory'"}});

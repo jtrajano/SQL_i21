@@ -1,0 +1,1 @@
+Ext.define('ContractManagement.store.ContractDetailView', {{"extend":"Ext.app.ViewModel","alias":"'viewmodel.actmanagement.store.contractdetailview'"}});

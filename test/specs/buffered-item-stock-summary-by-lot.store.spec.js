@@ -1,11 +1,11 @@
 UnitTestEngine.testStore({
     name: 'Inventory.store.BufferedItemStockSummaryByLot',
-    alias: "store.icbuffereditemstocksummary",
+    alias: "store.icbuffereditemstocksummarybylot",
     base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.ItemStockSummary"],
     config: {
         "model": "Inventory.model.ItemStockSummary",
-        "storeId": "BufferedItemStockSummary",
+        "storeId": "BufferedItemStockSummaryByLot",
         "pageSize": 50,
         "remoteFilter": true,
         "remoteSort": true,

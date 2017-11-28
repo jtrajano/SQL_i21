@@ -1,8 +1,7 @@
 var libFiles = [
     { pattern: 'app/lib/rx.all.js', watched: true },
     { pattern: 'app/lib/numeraljs/numeral.js', watched: true },
-    { pattern: 'app/lib/underscore.js', watched: true },
-    { pattern: 'node_modules/gulp-extjs-spec-generator/node_modules/extjs-spec-generator/src/UnitTestEngine.js', watched: true },
+    { pattern: 'app/lib/underscore.js', watched: true }
 ];
 
 var mainAppFiles = [
@@ -12,6 +11,7 @@ var mainAppFiles = [
 var dependencies = require('./test/dependencies.js');
 
 var testFiles = [
+    { pattern: 'node_modules/extjs-spec-generator/src/UnitTestEngine.js', watched: true },
     { pattern: 'test/specs/inventory-receipt.viewcontroller.spec.js', watched: true }
 ];
 

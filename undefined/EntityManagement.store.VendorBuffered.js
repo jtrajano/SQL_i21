@@ -1,0 +1,1 @@
+Ext.define('EntityManagement.store.VendorBuffered', {{"extend":"Ext.app.ViewModel","alias":"'viewmodel.ymanagement.store.vendorbuffered'"}});
