@@ -166,24 +166,24 @@ BEGIN TRY
 			,intGroupId INT
 			)
 
-		IF EXISTS (
-				SELECT 1
-				FROM tblMFTask
-				WHERE intOrderHeaderId = @intOrderHeaderId
-					AND intTaskStateId NOT IN (
-						3
-						,4
-						)
-				)
-		BEGIN
-			DELETE
-			FROM tblMFTask
-			WHERE intOrderHeaderId = @intOrderHeaderId
-				AND intTaskStateId NOT IN (
-					3
-					,4
-					)
-		END
+		--IF EXISTS (
+		--		SELECT 1
+		--		FROM tblMFTask
+		--		WHERE intOrderHeaderId = @intOrderHeaderId
+		--			AND intTaskStateId NOT IN (
+		--				3
+		--				,4
+		--				)
+		--		)
+		--BEGIN
+		--	DELETE
+		--	FROM tblMFTask
+		--	WHERE intOrderHeaderId = @intOrderHeaderId
+		--		AND intTaskStateId NOT IN (
+		--			3
+		--			,4
+		--			)
+		--END
 
 		UPDATE tblMFOrderDetail
 		SET dblWeight = dblQty
