@@ -306,7 +306,7 @@ BEGIN TRY
 				,dblNetWt = dbo.[fnCTConvertQuantityToTargetItemUOM](@intItemId, intLotUnitMeasureId, intWeightUnitMeasureId, @dblNewPickedQty)
 			WHERE intPickLotDetailId = @intPickLotDetailId
 
-			EXEC uspLGReserveStockForPickLots @intPickLotHeaderId = @intNewPickLotHeaderId
+			EXEC uspLGReserveStockForPickLots @intPickLotHeaderId = @intPickLotHeaderId
 
 		END
 	END
