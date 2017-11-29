@@ -1,19 +1,17 @@
 ﻿PRINT N'*** BEGIN - UPDATE RETIRE STOCK NO. IN PATRONAGE ***'
 GO
-	IF EXISTS (SELECT 1 FROM [dbo].[tblPATCustomerStock] WHERE [strActivityStatus] = 'Retired' AND ([strRetireNo] IS NULL OR [strRetireNo] = ''))
+	IF EXISTS (SELECT 1 FROM [dbo].[tblPATRetireStock] WHERE ([strRetireNo] IS NULL OR [strRetireNo] = ''))
 	BEGIN
 		DECLARE @strRetireNo NVARCHAR(40) = NULL;
-		DECLARE @intCustomerStockId INT = NULL;
-		WHILE EXISTS(SELECT 1 FROM [dbo].[tblPATCustomerStock] WHERE [strActivityStatus] = 'Retired' AND ([strRetireNo] IS NULL OR [strRetireNo] = ''))
+		DECLARE @intRetireStockId INT = NULL;
+		WHILE EXISTS(SELECT 1 FROM [dbo].[tblPATRetireStock] WHERE [strRetireNo] IS NULL OR [strRetireNo] = '')
 		BEGIN
-			SELECT TOP 1 @intCustomerStockId = intCustomerStockId FROM [dbo].[tblPATCustomerStock] 
-			WHERE [strActivityStatus] = 'Retired' AND ([strRetireNo] IS NULL OR [strRetireNo] = '')
-			
+			SELECT TOP 1 @intRetireStockId = intRetireStockId FROM [dbo].[tblPATRetireStock] WHERE [strRetireNo] IS NULL OR [strRetireNo] = ''
 			EXEC [dbo].[uspSMGetStartingNumber] 127, @strRetireNo out;
 
-			UPDATE [dbo].[tblPATCustomerStock] SET [strRetireNo] = @strRetireNo 
-			WHERE intCustomerStockId = @intCustomerStockId; 
-			SET @strRetireNo = NULL; SET @intCustomerStockId = NULL;
+			UPDATE [dbo].[tblPATRetireStock] SET [strRetireNo] = @strRetireNo 
+			WHERE intRetireStockId = @intRetireStockId; 
+			SET @strRetireNo = NULL; SET @intRetireStockId = NULL;
 		END
 	END
 	

@@ -1,16 +1,17 @@
 ﻿PRINT N'*** BEGIN - MIGRATE tblPATCustomerStock RECORDS TO tblPATIssueStock & tblPATRetireStock ***'
 GO
-IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblPATIssueStock')
+IF EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblPATIssueStock')
 BEGIN
-	IF EXISTS(SELECT TOP 1 1 FROM [dbo].[tblPATIssueStock] IssueStk 
-			LEFT JOIN [dbo].[tblPATCustomerStock] CustomerStk ON CustomerStk.intCustomerStockId = IssueStk.intCustomerStockId
+	IF NOT EXISTS(SELECT 1 FROM [dbo].[tblPATIssueStock] IssueStk 
+			INNER JOIN [dbo].[tblPATCustomerStock] CustomerStk ON CustomerStk.intCustomerStockId = IssueStk.intCustomerStockId
 			WHERE CustomerStk.strActivityStatus = 'Open' AND IssueStk.intIssueStockId IS NOT NULL)
 			BEGIN
 				EXEC('
-				SELECT * 
+				SELECT	CustomerStk.*
 				INTO #tmpIssueStock
-				FROM [dbo].[tblPATCustomerStock]
-				WHERE [strActivityStatus] = ''Open''
+				FROM [dbo].[tblPATCustomerStock] CustomerStk 
+				LEFT OUTER JOIN [dbo].[tblPATIssueStock] IssueStk ON CustomerStk.intCustomerStockId = IssueStk.intCustomerStockId
+				WHERE IssueStk.intCustomerStockId IS NULL
 
 				INSERT INTO [dbo].[tblPATIssueStock](
 					[intCustomerStockId], 
@@ -45,17 +46,18 @@ BEGIN
 			END
 END
 
-IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblPATRetireStock')
+IF EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblPATRetireStock')
 BEGIN
-	IF EXISTS(SELECT TOP 1 1 FROM [dbo].[tblPATRetireStock] RetireStk 
-			LEFT JOIN [dbo].[tblPATCustomerStock] CustomerStk ON CustomerStk.intCustomerStockId = RetireStk.intCustomerStockId
-			WHERE CustomerStk.strActivityStatus = 'Retire' AND RetireStk.intRetireStockId IS NOT NULL)
+	IF NOT EXISTS(SELECT 1 FROM [dbo].[tblPATRetireStock] RetireStk 
+			INNER JOIN [dbo].[tblPATCustomerStock] CustomerStk ON CustomerStk.intCustomerStockId = RetireStk.intCustomerStockId
+			WHERE CustomerStk.strActivityStatus = 'Retired' AND RetireStk.intRetireStockId IS NOT NULL)
 			BEGIN
 				EXEC('
-				SELECT * 
+				SELECT	CustomerStk.*
 				INTO #tmpRetireStock
-				FROM [dbo].[tblPATRetireStock]
-				WHERE [strActivityStatus] = ''Retire''
+				FROM [dbo].[tblPATCustomerStock] CustomerStk 
+				LEFT JOIN [dbo].[tblPATRetireStock] RetireStk ON CustomerStk.intCustomerStockId = RetireStk.intCustomerStockId
+				WHERE CustomerStk.strActivityStatus = ''Retired'' AND RetireStk.intRetireStockId IS NULL
 
 				INSERT INTO [dbo].[tblPATRetireStock](
 					[intCustomerStockId], 
