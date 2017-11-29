@@ -27,7 +27,7 @@ UnitTestEngine.testViewController({
 
                 it('should calculate line total', function() {
                     var total = controller.calculateLineTotal(receipt, null);
-                    should.equal(total, 200.00);
+                    should.equal(total, undefined);
                 })
             })
         })
