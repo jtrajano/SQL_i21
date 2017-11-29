@@ -14,11 +14,13 @@ SET ANSI_WARNINGS OFF
 		[intTempId] INT IDENTITY PRIMARY KEY,
 		[intCustomerPatronId] INT NOT NULL, 
 		[intStockId] INT,
-		[strCertificateNo] CHAR(50),
-		[strStockStatus] NVARCHAR(50),
+		[strCertificateNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,		
+		[strIssueNo] NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL,
+		[strRetireNo] NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL,
+		[strStockStatus] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 		[dblSharesNo] NUMERIC(18, 6),
 		[dtmIssueDate] DATETIME, 
-		[strActivityStatus] NVARCHAR(50),
+		[strActivityStatus] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 		[dtmRetireDate] DATETIME,
 		[intTransferredFrom] INT,
 		[dtmTransferredDate] DATETIME,
@@ -85,18 +87,51 @@ SET ANSI_WARNINGS OFF
 	IF(@checking = 1)
 	BEGIN
 		SELECT @total = COUNT(*) FROM @customerStockTable tempCS
-		WHERE tempCS.intCustomerPatronId NOT IN (SELECT intCustomerPatronId FROM tblPATCustomerStock)
-
+		WHERE strCertificateNo NOT IN (SELECT strCertificateNo FROM tblPATIssueStock)
 		RETURN @total;
 	END
 	---------------------------- END - COUNT ORIGIN DATA TO BE IMPORTED -----------------------
-
 	
-	---------------------------- BEGIN - INSERT INTO CUSTOMER STOCK TABLE -----------------------
-	INSERT INTO tblPATCustomerStock(intCustomerPatronId, intStockId, strCertificateNo, strStockStatus, dblSharesNo, dtmIssueDate, strActivityStatus, dtmRetireDate, intTransferredFrom, dtmTransferredDate, dblParValue, dblFaceValue)
-	SELECT	tempCS.intCustomerPatronId, tempCS.intStockId, tempCS.strCertificateNo, tempCS.strStockStatus, tempCS.dblSharesNo, tempCS.dtmIssueDate, tempCS.strActivityStatus, tempCS.dtmRetireDate, tempCS.intTransferredFrom, tempCS.dtmTransferredDate, tempCS.dblParValue, tempCS.dblFaceValue
+	---------------------------- BEGIN - ASSIGN ISSUE & RETIRE STARTING NUMBER -----------------------
+	WHILE EXISTS(SELECT 1 FROM @customerStockTable tempCS WHERE strIssueNo IS NULL OR strRetireNo IS NULL)
+	BEGIN
+		DECLARE @customerStockId INT;
+		DECLARE @strIssueNo NVARCHAR(50) = NULL;
+		DECLARE @strRetireNo NVARCHAR(50) = NULL;
+
+		SELECT TOP 1 @customerStockId = intTempId FROM @customerStockTable;
+		EXEC [dbo].[uspSMGetStartingNumber] 126, @strIssueNo out;
+
+		IF EXISTS(SELECT 1 FROM @customerStockTable WHERE intTempId = @customerStockId AND strActivityStatus = 'Retired')
+		BEGIN
+			EXEC [dbo].[uspSMGetStartingNumber] 126, @strRetireNo out;
+		END
+		UPDATE @customerStockTable
+		SET strIssueNo = @strIssueNo, strRetireNo = @strRetireNo
+		WHERE intTempId = @customerStockId;
+	END
+	---------------------------- END - ASSIGN ISSUE & RETIRE STARTING NUMBER -----------------------
+
+	---------------------------- BEGIN - INSERT INTO ISSUE STOCK TABLE -----------------------
+	INSERT INTO tblPATIssueStock(intCustomerPatronId, strIssueNo, intStockId, strCertificateNo, strStockStatus, dblSharesNo, dblParValue, dblFaceValue)
+	SELECT	tempCS.intCustomerPatronId, tempCS.strIssueNo, tempCS.intStockId, tempCS.strCertificateNo, tempCS.strStockStatus, tempCS.dblSharesNo, tempCS.dblParValue, tempCS.dblFaceValue
 	FROM @customerStockTable tempCS
-	WHERE tempCS.intCustomerPatronId NOT IN (SELECT intCustomerPatronId FROM tblPATCustomerStock)
+	WHERE strCertificateNo NOT IN (SELECT strCertificateNo FROM tblPATIssueStock)
+	---------------------------- END - INSERT INTO ISSUE STOCK TABLE -----------------------
+
+	---------------------------- BEGIN - INSERT INTO CUSTOMER STOCK TABLE -----------------------
+	INSERT INTO tblPATCustomerStock(intCustomerPatronId, intStockId, strCertificateNo, strStockStatus, dblSharesNo, strActivityStatus, intTransferredFrom, dtmTransferredDate, dblParValue, dblFaceValue)
+	SELECT	tempCS.intCustomerPatronId, tempCS.intStockId, tempCS.strCertificateNo, tempCS.strStockStatus, tempCS.dblSharesNo, tempCS.strActivityStatus, tempCS.intTransferredFrom, tempCS.dtmTransferredDate, tempCS.dblParValue, tempCS.dblFaceValue
+	FROM @customerStockTable tempCS
+	WHERE strCertificateNo NOT IN (SELECT strCertificateNo FROM tblPATIssueStock)
+	---------------------------- END - INSERT INTO CUSTOMER STOCK TABLE -----------------------
+
+	---------------------------- BEGIN - INSERT INTO CUSTOMER STOCK TABLE -----------------------
+	INSERT INTO tblPATRetireStock(intCustomerPatronId, strRetireNo, dblSharesNo, dtmRetireDate, dblParValue, dblFaceValue)
+	SELECT	tempCS.intCustomerPatronId, tempCS.strRetireNo, tempCS.dblSharesNo, tempCS.dtmRetireDate, tempCS.dblParValue, tempCS.dblFaceValue
+	FROM @customerStockTable tempCS
+	WHERE strCertificateNo NOT IN (SELECT strCertificateNo FROM tblPATIssueStock)
+	AND strActivityStatus = 'Retire'
 	---------------------------- END - INSERT INTO CUSTOMER STOCK TABLE -----------------------
 
 END

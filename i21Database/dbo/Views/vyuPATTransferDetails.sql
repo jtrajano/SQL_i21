@@ -42,8 +42,8 @@ SELECT	TD.intTransferDetailId,
 		ON transferor.intEntityId = TD.intTransferorId
 	LEFT OUTER JOIN tblEMEntity transferee
 		ON transferee.intEntityId = TD.intTransfereeId
-	LEFT OUTER JOIN (SELECT iCS.intCustomerStockId,iCS.dtmIssueDate, iCS.dblParValue, iCS.strStockStatus, iCS.strCertificateNo, iSC.strStockName
-						FROM tblPATCustomerStock iCS INNER JOIN tblPATStockClassification iSC 
+	LEFT OUTER JOIN (SELECT iCS.intCustomerStockId, iCS.dtmIssueDate, iCS.dblParValue, iCS.strStockStatus, iCS.strCertificateNo, iSC.strStockName
+						FROM tblPATIssueStock iCS INNER JOIN tblPATStockClassification iSC 
 						ON iCS.intStockId = iSC.intStockId) CS
 		ON CS.intCustomerStockId = TD.intCustomerStockId
 	LEFT OUTER JOIN tblPATStockClassification SC

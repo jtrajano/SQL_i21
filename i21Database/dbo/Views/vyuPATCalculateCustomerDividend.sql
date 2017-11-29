@@ -1,21 +1,21 @@
 ﻿CREATE VIEW [dbo].[vyuPATCalculateCustomerDividend]
 	AS
-SELECT CS.intCustomerStockId,
-	CS.intCustomerPatronId AS intCustomerId,
+SELECT IssueStk.intCustomerStockId,
+	IssueStk.intCustomerPatronId AS intCustomerId,
 	NEWID() as id,
-	CS.intStockId,
+	IssueStk.intStockId,
 	SC.strStockName,
-	CS.strCertificateNo,
-	CS.dtmIssueDate,
-	SC.dblParValue,
-	CS.dblSharesNo,
-	CS.ysnPosted,
+	IssueStk.strCertificateNo,
+	IssueStk.dtmIssueDate,
+	IssueStk.dblParValue,
+	IssueStk.dblSharesNo,
+	IssueStk.ysnPosted,
 	SC.dblDividendsPerShare
 	FROM tblPATStockClassification SC
-INNER JOIN tblPATCustomerStock CS
-	ON CS.intStockId = SC.intStockId
+INNER JOIN tblPATIssueStock IssueStk
+	ON IssueStk.intStockId = SC.intStockId
 INNER JOIN tblEMEntity ENT
-	ON ENT.intEntityId = CS.intCustomerPatronId
+	ON ENT.intEntityId = IssueStk.intCustomerPatronId
 INNER JOIN tblARCustomer ARC
 	ON ARC.intEntityId = ENT.intEntityId
-WHERE CS.strActivityStatus = 'Open' AND CS.ysnPosted = 1
+WHERE IssueStk.ysnPosted = 1

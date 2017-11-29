@@ -174,6 +174,8 @@
 :r .\22_PAT\2_AddTransferType.sql
 :r .\22_PAT\3_MigrateDataChanges.sql
 :r .\22_PAT\4_DefaultBillId.sql
+:r .\22_PAT\5_AddIssueAndRetireTable.sql
+:r .\22_PAT\6_MigrateCustomerStock.sql
 
 --EM
 

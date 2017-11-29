@@ -1,8 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspPATPostIssueStock]
-	@intCustomerStockId INT = NULL,
+	@intIssueStockId INT = NULL,
 	@ysnPosted BIT = NULL,
 	@ysnRecap BIT = NULL,
-	@ysnRetired BIT = NULL,
 	@intCompanyLocationId INT = NULL,
 	@intUserId INT = NULL,
 	@batchIdUsed NVARCHAR(40) = NULL OUTPUT,
@@ -25,15 +24,12 @@ DECLARE @dateToday AS DATETIME = GETDATE();
 DECLARE @GLEntries AS RecapTableType;
 DECLARE @totalRecords INT;
 DECLARE @batchId NVARCHAR(40);
-DECLARE @isGLSucces AS BIT = 0;
 DECLARE @intCreatedId INT;
+DECLARE @intCreatedCustomerStockId INT;
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Patronage';
-DECLARE @RETIRE_STOCK NVARCHAR(25) = 'Retire Stock';
 DECLARE @ISSUE_STOCK NVARCHAR(25) = 'Issue Stock';
 DECLARE @MODULE_CODE NVARCHAR(5)  = 'PAT';
 DECLARE @batchId2 AS NVARCHAR(40);
-DECLARE @voidRetire AS BIT = 0;
-DECLARE @voucherId as Id;
 
 CREATE TABLE #tempValidateTable (
 	[strError] [NVARCHAR](MAX),
@@ -47,35 +43,33 @@ IF(@batchId IS NULL)
 
 SET @batchIdUsed = @batchId;
 
-	SELECT	CS.intCustomerStockId,
-			CS.intCustomerPatronId,
-			CS.intStockId,
-			CS.strCertificateNo,
-			CS.strStockStatus,
-			CS.dblSharesNo,
-			CS.dtmIssueDate,
-			CS.strActivityStatus,
-			CS.dtmRetireDate,
-			CS.intTransferredFrom,
-			CS.dtmTransferredDate,
-			CS.dblParValue,
-			CS.dblFaceValue,
-			CS.intBillId,
-			CS.intInvoiceId,
-			CS.ysnPosted,
-			CS.ysnRetiredPosted
+	SELECT	IssueStk.intIssueStockId,
+			IssueStk.strIssueNo,
+			IssueStk.dtmIssueDate,
+			IssueStk.intCustomerStockId,
+			IssueStk.intCustomerPatronId,
+			IssueStk.intStockId,
+			IssueStk.strCertificateNo,
+			IssueStk.strStockStatus,
+			IssueStk.dblSharesNo,
+			IssueStk.dblParValue,
+			IssueStk.dblFaceValue,
+			IssueStk.intInvoiceId,
+			IssueStk.ysnPosted,
+			CS.strActivityStatus
 	INTO #tempCustomerStock
-	FROM tblPATCustomerStock CS
-		WHERE intCustomerStockId = @intCustomerStockId
+	FROM tblPATIssueStock IssueStk
+	LEFT JOIN tblPATCustomerStock CS
+		ON CS.intCustomerStockId = IssueStk.intCustomerStockId
+	WHERE intIssueStockId = @intIssueStockId
 		
 
 IF(ISNULL(@ysnPosted,0) = 0)
 BEGIN
 	-------- VALIDATE IF CAN BE UNPOSTED
-	DECLARE @type AS INT = CASE WHEN @ysnRetired = 0 THEN 1 ELSE 2 END;
 
 	INSERT INTO #tempValidateTable
-	SELECT * FROM fnPATValidateAssociatedTransaction((SELECT intCustomerStockId FROM #tempCustomerStock), @type, @MODULE_NAME)
+	SELECT * FROM fnPATValidateAssociatedTransaction((SELECT intIssueStockId FROM #tempCustomerStock), 1, @MODULE_NAME)
 
 	SELECT * FROM #tempValidateTable
 	IF EXISTS(SELECT 1 FROM #tempValidateTable)
@@ -87,201 +81,8 @@ BEGIN
 END
 
 
-IF (@ysnRetired = 1)
-BEGIN
 	IF(@ysnPosted = 1)
 	BEGIN
-
-	------------------------CREATE GL ENTRIES---------------------
-		INSERT INTO @GLEntries(
-			[dtmDate], 
-			[strBatchId], 
-			[intAccountId],
-			[dblDebit],
-			[dblCredit],
-			[dblDebitUnit],
-			[dblCreditUnit],
-			[strDescription],
-			[strCode],
-			[strReference],
-			[intCurrencyId],
-			[dtmDateEntered],
-			[dtmTransactionDate],
-			[strJournalLineDescription],
-			[intJournalLineNo],
-			[ysnIsUnposted],
-			[intUserId],
-			[intEntityId],
-			[strTransactionId],
-			[intTransactionId],
-			[strTransactionType],
-			[strTransactionForm],
-			[strModuleName],
-			[dblDebitForeign],
-			[dblDebitReport],
-			[dblCreditForeign],
-			[dblCreditReport],
-			[dblReportingRate],
-			[dblForeignRate],
-			[strRateType]
-		)
-		--VOTING STOCK/NON-VOTING STOCK/OTHER ISSUED
-		SELECT	
-			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
-			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
-			[intAccountId]					=	CASE WHEN A.strStockStatus = 'Voting' THEN ComPref.intVotingStockId ELSE ComPref.intNonVotingStockId END,
-			[dblDebit]						=	ROUND(A.dblFaceValue, 2),
-			[dblCredit]						=	0,
-			[dblDebitUnit]					=	0,
-			[dblCreditUnit]					=	0,
-			[strDescription]				=	CASE WHEN A.strStockStatus = 'Voting' THEN 'Posted Voting Retired Stock' ELSE 'Posted Non-Voting/Other Retired Stock' END,
-			[strCode]						=	@MODULE_CODE,
-			[strReference]					=	A.strCertificateNo,
-			[intCurrencyId]					=	1,
-			[dtmDateEntered]				=	GETDATE(),
-			[dtmTransactionDate]			=	NULL,
-			[strJournalLineDescription]		=	CASE WHEN A.strStockStatus = 'Voting' THEN 'Posted Voting Retired Stock' ELSE 'Posted Non-Voting/Other Retired Stock' END,
-			[intJournalLineNo]				=	1,
-			[ysnIsUnposted]					=	0,
-			[intUserId]						=	@intUserId,
-			[intEntityId]					=	@intUserId,
-			[strTransactionId]				=	A.intCustomerStockId, 
-			[intTransactionId]				=	A.intCustomerStockId, 
-			[strTransactionType]			=	CASE WHEN A.strStockStatus = 'Voting' THEN 'Voting' ELSE 'Non-Voting/Other' END,
-			[strTransactionForm]			=	@RETIRE_STOCK,
-			[strModuleName]					=	@MODULE_NAME,
-			[dblDebitForeign]				=	0,      
-			[dblDebitReport]				=	0,
-			[dblCreditForeign]				=	0,
-			[dblCreditReport]				=	0,
-			[dblReportingRate]				=	0,
-			[dblForeignRate]				=	0,
-			[strRateType]					=	NULL
-		FROM	[dbo].[tblPATCustomerStock] A
-				CROSS JOIN tblPATCompanyPreference ComPref
-		WHERE	A.intCustomerStockId IN (SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@intCustomerStockId))
-		UNION ALL
-		--AP CLEARING
-		SELECT	
-			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
-			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
-			[intAccountId]					=	ComPref.intAPClearingGLAccount,
-			[dblDebit]						=	0,
-			[dblCredit]						=	ROUND(A.dblFaceValue,2),
-			[dblDebitUnit]					=	0,
-			[dblCreditUnit]					=	0,
-			[strDescription]				=	'Posted AP Clearing for Retire Stock',
-			[strCode]						=	@MODULE_CODE,
-			[strReference]					=	A.strCertificateNo,
-			[intCurrencyId]					=	1,
-			[dtmDateEntered]				=	GETDATE(),
-			[dtmTransactionDate]			=	NULL,
-			[strJournalLineDescription]		=	'Posted AP Clearing for Retire Stock',
-			[intJournalLineNo]				=	1,
-			[ysnIsUnposted]					=	0,
-			[intUserId]						=	@intUserId,
-			[intEntityId]					=	@intUserId,
-			[strTransactionId]				=	A.intCustomerStockId, 
-			[intTransactionId]				=	A.intCustomerStockId, 
-			[strTransactionType]			=	'Retire Stock',
-			[strTransactionForm]			=	@RETIRE_STOCK,
-			[strModuleName]					=	@MODULE_NAME,
-			[dblDebitForeign]				=	0,      
-			[dblDebitReport]				=	0,
-			[dblCreditForeign]				=	0,
-			[dblCreditReport]				=	0,
-			[dblReportingRate]				=	0,
-			[dblForeignRate]				=	0,
-			[strRateType]					=	NULL
-		FROM	[dbo].[tblPATCustomerStock] A
-				CROSS JOIN tblPATCompanyPreference ComPref
-		WHERE	A.intCustomerStockId IN (SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@intCustomerStockId))
-		
-
-	END
-	ELSE
-	BEGIN
-	------------------------REVERSE GL ENTRIES---------------------
-		INSERT INTO @GLEntries(
-			[strTransactionId]
-			,[intTransactionId]
-			,[dtmDate]
-			,[strBatchId]
-			,[intAccountId]
-			,[dblDebit]
-			,[dblCredit]
-			,[dblDebitUnit]
-			,[dblCreditUnit]
-			,[strDescription]
-			,[strCode]
-			,[strReference]
-			,[intCurrencyId]
-			,[dblExchangeRate]
-			,[dtmDateEntered]
-			,[dtmTransactionDate]
-			,[strJournalLineDescription]
-			,[intJournalLineNo]
-			,[ysnIsUnposted]
-			,[intUserId]
-			,[intEntityId]
-			,[strTransactionType]
-			,[strTransactionForm]
-			,[strModuleName]
-			,[dblDebitForeign]           
-			,[dblDebitReport]            
-			,[dblCreditForeign]          
-			,[dblCreditReport]           
-			,[dblReportingRate]          
-			,[dblForeignRate]
-			,[strRateType]
-		)
-		SELECT	
-			[strTransactionId]
-			,[intTransactionId]
-			,[dtmDate]
-			,strBatchId = @batchId COLLATE Latin1_General_CI_AS
-			,[intAccountId]
-			,[dblDebit] = [dblCredit]		-- (Debit -> Credit)
-			,[dblCredit] = [dblDebit]		-- (Debit <- Credit)
-			,[dblDebitUnit] = [dblCreditUnit]	-- (Debit Unit -> Credit Unit)
-			,[dblCreditUnit] = [dblDebitUnit]	-- (Debit Unit <- Credit Unit)
-			,[strDescription]
-			,[strCode]
-			,[strReference]
-			,[intCurrencyId]
-			,[dblExchangeRate]
-			,dtmDateEntered = GETDATE()
-			,[dtmTransactionDate]
-			,[strJournalLineDescription]
-			,[intJournalLineNo]
-			,ysnIsUnposted = 1
-			,intUserId = @intUserId
-			,[intEntityId]
-			,[strTransactionType]
-			,[strTransactionForm]
-			,[strModuleName]
-			,[dblDebitForeign]           
-			,[dblDebitReport]            
-			,[dblCreditForeign]          
-			,[dblCreditReport]           
-			,[dblReportingRate]          
-			,[dblForeignRate]
-			,NULL
-		FROM	tblGLDetail 
-		WHERE	intTransactionId IN (SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@intCustomerStockId))
-		AND ysnIsUnposted = 0 AND strTransactionForm = @RETIRE_STOCK AND strModuleName = @MODULE_NAME
-		ORDER BY intGLDetailId
-
-		UPDATE tblGLDetail SET ysnIsUnposted = 1
-		WHERE intTransactionId = @intCustomerStockId 
-			AND strModuleName = @MODULE_NAME AND strTransactionForm = @RETIRE_STOCK
-	END
-END
-ELSE
-BEGIN
-	IF(@ysnPosted = 1)
-	BEGIN
-
 	------------------------CREATE GL ENTRIES---------------------
 		INSERT INTO @GLEntries(
 			[dtmDate], 
@@ -334,8 +135,8 @@ BEGIN
 			[ysnIsUnposted]					=	0,
 			[intUserId]						=	@intUserId,
 			[intEntityId]					=	@intUserId,
-			[strTransactionId]				=	A.intCustomerStockId, 
-			[intTransactionId]				=	A.intCustomerStockId, 
+			[strTransactionId]				=	A.strIssueNo, 
+			[intTransactionId]				=	A.intIssueStockId, 
 			[strTransactionType]			=	CASE WHEN A.strStockStatus = 'Voting' THEN 'Voting Stock' ELSE 'Non-Voting/Other' END,
 			[strTransactionForm]			=	@ISSUE_STOCK,
 			[strModuleName]					=	@MODULE_NAME,
@@ -346,10 +147,9 @@ BEGIN
 			[dblReportingRate]				=	0,
 			[dblForeignRate]				=	0,
 			[strRateType]					=	NULL
-		FROM	[dbo].[tblPATCustomerStock] A
+		FROM	#tempCustomerStock A
 		CROSS JOIN (SELECT intSalesAccount FROM tblSMCompanyLocation where intCompanyLocationId = @intCompanyLocationId) SADef
 		INNER JOIN tblGLAccount GL ON GL.intAccountId = SADef.intSalesAccount
-		WHERE	A.intCustomerStockId IN (SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@intCustomerStockId))
 		UNION ALL
 		--AR Account
 		SELECT	
@@ -371,8 +171,8 @@ BEGIN
 			[ysnIsUnposted]					=	0,
 			[intUserId]						=	@intUserId,
 			[intEntityId]					=	@intUserId,
-			[strTransactionId]				=	A.intCustomerStockId, 
-			[intTransactionId]				=	A.intCustomerStockId, 
+			[strTransactionId]				=	A.intIssueStockId, 
+			[intTransactionId]				=	A.intIssueStockId, 
 			[strTransactionType]			=	'Voting Stock',
 			[strTransactionForm]			=	@ISSUE_STOCK,
 			[strModuleName]					=	@MODULE_NAME,
@@ -383,27 +183,14 @@ BEGIN
 			[dblReportingRate]				=	0,
 			[dblForeignRate]				=	0,
 			[strRateType]					=	NULL
-		FROM	[dbo].[tblPATCustomerStock] A
+		FROM	#tempCustomerStock A
 		CROSS APPLY tblARCompanyPreference ComPref
 		INNER JOIN tblGLAccount GL
 			ON ComPref.intARAccountId = GL.intAccountId
-		WHERE	A.intCustomerStockId IN (SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@intCustomerStockId))
-
 	END
-END
 
-BEGIN TRY
-IF(ISNULL(@ysnRecap, 0) = 0)
-BEGIN
-	IF(@ysnRetired = 1)
-	BEGIN
-		SELECT * FROM @GLEntries;
-		EXEC uspGLBookEntries @GLEntries, @ysnPosted;
-	END
-	SET @isGLSucces = 1;
 
-END
-ELSE
+IF(ISNULL(@ysnRecap, 0) = 1)
 BEGIN
 		INSERT INTO tblGLPostRecap(
 			 [strTransactionId]
@@ -462,123 +249,13 @@ BEGIN
 		INNER JOIN dbo.tblGLAccountGroup C
 			ON B.intAccountGroupId = C.intAccountGroupId
 END
-END TRY
-BEGIN CATCH
-	SET @error = ERROR_MESSAGE()
-	RAISERROR(@error, 16, 1);
-	GOTO Post_Rollback
-END CATCH
-
-
-
-
-IF(@isGLSucces = 1)
+ELSE
 BEGIN
 
 	IF(@batchId2 IS NULL)
 		EXEC uspSMGetStartingNumber 3, @batchId2 OUT
 
-	--------------------- RETIRED STOCKS ------------------	
-	IF(@ysnRetired = 1)
-	BEGIN
-		IF(@ysnPosted = 1)
-		BEGIN
-			DECLARE @voucherDetailNonInventory AS VoucherDetailNonInventory;
-			DECLARE @intCustomerId AS INT;
-			DECLARE @dblFaceValue AS NUMERIC(18,6);
-			DECLARE @strVenderOrderNumber AS NVARCHAR(50);
-			DECLARE @apClearing AS INT;
-
-			SELECT 
-				@intCustomerId = tempCS.intCustomerPatronId,
-				@dblFaceValue = ROUND(tempCS.dblFaceValue,2),
-				@strVenderOrderNumber = tempCS.strCertificateNo,
-				@apClearing = ComPref.intAPClearingGLAccount
-			FROM #tempCustomerStock tempCS
-			CROSS APPLY tblPATCompanyPreference ComPref
-
-			INSERT INTO @voucherDetailNonInventory([intAccountId], [strMiscDescription],[dblQtyReceived],[dblDiscount],[dblCost])
-			VALUES(@apClearing, 'Patronage Retired Stock', 1, 0, @dblFaceValue);
-
-			EXEC [dbo].[uspAPCreateBillData]
-				@userId	= @intUserId
-				,@vendorId = @intCustomerId
-				,@type = 1	
-				,@voucherNonInvDetails = @voucherDetailNonInventory
-				,@shipTo = NULL
-				,@vendorOrderNumber = @strVenderOrderNumber
-				,@voucherDate = @dateToday
-				,@billId = @intCreatedId OUTPUT
-
-			UPDATE tblPATCustomerStock SET intBillId = @intCreatedId WHERE intCustomerStockId = @intCustomerStockId;
-			UPDATE tblAPBillDetail set intCurrencyId = [dbo].[fnSMGetDefaultCurrency]('FUNCTIONAL') WHERE intBillId = @intCreatedId;
-
-			IF EXISTS(SELECT 1 FROM tblAPBillDetailTax WHERE intBillDetailId IN (SELECT intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intCreatedId))
-			BEGIN
-				INSERT INTO @voucherId SELECT intBillId FROM tblAPBill where intBillId = @intCreatedId;
-
-				EXEC [dbo].[uspAPDeletePatronageTaxes] @voucherId;
-
-				UPDATE tblAPBill SET dblTax = 0 WHERE intBillId IN (SELECT intBillId FROM @voucherId);
-				UPDATE tblAPBillDetail SET dblTax = 0 WHERE intBillId IN (SELECT intBillId FROM @voucherId);
-
-				EXEC uspAPUpdateVoucherTotal @voucherId;
-				DELETE FROM @voucherId;
-			END
-
-			EXEC [dbo].[uspAPPostBill]
-				@batchId = @batchId2,
-				@billBatchId = NULL,
-				@transactionType = NULL,
-				@post = 1,
-				@recap = 0,
-				@isBatch = 0,
-				@param = NULL,
-				@userId = @intUserId,
-				@beginTransaction = @intCreatedId,
-				@endTransaction = @intCreatedId,
-				@success = @success OUTPUT
-
-
-		END
-		ELSE
-		BEGIN
-
-			DECLARE @voucher AS NVARCHAR(MAX);
-			SELECT @voucher = intBillId FROM tblPATCustomerStock WHERE intCustomerStockId = @intCustomerStockId;
-
-			EXEC [dbo].[uspAPPostBill]
-					@batchId = NULL,
-					@billBatchId = NULL,
-					@transactionType = @MODULE_NAME,
-					@post = 0,
-					@recap = 0,
-					@isBatch = 0,
-					@param = @voucher,
-					@userId = @intUserId,
-					@beginTransaction = NULL,
-					@endTransaction = NULL,
-					@success = @success OUTPUT
-
-			IF(@success = 0)
-			BEGIN
-				SET @error = 'Unable to unpost transaction';
-				RAISERROR(@error, 16, 1);
-				GOTO Post_Rollback;
-			END
-			
-			DELETE FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM #tempCustomerStock) AND ysnPaid <> 1;
-			UPDATE tblPATCustomerStock
-			SET strActivityStatus = 'Open',
-				dtmRetireDate = null,
-				intBillId = null
-			WHERE intCustomerStockId = @intCustomerStockId
-		END
-		---------- UPDATE CUSTOMER STOCK TABLE ---------------
-		UPDATE tblPATCustomerStock SET ysnRetiredPosted = @ysnPosted WHERE intCustomerStockId = @intCustomerStockId;
-
-	END
-	ELSE
+	--------------------- ISSUE STOCKS ------------------	
 	BEGIN
 		IF(@ysnPosted = 1)
 		BEGIN
@@ -663,7 +340,7 @@ BEGIN
 			)
 			SELECT
 				[strSourceTransaction]					= 'Patronage'
-				,[intSourceId]							= CS.intCustomerStockId
+				,[intSourceId]							= CS.intIssueStockId
 				,[strSourceId]							= CS.strCertificateNo
 				,[intInvoiceId]							= NULL
 				,[intEntityCustomerId]					= CS.intCustomerPatronId
@@ -693,7 +370,7 @@ BEGIN
 				,[intLoadDistributionHeaderId]			= NULL
 				,[strActualCostId]						= ''
 				,[intShipmentId]						= NULL
-				,[intTransactionId]						= CS.intCustomerStockId
+				,[intTransactionId]						= CS.intIssueStockId
 				,[intEntityId]							= @intUserId
 				,[ysnResetDetails]						= 0
 				,[ysnPost]								= 1
@@ -735,14 +412,13 @@ BEGIN
 				,[ysnLeaseBilling]						= NULL
 				,[ysnVirtualMeterReading]				= NULL
 				,[ysnClearDetailTaxes]					= 1
-				,[intTempDetailIdForTaxes]				= @intCustomerStockId
+				,[intTempDetailIdForTaxes]				= @intIssueStockId
 				,[intSalesAccountId]					= SADef.intSalesAccount
 
-			FROM tblPATCustomerStock CS
+			FROM #tempCustomerStock CS
 			INNER JOIN tblARCustomer ARC
-				ON ARC.[intEntityId] = CS.intCustomerPatronId
+				ON ARC.intEntityId = CS.intCustomerPatronId
 			CROSS JOIN (SELECT intSalesAccount FROM tblSMCompanyLocation where intCompanyLocationId = @intCompanyLocationId) SADef
-			WHERE CS.intCustomerStockId = @intCustomerStockId
 
 			EXEC [dbo].[uspARProcessInvoices]
 				@InvoiceEntries = @EntriesForInvoice,
@@ -752,8 +428,31 @@ BEGIN
 				@ErrorMessage	= @error OUTPUT,
 				@CreatedIvoices	= @intCreatedId OUTPUT
 
-			UPDATE tblPATCustomerStock SET intInvoiceId = @intCreatedId WHERE intCustomerStockId = @intCustomerStockId
+			UPDATE tblPATIssueStock SET intInvoiceId = @intCreatedId WHERE intIssueStockId = @intIssueStockId;
 
+			INSERT INTO tblPATCustomerStock(
+				[intCustomerPatronId],
+				[intStockId],
+				[strCertificateNo],
+				[strStockStatus],
+				[strActivityStatus],
+				[dblSharesNo],
+				[dblParValue],
+				[dblFaceValue]
+			)
+			SELECT	CS.intCustomerPatronId,
+					CS.intStockId,
+					CS.strCertificateNo,
+					CS.strStockStatus,
+					'Open',
+					CS.dblSharesNo,
+					CS.dblParValue,
+					CS.dblFaceValue
+			FROM #tempCustomerStock CS
+
+			SET @intCreatedCustomerStockId = SCOPE_IDENTITY();
+
+			UPDATE tblPATIssueStock SET [intCustomerStockId] = @intCreatedCustomerStockId WHERE intIssueStockId = @intIssueStockId;
 		END
 		ELSE
 		BEGIN
@@ -791,10 +490,11 @@ BEGIN
 
 
 			DELETE FROM tblARInvoice WHERE intInvoiceId IN (SELECT intInvoiceId FROM #tempCustomerStock) AND ysnPaid <> 1;
-			UPDATE tblPATCustomerStock SET intInvoiceId = null WHERE intCustomerStockId = @intCustomerStockId;
+			DELETE FROM tblPATCustomerStock WHERE intCustomerStockId IN (SELECT intCustomerPatronId FROM #tempCustomerStock);
+			--UPDATE tblPATCustomerStock SET intInvoiceId = null WHERE intCustomerStockId = @intCustomerStockId;
 		END
 		---------- UPDATE CUSTOMER STOCK TABLE ---------------
-		UPDATE tblPATCustomerStock SET ysnPosted = @ysnPosted WHERE intCustomerStockId = @intCustomerStockId;
+		UPDATE tblPATIssueStock SET ysnPosted = @ysnPosted WHERE intIssueStockId = @intIssueStockId;
 	END
 END
 

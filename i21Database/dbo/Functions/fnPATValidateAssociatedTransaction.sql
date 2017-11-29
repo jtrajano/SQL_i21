@@ -26,10 +26,10 @@ BEGIN
 				'Issued Stock',
 				ARI.strInvoiceNumber,
 				ARI.intInvoiceId
-		FROM tblPATCustomerStock CS
+		FROM tblPATIssueStock IssueStk
 		INNER JOIN tblARInvoice ARI
-			ON ARI.intInvoiceId = CS.intInvoiceId
-		WHERE ARI.ysnPaid = 1 AND CS.strActivityStatus = 'Open' AND CS.intCustomerStockId IN (SELECT * FROM @tmpTransactions)
+			ON ARI.intInvoiceId = IssueStk.intInvoiceId
+		WHERE ARI.ysnPaid = 1 AND IssueStk.intCustomerStockId IN (SELECT * FROM @tmpTransactions)
 	END
 	ELSE IF(@type = 2)
 	BEGIN
@@ -38,10 +38,10 @@ BEGIN
 				'Retired Stock',
 				APB.strBillId,
 				APB.intBillId
-		FROM tblPATCustomerStock CS
+		FROM tblPATRetireStock RetireStk
 		INNER JOIN tblAPBill APB
-			ON APB.intBillId = CS.intBillId
-		WHERE APB.ysnPaid = 1 AND CS.strActivityStatus = 'Retired' AND CS.intCustomerStockId IN (SELECT * FROM @tmpTransactions)
+			ON APB.intBillId = RetireStk.intBillId
+		WHERE APB.ysnPaid = 1 AND RetireStk.intCustomerStockId IN (SELECT * FROM @tmpTransactions)
 	END
 	ELSE IF(@type = 3)
 	BEGIN
@@ -63,8 +63,10 @@ BEGIN
 				APB.strBillId,
 				APB.intBillId
 		FROM tblAPBill APB
+		INNER JOIN tblPATRetireStock RetireStk
+			ON APB.intBillId = RetireStk.intBillId
 		INNER JOIN tblPATCustomerStock CS
-			ON APB.intBillId = CS.intBillId
+			ON CS.intCustomerStockId = RetireStk.intCustomerStockId
 		WHERE APB.ysnPosted = 1 AND APB.intBillId IN (SELECT * FROM @tmpTransactions) AND @transaction != 'Patronage'
 		UNION ALL
 		SELECT	'This voucher was created from Equity Payments - <strong>'+ EP.strPaymentNumber +'</strong>. Unpost it from there.',

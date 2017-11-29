@@ -2653,7 +2653,6 @@
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnit.sql" />
     <Build Include="dbo\Functions\fnGLGetMTDActivity.sql" />
     <Build Include="dbo\Functions\fnGLValidateRevaluePeriod.sql" />
-    <Build Include="dbo\Stored Procedures\uspPATProcessVoid.sql" />
     <Build Include="dbo\Functions\fnIsAllowUserSelfPost.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099MISC.sql" />
     <Build Include="dbo\Stored Procedures\uspWHMoveContainer.sql" />
@@ -5910,6 +5909,9 @@
     <Build Include="dbo\Views\vyuMFCompanyPreference.sql" />
     <Build Include="dbo\Views\vyuARQuoteTemplate.sql" />
     <Build Include="dbo\Stored Procedures\uspARApplyCreditsToOpenInvoices.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATPostRetireStock.sql" />
+    <Build Include="dbo\Tables\tblPATIssueStock.sql" />
+    <Build Include="dbo\Tables\tblPATRetireStock.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
