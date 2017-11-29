@@ -111,9 +111,9 @@ BEGIN
 					'Invoice' AS strDescription,
 					NULL AS strConfirmed,
 					NULL AS dblAllocatedQty,
-					ID.dblPrice /
+					dbo.[fnCTConvertQuantityToTargetItemUOM](ID.intItemId,@intUnitMeasureId,QU.intUnitMeasureId,ID.dblPrice) /
 					CASE WHEN ID.intSubCurrencyId IS NOT NULL THEN 100 ELSE 1 END	AS	dblPrice,
-					CY.strCurrency AS strCurrency,
+					ISNULL(MY.strCurrency,CY.strCurrency) AS strCurrency,
 					NULL AS dblFX,
 					dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId,QU.intUnitMeasureId,@intUnitMeasureId, ID.dblQtyShipped) AS dblBooked,
 					ID.dblTotal AS dblAccounting,
@@ -128,6 +128,7 @@ BEGIN
 			JOIN	tblICItemUOM			PU	ON	PU.intItemUOMId			=	CD.intPriceItemUOMId	
 			JOIN	tblSMCurrency			CY	ON	CY.intCurrencyID		=	IV.intCurrencyId
 			JOIN	@tblLGAllocationDetail	AD	ON	AD.intSContractDetailId	=	ID.intContractDetailId
+	LEFT	JOIN	tblSMCurrency			MY	ON	MY.intCurrencyID		=	CY.intMainCurrencyId
 			WHERE	ID.intContractDetailId	=	@intSContractDetailId
 		)d
 
@@ -156,6 +157,7 @@ BEGIN
 		JOIN	tblICItemUOM			PU	ON	PU.intItemUOMId			=	CD.intPriceItemUOMId	
 		JOIN	tblSMCurrency			CY	ON	CY.intCurrencyID		=	IV.intCurrencyId
 		WHERE	AD.intSContractDetailId	=	@intSContractDetailId
+		AND		EXISTS(SELECT * FROM tblARInvoiceDetail WHERE intContractDetailId	=	@intSContractDetailId)
 
 		UNION ALL
 
