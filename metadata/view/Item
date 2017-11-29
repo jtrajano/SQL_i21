@@ -12852,7 +12852,7 @@
                                                                         "designer|createAlias": "gridcombobox",
                                                                         "displayField": "strCategoryCode",
                                                                         "enableDrillDown": "true",
-                                                                        "fieldLabel": "Direct Sale",
+                                                                        "fieldLabel": "Direct Sale Category",
                                                                         "itemId": "cboPatronageDirect",
                                                                         "labelWidth": 116,
                                                                         "layout|flex": null,
