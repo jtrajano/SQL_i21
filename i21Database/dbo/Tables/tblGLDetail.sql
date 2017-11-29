@@ -196,3 +196,9 @@ EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Credits in the
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Future use - to easily identify commodity in the GL' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'intCommodityId' 
 GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'This is the enities document number for example it is the vendor invoice number on a voucher - a customer po number on an invoice.' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'strSourceDocumentId' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Document' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'strDocument' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Comments' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'strComments' 
+GO

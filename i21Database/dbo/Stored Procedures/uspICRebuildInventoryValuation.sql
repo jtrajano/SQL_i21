@@ -587,6 +587,7 @@ BEGIN
 				dbo.fnRecalculateAverageCost(intItemId, intItemLocationId)
 				, dblLastCost
 			) 
+			, ysnIsPendingUpdate = 1 
 	FROM	dbo.tblICItemPricing ItemPricing 
 	WHERE	intItemId = ISNULL(@intItemId, intItemId) 
 END 

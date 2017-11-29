@@ -16,10 +16,11 @@ CREATE FUNCTION fnGetItemCostingOnPostErrors (
 	, @dblQty AS NUMERIC(38,20) = 0
 	, @intLotId AS INT
 	, @strActualCostId AS NVARCHAR(50)
-	, @intTransactionTypeId AS INT 
+	, @intTransactionTypeId AS INT  
 	, @strTransactionId AS NVARCHAR(50) 
 	, @intCurrencyId AS INT 
 	, @dblForexRate AS NUMERIC(18, 6) = 0.00 
+	, @dblCost AS NUMERIC(38, 20) = 0.00 
 )
 RETURNS TABLE 
 AS
@@ -392,6 +393,28 @@ RETURN (
 				AND @intCurrencyId IS NOT NULL 
 				AND @intCurrencyId <> dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
 				AND @intCurrencyId NOT IN (SELECT intCurrencyID FROM tblSMCurrency WHERE ysnSubCurrency = 1 AND intMainCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL'))
+
+		-- '{Item} will have a negative cost. Negative cost is not allowed.'
+		UNION ALL 
+		SELECT	intItemId = @intItemId
+				,intItemLocationId = @intItemLocationId
+				,strText = dbo.fnFormatMessage(
+							dbo.fnICGetErrorMessage(80196)
+							, Item.strItemNo
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+						) 
+				,intErrorCode = 80196				
+		FROM	tblICItem Item
+		WHERE	Item.intItemId = @intItemId
+				AND ISNULL(@dblCost, 0) < 0
 
 	) AS Query		
 )

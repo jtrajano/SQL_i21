@@ -24,5 +24,4 @@
     CONSTRAINT [FK_tblLGLoadWarehouseServices_tblLGLoadWarehouse_intLoadWarehouseId] FOREIGN KEY ([intLoadWarehouseId]) REFERENCES [tblLGLoadWarehouse]([intLoadWarehouseId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblLGLoadWarehouseServices_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblLGLoadWarehouseServices_tblICItemUOM_intItemUOMId] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
-	CONSTRAINT [FK_tblLGLoadWarehouseServices_tblAPBill_intBillId] FOREIGN KEY ([intBillId]) REFERENCES [tblAPBill]([intBillId]),
 )

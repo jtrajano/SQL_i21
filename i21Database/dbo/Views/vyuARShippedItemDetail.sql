@@ -68,7 +68,7 @@ FROM
 		FROM dbo.tblLGLoad WITH (NOLOCK)
 		WHERE ysnPosted = 1
 	) L
-	JOIN (
+INNER JOIN (
 		SELECT intLoadId
 			 , intLoadDetailId
 			 , intCustomerEntityId
@@ -129,7 +129,7 @@ LEFT OUTER JOIN (
 	 FROM dbo.vyuARCustomerContract WITH (NOLOCK)
 	) ARCC ON LD.intSContractDetailId = ARCC.intContractDetailId
 INNER JOIN
-	tblICItem ICI
+	(SELECT [intItemId], [strItemNo], [strDescription] FROM tblICItem WITH(NOLOCK)) ICI
 		ON LD.[intItemId] = ICI.[intItemId]
 LEFT JOIN(
 	SELECT intItemUOMId
@@ -156,7 +156,7 @@ LEFT JOIN(
 	) UM ON IU.intUnitMeasureId = UM.intUnitMeasureId) SUOM
 		ON ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId) = SUOM.intItemUOMId							
 LEFT OUTER JOIN
-	vyuARGetItemAccount ARIA
+	(SELECT [intItemId], [intAccountId], [intLocationId], [intCOGSAccountId], [intSalesAccountId], [intInventoryAccountId] FROM vyuARGetItemAccount) ARIA
 		ON LD.[intItemId] = ARIA.[intItemId]
 		AND ARCC.[intCompanyLocationId] = ARIA.[intLocationId]
 LEFT OUTER JOIN(

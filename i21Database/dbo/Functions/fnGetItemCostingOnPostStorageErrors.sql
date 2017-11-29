@@ -15,6 +15,7 @@ CREATE FUNCTION fnGetItemCostingOnPostStorageErrors (
 	, @intStorageLocationId AS INT
 	, @dblQty AS NUMERIC(38,20) = 0
 	, @intLotId AS INT
+	, @dblCost AS NUMERIC(38, 20) = 0.00 
 )
 RETURNS TABLE 
 AS
@@ -216,5 +217,27 @@ RETURN (
 					WHERE l.intLotId = @intLotId
 						AND l.ysnLockedInventory = 1
 				)
+
+		-- '{Item} will have a negative cost. Negative cost is not allowed.'
+		UNION ALL 
+		SELECT	intItemId = @intItemId
+				,intItemLocationId = @intItemLocationId
+				,strText = dbo.fnFormatMessage(
+							dbo.fnICGetErrorMessage(80196)
+							, Item.strItemNo
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+						) 
+				,intErrorCode = 80196				
+		FROM	tblICItem Item
+		WHERE	Item.intItemId = @intItemId
+				AND ISNULL(@dblCost, 0) < 0
 	) AS Query		
 )

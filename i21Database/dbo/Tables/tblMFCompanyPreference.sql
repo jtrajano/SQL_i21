@@ -10,8 +10,8 @@
     [ysnSanitizationInboundPutaway] BIT NULL, 
     [ysnBlendRequirementRequired] BIT NULL DEFAULT 1, 
     [ysnBlendSheetRequired] BIT NULL DEFAULT 1, 
-	ysnSanitizationProcessEnabled BIT NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnSanitizationProcessEnabled] DEFAULT 0,
-	ysnWIPStagingProcessEnabled BIT NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnWIPStagingProcessEnabled] DEFAULT 0,
+	ysnSanitizationProcessEnabled BIT NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnSanitizationProcessEnabled] DEFAULT 0,--Not used
+	ysnWIPStagingProcessEnabled BIT NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnWIPStagingProcessEnabled] DEFAULT 0,--Not used
 	ysnAutoPriorityOrderByDemandRatio BIT,
     ysnDisplayNewOrderByExpectedDate BIT NULL,
 	ysnCheckCrossContamination BIT NULL, 
@@ -20,7 +20,7 @@
 	strScheduleType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	intForecastFirstEditableMonth INT CONSTRAINT [DF_tblMFCompanyPreference_intForecastFirstEditableMonth] DEFAULT 0,
 	dblDefaultResidueQty NUMERIC(18,6),
-	[strDefaultRecipeCost] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[strDefaultRecipeCost] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,--Not used
     [ysnLotHistoryByStorageLocation] BIT NULL, 
 	[ysnShowCostInSalesOrderPickList] BIT NULL DEFAULT 0, 
 	intWastageWorkOrderDuration INT NULL,
@@ -51,5 +51,12 @@
 	ysnSplitLotOnPartialQty Bit NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnSplitLotOnPartialQty] DEFAULT 0,
 	ysnProducedQtyByUnitCount Bit NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnProducedQtyByUnitCount] DEFAULT 0,
 	intDamagedStatusId int,
+	intIRParentLotNumberPatternId int,
+
+	ysnAllowMoveAssignedTask BIT,
+	intAllowablePickDayRange INT,
+	ysnGTINCaseCodeMandatory BIT,
+	intMaximumPalletsOnForklift INT,
+
     CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )

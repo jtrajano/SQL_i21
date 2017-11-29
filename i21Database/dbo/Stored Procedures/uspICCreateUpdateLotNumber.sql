@@ -100,6 +100,10 @@ DECLARE
 	,@strCondition				AS NVARCHAR(50) 
 	,@strUnitMeasure			AS NVARCHAR(50)
 	,@intUnitMeasureId			AS INT
+	,@intInventoryReceiptId		AS INT 
+	,@intInventoryReceiptItemId	AS INT 
+	,@intInventoryReceiptItemLotId	AS INT 
+
 
 DECLARE @strName AS NVARCHAR(200)
 		,@intItemOwnerId AS INT 
@@ -188,6 +192,9 @@ SELECT  intId
 		,intShiftId 
 		,strContainerNo
 		,strCondition
+		,intInventoryReceiptId
+		,intInventoryReceiptItemId
+		,intInventoryReceiptItemLotId
 FROM	@ItemsForLot
 
 OPEN loopLotItems;
@@ -238,6 +245,9 @@ FETCH NEXT FROM loopLotItems INTO
 		,@intShiftId
 		,@strContainerNo
 		,@strCondition
+		,@intInventoryReceiptId
+		,@intInventoryReceiptItemId
+		,@intInventoryReceiptItemLotId
 ;
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -268,6 +278,30 @@ BEGIN
 		SET @intReturnCode = -80005;
 		GOTO _Exit_Loop;
 	END 	
+
+	-- Generate the parent lot number 
+	IF ISNULL(@strParentLotNumber, '') = '' 
+	BEGIN 
+		EXEC dbo.uspMFGeneratePatternId 
+				@intCategoryId = @intCategoryId
+				,@intItemId = @intItemId
+				,@intManufacturingId = NULL
+				,@intSubLocationId = @intSubLocationId
+				,@intLocationId = @intLocationId
+				,@intOrderTypeId = NULL
+				,@intBlendRequirementId = NULL
+				,@intPatternCode = 78
+				,@ysnProposed = 0
+				,@strPatternString = @strParentLotNumber OUTPUT
+				,@intEntityId = @intEntityUserSecurityId
+				,@intShiftId = @intShiftId
+				,@dtmDate = @dtmManufacturedDate
+				,@strParentLotNumber = NULL
+				,@intInventoryReceiptId = @intInventoryReceiptId
+				,@intInventoryReceiptItemId = @intInventoryReceiptItemId
+				,@intInventoryReceiptItemLotId = @intInventoryReceiptItemLotId
+				,@intTransactionTypeId = @intSourceTransactionTypeId
+	END 
 	
 	-- Generate the next lot number - if lot id is NULL AND it is a serial lot item. 
 	IF @intLotTypeId = @LotType_Serial AND @intLotId IS NULL 
@@ -294,6 +328,12 @@ BEGIN
 				, @intEntityUserSecurityId
 				, @intShiftId
 				, @dtmManufacturedDate
+				, @strParentLotNumber
+				, @intInventoryReceiptId
+				, @intInventoryReceiptItemId
+				, @intInventoryReceiptItemLotId
+				, @intSourceTransactionTypeId 
+
 		END 
 	END 
 
@@ -322,6 +362,11 @@ BEGIN
 				, @intEntityUserSecurityId
 				, @intShiftId
 				, @dtmManufacturedDate
+				, @strParentLotNumber
+				, @intInventoryReceiptId
+				, @intInventoryReceiptItemId
+				, @intInventoryReceiptItemLotId
+				, @intSourceTransactionTypeId 
 		END 
 	END 
 
@@ -842,7 +887,7 @@ BEGIN
 		END 
 
 		-- Insert the parent lot 
-		IF ISNULL(@intInsertedLotId, 0) <> 0
+		IF ISNULL(@intInsertedLotId, 0) <> 0 
 		BEGIN 
 			SET @intParentLotId = NULL
 			SET @intReturnCode = 0
@@ -1015,6 +1060,9 @@ BEGIN
 		,@intShiftId
 		,@strContainerNo
 		,@strCondition
+		,@intInventoryReceiptId
+		,@intInventoryReceiptItemId
+		,@intInventoryReceiptItemLotId
 	;
 END
 

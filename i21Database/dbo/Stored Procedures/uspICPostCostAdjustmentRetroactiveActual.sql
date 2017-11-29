@@ -104,6 +104,7 @@ BEGIN
 	DECLARE	@StockItemUOMId AS INT
 			,@strDescription AS NVARCHAR(255)
 			,@strNewCost AS NVARCHAR(50) 
+			,@strItemNo AS NVARCHAR(50) 
 
 END 
 
@@ -190,8 +191,6 @@ BEGIN
 	BEGIN 
 		IF @CostBucketId IS NULL
 		BEGIN 
-			DECLARE @strItemNo AS NVARCHAR(50)				
-
 			SELECT	@strItemNo = CASE WHEN ISNULL(strItemNo, '') = '' THEN 'id: ' + CAST(@intItemId AS NVARCHAR(20)) ELSE strItemNo END 
 			FROM	tblICItem 
 			WHERE	intItemId = @intItemId
@@ -360,6 +359,18 @@ BEGIN
 		-- Update the cost bucket cost. 
 		IF @t_dblQty > 0 AND @t_intInventoryTransactionId = @InventoryTransactionStartId  
 		BEGIN 
+			-- Validate if the cost is going to be negative. 
+			IF (@CostBucketOriginalValue + @CostAdjustment) < 0 
+			BEGIN 
+				SELECT	@strItemNo = CASE WHEN ISNULL(strItemNo, '') = '' THEN 'id: ' + CAST(@intItemId AS NVARCHAR(20)) ELSE strItemNo END 
+				FROM	tblICItem 
+				WHERE	intItemId = @intItemId
+
+				-- '{Item} will have a negative cost. Negative cost is not allowed.'
+				EXEC uspICRaiseError 80196, @strItemNo
+				RETURN -80196;
+			END 
+
 			UPDATE	cb
 			SET		cb.dblCost = 
 						dbo.fnDivide(

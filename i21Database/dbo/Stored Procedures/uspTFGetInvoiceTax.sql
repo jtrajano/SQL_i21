@@ -634,7 +634,9 @@ BEGIN TRY
 				AND CAST(FLOOR(CAST(tblTRLoadHeader.dtmLoadDateTime AS FLOAT))AS DATETIME) <= CAST(FLOOR(CAST(@DateTo AS FLOAT))AS DATETIME)
 				AND tblICInventoryTransfer.ysnPosted = 1
 				AND (tblTFReportingComponentCriteria.strCriteria IS NULL 
-					OR (tblTFReportingComponentCriteria.strCriteria = '<> 0' AND tblSMTaxCode.intTaxCodeId = TaxCodeCategory.intTaxCodeId ))
+						OR (tblTFReportingComponentCriteria.strCriteria = '<> 0' AND tblSMTaxCode.intTaxCodeId = TaxCodeCategory.intTaxCodeId) -- FOR TRACK MFT ACTIVITY
+						OR (TaxCodeCategory.intTaxCodeId IS NULL AND tblTFReportingComponentCriteria.strCriteria = '= 0') -- FOR NO TAX CODE MAPPED TO MFT CATEGORY
+					)
 		) tblTransactions
 		
 		IF (@ReportingComponentId <> '')
@@ -699,10 +701,10 @@ BEGIN TRY
 				, intProductCode
 				, strProductCode
 				, intItemId
-				, dblQtyShipped
-				, dblGross
-				, dblNet
-				, dblBillQty
+				, CONVERT(DECIMAL(18), dblQtyShipped)
+				, CONVERT(DECIMAL(18), dblGross)
+				, CONVERT(DECIMAL(18), dblNet)
+				, CONVERT(DECIMAL(18), dblBillQty)
 				, strInvoiceNumber
 				, strPONumber
 				, strBillOfLading

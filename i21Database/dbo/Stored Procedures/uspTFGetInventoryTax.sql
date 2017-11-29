@@ -512,11 +512,11 @@ BEGIN TRY
 				, intProductCodeId
 				, strProductCode
 				, strBillOfLading
-				, dblReceived
+				, CONVERT(DECIMAL(18), dblReceived)
 				, strTaxCategory
-				, dblGross
-				, dblNet
-				, dblBillQty
+				, CONVERT(DECIMAL(18), dblGross)
+				, CONVERT(DECIMAL(18), dblNet)
+				, CONVERT(DECIMAL(18), dblBillQty)
 				, dblTax
 				, dtmReceiptDate
 				, strShipVia
@@ -560,7 +560,7 @@ BEGIN TRY
 				, strTransactionType
 				, intTransactionNumberId
 				, strVendorLicenseNumber
-				, dblGross
+				, CONVERT(DECIMAL(18), dblGross)
 			FROM @TFTransaction
 		END
 

@@ -2556,3 +2556,23 @@ BEGIN
 		,'ALPHABETICAL SEQUENCE'
 END
 GO
+UPDATE tblMFCompanyPreference
+SET intIRParentLotNumberPatternId = 0
+WHERE intIRParentLotNumberPatternId IS NULL
+GO
+UPDATE tblMFCompanyPreference
+SET ysnAllowMoveAssignedTask = 1
+WHERE ysnAllowMoveAssignedTask IS NULL
+GO
+UPDATE tblMFCompanyPreference
+SET intAllowablePickDayRange = 30
+WHERE intAllowablePickDayRange IS NULL
+GO
+UPDATE tblMFCompanyPreference
+SET ysnGTINCaseCodeMandatory = 1
+WHERE ysnGTINCaseCodeMandatory IS NULL
+GO
+UPDATE tblMFCompanyPreference
+SET intMaximumPalletsOnForklift = 3
+WHERE intMaximumPalletsOnForklift IS NULL
+GO

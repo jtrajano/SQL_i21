@@ -54,7 +54,8 @@ WHERE	intItemUOMId = @intItemUOMId
 -- Validate Functional Currency
 IF ISNULL(@dblForexRate , 0) = 0
 BEGIN
-	EXEC uspICRaiseError 80196, @strTransactionId
+	-- 'Unable to post {Transaction Id}. Functional currency is not set for the company.'
+	EXEC uspICRaiseError 80197, @strTransactionId
 	GOTO _EXIT
 END
 

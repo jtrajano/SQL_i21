@@ -1,6 +1,6 @@
 ﻿CREATE VIEW vyuLGLoadWarehouseView
 AS
-SELECT LW.intLoadWarehouseId
+SELECT DISTINCT LW.intLoadWarehouseId
 	  ,LW.intConcurrencyId
 	  ,LW.strDeliveryNoticeNumber
 	  ,LW.dtmDeliveryNoticeDate
@@ -72,6 +72,7 @@ SELECT LW.intLoadWarehouseId
 			THEN 'Vessel Nomination'
 		ELSE ''
 		END COLLATE Latin1_General_CI_AS AS strShipmentType
+		,BI.strBillId
 FROM tblLGLoadWarehouse LW
 JOIN tblLGLoad L ON L.intLoadId = LW.intLoadId
 JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
@@ -81,3 +82,5 @@ LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = L.intDriverEntityId
 LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
 LEFT JOIN tblLGWarehouseRateMatrixHeader WRMH ON WRMH.intWarehouseRateMatrixHeaderId = LW.intWarehouseRateMatrixHeaderId
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = LW.intStorageLocationId
+LEFT JOIN tblLGLoadWarehouseServices LWS ON LWS.intLoadWarehouseId = LW.intLoadWarehouseId
+LEFT JOIN tblAPBill BI ON BI.intBillId = LWS.intBillId

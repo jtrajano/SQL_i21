@@ -28,3 +28,5 @@ EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Consolidating 
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Default Visible Old Account System Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLCompanyPreferenceOption', @level2type=N'COLUMN',@level2name=N'intDefaultVisibleOldAccountSystemId' 
 GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'SQL Database version (year)' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLCompanyPreferenceOption', @level2type=N'COLUMN',@level2name=N'intDBVersion' 
+GO

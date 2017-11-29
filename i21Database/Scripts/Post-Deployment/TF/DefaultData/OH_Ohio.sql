@@ -1,7 +1,6 @@
-﻿-- Declare the Tax Authority Code that will be used all throughout Indiana Default Data
-
-DECLARE @TaxAuthorityCode NVARCHAR(10) = 'OH'
+﻿DECLARE @TaxAuthorityCode NVARCHAR(10) = 'OH'
 	, @TaxAuthorityId INT
+
 SELECT @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode AND ysnFilingForThisTA = 1
 
 IF(@TaxAuthorityId IS NOT NULL)
@@ -559,31 +558,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId and TaxCat.intTaxAuthorityId = @Tax
 		, strCriteria
 		, intMasterId
 	)
-	SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Gasoline', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Gasoline', strCriteria = '<> 0', intMasterId = 35399
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Clear Diesel', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Clear Diesel', strCriteria = '<> 0', intMasterId = 35400
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Low Sulfur Dyed Diesel', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Low Sulfur Dyed Diesel', strCriteria = '<> 0', intMasterId = 35401
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax High Sulfur Dyed Diesel', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '1', strType = 'High Sulfur Dyed Diesel', strCriteria = '<> 0', intMasterId = 35402
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Kerosene', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Kerosene', strCriteria = '<> 0', intMasterId = 35403
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax CNG', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '1', strType = 'CNG', strCriteria = '<> 0', intMasterId = 35404
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax LNG', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '1', strType = 'LNG', strCriteria = '<> 0', intMasterId = 35405
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Propane', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Propane', strCriteria = '<> 0', intMasterId = 35406
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Other', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Other', strCriteria = '<> 0', intMasterId = 35407
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Gasoline', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Gasoline', strCriteria = '= 0', intMasterId = 35408
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Clear Diesel', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Clear Diesel', strCriteria = '= 0', intMasterId = 35409
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Low Sulfur Dyed Diesel', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Low Sulfur Dyed Diesel', strCriteria = '= 0', intMasterId = 35410
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax High Sulfur Dyed Diesel', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '2', strType = 'High Sulfur Dyed Diesel', strCriteria = '= 0', intMasterId = 35411
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Kerosene', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Kerosene', strCriteria = '= 0', intMasterId = 35412
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax CNG', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '2', strType = 'CNG', strCriteria = '= 0', intMasterId = 35413
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax LNG', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '2', strType = 'LNG', strCriteria = '= 0', intMasterId = 35414
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Propane', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Propane', strCriteria = '= 0', intMasterId = 35415
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Other', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Other', strCriteria = '= 0', intMasterId = 35416
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Gasoline', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Gasoline', strCriteria = '= 0', intMasterId = 35417
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Clear Diesel', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Clear Diesel', strCriteria = '= 0', intMasterId = 35418
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Low Sulfur Dyed Diesel', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Low Sulfur Dyed Diesel', strCriteria = '= 0', intMasterId = 35419
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax High Sulfur Dyed Diesel', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '3', strType = 'High Sulfur Dyed Diesel', strCriteria = '= 0', intMasterId = 35420
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Kerosene', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Kerosene', strCriteria = '= 0', intMasterId = 35421
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax CNG', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '3', strType = 'CNG', strCriteria = '= 0', intMasterId = 35422
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax LNG', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '3', strType = 'LNG', strCriteria = '= 0', intMasterId = 35423
+	SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax LNG', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '3', strType = 'LNG', strCriteria = '= 0', intMasterId = 35423
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Propane', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Propane', strCriteria = '= 0', intMasterId = 35424
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Other', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Other', strCriteria = '= 0', intMasterId = 35425
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Gasoline', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '5', strType = 'Gasoline', strCriteria = '<> 0', intMasterId = 35426
@@ -598,15 +573,15 @@ where RC.intTaxAuthorityId = @TaxAuthorityId and TaxCat.intTaxAuthorityId = @Tax
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Gasoline', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Gasoline', strCriteria = '= 0', intMasterId = 35435
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Clear Diesel', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Clear Diesel', strCriteria = '= 0', intMasterId = 35436
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Low Sulfur Dyed Diesel', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Low Sulfur Dyed Diesel', strCriteria = '= 0', intMasterId = 35437
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax High Sulfur Dyed Diesel', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '6', strType = 'High Sulfur Dyed Diesel', strCriteria = '= 0', intMasterId = 35438
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Kerosene', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Kerosene', strCriteria = '= 0', intMasterId = 35439
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax CNG', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '6', strType = 'CNG', strCriteria = '= 0', intMasterId = 35440
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax LNG', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '6', strType = 'LNG', strCriteria = '= 0', intMasterId = 35441
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Propane', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Propane', strCriteria = '= 0', intMasterId = 35442
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Other', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Other', strCriteria = '= 0', intMasterId = 35443
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Gasoline', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Gasoline', strCriteria = '= 0', intMasterId = 35444
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Clear Diesel', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Clear Diesel', strCriteria = '= 0', intMasterId = 35445
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Low Sulfur Dyed Diesel', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Low Sulfur Dyed Diesel', strCriteria = '= 0', intMasterId = 35446
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax CNG', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '3', strType = 'CNG', strCriteria = '= 0', intMasterId = 35422
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Kerosene', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Kerosene', strCriteria = '= 0', intMasterId = 35421
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax High Sulfur Dyed Diesel', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '3', strType = 'High Sulfur Dyed Diesel', strCriteria = '= 0', intMasterId = 35420
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Low Sulfur Dyed Diesel', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Low Sulfur Dyed Diesel', strCriteria = '= 0', intMasterId = 35419
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Clear Diesel', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Clear Diesel', strCriteria = '= 0', intMasterId = 35418
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Gasoline', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Gasoline', strCriteria = '= 0', intMasterId = 35417
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Other', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Other', strCriteria = '= 0', intMasterId = 35416
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Propane', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Propane', strCriteria = '= 0', intMasterId = 35415
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax LNG', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '2', strType = 'LNG', strCriteria = '= 0', intMasterId = 35414
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax High Sulfur Dyed Diesel', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '8', strType = 'High Sulfur Dyed Diesel', strCriteria = '= 0', intMasterId = 35447
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Kerosene', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Kerosene', strCriteria = '= 0', intMasterId = 35448
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax CNG', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '8', strType = 'CNG', strCriteria = '= 0', intMasterId = 35449
@@ -620,6 +595,30 @@ where RC.intTaxAuthorityId = @TaxAuthorityId and TaxCat.intTaxAuthorityId = @Tax
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Kerosene', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '10', strType = 'LNG', strCriteria = '= 0', intMasterId = 35457
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax CNG', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '10', strType = 'Propane', strCriteria = '= 0', intMasterId = 35458
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax LNG', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '10', strType = 'Other', strCriteria = '= 0', intMasterId = 35459
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax CNG', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '2', strType = 'CNG', strCriteria = '= 0', intMasterId = 35413
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Kerosene', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Kerosene', strCriteria = '= 0', intMasterId = 35412
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax High Sulfur Dyed Diesel', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '2', strType = 'High Sulfur Dyed Diesel', strCriteria = '= 0', intMasterId = 35411
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Low Sulfur Dyed Diesel', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Low Sulfur Dyed Diesel', strCriteria = '= 0', intMasterId = 35410
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Clear Diesel', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Clear Diesel', strCriteria = '= 0', intMasterId = 35409
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Gasoline', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Gasoline', strCriteria = '= 0', intMasterId = 35408
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Other', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Other', strCriteria = '<> 0', intMasterId = 35407
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Propane', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Propane', strCriteria = '<> 0', intMasterId = 35406
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax LNG', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '1', strType = 'LNG', strCriteria = '<> 0', intMasterId = 35405
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax CNG', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '1', strType = 'CNG', strCriteria = '<> 0', intMasterId = 35404
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Kerosene', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Kerosene', strCriteria = '<> 0', intMasterId = 35403
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax High Sulfur Dyed Diesel', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '1', strType = 'High Sulfur Dyed Diesel', strCriteria = '<> 0', intMasterId = 35402
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Low Sulfur Dyed Diesel', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Low Sulfur Dyed Diesel', strCriteria = '<> 0', intMasterId = 35401
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Clear Diesel', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Clear Diesel', strCriteria = '<> 0', intMasterId = 35400
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Gasoline', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Gasoline', strCriteria = '<> 0', intMasterId = 35399
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax High Sulfur Dyed Diesel', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '6', strType = 'High Sulfur Dyed Diesel', strCriteria = '= 0', intMasterId = 35438
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Kerosene', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Kerosene', strCriteria = '= 0', intMasterId = 35439
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax CNG', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '6', strType = 'CNG', strCriteria = '= 0', intMasterId = 35440
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax LNG', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '6', strType = 'LNG', strCriteria = '= 0', intMasterId = 35441
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Propane', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Propane', strCriteria = '= 0', intMasterId = 35442
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Other', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Other', strCriteria = '= 0', intMasterId = 35443
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Gasoline', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Gasoline', strCriteria = '= 0', intMasterId = 35444
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Clear Diesel', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Clear Diesel', strCriteria = '= 0', intMasterId = 35445
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'OH Excise Tax Low Sulfur Dyed Diesel', strState = 'OH', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Low Sulfur Dyed Diesel', strCriteria = '= 0', intMasterId = 35446
 
 	EXEC uspTFUpgradeTaxCriteria @TaxAuthorityCode = @TaxAuthorityCode, @TaxCriteria = @TaxCriteria
 

@@ -87,18 +87,18 @@ BEGIN
 	SET		dblStandardCost = ROUND(dbo.fnCalculateCostBetweenUOM(@OriginalStockItemUOMId, @NewStockItemUOMId, dblStandardCost), 5)
 			,dblLastCost = ROUND(dbo.fnCalculateCostBetweenUOM(@OriginalStockItemUOMId, @NewStockItemUOMId, dblLastCost), 5)
 			,dblAverageCost = ROUND(dbo.fnCalculateCostBetweenUOM(@OriginalStockItemUOMId, @NewStockItemUOMId, dblAverageCost), 5)
-			,dblSalePrice = ROUND(dbo.fnCalculateCostBetweenUOM(@OriginalStockItemUOMId, @NewStockItemUOMId, dblSalePrice), 5)
+			,dblSalePrice = ROUND(dbo.fnCalculateCostBetweenUOM(@OriginalStockItemUOMId, @NewStockItemUOMId, dblSalePrice), 6)
 	FROM	dbo.tblICItemPricing p
 	WHERE	p.intItemId = @intItemId
 	
 	-- Item Pricing tab
 	UPDATE	pl
-	SET		pl.dblUnitPrice = ROUND(dbo.fnCalculateCostBetweenUOM(pl.intItemUnitMeasureId, @OriginalStockItemUOMId, pl.dblUnitPrice), 5)
+	SET		pl.dblUnitPrice = ROUND(dbo.fnCalculateCostBetweenUOM(pl.intItemUnitMeasureId, @OriginalStockItemUOMId, pl.dblUnitPrice), 6)
 	FROM	tblICItemPricingLevel pl
 	WHERE	intItemId = @intItemId
 
 	UPDATE	l
-	SET		dblLastCost = ROUND(dbo.fnCalculateQtyBetweenUOM(@OriginalStockItemUOMId, @NewStockItemUOMId, dblLastCost) , 5)
+	SET		dblLastCost = ROUND(dbo.fnCalculateQtyBetweenUOM(@OriginalStockItemUOMId, @NewStockItemUOMId, dblLastCost), 6)
 	FROM	dbo.tblICLot l
 	WHERE	l.intItemId = @intItemId
 END 

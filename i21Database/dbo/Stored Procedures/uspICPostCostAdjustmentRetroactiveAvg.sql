@@ -109,7 +109,7 @@ BEGIN
 	DECLARE	@StockItemUOMId AS INT
 			,@strDescription AS NVARCHAR(255)
 			,@strNewCost AS NVARCHAR(50) 
-
+			,@strItemNo AS NVARCHAR(50)				
 END 
 
 -- Compute the cost adjustment
@@ -194,8 +194,6 @@ BEGIN
 	BEGIN 
 		IF @InventoryTransactionStartId IS NULL
 		BEGIN 
-			DECLARE @strItemNo AS NVARCHAR(50)				
-
 			SELECT	@strItemNo = CASE WHEN ISNULL(strItemNo, '') = '' THEN 'id: ' + CAST(@intItemId AS NVARCHAR(20)) ELSE strItemNo END 
 			FROM	tblICItem 
 			WHERE	intItemId = @intItemId
@@ -453,6 +451,18 @@ BEGIN
 			AND @t_intTransactionDetailId = @intSourceTransactionDetailId
 			AND @t_strTransactionId = @strSourceTransactionId
 		BEGIN 
+			-- Validate if the cost is going to be negative. 
+			IF (@CostBucketOriginalValue + @CostAdjustment) < 0 
+			BEGIN 
+				SELECT	@strItemNo = CASE WHEN ISNULL(strItemNo, '') = '' THEN 'id: ' + CAST(@intItemId AS NVARCHAR(20)) ELSE strItemNo END 
+				FROM	tblICItem 
+				WHERE	intItemId = @intItemId
+
+				-- '{Item} will have a negative cost. Negative cost is not allowed.'
+				EXEC uspICRaiseError 80196, @strItemNo
+				RETURN -80196;
+			END 
+
 			UPDATE	cb
 			SET		cb.dblCost = (@CostBucketOriginalValue + @CostAdjustment) / cb.dblStockIn
 			FROM	tblICInventoryFIFO cb
@@ -666,10 +676,16 @@ END
 BEGIN 
 	UPDATE	p
 	SET		p.dblAverageCost = @NewAverageCost
+			,p.ysnIsPendingUpdate = 1
 	FROM	tblICItemPricing p 
 	WHERE	p.intItemId = @intItemId
 			AND p.intItemLocationId = @intItemLocationId
 			AND @NewAverageCost IS NOT NULL 
+
+	-- Update the Item Pricing
+	EXEC uspICUpdateItemPricing
+		@intItemId
+		,@intItemLocationId
 END
 
 -- Create the auto-variance. 

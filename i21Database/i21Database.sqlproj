@@ -5922,6 +5922,14 @@
     <Build Include="dbo\Functions\fnFormatNumber.sql" />
     <Build Include="dbo\Functions\fnRTrim.sql" />
     <Build Include="dbo\Views\vyuQMCompanyPreference.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateItemPricing.sql" />
+    <Build Include="dbo\Views\vyuRKGetPurchaseInventory.sql" />
+    <Build Include="dbo\Tables\tblMFParentLotNumberPattern.sql" />
+    <Build Include="dbo\Tables\tblCRMSalesRepSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspCRMGetSalesRepSummary.sql" />
+    <Build Include="dbo\Views\vyuMFCompanyPreference.sql" />
+    <Build Include="dbo\Views\vyuVRRebateExport.sql" />
+    <Build Include="dbo\Views\vyuARQuoteTemplate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -6074,6 +6082,8 @@
     <Build Include="dbo\Stored Procedures\uspSMUpdateEntityCredentialCompanyGridLayout.sql" />
     <None Include="Scripts\Post-Deployment\CCR\RemoveCCRObsoleteScreen.sql" />
     <Build Include="dbo\Stored Procedures\uspCRMGetPipelineForecast.sql" />
+    <None Include="Scripts\Post-Deployment\MF\CBIPattern.sql" />
+    <None Include="Scripts\Post-Deployment\AP\DeleteInvalidBasisAdvanceStaging.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

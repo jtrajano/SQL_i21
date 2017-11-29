@@ -75,6 +75,7 @@ BEGIN
 	WHEN MATCHED THEN 
 		UPDATE 
 		SET		dblAverageCost = StockToUpdate.dblNewAverageCost --CASE WHEN @CurrentStockQty <=0 THEN @CurrentAverageCost ELSE StockToUpdate.dblNewAverageCost END 
+				,ysnIsPendingUpdate = 1
 
 	-- If none found, insert a new item pricing record
 	WHEN NOT MATCHED THEN 
@@ -84,6 +85,7 @@ BEGIN
 			,dblAverageCost 
 			,dblLastCost 
 			,dblStandardCost
+			,ysnIsPendingUpdate
 			,intConcurrencyId
 		)
 		VALUES (
@@ -93,6 +95,12 @@ BEGIN
 			,0
 			,0
 			,1
+			,1
 		)
 	;
+
+	-- Update the item pricing because of the new average cost. 
+	EXEC uspICUpdateItemPricing
+		@intItemId
+		,@intItemLocationId
 END 

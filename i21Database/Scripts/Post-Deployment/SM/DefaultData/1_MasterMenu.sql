@@ -5494,9 +5494,9 @@ INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@C
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Activities (Portal)' AND strModuleName = 'CRM' AND intParentMenuID = @CRMPortalParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Activities (Portal)', N'CRM', @CRMPortalParentMenuId, N'Activities (Portal)', N'Portal Menu', N'Screen', N'CRM.view.Opportunity?searchCommand=searchConfigAllActivities', N'small-menu-portal', 1, 0, 0, 1, 0, 1)
+	VALUES (N'Activities (Portal)', N'CRM', @CRMPortalParentMenuId, N'Activities (Portal)', N'Portal Menu', N'Screen', N'CRM.view.Opportunity?showSearch=true&searchCommand=Activity', N'small-menu-portal', 1, 0, 0, 1, 0, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'CRM.view.Opportunity?searchCommand=searchConfigAllActivities' WHERE strMenuName = 'Activities (Portal)' AND strModuleName = 'CRM' AND intParentMenuID = @CRMPortalParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'CRM.view.Opportunity?showSearch=true&searchCommand=Activity' WHERE strMenuName = 'Activities (Portal)' AND strModuleName = 'CRM' AND intParentMenuID = @CRMPortalParentMenuId
 
 DECLARE @CRMActivitiesMenuId INT
 SELECT  @CRMActivitiesMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities (Portal)' AND strModuleName = 'CRM' AND intParentMenuID = @CRMPortalParentMenuId
