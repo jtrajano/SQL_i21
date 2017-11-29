@@ -42,9 +42,13 @@ FETCH NEXT FROM intListCursor INTO @strItemNo;
 
 WHILE @@FETCH_STATUS = 0
 BEGIN
-	
+	DECLARE @total AS DECIMAL(38,20);
+	SELECT @total = SUM(SCT.dblNetUnits) FROM tblSCDeliverySheet SCD
+	LEFT JOIN tblSCTicket SCT ON SCD.intDeliverySheetId = SCT.intDeliverySheetId
+	WHERE SCT.intDeliverySheetId = @intDeliverySheetId
+
 	UPDATE #DeliverySheetGrade SET Amount = 
-	ISNULL((SELECT AVG(QM.dblGradeReading) AS dblAppliedQty FROM tblSCDeliverySheet SCD
+	ISNULL((SELECT SUM(((SCT.dblNetUnits / @total) * QM.dblGradeReading))  FROM tblSCDeliverySheet SCD
 	LEFT JOIN tblSCTicket SCT ON SCD.intDeliverySheetId = SCT.intDeliverySheetId
 	LEFT JOIN tblQMTicketDiscount QM ON QM.intTicketId = SCT.intTicketId
 	LEFT JOIN tblGRDiscountScheduleCode GR ON GR.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId

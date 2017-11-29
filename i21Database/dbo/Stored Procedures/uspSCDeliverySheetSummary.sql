@@ -116,32 +116,37 @@ BEGIN
 		SET @Storage = 
 		ISNULL((SELECT SUM(IRI.dblOpenReceive) FROM tblSCDeliverySheet SCD
 		INNER JOIN tblICInventoryReceiptItem IRI ON SCD.intDeliverySheetId = IRI.intSourceId
-		INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
-		INNER JOIN tblGRCustomerStorage GRC ON SCD.intDeliverySheetId = GRC.intDeliverySheetId
+		INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId AND IR.intEntityVendorId = 4 AND IR.intSourceType = 5
+		INNER JOIN tblGRCustomerStorage GRC ON SCD.intDeliverySheetId = GRC.intDeliverySheetId AND GRC.intEntityId = @intEntityId 
 		INNER JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = GRC.intStorageTypeId
-		WHERE IR.intEntityVendorId = @intEntityId AND IRI.intOwnershipType = 2 
-		AND IR.intSourceType IN (1,5) AND GR.ysnReceiptedStorage = 0 
+		WHERE IRI.intOwnershipType = 2 AND GR.ysnReceiptedStorage = 0 
 		AND GR.ysnDPOwnedType = 0 AND GR.ysnGrainBankType = 0 AND GR.ysnCustomerStorage = 0), 0)
 		
-		--For storage scale
-		SET @StorageScale = 
-		ISNULL((SELECT SUM(IRI.dblOpenReceive) FROM tblICInventoryReceipt IR
-		INNER JOIN tblICInventoryReceiptItem IRI ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
-		INNER JOIN tblSCTicket SC ON IRI.intSourceId = SC.intTicketId
-		INNER JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = SC.intStorageScheduleTypeId
-		WHERE IR.intEntityVendorId = @intEntityId AND IRI.intOwnershipType = 2 
-		AND IR.intSourceType IN (1,5) AND SC.intItemId = @intItemId
-		AND GR.ysnReceiptedStorage = 0 AND GR.ysnDPOwnedType = 0 AND GR.ysnGrainBankType = 0 AND GR.ysnCustomerStorage = 0), 0)
+		----For storage scale
+		--SET @StorageScale = 
+		--ISNULL((SELECT SUM(IRI.dblOpenReceive) FROM tblICInventoryReceipt IR
+		--INNER JOIN tblICInventoryReceiptItem IRI ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
+		--INNER JOIN tblSCTicket SC ON IRI.intSourceId = SC.intTicketId
+		--INNER JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = SC.intStorageScheduleTypeId
+		--WHERE IR.intEntityVendorId = @intEntityId AND IRI.intOwnershipType = 2 
+		--AND IR.intSourceType IN (1) AND SC.intItemId = @intItemId
+		--AND GR.ysnReceiptedStorage = 0 AND GR.ysnDPOwnedType = 0 AND GR.ysnGrainBankType = 0 AND GR.ysnCustomerStorage = 0), 0)
 
 		--Storage hold split ticket
-		SET @StorageScale = 
-		@StorageScale + ISNULL((SELECT SUM((SCT.dblNetUnits * @SplitAverage) / 100) FROM tblSCDeliverySheet SCD
-		LEFT JOIN tblSCTicket SCT ON SCD.intDeliverySheetId = SCT.intDeliverySheetId
-		LEFT JOIN tblSCTicketSplit SCSPL ON SCSPL.intTicketId = SCT.intTicketId
-		INNER JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = SCSPL.intStorageScheduleTypeId
+		SET @StorageScale = ISNULL((SELECT SUM((SCT.dblNetUnits * @SplitAverage) / 100) FROM tblSCDeliverySheet SCD
+		LEFT JOIN tblSCTicket SCT ON SCD.intDeliverySheetId = SCT.intDeliverySheetId AND SCT.ysnDeliverySheetPost = 0
+		LEFT JOIN tblEMEntitySplitDetail EMSD ON EMSD.intSplitId = SCD.intSplitId
+		OUTER APPLY (
+			SELECT * FROM tblGRStorageType GRS WHERE GRS.intStorageScheduleTypeId = 
+												CASE 
+													WHEN EMSD.strOption = 'Contract' THEN -2
+													WHEN EMSD.strOption = 'Spot Sale' THEN -3
+													ELSE EMSD.intStorageScheduleTypeId
+												END
+		) GR
 		WHERE GR.ysnReceiptedStorage = 0 AND GR.ysnDPOwnedType = 0 AND GR.ysnGrainBankType = 0 AND GR.ysnCustomerStorage = 0
-		AND SCD.intDeliverySheetId = @intDeliverySheetId AND SCT.strTicketStatus = 'H' AND ysnDeliverySheetPost = 0
-		AND SCSPL.intCustomerId = @intEntityId AND SCT.intItemId = @intItemId AND GR.intStorageScheduleTypeId = @intStorageScheduleTypeId), 0)
+		AND SCD.intDeliverySheetId = @intDeliverySheetId AND SCT.strTicketStatus = 'H'
+		AND EMSD.intEntityId = @intEntityId AND SCT.intItemId = @intItemId AND GR.intStorageScheduleTypeId = @intStorageScheduleTypeId), 0)
 
 		SET @Storage = @Storage + @StorageScale
 
@@ -181,40 +186,45 @@ BEGIN
 		SET @WHGB = 
 		ISNULL((SELECT SUM(IRI.dblOpenReceive) FROM tblSCDeliverySheet SCD
 		INNER JOIN tblICInventoryReceiptItem IRI ON SCD.intDeliverySheetId = IRI.intSourceId
-		INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
-		INNER JOIN tblGRCustomerStorage GRC ON SCD.intDeliverySheetId = GRC.intDeliverySheetId
+		INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId AND IR.intEntityVendorId = 4 AND IR.intSourceType = 5
+		INNER JOIN tblGRCustomerStorage GRC ON SCD.intDeliverySheetId = GRC.intDeliverySheetId AND GRC.intEntityId = @intEntityId 
 		INNER JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = GRC.intStorageTypeId
-		WHERE IR.intEntityVendorId = @intEntityId AND IRI.intOwnershipType = 2 
-		AND IR.intSourceType IN (1,5) AND IRI.intItemId = @intItemId
+		WHERE IRI.intOwnershipType = 2 AND IRI.intItemId = @intItemId
 		AND (GR.ysnReceiptedStorage = 1 OR GR.ysnGrainBankType = 1) AND GR.ysnDPOwnedType = 0 AND GR.ysnCustomerStorage = 0), 0)
 
-		--For warehouse and grainbank scale
-		SET @WHGBScale = 
-		ISNULL((SELECT SUM(IRI.dblOpenReceive) FROM tblICInventoryReceipt IR
-		INNER JOIN tblICInventoryReceiptItem IRI ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
-		INNER JOIN tblSCTicket SC ON IRI.intSourceId = SC.intTicketId
-		INNER JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = SC.intStorageScheduleTypeId
-		WHERE IR.intEntityVendorId = @intEntityId AND IRI.intOwnershipType = 2 
-		AND IR.intSourceType IN (1,5) AND SC.intItemId = @intItemId
-		AND (GR.ysnReceiptedStorage = 1 OR GR.ysnGrainBankType = 1) AND GR.ysnDPOwnedType = 0 AND GR.ysnCustomerStorage = 0), 0)
+		----For warehouse and grainbank scale
+		--SET @WHGBScale = 
+		--ISNULL((SELECT SUM(IRI.dblOpenReceive) FROM tblICInventoryReceipt IR
+		--INNER JOIN tblICInventoryReceiptItem IRI ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
+		--INNER JOIN tblSCTicket SC ON IRI.intSourceId = SC.intTicketId
+		--INNER JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = SC.intStorageScheduleTypeId
+		--WHERE IR.intEntityVendorId = @intEntityId AND IRI.intOwnershipType = 2 
+		--AND IR.intSourceType IN (1,5) AND SC.intItemId = @intItemId
+		--AND (GR.ysnReceiptedStorage = 1 OR GR.ysnGrainBankType = 1) AND GR.ysnDPOwnedType = 0 AND GR.ysnCustomerStorage = 0), 0)
 
 		--GBWH hold split ticket
-		SET @WHGBScale = 
-		@WHGBScale + ISNULL((SELECT SUM((SCT.dblNetUnits * @SplitAverage) / 100) FROM tblSCDeliverySheet SCD
-		LEFT JOIN tblSCTicket SCT ON SCD.intDeliverySheetId = SCT.intDeliverySheetId
-		LEFT JOIN tblSCTicketSplit SCSPL ON SCSPL.intTicketId = SCT.intTicketId
-		INNER JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = SCSPL.intStorageScheduleTypeId
+		SET @WHGBScale = ISNULL((SELECT SUM((SCT.dblNetUnits * @SplitAverage) / 100) FROM tblSCDeliverySheet SCD
+		LEFT JOIN tblSCTicket SCT ON SCD.intDeliverySheetId = SCT.intDeliverySheetId AND SCT.ysnDeliverySheetPost = 0
+		LEFT JOIN tblEMEntitySplitDetail EMSD ON EMSD.intSplitId = SCD.intSplitId
+		OUTER APPLY (
+			SELECT * FROM tblGRStorageType GRS WHERE GRS.intStorageScheduleTypeId = 
+												CASE 
+													WHEN EMSD.strOption = 'Contract' THEN -2
+													WHEN EMSD.strOption = 'Spot Sale' THEN -3
+													ELSE EMSD.intStorageScheduleTypeId
+												END
+		) GR
 		WHERE (GR.ysnReceiptedStorage = 1 OR GR.ysnGrainBankType = 1) AND GR.ysnDPOwnedType = 0 AND GR.ysnCustomerStorage = 0
-		AND SCD.intDeliverySheetId = @intDeliverySheetId AND SCT.strTicketStatus = 'H' AND ysnDeliverySheetPost = 0
-		AND SCSPL.intCustomerId = @intEntityId AND SCT.intItemId = @intItemId AND GR.intStorageScheduleTypeId = @intStorageScheduleTypeId), 0)
+		AND SCD.intDeliverySheetId = @intDeliverySheetId AND SCT.strTicketStatus = 'H'
+		AND EMSD.intEntityId = @intEntityId AND SCT.intItemId = @intItemId AND GR.intStorageScheduleTypeId = @intStorageScheduleTypeId), 0)
 
 		SET @WHGB = @WHGB + @WHGBScale;
 
 		--For hold
 		SET @Hold =
 		ISNULL((SELECT SUM((SCT.dblNetUnits * @SplitAverage) / 100) FROM tblSCDeliverySheet SCD
-		LEFT JOIN tblSCTicket SCT ON SCD.intDeliverySheetId = SCT.intDeliverySheetId
-		WHERE SCD.intDeliverySheetId = @intDeliverySheetId AND SCT.strTicketStatus = 'H' AND ysnDeliverySheetPost = 0
+		LEFT JOIN tblSCTicket SCT ON SCD.intDeliverySheetId = SCT.intDeliverySheetId AND SCT.ysnDeliverySheetPost = 0
+		WHERE SCD.intDeliverySheetId = @intDeliverySheetId AND SCT.strTicketStatus = 'H'
 		AND SCD.intEntityId = @intEntityId AND SCD.intItemId = @intItemId), 0)
 
 	END
@@ -273,6 +283,7 @@ IF ISNULL(@intEntityId,0) = 0
 		ISNULL((SELECT SUM(IRI.dblOpenReceive) FROM tblICInventoryReceipt IR
 		INNER JOIN tblICInventoryReceiptItem IRI ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
 		INNER JOIN tblSCTicket SC ON IRI.intSourceId = SC.intTicketId
+		INNER JOIN tblGRCustomerStorage GRC ON SC.intTicketId = GRC.intTicketId
 		INNER JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = SC.intStorageScheduleTypeId
 		WHERE IR.intEntityVendorId = @intEntityId AND IRI.intOwnershipType = 2 
 		AND IR.intSourceType IN (1,5) AND SC.intItemId = @intItemId
@@ -339,7 +350,7 @@ IF ISNULL(@intEntityId,0) = 0
 		SET @Hold = 
 		ISNULL((SELECT SUM(SCT.dblNetUnits) FROM tblSCDeliverySheet SCD
 		LEFT JOIN tblSCTicket SCT ON SCD.intDeliverySheetId = SCT.intDeliverySheetId
-		WHERE SCD.intDeliverySheetId = @intDeliverySheetId AND SCT.strTicketStatus = 'H' AND ysnDeliverySheetPost = 0), 0)
+		WHERE SCD.intDeliverySheetId = @intDeliverySheetId AND SCT.strTicketStatus = 'H' AND SCT.ysnDeliverySheetPost = 0), 0)
 
 		INSERT INTO #temp (Id, Contract, Cash, Storage, DP, Basis, WHGB, Hold) 
 		VALUES(@counter, @Contract, @Cash, @Storage, @DP, @Basis, @WHGB, @Hold)
