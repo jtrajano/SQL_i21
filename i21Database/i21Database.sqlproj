@@ -5883,6 +5883,7 @@
     <Build Include="dbo\Views\vyuLGGetShipmentContainerContract.sql" />
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1p_CompanyPreferenceOption.sql" />
     <Build Include="dbo\Tables\tblMFParentLotNumberPattern.sql" />
+    <Build Include="dbo\Views\vyuARQuoteTemplate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
