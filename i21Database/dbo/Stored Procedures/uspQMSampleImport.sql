@@ -354,6 +354,13 @@ BEGIN TRY
 		-- Contract details
 		IF ISNULL(@intContractDetailId, 0) > 0
 		BEGIN
+			IF ISNULL(@dblSequenceQuantity, 0) <= 0
+			BEGIN
+				SELECT @dblSequenceQuantity = CD.dblQuantity
+				FROM tblCTContractDetail CD
+				WHERE CD.intContractDetailId = @intContractDetailId
+			END
+
 			SELECT @intProductTypeId = 8 -- Contract Line Item
 				,@intProductValueId = CD.intContractDetailId
 				,@intItemContractId = CD.intItemContractId
