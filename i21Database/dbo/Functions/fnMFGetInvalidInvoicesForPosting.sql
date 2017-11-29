@@ -147,8 +147,6 @@ BEGIN
 			,intStorageLocationId INT
 		)
 
-	Select TOP 1 @intManufacturingProcessId=intManufacturingProcessId from tblMFManufacturingProcess Where intAttributeTypeId=2
-
 	--Add records from @Invoices table to @tblInput
 	Insert Into @tblInput(intInvoiceId,dtmDate,intCompanyLocationId,intInvoiceDetailId,intItemId,intItemUOMId,intSubLocationId,intStorageLocationId,dblQuantity,intUserId)
 	Select intInvoiceId,dtmDate,intCompanyLocationId,intInvoiceDetailId,intItemId,intItemUOMId,intSubLocationId,intStorageLocationId,dblQuantity,intUserId

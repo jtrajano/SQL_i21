@@ -44,21 +44,12 @@ Declare @tblWorkOrder table
 )
 
 --Get the Comma Separated Work Order Ids into a table
-SET @index = CharIndex(',',@strWorkOrderIds)
-WHILE @index > 0
-BEGIN
-        SET @id = SUBSTRING(@strWorkOrderIds,1,@index-1)
-        SET @strWorkOrderIds = SUBSTRING(@strWorkOrderIds,@index+1,LEN(@strWorkOrderIds)-@index)
-
-        INSERT INTO @tblWorkOrder(intWorkOrderId) values (@id)
-        SET @index = CharIndex(',',@strWorkOrderIds)
-END
-SET @id=@strWorkOrderIds
-INSERT INTO @tblWorkOrder(intWorkOrderId) values (@id)
+INSERT INTO @tblWorkOrder(intWorkOrderId) 
+Select * from dbo.[fnCommaSeparatedValueToTable](@strWorkOrderIds)
 
 Select TOP 1 @dblDefaultResidueQty=ISNULL(dblDefaultResidueQty,0.00001) From tblMFCompanyPreference
 
-Select TOP 1 @intManufacturingProcessId=intManufacturingProcessId From tblMFManufacturingProcess where intAttributeTypeId=2
+Select TOP 1 @intManufacturingProcessId=w.intManufacturingProcessId From tblMFWorkOrder w join @tblWorkOrder tw on w.intWorkOrderId=tw.intWorkOrderId
 
 Select TOP 1 @intWorkOrderId=intWorkOrderId From tblMFWorkOrder Where intWorkOrderId=(Select TOP 1 intWorkOrderId From @tblWorkOrder)
 

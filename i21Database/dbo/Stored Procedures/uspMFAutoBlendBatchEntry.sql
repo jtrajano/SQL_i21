@@ -140,8 +140,6 @@ BEGIN TRY
 	DECLARE @tblBlendRequirementOutput table (intBlendRequirementId int,intInvoiceDetailId int)
 	DECLARE @tblWorkOrderOutput table (intWorkOrderId int,intInvoiceDetailId int)
 
-	Select TOP 1 @intManufacturingProcessId=intManufacturingProcessId from tblMFManufacturingProcess Where intAttributeTypeId=2
-
 	--Add records from @Invoices table to @tblInput
 	Insert Into @tblInput(intInvoiceId,dtmDate,intCompanyLocationId,intInvoiceDetailId,intItemId,intItemUOMId,intSubLocationId,intStorageLocationId,dblQuantity,intUserId)
 	Select intInvoiceId,dtmDate,intCompanyLocationId,intInvoiceDetailId,intItemId,intItemUOMId,intSubLocationId,intStorageLocationId,dblQuantity,intUserId
@@ -170,7 +168,8 @@ BEGIN TRY
 		SELECT TOP 1 
 				@intRecipeId = r.intRecipeId
 				,@intBlendItemUOMId = r.intItemUOMId 
-				,@dblRecipeQty = r.dblQuantity 
+				,@dblRecipeQty = r.dblQuantity
+				,@intManufacturingProcessId=r.intManufacturingProcessId  
 		FROM	tblMFRecipe r JOIN tblMFManufacturingProcess mp 
 					ON r.intManufacturingProcessId=mp.intManufacturingProcessId 
 		WHERE	intItemId = @intBlendItemId 
