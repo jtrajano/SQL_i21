@@ -1,1 +1,0 @@
-Ext.define('Grain.store.BufferedUniqueStorageSchedule', {{"extend":"Ext.app.ViewModel","alias":"'viewmodel..store.buffereduniquestorageschedule'"}});

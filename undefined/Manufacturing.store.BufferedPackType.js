@@ -1,1 +1,0 @@
-Ext.define('Manufacturing.store.BufferedPackType', {{"extend":"Ext.app.ViewModel","alias":"'viewmodel.acturing.store.bufferedpacktype'"}});

@@ -14,6 +14,7 @@ gulp.task('test', function(done) {
     new Server({
         configFile: config.testing.config,
         singleRun: false,
+        reporters: 'mocha'
     }, done).start();
 });
 
@@ -21,7 +22,15 @@ gulp.task('test-mocha', function(done) {
     new Server({
         configFile: config.testing.config,
         singleRun: false,
-        reporters: 'mocha'
+        reporters: 'nyan'
+    }, done).start();
+});
+
+gulp.task('test-nyan', function(done) {
+    new Server({
+        configFile: config.testing.config,
+        singleRun: false,
+        reporters: 'nyan'
     }, done).start();
 });
 

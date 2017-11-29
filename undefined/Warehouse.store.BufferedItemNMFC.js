@@ -1,1 +1,0 @@
-Ext.define('Warehouse.store.BufferedItemNMFC', {{"extend":"Ext.app.ViewModel","alias":"'viewmodel.ouse.store.buffereditemnmfc'"}});

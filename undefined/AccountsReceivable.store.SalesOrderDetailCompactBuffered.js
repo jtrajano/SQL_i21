@@ -1,1 +1,0 @@
-Ext.define('AccountsReceivable.store.SalesOrderDetailCompactBuffered', {{"extend":"Ext.app.ViewModel","alias":"'viewmodel.ntsreceivable.store.salesorderdetailcompactbuffered'"}});
