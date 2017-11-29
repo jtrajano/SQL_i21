@@ -5929,6 +5929,7 @@
     <Build Include="dbo\Stored Procedures\uspCRMGetSalesRepSummary.sql" />
     <Build Include="dbo\Views\vyuMFCompanyPreference.sql" />
     <Build Include="dbo\Views\vyuVRRebateExport.sql" />
+    <Build Include="dbo\Views\vyuARQuoteTemplate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
