@@ -1387,6 +1387,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                         me.doPostPreview(win, cfg);
                     }                    
                     button.enable();
+                    iRely.Functions.refreshFloatingSearch('Inventory.view.InventoryAdjustment');
                 }
                 ,function(failureResponse) {
                     var responseText = Ext.decode(failureResponse.responseText);
