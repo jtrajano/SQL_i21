@@ -1510,6 +1510,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var subCurrencyCents = records[0].get('intSubCurrencyCent');
             subCurrencyCents = subCurrencyCents && Ext.isNumeric(subCurrencyCents) && subCurrencyCents > 0 ? subCurrencyCents : 1;
             current.set('intSubCurrencyCents', subCurrencyCents);
+            current.set('intCurrencyId', records[0].get('intCurrencyID'));
         }
     },
 
@@ -2109,6 +2110,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
             // Do not compute the tax if item ownership is 'Storage'. 
             if (detailRecord.get('intOwnershipType') != 2) {
+                var dblForexRate = detailRecord.get('dblForexRate');
+                dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0;
+
                 Ext.Array.each(itemTaxes, function (itemDetailTax) {
                     var taxableAmount,
                         taxAmount;
@@ -2118,6 +2122,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         taxAmount = (taxableAmount * (itemDetailTax.dblRate / 100));
                     } else {
                         taxAmount = qtyOrdered * itemDetailTax.dblRate;
+
+                        // If a line is using a foreign currency, convert the tax from functional currency to the transaction currency. 
+                        taxAmount = dblForexRate != 0 ? taxAmount / dblForexRate : taxAmount;
                     }
 
                     if (itemDetailTax.ysnCheckoffTax) {
