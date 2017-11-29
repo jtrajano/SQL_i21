@@ -5908,6 +5908,7 @@
     <Build Include="dbo\Stored Procedures\uspARTaxReport.sql" />
     <Build Include="dbo\Tables\tblARTaxStagingTable.sql" />
     <Build Include="dbo\Views\vyuMFCompanyPreference.sql" />
+    <Build Include="dbo\Views\vyuARQuoteTemplate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
