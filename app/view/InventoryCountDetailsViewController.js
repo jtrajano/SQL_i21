@@ -344,7 +344,7 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
             }    
         }
 
-        win.context.data.validator.validateRecord({ window: win }, function (valid) {
+        win.context.data.validator.validateRecord(win.context.data.configuration, function (valid) {
             if (valid) {
                 win.context.data.saveRecord({
                     successFn: function () {

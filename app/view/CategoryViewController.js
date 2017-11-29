@@ -347,7 +347,7 @@ Ext.define('Inventory.view.CategoryViewController', {
             } });
         }
         else {
-            win.context.data.validator.validateRecord({ window: win }, function(valid) {
+            win.context.data.validator.validateRecord(win.context.data.configuration, function(valid) {
                 if (valid) {
                     me.openCategoryLocationScreen('new', win);
                 }
@@ -373,7 +373,7 @@ Ext.define('Inventory.view.CategoryViewController', {
             } });
         }
         else {
-            win.context.data.validator.validateRecord({ window: win }, function(valid) {
+            win.context.data.validator.validateRecord(win.context.data.configuration, function(valid) {
                 if (valid) {
                     me.openCategoryLocationScreen('edit', win, selection[0]);
                 }
@@ -683,7 +683,7 @@ Ext.define('Inventory.view.CategoryViewController', {
             } });
         }
         else {
-            win.context.data.validator.validateRecord({ window: win }, function(valid) {
+            win.context.data.validator.validateRecord(win.context.data.configuration, function(valid) {
                 if (valid) {
                     me.openCategoryLocationScreen('edit', win, record);
                     return;
