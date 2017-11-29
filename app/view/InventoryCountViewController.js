@@ -1330,7 +1330,8 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                             ysnPosted: current.get('ysnPosted') ? true : false
                         };
                         me.doPostPreview(win, cfg);
-                    }                     
+                    }
+                    iRely.Functions.refreshFloatingSearch('Inventory.view.InventoryCount');
                 }
                 ,function(failureResponse) {
                     var responseText = Ext.decode(failureResponse.responseText);

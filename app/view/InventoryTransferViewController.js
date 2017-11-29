@@ -769,6 +769,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                         me.doPostPreview(win, cfg);
                     }
                     btnPost.enable();
+                    iRely.Functions.refreshFloatingSearch('Inventory.view.InventoryTransfer');
                 }
                 ,function(failureResponse) {
                     var responseText = Ext.decode(failureResponse.responseText);

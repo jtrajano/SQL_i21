@@ -6431,7 +6431,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         switch (newCard.itemId) {
             case 'pgeIncomingInspection':
-                var doPost = function () {
+                var updateReceiptInspection = function () {
                     if (current) {
                         ic.utils.ajax({
                             url: './inventory/api/inventoryreceipt/updatereceiptinspection',
@@ -6455,14 +6455,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                 // If there is no data change, do the post.
                 if (!context.data.hasChanges()) {
-                    doPost();
+                    updateReceiptInspection();
                     return;
                 }
 
                 // Save has data changes first before doing the post.
                 context.data.saveRecord({
                     successFn: function () {
-                        doPost();
+                        updateReceiptInspection();
                     }
                 });
                 break;
@@ -6777,6 +6777,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         me.doPostPreview(win, cfg);
                     }
                     btnPost.enable();
+                    iRely.Functions.refreshFloatingSearch('Inventory.view.InventoryReceipt');
                 }
                 , function (failureResponse) {
                     var responseText = Ext.decode(failureResponse.responseText);
