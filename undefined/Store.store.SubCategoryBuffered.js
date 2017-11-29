@@ -1,1 +1,0 @@
-Ext.define('Store.store.SubCategoryBuffered', {{"extend":"Ext.app.ViewModel","alias":"'viewmodel..store.subcategorybuffered'"}});

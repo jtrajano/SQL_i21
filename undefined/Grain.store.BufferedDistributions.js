@@ -1,1 +1,0 @@
-Ext.define('Grain.store.BufferedDistributions', {{"extend":"Ext.app.ViewModel","alias":"'viewmodel..store.buffereddistributions'"}});

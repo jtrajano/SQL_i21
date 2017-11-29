@@ -1,4 +1,4 @@
 Ext.define('i21.store.TaxGroupMasterBuffered', {
     "extend": "Ext.data.BufferedStore",
-    "alias": "store.i21taxgroupmasterbuffered"
+    "alias": "store.smtaxgroupmasterbuffered"
 });

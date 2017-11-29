@@ -1,1 +1,0 @@
-Ext.define('i21.store.CountryBufferedStore', {{"extend":"Ext.app.ViewModel","alias":"'viewmodel.tore.countrybufferedstore'"}});

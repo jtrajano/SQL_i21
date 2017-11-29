@@ -1,1 +1,0 @@
-Ext.define('AccountsPayable.store.PurchaseOrderDetailBuffered', {{"extend":"Ext.app.ViewModel","alias":"'viewmodel.ntspayable.store.purchaseorderdetailbuffered'"}});

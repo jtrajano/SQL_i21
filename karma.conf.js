@@ -17,7 +17,7 @@ var appFiles = [
 
 var testFiles = [
     { pattern: 'node_modules/extjs-spec-generator/src/UnitTestEngine.js', watched: true },
-    { pattern: 'test/specs/**/*.viewcontroller.spec.js', watched: true }
+    { pattern: 'test/specs/**/*.spec.js', watched: true }
 ];
 
 var files = libFiles.concat(dependencies.frameworkFiles).concat(mockFiles).concat(dependencies.files).concat(appFiles).concat(testFiles);
@@ -51,7 +51,7 @@ module.exports = function (config) {
         // test results reporter to use
         // possible values: 'dots', 'progress'
         // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-        reporters: ['mocha'],
+        reporters: ['mocha', 'nyan'],
 
 
         // web server port

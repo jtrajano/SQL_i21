@@ -1,1 +1,0 @@
-Ext.define('EntityManagement.store.ShipViaBuffered', {{"extend":"Ext.app.ViewModel","alias":"'viewmodel.ymanagement.store.shipviabuffered'"}});

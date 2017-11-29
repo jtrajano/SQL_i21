@@ -1,1 +1,0 @@
-Ext.define('Store.store.PromotionSalesBuffered', {{"extend":"Ext.app.ViewModel","alias":"'viewmodel..store.promotionsalesbuffered'"}});

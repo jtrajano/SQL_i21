@@ -1,1 +1,0 @@
-Ext.define('GeneralLedger.store.BufAccountId', {{"extend":"Ext.app.ViewModel","alias":"'viewmodel.alledger.store.bufaccountid'"}});

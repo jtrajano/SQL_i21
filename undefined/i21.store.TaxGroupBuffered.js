@@ -1,1 +1,0 @@
-Ext.define('i21.store.TaxGroupBuffered', {{"extend":"Ext.app.ViewModel","alias":"'viewmodel.tore.taxgroupbuffered'"}});
