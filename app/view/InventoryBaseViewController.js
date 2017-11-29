@@ -64,7 +64,7 @@ Ext.define('Inventory.view.InventoryBaseViewController', {
         }
 
         // Validate the record first. 
-        context.data.validator.validateRecord({ window: win }, function(valid) {
+        context.data.validator.validateRecord(context.data.configuration, function(valid) {
             // If records are valid, continue with the save. 
             if (valid){
                 // Save and call the after Save callback. 
