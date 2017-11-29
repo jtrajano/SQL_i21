@@ -212,4 +212,7 @@ CREATE TYPE [dbo].[ItemLotTableType] AS TABLE
 	,[intShiftId]				INT NULL
 	,[strContainerNo]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL 
 	,[strCondition]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL 
+	,[intInventoryReceiptId]		INT NULL 
+	,[intInventoryReceiptItemId]	INT NULL 
+	,[intInventoryReceiptItemLotId]	INT NULL 
 )
