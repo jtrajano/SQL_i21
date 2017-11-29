@@ -49,6 +49,7 @@ where intTaxAuthorityId = @TaxAuthorityId
 
 	EXEC uspTFUpgradeProductCodes @TaxAuthorityCode = @TaxAuthorityCode, @ProductCodes = @ProductCodes
 
+
 -- Tax Category
 /* Generate script for Tax Categories. Specify Tax Authority Id to filter out specific Tax Categories only.
 select 'UNION ALL SELECT intTaxCategoryId = ' + CAST(0 AS NVARCHAR(10))
@@ -71,6 +72,7 @@ where intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intTaxCategoryId = 0, strState = 'NC', strTaxCategory = 'NC Excise Tax Diesel Clear', intMasterId = 332100
 
 	EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = @TaxAuthorityCode, @TaxCategories = @TaxCategories
+
 
 -- Reporting Component
 /* Generate script for Reporting Components. Specify Tax Authority Id to filter out specific Reporting Components only.
@@ -160,7 +162,7 @@ where intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'Gas-1206', strFormName = 'Claim for Refund', strScheduleCode = 'Edu', strScheduleName = 'Exempt - NC Local Board of Education', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 470, strSPInventory = 'uspTFGetInventoryTax', strSPInvoice = 'uspTFGetInvoiceTax', strSPRunReport = NULL, intMasterId = 332737, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'Gas-1206', strFormName = 'Claim for Refund', strScheduleCode = 'College', strScheduleName = 'Exempt - NC Community College', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 480, strSPInventory = 'uspTFGetInventoryTax', strSPInvoice = 'uspTFGetInvoiceTax', strSPRunReport = NULL, intMasterId = 332738, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'NC EDI', strFormName = 'NC EDI File', strScheduleCode = '', strScheduleName = '', strType = '', strNote = 'NC EDI File', strTransactionType = '', intSort = 1000, strSPInventory = 'uspTFGetInventoryTax', strSPInvoice = 'uspTFGetInvoiceTax', strSPRunReport = NULL, intMasterId = 332739, intComponentTypeId = 3
-
+	
 	EXEC uspTFUpgradeReportingComponents @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponent = @ReportingComponent
 
 
