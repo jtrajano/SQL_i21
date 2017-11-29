@@ -69,6 +69,54 @@ BEGIN TRY
 				AND (ISNULL(strOriginTCN, '') <> '' OR ISNULL(strDestinationTCN, '') <> '')
 		END
 
+		ELSE IF (@TaxAuthorityCode = 'OR')
+		BEGIN
+			DELETE FROM tblTFTransactionDynamicOR
+			WHERE intTransactionId IN (
+				SELECT intTransactionId FROM #tmpTransaction
+			)
+
+			INSERT INTO tblTFTransactionDynamicOR(
+				intTransactionId
+				, strOriginAltFacilityNumber
+				, strDestinationAltFacilityNumber
+				, strAltDocumentNumber
+				, strExplanation
+				, strInvoiceNumber
+			)
+			SELECT intTransactionId
+				, [strOriginAltFacilityNumber] = NULL
+				, [strDestinationAltFacilityNumber] = CASE WHEN @FormCode IN ('1', '2', '3') THEN Origin.strOregonFacilityNumber ELSE NULL END
+				, [strAltDocumentNumber] = NULL
+				, [strExplanation] = NULL
+				, [strInvoiceNumber] = NULL
+			FROM #tmpTransaction Trans
+			LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = Trans.intTransactionNumberId
+			LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+			LEFT JOIN tblSMCompanyLocation Origin ON Origin.intCompanyLocationId = Receipt.intLocationId
+			WHERE Trans.strTransactionType = 'Receipt'
+
+			UNION ALL
+
+			SELECT intTransactionId
+				, [strOriginAltFacilityNumber] = CASE WHEN @FormCode IN ('5', '5LO', '6', '7', '5BLK', '5CRD', '6BLK', '6CRD') THEN Origin.strOregonFacilityNumber ELSE NULL END
+				, [strDestinationAltFacilityNumber] = CASE WHEN @FormCode IN ('5', '5LO', '6', '7', '5BLK', '5CRD', '6BLK', '6CRD') THEN Destination.strOregonFacilityNumber ELSE NULL END
+				, [strAltDocumentNumber] = CASE WHEN Invoice.strTransactionType = 'CF Tran' AND @FormCode IN ('5CRD', '6CRD') THEN CFTran.strCardNumber ELSE NULL END
+				, [strExplanation] = CASE WHEN Invoice.strTransactionType = 'CF Tran' AND @FormCode IN ('5CRD', '6CRD') THEN TaxException.strException ELSE NULL END
+				, [strInvoiceNumber] = CASE WHEN @FormCode IN ('5CRD', '6CRD') THEN Invoice.strInvoiceNumber ELSE NULL END
+			FROM #tmpTransaction Trans
+			LEFT JOIN tblARInvoiceDetail InvoiceDetail ON InvoiceDetail.intInvoiceDetailId = Trans.intTransactionDetailId
+			LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = Invoice.intInvoiceId
+			LEFT JOIN tblSMCompanyLocation Origin ON Origin.intCompanyLocationId = Invoice.intLocataionId
+			LEFT JOIN tblEMEntityLocation Destination ON Destination.intEntityLocationId = Invoice.intShipToLocationId
+			LEFT JOIN vyuCFInvoiceReport CFTran ON CFTran.intInvoiceId = Invoice.intInvoiceId AND CFTran.ysnPosted = 1
+			LEFT JOIN tblARCustomerTaxingTaxException TaxException ON TaxException.intEntityCustomerId = Invoice.intEntityCustomerId AND TaxException.intItemId = InvoiceDetail.intItemId
+			WHERE Trans.strTransactionType = 'Invoice'
+			
+			
+			
+		END
+
 		DELETE FROM #tmpRC WHERE intReportingComponentId = @RCId
 
 		DROP TABLE #tmpTransaction

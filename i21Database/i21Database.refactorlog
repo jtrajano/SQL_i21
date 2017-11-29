@@ -6699,4 +6699,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intSuppressDiscountOptionId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="ba488008-863f-40e9-9f89-c5aa12c51fcd" ChangeDateTime="11/28/2017 09:34:48">
+    <Property Name="ElementName" Value="[dbo].[tblTFTransactionDynamicOR].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTransactionDynamicOR]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTransactionId" />
+  </Operation>
 </Operations>

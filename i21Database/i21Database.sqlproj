@@ -5930,6 +5930,8 @@
     <Build Include="dbo\Views\vyuMFCompanyPreference.sql" />
     <Build Include="dbo\Views\vyuVRRebateExport.sql" />
     <Build Include="dbo\Views\vyuARQuoteTemplate.sql" />
+    <Build Include="dbo\Tables\tblTFTransactionDynamicOR.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGetTransactionDynamic.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
