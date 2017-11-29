@@ -13,7 +13,11 @@
 	dblUnpricedLots		NUMERIC(18,6),
 	dblUnhedgedLots		NUMERIC(18,6),
 	intConcurrencyId	INT NOT NULL,
-	
+	strContractType		NVARCHAR(50)  COLLATE Latin1_General_CI_AS,
+	strEntityName		NVARCHAR(100)  COLLATE Latin1_General_CI_AS,
+	strDonorContract	NVARCHAR(50)  COLLATE Latin1_General_CI_AS,
+	strRecipientContract NVARCHAR(50)  COLLATE Latin1_General_CI_AS,
+
     PRIMARY KEY CLUSTERED ([intReassignId] ASC),
     CONSTRAINT [FK_tblCTReassign_tblEMEntity_intEntityId] FOREIGN KEY (intEntityId) REFERENCES tblEMEntity(intEntityId),
     CONSTRAINT [FK_tblCTReassign_tblCTContractType_intContractTypeId] FOREIGN KEY (intContractTypeId) REFERENCES tblCTContractType(intContractTypeId),
