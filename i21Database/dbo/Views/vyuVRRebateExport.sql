@@ -20,6 +20,8 @@ AS
 		,J.intVendorSetupId
 		,A.intInvoiceId
 		,F.strUnitMeasure
+		,I.strProgramDescription
+		,L.strVendorCustomer
 		,O.intConcurrencyId
 	FROM tblARInvoiceDetail B
 	INNER JOIN tblARInvoice A
