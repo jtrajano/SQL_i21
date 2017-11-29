@@ -791,7 +791,10 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                                 if (button === 'yes') {
                                     action(true);
                                 }
-                                else action(false);
+                                else {
+                                    win.down("#btnPost").enable();
+                                    action(false);
+                                }
                             };
                             iRely.Functions.showCustomDialog('question', 'yesnocancel', 'One of your line items has a zero (0) New Unit Cost.<br>Are you sure you want to set your new unit cost to zero(0)?', msgAction);
                         }
