@@ -174,12 +174,15 @@ BEGIN TRY
 		END
 
 		-- Quantity
-		IF ISNUMERIC(@dblSequenceQuantity) = 0
-			SELECT @strPreviousErrMsg += 'Invalid Quantity. '
-		ELSE
+		IF ISNULL(@dblSequenceQuantity, 0) > 0
 		BEGIN
-			IF @dblSequenceQuantity <= 0
+			IF ISNUMERIC(@dblSequenceQuantity) = 0
 				SELECT @strPreviousErrMsg += 'Invalid Quantity. '
+			ELSE
+			BEGIN
+				IF @dblSequenceQuantity <= 0
+					SELECT @strPreviousErrMsg += 'Invalid Quantity. '
+			END
 		END
 
 		-- Sample Status
@@ -376,6 +379,17 @@ BEGIN TRY
 					IF @dblSequenceQuantity > @dblCQuantity
 						SELECT @strPreviousErrMsg += 'Quantity cannot be greater than Contract Sequence Quantity.(' + LTRIM(@dblCQuantity) + '). '
 				END
+			END
+		END
+		ELSE
+		BEGIN
+			-- Quantity
+			IF ISNUMERIC(@dblSequenceQuantity) = 0
+				SELECT @strPreviousErrMsg += 'Invalid Quantity. '
+			ELSE
+			BEGIN
+				IF @dblSequenceQuantity <= 0
+					SELECT @strPreviousErrMsg += 'Invalid Quantity. '
 			END
 		END
 
