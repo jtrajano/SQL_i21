@@ -4284,7 +4284,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 ],
                                                                                 enableDrillDown: 'true',
                                                                                 itemId: 'cboPatronageDirect',
-                                                                                fieldLabel: 'Direct Sale',
+                                                                                fieldLabel: 'Direct Sale Category',
                                                                                 labelWidth: 116,
                                                                                 displayField: 'strCategoryCode',
                                                                                 valueField: 'intPatronageCategoryId'
