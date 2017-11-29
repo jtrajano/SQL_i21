@@ -254,6 +254,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\UpdatePrepayVoucherStatus.sql
 :r .\AP\UpdateTaxGroupId.sql
 :r .\AP\UpdateBillDetailRate.sql
+:r .\AP\DeleteInvalidBasisAdvanceStaging.sql
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 

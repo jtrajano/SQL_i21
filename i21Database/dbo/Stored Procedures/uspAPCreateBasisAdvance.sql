@@ -76,7 +76,8 @@ OUTER APPLY (
         ,basisAdvance.intCompanyLocationId
     ) voucherData
 ) A
-WHERE basisAdvance.dblFuturesPrice + basisAdvance.dblUnitBasis > 0;
+WHERE --basisAdvance.dblFuturesPrice + basisAdvance.dblUnitBasis > 0;
+basisAdvance.dblAmountToAdvance > 0
 
 --GENERATE RECORD NUMBER
 DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
