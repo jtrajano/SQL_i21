@@ -1,17 +1,17 @@
 module.exports = {
     frameworkFiles: [
-        { pattern: '../i21_resources/extjs/ext-6.5.0/build/ext-all-debug.js', watched: false },
+        { pattern: 'test/vendor/extjs/ext-6.5.0/build/ext-all-debug.js', watched: false },
         // load the override for Ext.data.Connection.
-    {pattern: '../i21_resources/test/override/Ext.data.Connection.js', watched: false},
+        {pattern: 'test/resources/test/override/Ext.data.Connection.js', watched: false},
 
-     {pattern: '../i21_globalcomponentengine/irely/BaseEntity.js', watched: false},
-     {pattern: '../i21_globalcomponentengine/irely/model/EntityCredential.js', watched: false},
-     {pattern: '../i21_globalcomponentengine/irely/model/EntityToContact.js', watched: false},
-     {pattern: '../i21_globalcomponentengine/irely/model/EntityLocation.js', watched: false},
-     {pattern: '../i21_globalcomponentengine/irely/model/EntityNote.js', watched: false},
-     {pattern: '../i21_globalcomponentengine/irely/model/Entity.js', watched: false},
-     {pattern: '../i21_globalcomponentengine/irely/model/EntityContact.js', watched: false},
-     {pattern: '../i21_globalcomponentengine/irely/Functions.js', watched: false}
+        {pattern: 'test/gce/irely/BaseEntity.js', watched: false},
+        {pattern: 'test/gce/irely/model/EntityCredential.js', watched: false},
+        {pattern: 'test/gce/irely/model/EntityToContact.js', watched: false},
+        {pattern: 'test/gce/irely/model/EntityLocation.js', watched: false},
+        {pattern: 'test/gce/irely/model/EntityNote.js', watched: false},
+        {pattern: 'test/gce/irely/model/Entity.js', watched: false},
+        {pattern: 'test/gce/irely/model/EntityContact.js', watched: false},
+        {pattern: 'test/gce/irely/Functions.js', watched: false}
     ],
     files: [{
         "pattern": "app/Application.js"
