@@ -55,6 +55,7 @@ BEGIN TRY
 			, strLastIndexOf			= SOURCE.strLastIndexOf
 			, strSegment				= SOURCE.strSegment
 			, intConfigurationSequence	= SOURCE.intSort
+			, ysnOutputDesigner			= SOURCE.ysnOutputDesigner
 	WHEN NOT MATCHED BY TARGET THEN 
 		INSERT (
 			intReportingComponentId
@@ -70,6 +71,7 @@ BEGIN TRY
 			, strLastIndexOf
 			, strSegment
 			, intConfigurationSequence
+			, ysnOutputDesigner	
 			, intMasterId
 		)
 		VALUES (
@@ -86,6 +88,7 @@ BEGIN TRY
 			, SOURCE.strLastIndexOf
 			, SOURCE.strSegment
 			, SOURCE.intSort
+			, SOURCE.ysnOutputDesigner
 			, SOURCE.intMasterId
 		);
 	
