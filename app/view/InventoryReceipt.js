@@ -276,17 +276,18 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 hidden: true
                                                             },
                                                             {
-                                                                dataIndex: 'strVendorId',
+                                                                dataIndex: 'strName',
                                                                 dataType: 'string',
-                                                                text: 'Vendor No',
+                                                                text: 'Vendor Name',
                                                                 flex: 1,
                                                                 defaultSort: true
                                                             },
                                                             {
-                                                                dataIndex: 'strName',
+                                                                dataIndex: 'strVendorId',
                                                                 dataType: 'string',
-                                                                text: 'Vendor Name',
-                                                                flex: 1
+                                                                text: 'Vendor No',
+                                                                flex: 1,
+                                                                
                                                             },
                                                             {
                                                                 dataIndex: 'intCurrencyId',

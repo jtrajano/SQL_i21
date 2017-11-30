@@ -293,15 +293,15 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         hidden: true
                                                                     },
                                                                     {
-                                                                        dataIndex: 'strCustomerNumber',
-                                                                        dataType: 'string',
-                                                                        text: 'Customer No',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
                                                                         dataIndex: 'strName',
                                                                         dataType: 'string',
                                                                         text: 'Name',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strCustomerNumber',
+                                                                        dataType: 'string',
+                                                                        text: 'Customer No',
                                                                         flex: 1
                                                                     }
                                                                 ],
