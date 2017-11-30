@@ -110,6 +110,8 @@ Ext.define('Inventory.view.InventoryUOMViewController', {
         var col = grd.columns[0];
         var cboUOM = col.getEditor();
 
+        if (!cboUOM) return; 
+
         switch(record.get('strUnitType')){
             case 'Area':
             case 'Length':
