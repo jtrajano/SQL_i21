@@ -20,6 +20,14 @@ DECLARE @intBankAccountId AS INT
 DECLARE @xmlDocumentId AS INT
 DECLARE @companyLogo varbinary(max)
 
+DECLARE @strPhone NVARCHAR(500)
+
+SELECT @strPhone = CASE 
+						WHEN LTRIM(RTRIM(strPhone)) = '' THEN NULL 
+						ELSE LTRIM(RTRIM(strPhone)) 
+				   END 
+FROM tblSMCompanySetup
+
 DECLARE @temp_xml_table TABLE 
 (
 	[fieldname] NVARCHAR(50)
@@ -97,9 +105,10 @@ BEGIN
 		,intTransactionId = BNKTRN.intTransactionId
 		,strTransactionId = BNKTRN.strTransactionId
 		,strCompanyName = COMPANY.strCompanyName
-		,strCompanyAddress = dbo.fnConvertToFullAddress(COMPANY.strAddress, COMPANY.strCity, COMPANY.strState, COMPANY.strZip)
+		,strCompanyAddress = dbo.fnConvertToFullAddress(COMPANY.strAddress, COMPANY.strCity, COMPANY.strState, COMPANY.strZip) + CHAR(13)+ CHAR(10) + @strPhone
 		,strItemNo = Item.strItemNo
-		,strGrade  = Attribute.strDescription
+		,lblGrade  = CASE WHEN SC.intCommodityAttributeId >0 THEN 'Grade' ELSE NULL END
+		,strGrade  = CASE WHEN SC.intCommodityAttributeId >0 THEN Attribute.strDescription ELSE NULL END
 		,strCommodity = Commodity.strCommodityCode
 		,strDate = CONVERT(VARCHAR(10), GETDATE(), 110)
 		,strTime = CONVERT(VARCHAR(8), GETDATE(), 108)
@@ -593,9 +602,10 @@ BEGIN
 		,intTransactionId = BNKTRN.intTransactionId
 		,strTransactionId = BNKTRN.strTransactionId
 		,strCompanyName = COMPANY.strCompanyName
-		,strCompanyAddress = dbo.fnConvertToFullAddress(COMPANY.strAddress, COMPANY.strCity, COMPANY.strState, COMPANY.strZip)
+		,strCompanyAddress = dbo.fnConvertToFullAddress(COMPANY.strAddress, COMPANY.strCity, COMPANY.strState, COMPANY.strZip)+ CHAR(13)+ CHAR(10) + @strPhone
 		,strItemNo= Item.strItemNo
-		,strGrade  = Attribute.strDescription
+		,lblGrade  = CASE WHEN SC.intCommodityAttributeId >0 THEN 'Grade' ELSE NULL END
+		,strGrade  = CASE WHEN SC.intCommodityAttributeId >0 THEN Attribute.strDescription ELSE NULL END
 		,strCommodity = Commodity.strCommodityCode
 		,strDate = CONVERT(VARCHAR(10), GETDATE(), 110)
 		,strTime = CONVERT(VARCHAR(8), GETDATE(), 108)
@@ -757,9 +767,10 @@ BEGIN
 		,intTransactionId = BNKTRN.intTransactionId
 		,strTransactionId = BNKTRN.strTransactionId
 		,strCompanyName = COMPANY.strCompanyName
-		,strCompanyAddress = dbo.fnConvertToFullAddress(COMPANY.strAddress, COMPANY.strCity, COMPANY.strState, COMPANY.strZip)
+		,strCompanyAddress = dbo.fnConvertToFullAddress(COMPANY.strAddress, COMPANY.strCity, COMPANY.strState, COMPANY.strZip)+ CHAR(13)+ CHAR(10) + @strPhone
 		,strItemNo = Item.strItemNo
-		,strGrade  = Attribute.strDescription
+		,lblGrade  = CASE WHEN SC.intCommodityAttributeId >0 THEN 'Grade' ELSE NULL END
+		,strGrade  = CASE WHEN SC.intCommodityAttributeId >0 THEN Attribute.strDescription ELSE NULL END
 		,strCommodity = Commodity.strCommodityCode
 		,strDate = CONVERT(VARCHAR(10), GETDATE(), 110)
 		,strTime = CONVERT(VARCHAR(8), GETDATE(), 108)
@@ -1229,9 +1240,10 @@ BEGIN
 		,intTransactionId = BNKTRN.intTransactionId
 		,strTransactionId = BNKTRN.strTransactionId
 		,strCompanyName = COMPANY.strCompanyName
-		,strCompanyAddress = dbo.fnConvertToFullAddress(COMPANY.strAddress, COMPANY.strCity, COMPANY.strState, COMPANY.strZip)
+		,strCompanyAddress = dbo.fnConvertToFullAddress(COMPANY.strAddress, COMPANY.strCity, COMPANY.strState, COMPANY.strZip)+ CHAR(13)+ CHAR(10) + @strPhone
 		,strItemNo = Item.strItemNo
-		,strGrade  = Attribute.strDescription
+		,lblGrade  = CASE WHEN SC.intCommodityAttributeId >0 THEN 'Grade' ELSE NULL END
+		,strGrade  = CASE WHEN SC.intCommodityAttributeId >0 THEN Attribute.strDescription ELSE NULL END
 		,strCommodity = Commodity.strCommodityCode
 		,strDate = CONVERT(VARCHAR(10), GETDATE(), 110)
 		,strTime = CONVERT(VARCHAR(8), GETDATE(), 108)

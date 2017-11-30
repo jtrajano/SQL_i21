@@ -2,8 +2,8 @@
 (
 	[intDiscountId] INT NOT NULL IDENTITY, 
     [intCurrencyId] INT NOT NULL, 
-    [strDiscountId] NVARCHAR(3) COLLATE Latin1_General_CI_AS NOT NULL, 
-    [strDiscountDescription] NVARCHAR(30) COLLATE Latin1_General_CI_AS NOT NULL, 
+    [strDiscountId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
+    [strDiscountDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [ysnDiscountIdActive] BIT NOT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT 1, 
     CONSTRAINT [PK_tblGRDiscountId_intDiscountId] PRIMARY KEY ([intDiscountId]), 

@@ -5918,6 +5918,7 @@
     <Build Include="dbo\Stored Procedures\uspMFAddDefaultValuesToManufacturingProcess.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetBrokerageCommission.sql" />
     <Build Include="dbo\Views\vyuLGWarehouseRateMatrixSearch.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRDuplicateDiscountTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
