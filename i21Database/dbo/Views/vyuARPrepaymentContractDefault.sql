@@ -9,6 +9,7 @@ SELECT
 	,[strContractType]			= CustCon.[strContractType]
 	,[dtmStartDate]				= CustCon.[dtmStartDate]
 	,[dtmEndDate]				= CustCon.[dtmEndDate]
+	,[dtmDueDate]				= dbo.fnGetDueDateBasedOnTerm(CAST(CustCon.[dtmStartDate] AS DATE), CustCon.[intTermId])
 	,[strContractStatus]		= CustCon.[strContractStatus]
 	,[intEntityCustomerId]		= CustCon.[intEntityCustomerId]
 	,[strCustomerName]			= ARC.[strName]
@@ -41,6 +42,7 @@ SELECT
 	,[ysnAllowedToShow]			= CustCon.[ysnAllowedToShow]
 	,[intFreightTermId]			= CustCon.[intFreightTermId]
 	,[intTermId]				= CustCon.[intTermId]
+	,[strTerm]					= SMT.[strTerm]
 	,[intShipViaId]				= CustCon.[intShipViaId]
 	,[intBillToId]				= ARC.[intBillToId]
 	,[intShipToId]				= ARC.[intShipToId]
@@ -64,6 +66,7 @@ SELECT
 
 FROM [vyuARCustomerContract] CustCon
 INNER JOIN [vyuARCustomerSearch] ARC ON CustCon.intEntityCustomerId = ARC.[intEntityId]
+LEFT OUTER JOIN tblSMTerm SMT ON CustCon.[intTermId] = SMT.[intTermID]
 WHERE CustCon.intCurrencyId = (SELECT TOP 1 ISNULL(SMC.intMainCurrencyId, SMC.intCurrencyID) [intCurrencyID]
 								FROM tblCTContractDetail CTD 
 									INNER JOIN tblSMCurrency SMC
