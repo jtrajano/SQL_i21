@@ -9,6 +9,6 @@
 		
 		PRINT N'ARRANGE USER ROLE MENUS'
 		INSERT INTO tblSMMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
-		VALUES('System Manager', 'Arrange User Role Menus - Role Menu (Sales) - 1730', 'Arrange User Role Menus - Role Menu (Sales) - 1740', GETDATE())
+		VALUES('System Manager', 'Arrange User Role Menus - Role Menu (Sales) - 1740', 'Arrange User Role Menus - Role Menu (Sales) - 1740', GETDATE())
 	END
 GO
