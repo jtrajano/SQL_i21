@@ -5932,6 +5932,8 @@
     <Build Include="dbo\Views\vyuARQuoteTemplate.sql" />
     <Build Include="dbo\Tables\tblTFTransactionDynamicOR.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGetTransactionDynamic.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateLAImporter.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateLATransporter.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
