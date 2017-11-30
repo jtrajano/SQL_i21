@@ -124,14 +124,14 @@ BEGIN
 						-- Note: Do not compute tax if it can't be converted to voucher. Zero out the amount and Qty so that tax will be zero too. 
 						-- Charges with Accrue = false and Price = false does not create vouchers. 
 						 @Amount = CASE WHEN ISNULL(Charge.ysnAccrue, 0) = 1 OR ISNULL(Charge.ysnPrice, 0) = 1 THEN Charge.dblAmount ELSE 0 END 
-						,@Qty	 = CASE WHEN ISNULL(Charge.ysnAccrue, 0) = 1 OR ISNULL(Charge.ysnPrice, 0) = 1 THEN 1 ELSE 0 END 
+						,@Qty	 = CASE WHEN ISNULL(Charge.ysnAccrue, 0) = 1 OR ISNULL(Charge.ysnPrice, 0) = 1 THEN ISNULL(Charge.dblQuantity, 1) ELSE 0 END 
 				FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge Charge
 							ON Receipt.intInventoryReceiptId = Charge.intInventoryReceiptId
 				WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
 						AND Charge.intInventoryReceiptChargeId = @InventoryReceiptChargeId
 
 				-- Compute Taxes
-				-- Insert the data from the table variable into Inventory Receipt Item tax table. 
+				-- Insert the data from the table variable into Inventory Receipt Charge tax table. 
 				INSERT INTO dbo.tblICInventoryReceiptChargeTax(
 					[intInventoryReceiptChargeId]
 					,[intTaxGroupId]
@@ -150,21 +150,39 @@ BEGIN
 					,[intConcurrencyId]				
 				)
 				SELECT 	[intInventoryReceiptChargeId]	= @InventoryReceiptChargeId
-						,[intTaxGroupId]				= [intTaxGroupId]
-						,[intTaxCodeId]					= [intTaxCodeId]
-						,[intTaxClassId]				= [intTaxClassId]
-						,[strTaxableByOtherTaxes]		= [strTaxableByOtherTaxes]
-						,[strCalculationMethod]			= [strCalculationMethod]
-						,[dblRate]						= [dblRate]
-						,[dblTax]						= [dblTax]
-						,[dblAdjustedTax]				= [dblAdjustedTax]
-						,[intTaxAccountId]				= [intTaxAccountId]
-						,[ysnTaxAdjusted]				= [ysnTaxAdjusted]
-						,[ysnCheckoffTax]				= [ysnCheckoffTax]
-						,[strTaxCode]					= [strTaxCode]
+						,[intTaxGroupId]				= vendorTax.[intTaxGroupId]
+						,[intTaxCodeId]					= vendorTax.[intTaxCodeId]
+						,[intTaxClassId]				= vendorTax.[intTaxClassId]
+						,[strTaxableByOtherTaxes]		= vendorTax.[strTaxableByOtherTaxes]
+						,[strCalculationMethod]			= vendorTax.[strCalculationMethod]
+						,[dblRate]						= vendorTax.[dblRate]
+						,[dblTax]						=	CASE 
+																WHEN vendorTax.[strCalculationMethod] = 'Percentage' THEN vendorTax.[dblTax] 
+																ELSE 
+																	CASE 
+																		WHEN rc.dblForexRate <> 0 THEN 
+																			ROUND(
+																				dbo.fnDivide(
+																					-- Convert the tax to the transaction currency. 
+																					 vendorTax.[dblTax] 
+																					, rc.dblForexRate
+																				)
+																			, 2) 
+																		ELSE 
+																			vendorTax.[dblTax] 
+																	END 
+															END 
+
+						,[dblAdjustedTax]				= vendorTax.[dblAdjustedTax]
+						,[intTaxAccountId]				= vendorTax.[intTaxAccountId]
+						,[ysnTaxAdjusted]				= vendorTax.[ysnTaxAdjusted]
+						,[ysnCheckoffTax]				= vendorTax.[ysnCheckoffTax]
+						,[strTaxCode]					= vendorTax.[strTaxCode]
 						,[intSort]						= 1
 						,[intConcurrencyId]				= 1
-				FROM	[dbo].[fnGetItemTaxComputationForVendor](@ItemId, @EntityId, @TransactionDate, @Amount, @Qty, @TaxGroupId, @LocationId, @ShipFromId, 0, @FreightTermId, 0)
+				FROM	[dbo].[fnGetItemTaxComputationForVendor](@ItemId, @EntityId, @TransactionDate, @Amount, @Qty, @TaxGroupId, @LocationId, @ShipFromId, 0, @FreightTermId, 0) vendorTax
+						LEFT JOIN tblICInventoryReceiptCharge rc 
+							ON rc.intInventoryReceiptChargeId = @InventoryReceiptChargeId
 
 				--Get the next item. 
 				FETCH NEXT FROM loopReceiptChargeItems INTO 

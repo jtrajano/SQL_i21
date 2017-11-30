@@ -197,22 +197,39 @@ BEGIN
 		,[intConcurrencyId]				
 	)
 	SELECT 	[intInventoryReceiptItemId]		= @InventoryReceiptItemId
-			,[intTaxGroupId]				= [intTaxGroupId]
-			,[intTaxCodeId]					= [intTaxCodeId]
-			,[intTaxClassId]				= [intTaxClassId]
-			,[strTaxableByOtherTaxes]		= [strTaxableByOtherTaxes]
-			,[strCalculationMethod]			= [strCalculationMethod]
-			,[dblRate]						= [dblRate]
-			,[dblTax]						= [dblTax]
-			,[dblAdjustedTax]				= [dblAdjustedTax]
-			,[intTaxAccountId]				= [intTaxAccountId]
-			,[ysnTaxAdjusted]				= [ysnTaxAdjusted]
-			,[ysnSeparateOnInvoice]			= [ysnSeparateOnInvoice]
-			,[ysnCheckoffTax]				= [ysnCheckoffTax]
-			,[strTaxCode]					= [strTaxCode]
+			,[intTaxGroupId]				= vendorTax.[intTaxGroupId]
+			,[intTaxCodeId]					= vendorTax.[intTaxCodeId]
+			,[intTaxClassId]				= vendorTax.[intTaxClassId]
+			,[strTaxableByOtherTaxes]		= vendorTax.[strTaxableByOtherTaxes]
+			,[strCalculationMethod]			= vendorTax.[strCalculationMethod]
+			,[dblRate]						= vendorTax.[dblRate]
+			,[dblTax]						=	CASE 
+													WHEN vendorTax.[strCalculationMethod] = 'Percentage' THEN vendorTax.[dblTax] 
+													ELSE 
+														CASE 
+															WHEN ri.dblForexRate <> 0 THEN 
+																ROUND(
+																	dbo.fnDivide(
+																		-- Convert the tax to the transaction currency. 
+																		 vendorTax.[dblTax] 
+																		, ri.dblForexRate
+																	)
+																, 2) 
+															ELSE 
+																vendorTax.[dblTax] 
+														END 
+												END 
+			,[dblAdjustedTax]				= vendorTax.[dblAdjustedTax]
+			,[intTaxAccountId]				= vendorTax.[intTaxAccountId]
+			,[ysnTaxAdjusted]				= vendorTax.[ysnTaxAdjusted]
+			,[ysnSeparateOnInvoice]			= vendorTax.[ysnSeparateOnInvoice]
+			,[ysnCheckoffTax]				= vendorTax.[ysnCheckoffTax]
+			,[strTaxCode]					= vendorTax.[strTaxCode]
 			,[intSort]						= 1
 			,[intConcurrencyId]				= 1
-	FROM	[dbo].[fnGetItemTaxComputationForVendor](@ItemId, @EntityId, @TransactionDate, @Amount, @Qty, @TaxGroupId, @LocationId, @ShipFromId, 0, @FreightTermId,0)
+	FROM	[dbo].[fnGetItemTaxComputationForVendor](@ItemId, @EntityId, @TransactionDate, @Amount, @Qty, @TaxGroupId, @LocationId, @ShipFromId, 0, @FreightTermId,0) vendorTax
+			LEFT JOIN tblICInventoryReceiptItem ri 
+				ON ri.intInventoryReceiptItemId = @InventoryReceiptItemId
 								
 	-- Get the next item. 
 	FETCH NEXT FROM loopReceiptItems INTO 
