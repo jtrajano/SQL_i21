@@ -5919,6 +5919,7 @@
     <Build Include="dbo\Stored Procedures\uspCTGetBrokerageCommission.sql" />
     <Build Include="dbo\Views\vyuLGWarehouseRateMatrixSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspGRDuplicateDiscountTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTGetItemsAfterUpdateRegister.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
