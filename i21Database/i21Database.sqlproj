@@ -5912,6 +5912,7 @@
     <Build Include="dbo\Stored Procedures\uspPATPostRetireStock.sql" />
     <Build Include="dbo\Tables\tblPATIssueStock.sql" />
     <Build Include="dbo\Tables\tblPATRetireStock.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGetBrokerageCommission.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
