@@ -299,6 +299,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intTonnageTaxUOMId).HasColumnName("intTonnageTaxUOMId");
             this.Property(t => t.strTonnageTaxUOM).HasColumnName("strTonnageTaxUOM");
             this.Property(t => t.strFuelCategory).HasColumnName("strFuelCategory");
+            this.Property(t => t.strSecondaryStatus).HasColumnName("strSecondaryStatus");
             this.Property(t => t.strMedicationTag).HasColumnName("strMedicationTag");
             this.Property(t => t.strIngredientTag).HasColumnName("strIngredientTag");
             this.Property(t => t.strPhysicalItem).HasColumnName("strPhysicalItem");

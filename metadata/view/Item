@@ -6552,7 +6552,7 @@
                                                                                         "itemId": "cboReceiveLotStatus",
                                                                                         "labelWidth": 125,
                                                                                         "layout|flex": null,
-                                                                                        "valueField": "intLotStatusId"
+                                                                                        "valueField": "strSecondaryStatus"
                                                                                     },
                                                                                     "configAlternates": {
                                                                                         "columns": "array",

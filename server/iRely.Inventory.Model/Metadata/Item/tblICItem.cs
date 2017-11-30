@@ -616,6 +616,26 @@ namespace iRely.Inventory.Model
             }
         }
 
+        private string _secondaryStatus;
+
+        [NotMapped]
+        public string strSecondaryStatus
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_secondaryStatus))
+                    if (vyuICGetCompactItem != null)
+                        return vyuICGetCompactItem.strSecondaryStatus;
+                    else
+                        return null;
+                else
+                    return _secondaryStatus;
+            }
+            set
+            {
+                _secondaryStatus = value;
+            }
+        }
         public vyuICGetCompactItem vyuICGetCompactItem { get; set; }
 
         public tblICManufacturer tblICManufacturer { get; set; }
