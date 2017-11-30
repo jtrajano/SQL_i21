@@ -5934,6 +5934,7 @@
     <Build Include="dbo\Stored Procedures\uspTFGetTransactionDynamic.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateLAImporter.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateLATransporter.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateInvoiceNumInGLDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

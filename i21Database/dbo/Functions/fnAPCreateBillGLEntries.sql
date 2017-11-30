@@ -1,4 +1,4 @@
-﻿CREATE FUNCTION [dbo].[fnAPCreateBillGLEntries]
+﻿ALTER FUNCTION [dbo].[fnAPCreateBillGLEntries]
 (
 	@transactionIds		NVARCHAR(MAX)
 	,@intUserId			INT
@@ -43,7 +43,8 @@ RETURNS @returntable TABLE
 	[dblSourceUnitCredit]		NUMERIC(18, 9)	NULL,
 	[dblSourceUnitDebit]		NUMERIC(18, 9)	NULL,
 	[intCommodityId]			INT				NULL,
-	[intSourceLocationId]		INT				NULL
+	[intSourceLocationId]		INT				NULL,
+	[strSourceDocumentId]       NVARCHAR(255)   COLLATE Latin1_General_CI_AS NULL
 )
 AS
 BEGIN
@@ -134,15 +135,16 @@ BEGIN
 		[dblForeignRate]                =    ISNULL(NULLIF(Details.dblRate,0),1),--CASE WHEN ForexRateCounter.ysnUniqueForex = 0 THEN ForexRate.dblRate ELSE 0 END,
 		[strRateType]                   =    Details.strCurrencyExchangeRateType,
 		[strDocument]					=	A.strVendorOrderNumber,
-		[strComments]					=	A.strReference,
+		[strComments]					=	D.strName,
 		[intConcurrencyId]				=	1,
 		[dblSourceUnitCredit]			=	Details.dblUnits,
 		[dblSourceUnitDebit]			=	0,
 		[intCommodityId]				=	A.intCommodityId,
-		[intSourceLocationId]			=	A.intStoreLocationId
+		[intSourceLocationId]			=	A.intStoreLocationId,
+		[strSourceDocumentId]			=	A.strVendorOrderNumber
 	FROM	[dbo].tblAPBill A
 			CROSS APPLY dbo.fnAPCalculateVoucherUnits(A.intBillId) units	
-			LEFT JOIN tblAPVendor C
+			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON D.intEntityId = C.intEntityId)
 				ON A.intEntityVendorId = C.[intEntityId]
 			CROSS APPLY
 			(
@@ -254,16 +256,18 @@ BEGIN
 		[dblForeignRate]				=	ISNULL(NULLIF(ForexRate.dblRate,0),1),
 		[strRateType]					=	ForexRate.strCurrencyExchangeRateType,
 		[strDocument]					=	A.strVendorOrderNumber,
-		[strComments]					=	A.strReference,
+		[strComments]					=	E.strName,
 		[intConcurrencyId]				=	1,
 		[dblSourceUnitCredit]			=	0,
 		[dblSourceUnitDebit]			=	0,
 		[intCommodityId]				=	A.intCommodityId,
-		[intSourceLocationId]			=	A.intStoreLocationId
+		[intSourceLocationId]			=	A.intStoreLocationId,
+		[strSourceDocumentId]			=	A.strVendorOrderNumber
 	FROM tblAPBill A
 	INNER JOIN tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intBillId
 	INNER JOIN tblAPBill C ON B.intTransactionId = C.intBillId
-	LEFT JOIN tblAPVendor D ON C.intEntityVendorId = D.[intEntityId]
+	LEFT JOIN (tblAPVendor D INNER JOIN tblEMEntity E ON E.intEntityId = D.intEntityId)
+				ON C.intEntityVendorId = D.[intEntityId]
 	CROSS APPLY
 			(
 				SELECT TOP 1 A.intCurrencyExchangeRateTypeId,B.strCurrencyExchangeRateType,A.dblRate,A.ysnSubCurrency 
@@ -354,17 +358,18 @@ BEGIN
 		[dblForeignRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
 		[strRateType]					=	G.strCurrencyExchangeRateType,
 		[strDocument]					=	A.strVendorOrderNumber,
-		[strComments]					=	A.strReference,
+		[strComments]					=	D.strName,
 		[intConcurrencyId]				=	1,
 		[dblSourceUnitCredit]			=	0,
 		[dblSourceUnitDebit]			=	ISNULL(units.dblTotalUnits,0),
 		[intCommodityId]				=	A.intCommodityId,
-		[intSourceLocationId]			=	A.intStoreLocationId
+		[intSourceLocationId]			=	A.intStoreLocationId,
+		[strSourceDocumentId]			=	A.strVendorOrderNumber
 	FROM	[dbo].tblAPBill A 
 			LEFT JOIN [dbo].tblAPBillDetail B
 				ON A.intBillId = B.intBillId
 			--CROSS APPLY dbo.fnAPCalculateVoucherDetailUnits(B.intBillDetailId) units
-			LEFT JOIN tblAPVendor C
+			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON D.intEntityId = C.intEntityId)
 				ON A.intEntityVendorId = C.[intEntityId]
 			LEFT JOIN tblICInventoryReceiptItem E
 				ON B.intInventoryReceiptItemId = E.intInventoryReceiptItemId
@@ -527,16 +532,17 @@ BEGIN
 		[dblForeignRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
 		[strRateType]					=	G.strCurrencyExchangeRateType,
 		[strDocument]					=	A.strVendorOrderNumber,
-		[strComments]					=	NULL,
+		[strComments]					=	D.strName,
 		[intConcurrencyId]				=	1,
 		[dblSourceUnitCredit]			=	0,
 		[dblSourceUnitDebit]			=	0,
 		[intCommodityId]				=	A.intCommodityId,
-		[intSourceLocationId]			=	A.intStoreLocationId
+		[intSourceLocationId]			=	A.intStoreLocationId,
+		[strSourceDocumentId]			=	A.strVendorOrderNumber
 	FROM	[dbo].tblAPBill A 
 			INNER JOIN [dbo].tblAPBillDetail B
 				ON A.intBillId = B.intBillId
-			INNER JOIN tblAPVendor C
+			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON D.intEntityId = C.intEntityId)
 				ON A.intEntityVendorId = C.[intEntityId]
 			INNER JOIN tblICItemLocation ItemLoc
 				ON A.intShipToId = ItemLoc.intLocationId AND B.intItemId = ItemLoc.intItemId
@@ -634,12 +640,13 @@ BEGIN
 		[dblForeignRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
 		[strRateType]					=	G.strCurrencyExchangeRateType,
 		[strDocument]					=	A.strVendorOrderNumber,
-		[strComments]					=	NULL,
+		[strComments]					=	E.strName,
 		[intConcurrencyId]				=	1,
 		[dblSourceUnitCredit]			=	0,
 		[dblSourceUnitDebit]			=	ISNULL(units.dblTotalUnits,0),
 		[intCommodityId]				=	A.intCommodityId,
-		[intSourceLocationId]			=	A.intStoreLocationId
+		[intSourceLocationId]			=	A.intStoreLocationId,
+		[strSourceDocumentId]			=	A.strVendorOrderNumber
 	FROM	[dbo].tblAPBill A 
 			INNER JOIN [dbo].tblAPBillDetail B
 				ON A.intBillId = B.intBillId
@@ -648,7 +655,7 @@ BEGIN
 				ON B.intItemId = B2.intItemId
 			INNER JOIN tblICItemLocation loc
 				ON loc.intItemId = B.intItemId AND loc.intLocationId = A.intShipToId
-			INNER JOIN tblAPVendor C
+			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityId)
 				ON A.intEntityVendorId = C.[intEntityId]
 			LEFT JOIN tblICInventoryReceiptCharge D
 				ON B.intInventoryReceiptChargeId = D.intInventoryReceiptChargeId
@@ -732,16 +739,17 @@ BEGIN
 		[dblForeignRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
 		[strRateType]					=	G.strCurrencyExchangeRateType,
 		[strDocument]					=	A.strVendorOrderNumber,
-		[strComments]					=	NULL,
+		[strComments]					=	E.strName,
 		[intConcurrencyId]				=	1,
 		[dblSourceUnitCredit]			=	0,
 		[dblSourceUnitDebit]			=	0,
 		[intCommodityId]				=	A.intCommodityId,
-		[intSourceLocationId]			=	A.intStoreLocationId
+		[intSourceLocationId]			=	A.intStoreLocationId,
+		[strSourceDocumentId]			=	A.strVendorOrderNumber
 	FROM	[dbo].tblAPBill A 
 			INNER JOIN [dbo].tblAPBillDetail B
 				ON A.intBillId = B.intBillId
-			INNER JOIN tblAPVendor C
+			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityId)
 				ON A.intEntityVendorId = C.[intEntityId]
 			INNER JOIN tblAPBillDetailTax D
 				ON B.intBillDetailId = D.intBillDetailId
@@ -849,17 +857,18 @@ BEGIN
 		[dblForeignRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
 		[strRateType]					=	G.strCurrencyExchangeRateType,
 		[strDocument]					=	A.strVendorOrderNumber,
-		[strComments]					=	NULL,
+		[strComments]					=	E.strName,
 		[intConcurrencyId]				=	1,
 		[dblSourceUnitCredit]			=	0,
 		[dblSourceUnitDebit]			=	0,
 		[intCommodityId]				=	A.intCommodityId,
-		[intSourceLocationId]			=	A.intStoreLocationId
+		[intSourceLocationId]			=	A.intStoreLocationId,
+		[strSourceDocumentId]			=	A.strVendorOrderNumber
 	FROM	[dbo].tblAPBill A 
 			INNER JOIN [dbo].tblAPBillDetail B
 				ON A.intBillId = B.intBillId
-			INNER JOIN tblAPVendor C
-				ON A.intEntityVendorId = C.intEntityId
+			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityId)
+				ON A.intEntityVendorId = C.[intEntityId]
 			INNER JOIN tblAPBillDetailTax D
 				ON B.intBillDetailId = D.intBillDetailId
 			LEFT JOIN tblICInventoryReceiptCharge charges
@@ -902,6 +911,7 @@ BEGIN
 	,B.intInventoryReceiptChargeId
 	,A.intCommodityId
 	,A.intStoreLocationId
+	,E.strName
 	UPDATE A
 		SET A.strDescription = B.strDescription
 	FROM @returntable A
