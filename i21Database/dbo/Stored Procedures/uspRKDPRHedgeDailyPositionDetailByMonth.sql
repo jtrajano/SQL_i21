@@ -96,18 +96,17 @@ IF  @intCommodityId >0
 BEGIN
 
 INSERT INTO @List (strCommodityCode,intCommodityId,intContractHeaderId,strContractNumber,strType,strLocationName,strContractEndMonth,strContractEndMonthNearBy,dblTotal,intFromCommodityUnitMeasureId)
-	SELECT strCommodityCode,CD.intCommodityId,intContractHeaderId,strContractNumber +'-' +Convert(nvarchar,intContractSeq) strContractNumber
-		,strContractType+ ' ' + strPricingType [strType]
+	SELECT strCommodityCode,CD.intCommodityId,intContractHeaderId,strContractNumber
+		,CD.strType [strType]
 		,strLocationName
 		,RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) 
 		, case when intContractTypeId = 1 then
 		dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((CD.dblBalance),0))		
 		else
 		-dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((CD.dblBalance),0))
-		end AS dblTotal,
-		
+		end AS dblTotal,		
 		CD.intUnitMeasureId
-	FROM vyuCTContractDetailView CD
+	FROM vyuRKContractDetail CD
 	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=CD.intCommodityId AND CD.intUnitMeasureId=ium.intUnitMeasureId  and CD.intContractStatusId <> 3
 			AND intCompanyLocationId  IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
 				WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
