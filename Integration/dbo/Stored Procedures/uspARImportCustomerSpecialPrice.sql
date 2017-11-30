@@ -207,7 +207,7 @@ BEGIN
 							 WHERE OVND.ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_rack_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS)
 					 ELSE NULL 
 				END)
-			  --,CLOC.intEntityLocationId
+			  ,CASE WHEN PDV.ptpdv_cus_no <> OCUS.ptcus_bill_to THEN CLOC.intEntityLocationId ELSE NULL END -- intEntityLocationId
 			  --,'Standard' 
 			  ,(CASE WHEN PDV.ptpdv_class > ' ' THEN 
 							(SELECT CAT.intCategoryId FROM tblICCategory CAT
