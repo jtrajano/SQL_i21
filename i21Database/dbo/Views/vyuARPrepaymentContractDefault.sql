@@ -11,6 +11,7 @@ SELECT
 	,[dtmEndDate]				= CustCon.[dtmEndDate]
 	,[strContractStatus]		= CustCon.[strContractStatus]
 	,[intEntityCustomerId]		= CustCon.[intEntityCustomerId]
+	,[strCustomerName]			= ARC.[strName]
 	,[intCurrencyId]			= CustCon.[intCurrencyId]
 	,[strCurrency]				= CustCon.[strSubCurrency]
 	,[intCompanyLocationId]		= CustCon.[intCompanyLocationId]
