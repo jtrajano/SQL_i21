@@ -1,4 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspARApplyCreditsToOpenInvoices]
+	  @strCustomers					NVARCHAR(MAX) = NULL
+	, @strApplyToBudgetCustomer	    NVARCHAR(100) = 'Yes'
+	, @dtmThruDate					DATETIME
+	, @ysnApplyPrepaids				BIT = 0
+	, @ysnOmitACHPayments			BIT = 1
 AS
 
 DECLARE @tblCustomerWithCredits TABLE (intEntityCustomerId	INT
