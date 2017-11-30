@@ -37,7 +37,7 @@ SET ANSI_WARNINGS OFF
 
 		if exists(select * from ##tmpCRMPipelineForecast where strSalesperson = @strSalesPerson)
 		begin
-			exec('update ##tmpCRMPipelineForecast set '+@strLineOfBusinessColumn+' = '+@dblTotalNetOpportunityAmount+' where strSalesPerson = '''+@strSalesPerson+'''');
+			exec('update ##tmpCRMPipelineForecast set '+@strLineOfBusinessColumn+' = '+@dblTotalNetOpportunityAmount+' where strSalesperson = '''+@strSalesPerson+'''');
 		end
 		else
 		begin
