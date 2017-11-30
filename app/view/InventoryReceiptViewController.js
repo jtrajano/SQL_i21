@@ -6098,6 +6098,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
             if (charges) {
                 Ext.Array.each(charges.data.items, function (charge) {
+                    var dblForexRate = charge.get('dblForexRate');
+                    dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0;   
+
                     if (!charge.dummy) {
                         var computeItemTax = function (itemTaxes, me) {
                             var totalItemTax = 0.00,
@@ -6109,12 +6112,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             Ext.Array.each(itemTaxes, function (itemDetailTax) {
                                 var taxableAmount = charge.get('dblAmount');
                                 var taxAmount = 0.00;
+                                var chargeQuantity = charge.get('dblQuantity');
+                                chargeQuantity = Ext.isNumeric(chargeQuantity) ? chargeQuantity : 1; 
 
                                 if (itemDetailTax.strCalculationMethod === 'Percentage') {
                                     taxAmount = (taxableAmount * (itemDetailTax.dblRate / 100));
                                 } else {
-                                    //If calculation method is 'Unit', unit will be considered as 1 since other charges do not have quantity
-                                    taxAmount = itemDetailTax.dblRate;
+                                    taxAmount = chargeQuantity * itemDetailTax.dblRate;
+                                    
+                                    // If a line is using a foreign currency, convert the tax from functional currency to the charge currency. 
+                                    taxAmount = dblForexRate != 0 ? taxAmount / dblForexRate : taxAmount;
                                 }
                                 if (itemDetailTax.ysnCheckoffTax) {
                                     taxAmount = -(taxAmount);
