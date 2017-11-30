@@ -303,11 +303,7 @@ BEGIN TRY
 				THEN 0
 			ELSE CV.dblRate
 			END
-		,CASE 
-			WHEN CV.strCostMethod = 'Amount'
-				THEN CV.dblRate
-			ELSE 0
-			END
+		,CV.dblAmount
 		,CV.intItemUOMId
 		,(
 			SELECT TOP 1 CD.intContractHeaderId
@@ -351,6 +347,60 @@ BEGIN TRY
 	FROM vyuLGLoadCostView CV
 	JOIN tblLGLoad L ON L.intLoadId = CV.intLoadId
 	JOIN tblICItem I ON I.intItemId = CV.intItemId
+	WHERE L.intLoadId = @intLoadId
+
+	UNION ALL
+
+	SELECT CLSL.intVendorId
+		,LWS.intItemId
+		,'Per Unit'
+		,LWS.dblUnitRate
+		,LWS.dblActualAmount
+		,LWS.intItemUOMId
+		,(
+			SELECT TOP 1 CD.intContractHeaderId
+			FROM tblLGLoadDetail LD
+			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+			WHERE intLoadId = @intLoadId
+			)
+		,(
+			SELECT TOP 1 intPContractDetailId
+			FROM tblLGLoadDetail
+			WHERE intLoadId = @intLoadId
+			)
+		,1
+		,'Purchase Contract'
+		,NULL
+		,L.intCurrencyId
+		,(
+			SELECT TOP 1 LOD.intVendorEntityId
+			FROM tblLGLoadDetail LOD
+			WHERE intLoadId = @intLoadId
+			)
+		,(
+			SELECT TOP 1 intPCompanyLocationId
+			FROM tblLGLoadDetail
+			WHERE intLoadId = @intLoadId
+			)
+		,1
+		,NULL
+		,L.intCurrencyId
+		,(
+			SELECT TOP 1 EL.intEntityLocationId
+			FROM tblLGLoadDetail LD
+			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+			JOIN tblEMEntityLocation EL ON EL.intEntityId = CH.intEntityId
+				AND EL.ysnDefaultLocation = 1
+			WHERE LD.intLoadId = @intLoadId
+			)
+		,L.strBLNumber
+		,I.ysnInventoryCost
+	FROM tblLGLoad L
+	JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
+	JOIN tblLGLoadWarehouseServices LWS ON LW.intLoadWarehouseId = LWS.intLoadWarehouseId
+	JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
+	JOIN tblICItem I ON I.intItemId = LWS.intItemId
 	WHERE L.intLoadId = @intLoadId
 
 	IF NOT EXISTS (
