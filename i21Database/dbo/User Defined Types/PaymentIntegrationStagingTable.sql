@@ -52,9 +52,13 @@ CREATE TYPE [dbo].[PaymentIntegrationStagingTable] AS TABLE
 	,[dblBaseInvoiceTotal]					NUMERIC(18, 6)									NULL		-- Base Invoice Total
 	,[ysnApplyTermDiscount]					BIT												NULL		-- 	
 	,[dblDiscount]							NUMERIC(18, 6)									NULL		-- Discount
+	,[dblBaseDiscount]						NUMERIC(18, 6)									NULL		-- Discount
 	,[dblDiscountAvailable]					NUMERIC(18, 6)									NULL		-- Discount Available
+	,[dblBaseDiscountAvailable]				NUMERIC(18, 6)									NULL		-- Discount Available
 	,[dblInterest]							NUMERIC(18, 6)									NULL		-- Interest
+	,[dblBaseInterest]						NUMERIC(18, 6)									NULL		-- Interest
 	,[dblPayment]							NUMERIC(18, 6)									NULL		-- Payment	
+	,[dblBasePayment]						NUMERIC(18, 6)									NULL		-- Payment	
 	,[dblAmountDue]							NUMERIC(18, 6)									NULL		-- Invoice Total
 	,[dblBaseAmountDue]						NUMERIC(18, 6)									NULL		-- Base Invoice Total
 	,[strInvoiceReportNumber]				NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL		-- Transaction Number	

@@ -184,6 +184,7 @@ BEGIN TRY
 		,[dblDiscount]
 		,[dblBaseDiscount]
 		,[dblDiscountAvailable]
+		,[dblBaseDiscountAvailable]
 		,[dblInterest]
 		,[dblBaseInterest]
 		,[dblAmountDue]
@@ -205,9 +206,10 @@ BEGIN TRY
 		,[dblBaseInvoiceTotal]		= @BaseInvoiceTotal 
 		,[dblDiscount]				= (CASE WHEN @ApplyTermDiscount = 1 THEN @TermDiscount ELSE @Discount END)
 		,[dblBaseDiscount]			= (CASE WHEN @ApplyTermDiscount = 1 THEN @BaseTermDiscount ELSE @BaseDiscount END)
-		,[dblDiscountAvailable]		= @TermDiscount
+		,[dblDiscountAvailable]		= ARI.[dblDiscountAvailable]
+		,[dblBaseDiscountAvailable]	= ARI.[dblBaseDiscountAvailable]
 		,[dblInterest]				= @Interest
-		,[dblBavseInterest]			= @BaseInterest
+		,[dblBaseInterest]			= @BaseInterest
 		,[dblAmountDue]				= (@InvoiceAmountDue + @Interest) - (@Payment + (CASE WHEN @ApplyTermDiscount = 1 THEN @TermDiscount ELSE @Discount END))
 		,[dblBaseAmountDue]			= (@BaseInvoiceAmountDue + @BaseInterest) - (@BasePayment + (CASE WHEN @ApplyTermDiscount = 1 THEN @BaseTermDiscount ELSE @BaseDiscount END))
 		,[dblPayment]				= @Payment		
