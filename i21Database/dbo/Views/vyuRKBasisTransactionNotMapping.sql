@@ -3,6 +3,14 @@
 AS 
 
 SELECT intM2MBasisTransactionId
+		,mb.dtmM2MBasisDate
+		,bd.intM2MBasisId
+		,bd.intFutureMarketId
+		,bd.intCommodityId
+		,bd.intItemId
+		,bd.intCurrencyId
+		,bd.dblBasis
+		,bd.intUnitMeasureId
 		,strCommodityCode
 		,strFutMarketName
 		,strCurrency

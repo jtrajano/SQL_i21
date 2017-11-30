@@ -2,7 +2,25 @@
 
 AS 
 
-SELECT intM2MBasisDetailId
+SELECT 
+		bd.intM2MBasisDetailId,
+		bd.intM2MBasisId,
+		bd.intCommodityId,
+		bd.intItemId,
+		bd.strOriginDest,
+		bd.intFutureMarketId,
+		bd.intFutureMonthId,
+		bd.strPeriodTo,
+		bd.intCompanyLocationId,
+		bd.intMarketZoneId,
+		bd.intCurrencyId,
+		bd.intPricingTypeId,
+		bd.strContractInventory,
+		bd.intContractTypeId,
+		bd.dblCashOrFuture,
+		bd.dblBasisOrDiscount,
+		bd.intUnitMeasureId,
+		bd.strMarketValuation
 		,strCommodityCode
 		,strContractType
 		,strCurrency
@@ -13,7 +31,7 @@ SELECT intM2MBasisDetailId
 		,strPricingType
 		,strLocationName
 		,strUnitMeasure
- FROM tblRKM2MBasisDetail bd
+FROM tblRKM2MBasisDetail bd
 JOIN tblRKM2MBasis mb on mb.intM2MBasisId=bd.intM2MBasisId
 JOIN tblICCommodity c on c.intCommodityId=bd.intCommodityId
 LEFT JOIN tblARMarketZone z on z.intMarketZoneId=bd.intMarketZoneId
