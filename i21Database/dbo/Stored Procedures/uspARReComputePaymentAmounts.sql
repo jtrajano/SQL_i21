@@ -27,15 +27,39 @@ SET
 	 ARPD.[dblDiscount]					= ISNULL(ARPD.[dblDiscount], @ZeroDecimal)
 	,ARPD.[dblBaseDiscount]				= [dbo].fnRoundBanker(ISNULL(ARPD.[dblDiscount], @ZeroDecimal) * ARPD.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
 	,ARPD.[dblDiscountAvailable]		= ISNULL(ARPD.[dblDiscountAvailable], @ZeroDecimal)
-	,ARPD.[dblBaseDiscountAvailable]	= [dbo].fnRoundBanker(ISNULL(ARPD.[dblDiscountAvailable], @ZeroDecimal) * ARPD.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+	,ARPD.[dblBaseDiscountAvailable]	= ISNULL(ARPD.[dblBaseDiscountAvailable], @ZeroDecimal)
 	,ARPD.[dblInterest]					= ISNULL(ARPD.[dblInterest], @ZeroDecimal)
 	,ARPD.[dblBaseInterest]				= [dbo].fnRoundBanker(ISNULL(ARPD.[dblInterest], @ZeroDecimal) * ARPD.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
 	,ARPD.[dblAmountDue]				= ISNULL(ARPD.[dblAmountDue], @ZeroDecimal)
 	,ARPD.[dblBaseAmountDue]			= [dbo].fnRoundBanker(ISNULL(ARPD.[dblAmountDue], @ZeroDecimal) * ARPD.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
 	,ARPD.[dblPayment]					= ISNULL(ARPD.[dblPayment], @ZeroDecimal)
-	,ARPD.[dblBasePayment]				= ISNULL(ARPD.[dblBasePayment], @ZeroDecimal)	
+	,ARPD.[dblBasePayment]				= [dbo].fnRoundBanker(ISNULL(ARPD.[dblPayment], @ZeroDecimal) * ARPD.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
 FROM
 	tblARPaymentDetail ARPD
+WHERE 
+	EXISTS(SELECT NULL FROM @PaymentIds WHERE [intHeaderId] = ARPD.[intPaymentId])
+
+UPDATE ARPD
+SET	
+	 ARPD.[dblAmountDue]		= ISNULL(ARI.[dblAmountDue], @ZeroDecimal) + ISNULL(ARPD.[dblInterest], @ZeroDecimal) - (ISNULL(ARPD.[dblPayment], @ZeroDecimal) + ISNULL(ARPD.[dblDiscount], @ZeroDecimal))
+	,ARPD.[dblBaseAmountDue]	= ISNULL(ARI.[dblBaseAmountDue], @ZeroDecimal) + ISNULL(ARPD.[dblBaseInterest], @ZeroDecimal) - (ISNULL(ARPD.[dblBasePayment], @ZeroDecimal) + ISNULL(ARPD.[dblBaseDiscount], @ZeroDecimal))
+FROM
+	tblARPaymentDetail ARPD
+INNER JOIN
+	tblARInvoice ARI
+		ON ARPD.[intInvoiceId] = ARI.[intInvoiceId] 
+WHERE 
+	EXISTS(SELECT NULL FROM @PaymentIds WHERE [intHeaderId] = ARPD.[intPaymentId])
+
+UPDATE ARPD
+SET	
+	 ARPD.[dblAmountDue]		= ISNULL(APB.[dblAmountDue], @ZeroDecimal) + ISNULL(ARPD.[dblInterest], @ZeroDecimal) - (ISNULL(ARPD.[dblPayment], @ZeroDecimal) + ISNULL(ARPD.[dblDiscount], @ZeroDecimal))
+	,ARPD.[dblBaseAmountDue]	= ISNULL(APB.[dblAmountDue], @ZeroDecimal) + ISNULL(ARPD.[dblBaseInterest], @ZeroDecimal) - (ISNULL(ARPD.[dblBasePayment], @ZeroDecimal) + ISNULL(ARPD.[dblBaseDiscount], @ZeroDecimal))
+FROM
+	tblARPaymentDetail ARPD
+INNER JOIN
+	tblAPBill APB
+		ON ARPD.[intBillId] = APB.[intBillId] 
 WHERE 
 	EXISTS(SELECT NULL FROM @PaymentIds WHERE [intHeaderId] = ARPD.[intPaymentId])
 
