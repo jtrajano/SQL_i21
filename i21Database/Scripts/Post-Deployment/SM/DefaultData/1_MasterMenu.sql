@@ -1698,9 +1698,9 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Purchase Orders' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableCreateParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'New Purchase Orders', N'Accounts Payable', @AccountsPayableCreateParentMenuId, N'', N'Activity', N'Screen', N'AccountsPayable.view.PurchaseOrder?action=new', N'small-menu-create', 1, 0, 0, 1, 0, 1)
+	VALUES (N'New Purchase Orders', N'Accounts Payable', @AccountsPayableCreateParentMenuId, N'New Purchase Orders', N'Create', N'Screen', N'AccountsPayable.view.PurchaseOrder?action=new', N'small-menu-create', 1, 0, 0, 1, 0, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.view.PurchaseOrder?action=new', intSort = 0 WHERE strMenuName = 'New Purchase Orders' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableCreateParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.view.PurchaseOrder?action=new', intSort = 0, strDescription = 'New Purchase Orders', strCategory = 'Create' WHERE strMenuName = 'New Purchase Orders' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableCreateParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Vouchers' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableCreateParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
@@ -1748,6 +1748,7 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Open Clearing Detail' AND strM
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Vendor Expense Approval' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableActivitiesParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Vendor History' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @AccountsPayableReportParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Vendor' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @AccountsPayableActivitiesParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Vendor Contact List' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @AccountsPayableActivitiesParentMenuId
 /* END OF DELETING */
 
 /* ACCOUNTS RECEIVABLE */
@@ -3098,6 +3099,7 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName = 'M2M Inquiry' AND strModuleName 
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Assign Futures To Contracts' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Currency Contract' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Customer Position Inquiry' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementActivitiesParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'M2M Configuration' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementActivitiesParentMenuId
 /* END OF DELETE */
 
 /* TICKET MANAGEMENT */
