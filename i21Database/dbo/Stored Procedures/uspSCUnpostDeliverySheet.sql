@@ -121,7 +121,7 @@ BEGIN TRY
 						,[intLotId]				= NULL
 						,[intSubLocationId]		= NULL
 						,[intStorageLocationId]	= NULL
-						,[dblQty]				= (SELECT (SUM(dblNetUnits) * -1) FROM tblSCTicket WHERE intDeliverySheetId = @intDeliverySheetId AND strTicketStatus = 'H')
+						,[dblQty]				= (SELECT SUM(dblNetUnits) FROM tblSCTicket WHERE intDeliverySheetId = @intDeliverySheetId AND strTicketStatus = 'H')
 						,[intTransactionId]		= @intDeliverySheetId
 						,[strTransactionId]		= SCD.strDeliverySheetNumber
 						,[intTransactionTypeId] = 1
@@ -211,7 +211,7 @@ BEGIN TRY
 								,[intLotId]				= NULL
 								,[intSubLocationId]		= NULL
 								,[intStorageLocationId]	= NULL
-								,[dblQty]				= (SELECT (SUM(dblNetUnits) * -1) FROM tblSCTicket WHERE intDeliverySheetId = @intDeliverySheetId AND strTicketStatus = 'H')
+								,[dblQty]				= (SELECT SUM(dblNetUnits) FROM tblSCTicket WHERE intDeliverySheetId = @intDeliverySheetId AND strTicketStatus = 'H')
 								,[intTransactionId]		= @intDeliverySheetId
 								,[strTransactionId]		= SCD.strDeliverySheetNumber
 								,[intTransactionTypeId] = 1
