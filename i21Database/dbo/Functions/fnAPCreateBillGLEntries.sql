@@ -1,4 +1,4 @@
-﻿ALTER FUNCTION [dbo].[fnAPCreateBillGLEntries]
+﻿CREATE FUNCTION [dbo].[fnAPCreateBillGLEntries]
 (
 	@transactionIds		NVARCHAR(MAX)
 	,@intUserId			INT
