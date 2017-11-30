@@ -364,7 +364,19 @@ BEGIN
 									ELSE 
 										1
 							END 
-						, 2)						
+						, 2)	
+
+			,dblQuantity = 
+				CASE 
+					WHEN Charge.strCostMethod = 'Per Unit' AND ISNULL(Charge.dblRate, 0) <> 0 THEN
+						dbo.fnDivide(
+							ISNULL(CalculatedCharges.dblAmount, 0)
+							,Charge.dblRate
+						)
+
+					ELSE 
+						1
+				END 					
 
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge Charge 	
 				ON Receipt.intInventoryReceiptId = Charge.intInventoryReceiptId
