@@ -36,7 +36,7 @@ LEFT JOIN tblGLAccountUnit U on U.intAccountUnitId = A.intAccountUnitId
 CROSS APPLY(
 	SELECT top 1 intLength, intAccountStructureId FROM tblGLAccountStructure WHERE strType = 'Primary'
 )P
-CROSS APPLY(
+OUTER APPLY(
 	SELECT TOP 1 C.strAccountCategory FROM tblGLAccountSegmentMapping M 
 	JOIN tblGLAccountSegment S on S.intAccountSegmentId = M.intAccountSegmentId
 	JOIN tblGLAccountCategory C on C.intAccountCategoryId = S.intAccountCategoryId
