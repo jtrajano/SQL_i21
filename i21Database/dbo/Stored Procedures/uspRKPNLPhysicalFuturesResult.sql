@@ -51,8 +51,12 @@ BEGIN
 
 	SELECT	CONVERT(int,ROW_NUMBER() OVER (ORDER BY strContractType)) intRowNum,
 			*,
-			CASE WHEN strDescription = 'Invoice' THEN dblAccounting ELSE ISNULL(dblAllocatedQty,dblBooked) * dblPrice	END AS	dblTransactionValue,
-			ISNULL(dblAllocatedQty,dblBooked) * dblPrice * dblFX	AS	dblForecast
+			CASE	WHEN strType IN ('Invoice') THEN dblAccounting 
+					WHEN strType IN ('Amount')	THEN dblTranValue 
+			ELSE ISNULL(dblAllocatedQty,dblBooked) * dblPrice	END AS	dblTransactionValue,
+			CASE	WHEN strType IN ('Amount')	THEN dblTranValue 
+					ELSE ISNULL(dblAllocatedQty,dblBooked) * dblPrice * dblFX	
+			END AS	dblForecast
 	FROM
 	(
 		SELECT	TP.strContractType + ' - ' + CH.strContractNumber strContractType,
@@ -80,7 +84,10 @@ BEGIN
 				NUll AS dblBooked,
 				NULL AS dblAccounting,
 				AD.dtmAllocatedDate AS dtmDate,
+				'Sales Allocated'	AS strType,
+				0.0 AS dblTranValue, --Dummy
 				9999999 + AD.intPContractDetailId AS intSort
+				
 
 		FROM	@tblLGAllocationDetail	AD 
 		JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId	=	AD.intPContractDetailId 
@@ -117,7 +124,9 @@ BEGIN
 					NULL AS dblFX,
 					dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId,QU.intUnitMeasureId,@intUnitMeasureId, ID.dblQtyShipped) AS dblBooked,
 					ID.dblTotal AS dblAccounting,
-					IV.dtmDate AS dtmDate
+					IV.dtmDate AS dtmDate,
+					'Invoice'	AS strType,
+					0.0 AS dblTranValue --Dummy
 
 			FROM	tblARInvoiceDetail		ID 
 			JOIN	tblARInvoice			IV	ON	IV.intInvoiceId			=	ID.intInvoiceId
@@ -145,7 +154,10 @@ BEGIN
 				dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId,QU.intUnitMeasureId,@intUnitMeasureId, ID.dblQtyReceived) AS dblBooked,
 				ID.dblTotal AS dblAccounting,
 				IV.dtmDate AS dtmDate,
+				'Supp. Invoice'	AS strType,
+				0.0 AS dblTranValue, --Dummy
 				9999999 + AD.intPContractDetailId + 1 AS intSort
+				
 				
 		FROM	@tblLGAllocationDetail	AD
 		JOIN	tblAPBillDetail			ID	ON	ID.intContractDetailId	=	AD.intPContractDetailId
@@ -184,7 +196,9 @@ BEGIN
 					ISNULL(dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0),1) AS dblFX,
 					NUll AS dblBooked,
 					NULL AS dblAccounting,
-					AD.dtmAllocatedDate AS dtmDate
+					AD.dtmAllocatedDate AS dtmDate,
+					'Purchase Allocated'	AS strType,
+					0.0 AS dblTranValue --Dummy
 
 			FROM	@tblLGAllocationDetail	AD 
 			JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId	=	@intSContractDetailId
@@ -209,7 +223,7 @@ BEGIN
 
 		UNION ALL
 
-		SELECT strItemNo, strContractNumber, strDescription, strConfirmed, SUM(dblAllocatedQty) dblAllocatedQty, dblPrice, strCurrency, dblFX, dblBooked, dblAccounting, dtmContractDate, intSort
+		SELECT strItemNo, strContractNumber, strDescription, strConfirmed, SUM(dblAllocatedQty) dblAllocatedQty, dblPrice, strCurrency, dblFX, dblBooked, dblAccounting, dtmContractDate, strType,dblTranValue, intSort
 		FROM(
 			SELECT	IM.strItemNo,
 					CH.strContractNumber,
@@ -227,7 +241,10 @@ BEGIN
 					BL.dblBooked,
 					BL.dblAccounting,
 					CH.dtmContractDate,
+					CC.strCostMethod strType,
+					CASE WHEN CC.strCostMethod = 'Amount' THEN  CC.dblRate ELSE dblTranValue END AS dblTranValue,
 					CC.intItemId * 999999 AS intSort
+					
 
 			FROM	@tblLGAllocationDetail	AD 
 			JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId	IN	(AD.intPContractDetailId, AD.intSContractDetailId)
@@ -244,17 +261,19 @@ BEGIN
 			JOIN	(
 						SELECT	intContractCostId,
 								SUM(dbo.fnCTConvertQuantityToTargetItemUOM(BD.intItemId,IU.intUnitMeasureId,@intUnitMeasureId, BD.dblQtyReceived)) AS dblBooked,
+								SUM(BD.dblTotal)	dblAccounting,
 								SUM(	dbo.fnCTConvertQuantityToTargetItemUOM(BD.intItemId,IU.intUnitMeasureId,@intUnitMeasureId, BD.dblQtyReceived)*
 										dblCost/
-										CASE WHEN BD.ysnSubCurrency = 1 THEN 100 ELSE 1 END)	dblAccounting
+										CASE WHEN BD.ysnSubCurrency = 1 THEN 100 ELSE 1 END
+									)	dblTranValue
 						FROM	tblAPBillDetail BD
-						JOIN	tblICItemUOM	IU	ON	IU.intItemUOMId = BD.intUnitOfMeasureId
+				LEFT	JOIN	tblICItemUOM	IU	ON	IU.intItemUOMId = BD.intUnitOfMeasureId
 						WHERE	intContractDetailId IN (SELECT * FROM dbo.fnSplitString(@strDetailIds,',')) AND intContractCostId IS NOT NULL 
 						GROUP BY intContractCostId
 					)						BL	ON	BL.intContractCostId = CC.intContractCostId	
 			WHERE	intSContractDetailId	IN (SELECT * FROM dbo.fnSplitString(@strDetailIds,',')) AND ISNULL(MC.strM2MComputation,'No')	=	'No'
 		)d
-		GROUP BY strItemNo, strContractNumber, strDescription, strConfirmed, dblPrice, strCurrency, dblFX, dblBooked, dblAccounting, dtmContractDate, intSort
+		GROUP BY strItemNo, strContractNumber, strDescription, strConfirmed, dblPrice, strCurrency, dblFX, dblBooked, dblAccounting, dtmContractDate, intSort, strType, dblTranValue
 	)t
 	ORDER by intSort,strDescription
 END
