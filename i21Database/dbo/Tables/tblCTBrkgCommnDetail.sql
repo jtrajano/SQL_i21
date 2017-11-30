@@ -3,6 +3,8 @@
 	intBrkgCommnDetailId	INT NOT NULL IDENTITY, 
     intBrkgCommnId			INT NOT NULL,
     intContractCostId		INT NOT NULL,
+	dblReqstdAmount			NUMERIC(18,6),
+	dblRcvdPaidAmount		NUMERIC(18,6),
     intCreatedById			INT,
     dtmCreated				DATETIME,
     intLastModifiedById		INT,
