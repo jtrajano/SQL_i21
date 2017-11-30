@@ -125,6 +125,21 @@ BEGIN
 					-- Default Portal Menu
 					SELECT intMenuId FROM tblSMUserRoleMenu WHERE intUserRoleId = 999 AND ysnVisible = 0
 				)
+
+				UPDATE tblSMUserRoleMenu
+				SET ysnVisible = tblPatch.ysnVisible
+				FROM (
+					SELECT 
+						RoleMenu.intUserRoleMenuId,
+						ysnVisible = (CASE WHEN EXISTS((SELECT TOP 1 1 FROM tblSMUserRoleMenu tmpA WHERE tmpA.intParentMenuId = RoleMenu.intUserRoleMenuId AND tmpA.intUserRoleId = @userRoleId AND ysnVisible = 1)) THEN 1 
+											WHEN Menu.ysnLeaf = 1 THEN RoleMenu.ysnVisible
+											ELSE 0 END)
+					FROM tblSMUserRoleMenu RoleMenu
+					LEFT JOIN tblSMMasterMenu Menu ON Menu.intMenuID = RoleMenu.intMenuId
+					WHERE RoleMenu.intUserRoleId = @userRoleId
+					) tblPatch
+				WHERE tblPatch.intUserRoleMenuId = tblSMUserRoleMenu.intUserRoleMenuId
+				AND intUserRoleId = @userRoleId
 				--DELETE UserRoleMenu FROM tblSMUserRoleMenu UserRoleMenu
 				----SELECT UserRole.intUserRoleID, UserRole.strName as RoleName, UserRole.strRoleType, EntityToRole.intEntityId, MasterMenu.strMenuName, UserRoleMenu.ysnVisible FROM tblSMUserRoleMenu UserRoleMenu
 				--INNER JOIN tblSMUserRole UserRole ON UserRoleMenu.intUserRoleId = UserRole.intUserRoleID
@@ -182,6 +197,21 @@ BEGIN
 					) RoleMenu ON ContactMenu.intMasterMenuId = RoleMenu.intMenuId
 					WHERE ISNULL(RoleMenu.ysnVisible, 0) = 0	
 				)
+
+				UPDATE tblSMUserRoleMenu
+				SET ysnVisible = tblPatch.ysnVisible
+				FROM (
+					SELECT 
+						RoleMenu.intUserRoleMenuId,
+						ysnVisible = (CASE WHEN EXISTS((SELECT TOP 1 1 FROM tblSMUserRoleMenu tmpA WHERE tmpA.intParentMenuId = RoleMenu.intUserRoleMenuId AND tmpA.intUserRoleId = @userRoleId AND ysnVisible = 1)) THEN 1 
+											WHEN Menu.ysnLeaf = 1 THEN RoleMenu.ysnVisible
+											ELSE 0 END)
+					FROM tblSMUserRoleMenu RoleMenu
+					LEFT JOIN tblSMMasterMenu Menu ON Menu.intMenuID = RoleMenu.intMenuId
+					WHERE RoleMenu.intUserRoleId = @userRoleId
+					) tblPatch
+				WHERE tblPatch.intUserRoleMenuId = tblSMUserRoleMenu.intUserRoleMenuId
+				AND intUserRoleId = @userRoleId
 
 				--DELETE UserRoleMenu FROM tblSMUserRoleMenu UserRoleMenu
 				----SELECT UserRole.strName as RoleName, MasterMenu.strMenuName, UserRoleMenu.ysnVisible FROM tblSMUserRoleMenu UserRoleMenu
