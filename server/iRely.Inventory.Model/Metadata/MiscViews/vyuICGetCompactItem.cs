@@ -43,7 +43,7 @@ namespace iRely.Inventory.Model
         public bool? ysnBasisContract { get; set; }
         public int? intTonnageTaxUOMId { get; set; }
         public string strTonnageTaxUOM { get; set; }
-
+        public string strSecondaryStatus { get; set; }
         public string strFuelCategory { get; set; }
         public string strMedicationTag { get; set; }
         public string strIngredientTag { get; set; }
