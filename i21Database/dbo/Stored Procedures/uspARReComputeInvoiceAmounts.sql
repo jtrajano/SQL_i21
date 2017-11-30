@@ -11,11 +11,11 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE  @ZeroDecimal		DECIMAL(18,6)
-		,@InvoiceIdLocal	INT
-		,@CurrencyId		INT
-		,@strTransType		NVARCHAR(50)
-		,@OriginalInvoiceId INT
+DECLARE  @ZeroDecimal			DECIMAL(18,6)
+		,@InvoiceIdLocal		INT
+		,@CurrencyId			INT
+		,@strTransType			NVARCHAR(50)
+		,@OriginalInvoiceId		INT
 
 SET @ZeroDecimal = 0.000000	
 SET @InvoiceIdLocal = @InvoiceId
@@ -99,19 +99,28 @@ BEGIN
 	UPDATE
 		tblARInvoice
 	SET
-		  [dblDiscountAvailable]	= ISNULL([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], [dblInvoiceTotal])  + T.[dblItemTermDiscountTotal], @ZeroDecimal)
-		 ,[dblTotalTermDiscount]	= ISNULL(T.[dblItemTermDiscountTotal], @ZeroDecimal)
+		  [dblDiscountAvailable]		= ISNULL([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], [dblInvoiceTotal])  + T.[dblItemTermDiscountTotal], @ZeroDecimal)
+		 ,[dblBaseDiscountAvailable]	= ISNULL([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], [dblBaseInvoiceTotal])  + T.[dblBaseItemTermDiscountTotal], @ZeroDecimal)
+		 ,[dblTotalTermDiscount]		= ISNULL(T.[dblItemTermDiscountTotal], @ZeroDecimal)
 	FROM
 		(
 			SELECT 
 				 SUM(
 					CASE WHEN [strItemTermDiscountBy] = 'Percent'
 						THEN
-							([dblQtyShipped] * [dblPrice]) * ([dblItemTermDiscount]/100.000000)
+							[dbo].fnRoundBanker(([dblQtyShipped] * [dblPrice]) * ([dblItemTermDiscount]/100.000000), [dbo].[fnARGetDefaultDecimal]())
 						ELSE
-							[dblItemTermDiscount]
+							[dbo].fnRoundBanker([dblItemTermDiscount], [dbo].[fnARGetDefaultDecimal]())
 					END
 					)	AS [dblItemTermDiscountTotal]
+				,SUM(
+					CASE WHEN [strItemTermDiscountBy] = 'Percent'
+						THEN
+							[dbo].fnRoundBanker((([dblQtyShipped] * [dblPrice]) * ([dblItemTermDiscount]/100.000000)) * [dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+						ELSE
+							[dbo].fnRoundBanker([dblItemTermDiscount] * [dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+					END
+					)	AS [dblBaseItemTermDiscountTotal]
 				,[intInvoiceId]
 			FROM
 				tblARInvoiceDetail
