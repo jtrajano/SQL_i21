@@ -293,7 +293,7 @@ SELECT
 	INNER JOIN tmp_agordmstImport INV ON INV.agord_ivc_no COLLATE Latin1_General_CI_AS = A.strInvoiceOriginId  COLLATE Latin1_General_CI_AS
 	AND INV.agord_cus_no COLLATE Latin1_General_CI_AS = ENT.strEntityNo	
 	INNER JOIN [tblGLCOACrossReference] GL ON INV.agord_gl_acct = GL.[strExternalId]
-	INNER JOIN tblEMEntityLocation LOC ON LOC.intEntityId = A.intEntityCustomerId
+	--INNER JOIN tblEMEntityLocation LOC ON LOC.intEntityId = A.intEntityCustomerId
 	WHERE agord_un_sold IS NOT NULL AND agord_un_prc IS NOT NULL AND agord_line_no <> 0 AND agord_type = 'D'	
 
 SET @totalInsertedInvoiceDetail = @@ROWCOUNT;
