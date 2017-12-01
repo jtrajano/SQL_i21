@@ -27,7 +27,9 @@ SELECT
 	,strCustomerReferences	= dbo.fnARGetCustomerReferencesFromPayment(P.intPaymentId)
 	,intCurrencyId			= P.intCurrencyId
 	,strCurrency			= SMC.strCurrency
-    ,strCurrencyDescription	= SMC.strDescription	 
+    ,strCurrencyDescription	= SMC.strDescription
+	,P.strPaymentInfo
+	,P.ysnProcessedToNSF
 FROM (SELECT intPaymentId
 		   , strRecordNumber 
 		   , intEntityId
@@ -43,6 +45,8 @@ FROM (SELECT intPaymentId
 		   , dtmBatchDate
 		   , intPostedById
 		   , strBatchId
+		   , strPaymentInfo
+		   , ysnProcessedToNSF
 	  FROM dbo.tblARPayment WITH (NOLOCK)
 ) P 
 LEFT JOIN (

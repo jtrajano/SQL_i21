@@ -5920,6 +5920,9 @@
     <Build Include="dbo\Views\vyuLGWarehouseRateMatrixSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspGRDuplicateDiscountTable.sql" />
     <Build Include="dbo\Stored Procedures\uspSTGetItemsAfterUpdateRegister.sql" />
+    <Build Include="dbo\Stored Procedures\uspARProcessNSF.sql" />
+    <Build Include="dbo\Tables\tblARNSFStagingTableDetail.sql" />
+    <Build Include="dbo\Tables\tblARNSFStagingTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
