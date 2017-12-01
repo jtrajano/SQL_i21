@@ -32,47 +32,47 @@ SET @ZeroDecimal = 0.000000
 SELECT @DateOnly = CAST(GETDATE() AS DATE)
 
 IF ISNULL(@CurrencyExchangeRate,0) = 0
-	SET @CurrencyExchangeRate = 1.000000
+	SET @CurrencyExchangeRate = 1.000000 
 
 SET @Payment		= [dbo].fnRoundBanker(@Payment, [dbo].[fnARGetDefaultDecimal]())
-SET @BasePayment	= [dbo].fnRoundBanker(@Payment * @CurrencyExchangeRate, [dbo].[fnARGetDefaultDecimal]())
+SET @BasePayment	= [dbo].fnRoundBanker([dbo].fnRoundBanker(@Payment, [dbo].[fnARGetDefaultDecimal]()) * @CurrencyExchangeRate, [dbo].[fnARGetDefaultDecimal]())
 SET @Discount		= [dbo].fnRoundBanker(@Discount, [dbo].[fnARGetDefaultDecimal]())
-SET @BaseDiscount	= [dbo].fnRoundBanker(@Discount * @CurrencyExchangeRate, [dbo].[fnARGetDefaultDecimal]())
+SET @BaseDiscount	= [dbo].fnRoundBanker([dbo].fnRoundBanker(@Discount, [dbo].[fnARGetDefaultDecimal]()) * @CurrencyExchangeRate, [dbo].[fnARGetDefaultDecimal]())
 SET @Interest		= [dbo].fnRoundBanker(@Interest, [dbo].[fnARGetDefaultDecimal]())
-SET @BaseInterest	= [dbo].fnRoundBanker(@Interest * @CurrencyExchangeRate, [dbo].[fnARGetDefaultDecimal]())
+SET @BaseInterest	= [dbo].fnRoundBanker([dbo].fnRoundBanker(@Interest, [dbo].[fnARGetDefaultDecimal]()) * @CurrencyExchangeRate, [dbo].[fnARGetDefaultDecimal]())
 
 IF NOT EXISTS(SELECT NULL FROM tblARPayment WHERE [intPaymentId] = @PaymentId)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120010, 16, 1);
+			RAISERROR('The payment Id provided does not exists!', 16, 1);
 		RETURN 0;
 	END
 	
 IF NOT EXISTS(SELECT NULL FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120011, 16, 1);
+			RAISERROR('The invoice Id provided does not exists!', 16, 1);
 		RETURN 0;
 	END
 	
 IF NOT EXISTS(SELECT NULL FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId AND (([ysnPosted] = 1 AND [strTransactionType] <> 'Customer Prepayment') OR ([ysnPosted] = 0 AND [strTransactionType] = 'Customer Prepayment')))
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120012, 16, 1);
+			RAISERROR('The invoice provided is not yet posted!', 16, 1);
 		RETURN 0;
 	END
 	
 IF EXISTS(SELECT NULL FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId AND [ysnPosted] = 1 AND [strTransactionType] = 'Cash')
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120013, 16, 1);
+			RAISERROR('Invoice of type Cash cannot be added!', 16, 1);
 		RETURN 0;
 	END
 	
 IF EXISTS(SELECT NULL FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId AND [ysnPosted] = 1 AND [strTransactionType] = 'Cash Refund')
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120014, 16, 1);
+			RAISERROR('Invoice of type Cash Refund cannot be added!', 16, 1);
 		RETURN 0;
 	END
 
@@ -82,6 +82,8 @@ DECLARE @InvoiceTotal		NUMERIC(18, 6)
 	,@BaseInvoiceAmountDue	NUMERIC(18, 6)
 	,@TermDiscount			NUMERIC(18, 6)
 	,@BaseTermDiscount		NUMERIC(18, 6)
+	,@AvailableDiscount		NUMERIC(18, 6)
+	,@BaseAvailableDiscount	NUMERIC(18, 6)
 	,@InvoiceNumber			NVARCHAR(50)
 	,@TransactionType		NVARCHAR(25)
 	,@AmountPaid			NUMERIC(18, 6)
@@ -99,12 +101,14 @@ WHERE
 	[intPaymentId] = @PaymentId
 
 SELECT
-	 @InvoiceTotal			= [dblInvoiceTotal] * (CASE WHEN [strTransactionType] IN ('Credit Memo','Overpayment','Customer Prepayment') THEN -1 ELSE 1 END)
-	,@BaseInvoiceTotal		= [dblBaseInvoiceTotal] * (CASE WHEN [strTransactionType] IN ('Credit Memo','Overpayment','Customer Prepayment') THEN -1 ELSE 1 END)
-	,@InvoiceAmountDue		= [dblAmountDue] * (CASE WHEN [strTransactionType] IN ('Credit Memo','Overpayment','Customer Prepayment') THEN -1 ELSE 1 END)
-	,@BaseInvoiceAmountDue	= [dblBaseAmountDue] * (CASE WHEN [strTransactionType] IN ('Credit Memo','Overpayment','Customer Prepayment') THEN -1 ELSE 1 END)
+	 @InvoiceTotal			= [dblInvoiceTotal] * dbo.fnARGetInvoiceAmountMultiplier([strTransactionType])
+	,@BaseInvoiceTotal		= [dblBaseInvoiceTotal] * dbo.fnARGetInvoiceAmountMultiplier([strTransactionType])
+	,@InvoiceAmountDue		= [dblAmountDue] * dbo.fnARGetInvoiceAmountMultiplier([strTransactionType])
+	,@BaseInvoiceAmountDue	= [dblBaseAmountDue] * dbo.fnARGetInvoiceAmountMultiplier([strTransactionType])
 	,@TermDiscount			= [dbo].fnRoundBanker(ISNULL(dbo.[fnGetDiscountBasedOnTerm](@PaymentDate, [dtmDate], [intTermId], [dblInvoiceTotal]), @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
-	,@BaseTermDiscount		= [dbo].fnRoundBanker([dbo].fnRoundBanker(ISNULL(dbo.[fnGetDiscountBasedOnTerm](@PaymentDate, [dtmDate], [intTermId], [dblInvoiceTotal]), @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()) * @CurrencyExchangeRate, [dbo].[fnARGetDefaultDecimal]())
+	,@BaseTermDiscount		= [dbo].fnRoundBanker(ISNULL(dbo.[fnGetDiscountBasedOnTerm](@PaymentDate, [dtmDate], [intTermId], [dblBaseInvoiceTotal]), @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
+	,@AvailableDiscount		= [dblDiscountAvailable]
+	,@BaseAvailableDiscount	= [dblBaseDiscountAvailable]
 	,@InvoiceNumber			= [strInvoiceNumber]
 	,@TransactionType		= [strTransactionType]
 FROM
@@ -122,7 +126,7 @@ WHERE
 IF (@InvoiceAmountDue + @Interest) < (@Payment + (CASE WHEN @ApplyTermDiscount = 1 THEN @TermDiscount ELSE @Discount END))
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120058, 16, 1, @InvoiceNumber);
+			RAISERROR('Payment on %s is over the transaction''s amount due.', 16, 1, @InvoiceNumber);
 		RETURN 0;
 	END
 
@@ -135,28 +139,29 @@ SET @ErrorMsg = CONVERT(NVARCHAR(100),CAST(ISNULL(@Payment,@ZeroDecimal) AS MONE
 IF (@PaymentTotal + @Payment) > (@AmountPaid + @Payment) AND @TransactionType <> 'Customer Prepayment'
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120059, 16, 1, @ErrorMsg);
+			RAISERROR('Payment of %s for invoice will cause an under payment.', 16, 1, @ErrorMsg);
 		RETURN 0;
 	END
 
 IF ISNULL(@AllowOverpayment,0) = 0 AND (@PaymentTotal + @Payment) > (@AmountPaid + @Payment)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120060, 16, 1, @ErrorMsg);
+			RAISERROR('Payment of %s for invoice will cause an overpayment.', 16, 1, @ErrorMsg);
 		RETURN 0;
 	END
 
-IF @TransactionType IN ('Credit Memo','Overpayment','Customer Prepayment') AND @Payment > 0
+IF dbo.fnARGetInvoiceAmountMultiplier(@TransactionType) = -1 AND @Payment > 0
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(120061, 16, 1, @TransactionType);
+			RAISERROR('Positive payment amount is not allowed for invoice of type %s.', 16, 1, @TransactionType);
 		RETURN 0;
 	END
 
-IF @TransactionType IN ('Credit Memo','Overpayment','Customer Prepayment')
+IF dbo.fnARGetInvoiceAmountMultiplier(@TransactionType) = -1 
 	BEGIN
-		SET @Discount = @ZeroDecimal 
-		SET @Interest = @ZeroDecimal
+		SET @Discount		= @ZeroDecimal 
+		SET @Interest		= @ZeroDecimal
+		SET @TermDiscount	= @ZeroDecimal
 	END
 		
 IF ISNULL(@RaiseError,0) = 0	
