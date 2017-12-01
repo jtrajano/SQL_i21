@@ -293,7 +293,7 @@ SELECT
 	INNER JOIN tmp_ptticmstImport INV ON INV.pttic_ivc_no COLLATE Latin1_General_CI_AS = A.strInvoiceOriginId  COLLATE Latin1_General_CI_AS
 	AND INV.pttic_cus_no COLLATE Latin1_General_CI_AS = ENT.strEntityNo	
 	INNER JOIN [tblGLCOACrossReference] GL ON INV.pttic_gl_acct = GL.[strExternalId]
-	INNER JOIN tblEMEntityLocation LOC ON LOC.intEntityId = A.intEntityCustomerId
+	--INNER JOIN tblEMEntityLocation LOC ON LOC.intEntityId = A.intEntityCustomerId
 	WHERE pttic_qty_ship IS NOT NULL AND pttic_unit_prc IS NOT NULL AND pttic_line_no <> 0 AND pttic_type = 'D'
 	
 
