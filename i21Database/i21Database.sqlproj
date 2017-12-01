@@ -5924,6 +5924,7 @@
     <Build Include="dbo\Tables\tblARNSFStagingTableDetail.sql" />
     <Build Include="dbo\Tables\tblARNSFStagingTable.sql" />
     <Build Include="dbo\Views\vyuLGGetSaleContractForStockSale.sql" />
+    <Build Include="dbo\Views\vyuLGGetInventoryDocumentList.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
