@@ -32,6 +32,8 @@ SELECT DISTINCT CH.intContractHeaderId
 	,FMO.strFutureMonth
 	,CH.ysnMultiplePriceFixation
 	,CH.strInternalComment
+	,CD.strFixationBy
+	,CD.dblFutures
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
