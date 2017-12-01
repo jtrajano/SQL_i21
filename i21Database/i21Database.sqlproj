@@ -5939,6 +5939,7 @@
     <Build Include="dbo\Stored Procedures\uspGRDuplicateDiscountTable.sql" />
     <Build Include="dbo\Views\vyuLGGetSaleContractForStockSale.sql" />
     <Build Include="dbo\Views\vyuLGGetInventoryDocumentList.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKPnLBySalesContractSummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
