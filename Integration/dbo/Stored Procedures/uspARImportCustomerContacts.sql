@@ -40,7 +40,7 @@ SELECT ED.coefd_contact_id, ED.coefd_cus_no,
 								   WHEN x.coefd_eform_type = 'GCO' OR x.coefd_eform_type = 'ACO' THEN 'Contracts'
 								   WHEN x.coefd_eform_type = 'RPQ' THEN 'Transport Quote'
 								   WHEN x.coefd_eform_type = 'CFI' THEN 'CF Invoice'
-								   WHEN x.coefd_eform_type = 'EFT' THEN 'AR EFT'
+								   WHEN x.coefd_eform_type = 'EFT' THEN 'AR Remittance'
 								   WHEN x.coefd_eform_type = 'CCR' THEN 'Dealer CC Notification'
 								   WHEN x.coefd_eform_type = 'GSE' THEN 'Settlement'
 								   WHEN x.coefd_eform_type = 'POR' THEN 'Purchase Order'
