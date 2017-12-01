@@ -5937,6 +5937,7 @@
     <Build Include="dbo\Stored Procedures\uspAPUpdateInvoiceNumInGLDetail.sql" />
     <Build Include="dbo\Views\vyuLGWarehouseRateMatrixSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspGRDuplicateDiscountTable.sql" />
+    <Build Include="dbo\Views\vyuLGGetSaleContractForStockSale.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
