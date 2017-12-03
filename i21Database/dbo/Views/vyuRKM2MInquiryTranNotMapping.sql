@@ -2,7 +2,9 @@
 
 AS 
 
-SELECT DISTINCT intM2MInquiryTransactionId
+SELECT DISTINCT 
+bd.intM2MInquiryId,
+		intM2MInquiryTransactionId
 		,strCommodityCode
 		,strFutMarketName
 		,strFutureMonth
