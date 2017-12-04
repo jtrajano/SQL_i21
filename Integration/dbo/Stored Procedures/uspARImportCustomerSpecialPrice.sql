@@ -94,7 +94,7 @@ BEGIN
 				   ,[strLineNote]
 				   ,[dtmBeginDate]
 				   ,[dtmEndDate]
-				   --,[intCustomerLocationId]
+				   ,[intCustomerLocationId]
 				   --,[strInvoiceType]
 				   ,[intCategoryId]
 				   ,[intConcurrencyId])
@@ -115,7 +115,7 @@ BEGIN
 			  ,SP.spprc_comment
 			  ,(CASE WHEN ISDATE(SP.spprc_begin_rev_dt) = 1 THEN CONVERT(DATE,CAST(SP.spprc_begin_rev_dt AS CHAR(12)), 112) ELSE ' ' END)
 			  ,(CASE WHEN ISDATE(SP.spprc_end_rev_dt) = 1 THEN CONVERT(DATE,CAST(SP.spprc_end_rev_dt AS CHAR(12)), 112) ELSE ' ' END)
-			  --,CLOC.intEntityLocationId
+			  ,CASE WHEN SP.spprc_cus_no <> OCUS.agcus_bill_to THEN CLOC.intEntityLocationId ELSE NULL END -- intEntityLocationId
 			  --,'Standard' 
 			  ,(CASE WHEN SP.spprc_class > ' ' THEN 
 							(SELECT CAT.intCategoryId FROM tblICCategory CAT
@@ -153,7 +153,7 @@ BEGIN
 				   ,[intRackItemId]
 				   ,[intEntityLocationId]
 				   ,[intRackLocationId]
-				   --,[intCustomerLocationId]
+				   ,[intCustomerLocationId]
 				   --,[strInvoiceType]
 				   ,[intCategoryId]
 				   ,[intConcurrencyId])
