@@ -31,5 +31,7 @@ namespace iRely.Inventory.Model
         public bool? ysnSeparateOnInvoice { get; set; }
         public bool? ysnCheckoffTax { get; set; }
         public int? intSort { get; set; }
+        public decimal? dblQty { get; set; }
+        public decimal? dblCost { get; set; }
     }
 }

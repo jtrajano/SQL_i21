@@ -24,9 +24,9 @@ namespace iRely.Inventory.WebApi
 
         [HttpGet]
         [ActionName("GetReceiptItemTaxView")]
-        public async Task<HttpResponseMessage> GetReceiptItemTaxView(GetParameter param)
+        public async Task<HttpResponseMessage> GetReceiptItemTaxView(GetParameter param, int ReceiptItemId)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetReceiptItemTaxView(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetReceiptItemTaxView(param, ReceiptItemId));
         }
     }
 }

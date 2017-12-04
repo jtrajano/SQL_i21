@@ -2167,7 +2167,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         ysnTaxAdjusted: itemDetailTax.ysnTaxAdjusted,
                         ysnSeparateOnInvoice: itemDetailTax.ysnSeparateOnInvoice,
                         ysnCheckoffTax: itemDetailTax.ysnCheckoffTax,
-                        ysnTaxOnly: itemDetailTax.ysnTaxOnly
+                        ysnTaxOnly: itemDetailTax.ysnTaxOnly,
+                        dblQty: qtyOrdered,
+                        dblCost: unitCost
                     });
                     detailRecord.tblICInventoryReceiptItemTaxes().add(newItemTax);
                 });
@@ -2709,46 +2711,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
-    onViewTaxDetailsClick: function (ReceiptItemId) {
-        var win = this.getView();
-        var screenName = 'Inventory.view.TaxDetails';
-        var grd = win.down('#grdInventoryReceipt');
-        var vm = win.getViewModel();
-
-        if (vm.data.current.phantom === true) {
-            win.context.data.saveRecord({
-                callbackFn: function (batch, eOpts, success) {
-                    iRely.Functions.openScreen(screenName, {
-                        id: grd.getSelection()[0].data.intInventoryReceiptItemId,
-                        viewConfig: { modal: true }
-                    });
-                    return;
-                }
-            });
-        }
-        else if (win.context.data.hasChanges() !== true) {
-            iRely.Functions.openScreen(screenName, {
-                id: ReceiptItemId,
-                viewConfig: { modal: true }
-            });
-        }
-        else {
-            win.context.data.validator.validateRecord(win.context.data.configuration, function (valid) {
-                if (valid) {
-                    win.context.data.saveRecord({
-                        callbackFn: function (batch, eOpts, success) {
-                            iRely.Functions.openScreen(screenName, {
-                                id: grd.getSelection()[0].data.intInventoryReceiptItemId,
-                                viewConfig: { modal: true }
-                            });
-                            return;
-                        }
-                    });
-                }
-            });
-        }
-    },
-
     onInventoryClick: function (button, e, eOpts) {
         var win = button.up('window');
         var grd = win.down('#grdInventoryReceipt');
@@ -2840,22 +2802,93 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     onTaxDetailsClick: function (button, e, eOpts) {
         var win = button.up('window');
         var grd = win.down('#grdInventoryReceipt');
-
+        var me = this;
         var selected = grd.getSelectionModel().getSelection();
+        var context = win.context;
 
-        if (selected) {
-            if (selected.length > 0) {
-                var current = selected[0];
-                if (!current.dummy)
-                    this.onViewTaxDetailsClick(current.get('intInventoryReceiptItemId'));
-            }
-            else {
-                iRely.Functions.showErrorDialog('Please select an Item to view.');
-            }
+        // Validate the selected charge record. 
+        if (!selected || selected.length <= 0) {
+            iRely.Functions.showErrorDialog('Please select an Other Charge to view.');
+            return; 
         }
-        else {
-            iRely.Functions.showErrorDialog('Please select an Item to view.');
+
+        // Get the current record. 
+        var current = selected[0];        
+        if (!current) {
+            iRely.Functions.showErrorDialog('Please select an Other Charge to view.');
+            return;             
         }
+                
+        var ReceiptItemId = current.get('intInventoryReceiptItemId');
+
+        var showChargeTaxScreen = function () {
+            iRely.Functions.openScreen('GlobalComponentEngine.view.FloatingSearch', {
+                searchSettings: {
+                    scope: me,
+                    type: 'Inventory.Receipt.ItemTaxDetails',
+                    url: './inventory/api/inventoryreceiptitemtax/getreceiptitemtaxview?ReceiptItemId=' + ReceiptItemId ,
+                    columns: [
+                        { itemId: 'colInventoryReceiptItemTaxId', dataIndex: 'intInventoryReceiptItemTaxId', text: "Receipt Item Tax Id", flex: 1, dataType: 'numeric', key: true, hidden: true },
+                        { itemId: 'colItemId', dataIndex: 'intItemId', text: "Item Id", flex: 1, dataType: 'numeric', key: true, hidden: true },
+                        { itemId: 'colItemNo', dataIndex: 'strItemNo', text: 'Item No.', width: 100, dataType: 'string'},
+                        { itemId: 'colTaxGroup', dataIndex: 'strTaxGroup', text: 'Tax Group', width: 85, dataType: 'string' },
+                        { itemId: 'colTaxClass', dataIndex: 'strTaxClass', text: 'Tax Class', width: 100, dataType: 'string' },
+                        { itemId: 'colTaxCode', dataIndex: 'strTaxCode', text: 'Tax Code', width: 100, dataType: 'string' },
+                        { itemId: 'colCalculationMethod', dataIndex: 'strCalculationMethod', text: 'Calculation Method', width: 110, dataType: 'string' },                                
+                        { itemId: 'colQty', xtype: 'numbercolumn', dataIndex: 'dblQty', text: 'Qty', width: 100, dataType: 'float' },
+                        { itemId: 'colCost', xtype: 'numbercolumn', dataIndex: 'dblCost', text: 'Cost', width: 100, dataType: 'float' },
+                        { itemId: 'colRate', xtype: 'numbercolumn', dataIndex: 'dblRate', text: 'Rate', width: 100, dataType: 'float' },
+                        { 
+                            itemId: 'colCheckoff', 
+                            xtype: 'checkcolumn', 
+                            dataIndex: 'ysnCheckoffTax', 
+                            text: 'Checkoff', 
+                            width: 100, 
+                            dataType: 'boolean',
+                            listeners: {
+                                beforecheckchange: function(me, rowIndex, checked, record, e, eOpts){
+                                    // Return false so that checkbox value can't be changed. 
+                                    return false; 
+                                }
+                            }                                    
+                        },
+                        { itemId: 'colTax', xtype: 'numbercolumn', dataIndex: 'dblTax', text: 'Tax', width: 100, dataType: 'float' },
+                        { 
+                            itemId: 'colTaxAdjusted', 
+                            xtype: 'checkcolumn', 
+                            dataIndex: 'ysnTaxAdjusted', 
+                            text: 'Adjusted', 
+                            width: 100, 
+                            dataType: 'boolean',
+                            listeners: {
+                                beforecheckchange: function(me, rowIndex, checked, record, e, eOpts){
+                                    // Return false so that checkbox value can't be changed. 
+                                    return false; 
+                                }
+                            }                                    
+                        }                                
+                    ],
+                    title: "Item Tax Details",
+                    showNew: false,
+                    showOpenSelected: false
+                }
+            });
+        }
+
+        var task = new Ext.util.DelayedTask(function () {
+            // If there is no data change, show charge tax details screen
+            if (!context.data.hasChanges()) {
+                showChargeTaxScreen();
+            }
+
+            // Save has data changes first before showing charge tax details screen
+            context.data.saveRecord({
+                successFn: function () {
+                    showChargeTaxScreen();
+                }
+            });
+        });
+        task.delay(10);          
     },
 
     onInsertChargeClick: function (button, e, eOpts) {
@@ -6114,6 +6147,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 var taxAmount = 0.00;
                                 var chargeQuantity = charge.get('dblQuantity');
                                 chargeQuantity = Ext.isNumeric(chargeQuantity) ? chargeQuantity : 1; 
+                                var cost = taxableAmount / chargeQuantity;
+
+                                if (charge.get('ysnPrice')) {
+                                    taxableAmount = -taxableAmount; 
+                                }                                   
 
                                 if (itemDetailTax.strCalculationMethod === 'Percentage') {
                                     taxAmount = (taxableAmount * (itemDetailTax.dblRate / 100));
@@ -6164,7 +6202,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     intTaxAccountId: itemDetailTax.intTaxAccountId,
                                     ysnTaxAdjusted: itemDetailTax.ysnTaxAdjusted,
                                     ysnCheckoffTax: itemDetailTax.ysnCheckoffTax,
-                                    ysnTaxOnly: itemDetailTax.ysnTaxOnly
+                                    ysnTaxOnly: itemDetailTax.ysnTaxOnly,
+                                    dblQty: chargeQuantity,
+                                    dblCost: cost
+
                                 });
                                 charge.tblICInventoryReceiptChargeTaxes().add(newItemTax);
                             });
@@ -6536,70 +6577,91 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var selected = grd.getSelectionModel().getSelection();
         var context = win.context;
 
-        if (selected) {
-            if (selected.length > 0) {
-                var current = selected[0];
-                if (!current.dummy) {
-                    var ChargeId = current.get('intChargeId');
-                    var ReceiptId = current.get('intInventoryReceiptId');
-                    var showChargeTaxScreen = function () {
-                        var search = i21.ModuleMgr.Search;
-                        search.scope = me;
-                        search.url = './inventory/api/inventoryreceipt/getchargetaxdetails?ChargeId=' + ChargeId + '&ReceiptId=' + ReceiptId;
-                        search.columns = [
-                            { dataIndex: 'intKey', text: "Key", flex: 1, dataType: 'numeric', key: true, hidden: true },
-                            { dataIndex: 'intInventoryReceiptChargeTaxId', text: "Receipt Charge Tax Id", flex: 1, dataType: 'numeric', key: true, hidden: true },
-                            { dataIndex: 'intChargeId', text: "Charge Id", flex: 1, dataType: 'numeric', key: true, hidden: true },
-                            { dataIndex: 'strItemNo', text: 'Item No', width: 200, dataType: 'string' },
-                            { dataIndex: 'strTaxGroup', text: 'Tax Group', width: 150, dataType: 'string' },
-                            { dataIndex: 'strTaxCode', text: 'Tax Code', width: 150, dataType: 'string' },
-                            { dataIndex: 'strCalculationMethod', text: 'Calculation Method', width: 200, dataType: 'string' },
-                            { xtype: 'numbercolumn', dataIndex: 'dblRate', text: 'Rate', width: 100, dataType: 'float' },
-                            { xtype: 'numbercolumn', dataIndex: 'dblTax', text: 'Tax', width: 100, dataType: 'float' },
-                            { itemId: 'colKey', dataIndex: 'intKey', text: "Key", flex: 1, dataType: 'numeric', key: true, hidden: true },
-                            { itemId: 'colInventoryReceiptChargeTaxId', dataIndex: 'intInventoryReceiptChargeTaxId', text: "Receipt Charge Tax Id", flex: 1, dataType: 'numeric', key: true, hidden: true },
-                            { itemId: 'colChargeId', dataIndex: 'intChargeId', text: "Charge Id", flex: 1, dataType: 'numeric', key: true, hidden: true },
-                            { itemId: 'colItemNo', dataIndex: 'strItemNo', text: 'Item No', width: 200, dataType: 'string'},
-                            { itemId: 'colTaxGroup', dataIndex: 'strTaxGroup', text: 'Tax Group', width: 150, dataType: 'string' },
-                            { itemId: 'colTaxCode', dataIndex: 'strTaxCode', text: 'Tax Code', width: 150, dataType: 'string' },
-                            { itemId: 'colCalculationMethod', dataIndex: 'strCalculationMethod', text: 'Calculation Method', width: 200, dataType: 'string' },
-                            { itemId: 'colRate', xtype: 'numbercolumn', dataIndex: 'dblRate', text: 'Rate', width: 100, dataType: 'float' },
-                            { itemId: 'colTax', xtype: 'numbercolumn', dataIndex: 'dblTax', text: 'Tax', width: 100, dataType: 'float' }                                                        
-                        ];
-                        search.title = "Charge Tax Details";
-                        search.showNew = false;
-                        search.showOpenSelected = false;
-                        search.on({
-                            scope: me,
-                        });
-                        search.show();
-                    };
+        // Validate the selected charge record. 
+        if (!selected || selected.length <= 0) {
+            iRely.Functions.showErrorDialog('Please select an Other Charge to view.');
+            return; 
+        }
 
+        // Get the current record. 
+        var current = selected[0];        
+        if (!current) {
+            iRely.Functions.showErrorDialog('Please select an Other Charge to view.');
+            return;             
+        }
+                
+        var ReceiptChargeId = current.get('intInventoryReceiptChargeId');
+        var ReceiptId = current.get('intInventoryReceiptId');
 
-                    var task = new Ext.util.DelayedTask(function () {
-                        // If there is no data change, show charge tax details screen
-                        if (!context.data.hasChanges()) {
-                            showChargeTaxScreen();
-                        }
-
-                        // Save has data changes first before showing charge tax details screen
-                        context.data.saveRecord({
-                            successFn: function () {
-                                showChargeTaxScreen();
-                            }
-                        });
-                    });
-                    task.delay(10);
+        var showChargeTaxScreen = function () {
+            iRely.Functions.openScreen('GlobalComponentEngine.view.FloatingSearch', {
+                searchSettings: {
+                    scope: me,
+                    type: 'Inventory.Receipt.ChargesTaxDetails',
+                    url: './inventory/api/inventoryreceipt/getchargetaxdetails?ReceiptChargeId=' + ReceiptChargeId + '&ReceiptId=' + ReceiptId,
+                    columns: [
+                        { itemId: 'colKey', dataIndex: 'intKey', text: "Key", flex: 1, dataType: 'numeric', key: true, hidden: true },
+                        { itemId: 'colInventoryReceiptChargeTaxId', dataIndex: 'intInventoryReceiptChargeTaxId', text: "Receipt Charge Tax Id", flex: 1, dataType: 'numeric', key: true, hidden: true },
+                        { itemId: 'colChargeId', dataIndex: 'intChargeId', text: "Charge Id", flex: 1, dataType: 'numeric', key: true, hidden: true },
+                        { itemId: 'colItemNo', dataIndex: 'strItemNo', text: 'Other Charges', width: 100, dataType: 'string'},
+                        { itemId: 'colTaxGroup', dataIndex: 'strTaxGroup', text: 'Tax Group', width: 85, dataType: 'string' },
+                        { itemId: 'colTaxClass', dataIndex: 'strTaxClass', text: 'Tax Class', width: 100, dataType: 'string' },
+                        { itemId: 'colTaxCode', dataIndex: 'strTaxCode', text: 'Tax Code', width: 100, dataType: 'string' },
+                        { itemId: 'colCalculationMethod', dataIndex: 'strCalculationMethod', text: 'Calculation Method', width: 110, dataType: 'string' },                                
+                        { itemId: 'colQty', xtype: 'numbercolumn', dataIndex: 'dblQty', text: 'Qty', width: 100, dataType: 'float' },
+                        { itemId: 'colCost', xtype: 'numbercolumn', dataIndex: 'dblCost', text: 'Cost', width: 100, dataType: 'float' },
+                        { itemId: 'colRate', xtype: 'numbercolumn', dataIndex: 'dblRate', text: 'Rate', width: 100, dataType: 'float' },
+                        { 
+                            itemId: 'colCheckoff', 
+                            xtype: 'checkcolumn', 
+                            dataIndex: 'ysnCheckoffTax', 
+                            text: 'Checkoff', 
+                            width: 100, 
+                            dataType: 'boolean',
+                            listeners: {
+                                beforecheckchange: function(me, rowIndex, checked, record, e, eOpts){
+                                    // Return false so that checkbox value can't be changed. 
+                                    return false; 
+                                }
+                            }                                    
+                        },
+                        { itemId: 'colTax', xtype: 'numbercolumn', dataIndex: 'dblTax', text: 'Tax', width: 100, dataType: 'float' },
+                        { 
+                            itemId: 'colTaxAdjusted', 
+                            xtype: 'checkcolumn', 
+                            dataIndex: 'ysnTaxAdjusted', 
+                            text: 'Adjusted', 
+                            width: 100, 
+                            dataType: 'boolean',
+                            listeners: {
+                                beforecheckchange: function(me, rowIndex, checked, record, e, eOpts){
+                                    // Return false so that checkbox value can't be changed. 
+                                    return false; 
+                                }
+                            }                                    
+                        }                                
+                    ],
+                    title: "Charges Tax Details",
+                    showNew: false,
+                    showOpenSelected: false
                 }
-                // this.onViewChargeTaxDetailsClick(current.get('intChargeId'));
-            }
-            else {
-                iRely.Functions.showErrorDialog('Please select an Item to view.');
-            }
+            });
         }
-        else {
-            iRely.Functions.showErrorDialog('Please select an Item to view.');
-        }
+
+        var task = new Ext.util.DelayedTask(function () {
+            // If there is no data change, show charge tax details screen
+            if (!context.data.hasChanges()) {
+                showChargeTaxScreen();
+            }
+
+            // Save has data changes first before showing charge tax details screen
+            context.data.saveRecord({
+                successFn: function () {
+                    showChargeTaxScreen();
+                }
+            });
+        });
+        task.delay(10);            
     },
 
     onReceiptTypeSelect: function (combo, records, eOpts) {
