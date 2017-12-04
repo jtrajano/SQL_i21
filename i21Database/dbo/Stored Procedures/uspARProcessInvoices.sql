@@ -118,6 +118,10 @@ BEGIN TRY
 						WHEN @GroupingOption = 9 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber]'
 						WHEN @GroupingOption =10 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber]'
 						WHEN @GroupingOption =11 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments]'
+						WHEN @GroupingOption =12 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId]'
+						WHEN @GroupingOption =13 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId]'
+						WHEN @GroupingOption =14 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId]'
+						WHEN @GroupingOption =15 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId], [strInvoiceOriginId]'
 					END)
 					
 	SET @intId = (CASE WHEN @GroupingOption = 0 THEN '' ELSE '[intId],' END)
@@ -457,6 +461,10 @@ BEGIN
 		AND (ISNULL([strPONumber],'') = ISNULL(@PONumber,'') OR (@PONumber IS NULL AND @GroupingOption < 9))			
 		AND (ISNULL([strBOLNumber],'') = ISNULL(@BOLNumber,'') OR (@BOLNumber IS NULL AND @GroupingOption < 10))
 		AND (ISNULL([strComments],'') = ISNULL(@Comment,'') OR (@Comment IS NULL AND @GroupingOption < 11))
+		AND (ISNULL([intAccountId],0) = ISNULL(@AccountId,0) OR (@AccountId IS NULL AND @GroupingOption < 12))
+		AND (ISNULL([intFreightTermId],0) = ISNULL(@FreightTermId,0) OR (@FreightTermId IS NULL AND @GroupingOption < 13))
+		AND (ISNULL([intPaymentMethodId],0) = ISNULL(@PaymentMethodId,0) OR (@PaymentMethodId IS NULL AND @GroupingOption < 14))            
+		AND (ISNULL([strInvoiceOriginId],'') = ISNULL(@InvoiceOriginId,'') OR (@InvoiceOriginId IS NULL AND @GroupingOption < 15))
 	ORDER BY
 		[intId]
 
@@ -741,6 +749,10 @@ BEGIN
 		AND (ISNULL(I.[strPONumber],'') = ISNULL(@PONumber,'') OR (@PONumber IS NULL AND @GroupingOption < 9))			
 		AND (ISNULL(I.[strBOLNumber],'') = ISNULL(@BOLNumber,'') OR (@BOLNumber IS NULL AND @GroupingOption < 10))
 		AND (ISNULL(I.[strComments],'') = ISNULL(@Comment,'') OR (@Comment IS NULL AND @GroupingOption < 11))
+		AND (ISNULL(I.[intAccountId],0) = ISNULL(@AccountId,0) OR (@AccountId IS NULL AND @GroupingOption < 12))
+		AND (ISNULL(I.[intFreightTermId],0) = ISNULL(@FreightTermId,0) OR (@FreightTermId IS NULL AND @GroupingOption < 13))
+		AND (ISNULL(I.[intPaymentMethodId],0) = ISNULL(@PaymentMethodId,0) OR (@PaymentMethodId IS NULL AND @GroupingOption < 14))            
+		AND (ISNULL(I.[strInvoiceOriginId],'') = ISNULL(@InvoiceOriginId,'') OR (@InvoiceOriginId IS NULL AND @GroupingOption < 15))
 		AND I.[intId] = #EntriesForProcessing.[intId]
 		AND ISNULL(#EntriesForProcessing.[ysnForInsert],0) = 1
 		
@@ -1088,6 +1100,10 @@ BEGIN
 		AND (ISNULL(I.[strPONumber],'') = ISNULL(@PONumber,'') OR (@PONumber IS NULL AND @GroupingOption < 9))			
 		AND (ISNULL(I.[strBOLNumber],'') = ISNULL(@BOLNumber,'') OR (@BOLNumber IS NULL AND @GroupingOption < 10))
 		AND (ISNULL(I.[strComments],'') = ISNULL(@Comment,'') OR (@Comment IS NULL AND @GroupingOption < 11))
+		AND (ISNULL(I.[intAccountId],0) = ISNULL(@AccountId,0) OR (@AccountId IS NULL AND @GroupingOption < 12))
+		AND (ISNULL(I.[intFreightTermId],0) = ISNULL(@FreightTermId,0) OR (@FreightTermId IS NULL AND @GroupingOption < 13))
+		AND (ISNULL(I.[intPaymentMethodId],0) = ISNULL(@PaymentMethodId,0) OR (@PaymentMethodId IS NULL AND @GroupingOption < 14))            
+		AND (ISNULL(I.[strInvoiceOriginId],'') = ISNULL(@InvoiceOriginId,'') OR (@InvoiceOriginId IS NULL AND @GroupingOption < 15))
 		AND I.[intId] = #EntriesForProcessing.[intId]
 		AND ISNULL(#EntriesForProcessing.[ysnForInsert],0) = 1
 		
