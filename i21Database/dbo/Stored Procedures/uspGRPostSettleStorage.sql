@@ -84,6 +84,8 @@ BEGIN TRY
 	DECLARE @dblFutureMarkePrice DECIMAL(24, 10)
 	DECLARE @dblContractBasis DECIMAL(24, 10)
 	DECLARE @intParentSettleStorageId INT
+	DECLARE @GLEntries AS RecapTableType
+	DECLARE @intReturnValue AS INT
 
 	SET @dtmDate = GETDATE()
 
@@ -787,6 +789,9 @@ BEGIN TRY
 				DELETE
 				FROM @ItemsToPost
 
+				DELETE 
+				FROM @GLEntries
+
 				INSERT INTO @ItemsToStorage 
 				(
 					 intItemId
@@ -838,7 +843,7 @@ BEGIN TRY
 				JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SV.intCustomerStorageId
 				JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityId = CS.intCommodityId AND CU.ysnStockUnit = 1
 				JOIN tblGRStorageType St ON St.intStorageScheduleTypeId = CS.intStorageTypeId AND SV.intItemType = 1			
-				JOIN tblICItemStockUOM ItemStock ON ItemStock.intItemId=CS.intItemId AND ItemStock.intItemLocationId = @ItemLocationId
+				JOIN tblICItemStock ItemStock ON ItemStock.intItemId=CS.intItemId AND ItemStock.intItemLocationId = @ItemLocationId
 
 				INSERT INTO @ItemsToPost 
 				(
@@ -899,14 +904,59 @@ BEGIN TRY
 				END
 
 				BEGIN
-					EXEC uspICPostCosting 
-						 @ItemsToPost
-						,@strBatchId
-						,'Cost of Goods'
-						,@intCreatedUserId
+					--EXEC uspICPostCosting 
+					--	 @ItemsToPost
+					--	,@strBatchId
+					--	,'Cost of Goods'
+					--	,@intCreatedUserId
 
-					IF @@ERROR <> 0
+						INSERT INTO @GLEntries (
+							[dtmDate] 
+							,[strBatchId]
+							,[intAccountId]
+							,[dblDebit]
+							,[dblCredit]
+							,[dblDebitUnit]
+							,[dblCreditUnit]
+							,[strDescription]
+							,[strCode]
+							,[strReference]
+							,[intCurrencyId]
+							,[dblExchangeRate]
+							,[dtmDateEntered]
+							,[dtmTransactionDate]
+							,[strJournalLineDescription]
+							,[intJournalLineNo]
+							,[ysnIsUnposted]
+							,[intUserId]
+							,[intEntityId]
+							,[strTransactionId]
+							,[intTransactionId]
+							,[strTransactionType]
+							,[strTransactionForm]
+							,[strModuleName]
+							,[intConcurrencyId]
+							,[dblDebitForeign]	
+							,[dblDebitReport]	
+							,[dblCreditForeign]	
+							,[dblCreditReport]	
+							,[dblReportingRate]	
+							,[dblForeignRate]
+							,[strRateType]
+					)
+					EXEC	@intReturnValue = dbo.uspICPostCosting  
+							@ItemsToPost  
+							,@strBatchId  
+							,'AP Clearing'
+							,@intCreatedUserId
+					
+					IF @intReturnValue < 0
 						GOTO SettleStorage_Exit;
+
+					IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
+					BEGIN 
+							EXEC dbo.uspGLBookEntries @GLEntries, @ysnPosted 
+					END 
 				END
 			END
 

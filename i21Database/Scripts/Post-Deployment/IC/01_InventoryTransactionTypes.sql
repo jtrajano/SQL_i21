@@ -184,8 +184,8 @@ USING	(
 				,form = 'Inventory Adjustment'
 		UNION ALL
 		SELECT id = 44
-				,name = 'Shipment Schedule'
-				,form = 'Load/Shipment Schedule'
+				,name = 'Storage Settlement'
+				,form = 'Storage Settlement'
 
 ) AS InventoryTransactionTypeHardValues
 	ON  InventoryTransactionTypes.intTransactionTypeId = InventoryTransactionTypeHardValues.id
