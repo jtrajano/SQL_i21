@@ -5454,6 +5454,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetUOMByLot.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUpdateTask.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTaskDetail.sql" />
+    <Build Include="dbo\Views\vyuMFGetPutawayDate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

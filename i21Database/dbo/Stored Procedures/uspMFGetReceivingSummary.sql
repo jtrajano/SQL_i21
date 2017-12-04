@@ -46,19 +46,8 @@ FROM (
 		,UM.strUnitMeasure
 		,IR.dtmCreated
 		,IR.dtmReceiptDate
-		,(
-			SELECT TOP 1 IA.dtmDate
-			FROM tblMFInventoryAdjustment IA
-			WHERE IA.intTransactionTypeId = 20
-				AND IA.intSourceLotId = IRL.intLotId
-			ORDER BY IA.dtmDate ASC
-			) AS strPutawayDate
-		,(
-			SELECT MAX(IA.dtmDate)
-			FROM tblMFInventoryAdjustment IA
-			WHERE IA.intTransactionTypeId = 20
-				AND IA.intSourceLotId = IRL.intLotId
-			) AS strCompletedDate
+		,PD.dtmPutawayDate AS strPutawayDate
+		,PD.dtmPutawayDate AS strCompletedDate
 	FROM dbo.tblICInventoryReceipt IR
 	JOIN dbo.tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
 	JOIN dbo.tblICInventoryReceiptItemLot IRL ON IRL.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId
@@ -66,6 +55,7 @@ FROM (
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = IRL.intItemUnitMeasureId
 	JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 	JOIN dbo.tblMFLotInventory LI ON LI.intLotId = IRL.intLotId
+	Left JOIN vyuMFGetPutawayDate PD ON PD.intLotId=IRL.intLotId
 	WHERE IR.dtmReceiptDate BETWEEN @dtmFromDate
 			AND @dtmToDate
 				--AND IO1.intOwnerId = @intOwnerId
