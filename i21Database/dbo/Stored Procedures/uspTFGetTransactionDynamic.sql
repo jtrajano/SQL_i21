@@ -22,8 +22,11 @@ BEGIN TRY
 	
 	IF (ISNULL(@TaxAuthorityCode, '')) <> ''
 	BEGIN
-		DECLARE @QueryScript NVARCHAR(MAX) = 'SELECT * FROM tblTFTransactionDynamic' + @TaxAuthorityCode
-		EXECUTE sp_executesql @QueryScript
+		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFTransactionDynamic' + @TaxAuthorityCode)
+		BEGIN
+			DECLARE @QueryScript NVARCHAR(MAX) = 'SELECT * FROM tblTFTransactionDynamic' + @TaxAuthorityCode
+			EXECUTE sp_executesql @QueryScript
+		END
 	END
 
 END TRY
