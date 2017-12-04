@@ -3049,7 +3049,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         var context = win.context;
         var current = win.viewModel.data.current;
 
-        var doPost = function () {
+        var calculateCharges = function () {
             if (current) {
                 ic.utils.ajax({
                     timeout: 120000,
@@ -3078,14 +3078,14 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
         // If there is no data change, do the post.
         if (!context.data.hasChanges()){
-            doPost();
+            calculateCharges();
             return;
         }
 
         // Save has data changes first before doing the post.
         context.data.saveRecord({
             successFn: function () {
-                doPost();
+                calculateCharges();
             }
         });
     },
@@ -3260,6 +3260,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         me.doPostPreview(win, cfg);
                     }                     
                     btnPost.enable();
+                    iRely.Functions.refreshFloatingSearch('Inventory.view.InventoryShipment');
                 }
                 ,function(failureResponse) {
                     var responseText = Ext.decode(failureResponse.responseText);
@@ -3274,7 +3275,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
         // Save any unsaved data first before doing the post. 
         if (context.data.hasChanges()) {
-            context.data.validator.validateRecord({ window: win }, function(valid) {
+            context.data.validator.validateRecord(context.data.configuration, function(valid) {
                 // If records are valid, continue with the save. 
                 if (valid){
                     context.data.saveRecord({

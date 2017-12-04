@@ -1510,6 +1510,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var subCurrencyCents = records[0].get('intSubCurrencyCent');
             subCurrencyCents = subCurrencyCents && Ext.isNumeric(subCurrencyCents) && subCurrencyCents > 0 ? subCurrencyCents : 1;
             current.set('intSubCurrencyCents', subCurrencyCents);
+            current.set('intCurrencyId', records[0].get('intCurrencyID'));
         }
     },
 
@@ -2109,6 +2110,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
             // Do not compute the tax if item ownership is 'Storage'. 
             if (detailRecord.get('intOwnershipType') != 2) {
+                var dblForexRate = detailRecord.get('dblForexRate');
+                dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0;
+
                 Ext.Array.each(itemTaxes, function (itemDetailTax) {
                     var taxableAmount,
                         taxAmount;
@@ -2118,6 +2122,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         taxAmount = (taxableAmount * (itemDetailTax.dblRate / 100));
                     } else {
                         taxAmount = qtyOrdered * itemDetailTax.dblRate;
+
+                        // If a line is using a foreign currency, convert the tax from functional currency to the transaction currency. 
+                        taxAmount = dblForexRate != 0 ? taxAmount / dblForexRate : taxAmount;
                     }
 
                     if (itemDetailTax.ysnCheckoffTax) {
@@ -2726,7 +2733,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             });
         }
         else {
-            win.context.data.validator.validateRecord({ window: win }, function (valid) {
+            win.context.data.validator.validateRecord(win.context.data.configuration, function (valid) {
                 if (valid) {
                     win.context.data.saveRecord({
                         callbackFn: function (batch, eOpts, success) {
@@ -6091,6 +6098,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
             if (charges) {
                 Ext.Array.each(charges.data.items, function (charge) {
+                    var dblForexRate = charge.get('dblForexRate');
+                    dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0;   
+
                     if (!charge.dummy) {
                         var computeItemTax = function (itemTaxes, me) {
                             var totalItemTax = 0.00,
@@ -6102,12 +6112,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             Ext.Array.each(itemTaxes, function (itemDetailTax) {
                                 var taxableAmount = charge.get('dblAmount');
                                 var taxAmount = 0.00;
+                                var chargeQuantity = charge.get('dblQuantity');
+                                chargeQuantity = Ext.isNumeric(chargeQuantity) ? chargeQuantity : 1; 
 
                                 if (itemDetailTax.strCalculationMethod === 'Percentage') {
                                     taxAmount = (taxableAmount * (itemDetailTax.dblRate / 100));
                                 } else {
-                                    //If calculation method is 'Unit', unit will be considered as 1 since other charges do not have quantity
-                                    taxAmount = itemDetailTax.dblRate;
+                                    taxAmount = chargeQuantity * itemDetailTax.dblRate;
+                                    
+                                    // If a line is using a foreign currency, convert the tax from functional currency to the charge currency. 
+                                    taxAmount = dblForexRate != 0 ? taxAmount / dblForexRate : taxAmount;
                                 }
                                 if (itemDetailTax.ysnCheckoffTax) {
                                     taxAmount = -(taxAmount);
@@ -6431,7 +6445,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         switch (newCard.itemId) {
             case 'pgeIncomingInspection':
-                var doPost = function () {
+                var updateReceiptInspection = function () {
                     if (current) {
                         ic.utils.ajax({
                             url: './inventory/api/inventoryreceipt/updatereceiptinspection',
@@ -6455,14 +6469,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                 // If there is no data change, do the post.
                 if (!context.data.hasChanges()) {
-                    doPost();
+                    updateReceiptInspection();
                     return;
                 }
 
                 // Save has data changes first before doing the post.
                 context.data.saveRecord({
                     successFn: function () {
-                        doPost();
+                        updateReceiptInspection();
                     }
                 });
                 break;
@@ -6777,6 +6791,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         me.doPostPreview(win, cfg);
                     }
                     btnPost.enable();
+                    iRely.Functions.refreshFloatingSearch('Inventory.view.InventoryReceipt');
                 }
                 , function (failureResponse) {
                     var responseText = Ext.decode(failureResponse.responseText);
@@ -6793,7 +6808,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             if (button === 'yes') {
                 //  Save the data changes first. After saving calculate the other charges and do the post. 
                 if (context.data.hasChanges()) {                    
-                    context.data.validator.validateRecord({ window: win }, function(valid) {
+                    context.data.validator.validateRecord(context.data.configuration, function(valid) {
                         // If records are valid, continue with the save. 
                         if (valid){
                             context.data.saveRecord({
@@ -7048,7 +7063,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 });
             }
             else {
-                win.context.data.validator.validateRecord({ window: win }, function (valid) {
+                win.context.data.validator.validateRecord(win.context.data.configuration, function (valid) {
                     if (valid) {
                         me.openOrderItem(win, record, clickedDataIndex === 'strOrderNumber');
                         return;

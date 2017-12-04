@@ -2177,7 +2177,7 @@ Ext.define('Inventory.view.Item', {
                                                                                                 fieldLabel: 'Received Lot Status',
                                                                                                 labelWidth: 125,
                                                                                                 displayField: 'strSecondaryStatus',
-                                                                                                valueField: 'intLotStatusId'
+                                                                                                valueField: 'strSecondaryStatus'
                                                                                             }
                                                                                         ]
                                                                                     },

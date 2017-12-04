@@ -506,8 +506,9 @@ Ext.define('Inventory.view.ItemViewController', {
             cboAssociatedRecipe: '{current.intRecipeId}',
             chkSanitizationRequired: '{current.ysnSanitationRequired}',
             cboReceiveLotStatus: {
-                value: '{current.intLotStatusId}',
-                store: '{lotStatus}'
+                value: '{current.strSecondaryStatus}',
+                store: '{lotStatus}',
+                origValueField: 'intLotStatusId'
             },
             txtLifeTime: '{current.intLifeTime}',
             cboLifetimeType: {
@@ -2278,7 +2279,7 @@ Ext.define('Inventory.view.ItemViewController', {
 
         }
         else {
-            win.context.data.validator.validateRecord({ window: win }, function(valid) {
+            win.context.data.validator.validateRecord(win.context.data.configuration, function(valid) {
                 if (valid) {
                     me.openItemLocationScreen('edit', win, record);
                     return;
@@ -2310,7 +2311,7 @@ Ext.define('Inventory.view.ItemViewController', {
 
         }
         else {
-            win.context.data.validator.validateRecord({ window: win }, function(valid) {
+            win.context.data.validator.validateRecord(win.context.data.configuration, function(valid) {
                 if (valid) {
                     me.openItemLocationScreen('new', win);
                     return;
@@ -2508,7 +2509,7 @@ Ext.define('Inventory.view.ItemViewController', {
             );               
         }
         else {
-            win.context.data.validator.validateRecord({ window: win }, function(valid) {
+            win.context.data.validator.validateRecord(win.context.data.configuration, function(valid) {
                 if (valid) {
                     me.openItemLocationScreen('edit', win, selection[0]);
                 }
@@ -3977,7 +3978,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 );                
             }
             else {
-                win.context.data.validator.validateRecord({ window: win }, function(valid) {
+                win.context.data.validator.validateRecord(win.context.data.configuration, function(valid) {
                     if (valid) {
                         me.openItemLocationScreen('edit', win, record);
                         return;

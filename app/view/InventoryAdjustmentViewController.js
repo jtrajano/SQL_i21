@@ -602,7 +602,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                     });
                 }
                 else {
-                    win.context.data.validator.validateRecord({ window: win }, function (valid) {
+                    win.context.data.validator.validateRecord(win.context.data.configuration, function (valid) {
                         if (valid) {
                             iRely.Functions.openScreen(screen, id);
                             return;
@@ -1390,6 +1390,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                         me.doPostPreview(win, cfg);
                     }                    
                     button.enable();
+                    iRely.Functions.refreshFloatingSearch('Inventory.view.InventoryAdjustment');
                 }
                 ,function(failureResponse) {
                     var responseText = Ext.decode(failureResponse.responseText);
@@ -1404,7 +1405,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         
         // Save data changes first before doing the post.
         if (context.data.hasChanges()) {
-            context.data.validator.validateRecord({ window: win }, function(valid) {
+            context.data.validator.validateRecord(context.data.configuration, function(valid) {
                 // If records are valid, continue with the save. 
                 if (valid){
                     context.data.saveRecord({
@@ -1469,7 +1470,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
 
         // Save any unsaved data first before doing the post. 
         if (context.data.hasChanges()) {
-            context.data.validator.validateRecord({ window: win }, function(valid) {
+            context.data.validator.validateRecord(context.data.configuration, function(valid) {
                 // If records are valid, continue with the save. 
                 if (valid){
                     context.data.saveRecord({

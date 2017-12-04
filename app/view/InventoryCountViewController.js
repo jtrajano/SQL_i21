@@ -1330,7 +1330,8 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                             ysnPosted: current.get('ysnPosted') ? true : false
                         };
                         me.doPostPreview(win, cfg);
-                    }                     
+                    }
+                    iRely.Functions.refreshFloatingSearch('Inventory.view.InventoryCount');
                 }
                 ,function(failureResponse) {
                     var responseText = Ext.decode(failureResponse.responseText);
@@ -1346,7 +1347,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
 
         // Save any unsaved data first before doing the post. 
         if (context.data.hasChanges()) {
-            context.data.validator.validateRecord({ window: win }, function(valid) {
+            context.data.validator.validateRecord(context.data.configuration, function(valid) {
                 // If records are valid, continue with the save. 
                 if (valid){
                     context.data.saveRecord({
