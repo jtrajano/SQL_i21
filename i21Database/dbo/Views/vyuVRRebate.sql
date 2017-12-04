@@ -23,7 +23,9 @@ AS
 		,O.ysnSubmitted
 		,O.ysnExcluded
 		,O.intProgramId
-	FROM tblARInvoiceDetail B
+	FROM tblVRRebate O
+	INNER JOIN tblARInvoiceDetail B
+		ON B.intInvoiceDetailId = O.intInvoiceDetailId
 	INNER JOIN tblARInvoice A
 		ON A.intInvoiceId = B.intInvoiceId
 	INNER JOIN tblICItem C
@@ -39,7 +41,7 @@ AS
 	INNER JOIN tblEMEntity H
 		ON G.intEntityId = H.intEntityId
 	INNER JOIN tblVRProgram I
-		ON B.intProgramId = I.intProgramId
+		ON O.intProgramId = I.intProgramId
 	INNER JOIN tblVRVendorSetup J
 		ON I.intVendorSetupId = J.intVendorSetupId
 	INNER JOIN tblAPVendor K 
@@ -47,15 +49,5 @@ AS
 	INNER JOIN tblVRCustomerXref L
 		ON J.intVendorSetupId = L.intVendorSetupId
 			AND A.intEntityCustomerId = L.intEntityId
-	LEFT JOIN tblVRProgramItem M
-		ON B.intItemId = M.intItemId
-		AND B.intProgramId = M.intProgramId
-	LEFT JOIN tblVRProgramItem N
-		ON D.intCategoryId = N.intCategoryId
-		AND B.intProgramId = N.intProgramId
-	INNER JOIN tblVRRebate O
-		ON B.intInvoiceDetailId = O.intInvoiceDetailId
-	
-
 GO
 

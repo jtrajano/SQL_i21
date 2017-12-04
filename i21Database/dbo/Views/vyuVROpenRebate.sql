@@ -24,7 +24,7 @@ AS
 							END
 		,B.intInvoiceDetailId
 		,B.intConcurrencyId 
-		,B.intProgramId
+		,I.intProgramId
 	FROM tblARInvoiceDetail B
 	INNER JOIN tblARInvoice A
 		ON A.intInvoiceId = B.intInvoiceId
@@ -40,21 +40,30 @@ AS
 		ON A.intEntityCustomerId = G.intEntityId
 	INNER JOIN tblEMEntity H
 		ON G.intEntityId = H.intEntityId
-	INNER JOIN tblVRProgram I
-		ON B.intProgramId = I.intProgramId
+	INNER JOIN tblICItemLocation O
+		ON C.intItemId = O.intItemId
+			AND A.intCompanyLocationId = O.intLocationId
+	INNER JOIN tblSMCompanyLocation P
+		ON O.intLocationId = P.intCompanyLocationId
 	INNER JOIN tblVRVendorSetup J
-		ON I.intVendorSetupId = J.intVendorSetupId
+		ON O.intVendorId = J.intEntityId
+	INNER JOIN tblVRProgram I
+		ON J.intVendorSetupId = I.intVendorSetupId
+	LEFT JOIN tblVRProgramItem M
+		ON I.intProgramId = M.intProgramId
+			AND B.intItemId = M.intItemId
+			AND A.dtmDate >= M.dtmBeginDate
+			AND A.dtmDate <= ISNULL(M.dtmEndDate,'12/31/9999')
+	LEFT JOIN tblVRProgramItem N
+		ON I.intProgramId = N.intProgramId
+			AND D.intCategoryId = N.intCategoryId
+			AND A.dtmDate >= M.dtmBeginDate
+			AND A.dtmDate <= ISNULL(M.dtmEndDate,'12/31/9999')
 	INNER JOIN tblAPVendor K 
 		ON J.intEntityId = K.intEntityId
 	INNER JOIN tblVRCustomerXref L
 		ON J.intVendorSetupId = L.intVendorSetupId
-		AND A.intEntityCustomerId = L.intEntityId
-	LEFT JOIN tblVRProgramItem M
-		ON B.intItemId = M.intItemId
-		AND B.intProgramId = M.intProgramId
-	LEFT JOIN tblVRProgramItem N
-		ON D.intCategoryId = N.intCategoryId
-		AND B.intProgramId = N.intProgramId
+			AND A.intEntityCustomerId = L.intEntityId
 	WHERE (N.dblRebateRate IS NOT NULL OR M.dblRebateRate IS NOT NULL)
 		AND NOT EXISTS(SELECT TOP 1 1 FROM tblVRRebate WHERE intInvoiceDetailId = B.intInvoiceDetailId)
 		AND A.ysnPosted = 1
