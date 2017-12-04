@@ -70,8 +70,8 @@ BEGIN TRY
 		, @AutoAviationGas_29 NUMERIC(18, 2) = 0
 		, @AutoAviationGas_30 NUMERIC(18, 2) = 0
 		, @AutoAviationGas_31 NUMERIC(18, 2) = 0
-		, @Shrinkage NUMERIC(18, 2) = 0
-
+		, @AutomotiveShrinkage NUMERIC(18, 4) = 0
+		, @AviationShrinkage NUMERIC(18, 4) = 0
 
 	IF (ISNULL(@xmlParam,'') != '')
 	BEGIN 
@@ -118,8 +118,9 @@ BEGIN TRY
 		SELECT TOP 1 @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'MS'
 
 		-- Configuration
-		SELECT @Shrinkage = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'Gas-Line17Auto'
-		
+		SELECT @AutomotiveShrinkage = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,4), strConfiguration) / 100 END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'Gas-Line17Auto'
+		SELECT @AviationShrinkage = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE  CONVERT(NUMERIC(18,4), strConfiguration) / 100 END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'Gas-Line17Aviation'
+
 		INSERT INTO @transaction		
 		SELECT strFormCode, strScheduleCode, strType, dblReceived = SUM(ISNULL(dblReceived, 0.00)), dblBillQty = SUM(ISNULL(dblBillQty, 0.00)), dblQtyShipped = SUM(ISNULL(dblQtyShipped, 0.00)), dblTax = SUM(ISNULL(dblTax, 0.00)), dblTaxExempt = SUM(ISNULL(dblTaxExempt, 0.00))
 		FROM vyuTFGetTransaction Trans
@@ -170,8 +171,8 @@ BEGIN TRY
 		SET @AviationGas_16 = @AviationGas_9 - @AviationGas_15
 
 		-- Line 17
-		SET @AutomotiveGas_17 = @AutomotiveGas_16 * @Shrinkage
-		SET @AviationGas_17 = @AviationGas_16 * @Shrinkage
+		SET @AutomotiveGas_17 = @AutomotiveGas_16 * @AutomotiveShrinkage
+		SET @AviationGas_17 = @AviationGas_16 * @AviationShrinkage
 
 		-- Line 18
 		SET @AutomotiveGas_18 = @AutomotiveGas_16 - @AutomotiveGas_17
@@ -186,8 +187,8 @@ BEGIN TRY
 		SET @AviationGas_20 = @AviationGas_18 * @AviationGas_19
 		
 		-- Line 22
-		SET @AutomotiveGas_22 = @AutomotiveGas_13H * @Shrinkage
-		SET @AviationGas_22 = @AviationGas_13H * @Shrinkage
+		SET @AutomotiveGas_22 = @AutomotiveGas_13H * @AutomotiveShrinkage
+		SET @AviationGas_22 = @AviationGas_13H * @AviationShrinkage
 
 		-- Line 23
 		SET @AutomotiveGas_23 = @AutomotiveGas_13H - @AutomotiveGas_22
@@ -273,7 +274,8 @@ BEGIN TRY
 		, AutoAviationGas_29 = @AutoAviationGas_29
 		, AutoAviationGas_30 = @AutoAviationGas_30
 		, AutoAviationGas_31 = @AutoAviationGas_31
-		, Shrinkage = @Shrinkage
+		, AutomotiveShrinkage = @AutomotiveShrinkage
+		, AviationShrinkage = @AviationShrinkage
 
 END TRY
 BEGIN CATCH
