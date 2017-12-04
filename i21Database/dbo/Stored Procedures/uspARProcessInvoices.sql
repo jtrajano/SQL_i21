@@ -86,6 +86,10 @@ BEGIN TRY
 		,[strPONumber]					NVARCHAR (25)	COLLATE Latin1_General_CI_AS	NULL
 		,[strBOLNumber]					NVARCHAR (50)	COLLATE Latin1_General_CI_AS	NULL
 		,[strComments]					NVARCHAR (500)  COLLATE Latin1_General_CI_AS	NULL
+		,[intAccountId]					INT												NULL
+		,[intFreightTermId]				INT												NULL
+		,[intPaymentMethodId]			INT												NULL
+		,[strInvoiceOriginId]			NVARCHAR (25)	COLLATE Latin1_General_CI_AS	NULL
 		,[strInvoiceNumber]				NVARCHAR (50)	COLLATE Latin1_General_CI_AS	NULL
 		,[intInvoiceId]					INT												NULL
 		,[intInvoiceDetailId]			INT												NULL
