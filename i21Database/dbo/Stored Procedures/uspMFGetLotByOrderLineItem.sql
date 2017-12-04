@@ -133,13 +133,23 @@ BEGIN
 						ELSE T.dblQty
 						END, 0))
 			) AS dblQty
-		,L.dblWeight - (
-			SUM(ISNULL(CASE 
-						WHEN T.intTaskTypeId = 13
-							THEN L.dblWeight - T.dblWeight
-						ELSE T.dblWeight
-						END, 0))
-			) AS dblWeight
+		,CASE 
+			WHEN L.intWeightUOMId IS NULL
+				THEN L.dblQty - (
+						SUM(ISNULL(CASE 
+									WHEN T.intTaskTypeId = 13
+										THEN L.dblQty - T.dblQty
+									ELSE T.dblQty
+									END, 0))
+						)
+			ELSE L.dblWeight - (
+					SUM(ISNULL(CASE 
+								WHEN T.intTaskTypeId = 13
+									THEN L.dblWeight - T.dblWeight
+								ELSE T.dblWeight
+								END, 0))
+					)
+			END AS dblWeight
 	FROM tblICLot L
 	JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 	JOIN tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
@@ -346,13 +356,23 @@ BEGIN
 						ELSE T.dblQty
 						END, 0))
 			) AS dblQty
-		,L.dblWeight - (
-			SUM(ISNULL(CASE 
-						WHEN T.intTaskTypeId = 13
-							THEN L.dblWeight - T.dblWeight
-						ELSE T.dblWeight
-						END, 0))
-			) AS dblWeight
+		,CASE 
+			WHEN L.intWeightUOMId IS NULL
+				THEN L.dblQty - (
+						SUM(ISNULL(CASE 
+									WHEN T.intTaskTypeId = 13
+										THEN L.dblQty - T.dblQty
+									ELSE T.dblQty
+									END, 0))
+						)
+			ELSE L.dblWeight - (
+					SUM(ISNULL(CASE 
+								WHEN T.intTaskTypeId = 13
+									THEN L.dblWeight - T.dblWeight
+								ELSE T.dblWeight
+								END, 0))
+					)
+			END AS dblWeight
 	FROM tblICLot L
 	JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 	JOIN tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
