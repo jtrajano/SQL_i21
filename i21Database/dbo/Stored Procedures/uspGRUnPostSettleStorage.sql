@@ -27,6 +27,8 @@ BEGIN TRY
 	DECLARE @intInventoryItemStockUOMId INT
 	DECLARE @UserName NVARCHAR(100)
 	DECLARE @intParentSettleStorageId INT
+	DECLARE @GLEntries AS RecapTableType
+	DECLARE @intReturnValue AS INT
 	
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXml
@@ -233,6 +235,9 @@ BEGIN TRY
 				DELETE
 				FROM @ItemsToPost
 
+				DELETE 
+				FROM @GLEntries
+
 				INSERT INTO @ItemsToStorage 
 				(
 					intItemId
@@ -330,11 +335,60 @@ BEGIN TRY
 				END
 
 				BEGIN
-					EXEC uspICPostCosting 
-						 @ItemsToPost
-						,@strBatchId
-						,'Cost of Goods'
-						,@UserId
+					--EXEC uspICPostCosting 
+					--	 @ItemsToPost
+					--	,@strBatchId
+					--	,'Cost of Goods'
+					--	,@UserId
+
+					INSERT INTO @GLEntries 
+					(
+							[dtmDate] 
+							,[strBatchId]
+							,[intAccountId]
+							,[dblDebit]
+							,[dblCredit]
+							,[dblDebitUnit]
+							,[dblCreditUnit]
+							,[strDescription]
+							,[strCode]
+							,[strReference]
+							,[intCurrencyId]
+							,[dblExchangeRate]
+							,[dtmDateEntered]
+							,[dtmTransactionDate]
+							,[strJournalLineDescription]
+							,[intJournalLineNo]
+							,[ysnIsUnposted]
+							,[intUserId]
+							,[intEntityId]
+							,[strTransactionId]
+							,[intTransactionId]
+							,[strTransactionType]
+							,[strTransactionForm]
+							,[strModuleName]
+							,[intConcurrencyId]
+							,[dblDebitForeign]	
+							,[dblDebitReport]	
+							,[dblCreditForeign]	
+							,[dblCreditReport]	
+							,[dblReportingRate]	
+							,[dblForeignRate]
+							,[strRateType]
+					)
+					EXEC	@intReturnValue = dbo.uspICPostCosting  
+							@ItemsToPost  
+							,@strBatchId  
+							,'AP Clearing'
+							,@UserId
+					
+					IF @intReturnValue < 0
+						GOTO SettleStorage_Exit;
+
+					IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
+					BEGIN 
+							EXEC dbo.uspGLBookEntries @GLEntries, 0 
+					END
 
 					IF @@ERROR <> 0
 						GOTO SettleStorage_Exit;
