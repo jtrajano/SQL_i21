@@ -42,6 +42,7 @@ BEGIN
 				AND I.strInventoryTracking = 'Lot Level'
 			JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = ISNULL(L.intWeightUOMId, L.intItemUOMId)
 			JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
+			LEFT JOIN vyuMFStockReservation SR ON SR.intLotId = L.intLotId
 			WHERE L.intLotStatusId = 1
 				AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
 				AND L.dblQty > 0
@@ -54,10 +55,18 @@ BEGIN
 						ELSE L.intLotId
 						END
 					)
+				AND L.dblQty - IsNULL(SR.dblQty, 0) > 0
+				AND (
+					CASE 
+						WHEN L.intWeightUOMId IS NOT NULL
+							THEN L.dblWeight
+						ELSE L.dblQty
+						END
+					) - IsNULL(SR.dblWeight, 0) > 0
 			
 			UNION
 			
-			SELECT DISTINCT Ltrim(I.intItemId)+Ltrim(SL.intStorageLocationId)  AS LotCount
+			SELECT DISTINCT Ltrim(I.intItemId) + Ltrim(SL.intStorageLocationId) AS LotCount
 			FROM dbo.tblMFRecipe R
 			JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 				AND R.intItemId = @intItemId
@@ -113,9 +122,11 @@ BEGIN
 					OR L.intItemId = SI.intSubstituteItemId
 					)
 				AND L.intStorageLocationId = @intStorageLocationId
-			JOIN dbo.tblICItem I ON I.intItemId = L.intItemId AND I.strInventoryTracking = 'Lot Level'
+			JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
+				AND I.strInventoryTracking = 'Lot Level'
 			JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = ISNULL(L.intWeightUOMId, L.intItemUOMId)
 			JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
+			LEFT JOIN vyuMFStockReservation SR ON SR.intLotId = L.intLotId
 			WHERE L.intLotStatusId = 1
 				AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
 				AND L.dblQty > 0
@@ -128,10 +139,18 @@ BEGIN
 						ELSE L.intLotId
 						END
 					)
+				AND L.dblQty - IsNULL(SR.dblQty, 0) > 0
+				AND (
+					CASE 
+						WHEN L.intWeightUOMId IS NOT NULL
+							THEN L.dblWeight
+						ELSE L.dblQty
+						END
+					) - IsNULL(SR.dblWeight, 0) > 0
 			
 			UNION
 			
-			SELECT DISTINCT Ltrim(I.intItemId)+Ltrim(SL.intStorageLocationId)  AS LotCount
+			SELECT DISTINCT Ltrim(I.intItemId) + Ltrim(SL.intStorageLocationId) AS LotCount
 			FROM dbo.tblMFWorkOrderRecipe R
 			JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 				AND RI.intWorkOrderId = R.intWorkOrderId
