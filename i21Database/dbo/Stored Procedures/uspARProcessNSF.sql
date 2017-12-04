@@ -129,7 +129,7 @@ SELECT intCompanyId					= GL.intCompanyId
 	 , strReference					= GL.strReference
 	 , intCurrencyId				= GL.intCurrencyId
 	 , dblExchangeRate				= GL.dblExchangeRate
-	 , dtmDateEntered				= PAYMENTS.dtmDate
+	 , dtmDateEntered				= P.dtmDate
 	 , dtmTransactionDate			= GL.dtmTransactionDate
 	 , strJournalLineDescription	= 'NSF'
 	 , intJournalLineNo				= GL.intJournalLineNo
@@ -215,6 +215,12 @@ IF EXISTS (SELECT TOP 1 NULL FROM #SELECTEDPAYMENTS WHERE ysnInvoiceToCustomer =
 			, [ysnPost]
 			--detail
 			
+			, [ysnInventory]
+			, [strItemDescription]
+			, [dblQtyShipped]
+			, [dblPrice]
+			, [intTaxGroupId]
+			, [ysnRecomputeTax]
 		)
 		SELECT 'Invoice' 
 			 , 'Standard'
@@ -233,6 +239,12 @@ IF EXISTS (SELECT TOP 1 NULL FROM #SELECTEDPAYMENTS WHERE ysnInvoiceToCustomer =
 			 , 1
 
 			 --detail
+			 , 0
+			 , 'Bank Fees'
+			 , 1
+			 , P.dblNSFBankCharge
+			 , NULL
+			 , 0
 		FROM #SELECTEDPAYMENTS P
 		WHERE ysnInvoiceToCustomer = 1
 		  AND intNSFAccountId IS NOT NULL
