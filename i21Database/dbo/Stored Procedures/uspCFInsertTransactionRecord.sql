@@ -336,7 +336,7 @@ BEGIN
 	END
 	ELSE IF (@strNetworkType = 'Voyager')
 	BEGIN 
-		SET @strTransactionType = 'Local/Network'
+		SET @strTransactionType = 'Extended Remote'
 	END
 	ELSE IF (@strNetworkType = 'CFN')
 	BEGIN
