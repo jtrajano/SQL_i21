@@ -63,9 +63,9 @@ SELECT l.intLotId
 	,'' AS strCurrency
 	,'' AS strCostUOM
 	,0 AS intContainerId
-	,l.strContainerNo AS strContainerNo
-	,ISNULL(S.dblQty, 0) AS dblReservedQty
-	,Convert(DECIMAL(18, 4), ISNULL(S.dblQty, 0) / CASE 
+	,l.strContainerNo
+	,ISNULL(S.dblWeight, 0) AS dblReservedQty
+	,Convert(DECIMAL(18, 4), ISNULL(S.dblWeight, 0) / CASE 
 			WHEN ISNULL(l.dblWeightPerQty, 0) = 0
 				THEN 1
 			ELSE l.dblWeightPerQty
@@ -74,14 +74,14 @@ SELECT l.intLotId
 		WHEN l.intWeightUOMId IS NULL
 			THEN l.dblQty
 		ELSE l.dblWeight
-		END - ISNULL(S.dblQty, 0) dblAvailableQty
+		END - ISNULL(S.dblWeight, 0) dblAvailableQty
 	,Convert(DECIMAL(18, 4), (
 			(
 				CASE 
 					WHEN l.intWeightUOMId IS NULL
 						THEN l.dblQty
 					ELSE l.dblWeight
-					END - ISNULL(S.dblQty, 0)
+					END - ISNULL(S.dblWeight, 0)
 				) / CASE 
 				WHEN ISNULL(l.dblWeightPerQty, 0) = 0
 					THEN 1
