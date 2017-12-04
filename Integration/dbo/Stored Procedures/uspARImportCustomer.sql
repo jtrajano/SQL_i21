@@ -429,8 +429,12 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 						@intShipViaId = NULL,
 						@intTaxCodeId    = NULL,
 						@intTermsId      = (SELECT  intTermID FROM tblSMTerm WHERE strTermCode = CAST(agcus_terms_cd AS CHAR(10))),
+<<<<<<< HEAD
 						@intWarehouseId  = (SELECT intCompanyLocationId tblSMCompanyLocation WHERE strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS = agcus_bus_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS),
 
+=======
+						@intWarehouseId  = (SELECT intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS = agcus_bus_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS),
+>>>>>>> 8c17609a97... AR-6058
 				
 						--Customer
 						@strCustomerNumber		= agcus_key,			
@@ -1168,7 +1172,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 						@intShipViaId = NULL,
 						@intTaxCodeId    = NULL,
 						@intTermsId      = (SELECT intTermID FROM tblSMTerm WHERE strTermCode = CAST(ptcus_terms_code  AS CHAR(10))),
-						@intWarehouseId  = (SELECT intCompanyLocationId tblSMCompanyLocation WHERE strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS = ptcus_bus_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS),
+						@intWarehouseId  = (SELECT intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS = ptcus_bus_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS),
 
 						--Customer
 						@strCustomerNumber		= ptcus_cus_no,
