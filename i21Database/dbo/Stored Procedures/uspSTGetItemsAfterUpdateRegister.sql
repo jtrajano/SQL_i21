@@ -114,45 +114,188 @@ BEGIN TRY
 							   JOIN tblICItemPricing Prc ON Prc.intItemLocationId = IL.intItemLocationId
 							   JOIN tblICItemSpecialPricing SplPrc ON SplPrc.intItemId = I.intItemId
 
-							   LEFT JOIN tblSTPromotionItemList PIL ON PIL.intStoreId = ST.intStoreId -- Promo Item
+							   --LEFT JOIN tblSTPromotionItemList PIL ON PIL.intStoreId = ST.intStoreId -- Promo Item
 
-							   LEFT JOIN tblSTPromotionSalesList PSL ON PSL.intStoreId = ST.intStoreId -- Promo Sales
+							   --LEFT JOIN tblSTPromotionSalesList PSL ON PSL.intStoreId = ST.intStoreId -- Promo Sales
 
-						WHERE I.ysnFuelItem = 0 
-						AND R.intRegisterId = @intRegisterId 
-						AND ST.intStoreId = @intStoreId
-						AND ((@strCategoryCode <>'whitespaces' 
-						AND Cat.intCategoryId IN(select * from dbo.fnSplitString(@strCategoryCode,',')))
+						WHERE I.ysnFuelItem = 0 AND R.intRegisterId = @intRegisterId AND ST.intStoreId = @intStoreId
+						AND ((@strCategoryCode <>'whitespaces' AND Cat.intCategoryId IN(select * from dbo.fnSplitString(@strCategoryCode,',')))
 						OR (@strCategoryCode ='whitespaces'  AND Cat.intCategoryId = Cat.intCategoryId))
 						AND I.intItemId NOT IN (SELECT intItemId FROM @tableGetItems)
 
-						OR PIL.intPromoItemListId BETWEEN @intBeginningPromoItemListId AND @intEndingPromoItemListId -- Promo Item
+						--OR (PIL.intPromoItemListId 
+						--BETWEEN @intBeginningPromoItemListId 
+						--AND @intEndingPromoItemListId) -- Promo Item
 
-						OR PSL.strPromoType = 'C' AND PSL.intPromoSalesId BETWEEN @intBeginningPromoSalesId AND @intEndingPromoSalesId -- Promo Sales 
+						--OR (PSL.strPromoType = 'C' 
+						--AND PSL.intPromoSalesId 
+						--BETWEEN @intBeginningPromoSalesId 
+						--AND @intEndingPromoSalesId)) -- Promo Sales 
 					) as t
 			) t1
 			WHERE rn = 1
 		END
 
 
-	----PromotionItemListFile @StoreId , @Register, @BeginningItemListId, @EndingItemListId
-	--IF(@ysnPromotionItemList = 1)
-	--	BEGIN
-	--	END
+
+	--PromotionItemListFile @StoreId , @Register, @BeginningItemListId, @EndingItemListId
+	IF(@ysnPromotionItemList = 1)
+		BEGIN
+			INSERT INTO @tableGetItems
+			SELECT strActionType
+					, strUpcCode
+					, strDescription
+					, dblSalePrice
+					, ysnSalesTaxed
+					, ysnIdRequiredLiquor
+					, ysnIdRequiredCigarette
+					, strRegProdCode 
+					, intItemId 
+			FROM  
+			(
+			SELECT *,
+					rn = ROW_NUMBER() OVER(PARTITION BY t.intItemId ORDER BY (SELECT NULL))
+				FROM 
+					(
+						SELECT
+						CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
+							--PIL.strPromoItemListDescription
+							, IUOM.strUpcCode AS strUpcCode
+							, I.strDescription AS strDescription
+							, Prc.dblSalePrice AS dblSalePrice
+							, IL.ysnTaxFlag1 AS ysnSalesTaxed
+							, IL.ysnIdRequiredLiquor AS ysnIdRequiredLiquor
+							, IL.ysnIdRequiredCigarette AS ysnIdRequiredCigarette
+							, SubCat.strRegProdCode AS strRegProdCode
+							, I.intItemId AS intItemId
+						FROM tblSTPromotionItemListDetail PILD
+						JOIN tblSTPromotionItemList PIL ON PIL.intPromoItemListId = PILD.intPromoItemListId
+						JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = PILD.intItemUOMId
+						JOIN tblICItem I ON I.intItemId = IUOM.intItemId 
+						JOIN @tablePricebookFileOne tmpItem ON tmpItem.intItemId = I.intItemId
+						JOIN tblSTStore ST ON ST.intStoreId = PIL.intStoreId
+						JOIN tblICItemLocation IL ON IL.intLocationId = ST.intCompanyLocationId AND IL.intItemId = I.intItemId
+						JOIN tblICItemPricing Prc ON Prc.intItemLocationId = IL.intItemLocationId
+						JOIN tblSTSubcategoryRegProd SubCat ON SubCat.intStoreId = ST.intStoreId
+						JOIN tblSTRegister R ON R.intStoreId = ST.intStoreId
+
+						WHERE I.ysnFuelItem = 0 AND R.intRegisterId = @intRegisterId AND ST.intStoreId = @intStoreId
+						AND PIL.intPromoItemListId BETWEEN @intBeginningPromoItemListId AND @intEndingPromoItemListId
+
+						AND I.intItemId NOT IN (SELECT intItemId FROM @tableGetItems)
+				) as t
+			) t1
+			WHERE rn = 1
+		END
 
 
 	----PromotionSalesList
-	--IF(@ysnPromotionSalesList = 1)
-	--	BEGIN
-	--		IF(@strPromoCode = 'Combo')
-	--			BEGIN
-	--				Print('@StoreId , @Register, @BeginningComboId, @EndingComboId')
-	--			END
-	--		ELSE
-	--			BEGIN
-	--				Print('@StoreId , @Register, @BeginningMixMatchId, @EndingMixMatchId, @BuildFileThruEndingDate, @ExportEntirePricebookFile')
-	--			END
-	--	END
+	IF(@ysnPromotionSalesList = 1)
+		BEGIN
+			IF(@strPromoCode = 'Combo')
+				BEGIN
+					--Print('@StoreId , @Register, @BeginningComboId, @EndingComboId')
+					INSERT INTO @tableGetItems
+					SELECT strActionType
+							, strUpcCode
+							, strDescription
+							, dblSalePrice
+							, ysnSalesTaxed
+							, ysnIdRequiredLiquor
+							, ysnIdRequiredCigarette
+							, strRegProdCode 
+							, intItemId 
+					FROM  
+					(
+					SELECT *,
+							rn = ROW_NUMBER() OVER(PARTITION BY t.intItemId ORDER BY (SELECT NULL))
+						FROM 
+							(
+								SELECT 
+									CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
+									, IUOM.strUpcCode AS strUpcCode
+									, I.strDescription AS strDescription
+									, Prc.dblSalePrice AS dblSalePrice
+									, IL.ysnTaxFlag1 AS ysnSalesTaxed
+									, IL.ysnIdRequiredLiquor AS ysnIdRequiredLiquor
+									, IL.ysnIdRequiredCigarette AS ysnIdRequiredCigarette
+									, SubCat.strRegProdCode AS strRegProdCode
+									, I.intItemId AS intItemId
+								FROM tblICItem I
+								JOIN @tablePricebookFileOne tmpItem ON tmpItem.intItemId = I.intItemId
+								JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
+								JOIN tblICItemPricing Prc ON Prc.intItemLocationId = IL.intItemLocationId
+								JOIN tblSMCompanyLocation L ON L.intCompanyLocationId = IL.intLocationId 
+								JOIN tblSTStore ST ON ST.intCompanyLocationId = L.intCompanyLocationId 
+								JOIN tblSTRegister R ON R.intStoreId = ST.intStoreId
+								JOIN tblSTPromotionSalesList PSL ON PSL.intStoreId = ST.intStoreId --AND Cat.intCategoryId = PSL.intCategoryId
+								JOIN tblSTPromotionSalesListDetail PSLD ON PSLD.intPromoSalesListId = PSL.intPromoSalesListId
+								JOIN tblSTPromotionItemList PIL ON PIL.intPromoItemListId = PSLD.intPromoItemListId
+								JOIN tblSTPromotionItemListDetail PILD ON PILD.intPromoItemListId = PIL.intPromoItemListId
+								JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = PILD.intItemUOMId 
+								JOIN tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId
+								JOIN tblSTSubcategoryRegProd SubCat ON SubCat.intStoreId = ST.intStoreId
+
+								WHERE R.intRegisterId = @intRegisterId  AND ST.intStoreId = @intStoreId AND PSL.strPromoType = 'C'
+								AND PSL.intPromoSalesId BETWEEN @intBeginningPromoSalesId AND @intEndingPromoSalesId
+
+								AND I.intItemId NOT IN (SELECT intItemId FROM @tableGetItems)
+
+							) as t
+					) t1
+					WHERE rn = 1
+				END
+			ELSE
+				BEGIN
+					--Print('@StoreId , @Register, @BeginningMixMatchId, @EndingMixMatchId, @BuildFileThruEndingDate, @ExportEntirePricebookFile')
+					INSERT INTO @tableGetItems
+					SELECT strActionType
+							, strUpcCode
+							, strDescription
+							, dblSalePrice
+							, ysnSalesTaxed
+							, ysnIdRequiredLiquor
+							, ysnIdRequiredCigarette
+							, strRegProdCode 
+							, intItemId 
+					FROM  
+					(
+					SELECT *,
+							rn = ROW_NUMBER() OVER(PARTITION BY t.intItemId ORDER BY (SELECT NULL))
+						FROM 
+							(
+								SELECT 
+								CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
+								, IUOM.strUpcCode AS strUpcCode
+								, I.strDescription AS strDescription
+								, Prc.dblSalePrice AS dblSalePrice
+								, IL.ysnTaxFlag1 AS ysnSalesTaxed
+								, IL.ysnIdRequiredLiquor AS ysnIdRequiredLiquor
+								, IL.ysnIdRequiredCigarette AS ysnIdRequiredCigarette
+								, SubCat.strRegProdCode AS strRegProdCode
+								, I.intItemId AS intItemId
+									   FROM tblICItem I
+									   JOIN tblICCategory Cat ON Cat.intCategoryId = I.intCategoryId
+									   JOIN @tablePricebookFileOne tmpItem ON tmpItem.intItemId = I.intItemId
+									   JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
+									   LEFT JOIN tblSTSubcategoryRegProd SubCat ON SubCat.intRegProdId = IL.intProductCodeId
+									   JOIN tblSTStore ST ON ST.intStoreId = SubCat.intStoreId
+									   JOIN tblSMCompanyLocation L ON L.intCompanyLocationId = IL.intLocationId
+									   JOIN tblICItemUOM IUOM ON IUOM.intItemId = I.intItemId
+									   JOIN tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId
+									   JOIN tblSTRegister R ON R.intStoreId = ST.intStoreId
+									   JOIN tblICItemPricing Prc ON Prc.intItemLocationId = IL.intItemLocationId
+									   JOIN tblICItemSpecialPricing SplPrc ON SplPrc.intItemId = I.intItemId
+								WHERE I.ysnFuelItem = 0 AND R.intRegisterId = @intRegisterId AND ST.intStoreId = @intStoreId
+								AND ((@strCategoryCode <>'whitespaces' AND Cat.intCategoryId IN(select * from dbo.fnSplitString(@strCategoryCode,',')))
+								OR (@strCategoryCode ='whitespaces'  AND Cat.intCategoryId = Cat.intCategoryId))
+
+								AND I.intItemId NOT IN (SELECT intItemId FROM @tableGetItems)
+							) as t
+					) t1
+					WHERE rn = 1
+				END
+		END
 
 	-- Insert to tblSTUpdateRegisterHistory
 	INSERT INTO tblSTUpdateRegisterHistory (intStoreId, intRegisterId, ysnPricebookFile, ysnPromotionItemList, ysnPromotionSalesList, dtmBeginningChangeDate, dtmEndingChangeDate, strCategoryCode, ysnExportEntirePricebookFile, intBeginningPromoItemListId, intEndingPromoItemListId, strPromoCode, intBeginningPromoSalesId, intEndingPromoSalesId, dtmBuildFileThruEndingDate)
@@ -169,6 +312,8 @@ BEGIN TRY
 		, ysnIdRequiredCigarette
 		, strRegProdCode 
 	FROM @tableGetItems
+	ORDER BY intItemId ASC
+
 END TRY
 
 BEGIN CATCH       
