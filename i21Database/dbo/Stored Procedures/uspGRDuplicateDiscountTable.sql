@@ -65,12 +65,14 @@ BEGIN
 		 ,strDiscountId
 		 ,strDiscountDescription
 		 ,ysnDiscountIdActive
+		 ,intConcurrencyId
 	 )
 	SELECT 
 		  intCurrencyId
 		 ,@NewstrDiscountId 
 		 ,@NewDiscountDescription
 		 ,ysnDiscountIdActive
+		 , 1
 	FROM tblGRDiscountId  
 	WHERE intDiscountId = @DiscountId
 	------------------------------------------
