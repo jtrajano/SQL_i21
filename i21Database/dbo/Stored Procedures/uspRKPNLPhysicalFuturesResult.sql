@@ -63,7 +63,7 @@ BEGIN
 				'Sales - ' + SH.strContractNumber	AS	strNumber,
 				'Allocated' AS strDescription,
 				NULL AS strConfirmed,
-				dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,AD.intPUnitMeasureId,@intUnitMeasureId, AD.dblPAllocatedQty) AS dblAllocatedQty,
+				dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,AD.intPUnitMeasureId,@intUnitMeasureId, AD.dblPAllocatedQty) *-1AS dblAllocatedQty,
 				CASE	WHEN CD.dblCashPrice IS NULL 
 						THEN	(
 									(
@@ -151,8 +151,8 @@ BEGIN
 				ID.dblCost dblPrice,
 				CY.strCurrency AS strCurrency,
 				NULL AS dblFX,
-				dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId,QU.intUnitMeasureId,@intUnitMeasureId, ID.dblQtyReceived) AS dblBooked,
-				ID.dblTotal AS dblAccounting,
+				dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId,QU.intUnitMeasureId,@intUnitMeasureId, ID.dblQtyReceived)*-1 AS dblBooked,
+				ID.dblTotal *-1 AS dblAccounting,
 				IV.dtmDate AS dtmDate,
 				'Supp. Invoice'	AS strType,
 				0.0 AS dblTranValue, --Dummy
@@ -238,11 +238,11 @@ BEGIN
 					CASE WHEN OY.ysnSubCurrency = 1 THEN 100 ELSE 1 END	AS	dblPrice,
 					ISNULL(MY.strCurrency,CY.strCurrency) AS strCurrency,
 					ISNULL(dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0),1) AS dblFX,
-					BL.dblBooked,
-					BL.dblAccounting,
+					BL.dblBooked * -1 dblBooked,
+					BL.dblAccounting * -1 dblAccounting,
 					CH.dtmContractDate,
 					CC.strCostMethod strType,
-					CASE WHEN CC.strCostMethod = 'Amount' THEN  CC.dblRate ELSE dblTranValue END AS dblTranValue,
+					CASE WHEN CC.strCostMethod = 'Amount' THEN  CC.dblRate ELSE dblTranValue END *-1 AS dblTranValue,
 					CC.intItemId * 999999 AS intSort
 					
 
