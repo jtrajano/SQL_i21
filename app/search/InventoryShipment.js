@@ -183,9 +183,9 @@ Ext.define('Inventory.search.InventoryShipment', {
     ],
 
     /*Support functions*/
-    processShipmentToInvoice: function (shipmentId, callback) {
+    processShipmentToInvoice : function (shipmentId, callback) {
         ic.utils.ajax({
-            url: './Inventory/api/InventoryShipment/ProcessInvoice',
+            url: '../Inventory/api/InventoryShipment/ProcessShipmentToInvoice',
             params:{
                 id: shipmentId
             },
@@ -198,8 +198,12 @@ Ext.define('Inventory.search.InventoryShipment', {
             }
             ,function(failureResponse) {
                 var jsonData = Ext.decode(failureResponse.responseText);
-                var message = jsonData.message; 
-                iRely.Functions.showErrorDialog(message.statusText);
+                if(failureResponse.status === 404) {
+                    message = jsonData.Message;
+                } else {
+                    message = jsonData.message.statusText; 
+                }
+                iRely.Functions.showErrorDialog(message);
             }
         );          
     },      
