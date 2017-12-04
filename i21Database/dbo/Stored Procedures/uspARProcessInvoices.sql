@@ -761,7 +761,8 @@ BEGIN
 		AND (ISNULL(I.[strComments],'') = ISNULL(@Comment,'') OR (@Comment IS NULL AND @GroupingOption < 11))
 		AND (ISNULL(I.[intAccountId],0) = ISNULL(@AccountId,0) OR (@AccountId IS NULL AND @GroupingOption < 12))
 		AND (ISNULL(I.[intFreightTermId],0) = ISNULL(@FreightTermId,0) OR (@FreightTermId IS NULL AND @GroupingOption < 13))
-		AND (ISNULL(I.[strInvoiceOriginId],'') = ISNULL(@InvoiceOriginId,'') OR (@InvoiceOriginId IS NULL AND @GroupingOption < 11))
+		AND (ISNULL(I.[intPaymentMethodId],0) = ISNULL(@PaymentMethodId,0) OR (@PaymentMethodId IS NULL AND @GroupingOption < 14))            
+		AND (ISNULL(I.[strInvoiceOriginId],'') = ISNULL(@InvoiceOriginId,'') OR (@InvoiceOriginId IS NULL AND @GroupingOption < 15))
 		AND I.[intId] = #EntriesForProcessing.[intId]
 		AND ISNULL(#EntriesForProcessing.[ysnForInsert],0) = 1
 		
@@ -1109,7 +1110,10 @@ BEGIN
 		AND (ISNULL(I.[strComments],'') = ISNULL(@Comment,'') OR (@Comment IS NULL AND @GroupingOption < 11))
 		AND (ISNULL(I.[intAccountId],0) = ISNULL(@AccountId,0) OR (@AccountId IS NULL AND @GroupingOption < 12))
 		AND (ISNULL(I.[intFreightTermId],0) = ISNULL(@FreightTermId,0) OR (@FreightTermId IS NULL AND @GroupingOption < 13))
-		AND (ISNULL(I.[strInvoiceOriginId],'') = ISNULL(@InvoiceOriginId,'') OR (@InvoiceOriginId IS NULL AND @GroupingOption < 11))
+		AND (ISNULL(I.[intAccountId],0) = ISNULL(@AccountId,0) OR (@AccountId IS NULL AND @GroupingOption < 12))
+		AND (ISNULL(I.[intFreightTermId],0) = ISNULL(@FreightTermId,0) OR (@FreightTermId IS NULL AND @GroupingOption < 13))
+		AND (ISNULL(I.[intPaymentMethodId],0) = ISNULL(@PaymentMethodId,0) OR (@PaymentMethodId IS NULL AND @GroupingOption < 14))            
+		AND (ISNULL(I.[strInvoiceOriginId],'') = ISNULL(@InvoiceOriginId,'') OR (@InvoiceOriginId IS NULL AND @GroupingOption < 15))
 		AND I.[intId] = #EntriesForProcessing.[intId]
 		AND ISNULL(#EntriesForProcessing.[ysnForInsert],0) = 1
 		
