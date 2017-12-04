@@ -42,7 +42,7 @@ BEGIN
 						THEN L.dblWeight
 					ELSE L.dblQty
 					END
-				) AS dblWeight
+				) - IsNULL(SR.dblWeight, 0) AS dblWeight
 			,ISNULL(L.intWeightUOMId, L.intItemUOMId) AS intWeightUOMId
 			,U.strUnitMeasure
 			,IU.intUnitMeasureId
@@ -50,7 +50,7 @@ BEGIN
 			,L.strLotAlias
 			,SL.intStorageLocationId
 			,SL.strName
-			,L.dblQty
+			,L.dblQty - IsNULL(SR.dblQty, 0) AS dblQty
 			,L.intItemUOMId AS intQtyUOMId
 			,U1.strUnitMeasure AS strQtyUOM
 			,CASE 
@@ -125,6 +125,7 @@ BEGIN
 		JOIN dbo.tblICItemUOM SIU ON SIU.intItemId = I.intItemId
 			AND SIU.ysnStockUnit = 1
 		JOIN dbo.tblICUnitMeasure SU ON SU.intUnitMeasureId = SIU.intUnitMeasureId
+		LEFT JOIN vyuMFStockReservation SR ON SR.intLotId = L.intLotId
 		WHERE LS.strPrimaryStatus = 'Active'
 			AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
 			AND L.dblQty > 0
@@ -137,6 +138,14 @@ BEGIN
 					ELSE L.intLotId
 					END
 				)
+			AND L.dblQty - IsNULL(SR.dblQty, 0) > 0
+			AND (
+				CASE 
+					WHEN L.intWeightUOMId IS NOT NULL
+						THEN L.dblWeight
+					ELSE L.dblQty
+					END
+				) - IsNULL(SR.dblWeight, 0) >0
 		
 		UNION
 		
@@ -226,7 +235,7 @@ BEGIN
 						THEN L.dblWeight
 					ELSE L.dblQty
 					END
-				) AS dblWeight
+				) - IsNULL(SR.dblWeight, 0) AS dblWeight
 			,ISNULL(L.intWeightUOMId, L.intItemUOMId) AS intWeightUOMId
 			,U.strUnitMeasure
 			,IU.intUnitMeasureId
@@ -234,7 +243,7 @@ BEGIN
 			,L.strLotAlias
 			,SL.intStorageLocationId
 			,SL.strName
-			,L.dblQty
+			,L.dblQty - IsNULL(SR.dblQty, 0) AS dblQty
 			,L.intItemUOMId AS intQtyUOMId
 			,U1.strUnitMeasure AS strQtyUOM
 			,CASE 
@@ -308,6 +317,7 @@ BEGIN
 		JOIN dbo.tblICItemUOM SIU ON SIU.intItemId = I.intItemId
 			AND SIU.ysnStockUnit = 1
 		JOIN dbo.tblICUnitMeasure SU ON SU.intUnitMeasureId = SIU.intUnitMeasureId
+		LEFT JOIN vyuMFStockReservation SR ON SR.intLotId = L.intLotId
 		WHERE LS.strPrimaryStatus = 'Active'
 			AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
 			AND L.dblQty > 0
@@ -320,6 +330,14 @@ BEGIN
 					ELSE L.intLotId
 					END
 				)
+			AND L.dblQty - IsNULL(SR.dblQty, 0) > 0
+			AND (
+				CASE 
+					WHEN L.intWeightUOMId IS NOT NULL
+						THEN L.dblWeight
+					ELSE L.dblQty
+					END
+				) - IsNULL(SR.dblWeight, 0) >0
 		
 		UNION
 		
