@@ -1,8 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTGetBrokerageCommission]
-	@intEntityId			INT			= NULL,
-    @strStatus				NVARCHAR(50)= NULL,
-    @intContractHeaderId	INT			= NULL,
-    @ysnSummary				BIT			= 0
+	@intEntityId			INT			=	NULL,
+    @strStatus				NVARCHAR(50)=	NULL,
+    @intContractHeaderId	INT			=	NULL,
+    @ysnSummary				BIT			=	0,
+	@intBrkgCommnId			INT			=	0
 AS 
 
 	IF @strStatus = 'All' SET @strStatus = NULL
@@ -87,27 +88,60 @@ AS
 	END
 	ELSE
 	BEGIN
-		SELECT	CAST(ROW_NUMBER() OVER (ORDER BY strCurrency ASC) AS INT) AS intBrkgCommnDetailId,
-				*,
-				dblRecEstimated - dblPayEstimated AS dblNetEstimated,
-				dblRecActual - dblPayActual AS dblNetActual
-		FROM
-		(
-			SELECT	S.strCurrency,
-					S.strStatus,
-					SUM(CASE WHEN ysnReceivable = 1 THEN dblRate ELSE 0 END) dblRecEstimated, 
-					SUM(CASE WHEN ysnReceivable = 1 THEN 0 ELSE dblRate END) dblPayEstimated,
-					SUM(CASE	WHEN	S.strStatus IN ('Not yet due', 'Due') OR ysnReceivable <> 1
-							THEN	0 
-							ELSE	dbo.fnCTConvertQuantityToTargetItemUOM(intItemId,intQtyUOMId,intCostUOMId,dblNet)*dblRate 
-					END) AS dblRecActual,
-					SUM(CASE	WHEN	S.strStatus IN ('Not yet due', 'Due') OR ysnReceivable = 1
-							THEN	0 
-							ELSE	dbo.fnCTConvertQuantityToTargetItemUOM(intItemId,intQtyUOMId,intCostUOMId,dblNet)*dblRate 
-					END) AS dblPayActual
-			FROM #Status S
-			LEFT JOIN #BrkgDetail B ON B.strStatus = S.strStatus AND B.strCurrency = S.strCurrency
-			GROUP BY S.strStatus,S.strCurrency
-		)t
-		WHERE strCurrency IN (SELECT DISTINCT  strCurrency FROM #BrkgDetail)
+		IF ISNULL(@intBrkgCommnId,0) = 0
+		BEGIN
+			SELECT	CAST(ROW_NUMBER() OVER (ORDER BY strCurrency ASC) AS INT) AS intBrkgCommnDetailId,
+					*,
+					dblRecEstimated - dblPayEstimated AS dblNetEstimated,
+					dblRecActual - dblPayActual AS dblNetActual
+			FROM
+			(
+				SELECT	S.strCurrency,
+						S.strStatus,
+						SUM(CASE WHEN ysnReceivable = 1 THEN dblRate ELSE 0 END) dblRecEstimated, 
+						SUM(CASE WHEN ysnReceivable = 1 THEN 0 ELSE dblRate END) dblPayEstimated,
+						SUM(CASE	WHEN	S.strStatus IN ('Not yet due', 'Due') OR ysnReceivable <> 1
+								THEN	0 
+								ELSE	dbo.fnCTConvertQuantityToTargetItemUOM(intItemId,intQtyUOMId,intCostUOMId,dblNet)*dblRate 
+						END) AS dblRecActual,
+						SUM(CASE	WHEN	S.strStatus IN ('Not yet due', 'Due') OR ysnReceivable = 1
+								THEN	0 
+								ELSE	dbo.fnCTConvertQuantityToTargetItemUOM(intItemId,intQtyUOMId,intCostUOMId,dblNet)*dblRate 
+						END) AS dblPayActual
+				FROM #Status S
+				LEFT JOIN #BrkgDetail B ON B.strStatus = S.strStatus AND B.strCurrency = S.strCurrency
+				GROUP BY S.strStatus,S.strCurrency
+			)t
+			WHERE strCurrency IN (SELECT DISTINCT  strCurrency FROM #BrkgDetail)
+		END
+		ELSE
+		BEGIN
+			SELECT	CAST(ROW_NUMBER() OVER (ORDER BY strCurrency ASC) AS INT) AS intBrkgCommnDetailId,
+					*,
+					dblRecEstimated - dblPayEstimated AS dblNetEstimated,
+					dblRecActual - dblPayActual AS dblNetActual
+			FROM
+			(
+				SELECT	S.strCurrency,
+						S.strStatus,
+						SUM(CASE	 WHEN ysnReceivable = 1 AND S.strStatus = 'Requested' THEN dblDueEstimated 
+								 WHEN ysnReceivable = 1 AND S.strStatus = 'Received/Paid' THEN dblReqstdAmount 
+								 ELSE 0 END) dblRecEstimated, 
+						SUM(CASE	 WHEN ysnReceivable <> 1 AND S.strStatus = 'Requested' THEN dblDueEstimated 
+								 WHEN ysnReceivable <> 1 AND S.strStatus = 'Received/Paid' THEN dblReqstdAmount 
+								 ELSE 0 END) dblPayEstimated,
+						SUM(CASE	 WHEN ysnReceivable = 1 AND S.strStatus = 'Requested' THEN dblReqstdAmount 
+								 WHEN ysnReceivable = 1 AND S.strStatus = 'Received/Paid' THEN dblRcvdPaidAmount 
+								 ELSE 0 END) AS dblRecActual,
+						SUM(CASE	 WHEN ysnReceivable <> 1 AND S.strStatus = 'Requested' THEN dblReqstdAmount 
+								 WHEN ysnReceivable <> 1 AND S.strStatus = 'Received/Paid' THEN dblRcvdPaidAmount 
+								 ELSE 0 END) AS dblPayActual
+				FROM	#Status S
+		LEFT	JOIN	vyuCTGridBrokerageCommissionDetail	B	ON	B.strStatus		=	S.strStatus 
+																AND B.strCurrency	=	S.strCurrency
+																AND	intBrkgCommnId	=	@intBrkgCommnId
+				GROUP BY S.strStatus,S.strCurrency
+			)t
+			WHERE strCurrency IN (SELECT DISTINCT  strCurrency FROM vyuCTGridBrokerageCommissionDetail WHERE intBrkgCommnId = @intBrkgCommnId)
+		END
 	END

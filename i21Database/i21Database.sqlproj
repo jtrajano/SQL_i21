@@ -5927,6 +5927,8 @@
     <Build Include="dbo\Views\vyuLGGetInventoryDocumentList.sql" />
     <Build Include="dbo\Stored Procedures\uspRKPnLBySalesContractSummary.sql" />
     <Build Include="dbo\Views\vyuMFGetPutawayDate.sql" />
+    <Build Include="dbo\Views\vyuCTGridBrokerageCommissionDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTSaveBrokerageCommission.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
