@@ -221,11 +221,11 @@ BEGIN
 		SET @WHGB = @WHGB + @WHGBScale;
 
 		--For hold
-		SET @Hold =
-		ISNULL((SELECT SUM((SCT.dblNetUnits * @SplitAverage) / 100) FROM tblSCDeliverySheet SCD
-		LEFT JOIN tblSCTicket SCT ON SCD.intDeliverySheetId = SCT.intDeliverySheetId AND SCT.ysnDeliverySheetPost = 0
-		WHERE SCD.intDeliverySheetId = @intDeliverySheetId AND SCT.strTicketStatus = 'H'
-		AND SCD.intEntityId = @intEntityId AND SCD.intItemId = @intItemId), 0)
+		SET @Hold = 0;
+		--ISNULL((SELECT SUM((SCT.dblNetUnits * @SplitAverage) / 100) FROM tblSCDeliverySheet SCD
+		--LEFT JOIN tblSCTicket SCT ON SCD.intDeliverySheetId = SCT.intDeliverySheetId AND SCT.ysnDeliverySheetPost = 0
+		--WHERE SCD.intDeliverySheetId = @intDeliverySheetId AND SCT.strTicketStatus = 'H'
+		--AND SCD.intEntityId = @intEntityId AND SCD.intItemId = @intItemId), 0)
 
 	END
 	
