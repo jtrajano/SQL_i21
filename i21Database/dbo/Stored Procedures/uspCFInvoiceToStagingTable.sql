@@ -600,16 +600,18 @@ BEGIN TRY
 				,tblARCustomerStatementStagingTable.intCFDiscountDay					=	  cfAccntTerm.intDiscountDay
 				,tblARCustomerStatementStagingTable.strCFTermType						=	  cfAccntTerm.strType
 				,tblARCustomerStatementStagingTable.intCFTermID							=	  cfAccntTerm.intTermsCode
-				,tblARCustomerStatementStagingTable.strCFEmail							=	  (SELECT TOP (1) strEmail
-																								FROM    dbo.vyuARCustomerContacts
-																								WHERE (intEntityCustomerId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
+
+				,tblARCustomerStatementStagingTable.strCFEmail							=	  (SELECT TOP (1) ISNULL(strEmail,'')
+																								FROM    dbo.vyuARCustomerContacts as arCustCont
+																								WHERE (arCustCont.intCustomerEntityId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
 																								AND (strEmailDistributionOption LIKE '%CF Invoice%') 
 																								AND (ISNULL(strEmail, N'') <> ''))
-				,tblARCustomerStatementStagingTable.strCFEmailDistributionOption		=	  (SELECT TOP (1) strEmailDistributionOption
-																								FROM    dbo.vyuARCustomerContacts
-																								WHERE (intEntityCustomerId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
-																								AND (strEmailDistributionOption LIKE '%CF Invoice%') 
-																								AND (ISNULL(strEmail, N'') <> ''))	
+
+				,tblARCustomerStatementStagingTable.strCFEmailDistributionOption		=	  (SELECT TOP (1) ISNULL(strEmailDistributionOption,'')
+																							FROM    dbo.vyuARCustomerContacts as arCustCont
+																							WHERE (arCustCont.intCustomerEntityId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
+																							AND (strEmailDistributionOption LIKE '%CF Invoice%') 
+																							AND (ISNULL(strEmail, N'') <> ''))
 		FROM vyuCFAccountTerm cfAccntTerm
 		WHERE tblARCustomerStatementStagingTable.intEntityCustomerId = cfAccntTerm.intCustomerId
 
@@ -724,14 +726,14 @@ BEGIN TRY
 
 			UPDATE tblARCustomerStatementStagingTable
 			SET 
-			strCFEmail							=	  (SELECT TOP (1) strEmail
-																							FROM    dbo.vyuARCustomerContacts
-																							WHERE (intEntityCustomerId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
+			strCFEmail							=	  (SELECT TOP (1) ISNULL(strEmail,'')
+																							FROM    dbo.vyuARCustomerContacts as arCustCont
+																							WHERE (arCustCont.intCustomerEntityId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
 																							AND (strEmailDistributionOption LIKE '%CF Invoice%') 
 																							AND (ISNULL(strEmail, N'') <> ''))
-			,strCFEmailDistributionOption		=	  (SELECT TOP (1) strEmailDistributionOption
-																							FROM    dbo.vyuARCustomerContacts
-																							WHERE (intEntityCustomerId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
+			,strCFEmailDistributionOption		=	  (SELECT TOP (1) ISNULL(strEmailDistributionOption,'')
+																							FROM    dbo.vyuARCustomerContacts as arCustCont
+																							WHERE (arCustCont.intCustomerEntityId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
 																							AND (strEmailDistributionOption LIKE '%CF Invoice%') 
 																							AND (ISNULL(strEmail, N'') <> ''))	
 
@@ -772,6 +774,11 @@ BEGIN TRY
 
 
 	END
+
+
+	UPDATE tblARCustomerStatementStagingTable SET strCFEmailDistributionOption = '' WHERE strCFEmailDistributionOption IS NULL
+	UPDATE tblARCustomerStatementStagingTable SET strCFEmail = '' WHERE strCFEmail IS NULL
+	
 
 	--SELECT * FROM vyuCFAccountTerm
 	--select * from vyuCFCardAccount
