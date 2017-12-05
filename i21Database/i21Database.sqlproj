@@ -5942,6 +5942,7 @@
     <Build Include="dbo\Stored Procedures\uspRKPnLBySalesContractSummary.sql" />
     <Build Include="dbo\Views\vyuMFGetPutawayDate.sql" />
     <None Include="Scripts\Post-Deployment\IC\22_Update_Qty_Cost_For_ReceiptTaxes.sql" />
+    <Build Include="dbo\Views\vyuSMIdentityUserInfo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
