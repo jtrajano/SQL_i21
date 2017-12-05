@@ -35,13 +35,10 @@
 	,@SubCurrencyRate			NUMERIC(18,6)	= NULL OUTPUT
 	,@PricingType				NVARCHAR(50)	= NULL OUTPUT
 	,@TermIdOut					INT				= NULL OUTPUT
-	,@GetAllAvailablePricing	BIT				= 0    OUTPUT	
+	,@GetAllAvailablePricing	BIT				= 0	
 	,@SpecialPriceId			INT				= NULL OUTPUT
 	,@ProgramId					INT				= NULL OUTPUT
-	,@PriceSource				NVARCHAR(100)	= ''   OUTPUT
-	,@RebateSubmitted			BIT				= 0    OUTPUT
-	,@RebateExcluded			BIT				= 0    OUTPUT
-	,@RebateAmount				NUMERIC(18,6)	= 0.000000 OUTPUT
+	,@ProgramType				NVARCHAR(100)	= NULL OUTPUT
 	
 AS	
 
@@ -63,11 +60,6 @@ AS
 		,@SubCurrency		= strSubCurrency
 		,@SubCurrencyRate	= dblSubCurrencyRate
 		,@SpecialPriceId	= intSpecialPriceId
-		,@ProgramId			= intProgramId
-		,@PriceSource		= strPriceSource
-		,@RebateSubmitted	= ysnRebateSubmitted
-		,@RebateExcluded	= ysnRebateExcluded
-		,@RebateAmount		= dblRebateAmount
 	FROM
 		[dbo].[fnARGetItemPricingDetails](
 			 @ItemId
@@ -99,9 +91,9 @@ AS
 			,@GetAllAvailablePricing
 		)
 
-		-- IF @SpecialPriceId is not null or @SpecialPriceId > 0
-		-- BEGIN
-		-- 	SELECT top 1 @ProgramId=intProgramId  ,@ProgramType=strProgramType  from tblARCustomerSpecialPrice
-		-- END
+		IF @SpecialPriceId is not null or @SpecialPriceId > 0
+		BEGIN
+			SELECT top 1 @ProgramId=intProgramId  ,@ProgramType=strProgramType  from tblARCustomerSpecialPrice
+		END
 
-RETURN 1
+RETURN 0
