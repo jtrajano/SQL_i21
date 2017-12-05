@@ -193,6 +193,8 @@ BEGIN
 		,[ysnSeparateOnInvoice]
 		,[ysnCheckoffTax]
 		,[strTaxCode]
+		,[dblQty]
+		,[dblCost]
 		,[intSort]
 		,[intConcurrencyId]				
 	)
@@ -225,6 +227,8 @@ BEGIN
 			,[ysnSeparateOnInvoice]			= vendorTax.[ysnSeparateOnInvoice]
 			,[ysnCheckoffTax]				= vendorTax.[ysnCheckoffTax]
 			,[strTaxCode]					= vendorTax.[strTaxCode]
+			,[dblQty]						= @Qty
+			,[dblCost]						= @Amount
 			,[intSort]						= 1
 			,[intConcurrencyId]				= 1
 	FROM	[dbo].[fnGetItemTaxComputationForVendor](@ItemId, @EntityId, @TransactionDate, @Amount, @Qty, @TaxGroupId, @LocationId, @ShipFromId, 0, @FreightTermId,0) vendorTax
