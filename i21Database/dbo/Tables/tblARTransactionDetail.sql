@@ -25,8 +25,6 @@
 	[intStorageLocationId]					INT				NULL,
 	[intOwnershipTypeId]					INT				NULL,
 	[intStorageScheduleTypeId]				INT				NULL,
-	[intProgramId]							INT				NULL,
-	[strPriceSource]						NVARCHAR(100)  COLLATE Latin1_General_CI_AS		NULL,
 	[intConcurrencyId]						INT				CONSTRAINT [DF_tblARTransactionDetail_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tblARTransactionDetail] PRIMARY KEY CLUSTERED ([intId] ASC)
 )

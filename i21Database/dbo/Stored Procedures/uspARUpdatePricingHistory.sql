@@ -228,8 +228,6 @@ IF @SourceTransactionId = 2 -- INVOICE
 			,[strOriginalPricing]
 			,[dtmDate]
 			,[ysnApplied]
-			,[intProgramId]
-			,[strPriceSource]
 			,[intEntityId])
 
 			--Price Changed
@@ -246,8 +244,6 @@ IF @SourceTransactionId = 2 -- INVOICE
 			,[strOriginalPricing]		= ARTD.[strPricing]
 			,[dtmDate]					= @DateNow
 			,[ysnApplied]				= 1
-			,[intProgramId]				= ARID.[intProgramId]
-			,[strPriceSource]			= ARID.[strPriceSource]
 			,[intEntityId]				= @EntityId
 		FROM 
 			tblARInvoiceDetail ARID
@@ -280,8 +276,6 @@ IF @SourceTransactionId = 2 -- INVOICE
 			,[strOriginalPricing]		= ARTD.[strPricing]
 			,[dtmDate]					= @DateNow
 			,[ysnApplied]				= 1
-			,[intProgramId]				= ARID.[intProgramId]
-			,[strPriceSource]			= ARID.[strPriceSource]
 			,[intEntityId]				= @EntityId
 		FROM 
 			tblARInvoiceDetail ARID
@@ -312,8 +306,6 @@ IF @SourceTransactionId = 2 -- INVOICE
 			,[strOriginalPricing]		= NULL
 			,[dtmDate]					= @DateNow
 			,[ysnApplied]				= 1
-			,[intProgramId]				= ARID.[intProgramId]
-			,[strPriceSource]			= ARID.[strPriceSource]
 			,[intEntityId]				= @EntityId
 		FROM 
 			tblARInvoiceDetail ARID
