@@ -5929,6 +5929,7 @@
     <Build Include="dbo\Views\vyuMFGetPutawayDate.sql" />
     <Build Include="dbo\Views\vyuCTGridBrokerageCommissionDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspCTSaveBrokerageCommission.sql" />
+    <Build Include="dbo\Tables\tblARInvoiceAccrual.sql" />
     <None Include="Scripts\Post-Deployment\IC\22_Update_Qty_Cost_For_ReceiptTaxes.sql" />
   </ItemGroup>
   <ItemGroup>
