@@ -102,8 +102,6 @@
 	[intProgramId]							INT												NULL,
 	[strPriceSource]						NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL,
 	[strBOLNumber]							NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL,     
-	[ysnRebateSubmitted]					BIT												DEFAULT((0)) NULL,
-	[ysnRebateExcluded]						BIT												DEFAULT((0)) NULL,
 	[strRebateSubmitted]					NVARCHAR(1)		CONSTRAINT [DF_tblARInvoiceDetail_strRebateSubmitted] DEFAULT (N'N') NOT NULL,
 	[dblRebateAmount]						NUMERIC(18, 6)	CONSTRAINT [DF_tblARInvoiceDetail_dblRebateAmount] DEFAULT ((0)) NULL,
 	[dblBaseRebateAmount]					NUMERIC(18, 6)	CONSTRAINT [DF_tblARInvoiceDetail_dblBaseRebateAmount] DEFAULT ((0)) NULL,
