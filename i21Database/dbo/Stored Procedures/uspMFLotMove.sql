@@ -7,6 +7,7 @@
 	,@blnValidateLotReservation BIT = 0
 	,@blnInventoryMove BIT = 0
 	,@dtmDate DATETIME = NULL
+	,@strDescription nvarchar(50)=''
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -328,6 +329,7 @@ BEGIN TRY
 		,@intSourceTransactionTypeId
 		,@intUserId
 		,@intInventoryAdjustmentId OUTPUT
+		,@strDescription
 
 	SELECT @intNewLotId = intLotId
 	FROM dbo.tblICLot
