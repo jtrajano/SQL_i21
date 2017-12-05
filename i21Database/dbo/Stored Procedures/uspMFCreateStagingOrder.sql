@@ -39,6 +39,7 @@ BEGIN TRY
 		,dtmCreatedOn
 		,intLastUpdateById
 		,dtmLastUpdateOn
+		,intLocationId
 		)
 	SELECT 1
 		,intOrderStatusId
@@ -53,6 +54,7 @@ BEGIN TRY
 		,GETDATE()
 		,@intLastUpdateById
 		,GETDATE()
+		,intLocationId
 	FROM @OrderHeaderInformation
 
 	SELECT @intOrderHeaderId = SCOPE_IDENTITY()

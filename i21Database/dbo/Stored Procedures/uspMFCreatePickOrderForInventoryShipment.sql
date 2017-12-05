@@ -58,6 +58,7 @@ BEGIN TRY
 		,strComment
 		,dtmOrderDate
 		,strLastUpdateBy
+		,intLocationId 
 		)
 	SELECT 1
 		,5
@@ -68,6 +69,7 @@ BEGIN TRY
 		,@strReferenceNo
 		,@dtmCurrentDate
 		,@strUserName
+		,@intShipFromLocationId
 		
 	INSERT INTO @tblMFOrderHeader
 	EXEC dbo.uspMFCreateStagingOrder @OrderHeaderInformation = @OrderHeaderInformation
