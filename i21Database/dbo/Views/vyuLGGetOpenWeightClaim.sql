@@ -307,6 +307,12 @@ FROM (
 		,CONI.strContractItemNo
 		,CONI.strContractItemName
 		,OG.strCountry AS strOrigin
+		,dblSeqPriceConversionFactoryWeightUOM = dbo.fnCTConvertQtyToTargetItemUOM((
+				SELECT TOP (1) IU.intItemUOMId
+				FROM tblICItemUOM IU
+				WHERE IU.intItemId = CD.intItemId
+					AND IU.intUnitMeasureId = WUOM.intUnitMeasureId
+				), AD.intSeqPriceUOMId, 1)
 	FROM tblLGLoad LOAD
 	JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = LOAD.intWeightUnitMeasureId
 	JOIN tblLGLoadDetail LD ON LD.intLoadId = LOAD.intLoadId
