@@ -2522,3 +2522,20 @@ JOIN tblICInventoryShipment InvS ON InvS.strShipmentNumber = OH.strReferenceNo
 WHERE OH.intLocationId IS NULL
 	AND OH.intOrderTypeId = 5
 GO
+Go
+DECLARE @tblMFOrderHeader TABLE (intOrderHeaderId INT)
+
+INSERT INTO @tblMFOrderHeader
+SELECT intOrderHeaderId
+FROM tblMFOrderDetail
+GROUP BY intItemId
+	,intOrderHeaderId
+HAVING Count(*) = 1
+
+UPDATE T
+SET T.intOrderDetailId = OD.intOrderDetailId
+FROM tblMFTask T
+JOIN tblMFOrderDetail OD ON OD.intOrderHeaderId = T.intOrderHeaderId and OD.intItemId=T.intItemId
+JOIN @tblMFOrderHeader OH ON OH.intOrderHeaderId = OD.intOrderHeaderId
+Where T.intOrderDetailId is null
+Go
