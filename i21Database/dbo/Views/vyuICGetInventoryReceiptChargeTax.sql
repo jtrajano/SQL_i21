@@ -22,7 +22,9 @@
 	ReceiptChargeTax.ysnTaxAdjusted,
 	ReceiptChargeTax.ysnTaxOnly,
 	ReceiptChargeTax.ysnCheckoffTax,
-	ReceiptChargeTax.intSort
+	ReceiptChargeTax.intSort,
+	ReceiptChargeTax.dblQty,
+	ReceiptChargeTax.dblCost
 FROM tblICInventoryReceiptChargeTax ReceiptChargeTax
 	LEFT JOIN tblICInventoryReceiptCharge ReceiptCharge ON ReceiptCharge.intInventoryReceiptChargeId = ReceiptChargeTax.intInventoryReceiptChargeId
 	LEFT JOIN tblICItem Item ON Item.intItemId = ReceiptCharge.intChargeId
