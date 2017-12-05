@@ -14,8 +14,6 @@
 	[dtmDate]						DATETIME										NOT NULL,
 	[ysnApplied]					BIT												NOT NULL	CONSTRAINT [DF_tblARPricingHistory_ysnApplied] DEFAULT ((0)),		
 	[ysnDeleted]					BIT												NOT NULL	CONSTRAINT [DF_tblARPricingHistory_ysnDeleted] DEFAULT ((0)),		
-	[intProgramId]					INT												NULL,
-	[strPriceSource]				NVARCHAR(100)  COLLATE Latin1_General_CI_AS		NULL,
 	[intEntityId]					INT												NOT NULL,
 	[intConcurrencyId]				INT												NOT NULL	CONSTRAINT [DF_tblARPricingHistory_intConcurrencyId] DEFAULT ((0)),
     CONSTRAINT [PK_tblARPricingHistory_intPricingId] PRIMARY KEY CLUSTERED ([intPricingHistoryId] ASC),

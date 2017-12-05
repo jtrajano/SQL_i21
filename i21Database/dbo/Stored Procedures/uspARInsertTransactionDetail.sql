@@ -29,9 +29,7 @@ BEGIN
 		,[intCompanyLocationSubLocationId]
 		,[intStorageLocationId]
 		,[intOwnershipTypeId]
-		,[intStorageScheduleTypeId]
-		,[intProgramId]
-	    ,[strPriceSource])
+		,[intStorageScheduleTypeId])
 	SELECT
 		 [intTransactionDetailId]				= [intInvoiceDetailId]
 		,[intTransactionId]						= [intInvoiceId] 
@@ -55,9 +53,7 @@ BEGIN
 		,[intCompanyLocationSubLocationId]		= [intCompanyLocationSubLocationId]
 		,[intStorageLocationId]					= [intStorageLocationId]
 		,[intOwnershipTypeId]					= NULL
-		,[intStorageScheduleTypeId]				= [intStorageScheduleTypeId]		
-		,[intProgramId]							= [intProgramId]
-	    ,[strPriceSource]						= [strPriceSource]
+		,[intStorageScheduleTypeId]				= [intStorageScheduleTypeId]
 	FROM
 		[tblARInvoiceDetail]
 	WHERE

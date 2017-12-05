@@ -246,6 +246,9 @@ CREATE TABLE #Pricing(
 	,[intSpecialPriceId]	INT NULL
 	,[intProgramId]			INT NULL
 	,[strPriceSource]		NVARCHAR(100)
+	,[ysnRebateSubmitted]    BIT
+	,[ysnRebateExcluded]     BIT
+	,[dblRebateAmount]       NUMERIC(18,6)
 )
 BEGIN TRY
 	DELETE FROM #Pricing
@@ -276,6 +279,9 @@ BEGIN TRY
 		,[intSpecialPriceId]
 		,[intProgramId]
 		,[strPriceSource]
+		,[ysnRebateSubmitted]
+		,[ysnRebateExcluded]
+		,[dblRebateAmount]
 	)
 	SELECT
 		 [intId]				= IE.[intId]
@@ -304,6 +310,9 @@ BEGIN TRY
 		,[intSpecialPriceId]	= IP.[intSpecialPriceId]
 		,[intProgramId]			= IP.[intProgramId]
 		,[strPriceSource]		= IP.[strPriceSource]
+		,[ysnRebateSubmitted]	= IP.[ysnRebateSubmitted]
+		,[ysnRebateExcluded]	= IP.[ysnRebateExcluded]
+		,[dblRebateAmount]		= IP.[dblRebateAmount]
 	FROM
 		@ItemEntries IE
 	CROSS APPLY
@@ -454,6 +463,9 @@ USING
 		,[intSpecialPriceId]					= IP.[intSpecialPriceId]
 		,[intProgramId]							= IP.[intProgramId]
 		,[strPriceSource]						= IP.[strPriceSource]
+		,[ysnRebateSubmitted]					= IP.[ysnRebateSubmitted]
+		,[ysnRebateExcluded]					= IP.[ysnRebateExcluded]
+		,[dblRebateAmount]						= IP.[dblRebateAmount]
 		,[intConcurrencyId]						= 1
 		,[ysnRecomputeTax]						= IE.[ysnRecomputeTax]
 		,[intEntityId]							= IE.[intEntityId]
@@ -506,6 +518,9 @@ USING
 			,[intSpecialPriceId]
 			,[intProgramId]
 			,[strPriceSource]
+			,[ysnRebateSubmitted]
+			,[ysnRebateExcluded]
+			,[dblRebateAmount]
 		FROM
 			#Pricing WITH (NOLOCK)
 		) IP
@@ -633,6 +648,9 @@ INSERT(
 	,[intSpecialPriceId]
 	,[intProgramId]
 	,[strPriceSource]
+	,[ysnRebateSubmitted]
+	,[ysnRebateExcluded]
+	,[dblRebateAmount]
 	,[intConcurrencyId]
 	)
 VALUES(
@@ -736,6 +754,9 @@ VALUES(
 	,[intSpecialPriceId]
 	,[intProgramId]
 	,[strPriceSource]
+	,[ysnRebateSubmitted]
+	,[ysnRebateExcluded]
+	,[dblRebateAmount]
 	,[intConcurrencyId]
 )
 	OUTPUT  

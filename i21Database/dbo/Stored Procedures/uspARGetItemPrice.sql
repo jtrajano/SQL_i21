@@ -39,6 +39,9 @@
 	,@SpecialPriceId			INT				= NULL OUTPUT
 	,@ProgramId					INT				= NULL OUTPUT
 	,@PriceSource				NVARCHAR(100)	= ''   OUTPUT
+	,@RebateSubmitted			BIT				= 0    OUTPUT
+	,@RebateExcluded			BIT				= 0    OUTPUT
+	,@RebateAmount				NUMERIC(18,6)	= 0.000000 OUTPUT
 	
 AS	
 
@@ -62,6 +65,9 @@ AS
 		,@SpecialPriceId	= intSpecialPriceId
 		,@ProgramId			= intProgramId
 		,@PriceSource		= strPriceSource
+		,@RebateSubmitted	= ysnRebateSubmitted
+		,@RebateExcluded	= ysnRebateExcluded
+		,@RebateAmount		= dblRebateAmount
 	FROM
 		[dbo].[fnARGetItemPricingDetails](
 			 @ItemId
