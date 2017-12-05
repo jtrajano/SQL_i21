@@ -34,7 +34,7 @@ DECLARE @Contacts TABLE
 )
 
 SELECT ED.coefd_contact_id, ED.coefd_cus_no,
-       STUFF(ISNULL((SELECT ',' + CASE WHEN x.coefd_eform_type = 'INV' THEN 'Invoices, Credit Memo, Debit Memo, Cash Refund, Cash, Sales Order'
+       STUFF(ISNULL((SELECT ',' + CASE WHEN x.coefd_eform_type = 'INV' THEN 'Invoices,Credit Memo,Debit Memo,Cash Refund,Cash,Sales Order'
 								   WHEN x.coefd_eform_type = 'STM' OR x.coefd_eform_type = 'GST' THEN 'Statements'									
 								   WHEN x.coefd_eform_type = 'GTX' THEN 'Scale'
 								   WHEN x.coefd_eform_type = 'GCO' OR x.coefd_eform_type = 'ACO' THEN 'Contracts'
