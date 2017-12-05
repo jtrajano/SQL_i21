@@ -5766,6 +5766,7 @@
     <Build Include="dbo\Views\vyuRKGetPurchaseInventory.sql" />
     <Build Include="dbo\Views\vyuMFGetPutawayDate.sql" />
     <None Include="Scripts\Post-Deployment\IC\22_Update_Qty_Cost_For_ReceiptTaxes.sql" />
+    <Build Include="dbo\Tables\tblSCDeliverySheetSplit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
