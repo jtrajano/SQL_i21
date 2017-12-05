@@ -66,6 +66,7 @@ BEGIN
 		FROM tblSMDocumentMaintenance DM
 		JOIN tblSMDocumentMaintenanceMessage DMM ON DM.intDocumentMaintenanceId = DMM.intDocumentMaintenanceId
 		WHERE intEntityCustomerId = @intCustomerEntityId
+			AND DMM.ysnPickList = 1
 	END
 
 	SELECT TOP 1 @strCompanyName = strCompanyName
