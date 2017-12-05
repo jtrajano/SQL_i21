@@ -488,10 +488,17 @@ BEGIN
 	BEGIN
 		DECLARE @intReturnValue AS INT 
 
+		BEGIN TRY
 		EXEC @intReturnValue = uspICPostCostAdjustment 
 				@adjustedEntries
 				, @batchId
 				, @userId
+		END TRY
+		BEGIN CATCH
+			DECLARE @errorAdjustment NVARCHAR(200) = ERROR_MESSAGE()
+			RAISERROR(@errorAdjustment, 16, 1);
+			GOTO Post_Rollback
+		END CATCH
 
 		INSERT INTO @GLEntries (
 			dtmDate						
