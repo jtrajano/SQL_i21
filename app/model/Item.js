@@ -175,6 +175,7 @@ Ext.define('Inventory.model.Item', {
         { name: 'ysnHasMFTImplication', type: 'boolean' },
         { name: 'ysnItemUsedInDiscountCode', type: 'boolean' },
         { name: 'strInvoiceComments', type: 'string' },
+        { name: 'strCostUOM', type: 'string' },
         { name: 'strPickListComments', type: 'string' },
         { name: 'intLotStatusId', type: 'int', allowNull: true },
         { name: 'strRequired', type: 'string' },

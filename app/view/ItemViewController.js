@@ -720,8 +720,8 @@ Ext.define('Inventory.view.ItemViewController', {
             cboCostUOM: {
                 readOnly: '{checkPerUnitCostMethod}',
                 value: '{current.strCostUOM}',
-                origValueField: 'strUnitMeasure',
-                origUpdateField: 'strCostUOM',
+                origValueField: 'intItemUOMId',
+                origUpdateField: 'intCostUOMId',
                 store: '{costUOM}',
                 defaultFilters: [{
                     column: 'intItemId',
@@ -4360,9 +4360,9 @@ Ext.define('Inventory.view.ItemViewController', {
             "#grdContractItem": {
                 selectionchange: this.onContractItemSelectionChange
             },
-            "#cboCostUOM": {
-                select: this.onCostUOMSelect
-            },
+            // "#cboCostUOM": {
+            //     select: this.onCostUOMSelect
+            // },
             "#cboStatus": {
                 select: this.onStatusSelect
             },
