@@ -118,13 +118,20 @@ BEGIN
 				-- Fields used in the calculation of the taxes
 				DECLARE	@Amount	NUMERIC(38,20) 
 						,@Qty	NUMERIC(38,20)
+						,@Cost	NUMERIC(18,6) 
 				
 				-- Get the taxable amount and qty from the charges. 
 				SELECT TOP 1
 						-- Note: Do not compute tax if it can't be converted to voucher. Zero out the amount and Qty so that tax will be zero too. 
 						-- Charges with Accrue = false and Price = false does not create vouchers. 
-						 @Amount = CASE WHEN ISNULL(Charge.ysnAccrue, 0) = 1 OR ISNULL(Charge.ysnPrice, 0) = 1 THEN Charge.dblAmount ELSE 0 END 
+						 @Amount = 
+							CASE 
+								WHEN ISNULL(Charge.ysnAccrue, 0) = 1 THEN Charge.dblAmount 
+								WHEN ISNULL(Charge.ysnPrice, 0) = 1 THEN -Charge.dblAmount 
+								ELSE 0 
+							END 
 						,@Qty	 = CASE WHEN ISNULL(Charge.ysnAccrue, 0) = 1 OR ISNULL(Charge.ysnPrice, 0) = 1 THEN ISNULL(Charge.dblQuantity, 1) ELSE 0 END 
+						,@Cost   = CASE WHEN ISNULL(Charge.ysnAccrue, 0) = 1 OR ISNULL(Charge.ysnPrice, 0) = 1 THEN dbo.fnDivide(Charge.dblAmount, Charge.dblQuantity) ELSE 0 END 
 				FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge Charge
 							ON Receipt.intInventoryReceiptId = Charge.intInventoryReceiptId
 				WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
@@ -146,6 +153,8 @@ BEGIN
 					,[ysnTaxAdjusted]
 					,[ysnCheckoffTax]
 					,[strTaxCode]
+					,[dblQty]
+					,[dblCost]
 					,[intSort]
 					,[intConcurrencyId]				
 				)
@@ -178,9 +187,11 @@ BEGIN
 						,[ysnTaxAdjusted]				= vendorTax.[ysnTaxAdjusted]
 						,[ysnCheckoffTax]				= vendorTax.[ysnCheckoffTax]
 						,[strTaxCode]					= vendorTax.[strTaxCode]
+						,[dblQty]						= @Qty
+						,[dblCost]						= @Cost
 						,[intSort]						= 1
 						,[intConcurrencyId]				= 1
-				FROM	[dbo].[fnGetItemTaxComputationForVendor](@ItemId, @EntityId, @TransactionDate, @Amount, @Qty, @TaxGroupId, @LocationId, @ShipFromId, 0, @FreightTermId, 0) vendorTax
+				FROM	[dbo].[fnGetItemTaxComputationForVendor](@ItemId, @EntityId, @TransactionDate, @Cost, @Qty, @TaxGroupId, @LocationId, @ShipFromId, 0, @FreightTermId, 0) vendorTax
 						LEFT JOIN tblICInventoryReceiptCharge rc 
 							ON rc.intInventoryReceiptChargeId = @InventoryReceiptChargeId
 

@@ -273,6 +273,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\22_StockTypes.sql 
 :r .\IC\PopulateLotContainerNoAndCondition.sql
 :r .\IC\1740_DataFix_FixIntTransactionDetailId.sql
+:r .\IC\22_Update_Qty_Cost_For_ReceiptTaxes.sql
 
 -- Patronage
 :r .\PAT\DefaultData\1_AddDefaultLetters.sql 

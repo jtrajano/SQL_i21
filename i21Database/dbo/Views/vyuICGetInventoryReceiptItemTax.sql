@@ -23,7 +23,9 @@
 	ReceiptItemTax.ysnTaxOnly,
 	ReceiptItemTax.ysnSeparateOnInvoice,
 	ReceiptItemTax.ysnCheckoffTax,
-	ReceiptItemTax.intSort
+	ReceiptItemTax.intSort,
+	ReceiptItemTax.dblQty,
+	ReceiptItemTax.dblCost
 FROM tblICInventoryReceiptItemTax ReceiptItemTax
 	LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptItemTax.intInventoryReceiptItemId
 	LEFT JOIN tblICItem Item ON Item.intItemId = ReceiptItem.intItemId
