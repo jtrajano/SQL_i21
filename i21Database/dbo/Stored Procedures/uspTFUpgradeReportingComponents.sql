@@ -50,6 +50,7 @@ BEGIN TRY
 			, strScheduleCode		= SOURCE.strScheduleCode
 			, strScheduleName		= SOURCE.strScheduleName
 			, strNote				= SOURCE.strNote
+			, strType				= SOURCE.strType
 			, strTransactionType	= SOURCE.strTransactionType
 			, intSort				= SOURCE.intSort
 			, strSPInventory		= SOURCE.strSPInventory
