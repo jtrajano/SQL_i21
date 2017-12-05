@@ -3939,7 +3939,7 @@ Ext.define('Inventory.view.Item', {
                                                                         fieldLabel: 'UOM',
                                                                         labelWidth: 150,
                                                                         displayField: 'strUnitMeasure',
-                                                                        valueField: 'intItemUOMId'
+                                                                        valueField: 'strUnitMeasure'
                                                                     }
                                                                 ]
                                                             },

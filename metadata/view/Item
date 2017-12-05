@@ -11882,7 +11882,7 @@
                                                                 "itemId": "cboCostUOM",
                                                                 "labelWidth": 150,
                                                                 "layout|flex": null,
-                                                                "valueField": "intItemUOMId"
+                                                                "valueField": "strUnitMeasure"
                                                             },
                                                             "configAlternates": {
                                                                 "columns": "array",
