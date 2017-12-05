@@ -12,12 +12,14 @@ Post-Deployment Script Template
 
 DECLARE @intScreenId INT;
 
-IF((SELECT COUNT(*) FROM tblSMScreen WHERE strScreenName = 'Load Schedule') > 0)
+--IF((SELECT COUNT(*) FROM tblSMScreen WHERE strScreenName = 'Load Schedule') > 0)
+IF EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strScreenName = 'Load Schedule')
 	BEGIN
 		SET @intScreenId = (SELECT TOP 1 intScreenId FROM tblSMScreen WHERE strScreenName = 'Load Schedule')
 		
 		DELETE FROM tblSMCustomTabDetail WHERE intCustomTabId = (SELECT TOP 1 intCustomTabId FROM tblSMCustomTab WHERE intScreenId = @intScreenId)
 		DELETE FROM tblSMCustomTab WHERE intScreenId = @intScreenId
+		DELETE FROM tblSMTransaction WHERE intScreenId = @intScreenId
 		DELETE FROM tblSMScreen WHERE intScreenId = @intScreenId
 		PRINT 'Load Schedule Resources Deleted'
 	END
