@@ -399,7 +399,8 @@ INNER JOIN (tblICInventoryReceipt r
 		ON rc.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId
 WHERE	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 		AND B.intInventoryReceiptChargeId IS NOT NULL 
-		AND (rc.dblAmountPriced <> B.dblCost OR ISNULL(NULLIF(rc.dblForexRate,0),1) <> B.dblRate)
+		AND rc.ysnInventoryCost = 1 --create cost adjustment entries for Inventory only for inventory cost yes
+		AND (rc.dblAmount <> B.dblCost OR ISNULL(NULLIF(rc.dblForexRate,0),1) <> B.dblRate)
 
 IF ISNULL(@post,0) = 1
 BEGIN	
@@ -826,7 +827,7 @@ BEGIN
 
 		--UPDATE CHARGES (Price)
 		UPDATE	Charge
-		SET		Charge.dblAmountPriced = ISNULL(Charge.dblAmountPriced, 0) - BillDetail.dblTotal
+		SET		Charge.dblAmountPriced = ISNULL(Charge.dblAmount, 0) - BillDetail.dblTotal
 		FROM	tblAPBill Bill INNER JOIN tblAPBillDetail BillDetail 
 					ON Bill.intBillId = BillDetail.intBillId
 				INNER JOIN #tmpPostBillData
@@ -928,7 +929,7 @@ BEGIN
 					AND Charge.intEntityVendorId = Bill.intEntityVendorId
 		WHERE	BillDetail.dblTotal > 0 
 
-		--UPDATE CHARGES (Price)
+		-- --UPDATE CHARGES (Price)
 		UPDATE	Charge
 		SET		Charge.dblAmountPriced = ISNULL(Charge.dblAmountPriced, 0) + BillDetail.dblTotal
 		FROM	tblAPBill Bill INNER JOIN tblAPBillDetail BillDetail 
