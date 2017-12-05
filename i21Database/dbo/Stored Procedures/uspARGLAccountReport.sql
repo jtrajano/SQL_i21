@@ -10,8 +10,8 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @dtmAsOfDateLocal	DATETIME = @dtmAsOfDate
 
-IF @dtmAsOfDate IS NULL
-    SET @dtmAsOfDate = GETDATE()
+IF @dtmAsOfDateLocal IS NULL
+    SET @dtmAsOfDateLocal = GETDATE()
 
 TRUNCATE TABLE tblARGLSummaryStagingTable
 INSERT INTO tblARGLSummaryStagingTable
@@ -31,9 +31,9 @@ FROM (
 		INNER JOIN vyuGLAccountDetail GLAD ON GLD.intAccountId = GLAD.intAccountId
 			AND GLAD.strAccountCategory = 'AR Account'
 	WHERE GLD.ysnIsUnposted = 0
-	AND GLD.dtmDate <= @dtmAsOfDate
+	AND GLD.dtmDate <= @dtmAsOfDateLocal
 	GROUP BY GLD.intAccountId, GLAD.strAccountId, strAccountCategory
-	HAVING ISNULL(SUM(dblDebit) - SUM(dblCredit), 0) > 0.00
+	HAVING ISNULL(SUM(dblDebit) - SUM(dblCredit), 0) <> 0.00
 
 	UNION ALL 
 
@@ -45,9 +45,9 @@ FROM (
 		INNER JOIN vyuGLAccountDetail GLAD ON GLD.intAccountId = GLAD.intAccountId
 			AND GLAD.strAccountCategory = 'Customer Prepayments'
 	WHERE GLD.ysnIsUnposted = 0
-	AND GLD.dtmDate <= @dtmAsOfDate
+	AND GLD.dtmDate <= @dtmAsOfDateLocal
 	GROUP BY GLD.intAccountId, GLAD.strAccountId, strAccountCategory
-	HAVING ISNULL(SUM(dblDebit) - SUM(dblCredit), 0) > 0.00
+	HAVING ISNULL(SUM(dblDebit) - SUM(dblCredit), 0) <> 0.00
 ) GL
 OUTER APPLY (
 	SELECT dblTotalAR				= SUM(dblTotalAR) + ABS(SUM(dblPrepayments))
