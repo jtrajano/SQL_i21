@@ -2937,17 +2937,17 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     hidden: true
                                                                                 },
                                                                                 {
+                                                                                    dataIndex: 'strName',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Vendor Name',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
                                                                                     dataIndex: 'strVendorId',
                                                                                     dataType: 'string',
                                                                                     text: 'Vendor No',
                                                                                     flex: 1,
                                                                                     defaultSort: true
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'strName',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Vendor Name',
-                                                                                    flex: 1
                                                                                 },
                                                                                 {
                                                                                     dataIndex: 'intCurrencyId',
