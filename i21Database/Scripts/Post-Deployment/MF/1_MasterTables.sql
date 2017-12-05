@@ -2506,3 +2506,19 @@ UPDATE tblMFWorkOrder SET intCustomerId = NULL WHERE intCustomerId = 0
 UPDATE tblMFWorkOrder SET intSalesRepresentativeId = NULL WHERE intSalesRepresentativeId = 0
 UPDATE tblMFWorkOrder SET intActualShiftId = NULL WHERE intActualShiftId = 0
 GO
+UPDATE OH
+SET intLocationId = W.intLocationId
+FROM tblMFOrderHeader OH
+JOIN tblMFStageWorkOrder SW ON SW.intOrderHeaderId = OH.intOrderHeaderId
+JOIN tblMFWorkOrder W ON W.intWorkOrderId = SW.intWorkOrderId
+WHERE OH.intLocationId IS NULL
+	AND OH.intOrderTypeId = 1
+GO
+
+UPDATE OH
+SET intLocationId = InvS.intShipFromLocationId
+FROM tblMFOrderHeader OH
+JOIN tblICInventoryShipment InvS ON InvS.strShipmentNumber = OH.strReferenceNo
+WHERE OH.intLocationId IS NULL
+	AND OH.intOrderTypeId = 5
+GO

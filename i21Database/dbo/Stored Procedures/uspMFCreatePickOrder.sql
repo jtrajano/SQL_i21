@@ -233,6 +233,7 @@ BEGIN TRY
 		,strComment
 		,dtmOrderDate
 		,strLastUpdateBy
+		,intLocationId 
 		)
 	SELECT 1
 		,1
@@ -249,6 +250,7 @@ BEGIN TRY
 		,''
 		,@dtmCurrentDate
 		,@strUserName
+		,@intLocationId 
 
 	INSERT INTO @tblMFOrderHeader
 	EXEC dbo.uspMFCreateStagingOrder @OrderHeaderInformation = @OrderHeaderInformation
