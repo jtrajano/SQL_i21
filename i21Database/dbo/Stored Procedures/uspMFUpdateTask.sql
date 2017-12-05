@@ -52,6 +52,7 @@ BEGIN TRY
 		,@intOrderHeaderId = intOrderHeaderId
 		,@intLocationId = intLocationId
 		,@intUserId = intUserId
+		,@intOrderDetailId =intOrderDetailId 
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intTaskId INT
 			,intLotId INT
@@ -60,6 +61,7 @@ BEGIN TRY
 			,intOrderHeaderId INT
 			,intLocationId INT
 			,intUserId INT
+			,intOrderDetailId  int
 			)
 
 	SELECT @strTaskNo = strOrderNo
@@ -98,7 +100,6 @@ BEGIN TRY
 	END
 
 	SELECT @intToStorageLocationId = IsNULL(intStagingLocationId, @intToStorageLocationId)
-		,@intOrderDetailId = intOrderDetailId
 	FROM tblMFOrderDetail
 	WHERE intOrderHeaderId = @intOrderHeaderId
 		AND intItemId = @intItemId
