@@ -355,11 +355,11 @@ UNION ALL
 
 SELECT I.intInvoiceId
      , dblAmountPaid		= 0
-     , dblInvoiceTotal		= 0
+     , dblInvoiceTotal		= CASE WHEN I.strType = 'CF Tran' THEN (ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(PC.dblAppliedInvoiceAmount, 0)) * -1 ELSE 0 END
      , dblAmountDue			= 0    
      , dtmDueDate			= ISNULL(P.dtmDatePaid, I.dtmDueDate)
      , I.intEntityCustomerId
-     , dblAvailableCredit	= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(PC.dblAppliedInvoiceAmount, 0)
+     , dblAvailableCredit	= CASE WHEN I.strType = 'CF Tran' THEN 0 ELSE ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(PC.dblAppliedInvoiceAmount, 0) END
 	 , dblPrepayments		= 0
 	 , I.strType
 FROM #POSTEDINVOICES I WITH (NOLOCK)
