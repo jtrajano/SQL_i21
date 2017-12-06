@@ -14,8 +14,7 @@ DECLARE @ErrorState INT
 
 BEGIN TRY
 
-	DECLARE @dtmFillingPeriod DATETIME
-		, @strAccountNumber NVARCHAR(50)
+	DECLARE  @strAccountNumber NVARCHAR(50)
 		, @strFEIN NVARCHAR(50)
 		, @dbl1_A NUMERIC(18, 6)
 		, @dbl1_B NUMERIC(18, 6)
@@ -32,6 +31,12 @@ BEGIN TRY
 		, @dbl3_C NUMERIC(18, 6)
 		, @dbl3_D NUMERIC(18, 6)
 		, @dbl3_E NUMERIC(18, 6)
+		, @dbl4_A NUMERIC(18, 6)
+		, @dbl4_B NUMERIC(18, 6)
+		, @dbl4_C NUMERIC(18, 6)
+		, @dbl4_D NUMERIC(18, 6)
+		, @dbl4_E NUMERIC(18, 6)
+		, @dblPenalty NUMERIC(18, 6)
 		, @dtmFromDate DATE
 		, @dtmToDate DATE
 
@@ -61,37 +66,13 @@ BEGIN TRY
 			, [endgroup] NVARCHAR(50)
 			, [datatype] NVARCHAR(50))
 
-		DECLARE @DateFrom DATETIME
-		, @DateTo DATETIME
-		, @TaxAuthorityId INT
-		, @Guid NVARCHAR(100)
+		DECLARE @TaxAuthorityId INT, @Guid NVARCHAR(100)
 
-		SELECT TOP 1 @DateFrom = [from],  @DateTo = [to] FROM @Params WHERE [fieldname] = 'dtmDate'
 		SELECT TOP 1 @Guid = [from] FROM @Params WHERE [fieldname] = 'strGuid'
 		SELECT TOP 1 @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'LA'
 		
-		SELECT * 
-		INTO #tmpTransactions
-		FROM vyuTFGetTransaction Trans
-		WHERE Trans.uniqTransactionGuid = @Guid
-			AND CAST(FLOOR(CAST(Trans.dtmDate AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)
-			AND CAST(FLOOR(CAST(Trans.dtmDate AS FLOAT))AS DATETIME) <= CAST(FLOOR(CAST(@DateTo AS FLOAT))AS DATETIME)
-			AND Trans.intTaxAuthorityId = @TaxAuthorityId
-
-		SELECT strFormCode, strScheduleCode, strType, dblReceived = SUM(ISNULL(dblReceived, 0.00)), dblBillQty = SUM(ISNULL(dblBillQty, 0.00)), dblQtyShipped = SUM(ISNULL(dblQtyShipped, 0.00)), dblTax = SUM(ISNULL(dblTax, 0.00)), dblTaxExempt = SUM(ISNULL(dblTaxExempt, 0.00))
-		INTO #tmpTotals
-		FROM #tmpTransactions
-		GROUP BY strFormCode, strScheduleCode, strType
-
-		SELECT TOP 1 @strFEIN = strTaxPayerFEIN
-			, @dtmFillingPeriod = dtmReportingPeriodBegin
-		FROM #tmpTransactions
-
-		SELECT @strAccountNumber = CASE WHEN strFormCode = 'R-5346' AND strTemplateItemId = 'R-5346-AcctNum' THEN ISNULL(strConfiguration, 0.00) ELSE 0.00 END
-		FROM vyuTFGetReportingComponentConfiguration
-		WHERE intTaxAuthorityId = @TaxAuthorityId
-
-		SELECT @dbl1_A = CASE WHEN strFormCode = 'R-5346' AND strScheduleCode = 'G-23' AND strType = 'Gasohol' THEN ISNULL(dblQtyShipped, 0.00) ELSE 0.00 END
+		SELECT 
+			 @dbl1_A = CASE WHEN strFormCode = 'R-5346' AND strScheduleCode = 'G-23' AND strType = 'Gasohol' THEN ISNULL(dblQtyShipped, 0.00) ELSE 0.00 END
 			, @dbl1_B = CASE WHEN strFormCode = 'R-5346' AND strScheduleCode = 'G-23' AND strType = 'Gasoline' THEN ISNULL(dblQtyShipped, 0.00) ELSE 0.00 END
 			, @dbl1_C = CASE WHEN strFormCode = 'R-5346' AND strScheduleCode = 'G-23' AND strType = 'Undyed Diesel' THEN ISNULL(dblQtyShipped, 0.00) ELSE 0.00 END
 			, @dbl1_D = CASE WHEN strFormCode = 'R-5346' AND strScheduleCode = 'G-23' AND strType = 'Dyed Diesel' THEN ISNULL(dblQtyShipped, 0.00) ELSE 0.00 END
@@ -106,14 +87,40 @@ BEGIN TRY
 			, @dbl3_C = CASE WHEN strFormCode = 'R-5346' AND strScheduleCode = 'G-25' AND strType = 'Undyed Diesel' THEN ISNULL(dblQtyShipped, 0.00) ELSE 0.00 END
 			, @dbl3_D = CASE WHEN strFormCode = 'R-5346' AND strScheduleCode = 'G-25' AND strType = 'Dyed Diesel' THEN ISNULL(dblQtyShipped, 0.00) ELSE 0.00 END
 			, @dbl3_E = CASE WHEN strFormCode = 'R-5346' AND strScheduleCode = 'G-25' AND strType = 'Aviation Fuels' THEN ISNULL(dblQtyShipped, 0.00) ELSE 0.00 END
-		FROM #tmpTotals
+		FROM (
+			SELECT 
+			strFormCode, 
+			strScheduleCode, 
+			strType, 
+			dblReceived = SUM(ISNULL(dblReceived, 0.00)), 
+			dblBillQty = SUM(ISNULL(dblBillQty, 0.00)), 
+			dblQtyShipped = SUM(ISNULL(dblQtyShipped, 0.00)), 
+			dblTax = SUM(ISNULL(dblTax, 0.00)), 
+			dblTaxExempt = SUM(ISNULL(dblTaxExempt, 0.00))
+			FROM vyuTFGetTransaction Trans
+			WHERE Trans.uniqTransactionGuid = @Guid
+				AND Trans.intTaxAuthorityId = @TaxAuthorityId
+			GROUP BY strFormCode, strScheduleCode, strType
+		) Trans
+		
+		SELECT TOP 1 @strFEIN = strTaxPayerFEIN, @dtmFromDate = dtmReportingPeriodBegin, @dtmToDate = dtmReportingPeriodEnd 
+		FROM vyuTFGetTransaction Trans
+		WHERE Trans.uniqTransactionGuid = @Guid
 
-		DROP TABLE #tmpTotals
-		DROP TABLE #tmpTransactions
+		SELECT @strAccountNumber = CASE WHEN strTemplateItemId = 'R-5346-AcctNum' THEN ISNULL(strConfiguration,'') ELSE '' END
+		, @dblPenalty = CASE WHEN strTemplateItemId = 'R-5346-Penalty' THEN (CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END) ELSE 0 END
+		FROM vyuTFGetReportingComponentConfiguration
+		WHERE intTaxAuthorityId = @TaxAuthorityId
+	
+		SET @dbl4_A = @dbl1_A + @dbl2_A + @dbl3_A
+		SET @dbl4_B = @dbl1_B + @dbl2_B + @dbl3_B
+		SET @dbl4_C = @dbl1_C + @dbl2_C + @dbl3_C
+		SET @dbl4_D = @dbl1_D + @dbl2_D + @dbl3_D
+		SET @dbl4_E = @dbl1_E + @dbl2_E + @dbl3_E
+
 	END
 
-	SELECT dtmFillingPeriod = @dtmFillingPeriod
-		, strAccountNumber = @strAccountNumber
+	SELECT strAccountNumber = @strAccountNumber
 		, strFEIN = @strFEIN
 		, dbl1_A = @dbl1_A
 		, dbl1_B = @dbl1_B
@@ -130,8 +137,14 @@ BEGIN TRY
 		, dbl3_C = @dbl3_C
 		, dbl3_D = @dbl3_D
 		, dbl3_E = @dbl3_E
+		, dbl4_A = @dbl4_A
+		, dbl4_B = @dbl4_B
+		, dbl4_C = @dbl4_C
+		, dbl4_D = @dbl4_D
+		, dbl4_E = @dbl4_E
 		, dtmFromDate = @dtmFromDate
 		, dtmToDate = @dtmToDate
+		, dblPenalty = @dblPenalty
 
 END TRY
 BEGIN CATCH
