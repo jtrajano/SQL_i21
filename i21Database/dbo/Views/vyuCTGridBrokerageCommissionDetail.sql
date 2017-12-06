@@ -18,6 +18,10 @@ AS
 			CST.dtmDueDate,
 			CST.strCurrency,
 			CST.ysnReceivable,
+			CST.intContractDetailId,
+			CST.intVendorId,
+			CST.strUOM AS strRateUOM,
+			CST.dblRate,
 			dbo.fnRemoveTrailingZeroes(CST.dblRate) + ' ' +CST.strCurrency + '/' + CST.strUOM AS strRateUnit,	   
 		  
 			SEQ.strSequenceNumber,
@@ -29,9 +33,11 @@ AS
 			SEQ.dblQuantity,
 			SEQ.strItemUOM,
 
-			HDR.strCustomerContract AS	strBuyerRef,
-			HDR.strCPContract		 AS	strSellerRef,
-			SEY.strName			 AS	strSeller
+			HDR.strCustomerContract	AS	strBuyerRef,
+			HDR.strCPContract		AS	strSellerRef,
+			SEY.strName				AS	strSeller,
+			HDR.intContractHeaderId,
+			HDR.strContractNumber
 
     FROM	tblCTBrkgCommnDetail	BCD
     JOIN	vyuCTContractCostView	CST ON	CST.intContractCostId   =   BCD.intContractCostId	
