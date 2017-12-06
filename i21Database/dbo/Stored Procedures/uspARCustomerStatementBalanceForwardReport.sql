@@ -656,20 +656,20 @@ IF @ysnPrintFromCFLocal = 1
 	BEGIN
 		UPDATE @temp_balanceforward_table SET dblTotalAR = dblTotalAR - dblFuture
 
-		UPDATE BALANCEFORWARD
-		SET BALANCEFORWARD.dblTotalAR = BALANCEFORWARD.dblTotalAR + ISNULL(CF.dblTotalFuture, 0)
-		  , BALANCEFORWARD.dblFuture = CF.dblTotalFuture
-		FROM @temp_balanceforward_table BALANCEFORWARD
-		INNER JOIN (
-			SELECT intEntityCustomerId
-				 , dblTotalFuture = SUM(dblAmountDue)
-			FROM tblARInvoice WITH (NOLOCK)
-			WHERE strType = 'CF Tran'
-			AND dtmPostDate < @dtmDateFromLocal
-			AND ysnPaid = 0
-			AND ysnPosted = 1
-			GROUP BY intEntityCustomerId
-		) CF ON BALANCEFORWARD.intEntityCustomerId = CF.intEntityCustomerId
+		--UPDATE BALANCEFORWARD
+		--SET BALANCEFORWARD.dblTotalAR = BALANCEFORWARD.dblTotalAR + ISNULL(CF.dblTotalFuture, 0)
+		--  , BALANCEFORWARD.dblFuture = CF.dblTotalFuture
+		--FROM @temp_balanceforward_table BALANCEFORWARD
+		--INNER JOIN (
+		--	SELECT intEntityCustomerId
+		--		 , dblTotalFuture = SUM(dblAmountDue)
+		--	FROM tblARInvoice WITH (NOLOCK)
+		--	WHERE strType = 'CF Tran'
+		--	AND dtmPostDate < @dtmDateFromLocal
+		--	AND ysnPaid = 0
+		--	AND ysnPosted = 1
+		--	GROUP BY intEntityCustomerId
+		--) CF ON BALANCEFORWARD.intEntityCustomerId = CF.intEntityCustomerId
 
 		UPDATE AGINGREPORT
 		SET AGINGREPORT.dbl0Days = AGINGREPORT.dbl0Days + ISNULL(CF.dblTotalFuture, 0)
@@ -677,12 +677,13 @@ IF @ysnPrintFromCFLocal = 1
 		FROM @temp_aging_table AGINGREPORT
 		INNER JOIN (
 			SELECT intEntityCustomerId
-				 , dblTotalFuture = SUM(dblAmountDue)
+				 , dblTotalFuture = SUM(dbo.fnARGetInvoiceAmountMultiplier(strTransactionType) * dblAmountDue)
 			FROM tblARInvoice WITH (NOLOCK)
 			WHERE strType = 'CF Tran'
-			AND dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+			--AND dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 			AND ysnPaid = 0
 			AND ysnPosted = 1
+			AND intInvoiceId IN (SELECT intInvoiceId FROM tblCFInvoiceStagingTable)
 			GROUP BY intEntityCustomerId
 		) CF ON AGINGREPORT.intEntityCustomerId = CF.intEntityCustomerId
 
