@@ -14,6 +14,8 @@
     [dblOverpayment]		NUMERIC (18, 6) NULL,
 	[dblBaseOverpayment]	NUMERIC (18, 6) NULL,
     [dblBalance]			NUMERIC (18, 6) NULL,
+	[dblExchangeRate]		NUMERIC (18, 6) NULL,
+	[strReceivePaymentType]	NVARCHAR (25)   COLLATE Latin1_General_CI_AS NULL,
     [strRecordNumber]		NVARCHAR (25)   COLLATE Latin1_General_CI_AS NULL,
     [strPaymentInfo]		NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strNotes]				NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
@@ -25,6 +27,7 @@
 	[ysnImportedAsPosted]	BIT				CONSTRAINT [DF_tblARPayment_ysnImportedAsPosted] DEFAULT ((0)) NOT NULL,		
 	[intEntityId]			INT				NULL DEFAULT ((0)),
 	[intWriteOffAccountId]	INT				NULL,
+	[intCurrencyExchangeRateTypeId]	INT		NULL,
 	[strPaymentMethod]		NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
 	[intEntityCardInfoId]	INT				NULL,
 	[ysnProcessCreditCard]	BIT				CONSTRAINT [DF_tblARPayment_ysnProcessCreditCard] DEFAULT ((0)) NULL,
@@ -38,7 +41,8 @@
     CONSTRAINT [FK_tblARPayment_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
 	CONSTRAINT [FK_tblARPayment_tblGLAccount_intAccountId] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARPayment_tblCMBankAccount_intBankAccountId] FOREIGN KEY ([intBankAccountId]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId]),
-	CONSTRAINT [FK_tblARPayment_tblEMEntityCardInformation_intEntityCardInfoId] FOREIGN KEY ([intEntityCardInfoId]) REFERENCES [dbo].[tblEMEntityCardInformation] ([intEntityCardInfoId])
+	CONSTRAINT [FK_tblARPayment_tblEMEntityCardInformation_intEntityCardInfoId] FOREIGN KEY ([intEntityCardInfoId]) REFERENCES [dbo].[tblEMEntityCardInformation] ([intEntityCardInfoId]),
+	CONSTRAINT [FK_tblARPayment_tblSMCurrencyExchangeRateType_intCurrencyExchangeRateTypeId] FOREIGN KEY ([intCurrencyExchangeRateTypeId]) REFERENCES [dbo].[tblSMCurrencyExchangeRateType] ([intCurrencyExchangeRateTypeId])
 );
 
 
