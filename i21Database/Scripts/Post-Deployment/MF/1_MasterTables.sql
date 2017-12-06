@@ -2506,3 +2506,36 @@ UPDATE tblMFWorkOrder SET intCustomerId = NULL WHERE intCustomerId = 0
 UPDATE tblMFWorkOrder SET intSalesRepresentativeId = NULL WHERE intSalesRepresentativeId = 0
 UPDATE tblMFWorkOrder SET intActualShiftId = NULL WHERE intActualShiftId = 0
 GO
+UPDATE OH
+SET intLocationId = W.intLocationId
+FROM tblMFOrderHeader OH
+JOIN tblMFStageWorkOrder SW ON SW.intOrderHeaderId = OH.intOrderHeaderId
+JOIN tblMFWorkOrder W ON W.intWorkOrderId = SW.intWorkOrderId
+WHERE OH.intLocationId IS NULL
+	AND OH.intOrderTypeId = 1
+GO
+
+UPDATE OH
+SET intLocationId = InvS.intShipFromLocationId
+FROM tblMFOrderHeader OH
+JOIN tblICInventoryShipment InvS ON InvS.strShipmentNumber = OH.strReferenceNo
+WHERE OH.intLocationId IS NULL
+	AND OH.intOrderTypeId = 5
+GO
+Go
+DECLARE @tblMFOrderHeader TABLE (intOrderHeaderId INT)
+
+INSERT INTO @tblMFOrderHeader
+SELECT intOrderHeaderId
+FROM tblMFOrderDetail
+GROUP BY intItemId
+	,intOrderHeaderId
+HAVING Count(*) = 1
+
+UPDATE T
+SET T.intOrderDetailId = OD.intOrderDetailId
+FROM tblMFTask T
+JOIN tblMFOrderDetail OD ON OD.intOrderHeaderId = T.intOrderHeaderId and OD.intItemId=T.intItemId
+JOIN @tblMFOrderHeader OH ON OH.intOrderHeaderId = OD.intOrderHeaderId
+Where T.intOrderDetailId is null
+Go

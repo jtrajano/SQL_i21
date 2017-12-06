@@ -16,6 +16,12 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @ZeroDecimal NUMERIC(18, 6) = 0.000000
 		,@DateOnly DATETIME = CAST(GETDATE() AS DATE)
+		,@InitTranCount INT
+		,@Savepoint NVARCHAR(32)
+
+SET @InitTranCount = @@TRANCOUNT
+SET @Savepoint = SUBSTRING(('ARAddToInvoicesToPayments' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
+
 
 DECLARE @ItemEntries PaymentIntegrationStagingTable
 DELETE FROM @ItemEntries
@@ -61,9 +67,13 @@ INSERT INTO @ItemEntries
 	,[dblBaseInvoiceTotal]
 	,[ysnApplyTermDiscount]
 	,[dblDiscount]
+	,[dblBaseDiscount]
 	,[dblDiscountAvailable]
+	,[dblBaseDiscountAvailable]
 	,[dblInterest]
+	,[dblBaseInterest]
 	,[dblPayment]
+	,[dblBasePayment]
 	,[dblAmountDue]
 	,[dblBaseAmountDue]
 	,[strInvoiceReportNumber]
@@ -110,15 +120,19 @@ SELECT
 	,[strTransactionNumber]				= CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 THEN ARI.[strTransactionNumber] ELSE APB.[strTransactionNumber] END
 	,[intTermId]						= CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 THEN ARI.[intTermId] ELSE APB.[intTermId] END
 	,[intInvoiceAccountId]				= CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 THEN ARI.[intAccountId] ELSE APB.[intAccountId] END
-	,[dblInvoiceTotal]					= CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 THEN ISNULL(ARI.[dblInvoiceTotal], @ZeroDecimal) * dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType]) ELSE ISNULL(APB.[dblInvoiceTotal], @ZeroDecimal) END
-	,[dblBaseInvoiceTotal]				= CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 THEN ISNULL(ARI.[dblBaseInvoiceTotal], @ZeroDecimal) * dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType]) ELSE ISNULL(APB.[dblBaseInvoiceTotal], @ZeroDecimal) END
-	,[ysnApplyTermDiscount]				= PE.[ysnApplyTermDiscount]
-	,[dblDiscount]						= CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 AND dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType]) = -1 THEN @ZeroDecimal ELSE ISNULL(PE.[dblDiscount], @ZeroDecimal) END
-	,[dblDiscountAvailable]				= CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 THEN [dbo].fnRoundBanker(ISNULL(dbo.[fnGetDiscountBasedOnTerm](PE.[dtmDatePaid], ARI.[dtmDate], ARI.[intTermId], ARI.[dblInvoiceTotal]), @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()) ELSE @ZeroDecimal END
-	,[dblInterest]						= CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 AND dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType]) = -1 THEN @ZeroDecimal ELSE ISNULL(PE.[dblInterest], @ZeroDecimal) END
-	,[dblPayment]						= ISNULL(PE.[dblPayment], @ZeroDecimal)
-	,[dblAmountDue]						= CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 THEN ISNULL(ARI.[dblAmountDue], @ZeroDecimal) * dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType]) ELSE ISNULL(APB.[dblAmountDue], @ZeroDecimal) END
-	,[dblBaseAmountDue]					= CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 THEN ISNULL(ARI.[dblBaseAmountDue], @ZeroDecimal) * dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType]) ELSE ISNULL(APB.[dblBaseAmountDue], @ZeroDecimal) END
+	,[dblInvoiceTotal]					= [dbo].fnRoundBanker((CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 THEN ISNULL(ARI.[dblInvoiceTotal], @ZeroDecimal) * dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType]) ELSE ISNULL(APB.[dblInvoiceTotal], @ZeroDecimal) END), [dbo].[fnARGetDefaultDecimal]())
+	,[dblBaseInvoiceTotal]				= [dbo].fnRoundBanker((CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 THEN ISNULL(ARI.[dblBaseInvoiceTotal], @ZeroDecimal) * dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType]) ELSE ISNULL(APB.[dblBaseInvoiceTotal], @ZeroDecimal) END), [dbo].[fnARGetDefaultDecimal]())
+	,[ysnApplyTermDiscount]				= ISNULL(PE.[ysnApplyTermDiscount],0)
+	,[dblDiscount]						= [dbo].fnRoundBanker((CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 THEN (CASE WHEN dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType]) = -1 THEN @ZeroDecimal ELSE (CASE WHEN ISNULL(PE.[ysnApplyTermDiscount],0) = 1 THEN [dbo].fnRoundBanker(ISNULL(dbo.[fnGetDiscountBasedOnTerm](PE.[dtmDatePaid], ARI.[dtmDate], ARI.[intTermId], ARI.[dblInvoiceTotal]), @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()) ELSE ISNULL(PE.[dblDiscount], @ZeroDecimal) END) END)ELSE ISNULL(PE.[dblDiscount], @ZeroDecimal) END), [dbo].[fnARGetDefaultDecimal]())
+	,[dblBaseDiscount]					= [dbo].fnRoundBanker((CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 THEN (CASE WHEN dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType]) = -1 THEN @ZeroDecimal ELSE (CASE WHEN ISNULL(PE.[ysnApplyTermDiscount],0) = 1 THEN [dbo].fnRoundBanker(ISNULL(dbo.[fnGetDiscountBasedOnTerm](PE.[dtmDatePaid], ARI.[dtmDate], ARI.[intTermId], ARI.[dblBaseInvoiceTotal]), @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()) ELSE ISNULL(PE.[dblDiscount], @ZeroDecimal) END) END)ELSE ISNULL(PE.[dblDiscount], @ZeroDecimal) END), [dbo].[fnARGetDefaultDecimal]())
+	,[dblDiscountAvailable]				= [dbo].fnRoundBanker((CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 THEN ARI.[dblDiscountAvailable] ELSE @ZeroDecimal END), [dbo].[fnARGetDefaultDecimal]())
+	,[dblBaseDiscountAvailable]			= [dbo].fnRoundBanker((CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 THEN ARI.[dblBaseDiscountAvailable] ELSE @ZeroDecimal END), [dbo].[fnARGetDefaultDecimal]())
+	,[dblInterest]						= [dbo].fnRoundBanker((CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 AND dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType]) = -1 THEN @ZeroDecimal ELSE ISNULL(PE.[dblInterest], @ZeroDecimal) END), [dbo].[fnARGetDefaultDecimal]())
+	,[dblBaseInterest]					= [dbo].fnRoundBanker((CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 AND dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType]) = -1 THEN @ZeroDecimal ELSE ISNULL(PE.[dblInterest], @ZeroDecimal) END), [dbo].[fnARGetDefaultDecimal]())
+	,[dblPayment]						= [dbo].fnRoundBanker((ISNULL(PE.[dblPayment], @ZeroDecimal)), [dbo].[fnARGetDefaultDecimal]())
+	,[dblBasePayment]					= [dbo].fnRoundBanker((ISNULL(PE.[dblPayment], @ZeroDecimal)), [dbo].[fnARGetDefaultDecimal]())
+	,[dblAmountDue]						= [dbo].fnRoundBanker((CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 THEN ISNULL(ARI.[dblAmountDue], @ZeroDecimal) * dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType]) ELSE ISNULL(APB.[dblAmountDue], @ZeroDecimal) END), [dbo].[fnARGetDefaultDecimal]())
+	,[dblBaseAmountDue]					= [dbo].fnRoundBanker((CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 THEN ISNULL(ARI.[dblBaseAmountDue], @ZeroDecimal) * dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType]) ELSE ISNULL(APB.[dblBaseAmountDue], @ZeroDecimal) END), [dbo].[fnARGetDefaultDecimal]())
 	,[strInvoiceReportNumber]			= PE.[strInvoiceReportNumber]
 	,[intCurrencyExchangeRateTypeId]	= PE.[intCurrencyExchangeRateTypeId]
 	,[intCurrencyExchangeRateId]		= PE.[intCurrencyExchangeRateId]
@@ -138,6 +152,8 @@ LEFT OUTER JOIN
 			,[dblBaseInvoiceTotal]
 			,[dblAmountDue]
 			,[dblBaseAmountDue]
+			,[dblDiscountAvailable]
+			,[dblBaseDiscountAvailable]
 			,[dtmDate]
 		FROM
 			tblARInvoice			
@@ -353,7 +369,7 @@ SELECT
 FROM
 	@ItemEntries IT
 WHERE
-	(IT.[dblAmountDue] + IT.[dblInterest]) < (IT.[dblPayment] + (CASE WHEN IT.[ysnApplyTermDiscount] = 1 THEN IT.[dblDiscountAvailable] ELSE IT.[dblDiscount] END))
+	(IT.[dblAmountDue] + IT.[dblInterest]) < (IT.[dblPayment] + IT.[dblDiscount])
 	AND IT.[ysnFromAP] = 0
 
 --UNION ALL
@@ -416,7 +432,12 @@ FROM @ItemEntries V
 WHERE EXISTS(SELECT NULL FROM @InvalidRecords I WHERE V.[intId] = I.[intId])
 	
 IF ISNULL(@RaiseError,0) = 0	
-	BEGIN TRANSACTION
+BEGIN
+	IF @InitTranCount = 0
+		BEGIN TRANSACTION
+	ELSE
+		SAVE TRANSACTION @Savepoint
+END
 	
 DECLARE  @IntegrationLog PaymentIntegrationLogStagingTable
 DELETE FROM @IntegrationLog
@@ -511,9 +532,9 @@ USING
 		,[dblInvoiceTotal]					= [dblInvoiceTotal]
 		,[dblBaseInvoiceTotal]				= [dblBaseInvoiceTotal]
 		,[dblDiscount]						= [dblDiscount]
-		,[dblBaseDiscount]					= [dbo].fnRoundBanker([dblDiscount] * [dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+		,[dblBaseDiscount]					= [dblBaseDiscount]
 		,[dblDiscountAvailable]				= [dblDiscountAvailable]
-		,[dblBaseDiscountAvailable]			= [dbo].fnRoundBanker([dblDiscountAvailable] * [dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+		,[dblBaseDiscountAvailable]			= [dblBaseDiscountAvailable]
 		,[dblInterest]						= [dblInterest]
 		,[dblBaseInterest]					= [dbo].fnRoundBanker([dblInterest] * [dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
 		,[dblAmountDue]						= [dblAmountDue]
@@ -634,8 +655,16 @@ VALUES(
 			
 END TRY
 BEGIN CATCH
-	IF ISNULL(@RaiseError,0) = 0	
-		ROLLBACK TRANSACTION
+	IF ISNULL(@RaiseError,0) = 0
+	BEGIN
+		IF @InitTranCount = 0
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION
+		ELSE
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION @Savepoint
+	END
+
 	SET @ErrorMessage = ERROR_MESSAGE();
 	IF ISNULL(@RaiseError,0) = 1
 		RAISERROR(@ErrorMessage, 16, 1);
@@ -680,7 +709,15 @@ BEGIN TRY
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0
-		ROLLBACK TRANSACTION
+	BEGIN
+		IF @InitTranCount = 0
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION
+		ELSE
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION @Savepoint
+	END
+
 	SET @ErrorMessage = ERROR_MESSAGE();
 	IF ISNULL(@RaiseError,0) = 1
 		RAISERROR(@ErrorMessage, 16, 1);
@@ -688,8 +725,25 @@ BEGIN CATCH
 END CATCH
 
 
-IF ISNULL(@RaiseError,0) = 0	
-	COMMIT TRANSACTION
+IF ISNULL(@RaiseError,0) = 0
+BEGIN
+
+	IF @InitTranCount = 0
+		BEGIN
+			IF (XACT_STATE()) = -1
+				ROLLBACK TRANSACTION
+			IF (XACT_STATE()) = 1
+				COMMIT TRANSACTION
+		END		
+	ELSE
+		BEGIN
+			IF (XACT_STATE()) = -1
+				ROLLBACK TRANSACTION  @Savepoint
+			--IF (XACT_STATE()) = 1
+			--	COMMIT TRANSACTION  @Savepoint
+		END	
+END
+
 SET @ErrorMessage = NULL;
 RETURN 1;
 	

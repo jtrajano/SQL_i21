@@ -17,32 +17,33 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 	END
 
 -- Declare the variables.
-DECLARE  @dtmDateTo					AS DATETIME
-		,@dtmDateFrom				AS DATETIME
-		,@strDateTo					AS NVARCHAR(50)
-		,@strDateFrom				AS NVARCHAR(50)
-		,@strCustomerName           AS NVARCHAR(MAX)
-		,@strCustomerNumber			AS NVARCHAR(MAX)
-		,@strStatementFormat        AS NVARCHAR(50)
-		,@strAccountStatusCode		AS NVARCHAR(5)
-		,@strLocationName			AS NVARCHAR(50)
-		,@ysnPrintZeroBalance		AS BIT
-		,@ysnPrintCreditBalance		AS BIT
-		,@ysnIncludeBudget			AS BIT
-		,@ysnPrintOnlyPastDue		AS BIT
-		,@ysnEmailOnly				AS BIT
-		,@xmlDocumentId				AS INT
-		,@query						AS NVARCHAR(MAX)
-		,@filter					AS NVARCHAR(MAX) = ''
-		,@fieldname					AS NVARCHAR(50)
-		,@condition					AS NVARCHAR(20)
-		,@id						AS INT 
-		,@from						AS NVARCHAR(MAX)
-		,@to						AS NVARCHAR(MAX)
-		,@join						AS NVARCHAR(10)
-		,@begingroup				AS NVARCHAR(50)
-		,@endgroup					AS NVARCHAR(50)
-		,@datatype					AS NVARCHAR(50)
+DECLARE  @dtmDateTo						AS DATETIME
+		,@dtmDateFrom					AS DATETIME
+		,@strDateTo						AS NVARCHAR(50)
+		,@strDateFrom					AS NVARCHAR(50)
+		,@strCustomerName				AS NVARCHAR(MAX)
+		,@strCustomerNumber				AS NVARCHAR(MAX)
+		,@strStatementFormat			AS NVARCHAR(50)
+		,@strAccountStatusCode			AS NVARCHAR(5)
+		,@strLocationName				AS NVARCHAR(50)
+		,@ysnPrintZeroBalance			AS BIT
+		,@ysnPrintCreditBalance			AS BIT
+		,@ysnIncludeBudget				AS BIT
+		,@ysnPrintOnlyPastDue			AS BIT
+		,@ysnEmailOnly					AS BIT
+		,@ysnActiveCustomers			AS BIT
+		,@xmlDocumentId					AS INT
+		,@query							AS NVARCHAR(MAX)
+		,@filter						AS NVARCHAR(MAX) = ''
+		,@fieldname						AS NVARCHAR(50)
+		,@condition						AS NVARCHAR(20)
+		,@id							AS INT 
+		,@from							AS NVARCHAR(MAX)
+		,@to							AS NVARCHAR(MAX)
+		,@join							AS NVARCHAR(10)
+		,@begingroup					AS NVARCHAR(50)
+		,@endgroup						AS NVARCHAR(50)
+		,@datatype						AS NVARCHAR(50)
 		
 -- Create a table variable to hold the XML data. 		
 DECLARE @temp_xml_table TABLE (
@@ -127,6 +128,10 @@ SELECT @ysnEmailOnly = [from]
 FROM @temp_xml_table
 WHERE [fieldname] = 'ysnHasEmailSetup'
 
+SELECT @ysnActiveCustomers = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'ysnActiveCustomers'
+
 SELECT @strStatementFormat = CASE WHEN ISNULL([from], '') = '' THEN 'Open Item' ELSE [from] END
 FROM @temp_xml_table
 WHERE [fieldname] = 'strStatementFormat'
@@ -151,49 +156,52 @@ IF CHARINDEX('''', @strCustomerName) > 0
 IF @strStatementFormat = 'Balance Forward'
 	BEGIN
 		EXEC dbo.uspARCustomerStatementBalanceForwardReport 
-			  @dtmDateTo				= @dtmDateTo
-			, @dtmDateFrom				= @dtmDateFrom
-			, @ysnPrintZeroBalance		= @ysnPrintZeroBalance
-			, @ysnPrintCreditBalance	= @ysnPrintCreditBalance
-			, @ysnIncludeBudget			= @ysnIncludeBudget
-			, @ysnPrintOnlyPastDue		= @ysnPrintOnlyPastDue
-			, @ysnPrintFromCF			= 0
-			, @strCustomerNumber		= @strCustomerNumber
-			, @strAccountStatusCode		= @strAccountStatusCode
-			, @strLocationName			= @strLocationName
-			, @strCustomerName			= @strCustomerName
-			, @ysnEmailOnly				= @ysnEmailOnly
+			  @dtmDateTo					= @dtmDateTo
+			, @dtmDateFrom					= @dtmDateFrom
+			, @ysnPrintZeroBalance			= @ysnPrintZeroBalance
+			, @ysnPrintCreditBalance		= @ysnPrintCreditBalance
+			, @ysnIncludeBudget				= @ysnIncludeBudget
+			, @ysnPrintOnlyPastDue			= @ysnPrintOnlyPastDue
+			, @ysnActiveCustomers			= @ysnActiveCustomers
+			, @ysnPrintFromCF				= 0
+			, @strCustomerNumber			= @strCustomerNumber
+			, @strAccountStatusCode			= @strAccountStatusCode
+			, @strLocationName				= @strLocationName
+			, @strCustomerName				= @strCustomerName
+			, @ysnEmailOnly					= @ysnEmailOnly
 	END
 ELSE IF ISNULL(@strStatementFormat, 'Open Item') IN ('Open Item', 'Running Balance')
 	BEGIN
 		EXEC dbo.uspARCustomerStatementReport
-		      @dtmDateTo				= @dtmDateTo
-		    , @dtmDateFrom				= @dtmDateFrom
-		    , @ysnPrintZeroBalance		= @ysnPrintZeroBalance
-		    , @ysnPrintCreditBalance	= @ysnPrintCreditBalance
-		    , @ysnIncludeBudget			= @ysnIncludeBudget
-		    , @ysnPrintOnlyPastDue		= @ysnPrintOnlyPastDue
-		    , @strCustomerNumber		= @strCustomerNumber
-		    , @strAccountStatusCode		= @strAccountStatusCode
-		    , @strLocationName			= @strLocationName
-		    , @strStatementFormat		= @strStatementFormat
-			, @strCustomerName			= @strCustomerName
-			, @ysnEmailOnly				= @ysnEmailOnly
+		      @dtmDateTo					= @dtmDateTo
+		    , @dtmDateFrom					= @dtmDateFrom
+		    , @ysnPrintZeroBalance			= @ysnPrintZeroBalance
+		    , @ysnPrintCreditBalance		= @ysnPrintCreditBalance
+		    , @ysnIncludeBudget				= @ysnIncludeBudget
+		    , @ysnPrintOnlyPastDue			= @ysnPrintOnlyPastDue
+			, @ysnActiveCustomers			= @ysnActiveCustomers
+		    , @strCustomerNumber			= @strCustomerNumber
+		    , @strAccountStatusCode			= @strAccountStatusCode
+		    , @strLocationName				= @strLocationName
+		    , @strStatementFormat			= @strStatementFormat
+			, @strCustomerName				= @strCustomerName
+			, @ysnEmailOnly					= @ysnEmailOnly
 	END
 ELSE IF @strStatementFormat = 'Payment Activity'
 	BEGIN
 		EXEC dbo.uspARCustomerStatementPaymentActivityReport
-			  @dtmDateTo				= @dtmDateTo
-		    , @dtmDateFrom				= @dtmDateFrom
-		    , @ysnPrintZeroBalance		= @ysnPrintZeroBalance
-		    , @ysnPrintCreditBalance	= @ysnPrintCreditBalance
-		    , @ysnIncludeBudget			= @ysnIncludeBudget
-		    , @ysnPrintOnlyPastDue		= @ysnPrintOnlyPastDue
-		    , @strCustomerNumber		= @strCustomerNumber
-		    , @strAccountStatusCode		= @strAccountStatusCode
-		    , @strLocationName			= @strLocationName
-			, @strCustomerName			= @strCustomerName
-			, @ysnEmailOnly				= @ysnEmailOnly
+			  @dtmDateTo					= @dtmDateTo
+		    , @dtmDateFrom					= @dtmDateFrom
+		    , @ysnPrintZeroBalance			= @ysnPrintZeroBalance
+		    , @ysnPrintCreditBalance		= @ysnPrintCreditBalance
+		    , @ysnIncludeBudget				= @ysnIncludeBudget
+		    , @ysnPrintOnlyPastDue			= @ysnPrintOnlyPastDue
+			, @ysnActiveCustomers			= @ysnActiveCustomers
+		    , @strCustomerNumber			= @strCustomerNumber
+		    , @strAccountStatusCode			= @strAccountStatusCode
+		    , @strLocationName				= @strLocationName
+			, @strCustomerName				= @strCustomerName
+			, @ysnEmailOnly					= @ysnEmailOnly
 	END
 
 INSERT INTO @temp_SOA_table

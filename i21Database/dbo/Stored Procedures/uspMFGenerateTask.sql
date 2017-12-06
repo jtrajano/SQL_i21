@@ -70,6 +70,7 @@ BEGIN TRY
 		,@strPickByFullPallet NVARCHAR(50)
 		,@intCustomerLabelTypeId INT
 		,@intOrderId INT
+		,@intLocationId int
 
 	SELECT @intPackagingCategoryId = intAttributeId
 	FROM tblMFAttribute
@@ -127,6 +128,7 @@ BEGIN TRY
 		,@strOrderDirection = OD.strOrderDirection
 		,@strReferenceNo = OH.strReferenceNo
 		,@intOrderId = intOrderHeaderId
+		,@intLocationId=intLocationId
 	FROM tblMFOrderHeader OH
 	JOIN tblMFOrderType OT ON OT.intOrderTypeId = OH.intOrderTypeId
 	JOIN tblMFOrderDirection OD ON OD.intOrderDirectionId = OH.intOrderDirectionId
@@ -166,24 +168,24 @@ BEGIN TRY
 			,intGroupId INT
 			)
 
-		IF EXISTS (
-				SELECT 1
-				FROM tblMFTask
-				WHERE intOrderHeaderId = @intOrderHeaderId
-					AND intTaskStateId NOT IN (
-						3
-						,4
-						)
-				)
-		BEGIN
-			DELETE
-			FROM tblMFTask
-			WHERE intOrderHeaderId = @intOrderHeaderId
-				AND intTaskStateId NOT IN (
-					3
-					,4
-					)
-		END
+		--IF EXISTS (
+		--		SELECT 1
+		--		FROM tblMFTask
+		--		WHERE intOrderHeaderId = @intOrderHeaderId
+		--			AND intTaskStateId NOT IN (
+		--				3
+		--				,4
+		--				)
+		--		)
+		--BEGIN
+		--	DELETE
+		--	FROM tblMFTask
+		--	WHERE intOrderHeaderId = @intOrderHeaderId
+		--		AND intTaskStateId NOT IN (
+		--			3
+		--			,4
+		--			)
+		--END
 
 		UPDATE tblMFOrderDetail
 		SET dblWeight = dblQty
@@ -391,7 +393,8 @@ BEGIN TRY
 				AND BS.strPrimaryStatus = 'Active'
 			JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 			JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
-			WHERE L.intItemId = @intItemId
+			WHERE L.intLocationId=IsNULL(@intLocationId,L.intLocationId)
+				And L.intItemId = @intItemId
 				AND L.dblQty > 0
 				AND LS.strPrimaryStatus = 'Active'
 				AND ISNULL(L.dtmExpiryDate - @intReceivedLife, @dtmCurrentDateTime) >= @dtmCurrentDateTime
@@ -600,7 +603,8 @@ BEGIN TRY
 			JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 			JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 			JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
-			WHERE L.intItemId = @intItemId
+			WHERE L.intLocationId=IsNULL(@intLocationId,L.intLocationId)
+				And L.intItemId = @intItemId
 				AND L.dblQty > 0
 				AND LS.strPrimaryStatus = 'Active'
 				AND ISNULL(L.dtmExpiryDate - @intReceivedLife, @dtmCurrentDateTime) >= @dtmCurrentDateTime

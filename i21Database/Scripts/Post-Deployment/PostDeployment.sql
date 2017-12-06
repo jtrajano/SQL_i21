@@ -186,6 +186,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\ReportData\TrialBalanceDetail.sql
 :r .\GL\ReportData\BalanceSheetStandard.sql
 :r .\GL\DefaultData\1n_UpdateFiscalUpperBounds.sql
+:r .\GL\DefaultData\1p_CompanyPreferenceOption.sql
 
 -- Financial Report Designer
 :r .\FRD\FRDEntryDataFix.sql
@@ -265,6 +266,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\20_UpdateContractItemStatuses.sql
 :r .\IC\21_Update_LotWeightsRequired_tblICItem.sql
 :r .\IC\PopulateLotContainerNoAndCondition.sql
+:r .\IC\22_Update_Qty_Cost_For_ReceiptTaxes.sql
 
 -- Patronage
 :r .\PAT\DefaultData\1_AddDefaultLetters.sql 

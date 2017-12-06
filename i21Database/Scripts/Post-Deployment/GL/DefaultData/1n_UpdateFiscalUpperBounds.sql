@@ -9,8 +9,11 @@ Post-Deployment Script Template
                SELECT * FROM [$(TableName)]
 --------------------------------------------------------------------------------------
 */
-PRINT 'Updating fiscal year/period upper bounds'
+GO
+PRINT 'Begin updating fiscal year/period upper bounds'
 GO
 UPDATE tblGLFiscalYear set dtmDateTo = DATEADD(SECOND,59, DATEADD(MINUTE, 59, DATEADD(HOUR, 23, DATEADD(dd, 0, DATEDIFF(dd, 0, dtmDateTo)))))
 UPDATE tblGLFiscalYearPeriod set dtmEndDate = DATEADD(SECOND,59, DATEADD(MINUTE, 59, DATEADD(HOUR, 23, DATEADD(dd, 0, DATEDIFF(dd, 0, dtmEndDate)))))
+GO
+PRINT 'Finished updating fiscal year/period upper bounds'
 GO

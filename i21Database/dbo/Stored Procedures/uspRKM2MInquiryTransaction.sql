@@ -224,6 +224,7 @@ JOIN tblCTContractHeader ch on ch.intContractHeaderId=cd.intContractHeaderId
 JOIN tblRKM2MConfiguration M2M on dc.intItemId= M2M.intItemId and ch.intContractBasisId=M2M.intContractBasisId and dc.intItemId= M2M.intItemId 
 JOIN tblICCommodityUnitMeasure cu1 on cu1.intCommodityId=@intCommodityId and cu1.intUnitMeasureId=dc.intUnitMeasureId
 JOIN tblICCommodityUnitMeasure cu on cu.intCommodityId=@intCommodityId and cu.intUnitMeasureId=@intPriceUOMId  
+               
 GROUP BY cu.intCommodityUnitMeasureId,cu1.intCommodityUnitMeasureId,strAdjustmentType,dc.intContractDetailId
 )t group by intContractDetailId
 

@@ -471,6 +471,7 @@ BEGIN TRY
 				,@intSourceTransactionTypeId = 8
 				,@intEntityUserSecurityId = @intUserId
 				,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+				,@strDescription=@strWorkOrderNo 
 
 			INSERT INTO dbo.tblMFWorkOrderProducedLotTransaction (
 				intWorkOrderId
@@ -540,6 +541,7 @@ BEGIN TRY
 			,@intSourceTransactionTypeId = 8
 			,@intEntityUserSecurityId = @intUserId
 			,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+			,@strDescription=@strWorkOrderNo 
 	END
 
 	IF @strInventoryTracking = 'Item Level'

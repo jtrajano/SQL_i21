@@ -49,7 +49,7 @@ DECLARE @strMICRPreview						AS NVARCHAR(100),
 		@strMICRDesignationSuffix			AS NVARCHAR(1),
 		@intMICRDesignationSpacesCount		AS INT,
 		@intMICRDesignationSpacesPosition	AS INT,
-		@intCurrencyId						AS NVARCHAR(1)
+		@intCurrencyId						AS NVARCHAR(5)
 
 
 SELECT					

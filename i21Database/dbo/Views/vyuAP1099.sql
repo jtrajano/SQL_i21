@@ -110,8 +110,17 @@ SELECT
 FROM tblAPBillDetail A
 INNER JOIN tblAPBill B
     ON B.intBillId = A.intBillId
-LEFT JOIN vyuAPBillPayment B2
-	ON B.intBillId = B2.intBillId   
+--LEFT JOIN vyuAPBillPayment B2
+--	ON B.intBillId = B2.intBillId   
+LEFT JOIN (
+	SELECT
+		P2.intBillId
+		,P2.dblPayment
+		,P.dtmDatePaid
+	FROM tblAPPayment P
+	INNER JOIN tblAPPaymentDetail P2 ON P.intPaymentId = P2.intPaymentId
+	WHERE P.ysnPosted = 1
+) B2 ON B.intBillId = B2.intBillId
 LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity C2 ON C.[intEntityId] = C2.intEntityId)
     ON C.[intEntityId] = B.intEntityVendorId
 LEFT JOIN [tblEMEntityLocation] D

@@ -1,4 +1,5 @@
 ﻿
+
 CREATE VIEW [dbo].[vyuCFInvoiceReport]
 AS
 
@@ -12,15 +13,20 @@ SELECT intCustomerId = ( CASE cfTrans.strTransactionType
                         END ), 
        strCustomerName = ( CASE cfTrans.strTransactionType 
                              WHEN 'Foreign Sale' THEN cfSiteItem.strName 
-                             ELSE arInv.strCustomerName 
+                             ELSE cfCardAccount.strName 
                            END ), 
        strCustomerNumber = ( CASE cfTrans.strTransactionType 
                                WHEN 'Foreign Sale' THEN cfSiteItem.strEntityNo 
-                               ELSE arInv.strCustomerNumber 
+                               ELSE cfCardAccount.strCustomerNumber 
                              END ), 
        strBillTo = ( CASE cfTrans.strTransactionType 
                        WHEN 'Foreign Sale' THEN cfSiteItem.strBillTo 
-                       ELSE arInv.strBillTo 
+                       ELSE 
+							CASE cfTrans.ysnPostedCSV 
+							WHEN 1 THEN cfSiteItem.strBillTo 
+							ELSE 
+								arInv.strBillTo 
+							END
                      END ), 
        cfSiteItem.strNetwork, 
        ISNULL(emGroup.intCustomerGroupId, 0)                           AS 
@@ -231,14 +237,20 @@ ORDER  BY dtmTransactionDate DESC), 0)
 ELSE 0 
 END )                                                         AS dblTotalMiles, 
 arInv.strShipTo, 
-arInv.strCompanyName, 
-arInv.strCompanyAddress, 
+--arInv.strCompanyName, 
+--arInv.strCompanyAddress, 
+(SELECT        TOP 1 strCompanyName
+                               FROM            tblSMCompanySetup) AS strCompanyName,
+
+(SELECT        TOP 1 [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0)
+FROM            tblSMCompanySetup) AS strCompanyAddress,
+							   
 arInv.strType, 
 arInv.strLocationName, 
 arInv.intInvoiceId, 
 arInv.strInvoiceNumber, 
 arInv.dtmDate, 
-arInv.dtmPostDate                                               AS dtmPostedDate 
+cfTrans.dtmPostedDate                                               AS dtmPostedDate 
        , 
 cfTrans.intProductId, 
 cfTrans.intCardId, 
@@ -325,7 +337,9 @@ cfTrans.strPrintTimeStamp,
 								 (select top 1 strEmail from vyuARCustomerContacts where [intEntityId] = cfSiteItem.intCustomerId  AND strEmailDistributionOption LIKE '%CF Invoice%' AND ISNULL(strEmail,'') != '')
                                  ELSE 
 								 (select top 1 strEmail from vyuARCustomerContacts where [intEntityId] = cfCardAccount.intCustomerId  AND strEmailDistributionOption LIKE '%CF Invoice%' AND ISNULL(strEmail,'') != '')
-                               END )
+                               END ),
+							   
+	   cfTrans.ysnPostedCSV
 
 
 FROM   dbo.vyuCFInvoice AS arInv 
@@ -368,8 +382,10 @@ FROM   dbo.vyuCFInvoice AS arInv
                        cfVehicle 
                     ON cfTrans.intVehicleId = cfVehicle.intVehicleId 
        LEFT OUTER JOIN dbo.vyuCFCardAccount AS cfCardAccount 
-                    ON arInv.intEntityCustomerId = cfCardAccount.intCustomerId 
-                       AND cfTrans.intCardId = cfCardAccount.intCardId 
+                    ON 
+					--arInv.intEntityCustomerId = cfCardAccount.intCustomerId 
+     --                  AND 
+					   cfTrans.intCardId = cfCardAccount.intCardId 
        LEFT OUTER JOIN (SELECT arCustGroupDetail.intCustomerGroupDetailId, 
                                arCustGroupDetail.intCustomerGroupId, 
                                arCustGroupDetail.intEntityId, 

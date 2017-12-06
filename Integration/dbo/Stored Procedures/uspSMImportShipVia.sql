@@ -94,21 +94,35 @@ BEGIN
 
 	WHILE EXISTS(SELECT TOP 1 1 FROM @ImportShipVia)
 	begin
-	
-		select top 1 @CurKey = strShipViaOriginKey from @ImportShipVia
+		DECLARE	@strLocationName     NVARCHAR (50)
+		
+		select top 1 @CurKey = strShipViaOriginKey, @strLocationName = strName + ''Loc'' from @ImportShipVia
 
 		DECLARE @EntityId			int
+		DECLARE @ysnIsDefault BIT
+
 		Declare @EntityContactId	int
 		DECLARE @EntityLocationId	int
 
-		INSERT INTO tblEMEntity(strName,strEntityNo, strContactNumber)
-		SELECT TOP 1  
-			strName,
-			@CurKey,
-			''''
-			from @ImportShipVia
-				where strShipViaOriginKey = @CurKey
-		set @EntityId = @@IDENTITY
+
+
+		IF EXISTS(SELECT TOP 1 1 FROM tblEMEntity where LTRIM(RTRIM(strEntityNo)) = RTRIM(LTRIM(@CurKey))  )
+		BEGIN
+				SELECT TOP 1 @EntityId = intEntityId FROM tblEMEntity where LTRIM(RTRIM(strEntityNo)) = RTRIM(LTRIM(@CurKey)) 
+				SET @ysnIsDefault = 0
+		END
+		ELSE
+		BEGIN
+	
+			INSERT INTO tblEMEntity(strName,strEntityNo, strContactNumber)
+			SELECT TOP 1  
+				strName,
+				@CurKey,
+				''''
+				from @ImportShipVia
+					where strShipViaOriginKey = @CurKey
+			set @EntityId = @@IDENTITY
+		END
 
 
 		INSERT INTO [tblSMShipVia]
@@ -160,25 +174,40 @@ BEGIN
 				where strShipViaOriginKey = @CurKey
 		set @EntityContactId = @@IDENTITY
 
+
+		DECLARE @LocCount INT
+		SET @LocCount = 1 
+		
+
+		WHILE EXISTS(SELECT TOP 1 1 FROM tblEMEntityLocation where intEntityId = @EntityId and strLocationName = @strLocationName)
+		BEGIN
+			SET @LocCount = @LocCount + 1 
+			SET @strLocationName = @strLocationName + CAST(@LocCount as Nvarchar(2))
+			
+		END
+
+
 		INSERT INTO tblEMEntityLocation(intEntityId, strLocationName, strAddress, strZipCode, strCity, strState, ysnDefaultLocation)
 		SELECT TOP 1  
 			@EntityId,
-			strName + ''Loc'',
+			@strLocationName,
 			strAddress,
 			strZipCode,
 			strCity,
 			strState,
-			1
+			@ysnIsDefault
 			from @ImportShipVia
 				where strShipViaOriginKey = @CurKey
 		set @EntityLocationId = @@IDENTITY
 			
 		insert into tblEMEntityToContact(intEntityId, intEntityContactId, ysnPortalAccess, ysnDefaultContact, intConcurrencyId)		
-		select @EntityId, @EntityContactId, 0, 1, 1
+		select @EntityId, @EntityContactId, 0, @ysnIsDefault, 1
 
-		
-		insert into tblEMEntityType(intEntityId, intConcurrencyId, strType)
-		select @EntityId, 1, ''Ship Via''
+		IF NOT EXISTS (SELECT TOP 1 1 From tblEMEntityType where strType = ''Ship Via'' and intEntityId = @EntityId)
+		BEGIN
+			insert into tblEMEntityType(intEntityId, intConcurrencyId, strType)
+			select @EntityId, 1, ''Ship Via''
+		END
 
 		IF NOT EXISTS (select top 1 * from [tblEMEntityTariffType] where [strTariffType] = ''Default'')
 		Begin

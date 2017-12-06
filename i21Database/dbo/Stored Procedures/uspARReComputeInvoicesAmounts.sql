@@ -94,21 +94,30 @@ WHERE
 
 UPDATE ARI
 SET
-	  [dblDiscountAvailable]	= ISNULL([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], [dblInvoiceTotal])  + T.[dblItemTermDiscountTotal], @ZeroDecimal)
-	 ,[dblTotalTermDiscount]	= ISNULL(T.[dblItemTermDiscountTotal], @ZeroDecimal)
+	  [dblDiscountAvailable]		= ISNULL([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], [dblInvoiceTotal])  + T.[dblItemTermDiscountTotal], @ZeroDecimal)
+	 ,[dblBaseDiscountAvailable]	= ISNULL([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], [dblBaseInvoiceTotal])  + T.[dblBaseItemTermDiscountTotal], @ZeroDecimal)
+	 ,[dblTotalTermDiscount]		= ISNULL(T.[dblItemTermDiscountTotal], @ZeroDecimal)
 FROM
 	tblARInvoice ARI
 LEFT OUTER JOIN
 	(
 	SELECT 
-			SUM(
-			CASE WHEN [strItemTermDiscountBy] = 'Percent'
-				THEN
-					(ISNULL([dblQtyShipped], @ZeroDecimal) * ISNULL([dblPrice], @ZeroDecimal)) * (ISNULL([dblItemTermDiscount], @ZeroDecimal)/100.000000)
-				ELSE
-					ISNULL([dblItemTermDiscount], @ZeroDecimal)
-			END
-			)	AS [dblItemTermDiscountTotal]
+		SUM(
+		CASE WHEN [strItemTermDiscountBy] = 'Percent'
+			THEN
+				[dbo].fnRoundBanker((ISNULL([dblQtyShipped], @ZeroDecimal) * ISNULL([dblPrice], @ZeroDecimal)) * (ISNULL([dblItemTermDiscount], @ZeroDecimal)/100.000000), [dbo].[fnARGetDefaultDecimal]())
+			ELSE
+				[dbo].fnRoundBanker(ISNULL([dblItemTermDiscount], @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
+		END
+		)	AS [dblItemTermDiscountTotal]
+		,SUM(
+		CASE WHEN [strItemTermDiscountBy] = 'Percent'
+			THEN
+				[dbo].fnRoundBanker(((ISNULL([dblQtyShipped], @ZeroDecimal) * ISNULL([dblPrice], @ZeroDecimal)) * (ISNULL([dblItemTermDiscount], @ZeroDecimal)/100.000000)) * [dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+			ELSE
+				[dbo].fnRoundBanker(ISNULL([dblItemTermDiscount], @ZeroDecimal) * [dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+		END
+		)	AS [dblBaseItemTermDiscountTotal]
 		,[intInvoiceId]
 	FROM
 		tblARInvoiceDetail

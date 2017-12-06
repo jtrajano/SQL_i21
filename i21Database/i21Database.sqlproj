@@ -5752,8 +5752,21 @@
     <Build Include="dbo\Stored Procedures\uspSMValidateLocalServerRole.sql" />
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1p_CompanyPreferenceOption.sql" />
     <Build Include="dbo\Functions\fnMBGetWeightedCostAverage.sql" />
+    <Build Include="dbo\Tables\tblMFLotStatusException.sql" />
     <Build Include="dbo\Tables\tblCFImportTransactionLagging.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCProcessMemoToInvoice.sql" />
+    <Build Include="dbo\Views\vyuMFLotStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspICValidateInTransitCostingOnUnpost.sql" />
+    <Build Include="dbo\Functions\fnGetItemInTransitCostingOnUnpostErrors.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetLotByOrderLineItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetOrderLineItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetUOMByLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFUpdateTask.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTaskDetail.sql" />
     <Build Include="dbo\Views\vyuRKGetPurchaseInventory.sql" />
+    <Build Include="dbo\Views\vyuMFGetPutawayDate.sql" />
+    <None Include="Scripts\Post-Deployment\IC\22_Update_Qty_Cost_For_ReceiptTaxes.sql" />
+    <Build Include="dbo\Tables\tblSCDeliverySheetSplit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

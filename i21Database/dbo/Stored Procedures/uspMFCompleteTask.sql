@@ -47,6 +47,7 @@ BEGIN TRY
 		,@strReferenceNo NVARCHAR(50)
 		,@dblWeightPerQty NUMERIC(18, 6)
 		,@intOrderId INT
+		,@strDescription nvarchar(50)
 
 	SELECT @ysnLoadProcessEnabled = ysnLoadProcessEnabled
 		,@intDefaultShipmentDockDoorLocation = intDefaultShipmentDockDoorLocation
@@ -111,7 +112,7 @@ BEGIN TRY
 
 			SELECT @intDockDoorId = NULL
 
-			SELECT @intDockDoorId = IsNULL(InvSI.intDockDoorId, @intDefaultShipmentDockDoorLocation)
+			SELECT @intDockDoorId = IsNULL(InvSI.intDockDoorId, @intDefaultShipmentDockDoorLocation),@strDescription=@strOrderNo+' / '+InvS.strShipmentNumber 
 			FROM tblICInventoryShipment InvS
 			JOIN tblICInventoryShipmentItem InvSI ON InvS.intInventoryShipmentId = InvSI.intInventoryShipmentId
 			WHERE strShipmentNumber = @strReferenceNo
@@ -136,6 +137,12 @@ BEGIN TRY
 					,@intLotLocationId = intLocationId
 				FROM tblICLot
 				WHERE intLotId = @intLotId
+
+				Select @strDescription=@strOrderNo+' / '+W.strWorkOrderNo  
+				from tblMFStageWorkOrder SW
+				JOIN tblMFWorkOrder W on W.intWorkOrderId =SW.intWorkOrderId
+				WHERE SW.intOrderHeaderId = @intOrderHeaderId
+
 			END
 		END
 
@@ -152,6 +159,7 @@ BEGIN TRY
 			,@intUserId = @intUserId
 			,@blnValidateLotReservation = 0
 			,@blnInventoryMove = @blnInventoryMove
+			,@strDescription=@strDescription
 
 		SELECT TOP 1 @intNewLotId = intLotId
 		FROM tblICLot
@@ -414,7 +422,7 @@ BEGIN TRY
 
 				SELECT @intDockDoorId = NULL
 
-				SELECT @intDockDoorId = IsNULL(InvSI.intDockDoorId, @intDefaultShipmentDockDoorLocation)
+				SELECT @intDockDoorId = IsNULL(InvSI.intDockDoorId, @intDefaultShipmentDockDoorLocation),@strDescription=@strOrderNo+' / '+InvS.strShipmentNumber 
 				FROM tblICInventoryShipment InvS
 				JOIN tblICInventoryShipmentItem InvSI ON InvS.intInventoryShipmentId = InvSI.intInventoryShipmentId
 				WHERE strShipmentNumber = @strReferenceNo
@@ -438,6 +446,11 @@ BEGIN TRY
 					,@intLotLocationId = intLocationId
 				FROM tblICLot
 				WHERE intLotId = @intLotId
+
+				Select @strDescription=@strOrderNo+' / '+W.strWorkOrderNo  
+				from tblMFStageWorkOrder SW
+				JOIN tblMFWorkOrder W on W.intWorkOrderId =SW.intWorkOrderId
+				WHERE SW.intOrderHeaderId = @intOrderHeaderId
 			END
 
 			SELECT @intOrderDetailId = intOrderDetailId
@@ -453,6 +466,7 @@ BEGIN TRY
 				,@intUserId = @intUserId
 				,@blnValidateLotReservation = 0
 				,@blnInventoryMove = @blnInventoryMove
+				,@strDescription=@strDescription
 
 			SELECT TOP 1 @intNewLotId = intLotId
 			FROM tblICLot

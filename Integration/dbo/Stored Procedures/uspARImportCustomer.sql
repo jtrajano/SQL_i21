@@ -655,7 +655,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					WHILE EXISTS(SELECT TOP 1 1 FROM tblEMEntityLocation where intEntityId = @EntityId and strLocationName = @strLocationName)
 					BEGIN
 						SET @LocCount = @LocCount + 1 
-						SET @strLocationName = @strLocationName + CAST(@LocCount as Nvarchar(2))
+						SET @strLocationName =  LTRIM(RTRIM(@strLocationName)) + CAST(@LocCount as Nvarchar(2))
 						
 					END
 			
@@ -1396,7 +1396,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					WHILE EXISTS(SELECT TOP 1 1 FROM tblEMEntityLocation where intEntityId = @EntityId and strLocationName = @strLocationName)
 					BEGIN
 						SET @LocCount = @LocCount + 1 
-						SET @strLocationName = @strLocationName + CAST(@LocCount as Nvarchar(2))
+						SET @strLocationName = LTRIM(RTRIM(@strLocationName)) + CAST(@LocCount as Nvarchar(2))
 						
 					END
 

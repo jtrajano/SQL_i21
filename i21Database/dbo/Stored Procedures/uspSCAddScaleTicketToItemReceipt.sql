@@ -157,10 +157,7 @@ SELECT
 		,intLotId					= SC.intLotId
 		,intSubLocationId			= SC.intSubLocationId
 		,intStorageLocationId		= SC.intStorageLocationId
-		,ysnIsStorage				= CASE 
-										WHEN CNT.intPricingTypeId = 2 THEN 1
-										ELSE LI.ysnIsStorage
-									END
+		,ysnIsStorage				= LI.ysnIsStorage
 		,dblFreightRate				= SC.dblFreightRate
 		,intSourceId				= SC.intTicketId
 		,intSourceType		 		= 1 -- Source type for scale is 1 

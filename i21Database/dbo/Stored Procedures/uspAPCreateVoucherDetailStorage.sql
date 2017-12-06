@@ -38,7 +38,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[dblWeightUnitQty]				,
 		[dblCostUnitQty] 				,
 		[dblUnitQty] 					,
-		[dblNetWeight] 	
+		[dblNetWeight] 					,
+		[intContractSeq]
 	)
 	SELECT
 		[intBillId]						=	@voucherId,
@@ -64,7 +65,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[dblWeightUnitQty] 				=	A.dblWeightUnitQty,
 		[dblCostUnitQty] 				=	A.dblCostUnitQty,
 		[dblUnitQty] 					= 	A.dblUnitQty,
-		[dblNetWeight] 					=	A.dblNetWeight
+		[dblNetWeight] 					=	A.dblNetWeight,
+		[intContractSeq]				=	G.intContractSeq
 	FROM @voucherDetailStorage A
 	INNER JOIN tblICItem A2 ON A.intItemId = A2.intItemId
 	CROSS APPLY tblAPBill B
@@ -72,6 +74,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	INNER JOIN tblEMEntity E ON D.intEntityId = E.intEntityId
 	LEFT JOIN tblICItemLocation loc ON loc.intLocationId = B.intShipToId AND loc.intItemId = A.intItemId
 	LEFT JOIN tblAP1099Category F ON E.str1099Type = F.strCategory
+	LEFT JOIN tblCTContractDetail G ON G.intContractDetailId = A.intContractDetailId
 	--LEFT JOIN vyuICGetItemAccount G ON G.intItemId = A2.intItemId AND G.strAccountCategory = 'AP Clearing'
 	WHERE B.intBillId = @voucherId
 

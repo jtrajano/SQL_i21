@@ -183,6 +183,8 @@ BEGIN
 	DECLARE @intNetworkLocation			INT = 0
 	DECLARE @intDupTransCount			INT = 0
 	DECLARE @ysnDuplicate				BIT = 0
+
+	DECLARE @ysnOnHold					BIT = 0
 	  
 	------------------------------------------------------------
 
@@ -323,10 +325,18 @@ BEGIN
 		-----------ORIGINAL GROSS PRICE-------
 
 
+		--TAX PERCENTAGE CONVERSION--
+		SET @StateSalesTaxPercentageRate   = @StateSalesTaxPercentageRate  * 100
+		SET @CountySalesTaxPercentageRate  = @CountySalesTaxPercentageRate * 100
+		SET @CitySalesTaxPercentageRate    = @CitySalesTaxPercentageRate   * 100
+		SET @OtherSalesTaxPercentageRate   = @OtherSalesTaxPercentageRate  * 100
+		--TAX PERCENTAGE CONVERSION--
+
+
 	END
 	ELSE IF (@strNetworkType = 'Voyager')
 	BEGIN 
-		SET @strTransactionType = 'Local/Network'
+		SET @strTransactionType = 'Extended Remote'
 	END
 	ELSE IF (@strNetworkType = 'CFN')
 	BEGIN
@@ -1030,6 +1040,7 @@ BEGIN
 			,[intOverFilledTransactionId]
 			,[dtmInvoiceDate]
 			,[strInvoiceReportNumber]
+			,[ysnOnHold]
 		)
 		VALUES
 		(
@@ -1077,6 +1088,7 @@ BEGIN
 			,@intOverFilledTransactionId
 			,@dtmInvoiceDate
 			,@strInvoiceReportNumber
+			,@ysnOnHold
 		)			
 	
 		DECLARE @Pk	INT		

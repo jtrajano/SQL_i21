@@ -7,7 +7,7 @@
 	,strPONumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,strShipToName NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	,strShipToAddress1 NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
-	,SstrhipToAddress2 NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+	,strShipToAddress2 NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	,strShipToCity NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	,strShipToState NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	,strShipToZip NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
@@ -20,7 +20,7 @@
 	,strUPCCaseCode NVARCHAR(250) COLLATE Latin1_General_CI_AS
 	,strDescription NVARCHAR(250) COLLATE Latin1_General_CI_AS
 	,dblQtyOrdered NUMERIC(36, 20)
-	,strUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS, CONSTRAINT [PK_tblMFEDI940Archive_intEDI940Id] PRIMARY KEY (intEDI940Id)
+	,strUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,dblInnerPacksPerOuterPack NUMERIC(36, 20)
 	,dblTotalQtyOrdered NUMERIC(36, 20)
 	,dtmCreated datetime CONSTRAINT [DF_tblMFEDI940Archive_dtmCreated] DEFAULT GETDATE() 
@@ -28,4 +28,9 @@
 	,intInventoryShipmentId int
 	,intInventoryShipmentItemId int
 	,strFileName nvarchar(MAX) COLLATE Latin1_General_CI_AS
+	,strShipmentDate nvarchar(50) COLLATE Latin1_General_CI_AS
+	,strTransportationMethod nvarchar(50) COLLATE Latin1_General_CI_AS
+	,strSCAC nvarchar(50) COLLATE Latin1_General_CI_AS
+	,strRouting nvarchar(50) COLLATE Latin1_General_CI_AS
+	,strShipmentMethodOfPayment nvarchar(50) COLLATE Latin1_General_CI_AS
 	)

@@ -149,6 +149,6 @@ FROM	dbo.tblCMBankTransaction CHK
 		LEFT JOIN [tblEMEntityLocation] LOCATION
 			ON VENDOR.[intEntityId] = LOCATION.intEntityId AND ysnDefaultLocation = 1 
 WHERE	CHK.intBankAccountId = @intBankAccountId
-		AND CHK.strTransactionId = ISNULL(@strTransactionId, CHK.strTransactionId)
+		AND CHK.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionId))
 		AND (SELECT COUNT(intPaymentId) FROM tblAPPaymentDetail WHERE intPaymentId = PYMT.intPaymentId) > 10
 ORDER BY CHK.strReferenceNo ASC

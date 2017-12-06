@@ -1,4 +1,5 @@
 ﻿
+
 CREATE VIEW [dbo].[vyuCFBatchPostTransactions]
 AS
 SELECT   cfNetwork.ysnPostForeignSales,cfTrans.strTransactionType as strTransType, cfTrans.dtmTransactionDate, cfTrans.strTransactionId, 'Card Fueling' AS strTransactionType, cfTrans.ysnPosted, 
@@ -36,4 +37,4 @@ LEFT OUTER JOIN
                          dbo.vyuCTContractDetailView AS ctContracts ON cfTrans.intContractId = ctContracts.intContractDetailId
 WHERE     (cfTrans.ysnPosted IS NULL OR
                          cfTrans.ysnPosted <> 1) AND (cfTrans.ysnInvalid IS NULL OR
-                         cfTrans.ysnInvalid <> 1)
+                         cfTrans.ysnInvalid <> 1) AND (ISNULL(cfTrans.ysnOnHold,0) = 0)
