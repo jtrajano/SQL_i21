@@ -721,30 +721,43 @@ BEGIN
 		END TRY
 		BEGIN CATCH
 			DECLARE @error NVARCHAR(200) = ERROR_MESSAGE()
+			SET @invalidCount = @invalidCount + 1;
+			SET @totalRecords = @totalRecords - 1;
 			RAISERROR(@error, 16, 1);
 			GOTO Post_Rollback
 		END CATCH
 	END
 	ELSE
 	BEGIN
-		EXEC uspGLBatchPostEntries @GLEntries, @batchId, @userId, @post
-		DELETE A
-		FROM #tmpPostBillData A
-		INNER JOIN tblGLPostResult B ON A.intBillId = B.intTransactionId
-		WHERE B.strDescription NOT LIKE '%success%' AND B.strBatchId = @batchId
+		BEGIN TRY
+			EXEC uspGLBatchPostEntries @GLEntries, @batchId, @userId, @post
 
-		SET @failedPostValidation = @@ROWCOUNT;
-		SET @invalidCount = @invalidCount + @failedPostValidation;
-		SET @totalRecords = @totalRecords - @failedPostValidation;
+			DELETE A
+			FROM #tmpPostBillData A
+			INNER JOIN (SELECT DISTINCT strBatchId, intTransactionId, strDescription FROM tblGLPostResult) B ON A.intBillId = B.intTransactionId
+			WHERE B.strDescription NOT LIKE '%success%' AND B.strBatchId = @batchId
 
-		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, intTransactionId)
-		SELECT 
-			A.strDescription
-			,A.strTransactionType
-			,A.strTransactionId
-			,A.intTransactionId
-		FROM tblGLPostResult A
-		WHERE A.strBatchId = @batchId
+			SET @failedPostValidation = @@ROWCOUNT;
+			SET @invalidCount = @invalidCount + @failedPostValidation;
+			SET @totalRecords = @totalRecords - @failedPostValidation;
+
+			INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+			SELECT 
+				A.strDescription
+				,A.strTransactionType
+				,A.strTransactionId
+				,@batchId
+				,A.intTransactionId
+			FROM tblGLPostResult A
+			WHERE A.strBatchId = @batchId
+		END TRY
+		BEGIN CATCH
+			DECLARE @errorBatchPost NVARCHAR(200) = ERROR_MESSAGE()
+			SET @invalidCount = @invalidCount + 1;
+			SET @totalRecords = @totalRecords - 1;
+			RAISERROR(@errorBatchPost, 16, 1);
+			GOTO Post_Rollback
+		END CATCH
 	END
 
 	IF(ISNULL(@post,0) = 0)

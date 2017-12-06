@@ -55,6 +55,9 @@ INSERT INTO #tmpPostBillBatchData SELECT [intID] FROM [dbo].fnGetRowsFromDelimit
 
 SELECT TOP 1 @BillBatchId = intBillBatchId FROM #tmpPostBillBatchData
 
+SET @invalidCount = 0;
+SET @successfulCount = 0;
+
 EXEC uspAPPostBill  @batchId = @batchId, @isBatch = @isBatch, @billBatchId = @BillBatchId, @post = @post, @recap = @recap, @userId = @userId, @exclude = @exclude, @success = @success OUTPUT, @successfulCount = @successfulCount OUTPUT, @invalidCount = @invalidCount OUTPUT
 		
 SET @batchIdUsed = @batchId
