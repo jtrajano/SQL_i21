@@ -242,21 +242,16 @@ Ext.define('Inventory.search.InventoryShipment', {
             function(successResponse) {
                 var jsonData = Ext.decode(successResponse.responseText);
                 var panel = control.up('panel');
-                var grdSearch = panel ? panel.query('#grdSearch') : null;
-
-                if (grdSearch && grdSearch.length > 0){
-                    grdSearch.forEach(function (grid) {
-                        if (grid && grid.url == './Inventory/api/InventoryShipment/SearchShipmentInvoice'){
-                            var store = grid ? grid.getStore() : null;
-                            if (store){
-                                store.reload({
-                                    callback: function(){
-                                        grid.getView().refresh();
-                                    }
-                                });                    
+                
+                if (panel && panel.url == './Inventory/api/InventoryShipment/SearchShipmentInvoice'){
+                    var store = panel ? panel.getStore() : null;
+                    if (store){
+                        store.reload({
+                            callback: function(){
+                                panel.getView().refresh();
                             }
-                        }
-                    }); 
+                        });                    
+                    }
                 }                
             }
             , function(failureResponse) {
