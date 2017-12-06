@@ -24,11 +24,11 @@ BEGIN
 END
 
 
-BEGIN TRANSACTION
+--BEGIN TRANSACTION
 EXECUTE [dbo].[uspGLImportOriginHistoricalJournalCLOSED] @intEntityId ,@result OUTPUT
 
-	IF @@ERROR <> 0	OR CHARINDEX(''SUCCESS'', @result,1)= 0
-			GOTO ROLLBACK_INSERT
+	--IF @@ERROR <> 0	OR CHARINDEX(''SUCCESS'', @result,1)= 0
+	--		GOTO ROLLBACK_INSERT
 
 SELECT @result = REPLACE(@result , ''SUCCESS '','''')
 
@@ -70,7 +70,7 @@ SELECT @result = REPLACE(@result , ''SUCCESS '','''')
 	FROM glhstmst
 	GROUP BY glhst_period, glhst_src_id, glhst_src_seq
 
-	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
+	--IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
 
 	--+++++++++++++++++++++++++++++++++
 	--	   INSERT IMPORT LOGS
@@ -85,7 +85,7 @@ SELECT @result = REPLACE(@result , ''SUCCESS '','''')
 	INSERT INTO tblGLCOAImportLogDetail (intImportLogId,strEventDescription,strPeriod,strSourceNumber,strSourceSystem,strJournalId,intConcurrencyId)
 		SELECT @intImportLogId,strDescription,dtmDate,strSourceId,strSourceType,strJournalId,1 FROM #iRelyImptblGLJournal
 
-	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
+	--IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
 
 	--+++++++++++++++++++++++++++++++++
 	--	   UPDATE POSTING DATE
@@ -121,7 +121,7 @@ SELECT @result = REPLACE(@result , ''SUCCESS '','''')
 			strSourceType
 	FROM #iRelyImptblGLJournal
 
-	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
+	--IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
 
 	--+++++++++++++++++++++++++++++++++
 	--		 TEMP DETAIL JOURNAL
@@ -161,7 +161,7 @@ SELECT @result = REPLACE(@result , ''SUCCESS '','''')
 		SUBSTRING(strCurrentExternalId,1,8) = glhst_acct1_8 AND SUBSTRING(strCurrentExternalId,10,8) = glhst_acct9_16
 	 INNER JOIN tblGLAccount ON tblGLAccount.intAccountId = tblGLCOACrossReference.inti21Id
 
-	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
+	--IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
 
 	--+++++++++++++++++++++++++++++++++
 	--		 UPDATE COLLATE JOURNAL
@@ -179,7 +179,7 @@ SELECT @result = REPLACE(@result , ''SUCCESS '','''')
 		ALTER COLUMN glhst_src_seq
 			CHAR(5) COLLATE Latin1_General_CI_AS NOT NULL
 
-	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
+	--IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
 
 	--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	--		 UPDATE DETAIL [intJournalId] BASED ON HEADER
@@ -192,7 +192,7 @@ SELECT @result = REPLACE(@result , ''SUCCESS '','''')
 		tblGLJournal.strJournalId = #iRelyImptblGLJournalDetail.glhst_jrnl_no
 		AND tblGLJournal.strSourceId = glhst_src_seq
 
-	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
+	--IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
 
 	--++++++++++++++++++++++++++++
 	--		UPDATE GOODDATE
@@ -215,7 +215,7 @@ SELECT @result = REPLACE(@result , ''SUCCESS '','''')
 	WHERE ISDATE(substring(convert(varchar(10),glhst_trans_dt),1,4) + substring(convert(varchar(10),glhst_trans_dt),5,2) + substring(convert(varchar(10),glhst_trans_dt),7,2) ) = 0
 	SELECT @invalidDatesUpdated =  CASE WHEN @@ROWCOUNT > 0  THEN ''1'' ELSE ''0'' END
 
-	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
+	--IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
 
 	--+++++++++++++++++++++++++++++++++
 	--	   INSERT JOURNAL [DETAIL]
@@ -227,7 +227,7 @@ SELECT @result = REPLACE(@result , ''SUCCESS '','''')
 								dblUnitsInlbs,strDocument,strComments,strReference,DebitUnitsInlbs,strCorrecting,strSourcePgm,strCheckbookNo,strWorkArea,A4GLIdentity
 						FROM  #iRelyImptblGLJournalDetail
 
-	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
+	--IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
 
 	--+++++++++++++++++++++++++++++++++++++
 	--	UPDATE POST DATE JOURNAL [HEADER]
@@ -237,34 +237,23 @@ SELECT @result = REPLACE(@result , ''SUCCESS '','''')
                                         WHERE tblGLJournalDetail.intJournalId = tblGLJournal.intJournalId)
 										WHERE intJournalId IN (SELECT DISTINCT(intJournalId) FROM #iRelyImptblGLJournalDetail)
 
-	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
+	--IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
 
     IF LEN(@result) > 0
 		SET @result = @result + '','' + CAST(@intImportLogId AS NVARCHAR(40))  --''SUCCESS SELECT A.intJournalId FROM tblGLJournal A INNER JOIN tblGLCOAImportLogDetail B on A.strJournalId = B.strJournalId WHERE B.intImportLogId IN('' +  @result --(Select (Select CAST(intJournalId AS NVARCHAR(MAX)) + '','' From (select intJournalId from tblGLJournal A left join #iRelyImptblGLJournal B on A.strJournalId = B.strJournalId COLLATE Latin1_General_CI_AS) X FOR XML PATH('''')) as intJournalId)
 	ELSE
-		SET @result = CAST(@intImportLogId AS NVARCHAR(40))
+		SET @result = CAST(@intImportLogId AS NVARCHAR(40));
 
-	--SET @result = ''SUCCESS '' + @result
-	UPDATE tblSMPreferences set strValue = ''true'' where strPreference = ''isHistoricalJournalImported''
-	SELECT ''SUCCESS:''+  @result +'':'' + @invalidDatesUpdated
+	
 --=====================================================================================================================================
 -- 	FINALIZING STAGE
 ---------------------------------------------------------------------------------------------------------------------------------------
-	EXEC dbo.uspGLInsertOffsetAccountForOriginTrans
-	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
+	EXEC dbo.uspGLInsertOffsetAccountForOriginTrans;
+	UPDATE tblGLCompanyPreferenceOption  set ysnHistoricalJournalImported = 1
+-- for testing only	THROW 51000, ''The record does not exist.'', 1;  
+	SELECT ''SUCCESS:''+  @result +'':'' + @invalidDatesUpdated
+	
 
-COMMIT_INSERT:
-	IF @@TRANCOUNT > 0
-		COMMIT TRANSACTION
-	GOTO IMPORT_EXIT
-ROLLBACK_INSERT:
-	IF @@TRANCOUNT > 0
-		ROLLBACK TRANSACTION
-	SELECT ''Importing Historical Journal error :'' + ERROR_MESSAGE()
-	GOTO IMPORT_EXIT
-
-IMPORT_EXIT:
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id(''tempdb..#iRelyImptblGLJournal'')) DROP TABLE #iRelyImptblGLJournal
-	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id(''tempdb..#iRelyImptblGLJournalDetail'')) DROP TABLE #iRelyImptblGLJournalDetail'
-	)
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id(''tempdb..#iRelyImptblGLJournalDetail'')) DROP TABLE #iRelyImptblGLJournalDetail')
 GO
