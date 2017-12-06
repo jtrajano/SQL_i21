@@ -261,4 +261,81 @@ BEGIN
     SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
     EXECUTE sp_executesql @SQLString;
 
+	--tblSCDeliverySheet
+	SET @SQLString = N'MERGE tblSCDeliverySheet AS Target
+        USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCDeliverySheet]) AS Source
+        ON (Target.intDeliverySheetId = Source.intDeliverySheetId)
+        WHEN MATCHED THEN
+            UPDATE SET Target.intEntityId = Source.intEntityId, Target.intCompanyLocationId = Source.intCompanyLocationId, Target.intItemId = Source.intItemId, Target.intDiscountId = Source.intDiscountId
+			, Target.strDeliverySheetNumber = Source.strDeliverySheetNumber, Target.dtmDeliverySheetDate = Source.dtmDeliverySheetDate, Target.intCurrencyId = Source.intCurrencyId
+			, Target.intTicketTypeId = Source.intTicketTypeId, Target.intSplitId = Source.intSplitId, Target.intFarmFieldId = Source.intFarmFieldId, Target.ysnPost = Source.ysnPost
+			, Target.intConcurrencyId = Source.intConcurrencyId, Target.strOfflineGuid = Source.strOfflineGuid
+        WHEN NOT MATCHED BY TARGET THEN
+            INSERT (intEntityId, intCompanyLocationId, intItemId, intDiscountId, strDeliverySheetNumber, dtmDeliverySheetDate
+			, intCurrencyId, intTicketTypeId, intSplitId, intFarmFieldId, ysnPost, intConcurrencyId, strOfflineGuid)
+            VALUES (Source.intEntityId, Source.intCompanyLocationId, Source.intItemId, Source.intDiscountId, Source.strDeliverySheetNumber, Source.dtmDeliverySheetDate, Source.intCurrencyId
+			, Source.intTicketTypeId, Source.intSplitId, Source.intFarmFieldId, Source.ysnPost, Source.intConcurrencyId, Source.strOfflineGuid)
+        WHEN NOT MATCHED BY SOURCE THEN
+            DELETE;';
+
+    SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+    SET IDENTITY_INSERT tblSCDeliverySheet ON
+    EXECUTE sp_executesql @SQLString;
+    SET IDENTITY_INSERT tblSCDeliverySheet OFF
+
+	 -- tblSCDeliverySheetSplit
+    SET @SQLString = N'MERGE tblSCDeliverySheetSplit AS Target
+        USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCDeliverySheetSplit]) AS Source
+        ON (Target.intDeliverySheetSplitId = Source.intDeliverySheetSplitId)
+        WHEN MATCHED THEN
+            UPDATE SET Target.intDeliverySheetId = Source.intDeliverySheetId, Target.intEntityId = Source.intEntityId, Target.dblSplitPercent = Source.dblSplitPercent
+			, Target.strDistributionOption = Source.strDistributionOption, Target.intConcurrencyId = Source.intConcurrencyId
+        WHEN NOT MATCHED BY TARGET THEN
+            INSERT (intDeliverySheetSplitId, intDeliverySheetId, intEntityId, dblSplitPercent, strDistributionOption, intConcurrencyId)
+            VALUES (Source.intDeliverySheetSplitId, Source.intDeliverySheetId, Source.intEntityId, Source.dblSplitPercent, Source.strDistributionOption, Source.intConcurrencyId)
+        WHEN NOT MATCHED BY SOURCE THEN
+            DELETE;';
+
+    SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+    SET IDENTITY_INSERT tblSCDeliverySheetSplit ON
+    EXECUTE sp_executesql @SQLString;
+    SET IDENTITY_INSERT tblSCDeliverySheetSplit OFF
+
+
+	-- tblSCDeliverySheetImportingTemplate
+    SET @SQLString = N'MERGE tblSCDeliverySheetImportingTemplate AS Target
+        USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCDeliverySheetImportingTemplate]) AS Source
+        ON (Target.intImportingTemplateId = Source.intImportingTemplateId)
+        WHEN MATCHED THEN
+            UPDATE SET Target.strTemplateCode = Source.strTemplateCode, Target.strTemplateDescription = Source.strTemplateDescription, Target.intDelimiterId = Source.intDelimiterId
+			, Target.strDelimiterType = Source.strDelimiterType, Target.ysnActive = Source.ysnActive, Target.intConcurrencyId = Source.intConcurrencyId
+        WHEN NOT MATCHED BY TARGET THEN
+            INSERT (intImportingTemplateId, strTemplateCode, strTemplateDescription, intDelimiterId, strDelimiterType, ysnActive, intConcurrencyId)
+            VALUES (Source.intImportingTemplateId, Source.strTemplateCode, Source.strTemplateDescription, Source.intDelimiterId, Source.strDelimiterType, Source.ysnActive, Source.intConcurrencyId)
+        WHEN NOT MATCHED BY SOURCE THEN
+            DELETE;';
+
+    SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+    SET IDENTITY_INSERT tblSCDeliverySheetImportingTemplate ON
+    EXECUTE sp_executesql @SQLString;
+    SET IDENTITY_INSERT tblSCDeliverySheetImportingTemplate OFF
+
+	-- tblSCDeliverySheetImportingTemplateDetail
+    SET @SQLString = N'MERGE tblSCDeliverySheetImportingTemplateDetail AS Target
+        USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCDeliverySheetImportingTemplateDetail]) AS Source
+        ON (Target.intImportingTemplateDetailId = Source.intImportingTemplateDetailId)
+        WHEN MATCHED THEN
+            UPDATE SET Target.intImportingTemplateId = Source.intImportingTemplateId, Target.intFieldNameId = Source.intFieldNameId, Target.strFieldName = Source.strFieldName
+			, Target.intFieldColumnNumber = Source.intFieldColumnNumber, Target.intConcurrencyId = Source.intConcurrencyId
+        WHEN NOT MATCHED BY TARGET THEN
+            INSERT (intImportingTemplateDetailId, intImportingTemplateId, intFieldNameId, intFieldColumnNumber, intConcurrencyId)
+            VALUES (Source.intImportingTemplateDetailId, Source.intImportingTemplateId, Source.intFieldNameId, Source.intFieldColumnNumber, Source.intConcurrencyId)
+        WHEN NOT MATCHED BY SOURCE THEN
+            DELETE;';
+
+    SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+    SET IDENTITY_INSERT tblSCDeliverySheetImportingTemplateDetail ON
+    EXECUTE sp_executesql @SQLString;
+    SET IDENTITY_INSERT tblSCDeliverySheetImportingTemplateDetail OFF
+
 END
