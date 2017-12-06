@@ -5400,7 +5400,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             if (receiptFreightTerms != addOrderFreightTerms
                                 && (
                                     ReceiptType === 'Purchase Order'
-                                    || (ReceiptType === 'Purchase Contract' && SourceType == 2 ) 
+                                    || (ReceiptType === 'Purchase Contract' && (SourceType == 0 || SourceType == 2) ) 
                                 )
                             ){
                                 freightTermsError.push({
