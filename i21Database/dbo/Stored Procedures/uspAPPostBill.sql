@@ -360,6 +360,7 @@ FROM	tblAPBill A INNER JOIN tblAPBillDetail B
 
 WHERE	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 		AND B.intInventoryReceiptChargeId IS NULL 
+		AND E2.intOwnershipType != 2
 		-- Compare the cost used in Voucher against the IR cost. 
 		-- Compare the ForexRate use in Voucher against IR Rate
 		-- If there is a difference, add it to @adjustedEntries table variable. 
