@@ -428,14 +428,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 						@strLocationNotes        = NULL,
 						@intShipViaId = NULL,
 						@intTaxCodeId    = NULL,
-						@intTermsId      = (SELECT  intTermID FROM tblSMTerm WHERE strTermCode = CAST(agcus_terms_cd AS CHAR(10))),
-<<<<<<< HEAD
-						@intWarehouseId  = (SELECT intCompanyLocationId tblSMCompanyLocation WHERE strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS = agcus_bus_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS),
-
-=======
-						@intWarehouseId  = (SELECT intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS = agcus_bus_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS),
->>>>>>> 8c17609a97... AR-6058
-				
+						@intTermsId      = (SELECT  intTermID FROM tblSMTerm WHERE strTermCode = CAST(agcus_terms_cd AS CHAR(10))),						
+						@intWarehouseId  = (SELECT intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS = agcus_bus_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS),				
 						--Customer
 						@strCustomerNumber		= agcus_key,			
 						@strType				= CASE WHEN agcus_co_per_ind_cp = ''C'' THEN ''Company'' ELSE ''Person'' END,					
@@ -660,7 +654,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					WHILE EXISTS(SELECT TOP 1 1 FROM tblEMEntityLocation where intEntityId = @EntityId and strLocationName = @strLocationName)
 					BEGIN
 						SET @LocCount = @LocCount + 1 
-						SET @strLocationName = @strLocationName + CAST(@LocCount as Nvarchar(2))
+						SET @strLocationName = LTRIM(RTRIM(@strLocationName)) + CAST(@LocCount as Nvarchar(2))
 						
 					END
 			
@@ -1401,7 +1395,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					WHILE EXISTS(SELECT TOP 1 1 FROM tblEMEntityLocation where intEntityId = @EntityId and strLocationName = @strLocationName)
 					BEGIN
 						SET @LocCount = @LocCount + 1 
-						SET @strLocationName = @strLocationName + CAST(@LocCount as Nvarchar(2))
+						SET @strLocationName = LTRIM(RTRIM(@strLocationName)) + CAST(@LocCount as Nvarchar(2))
 						
 					END
 
