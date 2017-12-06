@@ -13,6 +13,7 @@
     [intFarmFieldId] INT NULL,
     [ysnPost] BIT NULL DEFAULT (0),
 	[intConcurrencyId] INT NOT NULL DEFAULT ((1)), 
+	[strOfflineGuid] NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT '', 
     CONSTRAINT [PK_tblSCDeliverySheet_intDeliverySheetId] PRIMARY KEY ([intDeliverySheetId]),
 	CONSTRAINT [FK_tblSCDeliverySheet_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]),
 	CONSTRAINT [FK_tblSCDeliverySheet_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
