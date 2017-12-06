@@ -139,13 +139,13 @@ SET ANSI_WARNINGS OFF
 			INNER JOIN tblARInvoiceDetail ARID
 					ON ARID.intInvoiceId = ARI.intInvoiceId
 			INNER JOIN tblARCustomer ARC
-				ON ARC.intEntityId = ARI.intEntityId AND ARC.strStockStatus != ''
+				ON ARC.intEntityId = ARI.intEntityCustomerId AND ARC.strStockStatus != ''
 			INNER JOIN tblICItem IC
 				ON IC.intItemId = ARID.intItemId
 			INNER JOIN tblICItemUOM UOM
 				ON UOM.intItemId = IC.intItemId AND UOM.intItemUOMId = ARID.intItemUOMId
 			INNER JOIN tblPATPatronageCategory PC
-				ON PC.intPatronageCategoryId = IC.intPatronageCategoryId AND PC.strPurchaseSale = @TYPE_PURCHASE
+				ON PC.intPatronageCategoryId = IC.intPatronageCategoryId AND PC.strPurchaseSale = @TYPE_SALE
 			CROSS APPLY tblGLFiscalYear FY
 			WHERE ARI.intInvoiceId IN (SELECT [intID] FROM @tempTransactionIds) AND ARI.dtmDate BETWEEN FY.dtmDateFrom AND FY.dtmDateTo
 			AND IC.intPatronageCategoryId IS NOT NULL
@@ -179,7 +179,7 @@ SET ANSI_WARNINGS OFF
 			INNER JOIN tblICItemUOM UOM
 				ON UOM.intItemId = IC.intItemId AND UOM.intItemUOMId = ARID.intItemUOMId
 			INNER JOIN tblPATPatronageCategory PC
-				ON PC.intPatronageCategoryId = IC.intPatronageCategoryDirectId AND PC.strPurchaseSale = @TYPE_PURCHASE
+				ON PC.intPatronageCategoryId = IC.intPatronageCategoryDirectId AND PC.strPurchaseSale = @TYPE_SALE
 			CROSS APPLY tblGLFiscalYear FY
 			WHERE ARI.intInvoiceId IN (SELECT [intID] FROM @tempTransactionIds) AND ARI.dtmDate BETWEEN FY.dtmDateFrom AND FY.dtmDateTo
 			AND IC.intPatronageCategoryDirectId IS NOT NULL
