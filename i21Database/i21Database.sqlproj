@@ -5946,6 +5946,7 @@
     <Build Include="dbo\Functions\fnRemoveSpecialChars.sql" />
     <Build Include="dbo\Tables\tblSCDeliverySheetSplit.sql" />
     <None Include="Scripts\Post-Deployment\MF\9_Lot Pattern.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLGenerateAccountRange.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
