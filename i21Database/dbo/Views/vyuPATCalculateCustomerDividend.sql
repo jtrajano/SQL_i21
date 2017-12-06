@@ -3,6 +3,7 @@
 SELECT CS.intCustomerStockId,
 	CS.intCustomerPatronId AS intCustomerId,
 	NEWID() as id,
+	CS.strStockStatus,
 	CS.intStockId,
 	SC.strStockName,
 	CS.strCertificateNo,
