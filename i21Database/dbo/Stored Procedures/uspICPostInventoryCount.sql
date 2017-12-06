@@ -16,7 +16,7 @@ SET ANSI_WARNINGS OFF
 -- Initialize   
 --------------------------------------------------------------------------------------------    
 -- Create a unique transaction name. 
-DECLARE @TransactionName AS VARCHAR(500) = 'Inventory Count Transaction' + CAST(NEWID() AS NVARCHAR(100));
+DECLARE @TransactionName AS VARCHAR(500) = 'InventoryCount' + CAST(NEWID() AS NVARCHAR(100));
 
 -- Constants  
 DECLARE @STARTING_NUMBER_BATCH AS INT = 3  

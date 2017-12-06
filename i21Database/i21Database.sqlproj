@@ -5931,6 +5931,7 @@
     <Build Include="dbo\Stored Procedures\uspCTSaveBrokerageCommission.sql" />
     <Build Include="dbo\Tables\tblARInvoiceAccrual.sql" />
     <None Include="Scripts\Post-Deployment\IC\22_Update_Qty_Cost_For_ReceiptTaxes.sql" />
+    <Build Include="dbo\Functions\fnRemoveSpecialChars.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

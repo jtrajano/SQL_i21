@@ -13,7 +13,7 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF  
 
 -- Create a unique transaction name. 
-DECLARE @TransactionName AS VARCHAR(500) = 'Create Shipment Lot' + CAST(NEWID() AS NVARCHAR(100));
+DECLARE @TransactionName AS VARCHAR(500) = 'CreateShipmentLot' + CAST(NEWID() AS NVARCHAR(100));
 
 DECLARE 
 	@intInventoryShipmentId INT,

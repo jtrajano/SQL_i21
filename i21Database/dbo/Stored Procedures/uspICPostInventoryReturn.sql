@@ -16,7 +16,7 @@ SET ANSI_WARNINGS OFF
 -- Initialize   
 --------------------------------------------------------------------------------------------    
 -- Create a unique transaction name. 
-DECLARE @TransactionName AS VARCHAR(500) = 'Inventory Return Transaction' + CAST(NEWID() AS NVARCHAR(100));
+DECLARE @TransactionName AS VARCHAR(500) = 'InventoryReturn' + CAST(NEWID() AS NVARCHAR(100));
 
 -- Constants  
 DECLARE @INVENTORY_RETURN_TYPE AS INT = 42
