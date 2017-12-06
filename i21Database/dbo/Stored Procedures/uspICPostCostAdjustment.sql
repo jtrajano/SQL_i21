@@ -255,6 +255,7 @@ BEGIN
 	BEGIN 
 		SET @strTransactionId_Batch = @strTransactionId
 		SET @TransactionName = 'Cost Adj ' + @strTransactionId
+		SET @TransactionName = dbo.fnRemoveSpecialChars(@TransactionName) 
 
 		-- Create a new transaction if it is missing. 
 		IF ISNULL(@TransCount, 0) = 0 
@@ -322,8 +323,7 @@ BEGIN
 			,@ErrorSeverity = ERROR_SEVERITY()
 			,@ErrorState = XACT_STATE()
 
-		-- Rollback to the last save point. 
-		ROLLBACK TRAN @TransactionName
+		RAISERROR(@ErrorMessage, @ErrorSeverity, @ErrorState)
 	END CATCH
 
 	-- FIFO
@@ -363,8 +363,7 @@ BEGIN
 			,@ErrorSeverity = ERROR_SEVERITY()
 			,@ErrorState = XACT_STATE()
 
-		-- Rollback to the last save point. 
-		ROLLBACK TRAN @TransactionName
+		RAISERROR(@ErrorMessage, @ErrorSeverity, @ErrorState)
 	END CATCH
 
 	-- LIFO
@@ -404,8 +403,7 @@ BEGIN
 			,@ErrorSeverity = ERROR_SEVERITY()
 			,@ErrorState = XACT_STATE()
 
-		-- Rollback to the last save point. 
-		ROLLBACK TRAN @TransactionName
+		RAISERROR(@ErrorMessage, @ErrorSeverity, @ErrorState)
 	END CATCH
 
 	-- Lot Costing
@@ -445,8 +443,7 @@ BEGIN
 			,@ErrorSeverity = ERROR_SEVERITY()
 			,@ErrorState = XACT_STATE()
 
-		-- Rollback to the last save point. 
-		ROLLBACK TRAN @TransactionName
+		RAISERROR(@ErrorMessage, @ErrorSeverity, @ErrorState)
 	END CATCH
 
 	-- Actual Costing
@@ -487,8 +484,7 @@ BEGIN
 			,@ErrorSeverity = ERROR_SEVERITY()
 			,@ErrorState = XACT_STATE()
 
-		-- Rollback to the last save point. 
-		ROLLBACK TRAN @TransactionName
+		RAISERROR(@ErrorMessage, @ErrorSeverity, @ErrorState)
 	END CATCH
 
 	-- If there is an error, do a rollback for that particular cost adjustment, 
@@ -497,6 +493,9 @@ BEGIN
 	-- and continue with loop to process the next item in line. 
 	IF ISNULL(@ReturnValue, 0) <> 0 
 	BEGIN 
+		-- Rollback to the last save point. 
+		ROLLBACK TRAN @TransactionName
+
 		EXEC uspICLogPostResult
 			@strMessage = @ErrorMessage
 			,@intErrorId = @ReturnValue

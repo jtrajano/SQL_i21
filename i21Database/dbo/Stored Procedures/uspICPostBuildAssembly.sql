@@ -15,7 +15,7 @@ SET ANSI_WARNINGS OFF
 -- Initialize   
 --------------------------------------------------------------------------------------------    
 -- Create a unique transaction name. 
-DECLARE @TransactionName AS VARCHAR(500) = 'Build Assembly Transaction' + CAST(NEWID() AS NVARCHAR(100));
+DECLARE @TransactionName AS VARCHAR(500) = 'BuildAssemblyTransaction' + CAST(NEWID() AS NVARCHAR(100));
 
 -- Constants  
 DECLARE @BUILD_ASSEMBLY_TYPE AS INT = 11
