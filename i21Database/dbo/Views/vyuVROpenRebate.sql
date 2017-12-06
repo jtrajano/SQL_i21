@@ -17,10 +17,12 @@ AS
 		,E.dblUnitQty
 		,dblCost = B.dblPrice
 		,dblRebateRate = ISNULL(M.dblRebateRate,ISNULL(N.dblRebateRate,0.0))
-		,dblRebateAmount = CASE WHEN M.strRebateBy = 'Percentage' THEN
+		,dblRebateAmount = CASE WHEN ISNULL(M.strRebateBy,N.strRebateBy) = 'Percentage' THEN
 								 CAST((B.dblQtyShipped * dblPrice * ISNULL(M.dblRebateRate,ISNULL(N.dblRebateRate,0.0)) / 100) AS NUMERIC(18,6))
+							WHEN ISNULL(M.strRebateBy,N.strRebateBy) = 'Unit' THEN
+								CAST((B.dblQtyShipped * ISNULL(M.dblRebateRate,ISNULL(N.dblRebateRate,0.0))) AS NUMERIC(18,6))
 							ELSE
-							  CAST((B.dblQtyShipped * ISNULL(M.dblRebateRate,ISNULL(N.dblRebateRate,0.0))) AS NUMERIC(18,6))
+								ISNULL(M.dblRebateRate,ISNULL(N.dblRebateRate,0.0))
 							END
 		,B.intInvoiceDetailId
 		,B.intConcurrencyId 
@@ -40,15 +42,15 @@ AS
 		ON A.intEntityCustomerId = G.intEntityId
 	INNER JOIN tblEMEntity H
 		ON G.intEntityId = H.intEntityId
-	INNER JOIN tblICItemLocation O
-		ON C.intItemId = O.intItemId
-			AND A.intCompanyLocationId = O.intLocationId
-	INNER JOIN tblSMCompanyLocation P
-		ON O.intLocationId = P.intCompanyLocationId
+	INNER JOIN tblVRCustomerXref L
+		ON A.intEntityCustomerId = L.intEntityId
 	INNER JOIN tblVRVendorSetup J
-		ON O.intVendorId = J.intEntityId
+		ON L.intVendorSetupId = J.intVendorSetupId
 	INNER JOIN tblVRProgram I
 		ON J.intVendorSetupId = I.intVendorSetupId
+	INNER JOIN tblICItemVendorXref O
+		ON B.intItemId = O.intItemId
+			AND J.intVendorSetupId = O.intVendorSetupId
 	LEFT JOIN tblVRProgramItem M
 		ON I.intProgramId = M.intProgramId
 			AND B.intItemId = M.intItemId
@@ -61,9 +63,6 @@ AS
 			AND A.dtmDate <= ISNULL(M.dtmEndDate,'12/31/9999')
 	INNER JOIN tblAPVendor K 
 		ON J.intEntityId = K.intEntityId
-	INNER JOIN tblVRCustomerXref L
-		ON J.intVendorSetupId = L.intVendorSetupId
-			AND A.intEntityCustomerId = L.intEntityId
 	WHERE (N.dblRebateRate IS NOT NULL OR M.dblRebateRate IS NOT NULL)
 		AND NOT EXISTS(SELECT TOP 1 1 FROM tblVRRebate WHERE intInvoiceDetailId = B.intInvoiceDetailId)
 		AND A.ysnPosted = 1
