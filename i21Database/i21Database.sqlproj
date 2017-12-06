@@ -5932,6 +5932,7 @@
     <Build Include="dbo\Tables\tblARInvoiceAccrual.sql" />
     <None Include="Scripts\Post-Deployment\IC\22_Update_Qty_Cost_For_ReceiptTaxes.sql" />
     <Build Include="dbo\Functions\fnRemoveSpecialChars.sql" />
+    <None Include="Scripts\Post-Deployment\MF\9_Lot Pattern.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
