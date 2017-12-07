@@ -108,7 +108,7 @@ BEGIN TRY
 	FROM tblMFCompanyPreference
 
 	SELECT @intAllowablePickDayRange = intAllowablePickDayRange
-	FROM tblWHCompanyPreference
+	FROM tblMFCompanyPreference
 
 	IF @intAllowablePickDayRange IS NULL
 		SELECT @intAllowablePickDayRange = 60

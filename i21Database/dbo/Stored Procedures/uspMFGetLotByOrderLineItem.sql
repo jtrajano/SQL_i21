@@ -55,7 +55,7 @@ WHERE oh.intOrderHeaderId = @intOrderHeaderId
 	AND oli.intItemId = @intItemId
 
 SELECT @intAllowablePickDayRange = intAllowablePickDayRange
-FROM tblWHCompanyPreference
+FROM tblMFCompanyPreference
 
 IF @strOrderType = 'INVENTORY SHIPMENT STAGING'
 BEGIN
