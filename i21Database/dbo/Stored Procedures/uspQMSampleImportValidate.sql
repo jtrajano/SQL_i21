@@ -18,6 +18,7 @@ BEGIN TRY
 		,@strContainerNumber NVARCHAR(100)
 		,@strMarks NVARCHAR(100)
 		,@dblSequenceQuantity NUMERIC(18, 6)
+		,@strQuantityUOM NVARCHAR(50)
 		,@strSampleStatus NVARCHAR(30)
 		,@strPropertyName NVARCHAR(100)
 		,@strPropertyValue NVARCHAR(MAX)
@@ -35,6 +36,7 @@ BEGIN TRY
 		,@intContractDetailId INT
 		,@strSampleImportDateTimeFormat NVARCHAR(50)
 		,@intConvertYear INT
+		,@intUnitMeasureId INT
 
 	BEGIN TRANSACTION
 
@@ -71,6 +73,7 @@ BEGIN TRY
 			,@strContainerNumber = NULL
 			,@strMarks = NULL
 			,@dblSequenceQuantity = NULL
+			,@strQuantityUOM = NULL
 			,@strSampleStatus = NULL
 			,@strPropertyName = NULL
 			,@strPropertyValue = NULL
@@ -86,6 +89,7 @@ BEGIN TRY
 			,@intProductId = NULL
 			,@intContractDetailId = NULL
 			,@strPreviousErrMsg = ''
+			,@intUnitMeasureId = NULL
 
 		SELECT @dtmSampleReceivedDate = CONVERT(DATETIME, dtmSampleReceivedDate, @intConvertYear)
 			,@strSampleNumber = strSampleNumber
@@ -97,6 +101,7 @@ BEGIN TRY
 			,@strContainerNumber = strContainerNumber
 			,@strMarks = strMarks
 			,@dblSequenceQuantity = dblSequenceQuantity
+			,@strQuantityUOM = strQuantityUOM
 			,@strSampleStatus = strSampleStatus
 			,@strPropertyName = strPropertyName
 			,@strPropertyValue = strPropertyValue
@@ -296,6 +301,35 @@ BEGIN TRY
 				SELECT @strPreviousErrMsg += 'Invalid Result. '
 		END
 
+		-- Quantity UOM
+		IF ISNULL(@strQuantityUOM, '') <> ''
+		BEGIN
+			IF NOT EXISTS (
+					SELECT 1
+					FROM tblICUnitMeasure
+					WHERE strUnitMeasure = @strQuantityUOM
+					)
+				SELECT @strPreviousErrMsg += 'Invalid Quantity UOM. '
+			ELSE
+			BEGIN
+				SELECT @intUnitMeasureId = intUnitMeasureId
+				FROM tblICUnitMeasure
+				WHERE strUnitMeasure = @strQuantityUOM
+
+				IF ISNULL(@intItemId, 0) > 0
+				BEGIN
+					IF NOT EXISTS (
+							SELECT 1
+							FROM tblICItemUOM IUOM
+							JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IUOM.intUnitMeasureId
+							WHERE IUOM.intItemId = @intItemId
+								AND UOM.strUnitMeasure = @strQuantityUOM
+							)
+						SELECT @strPreviousErrMsg += 'Quantity UOM is not available in the configured Item UOM. '
+				END
+			END
+		END
+
 		-- Contract Sequence Check
 		IF ISNULL(@intContractHeaderId, 0) > 0
 		BEGIN
@@ -363,12 +397,17 @@ BEGIN TRY
 				DECLARE @dblCQuantity NUMERIC(18, 6)
 				DECLARE @intSeqItemId INT
 				DECLARE @strItemNo NVARCHAR(50)
+				DECLARE @intCUnitMeasureId INT
+				DECLARE @strCUnitMeasure NVARCHAR(50)
 
 				SELECT @dblCQuantity = CD.dblQuantity
+					,@intCUnitMeasureId = CD.intUnitMeasureId
+					,@strCUnitMeasure = UOM.strUnitMeasure
 					,@intSeqItemId = CD.intItemId
 					,@strItemNo = I.strItemNo
 				FROM tblCTContractDetail CD
 				JOIN tblICItem I ON I.intItemId = CD.intItemId
+				JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = CD.intUnitMeasureId
 				WHERE CD.intContractDetailId = @intContractDetailId
 
 				IF @intItemId <> @intSeqItemId
@@ -378,6 +417,13 @@ BEGIN TRY
 				BEGIN
 					IF @dblSequenceQuantity > @dblCQuantity
 						SELECT @strPreviousErrMsg += 'Quantity cannot be greater than Contract Sequence Quantity.(' + LTRIM(@dblCQuantity) + '). '
+				END
+
+				-- Quantity UOM
+				IF ISNULL(@intUnitMeasureId, 0) > 0
+				BEGIN
+					IF @intUnitMeasureId <> @intCUnitMeasureId
+						SELECT @strPreviousErrMsg += 'Quantity UOM is not matching with Contract Sequence UOM.(' + LTRIM(@strCUnitMeasure) + '). '
 				END
 			END
 		END
@@ -464,6 +510,7 @@ BEGIN TRY
 							,strSampleNote
 							,strHeaderComment
 							,dblSequenceQuantity
+							,strQuantityUOM
 							,strSampleStatus
 						FROM tblQMSampleImport
 						WHERE strSampleNumber = @strSampleNumber
@@ -506,6 +553,7 @@ BEGIN TRY
 					,strSampleNote
 					,strHeaderComment
 					,dblSequenceQuantity
+					,strQuantityUOM
 					,strSampleStatus
 					,strPropertyName
 					,strPropertyValue
@@ -528,6 +576,7 @@ BEGIN TRY
 					,strSampleNote
 					,strHeaderComment
 					,dblSequenceQuantity
+					,strQuantityUOM
 					,strSampleStatus
 					,strPropertyName
 					,strPropertyValue
@@ -566,6 +615,7 @@ BEGIN TRY
 		,strSampleNote
 		,strHeaderComment
 		,dblSequenceQuantity
+		,strQuantityUOM
 		,strSampleStatus
 		,strPropertyName
 		,strPropertyValue
