@@ -5972,6 +5972,7 @@
     <Build Include="dbo\Tables\tblSTUpdateRegisterHistory.sql" />
     <Build Include="dbo\Views\vyuMFGetPalletSSCCNo.sql" />
     <Build Include="dbo\Views\vyuHDTicketWatcher.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCProcessMemoToInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
