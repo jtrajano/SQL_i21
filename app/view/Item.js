@@ -1623,8 +1623,8 @@ Ext.define('Inventory.view.Item', {
                                                                         itemId: 'cboHazmat',
                                                                         fieldLabel: 'Hazmat Message',
                                                                         labelWidth: 125,
-                                                                        displayField: 'strDescription',
-                                                                        valueField: 'strDescription'
+                                                                        displayField: 'strTagNumber',
+                                                                        valueField: 'intTagId'
                                                                     },
                                                                     {
                                                                         xtype: 'checkboxfield',
@@ -3495,15 +3495,15 @@ Ext.define('Inventory.view.Item', {
                                                                                     hidden: true
                                                                                 },
                                                                                 {
-                                                                                    dataIndex: 'strCustomerNumber',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Customer No',
-                                                                                    flex: 1
-                                                                                },
-                                                                                {
                                                                                     dataIndex: 'strName',
                                                                                     dataType: 'string',
                                                                                     text: 'Name',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strCustomerNumber',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Customer No',
                                                                                     flex: 1
                                                                                 }
                                                                             ],
@@ -3652,15 +3652,15 @@ Ext.define('Inventory.view.Item', {
                                                                                     hidden: true
                                                                                 },
                                                                                 {
-                                                                                    dataIndex: 'strVendorId',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Vendor No',
-                                                                                    flex: 1
-                                                                                },
-                                                                                {
                                                                                     dataIndex: 'strName',
                                                                                     dataType: 'string',
                                                                                     text: 'Vendor Name',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strVendorId',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Vendor No',
                                                                                     flex: 1
                                                                                 }
                                                                             ],

@@ -37,7 +37,7 @@ Ext.define('Inventory.view.InventoryTagViewModel', {
             var t = get('current.strType');
             switch(t) {
                 case "Hazmat Message":
-                    return get('current.intHazmatMessage');
+                    return get('current.intHazmatTag');
                 case "Ingredient Tag":
                     return get('current.intIngredientTag');
                 case "Medication Tag":

@@ -401,9 +401,9 @@ Ext.define('Inventory.view.ItemViewController', {
                 ]
             },
             cboHazmat: {
-                value: '{current.strHazmatMessage}',
+                value: '{current.strHazmatTag}',
                 origValueField: 'intTagId',
-                origUpdateField: 'intHazmatMessage',
+                origUpdateField: 'intHazmatTag',
                 store: '{inventoryTags}',
                 defaultFilters: [
                     {
@@ -3813,7 +3813,7 @@ Ext.define('Inventory.view.ItemViewController', {
     },
 
     onHazmatMessageTagDrilldown: function(combo) {
-        this.showInventoryTag('intHazmatMessage', "Hazmat Message");
+        this.showInventoryTag('intHazmatTag', "Hazmat Message");
     },
 
     showInventoryTag: function(fieldName, type) {
