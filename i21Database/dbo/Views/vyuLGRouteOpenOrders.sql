@@ -9,6 +9,7 @@ SELECT
 	,intEntityLocationId = NULL
 	,intEntityTypeId = NULL
 	,strEntityType = 'Customer'
+	,strCustomerNumber = NULL
 	,intSiteID = TMO.intSiteID
 	,intCustomerID = TMO.intCustomerId
 	,intDispatchID = TMO.intDispatchId
@@ -65,6 +66,7 @@ SELECT
 	,intEntityLocationId = LGLD.intCustomerEntityLocationId
 	,intEntityTypeId = NULL
 	,strEntityType = 'Customer'
+	,strCustomerNumber = NULL
 	,intSiteID = NULL
 	,intCustomerID = NULL
 	,intDispatchID = NULL
@@ -123,6 +125,7 @@ SELECT
 	,intEntityLocationId = LGLD.intVendorEntityLocationId
 	,intEntityTypeId = NULL
 	,strEntityType = 'Vendor'
+	,strCustomerNumber = NULL
 	,intSiteID = NULL
 	,intCustomerID = NULL
 	,intDispatchID = NULL
@@ -181,6 +184,7 @@ SELECT
 	,intEntityLocationId = NULL
 	,intEntityTypeId = NULL
 	,strEntityType = 'Customer'
+	,strCustomerNumber
 	,intSiteID = TMO.intSiteId
 	,intCustomerID = TMO.intCustomerId
 	,intDispatchID = NULL
@@ -235,6 +239,7 @@ SELECT
 	,intEntityLocationId = EL.intEntityLocationId
 	,intEntityTypeId = ET.intEntityTypeId
 	,strEntityType = ET.strType
+	,strCustomerNumber = NULL
 	,intSiteID = NULL
 	,intCustomerID = NULL
 	,intDispatchID = NULL
