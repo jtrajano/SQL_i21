@@ -169,6 +169,8 @@ BEGIN
 		intEntityCustomerId
 		,strCustomerNumber
 		,strName
+		,strPhoneNumber
+		,strContactName
 		,SUM(dblQtyShipped) dblQtyShipped
 		,SUM(dblQtyOrdered) dblQtyOrdered
 		,SUM(dblInvoiceTotal) dblInvoiceTotal
@@ -177,7 +179,9 @@ BEGIN
 		'GROUP BY 
 		intEntityCustomerId
 		,strCustomerNumber
-		,strName'
+		,strName
+		,strPhoneNumber
+		,strContactName'
 
 		EXEC (@q)
 
@@ -209,7 +213,8 @@ BEGIN
 
 
 		SELECT 
-		 ytd.intEntityCustomerId
+		row_number() OVER (order by ytd.dblInvoiceTotal desc) as intRankId
+		,ytd.intEntityCustomerId
 		,ytd.strCustomerNumber
 		,ytd.strName 
 		,ytd.dblQtyShipped as dblYTDQtyShipped
@@ -219,6 +224,8 @@ BEGIN
 		,pytd.dblQtyShipped as dblPYTDQtyShipped
 		,pytd.dblQtyOrdered as dblPYTDQtyOrdered
 		,pytd.dblInvoiceTotal as dblPYTDInvoiceTotal
+		,ytd.strContactName 
+		,ytd.strPhoneNumber
 		FROM 
 		##tblYTD as ytd
 		LEFT JOIN
@@ -229,14 +236,25 @@ BEGIN
 
 	END
 
-	DROP table ##tblPYTD
-	DROP table ##tblYTD
+	--DROP table ##tblPYTD
+	--DROP table ##tblYTD
+
+	IF OBJECT_ID('tempdb..##tblPYTD') IS NOT NULL
+    DROP TABLE ##tblPYTD
+
+	IF OBJECT_ID('tempdb..##tblYTD') IS NOT NULL
+    DROP TABLE ##tblYTD
 
 	END TRY
 	BEGIN CATCH
 
-	DROP table ##tblPYTD
-	DROP table ##tblYTD
+		SELECT ERROR_MESSAGE()
+	
+		IF OBJECT_ID('tempdb..##tblPYTD') IS NOT NULL
+		DROP TABLE ##tblPYTD
+
+		IF OBJECT_ID('tempdb..##tblYTD') IS NOT NULL
+		DROP TABLE ##tblYTD
 
 	END CATCH 
     
