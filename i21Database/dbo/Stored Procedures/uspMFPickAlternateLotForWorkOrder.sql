@@ -118,7 +118,7 @@ BEGIN TRY
 	FROM tblMFCompanyPreference
 
 	SELECT @intAllowablePickDayRange = intAllowablePickDayRange
-	FROM tblWHCompanyPreference
+	FROM tblMFCompanyPreference
 
 	IF @intLotId <> @intAlternateLotId
 		AND @ysnPickByLotCode = 1
