@@ -50,7 +50,12 @@ BEGIN TRY
 			@ysnLoad					BIT,
 			@ysnSlice					BIT,
 			@intNewShipperId			INT,
-			@intNewShippingLineId		INT
+			@intNewShippingLineId		INT,
+			@intAllowNegativeInventory  INT,
+			@intItemLocationId			INT, 
+			@intItemStockUOMId			INT, 
+			@dblUnitOnHand				NUMERIC(18,6), 
+			@strUnitMeasure				NVARCHAR(50)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @XML 
 	
@@ -111,6 +116,8 @@ BEGIN TRY
 			intShipperId				INT,
 			intShippingLineId			INT
 	)  
+
+	IF @intNewCompanyLocationId = 0 SET @intNewCompanyLocationId = NULL
 
 	IF @RowState  <> 'Added'
 	BEGIN
@@ -242,13 +249,6 @@ BEGIN TRY
 		--Active check
 		IF ISNULL(@ysnSlice,0) = 0
 		BEGIN
-			IF	@intNewItemId IS NOT NULL AND NOT EXISTS(SELECT * FROM tblICItem WHERE intItemId = @intNewItemId AND strStatus = 'Active')
-			BEGIN
-				SELECT @ErrMsg = strItemNo FROM tblICItem WHERE intItemId = @intNewItemId
-				SET @ErrMsg = 'Item ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
-				RAISERROR(@ErrMsg,16,1)
-			END
-
 			IF	@intNewItemContractId IS NOT NULL AND NOT EXISTS(SELECT * FROM vyuCTItemContractView WHERE intItemContractId = @intNewItemContractId AND strStatus = 'Active' AND intLocationId = @intNewCompanyLocationId)
 			BEGIN
 				SELECT @ErrMsg = strContractItemName FROM tblICItemContract WHERE intItemContractId = @intNewItemContractId
@@ -403,6 +403,37 @@ BEGIN TRY
 		END
 	END
 
+	IF ISNULL(@ysnSlice,0) = 0
+	BEGIN
+		IF	@intNewItemId IS NOT NULL AND NOT EXISTS(SELECT * FROM tblICItem WHERE intItemId = @intNewItemId AND strStatus = 'Active')
+		BEGIN
+			SELECT @ErrMsg = strStatus FROM tblICItem WHERE intItemId = @intNewItemId
+			IF @ErrMsg = 'Phased Out'
+			BEGIN
+				SELECT @intAllowNegativeInventory  = intAllowNegativeInventory, @intItemLocationId = intItemLocationId FROM tblICItemLocation WHERE intItemId = @intNewItemId AND intLocationId = @intNewCompanyLocationId
+				IF @intAllowNegativeInventory = 3
+				BEGIN
+					SELECT @intItemStockUOMId = intItemUOMId FROM tblICItemUOM WHERE  intItemId = @intNewItemId AND ysnStockUnit = 1
+					SELECT @strUnitMeasure	=	strUnitMeasure FROM tblICUnitMeasure WHERE  intUnitMeasureId = (SELECT intUnitMeasureId FROM tblICItemUOM WHERE  intItemUOMId = @intNewItemUOMId)
+					SELECT @dblUnitOnHand	=	ISNULL(dblUnitOnHand,0) FROM tblICItemStock WHERE intItemId = @intNewItemId AND intItemLocationId = @intItemLocationId
+					SELECT @dblUnitOnHand	=	dbo.fnCTConvertQtyToTargetItemUOM(@intItemStockUOMId,@intNewItemUOMId,@dblUnitOnHand)
+					IF @dblNewQuantity > @dblUnitOnHand
+					BEGIN
+						SELECT @ErrMsg = strItemNo FROM tblICItem WHERE intItemId = @intNewItemId
+						SELECT @ErrMsg = 'Phased Out item ' + @ErrMsg + ' has a stock of ' + dbo.fnRemoveTrailingZeroes(@dblUnitOnHand) + ' ' + @strUnitMeasure + '. ' +
+						'Which is insufficient to save sequence of ' + dbo.fnRemoveTrailingZeroes(@dblNewQuantity) + ' ' + @strUnitMeasure + '. '
+						RAISERROR(@ErrMsg,16,1)
+					END
+				END
+			END
+			ELSE
+			BEGIN
+				SELECT @ErrMsg = strItemNo FROM tblICItem WHERE intItemId = @intNewItemId
+				SET @ErrMsg = 'Item ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
+				RAISERROR(@ErrMsg,16,1)
+			END
+		END
+	END
 END TRY
 BEGIN CATCH       
 	SET @ErrMsg = ERROR_MESSAGE()      

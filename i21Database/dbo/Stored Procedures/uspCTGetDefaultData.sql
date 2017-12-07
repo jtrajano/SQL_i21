@@ -13,13 +13,13 @@
 	@intContractTypeId		INT = NULL
 AS
 BEGIN
-	DECLARE @intProductTypeId	INT,
-			@intFutureMarketId	INT,
-			@intFutureMonthId	INT,
-			@strFutureMonthYear NVARCHAR(100),
-			@strSubLocationName NVARCHAR(100),
-			@strStorageLocation NVARCHAR(100),
-			@strContractItemNo NVARCHAR(100),
+	DECLARE @intProductTypeId		INT,
+			@intFutureMarketId		INT,
+			@intFutureMonthId		INT,
+			@strFutureMonthYear		NVARCHAR(100),
+			@strSubLocationName		NVARCHAR(100),
+			@strStorageLocation		NVARCHAR(100),
+			@strContractItemNo		NVARCHAR(100),
 			@strContractItemName	NVARCHAR(100)
 
 	SELECT	@intItemId				= CASE WHEN @intItemId= 0 THEN NULL ELSE @intItemId END,
@@ -127,11 +127,11 @@ BEGIN
 
 	IF @strType = 'FutureMonthByPlannedDate'
 	BEGIN
-		SELECT TOP 1 @intFutureMonthId = intFutureMonthId,@strFutureMonthYear = strFutureMonthYear FROM vyuCTFuturesMonth WHERE intFutureMarketId = @intMarketId AND intYear >= @intYear AND intMonth >= @intPlannedMonth ORDER BY intYear ASC, intMonth ASC
+		SELECT TOP 1 @intFutureMonthId = intFutureMonthId,@strFutureMonthYear = strFutureMonthYear FROM vyuCTFuturesMonth WHERE intFutureMarketId = @intMarketId AND intYear >= @intYear AND intMonth >= @intPlannedMonth AND ysnExpired <> 1 ORDER BY intYear ASC, intMonth ASC
 
 		IF @intFutureMonthId IS NULL
 		BEGIN
-			SELECT TOP 1 @intFutureMonthId = intFutureMonthId,@strFutureMonthYear = strFutureMonthYear FROM vyuCTFuturesMonth WHERE intFutureMarketId = @intMarketId AND intYear >= @intYear + 1 AND intMonth > 0 ORDER BY intYear ASC, intMonth ASC
+			SELECT TOP 1 @intFutureMonthId = intFutureMonthId,@strFutureMonthYear = strFutureMonthYear FROM vyuCTFuturesMonth WHERE intFutureMarketId = @intMarketId AND intYear >= @intYear + 1 AND intMonth > 0 AND ysnExpired <> 1 ORDER BY intYear ASC, intMonth ASC
 		END
 		SELECT @intFutureMonthId AS intFutureMonthId, @strFutureMonthYear AS strFutureMonth
 	END
@@ -195,4 +195,14 @@ BEGIN
 		JOIN	tblSMCurrency C ON C.intCurrencyID = V.intCurrencyId
 		WHERE intEntityId = @intEntityId AND strEntityType = CASE WHEN @intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END
 	END
+
+	IF @strType = 'FutureMonth'
+	BEGIN
+		SELECT TOP 1 intFutureMonthId,REPLACE(strFutureMonth,' ','('+strSymbol+') ') strFutureMonth FROM tblRKFuturesMonth
+		WHERE intFutureMarketId = @intMarketId  AND 
+		ISNULL(	dtmLastTradingDate, CONVERT(DATETIME,SUBSTRING(LTRIM(year(GETDATE())),1,2)+ LTRIM(intYear)+'-'+SUBSTRING(strFutureMonth,1,3)+'-01')) >= DATEADD(d, 0, DATEDIFF(d, 0, GETDATE()))
+		AND ysnExpired <> 1
+		ORDER BY ISNULL(dtmLastTradingDate, CONVERT(DATETIME,SUBSTRING(LTRIM(year(GETDATE())),1,2)+ LTRIM(intYear)+'-'+SUBSTRING(strFutureMonth,1,3)+'-01')) ASC
+	END
+
 END
