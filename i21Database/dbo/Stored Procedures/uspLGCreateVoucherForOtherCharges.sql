@@ -32,17 +32,17 @@ BEGIN TRY
 		,dblQtyReceived NUMERIC(18, 6)
 		,dblCost NUMERIC(18, 6)
 		,intLoadCostId INT
-		,ysnInventoryCost BIT)
-
+		,ysnInventoryCost BIT
+		)
 	DECLARE @distinctVendor TABLE (
 		intRecordId INT Identity(1, 1)
-		,intVendorEntityId INT)
-
+		,intVendorEntityId INT
+		)
 	DECLARE @distinctItem TABLE (
 		intItemRecordId INT Identity(1, 1)
 		,intVendorEntityId INT
-		,intItemId INT)
-
+		,intItemId INT
+		)
 	DECLARE @receiptData TABLE (
 		intReceiptRecordId INT IDENTITY(1, 1)
 		,intInventoryReceiptId INT
@@ -50,7 +50,8 @@ BEGIN TRY
 		,intInventoryReceiptItemId INT
 		,intInventoryReceiptType INT
 		,dblCost NUMERIC(18, 6)
-		,intEntityVendorId INT)
+		,intEntityVendorId INT
+		)
 
 	INSERT INTO @receiptData
 	SELECT IR.intInventoryReceiptId
@@ -75,11 +76,14 @@ BEGIN TRY
 			SELECT TOP 1 1
 			FROM tblAPBillDetail BD
 			JOIN tblLGLoadCost LC ON LC.intBillId = BD.intBillId
-			WHERE LC.intLoadId = @intLoadId)
+			WHERE LC.intLoadId = @intLoadId
+			)
 	BEGIN
-		SET @strErrorMessage = 'Voucher was already created for other charges in ' + @strLoadNumber;
+		DECLARE @ErrorMessage NVARCHAR(250)
 
-		RAISERROR (@strErrorMessage,16,1);
+		SET @ErrorMessage = 'Voucher was already created for other charges in ' + @strLoadNumber;
+
+		RAISERROR (@ErrorMessage,16,1);
 	END
 
 	SELECT @intAPAccount = ISNULL(intAPAccount, 0)
@@ -165,7 +169,9 @@ BEGIN TRY
 			WHERE strAccountCategory IS NULL
 				AND I.intItemId IN (
 					SELECT intItemId
-					FROM @distinctItem))
+					FROM @distinctItem
+					)
+			)
 	BEGIN
 		RAISERROR ('''AP Clearing'' is not configured for one or more item(s).',11,1);
 	END
@@ -248,8 +254,8 @@ BEGIN TRY
 			WHERE intRecordId = @intMinVendorRecordId
 			
 			IF EXISTS (SELECT TOP 1 1
-					   FROM @voucherDetailData
-					   WHERE intVendorEntityId = @intVendorEntityId
+					FROM @voucherDetailData
+					WHERE intVendorEntityId = @intVendorEntityId
 						AND ysnInventoryCost = 0)
 			BEGIN
 				INSERT INTO @VoucherDetailLoadNonInv (
@@ -285,27 +291,25 @@ BEGIN TRY
 						WHERE intVendorEntityId = @intVendorEntityId
 							AND ysnInventoryCost = 0)
 
-				UPDATE tblAPBillDetail
-				SET intLoadId = @intLoadId
+				UPDATE tblAPBillDetail 
+				SET intLoadId = @intLoadId 
 				WHERE intBillId = @intBillId
 			END
 
+			
 			IF EXISTS (SELECT TOP 1 1
-					   FROM @voucherDetailData
-					   WHERE intVendorEntityId = @intVendorEntityId
+					FROM @voucherDetailData
+					WHERE intVendorEntityId = @intVendorEntityId
 						AND ysnInventoryCost = 1)
 			BEGIN
-				SELECT @intMinInventoryReceiptId = MIN(intInventoryReceiptId)
-					,@intBillId = NULL
+				SELECT @intMinInventoryReceiptId = MIN(intInventoryReceiptId), @intBillId = NULL
 				FROM @receiptData
 
 				INSERT INTO @voucherDetailReceiptCharge (intInventoryReceiptChargeId)
 				SELECT intInventoryReceiptChargeId
 				FROM tblICInventoryReceiptCharge C
-				WHERE intInventoryReceiptId = @intMinInventoryReceiptId
-					AND intEntityVendorId = @intVendorEntityId
-					AND ysnInventoryCost = 1
-
+				WHERE intInventoryReceiptId = @intMinInventoryReceiptId AND intEntityVendorId = @intVendorEntityId AND ysnInventoryCost = 1
+				
 				EXEC uspAPCreateBillData @userId = @intEntityUserSecurityId
 					,@vendorId = @intVendorEntityId
 					,@voucherDetailReceiptCharge = @voucherDetailReceiptCharge
@@ -318,6 +322,7 @@ BEGIN TRY
 						FROM @voucherDetailData
 						WHERE intVendorEntityId = @intVendorEntityId
 							AND ysnInventoryCost = 1)
+
 			END
 
 			SELECT @intMinVendorRecordId = MIN(intRecordId)
