@@ -344,6 +344,7 @@ BEGIN
 			JOIN tblICItem I ON I.intItemId = RI.intItemId
 			and RI.intRecipeId = @intRecipeId
 				AND I.intCategoryId = @intPMCategoryId
+				AND RI.intWorkOrderId = @intProductValueId
 				Where I.strDescription LIKE @strPackingCategory1
 
 			IF @strPackingMaterial IS NULL
@@ -356,6 +357,7 @@ BEGIN
 			JOIN tblICItem I ON I.intItemId = RI.intItemId
 			and RI.intRecipeId = @intRecipeId
 				AND I.intCategoryId = @intPMCategoryId
+				AND RI.intWorkOrderId = @intProductValueId
 				Where I.strDescription LIKE @strPackingCategory6
 
 			IF @strPackingMaterial1 IS NULL
