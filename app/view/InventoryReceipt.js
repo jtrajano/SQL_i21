@@ -582,15 +582,15 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 hidden: true
                                                                             },
                                                                             {
-                                                                                dataIndex: 'strUserName',
-                                                                                dataType: 'string',
-                                                                                text: 'User Name',
-                                                                                flex: 1
-                                                                            },
-                                                                            {
                                                                                 dataIndex: 'strFullName',
                                                                                 dataType: 'string',
                                                                                 text: 'Full Name',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strUserName',
+                                                                                dataType: 'string',
+                                                                                text: 'User Name',
                                                                                 flex: 1
                                                                             }
                                                                         ],

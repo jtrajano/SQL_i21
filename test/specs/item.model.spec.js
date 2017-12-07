@@ -260,7 +260,7 @@ UnitTestEngine.testModel({
         "type": "int",
         "allowNull": true
     }, {
-        "name": "intHazmatMessage",
+        "name": "intHazmatTag",
         "type": "int",
         "allowNull": true
     }, {
