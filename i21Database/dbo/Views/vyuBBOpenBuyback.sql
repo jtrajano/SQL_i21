@@ -23,11 +23,9 @@ AS
 	INNER JOIN tblVRCustomerXref C
 		ON A.intEntityCustomerId = C.intEntityId
 	INNER JOIN tblBBCustomerLocationXref D
-		ON C.intCustomerXrefId = D.intCustomerXrefId
-			AND A.intBillToLocationId = D.intEntityLocationId
+		ON A.intBillToLocationId = D.intEntityLocationId
 	INNER JOIN tblBBCustomerLocationXref E --Ship To
 		ON A.intShipToLocationId = E.intEntityLocationId
-			AND C.intCustomerXrefId = E.intCustomerXrefId
 	INNER JOIN tblVRVendorSetup F
 		ON C.intVendorSetupId = F.intVendorSetupId	
 	INNER JOIN tblEMEntity G
