@@ -109,6 +109,7 @@
 :r .\11_IC\CleanUPCCodes.sql
 :r .\11_IC\DeleteObsoleteSP.sql
 :r .\11_IC\DeleteObsoleteColumns.sql
+:r .\11_IC\RenameColumns.sql
 
 -- EM
 :r .\12_EM\01_EntitySchemaUpdate.sql

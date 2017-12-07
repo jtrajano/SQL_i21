@@ -4,9 +4,9 @@ SELECT
 	  intItemId					= item.intItemId
 	, strItemNo					= item.strItemNo
 	, strItemDescription		= item.strDescription
-	, strIngredientTag			= it.strDescription
-	, strMedicationTag			= mt.strDescription
-	, strHazmatMessage			= hm.strDescription
+	, strIngredientTag			= it.strTagNumber
+	, strMedicationTag			= mt.strTagNumber
+	, strHazmatTag				= hm.strTagNumber
 	, intIngredientTag			= it.intTagId
 	, intMedicationTag			= mt.intTagId
 	, intHazmatMessage			= hm.intTagId
@@ -19,5 +19,5 @@ SELECT
 FROM tblICItem item
 	LEFT JOIN tblICTag it ON it.intTagId = item.intIngredientTag
 	LEFT JOIN tblICTag mt ON mt.intTagId = item.intMedicationTag
-	LEFT JOIN tblICTag hm ON hm.intTagId = item.intHazmatMessage
+	LEFT JOIN tblICTag hm ON hm.intTagId = item.intHazmatTag
 WHERE item.strType IN ('Inventory', 'Raw Material', 'Finished Good', 'Bundle', 'Kit', 'Software')
