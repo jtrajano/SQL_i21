@@ -21,6 +21,7 @@ SELECT intSampleImportErrorId
 	,strSampleNote
 	,strHeaderComment
 	,dblSequenceQuantity
+	,strQuantityUOM
 	,strSampleStatus
 	,strPropertyName
 	,strPropertyValue

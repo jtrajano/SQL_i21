@@ -22,6 +22,7 @@ BEGIN TRY
 		,strSampleNote NVARCHAR(512)
 		,strHeaderComment NVARCHAR(MAX)
 		,dblSequenceQuantity NUMERIC(18, 6)
+		,strQuantityUOM NVARCHAR(50)
 		,strSampleStatus NVARCHAR(30)
 		,intCreatedUserId INT
 		,dtmCreated DATETIME
@@ -37,6 +38,7 @@ BEGIN TRY
 		,@strSampleNote NVARCHAR(512)
 		,@strHeaderComment NVARCHAR(MAX)
 		,@dblSequenceQuantity NUMERIC(18, 6)
+		,@strQuantityUOM NVARCHAR(50)
 		,@strSampleStatus NVARCHAR(30)
 		,@intCreatedUserId INT
 		,@dtmCreated DATETIME
@@ -109,6 +111,7 @@ BEGIN TRY
 		,strSampleNote
 		,strHeaderComment
 		,dblSequenceQuantity
+		,strQuantityUOM
 		,strSampleStatus
 		,MIN(intCreatedUserId) AS intCreatedUserId
 		,MIN(dtmCreated) AS dtmCreated
@@ -124,6 +127,7 @@ BEGIN TRY
 		,strSampleNote
 		,strHeaderComment
 		,dblSequenceQuantity
+		,strQuantityUOM
 		,strSampleStatus
 	ORDER BY intSampleImportId
 
@@ -144,6 +148,7 @@ BEGIN TRY
 			,@strSampleNote = NULL
 			,@strHeaderComment = NULL
 			,@dblSequenceQuantity = NULL
+			,@strQuantityUOM = NULL
 			,@strSampleStatus = NULL
 			,@intCreatedUserId = NULL
 			,@dtmCreated = NULL
@@ -181,6 +186,7 @@ BEGIN TRY
 			,@strSampleNote = strSampleNote
 			,@strHeaderComment = strHeaderComment
 			,@dblSequenceQuantity = dblSequenceQuantity
+			,@strQuantityUOM = strQuantityUOM
 			,@strSampleStatus = strSampleStatus
 			,@intCreatedUserId = intCreatedUserId
 			,@dtmCreated = dtmCreated
@@ -397,17 +403,26 @@ BEGIN TRY
 					OR strEntityType = 'Customer'
 					)
 
-			-- Take the template UOM. If not avail, take stock UOM
-			SELECT @intRepresentingUOMId = P.intUnitMeasureId
-			FROM tblQMProduct P
-			WHERE P.intProductId = @intProductId
-
-			IF ISNULL(@intRepresentingUOMId, 0) = 0
+			IF ISNULL(@strQuantityUOM, '') = ''
 			BEGIN
-				SELECT @intRepresentingUOMId = IU.intUnitMeasureId
-				FROM tblICItemUOM IU
-				WHERE IU.intItemId = @intItemId
-					AND IU.ysnStockUnit = 1
+				-- Take the template UOM. If not avail, take stock UOM
+				SELECT @intRepresentingUOMId = P.intUnitMeasureId
+				FROM tblQMProduct P
+				WHERE P.intProductId = @intProductId
+
+				IF ISNULL(@intRepresentingUOMId, 0) = 0
+				BEGIN
+					SELECT @intRepresentingUOMId = IU.intUnitMeasureId
+					FROM tblICItemUOM IU
+					WHERE IU.intItemId = @intItemId
+						AND IU.ysnStockUnit = 1
+				END
+			END
+			ELSE
+			BEGIN
+				SELECT @intRepresentingUOMId = intUnitMeasureId
+				FROM tblICUnitMeasure
+				WHERE strUnitMeasure = @strQuantityUOM
 			END
 		END
 

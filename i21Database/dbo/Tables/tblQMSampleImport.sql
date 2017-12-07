@@ -13,6 +13,7 @@
 	strSampleNote NVARCHAR(512) COLLATE Latin1_General_CI_AS,
 	strHeaderComment NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
 	dblSequenceQuantity NUMERIC(18, 6),
+	strQuantityUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	strSampleStatus NVARCHAR(30) COLLATE Latin1_General_CI_AS,
 	strPropertyName NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	strPropertyValue NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
