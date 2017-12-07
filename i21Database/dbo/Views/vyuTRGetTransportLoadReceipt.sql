@@ -17,4 +17,12 @@ LEFT JOIN vyuTRSupplyPointView SupplyPoint ON SupplyPoint.intSupplyPointId = Rec
 --LEFT JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = Receipt.intInventoryReceiptId
 --LEFT JOIN tblICInventoryTransfer IT ON IT.intInventoryTransferId = Receipt.intInventoryTransferId
 --LEFT JOIN tblSMTaxGroup TaxGroup ON TaxGroup.intTaxGroupId = Receipt.intTaxGroupId
-LEFT JOIN vyuLGLoadDetailView LoadSchedule ON LoadSchedule.intLoadDetailId = Receipt.intLoadDetailId
+
+/*
+BEGIN Fix for IC-4601
+(1) Original code: LEFT JOIN vyuLGLoadDetailView LoadSchedule ON LoadSchedule.intLoadDetailId = Receipt.intLoadDetailId 
+(2) Replaced it with the code below. Replace vyuLGLoadDetailView with vyuLGLoadContainerLookup. 
+vyuLGLoadDetailView is running slow. 
+*/
+LEFT JOIN vyuLGLoadContainerLookup LoadSchedule ON LoadSchedule.intLoadDetailId = Receipt.intLoadDetailId
+/*END Fix for IC-4601*/
