@@ -37,10 +37,28 @@ BEGIN TRY
 
 	SELECT @strLoadNumber = strLoadNumber FROM tblLGLoad WHERE intLoadId = @intLoadId
 
+	IF OBJECT_ID('tempdb..#tempVoucherId') IS NOT NULL
+		DROP TABLE #tempVoucherId
+
+	SELECT *
+	INTO #tempVoucherId
+	FROM (
+		SELECT intBillId
+		FROM tblLGLoadCost
+		WHERE intBillId IS NOT NULL
+	
+		UNION
+	
+		SELECT intBillId
+		FROM tblLGLoadWarehouseServices
+		WHERE intBillId IS NOT NULL
+		) tbl
+
 	IF EXISTS(SELECT TOP 1 1 FROM tblAPBillDetail BD 
 	JOIN tblLGLoadDetail LD ON BD.intLoadDetailId = LD.intLoadDetailId
-	WHERE LD.intLoadId = @intLoadId)
+	WHERE LD.intLoadId = @intLoadId AND BD.intBillId NOT IN (SELECT intBillId FROM #tempVoucherId))
 	BEGIN
+
 		DECLARE @ErrorMessage NVARCHAR(250)
 
 		SET @ErrorMessage = 'Voucher was already created for ' + @strLoadNumber;
@@ -82,16 +100,16 @@ BEGIN TRY
 		,LD.intItemId
 		,intAccountId = [dbo].[fnGetItemGLAccount](LD.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
 		,dblQtyReceived = LD.dblQuantity
+		,dblCost = CASE 
+			WHEN AD.ysnSeqSubCurrency = 1
+				THEN AD.dblQtyToPriceUOMConvFactor * ISNULL(AD.dblSeqPrice, 0) / 100
+			ELSE AD.dblQtyToPriceUOMConvFactor * ISNULL(AD.dblSeqPrice, 0)
+			END
 		--,dblCost = CASE 
 		--	WHEN AD.ysnSeqSubCurrency = 1
 		--		THEN AD.dblQtyToPriceUOMConvFactor * ISNULL(AD.dblSeqPrice, 0) / 100
 		--	ELSE AD.dblQtyToPriceUOMConvFactor * ISNULL(AD.dblSeqPrice, 0)
 		--	END
-		,dblCost = CASE 
-			WHEN AD.ysnSeqSubCurrency = 1
-				THEN ISNULL(AD.dblSeqPrice, 0) / 100
-			ELSE ISNULL(AD.dblSeqPrice, 0)
-			END
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
