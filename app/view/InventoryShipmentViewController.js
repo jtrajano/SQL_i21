@@ -2752,7 +2752,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                 if (shipmentFreightTerms != addOrderFreightTerms
                                     && (
                                         OrderType === 'Sales Order'
-                                        || (ReceiptType === 'Sales Contract') 
+                                        || (OrderType === 'Sales Contract') 
                                     )
                                 ){
                                     freightTermsError.push({
