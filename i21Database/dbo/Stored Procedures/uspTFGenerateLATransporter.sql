@@ -16,27 +16,27 @@ BEGIN TRY
 
 	DECLARE  @strAccountNumber NVARCHAR(50)
 		, @strFEIN NVARCHAR(50)
-		, @dbl1_A NUMERIC(18, 6)
-		, @dbl1_B NUMERIC(18, 6)
-		, @dbl1_C NUMERIC(18, 6)
-		, @dbl1_D NUMERIC(18, 6)
-		, @dbl1_E NUMERIC(18, 6)
-		, @dbl2_A NUMERIC(18, 6)
-		, @dbl2_B NUMERIC(18, 6)
-		, @dbl2_C NUMERIC(18, 6)
-		, @dbl2_D NUMERIC(18, 6)
-		, @dbl2_E NUMERIC(18, 6)
-		, @dbl3_A NUMERIC(18, 6)
-		, @dbl3_B NUMERIC(18, 6)
-		, @dbl3_C NUMERIC(18, 6)
-		, @dbl3_D NUMERIC(18, 6)
-		, @dbl3_E NUMERIC(18, 6)
-		, @dbl4_A NUMERIC(18, 6)
-		, @dbl4_B NUMERIC(18, 6)
-		, @dbl4_C NUMERIC(18, 6)
-		, @dbl4_D NUMERIC(18, 6)
-		, @dbl4_E NUMERIC(18, 6)
-		, @dblPenalty NUMERIC(18, 6)
+		, @dbl1_A NUMERIC(18, 6) = 0
+		, @dbl1_B NUMERIC(18, 6) = 0
+		, @dbl1_C NUMERIC(18, 6) = 0
+		, @dbl1_D NUMERIC(18, 6) = 0
+		, @dbl1_E NUMERIC(18, 6) = 0
+		, @dbl2_A NUMERIC(18, 6) = 0
+		, @dbl2_B NUMERIC(18, 6) = 0
+		, @dbl2_C NUMERIC(18, 6) = 0
+		, @dbl2_D NUMERIC(18, 6) = 0
+		, @dbl2_E NUMERIC(18, 6) = 0
+		, @dbl3_A NUMERIC(18, 6) = 0
+		, @dbl3_B NUMERIC(18, 6) = 0
+		, @dbl3_C NUMERIC(18, 6) = 0
+		, @dbl3_D NUMERIC(18, 6) = 0
+		, @dbl3_E NUMERIC(18, 6) = 0
+		, @dbl4_A NUMERIC(18, 6) = 0
+		, @dbl4_B NUMERIC(18, 6) = 0
+		, @dbl4_C NUMERIC(18, 6) = 0
+		, @dbl4_D NUMERIC(18, 6) = 0
+		, @dbl4_E NUMERIC(18, 6) = 0
+		, @dblPenalty NUMERIC(18, 6) = 0
 		, @dtmFromDate DATE
 		, @dtmToDate DATE
 
