@@ -29,6 +29,7 @@ GROUP BY A1.intAccountId)
 UPDATE A SET A.strDescription = ISNULL(CTE.strDescription ,'')
 FROM tblGLAccount A INNER JOIN CTE ON A.intAccountId = CTE.intAccountId
 
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[glactmst]') AND type IN (N'U'))
 UPDATE G SET G.glact_desc = SUBSTRING(ISNULL(A.strDescription,''),1,30)
 FROM tblGLAccount A 
 JOIN @tbl S ON S.intAccountId = A.intAccountId
