@@ -2848,6 +2848,8 @@ BEGIN
 		SET @intVehicleId = NULL
 		IF(@ysnVehicleRequire = 1)
 		BEGIN
+			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Vehicle is required.')
 			SET @ysnInvalid = 1
 		END
 	END
