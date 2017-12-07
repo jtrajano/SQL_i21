@@ -595,8 +595,9 @@ FROM
 		,[intInventoryReceiptChargeId]				=	NULL
 		,[intContractChargeId]						=	CC.intContractCostId      
 		,[dblUnitCost]								=	ISNULL(CASE	WHEN	CC.strCostMethod = 'Percentage' THEN
-																		dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice * (CC.dblRate / 100) *
-																		CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END
+																		ISNULL(NULLIF(CC.dblRate,0),1)
+																		--dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice * (CC.dblRate / 100) *
+																		--CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END
 																ELSE	ISNULL(NULLIF(CC.dblRate,0),1) 
 														END,0)
 		,[dblDiscount]								=	0
@@ -700,8 +701,9 @@ FROM
 		,[intInventoryReceiptChargeId]				=	NULL
 		,[intContractChargeId]						=	CC.intContractCostId      
 		,[dblUnitCost]								=	ISNULL(CASE	WHEN	CC.strCostMethod = 'Percentage' THEN
-																		dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice * (CC.dblRate / 100) *
-																		CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END
+																		ISNULL(NULLIF(CC.dblRate,0),1)
+																		--dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice * (CC.dblRate / 100) *
+																		--CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END
 																ELSE	ISNULL(CC.dblRate,1) 
 														END,0)
 		,[dblDiscount]								=	0
