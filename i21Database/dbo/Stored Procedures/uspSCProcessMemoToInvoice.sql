@@ -103,8 +103,8 @@ BEGIN TRY
 			SELECT 
 				[strTransactionType] = 'Invoice'
 				,[strType] = 'Standard'
-				,[strSourceTransaction] = 'Scale'
-				,[intSourceId] = NULL
+				,[strSourceTransaction] = 'Ticket Management'
+				,[intSourceId] = SC.intTicketId
 				,[strSourceId] = ''
 				,[intInvoiceId] = NULL --NULL Value will create new invoice
 				,[intEntityCustomerId] = @intEntityId
@@ -193,7 +193,22 @@ BEGIN TRY
 		BEGIN
 			SELECT @intInvoiceId = intInvoiceId FROM tblARInvoiceDetail WHERE intTicketId = @intTicketId;
 			IF ISNULL(@intInvoiceId, 0) > 0
+			BEGIN
 				EXEC [dbo].[uspARDeleteInvoice] @intInvoiceId, @intUserId
+
+				EXEC [dbo].[uspSCUpdateStatus] @intTicketId, 1;
+				
+				EXEC dbo.uspSMAuditLog 
+					@keyValue			= @intTicketId						-- Primary Key Value of the Ticket. 
+					,@screenName		= 'Grain.view.Scale'				-- Screen Namespace
+					,@entityId			= @intUserId						-- Entity Id.
+					,@actionType		= 'Updated'							-- Action Type
+					,@changeDescription	= 'Ticket Status'					-- Description
+					,@fromValue			= 'Completed'						-- Previous Value
+					,@toValue			= 'Reopened'						-- New Value
+					,@details			= '';
+			END
+			
 		END
 END TRY
 BEGIN CATCH
