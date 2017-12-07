@@ -5936,6 +5936,7 @@
     <Build Include="dbo\Stored Procedures\uspCTReportCmmerciaInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProvisionalCommission.sql" />
     <Build Include="dbo\Stored Procedures\uspCTSubagentStatement.sql" />
+    <Build Include="dbo\Views\vyuMFStorageUnit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
