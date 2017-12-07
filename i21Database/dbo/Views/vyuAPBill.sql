@@ -6,6 +6,16 @@ SELECT
 	A.strBillId,
 	A.intSubCurrencyCents,
 	CUR.strCurrency,
+	CASE A.intTransactionType
+		 WHEN 1 THEN 'Voucher'
+		 WHEN 2 THEN 'Vendor Prepayment'
+		 WHEN 3 THEN 'Debit Memo'
+		 WHEN 7 THEN 'Invalid Type'
+		 WHEN 9 THEN '1099 Adjustment'
+		 WHEN 11 THEN 'Claim'
+		 WHEN 13 THEN 'Basis Advance'
+		 ELSE 'Invalid Type'
+	END AS strTransactionType,
 	CASE WHEN (A.intTransactionType IN (3,8,11)) OR (A.intTransactionType IN (2, 13) AND A.ysnPrepayHasPayment = 1) THEN A.dblTotal * -1 ELSE A.dblTotal END AS dblTotal,
 	CASE WHEN (A.intTransactionType IN (3,8,11)) OR (A.intTransactionType IN (2, 13) AND A.ysnPrepayHasPayment = 1) THEN A.dblAmountDue * -1 ELSE A.dblAmountDue END AS dblAmountDue,
 	A.ysnPosted,

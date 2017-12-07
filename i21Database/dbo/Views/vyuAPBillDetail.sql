@@ -5,6 +5,16 @@ AS
 SELECT 
 	A.strBillId,
 	A.intTransactionType,
+	CASE A.intTransactionType
+		 WHEN 1 THEN 'Voucher'
+		 WHEN 2 THEN 'Vendor Prepayment'
+		 WHEN 3 THEN 'Debit Memo'
+		 WHEN 7 THEN 'Invalid Type'
+		 WHEN 9 THEN '1099 Adjustment'
+		 WHEN 11 THEN 'Claim'
+		 WHEN 13 THEN 'Basis Advance'
+		 ELSE 'Invalid Type'
+	END AS strTransactionType,
 	G2.strName,
 	A.strVendorOrderNumber,
 	A.intBillId,
