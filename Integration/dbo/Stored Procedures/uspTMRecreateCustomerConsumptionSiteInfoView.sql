@@ -34,6 +34,7 @@ BEGIN
 												ELSE     ISNULL(RTRIM(D.vwcus_last_name),'''') + ISNULL(RTRIM(D.vwcus_name_suffix),'''') + '', '' + ISNULL(RTRIM(D.vwcus_first_name),'''') + ISNULL(RTRIM(D.vwcus_mid_init),'''')    
 											END   
 									END) COLLATE Latin1_General_CI_AS 
+				,strCustomerNumber = D.vwcus_key COLLATE Latin1_General_CI_AS 
 				,strSiteAddress = B.strSiteAddress
 				,strSiteCity = B.strCity
 				,strSiteState = B.strState
