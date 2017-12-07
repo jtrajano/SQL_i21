@@ -2432,7 +2432,7 @@ SET ysnPaddingZero = 1
 WHERE ysnPaddingZero IS NULL
 GO
 UPDATE tblMFCompanyPreference
-SET ysnSetExpiryDateByParentLot = 1
+SET ysnSetExpiryDateByParentLot = 0
 WHERE ysnSetExpiryDateByParentLot IS NULL
 GO
 UPDATE tblMFCompanyPreference
@@ -2569,7 +2569,7 @@ SET intAllowablePickDayRange = 30
 WHERE intAllowablePickDayRange IS NULL
 GO
 UPDATE tblMFCompanyPreference
-SET ysnGTINCaseCodeMandatory = 1
+SET ysnGTINCaseCodeMandatory = 0
 WHERE ysnGTINCaseCodeMandatory IS NULL
 GO
 UPDATE tblMFCompanyPreference
@@ -2609,3 +2609,33 @@ JOIN tblMFOrderDetail OD ON OD.intOrderHeaderId = T.intOrderHeaderId and OD.intI
 JOIN @tblMFOrderHeader OH ON OH.intOrderHeaderId = OD.intOrderHeaderId
 Where T.intOrderDetailId is null
 Go
+
+GO
+UPDATE tblMFCompanyPreference
+SET ysnDisplayNewOrderByExpectedDate = 0
+WHERE ysnDisplayNewOrderByExpectedDate IS NULL
+GO
+UPDATE tblMFCompanyPreference
+SET ysnCheckCrossContamination = 0
+WHERE ysnCheckCrossContamination IS NULL
+GO
+UPDATE tblMFCompanyPreference
+SET strScheduleType = 'Forward'
+WHERE strScheduleType IS NULL
+GO
+UPDATE tblMFCompanyPreference
+SET dblDefaultResidueQty = 0.0001
+WHERE dblDefaultResidueQty IS NULL
+GO
+UPDATE tblMFCompanyPreference
+SET ysnGenerateInvShipmentStagingOrder = 1
+WHERE ysnGenerateInvShipmentStagingOrder IS NULL
+GO
+UPDATE tblMFCompanyPreference
+SET ysnReserveOnStage = 1
+WHERE ysnReserveOnStage IS NULL
+GO
+UPDATE tblMFCompanyPreference
+SET ysnGenerateNewParentLotOnChangeItem = 0
+WHERE ysnGenerateNewParentLotOnChangeItem IS NULL
+GO
