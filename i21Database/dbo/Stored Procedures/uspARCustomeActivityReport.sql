@@ -174,6 +174,8 @@ SELECT strReportDateRange	= 'From ' + CONVERT(NVARCHAR(50), @dtmDateFrom, 101) +
 	, dblPrepayments		= AGING.dblPrepayments
 	, dblPrepaids			= AGING.dblPrepaids
 	, dtmAsOfDate			= AGING.dtmAsOfDate
+	, ysnPrintDetail		= @ysnPrintDetail
+	, ysnPrintRecap			= @ysnPrintRecap
 FROM tblARCustomerAgingStagingTable AGING WITH (NOLOCK)
 INNER JOIN (
 	SELECT C.intEntityId
