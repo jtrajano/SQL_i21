@@ -118,8 +118,8 @@ BEGIN TRY
 		SELECT TOP 1 @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'MS'
 
 		-- Configuration
-		SELECT @AutomotiveShrinkage = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,4), strConfiguration) / 100 END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'Gas-Line17Auto'
-		SELECT @AviationShrinkage = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE  CONVERT(NUMERIC(18,4), strConfiguration) / 100 END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'Gas-Line17Aviation'
+		SELECT @AutomotiveShrinkage = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,4), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'Gas-Line17Auto'
+		SELECT @AviationShrinkage = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE  CONVERT(NUMERIC(18,4), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'Gas-Line17Aviation'
 
 		INSERT INTO @transaction		
 		SELECT strFormCode, strScheduleCode, strType, dblReceived = SUM(ISNULL(dblReceived, 0.00)), dblBillQty = SUM(ISNULL(dblBillQty, 0.00)), dblQtyShipped = SUM(ISNULL(dblQtyShipped, 0.00)), dblTax = SUM(ISNULL(dblTax, 0.00)), dblTaxExempt = SUM(ISNULL(dblTaxExempt, 0.00))
