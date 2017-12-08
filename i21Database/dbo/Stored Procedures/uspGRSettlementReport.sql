@@ -439,9 +439,10 @@ BEGIN
 	LEFT JOIN tblICCommodityAttribute Attribute ON Attribute.intCommodityAttributeId=SC.intCommodityAttributeId
 	WHERE BNKTRN.intBankAccountId = @intBankAccountId 
 
-   --------------------------------------------------------
+	--------------------------------------------------------
 	--Delivery Sheet --> SCALE -->Storage --> Settle Storage
-	--------------------------------------------------------	
+	--------------------------------------------------------
+	
 	UNION ALL
 	
 	SELECT 
@@ -449,8 +450,10 @@ BEGIN
 		,intTransactionId = BNKTRN.intTransactionId
 		,strTransactionId = BNKTRN.strTransactionId
 		,strCompanyName = COMPANY.strCompanyName
-		,strCompanyAddress = dbo.fnConvertToFullAddress(COMPANY.strAddress, COMPANY.strCity, COMPANY.strState, COMPANY.strZip)
+		,strCompanyAddress = dbo.fnConvertToFullAddress(COMPANY.strAddress, COMPANY.strCity, COMPANY.strState, COMPANY.strZip)+ CHAR(13)+ CHAR(10) + @strPhone
 		,strItemNo= Item.strItemNo
+		,lblGrade  = CASE WHEN SC.intCommodityAttributeId >0 THEN 'Grade' ELSE NULL END
+		,strGrade  = CASE WHEN SC.intCommodityAttributeId >0 THEN Attribute.strDescription ELSE NULL END
 		,strCommodity = Commodity.strCommodityCode
 		,strDate = CONVERT(VARCHAR(10), GETDATE(), 110)
 		,strTime = CONVERT(VARCHAR(8), GETDATE(), 108)
@@ -475,16 +478,19 @@ BEGIN
 		,strSplitNumber = '' 
 		,strCustomerReference = SC.strCustomerReference
 		,strTicketComment = SC.strTicketComment
+		,strDiscountReadings =[dbo].[fnGRGetDiscountCodeReadings](CS.intCustomerStorageId,'Storage')
 		,strFarmField = EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber
 		,dtmDate = Bill.dtmDate		
 		,dblGrossWeight = ISNULL(SC.dblGrossWeight, 0)		
 		,dblTareWeight = ISNULL(SC.dblTareWeight, 0)		
 		,dblNetWeight = ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
+		,dblDockage = [dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblShrink,3))
 		,dblCost = BillDtl.dblCost
 		,Net = BillDtl.dblQtyOrdered 
 		,strUnitMeasure = UOM.strUnitMeasure
 		,dblTotal = BillDtl.dblTotal
-		,dblTax = BillDtl.dblTax 
+		,dblTax = BillDtl.dblTax
+		,dblNetTotal = BillDtl.dblTotal + BillDtl.dblTax 
 		,strContractNumber = CNTRCT.strContractNumber
 		,TotalDiscount =  ISNULL(tblOtherCharge.dblTotal, 0)
 		,NetDue = BillDtl.dblTotal + ISNULL(tblTax.dblTax, 0) + ISNULL(tblOtherCharge.dblTotal, 0) 
@@ -514,9 +520,12 @@ BEGIN
 	   ,lblFactorTax = CASE WHEN ISNULL(ScaleDiscountTax.dblGradeFactorTax,0) <> 0 THEN 'Factor Tax' ELSE NULL END
 	   ,dblVendorPrepayment = CASE WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN VendorPrepayment.dblVendorPrepayment ELSE NULL END 
 	   ,lblVendorPrepayment = CASE WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN 'Vendor Prepay' ELSE NULL END
-	   ,dblCustomerPrepayment = NULL
-	   ,lblCustomerPrepayment = NULL
-
+	   ,dblCustomerPrepayment = CASE WHEN ISNULL(Invoice.dblPayment,0) <> 0 THEN Invoice.dblPayment ELSE NULL END 
+	   ,lblCustomerPrepayment = CASE WHEN ISNULL(Invoice.dblPayment,0) <> 0 THEN 'Customer Prepay' ELSE NULL END
+	   ,dblPartialPrepaymentSubTotal = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN PartialPayment.dblTotals ELSE NULL END
+	   ,dblPartialPrepayment = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN PartialPayment.dblPayment-PartialPayment.dblTotals ELSE NULL END 
+	   ,lblPartialPrepayment = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN 'Partial Payment Adj' ELSE NULL END
+	   ,blbHeaderLogo = @companyLogo
 	FROM tblCMBankTransaction BNKTRN
 	JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL ON BNKTRN.strTransactionId = PRINTSPOOL.strTransactionId AND BNKTRN.intBankAccountId = PRINTSPOOL.intBankAccountId
 	JOIN tblAPPayment PYMT ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
@@ -559,20 +568,31 @@ BEGIN
 			  )ScaleDiscountTax ON ScaleDiscountTax.intPaymentId=PYMT.intPaymentId
     
 	LEFT JOIN (
-				SELECT
-				PYMTDTL.intPaymentId
-			   ,PYMTDTL.intBillId
-			   ,SUM(PYMTDTL.dblPayment * -1) AS dblVendorPrepayment
-			   FROM tblAPPayment PYMT
-			   JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId			
-			   AND PYMT.ysnPrepay = 1 AND PYMT.ysnPosted = 1
-			   GROUP BY PYMTDTL.intPaymentId,PYMTDTL.intBillId
-			  ) VendorPrepayment ON VendorPrepayment.intPaymentId=PYMT.intPaymentId AND  VendorPrepayment.intBillId = Bill.intBillId
-	LEFT JOIN (
-					SELECT intPaymentId,SUM(dblPayment) dblPayment FROM tblAPPaymentDetail
-					WHERE intBillId IS NULL
-					GROUP BY intPaymentId
+				SELECT				
+				intBillId
+				,SUM(dblAmountApplied* -1) AS dblVendorPrepayment 
+				FROM tblAPAppliedPrepaidAndDebit WHERE ysnApplied=1
+				GROUP BY intBillId
+				) VendorPrepayment ON VendorPrepayment.intBillId = Bill.intBillId
+
+	LEFT JOIN (	
+				   SELECT 
+				   intPaymentId
+				  ,SUM(dblPayment) dblPayment 
+				  FROM tblAPPaymentDetail
+				  WHERE intInvoiceId IS NOT NULL
+				  GROUP BY intPaymentId
 			    ) Invoice ON Invoice.intPaymentId=PYMT.intPaymentId
+    
+	LEFT JOIN (  SELECT 
+				  intPaymentId
+				 ,SUM(dblTotal) dblTotals
+				 ,SUM(dblPayment) dblPayment 
+				  FROM tblAPPaymentDetail
+				  WHERE intBillId IS NOT NULL
+				  GROUP BY intPaymentId
+			    ) PartialPayment ON PartialPayment.intPaymentId=PYMT.intPaymentId
+
 	LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId=Item.intCommodityId
 	LEFT JOIN tblCTContractHeader CNTRCT ON BillDtl.intContractHeaderId = CNTRCT.intContractHeaderId
 	LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityId] = ISNULL(PYMT.[intEntityVendorId], BNKTRN.intEntityId)
@@ -582,7 +602,8 @@ BEGIN
 	LEFT JOIN tblICItemUOM ItemUOM ON BillDtl.intUnitOfMeasureId = ItemUOM.intItemUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 	LEFT JOIN tblEMEntityFarm EntityFarm ON EntityFarm.intEntityId=VENDOR.intEntityId AND EntityFarm.intFarmFieldId=ISNULL(SC.intFarmFieldId, 0)
-	WHERE BNKTRN.intBankAccountId = @intBankAccountId
+	LEFT JOIN tblICCommodityAttribute Attribute ON Attribute.intCommodityAttributeId=SC.intCommodityAttributeId
+	WHERE BNKTRN.intBankAccountId = @intBankAccountId 
 
 END
 ELSE
@@ -761,7 +782,7 @@ BEGIN
 			OR BillDtl.intInventoryReceiptItemId IS NOT NULL
 			)
 	--------------------------------------------------------
-	-- FROM SETTLE STORAGE
+	-- SCALE --> Storage --> Settle Storage
 	--------------------------------------------------------
 	
 	UNION ALL
@@ -928,13 +949,16 @@ BEGIN
 	--------------------------------------------------------
 	
 	UNION ALL
+	
 	SELECT 
 		 intBankAccountId = BNKTRN.intBankAccountId
 		,intTransactionId = BNKTRN.intTransactionId
 		,strTransactionId = BNKTRN.strTransactionId
 		,strCompanyName = COMPANY.strCompanyName
-		,strCompanyAddress = dbo.fnConvertToFullAddress(COMPANY.strAddress, COMPANY.strCity, COMPANY.strState, COMPANY.strZip)
+		,strCompanyAddress = dbo.fnConvertToFullAddress(COMPANY.strAddress, COMPANY.strCity, COMPANY.strState, COMPANY.strZip)+ CHAR(13)+ CHAR(10) + @strPhone
 		,strItemNo = Item.strItemNo
+		,lblGrade  = CASE WHEN SC.intCommodityAttributeId >0 THEN 'Grade' ELSE NULL END
+		,strGrade  = CASE WHEN SC.intCommodityAttributeId >0 THEN Attribute.strDescription ELSE NULL END
 		,strCommodity = Commodity.strCommodityCode
 		,strDate = CONVERT(VARCHAR(10), GETDATE(), 110)
 		,strTime = CONVERT(VARCHAR(8), GETDATE(), 108)
@@ -959,16 +983,19 @@ BEGIN
 		,strSplitNumber = '' 
 		,strCustomerReference = SC.strCustomerReference
 		,strTicketComment = SC.strTicketComment
+		,strDiscountReadings =[dbo].[fnGRGetDiscountCodeReadings](CS.intCustomerStorageId,'Storage')
 		,strFarmField = EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber
 		,dtmDate = Bill.dtmDate
 		,dblGrossWeight = ISNULL(SC.dblGrossWeight, 0)
 		,dblTareWeight =  ISNULL(SC.dblTareWeight, 0)
 		,dblNetWeight = ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
+		,dblDockage = [dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblShrink,3))
 		,dblCost = BillDtl.dblCost
 		,Net = BillDtl.dblQtyOrdered 
 		,strUnitMeasure = UOM.strUnitMeasure
 		,dblTotal = BillDtl.dblTotal
-		,dblTax = BillDtl.dblTax 
+		,dblTax = BillDtl.dblTax
+		,dblNetTotal = BillDtl.dblTotal+ BillDtl.dblTax 
 		,strContractNumber = CNTRCT.strContractNumber
 		,TotalDiscount = ISNULL(tblOtherCharge.dblTotal, 0) 
 		,NetDue = BillDtl.dblTotal + ISNULL(tblTax.dblTax, 0) + ISNULL(tblOtherCharge.dblTotal, 0)
@@ -997,9 +1024,12 @@ BEGIN
 	   ,lblFactorTax = CASE WHEN ISNULL(ScaleDiscountTax.dblGradeFactorTax,0) <> 0 THEN 'Factor Tax' ELSE NULL END
 	   ,dblVendorPrepayment = CASE WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN VendorPrepayment.dblVendorPrepayment ELSE NULL END 
 	   ,lblVendorPrepayment = CASE WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN 'Vendor Prepay' ELSE NULL END
-	   ,dblCustomerPrepayment = NULL
-	   ,lblCustomerPrepayment = NULL					    
-	
+	   ,dblCustomerPrepayment = CASE WHEN ISNULL(Invoice.dblPayment,0) <> 0 THEN Invoice.dblPayment ELSE NULL END 
+	   ,lblCustomerPrepayment = CASE WHEN ISNULL(Invoice.dblPayment,0) <> 0 THEN 'Customer Prepay' ELSE NULL END
+	   ,dblPartialPrepaymentSubTotal = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN PartialPayment.dblTotals ELSE NULL END
+	   ,dblPartialPrepayment = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN PartialPayment.dblPayment-PartialPayment.dblTotals ELSE NULL END 
+	   ,lblPartialPrepayment = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN 'Partial Payment Adj' ELSE NULL END
+	   ,blbHeaderLogo = @companyLogo					    	   					    
 	FROM tblCMBankTransaction BNKTRN	
 	JOIN tblAPPayment PYMT ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
 	JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
@@ -1041,21 +1071,29 @@ BEGIN
 			  )ScaleDiscountTax ON ScaleDiscountTax.intPaymentId=PYMT.intPaymentId
     
 	LEFT JOIN (
-				SELECT
-				PYMTDTL.intPaymentId
-			   ,PYMTDTL.intBillId
-			   ,SUM(PYMTDTL.dblPayment * -1) AS dblVendorPrepayment
-			   FROM tblAPPayment PYMT
-			   JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId			
-			   AND PYMT.ysnPrepay = 1 AND PYMT.ysnPosted = 1
-			   GROUP BY PYMTDTL.intPaymentId,PYMTDTL.intBillId
-			  ) VendorPrepayment ON VendorPrepayment.intPaymentId=PYMT.intPaymentId AND  VendorPrepayment.intBillId = Bill.intBillId
+				 SELECT
+				 intBillId
+				,SUM(dblAmountApplied* -1) AS dblVendorPrepayment 
+				FROM tblAPAppliedPrepaidAndDebit WHERE ysnApplied=1
+				GROUP BY intBillId
+				) VendorPrepayment ON VendorPrepayment.intBillId = Bill.intBillId
     
 	LEFT JOIN (
-					SELECT intPaymentId,SUM(dblPayment) dblPayment FROM tblAPPaymentDetail
-					WHERE intBillId IS NULL
-					GROUP BY intPaymentId
+				 SELECT 
+				 intPaymentId
+				 ,SUM(dblPayment) dblPayment 
+				 FROM tblAPPaymentDetail WHERE intInvoiceId IS NOT NULL
+				 GROUP BY intPaymentId
 			    ) Invoice ON Invoice.intPaymentId=PYMT.intPaymentId
+    
+	LEFT JOIN (  SELECT 
+				  intPaymentId
+				 ,SUM(dblTotal) dblTotals
+				 ,SUM(dblPayment) dblPayment 
+				  FROM tblAPPaymentDetail
+				  WHERE intBillId IS NOT NULL
+				  GROUP BY intPaymentId
+			    ) PartialPayment ON PartialPayment.intPaymentId=PYMT.intPaymentId
 
 	LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId=Item.intCommodityId
 	LEFT JOIN tblCTContractHeader CNTRCT ON BillDtl.intContractHeaderId = CNTRCT.intContractHeaderId
@@ -1066,6 +1104,7 @@ BEGIN
 	LEFT JOIN tblICItemUOM ItemUOM ON BillDtl.intUnitOfMeasureId = ItemUOM.intItemUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 	LEFT JOIN tblEMEntityFarm EntityFarm ON EntityFarm.intEntityId=VENDOR.intEntityId AND EntityFarm.intFarmFieldId=ISNULL(SC.intFarmFieldId, 0)	
+	LEFT JOIN tblICCommodityAttribute Attribute ON Attribute.intCommodityAttributeId=SC.intCommodityAttributeId
 	WHERE BNKTRN.intBankAccountId = @intBankAccountId AND BNKTRN.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionId))
 END
 
