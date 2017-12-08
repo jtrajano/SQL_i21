@@ -522,7 +522,7 @@ BEGIN
 						agstm_lc'+CAST(@cnt AS NVARCHAR)+'_amt
 					FROM agstmmst
 					INNER JOIN tblARInvoice INV ON INV.strShipToAddress COLLATE Latin1_General_CI_AS = LTRIM(RTRIM(agstm_ivc_no COLLATE Latin1_General_CI_AS)) + LTRIM(RTRIM(agstm_bill_to_cus COLLATE Latin1_General_CI_AS))
-					INNER JOIN tblICItem ITM ON ITM.strItemNo = ''LC'+CAST(@cnt AS NVARCHAR)+'-''+SUBSTRING (agstm_tax_key ,11 , 2 ) COLLATE Latin1_General_CI_AS
+					INNER JOIN tblICItem ITM ON ITM.strItemNo = ''LC'+CAST(@cnt AS NVARCHAR)+'-''+agstm_state COLLATE Latin1_General_CI_AS
 					WHERE agstm_un IS NOT NULL AND agstm_un_prc IS NOT NULL AND agstm_sls IS NOT NULL AND agstm_lc'+CAST(@cnt AS NVARCHAR)+'_amt <> 0'			
 
 					   EXEC (@SQLCMD)
