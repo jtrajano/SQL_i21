@@ -485,6 +485,7 @@ BEGIN TRY
 			,strContainerNo
 			,[intSort]
 			,[intConcurrencyId]
+			,strMarkings
 			)
 		SELECT intInventoryReceiptItemId
 			,NULL
@@ -499,6 +500,7 @@ BEGIN TRY
 			,LC.strContainerNumber
 			,1
 			,1
+			,LC.strMarks
 		FROM tblICInventoryReceiptItem RI
 		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = RI.intContainerId
 		WHERE intInventoryReceiptItemId = @intMinInvRecItemId
