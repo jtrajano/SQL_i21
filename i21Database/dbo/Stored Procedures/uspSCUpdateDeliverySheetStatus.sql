@@ -11,8 +11,6 @@ BEGIN
 	SET ANSI_WARNINGS OFF
 
 	CREATE TABLE #tmpSC(intTicketId INT)
-	DECLARE @intContractDetailId INT
-			,@intFromItemUOMId INT;
 
 	IF @status IS NOT NULL
 	BEGIN
@@ -23,7 +21,7 @@ BEGIN
 		FROM tblSCDeliverySheet A
 		WHERE A.intDeliverySheetId = @dsId
 
-		UPDATE tblSCTicket SET ysnDeliverySheetPost = 0 WHERE intDeliverySheetId = @dsId;
+		UPDATE tblSCTicket SET strDistributionOption = 'HLD', intStorageScheduleTypeId = -5, ysnDeliverySheetPost = 0 WHERE intDeliverySheetId = @dsId;
 	END
 	ELSE
 	BEGIN
