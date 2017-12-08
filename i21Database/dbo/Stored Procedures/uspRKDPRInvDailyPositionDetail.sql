@@ -6,7 +6,6 @@
 	,@strPositionIncludes nvarchar(100) = NULL
 as
 
-
 BEGIN
 	 DECLARE @Commodity AS TABLE 
 	 (
@@ -115,6 +114,38 @@ WHILE @mRowNumber > 0
 
 if @intCommodityId >= 0
 BEGIN
+
+DECLARE @tblGetOpenContractDetail TABLE (
+strCommodityCode nvarchar(100),
+intCommodityId int,
+intContractHeaderId int,
+strContractNumber nvarchar(100),
+strLocationName nvarchar(100),
+dtmEndDate datetime,
+dblBalance numeric(18,6),
+intUnitMeasureId int,
+intPricingTypeId int,
+intContractTypeId int,
+intCompanyLocationId int,
+strContractType nvarchar(100),
+strPricingType nvarchar(100),
+intCommodityUnitMeasureId int,
+intContractDetailId int,
+intContractStatusId int,
+intEntityId int,
+intCurrencyId int,
+strType nvarchar(100)
+,intItemId int
+,strItemNo nvarchar(100)
+,dtmContractDate datetime
+,strEntityName nvarchar(100)
+,strCustomerContract nvarchar(100))
+insert into @tblGetOpenContractDetail (strCommodityCode,intCommodityId,intContractHeaderId,strContractNumber,strLocationName,dtmEndDate,dblBalance,intUnitMeasureId,intPricingTypeId,intContractTypeId,
+	   intCompanyLocationId,strContractType,strPricingType,intCommodityUnitMeasureId,intContractDetailId,intContractStatusId,intEntityId,intCurrencyId,strType,intItemId,strItemNo ,dtmContractDate,strEntityName,strCustomerContract)
+SELECT strCommodityCode,intCommodityId,intContractHeaderId,strContractNumber,strLocationName,dtmEndDate,dblBalance,intUnitMeasureId,intPricingTypeId,intContractTypeId,
+	   intCompanyLocationId,strContractType,strPricingType,intCommodityUnitMeasureId,intContractDetailId,intContractStatusId,intEntityId,intCurrencyId,strType ,intItemId,strItemNo,dtmContractDate,strEntityName,strCustomerContract
+FROM vyuRKContractDetail where intCommodityId=@intCommodityId
+
 if isnull(@intVendorId,0) = 0
 BEGIN
 
@@ -126,7 +157,8 @@ BEGIN
 					,s.strLocationName,s.strItemNo,@intCommodityId intCommodityId,@intCommodityUnitMeasureId intFromCommodityUnitMeasureId,'' strTruckName,'' strDriverName
 					,null [Storage Due],s.intLocationId intLocationId
 					FROM vyuICGetItemStockUOM s  				  
-				                                  WHERE s.intCommodityId = @intCommodityId AND ysnStockUnit=1 AND ISNULL(dblOnHand,0) <>0 AND s.intLocationId= CASE WHEN ISNULL(@intLocationId,0)=0 then s.intLocationId else @intLocationId end 
+				    WHERE s.intCommodityId = @intCommodityId AND ysnStockUnit=1 AND ISNULL(dblOnHand,0) <>0
+						 AND s.intLocationId= CASE WHEN ISNULL(@intLocationId,0)=0 then s.intLocationId else @intLocationId end
 			UNION all
 				SELECT  1 AS intSeqId,'In-House',@strDescription,[Storage Type] AS [strType],
 				dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(Balance,0))
@@ -254,7 +286,7 @@ BEGIN
 		SELECT 8 intSeqId,'Collateral Receipts - Sales' strSeqHeader, @strDescription strCommodityCode,'Collateral Receipts - Sales' strType,
 		dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((dblRemainingQuantity),0)) dblTotal
 		, c.intCollateralId,cl.strLocationName,ch.strItemNo,ch.strEntityName,c.intReceiptNo,ch.intContractHeaderId,
-		ch.strContractNumber +'-' +Convert(nvarchar,intContractSeq) strContractNumber,
+		strContractNumber,
 		c.dtmOpenDate,
 		dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((c.dblOriginalQuantity),0)) dblOriginalQuantity,
 		dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((c.dblRemainingQuantity),0)) dblRemainingQuantity
@@ -263,8 +295,8 @@ BEGIN
 		JOIN tblICCommodity co on co.intCommodityId=c.intCommodityId
 		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=c.intCommodityId AND c.intUnitMeasureId=ium.intUnitMeasureId 
 		JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId=c.intLocationId
-		LEFT JOIN vyuCTContractDetailView ch on c.intContractHeaderId=ch.intContractHeaderId and ch.intContractStatusId <> 3
-		WHERE strType = 'Sale' AND c.intCommodityId = @intCommodityId 
+		LEFT JOIN @tblGetOpenContractDetail ch on c.intContractHeaderId=ch.intContractHeaderId and ch.intContractStatusId <> 3
+		WHERE c.strType = 'Sale' AND c.intCommodityId = @intCommodityId 
 		AND c.intLocationId = case when isnull(@intLocationId,0)=0 then c.intLocationId  else @intLocationId end)t
 						WHERE intCompanyLocationId  IN (
 				SELECT intCompanyLocationId FROM tblSMCompanyLocation
@@ -278,16 +310,16 @@ BEGIN
 		SELECT 9 intSeqId,'Collateral Receipts - Purchase' strSeqHeader, @strDescription strCommodityCode,'Collateral Receipts - Purchase' strType,
 		dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((dblRemainingQuantity),0)) dblTotal, c.intCollateralId,
 		cl.strLocationName,ch.strItemNo,ch.strEntityName,c.intReceiptNo,ch.intContractHeaderId,
-		ch.strContractNumber +'-' +Convert(nvarchar,intContractSeq) strContractNumber,c.dtmOpenDate,
+		strContractNumber,c.dtmOpenDate,
 			dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((c.dblOriginalQuantity),0)) dblOriginalQuantity,
 		dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((c.dblRemainingQuantity),0)) dblRemainingQuantity,
 		@intCommodityId AS intCommodityId,c.intUnitMeasureId,c.intLocationId intCompanyLocationId	
 		FROM tblRKCollateral c
 		JOIN tblICCommodity co on co.intCommodityId=c.intCommodityId
 		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=c.intCommodityId AND c.intUnitMeasureId=ium.intUnitMeasureId
-		LEFT JOIN vyuCTContractDetailView ch on c.intContractHeaderId=ch.intContractHeaderId and ch.intContractStatusId <> 3
+		LEFT JOIN @tblGetOpenContractDetail ch on c.intContractHeaderId=ch.intContractHeaderId and ch.intContractStatusId <> 3
 		JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId=c.intLocationId
-		WHERE strType = 'Purchase' AND c.intCommodityId = @intCommodityId 
+		WHERE ch.intContractTypeId = 1 AND c.intCommodityId = @intCommodityId 
 		AND c.intLocationId = case when isnull(@intLocationId,0)=0 then c.intLocationId  else @intLocationId end)t
 								WHERE intCompanyLocationId  IN (
 				SELECT intCompanyLocationId FROM tblSMCompanyLocation
@@ -362,17 +394,18 @@ SELECT 11 AS intSeqId,'Total Receipted',@strDescription
 								ELSE isnull(ysnLicensed, 0) END
 				) 
 
-	INSERT INTO @Final (intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,intCommodityId,strLocationName,strItemNo,strTicket,dtmTicketDateTime,strCustomerReference, strDistributionOption,intFromCommodityUnitMeasureId,intCompanyLocationId)
+	INSERT INTO @Final (intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,intCommodityId,strLocationName,strItemNo,strTicket,dtmTicketDateTime,strCustomerReference, strDistributionOption,intFromCommodityUnitMeasureId,intCompanyLocationId,strDPAReceiptNo)
 			SELECT * FROM (
 			SELECT 13 intSeqId,'Pur Basis Deliveries' strSeqHeader,@strDescription strCommodityCode,'Pur Basis Deliveries' strType,
 			dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((PLDetail.dblLotPickedQty),0)) AS dblTotal,
-			CT.intCommodityId,cl.strLocationName,CT.strItemNo,convert(nvarchar,CT.strContractNumber)+'/'+convert(nvarchar,CT.intContractSeq) strTicket,CT.dtmContractDate as dtmTicketDateTime ,
+			CT.intCommodityId,cl.strLocationName,CT.strItemNo,CT.strContractNumber strTicket,CT.dtmContractDate as dtmTicketDateTime ,
 			CT.strCustomerContract as strCustomerReference, 'CNT' as strDistributionOption,@intCommodityUnitMeasureId as intCommodityUnitMeasureId,
-			CT.intCompanyLocationId
+			CT.intCompanyLocationId,strPickLotNumber
 			FROM tblLGDeliveryPickDetail Del
 			INNER JOIN tblLGPickLotDetail PLDetail ON PLDetail.intPickLotDetailId = Del.intPickLotDetailId
+			INNER JOIN tblLGPickLotHeader PH on PH.intPickLotHeaderId=PLDetail.intPickLotHeaderId
 			INNER JOIN vyuLGPickOpenInventoryLots Lots ON Lots.intLotId = PLDetail.intLotId
-			INNER JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = Lots.intContractDetailId  and CT.intContractStatusId <> 3
+			INNER JOIN @tblGetOpenContractDetail CT ON CT.intContractDetailId = Lots.intContractDetailId  and CT.intContractStatusId <> 3
 			JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=CT.intCommodityId AND CT.intUnitMeasureId=ium.intUnitMeasureId 
 			INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=CT.intCompanyLocationId
 			WHERE CT.intPricingTypeId = 2 AND CT.intCommodityId = @intCommodityId 
@@ -383,11 +416,11 @@ SELECT 11 AS intSeqId,'Total Receipted',@strDescription
 			SELECT 13 intSeqId,'Pur Basis Deliveries' strSeqHeader,@strDescription strCommodityCode,'Pur Basis Deliveries' strType,
 			dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(ri.dblReceived, 0))  AS dblTotal,
 			st.intCommodityId,cl.strLocationName,cd.strItemNo,strTicketNumber strTicket,st.dtmTicketDateTime,strCustomerReference,
-					strDistributionOption,@intCommodityUnitMeasureId intCommodityUnitMeasureId,st.intProcessingLocationId intCompanyLocationId
+					strDistributionOption,@intCommodityUnitMeasureId intCommodityUnitMeasureId,st.intProcessingLocationId intCompanyLocationId,strReceiptNumber
 			FROM tblICInventoryReceipt r
 			INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND r.strReceiptType = 'Purchase Contract'
 			INNER JOIN tblSCTicket st ON st.intTicketId = ri.intSourceId  AND strDistributionOption IN ('CNT')
-			INNER JOIN vyuCTContractDetailView cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2  and cd.intContractStatusId <> 3
+			INNER JOIN @tblGetOpenContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2  and cd.intContractStatusId <> 3
 			JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
 			INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=st.intProcessingLocationId 
 			WHERE cd.intCommodityId = @intCommodityId AND st.intProcessingLocationId  = case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
@@ -397,16 +430,16 @@ SELECT 11 AS intSeqId,'Total Receipted',@strDescription
 								WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
 								ELSE isnull(ysnLicensed, 0) END
 				) 
-	INSERT INTO @Final (intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,intCommodityId,strLocationName,strItemNo,strTicket,dtmTicketDateTime,strCustomerReference, strDistributionOption,intFromCommodityUnitMeasureId,intCompanyLocationId)
+	INSERT INTO @Final (intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,intCommodityId,strLocationName,strItemNo,strTicket,dtmTicketDateTime,strCustomerReference, strDistributionOption,intFromCommodityUnitMeasureId,intCompanyLocationId,strDPAReceiptNo)
 			select * from (
 			SELECT 14 intSeqId,'Sls Basis Deliveries' strSeqHeader,@strDescription strCommodityCode,'Sls Basis Deliveries' strType,
 			dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(ri.dblQuantity, 0))  AS dblTotal,
-			cd.intCommodityId,cl.strLocationName,cd.strItemNo,convert(nvarchar,cd.strContractNumber)+'/'+convert(nvarchar,cd.intContractSeq) strTicketNumber,
+			cd.intCommodityId,cl.strLocationName,cd.strItemNo,strContractNumber strTicketNumber,
 			cd.dtmContractDate as dtmTicketDateTime ,
-			cd.strCustomerContract as strCustomerReference, 'CNT' as strDistributionOption,cd.intUnitMeasureId,cl.intCompanyLocationId
+			cd.strCustomerContract as strCustomerReference, 'CNT' as strDistributionOption,cd.intUnitMeasureId,cl.intCompanyLocationId,strShipmentNumber
 			FROM tblICInventoryShipment r
 			INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId
-			INNER JOIN vyuCTContractDetailView cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2	and cd.intContractStatusId <> 3
+			INNER JOIN @tblGetOpenContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2	and cd.intContractStatusId <> 3  AND cd.intContractTypeId = 2
 			JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
 			INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=cd.intCompanyLocationId
 			WHERE cd.intCommodityId = @intCommodityId 
@@ -417,7 +450,7 @@ SELECT 11 AS intSeqId,'Total Receipted',@strDescription
 								WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
 								ELSE isnull(ysnLicensed, 0) END
 				)  
-	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,intCommodityId,intFromCommodityUnitMeasureId)
+	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,intCommodityId,intFromCommodityUnitMeasureId,strDPAReceiptNo)
 
 SELECT 15 AS intSeqId,'Company Titled Stock',@strDescription
 		,'Company Titled Stock' AS [strType]
@@ -426,7 +459,7 @@ SELECT 15 AS intSeqId,'Company Titled Stock',@strDescription
 		 CASE WHEN (SELECT TOP 1 ysnIncludeOffsiteInventoryInCompanyTitled from tblRKCompanyPreference)=1 then isnull(OffSite,0) else 0 end +  
 		CASE WHEN (SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1 then 0 else -isnull(DP,0) end  
 		 +isnull(SlsBasisDeliveries ,0)
-		 AS dblTotal,@intCommodityId,@intCommodityUnitMeasureId
+		 AS dblTotal,@intCommodityId,@intCommodityUnitMeasureId,strDPAReceiptNo
 	FROM (
 		SELECT 
 		isnull((select sum(dblUnitOnHand) from (
@@ -459,7 +492,7 @@ SELECT 15 AS intSeqId,'Company Titled Stock',@strDescription
 				)) AS OffSite
 
 				,(select sum(dblTotal) from @Final where intSeqId = 14 and intCommodityId=@intCommodityId) as SlsBasisDeliveries
-
+				,(select top 1 strDPAReceiptNo from @Final where intSeqId = 14 and intCommodityId=@intCommodityId) as strDPAReceiptNo
 				,(select sum(dblTotal) dblTotal from (
 					SELECT 
 					dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,(isnull(Balance,0))) dblTotal
@@ -652,8 +685,7 @@ BEGIN
 		SELECT 8 intSeqId,'Collateral Receipts - Sales' strSeqHeader, @strDescription strCommodityCode,'Collateral Receipts - Sales' strType,
 		dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((dblRemainingQuantity),0)) dblTotal
 		, c.intCollateralId,cl.strLocationName,ch.strItemNo,ch.strEntityName,c.intReceiptNo,ch.intContractHeaderId,
-		ch.strContractNumber +'-' +Convert(nvarchar,intContractSeq) strContractNumber,
-		c.dtmOpenDate,
+		strContractNumber,c.dtmOpenDate,
 		dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((c.dblOriginalQuantity),0)) dblOriginalQuantity,
 		dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((c.dblRemainingQuantity),0)) dblRemainingQuantity
 	   ,@intCommodityId AS intCommodityId,c.intUnitMeasureId,c.intLocationId intCompanyLocationId 
@@ -662,8 +694,8 @@ BEGIN
 		JOIN tblICCommodity co on co.intCommodityId=c.intCommodityId
 		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=c.intCommodityId AND c.intUnitMeasureId=ium.intUnitMeasureId 
 		JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId=c.intLocationId
-		LEFT JOIN vyuCTContractDetailView ch on c.intContractHeaderId=ch.intContractHeaderId  and ch.intContractStatusId <> 3
-		WHERE strType = 'Sale' AND c.intCommodityId = @intCommodityId 
+		LEFT JOIN @tblGetOpenContractDetail ch on c.intContractHeaderId=ch.intContractHeaderId  and ch.intContractStatusId <> 3
+		WHERE intContractTypeId = 2 AND c.intCommodityId = @intCommodityId 
 		AND c.intLocationId = case when isnull(@intLocationId,0)=0 then c.intLocationId  else @intLocationId end
 		AND intEntityId= @intVendorId )t WHERE intCompanyLocationId  IN (
 				SELECT intCompanyLocationId FROM tblSMCompanyLocation
@@ -678,7 +710,7 @@ BEGIN
 		dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((dblRemainingQuantity),0)) dblTotal,
 		c.intCollateralId,
 		cl.strLocationName,ch.strItemNo,ch.strEntityName,c.intReceiptNo,ch.intContractHeaderId,
-		ch.strContractNumber +'-' +Convert(nvarchar,intContractSeq) strContractNumber,c.dtmOpenDate,
+		strContractNumber,c.dtmOpenDate,
 			dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((c.dblOriginalQuantity),0)) dblOriginalQuantity,
 		dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((c.dblRemainingQuantity),0)) dblRemainingQuantity,
 		@intCommodityId intCommodityId,c.intUnitMeasureId,c.intLocationId intCompanyLocationId	
@@ -686,9 +718,9 @@ BEGIN
 		LEFT JOIN tblRKCollateralAdjustment ca ON c.intCollateralId = ca.intCollateralId
 		JOIN tblICCommodity co on co.intCommodityId=c.intCommodityId
 		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=c.intCommodityId AND c.intUnitMeasureId=ium.intUnitMeasureId
-		LEFT JOIN vyuCTContractDetailView ch on c.intContractHeaderId=ch.intContractHeaderId  and ch.intContractStatusId <> 3
+		LEFT JOIN @tblGetOpenContractDetail ch on c.intContractHeaderId=ch.intContractHeaderId  and ch.intContractStatusId <> 3
 		JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId=c.intLocationId
-		WHERE strType = 'Purchase' AND c.intCommodityId = @intCommodityId 
+		WHERE intContractTypeId = 1 AND c.intCommodityId = @intCommodityId 
 		AND c.intLocationId = case when isnull(@intLocationId,0)=0 then c.intLocationId  else @intLocationId end
 		AND intEntityId= @intVendorId)t  WHERE intCompanyLocationId  IN (
 				SELECT intCompanyLocationId FROM tblSMCompanyLocation
@@ -747,12 +779,12 @@ BEGIN
 			SELECT * FROM (
 			SELECT 13 intSeqId,'Pur Basis Deliveries' strSeqHeader,@strDescription strCommodityCode,'Purchase Basis Deliveries' strType,
 			dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((PLDetail.dblLotPickedQty),0))
-			 AS dblTotal,CT.intCommodityId,cl.strLocationName,CT.strItemNo,strName,convert(nvarchar,CT.strContractNumber)+'/'+convert(nvarchar,CT.intContractSeq) strTicket,CT.dtmContractDate as dtmTicketDateTime ,
+			 AS dblTotal,CT.intCommodityId,cl.strLocationName,CT.strItemNo,strName,CT.strContractNumber strTicket,CT.dtmContractDate as dtmTicketDateTime ,
 			CT.strCustomerContract as strCustomerReference, 'CNT' as strDistributionOption,@intCommodityUnitMeasureId intCommodityUnitMeasureId,CT.intCompanyLocationId intCompanyLocationId
 			FROM tblLGDeliveryPickDetail Del
 			INNER JOIN tblLGPickLotDetail PLDetail ON PLDetail.intPickLotDetailId = Del.intPickLotDetailId
 			INNER JOIN vyuLGPickOpenInventoryLots Lots ON Lots.intLotId = PLDetail.intLotId
-			INNER JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = Lots.intContractDetailId  and CT.intContractStatusId <> 3
+			INNER JOIN @tblGetOpenContractDetail CT ON CT.intContractDetailId = Lots.intContractDetailId  and CT.intContractStatusId <> 3
 			JOIN tblEMEntity e on e.intEntityId=CT.intEntityId
 			JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=CT.intCommodityId AND CT.intUnitMeasureId=ium.intUnitMeasureId 
 			INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=CT.intCompanyLocationId
@@ -770,7 +802,7 @@ BEGIN
 			INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND r.strReceiptType = 'Purchase Contract'
 			INNER JOIN tblSCTicket st ON st.intTicketId = ri.intSourceId  AND strDistributionOption IN ('CNT')
 			JOIN tblEMEntity e on st.intEntityId=e.intEntityId
-			INNER JOIN vyuCTContractDetailView cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2  and cd.intContractStatusId <> 3
+			INNER JOIN @tblGetOpenContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2  and cd.intContractStatusId <> 3
 			JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
 			INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=st.intProcessingLocationId 
 			WHERE cd.intCommodityId = @intCommodityId 
@@ -788,12 +820,12 @@ BEGIN
 			select * from (
 			SELECT 14 intSeqId,'Sls Basis Deliveries' strSeqHeader,@strDescription strCommodityCode,'Sales Basis Deliveries' strType,
 			dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(ri.dblQuantity, 0))  AS dblTotal,
-			cd.intCommodityId,cl.strLocationName,cd.strItemNo,strName,convert(nvarchar,cd.strContractNumber)+'/'+convert(nvarchar,cd.intContractSeq) strTicketNumber,
+			cd.intCommodityId,cl.strLocationName,cd.strItemNo,strName,cd.strContractNumber strTicketNumber,
 			cd.dtmContractDate as dtmTicketDateTime ,
 			cd.strCustomerContract as strCustomerReference, 'CNT' as strDistributionOption,cd.intUnitMeasureId,cl.intCompanyLocationId 
 			FROM tblICInventoryShipment r
 			INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId
-			INNER JOIN vyuCTContractDetailView cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2	and cd.intContractStatusId <> 3
+			INNER JOIN @tblGetOpenContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2	and cd.intContractStatusId <> 3
 			JOIN tblEMEntity e on r.intEntityId=cd.intEntityId
 			JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
 			INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=cd.intCompanyLocationId
