@@ -5908,7 +5908,6 @@
     <Build Include="dbo\Tables\tblARTaxStagingTable.sql" />
     <Build Include="dbo\Views\vyuMFCompanyPreference.sql" />
     <Build Include="dbo\Views\vyuARQuoteTemplate.sql" />
-    <Build Include="dbo\Stored Procedures\uspARApplyCreditsToOpenInvoices.sql" />
     <Build Include="dbo\Stored Procedures\uspPATPostRetireStock.sql" />
     <Build Include="dbo\Tables\tblPATIssueStock.sql" />
     <Build Include="dbo\Tables\tblPATRetireStock.sql" />
