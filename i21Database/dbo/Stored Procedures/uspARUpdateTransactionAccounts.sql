@@ -57,6 +57,7 @@ END
 
 SELECT intCompanyLocationId
 	 , intProfitCenter
+	 , intSalesAccount
 INTO #COMPANYLOCATIONS
 FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
 
@@ -201,9 +202,14 @@ IF ISNULL(@TransactionType, 0) = 1	--Invoice
 
 		--NULL Account Ids
 		UPDATE LIA
-		SET LIA.intAccountId	= ISNULL(ARID.intServiceChargeAccountId, ISNULL(ARID.intConversionAccountId, ISNULL(ARID.intSalesAccountId, IST.intSalesAccountId)))
+		SET LIA.intAccountId	= CASE WHEN ISNULL(ARID.intItemId, 0) <> 0
+									   THEN ISNULL(ARID.intServiceChargeAccountId, ISNULL(ARID.intConversionAccountId, ISNULL(ARID.intSalesAccountId, IST.intSalesAccountId)))
+									   ELSE ISNULL(ARID.intServiceChargeAccountId, ISNULL(ARID.intConversionAccountId, ISNULL(ARID.intSalesAccountId, CL.intSalesAccount)))
+								  END
 		FROM @LineItemAccounts LIA
 		INNER JOIN #INVOICEDETAILS ARID ON LIA.intDetailId = ARID.intInvoiceDetailId
+		INNER JOIN #INVOICES ARI ON ARID.intInvoiceId = ARID.intInvoiceId
+		INNER JOIN #COMPANYLOCATIONS CL ON ARI.intCompanyLocationId = CL.intCompanyLocationId
 		OUTER APPLY (
 			SELECT TOP 1 intSalesAccountId
 			FROM vyuARGetItemAccount IST 
