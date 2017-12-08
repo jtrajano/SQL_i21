@@ -5753,6 +5753,7 @@
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1p_CompanyPreferenceOption.sql" />
     <Build Include="dbo\Functions\fnMBGetWeightedCostAverage.sql" />
     <Build Include="dbo\Tables\tblCFImportTransactionLagging.sql" />
+    <Build Include="dbo\Tables\tblSCDeliverySheetSplit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -5856,7 +5857,7 @@
     <None Include="Scripts\Post-Deployment\PR\DataFixes\UpdateOldData.sql" />
     <Build Include="dbo\Stored Procedures\uspPRInsertElectronicFilingW2.sql" />
     <Build Include="dbo\Functions\fnGLGetAccountDetailSQL.sql" />
-	<Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitTB.sql" />
+    <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitTB.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitRETB.sql" />
     <None Include="Scripts\Post-Deployment\PR\DefaultData\2_ElectronicFileFormats.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\21_UpdateFromPrepaymentToCustomerPrepayment.sql" />
