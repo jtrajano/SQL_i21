@@ -231,7 +231,7 @@ BEGIN
 	INTO #tmpPOSPayments
 	FROM tblARPOSPayment
 	WHERE intPOSId = @intPOSId
-	AND strPaymentMethod <> 'On Account'
+	AND strPaymentMethod IN ('Cash','Check')
 	
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpPOSPayments) 
 	BEGIN
