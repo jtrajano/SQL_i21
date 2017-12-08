@@ -4,7 +4,7 @@ AS
 SELECT   cfVehicle.strVehicleNumber, cfTransaction.intOdometer, cfTransaction.intPumpNumber, cfTransaction.strPONumber, cfTransaction.strMiscellaneous,
                          cfTransaction.strDeliveryPickupInd, cfTransaction.intTransactionId, cfTransaction.dtmBillingDate, cfTransaction.intTransTime, cfTransaction.strSequenceNumber,
                          cfSite.strLocationName AS strCompanyLocation, cfTransaction.strTransactionId, cfTransaction.dtmTransactionDate, cfTransaction.strTransactionType,
-                         cfTransaction.dblQuantity, cfTransaction.ysnOnHold,
+                         cfTransaction.dblQuantity, cfTransaction.ysnOnHold,cfTransaction.dtmCreatedDate,
 
 						  (CASE 
 						 WHEN cfTransaction.strTransactionType = 'Foreign Sale' THEN cfNetwork.intCustomerId
@@ -112,14 +112,6 @@ LEFT OUTER JOIN
 	ON cfTransaction.intTransactionId = tblCFTransactionTax_1.intTransactionId 
 LEFT OUTER JOIN dbo.tblCTContractHeader AS ctContracts 
 	ON cfTransaction.intContractId = ctContracts.intContractHeaderId
-GO
-
-
-
-GO
-
-
-
 GO
 
 
