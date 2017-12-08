@@ -6089,6 +6089,7 @@
     <None Include="Scripts\Post-Deployment\CCR\RemoveCCRObsoleteScreen.sql" />
     <None Include="Scripts\Post-Deployment\PAT\1_DropStoredProcedures.sql" />
     <None Include="Scripts\Post-Deployment\PAT\2_UpdateIssueStockNo.sql" />
+    <None Include="Scripts\Post-Deployment\MF\10_HandheldMenuItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
