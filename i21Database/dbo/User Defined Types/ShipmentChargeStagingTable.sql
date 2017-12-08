@@ -13,6 +13,7 @@
 
 	-- Charges
 	,intContractId INT NULL
+	,intContractDetailId INT NULL
 	,intChargeId INT NOT NULL
 	,strCostMethod NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	,dblRate NUMERIC(18, 6) NULL
