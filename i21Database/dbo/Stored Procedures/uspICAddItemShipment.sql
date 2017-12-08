@@ -221,6 +221,7 @@ INSERT INTO @ShipmentCharges(
 		, intShipToLocationId
 		, intFreightTermId
 		, intContractId
+		, intContractDetailId
 		, intChargeId
 		, strCostMethod
 		, dblRate
@@ -242,6 +243,7 @@ SELECT
 		, intShipToLocationId
 		, intFreightTermId
 		, intContractId
+		, intContractDetailId
 		, intChargeId
 		, strCostMethod
 		, dblRate
@@ -594,6 +596,7 @@ INSERT INTO tblICInventoryShipmentCharge(
 	, dblAmount
 	, dblRate
 	, intContractId
+	, intContractDetailId
 	, ysnPrice
 	, ysnAccrue
 	, intCostUOMId
@@ -610,6 +613,7 @@ SELECT
 	, sc.dblAmount
 	, sc.dblRate
 	, sc.intContractId
+	, sc.intContractDetailId
 	, sc.ysnPrice
 	, sc.ysnAccrue
 	, sc.intCostUOMId

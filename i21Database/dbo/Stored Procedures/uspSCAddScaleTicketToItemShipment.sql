@@ -218,6 +218,7 @@ BEGIN
 
 		-- Charges
 		,[intContractId]
+		,[intContractDetailId]
 		,[intCurrency]
 		,[intChargeId]
 		,[strCostMethod]
@@ -241,6 +242,7 @@ BEGIN
 
 	--Charges
 	,[intContractId]					= NULL
+	,[intContractDetailId]				= NULL 
 	,[intCurrencyId]  					= SE.intCurrencyId
 	,[intChargeId]						= IC.intItemId
 	,[strCostMethod]					= IC.strCostMethod
@@ -294,6 +296,7 @@ BEGIN
 
 		-- Charges
 		,[intContractId]
+		,[intContractDetailId]
 		,[intCurrency]
 		,[intChargeId]
 		,[strCostMethod]
@@ -317,6 +320,7 @@ BEGIN
 
 	--Charges
 	,[intContractId]					= NULL
+	,[intContractDetailId]				= NULL 
 	,[intCurrencyId]  					= SC.intCurrencyId
 	,[intChargeId]						= IC.intItemId
 	,[strCostMethod]					= IC.strCostMethod
@@ -398,6 +402,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 
 									-- Charges
 									,[intContractId]
+									,[intContractDetailId]
 									,[intCurrency]
 									,[intChargeId]
 									,[strCostMethod]
@@ -421,6 +426,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 
 								--Charges
 								,[intContractId]					= SE.intOrderId
+								,[intContractDetailId]				= SE.intLineNo
 								,[intCurrencyId]  					= SE.intCurrencyId
 								,[intChargeId]						= LoadCost.intItemId
 								,[strCostMethod]					= IC.strCostMethod
@@ -463,6 +469,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 
 									-- Charges
 									,[intContractId]
+									,[intContractDetailId]
 									,[intCurrency]
 									,[intChargeId]
 									,[strCostMethod]
@@ -486,6 +493,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 
 								--Charges
 								,[intContractId]					= SE.intOrderId
+								,[intContractDetailId]				= SE.intLineNo
 								,[intCurrencyId]  					= SE.intCurrencyId
 								,[intChargeId]						= LoadCost.intItemId
 								,[strCostMethod]					= LoadCost.strCostMethod
@@ -527,6 +535,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 
 									-- Charges
 									,[intContractId]
+									,[intContractDetailId]
 									,[intCurrency]
 									,[intChargeId]
 									,[strCostMethod]
@@ -550,6 +559,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 
 								--Charges
 								,[intContractId]					= SE.intOrderId
+								,[intContractDetailId]				= SE.intLineNo
 								,[intCurrencyId]  					= SE.intCurrencyId
 								,[intChargeId]						= ContractCost.intItemId
 								,[strCostMethod]					= IC.strCostMethod
@@ -590,6 +600,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 
 									-- Charges
 									,[intContractId]
+									,[intContractDetailId]
 									,[intCurrency]
 									,[intChargeId]
 									,[strCostMethod]
@@ -613,6 +624,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 
 								--Charges
 								,[intContractId]					= SE.intOrderId
+								,[intContractDetailId]				= SE.intLineNo
 								,[intCurrencyId]  					= SE.intCurrencyId
 								,[intChargeId]						= ContractCost.intItemId
 								,[strCostMethod]					= ContractCost.strCostMethod
@@ -655,6 +667,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 
 									-- Charges
 									,[intContractId]
+									,[intContractDetailId]
 									,[intCurrency]
 									,[intChargeId]
 									,[strCostMethod]
@@ -678,6 +691,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 
 								--Charges
 								,[intContractId]					= SE.intOrderId
+								,[intContractDetailId]				= SE.intLineNo
 								,[intCurrencyId]  					= SE.intCurrencyId
 								,[intChargeId]						= LoadCost.intItemId
 								,[strCostMethod]					= LoadCost.strCostMethod
@@ -718,6 +732,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 
 									-- Charges
 									,[intContractId]
+									,[intContractDetailId]
 									,[intCurrency]
 									,[intChargeId]
 									,[strCostMethod]
@@ -741,6 +756,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 
 								--Charges
 								,[intContractId]					= SE.intOrderId
+								,[intContractDetailId]				= SE.intLineNo
 								,[intCurrencyId]  					= SE.intCurrencyId
 								,[intChargeId]						= ContractCost.intItemId
 								,[strCostMethod]					= ContractCost.strCostMethod
@@ -784,6 +800,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 
 							-- Charges
 							,[intContractId]
+							,[intContractDetailId]
 							,[intCurrency]
 							,[intChargeId]
 							,[strCostMethod]
@@ -807,6 +824,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 
 						--Charges
 						,[intContractId]					= NULL
+						,[intContractDetailId]				= NULL 
 						,[intCurrencyId]  					= SE.intCurrencyId
 						,[intChargeId]						= @intFreightItemId
 						,[strCostMethod]					= IC.strCostMethod
@@ -851,6 +869,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 
 							-- Charges
 							,[intContractId]
+							,[intContractDetailId]
 							,[intCurrency]
 							,[intChargeId]
 							,[strCostMethod]
@@ -874,6 +893,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 				
 						--Charges
 						,[intContractId]					= SE.intOrderId
+						,[intContractDetailId]				= SE.intLineNo
 						,[intCurrencyId]  					= SE.intCurrencyId
 						,[intChargeId]						= ContractCost.intItemId
 						,[strCostMethod]					= IC.strCostMethod
@@ -916,6 +936,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 
 							-- Charges
 							,[intContractId]
+							,[intContractDetailId]
 							,[intCurrency]
 							,[intChargeId]
 							,[strCostMethod]
@@ -939,6 +960,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 				
 						--Charges
 						,[intContractId]					= SE.intOrderId
+						,[intContractDetailId]				= SE.intLineNo
 						,[intCurrencyId]  					= SE.intCurrencyId
 						,[intChargeId]						= ContractCost.intItemId
 						,[strCostMethod]					= ContractCost.strCostMethod
@@ -976,6 +998,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 
 					-- Charges
 					,[intContractId]
+					,[intContractDetailId]
 					,[intCurrency]
 					,[intChargeId]
 					,[strCostMethod]
@@ -999,6 +1022,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 				
 				--Charges
 				,[intContractId]					= SE.intOrderId
+				,[intContractDetailId]				= SE.intLineNo
 				,[intCurrencyId]  					= SE.intCurrencyId
 				,[intChargeId]						= ContractCost.intItemId
 				,[strCostMethod]					= ContractCost.strCostMethod
