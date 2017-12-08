@@ -6106,6 +6106,7 @@
     <Build Include="dbo\Stored Procedures\uspCRMGetPipelineForecast.sql" />
     <None Include="Scripts\Post-Deployment\MF\CBIPattern.sql" />
     <None Include="Scripts\Post-Deployment\AP\DeleteInvalidBasisAdvanceStaging.sql" />
+    <None Include="Scripts\Post-Deployment\MF\10_HandheldMenuItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
