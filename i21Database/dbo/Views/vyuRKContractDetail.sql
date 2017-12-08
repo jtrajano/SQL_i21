@@ -20,12 +20,23 @@ WITH Pricing AS
 		,ium.intCommodityUnitMeasureId,
 		CDT.intContractDetailId,
 		CDT.intContractStatusId,
-		intEntityId
+		ch.intEntityId
 		,CDT.intCurrencyId
-    FROM    tblCTPriceFixationDetail  PFD
+		,IM.intItemId
+		,IM.strItemNo,ch.dtmContractDate,strEntityName,ch.strCustomerContract
+	FROM    tblCTPriceFixationDetail  PFD
     JOIN    tblCTPriceFixation   PFX ON PFX.intPriceFixationId   = PFD.intPriceFixationId
-    JOIN    tblCTContractDetail   CDT ON CDT.intContractDetailId  = PFX.intContractDetailId and CDT.intPricingTypeId IN (1,2)
+    JOIN    tblCTContractDetail   CDT ON CDT.intContractDetailId  = PFX.intContractDetailId and CDT.intPricingTypeId IN (1,2,3)
+	JOIN	tblICItem			 IM	ON	IM.intItemId				=	CDT.intItemId
 	JOIN tblCTContractHeader ch on ch.intContractHeaderId=CDT.intContractHeaderId AND CDT.intContractStatusId <> 3
+	JOIN	vyuCTEntity							EY	ON	EY.intEntityId						=		ch.intEntityId			AND														
+														1 = (
+															CASE 
+																WHEN ch.intContractTypeId = 1 AND EY.strEntityType = 'Vendor' THEN 1 
+																WHEN ch.intContractTypeId <> 1 AND EY.strEntityType = 'Customer' THEN 1 
+																ELSE 0
+															END
+														) 
 	JOIN tblICCommodity c on ch.intCommodityId=c.intCommodityId
 	JOIN tblCTPricingType pt on pt.intPricingTypeId=CDT.intPricingTypeId
 	JOIN tblCTContractType ct on ct.intContractTypeId=ch.intContractTypeId
@@ -47,9 +58,10 @@ WITH Pricing AS
 						,ium.intCommodityUnitMeasureId,
 						CDT.intContractDetailId,
 						CDT.intContractStatusId,
-						intEntityId
-						,CDT.intCurrencyId
-    )
+						ch.intEntityId
+						,CDT.intCurrencyId,	
+						IM.intItemId
+						,IM.strItemNo,ch.dtmContractDate,strEntityName,ch.strCustomerContract)
 	SELECT * FROM (
     SELECT   strCommodityCode,
 		intCommodityId,
@@ -69,7 +81,9 @@ WITH Pricing AS
 		intContractStatusId,
 		intEntityId
 		,intCurrencyId
-		,strContractType+' Priced' AS strType
+		,strContractType+' Priced' AS strType	
+		,intItemId
+		,strItemNo,dtmContractDate,strEntityName,strCustomerContract
     FROM    Pricing
 
     UNION ALL
@@ -93,9 +107,20 @@ WITH Pricing AS
 		ch.intEntityId
 		,CDT.intCurrencyId
 		,ct.strContractType+' Basis' AS strType
+		,IM.intItemId
+		,IM.strItemNo,ch.dtmContractDate,EY.strEntityName,ch.strCustomerContract
     FROM    tblCTContractDetail CDT
-    JOIN    Pricing     PRC ON CDT.intContractDetailId = PRC.intContractDetailId and CDT.intPricingTypeId IN (1,2)
+    JOIN    Pricing     PRC ON CDT.intContractDetailId = PRC.intContractDetailId and CDT.intPricingTypeId IN (1,2,3)
 	JOIN tblCTContractHeader ch on ch.intContractHeaderId=CDT.intContractHeaderId AND CDT.intContractStatusId <> 3
+	JOIN	vyuCTEntity							EY	ON	EY.intEntityId						=		ch.intEntityId			AND														
+														1 = (
+															CASE 
+																WHEN ch.intContractTypeId = 1 AND EY.strEntityType = 'Vendor' THEN 1 
+																WHEN ch.intContractTypeId <> 1 AND EY.strEntityType = 'Customer' THEN 1 
+																ELSE 0
+															END
+														) 
+	JOIN	tblICItem			 IM	ON	IM.intItemId				=	CDT.intItemId
 	JOIN tblICCommodity c on ch.intCommodityId=c.intCommodityId
 	JOIN tblCTPricingType pt on pt.intPricingTypeId=CDT.intPricingTypeId
 	JOIN tblCTContractType ct on ct.intContractTypeId=ch.intContractTypeId
@@ -122,12 +147,23 @@ WITH Pricing AS
 		,ium.intCommodityUnitMeasureId,
 		CDT.intContractDetailId,
 		CDT.intContractStatusId,
-		intEntityId
+		EY.intEntityId
 		,CDT.intCurrencyId
 		,CASE WHEN CDT.intPricingTypeId = 1 THEN ct.strContractType+' Priced' ELSE ct.strContractType+' Basis' END AS strType
+		,IM.intItemId
+		,IM.strItemNo,ch.dtmContractDate,strEntityName,ch.strCustomerContract
     FROM    tblCTContractDetail CDT
 	JOIN tblCTContractHeader ch on ch.intContractHeaderId=CDT.intContractHeaderId AND CDT.intContractStatusId <> 3
-	JOIN tblICCommodity c on ch.intCommodityId=c.intCommodityId and CDT.intPricingTypeId IN (1,2)
+	JOIN	vyuCTEntity							EY	ON	EY.intEntityId						=		ch.intEntityId			AND														
+														1 = (
+															CASE 
+																WHEN ch.intContractTypeId = 1 AND EY.strEntityType = 'Vendor' THEN 1 
+																WHEN ch.intContractTypeId <> 1 AND EY.strEntityType = 'Customer' THEN 1 
+																ELSE 0
+															END
+														) 
+	JOIN	tblICItem			 IM	ON	IM.intItemId				=	CDT.intItemId
+	JOIN tblICCommodity c on ch.intCommodityId=c.intCommodityId and CDT.intPricingTypeId IN (1,2,3)
 	JOIN tblCTPricingType pt on pt.intPricingTypeId=CDT.intPricingTypeId
 	JOIN tblCTContractType ct on ct.intContractTypeId=ch.intContractTypeId
 	JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId		=	CDT.intCompanyLocationId
@@ -154,11 +190,22 @@ WITH Pricing AS
 		,ium.intCommodityUnitMeasureId,
 		CDT.intContractDetailId,
 		CDT.intContractStatusId,
-		intEntityId
+		EY.intEntityId
 		,CDT.intCurrencyId
 		,CASE WHEN CDT.intPricingTypeId = 3 THEN ct.strContractType+'HTA' END AS strType
-    FROM    tblCTContractDetail CDT
+		,IM.intItemId
+		,IM.strItemNo,ch.dtmContractDate,strEntityName,ch.strCustomerContract
+    FROM tblCTContractDetail CDT
 	JOIN tblCTContractHeader ch on ch.intContractHeaderId=CDT.intContractHeaderId AND CDT.intContractStatusId <> 3
+	JOIN	vyuCTEntity							EY	ON	EY.intEntityId						=		ch.intEntityId			AND														
+														1 = (
+															CASE 
+																WHEN ch.intContractTypeId = 1 AND EY.strEntityType = 'Vendor' THEN 1 
+																WHEN ch.intContractTypeId <> 1 AND EY.strEntityType = 'Customer' THEN 1 
+																ELSE 0
+															END
+														) 
+	JOIN	tblICItem			 IM	ON	IM.intItemId				=	CDT.intItemId
 	JOIN tblICCommodity c on ch.intCommodityId=c.intCommodityId and CDT.intPricingTypeId =3
 	JOIN tblCTPricingType pt on pt.intPricingTypeId=CDT.intPricingTypeId
 	JOIN tblCTContractType ct on ct.intContractTypeId=ch.intContractTypeId
