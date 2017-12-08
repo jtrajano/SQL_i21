@@ -24,5 +24,5 @@ INNER JOIN dbo.tblEMEntity entity ON vendor.intEntityId = entity.intEntityId
 INNER JOIN dbo.tblEMEntityToContact entityToContact ON entityToContact.intEntityId = entity.intEntityId
 INNER JOIN dbo.tblEMEntity entityContact
 		ON entityToContact.intEntityContactId = entityContact.intEntityId AND entityToContact.ysnDefaultContact = 1
-CROSS APPLY dbo.fnAPVendorInquiryFinancialInfo(vendor.intEntityId) fi
-CROSS APPLY dbo.fnAPGetVendorBalances(vendor.intEntityId) balances
+OUTER APPLY dbo.fnAPVendorInquiryFinancialInfo(vendor.intEntityId) fi
+OUTER APPLY dbo.fnAPGetVendorBalances(vendor.intEntityId) balances
