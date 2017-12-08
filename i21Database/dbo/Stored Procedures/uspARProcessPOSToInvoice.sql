@@ -314,7 +314,7 @@ BEGIN
 		,Inv.dblDiscount
 		,Inv.dblDiscountAvailable
 		,Inv.dblInterest
-		,@dblAmount
+		,CASE WHEN @dblAmount > Inv.dblAmountDue THEN Inv.dblAmountDue ELSE @dblAmount END
 		,Inv.dblAmountDue
 		,Inv.dblBaseAmountDue
 		,Inv.strInvoiceReportNumber
