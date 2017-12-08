@@ -62,6 +62,7 @@ SELECT
 											   ELSE DATEADD(DAY, intDiscountDay, ARIFP.dtmDate)
 										  END
 								  END
+	,ysnACHActive					=  ISNULL(ysnACHActive, 0)
 FROM
 	(
 		SELECT 
@@ -110,6 +111,7 @@ FROM
 										 END)
 			,intPaymentMethodId				= ARC.intPaymentMethodId	
 			,strPaymentMethod				= SMP.strPaymentMethod
+			,ysnACHActive					= EFT.ysnActive
 		FROM
 			[tblARInvoice] ARI
 		INNER JOIN
@@ -139,7 +141,15 @@ FROM
 			FROM
 				tblCFTransaction
 			) CFT 
-				ON ARI.[intInvoiceId] = CFT.[intInvoiceId]				
+				ON ARI.[intInvoiceId] = CFT.[intInvoiceId]	
+		LEFT JOIN
+			(
+				SELECT
+					intEntityId,
+					ysnActive
+				FROM
+					tblEMEntityEFTInformation
+			) EFT ON CE.intEntityId = EFT.intEntityId				
 		WHERE
 			[ysnPosted] = 1
 			AND ysnCancelled = 0
@@ -191,6 +201,7 @@ FROM
 			,[ysnExcludeForPayment]		= CONVERT(BIT, 0)
 			,intPaymentMethodId			= APV.intPaymentMethodId	
 			,strPaymentMethod			= SMP.strPaymentMethod
+			,ysnACHActive				= EFT.ysnActive
 		FROM
 			tblAPBill APB
 		INNER JOIN
@@ -215,7 +226,14 @@ FROM
 				intPaymentMethodID,
 				strPaymentMethod
 			 FROM
-				dbo.tblSMPaymentMethod) AS SMP ON APV.intPaymentMethodId = SMP.intPaymentMethodID								
+				dbo.tblSMPaymentMethod) AS SMP ON APV.intPaymentMethodId = SMP.intPaymentMethodID	
+		LEFT OUTER JOIN
+			(
+				SELECT
+				intEntityId,
+				ysnActive
+				FROM tblEMEntityEFTInformation
+				) AS EFT ON CE.intEntityId = EFT.intEntityId								
 		WHERE
 			[intTransactionType] IN (11,3)
 			AND [ysnPosted] = 1
