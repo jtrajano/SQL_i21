@@ -39,6 +39,7 @@ BEGIN TRY
 		, strFormat				= SOURCE.strFormat
 		, strFooter				= SOURCE.strFooter
 		, intWidth				= SOURCE.intWidth
+		, ysnFromConfiguration  = SOURCE.ysnFromConfiguration
 	FROM #tmpRCOD SOURCE
 	WHERE tblTFReportingComponentField.intMasterId = SOURCE.intMasterId
 		
@@ -50,6 +51,7 @@ BEGIN TRY
 		, strFooter
 		, intWidth
 		, intMasterId
+		, ysnFromConfiguration
 	)
 	SELECT SOURCE.intReportingComponentId
 		, SOURCE.strColumn
@@ -58,6 +60,7 @@ BEGIN TRY
 		, SOURCE.strFooter
 		, SOURCE.intWidth
 		, SOURCE.intMasterId
+		, SOURCE.ysnFromConfiguration
 	FROM #tmpRCOD SOURCE
 	LEFT JOIN tblTFReportingComponentField TARGET ON TARGET.intMasterId = SOURCE.intMasterId
 	WHERE TARGET.intReportingComponentFieldId IS NULL

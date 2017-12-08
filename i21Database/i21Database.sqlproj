@@ -5887,6 +5887,16 @@
     <Build Include="dbo\Views\vyuRKRiskPositionContractDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspGRDuplicateDiscountTable.sql" />
     <Build Include="dbo\Stored Procedures\uspRKPnLBySalesContractSummary.sql" />
+    <Build Include="dbo\Tables\tblTFTransactionDynamicOR.sql" />
+    <Build Include="dbo\Views\vyuTFGetOutputDesignerField.sql" />
+    <Build Include="dbo\Views\vyuTFGetReportingComponentField.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGetUncommonField.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGetTransactionDynamic.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateOHTR2.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateOHMF2.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateOHEx2.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateLATransporter.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateLAImporter.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -6124,9 +6134,9 @@
     <None Include="Scripts\Post-Deployment\TF\DefaultData\WA_Washington.sql" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Scripts\Post-Deployment\TF\DefaultData\OH_Ohio.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1740_RemoveLoadScheduleResources.sql" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Scripts\Post-Deployment\SM\1740_RemoveLoadScheduleResources.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\OH_Ohio.sql" />
   </ItemGroup>
 </Project>
