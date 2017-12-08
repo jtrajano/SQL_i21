@@ -133,6 +133,12 @@ BEGIN TRY
 
 	-- Update group if role is for contact admin.
 	EXEC uspSMResolveContactRoleMenus @UserRoleID
+
+	-- Make Dashboards menu visible
+	UPDATE rolemenu SET ysnVisible = 1
+	FROM tblSMUserRoleMenu rolemenu
+	INNER JOIN tblSMMasterMenu mastermenu ON rolemenu.intMenuId = mastermenu.intMenuID
+	AND mastermenu.strMenuName = 'Dashboards'
 	
 	---- Iterate through all affected user securities and apply Master Menus
 	--WHILE EXISTS (SELECT TOP 1 1 FROM #tmpUserSecurities)
