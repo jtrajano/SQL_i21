@@ -45,7 +45,7 @@ BEGIN
 		WHERE A.intEntityVendorId = @entityId AND A.ysnPosted = 1
 		ORDER BY dtmDate DESC
 	) lastVoucher
-	,(
+	OUTER APPLY (
 		SELECT
 			TOP 1
 			payment.dtmDatePaid AS dtmLastPaymentDate
@@ -54,7 +54,7 @@ BEGIN
 		WHERE payment.intEntityVendorId = @entityId AND payment.ysnPosted = 1
 		ORDER BY dtmDatePaid DESC
 	) lastPayment
-	,(
+	OUTER APPLY (
 		SELECT
 			SUM(voucher.dblTotal) AS dblYTDVouchers
 		FROM tblAPBill voucher
@@ -62,7 +62,7 @@ BEGIN
 		--AND DATEADD(dd, DATEDIFF(dd, 0, voucher.dtmDate), 0) BETWEEN @beginDate AND @endDateDate
 		AND DATEADD(dd, DATEDIFF(dd, 0, voucher.dtmDate), 0) <= @endDateDate
 	) voucherTotal
-	, (
+	OUTER APPLY  (
 		SELECT
 			SUM(dblAmountPaid) AS dblYTDPayments
 		FROM tblAPPayment payment
