@@ -78,8 +78,10 @@ BEGIN
 		ssvnd_terms_disc_pct			=	H.dblDiscountEP,
 		ssvnd_terms_due_day				=	H.intBalanceDue,
 		ssvnd_terms_disc_day			=	H.intDiscountDay,
-		ssvnd_terms_cutoff_day			=	H.intDayofMonthDue
-		
+		ssvnd_terms_cutoff_day			=	H.intDayofMonthDue,
+		ssvnd_acct_stat					=   (CASE WHEN B.ysnPymtCtrlActive = 1 THEN ''A'' ELSE NULL END),
+		ssvnd_terms_type 				=	(CASE WHEN H.strTerm IS NOT NULL THEN ''D'' ELSE NULL END)
+
 		FROM ssvndmst 		
 		INNER JOIN tblAPVendor B
 			ON ssvndmst.ssvnd_vnd_no COLLATE Latin1_General_CI_AS = SUBSTRING(B.strVendorId, 1, 10) COLLATE Latin1_General_CI_AS
@@ -130,7 +132,9 @@ BEGIN
 		ssvnd_terms_disc_pct,			
 		ssvnd_terms_due_day,			
 		ssvnd_terms_disc_day,			
-		ssvnd_terms_cutoff_day			
+		ssvnd_terms_cutoff_day,
+		ssvnd_acct_stat,	
+		ssvnd_terms_type			
 		)
 		SELECT 
 			ssvnd_vnd_no					=	CASE WHEN CHARINDEX(CHAR(10), B.strVendorId) > 0 THEN SUBSTRING(B.strVendorId, 0, CHARINDEX(CHAR(10),B.strVendorId)) ELSE B.strVendorId END,
@@ -163,7 +167,9 @@ BEGIN
 			ssvnd_terms_disc_pct			=	H.dblDiscountEP,
 			ssvnd_terms_due_day				=	H.intBalanceDue,
 			ssvnd_terms_disc_day			=	H.intDiscountDay,
-			ssvnd_terms_cutoff_day			=	H.intDayofMonthDue
+			ssvnd_terms_cutoff_day			=	H.intDayofMonthDue,
+			ssvnd_acct_stat					=   (CASE WHEN B.ysnPymtCtrlActive = 1 THEN ''A'' ELSE NULL END),
+			ssvnd_terms_type 				=	(CASE WHEN H.strTerm IS NOT NULL THEN ''D'' ELSE NULL END)
 		FROM
 			tblEMEntity A
 		INNER JOIN tblAPVendor B
