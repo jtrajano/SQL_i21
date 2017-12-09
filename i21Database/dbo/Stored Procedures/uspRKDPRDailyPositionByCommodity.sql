@@ -439,7 +439,7 @@ END
 
 SELECT intCommodityId
 	,strCommodityCode
-	,strUnitMeasure,intLocationId
+	,strUnitMeasure
 	,sum(isnull(OpenPurchasesQty, 0)) OpenPurchasesQty
 	,sum(isnull(OpenSalesQty, 0)) OpenSalesQty
 	,sum(isnull(dblCompanyTitled, 0)) dblCompanyTitled
