@@ -1,10 +1,4 @@
 ﻿GO
-
-
-IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAPOriginCCDTransaction')
-	DROP VIEW vyuAPOriginCCDTransaction
-GO
-
 IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 BEGIN
 /*
@@ -12,7 +6,7 @@ BEGIN
 	vyuAPOriginCCDTransaction stub is already in Database project. Alter command should be sufficient
 */
 EXEC ('
-	CREATE VIEW [dbo].[vyuAPOriginCCDTransaction]
+	ALTER VIEW [dbo].[vyuAPOriginCCDTransaction]
 	AS
 	
 	WITH APOriginCCDTransaction AS (
