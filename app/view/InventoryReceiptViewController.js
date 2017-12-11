@@ -5344,6 +5344,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     { dataIndex: 'intFreightTermId', text: 'Freight Terms Id', width: 100, dataType: 'numeric', hidden: true, required: true, allowNull: true },
                     { dataIndex: 'strFreightTerm', text: 'Freight Terms', width: 100, dataType: 'string' },
 
+                    { dataIndex: 'intLotId', text: 'Lot Id', dataType: 'numeric', width: 100, dataType: 'numeric', hidden: true, required: true },
+                    { dataIndex: 'strLotNumber', text: 'Lot No', width: 100, dataType: 'string', hidden: true, required: true },
+                    { dataIndex: 'dtmExpiryDate', text: 'Expiry Date', width: 100, dataType: 'date', hidden: true, required: true },
+                    { dataIndex: 'dtmManufacturedDate', text: 'Manufactured Date', width: 100, dataType: 'date', hidden: true, required: true },
+                    { dataIndex: 'strLotAlias', text: 'Lot Alias', width: 100, dataType: 'string', hidden: true, required: true },
+                    { dataIndex: 'intParentLotId', text: 'Parent Lot Id', dataType: 'numeric', width: 100, hidden: true, required: true },
+                    { dataIndex: 'strParentLotNumber', text: 'Parent Lot No', width: 100, dataType: 'string', hidden: true, required: true },
+
                     { dataIndex: 'strUnitMeasure', text: 'Item UOM', width: 100, dataType: 'string', required: true },
                     { dataIndex: 'strOrderUOM', text: 'Order UOM', width: 100, dataType: 'string', required: true },
                     { dataIndex: 'strItemUOM', text: 'Item UOM', width: 100, dataType: 'string', required: true, hidden: true },
@@ -5637,6 +5645,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     var currentReceiptItemVM = me.getViewModel().data.currentReceiptItem;
 
                                     var newReceiptItemLot = Ext.create('Inventory.model.ReceiptItemLot', {
+                                        intLotId: order.get('intLotId'),
+                                        strLotNumber: order.get('strLotNumber'),
+                                        dtmExpiryDate: order.get('dtmExpiryDate'),
+                                        dtmManufacturedDate: order.get('dtmManufacturedDate'),
+                                        strLotAlias: order.get('strLotAlias'),
+                                        intParentLotId: order.get('intParentLotId'),
+                                        strParentLotNumber: order.get('strParentLotNumber'),
                                         intInventoryReceiptItemId: newReceiptItem.get('intInventoryReceiptItemId'),
                                         intSubLocationId: newReceiptItem.get('intSubLocationId'),
                                         intStorageLocationId: newReceiptItem.get('intStorageLocationId'),
