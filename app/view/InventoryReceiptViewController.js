@@ -2341,14 +2341,18 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             txtNetDiff = win.down('#txtNetDiff'),
             txtLotNetWgt = win.down('#txtLotNetWgt'),
             txtLotGrossWgt = win.down('#txtLotGrossWgt'),
-            itemCount = 0,
-
-            line = { amount: 0, tax: 0, gross: 0, net: 0, lot: { gross: 0, net: 0 } };
+            line = { amount: 0, tax: 0, gross: 0, net: 0, lot: { gross: 0, net: 0 } };        
 
         if (current) {
-            var items = current.tblICInventoryReceiptItems();
-            if (items) {
-                Ext.Array.each(items.data.items, function (item) {
+            var itemCount = current.get('intItemCount');
+
+            var tblICInventoryReceiptItems = current.tblICInventoryReceiptItems();
+            var data = tblICInventoryReceiptItems ? tblICInventoryReceiptItems.data : null;
+            var items = data ? data.items : null; 
+
+            if (items && items.length > 0) {
+                itemCount = 0; 
+                Ext.Array.each(items, function (item) {
                     if (!item.dummy) {
                         itemCount++;                        
                         line.amount += item.get('dblLineTotal');
@@ -2364,6 +2368,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                 });
             }
+            current.set('intItemCount', itemCount);
         }
 
         var totalCharges = this.calculateOtherCharges(win);
@@ -2380,7 +2385,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (txtLotNetWgt) { txtLotNetWgt.setValue(line.lot.net); }
         if (txtGrossDiff) { txtGrossDiff.setValue(line.gross - line.lot.gross); }
         if (txtNetDiff) { txtNetDiff.setValue(line.net - line.lot.net); }
-        current.set('intItemCount', itemCount);
+        
     },
 
     getTaxableAmount: function (quantity, price, currentItemTax, itemTaxes) {
