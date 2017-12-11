@@ -5988,6 +5988,7 @@
     <Build Include="dbo\Tables\tblBBBuybackCharge.sql" />
     <Build Include="dbo\Tables\tblBBBuyback.sql" />
     <Build Include="dbo\Views\vyuMFStorageUnit.sql" />
+    <Build Include="dbo\Views\vyuMFLotSnapshot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
