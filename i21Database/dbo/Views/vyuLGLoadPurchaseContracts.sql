@@ -88,7 +88,7 @@ FROM (
 				WHERE ItemUOM.intItemUOMId = CT.intPriceItemUOMId
 				), 0)
 		,CU.strCurrency
-		,intSubCurrencyCents = CASE WHEN CT.intConvPriceCurrencyId IS NULL THEN 0 ELSE CY.intCent END
+		,intSubCurrencyCents = CASE WHEN CY.ysnSubCurrency > 0 THEN CY.intCent ELSE 1 END
 		,CY.strCurrency AS strMainCurrency
 		,CAST(ISNULL(CU.intMainCurrencyId, 0) AS BIT) AS ysnSubCurrency
 		,CT.dblCashPrice / CASE 
@@ -119,7 +119,7 @@ FROM (
 	LEFT JOIN tblICItemUOM PU ON PU.intItemUOMId = CT.intPriceItemUOMId
 	LEFT JOIN tblICUnitMeasure U2 ON U2.intUnitMeasureId = PU.intUnitMeasureId
 	LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CT.intCurrencyId
-	LEFT JOIN tblSMCurrency CY ON CY.intCurrencyID = CT.intConvPriceCurrencyId
+	LEFT JOIN tblSMCurrency CY ON CY.intCurrencyID = CT.intCurrencyId
 --	LEFT JOIN tblSMCurrency LC ON LC.intCurrencyID = L.intCurrencyId
 	LEFT JOIN tblSMCurrency LCU ON LCU.intCurrencyID = L.intCurrencyId
 	LEFT JOIN (tblICInventoryReceipt receipt INNER JOIN tblICInventoryReceiptItem receiptItem ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId)

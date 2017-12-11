@@ -7,7 +7,9 @@
 	[PostRemind_Days] INT NULL,
 	[OriginConversion_OffsetAccountId] INT NULL,
 	[ysnConsolidatingParent] [bit] NULL,
-	[intDefaultVisibleOldAccountSystemId] INT NULL
+	[intDefaultVisibleOldAccountSystemId] INT NULL,
+	[intDBVersion] INT NULL,
+	[ysnHistoricalJournalImported] INT NULL
     CONSTRAINT [PK_tblGLCompanyPreferenceOption] PRIMARY KEY ([intCompanyPreferenceOptionId])
 )
 GO
@@ -26,4 +28,8 @@ GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Consolidating Parent' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLCompanyPreferenceOption', @level2type=N'COLUMN',@level2name=N'ysnConsolidatingParent' 
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Default Visible Old Account System Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLCompanyPreferenceOption', @level2type=N'COLUMN',@level2name=N'intDefaultVisibleOldAccountSystemId' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'SQL Database version (year)' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLCompanyPreferenceOption', @level2type=N'COLUMN',@level2name=N'intDBVersion' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Indicates if Historical journal importing was already performed' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLCompanyPreferenceOption', @level2type=N'COLUMN',@level2name=N'ysnHistoricalJournalImported' 
 GO

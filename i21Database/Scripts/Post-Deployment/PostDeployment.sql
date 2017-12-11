@@ -64,6 +64,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1730_UpdateManufacturingMenus.sql
 :r .\SM\1740_UpdatePurchasingMenus.sql
 :r .\SM\1740_UpdateSalesMenus.sql
+:r .\SM\1740_RemoveLoadScheduleResources.sql
 
 -- Canned Report
 :r .\Reports\1_ReportDisableConstraints.sql
@@ -187,6 +188,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\ReportData\TrialBalanceDetail.sql
 :r .\GL\ReportData\BalanceSheetStandard.sql
 :r .\GL\DefaultData\1n_UpdateFiscalUpperBounds.sql
+:r .\GL\DefaultData\1p_CompanyPreferenceOption.sql
 
 -- Financial Report Designer
 :r .\FRD\FRDEntryDataFix.sql
@@ -252,6 +254,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\UpdatePrepayVoucherStatus.sql
 :r .\AP\UpdateTaxGroupId.sql
 :r .\AP\UpdateBillDetailRate.sql
+:r .\AP\DeleteInvalidBasisAdvanceStaging.sql
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 
@@ -392,6 +395,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\NC_NorthCarolina.sql
 :r .\TF\DefaultData\OR_Oregon.sql
 :r .\TF\DefaultData\WA_Washington.sql
+:r .\TF\DefaultData\OH_Ohio.sql
 :r .\TF\DefaultData\AfterUpgradeCleanup.sql
 
 --Integration

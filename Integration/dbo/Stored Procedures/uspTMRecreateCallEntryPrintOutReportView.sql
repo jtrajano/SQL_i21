@@ -158,7 +158,7 @@ BEGIN
 					ON C.intProduct = G.A4GLIdentity 
 					AND G.vwitm_loc_no COLLATE Latin1_General_CI_AS = L.vwloc_loc_no COLLATE Latin1_General_CI_AS 
 				LEFT JOIN vwtrmmst I 
-					ON F.intDeliveryTermID = I.vwtrm_key_n 
+					ON F.intDeliveryTermID = I.A4GLIdentity 
 				LEFT JOIN vwitmmst M 
 					ON F.intSubstituteProductID = M.A4GLIdentity 
 					AND M.vwitm_loc_no COLLATE Latin1_General_CI_AS = L.vwloc_loc_no COLLATE Latin1_General_CI_AS 

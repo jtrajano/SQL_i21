@@ -146,7 +146,7 @@ BEGIN TRY
 			, tblARInvoice.strBOLNumber
 			, tblARInvoice.dtmDate
 			, (CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strCity ELSE tblARInvoice.strShipToCity END) AS strDestinationCity
-			, (CASE WHEN tblARInvoice.intFreightTermId = 3 THEN NULL ELSE tblSMTaxCode.strCounty END) AS strDestinationCounty 
+			, (CASE WHEN tblARInvoice.intFreightTermId = 3 THEN NULL ELSE Destination.strCounty END) AS strDestinationCounty 
 			, (CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strStateProvince ELSE tblARInvoice.strShipToState END) AS strDestinationState
 			, tblSMCompanyLocation.strCity AS strOriginCity
 			, NULL AS strOriginCounty
@@ -190,8 +190,8 @@ BEGIN TRY
 		INNER JOIN tblSMCompanyLocation ON tblARInvoice.intCompanyLocationId = tblSMCompanyLocation.intCompanyLocationId
 		INNER JOIN tblARCustomer ON tblARInvoice.intEntityCustomerId = tblARCustomer.intEntityId
 		INNER JOIN tblEMEntity ON tblARCustomer.intEntityId = tblEMEntity.intEntityId
-		LEFT JOIN tblEMEntityLocation ON tblEMEntityLocation.intEntityId = tblARInvoice.intShipToLocationId
-		LEFT JOIN tblSMTaxCode ON tblSMTaxCode.intTaxCodeId = tblEMEntityLocation.intCountyTaxCodeId
+		LEFT JOIN tblEMEntityLocation ON tblEMEntityLocation.intEntityLocationId = tblARInvoice.intShipToLocationId
+		LEFT JOIN tblSMTaxCode Destination ON Destination.intTaxCodeId = tblEMEntityLocation.intCountyTaxCodeId
 		INNER JOIN tblTFReportingComponent ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 			ON tblTFProductCode.intProductCodeId = tblICItemMotorFuelTax.intProductCodeId
 		FULL OUTER JOIN tblEMEntity AS tblEMEntity_Transporter
@@ -406,18 +406,22 @@ BEGIN TRY
 		INNER JOIN tblSMCompanyLocation ON tblTRLoadDistributionHeader.intCompanyLocationId = tblSMCompanyLocation.intCompanyLocationId
 			ON tblTFProductCode.intProductCodeId = tblICItemMotorFuelTax.intProductCodeId
 		LEFT JOIN tblTFReportingComponentCriteria ON tblTFReportingComponent.intReportingComponentId = tblTFReportingComponentCriteria.intReportingComponentId
+			LEFT JOIN tblTFTaxCategory ON tblTFTaxCategory.intTaxCategoryId = tblTFReportingComponentCriteria.intTaxCategoryId
+				LEFT JOIN tblSMTaxCode AS TaxCodeCategory ON TaxCodeCategory.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId
 		LEFT OUTER JOIN tblTFTerminalControlNumber ON tblTRSupplyPoint.intTerminalControlNumberId = tblTFTerminalControlNumber.intTerminalControlNumberId
 		LEFT OUTER JOIN tblARInvoice ON tblTRLoadDistributionHeader.intInvoiceId = tblARInvoice.intInvoiceId
 		CROSS JOIN tblSMCompanySetup
+		CROSS JOIN tblSMTaxCode
 		WHERE tblICInventoryTransfer.intSourceType = 3
 			AND tblTFReportingComponent.intReportingComponentId = @RCId
+			AND tblSMTaxCode.intTaxCategoryId IS NOT NULL
 			AND (tblSMCompanyLocation.ysnTrackMFTActivity = 1)
 			AND (tblARInvoice.strBOLNumber IS NULL)
 			AND CAST(FLOOR(CAST(tblTRLoadHeader.dtmLoadDateTime AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)
 			AND CAST(FLOOR(CAST(tblTRLoadHeader.dtmLoadDateTime AS FLOAT))AS DATETIME) <= CAST(FLOOR(CAST(@DateTo AS FLOAT))AS DATETIME)
 			AND (tblICInventoryTransfer.ysnPosted = 1)
-			AND (tblTFReportingComponentCriteria.strCriteria <> '= 0' 
-			OR tblTFReportingComponentCriteria.strCriteria IS NULL)
+			AND (tblTFReportingComponentCriteria.strCriteria IS NULL 
+				OR (tblTFReportingComponentCriteria.strCriteria = '<> 0' AND tblSMTaxCode.intTaxCodeId = TaxCodeCategory.intTaxCodeId ))
 		)tblTransactions
 
 		-- INVENTORY TRANSFERS USING IC SCREEN --
@@ -518,6 +522,10 @@ BEGIN TRY
 				, intTransactionNumberId = tblICInventoryTransferDetail.intInventoryTransferDetailId
 			FROM tblTFProductCode
 			INNER JOIN tblICInventoryTransferDetail 
+				INNER JOIN tblICItem ON tblICItem.intItemId = tblICInventoryTransferDetail.intItemId
+					INNER JOIN tblICCategoryTax ON tblICCategoryTax.intCategoryId = tblICItem.intCategoryId 
+						INNER JOIN tblSMTaxClass ON tblSMTaxClass.intTaxClassId = tblICCategoryTax.intTaxClassId
+							INNER JOIN tblSMTaxCode ON tblSMTaxCode.intTaxClassId = tblSMTaxClass.intTaxClassId
 			INNER JOIN tblICInventoryTransfer ON tblICInventoryTransferDetail.intInventoryTransferId = tblICInventoryTransfer.intInventoryTransferId
 			INNER JOIN tblICItemMotorFuelTax
 			INNER JOIN tblTFReportingComponentProductCode ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
@@ -527,15 +535,19 @@ BEGIN TRY
 			INNER JOIN tblSMCompanyLocation ON tblICInventoryTransfer.intToLocationId = tblSMCompanyLocation.intCompanyLocationId
 			INNER JOIN tblSMCompanyLocation AS tblSMCompanyLocationFrom ON tblICInventoryTransfer.intFromLocationId = tblSMCompanyLocationFrom.intCompanyLocationId
 			LEFT JOIN tblTFReportingComponentCriteria ON tblTFReportingComponent.intReportingComponentId = tblTFReportingComponentCriteria.intReportingComponentId
-		CROSS JOIN tblSMCompanySetup
-		WHERE  tblICInventoryTransfer.intSourceType IN (0,1,2)
-		AND tblTFReportingComponent.intReportingComponentId = @RCId
+				LEFT JOIN tblTFTaxCategory ON tblTFTaxCategory.intTaxCategoryId = tblTFReportingComponentCriteria.intTaxCategoryId
+					LEFT JOIN tblSMTaxCode AS TaxCodeCategory ON TaxCodeCategory.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId
+			CROSS JOIN tblSMCompanySetup
+			WHERE  tblICInventoryTransfer.intSourceType IN (0,1,2)
+				AND tblTFReportingComponent.intReportingComponentId = @RCId
 				AND (tblSMCompanyLocation.ysnTrackMFTActivity = 1)
 				AND CAST(FLOOR(CAST(tblICInventoryTransfer.dtmTransferDate AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)
 				AND CAST(FLOOR(CAST(tblICInventoryTransfer.dtmTransferDate AS FLOAT))AS DATETIME) <= CAST(FLOOR(CAST(@DateTo AS FLOAT))AS DATETIME)
 				AND (tblICInventoryTransfer.ysnPosted = 1)
-				AND (tblTFReportingComponentCriteria.strCriteria <> '= 0' 
-				OR tblTFReportingComponentCriteria.strCriteria IS NULL)
+				AND (tblTFReportingComponentCriteria.strCriteria IS NULL 
+						OR (tblTFReportingComponentCriteria.strCriteria = '<> 0' AND tblSMTaxCode.intTaxCodeId = TaxCodeCategory.intTaxCodeId) -- FOR TRACK MFT ACTIVITY
+						OR (TaxCodeCategory.intTaxCodeId IS NULL AND tblTFReportingComponentCriteria.strCriteria = '= 0') -- FOR NO TAX CODE MAPPED TO MFT CATEGORY
+					)
 		)tblTransactions
 				
 		IF (@ReportingComponentId <> '')

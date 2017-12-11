@@ -471,6 +471,53 @@ SET @batchIdUsed = @batchId
 						ON A.intLocationId = L.intCompanyLocationId
 				WHERE L.intCompanyLocationId IS NULL
 				
+				--INACTIVE GL ACCOUNT
+				INSERT INTO 
+					@ARReceivableInvalidData
+				SELECT 
+					'Undeposited Funds Account : ' + CL.strUndepositedFundsId+ ' is not active.'
+					,'Receivable'
+					,A.strRecordNumber
+					,@batchId
+					,A.intPaymentId
+				FROM
+					tblARPayment A
+				INNER JOIN
+					@ARReceivablePostData P
+						ON A.intPaymentId = P.intPaymentId						 
+				LEFT OUTER JOIN
+					tblSMCompanyLocation L
+						ON A.intLocationId = L.intCompanyLocationId
+				LEFT OUTER JOIN vyuSMCompanyLocation CL
+					ON L.intCompanyLocationId = CL.intCompanyLocationId
+				INNER JOIN tblGLAccount GL
+					ON GL.strAccountId = CL.strUndepositedFundsId
+				WHERE GL.ysnActive != 1
+
+
+				-- GL Account Does not Exist
+				INSERT INTO 
+					@ARReceivableInvalidData
+				SELECT 
+					'Undeposited Funds Account : ' + CL.strUndepositedFundsId+ ' does not exist.'
+					,'Receivable'
+					,A.strRecordNumber
+					,@batchId
+					,A.intPaymentId
+				FROM
+					tblARPayment A
+				INNER JOIN
+					@ARReceivablePostData P
+						ON A.intPaymentId = P.intPaymentId						 
+				LEFT OUTER JOIN
+					tblSMCompanyLocation L
+						ON A.intLocationId = L.intCompanyLocationId
+				LEFT OUTER JOIN vyuSMCompanyLocation CL
+					ON L.intCompanyLocationId = CL.intCompanyLocationId
+				LEFT JOIN tblGLAccount GL
+					ON GL.strAccountId = CL.strUndepositedFundsId
+				WHERE  GL.strAccountId IS NULL AND strUndepositedFundsId != ''
+
 				----Bank Account
 				--INSERT INTO 
 				--	@ARReceivableInvalidData
@@ -972,6 +1019,9 @@ SET @batchIdUsed = @batchId
 					END
 					DELETE FROM @InvoiceIdsForChecking WHERE intInvoiceId = @InvID							
 				END		 																
+			
+			
+			
 			END
 
 		--UNPOSTING VALIDATIONS
@@ -2351,6 +2401,11 @@ IF @recap = 0
 		END CATCH	
 		 
 		BEGIN TRY 
+		
+		DECLARE @arPaymentIds AS Id --parameter for updating AP transactions
+		INSERT INTO @arPaymentIds
+		SELECT intPaymentId FROM @ARReceivablePostData
+		
 		IF @post = 0
 			BEGIN
 			
@@ -2588,7 +2643,8 @@ IF @recap = 0
 				intAccountId = NULL			
 			WHERE
 				intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)		
-									
+
+			EXEC uspAPUpdateBillPaymentFromAR @paymentIds = @arPaymentIds, @post = 0
 
 			END
 		ELSE
@@ -2822,7 +2878,9 @@ IF @recap = 0
 				A.intPaymentId
 			FROM tblARPayment A
 			WHERE intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
-							
+
+			EXEC uspAPUpdateBillPaymentFromAR @paymentIds = @arPaymentIds, @post = 1
+
 			END						
 
 		UPDATE 
@@ -2878,7 +2936,7 @@ IF @recap = 0
 		WHERE
 			B.ysnPosted = 0
 			AND ISNULL(B.[ysnInvoicePrepayment],0) = 0	
-			
+					
 		END TRY
 		BEGIN CATCH	
 			SELECT @ErrorMerssage = ERROR_MESSAGE()										

@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].uspAPRptVoucherCheckOff
+﻿CREATE PROCEDURE [dbo].[uspAPRptVoucherCheckOff]
 	@xmlParam NVARCHAR(MAX) = NULL
 AS
 
@@ -104,23 +104,31 @@ BEGIN
 	END
 END
 
-SET @query = 'SELECT  
-				VendorId ,
-				VendorName ,
-				strDescription ,
-				strItem , 
-				strTicketNumber ,
-				strVendorOrderNumber ,
-				StateOfOrigin ,
-				Location ,
-				BillDate ,
-				PaymentDate ,
-				ExemptUnits ,
-				dblTotal ,
-				strCompanyName ,
-				strCompanyAddress
-				FROM 
-			 [vyuAPRptVoucherCheckOff]'
+SET @query = 'SELECT * FROM (
+				SELECT  TOP 100 PERCENT
+					intBillId,
+					VendorId ,
+					VendorName ,
+					strDescription ,
+					strItem , 
+					intTicketId ,
+					strTicketNumber ,
+					strVendorOrderNumber ,
+					StateOfOrigin ,
+					Location ,
+					BillDate ,
+					PostDate ,
+					PaymentDate ,
+					ExemptUnits ,
+					dblTotal ,
+					dblTax ,
+					strCompanyName ,
+					strCompanyAddress
+					FROM 
+				[vyuAPRptVoucherCheckOff]
+				ORDER BY StateOfOrigin DESC
+			 ) tblAPCheckOffReportData
+'
 
 	  
 IF ISNULL(@innerQuery,'') != ''

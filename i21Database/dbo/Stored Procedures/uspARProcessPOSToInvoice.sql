@@ -217,4 +217,147 @@ BEGIN
 	SET intInvoiceId = @CreatedIvoices,
 		ysnHold = 0
 	WHERE intPOSId = @intPOSId
+
+	DECLARE @EntriesForPayment		AS PaymentIntegrationStagingTable,
+			@LogId AS INT,
+			@intPOSPaymentId AS INT,
+			@strPaymentMethod AS NVARCHAR(50),
+			@strReferenceNo AS NVARCHAR(50),
+			@dblAmount AS NUMERIC(18,6),
+			@intPaymentIdNew AS INT
+
+	--Get POS Payment
+	SELECT *
+	INTO #tmpPOSPayments
+	FROM tblARPOSPayment
+	WHERE intPOSId = @intPOSId
+	AND strPaymentMethod IN ('Cash','Check')
+	
+	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpPOSPayments) 
+	BEGIN
+
+		SELECT TOP 1 
+			@intPOSPaymentId = intPOSPaymentId
+			,@strPaymentMethod = strPaymentMethod
+			,@strReferenceNo = strReferenceNo
+			,@dblAmount = dblAmount 
+		FROM #tmpPOSPayments
+
+		INSERT INTO @EntriesForPayment
+		(
+		intId
+		,strSourceTransaction
+		,intSourceId
+		,strSourceId
+		,intPaymentId
+		,intEntityCustomerId
+		,intCompanyLocationId
+		,intCurrencyId
+		,dtmDatePaid
+		,intPaymentMethodId
+		,strPaymentMethod
+		,strPaymentInfo
+		,strNotes
+		,intAccountId
+		,intBankAccountId
+		,dblAmountPaid
+		,ysnPost
+		,intEntityId
+		,intInvoiceId
+		,strTransactionType
+		,strTransactionNumber
+		,intTermId
+		,intInvoiceAccountId
+		,dblInvoiceTotal
+		,dblBaseInvoiceTotal
+		,ysnApplyTermDiscount
+		,dblDiscount
+		,dblDiscountAvailable
+		,dblInterest
+		,dblPayment
+		,dblAmountDue
+		,dblBaseAmountDue
+		,strInvoiceReportNumber
+		,intCurrencyExchangeRateTypeId
+		,intCurrencyExchangeRateId
+		,dblCurrencyExchangeRate
+		,ysnAllowOverpayment
+		,ysnFromAP
+		)
+		select  
+		Inv.intInvoiceId
+		,strTransactionType
+		,Inv.intInvoiceId
+		,Inv.strInvoiceNumber
+		,intPaymentId
+		,intEntityCustomerId
+		,intCompanyLocationId
+		,intCurrencyId
+		,GETDATE()
+		,(SELECT TOP 1 intPaymentMethodID FROM vyuARPaymentMethodForReceivePayments WHERE strPaymentMethod = @strPaymentMethod)
+		,@strPaymentMethod --Payment Method
+		,@strReferenceNo
+		,'' --Notes
+		,Inv.intAccountId
+		,NULL --Bank Account
+		,dblAmountDue
+		,NULL --Set NULL to Create
+		,intEntityCustomerId
+		,Inv.intInvoiceId
+		,Inv.strTransactionType
+		,Inv.strTransactionNumber
+		,Inv.intTermId
+		,Inv.intAccountId
+		,Inv.dblInvoiceTotal
+		,Inv.dblBaseInvoiceTotal
+		,0
+		,Inv.dblDiscount
+		,Inv.dblDiscountAvailable
+		,Inv.dblInterest
+		,CASE WHEN @dblAmount > Inv.dblAmountDue THEN Inv.dblAmountDue ELSE @dblAmount END
+		,Inv.dblAmountDue
+		,Inv.dblBaseAmountDue
+		,Inv.strInvoiceReportNumber
+		,Inv.intCurrencyExchangeRateTypeId
+		,Inv.intCurrencyExchangeRateId
+		,Inv.dblCurrencyExchangeRate
+		,0
+		,0
+		from vyuARInvoicesForPayment Inv
+		where Inv.intInvoiceId = @CreatedIvoices
+
+		--Save the RCV
+		EXEC [dbo].[uspARProcessPayments]
+				 @PaymentEntries	= @EntriesForPayment
+				,@UserId			= 1
+				,@GroupingOption	= 3
+				,@RaiseError		= 1
+				,@ErrorMessage		= @ErrorMessage OUTPUT
+				,@LogId				= @LogId OUTPUT
+
+		--Get the new Id generated
+		SELECT @intPaymentIdNew =  ISNULL(intPaymentId,0) FROM tblARPaymentIntegrationLogDetail WHERE intIntegrationLogId = @LogId AND ISNULL(ysnSuccess,0) = 1 AND ysnHeader = 1
+
+		--Posting of Receive Payment
+		EXEC [dbo].[uspARPostPayment]
+				@batchId = NULL,
+				@post = 1,
+				@recap = 0,
+				@param = @intPaymentIdNew,
+				@userId = @intEntityUserId,
+				@beginDate = NULL,
+				@endDate = NULL,
+				@beginTransaction = NULL,
+				@endTransaction = NULL,
+				@exclude = NULL,
+				@raiseError = 1,
+				@bankAccountId = NULL
+
+
+
+
+		DELETE FROM #tmpPOSPayments WHERE intPOSPaymentId = @intPOSPaymentId
+
+	END
+
 END

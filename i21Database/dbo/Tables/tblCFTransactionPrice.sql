@@ -20,4 +20,30 @@ CREATE NONCLUSTERED INDEX [tblCFTransactionPrice_intTransactionPriceId]
 GO
 CREATE NONCLUSTERED INDEX [tblCFTransactionPrice_intTransactionId]
     ON [dbo].[tblCFTransactionPrice]([intTransactionId] ASC);
+GO
 
+CREATE NONCLUSTERED INDEX [IX_tblCFTransactionPrice_17_359672329__K2_K1_3] ON [dbo].[tblCFTransactionPrice]
+(
+	[intTransactionId] ASC,
+	[intTransactionPriceId] ASC
+)
+INCLUDE ( 	[strTransactionPriceId])
+GO
+
+
+CREATE NONCLUSTERED INDEX [IX_tblCFTransactionPrice_17_359672329__K2_3] ON [dbo].[tblCFTransactionPrice]
+(
+	[intTransactionId] ASC
+)
+INCLUDE ( 	[strTransactionPriceId]) 
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblCFTransactionPrice_17_359672329__K2_K1_3_5] ON [dbo].[tblCFTransactionPrice]
+(
+	[intTransactionId] ASC,
+	[intTransactionPriceId] ASC
+)
+INCLUDE ( 	[strTransactionPriceId],
+	[dblCalculatedAmount]) 
+
+GO

@@ -69,7 +69,7 @@ BEGIN
 					
 	--Item Promotional Pricing 
 	SELECT TOP 1
-		@Price			= @UOMQuantity *
+		@Price			= @Quantity *
 							(CASE WHEN ICISP.strPromotionType = 'Terms Discount' THEN ICISP.dblUnitAfterDiscount
 							ELSE
 								(CASE

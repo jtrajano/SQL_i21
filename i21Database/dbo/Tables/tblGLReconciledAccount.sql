@@ -7,7 +7,7 @@
     [strReconciledId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
 );
 GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLReconciledAccount', @level2type=N'COLUMN',@level2name=N'intId'
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Primary key column' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLReconciledAccount', @level2type=N'COLUMN',@level2name=N'intId'
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Concurrency Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLReconciledAccount', @level2type=N'COLUMN',@level2name=N'intConcurrencyId'
 GO

@@ -57,11 +57,11 @@ SELECT intEntityId				= ENTITY.intEntityId
      , strBillToCountry			= BILLTOLOCATION.strCountry
 	 , strBillToPhone			= BILLTOLOCATION.strPhone
 	 , intServiceChargeId		= CUSTOMER.intServiceChargeId
-	 , intWarehouseId			= CUSTOMERLOCATION.intWarehouseId
-	 , strWarehouseName			= CUSTOMERLOCATION.strWarehouseName
 	 , intPaymentMethodId		= CUSTOMER.intPaymentMethodId
 	 , strPaymentMethod			= CUSTOMER.strPaymentMethod
 	 , ysnCreditHold
+	 , intWarehouseId			= SHIPTOLOCATION.intWarehouseId
+	 , strWarehouseName			= SHIPTOLOCATION.strWarehouseName
 FROM tblEMEntity ENTITY
 INNER JOIN (
 	SELECT C.intEntityId
@@ -190,7 +190,14 @@ LEFT JOIN (
 		 , strState
 		 , strZipCode
 		 , strCountry
+		 , intWarehouseId
+		 , strWarehouseName
 	FROM dbo.tblEMEntityLocation EL WITH (NOLOCK)
+	LEFT JOIN (
+		SELECT intCompanyLocationId
+			 , strWarehouseName	= strLocationName
+		FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
+	) WH ON EL.intWarehouseId = WH.intCompanyLocationId
 ) SHIPTOLOCATION ON CUSTOMER.intShipToId = SHIPTOLOCATION.intEntityLocationId
 LEFT JOIN (
 	SELECT intEntityLocationId

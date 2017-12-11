@@ -143,5 +143,6 @@ BEGIN CATCH
 	SET @ErrorMessage  = ERROR_MESSAGE()
 	SET @ErrorState    = ERROR_STATE()
 	SET @ErrorLine     = ERROR_LINE()
+	IF @transCount = 0 AND XACT_STATE() <> 0 ROLLBACK TRANSACTION
 	RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
 END CATCH

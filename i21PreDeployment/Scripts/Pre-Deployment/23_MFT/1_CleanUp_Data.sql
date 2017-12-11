@@ -79,10 +79,16 @@ BEGIN
     EXEC('TRUNCATE TABLE tblTFTransactionSummary')
 END	
 
+IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFTransactionDynamicOR') 
+BEGIN
+	PRINT('Truncate tblTFTransactionDynamicOR')
+    EXEC('TRUNCATE TABLE tblTFTransactionDynamicOR')
+END
+
 IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFTransaction') 
 BEGIN
 	PRINT('Truncate tblTFTransaction')
-    EXEC('TRUNCATE TABLE tblTFTransaction')
+    EXEC('DELETE FROM tblTFTransaction')
 END
 
 -- Update Component Type from 5(EFile Main) to 4(EFile). EFile Main is obsolete

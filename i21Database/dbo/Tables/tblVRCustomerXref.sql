@@ -8,6 +8,6 @@
 	CONSTRAINT [UQ_tblVRCustomerXref_intCustomerEntityId_intVendorEntityId] UNIQUE NONCLUSTERED ([intEntityId] ASC,[intVendorSetupId] ASC),
 	CONSTRAINT [UQ_tblVRCustomerXref_strVendorCustomer_intVendorEntity] UNIQUE NONCLUSTERED ([strVendorCustomer] ASC,[intVendorSetupId] ASC),
 	CONSTRAINT [FK_tblVRCustomerXref_tblARCustomer] FOREIGN KEY([intEntityId])REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
-	CONSTRAINT [FK_tblVRCustomerXref_tblVRVendorSetup] FOREIGN KEY([intVendorSetupId])REFERENCES [dbo].[tblVRVendorSetup] ([intVendorSetupId])
+	CONSTRAINT [FK_tblVRCustomerXref_tblVRVendorSetup] FOREIGN KEY([intVendorSetupId])REFERENCES [dbo].[tblVRVendorSetup] ([intVendorSetupId]) ON DELETE CASCADE
 );
 GO

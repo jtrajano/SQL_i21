@@ -41,8 +41,18 @@ Declare @strBulkItemXml nvarchar(max)
 		,@dblPickQuantity numeric(38,20)
 		,@intPickUOMId int
 		,@intQtyItemUOMId int
+
+Declare @tblWorkOrder table
+(
+	intRowNo int Identity(1,1),
+	intWorkOrderId int
+)
+
+--Get the Comma Separated Work Order Ids into a table
+INSERT INTO @tblWorkOrder(intWorkOrderId) 
+Select * from dbo.[fnCommaSeparatedValueToTable](@strWorkOrderIds)
  
-Select TOP 1 @intManufacturingProcessId=intManufacturingProcessId From tblMFManufacturingProcess Where intAttributeTypeId=2
+Select TOP 1 @intManufacturingProcessId=w.intManufacturingProcessId From tblMFWorkOrder w join @tblWorkOrder tw on w.intWorkOrderId=tw.intWorkOrderId
 
 Select TOP 1 @ysnBlendSheetRequired=ISNULL(ysnBlendSheetRequired,0) From tblMFCompanyPreference
 
@@ -70,12 +80,6 @@ If ISNULL(@intBlendStagingLocationId ,0)=0
 
 Select @intNewSubLocationId=intSubLocationId from tblICStorageLocation Where intStorageLocationId=@intBlendStagingLocationId
 
-Declare @tblWorkOrder table
-(
-	intRowNo int Identity(1,1),
-	intWorkOrderId int
-)
-
 Declare @tblParentLot table
 (
 	intRowNo int Identity(1,1),
@@ -101,20 +105,6 @@ Declare @tblChildLot table
 	intPickUOMId int,
 	intPickListDetailId int
 )
-
---Get the Comma Separated Work Order Ids into a table
-SET @index = CharIndex(',',@strWorkOrderIds)
-WHILE @index > 0
-BEGIN
-        SET @id = SUBSTRING(@strWorkOrderIds,1,@index-1)
-        SET @strWorkOrderIds = SUBSTRING(@strWorkOrderIds,@index+1,LEN(@strWorkOrderIds)-@index)
-
-        INSERT INTO @tblWorkOrder(intWorkOrderId) values (@id)
-        SET @index = CharIndex(',',@strWorkOrderIds)
-END
-SET @id=@strWorkOrderIds
-INSERT INTO @tblWorkOrder(intWorkOrderId) values (@id)
-
 
 --One WorkOrder one Pick List
 If (Select COUNT(1) From @tblWorkOrder)=1

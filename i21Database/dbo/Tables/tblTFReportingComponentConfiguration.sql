@@ -10,6 +10,7 @@
 	[strConfiguration] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[ysnConfiguration] BIT NULL,
 	[ysnUserDefinedValue] BIT NOT NULL,
+	[ysnOutputDesigner] BIT NULL DEFAULT((0)),
 	[strLastIndexOf] [nvarchar](10) COLLATE Latin1_General_CI_AS NULL,
 	[strSegment] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intConfigurationSequence] [int] NULL,

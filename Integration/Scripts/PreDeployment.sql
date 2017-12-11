@@ -245,6 +245,7 @@
 :r "..\dbo\Stored Procedures\uspGRImportStorageType.sql"
 :r "..\dbo\Stored Procedures\uspGRImportWeightGrades.sql"
 :r "..\dbo\Stored Procedures\uspGRImportShipTo.sql"
+:r "..\dbo\Views\vyuSCTicketLVControlView.sql"
 
 --MANUFACTURING RECIPE
 :r "..\dbo\Stored Procedures\uspMFImportRecipe.sql" 

@@ -14,7 +14,7 @@ WITH DETAIL AS(
 ,ACCOUNTTYPE AS
 (
 	SELECT D.*, G.strAccountType 
-	FROM DETAIL D JOIN tblGLAccountGroup G 
+	FROM DETAIL D LEFT JOIN tblGLAccountGroup G 
 	ON G.intAccountGroupId = D.intAccountGroupId
 )
 SELECT
@@ -24,7 +24,7 @@ SELECT
 	,ISNULL(MTD.beginningBalance,0) MTD  
 FROM 
 	ACCOUNTTYPE A 
-CROSS APPLY (  
+OUTER APPLY (  
 	SELECT SUM(ISNULL(dblDebit, 0) - ISNULL(dblCredit,0)) beginningBalance
 	FROM  tblGLDetail D  WHERE D.intAccountId = A.intAccountId
 	AND D.ysnIsUnposted = 0
@@ -34,7 +34,7 @@ CROSS APPLY (
 		END 
 	AND A.PeriodEnd
 )YTD
-CROSS APPLY (  
+OUTER APPLY (  
 	SELECT SUM(ISNULL(dblDebit, 0) - ISNULL(dblCredit,0)) beginningBalance
 	FROM tblGLDetail D 
 	WHERE D.dtmDate BETWEEN A.PeriodStart AND A.PeriodEnd and D.ysnIsUnposted = 0

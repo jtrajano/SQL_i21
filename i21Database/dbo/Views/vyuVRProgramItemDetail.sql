@@ -22,7 +22,7 @@ FROM(
 		,B.dtmEndDate
 		,B.intConcurrencyId
 	FROM tblVRProgram A
-	INNER JOIN tblVRProgramItem B
+	LEFT JOIN tblVRProgramItem B
 		ON A.intProgramId = B.intProgramId
 	INNER JOIN tblICItem C
 		ON B.intItemId = C.intItemId
@@ -77,6 +77,37 @@ FROM(
 	INNER JOIN tblEMEntity H
 		ON G.intEntityId = H.intEntityId
 	WHERE B.intCategoryId IS NOT NULL
+
+	UNION ALL
+
+	SELECT 
+		A.intProgramId
+		,strVendorNumber = G.strVendorId
+		,strVendorName = H.strName
+		,A.strProgram
+		,A.strProgramDescription
+		,A.strVendorProgram
+		,strItemNumber = ''
+		,strItemDescription = ''
+		,strItemUOM = ''
+		,dblUnitQty = 0.0
+		,B.strRebateBy
+		,B.dblRebateRate
+		,B.dtmBeginDate
+		,B.dtmEndDate
+		,intConcurrencyId = 0
+	FROM tblVRProgram A
+	LEFT JOIN tblVRProgramItem B
+		ON A.intProgramId = B.intProgramId
+	INNER JOIN tblVRVendorSetup F
+		ON A.intVendorSetupId = F.intVendorSetupId
+	INNER JOIN tblAPVendor G
+		ON F.intEntityId = G.intEntityId
+	INNER JOIN tblEMEntity H
+		ON G.intEntityId = H.intEntityId
+	WHERE B.intCategoryId IS NULL AND B.intItemId IS NULL
+
+
 ) A
 GO
 

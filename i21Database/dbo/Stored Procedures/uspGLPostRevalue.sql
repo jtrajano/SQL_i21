@@ -9,8 +9,7 @@ DECLARE @ReversePostGLEntries RecapTableType
 DECLARE @strPostBatchId NVARCHAR(100) = ''
 DECLARE @strReversePostBatchId NVARCHAR(100) = ''
 
-BEGIN TRY
-	BEGIN TRANSACTION
+
 		DECLARE @errorNum INT
 		DECLARE @dateNow DATETIME
 		SELECT @dateNow = GETDATE()
@@ -172,9 +171,10 @@ BEGIN TRY
 			AND f.strModule COLLATE Latin1_General_CI_AS = A.strModule COLLATE Latin1_General_CI_AS
 			AND f.OffSet  = A.OffSet
 		)G
-		DECLARE @dtmReverseDate DATETIME
-		SELECT TOP 1 @dtmReverseDate = dtmReverseDate FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationId
-		
+		DECLARE @dtmReverseDate DATETIME, @missingAccountMessage NVARCHAR(150)
+		SELECT TOP 1 @dtmReverseDate = dtmReverseDate , @missingAccountMessage = 'Forex Gain/Loss account setting is required in Company Configuration screen for ' +  strTransactionType + ' transaction type.' FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationId
+		IF EXISTS(Select TOP 1 1 FROM @PostGLEntries WHERE intAccountId IS NULL)
+				RAISERROR (  @missingAccountMessage ,11,1)
 		IF @ysnRecap = 0
 			BEGIN
 				DECLARE @strReverseRevalueId NVARCHAR(100)
@@ -460,34 +460,7 @@ BEGIN TRY
 				,[strTransactionForm]
 				,strModuleName
 			FROM @PostGLEntries
-			-- UNION ALL
-			--SELECT
-			--	 [strTransactionId]
-			--	,[intTransactionId]
-			--	,[intAccountId]
-			--	,[strDescription]
-			--	,[dtmTransactionDate]
-			--	,[dblDebit] 
-			--	,[dblCredit]
-			--	,[dtmDate] 
-			--	,[ysnIsUnposted]
-			--	,[intConcurrencyId]	
-			--	,[intCurrencyId]
-			--	,[intUserId]
-			--	,[intEntityId]			
-			--	,[dtmDateEntered]
-			--	,[strBatchId]=@strReversePostBatchId
-			--	,[strCode]			
-			--	,[strJournalLineDescription]
-			--	,[intJournalLineNo]
-			--	,[strTransactionType]
-			--	,[strTransactionForm]
-			--	,strModuleName
-			--FROM @ReversePostGLEntries
 			
-			IF EXISTS(Select TOP 1 1 FROM @PostGLEntries WHERE intAccountId IS NULL)
-				RAISERROR ('Forex Gain/Loss account setting is required in Company Configuration screen.',11,1)
-
 			EXEC uspGLPostRecap @RecapTable, @intEntityId
 		END
 		if @ysnRecap = 0
@@ -506,35 +479,18 @@ BEGIN TRY
 				UPDATE tblGLFiscalYearPeriod SET ysnINVRevalued = 1 WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
 			IF @strTransactionType = 'CT' 
 				UPDATE tblGLFiscalYearPeriod SET ysnCTRevalued = 1 WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
+			IF @strTransactionType = 'CM' 
+				UPDATE tblGLFiscalYearPeriod SET ysnCMRevalued = 1 WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
 
 			IF @strTransactionType = 'All' 
 				UPDATE tblGLFiscalYearPeriod SET 
 					ysnARRevalued =		1,
 					ysnAPRevalued =		1,
 					ysnINVRevalued =	1,
-					ysnCTRevalued =		1
+					ysnCTRevalued =		1,
+					ysnCMRevalued =		1
 				WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
 
 			
 		END
-	IF @@TRANCOUNT > 0
-		COMMIT TRANSACTION
 	SELECT @strPostBatchId PostBatchId--,	@strReversePostBatchId ReversePostBatchId
-END TRY
-BEGIN CATCH
-IF @@TRANCOUNT > 0
-	ROLLBACK TRANSACTION
-
-	DECLARE @ErrorMessage NVARCHAR(4000);  
-    DECLARE @ErrorSeverity INT;  
-    DECLARE @ErrorState INT;  
-	 SELECT   
-        @ErrorMessage = ERROR_MESSAGE(),  
-        @ErrorSeverity = ERROR_SEVERITY(),  
-        @ErrorState = ERROR_STATE();  
-  
-    RAISERROR (@ErrorMessage, -- Message text.  
-               @ErrorSeverity, -- Severity.  
-               @ErrorState -- State.  
-               );  
-END CATCH

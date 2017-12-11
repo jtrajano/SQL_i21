@@ -258,6 +258,49 @@ CREATE NONCLUSTERED INDEX [tblCFTransaction_intARLocationId]
 
 
 GO
+
 CREATE NONCLUSTERED INDEX [tblCFTransaction_intARItemId]
     ON [dbo].[tblCFTransaction]([intARItemId] ASC);
+
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_17_1326992154__K46_K31] ON [dbo].[tblCFTransaction]
+(
+	[ysnPosted] ASC,
+	[intProductId] ASC
+)
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_17_1326992154__K46_K31_K1_13] ON [dbo].[tblCFTransaction]
+(
+	[ysnPosted] ASC,
+	[intProductId] ASC,
+	[intTransactionId] ASC
+)
+INCLUDE ( 	[dblQuantity])
+
+GO
+CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_17_1326992154__K46_K27_K1_K29_K31_25] ON [dbo].[tblCFTransaction]
+(
+	[ysnPosted] ASC,
+	[intNetworkId] ASC,
+	[intTransactionId] ASC,
+	[intCardId] ASC,
+	[intProductId] ASC
+)
+INCLUDE ( 	[strTransactionType]) 
+GO
+
+
+CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_17_1326992154__K46_K27_K1_K29_K31_13_25] ON [dbo].[tblCFTransaction]
+(
+	[ysnPosted] ASC,
+	[intNetworkId] ASC,
+	[intTransactionId] ASC,
+	[intCardId] ASC,
+	[intProductId] ASC
+)
+INCLUDE ( 	[dblQuantity],
+	[strTransactionType])
+GO
 

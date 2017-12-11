@@ -24,6 +24,7 @@
     [intJournalIdToReverse] INT NULL, 
     [ysnReversed] BIT NULL, 
     [ysnRecurringTemplate] BIT NULL, 
+	[ysnExported] BIT NULL,
 	[intCurrencyExchangeRateId] INT NULL,
     CONSTRAINT [PK_tblGLJournal] PRIMARY KEY CLUSTERED ([intJournalId] ASC),
 	CONSTRAINT [FK_tblGLJournal_tblSMCurrency] FOREIGN KEY([intCurrencyId]) REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID]),
@@ -82,4 +83,6 @@ GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Recurring Template' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLJournal', @level2type=N'COLUMN',@level2name=N'ysnRecurringTemplate' 
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Currency Exchange Rate Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLJournal', @level2type=N'COLUMN',@level2name=N'intCurrencyExchangeRateId' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Exported' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLJournal', @level2type=N'COLUMN',@level2name=N'ysnExported' 
 GO

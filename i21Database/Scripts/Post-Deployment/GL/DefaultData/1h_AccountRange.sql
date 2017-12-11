@@ -1,7 +1,7 @@
 ﻿GO
-	PRINT N'Begin Generating Account Range'
-	
-	EXEC dbo.uspGLGenerateAccountRange
-	
-	PRINT N'Finished Generating Account Range'
+	PRINT 'Start generating default account range'
+GO
+	EXEC uspGLGenerateAccountRange
+GO
+	PRINT 'Fnished generating default account range'
 GO

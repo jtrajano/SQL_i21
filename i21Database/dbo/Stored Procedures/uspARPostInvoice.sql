@@ -3400,7 +3400,14 @@ IF @post = 1
 		IF @recap = 0
 		BEGIN
 			BEGIN TRY
-				UPDATE @GLEntries SET [dtmDateEntered] = @PostDate 
+				UPDATE GLEntries
+				SET [dtmDateEntered] = @PostDate
+				   ,[dblDebitUnit] = DebitUnit.Value
+				   ,[dblCreditUnit] = CreditUnit.Value					
+				FROM @GLEntries GLEntries
+				CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebitUnit, 0) - ISNULL(GLEntries.dblCreditUnit, 0)) DebitUnit
+				CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebitUnit, 0) - ISNULL(GLEntries.dblCreditUnit, 0))  CreditUnit
+
 				EXEC dbo.uspGLBookEntries @GLEntries, @post
 			END TRY
 			BEGIN CATCH

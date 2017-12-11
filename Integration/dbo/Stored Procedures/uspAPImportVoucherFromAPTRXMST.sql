@@ -352,7 +352,7 @@ SELECT
 								END),
 	[intAccountId]			=	ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CAST(C.apegl_gl_acct AS NVARCHAR(MAX))), 0),
 	[dblTotal]				=	CASE WHEN  C2.aptrx_trans_type IN ('C','A') 
-											THEN ABS(C.apegl_gl_amt) * (CASE WHEN C.apegl_gl_amt > 0 THEN (-1) ELSE 1 END)
+											THEN C.apegl_gl_amt * (-1) 
 										ELSE C.apegl_gl_amt END,
 	[dblCost]				=	(CASE WHEN C2.aptrx_trans_type IN ('C','A','I') THEN
 										(CASE WHEN C.apegl_gl_amt < 0 THEN C.apegl_gl_amt * -1 ELSE C.apegl_gl_amt END) --Cost should always positive
@@ -361,6 +361,7 @@ SELECT
 FROM tblAPBill A
 	INNER JOIN tblAPVendor B
 		ON A.intEntityVendorId = B.intEntityId
+	INNER JOIN #tmpVoucherTransactions tmpCreatedVouchers ON A.intBillId = tmpCreatedVouchers.intBillId
 	INNER JOIN (tmp_aptrxmstImport C2 INNER JOIN tmp_apeglmstImport C 
 					ON C2.aptrx_ivc_no = C.apegl_ivc_no 
 					AND C2.aptrx_vnd_no = C.apegl_vnd_no)

@@ -1,6 +1,12 @@
 ﻿CREATE VIEW vyuRKGetSequenceMonthNotMapping
 AS
-SELECT   intM2MGrainBasisId
+SELECT 		bd.intCommodityId
+		,bd.intFutureMarketId
+		,bd.strDeliveryMonth
+		,bd.intFutureMonthId
+		,bd.dblBasis
+		,bd.intCompanyLocationId
+		,intM2MGrainBasisId
 		,strCommodityCode
 		,strFutMarketName
 		,strFutureMonth +' ('+strSymbol+')' strFutureMonth

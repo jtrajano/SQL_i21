@@ -49,7 +49,7 @@ AS
 	um.strUnitMeasure AS strUOM,2 AS intStatusId,br.intManufacturingCellId,br.intMachineId,br.dtmDueDate AS dtmExpectedDate,
 	br.dblBlenderSize AS dblBinSize,br.intBlendRequirementId,CAST(0 AS BIT) AS ysnUseTemplate,CAST(0 AS BIT) AS ysnKittingEnabled,br.strDemandNo AS strComment,
 	br.intLocationId,Cast(0 AS decimal) AS dblBalancedQtyToProduce,ip.dblStandardCost,CAST(ISNULL(Ceiling(br.dblEstNoOfBlendSheet),1) AS decimal) AS dblEstNoOfBlendSheet,
-	mc.strCellName,m.strName AS strMachineName
+	mc.strCellName,m.strName AS strMachineName,r.intManufacturingProcessId
 	FROM tblMFBlendRequirement br JOIN tblICItem i ON br.intItemId=i.intItemId 
 	Join tblICItemUOM iu on i.intItemId=iu.intItemId and br.intUOMId=iu.intUnitMeasureId 
 	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
@@ -57,4 +57,6 @@ AS
 	Left Join tblICItemPricing ip on ip.intItemId=i.intItemId And ip.intItemLocationId=il.intItemLocationId
 	Left Join tblMFManufacturingCell mc on br.intManufacturingCellId=mc.intManufacturingCellId
 	Left Join tblMFMachine m on br.intMachineId=m.intMachineId
+	Left Join tblMFRecipe r on br.intItemId=r.intItemId AND br.intLocationId=r.intLocationId AND r.ysnActive=1
+	Left Join tblMFManufacturingProcessAttribute pa on r.intManufacturingProcessId=pa.intManufacturingProcessId AND pa.intLocationId=br.intLocationId
 	WHERE br.intBlendRequirementId=@intBlendRequirementId

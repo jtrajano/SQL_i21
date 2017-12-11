@@ -79,7 +79,7 @@ SELECT
  INTO #iRelyImptblGLJournal
  FROM glarcmst
  GROUP BY glarc_period, glarc_src_id, glarc_src_seq
-IF @@ERROR <> 0 GOTO ROLLBACK_INSERT
+
 --+++++++++++++++++++++++++++++++++
  -- INSERT IMPORT LOGS
  --+++++++++++++++++++++++++++++++++
@@ -91,7 +91,7 @@ IF @@ERROR <> 0 GOTO ROLLBACK_INSERT
  INSERT INTO tblGLCOAImportLogDetail (intImportLogId,strEventDescription,strPeriod,strSourceNumber,strSourceSystem,strJournalId,intConcurrencyId)
  SELECT @intImportLogId,strDescription,dtmDate,strSourceId,strSourceType,strJournalId,1 FROM #iRelyImptblGLJournal
 
- IF @@ERROR <> 0 GOTO ROLLBACK_INSERT
+ 
 --+++++++++++++++++++++++++++++++++
  -- UPDATE POSTING DATE
  --+++++++++++++++++++++++++++++++++
@@ -122,7 +122,7 @@ IF @@ERROR <> 0 GOTO ROLLBACK_INSERT
  strRecurringStatus,
  strSourceType
  FROM #iRelyImptblGLJournal
-IF @@ERROR <> 0 GOTO ROLLBACK_INSERT
+
 --+++++++++++++++++++++++++++++++++
  -- TEMP DETAIL JOURNAL
  --+++++++++++++++++++++++++++++++++
@@ -160,8 +160,7 @@ SELECT
  SUBSTRING(strCurrentExternalId,1,8) = glarc_acct1_8 AND SUBSTRING(strCurrentExternalId,10,8) = glarc_acct9_16
  INNER JOIN tblGLAccount ON tblGLAccount.intAccountId = tblGLCOACrossReference.inti21Id
 
- IF @@ERROR <> 0 GOTO ROLLBACK_INSERT
-
+ 
   --+++++++++++++++++++++++++++++++++
  -- UPDATE COLLATE JOURNAL
  --+++++++++++++++++++++++++++++++++
@@ -185,7 +184,6 @@ UPDATE #iRelyImptblGLJournalDetail
  tblGLJournal.strJournalId = #iRelyImptblGLJournalDetail.glarc_jrnl_no
  AND tblGLJournal.strSourceId = glarc_src_seq
 
-IF @@ERROR <> 0 GOTO ROLLBACK_INSERT
 
 --++++++++++++++++++++++++++++
  -- UPDATE GOODDATE
@@ -206,7 +204,7 @@ SET gooddate = CAST (substring(convert(varchar(10),glarc_trans_dt),1,4)
 FROM #iRelyImptblGLJournalDetail
 WHERE ISDATE(substring(convert(varchar(10),glarc_trans_dt),1,4) + substring(convert(varchar(10),glarc_trans_dt),5,2) + substring(convert(varchar(10),glarc_trans_dt),7,2) ) = 0
 
-IF @@ERROR <> 0 GOTO ROLLBACK_INSERT
+
 --+++++++++++++++++++++++++++++++++
  -- INSERT JOURNAL [DETAIL]
  --+++++++++++++++++++++++++++++++++
@@ -216,7 +214,6 @@ INSERT tblGLJournalDetail (intCompanyId, intLineNo,intJournalId,dtmDate,intAccou
  dblUnitsInlbs,strDocument,strComments,strReference,DebitUnitsInlbs,strCorrecting,strSourcePgm,strCheckbookNo,strWorkArea,A4GLIdentity
  FROM #iRelyImptblGLJournalDetail
 
- IF @@ERROR <> 0 GOTO ROLLBACK_INSERT
 
  --+++++++++++++++++++++++++++++++++++++
  -- UPDATE POST DATE JOURNAL [HEADER]
@@ -226,7 +223,6 @@ INSERT tblGLJournalDetail (intCompanyId, intLineNo,intJournalId,dtmDate,intAccou
  WHERE tblGLJournalDetail.intJournalId = tblGLJournal.intJournalId)
  WHERE intJournalId IN (SELECT DISTINCT(intJournalId) FROM #iRelyImptblGLJournalDetail)
 
- IF @@ERROR <> 0 GOTO ROLLBACK_INSERT
 
  SET @resultOut = ''SUCCESS '' + CAST(@intImportLogId AS NVARCHAR(40))
 
@@ -235,20 +231,13 @@ END
 --=====================================================================================================================================
 -- FINALIZING STAGE
 ---------------------------------------------------------------------------------------------------------------------------------------
-COMMIT_INSERT:
- GOTO IMPORT_EXIT
 
-ROLLBACK_INSERT:
- SELECT @resultOut =  ''One Time Closed Year Conversion error :'' + ERROR_MESSAGE()
- GOTO IMPORT_EXIT
-
-IMPORT_EXIT:
  IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id(''tempdb..#iRelyImptblGLJournal'')) DROP TABLE #iRelyImptblGLJournal
  IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id(''tempdb..#iRelyImptblGLJournalDetail'')) DROP TABLE #iRelyImptblGLJournalDetail'
 
  EXEC sp_executesql @sql, @ParmDefinition,@intEntityId = @intEntityId, @resultOut = @result OUTPUT
 END
 ELSE
-	SELECT @result = 'SUCCESS '
+	SET @result = 'SUCCESS '
 GO
 

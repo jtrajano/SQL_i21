@@ -166,8 +166,8 @@ DECLARE @tblTempTransaction TABLE (
 						 tblTFReportingComponent.intReportingComponentId, 
 						 tblTFReportingComponent.strScheduleCode, 
                          tblTFReportingComponent.strType, 
-						 vyuTFGetReportingComponentDestinationState.intProductCode, 
-						 vyuTFGetReportingComponentDestinationState.strProductCode, 
+						 vyuTFGetReportingComponentProductCode.intProductCodeId, 
+						 vyuTFGetReportingComponentProductCode.strProductCode, 
 						 tblICInventoryTransferDetail.intItemId, 
                          tblICInventoryTransferDetail.dblQuantity AS dblQtyShipped, 
 						 tblICInventoryTransferDetail.dblQuantity AS dblGross, 
@@ -211,16 +211,16 @@ DECLARE @tblTempTransaction TABLE (
                          tblICInventoryTransferDetail INNER JOIN
                          tblICInventoryTransfer ON tblICInventoryTransferDetail.intInventoryTransferId = tblICInventoryTransfer.intInventoryTransferId INNER JOIN
                          tblICItemMotorFuelTax INNER JOIN
-                         vyuTFGetReportingComponentDestinationState ON tblICItemMotorFuelTax.intProductCodeId = vyuTFGetReportingComponentDestinationState.intProductCode INNER JOIN
-                         tblTFReportingComponent ON vyuTFGetReportingComponentDestinationState.intReportingComponentId = tblTFReportingComponent.intReportingComponentId ON 
+                         vyuTFGetReportingComponentProductCode ON tblICItemMotorFuelTax.intProductCodeId = vyuTFGetReportingComponentProductCode.intProductCodeId INNER JOIN
+                         tblTFReportingComponent ON vyuTFGetReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId ON 
                          tblICInventoryTransferDetail.intItemId = tblICItemMotorFuelTax.intItemId INNER JOIN
                          tblTRLoadReceipt ON tblICInventoryTransfer.intInventoryTransferId = tblTRLoadReceipt.intInventoryTransferId INNER JOIN
                          tblTRLoadHeader ON tblTRLoadReceipt.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId INNER JOIN
                          tblTRLoadDistributionHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadDistributionHeader.intLoadHeaderId INNER JOIN
-                         tblSMShipVia ON tblTRLoadHeader.intShipViaId = tblSMShipVia.intEntityShipViaId INNER JOIN
-                         tblEMEntity ON tblSMShipVia.intEntityShipViaId = tblEMEntity.intEntityId INNER JOIN
-                         tblAPVendor ON tblTRLoadReceipt.intTerminalId = tblAPVendor.intEntityVendorId INNER JOIN
-                         tblEMEntity AS EntityAPVendor ON tblAPVendor.intEntityVendorId = EntityAPVendor.intEntityId INNER JOIN
+                         tblSMShipVia ON tblTRLoadHeader.intShipViaId = tblSMShipVia.intEntityId INNER JOIN
+                         tblEMEntity ON tblSMShipVia.intEntityId = tblEMEntity.intEntityId INNER JOIN
+                         tblAPVendor ON tblTRLoadReceipt.intTerminalId = tblAPVendor.intEntityId INNER JOIN
+                         tblEMEntity AS EntityAPVendor ON tblAPVendor.intEntityId = EntityAPVendor.intEntityId INNER JOIN
                          tblTRSupplyPoint ON tblTRLoadReceipt.intSupplyPointId = tblTRSupplyPoint.intSupplyPointId INNER JOIN
                          tblEMEntityLocation ON tblTRSupplyPoint.intEntityLocationId = tblEMEntityLocation.intEntityLocationId INNER JOIN
                          tblSMCompanyLocation ON tblTRLoadDistributionHeader.intCompanyLocationId = tblSMCompanyLocation.intCompanyLocationId ON 
@@ -421,17 +421,12 @@ DECLARE @TRRCId NVARCHAR(50)
 					END
 
 				--INVENTORY TRANSFER
-				SET @TRquery = 'INSERT INTO tblTFTransaction (uniqTransactionGuid, intReportingComponentId, intTaxAuthorityId, strTaxAuthority, strFormCode, strScheduleCode, strType, intProductCodeId, strProductCode, intItemId, dblQtyShipped, dblGross, dblNet,
-							  dblBillQty, dblTax, dblTaxExempt, strInvoiceNumber, strPONumber, strBOLNumber, dtmDate, strDestinationCity, strDestinationState, strOriginCity, strOriginState, strShipVia, strTransporterLicense,
+				SET @TRquery = 'INSERT INTO tblTFTransaction (uniqTransactionGuid, intReportingComponentId, intProductCodeId, strProductCode, intItemId, dblQtyShipped, dblGross, dblNet,
+							  dblBillQty, dblTax, dblTaxExempt, strInvoiceNumber, strPONumber, strBillOfLading, dtmDate, strDestinationCity, strDestinationState, strOriginCity, strOriginState, strShipVia, strTransporterLicense,
 							  strTransportationMode, strTransporterName, strTransporterFederalTaxId, strConsignorName, strConsignorFederalTaxId, strTerminalControlNumber, strVendorName, strVendorFederalTaxId,strCustomerName,strCustomerFederalTaxId,
-							  strTaxPayerName, strTaxPayerAddress, strCity, strState, strZipCode, strTelephoneNumber, strTaxPayerIdentificationNumber, strTaxPayerFEIN, dtmReportingPeriodBegin, dtmReportingPeriodEnd, strItemNo,intIntegrationError,leaf)
+							  strTaxPayerName, strTaxPayerAddress, strCity, strState, strZipCode, strTelephoneNumber, strTaxPayerIdentificationNumber, strTaxPayerFEIN, dtmReportingPeriodBegin, dtmReportingPeriodEnd, strItemNo,intIntegrationError)
 							  SELECT DISTINCT ''' + @Guid + ''', RC.intReportingComponentId,
-								RC.intTaxAuthorityId,
-								IPC.strTaxAuthority,
-								RC.strFormCode,
-								RC.strScheduleCode,
-								RC.strType,
-								VPC.intProductCode,
+								VPC.intProductCodeId,
 								IPC.strProductCode,
 								NULL AS intItemId,
 								TR.dblTransactionOutboundGrossGals AS dblQtyShipped,
@@ -471,8 +466,7 @@ DECLARE @TRRCId NVARCHAR(50)
 								''' + @DateFrom + ''',
 								''' + @DateTo + ''',
 								TR.strItemNumber,
-								(SELECT COUNT(*) FROM tblTFIntegrationError),
-								0
+								(SELECT COUNT(*) FROM tblTFIntegrationError)
 							  FROM tblTFReportingComponentCriteria RIGHT OUTER JOIN
 							  vyuTFGetReportingComponentProductCode AS VPC INNER JOIN
 							  tblTFReportingComponent AS RC ON VPC.intReportingComponentId = RC.intReportingComponentId INNER JOIN

@@ -17,7 +17,8 @@ SELECT          A.intBillDetailTaxId ,
 				A.ysnCheckOffTax ,
 				A.ysnTaxExempt,
 				A.intConcurrencyId,
-				B.strTaxCode
+				B.strTaxCode,
+				A.ysnTaxOnly
 FROM dbo.tblAPBillDetailTax A
 INNER JOIN dbo.tblSMTaxCode B ON  A.intTaxCodeId  = B.intTaxCodeId
 GO

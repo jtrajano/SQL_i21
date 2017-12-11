@@ -18,6 +18,7 @@ DECLARE @tblACHPayments TABLE (
 		  , intEntityCustomerId	INT
 		  , dblAmountPaid		NUMERIC(18, 6)
 		  , dtmDatePaid			DATETIME
+		  , ysnVendorRefund		BIT
 		)
 
 DECLARE @strTransactionId					NVARCHAR(100)
@@ -42,15 +43,16 @@ IF ISNULL(@strPaymentIds, '') != ''
 			 , intEntityCustomerId
 			 , dblAmountPaid
 			 , dtmDatePaid
+			 , CASE WHEN P.strReceivePaymentType = 'Vendor Refund' THEN 1 ELSE 0 END
 		FROM dbo.tblARPayment P WITH (NOLOCK)
 			INNER JOIN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@strPaymentIds) 
 						WHERE ISNULL(intID, 0) <> 0
 			) PAYMENT ON P.intPaymentId = PAYMENT.intID
-			INNER JOIN (SELECT intPaymentMethodID
+			LEFT JOIN (SELECT intPaymentMethodID
 							 , strPaymentMethod 
 						FROM dbo.tblSMPaymentMethod WITH (NOLOCK)
 			) PM ON P.intPaymentMethodId = PM.intPaymentMethodID
-			    AND PM.strPaymentMethod = 'ACH'
+			    AND (PM.strPaymentMethod = 'ACH' OR P.strReceivePaymentType = 'Vendor Refund')
 		WHERE P.ysnPosted = 1
 	END
 ELSE
@@ -102,7 +104,7 @@ SELECT
 	,[intBankTransactionTypeId]		= 1
 	,[dtmDate]						= P.dtmDatePaid
 	,[dblAmount]					= SUM(UF.dblAmount)
-	,[strMemo]						= 'AR ACH'
+	,[strMemo]						= CASE WHEN P.ysnVendorRefund = 1 THEN 'Vendor Refund' ELSE 'AR ACH' END
 	,[intCompanyLocationId]			= UF.intLocationId
 FROM dbo.tblCMUndepositedFund UF WITH (NOLOCK)
 	CROSS APPLY (
@@ -113,6 +115,7 @@ GROUP BY UF.intBankAccountId
 	   , P.intCurrencyId
 	   , P.dtmDatePaid
 	   , UF.intLocationId
+	   , P.ysnVendorRefund
 
 
 --PaymentDup

@@ -207,20 +207,10 @@ IF(@Checking = 1)
 	)	
 	--GET ALL THE INVALID GL ACCOUNT BEFORE THE IMPORTING EVEN STARTS
 
-
-
-
-
-
-
-
-
-
-
-		INSERT INTO @MissingGLAccount ( strGLAccount )
-		SELECT
+	INSERT INTO @MissingGLAccount ( strGLAccount )
+	
+	SELECT
 		DISTINCT P1.[agpay_acct_no]
-
 	FROM
 		[agpaymst] P1				--Origin Posted Payments Table
 	INNER JOIN
@@ -264,13 +254,10 @@ IF(@Checking = 1)
 					AND a.[intAccountId] = ISNULL(GL.[inti21Id],0)
 					AND a.[intPaymentMethodId] = ISNULL(P.[intPaymentMethodID],@DefaultPaymenMethodtId)	
 					AND a.[strPaymentInfo] COLLATE Latin1_General_CI_AS = P1.[agpay_ref_no] COLLATE Latin1_General_CI_AS					
-			)		
-	
-		UNION
+			)
+	UNION
 
-	
-	SELECT
-		DISTINCT P1.[agpye_acct_no]
+	SELECT DISTINCT P1.[agpye_acct_no]
 	FROM
 		[agpyemst] P1				--Origin UnPosted Payments Table
 	INNER JOIN
@@ -315,12 +302,8 @@ IF(@Checking = 1)
 					AND a.[intPaymentMethodId] = ISNULL(P.[intPaymentMethodID],@DefaultPaymenMethodtId)	
 					AND a.[strPaymentInfo] COLLATE Latin1_General_CI_AS = P1.[agpye_ref_no] COLLATE Latin1_General_CI_AS					
 			)	
-
 	UNION
-
-	
-		SELECT
-			P1.[agcrd_acct_no]
+	SELECT DISTINCT P1.[agcrd_acct_no]
 		FROM
 			[agcrdmst] P1				--Origin Credits Table
 		INNER JOIN
@@ -336,7 +319,7 @@ IF(@Checking = 1)
 			[tblSMPaymentMethod] P
 				ON P1.[agcrd_pay_type] COLLATE Latin1_General_CI_AS = P.strPaymentMethodCode COLLATE Latin1_General_CI_AS
 		WHERE 
-			GL.[strExternalId] IS NULL AND 
+			GL.[strExternalId] IS NULL AND 			
 			(P1.agcrd_amt - P1.agcrd_amt_used) <> 0
 			AND NOT EXISTS
 				(	SELECT NULL 
@@ -354,7 +337,6 @@ IF(@Checking = 1)
 						AND a.[intPaymentMethodId] = ISNULL(P.[intPaymentMethodID],@DefaultPaymenMethodtId)	
 						AND a.[strPaymentInfo] COLLATE Latin1_General_CI_AS = P1.[agcrd_ref_no] COLLATE Latin1_General_CI_AS					
 						AND a.dblUnappliedAmount <> 0)
-	
 	--SELECT * FROM @MissingGLAccount
 	IF EXISTS( SELECT TOP 1 1 FROM @MissingGLAccount)
 	BEGIN
@@ -364,8 +346,6 @@ IF(@Checking = 1)
 		RAISERROR (@EAccountError, 16, 1);
 		RETURN
 	END
-	--MARK #CHANGES AR-5195
-
 
 
 	--POSTED PAYMENTS
@@ -1394,7 +1374,6 @@ IF(@Checking = 1)
 		RETURN @Total  
 	END   
 	
-
 	--MARK #CHANGES AR-5195
 	
 	DECLARE @MissingGLAccount TABLE (
@@ -1402,67 +1381,80 @@ IF(@Checking = 1)
 	)	
 	--GET ALL THE INVALID GL ACCOUNT BEFORE THE IMPORTING EVEN STARTS
 
-
-
-
-
-
-
-
-
-
-
-		INSERT INTO @MissingGLAccount ( strGLAccount )
-		SELECT 
-			DISTINCT P1.[ptpay_acct_no]
-			FROM
-			[ptpaymst] P1				--Origin Posted Payments Table
-		INNER JOIN
-			[tblARInvoice] I
-				ON I.[ysnPosted] = 1
-				AND P1.[ptpay_invc_no] COLLATE Latin1_General_CI_AS  = I.[strInvoiceOriginId] COLLATE Latin1_General_CI_AS 	
+	INSERT INTO @MissingGLAccount ( strGLAccount )
+	SELECT DISTINCT P1.[ptpay_acct_no] 
+	FROM
+		[ptpaymst] P1				
+	INNER JOIN
+		[tblARCustomer] C
+			--ON  CUS.[ptcus_bill_to] COLLATE Latin1_General_CI_AS = C.[strCustomerNumber] COLLATE Latin1_General_CI_AS
+			on  P1.[ptpay_cus_no] COLLATE Latin1_General_CI_AS = C.[strCustomerNumber] COLLATE Latin1_General_CI_AS 
+		 						
+	LEFT OUTER JOIN
+		[tblGLCOACrossReference] GL
+			ON P1.[ptpay_acct_no] = GL.[strExternalId]
+	left  JOIN
+		[tblSMCompanyLocation] CL
+			ON P1.[ptpay_loc_no] COLLATE Latin1_General_CI_AS = CL.[strLocationNumber] COLLATE Latin1_General_CI_AS
+	LEFT OUTER JOIN
+		[tblSMPaymentMethod] P
+			ON P1.[ptpay_pay_type] COLLATE Latin1_General_CI_AS = P.strPaymentMethodCode COLLATE Latin1_General_CI_AS
+	WHERE 
+		GL.[strExternalId] IS NULL AND 				
+		ptpay_pay_type NOT IN (''DSC'', ''SRV'') 
+		and ptpay_no <> 0 and ptpay_amt <> 0
+	UNION
+	SELECT DISTINCT P1.[ptcrd_acct_no] 
+		FROM
+			[ptcrdmst] P1				--Origin Credits Table
 		INNER JOIN
 			[tblARCustomer] C
-				ON I.[intEntityCustomerId] = C.[intEntityId] 
-		INNER JOIN ptcusmst CUS ON CUS.[ptcus_cus_no] COLLATE Latin1_General_CI_AS = C.[strCustomerNumber] COLLATE Latin1_General_CI_AS 						
-				AND P1.ptpay_cus_no = CUS.ptcus_bill_to
+				ON P1.[ptcrd_cus_no] COLLATE Latin1_General_CI_AS = C.[strCustomerNumber] COLLATE Latin1_General_CI_AS 		
 		LEFT OUTER JOIN
 			[tblGLCOACrossReference] GL
-				ON P1.[ptpay_acct_no] = GL.[strExternalId]
+				ON P1.[ptcrd_acct_no] = GL.[strExternalId]
 		INNER JOIN
 			[tblSMCompanyLocation] CL
-				ON P1.[ptpay_loc_no] COLLATE Latin1_General_CI_AS = CL.[strLocationNumber] COLLATE Latin1_General_CI_AS
+				ON P1.[ptcrd_loc_no] COLLATE Latin1_General_CI_AS = CL.[strLocationNumber] COLLATE Latin1_General_CI_AS
 		LEFT OUTER JOIN
 			[tblSMPaymentMethod] P
-				ON P1.[ptpay_pay_type] COLLATE Latin1_General_CI_AS = P.strPaymentMethodCode COLLATE Latin1_General_CI_AS
-		WHERE 
-			GL.[strExternalId] IS NULL AND 
-			RTRIM(LTRIM(P1.[ptpay_check_no])) <> ''DISC'' AND P1.[ptpay_pay_type] <> ''SRV'' AND P1.[ptpay_pay_type] <> ''RSV''
-			AND NOT EXISTS
-				(	SELECT NULL 
-					FROM tblARPayment a
-					INNER JOIN tblARPaymentDetail ad
-						ON a.[intPaymentId] = ad.[intPaymentId] 
-					WHERE
-						a.[ysnPosted] = 1
-						AND a.[intEntityCustomerId] = I.[intEntityCustomerId] 
-						AND ad.[intInvoiceId] = I.[intInvoiceId] 
-						AND a.[dtmDatePaid] = (CASE 
-													WHEN ISDATE(P1.[ptpay_rev_dt]) = 1 
-														THEN CONVERT(DATE, CAST(P1.[ptpay_rev_dt] AS CHAR(12)), 112) 
-													ELSE
-														NULL 
-												END)
-						AND a.[intAccountId] = ISNULL(GL.[inti21Id],0)
-						AND a.[intPaymentMethodId] = ISNULL(P.[intPaymentMethodID],@DefaultPaymenMethodtId)	
-						AND a.[strPaymentInfo] COLLATE Latin1_General_CI_AS = P1.[ptpay_ref_no] COLLATE Latin1_General_CI_AS					
-				)		
-
-		UNION
-
-		
-	SELECT
-		DISTINCT P1.[ptpye_acct_no]
+				ON P1.[ptcrd_pay_type] COLLATE Latin1_General_CI_AS = P.strPaymentMethodCode COLLATE Latin1_General_CI_AS
+		WHERE  
+		GL.[strExternalId] IS NULL AND P1.ptcrd_type NOT IN (''C'')
+	UNION
+	SELECT DISTINCT P1.[ptpay_acct_no] 
+	FROM
+		[ptpaymst] P1				--Origin Posted Payments Table
+	--left JOIN ptcusmst CUS ON P1.ptpay_cus_no = CUS.ptcus_cus_no
+	--few customer master data is missing in origin. So less records with this join.
+	INNER JOIN
+		[tblARCustomer] C
+			--ON  CUS.[ptcus_bill_to] COLLATE Latin1_General_CI_AS = C.[strCustomerNumber] COLLATE Latin1_General_CI_AS
+			on  P1.[ptpay_cus_no] COLLATE Latin1_General_CI_AS = C.[strCustomerNumber] COLLATE Latin1_General_CI_AS 
+	INNER JOIN
+		[tblSMCompanyLocation] IL
+			ON P1.[ptpay_ivc_loc_no] COLLATE Latin1_General_CI_AS = IL.[strLocationNumber] COLLATE Latin1_General_CI_AS	
+	INNER JOIN
+		[tblARInvoice] I
+			ON I.[ysnPosted] = 1
+			AND P1.[ptpay_invc_no] COLLATE Latin1_General_CI_AS  = I.[strInvoiceOriginId] COLLATE Latin1_General_CI_AS 	
+			AND I.[intEntityCustomerId] = C.[intEntityId] AND I.intCompanyLocationId = IL.intCompanyLocationId	
+			AND I.strComments = ''SERVICE CHARGES''			 						
+	LEFT OUTER JOIN
+		[tblGLCOACrossReference] GL
+			ON P1.[ptpay_acct_no] = GL.[strExternalId]
+	left  JOIN
+		[tblSMCompanyLocation] CL
+			ON P1.[ptpay_loc_no] COLLATE Latin1_General_CI_AS = CL.[strLocationNumber] COLLATE Latin1_General_CI_AS
+	LEFT OUTER JOIN
+		[tblSMPaymentMethod] P
+			ON P1.[ptpay_pay_type] COLLATE Latin1_General_CI_AS = P.strPaymentMethodCode COLLATE Latin1_General_CI_AS
+	WHERE   
+		GL.[strExternalId] IS NULL AND 
+		ptpay_pay_type IN (''DSC'') 
+		and ptpay_no <> 0 and ptpay_amt <> 0	
+	UNION
+	SELECT DISTINCT P1.[ptpye_acct_no]
 	FROM
 		[ptpyemst] P1				--Origin UnPosted Payments Table
 	INNER JOIN
@@ -1482,29 +1474,30 @@ IF(@Checking = 1)
 	LEFT OUTER JOIN
 		[tblSMPaymentMethod] P
 			ON P1.[ptpye_pay_type] COLLATE Latin1_General_CI_AS = P.strPaymentMethodCode COLLATE Latin1_General_CI_AS
-	WHERE 		
+	WHERE    
 		GL.[strExternalId] IS NULL AND 
 		RTRIM(LTRIM(P1.[ptpye_check_no])) <> ''DISC''
-		AND NOT EXISTS
-			(	SELECT NULL 
-				FROM tblARPayment a
-				INNER JOIN tblARPaymentDetail ad
-					ON a.[intPaymentId] = ad.[intPaymentId] 
-				WHERE
-					a.[ysnPosted] = 0
-					AND a.[intEntityCustomerId] = I.[intEntityCustomerId] 
-					AND ad.[intInvoiceId] = I.[intInvoiceId] 
-					AND a.[dtmDatePaid] = (CASE 
-												WHEN ISDATE(P1.[ptpye_rev_dt]) = 1 
-													THEN CONVERT(DATE, CAST(P1.[ptpye_rev_dt] AS CHAR(12)), 112) 
-												ELSE
-													NULL 
-											END)
-					AND a.[intAccountId] = ISNULL(GL.[inti21Id],0)
-					AND a.[intPaymentMethodId] = ISNULL(P.[intPaymentMethodID],@DefaultPaymenMethodtId)	
-					AND a.[strPaymentInfo] COLLATE Latin1_General_CI_AS = P1.[ptpye_ref_no] COLLATE Latin1_General_CI_AS					
-			)
-				
+		--AND NOT EXISTS
+		--	(	SELECT NULL 
+		--		FROM tblARPayment a
+		--		INNER JOIN tblARPaymentDetail ad
+		--			ON a.[intPaymentId] = ad.[intPaymentId] 
+		--		WHERE
+		--			a.[ysnPosted] = 0
+		--			AND a.[intEntityCustomerId] = I.[intEntityCustomerId] 
+		--			AND ad.[intInvoiceId] = I.[intInvoiceId] 
+		--			AND a.[dtmDatePaid] = (CASE 
+		--										WHEN ISDATE(P1.[ptpye_rev_dt]) = 1 
+		--											THEN CONVERT(DATE, CAST(P1.[ptpye_rev_dt] AS CHAR(12)), 112) 
+		--										ELSE
+		--											NULL 
+		--									END)
+		--			AND a.[intAccountId] = ISNULL(GL.[inti21Id],0)
+		--			AND a.[intPaymentMethodId] = ISNULL(P.[intPaymentMethodID],@DefaultPaymenMethodtId)	
+		--			AND a.[strPaymentInfo] COLLATE Latin1_General_CI_AS = P1.[ptpye_ref_no] COLLATE Latin1_General_CI_AS					
+		--	)	
+
+
 	--SELECT * FROM @MissingGLAccount
 	IF EXISTS( SELECT TOP 1 1 FROM @MissingGLAccount)
 	BEGIN
@@ -1514,10 +1507,6 @@ IF(@Checking = 1)
 		RAISERROR (@EAccountError, 16, 1);
 		RETURN
 	END
-	--MARK #CHANGES AR-5195
-
-
-
 
 
 
@@ -1588,7 +1577,7 @@ SELECT
 			ON P1.[ptpay_acct_no] = GL.[strExternalId]
 	left  JOIN
 		[tblSMCompanyLocation] CL
-			ON P1.[ptpay_loc_no] COLLATE Latin1_General_CI_AS = CL.[strLocationNumber] COLLATE Latin1_General_CI_AS
+			ON P1.[ptpye_loc_no] COLLATE Latin1_General_CI_AS = CL.[strLocationNumber] COLLATE Latin1_General_CI_AS
 	LEFT OUTER JOIN
 		[tblSMPaymentMethod] P
 			ON P1.[ptpay_pay_type] COLLATE Latin1_General_CI_AS = P.strPaymentMethodCode COLLATE Latin1_General_CI_AS

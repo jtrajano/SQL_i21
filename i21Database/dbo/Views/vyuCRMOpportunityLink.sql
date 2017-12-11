@@ -75,6 +75,7 @@
 			,strEntityLocation = p.strLocationName
 			,strLostToCompetitor = q.strName
 			,strDirectionEntityType = (case when a.strDirection = 'Purchase' then 'Vendor' else 'Customer' end)
+			,strLOBType = (select top 1 r.strType from tblSMLineOfBusiness r, tblCRMOpportunityLob s where r.strType = 'Software' and r.intLineOfBusinessId = s.intLineOfBusinessId and s.intOpportunityId = a.intOpportunityId)
 		from
 			tblCRMOpportunity a
 			left join tblEMEntity b on b.intEntityId = a.intCustomerId

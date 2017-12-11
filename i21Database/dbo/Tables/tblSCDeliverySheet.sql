@@ -10,16 +10,17 @@
 	[intCurrencyId] INT NULL,
 	[intTicketTypeId] INT NULL, 
 	[intSplitId] INT NULL, 
-    [intFarmFieldId] INT NULL,  
+    [intFarmFieldId] INT NULL,
     [ysnPost] BIT NULL DEFAULT (0),
 	[intConcurrencyId] INT NOT NULL DEFAULT ((1)), 
+	[strOfflineGuid] NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT '', 
     CONSTRAINT [PK_tblSCDeliverySheet_intDeliverySheetId] PRIMARY KEY ([intDeliverySheetId]),
 	CONSTRAINT [FK_tblSCDeliverySheet_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]),
 	CONSTRAINT [FK_tblSCDeliverySheet_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
 	CONSTRAINT [FK_tblSCDeliverySheet_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblSCDeliverySheet_tblGRDiscountId_intDiscountId] FOREIGN KEY ([intDiscountId]) REFERENCES [tblGRDiscountId]([intDiscountId]),
 	CONSTRAINT [FK_tblSCDeliverySheet_tblSCListTicketTypes_intTicketTypeId] FOREIGN KEY ([intTicketTypeId]) REFERENCES [tblSCListTicketTypes]([intTicketTypeId]),
-	CONSTRAINT [FK_tblSCDeliverySheet_tblSMCurrency_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID])
+	CONSTRAINT [FK_tblSCDeliverySheet_tblSMCurrency_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
 )
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',

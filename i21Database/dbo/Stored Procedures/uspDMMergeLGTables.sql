@@ -24,16 +24,16 @@ BEGIN
     EXECUTE sp_executesql @SQLString;
 
     -- tblLGLoadAllocationDetail
-    SET @SQLString = N'MERGE tblLGLoadAllocationDetail AS Target
-        USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblLGLoadAllocationDetail]) AS Source
-        ON (Target.intLoadAllocationDetailId = Source.intLoadAllocationDetailId)
-        WHEN MATCHED THEN
-            UPDATE SET Target.intConcurrencyId = Source.intConcurrencyId, Target.intGenerateLoadId = Source.intGenerateLoadId, Target.intPLoadId = Source.intPLoadId, Target.intSLoadId = Source.intSLoadId, Target.dblPAllocatedQty = Source.dblPAllocatedQty, Target.dblSAllocatedQty = Source.dblSAllocatedQty, Target.intPUnitMeasureId = Source.intPUnitMeasureId, Target.intSUnitMeasureId = Source.intSUnitMeasureId, Target.dtmAllocatedDate = Source.dtmAllocatedDate, Target.intUserSecurityId = Source.intUserSecurityId, Target.strComments = Source.strComments
-        WHEN NOT MATCHED BY SOURCE THEN
-            DELETE;';
+    --SET @SQLString = N'MERGE tblLGLoadAllocationDetail AS Target
+    --    USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblLGLoadAllocationDetail]) AS Source
+    --    ON (Target.intLoadAllocationDetailId = Source.intLoadAllocationDetailId)
+    --    WHEN MATCHED THEN
+    --        UPDATE SET Target.intConcurrencyId = Source.intConcurrencyId, Target.intGenerateLoadId = Source.intGenerateLoadId, Target.intPLoadId = Source.intPLoadId, Target.intSLoadId = Source.intSLoadId, Target.dblPAllocatedQty = Source.dblPAllocatedQty, Target.dblSAllocatedQty = Source.dblSAllocatedQty, Target.intPUnitMeasureId = Source.intPUnitMeasureId, Target.intSUnitMeasureId = Source.intSUnitMeasureId, Target.dtmAllocatedDate = Source.dtmAllocatedDate, Target.intUserSecurityId = Source.intUserSecurityId, Target.strComments = Source.strComments
+    --    WHEN NOT MATCHED BY SOURCE THEN
+    --        DELETE;';
 
-    SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
-    EXECUTE sp_executesql @SQLString;
+    --SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+    --EXECUTE sp_executesql @SQLString;
 
     -- tblLGLoadCost
     SET @SQLString = N'MERGE tblLGLoadCost AS Target

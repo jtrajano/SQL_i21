@@ -43,7 +43,8 @@ RETURNS @returntable TABLE
 	[dblSourceUnitCredit]		NUMERIC(18, 9)	NULL,
 	[dblSourceUnitDebit]		NUMERIC(18, 9)	NULL,
 	[intCommodityId]			INT				NULL,
-	[intSourceLocationId]		INT				NULL
+	[intSourceLocationId]		INT				NULL,
+	[strSourceDocumentId]       NVARCHAR(255)   COLLATE Latin1_General_CI_AS NULL
 )
 AS
 BEGIN
@@ -134,15 +135,16 @@ BEGIN
 		[dblForeignRate]                =    ISNULL(NULLIF(Details.dblRate,0),1),--CASE WHEN ForexRateCounter.ysnUniqueForex = 0 THEN ForexRate.dblRate ELSE 0 END,
 		[strRateType]                   =    Details.strCurrencyExchangeRateType,
 		[strDocument]					=	A.strVendorOrderNumber,
-		[strComments]					=	A.strReference,
+		[strComments]					=	D.strName,
 		[intConcurrencyId]				=	1,
 		[dblSourceUnitCredit]			=	Details.dblUnits,
 		[dblSourceUnitDebit]			=	0,
 		[intCommodityId]				=	A.intCommodityId,
-		[intSourceLocationId]			=	A.intStoreLocationId
+		[intSourceLocationId]			=	A.intStoreLocationId,
+		[strSourceDocumentId]			=	A.strVendorOrderNumber
 	FROM	[dbo].tblAPBill A
 			CROSS APPLY dbo.fnAPCalculateVoucherUnits(A.intBillId) units	
-			LEFT JOIN tblAPVendor C
+			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON D.intEntityId = C.intEntityId)
 				ON A.intEntityVendorId = C.[intEntityId]
 			CROSS APPLY
 			(
@@ -254,16 +256,18 @@ BEGIN
 		[dblForeignRate]				=	ISNULL(NULLIF(ForexRate.dblRate,0),1),
 		[strRateType]					=	ForexRate.strCurrencyExchangeRateType,
 		[strDocument]					=	A.strVendorOrderNumber,
-		[strComments]					=	A.strReference,
+		[strComments]					=	E.strName,
 		[intConcurrencyId]				=	1,
 		[dblSourceUnitCredit]			=	0,
 		[dblSourceUnitDebit]			=	0,
 		[intCommodityId]				=	A.intCommodityId,
-		[intSourceLocationId]			=	A.intStoreLocationId
+		[intSourceLocationId]			=	A.intStoreLocationId,
+		[strSourceDocumentId]			=	A.strVendorOrderNumber
 	FROM tblAPBill A
 	INNER JOIN tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intBillId
 	INNER JOIN tblAPBill C ON B.intTransactionId = C.intBillId
-	LEFT JOIN tblAPVendor D ON C.intEntityVendorId = D.[intEntityId]
+	LEFT JOIN (tblAPVendor D INNER JOIN tblEMEntity E ON E.intEntityId = D.intEntityId)
+				ON C.intEntityVendorId = D.[intEntityId]
 	CROSS APPLY
 			(
 				SELECT TOP 1 A.intCurrencyExchangeRateTypeId,B.strCurrencyExchangeRateType,A.dblRate,A.ysnSubCurrency 
@@ -354,20 +358,23 @@ BEGIN
 		[dblForeignRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
 		[strRateType]					=	G.strCurrencyExchangeRateType,
 		[strDocument]					=	A.strVendorOrderNumber,
-		[strComments]					=	A.strReference,
+		[strComments]					=	D.strName,
 		[intConcurrencyId]				=	1,
 		[dblSourceUnitCredit]			=	0,
 		[dblSourceUnitDebit]			=	ISNULL(units.dblTotalUnits,0),
 		[intCommodityId]				=	A.intCommodityId,
-		[intSourceLocationId]			=	A.intStoreLocationId
+		[intSourceLocationId]			=	A.intStoreLocationId,
+		[strSourceDocumentId]			=	A.strVendorOrderNumber
 	FROM	[dbo].tblAPBill A 
 			LEFT JOIN [dbo].tblAPBillDetail B
 				ON A.intBillId = B.intBillId
 			--CROSS APPLY dbo.fnAPCalculateVoucherDetailUnits(B.intBillDetailId) units
-			LEFT JOIN tblAPVendor C
+			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON D.intEntityId = C.intEntityId)
 				ON A.intEntityVendorId = C.[intEntityId]
 			LEFT JOIN tblICInventoryReceiptItem E
 				ON B.intInventoryReceiptItemId = E.intInventoryReceiptItemId
+			LEFT JOIN tblICInventoryReceiptCharge charges
+				ON B.intInventoryReceiptChargeId = charges.intInventoryReceiptChargeId
 			LEFT JOIN dbo.tblSMCurrencyExchangeRateType G
 				ON B.intCurrencyExchangeRateTypeId = G.intCurrencyExchangeRateTypeId
 			LEFT JOIN tblICItem B2
@@ -399,28 +406,31 @@ BEGIN
 			) Taxes
 			OUTER APPLY (
 				SELECT dblTotal = CAST (
-						CASE	
-							-- If there is a Gross/Net UOM, compute by the net weight. 
-							WHEN E.intWeightUOMId IS NOT NULL THEN 
-								-- Convert the Cost UOM to Gross/Net UOM. 
-								dbo.fnCalculateCostBetweenUOM(
-									ISNULL(E.intCostUOMId, E.intUnitMeasureId)
-									, E.intWeightUOMId
-									, E.dblUnitCost
-								) 
-								/ CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(NULLIF(A.intSubCurrencyCents, 0),1) ELSE 1 END 
-								* B.dblNetWeight
+						CASE WHEN B.intInventoryReceiptChargeId > 0
+						THEN charges.dblAmount
+						ELSE (CASE	
+								-- If there is a Gross/Net UOM, compute by the net weight. 
+								WHEN E.intWeightUOMId IS NOT NULL THEN 
+									-- Convert the Cost UOM to Gross/Net UOM. 
+									dbo.fnCalculateCostBetweenUOM(
+										ISNULL(E.intCostUOMId, E.intUnitMeasureId)
+										, E.intWeightUOMId
+										, E.dblUnitCost
+									) 
+									/ CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(NULLIF(A.intSubCurrencyCents, 0),1) ELSE 1 END 
+									* B.dblNetWeight
 
-							-- If Gross/Net UOM is missing: compute by the receive qty. 
-							ELSE 
-								-- Convert the Cost UOM to Gross/Net UOM. 
-								dbo.fnCalculateCostBetweenUOM(
-									ISNULL(E.intCostUOMId, E.intUnitMeasureId)
-									, E.intUnitMeasureId
-									, E.dblUnitCost
-								) 
-								/ CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(NULLIF(A.intSubCurrencyCents, 0),1) ELSE 1 END  
-								* B.dblQtyReceived
+								-- If Gross/Net UOM is missing: compute by the receive qty. 
+								ELSE 
+									-- Convert the Cost UOM to Gross/Net UOM. 
+									dbo.fnCalculateCostBetweenUOM(
+										ISNULL(E.intCostUOMId, E.intUnitMeasureId)
+										, E.intUnitMeasureId
+										, E.dblUnitCost
+									) 
+									/ CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(NULLIF(A.intSubCurrencyCents, 0),1) ELSE 1 END  
+									* B.dblQtyReceived
+							END)
 						END				
 						AS DECIMAL(18, 2)
 					)
@@ -492,7 +502,9 @@ BEGIN
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
-		[intAccountId]					=	[dbo].[fnGetItemGLAccount](B.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'),--[dbo].[fnGetItemGLAccount](B.intItemId, ItemLoc.intItemLocationId, 'Auto-Variance'),
+		[intAccountId]					=	CASE WHEN B.intInventoryReceiptChargeId > 0 THEN [dbo].[fnGetItemGLAccount](B.intItemId, ItemLoc.intItemLocationId, 'Other Charge Expense')
+												ELSE [dbo].[fnGetItemGLAccount](B.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
+											END,
 		[dblDebit]						=	CAST((CASE	WHEN A.intTransactionType IN (1) THEN (B.dblTotal - usingOldCost.dblTotal) * ISNULL(NULLIF(B.dblRate,0),1) 
 											 ELSE 0 END) AS  DECIMAL(18, 2)), 
 		[dblCredit]						=	0, -- Bill
@@ -527,16 +539,17 @@ BEGIN
 		[dblForeignRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
 		[strRateType]					=	G.strCurrencyExchangeRateType,
 		[strDocument]					=	A.strVendorOrderNumber,
-		[strComments]					=	NULL,
+		[strComments]					=	D.strName,
 		[intConcurrencyId]				=	1,
 		[dblSourceUnitCredit]			=	0,
 		[dblSourceUnitDebit]			=	0,
 		[intCommodityId]				=	A.intCommodityId,
-		[intSourceLocationId]			=	A.intStoreLocationId
+		[intSourceLocationId]			=	A.intStoreLocationId,
+		[strSourceDocumentId]			=	A.strVendorOrderNumber
 	FROM	[dbo].tblAPBill A 
 			INNER JOIN [dbo].tblAPBillDetail B
 				ON A.intBillId = B.intBillId
-			INNER JOIN tblAPVendor C
+			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON D.intEntityId = C.intEntityId)
 				ON A.intEntityVendorId = C.[intEntityId]
 			INNER JOIN tblICItemLocation ItemLoc
 				ON A.intShipToId = ItemLoc.intLocationId AND B.intItemId = ItemLoc.intItemId
@@ -548,27 +561,31 @@ BEGIN
 				ON B.intCurrencyExchangeRateTypeId = G.intCurrencyExchangeRateTypeId	
 			OUTER APPLY (
 				SELECT dblTotal = CAST (
-						CASE	
-							-- If there is a Gross/Net UOM, compute by the net weight. 
-							WHEN E.intWeightUOMId IS NOT NULL THEN 
-								-- Convert the Cost UOM to Gross/Net UOM. 
-								dbo.fnCalculateCostBetweenUOM(
-									ISNULL(E.intCostUOMId, E.intUnitMeasureId)
-									, E.intWeightUOMId
-									, E.dblUnitCost
-								) 
-								* B.dblNetWeight
-
-							-- If Gross/Net UOM is missing: compute by the receive qty. 
+							CASE WHEN B.intInventoryReceiptChargeId > 0 
+							THEN F.dblAmount
 							ELSE 
-								-- Convert the Cost UOM to Gross/Net UOM. 
-								dbo.fnCalculateCostBetweenUOM(
-									ISNULL(E.intCostUOMId, E.intUnitMeasureId)
-									, E.intUnitMeasureId
-									, E.dblUnitCost
-								) 
-								* B.dblQtyReceived
-						END				
+								(CASE	
+									-- If there is a Gross/Net UOM, compute by the net weight. 
+									WHEN E.intWeightUOMId IS NOT NULL THEN 
+										-- Convert the Cost UOM to Gross/Net UOM. 
+										dbo.fnCalculateCostBetweenUOM(
+											ISNULL(E.intCostUOMId, E.intUnitMeasureId)
+											, E.intWeightUOMId
+											, E.dblUnitCost
+										) 
+										* B.dblNetWeight
+
+									-- If Gross/Net UOM is missing: compute by the receive qty. 
+									ELSE 
+										-- Convert the Cost UOM to Gross/Net UOM. 
+										dbo.fnCalculateCostBetweenUOM(
+											ISNULL(E.intCostUOMId, E.intUnitMeasureId)
+											, E.intUnitMeasureId
+											, E.dblUnitCost
+										) 
+										* B.dblQtyReceived
+								END)
+							END				
 						AS DECIMAL(18, 2)
 					)
 			) usingOldCost 
@@ -576,6 +593,7 @@ BEGIN
 
 	WHERE	A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	AND B.dblOldCost IS NOT NULL AND B.dblCost != B.dblOldCost AND B.intInventoryReceiptItemId IS NOT NULL
+	AND 1 = (CASE WHEN B.intInventoryReceiptChargeId > 0 AND F.ysnInventoryCost = 0 THEN 1 ELSE 0 END) --created adjustment for charges only if inventory cost yes
 	UNION ALL
 	--CHARGES
 	SELECT	
@@ -585,16 +603,13 @@ BEGIN
 		--										ELSE dbo.[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'AP Clearing') END,
 		--[intAccountId]					=	dbo.[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'AP Clearing'), --AP-3227 always use the AP Clearing Account
 		[intAccountId]					=	B.intAccountId, --NO NEED TO GET THE ACCOUNT WHEN CREATING GL ENTRIES, ACCOUNT ON TRANSACTION DETAIL SHOULD BE THE ONE TO USE
-		[dblDebit]						=	CAST(CASE WHEN D.[intInventoryReceiptChargeId] IS NULL THEN B.dblTotal 
-												 ELSE (CASE WHEN A.intTransactionType IN (2, 3, 13) THEN D.dblAmount * (-1) 
-														ELSE 
-															(CASE WHEN D.ysnInventoryCost = 0 
-																THEN B.dblTotal  --Get the amount from voucher if NOT inventory cost
-																ELSE D.dblAmount END)
-													END) * ISNULL(NULLIF(B.dblRate,0),1)
-													--+ CAST(ISNULL(ISNULL(@OtherChargeTaxes,0), 0) AS DECIMAL(18,2)) 
+		[dblDebit]						=	CAST(CASE WHEN B.dblOldCost IS NULL THEN B.dblTotal 
+												 ELSE (CASE WHEN D.ysnInventoryCost = 0 THEN D.dblAmount ELSE B.dblTotal END)
 													--commented on AP-3227, taxes for other charges should not be added here as it is already part of taxes entries
-											END AS DECIMAL(18,2)), --Bill Detail
+											END AS DECIMAL(18,2))
+											* ISNULL(NULLIF(B.dblRate,0),1) 
+											* CASE WHEN A.intTransactionType IN (2, 3, 13) THEN (-1) 
+														ELSE 1 END,
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	ISNULL(units.dblTotalUnits,0),
 		[dblCreditUnit]					=	0,
@@ -619,14 +634,13 @@ BEGIN
 											ELSE 'NONE' END,
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,
-		[dblDebitForeign]				=	CAST(CASE WHEN D.[intInventoryReceiptChargeId] IS NULL THEN B.dblTotal 
-												 ELSE (CASE WHEN A.intTransactionType IN (2, 3, 13) THEN D.dblAmount * (-1) 
-														ELSE 
-															(CASE WHEN D.ysnInventoryCost = 0 
-																THEN B.dblTotal  --Get the amount from voucher if NOT inventory cost
-																ELSE D.dblAmount END)
-													END) 
-											END AS DECIMAL(18,2)), --Bill Detail,      
+		[dblDebitForeign]				=	CAST(CASE WHEN B.dblOldCost IS NULL THEN B.dblTotal 
+												 ELSE (CASE WHEN D.ysnInventoryCost = 0 THEN D.dblAmount ELSE B.dblTotal END)
+													--commented on AP-3227, taxes for other charges should not be added here as it is already part of taxes entries
+											END AS DECIMAL(18,2))
+											* ISNULL(NULLIF(B.dblRate,0),1) 
+											* CASE WHEN A.intTransactionType IN (2, 3, 13) THEN (-1) 
+														ELSE 1 END,      
 		[dblDebitReport]				=	0,
 		[dblCreditForeign]				=	0,
 		[dblCreditReport]				=	0,
@@ -634,12 +648,13 @@ BEGIN
 		[dblForeignRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
 		[strRateType]					=	G.strCurrencyExchangeRateType,
 		[strDocument]					=	A.strVendorOrderNumber,
-		[strComments]					=	NULL,
+		[strComments]					=	E.strName,
 		[intConcurrencyId]				=	1,
 		[dblSourceUnitCredit]			=	0,
 		[dblSourceUnitDebit]			=	ISNULL(units.dblTotalUnits,0),
 		[intCommodityId]				=	A.intCommodityId,
-		[intSourceLocationId]			=	A.intStoreLocationId
+		[intSourceLocationId]			=	A.intStoreLocationId,
+		[strSourceDocumentId]			=	A.strVendorOrderNumber
 	FROM	[dbo].tblAPBill A 
 			INNER JOIN [dbo].tblAPBillDetail B
 				ON A.intBillId = B.intBillId
@@ -648,7 +663,7 @@ BEGIN
 				ON B.intItemId = B2.intItemId
 			INNER JOIN tblICItemLocation loc
 				ON loc.intItemId = B.intItemId AND loc.intLocationId = A.intShipToId
-			INNER JOIN tblAPVendor C
+			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityId)
 				ON A.intEntityVendorId = C.[intEntityId]
 			LEFT JOIN tblICInventoryReceiptCharge D
 				ON B.intInventoryReceiptChargeId = D.intInventoryReceiptChargeId
@@ -732,16 +747,17 @@ BEGIN
 		[dblForeignRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
 		[strRateType]					=	G.strCurrencyExchangeRateType,
 		[strDocument]					=	A.strVendorOrderNumber,
-		[strComments]					=	NULL,
+		[strComments]					=	E.strName,
 		[intConcurrencyId]				=	1,
 		[dblSourceUnitCredit]			=	0,
 		[dblSourceUnitDebit]			=	0,
 		[intCommodityId]				=	A.intCommodityId,
-		[intSourceLocationId]			=	A.intStoreLocationId
+		[intSourceLocationId]			=	A.intStoreLocationId,
+		[strSourceDocumentId]			=	A.strVendorOrderNumber
 	FROM	[dbo].tblAPBill A 
 			INNER JOIN [dbo].tblAPBillDetail B
 				ON A.intBillId = B.intBillId
-			INNER JOIN tblAPVendor C
+			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityId)
 				ON A.intEntityVendorId = C.[intEntityId]
 			INNER JOIN tblAPBillDetailTax D
 				ON B.intBillDetailId = D.intBillDetailId
@@ -849,17 +865,18 @@ BEGIN
 		[dblForeignRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
 		[strRateType]					=	G.strCurrencyExchangeRateType,
 		[strDocument]					=	A.strVendorOrderNumber,
-		[strComments]					=	NULL,
+		[strComments]					=	E.strName,
 		[intConcurrencyId]				=	1,
 		[dblSourceUnitCredit]			=	0,
 		[dblSourceUnitDebit]			=	0,
 		[intCommodityId]				=	A.intCommodityId,
-		[intSourceLocationId]			=	A.intStoreLocationId
+		[intSourceLocationId]			=	A.intStoreLocationId,
+		[strSourceDocumentId]			=	A.strVendorOrderNumber
 	FROM	[dbo].tblAPBill A 
 			INNER JOIN [dbo].tblAPBillDetail B
 				ON A.intBillId = B.intBillId
-			INNER JOIN tblAPVendor C
-				ON A.intEntityVendorId = C.intEntityId
+			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityId)
+				ON A.intEntityVendorId = C.[intEntityId]
 			INNER JOIN tblAPBillDetailTax D
 				ON B.intBillDetailId = D.intBillDetailId
 			LEFT JOIN tblICInventoryReceiptCharge charges
@@ -902,6 +919,7 @@ BEGIN
 	,B.intInventoryReceiptChargeId
 	,A.intCommodityId
 	,A.intStoreLocationId
+	,E.strName
 	UPDATE A
 		SET A.strDescription = B.strDescription
 	FROM @returntable A

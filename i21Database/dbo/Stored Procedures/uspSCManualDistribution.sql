@@ -412,26 +412,49 @@ END
 		IF ISNULL(@intInventoryReceiptItemId , 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6) AND ISNULL(@intOwnershipType,0) = 1
 		BEGIN
 			EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intUserId;
-			SELECT @intBillId = intBillId, @dblTotal = SUM(dblTotal) FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId GROUP BY intBillId
+			IF OBJECT_ID (N'tempdb.dbo.#tmpVoucherDetail') IS NOT NULL
+                DROP TABLE #tmpVoucherDetail
+			CREATE TABLE #tmpVoucherDetail (
+				[intBillId] [INT] PRIMARY KEY,
+				[dblTotal] DECIMAL(18,6),
+				UNIQUE ([intBillId])
+			);
+			INSERT INTO #tmpVoucherDetail(intBillId, dblTotal) SELECT DISTINCT(intBillId), SUM(dblTotal) FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId GROUP BY intBillId
 					
-			EXEC [dbo].[uspSMTransactionCheckIfRequiredApproval]
-			@type = N'AccountsPayable.view.Voucher',
-			@transactionEntityId = @intEntityId,
-			@currentUserEntityId = @intUserId,
-			@locationId = @intLocationId,
-			@amount = @dblTotal,
-			@requireApproval = @requireApproval OUTPUT
+			DECLARE voucherCursor CURSOR LOCAL FAST_FORWARD
+			FOR
+			SELECT intBillId,dblTotal FROM #tmpVoucherDetail
 
-			IF ISNULL(@intBillId , 0) != 0 AND ISNULL(@dblTotal,0) > 0 AND ISNULL(@requireApproval , 0) = 0
+			OPEN voucherCursor;
+
+			FETCH NEXT FROM voucherCursor INTO @intBillId, @dblTotal;
+
+			WHILE @@FETCH_STATUS = 0
 			BEGIN
-				EXEC [dbo].[uspAPPostBill]
-				@post = 1
-				,@recap = 0
-				,@isBatch = 0
-				,@param = @intBillId
-				,@userId = @intUserId
-				,@success = @success OUTPUT
+				EXEC [dbo].[uspSMTransactionCheckIfRequiredApproval]
+					@type = N'AccountsPayable.view.Voucher',
+					@transactionEntityId = @intEntityId,
+					@currentUserEntityId = @intUserId,
+					@locationId = @intLocationId,
+					@amount = @dblTotal,
+					@requireApproval = @requireApproval OUTPUT
+
+					IF ISNULL(@intBillId , 0) != 0 AND ISNULL(@dblTotal,0) > 0 AND ISNULL(@requireApproval , 0) = 0
+					BEGIN
+						EXEC [dbo].[uspAPPostBill]
+						@post = 1
+						,@recap = 0
+						,@isBatch = 0
+						,@param = @intBillId
+						,@userId = @intUserId
+						,@success = @success OUTPUT
+					END
+				FETCH NEXT FROM voucherCursor INTO @intBillId, @dblTotal;
 			END
+			
+			CLOSE voucherCursor  
+			DEALLOCATE voucherCursor 
+
 		END
 		FETCH NEXT FROM intListCursor INTO @intInventoryReceiptItemId, @intOrderId, @intOwnershipType;
 	END

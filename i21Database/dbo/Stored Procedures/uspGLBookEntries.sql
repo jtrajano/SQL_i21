@@ -62,6 +62,13 @@ BEGIN
             ,[dblCreditReport]
             ,[dblForeignRate]
 			,[dblReportingRate]
+			,strSourceDocumentId
+			,intSourceLocationId
+			,intSourceUOMId
+			,dblSourceUnitDebit
+			,dblSourceUnitCredit
+			,intCommodityId
+			,intSourceEntityId
 			,[intConcurrencyId]
 	)
 	SELECT 
@@ -98,6 +105,13 @@ BEGIN
             ,ISNULL([dblCreditReport],0)
             ,[dblForeignRate]
 			,ISNULL([dblReportingRate],0)
+			,ISNULL(strSourceDocumentId,'')
+			,intSourceLocationId
+			,intSourceUOMId
+			,ISNULL(dblSourceUnitDebit,0)
+			,ISNULL(dblSourceUnitCredit,0)
+			,intCommodityId
+			,intSourceEntityId
 			,[intConcurrencyId]
 	FROM	@GLEntries GLEntries
 			CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0)) Debit

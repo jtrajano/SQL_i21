@@ -398,8 +398,10 @@ SELECT
 									(CASE WHEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) < 0 THEN -1 ELSE 1 END) -- make the quantity negative if amount is negative 
 								END),
 	[intAccountId]			=	ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CAST(C.aphgl_gl_acct AS NVARCHAR(MAX))), B.intGLAccountExpenseId),
-	[dblTotal]				=	CASE WHEN C2.apivc_trans_type IN ('C','A') AND ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) < 0 THEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) * -1 --make this positive as this is from a debit memo or prepayment
-										ELSE ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) END,
+	[dblTotal]				=	CASE WHEN C2.apivc_trans_type IN ('C','A') --always reverse the amount of detail if type is C or A
+											THEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) * -1 --make this positive as this is from a debit memo or prepayment
+										--WHEN C.aphgl_gl_amt < 0 AND C2.apivc_trans_type = 'I' THEN C.aphgl_gl_amt * -1 --reverse the amount of detail if type is I and amount is negative
+										ELSE ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) END, --IF 'I' the amount sign is correct
 	[dblCost]				=	(CASE WHEN C2.apivc_trans_type IN ('C','A','I') THEN
 										(CASE WHEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) < 0 THEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) * -1 ELSE ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) END) --Cost should always positive
 									ELSE ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) END) / (CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END),
@@ -420,6 +422,7 @@ SELECT
 FROM tblAPBill A
 INNER JOIN tblAPVendor B
 	ON A.intEntityVendorId = B.intEntityId
+INNER JOIN #tmpVouchersWithRecordNumber tmpCreatedVouchers ON A.intBillId = tmpCreatedVouchers.intBillId
 INNER JOIN (tmp_apivcmstImport C2 INNER JOIN tmp_aphglmstImport C 
 			ON C2.apivc_ivc_no = C.aphgl_ivc_no 
 			AND C2.apivc_vnd_no = C.aphgl_vnd_no)

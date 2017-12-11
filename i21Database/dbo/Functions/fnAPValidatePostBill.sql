@@ -347,6 +347,24 @@ BEGIN
 		FROM tblAPBill A 
 		WHERE  A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills) 
 		AND EXISTS(SELECT * FROM tblAPBillDetail B WHERE B.intBillId = A.intBillId AND B.dblCost = 0.000000)
+
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT
+			'There was a cost adjustment made on item "' + E.strItemNo + '" on this transaction. Please setup Other Charge Expense Account for the item.',
+			'Bill',
+			A.strBillId,
+			A.intBillId,
+			27
+		FROM tblAPBill A 
+			INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+			INNER JOIN tblICInventoryReceiptItem C ON C.intInventoryReceiptItemId = B.[intInventoryReceiptItemId] AND B.intItemId = C.intItemId
+			INNER JOIN tblICInventoryReceiptCharge D ON B.intInventoryReceiptChargeId = D.intInventoryReceiptChargeId
+			INNER JOIN tblICItem E ON B.intItemId = E.intItemId
+			INNER JOIN tblICItemLocation ItemLoc
+				ON A.intShipToId = ItemLoc.intLocationId AND B.intItemId = ItemLoc.intItemId
+		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
+		AND B.dblOldCost IS NOT NULL AND D.ysnInventoryCost = 0
+		AND [dbo].[fnGetItemGLAccount](B.intItemId, ItemLoc.intItemLocationId, 'Other Charge Expense') IS NULL
 	END
 	ELSE
 	BEGIN

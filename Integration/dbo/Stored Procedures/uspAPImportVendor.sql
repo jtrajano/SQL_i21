@@ -78,8 +78,10 @@ BEGIN
 		ssvnd_terms_disc_pct			=	H.dblDiscountEP,
 		ssvnd_terms_due_day				=	H.intBalanceDue,
 		ssvnd_terms_disc_day			=	H.intDiscountDay,
-		ssvnd_terms_cutoff_day			=	H.intDayofMonthDue
-		
+		ssvnd_terms_cutoff_day			=	H.intDayofMonthDue,
+		ssvnd_acct_stat					=   (CASE WHEN B.ysnPymtCtrlActive = 1 THEN ''A'' ELSE NULL END),
+		ssvnd_terms_type 				=	(CASE WHEN H.strTerm IS NOT NULL THEN ''D'' ELSE NULL END)
+
 		FROM ssvndmst 		
 		INNER JOIN tblAPVendor B
 			ON ssvndmst.ssvnd_vnd_no COLLATE Latin1_General_CI_AS = SUBSTRING(B.strVendorId, 1, 10) COLLATE Latin1_General_CI_AS
@@ -130,7 +132,9 @@ BEGIN
 		ssvnd_terms_disc_pct,			
 		ssvnd_terms_due_day,			
 		ssvnd_terms_disc_day,			
-		ssvnd_terms_cutoff_day			
+		ssvnd_terms_cutoff_day,
+		ssvnd_acct_stat,	
+		ssvnd_terms_type			
 		)
 		SELECT 
 			ssvnd_vnd_no					=	CASE WHEN CHARINDEX(CHAR(10), B.strVendorId) > 0 THEN SUBSTRING(B.strVendorId, 0, CHARINDEX(CHAR(10),B.strVendorId)) ELSE B.strVendorId END,
@@ -163,7 +167,9 @@ BEGIN
 			ssvnd_terms_disc_pct			=	H.dblDiscountEP,
 			ssvnd_terms_due_day				=	H.intBalanceDue,
 			ssvnd_terms_disc_day			=	H.intDiscountDay,
-			ssvnd_terms_cutoff_day			=	H.intDayofMonthDue
+			ssvnd_terms_cutoff_day			=	H.intDayofMonthDue,
+			ssvnd_acct_stat					=   (CASE WHEN B.ysnPymtCtrlActive = 1 THEN ''A'' ELSE NULL END),
+			ssvnd_terms_type 				=	(CASE WHEN H.strTerm IS NOT NULL THEN ''D'' ELSE NULL END)
 		FROM
 			tblEMEntity A
 		INNER JOIN tblAPVendor B
@@ -395,7 +401,7 @@ BEGIN
                 @ysnPymtCtrlEFTActive     	= CASE WHEN ssvnd_pay_ctl_ind = ''E'' THEN 1 ELSE 0 END,
                 @ysnPymtCtrlHold          	= CASE WHEN ssvnd_pay_ctl_ind = ''H'' THEN 1 ELSE 0 END,
                 @ysnWithholding           	= CASE WHEN ssvnd_wthhld_yn = ''N'' THEN 0 ELSE 1 END,
-                @dblCreditLimit           	= ISNULL(ssvnd_future_bal,0),
+                @dblCreditLimit           	= 0,
                 @intCreatedUserId         	= NULL,
                 @intLastModifiedUserId    	= NULL,
                 @dtmLastModified          	= NULL,
@@ -556,8 +562,8 @@ BEGIN
 			SET @ysnPymtCtrlActive = 1
 		END
 
-		INSERT [dbo].[tblAPVendor]	([intEntityId], [intDefaultLocationId], [intDefaultContactId], [intCurrencyId], [strVendorPayToId], [intPaymentMethodId], [intTaxCodeId], [intGLAccountExpenseId], [intVendorType], [strVendorId], [strVendorAccountNum], [ysnPymtCtrlActive], [ysnPymtCtrlAlwaysDiscount], [ysnPymtCtrlEFTActive], [ysnPymtCtrlHold], [ysnWithholding], [intCreatedUserId], [intLastModifiedUserId], [dtmLastModified], [dtmCreated], [strTaxState], [intBillToId], [intShipFromId], [intTermsId])
-		VALUES						(@EntityId, @EntityLocationId, @EntityContactId, @intCurrencyId, @strVendorPayToId, @intPaymentMethodId, @intVendorTaxCodeId, @intGLAccountExpenseId, @intVendorType, @originVendor, @strVendorAccountNum, @ysnPymtCtrlActive, ISNULL(@ysnPymtCtrlAlwaysDiscount,0), ISNULL(@ysnPymtCtrlEFTActive,0), @ysnPymtCtrlHold, @ysnWithholding, @intCreatedUserId, @intLastModifiedUserId, @dtmLastModified, @dtmCreated, @strTaxState, @EntityLocationId, @EntityLocationId, @intTermsId)
+		INSERT [dbo].[tblAPVendor]	([intEntityId], [intDefaultLocationId], [intDefaultContactId], [intCurrencyId], [strVendorPayToId], [intPaymentMethodId], [intTaxCodeId], [intGLAccountExpenseId], [intVendorType], [strVendorId], [strVendorAccountNum], [ysnPymtCtrlActive], [ysnPymtCtrlAlwaysDiscount], [ysnPymtCtrlEFTActive], [ysnPymtCtrlHold], [ysnWithholding], [intCreatedUserId], [intLastModifiedUserId], [dtmLastModified], [dblCreditLimit], [dtmCreated], [strTaxState], [intBillToId], [intShipFromId], [intTermsId])
+		VALUES						(@EntityId, @EntityLocationId, @EntityContactId, @intCurrencyId, @strVendorPayToId, @intPaymentMethodId, @intVendorTaxCodeId, @intGLAccountExpenseId, @intVendorType, @originVendor, @strVendorAccountNum, @ysnPymtCtrlActive, ISNULL(@ysnPymtCtrlAlwaysDiscount,0), ISNULL(@ysnPymtCtrlEFTActive,0), @ysnPymtCtrlHold, @ysnWithholding, @intCreatedUserId, @intLastModifiedUserId, @dtmLastModified, @dblCreditLimit, @dtmCreated, @strTaxState, @EntityLocationId, @EntityLocationId, @intTermsId)
 
 		DECLARE @VendorIdentityId INT
 		SET @VendorIdentityId = SCOPE_IDENTITY()		
