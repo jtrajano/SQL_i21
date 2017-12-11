@@ -46,6 +46,14 @@ FROM (
 			-- Conversion factor --------------------------------------------------------
 			, dblItemUOMConvFactor		= ItemUOM.dblUnitQty
 			, dblWeightUOMConvFactor	= GrossNetUOM.dblUnitQty
+			-- Lot Details -------------------------------------------------------
+			, intLotId					= LotItem.intLotId
+			, strLotNumber				= LotItem.strLotNumber
+			, dtmExpiryDate				= LotItem.dtmExpiryDate
+			, dtmManufacturedDate		= LotItem.dtmManufacturedDate
+			, strLotAlias				= LotItem.strLotAlias
+			, intParentLotId			= LotItem.intParentLotId
+			, strParentLotNumber		= ParentLot.strParentLotNumber
 			-- Cost UOM --------------------------------------------------------
 			, intCostUOMId				= CostUOM.intItemUOMId -- intItemUOMId
 			, strCostUOM				= CostUnitMeasure.strUnitMeasure
@@ -125,6 +133,19 @@ FROM (
 			LEFT JOIN dbo.tblICUnitMeasure CostUnitMeasure
 				ON CostUnitMeasure.intUnitMeasureId = CostUOM.intUnitMeasureId
 			LEFT JOIN dbo.tblSMCompanyLocation Loc ON Loc.intCompanyLocationId = toLocation.intLocationId
+
+			LEFT JOIN dbo.tblICLot LotItem
+				ON item.intItemId = LotItem.intItemId
+				AND ItemUOM.intItemUOMId = LotItem.intItemUOMId
+				AND h.intToLocationId = LotItem.intLocationId
+				AND toSubLocation.intCompanyLocationSubLocationId = LotItem.intSubLocationId
+				AND toStorageLocation.intStorageLocationId= LotItem.intStorageLocationId
+				AND LotItem.intLotStatusId = 1
+				AND toLocation.intItemLocationId = LotItem.intItemLocationId
+			LEFT JOIN dbo.tblICParentLot ParentLot
+				ON ParentLot.intParentLotId = LotItem.intParentLotId
+				AND ParentLot.intItemId = item.intItemId
+
 	WHERE h.ysnPosted = 1
 		AND h.ysnShipmentRequired = 1
 		AND (h.intStatusId = 1 OR h.intStatusId = 2)
