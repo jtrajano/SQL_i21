@@ -105,7 +105,7 @@ BEGIN
 		SELECT 
 			 RecordKey
 			,Record
-		FROM [fnCFSplitString]('intAccountId,strNetwork,strCustomerNumber,dtmTransactionDate,dtmPostedDate,strInvoiceCycle,strInvoiceReportNumber',',') 
+		FROM [fnCFSplitString]('intAccountId,strNetwork,strCustomerNumber,dtmTransactionDate,dtmCreatedDate,dtmPostedDate,strInvoiceCycle,strInvoiceReportNumber',',') 
 
 		--READ XML
 		EXEC sp_xml_preparedocument @idoc OUTPUT, @xmlParam
@@ -281,11 +281,19 @@ BEGIN
 			[strInvoiceNumber]	NVARCHAR(MAX)
 		)
 
+
+		SELECT * INTO #tblCFTempInvoiceReport FROM vyuCFInvoiceReport
+
 		---------GET DISTINCT CARD ID---------
-		SET @tblCFTempTableQuery = 'SELECT DISTINCT ISNULL(intAccountId,0) FROM vyuCFInvoiceReport ' + @whereClause
+		SET @tblCFTempTableQuery = 'SELECT DISTINCT ISNULL(intAccountId,0) FROM #tblCFTempInvoiceReport ' + @whereClause
+
+		--SELECT @tblCFTempTableQuery
 
 		INSERT INTO  @tblCFTableCardIds (intAccountId)
 		EXEC (@tblCFTempTableQuery)
+
+
+		--select '@tblCFTableCardIds',* from @tblCFTableCardIds ---------------------------------------------------------------------------------
 		---------GET DISTINCT CARD ID---------
 
 		---------CREATE ID WITH INVOICE NUMBER--------
@@ -326,16 +334,22 @@ BEGIN
 		IF (UPPER(@Condition) in ('EQUAL','EQUALS','EQUAL TO','EQUALS TO','=') AND (@From = 'FALSE' OR @From = 0))
 		BEGIN
 			SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-				' ( strInvoiceReportNumber  IS NULL )'
+				' ( strInvoiceReportNumber  IS NULL OR ysnPostedCSV = 1)'
 
 			---------GET DISTINCT TRANSACTION ID---------
-			SET @tblCFTempTableQuery = 'SELECT DISTINCT intTransactionId FROM vyuCFInvoiceReport ' + @whereClause
+			SET @tblCFTempTableQuery = 'SELECT DISTINCT intTransactionId FROM #tblCFTempInvoiceReport ' + @whereClause
+
+			--SELECT @tblCFTempTableQuery
 
 			INSERT INTO  @tblCFTableTransationIds (intTransactionId)
 			EXEC (@tblCFTempTableQuery)
 
 			INSERT INTO  @tblCFFilterIds (intTransactionId)
 			EXEC (@tblCFTempTableQuery)
+
+			--SELECT '@tblCFTableTransationIds',* FROM @tblCFTableTransationIds
+			--SELECT '@tblCFFilterIds',* FROM @tblCFFilterIds
+
 			---------GET DISTINCT TRANSACTION ID---------
 
 
@@ -370,6 +384,8 @@ BEGIN
 				IF(@CFID IS NOT NULL)
 				BEGIN
 					EXEC('UPDATE tblCFTransaction SET strPrintTimeStamp = ' + '''' + @strPrintTimeStamp + '''' + ',' + 'dtmInvoiceDate = ' + '''' + @InvoiceDate + '''' + ',' + 'strTempInvoiceReportNumber = ' + '''' + @strInvoiceNumber + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
+					EXEC('UPDATE #tblCFTempInvoiceReport SET strPrintTimeStamp = ' + '''' + @strPrintTimeStamp + '''' + ',' + 'dtmInvoiceDate = ' + '''' + @InvoiceDate + '''' + ',' + 'strTempInvoiceReportNumber = ' + '''' + @strInvoiceNumber + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
+					
 					--EXEC('UPDATE tblCFTransaction SET strPrintTimeStamp = ' + '''' + @strPrintTimeStamp + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
 					--EXEC('UPDATE tblCFTransaction SET dtmInvoiceDate = ' + '''' + @InvoiceDate + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
 				END
@@ -384,7 +400,7 @@ BEGIN
 		BEGIN
 
 			---------GET DISTINCT TRANSACTION ID---------
-			SET @tblCFTempTableQuery = 'SELECT DISTINCT intTransactionId FROM vyuCFInvoiceReport ' + @whereClause
+			SET @tblCFTempTableQuery = 'SELECT DISTINCT intTransactionId FROM #tblCFTempInvoiceReport ' + @whereClause
 
 			INSERT INTO  @tblCFTableTransationIds (intTransactionId)
 			EXEC (@tblCFTempTableQuery)
@@ -428,6 +444,7 @@ BEGIN
 
 					EXEC('UPDATE tblCFTransaction SET strPrintTimeStamp = ' + '''' + @strPrintTimeStamp + '''' + ',' + 'dtmInvoiceDate = ' + '''' + @InvoiceDate + '''' + ',' + 'strTempInvoiceReportNumber = ' + '''' + @strInvoiceNumber + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
 
+					EXEC('UPDATE #tblCFTempInvoiceReport SET strPrintTimeStamp = ' + '''' + @strPrintTimeStamp + '''' + ',' + 'dtmInvoiceDate = ' + '''' + @InvoiceDate + '''' + ',' + 'strTempInvoiceReportNumber = ' + '''' + @strInvoiceNumber + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
 
 				END
 				---------UPDATE INVOICE REPORT NUMBER ID---------
@@ -440,18 +457,112 @@ BEGIN
 		ELSE
 		BEGIN
 			---------GET DISTINCT TRANSACTION ID---------
-			SET @tblCFTempTableQuery = 'SELECT DISTINCT intTransactionId FROM vyuCFInvoiceReport ' + @whereClause
+			SET @tblCFTempTableQuery = 'SELECT DISTINCT intTransactionId FROM #tblCFTempInvoiceReport ' + @whereClause
 
 			INSERT INTO  @tblCFFilterIds (intTransactionId)
 			EXEC (@tblCFTempTableQuery)
 
 			UPDATE tblCFTransaction SET strTempInvoiceReportNumber = strInvoiceReportNumber where intTransactionId in (SELECT intTransactionId FROM @tblCFFilterIds)
+			UPDATE #tblCFTempInvoiceReport SET strTempInvoiceReportNumber = strInvoiceReportNumber where intTransactionId in (SELECT intTransactionId FROM @tblCFFilterIds)
 
 			---------GET DISTINCT TRANSACTION ID---------
 		END
 
 		--EXEC('SELECT * FROM vyuCFInvoiceReport ' + @whereClause)
 		--SELECT * FROM vyuCFInvoiceReport where intTransactionId in (SELECT intTransactionId FROM @tblCFFilterIds)
+
+		SELECT 
+		 intCustomerGroupId			
+		,intTransactionId			
+		,intOdometer				
+		,intOdometerAging			
+		,intInvoiceId				
+		,intProductId				
+		,intCardId					
+		,main.intAccountId				
+		,intInvoiceCycle			
+		--,intSubAccountId			
+		,intCustomerId				
+		,strGroupName				
+		,strCustomerNumber			
+		,strShipTo					
+		,strBillTo					
+		,strCompanyName				
+		,strCompanyAddress			
+		,strType					
+		,strCustomerName			
+		,strLocationName			
+		,main.strInvoiceNumber			
+		,strTransactionId			
+		,strTransactionType			
+		,strInvoiceReportNumber		
+		,strTempInvoiceReportNumber	
+		,strMiscellaneous			
+		,strName					
+		,strCardNumber				
+		,strCardDescription			
+		,strNetwork					
+		,strInvoiceCycle			
+		,strPrimarySortOptions		
+		,strSecondarySortOptions	
+		,strPrintRemittancePage		
+		,strPrintPricePerGallon		
+		,strPrintSiteAddress		
+		,strSiteNumber				
+		,strSiteName				
+		,strProductNumber			
+		,strItemNo					
+		,strDescription				
+		,strVehicleNumber			
+		,strVehicleDescription		
+		,strTaxState				
+		,strDepartment				
+		,strSiteType				
+		,strState					
+		,strSiteAddress				
+		,strSiteCity				
+		,strPrintTimeStamp			
+		,strEmailDistributionOption	
+		,strEmail					
+		,dtmTransactionDate			
+		,dtmDate					
+		,dtmPostedDate				
+		,dblTotalMiles				
+		,dblQuantity				
+		,dblCalculatedTotalAmount	
+		,dblOriginalTotalAmount		
+		,dblCalculatedGrossAmount	
+		,dblOriginalGrossAmount		
+		,dblCalculatedNetAmount		
+		,dblOriginalNetAmount		
+		,dblMargin					
+		,dblTotalTax				
+		,dblTotalSST				
+		,dblTaxExceptSST			
+		--,dblInvoiceTotal			
+		,ysnPrintMiscellaneous		
+		,ysnSummaryByCard			
+		,ysnSummaryByDepartment		
+		,ysnSummaryByMiscellaneous	
+		,ysnSummaryByProduct		
+		,ysnSummaryByVehicle
+		,ysnSummaryByCardProd	 
+		,ysnSummaryByDeptCardProd		
+		,ysnPrintTimeOnInvoices		
+		,ysnPrintTimeOnReports		
+		,ysnInvalid					
+		,ysnPosted		
+		,ysnPostForeignSales	
+		,ysnDepartmentGrouping
+		,ysnSummaryByDeptVehicleProd	
+		,ysnPostedCSV
+		INTO #tblCFTempInvoiceReportSummary 
+		FROM #tblCFTempInvoiceReport AS main 
+		INNER JOIN @tblCFInvoiceNunber as cfInvRptNo
+		on main.intAccountId = cfInvRptNo.intAccountId
+
+
+		--SELECT '#tblCFTempInvoiceReportSummary',* FROM #tblCFTempInvoiceReportSummary 
 
 		INSERT INTO tblCFInvoiceReportTempTable (
 		intCustomerGroupId			
@@ -537,6 +648,7 @@ BEGIN
 		,ysnPostForeignSales
 		,ysnDepartmentGrouping
 		,ysnSummaryByDeptVehicleProd
+		,ysnPostedCSV
 		)
 		SELECT
 		 intCustomerGroupId			
@@ -546,7 +658,7 @@ BEGIN
 		,intInvoiceId				
 		,intProductId				
 		,intCardId					
-		,main.intAccountId				
+		,intAccountId				
 		,intInvoiceCycle			
 		--,intSubAccountId			
 		,intCustomerId				
@@ -559,7 +671,7 @@ BEGIN
 		,strType					
 		,strCustomerName			
 		,strLocationName			
-		,main.strInvoiceNumber			
+		,strInvoiceNumber			
 		,strTransactionId			
 		,strTransactionType			
 		,strInvoiceReportNumber		
@@ -622,16 +734,8 @@ BEGIN
 		,ysnPostForeignSales	
 		,ysnDepartmentGrouping
 		,ysnSummaryByDeptVehicleProd		
-	    FROM vyuCFInvoiceReport AS main 
-		INNER JOIN @tblCFInvoiceNunber as cfInvRptNo
-		on main.intAccountId = cfInvRptNo.intAccountId
-		--INNER JOIN 
-		--(	SELECT intAccountId AS intSubAccountId,SUM(dblCalculatedTotalAmount) AS dblInvoiceTotal 
-		--	FROM vyuCFInvoiceReport
-		--	WHERE intTransactionId in (SELECT intTransactionId FROM @tblCFFilterIds)
-		--	GROUP BY intAccountId 
-		--) AS sub
-		--ON main.intAccountId = sub.intSubAccountId 
+		,ysnPostedCSV
+	    FROM #tblCFTempInvoiceReportSummary 
 		where intTransactionId in (SELECT intTransactionId FROM @tblCFFilterIds)
 
 		--SELECT * FROM tblCFInvoiceReportTempTable

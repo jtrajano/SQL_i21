@@ -1,4 +1,6 @@
-﻿CREATE VIEW [dbo].[vyuCFInvoiceReportSummary]
+﻿
+
+CREATE VIEW [dbo].[vyuCFInvoiceReportSummary]
 AS
 SELECT intCustomerId = ( CASE cfTrans.strTransactionType 
                            WHEN 'Foreign Sale' THEN cfSiteItem.intCustomerId 
@@ -10,11 +12,11 @@ SELECT intCustomerId = ( CASE cfTrans.strTransactionType
                         END ), 
        strCustomerName = ( CASE cfTrans.strTransactionType 
                              WHEN 'Foreign Sale' THEN cfSiteItem.strName 
-                             ELSE arInv.strCustomerName 
+                             ELSE cfCardAccount.strName 
                            END ), 
        strCustomerNumber = ( CASE cfTrans.strTransactionType 
                                WHEN 'Foreign Sale' THEN cfSiteItem.strEntityNo 
-                               ELSE arInv.strCustomerNumber 
+                               ELSE cfCardAccount.strCustomerNumber 
                              END ), 
        strBillTo = ( CASE cfTrans.strTransactionType 
                        WHEN 'Foreign Sale' THEN cfSiteItem.strBillTo 
@@ -83,6 +85,8 @@ SELECT intCustomerId = ( CASE cfTrans.strTransactionType
        cfTrans.intProductId, 
        cfTrans.intARItemId, 
        cfSiteItem.ysnIncludeInQuantityDiscount, 
+	   Dateadd(dd, Datediff(dd, 0, cfTrans.dtmCreatedDate), 0)    AS 
+       dtmCreatedDate, 
        Dateadd(dd, Datediff(dd, 0, cfTrans.dtmInvoiceDate), 0)    AS 
        dtmInvoiceDate, 
        cfTrans.strInvoiceReportNumber                             AS 
@@ -100,7 +104,8 @@ SELECT intCustomerId = ( CASE cfTrans.strTransactionType
        strInvoiceReportNumber, 
        cfTrans.strPrintTimeStamp, 
        cfCardAccount.strEmailDistributionOption, 
-       cfCardAccount.strEmail 
+       cfCardAccount.strEmail ,
+	   cfTrans.ysnPostedCSV
 FROM   dbo.vyuCFInvoice AS arInv 
        RIGHT JOIN dbo.tblCFTransaction AS cfTrans 
                ON cfTrans.ysnPosted = 1 
