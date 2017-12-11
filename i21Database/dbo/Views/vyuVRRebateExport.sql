@@ -16,7 +16,7 @@ AS
 		,C.strItemNo
 		,strVendorItemNo = P.strVendorProduct
 		,strVendorUOM = R.strVendorUOM
-		,intProgramId = NULL
+		,intProgramId = I.intProgramId
 		,J.intVendorSetupId
 		,A.intInvoiceId
 		,F.strUnitMeasure
