@@ -5955,6 +5955,7 @@
     <Build Include="dbo\Tables\tblCFImportTransactionLagging.sql" />
     <Build Include="dbo\Views\vyuCFTopCardLockCustomer.sql" />
     <Build Include="dbo\Stored Procedures\uspCFTopCardLockCustomerReport.sql" />
+    <Build Include="dbo\Views\vyuMFLotSnapshot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
