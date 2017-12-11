@@ -8,4 +8,4 @@
 
 CREATE VIEW vyuAPOriginCCDTransaction
 AS
-SELECT  '' AS stub
+SELECT  '' stub WHERE 0 = 1
