@@ -48,6 +48,13 @@ namespace iRely.Inventory.Model
         public string strWeightUOM { get; set; }
         public decimal? dblItemUOMConvFactor { get; set; }
         public decimal? dblWeightUOMConvFactor { get; set; }
+        public int? intLotId { get; set; }
+        public string strLotNumber { get; set; }
+        public DateTime? dtmExpiryDate { get; set; }
+        public DateTime? dtmManufacturedDate { get; set; }
+        public string strLotAlias { get; set; }
+        public int? intParentLotId { get; set; }
+        public string strParentLotNumber { get; set; }
         public int? intCostUOMId { get; set; }
         public string strCostUOM { get; set; }
         public decimal? dblCostUOMConvFactor { get; set; }
