@@ -6,7 +6,10 @@
     [intBillId] INT NULL, 
     [intInvoiceId] INT NULL, 
     [intEntityId] INT NOT NULL, 
+    [intConcurrencyId] INT NOT NULL DEFAULT 0, 
+    [ysnPosted] BIT NOT NULL DEFAULT 0, 
     CONSTRAINT [PK_tblBBBuyback] PRIMARY KEY ([intBuybackId]) 
+	
 	
 )
 GO
