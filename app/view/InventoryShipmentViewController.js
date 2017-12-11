@@ -2241,7 +2241,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         var plugin = grid.getPlugin('cepCharges');
         var current = plugin.getActiveRecord();
         var masterRecord = win.viewModel.data.current;
-        var cboCurrency = win.down('#cboCurrency');
+        //var cboCurrency = win.down('#cboCurrency');
         
         if (combo.itemId === 'cboOtherCharge') {
             // Get the default Forex Rate Type from the Company Preference. 
@@ -2252,7 +2252,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             var strFunctionalCurrency = i21.ModuleMgr.SystemManager.getCompanyPreference('strDefaultCurrency');
 
             // Get the transaction currency
-            var chargeCurrencyId = cboCurrency.getValue();
+            var chargeCurrencyId = masterRecord.get('intCurrencyId');
+            var chargeCurrency = masterRecord.get('strCurrency');
 
             current.set('intChargeId', record.get('intItemId'));
             current.set('intCostUOMId', record.get('intCostUOMId'));
@@ -2262,7 +2263,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             current.set('ysnPrice', record.get('ysnPrice'));
             current.set('ysnAccrue', record.get('ysnAccrue'));
             current.set('intCurrencyId', chargeCurrencyId);
-            current.set('strCurrency', cboCurrency.getRawValue());
+            current.set('strCurrency', chargeCurrency);
 
             if (!iRely.Functions.isEmpty(record.get('strOnCostType'))) {
                 current.set('strCostMethod', 'Percentage');
@@ -2566,7 +2567,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 type: 'Inventory.GetAddOrders',
                 url: './inventory/api/inventoryshipment/getaddorders?customerid=' + CustomerId + '&ordertype=' + OrderType + '&sourcetype=' + SourceType,
                 columns: [
-                    {dataIndex: 'intLineNo', text: 'intLineNo', width: 100, dataType: 'numeric', defaultSort: true, sortOrder: 'DESC', key: true, hidden: true },
+                    {dataIndex: 'intLineNo', text: 'intLineNo', width: 100, dataType: 'numeric', defaultSort: true, sortOrder: 'DESC', key: true, hiddenRequired: true },
                     
                     { dataIndex: 'strOrderNumber', text: 'Order Number', width: 100, dataType: 'string' },
                     { dataIndex: 'strSourceNumber', text: 'Source Number', width: 100, dataType: 'string' },
@@ -2574,29 +2575,29 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     { dataIndex: 'strCustomerNumber', text: 'Customer Number', width: 100, dataType: 'string' },
                     { dataIndex: 'strCustomerName', text: 'Customer Name', width: 100, dataType: 'string' },
     
-                    { dataIndex: 'intLocationId', text: 'Location Id', width: 100, dataType: 'numeric', hidden: true },
-                    { dataIndex: 'intItemId', text: 'Item Id', width: 100, dataType: 'numeric', hidden: true },
+                    { dataIndex: 'intLocationId', text: 'Location Id', width: 100, dataType: 'numeric', hiddenRequired: true, allowNull: true },
+                    { dataIndex: 'intItemId', text: 'Item Id', width: 100, dataType: 'numeric', hiddenRequired: true, allowNull: true },
                     { dataIndex: 'strItemNo', text: 'Item No', width: 100, dataType: 'string' },
                     { dataIndex: 'strItemDescription', text: 'Item Description', width: 100, dataType: 'string' },
                     { dataIndex: 'strLotTracking', text: 'Lot Tracking', width: 100, dataType: 'string' },
-                    { dataIndex: 'intCommodityId', text: 'Commodity Id', width: 100, dataType: 'numeric', hidden: true },
-                    { dataIndex: 'intSubLocationId', text: 'SubLocation Id', width: 100, dataType: 'numeric', hidden: true },
+                    { dataIndex: 'intCommodityId', text: 'Commodity Id', width: 100, dataType: 'numeric', hiddenRequired: true, allowNull: true },
+                    { dataIndex: 'intSubLocationId', text: 'SubLocation Id', width: 100, dataType: 'numeric', hiddenRequired: true, allowNull: true, allowNull: true },
                     { dataIndex: 'strSubLocationName', text: 'SubLocation Name', width: 100, dataType: 'string' },
-                    { dataIndex: 'intStorageLocationId', text: 'Storage Location Id', width: 100, dataType: 'numeric', hidden: true },
+                    { dataIndex: 'intStorageLocationId', text: 'Storage Location Id', width: 100, dataType: 'numeric', hiddenRequired: true, allowNull: true },
                     { dataIndex: 'strStorageLocationName', text: 'Storage Location Name', width: 100, dataType: 'string' },
     
-                    { dataIndex: 'intFreightTermId', text: 'Freight Terms Id', width: 100, dataType: 'numeric', hidden: true, required: true, allowNull: true },
+                    { dataIndex: 'intFreightTermId', text: 'Freight Terms Id', width: 100, dataType: 'numeric', hiddenRequired: true, allowNull: true },
                     { dataIndex: 'strFreightTerm', text: 'Freight Terms', width: 100, dataType: 'string' },           
                     
-                    { dataIndex: 'intOrderUOMId', text: 'Order UOM Id', width: 100, dataType: 'numeric', hidden: true },
+                    { dataIndex: 'intOrderUOMId', text: 'Order UOM Id', width: 100, dataType: 'numeric', hiddenRequired: true, allowNull: true },
                     { dataIndex: 'strOrderUOM', text: 'Order UOM', width: 100, dataType: 'string' },
-                    { xtype: 'numbercolumn', dataIndex: 'dblOrderUOMConvFactor', text: 'Order UOM Conversion Factor', width: 100, dataType: 'float', hidden: true },
-                    { dataIndex: 'intItemUOMId', text: 'Item UOM Id', width: 100, dataType: 'numeric', hidden: true },
+                    { xtype: 'numbercolumn', dataIndex: 'dblOrderUOMConvFactor', text: 'Order UOM Conversion Factor', width: 100, dataType: 'float', hiddenRequired: true },
+                    { dataIndex: 'intItemUOMId', text: 'Item UOM Id', width: 100, dataType: 'numeric', hiddenRequired: true, allowNull: true },
                     { dataIndex: 'strItemUOM', text: 'Item UOM', width: 100, dataType: 'string' },
-                    { xtype: 'numbercolumn', dataIndex: 'dblItemUOMConv', text: 'Item UOM Conversion Factor', width: 100, dataType: 'float', hidden: true },
-                    { dataIndex: 'intWeightUOMId', text: 'Weight UOM Id', width: 100, dataType: 'numeric', hidden: true },
+                    { xtype: 'numbercolumn', dataIndex: 'dblItemUOMConv', text: 'Item UOM Conversion Factor', width: 100, dataType: 'float', hiddenRequired: true },
+                    { dataIndex: 'intWeightUOMId', text: 'Weight UOM Id', width: 100, dataType: 'numeric', hiddenRequired: true, allowNull: true },
                     { dataIndex: 'strWeightUOM', text: 'Weight UOM', width: 100, dataType: 'string' },
-                    { xtype: 'numbercolumn', dataIndex: 'dblWeightItemUOMConv', text: 'Weight Item UOM Conversion Factor', width: 100, dataType: 'float', hidden: true },
+                    { xtype: 'numbercolumn', dataIndex: 'dblWeightItemUOMConv', text: 'Weight Item UOM Conversion Factor', width: 100, dataType: 'float', hiddenRequired: true },
                     { xtype: 'numbercolumn', dataIndex: 'dblQtyOrdered', text: 'Qty Ordered', width: 100, dataType: 'float' },
                     { xtype: 'numbercolumn', dataIndex: 'dblQtyAllocated', text: 'Qty Allocated', width: 100, dataType: 'float' },
                     { xtype: 'numbercolumn', dataIndex: 'dblQtyShipped', text: 'Qty Shipped', width: 100, dataType: 'float' },
@@ -2606,29 +2607,29 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     { xtype: 'numbercolumn', dataIndex: 'dblQtyToShip', text: 'Qty To Ship', width: 100, dataType: 'float' },
                     { xtype: 'numbercolumn', dataIndex: 'dblPrice', text: 'Price', width: 100, dataType: 'float' },
                     { xtype: 'numbercolumn', dataIndex: 'dblLineTotal', text: 'Line Total', width: 100, dataType: 'float' },
-                    { dataIndex: 'intGradeId', text: 'Grade Id', width: 100, dataType: 'numeric', hidden: true },
-                    { dataIndex: 'strGrade', text: 'Grade', width: 100, dataType: 'numeric', hidden: true },
-                    { dataIndex: 'intDestinationGradeId', text: 'Destination Grade Id', width: 100, dataType: 'numeric', hidden: true },
+                    { dataIndex: 'intGradeId', text: 'Grade Id', width: 100, dataType: 'numeric', hiddenRequired: true, allowNull: true },
+                    { dataIndex: 'strGrade', text: 'Grade', width: 100, dataType: 'numeric', hiddenRequired: true },
+                    { dataIndex: 'intDestinationGradeId', text: 'Destination Grade Id', width: 100, dataType: 'numeric', hiddenRequired: true, allowNull: true },
                     { dataIndex: 'strDestinationGrades', text: 'Destination Grades', width: 100, dataType: 'string' },
-                    { dataIndex: 'intDestinationWeightId', text: 'Destination Weight Id', width: 100, dataType: 'numeric', hidden: true },
+                    { dataIndex: 'intDestinationWeightId', text: 'Destination Weight Id', width: 100, dataType: 'numeric', hiddenRequired: true, allowNull: true },
                     { dataIndex: 'strDestinationWeights', text: 'Destination Weights', width: 100, dataType: 'string' },
     
-                    { dataIndex: 'intForexRateTypeId', text: 'Forex Rate Type Id', width: 100, dataType: 'numeric', hidden: true },
-                    { dataIndex: 'strForexRateType', text: 'Forex Rate Type', width: 100, dataType: 'string', hidden: true },
-                    { xtype: 'numbercolumn', dataIndex: 'dblForexRate', text: 'Forex Rate', width: 100, dataType: 'float', hidden: true },               
+                    { dataIndex: 'intForexRateTypeId', text: 'Forex Rate Type Id', width: 100, dataType: 'numeric', hiddenRequired: true, allowNull: true },
+                    { dataIndex: 'strForexRateType', text: 'Forex Rate Type', width: 100, dataType: 'string', hiddenRequired: true },
+                    { xtype: 'numbercolumn', dataIndex: 'dblForexRate', text: 'Forex Rate', width: 100, dataType: 'float', hiddenRequired: true },               
                     
-                    { dataIndex: 'intOrderId', text: 'intOrderId', width: 100, dataType: 'numeric', hidden: true },
-                    { dataIndex: 'intSourceId', text: 'intSourceId', width: 100, dataType: 'numeric', hidden: true },
-                    { dataIndex: 'intCurrencyId', text: 'Currency Id', hidden: true, dataType: 'numeric' },
-                    { dataIndex: 'strCurrency', text: 'Currency', hidden: true, dataType: 'numeric' },
-                    { dataIndex: 'intShipToLocationId', text: 'Ship To Location Id', hidden: true, dataType: 'numeric' },
-                    { dataIndex: 'strShipToLocation', text: 'Ship To Location', width: 100, dataType: 'string', hidden: true },
-                    { dataIndex: 'strShipToStreet', text: 'Ship To Street', width: 100, dataType: 'string', hidden: true },
-                    { dataIndex: 'strShipToCity', text: 'Ship To City', width: 100, dataType: 'string', hidden: true },
-                    { dataIndex: 'strShipToState', text: 'Ship To State', width: 100, dataType: 'string', hidden: true },
-                    { dataIndex: 'strShipToZipCode', text: 'Ship To Zip Code', width: 100, dataType: 'string', hidden: true },
-                    { dataIndex: 'strShipToCountry', text: 'Ship To Country', width: 100, dataType: 'string', hidden: true },
-                    { dataIndex: 'strShipToAddress', text: 'Ship To Address', width: 100, dataType: 'string', hidden: true }
+                    { dataIndex: 'intOrderId', text: 'intOrderId', width: 100, dataType: 'numeric', hiddenRequired: true, allowNull: true },
+                    { dataIndex: 'intSourceId', text: 'intSourceId', width: 100, dataType: 'numeric', hiddenRequired: true, allowNull: true },
+                    { dataIndex: 'intCurrencyId', text: 'Currency Id', dataType: 'numeric', hiddenRequired: true, allowNull: true },
+                    { dataIndex: 'strCurrency', text: 'Currency', dataType: 'numeric' },
+                    { dataIndex: 'intShipToLocationId', text: 'Ship To Location Id', hiddenRequired: true, dataType: 'numeric', allowNull: true },
+                    { dataIndex: 'strShipToLocation', text: 'Ship To Location', width: 100, dataType: 'string', hiddenRequired: true },
+                    { dataIndex: 'strShipToStreet', text: 'Ship To Street', width: 100, dataType: 'string',  hiddenRequired: true },
+                    { dataIndex: 'strShipToCity', text: 'Ship To City', width: 100, dataType: 'string',  hiddenRequired: true },
+                    { dataIndex: 'strShipToState', text: 'Ship To State', width: 100, dataType: 'string',  hiddenRequired: true },
+                    { dataIndex: 'strShipToZipCode', text: 'Ship To Zip Code', width: 100, dataType: 'string', hiddenRequired: true },
+                    { dataIndex: 'strShipToCountry', text: 'Ship To Country', width: 100, dataType: 'string', hiddenRequired: true },
+                    { dataIndex: 'strShipToAddress', text: 'Ship To Address', width: 100, dataType: 'string', hiddenRequired: true }
                 ],
                 title: "Add Orders",
                 showNew: false
@@ -2704,7 +2705,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                                         var totalQty = 0;
                                                         Ext.Array.each(pickLot.vyuLGDeliveryOpenPickLotDetails().data.items, function (lotDetails) {
                                                             if (lotDetails.get('intSContractHeaderId') === lot.get('intSContractHeaderId') &&
-                                                                lotDetails.get('intPickLotHeaderId') === lot.get('intPickLotHeaderId')) {
+                                                                lotDetails.get('intPickLotHeaderId') === lot.get('intPickLotHeaderId') 
+                                                            ) {
                                                                 totalQty += lotDetails.get('dblLotPickedQty');
                                                                 var newItemLot = Ext.create('Inventory.model.ShipmentItemLot', {
                                                                     intLotId: lotDetails.get('intLotId'),
@@ -2760,7 +2762,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                         orderFreightTerm: addOrderFreightTerms
                                     });
                                     isValidToAdd = false; 
-                                }  
+                                }
 
                                 if(isValidToAdd && !currentRecord.get('strCurrency')) {
                                     currentRecord.set('intCurrencyId', order.get('intCurrencyId'));
