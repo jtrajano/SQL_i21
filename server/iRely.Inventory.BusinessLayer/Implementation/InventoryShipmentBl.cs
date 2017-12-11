@@ -113,7 +113,7 @@ namespace iRely.Inventory.BusinessLayer
                     }
 
                     // Save the data. 
-                    result = await _db.SaveAsync(true).ConfigureAwait(false);
+                    result = await _db.SaveAsync(continueOnConflict).ConfigureAwait(false);
 
                     // Process the deleted records. 
                     foreach (var shipment in deletedShipments)
