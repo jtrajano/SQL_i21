@@ -10,27 +10,40 @@ SELECT
 	,[strMiscDescription]						=	Item.strDescription
 	,[strItemNo]								=	Item.strItemNo
 	,[strDescription]							=	Item.strDescription
-	,[dblOrderQty]								=	CASE 
+	,[dblOrderQty]								=	
+													CASE 
 														WHEN ISNULL(ReceiptCharge.dblAmount,0) < 0 -- Negate the qty if Charge is negative. 
-															THEN -1
-														ELSE 1 
+															THEN -(ReceiptCharge.dblQuantity - ISNULL(ReceiptCharge.dblQuantityBilled, 0))
+														ELSE ReceiptCharge.dblQuantity - ISNULL(ReceiptCharge.dblQuantityBilled, 0)
 													END 
 	,[dblPOOpenReceive]							=	0
-	,[dblOpenReceive]							=	CASE 
+	,[dblOpenReceive]							=	
+													CASE 
 														WHEN ISNULL(ReceiptCharge.dblAmount,0) < 0 -- Negate the qty if Charge is negative. 
-															THEN -1
-														ELSE 1 
+															THEN -(ReceiptCharge.dblQuantity- ISNULL(ReceiptCharge.dblQuantityBilled, 0))
+														ELSE ReceiptCharge.dblQuantity - ISNULL(ReceiptCharge.dblQuantityBilled, 0)
 													END 
-	,[dblQuantityToBill]						=	CASE 
+	,[dblQuantityToBill]						=	
+													CASE 
 														WHEN ISNULL(ReceiptCharge.dblAmount,0) < 0 -- Negate the qty if Charge is negative. 
-															THEN -1
-														ELSE 1 
+															THEN -(ReceiptCharge.dblQuantity - ISNULL(ReceiptCharge.dblQuantityBilled, 0)) 
+														ELSE ReceiptCharge.dblQuantity - ISNULL(ReceiptCharge.dblQuantityBilled, 0)	
 													END 
 	,[dblQuantityBilled]						=	0
 	,[intLineNo]								=	1
 	,[intInventoryReceiptItemId]				=	ReceiptItem.intInventoryReceiptItemId --add for strSource reference
 	,[intInventoryReceiptChargeId]				=	ReceiptCharge.intInventoryReceiptChargeId
-	,[dblUnitCost]								=	CASE WHEN ReceiptCharge.ysnSubCurrency > 0 THEN (ABS(ReceiptCharge.dblAmount) * 100) ELSE ABS(ReceiptCharge.dblAmount) END
+	,[dblUnitCost]								=	
+													CASE 
+														WHEN ReceiptCharge.ysnSubCurrency = 1 AND ReceiptCharge.strCostMethod = 'Per Unit' THEN 
+															ABS(ISNULL(ReceiptCharge.dblRate, 0)) * 100
+														WHEN ReceiptCharge.strCostMethod = 'Per Unit' THEN 
+															ABS(ISNULL(ReceiptCharge.dblRate, 0))
+														WHEN ReceiptCharge.ysnSubCurrency = 1 THEN 
+															ABS(ISNULL(ReceiptCharge.dblAmount, 0)) * 100
+														ELSE 
+															ABS(ISNULL(ReceiptCharge.dblAmount, 0))
+													END
 	,[dblTax]									=	ISNULL(ReceiptCharge.dblTax,0) 
 	,[intAccountId]								=	
 													CASE	WHEN ISNULL(ReceiptCharge.ysnInventoryCost, 0) = 0 THEN 
@@ -152,30 +165,46 @@ SELECT
 	,[strMiscDescription]						=	Item.strDescription
 	,[strItemNo]								=	Item.strItemNo
 	,[strDescription]							=	Item.strDescription
-	,[dblOrderQty]								=	CASE 
+	,[dblOrderQty]								=		
+													CASE 
 														WHEN ReceiptCharge.dblAmount > 0 
-															THEN -1 --Negate Quantity if amount is positive for Price Down charges; Amount is negated in Voucher for Price Down so no need to negate quantity for negative amount
+															--Negate Quantity if amount is positive for Price Down charges; Amount is negated in Voucher for Price Down so no need to negate quantity for negative amount
+															THEN -(ReceiptCharge.dblQuantity - ISNULL(ReceiptCharge.dblQuantityBilled, 0))															
 														ELSE 
-															1 
+															ReceiptCharge.dblQuantity - ISNULL(ReceiptCharge.dblQuantityBilled, 0)
 													END  
 	,[dblPOOpenReceive]							=	0
-	,[dblOpenReceive]							=	CASE 
+	,[dblOpenReceive]							=		
+													CASE 
 														WHEN ReceiptCharge.dblAmount > 0 
-															THEN -1 --Negate Quantity if amount is positive for Price Down charges; Amount is negated in Voucher for Price Down so no need to negate quantity for negative amount
+															--Negate Quantity if amount is positive for Price Down charges; Amount is negated in Voucher for Price Down so no need to negate quantity for negative amount
+															THEN -(ReceiptCharge.dblQuantity - ISNULL(ReceiptCharge.dblQuantityBilled, 0))
 														ELSE 
-															1 
+															ReceiptCharge.dblQuantity - ISNULL(ReceiptCharge.dblQuantityBilled, 0)
 													END 
-	,[dblQuantityToBill]						=	CASE 
+	,[dblQuantityToBill]						=	
+													CASE 
 														WHEN ReceiptCharge.dblAmount > 0 
-															THEN -1 --Negate Quantity if amount is positive for Price Down charges; Amount is negated in Voucher for Price Down so no need to negate quantity for negative amount
+															--Negate Quantity if amount is positive for Price Down charges; Amount is negated in Voucher for Price Down so no need to negate quantity for negative amount
+															THEN -(ReceiptCharge.dblQuantity - ISNULL(ReceiptCharge.dblQuantityBilled, 0))
 														ELSE 
-															1 
+															ReceiptCharge.dblQuantity - ISNULL(ReceiptCharge.dblQuantityBilled, 0)
 													END 
 	,[dblQuantityBilled]						=	0
 	,[intLineNo]								=	1
 	,[intInventoryReceiptItemId]				=	ReceiptItem.intInventoryReceiptItemId  --add for strSource reference
 	,[intInventoryReceiptChargeId]				=	ReceiptCharge.intInventoryReceiptChargeId
-	,[dblUnitCost]								=	CASE WHEN ReceiptCharge.ysnSubCurrency > 0 THEN (ABS(ReceiptCharge.dblAmount) * 100) ELSE ABS(ReceiptCharge.dblAmount) END -- CASE WHEN ReceiptCharge.ysnSubCurrency > 0 THEN -1 * (ReceiptCharge.dblAmount * 100)  ELSE -1 * ReceiptCharge.dblAmount END /* Negate the cost if other charge is set as price; this is only for script computation for total cost in voucher; Cost will still be seen as positive value in Voucher screen*/  
+	,[dblUnitCost]								=	
+													CASE 
+														WHEN ReceiptCharge.ysnSubCurrency = 1 AND ReceiptCharge.strCostMethod = 'Per Unit' THEN 
+															ABS(ISNULL(ReceiptCharge.dblRate, 0)) * 100
+														WHEN ReceiptCharge.strCostMethod = 'Per Unit' THEN 
+															ABS(ISNULL(ReceiptCharge.dblRate, 0))
+														WHEN ReceiptCharge.ysnSubCurrency = 1 THEN 
+															ABS(ISNULL(ReceiptCharge.dblAmount, 0)) * 100
+														ELSE 
+															ABS(ISNULL(ReceiptCharge.dblAmount, 0))
+													END
 	,[dblTax]									=	ISNULL(ReceiptCharge.dblTax,0)
 	,[intAccountId]								=	
 													CASE	WHEN ISNULL(ReceiptCharge.ysnInventoryCost, 0) = 0 THEN 
