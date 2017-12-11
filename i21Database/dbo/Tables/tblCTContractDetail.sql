@@ -46,6 +46,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[dblConvertedBasis] [numeric](18, 6) NULL,
 	intBasisCurrencyId INT,
 	intBasisUOMId INT,
+	[dblRatio] NUMERIC(18,6),
 	[dblCashPrice] [numeric](18, 6) NULL,
 	[dblTotalCost] [numeric](18, 6) NULL,
 	[intCurrencyId] [int] NULL,

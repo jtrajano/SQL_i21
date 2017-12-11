@@ -148,6 +148,14 @@ BEGIN
 END
 GO
 
+GO
+IF NOT EXISTS(SELECT * FROM tblCTPricingType WHERE intPricingTypeId = 8)
+BEGIN
+	INSERT INTO tblCTPricingType
+	SELECT 8,'Ratio',1	
+END
+GO
+
 --tblCTPutCall
 GO
 IF NOT EXISTS(SELECT * FROM tblCTPutCall WHERE intPutCallId = 1)
