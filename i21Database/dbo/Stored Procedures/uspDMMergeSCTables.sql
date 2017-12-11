@@ -118,10 +118,10 @@ BEGIN
 			, Target.intTicketTypeId = Source.intTicketTypeId, Target.intSplitId = Source.intSplitId, Target.intFarmFieldId = Source.intFarmFieldId, Target.ysnPost = Source.ysnPost
 			, Target.intConcurrencyId = Source.intConcurrencyId, Target.strOfflineGuid = Source.strOfflineGuid
         WHEN NOT MATCHED BY TARGET THEN
-            INSERT (intEntityId, intCompanyLocationId, intItemId, intDiscountId, strDeliverySheetNumber, dtmDeliverySheetDate
-			, intCurrencyId, intTicketTypeId, intSplitId, intFarmFieldId, ysnPost, intConcurrencyId, strOfflineGuid)
-            VALUES (Source.intEntityId, Source.intCompanyLocationId, Source.intItemId, Source.intDiscountId, Source.strDeliverySheetNumber, Source.dtmDeliverySheetDate, Source.intCurrencyId
-			, Source.intTicketTypeId, Source.intSplitId, Source.intFarmFieldId, Source.ysnPost, Source.intConcurrencyId, Source.strOfflineGuid)
+            INSERT (intDeliverySheetId, intEntityId, intCompanyLocationId, intItemId, intDiscountId, strDeliverySheetNumber, dtmDeliverySheetDate
+			, intCurrencyId, intTicketTypeId, intSplitId, intFarmFieldId, ysnPost, intConcurrencyId)
+            VALUES (Source.intDeliverySheetId, Source.intEntityId, Source.intCompanyLocationId, Source.intItemId, Source.intDiscountId, Source.strDeliverySheetNumber, Source.dtmDeliverySheetDate, Source.intCurrencyId
+			, Source.intTicketTypeId, Source.intSplitId, Source.intFarmFieldId, Source.ysnPost, Source.intConcurrencyId)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
