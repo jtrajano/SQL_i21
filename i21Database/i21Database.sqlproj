@@ -5959,6 +5959,7 @@
     <Build Include="dbo\Tables\tblBBBuybackExcluded.sql" />
     <Build Include="dbo\Views\vyuBBExcludedBuyback.sql" />
     <Build Include="dbo\Views\vyuBBBuybackDetail.sql" />
+    <Build Include="dbo\Views\vyuBBOpenBuybackWithRate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
