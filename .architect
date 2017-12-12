@@ -1819,6 +1819,9 @@
                                                                     ]
                                                                 },
                                                                 {
+                                                                    "id": "8d7e8318-c95d-4e0a-871b-a9a39850ea04"
+                                                                },
+                                                                {
                                                                     "id": "d252a4f0-78d2-451a-9d21-965639d5fd49"
                                                                 },
                                                                 {
@@ -2015,6 +2018,14 @@
                                                     ]
                                                 },
                                                 {
+                                                    "id": "66726572-7f95-47b7-af16-28252a0f76c2",
+                                                    "cn": [
+                                                        {
+                                                            "id": "00b04c2e-0833-4af2-81f9-334e0850d745"
+                                                        }
+                                                    ]
+                                                },
+                                                {
                                                     "id": "980a9b7c-d039-47fb-8bea-dcf4f086d06c",
                                                     "cn": [
                                                         {
@@ -2114,6 +2125,14 @@
                                     "cn": [
                                         {
                                             "id": "9655a910-861f-4660-b4ff-ee174fc51ba9"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "id": "65a8260a-018e-40af-8449-3df80b48dc53",
+                                    "cn": [
+                                        {
+                                            "id": "420b5736-a150-4eb4-adb9-773dddf0e194"
                                         }
                                     ]
                                 },
@@ -10619,15 +10638,16 @@
             "fce4eccc-52e6-4176-8dc8-67140c5bb31a",
             "fa67247d-7427-454a-9772-9371f6e5d623",
             "467f343c-c005-4700-bed6-351559b316d7",
-            "b6b8ef41-1eb1-4854-99ef-98f5a7167844"
+            "b6b8ef41-1eb1-4854-99ef-98f5a7167844",
+            "c8873ce8-0312-4503-aed6-fc59e70d1895"
         ]
     },
     "canvasState": {
-        "topInstance": "d7ef9c4d-9fa7-40a9-ac40-8922ff13c54c"
+        "topInstance": "c8873ce8-0312-4503-aed6-fc59e70d1895"
     },
     "inspectorState": {
-        "topInstance": "d7ef9c4d-9fa7-40a9-ac40-8922ff13c54c",
-        "selectedInstance": "d25ec096-e4a7-4f3f-80ac-24ec76c77621"
+        "topInstance": "c8873ce8-0312-4503-aed6-fc59e70d1895",
+        "selectedInstance": "c8873ce8-0312-4503-aed6-fc59e70d1895"
     },
     "editMode": "design",
     "userSettings": {
