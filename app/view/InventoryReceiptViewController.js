@@ -3469,7 +3469,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         receiptItem.set('dblLineTotal', me.calculateLineTotal(currentReceipt, receiptItem));
 
         if (context.field === 'dblQuantity') {
-            me.calculateGrossNet(receiptItem, 0);
+            me.calculateGrossNet(receiptItem, 1);
         }
 
         //Calculate expiryDate
