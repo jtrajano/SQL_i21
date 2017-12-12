@@ -384,6 +384,7 @@ BEGIN
 			,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
 			,@intFobPointId							= @intFobPointId 
 			,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
+			,@strActualCostId						= @strActualCostId
 
 		-- Log original cost to tblICInventoryActualCostAdjustmentLog
 		IF NOT EXISTS (
@@ -607,6 +608,7 @@ BEGIN
 						,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
 						,@intFobPointId							= @intFobPointId 
 						,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
+						,@strActualCostId						= @strActualCostId
 				END 	
 
 				---------------------------------------------------------------------------
@@ -679,6 +681,7 @@ BEGIN
 						,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
 						,@intFobPointId							= @intFobPointId 
 						,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
+						,@strActualCostId						= @strActualCostId
 					
 					-----------------------------------------------------------------------------------------------------------
 					-- 9. Get the 'produced/transferred/in-transit item'. Insert it in a temporary table for later processing. 
