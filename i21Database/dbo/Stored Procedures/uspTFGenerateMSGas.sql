@@ -33,7 +33,7 @@ BEGIN TRY
 		, @AutomotiveGas_17 NUMERIC(18, 0) = 0
 		, @AutomotiveGas_18 NUMERIC(18, 0) = 0
 		, @AutomotiveGas_19 NUMERIC(18, 4) = 0
-		, @AutomotiveGas_20 NUMERIC(18, 4) = 0
+		, @AutomotiveGas_20 NUMERIC(18, 2) = 0
 		, @AutomotiveGas_22 NUMERIC(18, 0) = 0
 		, @AutomotiveGas_23 NUMERIC(18, 0) = 0
 		, @AutomotiveGas_24 NUMERIC(18, 4) = 0
