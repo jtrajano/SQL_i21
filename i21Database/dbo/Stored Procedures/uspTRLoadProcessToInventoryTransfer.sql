@@ -187,7 +187,7 @@ END
 		,[intItemId]                = MIN(TR.intItemId)
 		,[intLotId]                 = NULL
 		,[intItemUOMId]             = MIN(ItemUOM.intItemUOMId)
-		,[dblQuantityToTransfer]    = SUM(CASE WHEN SP.strGrossOrNet = 'Gross' THEN TR.dblGross ELSE TR.dblNet END)
+		,[dblQuantityToTransfer]    = SUM(Blend.dblQuantity)
 		,[strNewLotId]              = NULL
 		,[intFromSubLocationId]     = NULL
 		,[intToSubLocationId]       = NULL
