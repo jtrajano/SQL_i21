@@ -506,7 +506,7 @@ BEGIN
 	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,strLocationName,strItemNo,strCustomer,intCommodityId,intFromCommodityUnitMeasureId,strTruckName,strDriverName,[Storage Due],intCompanyLocationId)
 	
 				(select 1 AS intSeqId,'In-House',@strDescription,StorageType AS [strType],				
-				 CASE WHEN (SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1 then dblTotal  else 0 end dblTotal 
+				 isnull(dblTotal,0)
 				 ,strLocationName,strItemNo,strName,@intCommodityId,@intCommodityUnitMeasureId,'' strTruckName,'' strDriverName,[Storage Due],intCompanyLocationId
 				 FROM (
 				SELECT 
