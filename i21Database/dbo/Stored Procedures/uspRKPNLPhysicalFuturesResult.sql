@@ -54,7 +54,8 @@ BEGIN
 			CASE	WHEN strType IN ('Invoice') THEN dblAccounting 
 					WHEN strType IN ('Amount')	THEN dblTranValue 
 			ELSE ISNULL(dblAllocatedQty,dblBooked) * dblPrice	END AS	dblTransactionValue,
-			CASE	WHEN strType IN ('Amount')	THEN dblTranValue 
+			CASE	WHEN strType IN ('Amount')	THEN dblTranValue  / dblFX
+					WHEN strType IN ('Per Unit') THEN ISNULL(dblAllocatedQty,dblBooked) * dblPrice / dblFX
 					ELSE ISNULL(dblAllocatedQty,dblBooked) * dblPrice * dblFX	
 			END AS	dblForecast
 	FROM
@@ -170,6 +171,7 @@ BEGIN
 		JOIN	tblSMCurrency			CY	ON	CY.intCurrencyID		=	IV.intCurrencyId
 		WHERE	AD.intSContractDetailId	=	@intSContractDetailId
 		AND		EXISTS(SELECT * FROM tblARInvoiceDetail WHERE intContractDetailId	=	@intSContractDetailId)
+		AND		ID.intContractCostId IS NULL
 
 		UNION ALL
 
@@ -223,10 +225,10 @@ BEGIN
 
 		UNION ALL
 
-		SELECT strItemNo, strContractNumber, strDescription, strConfirmed, SUM(dblAllocatedQty) dblAllocatedQty, dblPrice, strCurrency, dblFX, dblBooked, dblAccounting, dtmContractDate, strType,dblTranValue, intSort
+		SELECT strItemNo, strBillId, strDescription, strConfirmed, SUM(dblAllocatedQty) dblAllocatedQty, dblPrice, strCurrency, dblFX, dblBooked, dblAccounting, dtmContractDate, strType,dblTranValue, intSort
 		FROM(
 			SELECT	IM.strItemNo,
-					CH.strContractNumber,
+					strBillId,
 					TP.strContractType + ' - ' +  CH.strContractNumber AS strDescription,
 					NULL AS strConfirmed,
 					dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,AD.intPUnitMeasureId,@intUnitMeasureId, AD.dblPAllocatedQty) AS dblAllocatedQty,
@@ -235,9 +237,9 @@ BEGIN
 						WHEN	CC.strCostMethod = 'Amount'		THEN
 							CC.dblRate
 					END /
-					CASE WHEN OY.ysnSubCurrency = 1 THEN 100 ELSE 1 END	AS	dblPrice,
+					CASE WHEN OY.ysnSubCurrency = 1 THEN 100 ELSE 1 END	 * -1 AS	dblPrice,
 					ISNULL(MY.strCurrency,CY.strCurrency) AS strCurrency,
-					ISNULL(dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0),1) AS dblFX,
+					ISNULL(dbo.fnCTGetCurrencyExchangeRate(CC.intContractCostId,1),1) AS dblFX,
 					BL.dblBooked * -1 dblBooked,
 					BL.dblAccounting * -1 dblAccounting,
 					CH.dtmContractDate,
@@ -255,11 +257,12 @@ BEGIN
 			JOIN	tblICItemUOM			PU	ON	PU.intItemUOMId			=	CD.intPriceItemUOMId	LEFT
 			JOIN	tblICItemUOM			CU	ON	CU.intItemUOMId			=	CC.intItemUOMId			LEFT
 			JOIN	tblSMCurrency			OY	ON	OY.intCurrencyID		=	CC.intCurrencyId		LEFT 
-			JOIN	tblSMCurrency			CY	ON	CY.intCurrencyID		=	CD.intCurrencyId		LEFT 
+			JOIN	tblSMCurrency			CY	ON	CY.intCurrencyID		=	CC.intCurrencyId		LEFT 
 			JOIN	tblICM2MComputation		MC	ON	MC.intM2MComputationId	=	IM.intM2MComputationId	LEFT
 			JOIN	tblSMCurrency			MY	ON	MY.intCurrencyID		=	CY.intMainCurrencyId	LEFT
 			JOIN	(
 						SELECT	intContractCostId,
+								BL.strBillId,
 								SUM(dbo.fnCTConvertQuantityToTargetItemUOM(BD.intItemId,IU.intUnitMeasureId,@intUnitMeasureId, BD.dblQtyReceived)) AS dblBooked,
 								SUM(BD.dblTotal)	dblAccounting,
 								SUM(	dbo.fnCTConvertQuantityToTargetItemUOM(BD.intItemId,IU.intUnitMeasureId,@intUnitMeasureId, BD.dblQtyReceived)*
@@ -267,13 +270,14 @@ BEGIN
 										CASE WHEN BD.ysnSubCurrency = 1 THEN 100 ELSE 1 END
 									)	dblTranValue
 						FROM	tblAPBillDetail BD
-				LEFT	JOIN	tblICItemUOM	IU	ON	IU.intItemUOMId = BD.intUnitOfMeasureId
+						JOIN	tblAPBill		BL	ON	BL.intBillId	=	BD.intBillId
+				LEFT	JOIN	tblICItemUOM	IU	ON	IU.intItemUOMId =	BD.intUnitOfMeasureId
 						WHERE	intContractDetailId IN (SELECT * FROM dbo.fnSplitString(@strDetailIds,',')) AND intContractCostId IS NOT NULL 
-						GROUP BY intContractCostId
+						GROUP BY intContractCostId,BL.strBillId
 					)						BL	ON	BL.intContractCostId = CC.intContractCostId	
 			WHERE	intSContractDetailId	IN (SELECT * FROM dbo.fnSplitString(@strDetailIds,',')) AND ISNULL(MC.strM2MComputation,'No')	=	'No'
 		)d
-		GROUP BY strItemNo, strContractNumber, strDescription, strConfirmed, dblPrice, strCurrency, dblFX, dblBooked, dblAccounting, dtmContractDate, intSort, strType, dblTranValue
+		GROUP BY strItemNo, strBillId, strDescription, strConfirmed, dblPrice, strCurrency, dblFX, dblBooked, dblAccounting, dtmContractDate, intSort, strType, dblTranValue
 	)t
 	ORDER by intSort,strDescription
 END
