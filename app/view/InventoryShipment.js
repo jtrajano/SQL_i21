@@ -1280,6 +1280,12 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                         source: 'current',
                                                                                         conjunction: 'and',
                                                                                         condition: 'eq'
+                                                                                    },
+                                                                                    {
+                                                                                        column: 'ysnAllowSale',
+                                                                                        value: true,
+                                                                                        conjunction: 'and',
+                                                                                        condition: 'eq'
                                                                                     }
                                                                                 ],
                                                                                 comboBoxConfig: {
