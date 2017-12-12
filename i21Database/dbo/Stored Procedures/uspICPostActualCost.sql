@@ -124,6 +124,7 @@ BEGIN
 					,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
 					,@intForexRateTypeId = @intForexRateTypeId
 					,@dblForexRate = @dblForexRate						
+					,@strActualCostId = @strActualCostId
 			
 			-- Insert the record the the Actual-out table
 			INSERT INTO dbo.tblICInventoryActualCostOut (
@@ -180,7 +181,8 @@ BEGIN
 				,@intCostingMethod = @ACTUALCOST
 				,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 
 				,@intForexRateTypeId = @intForexRateTypeId
-				,@dblForexRate = @dblForexRate						
+				,@dblForexRate = @dblForexRate				
+				,@strActualCostId = @strActualCostId		
 
 		-- Repeat call on uspICIncreaseStockInActual until @dblAddQty is completely distributed to the negative cost Actual buckets or added as a new bucket. 
 		WHILE (ISNULL(@dblAddQty, 0) > 0)
@@ -250,6 +252,7 @@ BEGIN
 							,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
 							,@intForexRateTypeId = @intForexRateTypeId
 							,@dblForexRate = @dblForexRate
+							,@strActualCostId = @strActualCostId
 				END 
 			END
 			
