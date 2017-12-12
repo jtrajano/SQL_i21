@@ -17,7 +17,11 @@
 	entityLocationTerm.strTerm,
 	MAX(custInvoice.dtmDate) AS dtmLastInvoice,
 	MAX(custPayment.dtmDatePaid) AS dtmLastPayment,
-	cust.ysnActive
+	cust.ysnActive,
+	entityToCustomer.strMobile,
+	entityToCustomer.strEmail,
+	LOB.strLineOfBusiness,
+	entityClass.strClass
 FROM tblARCustomer cust
 INNER JOIN tblEMEntity entityToCustomer ON cust.intEntityId = entityToCustomer.intEntityId
 LEFT JOIN tblEMEntity entityToSalesperson ON cust.intSalespersonId = entityToSalesperson.intEntityId
@@ -31,6 +35,10 @@ LEFT JOIN vyuEMEntityType entityType ON cust.intEntityId = entityType.intEntityI
 LEFT JOIN tblSMCompanyLocationPricingLevel entityLocationPricingLevel ON cust.intCompanyLocationPricingLevelId = entityLocationPricingLevel.intCompanyLocationPricingLevelId
 LEFT JOIN tblARInvoice custInvoice ON cust.intEntityId = custInvoice.intEntityCustomerId
 LEFT JOIN tblARPayment custPayment ON cust.intEntityId = custPayment.intEntityCustomerId
+LEFT JOIN tblEMEntityLineOfBusiness entityLOB ON cust.intEntityId = entityLOB.intEntityId
+LEFT JOIN tblSMLineOfBusiness LOB ON entityLOB.intEntityLineOfBusinessId = LOB.intLineOfBusinessId
+LEFT JOIN tblEMEntityClass entityClass ON entityToCustomer.intEntityClassId = entityClass.intEntityClassId
+
 WHERE		
 		entityType.Customer = 1 -- check if entity is a customer
 		OR custInvoice.dtmDate = (SELECT MAX(dtmDate) FROM tblARInvoice x WHERE x.intEntityCustomerId = x.intEntityCustomerId)
@@ -51,5 +59,9 @@ GROUP BY
 	entityToCustomer.dtmOriginationDate,
 	entityLocationTerm.strTerm,
 	cust.ysnActive,
-	entityPhone.strPhone
+	entityPhone.strPhone,
+	entityToCustomer.strMobile,
+	entityToCustomer.strEmail,
+	LOB.strLineOfBusiness,
+	entityClass.strClass
 GO
