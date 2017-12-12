@@ -54,8 +54,16 @@ RETURNS @returntable TABLE
 AS
 BEGIN
 
+DECLARE @ItemVendorId				INT
+		,@ItemLocationId			INT
+		,@ItemCategoryId			INT
+		,@ItemCategory				NVARCHAR(100)
+		,@UOMQuantity				NUMERIC(18,6)
+
 DECLARE	 @Price				NUMERIC(18,6)
 		,@Pricing			NVARCHAR(250)
+		,@ContractPrice		NUMERIC(18,6)
+		,@ContractPricing	NVARCHAR(250)
 		,@Deviation			NUMERIC(18,6)
 		,@TermDiscount		NUMERIC(18,6)
 		,@PricingType		NVARCHAR(50)
@@ -67,6 +75,8 @@ DECLARE	 @Price				NUMERIC(18,6)
 		,@OriginalItemUOMId	INT
 		,@termIdOut			INT = NULL
 		,@SpecialPriceId	INT = NULL
+		,@IsMaxPrice		BIT = 0
+		,@ContractPricingLevelId	INT = NULL
 	SET @OriginalItemUOMId = @ItemUOMId
 
 	SET @TransactionDate = ISNULL(@TransactionDate,GETDATE())
@@ -92,6 +102,8 @@ DECLARE	 @Price				NUMERIC(18,6)
 		SELECT TOP 1
 			 @Price				= dblPrice
 			,@Pricing			= strPricing
+			,@ContractPrice		= dblPrice
+			,@ContractPricing	= strPricing
 			,@Deviation			= dblPrice 
 			,@ContractHeaderId	= intContractHeaderId
 			,@ContractDetailId	= intContractDetailId
@@ -106,6 +118,8 @@ DECLARE	 @Price				NUMERIC(18,6)
 			,@ItemUOMId			= intPriceUOMId 
 			,@PriceUOM			= strPriceUOM
 			,@termIdOut			= intTermId
+			,@IsMaxPrice		= ysnMaxPrice
+			,@ContractPricingLevelId = intCompanyLocationPricingLevelId
 		FROM
 			[dbo].[fnARGetContractPricingDetails](
 				 @ItemId
@@ -124,6 +138,87 @@ DECLARE	 @Price				NUMERIC(18,6)
 			
 		IF(@Price IS NOT NULL)
 		BEGIN
+			IF ISNULL(@IsMaxPrice,0) = 1
+			BEGIN 
+
+				SELECT TOP 1 
+					 @ItemVendorId				= intItemVendorId
+					,@ItemLocationId			= intItemLocationId
+					,@ItemCategoryId			= intItemCategoryId
+					,@ItemCategory				= strItemCategory
+					,@UOMQuantity				= dblUOMQuantity
+				FROM
+					[dbo].[fnARGetLocationItemVendorDetailsForPricing](
+						 @ItemId
+						,@CustomerId
+						,@LocationId
+						,@OriginalItemUOMId
+						,@VendorId
+						,NULL
+						,NULL
+					);		
+	
+				--Item Standard Pricing
+				IF ISNULL(@UOMQuantity,0) = 0
+					SET @UOMQuantity = 1
+				SET @Price = @UOMQuantity *	
+									( 
+										SELECT
+											P.dblSalePrice
+										FROM
+											tblICItemPricing P
+										WHERE
+											P.intItemId = @ItemId
+											AND P.intItemLocationId = @ItemLocationId
+										)
+
+				IF @Price > @ContractPrice
+				BEGIN
+					SET @Pricing = @ContractPricing + '-Max Price'
+				END
+				ELSE
+				BEGIN
+					SET @Price = @ContractPrice
+					SET @Pricing = @ContractPricing
+				END
+
+			END
+
+			IF ISNULL(@ContractPricingLevelId,0) <> 0 AND (ISNULL(@IsMaxPrice,0) = 0 OR @Pricing <> @ContractPricing + '-Max Price')
+			BEGIN 
+				SELECT TOP 1
+					 @Price				= dblPrice
+					,@Pricing			= strPricing
+					,@Deviation			= dblDeviation
+					,@TermDiscount		= dblTermDiscount
+					,@TermDiscountBy	= strTermDiscountBy 
+				FROM
+					[dbo].[fnARGetInventoryItemPricingDetails](
+						 @ItemId
+						,@CustomerId
+						,@LocationId
+						,@OriginalItemUOMId
+						,@TransactionDate
+						,@Quantity
+						,@VendorId
+						,@ContractPricingLevelId
+						,@TermId
+						,0
+						,@CurrencyId
+					);
+
+				IF 'Inventory - Pricing Level' = @Pricing AND @Price > @ContractPrice
+				BEGIN
+					SET @Pricing = @ContractPricing + '-Pricing Level'
+				END
+				ELSE
+				BEGIN
+					SET @Price = @ContractPrice
+					SET @Pricing = @ContractPricing
+				END
+
+			END
+
 			INSERT @returntable(dblPrice, dblTermDiscount, strTermDiscountBy, strPricing, intSubCurrencyId, dblSubCurrencyRate, strSubCurrency, intPriceUOMId, strPriceUOM, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblAvailableQty, ysnUnlimitedQty, strPricingType, intTermId, intSort)
 			SELECT @Price, @TermDiscount, @TermDiscountBy, @Pricing, @SubCurrencyId, @SubCurrencyRate, @SubCurrency, @ItemUOMId, @PriceUOM, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity, @PricingType, @termIdOut, 1
 			IF @GetAllAvailablePricing = 0 RETURN
@@ -330,11 +425,11 @@ DECLARE	 @Price				NUMERIC(18,6)
 			END	
 	END
 	
-	DECLARE @ItemVendorId				INT
-			,@ItemLocationId			INT
-			,@ItemCategoryId			INT
-			,@ItemCategory				NVARCHAR(100)
-			,@UOMQuantity				NUMERIC(18,6)
+	--DECLARE @ItemVendorId				INT
+	--		,@ItemLocationId			INT
+	--		,@ItemCategoryId			INT
+	--		,@ItemCategory				NVARCHAR(100)
+	--		,@UOMQuantity				NUMERIC(18,6)
 
 	SELECT TOP 1 
 		 @ItemVendorId				= intItemVendorId

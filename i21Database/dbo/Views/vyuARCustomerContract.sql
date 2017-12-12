@@ -50,7 +50,9 @@ SELECT intContractHeaderId				= CTCD.intContractHeaderId
 	 , intDestinationWeightId			= CTCH.intWeightId
 	 , strDestinationWeight				= CTCH.strDestinationWeight
 	 , intItemWeightUOMId				= CTCD.intNetWeightUOMId
-	 , strWeightUnitMeasure				= ICUMW.strUnitMeasure	 
+	 , strWeightUnitMeasure				= ICUMW.strUnitMeasure
+	 , ysnMaxPrice						= CTCH.ysnMaxPrice
+	 , intCompanyLocationPricingLevelId = CTCH.intCompanyLocationPricingLevelId
 FROM (
 	SELECT intContractHeaderId
 		 , intContractDetailId
@@ -95,6 +97,8 @@ INNER JOIN (
 		 , CTDG.strDestinationGrade
 		 , CH.intWeightId
 		 , CTDW.strDestinationWeight
+		 , CH.ysnMaxPrice
+		 , CH.intCompanyLocationPricingLevelId
 	FROM dbo.tblCTContractHeader CH WITH (NOLOCK)
 		LEFT OUTER JOIN (
 			SELECT intWeightGradeId		= intWeightGradeId

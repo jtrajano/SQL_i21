@@ -29,6 +29,8 @@ RETURNS @returntable TABLE
 	,ysnUnlimitedQty        BIT
 	,strPricingType			NVARCHAR(50)
 	,intTermId				INT
+	,ysnMaxPrice	        BIT
+	,intCompanyLocationPricingLevelId	INT NULL
 )
 AS
 BEGIN
@@ -44,6 +46,8 @@ DECLARE	 @Price				NUMERIC(18,6)
 		,@SubCurrency		NVARCHAR(40)
 		,@PriceUOM			NVARCHAR(50)
 		,@termId			INT
+		,@IsMaxPrice		BIT = 0
+		,@ContractPricingLevelId	INT = NULL
 
 	IF ISNULL(@ContractDetailId,0) <> 0 AND ISNULL(@ContractHeaderId,0) = 0
 	BEGIN
@@ -67,6 +71,8 @@ DECLARE	 @Price				NUMERIC(18,6)
 		,@ItemUOMId			= ARCC.[intItemUOMId] 
 		,@PriceUOM			= ARCC.[strUnitMeasure] 
 		,@termId			= ARCC.[intTermId]
+		,@IsMaxPrice		= ARCC.[ysnMaxPrice]
+		,@ContractPricingLevelId = ARCC.[intCompanyLocationPricingLevelId]
 	FROM
 		[vyuARCustomerContract] ARCC
 	WHERE
@@ -106,6 +112,8 @@ DECLARE	 @Price				NUMERIC(18,6)
 			,[ysnUnlimitedQty]
 			,[strPricingType]
 			,[intTermId]
+			,[ysnMaxPrice]
+			,[intCompanyLocationPricingLevelId]
 		)
 		SELECT
 			 [dblPrice]				= @Price
@@ -123,6 +131,8 @@ DECLARE	 @Price				NUMERIC(18,6)
 			,[ysnUnlimitedQty]		= @UnlimitedQuantity
 			,[strPricingType]		= @PricingType
 			,[intTermId]			= @termId
+			,[ysnMaxPrice]			= @IsMaxPrice
+			,[intCompanyLocationPricingLevelId] = @ContractPricingLevelId
 
 		RETURN
 	END
@@ -133,6 +143,8 @@ DECLARE	 @Price				NUMERIC(18,6)
 	SET @ContractSeq		= NULL
 	SET @AvailableQuantity  = NULL
 	SET @UnlimitedQuantity  = NULL
+	SET @IsMaxPrice			= 0
+	SET @ContractPricingLevelId = NULL
 			
 	SELECT TOP 1
 		 @Price				= ARCC.[dblCashPrice]
@@ -149,6 +161,8 @@ DECLARE	 @Price				NUMERIC(18,6)
 		,@ItemUOMId			= ARCC.[intItemUOMId] 
 		,@PriceUOM			= ARCC.[strUnitMeasure] 
 		,@termId			= ARCC.[intTermId]
+		,@IsMaxPrice		= ARCC.[ysnMaxPrice]
+		,@ContractPricingLevelId = ARCC.[intCompanyLocationPricingLevelId]
 	FROM
 		[vyuARCustomerContract] ARCC
 	WHERE
@@ -186,6 +200,8 @@ DECLARE	 @Price				NUMERIC(18,6)
 			,[ysnUnlimitedQty]
 			,[strPricingType]
 			,[intTermId]
+			,[ysnMaxPrice]
+			,[intCompanyLocationPricingLevelId]
 		)
 		SELECT
 			 [dblPrice]				= @Price
@@ -203,11 +219,13 @@ DECLARE	 @Price				NUMERIC(18,6)
 			,[ysnUnlimitedQty]		= @UnlimitedQuantity
 			,[strPricingType]		= @PricingType
 			,[intTermId]			= @termId
+			,[ysnMaxPrice]			= @IsMaxPrice
+			,[intCompanyLocationPricingLevelId] = @ContractPricingLevelId
 
 		RETURN
 	END		
 	
-	INSERT @returntable([dblPrice], [strPricing], [intContractHeaderId], [intContractDetailId], [strContractNumber], [intContractSeq], [dblAvailableQty], [ysnUnlimitedQty], [strPricingType], [intTermId])
-	SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity, @PricingType, @termId
+	INSERT @returntable([dblPrice], [strPricing], [intContractHeaderId], [intContractDetailId], [strContractNumber], [intContractSeq], [dblAvailableQty], [ysnUnlimitedQty], [strPricingType], [intTermId], [ysnMaxPrice], [intCompanyLocationPricingLevelId])
+	SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity, @PricingType, @termId, @IsMaxPrice, @ContractPricingLevelId
 	RETURN				
 END
