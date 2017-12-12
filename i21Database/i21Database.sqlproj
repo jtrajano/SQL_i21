@@ -5989,6 +5989,10 @@
     <Build Include="dbo\Tables\tblBBBuyback.sql" />
     <Build Include="dbo\Views\vyuMFStorageUnit.sql" />
     <Build Include="dbo\Views\vyuMFLotSnapshot.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFImportRecipes.sql" />
+    <Build Include="dbo\Tables\tblMFRecipeItemStage.sql" />
+    <Build Include="dbo\Tables\tblMFRecipeSubstituteItemStage.sql" />
+    <Build Include="dbo\Tables\tblMFRecipeStage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
