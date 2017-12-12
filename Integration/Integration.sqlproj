@@ -439,5 +439,6 @@
     <None Include="dbo\Stored Procedures\uspAPImportVendorTaxExemption.sql" />
     <None Include="dbo\Stored Procedures\uspCMImportBanksFromOrigin.sql" />
     <None Include="dbo\Views\vyuSCTicketLVControlView.sql" />
+    <None Include="dbo\Stored Procedures\uspARImportCustomerComments.sql" />
   </ItemGroup>
 </Project>
