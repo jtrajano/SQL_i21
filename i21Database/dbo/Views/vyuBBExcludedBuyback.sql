@@ -1,8 +1,9 @@
-﻿CREATE VIEW [dbo].[vyuBBOpenBuyback]
+﻿CREATE VIEW [dbo].[vyuBBExcludedBuyback]
 AS  
 	SELECT 
-		strVendorNumber = E.strEntityNo
+		M.dtmExcludedDate
 		,strVendorName = E.strName
+		,strVendorNumber = E.strEntityNo
 		,strCustomerLocation = F.strLocationName
 		,strCustomerId = D.strVendorSoldTo
 		,A.strInvoiceNumber
@@ -12,11 +13,9 @@ AS
 		,H.strCategoryCode
 		,J.strUnitMeasure
 		,dblQuantity = B.dblQtyShipped
-		,dblStockQuantity = CAST(dbo.fnICConvertUOMtoStockUnit(B.intItemId,B.intItemUOMId,B.dblQtyShipped) AS NUMERIC(18,6))
-		,strStockUOM = L.strUnitMeasure
 		,B.intConcurrencyId
 		,B.intInvoiceDetailId
-		,C.intEntityId
+		,M.intBuybackExcludedId
 	FROM tblARInvoice A
 	INNER JOIN tblARInvoiceDetail B
 		ON A.intInvoiceId = B.intInvoiceId
@@ -36,16 +35,8 @@ AS
 		ON B.intItemUOMId = I.intItemUOMId
 	INNER JOIN tblICUnitMeasure J
 		ON I.intUnitMeasureId = J.intUnitMeasureId
-	LEFT JOIN tblICItemUOM K
-		ON B.intItemId = K.intItemId
-			AND K.ysnStockUnit = 1
-	LEFT JOIN tblICUnitMeasure L
-		ON K.intUnitMeasureId = L.intUnitMeasureId
-	WHERE B.dblPrice = 0
-		AND NOT EXISTS(SELECT TOP 1 1 FROM tblBBBuybackDetail WHERE intInvoiceDetailId = B.intInvoiceDetailId)
-		AND NOT EXISTS(SELECT TOP 1 1 FROM tblBBBuybackExcluded WHERE intInvoiceDetailId = B.intInvoiceDetailId)
-		AND B.strBuybackSubmitted <> 'E'
-		AND A.ysnPosted = 1
+	INNER JOIN tblBBBuybackExcluded M 
+		ON B.intInvoiceDetailId = M.intInvoiceDetailId
 
 GO
 

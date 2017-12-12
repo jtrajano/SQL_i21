@@ -5956,6 +5956,9 @@
     <Build Include="dbo\Views\vyuCFTopCardLockCustomer.sql" />
     <Build Include="dbo\Stored Procedures\uspCFTopCardLockCustomerReport.sql" />
     <Build Include="dbo\Views\vyuMFLotSnapshot.sql" />
+    <Build Include="dbo\Tables\tblBBBuybackExcluded.sql" />
+    <Build Include="dbo\Views\vyuBBExcludedBuyback.sql" />
+    <Build Include="dbo\Views\vyuBBBuybackDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
