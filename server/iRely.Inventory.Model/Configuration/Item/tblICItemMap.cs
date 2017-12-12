@@ -75,7 +75,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnHandAddIngredient).HasColumnName("ysnHandAddIngredient");
             this.Property(t => t.intMedicationTag).HasColumnName("intMedicationTag");
             this.Property(t => t.intIngredientTag).HasColumnName("intIngredientTag");
-            this.Property(t => t.intHazmatMessage).HasColumnName("intHazmatMessage");
+            this.Property(t => t.intHazmatTag).HasColumnName("intHazmatTag");
             this.Property(t => t.strVolumeRebateGroup).HasColumnName("strVolumeRebateGroup");
             this.Property(t => t.intPhysicalItem).HasColumnName("intPhysicalItem");
             this.Property(t => t.ysnExtendPickTicket).HasColumnName("ysnExtendPickTicket");
@@ -300,10 +300,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strTonnageTaxUOM).HasColumnName("strTonnageTaxUOM");
             this.Property(t => t.strFuelCategory).HasColumnName("strFuelCategory");
             this.Property(t => t.strSecondaryStatus).HasColumnName("strSecondaryStatus");
-            this.Property(t => t.strMedicationTag).HasColumnName("strMedicationTag");
-            this.Property(t => t.strIngredientTag).HasColumnName("strIngredientTag");
             this.Property(t => t.strPhysicalItem).HasColumnName("strPhysicalItem");
-            this.Property(t => t.strHazmatMessage).HasColumnName("strHazmatMessage");
             this.Property(t => t.strPatronageCategory).HasColumnName("strPatronageCategory");
             this.Property(t => t.strPatronageDirect).HasColumnName("strPatronageDirect");
             this.Property(t => t.strGrade).HasColumnName("strGrade");
@@ -318,6 +315,12 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strDimensionUOM).HasColumnName("strDimensionUOM");
             this.Property(t => t.strWeightUOM).HasColumnName("strWeightUOM");
             this.Property(t => t.ysnLotWeightsRequired).HasColumnName("ysnLotWeightsRequired");
+            this.Property(t => t.strMedicationTag).HasColumnName("strMedicationTag");
+            this.Property(t => t.strIngredientTag).HasColumnName("strIngredientTag");
+            this.Property(t => t.strHazmatTag).HasColumnName("strHazmatTag");
+            this.Property(t => t.strMedicationMessage).HasColumnName("strMedicationMessage");
+            this.Property(t => t.strIngredientMessage).HasColumnName("strIngredientMessage");
+            this.Property(t => t.strHazmatMessage).HasColumnName("strHazmatMessage");
         }
     }
 

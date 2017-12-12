@@ -267,15 +267,15 @@ Ext.define('Inventory.view.ItemLocation', {
                                                                     hidden: true
                                                                 },
                                                                 {
-                                                                    dataIndex: 'strVendorId',
-                                                                    dataType: 'string',
-                                                                    text: 'Vendor No',
-                                                                    flex: 1
-                                                                },
-                                                                {
                                                                     dataIndex: 'strName',
                                                                     dataType: 'string',
                                                                     text: 'Vendor Name',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strVendorId',
+                                                                    dataType: 'string',
+                                                                    text: 'Vendor No',
                                                                     flex: 1
                                                                 }
                                                             ],

@@ -256,38 +256,34 @@ Ext.define('Inventory.search.InventoryReceipt', {
         );          
     },    
 
-    onRefreshVoucherClick: function (control) {
-        ic.utils.ajax({
-            url: './Inventory/api/InventoryReceipt/UpdateReceiptVoucher',
-            method: 'post'
-        })
-            .subscribe(
-            function (successResponse) {
-                var jsonData = Ext.decode(successResponse.responseText);
-                var panel = control.up('panel');
-                var grdSearch = panel ? panel.query('#grdSearch') : null;
+    // onRefreshVoucherClick: function (control) {
+    //     ic.utils.ajax({
+    //         url: './Inventory/api/InventoryReceipt/UpdateReceiptVoucher',
+    //         method: 'post'
+    //     })
+    //         .subscribe(
+    //         function (successResponse) {
+    //             var jsonData = Ext.decode(successResponse.responseText);
+    //             var panel = control.up('panel');
 
-                if (grdSearch && grdSearch.length > 0) {
-                    grdSearch.forEach(function (grid) {
-                        if (grid && grid.url == './Inventory/api/InventoryReceipt/SearchReceiptVouchers') {
-                            var store = grid ? grid.getStore() : null;
-                            if (store) {
-                                store.reload({
-                                    callback: function () {
-                                        grid.getView().refresh();
-                                    }
-                                });
-                            }
-                        }
-                    });
-                }
-            }
-            , function (failureResponse) {
-                var jsonData = Ext.decode(failureResponse.responseText);
-                iRely.Functions.showErrorDialog(jsonData.message.statusText);
-            }
-            );
-    },
+    //             if (panel && panel.url == './Inventory/api/InventoryReceipt/SearchReceiptVouchers') {
+    //                 var store = panel ? panel.getStore() : null;
+    //                 if (store) {
+    //                     store.reload({
+    //                         callback: function () {
+    //                             panel.getView().refresh();
+    //                         }
+    //                     });
+    //                 }
+    //             }
+
+    //         }
+    //         , function (failureResponse) {
+    //             var jsonData = Ext.decode(failureResponse.responseText);
+    //             iRely.Functions.showErrorDialog(jsonData.message.statusText);
+    //         }
+    //         );
+    // },
 
     onItemClick: function () {
         iRely.Functions.openScreen('Inventory.view.Item', { action: 'new', viewConfig: { modal: true } });

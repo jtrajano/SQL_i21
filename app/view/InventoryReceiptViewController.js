@@ -2343,14 +2343,18 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             txtNetDiff = win.down('#txtNetDiff'),
             txtLotNetWgt = win.down('#txtLotNetWgt'),
             txtLotGrossWgt = win.down('#txtLotGrossWgt'),
-            itemCount = 0,
-
-            line = { amount: 0, tax: 0, gross: 0, net: 0, lot: { gross: 0, net: 0 } };
+            line = { amount: 0, tax: 0, gross: 0, net: 0, lot: { gross: 0, net: 0 } };        
 
         if (current) {
-            var items = current.tblICInventoryReceiptItems();
-            if (items) {
-                Ext.Array.each(items.data.items, function (item) {
+            var itemCount = current.get('intItemCount');
+
+            var tblICInventoryReceiptItems = current.tblICInventoryReceiptItems();
+            var data = tblICInventoryReceiptItems ? tblICInventoryReceiptItems.data : null;
+            var items = data ? data.items : null; 
+
+            if (items && items.length > 0) {
+                itemCount = 0; 
+                Ext.Array.each(items, function (item) {
                     if (!item.dummy) {
                         itemCount++;                        
                         line.amount += item.get('dblLineTotal');
@@ -2366,6 +2370,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                 });
             }
+            current.set('intItemCount', itemCount);
         }
 
         var totalCharges = this.calculateOtherCharges(win);
@@ -2382,7 +2387,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (txtLotNetWgt) { txtLotNetWgt.setValue(line.lot.net); }
         if (txtGrossDiff) { txtGrossDiff.setValue(line.gross - line.lot.gross); }
         if (txtNetDiff) { txtNetDiff.setValue(line.net - line.lot.net); }
-        current.set('intItemCount', itemCount);
+        
     },
 
     getTaxableAmount: function (quantity, price, currentItemTax, itemTaxes) {
@@ -5339,6 +5344,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     { dataIndex: 'intFreightTermId', text: 'Freight Terms Id', width: 100, dataType: 'numeric', hidden: true, required: true, allowNull: true },
                     { dataIndex: 'strFreightTerm', text: 'Freight Terms', width: 100, dataType: 'string' },
 
+                    { dataIndex: 'intLotId', text: 'Lot Id', dataType: 'numeric', width: 100, dataType: 'numeric', hidden: true, required: true },
+                    { dataIndex: 'strLotNumber', text: 'Lot No', width: 100, dataType: 'string', hidden: true, required: true },
+                    { dataIndex: 'dtmExpiryDate', text: 'Expiry Date', width: 100, dataType: 'date', hidden: true, required: true },
+                    { dataIndex: 'dtmManufacturedDate', text: 'Manufactured Date', width: 100, dataType: 'date', hidden: true, required: true },
+                    { dataIndex: 'strLotAlias', text: 'Lot Alias', width: 100, dataType: 'string', hidden: true, required: true },
+                    { dataIndex: 'intParentLotId', text: 'Parent Lot Id', dataType: 'numeric', width: 100, hidden: true, required: true },
+                    { dataIndex: 'strParentLotNumber', text: 'Parent Lot No', width: 100, dataType: 'string', hidden: true, required: true },
+
                     { dataIndex: 'strUnitMeasure', text: 'Item UOM', width: 100, dataType: 'string', required: true },
                     { dataIndex: 'strOrderUOM', text: 'Order UOM', width: 100, dataType: 'string', required: true },
                     { dataIndex: 'strItemUOM', text: 'Item UOM', width: 100, dataType: 'string', required: true, hidden: true },
@@ -5433,7 +5446,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             if (receiptFreightTerms != addOrderFreightTerms
                                 && (
                                     ReceiptType === 'Purchase Order'
-                                    || (ReceiptType === 'Purchase Contract' && SourceType == 2 ) 
+                                    || (ReceiptType === 'Purchase Contract' && (SourceType == 0 || SourceType == 2) ) 
                                 )
                             ){
                                 freightTermsError.push({
@@ -5632,6 +5645,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     var currentReceiptItemVM = me.getViewModel().data.currentReceiptItem;
 
                                     var newReceiptItemLot = Ext.create('Inventory.model.ReceiptItemLot', {
+                                        intLotId: order.get('intLotId'),
+                                        strLotNumber: order.get('strLotNumber'),
+                                        dtmExpiryDate: order.get('dtmExpiryDate'),
+                                        dtmManufacturedDate: order.get('dtmManufacturedDate'),
+                                        strLotAlias: order.get('strLotAlias'),
+                                        intParentLotId: order.get('intParentLotId'),
+                                        strParentLotNumber: order.get('strParentLotNumber'),
                                         intInventoryReceiptItemId: newReceiptItem.get('intInventoryReceiptItemId'),
                                         intSubLocationId: newReceiptItem.get('intSubLocationId'),
                                         intStorageLocationId: newReceiptItem.get('intStorageLocationId'),

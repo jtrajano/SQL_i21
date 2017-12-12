@@ -45,9 +45,6 @@ namespace iRely.Inventory.Model
         public string strTonnageTaxUOM { get; set; }
         public string strSecondaryStatus { get; set; }
         public string strFuelCategory { get; set; }
-        public string strMedicationTag { get; set; }
-        public string strIngredientTag { get; set; }
-        public string strHazmatMessage { get; set; }
         public string strPhysicalItem { get; set; }
         public string strPatronageCategory { get; set; }
         public string strPatronageDirect { get; set; }
@@ -63,6 +60,12 @@ namespace iRely.Inventory.Model
         public string strDimensionUOM { get; set; }
         public string strWeightUOM { get; set; }
         public bool? ysnLotWeightsRequired { get; set; }
+        public string strMedicationTag { get; set; }
+        public string strIngredientTag { get; set; }
+        public string strHazmatTag { get; set; }
+        public string strMedicationMessage { get; set; }
+        public string strIngredientMessage { get; set; }
+        public string strHazmatMessage { get; set; }
 
         public tblICItem tblICItem { get; set; }        
     }

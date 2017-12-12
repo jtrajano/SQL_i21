@@ -74,7 +74,7 @@ namespace iRely.Inventory.Model
         public bool? ysnHandAddIngredient { get; set; }
         public int? intMedicationTag { get; set; }
         public int? intIngredientTag { get; set; }
-        public int? intHazmatMessage { get; set; }
+        public int? intHazmatTag { get; set; }
         public string strVolumeRebateGroup { get; set; }
         public int? intPhysicalItem { get; set; }
         public bool? ysnExtendPickTicket { get; set; }
@@ -322,24 +322,24 @@ namespace iRely.Inventory.Model
             }
         }
 
-        private string _hazmatMessage;
+        private string _hazmatTag;
 
         [NotMapped]
-        public string strHazmatMessage
+        public string strHazmatTag
         {
             get
             {
-                if (string.IsNullOrEmpty(_hazmatMessage))
+                if (string.IsNullOrEmpty(_hazmatTag))
                     if (vyuICGetCompactItem != null)
-                        return vyuICGetCompactItem.strHazmatMessage;
+                        return vyuICGetCompactItem.strHazmatTag;
                     else
                         return null;
                 else
-                    return _hazmatMessage;
+                    return _hazmatTag;
             }
             set
             {
-                _hazmatMessage = value;
+                _hazmatTag = value;
             }
         }
 
