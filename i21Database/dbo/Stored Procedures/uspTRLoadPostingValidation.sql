@@ -293,6 +293,7 @@ BEGIN TRY
 		WHERE Detail.intLoadDistributionDetailId NOT IN (SELECT DISTINCT intLoadDistributionDetailId FROM vyuTRGetLoadBlendIngredient)
 			AND Header.intLoadHeaderId = @intLoadHeaderId
 			AND Detail.intItemId = @intItemId
+			AND Detail.ysnBlendedItem = 1
 
 		UNION ALL 
 
