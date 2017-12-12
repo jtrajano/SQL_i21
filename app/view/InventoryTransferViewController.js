@@ -570,6 +570,11 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             current.set('intNewLotStatusId', records[0].get('intLotStatusId'));
             current.set('dblItemUnitQty', records[0].get('dblItemUnitQty'));
 
+            current.set('intFromSubLocationId', records[0].get('intSubLocationId'));
+            current.set('intFromStorageLocationId', records[0].get('intStorageLocationId'));
+            current.set('strFromSubLocationName', records[0].get('strSubLocationName'));
+            current.set('strFromStorageLocationName', records[0].get('strStorageLocation'));
+
             var strNewLotStatus = 'Active';
             switch(records[0].get('intLotStatusId')) {
                 case 1:

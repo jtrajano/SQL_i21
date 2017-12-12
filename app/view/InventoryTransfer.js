@@ -876,9 +876,21 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                     hidden: true
                                                                 },
                                                                 {
+                                                                    dataIndex: 'strSubLocationName',
+                                                                    dataType: 'string',
+                                                                    text: 'Storage Location',
+                                                                    hidden: true
+                                                                },
+                                                                {
                                                                     dataIndex: 'intStorageLocationId',
                                                                     dataType: 'numeric',
                                                                     text: 'Storage Unit Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strStorageLocation',
+                                                                    dataType: 'string',
+                                                                    text: 'Storage Unit',
                                                                     hidden: true
                                                                 },
                                                                 {
