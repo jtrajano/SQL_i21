@@ -61,6 +61,7 @@ BEGIN TRY
 		, @ysnItemizeSurcharge BIT
 		, @ReceiptLink NVARCHAR(50)
 		, @BlendedItem BIT = 0
+		, @dblNonBlendedDistributedQuantity DECIMAL(18, 6) = 0
 	
 	SELECT @dtmLoadDateTime = TL.dtmLoadDateTime
 		, @intShipVia = TL.intShipViaId
@@ -310,6 +311,18 @@ BEGIN TRY
 		IF EXISTS (SELECT TOP 1 1 FROM #tmpBlendDistributionItems)
 		BEGIN
 			SELECT @dblDistributedQuantity = SUM(dblQuantity) FROM #tmpBlendDistributionItems
+
+			if (@dblReceivedQuantity > @dblDistributedQuantity)
+			begin
+				set @dblNonBlendedDistributedQuantity = (SELECT sum(Detail.dblUnits)
+														FROM tblTRLoadDistributionDetail Detail
+														LEFT JOIN tblTRLoadDistributionHeader Header ON Header.intLoadDistributionHeaderId = Detail.intLoadDistributionHeaderId
+														WHERE Detail.intLoadDistributionDetailId NOT IN (SELECT DISTINCT intLoadDistributionDetailId FROM vyuTRGetLoadBlendIngredient)
+															AND Header.intLoadHeaderId = @intLoadHeaderId
+															AND Detail.intItemId = @intItemId);
+
+				set @dblReceivedQuantity = @dblReceivedQuantity - isnull(@dblNonBlendedDistributedQuantity,0);
+			end
 
 			IF (@dblReceivedQuantity != @dblDistributedQuantity)
 			BEGIN
