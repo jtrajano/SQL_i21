@@ -535,8 +535,7 @@ WHERE st.intCommodityId  = @intCommodityId
 END
 ELSE
 BEGIN
-
-	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,strLocationName,strItemNo,strCustomer,intCommodityId,intFromCommodityUnitMeasureId,strTruckName,strDriverName,[Storage Due],intCompanyLocationId)                                
+       INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,strLocationName,strItemNo,strCustomer,intCommodityId,intFromCommodityUnitMeasureId,strTruckName,strDriverName,[Storage Due],intCompanyLocationId)                                
        (SELECT 1 intSeqId,'In-House' strSeqHeader,@strDescription strCommodityCode,[strType],dblTotal,strLocationName,strItemNo,strName,intCommodityId,intFromCommodityUnitMeasureId,strTruckName,strDriverName
                      ,[Storage Due],intLocationId 
        FROM(  SELECT  [Storage Type] AS [strType],
@@ -548,7 +547,7 @@ BEGIN
                            WHERE 
                            intCommodityId = @intCommodityId AND 
                            intCompanyLocationId= case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end
-                           AND s.intEntityId= @intVendorId 	AND strOwnedPhysicalStock='Customer'
+                           AND s.intEntityId= @intVendorId and strOwnedPhysicalStock='Customer'
                      UNION all
                            SELECT strType, dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(st.dblNetUnits, 0))  AS dblTotal,
                      cl.strLocationName,i1.strItemNo,@intCommodityId,@intCommodityUnitMeasureId,strTruckName,strDriverName,null [Storage Due], 
@@ -567,7 +566,8 @@ BEGIN
                                   WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
                                                               WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
                                                               ELSE isnull(ysnLicensed, 0) END
-                           ) )
+                                  ) )
+
 
 	INSERT INTO @Final (intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,intCommodityId ,strLocationName,strItemNo,strCustomer,dtmDeliveryDate ,strTicket ,
 					strCustomerReference,strDPAReceiptNo ,dblDiscDue ,[Storage Due] , dtmLastStorageAccrueDate ,strScheduleId,intFromCommodityUnitMeasureId,intCompanyLocationId)
