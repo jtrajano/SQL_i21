@@ -1,7 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuBBOpenBuybackWithRate]
 AS  
-	SELECT 
-		strVendorNumber = E.strEntityNo
+	SELECT
+		intRowId = CAST(ROW_NUMBER() OVER(ORDER BY B.intInvoiceDetailId) AS INT) 
+		,strVendorNumber = E.strEntityNo
 		,strVendorName = E.strName
 		,strCustomerLocation = F.strLocationName
 		,strCustomerId = D.strVendorSoldTo
