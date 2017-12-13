@@ -1,6 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuCTCompactContractDetailView]
 AS
-	SELECT	CD.intContractDetailId
+	SELECT	CD.intContractHeaderId
+			,CD.intContractDetailId
 			,CH.strContractNumber
 			,CH.dtmContractDate
 			,U1.strUnitMeasure	AS	strItemUOM

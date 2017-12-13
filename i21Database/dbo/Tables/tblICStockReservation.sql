@@ -22,6 +22,10 @@
     ,CONSTRAINT [FK_tblICStockReservation_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId])
     ,CONSTRAINT [FK_tblICStockReservation_tblICItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId])
 )
+GO 
+
+CREATE NONCLUSTERED INDEX [IX_tblICStockReservation]
+	ON [dbo].[tblICStockReservation]([intItemId] ASC, [intLocationId] ASC, [intItemLocationId] ASC, [intItemUOMId] ASC, [intLotId] ASC, [intSubLocationId] ASC, [intStorageLocationId] ASC)
 
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
