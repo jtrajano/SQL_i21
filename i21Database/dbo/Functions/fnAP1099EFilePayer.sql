@@ -79,7 +79,37 @@ BEGIN
 				AND A.intYear = @year
 			) tmpAmountCodes
 		) tblAmountCodes
-	END
+	END   
+	ELSE IF @form1099 = 5 --DIV
+	BEGIN
+		SELECT @amountCodes = COALESCE(@amountCodes,'') + strAmountCodes FROM (
+			SELECT DISTINCT(strAmountCodes) strAmountCodes 
+			FROM (
+				SELECT 
+					CASE 
+						WHEN A.dblOrdinaryDividends > 0 THEN '1' --PAGE 53
+						WHEN A.dblQualified > 0 THEN '2' --ELSE '' END,
+						WHEN A.dblCapitalGain > 0 THEN '3' --ELSE '' END,
+						WHEN A.dblUnrecapGain > 0 THEN '6' --ELSE '' END,
+						WHEN A.dblSection1202 > 0 THEN '7' --ELSE '' END,
+						WHEN A.dblCollectibles > 0 THEN '8' --ELSE '' END,
+						WHEN A.dblNonDividends > 0 THEN '9' --ELSE '' END, 
+						WHEN A.dblFITW > 0 THEN 'A' --ELSE '' END,
+						WHEN A.dblInvestment > 0 THEN 'B' --ELSE '' END,
+						WHEN A.dblForeignTax > 0 THEN 'C' --ELSE '' END,
+						WHEN A.dblCash > 0 THEN 'D' --ELSE '' END,
+						WHEN A.dblNonCash > 0 THEN 'E' --ELSE '' END,
+						WHEN A.dblExempt > 0 THEN 'F' --ELSE '' END,
+						WHEN A.dblPrivate > 0 THEN 'G' --ELSE '' END,
+					ELSE '' END AS strAmountCodes
+				FROM dbo.vyuAP1099DIV A
+				WHERE 1 = (CASE WHEN @vendorFrom IS NOT NULL THEN
+							(CASE WHEN A.strVendorId BETWEEN @vendorFrom AND @vendorTo THEN 1 ELSE 0 END)
+						ELSE 1 END)
+				AND A.intYear = @year
+			) tmpAmountCodes
+		) tblAmountCodes
+	END 
 
 	SELECT 
 	@payer =

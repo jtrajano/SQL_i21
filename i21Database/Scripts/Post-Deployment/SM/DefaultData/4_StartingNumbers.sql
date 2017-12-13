@@ -1251,6 +1251,16 @@ GO
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Buybacks Program')
 
+	UNION ALL
+	SELECT	 [intStartingNumberId]	= 130
+			,[strTransactionType]	= N'Buybacks Reimbursement'
+			,[strPrefix]			= N'BBR-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Buybacks'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Buybacks Program')
+
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
 	PRINT N'END INSERT DEFAULT STARTING NUMBERS'

@@ -1,9 +1,10 @@
-﻿CREATE VIEW [dbo].[vyuCFSearchTransaction]
+﻿
+CREATE VIEW [dbo].[vyuCFSearchTransaction]
 AS
 SELECT   cfVehicle.strVehicleNumber, cfTransaction.intOdometer, cfTransaction.intPumpNumber, cfTransaction.strPONumber, cfTransaction.strMiscellaneous,
                          cfTransaction.strDeliveryPickupInd, cfTransaction.intTransactionId, cfTransaction.dtmBillingDate, cfTransaction.intTransTime, cfTransaction.strSequenceNumber,
                          cfSite.strLocationName AS strCompanyLocation, cfTransaction.strTransactionId, cfTransaction.dtmTransactionDate, cfTransaction.strTransactionType,
-                         cfTransaction.dblQuantity, 
+                         cfTransaction.dblQuantity, cfTransaction.ysnOnHold,cfTransaction.dtmCreatedDate,
 
 						  (CASE 
 						 WHEN cfTransaction.strTransactionType = 'Foreign Sale' THEN cfNetwork.intCustomerId

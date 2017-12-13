@@ -14,9 +14,11 @@ DECLARE @ItemsToReserve AS dbo.ItemReservationTableType
 	,@intInventoryShipmentId INT
 	,@strReferenceNo NVARCHAR(50)
 	,@strOrderType NVARCHAR(50)
+	,@strOrderNo nvarchar(50)
 
 SELECT @strOrderType = OT.strOrderType
 	,@strReferenceNo = strReferenceNo
+	,@strOrderNo=strOrderNo 
 FROM tblMFOrderHeader OH
 JOIN tblMFOrderType OT ON OT.intOrderTypeId = OH.intOrderTypeId
 WHERE intOrderHeaderId = @intOrderHeaderId
@@ -25,6 +27,13 @@ SELECT @intInventoryShipmentId = intInventoryShipmentId
 FROM tblICInventoryShipment
 WHERE strShipmentNumber = @strReferenceNo
 
+If not exists(Select 1 from tblMFTask Where intOrderHeaderId =@intOrderHeaderId)
+Begin
+	UPDATE tblMFOrderHeader
+	SET intOrderStatusId = 1
+	WHERE intOrderHeaderId = @intOrderHeaderId
+End
+
 IF @strOrderType = 'INVENTORY SHIPMENT STAGING'
 BEGIN
 	SELECT @intTransactionId = @intInventoryShipmentId
@@ -32,8 +41,8 @@ BEGIN
 	SELECT @strTransactionId = @strReferenceNo
 
 	EXEC dbo.uspICCreateStockReservation @ItemsToReserve
-		,@intTransactionId
-		,@intInventoryTransactionType
+		,@intOrderHeaderId
+		,34
 
 	IF @ysnDeleteAll = 0
 	BEGIN
@@ -56,9 +65,9 @@ BEGIN
 			,intSubLocationId = SL.intSubLocationId
 			,intStorageLocationId = T.intFromStorageLocationId
 			,dblQty = T.dblPickQty
-			,intTransactionId = @intTransactionId
-			,strTransactionId = @strTransactionId
-			,intTransactionTypeId = @intInventoryTransactionType
+			,intTransactionId = @intOrderHeaderId
+			,strTransactionId = @strReferenceNo + ' / ' + @strOrderNo
+			,intTransactionTypeId = 34
 		FROM tblMFTask T
 		JOIN tblICStorageLocation SL ON SL.intStorageLocationId = T.intFromStorageLocationId
 		JOIN tblICItemLocation IL ON IL.intItemId = T.intItemId
@@ -66,7 +75,7 @@ BEGIN
 		WHERE T.intOrderHeaderId = @intOrderHeaderId
 
 		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
-			,@intTransactionId
-			,@intInventoryTransactionType
+			,@intOrderHeaderId
+			,34
 	END
 END

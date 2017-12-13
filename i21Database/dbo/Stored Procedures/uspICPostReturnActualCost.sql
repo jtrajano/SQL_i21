@@ -131,6 +131,7 @@ BEGIN
 						,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
 						,@intForexRateTypeId = @intForexRateTypeId
 						,@dblForexRate = @dblForexRate
+						,@strActualCostId = @strActualCostId
 
 				IF @intReturnValue < 0 GOTO _Exit_With_Error
 

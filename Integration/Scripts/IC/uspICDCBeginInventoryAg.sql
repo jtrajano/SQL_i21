@@ -125,7 +125,7 @@ BEGIN
         ,dblNewQuantity
         ,dblAdjustByQuantity
 		,intItemUOMId
-        ,dblCost
+        ,dblNewCost
 		,intSubLocationId
 		,intStorageLocationId
         ,intConcurrencyId
@@ -138,7 +138,8 @@ BEGIN
 		,agitm_un_on_hand
 		,agitm_un_on_hand
 		,uom.intItemUOMId
-		,case when @strAvgLast = 'A' then agitm_avg_un_cost else agitm_last_un_cost end
+		--,case when @strAvgLast = 'A' then agitm_avg_un_cost else agitm_last_un_cost end
+		,agitm_avg_un_cost
 		,sl.intSubLocationId
 		,sl.intStorageLocationId
 		,1

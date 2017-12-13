@@ -191,10 +191,10 @@
 		END
 	 AS BIT) AS ysnFeesActive
 	 
-	,CT.strContractNumber AS strShowContractNumber
-	,CT.intContractSeq AS intContractDetailSequence
-	,CT.strLocationName AS strContractDetailLocation
-	,CT.intContractHeaderId AS intContractHeaderId
+	,CT.strShowContractNumber
+	,CT.intContractDetailSequence
+	,CT.strContractDetailLocation
+	,CT.intContractHeaderId
 	,CTEntity.strEntityName AS strHaulerName
 	,CTGrade.strWeightGradeDesc AS strGradeOrigDes
 	,CTWeight.strWeightGradeDesc AS strWeightOrigDes
@@ -236,10 +236,58 @@
 	LEFT JOIN tblGRDiscountId GRDiscountId on GRDiscountId.intDiscountId = SCT.intDiscountId
 	LEFT JOIN tblGRStorageScheduleRule GRSSR on GRSSR.intStorageScheduleRuleId = SCT.intStorageScheduleId
 
-	LEFT JOIN vyuCTContractDetailView CT on CT.intContractDetailId = SCT.intContractId
+	LEFT JOIN (
+		SELECT
+			CTH.intContractHeaderId 
+			,CTD.intContractDetailId
+			,CTH.strContractNumber AS strShowContractNumber
+			,CTD.intContractSeq AS intContractDetailSequence
+			,SML.strLocationName AS strContractDetailLocation
+		FROM tblCTContractDetail CTD 
+		LEFT JOIN tblCTContractHeader CTH ON CTH.intContractHeaderId = CTD.intContractHeaderId
+		LEFT JOIN tblSMCompanyLocation SML ON SML.intCompanyLocationId = CTD.intCompanyLocationId
+	) CT ON CT.intContractDetailId = SCT.intContractId
 	LEFT JOIN vyuCTEntity CTEntity on CTEntity.intEntityId = SCT.intHaulerId
 	LEFT JOIN tblCTWeightGrade CTGrade on CTGrade.intWeightGradeId = SCT.intGradeId
 	LEFT JOIN tblCTWeightGrade CTWeight on CTWeight.intWeightGradeId = SCT.intWeightId
 	LEFT JOIN tblCTContractCost CTCost on CTCost.intContractCostId = SCT.intContractCostId
 
-	LEFT JOIN vyuLGLoadDetailView LGD on LGD.intLoadId = SCT.intLoadId
+	LEFT JOIN (SELECT L.intLoadId
+				,L.strLoadNumber
+				,LD.intLoadDetailId
+				,PCD.intContractDetailId AS intPContractDetailId
+				,PCD.intContractHeaderId AS intPContractHeaderId
+				,SCD.intContractDetailId AS intSContractDetailId
+				,SCD.intContractHeaderId AS intSContractHeaderId
+				,EV.intEntityId AS intVendorId
+				,EV.strName AS strVendorName
+				,EC.intEntityId AS intCustomerId
+				,EC.strName AS strCustomerName
+				,LD.intItemId
+				,LD.intItemUOMId
+				,LD.dblGross
+				,LD.dblTare
+				,LD.dblNet
+				,UM.strUnitMeasure AS strItemUOM
+				,WIU.intItemUOMId AS intWeightUOMId
+				,WUM.strUnitMeasure AS strWeightUOM
+				,VEL.intEntityLocationId AS intVendorLocationId
+				,VEL.strLocationName AS strShipFrom
+				,VEL.strLocationName AS strVendorLocationName
+				,CEL.intEntityLocationId AS intCustomerLocationId
+				,CEL.strLocationName AS strShipTo
+				,CEL.strLocationName AS strCustomerLocationName
+			FROM tblLGLoad L
+			JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+			LEFT JOIN tblCTContractDetail PCD ON PCD.intContractDetailId = LD.intPContractDetailId
+			LEFT JOIN tblCTContractDetail SCD ON SCD.intContractDetailId = LD.intSContractDetailId
+			LEFT JOIN tblEMEntity EV ON EV.intEntityId = LD.intVendorEntityId
+			LEFT JOIN tblEMEntityLocation VEL ON VEL.intEntityLocationId = LD.intVendorEntityLocationId
+			LEFT JOIN tblEMEntity EC ON EC.intEntityId = LD.intCustomerEntityId
+			LEFT JOIN tblEMEntityLocation CEL ON CEL.intEntityLocationId = LD.intVendorEntityLocationId
+			LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
+			LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+			LEFT JOIN tblICItemUOM WIU ON WIU.intItemUOMId = LD.intWeightItemUOMId
+			LEFT JOIN tblICUnitMeasure WUM ON WUM.intUnitMeasureId = WIU.intUnitMeasureId
+	) LGD on LGD.intLoadId = SCT.intLoadId
+	

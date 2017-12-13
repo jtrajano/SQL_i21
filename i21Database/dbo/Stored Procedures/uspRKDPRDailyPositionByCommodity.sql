@@ -121,10 +121,7 @@ FROM (
 		,isnull(OpenSalesQty, 0) OpenSalesQty
 		,isnull(OpenPurQty, 0) OpenPurQty
 		,CASE WHEN isnull(@intVendorId, 0) = 0 THEN isnull(invQty, 0) + isnull(dblGrainBalance, 0) + isnull(OnHold, 0) --+ isnull(DP ,0)
-			ELSE isnull(CASE WHEN (
-								SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled
-								FROM tblRKCompanyPreference
-								) = 1 THEN isnull(DPCustomer, 0) ELSE 0 END, 0) + isnull(OnHold, 0) END AS InHouse
+			ELSE isnull(DPCustomer, 0) + isnull(OnHold, 0) END AS InHouse
 	FROM (
 		SELECT DISTINCT c.intCommodityId
 			,strLocationName

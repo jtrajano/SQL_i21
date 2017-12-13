@@ -20,13 +20,13 @@ BEGIN
 	SELECT TOP 1 @HasImportedHistorical = ysnHistoricalJournalImported FROM tblGLCompanyPreferenceOption
 	SELECT TOP 1 @HasImportedFiscalYear = 1 FROM tblGLFiscalYear
 	SELECT
-		@HasStructureBuilt AS HasStructureBuilt,
-		@HasAccountBuilt AS HasAccountBuilt,
-		@HasPrimarySegmentBuilt AS HasPrimarySegmentBuilt,
-		@HasLocationSegmentBuilt AS HasLocationSegmentBuilt,
-		@HasUOMBuilt AS HasUOMBuilt,
-		@HasImportedReallocation AS HasImportedReallocation,
-		@HasImportedHistorical AS HasImportedHistorical,
-		@HasStructureBuilt AS HasStructureBuilt,
-		@HasImportedFiscalYear AS HasImportedFiscalYear
+		ISNULL(@HasStructureBuilt,0) AS HasStructureBuilt,
+		ISNULL(@HasAccountBuilt,0) AS HasAccountBuilt,
+		ISNULL(@HasPrimarySegmentBuilt,0) AS HasPrimarySegmentBuilt,
+		ISNULL(@HasLocationSegmentBuilt,0) AS HasLocationSegmentBuilt,
+		ISNULL(@HasUOMBuilt,0) AS HasUOMBuilt,
+		ISNULL(@HasImportedReallocation,0) AS HasImportedReallocation,
+		ISNULL(@HasImportedHistorical,0) AS HasImportedHistorical,
+		ISNULL(@HasStructureBuilt,0) AS HasStructureBuilt,
+		ISNULL(@HasImportedFiscalYear,0) AS HasImportedFiscalYear
 END

@@ -1,4 +1,6 @@
-﻿CREATE VIEW [dbo].[vyuCFInvoiceDiscount]
+﻿
+
+CREATE VIEW [dbo].[vyuCFInvoiceDiscount]
 AS
 SELECT   
 
@@ -25,7 +27,7 @@ strCustomerName = (
 		WHEN 'Foreign Sale' 
 		THEN cfSiteItem.strName
 
-		ELSE arInv.strCustomerName
+		ELSE cfCardAccount.strName
 	END),
 
 strCustomerNumber = (	
@@ -33,15 +35,16 @@ strCustomerNumber = (
 		WHEN 'Foreign Sale' 
 		THEN cfSiteItem.strEntityNo
 
-		ELSE arInv.strCustomerNumber
+		ELSE cfCardAccount.strCustomerNumber
 	END),
 
 ROUND(ISNULL(cfTransPrice.dblCalculatedAmount, 0), 2) AS dblTotalAmount, smTerm.intTermID, smTerm.strTerm, smTerm.strType, smTerm.dblDiscountEP, 
                          smTerm.intBalanceDue, smTerm.intDiscountDay, smTerm.dblAPR, smTerm.strTermCode, smTerm.ysnAllowEFT, smTerm.intDayofMonthDue, smTerm.intDueNextMonth, 
                          smTerm.dtmDiscountDate, smTerm.dtmDueDate, smTerm.ysnActive, smTerm.ysnEnergyTrac, smTerm.intSort, smTerm.intConcurrencyId, 
-                          cfTrans.intTransactionId, cfCardAccount.strNetwork, arInv.dtmPostDate AS dtmPostedDate, 
+                          cfTrans.intTransactionId, cfCardAccount.strNetwork, cfTrans.dtmPostedDate AS dtmPostedDate, 
                          cfCardAccount.strInvoiceCycle, cfTrans.dtmTransactionDate, cfTrans.strTransactionType, cfCardAccount.intDiscountScheduleId, 
                          ISNULL(emGroup.intCustomerGroupId, 0) AS intCustomerGroupId, emGroup.strGroupName, arInv.intInvoiceId, arInv.strInvoiceNumber, cfTrans.strInvoiceReportNumber, 
+						 cfTrans.dtmCreatedDate,
                          cfTrans.strPrintTimeStamp, cfCardAccount.strEmailDistributionOption, cfCardAccount.strEmail, DATEADD(dd, DATEDIFF(dd, 0, cfTrans.dtmInvoiceDate), 0) AS dtmInvoiceDate, cfTrans.intSalesPersonId,cfDiscount.strDiscountSchedule,ISNULL(cfDiscount.ysnShowOnCFInvoice,0) as ysnShowOnCFInvoice
 
  ,dblQuantity = (

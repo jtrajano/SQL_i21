@@ -31,4 +31,8 @@
 	,strSCAC nvarchar(50) COLLATE Latin1_General_CI_AS
 	,strRouting nvarchar(50) COLLATE Latin1_General_CI_AS
 	,strShipmentMethodOfPayment nvarchar(50) COLLATE Latin1_General_CI_AS
+	,strCustomerCode nvarchar(50) COLLATE Latin1_General_CI_AS
+	,intCustomerCodeType int
+	,ysnNotify bit 
+	,ysnSentEMail bit
 	)

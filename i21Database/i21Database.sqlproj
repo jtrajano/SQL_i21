@@ -5952,6 +5952,17 @@
     <Build Include="dbo\Tables\tblBBBuybackCharge.sql" />
     <Build Include="dbo\Tables\tblBBBuyback.sql" />
     <Build Include="dbo\Views\vyuMFStorageUnit.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionLagging.sql" />
+    <Build Include="dbo\Views\vyuCFTopCardLockCustomer.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFTopCardLockCustomerReport.sql" />
+    <Build Include="dbo\Views\vyuMFLotSnapshot.sql" />
+    <Build Include="dbo\Tables\tblBBBuybackExcluded.sql" />
+    <Build Include="dbo\Views\vyuBBExcludedBuyback.sql" />
+    <Build Include="dbo\Views\vyuBBBuybackDetail.sql" />
+    <Build Include="dbo\Views\vyuBBOpenBuybackWithRate.sql" />
+    <Build Include="dbo\Views\vyuMFGetInventoryReceiptCustomField.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPApplyPrepaid.sql" />
+    <None Include="Scripts\Post-Deployment\IC\23_Update_ActualCostId_On_InventoryTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -6107,6 +6118,9 @@
     <None Include="Scripts\Post-Deployment\MF\CBIPattern.sql" />
     <None Include="Scripts\Post-Deployment\AP\DeleteInvalidBasisAdvanceStaging.sql" />
     <None Include="Scripts\Post-Deployment\MF\10_HandheldMenuItem.sql" />
+    <Build Include="dbo\Functions\fnAP1099EFileDIVPayee.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreate1099DIVFile.sql" />
+    <Build Include="dbo\Functions\fnAP1099EFileEndOfDIV.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

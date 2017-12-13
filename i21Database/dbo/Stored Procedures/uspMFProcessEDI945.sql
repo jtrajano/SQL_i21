@@ -24,6 +24,17 @@ BEGIN
 			FROM tblMFEDI945 EDI945
 			WHERE EDI945.intInventoryShipmentId = InvS.intInventoryShipmentId
 			)
+		UNION
+		SELECT InvS.intInventoryShipmentId
+		,InvS.strReferenceNumber
+		FROM tblICInventoryShipment InvS
+		JOIN vyuMFGetInventoryShipmentCustomField CF on CF.intRecordId =InvS.intInventoryShipmentId
+		WHERE ysnPosted = 1 and CF.ysnEDI=1
+		AND NOT EXISTS (
+			SELECT *
+			FROM tblMFEDI945 EDI945
+			WHERE EDI945.intInventoryShipmentId = InvS.intInventoryShipmentId
+			)
 
 	SELECT 945 AS strTransactionId
 		,'Wholesome Sweetners' AS strCustomerId

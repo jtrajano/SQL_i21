@@ -134,6 +134,7 @@ BEGIN
 
 	
 	DECLARE @ysnCaptiveSite					BIT
+	DECLARE @ysnActive						BIT
 
 
 	
@@ -286,6 +287,18 @@ BEGIN
 		ON cfCard.intAccountId = cfAccount.intAccountId
 		WHERE cfCard.intCardId = @intCardId
 	END
+
+
+	--GET @ysnActive CUSTOMER--
+
+		SELECT TOP 1
+		@ysnActive = ysnActive
+		FROM tblARCustomer
+		WHERE intEntityId = @intCustomerId
+
+	--GET @ysnActive CUSTOMER--
+
+	
 	
 	--GET COMPANY LOCATION ID--
 	SELECT TOP 1
@@ -2402,39 +2415,40 @@ BEGIN
 
 		END
 	ELSE IF @strPriceMethod = 'Network Cost'
-		BEGIN
+	BEGIN
  
-			DECLARE @dblNetworkCostGrossPrice NUMERIC(18,6)
-			SET @dblNetworkCostGrossPrice =  ROUND (Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6) + ISNULL(@dblAdjustments,0) + ROUND((ISNULL(@totalCalculatedTax,0) / @dblQuantity),6),6)
-
-			IF(ISNULL(@ysnForceRounding,0) = 1) 
-			BEGIN
-				SELECT @dblNetworkCostGrossPrice = dbo.fnCFForceRounding(@dblNetworkCostGrossPrice)
-			END
-
-			INSERT INTO @tblTransactionPrice (strTransactionPriceId	
-				,dblOriginalAmount		
-				,dblCalculatedAmount	
-			)
-			VALUES
-			(
-				 'Gross Price'
-				,@dblOriginalPrice
-				,@dblNetworkCostGrossPrice
-			),
-			(
-				 'Net Price'
-				 ,Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6)
-				 ,ROUND(((Round((@dblNetworkCostGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0)) ) / @dblQuantity),6)
-				--,ROUND((((@dblNetworkCostGrossPrice * @dblQuantity) - (@totalCalculatedTaxExempt + @totalCalculatedTax) ) / @dblQuantity),6)
-			),
-			(
-				 'Total Amount'
-				,ROUND(@dblOriginalPrice * @dblQuantity,2)
-				,ROUND((@dblNetworkCostGrossPrice * @dblQuantity),2)
-			)
+	DECLARE @dblNetworkCostGrossPrice NUMERIC(18,6)
+	SET @dblNetworkCostGrossPrice = ISNULL(@TransferCost,0)
+	SET @dblImportFileGrossPrice = ROUND((ISNULL(@TransferCost,0) - (ISNULL(@totalOriginalTax,0) / @dblQuantity)) + ISNULL(@dblAdjustments,0) + (ISNULL(@totalCalculatedTax,0) / @dblQuantity) , 6)
  
-		END
+	IF(ISNULL(@ysnForceRounding,0) = 1) 
+	BEGIN
+	SELECT @dblImportFileGrossPrice = dbo.fnCFForceRounding(@dblImportFileGrossPrice)
+	END
+ 
+	INSERT INTO @tblTransactionPrice (strTransactionPriceId 
+	,dblOriginalAmount 
+	,dblCalculatedAmount 
+	)
+	VALUES
+	(
+	'Gross Price'
+	,@dblNetworkCostGrossPrice
+	,@dblImportFileGrossPrice
+	),
+	(
+	'Net Price'
+	,ROUND((((@dblNetworkCostGrossPrice * @dblQuantity) - (@totalOriginalTax) ) / @dblQuantity),6)
+	--,ROUND((((@dblImportFileGrossPrice * @dblQuantity) - (@totalCalculatedTaxExempt + @totalCalculatedTax) ) / @dblQuantity),6)
+	,ROUND((((@dblImportFileGrossPrice * @dblQuantity) - (ISNULL(@totalCalculatedTax,0))) / @dblQuantity),6)
+	),
+	(
+	'Total Amount'
+	,ROUND(@dblNetworkCostGrossPrice * @dblQuantity,2)
+	,ROUND((@dblImportFileGrossPrice * @dblQuantity),2)
+	)
+ 
+	END
 	ELSE IF (LOWER(@strPriceBasis) = 'local index cost' OR LOWER(@strPriceBasis) = 'remote index cost'  )
 		BEGIN
 
@@ -2707,39 +2721,32 @@ BEGIN
 	DECLARE @dblInventoryCost	NUMERIC(18,6)
 	DECLARE @dblMarginNetPrice	NUMERIC(18,6)
 
-	--SELECT @dblMargin = dblMargin , @dblInventoryCost = dblInventoryCost
-	--FROM [dbo].[fnCFGetTransactionMargin](
-	-- 0
-	--,@intItemId			
-	--,@intLocationId	
-	--,(SELECT TOP 1 dblCalculatedAmount FROM @tblTransactionPrice WHERE strTransactionPriceId = 'Net Price')
-	--,(SELECT TOP 1 dblCalculatedAmount FROM @tblTransactionPrice WHERE strTransactionPriceId = 'Gross Price')
-	--,(select SUM(dblCalculatedTax) FROM @tblCFTransactionTax WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL)
-	--,(select SUM(dblOriginalTax) FROM @tblCFTransactionTax WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL)
-	--,@dblQuantity
-	--,@dblTransferCost	
-	--,@strTransactionType
-	--,@strPriceBasis
-	--)
+	
 	SELECT TOP 1 @dblMarginNetPrice = dblCalculatedAmount 
 	FROM @tblTransactionPrice 
 	WHERE strTransactionPriceId = 'Net Price'
 
-	SELECT TOP 1 @dblInventoryCost = ISNULL(arSalesAnalysisReport.dblUnitCost ,0)
-	FROM tblCFTransaction AS cfTransaction
-			INNER JOIN tblARInvoice AS arInvoice
-			ON cfTransaction.intInvoiceId = arInvoice.intInvoiceId
-			INNER JOIN vyuARSalesAnalysisReport AS arSalesAnalysisReport
-			ON arInvoice.intInvoiceId = arSalesAnalysisReport.intTransactionId
-			WHERE cfTransaction.intTransactionId = @intTransactionId
 
-	
 	IF (@strTransactionType = 'Remote' OR @strTransactionType = 'Extended Remote')
 	BEGIN
 		SET @dblMargin = ISNULL(@dblMarginNetPrice,0) - ISNULL(@dblNetTransferCost,0)
 	END
 	ELSE
 	BEGIN
+		--SELECT TOP 1 @dblInventoryCost = ISNULL(arSalesAnalysisReport.dblUnitCost ,0)
+		--FROM tblCFTransaction AS cfTransaction
+		--		INNER JOIN tblARInvoice AS arInvoice
+		--		ON cfTransaction.intInvoiceId = arInvoice.intInvoiceId
+		--		INNER JOIN vyuARSalesAnalysisReport AS arSalesAnalysisReport
+		--		ON arInvoice.intInvoiceId = arSalesAnalysisReport.intTransactionId
+		--		WHERE cfTransaction.intTransactionId = @intTransactionId
+
+		SELECT
+		@dblInventoryCost = dblAverageCost
+		FROM vyuICGetItemPricing 
+		WHERE intItemId = @intItemId
+		AND intLocationId = @intLocationId
+
 		SET @dblMargin = ISNULL(@dblMarginNetPrice,0) - ISNULL(@dblInventoryCost,0)
 	END
 
@@ -2841,6 +2848,8 @@ BEGIN
 		SET @intVehicleId = NULL
 		IF(@ysnVehicleRequire = 1)
 		BEGIN
+			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Vehicle is required.')
 			SET @ysnInvalid = 1
 		END
 	END
@@ -2874,6 +2883,18 @@ BEGIN
 	---------------------------------------------------
 	--					ZERO PRICING				 --
 	---------------------------------------------------
+
+
+	IF (ISNULL(@ysnActive,0) = 0)
+	BEGIN
+
+			SET @ysnInvalid = 1
+			--UPDATE tblCFTransaction SET ysnInvalid = 1 WHERE intTransactionId = @intTransactionId
+			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Customer is invalid.')
+
+	END
+
 
 	--IF (ISNULL(@ysnInvalid,0) = 0)
 	--BEGIN

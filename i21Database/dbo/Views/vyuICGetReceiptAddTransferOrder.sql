@@ -41,11 +41,19 @@ FROM (
 			, strUnitMeasure			= ItemUnitMeasure.strUnitMeasure
 			, strUnitType				= CAST(NULL AS NVARCHAR(50))
 			-- Gross/Net UOM --------------------------------------------------------
-			, intWeightUOMId			= GrossNetUOM.intItemUOMId
-			, strWeightUOM				= GrossNetUnitMeasure.strUnitMeasure
+			, intWeightUOMId			= ISNULL(GrossNetUOM.intItemUOMId, LotItemUOM.intItemUOMId)
+			, strWeightUOM				= ISNULL(GrossNetUnitMeasure.strUnitMeasure, LotItemUOM.strUnitMeasure)
 			-- Conversion factor --------------------------------------------------------
 			, dblItemUOMConvFactor		= ItemUOM.dblUnitQty
 			, dblWeightUOMConvFactor	= GrossNetUOM.dblUnitQty
+			-- Lot Details -------------------------------------------------------
+			, intLotId					= LotItem.intLotId
+			, strLotNumber				= LotItem.strLotNumber
+			, dtmExpiryDate				= LotItem.dtmExpiryDate
+			, dtmManufacturedDate		= LotItem.dtmManufacturedDate
+			, strLotAlias				= LotItem.strLotAlias
+			, intParentLotId			= LotItem.intParentLotId
+			, strParentLotNumber		= ParentLot.strParentLotNumber
 			-- Cost UOM --------------------------------------------------------
 			, intCostUOMId				= CostUOM.intItemUOMId -- intItemUOMId
 			, strCostUOM				= CostUnitMeasure.strUnitMeasure
@@ -60,8 +68,8 @@ FROM (
 			, ysnSubCurrency			= CAST(0 AS BIT) 
 			, intCurrencyId				= dbo.fnSMGetDefaultCurrency('FUNCTIONAL')  
 			, strSubCurrency			= CAST(NULL AS NVARCHAR(50)) 
-			, dblGross					= CAST(0 AS NUMERIC(38, 20)) -- There is no gross from transfer
-			, dblNet					= CAST(0 AS NUMERIC(38, 20)) -- There is no net from transfer
+			, dblGross					= ISNULL(d.dblGross, 0) -- There is no gross from transfer
+			, dblNet					= ISNULL(d.dblNet, 0) -- There is no net from transfer
 			, ysnBundleItem = CAST(0 AS BIT)
 			, intBundledItemId = CAST(NULL AS INT)
 			, strBundledItemNo = CAST(NULL AS NVARCHAR(50))
@@ -125,6 +133,21 @@ FROM (
 			LEFT JOIN dbo.tblICUnitMeasure CostUnitMeasure
 				ON CostUnitMeasure.intUnitMeasureId = CostUOM.intUnitMeasureId
 			LEFT JOIN dbo.tblSMCompanyLocation Loc ON Loc.intCompanyLocationId = toLocation.intLocationId
+
+			LEFT JOIN dbo.tblICLot LotItem
+				ON item.intItemId = LotItem.intItemId
+				AND ItemUOM.intItemUOMId = LotItem.intItemUOMId
+				AND h.intToLocationId = LotItem.intLocationId
+				AND toSubLocation.intCompanyLocationSubLocationId = LotItem.intSubLocationId
+				AND toStorageLocation.intStorageLocationId= LotItem.intStorageLocationId
+				AND LotItem.intLotStatusId = 1
+				AND toLocation.intItemLocationId = LotItem.intItemLocationId
+			LEFT JOIN dbo.vyuICItemUOM LotItemUOM
+				ON LotItemUOM.intItemUOMId = LotItem.intItemUOMId
+			LEFT JOIN dbo.tblICParentLot ParentLot
+				ON ParentLot.intParentLotId = LotItem.intParentLotId
+				AND ParentLot.intItemId = item.intItemId
+
 	WHERE h.ysnPosted = 1
 		AND h.ysnShipmentRequired = 1
 		AND (h.intStatusId = 1 OR h.intStatusId = 2)

@@ -31,7 +31,10 @@ AS
 	, strItemDescription = Item.strDescription
 	, Item.strLotTracking
 	, Item.intCommodityId
+	, TransferDetail.intLotId
 	, Lot.strLotNumber
+	, ParentLot.intParentLotId
+	, ParentLot.strParentLotNumber
 	, Item.intLifeTime
 	, Item.strLifeTimeType
 	, TransferDetail.intFromSubLocationId
@@ -81,9 +84,9 @@ AS
 								WHEN TransferDetail.intOwnershipType = 2 THEN 'Storage'
 								WHEN TransferDetail.intOwnershipType = 3 THEN 'Consigned Purchase'
 								ELSE NULL END)
-	, Transfer.ysnPosted
+	, [Transfer].ysnPosted
 	, ysnWeights
-	, Transfer.strDescription
+	, [Transfer].strDescription
 	, COALESCE(TransferDetail.strItemType, Item.strType) AS strItemType
 	, TransferDetail.dblGross
 	, TransferDetail.dblNet
@@ -94,8 +97,8 @@ AS
 	, strGrossNetUOMSymbol = COALESCE(GrossNetUOM.strSymbol, GrossNetUOM.strUnitMeasure)
 	, TransferDetail.dblGrossNetUnitQty
 	, TransferDetail.dblItemUnitQty
-	, Transfer.dtmTransferDate
-	, Transfer.ysnShipmentRequired
+	, [Transfer].dtmTransferDate
+	, [Transfer].ysnShipmentRequired
 	, strTransferredBy = e.strName
 	, strFromLocationName = FromLoc.strLocationName
 	, strToLocationName = ToLoc.strLocationName
@@ -128,12 +131,12 @@ AS
 	, TransferDetail.strLotCondition
 	FROM tblICInventoryTransferDetail TransferDetail
 		LEFT JOIN tblICInventoryTransfer [Transfer] ON [Transfer].intInventoryTransferId = TransferDetail.intInventoryTransferId
-		LEFT JOIN tblEMEntity e ON e.intEntityId = Transfer.intTransferredById
+		LEFT JOIN tblEMEntity e ON e.intEntityId = [Transfer].intTransferredById
 		LEFT JOIN tblICItem Item ON Item.intItemId = TransferDetail.intItemId
-		LEFT JOIN tblICStatus stat ON stat.intStatusId = Transfer.intStatusId
+		LEFT JOIN tblICStatus stat ON stat.intStatusId = [Transfer].intStatusId
 		LEFT JOIN vyuICGetLot Lot ON Lot.intLotId = TransferDetail.intLotId
-		LEFT JOIN tblSMCompanyLocation FromLoc ON FromLoc.intCompanyLocationId = Transfer.intFromLocationId
-		LEFT JOIN tblSMCompanyLocation ToLoc ON ToLoc.intCompanyLocationId = Transfer.intToLocationId
+		LEFT JOIN tblSMCompanyLocation FromLoc ON FromLoc.intCompanyLocationId = [Transfer].intFromLocationId
+		LEFT JOIN tblSMCompanyLocation ToLoc ON ToLoc.intCompanyLocationId = [Transfer].intToLocationId
 		LEFT JOIN tblSMCompanyLocationSubLocation FromSubLocation ON FromSubLocation.intCompanyLocationSubLocationId = TransferDetail.intFromSubLocationId
 		LEFT JOIN tblSMCompanyLocationSubLocation ToSubLocation ON ToSubLocation.intCompanyLocationSubLocationId = TransferDetail.intToSubLocationId
 		LEFT JOIN tblICStorageLocation FromStorageLocation ON FromStorageLocation.intStorageLocationId = TransferDetail.intFromStorageLocationId
@@ -148,4 +151,5 @@ AS
 			AND ISNULL(StockFrom.intSubLocationId, 0) = ISNULL(TransferDetail.intFromSubLocationId, 0)
 			AND ISNULL(StockFrom.intStorageLocationId, 0) = ISNULL(TransferDetail.intFromStorageLocationId, 0)
 		LEFT JOIN (tblICInventoryReceiptItem ReceiptItem INNER JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId)
-			ON ReceiptItem.intOrderId = Transfer.intInventoryTransferId AND Receipt.strReceiptType = 'Transfer Order'
+			ON ReceiptItem.intOrderId = [Transfer].intInventoryTransferId AND Receipt.strReceiptType = 'Transfer Order'
+		LEFT JOIN tblICParentLot ParentLot ON Lot.intParentLotId = Lot.intParentLotId AND ParentLot.intItemId = TransferDetail.intItemId
