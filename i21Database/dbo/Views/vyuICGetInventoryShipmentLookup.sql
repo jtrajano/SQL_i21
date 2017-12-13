@@ -1,20 +1,11 @@
 ﻿CREATE VIEW [dbo].[vyuICGetInventoryShipmentLookUp]
-	AS 
+AS 
 
 SELECT 
 
 Shipment.intInventoryShipmentId
-, strOrderType = (CASE WHEN Shipment.intOrderType = 1 THEN 'Sales Contract'
-					WHEN Shipment.intOrderType = 2 THEN 'Sales Order'
-					WHEN Shipment.intOrderType = 3 THEN 'Transfer Order'
-					WHEN Shipment.intOrderType = 4 THEN 'Direct'
-				END) COLLATE Latin1_General_CI_AS
-, strSourceType = (CASE WHEN Shipment.intSourceType = 1 THEN 'Scale'
-					WHEN Shipment.intSourceType = 2 THEN 'Inbound Shipment'
-					WHEN Shipment.intSourceType = 3 THEN 'Pick Lot'
-					WHEN Shipment.intSourceType = 0 THEN 'None'
-				END) COLLATE Latin1_General_CI_AS
-
+, strOrderType = OrderTypes.strOrderType
+, strSourceType = SourceTypes.strSourceType
 -- Ship From Name and Address
 , strShipFromLocation = ShipFromLocation.strLocationName
 , strShipFromStreet = ShipFromLocation.strAddress
@@ -100,6 +91,17 @@ FROM
 		FROM	tblLGWarehouseInstructionHeader 
 		WHERE	tblLGWarehouseInstructionHeader.intInventoryShipmentId = Shipment.intInventoryShipmentId
 	) WarehouseInstruction
-
-
-GO
+	LEFT JOIN (
+		SELECT	intOrderType = 1,  strOrderType = 'Sales Contract' COLLATE Latin1_General_CI_AS
+		UNION ALL SELECT intOrderType = 2,  strOrderType = 'Sales Order' COLLATE Latin1_General_CI_AS
+		UNION ALL SELECT intOrderType = 3,  strOrderType = 'Transfer Order' COLLATE Latin1_General_CI_AS
+		UNION ALL SELECT intOrderType = 4,  strOrderType = 'Direct' COLLATE Latin1_General_CI_AS
+	) OrderTypes
+		ON OrderTypes.intOrderType = Shipment.intOrderType
+	LEFT JOIN (
+		SELECT	intSourceType = 1,  strSourceType = 'Scale' COLLATE Latin1_General_CI_AS
+		UNION ALL SELECT intSourceType = 2,  strSourceType = 'Inbound Shipment' COLLATE Latin1_General_CI_AS
+		UNION ALL SELECT intSourceType = 3,  strSourceType = 'Pick Lot' COLLATE Latin1_General_CI_AS
+		UNION ALL SELECT intSourceType = 0,  strSourceType = 'None' COLLATE Latin1_General_CI_AS
+	) SourceTypes
+		ON SourceTypes.intSourceType = Shipment.intSourceType
