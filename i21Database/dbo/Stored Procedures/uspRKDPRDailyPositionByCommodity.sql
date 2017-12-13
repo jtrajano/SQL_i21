@@ -112,8 +112,10 @@ FROM (
 					SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled
 					FROM tblRKCompanyPreference
 					) = 1 THEN  0 ELSE -isnull(DP ,0)  END
-					+isnull(dblPriceRisk1,0)+isnull(dblPriceRisk2,0)
+					+
+					isnull(dblOptionNetHedge,0)+isnull(dblFutNetHedge,0)
 		AS CashExposure
+
 		,isnull(ReceiptProductQty, 0) ReceiptProductQty
 		,isnull(OpenPurchasesQty, 0) OpenPurchasesQty
 		,isnull(OpenSalesQty, 0) OpenSalesQty
@@ -300,17 +302,11 @@ FROM (
 						)
 					) t
 				) AS OnHold
-				,(select sum(intOpenContract) intOpenContract
-				 from(SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc1.intCommodityUnitMeasureId,um.intCommodityUnitMeasureId, intOpenContract*dblContractSize) as intOpenContract 
-				from vyuRKGetOpenContract otr  
-				JOIN tblRKFutOptTransaction t on otr.intFutOptTransactionId=t.intFutOptTransactionId
-				JOIN tblRKFutureMarket m on t.intFutureMarketId=m.intFutureMarketId
-				JOIN tblICCommodityUnitMeasure cuc1 on t.intCommodityId=cuc1.intCommodityId and m.intUnitMeasureId=cuc1.intUnitMeasureId
-				WHERE t.intCommodityId=c.intCommodityId
-				AND t.intLocationId =  cl.intCompanyLocationId
-				 )t) dblPriceRisk2 
-		
-			,(select sum(dblNoOfContract) from (SELECT 
+
+
+				,(	
+			select sum(dblNetHedge) dblNetHedge from (			
+				SELECT 
 				CASE WHEN ft.strBuySell = 'Buy' THEN (
 						ft.intNoOfContract - isnull((SELECT sum(intMatchQty) FROM tblRKOptionsMatchPnS l
 						WHERE l.intLFutOptTransactionId = ft.intFutOptTransactionId	), 0)
@@ -322,17 +318,47 @@ FROM (
 						WHERE intFutureMarketId = ft.intFutureMarketId AND mm.intOptionMonthId = ft.intOptionMonthId AND mm.intTypeId = CASE WHEN ft.strOptionType = 'Put' THEN 1 ELSE 2 END
 						AND ft.dblStrike = mm.dblStrike
 						ORDER BY dtmPriceDate DESC
-				),0)*m.dblContractSize AS dblNoOfContract
-			FROM tblRKFutOptTransaction ft
-			INNER JOIN tblRKFutureMarket m ON ft.intFutureMarketId = m.intFutureMarketId
-			INNER JOIN tblSMCompanyLocation l on ft.intLocationId=l.intCompanyLocationId
-			INNER JOIN tblICCommodity ic on ft.intCommodityId=ic.intCommodityId
-			INNER JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
-			INNER JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 2
-			INNER JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = ft.intFutureMonthId AND fm.intFutureMarketId = ft.intFutureMarketId AND fm.ysnExpired = 0
-			WHERE ft.intCommodityId = c.intCommodityId AND intLocationId =  cl.intCompanyLocationId AND intFutOptTransactionId NOT IN (
-					SELECT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned	) AND intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExpired))t)
-		AS dblPriceRisk1
+				),0)*m.dblContractSize AS dblNetHedge
+	FROM tblRKFutOptTransaction ft
+	INNER JOIN tblRKFutureMarket m ON ft.intFutureMarketId = m.intFutureMarketId
+						AND ft.intLocationId  IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
+				WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+								WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+								ELSE isnull(ysnLicensed, 0) END
+				)
+	INNER JOIN tblSMCompanyLocation l on ft.intLocationId=l.intCompanyLocationId
+	INNER JOIN tblICCommodity ic on ft.intCommodityId=ic.intCommodityId
+	INNER JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
+	INNER JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 2
+	INNER JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = ft.intFutureMonthId AND fm.intFutureMarketId = ft.intFutureMarketId AND fm.ysnExpired = 0
+	WHERE ft.intCommodityId = c.intCommodityId AND intLocationId = cl.intCompanyLocationId
+	and  ft.intEntityId= CASE WHEN ISNULL(@intVendorId,0)=0 then ft.intEntityId else @intVendorId end  
+	AND intFutOptTransactionId NOT IN (
+			SELECT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned	) AND intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExpired)
+	)t) dblOptionNetHedge
+	,(	select sum(dblNetHedge) dblFutNetHedge from (	
+    SELECT 
+		dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc1.intCommodityUnitMeasureId,um.intCommodityUnitMeasureId,  
+		case when f.strBuySell = 'Buy' then ISNULL(intOpenContract, 0) else ISNULL(intOpenContract, 0) end
+			 * 	 dblContractSize) AS dblNetHedge
+		FROM vyuRKGetOpenContract oc
+			  JOIN tblRKFutOptTransaction f on oc.intFutOptTransactionId=f.intFutOptTransactionId and oc.intOpenContract <> 0
+		INNER JOIN tblRKFutureMarket m ON f.intFutureMarketId = m.intFutureMarketId
+					AND f.intLocationId  IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
+				WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+								WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+								ELSE isnull(ysnLicensed, 0) END
+				)
+		INNER JOIN tblICCommodity ic on f.intCommodityId=ic.intCommodityId
+		JOIN tblICCommodityUnitMeasure cuc1 on f.intCommodityId=cuc1.intCommodityId and m.intUnitMeasureId=cuc1.intUnitMeasureId
+		INNER JOIN tblRKFuturesMonth fm on fm.intFutureMonthId=f.intFutureMonthId
+		INNER JOIN tblSMCompanyLocation l on f.intLocationId=l.intCompanyLocationId
+		INNER JOIN tblRKBrokerageAccount ba ON f.intBrokerageAccountId = ba.intBrokerageAccountId
+		INNER JOIN tblEMEntity e ON e.intEntityId = f.intEntityId AND f.intInstrumentTypeId = 1
+		WHERE ic.intCommodityId =c.intCommodityId
+			AND f.intLocationId= cl.intCompanyLocationId		
+			and  f.intEntityId= CASE WHEN ISNULL(@intVendorId,0)=0 then f.intEntityId else @intVendorId end
+	)t 	) dblFutNetHedge
 
 		FROM tblSMCompanyLocation cl
 		JOIN tblICItemLocation lo ON lo.intLocationId = cl.intCompanyLocationId and  lo.intLocationId  IN (

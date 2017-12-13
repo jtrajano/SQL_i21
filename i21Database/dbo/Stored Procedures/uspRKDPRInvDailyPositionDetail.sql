@@ -510,15 +510,16 @@ SELECT 15 AS intSeqId,'Company Titled Stock',@strDescription
 
 		) t
 
-INSERT INTO @Final (intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,intCommodityId,strLocationName,strItemNo,strTicket,dtmTicketDateTime,strCustomerReference, strDistributionOption,intFromCommodityUnitMeasureId,strTruckName,strDriverName,intCompanyLocationId)
+INSERT INTO @Final (intSeqId,strSeqHeader,strCommodityCode,strType,strCustomer , dblTotal,intCommodityId,strLocationName,strItemNo,strTicket,dtmTicketDateTime,strCustomerReference, strDistributionOption,intFromCommodityUnitMeasureId,strTruckName,strDriverName,intCompanyLocationId)
 select * from (
-SELECT 16 intSeqId,'On-Hold' strSeqHeader,@strDescription strCommodityCode,'On-Hold' strType,
+SELECT 16 intSeqId,'On-Hold' strSeqHeader,@strDescription strCommodityCode,'On-Hold' strType,e.strName,
 dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(st.dblNetUnits, 0))  AS dblTotal,
 st.intCommodityId,cl.strLocationName,i1.strItemNo,strTicketNumber strTicket,st.dtmTicketDateTime,strCustomerReference,
 		strDistributionOption,@intCommodityUnitMeasureId AS intCommodityUnitMeasureId
 		,strTruckName
 		,strDriverName, st.intProcessingLocationId intCompanyLocationId
 FROM tblSCTicket st
+join tblEMEntity e on e.intEntityId= st.intEntityId
 JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=st.intProcessingLocationId and st.strDistributionOption='HLD'
 JOIN tblICItem i1 on i1.intItemId=st.intItemId
 JOIN tblICItemUOM iuom on i1.intItemId=iuom.intItemId and ysnStockUnit=1
