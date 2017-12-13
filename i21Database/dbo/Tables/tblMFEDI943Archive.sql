@@ -25,8 +25,12 @@
 	,strUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS, 
 	dtmCreated datetime  
 	,strStatus nvarchar(50) COLLATE Latin1_General_CI_AS
-		,intInventoryReceiptId int
-		,strFileName nvarchar(MAX) COLLATE Latin1_General_CI_AS
-		,strParentLotNumber nvarchar(50) COLLATE Latin1_General_CI_AS
-		,intLineNumber int
+	,intInventoryReceiptId int
+	,strFileName nvarchar(MAX) COLLATE Latin1_General_CI_AS
+	,strParentLotNumber nvarchar(50) COLLATE Latin1_General_CI_AS
+	,intLineNumber int
+	,strWarehouseCode nvarchar(50) COLLATE Latin1_General_CI_AS
+	,intWarehouseCodeType int
+	,ysnNotify bit
+	,ysnSentEMail bit
 	)
