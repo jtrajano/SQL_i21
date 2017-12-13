@@ -41,8 +41,8 @@ FROM (
 			, strUnitMeasure			= ItemUnitMeasure.strUnitMeasure
 			, strUnitType				= CAST(NULL AS NVARCHAR(50))
 			-- Gross/Net UOM --------------------------------------------------------
-			, intWeightUOMId			= GrossNetUOM.intItemUOMId
-			, strWeightUOM				= GrossNetUnitMeasure.strUnitMeasure
+			, intWeightUOMId			= ISNULL(GrossNetUOM.intItemUOMId, LotItemUOM.intItemUOMId)
+			, strWeightUOM				= ISNULL(GrossNetUnitMeasure.strUnitMeasure, LotItemUOM.strUnitMeasure)
 			-- Conversion factor --------------------------------------------------------
 			, dblItemUOMConvFactor		= ItemUOM.dblUnitQty
 			, dblWeightUOMConvFactor	= GrossNetUOM.dblUnitQty
@@ -68,8 +68,8 @@ FROM (
 			, ysnSubCurrency			= CAST(0 AS BIT) 
 			, intCurrencyId				= dbo.fnSMGetDefaultCurrency('FUNCTIONAL')  
 			, strSubCurrency			= CAST(NULL AS NVARCHAR(50)) 
-			, dblGross					= CAST(0 AS NUMERIC(38, 20)) -- There is no gross from transfer
-			, dblNet					= CAST(0 AS NUMERIC(38, 20)) -- There is no net from transfer
+			, dblGross					= ISNULL(d.dblGross, 0) -- There is no gross from transfer
+			, dblNet					= ISNULL(d.dblNet, 0) -- There is no net from transfer
 			, ysnBundleItem = CAST(0 AS BIT)
 			, intBundledItemId = CAST(NULL AS INT)
 			, strBundledItemNo = CAST(NULL AS NVARCHAR(50))
@@ -142,6 +142,8 @@ FROM (
 				AND toStorageLocation.intStorageLocationId= LotItem.intStorageLocationId
 				AND LotItem.intLotStatusId = 1
 				AND toLocation.intItemLocationId = LotItem.intItemLocationId
+			LEFT JOIN dbo.vyuICItemUOM LotItemUOM
+				ON LotItemUOM.intItemUOMId = LotItem.intItemUOMId
 			LEFT JOIN dbo.tblICParentLot ParentLot
 				ON ParentLot.intParentLotId = LotItem.intParentLotId
 				AND ParentLot.intItemId = item.intItemId
