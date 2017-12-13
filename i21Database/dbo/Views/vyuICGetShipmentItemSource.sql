@@ -127,30 +127,39 @@ FROM	tblICInventoryShipmentItem ShipmentItem LEFT JOIN tblICInventoryShipment Sh
 			ON SODetail.intSalesOrderId = ShipmentItem.intOrderId 
 			AND SODetail.intSalesOrderDetailId = ShipmentItem.intLineNo
 			AND Shipment.intOrderType = 2
-		LEFT JOIN vyuCTContractDetailView ContractView
+			AND 1 = 0 
+		LEFT JOIN vyuCTCompactContractDetailView ContractView -- Resolution. 
 			ON ContractView.intContractDetailId = ShipmentItem.intLineNo
 			AND ContractView.intContractHeaderId = ShipmentItem.intOrderId
 			AND Shipment.intOrderType = 1
-			-- AND Shipment.intSourceType IN (0, 1) 
-		LEFT JOIN vyuTRGetLoadReceipt TransportView
-			ON TransportView.intLoadReceiptId = ShipmentItem.intSourceId
-			AND Shipment.intSourceType = 3
+			AND 1 = 0 
+			
+		--LEFT JOIN vyuTRGetLoadReceipt TransportView
+		--	ON TransportView.intLoadReceiptId = ShipmentItem.intSourceId
+		--	AND Shipment.intSourceType = 3
+		--	 -- AND 1 = 0 -- DELAY
+
 		LEFT JOIN tblSCTicket ScaleView
 			ON ScaleView.intTicketId = ShipmentItem.intSourceId
 			AND Shipment.intSourceType = 1
+			  AND 1 = 0 
 		LEFT JOIN tblSCDeliverySheet DeliverySheetView
 			ON DeliverySheetView.intDeliverySheetId = ShipmentItem.intSourceId
 			AND Shipment.intSourceType = 4
+			  AND 1 = 0 
 		LEFT JOIN tblLGShipment LogisticView
 			ON LogisticView.intShipmentId = ShipmentItem.intSourceId
 			AND Shipment.intSourceType = 2
-		LEFT JOIN tblLGPickLotHeader PickLot
+			  AND 1 = 0 
+		LEFT JOIN (
+			tblLGPickLotHeader PickLot LEFT JOIN tblLGPickLotDetail PickLotDetail
+				ON PickLotDetail.intPickLotHeaderId = PickLot.intPickLotHeaderId			
+			LEFT JOIN tblLGAllocationDetail PickLotAllocation
+				ON PickLotAllocation.intAllocationDetailId = PickLotDetail.intAllocationDetailId
+			LEFT JOIN tblICUnitMeasure PickLotUOM
+				ON PickLotUOM.intUnitMeasureId = PickLotDetail.intSaleUnitMeasureId
+		)
 			ON PickLot.intPickLotHeaderId = ShipmentItem.intSourceId
-			 AND Shipment.intSourceType = 3
-		LEFT JOIN tblLGPickLotDetail PickLotDetail
-			ON PickLotDetail.intPickLotHeaderId = PickLot.intPickLotHeaderId
-		LEFT JOIN tblLGAllocationDetail PickLotAllocation
-			ON PickLotAllocation.intAllocationDetailId = PickLotDetail.intAllocationDetailId
-		LEFT JOIN tblICUnitMeasure PickLotUOM
-			ON PickLotUOM.intUnitMeasureId = PickLotDetail.intSaleUnitMeasureId
+			 AND Shipment.intSourceType = 3		
+			 AND 1 = 0 
 GO

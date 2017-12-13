@@ -52,6 +52,10 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICInventoryShipmentItem_tblCTWeightGrade_Weights] FOREIGN KEY ([intDestinationWeightId]) REFERENCES [tblCTWeightGrade]([intWeightGradeId]),
 		CONSTRAINT [FK_tblICInventoryShipmentItem_tblSMCurrencyExchangeRateType] FOREIGN KEY ([intForexRateTypeId]) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId])
 	)
+	GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryShipmentItem]
+		ON [dbo].[tblICInventoryShipmentItem]([intInventoryShipmentId] ASC)
 
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
