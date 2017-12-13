@@ -469,7 +469,7 @@ BEGIN TRY
 						,1
 
 					INSERT INTO tblARCustomer (
-						intEntityCustomerId
+						intEntityId
 						,strCustomerNumber
 						,strType
 						,strPricing

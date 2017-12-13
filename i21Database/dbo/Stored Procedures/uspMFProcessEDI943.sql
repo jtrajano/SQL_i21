@@ -469,7 +469,7 @@ BEGIN TRY
 						,1
 
 					INSERT INTO tblAPVendor (
-						intEntityVendorId
+						intEntityId
 						,strVendorPayToId
 						,intVendorType
 						,strVendorId
