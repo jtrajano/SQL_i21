@@ -5961,6 +5961,7 @@
     <Build Include="dbo\Views\vyuBBBuybackDetail.sql" />
     <Build Include="dbo\Views\vyuBBOpenBuybackWithRate.sql" />
     <Build Include="dbo\Views\vyuMFGetInventoryReceiptCustomField.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPApplyPrepaid.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
