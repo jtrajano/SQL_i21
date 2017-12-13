@@ -11,6 +11,7 @@ AS
 		,strCategoryCode = F.strCategoryCode
 		,strUnitMeasure = H.strUnitMeasure
 		,strChargeItemDescription = M.strDescription
+		,intChargedItemId = M.intItemId
 	FROM tblBBBuybackDetail A
 	INNER JOIN tblARInvoiceDetail B
 		ON A.intInvoiceDetailId = B.intInvoiceDetailId
