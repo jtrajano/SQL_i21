@@ -36,7 +36,7 @@ LEFT JOIN tblSMCompanyLocationPricingLevel entityLocationPricingLevel ON cust.in
 LEFT JOIN tblARInvoice custInvoice ON cust.intEntityId = custInvoice.intEntityCustomerId
 LEFT JOIN tblARPayment custPayment ON cust.intEntityId = custPayment.intEntityCustomerId
 LEFT JOIN tblEMEntityLineOfBusiness entityLOB ON cust.intEntityId = entityLOB.intEntityId
-LEFT JOIN tblSMLineOfBusiness LOB ON entityLOB.intEntityLineOfBusinessId = LOB.intLineOfBusinessId
+LEFT JOIN tblSMLineOfBusiness LOB ON entityLOB.intLineOfBusinessId = LOB.intLineOfBusinessId
 LEFT JOIN tblEMEntityClass entityClass ON entityToCustomer.intEntityClassId = entityClass.intEntityClassId
 
 WHERE		
