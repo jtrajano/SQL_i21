@@ -30,5 +30,8 @@
 	,strSCAC nvarchar(50) COLLATE Latin1_General_CI_AS
 	,strRouting nvarchar(50) COLLATE Latin1_General_CI_AS
 	,strShipmentMethodOfPayment nvarchar(50) COLLATE Latin1_General_CI_AS
-
+	,strCustomerCode nvarchar(50) COLLATE Latin1_General_CI_AS
+	,intCustomerCodeType int
+	,ysnNotify bit CONSTRAINT [DF_tblMFEDI940_ysnNotify] DEFAULT 0
+	,ysnSentEMail bit
 	)

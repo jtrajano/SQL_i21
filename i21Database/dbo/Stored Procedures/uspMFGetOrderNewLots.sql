@@ -28,6 +28,9 @@ BEGIN TRY
 	FROM tblMFOrderManifest OM
 	WHERE OM.intOrderHeaderId = @intOrderHeaderId
 
+	If @strLotId is null
+	Select @strLotId=''
+
 	SET @SQL = 'SELECT * FROM (
 	SELECT DENSE_RANK() OVER (
 	ORDER BY L.intLotId DESC
