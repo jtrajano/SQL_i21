@@ -38,35 +38,40 @@ gacom_load_cnt_under_un,gacom_load_cnt_over_un,1 ConcurrencyId
  ----=====================================STEP 2=========================================
 --insert uoms into Commodity UOM 
 --find the uoms in i21 which matches the commodity code in origin and i21
---Bushels has to be set as stock unit and unit qty has to be set to 1
+--Bushels or Ton has to be set as stock unit and unit qty has to be set to 1
 
 insert into tblICCommodityUnitMeasure 
 (intCommodityId, intUnitMeasureId, dblUnitQty, ysnStockUnit, ysnDefault, intConcurrencyId)
-select ic.intCommodityId, iu.intUnitMeasureId, 1, 
-case iu.strUnitMeasure when 'BU' then 1 else 0 end 'ysnStockUnit', case iu.strUnitMeasure when 'BU' then 1 else 0 end 'ysnDefault', 1 'intConcurrencyId' 
+select ic.intCommodityId, iu.intUnitMeasureId, 1 dblUnitQty, 
+case iu.strUnitMeasure when 'BU' then 1 When 'TON' then 1 else 0 end 'ysnStockUnit', 
+case iu.strUnitMeasure when 'BU' then 1 When 'TON' then 1 else 0 end 'ysnDefault', 
+1 'intConcurrencyId' 
 from gacommst oc 
 join tblICCommodity ic on rtrim(oc.gacom_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS = ic.strCommodityCode COLLATE SQL_Latin1_General_CP1_CS_AS
-join tblICUnitMeasure iu on iu.strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oc.gacom_un_desc) COLLATE SQL_Latin1_General_CP1_CS_AS
+join tblICUnitMeasure iu on upper(iu.strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS = upper(rtrim(oc.gacom_un_desc)) COLLATE SQL_Latin1_General_CP1_CS_AS
 
 ----=====================================STEP 3===========================
 --origin stores the wgt factor to lb. There is no lb uom in origin setup for this. In i21 lb needs to be setup as a uom to receive commodity in lb
 --insert an record in commodity uom for lb for each commodity
---convert the unit qty to match converstion to stock unit bu
+--convert the unit qty to match converstion to stock unit bu or ton
 
 insert into tblICCommodityUnitMeasure 
 (intCommodityId, intUnitMeasureId, dblUnitQty, ysnStockUnit, ysnDefault, intConcurrencyId)
-select ic.intCommodityId, (select top 1 intUnitMeasureId from tblICUnitMeasure where strUnitMeasure = 'lb') lbunit , 1/gacom_un_wgt unitqty, 
+select ic.intCommodityId, (select top 1 intUnitMeasureId from tblICUnitMeasure where strUnitMeasure = 'lb') lbunit , 
+Case iu.strUnitMeasure When 'BU' then 1/gacom_un_wgt When 'TON' then 1/gacom_un_wgt else gacom_un_wgt end unitqty, 
 0 'ysnStockUnit', 0 'ysnDefault', 1 'intConcurrencyId' 
 from gacommst oc 
 join tblICCommodity ic on rtrim(oc.gacom_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS = ic.strCommodityCode COLLATE SQL_Latin1_General_CP1_CS_AS
-join tblICUnitMeasure iu on iu.strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS = oc.gacom_un_desc COLLATE SQL_Latin1_General_CP1_CS_AS
+join tblICUnitMeasure iu on upper(iu.strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS = upper(rtrim(oc.gacom_un_desc)) COLLATE SQL_Latin1_General_CP1_CS_AS
 
 
 ----====================================STEP 4======================================
---Setup a category for each commodity. Category is required for i21
+--For grain only business, Setup a category for each commodity. Category is required for i21
+--for grain & ag business, setup a category for commodites which does not have an associated ag item
 insert into tblICCategory (strCategoryCode, strDescription, strInventoryType, intCostingMethod, strInventoryTracking, intConcurrencyId)
 select rtrim(gacom_com_cd), rtrim(gacom_desc), 'Inventory' strInventoryType, 1 CostingMethod, 'Item Level' InventoryTracking, 1 intConcurrencyId
-from gacommst
+from gacommst oc
+where NOT EXISTS (select agitm_no from agitmmst where agitm_ga_com_cd = oc.gacom_com_cd)
 
 
 ----===============================STEP 5===================================
@@ -74,7 +79,8 @@ from gacommst
 --moved to another sp
 
 ----=========================STEP 6=================================
-----insert an item for each commodity. i21 needs an item for the commodities.
+--for grain only business, insert an item for each commodity. i21 needs an item for the commodities.
+--for grain & ag business, insert an item for commodites which does not have an associated ag item
 insert into tblICItem 
 (strItemNo, strDescription, strType, strInventoryTracking, strLotTracking, intCommodityId, intCategoryId, strStatus,
 intLifeTime)
@@ -115,13 +121,12 @@ left join tblSMCompanyLocation L on 1 = 1
 where U.ysnStockUnit = 1)
 
 
-
-
 ----====================================STEP 9======================================
---Setup a category for each commodity discount. 
+--Setup a grain discount category for each commodity if grain discounts are setup
 insert into tblICCategory (strCategoryCode, strDescription, strInventoryType, intCostingMethod, strInventoryTracking, intConcurrencyId)
 select rtrim(gacom_com_cd)+'Discount', rtrim(gacom_desc)+' Discount', 'Other Charge' strInventoryType, 1 CostingMethod, 'Item Level' InventoryTracking, 1 intConcurrencyId
-from gacommst
+from gacommst oc
+join gacdcmst od on rtrim(oc.gacom_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(od.gacdc_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS
 
 ----====================================STEP 10======================================
 --convert discount codes as other charge items from discount code table. 
