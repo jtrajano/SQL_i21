@@ -411,6 +411,10 @@ BEGIN TRY
 			,34
 	END
 
+		UPDATE tblMFOrderHeader
+		SET intOrderStatusId = 2
+		WHERE intOrderHeaderId = @intOrderHeaderId
+
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION
 

@@ -5960,6 +5960,7 @@
     <Build Include="dbo\Views\vyuBBExcludedBuyback.sql" />
     <Build Include="dbo\Views\vyuBBBuybackDetail.sql" />
     <Build Include="dbo\Views\vyuBBOpenBuybackWithRate.sql" />
+    <Build Include="dbo\Views\vyuMFGetInventoryReceiptCustomField.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
