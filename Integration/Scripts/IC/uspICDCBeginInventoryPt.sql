@@ -111,7 +111,7 @@ BEGIN
 				,dblNewQuantity
 				,dblAdjustByQuantity
 				,intItemUOMId
-				,dblCost
+				,dblNewCost
 				,intSubLocationId
 				,intStorageLocationId
 				,intConcurrencyId
@@ -124,7 +124,8 @@ BEGIN
 				,ptitm_on_hand
 				,ptitm_on_hand
 				,uom.intItemUOMId
-				,case when @strAvgLast = 'A' then ptitm_avg_cost else ptitm_cost1 end
+				--,case when @strAvgLast = 'A' then ptitm_avg_cost else ptitm_cost1 end
+				,ptitm_avg_cost 
 				,(select sl.intSubLocationId 
 					from 
 						tblICStorageLocation sl 
