@@ -26,6 +26,8 @@ namespace iRely.Inventory.Model
         public bool? ysnCheckoffTax { get; set; }
         public string strTaxCode { get; set; }
         public int? intSort { get; set; }
+        public decimal? dblQty { get; set; }
+        public decimal? dblCost { get; set; }
 
         public tblICInventoryReceiptItem tblICInventoryReceiptItem { get; set; }
     }

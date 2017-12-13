@@ -52,6 +52,8 @@ Ext.define('Inventory.model.ReceiptChargeTax', {
         { name: 'ysnTaxOnly', type: 'boolean' },
         { name: 'ysnCheckoffTax', type: 'boolean' },
         { name: 'strTaxCode', type: 'string' },
+        { name: 'dblQty', type: 'float' },
+        { name: 'dblCost', type: 'float' },               
         { name: 'intSort', type: 'int', allowNull: true }
     ]
 });

@@ -17,9 +17,10 @@ namespace iRely.Inventory.BusinessLayer
         }
         #endregion
 
-        public async Task<SearchResult> GetReceiptItemTaxView(GetParameter param)
+        public async Task<SearchResult> GetReceiptItemTaxView(GetParameter param, int ReceiptItemId)
         {
             var query = _db.GetQuery<vyuICGetInventoryReceiptItemTax>()
+                .Where(p => p.intInventoryReceiptItemId == ReceiptItemId)
                 .Filter(param, true);
             var data = await query.ExecuteProjection(param, "intInventoryReceiptItemTaxId").ToListAsync(param.cancellationToken);
 

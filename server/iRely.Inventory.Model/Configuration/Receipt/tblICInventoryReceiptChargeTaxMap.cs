@@ -33,7 +33,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnCheckoffTax).HasColumnName("ysnCheckoffTax");
             this.Property(t => t.strTaxCode).HasColumnName("strTaxCode");
             this.Property(t => t.intSort).HasColumnName("intSort");
-
+            this.Property(t => t.dblQty).HasColumnName("dblQty");
+            this.Property(t => t.dblCost).HasColumnName("dblCost");
         }
     }
 }
