@@ -5994,6 +5994,7 @@
     <Build Include="dbo\Tables\tblMFRecipeSubstituteItemStage.sql" />
     <Build Include="dbo\Tables\tblMFRecipeStage.sql" />
     <Build Include="dbo\Views\vyuMFGetInventoryReceiptCustomField.sql" />
+    <Build Include="Scripts\Post-Deployment\AR\DefaultData\33_InvoiceAccrualEntries.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
