@@ -330,7 +330,7 @@ BEGIN TRY
 			FROM tblLGLoadDetail
 			WHERE intLoadId = @intLoadId
 			)
-		,CV.ysnPrice
+		,0
 		,NULL
 		,CV.intCurrencyId
 		,(
@@ -382,7 +382,7 @@ BEGIN TRY
 			FROM tblLGLoadDetail
 			WHERE intLoadId = @intLoadId
 			)
-		,1
+		,0
 		,NULL
 		,L.intCurrencyId
 		,(
