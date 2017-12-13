@@ -122,18 +122,14 @@ BEGIN
 		,strReceiptNumber = INVRCPT.strReceiptNumber
 		,intInventoryReceiptItemId = ISNULL(INVRCPTITEM.intInventoryReceiptItemId, 0) 
 		,intContractDetailId = ISNULL(BillDtl.intContractDetailId, 0) 
-		,RecordId = Bill.strBillId
-		,strSourceType = CASE 
-							  WHEN INVRCPT.intSourceType = 4 THEN 'Settle Storage'
-							  WHEN INVRCPT.intSourceType = 3 THEN 'Transport'
-							  WHEN INVRCPT.intSourceType = 2 THEN 'Inboud Shipment'
-							  WHEN INVRCPT.intSourceType = 1 THEN 'Scale'
-							  ELSE 'None'
-						 END 
+		,RecordId = Bill.strBillId		
+        ,lblSplitNumber = CASE WHEN EM.strSplitNumber IS NOT NULL THEN 'Split' ELSE NULL END
 		,strSplitNumber = EM.strSplitNumber
-		,strCustomerReference = SC.strCustomerReference 
+		,strCustomerReference = SC.strCustomerReference
+		,lblTicketComment = CASE WHEN ISNULL(SC.strTicketComment,'')<>'' THEN 'Comments' ELSE NULL END 
 		,strTicketComment = SC.strTicketComment
 		,strDiscountReadings =[dbo].[fnGRGetDiscountCodeReadings](SC.intTicketId,'Scale')
+		,lblFarmField = CASE WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' ELSE NULL END 
 		,strFarmField = EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber 
 		,dtmDate = Bill.dtmDate
 		,dblGrossWeight = ISNULL(SC.dblGrossWeight, 0) 		
@@ -146,7 +142,22 @@ BEGIN
 		,dblTotal = BillDtl.dblTotal
 		,dblTax = BillDtl.dblTax
 		,dblNetTotal = BillDtl.dblTotal+ BillDtl.dblTax
-		,strContractNumber = CNTRCT.strContractNumber
+		,lblSourceType = CASE 
+							 WHEN ISNULL(BillDtl.intContractHeaderId,0)= 0 THEN 'Dist Type'
+		                     ELSE 'Contract'
+		                 END							  								 
+		,strSourceType = CASE 
+							 WHEN ISNULL(BillDtl.intContractHeaderId,0)= 0 THEN
+								 CASE 
+									WHEN INVRCPT.intSourceType = 4 THEN 'Settle Storage'
+									WHEN INVRCPT.intSourceType = 3 THEN 'Transport'
+									WHEN INVRCPT.intSourceType = 2 THEN 'Inboud Shipment'
+									WHEN INVRCPT.intSourceType = 1 THEN 'Scale'
+									ELSE 'None'
+								END
+                             ELSE CNTRCT.strContractNumber
+                         END							  								 
+		--,strContractNumber = CNTRCT.strContractNumber
 		,TotalDiscount = ISNULL(BillByReceipt.dblTotal, 0) 
 		,NetDue = BillDtl.dblTotal + BillDtl.dblTax + ISNULL(BillByReceipt.dblTotal, 0)
 		,strId = Bill.strBillId
@@ -301,18 +312,14 @@ BEGIN
 		,strReceiptNumber = '' 
 		,intInventoryReceiptItemId=0
 		,intContractDetailId = ISNULL(BillDtl.intContractDetailId, 0) 
-		,RecordId = Bill.strBillId 
-		,strSourceType= CASE 
-							WHEN StrgHstry.intTransactionTypeId = 4 THEN 'Settle Storage'
-							WHEN StrgHstry.intTransactionTypeId = 3 THEN 'Transport'
-							WHEN StrgHstry.intTransactionTypeId = 2 THEN 'Inboud Shipment'
-							WHEN StrgHstry.intTransactionTypeId = 1 THEN 'Scale'
-							ELSE 'None'
-						END 
-		,strSplitNumber = '' 
+		,RecordId = Bill.strBillId
+        ,lblSplitNumber = NULL						 
+		,strSplitNumber = NULL 
 		,strCustomerReference = SC.strCustomerReference
+		,lblTicketComment = CASE WHEN ISNULL(SC.strTicketComment,'')<>'' THEN 'Comments' ELSE NULL END
 		,strTicketComment = SC.strTicketComment
 		,strDiscountReadings =[dbo].[fnGRGetDiscountCodeReadings](CS.intCustomerStorageId,'Storage')
+		,lblFarmField = CASE WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' ELSE NULL END 
 		,strFarmField = EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber
 		,dtmDate = Bill.dtmDate		
 		,dblGrossWeight = ISNULL(SC.dblGrossWeight, 0)		
@@ -324,8 +331,23 @@ BEGIN
 		,strUnitMeasure = UOM.strUnitMeasure
 		,dblTotal = BillDtl.dblTotal
 		,dblTax = BillDtl.dblTax
-		,dblNetTotal = BillDtl.dblTotal + BillDtl.dblTax 
-		,strContractNumber = CNTRCT.strContractNumber
+		,dblNetTotal = BillDtl.dblTotal + BillDtl.dblTax
+		,lblSourceType = CASE 
+							 WHEN ISNULL(BillDtl.intContractHeaderId,0)= 0 THEN 'Dist Type'
+		                     ELSE 'Contract'
+		                 END
+        ,strSourceType = CASE 
+							 WHEN ISNULL(BillDtl.intContractHeaderId,0)= 0 THEN
+								 CASE 
+									WHEN StrgHstry.intTransactionTypeId = 4 THEN 'Settle Storage'
+									WHEN StrgHstry.intTransactionTypeId = 3 THEN 'Transport'
+									WHEN StrgHstry.intTransactionTypeId = 2 THEN 'Inboud Shipment'
+									WHEN StrgHstry.intTransactionTypeId = 1 THEN 'Scale'
+									ELSE 'None'
+								END
+		                     ELSE CNTRCT.strContractNumber
+		                 END
+		--,strContractNumber = CNTRCT.strContractNumber
 		,TotalDiscount =  ISNULL(tblOtherCharge.dblTotal, 0)
 		,NetDue = BillDtl.dblTotal + ISNULL(tblTax.dblTax, 0) + ISNULL(tblOtherCharge.dblTotal, 0) 
 		,strId = Bill.strBillId 
@@ -467,18 +489,14 @@ BEGIN
 		,strReceiptNumber = '' 
 		,intInventoryReceiptItemId=0
 		,intContractDetailId = ISNULL(BillDtl.intContractDetailId, 0) 
-		,RecordId = Bill.strBillId 
-		,strSourceType= CASE 
-							WHEN StrgHstry.intTransactionTypeId = 4 THEN 'Settle Storage'
-							WHEN StrgHstry.intTransactionTypeId = 3 THEN 'Transport'
-							WHEN StrgHstry.intTransactionTypeId = 2 THEN 'Inboud Shipment'
-							WHEN StrgHstry.intTransactionTypeId = 1 THEN 'Scale'
-							ELSE 'None'
-						END 
-		,strSplitNumber = '' 
+		,RecordId = Bill.strBillId
+		,lblSplitNumber = NULL
+		,strSplitNumber = NULL 
 		,strCustomerReference = ''
-		,strTicketComment = ''
+		,lblTicketComment = NULL
+		,strTicketComment = NULL
 		,strDiscountReadings =[dbo].[fnGRGetDiscountCodeReadings](CS.intCustomerStorageId,'Storage')
+		,lblFarmField = CASE WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' ELSE NULL END 
 		,strFarmField = EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber		
 		,dtmDate = Bill.dtmDate		
 		,dblGrossWeight = ISNULL(SC.dblGrossWeight, 0)		
@@ -490,8 +508,23 @@ BEGIN
 		,strUnitMeasure = UOM.strUnitMeasure
 		,dblTotal = BillDtl.dblTotal
 		,dblTax = BillDtl.dblTax
-		,dblNetTotal = BillDtl.dblTotal + BillDtl.dblTax 
-		,strContractNumber = CNTRCT.strContractNumber
+		,dblNetTotal = BillDtl.dblTotal + BillDtl.dblTax
+		,lblSourceType = CASE 
+							 WHEN ISNULL(BillDtl.intContractHeaderId,0)= 0 THEN 'Dist Type'
+		                     ELSE 'Contract'
+		                 END
+        ,strSourceType = CASE 
+							 WHEN ISNULL(BillDtl.intContractHeaderId,0)= 0 THEN
+								 CASE 
+									WHEN StrgHstry.intTransactionTypeId = 4 THEN 'Settle Storage'
+									WHEN StrgHstry.intTransactionTypeId = 3 THEN 'Transport'
+									WHEN StrgHstry.intTransactionTypeId = 2 THEN 'Inboud Shipment'
+									WHEN StrgHstry.intTransactionTypeId = 1 THEN 'Scale'
+									ELSE 'None'
+								END
+		                     ELSE CNTRCT.strContractNumber
+		                 END							  								 						 							  								  
+		--,strContractNumber = CNTRCT.strContractNumber
 		,TotalDiscount =  ISNULL(tblOtherCharge.dblTotal, 0)
 		,NetDue = BillDtl.dblTotal + ISNULL(tblTax.dblTax, 0) + ISNULL(tblOtherCharge.dblTotal, 0) 
 		,strId = Bill.strBillId 
@@ -643,17 +676,13 @@ BEGIN
 		,intInventoryReceiptItemId = ISNULL(INVRCPTITEM.intInventoryReceiptItemId, 0) 
 		,intContractDetailId = ISNULL(BillDtl.intContractDetailId, 0) 
 		,RecordId = Bill.strBillId
-		,strSourceType = CASE 
-							  WHEN INVRCPT.intSourceType = 4 THEN 'Settle Storage'
-							  WHEN INVRCPT.intSourceType = 3 THEN 'Transport'
-							  WHEN INVRCPT.intSourceType = 2 THEN 'Inboud Shipment'
-							  WHEN INVRCPT.intSourceType = 1 THEN 'Scale'
-							  ELSE 'None'
-						 END 
+		,lblSplitNumber = CASE WHEN EM.strSplitNumber IS NOT NULL THEN 'Split' ELSE NULL END		 
 		,strSplitNumber = EM.strSplitNumber
-		,strCustomerReference = SC.strCustomerReference 
+		,strCustomerReference = SC.strCustomerReference
+		,lblTicketComment = CASE WHEN ISNULL(SC.strTicketComment,'')<>'' THEN 'Comments' ELSE NULL END  
 		,strTicketComment = SC.strTicketComment
 		,strDiscountReadings =[dbo].[fnGRGetDiscountCodeReadings](SC.intTicketId,'Scale')
+		,lblFarmField = CASE WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' ELSE NULL END
 		,strFarmField = EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber 
 		,dtmDate = Bill.dtmDate
 		,dblGrossWeight = ISNULL(SC.dblGrossWeight, 0) 		
@@ -666,7 +695,22 @@ BEGIN
 		,dblTotal = BillDtl.dblTotal
 		,dblTax = BillDtl.dblTax
 		,dblNetTotal = BillDtl.dblTotal+ BillDtl.dblTax
-		,strContractNumber = CNTRCT.strContractNumber
+		,lblSourceType = CASE 
+							 WHEN ISNULL(BillDtl.intContractHeaderId,0)= 0 THEN 'Dist Type'
+		                     ELSE 'Contract'
+		                 END							  								 
+		,strSourceType = CASE 
+							 WHEN ISNULL(BillDtl.intContractHeaderId,0)= 0 THEN
+								 CASE 
+									WHEN INVRCPT.intSourceType = 4 THEN 'Settle Storage'
+									WHEN INVRCPT.intSourceType = 3 THEN 'Transport'
+									WHEN INVRCPT.intSourceType = 2 THEN 'Inboud Shipment'
+									WHEN INVRCPT.intSourceType = 1 THEN 'Scale'
+									ELSE 'None'
+								END
+		                     ELSE CNTRCT.strContractNumber
+		                 END
+		--,strContractNumber = CNTRCT.strContractNumber
 		,TotalDiscount = ISNULL(BillByReceipt.dblTotal, 0) 
 		,NetDue = BillDtl.dblTotal + BillDtl.dblTax + ISNULL(BillByReceipt.dblTotal, 0)
 		,strId = Bill.strBillId
@@ -818,18 +862,14 @@ BEGIN
 		,strReceiptNumber = ''
 		,intInventoryReceiptItemId = 0 
 		,intContractDetailId = ISNULL(BillDtl.intContractDetailId, 0) 
-		,RecordId = Bill.strBillId 
-		,strSourceType = CASE 
-							WHEN StrgHstry.intTransactionTypeId = 4 THEN 'Settle Storage'
-							WHEN StrgHstry.intTransactionTypeId = 3 THEN 'Transport'
-							WHEN StrgHstry.intTransactionTypeId = 2 THEN 'Inboud Shipment'
-							WHEN StrgHstry.intTransactionTypeId = 1 THEN 'Scale'
-							ELSE 'None'
-						 END 
-		,strSplitNumber = '' 
+		,RecordId = Bill.strBillId 		 
+		,lblSplitNumber = NULL						 
+		,strSplitNumber = NULL 
 		,strCustomerReference = SC.strCustomerReference
+		,lblTicketComment = CASE WHEN ISNULL(SC.strTicketComment,'')<>'' THEN 'Comments' ELSE NULL END
 		,strTicketComment = SC.strTicketComment
 		,strDiscountReadings =[dbo].[fnGRGetDiscountCodeReadings](CS.intCustomerStorageId,'Storage')
+		,lblFarmField = CASE WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' ELSE NULL END 
 		,strFarmField = EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber
 		,dtmDate = Bill.dtmDate
 		,dblGrossWeight = ISNULL(SC.dblGrossWeight, 0)
@@ -841,8 +881,23 @@ BEGIN
 		,strUnitMeasure = UOM.strUnitMeasure
 		,dblTotal = BillDtl.dblTotal
 		,dblTax = BillDtl.dblTax
-		,dblNetTotal = BillDtl.dblTotal+ BillDtl.dblTax 
-		,strContractNumber = CNTRCT.strContractNumber
+		,dblNetTotal = BillDtl.dblTotal+ BillDtl.dblTax
+		,lblSourceType = CASE 
+							 WHEN ISNULL(BillDtl.intContractHeaderId,0)= 0 THEN 'Dist Type'
+		                     ELSE 'Contract'
+		                 END
+		,strSourceType = CASE 
+							 WHEN ISNULL(BillDtl.intContractHeaderId,0)= 0 THEN
+								 CASE 
+									WHEN StrgHstry.intTransactionTypeId = 4 THEN 'Settle Storage'
+									WHEN StrgHstry.intTransactionTypeId = 3 THEN 'Transport'
+									WHEN StrgHstry.intTransactionTypeId = 2 THEN 'Inboud Shipment'
+									WHEN StrgHstry.intTransactionTypeId = 1 THEN 'Scale'
+									ELSE 'None'
+								END
+		                     ELSE CNTRCT.strContractNumber
+		                 END 
+		--,strContractNumber = CNTRCT.strContractNumber
 		,TotalDiscount = ISNULL(tblOtherCharge.dblTotal, 0) 
 		,NetDue = BillDtl.dblTotal + ISNULL(tblTax.dblTax, 0) + ISNULL(tblOtherCharge.dblTotal, 0)
 		,strId = Bill.strBillId
@@ -981,18 +1036,14 @@ BEGIN
 		,strReceiptNumber = ''
 		,intInventoryReceiptItemId = 0 
 		,intContractDetailId = ISNULL(BillDtl.intContractDetailId, 0) 
-		,RecordId = Bill.strBillId 
-		,strSourceType = CASE 
-							WHEN StrgHstry.intTransactionTypeId = 4 THEN 'Settle Storage'
-							WHEN StrgHstry.intTransactionTypeId = 3 THEN 'Transport'
-							WHEN StrgHstry.intTransactionTypeId = 2 THEN 'Inboud Shipment'
-							WHEN StrgHstry.intTransactionTypeId = 1 THEN 'Scale'
-							ELSE 'None'
-						 END 
-		,strSplitNumber = '' 
+		,RecordId = Bill.strBillId 		 
+		,lblSplitNumber = NULL
+		,strSplitNumber = NULL 
 		,strCustomerReference = ''
-		,strTicketComment = ''
-		,strDiscountReadings =[dbo].[fnGRGetDiscountCodeReadings](CS.intCustomerStorageId,'Storage')		
+		,lblTicketComment = NULL
+		,strTicketComment = NULL
+		,strDiscountReadings =[dbo].[fnGRGetDiscountCodeReadings](CS.intCustomerStorageId,'Storage')
+		,lblFarmField = CASE WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' ELSE NULL END 		
 		,strFarmField = EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber
 		,dtmDate = Bill.dtmDate
 		,dblGrossWeight = ISNULL(SC.dblGrossWeight, 0)
@@ -1004,8 +1055,23 @@ BEGIN
 		,strUnitMeasure = UOM.strUnitMeasure
 		,dblTotal = BillDtl.dblTotal
 		,dblTax = BillDtl.dblTax
-		,dblNetTotal = BillDtl.dblTotal+ BillDtl.dblTax 
-		,strContractNumber = CNTRCT.strContractNumber
+		,dblNetTotal = BillDtl.dblTotal+ BillDtl.dblTax
+		,lblSourceType = CASE 
+							 WHEN ISNULL(BillDtl.intContractHeaderId,0)= 0 THEN 'Dist Type'
+		                     ELSE 'Contract'
+		                 END
+		,strSourceType = CASE 
+							 WHEN ISNULL(BillDtl.intContractHeaderId,0)= 0 THEN
+								 CASE 
+									WHEN StrgHstry.intTransactionTypeId = 4 THEN 'Settle Storage'
+									WHEN StrgHstry.intTransactionTypeId = 3 THEN 'Transport'
+									WHEN StrgHstry.intTransactionTypeId = 2 THEN 'Inboud Shipment'
+									WHEN StrgHstry.intTransactionTypeId = 1 THEN 'Scale'
+									ELSE 'None'
+								END
+		                     ELSE CNTRCT.strContractNumber
+		                 END
+		--,strContractNumber = CNTRCT.strContractNumber
 		,TotalDiscount = ISNULL(tblOtherCharge.dblTotal, 0) 
 		,NetDue = BillDtl.dblTotal + ISNULL(tblTax.dblTax, 0) + ISNULL(tblOtherCharge.dblTotal, 0)
 		,strId = Bill.strBillId
