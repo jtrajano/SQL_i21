@@ -27,4 +27,8 @@
 	,strFileName nvarchar(MAX) COLLATE Latin1_General_CI_AS
 	,strParentLotNumber nvarchar(50) COLLATE Latin1_General_CI_AS
 	,intLineNumber int
+	,strWarehouseCode nvarchar(50) COLLATE Latin1_General_CI_AS
+	,intWarehouseCodeType int
+	,ysnNotify bit CONSTRAINT [DF_tblMFEDI943_ysnNotify] DEFAULT 0
+	,ysnSentEMail bit CONSTRAINT [DF_tblMFEDI943_ysnSentEMail] DEFAULT 0
 	)

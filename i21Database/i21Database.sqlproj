@@ -5993,6 +5993,7 @@
     <Build Include="dbo\Tables\tblMFRecipeItemStage.sql" />
     <Build Include="dbo\Tables\tblMFRecipeSubstituteItemStage.sql" />
     <Build Include="dbo\Tables\tblMFRecipeStage.sql" />
+    <Build Include="dbo\Views\vyuMFGetInventoryReceiptCustomField.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
