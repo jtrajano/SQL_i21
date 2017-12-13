@@ -50,13 +50,13 @@ IF @transCount = 0 BEGIN TRANSACTION
 	FROM tblAPBill A
 	INNER JOIN @voucherIds B ON A.intBillId = B.intId
 	OUTER APPLY (
-		SELECT SUM(dblAmountApplied) dblTotalPrePayment FROM tblAPAppliedPrepaidAndDebit C WHERE C.intBillId = B.intId
+		SELECT SUM(dblAmountApplied) dblTotalPrePayment FROM tblAPAppliedPrepaidAndDebit C WHERE C.intBillId = B.intId AND C.ysnApplied = 1
 	) PrePayment
 	WHERE PrePayment.dblTotalPrePayment IS NOT NULL
 
 	--UPDATE HEADER TOTAL
 	UPDATE A
-		SET A.dblTotal = CAST((DetailTotal.dblTotal + DetailTotal.dblTotalTax) - A.dblPayment AS DECIMAL(18,2)) 
+		SET A.dblTotal = CAST((DetailTotal.dblTotal + DetailTotal.dblTotalTax) AS DECIMAL(18,2)) 
 		,A.dblSubtotal = CAST((DetailTotal.dblTotal)  AS DECIMAL(18,2)) 
 		,A.dblAmountDue =  CAST((DetailTotal.dblTotal + DetailTotal.dblTotalTax) - A.dblPayment AS DECIMAL(18,2)) 
 		,A.dblTax = DetailTotal.dblTotalTax
