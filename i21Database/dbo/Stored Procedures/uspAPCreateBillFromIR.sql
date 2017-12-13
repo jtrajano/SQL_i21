@@ -505,6 +505,7 @@ BEGIN
 			[dblFranchiseWeight],
 			[intContractDetailId],
 			[intContractHeaderId],
+			[intContractSeq],
 			[intUnitOfMeasureId],
 			[intCostUOMId],
 			[intWeightUOMId],
@@ -600,6 +601,10 @@ BEGIN
 															( A.strReceiptType = 'Inventory Return' AND InventoryReturnOrigReceipt.strReceiptType = 'Purchase Contract'))
 															THEN E.intContractHeaderId 
 												WHEN A.strReceiptType = 'Purchase Order' THEN POContractItems.intContractHeaderId
+												ELSE NULL END,
+			[intContractSeq]			=	CASE WHEN ((A.strReceiptType = 'Purchase Contract') OR
+															( A.strReceiptType = 'Inventory Return' AND InventoryReturnOrigReceipt.strReceiptType = 'Purchase Contract'))
+															THEN E1.intContractSeq 
 												ELSE NULL END,
 			[intUnitOfMeasureId]		=	B.intUnitMeasureId,
 			[intCostUOMId]				=	B.intCostUOMId,
