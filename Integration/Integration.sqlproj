@@ -153,6 +153,7 @@
     <None Include="Scripts\SM\InsertOriginTaxClassXRef.sql" />
     <None Include="dbo\Stored Procedures\uspGLImportOriginHistoricalJournal.sql" />
     <None Include="dbo\Stored Procedures\uspCMImportBanksFromOrigin.sql" />
+    <None Include="dbo\Stored Procedures\uspGRImportStorageSchedule.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />
