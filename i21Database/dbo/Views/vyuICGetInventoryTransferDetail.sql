@@ -157,4 +157,3 @@ AS
 			AND ParentLot.intItemId = TransferDetail.intItemId 
 			AND TransferDetail.intLotId = Lot.intLotId
 
-		WHERE [Transfer].intInventoryTransferId = 421
