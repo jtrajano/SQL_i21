@@ -155,6 +155,7 @@
     <None Include="dbo\Stored Procedures\uspCMImportBanksFromOrigin.sql" />
     <None Include="dbo\Stored Procedures\uspGRImportStorageSchedule.sql" />
     <None Include="dbo\Stored Procedures\uspGRImportDiscountSchedule.sql" />
+    <None Include="dbo\Stored Procedures\uspGRImportDiscountAndStorageChargeItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />
