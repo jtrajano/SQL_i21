@@ -5963,6 +5963,7 @@
     <Build Include="dbo\Views\vyuMFGetInventoryReceiptCustomField.sql" />
     <Build Include="dbo\Stored Procedures\uspAPApplyPrepaid.sql" />
     <None Include="Scripts\Post-Deployment\IC\23_Update_ActualCostId_On_InventoryTransaction.sql" />
+    <Build Include="dbo\Tables\tblMFReportLabel.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
