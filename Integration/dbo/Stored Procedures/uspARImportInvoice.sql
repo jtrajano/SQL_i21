@@ -448,7 +448,7 @@ BEGIN
 				ITM.strDescription,
 				NULL,
 				agstm_un,
-				0,
+				agstm_set_amt/agstm_un,
 				agstm_set_amt
 			FROM agstmmst
 			INNER JOIN tblARInvoice INV ON INV.strShipToAddress COLLATE Latin1_General_CI_AS = LTRIM(RTRIM(agstm_ivc_no COLLATE Latin1_General_CI_AS)) + LTRIM(RTRIM(agstm_bill_to_cus COLLATE Latin1_General_CI_AS))
@@ -470,7 +470,7 @@ BEGIN
 				ITM.strDescription,
 				NULL,
 				agstm_un,
-				0,
+				agstm_fet_amt/agstm_un,
 				agstm_fet_amt
 			FROM agstmmst
 			INNER JOIN tblARInvoice INV ON INV.strShipToAddress COLLATE Latin1_General_CI_AS = LTRIM(RTRIM(agstm_ivc_no COLLATE Latin1_General_CI_AS)) + LTRIM(RTRIM(agstm_bill_to_cus COLLATE Latin1_General_CI_AS))
@@ -492,7 +492,7 @@ BEGIN
 				ITM.strDescription,
 				NULL,
 				agstm_un,
-				0,
+				agstm_sst_amt/agstm_un,
 				agstm_sst_amt
 			FROM agstmmst
 			INNER JOIN tblARInvoice INV ON INV.strShipToAddress COLLATE Latin1_General_CI_AS = LTRIM(RTRIM(agstm_ivc_no COLLATE Latin1_General_CI_AS)) + LTRIM(RTRIM(agstm_bill_to_cus COLLATE Latin1_General_CI_AS))
@@ -517,7 +517,7 @@ BEGIN
 						ITM.strDescription,
 						NULL,
 						agstm_un,
-						0,
+						agstm_lc'+CAST(@cnt AS NVARCHAR)+'_amt/ptstm_un,
 						agstm_lc'+CAST(@cnt AS NVARCHAR)+'_amt
 					FROM agstmmst
 					INNER JOIN tblARInvoice INV ON INV.strShipToAddress COLLATE Latin1_General_CI_AS = LTRIM(RTRIM(agstm_ivc_no COLLATE Latin1_General_CI_AS)) + LTRIM(RTRIM(agstm_bill_to_cus COLLATE Latin1_General_CI_AS))
@@ -574,7 +574,7 @@ BEGIN
 				ITM.strDescription,
 				NULL,
 				CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Cash Refund') THEN ptstm_un * -1 ELSE ptstm_un END,
-				0,
+				CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Cash Refund') THEN (ptstm_set_amt/ptstm_un) * -1 ELSE (ptstm_set_amt/ptstm_un) END,
 				CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Cash Refund') THEN ptstm_set_amt * -1 ELSE ptstm_set_amt END 
 			FROM ptstmmst
 			INNER JOIN tblARInvoice INV ON INV.strShipToAddress COLLATE Latin1_General_CI_AS = LTRIM(RTRIM(ptstm_ivc_no COLLATE Latin1_General_CI_AS)) + LTRIM(RTRIM(ptstm_bill_to_cus COLLATE Latin1_General_CI_AS))
@@ -596,7 +596,7 @@ BEGIN
 				ITM.strDescription,
 				NULL,
 				CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Cash Refund') THEN ptstm_un * -1 ELSE ptstm_un END,
-				0,
+				CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Cash Refund') THEN (ptstm_fet_amt/ptstm_un) * -1 ELSE (ptstm_fet_amt/ptstm_un) END,
 				CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Cash Refund') THEN ptstm_fet_amt * -1 ELSE ptstm_fet_amt END 
 			FROM ptstmmst
 			INNER JOIN tblARInvoice INV ON INV.strShipToAddress COLLATE Latin1_General_CI_AS = LTRIM(RTRIM(ptstm_ivc_no COLLATE Latin1_General_CI_AS)) + LTRIM(RTRIM(ptstm_bill_to_cus COLLATE Latin1_General_CI_AS))
@@ -618,7 +618,7 @@ BEGIN
 				ITM.strDescription,
 				NULL,
 				CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Cash Refund') THEN ptstm_un * -1 ELSE ptstm_un END,
-				0,
+				CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Cash Refund') THEN (ptstm_sst_amt/ptstm_un) * -1 ELSE (ptstm_sst_amt/ptstm_un) END,
 				CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Cash Refund') THEN ptstm_sst_amt * -1 ELSE ptstm_sst_amt END 
 			FROM ptstmmst
 			INNER JOIN tblARInvoice INV ON INV.strShipToAddress COLLATE Latin1_General_CI_AS = LTRIM(RTRIM(ptstm_ivc_no COLLATE Latin1_General_CI_AS)) + LTRIM(RTRIM(ptstm_bill_to_cus COLLATE Latin1_General_CI_AS))
@@ -643,7 +643,7 @@ BEGIN
 						ITM.strDescription,
 						NULL,
 						CASE WHEN INV.strTransactionType IN (''Credit Memo'', ''Cash Refund'') THEN ptstm_un * -1 ELSE ptstm_un END,
-						0,
+						CASE WHEN INV.strTransactionType IN (''Credit Memo'', ''Cash Refund'') THEN (ptstm_lc'+CAST(@cnt AS NVARCHAR)+'_amt/ptstm_un) * -1 ELSE (ptstm_lc'+CAST(@cnt AS NVARCHAR)+'_amt/ptstm_un) END,
 						CASE WHEN INV.strTransactionType IN (''Credit Memo'', ''Cash Refund'') THEN ptstm_lc'+CAST(@cnt AS NVARCHAR)+'_amt * -1 ELSE ptstm_lc'+CAST(@cnt AS NVARCHAR)+'_amt END 
 					FROM ptstmmst
 					INNER JOIN tblARInvoice INV ON INV.strShipToAddress COLLATE Latin1_General_CI_AS = LTRIM(RTRIM(ptstm_ivc_no COLLATE Latin1_General_CI_AS)) + LTRIM(RTRIM(ptstm_bill_to_cus COLLATE Latin1_General_CI_AS))
