@@ -358,7 +358,7 @@ BEGIN
 						,@strRelatedTransactionId = @strRelatedTransactionId 
 						,@strTransactionForm = @strTransactionForm
 						,@intEntityUserSecurityId = @intEntityUserSecurityId
-						,@intCostingMethod = @FIFO
+						,@intCostingMethod = @LOTCOST
 						,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 
 						,@intForexRateTypeId = @intForexRateTypeId
 						,@dblForexRate = @dblForexRate
