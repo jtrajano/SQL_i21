@@ -150,6 +150,11 @@ AS
 			AND StockFrom.intItemUOMId = TransferDetail.intItemUOMId
 			AND ISNULL(StockFrom.intSubLocationId, 0) = ISNULL(TransferDetail.intFromSubLocationId, 0)
 			AND ISNULL(StockFrom.intStorageLocationId, 0) = ISNULL(TransferDetail.intFromStorageLocationId, 0)
+			AND StockFrom.intLotId = Lot.intLotId
 		LEFT JOIN (tblICInventoryReceiptItem ReceiptItem INNER JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId)
 			ON ReceiptItem.intOrderId = [Transfer].intInventoryTransferId AND Receipt.strReceiptType = 'Transfer Order'
-		LEFT JOIN tblICParentLot ParentLot ON Lot.intParentLotId = Lot.intParentLotId AND ParentLot.intItemId = TransferDetail.intItemId
+		LEFT JOIN tblICParentLot ParentLot ON ParentLot.intParentLotId = Lot.intParentLotId 
+			AND ParentLot.intItemId = TransferDetail.intItemId 
+			AND TransferDetail.intLotId = Lot.intLotId
+
+		WHERE [Transfer].intInventoryTransferId = 421
