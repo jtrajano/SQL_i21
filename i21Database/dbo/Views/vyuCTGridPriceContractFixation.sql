@@ -68,7 +68,9 @@ AS
 				CD.ysnBasisSubCurrency,
 				BU.intCommodityUnitMeasureId	AS	intBasisCommodityUOMId,			
 				CD.intDiscountScheduleCodeId,
-				SI.strDescription				AS	strDiscountScheduleCode
+				SI.strDescription				AS	strDiscountScheduleCode,
+				CD.strPricingType,
+				CD.dblRatio
 
 		FROM	tblCTPriceFixation	PF
 		JOIN	vyuCTContractSequence		CD	ON	CD.intContractDetailId	=	PF.intContractDetailId
@@ -134,7 +136,9 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId			=	SC.intItemId
 				NULL,
 				NULL,			
 				CD.intDiscountScheduleCodeId,
-				SI.strDescription				AS	strDiscountScheduleCode
+				SI.strDescription				AS	strDiscountScheduleCode,
+				CD.strPricingType,
+				CD.dblRatio
 
 		FROM	tblCTPriceFixation	PF	
 		JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityUnitMeasureId	=	PF.intFinalPriceUOMId 

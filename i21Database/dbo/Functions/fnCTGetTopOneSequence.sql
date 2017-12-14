@@ -40,7 +40,8 @@ RETURNS @returntable	TABLE
 	ysnBasisSubCurrency		BIT,
 	intBasisUOMId			INT,
 	intBasisUnitMeasureId	INT,
-	intDiscountScheduleCodeId INT
+	intDiscountScheduleCodeId INT,
+	dblRatio				NUMERIC(18,6)
 )
 AS
 BEGIN
@@ -55,7 +56,8 @@ BEGIN
 				strCurrency,					strFutureMonth,				strStorageLocation,				strSubLocation,
 				strItemDescription,				intContractDetailId,		strProductType,					ysnSubCurrency,
 				intContractStatusId,			strContractItemName,		strContractItemNo,				intBasisCurrencyId,
-				ysnBasisSubCurrency,			intBasisUOMId,				intBasisUnitMeasureId,			intDiscountScheduleCodeId
+				ysnBasisSubCurrency,			intBasisUOMId,				intBasisUnitMeasureId,			intDiscountScheduleCodeId,
+				dblRatio
 
 		FROM	vyuCTContractSequence WHERE intContractDetailId = @intContractDetailId
 	ELSE
@@ -68,7 +70,8 @@ BEGIN
 				strCurrency,					strFutureMonth,				strStorageLocation,				strSubLocation,
 				strItemDescription,				intContractDetailId,		strProductType,					ysnSubCurrency,
 				intContractStatusId,			strContractItemName,		strContractItemNo,				intBasisCurrencyId,
-				ysnBasisSubCurrency,			intBasisUOMId,				intBasisUnitMeasureId,			intDiscountScheduleCodeId
+				ysnBasisSubCurrency,			intBasisUOMId,				intBasisUnitMeasureId,			intDiscountScheduleCodeId,
+				dblRatio
 				
 		FROM	vyuCTContractSequence WHERE intContractHeaderId = @intContractHeaderId
 	RETURN;

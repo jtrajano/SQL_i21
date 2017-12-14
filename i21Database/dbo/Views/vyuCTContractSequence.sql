@@ -13,7 +13,7 @@ AS
 			CD.intBookId,			CD.intSubBookId,		CD.intDiscountScheduleCodeId,
 			CD.strERPPONumber,		CD.intSplitFromId,		CD.dtmPlannedAvailabilityDate,
 			CD.strERPItemNumber,	CD.strERPBatchNumber,	CD.intBasisCurrencyId,
-			CD.intBasisUOMId,
+			CD.intBasisUOMId,		CD.dblRatio,
 
 			--Detail Join
 			IM.strItemNo,			PT.strPricingType,		IM.strDescription			AS	strItemDescription,
