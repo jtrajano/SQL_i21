@@ -1089,6 +1089,17 @@ Ext.define('Inventory.view.ItemLocation', {
                                     ]
                                 }
                             ]
+                        },
+                        {
+                            xtype: 'panel',
+                            itemId: 'pgeAuditLog',
+                            layout: 'fit',
+                            title: 'Audit Log',
+                            items: [
+                                {
+                                    xtype: 'auditlogtree'
+                                }
+                            ]
                         }
                     ]
                 }

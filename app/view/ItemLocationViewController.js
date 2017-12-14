@@ -222,7 +222,8 @@ Ext.define('Inventory.view.ItemLocationViewController', {
             createRecord: {
                 fn: me.createRecord,
                 scope: me
-            }
+            },
+            enableAudit: true
         });
 
         var filter = [{ dataIndex: 'intItemId', value: options.itemId, condition: 'eq' }];
