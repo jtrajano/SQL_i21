@@ -2639,3 +2639,23 @@ UPDATE tblMFCompanyPreference
 SET ysnGenerateNewParentLotOnChangeItem = 0
 WHERE ysnGenerateNewParentLotOnChangeItem IS NULL
 GO
+
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFReportLabel WHERE strReportName = 'UCCPalletLabel')
+BEGIN
+    INSERT INTO tblMFReportLabel(strReportName,ysnShow,intConcurrencyId)
+    VALUES('UCCPalletLabel',1,1)
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFReportLabel WHERE strReportName = 'LidlUCCPalletLabel')
+BEGIN
+    INSERT INTO tblMFReportLabel(strReportName,ysnShow,intConcurrencyId)
+    VALUES('LidlUCCPalletLabel',1,1)
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFReportLabel WHERE strReportName = 'DotFoodsUCCPalletLabel')
+BEGIN
+    INSERT INTO tblMFReportLabel(strReportName,ysnShow,intConcurrencyId)
+    VALUES('DotFoodsUCCPalletLabel',1,1)
+END
+GO
