@@ -2990,6 +2990,61 @@
                                     ]
                                 }
                             ]
+                        },
+                        {
+                            "type": "Ext.panel.Panel",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "bodyPadding": null,
+                                "itemId": "pgeAuditLog",
+                                "layout": "fit",
+                                "title": "Audit Log"
+                            },
+                            "configAlternates": {
+                                "bodyPadding": "auto",
+                                "itemId": "string",
+                                "layout": "string",
+                                "title": "string",
+                                "scrollable": "boolean"
+                            },
+                            "name": "MyPanel39",
+                            "designerId": "3333c806-30f2-4de7-90be-558d190fcf24",
+                            "cn": [
+                                {
+                                    "type": "Ext.tab.Tab",
+                                    "reference": {
+                                        "name": "tabConfig",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "configAlternates": {
+                                        "scrollable": "boolean"
+                                    },
+                                    "name": "TabConfig16",
+                                    "designerId": "a2c0286f-9eae-48a3-bece-d18fad08dee9"
+                                },
+                                {
+                                    "type": "Ext.container.Container",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "designer|createAlias": "auditlogtree"
+                                    },
+                                    "configAlternates": {
+                                        "designer|createAlias": "string",
+                                        "scrollable": "boolean"
+                                    },
+                                    "name": "MyContainer39",
+                                    "designerId": "eda3444a-c1b7-40ba-8acc-efaa578b5f4e"
+                                }
+                            ]
                         }
                     ]
                 },
