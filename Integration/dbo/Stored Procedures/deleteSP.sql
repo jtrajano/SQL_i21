@@ -62,3 +62,7 @@ IF EXISTS (select top 1 1 from sys.procedures where name = 'uspARImportCustomerC
 	DROP PROCEDURE uspARImportCustomerComments
 GO
 
+IF EXISTS (select top 1 1 from sys.procedures where name = 'uspARImportDefaultTaxItems')
+	DROP PROCEDURE uspARImportDefaultTaxItems
+GO
+
