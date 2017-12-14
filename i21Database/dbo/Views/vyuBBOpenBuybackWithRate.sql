@@ -83,7 +83,10 @@ AS
 		ON N.intProgramChargeId =Q.intProgramChargeId
 			AND J.intUnitMeasureId = Q.intUnitMeasureId
 	WHERE B.dblPrice = 0
-		AND NOT EXISTS(SELECT TOP 1 1 FROM tblBBBuybackDetail WHERE intInvoiceDetailId = B.intInvoiceDetailId)
+		AND NOT EXISTS(SELECT TOP 1 1 FROM tblBBBuybackDetail WHERE intInvoiceDetailId = B.intInvoiceDetailId AND intProgramRateId = (CASE WHEN ISNULL(O.intRateId,0) <> 0 THEN O.intRateId
+																																			WHEN ISNULL(P.intRateId,0) <> 0 THEN P.intRateId
+																																			WHEN ISNULL(Q.intRateId,0) <> 0 THEN Q.intRateId
+																																		END))
 		AND NOT EXISTS(SELECT TOP 1 1 FROM tblBBBuybackExcluded WHERE intInvoiceDetailId = B.intInvoiceDetailId)
 		AND B.strBuybackSubmitted <> 'E'
 		AND A.ysnPosted = 1
