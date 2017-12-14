@@ -360,7 +360,7 @@ BEGIN
 							,@strRelatedTransactionId = @strRelatedTransactionId 
 							,@strTransactionForm = @strTransactionForm
 							,@intEntityUserSecurityId = @intEntityUserSecurityId
-							,@intCostingMethod = @AVERAGECOST
+							,@intCostingMethod = @LOTCOST
 							,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 
 							,@intForexRateTypeId = @intForexRateTypeId
 							,@dblForexRate = @dblForexRate

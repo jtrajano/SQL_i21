@@ -252,7 +252,7 @@ BEGIN
 							,@strRelatedTransactionId = @strRelatedTransactionId 
 							,@strTransactionForm = @strTransactionForm
 							,@intEntityUserSecurityId = @intEntityUserSecurityId
-							,@intCostingMethod = @AVERAGECOST
+							,@intCostingMethod = @ACTUALCOST
 							,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 
 							,@intFobPointId = @intFobPointId
 							,@intInTransitSourceLocationId = @intInTransitSourceLocationId

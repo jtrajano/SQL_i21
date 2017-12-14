@@ -248,7 +248,7 @@ BEGIN
 							,@strRelatedTransactionId = @strRelatedTransactionId 
 							,@strTransactionForm = @strTransactionForm
 							,@intEntityUserSecurityId = @intEntityUserSecurityId
-							,@intCostingMethod = @AVERAGECOST
+							,@intCostingMethod = @ACTUALCOST
 							,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
 							,@intForexRateTypeId = @intForexRateTypeId
 							,@dblForexRate = @dblForexRate
