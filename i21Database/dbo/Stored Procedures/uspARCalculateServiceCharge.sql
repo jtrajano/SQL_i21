@@ -116,8 +116,7 @@ AS
 			IF (DATEPART(dd, @asOfDate) = 31)
 				DELETE FROM tblARCustomerAgingStagingTable WHERE dtmDueDate = @asOfDate
 
-			DELETE FROM tblARCustomerAgingStagingTable
-			WHERE [strInvoiceNumber] IN (SELECT strInvoiceNumber FROM tblARInvoice WHERE strType IN ('CF Tran'))
+			DELETE FROM tblARCustomerAgingStagingTable WHERE strType = 'CF Tran'
 		END
 
 	IF EXISTS(SELECT TOP 1 NULL FROM #tmpCustomers WHERE ISNULL(intTermId, 0) = 0) AND @isRecap = 0
@@ -219,9 +218,15 @@ AS
 							DECLARE @dblTotalAR			NUMERIC(18, 6) = 0								  
 
 							SELECT @dblTotalAR = SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl120Days) + SUM(dbl121Days) + SUM(dblCredits) + SUM(dblPrepayments) 
-							FROM tblARCustomerAgingStagingTable
-							WHERE intEntityCustomerId = @entityId							
-							  AND dtmDueDate BETWEEN ISNULL(@dtmLastServiceCharge, '01/01/1900') AND @asOfDate
+							FROM tblARCustomerAgingStagingTable AGING
+							INNER JOIN (
+								SELECT intInvoiceId
+									 , dtmCalculated
+								FROM dbo.tblARInvoice
+								WHERE ysnPosted = 1
+							) I ON AGING.intInvoiceId = I.intInvoiceId
+							WHERE AGING.intEntityCustomerId = @entityId
+							  AND (I.dtmCalculated IS NOT NULL AND I.dtmCalculated BETWEEN ISNULL(@dtmLastServiceCharge, '01/01/1900') AND @asOfDate OR I.dtmCalculated IS NULL)
 
 							SELECT TOP 1 @dblMinimumSC = ISNULL(dblMinimumCharge, 0)
 									   , @dblMinFinanceSC = ISNULL(dblMinimumFinanceCharge, 0)
