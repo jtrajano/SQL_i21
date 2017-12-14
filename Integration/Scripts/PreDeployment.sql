@@ -239,6 +239,7 @@
 
 :r "..\dbo\Stored Procedures\uspARImportPTTaxExemption.sql" 
 :r "..\dbo\Stored Procedures\uspARImportCustomerComments.sql"
+:r "..\dbo\Stored Procedures\uspARImportDefaultTaxItems.sql"
 :r "..\dbo\Stored Procedures\uspAPImportVendorTaxExemption.sql" 
 :r "..\dbo\Stored Procedures\uspEMImportPTTerminalToCustomer.sql" 
 
