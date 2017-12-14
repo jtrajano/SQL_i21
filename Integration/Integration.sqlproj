@@ -157,6 +157,7 @@
     <None Include="dbo\Stored Procedures\uspGRImportDiscountSchedule.sql" />
     <None Include="dbo\Stored Procedures\uspGRImportDiscountAndStorageChargeItem.sql" />
     <None Include="dbo\Stored Procedures\uspGRImportDiscountTable.sql" />
+    <None Include="dbo\Stored Procedures\uspGRImportDiscountCode.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />
