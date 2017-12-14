@@ -4917,6 +4917,19 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
 
         if (combo.itemId === 'cboChargeCurrency') {
+            
+            var dblRate = current.get('dblRate'); 
+            var functionalCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
+            var strFunctionalCurrency = i21.ModuleMgr.SystemManager.getCompanyPreference('strDefaultCurrency');         
+            var intRateType = i21.ModuleMgr.SystemManager.getCompanyPreference('intInventoryRateTypeId');  
+            var dblCurrentForexRate = current.get('dblForexRate');
+            
+            // Convert the current rate to the functional currency. 
+            dblCurrentForexRate = Ext.isNumeric(dblCurrentForexRate) ? dblCurrentForexRate : 0;
+            dblRate = Ext.isNumeric(dblRate) ? dblRate : 0;
+            dblRate = dblCurrentForexRate != 0 ? dblRate * dblCurrentForexRate : dblRate;
+            dblRate = i21.ModuleMgr.Inventory.roundDecimalFormat(dblRate, 6);	            
+
             current.set('intCurrencyId', record.get('intCurrencyID'));
             current.set('strCurrency', record.get('strCurrency'));
             current.set('intCent', record.get('intCent'));
@@ -4924,11 +4937,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('intForexRateTypeId', null);
             current.set('strForexRateType', null);
             current.set('dblForexRate', null);
+            current.set('dblRate', dblRate);
 
-            var chargeCurrencyId = current.get('intCurrencyId');            
-            var functionalCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
-            var strFunctionalCurrency = i21.ModuleMgr.SystemManager.getCompanyPreference('strDefaultCurrency');         
-            var intRateType = i21.ModuleMgr.SystemManager.getCompanyPreference('intInventoryRateTypeId');  
+            var chargeCurrencyId = current.get('intCurrencyId');         
 
             // function variable to process the default forex rate. 
             var processForexRateOnSuccess = function (successResponse, isItemLastCost) {
@@ -4938,9 +4949,17 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                     dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0;
 
+                    // Convert the dblRate to the other charge currency.
+                    // and round it to six decimal places.  
+                    if (chargeCurrencyId != functionalCurrencyId && dblRate) {
+                        dblRate = dblRate != 0 ? dblRate / dblForexRate : 0;
+                        dblRate = i21.ModuleMgr.Inventory.roundDecimalFormat(dblRate, 6);
+                    }	                    
+
                     current.set('intForexRateTypeId', intRateType);
                     current.set('strForexRateType', strRateType);
                     current.set('dblForexRate', dblForexRate);
+                    current.set('dblRate', dblRate);
                 }
             }
 
@@ -5081,6 +5100,17 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
 
         if (combo.itemId === 'cboChargeForexRateType') {
+            var chargeCurrencyId = current.get('intCurrencyId');
+            var dblRate = current.get('dblRate'); 
+            var functionalCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
+            var dblCurrentForexRate = current.get('dblForexRate');
+
+            // Convert the current rate to the functional currency.             
+            dblCurrentForexRate = Ext.isNumeric(dblCurrentForexRate) ? dblCurrentForexRate : 0;
+            dblRate = Ext.isNumeric(dblRate) ? dblRate : 0;
+            dblRate = dblCurrentForexRate != 0 ? dblRate * dblCurrentForexRate : dblRate;
+            dblRate = i21.ModuleMgr.Inventory.roundDecimalFormat(dblRate, 6);	
+
             current.set('intForexRateTypeId', records[0].get('intCurrencyExchangeRateTypeId'));
             current.set('strForexRateType', records[0].get('strCurrencyExchangeRateType'));
             current.set('dblForexRate', null);
@@ -5092,6 +5122,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 function (successResponse) {
                     if (successResponse && successResponse.length > 0) {
                         current.set('dblForexRate', successResponse[0].dblRate);
+                        var dblForexRate = current.get('dblForexRate');
+
+                        // Convert the dblRate to the other charge currency.
+                        // and round it to six decimal places.  
+                        if (chargeCurrencyId != functionalCurrencyId && dblRate) {
+                            dblRate = dblRate != 0 ? dblRate / dblForexRate : 0;
+                            dblRate = i21.ModuleMgr.Inventory.roundDecimalFormat(dblRate, 6);
+                        }	                          
+
+                        current.set('dblRate', dblRate);
                     }
                 },
                 function (failureResponse) {
@@ -5102,7 +5142,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             );
         }
     },
-
 
     onAccrueCheckChange: function (obj, rowIndex, checked, eOpts) {
         if (obj.dataIndex === 'ysnAccrue') {
