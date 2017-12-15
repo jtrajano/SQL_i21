@@ -380,7 +380,7 @@ SELECT W.intWorkOrderId
 	,NULL AS dblPulseStartReading
 	,NULL AS dblPulseEndReading
 	,NULL AS dblPulseQty
-	,W.strComment
+	,ISNULL(WP.strComment, W.strComment) AS strComment
 	,NULL AS strFormulaUsedForTotalizerReading
 	,NULL AS strFormulaUsedForPulseReading
 	,NULL AS dblMinMoisture
@@ -419,7 +419,7 @@ JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId
 JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
-JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId
+LEFT JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId
 JOIN dbo.tblMFManufacturingProcess MP ON MP.intManufacturingProcessId = W.intManufacturingProcessId
 LEFT JOIN dbo.tblMFShift BS ON BS.intShiftId = WP.intBusinessShiftId
 JOIN dbo.tblICItem II ON II.intItemId = WP.intItemId
@@ -491,7 +491,7 @@ SELECT W.intWorkOrderId
 	,NULL AS dblPulseStartReading
 	,NULL AS dblPulseEndReading
 	,NULL AS dblPulseQty
-	,W.strComment
+	,ISNULL(WP.strComment, W.strComment) AS strComment
 	,NULL AS strFormulaUsedForTotalizerReading
 	,NULL AS strFormulaUsedForPulseReading
 	,NULL AS dblMinMoisture
@@ -530,7 +530,7 @@ JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId
 JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
-JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId
+LEFT JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId
 JOIN dbo.tblMFManufacturingProcess MP ON MP.intManufacturingProcessId = W.intManufacturingProcessId
 LEFT JOIN dbo.tblMFShift BS ON BS.intShiftId = WP.intBusinessShiftId
 JOIN dbo.tblICItem II ON II.intItemId = WP.intItemId
