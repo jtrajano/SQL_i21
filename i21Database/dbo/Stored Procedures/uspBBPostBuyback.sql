@@ -146,7 +146,7 @@ AS
 			,@vendorOrderNumber = strReimbursementNo
 			,@voucherDate = @APDate
 			,@voucherNonInvDetails = @voucherNonInvDetails
-			,@billId = @intCreatedBillId 
+			,@billId = @intCreatedBillId OUTPUT
 
 		UPDATE tblAPBillDetail
 		SET intBuybackChargeId = A.intBuybackChargeId
