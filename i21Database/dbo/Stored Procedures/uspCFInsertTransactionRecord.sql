@@ -926,10 +926,10 @@ BEGIN
 		BEGIN
 			SET @ysnInvalid = 1
 		END
-		IF(@intPrcItemUOMId = 0 OR @intPrcItemUOMId IS NULL)
-		BEGIN
-			SET @ysnInvalid = 1
-		END
+		--IF(@intPrcItemUOMId = 0 OR @intPrcItemUOMId IS NULL)
+		--BEGIN
+		--	SET @ysnInvalid = 1
+		--END
 		IF(@intNetworkId = 0 OR @intNetworkId IS NULL)
 		BEGIN
 			SET @intNetworkId = NULL
@@ -1120,13 +1120,13 @@ BEGIN
 			
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Invalid location for site ' + @strSiteId)
 		END
-		IF(@intPrcItemUOMId = 0 OR @intPrcItemUOMId IS NULL)
-		BEGIN
-			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
-			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Invalid UOM for product number ' + @strProductId)
+		--IF(@intPrcItemUOMId = 0 OR @intPrcItemUOMId IS NULL)
+		--BEGIN
+		--	INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+		--	VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Invalid UOM for product number ' + @strProductId)
 			
-			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Invalid UOM for product number ' + @strProductId)
-		END
+		--	INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Invalid UOM for product number ' + @strProductId)
+		--END
 		IF(@intNetworkId = 0 OR @intNetworkId IS NULL)
 		BEGIN
 			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
