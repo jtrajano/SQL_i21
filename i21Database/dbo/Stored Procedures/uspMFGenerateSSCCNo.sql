@@ -53,19 +53,20 @@ BEGIN
 			,@intCheckDigit = NULL
 			,@strSSCCNo = ''
 
-		IF @intCustomerLabelTypeId = 1 -- Pallet Label
+		IF @intCustomerLabelTypeId = 1 OR @intCustomerLabelTypeId = 3 -- Pallet Label / Pallet Label with Weight
 		BEGIN
 			SELECT @strSSCCNo = strSSCCNo
 			FROM tblMFOrderManifestLabel
 			WHERE intOrderManifestId = @intOrderManifestId
-				AND intCustomerLabelTypeId = @intCustomerLabelTypeId
+				AND intCustomerLabelTypeId IN (1, 3)
 
 			IF ISNULL(@strSSCCNo, '') <> ''
 			BEGIN
 				UPDATE tblMFOrderManifestLabel
 				SET ysnPrinted = 0
+					,intCustomerLabelTypeId = @intCustomerLabelTypeId
 				WHERE intOrderManifestId = @intOrderManifestId
-					AND intCustomerLabelTypeId = @intCustomerLabelTypeId
+					AND intCustomerLabelTypeId IN (1, 3)
 
 				SELECT @intOrderManifestId = MIN(intOrderManifestId)
 				FROM @tblMFGenerateSSNo

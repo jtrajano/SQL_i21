@@ -2476,6 +2476,20 @@ BEGIN
 	SELECT 2
 		,'Case Label'
 END
+GO
+IF NOT EXISTS (
+		SELECT 1
+		FROM tblMFCustomerLabelType
+		WHERE intCustomerLabelTypeId = 3
+		)
+BEGIN
+	INSERT INTO tblMFCustomerLabelType (
+		intCustomerLabelTypeId
+		,strLabelType
+		)
+	SELECT 3
+		,'Pallet Label with Weight'
+END
 
 GO
 UPDATE tblMFCompanyPreference
