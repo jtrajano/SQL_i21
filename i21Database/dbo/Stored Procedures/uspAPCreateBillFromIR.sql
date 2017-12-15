@@ -531,7 +531,7 @@ BEGIN
 			[dblQtyReceived]			=	ABS(B.dblOpenReceive - B.dblBillQty),--CASE WHEN A.strReceiptType = 'Inventory Return' THEN ABS(B.dblOpenReceive) ELSE ABS(B.dblOpenReceive - B.dblBillQty) END,
 			[dblTax]					=	ISNULL(B.dblTax,0),
 			[dblDiscount]				=	CASE WHEN A.strReceiptType = 'Purchase Order' THEN POContractItems.dblDiscount ELSE 0 END,
-			[dblForexRate]				=	ISNULL(B.dblForexRate,1),
+			[dblForexRate]				=	ISNULL(NULLIF(B.dblForexRate,0),1),
 			[intForexRateTypeId]		=	B.intForexRateTypeId,
 			[ysnSubCurrency]			=	CASE WHEN B.ysnSubCurrency > 0 THEN 1 ELSE 0 END,
 			[intTaxGroupId]				=	B.intTaxGroupId,
