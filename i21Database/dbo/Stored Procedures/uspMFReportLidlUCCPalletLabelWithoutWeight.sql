@@ -112,7 +112,7 @@ BEGIN TRY
 	-- only for print mode
 	IF ISNULL(@strOrderManifestLabelId, '') = ''
 	BEGIN
-		IF @intCustomerLabelTypeId = 1 -- Pallet Label
+		IF @intCustomerLabelTypeId = 1 OR @intCustomerLabelTypeId = 3 -- Pallet Label / Pallet Label with Weight
 		BEGIN
 			INSERT INTO @tblMFGenerateSSNo
 			SELECT *
@@ -244,6 +244,7 @@ BEGIN TRY
 	BEGIN
 		UPDATE tblMFOrderManifestLabel
 		SET ysnPrinted = 0
+			,intCustomerLabelTypeId = @intCustomerLabelTypeId
 		WHERE ysnPrinted = 1
 			AND intOrderManifestLabelId IN (
 				SELECT *
