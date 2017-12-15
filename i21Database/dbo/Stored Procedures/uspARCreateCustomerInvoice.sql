@@ -398,6 +398,7 @@ BEGIN TRY
 		,[intEntityId]
 		,[intTruckDriverId]
 		,[intTruckDriverReferenceId]
+		,[intDocumentMaintenanceId]
 		,[intConcurrencyId])
 	SELECT [strInvoiceNumber]			= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @InvoiceOriginId ELSE NULL END
 		,[strTransactionType]			= @TransactionType
@@ -467,6 +468,7 @@ BEGIN TRY
 		,[intEntityId]					= @EntityId
 		,[intTruckDriverId]				= @TruckDriverId
 		,[intTruckDriverReferenceId]	= @TruckDriverReferenceId
+		,[intDocumentMaintenanceId]		= @DocumentMaintenanceId
 		,[intConcurrencyId]				= 0
 	FROM	
 		tblARCustomer C
