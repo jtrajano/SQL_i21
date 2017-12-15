@@ -3054,6 +3054,7 @@ BEGIN
 			,ysnDuplicate			   = @ysnDuplicate			
 			,ysnInvalid				   = @ysnInvalid	
 			,dblQuantity			   = @dblQuantity
+			,intSiteGroupId			   = @intSiteGroupId
 			WHERE intTransactionId	   = @intTransactionId
 			---------------------------------------------------------------------------
 			DELETE tblCFTransactionTax WHERE intTransactionId = @intTransactionId
