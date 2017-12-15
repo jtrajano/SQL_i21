@@ -31,14 +31,17 @@ namespace iRely.Inventory.BusinessLayer
 
         public override BusinessResult<tblICRinFeedStock> Validate(IEnumerable<tblICRinFeedStock> entities, ValidateAction action)
         {
-            if (entities.Where(p => string.IsNullOrEmpty(p.strRinFeedStockCode)).Count() > 0)
+            if (action != ValidateAction.Delete && action != ValidateAction.SyncDelete)
             {
-                return new BusinessResult<tblICRinFeedStock>()
+                if (entities.Where(p => string.IsNullOrEmpty(p.strRinFeedStockCode)).Count() > 0)
                 {
-                    data = entities,
-                    message = new MessageResult() { button = "Ok", status = Error.OtherException, statusText = "Code must not be blank." },
-                    success = false
-                };
+                    return new BusinessResult<tblICRinFeedStock>()
+                    {
+                        data = entities,
+                        message = new MessageResult() { button = "Ok", status = Error.OtherException, statusText = "Code must not be blank." },
+                        success = false
+                    };
+                }
             }
             return base.Validate(entities, action);
         }

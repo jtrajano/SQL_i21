@@ -31,14 +31,17 @@ namespace iRely.Inventory.BusinessLayer
 
         public override BusinessResult<tblICRinFuelCategory> Validate(IEnumerable<tblICRinFuelCategory> entities, ValidateAction action)
         {
-            if (entities.Where(p => string.IsNullOrEmpty(p.strRinFuelCategoryCode)).Count() > 0)
+            if (action != ValidateAction.Delete && action != ValidateAction.SyncDelete)
             {
-                return new BusinessResult<tblICRinFuelCategory>()
+                if (entities.Where(p => string.IsNullOrEmpty(p.strRinFuelCategoryCode)).Count() > 0)
                 {
-                    data = entities,
-                    message = new MessageResult() { button = "Ok", status = Error.OtherException, statusText = "Fuel Category must not be blank." },
-                    success = false
-                };
+                    return new BusinessResult<tblICRinFuelCategory>()
+                    {
+                        data = entities,
+                        message = new MessageResult() { button = "Ok", status = Error.OtherException, statusText = "Fuel Category must not be blank." },
+                        success = false
+                    };
+                }
             }
             return base.Validate(entities, action);
         }
