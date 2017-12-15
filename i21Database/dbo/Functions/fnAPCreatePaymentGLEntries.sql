@@ -135,7 +135,7 @@ BEGIN
 			,ROUND(SUM([dblCreditForeign]),2) as [dblCreditForeign]	
 	FROM
 	(
-		SELECT		
+		SELECT		DISTINCT
 					[intPaymentId]					=	A.intPaymentId,
 					[dblCredit]	 					=	CASE WHEN A.dblExchangeRate > 1 THEN CAST(
 														dbo.fnAPGetPaymentAmountFactor((Details.dblTotal 
@@ -359,15 +359,10 @@ BEGIN
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.[dtmDatePaid]), 0),
 		[strBatchId]					=	@batchId,
 		[intAccountId]					=	B.intAccountId,
-		[dblDebit]						=   CASE WHEN voucherDetail.dblRate > 1 
-											THEN
-											(CAST(
+		[dblDebit]						=  (CAST(
 												SUM(
-													dbo.fnAPGetPaymentAmountFactor((voucherDetail.dblTotal + voucherDetail.dblTax), B.dblPayment + B.dblDiscount - B.dblInterest, voucher.dblTotal) *  ISNULL(NULLIF(voucherDetail.dblRate,0),1))
-											AS DECIMAL(18,2))
-											* (CASE WHEN voucher.intTransactionType != 1 AND A.ysnPrepay = 0 THEN -1 ELSE 1 END))
-											ELSE
-											(CAST(SUM(dbo.fnAPGetPaymentDetailPayment(B.intPaymentDetailId)) AS DECIMAL(18,2))) END,
+													dbo.fnAPGetPaymentAmountFactor(B.dblTotal, B.dblPayment + B.dblDiscount - B.dblInterest, voucher.dblTotal) *  ISNULL(NULLIF(A.dblExchangeRate,0),1))
+											AS DECIMAL(18,2))) * (CASE WHEN voucher.intTransactionType != 1 AND A.ysnPrepay = 0 THEN -1 ELSE 1 END),
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
@@ -391,7 +386,7 @@ BEGIN
 		[intConcurrencyId]				=	1,
 		[dblDebitForeign]				=	CAST(
 												SUM(
-													dbo.fnAPGetPaymentAmountFactor((voucherDetail.dblTotal + voucherDetail.dblTax), B.dblPayment + B.dblDiscount - B.dblInterest, voucher.dblTotal))
+													dbo.fnAPGetPaymentAmountFactor(B.dblTotal, B.dblPayment + B.dblDiscount - B.dblInterest, voucher.dblTotal))
 											AS DECIMAL(18,2))
 											* (CASE WHEN voucher.intTransactionType != 1 AND A.ysnPrepay = 0 THEN -1 ELSE 1 END),      
 		[dblDebitReport]				=	0,
@@ -404,7 +399,7 @@ BEGIN
 			INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
 			INNER JOIN tblAPVendor D ON A.intEntityVendorId = D.[intEntityId] 
 			INNER JOIN tblAPBill voucher ON voucher.intBillId = B.intBillId
-			INNER JOIN tblAPBillDetail voucherDetail ON voucherDetail.intBillId = voucher.intBillId
+			--INNER JOIN tblAPBillDetail voucherDetail ON voucherDetail.intBillId = voucher.intBillId
 			LEFT JOIN tblSMCurrencyExchangeRateType rateType ON A.intCurrencyExchangeRateTypeId = rateType.intCurrencyExchangeRateTypeId
 	WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
 	AND B.dblPayment <> 0
@@ -414,7 +409,7 @@ BEGIN
 	A.intPaymentId,
 	rateType.strCurrencyExchangeRateType,
 	voucher.intTransactionType,
-	voucherDetail.dblRate,
+	--voucherDetail.dblRate,
 	B.intBillId,
 	D.strVendorId,
 	A.dtmDatePaid,
