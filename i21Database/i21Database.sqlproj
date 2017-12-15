@@ -5968,6 +5968,7 @@
     <Build Include="dbo\Views\vyuBBBuybackExport.sql" />
     <Build Include="dbo\Stored Procedures\uspBBUnpostBuyback.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportLidlUCCPalletLabelWithoutWeight.sql" />
+    <Build Include="dbo\Views\vyuRKM2MContractCost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
