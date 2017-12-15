@@ -727,7 +727,7 @@
                                                         "itemId": "cboCommodity",
                                                         "layout|flex": null,
                                                         "tabIndex": null,
-                                                        "valueField": "intCommodityId"
+                                                        "valueField": "strCommodityCode"
                                                     },
                                                     "configAlternates": {
                                                         "columns": "array",
@@ -808,7 +808,7 @@
                                                         "layout|flex": null,
                                                         "margin": null,
                                                         "tabIndex": null,
-                                                        "valueField": "intCategoryId"
+                                                        "valueField": "strCategoryCode"
                                                     },
                                                     "configAlternates": {
                                                         "columns": "array",

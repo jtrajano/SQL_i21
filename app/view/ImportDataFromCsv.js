@@ -107,8 +107,7 @@ Ext.define('Inventory.view.ImportDataFromCsv', {
                                             flex: 1,
                                             itemId: 'txtBrowseFile',
                                             padding: 3,
-                                            width: 199,
-                                            submitValue: true
+                                            width: 199
                                         }
                                     ]
                                 },
