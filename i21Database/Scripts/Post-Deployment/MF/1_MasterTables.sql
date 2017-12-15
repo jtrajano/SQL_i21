@@ -2659,3 +2659,9 @@ BEGIN
     VALUES('DotFoodsUCCPalletLabel',1,1)
 END
 GO
+IF NOT EXISTS(SELECT 1 FROM tblMFReportLabel WHERE strReportName = 'LidlUCCPalletLabelWithoutWeight')
+BEGIN
+    INSERT INTO tblMFReportLabel(strReportName,ysnShow,intConcurrencyId)
+    VALUES('LidlUCCPalletLabelWithoutWeight',1,1)
+END
+GO
