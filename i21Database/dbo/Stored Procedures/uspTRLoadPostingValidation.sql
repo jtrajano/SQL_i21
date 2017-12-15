@@ -276,6 +276,7 @@ BEGIN TRY
 		-- Blend Item Quantity Check
 		SELECT BlendIngredient.intIngredientItemId
 			, dblQuantity = SUM(BlendIngredient.dblQuantity)
+			, ysnBlended = 1
 		INTO #tmpBlendDistributionItems
 		FROM vyuTRGetLoadBlendIngredient BlendIngredient
 		LEFT JOIN tblMFRecipe Recipe ON Recipe.intRecipeId = BlendIngredient.intRecipeId
@@ -289,17 +290,18 @@ BEGIN TRY
 
 		SELECT Detail.intItemId
 			, Detail.dblUnits
+			, Detail.ysnBlendedItem
 		FROM tblTRLoadDistributionDetail Detail
 		LEFT JOIN tblTRLoadDistributionHeader Header ON Header.intLoadDistributionHeaderId = Detail.intLoadDistributionHeaderId
 		WHERE Detail.intLoadDistributionDetailId NOT IN (SELECT DISTINCT intLoadDistributionDetailId FROM vyuTRGetLoadBlendIngredient)
 			AND Header.intLoadHeaderId = @intLoadHeaderId
 			AND Detail.intItemId = @intItemId
-			AND Detail.ysnBlendedItem = 1
 
 		UNION ALL 
 
 		SELECT BlendIngredient.intSubstituteItemId
 			, dblQuantity = SUM(BlendIngredient.dblQuantity)
+			, ysnBlended = 1
 		FROM vyuTRGetLoadBlendIngredient BlendIngredient
 		LEFT JOIN tblMFRecipe Recipe ON Recipe.intRecipeId = BlendIngredient.intRecipeId
 		LEFT JOIN tblTRLoadDistributionHeader HeaderDistItem ON HeaderDistItem.intLoadDistributionHeaderId = BlendIngredient.intLoadDistributionHeaderId
@@ -308,22 +310,10 @@ BEGIN TRY
 			AND BlendIngredient.intSubstituteItemId = @intItemId
 		GROUP BY BlendIngredient.intSubstituteItemId
 
-		IF EXISTS (SELECT TOP 1 1 FROM #tmpBlendDistributionItems)
+		IF EXISTS (SELECT TOP 1 1 FROM #tmpBlendDistributionItems WHERE ysnBlended = 1)
 		BEGIN
 			SELECT @dblDistributedQuantity = SUM(dblQuantity) FROM #tmpBlendDistributionItems
-
-			if (@dblReceivedQuantity > @dblDistributedQuantity)
-			begin
-				set @dblNonBlendedDistributedQuantity = (SELECT sum(Detail.dblUnits)
-														FROM tblTRLoadDistributionDetail Detail
-														LEFT JOIN tblTRLoadDistributionHeader Header ON Header.intLoadDistributionHeaderId = Detail.intLoadDistributionHeaderId
-														WHERE Detail.intLoadDistributionDetailId NOT IN (SELECT DISTINCT intLoadDistributionDetailId FROM vyuTRGetLoadBlendIngredient)
-															AND Header.intLoadHeaderId = @intLoadHeaderId
-															AND Detail.intItemId = @intItemId);
-
-				set @dblReceivedQuantity = @dblReceivedQuantity - isnull(@dblNonBlendedDistributedQuantity,0);
-			end
-
+			
 			IF (@dblReceivedQuantity != @dblDistributedQuantity)
 			BEGIN
 				SET @strresult = 'Raw Materials ' + @strDescription + ' received quantity ' + LTRIM(@dblReceivedQuantity)  + ' does not match required quantity ' + LTRIM(@dblDistributedQuantity) + '.'
