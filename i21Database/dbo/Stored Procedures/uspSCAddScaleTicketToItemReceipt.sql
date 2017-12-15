@@ -101,6 +101,7 @@ INSERT into @ReceiptStagingTable(
 		,intSourceId
 		,intSourceType	
 		,strSourceScreenName
+		,strChargesLink
 )	
 SELECT 
 		strReceiptType				= CASE 
@@ -162,6 +163,7 @@ SELECT
 		,intSourceId				= SC.intTicketId
 		,intSourceType		 		= 1 -- Source type for scale is 1 
 		,strSourceScreenName		= 'Scale Ticket'
+		,strChargesLink				= 'CL-'+ CAST (LI.intId AS nvarchar(MAX)) 
 FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId INNER JOIN dbo.tblICItemUOM ItemUOM	ON ItemUOM.intItemId = SC.intItemId 
 		AND ItemUOM.intItemUOMId = @intTicketItemUOMId
 		INNER JOIN dbo.tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
@@ -210,6 +212,7 @@ WHERE SCTicket.intTicketId = @intTicketId
 				,[intContractDetailId] 
 				,[ysnAccrue]
 				,[ysnPrice]
+				,[strChargesLink]
 		)
 		SELECT	
 		[intEntityVendorId]					= RE.intEntityVendorId
@@ -284,6 +287,7 @@ WHERE SCTicket.intTicketId = @intTicketId
 												WHEN QM.dblDiscountAmount < 0 THEN 0
 												WHEN QM.dblDiscountAmount > 0 THEN 1
 											END
+		,[strChargesLink]					= RE.strChargesLink
 		FROM @ReceiptStagingTable RE
 		LEFT JOIN tblQMTicketDiscount QM ON QM.intTicketId = RE.intSourceId
 		LEFT JOIN tblGRDiscountScheduleCode GR ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
