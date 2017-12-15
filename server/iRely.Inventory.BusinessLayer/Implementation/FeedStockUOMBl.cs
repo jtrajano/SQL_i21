@@ -58,14 +58,17 @@ namespace iRely.Inventory.BusinessLayer
 
         public override BusinessResult<tblICRinFeedStockUOM> Validate(IEnumerable<tblICRinFeedStockUOM> entities, ValidateAction action)
         {
-            if (entities.Where(p => string.IsNullOrEmpty(p.strUnitMeasure)).Count() > 0)
+            if (action != ValidateAction.Delete && action != ValidateAction.SyncDelete)
             {
-                return new BusinessResult<tblICRinFeedStockUOM>()
+                if (entities.Where(p => string.IsNullOrEmpty(p.strUnitMeasure)).Count() > 0)
                 {
-                    data = entities,
-                    message = new MessageResult() { button = "Ok", status = Error.OtherException, statusText = "UOM must not be blank." },
-                    success = false
-                };
+                    return new BusinessResult<tblICRinFeedStockUOM>()
+                    {
+                        data = entities,
+                        message = new MessageResult() { button = "Ok", status = Error.OtherException, statusText = "UOM must not be blank." },
+                        success = false
+                    };
+                }
             }
             return base.Validate(entities, action);
         }
