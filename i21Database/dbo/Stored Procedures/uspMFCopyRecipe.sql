@@ -132,6 +132,7 @@ BEGIN TRY
 		,dblMargin
 		,ysnCostAppliedAtInvoice
 		,ysnPartialFillConsumption
+		,intManufacturingCellId
 		,intWorkOrderId
 		,intCreatedUserId
 		,dtmCreated
@@ -168,6 +169,7 @@ BEGIN TRY
 		,dblMargin
 		,ysnCostAppliedAtInvoice
 		,ysnPartialFillConsumption
+		,intManufacturingCellId
 		,@intWorkOrderId
 		,intCreatedUserId
 		,dtmCreated

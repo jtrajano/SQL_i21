@@ -34,6 +34,7 @@
 	[dblMargin] NUMERIC(18,6) NULL,
 	[ysnCostAppliedAtInvoice] BIT,
 	ysnPartialFillConsumption BIT NOT NULL CONSTRAINT [DF_tblMFWorkOrderRecipeItem_ysnPartialFillConsumption] DEFAULT 1,
+	[intManufacturingCellId] [int] NULL,
 	[intCreatedUserId] [int] NOT NULL,
 	[dtmCreated] [datetime] NOT NULL CONSTRAINT [DF_tblMFWorkOrderRecipeItem_dtmCreated] DEFAULT GetDate(),
 	[intLastModifiedUserId] [int] NOT NULL,
@@ -49,7 +50,8 @@
 	CONSTRAINT [FK_tblMFWorkOrderRecipeItem_tblMFRecipe_intRecipeId_intReferenceRecipeId] FOREIGN KEY ([intReferenceRecipeId]) REFERENCES [tblMFRecipe]([intRecipeId]), 
 	CONSTRAINT [FK_tblMFWorkOrderRecipeItem_tblSMCurrency_intCurrencyId_intLaborCostCurrencyId] FOREIGN KEY ([intLaborCostCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]), 
 	CONSTRAINT [FK_tblMFWorkOrderRecipeItem_tblSMCurrency_intCurrencyId_intOverheadCostCurrencyId] FOREIGN KEY ([intOverheadCostCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
-	CONSTRAINT [FK_tblMFWorkOrderRecipeItem_tblMFWorkOrder_intWorkOrderId] FOREIGN KEY ([intWorkOrderId]) REFERENCES [tblMFWorkOrder]([intWorkOrderId])
+	CONSTRAINT [FK_tblMFWorkOrderRecipeItem_tblMFWorkOrder_intWorkOrderId] FOREIGN KEY ([intWorkOrderId]) REFERENCES [tblMFWorkOrder]([intWorkOrderId]),
+	CONSTRAINT [FK_tblMFWorkOrderRecipeItem_tblMFManufacturingCell_intManufacturingCellId] FOREIGN KEY ([intManufacturingCellId]) REFERENCES [tblMFManufacturingCell]([intManufacturingCellId]),
 )
 
 GO

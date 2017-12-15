@@ -33,6 +33,7 @@
 	[strDocumentNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[intSequenceNo] INT NULL,
 	ysnPartialFillConsumption BIT NOT NULL CONSTRAINT [DF_tblMFRecipeItem_ysnPartialFillConsumption] DEFAULT 1,
+	[intManufacturingCellId] [int] NULL,
 	[intCreatedUserId] [int] NOT NULL,
 	[dtmCreated] [datetime] NOT NULL CONSTRAINT [DF_tblMFRecipeItem_dtmCreated] DEFAULT GetDate(),
 	[intLastModifiedUserId] [int] NOT NULL,
@@ -47,7 +48,8 @@
 	CONSTRAINT [FK_tblMFRecipeItem_tblICStorageLocation_intStorageLocationId] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]),
 	CONSTRAINT [FK_tblMFRecipeItem_tblMFRecipe_intRecipeId_intReferenceRecipeId] FOREIGN KEY ([intReferenceRecipeId]) REFERENCES [tblMFRecipe]([intRecipeId]),
 	CONSTRAINT [FK_tblMFRecipeItem_tblMFMarginBy_intMarginById] FOREIGN KEY ([intMarginById]) REFERENCES [tblMFMarginBy]([intMarginById]),
-	CONSTRAINT [FK_tblMFRecipeItem_tblMFCommentType_intCommentTypeId] FOREIGN KEY ([intCommentTypeId]) REFERENCES [tblMFCommentType]([intCommentTypeId]) 
+	CONSTRAINT [FK_tblMFRecipeItem_tblMFCommentType_intCommentTypeId] FOREIGN KEY ([intCommentTypeId]) REFERENCES [tblMFCommentType]([intCommentTypeId]),
+	CONSTRAINT [FK_tblMFRecipeItem_tblMFManufacturingCell_intManufacturingCellId] FOREIGN KEY ([intManufacturingCellId]) REFERENCES [tblMFManufacturingCell]([intManufacturingCellId]),
 )
 
 GO
