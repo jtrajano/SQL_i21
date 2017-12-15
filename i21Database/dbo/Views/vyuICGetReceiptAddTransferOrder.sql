@@ -84,6 +84,7 @@ FROM (
 				AND ISNULL(t.dblQty, 0) <> 0 
 				AND ISNULL(t.dblQty, 0) < 0 
 				AND t.ysnIsUnposted = 0 
+				AND t.intItemId = d.intItemId
 
 			INNER JOIN dbo.tblICItem item
 				ON item.intItemId = d.intItemId
