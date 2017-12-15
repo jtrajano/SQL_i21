@@ -517,7 +517,7 @@ BEGIN
 						ITM.strDescription,
 						NULL,
 						agstm_un,
-						agstm_lc'+CAST(@cnt AS NVARCHAR)+'_amt/ptstm_un,
+						agstm_lc'+CAST(@cnt AS NVARCHAR)+'_amt/agstm_un,
 						agstm_lc'+CAST(@cnt AS NVARCHAR)+'_amt
 					FROM agstmmst
 					INNER JOIN tblARInvoice INV ON INV.strShipToAddress COLLATE Latin1_General_CI_AS = LTRIM(RTRIM(agstm_ivc_no COLLATE Latin1_General_CI_AS)) + LTRIM(RTRIM(agstm_bill_to_cus COLLATE Latin1_General_CI_AS))
