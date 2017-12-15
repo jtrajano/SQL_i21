@@ -24,6 +24,7 @@ AS
 		ON A.intEntityCustomerId =  C.intEntityId
 	INNER JOIN tblBBCustomerLocationXref D
 		ON A.intShipToLocationId = D.intEntityLocationId
+			AND C.intVendorSetupId = D.intVendorSetupId
 	INNER JOIN tblEMEntity E
 		ON C.intEntityId = E.intEntityId
 	INNER JOIN tblEMEntityLocation F
