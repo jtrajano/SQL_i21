@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspMFReportLidlUCCPalletLabel @xmlParam NVARCHAR(MAX) = NULL
+﻿CREATE PROCEDURE uspMFReportLidlUCCPalletLabelWithoutWeight @xmlParam NVARCHAR(MAX) = NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -193,21 +193,32 @@ BEGIN TRY
 					WHERE OM.intOrderManifestId = @intOrderManifestId
 
 					-- Bar Code 2
-					SELECT @strBarcodeLabel2 = @strSecondBarcodeStart + dbo.[fnMFConvertNumberToString](Convert(NUMERIC(18, 0), L.dblQty * I.dblUnitPerCase), 2, 6) + @strSecondBarcodeFollowGrossWeight + dbo.[fnMFConvertNumberToString](Convert(NUMERIC(18, 0), L.dblWeight), 2, 6) + @strSecondBarcodeEnd + LTRIM(I.intInnerUnits)
-						,@strBarcode2 = REPLACE(REPLACE(@strGS1SpecialCode + @strSecondBarcodeStart + dbo.[fnMFConvertNumberToString](Convert(NUMERIC(18, 0), L.dblQty * I.dblUnitPerCase), 2, 6) + @strSecondBarcodeFollowGrossWeight + dbo.[fnMFConvertNumberToString](Convert(NUMERIC(18, 0), L.dblWeight), 2, 6) + @strSecondBarcodeEnd + LTRIM(I.intInnerUnits), '(', ''), ')', '')
-					FROM tblMFOrderManifest OM
-					JOIN tblICLot L ON L.intLotId = OM.intLotId
-					JOIN tblICItem I ON I.intItemId = L.intItemId
-					LEFT JOIN tblMFWorkOrderProducedLot WPL ON WPL.intLotId = L.intLotId
-					WHERE OM.intOrderManifestId = @intOrderManifestId
+					--SELECT @strBarcodeLabel2 = @strSecondBarcodeStart + dbo.[fnMFConvertNumberToString](Convert(NUMERIC(18, 0), L.dblQty * I.dblUnitPerCase), 2, 6) + @strSecondBarcodeFollowGrossWeight + dbo.[fnMFConvertNumberToString](Convert(NUMERIC(18, 0), L.dblWeight), 2, 6) + @strSecondBarcodeEnd + LTRIM(I.intInnerUnits)
+					--	,@strBarcode2 = REPLACE(REPLACE(@strGS1SpecialCode + @strSecondBarcodeStart + dbo.[fnMFConvertNumberToString](Convert(NUMERIC(18, 0), L.dblQty * I.dblUnitPerCase), 2, 6) + @strSecondBarcodeFollowGrossWeight + dbo.[fnMFConvertNumberToString](Convert(NUMERIC(18, 0), L.dblWeight), 2, 6) + @strSecondBarcodeEnd + LTRIM(I.intInnerUnits), '(', ''), ')', '')
+					--FROM tblMFOrderManifest OM
+					--JOIN tblICLot L ON L.intLotId = OM.intLotId
+					--JOIN tblICItem I ON I.intItemId = L.intItemId
+					--LEFT JOIN tblMFWorkOrderProducedLot WPL ON WPL.intLotId = L.intLotId
+					--WHERE OM.intOrderManifestId = @intOrderManifestId
 
 					-- Bar Code 3
-					SELECT @strBarcodeLabel3 = @strThirdBarcodeStart + Right(Ltrim(RTrim(REPLACE(REPLACE(REPLACE(OML.strSSCCNo, '(', ''), ')', ''), ' ', ''))), 18)
-						,@strBarcode3 = REPLACE(REPLACE(@strGS1SpecialCode + @strThirdBarcodeStart + Right(Ltrim(RTrim(REPLACE(REPLACE(REPLACE(OML.strSSCCNo, '(', ''), ')', ''), ' ', ''))), 18), '(', ''), ')', '')
+					--SELECT @strBarcodeLabel3 = @strThirdBarcodeStart + Right(Ltrim(RTrim(REPLACE(REPLACE(REPLACE(OML.strSSCCNo, '(', ''), ')', ''), ' ', ''))), 18)
+					--	,@strBarcode3 = REPLACE(REPLACE(@strGS1SpecialCode + @strThirdBarcodeStart + Right(Ltrim(RTrim(REPLACE(REPLACE(REPLACE(OML.strSSCCNo, '(', ''), ')', ''), ' ', ''))), 18), '(', ''), ')', '')
+					--FROM tblMFOrderManifest OM
+					--JOIN tblMFOrderManifestLabel OML ON OML.intOrderManifestId = OM.intOrderManifestId
+					--	AND OML.ysnPrinted = 0
+					--	AND OML.intCustomerLabelTypeId = @intCustomerLabelTypeId
+					--WHERE OM.intOrderManifestId = @intOrderManifestId
+
+					-- Bar Code 3
+					SELECT @strBarcodeLabel2 = @strSecondBarcodeStart + Right(Ltrim(RTrim(REPLACE(REPLACE(REPLACE(OML.strSSCCNo, '(', ''), ')', ''), ' ', ''))), 18) + @strSecondBarcodeEnd + LTRIM(I.intInnerUnits)
+						,@strBarcode2 = REPLACE(REPLACE(@strGS1SpecialCode + @strSecondBarcodeStart + Right(Ltrim(RTrim(REPLACE(REPLACE(REPLACE(OML.strSSCCNo, '(', ''), ')', ''), ' ', ''))), 18) + @strSecondBarcodeEnd + LTRIM(I.intInnerUnits), '(', ''), ')', '')
 					FROM tblMFOrderManifest OM
 					JOIN tblMFOrderManifestLabel OML ON OML.intOrderManifestId = OM.intOrderManifestId
 						AND OML.ysnPrinted = 0
 						AND OML.intCustomerLabelTypeId = @intCustomerLabelTypeId
+					JOIN tblICLot L ON L.intLotId = OM.intLotId
+					JOIN tblICItem I ON I.intItemId = L.intItemId
 					WHERE OM.intOrderManifestId = @intOrderManifestId
 
 					UPDATE tblMFOrderManifestLabel
@@ -311,7 +322,7 @@ BEGIN TRY
 END TRY
 
 BEGIN CATCH
-	SET @ErrMsg = 'uspMFReportLidlUCCPalletLabel - ' + ERROR_MESSAGE()
+	SET @ErrMsg = 'uspMFReportLidlUCCPalletLabelWithoutWeight - ' + ERROR_MESSAGE()
 
 	RAISERROR (
 			@ErrMsg

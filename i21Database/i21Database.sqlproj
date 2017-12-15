@@ -5458,6 +5458,7 @@
     <None Include="Scripts\Post-Deployment\IC\22_Update_Qty_Cost_For_ReceiptTaxes.sql" />
     <Build Include="dbo\Views\vyuAPOriginCCDTransaction.sql" />
     <Build Include="dbo\Views\vyuMFGetInventoryReceiptCustomField.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReportLidlUCCPalletLabelWithoutWeight.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
