@@ -57,10 +57,13 @@ END
 ELSE
 BEGIN
 	--- Validate if there are paid vouchers
+	IF(ISNULL(@ysnRecap, 0) = 0)
+	BEGIN
 	INSERT INTO @invalidRefundCustomer
 	SELECT	strError,
 			intTransactionId
 	FROM [dbo].[fnPATValidateAssociatedTransaction](@intRefundId, 5, default)
+	END
 END
 
 
@@ -115,7 +118,7 @@ END
 DECLARE @voucheredRefunds INT = 0;
 SELECT @voucheredRefunds = COUNT(*) FROM #tmpRefundData WHERE intBillId IS NOT NULL;
 
-IF(ISNULL(@ysnPosted,0) = 0 AND @voucheredRefunds > 0)
+IF(ISNULL(@ysnPosted,0) = 0 AND ISNULL(@ysnRecap, 0) = 0 AND @voucheredRefunds > 0)
 BEGIN
 
 	BEGIN TRY
