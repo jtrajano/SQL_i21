@@ -5775,6 +5775,7 @@
     <Build Include="dbo\Views\vyuMFGetInventoryReceiptCustomField.sql" />
     <None Include="Scripts\Post-Deployment\IC\23_Update_ActualCostId_On_InventoryTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportLidlUCCPalletLabelWithoutWeight.sql" />
+    <Build Include="dbo\Views\vyuRKM2MContractCost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
