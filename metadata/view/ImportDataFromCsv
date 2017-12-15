@@ -256,7 +256,6 @@
                                                 "itemId": "txtBrowseFile",
                                                 "layout|flex": 1,
                                                 "padding": 3,
-                                                "submitValue": true,
                                                 "width": 199
                                             },
                                             "configAlternates": {

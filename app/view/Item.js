@@ -263,7 +263,7 @@ Ext.define('Inventory.view.Item', {
                                                                 itemId: 'cboCommodity',
                                                                 fieldLabel: 'Commodity',
                                                                 displayField: 'strCommodityCode',
-                                                                valueField: 'intCommodityId'
+                                                                valueField: 'strCommodityCode'
                                                             },
                                                             {
                                                                 xtype: 'gridcombobox',
@@ -304,7 +304,7 @@ Ext.define('Inventory.view.Item', {
                                                                 itemId: 'cboCategory',
                                                                 fieldLabel: 'Category',
                                                                 displayField: 'strCategoryCode',
-                                                                valueField: 'intCategoryId'
+                                                                valueField: 'strCategoryCode'
                                                             },
                                                             {
                                                                 xtype: 'combobox',
