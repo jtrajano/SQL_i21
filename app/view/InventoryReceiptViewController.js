@@ -2829,22 +2829,22 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var selected = grd.getSelectionModel().getSelection();
         var context = win.context;
 
-        // Validate the selected charge record. 
+        // Validate the selected item record. 
         if (!selected || selected.length <= 0) {
-            iRely.Functions.showErrorDialog('Please select an Other Charge to view.');
+            iRely.Functions.showErrorDialog('Please select an Item to view.');
             return; 
         }
 
         // Get the current record. 
         var current = selected[0];        
-        if (!current) {
-            iRely.Functions.showErrorDialog('Please select an Other Charge to view.');
+        if (!current || current.dummy) {
+            iRely.Functions.showErrorDialog('Please select an Item to view.');
             return;             
         }
-                
-        var ReceiptItemId = current.get('intInventoryReceiptItemId');
 
         var showChargeTaxScreen = function () {
+            var ReceiptItemId = current.get('intInventoryReceiptItemId');
+
             iRely.Functions.openScreen('GlobalComponentEngine.view.FloatingSearch', {
                 searchSettings: {
                     scope: me,
@@ -6681,7 +6681,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         // Get the current record. 
         var current = selected[0];        
-        if (!current) {
+        if (!current || current.dummy) {
             iRely.Functions.showErrorDialog('Please select an Other Charge to view.');
             return;             
         }
