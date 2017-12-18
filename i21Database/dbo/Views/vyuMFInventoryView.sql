@@ -98,6 +98,7 @@ SELECT l.intLotId
 	,LI.strReceiptNumber As strReceiptNo
 	,LI.dtmReceiptDate
 	,CAST(Case When ((i.intUnitPerLayer *i.intLayerPerPallet>0) and (l.dblQty%(i.intUnitPerLayer *i.intLayerPerPallet)>0)) then 1 else 0 end AS BIT) AS ysnPartialPallet
+	,l.intUnitPallet
 FROM tblICLot l
 JOIN tblICItem i ON i.intItemId = l.intItemId
 JOIN tblICCategory ic ON ic.intCategoryId = i.intCategoryId
