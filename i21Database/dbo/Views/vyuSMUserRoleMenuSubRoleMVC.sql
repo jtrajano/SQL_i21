@@ -9,6 +9,6 @@ SELECT        ISNULL(SubRole.intUserRoleID, RoleMenu.intUserRoleId) AS intUserRo
 FROM            dbo.vyuSMUserRoleSubRole AS SubRole RIGHT OUTER JOIN
                          dbo.tblSMUserRoleMenu AS RoleMenu ON SubRole.intSubRoleId = RoleMenu.intUserRoleId INNER JOIN
                          dbo.tblSMMasterMenu AS Menu ON RoleMenu.intMenuId = Menu.intMenuID
-WHERE        (ISNULL(RoleMenu.ysnAvailable, 1) = 1)
+WHERE        (ISNULL(RoleMenu.ysnAvailable, 1) = 1) AND (RoleMenu.ysnVisible = 1)
 GROUP BY ISNULL(SubRole.intUserRoleID, RoleMenu.intUserRoleId), RoleMenu.intMenuId, Menu.intParentMenuID, Menu.intRow, Menu.strMenuName, Menu.strModuleName, Menu.strCategory, Menu.strType, Menu.strCommand, 
                          Menu.ysnIsLegacy
