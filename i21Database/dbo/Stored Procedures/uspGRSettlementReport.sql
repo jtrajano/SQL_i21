@@ -100,8 +100,9 @@ BEGIN
 	--------------------------------------------------------
 	-- FROM INVENTORY RECEIPT
 	--------------------------------------------------------
-	SELECT 
+	SELECT DISTINCT
 		 intBankAccountId = BNKTRN.intBankAccountId
+		,intBillDetailId  = BillDtl.intBillDetailId
 		,intTransactionId = BNKTRN.intTransactionId
 		,strTransactionId = BNKTRN.strTransactionId
 		,strCompanyName = COMPANY.strCompanyName
@@ -290,8 +291,9 @@ BEGIN
 	
 	UNION ALL
 	
-	SELECT 
+	SELECT DISTINCT 
 		 intBankAccountId = BNKTRN.intBankAccountId
+		,intBillDetailId  = BillDtl.intBillDetailId
 		,intTransactionId = BNKTRN.intTransactionId
 		,strTransactionId = BNKTRN.strTransactionId
 		,strCompanyName = COMPANY.strCompanyName
@@ -348,7 +350,7 @@ BEGIN
 		                     ELSE CNTRCT.strContractNumber
 		                 END
 		--,strContractNumber = CNTRCT.strContractNumber
-		,TotalDiscount =  ISNULL(tblOtherCharge.dblTotal, 0)
+		,TotalDiscount =  ISNULL(tblOtherCharge.dblTotal, 0) *(BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)
 		,NetDue = BillDtl.dblTotal + ISNULL(tblTax.dblTax, 0) + ISNULL(tblOtherCharge.dblTotal, 0) 
 		,strId = Bill.strBillId 
 		,intPaymentId = PYMT.intPaymentId
@@ -448,6 +450,12 @@ BEGIN
 				  WHERE intBillId IS NOT NULL
 				  GROUP BY intPaymentId
 			    ) PartialPayment ON PartialPayment.intPaymentId=PYMT.intPaymentId
+    LEFT JOIN (
+				SELECT A.intBillId,SUM(dblQtyOrdered) dblTotalQty
+				FROM tblAPBillDetail A
+				JOIN tblICItem B ON A.intItemId = B.intItemId  AND B.strType <> 'Other Charge'
+				GROUP BY A.intBillId
+		      ) tblInventory ON tblInventory.intBillId = BillDtl.intBillId
 
 	LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId=Item.intCommodityId
 	LEFT JOIN tblCTContractHeader CNTRCT ON BillDtl.intContractHeaderId = CNTRCT.intContractHeaderId
@@ -467,8 +475,9 @@ BEGIN
 	
 	UNION ALL
 	
-	SELECT 
+	SELECT DISTINCT
 		 intBankAccountId = BNKTRN.intBankAccountId
+		,intBillDetailId  = BillDtl.intBillDetailId
 		,intTransactionId = BNKTRN.intTransactionId
 		,strTransactionId = BNKTRN.strTransactionId
 		,strCompanyName = COMPANY.strCompanyName
@@ -525,7 +534,7 @@ BEGIN
 		                     ELSE CNTRCT.strContractNumber
 		                 END							  								 						 							  								  
 		--,strContractNumber = CNTRCT.strContractNumber
-		,TotalDiscount =  ISNULL(tblOtherCharge.dblTotal, 0)
+		,TotalDiscount = ISNULL(tblOtherCharge.dblTotal, 0) *(BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)
 		,NetDue = BillDtl.dblTotal + ISNULL(tblTax.dblTax, 0) + ISNULL(tblOtherCharge.dblTotal, 0) 
 		,strId = Bill.strBillId 
 		,intPaymentId = PYMT.intPaymentId
@@ -634,6 +643,12 @@ BEGIN
 				  WHERE intBillId IS NOT NULL
 				  GROUP BY intPaymentId
 			    ) PartialPayment ON PartialPayment.intPaymentId=PYMT.intPaymentId
+    LEFT JOIN (
+				SELECT A.intBillId,SUM(dblQtyOrdered) dblTotalQty
+				FROM tblAPBillDetail A
+				JOIN tblICItem B ON A.intItemId = B.intItemId  AND B.strType <> 'Other Charge'
+				GROUP BY A.intBillId
+		      ) tblInventory ON tblInventory.intBillId = BillDtl.intBillId
 
 	LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId=Item.intCommodityId
 	LEFT JOIN tblCTContractHeader CNTRCT ON BillDtl.intContractHeaderId = CNTRCT.intContractHeaderId
@@ -653,8 +668,9 @@ BEGIN
 	--------------------------------------------------------
 	-- FROM INVENTORY RECEIPT
 	--------------------------------------------------------
-	SELECT 
+	SELECT  DISTINCT 
 		 intBankAccountId = BNKTRN.intBankAccountId
+		,intBillDetailId  = BillDtl.intBillDetailId
 		,intTransactionId = BNKTRN.intTransactionId
 		,strTransactionId = BNKTRN.strTransactionId
 		,strCompanyName = COMPANY.strCompanyName
@@ -840,8 +856,9 @@ BEGIN
 	
 	UNION ALL
 	
-	SELECT 
+	SELECT DISTINCT
 		 intBankAccountId = BNKTRN.intBankAccountId
+		,intBillDetailId  = BillDtl.intBillDetailId
 		,intTransactionId = BNKTRN.intTransactionId
 		,strTransactionId = BNKTRN.strTransactionId
 		,strCompanyName = COMPANY.strCompanyName
@@ -898,7 +915,7 @@ BEGIN
 		                     ELSE CNTRCT.strContractNumber
 		                 END 
 		--,strContractNumber = CNTRCT.strContractNumber
-		,TotalDiscount = ISNULL(tblOtherCharge.dblTotal, 0) 
+		,TotalDiscount = ISNULL(tblOtherCharge.dblTotal, 0) *(BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)
 		,NetDue = BillDtl.dblTotal + ISNULL(tblTax.dblTax, 0) + ISNULL(tblOtherCharge.dblTotal, 0)
 		,strId = Bill.strBillId
 		,intPaymentId = PYMT.intPaymentId
@@ -995,7 +1012,12 @@ BEGIN
 				  WHERE intBillId IS NOT NULL
 				  GROUP BY intPaymentId
 			    ) PartialPayment ON PartialPayment.intPaymentId=PYMT.intPaymentId
-
+     LEFT JOIN (
+				SELECT A.intBillId,SUM(dblQtyOrdered) dblTotalQty
+				FROM tblAPBillDetail A
+				JOIN tblICItem B ON A.intItemId = B.intItemId  AND B.strType <> 'Other Charge'
+				GROUP BY A.intBillId
+		      ) tblInventory ON tblInventory.intBillId = BillDtl.intBillId
 	LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId=Item.intCommodityId
 	LEFT JOIN tblCTContractHeader CNTRCT ON BillDtl.intContractHeaderId = CNTRCT.intContractHeaderId
 	LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityId] = ISNULL(PYMT.[intEntityVendorId], BNKTRN.intEntityId)
@@ -1014,8 +1036,9 @@ BEGIN
 	
 	UNION ALL
 	
-	SELECT 
+	SELECT  DISTINCT
 		 intBankAccountId = BNKTRN.intBankAccountId
+		,intBillDetailId  = BillDtl.intBillDetailId
 		,intTransactionId = BNKTRN.intTransactionId
 		,strTransactionId = BNKTRN.strTransactionId
 		,strCompanyName = COMPANY.strCompanyName
@@ -1072,7 +1095,7 @@ BEGIN
 		                     ELSE CNTRCT.strContractNumber
 		                 END
 		--,strContractNumber = CNTRCT.strContractNumber
-		,TotalDiscount = ISNULL(tblOtherCharge.dblTotal, 0) 
+		,TotalDiscount =ISNULL(tblOtherCharge.dblTotal, 0) *(BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)   
 		,NetDue = BillDtl.dblTotal + ISNULL(tblTax.dblTax, 0) + ISNULL(tblOtherCharge.dblTotal, 0)
 		,strId = Bill.strBillId
 		,intPaymentId = PYMT.intPaymentId
@@ -1178,6 +1201,12 @@ BEGIN
 				  WHERE intBillId IS NOT NULL
 				  GROUP BY intPaymentId
 			    ) PartialPayment ON PartialPayment.intPaymentId=PYMT.intPaymentId
+    LEFT JOIN (
+				SELECT A.intBillId,SUM(dblQtyOrdered) dblTotalQty
+				FROM tblAPBillDetail A
+				JOIN tblICItem B ON A.intItemId = B.intItemId  AND B.strType <> 'Other Charge'
+				GROUP BY A.intBillId
+		      ) tblInventory ON tblInventory.intBillId = BillDtl.intBillId
 
 	LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId=Item.intCommodityId
 	LEFT JOIN tblCTContractHeader CNTRCT ON BillDtl.intContractHeaderId = CNTRCT.intContractHeaderId
