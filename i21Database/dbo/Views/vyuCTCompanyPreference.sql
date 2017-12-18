@@ -9,6 +9,8 @@ AS
 			CS.strContractStatus	AS	strDefContractStatus,
 			CT.strContainerType		AS	strDefContainerType,
 			EY.strName				AS	strDefSalesperson,
+			VI.strItemNo			AS	strVoucherItem,
+			II.strItemNo			AS	strInvoiceItem,
 			PC.strPriceCalculationType
 
 	FROM	tblCTCompanyPreference		CP LEFT
@@ -17,4 +19,6 @@ AS
 	JOIN	tblCTContractStatus			CS	ON	CS.intContractStatusId		=	CP.intDefContractStatusId	LEFT
 	JOIN	tblLGContainerType			CT	ON	CT.intContainerTypeId		=	CP.intDefContainerTypeId	LEFT
 	JOIN	tblEMEntity					EY	ON	EY.intEntityId				=	CP.intDefSalespersonId		LEFT
+	JOIN	tblICItem					VI	ON	VI.intItemId				=	CP.intVoucherItemId			LEFT
+	JOIN	tblICItem					II	ON	II.intItemId				=	CP.intInvoiceItemId			LEFT
 	JOIN	tblCTPriceCalculationType	PC	ON	PC.intPriceCalculationTypeId=	CP.intPriceCalculationTypeId

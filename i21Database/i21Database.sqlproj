@@ -6000,6 +6000,7 @@
     <Build Include="dbo\Tables\tblMFReportLabel.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportLidlUCCPalletLabelWithoutWeight.sql" />
     <Build Include="dbo\Views\vyuRKM2MContractCost.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTProcessBrkgCommn.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
