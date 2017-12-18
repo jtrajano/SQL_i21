@@ -6001,6 +6001,7 @@
     <Build Include="dbo\Stored Procedures\uspMFReportLidlUCCPalletLabelWithoutWeight.sql" />
     <Build Include="dbo\Views\vyuRKM2MContractCost.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProcessBrkgCommn.sql" />
+    <Build Include="dbo\Tables\tblSTUpdateRegisterHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
