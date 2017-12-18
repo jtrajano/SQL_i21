@@ -1157,7 +1157,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }
             var ReceiptItems = current.tblICInventoryReceiptItems();
 
-            me.validateWeightLoss(win);
+            me.calculateWtGainLoss(win);
             me.showSummaryTotals(win);
             me.showOtherCharges(win);
         }
@@ -1165,24 +1165,42 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
     updateWeightLossText: function(window, clear, weightLoss) {
         if (!window) return;
+
         weightLoss = weightLoss ? weightLoss : {
             dblWeightLoss: 0.00,
-            dblWeightLossPercentage: 0.00
+            dblWeightLossPercentage: 0.00,
+            dblFranchise: 0.00
         }; 
 
-        if(clear) {
-            window.down("#txtWeightLossMsgValue").setValue(0.00);
-            window.down("#txtWeightLossMsgPercent").setValue(0.00);
-        } else {
-            window.down("#txtWeightLossMsgValue").setValue(weightLoss.dblWeightLoss);
-            window.down("#txtWeightLossMsgPercent").setValue(weightLoss.dblWeightLossPercentage);
+        var txtWeightLossMsgValue =  window.down("#txtWeightLossMsgValue"); 
+        var txtWeightLossMsgPercent = window.down("#txtWeightLossMsgPercent"); 
 
+        if(clear) {
+            txtWeightLossMsgValue.setValue(0.00);
+            txtWeightLossMsgPercent.setValue(Ext.util.Format.number(0.00, "0,000.00%"));
+            
+            document.getElementsByName(txtWeightLossMsgValue.name)[0].style.color = 'gray';
+            document.getElementsByName(txtWeightLossMsgPercent.name)[0].style.color = 'gray';
+        } else {
+            txtWeightLossMsgValue.setValue(weightLoss.dblWeightLoss);
+            txtWeightLossMsgPercent.setValue(Ext.util.Format.number(weightLoss.dblWeightLossPercentage, "0,000.00%"));
+            
+            // If there is no Gain/Loss, set the color to gray. Otherwise, set it to Red.          
+            // Gray is the color of Readonly fields.   
             if (weightLoss.dblWeightLoss === 0) {
-                document.getElementsByName(window.down("#txtWeightLossMsgValue").name)[0].style.color = 'black';
+                document.getElementsByName(txtWeightLossMsgValue.name)[0].style.color = 'gray';
             }
             else {
-                document.getElementsByName(window.down("#txtWeightLossMsgValue").name)[0].style.color = 'red';
+                document.getElementsByName(txtWeightLossMsgValue.name)[0].style.color = 'red';
             }
+
+            // If there is percentage > franchise, set the color to red, Otherwise, set it to Gray. 
+            if (weightLoss.dblFranchise !=0 && Math.abs(weightLoss.dblWeightLossPercentage) > Math.abs(weightLoss.dblFranchise)) { 
+                document.getElementsByName(txtWeightLossMsgPercent.name)[0].style.color = 'red';
+            }
+            else {
+                document.getElementsByName(txtWeightLossMsgPercent.name)[0].style.color = 'gray';
+            }            
         }
     },
 
@@ -3460,7 +3478,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         // Validate the gross and net variance.
         vw.data.currentReceiptItem = currentReceiptItem;
         if (context.field === 'dblGross' || context.field === 'dblNet') {
-            me.validateWeightLoss(win)
+            me.calculateWtGainLoss(win)
         }
 
         // Calculate the taxes
@@ -4717,6 +4735,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 });
                 task.delay(1);    
             }
+
+            // Calcualte the Weight Gain/Loss per line item. 
+            me.calculateWtGainLoss(win);
         }
     },
 
@@ -5587,7 +5608,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 me.calculateItemTaxes();
 
                                 // Calculate the Wgt or Volume Gain/Loss 
-                                me.validateWeightLoss(win);
+                                me.calculateWtGainLoss(win);
 
                                 if (ReceiptType === 'Purchase Contract') {
                                     ContractStore.load({
@@ -6104,20 +6125,23 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     },
 
     getWeightLoss: function (ReceiptItems, sourceType) {
+        if (!ReceiptItems || ReceiptItems.length <= 0) return; 
+
         var me = this; 
         var dblWeightLoss = 0.00;
-        var dblNetShippedWt = 0;
+        var dblOrderNetShippedWt = 0;
         var dblNetReceivedWt = 0;
         var dblFranchise = 0;
         var dblWeightLossPercentage = 0;
 
         var dblTotalWeightLoss = 0.00;
-        var dblTotalNetShippedWt = 0.00;
-        var dblTotalReceivedWt = 0.00;        
+        var dblTotalOrderNetShippedWt = 0.00;
+        var dblTotalReceivedWt = 0.00;  
+        var dblTotalFranchise = 0.00;
 
         // Check if item is Inbound Shipment
         if (sourceType === 2) {
-            Ext.Array.each(ReceiptItems.data.items, function (item) {
+            Ext.Array.each(ReceiptItems, function (item) {
                 if (!item.dummy) {
                     // Get the Net Wgt. 
                     var dblNetReceivedWt = item.get('dblNet');
@@ -6129,47 +6153,59 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     
                     orderQty = orderQty ? orderQty : 0.00;
                     wgtQty = wgtQty ? wgtQty : 0.00;
-                    dblNetShippedWt = orderQty * wgtQty;
+                    dblOrderNetShippedWt = orderQty * wgtQty;
 
                     // Convert the Logistic Wgt UOM to the IR Wgt UOM.                     
                     var dblShippedWeightUOMConvFactor = item.get('dblContainerWeightUOMConvFactor');
                     var dblWeightUOMConvFactor = item.get('dblWeightUOMConvFactor');
                     dblShippedWeightUOMConvFactor = dblShippedWeightUOMConvFactor ? dblShippedWeightUOMConvFactor : 0.00;
                     dblWeightUOMConvFactor = dblWeightUOMConvFactor ? dblWeightUOMConvFactor : 0.00;
+
+                    dblFranchise = item.get('dblFranchise');
+                    dblFranchise = Ext.isNumeric(dblFranchise) ? dblFranchise * 100 : 0.00;                   
                     
                     if (dblShippedWeightUOMConvFactor != dblWeightUOMConvFactor){
-                        dblNetShippedWt = me.convertQtyBetweenUOM(
+                        dblOrderNetShippedWt = me.convertQtyBetweenUOM(
                             dblShippedWeightUOMConvFactor, 
                             dblWeightUOMConvFactor, 
-                            dblNetShippedWt
+                            dblOrderNetShippedWt
                         );
                     }                   
                     
                     dblTotalReceivedWt += dblNetReceivedWt; 
-                    dblTotalNetShippedWt += dblNetShippedWt;                    
-                    dblTotalWeightLoss += (dblNetReceivedWt - dblNetShippedWt);
+                    dblTotalOrderNetShippedWt += dblOrderNetShippedWt;                    
+                    dblTotalWeightLoss += dblOrderNetShippedWt != 0.00 ? (dblNetReceivedWt - dblOrderNetShippedWt) : 0.00;
+                    dblTotalFranchise += dblFranchise; 
                 }
             });
         }
 
         dblTotalWeightLoss = ic.utils.Math.round(dblTotalWeightLoss, 2);
+        dblTotalWeightLoss = dblTotalWeightLoss ? dblTotalWeightLoss : 0.00; 
+
         dblWeightLossPercentage = ic.utils.Math.round(
-            dblTotalNetShippedWt != 0 ? (dblTotalReceivedWt - dblTotalNetShippedWt) / dblTotalNetShippedWt * 100 : 0.00
+            dblTotalOrderNetShippedWt != 0 ? (dblTotalReceivedWt - dblTotalOrderNetShippedWt) / dblTotalOrderNetShippedWt * 100 : 0.00
             , 2
         );
+        dblWeightLossPercentage = dblWeightLossPercentage ? dblWeightLossPercentage : 0.00; 
+
+        dblTotalFranchise = ic.utils.Math.round(dblTotalFranchise, 2);
+        dblTotalFranchise = dblTotalFranchise ? dblTotalFranchise : 0.00;        
 
         return {
             dblWeightLoss: dblTotalWeightLoss,
-            dblWeightLossPercentage: dblWeightLossPercentage
+            dblWeightLossPercentage: dblWeightLossPercentage,
+            dblFranchise: dblTotalFranchise
         };
     },
 
-    validateWeightLoss: function (win, ReceiptItems) {
-        win.viewModel.data.weightLoss = 0;
+    calculateWtGainLoss: function (win) {
+        if (!win) return;        
+
         var me = this;
-
-        var ReceiptItems = win.viewModel.data.current.tblICInventoryReceiptItems();
-
+        var grdInventoryReceipt = win.down('#grdInventoryReceipt'); 
+        var ReceiptItems = grdInventoryReceipt.getSelectionModel().getSelection();       
+        
         var current = win.viewModel.data.current;
         var sourceType = current.get('intSourceType');
 
@@ -6178,7 +6214,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             win.viewModel.set('weightLoss', weightLoss);
             me.updateWeightLossText(win, false, weightLoss);
         }
-
     },
 
     doOtherChargeTaxCalculate: function (win) {

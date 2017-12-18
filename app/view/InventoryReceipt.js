@@ -2490,7 +2490,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         items: [
                                                                             {
                                                                                 xtype: 'numberfield',
-                                                                                quantityField: true,
+                                                                                quantityField: false,
                                                                                 itemId: 'txtWeightLossMsgValue',
                                                                                 tabIndex: -1,
                                                                                 fieldLabel: 'Gain/Loss:',
@@ -2498,12 +2498,13 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 readOnly: true
                                                                             },
                                                                             {
-                                                                                xtype: 'numberfield',
-                                                                                quantityField: true,
+                                                                                xtype: 'textfield',
+                                                                                quantityField: false,
                                                                                 itemId: 'txtWeightLossMsgPercent',
                                                                                 tabIndex: -1,
                                                                                 fieldLabel: 'Gain/Loss (%):',
                                                                                 value: 0.00,
+                                                                                fieldStyle: 'text-align: right;',
                                                                                 readOnly: true
                                                                             }
                                                                         ]

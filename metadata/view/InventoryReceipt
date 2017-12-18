@@ -6850,7 +6850,7 @@
                                                                         "inputWrapCls": null,
                                                                         "itemId": "txtWeightLossMsgValue",
                                                                         "layout|flex": null,
-                                                                        "quantityField": true,
+                                                                        "quantityField": false,
                                                                         "readOnly": true,
                                                                         "readOnlyCls": null,
                                                                         "tabIndex": -1,
@@ -6885,7 +6885,7 @@
                                                                     ]
                                                                 },
                                                                 {
-                                                                    "type": "Ext.form.field.Number",
+                                                                    "type": "Ext.form.field.Text",
                                                                     "reference": {
                                                                         "name": "items",
                                                                         "type": "array"
@@ -6893,11 +6893,11 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "fieldLabel": "Gain/Loss (%):",
-                                                                        "fieldStyle": null,
+                                                                        "fieldStyle": "text-align: right;",
                                                                         "inputWrapCls": null,
                                                                         "itemId": "txtWeightLossMsgPercent",
                                                                         "layout|flex": null,
-                                                                        "quantityField": true,
+                                                                        "quantityField": false,
                                                                         "readOnly": true,
                                                                         "readOnlyCls": null,
                                                                         "tabIndex": -1,
@@ -6921,7 +6921,7 @@
                                                                         "width": "auto",
                                                                         "scrollable": "boolean"
                                                                     },
-                                                                    "name": "MyNumberField2",
+                                                                    "name": "MyTextField14",
                                                                     "designerId": "7f73afbc-25ce-4343-a9c0-e5eda13f5afb",
                                                                     "customConfigs": [
                                                                         {
