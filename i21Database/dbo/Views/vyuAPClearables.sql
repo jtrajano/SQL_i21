@@ -89,9 +89,9 @@ SELECT DISTINCT
 	, Bill.ysnPaid
 	, strTerm = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN Bill.strTerm ELSE '' END 
 	,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
-	,dblQtyToReceive = 1 
-	,dblQtyVouchered = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN 1 ELSE 0 END 
-	,dblQtyToVoucher = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN 0 ELSE 1 END 
+	,dblQtyToReceive = ISNULL(ReceiptCharge.dblQuantity,1)
+	,dblQtyVouchered = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN ISNULL(ReceiptCharge.dblQuantity,1) ELSE 0 END 
+	,dblQtyToVoucher = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN 0 ELSE ISNULL(ReceiptCharge.dblQuantity,1) END 
 	,dblAmountToVoucher = CAST(((ISNULL(dblAmount,0)) + (ISNULL(dblTax,0))) AS DECIMAL (18,2)) 
 	, 0 AS dblChargeAmount	
 	, ''AS strContainer
@@ -162,9 +162,9 @@ SELECT DISTINCT
 	, Bill.ysnPaid
 	, strTerm = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN Bill.strTerm ELSE '' END 
 	,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
-	, dblQtyToReceive = -1 
-	, dblQtyVouchered = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN -1 ELSE 0 END 
-	, dblQtyToVoucher = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN 0 ELSE -1 END 
+	, dblQtyToReceive = ISNULL(-ReceiptCharge.dblQuantity,-1)
+	, dblQtyVouchered = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN ISNULL(-ReceiptCharge.dblQuantity,-1) ELSE 0 END 
+	, dblQtyToVoucher = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN 0 ELSE ISNULL(-ReceiptCharge.dblQuantity,-1) END 
 	, dblAmountToVoucher = CAST(( (ISNULL(dblAmount,0)* -1) + (ISNULL(dblTax,0)* -1)) AS DECIMAL (18,2)) 
 	, 0 AS dblChargeAmount	
 	, ''AS strContainer
@@ -235,9 +235,9 @@ SELECT DISTINCT
 	, Bill.ysnPaid
 	, strTerm = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN Bill.strTerm ELSE '' END 
 	,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
-	, dblQtyToReceive = 1
-	, dblQtyVouchered = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN 1 ELSE 0 END 
-	, dblQtyToVoucher = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN 0 ELSE 1 END 
+	, dblQtyToReceive = ISNULL(ReceiptCharge.dblQuantity,1)
+	, dblQtyVouchered = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN ISNULL(ReceiptCharge.dblQuantity,1) ELSE 0 END 
+	, dblQtyToVoucher = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN 0 ELSE ISNULL(ReceiptCharge.dblQuantity,1) END 
 	, dblAmountToVoucher =  CAST(((ISNULL(dblAmount,0)) + (ISNULL(ReceiptCharge.dblTax,0))) AS DECIMAL (18,2)) 
 	, 0 AS dblChargeAmount	
 	, ''AS strContainer
@@ -311,9 +311,9 @@ SELECT DISTINCT
 	, Bill.ysnPaid
 	, strTerm = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN Bill.strTerm ELSE '' END 
 	,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
-	, dblQtyToReceive = 1
-	, dblQtyVouchered = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN 1 ELSE 0 END 
-	, dblQtyToVoucher = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN 0 ELSE 1 END 
+	, dblQtyToReceive = ISNULL(ShipmentCharge.dblQuantity,1)
+	, dblQtyVouchered = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN ISNULL(ShipmentCharge.dblQuantity,1) ELSE 0 END 
+	, dblQtyToVoucher = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN 0 ELSE ISNULL(ShipmentCharge.dblQuantity,1) END 
 	, dblAmountToVoucher =  CAST(((ISNULL(dblAmount,0)) /*+ (ISNULL(ReceiptCharge.dblTax,0))*/) AS DECIMAL (18,2)) 
 	, 0 AS dblChargeAmount	
 	, ''AS strContainer
