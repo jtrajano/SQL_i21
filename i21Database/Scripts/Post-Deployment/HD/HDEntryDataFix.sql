@@ -444,4 +444,16 @@ GO
 
 GO
 	PRINT N'End decrypting Help Desk Ticket comment.'
+	PRINT N'Start updating Help Desk Ticket comment image link.'
+GO
+
+	IF NOT EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblHDTicketComment' AND COLUMN_NAME = 'intUpdateImageLink')
+	begin
+		alter table tblHDTicketComment add intUpdateImageLink int null;
+	end
+
+	exec('update tblHDTicketComment set strComment = replace(replace(strComment,''../HelpDesk/redactorUpload'',''./Export/CRM''),''HelpDesk/redactorUpload'',''Export/CRM''), intUpdateImageLink = 1 where intUpdateImageLink is null');
+
+GO
+	PRINT N'End updating Help Desk Ticket comment image link.'
 GO
