@@ -30,8 +30,8 @@ FROM (
 		, intCommodityId			= LogisticsView.intPCommodityId
 		, intContainerId			= LogisticsView.intLoadContainerId
 		, strContainer				= LogisticsView.strContainerNumber
-		, intSubLocationId			= LogisticsView.intPSubLocationId
-		, strSubLocationName		= subLocation.strSubLocationName
+		, intSubLocationId			= ISNULL(LogisticsView.intSubLocationId, LogisticsView.intPSubLocationId) 
+		, strSubLocationName		= CASE WHEN LogisticsView.intSubLocationId IS NOT NULL THEN LogisticsView.strSubLocationName ELSE OrdersSubLocation.strSubLocationName END 
 		, intStorageLocationId		= LogisticsView.intStorageLocationId
 		, strStorageLocationName	= LogisticsView.strStorageLocationName 
 		, intOrderUOMId				= ItemUOM.intItemUOMId
@@ -91,7 +91,7 @@ FROM (
 				ON ItemLocation.intItemId = LogisticsView.intItemId AND ItemLocation.intLocationId = LogisticsView.intCompanyLocationId
 			LEFT JOIN tblLGLoadContainer LC 
 				ON LC.intLoadContainerId = LogisticsView.intLoadContainerId
-			LEFT JOIN tblSMCompanyLocationSubLocation subLocation ON subLocation.intCompanyLocationSubLocationId = LogisticsView.intPSubLocationId
+			LEFT JOIN tblSMCompanyLocationSubLocation OrdersSubLocation ON OrdersSubLocation.intCompanyLocationSubLocationId = LogisticsView.intPSubLocationId
 			LEFT JOIN tblSMCurrencyExchangeRateType currencyType ON currencyType.intCurrencyExchangeRateTypeId = LogisticsView.intForexRateTypeId
 
 			OUTER APPLY (
