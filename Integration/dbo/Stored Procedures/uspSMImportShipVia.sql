@@ -104,7 +104,8 @@ BEGIN
 		Declare @EntityContactId	int
 		DECLARE @EntityLocationId	int
 
-
+		SET @ysnIsDefault = 1
+		SET @strLocationName = LTRIM(RTRIM(@strLocationName))
 
 		IF EXISTS(SELECT TOP 1 1 FROM tblEMEntity where LTRIM(RTRIM(strEntityNo)) = RTRIM(LTRIM(@CurKey))  )
 		BEGIN
@@ -182,7 +183,7 @@ BEGIN
 		WHILE EXISTS(SELECT TOP 1 1 FROM tblEMEntityLocation where intEntityId = @EntityId and strLocationName = @strLocationName)
 		BEGIN
 			SET @LocCount = @LocCount + 1 
-			SET @strLocationName = @strLocationName + CAST(@LocCount as Nvarchar(2))
+			SET @strLocationName = LTRIM(RTRIM(@strLocationName)) + CAST(@LocCount as Nvarchar(2))
 			
 		END
 
