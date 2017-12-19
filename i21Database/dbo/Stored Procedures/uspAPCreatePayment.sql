@@ -382,13 +382,12 @@ BEGIN
 	--  ) Withheld
 	-- WHERE A.intPaymentId = @paymentId
 
-	--UNDO THE DISCOUNT AFTER CREATING PAYMENT AS WE ARE UPDATING THE DISCOUNT OF VOUCHER ONCE PAYMENT IS POSTED
-	--UPDATE A
-	--	SET dblDiscount = 0, dblInterest = 0
-	--FROM tblAPBill A
-	--WHERE A.intBillId IN (SELECT intID FROM #tmpBillsId)
-	--AND A.ysnPaid = 0
+	--UNDO THE DISCOUNT AFTER CREATING PAYMENT AS WE ARE UPDATING THE INTEREST OF VOUCHER ONCE PAYMENT IS POSTED
+	UPDATE A
+		SET dblInterest = 0
+	FROM tblAPBill A
+	WHERE A.intBillId IN (SELECT intID FROM #tmpBillsId)
+	AND A.ysnPaid = 0
 
-		 
 	 SET @createdPaymentId = @paymentId
 END
