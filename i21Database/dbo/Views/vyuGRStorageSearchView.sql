@@ -8,7 +8,9 @@ SELECT TOP 100 PERCENT
 ,strName					  = E.strName  
 ,strStorageTicketNumber		  = CS.strStorageTicketNumber
 ,intStorageTypeId			  = CS.intStorageTypeId
-,strStorageTypeDescription	  = ST.strStorageTypeDescription 
+,strStorageTypeDescription	  = ST.strStorageTypeDescription
+,intCommodityId				  = CS.intCommodityId
+,strCommodityCode			  = Commodity.strCommodityCode 
 ,intItemId					  = CS.intItemId  
 ,strItemNo					  = Item.strItemNo   
 ,intCompanyLocationId		  = CS.intCompanyLocationId
@@ -37,10 +39,12 @@ SELECT TOP 100 PERCENT
 ,strContractNumber			  = CH.strContractNumber
 ,strDeliverySheetNumber		  = DeliverySheet.strDeliverySheetNumber
 ,dtmLastStorageAccrueDate	  = CS.dtmLastStorageAccrueDate
+,dblSplitPercent			  = ISNULL(SCTicketSplit.dblSplitPercent,100)
 FROM tblGRCustomerStorage       CS  
 JOIN tblSMCompanyLocation       LOC				ON LOC.intCompanyLocationId			= CS.intCompanyLocationId  
 JOIN tblGRStorageType	        ST				ON ST.intStorageScheduleTypeId		= CS.intStorageTypeId  
 JOIN tblICItem			        Item			ON Item.intItemId					= CS.intItemId
+JOIN tblICCommodity			    Commodity		ON Commodity.intCommodityId			= CS.intCommodityId
 JOIN tblICCommodityUnitMeasure  CU				ON CU.intCommodityId				= CS.intCommodityId AND CU.ysnStockUnit=1  
 JOIN tblEMEntity				E			    ON E.intEntityId					= CS.intEntityId
 JOIN tblGRStorageScheduleRule   SR				ON SR.intStorageScheduleRuleId		= CS.intStorageScheduleId

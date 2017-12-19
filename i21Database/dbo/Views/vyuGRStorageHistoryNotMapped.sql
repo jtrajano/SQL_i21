@@ -22,14 +22,20 @@ SELECT
 						  END
 ,strReceiptNumber		= Receipt.strReceiptNumber
 ,intInventoryShipmentId = SH.intInventoryShipmentId
-,strShipmentNumber      = Shipment.strShipmentNumber 
-FROM tblGRStorageHistory SH
-LEFT JOIN tblEMEntity E ON E.intEntityId = SH.intEntityId
-LEFT JOIN tblSMCompanyLocation LOC ON LOC.intCompanyLocationId = SH.intCompanyLocationId
-LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId=SH.intContractHeaderId
-LEFT JOIN tblARInvoice Inv ON Inv.intInvoiceId=SH.intInvoiceId
-LEFT JOIN tblAPBill Bill ON Bill.intBillId=SH.intBillId
-LEFT JOIN tblGRSettleStorage SettleStorage ON SettleStorage.intSettleStorageId=SH.intSettleStorageId
-LEFT JOIN tblSCDeliverySheet DS ON DS.intDeliverySheetId=SH.intDeliverySheetId
-LEFT JOIN  tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId=SH.intInventoryReceiptId
-LEFT JOIN  tblICInventoryShipment Shipment ON Shipment.intInventoryShipmentId=SH.intInventoryShipmentId
+,strShipmentNumber      = Shipment.strShipmentNumber
+,strSplitNumber			= EMSplit.strSplitNumber
+,dblSplitPercent	    = ISNULL(SCTicketSplit.dblSplitPercent,100) 
+FROM tblGRStorageHistory		  SH
+JOIN tblGRCustomerStorage		  CS				ON CS.intCustomerStorageId			= SH.intCustomerStorageId
+LEFT JOIN tblEMEntity			  E					ON E.intEntityId					= SH.intEntityId
+LEFT JOIN tblSMCompanyLocation	  LOC				ON LOC.intCompanyLocationId			= SH.intCompanyLocationId
+LEFT JOIN tblCTContractHeader	  CH				ON CH.intContractHeaderId			= SH.intContractHeaderId
+LEFT JOIN tblARInvoice			  Inv				ON Inv.intInvoiceId					= SH.intInvoiceId
+LEFT JOIN tblAPBill				  Bill				ON Bill.intBillId					= SH.intBillId
+LEFT JOIN tblGRSettleStorage	  SettleStorage		ON SettleStorage.intSettleStorageId = SH.intSettleStorageId
+LEFT JOIN tblSCDeliverySheet	  DS				ON DS.intDeliverySheetId		    = SH.intDeliverySheetId
+LEFT JOIN tblICInventoryReceipt   Receipt			ON Receipt.intInventoryReceiptId	= SH.intInventoryReceiptId
+LEFT JOIN tblICInventoryShipment  Shipment			ON Shipment.intInventoryShipmentId  = SH.intInventoryShipmentId
+LEFT JOIN tblSCTicket		      SC				ON SC.intTicketId					= SH.intTicketId AND SH.strType IN('From Scale','From Transfer','From Delivery Sheet')
+LEFT JOIN tblSCTicketSplit	      SCTicketSplit	    ON SCTicketSplit.intTicketId		= CS.intTicketId AND SCTicketSplit.intCustomerId = CS.intEntityId AND SCTicketSplit.intStorageScheduleTypeId=CS.intStorageTypeId
+LEFT JOIN tblEMEntitySplit		  EMSplit		    ON EMSplit.intSplitId				= SC.intSplitId
