@@ -36,6 +36,9 @@ BEGIN TRY
 		,@intCustomTabDetailId INT
 		,@strReceiptNumber NVARCHAR(50)
 
+	UPDATE tblMFEDI943
+	SET strDepositorOrderNumber = REPLACE(LTRIM(REPLACE(strDepositorOrderNumber, '0', ' ')), ' ', '0')
+
 	DECLARE @ReceiptStagingTable ReceiptStagingTable
 	DECLARE @OtherCharges ReceiptOtherChargesTableType
 	DECLARE @tblMFOrderNo TABLE (
@@ -282,7 +285,7 @@ BEGIN TRY
 
 			SELECT @intEntityLocationId = intEntityLocationId
 			FROM tblEMEntityLocation
-			WHERE strFax = @strCustomerCode
+			WHERE strCheckPayeeName  = @strCustomerCode
 
 			IF @intEntityLocationId IS NULL
 			BEGIN
@@ -465,7 +468,7 @@ BEGIN TRY
 						,intConcurrencyId
 						)
 					SELECT @intEntityId
-						,'Customer'
+						,'Vendor'
 						,1
 
 					INSERT INTO tblAPVendor (
@@ -515,7 +518,7 @@ BEGIN TRY
 					,ysnActive
 					,strTimezone
 					,intConcurrencyId
-					,strFax
+					,strCheckPayeeName
 					)
 				SELECT TOP 1 @intEntityId intEntityId
 					,strShipToState + ' ' + Ltrim(IsNULL((
@@ -524,7 +527,7 @@ BEGIN TRY
 								JOIN tblEMEntityType ET ON ET.intEntityId = E.intEntityId
 								JOIN tblEMEntityLocation EL ON EL.intEntityId = E.intEntityId
 									AND EL.strState = strShipToState
-								WHERE ET.strType = 'Customer'
+								WHERE ET.strType = 'Vendor'
 									AND E.strName = strShipToName
 								), 0) + row_number() OVER (
 							PARTITION BY @intEntityId
@@ -552,9 +555,11 @@ BEGIN TRY
 					,1 ysnActive
 					,'(UTC-06:00) Central Time (US & Canada)' strTimezone
 					,1 intConcurrencyId
-					,strCustomerCode strFax
+					,strCustomerCode strCheckPayeeName
 				FROM tblMFEDI940
 				WHERE strDepositorOrderNumber = @strOrderNo
+
+								SELECT @intEntityLocationId = SCOPE_IDENTITY()
 
 				--New Customer Notification
 				UPDATE tblMFEDI943
@@ -565,7 +570,7 @@ BEGIN TRY
 						END
 				WHERE strDepositorOrderNumber = @strOrderNo
 
-				SELECT @intEntityLocationId = SCOPE_IDENTITY()
+
 
 				INSERT INTO tblEMEntityToContact (
 					intEntityId
@@ -682,7 +687,7 @@ BEGIN TRY
 				,intFreightTermId
 				)
 			SELECT strReceiptType = 'Direct'
-				,intEntityVendorId = E.intEntityId
+				,intEntityVendorId = EL.intEntityId
 				,intShipFromId = EL.intEntityLocationId
 				,intLocationId = IL.intLocationId
 				,strBillOfLadding = NULL
@@ -731,10 +736,7 @@ BEGIN TRY
 			JOIN tblICItem I ON I.strItemNo = EDI.strVendorItemNumber
 			JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
 				AND IL.intLocationId IS NOT NULL
-			JOIN tblEMEntity E ON E.strName = EDI.strShipFromName
-			JOIN tblEMEntityType ET ON ET.intEntityId = E.intEntityId
-				AND ET.strType = 'Vendor'
-			JOIN tblEMEntityLocation EL ON EL.intEntityId = E.intEntityId
+			JOIN tblEMEntityLocation EL ON 1 = 1 and EL.intEntityLocationId =@intEntityLocationId 
 			LEFT JOIN dbo.tblICUnitMeasure UM ON UM.strUnitMeasure = I.strExternalGroup
 			LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
 				AND UM.intUnitMeasureId = IU.intUnitMeasureId

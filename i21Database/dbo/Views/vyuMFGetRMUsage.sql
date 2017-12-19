@@ -8,6 +8,7 @@ SELECT [Dump Date]
 	,[Job #]
 	,[WSI Item]
 	,[WSI Item Description]
+	,Convert(Decimal(24,0),dblRequiredQty) AS dblRequiredQty
 	,[Pallet Id]
 	,[Lot #]
 	,[Quantity]
@@ -27,6 +28,13 @@ FROM (
 		,W.strWorkOrderNo AS [Job #]
 		,I1.strItemNo AS [WSI Item]
 		,I1.strDescription [WSI Item Description]
+				,(
+			SELECT TOP 1 CC.dblRequiredQty
+			FROM tblMFProcessCycleCount CC
+			JOIN tblMFProcessCycleCountSession PCC ON PCC.intCycleCountSessionId = CC.intCycleCountSessionId
+			WHERE PCC.intWorkOrderId = W.intWorkOrderId
+				AND CC.intItemId = WI.intItemId
+			) AS dblRequiredQty
 		,IL.strLotNumber AS [Pallet Id]
 		,IPL.strParentLotNumber AS [Lot #]
 		,Ceiling(WI.dblQuantity / IsNULL((

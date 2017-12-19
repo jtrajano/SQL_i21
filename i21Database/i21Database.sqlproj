@@ -5459,6 +5459,7 @@
     <Build Include="dbo\Views\vyuAPOriginCCDTransaction.sql" />
     <Build Include="dbo\Views\vyuMFGetInventoryReceiptCustomField.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportLidlUCCPalletLabelWithoutWeight.sql" />
+    <Build Include="dbo\Views\vyuMFGetPalletSSCCNo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
