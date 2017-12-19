@@ -5994,7 +5994,7 @@
     <Build Include="dbo\Tables\tblMFRecipeSubstituteItemStage.sql" />
     <Build Include="dbo\Tables\tblMFRecipeStage.sql" />
     <Build Include="dbo\Views\vyuMFGetInventoryReceiptCustomField.sql" />
-    <Build Include="Scripts\Post-Deployment\AR\DefaultData\33_InvoiceAccrualEntries.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\33_InvoiceAccrualEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspAPApplyPrepaid.sql" />
     <None Include="Scripts\Post-Deployment\IC\23_Update_ActualCostId_On_InventoryTransaction.sql" />
     <Build Include="dbo\Tables\tblMFReportLabel.sql" />
