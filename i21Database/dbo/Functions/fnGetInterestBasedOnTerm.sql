@@ -13,7 +13,8 @@ BEGIN
 	DECLARE @isDue BIT = 0;
 	DECLARE @monthDue INT;
 	DECLARE @dueDate DATETIME;
-	
+	DECLARE @daysDue INT = 0;
+
 	SET @isDue = dbo.fnIsDue(@transactionDate, @dateToCompute, @termId);
 
 	IF @isDue = 1 
@@ -24,7 +25,11 @@ BEGIN
 		SET @dueDate = dbo.fnGetDueDateBasedOnTerm(@transactionDate, @termId);
 		--Determine the number of months where transaction is due
 		SET @monthDue = DATEDIFF(MONTH, @dueDate, @dateToCompute);
-
+		IF @monthDue = 0
+		BEGIN
+			SET @daysDue = DATEDIFF(DAY, @dueDate, @dateToCompute);
+			IF @daysDue > 0 SET @monthDue = 1
+		END
 		SET @interestPercentage = ((@interestPercentage / 100) / 12) * @monthDue;
 		SET @interest = CAST((@transactionAmount * @interestPercentage) AS DECIMAL(18,2))
 	END
