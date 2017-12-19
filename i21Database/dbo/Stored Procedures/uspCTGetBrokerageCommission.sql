@@ -35,6 +35,7 @@ AS
 				CST.dblRate,
 				CST.intUnitMeasureId AS intCostUOMId,
 				CST.intItemId,
+				CST.intVendorId AS intCostEntityId,
 
 				dbo.fnRemoveTrailingZeroes(CST.dblRate) + ' ' +CST.strCurrency + '/' + CST.strUOM AS strRateUnit,
 	   
@@ -55,7 +56,8 @@ AS
 
 				dbo.fnCTConvertQuantityToTargetItemUOM(SEQ.intItemId,SEQ.intUnitMeasureId,CST.intUnitMeasureId,SEQ.dblQuantity)*CST.dblRate AS dblEstimatedAmount,
 				dbo.fnCTConvertQuantityToTargetItemUOM(SEQ.intItemId,SEQ.intUnitMeasureId,CST.intUnitMeasureId,dblNet)*CST.dblRate AS dblAccruedAmount,
-				dblNet
+				dblNet,
+				SEQ.strPricingType
 
 		FROM	vyuCTContractCostView	CST
 		JOIN	vyuCTContractSequence	SEQ	ON	SEQ.intContractDetailId =   CST.intContractDetailId
