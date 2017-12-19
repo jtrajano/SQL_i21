@@ -59,6 +59,7 @@ DECLARE @join NVARCHAR(10)
 DECLARE @begingroup NVARCHAR(50)
 DECLARE @endgroup NVARCHAR(50)
 DECLARE @datatype NVARCHAR(50)
+DECLARE @ysnFilter NVARCHAR(50) = 0;
 
 	-- Sanitize the @xmlParam 
 IF LTRIM(RTRIM(@xmlParam)) = '' 
@@ -86,6 +87,7 @@ BEGIN
 		NULL AS strContractNumber,
 		NULL AS strLoadNumber,
 		NULL AS strClass,
+		NULL AS strDateDesc,
 		NULL AS strCommodityCode,
 		0 AS intAccountId,
 		0 AS dblTotal,
@@ -172,6 +174,7 @@ SET @originInnerQuery = 'SELECT --DISTINCT
 
 IF @dateFrom IS NOT NULL
 BEGIN	
+	SET @ysnFilter = 1
 	IF @condition = 'Equal To'
 	BEGIN 
 		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
@@ -190,6 +193,7 @@ DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmDueDate'
 
 IF @dtmDate IS NOT NULL
 BEGIN	
+	SET @ysnFilter = 1
 	IF @condition = 'Equal To'
 	BEGIN 
 		SET @innerQuery = @innerQuery +  (CASE WHEN @dateFrom IS NOT NULL AND @dtmDate IS NOT NULL THEN + ' AND ' ELSE +' WHERE ' END) +' DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''''
@@ -208,7 +212,7 @@ END
 ELSE
 BEGIN
 	SET @dateFrom = CONVERT(VARCHAR(10), '1/1/1900', 110)
-	SET @dateTo = GETDATE();
+	SET @dateTo = CONVERT(VARCHAR(10), '1/1/2100', 110)
 END
 
 DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmDate'
@@ -343,6 +347,7 @@ SET @query = '
 	,tmpAgingSummaryTotal.dblAmountDue
 	,ISNULL(B.strVendorId,'''') + '' - '' + isnull(C.strName,'''') as strVendorIdName 
 	,EC.strClass
+	,(CASE WHEN ' + @ysnFilter + ' = 1 THEN ''As Of'' ELSE ''All Dates'' END ) as strDateDesc
 	,F.strCommodityCode
 	,CASE WHEN tmpAgingSummaryTotal.dblAmountDue>=0 THEN 0 
 			ELSE tmpAgingSummaryTotal.dblAmountDue END AS dblUnappliedAmount
