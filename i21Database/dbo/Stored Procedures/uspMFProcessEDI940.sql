@@ -33,6 +33,10 @@ BEGIN TRY
 		intRecordId INT identity(1, 1)
 		,strOrderNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		)
+
+	UPDATE tblMFEDI940
+	SET strDepositorOrderNumber = REPLACE(LTRIM(REPLACE(strDepositorOrderNumber, '0', ' ')), ' ', '0')
+
 	DECLARE @tblMFSession TABLE (intEDI940Id INT)
 
 	INSERT INTO @tblMFSession (intEDI940Id)
@@ -282,7 +286,7 @@ BEGIN TRY
 
 			SELECT @intEntityLocationId = intEntityLocationId
 			FROM tblEMEntityLocation
-			WHERE strFax = @strCustomerCode
+			WHERE strCheckPayeeName  = @strCustomerCode
 
 			IF @intEntityLocationId IS NULL
 			BEGIN
@@ -515,7 +519,7 @@ BEGIN TRY
 					,ysnActive
 					,strTimezone
 					,intConcurrencyId
-					,strFax
+					,strCheckPayeeName 
 					)
 				SELECT TOP 1 @intEntityId intEntityId
 					,strShipToState + ' ' + Ltrim(IsNULL((
@@ -530,7 +534,10 @@ BEGIN TRY
 							PARTITION BY @intEntityId
 							,strShipToState ORDER BY strShipToState
 							)) strLocationName
-					,strShipToAddress1 + Case When IsNULL(strShipToAddress2,'')<>'' then ' '+strShipToAddress2 end  strAddress
+					,strShipToAddress1 + CASE 
+						WHEN IsNULL(strShipToAddress2, '') <> ''
+							THEN ' ' + strShipToAddress2
+						END strAddress
 					,strShipToCity strCity
 					,'United States' strCountry
 					,strShipToState strState
@@ -549,9 +556,11 @@ BEGIN TRY
 					,1 ysnActive
 					,'(UTC-06:00) Central Time (US & Canada)' strTimezone
 					,1 intConcurrencyId
-					,strCustomerCode strFax
+					,strCustomerCode strCheckPayeeName
 				FROM tblMFEDI940
 				WHERE strDepositorOrderNumber = @strOrderNo
+
+				SELECT @intEntityLocationId = SCOPE_IDENTITY()
 
 				--New Customer Notification
 				UPDATE tblMFEDI940
@@ -561,8 +570,6 @@ BEGIN TRY
 							THEN 2
 						END
 				WHERE strDepositorOrderNumber = @strOrderNo
-
-				SELECT @intEntityLocationId = SCOPE_IDENTITY()
 
 				INSERT INTO tblEMEntityToContact (
 					intEntityId
@@ -597,11 +604,44 @@ BEGIN TRY
 				FROM tblMFEDI940
 				WHERE strDepositorOrderNumber = @strOrderNo
 
+				--IF NOT EXISTS (
+				--		SELECT *
+				--		FROM tblEMEntity E
+				--		JOIN tblEMEntityType ET ON ET.intEntityId = E.intEntityId
+				--		JOIN tblEMEntityLocation EL ON EL.intEntityId = E.intEntityId
+				--		WHERE ET.strType = 'Customer'
+				--			AND EL.intEntityLocationId = @intEntityLocationId
+				--			AND E.strName = @strShipToName
+				--		)
+				--BEGIN
+				--	UPDATE E
+				--	SET E.strName = @strShipToName
+				--	FROM tblEMEntity E
+				--	JOIN tblEMEntityType ET ON ET.intEntityId = E.intEntityId
+				--	JOIN tblEMEntityLocation EL ON EL.intEntityId = E.intEntityId
+				--	WHERE ET.strType = 'Customer'
+				--		AND EL.intEntityLocationId = @intEntityLocationId
+
+				--	SELECT @intEntityId = NULL
+
+				--SELECT @intEntityId = intEntityId
+				--FROM tblEMEntity
+				--WHERE strName = @strShipToName
+
+				--	UPDATE tblMFEDI940
+				--	SET ysnNotify = 1
+				--		,intCustomerCodeType = 3
+				--	WHERE strDepositorOrderNumber = @strOrderNo
+				--END
+
 				IF NOT EXISTS (
 						SELECT *
 						FROM tblEMEntityLocation
 						WHERE intEntityLocationId = @intEntityLocationId
-							AND strAddress = @strShipToAddress1 +Case When IsNULL(@strShipToAddress1,'')<>'' then ' '+@strShipToAddress1 end
+							AND strAddress = @strShipToAddress1 + CASE 
+								WHEN IsNULL(@strShipToAddress1, '') <> ''
+									THEN ' ' + @strShipToAddress1
+								END
 							AND strCity = @strShipToCity
 							AND strState = @strShipToState
 							AND strZipCode = @strShipToZip
@@ -616,7 +656,7 @@ BEGIN TRY
 
 					UPDATE tblMFEDI940
 					SET ysnNotify = 1
-						,intCustomerCodeType = 3
+						,intCustomerCodeType = 4
 					WHERE strDepositorOrderNumber = @strOrderNo
 				END
 			END
@@ -659,7 +699,7 @@ BEGIN TRY
 				)
 			SELECT intOrderType = 4
 				,intSourceType = 0
-				,intEntityCustomerId = E.intEntityId
+				,intEntityCustomerId = EL.intEntityId
 				,dtmShipDate = EDI.strShipmentDate
 				,intShipFromLocationId = IL.intLocationId
 				,intShipToLocationId = EL.intEntityLocationId
@@ -687,10 +727,10 @@ BEGIN TRY
 			JOIN tblICItem I ON I.strItemNo = EDI.strCustomerItemNumber
 			JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
 				AND IL.intLocationId IS NOT NULL
-			JOIN tblEMEntity E ON E.strName = EDI.strShipToName
-			JOIN tblEMEntityType ET ON ET.intEntityId = E.intEntityId
-				AND ET.strType = 'Customer'
-			JOIN tblEMEntityLocation EL ON EL.intEntityId = E.intEntityId
+			--JOIN tblEMEntity E ON E.strName = EDI.strShipToName
+			--JOIN tblEMEntityType ET ON ET.intEntityId = E.intEntityId
+			--	AND ET.strType = 'Customer'
+			JOIN tblEMEntityLocation EL ON 1 = 1
 				AND EL.intEntityLocationId = @intEntityLocationId
 			LEFT JOIN dbo.tblICUnitMeasure UM ON UM.strUnitMeasure = I.strExternalGroup
 			LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
@@ -773,6 +813,31 @@ BEGIN TRY
 				WHERE [Extent1].[intCustomTabId] = @intCustomTabId
 					AND strFieldName = 'EDI'
 
+				--INSERT [dbo].[tblSMTransaction] (
+				--	[intScreenId]
+				--	,[strTransactionNo]
+				--	,[intEntityId]
+				--	,[intRecordId]
+				--	,[intConcurrencyId]
+				--	)
+				--SELECT @intScreenId
+				--	,@strShipmentNumber
+				--	,1
+				--	,@intInventoryShipmentId
+				--	,1
+				--			SELECT @intTransactionId = scope_identity()
+				INSERT [dbo].[tblSMTabRow] (
+					[intCustomTabId]
+					,[intTransactionId]
+					,[intSort]
+					,[intConcurrencyId]
+					)
+				SELECT @intCustomTabId
+					,@intTransactionId
+					,0
+					,1
+
+				SELECT @intTabRowId = scope_identity()
 
 				INSERT [dbo].[tblSMFieldValue] (
 					[intTabRowId]
