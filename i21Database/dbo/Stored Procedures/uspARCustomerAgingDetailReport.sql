@@ -21,6 +21,7 @@ DECLARE @dtmDateTo				DATETIME
       , @dtmDateFrom			DATETIME
 	  , @strSalesperson			NVARCHAR(100)
 	  , @strCustomerName		NVARCHAR(100)
+	  , @strAccountStatusCode	NVARCHAR(5)
 	  , @xmlDocumentId			INT
 	  , @query					NVARCHAR(MAX)
 	  , @filter					NVARCHAR(MAX) = ''
@@ -78,6 +79,10 @@ WHERE	[fieldname] = 'strCustomerName'
 SELECT  @strSalesperson = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM	@temp_xml_table
 WHERE	[fieldname] = 'strSalespersonName'
+
+SELECT  @strAccountStatusCode = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM	@temp_xml_table
+WHERE	[fieldname] = 'strAccountStatusCode'
 
 SELECT  @dtmDateFrom = CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE CAST(-53690 AS DATETIME) END AS DATETIME)
  	   ,@dtmDateTo   = CAST(CASE WHEN ISNULL([to], '') <> '' THEN [to] ELSE GETDATE() END AS DATETIME)
@@ -147,6 +152,7 @@ EXEC dbo.uspARCustomerAgingDetailAsOfDateReport @dtmDateFrom = @dtmDateFrom
 											  , @strSalesperson = @strSalesperson
 											  , @strSourceTransaction = @strSourceTransaction
 											  , @strCustomerName = @strCustomerName
+											  , @strAccountStatusCode = @strAccountStatusCode
 											  , @ysnInclude120Days = 0
 
 DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityCustomerId IN (SELECT intEntityCustomerId FROM tblARCustomerAgingStagingTable GROUP BY intEntityCustomerId HAVING SUM(ISNULL(dblTotalAR, 0)) = 0)
