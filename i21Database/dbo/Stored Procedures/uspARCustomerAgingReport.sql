@@ -22,6 +22,7 @@ DECLARE @dtmDateTo						DATETIME
 	  , @intEntityCustomerId			INT	= NULL
 	  , @strSalesperson					NVARCHAR(100)
 	  , @strCustomerName				NVARCHAR(MAX)
+	  , @strAccountStatusCode			NVARCHAR(5)
 	  , @xmlDocumentId					INT
 	  , @filter							NVARCHAR(MAX) = ''
 	  , @fieldname						NVARCHAR(50)
@@ -76,6 +77,10 @@ WHERE	[fieldname] = 'strCustomerName'
 SELECT  @strSalesperson = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM	@temp_xml_table
 WHERE	[fieldname] = 'strSalespersonName'
+
+SELECT  @strAccountStatusCode = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM	@temp_xml_table
+WHERE	[fieldname] = 'strAccountStatusCode'
 
 SELECT  @dtmDateFrom = CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE CAST(-53690 AS DATETIME) END AS DATETIME)
  	   ,@dtmDateTo   = CAST(CASE WHEN ISNULL([to], '') <> '' THEN [to] ELSE GETDATE() END AS DATETIME)
@@ -136,6 +141,7 @@ EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateFrom = @dtmDateFrom
 										, @strSalesperson = @strSalesperson
 										, @strSourceTransaction = @strSourceTransaction
 										, @strCustomerName	= @strCustomerName
+										, @strAccountStatusCode = @strAccountStatusCode
 EXEC dbo.uspARGLAccountReport @dtmDateTo
 
 DELETE FROM tblARCustomerAgingStagingTable WHERE dbo.fnRoundBanker(dblTotalAR, 2) = 0.00 
