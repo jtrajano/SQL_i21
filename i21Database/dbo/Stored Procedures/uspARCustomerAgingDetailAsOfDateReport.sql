@@ -5,6 +5,7 @@
     @strSourceTransaction	NVARCHAR(100) = NULL,
 	@intEntityCustomerId    INT	= NULL,
 	@strCustomerName		NVARCHAR(MAX) = NULL,
+	@strAccountStatusCode	NVARCHAR(100) = NULL,
 	@ysnInclude120Days		BIT = 0
 AS
 
@@ -20,6 +21,7 @@ DECLARE @dtmDateFromLocal			DATETIME = NULL,
 		@strSourceTransactionLocal	NVARCHAR(100) = NULL,
 		@intEntityCustomerIdLocal   INT = NULL,
 		@strCustomerNameLocal		NVARCHAR(MAX) = NULL,
+		@strAccountStatusCodeLocal	NVARCHAR(100) = NULL,
 		@intSalespersonId			INT = NULL
 
 DECLARE @tblCustomers TABLE (
@@ -29,12 +31,13 @@ DECLARE @tblCustomers TABLE (
 	  , dblCreditLimit				NUMERIC(18, 6)
 )
 		
-SET @dtmDateFromLocal			= @dtmDateFrom
-SET	@dtmDateToLocal				= @dtmDateTo
-SET @strSalespersonLocal		= @strSalesperson
-SET @strSourceTransactionLocal	= @strSourceTransaction
-SET @intEntityCustomerIdLocal	= @intEntityCustomerId
-SET @strCustomerNameLocal		= @strCustomerName
+SET @dtmDateFromLocal			= ISNULL(@dtmDateFrom, CAST(-53690 AS DATETIME))
+SET	@dtmDateToLocal				= ISNULL(@dtmDateTo, GETDATE())
+SET @strSalespersonLocal		= NULLIF(@strSalesperson, '')
+SET @strSourceTransactionLocal	= NULLIF(@strSourceTransaction, '')
+SET @intEntityCustomerIdLocal	= NULLIF(@intEntityCustomerId, 0)
+SET @strCustomerNameLocal		= NULLIF(@strCustomerName, '')
+SET @strAccountStatusCodeLocal	= NULLIF(@strAccountStatusCode, '')
 
 IF ISNULL(@intEntityCustomerIdLocal, 0) <> 0
 	BEGIN
@@ -65,13 +68,22 @@ ELSE
 			FROM dbo.tblEMEntity WITH (NOLOCK)
 			WHERE (@strCustomerNameLocal IS NULL OR strName LIKE '%'+ @strCustomerNameLocal +'%')
 		) EC ON C.intEntityId = EC.intEntityId
+		OUTER APPLY (
+			SELECT strAccountStatusCode = LEFT(strAccountStatusCode, LEN(strAccountStatusCode) - 1)
+			FROM (
+				SELECT CAST(ARAS.strAccountStatusCode AS VARCHAR(200))  + ', '
+				FROM dbo.tblARCustomerAccountStatus CAS WITH(NOLOCK)
+				INNER JOIN (
+					SELECT intAccountStatusId
+							, strAccountStatusCode
+					FROM dbo.tblARAccountStatus WITH (NOLOCK)
+				) ARAS ON CAS.intAccountStatusId = ARAS.intAccountStatusId
+				WHERE CAS.intEntityCustomerId = C.intEntityId
+				FOR XML PATH ('')
+			) SC (strAccountStatusCode)
+		) STATUSCODES
+		WHERE (@strAccountStatusCodeLocal IS NULL OR STATUSCODES.strAccountStatusCode LIKE '%'+ @strAccountStatusCodeLocal +'%')
 	END
-
-IF @dtmDateFromLocal IS NULL
-    SET @dtmDateFromLocal = CAST(-53690 AS DATETIME)
-
-IF @dtmDateToLocal IS NULL
-    SET @dtmDateToLocal = GETDATE()
 
 IF ISNULL(@strSalespersonLocal, '') <> ''
 	BEGIN
@@ -83,9 +95,6 @@ IF ISNULL(@strSalespersonLocal, '') <> ''
 			WHERE (@strSalespersonLocal IS NULL OR strName LIKE '%'+ @strSalespersonLocal +'%')
 		) ES ON SP.intEntityId = ES.intEntityId
 	END
-
-IF RTRIM(LTRIM(@strSourceTransactionLocal)) = ''
-    SET @strSourceTransactionLocal = NULL;
 
 --DROP TEMP TABLES
 IF(OBJECT_ID('tempdb..#ARPOSTEDPAYMENT') IS NOT NULL)
