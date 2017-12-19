@@ -885,7 +885,8 @@ BEGIN
 						[dblWithheld],
 						[intStoreLocationId],
 						[intPayToAddressId],
-						[intSubCurrencyCents]
+						[intSubCurrencyCents],
+						[intContactId]
 					)
 					OUTPUT inserted.intBillId, @receiptId, @intThirdPartyVendorId, inserted.intCurrencyId INTO #tmpReceiptBillIds(intBillId, intInventoryReceiptId, intEntityVendorId, intCurrencyId)
 					SELECT
@@ -893,7 +894,7 @@ BEGIN
 						,[strVendorOrderNumber] =	A.strVendorRefNo
 						,[intTermsId] 			=	ISNULL(Terms.intTermsId,(SELECT TOP 1 intTermID FROM tblSMTerm WHERE LOWER(strTerm) = 'due on receipt'))
 						,[intShipViaId]			=	A.intShipViaId
-						,[intShipFromId]		=	NULLIF(A.intShipFromId,0)
+						,[intShipFromId]		=	NULLIF(Terms.intEntityLocationId,0)
 						,[intShipToId]			=	A.intLocationId
 						,[dtmDate] 				=	GETDATE()
 						,[dtmDateCreated] 		=	GETDATE()
@@ -912,19 +913,29 @@ BEGIN
 						,[dblDiscount]			=	0
 						,[dblWithheld]			=	0
 						,[intStoreLocationId]	=	A.intLocationId
-						,[intPayToAddressId]	=	A.intShipFromId
+						,[intPayToAddressId]	=	Terms.intEntityLocationId
 						,[intSubCurrencyCents]	=	ISNULL(A.intSubCurrencyCents,1)
+						,[intContactId]			=	EntityContract.intEntityId
 					FROM #tmpReceiptData A
 					OUTER APPLY 
 					(
 						SELECT 
 								C.intTermsId
 								,B.intCurrencyId
+								,C.intEntityLocationId
 						FROM	tblAPVendor B INNER JOIN tblEMEntityLocation C 
 									ON B.intEntityId = C.intEntityId 
 									AND C.ysnDefaultLocation = 1
 						WHERE	B.intEntityId = @intThirdPartyVendorId
 					) Terms	
+					OUTER APPLY 
+					(
+						SELECT intEntityId FROM dbo.tblEMEntity WHERE intEntityId IN (
+							SELECT intEntityContactId 
+							FROM dbo.tblEMEntityToContact A 
+							WHERE A.intEntityId = @intThirdPartyVendorId				
+						)
+					) EntityContract
 					WHERE	A.intInventoryReceiptId = @receiptId 
 							AND A.ysnPosted = 1
 
