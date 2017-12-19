@@ -42,11 +42,11 @@ BEGIN
 		@intEntityEmployeeId
 		,@intYear
 		,strControlNumber = ''
-		,dblAdjustedGross = ISNULL(PCHK.dblGrossSum, 0)
+		,dblAdjustedGross = CASE WHEN (ISNULL(TXBLFIT.dblTotal, 0) - ISNULL(PRTXFIT.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLFIT.dblTotal, 0) - ISNULL(PRTXFIT.dblTotal, 0) END
 		,dblFIT = ISNULL(FIT.dblTotal, 0)
-		,dblTaxableSS = CASE WHEN (ISNULL(TXBLSS.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLSS.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0) END
-		,dblTaxableMed = CASE WHEN (ISNULL(TXBLMED.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLMED.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0) END
-		,dblTaxableSSTips = CASE WHEN (ISNULL(TXBLSSTIPS.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLSSTIPS.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0) END
+		,dblTaxableSS = CASE WHEN (ISNULL(TXBLSS.dblTotal, 0) - ISNULL(PRTXSS.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLSS.dblTotal, 0) - ISNULL(PRTXSS.dblTotal, 0) END
+		,dblTaxableMed = CASE WHEN (ISNULL(TXBLMED.dblTotal, 0) - ISNULL(PRTXMED.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLMED.dblTotal, 0) - ISNULL(PRTXMED.dblTotal, 0) END
+		,dblTaxableSSTips = CASE WHEN (ISNULL(TXBLSSTIPS.dblTotal, 0) - ISNULL(PRTXSS.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLSSTIPS.dblTotal, 0) - ISNULL(PRTXSS.dblTotal, 0) END
 		,dblSSTax = ISNULL(SSTAX.dblTotal, 0)
 		,dblMedTax = ISNULL(MEDTAX.dblTotal, 0)
 		,dblAllocatedTips = 0
@@ -70,12 +70,16 @@ BEGIN
 							ELSE
 								ISNULL((SELECT TOP 1 strStateTaxID FROM tblSMCompanySetup), '')
 							END
-		,dblTaxableState = ISNULL(TXBLSTATE.dblTotal, 0)
+		,dblTaxableState = CASE WHEN (ISNULL(TXBLSTATE.dblTotal, 0) - ISNULL(PRTXSTATE.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLSTATE.dblTotal, 0) - ISNULL(PRTXSTATE.dblTotal, 0) END
 		,dblStateTax = ISNULL(STATETAX.dblTotal, 0)
-		,dblTaxableLocal = CASE WHEN (ISNULL(LOCALTAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN ISNULL(TXBLLOCAL.dblTotal, 0) ELSE 0 END
+		,dblTaxableLocal = CASE WHEN (ISNULL(LOCALTAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN 
+								CASE WHEN (ISNULL(TXBLLOCAL.dblTotal, 0) - ISNULL(PRTXLOCAL.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLLOCAL.dblTotal, 0) - ISNULL(PRTXLOCAL.dblTotal, 0) END
+							ELSE 0 END
 		,dblLocalTax = CASE WHEN (ISNULL(LOCALTAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN ISNULL(LOCALTAX.dblTotal, 0) ELSE 0 END
 		,intConcurrencyId = 1
 	FROM 
+		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning 
+			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnFITTaxable = 1 AND ysnVoid = 0) TXBLFIT OUTER APPLY
 		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning 
 			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strCalculationType <> 'Tip' AND ysnSSTaxable = 1 AND ysnVoid = 0) TXBLSS OUTER APPLY
 		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning 
@@ -87,7 +91,15 @@ BEGIN
 		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning 
 			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnLocalTaxable = 1 AND ysnVoid = 0) TXBLLOCAL OUTER APPLY
 		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strDeductFrom = 'Gross Pay' AND ysnVoid = 0) PRETAX OUTER APPLY
+			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strDeductFrom = 'Gross Pay' AND ysnFITTaxable = 1 AND ysnVoid = 0) PRTXFIT OUTER APPLY
+		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction 
+			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strDeductFrom = 'Gross Pay' AND ysnSSTaxable = 1 AND ysnVoid = 0) PRTXSS OUTER APPLY
+		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction 
+			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strDeductFrom = 'Gross Pay' AND ysnMedTaxable = 1 AND ysnVoid = 0) PRTXMED OUTER APPLY
+		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction 
+			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strDeductFrom = 'Gross Pay' AND ysnStateTaxable = 1 AND ysnVoid = 0) PRTXSTATE OUTER APPLY
+		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction 
+			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strDeductFrom = 'Gross Pay' AND ysnLocalTaxable = 1 AND ysnVoid = 0) PRTXLOCAL OUTER APPLY
 		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckTax 
 			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strCalculationType = 'USA Federal Tax' AND ysnVoid = 0) FIT OUTER APPLY
 		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckTax
@@ -118,11 +130,11 @@ ELSE
 BEGIN
 	/* If it exists, update the values */
 	UPDATE tblPREmployeeW2
-	SET dblAdjustedGross = ISNULL(PCHK.dblGrossSum, 0)
+	SET dblAdjustedGross = CASE WHEN (ISNULL(TXBLFIT.dblTotal, 0) - ISNULL(PRTXFIT.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLFIT.dblTotal, 0) - ISNULL(PRTXFIT.dblTotal, 0) END
 		,dblFIT = ISNULL(FIT.dblTotal, 0)
-		,dblTaxableSS = CASE WHEN (ISNULL(TXBLSS.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLSS.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0) END
-		,dblTaxableMed = CASE WHEN (ISNULL(TXBLMED.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLMED.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0) END
-		,dblTaxableSSTips = CASE WHEN (ISNULL(TXBLSSTIPS.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLSSTIPS.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0) END
+		,dblTaxableSS = CASE WHEN (ISNULL(TXBLSS.dblTotal, 0) - ISNULL(PRTXSS.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLSS.dblTotal, 0) - ISNULL(PRTXSS.dblTotal, 0) END
+		,dblTaxableMed = CASE WHEN (ISNULL(TXBLMED.dblTotal, 0) - ISNULL(PRTXMED.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLMED.dblTotal, 0) - ISNULL(PRTXMED.dblTotal, 0) END
+		,dblTaxableSSTips = CASE WHEN (ISNULL(TXBLSSTIPS.dblTotal, 0) - ISNULL(PRTXSS.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLSSTIPS.dblTotal, 0) - ISNULL(PRTXSS.dblTotal, 0) END
 		,dblSSTax = ISNULL(SSTAX.dblTotal, 0)
 		,dblMedTax = ISNULL(MEDTAX.dblTotal, 0)
 		,strState = ISNULL(STATETAX.strState, '')
@@ -134,12 +146,16 @@ BEGIN
 							ELSE
 								ISNULL((SELECT TOP 1 strStateTaxID FROM tblSMCompanySetup), '')
 							END
-		,dblTaxableState = ISNULL(TXBLSTATE.dblTotal, 0)
+		,dblTaxableState = CASE WHEN (ISNULL(TXBLSTATE.dblTotal, 0) - ISNULL(PRTXSTATE.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLSTATE.dblTotal, 0) - ISNULL(PRTXSTATE.dblTotal, 0) END
 		,dblStateTax = ISNULL(STATETAX.dblTotal, 0)
-		,dblTaxableLocal = CASE WHEN (ISNULL(LOCALTAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN ISNULL(TXBLLOCAL.dblTotal, 0) ELSE 0 END
+		,dblTaxableLocal = CASE WHEN (ISNULL(LOCALTAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN 
+								CASE WHEN (ISNULL(TXBLLOCAL.dblTotal, 0) - ISNULL(PRTXLOCAL.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLLOCAL.dblTotal, 0) - ISNULL(PRTXLOCAL.dblTotal, 0) END
+							ELSE 0 END
 		,dblLocalTax = CASE WHEN (ISNULL(LOCALTAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN ISNULL(LOCALTAX.dblTotal, 0) ELSE 0 END
 		,intConcurrencyId = 1
 	FROM 
+		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning 
+			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnFITTaxable = 1 AND ysnVoid = 0) TXBLFIT OUTER APPLY
 		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning 
 			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strCalculationType <> 'Tip' AND ysnSSTaxable = 1 AND ysnVoid = 0) TXBLSS OUTER APPLY
 		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning 
@@ -151,7 +167,15 @@ BEGIN
 		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning 
 			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnLocalTaxable = 1 AND ysnVoid = 0) TXBLLOCAL OUTER APPLY
 		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction 
-			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strDeductFrom = 'Gross Pay' AND ysnVoid = 0) PRETAX OUTER APPLY
+			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strDeductFrom = 'Gross Pay' AND ysnFITTaxable = 1 AND ysnVoid = 0) PRTXFIT OUTER APPLY
+		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction 
+			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strDeductFrom = 'Gross Pay' AND ysnSSTaxable = 1 AND ysnVoid = 0) PRTXSS OUTER APPLY
+		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction 
+			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strDeductFrom = 'Gross Pay' AND ysnMedTaxable = 1 AND ysnVoid = 0) PRTXMED OUTER APPLY
+		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction 
+			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strDeductFrom = 'Gross Pay' AND ysnStateTaxable = 1 AND ysnVoid = 0) PRTXSTATE OUTER APPLY
+		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction 
+			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strDeductFrom = 'Gross Pay' AND ysnLocalTaxable = 1 AND ysnVoid = 0) PRTXLOCAL OUTER APPLY
 		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckTax 
 			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strCalculationType = 'USA Federal Tax' AND ysnVoid = 0) FIT OUTER APPLY
 		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckTax
