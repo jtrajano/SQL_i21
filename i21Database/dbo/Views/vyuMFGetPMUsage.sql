@@ -12,22 +12,29 @@ SELECT DISTINCT Rtrim(Convert(CHAR, W.dtmPlannedDate, 101)) [Dump Date]
 	,W.strWorkOrderNo AS [Job #]
 	,I1.strItemNo AS [WSI Item]
 	,I1.strDescription [WSI Item Description]
+	,(
+		SELECT TOP 1 CC.dblRequiredQty
+		FROM tblMFProcessCycleCount CC
+		JOIN tblMFProcessCycleCountSession PCC ON PCC.intCycleCountSessionId = CC.intCycleCountSessionId
+		WHERE PCC.intWorkOrderId = W.intWorkOrderId
+			AND CC.intItemId = WC.intItemId
+		) AS dblRequiredQty
 	,Round(SUM(WC.dblIssuedQuantity) + IsNULL((
+				SELECT Round(SUM(IsNULL(WC1.dblIssuedQuantity, 0)), 0)
+				FROM dbo.tblMFWorkOrderConsumedLot WC1
+				WHERE WC1.intWorkOrderId = W.intWorkOrderId
+					AND WC1.intItemId = WC.intItemId
+					AND WC1.intSequenceNo = 9999
+				), 0), 0) AS [Total Consumed Quantity]
+	,SUM(WC.dblIssuedQuantity) AS [Used in Packaging]
+	,UM1.strUnitMeasure AS [UOM]
+	,IsNUll((
 			SELECT Round(SUM(IsNULL(WC1.dblIssuedQuantity, 0)), 0)
 			FROM dbo.tblMFWorkOrderConsumedLot WC1
 			WHERE WC1.intWorkOrderId = W.intWorkOrderId
 				AND WC1.intItemId = WC.intItemId
 				AND WC1.intSequenceNo = 9999
-			),0), 0) AS [Total Consumed Quantity]
-	,SUM(WC.dblIssuedQuantity) AS [Used in Packaging]
-	,UM1.strUnitMeasure AS [UOM]
-	,IsNUll((
-		SELECT Round(SUM(IsNULL(WC1.dblIssuedQuantity, 0)), 0)
-		FROM dbo.tblMFWorkOrderConsumedLot WC1
-		WHERE WC1.intWorkOrderId = W.intWorkOrderId
-			AND WC1.intItemId = WC.intItemId
-			AND WC1.intSequenceNo = 9999
-		),0) AS [Damaged]
+			), 0) AS [Damaged]
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderConsumedLot WC ON WC.intWorkOrderId = W.intWorkOrderId
 	AND intSequenceNo <> 9999

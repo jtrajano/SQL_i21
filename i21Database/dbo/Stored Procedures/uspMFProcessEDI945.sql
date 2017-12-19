@@ -4,14 +4,17 @@ BEGIN
 	DECLARE @tblMFOrderNo TABLE (
 		intInventoryShipmentId INT
 		,strOrderNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strShipmentNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		)
 
 	INSERT INTO @tblMFOrderNo (
 		intInventoryShipmentId
 		,strOrderNo
+		,strShipmentNo
 		)
 	SELECT InvS.intInventoryShipmentId
 		,InvS.strReferenceNumber
+		,InvS.strShipmentNumber
 	FROM tblICInventoryShipment InvS
 	WHERE ysnPosted = 1
 		AND EXISTS (
@@ -24,12 +27,16 @@ BEGIN
 			FROM tblMFEDI945 EDI945
 			WHERE EDI945.intInventoryShipmentId = InvS.intInventoryShipmentId
 			)
-		UNION
-		SELECT InvS.intInventoryShipmentId
+	
+	UNION
+	
+	SELECT InvS.intInventoryShipmentId
 		,InvS.strReferenceNumber
-		FROM tblICInventoryShipment InvS
-		JOIN vyuMFGetInventoryShipmentCustomField CF on CF.intRecordId =InvS.intInventoryShipmentId
-		WHERE ysnPosted = 1 and CF.ysnEDI=1
+		,InvS.strShipmentNumber
+	FROM tblICInventoryShipment InvS
+	JOIN vyuMFGetInventoryShipmentCustomField CF ON CF.intRecordId = InvS.intInventoryShipmentId
+	WHERE ysnPosted = 1
+		AND CF.ysnEDI = 1
 		AND NOT EXISTS (
 			SELECT *
 			FROM tblMFEDI945 EDI945
@@ -48,53 +55,30 @@ BEGIN
 		,EL.strCity AS strShipToCity
 		,EL.strState AS strShipToState
 		,EL.strZipCode AS strShipToZipCode
-		,0 AS strShipToCode
-		,strShipmentNumber strShipmentId
+		,IsNULL(EDI.strShipToCode, '') AS strShipToCode
 		,dtmShipDate dtmShippedDate
-		,(
-			SELECT TOP 1 strTransportationMethod
-			FROM tblMFEDI940Archive EDI940
-			WHERE EDI940.intInventoryShipmentItemId = InvSI.intInventoryShipmentItemId
-			) AS strTransportationMethod
-		,(
-			SELECT TOP 1 strSCAC
-			FROM tblMFEDI940Archive EDI940
-			WHERE EDI940.intInventoryShipmentItemId = InvSI.intInventoryShipmentItemId
-			) AS strSCAC
-		,(
-			SELECT TOP 1 strRouting
-			FROM tblMFEDI940Archive EDI940
-			WHERE EDI940.intInventoryShipmentItemId = InvSI.intInventoryShipmentItemId
-			) AS strRouting
-		,(
-			SELECT TOP 1 strShipmentMethodOfPayment
-			FROM tblMFEDI940Archive EDI940
-			WHERE EDI940.intInventoryShipmentItemId = InvSI.intInventoryShipmentItemId
-			) AS strShipmentMethodOfPayment
+		,IsNULL(EDI.strTransportationMethod, '') AS strTransportationMethod
+		,IsNULL(EDI.strSCAC, '') AS strSCAC
+		,IsNULL(EDI.strRouting, '') AS strRouting
+		,IsNULL(EDI.strShipmentMethodOfPayment, '') AS strShipmentMethodOfPayment
 		,strTotalPalletsLoaded
 		,SUm(dblQuantityShipped) OVER (PARTITION BY InvS.intInventoryShipmentId) dblTotalUnitsShipped
 		,0 AS dblTotalWeight
 		,'' AS strWeightUOM
-		,InvSI.intLineNo AS strLineNumber
-		,OML.strSSCCNo AS strUCC128
+		,InvSI.intLineNo AS intLineNo
 		,'CC' AS strOrderStatus
-		,'' AS strUPCCaseCode
-		,strItemNo
-		,strDescription
-		,(
-			SELECT TOP 1 dblQtyOrdered
-			FROM tblMFEDI940Archive EDI940
-			WHERE EDI940.intInventoryShipmentItemId = InvSI.intInventoryShipmentItemId
-			) AS dblQtyOrdered
-		,InvSI.dblQuantity AS dblQtyShipped
-		,(
-			SELECT TOP 1 dblQtyOrdered
-			FROM tblMFEDI940Archive EDI940
-			WHERE EDI940.intInventoryShipmentItemId = InvSI.intInventoryShipmentItemId
-			) - InvSI.dblQuantity AS dblQtyDifference
+		,IsNULL(EDI.strUPCCaseCode, '') AS strUPCCaseCode
+		,I.intItemId
+		,I.strItemNo
+		,I.strDescription
+		,IsNULL(EDI.dblQtyOrdered, 0) AS dblQtyOrdered
+		,InvSL.dblQuantityShipped AS dblQtyShipped
 		,I.strExternalGroup strUOM
-		,PL.strParentLotNumber strLotNumber
+		,PL.strParentLotNumber strParentLotNumber
+		,L.strLotNumber
+	INTO #tblMFEDI945
 	FROM dbo.tblICInventoryShipment InvS
+	JOIN @tblMFOrderNo O ON O.intInventoryShipmentId = InvS.intInventoryShipmentId
 	JOIN dbo.tblICInventoryShipmentItem InvSI ON InvSI.intInventoryShipmentId = InvS.intInventoryShipmentId
 	JOIN dbo.tblICInventoryShipmentItemLot InvSL ON InvSL.intInventoryShipmentItemId = InvSI.intInventoryShipmentItemId
 	JOIN dbo.tblICLot L ON L.intLotId = InvSL.intLotId
@@ -103,21 +87,58 @@ BEGIN
 	JOIN dbo.tblEMEntity E ON E.intEntityId = InvS.intEntityCustomerId
 	JOIN dbo.tblEMEntityLocation EL ON EL.intEntityLocationId = InvS.intShipToLocationId
 	JOIN tblICItem I ON I.intItemId = InvSI.intItemId
-		AND EXISTS (
-			SELECT *
-			FROM @tblMFOrderNo O
-			WHERE O.strOrderNo = InvS.strReferenceNumber
+	LEFT JOIN tblMFEDI940Archive EDI ON EDI.intInventoryShipmentItemId = InvSI.intInventoryShipmentItemId
+
+	SELECT *
+	INTO #tblMFSSCCNo
+	FROM dbo.vyuMFGetPalletSSCCNo
+	WHERE strReferenceNo IN (
+			SELECT strShipmentNo
+			FROM @tblMFOrderNo
 			)
-	LEFT JOIN tblMFOrderHeader OH ON OH.strReferenceNo = InvS.strShipmentNumber
-		AND EXISTS (
-			SELECT *
-			FROM @tblMFOrderNo O1
-			WHERE O1.strOrderNo = OH.strReferenceNo
-			)
-	LEFT JOIN tblMFOrderDetail OD ON OD.intOrderHeaderId = OH.intOrderHeaderId
-		AND OD.intItemId = InvSI.intItemId
-	LEFT JOIN tblMFOrderManifest OM ON OM.intOrderDetailId = OD.intOrderDetailId
-	LEFT JOIN tblMFOrderManifestLabel OML ON OML.intOrderManifestId = OM.intOrderManifestId
+
+	SELECT EDI.strTransactionId
+		,EDI.strCustomerId
+		,EDI.strType
+		,EDI.strDepositorOrderNumber
+		,EDI.strPurchaseOrderNumber
+		,EDI.dtmShipmentDate
+		,EDI.strShipmentId
+		,EDI.strName
+		,EDI.strShipToAddress
+		,EDI.strShipToCity
+		,EDI.strShipToState
+		,EDI.strShipToZipCode
+		,EDI.strShipToCode
+		,EDI.strShipmentId
+		,EDI.dtmShippedDate
+		,EDI.strTransportationMethod
+		,EDI.strSCAC
+		,EDI.strRouting
+		,EDI.strShipmentMethodOfPayment
+		,EDI.strTotalPalletsLoaded
+		,EDI.dblTotalUnitsShipped
+		,EDI.dblTotalWeight
+		,EDI.strWeightUOM
+		,EDI.intLineNo
+		,SSCCNo.strSSCCNo strUCC128
+		,EDI.strOrderStatus
+		,EDI.strUPCCaseCode
+		,EDI.strItemNo
+		,EDI.strDescription
+		,EDI.dblQtyOrdered
+		,SUM(EDI.dblQtyShipped) OVER (
+			PARTITION BY EDI.strParentLotNumber
+			,EDI.strItemNo
+			) dblQtyShipped
+		,EDI.dblQtyOrdered-SUM(EDI.dblQtyShipped) OVER (
+			PARTITION BY EDI.strItemNo
+			) AS dblQtyDifference
+		,EDI.strUOM
+		,EDI.strParentLotNumber AS strLotNumber
+	FROM #tblMFEDI945 EDI
+	LEFT JOIN #tblMFSSCCNo SSCCNo ON SSCCNo.strLotNumber = EDI.strLotNumber
+	Order by EDI.intLineNo
 
 	INSERT INTO tblMFEDI945 (
 		intInventoryShipmentId
