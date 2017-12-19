@@ -139,6 +139,17 @@ BEGIN TRY
 	JOIN tblMFStageWorkOrder SW ON SW.intOrderHeaderId = T.intOrderHeaderId
 	JOIN tblMFWorkOrder W ON W.intWorkOrderId = SW.intWorkOrderId
 		AND W.intStatusId = 13
+
+	DELETE
+	FROM tblICStockReservation
+	WHERE intInventoryTransactionType = 34
+		AND ysnPosted = 0
+		AND NOT EXISTS (
+			SELECT *
+			FROM tblMFTask
+			WHERE intLotId = tblICStockReservation.intLotId and intOrderHeaderId =tblICStockReservation.intTransactionId 
+			)
+
 END TRY
 
 BEGIN CATCH
