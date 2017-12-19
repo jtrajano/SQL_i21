@@ -1444,6 +1444,40 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 						 WHERE ptcus_cus_no = @originCustomer AND 
 						 ptcus_bill_to is not null and ptcus_cus_no <> ptcus_bill_to AND ETYP.strType = ''Customer''
 
+					--INSERT BILL TO ADDRESS LOCATIONS (ptadrmst)
+						INSERT [dbo].[tblEMEntityLocation]	
+							([intEntityId],
+							 [strLocationName],
+							 [strAddress],
+							 [strCity], 
+							 [strCountry], 
+							 [strState], 
+							 [strZipCode], 
+							 [strNotes],  
+							 [intShipViaId], 
+							 [intTermsId], 
+							 [intWarehouseId], 
+							 [ysnDefaultLocation])
+						SELECT 
+							 EM.intEntityId,
+							 ISNULL(LTRIM(RTRIM(EM.strEntityNo)),'''')+ '' BILL TO'',
+							 ISNULL(LTRIM(RTRIM(ptadr_addr)),'''') + CHAR(10) + ISNULL(LTRIM(RTRIM(ptadr_addr2)),''''),
+							 LTRIM(RTRIM(ptadr_city)),
+							 LTRIM(RTRIM(ptcus_country)),
+							 LTRIM(RTRIM(ptadr_state)),
+							 LTRIM(RTRIM(ptadr_zip)),
+							 NULL,
+							 NULL,
+							 (SELECT intTermID FROM tblSMTerm WHERE strTermCode = CAST(ptcus_terms_code  AS CHAR(10))),
+							 (SELECT intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS = ptcus_bus_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS),
+							 0
+						 FROM ptadrmst ADR 
+						INNER JOIN ptcusmst ON ptcus_cus_no = ptadr_key
+						INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = ADR.ptadr_key COLLATE SQL_Latin1_General_CP1_CS_AS
+						INNER JOIN tblEMEntity EM ON EM.intEntityId = CUS.intEntityId
+						LEFT JOIN tblEMEntityLocation LOC ON LOC.intEntityId = EM.intEntityId AND LOC.strLocationName =ISNULL(LTRIM(RTRIM(EM.strEntityNo)),'''')+ '' BILL TO''
+						WHERE ADR.ptadr_key = @originCustomer AND LOC.intEntityLocationId IS NULL
+
 					--INSERT into tblARCustomerToContact
 					DECLARE @CustomerToContactId INT
 
@@ -1460,6 +1494,12 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 						intBillToId = @EntityLocationId,
 						intShipToId = @EntityLocationId
 					WHERE intEntityId = @EntityId
+
+					UPDATE CUS SET CUS.intBillToId = LOC.intEntityLocationId
+					FROM tblARCustomer CUS
+					INNER JOIN tblEMEntity EM ON EM.intEntityId = CUS.intEntityId
+					INNER JOIN tblEMEntityLocation LOC ON LOC.intEntityId = EM.intEntityId AND LOC.strLocationName =ISNULL(LTRIM(RTRIM(EM.strEntityNo)),'''')+ '' BILL TO''
+					WHERE EM.strEntityNo = @originCustomer
 
 					--INSERT TERMINAL TO CUSTOMER FREIGHT
 					--EXEC uspEMImportPTTerminalToCustomer @originCustomer
