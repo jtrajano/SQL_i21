@@ -944,6 +944,16 @@ BEGIN TRY
 	JOIN tblMFWorkOrder W ON W.intWorkOrderId = SW.intWorkOrderId
 		AND W.intStatusId = 13
 
+	DELETE
+	FROM tblICStockReservation
+	WHERE intInventoryTransactionType = 34
+		AND ysnPosted = 0
+		AND NOT EXISTS (
+			SELECT *
+			FROM tblMFTask
+			WHERE intLotId = tblICStockReservation.intLotId and intOrderHeaderId =tblICStockReservation.intTransactionId 
+			)
+
 	COMMIT TRANSACTION
 
 	EXEC sp_xml_removedocument @idoc
