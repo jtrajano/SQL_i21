@@ -13,5 +13,5 @@ BEGIN
 	Select @dblUnitQtyFrom=ISNULL(dblUnitQty,1) From tblICItemUOM Where intItemUOMId=@intFromItemUOMId
 	Select @dblUnitQtyTo=ISNULL(dblUnitQty,1) From tblICItemUOM Where intItemUOMId=@intToItemUOMId
 
-	return (@dblUnitQtyFrom/@dblUnitQtyTo) * @dblQuantity
+	return (@dblUnitQtyFrom* @dblQuantity)/@dblUnitQtyTo
 END

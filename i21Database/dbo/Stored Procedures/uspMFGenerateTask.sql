@@ -1215,7 +1215,7 @@ BEGIN TRY
 					SET @dblRequiredQty = @dblRequiredQty - (
 							CASE 
 								WHEN dbo.fnMFConvertQuantityToTargetItemUOM(@intLotItemUOMId, @intRequiredUOMId, @dblRemainingLotQty) > @dblRequiredQty
-									THEN @dblRequiredQty
+									THEN dbo.fnMFConvertQuantityToTargetItemUOM( @intRequiredUOMId,@intLotItemUOMId, @dblRequiredQty) 
 								ELSE dbo.fnMFConvertQuantityToTargetItemUOM(@intLotItemUOMId, @intRequiredUOMId, @dblRemainingLotQty)
 								END
 							)
