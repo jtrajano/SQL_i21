@@ -531,6 +531,8 @@ BEGIN
 												@COST_ADJ_TYPE_Adjust_Value
 											WHEN @t_intLocationId IS NULL THEN 
 												@COST_ADJ_TYPE_Adjust_InTransit
+											WHEN @t_intTransactionTypeId = @INV_TRANS_Inventory_Transfer THEN 
+												@COST_ADJ_TYPE_Adjust_InventoryAdjustment
 											ELSE 
 												@COST_ADJ_TYPE_Adjust_Value
 									END 
@@ -550,6 +552,8 @@ BEGIN
 													,@INV_TRANS_TYPE_ADJ_Lot_Move
 												) THEN 
 													@COST_ADJ_TYPE_Adjust_InventoryAdjustment
+											WHEN @t_intTransactionTypeId = @INV_TRANS_Inventory_Transfer THEN 
+												@COST_ADJ_TYPE_Adjust_InventoryAdjustment
 											ELSE 
 												@COST_ADJ_TYPE_Adjust_Sold
 									END 
