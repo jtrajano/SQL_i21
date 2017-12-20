@@ -6003,6 +6003,7 @@
     <Build Include="dbo\Stored Procedures\uspCTProcessBrkgCommn.sql" />
     <Build Include="dbo\Tables\tblSTUpdateRegisterHistory.sql" />
     <Build Include="dbo\Views\vyuMFGetPalletSSCCNo.sql" />
+    <Build Include="dbo\Views\vyuCTProjectedCommission.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
