@@ -733,6 +733,12 @@ BEGIN
 		
 		--DELETE THE @billDetailIds ID TO AVOID DUPLICATE INSERTION OF BILLDETAIL ID
 		DELETE FROM @billDetailIds
+		
+		DECLARE @Sourcetype NVARCHAR(50);
+		SET @Sourcetype =  (SELECT TOP 1 intSourceType FROM #tmpReceiptData WHERE intInventoryReceiptId IN (@receiptIds)) 
+		IF(@Sourcetype != 3) --Transport
+		BEGIN
+		      
 
 		--ADD CHARGES FOR MAIN VENDOR OR PRODUCER
 		IF(@totalChargesCount != 0 AND @counter2 = 1) --make sure charges has not been processed yet, this part should be only run once
@@ -826,6 +832,7 @@ BEGIN
 		END    
 
 		DELETE FROM #tmpReceiptDetailData WHERE intInventoryReceiptItemId = @receiptDetailId
+		END
 	END  
 
 	BEGIN
@@ -854,6 +861,9 @@ BEGIN
 			
 			SET @chargeCounter = @chargeCounter + 1;
 
+			IF(@Sourcetype != 3) --Transport
+			BEGIN
+			        
 			--MAKE SURE VOUCHER WAS NOT CREATED YET			
 			IF NOT EXISTS(SELECT TOP 1 intBillId FROM #tmpReceiptBillIds WHERE intEntityVendorId = @intThirdPartyVendorId AND intCurrencyId = @chargeCurrency)
 				AND @intThirdPartyVendorId IS NOT NULL --AND @ysnThirdPartyVendor > 0
@@ -1035,9 +1045,10 @@ BEGIN
 					WHERE A.intInventoryReceiptChargeId = @intReceiptChargeId AND A.intEntityVendorId = @intThirdPartyVendorId                 
 			END
 			DELETE FROM #tmpReceiptChargeData WHERE intInventoryReceiptChargeId = @intReceiptChargeId
-		END
+			END
 	END
 	DELETE FROM #tmpReceiptIds WHERE intInventoryReceiptId = @receiptId  
+	END  
 END
 
 --UPDATE VOUCHER DATA
