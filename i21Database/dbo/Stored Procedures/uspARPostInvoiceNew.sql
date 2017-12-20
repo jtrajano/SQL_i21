@@ -1080,9 +1080,20 @@ IF @Post = 1
 			SELECT @ErrorMerssage = ERROR_MESSAGE()					
 			IF @RaiseError = 0
 				BEGIN
-					IF (XACT_STATE()) = -1
-						ROLLBACK TRANSACTION						
-					BEGIN TRANSACTION
+					IF @InitTranCount = 0
+						IF (XACT_STATE()) <> 0
+							ROLLBACK TRANSACTION
+					ELSE
+						IF (XACT_STATE()) <> 0
+							ROLLBACK TRANSACTION @Savepoint
+			
+					SET @CurrentTranCount = @@TRANCOUNT
+					SET @CurrentSavepoint = SUBSTRING(('uspARPostInvoiceNew' + CONVERT(VARCHAR, @CurrentTranCount)), 1, 32)										
+			
+					IF @CurrentTranCount = 0
+						BEGIN TRANSACTION
+					ELSE
+						SAVE TRANSACTION @CurrentSavepoint
 					--INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 					--SELECT @ErrorMerssage, @TransType, @param, @BatchId, 0							
 					--EXEC uspARInsertPostResult @BatchId, 'Invoice', @ErrorMerssage, @param															
@@ -1103,9 +1114,20 @@ IF @Post = 1
 						AND ILD.[ysnPost] IS NOT NULL
 									
 							
-
-					COMMIT TRANSACTION
-					--COMMIT TRAN @TransactionName
+					IF @CurrentTranCount = 0
+						BEGIN
+							IF (XACT_STATE()) = -1
+								ROLLBACK TRANSACTION
+							IF (XACT_STATE()) = 1
+								COMMIT TRANSACTION
+						END		
+					ELSE
+						BEGIN
+							IF (XACT_STATE()) = -1
+								ROLLBACK TRANSACTION  @CurrentSavepoint
+							--IF (XACT_STATE()) = 1
+							--	COMMIT TRANSACTION  @Savepoint
+						END	
 				END						
 			IF @RaiseError = 1
 				RAISERROR(@ErrorMerssage, 11, 1)
@@ -4157,13 +4179,13 @@ Do_Rollback:
 				IF (XACT_STATE()) <> 0
 					ROLLBACK TRANSACTION @Savepoint
 			
-			SET @CurrentTranCount = @@TRANCOUNT
-			SET @CurrentSavepoint = SUBSTRING(('uspARPostInvoiceNew' + CONVERT(VARCHAR, @CurrentTranCount)), 1, 32)										
+			--SET @CurrentTranCount = @@TRANCOUNT
+			--SET @CurrentSavepoint = SUBSTRING(('uspARPostInvoiceNew' + CONVERT(VARCHAR, @CurrentTranCount)), 1, 32)										
 			
-			IF @CurrentTranCount = 0
-				BEGIN TRANSACTION
-			ELSE
-				SAVE TRANSACTION @CurrentSavepoint		
+			--IF @CurrentTranCount = 0
+			--	BEGIN TRANSACTION
+			--ELSE
+			--	SAVE TRANSACTION @CurrentSavepoint		
 
 			--EXEC uspARInsertPostResult @BatchId, 'Invoice', @ErrorMerssage, @param								
 			UPDATE ILD
@@ -4183,20 +4205,20 @@ Do_Rollback:
 				AND ILD.[ysnPost] IS NOT NULL
 			
 			
-			IF @CurrentTranCount = 0
-				BEGIN
-					IF (XACT_STATE()) = -1
-						ROLLBACK TRANSACTION
-					IF (XACT_STATE()) = 1
-						COMMIT TRANSACTION
-				END		
-			ELSE
-				BEGIN
-					IF (XACT_STATE()) = -1
-						ROLLBACK TRANSACTION  @CurrentSavepoint
-					--IF (XACT_STATE()) = 1
-					--	COMMIT TRANSACTION  @CurrentSavepoint
-				END			
+			--IF @CurrentTranCount = 0
+			--	BEGIN
+			--		IF (XACT_STATE()) = -1
+			--			ROLLBACK TRANSACTION
+			--		IF (XACT_STATE()) = 1
+			--			COMMIT TRANSACTION
+			--	END		
+			--ELSE
+			--	BEGIN
+			--		IF (XACT_STATE()) = -1
+			--			ROLLBACK TRANSACTION  @CurrentSavepoint
+			--		--IF (XACT_STATE()) = 1
+			--		--	COMMIT TRANSACTION  @CurrentSavepoint
+			--	END			
 		END
 	IF @RaiseError = 1
 		RAISERROR(@ErrorMerssage, 11, 1)	
