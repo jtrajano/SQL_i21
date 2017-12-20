@@ -83,21 +83,35 @@ SET
 FROM
 	(
 		SELECT SOD.intSalesOrderDetailId
-			 , dblQuantity			= SUM(ISNULL(CASE WHEN ID.intItemUOMId IS NOT NULL AND SOD.intItemUOMId IS NOT NULL THEN ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, SOD.intItemUOMId, ISNULL(ID.dblQtyShipped,0)), ISNULL(ID.dblQtyShipped,0)) ELSE ISNULL(ID.dblQtyShipped,0) END, 0)) + SUM(ISNULL(dbo.fnCalculateQtyBetweenUOM(ISHI.intItemUOMId, SOD.intItemUOMId, ISNULL(ISHI.dblQuantity,0)), 0))			 
+			 , dblQuantity			= SUM(ISNULL(CASE WHEN ID.intItemUOMId IS NOT NULL AND SOD.intItemUOMId IS NOT NULL THEN ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, SOD.intItemUOMId, ISNULL(ID.dblQtyShipped,0)), ISNULL(ID.dblQtyShipped,0)) ELSE ISNULL(ID.dblQtyShipped,0) END, 0)) 
+			 --+ SUM(ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, SOD.intItemUOMId, ISNULL(ID.dblQtyShipped,0)), 0))			 
 		FROM tblSOSalesOrderDetail SOD
-			LEFT JOIN (SELECT ID.intSalesOrderDetailId
-							, ID.intItemUOMId
-							, dblQtyShipped	= CASE WHEN ISNULL(ISHI.dblQuantity, 0) = 0 THEN ID.dblQtyShipped ELSE ID.dblQtyShipped - ISNULL(ISHI.dblQuantity, 0) END
+			LEFT JOIN (
+					SELECT ID.intSalesOrderDetailId
+							, ID.intItemUOMId							
+							, dblQtyShipped	= --CASE WHEN ISNULL(ISHI.dblQuantity, 0) = 0 THEN ID.dblQtyShipped ELSE ID.dblQtyShipped - ISNULL(ISHI.dblQuantity, 0) END
+									CASE WHEN ISHI.intInventoryShipmentItemId IS NULL THEN ID.dblQtyShipped ELSE ISNULL(ISHI.dblQuantity, 0) END
 						FROM tblARInvoiceDetail ID 
 								INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 								LEFT JOIN (tblICInventoryShipmentItem ISHI INNER JOIN tblICInventoryShipment ISH 
 											ON ISHI.intInventoryShipmentId = ISH.intInventoryShipmentId)
 												ON ISHI.intLineNo = ID.intSalesOrderDetailId
-							) ID
+													AND ISHI.intInventoryShipmentItemId = ID.intInventoryShipmentItemId
+
+						UNION ALL
+						SELECT 
+							intSalesOrderDetailId = ISHI_A.intLineNo
+							,intItemUOMId = ISHI_A.intItemUOMId
+							, dblQtyShipped = ISHI_A.dblQuantity
+						FROM tblICInventoryShipmentItem ISHI_A
+								WHERE ISHI_A.intInventoryShipmentItemId NOT IN (SELECT intInventoryShipmentItemId FROM tblARInvoiceDetail WHERE intInventoryShipmentItemId IS NOT NULL)
+							--WHERE ISHI_A.intLineNo = ID.intSalesOrderDetailId
+							) ID 
 				ON SOD.intSalesOrderDetailId = ID.intSalesOrderDetailId
-			LEFT JOIN (tblICInventoryShipmentItem ISHI INNER JOIN tblICInventoryShipment ISH 
-							ON ISHI.intInventoryShipmentId = ISH.intInventoryShipmentId)
-				ON SOD.intSalesOrderDetailId = ISHI.intLineNo AND SOD.intSalesOrderId = ISHI.intOrderId
+				
+			-- LEFT JOIN (tblICInventoryShipmentItem ISHI INNER JOIN tblICInventoryShipment ISH 
+			-- 				ON ISHI.intInventoryShipmentId = ISH.intInventoryShipmentId)
+			--	ON SOD.intSalesOrderDetailId = ISHI.intLineNo AND SOD.intSalesOrderId = ISHI.intOrderId
 		WHERE SOD.dblQtyOrdered > 0
 		GROUP BY SOD.intSalesOrderDetailId
 	) SHP
