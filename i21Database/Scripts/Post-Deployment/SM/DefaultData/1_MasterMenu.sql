@@ -4131,6 +4131,16 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Transacti
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'Reporting.view.ReportManager?group=Card Fueling&report=TransactionSummaryBySite&direct=true&showCriteria=true', intSort = 1 WHERE strMenuName = 'Transaction Summary By Site' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingReportParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Transaction Summary By Product Category' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingReportParentMenuId)
+BEGIN
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Transaction Summary By Product Category', N'Card Fueling', @CardFuelingReportParentMenuId, N'Transaction Summary By Product Category', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Card Fueling&report=TransactionSummaryByCustomerProdPeriod&direct=true&showCriteria=true', N'small-menu-maintenance', 0, 0, 0, 1, 2, 1)
+
+	EXEC uspSMIncreaseECConcurrency 0
+END
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'Reporting.view.ReportManager?group=Card Fueling&report=TransactionSummaryByCustomerProdPeriod&direct=true&showCriteria=true', intSort = 2 WHERE strMenuName = 'Transaction Summary By Product Category' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingReportParentMenuId
+
 /* START OF DELETION */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Batch Posting' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Discount Schedules' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingMaintenanceParentMenuId
@@ -5266,7 +5276,7 @@ BEGIN
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 	VALUES (N'Buybacks', N'Buybacks', 0, N'Buybacks', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 33, 0)
 
-	EXEC uspSMUpdateUserRoleMenus 0
+	EXEC uspSMIncreaseECConcurrency 0
 END
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 33 WHERE strMenuName = 'Buybacks' AND strModuleName = 'Buybacks' AND intParentMenuID = 0
