@@ -15,14 +15,14 @@ BEGIN TRY
 	FROM tblLGLoad
 	WHERE intLoadId = @intLoadId
 
-	IF @intPurchaseSale = 1
+	IF @intPurchaseSale IN (1,3)
 	BEGIN
 		EXEC uspLGCreateVoucherForInbound 
 		        @intLoadId = @intLoadId
 			   ,@intEntityUserSecurityId = @intEntityUserSecurityId
 			   ,@intBillId = @intBillId OUTPUT
 	END
-	ELSE IF @intPurchaseSale IN (2,3)
+	ELSE IF @intPurchaseSale IN (2)
 	BEGIN
 		EXEC uspLGCreateVoucherForOutbound 
 				@intLoadId = @intLoadId

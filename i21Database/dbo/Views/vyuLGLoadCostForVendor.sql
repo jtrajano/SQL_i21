@@ -48,6 +48,7 @@ AS
 			,CU.strCurrency
 			,[strPriceUOM] = UOM.strUnitMeasure
 			,[ysnPosted] = L.ysnPosted
+			,LC.strCostMethod
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblLGLoadCost LC ON LC.intLoadId = L.intLoadId

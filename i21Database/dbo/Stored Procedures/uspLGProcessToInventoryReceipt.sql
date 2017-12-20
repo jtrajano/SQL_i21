@@ -295,59 +295,75 @@ BEGIN TRY
 		,[strBillOfLadding]
 		,[ysnInventoryCost]
 		)
-	SELECT CV.intEntityId
+	SELECT CV.intEntityVendorId
 		,CV.intItemId
 		,CV.strCostMethod
 		,CASE 
 			WHEN CV.strCostMethod = 'Amount'
 				THEN 0
-			ELSE CV.dblRate
+			ELSE ROUND((
+						CV.[dblShipmentUnitPrice] / (
+							SELECT SUM(LOD.dblQuantity)
+							FROM tblLGLoadDetail LOD
+							WHERE LOD.intLoadId = L.intLoadId
+							)
+						) * CONVERT(NUMERIC(18, 6), LD.dblQuantity), 2)
 			END
-		,CV.dblAmount
+		,ROUND((
+				CV.[dblTotal] / (
+					SELECT SUM(LOD.dblQuantity)
+					FROM tblLGLoadDetail LOD
+					WHERE LOD.intLoadId = L.intLoadId
+					)
+				) * LD.dblQuantity, 2)
 		,CV.intItemUOMId
-		,(
-			SELECT TOP 1 CD.intContractHeaderId
-			FROM tblLGLoadDetail LD
-			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
-			WHERE intLoadId = @intLoadId
-			)
-		,(
-			SELECT TOP 1 intPContractDetailId
-			FROM tblLGLoadDetail
-			WHERE intLoadId = @intLoadId
-			)
-		,CV.ysnAccrue
+		,CD.intContractHeaderId
+		,LD.intPContractDetailId
+		,1 ysnAccrue
 		,'Purchase Contract'
 		,NULL
 		,CV.intCurrencyId
-		,(
-			SELECT TOP 1 LOD.intVendorEntityId
-			FROM tblLGLoadDetail LOD
-			WHERE intLoadId = @intLoadId
-			)
-		,(
-			SELECT TOP 1 intPCompanyLocationId
-			FROM tblLGLoadDetail
-			WHERE intLoadId = @intLoadId
-			)
+		,LD.intVendorEntityId
+		,LD.intPCompanyLocationId
 		,0
 		,NULL
 		,CV.intCurrencyId
-		,(
-			SELECT TOP 1 EL.intEntityLocationId
-			FROM tblLGLoadDetail LD
-			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
-			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-			JOIN tblEMEntityLocation EL ON EL.intEntityId = CH.intEntityId
-				AND EL.ysnDefaultLocation = 1
-			WHERE LD.intLoadId = @intLoadId
-			)
+		,EL.intEntityLocationId
 		,L.strBLNumber
 		,I.ysnInventoryCost
-	FROM vyuLGLoadCostView CV
-	JOIN tblLGLoad L ON L.intLoadId = CV.intLoadId
+	FROM vyuLGLoadCostForVendor CV
+	JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = CV.intLoadDetailId
+	JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
+			WHEN ISNULL(LD.intPContractDetailId, 0) = 0
+				THEN LD.intSContractDetailId
+			ELSE LD.intPContractDetailId
+			END
 	JOIN tblICItem I ON I.intItemId = CV.intItemId
+	JOIN tblEMEntityLocation EL ON EL.intEntityId = CASE 
+			WHEN ISNULL(LD.intPContractDetailId, 0) = 0
+				THEN LD.intCustomerEntityId
+			ELSE LD.intVendorEntityId
+			END
+		AND EL.ysnDefaultLocation = 1
 	WHERE L.intLoadId = @intLoadId
+	GROUP BY CV.intEntityVendorId
+		,CV.intItemId
+		,CV.strCostMethod
+		,CV.[dblShipmentUnitPrice]
+		,CV.[dblTotal]
+		,CV.intItemUOMId
+		,CD.intContractHeaderId
+		,LD.intPContractDetailId
+		,CV.intCurrencyId
+		,LD.dblQuantity
+		,L.strBLNumber
+		,I.ysnInventoryCost
+		,CV.intLoadId
+		,L.intLoadId
+		,LD.intVendorEntityId
+		,LD.intPCompanyLocationId
+		,EL.intEntityLocationId
 
 	UNION ALL
 
