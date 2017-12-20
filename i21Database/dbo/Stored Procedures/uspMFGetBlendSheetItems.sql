@@ -2,7 +2,8 @@
 	@intItemId int,
 	@intLocationId int,
 	@dblQtyToProduce decimal(38,20),
-	@dtmDueDate DateTime
+	@dtmDueDate DateTime,
+	@strHandAddIngredientXml nvarchar(max)=''
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -58,7 +59,8 @@ Declare @tblRequiredQty table
 	dblRecipeItemQty numeric(38,20),
 	strRecipeItemUOM nvarchar(50),
 	strConsumptionStorageLocation nvarchar(50),
-	intConsumptionMethodId int
+	intConsumptionMethodId int,
+	intConsumptionStorageLocationId int
 )
 
 Insert into @tblRequiredQty
@@ -68,7 +70,7 @@ Select ri.intItemId,(ri.dblCalculatedQuantity * (@dblQtyToProduce/r.dblQuantity)
 (ri.dblCalculatedUpperTolerance * (@dblQtyToProduce/r.dblQuantity)) AS dblUpperToleranceQty,
 ri.ysnMinorIngredient,ysnScaled,r.dblQuantity AS dblRecipeQty,
 ri.dblQuantity AS dblRecipeItemQty,u.strUnitMeasure AS strRecipeItemUOM,
-ISNULL(sl.strName,'') AS strConsumptionStorageLocation,ri.intConsumptionMethodId
+ISNULL(sl.strName,'') AS strConsumptionStorageLocation,ri.intConsumptionMethodId,ISNULL(ri.intStorageLocationId,0)
 From tblMFRecipeItem ri 
 Join tblMFRecipe r on r.intRecipeId=ri.intRecipeId 
 Join tblICItemUOM iu on ri.intItemUOMId=iu.intItemUOMId
@@ -84,7 +86,7 @@ Select rs.intSubstituteItemId AS intItemId,(rs.dblQuantity * (@dblQtyToProduce/r
 (rs.dblCalculatedUpperTolerance * (@dblQtyToProduce/r.dblQuantity)) AS dblUpperToleranceQty,
 0 AS ysnMinorIngredient,0 AS ysnScaled,r.dblQuantity AS dblRecipeQty,
 rs.dblQuantity AS dblRecipeItemQty,u.strUnitMeasure AS strRecipeItemUOM,
-'' AS strConsumptionStorageLocation,0
+'' AS strConsumptionStorageLocation,0,0
 From tblMFRecipeSubstituteItem rs
 Join tblMFRecipe r on r.intRecipeId=rs.intRecipeId 
 Join tblICItemUOM iu on rs.intItemUOMId=iu.intItemUOMId
@@ -97,6 +99,58 @@ Update a Set a.ysnHasSubstitute=1 from @tblRequiredQty a Join @tblRequiredQty b 
 Update t Set t.dblRequiredQty=CEILING(t.dblRequiredQty)
 From @tblRequiredQty t join tblICItem i on t.intItemId=i.intItemId
 join (Select value from dbo.fnCommaSeparatedValueToTable(@strPackagingCategoryId)) p on i.intCategoryId=p.value
+
+--Hand Add Ingredient
+If ISNULL(@strHandAddIngredientXml,'')<>''
+Begin
+	Declare @tblHandAddIngredient AS Table
+	(
+		intRecipeItemId int,
+		dblQuantity numeric(38,20)
+	)
+	Declare @idoc int
+	EXEC sp_xml_preparedocument @idoc OUTPUT,@strHandAddIngredientXml
+
+	INSERT INTO @tblHandAddIngredient (
+		intRecipeItemId
+		,dblQuantity
+		)
+	SELECT intRecipeItemId
+		,dblQuantity
+	FROM OPENXML(@idoc, 'root', 2) WITH (
+			intRecipeItemId INT
+			,dblQuantity NUMERIC(38,20)
+			)
+
+	Declare @dblHandAddIngredientQty numeric(38,20)
+	Declare @dblRemainingHandAddQty numeric(38,20)
+	Declare @dblTotalHandAddReqQty numeric(38,20)
+	Declare @dblRecipeQtyWOHandAdd numeric(38,20)
+
+	Select @dblHandAddIngredientQty=SUM(dblQuantity) From @tblHandAddIngredient
+
+	Select @dblTotalHandAddReqQty=SUM(t.dblRequiredQty) From @tblRequiredQty t join tblICItem i on t.intItemId=i.intItemId
+	Where ISNULL(i.ysnHandAddIngredient,0)=1
+
+	Select @dblRecipeQtyWOHandAdd=SUM(t.dblRecipeItemQty) From @tblRequiredQty t join tblICItem i on t.intItemId=i.intItemId
+	Where ISNULL(i.ysnHandAddIngredient,0)=0
+
+	If @dblHandAddIngredientQty<=@dblTotalHandAddReqQty
+		Set @dblRemainingHandAddQty=@dblTotalHandAddReqQty-@dblHandAddIngredientQty
+	Else
+		Set @dblRemainingHandAddQty=@dblHandAddIngredientQty
+
+	--Add the variance to req qty
+	Update t Set t.dblRequiredQty=t.dblRequiredQty + (dblRecipeItemQty/@dblRecipeQtyWOHandAdd*@dblRemainingHandAddQty) 
+	From @tblRequiredQty t join tblICItem i on t.intItemId=i.intItemId
+	Where ISNULL(i.ysnHandAddIngredient,0)=0
+
+	--Leave the hand add qty unchanged
+	Update t Set t.dblRequiredQty=h.dblQuantity
+	From @tblRequiredQty t join @tblHandAddIngredient h on t.intRecipeItemId=h.intRecipeItemId
+	join tblICItem i on t.intItemId=i.intItemId
+	Where ISNULL(i.ysnHandAddIngredient,0)=1
+End
 
 Declare @tblPhysicalQty table
 (
@@ -152,7 +206,7 @@ ISNULL(ROUND((ISNULL((ISNULL(b.dblPhysicalQty,0) - ISNULL(c.dblReservedQty,0)),0
 a.ysnIsSubstitute,a.intParentItemId,a.ysnHasSubstitute,a.intRecipeItemId,a.intParentRecipeItemId,a.strGroupName,
 a.dblLowerToleranceQty,a.dblUpperToleranceQty,
 a.ysnMinorIngredient,a.ysnScaled,a.dblRecipeQty,
-a.dblRecipeItemQty,a.strRecipeItemUOM,a.strConsumptionStorageLocation,a.intConsumptionMethodId
+a.dblRecipeItemQty,a.strRecipeItemUOM,a.strConsumptionStorageLocation,a.intConsumptionMethodId,ISNULL(i.ysnHandAddIngredient,0) AS ysnHandAddIngredient,@intRecipeId AS intRecipeId,a.intConsumptionStorageLocationId
 from @tblRequiredQty a 
 Left Join @tblPhysicalQty b on a.intItemId=b.intItemId
 Left Join @tblReservedQty c on a.intItemId=c.intItemId

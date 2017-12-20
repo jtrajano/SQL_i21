@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspMFGetBlendProductionChildLots] @intWorkOrderId INT,@intLocationId INT = NULL,@intItemId INT = NULL,@dblQtyToProduce NUMERIC(38,20)
+﻿CREATE PROCEDURE [dbo].[uspMFGetBlendProductionChildLots] @intWorkOrderId INT,@intLocationId INT = NULL,@intItemId INT = NULL,@dblQtyToProduce NUMERIC(38,20),@strRecipeXml nvarchar(max)=''
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -257,7 +257,7 @@ Begin
 	)
 
 	Insert Into @tblPickedLots
-	Exec uspMFAutoBlendSheetFIFO @intLocationId,0,@dblQtyToProduce,'',0,'','',@intItemId
+	Exec uspMFAutoBlendSheetFIFO @intLocationId,0,@dblQtyToProduce,@strRecipeXml,0,'','',@intItemId
 
 	Select tpl.intWorkOrderInputLotId AS intWorkOrderConsumedLotId,
 	0 AS intWorkOrderId,
@@ -296,7 +296,8 @@ Begin
 	i.strLotTracking,
 	i.intCategoryId,
     tpl.intSubLocationId,
-    tpl.intStorageLocationId
+    tpl.intStorageLocationId,
+	ISNULL(i.ysnHandAddIngredient,0) AS ysnHandAddIngredient
 	From @tblPickedLots tpl 
 	Left Join tblICLot l on tpl.intLotId=l.intLotId
 	Left Join tblICParentLot pl on l.intParentLotId=pl.intParentLotId
