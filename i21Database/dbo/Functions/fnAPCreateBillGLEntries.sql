@@ -593,7 +593,8 @@ BEGIN
 
 	WHERE	A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	AND B.dblOldCost IS NOT NULL AND B.dblCost != B.dblOldCost AND B.intInventoryReceiptItemId IS NOT NULL
-	AND 1 = (CASE WHEN B.intInventoryReceiptChargeId > 0 AND F.ysnInventoryCost = 0 THEN 1 ELSE 0 END) --created adjustment for charges only if inventory cost yes
+	AND 1 = (CASE WHEN B.intInventoryReceiptChargeId > 0 AND F.ysnInventoryCost = 0 THEN 1 
+			WHEN B.intInventoryReceiptItemId > 0 THEN 1 ELSE 0 END) --created adjustment for charges only if inventory cost yes
 	UNION ALL
 	--CHARGES
 	SELECT	
