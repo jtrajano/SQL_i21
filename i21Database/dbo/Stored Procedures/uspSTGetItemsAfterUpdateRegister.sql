@@ -93,7 +93,8 @@ BEGIN TRY
 					(
 						SELECT 
 						CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
-						, IUOM.strUpcCode AS strUpcCode
+						--, IUOM.strUpcCode AS strUpcCode
+						, IUOM.strLongUPCCode AS strUpcCode
 						, I.strDescription AS strDescription
 						, Prc.dblSalePrice AS dblSalePrice
 						, IL.ysnTaxFlag1 AS ysnSalesTaxed
@@ -160,7 +161,8 @@ BEGIN TRY
 						SELECT
 						CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
 							--PIL.strPromoItemListDescription
-							, IUOM.strUpcCode AS strUpcCode
+							--, IUOM.strUpcCode AS strUpcCode
+							, IUOM.strLongUPCCode AS strUpcCode
 							, I.strDescription AS strDescription
 							, Prc.dblSalePrice AS dblSalePrice
 							, IL.ysnTaxFlag1 AS ysnSalesTaxed
@@ -213,7 +215,8 @@ BEGIN TRY
 							(
 								SELECT 
 									CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
-									, IUOM.strUpcCode AS strUpcCode
+									-- , IUOM.strUpcCode AS strUpcCode
+									, IUOM.strLongUPCCode AS strUpcCode
 									, I.strDescription AS strDescription
 									, Prc.dblSalePrice AS dblSalePrice
 									, IL.ysnTaxFlag1 AS ysnSalesTaxed
@@ -266,7 +269,8 @@ BEGIN TRY
 							(
 								SELECT 
 								CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
-								, IUOM.strUpcCode AS strUpcCode
+								--, IUOM.strUpcCode AS strUpcCode
+								, IUOM.strLongUPCCode AS strUpcCode
 								, I.strDescription AS strDescription
 								, Prc.dblSalePrice AS dblSalePrice
 								, IL.ysnTaxFlag1 AS ysnSalesTaxed
