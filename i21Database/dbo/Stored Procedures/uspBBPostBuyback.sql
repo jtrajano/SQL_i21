@@ -71,7 +71,7 @@ AS
 			,[dblPrice] = B.dblReimbursementAmount
 		FROM tblBBBuybackCharge B
 		INNER JOIN tblBBBuyback A
-			ON A.intBuybackId = A.intBuybackId
+			ON B.intBuybackId = A.intBuybackId
 		WHERE A.intBuybackId = @intBuyBackId
 
 		EXEC [dbo].[uspARProcessInvoices] @InvoiceEntries = @EntriesForInvoice
