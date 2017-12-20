@@ -151,8 +151,8 @@ BEGIN
 			,[dblQty] 
 			,[dblUOMQty] 
 			,[intCostUOMId]
-			,[dblVoucherCost] 
-			,[dblNewValue]
+			,[dblVoucherCost] = CASE WHEN @ysnPost = 1 THEN [dblVoucherCost] ELSE -[dblVoucherCost] END 
+			,[dblNewValue] = CASE WHEN @ysnPost = 1 THEN [dblNewValue] ELSE -[dblNewValue] END 
 			,[intCurrencyId] 
 			,[intTransactionId]
 			,[intTransactionDetailId] 
