@@ -91,6 +91,7 @@ AS
 		AND NOT EXISTS(SELECT TOP 1 1 FROM tblBBBuybackExcluded WHERE intInvoiceDetailId = B.intInvoiceDetailId)
 		AND B.strBuybackSubmitted <> 'E'
 		AND A.ysnPosted = 1
+		AND (O.intRateId IS NOT NULL OR P.intRateId IS NOT NULL OR Q.intRateId IS NOT NULL)
 
 GO
 
