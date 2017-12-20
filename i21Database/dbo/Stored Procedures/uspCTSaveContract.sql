@@ -152,7 +152,7 @@ BEGIN TRY
 			UPDATE tblCTContractDetail SET ysnPriceChanged = 0 WHERE intContractDetailId = @intContractDetailId
 		END
 		
-		IF @intPricingTypeId = 2 AND @dblOriginalBasis IS NULL
+		IF @intPricingTypeId IN (2,8) AND @dblOriginalBasis IS NULL
 		BEGIN
 			UPDATE tblCTContractDetail SET dblOriginalBasis = dblBasis WHERE intContractDetailId = @intContractDetailId
 		END
@@ -162,7 +162,7 @@ BEGIN TRY
 			EXEC uspCTUpdateSequenceBasis @intContractDetailId,@dblBasis
 		END
 
-		IF @intPricingTypeId IN (1,2)
+		IF @intPricingTypeId IN (1,2,8)
 		BEGIN
 			UPDATE	CD 
 			SET		CD.dblConvertedBasis = dbo.fnCTConvertQtyToTargetItemUOM(CD.intPriceItemUOMId,CD.intBasisUOMId,CD.dblBasis) / 

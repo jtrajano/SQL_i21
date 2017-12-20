@@ -113,7 +113,7 @@ BEGIN TRY
 		WHERE	intCommodityId		=	@intCommodityId 
 		AND		intUnitMeasureId	=	@intUnitMeasureId
 
-		IF @intPricingTypeId = 2 AND @strAction <> 'Delete'
+		IF @intPricingTypeId IN (2,8) AND @strAction <> 'Delete'
 		BEGIN
 			UPDATE tblCTContractDetail SET dblOriginalBasis = dblBasis WHERE intContractDetailId = @intContractDetailId
 		END
@@ -125,7 +125,7 @@ BEGIN TRY
 			SET		CD.dblBasis				=	ISNULL(CD.dblOriginalBasis,0),
 					CD.intFutureMarketId	=	PF.intOriginalFutureMarketId,
 					CD.intFutureMonthId		=	PF.intOriginalFutureMonthId,
-					CD.intPricingTypeId		=	2,
+					CD.intPricingTypeId		=	CASE WHEN CD.intPricingTypeId = 1 THEN 2 ELSE CD.intPricingTypeId END,
 					CD.dblFutures			=	NULL,
 					CD.dblCashPrice			=	NULL,
 					CD.dblTotalCost			=	NULL,
@@ -202,8 +202,8 @@ BEGIN TRY
 			WHERE	intPriceFixationId = @intPriceFixationId
 
 			UPDATE	PF
-			SET		PF.[dblTotalLots]			=	FD.[dblNoOfLots],
-					PF.[dblLotsFixed]			=	FD.[dblNoOfLots],
+			SET		PF.[dblTotalLots]		=	FD.[dblNoOfLots],
+					PF.[dblLotsFixed]		=	FD.[dblNoOfLots],
 					PF.intLotsHedged		=	CASE WHEN @ysnHedge = 1 THEN FD.[dblNoOfLots] ELSE NULL END,
 					PF.dblPriceWORollArb	=	FD.dblFutures,
 					PF.dblFinalPrice		=	PF.dblFinalPrice - PF.dblPriceWORollArb + FD.dblFutures
@@ -391,7 +391,7 @@ BEGIN TRY
 		IF	@dblLotsUnfixed = 0
 		BEGIN
 			UPDATE	CD
-			SET		CD.intPricingTypeId		=	1,
+			SET		CD.intPricingTypeId		=	CASE WHEN CD.intPricingTypeId = 2 THEN 1 ELSE CD.intPricingTypeId END,
 					CD.dblFutures			=	dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0))  / 
 												CASE	WHEN	@intFinalCurrencyId = @intCurrencyId	THEN 1 
 														WHEN	@intFinalCurrencyId <> @intCurrencyId	
@@ -407,13 +407,16 @@ BEGIN TRY
 													END
 												) + 
 												(
-													dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0)) / 
-													CASE	WHEN	@intFinalCurrencyId = @intCurrencyId	THEN 1 
-															WHEN	@intFinalCurrencyId <> @intCurrencyId	
-															AND		@ysnFinalSubCurrency = 1				THEN 100 
-															ELSE	0.01 
-													END									
-												) ,	
+													CASE WHEN CD.intPricingTypeId = 8 THEN CD.dblRatio ELSE 1 END *
+													(
+														dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0)) / 
+														CASE	WHEN	@intFinalCurrencyId = @intCurrencyId	THEN 1 
+																WHEN	@intFinalCurrencyId <> @intCurrencyId	
+																AND		@ysnFinalSubCurrency = 1				THEN 100 
+																ELSE	0.01 
+														END									
+													) 
+												),	
 					CD.dblTotalCost			=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * 
 												(	
 													(
@@ -425,12 +428,15 @@ BEGIN TRY
 														END
 													) + 
 													(
-														dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0))  / 
-														CASE	WHEN	@intFinalCurrencyId = @intCurrencyId	THEN 1 
-																WHEN	@intFinalCurrencyId <> @intCurrencyId	
-																AND		@ysnFinalSubCurrency = 1				THEN 100 
-																ELSE	0.01 
-														END
+														CASE WHEN CD.intPricingTypeId = 8 THEN CD.dblRatio ELSE 1 END *
+														(
+															dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0))  / 
+															CASE	WHEN	@intFinalCurrencyId = @intCurrencyId	THEN 1 
+																	WHEN	@intFinalCurrencyId <> @intCurrencyId	
+																	AND		@ysnFinalSubCurrency = 1				THEN 100 
+																	ELSE	0.01 
+															END
+														)
 													)
 												)/
 												CASE WHEN ISNULL(CY.ysnSubCurrency,0) = 0 THEN 1 ELSE CY.intCent END,	
@@ -454,7 +460,7 @@ BEGIN TRY
 		ELSE
 		BEGIN
 			UPDATE	CD
-			SET		CD.intPricingTypeId		=	2,
+			SET		CD.intPricingTypeId		=	CASE WHEN CD.intPricingTypeId = 1 THEN 2 ELSE CD.intPricingTypeId END,
 					CD.dblFutures			=	NULL,
 					CD.dblCashPrice			=	NULL,	
 					CD.dblTotalCost			=	NULL,
