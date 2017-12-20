@@ -180,7 +180,7 @@ BEGIN TRY
 		,W.intItemId
 		,I.intCategoryId
 	FROM dbo.tblMFWorkOrderInputLot WI
-	JOIN @tblMFWorkOrder W ON W.intWorkOrderId = WI.intWorkOrderId
+	JOIN @tblMFWorkOrder W ON W.intWorkOrderId = WI.intWorkOrderId AND WI.ysnConsumptionReversed  = 0
 	JOIN dbo.tblICItem I ON I.intItemId = WI.intItemId
 	Where WI.intWorkOrderInputLotId Not in (Select x.intTransactionId
 	FROM OPENXML(@idoc, 'root/Transactions/Transaction', 2) WITH (
