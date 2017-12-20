@@ -39,4 +39,5 @@ JOIN dbo.tblMFLotInventory LI ON LI.intLotId = IRL.intLotId
 JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = IRI.intStorageLocationId
 LEFT JOIN tblSMCountry C ON C.intCountryID = IRL.intOriginId
 JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = IR.intLocationId
+Where IR.ysnPosted =1
 

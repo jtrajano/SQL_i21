@@ -3,6 +3,8 @@ CREATE VIEW [dbo].[vyuCFTransactionSummary]
 AS
 SELECT   
 
+YEAR(cfTransaction.dtmTransactionDate) AS intYear,
+MONTH(cfTransaction.dtmTransactionDate) AS intMonth,
 cfSite.intSiteId,
 cfSite.strSiteAddress,
 RTRIM(LTRIM(cfSite.strSiteName)) AS strSiteName,

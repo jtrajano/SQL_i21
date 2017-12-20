@@ -143,7 +143,7 @@ BEGIN
 	IF @ysnPost = 1
 	BEGIN
 		--You cannot %s transaction under a closed module.
-		RAISERROR('You cannot %s transaction under a closed module.', 11, 1, 'Post')
+		RAISERROR('You cannot %s transaction under a closed module.', 11, 1, 'Void')
 		GOTO Post_Rollback
 	END
 	ELSE
@@ -166,7 +166,7 @@ END
 IF @ysnPost = 1 AND @ysnTransactionPostedFlag = 1 and @ysnRecap = 0
 BEGIN 
 	-- The transaction is already posted.
-	RAISERROR('The transaction is already posted.', 11, 1)
+	RAISERROR('The transaction is already voided.', 11, 1)
 	GOTO Post_Rollback
 END 
 
@@ -208,7 +208,7 @@ BEGIN
 	-- 'You cannot %s transactions you did not create. Please contact your local administrator.'
 	IF @ysnPost = 1	
 	BEGIN 
-		RAISERROR('You cannot %s transactions you did not create. Please contact your local administrator.', 11, 1, 'Post')
+		RAISERROR('You cannot %s transactions you did not create. Please contact your local administrator.', 11, 1, 'Void')
 		GOTO Post_Rollback
 	END 
 	IF @ysnPost = 0
@@ -222,7 +222,7 @@ END
 IF @dblAmount = 0 AND @ysnPost = 1 AND @ysnRecap = 0
 BEGIN 
 	-- Cannot post a zero-value transaction.
-	RAISERROR('Cannot post a zero-value transaction.', 11, 1)
+	RAISERROR('Cannot void a zero-value transaction.', 11, 1)
 	GOTO Post_Rollback
 END 
 

@@ -15,10 +15,14 @@ SET ANSI_WARNINGS OFF
 IF @post = 0
 BEGIN
 	
-	UPDATE A
-		SET A.dblAmountDue = A.dblAmountDue + A.dblPayment
-	FROM tblARPaymentDetail A
-	WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds)
+	UPDATE B
+		SET B.dblAmountDue = B.dblAmountDue + B.dblPayment
+	FROM tblARPayment A
+				INNER JOIN tblARPaymentDetail B 
+						ON A.intPaymentId = B.intPaymentId
+				INNER JOIN tblAPBill C
+						ON B.intBillId = C.intBillId
+				WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds)
 
 	UPDATE tblAPBill
 		SET tblAPBill.dblAmountDue = B.dblAmountDue, --(CASE WHEN C.intTransactionType !=1 THEN B.dblAmountDue * -1 ELSE B.dblAmountDue END),
@@ -37,10 +41,14 @@ END
 ELSE IF @post = 1
 BEGIN
 
-	UPDATE A
-		SET A.dblAmountDue = A.dblAmountDue - A.dblPayment
-	FROM tblARPaymentDetail A
-	WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds)
+	UPDATE B
+		SET B.dblAmountDue = B.dblAmountDue - B.dblPayment
+	FROM tblARPayment A
+				INNER JOIN tblARPaymentDetail B 
+						ON A.intPaymentId = B.intPaymentId
+				INNER JOIN tblAPBill C
+						ON B.intBillId = C.intBillId
+				WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds)
 
 	UPDATE tblAPBill
 		SET tblAPBill.dblAmountDue = B.dblAmountDue,

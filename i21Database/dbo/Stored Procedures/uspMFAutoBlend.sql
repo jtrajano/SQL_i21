@@ -266,9 +266,6 @@ BEGIN TRY
 					ON mcp.intManufacturingCellId = mc.intManufacturingCellId
 		WHERE	mc.intManufacturingCellId=@intCellId
 
-		IF ISNULL(@dblBlendBinSize,0)=0
-			RAISERROR('Blend bin size is not defined',16,1)
-
 		SELECT	@strBlendItemTrackingType=strLotTracking 
 		FROM	tblICItem 
 		WHERE	intItemId=@intBlendItemId
@@ -340,6 +337,9 @@ BEGIN TRY
 			SET @ErrMsg='No Manufacturing Cell configured for item ' + @strItemNo + ' in location ' + @strLocationName + '.'
 			RAISERROR(@ErrMsg,16,1)
 		End
+
+		IF ISNULL(@dblBlendBinSize,0)=0
+			RAISERROR('Blend bin size is not defined. Please configure Blend bin size(Machine Capacity in Packing Types Tab) in Machine Configuration Screen.',16,1)
 	END 
 	/******************************************************************************
 	  END VALIDATIONS
@@ -525,7 +525,44 @@ BEGIN TRY
 
 		IF @strRawItemTrackingType = 'No'
 		BEGIN 
-			INSERT INTO @tblLot (
+			IF @strOrderType='LOAD DISTRIBUTION'
+				INSERT INTO @tblLot (
+					 intLotId
+					,strLotNumber
+					,intItemId
+					,dblQty
+					,intLocationId
+					,intSubLocationId
+					,intStorageLocationId
+					,dtmCreateDate
+					,dtmExpiryDate
+					,dblUnitCost
+					,dblWeightPerQty
+					,strCreatedBy
+					,intParentLotId
+					,intItemUOMId
+					,intItemIssuedUOMId
+				)
+				SELECT 
+						0
+						,''
+						,t.intItemId
+						,t.dblRequiredQty
+						,@intLocationId
+						,NULL
+						,NULL
+						,NULL
+						,NULL
+						,0
+						,1
+						,''
+						,0
+						,t.intItemUOMId
+						,0 
+				FROM	@tblInputItem t
+				WHERE t.intItemId=@intRawItemId
+			ELSE
+				INSERT INTO @tblLot (
 				 intLotId
 				,strLotNumber
 				,intItemId
@@ -620,7 +657,7 @@ BEGIN TRY
 			ORDER BY L.dtmDateCreated
 		END
 
-		IF (SELECT COUNT(1) FROM @tblLot)=0
+		IF (SELECT COUNT(1) FROM @tblLot)=0 AND @strOrderType IN ('SALES ORDER','INVOICE')
 		BEGIN
 			SELECT	@strItemNo=strItemNo 
 			FROM	tblICItem 
@@ -965,6 +1002,10 @@ BEGIN TRY
 			,@intLoadDistributionDetailId = @intLoadDistributionDetailId
 			,@dtmDate = @dtmDate
 
+		--Check if the consumption entries exist
+		IF (SELECT COUNT(1) FROM tblMFWorkOrderConsumedLot WHERE intWorkOrderId = @intWorkOrderId)=0
+			RAISERROR('No consumption entries found.',16,1)
+
 		UPDATE	tblMFWorkOrder 
 		SET		intStatusId=12
 				,dtmCompletedDate = GETDATE()
@@ -1022,7 +1063,7 @@ BEGIN TRY
 		FROM	tblMFWorkOrderConsumedLot wc 
 		WHERE	intWorkOrderId = @intWorkOrderId
 
-		SET @strXml += @strWorkOrderConsumedLotsXml
+		SET @strXml += ISNULL(@strWorkOrderConsumedLotsXml,'')
 		SET @strXml += '</root>'
 
 		EXEC uspMFCompleteBlendSheet 

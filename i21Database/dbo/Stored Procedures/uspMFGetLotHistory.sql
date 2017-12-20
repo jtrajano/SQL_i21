@@ -37,7 +37,7 @@ BEGIN
 		,strOldVendorNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,strNewVendorLotNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,strOldVendorLotNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
-		,strNotes NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strNotes NVARCHAR(1000) COLLATE Latin1_General_CI_AS
 		,strUser NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,strBatchId NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		)
@@ -72,7 +72,7 @@ BEGIN
 		,strOldVendorNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,strNewVendorLotNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,strOldVendorLotNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
-		,strNotes NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strNotes NVARCHAR(1000) COLLATE Latin1_General_CI_AS
 		,strUser NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,strBatchId NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		)
