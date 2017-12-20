@@ -6004,6 +6004,7 @@
     <Build Include="dbo\Tables\tblSTUpdateRegisterHistory.sql" />
     <Build Include="dbo\Views\vyuMFGetPalletSSCCNo.sql" />
     <Build Include="dbo\Views\vyuCTProjectedCommission.sql" />
+    <Build Include="dbo\Functions\fnRKGetVariationMargin.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

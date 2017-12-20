@@ -7,7 +7,7 @@ SELECT TOP 100 PERCENT convert(int,DENSE_RANK() OVER(ORDER BY CONVERT(DATETIME,'
 SELECT (convert(int,isnull((Long1-MatchLong),0)- isnull(Sell1-MatchShort,0)))*dblContractSize/ case when ysnSubCurrency = 'true' then intCent else 1 end  GrossPnL,isnull(((Long1-MatchLong)*dblPrice),0) LongWaitedPrice,  
 isnull((Long1-MatchLong),0) as dblLong,isnull(Sell1-MatchShort,0) as dblShort, isnull(((Sell1-MatchShort)*dblPrice),0) ShortWaitedPrice,  
 convert(int,isnull((Long1-MatchLong),0)- isnull(Sell1-MatchShort,0)) * -dblFutCommission1 / case when ComSubCurrency = 'true' then ComCent else 1 end  AS dblFutCommission,
-convert(int,isnull((Long1-MatchLong),0)- isnull(Sell1-MatchShort,0)) as  intNet,   
+convert(int,isnull((Long1-MatchLong),0)- isnull(Sell1-MatchShort,0)) as  intNet,0.0 dblVariationMargin,  
 * FROM (   
 SELECT  intFutOptTransactionId,
 		fm.strFutMarketName,  
@@ -33,17 +33,18 @@ SELECT  intFutOptTransactionId,
 		isnull(ot.dblPrice,0) dblPrice,  
 		fm.dblContractSize dblContractSize,0 as intConcurrencyId,  
 		CASE WHEN bc.intFuturesRateType= 1 then 0 else  isnull(bc.dblFutCommission,0) end as dblFutCommission1,  
-	   isnull((select sum(dblMatchQty) from tblRKMatchFuturesPSDetail psd 
-				join tblRKMatchFuturesPSHeader h on psd.intMatchFuturesPSHeaderId=h.intMatchFuturesPSHeaderId
+	   ISNULL((SELECT SUM(dblMatchQty) from tblRKMatchFuturesPSDetail psd 
+				JOIN tblRKMatchFuturesPSHeader h on psd.intMatchFuturesPSHeaderId=h.intMatchFuturesPSHeaderId
 				WHERE psd.intLFutOptTransactionId=ot.intFutOptTransactionId 
 					  AND convert(datetime,CONVERT(VARCHAR(10),h.dtmMatchDate,110),110) <= 
 				(SELECT TOP 1 convert(datetime,CONVERT(VARCHAR(10),dtmToDate,110),110) from tblRKDateFilterFor360 order by 1 desc)),0) as MatchLong,  
-	   isnull((select sum(dblMatchQty) from tblRKMatchFuturesPSDetail psd
-			   join tblRKMatchFuturesPSHeader h on psd.intMatchFuturesPSHeaderId=h.intMatchFuturesPSHeaderId
+	   ISNULL((SELECT sum(dblMatchQty) from tblRKMatchFuturesPSDetail psd
+			   JOIN tblRKMatchFuturesPSHeader h on psd.intMatchFuturesPSHeaderId=h.intMatchFuturesPSHeaderId
 			 WHERE psd.intSFutOptTransactionId=ot.intFutOptTransactionId
 			  AND convert(datetime,CONVERT(VARCHAR(10),h.dtmMatchDate,110),110) <= 
 			  (SELECT TOP 1 convert(datetime,CONVERT(VARCHAR(10),dtmToDate,110),110) from tblRKDateFilterFor360 order by 1 desc)),0) as MatchShort,            
 		c.intCurrencyID as intCurrencyId,c.intCent,c.ysnSubCurrency,intFutOptTransactionHeaderId,ysnExpired,cur.intCent ComCent,cur.ysnSubCurrency ComSubCurrency            
+		
  FROM tblRKFutOptTransaction ot   
  JOIN tblRKFuturesMonth om on om.intFutureMonthId=ot.intFutureMonthId   and ot.strStatus='Filled'
  JOIN tblRKBrokerageAccount acc on acc.intBrokerageAccountId=ot.intBrokerageAccountId  
@@ -59,4 +60,5 @@ SELECT  intFutOptTransactionId,
  LEFT JOIN tblCTBook cb on cb.intBookId= ot.intBookId  
  LEFT join tblCTSubBook csb on csb.intSubBookId=ot.intSubBookId 
   )t1)t1 
-)t1 where (dblLong<>0 or dblShort <>0) ORDER BY RowNum ASC
+)t1 where (dblLong<>0 or dblShort <>0) 
+ORDER BY RowNum ASC
