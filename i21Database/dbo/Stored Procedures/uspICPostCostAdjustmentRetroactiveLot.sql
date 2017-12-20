@@ -226,6 +226,7 @@ BEGIN
 			AND ISNULL(t.intTransactionDetailId, 0) = ISNULL(@intSourceTransactionDetailId, 0)
 			AND t.strTransactionId = @strSourceTransactionId
 			AND ISNULL(t.ysnIsUnposted, 0) = 0 
+			AND t.dblQty > 0 
 	-- Cost Bucket Out: 
 	UNION ALL 
 	SELECT	cbOut.intInventoryTransactionId
