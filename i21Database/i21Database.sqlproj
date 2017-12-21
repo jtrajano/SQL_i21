@@ -5675,4 +5675,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\AfterUpgradeCleanup.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1p_CompanyPreferenceOption.sql" />
+  </ItemGroup>
 </Project>
