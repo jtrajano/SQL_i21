@@ -992,13 +992,13 @@ ELSE
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Account Mapping' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId)
 BEGIN
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Account Mapping', N'General Ledger', @GeneralLedgerMaintenanceParentMenuId, N'Account Mapping', N'Maintenance', N'Screen', N'GeneralLedger.view.AccountMapping', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
+	VALUES (N'Account Mapping', N'General Ledger', @GeneralLedgerMaintenanceParentMenuId, N'Account Mapping', N'Maintenance', N'Screen', N'GeneralLedger.view.AccountMapping?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
 	
 	EXEC uspSMIncreaseECConcurrency 0
 END
 ELSE
 BEGIN
-	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'GeneralLedger.view.AccountMapping' WHERE strMenuName = N'Account Mapping' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'GeneralLedger.view.AccountMapping?showSearch=true' WHERE strMenuName = N'Account Mapping' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId
 END 	
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Audit Adjustment' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId)
