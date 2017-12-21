@@ -1,6 +1,6 @@
 ﻿CREATE FUNCTION [dbo].[fnCTGetCleanUncleanWeight]
 (
-	@intInventoryReceiptId	INT
+	@intLoadDetailId	INT
 )
 RETURNS @returntable	TABLE
 (
@@ -21,14 +21,14 @@ BEGIN
 			
 	FROM	tblICInventoryReceiptItem		RI  
 	JOIN	tblICItemUOM					UM ON UM.intItemUOMId				=	RI.intWeightUOMId  
-	WHERE	RI.intInventoryReceiptId = @intInventoryReceiptId
+	WHERE	RI.intSourceId = @intLoadDetailId
 
 	SELECT	@dblCleanWeight = SUM(dbo.fnCTConvertQuantityToTargetItemUOM(RI.intItemId,UM.intUnitMeasureId, @intCleanCostUOMId, ISNULL(IL.dblGrossWeight,0) - ISNULL(dblTareWeight,0)))  
 	
 	FROM	tblICInventoryReceiptItem		RI  
 	JOIN	tblICInventoryReceiptItemLot	IL ON IL.intInventoryReceiptItemId	=	RI.intInventoryReceiptItemId
 	JOIN	tblICItemUOM					UM ON UM.intItemUOMId				=	RI.intWeightUOMId  
-	WHERE	RI.intInventoryReceiptId = @intInventoryReceiptId AND ISNULL(IL.strCondition,'') <> 'Damaged'
+	WHERE	RI.intSourceId = @intLoadDetailId AND ISNULL(IL.strCondition,'') <> 'Damaged'
 
 	INSERT	@returntable
 	(

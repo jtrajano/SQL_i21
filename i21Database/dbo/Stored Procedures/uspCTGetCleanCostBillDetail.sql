@@ -86,7 +86,7 @@ BEGIN TRY
 				JOIN	tblICItem					IM	ON	IM.intItemId		=	BD.intItemId		 LEFT			
 				JOIN	tblICItemUOM                IU  ON  IU.intItemUOMId     =   BD.intWeightUOMId    LEFT
                 JOIN	tblSMCurrency               CU  ON  CU.intCurrencyID    =   BL.intCurrencyId
-                WHERE	BD.intContractDetailId = @intContractDetailId AND BL.intTransactionType = 1 AND BD.intBillDetailId NOT IN (SELECT ISNULL(intBillDetailApplied, 0 ) FROM tblAPAppliedPrepaidAndDebit)
+                WHERE	BD.intLoadDetailId = @intShipmentId AND BL.intTransactionType = 1 AND BD.intBillDetailId NOT IN (SELECT ISNULL(intBillDetailApplied, 0 ) FROM tblAPAppliedPrepaidAndDebit)
 				
 				UNION ALL 
 				
@@ -123,7 +123,7 @@ BEGIN TRY
 				JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId			=	BD.intContractDetailId
 				JOIN	tblICItemUOM				PM	ON	PM.intItemUOMId					=	CD.intPriceItemUOMId	LEFT			
 				JOIN	tblICItemUOM                BU  ON  BU.intItemUOMId					=   BD.intUnitOfMeasureId
-				WHERE	BD.intContractDetailId	=	@intContractDetailId AND BL.intTransactionType = 2
+				WHERE	BD.intLoadDetailId = @intShipmentId AND BL.intTransactionType = 2
 		)t
 		GROUP BY	intItemId,
 					intCCCurrencyId,
