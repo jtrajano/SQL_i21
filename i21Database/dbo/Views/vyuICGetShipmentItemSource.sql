@@ -119,38 +119,38 @@ SELECT
 	dblCost = ItemPricing.dblLastCost
 FROM	tblICInventoryShipmentItem ShipmentItem LEFT JOIN tblICInventoryShipment Shipment 
 			ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
+
 		LEFT JOIN vyuICGetItemPricing ItemPricing 
 			ON ItemPricing.intUnitMeasureId = ShipmentItem.intItemUOMId 
 			AND ItemPricing.intItemId = ShipmentItem.intItemId
 			AND ItemPricing.intLocationId = Shipment.intShipFromLocationId			
+
 		LEFT JOIN vyuSOSalesOrderDetail SODetail
 			ON SODetail.intSalesOrderId = ShipmentItem.intOrderId 
 			AND SODetail.intSalesOrderDetailId = ShipmentItem.intLineNo
 			AND Shipment.intOrderType = 2
-			AND 1 = 0 
+
 		LEFT JOIN vyuCTCompactContractDetailView ContractView -- Resolution. 
 			ON ContractView.intContractDetailId = ShipmentItem.intLineNo
 			AND ContractView.intContractHeaderId = ShipmentItem.intOrderId
 			AND Shipment.intOrderType = 1
-			AND 1 = 0 
 			
 		--LEFT JOIN vyuTRGetLoadReceipt TransportView
 		--	ON TransportView.intLoadReceiptId = ShipmentItem.intSourceId
 		--	AND Shipment.intSourceType = 3
-		--	 -- AND 1 = 0 -- DELAY
 
 		LEFT JOIN tblSCTicket ScaleView
 			ON ScaleView.intTicketId = ShipmentItem.intSourceId
 			AND Shipment.intSourceType = 1
-			  AND 1 = 0 
+
 		LEFT JOIN tblSCDeliverySheet DeliverySheetView
 			ON DeliverySheetView.intDeliverySheetId = ShipmentItem.intSourceId
 			AND Shipment.intSourceType = 4
-			  AND 1 = 0 
+
 		LEFT JOIN tblLGShipment LogisticView
 			ON LogisticView.intShipmentId = ShipmentItem.intSourceId
 			AND Shipment.intSourceType = 2
-			  AND 1 = 0 
+
 		LEFT JOIN (
 			tblLGPickLotHeader PickLot LEFT JOIN tblLGPickLotDetail PickLotDetail
 				ON PickLotDetail.intPickLotHeaderId = PickLot.intPickLotHeaderId			
@@ -161,5 +161,4 @@ FROM	tblICInventoryShipmentItem ShipmentItem LEFT JOIN tblICInventoryShipment Sh
 		)
 			ON PickLot.intPickLotHeaderId = ShipmentItem.intSourceId
 			 AND Shipment.intSourceType = 3		
-			 AND 1 = 0 
 GO
