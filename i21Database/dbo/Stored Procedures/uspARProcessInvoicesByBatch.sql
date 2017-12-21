@@ -1627,16 +1627,6 @@ BEGIN CATCH
 END CATCH
 
 
-DECLARE @LastSavepoint NVARCHAR(32)
-		,@LastTranCount INT
-
-SET @LastSavepoint = 'NewIdsForPosting'
-SET @LastTranCount = @@TRANCOUNT 
-
-IF @LastTranCount = 0
-	BEGIN TRANSACTION @LastSavepoint
-ELSE
-	SAVE TRANSACTION @LastSavepoint
 
 --Posting Newly Created Invoices
 BEGIN TRY
@@ -1731,12 +1721,12 @@ END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0
 	BEGIN
-		IF @LastTranCount = 0
+		IF @InitTranCount = 0
 			IF (XACT_STATE()) <> 0
 				ROLLBACK TRANSACTION
 		ELSE
 			IF (XACT_STATE()) <> 0
-				ROLLBACK TRANSACTION @LastSavepoint
+				ROLLBACK TRANSACTION @Savepoint
 	END
 
 	SET @ErrorMessage = ERROR_MESSAGE();
@@ -1744,15 +1734,6 @@ BEGIN CATCH
 		RAISERROR(@ErrorMessage, 16, 1);
 	RETURN 0;
 END CATCH
-
-
-SET @LastSavepoint = 'UpdatedIdsForPosting'
-SET @LastTranCount = @@TRANCOUNT 
-
-IF @LastTranCount = 0
-	BEGIN TRANSACTION @LastSavepoint
-ELSE
-	SAVE TRANSACTION @LastSavepoint
 
 		
 --Posting Updated Invoices
@@ -1848,12 +1829,12 @@ END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0
 	BEGIN
-		IF @LastTranCount = 0
+		IF @InitTranCount = 0
 			IF (XACT_STATE()) <> 0
 				ROLLBACK TRANSACTION
 		ELSE
 			IF (XACT_STATE()) <> 0
-				ROLLBACK TRANSACTION @LastSavepoint
+				ROLLBACK TRANSACTION @Savepoint
 	END
 
 	SET @ErrorMessage = ERROR_MESSAGE();
@@ -1940,14 +1921,6 @@ BEGIN TRY
 
 	IF ISNULL(@IntegrationLogId, 0) <> 0
 		EXEC [uspARInsertInvoiceIntegrationLogDetail] @IntegrationLogEntries = @IntegrationLog
-
-	SET @LastSavepoint = '@UpdatedIdsForUnPosting'
-	SET @LastTranCount = @@TRANCOUNT 
-
-	IF @LastTranCount = 0
-		BEGIN TRANSACTION @LastSavepoint
-	ELSE
-		SAVE TRANSACTION @LastSavepoint
 
 	DECLARE @UpdatedIdsForUnPosting InvoiceId
 	INSERT INTO @UpdatedIdsForUnPosting(
@@ -2042,12 +2015,12 @@ END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0
 	BEGIN
-		IF @LastTranCount = 0
+		IF @InitTranCount = 0
 			IF (XACT_STATE()) <> 0
 				ROLLBACK TRANSACTION
 		ELSE
 			IF (XACT_STATE()) <> 0
-				ROLLBACK TRANSACTION @LastSavepoint
+				ROLLBACK TRANSACTION @Savepoint
 	END
 
 	SET @ErrorMessage = ERROR_MESSAGE();
@@ -2060,7 +2033,7 @@ END CATCH
 IF ISNULL(@RaiseError,0) = 0
 BEGIN
 
-	IF @LastTranCount = 0
+	IF @InitTranCount = 0
 		BEGIN
 			IF (XACT_STATE()) = -1
 				ROLLBACK TRANSACTION
