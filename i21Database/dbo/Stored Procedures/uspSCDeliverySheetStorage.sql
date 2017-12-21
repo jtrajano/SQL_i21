@@ -305,7 +305,7 @@ BEGIN TRY
 			,[intStorageTicketNumber] = SCD.strDeliverySheetNumber
 			,SCD.[intItemId]
 			,NULL -- SET to null delivery sheet has no requirements yet for sub location
-			,NULL -- SET to null delivery sheet has no requirements yet for sub location
+			,NULL -- SET to null delivery sheet has no requirements yet for storage location
 			,(SELECT intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = @intTicketItemUOMId)
 	FROM	dbo.tblSCDeliverySheet SCD 
 	INNER JOIN dbo.tblICItem IC ON IC.intItemId = SCD.intItemId
@@ -376,7 +376,7 @@ BEGIN TRY
            ,[strSourceType]
 		   ,[intSort]
 		   ,[strDiscountChargeType])
-		SELECT DISTINCT
+		SELECT
 			[intConcurrencyId]= 1       
            ,[dblGradeReading]= SD.[dblGradeReading]
            ,[strCalcMethod]= SD.[strCalcMethod]
@@ -394,8 +394,7 @@ BEGIN TRY
 		   ,[intSort]=SD.[intSort]
 		   ,[strDiscountChargeType]=SD.[strDiscountChargeType]
 		FROM dbo.[tblQMTicketDiscount] SD
-		INNER JOIN tblSCTicket SC ON SC.intTicketId = SD.intTicketId
-		WHERE SC.intDeliverySheetId = @intDeliverySheetId AND SD.strSourceType = 'Scale'
+		WHERE SD.intTicketFileId = @intDeliverySheetId AND SD.strSourceType = 'Delivery Sheet'
 		
 		UPDATE CS
 		SET  CS.dblDiscountsDue=QM.dblDiscountsDue
