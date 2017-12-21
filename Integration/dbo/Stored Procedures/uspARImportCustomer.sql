@@ -337,6 +337,9 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			DECLARE @ysnApplySalesTax			BIT
 			DECLARE @ysnApplyPrepaidTax			BIT
 			DECLARE @dblBudgetAmountForBudgetBilling NUMERIC(18,6)
+			DECLARE @dblMonthlyBudget			NUMERIC(18,6)
+			DECLARE @intNoOfPeriods				INT
+			DECLARE @dtmBudgetBeginDate			DATETIME
 			DECLARE @strBudgetBillingBeginMonth	NVARCHAR(50)
 			DECLARE @strBudgetBillingEndMonth	NVARCHAR(50)
 			DECLARE @OriginCurrency				NVARCHAR(50)
@@ -455,6 +458,11 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 						@dblBudgetAmountForBudgetBilling = agcus_budget_amt,
 						@strBudgetBillingBeginMonth	= agcus_budget_beg_mm,	
 						@strBudgetBillingEndMonth	= agcus_budget_end_mm,
+						@dblMonthlyBudget	= agcus_budget_amt,
+						@intNoOfPeriods		= CASE WHEN (agcus_budget_beg_mm < agcus_budget_end_mm) THEN (agcus_budget_end_mm -agcus_budget_beg_mm) + 1
+												   WHEN (agcus_budget_beg_mm > agcus_budget_end_mm) THEN ((13 - agcus_budget_beg_mm) + agcus_budget_end_mm)
+												   ELSE 0 END, 
+						@dtmBudgetBeginDate =  CONVERT(DATE, CAST(YEAR(getdate()) AS CHAR(4))+RIGHT(''00''+RTRIM(CAST(agcus_budget_beg_mm AS CHAR(2))),2)+''01'' , 112)
 						@OriginCurrency 			= agcus_dflt_currency,
 						--Grain Tab
 						@strDPAContract = agcus_dpa_cnt,				
@@ -529,6 +537,9 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					[dblBudgetAmountForBudgetBilling],
 					[strBudgetBillingBeginMonth],
 					[strBudgetBillingEndMonth],
+					[dblMonthlyBudget],			
+					[intNoOfPeriods],				
+					[dtmBudgetBeginDate],			
 					--Grain Tab
 					[strDPAContract],				
 					[dtmDPADate],				
@@ -569,6 +580,9 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					 @dblBudgetAmountForBudgetBilling,
 					 @strBudgetBillingBeginMonth,
 					 @strBudgetBillingEndMonth,
+					 @dblMonthlyBudget,			
+					 @intNoOfPeriods,				
+					 @dtmBudgetBeginDate,			
 					 @strDPAContract,				
 					 @dtmDPADate,					
 					 @strGBReceiptNumber,			
@@ -721,6 +735,46 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 						intBillToId = @EntityLocationId,
 						intShipToId = @EntityLocationId
 					WHERE intEntityId = @EntityId 
+
+					--INSERT into tblARCustomerBudget
+						DECLARE @cnt int = 0
+						IF (SELECT intNoOfPeriods FROM tblARCustomer where strCustomerNumber = @originCustomer) > 0
+						BEGIN
+							WHILE @cnt < (SELECT intNoOfPeriods FROM tblARCustomer where strCustomerNumber = @originCustomer)
+							BEGIN
+								IF @cnt = 0
+								BEGIN
+										INSERT INTO tblARCustomerBudget
+											   ([intEntityCustomerId]	
+											   ,[dblBudgetAmount]		
+											   ,[dtmBudgetDate]			
+											   ,[intConcurrencyId])	
+										SELECT intEntityId
+											  ,dblMonthlyBudget--dblBudgetAmount
+											  ,dtmBudgetBeginDate
+											  ,0
+										 FROM tblARCustomer
+										WHERE strCustomerNumber = @originCustomer
+								END 
+								ELSE 
+								BEGIN
+										INSERT INTO tblARCustomerBudget
+											   ([intEntityCustomerId]	
+											   ,[dblBudgetAmount]		
+											   ,[dtmBudgetDate]			
+											   ,[intConcurrencyId])	
+										SELECT intEntityId
+											  ,dblMonthlyBudget--dblBudgetAmount
+											  ,DATEADD(MONTH, @cnt, dtmBudgetBeginDate)
+											  ,0
+										 FROM tblARCustomer
+										WHERE strCustomerNumber = @originCustomer
+								END
+
+							   SET @cnt = @cnt + 1;
+							END
+						END
+
 
 					--INSERT AR CUSTOMER SPECIAL PRICE
 					--EXEC uspARImportCustomerSpecialPrice @originCustomer
@@ -1077,6 +1131,9 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			DECLARE @ysnApplySalesTax			BIT
 			DECLARE @ysnApplyPrepaidTax			BIT
 			DECLARE @dblBudgetAmountForBudgetBilling NUMERIC(18,6)
+			DECLARE @dblMonthlyBudget			NUMERIC(18,6)
+			DECLARE @intNoOfPeriods				INT
+			DECLARE @dtmBudgetBeginDate			DATETIME
 			DECLARE @strBudgetBillingBeginMonth	NVARCHAR(50)
 			DECLARE @strBudgetBillingEndMonth	NVARCHAR(50)
 			DECLARE @OriginCurrency				NVARCHAR(50)
@@ -1192,7 +1249,12 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 						@ysnApplyPrepaidTax		= CASE WHEN ptcus_sales_tax_yn = ''P'' THEN 1 ELSE 0 END,
 						@dblBudgetAmountForBudgetBilling = ptcus_budget_amt,
 						@strBudgetBillingBeginMonth	= ptcus_budget_beg_mm,
-						@strBudgetBillingEndMonth	= ptcus_budget_end_mm
+						@strBudgetBillingEndMonth	= ptcus_budget_end_mm,
+						@dblMonthlyBudget	= ptcus_budget_amt,
+						@intNoOfPeriods		= CASE WHEN (ptcus_budget_beg_mm < ptcus_budget_end_mm) THEN (ptcus_budget_end_mm -ptcus_budget_beg_mm) + 1
+												   WHEN (ptcus_budget_beg_mm > ptcus_budget_end_mm) THEN ((13 - ptcus_budget_beg_mm) + ptcus_budget_end_mm)
+												   ELSE 0 END, 
+						@dtmBudgetBeginDate =  CONVERT(DATE, CAST(YEAR(getdate()) AS CHAR(4))+RIGHT(''00''+RTRIM(CAST(ptcus_budget_beg_mm AS CHAR(2))),2)+''01'' , 112)
 						--Grain Tab
 						--@strDPAContract = agcus_dpa_cnt,
 						--@dtmDPADate = (CASE WHEN agcus_dpa_rev_dt = 0 THEN NULL ELSE CONVERT(datetime,SUBSTRING(CONVERT(nvarchar,agcus_dpa_rev_dt),0,5) + ''-'' + SUBSTRING(CONVERT(nvarchar,agcus_dpa_rev_dt),5,2) + ''-'' + SUBSTRING(CONVERT(nvarchar,agcus_dpa_rev_dt),7,2)) END),
@@ -1261,7 +1323,10 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					[ysnApplyPrepaidTax],
 					[dblBudgetAmountForBudgetBilling],
 					[strBudgetBillingBeginMonth],
-					[strBudgetBillingEndMonth], 
+					[strBudgetBillingEndMonth],
+					[dblMonthlyBudget],
+					[intNoOfPeriods],
+					[dtmBudgetBeginDate],
 					[intTermsId],
 					[intCurrencyId]
 					--Grain Tab
@@ -1303,6 +1368,9 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					 @dblBudgetAmountForBudgetBilling,
 					 @strBudgetBillingBeginMonth,
 					 @strBudgetBillingEndMonth, 
+					 @dblMonthlyBudget,	
+					 @intNoOfPeriods,		
+					 @dtmBudgetBeginDate,
 					 @intTermsId,
 					 @intCurrencyId
 					 --@strDPAContract,
@@ -1500,6 +1568,46 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					INNER JOIN tblEMEntity EM ON EM.intEntityId = CUS.intEntityId
 					INNER JOIN tblEMEntityLocation LOC ON LOC.intEntityId = EM.intEntityId AND LOC.strLocationName =ISNULL(LTRIM(RTRIM(EM.strEntityNo)),'''')+ '' BILL TO''
 					WHERE EM.strEntityNo = @originCustomer
+
+					--INSERT into tblARCustomerBudget
+						DECLARE @cnt int = 0
+						IF (SELECT intNoOfPeriods FROM tblARCustomer where strCustomerNumber = @originCustomer) > 0
+						BEGIN
+							WHILE @cnt < (SELECT intNoOfPeriods FROM tblARCustomer where strCustomerNumber = @originCustomer)
+							BEGIN
+								IF @cnt = 0
+								BEGIN
+										INSERT INTO tblARCustomerBudget
+											   ([intEntityCustomerId]	
+											   ,[dblBudgetAmount]		
+											   ,[dtmBudgetDate]			
+											   ,[intConcurrencyId])	
+										SELECT intEntityId
+											  ,dblMonthlyBudget--dblBudgetAmount
+											  ,dtmBudgetBeginDate
+											  ,0
+										 FROM tblARCustomer
+										WHERE strCustomerNumber = @originCustomer
+								END 
+								ELSE 
+								BEGIN
+										INSERT INTO tblARCustomerBudget
+											   ([intEntityCustomerId]	
+											   ,[dblBudgetAmount]		
+											   ,[dtmBudgetDate]			
+											   ,[intConcurrencyId])	
+										SELECT intEntityId
+											  ,dblMonthlyBudget--dblBudgetAmount
+											  ,DATEADD(MONTH, @cnt, dtmBudgetBeginDate)
+											  ,0
+										 FROM tblARCustomer
+										WHERE strCustomerNumber = @originCustomer
+								END
+
+							   SET @cnt = @cnt + 1;
+							END
+						END
+
 
 					--INSERT TERMINAL TO CUSTOMER FREIGHT
 					--EXEC uspEMImportPTTerminalToCustomer @originCustomer
