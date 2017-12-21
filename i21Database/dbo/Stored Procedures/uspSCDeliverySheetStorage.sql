@@ -394,7 +394,7 @@ BEGIN TRY
 		   ,[intSort]=SD.[intSort]
 		   ,[strDiscountChargeType]=SD.[strDiscountChargeType]
 		FROM dbo.[tblQMTicketDiscount] SD
-		WHERE SD.intTicketId = @intDeliverySheetId AND SD.strSourceType = 'Delivery Sheet'
+		WHERE SD.intTicketFileId = @intDeliverySheetId AND SD.strSourceType = 'Delivery Sheet'
 		
 		UPDATE CS
 		SET  CS.dblDiscountsDue=QM.dblDiscountsDue
