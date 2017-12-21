@@ -608,7 +608,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 							SELECT 
 								@strContactName = isnull(sscon_contact_id, '''')								
 								, @strTitle = isnull(sscon_contact_title, '''')
-								, @strEmail = isnull(sscon_email, '''')
+								, @strEmail = RTRIM(LTRIM(isnull(sscon_email, '''')))
 								, @strName = RTRIM(LTRIM(sscon_last_name)) + '', '' + RTRIM(LTRIM(sscon_first_name)) 
 								, @strPhone = (CASE	
 											WHEN sscon_work_ext IS NULL OR sscon_work_ext = '''' THEN
@@ -1345,7 +1345,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 							SELECT 
 								@strContactName = isnull(sscon_contact_id, '''')								
 								, @strTitle = isnull(sscon_contact_title, '''')
-								, @strEmail = isnull(sscon_email, '''')
+								, @strEmail = RTRIM(LTRIM(isnull(sscon_email, '''')))
 								, @strName = RTRIM(LTRIM(sscon_last_name)) + '', '' + RTRIM(LTRIM(sscon_first_name)) 
 								, @strPhone = (CASE	
 											WHEN sscon_work_ext IS NULL OR sscon_work_ext = '''' THEN
