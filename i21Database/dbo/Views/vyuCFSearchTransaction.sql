@@ -32,7 +32,7 @@ SELECT   cfVehicle.strVehicleNumber, cfTransaction.intOdometer, cfTransaction.in
 						 ELSE cfCard.strCardDescription
 						 END) AS strCardDescription,
 						
-						 cfNetwork.strNetwork, cfSite.strSiteNumber,
+						 cfNetwork.strNetwork, cfSite.strSiteNumber,cfSite.strTaxState, cfSite.strTaxGroup,
                          cfSite.strSiteName, cfItem.strProductNumber, cfItem.strItemNo, cfItem.strDescription, ROUND(cfTransPrice.dblCalculatedAmount,2) AS dblCalculatedTotalAmount,
                          ROUND(cfTransPrice.dblOriginalAmount,2) AS dblOriginalTotalAmount, cfTransGrossPrice.dblCalculatedAmount AS dblCalculatedGrossAmount,
                          cfTransGrossPrice.dblOriginalAmount AS dblOriginalGrossAmount, cfTransNetPrice.dblCalculatedAmount AS dblCalculatedNetAmount,
@@ -62,13 +62,15 @@ LEFT OUTER JOIN
 			ON cfNetwork.intCustomerId = emEntity.intEntityId) as cfNetwork  
 	ON cfNetwork.intNetworkId = cfTransaction.intNetworkId
 LEFT OUTER JOIN
-	(	SELECT   smiCompanyLocation.strLocationName, cfiSite.intSiteId, cfiSite.strSiteNumber, cfiSite.strSiteName
+	(	SELECT   smiCompanyLocation.strLocationName, cfiSite.intSiteId, cfiSite.strSiteNumber, cfiSite.strSiteName, cfiSite.strTaxState, TG.strTaxGroup
 			,SG.strSiteGroup
         FROM dbo.tblCFSite AS cfiSite 
 		LEFT OUTER JOIN	dbo.tblSMCompanyLocation AS smiCompanyLocation 
 			ON cfiSite.intARLocationId = smiCompanyLocation.intCompanyLocationId
 		LEFT JOIN tblCFSiteGroup SG
 			ON cfiSite.intAdjustmentSiteGroupId = SG.intSiteGroupId
+		LEFT JOIN tblSMTaxGroup TG 
+			ON cfiSite.intTaxGroupId = TG.intTaxGroupId
 			) AS cfSite 
 	ON cfTransaction.intSiteId = cfSite.intSiteId 
 LEFT OUTER JOIN 
@@ -112,14 +114,6 @@ LEFT OUTER JOIN
 	ON cfTransaction.intTransactionId = tblCFTransactionTax_1.intTransactionId 
 LEFT OUTER JOIN dbo.tblCTContractHeader AS ctContracts 
 	ON cfTransaction.intContractId = ctContracts.intContractHeaderId
-GO
-
-
-
-GO
-
-
-
 GO
 
 
