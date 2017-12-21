@@ -38,8 +38,6 @@
 	[strPaymentServer] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,  
 	[strCreditCardProcessingType] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,  
 	[strPaymentExternalLink] NVARCHAR(350) COLLATE Latin1_General_CI_AS NULL,  
-	[strDateFormat] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
-    [strNumberFormat] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,	
 	[intCurrencyDecimal] INT NOT NULL DEFAULT 2,
 	[intLockedRecordExpiration] INT NOT NULL DEFAULT 60,
 	[ysnValidatePassword] BIT NOT NULL DEFAULT 0, 
