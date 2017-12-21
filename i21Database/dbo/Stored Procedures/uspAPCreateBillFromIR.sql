@@ -788,9 +788,7 @@ BEGIN
 				[ysnSubCurrency]			=	ISNULL(A.ysnSubCurrency,0),
 				[intTaxGroupId]				=	NULL,
 				[intAccountId]				=	[dbo].[fnGetItemGLAccount](A.intItemId,D.intItemLocationId, 'AP Clearing'),
-				[dblTotal]					=	CASE WHEN C.ysnPrice > 0 THEN  (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END) * -1 
-														ELSE (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END)
-												END * A.dblQuantityToBill,
+				[dblTotal]					=	(CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END) * A.dblQuantityToBill,
 				[dblCost]					=	ABS(A.dblUnitCost),
 				[dblOldCost]				=	NULL,
 				[dblClaimAmount]			=	0,
@@ -985,9 +983,7 @@ BEGIN
 						[intTaxGroupId]				=	NULL,
 						[intAccountId]				=	[dbo].[fnGetItemGLAccount](A.intItemId, D.intItemLocationId, 'AP Clearing'),
 						--[dblTotal]					=	(CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END),
-						[dblTotal]					=	CASE WHEN C.ysnPrice > 0  AND @ysnThirdPartyVendor = 0 THEN  (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END) * -1 
-															ELSE (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END)
-														END * A.dblQuantityToBill, --3RD PARTY TOTAL WILL BE POSSTIVE / RECEIPT VENDOR PRICE = Y WILL BE NEGATIVE
+						[dblTotal]					=	(CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END) * A.dblQuantityToBill, --3RD PARTY TOTAL WILL BE POSSTIVE / RECEIPT VENDOR PRICE = Y WILL BE NEGATIVE
 						[dblCost]					=	ABS(A.dblUnitCost),
 						[dblOldCost]				=	NULL,
 						[dblClaimAmount]			=	0,
