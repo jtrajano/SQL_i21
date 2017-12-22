@@ -766,7 +766,7 @@ BEGIN TRY
 					sd.intLocationId,sd.intSubLocationId,sd.intStorageLocationId,NULL,NULL,0,sd.dblUnitQty,'',0,@intItemUOMId AS intItemUOMId,@intItemUOMId AS intItemUOMId 
 					From vyuMFGetItemStockDetail sd 
 					Where sd.intItemId=@intRawItemId AND sd.dblAvailableQty > .01 AND sd.intLocationId=@intLocationId 
-					AND ISNULL(sd.intStorageLocationId,-1) NOT IN (@intKitStagingLocationId,@intBlendStagingLocationId)
+					AND ISNULL(sd.intStorageLocationId,-1) NOT IN (ISNULL(@intKitStagingLocationId,0),ISNULL(@intBlendStagingLocationId,0))
 					AND ISNULL(sd.ysnStockUnit,0)=1 ORDER BY sd.intItemStockUOMId
 
 					Declare @intMinItem INT
