@@ -786,7 +786,7 @@ BEGIN
 				[dblForexRate]				=	ISNULL(A.dblForexRate,1),
 				[intForexRateTypeId]		=   A.intForexRateTypeId,
 				[ysnSubCurrency]			=	ISNULL(A.ysnSubCurrency,0),
-				[intTaxGroupId]				=	NULL,
+				[intTaxGroupId]				=	A.intTaxGroupId,
 				[intAccountId]				=	[dbo].[fnGetItemGLAccount](A.intItemId,D.intItemLocationId, 'AP Clearing'),
 				[dblTotal]					=	(CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END) * A.dblQuantityToBill,
 				[dblCost]					=	ABS(A.dblUnitCost),
@@ -980,7 +980,7 @@ BEGIN
 						[dblForexRate]				=	ISNULL(A.dblForexRate,1),
 						[intForexRateTypeId]		=   A.intForexRateTypeId,
 						[ysnSubCurrency]			=	ISNULL(A.ysnSubCurrency,0),
-						[intTaxGroupId]				=	NULL,
+						[intTaxGroupId]				=	A.intTaxGroupId,
 						[intAccountId]				=	[dbo].[fnGetItemGLAccount](A.intItemId, D.intItemLocationId, 'AP Clearing'),
 						--[dblTotal]					=	(CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END),
 						[dblTotal]					=	(CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END) * A.dblQuantityToBill, --3RD PARTY TOTAL WILL BE POSSTIVE / RECEIPT VENDOR PRICE = Y WILL BE NEGATIVE
