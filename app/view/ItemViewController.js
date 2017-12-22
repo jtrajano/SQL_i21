@@ -853,24 +853,17 @@ Ext.define('Inventory.view.ItemViewController', {
                 colPricingEOMCost: 'dblEndMonthCost',
                 colPricingMethod: {
                     dataIndex: 'strPricingMethod',
-                    hidden: '{!pgeCommodityHide}',
                     editor: {
                         store: '{pricingPricingMethods}'
                     }
                 },
                 colPricingAmount: {
-                    dataIndex: 'dblAmountPercent',
-                    hidden: '{!pgeCommodityHide}'
+                    dataIndex: 'dblAmountPercent'
                 },
                 colPricingRetailPrice: {
-                    dataIndex: 'dblSalePrice',
-                    hidden: '{!pgeCommodityHide}'
+                    dataIndex: 'dblSalePrice'
                 },
                 colPricingMSRP: 'dblMSRPPrice'
-                
-            },
-            tabPricing: { 
-                hidden: '{!pgeCommodityHide}'
             },
             grdPricingLevel: {
                 colPricingLevelLocation: {
@@ -1104,7 +1097,6 @@ Ext.define('Inventory.view.ItemViewController', {
             },
 
             grdCommodityCost: {
-                hidden: true,
                 colCommodityLocation: {
                     dataIndex: 'strLocationName',
                     editor: {
