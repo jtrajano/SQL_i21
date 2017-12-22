@@ -1166,5 +1166,19 @@ namespace iRely.Inventory.BusinessLayer
                 throw new Exception(ex.Message);
             }
         }
+        public async Task<SearchResult> GetReceiptTaxView(GetParameter param, int ReceiptId)
+        {
+            var query = _db.GetQuery<vyuICGetInventoryReceiptItemTax>()
+                .Where(p => p.intInventoryReceiptId == ReceiptId)
+                .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "intInventoryReceiptItemTaxId").ToListAsync(param.cancellationToken);
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync(param.cancellationToken),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
+            };
+        }
     }
 }
