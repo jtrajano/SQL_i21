@@ -129,7 +129,7 @@
 	,SCD.strDeliverySheetNumber
 	,SCListTicket.strTicketType
 	,SCT.ysnDeliverySheetPost
-	,(SELECT SCMatch.strTicketNumber FROM tblSCTicket SCMatch WHERE SCMatch.intMatchTicketId = SCT.intMatchTicketId) AS strMatchTicketNumber
+	,(SELECT SCMatch.strTicketNumber FROM tblSCTicket SCMatch WHERE SCMatch.intTicketId = SCT.intMatchTicketId) AS strMatchTicketNumber
     ,SCT.intLotId
     ,SCT.strLotNumber
 

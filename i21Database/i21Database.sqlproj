@@ -5973,6 +5973,8 @@
     <Build Include="dbo\Views\vyuMFGetPalletSSCCNo.sql" />
     <Build Include="dbo\Views\vyuHDTicketWatcher.sql" />
     <Build Include="dbo\Stored Procedures\uspSCProcessMemoToInvoice.sql" />
+    <Build Include="dbo\User Defined Types\TFInvoiceDetailTransaction.sql" />
+    <Build Include="dbo\User Defined Types\TFInventoryReceiptDetailTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

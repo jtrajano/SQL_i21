@@ -21,7 +21,7 @@ DECLARE @ErrorState INT
 BEGIN TRY
 
 	DECLARE @tmpInvoiceTransaction TFInvoiceTransaction
-	DECLARE @tmpInvoiceDetail TABLE (intInvoiceDetailId INT, intTaxCodeId INT NULL, intTaxCategoryId INT NULL)
+	DECLARE @tmpInvoiceDetail TFInvoiceDetailTransaction
 	DECLARE @tmpRC TABLE (intReportingComponentId INT)
 
 	IF @Refresh = 1
@@ -46,14 +46,13 @@ BEGIN TRY
 
 		-- GET RECORDS WITH TAX CRITERIA
 		INSERT INTO @tmpInvoiceDetail 
-			SELECT DISTINCT tblARInvoiceDetail.intInvoiceDetailId, tblARInvoiceDetailTax.intTaxCodeId, tblSMTaxCode.intTaxCategoryId
+			SELECT DISTINCT tblARInvoiceDetail.intInvoiceDetailId, tblARInvoiceDetailTax.intTaxCodeId
 			FROM tblTFReportingComponent
 				INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 				INNER JOIN tblICItemMotorFuelTax ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
 					INNER JOIN tblTFProductCode ON tblTFProductCode.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
 				INNER JOIN tblARInvoiceDetail ON tblARInvoiceDetail.intItemId = tblICItemMotorFuelTax.intItemId
-					LEFT JOIN tblARInvoiceDetailTax ON tblARInvoiceDetailTax.intInvoiceDetailId= tblARInvoiceDetail.intInvoiceDetailId
-						LEFT JOIN tblSMTaxCode ON tblSMTaxCode.intTaxCodeId = tblARInvoiceDetailTax.intTaxCodeId
+					LEFT JOIN tblARInvoiceDetailTax ON tblARInvoiceDetailTax.intInvoiceDetailId= tblARInvoiceDetail.intInvoiceDetailId	
 				INNER JOIN tblTFReportingComponentCriteria ON tblTFReportingComponentCriteria.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 				INNER JOIN tblARInvoice ON tblARInvoice.intInvoiceId = tblARInvoiceDetail.intInvoiceId
 					LEFT JOIN tblSMShipVia ON tblSMShipVia.intEntityId = tblARInvoice.intShipViaId
@@ -418,9 +417,9 @@ BEGIN TRY
 		WHILE EXISTS(SELECT TOP 1 1 FROM @tmpInvoiceDetail) -- LOOP ON INVENTORY RECEIPT ITEM ID/S
 		BEGIN
 
-			DECLARE @InvoiceDetailId NVARCHAR(30), @intDetailTaxCodeId INT, @intTaxCategoryId INT
+			DECLARE @InvoiceDetailId NVARCHAR(30), @intDetailTaxCodeId INT
 
-			SELECT TOP 1 @InvoiceDetailId = intInvoiceDetailId, @intDetailTaxCodeId = intTaxCodeId, @intTaxCategoryId = intTaxCategoryId FROM @tmpInvoiceDetail
+			SELECT TOP 1 @InvoiceDetailId = intInvoiceDetailId, @intDetailTaxCodeId = intTaxCodeId FROM @tmpInvoiceDetail
 
 			DECLARE @tblTaxCriteria TABLE (
 				intCriteriaId INT,
@@ -444,11 +443,26 @@ BEGIN TRY
 			WHILE EXISTS (SELECT TOP 1 1 FROM @tblTaxCriteria) -- LOOP ON TAX CATEGORY
 			BEGIN
 
-				DECLARE @intCriteriaId INT, @strCriteriaTaxCodeId NVARCHAR(10), @strCriteria NVARCHAR(10)
+				DECLARE @intCriteriaId INT, @strCriteriaTaxCodeId NVARCHAR(10), @strCriteria NVARCHAR(10), @intTaxCategoryId INT, @intTransTaxCategoryId INT
 				
-				SELECT TOP 1 @intCriteriaId = intCriteriaId,  @strCriteriaTaxCodeId = intTaxCodeId, @strCriteria = strCriteria FROM @tblTaxCriteria
+				SELECT TOP 1 @intCriteriaId = intCriteriaId,  @strCriteriaTaxCodeId = intTaxCodeId, @strCriteria = strCriteria, @intTaxCategoryId = intTaxCategoryId FROM @tblTaxCriteria
 
-				IF(@intDetailTaxCodeId IS NULL OR @intTaxCategoryId IS NULL) -- DOES NOT HAVE THE TAX CODE OR NOT MAPPED ON MFT TAX CATEGORY
+				-- GET Tax Transaction Detail
+				SELECT TOP 1 @intTransTaxCategoryId = tblSMTaxCode.intTaxCategoryId 
+				FROM tblARInvoiceDetailTax 
+				LEFT JOIN tblSMTaxCode ON tblSMTaxCode.intTaxCodeId = tblARInvoiceDetailTax.intTaxCodeId 
+				LEFT JOIN tblTFTaxCategory ON tblTFTaxCategory.intTaxCategoryId = tblSMTaxCode.intTaxCategoryId
+				WHERE intInvoiceDetailId = @InvoiceDetailId AND tblTFTaxCategory.intTaxCategoryId = @intTaxCategoryId
+
+				IF(@intDetailTaxCodeId IS NULL) -- DOES NOT HAVE THE TAX CODE
+				BEGIN
+					IF(@strCriteria = '<> 0')
+					BEGIN
+						DELETE FROM @tmpInvoiceTransaction WHERE intInvoiceDetailId = @InvoiceDetailId										 
+						BREAK
+					END
+				END
+				ELSE IF (@intDetailTaxCodeId IS NOT NULL AND @intTransTaxCategoryId IS NULL) -- NOT MAPPED ON MFT TAX CATEGORY
 				BEGIN
 					IF(@strCriteria = '<> 0')
 					BEGIN
