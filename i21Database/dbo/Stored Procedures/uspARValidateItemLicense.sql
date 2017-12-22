@@ -67,6 +67,7 @@ SET @strErrorMessage = NULL
 WHILE EXISTS (SELECT TOP 1 NULL FROM #ITEMSTOVALIDATE)
 	BEGIN
 		DECLARE @intItemId					INT = NULL
+			  , @intLicenseTypeId			INT = NULL
 			  , @intCustomerId				INT = NULL
 			  , @strItemNo					NVARCHAR(200)	= NULL
 			  , @strCode					NVARCHAR(200)	= NULL
@@ -75,6 +76,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #ITEMSTOVALIDATE)
 			  , @ysnRequiredForApplication	BIT = NULL
 			  
 		SELECT TOP 1 @intItemId					= intItemId
+			       , @intLicenseTypeId			= intLicenseTypeId
 				   , @intCustomerId				= intEntityCustomerId
 				   , @strItemNo					= ISNULL(strItemNo, '')
 				   , @strCode					= ISNULL(strCode, '')
@@ -90,12 +92,12 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #ITEMSTOVALIDATE)
 		ELSE
 			BEGIN
 				--Validate if Customer's License is 
-				IF (@dtmDate NOT BETWEEN @dtmDateTo AND @dtmDateFrom)
+				IF (@dtmDate NOT BETWEEN @dtmDateFrom AND @dtmDateTo)
 					SET @strErrorMessage = ISNULL(@strErrorMessage, '') + @strCode + ' License is already expired for item ' + @strItemNo + CHAR(13)
 
 				IF (@ysnRequiredForApplication = 1 AND ISNULL(@intEntityApplicatorId, 0) = 0)
 					SET @strErrorMessage = ISNULL(@strErrorMessage, '') + 'Applicator is required for ' + @strCode + ' License in item ' + @strItemNo + CHAR(13)
 			END
 
-		DELETE FROM #ITEMSTOVALIDATE WHERE intItemId = @intItemId
+		DELETE FROM #ITEMSTOVALIDATE WHERE intItemId = @intItemId AND intLicenseTypeId = @intLicenseTypeId
 	END
