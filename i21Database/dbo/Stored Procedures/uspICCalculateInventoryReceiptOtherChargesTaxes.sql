@@ -75,6 +75,9 @@ BEGIN
 
 			WHILE @@FETCH_STATUS = 0
 			BEGIN 
+				-- Clear the records in tblICInventoryReceiptChargeTax
+				DELETE FROM tblICInventoryReceiptChargeTax WHERE intInventoryReceiptChargeId = @InventoryReceiptChargeId
+
 				-- Clear the contents of the table variable.
 				DELETE FROM @Taxes
 
@@ -192,7 +195,12 @@ BEGIN
 
 		-- Calculate the tax per line item 
 		UPDATE	Charge 
-		SET		dblTax = ROUND(dbo.fnDivide(ISNULL(Taxes.dblTaxPerLineItem, 0) ,ISNULL(Receipt.intSubCurrencyCents, 1)), 2)  					
+		SET		dblTax = 
+					CASE WHEN Charge.ysnSubCurrency = 1 THEN 
+						ROUND(dbo.fnDivide(ISNULL(Taxes.dblTaxPerLineItem, 0) ,ISNULL(Receipt.intSubCurrencyCents, 1)), 2)  					
+					ELSE 
+						ROUND(ISNULL(Taxes.dblTaxPerLineItem, 0), 2)  					
+					END 
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge Charge
 						ON Receipt.intInventoryReceiptId = Charge.intInventoryReceiptId
 				LEFT JOIN (
