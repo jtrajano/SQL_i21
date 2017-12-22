@@ -60,7 +60,7 @@ LEFT JOIN (
 	FROM dbo.tblARCustomerMasterLicense WITH (NOLOCK)
 	WHERE ysnAcvite = 1
 		AND intEntityCustomerId = @intEntityCustomerId
-) CML ON ITEMS.intLicenseTypeId = CML.intLicenseTypeId
+) CML ON IL.intLicenseTypeId = CML.intLicenseTypeId
 
 SET @strErrorMessage = NULL
 
