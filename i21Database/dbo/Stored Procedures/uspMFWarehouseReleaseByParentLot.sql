@@ -101,6 +101,7 @@ BEGIN
 
 		EXEC uspMFWarehouseReleaseLot @strXML = @strInputXML
 			,@ysnBuildEMailContent = 0
+			,@ysnBulkRelease=1
 
 		SELECT @intRecordId = MIN(intRecordId)
 		FROM @tblMFParentLot
