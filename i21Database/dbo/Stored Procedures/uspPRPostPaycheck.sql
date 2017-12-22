@@ -182,8 +182,12 @@ BEGIN
 	WHERE A.dblTotal <> 0 AND A.strCalculationType <> 'Fringe Benefit'
 	AND intPaycheckId = @intPaycheckId
 		
+	--PERFORM GL ACCOUNT SEGMENT SWITCHING AND VALIDATION
 	--Place Earning to Temporary Table to Validate Earning GL Distribution
 	SELECT * INTO #tmpEarningTemp FROM #tmpEarning WHERE intDepartmentId IS NOT NULL
+	AND intEmployeeEarningId IN (SELECT intEmployeeEarningId FROM tblPREmployeeEarningDistribution 
+									WHERE intEmployeeEarningId = #tmpEarning.intEmployeeEarningId
+									GROUP BY intEmployeeEarningId HAVING COUNT(intAccountId) = 1)
 
 	DECLARE @intEarningTempEarningId INT
 	DECLARE @intEarningTempDepartmentId INT
@@ -279,6 +283,42 @@ BEGIN
 			AND ISNULL(intDepartmentId, 0) = ISNULL(@intEarningTempDepartmentId, 0)
 			AND ISNULL(intProfitCenter, 0) = ISNULL(@intEarningTempProfitCenter, 0)
 			AND ISNULL(intLOB, 0) = ISNULL(@intEarningTempLOB, 0)
+	END
+
+	--PERFORM AMOUNT DISTRIBUTION
+	--Place Earning to Temporary Table to Distribute Amounts
+	SELECT * INTO #tmpEarningAmount FROM #tmpEarning
+	SELECT DISTINCT intTypeEarningId INTO #tmpEarningType FROM #tmpEarning
+
+	DECLARE @intTypeEarningId INT
+	DECLARE @dblFullAmount NUMERIC(18, 6)
+	DECLARE @intTmpEarningId INT
+
+	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpEarningType)
+	BEGIN
+		SELECT TOP 1 @dblFullAmount = dblAmount
+					,@intTypeEarningId = intTypeEarningId
+		FROM #tmpEarningAmount
+
+		WHILE (@dblFullAmount > 0)
+		BEGIN
+			SELECT TOP 1 @intTmpEarningId = intTmpEarningId FROM #tmpEarningAmount WHERE intTypeEarningId = @intTypeEarningId
+
+			IF ((SELECT COUNT(1) FROM #tmpEarningAmount WHERE intTypeEarningId = @intTypeEarningId) = 1) 
+				BEGIN
+					UPDATE #tmpEarning SET dblAmount = @dblFullAmount WHERE intTmpEarningId = @intTmpEarningId
+					SELECT @dblFullAmount = 0.000000
+				END
+			ELSE
+				BEGIN
+					SELECT @dblFullAmount = @dblFullAmount - ROUND(dblAmount * (dblPercentage / 100.000000), 2) FROM #tmpEarning WHERE intTmpEarningId = @intTmpEarningId
+					UPDATE #tmpEarning SET dblAmount = ROUND(dblAmount * (dblPercentage / 100.000000), 2) WHERE intTmpEarningId = @intTmpEarningId
+				END
+
+			DELETE FROM #tmpEarningAmount WHERE intTmpEarningId = @intTmpEarningId
+		END
+
+		DELETE FROM #tmpEarningType WHERE intTypeEarningId = @intTypeEarningId
 	END
 
 	--PRINT 'Insert Earnings into tblCMBankTransactionDetail'
