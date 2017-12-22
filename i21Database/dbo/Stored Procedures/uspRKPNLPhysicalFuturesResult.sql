@@ -85,7 +85,7 @@ BEGIN
 				NUll AS dblBooked,
 				NULL AS dblAccounting,
 				AD.dtmAllocatedDate AS dtmDate,
-				'Sales Allocated'	AS strType,
+				'Purchase Allocated'	AS strType,
 				0.0 AS dblTranValue, --Dummy
 				9999999 + AD.intPContractDetailId AS intSort
 				
@@ -120,7 +120,7 @@ BEGIN
 					NULL AS strConfirmed,
 					NULL AS dblAllocatedQty,
 					dbo.[fnCTConvertQuantityToTargetItemUOM](ID.intItemId,@intUnitMeasureId,QU.intUnitMeasureId,ID.dblPrice) /
-					CASE WHEN ID.intSubCurrencyId IS NOT NULL THEN 100 ELSE 1 END	AS	dblPrice,
+					CASE WHEN SY.ysnSubCurrency = 1 THEN 100 ELSE 1 END	AS	dblPrice,
 					ISNULL(MY.strCurrency,CY.strCurrency) AS strCurrency,
 					NULL AS dblFX,
 					dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId,QU.intUnitMeasureId,@intUnitMeasureId, ID.dblQtyShipped) AS dblBooked,
@@ -137,6 +137,7 @@ BEGIN
 			JOIN	tblICItemUOM			QU	ON	QU.intItemUOMId			=	ID.intItemUOMId	
 			JOIN	tblICItemUOM			PU	ON	PU.intItemUOMId			=	CD.intPriceItemUOMId	
 			JOIN	tblSMCurrency			CY	ON	CY.intCurrencyID		=	IV.intCurrencyId
+			JOIN	tblSMCurrency			SY	ON	SY.intCurrencyID		=	ID.intSubCurrencyId
 			JOIN	@tblLGAllocationDetail	AD	ON	AD.intSContractDetailId	=	ID.intContractDetailId
 	LEFT	JOIN	tblSMCurrency			MY	ON	MY.intCurrencyID		=	CY.intMainCurrencyId
 			WHERE	ID.intContractDetailId	=	@intSContractDetailId
@@ -157,7 +158,7 @@ BEGIN
 				IV.dtmDate AS dtmDate,
 				'Supp. Invoice'	AS strType,
 				0.0 AS dblTranValue, --Dummy
-				9999999 + AD.intPContractDetailId + 1 AS intSort
+				9999999 + AD.intPContractDetailId AS intSort
 				
 				
 		FROM	@tblLGAllocationDetail	AD
@@ -170,7 +171,7 @@ BEGIN
 		JOIN	tblICItemUOM			PU	ON	PU.intItemUOMId			=	CD.intPriceItemUOMId	
 		JOIN	tblSMCurrency			CY	ON	CY.intCurrencyID		=	IV.intCurrencyId
 		WHERE	AD.intSContractDetailId	=	@intSContractDetailId
-		AND		EXISTS(SELECT * FROM tblARInvoiceDetail WHERE intContractDetailId	=	@intSContractDetailId)
+		--AND		EXISTS(SELECT * FROM tblARInvoiceDetail WHERE intContractDetailId	=	@intSContractDetailId)
 		AND		ID.intContractCostId IS NULL
 
 		UNION ALL
@@ -199,7 +200,7 @@ BEGIN
 					NUll AS dblBooked,
 					NULL AS dblAccounting,
 					AD.dtmAllocatedDate AS dtmDate,
-					'Purchase Allocated'	AS strType,
+					'Sales Allocated'	AS strType,
 					0.0 AS dblTranValue --Dummy
 
 			FROM	@tblLGAllocationDetail	AD 
@@ -240,7 +241,7 @@ BEGIN
 					CASE WHEN OY.ysnSubCurrency = 1 THEN 100 ELSE 1 END	 * -1 AS	dblPrice,
 					ISNULL(MY.strCurrency,CY.strCurrency) AS strCurrency,
 					ISNULL(dbo.fnCTGetCurrencyExchangeRate(CC.intContractCostId,1),1) AS dblFX,
-					BL.dblBooked * -1 dblBooked,
+					NULL dblBooked,
 					BL.dblAccounting * -1 dblAccounting,
 					CH.dtmContractDate,
 					CC.strCostMethod strType,

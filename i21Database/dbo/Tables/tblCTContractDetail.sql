@@ -344,3 +344,205 @@ GO
 
 CREATE STATISTICS [_dta_stat_2133894969_1_4_13_16_9_30_38_39_22_21_5] ON [dbo].[tblCTContractDetail]([intContractDetailId], [intContractHeaderId], [intItemId], [intItemUOMId], [dtmEndDate], [intPricingTypeId], [intCurrencyId], [intPriceItemUOMId], [intNetWeightUOMId], [dblNetWeight], [intContractStatusId])
 GO
+
+CREATE NONCLUSTERED INDEX [_dta_index_tblCTContractDetail_197_1518224759__K45_K7_K36_K35_K6_K19_K46_K15_K34_K9_K1_8_10_11_18_21_37_40_43_47_53_92_101] ON [dbo].[tblCTContractDetail]
+(
+       [intCurrencyId] ASC,
+       [intContractStatusId] ASC,
+       [intFutureMonthId] ASC,
+       [intFutureMarketId] ASC,
+       [intContractHeaderId] ASC,
+       [intItemUOMId] ASC,
+       [intPriceItemUOMId] ASC,
+       [intItemId] ASC,
+       [intPricingTypeId] ASC,
+       [intCompanyLocationId] ASC,
+       [intContractDetailId] ASC
+)
+INCLUDE (     [intContractSeq],
+       [dtmStartDate],
+       [dtmEndDate],
+       [dblQuantity],
+       [dblBalance],
+       [dblFutures],
+       [dblConvertedBasis],
+       [dblCashPrice],
+       [dblNoOfLots],
+       [intMarketZoneId],
+       [dtmPlannedAvailabilityDate],
+       [dblRate]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_19_46] ON [dbo].[tblCTContractDetail]([intItemUOMId], [intPriceItemUOMId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_6_7_36] ON [dbo].[tblCTContractDetail]([intContractHeaderId], [intContractStatusId], [intFutureMonthId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_7_6_19] ON [dbo].[tblCTContractDetail]([intContractStatusId], [intContractHeaderId], [intItemUOMId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_7_19_46_36_35] ON [dbo].[tblCTContractDetail]([intContractStatusId], [intItemUOMId], [intPriceItemUOMId], [intFutureMonthId], [intFutureMarketId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_6_19_46_7_36] ON [dbo].[tblCTContractDetail]([intContractHeaderId], [intItemUOMId], [intPriceItemUOMId], [intContractStatusId], [intFutureMonthId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_15_7_36_35_6_19] ON [dbo].[tblCTContractDetail]([intItemId], [intContractStatusId], [intFutureMonthId], [intFutureMarketId], [intContractHeaderId], [intItemUOMId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_34_7_36_35_6_19_46] ON [dbo].[tblCTContractDetail]([intPricingTypeId], [intContractStatusId], [intFutureMonthId], [intFutureMarketId], [intContractHeaderId], [intItemUOMId], [intPriceItemUOMId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_7_9_36_35_6_19_46_15] ON [dbo].[tblCTContractDetail]([intContractStatusId], [intCompanyLocationId], [intFutureMonthId], [intFutureMarketId], [intContractHeaderId], [intItemUOMId], [intPriceItemUOMId], [intItemId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_7_45_36_35_6_19_46_15_34] ON [dbo].[tblCTContractDetail]([intContractStatusId], [intCurrencyId], [intFutureMonthId], [intFutureMarketId], [intContractHeaderId], [intItemUOMId], [intPriceItemUOMId], [intItemId], [intPricingTypeId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_35_7_36_6_19_46_15_34_9_45] ON [dbo].[tblCTContractDetail]([intFutureMarketId], [intContractStatusId], [intFutureMonthId], [intContractHeaderId], [intItemUOMId], [intPriceItemUOMId], [intItemId], [intPricingTypeId], [intCompanyLocationId], [intCurrencyId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_36_35_6_19_46_15_34_9_45_1] ON [dbo].[tblCTContractDetail]([intFutureMonthId], [intFutureMarketId], [intContractHeaderId], [intItemUOMId], [intPriceItemUOMId], [intItemId], [intPricingTypeId], [intCompanyLocationId], [intCurrencyId], [intContractDetailId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_7_1_36_35_6_19_46_15_34_9_45] ON [dbo].[tblCTContractDetail]([intContractStatusId], [intContractDetailId], [intFutureMonthId], [intFutureMarketId], [intContractHeaderId], [intItemUOMId], [intPriceItemUOMId], [intItemId], [intPricingTypeId], [intCompanyLocationId], [intCurrencyId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_6_18_7] ON [dbo].[tblCTContractDetail]([intContractHeaderId], [dblQuantity], [intContractStatusId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_34_18_7] ON [dbo].[tblCTContractDetail]([intPricingTypeId], [dblQuantity], [intContractStatusId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_45_18_7] ON [dbo].[tblCTContractDetail]([intCurrencyId], [dblQuantity], [intContractStatusId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_15_18_7] ON [dbo].[tblCTContractDetail]([intItemId], [dblQuantity], [intContractStatusId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_18_7_124_1] ON [dbo].[tblCTContractDetail]([dblQuantity], [intContractStatusId], [dblInvoicedQty], [intContractDetailId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_18_7_124_46] ON [dbo].[tblCTContractDetail]([dblQuantity], [intContractStatusId], [dblInvoicedQty], [intPriceItemUOMId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_1_6_18_7] ON [dbo].[tblCTContractDetail]([intContractDetailId], [intContractHeaderId], [dblQuantity], [intContractStatusId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_18_7_124_45_1] ON [dbo].[tblCTContractDetail]([dblQuantity], [intContractStatusId], [dblInvoicedQty], [intCurrencyId], [intContractDetailId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_18_7_124_34_1_36] ON [dbo].[tblCTContractDetail]([dblQuantity], [intContractStatusId], [dblInvoicedQty], [intPricingTypeId], [intContractDetailId], [intFutureMonthId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_36_18_7_124_1_45_34] ON [dbo].[tblCTContractDetail]([intFutureMonthId], [dblQuantity], [intContractStatusId], [dblInvoicedQty], [intContractDetailId], [intCurrencyId], [intPricingTypeId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_7_1_36_45_34_35_9_18] ON [dbo].[tblCTContractDetail]([intContractStatusId], [intContractDetailId], [intFutureMonthId], [intCurrencyId], [intPricingTypeId], [intFutureMarketId], [intCompanyLocationId], [dblQuantity])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_9_18_7_124_1_36_45_34] ON [dbo].[tblCTContractDetail]([intCompanyLocationId], [dblQuantity], [intContractStatusId], [dblInvoicedQty], [intContractDetailId], [intFutureMonthId], [intCurrencyId], [intPricingTypeId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_124_1_36_45_34_35_9_7] ON [dbo].[tblCTContractDetail]([dblInvoicedQty], [intContractDetailId], [intFutureMonthId], [intCurrencyId], [intPricingTypeId], [intFutureMarketId], [intCompanyLocationId], [intContractStatusId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_18_7_124_15_1_36_45_34_35] ON [dbo].[tblCTContractDetail]([dblQuantity], [intContractStatusId], [dblInvoicedQty], [intItemId], [intContractDetailId], [intFutureMonthId], [intCurrencyId], [intPricingTypeId], [intFutureMarketId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_18_7_124_6_1_36_45_34_35_9] ON [dbo].[tblCTContractDetail]([dblQuantity], [intContractStatusId], [dblInvoicedQty], [intContractHeaderId], [intContractDetailId], [intFutureMonthId], [intCurrencyId], [intPricingTypeId], [intFutureMarketId], [intCompanyLocationId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_46_19_18_7_124_1_36_45_34_35_9_15] ON [dbo].[tblCTContractDetail]([intPriceItemUOMId], [intItemUOMId], [dblQuantity], [intContractStatusId], [dblInvoicedQty], [intContractDetailId], [intFutureMonthId], [intCurrencyId], [intPricingTypeId], [intFutureMarketId], [intCompanyLocationId], [intItemId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_1_36_45_34_35_9_18_124_15_6_46_19] ON [dbo].[tblCTContractDetail]([intContractDetailId], [intFutureMonthId], [intCurrencyId], [intPricingTypeId], [intFutureMarketId], [intCompanyLocationId], [dblQuantity], [dblInvoicedQty], [intItemId], [intContractHeaderId], [intPriceItemUOMId], [intItemUOMId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_35_18_7_124_1_36_45_34_9_15_6_46_19] ON [dbo].[tblCTContractDetail]([intFutureMarketId], [dblQuantity], [intContractStatusId], [dblInvoicedQty], [intContractDetailId], [intFutureMonthId], [intCurrencyId], [intPricingTypeId], [intCompanyLocationId], [intItemId], [intContractHeaderId], [intPriceItemUOMId], [intItemUOMId])
+go
+
+CREATE NONCLUSTERED INDEX [_dta_index_tblCTContractDetail_197_1518224759__K35_K1_K36_K15_K19_K6_K34_K7_8_9_10_18_21_47] ON [dbo].[tblCTContractDetail]
+(
+	[intFutureMarketId] ASC,
+	[intContractDetailId] ASC,
+	[intFutureMonthId] ASC,
+	[intItemId] ASC,
+	[intItemUOMId] ASC,
+	[intContractHeaderId] ASC,
+	[intPricingTypeId] ASC,
+	[intContractStatusId] ASC
+)
+INCLUDE ( 	[intContractSeq],
+	[intCompanyLocationId],
+	[dtmStartDate],
+	[dblQuantity],
+	[dblBalance],
+	[dblNoOfLots]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_19_15_35_1_34] ON [dbo].[tblCTContractDetail]([intItemUOMId], [intItemId], [intFutureMarketId], [intContractDetailId], [intPricingTypeId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_36_15_19_6_1] ON [dbo].[tblCTContractDetail]([intFutureMonthId], [intItemId], [intItemUOMId], [intContractHeaderId], [intContractDetailId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_6_15_35_1_34] ON [dbo].[tblCTContractDetail]([intContractHeaderId], [intItemId], [intFutureMarketId], [intContractDetailId], [intPricingTypeId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_36_15_35_1_34] ON [dbo].[tblCTContractDetail]([intFutureMonthId], [intItemId], [intFutureMarketId], [intContractDetailId], [intPricingTypeId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_15_35_1_34_7_19] ON [dbo].[tblCTContractDetail]([intItemId], [intFutureMarketId], [intContractDetailId], [intPricingTypeId], [intContractStatusId], [intItemUOMId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_7_1_36_15_19_6_35] ON [dbo].[tblCTContractDetail]([intContractStatusId], [intContractDetailId], [intFutureMonthId], [intItemId], [intItemUOMId], [intContractHeaderId], [intFutureMarketId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_34_1_36_15_19_6_35] ON [dbo].[tblCTContractDetail]([intPricingTypeId], [intContractDetailId], [intFutureMonthId], [intItemId], [intItemUOMId], [intContractHeaderId], [intFutureMarketId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_15_35_1_34_7_6_36] ON [dbo].[tblCTContractDetail]([intItemId], [intFutureMarketId], [intContractDetailId], [intPricingTypeId], [intContractStatusId], [intContractHeaderId], [intFutureMonthId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_1_15_35_34_7_36_19_6] ON [dbo].[tblCTContractDetail]([intContractDetailId], [intItemId], [intFutureMarketId], [intPricingTypeId], [intContractStatusId], [intFutureMonthId], [intItemUOMId], [intContractHeaderId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_36_1] ON [dbo].[tblCTContractDetail]([intFutureMonthId], [intContractDetailId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_35_1_7] ON [dbo].[tblCTContractDetail]([intFutureMarketId], [intContractDetailId], [intContractStatusId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_19_1_7_36] ON [dbo].[tblCTContractDetail]([intItemUOMId], [intContractDetailId], [intContractStatusId], [intFutureMonthId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_36_35_19_6_1] ON [dbo].[tblCTContractDetail]([intFutureMonthId], [intFutureMarketId], [intItemUOMId], [intContractHeaderId], [intContractDetailId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_7_36_1_35_19] ON [dbo].[tblCTContractDetail]([intContractStatusId], [intFutureMonthId], [intContractDetailId], [intFutureMarketId], [intItemUOMId])
+go
+
+CREATE STATISTICS [_dta_stat_1518224759_1_7_6_36_35_19] ON [dbo].[tblCTContractDetail]([intContractDetailId], [intContractStatusId], [intContractHeaderId], [intFutureMonthId], [intFutureMarketId], [intItemUOMId])
+go
+
+
+CREATE NONCLUSTERED INDEX [_dta_index_tblCTContractDetail_197_1518224759__K1_K7_K19_K36_K35_K6_8_9_10_15_18_21_34_47] ON [dbo].[tblCTContractDetail]
+(
+	[intContractDetailId] ASC,
+	[intContractStatusId] ASC,
+	[intItemUOMId] ASC,
+	[intFutureMonthId] ASC,
+	[intFutureMarketId] ASC,
+	[intContractHeaderId] ASC
+)
+INCLUDE ( 	[intContractSeq],
+	[intCompanyLocationId],
+	[dtmStartDate],
+	[intItemId],
+	[dblQuantity],
+	[dblBalance],
+	[intPricingTypeId],
+	[dblNoOfLots]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+go
