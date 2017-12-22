@@ -602,7 +602,7 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 			-- UPDATE modified record for apcbkmst_origin
 			UPDATE	dbo.apcbkmst_origin 
 			SET		apcbk_no					= i.strCbkNo
-					,apcbk_currency				= dbo.fnGetCurrencyIdFromi21ToOrigin(i.intCurrencyId)
+					,apcbk_currency				= ISNULL(dbo.fnGetCurrencyIdFromi21ToOrigin(i.intCurrencyId),apcbk_currency)
 					,apcbk_password				= i.apcbk_password
 					--,apcbk_desc					= LEFT(bank.strBankName COLLATE SQL_Latin1_General_CP1_CS_AS,30)
 					,apcbk_bank_acct_no			= i.strBankAccountNo COLLATE SQL_Latin1_General_CP1_CS_AS
