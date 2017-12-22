@@ -147,3 +147,65 @@ INCLUDE (
 	,ysnLoad
 ) 
 GO 
+
+CREATE NONCLUSTERED INDEX [_dta_index_tblCTContractHeader_197_752721734__K1_K32_K4_K3_K8_10_11_12_31_49_53] ON [dbo].[tblCTContractHeader]
+(
+       [intContractHeaderId] ASC,
+       [intPositionId] ASC,
+       [intEntityId] ASC,
+       [intContractTypeId] ASC,
+       [intCommodityId] ASC
+)
+INCLUDE (     [intCommodityUOMId],
+       [strContractNumber],
+       [dtmContractDate],
+       [intContractBasisId],
+       [ysnMultiplePriceFixation],
+       [dblNoOfLots]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+go
+
+CREATE STATISTICS [_dta_stat_752721734_3_32_4] ON [dbo].[tblCTContractHeader]([intContractTypeId], [intPositionId], [intEntityId])
+go
+
+CREATE STATISTICS [_dta_stat_752721734_4_1_32_3] ON [dbo].[tblCTContractHeader]([intEntityId], [intContractHeaderId], [intPositionId], [intContractTypeId])
+go
+
+CREATE STATISTICS [_dta_stat_752721734_8_32_4_3_1] ON [dbo].[tblCTContractHeader]([intCommodityId], [intPositionId], [intEntityId], [intContractTypeId], [intContractHeaderId])
+go
+
+CREATE STATISTICS [_dta_stat_752721734_32_12] ON [dbo].[tblCTContractHeader]([intPositionId], [dtmContractDate])
+go
+
+CREATE STATISTICS [_dta_stat_752721734_4_12] ON [dbo].[tblCTContractHeader]([intEntityId], [dtmContractDate])
+go
+
+CREATE STATISTICS [_dta_stat_752721734_8_32_1] ON [dbo].[tblCTContractHeader]([intCommodityId], [intPositionId], [intContractHeaderId])
+go
+
+CREATE STATISTICS [_dta_stat_752721734_8_12_32] ON [dbo].[tblCTContractHeader]([intCommodityId], [dtmContractDate], [intPositionId])
+go
+
+CREATE STATISTICS [_dta_stat_752721734_3_12_8_32] ON [dbo].[tblCTContractHeader]([intContractTypeId], [dtmContractDate], [intCommodityId], [intPositionId])
+go
+
+CREATE STATISTICS [_dta_stat_752721734_1_12_8_32_3] ON [dbo].[tblCTContractHeader]([intContractHeaderId], [dtmContractDate], [intCommodityId], [intPositionId], [intContractTypeId])
+go
+
+CREATE STATISTICS [_dta_stat_752721734_12_8_4_32_1_3] ON [dbo].[tblCTContractHeader]([dtmContractDate], [intCommodityId], [intEntityId], [intPositionId], [intContractHeaderId], [intContractTypeId])
+go
+
+CREATE NONCLUSTERED INDEX [_dta_index_tblCTContractHeader_197_752721734__K8_K3_K4_K1_11_49_53] ON [dbo].[tblCTContractHeader]
+(
+	[intCommodityId] ASC,
+	[intContractTypeId] ASC,
+	[intEntityId] ASC,
+	[intContractHeaderId] ASC
+)
+INCLUDE ( 	[strContractNumber],
+	[ysnMultiplePriceFixation],
+	[dblNoOfLots]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+go
+
+CREATE STATISTICS [_dta_stat_752721734_1_8_3] ON [dbo].[tblCTContractHeader]([intContractHeaderId], [intCommodityId], [intContractTypeId])
+
+GO

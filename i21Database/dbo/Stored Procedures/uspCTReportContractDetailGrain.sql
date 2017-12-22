@@ -11,7 +11,7 @@ BEGIN TRY
 	SELECT	strItemNo,dblDetailQuantity,
 			CASE	WHEN intPricingTypeId IN (1,6)	THEN	ISNULL(dblCashPrice,0)
 					WHEN intPricingTypeId = 2		THEN	ISNULL(dblBasis,0)
-					WHEN intPricingTypeId = 3		THEN	ISNULL(dblCashPrice,0)
+					WHEN intPricingTypeId = 3		THEN	ISNULL(dblFutures,0)
 					ELSE 0
 			END	dblPrice,
 			dtmStartDate,
