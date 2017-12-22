@@ -370,6 +370,18 @@ BEGIN
 
 	-- Process the Other Charges
 	BEGIN 
+		-- Calculate the other charges. 
+		EXEC dbo.uspICCalculateOtherCharges
+			@intTransactionId			
+
+		-- Allocate the other charges and surcharges. 
+		EXEC dbo.uspICAllocateInventoryReceiptOtherCharges 
+			@intTransactionId		
+				
+		-- Calculate Other Charges Taxes
+		EXEC dbo.uspICCalculateInventoryReceiptOtherChargesTaxes
+			@intTransactionId
+
 		INSERT INTO @GLEntries (
 			[dtmDate] 
 			,[strBatchId]

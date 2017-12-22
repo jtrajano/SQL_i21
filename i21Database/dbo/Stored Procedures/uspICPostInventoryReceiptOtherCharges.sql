@@ -164,17 +164,17 @@ BEGIN
 	END 
 END 
 
--- Calculate the other charges. 
-BEGIN
-	EXEC dbo.uspICCalculateOtherCharges
-		@intInventoryReceiptId
-END 
+---- Calculate the other charges. 
+--BEGIN
+--	EXEC dbo.uspICCalculateOtherCharges
+--		@intInventoryReceiptId
+--END 
 
--- Allocate the other charges and surcharges. 
-BEGIN 
-	EXEC dbo.uspICAllocateInventoryReceiptOtherCharges 
-		@intInventoryReceiptId
-END 
+---- Allocate the other charges and surcharges. 
+--BEGIN 
+--	EXEC dbo.uspICAllocateInventoryReceiptOtherCharges 
+--		@intInventoryReceiptId
+--END 
 
 -- Create the G/L Entries
 BEGIN 
