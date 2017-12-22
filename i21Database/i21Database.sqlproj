@@ -6005,6 +6005,7 @@
     <Build Include="dbo\Views\vyuMFGetPalletSSCCNo.sql" />
     <Build Include="dbo\Views\vyuCTProjectedCommission.sql" />
     <Build Include="dbo\Functions\fnRKGetVariationMargin.sql" />
+    <Build Include="dbo\Stored Procedures\uspARValidateItemLicense.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
