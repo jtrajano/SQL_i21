@@ -16,6 +16,7 @@
 	,@intInventoryReceiptItemId INT = NULL
 	,@intInventoryReceiptItemLotId INT = NULL
 	,@intTransactionTypeId INT = NULL
+	,@intCommodityId int=NULL
 AS
 BEGIN
 	DECLARE @intSubPatternTypeId INT
@@ -124,6 +125,13 @@ BEGIN
 		FROM dbo.tblICItem
 		WHERE intItemId = @intItemId
 	END
+
+	If @intCommodityId is null
+	Begin
+		SELECT @intCommodityId = intCommodityId
+		FROM dbo.tblICItem
+		WHERE intItemId = @intItemId
+	End
 
 	INSERT INTO @tblMFPatternDetail (
 		intSubPatternTypeId
@@ -299,6 +307,8 @@ BEGIN
 						THEN @intEntityId
 					WHEN @strTableName = 'tblMFShift'
 						THEN @intShiftId
+					WHEN @strTableName = 'tblICCommodity'
+						THEN @intCommodityId
 					END
 
 			IF @intPrimaryColumnId IS NULL
