@@ -8,7 +8,7 @@
 	,@strNewLotNumber NVARCHAR(100) = NULL
 	,@strNote NVARCHAR(1024) = NULL
 	,@intInventoryAdjustmentId INT = NULL OUTPUT
-	,@dtmDate DATETIME=NULL
+	,@dtmDate DATETIME = NULL
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -38,9 +38,12 @@ BEGIN TRY
 		,@dblOldDestinationWeight NUMERIC(38, 20)
 		,@dblOldSourceWeight NUMERIC(38, 20)
 		,@intNewLotId INT
-		,@dblDefaultResidueQty NUMERIC(38,20)
+		,@dblDefaultResidueQty NUMERIC(38, 20)
+		,@intParentLotId INT
+		,@strParentLotNumber NVARCHAR(50)
 
-		SELECT TOP 1 @dblDefaultResidueQty=ISNULL(dblDefaultResidueQty,0.00001) FROM tblMFCompanyPreference
+	SELECT TOP 1 @dblDefaultResidueQty = ISNULL(dblDefaultResidueQty, 0.00001)
+	FROM tblMFCompanyPreference
 
 	SELECT @intNewLocationId = intCompanyLocationId
 	FROM tblSMCompanyLocationSubLocation
@@ -62,6 +65,7 @@ BEGIN TRY
 				THEN dblQty
 			ELSE dblWeight
 			END
+		,@intParentLotId = intParentLotId
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
@@ -79,7 +83,7 @@ BEGIN TRY
 		,@intSourceTransactionTypeId = 8
 
 	IF @dtmDate IS NULL
-	Select @dtmDate = GETDATE()
+		SELECT @dtmDate = GETDATE()
 
 	SELECT @dblLotReservedQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(intItemUOMId, ISNULL(@intWeightUOMId, @intItemUOMId), ISNULL(dblQty, 0)))
 	FROM tblICStockReservation
@@ -125,23 +129,40 @@ BEGIN TRY
 	--				)
 	--	END
 	--END
-
 	IF (
 			@strNewLotNumber = ''
 			OR @strNewLotNumber IS NULL
 			)
 	BEGIN
-		IF (@strLotTracking = 'Yes - Serial Number')
+		IF (@strLotTracking = 'Yes - Manual')
 		BEGIN
 			SET @strNewLotNumber = 'Split Lot Serial Number'
-		END
-		ELSE
-		BEGIN
+
 			RAISERROR (
 					'Lot tracking for the item is set as manual. Please supply the split lot number.'
 					,11
 					,1
 					)
+		END
+		ELSE
+		BEGIN
+			SELECT @strParentLotNumber = strParentLotNumber
+			FROM tblICParentLot
+			WHERE intParentLotId = @intParentLotId
+
+			EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+				,@intItemId = @intItemId
+				,@intManufacturingId = NULL
+				,@intSubLocationId = @intSubLocationId
+				,@intLocationId = @intLocationId
+				,@intOrderTypeId = NULL
+				,@intBlendRequirementId = NULL
+				,@intPatternCode = 24
+				,@ysnProposed = 0
+				,@strPatternString = @strNewLotNumber OUTPUT
+				,@intShiftId = NULL
+				,@dtmDate = @dtmDate
+				,@strParentLotNumber = @strParentLotNumber
 		END
 	END
 
@@ -183,8 +204,9 @@ BEGIN TRY
 		,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
 
 	SELECT TOP 1 @strSplitLotNumber = strLotNumber
-				,@intNewLotId = intLotId
-	FROM tblICLot ORDER BY intLotId DESC
+		,@intNewLotId = intLotId
+	FROM tblICLot
+	ORDER BY intLotId DESC
 
 	EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmDate
 		,@intTransactionTypeId = 17
