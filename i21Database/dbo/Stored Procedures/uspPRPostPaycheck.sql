@@ -189,6 +189,9 @@ BEGIN
 	--PERFORM GL ACCOUNT SEGMENT SWITCHING AND VALIDATION
 	--Place Earning to Temporary Table to Validate Earning GL Distribution
 	SELECT * INTO #tmpEarningTemp FROM #tmpEarning WHERE intDepartmentId IS NOT NULL
+	AND intEmployeeEarningId IN (SELECT intEmployeeEarningId FROM tblPREmployeeEarningDistribution 
+									WHERE intEmployeeEarningId = #tmpEarning.intEmployeeEarningId
+									GROUP BY intEmployeeEarningId HAVING COUNT(intAccountId) = 1)
 
 	DECLARE @intEarningTempEarningId INT
 	DECLARE @intEarningTempDepartmentId INT
