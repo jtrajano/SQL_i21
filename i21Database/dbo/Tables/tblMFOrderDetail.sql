@@ -25,7 +25,7 @@
 		,[dtmCreatedOn] DATETIME DEFAULT GETDATE() NULL
 		,[intLastUpdateById] INT NULL
 		,[dtmLastUpdateOn] DATETIME DEFAULT GETDATE() NULL
-		
+		,dblSurplusQtyInStageLocation NUMERIC(18, 6)
 		,CONSTRAINT [PK_tblMFOrderLineItem_intOrderLineItemId] PRIMARY KEY ([intOrderDetailId])
 		,CONSTRAINT [FK_tblMFOrderLineItem_tblMFOrderHeader_intOrderHeaderId] FOREIGN KEY ([intOrderHeaderId]) REFERENCES [tblMFOrderHeader]([intOrderHeaderId]) ON DELETE CASCADE
 		,CONSTRAINT [FK_tblMFOrderLineItem_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId])

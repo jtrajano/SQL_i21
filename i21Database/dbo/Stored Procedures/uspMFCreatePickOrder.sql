@@ -52,8 +52,8 @@ BEGIN TRY
 		,@intPMStageLocationId INT
 		,@intStagingLocationId INT
 		,@strPickByUpperToleranceQty NVARCHAR(50)
-		,@ysnPickRemainingQty bit
-		,@strReferernceNo nvarchar(50)
+		,@ysnPickRemainingQty BIT
+		,@strReferernceNo NVARCHAR(50)
 
 	SELECT @dtmCurrentDate = GetDate()
 
@@ -65,15 +65,15 @@ BEGIN TRY
 	SELECT @intManufacturingProcessId = intManufacturingProcessId
 		,@intLocationId = x.intLocationId
 		,@intUserId = intUserId
-		,@ysnPickRemainingQty=IsNULL(ysnPickRemainingQty,1)
+		,@ysnPickRemainingQty = IsNULL(ysnPickRemainingQty, 1)
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intManufacturingProcessId INT
 			,intLocationId INT
 			,intUserId INT
-			,ysnPickRemainingQty Bit
+			,ysnPickRemainingQty BIT
 			) x
-	--Select @ysnPickRemainingQty=0
 
+	--Select @ysnPickRemainingQty=0
 	DECLARE @tblMFWorkOrder TABLE (
 		intWorkOrderId INT
 		,intItemId INT
@@ -221,7 +221,12 @@ BEGIN TRY
 
 	DECLARE @OrderHeaderInformation AS OrderHeaderInformation
 
-	Select @strReferernceNo=strWorkOrderNo from tblMFWorkOrder Where intWorkOrderId in (Select intWorkOrderId from @tblMFWorkOrder)
+	SELECT @strReferernceNo = strWorkOrderNo
+	FROM tblMFWorkOrder
+	WHERE intWorkOrderId IN (
+			SELECT intWorkOrderId
+			FROM @tblMFWorkOrder
+			)
 
 	INSERT INTO @OrderHeaderInformation (
 		intOrderStatusId
@@ -233,7 +238,7 @@ BEGIN TRY
 		,strComment
 		,dtmOrderDate
 		,strLastUpdateBy
-		,intLocationId 
+		,intLocationId
 		)
 	SELECT 1
 		,1
@@ -250,7 +255,7 @@ BEGIN TRY
 		,''
 		,@dtmCurrentDate
 		,@strUserName
-		,@intLocationId 
+		,@intLocationId
 
 	INSERT INTO @tblMFOrderHeader
 	EXEC dbo.uspMFCreateStagingOrder @OrderHeaderInformation = @OrderHeaderInformation
@@ -451,10 +456,8 @@ BEGIN TRY
 						AND DATEPART(dy, ri.dtmValidTo)
 					)
 				)
-			AND ri.intConsumptionMethodId IN (
-				1
-				--,2
-				)
+			AND ri.intConsumptionMethodId IN (1)
+		--,2
 		GROUP BY ri.intItemId
 			,ri.intItemUOMId
 			,I.intUnitPerLayer
@@ -482,9 +485,8 @@ BEGIN TRY
 				)
 		GROUP BY OD1.intItemId
 
-		If @ysnPickRemainingQty=1
-		Begin
-
+		IF @ysnPickRemainingQty = 1
+		BEGIN
 			DECLARE @tblMFStagedQty TABLE (
 				intItemId INT
 				,dblStagedQty DECIMAL(38, 20)
@@ -539,9 +541,10 @@ BEGIN TRY
 						THEN 0
 					ELSE dblWeight - R.dblRemainingQty
 					END
+				,dblSurplusQtyInStageLocation=R.dblRemainingQty
 			FROM @OrderDetail OD
 			LEFT JOIN @tblMFRemainingQty R ON R.intItemId = OD.intItemId
-		End
+		END
 
 		SELECT @intWorkOrderId = intWorkOrderId
 			,@intProductId = intItemId
@@ -564,6 +567,7 @@ BEGIN TRY
 			,intSanitizationOrderDetailsId
 			,strLineItemNote
 			,intStagingLocationId
+			,dblSurplusQtyInStageLocation
 			)
 		SELECT intOrderHeaderId
 			,intItemId
@@ -580,6 +584,7 @@ BEGIN TRY
 			,intSanitizationOrderDetailsId
 			,strLineItemNote
 			,intStagingLocationId
+			,dblSurplusQtyInStageLocation
 		FROM @OrderDetail
 
 		SELECT @dblMinQtyCanBeProduced = - 1
@@ -606,7 +611,7 @@ BEGIN TRY
 			SELECT @dblAvailableQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intItemUOMId, L.dblQty))
 			FROM dbo.tblICLot L
 			JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
-			JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId,R.intRestrictionId)
+			JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId, R.intRestrictionId)
 				AND R.strInternalCode = 'STOCK'
 			JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 			JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
@@ -620,9 +625,6 @@ BEGIN TRY
 					FROM @tblMFStageLocation
 					)
 
-			--Select @dblAvailableQty=@dblAvailableQty- IsNULL(SUM(dbo.fnMFConvertQuantityToTargetItemUOM(OD.intItemUOMId, @intItemUOMId, OD.dblRequiredQty )), 0)
-			--from tblMFOrderDetail OD 
-			--Where OD.intItemId = @intItemId and OD.intOrderHeaderId in (Select OH.intOrderHeaderId from tblMFOrderHeader OH Where OH.intOrderStatusId <>10)
 			IF @dblAvailableQty IS NULL
 				OR @dblAvailableQty < 0
 			BEGIN
@@ -696,7 +698,7 @@ BEGIN TRY
 					SELECT @dblAvailableQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intItemUOMId, L.dblQty))
 					FROM dbo.tblICLot L
 					JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
-					JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId,R.intRestrictionId)
+					JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId, R.intRestrictionId)
 						AND R.strInternalCode = 'STOCK'
 					JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 					JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
@@ -711,9 +713,6 @@ BEGIN TRY
 							FROM @tblMFStageLocation
 							)
 
-					--Select @dblAvailableQty=@dblAvailableQty- IsNULL(SUM(dbo.fnMFConvertQuantityToTargetItemUOM(OD.intItemUOMId, @intItemUOMId, OD.dblRequiredQty )), 0)
-					--from tblMFOrderDetail OD 
-					--Where OD.intItemId = @intItemId and OD.intOrderHeaderId in (Select OH.intOrderHeaderId from tblMFOrderHeader OH Where OH.intOrderStatusId <>10)
 					IF @dblAvailableQty IS NULL
 					BEGIN
 						SELECT @dblAvailableQty = 0
@@ -864,35 +863,6 @@ BEGIN TRY
 		END
 	END
 
-	--IF @dblMinQtyCanBeProduced > - 1 and @ysnPickRemainingQty=1
-	--BEGIN
-	--	SELECT @intItemUOMId = intItemUOMId
-	--	FROM tblMFWorkOrder
-	--	WHERE intWorkOrderId = @intWorkOrderId
-
-	--	SELECT @intUnitMeasureId = intUnitMeasureId
-	--	FROM tblICItemUOM
-	--	WHERE intItemUOMId = @intItemUOMId
-
-	--	SELECT @strUnitMeasure = strUnitMeasure
-	--	FROM tblICUnitMeasure
-	--	WHERE intUnitMeasureId = @intUnitMeasureId
-
-	--	SELECT @strMinQtyCanBeProduced = @strMinQtyCanBeProduced + ' ' + @strUnitMeasure
-
-	--	RAISERROR (
-	--			'Available qty for item %s is %s which is less than the required qty %s. %s can be produced with the available inputs. Please change the work order quantity and try again.'
-	--			,11
-	--			,1
-	--			,@strItemNo
-	--			,@strAvailableQty
-	--			,@strRequiredQty
-	--			,@strMinQtyCanBeProduced
-	--			)
-
-	--	RETURN
-	--END
-
 	EXEC dbo.uspMFCreateStagingOrderDetail @OrderDetailInformation = @OrderDetailInformation
 
 	INSERT INTO tblMFStageWorkOrder (
@@ -951,7 +921,8 @@ BEGIN TRY
 		AND NOT EXISTS (
 			SELECT *
 			FROM tblMFTask
-			WHERE intLotId = tblICStockReservation.intLotId and intOrderHeaderId =tblICStockReservation.intTransactionId 
+			WHERE intLotId = tblICStockReservation.intLotId
+				AND intOrderHeaderId = tblICStockReservation.intTransactionId
 			)
 
 	COMMIT TRANSACTION
