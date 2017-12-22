@@ -16,27 +16,27 @@ BEGIN
 		ON Deduction.intTypeDeductionId = EmpDeduction.intTypeDeductionId
 	WHERE EmpDeduction.intTypeDeductionId = @intTypeDeductionId
 
-	--Delete Deduction Taxes
-	DELETE FROM tblPREmployeeDeductionTax 
-	WHERE intEmployeeDeductionId = (SELECT TOP 1 intEmployeeDeductionId 
-									FROM tblPREmployeeDeduction 
-									WHERE intTypeDeductionId = @intTypeDeductionId)
-
-	IF EXISTS(SELECT intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intTypeDeductionId = @intTypeDeductionId)
-	BEGIN
-		--Reinsert Deduction Taxes
-		INSERT INTO tblPREmployeeDeductionTax
-			(intEmployeeDeductionId
-			,intTypeTaxId
-			,intSort
-			,intConcurrencyId)
-		SELECT
-			(SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intTypeDeductionId = @intTypeDeductionId)
-			,intTypeTaxId
-			,intSort
-			,intConcurrencyId
-		FROM tblPRTypeDeductionTax
+	--Insert Employee Deductions to Temp Table
+	SELECT intEmployeeDeductionId 
+		INTO #tmpEmployeeDeduction
+		FROM tblPREmployeeDeduction 
 		WHERE intTypeDeductionId = @intTypeDeductionId
+
+	DELETE FROM tblPREmployeeDeductionTax 
+			WHERE intEmployeeDeductionId IN (SELECT intEmployeeDeductionId FROM #tmpEmployeeDeduction)
+
+	DECLARE @intEmployeeDeductionId INT
+	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEmployeeDeduction)
+	BEGIN
+		SELECT TOP 1 @intEmployeeDeductionId = intEmployeeDeductionId FROM #tmpEmployeeDeduction
+
+		--Reinsert Deduction Taxes
+		INSERT INTO tblPREmployeeDeductionTax (intEmployeeDeductionId, intTypeTaxId, intSort, intConcurrencyId)
+			SELECT @intEmployeeDeductionId, intTypeTaxId, intSort, intConcurrencyId 
+			FROM tblPRTypeDeductionTax
+			WHERE intTypeDeductionId = @intTypeDeductionId
+
+		DELETE FROM #tmpEmployeeDeduction WHERE intEmployeeDeductionId = @intEmployeeDeductionId
 	END
 
 	--Update Template Deduction 
@@ -52,27 +52,31 @@ BEGIN
 		ON Deduction.intTypeDeductionId = EmpDeduction.intTypeDeductionId
 	WHERE EmpDeduction.intTypeDeductionId = @intTypeDeductionId
 
+	--Insert Template Deductions to Temp Table
+	SELECT intTemplateDeductionId 
+		INTO #tmpTemplateDeduction
+		FROM tblPRTemplateDeduction 
+		WHERE intTypeDeductionId = @intTypeDeductionId
+
 	--Delete Template Deduction Taxes
 	DELETE FROM tblPRTemplateDeductionTax 
-	WHERE intTemplateDeductionId = (SELECT TOP 1 intTemplateDeductionId 
-									FROM tblPRTemplateDeduction 
-									WHERE intTypeDeductionId = @intTypeDeductionId)
+			WHERE intTemplateDeductionId IN (SELECT intTemplateDeductionId FROM #tmpTemplateDeduction)
 
-	IF EXISTS(SELECT intTemplateDeductionId FROM tblPRTemplateDeduction WHERE intTypeDeductionId = @intTypeDeductionId)
+	DECLARE @intTemplateDeductionId INT
+	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTemplateDeduction)
 	BEGIN
+		SELECT TOP 1 @intTemplateDeductionId = intTemplateDeductionId FROM #tmpTemplateDeduction
+
 		--Reinsert Template Deduction Taxes
-		INSERT INTO tblPRTemplateDeductionTax
-			(intTemplateDeductionId
-			,intTypeTaxId
-			,intSort
-			,intConcurrencyId)
-		SELECT
-			(SELECT TOP 1 intTemplateDeductionId FROM tblPRTemplateDeduction WHERE intTypeDeductionId = @intTypeDeductionId)
-			,intTypeTaxId
-			,intSort
-			,intConcurrencyId
-		FROM tblPRTypeDeductionTax
-		WHERE intTypeDeductionId = @intTypeDeductionId
+		INSERT INTO tblPRTemplateDeductionTax (intTemplateDeductionId, intTypeTaxId, intSort, intConcurrencyId)
+			SELECT @intTemplateDeductionId, intTypeTaxId, intSort, intConcurrencyId
+			FROM tblPRTypeDeductionTax
+			WHERE intTypeDeductionId = @intTypeDeductionId
+
+		DELETE FROM #tmpTemplateDeduction WHERE intTemplateDeductionId = @intTemplateDeductionId
 	END
+
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpEmployeeDeduction')) DROP TABLE #tmpEmployeeDeduction
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpTemplateDeduction')) DROP TABLE #tmpTemplateDeduction
 END
 GO
