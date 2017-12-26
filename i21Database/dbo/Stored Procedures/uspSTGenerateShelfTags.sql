@@ -56,11 +56,23 @@ BEGIN TRY
 			[dblStandardCost]	NVARCHAR(20)
 	)  
 
+	-- Get Currency
+	DECLARE @strCurrency AS NVARCHAR(5)
+	DECLARE @strSymbol AS NVARCHAR(5)
+	SELECT @strCurrency = strCurrency, @strSymbol = strSymbol
+	FROM tblSMCurrency
+	WHERE intCurrencyID = (SELECT intDefaultCurrencyId FROM tblSMCompanyPreference)
+
+	IF(@strSymbol IS NULL OR @strSymbol = '')
+	BEGIN
+		SET @strSymbol = '$'
+	END
+
 	INSERT INTO @tblTempColumnAndValue
 	SELECT 
-		dbo.fnSTSeparateStringToColumns(Item, 1, '|') strDescription,
-		dbo.fnSTSeparateStringToColumns(Item, 2, '|') strLongUPCCode,
-		dbo.fnSTSeparateStringToColumns(Item, 3, '|') dblStandardCost
+		UPPER(dbo.fnSTSeparateStringToColumns(Item, 1, '|')) strDescription,
+		UPPER(dbo.fnSTSeparateStringToColumns(Item, 2, '|')) strLongUPCCode,
+		@strSymbol + dbo.fnSTSeparateStringToColumns(Item, 3, '|') dblStandardCost
 	FROM dbo.fnSplitString(@strXmlString, ',')
 
 
