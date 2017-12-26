@@ -159,6 +159,7 @@
     <None Include="dbo\Stored Procedures\uspGRImportDiscountTable.sql" />
     <None Include="dbo\Stored Procedures\uspGRImportDiscountCode.sql" />
     <None Include="dbo\Stored Procedures\uspGRImportScaleStation.sql" />
+    <None Include="dbo\Stored Procedures\uspGRImportScaleTicket.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />
@@ -446,5 +447,6 @@
     <None Include="dbo\Stored Procedures\uspARImportCustomerComments.sql" />
     <None Include="dbo\Stored Procedures\uspARImportDefaultTaxItems.sql" />
     <Build Include="dbo\Functions\fnCTConvertYNToBit.sql" />
+    <Build Include="dbo\Functions\fnCTConvertToDateTime.sql" />
   </ItemGroup>
 </Project>
