@@ -153,8 +153,7 @@
     <None Include="Scripts\Pre-Deployment\21_PR\3_1640_to_1710.sql" />
     <None Include="Scripts\Pre-Deployment\11_IC\CleanUPCCodes.sql" />
     <None Include="Scripts\Pre-Deployment\7_AR\9_FixNRCompanyPreference.sql" />
-    <None Include="Scripts\Pre-Deployment\22_PAT\5_AddIssueAndRetireTable.sql" />
-    <None Include="Scripts\Pre-Deployment\22_PAT\6_MigrateCustomerStock.sql" />
+    <None Include="Scripts\Pre-Deployment\22_PAT\5_DuplicateStockTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />

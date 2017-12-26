@@ -279,8 +279,9 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\PAT\DefaultData\1_AddDefaultLetters.sql 
 :r .\PAT\DefaultData\2_DefaultCompanyPreference.sql
 :r .\PAT\1_DropStoredProcedures.sql
-:r .\PAT\2_UpdateIssueStockNo.sql
-:r .\PAT\3_UpdateRetiredStockNo.sql
+:r .\PAT\2_MigrateStockRecords.sql
+:r .\PAT\3_UpdateIssueStockNo.sql
+:r .\PAT\4_UpdateRetiredStockNo.sql
 
 --Contract Management
 :R .\CT\1_MasterTables.sql
