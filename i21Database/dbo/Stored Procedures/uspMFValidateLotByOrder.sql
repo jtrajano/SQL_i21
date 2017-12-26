@@ -7,6 +7,7 @@ BEGIN
 	DECLARE @intStagingLocationId INT
 		,@strName NVARCHAR(50)
 		,@strErrMsg NVARCHAR(MAX) = ''
+		,@intLotId int
 
 	SELECT @intStagingLocationId = intStagingLocationId
 	FROM tblMFOrderHeader
@@ -56,6 +57,26 @@ BEGIN
 			)
 	BEGIN
 		SELECT @strErrMsg = 'SCANNED LOT IS NOT AVAILABLE IN LOCATION ''' + @strName + '''.'
+
+		RAISERROR (
+				@strErrMsg
+				,16
+				,1
+				)
+
+		RETURN
+	END
+	SELECT @intLotId=intLotId
+			FROM tblICLot
+			WHERE strLotNumber = @strScannedLotNo
+				AND intStorageLocationId = @intStagingLocationId
+				AND dblQty > 0
+
+	IF NOT EXISTS (Select *from tblMFTask Where intLotId=@intLotId and strTaskNo=@strPickNo and intTaskStateId=3
+			
+			)
+	BEGIN
+		SELECT @strErrMsg = 'SCANNED LOT IS NOT AVAILABLE IN THE SCANNED PICK LIST ''' + @strPickNo + '''.'
 
 		RAISERROR (
 				@strErrMsg
