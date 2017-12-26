@@ -322,11 +322,11 @@ BEGIN TRY
 		,1 ysnAccrue
 		,'Purchase Contract'
 		,NULL
-		,CV.intCurrencyId
+		,L.intCurrencyId
 		,LD.intVendorEntityId
 		,LD.intPCompanyLocationId
 		,0
-		,NULL
+		,CUR.ysnSubCurrency
 		,CV.intCurrencyId
 		,EL.intEntityLocationId
 		,L.strBLNumber
@@ -346,6 +346,7 @@ BEGIN TRY
 			ELSE LD.intVendorEntityId
 			END
 		AND EL.ysnDefaultLocation = 1
+	JOIN tblSMCurrency CUR ON CUR.intCurrencyID = CV.intCurrencyId
 	WHERE L.intLoadId = @intLoadId
 	GROUP BY CV.intEntityVendorId
 		,CV.intItemId
@@ -364,6 +365,8 @@ BEGIN TRY
 		,LD.intVendorEntityId
 		,LD.intPCompanyLocationId
 		,EL.intEntityLocationId
+		,L.intCurrencyId
+		,CUR.ysnSubCurrency
 
 	UNION ALL
 
@@ -399,7 +402,7 @@ BEGIN TRY
 			WHERE intLoadId = @intLoadId
 			)
 		,0
-		,NULL
+		,CUR.ysnSubCurrency
 		,L.intCurrencyId
 		,(
 			SELECT TOP 1 EL.intEntityLocationId
@@ -417,6 +420,7 @@ BEGIN TRY
 	JOIN tblLGLoadWarehouseServices LWS ON LW.intLoadWarehouseId = LWS.intLoadWarehouseId
 	JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
 	JOIN tblICItem I ON I.intItemId = LWS.intItemId
+	JOIN tblSMCurrency CUR ON CUR.intCurrencyID = L.intCurrencyId
 	WHERE L.intLoadId = @intLoadId
 
 	IF NOT EXISTS (
