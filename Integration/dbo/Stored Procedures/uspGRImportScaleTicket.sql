@@ -1,0 +1,367 @@
+﻿IF EXISTS (SELECT TOP 1 1 FROM sys.procedures WHERE name = 'uspGRImportScaleTicket')
+	DROP PROCEDURE uspGRImportScaleTicket
+GO
+
+CREATE PROCEDURE uspGRImportScaleTicket 
+	 @Checking BIT = 0
+	,@UserId INT = 0
+	,@Total INT = 0 OUTPUT
+AS
+BEGIN
+	
+	--================================================
+	--     IMPORT Scale Station SetUps
+	--================================================
+	IF (@Checking = 1)
+	BEGIN
+		
+		SELECT @Total = COUNT(1)
+		FROM gasctmst 
+				
+		RETURN @Total
+
+	END
+
+	 BEGIN
+	
+	SET IDENTITY_INSERT tblSCTicket ON
+	
+	DECLARE @intCurrencyId INT
+	SELECT @intCurrencyId =intDefaultCurrencyId FROM tblSMCompanyPreference
+
+	INSERT INTO tblSCTicket
+	(
+	 intConcurrencyId
+	,intTicketId
+	,strTicketStatus
+	,strTicketNumber
+	,intScaleSetupId
+	,intTicketPoolId
+	,intTicketLocationId
+	,intTicketType
+	,strInOutFlag
+	,dtmTicketDateTime
+	,dtmTicketTransferDateTime
+	,dtmTicketVoidDateTime
+	,intProcessingLocationId
+	,strScaleOperatorUser
+	,intEntityScaleOperatorId
+	,strPurchaseOrderNumber
+	,strTruckName
+	,strDriverName
+	,ysnDriverOff
+	,ysnSplitWeightTicket
+	,ysnGrossManual
+	,dblGrossWeight
+	,dblGrossWeightOriginal
+	,dblGrossWeightSplit1
+	,dblGrossWeightSplit2
+	,dtmGrossDateTime
+	,intGrossUserId
+	,ysnTareManual
+	,dblTareWeight
+	,dblTareWeightOriginal
+	,dblTareWeightSplit1
+	,dblTareWeightSplit2
+	,dtmTareDateTime
+	,intTareUserId
+	,dblGrossUnits
+	,dblNetUnits
+	,strItemNumber
+	,strItemUOM
+	,intCustomerId
+	,strDistributionOption
+	,intDiscountSchedule
+	,strDiscountLocation
+	,dtmDeferDate
+	,strContractNumber
+	,intContractSequence
+	,strContractLocation
+	,dblUnitPrice
+	,dblUnitBasis
+	,dblTicketFees
+	,intCurrencyId
+	,dblCurrencyRate
+	,strTicketComment
+	,strCustomerReference
+	,ysnTicketPrinted
+	,ysnPlantTicketPrinted
+	,ysnGradingTagPrinted
+	,intHaulerId
+	,intFreightCarrierId
+	,dblFreightRate
+	,dblFreightAdjustment
+	,intFreightCurrencyId
+	,dblFreightCurrencyRate
+	,strFreightCContractNumber
+	,ysnFarmerPaysFreight
+	,strLoadNumber
+	,intLoadLocationId
+	,intAxleCount
+	,strBinNumber
+	,strPitNumber
+	,intGradingFactor
+	,strVarietyType
+	,strFarmNumber
+	,strFieldNumber
+	,strDiscountComment
+	,strCommodityCode
+	,intCommodityId
+	,intDiscountId
+	,intContractId
+	,intDiscountLocationId
+	,intItemId
+	,intEntityId
+	,intItemUOMIdFrom
+	,intItemUOMIdTo
+	,ysnCusVenPaysFees
+	)
+	
+
+	SELECT	
+	 intConcurrencyId 		   = 1
+	,intTicketId       		   = A4GLIdentity
+	,strTicketStatus		   = CASE WHEN ISNULL(LTRIM(RTRIM(gasct_open_close_ind)),'') = '' THEN 'O' ELSE gasct_open_close_ind END
+	,strTicketNumber		   = gasct_tic_no
+	,intScaleSetupId		   = SS.intScaleSetupId
+	,intTicketPoolId		   = SS.intTicketPoolId
+	,intTicketLocationId	   = CL.intCompanyLocationId
+	,intTicketType			   = CASE	
+										WHEN gasct_tic_type IN ('I','O')  THEN 1
+								 		WHEN gasct_tic_type = ('X')       THEN 2 
+								 		WHEN gasct_tic_type = ('M')       THEN 3
+								 		WHEN gasct_tic_type = ('T')       THEN 4
+								 		ELSE 5
+								 END 
+	,strInOutFlag			   = gasct_in_out_ind
+	,dtmTicketDateTime		   = dbo.fnCTConvertToDateTime(gasct_rev_dt,null)
+	,dtmTicketTransferDateTime = NULL
+	,dtmTicketVoidDateTime	   = NULL
+	,intProcessingLocationId   = CL.intCompanyLocationId
+	,strScaleOperatorUser	   = ISNULL(gasct_weigher,'')
+	,intEntityScaleOperatorId  = 0
+	,strPurchaseOrderNumber	   = NULL
+	,strTruckName			   = gasct_truck_id
+	,strDriverName			   = gasct_driver
+	,ysnDriverOff			   = dbo.fnCTConvertYNToBit(gasct_driver_on_yn,0)
+	,ysnSplitWeightTicket	   = dbo.fnCTConvertYNToBit(gasct_split_wgt_yn,0)
+	,ysnGrossManual			   = dbo.fnCTConvertYNToBit(gasct_gross_manual_yn,0)
+	,dblGrossWeight			   = gasct_gross_wgt
+	,dblGrossWeightOriginal	   = gasct_orig_gross_wgt
+	,dblGrossWeightSplit1	   = gasct_spl_gross_wgt1
+	,dblGrossWeightSplit2	   = gasct_spl_gross_wgt2
+	,dtmGrossDateTime		   = dbo.fnCTConvertToDateTime(gasct_gross_rev_dt,gasct_gross_time)
+	,intGrossUserId			   = NULL
+	,ysnTareManual			   = dbo.fnCTConvertYNToBit(gasct_tare_manual_yn,0)
+	,dblTareWeight			   = gasct_tare_wgt
+	,dblTareWeightOriginal	   = gasct_orig_tare_wgt
+	,dblTareWeightSplit1	   = gasct_spl_tare_wgt1
+	,dblTareWeightSplit2	   = gasct_spl_tare_wgt2
+	,dtmTareDateTime		   = dbo.fnCTConvertToDateTime(gasct_tare_rev_dt,gasct_tare_time)
+	,intTareUserId			   = NULL
+	,dblGrossUnits			   = gasct_gross_un
+	,dblNetUnits			   = gasct_net_un
+	,strItemNumber			   = IM.strItemNo
+	,strItemUOM				   = UM.strUnitMeasure
+	,intCustomerId			   = EY.intEntityId
+	,strDistributionOption	   = gasct_dist_option
+	,intDiscountSchedule	   = DS.intDiscountScheduleId
+	,strDiscountLocation	   = ''
+	,dtmDeferDate			   = dbo.fnCTConvertToDateTime(gasct_defer_rev_dt,null)
+	,strContractNumber		   = gasct_cnt_no
+	,intContractSequence	   = gasct_cnt_seq
+	,strContractLocation	   = gasct_cnt_loc
+	,dblUnitPrice			   = gasct_un_prc
+	,dblUnitBasis			   = NULL
+	,dblTicketFees			   = gasct_fees
+	,intCurrencyId			   = ISNULL(CY.intCurrencyID,@intCurrencyId)
+	,dblCurrencyRate		   = gasct_currency_rt
+	,strTicketComment		   = gasct_comment
+	,strCustomerReference	   = gasct_cus_ref_no
+	,ysnTicketPrinted		   = NULL
+	,ysnPlantTicketPrinted	   = dbo.fnCTConvertYNToBit(gasct_plant_prt_ind,0)
+	,ysnGradingTagPrinted	   = dbo.fnCTConvertYNToBit(gasct_grade_prt_ind,0)
+	,intHaulerId			   = NULL
+	,intFreightCarrierId	   = NULL
+	,dblFreightRate			   = NULL
+	,dblFreightAdjustment	   = NULL
+	,intFreightCurrencyId	   = ISNULL(FY.intCurrencyID,@intCurrencyId)
+	,dblFreightCurrencyRate	   = gasct_frt_currency_rt
+	,strFreightCContractNumber = gasct_frt_currency_cnt 
+	,ysnFarmerPaysFreight	   = dbo.fnCTConvertYNToBit(gasct_frt_deduct_yn,0)
+	,strLoadNumber			   = gasct_load_no
+	,intLoadLocationId		   = CL.intCompanyLocationId
+	,intAxleCount			   = NULL
+	,strBinNumber			   = gasct_bin_no
+	,strPitNumber			   = gasct_pit_no
+	,intGradingFactor		   = gasct_grade
+	,strVarietyType			   = gasct_variety
+	,strFarmNumber			   = NULL
+	,strFieldNumber			   = NULL
+	,strDiscountComment		   = gasct_tic_comment
+	,strCommodityCode		   = gasct_com_cd
+	,intCommodityId			   = CO.intCommodityId
+	,intDiscountId			   = 1
+	,intContractId			   = CD.intContractDetailId
+	,intDiscountLocationId	   = NULL
+	,intItemId				   = IM.intItemId
+	,intEntityId			   = EY.intEntityId
+	,intItemUOMIdFrom		   = IU.intItemUOMId
+	,intItemUOMIdTo			   = IU.intItemUOMId
+	,ysnCusVenPaysFees		   = CAST(0 AS BIT)
+	FROM	gasctmst GT
+			JOIN	tblSCScaleSetup			SS	ON	LTRIM(RTRIM(SS.strStationShortDescription)) collate Latin1_General_CI_AS = LTRIM(RTRIM(GT.gasct_loc_no)) + LTRIM(RTRIM(GT.gasct_scale_id))
+			JOIN    tblSCTicketPool         TP  ON TP.intTicketPoolId=SS.intTicketPoolId --AND TP.strTicketPool  collate Latin1_General_CI_AS =LTRIM(RTRIM(GT.gasct_loc_no)) + LTRIM(RTRIM(GT.gasct_scale_id))---Added
+			JOIN	tblSMCompanyLocation	CL	ON	LTRIM(RTRIM(CL.strLocationNumber)) collate Latin1_General_CI_AS  = LTRIM(RTRIM(GT.gasct_loc_no))
+	--LEFT	JOIN	tblEMEntity				EY	ON	LTRIM(RTRIM(EY.strName)) collate Latin1_General_CI_AS	= LTRIM(RTRIM(GT.gasct_cus_no))
+	LEFT	JOIN	tblEMEntity				EY	ON	LTRIM(RTRIM(EY.strEntityNo)) collate Latin1_General_CI_AS	= LTRIM(RTRIM(GT.gasct_cus_no)) AND EY.ysnActive =1
+	LEFT	JOIN	tblEMEntityType			ET	ON	ET.intEntityId	=	EY.intEntityId 
+	LEFT	JOIN	tblICCommodity			CO	ON	LTRIM(RTRIM(CO.strCommodityCode))  collate Latin1_General_CI_AS = LTRIM(RTRIM(GT.gasct_com_cd))
+	--LEFT	JOIN	tblICItem				IM	ON	LTRIM(RTRIM(IM.strItemNo)) = LTRIM(RTRIM(CO.strDescription))
+	LEFT	JOIN	tblICItem				IM	ON	LTRIM(RTRIM(IM.strItemNo)) = LTRIM(RTRIM(CO.strCommodityCode))
+	LEFT	JOIN	tblICItemUOM			IU	ON	IU.intItemId	=	IM.intItemId AND IU.ysnStockUnit =1 ---- IU.intUnitMeasureId = SS.intUnitMeasureId
+	LEFT	JOIN	tblICUnitMeasure		UM	ON	UM.intUnitMeasureId	= SS.intUnitMeasureId
+		
+	LEFT	JOIN	tblGRDiscountSchedule	DS	ON	DS.strDiscountDescription collate Latin1_General_CI_AS = GT.gasct_disc_schd_no AND DS.intCommodityId = CO.intCommodityId
+	LEFT	JOIN	tblSMCurrency			CY	ON	LTRIM(RTRIM(CY.strCurrency)) collate Latin1_General_CI_AS = LTRIM(RTRIM(GT.gasct_currency))
+	LEFT	JOIN	tblSMCurrency			FY	ON	LTRIM(RTRIM(FY.strCurrency)) collate Latin1_General_CI_AS = LTRIM(RTRIM(GT.gasct_frt_currency))
+	LEFT	JOIN	tblCTContractHeader		CH	ON	LTRIM(RTRIM(CH.strContractNumber)) collate Latin1_General_CI_AS = LTRIM(RTRIM(GT.gasct_cnt_no))
+										AND CH.intContractTypeId = 
+																	CASE 
+																		  WHEN GT.gasct_tic_type='I' THEN 1 
+																		  ELSE 2 
+																	END
+	LEFT	JOIN	tblCTContractDetail		CD	ON	CD.intContractHeaderId = CH.intContractHeaderId AND CD.intContractSeq = gasct_cnt_seq	
+	WHERE	
+	--(EY.intEntityId IS NULL OR ET.strType = 'Customer') 
+	  (
+		EY.intEntityId IS NULL 
+		OR 
+		ET.strType = CASE 
+					 	  WHEN GT.gasct_tic_type='I' THEN 'Vendor'
+					 	  ELSE 'Customer'
+					 END
+	  ) 
+	AND A4GLIdentity NOT IN (SELECT A4GLIdentity FROM gasctmst WHERE gasct_tic_no = 'o         ' AND  ISNULL(LTRIM(RTRIM(gasct_open_close_ind)),'') = '')
+	AND GT.gasct_tic_no NOT IN('0000120797','0000120802')
+	AND EY.intEntityId IS NOT NULL
+
+	SET IDENTITY_INSERT tblSCTicket OFF
+
+	UPDATE tblSCTicket SET strDistributionOption='CNT' WHERE intContractId >0
+
+	DECLARE @intStorageScheduleTypeId INT
+	SELECT	@intStorageScheduleTypeId = intStorageScheduleTypeId FROM tblGRStorageType WHERE strStorageTypeDescription = 'Default'
+
+	INSERT INTO tblQMTicketDiscount (intConcurrencyId, dblGradeReading, strShrinkWhat, dblShrinkPercent, intDiscountScheduleCodeId, intTicketId, intTicketFileId, strSourceType, strDiscountChargeType)	
+	SELECT 
+	DISTINCT 
+	 1 AS intConcurrencyId
+	,gasct_reading AS dblGradeReading
+	,gasct_shrk_what AS strShrinkWhat
+	,gasct_shrk_pct AS dblShrinkPercent
+	,intDiscountScheduleCodeId
+	,intTicketId
+	,intTicketId AS intTicketFileId
+	,'Scale' AS strSourceType
+	,'Dollar' strDiscountChargeType 
+	FROM (
+			SELECT	
+				gasct_disc_cd_1		gasct_disc_cd,
+				gasct_reading_1		gasct_reading,
+				gasct_disc_calc_1	gasct_disc_calc,
+				gasct_un_disc_amt_1 gasct_un_disc_amt,
+				gasct_shrk_what_1	gasct_shrk_what,
+				gasct_shrk_pct_1	gasct_shrk_pct,
+				A4GLIdentity		
+				FROM gasctmst 
+				WHERE gasct_disc_cd_1 IS NOT NULL
+
+			UNION ALL
+				SELECT gasct_disc_cd_2,gasct_reading_2,gasct_disc_calc_2,gasct_un_disc_amt_2,gasct_shrk_what_2,gasct_shrk_pct_2,A4GLIdentity      
+				FROM gasctmst  WHERE gasct_disc_cd_2 IS NOT NULL
+			UNION ALL
+			
+				SELECT gasct_disc_cd_3,gasct_reading_3,gasct_disc_calc_3,gasct_un_disc_amt_3,gasct_shrk_what_3,gasct_shrk_pct_3,A4GLIdentity
+				FROM gasctmst  WHERE gasct_disc_cd_3 IS NOT NULL AND gasct_disc_cd_3 <> gasct_disc_cd_4 AND gasct_disc_cd_4 <>'TW' 
+			UNION ALL
+				SELECT gasct_disc_cd_4,gasct_reading_4,gasct_disc_calc_4,gasct_un_disc_amt_4,gasct_shrk_what_4,gasct_shrk_pct_4,A4GLIdentity
+				FROM gasctmst  WHERE gasct_disc_cd_4 IS NOT NULL AND gasct_disc_cd_3 <> gasct_disc_cd_4 AND gasct_disc_cd_4 <>'TW'
+			UNION ALL
+				(
+				 SELECT disc_cd
+				 	,SUM(reading)
+				 	,SUM(disc_calc)
+				 	,SUM(un_disc)
+				 	,shrk_what
+				 	,SUM(gasct_shrk_pct)
+				 	,A4GLIdentity
+				 FROM (
+				 		SELECT 
+				 		 gasct_disc_cd_4 disc_cd
+				 		,Convert(FLOAT, gasct_reading_4) reading
+				 		,Convert(FLOAT, gasct_disc_calc_4) disc_calc
+				 		,Convert(FLOAT, gasct_un_disc_amt_4) un_disc
+				 		,gasct_shrk_what_4 shrk_what
+				 		,Convert(FLOAT, gasct_shrk_pct_4) gasct_shrk_pct
+				 		,A4GLIdentity
+				 	    FROM gasctmst
+				 	    WHERE gasct_disc_cd_4 IS NOT NULL
+				 	    	AND gasct_disc_cd_3 IS NOT NULL
+				 	    	AND gasct_disc_cd_3 = gasct_disc_cd_4
+				 	    	AND gasct_disc_cd_4 = 'TW'
+				 	
+				 	UNION ALL
+				 	
+				 	SELECT 
+				 		gasct_disc_cd_3
+				 		,Convert(FLOAT, gasct_reading_3)
+				 		,Convert(FLOAT, gasct_disc_calc_3)
+				 		,Convert(FLOAT, gasct_un_disc_amt_3)
+				 		,gasct_shrk_what_3
+				 		,Convert(FLOAT, gasct_shrk_pct_3)
+				 		,A4GLIdentity
+				 	    FROM gasctmst
+				 	    WHERE gasct_disc_cd_3 IS NOT NULL
+				 	    	AND gasct_disc_cd_4 IS NOT NULL
+				 	    	AND gasct_disc_cd_3 = gasct_disc_cd_4
+				 	    	AND gasct_disc_cd_3 = 'TW'
+				 	) t
+				 GROUP BY disc_cd
+				 	,shrk_what
+				 	,A4GLIdentity
+				 
+				) 
+			UNION ALL
+				SELECT gasct_disc_cd_5,gasct_reading_5,gasct_disc_calc_5,gasct_un_disc_amt_5,gasct_shrk_what_5,gasct_shrk_pct_5,A4GLIdentity
+				FROM gasctmst  WHERE gasct_disc_cd_5 IS NOT NULL 
+			UNION ALL
+				SELECT gasct_disc_cd_6,gasct_reading_6,gasct_disc_calc_6,gasct_un_disc_amt_6,gasct_shrk_what_6,gasct_shrk_pct_6,A4GLIdentity
+				FROM gasctmst  WHERE gasct_disc_cd_6 IS NOT NULL
+			UNION ALL
+				SELECT gasct_disc_cd_7,gasct_reading_7,gasct_disc_calc_7,gasct_un_disc_amt_7,gasct_shrk_what_7,gasct_shrk_pct_7,A4GLIdentity
+				FROM gasctmst  WHERE gasct_disc_cd_7 IS NOT NULL 
+			UNION ALL
+				SELECT gasct_disc_cd_8,gasct_reading_8,gasct_disc_calc_8,gasct_un_disc_amt_8,gasct_shrk_what_8,gasct_shrk_pct_8,A4GLIdentity
+				FROM gasctmst  WHERE gasct_disc_cd_8 IS NOT NULL  
+			UNION ALL
+				SELECT gasct_disc_cd_9,gasct_reading_9,gasct_disc_calc_9,gasct_un_disc_amt_9,gasct_shrk_what_9,gasct_shrk_pct_9,A4GLIdentity
+				FROM gasctmst  WHERE gasct_disc_cd_9 IS NOT NULL 
+			UNION ALL
+				SELECT gasct_disc_cd_10,gasct_reading_10,gasct_disc_calc_10,gasct_un_disc_amt_10,gasct_shrk_what_10,gasct_shrk_pct_10,A4GLIdentity
+				FROM gasctmst  WHERE gasct_disc_cd_10 IS NOT NULL 
+			UNION ALL
+				SELECT gasct_disc_cd_11,gasct_reading_11,gasct_disc_calc_11,gasct_un_disc_amt_11,gasct_shrk_what_11,gasct_shrk_pct_11,A4GLIdentity
+				FROM gasctmst  WHERE gasct_disc_cd_11 IS NOT NULL 
+			UNION ALL
+				SELECT gasct_disc_cd_12,gasct_reading_12,gasct_disc_calc_12,gasct_un_disc_amt_12,gasct_shrk_what_12,gasct_shrk_pct_12,A4GLIdentity
+				FROM gasctmst  WHERE gasct_disc_cd_12 IS NOT NULL
+	)b 
+	JOIN tblSCTicket k ON	k.intTicketId = b.A4GLIdentity AND b.gasct_disc_cd is not null
+	JOIN tblGRDiscountSchedule d ON d.intDiscountScheduleId = k.intDiscountSchedule
+	JOIN tblGRDiscountScheduleCode c ON c.intDiscountScheduleId = d.intDiscountScheduleId AND c.intStorageTypeId = @intStorageScheduleTypeId
+	JOIN tblICItem i on i.intItemId = c.intItemId AND i.strShortName = b.gasct_disc_cd  COLLATE Latin1_General_CI_AS
+	WHERE b.gasct_disc_cd IS NOT NULL	
+END
+
+END
