@@ -233,11 +233,26 @@ FROM (
                            FROM (
                                   SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(s.intCommodityUnitMeasureId, um.intCommodityUnitMeasureId, isnull(Balance, 0)) dblTotal
                                   FROM vyuGRGetStorageDetail s
-                                  WHERE s.intCommodityId = c.intCommodityId AND s.intCompanyLocationId = cl.intCompanyLocationId AND strOwnedPhysicalStock = 'Customer' 
-								  AND intEntityId = CASE WHEN ISNULL(@intVendorId, 0) = 0 THEN intEntityId ELSE @intVendorId END 
+                                  WHERE s.intCommodityId = c.intCommodityId AND s.intCompanyLocationId = cl.intCompanyLocationId AND strOwnedPhysicalStock = 'Customer' AND intEntityId = CASE WHEN ISNULL(@intVendorId, 0) = 0 THEN intEntityId ELSE @intVendorId END 
+								   union all
+								  SELECT 
+									dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,um.intCommodityUnitMeasureId,((SCT.dblNetUnits * SCDS.dblSplitPercent) / 100)) dblTotal									
+									FROM tblSCDeliverySheet SCD 
+									INNER JOIN tblSCTicket SCT ON SCD.intDeliverySheetId = SCT.intDeliverySheetId AND SCT.ysnDeliverySheetPost = 0
+									INNER JOIN tblSCDeliverySheetSplit SCDS ON SCDS.intDeliverySheetId = SCD.intDeliverySheetId
+									INNER JOIN tblICItem i on i.intItemId=SCT.intItemId
+									JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and ysnStockUnit=1
+									JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId 
+									INNER JOIN tblSMCompanyLocation l on SCT.intProcessingLocationId=l.intCompanyLocationId
+									INNER JOIN tblEMEntity E on E.intEntityId=SCDS.intEntityId
+									LEFT JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = SCDS.intStorageScheduleTypeId AND GR.intStorageScheduleTypeId > 0
+									WHERE SCT.strTicketStatus = 'H' and isnull(SCT.intDeliverySheetId,0) <>0
+									AND  SCT.intCommodityId= c.intCommodityId
+										AND	l.intCompanyLocationId  = cl.intCompanyLocationId
+										AND strOwnedPhysicalStock = 'Customer' 
+										AND E.intEntityId= case when isnull(@intVendorId,0)=0 then E.intEntityId else @intVendorId end  
                                   ) t
                            ) AS DPCustomer
-
                      ,(
                            SELECT Sum(dblTotal)
                            FROM (
@@ -254,7 +269,7 @@ FROM (
 									JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and ysnStockUnit=1
 									JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId 
 									INNER JOIN tblSMCompanyLocation l on SCT.intProcessingLocationId=l.intCompanyLocationId
-									INNER JOIN tblEMEntity E on E.intEntityId=SCDS.intEntityId
+									INNER JOIN tblEMEntity E on E.intEntityId=SCD.intEntityId
 									LEFT JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = SCDS.intStorageScheduleTypeId AND GR.intStorageScheduleTypeId > 0
 									WHERE SCT.strTicketStatus = 'H' and isnull(SCT.intDeliverySheetId,0) <>0
 									AND SCT.intCommodityId = c.intCommodityId 
