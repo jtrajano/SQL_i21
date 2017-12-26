@@ -28,7 +28,8 @@ DECLARE @InventoryReceiptId INT
 		,@invalidCount AS INT
 		,@batchIdUsed AS NVARCHAR(100)
 		,@recapId AS INT
-		,@intInventoryTransferId AS INT;
+		,@intInventoryTransferId AS INT
+		,@InTransitTableType AS InTransitTableType;
 
 BEGIN TRY
 		
@@ -93,14 +94,43 @@ BEGIN TRY
 
 					EXEC [dbo].[uspICPostInventoryReceipt] 0, 0, @strTransactionId, @intUserId
 					EXEC [dbo].[uspSCReverseScheduleQty] @InventoryReceiptId, @intUserId
-					EXEC [dbo].[uspICDeleteInventoryReceipt] @InventoryReceiptId, @intUserId
 					EXEC [dbo].[uspGRReverseOnReceiptDelete] @InventoryReceiptId
+					EXEC [dbo].[uspICDeleteInventoryReceipt] @InventoryReceiptId, @intUserId
 
 					FETCH NEXT FROM intListCursor INTO @InventoryReceiptId , @strTransactionId;
 				END
 				CLOSE intListCursor  
 				DEALLOCATE intListCursor 
 				EXEC [dbo].[uspSCUpdateDeliverySheetStatus] @intDeliverySheetId, 1;
+
+				INSERT INTO @InTransitTableType (
+					[intItemId]
+					,[intItemLocationId]
+					,[intItemUOMId]
+					,[intLotId]
+					,[intSubLocationId]
+					,[intStorageLocationId]
+					,[dblQty]
+					,[intTransactionId]
+					,[strTransactionId]
+					,[intTransactionTypeId]
+				)
+				SELECT	[intItemId]				= SCD.intItemId
+						,[intItemLocationId]	= ICIL.intItemLocationId
+						,[intItemUOMId]			= UOM.intItemUOMId
+						,[intLotId]				= NULL
+						,[intSubLocationId]		= NULL
+						,[intStorageLocationId]	= NULL
+						,[dblQty]				= (SELECT SUM(dblNetUnits) FROM tblSCTicket WHERE intDeliverySheetId = @intDeliverySheetId AND strTicketStatus = 'H')
+						,[intTransactionId]		= @intDeliverySheetId
+						,[strTransactionId]		= SCD.strDeliverySheetNumber
+						,[intTransactionTypeId] = 1
+				FROM	tblSCDeliverySheet SCD 
+				INNER JOIN dbo.tblICItemLocation ICIL ON ICIL.intItemId = SCD.intItemId AND ICIL.intLocationId = SCD.intCompanyLocationId
+				INNER JOIN dbo.tblICItemUOM UOM ON UOM.intItemId = SCD.intItemId AND UOM.ysnStockUnit = 1
+				WHERE SCD.intDeliverySheetId = @intDeliverySheetId
+
+				EXEC dbo.uspICIncreaseInTransitInBoundQty @InTransitTableType;
 			END
 		ELSE
 			BEGIN
@@ -154,14 +184,43 @@ BEGIN TRY
 								EXEC [dbo].[uspARDeleteInvoice] @intInvoiceId, @intUserId
 							EXEC [dbo].[uspICPostInventoryShipment] 0, 0, @strTransactionId, @intUserId;
 							EXEC [dbo].[uspGRDeleteStorageHistory] @strSourceType = 'InventoryShipment' ,@IntSourceKey = @InventoryShipmentId
-							EXEC [dbo].[uspICDeleteInventoryShipment] @InventoryShipmentId, @intEntityId;
 							EXEC [dbo].[uspGRReverseTicketOpenBalance] 'InventoryShipment' , @InventoryShipmentId ,@intUserId;
+							EXEC [dbo].[uspICDeleteInventoryShipment] @InventoryShipmentId, @intEntityId;
 							DELETE tblQMTicketDiscount WHERE intTicketFileId = @InventoryShipmentId AND strSourceType = 'Inventory Shipment'
 							FETCH NEXT FROM intListCursor INTO @InventoryShipmentId, @strTransactionId;
 						END
 						CLOSE intListCursor  
 						DEALLOCATE intListCursor 
 						EXEC [dbo].[uspSCUpdateDeliverySheetStatus] @intDeliverySheetId, 1;
+
+						INSERT INTO @InTransitTableType (
+							[intItemId]
+							,[intItemLocationId]
+							,[intItemUOMId]
+							,[intLotId]
+							,[intSubLocationId]
+							,[intStorageLocationId]
+							,[dblQty]
+							,[intTransactionId]
+							,[strTransactionId]
+							,[intTransactionTypeId]
+						)
+						SELECT	[intItemId]				= SCD.intItemId
+								,[intItemLocationId]	= ICIL.intItemLocationId
+								,[intItemUOMId]			= UOM.intItemUOMId
+								,[intLotId]				= NULL
+								,[intSubLocationId]		= NULL
+								,[intStorageLocationId]	= NULL
+								,[dblQty]				= (SELECT SUM(dblNetUnits) FROM tblSCTicket WHERE intDeliverySheetId = @intDeliverySheetId AND strTicketStatus = 'H')
+								,[intTransactionId]		= @intDeliverySheetId
+								,[strTransactionId]		= SCD.strDeliverySheetNumber
+								,[intTransactionTypeId] = 1
+						FROM	tblSCDeliverySheet SCD 
+						INNER JOIN dbo.tblICItemLocation ICIL ON ICIL.intItemId = SCD.intItemId AND ICIL.intLocationId = SCD.intCompanyLocationId
+						INNER JOIN dbo.tblICItemUOM UOM ON UOM.intItemId = SCD.intItemId AND UOM.ysnStockUnit = 1
+						WHERE SCD.intDeliverySheetId = @intDeliverySheetId
+
+						EXEC dbo.uspICIncreaseInTransitOutBoundQty @InTransitTableType;
 					END
 			END
 		

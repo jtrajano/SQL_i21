@@ -1,12 +1,17 @@
 ﻿CREATE VIEW [dbo].[vyuSCTicketView]
 	AS select SCT.intTicketId,
-	   (CASE 
+	   (CASE
+			
 			WHEN SCT.strTicketStatus = 'O' THEN 'OPEN'
 			WHEN SCT.strTicketStatus = 'A' THEN 'PRINTED'
 			WHEN SCT.strTicketStatus = 'C' THEN 'COMPLETED'
 			WHEN SCT.strTicketStatus = 'V' THEN 'VOID'
 			WHEN SCT.strTicketStatus = 'R' THEN 'REOPENED'
-			WHEN SCT.strTicketStatus = 'H' THEN 'HOLD'
+			WHEN SCT.strTicketStatus = 'H'  THEN
+			CASE
+				wHEN SCT.ysnDeliverySheetPost = 1 THEN 'COMPLETED' 
+				ELSE 'HOLD'
+			END
 		END) AS strTicketStatusDescription
 	   ,SCT.strTicketStatus
        ,SCT.strTicketNumber
