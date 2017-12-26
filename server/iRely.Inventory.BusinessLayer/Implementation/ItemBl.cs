@@ -22,7 +22,19 @@ namespace iRely.Inventory.BusinessLayer
 
         private bool IsAccountExist(ICollection<tblICItemAccount> accounts, string accountCategory, string message, out string newMessage)
         {
-            var msg = message;
+            // If there is no item-account record, then return immediately. 
+            if (accounts == null) {
+                if (!string.IsNullOrEmpty(message))
+                {
+                    message += ", ";
+                }
+                message += accountCategory;
+
+                newMessage = message;
+                return false;
+            }
+
+            // Check if the account category exists in the item-account setup. 
             var category = accounts.FirstOrDefault(p=> p.strAccountCategory == accountCategory);
             if (category == null)
             {
@@ -49,7 +61,7 @@ namespace iRely.Inventory.BusinessLayer
                 case ValidateAction.Post:
                     foreach (tblICItem item in entities)
                     {
-                        if (item.intCategoryId == null && item.intCommodityId == null)
+                        if (item.intCategoryId == null)
                         {
                             var accounts = item.tblICItemAccounts;
                             switch (item.strType)
