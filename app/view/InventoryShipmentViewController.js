@@ -68,6 +68,12 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 value: '{current.strFreightTerm}',
                 origValueField: 'intFreightTermId',
                 store: '{freightTerm}',
+                defaultFilters: [
+                    {
+                        column: 'ysnActive',
+                        value: 'true'
+                    }
+                ],                
                 readOnly: '{current.ysnPosted}'
             },
             cboCurrency: {

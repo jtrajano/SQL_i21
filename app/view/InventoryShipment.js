@@ -362,12 +362,6 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         dataType: 'string',
                                                                         text: 'FOB Point',
                                                                         flex: 1
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'ysnActive',
-                                                                        dataType: 'boolean',
-                                                                        text: 'Active',
-                                                                        flex: 1
                                                                     }
                                                                 ],
                                                                 flex: 0.8,

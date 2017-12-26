@@ -1089,12 +1089,6 @@
                                                             "\t\tdataType: 'string',",
                                                             "\t\ttext: 'FOB Point',",
                                                             "\t\tflex: 1",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'ysnActive',",
-                                                            "\t\tdataType: 'boolean',",
-                                                            "\t\ttext: 'Active',",
-                                                            "\t\tflex: 1",
                                                             "\t}",
                                                             "]"
                                                         ],
