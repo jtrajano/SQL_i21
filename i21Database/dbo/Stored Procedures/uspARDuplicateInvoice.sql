@@ -109,7 +109,7 @@ SELECT
 	,@InvoiceOriginId				= ''	--[strInvoiceOriginId]
 	,@PONumber						= [strPONumber]
 	,@BOLNumber						= [strBOLNumber]
-	,@DeliverPickup					= [strDeliverPickup]
+	--,@DeliverPickup					= [strDeliverPickup]
 	,@Comments						= CASE WHEN [ysnRecurring] = 1 AND @ForRecurring = 1
 												THEN [strComments]
 										   WHEN @IsCancel = 1
@@ -340,7 +340,7 @@ BEGIN TRY
 		,@InvoiceOriginId						= @InvoiceOriginId
 		,@PONumber								= @PONumber
 		,@BOLNumber								= @BOLNumber
-		,@DeliverPickUp							= @DeliverPickup
+		--,@DeliverPickUp							= @DeliverPickup
 		,@Comment								= @Comments
 		,@ShipToLocationId						= @ShipToLocationId
 		,@BillToLocationId						= @BillToLocationId

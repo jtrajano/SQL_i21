@@ -116,7 +116,7 @@ BEGIN
 		,ysnSplitted
 		,dblSplitPercent 
 		,intFreightTermId
-		,strDeliverPickup 
+		--,strDeliverPickup 
 		,intShipToLocationId
 		,strShipToLocationName
 		,strShipToAddress
@@ -166,7 +166,7 @@ BEGIN
 		,CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN 1 ELSE 0 END
 		,CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN ISNULL(@dblSplitPercent,1) ELSE 1 END
 		,intFreightTermId
-		,strDeliverPickup 
+		--,strDeliverPickup 
 		,intShipToLocationId
 		,strShipToLocationName
 		,strShipToAddress
