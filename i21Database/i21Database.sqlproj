@@ -6028,6 +6028,7 @@
     <None Include="Scripts\Post-Deployment\PAT\4_UpdateRetiredStockNo.sql" />
     <Build Include="dbo\Functions\fnARGetDefaultCommentTable.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateCompanyLocationFreightTerm.sql" />
+	<Build Include="dbo\Stored Procedures\uspGLDeleteMultiAccounts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
