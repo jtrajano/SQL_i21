@@ -387,7 +387,7 @@ INSERT INTO @ChargesToAdjust
 )
 SELECT 
 	[intInventoryReceiptChargeId]	= rc.intInventoryReceiptChargeId
-	,[dblNewValue]					= B.dblCost
+	,[dblNewValue]					= B.dblCost - B.dblOldCost
 	,[dtmDate]						= A.dtmDate
 	,[intTransactionId]				= A.intBillId
 	,[intTransactionDetailId]		= B.intBillDetailId
@@ -401,7 +401,7 @@ INNER JOIN (tblICInventoryReceipt r
 		ON rc.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId
 WHERE	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 		AND B.intInventoryReceiptChargeId IS NOT NULL 
-		AND rc.ysnInventoryCost = 1 --create cost adjustment entries for Inventory only for inventory cost yes
+		-- AND rc.ysnInventoryCost = 1 --create cost adjustment entries for Inventory only for inventory cost yes
 		AND (rc.dblAmount <> B.dblCost OR ISNULL(NULLIF(rc.dblForexRate,0),1) <> B.dblRate)
 
 IF ISNULL(@post,0) = 1
