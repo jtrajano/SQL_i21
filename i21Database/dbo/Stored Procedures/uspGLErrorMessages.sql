@@ -55,3 +55,7 @@ EXEC sp_addmessage 60012,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 60013) EXEC sp_dropmessage 60013, 'us_english'	
 SET @strmessage = 'Foreign debit and credit amounts are not balanced.'
 EXEC sp_addmessage 60013,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 60014) EXEC sp_dropmessage 60014, 'us_english'	
+SET @strmessage = '%s is linked to an Origin Account which is not allowed to be deleted.'
+EXEC sp_addmessage 60014,11,@strmessage,'us_english','False'

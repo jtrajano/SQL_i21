@@ -6007,19 +6007,20 @@
     <Build Include="dbo\Functions\fnRKGetVariationMargin.sql" />
     <Build Include="dbo\Stored Procedures\uspARValidateItemLicense.sql" />
     <Build Include="dbo\Tables\tblCFImportTransactionLagging.sql" />
-     <Build Include="dbo\Views\vyuCFTopCardLockCustomer.sql" />
-     <Build Include="dbo\Stored Procedures\uspCFTopCardLockCustomerReport.sql" />
-     <Build Include="dbo\Tables\tblBBBuybackExcluded.sql" />
-         <Build Include="dbo\Views\vyuBBExcludedBuyback.sql" />
-         <Build Include="dbo\Views\vyuBBBuybackDetail.sql" />
-         <Build Include="dbo\Views\vyuBBOpenBuybackWithRate.sql" />
-         <Build Include="dbo\Stored Procedures\uspBBPostBuyback.sql" />
-          <Build Include="dbo\Views\vyuBBBuybackExport.sql" />
-          <Build Include="dbo\Stored Procedures\uspBBUnpostBuyback.sql" />
-          <Build Include="dbo\Views\vyuHDTicketWatcher.sql" />
-          <Build Include="dbo\Stored Procedures\uspSCProcessMemoToInvoice.sql" />
-          <Build Include="dbo\User Defined Types\TFInvoiceDetailTransaction.sql" />
-          <Build Include="dbo\User Defined Types\TFInventoryReceiptDetailTransaction.sql" />
+    <Build Include="dbo\Views\vyuCFTopCardLockCustomer.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFTopCardLockCustomerReport.sql" />
+    <Build Include="dbo\Tables\tblBBBuybackExcluded.sql" />
+    <Build Include="dbo\Views\vyuBBExcludedBuyback.sql" />
+    <Build Include="dbo\Views\vyuBBBuybackDetail.sql" />
+    <Build Include="dbo\Views\vyuBBOpenBuybackWithRate.sql" />
+    <Build Include="dbo\Stored Procedures\uspBBPostBuyback.sql" />
+    <Build Include="dbo\Views\vyuBBBuybackExport.sql" />
+    <Build Include="dbo\Stored Procedures\uspBBUnpostBuyback.sql" />
+    <Build Include="dbo\Views\vyuHDTicketWatcher.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCProcessMemoToInvoice.sql" />
+    <Build Include="dbo\User Defined Types\TFInvoiceDetailTransaction.sql" />
+    <Build Include="dbo\User Defined Types\TFInventoryReceiptDetailTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLErrorMessages.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
