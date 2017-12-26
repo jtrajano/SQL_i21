@@ -31,10 +31,16 @@ BEGIN
 
     EXEC uspDMAlterConstraint;
 
-    EXEC uspDMMergeEMTables
-		@remoteDB = @remoteDB;
+ --   EXEC uspDMMergeEMTables
+	--	@remoteDB = @remoteDB;
+
+	--EXEC uspDMMergeSMTables
+	--	@remoteDB = @remoteDB;
 
 	EXEC uspDMMergeSMTables
+		@remoteDB = @remoteDB;
+
+	EXEC uspDMMergeEMTables
 		@remoteDB = @remoteDB;
 
     EXEC uspDMMergeGRTables

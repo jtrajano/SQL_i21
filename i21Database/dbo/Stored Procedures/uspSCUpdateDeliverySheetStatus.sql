@@ -11,8 +11,6 @@ BEGIN
 	SET ANSI_WARNINGS OFF
 
 	CREATE TABLE #tmpSC(intTicketId INT)
-	DECLARE @intContractDetailId INT
-			,@intFromItemUOMId INT;
 
 	IF @status IS NOT NULL
 	BEGIN
@@ -23,15 +21,7 @@ BEGIN
 		FROM tblSCDeliverySheet A
 		WHERE A.intDeliverySheetId = @dsId
 
-		UPDATE tblSCTicket SET ysnDeliverySheetPost = 0 WHERE intDeliverySheetId = @dsId;
-		--SELECT @intContractDetailId = intContractId, @intFromItemUOMId = intItemUOMIdTo FROM tblSCTicket where intTicketId = @dsId
-
-		--UPDATE vyuCTContractDetailView set dblScheduleQty = (CT.dblScheduleQty - dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,CT.intItemUOMId,SC.dblScheduleQty))
-		--FROM vyuCTContractDetailView CT 
-		--LEFT JOIN tblSCTicketContractUsed SC ON SC.intContractDetailId = CT.intContractDetailId
-		--WHERE SC.intTicketId = @dsId AND SC.intContractDetailId != ISNULL(@intContractDetailId,0)
-
-		--DELETE FROM tblSCTicketContractUsed WHERE intTicketId = @dsId
+		UPDATE tblSCTicket SET strDistributionOption = 'HLD', intStorageScheduleTypeId = -5, ysnDeliverySheetPost = 0 WHERE intDeliverySheetId = @dsId;
 	END
 	ELSE
 	BEGIN

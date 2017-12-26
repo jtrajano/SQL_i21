@@ -484,6 +484,7 @@ BEGIN
 				,@GroupingOption	= @GroupingOption
 				,@UserId			= @UserId
 				,@RaiseError		= @RaiseError
+				,@BatchId			= @NewBathId
 				,@ErrorMessage		= @CurrentErrorMessage
 			
 	
@@ -1433,6 +1434,7 @@ BEGIN
 				,@IntegrationLogId	= @IntegrationLogId
 				,@UserId			= @UserId
 				,@RaiseError		= @RaiseError
+				,@BatchId			= @NewBathId
 				,@ErrorMessage		= @CurrentErrorMessage
 			
 	

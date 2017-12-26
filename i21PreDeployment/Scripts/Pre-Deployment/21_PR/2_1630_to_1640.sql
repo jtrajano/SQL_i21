@@ -7,7 +7,8 @@ GO
    Attempts to update null tblPREmployeeEarning.intPayGroupId with values from logical sources
 */
 IF EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intPayGroupId' AND OBJECT_ID = OBJECT_ID(N'tblPREmployeeEarning')) 
-AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intEntityEmployeeId' AND OBJECT_ID = OBJECT_ID(N'tblPREmployee')) 
+AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intEntityEmployeeId' AND OBJECT_ID = OBJECT_ID(N'tblPREmployee'))
+AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME IN (N'strPayGroup', N'intPayGroupId') AND OBJECT_ID = OBJECT_ID(N'tblPRPayGroup'))
 BEGIN
 
 --Try to use employee pay group with similar name or description as employee's pay period
@@ -36,7 +37,8 @@ EXEC('UPDATE tblPREmployeeEarning
 
 END
 ELSE IF EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intPayGroupId' AND OBJECT_ID = OBJECT_ID(N'tblPREmployeeEarning')) 
-AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intEntityId' AND OBJECT_ID = OBJECT_ID(N'tblPREmployee')) 
+AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intEntityId' AND OBJECT_ID = OBJECT_ID(N'tblPREmployee'))
+AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME IN (N'strPayGroup', N'intPayGroupId') AND OBJECT_ID = OBJECT_ID(N'tblPRPayGroup'))
 BEGIN
 
 --Try to use employee pay group with similar name or description as employee's pay period
