@@ -856,7 +856,7 @@ BEGIN
 				,[strInvoiceOriginId]
 				,[strPONumber]
 				,[strBOLNumber]
-				,[strDeliverPickup]
+				--,[strDeliverPickup]
 				,[strComments]
 				,[intShipToLocationId]
 				,[intBillToLocationId]

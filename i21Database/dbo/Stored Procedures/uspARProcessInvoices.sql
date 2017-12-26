@@ -340,7 +340,7 @@ BEGIN
 		,@UseOriginIdAsInvoiceNumber	= [ysnUseOriginIdAsInvoiceNumber]
 		,@PONumber						= [strPONumber]
 		,@BOLNumber						= [strBOLNumber]
-		,@DeliverPickup					= [strDeliverPickup]
+		--,@DeliverPickup					= [strDeliverPickup]
 		,@Comment						= [strComments]
 		,@ShipToLocationId				= [intShipToLocationId]
 		,@BillToLocationId				= [intBillToLocationId]
@@ -578,7 +578,7 @@ BEGIN
 			,@UseOriginIdAsInvoiceNumber	= @UseOriginIdAsInvoiceNumber
 			,@PONumber						= @PONumber
 			,@BOLNumber						= @BOLNumber
-			,@DeliverPickUp					= @DeliverPickup
+			--,@DeliverPickUp					= @DeliverPickup
 			,@Comment						= @Comment
 			,@ShipToLocationId				= @ShipToLocationId
 			,@BillToLocationId				= @BillToLocationId
@@ -1231,7 +1231,7 @@ BEGIN TRY
 			,@InvoiceOriginId				= [strInvoiceOriginId]
 			,@PONumber						= [strPONumber]
 			,@BOLNumber						= [strBOLNumber]
-			,@DeliverPickup					= [strDeliverPickup]
+			--,@DeliverPickup					= [strDeliverPickup]
 			,@Comment						= [strComments]
 			,@ShipToLocationId				= [intShipToLocationId]
 			,@BillToLocationId				= [intBillToLocationId]
@@ -1363,7 +1363,7 @@ BEGIN TRY
 			,[strInvoiceOriginId]		= @InvoiceOriginId
 			,[strPONumber]				= @PONumber
 			,[strBOLNumber]				= @BOLNumber
-			,[strDeliverPickup]			= @DeliverPickup
+			--,[strDeliverPickup]			= @DeliverPickup
 			,[strComments]				= @Comment
 			,[intShipToLocationId]		= ISNULL(@ShipToLocationId, ISNULL(SL1.[intEntityLocationId], EL.[intEntityLocationId]))
 			,[strShipToLocationName]	= ISNULL(SL.[strLocationName], ISNULL(SL1.[strLocationName], EL.[strLocationName]))

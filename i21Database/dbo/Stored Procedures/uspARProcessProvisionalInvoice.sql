@@ -64,7 +64,7 @@ SELECT
 	,@InvoiceOriginId		= [strInvoiceNumber]
 	,@PONumber				= [strPONumber]
 	,@BOLNumber				= [strBOLNumber]
-	,@DeliverPickup			= [strDeliverPickup]
+	--,@DeliverPickup			= [strDeliverPickup]
 	,@Comments				= [strComments]
 	,@ShipToLocationId		= [intShipToLocationId]
 	,@BillToLocationId		= [intBillToLocationId]
@@ -99,7 +99,7 @@ BEGIN TRY
 		,[strInvoiceOriginId]
 		,[strPONumber]
 		,[strBOLNumber]
-		,[strDeliverPickup]
+		--,[strDeliverPickup]
 		,[strComments]
 		,[intShipToLocationId]
 		,[intBillToLocationId]
@@ -193,7 +193,7 @@ BEGIN TRY
 		,[strInvoiceOriginId]				= @InvoiceNumber
 		,[strPONumber]						= @PONumber
 		,[strBOLNumber]						= @BOLNumber
-		,[strDeliverPickup]					= @DeliverPickup
+		--,[strDeliverPickup]					= @DeliverPickup
 		,[strComments]						= @Comments
 		,[intShipToLocationId]				= @ShipToLocationId
 		,[intBillToLocationId]				= @BillToLocationId
@@ -306,7 +306,7 @@ SELECT
 		,[strInvoiceOriginId]				= @InvoiceNumber
 		,[strPONumber]						= @PONumber
 		,[strBOLNumber]						= @BOLNumber
-		,[strDeliverPickup]					= @DeliverPickup
+		--,[strDeliverPickup]					= @DeliverPickup
 		,[strComments]						= @Comments
 		,[intShipToLocationId]				= @ShipToLocationId
 		,[intBillToLocationId]				= @BillToLocationId

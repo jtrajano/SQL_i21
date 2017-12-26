@@ -362,7 +362,7 @@ BEGIN TRY
 		,[strInvoiceOriginId]
 		,[strPONumber]
 		,[strBOLNumber]
-		,[strDeliverPickup]
+		--,[strDeliverPickup]
 		,[strComments]
 		,[strFooterComments]
 		,[intShipToLocationId]
@@ -433,7 +433,7 @@ BEGIN TRY
 		,[strInvoiceOriginId]			= @InvoiceOriginId
 		,[strPONumber]					= @PONumber
 		,[strBOLNumber]					= @BOLNumber
-		,[strDeliverPickup]				= @DeliverPickUp
+		--,[strDeliverPickup]				= @DeliverPickUp
 		,[strComments]					= CASE WHEN ISNULL(@Comment, '') = '' THEN dbo.fnARGetDefaultComment(@CompanyLocationId, C.[intEntityId], @TransactionType, @Type, 'Header', NULL, 0) ELSE @Comment END
 		,[strFooterComments]			= dbo.fnARGetDefaultComment(@CompanyLocationId, C.[intEntityId], @TransactionType, @Type, 'Footer', NULL, 0)
 		,[intShipToLocationId]			= ISNULL(@ShipToLocationId, ISNULL(SL1.[intEntityLocationId], EL.[intEntityLocationId]))

@@ -31,7 +31,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , dtmShipDate				= INV.dtmShipDate
 	 , dtmDueDate				= INV.dtmDueDate
 	 , strFreightTerm			= FREIGHT.strFreightTerm
-	 , strDeliverPickup			= INV.strDeliverPickup	 
+	 , strDeliverPickup			= FREIGHT.strFobPoint--INV.strDeliverPickup	 
 	 , strInvoiceHeaderComment	= ISNULL(Comments.strMessage, INV.strComments)
 	 , strInvoiceFooterComment	= INV.strFooterComments
 	 , dblInvoiceSubtotal		= CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(INV.dblInvoiceSubtotal, 0) * -1 ELSE ISNULL(INV.dblInvoiceSubtotal, 0) END
@@ -210,6 +210,7 @@ LEFT JOIN (
 LEFT JOIN (
 	SELECT intFreightTermId
 		 , strFreightTerm
+		 , strFobPoint
 	FROM dbo.tblSMFreightTerms WITH (NOLOCK)
 ) FREIGHT ON INV.intFreightTermId = FREIGHT.intFreightTermId
 LEFT JOIN (SELECT 
