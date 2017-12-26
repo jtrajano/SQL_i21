@@ -87,8 +87,8 @@ SET		rc.dblQuantity =
 			END 
 FROM	tblICInventoryReceiptCharge rc
 WHERE	ISNULL(rc.dblQuantity, 0) = 0 
-		AND rc.strCostMethod = 'Per Unit' 
-		AND rc.dblRate <> 0 
+		--AND rc.strCostMethod = 'Per Unit' 
+		--AND rc.dblRate <> 0 
 		AND rc.dblAmount <> 0 
 
 GO 
