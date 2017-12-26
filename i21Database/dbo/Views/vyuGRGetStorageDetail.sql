@@ -1,6 +1,7 @@
 CREATE VIEW [dbo].[vyuGRGetStorageDetail]
 AS
 SELECT 
+	a.intCustomerStorageId,
 	a.intCompanyLocationId	
 	,c.strLocationName [Loc]
 	,convert(datetime,CONVERT(VARCHAR(10),a.dtmDeliveryDate ,110),110) [Delivery Date]
