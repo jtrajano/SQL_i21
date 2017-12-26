@@ -36,3 +36,14 @@
 	CONSTRAINT [FK_tblCTPriceFixation_tblICCommodityUnitMeasure_intAgreedItemUOMId_intCommodityUnitMeasureId] FOREIGN KEY ([intAgreedItemUOMId]) REFERENCES [tblICCommodityUnitMeasure]([intCommodityUnitMeasureId]),
 	CONSTRAINT [FK_tblCTPriceFixation_tblICCommodityUnitMeasure_intFinalPriceUOMId_intCommodityUnitMeasureId] FOREIGN KEY ([intFinalPriceUOMId]) REFERENCES [tblICCommodityUnitMeasure]([intCommodityUnitMeasureId])
 )
+
+GO
+
+CREATE NONCLUSTERED INDEX [_dta_index_tblCTPriceFixation_197_13243102__K4_5_9_10] ON [dbo].[tblCTPriceFixation]
+(
+       [intContractHeaderId] ASC
+)
+INCLUDE (     [intContractDetailId],
+       [dblTotalLots],
+       [dblLotsFixed]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+go

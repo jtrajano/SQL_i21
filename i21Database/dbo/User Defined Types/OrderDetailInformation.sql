@@ -8,7 +8,7 @@
 	,[intWeightUOMId]					INT
 	,[dblWeightPerUnit]					NUMERIC(18, 6)
 	,[intWeightPerUnitUOMId]			INT
-	,[dblRequiredQty]						NUMERIC(18, 6)
+	,[dblRequiredQty]					NUMERIC(18, 6)
 	,[intLotId]							INT
 	,[strLotAlias]						NVARCHAR(100)
 	,[intUnitsPerLayer]					INT
@@ -19,4 +19,5 @@
 	,[intSanitizationOrderDetailsId]	INT
 	,[strLineItemNote]					NVARCHAR(MAX)
 	,intStagingLocationId				int
-	,[strLastUpdateBy]					NVARCHAR(100))
+	,[strLastUpdateBy]					NVARCHAR(100)
+	,dblSurplusQtyInStageLocation		NUMERIC(18, 6))

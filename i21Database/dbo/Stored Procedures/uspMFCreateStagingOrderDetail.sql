@@ -52,6 +52,7 @@ BEGIN TRY
 		,dtmCreatedOn
 		,intLastUpdateById
 		,dtmLastUpdateOn
+		,dblSurplusQtyInStageLocation
 		)
 	SELECT 1
 		,intOrderHeaderId
@@ -76,6 +77,7 @@ BEGIN TRY
 		,GETDATE()
 		,@intLastUpdateById
 		,GETDATE()
+		,dblSurplusQtyInStageLocation
 	FROM @OrderDetailInformation
 
 	SELECT @intOrderDetailId = SCOPE_IDENTITY()

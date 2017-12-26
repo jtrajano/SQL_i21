@@ -462,7 +462,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 						@intNoOfPeriods		= CASE WHEN (agcus_budget_beg_mm < agcus_budget_end_mm) THEN (agcus_budget_end_mm -agcus_budget_beg_mm) + 1
 												   WHEN (agcus_budget_beg_mm > agcus_budget_end_mm) THEN ((13 - agcus_budget_beg_mm) + agcus_budget_end_mm)
 												   ELSE 0 END, 
-						@dtmBudgetBeginDate =  CONVERT(DATE, CAST(YEAR(getdate()) AS CHAR(4))+RIGHT(''00''+RTRIM(CAST(agcus_budget_beg_mm AS CHAR(2))),2)+''01'' , 112)
+						@dtmBudgetBeginDate =  CONVERT(DATE, CAST(YEAR(getdate()) AS CHAR(4))+RIGHT(''00''+RTRIM(CAST(agcus_budget_beg_mm AS CHAR(2))),2)+''01'' , 112),
 						@OriginCurrency 			= agcus_dflt_currency,
 						--Grain Tab
 						@strDPAContract = agcus_dpa_cnt,				

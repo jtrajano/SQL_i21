@@ -331,7 +331,6 @@ END
 			EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intEntityId;
 			SELECT @dblNetUnits = SUM(dblQty) FROM @ItemsForItemReceipt
 			EXEC dbo.uspSCProcessHoldTicket @intDeliverySheetId,@intEntityId, @dblNetUnits , @intUserId, 'I', 0, 1
-			UPDATE tblSCTicket SET ysnDeliverySheetPost = 1 WHERE intDeliverySheetId = @intDeliverySheetId;
 			--VOUCHER intergration
 			CREATE TABLE #tmpItemReceiptIds (
 				[intInventoryReceiptItemId] [INT] PRIMARY KEY,

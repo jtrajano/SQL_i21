@@ -802,13 +802,14 @@ BEGIN TRY
 
 		DELETE FROM @tmpInvoiceTransaction
 		DELETE FROM @tmpRC WHERE intReportingComponentId = @RCId
-	END
 
-	EXEC uspTFProcessBeforePreview @Guid = @Guid
+		EXEC uspTFProcessBeforePreview @Guid = @Guid
 		, @ReportingComponentId = @ReportingComponentId
 		, @DateFrom = @DateFrom
 		, @DateTo = @DateTo
-		
+
+	END
+
 END TRY
 BEGIN CATCH
 	SELECT 

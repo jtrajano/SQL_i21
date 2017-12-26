@@ -50,7 +50,7 @@ BEGIN
 
 		EXEC [dbo].[uspSOInsertTransactionDetail] @intSalesOrderId
 
-		EXEC dbo.uspSOUpdateOrderShipmentStatus @intSalesOrderId, 0, @isDelete
+		EXEC dbo.uspSOUpdateOrderShipmentStatus @intTransactionId, 'Inventory', @isDelete
 
 		EXEC dbo.[uspSOUpdateCommitted] @intSalesOrderId, @ysnPost ,@qtyToPost
 

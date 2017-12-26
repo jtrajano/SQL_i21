@@ -361,7 +361,7 @@ SELECT * FROM #tmpForeignTransactionId
 
 	DROP TABLE #tmpTransactionId
 		
-	BEGIN TRANSACTION
+	--BEGIN TRANSACTION
 
 
 --	Foreign Sale
@@ -412,12 +412,12 @@ SELECT * FROM #tmpForeignTransactionId
 
 	SET @SuccessfulCount = 0;
 
-	SELECT intInvoiceId, intSourceId  INTO #tmpCreatedInvoice FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @LogId AND ISNULL(ysnSuccess,0) = 1 AND ISNULL(ysnHeader,0) = 1 AND ISNULL(ysnPosted,0) = 1
+	SELECT DISTINCT intInvoiceId, intSourceId, ysnPosted  INTO #tmpCreatedInvoice FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @LogId AND ISNULL(ysnSuccess,0) = 1 AND ISNULL(ysnHeader,0) = 1 --AND ISNULL(ysnPosted,0) = 1
 
-	SELECT @SuccessfulCount = ISNULL(Count(*),0) FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @LogId AND ISNULL(ysnSuccess,0) = 1 AND ISNULL(ysnHeader,0) = 1 AND ISNULL(ysnPosted,0) = 1 --#tmpCreatedInvoice
-		
-	IF ((@ErrorMessage IS NULL OR @ErrorMessage = '') AND @SuccessfulCount > 0)
-		BEGIN
+	SELECT @SuccessfulCount = Count(intInvoiceId) FROM #tmpCreatedInvoice WHERE ISNULL(ysnPosted,0) = 1
+
+	--IF ((@ErrorMessage IS NULL OR @ErrorMessage = '') AND @SuccessfulCount > 0)
+	--	BEGIN
 
 			IF ((@Recap = 0 OR @Recap IS NULL) AND (@Post = 1))
 			BEGIN
@@ -430,7 +430,8 @@ SELECT * FROM #tmpForeignTransactionId
 					tblCFTransaction CFTran
 				INNER JOIN
 					#tmpCreatedInvoice ARL
-						ON CFTran.intTransactionId = ARL.intSourceId 
+						ON CFTran.intTransactionId = ARL.intSourceId
+						AND ARL.ysnPosted = 1
 
 				IF (@Post = 1)
 				BEGIN
@@ -445,6 +446,7 @@ SELECT * FROM #tmpForeignTransactionId
 							INNER JOIN
 								#tmpCreatedInvoice ARL
 									ON CFTran.intTransactionId = ARL.intSourceId 
+									AND ARL.ysnPosted = 1
 								GROUP BY  CFTran.intCardId
 						) CFT
 							ON CFC.intCardId = CFT.intCardId					
@@ -478,27 +480,27 @@ SELECT * FROM #tmpForeignTransactionId
 				FROM
 					tblCFTransaction CFTran
 				INNER JOIN
-					(SELECT intInvoiceId, intSourceId FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @LogId AND ISNULL(ysnSuccess,0) = 1 AND ysnHeader = 1) ARL
+					#tmpCreatedInvoice ARL
 						ON CFTran.intTransactionId = ARL.intSourceId 
 			END
 
 		--TRANSACTION COUNT + FOREIGN TRANSACTION COUNT (ysnPostForeignTrans = 0)
 		SET @SuccessfulCount = @SuccessfulCount + @intForeignTransCount
 
-		COMMIT TRANSACTION
-	END
-	ELSE
-		BEGIN
-			IF(@intForeignTransCount > 0)
-			BEGIN
-				SET @SuccessfulCount = @SuccessfulCount + @intForeignTransCount
-				COMMIT TRANSACTION
-			END
-			ELSE
-			BEGIN
-				ROLLBACK TRANSACTION
-			END
-		END
+		--COMMIT TRANSACTION
+	--END
+	--ELSE
+	--	BEGIN
+	--		IF(@intForeignTransCount > 0)
+	--		BEGIN
+	--			SET @SuccessfulCount = @SuccessfulCount + @intForeignTransCount
+	--			COMMIT TRANSACTION
+	--		END
+	--		ELSE
+	--		BEGIN
+	--			ROLLBACK TRANSACTION
+	--		END
+	--	END
 
 	IF OBJECT_ID('tempdb..#tmpCreatedInvoice') IS NOT NULL DROP TABLE #tmpCreatedInvoice
 	IF OBJECT_ID('tempdb..##tmpForeignTransactionId') IS NOT NULL DROP TABLE #tmpForeignTransactionId

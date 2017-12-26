@@ -37,9 +37,13 @@ BEGIN TRY
 		,@dblOldDestinationQty NUMERIC(38, 20)
 		,@dblOldSourceQty NUMERIC(38, 20)
 		,@intNewLotId INT
-		,@dblDefaultResidueQty NUMERIC(38,20)
+		,@dblDefaultResidueQty NUMERIC(38, 20)
+		,@intParentLotId INT
+		,@strParentLotNumber NVARCHAR(50)
+		,@intCategoryId int
 
-		SELECT TOP 1 @dblDefaultResidueQty=ISNULL(dblDefaultResidueQty,0.00001) FROM tblMFCompanyPreference
+	SELECT TOP 1 @dblDefaultResidueQty = ISNULL(dblDefaultResidueQty, 0.00001)
+	FROM tblMFCompanyPreference
 
 	SELECT @intNewLocationId = intCompanyLocationId
 	FROM tblSMCompanyLocationSubLocation
@@ -104,6 +108,7 @@ BEGIN TRY
 	END
 
 	SELECT @strLotTracking = strLotTracking
+			,@intCategoryId = intCategoryId
 	FROM dbo.tblICItem
 	WHERE intItemId = @intItemId
 
@@ -129,18 +134,35 @@ BEGIN TRY
 			OR @strNewLotNumber IS NULL
 			)
 	BEGIN
-		IF (@strLotTracking = 'Yes - Serial Number')
+		IF (@strLotTracking = 'Yes - Manual')
 		BEGIN
-			EXEC dbo.uspSMGetStartingNumber 24
-				,@strNewLotNumber OUTPUT
-		END
-		ELSE
-		BEGIN
+			SET @strNewLotNumber = 'Split Lot Serial Number'
+
 			RAISERROR (
 					'Lot tracking for the item is set as manual. Please supply the split lot number.'
 					,11
 					,1
 					)
+		END
+		ELSE
+		BEGIN
+			SELECT @strParentLotNumber = strParentLotNumber
+			FROM tblICParentLot
+			WHERE intParentLotId = @intParentLotId
+
+			EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+				,@intItemId = @intItemId
+				,@intManufacturingId = NULL
+				,@intSubLocationId = @intSubLocationId
+				,@intLocationId = @intLocationId
+				,@intOrderTypeId = NULL
+				,@intBlendRequirementId = NULL
+				,@intPatternCode = 24
+				,@ysnProposed = 0
+				,@strPatternString = @strNewLotNumber OUTPUT
+				,@intShiftId = NULL
+				,@dtmDate = @dtmDate
+				,@strParentLotNumber = @strParentLotNumber
 		END
 	END
 
@@ -169,8 +191,9 @@ BEGIN TRY
 		,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
 
 	SELECT TOP 1 @strSplitLotNumber = strLotNumber
-				,@intNewLotId = intLotId
-	FROM tblICLot ORDER BY intLotId DESC
+		,@intNewLotId = intLotId
+	FROM tblICLot
+	ORDER BY intLotId DESC
 
 	SELECT @strSplitLotNumber AS strSplitLotNumber
 

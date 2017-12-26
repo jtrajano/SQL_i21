@@ -5975,6 +5975,7 @@
     <Build Include="dbo\Stored Procedures\uspSCProcessMemoToInvoice.sql" />
     <Build Include="dbo\User Defined Types\TFInvoiceDetailTransaction.sql" />
     <Build Include="dbo\User Defined Types\TFInventoryReceiptDetailTransaction.sql" />
+    <Build Include="dbo\Views\vyuGRSettlementSummaryReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

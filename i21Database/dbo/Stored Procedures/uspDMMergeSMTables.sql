@@ -35,4 +35,21 @@ BEGIN
     SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
     EXECUTE sp_executesql @SQLString;
 
+	--tblSMFreightTerms
+    SET @SQLString = N'MERGE tblSMFreightTerms AS Target
+        USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSMFreightTerms]) AS Source
+        ON (Target.intFreightTermId = Source.intFreightTermId)
+        WHEN MATCHED THEN
+            UPDATE SET Target.strFreightTerm = Source.strFreightTerm, Target.strFobPoint = Source.strFobPoint ,Target.ysnActive = Source.ysnActive, Target.intConcurrencyId = Source.intConcurrencyId
+        WHEN NOT MATCHED BY TARGET THEN
+	       INSERT (intFreightTermId, strFreightTerm, strFobPoint, ysnActive, intConcurrencyId)
+		   VALUES (Source.intFreightTermId, Source.strFreightTerm, Source.strFobPoint, Source.ysnActive, Source.intConcurrencyId) 
+	    WHEN NOT MATCHED BY SOURCE THEN
+            DELETE;';
+
+     SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+	 SET IDENTITY_INSERT tblSMFreightTerms ON
+	 EXECUTE sp_executesql @SQLString;
+	 SET IDENTITY_INSERT tblSMFreightTerms OFF
+
 END

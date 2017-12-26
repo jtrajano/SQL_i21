@@ -160,6 +160,16 @@ SELECT * FROM [fnAPValidatePrepay](@prepayIds, @post, @userId)
 
 SET @totalInvalid = (SELECT COUNT(*) FROM #tmpPayableInvalidData)
 
+--OVERIDE THE INVALID TRANSACTION COUNT TO HANDLE VOIDED RECAP VIEWING
+DECLARE @totalVoided INT
+SELECT @totalVoided = COUNT(*) FROM tblAPPayment B 
+INNER JOIN tblCMBankTransaction C ON B.strPaymentRecordNum = C.strTransactionId
+WHERE intPaymentId IN (SELECT intId FROM @payments) AND C.ysnCheckVoid = 1
+IF(@recap = 1 AND @totalVoided = 1)
+BEGIN
+	SET @totalInvalid = 0
+END
+
 IF(@totalInvalid > 0)
 BEGIN
 
