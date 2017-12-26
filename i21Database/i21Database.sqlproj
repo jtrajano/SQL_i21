@@ -6006,6 +6006,20 @@
     <Build Include="dbo\Views\vyuCTProjectedCommission.sql" />
     <Build Include="dbo\Functions\fnRKGetVariationMargin.sql" />
     <Build Include="dbo\Stored Procedures\uspARValidateItemLicense.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionLagging.sql" />
+     <Build Include="dbo\Views\vyuCFTopCardLockCustomer.sql" />
+     <Build Include="dbo\Stored Procedures\uspCFTopCardLockCustomerReport.sql" />
+     <Build Include="dbo\Tables\tblBBBuybackExcluded.sql" />
+         <Build Include="dbo\Views\vyuBBExcludedBuyback.sql" />
+         <Build Include="dbo\Views\vyuBBBuybackDetail.sql" />
+         <Build Include="dbo\Views\vyuBBOpenBuybackWithRate.sql" />
+         <Build Include="dbo\Stored Procedures\uspBBPostBuyback.sql" />
+          <Build Include="dbo\Views\vyuBBBuybackExport.sql" />
+          <Build Include="dbo\Stored Procedures\uspBBUnpostBuyback.sql" />
+          <Build Include="dbo\Views\vyuHDTicketWatcher.sql" />
+          <Build Include="dbo\Stored Procedures\uspSCProcessMemoToInvoice.sql" />
+          <Build Include="dbo\User Defined Types\TFInvoiceDetailTransaction.sql" />
+          <Build Include="dbo\User Defined Types\TFInventoryReceiptDetailTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -6163,6 +6177,9 @@
     <None Include="Scripts\Post-Deployment\MF\CBIPattern.sql" />
     <None Include="Scripts\Post-Deployment\AP\DeleteInvalidBasisAdvanceStaging.sql" />
     <None Include="Scripts\Post-Deployment\MF\10_HandheldMenuItem.sql" />
+    <Build Include="dbo\Functions\fnAP1099EFileDIVPayee.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreate1099DIVFile.sql" />
+    <Build Include="dbo\Functions\fnAP1099EFileEndOfDIV.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

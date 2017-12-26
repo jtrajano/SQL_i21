@@ -44,5 +44,7 @@ BEGIN
 	-- End duplication of Consignment Rate Detail table --
 	------------------------------------------------------
 
+	select @NewConsignmentRateId;
+
 END
 GO

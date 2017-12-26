@@ -128,6 +128,7 @@
     [ysnPrintTimeOnInvoices]       BIT             NULL,
     [ysnPrintTimeOnReports]        BIT             NULL,
     [ysnInvalid]                   BIT             NULL,
+    [ysnPostedCSV]                 BIT             NULL,
     [ysnPosted]                    BIT             NULL,
     [ysnIncludeInQuantityDiscount] BIT             NULL,
     [ysnAllowEFT]                  BIT             NULL,
@@ -139,6 +140,8 @@
     [ysnSummaryByDeptVehicleProd]  BIT             NULL,
     [ysnDepartmentGrouping]        BIT             NULL
 );
+
+
 
 
 

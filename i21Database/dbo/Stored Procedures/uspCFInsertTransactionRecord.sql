@@ -4,6 +4,8 @@ CREATE PROCEDURE [dbo].[uspCFInsertTransactionRecord]
 	 @strGUID						NVARCHAR(MAX)
 	,@strProcessDate				NVARCHAR(MAX)
 	,@strPostedDate					NVARCHAR(MAX)
+	,@strCreatedDate				NVARCHAR(MAX)
+	,@strLaggingDate				NVARCHAR(MAX)
 	,@strCardId						NVARCHAR(MAX)
 	,@strVehicleId					NVARCHAR(MAX)
 	,@strProductId					NVARCHAR(MAX)
@@ -181,6 +183,8 @@ BEGIN
 	DECLARE @intNetworkLocation			INT = 0
 	DECLARE @intDupTransCount			INT = 0
 	DECLARE @ysnDuplicate				BIT = 0
+
+	DECLARE @ysnOnHold					BIT = 0
 	  
 	------------------------------------------------------------
 
@@ -321,10 +325,18 @@ BEGIN
 		-----------ORIGINAL GROSS PRICE-------
 
 
+		--TAX PERCENTAGE CONVERSION--
+		SET @StateSalesTaxPercentageRate   = @StateSalesTaxPercentageRate  * 100
+		SET @CountySalesTaxPercentageRate  = @CountySalesTaxPercentageRate * 100
+		SET @CitySalesTaxPercentageRate    = @CitySalesTaxPercentageRate   * 100
+		SET @OtherSalesTaxPercentageRate   = @OtherSalesTaxPercentageRate  * 100
+		--TAX PERCENTAGE CONVERSION--
+
+
 	END
 	ELSE IF (@strNetworkType = 'Voyager')
 	BEGIN 
-		SET @strTransactionType = 'Local/Network'
+		SET @strTransactionType = 'Extended Remote'
 	END
 	ELSE IF (@strNetworkType = 'CFN')
 	BEGIN
@@ -344,6 +356,23 @@ BEGIN
 		BEGIN
 			SET @strTransactionType = 'Extended Remote'
 		END
+
+		--TAXES--
+		IF(ISNULL(@dblQuantity,0) != 0)
+		BEGIN
+			SET @TaxValue1	= ISNULL(@TaxValue1,0)  / ISNULL(@dblQuantity,0)					
+			SET @TaxValue2	= ISNULL(@TaxValue2,0)  / ISNULL(@dblQuantity,0)					
+			SET @TaxValue3	= ISNULL(@TaxValue3,0)  / ISNULL(@dblQuantity,0)					
+			SET @TaxValue4	= ISNULL(@TaxValue4,0)  / ISNULL(@dblQuantity,0)					
+			SET @TaxValue5	= ISNULL(@TaxValue5,0)  / ISNULL(@dblQuantity,0)					
+			SET @TaxValue6	= ISNULL(@TaxValue6,0)  / ISNULL(@dblQuantity,0)					
+			SET @TaxValue7	= ISNULL(@TaxValue7,0)  / ISNULL(@dblQuantity,0)					
+			SET @TaxValue8	= ISNULL(@TaxValue8,0)  / ISNULL(@dblQuantity,0)					
+			SET @TaxValue9	= ISNULL(@TaxValue9,0)  / ISNULL(@dblQuantity,0)					
+			SET @TaxValue10	= ISNULL(@TaxValue10,0) / ISNULL(@dblQuantity,0)		
+		END					
+
+
 	END
 
 
@@ -897,10 +926,10 @@ BEGIN
 		BEGIN
 			SET @ysnInvalid = 1
 		END
-		IF(@intPrcItemUOMId = 0 OR @intPrcItemUOMId IS NULL)
-		BEGIN
-			SET @ysnInvalid = 1
-		END
+		--IF(@intPrcItemUOMId = 0 OR @intPrcItemUOMId IS NULL)
+		--BEGIN
+		--	SET @ysnInvalid = 1
+		--END
 		IF(@intNetworkId = 0 OR @intNetworkId IS NULL)
 		BEGIN
 			SET @intNetworkId = NULL
@@ -931,8 +960,19 @@ BEGIN
 				SET @ysnInvalid = 1
 			END
 		END
-
 		
+		----------POSTED DATE----------
+		SELECT @strLaggingDate
+
+		IF (@dtmTransactionDate <= @strLaggingDate)
+		BEGIN
+			SET @strPostedDate = @strPostedDate
+		END
+		ELSE
+		BEGIN
+			SET @strPostedDate = @dtmTransactionDate
+		END
+		----------POSTED DATE----------
 
 		---- DUPLICATE CHECK -- 
 		--SELECT @intDupTransCount = COUNT(*)
@@ -966,7 +1006,8 @@ BEGIN
 			,[intContractId]				
 			,[dblQuantity]				
 			,[dtmBillingDate]			
-			,[dtmPostedDate]
+			,[dtmPostedDate]		
+			,[dtmCreatedDate]
 			,[dtmTransactionDate]		
 			,[intTransTime]				
 			,[strSequenceNumber]		
@@ -999,6 +1040,7 @@ BEGIN
 			,[intOverFilledTransactionId]
 			,[dtmInvoiceDate]
 			,[strInvoiceReportNumber]
+			,[ysnOnHold]
 		)
 		VALUES
 		(
@@ -1013,6 +1055,7 @@ BEGIN
 			,@dblQuantity				
 			,@dtmBillingDate		
 			,@strPostedDate	
+			,@strCreatedDate
 			,@dtmTransactionDate		
 			,@intTransTime				
 			,@strSequenceNumber	
@@ -1045,6 +1088,7 @@ BEGIN
 			,@intOverFilledTransactionId
 			,@dtmInvoiceDate
 			,@strInvoiceReportNumber
+			,@ysnOnHold
 		)			
 	
 		DECLARE @Pk	INT		
@@ -1076,13 +1120,13 @@ BEGIN
 			
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Invalid location for site ' + @strSiteId)
 		END
-		IF(@intPrcItemUOMId = 0 OR @intPrcItemUOMId IS NULL)
-		BEGIN
-			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
-			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Invalid UOM for product number ' + @strProductId)
+		--IF(@intPrcItemUOMId = 0 OR @intPrcItemUOMId IS NULL)
+		--BEGIN
+		--	INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+		--	VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Invalid UOM for product number ' + @strProductId)
 			
-			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Invalid UOM for product number ' + @strProductId)
-		END
+		--	INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Invalid UOM for product number ' + @strProductId)
+		--END
 		IF(@intNetworkId = 0 OR @intNetworkId IS NULL)
 		BEGIN
 			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)

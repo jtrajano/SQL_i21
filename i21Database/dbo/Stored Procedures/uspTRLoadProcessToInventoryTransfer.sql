@@ -16,51 +16,40 @@ DECLARE @ErrorMessage NVARCHAR(4000);
 DECLARE @ErrorSeverity INT;
 DECLARE @ErrorState INT;
 DECLARE @InventoryReceiptId AS INT; 
-DECLARE @ErrMsg                    NVARCHAR(MAX);
- IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddInventoryTransferResult'))
-    BEGIN
-        CREATE TABLE #tmpAddInventoryTransferResult (
-            intSourceId INT
-            ,intInventoryTransferId INT
-        )
-    END
+DECLARE @ErrMsg NVARCHAR(MAX);
 
-BEGIN TRY
-DECLARE @TransferEntries AS InventoryTransferStagingTable,
-        @total as int;
-       
-if @ysnPostOrUnPost = 0 and @ysnRecap = 0
+IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddInventoryTransferResult'))
 BEGIN
-     INSERT  INTO #tmpAddInventoryTransferResult
-    SELECT TR.intInventoryReceiptId,intInventoryTransferId FROM	tblTRLoadHeader TL 
-	        JOIN tblTRLoadReceipt TR 
-				ON TR.intLoadHeaderId = TL.intLoadHeaderId	
-			JOIN tblTRLoadDistributionHeader DH 
-				ON TL.intLoadHeaderId = DH.intLoadHeaderId		
-			JOIN tblTRLoadDistributionDetail DD 
-				ON DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId		
-            LEFT JOIN vyuICGetItemStock IC
-			    ON IC.intItemId = TR.intItemId and IC.intLocationId = TR.intCompanyLocationId         			
-    WHERE	TL.intLoadHeaderId = @intLoadHeaderId
-	        AND IC.strType != 'Non-Inventory' 
-			AND ((TR.strOrigin = 'Location' AND DH.strDestination = 'Location') 
-			or (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Location' and TR.intCompanyLocationId != DH.intCompanyLocationId)
-			or (TR.strOrigin = 'Location' AND DH.strDestination = 'Customer' and TR.intCompanyLocationId != DH.intCompanyLocationId)
-			or (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Customer' and TR.intCompanyLocationId != DH.intCompanyLocationId))
-			AND ISNULL(intInventoryTransferId, '') <> ''
-	
-	SELECT @total = COUNT(*) FROM #tmpAddInventoryTransferResult;
-    IF (@total = 0)
-	   BEGIN
-	     RETURN;
-	   END
-	ELSE
-	    BEGIN
-        	GOTO _PostOrUnPost;
-		END
+	CREATE TABLE #tmpAddInventoryTransferResult (intSourceId INT
+		, intInventoryTransferId INT)
 END
 
--- Insert the data needed to create the inventory transfer.
+BEGIN TRY
+	DECLARE @TransferEntries AS InventoryTransferStagingTable,
+			@total as int;
+       
+	IF @ysnPostOrUnPost = 0 AND @ysnRecap = 0
+	BEGIN
+		INSERT INTO #tmpAddInventoryTransferResult
+		SELECT DISTINCT Header.intInventoryTransferId, Header.intInventoryTransferId
+		FROM tblICInventoryTransfer Header
+		LEFT JOIN tblICInventoryTransferDetail Detail ON Detail.intInventoryTransferId = Header.intInventoryTransferId
+		WHERE Header.intSourceType = 3
+			AND intSourceId IN (SELECT intLoadReceiptId FROM tblTRLoadReceipt WHERE intLoadHeaderId = @intLoadHeaderId)
+
+	
+		SELECT @total = COUNT(*) FROM #tmpAddInventoryTransferResult;
+		IF (@total = 0)
+		   BEGIN
+			 RETURN;
+		   END
+		ELSE
+			BEGIN
+        		GOTO _PostOrUnPost;
+			END
+	END
+
+	-- Insert the data needed to create the inventory transfer.
     INSERT INTO @TransferEntries (
         [dtmTransferDate]
         ,[strTransferType]
@@ -187,7 +176,7 @@ END
 		,[intItemId]                = MIN(TR.intItemId)
 		,[intLotId]                 = NULL
 		,[intItemUOMId]             = MIN(ItemUOM.intItemUOMId)
-		,[dblQuantityToTransfer]    = SUM(CASE WHEN SP.strGrossOrNet = 'Gross' THEN TR.dblGross ELSE TR.dblNet END)
+		,[dblQuantityToTransfer]    = SUM(Blend.dblQuantity)
 		,[strNewLotId]              = NULL
 		,[intFromSubLocationId]     = NULL
 		,[intToSubLocationId]       = NULL

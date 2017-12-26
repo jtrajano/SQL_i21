@@ -37,6 +37,7 @@
 	,@ItemStorageScheduleTypeId		INT				= NULL
 	,@ItemDestinationGradeId		INT				= NULL
 	,@ItemDestinationWeightId		INT				= NULL
+	,@ItemTicketId					INT				= NULL
 	,@ItemBOLNumber					NVARCHAR(100)	= NULL
 AS
 
@@ -223,7 +224,7 @@ BEGIN TRY
 		,[intContractDetailId]				= NULL
 		,[intShipmentId]					= NULL
 		,[intShipmentPurchaseSalesContractId] =	NULL 
-		,[intTicketId]						= NULL
+		,[intTicketId]						= @ItemTicketId
 		,[intTicketHoursWorkedId]			= NULL 
 		,[intSiteId]						= NULL
 		,[strBillingBy]						= NULL

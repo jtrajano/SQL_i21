@@ -113,7 +113,11 @@ SELECT
 										WHEN ISNULL(CNT.intContractDetailId,0) > 0 THEN CNT.intCurrencyId
 									END
 		,intLocationId				= SCD.intCompanyLocationId
-		,intShipFromId				= (select top 1 intShipFromId from tblAPVendor where intEntityId = @intEntityId)
+		,intShipFromId				= CASE 
+										WHEN ISNULL((SELECT TOP 1 intShipFromId from tblAPVendor where intEntityId = @intEntityId), 0) > 0
+										THEN (SELECT TOP 1 intShipFromId from tblAPVendor where intEntityId = @intEntityId)
+										ELSE (SELECT top 1 intEntityLocationId from tblEMEntityLocation where intEntityId = @intEntityId AND ysnDefaultLocation = 1)
+									END
 		,intShipViaId				= NULL
 		,intDiscountSchedule		= SCD.intDiscountId
 		,strVendorRefNo				= 'DS-' + SCD.strDeliverySheetNumber

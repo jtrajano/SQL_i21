@@ -63,12 +63,12 @@ BEGIN
 		SET @ysnHasError = 1
 	END
 
-	IF(@strSite = NULL OR @strSite = '')
-	BEGIN
-		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
-		VALUES (@strSite,'Site number is required')
-		SET @ysnHasError = 1
-	END
+	--IF(@strSite = NULL OR @strSite = '')
+	--BEGIN
+	--	INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+	--	VALUES (@strSite,'Site number is required')
+	--	SET @ysnHasError = 1
+	--END
 	---------------------------------------------------------
 
 	IF(@ysnHasError = 1)
@@ -108,18 +108,23 @@ BEGIN
 
 			IF (ISNULL(@intSiteId,0) = 0)
 			BEGIN
-				INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
-				VALUES (@strItemCode,'Unable to find match for '+ @strSite +' on site list')
-				SET @ysnHasError = 1
+				IF(ISNULL(@strSite,'') != '')
+				BEGIN
+					INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+					VALUES (@strItemCode,'Unable to find match for '+ @strSite +' on site list')
+					SET @ysnHasError = 1
+				END
 			END
 
 
-			ELSE
-			BEGIN
+			--ELSE
+
+			--BEGIN
+
 				---------------------------------------------------------
 				--			      DUPLICATE VEHICLE NUMBER				   --
 				---------------------------------------------------------
-				SELECT @intDuplicateItem = COUNT(*) FROM tblCFItem WHERE intSiteId = @intSiteId AND intNetworkId = @intNetworkId AND strProductNumber = @strItemCode
+				SELECT @intDuplicateItem = COUNT(*) FROM tblCFItem WHERE ISNULL(intSiteId,0) = @intSiteId AND intNetworkId = @intNetworkId AND strProductNumber = @strItemCode
 				IF (@intDuplicateItem > 0)
 				BEGIN
 					INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
@@ -128,7 +133,7 @@ BEGIN
 				END
 	
 				---------------------------------------------------------
-			END
+			--END
 		END
 	ELSE
 		BEGIN
@@ -241,6 +246,11 @@ BEGIN
 	---------------------------------------------------------
 	BEGIN TRANSACTION
 		BEGIN TRY
+
+			IF(@intSiteId = 0)
+			BEGIN
+				SET @intSiteId = NULL
+			END
 
 			INSERT INTO tblCFItem
 			(

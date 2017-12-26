@@ -61,6 +61,7 @@ BEGIN TRY
 		, @ysnItemizeSurcharge BIT
 		, @ReceiptLink NVARCHAR(50)
 		, @BlendedItem BIT = 0
+		, @dblNonBlendedDistributedQuantity DECIMAL(18, 6) = 0
 	
 	SELECT @dtmLoadDateTime = TL.dtmLoadDateTime
 		, @intShipVia = TL.intShipViaId
@@ -275,6 +276,7 @@ BEGIN TRY
 		-- Blend Item Quantity Check
 		SELECT BlendIngredient.intIngredientItemId
 			, dblQuantity = SUM(BlendIngredient.dblQuantity)
+			, ysnBlended = 1
 		INTO #tmpBlendDistributionItems
 		FROM vyuTRGetLoadBlendIngredient BlendIngredient
 		LEFT JOIN tblMFRecipe Recipe ON Recipe.intRecipeId = BlendIngredient.intRecipeId
@@ -288,6 +290,7 @@ BEGIN TRY
 
 		SELECT Detail.intItemId
 			, Detail.dblUnits
+			, Detail.ysnBlendedItem
 		FROM tblTRLoadDistributionDetail Detail
 		LEFT JOIN tblTRLoadDistributionHeader Header ON Header.intLoadDistributionHeaderId = Detail.intLoadDistributionHeaderId
 		WHERE Detail.intLoadDistributionDetailId NOT IN (SELECT DISTINCT intLoadDistributionDetailId FROM vyuTRGetLoadBlendIngredient)
@@ -298,6 +301,7 @@ BEGIN TRY
 
 		SELECT BlendIngredient.intSubstituteItemId
 			, dblQuantity = SUM(BlendIngredient.dblQuantity)
+			, ysnBlended = 1
 		FROM vyuTRGetLoadBlendIngredient BlendIngredient
 		LEFT JOIN tblMFRecipe Recipe ON Recipe.intRecipeId = BlendIngredient.intRecipeId
 		LEFT JOIN tblTRLoadDistributionHeader HeaderDistItem ON HeaderDistItem.intLoadDistributionHeaderId = BlendIngredient.intLoadDistributionHeaderId
@@ -306,10 +310,10 @@ BEGIN TRY
 			AND BlendIngredient.intSubstituteItemId = @intItemId
 		GROUP BY BlendIngredient.intSubstituteItemId
 
-		IF EXISTS (SELECT TOP 1 1 FROM #tmpBlendDistributionItems)
+		IF EXISTS (SELECT TOP 1 1 FROM #tmpBlendDistributionItems WHERE ysnBlended = 1)
 		BEGIN
 			SELECT @dblDistributedQuantity = SUM(dblQuantity) FROM #tmpBlendDistributionItems
-
+			
 			IF (@dblReceivedQuantity != @dblDistributedQuantity)
 			BEGIN
 				SET @strresult = 'Raw Materials ' + @strDescription + ' received quantity ' + LTRIM(@dblReceivedQuantity)  + ' does not match required quantity ' + LTRIM(@dblDistributedQuantity) + '.'

@@ -3,6 +3,7 @@
 	,@IntegrationLogId	INT					= NULL
 	,@UserId			INT
 	,@RaiseError		BIT					= 0
+	,@BatchId			NVARCHAR(40)		= NULL
 	,@ErrorMessage		NVARCHAR(250)		= NULL	OUTPUT
 AS
 
@@ -600,6 +601,7 @@ INSERT INTO @IntegrationLog
 	,[intEntityId]
 	,[intGroupingOption]
 	,[strMessage]
+	,[strBatchId]
 	,[strBatchIdForNewPost]
 	,[intPostedNewCount]
 	,[strBatchIdForNewPostRecap]
@@ -631,17 +633,18 @@ SELECT
 	,[intEntityId]							= @UserId
 	,[intGroupingOption]					= 0
 	,[strMessage]							= [strMessage]
-	,[strBatchIdForNewPost]					= ''
+	,[strBatchId]							= @BatchId
+	,[strBatchIdForNewPost]					= @BatchId
 	,[intPostedNewCount]					= 0
-	,[strBatchIdForNewPostRecap]			= ''
+	,[strBatchIdForNewPostRecap]			= @BatchId
 	,[intRecapNewCount]						= 0
-	,[strBatchIdForExistingPost]			= ''
+	,[strBatchIdForExistingPost]			= @BatchId
 	,[intPostedExistingCount]				= 0
-	,[strBatchIdForExistingRecap]			= ''
+	,[strBatchIdForExistingRecap]			= @BatchId
 	,[intRecapPostExistingCount]			= 0
-	,[strBatchIdForExistingUnPost]			= ''
+	,[strBatchIdForExistingUnPost]			= @BatchId
 	,[intUnPostedExistingCount]				= 0
-	,[strBatchIdForExistingUnPostRecap]		= ''
+	,[strBatchIdForExistingUnPostRecap]		= @BatchId
 	,[intRecapUnPostedExistingCount]		= 0
 	,[intIntegrationLogDetailId]			= 0
 	,[intInvoiceId]							= NULL
@@ -759,17 +762,18 @@ BEGIN TRY
 			,@UserId								--[intEntityId]
 			,0										--[intGroupingOption]
 			,'Invoice was successfully updated.'	--[strErrorMessage]
+			,@BatchId								--[strBatchId]
 			,''										--[strBatchIdForNewPost]
 			,0										--[intPostedNewCount]
 			,''										--[strBatchIdForNewPostRecap]
 			,0										--[intRecapNewCount]
-			,''										--[strBatchIdForExistingPost]
+			,@BatchId								--[strBatchIdForExistingPost]
 			,0										--[intPostedExistingCount]
-			,''										--[strBatchIdForExistingRecap]
+			,@BatchId								--[strBatchIdForExistingRecap]
 			,0										--[intRecapPostExistingCount]
-			,''										--[strBatchIdForExistingUnPost]
+			,@BatchId								--[strBatchIdForExistingUnPost]
 			,0										--[intUnPostedExistingCount]
-			,''										--[strBatchIdForExistingUnPostRecap]
+			,@BatchId								--[strBatchIdForExistingUnPostRecap]
 			,0										--[intRecapUnPostedExistingCount]
 			,NULL									--[intIntegrationLogDetailId]
 			,ITG.[intInvoiceId]						--[intInvoiceId]
@@ -795,6 +799,7 @@ BEGIN TRY
 			,[intEntityId]
 			,[intGroupingOption]
 			,[strMessage]
+			,[strBatchId]
 			,[strBatchIdForNewPost]
 			,[intPostedNewCount]
 			,[strBatchIdForNewPostRecap]

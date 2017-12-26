@@ -86,6 +86,7 @@ DECLARE	 @OriginalInvoiceId			INT
 		,@ItemSubCurrencyId			INT
 		,@ItemSubCurrencyRate		NUMERIC(18,6)
 		,@ysnRecurringDuplicate		BIT = 0
+		,@intDocumentMaintenanceId		INT = NULL
 		,@intEntityLineOfBusinessId INT = 0
 		
 SELECT 
@@ -136,6 +137,7 @@ SELECT
 	,@TotalWeight					= [dblTotalWeight]
 	,@EntityContactId				= [intEntityContactId]
 	,@TotalTermDiscount				= [dblTotalTermDiscount]	
+	,@intDocumentMaintenanceId		= [intDocumentMaintenanceId]
 	,@intEntityLineOfBusinessId		= [intEntityLineOfBusinessId]
 FROM
 	tblARInvoice
@@ -402,6 +404,7 @@ BEGIN TRY
 		,@ItemSubCurrencyRate					= @ItemSubCurrencyRate
 		,@EntityContactId						= @EntityContactId
 		,@ItemStorageScheduleTypeId					= @StorageScheduleTypeId
+		,@DocumentMaintenanceId					= @intDocumentMaintenanceId
 		,@intEntityLineOfBusinessId				= @intEntityLineOfBusinessId
 
 END TRY

@@ -18,6 +18,7 @@ DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
 BEGIN TRANSACTION
 INSERT INTO @EntriesForInvoice(
 	 [strTransactionType]
+	,[strType]
 	,[strSourceTransaction]
 	,[intSourceId]
 	,[strSourceId]
@@ -100,6 +101,7 @@ INSERT INTO @EntriesForInvoice(
 )
 SELECT
 	 [strTransactionType]					= @strTransactionType
+	,[strType]								= 'POS'
 	,[strSourceTransaction]					= 'POS'
 	,[intSourceId]							= POS.intPOSId
 	,[strSourceId]							= POS.strReceiptNumber
@@ -111,7 +113,7 @@ SELECT
 	,[dtmDate]								= POS.dtmDate
 	,[dtmDueDate]							= NULL
 	,[dtmShipDate]							= POS.dtmDate
-	,[intEntitySalespersonId]				= POS.intEntityUserId -- This is the Cashier
+	,[intEntitySalespersonId]				= NULL --This will automatically poputaled if the customer has default Salesperson
 	,[intFreightTermId]						= NULL 
 	,[intShipViaId]							= NULL 
 	,[intPaymentMethodId]					= NULL
@@ -119,7 +121,7 @@ SELECT
 	,[strPONumber]							= '' --Check this one
 	,[strBOLNumber]							= ''
 	,[strDeliverPickup]						= ''
-	,[strComments]							= ''
+	,[strComments]							= POS.strReceiptNumber
 	,[intShipToLocationId]					= NULL
 	,[intBillToLocationId]					= NULL
 	,[ysnTemplate]							= 0

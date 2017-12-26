@@ -19,12 +19,16 @@ DECLARE @strReversePostBatchId NVARCHAR(100) = ''
 			DECLARE @errorCode INT , @strModule  NVARCHAR(50), @strStatus NVARCHAR(10)
 			SELECT TOP 1 @errorCode = errorCode, @strModule = strModule, @strStatus = strStatus FROM dbo.fnGLValidateRevaluePeriod(@intConsolidationId)
 			RAISERROR (@errorCode,11,1,@strModule, @strStatus)
+			RETURN
 		END
 
 		IF @ysnRecap = 0
 			BEGIN
 				IF EXISTS(SELECT TOP 1 1 FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationId AND ysnPosted = 1)
-				RAISERROR ('The transaction is already posted.',11,1)
+				BEGIN
+					RAISERROR ('The transaction is already posted.',11,1)
+					RETURN
+				END
 			EXEC [dbo].uspGLGetNewID 3, @strPostBatchId OUTPUT
 			END
 		ELSE

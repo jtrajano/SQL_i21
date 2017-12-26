@@ -84,7 +84,7 @@ BEGIN TRY
 				, strExplanation
 				, strInvoiceNumber
 			)
-			SELECT intTransactionId
+			SELECT Trans.intTransactionId
 				, [strOriginAltFacilityNumber] = NULL
 				, [strDestinationAltFacilityNumber] = CASE WHEN @FormCode IN ('1', '2', '3') THEN Origin.strOregonFacilityNumber ELSE NULL END
 				, [strAltDocumentNumber] = NULL
@@ -98,16 +98,16 @@ BEGIN TRY
 
 			UNION ALL
 
-			SELECT intTransactionId
+			SELECT Trans.intTransactionId
 				, [strOriginAltFacilityNumber] = CASE WHEN @FormCode IN ('5', '5LO', '6', '7', '5BLK', '5CRD', '6BLK', '6CRD') THEN Origin.strOregonFacilityNumber ELSE NULL END
 				, [strDestinationAltFacilityNumber] = CASE WHEN @FormCode IN ('5', '5LO', '6', '7', '5BLK', '5CRD', '6BLK', '6CRD') THEN Destination.strOregonFacilityNumber ELSE NULL END
 				, [strAltDocumentNumber] = CASE WHEN Invoice.strTransactionType = 'CF Tran' AND @FormCode IN ('5CRD', '6CRD') THEN CFTran.strCardNumber ELSE NULL END
 				, [strExplanation] = CASE WHEN Invoice.strTransactionType = 'CF Tran' AND @FormCode IN ('5CRD', '6CRD') THEN TaxException.strException ELSE NULL END
 				, [strInvoiceNumber] = CASE WHEN @FormCode IN ('5CRD', '6CRD') THEN Invoice.strInvoiceNumber ELSE NULL END
 			FROM #tmpTransaction Trans
-			LEFT JOIN tblARInvoiceDetail InvoiceDetail ON InvoiceDetail.intInvoiceDetailId = Trans.intTransactionDetailId
+			LEFT JOIN tblARInvoiceDetail InvoiceDetail ON InvoiceDetail.intInvoiceDetailId = Trans.intTransactionNumberId
 			LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = Invoice.intInvoiceId
-			LEFT JOIN tblSMCompanyLocation Origin ON Origin.intCompanyLocationId = Invoice.intLocataionId
+			LEFT JOIN tblSMCompanyLocation Origin ON Origin.intCompanyLocationId = Invoice.intCompanyLocationId
 			LEFT JOIN tblEMEntityLocation Destination ON Destination.intEntityLocationId = Invoice.intShipToLocationId
 			LEFT JOIN vyuCFInvoiceReport CFTran ON CFTran.intInvoiceId = Invoice.intInvoiceId AND CFTran.ysnPosted = 1
 			LEFT JOIN tblARCustomerTaxingTaxException TaxException ON TaxException.intEntityCustomerId = Invoice.intEntityCustomerId AND TaxException.intItemId = InvoiceDetail.intItemId

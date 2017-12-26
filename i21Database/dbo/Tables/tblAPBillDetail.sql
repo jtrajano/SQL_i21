@@ -63,6 +63,7 @@
 	[strBillOfLading] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[intContractSeq] INT NULL,
 	[intInvoiceId] INT NULL , 
+    [intBuybackChargeId] INT NULL, 
     CONSTRAINT [PK__tblAPBil__DCE2CCF4681FF753] PRIMARY KEY CLUSTERED ([intBillDetailId] ASC) ON [PRIMARY],
     CONSTRAINT [FK_tblAPBillDetail_tblAPBill] FOREIGN KEY ([intBillId]) REFERENCES [dbo].[tblAPBill] ([intBillId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblAPBillDetail_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]),

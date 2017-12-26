@@ -894,26 +894,27 @@ SELECT *,isnull(dblContractBasis,0) + isnull(dblFutures,0) as dblContractPrice,
 END
 
 ------------- Calculation of Results ----------------------
-   UPDATE #Temp set dblResult=
-             CASE WHEN intContractTypeId = 1 and (dblAdjustedContractPrice <= dblMarketPrice) 
-                  THEN abs(dblResult)
-                  WHEN intContractTypeId = 1 and (dblAdjustedContractPrice > dblMarketPrice) 
-                  THEN -abs(dblResult)
-                  WHEN intContractTypeId = 2  and (dblAdjustedContractPrice >= dblMarketPrice) 
-                  THEN abs(dblResult)
-                  WHEN intContractTypeId = 2  and (dblAdjustedContractPrice < dblMarketPrice) 
-                  THEN -abs(dblResult)
-               END ,
-              dblResultCash=
-             CASE WHEN intContractTypeId = 1 and (dblAdjustedContractPrice <= dblMarketPrice) 
-                  THEN abs(dblResultCash)
-                  WHEN intContractTypeId = 1 and (dblAdjustedContractPrice > dblMarketPrice) 
-                  THEN -abs(dblResultCash)
-                  WHEN intContractTypeId = 2  and (dblAdjustedContractPrice >= dblMarketPrice) 
-                  THEN abs(dblResultCash)
-                  WHEN intContractTypeId = 2  and (dblAdjustedContractPrice < dblMarketPrice) 
-                  THEN -abs(dblResultCash)
-               END ,
+   UPDATE #Temp set 
+   --dblResult=
+   --          CASE WHEN intContractTypeId = 1 and (dblAdjustedContractPrice <= dblMarketPrice) 
+   --               THEN abs(dblResult)
+   --               WHEN intContractTypeId = 1 and (dblAdjustedContractPrice > dblMarketPrice) 
+   --               THEN -abs(dblResult)
+   --               WHEN intContractTypeId = 2  and (dblAdjustedContractPrice >= dblMarketPrice) 
+   --               THEN abs(dblResult)
+   --               WHEN intContractTypeId = 2  and (dblAdjustedContractPrice < dblMarketPrice) 
+   --               THEN -abs(dblResult)
+   --            END ,
+   --           dblResultCash=
+   --          CASE WHEN intContractTypeId = 1 and (dblAdjustedContractPrice <= dblMarketPrice) 
+   --               THEN abs(dblResultCash)
+   --               WHEN intContractTypeId = 1 and (dblAdjustedContractPrice > dblMarketPrice) 
+   --               THEN -abs(dblResultCash)
+   --               WHEN intContractTypeId = 2  and (dblAdjustedContractPrice >= dblMarketPrice) 
+   --               THEN abs(dblResultCash)
+   --               WHEN intContractTypeId = 2  and (dblAdjustedContractPrice < dblMarketPrice) 
+   --               THEN -abs(dblResultCash)
+   --            END ,
                dblResultBasis=
              CASE WHEN intContractTypeId = 1 and (isnull(dblContractBasis,0) <= dblMarketBasis) 
                   THEN abs(dblResultBasis)

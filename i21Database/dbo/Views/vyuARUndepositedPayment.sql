@@ -72,3 +72,4 @@ WHERE
 	AND A.[strTransactionType] IN ('Cash', 'Cash Refund')
 	AND CM.intSourceTransactionId IS NULL
 	AND UPPER(ISNULL(SMPM.strPaymentMethod,'')) <> UPPER('Write Off')
+	AND (ISNULL(A.ysnImportedFromOrigin,0) <> 1 AND ISNULL(A.ysnImportedAsPosted,0) <> 1)
