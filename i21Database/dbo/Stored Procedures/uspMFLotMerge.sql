@@ -4,7 +4,9 @@
 	,@intMergeItemUOMId INT
 	,@intUserId INT
 	,@blnValidateLotReservation BIT = 0
-	,@dtmDate datetime=NULL
+	,@dtmDate DATETIME = NULL
+	,@strReasonCode NVARCHAR(MAX) = NULL
+	,@strNotes NVARCHAR(MAX) = NULL
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -39,9 +41,14 @@ BEGIN TRY
 		,@strItemNumber NVARCHAR(50)
 		,@strUnitMeasure NVARCHAR(50)
 		,@intItemUOMId INT
-		,@dblDefaultResidueQty NUMERIC(38,20)
+		,@dblDefaultResidueQty NUMERIC(38, 20)
+		,@intTransactionCount INT
+		,@strDescription NVARCHAR(MAX)
 
-		SELECT TOP 1 @dblDefaultResidueQty=ISNULL(dblDefaultResidueQty,0.00001) FROM tblMFCompanyPreference
+	SELECT @strDescription = Ltrim(isNULL(@strReasonCode, '') + ' ' + isNULL(@strNotes, ''))
+
+	SELECT TOP 1 @dblDefaultResidueQty = ISNULL(dblDefaultResidueQty, 0.00001)
+	FROM tblMFCompanyPreference
 
 	SELECT @dblMergeWeight = @dblMergeQty
 
@@ -139,9 +146,9 @@ BEGIN TRY
 			END
 	FROM tblICLot
 	WHERE intLotId = @intNewLotId
-	
+
 	IF @dtmDate IS NULL
-	SELECT @dtmDate = GETDATE()
+		SELECT @dtmDate = GETDATE()
 
 	SELECT @intSourceId = 1
 		,@intSourceTransactionTypeId = 8
@@ -186,7 +193,10 @@ BEGIN TRY
 				)
 	END
 
-	BEGIN TRANSACTION
+	SELECT @intTransactionCount = @@TRANCOUNT
+
+	IF @intTransactionCount = 0
+		BEGIN TRANSACTION
 
 	EXEC uspICInventoryAdjustment_CreatePostLotMerge @intItemId = @intItemId
 		,@dtmDate = @dtmDate
@@ -209,6 +219,7 @@ BEGIN TRY
 		,@intSourceTransactionTypeId = @intSourceTransactionTypeId
 		,@intEntityUserSecurityId = @intUserId
 		,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+		,@strDescription = @strDescription
 
 	EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmDate
 		,@intTransactionTypeId = 19
@@ -223,10 +234,10 @@ BEGIN TRY
 		,@intOldLotStatusId = NULL
 		,@intNewLotStatusId = NULL
 		,@intUserId = @intUserId
-		,@strNote = NULL
-		,@strReason = NULL
+		,@strNote = @strNotes
+		,@strReason = @strReasonCode
 		,@intLocationId = @intLocationId
-		,@intInventoryAdjustmentId=@intInventoryAdjustmentId
+		,@intInventoryAdjustmentId = @intInventoryAdjustmentId
 
 	IF EXISTS (
 			SELECT 1
@@ -283,12 +294,13 @@ BEGIN TRY
 			,@strNotes = 'Residue qty clean up'
 	END
 
-	COMMIT TRANSACTION
+	IF @intTransactionCount = 0
+		COMMIT TRANSACTION
 END TRY
 
 BEGIN CATCH
 	IF XACT_STATE() != 0
-		AND @@TRANCOUNT > 0
+		AND @intTransactionCount = 0
 		ROLLBACK TRANSACTION
 
 	SET @ErrMsg = ERROR_MESSAGE()

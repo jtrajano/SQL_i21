@@ -2,6 +2,7 @@
 	,@intNewLotStatusId INT
 	,@intUserId INT
 	,@strNotes NVARCHAR(MAX) = NULL
+	,@strReasonCode NVARCHAR(MAX) = NULL
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -16,6 +17,9 @@ BEGIN TRY
 		,@intInventoryAdjustmentId INT
 		,@TransactionCount INT
 		,@ErrMsg NVARCHAR(MAX)
+		,@strDescription NVARCHAR(MAX)
+
+	SELECT @strDescription = Ltrim(isNULL(@strReasonCode, '') + ' ' + isNULL(@strNotes, ''))
 
 	SELECT @intItemId = intItemId
 		,@intLocationId = intLocationId
@@ -94,6 +98,7 @@ BEGIN TRY
 		,@intSourceTransactionTypeId
 		,@intUserId
 		,@intInventoryAdjustmentId OUTPUT
+		,@strDescription
 
 	EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmDate
 		,@intTransactionTypeId = 16
@@ -108,8 +113,8 @@ BEGIN TRY
 		,@intOldLotStatusId = @intLotStatusId
 		,@intNewLotStatusId = @intNewLotStatusId
 		,@intUserId = @intUserId
-		,@strNote = NULL
-		,@strReason = NULL
+		,@strNote = @strNotes
+		,@strReason = @strReasonCode
 		,@intLocationId = @intLocationId
 		,@intInventoryAdjustmentId = @intInventoryAdjustmentId
 END TRY

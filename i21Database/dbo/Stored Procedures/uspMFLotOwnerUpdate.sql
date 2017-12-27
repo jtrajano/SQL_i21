@@ -6,6 +6,8 @@
 	,@strWarehouseRefNo NVARCHAR(50)
 	,@strContainerNo NVARCHAR(50)
 	,@strNotes NVARCHAR(MAX)
+	,@ysnUpdateOwnerOnly BIT = 0
+	,@strReasonCode NVARCHAR(MAX) = NULL
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -31,6 +33,10 @@ BEGIN TRY
 		,@strReceiptNumber NVARCHAR(50)
 		,@strOldContainerNo NVARCHAR(50)
 		,@strOldNotes NVARCHAR(MAX)
+		,@intTransactionCount INT
+		,@strDescription NVARCHAR(MAX)
+
+	SELECT @strDescription = Ltrim(isNULL(@strReasonCode, '') + ' ' + isNULL(@strNotes, ''))
 
 	SELECT @strLotNumber = strLotNumber
 		,@intItemId = intItemId
@@ -47,7 +53,8 @@ BEGIN TRY
 	FROM tblMFLotInventory
 	WHERE intLotId = @intLotId
 
-	SELECT @intOldLotItemOwnerId = intItemOwnerId,@intOldItemOwnerId = intItemOwnerId
+	SELECT @intOldLotItemOwnerId = intItemOwnerId
+		,@intOldItemOwnerId = intItemOwnerId
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
@@ -63,6 +70,9 @@ BEGIN TRY
 				,1
 				)
 	END
+
+	IF @intTransactionCount = 0
+		BEGIN TRANSACTION
 
 	IF NOT EXISTS (
 			SELECT 1
@@ -106,8 +116,8 @@ BEGIN TRY
 			,@intOldLotStatusId = NULL
 			,@intNewLotStatusId = NULL
 			,@intUserId = @intUserId
-			,@strNote = NULL
-			,@strReason = NULL
+			,@strNote = @strNotes
+			,@strReason = @strReasonCode
 			,@intLocationId = @intLocationId
 			,@intInventoryAdjustmentId = NULL
 			,@intOldItemOwnerId = NULL
@@ -127,13 +137,12 @@ BEGIN TRY
 			,@intSourceTransactionTypeId = @intSourceTransactionTypeId
 			,@intEntityUserSecurityId = @intUserId
 			,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
-			,@strDescription = NULL
+			,@strDescription = @strDescription
 	END
 	ELSE
 	BEGIN
 		IF @intNewItemOwnerId <> ISNULL(@intOldItemOwnerId, 0)
 		BEGIN
-
 			UPDATE tblMFItemOwnerDetail
 			SET dtmToDate = @dtmDate
 			WHERE intLotId = @intLotId
@@ -163,8 +172,8 @@ BEGIN TRY
 				,@intOldLotStatusId = NULL
 				,@intNewLotStatusId = NULL
 				,@intUserId = @intUserId
-				,@strNote = NULL
-				,@strReason = NULL
+				,@strNote = @strNotes
+				,@strReason = @strReasonCode
 				,@intLocationId = @intLocationId
 				,@intInventoryAdjustmentId = NULL
 				,@intOldItemOwnerId = @intOldItemOwnerId
@@ -184,7 +193,7 @@ BEGIN TRY
 				,@intSourceTransactionTypeId = @intSourceTransactionTypeId
 				,@intEntityUserSecurityId = @intUserId
 				,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
-				,@strDescription = NULL
+				,@strDescription = @strDescription
 		END
 	END
 
@@ -204,88 +213,94 @@ BEGIN TRY
 			,@intSourceTransactionTypeId = @intSourceTransactionTypeId
 			,@intEntityUserSecurityId = @intUserId
 			,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
-			,@strDescription = NULL
+			,@strDescription = @strDescription
 	END
 
-	-- Parent Lot No. Update
-	SELECT @strOldParentLotNumber = PL.strParentLotNumber
-	FROM tblICLot L
-	JOIN tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
-	WHERE L.intLotId = @intLotId
-
-	IF ISNULL(@strOldParentLotNumber, '') <> ISNULL(@strParentLotNumber, '')
+	IF @ysnUpdateOwnerOnly = 0
 	BEGIN
-		EXEC uspMFCreateUpdateParentLotNumber @strParentLotNumber = @strParentLotNumber
-			,@strParentLotAlias = NULL
-			,@intItemId = @intItemId
-			,@dtmExpiryDate = @dtmExpiryDate
-			,@intLotStatusId = @intLotStatusId
-			,@intEntityUserSecurityId = @intUserId
-			,@intLotId = @intLotId
-			,@intParentLotId = @intParentLotId OUTPUT
-			,@intSubLocationId = @intSubLocationId
-			,@intLocationId = @intLocationId
-			,@dtmDate = NULL
-			,@intShiftId = NULL
-	END
+		-- Parent Lot No. Update
+		SELECT @strOldParentLotNumber = PL.strParentLotNumber
+		FROM tblICLot L
+		JOIN tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
+		WHERE L.intLotId = @intLotId
 
-	-- Vendor & Warehouse ref no update
-	SELECT @strOldVendorRefNo = strVendorRefNo
-		,@strOldWarehouseRefNo = strWarehouseRefNo
-	FROM tblMFLotInventory
-	WHERE intLotId = @intLotId
-
-	IF ISNULL(@strOldVendorRefNo, '') <> ISNULL(@strVendorRefNo, '')
-	BEGIN
-		IF ISNULL(@strReceiptNumber, '') = ''
+		IF ISNULL(@strOldParentLotNumber, '') <> ISNULL(@strParentLotNumber, '')
 		BEGIN
-			UPDATE tblMFLotInventory
-			SET strVendorRefNo = @strVendorRefNo
+			EXEC uspMFCreateUpdateParentLotNumber @strParentLotNumber = @strParentLotNumber
+				,@strParentLotAlias = NULL
+				,@intItemId = @intItemId
+				,@dtmExpiryDate = @dtmExpiryDate
+				,@intLotStatusId = @intLotStatusId
+				,@intEntityUserSecurityId = @intUserId
+				,@intLotId = @intLotId
+				,@intParentLotId = @intParentLotId OUTPUT
+				,@intSubLocationId = @intSubLocationId
+				,@intLocationId = @intLocationId
+				,@dtmDate = NULL
+				,@intShiftId = NULL
+		END
+
+		-- Vendor & Warehouse ref no update
+		SELECT @strOldVendorRefNo = strVendorRefNo
+			,@strOldWarehouseRefNo = strWarehouseRefNo
+		FROM tblMFLotInventory
+		WHERE intLotId = @intLotId
+
+		IF ISNULL(@strOldVendorRefNo, '') <> ISNULL(@strVendorRefNo, '')
+		BEGIN
+			IF ISNULL(@strReceiptNumber, '') = ''
+			BEGIN
+				UPDATE tblMFLotInventory
+				SET strVendorRefNo = @strVendorRefNo
+				WHERE intLotId = @intLotId
+			END
+			ELSE
+			BEGIN
+				UPDATE tblMFLotInventory
+				SET strVendorRefNo = @strVendorRefNo
+				WHERE strReceiptNumber = @strReceiptNumber
+			END
+		END
+
+		IF ISNULL(@strOldWarehouseRefNo, '') <> ISNULL(@strWarehouseRefNo, '')
+		BEGIN
+			IF ISNULL(@strReceiptNumber, '') = ''
+			BEGIN
+				UPDATE tblMFLotInventory
+				SET strWarehouseRefNo = @strWarehouseRefNo
+				WHERE intLotId = @intLotId
+			END
+			ELSE
+			BEGIN
+				UPDATE tblMFLotInventory
+				SET strWarehouseRefNo = @strWarehouseRefNo
+				WHERE strReceiptNumber = @strReceiptNumber
+			END
+		END
+
+		-- Container No & Notes(Remarks) update
+		SELECT @strOldNotes = strNotes
+			,@strOldContainerNo = strContainerNo
+		FROM tblICLot
+		WHERE intLotId = @intLotId
+
+		IF ISNULL(@strOldNotes, '') <> ISNULL(@strNotes, '')
+		BEGIN
+			UPDATE tblICLot
+			SET strNotes = @strNotes
 			WHERE intLotId = @intLotId
 		END
-		ELSE
-		BEGIN
-			UPDATE tblMFLotInventory
-			SET strVendorRefNo = @strVendorRefNo
-			WHERE strReceiptNumber = @strReceiptNumber
-		END
-	END
 
-	IF ISNULL(@strOldWarehouseRefNo, '') <> ISNULL(@strWarehouseRefNo, '')
-	BEGIN
-		IF ISNULL(@strReceiptNumber, '') = ''
+		IF ISNULL(@strOldContainerNo, '') <> ISNULL(@strContainerNo, '')
 		BEGIN
-			UPDATE tblMFLotInventory
-			SET strWarehouseRefNo = @strWarehouseRefNo
+			UPDATE tblICLot
+			SET strContainerNo = @strContainerNo
 			WHERE intLotId = @intLotId
 		END
-		ELSE
-		BEGIN
-			UPDATE tblMFLotInventory
-			SET strWarehouseRefNo = @strWarehouseRefNo
-			WHERE strReceiptNumber = @strReceiptNumber
-		END
 	END
 
-	-- Container No & Notes(Remarks) update
-	SELECT @strOldNotes = strNotes
-		,@strOldContainerNo = strContainerNo
-	FROM tblICLot
-	WHERE intLotId = @intLotId
-
-	IF ISNULL(@strOldNotes, '') <> ISNULL(@strNotes, '')
-	BEGIN
-		UPDATE tblICLot
-		SET strNotes = @strNotes
-		WHERE intLotId = @intLotId
-	END
-
-	IF ISNULL(@strOldContainerNo, '') <> ISNULL(@strContainerNo, '')
-	BEGIN
-		UPDATE tblICLot
-		SET strContainerNo = @strContainerNo
-		WHERE intLotId = @intLotId
-	END
+	IF @intTransactionCount = 0
+		COMMIT TRANSACTION
 END TRY
 
 BEGIN CATCH

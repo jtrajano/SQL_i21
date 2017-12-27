@@ -3,6 +3,8 @@
 	,@intUserId INT
 	,@strNewLotNumber NVARCHAR(100) = NULL OUTPUT
 	,@dtmDate DATETIME
+	,@strReasonCode NVARCHAR(MAX) = NULL
+	,@strNotes NVARCHAR(MAX) = NULL
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -32,6 +34,9 @@ BEGIN TRY
 		,@dblLotReservedQty NUMERIC(16, 8)
 		,@ysnGenerateNewParentLotOnChangeItem BIT
 		,@intParentLotId INT
+		,@strDescription NVARCHAR(MAX)
+
+	SELECT @strDescription = Ltrim(isNULL(@strReasonCode, '') + ' ' + isNULL(@strNotes, ''))
 
 	SELECT @intItemId = intItemId
 		,@intLocationId = intLocationId
@@ -83,6 +88,7 @@ BEGIN TRY
 			WHERE intFromItemCategoryId = @intFromItemCategory
 				AND intToItemCategoryId = @intToItemCategory
 			)
+		AND @intFromItemCategory <> @intToItemCategory
 	BEGIN
 		SET @strErrMsg = 'Item change not allowed from category ' + @strFromItemCategory + ' to ' + @strToItemCategory + '.'
 
@@ -121,11 +127,14 @@ BEGIN TRY
 				)
 	END
 
-	If @dtmDate=NULL
-	SELECT @dtmDate = GETDATE()
+	IF @dtmDate = NULL
+		SELECT @dtmDate = GETDATE()
 
 	SELECT @intSourceId = 1
 		,@intSourceTransactionTypeId = 8
+
+	IF @intTransactionCount = 0
+		BEGIN TRANSACTION
 
 	EXEC uspICInventoryAdjustment_CreatePostItemChange @intItemId = @intItemId
 		,@dtmDate = @dtmDate
@@ -142,6 +151,7 @@ BEGIN TRY
 		,@intSourceTransactionTypeId = @intSourceTransactionTypeId
 		,@intEntityUserSecurityId = @intUserId
 		,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+		,@strDescription = @strDescription
 
 	SELECT TOP 1 @strNewLotNumber = strLotNumber
 		,@intNewLotId = intLotId
@@ -162,8 +172,8 @@ BEGIN TRY
 		,@intOldLotStatusId = NULL
 		,@intNewLotStatusId = NULL
 		,@intUserId = @intUserId
-		,@strNote = NULL
-		,@strReason = NULL
+		,@strNote = @strNotes
+		,@strReason = @strReasonCode
 		,@intLocationId = @intLocationId
 		,@intInventoryAdjustmentId = @intInventoryAdjustmentId
 
@@ -174,13 +184,15 @@ BEGIN TRY
 		WHERE intLotId = @intNewLotId
 	END
 
+	IF @intTransactionCount = 0
+		COMMIT TRANSACTION
+
 	SELECT @strNewLotNumber AS strNewLotNumber
 END TRY
 
 BEGIN CATCH
 	IF XACT_STATE() != 0
 		AND @intTransactionCount = 0
-		AND @@TRANCOUNT > 0
 		ROLLBACK TRANSACTION
 
 	SET @strErrMsg = ERROR_MESSAGE()
