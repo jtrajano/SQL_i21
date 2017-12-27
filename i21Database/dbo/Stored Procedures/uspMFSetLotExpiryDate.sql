@@ -3,10 +3,10 @@
 	,@intUserId INT
 	,@strReasonCode NVARCHAR(MAX) = NULL
 	,@strNotes NVARCHAR(MAX) = NULL
+	,@dtmDate DATETIME = NULL
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
-		,@dtmDate DATETIME
 		,@intLocationId INT
 		,@intSubLocationId INT
 		,@intStorageLocationId INT
@@ -24,6 +24,9 @@ BEGIN TRY
 		,@intLotRecordId INT
 		,@ysnSetExpiryDateByParentLot BIT
 		,@strDescription NVARCHAR(MAX)
+		,@intTransactionCount INT
+
+	SELECT @intTransactionCount = @@TRANCOUNT
 
 	SELECT @strDescription = Ltrim(isNULL(@strReasonCode, '') + ' ' + isNULL(@strNotes, ''))
 
@@ -62,7 +65,8 @@ BEGIN TRY
 		SELECT @intChildLotCount = 0
 	END
 
-	SELECT @dtmDate = GETDATE()
+	IF @dtmDate IS NULL
+		SELECT @dtmDate = GETDATE()
 
 	SELECT @intSourceId = 1
 		,@intSourceTransactionTypeId = 8
@@ -106,6 +110,9 @@ BEGIN TRY
 				,1
 				)
 	END
+
+	IF @intTransactionCount = 0
+		BEGIN TRANSACTION
 
 	IF (@intChildLotCount > 1)
 	BEGIN
@@ -204,12 +211,14 @@ BEGIN TRY
 			,@intLocationId = @intLocationId
 			,@intInventoryAdjustmentId = @intInventoryAdjustmentId
 	END
+
+	IF @intTransactionCount = 0
+		COMMIT TRANSACTION
 END TRY
 
 BEGIN CATCH
 	IF XACT_STATE() != 0
 		AND @TransactionCount = 0
-		AND @@TRANCOUNT > 0
 		ROLLBACK TRANSACTION
 
 	SET @ErrMsg = ERROR_MESSAGE()

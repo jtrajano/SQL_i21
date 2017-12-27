@@ -34,6 +34,8 @@ BEGIN TRY
 		,@intTransactionCount INT
 		,@strDescription NVARCHAR(MAX)
 
+	SELECT @intTransactionCount = @@TRANCOUNT
+
 	SELECT @strDescription = Ltrim(isNULL(@strReasonCode, '') + ' ' + isNULL(@strNotes, ''))
 
 	SELECT TOP 1 @dblDefaultResidueQty = ISNULL(dblDefaultResidueQty, 0.00001)

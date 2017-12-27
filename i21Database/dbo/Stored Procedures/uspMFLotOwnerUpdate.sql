@@ -8,10 +8,10 @@
 	,@strNotes NVARCHAR(MAX)
 	,@ysnUpdateOwnerOnly BIT = 0
 	,@strReasonCode NVARCHAR(MAX) = NULL
+	,@dtmDate DATETIME = NULL
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
-		,@dtmDate DATETIME
 		,@intLocationId INT
 		,@strLotNumber NVARCHAR(50)
 		,@TransactionCount INT
@@ -36,6 +36,8 @@ BEGIN TRY
 		,@intTransactionCount INT
 		,@strDescription NVARCHAR(MAX)
 
+	SELECT @intTransactionCount = @@TRANCOUNT
+
 	SELECT @strDescription = Ltrim(isNULL(@strReasonCode, '') + ' ' + isNULL(@strNotes, ''))
 
 	SELECT @strLotNumber = strLotNumber
@@ -43,11 +45,13 @@ BEGIN TRY
 		,@intStorageLocationId = intStorageLocationId
 		,@intSubLocationId = intSubLocationId
 		,@intLocationId = intLocationId
-		,@dtmDate = GETDATE()
 		,@intLotStatusId = intLotStatusId
 		,@dtmExpiryDate = dtmExpiryDate
 	FROM tblICLot
 	WHERE intLotId = @intLotId
+
+	IF @dtmDate IS NULL
+		SELECT @dtmDate = GETDATE()
 
 	SELECT @strReceiptNumber = strReceiptNumber
 	FROM tblMFLotInventory
@@ -306,7 +310,6 @@ END TRY
 BEGIN CATCH
 	IF XACT_STATE() != 0
 		AND @TransactionCount = 0
-		AND @@TRANCOUNT > 0
 		ROLLBACK TRANSACTION
 
 	SET @ErrMsg = ERROR_MESSAGE()
