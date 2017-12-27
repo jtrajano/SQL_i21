@@ -5927,7 +5927,6 @@
     <Build Include="dbo\Stored Procedures\uspMFGetOrderLineItem.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetUOMByLot.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUpdateTask.sql" />
-    <None Include="Scripts\Post-Deployment\PAT\3_UpdateRetiredStockNo.sql" />
     <Build Include="dbo\Views\vyuARGetCustomerTaxException.sql" />
     <Build Include="dbo\Views\vyuARGetCustomerSpecialTax.sql" />
     <Build Include="dbo\Views\vyuARGetLocationTax.sql" />
@@ -6024,6 +6023,9 @@
     <Build Include="dbo\Views\vyuGRSettlementSummaryReport.sql" />
     <Build Include="dbo\Functions\fnSTSeparateStringToColumns.sql" />
     <Build Include="dbo\Stored Procedures\uspSTGenerateShelfTags.sql" />
+    <None Include="Scripts\Post-Deployment\PAT\2_MigrateStockRecords.sql" />
+    <None Include="Scripts\Post-Deployment\PAT\3_UpdateIssueStockNo.sql" />
+    <None Include="Scripts\Post-Deployment\PAT\4_UpdateRetiredStockNo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -6176,7 +6178,6 @@
     <Build Include="dbo\Stored Procedures\uspSMUpdateEntityCredentialCompanyGridLayout.sql" />
     <None Include="Scripts\Post-Deployment\CCR\RemoveCCRObsoleteScreen.sql" />
     <None Include="Scripts\Post-Deployment\PAT\1_DropStoredProcedures.sql" />
-    <None Include="Scripts\Post-Deployment\PAT\2_UpdateIssueStockNo.sql" />
     <Build Include="dbo\Stored Procedures\uspCRMGetPipelineForecast.sql" />
     <None Include="Scripts\Post-Deployment\MF\CBIPattern.sql" />
     <None Include="Scripts\Post-Deployment\AP\DeleteInvalidBasisAdvanceStaging.sql" />

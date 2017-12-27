@@ -606,7 +606,6 @@ SET @batchIdUsed = @batchId;
 		FROM tblPATCustomerStock AS CS 
 		INNER JOIN #tempTransferDetails AS tempTD
 			ON CS.intCustomerStockId = tempTD.intCustomerStockId
-		WHERE CS.ysnPosted = 1
 
 	END
 
@@ -615,12 +614,13 @@ SET @batchIdUsed = @batchId;
 		---------------------  TRANSFER EQUITY TO STOCK ---------------------------------
 		IF(@ysnPosted = 1)
 		BEGIN
-			DECLARE @certificateNo NVARCHAR(MAX);
-			SET @certificateNo = (SELECT TOP 1 strCertificateNo FROM #tempTransferDetails tempTD INNER JOIN tblPATCustomerStock CS ON tempTD.strToCertificateNo = CS.strCertificateNo);
+			DECLARE @certificateNo NVARCHAR(MAX), @issueStkNo NVARCHAR(50);
+			SET @certificateNo = (SELECT TOP 1 strCertificateNo FROM #tempTransferDetails tempTD INNER JOIN tblPATIssueStock CS ON tempTD.strToCertificateNo = CS.strCertificateNo);
+			EXEC [dbo].[uspSMGetStartingNumber] 126, @issueStkNo out;
 			IF (@certificateNo = '' OR @certificateNo IS NULL)
 			BEGIN
-				INSERT INTO tblPATCustomerStock(intCustomerPatronId, intStockId, strCertificateNo, strStockStatus, dblSharesNo, dtmIssueDate, strActivityStatus, dblParValue, dblFaceValue, ysnPosted, intConcurrencyId)
-				SELECT intTransferorId, intToStockId, strToCertificateNo, strToStockStatus, dblQuantityTransferred, dtmToIssueDate, 'Open', dblToParValue, (dblQuantityTransferred * dblToParValue), 0, 1
+				INSERT INTO tblPATIssueStock(strIssueNo, intCustomerPatronId, intStockId, strCertificateNo, strStockStatus, dblSharesNo, dtmIssueDate, strActivityStatus, dblParValue, dblFaceValue, ysnPosted, intConcurrencyId)
+				SELECT @issueStkNo,intTransferorId, intToStockId, strToCertificateNo, strToStockStatus, dblQuantityTransferred, dtmToIssueDate, 'Open', dblToParValue, (dblQuantityTransferred * dblToParValue), 0, 1
 				FROM #tempTransferDetails WHERE intTransferType = 4;
 			END
 			ELSE
@@ -632,9 +632,9 @@ SET @batchIdUsed = @batchId;
 		END
 		ELSE
 		BEGIN
-			IF NOT EXISTS(SELECT * FROM #tempTransferDetails tempTD INNER JOIN tblPATCustomerStock CS ON tempTD.strToCertificateNo = CS.strCertificateNo WHERE CS.ysnPosted = 1)
+			IF NOT EXISTS(SELECT * FROM #tempTransferDetails tempTD INNER JOIN tblPATIssueStock CS ON tempTD.strToCertificateNo = CS.strCertificateNo)
 			BEGIN
-				DELETE FROM tblPATCustomerStock WHERE strCertificateNo IN (SELECT strToCertificateNo FROM #tempTransferDetails where intTransferType = 4)
+				DELETE FROM tblPATIssueStock WHERE strCertificateNo IN (SELECT strToCertificateNo FROM #tempTransferDetails where intTransferType = 4)
 			END
 			ELSE
 			BEGIN
