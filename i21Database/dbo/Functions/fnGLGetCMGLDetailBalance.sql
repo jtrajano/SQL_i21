@@ -9,9 +9,7 @@ BEGIN
 RETURN 
 (
 	SELECT ISNULL(sum(dblDebit - dblCredit),0) FROM
-	vyuCMBankAccount CM
-	JOIN tblGLDetail GL
-	ON CM.intGLAccountId = GL.intAccountId
+	tblGLDetail GL
 	WHERE ysnIsUnposted = 0
 	AND dtmDate<= @dtmDate
 	AND intAccountId = @intAccountId
