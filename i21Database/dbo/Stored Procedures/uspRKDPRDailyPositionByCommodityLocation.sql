@@ -4,23 +4,6 @@
 	,@strPositionIncludes NVARCHAR(100) = NULL
 AS
 
-DECLARE @tblFinalDetail TABLE (
-	intRowNum INT
-	,strLocationName NVARCHAR(500) COLLATE Latin1_General_CI_AS
-	,intLocationId INT
-	,intCommodityId INT
-	,strCommodityCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
-	,strUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
-	,OpenPurchasesQty DECIMAL(24, 10)
-	,OpenSalesQty DECIMAL(24, 10)
-	,dblCompanyTitled DECIMAL(24, 10)
-	,dblCaseExposure DECIMAL(24, 10)
-	,OpenSalQty DECIMAL(24, 10)
-	,dblAvailForSale DECIMAL(24, 10)
-	,dblInHouse DECIMAL(24, 10)
-	,dblBasisExposure DECIMAL(24, 10)
-	)
-
 DECLARE @Commodity AS TABLE (
 	intCommodityIdentity INT IDENTITY(1, 1) PRIMARY KEY
 	,intCommodity INT
@@ -56,59 +39,7 @@ SELECT strCommodityCode,intCommodityId,intContractHeaderId,strContractNumber,str
 	   intCompanyLocationId,strContractType,strPricingType,intCommodityUnitMeasureId,intContractDetailId,intContractStatusId,intEntityId,intCurrencyId,strType 
 FROM vyuRKContractDetail
 
-SELECT strLocationName
-	,OpenPurchasesQty
-	,OpenSalesQty
-	,intCommodityId
-	,strCommodityCode
-	,intUnitMeasureId
-	,strUnitMeasure
-	,isnull(CompanyTitled, 0)-(isnull(OpenPurchasesQty, 0) - isnull(OpenSalesQty, 0)) AS dblCompanyTitled
-	,isnull(CashExposure, 0) AS dblCaseExposure
-	,isnull(CompanyTitled, 0)  AS dblBasisExposure
-	,isnull(CompanyTitled, 0)  - isnull(ReceiptProductQty, 0) AS dblAvailForSale
-	,isnull(InHouse, 0) AS dblInHouse
-	,intLocationId
-INTO #temp
-FROM (
-	SELECT strLocationName
-		,intCommodityId
-		,strCommodityCode
-		,strUnitMeasure
-		,intUnitMeasureId
-		,intLocationId
-		,isnull(invQty, 0)+ 
-		 CASE WHEN (
-					SELECT TOP 1 ysnIncludeOffsiteInventoryInCompanyTitled
-					FROM tblRKCompanyPreference
-					) = 1 THEN isnull(OffSite, 0) ELSE 0 END + CASE WHEN (
-					SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled
-					FROM tblRKCompanyPreference
-					) = 1 THEN 0 ELSE -isnull(DP ,0) END 
-		+ (isnull(dblCollatralPurchase, 0) -isnull(dblCollatralSales, 0)) 
-		 + isnull(SlsBasisDeliveries, 0) 
-		 +(isnull(OpenPurchasesQty, 0) - isnull(OpenSalesQty, 0))
-		 AS CompanyTitled
-		,
-		isnull(invQty, 0) 
-		- isnull(PurBasisDelivary, 0)
-		 + (isnull(OpenPurQty, 0)- isnull(OpenSalQty, 0))
-		 + isnull(dblCollatralSales, 0) +
-		  isnull(SlsBasisDeliveries, 0) 
-				+CASE WHEN (
-					SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled
-					FROM tblRKCompanyPreference
-					) = 1 THEN  0 ELSE -isnull(DP ,0)  END
-					+	isnull(dblOptionNetHedge,0)+isnull(dblFutNetHedge,0)
-		AS CashExposure
-		,isnull(ReceiptProductQty, 0) ReceiptProductQty
-		,isnull(OpenPurchasesQty, 0) OpenPurchasesQty
-		,isnull(OpenSalesQty, 0) OpenSalesQty
-		,isnull(OpenPurQty, 0) OpenPurQty
-		,CASE WHEN isnull(@intVendorId, 0) = 0 THEN isnull(invQty, 0) + isnull(dblGrainBalance, 0) + isnull(OnHold, 0) --+ isnull(DP ,0)
-			ELSE isnull(DPCustomer, 0) + isnull(OnHold, 0) END AS InHouse
-	FROM (
-		SELECT DISTINCT c.intCommodityId
+SELECT DISTINCT c.intCommodityId
 			,strLocationName
 			,intLocationId
 			,strCommodityCode
@@ -315,9 +246,38 @@ FROM (
 										 	 and isnull(st.intDeliverySheetId,0) =0
 						)
 					) t
-				) AS OnHold
-								,(	
-			select sum(dblNetHedge) dblNetHedge from (			
+				) AS OnHold							
+	
+	INTO #Physical  
+		FROM tblSMCompanyLocation cl 
+		JOIN tblICItemLocation lo ON lo.intLocationId = cl.intCompanyLocationId and  lo.intLocationId  IN (
+													SELECT intCompanyLocationId FROM tblSMCompanyLocation
+													WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+													WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+													ELSE isnull(ysnLicensed, 0) END)
+		JOIN tblICItem i ON lo.intItemId = i.intItemId
+		JOIN tblICCommodity c ON c.intCommodityId = i.intCommodityId
+		LEFT JOIN tblICCommodityUnitMeasure um ON c.intCommodityId = um.intCommodityId
+		LEFT JOIN tblICUnitMeasure u ON um.intUnitMeasureId = u.intUnitMeasureId
+		WHERE ysnDefault = 1 
+		GROUP BY c.intCommodityId
+			,strCommodityCode
+			,cl.intCompanyLocationId
+			,cl.strLocationName
+			,intLocationId
+			,u.intUnitMeasureId
+			,u.strUnitMeasure
+			,um.intCommodityUnitMeasureId
+
+
+SELECT DISTINCT c.intCommodityId
+			,strLocationName
+			,intLocationId
+			,strCommodityCode
+			,u.intUnitMeasureId
+			,u.strUnitMeasure
+			,(	
+			SELECT SUM(dblNetHedge) dblNetHedge FROM (			
 				SELECT 
 				CASE WHEN ft.strBuySell = 'Buy' THEN (
 						ft.intNoOfContract - isnull((SELECT sum(intMatchQty) FROM tblRKOptionsMatchPnS l
@@ -371,18 +331,17 @@ FROM (
 			AND f.intLocationId= cl.intCompanyLocationId		
 			and  f.intEntityId= CASE WHEN ISNULL(@intVendorId,0)=0 then f.intEntityId else @intVendorId end
 	)t 	) dblFutNetHedge
-
-		FROM tblSMCompanyLocation cl
-		JOIN tblICItemLocation lo ON lo.intLocationId = cl.intCompanyLocationId and  lo.intLocationId  IN (
+	INTO #Future  
+		FROM   tblSMCompanyLocation cl  
+ JOIN tblRKFutOptTransaction lo ON lo.intLocationId = cl.intCompanyLocationId AND  lo.intLocationId  IN (
 													SELECT intCompanyLocationId FROM tblSMCompanyLocation
 													WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
 													WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
-													ELSE isnull(ysnLicensed, 0) END)
-		JOIN tblICItem i ON lo.intItemId = i.intItemId
-		JOIN tblICCommodity c ON c.intCommodityId = i.intCommodityId
-		LEFT JOIN tblICCommodityUnitMeasure um ON c.intCommodityId = um.intCommodityId
-		LEFT JOIN tblICUnitMeasure u ON um.intUnitMeasureId = u.intUnitMeasureId
-		WHERE ysnDefault = 1 
+													ELSE isnull(ysnLicensed, 0) END)     
+ JOIN tblICCommodity c on c.intCommodityId=lo.intCommodityId   
+LEFT JOIN tblICCommodityUnitMeasure um on c.intCommodityId=um.intCommodityId   
+LEFT JOIN tblICUnitMeasure u on um.intUnitMeasureId=u.intUnitMeasureId   
+WHERE ysnDefault = 1 
 		GROUP BY c.intCommodityId
 			,strCommodityCode
 			,cl.intCompanyLocationId
@@ -390,7 +349,72 @@ FROM (
 			,intLocationId
 			,u.intUnitMeasureId
 			,u.strUnitMeasure
-			,um.intCommodityUnitMeasureId
+			,um.intCommodityUnitMeasureId		
+
+ SELECT DISTINCT ISNULL(a.intCommodityId,b.intCommodityId) intCommodityId 
+ ,isnull(a.intLocationId,b.intLocationId) intLocationId
+ ,isnull(a.strCommodityCode,b.strCommodityCode) strCommodityCode
+ ,isnull(a.strLocationName,b.strLocationName) strLocationName
+ ,isnull(a.intUnitMeasureId,b.intUnitMeasureId) intUnitMeasureId
+ ,isnull(a.strUnitMeasure,b.strUnitMeasure) strUnitMeasure
+ ,a.OpenPurQty,a.OpenSalQty,a.ReceiptProductQty,a.OpenPurchasesQty,a.OpenSalesQty
+  ,invQty,dblCollatralSales,dblCollatralPurchase,SlsBasisDeliveries,OffSite,DP,DPCustomer,dblGrainBalance,PurBasisDelivary
+  ,OnHold,b.dblFutNetHedge,b.dblOptionNetHedge into #TempContractFutByLocation  from #Physical a
+ FULL JOIN #Future b on a.intLocationId=b.intLocationId and a.intCommodityId=b.intCommodityId		
+
+SELECT strLocationName
+	,OpenPurchasesQty
+	,OpenSalesQty
+	,intCommodityId
+	,strCommodityCode
+	,intUnitMeasureId
+	,strUnitMeasure
+	,isnull(CompanyTitled, 0)-(isnull(OpenPurchasesQty, 0) - isnull(OpenSalesQty, 0)) AS dblCompanyTitled
+	,isnull(CashExposure, 0) AS dblCaseExposure
+	,isnull(CompanyTitled, 0)  AS dblBasisExposure
+	,isnull(CompanyTitled, 0)  - isnull(ReceiptProductQty, 0) AS dblAvailForSale
+	,isnull(InHouse, 0) AS dblInHouse
+	,intLocationId
+INTO #temp
+FROM (
+	SELECT strLocationName
+		,intCommodityId
+		,strCommodityCode
+		,strUnitMeasure
+		,intUnitMeasureId
+		,intLocationId
+		,isnull(invQty, 0)+ 
+		 CASE WHEN (
+					SELECT TOP 1 ysnIncludeOffsiteInventoryInCompanyTitled
+					FROM tblRKCompanyPreference
+					) = 1 THEN isnull(OffSite, 0) ELSE 0 END + CASE WHEN (
+					SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled
+					FROM tblRKCompanyPreference
+					) = 1 THEN 0 ELSE -isnull(DP ,0) END 
+		+ (isnull(dblCollatralPurchase, 0) -isnull(dblCollatralSales, 0)) 
+		 + isnull(SlsBasisDeliveries, 0) 
+		 +(isnull(OpenPurchasesQty, 0) - isnull(OpenSalesQty, 0))
+		 AS CompanyTitled
+		,
+		isnull(invQty, 0) 
+		- isnull(PurBasisDelivary, 0)
+		 + (isnull(OpenPurQty, 0)- isnull(OpenSalQty, 0))
+		 + isnull(dblCollatralSales, 0) +
+		  isnull(SlsBasisDeliveries, 0) 
+				+CASE WHEN (
+					SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled
+					FROM tblRKCompanyPreference
+					) = 1 THEN  0 ELSE -isnull(DP ,0)  END
+					+	isnull(dblOptionNetHedge,0)+isnull(dblFutNetHedge,0)
+		AS CashExposure
+		,isnull(ReceiptProductQty, 0) ReceiptProductQty
+		,isnull(OpenPurchasesQty, 0) OpenPurchasesQty
+		,isnull(OpenSalesQty, 0) OpenSalesQty
+		,isnull(OpenPurQty, 0) OpenPurQty
+		,CASE WHEN isnull(@intVendorId, 0) = 0 THEN isnull(invQty, 0) + isnull(dblGrainBalance, 0) + isnull(OnHold, 0) --+ isnull(DP ,0)
+			ELSE isnull(DPCustomer, 0) + isnull(OnHold, 0) END AS InHouse
+	FROM (
+		Select * from #TempContractFutByLocation
 		) t
 	) t1
 	
