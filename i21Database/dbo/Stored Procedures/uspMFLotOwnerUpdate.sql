@@ -201,24 +201,24 @@ BEGIN TRY
 		END
 	END
 
-	IF @intNewItemOwnerId <> ISNULL(@intOldLotItemOwnerId, 0)
-	BEGIN
-		SELECT @intSourceId = 1
-			,@intSourceTransactionTypeId = 8
+	--IF @intNewItemOwnerId <> ISNULL(@intOldLotItemOwnerId, 0)
+	--BEGIN
+	--	SELECT @intSourceId = 1
+	--		,@intSourceTransactionTypeId = 8
 
-		EXEC [dbo].[uspICInventoryAdjustment_CreatePostOwnerChange] @intItemId = @intItemId
-			,@dtmDate = @dtmDate
-			,@intLocationId = @intLocationId
-			,@intSubLocationId = @intSubLocationId
-			,@intStorageLocationId = @intStorageLocationId
-			,@strLotNumber = @strLotNumber
-			,@intNewOwnerId = @intOwnerId
-			,@intSourceId = @intSourceId
-			,@intSourceTransactionTypeId = @intSourceTransactionTypeId
-			,@intEntityUserSecurityId = @intUserId
-			,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
-			,@strDescription = @strDescription
-	END
+	--	EXEC [dbo].[uspICInventoryAdjustment_CreatePostOwnerChange] @intItemId = @intItemId
+	--		,@dtmDate = @dtmDate
+	--		,@intLocationId = @intLocationId
+	--		,@intSubLocationId = @intSubLocationId
+	--		,@intStorageLocationId = @intStorageLocationId
+	--		,@strLotNumber = @strLotNumber
+	--		,@intNewOwnerId = @intOwnerId
+	--		,@intSourceId = @intSourceId
+	--		,@intSourceTransactionTypeId = @intSourceTransactionTypeId
+	--		,@intEntityUserSecurityId = @intUserId
+	--		,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+	--		,@strDescription = @strDescription
+	--END
 
 	IF @ysnUpdateOwnerOnly = 0
 	BEGIN
