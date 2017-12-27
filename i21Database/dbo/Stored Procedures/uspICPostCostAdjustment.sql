@@ -93,6 +93,7 @@ DECLARE @intId AS INT
 		,@intLotId AS INT 
 		,@intFobPointId AS TINYINT
 		,@intInTransitSourceLocationId INT 
+		,@intOtherChargeItemId INT 
 
 		,@strTransactionId_Batch AS NVARCHAR(40) 
 
@@ -142,6 +143,7 @@ BEGIN
 			,[intRelatedInventoryTransactionId]	
 			,[intFobPointId]
 			,[intInTransitSourceLocationId]
+			,[intOtherChargeItemId]
 	)
 	SELECT 
 			[intItemId] 
@@ -169,6 +171,7 @@ BEGIN
 			,[intRelatedInventoryTransactionId]
 			,[intFobPointId]
 			,[intInTransitSourceLocationId]
+			,[intOtherChargeItemId]
 	FROM	@ItemsToAdjust 
 	ORDER BY	
 		[intItemId]
@@ -210,6 +213,7 @@ SELECT  intId
 		,intLotId
 		,intFobPointId
 		,intInTransitSourceLocationId
+		,intOtherChargeItemId
 FROM	@Internal_ItemsToAdjust
 
 OPEN loopItemsToAdjust;
@@ -240,6 +244,7 @@ FETCH NEXT FROM loopItemsToAdjust INTO
 	,@intLotId
 	,@intFobPointId
 	,@intInTransitSourceLocationId
+	,@intOtherChargeItemId
 ;
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -314,6 +319,7 @@ BEGIN
 			,@intFobPointId 
 			,@intInTransitSourceLocationId 
 			,@ysnPost
+			,@intOtherChargeItemId 
 	END TRY
 	BEGIN CATCH
 		-- Get the error details. 
@@ -354,6 +360,7 @@ BEGIN
 			,@intFobPointId 
 			,@intInTransitSourceLocationId 
 			,@ysnPost
+			,@intOtherChargeItemId 
 	END TRY
 	BEGIN CATCH
 		-- Get the error details. 
@@ -394,6 +401,7 @@ BEGIN
 			,@intFobPointId 
 			,@intInTransitSourceLocationId 
 			,@ysnPost
+			,@intOtherChargeItemId 
 	END TRY
 	BEGIN CATCH
 		-- Get the error details. 
@@ -434,6 +442,7 @@ BEGIN
 			,@intFobPointId 
 			,@intInTransitSourceLocationId 
 			,@ysnPost
+			,@intOtherChargeItemId 
 	END TRY
 	BEGIN CATCH
 		-- Get the error details. 
@@ -475,6 +484,7 @@ BEGIN
 			,@intInTransitSourceLocationId 
 			,@strActualCostId 
 			,@ysnPost
+			,@intOtherChargeItemId 
 	END TRY
 	BEGIN CATCH
 		-- Get the error details. 
@@ -535,6 +545,7 @@ BEGIN
 		,@intLotId
 		,@intFobPointId
 		,@intInTransitSourceLocationId
+		,@intOtherChargeItemId
 	;
 END;
 -----------------------------------------------------------------------------------------------------------------------------

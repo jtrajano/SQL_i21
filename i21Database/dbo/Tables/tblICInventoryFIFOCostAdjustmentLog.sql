@@ -25,6 +25,7 @@
 		[intRelatedTransactionId] INT,
 		[intRelatedTransactionDetailId] INT,
 		[intRelatedInventoryTransactionId] INT,
+		[intOtherChargeItemId] INT,
 		[intCreatedUserId] INT NULL, 
 		[intCreatedEntityUserId] INT NULL, 
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 
