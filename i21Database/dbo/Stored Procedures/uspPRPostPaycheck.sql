@@ -140,7 +140,8 @@ IF (@ysnPost = 1)
 BEGIN
 	--Insert Earning Distribution to Temporary Table
 	CREATE TABLE #tmpEarning (
-		intPaycheckId			INT
+		intTmpEarningId			INT IDENTITY(1, 1)
+		,intPaycheckId			INT
 		,intEmployeeEarningId	INT
 		,intTypeEarningId		INT
 		,intAccountId			INT
