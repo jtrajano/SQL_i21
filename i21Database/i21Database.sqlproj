@@ -5967,6 +5967,7 @@
     <Build Include="dbo\Views\vyuBBBuybackExport.sql" />
     <Build Include="dbo\Stored Procedures\uspBBUnpostBuyback.sql" />
     <Build Include="dbo\Views\vyuRKM2MContractCost.sql" />
+    <Build Include="dbo\Functions\fnGLGetCMGLDetailBalance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
