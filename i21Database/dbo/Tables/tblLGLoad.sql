@@ -220,3 +220,39 @@ INCLUDE (
 	,[dtmStuffingDate]
 ) 
 GO
+
+CREATE STATISTICS [_dta_stat_1172915250_94_93] ON [dbo].[tblLGLoad]([ysnPosted], [intShipmentStatus])
+GO
+
+CREATE STATISTICS [_dta_stat_1172915250_1_93] ON [dbo].[tblLGLoad]([intLoadId], [intShipmentStatus])
+GO
+
+CREATE STATISTICS [_dta_stat_1172915250_5_3_93] ON [dbo].[tblLGLoad]([intPurchaseSale], [strLoadNumber], [intShipmentStatus])
+GO
+
+CREATE STATISTICS [_dta_stat_1172915250_5_93_94] ON [dbo].[tblLGLoad]([intPurchaseSale], [intShipmentStatus], [ysnPosted])
+GO
+
+CREATE STATISTICS [_dta_stat_1172915250_3_94_93_5] ON [dbo].[tblLGLoad]([strLoadNumber], [ysnPosted], [intShipmentStatus], [intPurchaseSale])
+GO
+
+CREATE STATISTICS [_dta_stat_1172915250_1_3_94_93] ON [dbo].[tblLGLoad]([intLoadId], [strLoadNumber], [ysnPosted], [intShipmentStatus])
+GO
+
+CREATE STATISTICS [_dta_stat_1172915250_1_94_93_5_3] ON [dbo].[tblLGLoad]([intLoadId], [ysnPosted], [intShipmentStatus], [intPurchaseSale], [strLoadNumber])
+GO
+
+CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoad_197_1172915250__K5_K1] ON [dbo].[tblLGLoad]
+(
+	[intPurchaseSale] ASC,
+	[intLoadId] ASC
+)WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoad_197_1172915250__K1_K5] ON [dbo].[tblLGLoad]
+(
+	[intLoadId] ASC,
+	[intPurchaseSale] ASC
+)WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+GO
+CREATE STATISTICS [_dta_stat_1172915250_103_5_1] ON [dbo].[tblLGLoad]([ysnQuantityFinal], [intPurchaseSale], [intLoadId])
