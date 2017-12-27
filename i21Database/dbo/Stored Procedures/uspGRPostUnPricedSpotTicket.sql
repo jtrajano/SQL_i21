@@ -84,7 +84,8 @@ BEGIN TRY
 				DELETE
 				FROM @voucherDetailStorage
 
-				INSERT INTO @voucherDetailStorage (
+				INSERT INTO @voucherDetailStorage 
+				(
 					 [intScaleTicketId]
 					,[intItemId]
 					,[intAccountId]
@@ -98,22 +99,22 @@ BEGIN TRY
 					,[dblCostUnitQty]
 					,[dblUnitQty]
 					,[dblNetWeight]
-					)
+				)
 				--Inventory Item
 				SELECT 
-					 [intScaleTicketId] = SpotTicket.intTicketId
-					,[intItemId] = @intItemId
-					,[intAccountId] = NULL
-					,[dblQtyReceived] = SpotTicket.dblUnits
-					,[strMiscDescription] = Item.strItemNo
-					,[dblCost] = @dblCashPrice
+					 [intScaleTicketId]    = SpotTicket.intTicketId
+					,[intItemId]           = @intItemId
+					,[intAccountId]        = NULL
+					,[dblQtyReceived]      = SpotTicket.dblUnits
+					,[strMiscDescription]  = Item.strItemNo
+					,[dblCost]			   = @dblCashPrice
 					,[intContractHeaderId] = NULL
 					,[intContractDetailId] = NULL
-					,[intUnitOfMeasureId] = SC.intItemUOMIdTo
-					,[dblWeightUnitQty] = 1
-					,[dblCostUnitQty] = 1
-					,[dblUnitQty] = 1
-					,[dblNetWeight] = 0
+					,[intUnitOfMeasureId]  = SC.intItemUOMIdTo
+					,[dblWeightUnitQty]	   = 1
+					,[dblCostUnitQty]      = 1
+					,[dblUnitQty]	       = 1
+					,[dblNetWeight]        = 0
 				FROM tblGRUnPricedSpotTicket SpotTicket
 				JOIN tblSCTicket SC ON SC.intTicketId = SpotTicket.intTicketId
 				JOIN tblICItem Item ON Item.intItemId = SC.intItemId
@@ -124,19 +125,19 @@ BEGIN TRY
 				
 				--Discount Item
 				SELECT 
-					 [intScaleTicketId] = SpotTicket.intTicketId
-					,[intItemId] = DItem.intItemId
-					,[intAccountId] = NULL
-					,[dblQtyReceived] = SpotTicket.dblUnits
-					,[strMiscDescription] = DItem.strItemNo
-					,[dblCost] = QM.dblDiscountDue
+					 [intScaleTicketId]    = SpotTicket.intTicketId
+					,[intItemId]		   = DItem.intItemId
+					,[intAccountId]        = NULL
+					,[dblQtyReceived]      = SpotTicket.dblUnits
+					,[strMiscDescription]  = DItem.strItemNo
+					,[dblCost]             = QM.dblDiscountDue
 					,[intContractHeaderId] = NULL
 					,[intContractDetailId] = NULL
-					,[intUnitOfMeasureId] = SC.intItemUOMIdTo
-					,[dblWeightUnitQty] = 1
-					,[dblCostUnitQty] = 1
-					,[dblUnitQty] = 1
-					,[dblNetWeight] = 0
+					,[intUnitOfMeasureId]  = SC.intItemUOMIdTo
+					,[dblWeightUnitQty]	   = 1
+					,[dblCostUnitQty]      = 1
+					,[dblUnitQty]          = 1
+					,[dblNetWeight]        = 0
 				FROM tblGRUnPricedSpotTicket SpotTicket
 				JOIN tblSCTicket SC ON SC.intTicketId = SpotTicket.intTicketId
 				JOIN tblICItem Item ON Item.intItemId = SC.intItemId
@@ -151,19 +152,19 @@ BEGIN TRY
 				UNION
 				
 				--Fee Item
-				SELECT [intScaleTicketId] = SpotTicket.intTicketId
-					,[intItemId] = Item.intItemId
-					,[intAccountId] = NULL
-					,[dblQtyReceived] = SpotTicket.dblUnits
-					,[strMiscDescription] = Item.strItemNo
-					,[dblCost] = SC.dblTicketFees
+				SELECT [intScaleTicketId]  = SpotTicket.intTicketId
+					,[intItemId]           = Item.intItemId
+					,[intAccountId]        = NULL
+					,[dblQtyReceived]      = SpotTicket.dblUnits
+					,[strMiscDescription]  = Item.strItemNo
+					,[dblCost]			   = SC.dblTicketFees
 					,[intContractHeaderId] = NULL
 					,[intContractDetailId] = NULL
-					,[intUnitOfMeasureId] = SC.intItemUOMIdTo
-					,[dblWeightUnitQty] = 1
-					,[dblCostUnitQty] = 1
-					,[dblUnitQty] = 1
-					,[dblNetWeight] = 0
+					,[intUnitOfMeasureId]  = SC.intItemUOMIdTo
+					,[dblWeightUnitQty]    = 1
+					,[dblCostUnitQty]      = 1
+					,[dblUnitQty]          = 1
+					,[dblNetWeight]		   = 0
 				FROM tblGRUnPricedSpotTicket SpotTicket
 				JOIN tblSCTicket SC ON SC.intTicketId = SpotTicket.intTicketId
 				JOIN tblSCScaleSetup Setup ON Setup.intScaleSetupId = SC.intScaleSetupId
@@ -288,8 +289,9 @@ BEGIN TRY
 				DELETE
 				FROM @EntriesForInvoice
 
-				INSERT INTO @EntriesForInvoice (
-					[strTransactionType]
+				INSERT INTO @EntriesForInvoice 
+				(
+					 [strTransactionType]
 					,[strType]
 					,[strSourceTransaction]
 					,[intSourceId]
@@ -362,80 +364,81 @@ BEGIN TRY
 					,[ysnLeaseBilling]
 					,[ysnVirtualMeterReading]
 					,[intCustomerStorageId]
-					)
-				SELECT [strTransactionType] = 'Invoice'
-					,[strType] = 'Standard'
-					,[strSourceTransaction] = 'Sale OffSite'
-					,[intSourceId] = NULL
-					,[strSourceId] = ''
-					,[intInvoiceId] = @InvoiceId --NULL Value will create new invoice
-					,[intEntityCustomerId] = @intEntityId
-					,[intCompanyLocationId] = @intCompanyLocationId
-					,[intCurrencyId] = @intCurrencyId
-					,[intTermId] = @intTermId
-					,[dtmDate] = GETDATE()
-					,[dtmDueDate] = NULL
-					,[dtmShipDate] = NULL
-					,[intEntitySalespersonId] = NULL
-					,[intFreightTermId] = NULL
-					,[intShipViaId] = NULL
-					,[intPaymentMethodId] = NULL
-					,[strInvoiceOriginId] = NULL --''
-					,[strPONumber] = NULL --''
-					,[strBOLNumber] = NULL --''
-					,[strDeliverPickup] = NULL --''
-					,[strComments] = NULL --''
-					,[intShipToLocationId] = NULL
-					,[intBillToLocationId] = NULL
-					,[ysnTemplate] = 0
-					,[ysnForgiven] = 0
-					,[ysnCalculated] = 0
-					,[ysnSplitted] = 0
-					,[intPaymentId] = NULL
-					,[intSplitId] = NULL
-					,[strActualCostId] = NULL --''
-					,[intEntityId] = @UserEntityId
-					,[ysnResetDetails] = 0
-					,[ysnPost] = NULL
-					,[intInvoiceDetailId] = NULL
-					,[intItemId] = @intItemId
-					,[ysnInventory] = 1
-					,[strItemDescription] = @ItemDescription
-					,[intOrderUOMId] =SC.intItemUOMIdTo
-					,[intItemUOMId] = SC.intItemUOMIdTo
-					,[dblQtyOrdered] = dblUnits
-					,[dblQtyShipped] = dblUnits
-					,[dblDiscount] = 0
-					,[dblPrice] = @dblCashPrice
-					,[ysnRefreshPrice] = 0
-					,[strMaintenanceType] = ''
-					,[strFrequency] = ''
-					,[dtmMaintenanceDate] = NULL
-					,[dblMaintenanceAmount] = NULL
-					,[dblLicenseAmount] = NULL
-					,[intTaxGroupId] = NULL
-					,[ysnRecomputeTax] = 1
-					,[intSCInvoiceId] = NULL
-					,[strSCInvoiceNumber] = ''
-					,[intInventoryShipmentItemId] = NULL
-					,[strShipmentNumber] = ''
-					,[intSalesOrderDetailId] = NULL
-					,[strSalesOrderNumber] = ''
-					,[intContractHeaderId] = NULL
-					,[intContractDetailId] = NULL
-					,[intShipmentPurchaseSalesContractId] = NULL
-					,[intTicketId] = NULL
-					,[intTicketHoursWorkedId] = NULL
-					,[intSiteId] = NULL
-					,[strBillingBy] = ''
-					,[dblPercentFull] = NULL
-					,[dblNewMeterReading] = NULL
-					,[dblPreviousMeterReading] = NULL
-					,[dblConversionFactor] = NULL
-					,[intPerformerId] = NULL
-					,[ysnLeaseBilling] = NULL
-					,[ysnVirtualMeterReading] = NULL
-					,[intCustomerStorageId] = SC.intTicketId
+				)
+				SELECT 
+				     [strTransactionType]					= 'Invoice'
+					,[strType]								= 'Standard'
+					,[strSourceTransaction]					= 'Zero Priced Spot Tickets'
+					,[intSourceId]							= NULL
+					,[strSourceId]							= ''
+					,[intInvoiceId]							= @InvoiceId --NULL Value will create new invoice
+					,[intEntityCustomerId]					= @intEntityId
+					,[intCompanyLocationId]					= @intCompanyLocationId
+					,[intCurrencyId]						= @intCurrencyId
+					,[intTermId]							= @intTermId
+					,[dtmDate]								= GETDATE()
+					,[dtmDueDate]							= NULL
+					,[dtmShipDate]							= NULL
+					,[intEntitySalespersonId]				= NULL
+					,[intFreightTermId]						= NULL
+					,[intShipViaId]							= NULL
+					,[intPaymentMethodId]					= NULL
+					,[strInvoiceOriginId]					= NULL --''
+					,[strPONumber]							= NULL --''
+					,[strBOLNumber]							= NULL --''
+					,[strDeliverPickup]						= NULL --''
+					,[strComments]							= NULL --''
+					,[intShipToLocationId]					= NULL
+					,[intBillToLocationId]					= NULL
+					,[ysnTemplate]							= 0
+					,[ysnForgiven]							= 0
+					,[ysnCalculated]						= 0
+					,[ysnSplitted]							= 0
+					,[intPaymentId]							= NULL
+					,[intSplitId]							= NULL
+					,[strActualCostId]						= NULL --''
+					,[intEntityId]							= @UserEntityId
+					,[ysnResetDetails]						= 0
+					,[ysnPost]								= NULL
+					,[intInvoiceDetailId]					= NULL
+					,[intItemId]							= @intItemId
+					,[ysnInventory]							= 1
+					,[strItemDescription]					= @ItemDescription
+					,[intOrderUOMId]						= SC.intItemUOMIdTo
+					,[intItemUOMId]							= SC.intItemUOMIdTo
+					,[dblQtyOrdered]						= dblUnits
+					,[dblQtyShipped]						= dblUnits
+					,[dblDiscount]							= 0
+					,[dblPrice]							    = @dblCashPrice
+					,[ysnRefreshPrice]						= 0
+					,[strMaintenanceType]					= ''
+					,[strFrequency]							= ''
+					,[dtmMaintenanceDate]					= NULL
+					,[dblMaintenanceAmount]					= NULL
+					,[dblLicenseAmount]						= NULL
+					,[intTaxGroupId]						= NULL
+					,[ysnRecomputeTax]						= 1
+					,[intSCInvoiceId]						= NULL
+					,[strSCInvoiceNumber]					= ''
+					,[intInventoryShipmentItemId]           = NULL
+					,[strShipmentNumber]					= ''
+					,[intSalesOrderDetailId]				= NULL
+					,[strSalesOrderNumber]					= ''
+					,[intContractHeaderId]					= NULL
+					,[intContractDetailId]					= NULL
+					,[intShipmentPurchaseSalesContractId]   = NULL
+					,[intTicketId]							= SC.intTicketId
+					,[intTicketHoursWorkedId]				= NULL
+					,[intSiteId]							= NULL
+					,[strBillingBy]							= ''
+					,[dblPercentFull]						= NULL
+					,[dblNewMeterReading]					= NULL
+					,[dblPreviousMeterReading]				= NULL
+					,[dblConversionFactor]					= NULL
+					,[intPerformerId]						= NULL
+					,[ysnLeaseBilling]						= NULL
+					,[ysnVirtualMeterReading]				= NULL
+					,[intCustomerStorageId]					= NULL
 				FROM tblGRUnPricedSpotTicket SpotTicket
 				JOIN tblSCTicket SC ON SC.intTicketId = SpotTicket.intTicketId
 				JOIN tblICItem Item ON Item.intItemId = SC.intItemId
@@ -457,7 +460,7 @@ BEGIN TRY
 					COMMIT TRANSACTION
 
 					UPDATE SpotTicket
-					SET intBillId = CONVERT(INT,@CreatedIvoices)
+					SET intInvoiceId = CONVERT(INT,@CreatedIvoices)
 					FROM tblGRUnPricedSpotTicket SpotTicket
 					JOIN tblSCTicket SC ON SC.intTicketId = SpotTicket.intTicketId
 					WHERE SpotTicket.intUnPricedId = @intUnPricedId AND SC.intEntityId = @intEntityId
@@ -480,6 +483,10 @@ BEGIN TRY
 				FROM @tblEntity
 				WHERE intEntityKey > @intEntityKey
 			END
+
+			UPDATE tblGRUnPriced
+			SET ysnPosted = 1
+			WHERE intUnPricedId = @intUnPricedId
 		END
 	END
 
