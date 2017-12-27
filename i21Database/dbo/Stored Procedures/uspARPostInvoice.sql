@@ -1400,13 +1400,13 @@ BEGIN TRY
 										@dblMaxQtyToProduce		= @dblMaxQuantity OUT
 								END
 						END
-					--ELSE
-					--	BEGIN
-					--		EXEC dbo.uspMFReverseAutoBlend
-					--			@intSalesOrderDetailId	= NULL,
-					--			@intInvoiceDetailId		= @intInvoiceDetailId,
-					--			@intUserId				= @userId 
-					--	END						
+					ELSE
+						BEGIN
+							EXEC dbo.uspMFReverseAutoBlend
+								@intSalesOrderDetailId	= NULL,
+								@intInvoiceDetailId		= @intInvoiceDetailId,
+								@intUserId				= @userId 
+						END						
 					END TRY
 					BEGIN CATCH
 						SELECT @ErrorMerssage = ERROR_MESSAGE()
