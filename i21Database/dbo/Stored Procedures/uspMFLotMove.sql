@@ -7,7 +7,6 @@
 	,@blnValidateLotReservation BIT = 0
 	,@blnInventoryMove BIT = 0
 	,@dtmDate DATETIME = NULL
-	,@strDescription NVARCHAR(50) = ''
 	,@strReasonCode NVARCHAR(MAX) = NULL
 	,@strNotes NVARCHAR(MAX) = NULL
 AS
@@ -48,6 +47,9 @@ BEGIN TRY
 		,@dblDefaultResidueQty NUMERIC(38, 20)
 		,@dblDestinationLotQty NUMERIC(38, 20)
 		,@intTransactionCount INT
+		,@strDescription nvarchar(MAX)
+
+	Select @intTransactionCount = @@TRANCOUNT
 
 	SELECT @strDescription = Ltrim(isNULL(@strReasonCode, '') + ' ' + isNULL(@strNotes, ''))
 

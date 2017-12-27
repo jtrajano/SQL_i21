@@ -36,6 +36,8 @@ BEGIN TRY
 		,@intParentLotId INT
 		,@strDescription NVARCHAR(MAX)
 
+	SELECT @intTransactionCount = @@TRANCOUNT
+
 	SELECT @strDescription = Ltrim(isNULL(@strReasonCode, '') + ' ' + isNULL(@strNotes, ''))
 
 	SELECT @intItemId = intItemId
