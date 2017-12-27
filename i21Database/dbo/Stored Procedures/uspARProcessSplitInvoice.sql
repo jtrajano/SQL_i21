@@ -9,7 +9,7 @@ BEGIN
 	DECLARE @splitDetails TABLE(intSplitId INT, intSplitDetailId INT, intEntityId INT, dblSplitPercent NUMERIC(18,6))
 	DECLARE @intSplitId			INT
 	      , @intSplitDetailId	INT
-		  , @dtmDate			DATETIME
+		  , @dtmDate			DATETIME = GETDATE()
 		  , @intSplitEntityId	INT
 		  , @dblSplitPercent	NUMERIC(18,6)
 		  , @newInvoiceNumber	NVARCHAR(50)	
@@ -18,27 +18,24 @@ BEGIN
 		  , @newBillToId		INT
 		  , @customerId			INT
 
-	SET @dtmDate = GETDATE()
-
-	SELECT @intSplitId = intSplitId, @customerId = intEntityCustomerId
-	FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId
+	SELECT @intSplitId = intSplitId
+		 , @customerId = intEntityCustomerId
+	FROM dbo.tblARInvoice 
+	WHERE intInvoiceId = @intInvoiceId
 
 	INSERT INTO @splitDetails(intSplitDetailId, intEntityId, dblSplitPercent)
-	SELECT EMESD.intSplitDetailId, EMESD.intEntityId, EMESD.dblSplitPercent
-	FROM
-		[tblEMEntitySplitDetail] EMESD
-	INNER JOIN
-		[tblARCustomer] ARC
+	SELECT EMESD.intSplitDetailId
+		 , EMESD.intEntityId
+		 , EMESD.dblSplitPercent
+	FROM dbo.tblEMEntitySplitDetail EMESD
+	INNER JOIN dbo.tblARCustomer ARC
 			ON EMESD.[intEntityId] = ARC.[intEntityId] 
 	WHERE EMESD.intSplitId = @intSplitId
 
 	WHILE EXISTS(SELECT NULL FROM @splitDetails)
 		BEGIN
-			DECLARE @newInvoiceId	INT
-				  , @newCustomerId	INT
-				  
-			SELECT @intSplitDetailId = NULL
-			     , @newInvoiceNumber = NULL			
+			DECLARE @newInvoiceId	INT = NULL
+				  , @newCustomerId	INT = NULL
 			
 			SELECT TOP 1 @intSplitDetailId = intSplitDetailId FROM @splitDetails WHERE intEntityId <> @customerId ORDER BY intSplitDetailId
 
@@ -104,13 +101,19 @@ BEGIN
 	  , dblSplitPercent     = ISNULL(@dblSplitPercent, 1)
 	WHERE ISNULL(@intSplitEntityId, 0) <> 0 
 	AND intInvoiceId = @intInvoiceId
-
 		
 	INSERT INTO @InvoiceDetails
-	SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE  ISNULL(@intSplitEntityId, 0) <> 0 AND intInvoiceId = @intInvoiceId 
+	SELECT intInvoiceDetailId 
+	FROM tblARInvoiceDetail 
+	WHERE ISNULL(@intSplitEntityId, 0) <> 0 
+	  AND intInvoiceId = @intInvoiceId 
 
-	DECLARE @TransactionType varchar(20)
-	SET @TransactionType = (SELECT strTransactionType FROM tblARInvoice WHERE  ISNULL(@intSplitEntityId, 0) <> 0 AND intInvoiceId = @intInvoiceId)
+	DECLARE @TransactionType NVARCHAR(20)
+	
+	SELECT TOP 1 @TransactionType = strTransactionType 
+	FROM dbo.tblARInvoice 
+	WHERE ISNULL(@intSplitEntityId, 0) <> 0 
+	  AND intInvoiceId = @intInvoiceId
 
 	WHILE EXISTS(SELECT NULL FROM @InvoiceDetails)
 		BEGIN
@@ -118,12 +121,9 @@ BEGIN
 			SELECT TOP 1 @intInvoiceDetailId = intInvoiceDetailId FROM @InvoiceDetails ORDER BY intInvoiceDetailId
 
 			UPDATE tblARInvoiceDetail
-			SET dblDiscount		= dblDiscount --* @dblSplitPercent
-			 --, dblPrice		= dblPrice * @dblSplitPercent  -- AR-2505
+			SET dblDiscount		= dblDiscount
 			  , dblTotalTax	    = dblTotalTax * @dblSplitPercent
 			  , dblTotal		= dblTotal * @dblSplitPercent
-			  --, dblQtyOrdered	= dblQtyShipped * @dblSplitPercent
-			
 			  , dblQtyOrdered	= (CASE WHEN  @TransactionType='Invoice' 
 										AND ((intInventoryShipmentItemId is not null OR intSalesOrderDetailId is not null) 
 										OR (intInventoryShipmentItemId is null OR intSalesOrderDetailId is null))
@@ -140,4 +140,21 @@ BEGIN
 		END
 	
 	SELECT @invoicesToAdd = ISNULL(@invoicesToAdd, '') + CONVERT(NVARCHAR(20), @intInvoiceId)	
+
+	EXEC dbo.uspARReComputeInvoiceTaxes @intInvoiceId
+
+	DECLARE @AddedInvoices AS [dbo].[Id]
+	INSERT INTO @AddedInvoices([intId])
+	SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@invoicesToAdd)
+
+	WHILE EXISTS(SELECT NULL FROM @AddedInvoices)
+		BEGIN
+			DECLARE @AddedInvoiceId INT
+
+			SELECT TOP 1 @AddedInvoiceId = [intId] FROM @AddedInvoices
+
+			EXEC dbo.uspARReComputeInvoiceTaxes @AddedInvoiceId
+
+			DELETE FROM @AddedInvoices WHERE [intId] = @AddedInvoiceId
+		END
 END

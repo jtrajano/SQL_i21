@@ -290,14 +290,13 @@ BEGIN
 								,[intItemId] 
 								,[strItemDescription]
 								,[intItemUOMId]
-								--,[dblQtyShipped] * @dblSplitPercent
 								,(CASE WHEN  @TransactionType='Invoice' 
 										AND ((intInventoryShipmentItemId is not null OR intSalesOrderDetailId is not null) 
 										OR (intInventoryShipmentItemId is null OR intSalesOrderDetailId is null))
 			                            THEN dblQtyShipped * @dblSplitPercent  ELSE 0 END)
 								,[dblQtyShipped] * @dblSplitPercent
 								,[dblDiscount]	  
-								,[dblPrice]      --* @dblSplitPercent -- AR-2505
+								,[dblPrice]
 								,[dblTotalTax]   * @dblSplitPercent
 								,[dblTotal]      * @dblSplitPercent
 								,[intAccountId] 
@@ -456,9 +455,7 @@ BEGIN
 			DELETE FROM @InvoiceDetails WHERE [intInvoiceDetailId] = @InvoiceDetailId
 		END		
 	
-	IF ISNULL(@SplitDetailId, 0) = 0 
-		EXEC dbo.uspARReComputeInvoiceAmounts @NewInvoiceId
-	
+	EXEC dbo.uspARReComputeInvoiceTaxes @NewInvoiceId
 	EXEC dbo.uspARInsertTransactionDetail @NewInvoiceId
 	EXEC dbo.uspARUpdateInvoiceIntegrations @NewInvoiceId, 0, @UserId		
 
