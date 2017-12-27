@@ -149,3 +149,124 @@ INCLUDE (
 	,[dblQuantity]
 ) 
 GO
+CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoadDetail_197_1412916105__K3_K1_K9_10_13_15_16_17_19] ON [dbo].[tblLGLoadDetail]
+(
+       [intLoadId] ASC,
+       [intLoadDetailId] ASC,
+       [intPContractDetailId] ASC
+)
+INCLUDE (     [intSContractDetailId],
+       [dblQuantity],
+       [dblGross],
+       [dblTare],
+       [dblNet],
+       [dblDeliveredQuantity]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+go
+
+CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoadDetail_197_1412916105__K3_K1_K9] ON [dbo].[tblLGLoadDetail]
+(
+       [intLoadId] ASC,
+       [intLoadDetailId] ASC,
+       [intPContractDetailId] ASC
+)WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoadDetail_197_1412916105__K35_K1_K10_K3_K13] ON [dbo].[tblLGLoadDetail]
+(
+	[intPickLotDetailId] ASC,
+	[intLoadDetailId] ASC,
+	[intSContractDetailId] ASC,
+	[intLoadId] ASC,
+	[dblQuantity] ASC
+)WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoadDetail_197_1412916105__K1_K10_K3_K13] ON [dbo].[tblLGLoadDetail]
+(
+	[intLoadDetailId] ASC,
+	[intSContractDetailId] ASC,
+	[intLoadId] ASC,
+	[dblQuantity] ASC
+)WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+GO
+
+CREATE STATISTICS [_dta_stat_1412916105_9_35_1_10] ON [dbo].[tblLGLoadDetail]([intPContractDetailId], [intPickLotDetailId], [intLoadDetailId], [intSContractDetailId])
+GO
+
+CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoadDetail_197_1412916105__K35_K1_K3_K10_K9_K13] ON [dbo].[tblLGLoadDetail]
+(
+	[intPickLotDetailId] ASC,
+	[intLoadDetailId] ASC,
+	[intLoadId] ASC,
+	[intSContractDetailId] ASC,
+	[intPContractDetailId] ASC,
+	[dblQuantity] ASC
+)WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoadDetail_197_1412916105__K9_K1_K35_K3_K10_K13] ON [dbo].[tblLGLoadDetail]
+(
+	[intPContractDetailId] ASC,
+	[intLoadDetailId] ASC,
+	[intPickLotDetailId] ASC,
+	[intLoadId] ASC,
+	[intSContractDetailId] ASC,
+	[dblQuantity] ASC
+)WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoadDetail_197_1412916105__K3_K1_K9_K13_K10_K35] ON [dbo].[tblLGLoadDetail]
+(
+	[intLoadId] ASC,
+	[intLoadDetailId] ASC,
+	[intPContractDetailId] ASC,
+	[dblQuantity] ASC,
+	[intSContractDetailId] ASC,
+	[intPickLotDetailId] ASC
+)WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoadDetail_197_1412916105__K1_K3_K35_K10_K9_K13] ON [dbo].[tblLGLoadDetail]
+(
+	[intLoadDetailId] ASC,
+	[intLoadId] ASC,
+	[intPickLotDetailId] ASC,
+	[intSContractDetailId] ASC,
+	[intPContractDetailId] ASC,
+	[dblQuantity] ASC
+)WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoadDetail_197_1412916105__K1_K13_K10_3_35] ON [dbo].[tblLGLoadDetail]
+(
+	[intLoadDetailId] ASC,
+	[dblQuantity] ASC,
+	[intSContractDetailId] ASC
+)
+INCLUDE ( 	[intLoadId],
+	[intPickLotDetailId]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoadDetail_197_1412916105__K1_K13_K10_3] ON [dbo].[tblLGLoadDetail]
+(
+	[intLoadDetailId] ASC,
+	[dblQuantity] ASC,
+	[intSContractDetailId] ASC
+)
+INCLUDE ( 	[intLoadId]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+GO
+
+CREATE STATISTICS [_dta_stat_1412916105_1_10_35] ON [dbo].[tblLGLoadDetail]([intLoadDetailId], [intSContractDetailId], [intPickLotDetailId])
+GO
+
+CREATE STATISTICS [_dta_stat_1412916105_3_1_10_13] ON [dbo].[tblLGLoadDetail]([intLoadId], [intLoadDetailId], [intSContractDetailId], [dblQuantity])
+GO
+
+CREATE STATISTICS [_dta_stat_1412916105_1_9_35_3] ON [dbo].[tblLGLoadDetail]([intLoadDetailId], [intPContractDetailId], [intPickLotDetailId], [intLoadId])
+GO
+
+CREATE STATISTICS [_dta_stat_1412916105_35_3_1_10_13] ON [dbo].[tblLGLoadDetail]([intPickLotDetailId], [intLoadId], [intLoadDetailId], [intSContractDetailId], [dblQuantity])
+GO
+
+CREATE STATISTICS [_dta_stat_1412916105_1_13_9_10_35] ON [dbo].[tblLGLoadDetail]([intLoadDetailId], [dblQuantity], [intPContractDetailId], [intSContractDetailId], [intPickLotDetailId])
+GO
