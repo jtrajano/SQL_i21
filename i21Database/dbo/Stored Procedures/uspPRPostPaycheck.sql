@@ -302,20 +302,20 @@ BEGIN
 
 		WHILE (@dblFullAmount > 0)
 		BEGIN
-			SELECT TOP 1 @intTmpEarningId = intTmpEarningId FROM #tmpEarningAmount WHERE intTypeEarningId = @intTypeEarningId
+			SELECT TOP 1 @intTmpEarningId = intTypeEarningId FROM #tmpEarningAmount WHERE intTypeEarningId = @intTypeEarningId
 
 			IF ((SELECT COUNT(1) FROM #tmpEarningAmount WHERE intTypeEarningId = @intTypeEarningId) = 1) 
 				BEGIN
-					UPDATE #tmpEarning SET dblAmount = @dblFullAmount WHERE intTmpEarningId = @intTmpEarningId
+					UPDATE #tmpEarning SET dblAmount = @dblFullAmount WHERE intTypeEarningId = @intTmpEarningId
 					SELECT @dblFullAmount = 0.000000
 				END
 			ELSE
 				BEGIN
-					SELECT @dblFullAmount = @dblFullAmount - ROUND(dblAmount * (dblPercentage / 100.000000), 2) FROM #tmpEarning WHERE intTmpEarningId = @intTmpEarningId
-					UPDATE #tmpEarning SET dblAmount = ROUND(dblAmount * (dblPercentage / 100.000000), 2) WHERE intTmpEarningId = @intTmpEarningId
+					SELECT @dblFullAmount = @dblFullAmount - ROUND(dblAmount * (dblPercentage / 100.000000), 2) FROM #tmpEarning WHERE intTypeEarningId = @intTmpEarningId
+					UPDATE #tmpEarning SET dblAmount = ROUND(dblAmount * (dblPercentage / 100.000000), 2) WHERE intTypeEarningId = @intTmpEarningId
 				END
 
-			DELETE FROM #tmpEarningAmount WHERE intTmpEarningId = @intTmpEarningId
+			DELETE FROM #tmpEarningAmount WHERE intTypeEarningId = @intTmpEarningId
 		END
 
 		DELETE FROM #tmpEarningType WHERE intTypeEarningId = @intTypeEarningId
