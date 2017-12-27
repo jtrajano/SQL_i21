@@ -619,8 +619,8 @@ SET @batchIdUsed = @batchId;
 			EXEC [dbo].[uspSMGetStartingNumber] 126, @issueStkNo out;
 			IF (@certificateNo = '' OR @certificateNo IS NULL)
 			BEGIN
-				INSERT INTO tblPATIssueStock(strIssueNo, intCustomerPatronId, intStockId, strCertificateNo, strStockStatus, dblSharesNo, dtmIssueDate, strActivityStatus, dblParValue, dblFaceValue, ysnPosted, intConcurrencyId)
-				SELECT @issueStkNo,intTransferorId, intToStockId, strToCertificateNo, strToStockStatus, dblQuantityTransferred, dtmToIssueDate, 'Open', dblToParValue, (dblQuantityTransferred * dblToParValue), 0, 1
+				INSERT INTO tblPATIssueStock(strIssueNo, intCustomerPatronId, intStockId, strCertificateNo, strStockStatus, dblSharesNo, dtmIssueDate, dblParValue, dblFaceValue, ysnPosted, intConcurrencyId)
+				SELECT @issueStkNo,intTransferorId, intToStockId, strToCertificateNo, strToStockStatus, dblQuantityTransferred, dtmToIssueDate, dblToParValue, (dblQuantityTransferred * dblToParValue), 0, 1
 				FROM #tempTransferDetails WHERE intTransferType = 4;
 			END
 			ELSE
