@@ -6,8 +6,8 @@
 	@strHeaderComment		NVARCHAR(500) = NULL OUTPUT,
 	@strFooterComment		NVARCHAR(500) = NULL OUTPUT,
 	@DocumentMaintenanceId	INT = NULL,
-	@intDocumentUsedId		INT NULL OUTPUT,
-	@strDocumentUsedCode	NVARCHAR(10) NULL OUTPUT
+	@intDocumentUsedId		INT = NULL OUTPUT,
+	@strDocumentUsedCode	NVARCHAR(10) = NULL OUTPUT
 AS
 
 SELECT TOP 1 @strHeaderComment =  strDefaultComment,
