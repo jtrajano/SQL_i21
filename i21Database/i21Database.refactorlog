@@ -6706,4 +6706,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intTransactionId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="dce50be9-2966-4135-a3a7-d49c03381b15" ChangeDateTime="12/26/2017 10:59:05">
+    <Property Name="ElementName" Value="[dbo].[tblSMLogoPreference].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMLogoPreference]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intLogoPreferenceId" />
+  </Operation>
 </Operations>
