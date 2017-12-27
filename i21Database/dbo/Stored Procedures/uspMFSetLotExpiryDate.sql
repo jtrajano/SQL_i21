@@ -1,6 +1,8 @@
 ﻿CREATE PROCEDURE [uspMFSetLotExpiryDate] @intLotId INT
 	,@dtmNewExpiryDate DATETIME
 	,@intUserId INT
+	,@strReasonCode NVARCHAR(MAX) = NULL
+	,@strNotes NVARCHAR(MAX) = NULL
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -21,6 +23,10 @@ BEGIN TRY
 		,@intChildLotCount INT
 		,@intLotRecordId INT
 		,@ysnSetExpiryDateByParentLot BIT
+		,@strDescription NVARCHAR(MAX)
+
+	SELECT @strDescription = Ltrim(isNULL(@strReasonCode, '') + ' ' + isNULL(@strNotes, ''))
+
 	DECLARE @tblLotsWithSameParentLot TABLE (
 		intLotRecordId INT Identity(1, 1)
 		,strLotNumber NVARCHAR(100)
@@ -141,6 +147,7 @@ BEGIN TRY
 				,@intSourceTransactionTypeId
 				,@intUserId
 				,@intInventoryAdjustmentId OUTPUT
+				,@strDescription
 
 			EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmDate
 				,@intTransactionTypeId = 18
@@ -155,8 +162,8 @@ BEGIN TRY
 				,@intOldLotStatusId = NULL
 				,@intNewLotStatusId = NULL
 				,@intUserId = @intUserId
-				,@strNote = NULL
-				,@strReason = NULL
+				,@strNote = @strNotes
+				,@strReason = @strReasonCode
 				,@intLocationId = @intLocationId
 				,@intInventoryAdjustmentId = @intInventoryAdjustmentId
 
