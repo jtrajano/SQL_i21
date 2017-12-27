@@ -6027,6 +6027,7 @@
     <None Include="Scripts\Post-Deployment\PAT\3_UpdateIssueStockNo.sql" />
     <None Include="Scripts\Post-Deployment\PAT\4_UpdateRetiredStockNo.sql" />
     <Build Include="dbo\Functions\fnARGetDefaultCommentTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateCompanyLocationFreightTerm.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
