@@ -84,11 +84,45 @@ SET		rc.dblQuantity =
 
 				ELSE 
 					1
-			END 
+			END 	
 FROM	tblICInventoryReceiptCharge rc
 WHERE	ISNULL(rc.dblQuantity, 0) = 0 
-		--AND rc.strCostMethod = 'Per Unit' 
-		--AND rc.dblRate <> 0 
 		AND rc.dblAmount <> 0 
+
+GO 
+
+-- Update the Quantity Billed for the other charges. 
+UPDATE	rc 
+SET		rc.dblQuantityBilled = 
+			CASE 
+				WHEN rc.strCostMethod = 'Per Unit' AND ISNULL(rc.dblRate, 0) <> 0 THEN
+					dbo.fnDivide(
+						rc.dblAmountBilled
+						,rc.dblRate
+					)
+				ELSE 
+					1
+			END 	
+FROM	tblICInventoryReceiptCharge rc
+WHERE	ISNULL(rc.dblQuantityBilled, 0) = 0 
+		AND rc.dblAmountBilled <> 0 
+
+GO 
+
+-- Update the Quantity Priced for the other charges. 
+UPDATE	rc 
+SET		rc.dblQuantityPriced = 
+			CASE 
+				WHEN rc.strCostMethod = 'Per Unit' AND ISNULL(rc.dblRate, 0) <> 0 THEN
+					dbo.fnDivide(
+						rc.dblAmountPriced
+						,rc.dblRate
+					)
+				ELSE 
+					1
+			END 	
+FROM	tblICInventoryReceiptCharge rc
+WHERE	ISNULL(rc.dblQuantityPriced, 0) = 0 
+		AND rc.dblAmountPriced <> 0 
 
 GO 

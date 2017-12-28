@@ -859,6 +859,7 @@ BEGIN
 		--UPDATE CHARGES (Accrue)
 		UPDATE	Charge
 		SET		Charge.dblAmountBilled = ISNULL(Charge.dblAmountBilled, 0) - BillDetail.dblTotal
+				,Charge.dblQuantityBilled = ISNULL(Charge.dblQuantityBilled, 0) - BillDetail.dblQtyReceived
 		FROM	tblAPBill Bill INNER JOIN tblAPBillDetail BillDetail 
 					ON Bill.intBillId = BillDetail.intBillId
 				INNER JOIN #tmpPostBillData
@@ -870,7 +871,8 @@ BEGIN
 
 		--UPDATE CHARGES (Price)
 		UPDATE	Charge
-		SET		Charge.dblAmountPriced = ISNULL(Charge.dblAmount, 0) - BillDetail.dblTotal
+		SET		Charge.dblAmountPriced = ISNULL(Charge.dblAmountPriced, 0) - BillDetail.dblTotal
+				,Charge.dblQuantityPriced = ISNULL(Charge.dblQuantityPriced, 0) - BillDetail.dblQtyReceived
 		FROM	tblAPBill Bill INNER JOIN tblAPBillDetail BillDetail 
 					ON Bill.intBillId = BillDetail.intBillId
 				INNER JOIN #tmpPostBillData
@@ -963,6 +965,7 @@ BEGIN
 		--UPDATE CHARGES (Accrue)
 		UPDATE	Charge
 		SET		Charge.dblAmountBilled = ISNULL(Charge.dblAmountBilled, 0) + BillDetail.dblTotal
+				,Charge.dblQuantityBilled = ISNULL(Charge.dblQuantityBilled, 0) + BillDetail.dblQtyReceived
 		FROM	tblAPBill Bill INNER JOIN tblAPBillDetail BillDetail 
 					ON Bill.intBillId = BillDetail.intBillId
 				INNER JOIN #tmpPostBillData
@@ -975,6 +978,7 @@ BEGIN
 		-- --UPDATE CHARGES (Price)
 		UPDATE	Charge
 		SET		Charge.dblAmountPriced = ISNULL(Charge.dblAmountPriced, 0) + BillDetail.dblTotal
+				,Charge.dblQuantityPriced = ISNULL(Charge.dblQuantityPriced, 0) + BillDetail.dblQtyReceived
 		FROM	tblAPBill Bill INNER JOIN tblAPBillDetail BillDetail 
 					ON Bill.intBillId = BillDetail.intBillId
 				INNER JOIN #tmpPostBillData
