@@ -85,7 +85,11 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intPODetailId]					=	NULL,
 		[dblQtyOrdered]					=	A.dblOrderQty,
 		[dblQtyReceived]				=	A.dblQuantityToBill,
-		[dblTax]						=	(CASE WHEN A.ysnPrice = 1 THEN ISNULL(A.dblTax,0) * -1 ELSE ISNULL(A.dblTax,0) END), -- RECEIPT VENDOR: WILL NEGATE THE TAX IF PRCE DOWN AND NOT CHECK OFF (OR NEGATIVE AMOUNT)
+		[dblTax]						=	ISNULL((CASE WHEN ISNULL(A.intEntityVendorId, IR.intEntityVendorId) != IR.intEntityVendorId
+																		THEN (CASE WHEN IRCT.ysnCheckoffTax = 0 THEN ABS(A.dblTax) 
+																				ELSE A.dblTax END) --THIRD PARTY TAX SHOULD RETAIN NEGATIVE IF CHECK OFF
+																	 ELSE (CASE WHEN A.ysnPrice = 1 AND IRCT.ysnCheckoffTax = 1 THEN A.dblTax * -1 ELSE A.dblTax END ) END),0), -- RECEIPT VENDOR: WILL NEGATE THE TAX IF PRCE DOWN 
+											--(CASE WHEN A.ysnPrice = 1 THEN ISNULL(A.dblTax,0) * -1 ELSE ISNULL(A.dblTax,0) END), -- RECEIPT VENDOR: WILL NEGATE THE TAX IF PRCE DOWN AND NOT CHECK OFF (OR NEGATIVE AMOUNT)
 		[dblForexRate]					=	ISNULL(A.dblForexRate,1),
 		[intForexRateTypeId]			=   A.intForexRateTypeId,
 		[ysnSubCurrency]				=	ISNULL(A.ysnSubCurrency,0),
@@ -117,12 +121,18 @@ IF @transCount = 0 BEGIN TRANSACTION
 	FROM [vyuICChargesForBilling] A
 	INNER JOIN @voucherDetailReceiptCharge charges
 		ON A.intInventoryReceiptChargeId = charges.intInventoryReceiptChargeId
+	LEFT JOIN dbo.tblICInventoryReceipt IR ON IR.intInventoryReceiptId = A.intInventoryReceiptId
 	INNER JOIN tblICItemLocation D
 		ON A.intLocationId = D.intLocationId AND A.intItemId = D.intItemId
 	LEFT JOIN tblSMCurrencyExchangeRate F 
 		ON  (F.intFromCurrencyId = @defaultCurrency AND F.intToCurrencyId = A.intCurrencyId) 
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G 
 		ON F.intCurrencyExchangeRateId = G.intCurrencyExchangeRateId AND G.dtmValidFromDate = @currentDateFilter
+	OUTER APPLY
+	(
+		SELECT TOP 1 ysnCheckoffTax FROM tblICInventoryReceiptChargeTax IRCT
+		WHERE IRCT.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
+	)  IRCT
 	-- OUTER APPLY(
 	-- 	SELECT ysnPrice FROM #tmpReceiptChargeData RC
 	-- 	WHERE RC.intInventoryReceiptId = A.intInventoryReceiptId AND RC.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId

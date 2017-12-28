@@ -60,7 +60,7 @@
     [intContactId] INT NULL , 
     [intOrderById] INT NULL , 
     [intCurrencyId] INT NOT NULL,
-	[intSubCurrencyCents] INT NOT NULL DEFAULT 0,
+	[intSubCurrencyCents] INT NOT NULL DEFAULT 1,
 	[ysnApproved] BIT NOT NULL DEFAULT 0,
 	[ysnForApproval] BIT NOT NULL DEFAULT 0,
     [ysnOrigin] BIT NOT NULL DEFAULT 0,
