@@ -178,6 +178,10 @@ namespace iRely.Inventory.BusinessLayer
                 {
                     msg = "Cannot delete this item because it's already used in a receipt.";
                 }
+                else if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'UN_tblICItemOwner'"))
+                {
+                    msg = "Duplicate item owners are not allowed.";
+                }
             }
 
             return new BusinessResult<tblICItem>()

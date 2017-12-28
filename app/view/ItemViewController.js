@@ -4145,6 +4145,26 @@ Ext.define('Inventory.view.ItemViewController', {
         current.set('strCodeDescription', selectedRecord.get('strDescription'));
     },
 
+    onOwnerDefaultCheckChange: function(obj, rowIndex, checked, eOpts ) {
+        var me = this;
+        if (obj.dataIndex === 'ysnDefault'){
+            var grid = obj.up('grid');
+            var win = obj.up('window');
+            var current = grid.view.getRecord(rowIndex);
+
+            if (checked === true){
+                var itemOwners = grid.store.data.items;
+                if (itemOwners) {
+                    itemOwners.forEach(function(itemOwner){
+                        if (itemOwner !== current){
+                            itemOwner.set('ysnDefault', false);
+                        }
+                    });
+                }            
+            }
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboType": {
@@ -4238,6 +4258,9 @@ Ext.define('Inventory.view.ItemViewController', {
             "#colStockUnit": {
                 beforecheckchange: this.beforeUOMStockUnitCheckChange,
                 checkchange: this.onUOMStockUnitCheckChange
+            },
+            "#colOwnerDefault": {
+                checkchange: this.onOwnerDefaultCheckChange
             },
             "#colCellNameDefault": {
                 beforecheckchange: this.onManufacturingCellDefaultCheckChange

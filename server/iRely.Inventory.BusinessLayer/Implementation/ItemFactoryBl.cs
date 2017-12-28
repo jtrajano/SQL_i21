@@ -70,6 +70,5 @@ namespace iRely.Inventory.BusinessLayer
             _db = db;
         }
         #endregion
-
     }
 }
