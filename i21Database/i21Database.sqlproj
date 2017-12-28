@@ -5982,6 +5982,7 @@
     <Build Include="dbo\Tables\tblTFTaxAuthorityBeginEndInventory.sql" />
     <Build Include="dbo\Tables\tblTFTaxAuthorityBeginEndInventoryDetail.sql" />
     <Build Include="dbo\Views\vyuTFGetTaxAuthorityBeginEndInventoryDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFRegenerateTask.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
