@@ -2,10 +2,10 @@
 	,@dblNewLotQty NUMERIC(38, 20)
 	,@intAdjustItemUOMId INT
 	,@intUserId INT
-	,@strReasonCode NVARCHAR(1000)
+	,@strReasonCode NVARCHAR(MAX) = NULL
 	,@blnValidateLotReservation BIT = 0
 	,@strNotes NVARCHAR(MAX) = NULL
-	,@dtmDate datetime=NULL
+	,@dtmDate DATETIME = NULL
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -29,10 +29,17 @@ BEGIN TRY
 		,@dblWeight NUMERIC(38, 20)
 		,@dblLotReservedQty NUMERIC(38, 20)
 		,@dblLotAvailableQty NUMERIC(38, 20)
-		,@strNote1 nvarchar(MAX)
-		,@dblDefaultResidueQty NUMERIC(38,20)
+		,@strNote1 NVARCHAR(MAX)
+		,@dblDefaultResidueQty NUMERIC(38, 20)
+		,@intTransactionCount INT
+		,@strDescription NVARCHAR(MAX)
 
-		SELECT TOP 1 @dblDefaultResidueQty=ISNULL(dblDefaultResidueQty,0.00001) FROM tblMFCompanyPreference
+	SELECT @intTransactionCount = @@TRANCOUNT
+
+	SELECT @strDescription = Ltrim(isNULL(@strReasonCode, '') + ' ' + isNULL(@strNotes, ''))
+
+	SELECT TOP 1 @dblDefaultResidueQty = ISNULL(dblDefaultResidueQty, 0.00001)
+	FROM tblMFCompanyPreference
 
 	IF @strReasonCode = '0'
 		SELECT @strReasonCode = ''
@@ -99,7 +106,8 @@ BEGIN TRY
 		END
 	END
 
-	IF @dblNewLotQty = 0 and @intWeightUOMId is not null
+	IF @dblNewLotQty = 0
+		AND @intWeightUOMId IS NOT NULL
 	BEGIN
 		SELECT @dblAdjustByQuantity = - @dblWeight
 
@@ -159,7 +167,6 @@ BEGIN TRY
 	--			,1
 	--			)
 	--END
-
 	IF EXISTS (
 			SELECT 1
 			FROM tblWHSKU
@@ -173,8 +180,10 @@ BEGIN TRY
 				)
 	END
 
-	BEGIN TRANSACTION
-	Set @strNote1=isNULL(@strReasonCode,'')+' '+IsNULL(@strNotes,'')
+	IF @intTransactionCount = 0
+		BEGIN TRANSACTION
+
+	SET @strNote1 = isNULL(@strReasonCode, '') + ' ' + IsNULL(@strNotes, '')
 
 	EXEC uspICInventoryAdjustment_CreatePostQtyChange @intItemId
 		,@dtmDate
@@ -189,7 +198,7 @@ BEGIN TRY
 		,@intSourceTransactionTypeId
 		,@intUserId
 		,@intInventoryAdjustmentId OUTPUT
-		,@strNote1
+		,@strDescription
 
 	EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmDate
 		,@intTransactionTypeId = 10
@@ -207,7 +216,7 @@ BEGIN TRY
 		,@strNote = @strNotes
 		,@strReason = @strReasonCode
 		,@intLocationId = @intLocationId
-		,@intInventoryAdjustmentId=@intInventoryAdjustmentId
+		,@intInventoryAdjustmentId = @intInventoryAdjustmentId
 
 	IF EXISTS (
 			SELECT TOP 1 *
@@ -311,6 +320,7 @@ BEGIN TRY
 			,@intSourceTransactionTypeId
 			,@intUserId
 			,@intInventoryAdjustmentId OUTPUT
+			,@strDescription
 
 		EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmDate
 			,@intTransactionTypeId = 10
@@ -328,15 +338,16 @@ BEGIN TRY
 			,@strNote = @strNotes
 			,@strReason = @strReasonCode
 			,@intLocationId = @intLocationId
-			,@intInventoryAdjustmentId=@intInventoryAdjustmentId
+			,@intInventoryAdjustmentId = @intInventoryAdjustmentId
 	END
 
-	COMMIT TRANSACTION
+	IF @intTransactionCount = 0
+		COMMIT TRANSACTION
 END TRY
 
 BEGIN CATCH
 	IF XACT_STATE() != 0
-		AND @@TRANCOUNT > 0
+		AND @intTransactionCount = 0
 		ROLLBACK TRANSACTION
 
 	SET @ErrMsg = ERROR_MESSAGE()

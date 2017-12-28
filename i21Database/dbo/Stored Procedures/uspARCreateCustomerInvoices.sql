@@ -4,6 +4,7 @@
 	,@GroupingOption	INT					= 0
 	,@UserId			INT
 	,@RaiseError		BIT					= 0
+	,@BatchId			NVARCHAR(40)		= NULL
 	,@ErrorMessage		NVARCHAR(250)		= NULL	OUTPUT
 AS
 
@@ -871,6 +872,7 @@ INSERT INTO @IntegrationLog
 	,[intEntityId]
 	,[intGroupingOption]
 	,[strMessage]
+	,[strBatchId]
 	,[strBatchIdForNewPost]
 	,[intPostedNewCount]
 	,[strBatchIdForNewPostRecap]
@@ -902,17 +904,18 @@ SELECT
 	,[intEntityId]							= @UserId
 	,[intGroupingOption]					= @GroupingOption
 	,[strMessage]							= [strMessage]
-	,[strBatchIdForNewPost]					= ''
+	,[strBatchId]							= @BatchId
+	,[strBatchIdForNewPost]					= @BatchId
 	,[intPostedNewCount]					= 0
-	,[strBatchIdForNewPostRecap]			= ''
+	,[strBatchIdForNewPostRecap]			= @BatchId
 	,[intRecapNewCount]						= 0
-	,[strBatchIdForExistingPost]			= ''
+	,[strBatchIdForExistingPost]			= @BatchId
 	,[intPostedExistingCount]				= 0
-	,[strBatchIdForExistingRecap]			= ''
+	,[strBatchIdForExistingRecap]			= @BatchId
 	,[intRecapPostExistingCount]			= 0
-	,[strBatchIdForExistingUnPost]			= ''
+	,[strBatchIdForExistingUnPost]			= @BatchId
 	,[intUnPostedExistingCount]				= 0
-	,[strBatchIdForExistingUnPostRecap]		= ''
+	,[strBatchIdForExistingUnPostRecap]		= @BatchId
 	,[intRecapUnPostedExistingCount]		= 0
 	,[intIntegrationLogDetailId]			= 0
 	,[intInvoiceId]							= NULL
@@ -1253,9 +1256,10 @@ VALUES(
 			,INSERTED.[intEntityId]					--[intEntityId]
 			,@GroupingOption						--[intGroupingOption]
 			,'Invoice was successfully created.'	--[strErrorMessage]
-			,''										--[strBatchIdForNewPost]
+			,@BatchId								--[strBatchId]
+			,@BatchId								--[strBatchIdForNewPost]
 			,0										--[intPostedNewCount]
-			,''										--[strBatchIdForNewPostRecap]
+			,@BatchId								--[strBatchIdForNewPostRecap]
 			,0										--[intRecapNewCount]
 			,''										--[strBatchIdForExistingPost]
 			,0										--[intPostedExistingCount]
@@ -1289,6 +1293,7 @@ VALUES(
 			,[intEntityId]
 			,[intGroupingOption]
 			,[strMessage]
+			,strBatchId
 			,[strBatchIdForNewPost]
 			,[intPostedNewCount]
 			,[strBatchIdForNewPostRecap]

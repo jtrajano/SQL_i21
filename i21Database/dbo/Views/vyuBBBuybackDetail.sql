@@ -24,7 +24,7 @@ AS
 	INNER JOIN tblICCategory F
 		ON D.intCategoryId = F.intCategoryId
 	INNER JOIN tblICItemUOM G
-		ON D.intItemId = G.intItemUOMId
+		ON B.intItemUOMId = G.intItemUOMId
 	INNER JOIN tblICUnitMeasure H
 	    ON G.intUnitMeasureId = H.intUnitMeasureId
 	INNER JOIN tblEMEntity J

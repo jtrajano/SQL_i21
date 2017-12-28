@@ -1,8 +1,8 @@
 ﻿
 CREATE PROCEDURE uspCMApplyCheckChangeForCheckPrint
 	@intBankAccountId INT = NULL,
-	@strTransactionIds NVARCHAR(max) = NULL,
-	@strBatchId NVARCHAR(20) = NULL,
+	@intBankTransactionTypeId INT = NULL,
+	@strTransactionId NVARCHAR(50) = NULL,
 	@strProcessType NVARCHAR(100),
 	@ysnCheckToBePrinted BIT = 0
 AS
@@ -43,11 +43,16 @@ DECLARE @BANK_DEPOSIT INT = 1
 -- Mass update the ysnCheckToBePrinted
 IF(@strProcessType = 'ACH From Customer')
 BEGIN
-	UPDATE tblCMUndepositedFund
-	SET ysnToProcess = @ysnCheckToBePrinted
-		,intConcurrencyId = intConcurrencyId + 1
-	WHERE intUndepositedFundId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@strTransactionIds))
-		AND ysnCommitted is null
+	UPDATE U
+	SET U.ysnToProcess = @ysnCheckToBePrinted
+		,U.intConcurrencyId = U.intConcurrencyId + 1
+	FROM tblCMUndepositedFund U
+	INNER JOIN tblCMBankTransaction B ON U.intBankDepositId = B.intTransactionId
+	WHERE 
+	U.intBankAccountId = @intBankAccountId
+	AND B.strTransactionId = ISNULL(@strTransactionId, B.strTransactionId)
+	AND U.ysnCommitted is null
+	AND U.intBankDepositId IS NOT NULL
 END
 ELSE
 BEGIN
@@ -55,11 +60,11 @@ BEGIN
 	SET		ysnCheckToBePrinted = @ysnCheckToBePrinted
 			,intConcurrencyId = intConcurrencyId + 1
 	WHERE	intBankAccountId = @intBankAccountId
-			AND intBankTransactionTypeId IN (@MISC_CHECKS, @AP_PAYMENT, @PAYCHECK, @ACH, @DIRECT_DEPOSIT)
-			AND intTransactionId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@strTransactionIds))
-			AND strLink = ISNULL(@strBatchId, strLink)
+			AND intBankTransactionTypeId = @intBankTransactionTypeId
+			--AND intTransactionId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@strTransactionIds))
+			AND strTransactionId = ISNULL(@strTransactionId, strTransactionId)
 			AND ysnPosted = 1
-			--AND ysnClr = 0
+			AND dtmCheckPrinted IS NULL
 			AND dblAmount <> 0
 			AND ISNULL(strReferenceNo,'') NOT IN ('CASH') -- Do not include AP Payments that is paid thru a "Cash" payment method. 
 END

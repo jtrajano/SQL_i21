@@ -26,6 +26,7 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentRetroactiveLot]
 	,@intFobPointId AS TINYINT = NULL
 	,@intInTransitSourceLocationId AS INT = NULL  
 	,@ysnPost AS BIT = 1
+	,@intOtherChargeItemId AS INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -226,6 +227,7 @@ BEGIN
 			AND ISNULL(t.intTransactionDetailId, 0) = ISNULL(@intSourceTransactionDetailId, 0)
 			AND t.strTransactionId = @strSourceTransactionId
 			AND ISNULL(t.ysnIsUnposted, 0) = 0 
+			AND t.dblQty > 0 
 	-- Cost Bucket Out: 
 	UNION ALL 
 	SELECT	cbOut.intInventoryTransactionId
@@ -276,7 +278,7 @@ END
 -- There could be more than one lot record per item received. 
 -- Calculate how much cost adjustment goes for each lot qty. 
 BEGIN 
-	SELECT	@CostAdjustmentPerLot = @CostAdjustment / SUM(ISNULL(cb.dblStockIn, 0))
+	SELECT	@CostAdjustmentPerLot = dbo.fnDivide(@CostAdjustment, SUM(ISNULL(cb.dblStockIn, 0))) 
 	FROM	tblICInventoryLot cb
 	WHERE	cb.intItemId = @intItemId
 			AND cb.intItemLocationId = @intItemLocationId
@@ -310,6 +312,7 @@ BEGIN
 				,[intRelatedTransactionId] 
 				,[intCreatedUserId] 
 				,[intCreatedEntityUserId] 
+				,[intOtherChargeItemId] 
 		)
 		SELECT
 				[intInventoryLotId] = cb.intInventoryLotId
@@ -324,6 +327,7 @@ BEGIN
 				,[intRelatedTransactionId] = cb.intTransactionId
 				,[intCreatedUserId] = @intEntityUserSecurityId
 				,[intCreatedEntityUserId] = @intEntityUserSecurityId
+				,[intOtherChargeItemId] = @intOtherChargeItemId 
 		FROM	tblICInventoryLot cb LEFT JOIN tblICInventoryLotCostAdjustmentLog cl
 					ON cb.intInventoryLotId = cl.intInventoryLotId
 		WHERE	cb.intItemId = @intItemId
@@ -519,6 +523,7 @@ BEGIN
 				,[intRelatedInventoryTransactionId]
 				,[intCreatedUserId] 
 				,[intCreatedEntityUserId] 
+				,[intOtherChargeItemId] 
 			)
 			SELECT
 				[intInventoryLotId] = @CostBucketId
@@ -538,6 +543,8 @@ BEGIN
 												@COST_ADJ_TYPE_Adjust_Value
 											WHEN @t_intLocationId IS NULL THEN 
 												@COST_ADJ_TYPE_Adjust_InTransit
+											WHEN @t_intTransactionTypeId = @INV_TRANS_Inventory_Transfer THEN 
+												@COST_ADJ_TYPE_Adjust_InventoryAdjustment
 											ELSE 
 												@COST_ADJ_TYPE_Adjust_Value
 									END 
@@ -557,6 +564,8 @@ BEGIN
 													,@INV_TRANS_TYPE_ADJ_Lot_Move
 												) THEN 
 													@COST_ADJ_TYPE_Adjust_InventoryAdjustment
+											WHEN @t_intTransactionTypeId = @INV_TRANS_Inventory_Transfer THEN 
+												@COST_ADJ_TYPE_Adjust_InventoryAdjustment
 											ELSE 
 												@COST_ADJ_TYPE_Adjust_Sold
 									END 
@@ -579,6 +588,7 @@ BEGIN
 				,[intRelatedInventoryTransactionId] = @t_intInventoryTransactionId
 				,[intCreatedUserId] = @intEntityUserSecurityId
 				,[intCreatedEntityUserId] = @intEntityUserSecurityId
+				,[intOtherChargeItemId] = @intOtherChargeItemId 
 			WHERE		
 				CASE	WHEN @IsSourceTransaction = 1 THEN 
 							@t_dblQty * @CostAdjustmentPerLot

@@ -26,3 +26,23 @@
 	CONSTRAINT [FK_tblLGPickLotDetail_tblICUnitMeasure_intWeightUnitMeasureId] FOREIGN KEY ([intWeightUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
     CONSTRAINT [FK_tblLGPickLotDetail_tblSMUserSecurity_intUserSecurityId] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityId])
 )
+GO
+
+CREATE NONCLUSTERED INDEX [_dta_index_tblLGPickLotDetail_197_1924917929__K4_K1] ON [dbo].[tblLGPickLotDetail]
+(
+	[intAllocationDetailId] ASC,
+	[intPickLotDetailId] ASC
+)WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX [_dta_index_tblLGPickLotDetail_197_1924917929__K4] ON [dbo].[tblLGPickLotDetail]
+(
+	[intAllocationDetailId] ASC
+)WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX [_dta_index_tblLGPickLotDetail_197_1924917929__K1_K4] ON [dbo].[tblLGPickLotDetail]
+(
+	[intPickLotDetailId] ASC,
+	[intAllocationDetailId] ASC
+)WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]

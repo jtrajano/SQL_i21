@@ -1,8 +1,6 @@
-﻿CREATE PROCEDURE uspMFCreatePickOrderForInventoryShipment
-		 @intInventoryShipmentId INT
-		,@intUserId INT 
-		,@intOrderHeaderId INT OUTPUT
-
+﻿CREATE PROCEDURE uspMFCreatePickOrderForInventoryShipment @intInventoryShipmentId INT
+	,@intUserId INT
+	,@intOrderHeaderId INT OUTPUT
 AS
 BEGIN TRY
 	DECLARE @strErrMsg NVARCHAR(MAX)
@@ -16,12 +14,16 @@ BEGIN TRY
 	DECLARE @intStageLocationId INT
 	DECLARE @dtmCurrentDate DATETIME
 	DECLARE @strUserName NVARCHAR(100)
-			,@strReferenceNo nvarchar(50)
+		,@strReferenceNo NVARCHAR(50)
 
-	SELECT @strInventoryShipmentNo = strShipmentNumber,
-		   @intShipFromLocationId = intShipFromLocationId,
-		   @dtmCurrentDate = GETDATE(),
-		   @strReferenceNo=Case When strReferenceNumber<>'' Then 'Ref. # '+strReferenceNumber Else ''End
+	SELECT @strInventoryShipmentNo = strShipmentNumber
+		,@intShipFromLocationId = intShipFromLocationId
+		,@dtmCurrentDate = GETDATE()
+		,@strReferenceNo = CASE 
+			WHEN strReferenceNumber <> ''
+				THEN 'Ref. # ' + strReferenceNumber
+			ELSE ''
+			END
 	FROM tblICInventoryShipment
 	WHERE intInventoryShipmentId = @intInventoryShipmentId
 
@@ -30,22 +32,32 @@ BEGIN TRY
 	WHERE [intEntityId] = @intUserId
 
 	EXEC dbo.uspMFGeneratePatternId @intCategoryId = NULL
-								   ,@intItemId = NULL
-								   ,@intManufacturingId = NULL
-								   ,@intSubLocationId = NULL
-								   ,@intLocationId = @intShipFromLocationId
-								   ,@intOrderTypeId = 6
-								   ,@intBlendRequirementId = NULL
-								   ,@intPatternCode = 75
-								   ,@ysnProposed = 0
-								   ,@strPatternString = @strOrderNo OUTPUT
-								  
-	SELECT @intStageLocationId = intDefaultShipmentStagingLocation FROM tblMFCompanyPreference
+		,@intItemId = NULL
+		,@intManufacturingId = NULL
+		,@intSubLocationId = NULL
+		,@intLocationId = @intShipFromLocationId
+		,@intOrderTypeId = 6
+		,@intBlendRequirementId = NULL
+		,@intPatternCode = 75
+		,@ysnProposed = 0
+		,@strPatternString = @strOrderNo OUTPUT
 
-	IF EXISTS(SELECT 1 FROM tblMFOrderHeader WHERE strReferenceNo = @strInventoryShipmentNo)
+	SELECT @intStageLocationId = intDefaultShipmentStagingLocation
+	FROM tblMFCompanyPreference
+
+	IF EXISTS (
+			SELECT 1
+			FROM tblMFOrderHeader
+			WHERE strReferenceNo = @strInventoryShipmentNo
+			)
 	BEGIN
-		SET @strErrMsg = 'Pick order has already been created for inventory shipment ' + @strInventoryShipmentNo +'.'
-		RAISERROR(@strErrMsg,16,1)
+		SET @strErrMsg = 'Pick order has already been created for inventory shipment ' + @strInventoryShipmentNo + '.'
+
+		RAISERROR (
+				@strErrMsg
+				,16
+				,1
+				)
 	END
 
 	INSERT INTO @OrderHeaderInformation (
@@ -58,7 +70,7 @@ BEGIN TRY
 		,strComment
 		,dtmOrderDate
 		,strLastUpdateBy
-		,intLocationId 
+		,intLocationId
 		)
 	SELECT 1
 		,5
@@ -70,7 +82,7 @@ BEGIN TRY
 		,@dtmCurrentDate
 		,@strUserName
 		,@intShipFromLocationId
-		
+
 	INSERT INTO @tblMFOrderHeader
 	EXEC dbo.uspMFCreateStagingOrder @OrderHeaderInformation = @OrderHeaderInformation
 
@@ -78,40 +90,44 @@ BEGIN TRY
 	FROM @tblMFOrderHeader
 
 	INSERT INTO @OrderDetailInformation (
-			intOrderHeaderId
-			,intItemId
-			,dblQty
-			,intItemUOMId
-			,dblWeight
-			,intWeightUOMId
-			,dblWeightPerUnit
-			,intUnitsPerLayer
-			,intLayersPerPallet
-			,intPreferenceId
-			,intLineNo
-			,intSanitizationOrderDetailsId
-			,strLineItemNote
-			)
+		intOrderHeaderId
+		,intItemId
+		,dblQty
+		,intItemUOMId
+		,dblWeight
+		,intWeightUOMId
+		,dblWeightPerUnit
+		,intUnitsPerLayer
+		,intLayersPerPallet
+		,intPreferenceId
+		,intLineNo
+		,intSanitizationOrderDetailsId
+		,strLineItemNote
+		)
 	SELECT @intOrderHeaderId
-			,SHI.intItemId
-			,SHI.dblQuantity
-			,SHI.intItemUOMId
-			,SHI.dblQuantity*I.dblWeight 
-			,IU.intItemUOMId
-			,I.dblWeight
-			,ISNULL(NULL, I.intUnitPerLayer)
-			,ISNULL(NULL, I.intLayerPerPallet)
-			,(SELECT TOP 1 intPickListPreferenceId  FROM tblMFPickListPreference ) 
-			,Row_Number() OVER (ORDER BY SHI.intInventoryShipmentItemId)
-			,NULL
-			,''
+		,SHI.intItemId
+		,SHI.dblQuantity
+		,SHI.intItemUOMId
+		,dbo.fnMFConvertQuantityToTargetItemUOM(SHI.intItemUOMId, IU.intItemUOMId, SHI.dblQuantity)
+		,IU.intItemUOMId
+		,dbo.fnMFConvertQuantityToTargetItemUOM(SHI.intItemUOMId, IU.intItemUOMId, 1)--1/(Case When IU.dblUnitQty=0 then 1 else IU.dblUnitQty End)
+		,I.intUnitPerLayer
+		,I.intLayerPerPallet
+		,(
+			SELECT TOP 1 intPickListPreferenceId
+			FROM tblMFPickListPreference
+			)
+		,Row_Number() OVER (
+			ORDER BY SHI.intInventoryShipmentItemId
+			)
+		,NULL
+		,''
 	FROM dbo.tblICInventoryShipment ISH
 	JOIN tblICInventoryShipmentItem SHI ON SHI.intInventoryShipmentId = ISH.intInventoryShipmentId
 	JOIN dbo.tblICItem I ON I.intItemId = SHI.intItemId
-	JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId and IU.intUnitMeasureId =I.intWeightUOMId
-	--JOIN dbo.tblICCategory C ON I.intCategoryId = C.intCategoryId
-	--JOIN dbo.tblICItem P ON SHI.intItemId = P.intItemId
-	WHERE ISH.intInventoryShipmentId = @intInventoryShipmentId	
+	JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
+		AND IU.intUnitMeasureId = I.intWeightUOMId
+	WHERE ISH.intInventoryShipmentId = @intInventoryShipmentId
 
 	EXEC dbo.uspMFCreateStagingOrderDetail @OrderDetailInformation = @OrderDetailInformation
 
@@ -139,15 +155,29 @@ BEGIN TRY
 	JOIN tblMFStageWorkOrder SW ON SW.intOrderHeaderId = T.intOrderHeaderId
 	JOIN tblMFWorkOrder W ON W.intWorkOrderId = SW.intWorkOrderId
 		AND W.intStatusId = 13
+
+	DELETE
+	FROM tblICStockReservation
+	WHERE intInventoryTransactionType = 34
+		AND ysnPosted = 0
+		AND NOT EXISTS (
+			SELECT *
+			FROM tblMFTask
+			WHERE intLotId = tblICStockReservation.intLotId
+				AND intOrderHeaderId = tblICStockReservation.intTransactionId
+			)
 END TRY
 
 BEGIN CATCH
-	
-	SET @strErrMsg= ERROR_MESSAGE()
+	SET @strErrMsg = ERROR_MESSAGE()
 
 	IF XACT_STATE() != 0
 		ROLLBACK TRANSACTION
 
-	RAISERROR (@strErrMsg,16,1,'WITH NOWAIT')
-
+	RAISERROR (
+			@strErrMsg
+			,16
+			,1
+			,'WITH NOWAIT'
+			)
 END CATCH

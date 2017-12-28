@@ -1,5 +1,6 @@
 ﻿--THIS SCRIPT WILL UPDATE INVALID PAYMENT METHOD USED IN PAYMENT
-IF(EXISTS(SELECT 1 FROM sys.columns WHERE name = N'intPaymentMethodId' and object_id = OBJECT_ID(N'tblAPPayment')))
+IF(EXISTS(SELECT 1 FROM sys.columns WHERE name = N'intPaymentMethodId' and object_id = OBJECT_ID(N'tblAPPayment'))
+AND EXISTS(SELECT 1 FROM sys.columns WHERE name = N'intPaymentMethodID' and object_id = OBJECT_ID(N'tblSMPaymentMethod')))
 BEGIN
 	IF (EXISTS(SELECT 1 FROM tblAPPayment WHERE intPaymentMethodId NOT IN (SELECT intPaymentMethodID FROM tblSMPaymentMethod)))
 	BEGIN

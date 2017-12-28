@@ -531,7 +531,7 @@ BEGIN
 			[dblQtyReceived]			=	ABS(B.dblOpenReceive - B.dblBillQty),--CASE WHEN A.strReceiptType = 'Inventory Return' THEN ABS(B.dblOpenReceive) ELSE ABS(B.dblOpenReceive - B.dblBillQty) END,
 			[dblTax]					=	ISNULL(B.dblTax,0),
 			[dblDiscount]				=	CASE WHEN A.strReceiptType = 'Purchase Order' THEN POContractItems.dblDiscount ELSE 0 END,
-			[dblForexRate]				=	ISNULL(B.dblForexRate,1),
+			[dblForexRate]				=	ISNULL(NULLIF(B.dblForexRate,0),1),
 			[intForexRateTypeId]		=	B.intForexRateTypeId,
 			[ysnSubCurrency]			=	CASE WHEN B.ysnSubCurrency > 0 THEN 1 ELSE 0 END,
 			[intTaxGroupId]				=	B.intTaxGroupId,
@@ -733,6 +733,12 @@ BEGIN
 		
 		--DELETE THE @billDetailIds ID TO AVOID DUPLICATE INSERTION OF BILLDETAIL ID
 		DELETE FROM @billDetailIds
+		
+		DECLARE @Sourcetype NVARCHAR(50);
+		SET @Sourcetype =  (SELECT TOP 1 intSourceType FROM #tmpReceiptData WHERE intInventoryReceiptId IN (@receiptIds)) 
+		IF(@Sourcetype != 3) --Transport
+		BEGIN
+		      
 
 		--ADD CHARGES FOR MAIN VENDOR OR PRODUCER
 		IF(@totalChargesCount != 0 AND @counter2 = 1) --make sure charges has not been processed yet, this part should be only run once
@@ -786,11 +792,9 @@ BEGIN
 				[dblForexRate]				=	ISNULL(A.dblForexRate,1),
 				[intForexRateTypeId]		=   A.intForexRateTypeId,
 				[ysnSubCurrency]			=	ISNULL(A.ysnSubCurrency,0),
-				[intTaxGroupId]				=	NULL,
+				[intTaxGroupId]				=	A.intTaxGroupId,
 				[intAccountId]				=	[dbo].[fnGetItemGLAccount](A.intItemId,D.intItemLocationId, 'AP Clearing'),
-				[dblTotal]					=	CASE WHEN C.ysnPrice > 0 THEN  (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END) * -1 
-														ELSE (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END)
-												END * A.dblQuantityToBill,
+				[dblTotal]					=	(CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END) * A.dblQuantityToBill,
 				[dblCost]					=	ABS(A.dblUnitCost),
 				[dblOldCost]				=	NULL,
 				[dblClaimAmount]			=	0,
@@ -826,6 +830,7 @@ BEGIN
 		END    
 
 		DELETE FROM #tmpReceiptDetailData WHERE intInventoryReceiptItemId = @receiptDetailId
+		END
 	END  
 
 	BEGIN
@@ -854,6 +859,9 @@ BEGIN
 			
 			SET @chargeCounter = @chargeCounter + 1;
 
+			IF(@Sourcetype != 3) --Transport
+			BEGIN
+			        
 			--MAKE SURE VOUCHER WAS NOT CREATED YET			
 			IF NOT EXISTS(SELECT TOP 1 intBillId FROM #tmpReceiptBillIds WHERE intEntityVendorId = @intThirdPartyVendorId AND intCurrencyId = @chargeCurrency)
 				AND @intThirdPartyVendorId IS NOT NULL --AND @ysnThirdPartyVendor > 0
@@ -885,7 +893,8 @@ BEGIN
 						[dblWithheld],
 						[intStoreLocationId],
 						[intPayToAddressId],
-						[intSubCurrencyCents]
+						[intSubCurrencyCents],
+						[intContactId]
 					)
 					OUTPUT inserted.intBillId, @receiptId, @intThirdPartyVendorId, inserted.intCurrencyId INTO #tmpReceiptBillIds(intBillId, intInventoryReceiptId, intEntityVendorId, intCurrencyId)
 					SELECT
@@ -893,7 +902,7 @@ BEGIN
 						,[strVendorOrderNumber] =	A.strVendorRefNo
 						,[intTermsId] 			=	ISNULL(Terms.intTermsId,(SELECT TOP 1 intTermID FROM tblSMTerm WHERE LOWER(strTerm) = 'due on receipt'))
 						,[intShipViaId]			=	A.intShipViaId
-						,[intShipFromId]		=	NULLIF(A.intShipFromId,0)
+						,[intShipFromId]		=	NULLIF(Terms.intEntityLocationId,0)
 						,[intShipToId]			=	A.intLocationId
 						,[dtmDate] 				=	GETDATE()
 						,[dtmDateCreated] 		=	GETDATE()
@@ -912,19 +921,29 @@ BEGIN
 						,[dblDiscount]			=	0
 						,[dblWithheld]			=	0
 						,[intStoreLocationId]	=	A.intLocationId
-						,[intPayToAddressId]	=	A.intShipFromId
+						,[intPayToAddressId]	=	Terms.intEntityLocationId
 						,[intSubCurrencyCents]	=	ISNULL(A.intSubCurrencyCents,1)
+						,[intContactId]			=	EntityContract.intEntityId
 					FROM #tmpReceiptData A
 					OUTER APPLY 
 					(
 						SELECT 
 								C.intTermsId
 								,B.intCurrencyId
+								,C.intEntityLocationId
 						FROM	tblAPVendor B INNER JOIN tblEMEntityLocation C 
 									ON B.intEntityId = C.intEntityId 
 									AND C.ysnDefaultLocation = 1
 						WHERE	B.intEntityId = @intThirdPartyVendorId
 					) Terms	
+					OUTER APPLY 
+					(
+						SELECT intEntityId FROM dbo.tblEMEntity WHERE intEntityId IN (
+							SELECT intEntityContactId 
+							FROM dbo.tblEMEntityToContact A 
+							WHERE A.intEntityId = @intThirdPartyVendorId				
+						)
+					) EntityContract
 					WHERE	A.intInventoryReceiptId = @receiptId 
 							AND A.ysnPosted = 1
 
@@ -982,12 +1001,10 @@ BEGIN
 						[dblForexRate]				=	ISNULL(A.dblForexRate,1),
 						[intForexRateTypeId]		=   A.intForexRateTypeId,
 						[ysnSubCurrency]			=	ISNULL(A.ysnSubCurrency,0),
-						[intTaxGroupId]				=	NULL,
+						[intTaxGroupId]				=	A.intTaxGroupId,
 						[intAccountId]				=	[dbo].[fnGetItemGLAccount](A.intItemId, D.intItemLocationId, 'AP Clearing'),
 						--[dblTotal]					=	(CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END),
-						[dblTotal]					=	CASE WHEN C.ysnPrice > 0  AND @ysnThirdPartyVendor = 0 THEN  (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END) * -1 
-															ELSE (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END)
-														END * A.dblQuantityToBill, --3RD PARTY TOTAL WILL BE POSSTIVE / RECEIPT VENDOR PRICE = Y WILL BE NEGATIVE
+						[dblTotal]					=	(CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END) * A.dblQuantityToBill, --3RD PARTY TOTAL WILL BE POSSTIVE / RECEIPT VENDOR PRICE = Y WILL BE NEGATIVE
 						[dblCost]					=	ABS(A.dblUnitCost),
 						[dblOldCost]				=	NULL,
 						[dblClaimAmount]			=	0,
@@ -1024,9 +1041,10 @@ BEGIN
 					WHERE A.intInventoryReceiptChargeId = @intReceiptChargeId AND A.intEntityVendorId = @intThirdPartyVendorId                 
 			END
 			DELETE FROM #tmpReceiptChargeData WHERE intInventoryReceiptChargeId = @intReceiptChargeId
-		END
+			END
 	END
 	DELETE FROM #tmpReceiptIds WHERE intInventoryReceiptId = @receiptId  
+	END  
 END
 
 --UPDATE VOUCHER DATA

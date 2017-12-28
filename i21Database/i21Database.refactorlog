@@ -6706,4 +6706,39 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intTransactionId" />
   </Operation>
+    <Operation Name="Rename Refactor" Key="dce50be9-2966-4135-a3a7-d49c03381b15" ChangeDateTime="12/26/2017 10:59:05">
+    <Property Name="ElementName" Value="[dbo].[tblSMLogoPreference].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMLogoPreference]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intLogoPreferenceId" />
+</Operation>
+  <Operation Name="Rename Refactor" Key="314f7bb6-9319-413a-ac11-5d0dbae73872" ChangeDateTime="12/26/2017 22:27:30">
+    <Property Name="ElementName" Value="[dbo].[tblTFTaxAuthorityBeginEndInventoryDetail].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTaxAuthorityBeginEndInventoryDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="inttblTFTaxAuthorityBeginEndInventoryId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="371d2739-a51a-4b5f-a95e-8b5db15f203d" ChangeDateTime="12/26/2017 22:27:38">
+    <Property Name="ElementName" Value="[dbo].[tblTFTaxAuthorityBeginEndInventoryDetail].[inttblTFTaxAuthorityBeginEndInventoryId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTaxAuthorityBeginEndInventoryDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTaxAuthorityBeginEndInventoryId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="3a32e867-1cfa-43e7-8132-f877f75854db" ChangeDateTime="12/26/2017 22:27:46">
+    <Property Name="ElementName" Value="[dbo].[tblTFTaxAuthorityBeginEndInventoryDetail].[intTaxAuthorityBeginEndInventoryId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTaxAuthorityBeginEndInventoryDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTaxAuthorityBeginEndInventoryDetailId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="4fba5284-2555-4020-94ea-07a7094455a8" ChangeDateTime="12/27/2017 12:12:39">
+    <Property Name="ElementName" Value="[dbo].[FK_tblTFTaxAuthorityBeginEndInventoryDetail_ToTable]" />
+    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTaxAuthorityBeginEndInventoryDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[FK_tblTFTaxAuthorityBeginEndInventoryDetail_tblTFTaxAuthorityBeginEndInventory]" />
+  </Operation>
 </Operations>

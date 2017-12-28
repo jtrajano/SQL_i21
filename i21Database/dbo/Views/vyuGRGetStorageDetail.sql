@@ -1,10 +1,10 @@
 CREATE VIEW [dbo].[vyuGRGetStorageDetail]
 AS
-SELECT
-	a.intCustomerStorageId
-	,a.intCompanyLocationId	
+SELECT 
+	a.intCustomerStorageId,
+	a.intCompanyLocationId	
 	,c.strLocationName [Loc]
-	,a.dtmDeliveryDate [Delivery Date]
+	,convert(datetime,CONVERT(VARCHAR(10),a.dtmDeliveryDate ,110),110) [Delivery Date]
 	,a.strStorageTicketNumber [Ticket]
 	,a.intEntityId
 	,E.strName [Customer]
@@ -27,7 +27,7 @@ SELECT
  	,c1.strScheduleId
 	,i.strItemNo
 	,c.strLocationName
-	,intCommodityUnitMeasureId as intCommodityUnitMeasureId
+	,ium.intCommodityUnitMeasureId as intCommodityUnitMeasureId
 	,i.intItemId as intItemId
 FROM tblGRCustomerStorage a
 JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId
@@ -38,4 +38,4 @@ LEFT JOIN tblGRStorageScheduleRule c1 on c1.intStorageScheduleRuleId=a.intStorag
 JOIN tblSMCompanyLocation c ON c.intCompanyLocationId=a.intCompanyLocationId
 JOIN tblEMEntity E ON E.intEntityId=a.intEntityId
 JOIN tblICCommodity CM ON CM.intCommodityId=a.intCommodityId
-Where ISNULL(a.strStorageType,'') <> 'ITR'
+WHERE ISNULL(a.strStorageType,'') <> 'ITR' 

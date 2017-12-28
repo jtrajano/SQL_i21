@@ -2476,6 +2476,20 @@ BEGIN
 	SELECT 2
 		,'Case Label'
 END
+GO
+IF NOT EXISTS (
+		SELECT 1
+		FROM tblMFCustomerLabelType
+		WHERE intCustomerLabelTypeId = 3
+		)
+BEGIN
+	INSERT INTO tblMFCustomerLabelType (
+		intCustomerLabelTypeId
+		,strLabelType
+		)
+	SELECT 3
+		,'Pallet Label with Weight'
+END
 
 GO
 UPDATE tblMFCompanyPreference
@@ -2638,4 +2652,30 @@ GO
 UPDATE tblMFCompanyPreference
 SET ysnGenerateNewParentLotOnChangeItem = 0
 WHERE ysnGenerateNewParentLotOnChangeItem IS NULL
+GO
+
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFReportLabel WHERE strReportName = 'UCCPalletLabel')
+BEGIN
+    INSERT INTO tblMFReportLabel(strReportName,ysnShow,intConcurrencyId)
+    VALUES('UCCPalletLabel',1,1)
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFReportLabel WHERE strReportName = 'LidlUCCPalletLabel')
+BEGIN
+    INSERT INTO tblMFReportLabel(strReportName,ysnShow,intConcurrencyId)
+    VALUES('LidlUCCPalletLabel',1,1)
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFReportLabel WHERE strReportName = 'DotFoodsUCCPalletLabel')
+BEGIN
+    INSERT INTO tblMFReportLabel(strReportName,ysnShow,intConcurrencyId)
+    VALUES('DotFoodsUCCPalletLabel',1,1)
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFReportLabel WHERE strReportName = 'LidlUCCPalletLabelWithoutWeight')
+BEGIN
+    INSERT INTO tblMFReportLabel(strReportName,ysnShow,intConcurrencyId)
+    VALUES('LidlUCCPalletLabelWithoutWeight',1,1)
+END
 GO

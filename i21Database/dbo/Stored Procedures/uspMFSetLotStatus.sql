@@ -2,10 +2,11 @@
 	,@intNewLotStatusId INT
 	,@intUserId INT
 	,@strNotes NVARCHAR(MAX) = NULL
+	,@strReasonCode NVARCHAR(MAX) = NULL
+	,@dtmDate DATETIME = NULL
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
-		,@dtmDate DATETIME
 		,@intLocationId INT
 		,@intSubLocationId INT
 		,@intStorageLocationId INT
@@ -14,8 +15,13 @@ BEGIN TRY
 		,@intSourceTransactionTypeId INT
 		,@intLotStatusId INT
 		,@intInventoryAdjustmentId INT
-		,@TransactionCount INT
 		,@ErrMsg NVARCHAR(MAX)
+		,@strDescription NVARCHAR(MAX)
+		,@intTransactionCount INT
+
+	SELECT @intTransactionCount = @@TRANCOUNT
+
+	SELECT @strDescription = Ltrim(isNULL(@strReasonCode, '') + ' ' + isNULL(@strNotes, ''))
 
 	SELECT @intItemId = intItemId
 		,@intLocationId = intLocationId
@@ -26,7 +32,8 @@ BEGIN TRY
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
-	SELECT @dtmDate = GETDATE()
+	IF @dtmDate IS NULL
+		SELECT @dtmDate = GETDATE()
 
 	SELECT @intSourceId = 1
 		,@intSourceTransactionTypeId = 8
@@ -83,6 +90,9 @@ BEGIN TRY
 		END
 	END
 
+	IF @intTransactionCount = 0
+		BEGIN TRANSACTION
+
 	EXEC uspICInventoryAdjustment_CreatePostLotStatusChange @intItemId
 		,@dtmDate
 		,@intLocationId
@@ -94,6 +104,7 @@ BEGIN TRY
 		,@intSourceTransactionTypeId
 		,@intUserId
 		,@intInventoryAdjustmentId OUTPUT
+		,@strDescription
 
 	EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmDate
 		,@intTransactionTypeId = 16
@@ -108,16 +119,18 @@ BEGIN TRY
 		,@intOldLotStatusId = @intLotStatusId
 		,@intNewLotStatusId = @intNewLotStatusId
 		,@intUserId = @intUserId
-		,@strNote = NULL
-		,@strReason = NULL
+		,@strNote = @strNotes
+		,@strReason = @strReasonCode
 		,@intLocationId = @intLocationId
 		,@intInventoryAdjustmentId = @intInventoryAdjustmentId
+
+	IF @intTransactionCount = 0
+		COMMIT TRANSACTION
 END TRY
 
 BEGIN CATCH
 	IF XACT_STATE() != 0
-		AND @TransactionCount = 0
-		AND @@TRANCOUNT > 0
+		AND @intTransactionCount = 0
 		ROLLBACK TRANSACTION
 
 	SET @ErrMsg = ERROR_MESSAGE()

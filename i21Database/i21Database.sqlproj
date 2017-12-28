@@ -5963,11 +5963,25 @@
     <Build Include="dbo\Views\vyuMFGetInventoryReceiptCustomField.sql" />
     <Build Include="dbo\Stored Procedures\uspAPApplyPrepaid.sql" />
     <None Include="Scripts\Post-Deployment\IC\23_Update_ActualCostId_On_InventoryTransaction.sql" />
+    <Build Include="dbo\Tables\tblMFReportLabel.sql" />
     <Build Include="dbo\Stored Procedures\uspBBPostBuyback.sql" />
     <Build Include="dbo\Views\vyuBBBuybackExport.sql" />
     <Build Include="dbo\Stored Procedures\uspBBUnpostBuyback.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReportLidlUCCPalletLabelWithoutWeight.sql" />
     <Build Include="dbo\Views\vyuRKM2MContractCost.sql" />
+    <Build Include="dbo\Tables\tblSTUpdateRegisterHistory.sql" />
+    <Build Include="dbo\Views\vyuMFGetPalletSSCCNo.sql" />
+    <Build Include="dbo\Views\vyuHDTicketWatcher.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCProcessMemoToInvoice.sql" />
+    <Build Include="dbo\User Defined Types\TFInvoiceDetailTransaction.sql" />
+    <Build Include="dbo\User Defined Types\TFInventoryReceiptDetailTransaction.sql" />
+    <Build Include="dbo\Views\vyuGRSettlementSummaryReport.sql" />
     <Build Include="dbo\Functions\fnGLGetCMGLDetailBalance.sql" />
+    <Build Include="dbo\Functions\fnARGetDefaultCommentTable.sql" />
+    <Build Include="dbo\Tables\tblSMLogoPreference.sql" />
+    <Build Include="dbo\Tables\tblTFTaxAuthorityBeginEndInventory.sql" />
+    <Build Include="dbo\Tables\tblTFTaxAuthorityBeginEndInventoryDetail.sql" />
+    <Build Include="dbo\Views\vyuTFGetTaxAuthorityBeginEndInventoryDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

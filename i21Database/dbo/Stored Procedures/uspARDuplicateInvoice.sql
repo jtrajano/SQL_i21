@@ -86,6 +86,7 @@ DECLARE	 @OriginalInvoiceId			INT
 		,@ItemSubCurrencyId			INT
 		,@ItemSubCurrencyRate		NUMERIC(18,6)
 		,@ysnRecurringDuplicate		BIT = 0
+		,@intDocumentMaintenanceId		INT = NULL
 		
 SELECT 
 	 @InvoiceNumber					= [strInvoiceNumber]
@@ -135,6 +136,7 @@ SELECT
 	,@TotalWeight					= [dblTotalWeight]
 	,@EntityContactId				= [intEntityContactId]
 	,@TotalTermDiscount				= [dblTotalTermDiscount]	
+	,@intDocumentMaintenanceId		= [intDocumentMaintenanceId]
 FROM
 	tblARInvoice
 WHERE
@@ -400,6 +402,7 @@ BEGIN TRY
 		,@ItemSubCurrencyRate					= @ItemSubCurrencyRate
 		,@EntityContactId						= @EntityContactId
 		,@ItemStorageScheduleTypeId					= @StorageScheduleTypeId
+		,@DocumentMaintenanceId					= @intDocumentMaintenanceId
 
 END TRY
 BEGIN CATCH

@@ -283,20 +283,21 @@ BEGIN
 			,[intSubLocationId]				= t.intSubLocationId
 			,[intStorageLocationId]			= t.intStorageLocationId
 			,[ysnIsStorage]					= NULL 
-			,[strActualCostId]				= actualCostCb.strActualCostId 
+			,[strActualCostId]				= t.strActualCostId 
 			,[intSourceTransactionId]		= t.intTransactionId
 			,[intSourceTransactionDetailId]	= t.intTransactionDetailId
 			,[strSourceTransactionId]		= t.strTransactionId
 			,[intRelatedInventoryTransactionId] = t.intInventoryTransactionId	
 			,[intFobPointId]				= t.intFobPointId
 			,[intInTransitSourceLocationId]	= t.intInTransitSourceLocationId
-	FROM	dbo.tblICInventoryTransaction t LEFT JOIN tblICInventoryActualCost actualCostCb
-				ON actualCostCb.strTransactionId = t.strTransactionId
-				AND actualCostCb.intTransactionId = t.intTransactionId
-				AND actualCostCb.intTransactionDetailId = t.intTransactionDetailId
-				AND actualCostCb.intItemId = t.intItemId
-				AND actualCostCb.intItemLocationId = t.intItemLocationId
-				AND t.intCostingMethod = @ACTUALCOST
-				AND actualCostCb.ysnIsUnposted = 0 
+	FROM	dbo.tblICInventoryTransaction t 
+			--LEFT JOIN tblICInventoryActualCost actualCostCb
+			--	ON actualCostCb.strTransactionId = t.strTransactionId
+			--	AND actualCostCb.intTransactionId = t.intTransactionId
+			--	AND actualCostCb.intTransactionDetailId = t.intTransactionDetailId
+			--	AND actualCostCb.intItemId = t.intItemId
+			--	AND actualCostCb.intItemLocationId = t.intItemLocationId
+			--	AND t.intCostingMethod = @ACTUALCOST
+			--	AND actualCostCb.ysnIsUnposted = 0 
 	WHERE	intInventoryTransactionId = @EscalateInventoryTransactionId
 END 

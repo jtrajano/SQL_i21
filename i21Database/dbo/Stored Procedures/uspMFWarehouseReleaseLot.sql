@@ -5,6 +5,7 @@
 	,@strSubject VARCHAR(MAX) = NULL OUTPUT
 	,@strBody NVARCHAR(MAX) = NULL OUTPUT
 	,@ysnBuildEMailContent BIT = 1
+	,@ysnBulkRelease BIT=0
 	)
 AS
 BEGIN TRY
@@ -154,7 +155,7 @@ BEGIN TRY
 	--			,@strLotNumber
 	--			)
 	--END
-	IF EXISTS (
+	IF @ysnBulkRelease =0 and EXISTS (
 			SELECT 1
 			FROM dbo.tblMFWorkOrderProducedLot
 			WHERE ysnReleased = 1

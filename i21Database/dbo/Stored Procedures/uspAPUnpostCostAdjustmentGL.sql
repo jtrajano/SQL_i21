@@ -31,7 +31,7 @@ FETCH NEXT FROM @billsCursor INTO @billId, @billRecordNumber
 WHILE @@FETCH_STATUS = 0
 BEGIN
 
-	EXEC uspICUnpostCostAdjustment @billId, @billRecordNumber, @strBatchId, @userId, 0
+	EXEC uspICUnpostCostAdjustment @billId, @billRecordNumber, @strBatchId, @userId, DEFAULT
 	FETCH NEXT FROM @billsCursor INTO @billId, @billRecordNumber
 END
 

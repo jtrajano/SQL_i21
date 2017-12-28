@@ -112,7 +112,7 @@ BEGIN TRY
 	-- only for print mode
 	IF ISNULL(@strOrderManifestLabelId, '') = ''
 	BEGIN
-		IF @intCustomerLabelTypeId = 1 -- Pallet Label
+		IF @intCustomerLabelTypeId = 1 OR @intCustomerLabelTypeId = 3 -- Pallet Label / Pallet Label with Weight
 		BEGIN
 			INSERT INTO @tblMFGenerateSSNo
 			SELECT *
@@ -185,8 +185,8 @@ BEGIN TRY
 					WHERE OM.intOrderManifestId = @intOrderManifestId
 
 					-- Bar Code 1
-					SELECT @strBarcodeLabel1 = @strFirstBarcodeStart + '0' + IsNULL(@strGTINNumber, I.strGTIN) + @strFirstBarcodeFollowGTIN + CONVERT(NVARCHAR(6), L.dtmExpiryDate, 12) + @strFirstBarcodeEnd + LTRIM(Convert(NUMERIC(18, 0), ISNULL(L.dblQty, 0)))
-						,@strBarcode1 = REPLACE(REPLACE(@strGS1SpecialCode + @strFirstBarcodeStart + '0' + IsNULL(@strGTINNumber, I.strGTIN) + @strFirstBarcodeFollowGTIN + CONVERT(NVARCHAR(6), L.dtmExpiryDate, 12) + @strFirstBarcodeEnd + LTRIM(Convert(NUMERIC(18, 0), ISNULL(L.dblQty, 0))), '(', ''), ')', '')
+					SELECT @strBarcodeLabel1 = @strFirstBarcodeStart + '0' + (CASE WHEN ISNULL(@strGTINNumber, '') <> '' THEN @strGTINNumber ELSE I.strGTIN END) + @strFirstBarcodeFollowGTIN + CONVERT(NVARCHAR(6), L.dtmExpiryDate, 12) + @strFirstBarcodeEnd + LTRIM(Convert(NUMERIC(18, 0), ISNULL(L.dblQty, 0)))
+						,@strBarcode1 = REPLACE(REPLACE(@strGS1SpecialCode + @strFirstBarcodeStart + '0' + (CASE WHEN ISNULL(@strGTINNumber, '') <> '' THEN @strGTINNumber ELSE I.strGTIN END) + @strFirstBarcodeFollowGTIN + CONVERT(NVARCHAR(6), L.dtmExpiryDate, 12) + @strFirstBarcodeEnd + LTRIM(Convert(NUMERIC(18, 0), ISNULL(L.dblQty, 0))), '(', ''), ')', '')
 					FROM tblMFOrderManifest OM
 					JOIN tblICLot L ON L.intLotId = OM.intLotId
 					JOIN tblICItem I ON I.intItemId = L.intItemId
@@ -233,6 +233,7 @@ BEGIN TRY
 	BEGIN
 		UPDATE tblMFOrderManifestLabel
 		SET ysnPrinted = 0
+			,intCustomerLabelTypeId = @intCustomerLabelTypeId
 		WHERE ysnPrinted = 1
 			AND intOrderManifestLabelId IN (
 				SELECT *
@@ -271,7 +272,7 @@ BEGIN TRY
 					ELSE CL.strCountry
 					END)) AS strFromShipment
 		,I.strDescription + ' ' + CHAR(13) + ISNULL(I.strShortName, '') AS strDescription
-		,ISNULL(OD.strOrderGTIN, I.strGTIN) AS strOrderGTIN
+		,(CASE WHEN ISNULL(OD.strOrderGTIN, '') <> '' THEN OD.strOrderGTIN ELSE I.strGTIN END) AS strOrderGTIN
 		,Convert(NUMERIC(18, 0), ISNULL(LOT.dblQty, 0)) AS intCasesPerPallet
 		,I.intInnerUnits AS intUnitsPerCase
 		,CONVERT(VARCHAR(10), LOT.dtmExpiryDate, 101) AS dtmExpiryDate

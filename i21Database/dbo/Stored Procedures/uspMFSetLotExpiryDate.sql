@@ -1,10 +1,12 @@
 ﻿CREATE PROCEDURE [uspMFSetLotExpiryDate] @intLotId INT
 	,@dtmNewExpiryDate DATETIME
 	,@intUserId INT
+	,@strReasonCode NVARCHAR(MAX) = NULL
+	,@strNotes NVARCHAR(MAX) = NULL
+	,@dtmDate DATETIME = NULL
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
-		,@dtmDate DATETIME
 		,@intLocationId INT
 		,@intSubLocationId INT
 		,@intStorageLocationId INT
@@ -21,6 +23,13 @@ BEGIN TRY
 		,@intChildLotCount INT
 		,@intLotRecordId INT
 		,@ysnSetExpiryDateByParentLot BIT
+		,@strDescription NVARCHAR(MAX)
+		,@intTransactionCount INT
+
+	SELECT @intTransactionCount = @@TRANCOUNT
+
+	SELECT @strDescription = Ltrim(isNULL(@strReasonCode, '') + ' ' + isNULL(@strNotes, ''))
+
 	DECLARE @tblLotsWithSameParentLot TABLE (
 		intLotRecordId INT Identity(1, 1)
 		,strLotNumber NVARCHAR(100)
@@ -56,7 +65,8 @@ BEGIN TRY
 		SELECT @intChildLotCount = 0
 	END
 
-	SELECT @dtmDate = GETDATE()
+	IF @dtmDate IS NULL
+		SELECT @dtmDate = GETDATE()
 
 	SELECT @intSourceId = 1
 		,@intSourceTransactionTypeId = 8
@@ -101,6 +111,9 @@ BEGIN TRY
 				)
 	END
 
+	IF @intTransactionCount = 0
+		BEGIN TRANSACTION
+
 	IF (@intChildLotCount > 1)
 	BEGIN
 		INSERT INTO @tblLotsWithSameParentLot
@@ -141,6 +154,7 @@ BEGIN TRY
 				,@intSourceTransactionTypeId
 				,@intUserId
 				,@intInventoryAdjustmentId OUTPUT
+				,@strDescription
 
 			EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmDate
 				,@intTransactionTypeId = 18
@@ -155,8 +169,8 @@ BEGIN TRY
 				,@intOldLotStatusId = NULL
 				,@intNewLotStatusId = NULL
 				,@intUserId = @intUserId
-				,@strNote = NULL
-				,@strReason = NULL
+				,@strNote = @strNotes
+				,@strReason = @strReasonCode
 				,@intLocationId = @intLocationId
 				,@intInventoryAdjustmentId = @intInventoryAdjustmentId
 
@@ -197,12 +211,14 @@ BEGIN TRY
 			,@intLocationId = @intLocationId
 			,@intInventoryAdjustmentId = @intInventoryAdjustmentId
 	END
+
+	IF @intTransactionCount = 0
+		COMMIT TRANSACTION
 END TRY
 
 BEGIN CATCH
 	IF XACT_STATE() != 0
 		AND @TransactionCount = 0
-		AND @@TRANCOUNT > 0
 		ROLLBACK TRANSACTION
 
 	SET @ErrMsg = ERROR_MESSAGE()

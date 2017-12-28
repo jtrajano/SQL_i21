@@ -75,7 +75,7 @@ SELECT ED.coefd_contact_id, ED.coefd_cus_no,
 			isnull(sscon_contact_id, '')
 			, isnull(sscon_cus_no, '')
 			, isnull(sscon_contact_title, '')
-			, isnull(sscon_email, '')
+			, RTRIM(LTRIM(isnull(sscon_email, '')))
 			, isnull(sscon_first_name, '')
 			, isnull(sscon_last_name, '')
 			, isnull(sscon_suffix, '')

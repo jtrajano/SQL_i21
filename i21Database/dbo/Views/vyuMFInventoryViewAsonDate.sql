@@ -107,6 +107,7 @@ SELECT l.intLotId
 			END AS BIT) AS ysnPartialPallet
 	,SH.dtmDate dtmSnapshotDate
 	,SD.intLotSnapshotDetail
+	,l.intUnitPallet
 FROM tblICLot l
 JOIN tblMFLotSnapshotDetail SD ON SD.intLotId = l.intLotId
 JOIN tblMFLotSnapshot SH ON SD.intLotSnapshotId = SH.intLotSnapshotId

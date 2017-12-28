@@ -253,7 +253,7 @@ SELECT inv.intItemId
 	,1 intCostingMethod
 	,intItemUOMId intIssueUOMId
 	,intItemUOMId intReceiveUOMId
-	,0 intAllowNegativeInventory
+	,3 intAllowNegativeInventory
 	,1 intConcurrencyId
 	FROM agitmmst AS itm INNER JOIN tblICItem AS inv ON (itm.agitm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS)
 	 INNER JOIN tblSMCompanyLocation AS loc ON (itm.agitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = loc.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS)

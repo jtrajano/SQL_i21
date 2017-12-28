@@ -125,7 +125,7 @@ BEGIN TRY
 			CONVERT(NUMERIC(18, 6), Sum(V.dblPrice)) / (
 				CONVERT(NUMERIC(18, 6), (
 						SELECT SUM(dblNet)
-						FROM vyuLGLoadCostForVendor VN
+						FROM tblLGLoadDetail VN
 						WHERE VN.intLoadId = V.intLoadId
 						))
 				)
@@ -305,10 +305,30 @@ BEGIN TRY
 				SELECT @intMinInventoryReceiptId = MIN(intInventoryReceiptId), @intBillId = NULL
 				FROM @receiptData
 
-				INSERT INTO @voucherDetailReceiptCharge (intInventoryReceiptChargeId)
+				INSERT INTO @voucherDetailReceiptCharge (intInventoryReceiptChargeId,dblQtyReceived,dblCost)
 				SELECT intInventoryReceiptChargeId
+					,1
+					,LC.dblAmount / (
+						SELECT SUM(LO.dblQuantity)
+						FROM tblLGLoadDetail LO
+						WHERE LO.intLoadId = LC.intLoadId
+						) * LD.dblQuantity
 				FROM tblICInventoryReceiptCharge C
-				WHERE intInventoryReceiptId = @intMinInventoryReceiptId AND intEntityVendorId = @intVendorEntityId AND ysnInventoryCost = 1
+				JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = C.intContractDetailId
+				JOIN tblLGLoadCost LC ON LC.intLoadId = LD.intLoadId
+					AND C.intChargeId = LC.intItemId
+					AND LC.intVendorId = C.intEntityVendorId
+				WHERE C.ysnInventoryCost = 1
+					AND LD.intLoadId = @intLoadId
+					AND  C.intEntityVendorId = @intVendorEntityId 
+				GROUP BY intInventoryReceiptChargeId
+					,LC.dblAmount
+					,LD.dblQuantity
+					,LC.intLoadId
+
+				--SELECT intInventoryReceiptChargeId
+				--FROM tblICInventoryReceiptCharge C
+				--WHERE intInventoryReceiptId = @intMinInventoryReceiptId AND intEntityVendorId = @intVendorEntityId AND ysnInventoryCost = 1
 				
 				EXEC uspAPCreateBillData @userId = @intEntityUserSecurityId
 					,@vendorId = @intVendorEntityId

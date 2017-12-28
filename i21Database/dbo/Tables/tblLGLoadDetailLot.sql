@@ -19,3 +19,36 @@
 	CONSTRAINT [FK_tblLGLoadDetailLot_intItemUOMId] FOREIGN KEY([intItemUOMId]) REFERENCES [dbo].[tblICItemUOM] ([intItemUOMId]),
 	CONSTRAINT [FK_tblLGLoadDetailLot_intWeightUOMId] FOREIGN KEY([intWeightUOMId]) REFERENCES [dbo].[tblICItemUOM] ([intItemUOMId]),
 )
+GO
+
+CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoadDetailLot_197_1540916561__K2_K4_3] ON [dbo].[tblLGLoadDetailLot]
+(
+	[intLoadDetailId] ASC,
+	[dblLotQuantity] ASC
+)
+INCLUDE ( 	[intLotId]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoadDetailLot_197_1540916561__K3_K2_K4] ON [dbo].[tblLGLoadDetailLot]
+(
+	[intLotId] ASC,
+	[intLoadDetailId] ASC,
+	[dblLotQuantity] ASC
+)WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoadDetailLot_197_1540916561__K2_K4] ON [dbo].[tblLGLoadDetailLot]
+(
+	[intLoadDetailId] ASC,
+	[dblLotQuantity] ASC
+)WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+
+GO
+
+CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoadDetailLot_197_1540916561__K2_K3_K4] ON [dbo].[tblLGLoadDetailLot]
+(
+	[intLoadDetailId] ASC,
+	[intLotId] ASC,
+	[dblLotQuantity] ASC
+)WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+GO

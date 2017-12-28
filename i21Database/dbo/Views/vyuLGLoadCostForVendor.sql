@@ -48,6 +48,7 @@ AS
 			,CU.strCurrency
 			,[strPriceUOM] = UOM.strUnitMeasure
 			,[ysnPosted] = L.ysnPosted
+			,LC.strCostMethod
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblLGLoadCost LC ON LC.intLoadId = L.intLoadId
@@ -71,4 +72,4 @@ AS
 			 LC.dblRate,LD.[intWeightItemUOMId],ARIA.[intAccountId],
 			 ARIA.[intCOGSAccountId],ARIA.[intSalesAccountId],ARIA.[intInventoryAccountId],
 			 LC.[intCurrencyId],LD.intItemUOMId,LC.intItemUOMId,LD.dblGross,LD.dblTare,
-			 LD.dblNet, str1099Form, str1099Type,CU.strCurrency,UOM.strUnitMeasure,L.ysnPosted,LC.intLoadCostId
+			 LD.dblNet, str1099Form, str1099Type,CU.strCurrency,UOM.strUnitMeasure,L.ysnPosted,LC.intLoadCostId,LC.strCostMethod
