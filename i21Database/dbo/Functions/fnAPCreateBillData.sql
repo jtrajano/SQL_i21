@@ -61,6 +61,7 @@ RETURNS @returntable TABLE
     [intContactId]			INT NULL , 
     [intOrderById]			INT NULL , 
     [intCurrencyId]			INT NOT NULL,
+	[intSubCurrencyCents]	INT NOT NULL DEFAULT 1,
 	[ysnApproved]			BIT NOT NULL DEFAULT 0,
 	[ysnForApproval]		BIT NOT NULL DEFAULT 0,
     [ysnOrigin]				BIT NOT NULL DEFAULT 0,
@@ -81,6 +82,7 @@ BEGIN
 	DECLARE @contact INT;
 	DECLARE @currency INT;
 	DECLARE @shipVia INT;
+	DECLARE @subCurrencyCents INT;
 	
 	DECLARE @shipFromAddress NVARCHAR(200)
 	DECLARE @shipFromCity NVARCHAR(50)
@@ -139,6 +141,11 @@ BEGIN
 		@currency = CASE WHEN ISNULL(@currencyId,0) > 0 THEN @currencyId ELSE intDefaultCurrencyId END
 	FROM tblSMCompanyPreference
 
+	SELECT
+		@subCurrencyCents = ISNULL(NULLIF(intCent, 0), 1)
+	FROM tblSMCurrency
+	WHERE intMainCurrencyId = @currency AND ysnSubCurrency = 1
+
 	INSERT @returntable
 	(
 		[intTermsId]			,
@@ -168,7 +175,8 @@ BEGIN
 		[intShipViaId]			,
 		[intContactId]			,
 		[intOrderById]			,
-		[intCurrencyId]			
+		[intCurrencyId]			,
+		[intSubCurrencyCents]	
 	)
 	SELECT 
 		@term, 
@@ -198,7 +206,7 @@ BEGIN
 		@shipVia,
 		@contact,
 		@userId,
-		@currency
-
+		@currency,
+		@subCurrencyCents
 	RETURN;
 END
