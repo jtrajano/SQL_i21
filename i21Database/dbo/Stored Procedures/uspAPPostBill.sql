@@ -386,23 +386,73 @@ INSERT INTO @ChargesToAdjust
 	,[strTransactionId] 
 )
 SELECT 
-	[intInventoryReceiptChargeId]	= rc.intInventoryReceiptChargeId
-	,[dblNewValue]					= B.dblCost - B.dblOldCost
-	,[dtmDate]						= A.dtmDate
-	,[intTransactionId]				= A.intBillId
-	,[intTransactionDetailId]		= B.intBillDetailId
-	,[strTransactionId]				= A.strBillId
-FROM tblAPBill A
-INNER JOIN tblAPBillDetail B
-		ON A.intBillId = B.intBillId
-INNER JOIN (tblICInventoryReceipt r 
-				-- INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId
-				INNER JOIN tblICInventoryReceiptCharge rc ON r.intInventoryReceiptId = rc.intInventoryReceiptId)
-		ON rc.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId
-WHERE	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
-		AND B.intInventoryReceiptChargeId IS NOT NULL 
-		-- AND rc.ysnInventoryCost = 1 --create cost adjustment entries for Inventory only for inventory cost yes
-		AND (rc.dblAmount <> B.dblCost OR ISNULL(NULLIF(rc.dblForexRate,0),1) <> B.dblRate)
+	[intInventoryReceiptChargeId] = rc.intInventoryReceiptChargeId
+	,[dblNewValue] = --B.dblCost - B.dblOldCost
+			CASE 
+			WHEN ISNULL(rc.dblForexRate, 1) <> 1 THEN 
+			-- Formula: 
+			-- 1. {Voucher Other Charge} minus {IR Other Charge} 
+			-- 2. convert to sub currency cents. 
+			-- 3. and then convert into functional currency. 
+				((B.dblQtyReceived * B.dblCost)
+					/ ISNULL(r.intSubCurrencyCents, 1) 
+					* ISNULL(rc.dblForexRate, 1)) 
+				- ((rc.dblAmount - ISNULL(rc.dblAmountBilled, 0)) 
+					/ ISNULL(r.intSubCurrencyCents, 1) 
+					* ISNULL(rc.dblForexRate, 1) )   
+			WHEN ISNULL(rc.ysnSubCurrency, 0) = 1 THEN 
+			-- Formula: 
+			-- 1. {Voucher Other Charge} minus {IR Other Charge} 
+			-- 2. and then convert into functional currency. 
+				(
+					(B.dblQtyReceived * B.dblCost)
+					/ ISNULL(r.intSubCurrencyCents, 1) )  
+				- (
+					(rc.dblAmount - ISNULL(rc.dblAmountBilled, 0)) 
+					/ ISNULL(r.intSubCurrencyCents, 1))
+			ELSE
+			-- Formula: 
+			-- 1. {Voucher Other Charge} minus {IR Other Charge} 
+				(B.dblQtyReceived * B.dblCost )  
+				- (rc.dblAmount - ISNULL(rc.dblAmountBilled, 0))
+			END  
+	,[dtmDate] = A.dtmDate
+	,[intTransactionId] = A.intBillId
+	,[intTransactionDetailId] = B.intBillDetailId
+	,[strTransactionId] = A.strBillId
+FROM tblAPBill A INNER JOIN tblAPBillDetail B
+ON A.intBillId = B.intBillId
+INNER JOIN (
+	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptCharge rc 
+ON r.intInventoryReceiptId = rc.intInventoryReceiptId
+)
+ON rc.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId
+WHERE 
+A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
+AND B.intInventoryReceiptChargeId IS NOT NULL 
+-- AND rc.ysnInventoryCost = 1 --create cost adjustment entries for Inventory only for inventory cost yes
+AND (
+	rc.dblAmount <> B.dblCost 
+	OR ISNULL(NULLIF(rc.dblForexRate,0),1) <> B.dblRate
+)
+-- SELECT 
+-- 	[intInventoryReceiptChargeId]	= rc.intInventoryReceiptChargeId
+-- 	,[dblNewValue]					= B.dblCost - B.dblOldCost
+-- 	,[dtmDate]						= A.dtmDate
+-- 	,[intTransactionId]				= A.intBillId
+-- 	,[intTransactionDetailId]		= B.intBillDetailId
+-- 	,[strTransactionId]				= A.strBillId
+-- FROM tblAPBill A
+-- INNER JOIN tblAPBillDetail B
+-- 		ON A.intBillId = B.intBillId
+-- INNER JOIN (tblICInventoryReceipt r 
+-- 				-- INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+-- 				INNER JOIN tblICInventoryReceiptCharge rc ON r.intInventoryReceiptId = rc.intInventoryReceiptId)
+-- 		ON rc.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId
+-- WHERE	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
+-- 		AND B.intInventoryReceiptChargeId IS NOT NULL 
+-- 		-- AND rc.ysnInventoryCost = 1 --create cost adjustment entries for Inventory only for inventory cost yes
+-- 		AND (rc.dblAmount <> B.dblCost OR ISNULL(NULLIF(rc.dblForexRate,0),1) <> B.dblRate)
 
 IF ISNULL(@post,0) = 1
 BEGIN	
