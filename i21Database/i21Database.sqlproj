@@ -5777,6 +5777,7 @@
     <Build Include="dbo\Stored Procedures\uspMFReportLidlUCCPalletLabelWithoutWeight.sql" />
     <Build Include="dbo\Views\vyuRKM2MContractCost.sql" />
     <Build Include="dbo\Views\vyuMFGetPalletSSCCNo.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFRegenerateTask.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
