@@ -1,6 +1,5 @@
 ﻿CREATE FUNCTION dbo.fnRKGetVariationMargin (
-	@intFutureMarketId INT
-	,@intFutureMonthId INT
+	 @intFutOptTransactionId INT
 	,@ClosingDate DATE
 	,@dtmTradeDate DATE
 	)
@@ -8,8 +7,11 @@ RETURNS NUMERIC(18, 6)
 AS
 BEGIN
 	DECLARE @result AS NUMERIC(18, 6)
-
 	DECLARE @dblLastSettle INT
+	DECLARE @intFutureMarketId INT
+	DECLARE @intFutureMonthId INT
+	DECLARE @strBuySell nvarchar(10)
+	SELECT @intFutureMarketId=intFutureMarketId,@intFutureMonthId=intFutureMonthId,@strBuySell=strBuySell FROM tblRKFutOptTransaction WHERE intFutOptTransactionId=@intFutOptTransactionId
 
 	SELECT @dblLastSettle = count(dblLastSettle)
 	FROM tblRKFuturesSettlementPrice p
@@ -25,7 +27,7 @@ BEGIN
 		DECLARE @dblLastSettle1 NUMERIC(24, 10)
 			,@dblLastSettle2 NUMERIC(24, 10)
 
-		SELECT @dblLastSettle1 = dblLastSettle
+		SELECT @dblLastSettle2 = dblLastSettle
 		FROM (
 			SELECT TOP 2 ROW_NUMBER() OVER (
 					ORDER BY dtmPriceDate DESC
@@ -39,7 +41,7 @@ BEGIN
 			) t
 		WHERE intRowNum = 1
 
-		SELECT @dblLastSettle2 = dblLastSettle
+		SELECT @dblLastSettle1 = dblLastSettle
 		FROM (
 			SELECT TOP 2 ROW_NUMBER() OVER (
 					ORDER BY dtmPriceDate DESC
@@ -52,8 +54,11 @@ BEGIN
 			ORDER BY dtmPriceDate DESC
 			) t
 		WHERE intRowNum = 2
-
-		SET @result = @dblLastSettle2-@dblLastSettle1
+				
+		if @strBuySell='Buy'
+			SET @result = @dblLastSettle2-@dblLastSettle1	
+		else
+			SET @result = @dblLastSettle1-@dblLastSettle2
 	END
 	ELSE
 	BEGIN
