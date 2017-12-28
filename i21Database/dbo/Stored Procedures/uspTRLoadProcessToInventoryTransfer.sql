@@ -224,7 +224,12 @@ BEGIN TRY
 	--if No Records to Process exit
     SELECT @total = COUNT(*) FROM @TransferEntries;
     IF (@total = 0)
-	   RETURN;
+	BEGIN
+		UPDATE tblTRLoadReceipt
+		SET intInventoryTransferId = NULL
+		WHERE intLoadHeaderId = @intLoadHeaderId
+		RETURN;
+	END
 
     -- Call uspICAddInventoryTransfer stored procedure.
     EXEC dbo.uspICAddInventoryTransfer
@@ -234,7 +239,7 @@ BEGIN TRY
 	-- Update the Inventory Transfer Key to the Transaction Table
 	UPDATE	TR
 	SET		intInventoryTransferId = addResult.intInventoryTransferId
-	FROM	dbo.tblTRLoadReceipt TR INNER JOIN #tmpAddInventoryTransferResult addResult
+	FROM	tblTRLoadReceipt TR INNER JOIN #tmpAddInventoryTransferResult addResult
 				ON TR.intLoadReceiptId = addResult.intSourceId;
 _PostOrUnPost:
 	-- Post the Inventory Transfers                                            

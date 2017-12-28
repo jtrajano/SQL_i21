@@ -9,6 +9,7 @@
 	,@strNote NVARCHAR(1024) = NULL
 	,@intInventoryAdjustmentId INT = NULL OUTPUT
 	,@dtmDate DATETIME = NULL
+	,@strReasonCode NVARCHAR(MAX) = NULL
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -41,6 +42,12 @@ BEGIN TRY
 		,@dblDefaultResidueQty NUMERIC(38, 20)
 		,@intParentLotId INT
 		,@strParentLotNumber NVARCHAR(50)
+		,@intTransactionCount INT
+		,@strDescription NVARCHAR(MAX)
+
+	SELECT @intTransactionCount = @@TRANCOUNT
+
+	SELECT @strDescription = Ltrim(isNULL(@strReasonCode, '') + ' ' + isNULL(@strNote, ''))
 
 	SELECT TOP 1 @dblDefaultResidueQty = ISNULL(dblDefaultResidueQty, 0.00001)
 	FROM tblMFCompanyPreference
@@ -179,7 +186,8 @@ BEGIN TRY
 				)
 	END
 
-	BEGIN TRANSACTION
+	IF @intTransactionCount = 0
+		BEGIN TRANSACTION
 
 	EXEC uspICInventoryAdjustment_CreatePostSplitLot @intItemId = @intItemId
 		,@dtmDate = @dtmDate
@@ -202,6 +210,7 @@ BEGIN TRY
 		,@intSourceTransactionTypeId = @intSourceTransactionTypeId
 		,@intEntityUserSecurityId = @intUserId
 		,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+		,@strDescription = @strDescription
 
 	SELECT TOP 1 @strSplitLotNumber = strLotNumber
 		,@intNewLotId = intLotId
@@ -222,7 +231,7 @@ BEGIN TRY
 		,@intNewLotStatusId = NULL
 		,@intUserId = @intUserId
 		,@strNote = @strNote
-		,@strReason = NULL
+		,@strReason = @strReasonCode
 		,@intLocationId = @intLocationId
 		,@intInventoryAdjustmentId = @intInventoryAdjustmentId
 
@@ -282,12 +291,13 @@ BEGIN TRY
 		,@intLocationId = @intLocationId
 		,@intUserId = @intUserId
 
-	COMMIT TRANSACTION
+	IF @intTransactionCount = 0
+		COMMIT TRANSACTION
 END TRY
 
 BEGIN CATCH
 	IF XACT_STATE() != 0
-		AND @@TRANCOUNT > 0
+		AND @intTransactionCount = 0
 		ROLLBACK TRANSACTION
 
 	SET @ErrMsg = ERROR_MESSAGE()

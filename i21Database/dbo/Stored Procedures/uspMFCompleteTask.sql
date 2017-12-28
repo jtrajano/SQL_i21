@@ -159,7 +159,7 @@ BEGIN TRY
 			,@intUserId = @intUserId
 			,@blnValidateLotReservation = 0
 			,@blnInventoryMove = @blnInventoryMove
-			,@strDescription=@strDescription
+			,@strNotes=@strDescription
 
 		SELECT TOP 1 @intNewLotId = intLotId
 		FROM tblICLot
@@ -466,7 +466,7 @@ BEGIN TRY
 				,@intUserId = @intUserId
 				,@blnValidateLotReservation = 0
 				,@blnInventoryMove = @blnInventoryMove
-				,@strDescription=@strDescription
+				,@strNotes=@strDescription
 
 			SELECT TOP 1 @intNewLotId = intLotId
 			FROM tblICLot

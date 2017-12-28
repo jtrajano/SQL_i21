@@ -21,3 +21,31 @@
     CONSTRAINT [FK_tblLGAllocationDetail_tblICUnitMeasure_intSUnitMeasureId] FOREIGN KEY ([intSUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
     CONSTRAINT [FK_tblLGAllocationDetail_tblSMUserSecurity_intUserSecurityId] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityId])
 )
+GO
+CREATE NONCLUSTERED INDEX [_dta_index_tblLGAllocationDetail_197_692913540__K4_1] ON [dbo].[tblLGAllocationDetail]
+(
+	[intPContractDetailId] ASC
+)
+INCLUDE ( 	[intAllocationDetailId]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX [_dta_index_tblLGAllocationDetail_197_692913540__K4_K1] ON [dbo].[tblLGAllocationDetail]
+(
+	[intPContractDetailId] ASC,
+	[intAllocationDetailId] ASC
+)WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX [_dta_index_tblLGAllocationDetail_197_692913540__K1_K4] ON [dbo].[tblLGAllocationDetail]
+(
+       [intAllocationDetailId] ASC,
+       [intPContractDetailId] ASC
+)WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoad_197_1172915250__K5_1] ON [dbo].[tblLGLoad]
+(
+	[intPurchaseSale] ASC
+)
+INCLUDE ( 	[intLoadId]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+GO

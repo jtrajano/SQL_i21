@@ -487,87 +487,46 @@ BEGIN
 	FROM dbo.fnAPCreateBillGLEntries(@validBillIds, @userId, @batchId)
 	ORDER BY intTransactionId
 
+	-- Call the Item's Cost Adjustment
+	DECLARE @intReturnValue AS INT 
+	DECLARE @errorAdjustment NVARCHAR(200) 
 	IF EXISTS(SELECT 1 FROM @adjustedEntries)
-	BEGIN
-		DECLARE @intReturnValue AS INT 
-
+	BEGIN	
 		BEGIN TRY
-		EXEC @intReturnValue = uspICPostCostAdjustment 
-				@adjustedEntries
-				, @batchId
-				, @userId
+			EXEC @intReturnValue = uspICPostCostAdjustment 
+					@adjustedEntries
+					, @batchId
+					, @userId
 		END TRY
 		BEGIN CATCH
-			DECLARE @errorAdjustment NVARCHAR(200) = ERROR_MESSAGE()
+			SET @errorAdjustment = ERROR_MESSAGE()
 			RAISERROR(@errorAdjustment, 16, 1);
 			GOTO Post_Rollback
 		END CATCH
-
-		INSERT INTO @GLEntries (
-			dtmDate						
-			,strBatchId					
-			,intAccountId				
-			,dblDebit					
-			,dblCredit					
-			,dblDebitUnit				
-			,dblCreditUnit				
-			,strDescription				
-			,strCode					
-			,strReference				
-			,intCurrencyId				
-			,dblExchangeRate			
-			,dtmDateEntered				
-			,dtmTransactionDate			
-			,strJournalLineDescription  
-			,intJournalLineNo			
-			,ysnIsUnposted				
-			,intUserId					
-			,intEntityId				
-			,strTransactionId			
-			,intTransactionId			
-			,strTransactionType			
-			,strTransactionForm			
-			,strModuleName				
-			,intConcurrencyId			
-			,dblDebitForeign			
-			,dblDebitReport				
-			,dblCreditForeign			
-			,dblCreditReport			
-			,dblReportingRate			
-			,dblForeignRate						
-		)
-		EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
-			@strBatchId = @batchId
-			,@intEntityUserSecurityId = @userId
-
-		--DELETE FAILED BILLS
-		DELETE A
-		FROM #tmpPostBillData A
-		WHERE EXISTS (
-			SELECT 1
-			FROM tblAPBill B
-			INNER JOIN tblAPBillDetail C ON B.intBillId = C.intBillId AND C.intInventoryReceiptItemId > 0
-			INNER JOIN @adjustedEntries D ON B.intBillId = D.intTransactionId AND B.strBillId = D.strTransactionId
-			WHERE A.intBillId = B.intBillId
-			AND EXISTS (
-				SELECT 1 FROM tblICPostResult E WHERE E.strBatchNumber = @batchId AND E.intTransactionId = C.intInventoryReceiptItemId
-			)
-		)
-
-		SET @failedAdjustment = @@ROWCOUNT;
-		SET @invalidCount = @invalidCount + @failedAdjustment;
-		SET @totalRecords = @totalRecords - @failedAdjustment;
 	END
 
+	-- Call the Item's Cost Adjustment from the Other Charges. 
 	IF EXISTS(SELECT 1 FROM @ChargesToAdjust)
 	BEGIN
-		EXEC uspICPostCostAdjustmentFromOtherCharge 
-			@ChargesToAdjust = @ChargesToAdjust 
-			,@strBatchId = @batchId 
-			,@intEntityUserSecurityId = @userId 
-			,@ysnPost = @post
-			,@strTransactionType = DEFAULT 
+		BEGIN TRY
+			EXEC @intReturnValue = uspICPostCostAdjustmentFromOtherCharge 
+				@ChargesToAdjust = @ChargesToAdjust 
+				,@strBatchId = @batchId 
+				,@intEntityUserSecurityId = @userId 
+				,@ysnPost = @post
+				,@strTransactionType = DEFAULT 
+		END TRY
+		BEGIN CATCH
+			SET @errorAdjustment = ERROR_MESSAGE()
+			RAISERROR(@errorAdjustment, 16, 1);
+			GOTO Post_Rollback
+		END CATCH
+	END
 
+	-- Create the GL entries for the Cost Adjustment 
+	IF	EXISTS(SELECT 1 FROM @adjustedEntries)
+		OR EXISTS(SELECT 1 FROM @ChargesToAdjust)
+	BEGIN 
 		INSERT INTO @GLEntries (
 			dtmDate						
 			,strBatchId					
@@ -615,6 +574,24 @@ BEGIN
 			SELECT 1
 			FROM tblAPBill B
 			INNER JOIN tblAPBillDetail C ON B.intBillId = C.intBillId AND C.intInventoryReceiptItemId > 0
+			INNER JOIN @adjustedEntries D ON B.intBillId = D.intTransactionId AND B.strBillId = D.strTransactionId
+			WHERE A.intBillId = B.intBillId
+			AND EXISTS (
+				SELECT 1 FROM tblICPostResult E WHERE E.strBatchNumber = @batchId AND E.intTransactionId = C.intInventoryReceiptItemId
+			)
+		)
+
+		SET @failedAdjustment = @@ROWCOUNT;
+		SET @invalidCount = @invalidCount + @failedAdjustment;
+		SET @totalRecords = @totalRecords - @failedAdjustment;
+
+		--DELETE FAILED BILLS
+		DELETE A
+		FROM #tmpPostBillData A
+		WHERE EXISTS (
+			SELECT 1
+			FROM tblAPBill B
+			INNER JOIN tblAPBillDetail C ON B.intBillId = C.intBillId AND C.intInventoryReceiptItemId > 0
 			INNER JOIN @ChargesToAdjust D ON B.intBillId = D.intTransactionId AND B.strBillId = D.strTransactionId
 			WHERE A.intBillId = B.intBillId
 			AND EXISTS (
@@ -626,6 +603,7 @@ BEGIN
 		SET @invalidCount = @invalidCount + @failedAdjustment;
 		SET @totalRecords = @totalRecords - @failedAdjustment;
 	END
+
 END
 ELSE
 BEGIN

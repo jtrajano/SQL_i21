@@ -7,7 +7,8 @@
 	,@blnValidateLotReservation BIT = 0
 	,@blnInventoryMove BIT = 0
 	,@dtmDate DATETIME = NULL
-	,@strDescription nvarchar(50)=''
+	,@strReasonCode NVARCHAR(MAX) = NULL
+	,@strNotes NVARCHAR(MAX) = NULL
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -45,6 +46,12 @@ BEGIN TRY
 		,@intCategoryId INT
 		,@dblDefaultResidueQty NUMERIC(38, 20)
 		,@dblDestinationLotQty NUMERIC(38, 20)
+		,@intTransactionCount INT
+		,@strDescription nvarchar(MAX)
+
+	Select @intTransactionCount = @@TRANCOUNT
+
+	SELECT @strDescription = Ltrim(isNULL(@strReasonCode, '') + ' ' + isNULL(@strNotes, ''))
 
 	SELECT TOP 1 @dblDefaultResidueQty = ISNULL(dblDefaultResidueQty, 0.00001)
 	FROM tblMFCompanyPreference
@@ -311,7 +318,10 @@ BEGIN TRY
 		END
 	END
 
-	BEGIN TRANSACTION
+	SELECT @intTransactionCount = @@TRANCOUNT
+
+	IF @intTransactionCount = 0
+		BEGIN TRANSACTION
 
 	EXEC uspICInventoryAdjustment_CreatePostLotMove @intItemId
 		,@dtmDate
@@ -349,8 +359,8 @@ BEGIN TRY
 		,@intOldLotStatusId = NULL
 		,@intNewLotStatusId = NULL
 		,@intUserId = @intUserId
-		,@strNote = NULL
-		,@strReason = NULL
+		,@strNote = @strNotes
+		,@strReason = @strReasonCode
 		,@intLocationId = @intLocationId
 		,@intInventoryAdjustmentId = @intInventoryAdjustmentId
 
@@ -491,12 +501,13 @@ BEGIN TRY
 			,@strNotes = 'Residue qty clean up'
 	END
 
-	COMMIT TRANSACTION
+	IF @intTransactionCount = 0
+		COMMIT TRANSACTION
 END TRY
 
 BEGIN CATCH
 	IF XACT_STATE() != 0
-		AND @@TRANCOUNT > 0
+		AND @intTransactionCount = 0
 		ROLLBACK TRANSACTION
 
 	SET @ErrMsg = ERROR_MESSAGE()

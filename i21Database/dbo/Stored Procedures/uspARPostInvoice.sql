@@ -978,26 +978,10 @@ BEGIN TRY
 							,[strPostingMessage]			= ''
 							,[intUserId]					= @UserEntityID
 							,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost											
-						FROM 
-							dbo.tblARInvoice ARI WITH (NOLOCK)
+						FROM dbo.tblARInvoice ARI WITH (NOLOCK)
+						INNER JOIN dbo.fnGetRowsFromDelimitedValues(@invoicesToAdd) DV ON ARI.intInvoiceId = DV.intID
 						WHERE ARI.[ysnPosted] = 0 
-							AND intInvoiceId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@invoicesToAdd))
-
-						EXEC dbo.uspARReComputeInvoiceAmounts @intSplitInvoiceId
-
-						DECLARE @AddedInvoices AS [dbo].[Id]
-						INSERT INTO @AddedInvoices([intId])
-						SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@invoicesToAdd)
-						DECLARE @AddedInvoiceId INT
-
-						WHILE EXISTS(SELECT NULL FROM @AddedInvoices)
-							BEGIN
-								SELECT @AddedInvoiceId = [intId] FROM @AddedInvoices
-
-								EXEC dbo.uspARReComputeInvoiceAmounts @AddedInvoiceId
-
-								DELETE FROM @AddedInvoices WHERE [intId] = @AddedInvoiceId
-							END
+					
 					END
 
 				DELETE FROM @SplitInvoiceData WHERE intInvoiceId = @intSplitInvoiceId
@@ -1416,13 +1400,13 @@ BEGIN TRY
 										@dblMaxQtyToProduce		= @dblMaxQuantity OUT
 								END
 						END
-					--ELSE
-					--	BEGIN
-					--		EXEC dbo.uspMFReverseAutoBlend
-					--			@intSalesOrderDetailId	= NULL,
-					--			@intInvoiceDetailId		= @intInvoiceDetailId,
-					--			@intUserId				= @userId 
-					--	END						
+					ELSE
+						BEGIN
+							EXEC dbo.uspMFReverseAutoBlend
+								@intSalesOrderDetailId	= NULL,
+								@intInvoiceDetailId		= @intInvoiceDetailId,
+								@intUserId				= @userId 
+						END						
 					END TRY
 					BEGIN CATCH
 						SELECT @ErrorMerssage = ERROR_MESSAGE()
