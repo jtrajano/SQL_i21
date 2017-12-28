@@ -33,6 +33,8 @@ DECLARE @BANK_DEPOSIT INT = 1
   ,@VOID_CHECK AS INT = 19
   ,@AP_ECHECK AS INT = 20
   ,@PAYCHECK AS INT = 21
+  ,@ACH AS INT = 22
+  ,@DIRECT_DEPOSIT AS INT = 23
   
 -- Sample XML string structure:  
 --SET @xmlparam = '  
@@ -146,7 +148,7 @@ SELECT * FROM(
 			LEFT JOIN [dbo].tblICItem ITEM
 				ON BILLDETAIL.intItemId = ITEM.intItemId
 	WHERE	F.intTransactionId = ISNULL(@intTransactionIdFrom, F.intTransactionId)
-			AND F.intBankTransactionTypeId IN (@AP_PAYMENT, @AP_ECHECK)
+			AND F.intBankTransactionTypeId IN (@AP_PAYMENT, @AP_ECHECK, @ACH, @DIRECT_DEPOSIT)
 			AND PYMTDetail.intPaymentDetailId = @intPaymentDetailId
 
 	--Include Invoice
@@ -180,6 +182,6 @@ SELECT * FROM(
 			LEFT JOIN [dbo].tblICItem ITEM
 				ON INVDETAIL.intItemId = ITEM.intItemId
 	WHERE	F.intTransactionId = ISNULL(@intTransactionIdFrom, F.intTransactionId)
-			AND F.intBankTransactionTypeId IN (@AP_PAYMENT, @AP_ECHECK)
+			AND F.intBankTransactionTypeId IN (@AP_PAYMENT, @AP_ECHECK, @ACH, @DIRECT_DEPOSIT)
 			AND PYMTDetail.intPaymentDetailId = @intPaymentDetailId
 ) as tbl order by intPaymentDetailId
