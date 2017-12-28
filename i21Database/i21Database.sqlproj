@@ -6030,6 +6030,7 @@
     <Build Include="dbo\Stored Procedures\uspARUpdateCompanyLocationFreightTerm.sql" />
 	<Build Include="dbo\Stored Procedures\uspGLDeleteMultiAccounts.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRegenerateTask.sql" />
+    <Build Include="dbo\Views\vyuMFOrderHeaderNotMapped.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
