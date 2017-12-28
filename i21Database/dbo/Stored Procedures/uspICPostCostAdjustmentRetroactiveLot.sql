@@ -478,9 +478,11 @@ BEGIN
 					AND cb.strTransactionId = @t_strTransactionId	
 
 			UPDATE	l
-			SET		l.dblLastCost = cb.dblCost
+			SET		l.dblLastCost = dbo.fnCalculateUnitCost(cb.dblCost, iu.dblUnitQty) -- cb.dblCost
 			FROM	tblICLot l INNER JOIN tblICInventoryLot cb
 						ON l.intLotId = cb.intLotId
+					INNER JOIN tblICItemUOM iu
+						ON iu.intItemUOMId = cb.intItemUOMId
 			WHERE	l.intLotId = @t_intLotId
 		END 
 
