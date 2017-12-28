@@ -3956,18 +3956,18 @@ Ext.define('Inventory.view.ItemViewController', {
                 return;
             }
 
-            if (vm.data.current.phantom === true) {
-                // win.context.data.saveRecord({ successFn: function(batch, eOpts){
-                //     me.openItemLocationScreen('edit', win, record);
-                //     return;
-                // } });
+            if (vm.data.current.dirty === true) {
+                win.context.data.saveRecord({ successFn: function(batch, eOpts){
+                    me.openItemLocationScreen('edit', win, record);
+                    return;
+                } });
 
-                me.saveRecord(
-                    win, 
-                    function(batch, eOpts){
-                        me.openItemLocationScreen('edit', win, record);
-                    }
-                );                
+                // me.saveRecord(
+                //     win, 
+                //     function(batch, eOpts){
+                //         me.openItemLocationScreen('edit', win, record);
+                //     }
+                // );                
             }
             else {
                 win.context.data.validator.validateRecord(win.context.data.configuration, function(valid) {
