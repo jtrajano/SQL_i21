@@ -6,7 +6,9 @@
  ,@intUOMId INTEGER
  ,@intDecimal INTEGER,
   @intForecastWeeklyConsumption INTEGER = null,
-  @intForecastWeeklyConsumptionUOMId INTEGER = null   
+  @intForecastWeeklyConsumptionUOMId INTEGER = null   ,
+  @intBookId int = NULL, 
+  @intSubBookId int = NULL
 AS
 
 IF ISNULL(@intForecastWeeklyConsumptionUOMId,0) = 0
@@ -61,6 +63,9 @@ BEGIN
 		 ,@intDecimal = @intDecimal
 		 ,@intForecastWeeklyConsumption=@intForecastWeeklyConsumption
 		 ,@intForecastWeeklyConsumptionUOMId=@intForecastWeeklyConsumptionUOMId
+		 ,@intBookId  = @intBookId, 
+		 @intSubBookId = @intSubBookId 
+		
 
 	SELECT CONVERT(INT,ROW_NUMBER() OVER(ORDER BY strFutureMonth ASC)) intRowNum,
 		(select SUM(dblNoOfContract) FROM @tblFinalDetail t1 WHERE t1.Selection = 'Physical position / Basis risk' and t1.strFutureMonth= t.strFutureMonth) dblPhysicalPosition,
@@ -83,6 +88,8 @@ BEGIN
 		 ,@intDecimal = @intDecimal
 		 ,@intForecastWeeklyConsumption=@intForecastWeeklyConsumption
 		 ,@intForecastWeeklyConsumptionUOMId=@intForecastWeeklyConsumptionUOMId 
+		 ,@intBookId  = @intBookId, 
+		 @intSubBookId = @intSubBookId
 
 
 	SELECT CONVERT(INT,ROW_NUMBER() OVER(ORDER BY strFutureMonth ASC)) intRowNum,

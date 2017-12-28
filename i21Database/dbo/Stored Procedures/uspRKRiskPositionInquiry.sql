@@ -6,7 +6,9 @@
         @intUOMId INTEGER,  
         @intDecimal INTEGER,
         @intForecastWeeklyConsumption INTEGER = null,
-        @intForecastWeeklyConsumptionUOMId INTEGER = null   
+        @intForecastWeeklyConsumptionUOMId INTEGER = null,
+		@intBookId int = NULL, 
+		@intSubBookId int = NULL   
 AS  
 
 IF isnull(@intForecastWeeklyConsumptionUOMId, 0) = 0
@@ -77,6 +79,7 @@ DECLARE @List AS TABLE (
 	,intOrderBySubHeading INT
 	,intContractHeaderId INT
 	,intFutOptTransactionHeaderId INT
+
 	)
 DECLARE @PricedContractList AS TABLE (
 	strFutureMonth NVARCHAR(max) COLLATE Latin1_General_CI_AS
@@ -102,6 +105,7 @@ DECLARE @PricedContractList AS TABLE (
 	,dblDeltaPercent DECIMAL(24, 10)
 	,intContractDetailId INT
 	,intCommodityUnitMeasureId INT
+	,dblRatioContractSize DECIMAL(24, 10)
 	)
 
 INSERT INTO @PricedContractList
@@ -126,9 +130,10 @@ SELECT fm.strFutureMonth
 	,isnull(pl.ysnDeltaHedge, 0) ysnDeltaHedge
 	,intContractStatusId
 	,dblDeltaPercent,cv.intContractDetailId,um.intCommodityUnitMeasureId
+	,dbo.fnCTConvertQuantityToTargetCommodityUOM(um2.intCommodityUnitMeasureId,um.intCommodityUnitMeasureId,ffm.dblContractSize) dblRatioContractSize
 FROM vyuRKRiskPositionContractDetail cv
 JOIN tblRKFutureMarket ffm ON ffm.intFutureMarketId = cv.intFutureMarketId
-JOIN tblICCommodityUnitMeasure um1 ON um1.intCommodityId = cv.intCommodityId AND um1.intUnitMeasureId = ffm.intUnitMeasureId
+JOIN tblICCommodityUnitMeasure um2 ON um2.intUnitMeasureId = ffm.intUnitMeasureId and um2.intCommodityId = cv.intCommodityId
 JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = cv.intFutureMonthId
 JOIN tblICItemUOM u ON cv.intItemUOMId = u.intItemUOMId
 JOIN tblICItem ic ON ic.intItemId = cv.intItemId
@@ -136,19 +141,22 @@ LEFT JOIN tblICCommodityProductLine pl ON ic.intCommodityId = pl.intCommodityId 
 LEFT JOIN tblICCommodityAttribute ca ON ca.intCommodityAttributeId = ic.intProductTypeId
 LEFT JOIN tblICCommodityUnitMeasure um ON um.intCommodityId = cv.intCommodityId AND um.intUnitMeasureId = cv.intUnitMeasureId
 WHERE cv.intCommodityId = @intCommodityId AND cv.intFutureMarketId = @intFutureMarketId AND cv.intContractStatusId NOT IN (2, 3) --AND cv.intPricingTypeId = 1
+AND isnull(intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(intBookId,0) else @intBookId end
+AND isnull(intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(intSubBookId,0) else @intSubBookId end
+
 
 SELECT *
 INTO #ContractTransaction
 FROM (
 	SELECT strFutureMonth
 		,strAccountNumber
-		,case when intPricingTypeId=8 then dblNoOfLot*@dblContractSize else dblNoOfContract end dblNoOfContract
+		,case when intPricingTypeId=8 then  dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId, dblNoOfLot*dblRatioContractSize) else dblNoOfContract end dblNoOfContract
 		,strTradeNo
 		,TransactionDate
 		,TranType
 		,CustVendor
 		,dblNoOfLot
-		,case when intPricingTypeId=8 then dblNoOfLot*@dblContractSize else dblQuantity end dblQuantity
+		,case when intPricingTypeId=8 then dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId, dblNoOfLot*dblRatioContractSize) else dblQuantity end dblQuantity
 		,intContractHeaderId
 		,intFutOptTransactionHeaderId
 		,intPricingTypeId
@@ -166,13 +174,13 @@ FROM (
 	--Parcial Priced
 	SELECT strFutureMonth
 		,strAccountNumber
-		,case when intPricingTypeId=8 then dblFixedLots*@dblContractSize else dblFixedQty end AS dblNoOfContract
+		,case when intPricingTypeId=8 then  dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId, dblFixedLots*dblRatioContractSize) else dblFixedQty end AS dblNoOfContract
 		,strTradeNo
 		,TransactionDate
 		,TranType
 		,CustVendor
 		,dblFixedLots dblNoOfLot
-		,case when intPricingTypeId=8 then dblFixedLots*@dblContractSize else dblFixedQty end dblFixedQty
+		,case when intPricingTypeId=8 then  dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId, dblFixedLots*dblRatioContractSize) else dblFixedQty end dblFixedQty
 		,intContractHeaderId
 		,intFutOptTransactionHeaderId
 		,1 intPricingTypeId
@@ -211,8 +219,8 @@ FROM (
 					FROM tblCTPriceFixation pf
 					JOIN tblCTPriceFixationDetail pd ON pf.intPriceFixationId = pd.intPriceFixationId
 					WHERE pf.intContractHeaderId = cv.intContractHeaderId AND pf.intContractDetailId = cv.intContractDetailId
-					), 0) dblFixedQty
-
+					), 0) dblFixedQty,intCommodityUnitMeasureId
+					,dblRatioContractSize
 		FROM @PricedContractList cv
 		WHERE cv.intContractStatusId <> 3 AND intPricingTypeId <> 1 AND isnull(ysnDeltaHedge, 0) =0
 		) t
@@ -223,13 +231,13 @@ FROM (
 	--Parcial UnPriced
 	SELECT strFutureMonth
 		,strAccountNumber
-		,case when intPricingTypeId=8 then (isnull(dblNoOfLot, 0) - isnull(dblFixedLots, 0))*@dblContractSize else dblQuantity - dblFixedQty end AS dblNoOfContract
+		,case when intPricingTypeId=8 then dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId,(isnull(dblNoOfLot, 0) - isnull(dblFixedLots, 0)) * dblRatioContractSize) else dblQuantity - dblFixedQty end AS dblNoOfContract
 		,strTradeNo
 		,TransactionDate
 		,TranType
 		,CustVendor
 		,isnull(dblNoOfLot, 0) - isnull(dblFixedLots, 0) dblNoOfLot
-		,case when intPricingTypeId=8 then (isnull(dblNoOfLot, 0) - isnull(dblFixedLots, 0))*@dblContractSize else dblQuantity - dblFixedQty end dblQuantity
+		,case when intPricingTypeId=8 then dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId,(isnull(dblNoOfLot, 0) - isnull(dblFixedLots, 0))*dblRatioContractSize) else dblQuantity - dblFixedQty end dblQuantity
 		,intContractHeaderId
 		,intFutOptTransactionHeaderId
 		,2 intPricingTypeId
@@ -269,7 +277,7 @@ FROM (
 					JOIN tblCTPriceFixationDetail pd ON pf.intPriceFixationId = pd.intPriceFixationId
 					WHERE pf.intContractHeaderId = cv.intContractHeaderId AND pf.intContractDetailId = cv.intContractDetailId
 					), 0) dblFixedQty
-			,isnull(dblDeltaPercent,0) dblDeltaPercent
+			,isnull(dblDeltaPercent,0) dblDeltaPercent,intCommodityUnitMeasureId,dblRatioContractSize
 		FROM @PricedContractList cv
 		WHERE cv.intContractStatusId <> 3 AND intPricingTypeId <> 1 AND isnull(ysnDeltaHedge, 0) =0
 		) t
@@ -283,13 +291,13 @@ INTO #DeltaPrecent
 FROM (
 	SELECT strFutureMonth
 		,strAccountNumber + '(Delta=' + convert(NVARCHAR, left(dblDeltaPercent, 4)) + '%)' strAccountNumber
-		,(case when intPricingTypeId=8 then dblQuantity*@dblContractSize else dblNoOfContract end*dblDeltaPercent)/100 dblNoOfContract
+		,(case when intPricingTypeId=8 then dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId,dblQuantity*dblRatioContractSize) else dblNoOfContract end*dblDeltaPercent)/100 dblNoOfContract
 		,strTradeNo
 		,TransactionDate
 		,TranType
 		,CustVendor
 		,(dblNoOfLot*dblDeltaPercent)/100 dblNoOfLot
-		,(case when intPricingTypeId=8 then dblQuantity*@dblContractSize else dblQuantity end*dblDeltaPercent)/100 dblQuantity
+		,(case when intPricingTypeId=8 then dblQuantity*dblRatioContractSize else dblQuantity end*dblDeltaPercent)/100 dblQuantity
 		,intContractHeaderId
 		,intFutOptTransactionHeaderId
 		,intPricingTypeId
@@ -307,13 +315,13 @@ FROM (
 	--Parcial Priced
 	SELECT strFutureMonth
 		,strAccountNumber
-		,(case when intPricingTypeId=8 then dblFixedLots*@dblContractSize else dblFixedQty end*dblDeltaPercent)/100  AS dblNoOfContract
+		,(case when intPricingTypeId=8 then dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId,dblFixedLots*dblRatioContractSize) else dblFixedQty end*dblDeltaPercent)/100  AS dblNoOfContract
 		,strTradeNo
 		,TransactionDate
 		,TranType
 		,CustVendor
 		,(dblFixedLots*dblDeltaPercent)/100 dblNoOfLot
-		,(case when intPricingTypeId=8 then dblFixedLots*@dblContractSize else dblFixedQty end*dblDeltaPercent)/100 dblFixedQty
+		,(case when intPricingTypeId=8 then dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId,dblFixedLots*dblRatioContractSize) else dblFixedQty end*dblDeltaPercent)/100 dblFixedQty
 		,intContractHeaderId
 		,intFutOptTransactionHeaderId
 		,1 intPricingTypeId
@@ -353,7 +361,8 @@ FROM (
 					JOIN tblCTPriceFixationDetail pd ON pf.intPriceFixationId = pd.intPriceFixationId
 					WHERE pf.intContractHeaderId = cv.intContractHeaderId AND pf.intContractDetailId = cv.intContractDetailId
 					), 0) dblFixedQty
-			,dblDeltaPercent
+			,dblDeltaPercent,intCommodityUnitMeasureId
+			,dblRatioContractSize
 		FROM @PricedContractList cv
 		WHERE cv.intContractStatusId <> 3 AND intPricingTypeId <> 1 AND isnull(ysnDeltaHedge, 0) =1
 		) t
@@ -364,13 +373,13 @@ FROM (
 	--Parcial UnPriced
 	SELECT strFutureMonth
 		,strAccountNumber
-		,case when intPricingTypeId=8 then (isnull(dblNoOfLot, 0) - isnull(dblFixedLots, 0))*@dblContractSize else dblQuantity - dblFixedQty  end  AS dblNoOfContract
+		,case when intPricingTypeId=8 then dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId,(isnull(dblNoOfLot, 0) - isnull(dblFixedLots, 0))*dblRatioContractSize) else dblQuantity - dblFixedQty  end  AS dblNoOfContract
 		,strTradeNo
 		,TransactionDate
 		,TranType
 		,CustVendor
 		,isnull(dblNoOfLot, 0) - isnull(dblFixedLots, 0) dblNoOfLot
-		,case when intPricingTypeId=8 then (isnull(dblNoOfLot, 0) - isnull(dblFixedLots, 0))*@dblContractSize else dblQuantity - dblFixedQty  end dblQuantity
+		,case when intPricingTypeId=8 then dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId,(isnull(dblNoOfLot, 0) - isnull(dblFixedLots, 0))*dblRatioContractSize) else dblQuantity - dblFixedQty  end dblQuantity
 		,intContractHeaderId
 		,intFutOptTransactionHeaderId
 		,2 intPricingTypeId
@@ -409,7 +418,7 @@ FROM (
 					FROM tblCTPriceFixation pf
 					JOIN tblCTPriceFixationDetail pd ON pf.intPriceFixationId = pd.intPriceFixationId
 					WHERE pf.intContractHeaderId = cv.intContractHeaderId AND pf.intContractDetailId = cv.intContractDetailId
-					), 0) dblFixedQty
+					), 0) dblFixedQty,intCommodityUnitMeasureId,dblRatioContractSize
 		FROM @PricedContractList cv
 		WHERE cv.intContractStatusId <> 3 AND intPricingTypeId <> 1 AND isnull(ysnDeltaHedge, 0) = 1
 		) t
@@ -645,6 +654,8 @@ BEGIN
 			JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 1
 			JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = ft.intFutureMonthId AND fm.intFutureMarketId = ft.intFutureMarketId AND fm.ysnExpired = 0
 			WHERE ft.intCommodityId = @intCommodityId AND intLocationId = CASE WHEN isnull(@intCompanyLocationId, 0) = 0 THEN intLocationId ELSE @intCompanyLocationId END AND intLocationId = CASE WHEN isnull(@intCompanyLocationId, 0) = 0 THEN intLocationId ELSE @intCompanyLocationId END AND ft.intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
+			AND isnull(intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(intBookId,0) else @intBookId end
+			AND isnull(intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(intSubBookId,0) else @intSubBookId end
 			) t
 		
 		UNION
@@ -684,6 +695,9 @@ BEGIN
 			JOIN tblRKFutureMarket mar ON mar.intFutureMarketId = ft.intFutureMarketId
 			LEFT JOIN tblICCommodityUnitMeasure um ON um.intCommodityId = ft.intCommodityId AND um.intUnitMeasureId = mar.intUnitMeasureId
 			WHERE ft.intCommodityId = @intCommodityId AND intLocationId = CASE WHEN isnull(@intCompanyLocationId, 0) = 0 THEN intLocationId ELSE @intCompanyLocationId END AND ft.intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
+			AND isnull(intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(intBookId,0) else @intBookId end
+AND isnull(intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(intSubBookId,0) else @intSubBookId end
+
 			) t
 		
 		UNION
@@ -741,7 +755,10 @@ BEGIN
 		JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
 		JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 2
 		JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = ft.intFutureMonthId AND fm.intFutureMarketId = ft.intFutureMarketId AND fm.ysnExpired = 0
-		WHERE intCommodityId = @intCommodityId AND intLocationId = CASE WHEN isnull(@intCompanyLocationId, 0) = 0 THEN intLocationId ELSE @intCompanyLocationId END AND ft.intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate >= @dtmFutureMonthsDate AND intFutOptTransactionId NOT IN (
+		WHERE intCommodityId = @intCommodityId AND intLocationId = CASE WHEN isnull(@intCompanyLocationId, 0) = 0 THEN intLocationId ELSE @intCompanyLocationId END AND ft.intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate >= @dtmFutureMonthsDate 
+		AND isnull(intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(intBookId,0) else @intBookId end
+AND isnull(intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(intSubBookId,0) else @intSubBookId end
+		AND intFutOptTransactionId NOT IN (
 				SELECT intFutOptTransactionId
 				FROM tblRKOptionsPnSExercisedAssigned
 				) AND intFutOptTransactionId NOT IN (
@@ -797,7 +814,11 @@ BEGIN
 			JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
 			JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 1
 			JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = ft.intFutureMonthId AND fm.intFutureMarketId = ft.intFutureMarketId AND fm.ysnExpired = 0
-			WHERE intCommodityId = @intCommodityId AND intLocationId = CASE WHEN isnull(@intCompanyLocationId, 0) = 0 THEN intLocationId ELSE @intCompanyLocationId END AND ft.intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
+			WHERE intCommodityId = @intCommodityId AND intLocationId = CASE WHEN isnull(@intCompanyLocationId, 0) = 0 THEN intLocationId ELSE @intCompanyLocationId END 
+			AND isnull(intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(intBookId,0) else @intBookId end
+AND isnull(intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(intSubBookId,0) else @intSubBookId end
+
+			AND ft.intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
 			) t
 		
 		UNION
@@ -855,7 +876,10 @@ BEGIN
 		JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
 		JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 2
 		JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = ft.intFutureMonthId AND fm.intFutureMarketId = ft.intFutureMarketId AND fm.ysnExpired = 0
-		WHERE intCommodityId = @intCommodityId AND intLocationId = CASE WHEN isnull(@intCompanyLocationId, 0) = 0 THEN intLocationId ELSE @intCompanyLocationId END AND ft.intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate >= @dtmFutureMonthsDate AND intFutOptTransactionId NOT IN (
+		WHERE intCommodityId = @intCommodityId AND intLocationId = CASE WHEN isnull(@intCompanyLocationId, 0) = 0 THEN intLocationId ELSE @intCompanyLocationId END
+		AND isnull(intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(intBookId,0) else @intBookId end
+		AND isnull(intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(intSubBookId,0) else @intSubBookId end
+		 AND ft.intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate >= @dtmFutureMonthsDate AND intFutOptTransactionId NOT IN (
 				SELECT intFutOptTransactionId
 				FROM tblRKOptionsPnSExercisedAssigned
 				) AND intFutOptTransactionId NOT IN (
@@ -912,7 +936,10 @@ BEGIN
 			INNER JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = ft.intFutureMonthId AND fm.intFutureMarketId = ft.intFutureMarketId AND fm.ysnExpired = 0
 			INNER JOIN tblRKFutureMarket mar ON mar.intFutureMarketId = ft.intFutureMarketId
 			LEFT JOIN tblICCommodityUnitMeasure um ON um.intCommodityId = ft.intCommodityId AND um.intUnitMeasureId = mar.intUnitMeasureId
-			WHERE ft.intCommodityId = @intCommodityId AND intLocationId = CASE WHEN isnull(@intCompanyLocationId, 0) = 0 THEN intLocationId ELSE @intCompanyLocationId END AND ft.intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
+			WHERE ft.intCommodityId = @intCommodityId AND intLocationId = CASE WHEN isnull(@intCompanyLocationId, 0) = 0 THEN intLocationId ELSE @intCompanyLocationId END 
+			AND isnull(intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(intBookId,0) else @intBookId end
+			AND isnull(intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(intSubBookId,0) else @intSubBookId end
+			AND ft.intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
 			) t
 		
 		UNION
@@ -956,7 +983,10 @@ BEGIN
 			INNER JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = ft.intFutureMonthId AND fm.intFutureMarketId = ft.intFutureMarketId AND fm.ysnExpired = 0
 			INNER JOIN tblRKFutureMarket mar ON mar.intFutureMarketId = ft.intFutureMarketId
 			LEFT JOIN tblICCommodityUnitMeasure um ON um.intCommodityId = ft.intCommodityId AND um.intUnitMeasureId = mar.intUnitMeasureId
-			WHERE ft.intCommodityId = @intCommodityId AND intLocationId = CASE WHEN isnull(@intCompanyLocationId, 0) = 0 THEN intLocationId ELSE @intCompanyLocationId END AND ft.intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
+			WHERE ft.intCommodityId = @intCommodityId AND intLocationId = CASE WHEN isnull(@intCompanyLocationId, 0) = 0 THEN intLocationId ELSE @intCompanyLocationId END 
+			AND isnull(intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(intBookId,0) else @intBookId end
+			AND isnull(intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(intSubBookId,0) else @intSubBookId end
+			AND ft.intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
 			) t
 		) T
 		
@@ -1195,7 +1225,10 @@ IF NOT EXISTS (
 		JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
 		JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 2
 		JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = ft.intFutureMonthId AND fm.intFutureMarketId = ft.intFutureMarketId AND fm.ysnExpired = 0
-		WHERE intCommodityId = @intCommodityId AND intLocationId = CASE WHEN isnull(@intCompanyLocationId, 0) = 0 THEN intLocationId ELSE @intCompanyLocationId END AND ft.intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate >= @dtmFutureMonthsDate AND intFutOptTransactionId NOT IN (
+		WHERE intCommodityId = @intCommodityId AND intLocationId = CASE WHEN isnull(@intCompanyLocationId, 0) = 0 THEN intLocationId ELSE @intCompanyLocationId END
+		AND isnull(intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(intBookId,0) else @intBookId end
+		AND isnull(intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(intSubBookId,0) else @intSubBookId end
+		 AND ft.intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate >= @dtmFutureMonthsDate AND intFutOptTransactionId NOT IN (
 				SELECT intFutOptTransactionId
 				FROM tblRKOptionsPnSExercisedAssigned
 				) AND intFutOptTransactionId NOT IN (

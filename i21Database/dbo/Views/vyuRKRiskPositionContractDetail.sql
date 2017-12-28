@@ -23,6 +23,8 @@ SELECT DISTINCT CT.strContractType
 	,CH.ysnMultiplePriceFixation
 	,CD.dblNoOfLots dblDetailNoOfLots
 	,CT.intContractTypeId,FM.strFutureMonth
+	,CD.intBookId
+	,CD.intSubBookId
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId AND CD.intContractStatusId not in(2,3)
 JOIN tblRKFuturesMonth FM on FM.intFutureMonthId=CD.intFutureMonthId
