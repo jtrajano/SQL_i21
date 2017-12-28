@@ -28,6 +28,7 @@ CREATE PROCEDURE [dbo].[uspAPCreateBillData]
 	@shipFrom INT = NULL,
 	@vendorOrderNumber NVARCHAR(50) = NULL,
 	@voucherDate DATETIME = NULL,
+	@currencyId INT = NULL,
 	@billId INT OUTPUT
 AS
 BEGIN
@@ -113,9 +114,10 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intShipViaId]			=	A.[intShipViaId],
 		[intContactId]			=	A.[intContactId],
 		[intOrderById]			=	A.[intOrderById],
-		[intCurrencyId]			=	A.[intCurrencyId]
+		[intCurrencyId]			=	A.[intCurrencyId],
+		[intSubCurrencyCents]	=	A.[intSubCurrencyCents]
 	INTO #tmpBillData
-	FROM dbo.fnAPCreateBillData(@vendorId, @userId, @type, DEFAULT, DEFAULT, DEFAULT, @shipFrom, @shipTo) A
+	FROM dbo.fnAPCreateBillData(@vendorId, @userId, @type, DEFAULT, @currencyId, DEFAULT, @shipFrom, @shipTo) A
 
 	INSERT INTO tblAPBill
 	(
@@ -150,7 +152,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intShipViaId]			,
 		[intContactId]			,
 		[intOrderById]			,
-		[intCurrencyId]			
+		[intCurrencyId]			,
+		[intSubCurrencyCents]
 	)
 	SELECT * FROM #tmpBillData
 
