@@ -30,4 +30,5 @@ CREATE TYPE [dbo].[ItemCostAdjustmentTableType] AS TABLE
 	,[intRelatedInventoryTransactionId] INT NULL 
 	,[intFobPointId] TINYINT NULL
 	,[intInTransitSourceLocationId] INT NULL 
+	,[intOtherChargeItemId] INT NULL
 )

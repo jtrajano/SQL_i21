@@ -26,6 +26,7 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentRetroactiveLot]
 	,@intFobPointId AS TINYINT = NULL
 	,@intInTransitSourceLocationId AS INT = NULL  
 	,@ysnPost AS BIT = 1
+	,@intOtherChargeItemId AS INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -277,7 +278,7 @@ END
 -- There could be more than one lot record per item received. 
 -- Calculate how much cost adjustment goes for each lot qty. 
 BEGIN 
-	SELECT	@CostAdjustmentPerLot = @CostAdjustment / SUM(ISNULL(cb.dblStockIn, 0))
+	SELECT	@CostAdjustmentPerLot = dbo.fnDivide(@CostAdjustment, SUM(ISNULL(cb.dblStockIn, 0))) 
 	FROM	tblICInventoryLot cb
 	WHERE	cb.intItemId = @intItemId
 			AND cb.intItemLocationId = @intItemLocationId
@@ -311,6 +312,7 @@ BEGIN
 				,[intRelatedTransactionId] 
 				,[intCreatedUserId] 
 				,[intCreatedEntityUserId] 
+				,[intOtherChargeItemId] 
 		)
 		SELECT
 				[intInventoryLotId] = cb.intInventoryLotId
@@ -325,6 +327,7 @@ BEGIN
 				,[intRelatedTransactionId] = cb.intTransactionId
 				,[intCreatedUserId] = @intEntityUserSecurityId
 				,[intCreatedEntityUserId] = @intEntityUserSecurityId
+				,[intOtherChargeItemId] = @intOtherChargeItemId 
 		FROM	tblICInventoryLot cb LEFT JOIN tblICInventoryLotCostAdjustmentLog cl
 					ON cb.intInventoryLotId = cl.intInventoryLotId
 		WHERE	cb.intItemId = @intItemId
@@ -475,9 +478,11 @@ BEGIN
 					AND cb.strTransactionId = @t_strTransactionId	
 
 			UPDATE	l
-			SET		l.dblLastCost = cb.dblCost
+			SET		l.dblLastCost = dbo.fnCalculateUnitCost(cb.dblCost, iu.dblUnitQty) -- cb.dblCost
 			FROM	tblICLot l INNER JOIN tblICInventoryLot cb
 						ON l.intLotId = cb.intLotId
+					INNER JOIN tblICItemUOM iu
+						ON iu.intItemUOMId = cb.intItemUOMId
 			WHERE	l.intLotId = @t_intLotId
 		END 
 
@@ -520,6 +525,7 @@ BEGIN
 				,[intRelatedInventoryTransactionId]
 				,[intCreatedUserId] 
 				,[intCreatedEntityUserId] 
+				,[intOtherChargeItemId] 
 			)
 			SELECT
 				[intInventoryLotId] = @CostBucketId
@@ -584,6 +590,7 @@ BEGIN
 				,[intRelatedInventoryTransactionId] = @t_intInventoryTransactionId
 				,[intCreatedUserId] = @intEntityUserSecurityId
 				,[intCreatedEntityUserId] = @intEntityUserSecurityId
+				,[intOtherChargeItemId] = @intOtherChargeItemId 
 			WHERE		
 				CASE	WHEN @IsSourceTransaction = 1 THEN 
 							@t_dblQty * @CostAdjustmentPerLot

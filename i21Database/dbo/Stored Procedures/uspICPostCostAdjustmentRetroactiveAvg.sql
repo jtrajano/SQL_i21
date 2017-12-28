@@ -26,6 +26,7 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentRetroactiveAvg]
 	,@intFobPointId AS TINYINT = NULL
 	,@intInTransitSourceLocationId AS INT = NULL  
 	,@ysnPost AS BIT = 1 
+	,@intOtherChargeItemId AS INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -232,6 +233,7 @@ BEGIN
 			,[intRelatedTransactionId] 
 			,[intCreatedUserId] 
 			,[intCreatedEntityUserId] 
+			,[intOtherChargeItemId]
 		)
 		SELECT
 			[intInventoryFIFOId] = cb.intInventoryFIFOId
@@ -246,6 +248,7 @@ BEGIN
 			,[intRelatedTransactionId] = cb.intTransactionId
 			,[intCreatedUserId] = @intEntityUserSecurityId
 			,[intCreatedEntityUserId] = @intEntityUserSecurityId
+			,[intOtherChargeItemId] = @intOtherChargeItemId 
 		FROM tblICInventoryFIFO cb 
 		WHERE	cb.intInventoryFIFOId = @CostBucketId
 	END 
@@ -512,6 +515,7 @@ BEGIN
 				,[intRelatedInventoryTransactionId]
 				,[intCreatedUserId] 
 				,[intCreatedEntityUserId] 
+				,[intOtherChargeItemId] 
 			)
 			SELECT
 				[intInventoryFIFOId] = @CostBucketId
@@ -576,6 +580,7 @@ BEGIN
 				,[intRelatedInventoryTransactionId] = @t_intInventoryTransactionId
 				,[intCreatedUserId] = @intEntityUserSecurityId
 				,[intCreatedEntityUserId] = @intEntityUserSecurityId
+				,[intOtherChargeItemId] = @intOtherChargeItemId 
 			WHERE		
 				CASE	WHEN @t_dblQty > 0 AND @t_intInventoryTransactionId = @InventoryTransactionStartId THEN 
 							@CostAdjustment

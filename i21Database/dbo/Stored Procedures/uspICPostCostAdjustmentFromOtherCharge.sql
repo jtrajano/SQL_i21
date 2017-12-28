@@ -60,6 +60,7 @@ BEGIN
 			,@SOURCE_TYPE_Transport AS INT = 3
 
 	DECLARE @ApprovedChargesToAdjust AS OtherChargeCostAdjustmentTableType
+			,@ReturnValue AS INT 
 END 
 
 /*--------------------------------------------------
@@ -118,7 +119,8 @@ BEGIN
 				,[strActualCostId] 
 				,[intSourceTransactionId] 
 				,[intSourceTransactionDetailId] 
-				,[strSourceTransactionId] 
+				,[strSourceTransactionId]
+				,[intOtherChargeItemId] 
 		)
 		SELECT
 				[intItemId]						= ReceiptItem.intItemId
@@ -144,6 +146,7 @@ BEGIN
 				,[intSourceTransactionId]		= Receipt.intInventoryReceiptId
 				,[intSourceTransactionDetailId] = ReceiptItem.intInventoryReceiptItemId
 				,[strSourceTransactionId]		= Receipt.strReceiptNumber
+				,[intOtherChargeItemId]			= ReceiptCharge.intChargeId 
 		FROM	tblICInventoryReceiptCharge ReceiptCharge INNER JOIN @ApprovedChargesToAdjust approvedCharges
 					ON ReceiptCharge.intInventoryReceiptChargeId = approvedCharges.intInventoryReceiptChargeId						
 				INNER JOIN tblICInventoryReceipt Receipt 
@@ -210,6 +213,7 @@ BEGIN
 				,[intSourceTransactionId]		= Receipt.intInventoryReceiptId
 				,[intSourceTransactionDetailId] = ReceiptItem.intInventoryReceiptItemId
 				,[strSourceTransactionId]		= Receipt.strReceiptNumber
+				,[intOtherChargeItemId]			= ReceiptCharge.intChargeId
 		FROM	tblICInventoryReceiptCharge ReceiptCharge INNER JOIN @ApprovedChargesToAdjust approvedCharges
 					ON ReceiptCharge.intInventoryReceiptChargeId = approvedCharges.intInventoryReceiptChargeId		
 				INNER JOIN tblICInventoryReceipt Receipt 
@@ -276,6 +280,7 @@ BEGIN
 				,[intSourceTransactionId]		= Receipt.intInventoryReceiptId
 				,[intSourceTransactionDetailId] = ReceiptItem.intInventoryReceiptItemId
 				,[strSourceTransactionId]		= Receipt.strReceiptNumber
+				,[intOtherChargeItemId]			= ReceiptCharge.intChargeId
 		FROM	tblICInventoryReceiptCharge ReceiptCharge INNER JOIN @ApprovedChargesToAdjust approvedCharges
 					ON ReceiptCharge.intInventoryReceiptChargeId = approvedCharges.intInventoryReceiptChargeId						
 				INNER JOIN tblICInventoryReceipt Receipt 
@@ -334,6 +339,7 @@ BEGIN
 				,[intSourceTransactionId] 
 				,[intSourceTransactionDetailId] 
 				,[strSourceTransactionId] 
+				,[intOtherChargeItemId]
 		)
 		SELECT
 				[intItemId]						= ReceiptItem.intItemId
@@ -359,6 +365,7 @@ BEGIN
 				,[intSourceTransactionId]		= Receipt.intInventoryReceiptId
 				,[intSourceTransactionDetailId] = ReceiptItem.intInventoryReceiptItemId
 				,[strSourceTransactionId]		= Receipt.strReceiptNumber
+				,[intOtherChargeItemId]			= ReceiptCharge.intChargeId
 		FROM	tblICInventoryReceiptCharge ReceiptCharge INNER JOIN @ApprovedChargesToAdjust approvedCharges
 					ON ReceiptCharge.intInventoryReceiptChargeId = approvedCharges.intInventoryReceiptChargeId						
 				INNER JOIN tblICInventoryReceipt Receipt 
@@ -428,6 +435,7 @@ BEGIN
 				,[intSourceTransactionId]		= Receipt.intInventoryReceiptId
 				,[intSourceTransactionDetailId] = ReceiptItem.intInventoryReceiptItemId
 				,[strSourceTransactionId]		= Receipt.strReceiptNumber
+				,[intOtherChargeItemId]			= ReceiptCharge.intChargeId
 		FROM	tblICInventoryReceiptCharge ReceiptCharge INNER JOIN @ApprovedChargesToAdjust approvedCharges
 					ON ReceiptCharge.intInventoryReceiptChargeId = approvedCharges.intInventoryReceiptChargeId		
 				INNER JOIN tblICInventoryReceipt Receipt 
@@ -497,6 +505,7 @@ BEGIN
 				,[intSourceTransactionId]		= Receipt.intInventoryReceiptId
 				,[intSourceTransactionDetailId] = ReceiptItem.intInventoryReceiptItemId
 				,[strSourceTransactionId]		= Receipt.strReceiptNumber
+				,[intOtherChargeItemId]			= ReceiptCharge.intChargeId
 		FROM	tblICInventoryReceiptCharge ReceiptCharge INNER JOIN @ApprovedChargesToAdjust approvedCharges
 					ON ReceiptCharge.intInventoryReceiptChargeId = approvedCharges.intInventoryReceiptChargeId						
 				INNER JOIN tblICInventoryReceipt Receipt 
@@ -540,7 +549,7 @@ END
 
 IF EXISTS (SELECT TOP 1 1 FROM @itemsForCostAdjustment)
 BEGIN 	
-	EXEC uspICPostCostAdjustment 
+	EXEC @ReturnValue = uspICPostCostAdjustment 
 			@itemsForCostAdjustment
 			, @strBatchId
 			, @intEntityUserSecurityId
@@ -549,3 +558,5 @@ END
 
 -- Exit point
 _Exit:
+
+RETURN ISNULL(@ReturnValue, 0) 
