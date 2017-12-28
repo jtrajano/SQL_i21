@@ -142,13 +142,13 @@ INTO #ContractTransaction
 FROM (
 	SELECT strFutureMonth
 		,strAccountNumber
-		,dblNoOfContract
+		,case when intPricingTypeId=8 then dblNoOfLot*@dblContractSize else dblNoOfContract end dblNoOfContract
 		,strTradeNo
 		,TransactionDate
 		,TranType
 		,CustVendor
 		,dblNoOfLot
-		,dblQuantity
+		,case when intPricingTypeId=8 then dblNoOfLot*@dblContractSize else dblQuantity end dblQuantity
 		,intContractHeaderId
 		,intFutOptTransactionHeaderId
 		,intPricingTypeId
@@ -166,16 +166,16 @@ FROM (
 	--Parcial Priced
 	SELECT strFutureMonth
 		,strAccountNumber
-		,dblFixedQty AS dblNoOfContract
+		,case when intPricingTypeId=8 then dblFixedLots*@dblContractSize else dblFixedQty end AS dblNoOfContract
 		,strTradeNo
 		,TransactionDate
 		,TranType
 		,CustVendor
 		,dblFixedLots dblNoOfLot
-		,dblFixedQty
+		,case when intPricingTypeId=8 then dblFixedLots*@dblContractSize else dblFixedQty end dblFixedQty
 		,intContractHeaderId
 		,intFutOptTransactionHeaderId
-		,intPricingTypeId
+		,1 intPricingTypeId
 		,strContractType
 		,intCommodityId
 		,intCompanyLocationId
@@ -194,7 +194,7 @@ FROM (
 			,dblQuantity
 			,intContractHeaderId
 			,intFutOptTransactionHeaderId
-			,1 intPricingTypeId
+			,intPricingTypeId
 			,strContractType
 			,intCommodityId
 			,intCompanyLocationId
@@ -223,16 +223,16 @@ FROM (
 	--Parcial UnPriced
 	SELECT strFutureMonth
 		,strAccountNumber
-		,dblQuantity - dblFixedQty AS dblNoOfContract
+		,case when intPricingTypeId=8 then (isnull(dblNoOfLot, 0) - isnull(dblFixedLots, 0))*@dblContractSize else dblQuantity - dblFixedQty end AS dblNoOfContract
 		,strTradeNo
 		,TransactionDate
 		,TranType
 		,CustVendor
 		,isnull(dblNoOfLot, 0) - isnull(dblFixedLots, 0) dblNoOfLot
-		,dblQuantity - dblFixedQty dblQuantity
+		,case when intPricingTypeId=8 then (isnull(dblNoOfLot, 0) - isnull(dblFixedLots, 0))*@dblContractSize else dblQuantity - dblFixedQty end dblQuantity
 		,intContractHeaderId
 		,intFutOptTransactionHeaderId
-		,intPricingTypeId
+		,2 intPricingTypeId
 		,strContractType
 		,intCommodityId
 		,intCompanyLocationId
@@ -251,7 +251,7 @@ FROM (
 			,dblQuantity
 			,cv.intContractHeaderId
 			,NULL AS intFutOptTransactionHeaderId
-			,2 AS intPricingTypeId
+			,cv.intPricingTypeId
 			,cv.strContractType
 			,cv.intCommodityId
 			,cv.intCompanyLocationId
@@ -283,13 +283,13 @@ INTO #DeltaPrecent
 FROM (
 	SELECT strFutureMonth
 		,strAccountNumber + '(Delta=' + convert(NVARCHAR, left(dblDeltaPercent, 4)) + '%)' strAccountNumber
-		,(dblNoOfContract*dblDeltaPercent)/100 dblNoOfContract
+		,(case when intPricingTypeId=8 then dblQuantity*@dblContractSize else dblNoOfContract end*dblDeltaPercent)/100 dblNoOfContract
 		,strTradeNo
 		,TransactionDate
 		,TranType
 		,CustVendor
 		,(dblNoOfLot*dblDeltaPercent)/100 dblNoOfLot
-		,(dblQuantity*dblDeltaPercent)/100 dblQuantity
+		,(case when intPricingTypeId=8 then dblQuantity*@dblContractSize else dblQuantity end*dblDeltaPercent)/100 dblQuantity
 		,intContractHeaderId
 		,intFutOptTransactionHeaderId
 		,intPricingTypeId
@@ -307,16 +307,16 @@ FROM (
 	--Parcial Priced
 	SELECT strFutureMonth
 		,strAccountNumber
-		,(dblFixedQty*dblDeltaPercent)/100  AS dblNoOfContract
+		,(case when intPricingTypeId=8 then dblFixedLots*@dblContractSize else dblFixedQty end*dblDeltaPercent)/100  AS dblNoOfContract
 		,strTradeNo
 		,TransactionDate
 		,TranType
 		,CustVendor
 		,(dblFixedLots*dblDeltaPercent)/100 dblNoOfLot
-		,(dblFixedQty*dblDeltaPercent)/100 dblFixedQty
+		,(case when intPricingTypeId=8 then dblFixedLots*@dblContractSize else dblFixedQty end*dblDeltaPercent)/100 dblFixedQty
 		,intContractHeaderId
 		,intFutOptTransactionHeaderId
-		,intPricingTypeId
+		,1 intPricingTypeId
 		,strContractType
 		,intCommodityId
 		,intCompanyLocationId
@@ -335,7 +335,7 @@ FROM (
 			,dblQuantity
 			,intContractHeaderId
 			,intFutOptTransactionHeaderId
-			,1 intPricingTypeId
+			,intPricingTypeId
 			,strContractType
 			,intCommodityId
 			,intCompanyLocationId
@@ -364,16 +364,16 @@ FROM (
 	--Parcial UnPriced
 	SELECT strFutureMonth
 		,strAccountNumber
-		,dblQuantity - dblFixedQty AS dblNoOfContract
+		,case when intPricingTypeId=8 then (isnull(dblNoOfLot, 0) - isnull(dblFixedLots, 0))*@dblContractSize else dblQuantity - dblFixedQty  end  AS dblNoOfContract
 		,strTradeNo
 		,TransactionDate
 		,TranType
 		,CustVendor
 		,isnull(dblNoOfLot, 0) - isnull(dblFixedLots, 0) dblNoOfLot
-		,dblQuantity - dblFixedQty dblQuantity
+		,case when intPricingTypeId=8 then (isnull(dblNoOfLot, 0) - isnull(dblFixedLots, 0))*@dblContractSize else dblQuantity - dblFixedQty  end dblQuantity
 		,intContractHeaderId
 		,intFutOptTransactionHeaderId
-		,intPricingTypeId
+		,2 intPricingTypeId
 		,strContractType
 		,intCommodityId
 		,intCompanyLocationId
@@ -392,7 +392,7 @@ FROM (
 			,(dblQuantity*dblDeltaPercent)/100 dblQuantity
 			,cv.intContractHeaderId
 			,NULL AS intFutOptTransactionHeaderId
-			,2 AS intPricingTypeId
+			,intPricingTypeId
 			,cv.strContractType
 			,cv.intCommodityId
 			,cv.intCompanyLocationId
@@ -959,7 +959,7 @@ BEGIN
 			WHERE ft.intCommodityId = @intCommodityId AND intLocationId = CASE WHEN isnull(@intCompanyLocationId, 0) = 0 THEN intLocationId ELSE @intCompanyLocationId END AND ft.intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
 			) t
 		) T
-
+		
 	---- Taken inventory Qty ----------
 	INSERT INTO @List (
 		Selection

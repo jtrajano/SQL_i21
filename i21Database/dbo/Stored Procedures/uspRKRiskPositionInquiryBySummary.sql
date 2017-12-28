@@ -209,15 +209,17 @@ intCompanyLocationId  ,intFutureMarketId  ,dtmFutureMonthsDate  ,ysnExpired )
 
 SELECT cv.strFutureMonth,  
   strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,  
+  CASE WHEN intPricingTypeId=8 then cv.dblNoOfLots*@dblContractSize else
   dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,CASE WHEN @ysnIncludeInventoryHedge = 0 
-                                                                                  then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end) AS dblNoOfContract,  
+                                                                                  then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end) end AS dblNoOfContract,  
   LEFT(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, 
   dtmStartDate as TransactionDate,  
   strContractType as TranType, 
   strEntityName  as CustVendor,  
   dblNoOfLots as dblNoOfLot,
+  case when intPricingTypeId=8 then cv.dblNoOfLots*@dblContractSize else
   dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,case when @ysnIncludeInventoryHedge = 0 
-                                                                           then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end) as dblQuantity,
+                                                                           then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end) end as dblQuantity,
   cv.intContractHeaderId,null as intFutOptTransactionHeaderId  
   ,intPricingTypeId
   ,cv.strContractType
@@ -239,7 +241,7 @@ SELECT cv.strFutureMonth,
   LEFT JOIN tblARProductType pt on pt.intProductTypeId=ic.intProductTypeId
   LEFT JOIN tblICCommodityUnitMeasure um on um.intCommodityId=cv.intCommodityId AND um.intUnitMeasureId=cv.intUnitMeasureId
   WHERE @intCommodityId=cv.intCommodityId and cv.intFutureMarketId=@intFutureMarketId and  cv.intContractStatusId <> 3 and cv.intPricingTypeId=1
-union
+UNION
 --Parcial Priced
 SELECT strFutureMonth,strAccountNumber,dblFixedQty as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblFixedLots dblNoOfLot,dblFixedQty,
 intContractHeaderId,intFutOptTransactionHeaderId,intPricingTypeId,strContractType,intCommodityId,intCompanyLocationId,intFutureMarketId,dtmFutureMonthsDate,ysnExpired 
@@ -252,8 +254,9 @@ SELECT cv.strFutureMonth,
   strContractType as TranType, 
   strEntityName  as CustVendor,  
   cv.dblNoOfLots as dblNoOfLot,
+  case when cv.intPricingTypeId=8 then cv.dblNoOfLots*@dblContractSize else
   dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,case when @ysnIncludeInventoryHedge = 0 
-                                                                           THEN ISNULL(dblBalance,0) else isnull(dblDetailQuantity,0) end) as dblQuantity,
+                                                                           THEN ISNULL(dblBalance,0) else isnull(dblDetailQuantity,0) end) end as dblQuantity,
   cv.intContractHeaderId,null as intFutOptTransactionHeaderId  
   ,1 intPricingTypeId
   ,cv.strContractType
@@ -298,9 +301,12 @@ SELECT cv.strFutureMonth,
   dtmStartDate as TransactionDate,  
   strContractType as TranType, 
   strEntityName  as CustVendor,  
-  case when isnull(ch.ysnMultiplePriceFixation,0)=1 then ch.dblNoOfLots else cv.dblNoOfLots end as dblNoOfLot,
+  case when isnull(ch.ysnMultiplePriceFixation,0)=1 then
+     ch.dblNoOfLots else cv.dblNoOfLots end as dblNoOfLot,
+case when cv.intPricingTypeId=8 then   (CASE WHEN isnull(ch.ysnMultiplePriceFixation,0)=1 then
+									ch.dblNoOfLots else cv.dblNoOfLots end) *@dblContractSize else
   dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,case when @ysnIncludeInventoryHedge = 0 
-                                                                           then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end) as dblQuantity,
+                                                                           then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end) end as dblQuantity,
   cv.intContractHeaderId,null as intFutOptTransactionHeaderId  
   ,2 as intPricingTypeId
   ,cv.strContractType
