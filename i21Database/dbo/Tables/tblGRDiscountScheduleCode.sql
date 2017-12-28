@@ -7,7 +7,7 @@
     [ysnZeroIsValid] BIT NOT NULL DEFAULT 1, 
     [dblMinimumValue] NUMERIC(24, 10) NOT NULL DEFAULT 0, 
     [dblMaximumValue] NUMERIC(24, 10) NOT NULL , 
-    [dblDefaultValue] NUMERIC(24, 10) NOT NULL DEFAULT 0, 
+    [dblDefaultValue] NUMERIC(24, 10) NULL , 
 	[ysnQualityDiscount] BIT NOT NULL DEFAULT 0,
 	[ysnDryingDiscount] BIT NOT NULL DEFAULT 0,
 	[dtmEffectiveDate] DATETIME NULL,
