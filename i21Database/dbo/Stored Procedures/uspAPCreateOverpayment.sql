@@ -75,6 +75,7 @@ BEGIN
 		[intContactId]			,
 		[intOrderById]			,
 		[intCurrencyId]			,
+		[intSubCurrencyCents]	,
 		[ysnApproved]			,
 		[ysnForApproval]		,
 		[ysnOrigin]				,
