@@ -1,5 +1,5 @@
 ﻿
-WITH CTE 
+;WITH CTE 
 AS (
 	SELECT	RN = ROW_NUMBER() OVER (PARTITION BY intItemId, intOwnerId ORDER BY intItemOwnerId)
 	FROM	tblICItemOwner 
