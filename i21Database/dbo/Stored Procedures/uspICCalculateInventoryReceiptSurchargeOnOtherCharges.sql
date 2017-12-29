@@ -207,7 +207,8 @@ BEGIN
 									ELSE 
 										1
 							END 
-						, 2)		
+						, 2)
+			,dblQuantity = 1
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge Charge 	
 				ON Receipt.intInventoryReceiptId = Charge.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item 
