@@ -19,7 +19,7 @@ AS
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
 SET NOCOUNT ON  
-SET XACT_ABORT ON  
+SET XACT_ABORT OFF  
 SET ANSI_WARNINGS OFF  
   
 --------------------------------------------------------------------------------------------  
@@ -3017,7 +3017,7 @@ IF @Post = 1
 						IF @CurrentTranCount = 0
 							BEGIN
 								IF (XACT_STATE()) <> 0
-									ROLLBACK TRANSACTION @CurrentSavepoint
+									ROLLBACK TRANSACTION
 							END
 						ELSE
 							BEGIN
