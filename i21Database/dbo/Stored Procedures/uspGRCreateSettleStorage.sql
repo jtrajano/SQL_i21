@@ -41,6 +41,9 @@ BEGIN TRY
 	DECLARE @dblUnpaidUnits DECIMAL(24, 10)
 	DECLARE @dblContractAmount DECIMAL(24, 10)
 	DECLARE @NewSettleStorageId INT
+	DECLARE @Counter INT
+
+	SET @Counter = 1 
 
 	SELECT 
 		 @intCreatedUserId			 = intCreatedUserId
@@ -425,7 +428,7 @@ BEGIN TRY
 				,dtmCalculateStorageThrough = dtmCalculateStorageThrough
 				,dblAdjustPerUnit		    = dblAdjustPerUnit
 				,dblStorageDue				= @dblTicketStorageDue * @dblUnits
-				,strStorageTicket			= strStorageTicket + '/' + LTRIM(@intSettleVoucherKey)
+				,strStorageTicket			= strStorageTicket + '/' + LTRIM(@Counter)
 				,dblSelectedUnits			= @dblUnits
 				,dblUnpaidUnits				= 0
 				,dblSettleUnits				= @dblUnits
@@ -544,7 +547,7 @@ BEGIN TRY
 				,dtmCalculateStorageThrough		= dtmCalculateStorageThrough
 				,dblAdjustPerUnit				= dblAdjustPerUnit
 				,dblStorageDue					= @dblTicketStorageDue*@dblUnitsByOrderType
-				,strStorageTicket				= strStorageTicket + '/' + LTRIM(@intSettleVoucherKey)
+				,strStorageTicket				= strStorageTicket + '/' + LTRIM(@Counter)
 				,dblSelectedUnits				= @dblUnitsByOrderType
 				,dblUnpaidUnits					= @dblUnpaidUnits
 				,dblSettleUnits					= @dblUnitsByOrderType - @dblUnpaidUnits
@@ -592,6 +595,7 @@ BEGIN TRY
 
 		END
 
+		SET @Counter = @Counter + 1 
 		UPDATE @SettleVoucherCreate
 		SET IsProcessed = 1
 		WHERE intCustomerStorageId = @intCustomerStorageId AND strOrderType = @strOrderType
