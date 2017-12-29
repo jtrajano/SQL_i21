@@ -126,25 +126,29 @@ BEGIN TRY
 
 	IF @intCustomerStorageId > 0
 	BEGIN
-		SELECT @dblOldStoragePaid = CS.dblStoragePaid
-			,@dblOpenBalance = CASE 
-								   WHEN ISNULL(@dblOverrideStorageUnits, 0) = 0 THEN CS.dblOpenBalance
-								   ELSE @dblOverrideStorageUnits
-							   END
-			,@intStorageScheduleId = CASE 
-										 WHEN ISNULL(@intOverrideStorageScheduleId, 0) = 0 THEN CS.intStorageScheduleId
-										 ELSE @intOverrideStorageScheduleId
-									 END
-			,@intAllowanceDays = SR.intAllowanceDays
-			,@strStorageRate = SR.strStorageRate
-			,@strFirstMonth = SR.strFirstMonth
-			,@strLastMonth = SR.strLastMonth
-			,@dtmHEffectiveDate = SR.dtmEffectiveDate
-			,@dtmTerminationDate = SR.dtmTerminationDate
-			,@strAllowancePeriod=SR.strAllowancePeriod
-			,@dtmAllowancePeriodFrom=SR.dtmAllowancePeriodFrom
-			,@dtmAllowancePeriodTo=SR.dtmAllowancePeriodTo			
-			,@dtmDeliveryDate = CS.dtmDeliveryDate
+		SELECT 
+			 @dblOldStoragePaid        = CS.dblStoragePaid
+
+			,@dblOpenBalance	       = CASE 
+								       	        WHEN ISNULL(@dblOverrideStorageUnits, 0) = 0 THEN CS.dblOpenBalance
+								       	        ELSE @dblOverrideStorageUnits
+								         END
+
+			,@intStorageScheduleId     = CASE 
+									   			WHEN ISNULL(@intOverrideStorageScheduleId, 0) = 0 THEN CS.intStorageScheduleId
+									   			ELSE @intOverrideStorageScheduleId
+									     END
+
+			,@intAllowanceDays         = SR.intAllowanceDays
+			,@strStorageRate           = SR.strStorageRate
+			,@strFirstMonth            = SR.strFirstMonth
+			,@strLastMonth             = SR.strLastMonth
+			,@dtmHEffectiveDate        = SR.dtmEffectiveDate
+			,@dtmTerminationDate       = SR.dtmTerminationDate
+			,@strAllowancePeriod       = SR.strAllowancePeriod
+			,@dtmAllowancePeriodFrom   = SR.dtmAllowancePeriodFrom
+			,@dtmAllowancePeriodTo     = SR.dtmAllowancePeriodTo			
+			,@dtmDeliveryDate		   = CS.dtmDeliveryDate
 			,@dtmLastStorageAccrueDate = CASE 
 											 WHEN @strProcessType < > 'recalculate' THEN CS.dtmLastStorageAccrueDate
 											 ELSE NULL
@@ -155,19 +159,20 @@ BEGIN TRY
 	END
 	ELSE ---For ProcessType ='Test'     
 	BEGIN
-		SET @dblOpenBalance = @dblOverrideStorageUnits
-		SET @intStorageScheduleId = @intOverrideStorageScheduleId
-		SET @dtmDeliveryDate = @dtmOverrideDeliveryDate
-		SET @dtmLastStorageAccrueDate = NULL
-		SELECT @intAllowanceDays = intAllowanceDays
-			,@strStorageRate = strStorageRate
-			,@strFirstMonth = strFirstMonth
-			,@strLastMonth = strLastMonth
-			,@dtmHEffectiveDate = dtmEffectiveDate
-			,@dtmTerminationDate = dtmTerminationDate
-			,@strAllowancePeriod=strAllowancePeriod
-			,@dtmAllowancePeriodFrom=dtmAllowancePeriodFrom
-			,@dtmAllowancePeriodTo=dtmAllowancePeriodTo
+		SET @dblOpenBalance		       = @dblOverrideStorageUnits
+		SET @intStorageScheduleId      = @intOverrideStorageScheduleId
+		SET @dtmDeliveryDate	       = @dtmOverrideDeliveryDate
+		SET @dtmLastStorageAccrueDate  = NULL
+
+		SELECT @intAllowanceDays	   = intAllowanceDays
+			,@strStorageRate		   = strStorageRate
+			,@strFirstMonth			   = strFirstMonth
+			,@strLastMonth			   = strLastMonth
+			,@dtmHEffectiveDate		   = dtmEffectiveDate
+			,@dtmTerminationDate	   = dtmTerminationDate
+			,@strAllowancePeriod	   = strAllowancePeriod
+			,@dtmAllowancePeriodFrom   = dtmAllowancePeriodFrom
+			,@dtmAllowancePeriodTo     = dtmAllowancePeriodTo
 		FROM tblGRStorageScheduleRule
 		WHERE intStorageScheduleRuleId = @intStorageScheduleId
 	END
@@ -184,12 +189,12 @@ BEGIN TRY
 			,[dblStorageRate]
 		)
 		SELECT
-			 RANK() OVER (ORDER BY intSort)
-			,[strPeriodType]
-			,[dtmEffectiveDate]
-			,[dtmEndingDate]
-			,[intNumberOfDays]
-			,[dblStorageRate]
+			 [intPeriodKey]     = RANK() OVER (ORDER BY intSort)
+			,[strPeriodType]    = [strPeriodType]
+			,[dtmEffectiveDate] = [dtmEffectiveDate]
+			,[dtmEndingDate]    = [dtmEndingDate]
+			,[intNumberOfDays]  = [intNumberOfDays]
+			,[dblStorageRate]   = [dblStorageRate]
 		FROM tblGRStorageSchedulePeriod
 		WHERE intStorageScheduleRule = @intStorageScheduleId
 		ORDER BY intSort
@@ -206,21 +211,21 @@ BEGIN TRY
 			,[dblStorageRate]
 		)
 		 SELECT 
-		 RANK() OVER (ORDER BY intSort)
-		,[strPeriodType]
-		,(CASE WHEN CONVERT(DATE, [dtmEffectiveDate]) = '1900-01-01' THEN NULL ELSE [dtmEffectiveDate] END) [dtmEffectiveDate]
-		,(CASE WHEN CONVERT(DATE, [dtmEndingDate]) = '1900-01-01' THEN NULL    ELSE [dtmEndingDate] END)    [dtmEndingDate]
-		,[intNumberOfDays]
-		,[dblStorageRate]
+		  [intPeriodKey]          =  RANK() OVER (ORDER BY intSort)
+		, [strPeriodType]         =  [strPeriodType]
+		, [dtmEffectiveDate]      =  (CASE WHEN CONVERT(DATE, [dtmEffectiveDate]) = '1900-01-01' THEN NULL ELSE [dtmEffectiveDate] END)
+		, [dtmEndingDate]         =  (CASE WHEN CONVERT(DATE, [dtmEndingDate]) = '1900-01-01' THEN NULL    ELSE [dtmEndingDate] END)
+		, [intNumberOfDays]       =  [intNumberOfDays]
+		, [dblStorageRate]        =  [dblStorageRate]
 		FROM OPENXML(@idoc, 'root/Period', 2) WITH 
 		(
-			 intCustomerStorageId INT
-			,strPeriodType Nvarchar(30)
-			,dtmEffectiveDate DATETIME
-			,dtmEndingDate DATETIME
-			,intNumberOfDays INT
-			,dblStorageRate NUMERIC(18,6)
-			,intSort INT
+			 intCustomerStorageId   INT
+			,strPeriodType			Nvarchar(30)
+			,dtmEffectiveDate		DATETIME
+			,dtmEndingDate			DATETIME
+			,intNumberOfDays		INT
+			,dblStorageRate			NUMERIC(18,6)
+			,intSort				INT
 		)
 		ORDER BY intSort
 	END
@@ -286,7 +291,7 @@ BEGIN TRY
 	
 	SET @FirstMonthFullChargeApplicable=CASE 
 											WHEN ((@TotalOriginalMonthsApplicableForStorageCharge = 1) AND (@strFirstMonth <> @strLastMonth)) OR(@strFirstMonth = 'Full Month' AND @strLastMonth = 'Full Month')  THEN 1
-											WHEN ((@TotalOriginalMonthsApplicableForStorageCharge > 1) AND (@strFirstMonth = 'Full Month'))  THEN 1
+											WHEN ((@TotalOriginalMonthsApplicableForStorageCharge > 1) AND (@strFirstMonth = 'Full Month'))																		  THEN 1
 											ELSE
 											0
 										END	
@@ -304,22 +309,22 @@ BEGIN TRY
 		WHILE @intSchedulePeriodId > 0 AND @TotalDaysApplicableForStorageCharge > 0
 		BEGIN
 			
-			SET @intPeriodKey  = NULL	    
-			SET @strPeriodType = NULL
-			SET @dtmDEffectiveDate = NULL
-			SET @dtmEndingDate = NULL
-			SET @intNumberOfDays = NULL
-			SET @dblStorageRate = NULL
+			SET @intPeriodKey			= NULL	    
+			SET @strPeriodType          = NULL
+			SET @dtmDEffectiveDate      = NULL
+			SET @dtmEndingDate		    = NULL
+			SET @intNumberOfDays        = NULL
+			SET @dblStorageRate         = NULL
 			SET @CalculatedNumberOfDays = NULL
 
 
 			SELECT
-			     @intPeriodKey=intPeriodKey 
-				,@strPeriodType = strPeriodType
-				,@dtmDEffectiveDate = dtmEffectiveDate
-				,@dtmEndingDate = dtmEndingDate
-				,@intNumberOfDays = ISNULL(intNumberOfDays, 0)
-				,@dblStorageRate = dblStorageRate
+			     @intPeriodKey          = intPeriodKey 
+				,@strPeriodType         = strPeriodType
+				,@dtmDEffectiveDate     = dtmEffectiveDate
+				,@dtmEndingDate         = dtmEndingDate
+				,@intNumberOfDays       = ISNULL(intNumberOfDays, 0)
+				,@dblStorageRate        = dblStorageRate
 			FROM @tblGRStorageSchedulePeriod
 			WHERE intSchedulePeriodId = @intSchedulePeriodId
 
@@ -564,15 +569,15 @@ BEGIN TRY
 					,[dblCummulativeStorageDuePerUnit]								
 				)
 				SELECT
-				 @intPeriodKey 
-				,@strPeriodType AS [strPeriodType]
-				,@dtmDeliveryDate-ISNULL(@CalculatedNumberOfDays,0) [dtmEffectiveDate]
-				,@dtmDeliveryDate-1 AS [dtmEndingDate]
-				,@intNumberOfDays [intNumberOfDays]
-				,@CalculatedNumberOfDays [CalculatedNumberOfDays]
-				,@dblStorageRate [dblStorageRate]
-				,@dblStorageRate * ISNULL(@CalculatedNumberOfDays,0) [dblStorageDuePerUnit]
-				,@dblStorageDuePerUnit [dblCummulativeStorageDuePerUnit]	
+				 [intPeriodKey] 					= @intPeriodKey 
+				,[strPeriodType]					= @strPeriodType
+				,[dtmEffectiveDate]					= @dtmDeliveryDate-ISNULL(@CalculatedNumberOfDays,0)
+				,[dtmEndingDate]					= @dtmDeliveryDate-1
+				,[intNumberOfDays]					= @intNumberOfDays
+				,[CalculatedNumberOfDays]			= @CalculatedNumberOfDays 
+				,[dblStorageRate]					= @dblStorageRate
+				,[dblStorageDuePerUnit]				= @dblStorageRate * ISNULL(@CalculatedNumberOfDays,0)
+				,[dblCummulativeStorageDuePerUnit]	= @dblStorageDuePerUnit
 			END
 			
 			SELECT @intSchedulePeriodId = MIN(intSchedulePeriodId)
@@ -598,21 +603,21 @@ BEGIN TRY
 			WHILE @intSchedulePeriodId > 0 AND @TotalDaysApplicableForStorageCharge > 0
 			BEGIN
 			
-				SET @intPeriodKey  = NULL
-				SET @strPeriodType = NULL
-				SET @dtmDEffectiveDate = NULL
-				SET @dtmEndingDate = NULL
-				SET @intNumberOfDays = NULL
-				SET @dblStorageRate = NULL
+				SET @intPeriodKey			= NULL
+				SET @strPeriodType			= NULL
+				SET @dtmDEffectiveDate		= NULL
+				SET @dtmEndingDate          = NULL
+				SET @intNumberOfDays        = NULL
+				SET @dblStorageRate         = NULL
 				SET @CalculatedNumberOfDays = NULL
 			
 				SELECT 
-					 @intPeriodKey=intPeriodKey 
-					,@strPeriodType = strPeriodType
-					,@dtmDEffectiveDate = dtmEffectiveDate
-					,@dtmEndingDate = dtmEndingDate
-					,@intNumberOfDays = ISNULL(intNumberOfDays, 0)
-					,@dblStorageRate = dblStorageRate
+					 @intPeriodKey			= intPeriodKey 
+					,@strPeriodType			= strPeriodType
+					,@dtmDEffectiveDate		= dtmEffectiveDate
+					,@dtmEndingDate			= dtmEndingDate
+					,@intNumberOfDays		= ISNULL(intNumberOfDays, 0)
+					,@dblStorageRate		= dblStorageRate
 				FROM @tblGRStorageSchedulePeriod
 				WHERE intSchedulePeriodId = @intSchedulePeriodId
 
@@ -842,15 +847,15 @@ BEGIN TRY
 						,[dblCummulativeStorageDuePerUnit]								
 					)
 					SELECT 
-					 @intPeriodKey 
-					,@strPeriodType
-					,@dtmDeliveryDate-@CalculatedNumberOfDays
-					,@dtmDeliveryDate-1
-					,@intNumberOfDays
-					,@CalculatedNumberOfDays
-					,@dblStorageRate
-					,-@dblStorageRate * @CalculatedNumberOfDays
-					,@dblStorageDuePerUnit							
+					 [intPeriodKey] 					= @intPeriodKey 
+					,[strPeriodType]					= @strPeriodType
+					,[dtmEffectiveDate]					= @dtmDeliveryDate-@CalculatedNumberOfDays
+					,[dtmEndingDate]					= @dtmDeliveryDate-1
+					,[intNumberOfDays]					= @intNumberOfDays
+					,[CalculatedNumberOfDays]			= @CalculatedNumberOfDays
+					,[dblStorageRate]					= @dblStorageRate
+					,[dblStorageDuePerUnit]				= -@dblStorageRate * @CalculatedNumberOfDays
+					,[dblCummulativeStorageDuePerUnit]	= @dblStorageDuePerUnit							
 				END
 									
 				SELECT @intSchedulePeriodId = MIN(intSchedulePeriodId)
@@ -871,20 +876,20 @@ BEGIN TRY
 		
 		WHILE @intSchedulePeriodId > 0 AND @TotalMonthsApplicableForStorageCharge > 0
 		BEGIN
-			SET @intPeriodKey  = NULL
-			SET @strPeriodType = NULL
+			SET @intPeriodKey      = NULL
+			SET @strPeriodType     = NULL
 			SET @dtmDEffectiveDate = NULL
-			SET @dtmEndingDate = NULL
-			SET @intNumberOfDays = NULL
-			SET @dblStorageRate = NULL
+			SET @dtmEndingDate     = NULL
+			SET @intNumberOfDays   = NULL
+			SET @dblStorageRate    = NULL
 		
 			SELECT 
-				 @intPeriodKey=intPeriodKey
-				,@strPeriodType = strPeriodType
+				 @intPeriodKey      = intPeriodKey
+				,@strPeriodType     = strPeriodType
 				,@dtmDEffectiveDate = dtmEffectiveDate
-				,@dtmEndingDate = dtmEndingDate
-				,@intNumberOfDays = ISNULL(intNumberOfDays, 0)
-				,@dblStorageRate = dblStorageRate
+				,@dtmEndingDate		= dtmEndingDate
+				,@intNumberOfDays   = ISNULL(intNumberOfDays, 0)
+				,@dblStorageRate    = dblStorageRate
 			FROM @tblGRStorageSchedulePeriod
 			WHERE intSchedulePeriodId = @intSchedulePeriodId
 			
@@ -911,7 +916,20 @@ BEGIN TRY
 							
 							SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 							
-							INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+							INSERT INTO @StorageCharge
+							(
+							    [intPeriodKey]
+							   ,[strPeriodType]
+							   ,[dtmEffectiveDate]
+							   ,[dtmEndingDate]
+							   ,[dblStorageRate]
+							   ,[MonthType]
+							   ,[ChargeType]
+							   ,[ChargedNumberOfDays/Months]
+							   ,[dblStorageDuePerUnit]
+							   ,[dblCummulativeStorageDuePerUnit]
+							   ,[RemainingMonths]
+							 )
 							SELECT 
 							 @intPeriodKey
 							,@strPeriodType
@@ -955,7 +973,20 @@ BEGIN TRY
 																   END
 								SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 								
-								INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+								INSERT INTO @StorageCharge
+								(
+								    [intPeriodKey]
+								   ,[strPeriodType]
+								   ,[dtmEffectiveDate]
+								   ,[dtmEndingDate]
+								   ,[dblStorageRate]
+								   ,[MonthType]
+								   ,[ChargeType]
+								   ,[ChargedNumberOfDays/Months]
+								   ,[dblStorageDuePerUnit]
+								   ,[dblCummulativeStorageDuePerUnit]
+								   ,[RemainingMonths]
+								 )
 								SELECT 
 								 @intPeriodKey
 								,@strPeriodType
@@ -988,7 +1019,20 @@ BEGIN TRY
 										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate *(DATEDIFF(MONTH, @dtmDeliveryDate, @dtmEndingDate) + 1) 																															
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, @dtmEndingDate) + 1)
 											
-											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+											INSERT INTO @StorageCharge
+											(
+											    [intPeriodKey]
+											   ,[strPeriodType]
+											   ,[dtmEffectiveDate]
+											   ,[dtmEndingDate]
+											   ,[dblStorageRate]
+											   ,[MonthType]
+											   ,[ChargeType]
+											   ,[ChargedNumberOfDays/Months]
+											   ,[dblStorageDuePerUnit]
+											   ,[dblCummulativeStorageDuePerUnit]
+											   ,[RemainingMonths]
+											 )
 											SELECT 
 											 @intPeriodKey
 											,@strPeriodType
@@ -1010,8 +1054,21 @@ BEGIN TRY
 										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
 										
-											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
-											SELECT 
+											INSERT INTO @StorageCharge
+											(
+											    [intPeriodKey]
+											   ,[strPeriodType]
+											   ,[dtmEffectiveDate]
+											   ,[dtmEndingDate]
+											   ,[dblStorageRate]
+											   ,[MonthType]
+											   ,[ChargeType]
+											   ,[ChargedNumberOfDays/Months]
+											   ,[dblStorageDuePerUnit]
+											   ,[dblCummulativeStorageDuePerUnit]
+											   ,[RemainingMonths]
+											 )
+											 SELECT 
 											 @intPeriodKey
 											,@strPeriodType
 											,@dtmDeliveryDate
@@ -1034,8 +1091,21 @@ BEGIN TRY
 																										   
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 
-										INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
-										SELECT 
+										INSERT INTO @StorageCharge
+										(
+										    [intPeriodKey]
+										   ,[strPeriodType]
+										   ,[dtmEffectiveDate]
+										   ,[dtmEndingDate]
+										   ,[dblStorageRate]
+										   ,[MonthType]
+										   ,[ChargeType]
+										   ,[ChargedNumberOfDays/Months]
+										   ,[dblStorageDuePerUnit]
+										   ,[dblCummulativeStorageDuePerUnit]
+										   ,[RemainingMonths]
+										 )
+										 SELECT 
 										 @intPeriodKey
 										,@strPeriodType
 										,@dtmDeliveryDate
@@ -1078,8 +1148,21 @@ BEGIN TRY
 										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, @dtmEndingDate) + 1)
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, @dtmEndingDate) + 1)
 										
-											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
-											SELECT 
+											INSERT INTO @StorageCharge
+											(
+											    [intPeriodKey]
+											   ,[strPeriodType]
+											   ,[dtmEffectiveDate]
+											   ,[dtmEndingDate]
+											   ,[dblStorageRate]
+											   ,[MonthType]
+											   ,[ChargeType]
+											   ,[ChargedNumberOfDays/Months]
+											   ,[dblStorageDuePerUnit]
+											   ,[dblCummulativeStorageDuePerUnit]
+											   ,[RemainingMonths]
+											 )											
+											 SELECT 
 											 @intPeriodKey
 											,@strPeriodType
 											,@dtmDeliveryDate
@@ -1100,8 +1183,21 @@ BEGIN TRY
 										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
 										
-											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
-											SELECT 
+											INSERT INTO @StorageCharge
+											(
+											    [intPeriodKey]
+											   ,[strPeriodType]
+											   ,[dtmEffectiveDate]
+											   ,[dtmEndingDate]
+											   ,[dblStorageRate]
+											   ,[MonthType]
+											   ,[ChargeType]
+											   ,[ChargedNumberOfDays/Months]
+											   ,[dblStorageDuePerUnit]
+											   ,[dblCummulativeStorageDuePerUnit]
+											   ,[RemainingMonths]
+											 )
+											 SELECT 
 											 @intPeriodKey
 											,@strPeriodType
 											,@dtmDeliveryDate
@@ -1185,7 +1281,20 @@ BEGIN TRY
 							
 							SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 							
-							INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+							INSERT INTO @StorageCharge
+							(
+							    [intPeriodKey]
+							   ,[strPeriodType]
+							   ,[dtmEffectiveDate]
+							   ,[dtmEndingDate]
+							   ,[dblStorageRate]
+							   ,[MonthType]
+							   ,[ChargeType]
+							   ,[ChargedNumberOfDays/Months]
+							   ,[dblStorageDuePerUnit]
+							   ,[dblCummulativeStorageDuePerUnit]
+							   ,[RemainingMonths]
+							 )
 							SELECT 
 							 @intPeriodKey
 							,@strPeriodType
@@ -1226,7 +1335,20 @@ BEGIN TRY
 									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 									
-									INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+									INSERT INTO @StorageCharge
+									( 
+									    [intPeriodKey] 
+									   ,[strPeriodType] 
+									   ,[dtmEffectiveDate] 
+									   ,[dtmEndingDate] 
+									   ,[dblStorageRate] 
+									   ,[MonthType] 
+									   ,[ChargeType] 
+									   ,[ChargedNumberOfDays/Months] 
+									   ,[dblStorageDuePerUnit] 
+									   ,[dblCummulativeStorageDuePerUnit] 
+									   ,[RemainingMonths] 
+									 ) 
 									 SELECT 
 									 @intPeriodKey
 									,@strPeriodType
@@ -1247,7 +1369,20 @@ BEGIN TRY
 									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) +(@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0))) + 1)
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 									
-									 INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+									 INSERT INTO @StorageCharge
+									 (
+									     [intPeriodKey]
+									    ,[strPeriodType]
+									    ,[dtmEffectiveDate]
+									    ,[dtmEndingDate]
+									    ,[dblStorageRate]
+									    ,[MonthType]
+									    ,[ChargeType]
+									    ,[ChargedNumberOfDays/Months]
+									    ,[dblStorageDuePerUnit]
+									    ,[dblCummulativeStorageDuePerUnit]
+									    ,[RemainingMonths]
+									  )									 
 									 SELECT 
 									 @intPeriodKey
 									,@strPeriodType
@@ -1275,7 +1410,20 @@ BEGIN TRY
 										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
 										
-										 INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+										 INSERT INTO @StorageCharge
+										 (
+										     [intPeriodKey]
+										    ,[strPeriodType]
+										    ,[dtmEffectiveDate]
+										    ,[dtmEndingDate]
+										    ,[dblStorageRate]
+										    ,[MonthType]
+										    ,[ChargeType]
+										    ,[ChargedNumberOfDays/Months]
+										    ,[dblStorageDuePerUnit]
+										    ,[dblCummulativeStorageDuePerUnit]
+										    ,[RemainingMonths]
+										  )
 										 SELECT 
 										 @intPeriodKey
 										,@strPeriodType
@@ -1297,7 +1445,20 @@ BEGIN TRY
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
-											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+											INSERT INTO @StorageCharge
+											(
+											    [intPeriodKey]
+											   ,[strPeriodType]
+											   ,[dtmEffectiveDate]
+											   ,[dtmEndingDate]
+											   ,[dblStorageRate]
+											   ,[MonthType]
+											   ,[ChargeType]
+											   ,[ChargedNumberOfDays/Months]
+											   ,[dblStorageDuePerUnit]
+											   ,[dblCummulativeStorageDuePerUnit]
+											   ,[RemainingMonths]
+											 )											
 											SELECT 
 											 @intPeriodKey
 											,@strPeriodType
@@ -1318,8 +1479,21 @@ BEGIN TRY
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
-											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
-											SELECT 
+											INSERT INTO @StorageCharge
+											( 
+											    [intPeriodKey] 
+											   ,[strPeriodType] 
+											   ,[dtmEffectiveDate] 
+											   ,[dtmEndingDate] 
+											   ,[dblStorageRate] 
+											   ,[MonthType] 
+											   ,[ChargeType] 
+											   ,[ChargedNumberOfDays/Months] 
+											   ,[dblStorageDuePerUnit] 
+											   ,[dblCummulativeStorageDuePerUnit] 
+											   ,[RemainingMonths] 
+											 )
+											 SELECT 
 											 @intPeriodKey
 											,@strPeriodType
 											,@dtmDeliveryDate
@@ -1343,7 +1517,20 @@ BEGIN TRY
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
-											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+											INSERT INTO @StorageCharge
+											( 
+											    [intPeriodKey] 
+											   ,[strPeriodType] 
+											   ,[dtmEffectiveDate] 
+											   ,[dtmEndingDate] 
+											   ,[dblStorageRate] 
+											   ,[MonthType] 
+											   ,[ChargeType] 
+											   ,[ChargedNumberOfDays/Months] 
+											   ,[dblStorageDuePerUnit] 
+											   ,[dblCummulativeStorageDuePerUnit] 
+											   ,[RemainingMonths] 
+											 ) 
 											 SELECT 
 											 @intPeriodKey
 											,@strPeriodType
@@ -1364,8 +1551,21 @@ BEGIN TRY
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
-											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
-											SELECT 
+											INSERT INTO @StorageCharge
+											( 
+											    [intPeriodKey] 
+											   ,[strPeriodType] 
+											   ,[dtmEffectiveDate] 
+											   ,[dtmEndingDate] 
+											   ,[dblStorageRate] 
+											   ,[MonthType] 
+											   ,[ChargeType] 
+											   ,[ChargedNumberOfDays/Months] 
+											   ,[dblStorageDuePerUnit] 
+											   ,[dblCummulativeStorageDuePerUnit] 
+											   ,[RemainingMonths] 
+											 )
+											 SELECT 
 											 @intPeriodKey
 											,@strPeriodType
 											,@dtmDeliveryDate
@@ -1395,7 +1595,20 @@ BEGIN TRY
 										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
 										
-										 INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+										 INSERT INTO @StorageCharge
+										 (
+										     [intPeriodKey]
+										    ,[strPeriodType]
+										    ,[dtmEffectiveDate]
+										    ,[dtmEndingDate]
+										    ,[dblStorageRate]
+										    ,[MonthType]
+										    ,[ChargeType]
+										    ,[ChargedNumberOfDays/Months]
+										    ,[dblStorageDuePerUnit]
+										    ,[dblCummulativeStorageDuePerUnit]
+										    ,[RemainingMonths]
+										  )										 
 										 SELECT 
 										 @intPeriodKey
 										,@strPeriodType
@@ -1417,7 +1630,20 @@ BEGIN TRY
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
-											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+											INSERT INTO @StorageCharge
+											(
+											    [intPeriodKey]
+											   ,[strPeriodType]
+											   ,[dtmEffectiveDate]
+											   ,[dtmEndingDate]
+											   ,[dblStorageRate]
+											   ,[MonthType]
+											   ,[ChargeType]
+											   ,[ChargedNumberOfDays/Months]
+											   ,[dblStorageDuePerUnit]
+											   ,[dblCummulativeStorageDuePerUnit]
+											   ,[RemainingMonths]
+											 )
 											SELECT 
 											 @intPeriodKey
 											,@strPeriodType
@@ -1438,8 +1664,21 @@ BEGIN TRY
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
-											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
-											SELECT 
+											INSERT INTO @StorageCharge
+											(
+											    [intPeriodKey]
+											   ,[strPeriodType]
+											   ,[dtmEffectiveDate]
+											   ,[dtmEndingDate]
+											   ,[dblStorageRate]
+											   ,[MonthType]
+											   ,[ChargeType]
+											   ,[ChargedNumberOfDays/Months]
+											   ,[dblStorageDuePerUnit]
+											   ,[dblCummulativeStorageDuePerUnit]
+											   ,[RemainingMonths]
+											 )
+											 SELECT 
 											 @intPeriodKey
 											,@strPeriodType
 											,@dtmDeliveryDate
@@ -1463,7 +1702,20 @@ BEGIN TRY
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
-											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+											INSERT INTO @StorageCharge
+											(
+											    [intPeriodKey]
+											   ,[strPeriodType]
+											   ,[dtmEffectiveDate]
+											   ,[dtmEndingDate]
+											   ,[dblStorageRate]
+											   ,[MonthType]
+											   ,[ChargeType]
+											   ,[ChargedNumberOfDays/Months]
+											   ,[dblStorageDuePerUnit]
+											   ,[dblCummulativeStorageDuePerUnit]
+											   ,[RemainingMonths]
+											 )											
 											SELECT 
 											 @intPeriodKey
 											,@strPeriodType
@@ -1484,7 +1736,20 @@ BEGIN TRY
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
-											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+											INSERT INTO @StorageCharge
+											(
+											    [intPeriodKey]
+											   ,[strPeriodType]
+											   ,[dtmEffectiveDate]
+											   ,[dtmEndingDate]
+											   ,[dblStorageRate]
+											   ,[MonthType]
+											   ,[ChargeType]
+											   ,[ChargedNumberOfDays/Months]
+											   ,[dblStorageDuePerUnit]
+											   ,[dblCummulativeStorageDuePerUnit]
+											   ,[RemainingMonths]
+											 )
 											SELECT 
 											 @intPeriodKey
 											,@strPeriodType
@@ -1537,7 +1802,20 @@ BEGIN TRY
 								SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
 								SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 								
-								INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+								INSERT INTO @StorageCharge
+								(
+								    [intPeriodKey]
+								   ,[strPeriodType]
+								   ,[dtmEffectiveDate]
+								   ,[dtmEndingDate]
+								   ,[dblStorageRate]
+								   ,[MonthType]
+								   ,[ChargeType]
+								   ,[ChargedNumberOfDays/Months]
+								   ,[dblStorageDuePerUnit]
+								   ,[dblCummulativeStorageDuePerUnit]
+								   ,[RemainingMonths]
+								 )								
 								SELECT 
 								 @intPeriodKey
 								,@strPeriodType
@@ -1560,7 +1838,20 @@ BEGIN TRY
 									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 									
-									     INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+									     INSERT INTO @StorageCharge
+										 (
+										     [intPeriodKey]
+										    ,[strPeriodType]
+										    ,[dtmEffectiveDate]
+										    ,[dtmEndingDate]
+										    ,[dblStorageRate]
+										    ,[MonthType]
+										    ,[ChargeType]
+										    ,[ChargedNumberOfDays/Months]
+										    ,[dblStorageDuePerUnit]
+										    ,[dblCummulativeStorageDuePerUnit]
+										    ,[RemainingMonths]
+										  )
 										 SELECT 
 										 @intPeriodKey
 										,@strPeriodType
@@ -1582,7 +1873,20 @@ BEGIN TRY
 									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 									
-										INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+										INSERT INTO @StorageCharge
+										( 
+										    [intPeriodKey] 
+										   ,[strPeriodType] 
+										   ,[dtmEffectiveDate] 
+										   ,[dtmEndingDate] 
+										   ,[dblStorageRate] 
+										   ,[MonthType] 
+										   ,[ChargeType] 
+										   ,[ChargedNumberOfDays/Months] 
+										   ,[dblStorageDuePerUnit] 
+										   ,[dblCummulativeStorageDuePerUnit] 
+										   ,[RemainingMonths] 
+										 )
 										 SELECT 
 										 @intPeriodKey
 										,@strPeriodType
@@ -1610,7 +1914,20 @@ BEGIN TRY
 									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 									
-									 INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+									 INSERT INTO @StorageCharge
+									 ( 
+									     [intPeriodKey] 
+									    ,[strPeriodType] 
+									    ,[dtmEffectiveDate] 
+									    ,[dtmEndingDate] 
+									    ,[dblStorageRate] 
+									    ,[MonthType] 
+									    ,[ChargeType] 
+									    ,[ChargedNumberOfDays/Months] 
+									    ,[dblStorageDuePerUnit] 
+									    ,[dblCummulativeStorageDuePerUnit]
+									    ,[RemainingMonths] 
+									  )
 									 SELECT 
 									 @intPeriodKey
 									,@strPeriodType
@@ -1632,7 +1949,20 @@ BEGIN TRY
 									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0))) + 1)
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 									
-									 INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+									 INSERT INTO @StorageCharge
+									 ( 
+									     [intPeriodKey] 
+									    ,[strPeriodType] 
+									    ,[dtmEffectiveDate] 
+									    ,[dtmEndingDate] 
+									    ,[dblStorageRate] 
+									    ,[MonthType] 
+									    ,[ChargeType] 
+									    ,[ChargedNumberOfDays/Months] 
+									    ,[dblStorageDuePerUnit] 
+									    ,[dblCummulativeStorageDuePerUnit]
+									    ,[RemainingMonths] 
+									  )									 
 									 SELECT 
 									 @intPeriodKey
 									,@strPeriodType
@@ -1657,7 +1987,20 @@ BEGIN TRY
 										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, @dtmEndingDate) + 1)
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, @dtmEndingDate) + 1)
 										
-										INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+										INSERT INTO @StorageCharge
+										(  
+										    [intPeriodKey]  
+										   ,[strPeriodType]  
+										   ,[dtmEffectiveDate]  
+										   ,[dtmEndingDate]  
+										   ,[dblStorageRate]  
+										   ,[MonthType]  
+										   ,[ChargeType]  
+										   ,[ChargedNumberOfDays/Months]  
+										   ,[dblStorageDuePerUnit]  
+										   ,[dblCummulativeStorageDuePerUnit] 
+										   ,[RemainingMonths]  
+										 )
 										 SELECT 
 										 @intPeriodKey
 										,@strPeriodType
@@ -1679,7 +2022,20 @@ BEGIN TRY
 										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
 										
-										INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+										INSERT INTO @StorageCharge
+										( 
+										    [intPeriodKey] 
+										   ,[strPeriodType] 
+										   ,[dtmEffectiveDate] 
+										   ,[dtmEndingDate] 
+										   ,[dblStorageRate] 
+										   ,[MonthType] 
+										   ,[ChargeType] 
+										   ,[ChargedNumberOfDays/Months] 
+										   ,[dblStorageDuePerUnit] 
+										   ,[dblCummulativeStorageDuePerUnit]
+										   ,[RemainingMonths] 
+										 )										
 										SELECT 
 										 @intPeriodKey
 										,@strPeriodType
@@ -1701,7 +2057,20 @@ BEGIN TRY
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
-											 INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+											 INSERT INTO @StorageCharge
+											 ( 
+											     [intPeriodKey] 
+											    ,[strPeriodType] 
+											    ,[dtmEffectiveDate] 
+											    ,[dtmEndingDate] 
+											    ,[dblStorageRate] 
+											    ,[MonthType] 
+											    ,[ChargeType] 
+											    ,[ChargedNumberOfDays/Months] 
+											    ,[dblStorageDuePerUnit] 
+											    ,[dblCummulativeStorageDuePerUnit]
+											    ,[RemainingMonths] 
+											  )
 											 SELECT 
 											 @intPeriodKey
 											,@strPeriodType
@@ -1723,7 +2092,20 @@ BEGIN TRY
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 												
-												 INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+												 INSERT INTO @StorageCharge
+												 ( 
+												     [intPeriodKey] 
+												    ,[strPeriodType] 
+												    ,[dtmEffectiveDate] 
+												    ,[dtmEndingDate] 
+												    ,[dblStorageRate] 
+												    ,[MonthType] 
+												    ,[ChargeType] 
+												    ,[ChargedNumberOfDays/Months] 
+												    ,[dblStorageDuePerUnit] 
+												    ,[dblCummulativeStorageDuePerUnit]
+												    ,[RemainingMonths] 
+												  )
 												 SELECT 
 												 @intPeriodKey
 												,@strPeriodType
@@ -1753,7 +2135,20 @@ BEGIN TRY
 										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, @dtmEndingDate) + 1)
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, @dtmEndingDate) + 1)
 										
-										INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+										INSERT INTO @StorageCharge
+										( 
+										    [intPeriodKey] 
+										   ,[strPeriodType] 
+										   ,[dtmEffectiveDate] 
+										   ,[dtmEndingDate] 
+										   ,[dblStorageRate] 
+										   ,[MonthType] 
+										   ,[ChargeType] 
+										   ,[ChargedNumberOfDays/Months] 
+										   ,[dblStorageDuePerUnit] 
+										   ,[dblCummulativeStorageDuePerUnit]
+										   ,[RemainingMonths] 
+										 )										
 										SELECT 
 										 @intPeriodKey
 										,@strPeriodType
@@ -1775,7 +2170,20 @@ BEGIN TRY
 										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
 										
-										 INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+										 INSERT INTO @StorageCharge
+										 ( 
+										     [intPeriodKey] 
+										    ,[strPeriodType] 
+										    ,[dtmEffectiveDate] 
+										    ,[dtmEndingDate] 
+										    ,[dblStorageRate] 
+										    ,[MonthType] 
+										    ,[ChargeType] 
+										    ,[ChargedNumberOfDays/Months] 
+										    ,[dblStorageDuePerUnit] 
+										    ,[dblCummulativeStorageDuePerUnit]
+										    ,[RemainingMonths] 
+										  )
 										 SELECT 
 										 @intPeriodKey
 										,@strPeriodType
@@ -1797,7 +2205,20 @@ BEGIN TRY
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
-											 INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+											 INSERT INTO @StorageCharge
+											 ( 
+											     [intPeriodKey] 
+											    ,[strPeriodType] 
+											    ,[dtmEffectiveDate] 
+											    ,[dtmEndingDate] 
+											    ,[dblStorageRate] 
+											    ,[MonthType] 
+											    ,[ChargeType] 
+											    ,[ChargedNumberOfDays/Months] 
+											    ,[dblStorageDuePerUnit] 
+											    ,[dblCummulativeStorageDuePerUnit]
+											    ,[RemainingMonths] 
+											  )											 
 											 SELECT 
 											 @intPeriodKey
 											,@strPeriodType
@@ -1819,7 +2240,20 @@ BEGIN TRY
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
-											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+											INSERT INTO @StorageCharge
+											( 
+											    [intPeriodKey] 
+											   ,[strPeriodType] 
+											   ,[dtmEffectiveDate] 
+											   ,[dtmEndingDate] 
+											   ,[dblStorageRate] 
+											   ,[MonthType] 
+											   ,[ChargeType] 
+											   ,[ChargedNumberOfDays/Months] 
+											   ,[dblStorageDuePerUnit] 
+											   ,[dblCummulativeStorageDuePerUnit]
+											   ,[RemainingMonths] 
+											 )
 											SELECT 
 											 @intPeriodKey
 											,@strPeriodType
@@ -1857,7 +2291,20 @@ BEGIN TRY
 							SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
 							SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 							
-						    INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+						    INSERT INTO @StorageCharge
+							( 
+							    [intPeriodKey] 
+							   ,[strPeriodType] 
+							   ,[dtmEffectiveDate] 
+							   ,[dtmEndingDate] 
+							   ,[dblStorageRate] 
+							   ,[MonthType] 
+							   ,[ChargeType] 
+							   ,[ChargedNumberOfDays/Months] 
+							   ,[dblStorageDuePerUnit] 
+							   ,[dblCummulativeStorageDuePerUnit]
+							   ,[RemainingMonths] 
+							 )
 							SELECT 
 							 @intPeriodKey
 							,@strPeriodType
@@ -1881,7 +2328,20 @@ BEGIN TRY
 								SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
 								SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 								   
-								INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+								INSERT INTO @StorageCharge
+								(  
+								    [intPeriodKey]  
+								   ,[strPeriodType]  
+								   ,[dtmEffectiveDate]  
+								   ,[dtmEndingDate]  
+								   ,[dblStorageRate]  
+								   ,[MonthType]  
+								   ,[ChargeType]  
+								   ,[ChargedNumberOfDays/Months]  
+								   ,[dblStorageDuePerUnit]  
+								   ,[dblCummulativeStorageDuePerUnit] 
+								   ,[RemainingMonths]  
+								 ) 
 								 SELECT 
 								 @intPeriodKey
 								,@strPeriodType
@@ -1902,7 +2362,20 @@ BEGIN TRY
 								SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
 								SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 								
-								 INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+								 INSERT INTO @StorageCharge
+								 ( 
+								     [intPeriodKey] 
+								    ,[strPeriodType] 
+								    ,[dtmEffectiveDate] 
+								    ,[dtmEndingDate] 
+								    ,[dblStorageRate] 
+								    ,[MonthType] 
+								    ,[ChargeType] 
+								    ,[ChargedNumberOfDays/Months] 
+								    ,[dblStorageDuePerUnit] 
+								    ,[dblCummulativeStorageDuePerUnit]
+								    ,[RemainingMonths] 
+								  )								 
 								 SELECT 
 								 @intPeriodKey
 								,@strPeriodType
@@ -1930,7 +2403,20 @@ BEGIN TRY
 								SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
 								SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 								
-								INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+								INSERT INTO @StorageCharge
+								( 
+								    [intPeriodKey] 
+								   ,[strPeriodType] 
+								   ,[dtmEffectiveDate] 
+								   ,[dtmEndingDate] 
+								   ,[dblStorageRate] 
+								   ,[MonthType] 
+								   ,[ChargeType] 
+								   ,[ChargedNumberOfDays/Months] 
+								   ,[dblStorageDuePerUnit] 
+								   ,[dblCummulativeStorageDuePerUnit]
+								   ,[RemainingMonths] 
+								 )
 								SELECT 
 								 @intPeriodKey
 								,@strPeriodType
@@ -1951,7 +2437,20 @@ BEGIN TRY
 								SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0))) + 1)
 								SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 								
-							     INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+							     INSERT INTO @StorageCharge
+								 ( 
+								     [intPeriodKey] 
+								    ,[strPeriodType] 
+								    ,[dtmEffectiveDate] 
+								    ,[dtmEndingDate] 
+								    ,[dblStorageRate] 
+								    ,[MonthType] 
+								    ,[ChargeType] 
+								    ,[ChargedNumberOfDays/Months] 
+								    ,[dblStorageDuePerUnit] 
+								    ,[dblCummulativeStorageDuePerUnit]
+								    ,[RemainingMonths] 
+								  )
 								 SELECT 
 								 @intPeriodKey
 								,@strPeriodType
@@ -1974,7 +2473,20 @@ BEGIN TRY
 								SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
 								SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
 								
-								 INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+								 INSERT INTO @StorageCharge
+								 ( 
+								     [intPeriodKey] 
+								    ,[strPeriodType] 
+								    ,[dtmEffectiveDate] 
+								    ,[dtmEndingDate] 
+								    ,[dblStorageRate] 
+								    ,[MonthType] 
+								    ,[ChargeType] 
+								    ,[ChargedNumberOfDays/Months] 
+								    ,[dblStorageDuePerUnit] 
+								    ,[dblCummulativeStorageDuePerUnit]
+								    ,[RemainingMonths] 
+								  )
 								 SELECT 
 								 @intPeriodKey
 								,@strPeriodType
@@ -1996,7 +2508,21 @@ BEGIN TRY
 									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 									
-									INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+									INSERT INTO @StorageCharge
+									(  
+									    [intPeriodKey]  
+									   ,[strPeriodType]  
+									   ,[dtmEffectiveDate]  
+									   ,[dtmEndingDate]  
+									   ,[dblStorageRate]  
+									   ,[MonthType]  
+									   ,[ChargeType]  
+									   ,[ChargedNumberOfDays/Months]  
+									   ,[dblStorageDuePerUnit]  
+									   ,[dblCummulativeStorageDuePerUnit] 
+									   ,[RemainingMonths]  
+									 ) 
+									 
 									 SELECT 
 									 @intPeriodKey
 									,@strPeriodType
@@ -2017,7 +2543,20 @@ BEGIN TRY
 									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 									
-									INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+									INSERT INTO @StorageCharge
+									(  
+									    [intPeriodKey]  
+									   ,[strPeriodType]  
+									   ,[dtmEffectiveDate]  
+									   ,[dtmEndingDate]  
+									   ,[dblStorageRate]  
+									   ,[MonthType]  
+									   ,[ChargeType]  
+									   ,[ChargedNumberOfDays/Months]  
+									   ,[dblStorageDuePerUnit]  
+									   ,[dblCummulativeStorageDuePerUnit]
+									   ,[RemainingMonths]  
+									 ) 
 									SELECT 
 									 @intPeriodKey
 									,@strPeriodType
@@ -2044,7 +2583,20 @@ BEGIN TRY
 								SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
 								SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
 								
-								INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+								INSERT INTO @StorageCharge
+								(  
+								    [intPeriodKey]  
+								   ,[strPeriodType]  
+								   ,[dtmEffectiveDate]  
+								   ,[dtmEndingDate]  
+								   ,[dblStorageRate]  
+								   ,[MonthType]  
+								   ,[ChargeType]  
+								   ,[ChargedNumberOfDays/Months]  
+								   ,[dblStorageDuePerUnit]  
+								   ,[dblCummulativeStorageDuePerUnit]
+								   ,[RemainingMonths]  
+								 ) 
 								SELECT 
 								 @intPeriodKey
 								,@strPeriodType
@@ -2066,7 +2618,20 @@ BEGIN TRY
 									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 										
-									 INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+									 INSERT INTO @StorageCharge
+									 (  
+									     [intPeriodKey]  
+									    ,[strPeriodType]  
+									    ,[dtmEffectiveDate]  
+									    ,[dtmEndingDate]  
+									    ,[dblStorageRate]  
+									    ,[MonthType]  
+									    ,[ChargeType]  
+									    ,[ChargedNumberOfDays/Months]  
+									    ,[dblStorageDuePerUnit]  
+									    ,[dblCummulativeStorageDuePerUnit]
+									    ,[RemainingMonths]  
+									  ) 
 									 SELECT 
 									 @intPeriodKey
 									,@strPeriodType
@@ -2087,7 +2652,20 @@ BEGIN TRY
 									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 										
-									INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+									INSERT INTO @StorageCharge
+									(  
+									    [intPeriodKey]  
+									   ,[strPeriodType]  
+									   ,[dtmEffectiveDate]  
+									   ,[dtmEndingDate]  
+									   ,[dblStorageRate]  
+									   ,[MonthType]  
+									   ,[ChargeType]  
+									   ,[ChargedNumberOfDays/Months]  
+									   ,[dblStorageDuePerUnit]  
+									   ,[dblCummulativeStorageDuePerUnit]
+									   ,[RemainingMonths]  
+									 ) 
 									SELECT 
 									 @intPeriodKey
 								    ,@strPeriodType
@@ -2132,7 +2710,20 @@ BEGIN TRY
 								SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
 								SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 									
-								 INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+								 INSERT INTO @StorageCharge
+								 (  
+								     [intPeriodKey]  
+								    ,[strPeriodType]  
+								    ,[dtmEffectiveDate]  
+								    ,[dtmEndingDate]  
+								    ,[dblStorageRate]  
+								    ,[MonthType]  
+								    ,[ChargeType]  
+								    ,[ChargedNumberOfDays/Months]  
+								    ,[dblStorageDuePerUnit]  
+								    ,[dblCummulativeStorageDuePerUnit]
+								    ,[RemainingMonths]  
+								  ) 
 								 SELECT 
 								 @intPeriodKey
 								,@strPeriodType
@@ -2155,7 +2746,20 @@ BEGIN TRY
 									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 									
-									INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+									INSERT INTO @StorageCharge
+									(  
+									    [intPeriodKey]  
+									   ,[strPeriodType]  
+									   ,[dtmEffectiveDate]  
+									   ,[dtmEndingDate]  
+									   ,[dblStorageRate]  
+									   ,[MonthType]  
+									   ,[ChargeType]  
+									   ,[ChargedNumberOfDays/Months]  
+									   ,[dblStorageDuePerUnit]  
+									   ,[dblCummulativeStorageDuePerUnit]
+									   ,[RemainingMonths]  
+									 ) 
 									SELECT 
 									 @intPeriodKey
 									,@strPeriodType
@@ -2176,7 +2780,20 @@ BEGIN TRY
 									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0))) + 1)
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 										
-									INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+									INSERT INTO @StorageCharge
+									(  
+									    [intPeriodKey]  
+									   ,[strPeriodType]  
+									   ,[dtmEffectiveDate]  
+									   ,[dtmEndingDate]  
+									   ,[dblStorageRate]  
+									   ,[MonthType]  
+									   ,[ChargeType]  
+									   ,[ChargedNumberOfDays/Months]  
+									   ,[dblStorageDuePerUnit]  
+									   ,[dblCummulativeStorageDuePerUnit]
+									   ,[RemainingMonths]  
+									 ) 
 									SELECT 
 									 @intPeriodKey
 									,@strPeriodType
@@ -2204,7 +2821,20 @@ BEGIN TRY
 									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 									
-									 INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+									 INSERT INTO @StorageCharge
+									 (  
+									     [intPeriodKey]  
+									    ,[strPeriodType]  
+									    ,[dtmEffectiveDate]  
+									    ,[dtmEndingDate]  
+									    ,[dblStorageRate]  
+									    ,[MonthType]  
+									    ,[ChargeType]  
+									    ,[ChargedNumberOfDays/Months]  
+									    ,[dblStorageDuePerUnit]  
+									    ,[dblCummulativeStorageDuePerUnit]
+									    ,[RemainingMonths]  
+									  ) 
 									 SELECT 
 									 @intPeriodKey
 									,@strPeriodType
@@ -2225,7 +2855,20 @@ BEGIN TRY
 									SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0))) + 1)
 									SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 									
-									INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+									INSERT INTO @StorageCharge
+									(  
+									    [intPeriodKey]  
+									   ,[strPeriodType]  
+									   ,[dtmEffectiveDate]  
+									   ,[dtmEndingDate]  
+									   ,[dblStorageRate]  
+									   ,[MonthType]  
+									   ,[ChargeType]  
+									   ,[ChargedNumberOfDays/Months]  
+									   ,[dblStorageDuePerUnit]  
+									   ,[dblCummulativeStorageDuePerUnit]
+									   ,[RemainingMonths]  
+									 ) 
 									SELECT 
 									 @intPeriodKey
 									,@strPeriodType
@@ -2253,7 +2896,20 @@ BEGIN TRY
 										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
 										
-										INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+										INSERT INTO @StorageCharge
+										(  
+										    [intPeriodKey]  
+										   ,[strPeriodType]  
+										   ,[dtmEffectiveDate]  
+										   ,[dtmEndingDate]  
+										   ,[dblStorageRate]  
+										   ,[MonthType]  
+										   ,[ChargeType]  
+										   ,[ChargedNumberOfDays/Months]  
+										   ,[dblStorageDuePerUnit]  
+										   ,[dblCummulativeStorageDuePerUnit]
+										   ,[RemainingMonths]  
+										 ) 
 										SELECT 
 										 @intPeriodKey
 										,@strPeriodType
@@ -2275,7 +2931,20 @@ BEGIN TRY
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
-											 INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+											 INSERT INTO @StorageCharge
+											 (  
+											     [intPeriodKey]  
+											    ,[strPeriodType]  
+											    ,[dtmEffectiveDate]  
+											    ,[dtmEndingDate]  
+											    ,[dblStorageRate]  
+											    ,[MonthType]  
+											    ,[ChargeType]  
+											    ,[ChargedNumberOfDays/Months]  
+											    ,[dblStorageDuePerUnit]  
+											    ,[dblCummulativeStorageDuePerUnit]
+											    ,[RemainingMonths]  
+											  ) 
 											 SELECT 
 											 @intPeriodKey
 											,@strPeriodType
@@ -2296,7 +2965,20 @@ BEGIN TRY
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
-											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+											INSERT INTO @StorageCharge
+											(   
+											    [intPeriodKey]   
+											   ,[strPeriodType]   
+											   ,[dtmEffectiveDate]   
+											   ,[dtmEndingDate]   
+											   ,[dblStorageRate]   
+											   ,[MonthType]   
+											   ,[ChargeType]   
+											   ,[ChargedNumberOfDays/Months]   
+											   ,[dblStorageDuePerUnit]   
+											   ,[dblCummulativeStorageDuePerUnit] 
+											   ,[RemainingMonths]   
+											 )  
 											 SELECT 
 											 @intPeriodKey
 											,@strPeriodType
@@ -2321,7 +3003,20 @@ BEGIN TRY
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
-											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+											INSERT INTO @StorageCharge
+											(   
+											    [intPeriodKey]   
+											   ,[strPeriodType]   
+											   ,[dtmEffectiveDate]   
+											   ,[dtmEndingDate]   
+											   ,[dblStorageRate]   
+											   ,[MonthType]   
+											   ,[ChargeType]   
+											   ,[ChargedNumberOfDays/Months]   
+											   ,[dblStorageDuePerUnit]   
+											   ,[dblCummulativeStorageDuePerUnit] 
+											   ,[RemainingMonths]   
+											 )  
 											 SELECT 
 											 @intPeriodKey
 											,@strPeriodType
@@ -2342,7 +3037,20 @@ BEGIN TRY
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
-											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+											INSERT INTO @StorageCharge
+											(   
+											    [intPeriodKey]   
+											   ,[strPeriodType]   
+											   ,[dtmEffectiveDate]   
+											   ,[dtmEndingDate]   
+											   ,[dblStorageRate]   
+											   ,[MonthType]   
+											   ,[ChargeType]   
+											   ,[ChargedNumberOfDays/Months]   
+											   ,[dblStorageDuePerUnit]   
+											   ,[dblCummulativeStorageDuePerUnit] 
+											   ,[RemainingMonths]   
+											 )  
 											 SELECT 
 											 @intPeriodKey
 											,@strPeriodType
@@ -2373,7 +3081,20 @@ BEGIN TRY
 										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
 										
-										 INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+										 INSERT INTO @StorageCharge
+										 (  
+										     [intPeriodKey]  
+										    ,[strPeriodType]  
+										    ,[dtmEffectiveDate]  
+										    ,[dtmEndingDate]  
+										    ,[dblStorageRate]  
+										    ,[MonthType]  
+										    ,[ChargeType]  
+										    ,[ChargedNumberOfDays/Months]  
+										    ,[dblStorageDuePerUnit]  
+										    ,[dblCummulativeStorageDuePerUnit]
+										    ,[RemainingMonths]  
+										  ) 
 										 SELECT 
 										 @intPeriodKey
 										,@strPeriodType
@@ -2395,7 +3116,20 @@ BEGIN TRY
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
-											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+											INSERT INTO @StorageCharge
+											(  
+											    [intPeriodKey]  
+											   ,[strPeriodType]  
+											   ,[dtmEffectiveDate]  
+											   ,[dtmEndingDate]  
+											   ,[dblStorageRate]  
+											   ,[MonthType]  
+											   ,[ChargeType]  
+											   ,[ChargedNumberOfDays/Months]  
+											   ,[dblStorageDuePerUnit]  
+											   ,[dblCummulativeStorageDuePerUnit]
+											   ,[RemainingMonths]  
+											 ) 
 											SELECT 
 											 @intPeriodKey
 											,@strPeriodType
@@ -2416,7 +3150,20 @@ BEGIN TRY
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
-											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+											INSERT INTO @StorageCharge
+											(   
+											    [intPeriodKey]   
+											   ,[strPeriodType]   
+											   ,[dtmEffectiveDate]   
+											   ,[dtmEndingDate]   
+											   ,[dblStorageRate]   
+											   ,[MonthType]   
+											   ,[ChargeType]   
+											   ,[ChargedNumberOfDays/Months]   
+											   ,[dblStorageDuePerUnit]   
+											   ,[dblCummulativeStorageDuePerUnit] 
+											   ,[RemainingMonths]   
+											 )  
 											 SELECT 
 											 @intPeriodKey
 											,@strPeriodType
@@ -2441,7 +3188,20 @@ BEGIN TRY
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
-											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+											INSERT INTO @StorageCharge
+											(   
+											    [intPeriodKey]   
+											   ,[strPeriodType]   
+											   ,[dtmEffectiveDate]   
+											   ,[dtmEndingDate]   
+											   ,[dblStorageRate]   
+											   ,[MonthType]   
+											   ,[ChargeType]   
+											   ,[ChargedNumberOfDays/Months]   
+											   ,[dblStorageDuePerUnit]   
+											   ,[dblCummulativeStorageDuePerUnit] 
+											   ,[RemainingMonths]   
+											 )  
 											 SELECT 
 											 @intPeriodKey
 											,@strPeriodType
@@ -2462,7 +3222,20 @@ BEGIN TRY
 											SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
 											SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 											
-											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+											INSERT INTO @StorageCharge
+											(   
+											    [intPeriodKey]   
+											   ,[strPeriodType]   
+											   ,[dtmEffectiveDate]   
+											   ,[dtmEndingDate]   
+											   ,[dblStorageRate]   
+											   ,[MonthType]   
+											   ,[ChargeType]   
+											   ,[ChargedNumberOfDays/Months]   
+											   ,[dblStorageDuePerUnit]   
+											   ,[dblCummulativeStorageDuePerUnit] 
+											   ,[RemainingMonths]   
+											 )  
 											 SELECT 
 											 @intPeriodKey
 											,@strPeriodType
@@ -2496,32 +3269,32 @@ BEGIN TRY
 	---Due from Deliverydate to Last Storage Accrue Date.
 	IF @strStorageRate = 'Monthly' AND @StorageChargeCalculationRequired = 1
 	BEGIN
-		SELECT @dtmDeliveryDate = dtmDeliveryDate
-		FROM tblGRCustomerStorage
-		WHERE intCustomerStorageId = @intCustomerStorageId
+		SELECT @dtmDeliveryDate     = dtmDeliveryDate
+		FROM   tblGRCustomerStorage
+		WHERE  intCustomerStorageId = @intCustomerStorageId
 		
-		SELECT @TotalMonthsApplicableForStorageCharge = DATEDIFF(MONTH, @dtmDeliveryDate, @dtmLastStorageAccrueDate) + 1
-		SET @TotalOriginalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge
+		SELECT @TotalMonthsApplicableForStorageCharge		    =   DATEDIFF(MONTH, @dtmDeliveryDate, @dtmLastStorageAccrueDate) + 1
+		SET    @TotalOriginalMonthsApplicableForStorageCharge   =   @TotalMonthsApplicableForStorageCharge
 		
 		SELECT @intSchedulePeriodId = MIN(intSchedulePeriodId)
 		FROM @tblGRStorageSchedulePeriod		
 
 		WHILE @intSchedulePeriodId > 0 AND @TotalMonthsApplicableForStorageCharge > 0
 		BEGIN
-			SET @intPeriodKey  = NULL
-			SET @strPeriodType = NULL
-			SET @dtmDEffectiveDate = NULL
-			SET @dtmEndingDate = NULL
-			SET @intNumberOfDays = NULL
-			SET @dblStorageRate = NULL
+			SET @intPeriodKey       = NULL
+			SET @strPeriodType      = NULL
+			SET @dtmDEffectiveDate  = NULL
+			SET @dtmEndingDate      = NULL
+			SET @intNumberOfDays    = NULL
+			SET @dblStorageRate     = NULL
 		
 			SELECT 
-				 @intPeriodKey=intPeriodKey
-				,@strPeriodType = strPeriodType
+				 @intPeriodKey	    = intPeriodKey
+				,@strPeriodType     = strPeriodType
 				,@dtmDEffectiveDate = dtmEffectiveDate
-				,@dtmEndingDate = dtmEndingDate
-				,@intNumberOfDays = ISNULL(intNumberOfDays, 0)
-				,@dblStorageRate = dblStorageRate
+				,@dtmEndingDate		= dtmEndingDate
+				,@intNumberOfDays   = ISNULL(intNumberOfDays, 0)
+				,@dblStorageRate    = dblStorageRate
 			FROM @tblGRStorageSchedulePeriod
 			WHERE intSchedulePeriodId = @intSchedulePeriodId
 			
@@ -2546,7 +3319,20 @@ BEGIN TRY
 																							   END
 							SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 							
-							INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+							INSERT INTO @StorageCharge
+							(  
+							    [intPeriodKey]  
+							   ,[strPeriodType]  
+							   ,[dtmEffectiveDate]  
+							   ,[dtmEndingDate]  
+							   ,[dblStorageRate]  
+							   ,[MonthType]  
+							   ,[ChargeType]  
+							   ,[ChargedNumberOfDays/Months]  
+							   ,[dblStorageDuePerUnit]  
+							   ,[dblCummulativeStorageDuePerUnit]
+							   ,[RemainingMonths]  
+							 ) 
 							SELECT 
 							 @intPeriodKey
 							,@strPeriodType
@@ -2591,7 +3377,20 @@ BEGIN TRY
 																  
 								SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 								
-								INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+								INSERT INTO @StorageCharge
+								(  
+								    [intPeriodKey]  
+								   ,[strPeriodType]  
+								   ,[dtmEffectiveDate]  
+								   ,[dtmEndingDate]  
+								   ,[dblStorageRate]  
+								   ,[MonthType]  
+								   ,[ChargeType]  
+								   ,[ChargedNumberOfDays/Months]  
+								   ,[dblStorageDuePerUnit]  
+								   ,[dblCummulativeStorageDuePerUnit]
+								   ,[RemainingMonths]  
+								 ) 
 								SELECT 
 								 @intPeriodKey
 								,@strPeriodType
@@ -2624,7 +3423,20 @@ BEGIN TRY
 										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, @dtmEndingDate) + 1)
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, @dtmEndingDate) + 1)
 											
-											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+											INSERT INTO @StorageCharge
+											(  
+											    [intPeriodKey]  
+											   ,[strPeriodType]  
+											   ,[dtmEffectiveDate]  
+											   ,[dtmEndingDate]  
+											   ,[dblStorageRate]  
+											   ,[MonthType]  
+											   ,[ChargeType]  
+											   ,[ChargedNumberOfDays/Months]  
+											   ,[dblStorageDuePerUnit]  
+											   ,[dblCummulativeStorageDuePerUnit]
+											   ,[RemainingMonths]  
+											 ) 
 											SELECT 
 											 @intPeriodKey
 											,@strPeriodType
@@ -2646,7 +3458,20 @@ BEGIN TRY
 										SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmLastStorageAccrueDate), 0))) + 1)
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmLastStorageAccrueDate), 0))) + 1)
 										
-											INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+											INSERT INTO @StorageCharge
+											(  
+											    [intPeriodKey]  
+											   ,[strPeriodType]  
+											   ,[dtmEffectiveDate]  
+											   ,[dtmEndingDate]  
+											   ,[dblStorageRate]  
+											   ,[MonthType]  
+											   ,[ChargeType]  
+											   ,[ChargedNumberOfDays/Months]  
+											   ,[dblStorageDuePerUnit]  
+											   ,[dblCummulativeStorageDuePerUnit]
+											   ,[RemainingMonths]  
+											 ) 
 											SELECT 
 											 @intPeriodKey
 											,@strPeriodType
@@ -2670,7 +3495,20 @@ BEGIN TRY
 																										  
 										SET @TotalMonthsApplicableForStorageCharge = @TotalMonthsApplicableForStorageCharge - 1
 
-										INSERT INTO @StorageCharge([intPeriodKey],[strPeriodType],[dtmEffectiveDate],[dtmEndingDate],[dblStorageRate],[MonthType],[ChargeType],[ChargedNumberOfDays/Months],[dblStorageDuePerUnit],[dblCummulativeStorageDuePerUnit],[RemainingMonths])
+										INSERT INTO @StorageCharge
+										(  
+										    [intPeriodKey]  
+										   ,[strPeriodType]  
+										   ,[dtmEffectiveDate]  
+										   ,[dtmEndingDate]  
+										   ,[dblStorageRate]  
+										   ,[MonthType]  
+										   ,[ChargeType]  
+										   ,[ChargedNumberOfDays/Months]  
+										   ,[dblStorageDuePerUnit]  
+										   ,[dblCummulativeStorageDuePerUnit]
+										   ,[RemainingMonths]  
+										 ) 
 										SELECT 
 										 @intPeriodKey
 										,@strPeriodType
@@ -4137,7 +4975,7 @@ BEGIN TRY
 		BEGIN
 			UPDATE tblGRCustomerStorage
 			SET dtmLastStorageAccrueDate = @ActualStorageChargeDate
-			WHERE intCustomerStorageId = @intCustomerStorageId
+			WHERE intCustomerStorageId   = @intCustomerStorageId
 
 			UPDATE tblGRCustomerStorage
 			SET dblStorageDue = CASE 
@@ -4147,8 +4985,9 @@ BEGIN TRY
 										 
 			WHERE intCustomerStorageId = @intCustomerStorageId
 
-			INSERT INTO [dbo].[tblGRStorageHistory] (
-				[intConcurrencyId]
+			INSERT INTO [dbo].[tblGRStorageHistory] 
+			(
+				 [intConcurrencyId]
 				,[intCustomerStorageId]
 				,[intTicketId]
 				,[intInventoryReceiptId]
@@ -4164,40 +5003,41 @@ BEGIN TRY
 				,[intTransactionTypeId]
 				,[intEntityId]
 				,[intCompanyLocationId]
-				)
-			VALUES (
-				1
-				,@intCustomerStorageId
-				,NULL
-				,NULL
-				,NULL
-				,NULL
-				,@dblOpenBalance
-				,@ActualStorageChargeDate
-				,@dblStorageDuePerUnit
-				,NULL
-				,NULL
-				,'Accrued Storage Due'
-				,@UserName
-				,NULL
-				,NULL
-				,NULL
-				)
+			)
+			SELECT
+				 [intConcurrencyId]		 = 1
+				,[intCustomerStorageId]	 = @intCustomerStorageId
+				,[intTicketId]			 = NULL
+				,[intInventoryReceiptId] = NULL
+				,[intInvoiceId]			 = NULL
+				,[intContractHeaderId]	 = NULL
+				,[dblUnits]				 = @dblOpenBalance
+				,[dtmHistoryDate]		 = @ActualStorageChargeDate
+				,[dblPaidAmount]		 = @dblStorageDuePerUnit
+				,[strPaidDescription]	 = NULL
+				,[dblCurrencyRate]		 = NULL
+				,[strType]				 = 'Accrued Storage Due'
+				,[strUserName]			 = @UserName
+				,[intTransactionTypeId]	 = NULL
+				,[intEntityId]			 = NULL
+				,[intCompanyLocationId]	 = NULL
+			
 		END
 	END
 
 	IF @strUpdateType = 'Bill'
 	BEGIN
 		UPDATE tblGRCustomerStorage
-		SET dblStoragePaid = dblStorageDue
+		SET    dblStoragePaid	   = dblStorageDue
 		WHERE intCustomerStorageId = @intCustomerStorageId
 
-		SELECT @dblNewStoragePaid = dblStoragePaid
+		SELECT @dblNewStoragePaid  = dblStoragePaid
 		FROM tblGRCustomerStorage
 		WHERE intCustomerStorageId = @intCustomerStorageId
 
-		INSERT INTO [dbo].[tblGRStorageHistory] (
-			[intConcurrencyId]
+		INSERT INTO [dbo].[tblGRStorageHistory] 
+		(
+			 [intConcurrencyId]
 			,[intCustomerStorageId]
 			,[intTicketId]
 			,[intInventoryReceiptId]
@@ -4213,36 +5053,36 @@ BEGIN TRY
 			,[intTransactionTypeId]
 			,[intEntityId]
 			,[intCompanyLocationId]
-			)
-		VALUES (
-			1
-			,@intCustomerStorageId
-			,NULL
-			,NULL
-			,NULL
-			,NULL
-			,@dblOpenBalance
-			,@ActualStorageChargeDate
-			,(@dblNewStoragePaid - @dblOldStoragePaid)
-			,NULL
-			,NULL
-			,'Storage Paid'
-			,@UserName
-			,NULL
-			,NULL
-			,NULL
-			)
+		)
+		SELECT 
+			 [intConcurrencyId]		 = 1
+			,[intCustomerStorageId]	 = @intCustomerStorageId
+			,[intTicketId]			 = NULL
+			,[intInventoryReceiptId] = NULL
+			,[intInvoiceId]			 = NULL
+			,[intContractHeaderId]	 = NULL
+			,[dblUnits]				 = @dblOpenBalance
+			,[dtmHistoryDate]		 = @ActualStorageChargeDate
+			,[dblPaidAmount]		 = (@dblNewStoragePaid - @dblOldStoragePaid)
+			,[strPaidDescription]	 = NULL
+			,[dblCurrencyRate]		 = NULL
+			,[strType]				 = 'Storage Paid'
+			,[strUserName]			 = @UserName
+			,[intTransactionTypeId]	 = NULL
+			,[intEntityId]			 = NULL
+			,[intCompanyLocationId]	 = NULL
+			
 	END
 	
 	SET @dblStorageDuePerUnit=ISNULL(@dblStorageDuePerUnit,0)
 
-	SELECT @dblStorageDueTotalPerUnit = dblStorageDue - dblStoragePaid
-		,@dblStorageBilledPerUnit = dblStoragePaid - @dblOldStoragePaid
+	SELECT @dblStorageDueTotalPerUnit = dblStorageDue  - dblStoragePaid
+		  ,@dblStorageBilledPerUnit   = dblStoragePaid - @dblOldStoragePaid
 	FROM tblGRCustomerStorage
 	WHERE intCustomerStorageId = @intCustomerStorageId
 	
-	SET @dblStorageDueTotalPerUnit=ISNULL(@dblStorageDueTotalPerUnit,0)
-	SET @dblStorageBilledPerUnit=ISNULL(@dblStorageBilledPerUnit,0)
+	SET @dblStorageDueTotalPerUnit = ISNULL(@dblStorageDueTotalPerUnit,0)
+	SET @dblStorageBilledPerUnit   = ISNULL(@dblStorageBilledPerUnit,0)
 
 	IF @strProcessType = 'Unpaid'
 	BEGIN
