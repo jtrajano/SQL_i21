@@ -30,6 +30,11 @@ BEGIN TRY
 		,@intNoOfDecimalPlacesOnConsumption INT
 		,@ysnConsumptionByRatio BIT
 		,@intPhysicalItemUOMId INT
+		,@strPrefillCountedQty NVARCHAR(50)
+	DECLARE @tblMFProcessCycleCount TABLE (
+		intItemId INT
+		,dblQuantity NUMERIC(38, 20)
+		)
 
 	SELECT @TRANCOUNT = @@TRANCOUNT
 
@@ -767,7 +772,10 @@ BEGIN TRY
 	SELECT intItemId
 		,intConsumptionMethodId
 		,intStorageLocationId
-		,SUM(dblRequiredQty) Over (Partition by intItemId,intStorageLocationId)
+		,SUM(dblRequiredQty) OVER (
+			PARTITION BY intItemId
+			,intStorageLocationId
+			)
 		,ysnMainItem
 		,intItemUOMId
 		,intCategoryId
@@ -1031,7 +1039,7 @@ BEGIN TRY
 		LEFT JOIN @tblMFWorkOrderInputLot WI ON WI.intItemId = I.intItemId
 			AND WI.intMachineId = I.intMachineId
 	END
-	
+
 	DELETE
 	FROM @tblICFinalItem
 	WHERE ysnMainItem = 0
@@ -1070,6 +1078,18 @@ BEGIN TRY
 			AND I.intStorageLocationId = L.intStorageLocationId
 		LEFT JOIN @tblMFWorkOrderInputLot WI ON WI.intItemId = I.intItemId
 			AND WI.intMachineId = I.intMachineId
+	END
+
+	SELECT @strPrefillCountedQty = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 101
+
+	IF @strPrefillCountedQty IS NULL
+		OR @strPrefillCountedQty = ''
+	BEGIN
+		SELECT @strPrefillCountedQty = 'False'
 	END
 
 	--BEGIN TRANSACTION
@@ -1111,7 +1131,18 @@ BEGIN TRY
 		,NULL
 		,NULL
 		,I.intItemId
-		,NULL
+		,(
+			CASE 
+				WHEN @strPrefillCountedQty = 'True'
+					THEN (
+							SELECT SUM(PS.dblQtyInProductionStagingLocation)
+							FROM @tblMFQtyInProductionStagingLocation PS
+							WHERE PS.intItemId = I.intItemId
+								AND PS.intStorageLocationId = I.intStorageLocationId
+							)
+				ELSE NULL
+				END
+			)
 		,(
 			SELECT SUM(PS.dblQtyInProdStagingLocation)
 			FROM @tblMFQtyInProductionStagingLocation PS
@@ -1264,6 +1295,91 @@ BEGIN TRY
 					,3
 					)
 			)
+
+	IF @strPrefillCountedQty = 'True'
+	BEGIN
+		INSERT INTO @tblMFProcessCycleCount
+		SELECT intItemId
+			,SUM(dblQuantity)
+		FROM tblMFProcessCycleCount
+		WHERE intCycleCountSessionId = @intCycleCountSessionId
+		GROUP BY intItemId
+
+		UPDATE tblMFProductionSummary
+		SET dblCountQuantity = CASE 
+				WHEN RI.intRecipeItemTypeId = 1
+					OR RSI.intRecipeItemTypeId = 1
+					THEN ISNULL(CC.dblQuantity, 0)
+				ELSE 0
+				END
+			,dblCountOutputQuantity = CASE 
+				WHEN RI.intRecipeItemTypeId = 2
+					THEN ISNULL(CC.dblQuantity, 0)
+				ELSE 0
+				END
+		FROM @tblMFProcessCycleCount CC
+		LEFT JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intItemId = CC.intItemId
+			AND RI.intWorkOrderId = @intWorkOrderId
+		LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RSI ON RSI.intSubstituteItemId = CC.intItemId
+			AND RSI.intWorkOrderId = @intWorkOrderId
+		JOIN dbo.tblMFProductionSummary PS ON PS.intItemId = CC.intItemId
+			AND PS.intWorkOrderId = @intWorkOrderId
+			AND PS.intItemTypeId IN (
+				1
+				,3
+				)
+
+		INSERT INTO dbo.tblMFProductionSummary (
+			intWorkOrderId
+			,intItemId
+			,dblOpeningQuantity
+			,dblOpeningOutputQuantity
+			,dblOpeningConversionQuantity
+			,dblInputQuantity
+			,dblConsumedQuantity
+			,dblOutputQuantity
+			,dblOutputConversionQuantity
+			,dblCountQuantity
+			,dblCountOutputQuantity
+			,dblCountConversionQuantity
+			,dblCalculatedQuantity
+			)
+		SELECT DISTINCT @intWorkOrderId
+			,CC.intItemId
+			,0
+			,0
+			,0
+			,0
+			,0
+			,0
+			,0
+			,CASE 
+				WHEN RI.intRecipeItemTypeId = 1
+					OR RI.intRecipeItemTypeId IS NULL
+					THEN ISNULL(CC.dblQuantity, 0)
+				ELSE 0
+				END
+			,CASE 
+				WHEN RI.intRecipeItemTypeId = 2
+					THEN ISNULL(CC.dblQuantity, 0)
+				ELSE 0
+				END
+			,0
+			,0
+		FROM @tblMFProcessCycleCount CC
+		LEFT JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intItemId = CC.intItemId
+			AND RI.intWorkOrderId = @intWorkOrderId
+		WHERE NOT EXISTS (
+				SELECT *
+				FROM dbo.tblMFProductionSummary PS
+				WHERE PS.intWorkOrderId = @intWorkOrderId
+					AND PS.intItemId = CC.intItemId
+					AND PS.intItemTypeId IN (
+						1
+						,3
+						)
+				)
+	END
 
 	--COMMIT TRANSACTION
 	EXEC sp_xml_removedocument @idoc
