@@ -369,7 +369,7 @@ BEGIN TRY
 				     [strTransactionType]					= 'Invoice'
 					,[strType]								= 'Standard'
 					,[strSourceTransaction]					= 'Zero Priced Spot Tickets'
-					,[intSourceId]							= NULL
+					,[intSourceId]							= @intUnPricedId
 					,[strSourceId]							= ''
 					,[intInvoiceId]							= @InvoiceId --NULL Value will create new invoice
 					,[intEntityCustomerId]					= @intEntityId
