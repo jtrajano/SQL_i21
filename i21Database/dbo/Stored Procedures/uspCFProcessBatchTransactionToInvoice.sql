@@ -425,14 +425,14 @@ SELECT * FROM #tmpForeignTransactionId
 							
 				UPDATE CFTran
 				SET 
-					CFTran.ysnPosted	 = 1
+					CFTran.ysnPosted	 = ARL.ysnPosted
 					,CFTran.intInvoiceId = ARL.intInvoiceId
 				FROM
 					tblCFTransaction CFTran
 				INNER JOIN
 					#tmpCreatedInvoice ARL
 						ON CFTran.intTransactionId = ARL.intSourceId
-						AND ARL.ysnPosted = 1
+						--AND ARL.ysnPosted = 1
 
 				IF (@Post = 1)
 				BEGIN
