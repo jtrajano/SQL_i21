@@ -9,6 +9,7 @@
 	[intContractId] INT NULL,
 	[intContractDetailId] INT NULL,   
 	[dblCalculatedAmount] NUMERIC(38, 20) NULL DEFAULT ((0)), 
+	[dblCalculatedQty] NUMERIC(38, 20) NULL DEFAULT ((0)), 
 	[strAllocatePriceBy] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[ysnAccrue] BIT NULL DEFAULT ((0)),
 	[ysnPrice] BIT NULL DEFAULT ((0)),

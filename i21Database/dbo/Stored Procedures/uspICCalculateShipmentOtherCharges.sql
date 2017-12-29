@@ -34,20 +34,12 @@ BEGIN
 										1
 							END 
 						, 2)
-			,dblQuantity = 
-				CASE 
-					WHEN ShipmentCharge.strCostMethod = 'Per Unit' AND ISNULL(ShipmentCharge.dblRate, 0) <> 0 THEN
-						dbo.fnDivide(
-							ShipmentCharge.dblAmount
-							,ShipmentCharge.dblRate
-						)
+			,dblQuantity = ISNULL(NULLIF(ComputedCharges.dblCalculatedQty, 0), 1) 
 
-					ELSE 
-						1
-				END 
 	FROM	dbo.tblICInventoryShipmentCharge ShipmentCharge INNER JOIN  (
 				SELECT	intInventoryShipmentChargeId
 						, dblCalculatedAmount = SUM(dblCalculatedAmount) 
+						, dblCalculatedQty = SUM(ISNULL(dblCalculatedQty, 0)) 
 				FROM	tblICInventoryShipmentChargePerItem
 				WHERE	intInventoryShipmentId = @intInventoryShipmentId
 				GROUP BY intInventoryShipmentChargeId
