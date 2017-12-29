@@ -146,6 +146,7 @@ BEGIN
 		,intTypeEarningId		INT
 		,intAccountId			INT
 		,dblAmount				NUMERIC (18, 6)
+		,dblPercentage			NUMERIC (18, 6)
 		,intDepartmentId		INT
 		,strDepartment			NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,intProfitCenter		INT
@@ -159,6 +160,7 @@ BEGIN
 		,intTypeEarningId
 		,intAccountId
 		,dblAmount
+		,dblPercentage
 		,intDepartmentId
 		,strDepartment
 		,intProfitCenter
@@ -169,7 +171,8 @@ BEGIN
 		,A.intEmployeeEarningId
 		,A.intTypeEarningId
 		,B.intAccountId
-		,dblAmount = A.dblTotal * (B.dblPercentage / 100)
+		,A.dblTotal
+		,B.dblPercentage
 		,C.intDepartmentId
 		,C.strDepartment
 		,C.intProfitCenter
