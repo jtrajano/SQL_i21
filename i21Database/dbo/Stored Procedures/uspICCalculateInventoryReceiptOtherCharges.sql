@@ -61,6 +61,7 @@ BEGIN
 			,[intChargeId] 
 			,[intEntityVendorId] 
 			,[dblCalculatedAmount]
+			,[dblCalculatedQty]
 			,[intContractId]
 			,[intContractDetailId]
 			,[strAllocateCostBy]
@@ -82,6 +83,11 @@ BEGIN
 													, CASE WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN ISNULL(ReceiptItem.dblNet, 0) ELSE ISNULL(ReceiptItem.dblOpenReceive, 0) END 
 												)
 												, 2
+											 )
+			,[dblCalculatedQty]				= dbo.fnCalculateQtyBetweenUOM (
+												ISNULL(ReceiptItem.intWeightUOMId, ReceiptItem.intUnitMeasureId)
+												, dbo.fnGetMatchingItemUOMId(ReceiptItem.intItemId, Charge.intCostUOMId)
+												, CASE WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN ISNULL(ReceiptItem.dblNet, 0) ELSE ISNULL(ReceiptItem.dblOpenReceive, 0) END 
 											 )
 			,[intContractId]				= Charge.intContractId
 			,[intContractDetailId]			= Charge.intContractDetailId
@@ -202,6 +208,7 @@ BEGIN
 			,[intChargeId] 
 			,[intEntityVendorId] 
 			,[dblCalculatedAmount] 
+			,[dblCalculatedQty]
 			,[intContractId]
 			,[intContractDetailId]
 			,[strAllocateCostBy]
@@ -236,6 +243,7 @@ BEGIN
 												--ISNULL(ReceiptItem.dblLineTotal, ReceiptItem.dblOpenReceive * ReceiptItem.dblUnitCost) 
 												, 2
 											)
+			,[dblCalculatedQty]				= NULL 
 			,[intContractId]				= Charge.intContractId
 			,[intContractDetailId]			= Charge.intContractDetailId
 			,[strAllocateCostBy]			= Charge.strAllocateCostBy
@@ -322,6 +330,7 @@ BEGIN
 			,[intChargeId] 
 			,[intEntityVendorId] 
 			,[dblCalculatedAmount] 
+			,[dblCalculatedQty]
 			,[intContractId]
 			,[intContractDetailId]
 			,[strAllocateCostBy]
@@ -336,6 +345,7 @@ BEGIN
 			,[intChargeId]					= Charge.intChargeId
 			,[intEntityVendorId]			= Charge.intEntityVendorId
 			,[dblCalculatedAmount]			= ROUND(Charge.dblAmount, 2)
+			,[dblCalculatedQty]				= NULL 
 			,[intContractId]				= Charge.intContractId
 			,[intContractDetailId]			= Charge.intContractDetailId
 			,[strAllocateCostBy]			= Charge.strAllocateCostBy
@@ -355,44 +365,35 @@ END
 -- Update the Other Charge amounts
 -- If it is in sub-currency, convert it back to the currency amount.
 BEGIN 
-	UPDATE	Charge
+	UPDATE	ReceiptCharge
 	SET		dblAmount = ROUND(	
 							ISNULL(CalculatedCharges.dblAmount, 0)
 							/ 
-							CASE	WHEN Charge.ysnSubCurrency = 1 THEN 
-										CASE WHEN ISNULL(Charge.intCent, 1) <> 0 THEN ISNULL(Charge.intCent, 1) ELSE 1 END 
+							CASE	WHEN ReceiptCharge.ysnSubCurrency = 1 THEN 
+										CASE WHEN ISNULL(ReceiptCharge.intCent, 1) <> 0 THEN ISNULL(ReceiptCharge.intCent, 1) ELSE 1 END 
 									ELSE 
 										1
 							END 
 						, 2)	
 
-			,dblQuantity = 
-				CASE 
-					WHEN Charge.strCostMethod = 'Per Unit' AND ISNULL(Charge.dblRate, 0) <> 0 THEN
-						dbo.fnDivide(
-							ISNULL(CalculatedCharges.dblAmount, 0)
-							,Charge.dblRate
-						)
+			,dblQuantity = ISNULL(NULLIF(CalculatedCharges.dblQty, 0), 1) 
 
-					ELSE 
-						1
-				END 					
-
-	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge Charge 	
-				ON Receipt.intInventoryReceiptId = Charge.intInventoryReceiptId
+	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharge 	
+				ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item 
-				ON Item.intItemId = Charge.intChargeId		
+				ON Item.intItemId = ReceiptCharge.intChargeId		
 			LEFT JOIN (
 					SELECT	dblAmount = SUM(dblCalculatedAmount)
+							,dblQty = SUM(ISNULL(dblCalculatedQty, 0))
 							,intInventoryReceiptChargeId
 					FROM	dbo.tblICInventoryReceiptChargePerItem
 					WHERE	intInventoryReceiptId = @intInventoryReceiptId
 					GROUP BY intInventoryReceiptChargeId
 			) CalculatedCharges
-				ON CalculatedCharges.intInventoryReceiptChargeId = Charge.intInventoryReceiptChargeId
+				ON CalculatedCharges.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
 	WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
 			AND Item.intOnCostTypeId IS NULL
-			AND Charge.strCostMethod <> @COST_METHOD_AMOUNT
+			AND ReceiptCharge.strCostMethod <> @COST_METHOD_AMOUNT
 END 
 
 -- Exit point

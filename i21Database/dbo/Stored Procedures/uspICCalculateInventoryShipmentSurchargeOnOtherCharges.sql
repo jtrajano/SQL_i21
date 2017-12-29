@@ -207,6 +207,7 @@ BEGIN
 										1
 							END 
 						, 2)		
+			,dblQuantity = 1
 	FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentCharge Charge 	
 				ON Shipment.intInventoryShipmentId = Charge.intInventoryShipmentId
 			INNER JOIN dbo.tblICItem Item 

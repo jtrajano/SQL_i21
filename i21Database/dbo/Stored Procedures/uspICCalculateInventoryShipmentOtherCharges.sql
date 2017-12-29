@@ -59,6 +59,7 @@ BEGIN
 			,[intChargeId] 
 			,[intEntityVendorId] 
 			,[dblCalculatedAmount]
+			,[dblCalculatedQty]
 			,[intContractId]
 			,[intContractDetailId]
 			,[strAllocatePriceBy]
@@ -79,6 +80,11 @@ BEGIN
 												)
 												, 2
 											 )
+			,[dblCalculatedQty]				= dbo.fnCalculateQtyBetweenUOM (
+													ShipmentItem.intItemUOMId
+													, dbo.fnGetMatchingItemUOMId(ShipmentItem.intItemId, Charge.intCostUOMId)
+													, ISNULL(ShipmentItem.dblQuantity, 0) 
+											)
 			,[intContractId]				= Charge.intContractId
 			,[intContractDetailId]			= Charge.intContractDetailId
 			,[strAllocatePriceBy]			= Charge.strAllocatePriceBy
@@ -166,6 +172,7 @@ BEGIN
 			,[intChargeId] 
 			,[intEntityVendorId] 
 			,[dblCalculatedAmount] 
+			,[dblCalculatedQty]
 			,[intContractId]
 			,[intContractDetailId]
 			,[strAllocatePriceBy]
@@ -177,7 +184,7 @@ BEGIN
 			,[intInventoryShipmentItemId]	= ShipmentItem.intInventoryShipmentItemId
 			,[intChargeId]					= Charge.intChargeId
 			,[intEntityVendorId]			= Charge.intEntityVendorId
-			,[dblCalculatedAmount]			= 
+			,[dblCalculatedQty]			= 
 											ROUND (
 												(ISNULL(Charge.dblRate, 0) / 100)
 												*	ISNULL(ShipmentItem.dblQuantity, 0) 
@@ -197,7 +204,7 @@ BEGIN
 												END 
 												, 2
 											)
-
+			,[dblCalculatedQty]				= NULL 
 			,[intContractId]				= Charge.intContractId
 			,[intContractDetailId]			= Charge.intContractDetailId
 			,[strAllocatePriceBy]			= Charge.strAllocatePriceBy
@@ -252,6 +259,7 @@ BEGIN
 			,[intChargeId] 
 			,[intEntityVendorId] 
 			,[dblCalculatedAmount] 
+			,[dblCalculatedQty]
 			,[intContractId]
 			,[intContractDetailId]
 			,[strAllocatePriceBy]
@@ -264,6 +272,7 @@ BEGIN
 			,[intChargeId]					= Charge.intChargeId
 			,[intEntityVendorId]			= Charge.intEntityVendorId
 			,[dblCalculatedAmount]			= ROUND(Charge.dblAmount, 2)
+			,[dblCalculatedQty]				= NULL 
 			,[intContractId]				= Charge.intContractId
 			,[intContractDetailId]			= Charge.intContractDetailId
 			,[strAllocatePriceBy]			= Charge.strAllocatePriceBy
@@ -290,7 +299,8 @@ BEGIN
 									ELSE 
 										1
 							END 
-						, 2)						
+						, 2)
+			,dblQuantity = ISNULL(NULLIF(CalculatedCharges.dblQty, 0), 1) 
 
 	FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentCharge Charge 	
 				ON Shipment.intInventoryShipmentId = Charge.intInventoryShipmentId
@@ -298,6 +308,7 @@ BEGIN
 				ON Item.intItemId = Charge.intChargeId		
 			LEFT JOIN (
 					SELECT	dblAmount = SUM(dblCalculatedAmount)
+							,dblQty	= SUM(ISNULL(dblCalculatedQty, 0)) 
 							,intInventoryShipmentChargeId
 					FROM	dbo.tblICInventoryShipmentChargePerItem
 					WHERE	intInventoryShipmentId = @intInventoryShipmentId
