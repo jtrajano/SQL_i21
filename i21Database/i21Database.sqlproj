@@ -6028,9 +6028,10 @@
     <None Include="Scripts\Post-Deployment\PAT\4_UpdateRetiredStockNo.sql" />
     <Build Include="dbo\Functions\fnARGetDefaultCommentTable.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateCompanyLocationFreightTerm.sql" />
-	<Build Include="dbo\Stored Procedures\uspGLDeleteMultiAccounts.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLDeleteMultiAccounts.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRegenerateTask.sql" />
     <Build Include="dbo\Views\vyuMFOrderHeaderNotMapped.sql" />
+    <Build Include="dbo\Tables\tblMFRecipeAlertLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
