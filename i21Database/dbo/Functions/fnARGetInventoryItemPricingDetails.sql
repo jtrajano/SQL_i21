@@ -194,8 +194,8 @@ BEGIN
 					AND PL.intItemUnitMeasureId = @ItemUOMId
 					AND ISNULL(PL.intCurrencyId, @FunctionalCurrencyId) = @CurrencyId
 					AND ((@Quantity BETWEEN PL.dblMin AND PL.dblMax) OR (PL.dblMin = 0 AND PL.dblMax = 0))
-				ORDER BY
-					PL.dblMin
+					AND CAST(@TransactionDate AS DATE) BETWEEN CAST(ISNULL(PL.dtmEffectiveDate, @TransactionDate) AS DATE) AND CAST('12/31/2999' AS DATE)
+				ORDER BY CAST(ISNULL(PL.dtmEffectiveDate, '01/01/1900') AS DATE) DESC
 		
 				IF(ISNULL(@Price,0) <> 0)
 					BEGIN
@@ -239,8 +239,8 @@ BEGIN
 		AND ICPL.intItemUnitMeasureId = @ItemUOMId
 		AND ISNULL(ICPL.intCurrencyId, @FunctionalCurrencyId) = @CurrencyId
 		AND ((@Quantity BETWEEN ICPL.dblMin AND ICPL.dblMax) OR (ICPL.dblMin = 0 AND ICPL.dblMax = 0))
-	ORDER BY
-		ICPL.dblMin
+		AND CAST(@TransactionDate AS DATE) BETWEEN CAST(ISNULL(ICPL.dtmEffectiveDate, @TransactionDate) AS DATE) AND CAST('12/31/2999' AS DATE)
+	ORDER BY CAST(ISNULL(ICPL.dtmEffectiveDate, '01/01/1900') AS DATE) DESC
 		
 	IF(ISNULL(@Price,0) <> 0)
 		BEGIN
