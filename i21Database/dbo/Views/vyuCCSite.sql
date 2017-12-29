@@ -54,7 +54,7 @@ WITH SCHEMABINDING
 		C.intDealerSiteId,
 		C.intAccountId,
 		null as intCreditCardReceivableAccountId,
-		null as intFeeExpenseAccountId
+		C.intFeeExpenseAccountId
 	FROM  
 		 dbo.tblCCVendorDefault A
 		JOIN dbo.tblCCSite C
