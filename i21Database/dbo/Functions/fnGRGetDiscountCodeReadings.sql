@@ -11,7 +11,7 @@ BEGIN
 	IF @strSourceType = 'Scale'
 	BEGIN
 		SELECT @strDiscountCodeReadings = STUFF((
-													SELECT DISTINCT ', ' + Item.strItemNo + ' : ' + [dbo].[fnRemoveTrailingZeroes](QM.dblGradeReading)
+													SELECT DISTINCT ', ' + LTRIM(RTRIM(Item.strItemNo)) + ' : ' + [dbo].[fnRemoveTrailingZeroes](QM.dblGradeReading)
 													FROM tblQMTicketDiscount QM
 													JOIN tblGRDiscountScheduleCode DCode ON DCode.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
 													JOIN tblICItem Item ON Item.intItemId = DCode.intItemId
@@ -22,7 +22,7 @@ BEGIN
 	ELSE IF @strSourceType = 'Storage'
 	BEGIN
 		SELECT @strDiscountCodeReadings = STUFF((
-													SELECT DISTINCT ', ' + Item.strItemNo + ' : ' + [dbo].[fnRemoveTrailingZeroes](QM.dblGradeReading)
+													SELECT DISTINCT ', ' + LTRIM(RTRIM(Item.strItemNo)) + ' : ' + [dbo].[fnRemoveTrailingZeroes](QM.dblGradeReading)
 													FROM tblQMTicketDiscount QM
 													JOIN tblGRDiscountScheduleCode DCode ON DCode.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
 													JOIN tblICItem Item ON Item.intItemId = DCode.intItemId
