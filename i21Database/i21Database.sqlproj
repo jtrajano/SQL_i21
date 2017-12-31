@@ -6032,6 +6032,9 @@
     <Build Include="dbo\Stored Procedures\uspMFRegenerateTask.sql" />
     <Build Include="dbo\Views\vyuMFOrderHeaderNotMapped.sql" />
     <Build Include="dbo\Tables\tblMFRecipeAlertLog.sql" />
+    <Build Include="dbo\Functions\fnRKGetInitialMargin.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKUnrealizedPnL.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRealizedPnL.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
