@@ -59,6 +59,10 @@ DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 	,@strItemNo1 NVARCHAR(50)
 	,@intRecipeItemUOMId INT
 	,@strLocationName NVARCHAR(50)
+	,@strProduceBatchId NVARCHAR(40)
+
+SET @strProduceBatchId = ISNULL(@strBatchId, '') + '-P'
+
 DECLARE @GLEntriesForOtherCost TABLE (
 	dtmDate DATETIME
 	,intItemId INT
@@ -678,6 +682,7 @@ BEGIN
 	FROM @GLEntries
 
 	-- Call the post routine 
+	-- Use @strProduceBatchId as the Batch Id so that the GL entries for the Produce does not mix with the Consume. 
 	INSERT INTO @GLEntries (
 		[dtmDate]
 		,[strBatchId]
@@ -713,13 +718,30 @@ BEGIN
 		,[strRateType]
 		)
 	EXEC dbo.uspICPostCosting @ItemsForPost
-		,@strBatchId
+		,@strProduceBatchId
 		,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 		,@intUserId
 
-	DELETE
-	FROM @GLEntries
-	WHERE strTransactionType NOT IN ('Produce')
+	-- Replace @strProduceBatchId with the original @strBatchId. 
+	-- After sorting out the Batch for the Consume and Produce, the Produce still need to be posted using the original @strBatchId. 
+	BEGIN 
+		UPDATE	t
+		SET		t.strBatchId = @strBatchId
+		FROM	tblICInventoryTransaction t 
+		WHERE	t.intTransactionId = @intTransactionId
+				AND t.strTransactionId = @strTransactionId
+				AND t.strBatchId = @strProduceBatchId
+
+		UPDATE	t
+		SET		t.strBatchId = @strBatchId
+		FROM	tblICInventoryLotTransaction t 
+		WHERE	t.intTransactionId = @intTransactionId
+				AND t.strTransactionId = @strTransactionId
+				AND t.strBatchId = @strProduceBatchId
+
+		UPDATE @GLEntries
+		SET strBatchId = @strBatchId
+	END 
 
 	IF ISNULL(@ysnRecap, 0) = 0
 		EXEC dbo.uspGLBookEntries @GLEntries
