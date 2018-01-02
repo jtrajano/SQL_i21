@@ -11,8 +11,30 @@ DECLARE @dblConfirmedQty numeric(18,6)
 DECLARE @intDefaultStorageBin INT
 DECLARE @intManufacturingProcessId INT
 DECLARE @intLocationId INT
+DECLARE @dtmExpectedDate DateTime
+DECLARE @dtmProductionDate DateTime
+DECLARE @dtmCurrentDate DateTime=GETDATE()
+DECLARE @dtmBusinessDate DateTime
+DECLARE @intStatusId INT
+DECLARE @intShiftId INT
+DECLARE @strShiftName NVARCHAR(50)
 
-Select @intManufacturingProcessId=intManufacturingProcessId,@intLocationId=intLocationId From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId
+Select @intManufacturingProcessId=intManufacturingProcessId,@intLocationId=intLocationId,@dtmExpectedDate=dtmExpectedDate,@intStatusId=intStatusId From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId
+
+If @intStatusId=12 
+Begin
+	Set @dtmProductionDate=@dtmExpectedDate
+	If @dtmProductionDate is null OR @dtmProductionDate > GETDATE()
+		Set @dtmProductionDate=GETDATE()
+
+	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDate,@intLocationId) 
+
+	SELECT @intShiftId = intShiftId,@strShiftName=strShiftName
+	FROM dbo.tblMFShift
+	WHERE intLocationId = @intLocationId
+		AND @dtmCurrentDate BETWEEN @dtmBusinessDate+dtmShiftStartTime+intStartOffset
+					AND @dtmBusinessDate+dtmShiftEndTime + intEndOffset
+End
 
 	SELECT TOP 1 @intDefaultStorageBin=ISNULL(pa.strAttributeValue,0)
 	FROM tblMFManufacturingProcessAttribute pa
@@ -30,7 +52,7 @@ w.dblBinSize,w.intBlendRequirementId,
 w.ysnKittingEnabled,w.strComment,w.intLocationId,CASE WHEN ISNULL(w.intStorageLocationId,0)=0 THEN @intDefaultStorageBin ELSE w.intStorageLocationId END AS intStorageLocationId,
 br.strDemandNo,ISNULL(ws.strBackColorName,'') AS strBackColorName,us.strUserName,w.intExecutionOrder,
 ws.strName AS strStatus,sl.strName AS strStorageLocation,
-@dblConfirmedQty AS dblConfirmedQty,w.intPickListId,pl.strPickListNo,i.strLotTracking
+@dblConfirmedQty AS dblConfirmedQty,w.intPickListId,pl.strPickListNo,i.strLotTracking,@dtmProductionDate AS dtmProductionDate,@intShiftId AS intShiftId,@strShiftName AS strShiftName
 From tblMFWorkOrder w Join tblICItem i on w.intItemId=i.intItemId
 Join tblICItemUOM iu on w.intItemUOMId=iu.intItemUOMId
 Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
