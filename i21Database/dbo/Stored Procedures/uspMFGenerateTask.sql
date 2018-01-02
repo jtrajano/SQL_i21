@@ -428,8 +428,6 @@ BEGIN TRY
 					,10
 					,11
 					)
-			JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId, R.intRestrictionId)
-				AND R.strInternalCode = 'STOCK'
 			LEFT JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 			JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 			JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
@@ -473,6 +471,10 @@ BEGIN TRY
 							THEN @intItemOwnerId
 						ELSE IsNULL(L.intItemOwnerId, 0)
 						END
+					)
+				AND SL.intRestrictionId NOT IN (
+					SELECT RT.intRestrictionId
+					FROM tblMFInventoryShipmentRestrictionType RT
 					)
 			GROUP BY L.intLotId
 				,L.intItemId
@@ -633,8 +635,6 @@ BEGIN TRY
 			JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 			JOIN tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
 				AND UT.ysnAllowPick = 1
-			JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId, R.intRestrictionId)
-				AND R.strInternalCode = 'STOCK'
 			LEFT JOIN tblMFTask T ON T.intLotId = L.intLotId
 				AND T.intTaskTypeId NOT IN (
 					5
@@ -680,6 +680,10 @@ BEGIN TRY
 							THEN @intItemOwnerId
 						ELSE IsNULL(L.intItemOwnerId, 0)
 						END
+					)
+									AND SL.intRestrictionId NOT IN (
+					SELECT RT.intRestrictionId
+					FROM tblMFInventoryShipmentRestrictionType RT
 					)
 			GROUP BY L.intLotId
 				,L.intItemId

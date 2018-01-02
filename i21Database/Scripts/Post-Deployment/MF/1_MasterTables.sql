@@ -2679,3 +2679,18 @@ BEGIN
     VALUES('LidlUCCPalletLabelWithoutWeight',1,1)
 END
 GO
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFInventoryShipmentRestrictionType
+		)
+BEGIN
+	INSERT INTO tblMFInventoryShipmentRestrictionType
+	SELECT intRestrictionId
+	FROM tblICRestriction
+	WHERE strDisplayMember NOT IN (
+			'STOCK'
+			,'DAMAGED'
+			,'REPACK'
+			)
+END
+GO
