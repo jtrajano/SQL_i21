@@ -70,10 +70,20 @@ Ext.define('Inventory.view.ItemLocationViewController', {
                 origValueField: 'intItemUOMId',
                 origUpdateField: 'intGrossUOMId',
                 store: '{grossUOM}',
-                defaultFilters: [{
-                    column: 'intItemId',
-                    value: '{current.intItemId}'
-                }]
+                defaultFilters: [
+                    {
+                        column: 'strUnitType',
+                        value: 'Volume|^|Weight|^|',
+                        conjunction: 'Or',
+                        condition: 'eq'
+                    },                    
+                    {
+                        column: 'intItemId',
+                        value: '{current.intItemId}',
+                        conjunction: 'And',
+                        condition: 'eq'
+                    }                    
+                ]
             },
             cboIssueUom: {
                 value: '{current.strIssueUOM}',
