@@ -5,6 +5,33 @@ BEGIN
 		,@strLotNumber NVARCHAR(50)
 		,@strMessage NVARCHAR(max)
 
+	IF EXISTS (
+			SELECT 1
+			FROM tblICInventoryShipmentItem SI
+			JOIN tblICInventoryShipmentItemLot SL ON SI.intInventoryShipmentItemId = SL.intInventoryShipmentItemId
+			JOIN tblICLot L ON L.intLotId = SL.intLotId
+			JOIN tblICStorageLocation SL1 ON SL1.intStorageLocationId = L.intStorageLocationId
+			JOIN dbo.tblMFInventoryShipmentRestrictionType R ON R.intRestrictionId = SL1.intRestrictionId
+			WHERE SI.intInventoryShipmentId = @intInventoryShipmentId
+			)
+	BEGIN
+		SELECT @strLotNumber = L.strLotNumber
+		FROM tblICInventoryShipmentItem SI
+		JOIN tblICInventoryShipmentItemLot SL ON SI.intInventoryShipmentItemId = SL.intInventoryShipmentItemId
+		JOIN tblICLot L ON L.intLotId = SL.intLotId
+		JOIN tblICStorageLocation SL1 ON SL1.intStorageLocationId = L.intStorageLocationId
+		JOIN dbo.tblMFInventoryShipmentRestrictionType R ON R.intRestrictionId = SL1.intRestrictionId
+		WHERE SI.intInventoryShipmentId = @intInventoryShipmentId
+
+		SELECT @strMessage = 'Lot/Pallet ' + @strLotNumber + ' is in a restricted storage unit. Please choose lot/pallet from another storage unit that is not restricted.'
+
+		RAISERROR (
+				@strMessage
+				,16
+				,1
+				)
+	END
+
 	SELECT @intBondStatusId = intBondStatusId
 	FROM tblMFCompanyPreference
 
@@ -38,4 +65,3 @@ BEGIN
 				)
 	END
 END
-

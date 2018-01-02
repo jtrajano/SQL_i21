@@ -6035,6 +6035,7 @@
     <Build Include="dbo\Functions\fnRKGetInitialMargin.sql" />
     <Build Include="dbo\Stored Procedures\uspRKUnrealizedPnL.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRealizedPnL.sql" />
+    <Build Include="dbo\Tables\tblMFInventoryShipmentRestrictionType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
