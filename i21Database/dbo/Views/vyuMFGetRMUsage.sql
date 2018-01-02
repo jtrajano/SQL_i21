@@ -22,7 +22,7 @@ FROM (
 		,(
 			SELECT TOP 1 strParentLotNumber
 			FROM dbo.tblMFWorkOrderProducedLot WP
-			WHERE WP.intWorkOrderId = W.intWorkOrderId
+			WHERE WP.intWorkOrderId = W.intWorkOrderId and WP.intShiftId=WI.intShiftId
 			) AS [Production Lot]
 		,MC.strCellName AS Line
 		,W.strWorkOrderNo AS [Job #]
