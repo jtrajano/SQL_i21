@@ -137,22 +137,22 @@ BEGIN
 	(
 		SELECT		DISTINCT
 					[intPaymentId]					=	A.intPaymentId,
-					[dblCredit]	 					=	CASE WHEN A.dblExchangeRate > 1 THEN CAST(
+					[dblCredit]	 					=	CASE WHEN A.dblExchangeRate != 1 THEN CAST(
 														dbo.fnAPGetPaymentAmountFactor((Details.dblTotal 
 															- (CASE WHEN paymentDetail.dblWithheld > 0 THEN (Details.dblTotal * ISNULL(withHoldData.dblWithholdPercent,1)) ELSE 0 END)), 
-															paymentDetail.dblPayment, voucher.dblTotal) * A.dblExchangeRate
+															paymentDetail.dblPayment, voucher.dblTotal) * ISNULL(NULLIF(A.dblExchangeRate,0),1) 
 														AS DECIMAL(18,6)) * (CASE WHEN voucher.intTransactionType != 1 AND A.ysnPrepay = 0 THEN -1 ELSE 1 END)
 														ELSE
 															CAST(A.dblAmountPaid AS DECIMAL(18,2)) END,
 					[dblCreditForeign]				=	
-														CASE WHEN A.dblExchangeRate > 1 THEN 
+														CASE WHEN A.dblExchangeRate != 1 THEN 
 														CAST(
 														dbo.fnAPGetPaymentAmountFactor((Details.dblTotal 
 															- (CASE WHEN paymentDetail.dblWithheld > 0 THEN (Details.dblTotal * ISNULL(withHoldData.dblWithholdPercent,1)) ELSE 0 END)), 
 															paymentDetail.dblPayment, voucher.dblTotal)
 														AS DECIMAL(18,6)) * (CASE WHEN voucher.intTransactionType != 1 AND A.ysnPrepay = 0 THEN -1 ELSE 1 END)
 														ELSE
-															CAST(A.dblAmountPaid AS DECIMAL(18,2)) END											
+															CAST(A.dblAmountPaid AS DECIMAL(18,2)) END												
 				
 			FROM	[dbo].tblAPPayment A 
 			INNER JOIN tblAPPaymentDetail paymentDetail ON A.intPaymentId = paymentDetail.intPaymentId
