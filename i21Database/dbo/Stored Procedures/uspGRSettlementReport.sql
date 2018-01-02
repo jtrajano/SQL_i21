@@ -280,7 +280,7 @@ BEGIN
 		,intTransactionId					= BNKTRN.intTransactionId
 		,strTransactionId					= BNKTRN.strTransactionId
 		,strCompanyName						= @strCompanyName
-		,strCompanyAddress					= ISNULL(@strAddress,'') + ', ' + CHAR(13)+CHAR(10) +ISNULL(@strCity,'') + ISNULL(', '+@strState,'') + ISNULL(', '+@strZip,'') + ISNULL(', '+@strCountry,'')+ CHAR(13)+ CHAR(10) + ISNULL(', '+@strPhone,'') 
+		,strCompanyAddress					= ISNULL(@strAddress,'') + ', ' + CHAR(13)+CHAR(10) +ISNULL(@strCity,'') + ISNULL(', '+@strState,'') + ISNULL(', '+@strZip,'') + ISNULL(', '+@strCountry,'')+ CHAR(13)+ CHAR(10) + ISNULL(''+@strPhone,'') 
 		,strItemNo							= Item.strItemNo
 		,lblGrade							= CASE WHEN SC.intCommodityAttributeId >0 THEN 'Grade'				    ELSE NULL END
 		,strGrade							= CASE WHEN SC.intCommodityAttributeId >0 THEN Attribute.strDescription ELSE NULL END
@@ -467,7 +467,7 @@ BEGIN
 		,intTransactionId					= BNKTRN.intTransactionId
 		,strTransactionId					= BNKTRN.strTransactionId
 		,strCompanyName						= @strCompanyName
-		,strCompanyAddress					= ISNULL(@strAddress,'') + ', ' + CHAR(13)+CHAR(10) +ISNULL(@strCity,'') + ISNULL(', '+@strState,'') + ISNULL(', '+@strZip,'') + ISNULL(', '+@strCountry,'')+ CHAR(13)+ CHAR(10) + ISNULL(', '+@strPhone,'') 
+		,strCompanyAddress					= ISNULL(@strAddress,'') + ', ' + CHAR(13)+CHAR(10) +ISNULL(@strCity,'') + ISNULL(', '+@strState,'') + ISNULL(', '+@strZip,'') + ISNULL(', '+@strCountry,'')+ CHAR(13)+ CHAR(10) + ISNULL(''+@strPhone,'') 
 		,strItemNo							= Item.strItemNo
 		,lblGrade							= CASE WHEN SC.intCommodityAttributeId >0 THEN 'Grade'					ELSE NULL END
 		,strGrade							= CASE WHEN SC.intCommodityAttributeId >0 THEN Attribute.strDescription ELSE NULL END
@@ -647,7 +647,7 @@ BEGIN
 		,intTransactionId					= BNKTRN.intTransactionId
 		,strTransactionId					= BNKTRN.strTransactionId
 		,strCompanyName						= @strCompanyName
-		,strCompanyAddress					= ISNULL(@strAddress,'') + ', ' + CHAR(13)+CHAR(10) +ISNULL(@strCity,'') + ISNULL(', '+@strState,'') + ISNULL(', '+@strZip,'') + ISNULL(', '+@strCountry,'')+ CHAR(13)+ CHAR(10) + ISNULL(', '+@strPhone,'') 
+		,strCompanyAddress					= ISNULL(@strAddress,'') + ', ' + CHAR(13)+CHAR(10) +ISNULL(@strCity,'') + ISNULL(', '+@strState,'') + ISNULL(', '+@strZip,'') + ISNULL(', '+@strCountry,'')+ CHAR(13)+ CHAR(10) + ISNULL(''+@strPhone,'') 
 		,strItemNo							= Item.strItemNo
 		,lblGrade							= NULL
 		,strGrade							= NULL
@@ -920,7 +920,7 @@ BEGIN
 				,intTransactionId		    = BNKTRN.intTransactionId
 				,strTransactionId		    = BNKTRN.strTransactionId
 				,strCompanyName				= @strCompanyName
-				,strCompanyAddress			= ISNULL(@strAddress,'') + ', ' + CHAR(13)+CHAR(10) +ISNULL(@strCity,'') + ISNULL(', '+@strState,'') + ISNULL(', '+@strZip,'') + ISNULL(', '+@strCountry,'')+ CHAR(13)+ CHAR(10) + ISNULL(', '+@strPhone,'') 
+				,strCompanyAddress			= ISNULL(@strAddress,'') + ', ' + CHAR(13)+CHAR(10) +ISNULL(@strCity,'') + ISNULL(', '+@strState,'') + ISNULL(', '+@strZip,'') + ISNULL(', '+@strCountry,'')+ CHAR(13)+ CHAR(10) + ISNULL(''+@strPhone,'') 
 				,strItemNo				    = Item.strItemNo
 				,lblGrade				    = CASE WHEN SC.intCommodityAttributeId >0 THEN 'Grade' ELSE NULL END
 				,strGrade				    = CASE WHEN SC.intCommodityAttributeId >0 THEN Attribute.strDescription ELSE NULL END
@@ -1104,7 +1104,7 @@ BEGIN
 				,intTransactionId			 = BNKTRN.intTransactionId
 				,strTransactionId			 = BNKTRN.strTransactionId
 				,strCompanyName				 = @strCompanyName
-				,strCompanyAddress			 = ISNULL(@strAddress,'') + ', ' + CHAR(13)+CHAR(10) +ISNULL(@strCity,'') + ISNULL(', '+@strState,'') + ISNULL(', '+@strZip,'') + ISNULL(', '+@strCountry,'')+ CHAR(13)+ CHAR(10) + ISNULL(', '+@strPhone,'') 
+				,strCompanyAddress			 = ISNULL(@strAddress,'') + ', ' + CHAR(13)+CHAR(10) +ISNULL(@strCity,'') + ISNULL(', '+@strState,'') + ISNULL(', '+@strZip,'') + ISNULL(', '+@strCountry,'')+ CHAR(13)+ CHAR(10) + ISNULL(''+@strPhone,'') 
 				,strItemNo					 = Item.strItemNo
 				,lblGrade					 = CASE WHEN SC.intCommodityAttributeId >0 THEN 'Grade' ELSE NULL END
 				,strGrade					 = CASE WHEN SC.intCommodityAttributeId >0 THEN Attribute.strDescription ELSE NULL END
@@ -1280,7 +1280,7 @@ BEGIN
 				,intTransactionId			 = BNKTRN.intTransactionId
 				,strTransactionId			 = BNKTRN.strTransactionId
 				,strCompanyName				 = @strCompanyName
-				,strCompanyAddress			 = ISNULL(@strAddress,'') + ', ' + CHAR(13)+CHAR(10) +ISNULL(@strCity,'') + ISNULL(', '+@strState,'') + ISNULL(', '+@strZip,'') + ISNULL(', '+@strCountry,'')+ CHAR(13)+ CHAR(10) + ISNULL(', '+@strPhone,'') 
+				,strCompanyAddress			 = ISNULL(@strAddress,'') + ', ' + CHAR(13)+CHAR(10) +ISNULL(@strCity,'') + ISNULL(', '+@strState,'') + ISNULL(', '+@strZip,'') + ISNULL(', '+@strCountry,'')+ CHAR(13)+ CHAR(10) + ISNULL(''+@strPhone,'') 
 				,strItemNo					 = Item.strItemNo
 				,lblGrade					 = NULL
 				,strGrade					 = NULL
