@@ -16,9 +16,11 @@
     [strAllowancePeriod] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL,
 	[dtmAllowancePeriodFrom] DATETIME NULL,
 	[dtmAllowancePeriodTo] DATETIME NULL,
+	[intUnitMeasureId] INT NULL,
     CONSTRAINT [PK_tblGRStorageScheduleRule_intStorageScheduleRuleId] PRIMARY KEY ([intStorageScheduleRuleId]), 
     CONSTRAINT [FK_tblGRStorageScheduleRule_tblICCommodity] FOREIGN KEY ([intCommodity]) REFERENCES [tblICCommodity]([intCommodityId]), 
     CONSTRAINT [FK_tblGRStorageScheduleRule_tblGRStorageType] FOREIGN KEY ([intStorageType]) REFERENCES [tblGRStorageType]([intStorageScheduleTypeId]), 
     CONSTRAINT [FK_tblGRStorageScheduleRule_tblSMCurrency] FOREIGN KEY ([intCurrencyID]) REFERENCES [tblSMCurrency]([intCurrencyID]), 
-    CONSTRAINT [UK_tblGRStorageScheduleRule_strScheduleId_intStorageType_intCommodity] UNIQUE ([strScheduleId],[intStorageType],[intCommodity]) 
+    CONSTRAINT [UK_tblGRStorageScheduleRule_strScheduleId_intStorageType_intCommodity] UNIQUE ([strScheduleId],[intStorageType],[intCommodity]),
+	CONSTRAINT [FK_tblGRStorageScheduleRule_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]) 
 )
