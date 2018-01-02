@@ -6038,6 +6038,8 @@
     <Build Include="dbo\Tables\tblMFInventoryShipmentRestrictionType.sql" />
     <Build Include="dbo\Tables\tblMFStorageLocationRestrictionTypeLotStatus.sql" />
     <Build Include="dbo\Tables\tblMFPatternByCategory.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMReportSampleLabelbyControlPoint.sql" />
+    <Build Include="dbo\Tables\tblQMSampleLabel.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
