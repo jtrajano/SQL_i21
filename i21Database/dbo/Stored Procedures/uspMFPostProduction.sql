@@ -58,6 +58,9 @@ DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 	,@strItemNo1 NVARCHAR(50)
 	,@intRecipeItemUOMId INT
 	,@strLocationName NVARCHAR(50)
+	,@strProduceBatchId NVARCHAR(40)
+
+SET @strProduceBatchId = ISNULL(@strBatchId, '') + '-P'
 
 DECLARE @GLEntriesForOtherCost TABLE (
 	dtmDate DATETIME
@@ -621,54 +624,75 @@ BEGIN
 			,intSourceTransactionId = @INVENTORY_PRODUCE
 			,strSourceTransactionId = @strTransactionId
 			,strActualCostId = @strActualCost
-	DELETE
-	FROM @GLEntries
-
+	
 	-- Call the post routine 
-	INSERT INTO @GLEntries (
-		[dtmDate]
-		,[strBatchId]
-		,[intAccountId]
-		,[dblDebit]
-		,[dblCredit]
-		,[dblDebitUnit]
-		,[dblCreditUnit]
-		,[strDescription]
-		,[strCode]
-		,[strReference]
-		,[intCurrencyId]
-		,[dblExchangeRate]
-		,[dtmDateEntered]
-		,[dtmTransactionDate]
-		,[strJournalLineDescription]
-		,[intJournalLineNo]
-		,[ysnIsUnposted]
-		,[intUserId]
-		,[intEntityId]
-		,[strTransactionId]
-		,[intTransactionId]
-		,[strTransactionType]
-		,[strTransactionForm]
-		,[strModuleName]
-		,[intConcurrencyId]
-		,[dblDebitForeign]
-		,[dblDebitReport]
-		,[dblCreditForeign]
-		,[dblCreditReport]
-		,[dblReportingRate]
-		,[dblForeignRate]
-		,[strRateType]
-		)
-	EXEC dbo.uspICPostCosting @ItemsForPost
-		,@strBatchId
-		,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-		,@intUserId
+	-- Use @strProduceBatchId as the Batch Id so that the GL entries for the Produce does not mix with the Consume. 
+	BEGIN 
+		DELETE FROM @GLEntries
+		INSERT INTO @GLEntries (
+			[dtmDate]
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+			,[dblDebitForeign]
+			,[dblDebitReport]
+			,[dblCreditForeign]
+			,[dblCreditReport]
+			,[dblReportingRate]
+			,[dblForeignRate]
+			,[strRateType]
+			)
+		EXEC dbo.uspICPostCosting 
+			@ItemsForPost
+			,@strProduceBatchId
+			,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+			,@intUserId
+	END 
 
-	DELETE
-	FROM @GLEntries
-	WHERE strTransactionType NOT IN ('Produce') 
+	-- Replace @strProduceBatchId with the original @strBatchId. 
+	-- After sorting out the Batch for the Consume and Produce, the Produce still need to be posted using the original @strBatchId. 
+	BEGIN 
+		UPDATE	t
+		SET		t.strBatchId = @strBatchId
+		FROM	tblICInventoryTransaction t 
+		WHERE	t.intTransactionId = @intTransactionId
+				AND t.strTransactionId = @strTransactionId
+				AND t.strBatchId = @strProduceBatchId
 
-	EXEC dbo.uspGLBookEntries @GLEntries
+		UPDATE	t
+		SET		t.strBatchId = @strBatchId
+		FROM	tblICInventoryLotTransaction t 
+		WHERE	t.intTransactionId = @intTransactionId
+				AND t.strTransactionId = @strTransactionId
+				AND t.strBatchId = @strProduceBatchId
+
+		UPDATE @GLEntries
+		SET strBatchId = @strBatchId
+	END 
+
+	EXEC dbo.uspGLBookEntries 
+		@GLEntries
 		,@ysnPost
 
 	DROP TABLE #tmpBlendIngredients
