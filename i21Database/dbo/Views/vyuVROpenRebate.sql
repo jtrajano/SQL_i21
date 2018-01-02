@@ -17,12 +17,10 @@ AS
 		,E.dblUnitQty
 		,dblCost = B.dblPrice
 		,dblRebateRate = ISNULL(M.dblRebateRate,ISNULL(N.dblRebateRate,0.0))
-		,dblRebateAmount = CASE WHEN ISNULL(M.strRebateBy,N.strRebateBy) = 'Percentage' THEN
-								 CAST((B.dblQtyShipped * dblPrice * ISNULL(M.dblRebateRate,ISNULL(N.dblRebateRate,0.0)) / 100) AS NUMERIC(18,6))
-							WHEN ISNULL(M.strRebateBy,N.strRebateBy) = 'Unit' THEN
+		,dblRebateAmount = CASE WHEN ISNULL(M.strRebateBy,N.strRebateBy) = 'Unit' THEN
 								CAST((B.dblQtyShipped * ISNULL(M.dblRebateRate,ISNULL(N.dblRebateRate,0.0))) AS NUMERIC(18,6))
 							ELSE
-								ISNULL(M.dblRebateRate,ISNULL(N.dblRebateRate,0.0))
+								CAST((B.dblQtyShipped * dblPrice * ISNULL(M.dblRebateRate,ISNULL(N.dblRebateRate,0.0)) / 100) AS NUMERIC(18,6))
 							END
 		,B.intInvoiceDetailId
 		,B.intConcurrencyId 
