@@ -305,7 +305,7 @@ BEGIN
 
 				SELECT
 					intOriginId = A.A4GLIdentity
-					,intI21Id = B.intContractHeaderId
+					,intI21Id = B.intInvoiceId
 					,stri21Number = B.strInvoiceNumber
 					,strOriginNumber = A.vwivc_ivc_no COLLATE Latin1_General_CI_AS
 					,intEntityId = C.intEntityId
