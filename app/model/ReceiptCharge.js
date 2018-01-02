@@ -61,9 +61,9 @@ Ext.define('Inventory.model.ReceiptCharge', {
         { name: 'strVendorId', type: 'string' },
         { name: 'strVendorName', type: 'string' },
         { name: 'strContractNumber', type: 'string' },
-        /*     
-        { name: 'strCurrency', type: 'string' },
         { name: 'intCurrencyId', type: 'int', allowNull: true },
+        /*     
+        { name: 'strCurrency', type: 'string' },        
         { name: 'dblExchangeRate', type: 'float', allowNull: true  },
         { name: 'intCent', type: 'int', allowNull: true },
         */
