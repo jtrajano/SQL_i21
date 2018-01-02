@@ -16,7 +16,7 @@
 	,@intInventoryReceiptItemId INT = NULL
 	,@intInventoryReceiptItemLotId INT = NULL
 	,@intTransactionTypeId INT = NULL
-	,@intCommodityId int=NULL
+	,@intCommodityId INT = NULL
 AS
 BEGIN
 	DECLARE @intSubPatternTypeId INT
@@ -46,6 +46,33 @@ BEGIN
 		,@ysnPaddingZero BIT
 		,@ysnMaxSize BIT
 		,@intIRParentLotNumberPatternId INT
+
+	IF @strParentLotNumber IS NULL
+	BEGIN
+		SELECT @strParentLotNumber = ''
+	END
+
+	IF @intCategoryId IS NULL
+		OR @intCommodityId IS NULL
+	BEGIN
+		SELECT @intCategoryId = intCategoryId
+			,@intCommodityId = intCommodityId
+		FROM dbo.tblICItem
+		WHERE intItemId = @intItemId
+	END
+
+	IF EXISTS (
+			SELECT *
+			FROM tblMFPatternByCategory
+			WHERE intPatternCode = @intPatternCode
+				AND intCategoryId = @intCategoryId
+			)
+	BEGIN
+		SELECT @intPatternCode = intSubPatternCode
+		FROM tblMFPatternByCategory
+		WHERE intPatternCode = @intPatternCode
+			AND intCategoryId = @intCategoryId
+	END
 
 	SELECT @intIRParentLotNumberPatternId = intIRParentLotNumberPatternId
 	FROM tblMFCompanyPreference
@@ -118,20 +145,6 @@ BEGIN
 	END
 
 	SET @strPatternString = ''
-
-	IF @intCategoryId IS NULL
-	BEGIN
-		SELECT @intCategoryId = intCategoryId
-		FROM dbo.tblICItem
-		WHERE intItemId = @intItemId
-	END
-
-	If @intCommodityId is null
-	Begin
-		SELECT @intCommodityId = intCommodityId
-		FROM dbo.tblICItem
-		WHERE intItemId = @intItemId
-	End
 
 	INSERT INTO @tblMFPatternDetail (
 		intSubPatternTypeId
