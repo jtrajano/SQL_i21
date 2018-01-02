@@ -6036,6 +6036,7 @@
     <Build Include="dbo\Stored Procedures\uspRKUnrealizedPnL.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRealizedPnL.sql" />
     <Build Include="dbo\Tables\tblMFInventoryShipmentRestrictionType.sql" />
+    <Build Include="dbo\Tables\tblMFStorageLocationRestrictionTypeLotStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

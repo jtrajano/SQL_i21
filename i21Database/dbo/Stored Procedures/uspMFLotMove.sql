@@ -47,13 +47,17 @@ BEGIN TRY
 		,@dblDefaultResidueQty NUMERIC(38, 20)
 		,@dblDestinationLotQty NUMERIC(38, 20)
 		,@intTransactionCount INT
-		,@strDescription nvarchar(MAX)
+		,@strDescription NVARCHAR(MAX)
+		,@intSourceLocationRestrictionId INT
+		,@intDestinatinLocationRestrictionId INT
+		,@ysnChangeLotStatusOnLotMoveByStorageLocationRestrictionType BIT
 
-	Select @intTransactionCount = @@TRANCOUNT
+	SELECT @intTransactionCount = @@TRANCOUNT
 
 	SELECT @strDescription = Ltrim(isNULL(@strReasonCode, '') + ' ' + isNULL(@strNotes, ''))
 
 	SELECT TOP 1 @dblDefaultResidueQty = ISNULL(dblDefaultResidueQty, 0.00001)
+		,@ysnChangeLotStatusOnLotMoveByStorageLocationRestrictionType = isNULL(ysnChangeLotStatusOnLotMoveByStorageLocationRestrictionType, 0)
 	FROM tblMFCompanyPreference
 
 	SELECT @intItemId = intItemId
@@ -70,6 +74,20 @@ BEGIN TRY
 		,@intItemUOMId = intItemUOMId
 	FROM tblICLot
 	WHERE intLotId = @intLotId
+
+	SELECT @intSourceLocationRestrictionId = intRestrictionId
+	FROM tblICStorageLocation
+	WHERE intStorageLocationId = @intStorageLocationId
+
+	IF @intSourceLocationRestrictionId IS NULL
+		SELECT @intSourceLocationRestrictionId = 0
+
+	SELECT @intDestinatinLocationRestrictionId = intRestrictionId
+	FROM tblICStorageLocation
+	WHERE intStorageLocationId = @intNewStorageLocationId
+
+	IF @intDestinatinLocationRestrictionId IS NULL
+		SELECT @intDestinatinLocationRestrictionId = 0
 
 	SELECT @intDestinationLotStatusId = intLotStatusId
 		,@dblDestinationLotQty = dblQty
@@ -499,6 +517,29 @@ BEGIN TRY
 			,@intUserId = @intUserId
 			,@strReasonCode = 'Residue qty clean up'
 			,@strNotes = 'Residue qty clean up'
+	END
+
+	IF @intSourceLocationRestrictionId <> @intDestinatinLocationRestrictionId
+		AND @ysnChangeLotStatusOnLotMoveByStorageLocationRestrictionType = 1
+	BEGIN
+		SELECT @intLotStatusId=NULL
+		SELECT @intLotStatusId = intLotStatusId
+		FROM tblMFStorageLocationRestrictionTypeLotStatus
+		WHERE intRestrictionId = @intDestinatinLocationRestrictionId
+
+		IF @intLotStatusId IS NOT NULL
+			AND NOT EXISTS (
+				SELECT *
+				FROM tblICLot
+				WHERE intLotId = @intNewLotId
+					AND intLotStatusId = @intLotStatusId
+				)
+		BEGIN
+			EXEC uspMFSetLotStatus @intLotId = @intNewLotId
+				,@intNewLotStatusId = @intLotStatusId
+				,@intUserId = @intUserId
+				,@strNotes = ''
+		END
 	END
 
 	IF @intTransactionCount = 0

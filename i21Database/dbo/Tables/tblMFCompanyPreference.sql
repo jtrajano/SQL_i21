@@ -58,6 +58,6 @@
 	intAllowablePickDayRange INT,
 	ysnGTINCaseCodeMandatory BIT,
 	intMaximumPalletsOnForklift INT,
-
+	ysnChangeLotStatusOnLotMoveByStorageLocationRestrictionType Bit CONSTRAINT [DF_tblMFCompanyPreference_ysnChangeLotStatusOnLotMoveByStorageLocationRestrictionType] DEFAULT 0,
     CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )
