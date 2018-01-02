@@ -747,18 +747,18 @@ BEGIN TRY
 						THEN ISNULL(L.dtmManufacturedDate, L.dtmDateCreated)
 					ELSE '1900-01-01'
 					END ASC
-				,CASE 
-					WHEN @ysnPickByLotCode = 1
-						THEN CAST(CASE 
-									WHEN (
-											(IsNULL(I.intUnitPerLayer, 0) * IsNULL(I.intLayerPerPallet, 0) > 0)
-											AND (L.dblQty % (I.intUnitPerLayer * I.intLayerPerPallet) > 0)
-											)
-										THEN 0
-									ELSE 1
-									END AS BIT)
-					ELSE '1'
-					END ASC
+				--,CASE 
+				--	WHEN @ysnPickByLotCode = 1
+				--		THEN CAST(CASE 
+				--					WHEN (
+				--							(IsNULL(I.intUnitPerLayer, 0) * IsNULL(I.intLayerPerPallet, 0) > 0)
+				--							AND (L.dblQty % (I.intUnitPerLayer * I.intLayerPerPallet) > 0)
+				--							)
+				--						THEN 0
+				--					ELSE 1
+				--					END AS BIT)
+				--	ELSE '1'
+				--	END ASC
 				,CASE 
 					WHEN @ysnPickByLotCode = 1
 						THEN Substring(PL.strParentLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits)
