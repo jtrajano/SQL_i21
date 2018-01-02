@@ -5984,6 +5984,8 @@
     <Build Include="dbo\Views\vyuTFGetTaxAuthorityBeginEndInventoryDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRegenerateTask.sql" />
     <Build Include="dbo\Views\vyuMFOrderHeaderNotMapped.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMReportSampleLabelbyControlPoint.sql" />
+    <Build Include="dbo\Tables\tblQMSampleLabel.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
