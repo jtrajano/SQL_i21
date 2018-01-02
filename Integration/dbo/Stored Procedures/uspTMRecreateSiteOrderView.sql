@@ -18,7 +18,8 @@ BEGIN
 	IF ((SELECT TOP 1 ysnUseOriginIntegration FROM tblTMPreferenceCompany) = 1)
 	BEGIN
 		IF (EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwitmmst') AND EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwcusmst')
-			AND EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwslsmst'))
+			AND EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwslsmst')
+			AND EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwlocmst'))
 		BEGIN
 			EXEC('
 			CREATE VIEW [dbo].[vyuTMSiteOrder]  
@@ -38,7 +39,7 @@ BEGIN
 					)COLLATE Latin1_General_CI_AS AS strCustomerName
 				,RIGHT(''000''+ CAST(A.intSiteNumber AS NVARCHAR(4)),4) AS strSiteNumber
 				,(A.strSiteAddress + CHAR(10) + A.strCity + '', '' + A.strState +  '' '' +  A.strZipCode) AS strSiteAddress
-				,A.strLocation
+				,strLocation = Q.vwloc_loc_no COLLATE Latin1_General_CI_AS
 				,E.vwsls_name AS strDriverName
 				,F.vwitm_no AS strItemNo
 				,CAST(ISNULL(A.dblEstimatedPercentLeft,0) AS DECIMAL(18,2)) AS dblEstimatedPercentLeft
@@ -90,6 +91,8 @@ BEGIN
 				ON A.intRouteId = D.intRouteId	
 			LEFT JOIN vwslsmst E
 				ON A.intDriverID = E.A4GLIdentity	
+			LEFT JOIN vwlocmst Q
+				ON A.intLocationId = Q.A4GLIdentity
 			LEFT JOIN tblTMFillGroup O
 				ON A.intFillGroupId = O.intFillGroupId
 			LEFT JOIN (SELECT DISTINCT 
@@ -134,7 +137,7 @@ BEGIN
 				,C.strName AS strCustomerName
 				,RIGHT(''000''+ CAST(A.intSiteNumber AS NVARCHAR(4)),4) AS strSiteNumber
 				,(A.strSiteAddress + CHAR(10) + A.strCity + '', '' + A.strState +  '' '' +  A.strZipCode) AS strSiteAddress
-				,A.strLocation
+				,strLocation = Q.strLocationName
 				,E.strEntityNo AS strDriverName
 				,D.strItemNo AS strItemNo
 				,CAST(ISNULL(A.dblEstimatedPercentLeft,0) AS DECIMAL(18,2)) AS dblEstimatedPercentLeft
@@ -202,6 +205,8 @@ BEGIN
 				ON D.intCategoryId = H.intCategoryId	
 			LEFT JOIN tblTMFillGroup N
 				ON A.intFillGroupId = N.intFillGroupId
+			LEFT JOIN tblSMCompanyLocation Q
+				ON A.intLocationId = Q.intCompanyLocationId
 			INNER JOIN (
 				SELECT 
 					Ent.intEntityId
