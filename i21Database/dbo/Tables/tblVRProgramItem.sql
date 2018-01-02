@@ -2,7 +2,7 @@
 	[intProgramItemId] [int] IDENTITY(1,1) NOT NULL,
 	[intItemId] [int] NULL,
 	[intCategoryId] [int] NULL,
-	[strRebateBy] [nvarchar](15) COLLATE Latin1_General_CI_AS NOT NULL CONSTRAINT [DF_tblVRProgramItem_strRebateBy]  DEFAULT (N'Amount'),
+	[strRebateBy] [nvarchar](15) COLLATE Latin1_General_CI_AS NOT NULL CONSTRAINT [DF_tblVRProgramItem_strRebateBy]  DEFAULT (N'Percentage'),
 	[dblRebateRate] [numeric](18, 6) NULL,
 	[dtmBeginDate] [datetime] NOT NULL,
 	[dtmEndDate] [datetime] NULL,
