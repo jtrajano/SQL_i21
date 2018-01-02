@@ -2432,10 +2432,6 @@ SET ysnPaddingZero = 1
 WHERE ysnPaddingZero IS NULL
 GO
 UPDATE tblMFCompanyPreference
-SET ysnSetExpiryDateByParentLot = 0
-WHERE ysnSetExpiryDateByParentLot IS NULL
-GO
-UPDATE tblMFCompanyPreference
 SET ysnAddQtyOnExistingLot = 1
 WHERE ysnAddQtyOnExistingLot IS NULL
 GO

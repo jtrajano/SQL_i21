@@ -22,9 +22,9 @@ BEGIN TRY
 		,@intParentLotId INT
 		,@intChildLotCount INT
 		,@intLotRecordId INT
-		,@ysnSetExpiryDateByParentLot BIT
 		,@strDescription NVARCHAR(MAX)
 		,@intTransactionCount INT
+		,@ysnApplyTransactionByParentLot BIT
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -51,14 +51,17 @@ BEGIN TRY
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
-	SELECT @ysnSetExpiryDateByParentLot = ysnSetExpiryDateByParentLot
-	FROM tblMFCompanyPreference
+	SELECT @ysnApplyTransactionByParentLot = IsNULL(ysnApplyTransactionByParentLot, 0)
+	FROM tblMFLotTransactionType
+	WHERE intTransactionTypeId = 18 --Inventory Adjustment - Expiry Date Change
 
-	IF @ysnSetExpiryDateByParentLot = 1
+	IF @ysnApplyTransactionByParentLot = 1
 	BEGIN
 		SELECT @intChildLotCount = COUNT(*)
 		FROM tblICLot
 		WHERE intParentLotId = @intParentLotId
+			AND intItemId = @intItemId
+			AND intLocationId=@intLocationId
 	END
 	ELSE
 	BEGIN
@@ -125,6 +128,8 @@ BEGIN TRY
 			,intLocationId
 		FROM tblICLot
 		WHERE intParentLotId = @intParentLotId
+		AND intItemId = @intItemId
+			AND intLocationId=@intLocationId
 
 		SELECT @intLotRecordId = MIN(intLotRecordId)
 		FROM @tblLotsWithSameParentLot
