@@ -35,6 +35,19 @@ SELECT   L.intLoadId
 		,LC.ysnFDAHold
 		,CONVERT(BIT,ISNULL(LC.ysnRejected,0)) AS ysnRejected
 		,LC.ysnUSDAHold
+		,LC.dblCustomsClearedQty
+		,LC.dblIntransitQty
+		,LC.strDocumentNumber
+		,LC.dtmClearanceDate
+		,LC.strClearanceMonth
+		,LC.dblDeclaredWeight
+		,LC.dblStaticValue
+		,LC.intStaticValueCurrencyId
+		,CU.strCurrency AS strStaticValueCurrency
+		,LC.dblAmount
+		,LC.intAmountCurrencyId
+		,ACU.strCurrency AS strAmountCurrency
+		,LC.strRemarks
 
 		,LDCL.intLoadDetailContainerLinkId
 		,LDCL.strIntegrationNumber
@@ -123,3 +136,5 @@ LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = L.intEquipmentTypeId
 LEFT JOIN tblSMUserSecurity US ON US.[intEntityId]	= L.intDispatcherId
 LEFT JOIN tblCTPricingType PTP ON PTP.intPricingTypeId = PDetail.intPricingTypeId
 LEFT JOIN tblCTPricingType PTS ON PTS.intPricingTypeId = SDetail.intPricingTypeId
+LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = LC.intStaticValueCurrencyId
+LEFT JOIN tblSMCurrency ACU ON ACU.intCurrencyID = LC.intAmountCurrencyId

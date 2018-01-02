@@ -41,6 +41,18 @@
 [dblTotalCost] NUMERIC(18, 6) NULL,
 [ysnNewContainer] BIT DEFAULT (1),
 
+[dblCustomsClearedQty] NUMERIC(18, 6) NULL,
+[dblIntransitQty] NUMERIC(18, 6) NULL,
+[strDocumentNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+[dtmClearanceDate] DATETIME, 
+[strClearanceMonth] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+[dblDeclaredWeight] NUMERIC(18, 6) NULL,
+[dblStaticValue] NUMERIC(18, 6) NULL,
+[intStaticValueCurrencyId] INT,
+[dblAmount] NUMERIC(18, 6) NULL,
+[intAmountCurrencyId] INT,
+[strRemarks] NVARCHAR(1024) COLLATE Latin1_General_CI_AS NULL,
+
 CONSTRAINT [PK_tblLGLoadContainer] PRIMARY KEY ([intLoadContainerId]), 
 CONSTRAINT [FK_tblLGLoadContainer_tblLGLoad_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES [tblLGLoad]([intLoadId]) ON DELETE CASCADE,
 
