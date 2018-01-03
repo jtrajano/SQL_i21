@@ -51,6 +51,7 @@ BEGIN TRY
 			,'' strWarehouse
 			,'' strCropYear
 			,'' strPeriod
+			,'' strFarmNumber
 			,@strCompanyName AS strCompanyName
 			,@strCompanyAddress AS strCompanyAddress
 			,@strCity + ', ' + @strState + ', ' + @strZip AS strCityStateZip
@@ -119,6 +120,7 @@ BEGIN TRY
 			,'' strWarehouse
 			,'' strCropYear
 			,'' strPeriod
+			,'' strFarmNumber
 			,@strCompanyName AS strCompanyName
 			,@strCompanyAddress AS strCompanyAddress
 			,@strCity + ', ' + @strState + ', ' + @strZip AS strCityStateZip
@@ -147,6 +149,7 @@ BEGIN TRY
 		,ISNULL(CS.strSubLocationName, '') AS strWarehouse
 		,ISNULL(CY.strCropYear, '') AS strCropYear
 		,CONVERT(NVARCHAR, CD.dtmStartDate, 106) + ' - ' + CONVERT(NVARCHAR, CD.dtmEndDate, 106) AS strPeriod
+		,ISNULL(EF.strFarmNumber, '') AS strFarmNumber
 		,@strCompanyName AS strCompanyName
 		,@strCompanyAddress AS strCompanyAddress
 		,@strCity + ', ' + @strState + ', ' + @strZip AS strCityStateZip
@@ -158,6 +161,7 @@ BEGIN TRY
 	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = S.intContractDetailId
 	LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	LEFT JOIN tblCTCropYear CY ON CY.intCropYearId = CH.intCropYearId
+	LEFT JOIN tblEMEntityFarm EF ON EF.intFarmFieldId = CD.intFarmFieldId
 	LEFT JOIN tblLGLoad L ON L.intLoadId = S.intLoadId
 	LEFT JOIN tblEMEntity E ON E.intEntityId = S.intEntityId
 	LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = S.intRepresentingUOMId
