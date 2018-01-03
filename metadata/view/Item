@@ -8017,9 +8017,9 @@
                                                                                 "columns": [
                                                                                     "[",
                                                                                     "\t{",
-                                                                                    "\t\tdataIndex: 'intEntityCustomerId',",
+                                                                                    "\t\tdataIndex: 'intEntityId',",
                                                                                     "\t\tdataType: 'numeric',",
-                                                                                    "\t\ttext: 'Customer Id',",
+                                                                                    "\t\ttext: 'Entity Id',",
                                                                                     "\t\thidden: true",
                                                                                     "\t},",
                                                                                     "\t{",
@@ -8042,7 +8042,7 @@
                                                                                 "itemId": "txtOwner",
                                                                                 "labelWidth": 125,
                                                                                 "layout|flex": null,
-                                                                                "valueField": "intEntityCustomerId"
+                                                                                "valueField": "intEntityId"
                                                                             },
                                                                             "configAlternates": {
                                                                                 "columns": "array",
@@ -8076,9 +8076,9 @@
                                                                                 "columns": [
                                                                                     "[",
                                                                                     "\t{",
-                                                                                    "\t\tdataIndex: 'intEntityCustomerId',",
+                                                                                    "\t\tdataIndex: 'intEntityId',",
                                                                                     "\t\tdataType: 'numeric',",
-                                                                                    "\t\ttext: 'Customer Id',",
+                                                                                    "\t\ttext: 'Entity Id',",
                                                                                     "\t\thidden: true",
                                                                                     "\t},",
                                                                                     "\t{",
@@ -8101,7 +8101,7 @@
                                                                                 "itemId": "txtCustomer",
                                                                                 "labelWidth": 125,
                                                                                 "layout|flex": null,
-                                                                                "valueField": "intEntityCustomerId"
+                                                                                "valueField": "intEntityId"
                                                                             },
                                                                             "configAlternates": {
                                                                                 "columns": "array",

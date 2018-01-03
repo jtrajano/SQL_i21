@@ -2655,9 +2655,9 @@ Ext.define('Inventory.view.Item', {
                                                                                         xtype: 'gridcombobox',
                                                                                         columns: [
                                                                                             {
-                                                                                                dataIndex: 'intEntityCustomerId',
+                                                                                                dataIndex: 'intEntityId',
                                                                                                 dataType: 'numeric',
-                                                                                                text: 'Customer Id',
+                                                                                                text: 'Entity Id',
                                                                                                 hidden: true
                                                                                             },
                                                                                             {
@@ -2677,15 +2677,15 @@ Ext.define('Inventory.view.Item', {
                                                                                         fieldLabel: 'Owner',
                                                                                         labelWidth: 125,
                                                                                         displayField: 'strCustomerNumber',
-                                                                                        valueField: 'intEntityCustomerId'
+                                                                                        valueField: 'intEntityId'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'gridcombobox',
                                                                                         columns: [
                                                                                             {
-                                                                                                dataIndex: 'intEntityCustomerId',
+                                                                                                dataIndex: 'intEntityId',
                                                                                                 dataType: 'numeric',
-                                                                                                text: 'Customer Id',
+                                                                                                text: 'Entity Id',
                                                                                                 hidden: true
                                                                                             },
                                                                                             {
@@ -2705,7 +2705,7 @@ Ext.define('Inventory.view.Item', {
                                                                                         fieldLabel: 'Customer',
                                                                                         labelWidth: 125,
                                                                                         displayField: 'strCustomerNumber',
-                                                                                        valueField: 'intEntityCustomerId'
+                                                                                        valueField: 'intEntityId'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'numberfield',
