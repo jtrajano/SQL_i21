@@ -16,6 +16,7 @@ BEGIN TRY
 	DECLARE @ErrMsg					NVARCHAR(MAX),
 			@dblQuantity			NUMERIC(18,6),
 			@dblScheduleQty			NUMERIC(18,6),
+			@dblOrgScheduleQty		NUMERIC(18,6),
 			@dblBalance				NUMERIC(18,6),
 			@dblNewScheduleQty		NUMERIC(18,6),
 			@dblQuantityToIncrease	NUMERIC(18,6),
@@ -24,24 +25,31 @@ BEGIN TRY
 			@strContractNumber		NVARCHAR(100),
 			@strContractSeq			NVARCHAR(100),
 			@strAvailableQty		NVARCHAR(100),
+			@strBalanceQty			NVARCHAR(100),
 			@strQuantityToUpdate	NVARCHAR(100) = LTRIM(@dblQuantityToUpdate),
-			@dblTolerance			NUMERIC(18,6) = 0.0001
+			@dblTolerance			NUMERIC(18,6) = 0.0001,
+			@ysnAllowOverSchedule	BIT,
+			@strReason				NVARCHAR(MAX)
 
 	IF NOT EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId)
 	BEGIN
 		RAISERROR('Sequence is deleted by other user.',16,1)
 	END 
 	
+	SELECT @ysnAllowOverSchedule = ysnAllowOverSchedule FROM tblCTCompanyPreference
+
 	BEGINING:
 
 	SELECT	@dblQuantity			=	CASE WHEN ISNULL(ysnLoad,0) = 0 THEN ISNULL(dblDetailQuantity,0) ELSE ISNULL(intNoOfLoad,0) END,
 			@dblScheduleQty			=	ISNULL(dblScheduleQty,0),
+			@dblOrgScheduleQty		=	ISNULL(dblScheduleQty,0),
 			@dblBalance				=	ISNULL(dblBalance,0),
 			@ysnUnlimitedQuantity	=	ISNULL(ysnUnlimitedQuantity,0),
 			@intPricingTypeId		=	intPricingTypeId,
 			@strContractNumber		=	strContractNumber,
 			@strContractSeq			=	LTRIM(intContractSeq),
-			@strAvailableQty		=	LTRIM(dblAvailableQty)
+			@strAvailableQty		=	LTRIM(dblAvailableQty),
+			@strBalanceQty			=	LTRIM(ISNULL(dblBalance,0))
 	FROM	vyuCTContractDetailView 
 	WHERE	intContractDetailId = @intContractDetailId
 	
@@ -60,6 +68,18 @@ BEGIN TRY
 
 			GOTO BEGINING
 		END
+		ELSE IF @ysnAllowOverSchedule = 1
+		BEGIN
+			IF @dblQuantityToUpdate <= @dblBalance
+			BEGIN
+				SELECT @dblScheduleQty = (@dblQuantity + @dblQuantityToUpdate - @dblScheduleQty) - (@dblQuantity - @dblScheduleQty)
+				SELECT @strReason = 'Over Schedule'
+			END
+			ELSE
+			BEGIN
+				RAISERROR('Balance quantity for the contract %s and sequence %s is %s, which is insufficient to Save/Post a quantity of %s therefore could not Save/Post this transaction.',16,1,@strContractNumber,@strContractSeq,@strBalanceQty,@strQuantityToUpdate)
+			END
+		END
 		ELSE
 		BEGIN
 			IF ((@dblScheduleQty + @dblQuantityToUpdate) - @dblBalance) > @dblTolerance
@@ -75,15 +95,22 @@ BEGIN TRY
 	
 	IF	@dblScheduleQty + @dblQuantityToUpdate < 0 
 	BEGIN
-		IF ABS(@dblScheduleQty + @dblQuantityToUpdate) > @dblTolerance
+		IF @ysnAllowOverSchedule = 1
 		BEGIN
-			RAISERROR('Total scheduled quantity cannot be less than zero.',16,1)
+			SET @dblScheduleQty = ABS(@dblQuantityToUpdate) + @dblScheduleQty
+			SELECT @strReason = 'Over Schedule'
 		END
 		ELSE
 		BEGIN
-			SET @dblQuantityToUpdate = @dblQuantityToUpdate - (@dblScheduleQty + @dblQuantityToUpdate)
-		END 
-		
+			IF ABS(@dblScheduleQty + @dblQuantityToUpdate) > @dblTolerance
+			BEGIN
+				RAISERROR('Total scheduled quantity cannot be less than zero.',16,1)
+			END
+			ELSE
+			BEGIN
+				SET @dblQuantityToUpdate = @dblQuantityToUpdate - (@dblScheduleQty + @dblQuantityToUpdate)
+			END 
+		END
 	END
 	
 	SELECT	@dblNewScheduleQty =	@dblScheduleQty + @dblQuantityToUpdate
@@ -100,10 +127,11 @@ BEGIN TRY
 				@strScreenName			=	@strScreenName,
 				@intExternalId			=	@intExternalId,
 				@strFieldName			=	'Scheduled Quantity',
-				@dblOldValue			=	@dblScheduleQty,
+				@dblOldValue			=	@dblOrgScheduleQty,
 				@dblTransactionQuantity =	@dblQuantityToUpdate,
 				@dblNewValue			=	@dblNewScheduleQty,	
-				@intUserId				=	@intUserId
+				@intUserId				=	@intUserId,
+				@strReason				=	@strReason
 	END
 
 END TRY

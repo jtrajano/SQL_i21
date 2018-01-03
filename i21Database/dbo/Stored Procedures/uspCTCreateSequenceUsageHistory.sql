@@ -6,7 +6,8 @@
 	@dblOldValue			NUMERIC(18, 6),
 	@dblTransactionQuantity NUMERIC(18, 6),
 	@dblNewValue			NUMERIC(18, 6),	
-	@intUserId				INT
+	@intUserId				INT,
+	@strReason				NVARCHAR(MAX) = ''
 AS
 BEGIN TRY
 	DECLARE @ErrMsg					NVARCHAR(MAX),
@@ -26,13 +27,15 @@ BEGIN TRY
 
 	INSERT INTO tblCTSequenceUsageHistory
 	(
-			intContractDetailId,	strScreenName,				intExternalId,		strFieldName,
+			intContractDetailId,	strScreenName,				intExternalId,		strFieldName,	strReason,
 			dblOldValue,			dblTransactionQuantity,		dblNewValue,		intUserId,		dtmTransactionDate,
 			intExternalHeaderId,	intContractHeaderId,		intContractSeq,		strNumber,		strUserName
+			
 	)
-	SELECT	@intContractDetailId,	@strScreenName,				@intExternalId,		@strFieldName,
+	SELECT	@intContractDetailId,	@strScreenName,				@intExternalId,		@strFieldName,	@strReason,
 			@dblOldValue,			@dblTransactionQuantity,	@dblNewValue,		@intUserId,		GETDATE(),
 			@intExternalHeaderId,	@intContractHeaderId,		@intContractSeq,	@strNumber,		@strUserName
+			
 	
 END TRY      
 BEGIN CATCH       
