@@ -167,7 +167,7 @@ SET ANSI_WARNINGS OFF
 			INNER JOIN tblARInvoiceDetail ARID
 				ON ARID.intInvoiceId = ARI.intInvoiceId
 			INNER JOIN tblICInventoryShipmentItem ISItem
-				ON ISItem.intInventoryShipmentId = ARID.intInventoryShipmentItemId
+				ON ISItem.intInventoryShipmentItemId = ARID.intInventoryShipmentItemId
 			INNER JOIN tblICInventoryShipment InvShip
 				ON InvShip.intInventoryShipmentId = ISItem.intInventoryShipmentId AND InvShip.intSourceType = 1
 			INNER JOIN tblSCTicket SC
