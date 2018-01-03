@@ -96,7 +96,11 @@ ELSE IF @strTransactionType = 'Inventory'
 				  AND ID.intInvoiceId <> @intTransactionId
 				GROUP BY ID.intItemUOMId, UOM.intItemUOMId
 			) ITEMS
-		) OTHERITEMS		
+		) OTHERITEMS
+		
+		UPDATE tblSOSalesOrder
+		SET ysnShipped = CASE WHEN @ysnForDelete = 0 THEN 1 ELSE 0 END
+		WHERE intSalesOrderId = @intSalesOrderId
 	END
 ELSE
 	BEGIN

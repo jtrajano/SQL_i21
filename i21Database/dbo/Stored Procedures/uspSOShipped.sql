@@ -48,10 +48,7 @@ BEGIN
 		FROM	@OrderToUpdate 
 		ORDER BY intSalesOrderId        
 
-		EXEC [dbo].[uspSOInsertTransactionDetail] @intSalesOrderId
-
-		EXEC dbo.uspSOUpdateOrderShipmentStatus @intTransactionId, 'Inventory', @isDelete
-
+		EXEC [dbo].[uspSOInsertTransactionDetail] @intSalesOrderId		
 		EXEC dbo.[uspSOUpdateCommitted] @intSalesOrderId, @ysnPost ,@qtyToPost
 
 		--Update Contract Balance 
