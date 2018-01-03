@@ -68,7 +68,7 @@
 	[ysnDiscountOverride] BIT NOT NULL DEFAULT 0,
 	[ysnReadyForPayment] BIT NULL DEFAULT 0 ,
 	[ysnRecurring] BIT NULL DEFAULT 0 ,
-	[ysnExported] BIT NULL DEFAULT 0 ,
+	[ysnExported] BIT NULL,
 	[ysnForApprovalSubmitted] BIT NOT NULL DEFAULT 0 ,
 	[ysnOldPrepayment] BIT NOT NULL DEFAULT 0 ,
 	[dtmDateDeleted] DATETIME NULL,
