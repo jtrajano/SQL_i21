@@ -110,7 +110,7 @@ INSERT INTO #tblPRICES(intItemId,name,pricingMethod,reference,perUnit, intLocati
 			 ,reference = RTRIM(SUBSTRING(A.strDescription,0,11))
 			 ,priceID = X.RowID
 			 ,priceDiscount = 0.0000
-			 ,cashCode = ''
+			 ,cashCode = (SELECT TOP 1 strTermCode FROM tblSMTerm WHERE intTermID =  A.intDeliveryTermID )
 			 ,miscTranCode = ''
 			 ,misPriceID = ''
 			 ,lastDate =  CONVERT(VARCHAR(10), dtmLastDeliveryDate, 112)
