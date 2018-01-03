@@ -35,6 +35,7 @@
 	ysnPickByItemOwner BIT NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnPickByItemOwner] DEFAULT 0,
 	ysnDisplayLotIdAsPalletId BIT NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnDisplayLotIdAsPalletId] DEFAULT 0,
 	strLotTextInReport NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strParentLotTextInReport NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	intBondStatusId int,
 	ysnSetExpiryDateByParentLot bit,
     ysnAddQtyOnExistingLot BIT NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnAddQtyOnExistingLot] DEFAULT 1, 

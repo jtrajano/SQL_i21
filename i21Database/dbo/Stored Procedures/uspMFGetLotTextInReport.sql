@@ -10,11 +10,7 @@ BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
 
 	SELECT strLotTextInReport
-		,CASE 
-			WHEN strLotTextInReport = 'Pallet #'
-				THEN 'Lot #'
-			ELSE 'P-Lot #'
-			END AS strParentLotTextInReport
+		,strParentLotTextInReport
 	FROM tblMFCompanyPreference
 END TRY
 

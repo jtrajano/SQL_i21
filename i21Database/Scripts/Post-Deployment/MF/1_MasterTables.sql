@@ -2417,6 +2417,11 @@ UPDATE tblMFCompanyPreference
 SET strLotTextInReport = 'Lot No'
 WHERE strLotTextInReport IS NULL
 GO
+GO
+UPDATE tblMFCompanyPreference
+SET strParentLotTextInReport = 'P-Lot No'
+WHERE strParentLotTextInReport IS NULL
+GO
 
 INSERT INTO tblMFLotInventory (intLotId)
 SELECT L.intLotId
