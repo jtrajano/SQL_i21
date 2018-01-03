@@ -149,15 +149,15 @@ BEGIN TRY
 			WHERE intOwnerId = @intEntityCustomerId
 				AND intCustomerLabelTypeId = @intCustomerLabelTypeId
 
-			SELECT TOP 1 @strGTINNumber = FV.strValue
-			FROM tblSMTabRow TR
-			JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
-			JOIN tblSMCustomTabDetail TD ON TD.intCustomTabDetailId = FV.intCustomTabDetailId
-				AND LOWER(TD.strControlName) = 'GTIN Number'
-			JOIN tblSMTransaction T ON T.intTransactionId = TR.intTransactionId
-			JOIN tblSMScreen S ON S.intScreenId = T.intScreenId
-				AND S.strNamespace = 'Inventory.view.InventoryShipment'
-			WHERE T.intRecordId = @intInventoryShipmentId
+			--SELECT TOP 1 @strGTINNumber = FV.strValue
+			--FROM tblSMTabRow TR
+			--JOIN tblSMFieldValue FV ON TR.intTabRowId = FV.intTabRowId
+			--JOIN tblSMCustomTabDetail TD ON TD.intCustomTabDetailId = FV.intCustomTabDetailId
+			--	AND LOWER(TD.strControlName) = 'GTIN Number'
+			--JOIN tblSMTransaction T ON T.intTransactionId = TR.intTransactionId
+			--JOIN tblSMScreen S ON S.intScreenId = T.intScreenId
+			--	AND S.strNamespace = 'Inventory.view.InventoryShipment'
+			--WHERE T.intRecordId = @intInventoryShipmentId
 
 			WHILE @intOrderManifestId IS NOT NULL
 			BEGIN
@@ -185,8 +185,8 @@ BEGIN TRY
 					WHERE OM.intOrderManifestId = @intOrderManifestId
 
 					-- Bar Code 1
-					SELECT @strBarcodeLabel1 = @strFirstBarcodeStart + '0' + (CASE WHEN ISNULL(@strGTINNumber, '') <> '' THEN @strGTINNumber ELSE I.strGTIN END) + @strFirstBarcodeFollowGTIN + CONVERT(NVARCHAR(6), L.dtmExpiryDate, 12) + @strFirstBarcodeEnd + LTRIM(Convert(NUMERIC(18, 0), ISNULL(L.dblQty, 0)))
-						,@strBarcode1 = REPLACE(REPLACE(@strGS1SpecialCode + @strFirstBarcodeStart + '0' + (CASE WHEN ISNULL(@strGTINNumber, '') <> '' THEN @strGTINNumber ELSE I.strGTIN END) + @strFirstBarcodeFollowGTIN + CONVERT(NVARCHAR(6), L.dtmExpiryDate, 12) + @strFirstBarcodeEnd + LTRIM(Convert(NUMERIC(18, 0), ISNULL(L.dblQty, 0))), '(', ''), ')', '')
+					SELECT @strBarcodeLabel1 = @strFirstBarcodeStart + LEFT((CASE WHEN ISNULL(@strGTINNumber, '') <> '' THEN @strGTINNumber ELSE I.strGTIN END),14) + @strFirstBarcodeFollowGTIN + CONVERT(NVARCHAR(6), L.dtmExpiryDate, 12) + @strFirstBarcodeEnd + LTRIM(Convert(NUMERIC(18, 0), ISNULL(L.dblQty, 0)))
+						,@strBarcode1 = REPLACE(REPLACE(@strGS1SpecialCode + @strFirstBarcodeStart + LEFT((CASE WHEN ISNULL(@strGTINNumber, '') <> '' THEN @strGTINNumber ELSE I.strGTIN END),14) + @strFirstBarcodeFollowGTIN + CONVERT(NVARCHAR(6), L.dtmExpiryDate, 12) + @strFirstBarcodeEnd + LTRIM(Convert(NUMERIC(18, 0), ISNULL(L.dblQty, 0))), '(', ''), ')', '')
 					FROM tblMFOrderManifest OM
 					JOIN tblICLot L ON L.intLotId = OM.intLotId
 					JOIN tblICItem I ON I.intItemId = L.intItemId
@@ -272,7 +272,7 @@ BEGIN TRY
 					ELSE CL.strCountry
 					END)) AS strFromShipment
 		,I.strDescription + ' ' + CHAR(13) + ISNULL(I.strShortName, '') AS strDescription
-		,(CASE WHEN ISNULL(OD.strOrderGTIN, '') <> '' THEN OD.strOrderGTIN ELSE I.strGTIN END) AS strOrderGTIN
+		,LEFT((CASE WHEN ISNULL(OD.strOrderGTIN, '') <> '' THEN OD.strOrderGTIN ELSE I.strGTIN END),14) AS strOrderGTIN
 		,Convert(NUMERIC(18, 0), ISNULL(LOT.dblQty, 0)) AS intCasesPerPallet
 		,I.intInnerUnits AS intUnitsPerCase
 		,CONVERT(VARCHAR(10), LOT.dtmExpiryDate, 101) AS dtmExpiryDate

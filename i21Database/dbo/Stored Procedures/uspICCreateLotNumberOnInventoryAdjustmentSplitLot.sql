@@ -127,10 +127,31 @@ BEGIN
 			,[dtmExpiryDate]			= SourceLot.dtmExpiryDate
 			,[strLotAlias]				= SourceLot.strLotAlias
 			,[intLotStatusId]			= SourceLot.intLotStatusId
-										-- If target lot exists, do not overwrite the parent lot info. 
-			,[intParentLotId]			= ISNULL(TargetLot.intParentLotId, SourceLot.intParentLotId)
-			,[strParentLotNumber]		= ISNULL(ParentLotTargetLot.strParentLotNumber, ParentLotSourceLot.strParentLotNumber)
-			,[strParentLotAlias]		= ISNULL(ParentLotTargetLot.strParentLotAlias, ParentLotSourceLot.strParentLotNumber)  
+										-- If target lot exists, and qty or weight is not zero, then do not overwrite the parent lot info. 
+			,[intParentLotId]			= --ISNULL(TargetLot.intParentLotId, SourceLot.intParentLotId)
+										CASE 
+											WHEN TargetLot.dblQty = 0 OR (TargetLot.intWeightUOMId IS NOT NULL AND TargetLot.dblWeight = 0) THEN 
+												SourceLot.intParentLotId
+											ELSE 
+												ISNULL(TargetLot.intParentLotId, SourceLot.intParentLotId)
+										END 
+
+			,[strParentLotNumber]		= --ISNULL(ParentLotTargetLot.strParentLotNumber, ParentLotSourceLot.strParentLotNumber)
+										CASE 
+											WHEN TargetLot.dblQty = 0 OR (TargetLot.intWeightUOMId IS NOT NULL AND TargetLot.dblWeight = 0) THEN 
+												ParentLotSourceLot.strParentLotNumber
+											ELSE 
+												ISNULL(ParentLotTargetLot.strParentLotNumber, ParentLotSourceLot.strParentLotNumber)
+										END 
+
+			,[strParentLotAlias]		= --ISNULL(ParentLotTargetLot.strParentLotAlias, ParentLotSourceLot.strParentLotAlias)  
+										CASE 
+											WHEN TargetLot.dblQty = 0 OR (TargetLot.intWeightUOMId IS NOT NULL AND TargetLot.dblWeight = 0) THEN 
+												ParentLotSourceLot.strParentLotAlias 
+											ELSE 
+												ISNULL(ParentLotTargetLot.strParentLotAlias, ParentLotSourceLot.strParentLotAlias)  
+										END 
+
 			,[intSplitFromLotId]		= SourceLot.intLotId
 			,[dblGrossWeight]			= SourceLot.dblGrossWeight
 			,[dblWeight]				=  CASE	WHEN ISNULL(Detail.dblNewWeight, 0) <> 0 THEN 
