@@ -341,6 +341,22 @@ BEGIN
 	END 
 END
 
+-- Check if Basket
+BEGIN
+	SET @intItemId = NULL
+
+	SELECT TOP 1 @intItemId = i.intItemId
+	FROM tblICInventoryReceipt r
+		INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+		INNER JOIN tblICItem i ON i.intItemId = ri.intItemId
+	WHERE i.ysnIsBasket = 1
+
+	IF @intItemId IS NOT NULL
+	BEGIN
+		EXEC uspICRaiseError 80162
+	END
+END
+
 -- Get the next batch number
 BEGIN 
 	SET @strBatchId = NULL 
