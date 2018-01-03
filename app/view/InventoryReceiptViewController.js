@@ -1455,8 +1455,17 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         if(!controller.validateRequiredGrossWeight(receiptItems, function() { })) {
                             return false;
                         }
-                        var exists = Ext.Array.findBy(receiptItems, function (item) {
-                            if (item.get('dblUnitCost') === 0 && item.dummy !== true) {
+                        var hasZeroCostOnCompanyOwnedStock = Ext.Array.findBy(receiptItems, function (item) {
+                            var dblUnitCost = item.get('dblUnitCost'),
+                                dummy = item.dummy, 
+                                intOwnershipType = item.get('intOwnershipType');
+                            
+                                dblUnitCost = Ext.isNumeric(dblUnitCost) ? dblUnitCost : 0; 
+                                intOwnershipType = Ext.isNumeric(intOwnershipType) ? intOwnershipType : 1; 
+
+                            var own = 1; 
+
+                            if (!dummy && dblUnitCost === 0 && intOwnershipType === own) {
                                 return true;
                             }
                         });
@@ -1472,12 +1481,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             }
                         };
 
-                        if (exists) {
+                        if (hasZeroCostOnCompanyOwnedStock) {
                             var msgBox = iRely.Functions;
                             msgBox.showCustomDialog(
                                 msgBox.dialogType.WARNING,
                                 msgBox.dialogButtonType.YESNO,
-                                exists.get('strItemNo') + " has zero cost. Do you want to continue?",
+                                hasZeroCostOnCompanyOwnedStock.get('strItemNo') + " has zero cost. Do you want to continue?",
                                 result
                             );
                         }
