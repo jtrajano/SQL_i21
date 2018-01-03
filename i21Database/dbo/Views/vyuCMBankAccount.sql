@@ -113,6 +113,12 @@ SELECT	i21.intBankAccountId
 		,apcbk_laser_down_lines	= CAST(NULL AS INT)	-- INT
 		,apcbk_prtr_checks	= CAST(NULL AS NVARCHAR(80))	-- CHAR (80)
 		,apcbk_auto_assign_trx_yn	= CAST(NULL AS NVARCHAR(1))	-- Y/N
+
+		-- convert value suitable for checkbox for apcbk_show_bal_yn,apcbk_import_export_yn,apcbk_prompt_align_yn,apcbk_auto_assign_trx_yn
+		,NULL ysnShowRunningBalance
+		,NULL ysnPrintAlignPattern
+		,NULL ysnImportExportTrans
+		,NULL ysnAutoAssignOtherTrans
 		-- This is used to check if the bank account have a transaction
 		,ysnHasTransaction = CAST(ISNULL((select TOP 1 1 from  dbo.tblCMBankTransaction where intBankAccountId = i21.intBankAccountId),0) AS bit)
 		-- This is used to check if EFT No has been used

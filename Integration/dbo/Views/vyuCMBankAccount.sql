@@ -119,6 +119,13 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 				,origin.apcbk_laser_down_lines		-- INT
 				,origin.apcbk_prtr_checks			-- CHAR (80)
 				,origin.apcbk_auto_assign_trx_yn	-- Y/N
+
+				-- convert value suitable for checkbox for apcbk_show_bal_yn,apcbk_import_export_yn,apcbk_prompt_align_yn,apcbk_auto_assign_trx_yn
+				,cast (case when ISNULL(origin.apcbk_show_bal_yn,''N'') = ''N'' THEN 0 ELSE 1 end as bit) ysnShowRunningBalance
+				,cast (case when ISNULL(origin.apcbk_prompt_align_yn,''N'') = ''N'' THEN 0 ELSE 1 end as bit) ysnPrintAlignPattern
+				,cast (case when ISNULL(origin.apcbk_import_export_yn,''N'') = ''N'' THEN 0 ELSE 1 end as bit) ysnImportExportTrans
+				,cast (case when ISNULL(origin.apcbk_auto_assign_trx_yn,''N'') = ''N'' THEN 0 ELSE 1 end as bit) ysnAutoAssignOtherTrans
+
 				-- This is used to check if the bank account have a transaction
 				,ysnHasTransaction = CAST(ISNULL((select TOP 1 1 from dbo.tblCMBankTransaction where intBankAccountId = i21.intBankAccountId),0) AS bit)
 				-- This is used to check if EFT No has been used
