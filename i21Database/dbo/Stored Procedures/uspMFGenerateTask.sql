@@ -256,7 +256,7 @@ BEGIN TRY
 
 		DELETE
 		FROM @tblLineItem
-		WHERE dblRequiredQty = 0
+		WHERE dblRequiredQty <= 0
 
 		SELECT @intItemRecordId = MIN(intItemRecordId)
 		FROM @tblLineItem

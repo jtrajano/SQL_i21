@@ -40,6 +40,18 @@ BEGIN TRY
 		,@intTaskItemUOMId INT
 		,@dblTaskQty NUMERIC(18, 6)
 
+			,@dblAlternatePickQty NUMERIC(18, 6)
+	,@dblShort NUMERIC(18, 6)
+		,@dblAlternateTaskQty NUMERIC(18, 6)
+		,@intAlternateOrderHeaderId INT
+		,@intAlternateTaskId INT
+
+	DECLARE @tblMFTask TABLE (
+		intAlternateTaskId INT
+		,dblAlternateTaskQty NUMERIC(18, 6)
+		,intAlternateOrderHeaderId INT
+		)
+
 	SELECT @dtmCurrentDate = GETDATE()
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
@@ -83,6 +95,7 @@ BEGIN TRY
 				THEN 1
 			ELSE dblWeightPerQty
 			END
+		,@dblQty=dblQty
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
@@ -233,6 +246,74 @@ BEGIN TRY
 			,dtmLastModified = @dtmCurrentDate
 			,strComment = 'Manullay Updated.'
 		WHERE intTaskId = @intTaskId
+	END
+
+
+	SELECT @dblAlternatePickQty = SUM(dblPickQty)
+	FROM tblMFTask
+	WHERE intLotId = @intLotId
+		AND intTaskStateId <> 4
+		AND intTaskId <> @intTaskId
+		AND intOrderHeaderId<>@intOrderHeaderId
+
+	IF EXISTS (
+			SELECT 1
+			FROM tblMFTask
+			WHERE intLotId = @intLotId
+				AND intTaskStateId <> 4
+				AND intTaskId <> @intTaskId
+				AND intOrderHeaderId<>@intOrderHeaderId
+			)
+		AND (@dblQty - @dblAlternatePickQty) - @dblLotQty < 0
+	BEGIN
+		SELECT @dblShort = abs((@dblQty - @dblAlternatePickQty) - @dblLotQty)
+
+		INSERT INTO @tblMFTask (
+			intAlternateTaskId
+			,dblAlternateTaskQty
+			,intAlternateOrderHeaderId
+			)
+		SELECT intTaskId
+			,dblPickQty
+			,intOrderHeaderId
+		FROM tblMFTask
+		WHERE intLotId = @intLotId
+			AND intTaskStateId <> 4
+			AND intTaskId <> @intTaskId
+			AND intOrderHeaderId<>@intOrderHeaderId
+
+		SELECT @intAlternateTaskId = MAX(intAlternateTaskId)
+		FROM @tblMFTask
+
+		WHILE @intAlternateTaskId IS NOT NULL
+		BEGIN
+			SELECT @dblAlternateTaskQty = NULL
+				,@intAlternateOrderHeaderId = NULL
+
+			SELECT @dblAlternateTaskQty = dblAlternateTaskQty
+				,@intAlternateOrderHeaderId = intAlternateOrderHeaderId
+			FROM @tblMFTask
+			WHERE intAlternateTaskId = @intAlternateTaskId
+
+			DELETE
+			FROM tblMFTask
+			WHERE intTaskId = @intAlternateTaskId
+
+			EXEC uspMFGenerateTask @intOrderHeaderId = @intAlternateOrderHeaderId
+				,@intEntityUserSecurityId = @intUserId
+				,@ysnAllTasksNotGenerated = 0
+
+			SELECT @dblShort = @dblShort - @dblAlternateTaskQty
+
+			IF @dblShort <= 0
+			BEGIN
+				BREAK
+			END
+
+			SELECT @intAlternateTaskId = MAX(intAlternateTaskId)
+			FROM @tblMFTask
+			WHERE intAlternateTaskId < @intAlternateTaskId
+		END
 	END
 
 	IF @strOrderType = 'INVENTORY SHIPMENT STAGING'
