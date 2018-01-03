@@ -126,13 +126,43 @@ BEGIN
 		,L.intWeightUOMId
 		,UM1.strUnitMeasure AS strWeightUOM
 		,SL.strName
+		,L.dblQty
+		,CASE 
+			WHEN L.intWeightUOMId IS NULL
+				THEN L.dblQty
+			ELSE L.dblWeight
+			END AS dblWeight
+		,(
+			SUM(ISNULL(CASE 
+						WHEN T.intTaskTypeId = 13
+							THEN L.dblQty - T.dblQty
+						ELSE T.dblQty
+						END, 0))
+			) AS dblReservedQty
+		,CASE 
+			WHEN L.intWeightUOMId IS NULL
+				THEN (
+						SUM(ISNULL(CASE 
+									WHEN T.intTaskTypeId = 13
+										THEN L.dblQty - T.dblQty
+									ELSE T.dblQty
+									END, 0))
+						)
+			ELSE (
+					SUM(ISNULL(CASE 
+								WHEN T.intTaskTypeId = 13
+									THEN L.dblWeight - T.dblWeight
+								ELSE T.dblWeight
+								END, 0))
+					)
+			END AS dblReservedWeight
 		,L.dblQty - (
 			SUM(ISNULL(CASE 
 						WHEN T.intTaskTypeId = 13
 							THEN L.dblQty - T.dblQty
 						ELSE T.dblQty
 						END, 0))
-			) AS dblQty
+			) AS dblAvailableQty
 		,CASE 
 			WHEN L.intWeightUOMId IS NULL
 				THEN L.dblQty - (
@@ -149,7 +179,7 @@ BEGIN
 								ELSE T.dblWeight
 								END, 0))
 					)
-			END AS dblWeight
+			END AS dblAvailableWeight
 	FROM tblICLot L
 	JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 	JOIN tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
@@ -233,25 +263,6 @@ BEGIN
 		,UM1.strUnitMeasure
 		,SL.strName
 	HAVING (
-			CASE 
-				WHEN L.intWeightUOMId IS NULL
-					THEN L.dblQty
-				ELSE L.dblWeight
-				END
-			) - (
-			SUM(ISNULL(CASE 
-						WHEN T.intTaskTypeId = 13
-							THEN (
-									CASE 
-										WHEN L.intWeightUOMId IS NULL
-											THEN L.dblQty
-										ELSE L.dblWeight
-										END
-									) - T.dblWeight
-						ELSE T.dblWeight
-						END, 0))
-			) > 0
-		AND (
 			CASE 
 				WHEN IsNULL(@ysnAllowPartialPallet, 1) = 0
 					THEN (
@@ -349,13 +360,43 @@ BEGIN
 		,L.intWeightUOMId
 		,UM1.strUnitMeasure AS strWeightUOM
 		,SL.strName
+		,L.dblQty
+		,CASE 
+			WHEN L.intWeightUOMId IS NULL
+				THEN L.dblQty
+			ELSE L.dblWeight
+			END AS dblWeight
+		,(
+			SUM(ISNULL(CASE 
+						WHEN T.intTaskTypeId = 13
+							THEN L.dblQty - T.dblQty
+						ELSE T.dblQty
+						END, 0))
+			) AS dblReservedQty
+		,CASE 
+			WHEN L.intWeightUOMId IS NULL
+				THEN (
+						SUM(ISNULL(CASE 
+									WHEN T.intTaskTypeId = 13
+										THEN L.dblQty - T.dblQty
+									ELSE T.dblQty
+									END, 0))
+						)
+			ELSE (
+					SUM(ISNULL(CASE 
+								WHEN T.intTaskTypeId = 13
+									THEN L.dblWeight - T.dblWeight
+								ELSE T.dblWeight
+								END, 0))
+					)
+			END AS dblReservedWeight
 		,L.dblQty - (
 			SUM(ISNULL(CASE 
 						WHEN T.intTaskTypeId = 13
 							THEN L.dblQty - T.dblQty
 						ELSE T.dblQty
 						END, 0))
-			) AS dblQty
+			) AS dblAvailableQty
 		,CASE 
 			WHEN L.intWeightUOMId IS NULL
 				THEN L.dblQty - (
@@ -372,7 +413,7 @@ BEGIN
 								ELSE T.dblWeight
 								END, 0))
 					)
-			END AS dblWeight
+			END AS dblAvailableWeight
 	FROM tblICLot L
 	JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 	JOIN tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
@@ -454,25 +495,6 @@ BEGIN
 		,UM1.strUnitMeasure
 		,SL.strName
 	HAVING (
-			CASE 
-				WHEN L.intWeightUOMId IS NULL
-					THEN L.dblQty
-				ELSE L.dblWeight
-				END
-			) - (
-			SUM(ISNULL(CASE 
-						WHEN T.intTaskTypeId = 13
-							THEN (
-									CASE 
-										WHEN L.intWeightUOMId IS NULL
-											THEN L.dblQty
-										ELSE L.dblWeight
-										END
-									) - T.dblWeight
-						ELSE T.dblWeight
-						END, 0))
-			) > 0
-		AND (
 			CASE 
 				WHEN IsNULL(@ysnAllowPartialPallet, 1) = 0
 					THEN (
