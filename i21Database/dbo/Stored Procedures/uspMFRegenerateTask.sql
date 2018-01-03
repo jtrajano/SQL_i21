@@ -39,6 +39,14 @@ BEGIN TRY
 		,@dblMore NUMERIC(18, 6)
 		,@intOrderTaskId INT
 		,@dblOrderTaskQty NUMERIC(18, 6)
+		,@strOrderType NVARCHAR(50)
+
+		SELECT 
+		@strOrderType = OT.strOrderType
+
+	FROM tblMFOrderHeader oh
+	JOIN tblMFOrderType OT ON OT.intOrderTypeId = oh.intOrderTypeId
+	WHERE intOrderHeaderId = @intOrderHeaderId
 
 	SELECT @intTransactionCount = @@TranCount
 
@@ -389,6 +397,53 @@ BEGIN TRY
 		EXEC uspMFGenerateTask @intOrderHeaderId = @intOrderHeaderId
 			,@intEntityUserSecurityId = @intUserId
 			,@ysnAllTasksNotGenerated = 0
+	END
+
+	IF @strOrderType = 'INVENTORY SHIPMENT STAGING'
+	BEGIN
+		IF EXISTS (
+				SELECT 1
+				FROM tblMFOrderDetail OD
+				LEFT JOIN tblMFTask T ON OD.intItemId = T.intItemId
+					AND OD.intOrderHeaderId = T.intOrderHeaderId
+				WHERE OD.intOrderHeaderId = @intOrderHeaderId
+					AND OD.intItemId = @intItemId
+					AND OD.dblQty > 0
+				GROUP BY OD.dblQty
+				HAVING ISNULL(SUM(dbo.fnMFConvertQuantityToTargetItemUOM(T.intItemUOMId, OD.intItemUOMId, T.dblQty)), 0) > OD.dblQty
+				)
+		BEGIN
+			RAISERROR (
+					'Task Qty cannot be greater than required Qty.'
+					,16
+					,1
+					)
+
+			RETURN
+		END
+	END
+	ELSE
+	BEGIN
+		IF EXISTS (
+				SELECT 1
+				FROM tblMFOrderDetail OD
+				LEFT JOIN tblMFTask T ON OD.intItemId = T.intItemId
+					AND OD.intOrderHeaderId = T.intOrderHeaderId
+				WHERE OD.intOrderHeaderId = @intOrderHeaderId
+					AND OD.intItemId = @intItemId
+					AND OD.dblQty > 0
+				GROUP BY OD.dblWeight
+				HAVING ISNULL(SUM(dbo.fnMFConvertQuantityToTargetItemUOM(T.intWeightUOMId, OD.intWeightUOMId, T.dblWeight)), 0) > OD.dblWeight
+				)
+		BEGIN
+			RAISERROR (
+					'Task Qty cannot be greater than required Qty.'
+					,16
+					,1
+					)
+
+			RETURN
+		END
 	END
 
 	IF @intTransactionCount = 0
