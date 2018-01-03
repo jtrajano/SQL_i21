@@ -576,6 +576,7 @@ BEGIN
 			,@strTransactionForm = strTransactionForm
 	FROM	dbo.tblICInventoryTransaction
 	WHERE	strBatchId = @strBatchId
+			AND strTransactionId = @strTransactionId
 			AND ISNULL(ysnIsUnposted, 0) = 0 
 			AND dblQty > 0
 
@@ -713,6 +714,7 @@ BEGIN
 			,@intCostingMethod			= intCostingMethod
 	FROM	dbo.tblICInventoryTransaction
 	WHERE	strBatchId = @strBatchId
+			AND strTransactionId = @strTransactionId
 			AND ISNULL(ysnIsUnposted, 0) = 0 
 
 	IF EXISTS (SELECT TOP 1 1 FROM @ItemsWithZeroStock) 

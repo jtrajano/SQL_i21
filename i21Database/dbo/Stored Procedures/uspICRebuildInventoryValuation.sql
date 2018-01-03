@@ -2484,7 +2484,14 @@ BEGIN
 				SELECT	TOP 1 1 
 				FROM	tblICInventoryTransactionType 
 				WHERE	intTransactionTypeId = @intTransactionTypeId 
-						AND strName NOT IN ('Cost Adjustment', 'Inventory Shipment', 'Invoice', 'Inventory Receipt', 'Inventory Return', 'Inventory Transfer')
+						AND strName NOT IN (
+							'Cost Adjustment'
+							, 'Inventory Shipment'
+							, 'Invoice'
+							, 'Inventory Receipt'
+							, 'Inventory Return'
+							, 'Inventory Transfer'
+						)
 			) AND @strAccountToCounterInventory IS NOT NULL 
 			BEGIN 
 				SET @intReturnId = NULL 
@@ -2537,21 +2544,30 @@ BEGIN
 				END 
 			END 
 				
-			-- Fix discrepancies when posting Consume and Produce. 
-			IF ISNULL(@ysnPost, 1) = 1 AND EXISTS (SELECT TOP 1 1 FROM @GLEntries WHERE strTransactionType = 'Consume' OR strTransactionType = 'Produce')
-			BEGIN 
-				--PRINT 'Update decimal issue for Produce'
+			---- Fix discrepancies when posting Consume and Produce. 
+			--IF ISNULL(@ysnPost, 1) = 1 
+			--AND EXISTS (SELECT TOP 1 1 FROM @GLEntries WHERE strTransactionType = 'Consume' OR strTransactionType = 'Produce')
+			--BEGIN 
+			--	--PRINT 'Update decimal issue for Produce'
 
-				UPDATE	@GLEntries 
-				SET		dblDebit = (SELECT SUM(dblCredit) FROM @GLEntries WHERE strTransactionType = 'Consume') 
-				WHERE	strTransactionType = 'Produce'
-						AND dblDebit <> 0 
-
-				UPDATE	@GLEntries 
-				SET		dblCredit = (SELECT SUM(dblDebit) FROM @GLEntries WHERE strTransactionType = 'Consume') 
-				WHERE	strTransactionType = 'Produce'
-						AND dblCredit <> 0 
-			END 
+			--	UPDATE	@GLEntries 
+			--	SET		dblDebit = (
+			--				SELECT	SUM(ISNULL(dblCredit, 0)) 
+			--				FROM	@GLEntries 
+			--				WHERE	strTransactionType IN ('Consume', 'Inventory Auto Variance')
+			--			) 
+			--	WHERE	strTransactionType = 'Produce'
+			--			AND dblDebit <> 0 
+						
+			--	UPDATE	@GLEntries 
+			--	SET		dblCredit = (
+			--				SELECT	SUM(ISNULL(dblDebit, 0)) 
+			--				FROM	@GLEntries 
+			--				WHERE	strTransactionType IN ('Consume', 'Inventory Auto Variance')
+			--			) 
+			--	WHERE	strTransactionType = 'Produce'
+			--			AND dblCredit <> 0 
+			--END 
 		END 
 
 		-- Book the G/L Entries (except for cost adjustment)
