@@ -28,7 +28,15 @@ BEGIN
 							 WHEN (strAwardPeriod = 'Start of Year') THEN
 								DATEADD(YY, DATEDIFF(YY,0,getdate()), 0)
 							 WHEN (strAwardPeriod = 'End of Year') THEN
-								DATEADD(YY, DATEDIFF(YY,0,getdate()) + 1, -1)
+								CASE WHEN (CASE WHEN (ISNULL(T.dtmEligible, E.dtmDateHired) > ISNULL(T.dtmLastAward, E.dtmDateHired)) THEN 
+												ISNULL(T.dtmEligible, E.dtmDateHired) 
+											ELSE 
+												ISNULL(T.dtmLastAward, E.dtmDateHired) 
+											END) < (DATEADD(YY, DATEDIFF(YY,0,getdate()), -1)) THEN
+									DATEADD(YY, DATEDIFF(YY,0,getdate()), -1)
+								ELSE 
+									DATEADD(YY, DATEDIFF(YY,0,getdate()) + 1, -1)
+								END
 							 WHEN (strAwardPeriod = 'Anniversary Date') THEN
 								DATEADD(YY, YEAR(GETDATE()) - YEAR(E.dtmDateHired), E.dtmDateHired)
 							 ELSE NULL 
@@ -117,7 +125,8 @@ BEGIN
 								WHEN (strPeriod = 'Quarter') THEN
 									DATEDIFF(QQ, dtmLastAward, dtmNextAward) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
 								WHEN (strPeriod = 'Year') THEN
-									DATEDIFF(YY, dtmLastAward, dtmNextAward) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
+									CASE WHEN (DATEDIFF(YY, dtmLastAward, dtmNextAward) <= 0) THEN 1 ELSE (DATEDIFF(YY, dtmLastAward, dtmNextAward)) END
+										/ ISNULL(NULLIF(dblPerPeriod, 0), 1)
 								ELSE 0
 							END * dblRate * dblRateFactor
 						ELSE 0
