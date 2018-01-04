@@ -178,7 +178,7 @@ BEGIN TRY
 					--, tblARAccountStatus.strAccountStatusCode
 					, tblSMShipVia.strShipVia
 					, tblSMShipVia.strTransporterLicense
-					, tblSMShipVia.strTransportationMode
+					, tblSMTransportationMode.strCode
 					, Transporter.strName AS strTransporterName
 					, Transporter.strFederalTaxId AS strTransporterFEIN
 					, NULL AS strConsignorName
@@ -221,6 +221,7 @@ BEGIN TRY
 							LEFT JOIN tblTRState ON tblTRState.intStateId = tblTRLoadHeader.intStateId
 					LEFT JOIN tblSMShipVia ON tblSMShipVia.intEntityId = tblARInvoice.intShipViaId
 						LEFT JOIN  tblEMEntity AS Transporter ON Transporter.intEntityId = tblSMShipVia.intEntityId
+						LEFT JOIN tblSMTransportationMode ON  tblSMTransportationMode.strDescription = tblSMShipVia.strTransportationMode
 					INNER JOIN tblSMCompanyLocation ON tblSMCompanyLocation.intCompanyLocationId = tblARInvoice.intCompanyLocationId
 					INNER JOIN tblARCustomer ON tblARInvoice.intEntityCustomerId = tblARCustomer.intEntityId
 						INNER JOIN tblEMEntity ON tblEMEntity.intEntityId = tblARCustomer.intEntityId
@@ -348,7 +349,7 @@ BEGIN TRY
 					--, tblARAccountStatus.strAccountStatusCode
 					, tblSMShipVia.strShipVia
 					, tblSMShipVia.strTransporterLicense
-					, tblSMShipVia.strTransportationMode
+					, tblSMTransportationMode.strCode
 					, Transporter.strName AS strTransporterName
 					, Transporter.strFederalTaxId AS strTransporterFEIN
 					, NULL AS strConsignorName
@@ -390,6 +391,7 @@ BEGIN TRY
 							LEFT JOIN tblTRState ON tblTRState.intStateId = tblTRLoadHeader.intStateId
 					LEFT JOIN tblSMShipVia ON tblSMShipVia.intEntityId = tblARInvoice.intShipViaId
 						LEFT JOIN tblEMEntity AS Transporter ON Transporter.intEntityId = tblSMShipVia.intEntityId
+						LEFT JOIN tblSMTransportationMode ON  tblSMTransportationMode.strDescription = tblSMShipVia.strTransportationMode
 					INNER JOIN tblSMCompanyLocation ON tblSMCompanyLocation.intCompanyLocationId = tblARInvoice.intCompanyLocationId
 					INNER JOIN tblARCustomer ON tblARInvoice.intEntityCustomerId = tblARCustomer.intEntityId
 						INNER JOIN tblEMEntity ON tblEMEntity.intEntityId = tblARCustomer.intEntityId
@@ -605,7 +607,7 @@ BEGIN TRY
 				--, NULL AS strAccountStatusCode
 				, tblSMShipVia.strShipVia
 				, tblSMShipVia.strTransporterLicense
-				, tblSMShipVia.strTransportationMode
+				, tblSMTransportationMode.strCode
 				, tblEMEntity.strName AS strTransporterName
 				, tblEMEntity.strFederalTaxId AS strTransporterFEIN
 				, tblEMEntity.strName AS strConsignorName
@@ -654,6 +656,7 @@ BEGIN TRY
 			INNER JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadReceipt.intLoadHeaderId
 				LEFT JOIN tblSMShipVia ON tblTRLoadHeader.intShipViaId = tblSMShipVia.intEntityId 
 				LEFT JOIN tblEMEntity ON tblSMShipVia.intEntityId = tblEMEntity.intEntityId 
+				LEFT JOIN tblSMTransportationMode ON  tblSMTransportationMode.strDescription = tblSMShipVia.strTransportationMode
 			INNER JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId AND tblICInventoryTransfer.intToLocationId = tblTRLoadDistributionHeader.intCompanyLocationId
 				INNER JOIN tblSMCompanyLocation ON tblTRLoadDistributionHeader.intCompanyLocationId = tblSMCompanyLocation.intCompanyLocationId
 			LEFT JOIN tblTFReportingComponentCriteria ON tblTFReportingComponentCriteria.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
