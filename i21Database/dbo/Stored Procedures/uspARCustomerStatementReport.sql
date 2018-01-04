@@ -11,6 +11,7 @@
 	, @strLocationName				AS NVARCHAR(MAX)	= NULL
 	, @strStatementFormat			AS NVARCHAR(MAX)	= 'Open Item'
 	, @strCustomerName				AS NVARCHAR(MAX)	= NULL
+	, @strCustomerIds				AS NVARCHAR(MAX)	= NULL
 	, @ysnEmailOnly					AS BIT				= NULL
 AS
 
@@ -32,6 +33,7 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @strAccountStatusCodeLocal			AS NVARCHAR(MAX)	= NULL
 	  , @strStatementFormatLocal			AS NVARCHAR(MAX)	= 'Open Item'
 	  , @strCustomerNameLocal				AS NVARCHAR(MAX)	= NULL
+	  , @strCustomerIdsLocal				AS NVARCHAR(MAX)	= NULL
 	  , @strDateTo							AS NVARCHAR(50)
 	  , @strDateFrom						AS NVARCHAR(50)
 	  , @query								AS NVARCHAR(MAX)
@@ -102,6 +104,7 @@ SET @strAccountStatusCodeLocal			= NULLIF(@strAccountStatusCode, '')
 SET @strLocationNameLocal				= NULLIF(@strLocationName, '')
 SET @strStatementFormatLocal			= ISNULL(@strStatementFormat, 'Open Item')
 SET @strCustomerNameLocal				= NULLIF(@strCustomerName, '')
+SET @strCustomerIdsLocal				= NULLIF(@strCustomerIds, '')
 SET @strDateTo							= ''''+ CONVERT(NVARCHAR(50),@dtmDateToLocal, 110) + ''''
 SET @strDateFrom						= ''''+ CONVERT(NVARCHAR(50),@dtmDateFromLocal, 110) + ''''
 
@@ -120,6 +123,28 @@ IF @strCustomerNumberLocal IS NOT NULL
 					, strName
 			FROM dbo.tblEMEntity WITH (NOLOCK)
 			WHERE strEntityNo = @strCustomerNumberLocal
+		) EC ON C.intEntityId = EC.intEntityId
+		WHERE ((@ysnActiveCustomersLocal = 1 AND (C.ysnActive = 1 or C.dblARBalance <> 0 ) ) OR @ysnActiveCustomersLocal = 0)
+			AND C.strStatementFormat = @strStatementFormatLocal
+	END
+ELSE IF @strCustomerIdsLocal IS NOT NULL
+	BEGIN
+		INSERT INTO #CUSTOMERS
+		SELECT intEntityCustomerId  = C.intEntityId 
+		     , strCustomerNumber    = C.strCustomerNumber
+		     , strCustomerName      = EC.strName
+		     , strStatementFormat	= C.strStatementFormat
+		     , dblCreditLimit       = C.dblCreditLimit
+		     , dblARBalance         = C.dblARBalance        
+		FROM tblARCustomer C WITH (NOLOCK)
+		INNER JOIN (
+			SELECT intID
+			FROM dbo.fnGetRowsFromDelimitedValues(@strCustomerIdsLocal)
+		) CUSTOMERS ON C.intEntityId = CUSTOMERS.intID
+		INNER JOIN (
+			SELECT intEntityId
+				 , strName
+			FROM dbo.tblEMEntity WITH (NOLOCK)			
 		) EC ON C.intEntityId = EC.intEntityId
 		WHERE ((@ysnActiveCustomersLocal = 1 AND (C.ysnActive = 1 or C.dblARBalance <> 0 ) ) OR @ysnActiveCustomersLocal = 0)
 			AND C.strStatementFormat = @strStatementFormatLocal
