@@ -948,12 +948,12 @@ dblMarketBasis dblMarketBasis,dblFuturePrice dblFuturePrice,intContractTypeId,
 dblContractPrice+dblCosts dblAdjustedContractPrice ,
 dblCashPrice dblCashPrice,
 dblMarketBasis+dblFuturePrice+dblCashPrice dblMarketPrice,
-CASE WHEN isnull(@ysnIncludeBasisDifferentialsInResults,0) =0 then isnull(dblResultBasis,0)+isnull(dblMarketFuturesResult,0)+isnull(dblResultCash,0) ELSE dblResult+isnull(dblResultCash,0) END dblResult,dblResultBasis dblResultBasis,
+isnull(dblResultBasis,0)+isnull(dblMarketFuturesResult,0)+isnull(dblResultCash,0) dblResult,dblResultBasis dblResultBasis,
 dblMarketFuturesResult dblMarketFuturesResult,dblResultCash dblResultCash,
 CASE WHEN @ysnCanadianCustomer = 1 then dblCanadianFutures+case when isnull(@ysnIncludeBasisDifferentialsInResults,0) = 0 then dblDummyContractBasis else dblCanadianContractBasis end+dblCash
 ELSE dblContractBasis + dblFutures + dblCash end dblContractPrice
 ,intQuantityUOMId,intCommodityUnitMeasureId,intPriceUOMId,intCent,dtmPlannedAvailabilityDate FROM #Temp 
-WHERE strContractOrInventoryType  like '%(P)%' and dblOpenQty > 0 -- and strContractSeq='P-2029-2'
+WHERE strContractOrInventoryType  like '%(P)%' and dblOpenQty > 0
 UNION
 SELECT DISTINCT 0 as intConcurrencyId,intContractHeaderId,intContractDetailId,
 strContractOrInventoryType,strContractSeq,strEntityName,intEntityId,intFutureMarketId,strFutMarketName,intFutureMonthId,
@@ -964,10 +964,10 @@ dblContractPrice+dblCosts dblAdjustedContractPrice ,
 dblCashPrice dblCashPrice,
 
 dblMarketBasis+dblFuturePrice+dblCashPrice dblMarketPrice,
-case when isnull(@ysnIncludeBasisDifferentialsInResults,0) =0 then isnull(dblResultBasis,0)+isnull(dblMarketFuturesResult,0)+isnull(dblResultCash,0) ELSE dblResult+isnull(dblResultCash,0) END  dblResult,
+isnull(dblResultBasis,0)+isnull(dblMarketFuturesResult,0)+isnull(dblResultCash,0)  dblResult,
 dblResultBasis dblResultBasis,
 dblMarketFuturesResult dblMarketFuturesResult,dblResultCash dblResultCash,
 case when @ysnCanadianCustomer = 1 then dblCanadianFutures+case when isnull(@ysnIncludeBasisDifferentialsInResults,0) = 0 then 0 else dblCanadianContractBasis end+dblCash else dblContractBasis + dblFutures + dblCash end dblContractPrice,
 intQuantityUOMId,intCommodityUnitMeasureId,intPriceUOMId,intCent,dtmPlannedAvailabilityDate FROM #Temp 
-WHERE strContractOrInventoryType  like '%(S)%' and dblOpenQty <> 0 )t --where  strContractSeq='P-2029-2'
+WHERE strContractOrInventoryType  like '%(S)%' and dblOpenQty <> 0 )t 
  ORDER BY intContractHeaderId DESC 
