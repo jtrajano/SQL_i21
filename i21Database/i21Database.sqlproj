@@ -6045,6 +6045,7 @@
     <Build Include="dbo\Stored Procedures\uspRKFutOptTransactionLimit.sql" />
     <Build Include="dbo\Tables\tblCTContractProducer.sql" />
     <Build Include="dbo\Views\vyuCTContractProducer.sql" />
+    <Build Include="Scripts\Post-Deployment\AP\DefaultData\Threshold1099.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
