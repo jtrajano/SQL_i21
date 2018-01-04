@@ -36,6 +36,7 @@ DECLARE  @dtmDateTo					AS DATETIME
 		,@endgroup					AS NVARCHAR(50)
 		,@datatype					AS NVARCHAR(50)
 		,@strCustomerName			AS NVARCHAR(MAX)
+		,@strCustomerIds			AS NVARCHAR(MAX)
 		,@ysnEmailOnly				AS BIT
 		
 -- Create a table variable to hold the XML data. 		
@@ -124,6 +125,10 @@ SELECT @strCustomerName = [from]
 FROM @temp_xml_table
 WHERE [fieldname] IN ('strName', 'strCustomerName')
 
+SELECT @strCustomerIds = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM @temp_xml_table
+WHERE [fieldname] = 'strCustomerIds'
+
 -- SANITIZE THE DATE AND REMOVE THE TIME.
 IF @dtmDateTo IS NOT NULL
 	SET @dtmDateTo = CAST(FLOOR(CAST(@dtmDateTo AS FLOAT)) AS DATETIME)	
@@ -164,6 +169,26 @@ IF ISNULL(@strCustomerName, '') <> ''
 		) EC ON C.intEntityId = EC.intEntityId
 		WHERE C.ysnActive = 1
 	END
+ELSE IF ISNULL(@strCustomerIds, '') <> ''
+	BEGIN
+		INSERT INTO #CUSTOMERS
+		SELECT intEntityCustomerId	= C.intEntityId 
+			 , strCustomerNumber	= C.strCustomerNumber
+			 , strCustomerName		= EC.strName
+			 , dblCreditLimit		= C.dblCreditLimit
+			 , dblARBalance			= C.dblARBalance
+		FROM tblARCustomer C WITH (NOLOCK)
+		INNER JOIN (
+			SELECT intID
+			FROM dbo.fnGetRowsFromDelimitedValues(@strCustomerIds)
+		) CUSTOMERS ON C.intEntityId = CUSTOMERS.intID
+		INNER JOIN (
+			SELECT intEntityId
+				 , strName
+			FROM dbo.tblEMEntity WITH (NOLOCK)
+		) EC ON C.intEntityId = EC.intEntityId
+		WHERE C.ysnActive = 1
+	END
 ELSE
 	BEGIN
 		INSERT INTO #CUSTOMERS
@@ -175,12 +200,11 @@ ELSE
 		FROM tblARCustomer C WITH (NOLOCK)
 		INNER JOIN (
 			SELECT intEntityId
-					, strName
+				 , strName
 			FROM dbo.tblEMEntity WITH (NOLOCK)
-			WHERE (@strCustomerName IS NULL OR strName LIKE '%'+ @strCustomerName +'%')
 		) EC ON C.intEntityId = EC.intEntityId
 		WHERE C.ysnActive = 1
-END
+	END
 
 SELECT @ysnEmailOnly = [from] 
 FROM @temp_xml_table
