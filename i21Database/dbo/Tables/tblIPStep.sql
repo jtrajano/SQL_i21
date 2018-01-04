@@ -43,6 +43,7 @@
 	[strAttachment] NVARCHAR(256) COLLATE Latin1_General_CI_AS NULL,
 	[strSubject] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strMessage] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+	[strWebApi] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[intDelayTime] INT NULL DEFAULT 0,
 	[ysnSkip] BIT NULL DEFAULT 0,
 	[intConcurrencyId] INT NULL DEFAULT 0,
