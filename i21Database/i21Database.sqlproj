@@ -6042,6 +6042,7 @@
     <Build Include="dbo\Tables\tblQMSampleLabel.sql" />
     <Build Include="dbo\Views\vyuCTLimitsForDerivative.sql" />
     <Build Include="dbo\Tables\tblCTLimit.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKFutOptTransactionLimit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

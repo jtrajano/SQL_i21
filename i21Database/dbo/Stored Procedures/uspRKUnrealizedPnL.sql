@@ -4,26 +4,25 @@
 	,@intCommodityId INT = NULL
 	,@ysnExpired BIT
 	,@intFutureMarketId INT = NULL
-
 AS  
 
 SET @dtmFromDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromDate, 110), 110)
 SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
-
  
 SELECT CONVERT(INT,DENSE_RANK() OVER(ORDER BY CONVERT(DATETIME,'01 '+strFutureMonth))) RowNum, strFutMarketName+ ' - ' + strFutureMonth + ' - ' + strName MonthOrder,
 intFutOptTransactionId ,GrossPnL ,dblLong ,dblShort ,dblFutCommission ,strFutMarketName ,strFutureMonth ,dtmTradeDate ,strInternalTradeNo ,strName ,strAccountNumber 
-,strBook ,strSubBook ,strSalespersonId ,strCommodityCode ,strLocationName ,Long1 ,Sell1 ,intNet ,dblActual         ,dblClosing ,dblPrice ,dblContractSize ,dblFutCommission1 
+,strBook ,strSubBook ,strSalespersonId ,strCommodityCode ,strLocationName ,Long1 ,Sell1 ,intNet ,dblActual,100 dblClosing ,dblPrice ,dblContractSize ,dblFutCommission1 
 ,MatchLong ,MatchShort ,NetPnL ,intFutureMarketId ,intFutureMonthId ,intOriginalQty ,intFutOptTransactionHeaderId ,intCommodityId ,ysnExpired ,dblVariationMargin ,dblInitialMargin 
 ,LongWaitedPrice,ShortWaitedPrice
  from 
-(SELECT *,(GrossPnL1 * (dblClosing - dblPrice)-dblFutCommission2)  NetPnL,(GrossPnL1 * (dblClosing - dblPrice))*dblVariationMargin1 dblVariationMargin
+(SELECT *,(GrossPnL1 * (dblClosing - dblPrice)-dblFutCommission2)  NetPnL,intNet*dblVariationMargin1 dblVariationMargin
 ,GrossPnL1 * (dblClosing - dblPrice) GrossPnL,-dblFutCommission2 dblFutCommission
  FROM (  
 SELECT (convert(int,isnull((Long1-MatchLong),0)- isnull(Sell1-MatchShort,0)))*dblContractSize/ case when ysnSubCurrency = 'true' then intCent else 1 end  GrossPnL1,isnull(((Long1-MatchLong)*dblPrice),0) LongWaitedPrice,  
 isnull((Long1-MatchLong),0) as dblLong,isnull(Sell1-MatchShort,0) as dblShort, isnull(((Sell1-MatchShort)*dblPrice),0) ShortWaitedPrice,  
 convert(int,isnull((Long1-MatchLong),0)- isnull(Sell1-MatchShort,0)) * -dblFutCommission1 / case when ComSubCurrency = 'true' then ComCent else 1 end  AS dblFutCommission2,
-convert(int,isnull((Long1-MatchLong),0)- isnull(Sell1-MatchShort,0)) as  intNet,   
+convert(int,isnull((Long1-MatchLong),0)- isnull(Sell1-MatchShort,0)) as  intNet,  
+dbo.fnRKGetLatestClosingPrice (intFutureMarketId,intFutureMonthId,@dtmToDate) as dblClosing,     
 * FROM (   
 SELECT  intFutOptTransactionId,
 		fm.strFutMarketName,  
@@ -44,8 +43,7 @@ SELECT  intFutOptTransactionId,
 		isnull(Case WHEN ot.strBuySell='Buy' THEN isnull(ot.intNoOfContract,0) ELSE null end,0) Long1 ,  
 		isnull(Case WHEN ot.strBuySell='Sell' THEN isnull(ot.intNoOfContract,0) ELSE null end,0) Sell1,
 		ot.intNoOfContract as intNet1,  
-		ot.dblPrice as dblActual,  
-		IsNull(dbo.fnRKGetLatestClosingPrice (ot.intFutureMarketId,ot.intFutureMonthId ,@dtmToDate), 0.0) as dblClosing,    
+		ot.dblPrice as dblActual,  		
 		isnull(ot.dblPrice,0) dblPrice,  
 		fm.dblContractSize dblContractSize,0 as intConcurrencyId,  
 		CASE WHEN bc.intFuturesRateType= 1 then 0 else  isnull(bc.dblFutCommission,0) end as dblFutCommission1,  
@@ -58,7 +56,7 @@ SELECT  intFutOptTransactionId,
 			  WHERE psd.intSFutOptTransactionId=ot.intFutOptTransactionId
 			  AND convert(datetime,CONVERT(VARCHAR(10),h.dtmMatchDate,110),110) <= @dtmToDate),0) as MatchShort,            
 		c.intCurrencyID as intCurrencyId,c.intCent,c.ysnSubCurrency,intFutOptTransactionHeaderId,ysnExpired,cur.intCent ComCent,cur.ysnSubCurrency ComSubCurrency            
-		,IsNull(dbo.fnRKGetVariationMargin (ot.intFutOptTransactionId ,@dtmToDate,ot.dtmFilledDate), 0.0) dblVariationMargin1
+		,IsNull(dbo.fnRKGetVariationMargin (ot.intFutOptTransactionId ,@dtmToDate,ot.dtmFilledDate), 0.0)*fm.dblContractSize dblVariationMargin1
 		,IsNull(dbo.fnRKGetInitialMargin (ot.intFutOptTransactionId ,@dtmToDate,ot.dtmFilledDate), 0.0) as dblInitialMargin		
  FROM tblRKFutOptTransaction ot   
  JOIN tblRKFuturesMonth om on om.intFutureMonthId=ot.intFutureMonthId   and ot.strStatus='Filled'
