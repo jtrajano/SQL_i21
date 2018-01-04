@@ -47,6 +47,11 @@ BEGIN
 		,@ysnMaxSize BIT
 		,@intIRParentLotNumberPatternId INT
 
+	IF @strParentLotNumber IS NULL
+	BEGIN
+		SELECT @strParentLotNumber = ''
+	END
+
 	SELECT @intIRParentLotNumberPatternId = intIRParentLotNumberPatternId
 	FROM tblMFCompanyPreference
 
