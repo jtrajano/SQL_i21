@@ -19,7 +19,7 @@ BEGIN TRANSACTION;
 --=====================================================================================================================================
 -- 	INITIALIZATION 
 ---------------------------------------------------------------------------------------------------------------------------------------
-IF ISNULL(@ysnRecap, 0) = 0
+IF ISNULL(@ysnRecap, 0) = 1
 BEGIN
 	SELECT	@strBatchId = MAX(strBatchId)
 	FROM	tblGLDetail
@@ -34,7 +34,7 @@ END
 IF ISNULL(@ysnRecap, 0) = 0
 	BEGIN			
 		
-		EXEC uspGLInsertReverseGLEntry @strTransactionId,@intEntityId,@dtmDateReverse
+		EXEC uspGLInsertReverseGLEntry @strTransactionId,@intEntityId,@dtmDateReverse, @strBatchId
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 	END
 ELSE
