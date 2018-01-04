@@ -54,8 +54,10 @@ BEGIN
 		,@intRecipeItemUOMId INT
 		,@strLotTracking NVARCHAR(50)
 		,@strLocationName NVARCHAR(50)
+		,@intManufacturingCellId INT
 
-		SELECT TOP 1 @dblDefaultResidueQty=ISNULL(dblDefaultResidueQty,0.00001) FROM tblMFCompanyPreference
+	SELECT TOP 1 @dblDefaultResidueQty = ISNULL(dblDefaultResidueQty, 0.00001)
+	FROM tblMFCompanyPreference
 
 	DECLARE @tblMFLot TABLE (
 		intRecordId INT Identity(1, 1)
@@ -86,6 +88,7 @@ BEGIN
 
 	SELECT TOP 1 @intLocationId = W.intLocationId
 		,@strWorkOrderNo = strWorkOrderNo
+		,@intManufacturingCellId = intManufacturingCellId
 	FROM dbo.tblMFWorkOrder W
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -130,13 +133,13 @@ BEGIN
 		,dtmDate = @dtmProductionDate
 		,dblQty = (- cl.dblIssuedQuantity)
 		,dblUOMQty = ItemUOM.dblUnitQty
-		,dblCost = ISNULL(IP.dblLastCost,0)+ISNULL((
+		,dblCost = ISNULL(IP.dblLastCost, 0) + ISNULL((
 				CASE 
 					WHEN intMarginById = 2
-						THEN ISNULL(RI.dblMargin, 0)/ R.dblQuantity
+						THEN ISNULL(RI.dblMargin, 0) / R.dblQuantity
 					ELSE (ISNULL(IP.dblLastCost, 0) * ISNULL(RI.dblMargin, 0) / 100)
 					END
-				),0)
+				), 0)
 		,dblSalesPrice = 0
 		,intCurrencyId = NULL
 		,dblExchangeRate = 1
@@ -154,8 +157,10 @@ BEGIN
 	INNER JOIN dbo.tblICItemUOM ItemUOM ON cl.intItemIssuedUOMId = ItemUOM.intItemUOMId
 	INNER JOIN tblICItemLocation il ON i.intItemId = il.intItemId
 		AND il.intLocationId = @intLocationId
-	INNER JOIN dbo.tblICItemPricing IP on IP.intItemId=i.intItemId AND IP.intItemLocationId =il.intItemLocationId
-	INNER JOIN dbo.tblMFWorkOrderRecipeItem RI On RI.intWorkOrderId=cl.intWorkOrderId and RI.intItemId=cl.intItemId
+	INNER JOIN dbo.tblICItemPricing IP ON IP.intItemId = i.intItemId
+		AND IP.intItemLocationId = il.intItemLocationId
+	INNER JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intWorkOrderId = cl.intWorkOrderId
+		AND RI.intItemId = cl.intItemId
 	INNER JOIN dbo.tblMFWorkOrderRecipe R ON R.intWorkOrderId = RI.intWorkOrderId
 		AND R.intRecipeId = RI.intRecipeId
 	WHERE cl.intWorkOrderId = @intWorkOrderId
@@ -189,11 +194,11 @@ BEGIN
 		,dtmDate = @dtmProductionDate
 		,dblQty = (- cl.dblQuantity)
 		,dblUOMQty = ISNULL(WeightUOM.dblUnitQty, ItemUOM.dblUnitQty)
-		,dblCost = ISNULL(dbo.[fnCalculateCostBetweenUOM](IU.intItemUOMId,cl.intItemUOMId,l.dblLastCost), 0)+ISNULL((
+		,dblCost = ISNULL(dbo.[fnCalculateCostBetweenUOM](IU.intItemUOMId, cl.intItemUOMId, l.dblLastCost), 0) + ISNULL((
 				CASE 
 					WHEN intMarginById = 2
-						THEN ISNULL(RI.dblMargin, 0)/ R.dblQuantity
-					ELSE (ISNULL(dbo.[fnCalculateCostBetweenUOM](IU.intItemUOMId,cl.intItemUOMId,l.dblLastCost), 0) * ISNULL(RI.dblMargin, 0) / 100)
+						THEN ISNULL(RI.dblMargin, 0) / R.dblQuantity
+					ELSE (ISNULL(dbo.[fnCalculateCostBetweenUOM](IU.intItemUOMId, cl.intItemUOMId, l.dblLastCost), 0) * ISNULL(RI.dblMargin, 0) / 100)
 					END
 				), 0)
 		,dblSalesPrice = 0
@@ -212,10 +217,12 @@ BEGIN
 	INNER JOIN tblICLot l ON cl.intLotId = l.intLotId
 	INNER JOIN dbo.tblICItemUOM ItemUOM ON l.intItemUOMId = ItemUOM.intItemUOMId
 	LEFT JOIN dbo.tblICItemUOM WeightUOM ON l.intWeightUOMId = WeightUOM.intItemUOMId
-	INNER JOIN dbo.tblMFWorkOrderRecipeItem RI On RI.intWorkOrderId=cl.intWorkOrderId and RI.intItemId=cl.intItemId
+	INNER JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intWorkOrderId = cl.intWorkOrderId
+		AND RI.intItemId = cl.intItemId
 	INNER JOIN dbo.tblMFWorkOrderRecipe R ON R.intWorkOrderId = RI.intWorkOrderId
 		AND R.intRecipeId = RI.intRecipeId
-	INNER JOIN dbo.tblICItemUOM IU ON l.intItemId = IU.intItemId and IU.ysnStockUnit=1
+	INNER JOIN dbo.tblICItemUOM IU ON l.intItemId = IU.intItemId
+		AND IU.ysnStockUnit = 1
 	WHERE cl.intWorkOrderId = @intWorkOrderId
 		AND cl.intBatchId = @intBatchId
 
@@ -273,12 +280,16 @@ BEGIN
 	JOIN dbo.tblICItem I ON I.intItemId = RI.intItemId
 		AND RI.intRecipeItemTypeId = 1
 		AND RI.ysnCostAppliedAtInvoice = 0
-		AND I.strType in('Other Charge','Service')
+		AND I.strType IN (
+			'Other Charge'
+			,'Service'
+			)
 	JOIN dbo.tblICItemLocation IL ON IL.intItemId = I.intItemId
 		AND IL.intLocationId = @intLocationId
 	JOIN dbo.tblICItemPricing P ON P.intItemId = I.intItemId
 		AND P.intItemLocationId = IL.intItemLocationId
 	WHERE RI.intWorkOrderId = @intWorkOrderId
+		AND IsNULL(IsNULL(RI.intManufacturingCellId, @intManufacturingCellId), 0) = IsNULL(@intManufacturingCellId, 0)
 
 	IF @dblPercentage IS NOT NULL
 		SELECT @dblOtherCharges = @dblOtherCharges * @dblPercentage / 100
@@ -427,20 +438,22 @@ BEGIN
 		INNER JOIN @OtherChargesGLAccounts ChargesGLAccounts ON Item.intItemId = ChargesGLAccounts.intChargeId
 		WHERE ChargesGLAccounts.intOtherChargeExpense IS NULL
 
-		SELECT	TOP 1 
-				@strLocationName = c.strLocationName
-		FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
-					ON il.intLocationId = c.intCompanyLocationId
-				INNER JOIN @OtherChargesGLAccounts ChargesGLAccounts
-					ON ChargesGLAccounts.intChargeId = il.intItemId
-					AND ChargesGLAccounts.intItemLocationId = il.intItemLocationId
-		WHERE	il.intItemId = @intItemId1
-				AND ChargesGLAccounts.intOtherChargeExpense IS NULL
+		SELECT TOP 1 @strLocationName = c.strLocationName
+		FROM tblICItemLocation il
+		INNER JOIN tblSMCompanyLocation c ON il.intLocationId = c.intCompanyLocationId
+		INNER JOIN @OtherChargesGLAccounts ChargesGLAccounts ON ChargesGLAccounts.intChargeId = il.intItemId
+			AND ChargesGLAccounts.intItemLocationId = il.intItemLocationId
+		WHERE il.intItemId = @intItemId1
+			AND ChargesGLAccounts.intOtherChargeExpense IS NULL
 
 		IF @intItemId1 IS NOT NULL
 		BEGIN
 			-- {Item} in {Location} is missing a GL account setup for {Account Category} account category.
-			EXEC uspICRaiseError 80008, @strItemNo1, @strLocationName, @ACCOUNT_CATEGORY_OtherChargeExpense;
+			EXEC uspICRaiseError 80008
+				,@strItemNo1
+				,@strLocationName
+				,@ACCOUNT_CATEGORY_OtherChargeExpense;
+
 			RETURN;
 		END
 
@@ -639,7 +652,11 @@ BEGIN
 				END
 			)
 		,dblUOMQty = 1
-		,dblCost = Case When IsNULL(@dblPercentage,0)=0 then  @dblCostPerStockUOM Else @dblCostPerStockUOM*@dblPercentage/100 End 
+		,dblCost = CASE 
+			WHEN IsNULL(@dblPercentage, 0) = 0
+				THEN @dblCostPerStockUOM
+			ELSE @dblCostPerStockUOM * @dblPercentage / 100
+			END
 		,dblSalesPrice = 0
 		,intCurrencyId = NULL
 		,dblExchangeRate = 1
@@ -693,7 +710,7 @@ BEGIN
 		,[dblReportingRate]
 		,[dblForeignRate]
 		,[strRateType]
-	)
+		)
 	EXEC dbo.uspICCreateGLEntries @strBatchId
 		,NULL
 		,@intUserId

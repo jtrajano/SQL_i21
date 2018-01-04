@@ -24,7 +24,7 @@ CREATE PROCEDURE [dbo].[uspMFPostProduction] @ysnPost BIT = 0
 	,@intShiftId INT = NULL
 	,@intLoadDistributionDetailId INT = NULL
 	,@dblUnitCost NUMERIC(38, 20) = NULL
-	,@strNotes nvarchar(MAX)=NULL
+	,@strNotes NVARCHAR(MAX) = NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -60,6 +60,7 @@ DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 	,@intRecipeItemUOMId INT
 	,@strLocationName NVARCHAR(50)
 	,@strProduceBatchId NVARCHAR(40)
+	,@intManufacturingCellId INT
 
 SET @strProduceBatchId = ISNULL(@strBatchId, '') + '-P'
 
@@ -113,6 +114,7 @@ BEGIN
 			,@dtmDate = IsNULL(@dtmProductionDate, GetDate())
 			,@strTransactionId = strWorkOrderNo
 			,@intLocationId = intLocationId
+			,@intManufacturingCellId = intManufacturingCellId
 		FROM dbo.tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
 	END
@@ -198,6 +200,7 @@ JOIN dbo.tblICItemLocation IL ON IL.intItemId = I.intItemId
 JOIN dbo.tblICItemPricing P ON P.intItemId = I.intItemId
 	AND P.intItemLocationId = IL.intItemLocationId
 WHERE RI.intWorkOrderId = @intWorkOrderId
+	AND IsNULL(IsNULL(RI.intManufacturingCellId, @intManufacturingCellId), 0) = IsNULL(@intManufacturingCellId, 0)
 
 IF @dblPercentage IS NOT NULL
 	SELECT @dblOtherCharges = @dblOtherCharges * @dblPercentage / 100
@@ -295,7 +298,7 @@ BEGIN
 		,strSourceTransactionId = @strTransactionId
 		,intSourceTransactionTypeId = @INVENTORY_PRODUCE
 		,intShiftId = @intShiftId
-		,strParentLotNumber=@strParentLotNumber
+		,strParentLotNumber = @strParentLotNumber
 
 	EXEC dbo.uspICCreateUpdateLotNumber @ItemsThatNeedLotId
 		,@intUserId
@@ -303,18 +306,17 @@ BEGIN
 	SELECT TOP 1 @intLotId = intLotId
 	FROM #GeneratedLotItems
 	WHERE intDetailId = @intTransactionId
-
-	--EXEC dbo.uspMFCreateUpdateParentLotNumber @strParentLotNumber = @strParentLotNumber
-	--	,@strParentLotAlias = ''
-	--	,@intItemId = @intItemId
-	--	,@dtmExpiryDate = @dtmExpiryDate
-	--	,@intLotStatusId = 1
-	--	,@intEntityUserSecurityId = @intUserId
-	--	,@intLotId = @intLotId
-	--	,@intSubLocationId = @intSubLocationId
-	--	,@intLocationId = @intLocationId
-	--	,@dtmDate = @dtmProductionDate
-	--	,@intShiftId = @intShiftId
+		--EXEC dbo.uspMFCreateUpdateParentLotNumber @strParentLotNumber = @strParentLotNumber
+		--	,@strParentLotAlias = ''
+		--	,@intItemId = @intItemId
+		--	,@dtmExpiryDate = @dtmExpiryDate
+		--	,@intLotStatusId = 1
+		--	,@intEntityUserSecurityId = @intUserId
+		--	,@intLotId = @intLotId
+		--	,@intSubLocationId = @intSubLocationId
+		--	,@intLocationId = @intLocationId
+		--	,@dtmDate = @dtmProductionDate
+		--	,@intShiftId = @intShiftId
 END
 
 IF @dblOtherCharges IS NOT NULL
@@ -724,24 +726,24 @@ BEGIN
 
 	-- Replace @strProduceBatchId with the original @strBatchId. 
 	-- After sorting out the Batch for the Consume and Produce, the Produce still need to be posted using the original @strBatchId. 
-	BEGIN 
-		UPDATE	t
-		SET		t.strBatchId = @strBatchId
-		FROM	tblICInventoryTransaction t 
-		WHERE	t.intTransactionId = @intTransactionId
-				AND t.strTransactionId = @strTransactionId
-				AND t.strBatchId = @strProduceBatchId
+	BEGIN
+		UPDATE t
+		SET t.strBatchId = @strBatchId
+		FROM tblICInventoryTransaction t
+		WHERE t.intTransactionId = @intTransactionId
+			AND t.strTransactionId = @strTransactionId
+			AND t.strBatchId = @strProduceBatchId
 
-		UPDATE	t
-		SET		t.strBatchId = @strBatchId
-		FROM	tblICInventoryLotTransaction t 
-		WHERE	t.intTransactionId = @intTransactionId
-				AND t.strTransactionId = @strTransactionId
-				AND t.strBatchId = @strProduceBatchId
+		UPDATE t
+		SET t.strBatchId = @strBatchId
+		FROM tblICInventoryLotTransaction t
+		WHERE t.intTransactionId = @intTransactionId
+			AND t.strTransactionId = @strTransactionId
+			AND t.strBatchId = @strProduceBatchId
 
 		UPDATE @GLEntries
 		SET strBatchId = @strBatchId
-	END 
+	END
 
 	IF ISNULL(@ysnRecap, 0) = 0
 		EXEC dbo.uspGLBookEntries @GLEntries
