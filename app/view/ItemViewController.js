@@ -1978,7 +1978,7 @@ Ext.define('Inventory.view.ItemViewController', {
         if (combo.column.itemId === 'colDetailUnitMeasure') {
             current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
             if (currentItem.get('strType') === 'Bundle') {
-                uom.set('ysnAllowPurchase', !records[0].get('ysnIsBasket'));
+                current.set('ysnAllowPurchase', !records[0].get('ysnIsBasket'));
             }
             else {
                 current.set('ysnAllowPurchase', true);
