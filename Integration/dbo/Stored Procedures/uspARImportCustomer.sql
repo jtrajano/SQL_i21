@@ -462,7 +462,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 						@intNoOfPeriods		= CASE WHEN (agcus_budget_beg_mm < agcus_budget_end_mm) THEN (agcus_budget_end_mm -agcus_budget_beg_mm) + 1
 												   WHEN (agcus_budget_beg_mm > agcus_budget_end_mm) THEN ((13 - agcus_budget_beg_mm) + agcus_budget_end_mm)
 												   ELSE 0 END, 
-						@dtmBudgetBeginDate =  CONVERT(DATE, CAST(YEAR(getdate()) AS CHAR(4))+RIGHT(''00''+RTRIM(CAST(agcus_budget_beg_mm AS CHAR(2))),2)+''01'' , 112),
+						@dtmBudgetBeginDate =  CASE WHEN agcus_budget_beg_mm <> 0 THEN CONVERT(DATE, CAST(YEAR(getdate()) AS CHAR(4))+RIGHT(''00''+RTRIM(CAST(agcus_budget_beg_mm AS CHAR(2))),2)+''01'' , 112) ELSE NULL END,
 						@OriginCurrency 			= agcus_dflt_currency,
 						--Grain Tab
 						@strDPAContract = agcus_dpa_cnt,				
@@ -659,7 +659,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					END
 					
 					if @strPhone <> ''''
-						INSERT INTO tblEMEntityPhoneNumber(intEntityId, strPhone) VALUES (@ContactEntityId, @strPhone)
+						INSERT INTO tblEMEntityPhoneNumber(intEntityId,intCountryId, strPhone) VALUES (@ContactEntityId,NULL, @strPhone)
 					
 					-- RULE: when creating a default contact from agcusmst.agcus_contact, trim tblEMEntityContact.strContactNumber to 20 characters				
 							
@@ -1254,7 +1254,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 						@intNoOfPeriods		= CASE WHEN (ptcus_budget_beg_mm < ptcus_budget_end_mm) THEN (ptcus_budget_end_mm -ptcus_budget_beg_mm) + 1
 												   WHEN (ptcus_budget_beg_mm > ptcus_budget_end_mm) THEN ((13 - ptcus_budget_beg_mm) + ptcus_budget_end_mm)
 												   ELSE 0 END, 
-						@dtmBudgetBeginDate =  CONVERT(DATE, CAST(YEAR(getdate()) AS CHAR(4))+RIGHT(''00''+RTRIM(CAST(ptcus_budget_beg_mm AS CHAR(2))),2)+''01'' , 112)
+						@dtmBudgetBeginDate = CASE WHEN ptcus_budget_beg_mm <> 0 THEN CONVERT(DATE, CAST(YEAR(getdate()) AS CHAR(4))+RIGHT(''00''+RTRIM(CAST(ptcus_budget_beg_mm AS CHAR(2))),2)+''01'' , 112) ELSE NULL END,
 						--Grain Tab
 						--@strDPAContract = agcus_dpa_cnt,
 						--@dtmDPADate = (CASE WHEN agcus_dpa_rev_dt = 0 THEN NULL ELSE CONVERT(datetime,SUBSTRING(CONVERT(nvarchar,agcus_dpa_rev_dt),0,5) + ''-'' + SUBSTRING(CONVERT(nvarchar,agcus_dpa_rev_dt),5,2) + ''-'' + SUBSTRING(CONVERT(nvarchar,agcus_dpa_rev_dt),7,2)) END),
@@ -1454,7 +1454,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					END
 
 					if @strPhone <> ''''
-						INSERT INTO tblEMEntityPhoneNumber(intEntityId, strPhone) VALUES (@ContactEntityId, @strPhone)
+						INSERT INTO tblEMEntityPhoneNumber(intEntityId,intCountryId, strPhone) VALUES (@ContactEntityId,NULL, @strPhone)
 					-- RULE: when creating a default contact from agcusmst.agcus_contact, trim tblEMEntityContact.strContactNumber to 20 characters				
 
 					--Get intContactId				
