@@ -576,15 +576,16 @@ FROM
 		WHERE BD.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
 
 	) Billed
-	OUTER APPLY 
-	(
-		SELECT SUM(ISNULL(H.dblQtyReceived,0)) AS dblQty FROM tblAPBillDetail H 
-		INNER JOIN dbo.tblAPBill B ON B.intBillId = H.intBillId
-		WHERE H.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
-		GROUP BY H.intInventoryReceiptChargeId
+	--OUTER APPLY 
+	--(
+	--	SELECT SUM(ISNULL(H.dblQtyReceived,0)) AS dblQty FROM tblAPBillDetail H 
+	--	INNER JOIN dbo.tblAPBill B ON B.intBillId = H.intBillId
+	--	WHERE H.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
+	--	GROUP BY H.intInventoryReceiptChargeId
 			
-	) Qty
-	WHERE A.[intEntityVendorId] NOT IN (Billed.intEntityVendorId) OR (Qty.dblQty IS NULL)
+	--) Qty
+	WHERE  
+		A.[intEntityVendorId] NOT IN (Billed.intEntityVendorId) OR (A.dblOrderQty > 0)
 	UNION ALL
 	SELECT
 	DISTINCT  
@@ -1019,6 +1020,6 @@ FROM
 		GROUP BY H.intInventoryShipmentChargeId
 			
 	) Qty
-	WHERE A.[intEntityVendorId] NOT IN (Billed.intEntityVendorId) OR (Qty.dblQty IS NULL)
+	WHERE A.[intEntityVendorId] NOT IN (Billed.intEntityVendorId) OR (A.dblOrderQty > 0)
 ) Items
 GO
