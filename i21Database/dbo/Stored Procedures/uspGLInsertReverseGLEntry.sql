@@ -2,7 +2,8 @@ CREATE PROCEDURE [dbo].[uspGLInsertReverseGLEntry]
 (
 	@strTransactionId NVARCHAR(100),
 	@intEntityId INT,
-	@dtmDateReverse DATETIME = NULL
+	@dtmDateReverse DATETIME = NULL,
+	@strBatchId NVARCHAR(100) = ''
 )
 AS
 BEGIN
@@ -41,7 +42,7 @@ BEGIN
 		SELECT	 [strTransactionId]
 				,[intTransactionId]
 				,dtmDate			= ISNULL(@dtmDateReverse, [dtmDate]) -- If date is provided, use date reverse as the date for unposting the transaction.
-				,[strBatchId]
+				,[strBatchId]		= @strBatchId
 				,[intAccountId]
 				,[dblCredit]
 				,[dblDebit]
