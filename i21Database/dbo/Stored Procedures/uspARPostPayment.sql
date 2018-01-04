@@ -145,7 +145,7 @@ IF (@param IS NOT NULL)
 				INSERT INTO @ARReceivablePostData 
 				SELECT P.intPaymentId, P.strRecordNumber, P.intWriteOffAccountId, P.intEntityId, L.intInterestAccountId
 				FROM tblARPayment P
-					INNER JOIN tblSMCompanyLocation L ON P.intLocationId = L.intCompanyLocationId
+					LEFT JOIN tblSMCompanyLocation L ON P.intLocationId = L.intCompanyLocationId
 				WHERE P.ysnPosted = 0
 			END
 		ELSE
@@ -153,7 +153,7 @@ IF (@param IS NOT NULL)
 				INSERT INTO @ARReceivablePostData 
 				SELECT P.intPaymentId, P.strRecordNumber, P.intWriteOffAccountId, P.intEntityId, L.intInterestAccountId
 				FROM tblARPayment P
-					INNER JOIN tblSMCompanyLocation L ON P.intLocationId = L.intCompanyLocationId
+					LEFT JOIN tblSMCompanyLocation L ON P.intLocationId = L.intCompanyLocationId
 				WHERE P.intPaymentId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@param))
 			END
 	END
@@ -163,7 +163,7 @@ IF(@beginDate IS NOT NULL)
 		INSERT INTO @ARReceivablePostData
 		SELECT P.intPaymentId, P.strRecordNumber, P.intWriteOffAccountId, P.intEntityId, L.intInterestAccountId
 		FROM tblARPayment P
-			INNER JOIN tblSMCompanyLocation L ON P.intLocationId = L.intCompanyLocationId
+			LEFT JOIN tblSMCompanyLocation L ON P.intLocationId = L.intCompanyLocationId
 		WHERE P.dtmDatePaid BETWEEN @beginDate AND @endDate AND ysnPosted = 0
 	END
 
@@ -172,7 +172,7 @@ IF(@beginTransaction IS NOT NULL)
 		INSERT INTO @ARReceivablePostData
 		SELECT P.intPaymentId, P.strRecordNumber, P.intWriteOffAccountId, P.intEntityId, L.intInterestAccountId
 		FROM tblARPayment P
-			INNER JOIN tblSMCompanyLocation L ON P.intLocationId = L.intCompanyLocationId
+			LEFT JOIN tblSMCompanyLocation L ON P.intLocationId = L.intCompanyLocationId
 		WHERE P.intPaymentId BETWEEN @beginTransaction AND @endTransaction AND ysnPosted = 0
 	END
 
