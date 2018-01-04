@@ -234,6 +234,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\ClearPostResult.sql
 :r .\AP\DateCreatedValueDefault.sql
 :r .\AP\DefaultData\InsertWriteOffPaymentMethod.sql
+:r .\AP\DefaultData\Threshold1099.sql
 --:r .\AP\UpdatePOAddressInfo.sql
 :r .\AP\UpdateApprovalRecords.sql
 --:r .\AP\UpdateBillStatus.sql
