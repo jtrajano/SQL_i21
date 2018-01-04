@@ -22,6 +22,7 @@ DECLARE  @dtmDateTo						AS DATETIME
 		,@strDateTo						AS NVARCHAR(50)
 		,@strDateFrom					AS NVARCHAR(50)
 		,@strCustomerName				AS NVARCHAR(MAX)
+		,@strCustomerIds				AS NVARCHAR(MAX)
 		,@strCustomerNumber				AS NVARCHAR(MAX)
 		,@strStatementFormat			AS NVARCHAR(50)
 		,@strAccountStatusCode			AS NVARCHAR(5)
@@ -100,6 +101,10 @@ SELECT @strCustomerName = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM @temp_xml_table
 WHERE [fieldname] = 'strCustomerName'
 
+SELECT @strCustomerIds = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM @temp_xml_table
+WHERE [fieldname] = 'strCustomerIds'
+
 SELECT @strAccountStatusCode = [from]
 FROM @temp_xml_table
 WHERE [fieldname] = 'strAccountStatusCode'
@@ -168,6 +173,7 @@ IF @strStatementFormat = 'Balance Forward'
 			, @strAccountStatusCode			= @strAccountStatusCode
 			, @strLocationName				= @strLocationName
 			, @strCustomerName				= @strCustomerName
+			, @strCustomerIds				= @strCustomerIds
 			, @ysnEmailOnly					= @ysnEmailOnly
 	END
 ELSE IF ISNULL(@strStatementFormat, 'Open Item') IN ('Open Item', 'Running Balance')
@@ -185,6 +191,7 @@ ELSE IF ISNULL(@strStatementFormat, 'Open Item') IN ('Open Item', 'Running Balan
 		    , @strLocationName				= @strLocationName
 		    , @strStatementFormat			= @strStatementFormat
 			, @strCustomerName				= @strCustomerName
+			, @strCustomerIds				= @strCustomerIds
 			, @ysnEmailOnly					= @ysnEmailOnly
 	END
 ELSE IF @strStatementFormat = 'Payment Activity'
@@ -201,6 +208,7 @@ ELSE IF @strStatementFormat = 'Payment Activity'
 		    , @strAccountStatusCode			= @strAccountStatusCode
 		    , @strLocationName				= @strLocationName
 			, @strCustomerName				= @strCustomerName
+			, @strCustomerIds				= @strCustomerIds
 			, @ysnEmailOnly					= @ysnEmailOnly
 	END
 
