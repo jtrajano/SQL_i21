@@ -12,6 +12,7 @@
 	, @strAccountStatusCode			AS NVARCHAR(MAX)	= NULL
 	, @strLocationName				AS NVARCHAR(MAX)	= NULL
 	, @strCustomerName				AS NVARCHAR(MAX)	= NULL
+	, @strCustomerIds				AS NVARCHAR(MAX)	= NULL
 	, @ysnEmailOnly					AS BIT				= NULL
 AS
 
@@ -34,6 +35,7 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @strAccountStatusCodeLocal			AS NVARCHAR(MAX)	= NULL
 	  , @strLocationNameLocal				AS NVARCHAR(MAX)	= NULL
 	  , @strCustomerNameLocal				AS NVARCHAR(MAX)	= NULL
+	  , @strCustomerIdsLocal				AS NVARCHAR(MAX)	= NULL
 	  , @strDateTo							AS NVARCHAR(50)
 	  , @strDateFrom						AS NVARCHAR(50)
 	  , @query								AS NVARCHAR(MAX)
@@ -155,6 +157,7 @@ SET @strCustomerNumberLocal				= NULLIF(@strCustomerNumber, '')
 SET @strAccountStatusCodeLocal			= NULLIF(@strAccountStatusCode, '')
 SET @strLocationNameLocal				= NULLIF(@strLocationName, '')
 SET @strCustomerNameLocal				= NULLIF(@strCustomerName, '')
+SET @strCustomerIdsLocal				= NULLIF(@strCustomerIds, '')
 SET @dtmDateFromLocal					= DATEADD(DAYOFYEAR, 1, @dtmBalanceForwardDateLocal)
 SET @strDateTo							= ''''+ CONVERT(NVARCHAR(50),@dtmDateToLocal, 110) + ''''
 SET @strDateFrom						= ''''+ CONVERT(NVARCHAR(50),@dtmDateFromLocal, 110) + ''''
@@ -176,6 +179,28 @@ IF @strCustomerNumberLocal IS NOT NULL
 		) EC ON C.intEntityId = EC.intEntityId
 		WHERE ((@ysnActiveCustomersLocal = 1 AND (C.ysnActive = 1 or C.dblARBalance <> 0 )) OR @ysnActiveCustomersLocal = 0)
 		  AND C.strStatementFormat = 'Balance Forward'
+	END
+ELSE IF @strCustomerIdsLocal IS NOT NULL
+	BEGIN
+		INSERT INTO #CUSTOMERS
+		SELECT intEntityCustomerId	= C.intEntityId 
+			 , strCustomerNumber	= C.strCustomerNumber
+			 , strCustomerName      = EC.strName
+			 , strStatementFormat	= C.strStatementFormat
+			 , dblCreditLimit       = C.dblCreditLimit
+			 , dblARBalance			= C.dblARBalance        
+		FROM tblARCustomer C WITH (NOLOCK)
+		INNER JOIN (
+			SELECT intID
+			FROM dbo.fnGetRowsFromDelimitedValues(@strCustomerIdsLocal)
+		) CUSTOMERS ON C.intEntityId = CUSTOMERS.intID
+		INNER JOIN (
+			SELECT intEntityId
+				 , strName
+			FROM dbo.tblEMEntity WITH (NOLOCK)			
+		) EC ON C.intEntityId = EC.intEntityId
+		WHERE ((@ysnActiveCustomersLocal = 1 AND (C.ysnActive = 1 or C.dblARBalance <> 0 ) ) OR @ysnActiveCustomersLocal = 0)
+			AND C.strStatementFormat = 'Balance Forward'
 	END
 ELSE
 	BEGIN
