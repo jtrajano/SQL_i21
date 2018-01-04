@@ -5,7 +5,8 @@ CREATE PROCEDURE uspCTUpdationFromTicketDistribution
 	@dblNetUnits			NUMERIC(18,6),
 	@intContractDetailId	INT,
 	@intUserId				INT,
-	@ysnDP					BIT
+	@ysnDP					BIT,
+	@ysnDeliverySheet		BIT = 0
 	
 AS
 
@@ -39,9 +40,19 @@ BEGIN TRY
 			dblCost				NUMERIC(18,6)
 	)			
 	
-	IF NOT EXISTS(SELECT * FROM tblSCTicket WHERE intTicketId = @intTicketId)
+	IF @ysnDeliverySheet = 1 
 	BEGIN
-		RAISERROR ('Ticket is deleted by other user.',16,1,'WITH NOWAIT')  
+		IF NOT EXISTS(SELECT * FROM tblSCDeliverySheet WHERE intDeliverySheetId = @intTicketId)
+		BEGIN
+			RAISERROR ('Delivery Sheet is deleted by other user.',16,1,'WITH NOWAIT')  
+		END
+	END
+	ELSE
+	BEGIN
+		IF NOT EXISTS(SELECT * FROM tblSCTicket WHERE intTicketId = @intTicketId)
+		BEGIN
+			RAISERROR ('Ticket is deleted by other user.',16,1,'WITH NOWAIT')  
+		END
 	END
 	
 	SELECT	@ysnAutoCreateDP = ysnAutoCreateDP FROM tblCTCompanyPreference
