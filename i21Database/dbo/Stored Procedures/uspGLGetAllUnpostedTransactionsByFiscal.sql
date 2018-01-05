@@ -5,7 +5,7 @@
 -- Description:	Gets all unposted transaction (GL,CM,AP,IC,AR) 
 -- JIRA Key:	GL-1923
 -- =============================================
-CREATE PROCEDURE [uspGLGetAllUnpostedTransactionsByFiscal] --GL-1923
+CREATE PROCEDURE [dbo].[uspGLGetAllUnpostedTransactionsByFiscal] --GL-1923
  @intFiscalYearId INT,
  @intEntityId INT,
  @intFiscalYearPeriodId INT = 0,
@@ -97,16 +97,18 @@ BEGIN
 			 SELECT strTransactionId COLLATE Latin1_General_CI_AS,strTransactionType COLLATE Latin1_General_CI_AS, dtmDate ,'INV' from [vyuICGetUnpostedTransactions] UNION ALL
 			SELECT strTransactionId COLLATE Latin1_General_CI_AS,strTransactionType COLLATE Latin1_General_CI_AS, dtmDate ,'PR' from vyuPRUnpostedTransactions
 			)
-		INSERT INTO @tblOriginTransactions SELECT strTransactionId,strTransactionType,dtmDate,strModule FROM I21Transactions WHERE dtmDate >= @dtmDateFrom AND dtmDate <= @dtmDateTo
+		INSERT INTO @tblOriginTransactions SELECT strTransactionId,strTransactionType,dtmDate,strModule 
+		FROM I21Transactions WHERE dtmDate >= @dtmDateFrom AND dtmDate <= @dtmDateTo
 		-- END SHOW CM,INV, PR (I21) AND AP,GL (ORIGIN) TRANSACTIONS
 	END
 	
 	IF EXISTS (SELECT TOP 1 1 FROM @tblOriginTransactions)
 	BEGIN
-		SELECT  @transactionType ='Origin' 
-		SELECT TransactionType = @transactionType 
-		SELECT strTransactionId,strTransactionType,dtmDate FROM @tblOriginTransactions
-	SET @ysnUnpostedTrans = 1
+		SELECT @guid = NEWID()
+		INSERT INTO tblGLForBatchPosting ( strTransactionId,strTransactionType, dtmDate,[guid])
+			SELECT strTransactionId,strTransactionType,dtmDate,@guid FROM @tblOriginTransactions
+		SELECT TransactionType = 'Origin' ,batchGUID = @guid 
+		SET @ysnUnpostedTrans = 1
 		RETURN --SHOW GL SCREEN IF THERE ARE TRANSACTION THEN EXIT
 	END
 	-- END OPEN GL UNPOSTED SCREEN

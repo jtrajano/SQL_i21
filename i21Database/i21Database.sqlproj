@@ -6029,6 +6029,7 @@
     <Build Include="dbo\Functions\fnARGetDefaultCommentTable.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateCompanyLocationFreightTerm.sql" />
     <Build Include="dbo\Stored Procedures\uspGLDeleteMultiAccounts.sql" />
+	<Build Include="dbo\Stored Procedures\uspGLFiscalPeriodOpen.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRegenerateTask.sql" />
     <Build Include="dbo\Views\vyuMFOrderHeaderNotMapped.sql" />
     <Build Include="dbo\Tables\tblMFRecipeAlertLog.sql" />
