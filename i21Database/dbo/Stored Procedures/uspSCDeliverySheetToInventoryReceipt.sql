@@ -229,6 +229,7 @@ OPEN intListCursor;
 					,@intLoopContractId
 					,@intUserId
 					,@ysnDPStorage
+					,1
 
 					DECLARE @intDPContractId INT;
 					DECLARE @dblDPContractUnits NUMERIC(12,4);
