@@ -282,7 +282,7 @@ BEGIN
 		,dtmDeliveryDate					= SC.dtmTicketDateTime 
 		,intTicketId						= SC.intTicketId		
 		,strTicketNumber					= SC.strTicketNumber 
-		,strReceiptNumber					= INVRCPT.strReceiptNumber
+		,strReceiptNumber					= SC.strElevatorReceiptNumber
 		,intInventoryReceiptItemId			= ISNULL(INVRCPTITEM.intInventoryReceiptItemId, 0) 
 		,intContractDetailId				= ISNULL(BillDtl.intContractDetailId, 0) 
 		,RecordId							= Bill.strBillId		
@@ -301,7 +301,7 @@ BEGIN
 		,dblDockage							= ROUND(SC.dblShrink,3)		 
 		,dblCost							= BillDtl.dblCost
 		,Net								= BillDtl.dblQtyOrdered
-		,strUnitMeasure						= UOM.strUnitMeasure
+		,strUnitMeasure						= UOM.strSymbol
 		,dblTotal							= BillDtl.dblTotal
 		,dblTax								= BillDtl.dblTax
 		,dblNetTotal						= BillDtl.dblTotal+ BillDtl.dblTax
@@ -470,7 +470,7 @@ BEGIN
 		,dtmDeliveryDate					= SC.dtmTicketDateTime
 		,intTicketId						= SC.intTicketId
 		,strTicketNumber					= SC.strTicketNumber
-		,strReceiptNumber					= '' 
+		,strReceiptNumber					= SC.strElevatorReceiptNumber 
 		,intInventoryReceiptItemId			= 0
 		,intContractDetailId				= ISNULL(BillDtl.intContractDetailId, 0) 
 		,RecordId							= Bill.strBillId
@@ -489,7 +489,7 @@ BEGIN
 		,dblDockage							= [dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblShrink,3))
 		,dblCost							= BillDtl.dblCost
 		,Net								= BillDtl.dblQtyOrdered 
-		,strUnitMeasure						= UOM.strUnitMeasure
+		,strUnitMeasure						= UOM.strSymbol
 		,dblTotal							= BillDtl.dblTotal
 		,dblTax								= BillDtl.dblTax
 		,dblNetTotal						= BillDtl.dblTotal + BillDtl.dblTax
@@ -670,7 +670,7 @@ BEGIN
 		,dblDockage							= [dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblShrink,3))
 		,dblCost							= BillDtl.dblCost
 		,Net								= BillDtl.dblQtyOrdered 
-		,strUnitMeasure						= UOM.strUnitMeasure
+		,strUnitMeasure						= UOM.strSymbol
 		,dblTotal							= BillDtl.dblTotal
 		,dblTax								= BillDtl.dblTax
 		,dblNetTotal						= BillDtl.dblTotal + BillDtl.dblTax
@@ -925,7 +925,7 @@ BEGIN
 				,dtmDeliveryDate		    = SC.dtmTicketDateTime 
 				,intTicketId			    = SC.intTicketId		
 				,strTicketNumber		    = SC.strTicketNumber 
-				,strReceiptNumber		    = INVRCPT.strReceiptNumber
+				,strReceiptNumber		    = SC.strElevatorReceiptNumber
 				,intInventoryReceiptItemId  = ISNULL(INVRCPTITEM.intInventoryReceiptItemId, 0) 
 				,intContractDetailId		= ISNULL(BillDtl.intContractDetailId, 0) 
 				,RecordId					= Bill.strBillId
@@ -944,7 +944,7 @@ BEGIN
 				,dblDockage					= [dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblShrink,3))		 
 				,dblCost					= BillDtl.dblCost
 				,Net						= BillDtl.dblQtyOrdered
-				,strUnitMeasure				= UOM.strUnitMeasure
+				,strUnitMeasure				= UOM.strSymbol
 				,dblTotal					= BillDtl.dblTotal
 				,dblTax						= BillDtl.dblTax
 				,dblNetTotal				= BillDtl.dblTotal+ BillDtl.dblTax
@@ -1110,7 +1110,7 @@ BEGIN
 				,dtmDeliveryDate			 = SC.dtmTicketDateTime		
 				,intTicketId				 = SC.intTicketId		
 				,strTicketNumber			 = SC.strTicketNumber
-				,strReceiptNumber			 = ''
+				,strReceiptNumber			 = SC.strElevatorReceiptNumber
 				,intInventoryReceiptItemId   = 0 
 				,intContractDetailId		 = ISNULL(BillDtl.intContractDetailId, 0) 
 				,RecordId					 = Bill.strBillId 		 
@@ -1129,7 +1129,7 @@ BEGIN
 				,dblDockage					 = [dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblShrink,3))
 				,dblCost					 = BillDtl.dblCost
 				,Net					     = BillDtl.dblQtyOrdered 
-				,strUnitMeasure				 = UOM.strUnitMeasure
+				,strUnitMeasure				 = UOM.strSymbol
 				,dblTotal					 = BillDtl.dblTotal
 				,dblTax						 = BillDtl.dblTax
 				,dblNetTotal				 = BillDtl.dblTotal+ BillDtl.dblTax
@@ -1306,7 +1306,7 @@ BEGIN
 				,dblDockage					 = [dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblShrink,3))
 				,dblCost					 = BillDtl.dblCost
 				,Net						 = BillDtl.dblQtyOrdered 
-				,strUnitMeasure				 = UOM.strUnitMeasure
+				,strUnitMeasure				 = UOM.strSymbol
 				,dblTotal					 = BillDtl.dblTotal
 				,dblTax						 = BillDtl.dblTax
 				,dblNetTotal				 = BillDtl.dblTotal+ BillDtl.dblTax
