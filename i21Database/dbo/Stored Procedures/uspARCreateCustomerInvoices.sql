@@ -1689,7 +1689,7 @@ BEGIN TRY
 		,[intDetailId]						= NULL
 	 FROM @IntegrationLog WHERE [ysnSuccess] = 1
 
-	EXEC [dbo].[uspARReComputeInvoicesAmounts] @InvoiceIds = @CreatedInvoiceIds
+	EXEC [dbo].[uspARReComputeInvoicesTaxes] @InvoiceIds = @CreatedInvoiceIds
 
 	DECLARE @InvoiceLog AuditLogStagingTable	
 	DELETE FROM @InvoiceLog
