@@ -35,17 +35,22 @@ BEGIN TRY
 			@dblLotsFixed				NUMERIC(18,6),
 			@dblNoOfLots				NUMERIC(18,6),
 			@dblCorrectNetWeight		NUMERIC(18,6),
+			@dblFutures					NUMERIC(18,6),
 			@intPriceFixationId			INT
 
 	SELECT	@ysnMultiplePriceFixation	=	ysnMultiplePriceFixation,
 			@strContractNumber			=	strContractNumber,
-			@dblNoOfLots				=	dblNoOfLots
+			@dblNoOfLots				=	dblNoOfLots,
+			@dblFutures					=	dblFutures,
+			@intPricingTypeId			=	intPricingTypeId
 	FROM	tblCTContractHeader 
 	WHERE	intContractHeaderId			=	@intContractHeaderId
 
 	SELECT @ysnFeedOnApproval	=	ysnFeedOnApproval from tblCTCompanyPreference
 
 	SELECT	@intContractScreenId=	intScreenId FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.Contract'
+
+	SELECT @intPriceFixationId = intPriceFixationId FROM tblCTPriceFixation WHERE intContractHeaderId = @intContractHeaderId
 
 	SELECT  @ysnOnceApproved  =	ysnOnceApproved,
 			@intTransactionId = intTransactionId 
@@ -94,6 +99,23 @@ BEGIN TRY
 	AND		CD.intContractHeaderId	=	@intContractHeaderId
 
 	--End Correct if UOM are wrong
+
+	--Other safety Checks--
+
+	IF ISNULL(@intPriceFixationId,0) = 0 AND @ysnMultiplePriceFixation = 1 AND @dblFutures IS NOT NULL AND @intPricingTypeId = 2
+	BEGIN
+		UPDATE tblCTContractHeader SET dblFutures = NULL  WHERE intContractHeaderId = @intContractHeaderId
+
+		UPDATE	CD 
+		SET		CD.intPricingTypeId	=	2,
+				CD.dblFutures		=	NULL,
+				CD.dblCashPrice		=	NULL,
+				CD.dblTotalCost		=	NULL
+		FROM	tblCTContractDetail		CD
+		WHERE	CD.intContractHeaderId	=	@intContractHeaderId
+	END
+
+	------------------------
 
 	SELECT @intContractDetailId		=	MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId
 	
