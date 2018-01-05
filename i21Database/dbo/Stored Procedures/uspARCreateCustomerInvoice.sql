@@ -684,7 +684,7 @@ BEGIN TRY
 			AND ISNULL([intSourceId],0) <> 0
 	END
 
-	EXEC [dbo].[uspARReComputeInvoiceAmounts] @NewId
+	EXEC [dbo].[uspARReComputeInvoiceTaxes] @NewId
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0
