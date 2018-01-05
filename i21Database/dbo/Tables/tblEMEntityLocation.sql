@@ -36,6 +36,8 @@
     [strFarmSplitNumber]		NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,    
     [strFarmSplitType]			NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [dblFarmAcres]				NUMERIC(18, 6)  DEFAULT ((0)) NULL,
+	[imgFieldMapFile]			VARBINARY (MAX) NULL, 
+	[strFieldMapFile]			NVARCHAR (50) NULL, 
     --End Farm Fields
 	--Start 1099 Override
     [ysnPrint1099]     BIT             NULL,
