@@ -23,6 +23,7 @@ DECLARE @dtmDateTo						DATETIME
 	  , @strSalesperson					NVARCHAR(100)
 	  , @strCustomerName				NVARCHAR(MAX)
 	  , @strAccountStatusCode			NVARCHAR(5)
+	  , @strCompanyLocation				NVARCHAR(100)
 	  , @xmlDocumentId					INT
 	  , @filter							NVARCHAR(MAX) = ''
 	  , @fieldname						NVARCHAR(50)
@@ -82,6 +83,10 @@ SELECT  @strAccountStatusCode = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM	@temp_xml_table
 WHERE	[fieldname] = 'strAccountStatusCode'
 
+SELECT  @strCompanyLocation = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM	@temp_xml_table
+WHERE	[fieldname] = 'strCompanyLocation'
+
 SELECT  @dtmDateFrom = CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE CAST(-53690 AS DATETIME) END AS DATETIME)
  	   ,@dtmDateTo   = CAST(CASE WHEN ISNULL([to], '') <> '' THEN [to] ELSE GETDATE() END AS DATETIME)
 FROM	@temp_xml_table 
@@ -139,6 +144,7 @@ EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateFrom = @dtmDateFrom
 										, @dtmDateTo = @dtmDateTo
 										, @strSalesperson = @strSalesperson
 										, @strSourceTransaction = @strSourceTransaction
+										, @strCompanyLocation = @strCompanyLocation
 										, @strCustomerName	= @strCustomerName
 										, @strAccountStatusCode = @strAccountStatusCode
 EXEC dbo.uspARGLAccountReport @dtmDateTo
