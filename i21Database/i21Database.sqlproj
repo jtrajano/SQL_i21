@@ -5986,8 +5986,8 @@
     <Build Include="dbo\Views\vyuMFOrderHeaderNotMapped.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportSampleLabelbyControlPoint.sql" />
     <Build Include="dbo\Tables\tblQMSampleLabel.sql" />
-    <Build Include="Scripts\Post-Deployment\AP\DefaultData\Threshold1099.sql" />
     <Build Include="dbo\Views\vyuPREmployeeTimeOffUsedYTD.sql" />
+    <None Include="Scripts\Post-Deployment\AP\DefaultData\Threshold1099.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
