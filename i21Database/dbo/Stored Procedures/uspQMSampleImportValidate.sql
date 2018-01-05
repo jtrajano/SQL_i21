@@ -343,6 +343,8 @@ BEGIN TRY
 				,dblQuantity NUMERIC(18, 6)
 				)
 
+			DELETE FROM @ContractDetail
+
 			INSERT INTO @ContractDetail
 			SELECT intContractDetailId
 				,dblQuantity
@@ -399,6 +401,12 @@ BEGIN TRY
 				DECLARE @strItemNo NVARCHAR(50)
 				DECLARE @intCUnitMeasureId INT
 				DECLARE @strCUnitMeasure NVARCHAR(50)
+
+				SELECT @dblCQuantity = NULL
+					,@intSeqItemId = NULL
+					,@strItemNo = NULL
+					,@intCUnitMeasureId = NULL
+					,@strCUnitMeasure = NULL
 
 				SELECT @dblCQuantity = CD.dblQuantity
 					,@intCUnitMeasureId = CD.intUnitMeasureId
