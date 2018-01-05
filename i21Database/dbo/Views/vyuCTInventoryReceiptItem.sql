@@ -14,7 +14,9 @@ AS
 						IR.intEntityVendorId,
 						CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) AS strSequenceNumber,
 						SH.strLoadNumber,
-						EY.strName	AS strEntityName
+						EY.strName	AS strEntityName,
+						IR.ysnPosted
+
 				FROM	tblICInventoryReceiptItem	RI
 				JOIN	tblICInventoryReceipt		IR	ON	RI.intInventoryReceiptId	=	IR.intInventoryReceiptId
 				JOIN	tblLGLoadDetail				CQ	ON	CQ.intLoadDetailId			=	RI.intSourceId

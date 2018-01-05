@@ -146,7 +146,7 @@ BEGIN TRY
 				EXEC	@strTradeNo = uspCTGetStartingNumber 'Price Fixation Trade No'
 				SET		@XML =	'<root><toUpdate><strTradeNo>'+LTRIM(RTRIM(@strTradeNo))+'</strTradeNo><dblNoOfLots>'+STR(@dblChildSeqLots)+'</dblNoOfLots>'+
 								'<dblQuantity>'+STR(@dblChildSeqQty)+'</dblQuantity>'+
-								'<dtmFixationDate>'+@strDateWithTime+'</dtmFixationDate>'+
+								--'<dtmFixationDate>'+@strDateWithTime+'</dtmFixationDate>'+
 								CASE WHEN @ysnHedge = 1 THEN '<intFutOptTransactionId>'+STR(@intNewFutOptTransactionId)+'</intFutOptTransactionId>' ELSE '' END +
 								'<intPriceFixationId>'+STR(@intNewPriceFixationId)+'</intPriceFixationId></toUpdate></root>' 
 
