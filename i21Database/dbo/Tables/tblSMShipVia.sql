@@ -18,7 +18,7 @@
     [intSort]            INT            NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT (1), 
     CONSTRAINT [PK_tblSMShipVia] PRIMARY KEY CLUSTERED ([intEntityId] ASC), 
-    CONSTRAINT [AK_tblSMShipVia_strShipVia] UNIQUE ([strShipVia]),
+    CONSTRAINT [AK_tblSMShipVia_strShipVia] UNIQUE ([strShipVia]), --this field is used in SP uspEMMergeEntity, any changes in name should also be applied there
 	CONSTRAINT [FK_dbo_tblSMShipVia_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE,
 
 );
