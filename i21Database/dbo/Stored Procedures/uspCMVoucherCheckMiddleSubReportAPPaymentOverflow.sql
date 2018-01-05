@@ -114,6 +114,7 @@ SELECT * FROM (
 			,dblTotalAmount
 			,dtmCheckDate
 			,strCheckNumber
+			,strCurrency
 			,ROW_NUMBER() OVER (ORDER BY intPaymentDetailId ASC) AS [row_number]
 	 FROM 
 	(
@@ -140,6 +141,7 @@ SELECT * FROM (
 				,dtmCheckDate = F.dtmDate
 				,strCheckNumber = F.strReferenceNo
 				,PYMTDetail.intPaymentDetailId
+				,strCurrency = (SELECT strCurrency FROM tblSMCurrency WHERE intCurrencyID = F.intCurrencyId)
 		FROM	[dbo].[tblCMBankTransaction] F INNER JOIN [dbo].[tblAPPayment] PYMT
 					ON F.strTransactionId = PYMT.strPaymentRecordNum
 				INNER JOIN [dbo].[tblAPPaymentDetail] PYMTDetail
@@ -166,6 +168,7 @@ SELECT * FROM (
 			,dtmCheckDate = F.dtmDate
 			,strCheckNumber = F.strReferenceNo
 			,PYMTDetail.intPaymentDetailId
+			,strCurrency = (SELECT strCurrency FROM tblSMCurrency WHERE intCurrencyID = F.intCurrencyId)
 		FROM	[dbo].[tblCMBankTransaction] F
 			INNER JOIN [dbo].[tblAPPayment] PYMT
 				ON PYMT.strPaymentRecordNum = F.strTransactionId
@@ -197,6 +200,7 @@ SELECT * FROM (
 				,dtmCheckDate = F.dtmDate
 				,strCheckNumber = F.strReferenceNo
 				,PYMTDetail.intPaymentDetailId
+				,strCurrency = (SELECT strCurrency FROM tblSMCurrency WHERE intCurrencyID = F.intCurrencyId)
 		FROM	[dbo].[tblCMBankTransaction] F INNER JOIN [dbo].[tblAPPayment] PYMT
 					ON F.strTransactionId = PYMT.strPaymentRecordNum
 				INNER JOIN [dbo].[tblAPPaymentDetail] PYMTDetail
