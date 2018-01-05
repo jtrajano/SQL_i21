@@ -6029,7 +6029,7 @@
     <Build Include="dbo\Functions\fnARGetDefaultCommentTable.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateCompanyLocationFreightTerm.sql" />
     <Build Include="dbo\Stored Procedures\uspGLDeleteMultiAccounts.sql" />
-	<Build Include="dbo\Stored Procedures\uspGLFiscalPeriodOpen.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLFiscalPeriodOpen.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRegenerateTask.sql" />
     <Build Include="dbo\Views\vyuMFOrderHeaderNotMapped.sql" />
     <Build Include="dbo\Tables\tblMFRecipeAlertLog.sql" />
@@ -6048,6 +6048,8 @@
     <Build Include="dbo\Views\vyuCTContractProducer.sql" />
     <Build Include="Scripts\Post-Deployment\AP\DefaultData\Threshold1099.sql" />
     <Build Include="dbo\Functions\fnRTrim.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetOrganicDeclarationReportHeader.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetOrganicDeclarationReportDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
