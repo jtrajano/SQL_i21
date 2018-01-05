@@ -259,6 +259,8 @@ BEGIN TRY
 				,dblQuantity NUMERIC(18, 6)
 				)
 
+			DELETE FROM @ContractDetail
+
 			INSERT INTO @ContractDetail
 			SELECT intContractDetailId
 				,dblQuantity
@@ -322,6 +324,10 @@ BEGIN TRY
 				DECLARE @dblCQuantity NUMERIC(18, 6)
 				DECLARE @intSeqItemId INT
 				DECLARE @strCItemNo NVARCHAR(50)
+
+				SELECT @dblCQuantity = NULL
+					,@intSeqItemId = NULL
+					,@strCItemNo = NULL
 
 				SELECT @dblCQuantity = CD.dblQuantity
 					,@intSeqItemId = CD.intItemId
@@ -441,6 +447,10 @@ BEGIN TRY
 			DECLARE @strShipperCode NVARCHAR(MAX)
 			DECLARE @intFirstIndex INT
 			DECLARE @intSecondIndex INT
+
+			SELECT @strShipperCode = NULL
+				,@intFirstIndex = NULL
+				,@intSecondIndex = NULL
 
 			SELECT @intFirstIndex = ISNULL(CHARINDEX('/', @strMarks), 0)
 
@@ -763,6 +773,8 @@ BEGIN TRY
 			AND SI.strSampleNumber = @strSampleRefNo
 
 		-- Calculate and update formula property value
+		DELETE FROM @FormulaProperty
+
 		INSERT INTO @FormulaProperty
 		SELECT intTestResultId
 			,strFormula
