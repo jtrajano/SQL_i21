@@ -18,16 +18,17 @@
 	MAX(custInvoice.dtmDate) AS dtmLastInvoice,
 	MAX(custPayment.dtmDatePaid) AS dtmLastPayment,
 	cust.ysnActive,
-	entityToCustomer.strMobile,
-	entityToCustomer.strEmail,
+	entityContact.strMobile,
+	entityContact.strEmail,
 	LOB.strLineOfBusiness,
 	entityClass.strClass
 FROM tblARCustomer cust
 INNER JOIN tblEMEntity entityToCustomer ON cust.intEntityId = entityToCustomer.intEntityId
 LEFT JOIN tblEMEntity entityToSalesperson ON cust.intSalespersonId = entityToSalesperson.intEntityId
-LEFT JOIN tblEMEntityToContact entityContact ON entityToCustomer.intEntityId = entityContact.intEntityId AND entityContact.ysnDefaultContact = 1
+LEFT JOIN tblEMEntityToContact entityToContact ON entityToCustomer.intEntityId = entityToContact.intEntityId AND entityToContact.ysnDefaultContact = 1
+LEFT JOIN tblEMEntity entityContact ON entityContact.intEntityId = entityToContact.intEntityContactId AND entityToContact.ysnDefaultContact = 1
 LEFT JOIN tblEMEntityLocation custLocation ON cust.intEntityId = custLocation.intEntityId AND custLocation.ysnDefaultLocation = 1
-LEFT JOIN tblEMEntityPhoneNumber entityPhone ON entityContact.intEntityContactId = entityPhone.intEntityId
+LEFT JOIN tblEMEntityPhoneNumber entityPhone ON entityToContact.intEntityContactId = entityPhone.intEntityId
 LEFT JOIN tblSMTerm entityLocationTerm ON custLocation.intTermsId = entityLocationTerm.intTermID
 LEFT JOIN tblSMCurrency custCurrency ON cust.intCurrencyId = custCurrency.intCurrencyID
 LEFT JOIN tblSMCompanyLocation entityLocation ON custLocation.intWarehouseId = entityLocation.intCompanyLocationId
@@ -60,8 +61,8 @@ GROUP BY
 	entityLocationTerm.strTerm,
 	cust.ysnActive,
 	entityPhone.strPhone,
-	entityToCustomer.strMobile,
-	entityToCustomer.strEmail,
+	entityContact.strMobile,
+	entityContact.strEmail,
 	LOB.strLineOfBusiness,
 	entityClass.strClass
 GO
