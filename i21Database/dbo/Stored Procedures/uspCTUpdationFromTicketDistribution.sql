@@ -40,33 +40,41 @@ BEGIN TRY
 			dblCost				NUMERIC(18,6)
 	)			
 	
-	IF @ysnDeliverySheet = 1 
-	BEGIN
-		IF NOT EXISTS(SELECT * FROM tblSCDeliverySheet WHERE intDeliverySheetId = @intTicketId)
-		BEGIN
-			RAISERROR ('Delivery Sheet is deleted by other user.',16,1,'WITH NOWAIT')  
-		END
-	END
-	ELSE
-	BEGIN
-		IF NOT EXISTS(SELECT * FROM tblSCTicket WHERE intTicketId = @intTicketId)
-		BEGIN
-			RAISERROR ('Ticket is deleted by other user.',16,1,'WITH NOWAIT')  
-		END
-	END
-	
 	SELECT	@ysnAutoCreateDP = ysnAutoCreateDP FROM tblCTCompanyPreference
 
-	SELECT	@intItemId		=	intItemId,
-			@strInOutFlag	=	strInOutFlag 
-	FROM	tblSCTicket
-	WHERE	intTicketId		=	@intTicketId
+	IF @ysnDeliverySheet = 0
+		BEGIN
+			IF NOT EXISTS(SELECT * FROM tblSCTicket WHERE intTicketId = @intTicketId)
+			BEGIN
+				RAISERROR ('Ticket is deleted by other user.',16,1,'WITH NOWAIT')  
+			END
+			
+			SELECT	@intItemId		=	intItemId,
+					@strInOutFlag	=	strInOutFlag 
+			FROM	tblSCTicket
+			WHERE	intTicketId		=	@intTicketId
 
-	SELECT  @intScaleUOMId			=	IU.intItemUOMId,
-			@intScaleUnitMeasureId  =   IU.intUnitMeasureId
-    FROM    tblICItemUOM	IU    
-    JOIN	tblSCTicket		SC	ON	SC.intItemId = IU.intItemId  
-    WHERE   SC.intTicketId = @intTicketId AND IU.ysnStockUnit = 1
+			SELECT  @intScaleUOMId			=	IU.intItemUOMId,
+					@intScaleUnitMeasureId  =   IU.intUnitMeasureId
+			FROM    tblICItemUOM	IU    
+			JOIN	tblSCTicket		SC	ON	SC.intItemId = IU.intItemId  
+			WHERE   SC.intTicketId = @intTicketId AND IU.ysnStockUnit = 1
+		END
+	ELSE
+		BEGIN
+			IF NOT EXISTS(SELECT * FROM tblSCDeliverySheet WHERE intDeliverySheetId = @intTicketId)
+			BEGIN
+				RAISERROR ('Delivery Sheet is deleted by other user.',16,1,'WITH NOWAIT')  
+			END
+
+			SELECT	@intItemId				=	SCD.intItemId,
+					@strInOutFlag			= CASE WHEN SCD.intTicketTypeId = 1 THEN 'I' ELSE 'O' END,
+					@intScaleUOMId			=	IUOM.intItemUOMId,
+					@intScaleUnitMeasureId  =   IUOM.intUnitMeasureId
+			FROM	tblSCDeliverySheet SCD
+			INNER JOIN tblICItemUOM IUOM ON IUOM.intItemId = SCD.intItemId
+			WHERE	SCD.intDeliverySheetId = @intTicketId AND IUOM.ysnStockUnit = 1
+		END
 
 	SELECT	@ApplyScaleToBasis = CAST(strValue AS BIT) FROM tblSMPreferences WHERE strPreference = 'ApplyScaleToBasis'
 	SELECT	@ApplyScaleToBasis = ISNULL(@ApplyScaleToBasis,0)
