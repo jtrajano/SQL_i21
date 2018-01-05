@@ -350,10 +350,11 @@ BEGIN
 		INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
 		INNER JOIN tblICItem i ON i.intItemId = ri.intItemId
 	WHERE i.ysnIsBasket = 1
+		AND r.intInventoryReceiptId = @intTransactionId
 
 	IF @intItemId IS NOT NULL
 	BEGIN
-		EXEC uspICRaiseError 80162
+		EXEC uspICRaiseError 80198
 	END
 END
 
