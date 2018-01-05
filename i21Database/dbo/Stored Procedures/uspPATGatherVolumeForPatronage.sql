@@ -156,7 +156,7 @@ SET ANSI_WARNINGS OFF
 					FY.intFiscalYearId,
 					intCustomerPatronId = ARI.intEntityCustomerId,
 					IC.intItemId,
-					IC.intPatronageCategoryId,
+					IC.intPatronageCategoryDirectId,
 					PC.strPurchaseSale,
 					PC.strUnitAmount,
 					ARID.dblQtyShipped,
