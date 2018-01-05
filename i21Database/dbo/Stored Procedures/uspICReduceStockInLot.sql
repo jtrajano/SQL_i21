@@ -58,14 +58,11 @@ BEGIN
 	SELECT	@strItemNo = i.strItemNo
 			,@CostBucketId = cb.intInventoryLotId
 			,@AllowNegativeInventory = il.intAllowNegativeInventory
-			,@strLocationName = cl.strLocationName
 	FROM	tblICItem i INNER JOIN tblICItemLocation il
 				ON i.intItemId = il.intItemId
 				AND il.intItemLocationId = @intItemLocationId
-			INNER JOIN tblSMCompanyLocation cl
-				ON cl.intCompanyLocationId = il.intLocationId
 			OUTER APPLY (
-				SELECT	TOP 1 *
+				SELECT	TOP 1 cb.intInventoryLotId
 				FROM	tblICInventoryLot cb
 				WHERE	cb.intItemId = @intItemId
 						AND cb.intItemLocationId = @intItemLocationId
@@ -101,13 +98,8 @@ BEGIN
 		END 
 		ELSE 
 		BEGIN 
-			SET @strLocationName = 
-					dbo.fnFormatMsg80003(
-						@intItemLocationId
-						,@intSubLocationId 
-						,@intStorageLocationId
-					)
-
+			SET @strLocationName = dbo.fnFormatMsg80003(@intItemLocationId, @intSubLocationId, @intStorageLocationId)
+			
 			--'Negative stock quantity is not allowed for {Item No} in {Location Name}.'
 			EXEC uspICRaiseError 80003, @strItemNo, @strLocationName; 
 		END 
