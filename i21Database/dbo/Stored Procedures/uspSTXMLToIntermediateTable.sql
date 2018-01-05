@@ -111,7 +111,7 @@ BEGIN
 		
 		IF(@intImportFileColumnDetailId <> @intRootImportFileColumnDetailId)
 		BEGIN
-			SET @FROMNODES = @FROMNODES + 'CROSS APPLY ' + REPLACE(@ParentTag, '-', '') + '.nodes(''' + @NamespaceVar + @strXMLTag + ''') ' + @strCompressTag + '(' + @strCompressTag + ')' + CHAR(13)
+			SET @FROMNODES = @FROMNODES + 'OUTER APPLY ' + REPLACE(@ParentTag, '-', '') + '.nodes(''' + @NamespaceVar + @strXMLTag + ''') ' + @strCompressTag + '(' + @strCompressTag + ')' + CHAR(13)
 		END
 
 		

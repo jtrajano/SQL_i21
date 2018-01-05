@@ -204,7 +204,7 @@ BEGIN
 						, strAccountPromotionName
 						, dblAccountDiscountAmount
 						, dblManufacturerDiscountAmount
-						, strCouponPid
+						--, strCouponPid
 						, dblCouponAmount
 						
 						, strManufacturerMultipackFlag
@@ -241,7 +241,7 @@ BEGIN
 						, x.strAccountPromotionName
 						, x.dblAccountDiscountAmount
 						, x.dblManufacturerDiscountAmount
-						, x.strCouponPid
+						--, x.strCouponPid
 						, x.dblCouponAmount
 						
 						, x.strManufacturerMultipackFlag
@@ -267,7 +267,7 @@ BEGIN
 								, replace(convert(NVARCHAR, dtmDate, 120), ' ', '-') as strTransactionDateTime
 								, intTermMsgSN as strMarketBasketTransactionId
 								, intTermMsgSN as strScanTransactionId
-								, intPosNum as strRegisterId
+								, intTrTickNumPosNum as strRegisterId
 								, dblTrlQty as intQuantity
 								, dblTrlLineTot as dblPrice
 								, strTrlUPC as strUpcCode
@@ -284,7 +284,7 @@ BEGIN
 								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN 'COUPONS' ELSE '' END as strAccountPromotionName
 								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN dblTrpAmt ELSE 0 END as dblAccountDiscountAmount
 								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN dblTrpAmt ELSE 0 END as dblManufacturerDiscountAmount
-								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN strTrpCouponEntryMethod ELSE '' END as strCouponPid
+								--, CASE WHEN strTrpPaycode IN ('COUPONS') THEN strTrpCouponEntryMethod ELSE '' END as strCouponPid
 								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN dblTrpAmt ELSE 0 END as dblCouponAmount
 
 								, 'N' as strManufacturerMultipackFlag
@@ -302,7 +302,7 @@ BEGIN
 							AND CAST(TR.dtmOpenedTime as DATE) >= @dtmBeginningDate 
 							AND CAST(TR.dtmClosedTime as DATE) <= @dtmEndingDate 
 							AND ysnSubmitted = 0
-							AND strTrLinetype = 'plu'
+							AND strTrLineType = 'plu'
 					) x
 				END
 				--END Insert data from tblSTstgRebatesRJReynolds
