@@ -15,7 +15,7 @@ SELECT
 	,t3.intInventoryReceiptChargeId
 	,t3.intContractDetailId
 	,t3.dblTax
-	,t3.dblNetTotal
+	,t3.dblNetTotal* (t1.dblQtyOrdered / t2.dblTotalQty) dblNetTotal
 	FROM (
 			 SELECT 
 			 BillDtl.intBillDetailId
