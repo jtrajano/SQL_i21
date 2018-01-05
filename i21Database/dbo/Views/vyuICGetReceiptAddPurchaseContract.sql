@@ -1,4 +1,4 @@
-﻿CREATE  VIEW [dbo].[vyuICGetReceiptAddPurchaseContract]
+﻿CREATE VIEW [dbo].[vyuICGetReceiptAddPurchaseContract]
 AS
 
 SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId, intItemId, intLineNo) AS INT)
@@ -37,7 +37,7 @@ FROM (
 		, intOrderUOMId				= ItemUOM.intItemUOMId
 		, strOrderUOM				= ItemUnitMeasure.strUnitMeasure
 		, dblOrderUOMConvFactor		= ItemUOM.dblUnitQty
-		, intItemUOMId				= CASE WHEN ISNULL(ContractView.ysnIsBasket, 0) = 1 THEN BasketItemUOM.intItemUOMId ELSE ItemUOM.intItemUOMId END 
+		, intItemUOMId				= ItemUOM.intItemUOMId 
 		, strUnitMeasure			= ItemUnitMeasure.strUnitMeasure
 		, strUnitType				= ItemUnitMeasure.strUnitType
 		-- Gross/Net UOM -----------
@@ -63,14 +63,14 @@ FROM (
 		, strSubCurrency			= SubCurrency.strCurrency
 		, dblGross					= 
 									CASE WHEN ISNULL(ContractView.ysnIsBasket, 0) = 1 THEN 
-										CAST(dbo.fnCalculateQtyBetweenUOM(ItemUOM.intItemUOMId, BasketWeightUOM.intItemUOMId, dblDetailQuantity - (dblDetailQuantity - dblBalance)) AS NUMERIC(38, 20)) 
+										CAST(dblDetailQuantity - (dblDetailQuantity - dblBalance) AS NUMERIC(38, 20)) 
 									ELSE 
 										CAST(0 AS NUMERIC(38, 20))									
 									END
 									
 		, dblNet					= 
 									CASE WHEN ISNULL(ContractView.ysnIsBasket, 0) = 1 THEN 
-										CAST(dbo.fnCalculateQtyBetweenUOM(ItemUOM.intItemUOMId, BasketWeightUOM.intItemUOMId, dblDetailQuantity - (dblDetailQuantity - dblBalance)) AS NUMERIC(38, 20))
+										CAST(dblDetailQuantity - (dblDetailQuantity - dblBalance) AS NUMERIC(38, 20))
 									ELSE 
 										CAST(0 AS NUMERIC(38, 20))									
 									END
