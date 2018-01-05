@@ -20,6 +20,7 @@ Ext.define('Inventory.model.ItemFactory', {
                     role: 'tblICItemFactories',
                     storeConfig: {
                         remoteFilter: true,
+                        complete: true, 
                         proxy: {
                             extraParams: { include: 'tblICItemFactoryManufacturingCells.vyuICGetItemFactoryManufacturingCell, tblSMCompanyLocation' },
                             type: 'rest',

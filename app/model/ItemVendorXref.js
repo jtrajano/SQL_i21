@@ -19,6 +19,7 @@ Ext.define('Inventory.model.ItemVendorXref', {
                     role: 'tblICItemVendorXrefs',
                     storeConfig: {
                         remoteFilter: true,
+                        complete: true, 
                         proxy: {
                             extraParams: { include: 'vyuAPVendor, tblICItemUOM.tblICUnitMeasure, tblICItemLocation.vyuICGetItemLocation' },
                             type: 'rest',

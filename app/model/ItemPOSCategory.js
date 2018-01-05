@@ -19,6 +19,7 @@ Ext.define('Inventory.model.ItemPOSCategory', {
                     role: 'tblICItemPOSCategories',
                     storeConfig: {
                         remoteFilter: true,
+                        complete: true, 
                         proxy: {
                             extraParams: { include: 'tblICCategory' },
                             type: 'rest',

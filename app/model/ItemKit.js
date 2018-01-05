@@ -20,6 +20,7 @@ Ext.define('Inventory.model.ItemKit', {
                     role: 'tblICItemKits',
                     storeConfig: {
                         remoteFilter: true,
+                        complete: true, 
                         proxy: {
                             extraParams: { include: 'tblICItemKitDetails.tblICItem, tblICItemKitDetails.tblICItemUOM' },
                             type: 'rest',

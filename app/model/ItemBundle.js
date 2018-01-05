@@ -19,6 +19,7 @@ Ext.define('Inventory.model.ItemBundle', {
                     role: 'tblICItemBundles',
                     storeConfig: {
                         remoteFilter: true,
+                        complete: true, 
                         proxy: {
                             extraParams: { include: 'BundleItem, tblICItemUOM.tblICUnitMeasure' },
                             type: 'rest',

@@ -21,6 +21,7 @@ Ext.define('Inventory.model.ItemUOM', {
                     role: 'tblICItemUOMs',
                     storeConfig: {
                         remoteFilter: true,
+                        complete: true,
                         proxy: {
                             extraParams: { include: 'tblICUnitMeasure, WeightUOM, DimensionUOM, VolumeUOM, tblICUnitMeasure.vyuICGetUOMConversions' },
                             type: 'rest',

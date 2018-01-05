@@ -19,6 +19,7 @@ Ext.define('Inventory.model.ItemMotorFuelTax', {
                     role: 'tblICItemMotorFuelTaxes',
                     storeConfig: {
                         remoteFilter: true,
+                        complete: true, 
                         proxy: {
                             extraParams: { include: 'vyuICGetItemMotorFuelTax' },
                             type: 'rest',

@@ -19,6 +19,7 @@ Ext.define('Inventory.model.ItemPricingLevel', {
                     role: 'tblICItemPricingLevels',
                     storeConfig: {
                         remoteFilter: true,
+                        complete: true, 
                         proxy: {
                             type: 'rest',
                             api: {

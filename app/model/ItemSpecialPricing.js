@@ -20,6 +20,7 @@ Ext.define('Inventory.model.ItemSpecialPricing', {
                     role: 'tblICItemSpecialPricings',
                     storeConfig: {
                         remoteFilter: true,
+                        complete: true, 
                         proxy: {
                             type: 'rest',
                             api: {

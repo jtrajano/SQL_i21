@@ -18,6 +18,7 @@ Ext.define('Inventory.model.ItemContract', {
                 type: 'Inventory.model.Item',
                 inverse: {
                     role: 'tblICItemContracts',
+                    complete: true,
                     storeConfig: {
                         remoteFilter: true,
                         proxy: {

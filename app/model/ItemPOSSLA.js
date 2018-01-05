@@ -16,9 +16,10 @@ Ext.define('Inventory.model.ItemPOSSLA', {
             reference: {
                 type: 'Inventory.model.Item',
                 inverse: {
-                    role: 'tblICItemPOSSLAs',
+                    role: 'tblICItemPOSSLAs',                    
                     storeConfig: {
                         remoteFilter: true,
+                        complete: true, 
                         proxy: {
                             type: 'rest',
                             api: {

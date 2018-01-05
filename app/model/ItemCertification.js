@@ -19,6 +19,7 @@ Ext.define('Inventory.model.ItemCertification', {
                     role: 'tblICItemCertifications',
                     storeConfig: {
                         remoteFilter: true,
+                        complete: true, 
                         proxy: {
                             extraParams: { include: 'tblICCertification' },
                             type: 'rest',

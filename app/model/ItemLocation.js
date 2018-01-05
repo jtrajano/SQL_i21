@@ -20,6 +20,7 @@ Ext.define('Inventory.model.ItemLocation', {
                     role: 'tblICItemLocations',
                     storeConfig: {
                         remoteFilter: true,
+                        complette: true, 
                         proxy: {
                             extraParams: { include: 'vyuICGetItemLocation' },
                             type: 'rest',

@@ -18,6 +18,8 @@ Ext.define('Inventory.model.ItemLicense', {
                 inverse: {
                     role: 'tblICItemLicenses',
                     storeConfig: {
+                        remoteFilter: true,
+                        complete: true, 
                         proxy: {
                             type: 'rest',
                             api: {

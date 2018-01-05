@@ -19,6 +19,7 @@ Ext.define('Inventory.model.ItemOwner', {
                     role: 'tblICItemOwners',
                     storeConfig: {
                         remoteFilter: true,
+                        complete: true, 
                         proxy: {
                             extraParams: { include: 'tblARCustomer' },
                             type: 'rest',

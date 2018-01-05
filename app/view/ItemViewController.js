@@ -1347,6 +1347,7 @@ Ext.define('Inventory.view.ItemViewController', {
             details: [
                 {
                     key: 'tblICItemUOMs',
+                    lazy: true, 
                     component: Ext.create('iRely.grid.Manager', {
                         grid: grdUOM,
                         deleteButton : grdUOM.down('#btnDeleteUom')
@@ -1354,6 +1355,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 },
                 {
                     key: 'tblICItemLocations',
+                    lazy: true, 
                     component: Ext.create('iRely.grid.Manager', {
                         grid: grdLocationStore,
                         deleteButton : grdLocationStore.down('#btnDeleteLocation'),
@@ -1371,6 +1373,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 },
                 {
                     key: 'tblICItemVendorXrefs',
+                    lazy: true, 
                     component: Ext.create('iRely.grid.Manager', {
                         grid: grdVendorXref,
                         deleteButton : grdVendorXref.down('#btnDeleteVendorXref')
@@ -1378,6 +1381,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 },
                 {
                     key: 'tblICItemCustomerXrefs',
+                    lazy: true, 
                     component: Ext.create('iRely.grid.Manager', {
                         grid: grdCustomerXref,
                         deleteButton : grdCustomerXref.down('#btnDeleteCustomerXref')
@@ -1385,6 +1389,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 },
                 {
                     key: 'tblICItemContracts',
+                    lazy: true, 
                     component: Ext.create('iRely.grid.Manager', {
                         grid: grdContractItem,
                         deleteButton : grdContractItem.down('#btnDeleteContractItem')
@@ -1401,6 +1406,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 },
                 {
                     key: 'tblICItemMotorFuelTaxes',
+                    lazy: true, 
                     component: Ext.create('iRely.grid.Manager', {
                         grid: grdMotorFuelTax,
                         deleteButton: grdMotorFuelTax.down('#btnDeleteMFT')
@@ -1408,6 +1414,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 },
                 {
                     key: 'tblICItemCertifications',
+                    lazy: true, 
                     component: Ext.create('iRely.grid.Manager', {
                         grid: grdCertification,
                         deleteButton : grdCertification.down('#btnDeleteCertification')
@@ -1415,6 +1422,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 },
                 {
                     key: 'tblICItemPOSCategories',
+                    lazy: true, 
                     component: Ext.create('iRely.grid.Manager', {
                         grid: grdCategory,
                         deleteButton : win.down('#btnDeleteCategories')
@@ -1422,6 +1430,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 },
                 {
                     key: 'tblICItemPOSSLAs',
+                    lazy: true, 
                     component: Ext.create('iRely.grid.Manager', {
                         grid: win.down('#grdServiceLevelAgreement'),
                         deleteButton : win.down('#btnDeleteSLA')
@@ -1429,6 +1438,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 },
                 {
                     key: 'tblICItemAccounts',
+                    lazy: true, 
                     component: Ext.create('iRely.grid.Manager', {
                         grid: grdGlAccounts,
                         deleteButton : grdGlAccounts.down('#btnDeleteGlAccounts')
@@ -1436,6 +1446,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 },
                 {
                     key: 'tblICItemStocks',
+                    lazy: true, 
                     component: Ext.create('iRely.grid.Manager', {
                         grid: grdStock,
                         position: 'none'
@@ -1443,6 +1454,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 },
                 {
                     key: 'tblICItemCommodityCosts',
+                    lazy: true, 
                     component: Ext.create('iRely.grid.Manager', {
                         grid: grdCommodityCost,
                         deleteButton : grdCommodityCost.down('#btnDeleteCommodityCost')
@@ -1450,6 +1462,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 },
                 {
                     key: 'tblICItemPricings',
+                    lazy: true, 
                     component: Ext.create('iRely.grid.Manager', {
                         grid: grdPricing,
                         deleteButton : grdPricing.down('#btnDeletePricing')
@@ -1457,6 +1470,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 },
                 {
                     key: 'tblICItemPricingLevels',
+                    lazy: true, 
                     component: Ext.create('iRely.grid.Manager', {
                         grid: grdPricingLevel,
                         deleteButton : grdPricingLevel.down('#btnDeletePricingLevel')
@@ -1464,6 +1478,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 },
                 {
                     key: 'tblICItemSpecialPricings',
+                    lazy: true, 
                     component: Ext.create('iRely.grid.Manager', {
                         grid: grdSpecialPricing,
                         deleteButton : grdSpecialPricing.down('#btnDeleteSpecialPricing')
@@ -1471,6 +1486,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 },
                 {
                     key: 'tblICItemAssemblies',
+                    lazy: true, 
                     component: Ext.create('iRely.grid.Manager', {
                         grid: grdAssembly,
                         deleteButton : grdAssembly.down('#btnDeleteAssembly')
@@ -1478,6 +1494,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 },
                 {
                     key: 'tblICItemBundles',
+                    lazy: true, 
                     component: Ext.create('iRely.grid.Manager', {
                         grid: grdBundle,
                         deleteButton : grdBundle.down('#btnDeleteBundle'),
@@ -1486,6 +1503,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 },
                 {
                     key: 'tblICItemKits',
+                    lazy: true, 
                     component: Ext.create('iRely.grid.Manager', {
                         grid: grdKit,
                         deleteButton : grdKit.down('#btnDeleteKit')
@@ -1502,6 +1520,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 },
                 {
                     key: 'tblICItemOwners',
+                    lazy: true, 
                     component: Ext.create('iRely.grid.Manager', {
                         grid: grdOwner,
                         deleteButton : grdOwner.down('#btnDeleteOwner')
@@ -1509,6 +1528,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 },
                 {
                     key: 'tblICItemFactories',
+                    lazy: true, 
                     component: Ext.create('iRely.grid.Manager', {
                         grid: grdFactory,
                         deleteButton : grdFactory.down('#btnDeleteFactory')
@@ -1525,6 +1545,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 },
                 {
                     key: 'tblICItemLicenses',
+                    lazy: true, 
                     component: Ext.create('iRely.grid.Manager', {
                         grid: grdItemLicense,
                         deleteButton: grdItemLicense.down('#btnRemoveLicense'),
@@ -1735,111 +1756,111 @@ Ext.define('Inventory.view.ItemViewController', {
 
     onItemTabChange: function(tabPanel, newCard, oldCard, eOpts) {
         switch (newCard.itemId) {
-            case 'pgeDetails':
-                var pgeDetails = tabPanel.down('#pgeDetails');
-                var grdUnitOfMeasure = pgeDetails.down('#grdUnitOfMeasure');
-                if (grdUnitOfMeasure.store.complete === true)
-                    grdUnitOfMeasure.getView().refresh();
-                else
-                    grdUnitOfMeasure.store.load();
-                break;
+        //     case 'pgeDetails':
+        //         var pgeDetails = tabPanel.down('#pgeDetails');
+        //         var grdUnitOfMeasure = pgeDetails.down('#grdUnitOfMeasure');
+        //         if (grdUnitOfMeasure.store.complete === true)
+        //             grdUnitOfMeasure.getView().refresh();
+        //         else
+        //             grdUnitOfMeasure.store.load();
+        //         break;
 
-            case 'pgeSetup':
-                var tabSetup = tabPanel.down('#tabSetup');
-                this.onItemTabChange(tabSetup, tabSetup.activeTab);
+        //     case 'pgeSetup':
+        //         var tabSetup = tabPanel.down('#tabSetup');
+        //         this.onItemTabChange(tabSetup, tabSetup.activeTab);
 
-            case 'pgeLocation':
-                var pgeLocation = tabPanel.down('#pgeLocation');
-                var grdLocationStore = pgeLocation.down('#grdLocationStore');
-                if (grdLocationStore.store.complete === true)
-                    grdLocationStore.getView().refresh();
-                else
-                    grdLocationStore.store.load();
-                break;
+        //     case 'pgeLocation':
+        //         var pgeLocation = tabPanel.down('#pgeLocation');
+        //         var grdLocationStore = pgeLocation.down('#grdLocationStore');
+        //         if (grdLocationStore.store.complete === true)
+        //             grdLocationStore.getView().refresh();
+        //         else
+        //             grdLocationStore.store.load();
+        //         break;
 
-            case 'pgeGLAccounts':
-                var pgeGLAccounts = tabPanel.down('#pgeGLAccounts');
-                var grdGlAccounts = pgeGLAccounts.down('#grdGlAccounts');
-                if (grdGlAccounts.store.complete === true)
-                    grdGlAccounts.getView().refresh();
-                else
-                    grdGlAccounts.store.load();
-                break;
+        //     case 'pgeGLAccounts':
+        //         var pgeGLAccounts = tabPanel.down('#pgeGLAccounts');
+        //         var grdGlAccounts = pgeGLAccounts.down('#grdGlAccounts');
+        //         if (grdGlAccounts.store.complete === true)
+        //             grdGlAccounts.getView().refresh();
+        //         else
+        //             grdGlAccounts.store.load();
+        //         break;
 
-            case 'pgePOS':
-                var pgePOS = tabPanel.down('#pgePOS');
-                var grdCategory = pgePOS.down('#grdCategory');
-                if (grdCategory.store.complete === true)
-                    grdCategory.getView().refresh();
-                else
-                    grdCategory.store.load();
+        //     case 'pgePOS':
+        //         var pgePOS = tabPanel.down('#pgePOS');
+        //         var grdCategory = pgePOS.down('#grdCategory');
+        //         if (grdCategory.store.complete === true)
+        //             grdCategory.getView().refresh();
+        //         else
+        //             grdCategory.store.load();
 
-                var grdServiceLevelAgreement = pgePOS.down('#grdServiceLevelAgreement');
-                if (grdServiceLevelAgreement.store.complete === true)
-                    grdServiceLevelAgreement.getView().refresh();
-                else
-                    grdServiceLevelAgreement.store.load();
-                break;
+        //         var grdServiceLevelAgreement = pgePOS.down('#grdServiceLevelAgreement');
+        //         if (grdServiceLevelAgreement.store.complete === true)
+        //             grdServiceLevelAgreement.getView().refresh();
+        //         else
+        //             grdServiceLevelAgreement.store.load();
+        //         break;
 
-            case 'pgeXref':
-                var pgeXref = tabPanel.down('#pgeXref');
-                var grdCustomerXref = pgeXref.down('#grdCustomerXref');
-                if (grdCustomerXref.store.complete === true)
-                    grdCustomerXref.getView().refresh();
-                else
-                    grdCustomerXref.store.load();
+        //     case 'pgeXref':
+        //         var pgeXref = tabPanel.down('#pgeXref');
+        //         var grdCustomerXref = pgeXref.down('#grdCustomerXref');
+        //         if (grdCustomerXref.store.complete === true)
+        //             grdCustomerXref.getView().refresh();
+        //         else
+        //             grdCustomerXref.store.load();
 
-                var grdVendorXref = pgeXref.down('#grdVendorXref');
-                if (grdVendorXref.store.complete === true)
-                    grdVendorXref.getView().refresh();
-                else
-                    grdVendorXref.store.load();
-                break;
+        //         var grdVendorXref = pgeXref.down('#grdVendorXref');
+        //         if (grdVendorXref.store.complete === true)
+        //             grdVendorXref.getView().refresh();
+        //         else
+        //             grdVendorXref.store.load();
+        //         break;
 
-            case 'pgeContract':
-                var pgeContract = tabPanel.down('#pgeContract');
-                var grdContractItem = pgeContract.down('#grdContractItem');
-                if (grdContractItem.store.complete === true)
-                    grdContractItem.getView().refresh();
-                else
-                    grdContractItem.store.load();
+        //     case 'pgeContract':
+        //         var pgeContract = tabPanel.down('#pgeContract');
+        //         var grdContractItem = pgeContract.down('#grdContractItem');
+        //         if (grdContractItem.store.complete === true)
+        //             grdContractItem.getView().refresh();
+        //         else
+        //             grdContractItem.store.load();
 
-                var grdCertification = pgeContract.down('#grdCertification');
-                if (grdCertification.store.complete === true)
-                    grdCertification.getView().refresh();
-                else
-                    grdCertification.store.load();
-                break;
+        //         var grdCertification = pgeContract.down('#grdCertification');
+        //         if (grdCertification.store.complete === true)
+        //             grdCertification.getView().refresh();
+        //         else
+        //             grdCertification.store.load();
+        //         break;
 
-            case 'pgeMFT':
-                var pgeMFT = tabPanel.down('#pgeMFT');
-                var grdMotorFuelTax = pgeMFT.down('#grdMotorFuelTax');
-                if (grdMotorFuelTax.store.complete === true)
-                    grdMotorFuelTax.getView().refresh();
-                else
-                    grdMotorFuelTax.store.load();
-                break;
+        //     case 'pgeMFT':
+        //         var pgeMFT = tabPanel.down('#pgeMFT');
+        //         var grdMotorFuelTax = pgeMFT.down('#grdMotorFuelTax');
+        //         if (grdMotorFuelTax.store.complete === true)
+        //             grdMotorFuelTax.getView().refresh();
+        //         else
+        //             grdMotorFuelTax.store.load();
+        //         break;
 
-            case 'pgePricing':
-                var pgePricing = tabPanel.down('#pgePricing');
-                var grdPricing = pgePricing.down('#grdPricing');
-                if (grdPricing.store.complete === true)
-                    grdPricing.getView().refresh();
-                else
-                    grdPricing.store.load();
+        //     case 'pgePricing':
+        //         var pgePricing = tabPanel.down('#pgePricing');
+        //         var grdPricing = pgePricing.down('#grdPricing');
+        //         if (grdPricing.store.complete === true)
+        //             grdPricing.getView().refresh();
+        //         else
+        //             grdPricing.store.load();
 
-                var grdPricingLevel = pgePricing.down('#grdPricingLevel');
-                if (grdPricingLevel.store.complete === true)
-                    grdPricingLevel.getView().refresh();
-                else
-                    grdPricingLevel.store.load();
+        //         var grdPricingLevel = pgePricing.down('#grdPricingLevel');
+        //         if (grdPricingLevel.store.complete === true)
+        //             grdPricingLevel.getView().refresh();
+        //         else
+        //             grdPricingLevel.store.load();
 
-                var grdSpecialPricing = pgePricing.down('#grdSpecialPricing');
-                if (grdSpecialPricing.store.complete === true)
-                    grdSpecialPricing.getView().refresh();
-                else
-                    grdSpecialPricing.store.load();
-                break;
+        //         var grdSpecialPricing = pgePricing.down('#grdSpecialPricing');
+        //         if (grdSpecialPricing.store.complete === true)
+        //             grdSpecialPricing.getView().refresh();
+        //         else
+        //             grdSpecialPricing.store.load();
+        //         break;
 
             case 'pgeStock':
                 var pgeStock = tabPanel.down('#pgeStock');
@@ -1853,61 +1874,61 @@ Ext.define('Inventory.view.ItemViewController', {
                     grdStock.store.load();
                 break;
 
-            case 'pgeCommodity':
-                var pgeCommodity = tabPanel.down('#pgeCommodity');
-                var grdCommodityCost = pgeCommodity.down('#grdCommodityCost');
-                if (grdCommodityCost.store.complete === true)
-                    grdCommodityCost.getView().refresh();
-                else
-                    grdCommodityCost.store.load();
-                break;
+        //     case 'pgeCommodity':
+        //         var pgeCommodity = tabPanel.down('#pgeCommodity');
+        //         var grdCommodityCost = pgeCommodity.down('#grdCommodityCost');
+        //         if (grdCommodityCost.store.complete === true)
+        //             grdCommodityCost.getView().refresh();
+        //         else
+        //             grdCommodityCost.store.load();
+        //         break;
 
-            case 'pgeAssembly':
-                var pgeAssembly = tabPanel.down('#pgeAssembly');
-                var grdAssembly = pgeAssembly.down('#grdAssembly');
-                if (grdAssembly.store.complete === true)
-                    grdAssembly.getView().refresh();
-                else
-                    grdAssembly.store.load();
-                break;
+        //     case 'pgeAssembly':
+        //         var pgeAssembly = tabPanel.down('#pgeAssembly');
+        //         var grdAssembly = pgeAssembly.down('#grdAssembly');
+        //         if (grdAssembly.store.complete === true)
+        //             grdAssembly.getView().refresh();
+        //         else
+        //             grdAssembly.store.load();
+        //         break;
 
-            case 'pgeBundle':
-                var pgeBundle = tabPanel.down('#pgeBundle');
-                var grdBundle = pgeBundle.down('#grdBundle');
-                if (grdBundle.store.complete === true)
-                    grdBundle.getView().refresh();
-                else
-                    grdBundle.store.load();
-                break;
+        //     case 'pgeBundle':
+        //         var pgeBundle = tabPanel.down('#pgeBundle');
+        //         var grdBundle = pgeBundle.down('#grdBundle');
+        //         if (grdBundle.store.complete === true)
+        //             grdBundle.getView().refresh();
+        //         else
+        //             grdBundle.store.load();
+        //         break;
 
-            case 'pgeKit':
-                var pgeKit = tabPanel.down('#pgeKit');
-                var grdKit = pgeKit.down('#grdKit');
-                if (grdKit.store.complete === true)
-                    grdKit.getView().refresh();
-                else
-                    grdKit.store.load();
-                break;
+        //     case 'pgeKit':
+        //         var pgeKit = tabPanel.down('#pgeKit');
+        //         var grdKit = pgeKit.down('#grdKit');
+        //         if (grdKit.store.complete === true)
+        //             grdKit.getView().refresh();
+        //         else
+        //             grdKit.store.load();
+        //         break;
 
-            case 'pgeFactory':
-                var pgeFactory = tabPanel.down('#pgeFactory');
-                var grdFactory = pgeFactory.down('#grdFactory');
-                if (grdFactory.store.complete === true)
-                    grdFactory.getView().refresh();
-                else
-                    grdFactory.store.load();
+        //     case 'pgeFactory':
+        //         var pgeFactory = tabPanel.down('#pgeFactory');
+        //         var grdFactory = pgeFactory.down('#grdFactory');
+        //         if (grdFactory.store.complete === true)
+        //             grdFactory.getView().refresh();
+        //         else
+        //             grdFactory.store.load();
 
-                var grdOwner = pgeFactory.down('#grdOwner');
-                if (grdOwner.store.complete === true)
-                    grdOwner.getView().refresh();
-                else
-                    grdOwner.store.load();
+        //         var grdOwner = pgeFactory.down('#grdOwner');
+        //         if (grdOwner.store.complete === true)
+        //             grdOwner.getView().refresh();
+        //         else
+        //             grdOwner.store.load();
 
-                if (grdFactory) {
-                    grdFactory.getSelectionModel().select(0);
-                }
+        //         if (grdFactory) {
+        //             grdFactory.getSelectionModel().select(0);
+        //         }
 
-                break;
+        //         break;
 
         }
     },

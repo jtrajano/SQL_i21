@@ -19,6 +19,7 @@ Ext.define('Inventory.model.ItemCommodityCost', {
                     role: 'tblICItemCommodityCosts',
                     storeConfig: {
                         remoteFilter: true,
+                        complete: true, 
                         proxy: {
                             extraParams: { include: 'tblICItemLocation.vyuICGetItemLocation' },
                             type: 'rest',
