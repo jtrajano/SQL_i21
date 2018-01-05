@@ -13,21 +13,21 @@ SELECT
 	,[dblOrderQty]								=	
 													CASE 
 														WHEN ISNULL(ReceiptCharge.dblAmount,0) < 0 -- Negate the qty if Charge is negative. 
-															THEN -(ReceiptCharge.dblQuantity - ISNULL(ReceiptCharge.dblQuantityBilled, 0))
-														ELSE ReceiptCharge.dblQuantity - ISNULL(ReceiptCharge.dblQuantityBilled, 0)
+															THEN -(ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(ReceiptCharge.dblQuantityBilled, 0))
+														ELSE ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(ReceiptCharge.dblQuantityBilled, 0)
 													END 
 	,[dblPOOpenReceive]							=	0
 	,[dblOpenReceive]							=	
 													CASE 
 														WHEN ISNULL(ReceiptCharge.dblAmount,0) < 0 -- Negate the qty if Charge is negative. 
-															THEN -(ReceiptCharge.dblQuantity- ISNULL(ReceiptCharge.dblQuantityBilled, 0))
-														ELSE ReceiptCharge.dblQuantity - ISNULL(ReceiptCharge.dblQuantityBilled, 0)
+															THEN -(ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(ReceiptCharge.dblQuantityBilled, 0))
+														ELSE ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(ReceiptCharge.dblQuantityBilled, 0)
 													END 
 	,[dblQuantityToBill]						=	
 													CASE 
 														WHEN ISNULL(ReceiptCharge.dblAmount,0) < 0 -- Negate the qty if Charge is negative. 
-															THEN -(ReceiptCharge.dblQuantity - ISNULL(ReceiptCharge.dblQuantityBilled, 0)) 
-														ELSE ReceiptCharge.dblQuantity - ISNULL(ReceiptCharge.dblQuantityBilled, 0)	
+															THEN -(ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(ReceiptCharge.dblQuantityBilled, 0)) 
+														ELSE ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(ReceiptCharge.dblQuantityBilled, 0)	
 													END 
 	,[dblQuantityBilled]						=	0
 	,[intLineNo]								=	1
@@ -151,7 +151,13 @@ FROM
 
 WHERE	ReceiptCharge.ysnAccrue = 1 
 		AND ISNULL(Receipt.ysnPosted, 0) = 1
-		AND ISNULL(ReceiptCharge.dblAmountBilled, 0) < ROUND(ReceiptCharge.dblAmount, 6) 
+		AND (
+			ISNULL(ReceiptCharge.dblAmountBilled, 0) < ROUND(ReceiptCharge.dblAmount, 6) 
+			OR (
+				ISNULL(ReceiptCharge.dblAmountBilled, 0) = 0 
+				AND ROUND(ReceiptCharge.dblAmount, 6) = 0 
+			)
+		)
 
 -- Query for 'Price' Other Charges. 
 UNION ALL 
@@ -169,26 +175,26 @@ SELECT
 													CASE 
 														WHEN ReceiptCharge.dblAmount > 0 
 															--Negate Quantity if amount is positive for Price Down charges; Amount is negated in Voucher for Price Down so no need to negate quantity for negative amount
-															THEN -(ReceiptCharge.dblQuantity - ISNULL(-ReceiptCharge.dblQuantityPriced, 0))															
+															THEN -(ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(-ReceiptCharge.dblQuantityPriced, 0))															
 														ELSE 
-															ReceiptCharge.dblQuantity - ISNULL(-ReceiptCharge.dblQuantityPriced, 0)
+															ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(-ReceiptCharge.dblQuantityPriced, 0)
 													END  
 	,[dblPOOpenReceive]							=	0
 	,[dblOpenReceive]							=		
 													CASE 
 														WHEN ReceiptCharge.dblAmount > 0 
 															--Negate Quantity if amount is positive for Price Down charges; Amount is negated in Voucher for Price Down so no need to negate quantity for negative amount
-															THEN -(ReceiptCharge.dblQuantity - ISNULL(-ReceiptCharge.dblQuantityPriced, 0))
+															THEN -(ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(-ReceiptCharge.dblQuantityPriced, 0))
 														ELSE 
-															ReceiptCharge.dblQuantity - ISNULL(-ReceiptCharge.dblQuantityPriced, 0)
+															ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(-ReceiptCharge.dblQuantityPriced, 0)
 													END 
 	,[dblQuantityToBill]						=	
 													CASE 
 														WHEN ReceiptCharge.dblAmount > 0 
 															--Negate Quantity if amount is positive for Price Down charges; Amount is negated in Voucher for Price Down so no need to negate quantity for negative amount
-															THEN -(ReceiptCharge.dblQuantity - ISNULL(-ReceiptCharge.dblQuantityPriced, 0))
+															THEN -(ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(-ReceiptCharge.dblQuantityPriced, 0))
 														ELSE 
-															ReceiptCharge.dblQuantity - ISNULL(-ReceiptCharge.dblQuantityPriced, 0)
+															ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(-ReceiptCharge.dblQuantityPriced, 0)
 													END 
 	,[dblQuantityBilled]						=	0
 	,[intLineNo]								=	1
@@ -309,4 +315,10 @@ FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item
 
 WHERE	ReceiptCharge.ysnPrice = 1
 		AND ISNULL(Receipt.ysnPosted, 0) = 1
-		AND ISNULL(-ReceiptCharge.dblAmountPriced, 0) < ROUND(ReceiptCharge.dblAmount, 6) 
+		AND (
+			ISNULL(-ReceiptCharge.dblAmountPriced, 0) < ROUND(ReceiptCharge.dblAmount, 6) 
+			OR (
+				ISNULL(ReceiptCharge.dblAmountPriced, 0) = 0 
+				AND ROUND(ReceiptCharge.dblAmount, 6) = 0 
+			)
+		)
