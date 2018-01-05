@@ -36,8 +36,8 @@ Ext.define('Inventory.model.ItemUOM', {
                         },
                         sortOnLoad: true,
                         sorters: {
-                            direction: 'DESC',
-                            property: 'intSort'
+                            direction: 'ASC',
+                            property: 'intItemUOMId'
                         }
                     }
                 }
