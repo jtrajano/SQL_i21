@@ -3,6 +3,7 @@
 	@dtmDateTo				DATETIME = NULL,
 	@strSalesperson			NVARCHAR(100) = NULL,
     @strSourceTransaction	NVARCHAR(100) = NULL,
+	@strCompanyLocation		NVARCHAR(100) = NULL,
 	@intEntityCustomerId    INT	= NULL,
 	@strCustomerName		NVARCHAR(MAX) = NULL,
 	@strAccountStatusCode	NVARCHAR(100) = NULL,
@@ -19,7 +20,9 @@ DECLARE @dtmDateFromLocal			DATETIME = NULL,
 		@dtmDateToLocal				DATETIME = NULL,
 		@strSalespersonLocal		NVARCHAR(100) = NULL,
 		@strSourceTransactionLocal	NVARCHAR(100) = NULL,
+		@strCompanyLocationLocal    NVARCHAR(100) = NULL,
 		@intEntityCustomerIdLocal   INT = NULL,
+		@intCompanyLocationId		INT	= NULL,
 		@strCustomerNameLocal		NVARCHAR(MAX) = NULL,
 		@strAccountStatusCodeLocal	NVARCHAR(100) = NULL,
 		@intSalespersonId			INT = NULL
@@ -35,6 +38,7 @@ SET @dtmDateFromLocal			= ISNULL(@dtmDateFrom, CAST(-53690 AS DATETIME))
 SET	@dtmDateToLocal				= ISNULL(@dtmDateTo, GETDATE())
 SET @strSalespersonLocal		= NULLIF(@strSalesperson, '')
 SET @strSourceTransactionLocal	= NULLIF(@strSourceTransaction, '')
+SET @strCompanyLocationLocal	= NULLIF(@strCompanyLocation, '')
 SET @intEntityCustomerIdLocal	= NULLIF(@intEntityCustomerId, 0)
 SET @strCustomerNameLocal		= NULLIF(@strCustomerName, '')
 SET @strAccountStatusCodeLocal	= NULLIF(@strAccountStatusCode, '')
@@ -94,6 +98,13 @@ IF ISNULL(@strSalespersonLocal, '') <> ''
 			FROM dbo.tblEMEntity WITH (NOLOCK)
 			WHERE (@strSalespersonLocal IS NULL OR strName LIKE '%'+ @strSalespersonLocal +'%')
 		) ES ON SP.intEntityId = ES.intEntityId
+	END
+
+IF ISNULL(@strCompanyLocationLocal, '') <> ''
+	BEGIN
+		SELECT TOP 1 @intCompanyLocationId = intCompanyLocationId
+		FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
+		WHERE (@strCompanyLocationLocal IS NULL OR strLocationName LIKE '%'+ @strCompanyLocationLocal +'%')
 	END
 
 --DROP TEMP TABLES
@@ -187,9 +198,10 @@ WHERE ysnPosted = 1
 		) AC ON GLAS.intAccountCategoryId = AC.intAccountCategoryId
 	)
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	
+	AND (@intCompanyLocationId IS NULL OR I.intCompanyLocationId = @intCompanyLocationId)
 	AND (@intSalespersonId IS NULL OR intEntitySalespersonId = @intSalespersonId)
 	AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')	
-
+	
 --#PREPAIDS
 SELECT intPrepaymentId
 	 , dblAppliedInvoiceAmount = SUM(dblAppliedInvoiceAmount)

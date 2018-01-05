@@ -219,7 +219,7 @@ WHERE ysnPosted = 1
 		) AC ON GLAS.intAccountCategoryId = AC.intAccountCategoryId
 	)
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal		
-	AND (@intCompanyLocationId IS NULL OR intCompanyLocationId = @intCompanyLocationId)
+	AND (@intCompanyLocationId IS NULL OR I.intCompanyLocationId = @intCompanyLocationId)
 	AND (@intSalespersonId IS NULL OR intEntitySalespersonId = @intSalespersonId)
 	AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')	
 
