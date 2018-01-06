@@ -5778,6 +5778,7 @@
     <Build Include="dbo\Views\vyuRKM2MContractCost.sql" />
     <Build Include="dbo\Views\vyuMFGetPalletSSCCNo.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRegenerateTask.sql" />
+    <Build Include="dbo\Tables\tblTMDeliveryFillReportStaging.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
