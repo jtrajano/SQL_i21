@@ -5988,6 +5988,7 @@
     <Build Include="dbo\Tables\tblQMSampleLabel.sql" />
     <Build Include="dbo\Views\vyuPREmployeeTimeOffUsedYTD.sql" />
     <None Include="Scripts\Post-Deployment\AP\DefaultData\Threshold1099.sql" />
+    <Build Include="dbo\Tables\tblTMDeliveryFillReportStaging.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
