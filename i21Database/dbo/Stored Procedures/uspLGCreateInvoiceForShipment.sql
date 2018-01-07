@@ -374,7 +374,11 @@ DECLARE
 	  AND ARSI.[intLoadId] = @intLoadId
 
 	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM @EntriesForInvoice)
+	IF EXISTS(SELECT TOP 1 1 FROM tblARInvoice ARI
+		JOIN tblARInvoiceDetail ARID ON ARID.intInvoiceId = ARI.intInvoiceId
+		JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = ARID.intLoadDetailId
+		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+		WHERE LD.intLoadId = @intLoadId)
 	BEGIN
 		SELECT TOP 1
 			@InvoiceNumber		= ARI.[strInvoiceNumber]
