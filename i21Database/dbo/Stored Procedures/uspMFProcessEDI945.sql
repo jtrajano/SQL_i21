@@ -76,6 +76,7 @@ BEGIN
 		,I.strExternalGroup strUOM
 		,PL.strParentLotNumber strParentLotNumber
 		,L.strLotNumber
+		,(CONVERT(VARCHAR(8), L.dtmExpiryDate, 112)) strBestby
 	INTO #tblMFEDI945
 	FROM dbo.tblICInventoryShipment InvS
 	JOIN @tblMFOrderNo O ON O.intInventoryShipmentId = InvS.intInventoryShipmentId
@@ -136,6 +137,7 @@ BEGIN
 			) AS dblQtyDifference
 		,EDI.strUOM
 		,EDI.strParentLotNumber AS strLotNumber
+		,EDI.strBestby
 	FROM #tblMFEDI945 EDI
 	LEFT JOIN #tblMFSSCCNo SSCCNo ON SSCCNo.strLotNumber = EDI.strLotNumber
 	Order by EDI.intLineNo
