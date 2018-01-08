@@ -202,7 +202,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intCurrencyId]		= B.intCurrencyId
-			,[dblExchangeRate]		= dblDebitRate
+			,[dblExchangeRate]		= ISNULL(ISNULL(dblDebitRate,dblCreditRate),1)
 			,[intUserId]			= 0
 			,[intEntityId]			= @intEntityId			
 			,[dtmDateEntered]		= @currentDateTime
@@ -280,7 +280,7 @@ ELSE
 			,[dtmDate]				= ISNULL(B.[dtmDate], @currentDateTime)
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
-			,[dblExchangeRate]		= dblDebitRate
+			,[dblExchangeRate]		= ISNULL(ISNULL(dblDebitRate,dblCreditRate),1)
 			,[intUserId]			= 0
 			,[intEntityId]			= @intEntityId			
 			,[dtmDateEntered]		= @currentDateTime
