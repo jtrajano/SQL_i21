@@ -68,7 +68,7 @@ BEGIN
 				,dblLatitude = B.dblLatitude
 				,intCustomerId = B.intCustomerID
 				,ysnLeakCheckRequired = A.ysnLeakCheckRequired
-				,dblCustomerBalance = ISNULL(D.dblFutureCurrent, 0.0)
+				,dblCustomerBalance = ISNULL(D.vwcus_high_past_due, 0.0) -- TM-2695
 				,dblSiteEstimatedPercentLeft = B.dblEstimatedPercentLeft
 				,intFillMethodId = B.intFillMethodId
 				,strFillMethod = L.strFillMethod
@@ -141,7 +141,7 @@ BEGIN
 				,dblLatitude = B.dblLatitude
 				,intCustomerId = B.intCustomerID
 				,ysnLeakCheckRequired = A.ysnLeakCheckRequired
-				,dblCustomerBalance = ISNULL(K.dblTotalDue, 0.0)
+				,dblCustomerBalance = ISNULL(CI.dbl30Days,0.0) + ISNULL(CI.dbl60Days,0.0) + ISNULL(CI.dbl90Days,0.0) + ISNULL(CI.dbl91Days,0.0) --TM-2695
 				,dblSiteEstimatedPercentLeft = B.dblEstimatedPercentLeft
 				,intFillMethodId = B.intFillMethodId
 				,strFillMethod = L.strFillMethod
