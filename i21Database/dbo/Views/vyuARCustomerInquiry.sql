@@ -3,7 +3,7 @@ AS
 SELECT intEntityCustomerId          = C.intEntityId
      , intEntityId					= C.intEntityId
 	 , strCustomerName				= C.strName
-	 , CI.strTerm
+	 , strTerm = C.strCustomerTerm --CI.strTerm
 	 , C.strCustomerNumber
 	 , C.strAddress
 	 , C.strZipCode
