@@ -11,7 +11,7 @@
 	dblCustomerLastStatement NUMERIC(18,6)  NOT NULL,
 	dblCustomerTotalDue NUMERIC(18,6)  NOT NULL,
 	dblCustomerFuture NUMERIC(18,6)  NULL,
-	[intCustomerPriceLevel] NUMERIC(18,6)  NULL,
+	[intCustomerPriceLevel] INT  NULL,
 	strTerms NVARCHAR(100)  COLLATE Latin1_General_CI_AS NULL, 
 	dblCredits NUMERIC(18,6)  NULL,
 	dblTotalPast NUMERIC(18,6)  NULL,
