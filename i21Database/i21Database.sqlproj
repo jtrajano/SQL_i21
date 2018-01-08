@@ -6050,6 +6050,7 @@
     <Build Include="dbo\Functions\fnRTrim.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetOrganicDeclarationReportHeader.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetOrganicDeclarationReportDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspEMUpdateEntityType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
