@@ -65,7 +65,8 @@ SELECT
 	B.strStoreFTPPassword,
 	B.intStoreStoreId,
 	I.intStoreNo,
-	storeDescription = I.strDescription
+	storeDescription = I.strDescription,
+	ysnTransportTerminal
 FROM
 		dbo.tblEMEntity A
 	INNER JOIN dbo.tblAPVendor B
