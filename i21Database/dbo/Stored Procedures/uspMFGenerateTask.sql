@@ -1134,7 +1134,7 @@ BEGIN TRY
 				)
 	END
 
-	IF @strOrderType = 'INVENTORY SHIPMENT STAGING'
+	IF @strOrderType = 'INVENTORY SHIPMENT STAGING' and @intInventoryShipmentId IS NOT NULL
 	BEGIN
 		SELECT @intTransactionId = @intInventoryShipmentId
 
