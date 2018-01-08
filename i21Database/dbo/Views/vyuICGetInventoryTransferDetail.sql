@@ -95,8 +95,8 @@ AS
 	, TransferDetail.intGrossNetUOMId
 	, strGrossNetUOM = GrossNetUOM.strUnitMeasure
 	, strGrossNetUOMSymbol = COALESCE(GrossNetUOM.strSymbol, GrossNetUOM.strUnitMeasure)
-	, TransferDetail.dblGrossNetUnitQty
-	, TransferDetail.dblItemUnitQty
+	, dblGrossNetUnitQty = GrossNetUOM.dblUnitQty  --TransferDetail.dblGrossNetUnitQty
+	, dblItemUnitQty = ItemUOM.dblUnitQty --TransferDetail.dblItemUnitQty
 	, [Transfer].dtmTransferDate
 	, [Transfer].ysnShipmentRequired
 	, strTransferredBy = e.strName
@@ -129,6 +129,7 @@ AS
 	)
 	, Receipt.strWarehouseRefNo
 	, TransferDetail.strLotCondition
+	, TransferDetail.dblWeightPerQty
 	FROM tblICInventoryTransferDetail TransferDetail
 		LEFT JOIN tblICInventoryTransfer [Transfer] ON [Transfer].intInventoryTransferId = TransferDetail.intInventoryTransferId
 		LEFT JOIN tblEMEntity e ON e.intEntityId = [Transfer].intTransferredById

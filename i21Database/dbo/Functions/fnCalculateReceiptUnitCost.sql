@@ -7,7 +7,7 @@ CREATE FUNCTION [dbo].[fnCalculateReceiptUnitCost](
 	,@intItemUOMId AS INT		
 	,@intCostUOMId AS INT
 	,@intGrossUOMId AS INT
-	,@dblUnitCost AS NUMERIC(18,6)
+	,@dblUnitCost AS NUMERIC(38,20)
 	,@dblItemNetWgtVolume AS NUMERIC(38,20)
 	,@intLotId AS INT
 	,@intLotUOMId AS INT
