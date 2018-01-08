@@ -549,4 +549,11 @@ BEGIN
 END
 GO
 
+GO
+IF NOT EXISTS(SELECT * FROM tblCTAmendment)
+BEGIN
+    INSERT INTO tblCTAmendment(intConcurrencyId)
+    SELECT 1
+END
+GO
 PRINT('Contract 1_MasterTables End')
