@@ -5461,6 +5461,7 @@
     <Build Include="dbo\Stored Procedures\uspMFReportLidlUCCPalletLabelWithoutWeight.sql" />
     <Build Include="dbo\Views\vyuMFGetPalletSSCCNo.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRegenerateTask.sql" />
+    <Build Include="dbo\Views\vyuPREmployeeW3.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
