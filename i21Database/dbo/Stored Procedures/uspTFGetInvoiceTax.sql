@@ -184,8 +184,8 @@ BEGIN TRY
 					, NULL AS strConsignorName
 					, NULL AS strConsignorFEIN
 					, NULL AS strTerminalControlNumber
-					, NULL AS strVendorName
-					, NULL AS strVendorFederalTaxId
+					, tblSMCompanySetup.strCompanyName AS strVendorName
+					, tblSMCompanySetup.strEin AS strVendorFederalTaxId
 					, tblSMCompanySetup.strCompanyName
 					, tblSMCompanySetup.strAddress
 					, tblSMCompanySetup.strCity
@@ -355,8 +355,8 @@ BEGIN TRY
 					, NULL AS strConsignorName
 					, NULL AS strConsignorFEIN
 					, NULL AS strTerminalControlNumber
-					, NULL AS strVendorName
-					, NULL AS strVendorFederalTaxId
+					, tblSMCompanySetup.strCompanyName AS strVendorName
+					, tblSMCompanySetup.strEin AS strVendorFederalTaxId
 					, tblSMCompanySetup.strCompanyName
 					, tblSMCompanySetup.strAddress
 					, tblSMCompanySetup.strCity
