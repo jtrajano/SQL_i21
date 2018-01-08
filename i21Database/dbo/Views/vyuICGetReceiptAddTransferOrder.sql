@@ -13,19 +13,37 @@ FROM (
 			, intLineNo					= d.intInventoryTransferDetailId
 			, intOrderId				= h.intInventoryTransferId
 			, strOrderNumber			= h.strTransferNo
-			, dblOrdered				= -t.dblQty 
+			, dblOrdered				= d.dblQuantity -- -t.dblQty 										
 			, dblReceived				= CAST(NULL AS NUMERIC(38, 20))
 			, intSourceType				= CAST(0 AS INT)
-			, intSourceId				= CAST(NULL AS INT)
+			, intSourceId				= d.intInventoryTransferDetailId
 			, strSourceNumber			= CAST(NULL AS NVARCHAR(50))
 			, intItemId					= d.intItemId
 			, strItemNo					= item.strItemNo
 			, strItemDescription		= item.strDescription
-			, dblQtyToReceive			= -t.dblQty 
+			, dblQtyToReceive			= d.dblQuantity -- -t.dblQty 
 			, intLoadToReceive			= CAST(0 AS INT)
-			, dblUnitCost				= t.dblCost 
+			, dblUnitCost				= --t.dblCost 
+										CASE 
+											WHEN 
+												GrossNetUOM.intItemUOMId IS NOT NULL 
+												AND GrossNetUOM.intItemUOMId = CostUOM.intItemUOMId 
+												AND ISNULL(d.dblNet, 0) <> 0 THEN 
+													dbo.fnDivide(dbo.fnMultiply(-t.dblQty, t.dblCost), d.dblNet) 
+											WHEN 
+												t.intItemUOMId = ItemUOM.intItemUOMId 
+												AND ISNULL(d.dblQuantity, 0) <> 0 THEN 
+													dbo.fnDivide(dbo.fnMultiply(-t.dblQty, t.dblCost), d.dblQuantity) 
+											ELSE 
+												t.dblCost
+										END
+
 			, dblTax					= CAST(0 AS NUMERIC(18, 6))
-			, dblLineTotal				= CAST(0 AS NUMERIC(38, 20))
+			, dblLineTotal				= --CAST(0 AS NUMERIC(38, 20))
+										ROUND(
+											-t.dblQty * t.dblCost
+											, 2
+										)
 			, strLotTracking			= item.strLotTracking
 			, intCommodityId			= item.intCommodityId
 			, intContainerId			= CAST(NULL AS INT)
@@ -41,19 +59,19 @@ FROM (
 			, strUnitMeasure			= ItemUnitMeasure.strUnitMeasure
 			, strUnitType				= CAST(NULL AS NVARCHAR(50))
 			-- Gross/Net UOM --------------------------------------------------------
-			, intWeightUOMId			= ISNULL(GrossNetUOM.intItemUOMId, LotItemUOM.intItemUOMId)
-			, strWeightUOM				= ISNULL(GrossNetUnitMeasure.strUnitMeasure, LotItemUOM.strUnitMeasure)
+			, intWeightUOMId			= GrossNetUOM.intItemUOMId
+			, strWeightUOM				= GrossNetUnitMeasure.strUnitMeasure
 			-- Conversion factor --------------------------------------------------------
 			, dblItemUOMConvFactor		= ItemUOM.dblUnitQty
 			, dblWeightUOMConvFactor	= GrossNetUOM.dblUnitQty
 			-- Lot Details -------------------------------------------------------
-			, intLotId					= LotItem.intLotId
+			, intLotId					= CAST(NULL AS INT) -- LotItem.intLotId
 			, strLotNumber				= LotItem.strLotNumber
 			, dtmExpiryDate				= LotItem.dtmExpiryDate
 			, dtmManufacturedDate		= LotItem.dtmManufacturedDate
 			, strLotAlias				= LotItem.strLotAlias
 			, intParentLotId			= LotItem.intParentLotId
-			, strParentLotNumber		= ParentLot.strParentLotNumber
+			, strParentLotNumber		= LotItem.strParentLotNumber
 			-- Cost UOM --------------------------------------------------------
 			, intCostUOMId				= CostUOM.intItemUOMId -- intItemUOMId
 			, strCostUOM				= CostUnitMeasure.strUnitMeasure
@@ -114,40 +132,64 @@ FROM (
 				ON toStorageLocation.intStorageLocationId = d.intToStorageLocationId
 
 			LEFT JOIN dbo.tblICItemUOM ItemUOM
-				ON ItemUOM.intItemUOMId = t.intItemUOMId 
+				ON ItemUOM.intItemUOMId = d.intItemUOMId -- t.intItemUOMId 
 				AND ItemUOM.intItemId = item.intItemId
 
 			LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure
 				ON ItemUnitMeasure.intUnitMeasureId = ItemUOM.intUnitMeasureId
 
 			LEFT JOIN dbo.tblICItemUOM GrossNetUOM
-				ON GrossNetUOM.intItemUOMId = d.intItemWeightUOMId
+				ON GrossNetUOM.intItemUOMId = d.intGrossNetUOMId
 				AND GrossNetUOM.intItemId = item.intItemId
 
 			LEFT JOIN dbo.tblICUnitMeasure GrossNetUnitMeasure
 				ON GrossNetUnitMeasure.intUnitMeasureId = GrossNetUOM.intUnitMeasureId
 
 			LEFT JOIN dbo.tblICItemUOM CostUOM
-				ON CostUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(t.intItemId, t.intItemUOMId)
+				ON CostUOM.intItemUOMId = t.intItemUOMId 
 				AND CostUOM.intItemId = item.intItemId
 
 			LEFT JOIN dbo.tblICUnitMeasure CostUnitMeasure
 				ON CostUnitMeasure.intUnitMeasureId = CostUOM.intUnitMeasureId
 			LEFT JOIN dbo.tblSMCompanyLocation Loc ON Loc.intCompanyLocationId = toLocation.intLocationId
 
-			LEFT JOIN dbo.tblICLot LotItem
-				ON item.intItemId = LotItem.intItemId
-				AND ItemUOM.intItemUOMId = LotItem.intItemUOMId
-				AND h.intToLocationId = LotItem.intLocationId
-				AND toSubLocation.intCompanyLocationSubLocationId = LotItem.intSubLocationId
-				AND toStorageLocation.intStorageLocationId= LotItem.intStorageLocationId
-				AND LotItem.intLotStatusId = 1
-				AND toLocation.intItemLocationId = LotItem.intItemLocationId
-			LEFT JOIN dbo.vyuICItemUOM LotItemUOM
-				ON LotItemUOM.intItemUOMId = LotItem.intItemUOMId
-			LEFT JOIN dbo.tblICParentLot ParentLot
-				ON ParentLot.intParentLotId = LotItem.intParentLotId
-				AND ParentLot.intItemId = item.intItemId
+			--LEFT JOIN dbo.tblICLot LotItem
+			--	ON item.intItemId = LotItem.intItemId
+			--	AND ItemUOM.intItemUOMId = LotItem.intItemUOMId
+			--	AND h.intToLocationId = LotItem.intLocationId
+			--	AND toSubLocation.intCompanyLocationSubLocationId = LotItem.intSubLocationId
+			--	AND toStorageLocation.intStorageLocationId= LotItem.intStorageLocationId
+			--	AND LotItem.intLotStatusId = 1
+			--	AND toLocation.intItemLocationId = LotItem.intItemLocationId
+
+			OUTER APPLY (
+				SELECT	LotItem.intLotId
+						,LotItem.strLotNumber
+						,LotItem.dtmExpiryDate
+						,LotItem.dtmManufacturedDate
+						,LotItem.strLotAlias
+						,LotItem.intParentLotId
+						,LotItem.intItemUOMId 
+						,pl.strParentLotNumber						
+				FROM	dbo.tblICLot LotItem 
+						--INNER JOIN tblICInventoryTransaction t_lot
+						--	ON LotItem.intLotId = t_lot.intLotId
+						--	AND t_lot.intTransactionId = h.intInventoryTransferId
+						--	AND t_lot.strTransactionId = h.strTransferNo
+						--	AND ISNULL(t_lot.dblQty, 0) <> 0 
+						--	AND ISNULL(t_lot.dblQty, 0) > 0 
+						--	AND t_lot.ysnIsUnposted = 0 
+						--	AND t_lot.intItemId = d.intItemId
+						LEFT JOIN tblICParentLot pl
+							ON pl.intParentLotId = LotItem.intParentLotId 
+				WHERE	LotItem.intLotId = t.intLotId
+			) LotItem
+
+			--LEFT JOIN dbo.vyuICItemUOM LotItemUOM
+			--	ON LotItemUOM.intItemUOMId = LotItem.intItemUOMId
+			--LEFT JOIN dbo.tblICParentLot ParentLot
+			--	ON ParentLot.intParentLotId = LotItem.intParentLotId
+			--	AND ParentLot.intItemId = item.intItemId
 
 	WHERE h.ysnPosted = 1
 		AND h.ysnShipmentRequired = 1

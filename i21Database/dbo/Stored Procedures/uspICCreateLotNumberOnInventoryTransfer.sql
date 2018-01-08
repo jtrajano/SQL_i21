@@ -161,8 +161,8 @@ BEGIN
 			,strCondition
 			,[intWeightUOMId]
 			,[dblWeight]
-			,[dblGrossWeight]
-			,[dblWeightPerQty]
+			--,[dblGrossWeight]
+			--,[dblWeightPerQty]
 	)
 	SELECT	intLotId				= TransferItem.intNewLotId
 			,strLotNumber			= CASE WHEN ISNULL(TransferItem.strNewLotId, '') = '' THEN SourceLot.strLotNumber ELSE TransferItem.strNewLotId END 
@@ -171,7 +171,7 @@ BEGIN
 			,intItemLocationId		= ItemLocation.intItemLocationId
 			,intSubLocationId		= TransferItem.intToSubLocationId
 			,intStorageLocationId	= TransferItem.intToStorageLocationId
-			,dblQty					= CASE WHEN @ysnPost = 0 THEN -1 ELSE 1 END * TransferItem.dblQuantity
+			,dblQty					= CASE WHEN @ysnPost = 0 THEN -TransferItem.dblQuantity ELSE TransferItem.dblQuantity END 
 			,intItemUOMId			= TransferItem.intItemUOMId
 			,dtmExpiryDate			= SourceLot.dtmExpiryDate
 			,dtmManufacturedDate	= SourceLot.dtmManufacturedDate
@@ -196,9 +196,14 @@ BEGIN
 			,strContainerNo			= SourceLot.strContainerNo
 			,strCondition			= SourceLot.strCondition
 			,[intWeightUOMId] 		= TransferItem.intGrossNetUOMId
-			,[dblWeight]   			= CASE WHEN @ysnPost = 0 THEN -1 ELSE 1 END * TransferItem.dblNet
-			,[dblGrossWeight] 		= CASE WHEN TransferItem.intGrossNetUOMId IS NOT NULL THEN TransferItem.dblGross ELSE NULL END
-			,[dblWeightPerQty]		= CASE WHEN TransferItem.intGrossNetUOMId IS NOT NULL THEN CASE WHEN ISNULL(NULLIF(TransferItem.dblNet, 0), 0) = 0 THEN 0 ELSE TransferItem.dblQuantity / TransferItem.dblNet END ELSE NULL END
+			,[dblWeight]   			= 
+				CASE 
+					WHEN TransferItem.intGrossNetUOMId IS NOT NULL THEN 
+						CASE WHEN @ysnPost = 0 THEN -TransferItem.dblNet ELSE TransferItem.dblNet END
+					ELSE 0
+				END 
+			--,[dblGrossWeight] 		= CASE WHEN TransferItem.intGrossNetUOMId IS NOT NULL THEN TransferItem.dblGross ELSE NULL END
+			--,[dblWeightPerQty]		= CASE WHEN TransferItem.intGrossNetUOMId IS NOT NULL THEN CASE WHEN ISNULL(NULLIF(TransferItem.dblNet, 0), 0) = 0 THEN 0 ELSE TransferItem.dblQuantity / TransferItem.dblNet END ELSE NULL END
 	FROM	dbo.tblICInventoryTransfer [Transfer] INNER JOIN dbo.tblICInventoryTransferDetail TransferItem
 				ON [Transfer].intInventoryTransferId = TransferItem.intInventoryTransferId
 			INNER JOIN dbo.tblICItem Item

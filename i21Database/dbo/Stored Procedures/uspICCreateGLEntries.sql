@@ -265,6 +265,7 @@ AS
 	WHERE	t.strBatchId = @strBatchId
 			AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
 			AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId)
+			AND t.intFobPointId IS NULL -- If there is a value in intFobPointId, then it is for In-Transit costing. Use uspICCreateGLEntriesForInTransitCosting instead of this sp. 
 )
 -------------------------------------------------------------------------------------------
 -- This part is for the usual G/L entries for Inventory Account and its contra account 

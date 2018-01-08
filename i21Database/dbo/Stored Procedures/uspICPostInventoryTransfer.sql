@@ -24,20 +24,25 @@ DECLARE @TransactionName AS VARCHAR(500) = 'InventoryTransfer' + CAST(NEWID() AS
 DECLARE @INVENTORY_TRANSFER_TYPE AS INT = 12
 		,@INVENTORY_TRANSFER_WITH_SHIPMENT_TYPE AS INT = 13
 
-DECLARE @STARTING_NUMBER_BATCH AS INT = 3 
-DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Inventory In-Transit'
+		,@FOB_ORIGIN AS INT = 1
+		,@FOB_DESTINATION AS INT = 2
+
+		,@STARTING_NUMBER_BATCH AS INT = 3 
+		,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Inventory' --'Inventory In-Transit'
 
 -- Get the default currency ID and other variables. 
 DECLARE @DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 		,@strItemNo AS NVARCHAR(50)
 
 -- Create the gl entries variable 
-DECLARE		@GLEntries AS RecapTableType 
-			,@ysnGLEntriesRequired AS BIT = 0
-			,@intReturnValue AS INT
+DECLARE	@GLEntries AS RecapTableType 
+		,@ysnGLEntriesRequired AS BIT = 0
+		,@intReturnValue AS INT
+		,@DummyGLEntries AS RecapTableType 
 
-DECLARE		@InTransit_Outbound AS InTransitTableType
-			,@InTransit_Inbound AS InTransitTableType
+DECLARE	@InTransit_Outbound AS InTransitTableType
+		,@InTransit_Inbound AS InTransitTableType
+		,@ItemsForInTransitCosting AS ItemInTransitCostingTableType
 
 -- Ensure ysnPost is not NULL  
 SET @ysnPost = ISNULL(@ysnPost, 0)  
@@ -309,93 +314,7 @@ BEGIN
 		-------------------------------------------
 		-- Call the costing SP	
 		-------------------------------------------
-		EXEC	@intReturnValue = dbo.uspICPostCosting  
-				@ItemsForRemovalPost  
-				,@strBatchId  
-				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY 
-				,@intEntityUserSecurityId
-
-		IF @intReturnValue < 0 GOTO With_Rollback_Exit
-	END
-
-	-- Process the "To" Stock 
-	IF @ysnShipmentRequired = 0 
-	BEGIN 
-		DECLARE @ItemsForTransferPost AS ItemCostingTableType  
-		INSERT INTO @ItemsForTransferPost (  
-				intItemId  
-				,intItemLocationId 
-				,intItemUOMId  
-				,dtmDate  
-				,dblQty  
-				,dblUOMQty  
-				,dblCost  
-				,dblSalesPrice  
-				,intCurrencyId  
-				,dblExchangeRate  
-				,intTransactionId  
-				,intTransactionDetailId
-				,strTransactionId  
-				,intTransactionTypeId  
-				,intLotId 
-				,intSubLocationId
-				,intStorageLocationId
-				,strActualCostId
-		) 
-		SELECT Detail.intItemId
-				,dbo.fnICGetItemLocation(Detail.intItemId, Header.intToLocationId)
-				,COALESCE(Detail.intGrossNetUOMId, FromStock.intItemUOMId)
-				,Header.dtmTransferDate
-				,CASE WHEN Detail.intGrossNetUOMId IS NULL THEN -FromStock.dblQty ELSE Detail.dblNet END
-				,CASE WHEN Detail.intGrossNetUOMId IS NULL THEN FromStock.dblUOMQty ELSE Detail.dblGrossNetUnitQty END
-				,CASE WHEN Detail.intGrossNetUOMId IS NULL THEN ISNULL(FromStock.dblCost, 0) ELSE CASE WHEN ISNULL(NULLIF(Detail.dblNet, 0), 0) = 0 THEN 0 ELSE ((-FromStock.dblQty) * FromStock.dblCost) / Detail.dblNet END END
-				,0
-				,@DefaultCurrencyId
-				,1
-				,@intTransactionId 
-				,Detail.intInventoryTransferDetailId
-				,@strTransactionId
-				,@INVENTORY_TRANSFER_TYPE
-				,Detail.intNewLotId
-				,Detail.intToSubLocationId
-				,Detail.intToStorageLocationId
-				,strActualCostId = Detail.strToLocationActualCostId
-		FROM tblICInventoryTransferDetail Detail
-			INNER JOIN tblICItem Item ON Item.intItemId = Detail.intItemId
-			INNER JOIN tblICInventoryTransfer Header ON Header.intInventoryTransferId = Detail.intInventoryTransferId
-			INNER JOIN dbo.tblICInventoryTransaction FromStock ON Detail.intInventoryTransferDetailId = FromStock.intTransactionDetailId
-				AND Detail.intInventoryTransferId = FromStock.intTransactionId
-				AND FromStock.intItemId = Detail.intItemId
-			LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = Detail.intItemUOMId
-		WHERE ISNULL(FromStock.ysnIsUnposted, 0) = 0
-			AND FromStock.strBatchId = @strBatchId
-			AND Item.strType <> 'Comment'
-			AND Header.intInventoryTransferId = @intTransactionId
-
-		-- Clear the GL entries 
-		DELETE FROM @GLEntries
-
-		-------------------------------------------
-		-- Call the costing SP
-		-------------------------------------------
-		EXEC	@intReturnValue = dbo.uspICPostCosting  
-				@ItemsForTransferPost  
-				,@strBatchId  
-				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY 
-				,@intEntityUserSecurityId
-
-		IF @intReturnValue < 0 GOTO With_Rollback_Exit
-	END
-
-	-- Check if From and To locations are the same. If not, then generate the GL entries. 
-	IF EXISTS (SELECT TOP 1 1 FROM tblICInventoryTransfer WHERE intInventoryTransferId = @intTransactionId AND intFromLocationId <> intToLocationId)
-	BEGIN 	
-		SET @ysnGLEntriesRequired = 1
-
-		-----------------------------------------
-		-- Generate a new set of g/l entries
-		-----------------------------------------
-		INSERT INTO @GLEntries (
+		INSERT INTO @DummyGLEntries (
 				[dtmDate] 
 				,[strBatchId]
 				,[intAccountId]
@@ -429,12 +348,291 @@ BEGIN
 				,[dblForeignRate]
 				,[strRateType]
 		)
-		EXEC @intReturnValue = dbo.uspICCreateGLEntries 
-			@strBatchId
-			,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-			,@intEntityUserSecurityId
-			,@strGLDescription
+		EXEC	@intReturnValue = dbo.uspICPostCosting  
+				@ItemsForRemovalPost  
+				,@strBatchId  
+				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY 
+				,@intEntityUserSecurityId
 
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit
+	END
+
+	-- Process the "To" Stock (Shipment is NOT required). 
+	IF @ysnShipmentRequired = 0 
+	BEGIN 
+		DECLARE @ItemsForTransferPost AS ItemCostingTableType  
+		INSERT INTO @ItemsForTransferPost (  
+				intItemId  
+				,intItemLocationId 
+				,intItemUOMId  
+				,dtmDate  
+				,dblQty  
+				,dblUOMQty  
+				,dblCost  
+				,dblSalesPrice  
+				,intCurrencyId  
+				,dblExchangeRate  
+				,intTransactionId  
+				,intTransactionDetailId
+				,strTransactionId  
+				,intTransactionTypeId  
+				,intLotId 
+				,intSubLocationId
+				,intStorageLocationId
+				,strActualCostId
+		) 
+		SELECT Detail.intItemId
+				,dbo.fnICGetItemLocation(Detail.intItemId, Header.intToLocationId)
+				,COALESCE(Detail.intGrossNetUOMId, FromStock.intItemUOMId)
+				,Header.dtmTransferDate
+				,dblQty = CASE WHEN Detail.intGrossNetUOMId IS NULL THEN -FromStock.dblQty ELSE Detail.dblNet END
+				,dblUOMQty = CASE WHEN Detail.intGrossNetUOMId IS NULL THEN FromStock.dblUOMQty ELSE WeightUOM.dblUnitQty END
+				,dblCost = 
+					CASE	WHEN Detail.intGrossNetUOMId IS NULL THEN ISNULL(FromStock.dblCost, 0) 
+							ELSE 
+								CASE	WHEN ISNULL(NULLIF(Detail.dblNet, 0), 0) = 0 THEN 0 
+										ELSE dbo.fnDivide(dbo.fnMultiply(-FromStock.dblQty, FromStock.dblCost), Detail.dblNet)
+								END 
+					END
+				,dblSalesPrice = 0
+				,@DefaultCurrencyId
+				,dblExchangeRate = 1
+				,@intTransactionId 
+				,Detail.intInventoryTransferDetailId
+				,@strTransactionId
+				,@INVENTORY_TRANSFER_TYPE
+				,Detail.intNewLotId
+				,Detail.intToSubLocationId
+				,Detail.intToStorageLocationId
+				,strActualCostId = Detail.strToLocationActualCostId
+		FROM	tblICInventoryTransfer Header INNER JOIN tblICInventoryTransferDetail Detail 
+					ON Header.intInventoryTransferId = Detail.intInventoryTransferId
+				INNER JOIN tblICItem Item 
+					ON Item.intItemId = Detail.intItemId
+				INNER JOIN dbo.tblICInventoryTransaction FromStock 
+					ON FromStock.intTransactionDetailId = Detail.intInventoryTransferDetailId 
+					AND FromStock.intTransactionId = Detail.intInventoryTransferId
+					AND FromStock.intItemId = Detail.intItemId
+					AND FromStock.strTransactionId = Header.strTransferNo
+					AND FromStock.dblQty < 0 
+				LEFT JOIN tblICItemUOM ItemUOM 
+					ON ItemUOM.intItemUOMId = Detail.intItemUOMId
+				LEFT JOIN tblICItemUOM WeightUOM 
+					ON WeightUOM.intItemUOMId = Detail.intGrossNetUOMId
+		WHERE ISNULL(FromStock.ysnIsUnposted, 0) = 0
+			AND FromStock.strBatchId = @strBatchId
+			AND Item.strType <> 'Comment'
+			AND Header.intInventoryTransferId = @intTransactionId
+
+		-- Clear the GL entries 
+		DELETE FROM @GLEntries
+
+		-------------------------------------------
+		-- Call the costing SP
+		-------------------------------------------
+		EXEC	@intReturnValue = dbo.uspICPostCosting  
+				@ItemsForTransferPost  
+				,@strBatchId  
+				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY 
+				,@intEntityUserSecurityId
+
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit
+	END
+
+	-- Process the "To" Stock (Shipment is REQUIRED). 
+	IF @ysnShipmentRequired = 1
+	BEGIN 
+		-- Get values for the In-Transit Costing 
+		INSERT INTO @ItemsForInTransitCosting (
+				[intItemId] 
+				,[intItemLocationId] 
+				,[intItemUOMId] 
+				,[dtmDate] 
+				,[dblQty] 
+				,[dblUOMQty] 
+				,[dblCost] 
+				,[dblValue] 
+				,[dblSalesPrice] 
+				,[intCurrencyId] 
+				,[dblExchangeRate] 
+				,[intTransactionId] 
+				,[intTransactionDetailId] 
+				,[strTransactionId] 
+				,[intTransactionTypeId] 
+				,[intLotId] 
+				,[intSourceTransactionId] 
+				,[strSourceTransactionId] 
+				,[intSourceTransactionDetailId]
+				,[intFobPointId]
+				,[intInTransitSourceLocationId]
+				,[intForexRateTypeId]
+				,[dblForexRate]
+		)
+		SELECT
+				[intItemId] 
+				,[intItemLocationId] 
+				,[intItemUOMId] 
+				,[dtmDate] 
+				,-[dblQty] 
+				,[dblUOMQty] 
+				,[dblCost] 
+				,[dblValue] 
+				,[dblSalesPrice] 
+				,[intCurrencyId] 
+				,[dblExchangeRate] 
+				,[intTransactionId] 
+				,[intTransactionDetailId] 
+				,[strTransactionId] 
+				,[intTransactionTypeId] 
+				,[intLotId] 
+				,[intTransactionId] 
+				,[strTransactionId] 
+				,[intTransactionDetailId] 
+				,[intFobPointId] = @FOB_DESTINATION
+				,[intInTransitSourceLocationId] = FromStock.intItemLocationId
+				,[intForexRateTypeId] = FromStock.intForexRateTypeId
+				,[dblForexRate] = FromStock.dblForexRate
+		FROM	tblICInventoryTransaction FromStock 
+		WHERE	FromStock.strTransactionId = @strTransactionId
+				AND ISNULL(FromStock.ysnIsUnposted, 0) = 0 
+				AND FromStock.strBatchId = @strBatchId
+				AND FromStock.dblQty < 0 -- Ensure the Qty is negative. 
+
+		IF EXISTS (SELECT TOP 1 1 FROM @ItemsForInTransitCosting)
+		BEGIN 
+			-- Call the post routine for the In-Transit costing. 
+			INSERT INTO @DummyGLEntries (
+					[dtmDate] 
+					,[strBatchId]
+					,[intAccountId]
+					,[dblDebit]
+					,[dblCredit]
+					,[dblDebitUnit]
+					,[dblCreditUnit]
+					,[strDescription]
+					,[strCode]
+					,[strReference]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[dtmDateEntered]
+					,[dtmTransactionDate]
+					,[strJournalLineDescription]
+					,[intJournalLineNo]
+					,[ysnIsUnposted]
+					,[intUserId]
+					,[intEntityId]
+					,[strTransactionId]
+					,[intTransactionId]
+					,[strTransactionType]
+					,[strTransactionForm]
+					,[strModuleName]
+					,[intConcurrencyId]
+					,[dblDebitForeign]	
+					,[dblDebitReport]	
+					,[dblCreditForeign]	
+					,[dblCreditReport]	
+					,[dblReportingRate]	
+					,[dblForeignRate]
+			)
+			EXEC	@intReturnValue = dbo.uspICPostInTransitCosting  
+					@ItemsForInTransitCosting  
+					,@strBatchId  
+					,NULL 
+					,@intEntityUserSecurityId
+		END 
+	END 
+
+	-- Check if From and To locations are the same. If not, then generate the GL entries. 
+	IF EXISTS (SELECT TOP 1 1 FROM tblICInventoryTransfer WHERE intInventoryTransferId = @intTransactionId AND intFromLocationId <> intToLocationId)
+	BEGIN 	
+		SET @ysnGLEntriesRequired = 1
+
+		-----------------------------------------
+		-- Generate a new set of g/l entries
+		-----------------------------------------
+		IF @ysnShipmentRequired = 0 
+		BEGIN 
+			INSERT INTO @GLEntries (
+					[dtmDate] 
+					,[strBatchId]
+					,[intAccountId]
+					,[dblDebit]
+					,[dblCredit]
+					,[dblDebitUnit]
+					,[dblCreditUnit]
+					,[strDescription]
+					,[strCode]
+					,[strReference]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[dtmDateEntered]
+					,[dtmTransactionDate]
+					,[strJournalLineDescription]
+					,[intJournalLineNo]
+					,[ysnIsUnposted]
+					,[intUserId]
+					,[intEntityId]
+					,[strTransactionId]
+					,[intTransactionId]
+					,[strTransactionType]
+					,[strTransactionForm]
+					,[strModuleName]
+					,[intConcurrencyId]
+					,[dblDebitForeign]	
+					,[dblDebitReport]	
+					,[dblCreditForeign]	
+					,[dblCreditReport]	
+					,[dblReportingRate]	
+					,[dblForeignRate]
+					,[strRateType]
+			)
+			EXEC @intReturnValue = dbo.uspICCreateGLEntries 
+				@strBatchId
+				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+				,@intEntityUserSecurityId
+				,@strGLDescription
+		END 
+		ELSE IF @ysnShipmentRequired = 1
+		BEGIN 
+			INSERT INTO @GLEntries (
+					[dtmDate] 
+					,[strBatchId]
+					,[intAccountId]
+					,[dblDebit]
+					,[dblCredit]
+					,[dblDebitUnit]
+					,[dblCreditUnit]
+					,[strDescription]
+					,[strCode]
+					,[strReference]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[dtmDateEntered]
+					,[dtmTransactionDate]
+					,[strJournalLineDescription]
+					,[intJournalLineNo]
+					,[ysnIsUnposted]
+					,[intUserId]
+					,[intEntityId]
+					,[strTransactionId]
+					,[intTransactionId]
+					,[strTransactionType]
+					,[strTransactionForm]
+					,[strModuleName]
+					,[intConcurrencyId]
+					,[dblDebitForeign]	
+					,[dblDebitReport]	
+					,[dblCreditForeign]	
+					,[dblCreditReport]	
+					,[dblReportingRate]	
+					,[dblForeignRate]
+			)
+			EXEC @intReturnValue = dbo.uspICCreateGLEntriesForInTransitCosting 
+				@strBatchId
+				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+				,@intEntityUserSecurityId
+				,@strGLDescription
+		END 
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END 
 END   	
@@ -548,17 +746,18 @@ BEGIN
 
 	
 	IF @ysnPost = 1
-		BEGIN
-			UPDATE	dbo.tblICInventoryTransfer  
-			SET		intStatusId = 3 -- Status: Closed
-			WHERE	strTransferNo = @strTransactionId AND ysnShipmentRequired=0   
-		END
+	BEGIN
+		UPDATE	dbo.tblICInventoryTransfer  
+		SET		intStatusId = 3 -- Status: Closed
+		WHERE	strTransferNo = @strTransactionId 
+				AND ysnShipmentRequired = 0   
+	END
 	ELSE
-		BEGIN
-			UPDATE	dbo.tblICInventoryTransfer  
-			SET		intStatusId = 1 -- Status: Open
-			WHERE	strTransferNo = @strTransactionId
-		END
+	BEGIN
+		UPDATE	dbo.tblICInventoryTransfer  
+		SET		intStatusId = 1 -- Status: Open
+		WHERE	strTransferNo = @strTransactionId
+	END
 
 	-- If shipment required, then update the in-transit quantities. 
 	IF @ysnShipmentRequired = 1
