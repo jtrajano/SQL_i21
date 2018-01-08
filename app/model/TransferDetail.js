@@ -72,8 +72,9 @@ Ext.define('Inventory.model.TransferDetail', {
         { name: 'strLotCondition', type: 'string' },
         { name: 'intGrossNetUOMId', type: 'int', allowNull: true },
         { name: 'strGrossNetUOM', type: 'string' },
-        { name: 'dblGrossNetUnitQty', type: 'float', allowNull: true },
-        { name: 'dblItemUnitQty', type: 'float', allowNull: true}
+        //{ name: 'dblGrossNetUnitQty', type: 'float', allowNull: true },
+        //{ name: 'dblItemUnitQty', type: 'float', allowNull: true}
+        { name: 'dblWeightPerQty', type: 'float', allowNull: true}
     ],
 
     validators: [

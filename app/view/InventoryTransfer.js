@@ -852,15 +852,98 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colLotID',
                                                         width: 100,
-                                                        dataIndex: 'strLotID',
+                                                        dataIndex: 'strLotNumber',
                                                         text: 'Lot Number',
                                                         editor: {
                                                             xtype: 'gridcombobox',
                                                             columns: [
                                                                 {
-                                                                    dataIndex: 'intItemId',
+                                                                    dataIndex: 'intLotId',
                                                                     dataType: 'numeric',
-                                                                    text: 'Item Id',
+                                                                    text: 'Lot Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strLotNumber',
+                                                                    dataType: 'string',
+                                                                    text: 'Lot Number',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'dblQty',
+                                                                    dataType: 'numeric',
+                                                                    text: 'On Hand',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'dblCost',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Last Cost',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'dblWeight',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Weight',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'dblWeightPerQty',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Weight Per Qty',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'dblItemUOMUnitQty',
+                                                                    dataType: 'numeric',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intItemUOMId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Item UOM Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intWeightUOMId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Weight UOM Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intLotStatusId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Lot Status Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strItemUOM',
+                                                                    dataType: 'string',
+                                                                    text: 'Item UOM',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strWeightUOM',
+                                                                    dataType: 'string',
+                                                                    text: 'Weight UOM',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strLotStatus',
+                                                                    dataType: 'string',
+                                                                    text: 'Lot Status',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'dtmExpiryDate',
+                                                                    dataType: 'datetime',
+                                                                    text: 'Expiry Date',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intLocationId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Location Id',
                                                                     hidden: true
                                                                 },
                                                                 {
@@ -876,61 +959,39 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                     hidden: true
                                                                 },
                                                                 {
-                                                                    dataIndex: 'strSubLocationName',
-                                                                    dataType: 'string',
-                                                                    text: 'Storage Location',
-                                                                    hidden: true
-                                                                },
-                                                                {
                                                                     dataIndex: 'intStorageLocationId',
                                                                     dataType: 'numeric',
                                                                     text: 'Storage Unit Id',
                                                                     hidden: true
                                                                 },
                                                                 {
-                                                                    dataIndex: 'strStorageLocation',
+                                                                    dataIndex: 'strLocationName',
                                                                     dataType: 'string',
-                                                                    text: 'Storage Unit',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'intLotId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Lot Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strLotNumber',
-                                                                    dataType: 'string',
-                                                                    text: 'Lot Number',
+                                                                    text: 'Location Name',
                                                                     flex: 1
                                                                 },
                                                                 {
-                                                                    dataIndex: 'intLotStatusId',
-                                                                    dataType: 'numeric',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'dblQty',
-                                                                    dataType: 'float',
-                                                                    text: 'Available Qty',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'intItemUOMId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Item UOM Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strItemUOM',
+                                                                    dataIndex: 'strSubLocationName',
                                                                     dataType: 'string',
-                                                                    text: 'UOM',
+                                                                    text: 'Storage Location Name',
                                                                     flex: 1
                                                                 },
                                                                 {
-                                                                    dataIndex: 'dblItemUnitQty',
-                                                                    dataType: 'float',
+                                                                    dataIndex: 'strStorageLocationName',
+                                                                    dataType: 'string',
+                                                                    text: 'Storage Unit Name',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strOwnerName',
+                                                                    dataType: 'string',
+                                                                    text: 'Owner Name',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intItemOwnerId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Item Owner Id',
                                                                     hidden: true
                                                                 }
                                                             ],
@@ -1102,47 +1163,9 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        dataIndex: 'strGrossNetUOM',
                                                         itemId: 'colNetUOM',
-                                                        text: 'Gross/Net UOM',
-                                                        editor: {
-                                                            xtype: 'gridcombobox',
-                                                            columns: [
-                                                                {
-                                                                    dataIndex: 'intItemUOMId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Unit Of Measure Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strUnitMeasure',
-                                                                    dataType: 'string',
-                                                                    text: 'Unit Measure',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strUnitType',
-                                                                    dataType: 'string',
-                                                                    text: 'Unit Type',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'dblUnitQty',
-                                                                    dataType: 'float',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    xtype: 'checkcolumn',
-                                                                    dataIndex: 'ysnStockUnit',
-                                                                    dataType: 'boolean',
-                                                                    text: 'Stock Unit',
-                                                                    flex: 1
-                                                                }
-                                                            ],
-                                                            allowEmpty: true,
-                                                            itemId: 'cboNetUOM',
-                                                            displayField: 'strUnitMeasure',
-                                                            valueField: 'strUnitMeasure'
-                                                        }
+                                                        text: 'Gross/Net UOM'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',

@@ -167,27 +167,34 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                     editor: {
                         store: '{lot}',
                         readOnly: '{readOnlyInventoryTransferField}',
-                        defaultFilters: [{
-                            column: 'intItemId',
-                            value: '{grdInventoryTransfer.selection.intItemId}',
-                            conjunction: 'and'
-                        },{
-                            column: 'intLocationId',
-                            value: '{current.intFromLocationId}',
-                            conjunction: 'and'
-                        },{
-                            column: 'intSubLocationId',
-                            value: '{grdInventoryTransfer.selection.intFromSubLocationId}',
-                            conjunction: 'and'
-                        },{
-                            column: 'intStorageLocationId',
-                            value: '{grdInventoryTransfer.selection.intFromStorageLocationId}',
-                            conjunction: 'and'
-                        },{
-                            column: 'intOwnershipType',
-                            value: '{grdInventoryTransfer.selection.intOwnershipType}',
-                            conjunction: 'and'
-                        }]
+                        defaultFilters: [
+                            {
+                                column: 'intItemId',
+                                value: '{grdInventoryTransfer.selection.intItemId}',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intLocationId',
+                                value: '{current.intFromLocationId}',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intSubLocationId',
+                                value: '{grdInventoryTransfer.selection.intFromSubLocationId}',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intStorageLocationId',
+                                value: '{grdInventoryTransfer.selection.intFromStorageLocationId}',
+                                conjunction: 'and'
+                            }
+                            // ,
+                            // {
+                            //     column: 'intOwnershipType',
+                            //     value: '{grdInventoryTransfer.selection.intOwnershipType}',
+                            //     conjunction: 'and'
+                            // }
+                        ]
                     }
                 },
                 colAvailableQty: {
@@ -251,25 +258,25 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                     dataIndex: 'strNewLotId'
                 },
                 colNetUOM: {
-                    dataIndex: 'strGrossNetUOM',
-                    editor: {
-                        store: '{weightUOM}',
-                        readOnly: '{readOnlyInventoryTransferField}',                        
-                        origUpdateField: 'intGrossNetUOMId',
-                        origValueField: 'intItemUOMId',
-                        defaultFilters: [
-                            {
-                                column: 'intItemId',
-                                value: '{grdInventoryTransfer.selection.intItemId}',
-                                conjunction: 'and'
-                            },
-                            {
-                                column: 'ysnAllowPurchase',
-                                value: true,
-                                conjunction: 'and'
-                            }
-                        ]
-                    },
+                    dataIndex: 'strGrossNetUOM'
+                    // editor: {
+                    //     store: '{weightUOM}',
+                    //     readOnly: '{readOnlyInventoryTransferField}',                        
+                    //     origUpdateField: 'intGrossNetUOMId',
+                    //     origValueField: 'intItemUOMId',
+                    //     defaultFilters: [
+                    //         {
+                    //             column: 'intItemId',
+                    //             value: '{grdInventoryTransfer.selection.intItemId}',
+                    //             conjunction: 'and'
+                    //         },
+                    //         {
+                    //             column: 'ysnAllowPurchase',
+                    //             value: true,
+                    //             conjunction: 'and'
+                    //         }
+                    //     ]
+                    // },
                 },
                 colCost: {
                     dataIndex: 'dblCost',
@@ -294,9 +301,9 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                     dataIndex: 'dblTare'
                 },
                 colWeightUOMId: {
-                    editor: {
-                        readOnly: '{readOnlyInventoryTransferField}'
-                    },
+                    // editor: {
+                    //     readOnly: '{readOnlyInventoryTransferField}'
+                    // },
                     dataIndex: 'intWeightUOMId'
                 },
                 colNewLotStatus: {
@@ -327,24 +334,30 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
     },
 
     mapGrossNet: function (current) {
-        var gn = this.calculateGrossNet(current.get('dblQuantity'), current.get('dblItemUnitQty'), current.get('dblGrossNetUnitQty'), 0.00);
+        //var gn = this.calculateGrossNet(current.get('dblQuantity'), current.get('dblItemUnitQty'), current.get('dblWeightPerQty'));
+        var gn = this.calculateGrossNet(current.get('dblQuantity'), current.get('dblWeightPerQty'));
         current.set('dblGross', gn.gross);
     },
 
-    calculateGrossNet: function (lotQty, itemUOMConversionFactor, weightUOMConversionFactor, tareWeight) {
-        var grossQty = 0.00;
+    //calculateGrossNet: function (lotQty, itemUOMConversionFactor, weightPerQty, tareWeight) {
+    calculateGrossNet: function (lotQty, weightPerQty) {
         var me = this;
-        if (itemUOMConversionFactor === weightUOMConversionFactor) {
-            grossQty = lotQty;
-        }
-        else if (weightUOMConversionFactor !== 0) {
-            grossQty = me.convertQtyBetweenUOM(itemUOMConversionFactor, weightUOMConversionFactor, lotQty);
+       
+        var computedGross = 0.00;
+        weightPerQty = Ext.isNumeric(weightPerQty) ? weightPerQty : 0.00; 
+        
+        // if (itemUOMConversionFactor === weightPerQty) {
+        //     grossQty = lotQty;
+        // }
+        if (weightPerQty !== 0) {
+            //grossQty = me.convertQtyBetweenUOM(itemUOMConversionFactor, weightUOMConversionFactor, lotQty);
+            computedGross = lotQty * weightPerQty; 
         }
 
         return {
-            gross: grossQty,
-            tare: tareWeight,
-            net: grossQty - tareWeight
+            gross: computedGross
+            // tare: tareWeight,
+            // net: grossQty - tareWeight
         };
     },
 
@@ -563,17 +576,20 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             current.set('intLotId', records[0].get('intLotId'));
             current.set('dblAvailableQty', records[0].get('dblQty'));
             current.set('strAvailableUOM', records[0].get('strItemUOM'));
-            current.set('intItemUOMId', records[0].get('intItemUOMId'));
+            current.set('strGrossNetUOM', records[0].get('strWeightUOM')); 
+            current.set('intItemUOMId', records[0].get('intItemUOMId'));            
+            current.set('intGrossNetUOMId', records[0].get('intWeightUOMId'));
+            current.set('dblWeightPerQty', records[0].get('dblWeightPerQty'));
 
             current.set('dblOriginalAvailableQty', records[0].get('dblQty'));
             current.set('dblOriginalStorageQty', records[0].get('dblQty'));
             current.set('intNewLotStatusId', records[0].get('intLotStatusId'));
-            current.set('dblItemUnitQty', records[0].get('dblItemUnitQty'));
+            //current.set('dblItemUnitQty', records[0].get('dblItemUnitQty'));
 
             current.set('intFromSubLocationId', records[0].get('intSubLocationId'));
             current.set('intFromStorageLocationId', records[0].get('intStorageLocationId'));
             current.set('strFromSubLocationName', records[0].get('strSubLocationName'));
-            current.set('strFromStorageLocationName', records[0].get('strStorageLocation'));
+            current.set('strFromStorageLocationName', records[0].get('strStorageLocationName'));
 
             var strNewLotStatus = 'Active';
             switch(records[0].get('intLotStatusId')) {

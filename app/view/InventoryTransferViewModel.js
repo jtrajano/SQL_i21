@@ -23,7 +23,8 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
         'Inventory.store.BufferedItemStockUOMViewTotalsAllLocations',
         'Inventory.store.BufferedItemStockUOMViewTotalsAllStorageUnits',
         'GeneralLedger.controls.RecapTab',
-        'GeneralLedger.controls.PostHistory'      
+        'GeneralLedger.controls.PostHistory',
+        'Inventory.store.BufferedPostedLot'      
     ],
 
     stores: {
@@ -128,9 +129,9 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
         item: {
             type: 'icbuffereditemstockviewwithcomments'
         },
-        lot: {
-            type: 'icbufferedsearchlot'
-        },
+        // lot: {
+        //     type: 'icbufferedsearchlot'
+        // },
         fromSubLocation: {
             type: 'icbuffereditemstockuomviewtotalsalllocations'
         },
@@ -175,7 +176,10 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
                 name: 'intOwnershipType',
                 name: 'strOwnershipType'
             }
-        }
+        },
+        lot: {
+            type: 'icbufferedpostedlot'
+        },        
     },
 
     formulas: {
