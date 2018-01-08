@@ -40,10 +40,11 @@ BEGIN TRY
 		,@intOrderTaskId INT
 		,@dblOrderTaskQty NUMERIC(18, 6)
 		,@strOrderType NVARCHAR(50)
+		,@strPickByFullPallet NVARCHAR(50)
+		,@intWorkOrderId INT
+		,@intManufacturingProcessId INT
 
-		SELECT 
-		@strOrderType = OT.strOrderType
-
+	SELECT @strOrderType = OT.strOrderType
 	FROM tblMFOrderHeader oh
 	JOIN tblMFOrderType OT ON OT.intOrderTypeId = oh.intOrderTypeId
 	WHERE intOrderHeaderId = @intOrderHeaderId
@@ -81,10 +82,11 @@ BEGIN TRY
 	FROM tblMFTask
 	WHERE intTaskId = @intTaskId
 
-	If @intLotId=@intAlternateLotId and @dblTaskQty=@dblQty
-	Begin
-		Return
-	End
+	IF @intLotId = @intAlternateLotId
+		AND @dblTaskQty = @dblQty
+	BEGIN
+		RETURN
+	END
 
 	IF ISNULL(@dblAlternateLotQty, 0) <= 0
 	BEGIN
@@ -205,8 +207,6 @@ BEGIN TRY
 
 	IF @intTransactionCount = 0
 		BEGIN TRANSACTION
-
-
 
 	IF @intOrderHeaderId IS NOT NULL
 		AND EXISTS (
@@ -422,27 +422,49 @@ BEGIN TRY
 			RETURN
 		END
 	END
-	ELSE
+	ELSE IF @strOrderType = 'WO PROD STAGING'
 	BEGIN
-		IF EXISTS (
-				SELECT 1
-				FROM tblMFOrderDetail OD
-				LEFT JOIN tblMFTask T ON OD.intItemId = T.intItemId
-					AND OD.intOrderHeaderId = T.intOrderHeaderId
-				WHERE OD.intOrderHeaderId = @intOrderHeaderId
-					AND OD.intItemId = @intItemId
-					AND OD.dblQty > 0
-				GROUP BY OD.dblWeight
-				HAVING ISNULL(SUM(dbo.fnMFConvertQuantityToTargetItemUOM(T.intWeightUOMId, OD.intWeightUOMId, T.dblWeight)), 0) > OD.dblWeight
-				)
-		BEGIN
-			RAISERROR (
-					'Task Qty cannot be greater than required Qty.'
-					,16
-					,1
-					)
+		SELECT @intWorkOrderId = intWorkOrderId
+		FROM tblMFStageWorkOrder
+		WHERE intOrderHeaderId = @intOrderHeaderId
 
-			RETURN
+		SELECT @intManufacturingProcessId = intManufacturingProcessId
+		FROM tblMFWorkOrder
+		WHERE intWorkOrderId = @intWorkOrderId
+
+		SELECT @strPickByFullPallet = strAttributeValue
+		FROM tblMFManufacturingProcessAttribute
+		WHERE intManufacturingProcessId = @intManufacturingProcessId
+			AND intLocationId = @intLocationId
+			AND intAttributeId = 92 --Pick By Full Pallet
+
+		IF @strPickByFullPallet IS NULL
+		BEGIN
+			SELECT @strPickByFullPallet = 'False'
+		END
+
+		IF @strPickByFullPallet = 'False'
+		BEGIN
+			IF EXISTS (
+					SELECT 1
+					FROM tblMFOrderDetail OD
+					LEFT JOIN tblMFTask T ON OD.intItemId = T.intItemId
+						AND OD.intOrderHeaderId = T.intOrderHeaderId
+					WHERE OD.intOrderHeaderId = @intOrderHeaderId
+						AND OD.intItemId = @intItemId
+						AND OD.dblQty > 0
+					GROUP BY OD.dblWeight
+					HAVING ISNULL(SUM(dbo.fnMFConvertQuantityToTargetItemUOM(T.intWeightUOMId, OD.intWeightUOMId, T.dblWeight)), 0) > OD.dblWeight
+					)
+			BEGIN
+				RAISERROR (
+						'Task Qty cannot be greater than required Qty.'
+						,16
+						,1
+						)
+
+				RETURN
+			END
 		END
 	END
 
