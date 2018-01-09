@@ -15,6 +15,6 @@ SELECT l.intBookId
 FROM tblCTLimit l
 JOIN tblCTBook b ON b.intBookId = l.intBookId
 JOIN tblRKFutureMarket fm ON fm.intFutureMarketId = l.intFutureMarketId
-JOIN tblRKFuturesMonth m ON m.intFutureMonthId = l.intFutureMonthId
 JOIN tblICCommodity c ON c.intCommodityId = l.intCommodityId
 JOIN tblCTSubBook sb ON sb.intSubBookId = l.intSubBookId
+LEFT JOIN tblRKFuturesMonth m ON m.intFutureMonthId = l.intFutureMonthId
