@@ -30,6 +30,10 @@ Ext.define('Inventory.view.ItemViewController', {
                 store: '{itemTypes}',
                 readOnly: '{readOnlyForDiscountType}'
             },
+            cboBundleType: {
+                value: '{current.strBundleType}',
+                store: '{bundleTypes}'
+            },
             txtShortName: {
                 value: '{current.strShortName}',
                 hidden: '{HideDisableForComment}'
@@ -104,9 +108,9 @@ Ext.define('Inventory.view.ItemViewController', {
             cfgAssembly: {
                 hidden: '{pgeAssemblyHide}'
             },
-            cfgBundle: {
-                hidden: '{pgeBundleHide}'
-            },
+            // cfgBundle: {
+            //     hidden: '{pgeBundleHide}'
+            // },
             cfgKit: {
                 hidden: '{pgeKitHide}'
             },
@@ -184,7 +188,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 },
                 colAllowSale: 'ysnAllowSale',
                 colAllowPurchase: {
-                    disabled: '{readOnlyOnBundleItems}',
+                    //disabled: '{readOnlyOnBundleItems}',
                     dataIndex: 'ysnAllowPurchase'
                 },
                 colConvertToStock: 'dblConvertToStock',
@@ -693,7 +697,8 @@ Ext.define('Inventory.view.ItemViewController', {
             chkPrice: '{current.ysnPrice}',
             chkIsBasket: {
                 value: '{current.ysnIsBasket}',
-                hidden: '{hideOnBundleItems}'
+                //hidden: '{hideOnBundleItems}'
+                hidden: true
             },
             chkBasisContract: '{current.ysnBasisContract}',
             cboCostMethod: {
@@ -1158,10 +1163,21 @@ Ext.define('Inventory.view.ItemViewController', {
                         origUpdateField: 'intBundleItemId',
                         store: '{bundleItem}',
                         defaultFilters: [{
-                            column: 'strType',
-                            value: 'Inventory',
+                            inner: [
+                                {
+                                    column: 'strType',
+                                    value: 'Inventory',
+                                    conjunction: 'or'
+                                },
+                                {
+                                    column: 'strType',
+                                    value: 'Other Charge',
+                                    conjunction: 'or'
+                                }
+                            ],
                             conjunction: 'and'
-                        }, {
+                        }, 
+                        {
                             column: 'intCommodityId',
                             value: '{current.intCommodityId}',
                             conjunction: 'and'
@@ -1188,7 +1204,21 @@ Ext.define('Inventory.view.ItemViewController', {
                         }]
                     }
                 },
-                colBundleUnit: 'dblUnit'
+                colBundleAddOn:{
+                    dataIndex: 'ysnAddOn'
+                },
+                colBundleMarkUpOrDown: {
+                    dataIndex: 'dblMarkUpOrDown',
+                    hidden: '{!isSubstituteBundleType}'
+                },
+                colBundleBeginDate: {
+                    dataIndex: 'dtmBeginDate',
+                    hidden: '{!isSubstituteBundleType}'
+                },
+                colBundleEndDate: {
+                    dataIndex: 'dtmEndDate',
+                    hidden: '{!isSubstituteBundleType}'
+                }
             },
 
             //---------------//
@@ -4184,6 +4214,12 @@ Ext.define('Inventory.view.ItemViewController', {
                 }            
             }
         }
+    },
+
+    onBundleItemHeaderClick: function (menu, column) {
+        var grid = column.$initParent.grid;
+
+        i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('Inventory.view.Item', grid, 'intBundleItemId');
     },
 
     init: function(application) {

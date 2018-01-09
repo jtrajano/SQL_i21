@@ -73,9 +73,9 @@ Ext.define('Inventory.view.ItemViewModel', {
         itemTypes: {
             autoLoad: true,
             data: [
-                {
-                    strType: 'Bundle'
-                },
+                // {
+                //     strType: 'Bundle'
+                // },
                 {
                     strType: 'Inventory'
                 },
@@ -107,6 +107,25 @@ Ext.define('Inventory.view.ItemViewModel', {
             fields: [
                 {
                     name: 'strType'
+                }
+            ]
+        },
+        bundleTypes: {
+            autoLoad: true,
+            data: [
+                {
+                    strBundleType: 'Bundle'
+                },
+                {
+                    strBundleType: 'Basket'
+                },
+                {
+                    strBundleType: 'Substitute'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strBundleType'
                 }
             ]
         },
@@ -1468,17 +1487,20 @@ Ext.define('Inventory.view.ItemViewModel', {
             }
         },
         readOnlyOnBundleItems: function(get) {
-            if (get('current.strType') === 'Bundle') {
-                return !get('current.ysnIsBasket');
-            }
-            else {
-                return false;
-            }
+            return get('current.strBundleType') == 'Basket';
+            // if (get('current.strType') === 'Bundle') {
+            //     return !get('current.ysnIsBasket');
+            // }
+            // else {
+            //     return false;
+            // }
         },
         hideOnBundleItems: function(get) {
             return get('current.strType') !== 'Bundle';
         },
-
+        isSubstituteBundleType: function (get){
+            return get('current.strBundleType') == 'Substitute';
+        },
         readOnlyForOtherCharge: function(get){
             
             if(get('current.strType') === 'Other Charge'){

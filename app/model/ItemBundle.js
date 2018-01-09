@@ -44,7 +44,11 @@ Ext.define('Inventory.model.ItemBundle', {
         { name: 'strDescription', type: 'string' },
         { name: 'dblQuantity', type: 'float', defaultValue: 1.00 },
         { name: 'intItemUnitMeasureId', type: 'int', allowNull: true },
-        { name: 'dblUnit', type: 'float' },
+        //{ name: 'dblUnit', type: 'float' },
+        { name: 'ysnAddOn', type: 'boolean' },
+        { name: 'dblMarkUpOrDown', type: 'float' },
+        { name: 'dtmBeginDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d'},
+        { name: 'dtmEndDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },
         { name: 'intSort', type: 'int', allowNull: true },
 
         { name: 'strItemNo', type: 'string'},

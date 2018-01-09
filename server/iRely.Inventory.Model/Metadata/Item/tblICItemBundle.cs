@@ -17,6 +17,10 @@ namespace iRely.Inventory.Model
         public string strDescription { get; set; }
         public decimal? dblQuantity { get; set; }
         public int? intItemUnitMeasureId { get; set; }
+        public bool ysnAddOn { get; set; }
+        public decimal? dblMarkUpOrDown { get; set; }
+        public DateTime? dtmBeginDate { get; set; }
+        public DateTime? dtmEndDate { get; set; }
         public int? intSort { get; set; }
 
         private string _item;

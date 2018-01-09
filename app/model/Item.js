@@ -38,6 +38,7 @@ Ext.define('Inventory.model.Item', {
         { name: 'strItemNo', type: 'string' },
         { name: 'strShortName', type: 'string' },
         { name: 'strType', type: 'string' },
+        { name: 'strBundleType', type: 'string', allowNull: true },
         { name: 'strDescription', type: 'string' },
         { name: 'intManufacturerId', type: 'int', allowNull: true },
         { name: 'intBrandId', type: 'int', allowNull: true },

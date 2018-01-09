@@ -193,6 +193,15 @@ Ext.define('Inventory.view.Item', {
                                                                 valueField: 'strType'
                                                             },
                                                             {
+                                                                xtype: 'combobox',
+                                                                itemId: 'cboBundleType',
+                                                                modelValidation: true,
+                                                                fieldLabel: 'Bundle Type',
+                                                                labelWidth: 80,
+                                                                displayField: 'strBundleType',
+                                                                valueField: 'strBundleType'
+                                                            },
+                                                            {
                                                                 xtype: 'textfield',
                                                                 itemId: 'txtShortName',
                                                                 fieldLabel: 'Short Name',
@@ -1243,12 +1252,6 @@ Ext.define('Inventory.view.Item', {
                                                                         xtype: 'checkboxfield',
                                                                         itemId: 'chkFuelItem',
                                                                         fieldLabel: 'Fuel Item',
-                                                                        labelWidth: 116
-                                                                    },
-                                                                    {
-                                                                        xtype: 'checkboxfield',
-                                                                        itemId: 'chkListBundleSeparately',
-                                                                        fieldLabel: 'List Bundle Items Separately',
                                                                         labelWidth: 116
                                                                     },
                                                                     {
@@ -5974,7 +5977,7 @@ Ext.define('Inventory.view.Item', {
                                         xtype: 'panel',
                                         itemId: 'pgeBundle',
                                         layout: 'fit',
-                                        title: 'Bundle Details',
+                                        title: 'Bundle',
                                         tabConfig: {
                                             xtype: 'tab',
                                             itemId: 'cfgBundle'
@@ -6011,6 +6014,14 @@ Ext.define('Inventory.view.Item', {
                                                                 text: 'Remove'
                                                             },
                                                             {
+                                                                xtype: 'checkboxfield',
+                                                                itemId: 'chkListBundleSeparately',
+                                                                margin: '0 10',
+                                                                tabIndex: -1,
+                                                                fieldLabel: 'List Bundle Items Separately',
+                                                                labelWidth: 180
+                                                            },
+                                                            {
                                                                 xtype: 'filter1'
                                                             }
                                                         ]
@@ -6019,7 +6030,9 @@ Ext.define('Inventory.view.Item', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        flex: 2,
+                                                        headerDrillDownClick: 'onBundleItemHeaderClick',
+                                                        headerDrillDownText: 'Open',
+                                                        flex: 1.7,
                                                         itemId: 'colBundleItem',
                                                         dataIndex: 'string',
                                                         text: 'Item',
@@ -6057,6 +6070,16 @@ Ext.define('Inventory.view.Item', {
                                                         }
                                                     },
                                                     {
+                                                        xtype: 'gridcolumn',
+                                                        flex: 2,
+                                                        itemId: 'colBundleDescription',
+                                                        dataIndex: 'string',
+                                                        text: 'Description',
+                                                        editor: {
+                                                            xtype: 'textfield'
+                                                        }
+                                                    },
+                                                    {
                                                         xtype: 'numbercolumn',
                                                         flex: 1,
                                                         itemId: 'colBundleQuantity',
@@ -6071,17 +6094,7 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        flex: 2,
-                                                        itemId: 'colBundleDescription',
-                                                        dataIndex: 'string',
-                                                        text: 'Description',
-                                                        editor: {
-                                                            xtype: 'textfield'
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        flex: 1,
+                                                        flex: 1.25,
                                                         itemId: 'colBundleUOM',
                                                         dataIndex: 'string',
                                                         text: 'Unit Measure',
@@ -6125,11 +6138,43 @@ Ext.define('Inventory.view.Item', {
                                                         }
                                                     },
                                                     {
+                                                        xtype: 'checkcolumn',
+                                                        flex: 0.75,
+                                                        itemId: 'colBundleAddOn',
+                                                        text: 'Add-on'
+                                                    },
+                                                    {
                                                         xtype: 'numbercolumn',
-                                                        flex: 1,
-                                                        itemId: 'colBundleUnit',
+                                                        flex: 1.25,
+                                                        itemId: 'colBundleMarkUpOrDown',
                                                         align: 'right',
-                                                        text: 'Unit'
+                                                        text: 'Mark Up/Down',
+                                                        editor: {
+                                                            xtype: 'numberfield',
+                                                            quantityField: true,
+                                                            fieldStyle: 'text-align:right',
+                                                            hideTrigger: true
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'datecolumn',
+                                                        flex: 1,
+                                                        itemId: 'colBundleBeginDate',
+                                                        text: 'Begin Date',
+                                                        editor: {
+                                                            xtype: 'datefield',
+                                                            itemId: 'dtmBeginDate'
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'datecolumn',
+                                                        flex: 1,
+                                                        itemId: 'colBundleEndDate',
+                                                        text: 'End Date',
+                                                        editor: {
+                                                            xtype: 'datefield',
+                                                            itemId: 'dtmEndDate'
+                                                        }
                                                     }
                                                 ],
                                                 viewConfig: {

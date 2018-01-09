@@ -18,6 +18,10 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strDescription).HasColumnName("strDescription");
             this.Property(t => t.dblQuantity).HasColumnName("dblQuantity").HasPrecision(38, 20);
             this.Property(t => t.intItemUnitMeasureId).HasColumnName("intItemUnitMeasureId");
+            this.Property(t => t.ysnAddOn).HasColumnName("ysnAddOn");
+            this.Property(t => t.dblMarkUpOrDown).HasColumnName("dblMarkUpOrDown").HasPrecision(38, 20);
+            this.Property(t => t.dtmBeginDate).HasColumnName("dtmBeginDate");
+            this.Property(t => t.dtmEndDate).HasColumnName("dtmEndDate");
             this.Property(t => t.intSort).HasColumnName("intSort");
 
             this.HasOptional(p => p.BundleItem)

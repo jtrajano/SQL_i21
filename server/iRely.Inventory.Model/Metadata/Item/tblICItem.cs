@@ -16,6 +16,7 @@ namespace iRely.Inventory.Model
         public string strItemNo { get; set; }
         public string strShortName { get; set; }
         public string strType { get; set; }
+        public string strBundleType { get; set; }
         public string strDescription { get; set; }
         public int? intManufacturerId { get; set; }
         public int? intBrandId { get; set; }
