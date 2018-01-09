@@ -11,7 +11,8 @@ AS
 			EY.strName				AS	strDefSalesperson,
 			VI.strItemNo			AS	strVoucherItem,
 			II.strItemNo			AS	strInvoiceItem,
-			PC.strPriceCalculationType
+			PC.strPriceCalculationType,
+			SR.strScheduleDescription	AS	strDefStorageSchedule
 
 	FROM	tblCTCompanyPreference		CP LEFT
 	JOIN	tblICUnitMeasure			U1	ON	U1.intUnitMeasureId			=	CP.intCleanCostUOMId		LEFT
@@ -21,4 +22,6 @@ AS
 	JOIN	tblEMEntity					EY	ON	EY.intEntityId				=	CP.intDefSalespersonId		LEFT
 	JOIN	tblICItem					VI	ON	VI.intItemId				=	CP.intVoucherItemId			LEFT
 	JOIN	tblICItem					II	ON	II.intItemId				=	CP.intInvoiceItemId			LEFT
-	JOIN	tblCTPriceCalculationType	PC	ON	PC.intPriceCalculationTypeId=	CP.intPriceCalculationTypeId
+	JOIN	tblCTPriceCalculationType	PC	ON	PC.intPriceCalculationTypeId=	CP.intPriceCalculationTypeId	LEFT    
+	JOIN	tblGRStorageScheduleRule	SR	ON	SR.intStorageScheduleRuleId	=	CP.intDefStorageSchedule
+
