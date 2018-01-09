@@ -42,8 +42,8 @@ SELECT 'Debit Memo' AS strTransactionType,
        NULL AS intCompanyLocationId
 FROM tblAPBill
 WHERE intTransactionType = 3
-  AND ISNULL(ysnPosted, 0) = 0
-  UNION ALL
+AND ISNULL(ysnPosted, 0) = 0
+UNION ALL
 SELECT 'Vendor Prepayment' AS strTransactionType,
        intBillId,
        strBillId,
@@ -56,7 +56,8 @@ SELECT 'Vendor Prepayment' AS strTransactionType,
        NULL AS intCompanyLocationId
 FROM tblAPBill
 WHERE intTransactionType = 2
-  UNION ALL
+AND ISNULL(ysnPosted, 0) = 0
+UNION ALL
 SELECT 'Basis Advance' AS strTransactionType,
        intBillId,
        strBillId,
@@ -69,3 +70,4 @@ SELECT 'Basis Advance' AS strTransactionType,
        NULL AS intCompanyLocationId
 FROM tblAPBill
 WHERE intTransactionType = 13
+AND ISNULL(ysnPosted, 0) = 0
