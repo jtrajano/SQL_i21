@@ -73,7 +73,7 @@ BEGIN
 		,AG.[sscar_fed_id]			AS [strFederalId]
 		,AG.[sscar_trans_lic_no]	AS [strTransporterLicense]
 		,AG.[sscar_ifta_no]		AS [strMotorCarrierIFTA]
-		,AG.[sscar_trans_mode]		AS [strTransportationMode]
+		,B.strDescription--AG.[sscar_trans_mode]		AS [strTransportationMode]
 		,(CASE WHEN AG.[sscar_co_owned_yn] = ''Y'' 
 			THEN 1
 			ELSE 0
@@ -86,7 +86,10 @@ BEGIN
 		[sscarmst] AG
 	LEFT OUTER JOIN
 		[tblSMShipVia] SV
-			ON RTRIM(LTRIM(AG.[sscar_key] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(SV.[strShipViaOriginKey] COLLATE Latin1_General_CI_AS))										
+			ON RTRIM(LTRIM(AG.[sscar_key] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(SV.[strShipViaOriginKey] COLLATE Latin1_General_CI_AS))
+	LEFT JOIN 
+			tblSMTransportationMode B
+				ON LTRIM(RTRIM(B.strCode)) COLLATE Latin1_General_CI_AS  = LTRIM(RTRIM(AG.sscar_trans_mode)) COLLATE Latin1_General_CI_AS										
 	WHERE
 		SV.[strShipViaOriginKey] IS NULL		
 
