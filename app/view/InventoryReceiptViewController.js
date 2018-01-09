@@ -2487,6 +2487,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         }
                     }
                 });
+
+                if(!current.phantom && charges.data.items.length === 0) {
+                    totalChargeTaxes = current.get('dblTotalChargeTax');
+                }                
             }
         }
         return totalChargeTaxes;
