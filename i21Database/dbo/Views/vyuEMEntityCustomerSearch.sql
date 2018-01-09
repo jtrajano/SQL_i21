@@ -22,7 +22,11 @@
 	entityContact.strMobile,
 	entityContact.strEmail,
 	LOB.strLineOfBusiness,
-	entityClass.strClass
+	entityClass.strClass,
+	ysnHasBudgetSetup = CAST(CASE WHEN (SELECT TOP 1 1 FROM tblARCustomerBudget WHERE intEntityCustomerId = cust.intEntityId) = 1 THEN 1 ELSE 0 END AS BIT),
+	cust.intPaymentMethodId,
+	custPaymentMethod.strPaymentMethod
+
 FROM tblARCustomer cust
 INNER JOIN tblEMEntity entityToCustomer ON cust.intEntityId = entityToCustomer.intEntityId
 LEFT JOIN tblEMEntity entityToSalesperson ON cust.intSalespersonId = entityToSalesperson.intEntityId
@@ -40,6 +44,7 @@ LEFT JOIN tblARPayment custPayment ON cust.intEntityId = custPayment.intEntityCu
 LEFT JOIN tblEMEntityLineOfBusiness entityLOB ON cust.intEntityId = entityLOB.intEntityId
 LEFT JOIN tblSMLineOfBusiness LOB ON entityLOB.intLineOfBusinessId = LOB.intLineOfBusinessId
 LEFT JOIN tblEMEntityClass entityClass ON entityToCustomer.intEntityClassId = entityClass.intEntityClassId
+LEFT JOIN tblSMPaymentMethod custPaymentMethod ON cust.intPaymentMethodId = custPaymentMethod.intPaymentMethodID
 
 WHERE		
 		entityType.Customer = 1 -- check if entity is a customer
@@ -66,5 +71,7 @@ GROUP BY
 	entityContact.strMobile,
 	entityContact.strEmail,
 	LOB.strLineOfBusiness,
-	entityClass.strClass
+	entityClass.strClass,
+	custPaymentMethod.strPaymentMethod,
+	cust.intPaymentMethodId
 GO
