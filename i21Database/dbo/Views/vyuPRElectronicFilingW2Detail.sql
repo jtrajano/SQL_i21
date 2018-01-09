@@ -89,6 +89,8 @@ SELECT
 			   + CASE WHEN (strBox12c = 'DD') THEN dblBox12c ELSE 0 END + CASE WHEN (strBox12d = 'DD') THEN dblBox12d ELSE 0 END
 	,dblCodeEE = CASE WHEN (strBox12a = 'EE') THEN dblBox12a ELSE 0 END + CASE WHEN (strBox12b = 'EE') THEN dblBox12b ELSE 0 END 
 			   + CASE WHEN (strBox12c = 'EE') THEN dblBox12c ELSE 0 END + CASE WHEN (strBox12d = 'EE') THEN dblBox12d ELSE 0 END
+	,dblCodeFF = CASE WHEN (strBox12a = 'FF') THEN dblBox12a ELSE 0 END + CASE WHEN (strBox12b = 'FF') THEN dblBox12b ELSE 0 END 
+			   + CASE WHEN (strBox12c = 'FF') THEN dblBox12c ELSE 0 END + CASE WHEN (strBox12d = 'FF') THEN dblBox12d ELSE 0 END
 	,EMP.ysnStatutoryEmployee
 	,EMP.ysnRetirementPlan
 	,EMP.ysnThirdPartySickPay
