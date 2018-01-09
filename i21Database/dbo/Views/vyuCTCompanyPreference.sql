@@ -9,7 +9,8 @@ AS
 			CS.strContractStatus	AS	strDefContractStatus,
 			CT.strContainerType		AS	strDefContainerType,
 			EY.strName				AS	strDefSalesperson,
-			PC.strPriceCalculationType
+			PC.strPriceCalculationType,
+			SR.strScheduleDescription	AS	strDefStorageSchedule
 
 	FROM	tblCTCompanyPreference		CP LEFT
 	JOIN	tblICUnitMeasure			U1	ON	U1.intUnitMeasureId			=	CP.intCleanCostUOMId		LEFT
@@ -17,4 +18,5 @@ AS
 	JOIN	tblCTContractStatus			CS	ON	CS.intContractStatusId		=	CP.intDefContractStatusId	LEFT
 	JOIN	tblLGContainerType			CT	ON	CT.intContainerTypeId		=	CP.intDefContainerTypeId	LEFT
 	JOIN	tblEMEntity					EY	ON	EY.intEntityId				=	CP.intDefSalespersonId		LEFT
-	JOIN	tblCTPriceCalculationType	PC	ON	PC.intPriceCalculationTypeId=	CP.intPriceCalculationTypeId
+	JOIN	tblCTPriceCalculationType	PC	ON	PC.intPriceCalculationTypeId=	CP.intPriceCalculationTypeId	LEFT    
+	JOIN	tblGRStorageScheduleRule	SR	ON	SR.intStorageScheduleRuleId	=	CP.intDefStorageSchedule
