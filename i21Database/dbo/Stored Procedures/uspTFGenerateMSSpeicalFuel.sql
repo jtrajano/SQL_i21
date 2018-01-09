@@ -193,98 +193,93 @@ BEGIN TRY
 		WHERE uniqTransactionGuid = @Guid
 		GROUP BY strFormCode, strScheduleCode, strType
 
+		-- Dyed Diesel
+		SELECT @DyedDiesel_1 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '1' AND strType = 'Dyed Diesel and Kerosene'
+		SELECT @DyedDiesel_2 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '2A' AND strType = 'Dyed Diesel and Kerosene'
+		SELECT @DyedDiesel_3 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '2C' AND strType = 'Dyed Diesel and Kerosene'
+		SELECT @DyedDiesel_4 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '2X' AND strType = 'Dyed Diesel and Kerosene'
+		SELECT @DyedDiesel_5 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '5B' AND strType = 'Dyed Diesel and Kerosene'
+		SELECT @DyedDiesel_6 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '5D' AND strType = 'Dyed Diesel and Kerosene'
+		SELECT @DyedDiesel_9 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '6D' AND strType = 'Dyed Diesel and Kerosene'
+		SELECT @DyedDiesel_11 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '7' AND strType = 'Dyed Diesel and Kerosene'
+		SELECT @DyedDiesel_13 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '8' AND strType = 'Dyed Diesel and Kerosene'
+		SELECT @DyedDiesel_14 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '10A' AND strType = 'Dyed Diesel and Kerosene'
+		SELECT @DyedDiesel_15 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '10B' AND strType = 'Dyed Diesel and Kerosene'
+		SELECT @DyedDiesel_16 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '10R' AND strType = 'Dyed Diesel and Kerosene'
+		SELECT @DyedDiesel_17 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '10Y' AND strType = 'Dyed Diesel and Kerosene'	
+		SELECT @DyedDiesel_22 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '5F' AND strType = 'Dyed Diesel and Kerosene'
+		SELECT @DyedDiesel_23 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '5G' AND strType = 'Dyed Diesel and Kerosene'
+		SELECT @DyedDiesel_28 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '13H' AND strType = 'Dyed Diesel and Kerosene'
 
-		SELECT @DyedDiesel_1 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '1' AND strType = 'Dyed Diesel and Kerosene' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @DyedDiesel_2 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '2A' AND strType = 'Dyed Diesel and Kerosene' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @DyedDiesel_3 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '2C' AND strType = 'Dyed Diesel and Kerosene' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @DyedDiesel_4 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '2X' AND strType = 'Dyed Diesel and Kerosene' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @DyedDiesel_5 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '5B' AND strType = 'Dyed Diesel and Kerosene' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			, @DyedDiesel_6 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '5D' AND strType = 'Dyed Diesel and Kerosene' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			, @DyedDiesel_9 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '6D' AND strType = 'Dyed Diesel and Kerosene' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			, @DyedDiesel_11 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '7' AND strType = 'Dyed Diesel and Kerosene' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END	
-			, @DyedDiesel_13 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '8' AND strType = 'Dyed Diesel and Kerosene' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			, @DyedDiesel_14 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '10A' AND strType = 'Dyed Diesel and Kerosene' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			, @DyedDiesel_15 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '10B' AND strType = 'Dyed Diesel and Kerosene' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			, @DyedDiesel_16 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '10R' AND strType = 'Dyed Diesel and Kerosene' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			, @DyedDiesel_17 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '10Y' AND strType = 'Dyed Diesel and Kerosene' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			, @DyedDiesel_22 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '5F' AND strType = 'Dyed Diesel and Kerosene' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			, @DyedDiesel_23 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '5G' AND strType = 'Dyed Diesel and Kerosene' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			, @DyedDiesel_28 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '13H' AND strType = 'Dyed Diesel and Kerosene' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			  
-			, @FuelOil_1 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '1' AND strType = 'Fuel Oil and Other Special Fuel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @FuelOil_2 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '2A' AND strType = 'Fuel Oil and Other Special Fuel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @FuelOil_3 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '2C' AND strType = 'Fuel Oil and Other Special Fuel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @FuelOil_4 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '2X' AND strType = 'Fuel Oil and Other Special Fuel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @FuelOil_5 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '5B' AND strType = 'Fuel Oil and Other Special Fuel' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			, @FuelOil_6 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '5D' AND strType = 'Fuel Oil and Other Special Fuel' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			, @FuelOil_9 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '6D' AND strType = 'Fuel Oil and Other Special Fuel' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			, @FuelOil_11 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '7' AND strType = 'Fuel Oil and Other Special Fuel' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			, @FuelOil_13 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '8' AND strType = 'Fuel Oil and Other Special Fuel' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			, @FuelOil_14 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '10A' AND strType = 'Fuel Oil and Other Special Fuel' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			, @FuelOil_15 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '10B' AND strType = 'Fuel Oil and Other Special Fuel' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			, @FuelOil_16 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '10R' AND strType = 'Fuel Oil and Other Special Fuel' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			, @FuelOil_17 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '10Y' AND strType = 'Fuel Oil and Other Special Fuel' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			--, @FuelOil_22 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '5F' AND strType = 'Fuel Oil and Other Special Fuel' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			--, @FuelOil_23 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '5G' AND strType = 'Fuel Oil and Other Special Fuel' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			, @FuelOil_28 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '13H' AND strType = 'Fuel Oil and Other Special Fuel' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			  
-			, @UndyedDiesel_1 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '1' AND strType = 'Undyed Diesel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @UndyedDiesel_2 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '2A' AND strType = 'Undyed Diesel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @UndyedDiesel_3 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '2C' AND strType = 'Undyed Diesel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @UndyedDiesel_4 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '2X' AND strType = 'Undyed Diesel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @UndyedDiesel_5 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '5B' AND strType = 'Undyed Diesel' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			, @UndyedDiesel_6 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '5D' AND strType = 'Undyed Diesel' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			, @UndyedDiesel_9 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '6D' AND strType = 'Undyed Diesel' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			, @UndyedDiesel_11 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '7' AND strType = 'Undyed Diesel' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			, @UndyedDiesel_13 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '8' AND strType = 'Undyed Diesel' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			, @UndyedDiesel_14 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '10A' AND strType = 'Undyed Diesel' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			, @UndyedDiesel_15 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '10B' AND strType = 'Undyed Diesel' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			, @UndyedDiesel_16 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '10R' AND strType = 'Undyed Diesel' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			, @UndyedDiesel_17 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '10Y' AND strType = 'Undyed Diesel' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			--, @UndyedDiesel_22 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '5F' AND strType = 'Undyed Diesel' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			--, @UndyedDiesel_23 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '5G' AND strType = 'Undyed Diesel' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			, @UndyedDiesel_28 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '13H' AND strType = 'Undyed Diesel' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			  
-			, @JetFuel_1 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '1' AND strType = 'Jet Fuel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @JetFuel_2 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '2A' AND strType = 'Jet Fuel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @JetFuel_3 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '2C' AND strType = 'Jet Fuel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @JetFuel_4 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '2X' AND strType = 'Jet Fuel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @JetFuel_5 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '5B' AND strType = 'Jet Fuel' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			, @JetFuel_6 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '5D' AND strType = 'Jet Fuel' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			, @JetFuel_9 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '6D' AND strType = 'Jet Fuel' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			, @JetFuel_11 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '7' AND strType = 'Jet Fuel' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
+		-- Fuel Oil
+		SELECT @FuelOil_1 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '1' AND strType = 'Fuel Oil and Other Special Fuel'
+		SELECT @FuelOil_2 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '2A' AND strType = 'Fuel Oil and Other Special Fuel'
+		SELECT @FuelOil_3 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '2C' AND strType = 'Fuel Oil and Other Special Fuel'
+		SELECT @FuelOil_4 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '2X' AND strType = 'Fuel Oil and Other Special Fuel'
+		SELECT @FuelOil_5 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '5B' AND strType = 'Fuel Oil and Other Special Fuel'	
+		SELECT @FuelOil_6 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '5D' AND strType = 'Fuel Oil and Other Special Fuel'
+		SELECT @FuelOil_9 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '6D' AND strType = 'Fuel Oil and Other Special Fuel'
+		SELECT @FuelOil_11 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '7' AND strType = 'Fuel Oil and Other Special Fuel'
+		SELECT @FuelOil_13 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '8' AND strType = 'Fuel Oil and Other Special Fuel'
+		SELECT @FuelOil_14 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '10A' AND strType = 'Fuel Oil and Other Special Fuel'
+		SELECT @FuelOil_15 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '10B' AND strType = 'Fuel Oil and Other Special Fuel'
+		SELECT @FuelOil_16 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '10R' AND strType = 'Fuel Oil and Other Special Fuel'
+		SELECT @FuelOil_17 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '10Y' AND strType = 'Fuel Oil and Other Special Fuel'
+		SELECT @FuelOil_28 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '13H' AND strType = 'Fuel Oil and Other Special Fuel'
 
-			, @JetFuel_13 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '8' AND strType = 'Jet Fuel' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			, @JetFuel_14 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '10A' AND strType = 'Jet Fuel' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			, @JetFuel_15 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '10B' AND strType = 'Jet Fuel' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			, @JetFuel_16 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '10R' AND strType = 'Jet Fuel' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			, @JetFuel_17 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '10Y' AND strType = 'Jet Fuel' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			--, @JetFuel_22 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '5F' AND strType = 'Jet Fuel' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			--, @JetFuel_23 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '5G' AND strType = 'Jet Fuel' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-			, @JetFuel_28 = CASE WHEN strFormCode = 'SpecialFuels' AND strScheduleCode = '13H' AND strType = 'Jet Fuel' THEN ISNULL(dblBillQty, 0.00) ELSE 0.00 END
-		FROM @transaction
+		-- Undyed Diesel
+		SELECT @UndyedDiesel_1 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '1' AND strType = 'Undyed Diesel'
+		SELECT @UndyedDiesel_2 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '2A' AND strType = 'Undyed Diesel'
+		SELECT @UndyedDiesel_3 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '2C' AND strType = 'Undyed Diesel'
+		SELECT @UndyedDiesel_4 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '2X' AND strType = 'Undyed Diesel'
+		SELECT @UndyedDiesel_5 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '5B' AND strType = 'Undyed Diesel'
+		SELECT @UndyedDiesel_6 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '5D' AND strType = 'Undyed Diesel'
+		SELECT @UndyedDiesel_9 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '6D' AND strType = 'Undyed Diesel'
+		SELECT @UndyedDiesel_11 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '7' AND strType = 'Undyed Diesel'
+		SELECT @UndyedDiesel_13 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '8' AND strType = 'Undyed Diesel'
+		SELECT @UndyedDiesel_14 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '10A' AND strType = 'Undyed Diesel'
+		SELECT @UndyedDiesel_15 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '10B' AND strType = 'Undyed Diesel'
+		SELECT @UndyedDiesel_16 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '10R' AND strType = 'Undyed Diesel'
+		SELECT @UndyedDiesel_17 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '10Y' AND strType = 'Undyed Diesel'
+		SELECT @UndyedDiesel_28 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '13H' AND strType = 'Undyed Diesel'
 
-		SELECT @DyedDiesel_12 = CASE WHEN strTemplateItemId = 'SF-Line12Dyed' THEN (CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END) ELSE 0 END
-			, @DyedDiesel_20 = CASE WHEN  strTemplateItemId = 'SF-Line20Dyed' THEN (CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,4), strConfiguration) END) ELSE 0 END
-			, @DyedDiesel_25 =  CASE WHEN strTemplateItemId = 'SF-Line25Dyed' THEN (CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,4), strConfiguration) END) ELSE 0 END
-			, @DyedDiesel_29 = CASE WHEN strTemplateItemId = 'SF-Line29Dyed' THEN (CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,4), strConfiguration) END) ELSE 0 END
-			, @FuelOil_12 = CASE WHEN strTemplateItemId = 'SF-Line12FuelOil' THEN (CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END) ELSE 0 END
-			, @FuelOil_20 = CASE WHEN strTemplateItemId = 'SF-Line20FuelOil' THEN (CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,4), strConfiguration) END) ELSE 0 END
-			, @FuelOil_29 = CASE WHEN strTemplateItemId = 'SF-Line29FuelOil' THEN (CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,4), strConfiguration) END) ELSE 0 END
-			, @UndyedDiesel_12 = CASE WHEN strTemplateItemId = 'SF-Line12Undyed' THEN (CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END) ELSE 0 END
-			, @UndyedDiesel_20 = CASE WHEN strTemplateItemId = 'SF-Line20Undyed' THEN (CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,4), strConfiguration) END) ELSE 0 END
-			, @UndyedDiesel_29 = CASE WHEN strTemplateItemId = 'SF-Line29Undyed' THEN (CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,4), strConfiguration) END) ELSE 0 END
-			, @JetFuel_12 = CASE WHEN strTemplateItemId = 'SF-Line12Jet' THEN (CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,4), strConfiguration) END) ELSE 0 END
-			, @JetFuel_20 = CASE WHEN strTemplateItemId = 'SF-Line20Jet' THEN (CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,4), strConfiguration) END) ELSE 0 END
-			, @JetFuel_29 = CASE WHEN strTemplateItemId = 'SF-Line29Jet' THEN (CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,4), strConfiguration) END) ELSE 0 END
+		-- Jet Fuel
+		SELECT @JetFuel_1 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '1' AND strType = 'Jet Fuel'
+		SELECT @JetFuel_2 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '2A' AND strType = 'Jet Fuel'
+		SELECT @JetFuel_3 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '2C' AND strType = 'Jet Fuel'
+		SELECT @JetFuel_4 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '2X' AND strType = 'Jet Fuel'
+		SELECT @JetFuel_5 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '5B' AND strType = 'Jet Fuel'
+		SELECT @JetFuel_6 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '5D' AND strType = 'Jet Fuel'
+		SELECT @JetFuel_9 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '6D' AND strType = 'Jet Fuel'
+		SELECT @JetFuel_11 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '7' AND strType = 'Jet Fuel'
+		SELECT @JetFuel_13 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '8' AND strType = 'Jet Fuel'
+		SELECT @JetFuel_14 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '10A' AND strType = 'Jet Fuel'
+		SELECT @JetFuel_15 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '10B' AND strType = 'Jet Fuel'
+		SELECT @JetFuel_16 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '10R' AND strType = 'Jet Fuel'
+		SELECT @JetFuel_17 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '10Y' AND strType = 'Jet Fuel'
+		SELECT @JetFuel_28 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'SpecialFuels' AND strScheduleCode = '13H' AND strType = 'Jet Fuel'
 
-			, @Line33 = CASE WHEN strTemplateItemId = 'SF-Line33' THEN (CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END) ELSE 0 END
-			, @Line34 = CASE WHEN strTemplateItemId = 'SF-Line34' THEN (CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END) ELSE 0 END
-			, @Line35 = CASE WHEN strTemplateItemId = 'SF-Line35' THEN (CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END) ELSE 0 END
+		-- Configuration
+		SELECT @DyedDiesel_12 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strFormCode = 'SpecialFuels' AND strTemplateItemId = 'SF-Line12Dyed'
+		SELECT @DyedDiesel_20 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,4), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strFormCode = 'SpecialFuels' AND strTemplateItemId = 'SF-Line20Dyed'
+		SELECT @DyedDiesel_25 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,4), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strFormCode = 'SpecialFuels' AND strTemplateItemId = 'SF-Line25Dyed'
+		SELECT @DyedDiesel_29 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,4), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strFormCode = 'SpecialFuels' AND strTemplateItemId = 'SF-Line29Dyed'
 
-		FROM vyuTFGetReportingComponentConfiguration
-		WHERE intTaxAuthorityId = @TaxAuthorityId
-		AND strFormCode = 'SpecialFuels'
+		SELECT @FuelOil_12 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strFormCode = 'SpecialFuels' AND strTemplateItemId = 'SF-Line12FuelOil'
+		SELECT @FuelOil_20 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,4), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strFormCode = 'SpecialFuels' AND strTemplateItemId = 'SF-Line20FuelOil'
+		SELECT @FuelOil_29 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,4), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strFormCode = 'SpecialFuels' AND strTemplateItemId = 'SF-Line29FuelOil'
+
+		SELECT @UndyedDiesel_12 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strFormCode = 'SpecialFuels' AND strTemplateItemId = 'SF-Line12Undyed'
+		SELECT @UndyedDiesel_20 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,4), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strFormCode = 'SpecialFuels' AND strTemplateItemId = 'SF-Line20Undyed'
+		SELECT @UndyedDiesel_29 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,4), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strFormCode = 'SpecialFuels' AND strTemplateItemId = 'SF-Line29Undyed'
+
+		SELECT @JetFuel_12 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strFormCode = 'SpecialFuels' AND strTemplateItemId = 'SF-Line12Jet'
+		SELECT @JetFuel_20 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,4), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strFormCode = 'SpecialFuels' AND strTemplateItemId = 'SF-Line20Jet'
+		SELECT @JetFuel_29 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,4), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strFormCode = 'SpecialFuels' AND strTemplateItemId = 'SF-Line29Jet'
+
+		SELECT @Line33 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strFormCode = 'SpecialFuels' AND strTemplateItemId = 'SF-Line33'
+		SELECT @Line34 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,4), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strFormCode = 'SpecialFuels' AND strTemplateItemId = 'SF-Line34'
+		SELECT @Line35 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,4), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strFormCode = 'SpecialFuels' AND strTemplateItemId = 'SF-Line35'
 
 		-- Line 7
 		SET @DyedDiesel_7 = @DyedDiesel_1 + @DyedDiesel_2 + @DyedDiesel_3 + @DyedDiesel_4 + @DyedDiesel_5 + @DyedDiesel_6
