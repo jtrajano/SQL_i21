@@ -27,41 +27,35 @@ namespace iRely.Inventory.Test.Import
             Assert.IsTrue(valid);
         }
 
-        [TestMethod]
-        public async Task ImportBrands()
-        {
-            var success = true;
-            var message = "Successful.";
+        //[TestMethod]
+        //public async Task ImportBrands()
+        //{
+        //    var success = true;
+        //    var message = "Successful.";
 
-            var builder = new FakeBrandBuilder();
-            var director = new FakeCsvDirector(builder);
-            var data = Encoding.UTF8.GetBytes(director.BuildUnique().ToString());
+        //    var builder = new FakeBrandBuilder();
+        //    var director = new FakeCsvDirector(builder);
+        //    var data = Encoding.UTF8.GetBytes(director.BuildUnique().ToString());
 
-            GlobalSettings.Instance.FileType = "text/csv;charset=UTF-8";
-            GlobalSettings.Instance.AllowOverwriteOnImport = true;
-            GlobalSettings.Instance.AllowDuplicates = false;
-            GlobalSettings.Instance.ImportType = "Brands";
-            GlobalSettings.Instance.FileName = "";
+        //    GlobalSettings.Instance.FileType = "text/csv;charset=UTF-8";
+        //    GlobalSettings.Instance.AllowOverwriteOnImport = true;
+        //    GlobalSettings.Instance.AllowDuplicates = false;
+        //    GlobalSettings.Instance.ImportType = "Brands";
+        //    GlobalSettings.Instance.FileName = "";
    
-            try
-            {
-                var i = new ImportBrands(new InventoryEntities(), data)
-                {
-                    Username = "irelyadmin"
-                };
+        //    //try
+        //    //{
+        //    //    var result = await i.Import();
+        //    //    success = !result.Failed;
+        //    //    message = result.Description;
+        //    //}
+        //    //catch (Exception ex)
+        //    //{
+        //    //    success = false;
+        //    //    message = ex.InnerException.Message;
+        //    //}
 
-
-                var result = await i.Import();
-                success = !result.Failed;
-                message = result.Description;
-            }
-            catch (Exception ex)
-            {
-                success = false;
-                message = ex.InnerException.Message;
-            }
-
-            Assert.IsTrue(success, message);
-        }
+        //    Assert.IsTrue(success, message);
+        //}
     }
 }
