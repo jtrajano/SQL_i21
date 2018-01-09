@@ -6302,4 +6302,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\SM\1740_RemoveLoadScheduleResources.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1q_InsertOriginMapping.sql" />
+  </ItemGroup>
 </Project>

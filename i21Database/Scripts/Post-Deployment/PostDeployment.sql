@@ -189,6 +189,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\ReportData\BalanceSheetStandard.sql
 :r .\GL\DefaultData\1n_UpdateFiscalUpperBounds.sql
 :r .\GL\DefaultData\1p_CompanyPreferenceOption.sql
+:r .\GL\DefaultData\1q_InsertOriginMapping.sql
 
 -- Financial Report Designer
 :r .\FRD\FRDEntryDataFix.sql
