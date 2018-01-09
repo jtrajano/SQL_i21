@@ -115,8 +115,13 @@ BEGIN TRY
 				ysnPrinted			=	0,
 
 				intItemId			=	SC.intItemId,		intItemUOMId				=	SC.intItemUOMIdTo,
-				intContractSeq		=	1,					intStorageScheduleRuleId	=	ISNULL(SP.intStorageScheduleId,SC.intStorageScheduleId),
-				dtmEndDate			=	CP.dtmDefEndDate,	intCompanyLocationId		=	SC.intProcessingLocationId, 
+				intContractSeq		=	1,					intStorageScheduleRuleId	=	ISNULL(SP.intStorageScheduleId,ISNULL(SC.intStorageScheduleId,CP.intDefStorageSchedule)),
+				dtmEndDate			=	CASE	WHEN	strDefEndDateType	=	'Calender'	THEN ISNULL(CP.dtmDefEndDate,DATEADD(d, 0, DATEDIFF(d, 0, GETDATE())))
+												WHEN	strDefEndDateType	=	'None'		THEN DATEADD(d, 0, DATEDIFF(d, 0, GETDATE()))
+												WHEN	strDefEndDateType	=	'Last Date of the Start Date''s Month' THEN EOMONTH (GETDATE())
+												ELSE	DATEADD(d, 0, DATEDIFF(d, 0, GETDATE()))
+										END,
+				intCompanyLocationId		=	SC.intProcessingLocationId, 
 				dblQuantity			=	0,					intContractStatusId			=	1,
 				dblBalance			=	0,					dtmStartDate				=	SC.dtmTicketDateTime,
 				intPricingTypeId	=	5,					dtmCreated					=	GETDATE(),
