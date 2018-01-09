@@ -40,20 +40,21 @@ AS
 						IU.intUnitMeasureId,
 						EY.strName strVendorName, 
 						IM.strItemNo
-			FROM		tblCTContractCost	CC
-			JOIN		tblICItem			IM ON IM.intItemId				=	CC.intItemId
-			LEFT JOIN	tblICItemUOM		IU ON IU.intItemUOMId			=	CC.intItemUOMId
-			LEFT JOIN	tblICUnitMeasure	UM ON UM.intUnitMeasureId		=	IU.intUnitMeasureId
-			LEFT JOIN	tblSMCurrency		CY ON CY.intCurrencyID			=	CC.intCurrencyId
-			LEFT JOIN	tblEMEntity			EY ON EY.intEntityId			=	CC.intVendorId
+			FROM		dbo.tblCTContractCost	CC
+			JOIN		dbo.tblICItem			IM	ON	IM.intItemId			=	CC.intItemId 
+													AND ISNULL(CC.ysnBasis,0)	<>	1
+			LEFT JOIN	dbo.tblICItemUOM		IU	ON	IU.intItemUOMId			=	CC.intItemUOMId
+			LEFT JOIN	dbo.tblICUnitMeasure	UM	ON	UM.intUnitMeasureId		=	IU.intUnitMeasureId
+			LEFT JOIN	dbo.tblSMCurrency		CY	ON	CY.intCurrencyID		=	CC.intCurrencyId
+			LEFT JOIN	dbo.tblEMEntity			EY	ON	EY.intEntityId			=	CC.intVendorId
 			WHERE	ISNULL(ysnBasis,0) <> 1
 	)		CC 
-	JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId	=	CC.intContractDetailId	
-	JOIN	tblICItemUOM				PU	ON	PU.intItemUOMId			=	CD.intPriceItemUOMId	LEFT
-	JOIN	tblICItemUOM				CU	ON	CU.intItemUOMId			=	CC.intItemUOMId			LEFT	
-	JOIN	tblICItemUOM				CM	ON	CM.intUnitMeasureId		=	CC.intUnitMeasureId
-											AND	CM.intItemId			=	CD.intItemId			LEFT
-	JOIN	tblICItemUOM				QU	ON	QU.intItemUOMId			=	CD.intItemUOMId			LEFT
+	JOIN	dbo.tblCTContractDetail			CD	ON	CD.intContractDetailId	=	CC.intContractDetailId	
+	JOIN	dbo.tblICItemUOM				PU	ON	PU.intItemUOMId			=	CD.intPriceItemUOMId	LEFT
+	JOIN	dbo.tblICItemUOM				CU	ON	CU.intItemUOMId			=	CC.intItemUOMId			LEFT	
+	JOIN	dbo.tblICItemUOM				CM	ON	CM.intUnitMeasureId		=	CC.intUnitMeasureId
+												AND	CM.intItemId			=	CD.intItemId			LEFT
+	JOIN	dbo.tblICItemUOM				QU	ON	QU.intItemUOMId			=	CD.intItemUOMId			LEFT
 	JOIN	(
 					SELECT	BD.intItemId,
 							BD.dblTotal,	
@@ -70,6 +71,7 @@ AS
 									WHEN BL.intTransactionType = 10 THEN 'Patronage'
 									WHEN BL.intTransactionType = 11 THEN 'Claim'
 							END	strBillTranactionType
+
 					FROM	tblAPBillDetail		BD
 					JOIN	tblAPBill			BL	ON	BL.intBillId	=	BD.intBillId
 			)BD	ON	BD.intContractHeaderId	=	CD.intContractHeaderId AND CC.intItemId = BD.intItemId
