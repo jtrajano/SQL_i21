@@ -111,6 +111,8 @@ BEGIN TRY
 					OR strProductCode IN ('124', '999')))
 			AND PrimaryItem.intProductCodeId IN (SELECT intProductCodeId FROM @RawMaterialCode)
 			AND AgentItem.intProductCodeId IN (SELECT intProductCodeId FROM @RawMaterialCode)
+		ORDER BY Blend.dtmBlendDate
+
 	END
 
 	SELECT * FROM @Output
