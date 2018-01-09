@@ -6060,6 +6060,7 @@
     <Build Include="dbo\Functions\fnICGetCreateGLEntriesErrors.sql" />
     <Build Include="dbo\Functions\fnICFormatErrorMessage.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateCreateGLEntries.sql" />
+    <Build Include="dbo\Tables\tblMFBlendProductionOutputDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
