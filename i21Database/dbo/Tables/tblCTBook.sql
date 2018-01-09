@@ -1,8 +1,8 @@
 ﻿CREATE TABLE [dbo].[tblCTBook]
 (
 	[intBookId] INT NOT NULL IDENTITY, 
-    [strBook] NVARCHAR(10) COLLATE Latin1_General_CI_AS NOT NULL, 
-    [strBookDescription] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL, 
+    [strBook] NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL, 
+    [strBookDescription] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
     [ysnActive] BIT NOT NULL,
 	[ysnLimitForMonth] BIT NOT NULL,
 	[intConcurrencyId] INT NOT NULL, 
