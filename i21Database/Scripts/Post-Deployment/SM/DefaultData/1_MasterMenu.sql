@@ -1935,9 +1935,9 @@ UPDATE tblSMMasterMenu SET strMenuName = 'Receive Multiple Payments', strDescrip
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Quote' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Quote', N'Accounts Receivable', @AccountsReceivableActivitiesParentMenuId, N'Quote', N'Activity', N'Screen', N'AccountsReceivable.view.SalesOrder?showSearch=true&filters[0][column]=strTransactionType&filters[0][condition]=eq&filters[0][conjunction]=&filters[0][value]=Quote', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
+	VALUES (N'Quote', N'Accounts Receivable', @AccountsReceivableActivitiesParentMenuId, N'Quote', N'Activity', N'Screen', N'AccountsReceivable.view.Quote?showSearch=true&searchCommand=Quote', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'AccountsReceivable.view.SalesOrder?showSearch=true&filters[0][column]=strTransactionType&filters[0][condition]=eq&filters[0][conjunction]=&filters[0][value]=Quote' WHERE strMenuName = 'Quote' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'AccountsReceivable.view.Quote?showSearch=true&searchCommand=Quote' WHERE strMenuName = 'Quote' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sales Orders' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
