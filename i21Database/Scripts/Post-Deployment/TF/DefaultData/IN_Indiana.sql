@@ -109,6 +109,7 @@ where intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intTaxCategoryId = 0, strState = 'IN', strTaxCategory = 'IN Excise Tax Diesel Clear', intMasterId = 142
 	UNION ALL SELECT intTaxCategoryId = 0, strState = 'IN', strTaxCategory = 'IN Inspection Fee', intMasterId = 143
 	UNION ALL SELECT intTaxCategoryId = 0, strState = 'IN', strTaxCategory = 'IN Gasoline Use Tax (GUT)', intMasterId = 144
+	UNION ALL SELECT intTaxCategoryId = 0, strState = 'IN', strTaxCategory = 'IN Excise Tax Diesel Dyed', intMasterId = 145
 
 	EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = @TaxAuthorityCode, @TaxCategories = @TaxCategories
 
