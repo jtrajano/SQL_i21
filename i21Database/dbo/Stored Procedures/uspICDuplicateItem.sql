@@ -610,13 +610,20 @@ BEGIN
 		strDescription,
 		dblQuantity,
 		intItemUnitMeasureId,
-		intSort )
+		ysnAddOn,
+		dblMarkUpOrDown,
+		dtmBeginDate,
+		dtmEndDate
+		)
 	SELECT @NewItemId,
 		intBundleItemId,
 		strDescription,
 		dblQuantity,
 		dbo.fnICGetItemUOMIdFromDuplicateItem(intItemUnitMeasureId, @NewItemId),
-		intSort 
+		ysnAddOn,
+		dblMarkUpOrDown,
+		dtmBeginDate,
+		dtmEndDate
 	FROM tblICItemBundle
 	WHERE intItemId = @ItemId
 	------------------------------------------

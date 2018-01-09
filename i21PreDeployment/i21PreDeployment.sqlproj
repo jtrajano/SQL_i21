@@ -154,6 +154,7 @@
     <None Include="Scripts\Pre-Deployment\11_IC\CleanUPCCodes.sql" />
     <None Include="Scripts\Pre-Deployment\7_AR\9_FixNRCompanyPreference.sql" />
     <None Include="Scripts\Pre-Deployment\22_PAT\5_DuplicateStockTable.sql" />
+    <None Include="Scripts\Pre-Deployment\11_IC\CreateTempBasketColumn.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />

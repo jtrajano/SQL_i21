@@ -14,7 +14,7 @@ SELECT ItemBundle.intItemBundleId
 , dblConversionFactor = ItemUOM.dblUnitQty
 , UOM.strUnitMeasure
 , ItemUOM.dblUnitQty
-, ItemBundle.intSort
+--, ItemBundle.intSort
 FROM tblICItemBundle ItemBundle
 	LEFT JOIN tblICItem Item ON Item.intItemId = ItemBundle.intItemId
 	LEFT JOIN tblICItem BundleComponent ON BundleComponent.intItemId = ItemBundle.intBundleItemId

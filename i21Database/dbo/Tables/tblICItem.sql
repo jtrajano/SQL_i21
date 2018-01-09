@@ -15,6 +15,7 @@ Type the overview for the table here.
 		[strItemNo]                 NVARCHAR (50)  COLLATE Latin1_General_CI_AS NOT NULL,
 		[strShortName]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		[strType]					NVARCHAR(50)    COLLATE Latin1_General_CI_AS NOT NULL,
+		[strBundleType]				NVARCHAR(50)    COLLATE Latin1_General_CI_AS NULL,
 		[strDescription]            NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
 		[intManufacturerId]         INT             NULL,
 		[intBrandId]                INT             NULL,
@@ -200,6 +201,8 @@ Type the overview for the table here.
 	EXECUTE sp_addextendedproperty @name = N'MS_Description', @value = N'Unique key that corresponds to the item number. Origin: agitm-no ', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'tblICItem', @level2type = N'COLUMN', @level2name = N'strItemNo';
 	GO
 	EXECUTE sp_addextendedproperty @name = N'MS_Description', @value = N'Inventory type (e.g. 1=Inventory Item, 2=Service Item, 3=Finished Goods, 4=Bulk, 5=Pre-Mixes, 6=Raw Materials)', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'tblICItem', @level2type = N'COLUMN', @level2name = 'strType';
+	GO
+	EXECUTE sp_addextendedproperty @name = N'MS_Description', @value = N'Bundle type (e.g. 1=Bundle, 2=Basket, 3=Substitute)', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'tblICItem', @level2type = N'COLUMN', @level2name = 'strBundleType';
 	GO
 	EXECUTE sp_addextendedproperty @name = N'MS_Description', @value = N'Item Description. Origin: agitm-desc', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'tblICItem', @level2type = N'COLUMN', @level2name = N'strDescription';
 	GO

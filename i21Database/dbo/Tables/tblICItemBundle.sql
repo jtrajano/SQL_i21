@@ -18,7 +18,11 @@ Type the overview for the table here.
 		[strDescription] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 		[dblQuantity] NUMERIC(38, 20) NULL DEFAULT ((0)), 
 		[intItemUnitMeasureId] INT NULL, 
-		[intSort] INT NULL, 
+		[ysnAddOn] BIT NOT NULL DEFAULT(0),
+		[dblMarkUpOrDown] NUMERIC(38,20) NULL DEFAULT((0)),
+		[dtmBeginDate] DATETIME NULL,
+		[dtmEndDate] DATETIME NULL,
+		--[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICItemBundle] PRIMARY KEY ([intItemBundleId]),
 		CONSTRAINT [FK_tblICItemBundle_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
@@ -84,15 +88,15 @@ Type the overview for the table here.
 	
 	GO
 	
-	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Sort Field',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICItemBundle',
-		@level2type = N'COLUMN',
-		@level2name = N'intSort'
+	--GO
+	--EXEC sp_addextendedproperty @name = N'MS_Description',
+	--	@value = N'Sort Field',
+	--	@level0type = N'SCHEMA',
+	--	@level0name = N'dbo',
+	--	@level1type = N'TABLE',
+	--	@level1name = N'tblICItemBundle',
+	--	@level2type = N'COLUMN',
+	--	@level2name = N'intSort'
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Concurrency Field',
