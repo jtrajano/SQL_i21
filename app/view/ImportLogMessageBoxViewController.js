@@ -50,21 +50,33 @@ Ext.define('Inventory.view.ImportLogMessageBoxViewController', {
         var store = Ext.create('Ext.data.ArrayStore', {
             extend: 'Ext.data.ArrayStore',
             data: me.formParams.data,
-            fields: ["Message", "Column", "Row", "Type", "Status"],
+            fields: [
+                { name: 'Message', type: 'string' },
+                { name: 'Column', type: 'string' },
+                { name: 'Row', type: 'int' },
+                { name: 'Type', type: 'string' },
+                { name: 'Status', type: 'string' },
+                { name: 'Action', type: 'string' },
+                { name: 'Value', type: 'string' }
+            ],
             autoLoad: true,
             groupField: 'Row'
         });
         grid.reconfigure(store);
-        store.loadData(me.formParams.data.messages);
+        store.loadData(me.formParams.data.Messages);
 
         var colType = win.down('#colType');
         var colMessage = win.down('#colMessage');
         var colColumn = win.down('#colColumn');
         var colStatus = win.down('#colStatus');
+        var colValue = win.down('#colValue');
+        var colAction = win.down('#colAction');
         colMessage.renderer = this.fieldRenderer;
         colType.renderer = this.fieldRenderer;
         colColumn.renderer = this.fieldRenderer;
         colStatus.renderer = this.fieldRenderer;
+        colAction.renderer = this.fieldRenderer;
+        colValue.renderer = this.fieldRenderer;
         win.show();
         var context = win.context ? win.context.initialize() : me.setupContext();
     },

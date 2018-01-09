@@ -16,23 +16,26 @@ namespace iRely.Inventory.BusinessLayer
     {
         private InventoryRepository context;
 
+        public InventoryRepository Context { get { return context; } set { this.context = value; } }
+
         public ImportData()
         {
-            context = new InventoryRepository();
+            Context = new InventoryRepository();
         }
 
-        public ImportDataResult Import(byte[] data, string name)
+        public async Task<ImportDataResult> Import(byte[] data, string name)
         {
             try
             {
                 var type = Type.GetType("iRely.Inventory.BusinessLayer.Import" + name);
                 if(type == null)
                     throw new Exception("Import for " + name + " is not yet supported.");
-                var instance = (IImportDataLogic)Activator.CreateInstance(type);
+                var instance = (IImportDataLogic)Activator.CreateInstance(type, Context.ContextManager, data);
                 
-                instance.Context = context;
-                instance.Data = data;
-                return instance.Import();
+                //instance.Context = Context.ContextManager;
+                //instance.Data = data;
+                instance.Username = iRely.Common.Security.GetUserName();
+                return await instance.Import();
             } catch(Exception ex)
             {
                 throw new Exception(ex.Message, ex);
@@ -53,16 +56,16 @@ namespace iRely.Inventory.BusinessLayer
             var res = new ImportDataResult()
             {
                 Description = "Import from Origin",
-                Info = "success"
+                Type = Constants.TYPE_INFO
             };
 
             try
             {
-                await context.ContextManager.Database.ExecuteSqlCommandAsync(sql, pLob, pType, pEntityId);
+                await Context.ContextManager.Database.ExecuteSqlCommandAsync(sql, pLob, pType, pEntityId);
             }
             catch (Exception ex)
             {
-                res.Info = "error";
+                res.Type = Constants.TYPE_ERROR;
                 res.Description = ex.Message;
                 res.Messages.Add(new ImportDataMessage()
                 {

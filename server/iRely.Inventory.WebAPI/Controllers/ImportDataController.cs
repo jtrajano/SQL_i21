@@ -13,6 +13,9 @@ using System.IO;
 
 using iRely.Inventory.BusinessLayer;
 using Newtonsoft.Json;
+using iRely.Inventory.Model;
+using iRely.Common;
+using System.Data.Entity;
 
 namespace iRely.Inventory.WebApi.Controllers
 {
@@ -37,59 +40,47 @@ namespace iRely.Inventory.WebApi.Controllers
         public async Task<HttpResponseMessage> ImportOrigins()
         {
             var type = Request.Headers.GetValues("X-Import-Type").First();
+            var fileType = Request.Headers.GetValues("X-File-Type").First();
+            GlobalSettings.Instance.FileType = fileType;
             GlobalSettings.Instance.LineOfBusiness = Request.Headers.GetValues("X-Import-LineOfBusiness").First();
             ImportDataResult output = await bl.ImportOrigins(type);
-            var response = new
-            {
-                success = output.Info == "success" ? true : false,
-                info = output.Description,
-                result = output
-            };
-            return Request.CreateResponse(response.success ? HttpStatusCode.OK : HttpStatusCode.BadRequest, response);
+            return Request.CreateResponse(HttpStatusCode.OK, output);
         }
 
-        private async Task<HttpResponseMessage> ImportCsv(Func<byte[], string, ImportDataResult> func)
+        private async Task<HttpResponseMessage> ImportCsv(Func<byte[], string, Task<ImportDataResult>> func)
         {
             try
             {
                 var data = await Request.Content.ReadAsByteArrayAsync();
                 var type = Request.Headers.GetValues("X-Import-Type").First();
+                var fileType = Request.Headers.GetValues("X-File-Type").First();
+                GlobalSettings.Instance.FileType = fileType;
                 GlobalSettings.Instance.AllowOverwriteOnImport = bool.Parse(Request.Headers.GetValues("X-Import-Allow-Overwrite").First());
+                GlobalSettings.Instance.AllowDuplicates = bool.Parse(Request.Headers.GetValues("X-Import-Allow-Duplicates").First());
+                GlobalSettings.Instance.ImportType = type;
+                GlobalSettings.Instance.FileName = Request.Headers.GetValues("X-File-Name").First();
 
-                var output = func(data, type);
-                if (output.Info == "error")
-                {
-                    var response = new
-                    {
-                        success = false,
-                        info = output.Description != null ? output.Description : "Error(s) found during import.",
-                        messages = output.Messages,
-                        rows = output.Rows,
-                        result = output
-                    };
-                    return Request.CreateResponse(HttpStatusCode.BadRequest, response);
-                }
-                else
-                {
-                    var response = new
-                    {
-                        success = true,
-                        messages = output.Messages,
-                        rows = output.Rows,
-                        result = output
-                    };
-                    return Request.CreateResponse(HttpStatusCode.OK, response);
-                }
+                var output = await func(data, type);
+                return Request.CreateResponse(HttpStatusCode.OK, output);
             }
             catch (Exception ex)
             {
-                var response = new
+                var ImportResult = new ImportDataResult();
+                ImportResult.AddWarning(new ImportDataMessage()
                 {
-                    success = false,
-                    info = ex.Message != null ? ex.Message : "Error(s) found during import.",
-                    exception = ex
-                };
-                return Request.CreateResponse(HttpStatusCode.BadRequest, response);
+                    Type = Constants.TYPE_EXCEPTION,
+                    Value = "Save Logs",
+                    Action = "Import might be successful but logs were not written to database.",
+                    Column = "",
+                    Exception = ex,
+                    Row = 1,
+                    Status = Constants.STAT_FAILED,
+                    Message = ex.Message
+                });
+                ImportResult.Failed = true;
+                ImportResult.Type = Constants.TYPE_EXCEPTION;
+                ImportResult.Description = ex.Message + (ex.InnerException != null ? " -> " + (ex.InnerException.InnerException != null ? ex.InnerException.InnerException.Message : ex.InnerException.Message) : "");
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, ImportResult);
             }
         }
     }

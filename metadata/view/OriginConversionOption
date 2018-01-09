@@ -963,6 +963,30 @@
                                             ]
                                         }
                                     ]
+                                },
+                                {
+                                    "type": "Ext.button.Button",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "designer|uiInterfaceName": "i21-button-toolbar-small",
+                                        "itemId": "btnLogs",
+                                        "layout|flex": null,
+                                        "text": "View Logs",
+                                        "ui": "i21-button-toolbar-small"
+                                    },
+                                    "configAlternates": {
+                                        "designer|uiInterfaceName": "string",
+                                        "itemId": "string",
+                                        "layout|flex": "number",
+                                        "text": "string",
+                                        "ui": "string"
+                                    },
+                                    "name": "MyButton59",
+                                    "designerId": "39d023f0-bf5a-4fcc-b7c2-068a590f2ed9"
                                 }
                             ]
                         },

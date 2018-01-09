@@ -1,11 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2003
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iRely.Inventory.BusinessLayer", "iRely.Inventory.BusinessLayer\iRely.Inventory.BusinessLayer.csproj", "{896DA55E-1218-4146-ADD0-81C3EAED882D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iRely.Inventory.Model", "iRely.Inventory.Model\iRely.Inventory.Model.csproj", "{24827E37-D24E-4C49-858B-9127DD775958}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iRely.Inventory.WebApi", "iRely.Inventory.WebApi\iRely.Inventory.WebApi.csproj", "{D0FDE19B-6DFC-4BD9-A90A-A291D2404973}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iRely.Inventory.Test.Import", "iRely.Inventory.Test.Import\iRely.Inventory.Test.Import.csproj", "{AB4CAB3A-EE90-4EDE-9DF7-21E1B1F9DCE5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,8 +29,15 @@ Global
 		{D0FDE19B-6DFC-4BD9-A90A-A291D2404973}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D0FDE19B-6DFC-4BD9-A90A-A291D2404973}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D0FDE19B-6DFC-4BD9-A90A-A291D2404973}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB4CAB3A-EE90-4EDE-9DF7-21E1B1F9DCE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB4CAB3A-EE90-4EDE-9DF7-21E1B1F9DCE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB4CAB3A-EE90-4EDE-9DF7-21E1B1F9DCE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB4CAB3A-EE90-4EDE-9DF7-21E1B1F9DCE5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {396592AA-7BE3-4902-BBBA-D4EE617D5334}
 	EndGlobalSection
 EndGlobal

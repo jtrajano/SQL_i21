@@ -1,7 +1,9 @@
 ﻿using iRely.Inventory.Model;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,124 +11,40 @@ namespace iRely.Inventory.BusinessLayer
 {
     public class ImportFeedStockUOM : ImportDataLogic<tblICRinFeedStockUOM>
     {
+        public ImportFeedStockUOM(DbContext context, byte[] data) : base(context, data)
+        {
+        }
+
         protected override string[] GetRequiredFields()
         {
             return new string[] { "code", "unit of measure" };
         }
 
-        protected override tblICRinFeedStockUOM ProcessRow(int row, int fieldCount, string[] headers, LumenWorks.Framework.IO.Csv.CsvReader csv, ImportDataResult dr)
+        protected override Expression<Func<tblICRinFeedStockUOM, bool>> GetUniqueKeyExpression(tblICRinFeedStockUOM entity)
         {
-            tblICRinFeedStockUOM fc = new tblICRinFeedStockUOM();
-            bool valid = true;
-
-            for (var i = 0; i < fieldCount; i++)
-            {
-                //if (!valid)
-                //    break;
-                string header = headers[i];
-                string value = csv[header];
-
-                string h = header.ToLower().Trim();
-                int? lu = null;
-                bool inserted = false;
-
-                switch (h)
-                {
-                    case "code":
-                        if (!SetText(value, del => fc.strRinFeedStockUOMCode = del, "Code", dr, header, row, true))
-                            valid = false;
-                        if (HasLocalDuplicate(dr, header, value, row))
-                            valid = false;
-                        break;
-                    case "unit of measure":
-                        lu = InsertAndOrGetLookupId<tblICUnitMeasure>(
-                            context,
-                            m => m.strUnitMeasure == value,
-                            e => e.intUnitMeasureId,
-                            new tblICUnitMeasure()
-                            {
-                                strSymbol = value,
-                                strUnitMeasure = value,
-                                strUnitType = "Length"
-                            }, out inserted);
-                        if (inserted)
-                        {
-                            dr.Messages.Add(new ImportDataMessage()
-                            {
-                                Column = header,
-                                Type = TYPE_INNER_WARN,
-                                Row = row,
-                                Status = STAT_INNER_SUCCESS,
-                                Message = string.Format("{0}: A new unit of measurement record has been created with default unit type of 'Length'.", value)
-                            });
-                            dr.Info = INFO_WARN;
-                            if (lu != null)
-                            {
-                                LogItems.Add(new ImportLogItem()
-                                {
-                                    Description = "Created new Unit of Measurement item.",
-                                    FromValue = "",
-                                    ToValue = value,
-                                    ActionIcon = ICON_ACTION_NEW
-                                });
-                            }
-                        }
-
-                        if (lu != null)
-                            fc.intUnitMeasureId = (int)lu;
-                        else
-                        {
-                            dr.Messages.Add(new ImportDataMessage()
-                            {
-                                Column = header,
-                                Row = row,
-                                Type = TYPE_INNER_ERROR,
-                                Message = "Can't find Unit of Measurement item: " + value + '.',
-                                Status = STAT_REC_SKIP
-                            });
-                            dr.Info = INFO_WARN;
-                            valid = false;
-                        }
-                        break;
-                }
-            }
-
-            if (!valid)
-                return null;
-
-            if (context.GetQuery<tblICRinFeedStockUOM>().Any(t => t.intUnitMeasureId == fc.intUnitMeasureId))
-            {
-                if (!GlobalSettings.Instance.AllowOverwriteOnImport)
-                {
-                    dr.Info = INFO_ERROR;
-                    dr.Messages.Add(new ImportDataMessage()
-                    {
-                        Type = TYPE_INNER_ERROR,
-                        Status = STAT_REC_SKIP,
-                        Column = headers[0],
-                        Row = row,
-                        Message = "The record already exists: " + fc.strUnitMeasure + ". The system does not allow existing records to be modified."
-                    });
-                    return null;
-                }
-
-                var entry = context.ContextManager.Entry<tblICRinFeedStockUOM>(
-                    context.GetQuery<tblICRinFeedStockUOM>().First(t => t.intUnitMeasureId == fc.intUnitMeasureId));
-                entry.Property(e => e.strRinFeedStockUOMCode).CurrentValue = fc.strRinFeedStockUOMCode;
-
-                entry.State = System.Data.Entity.EntityState.Modified;
-                entry.Property(e => e.intUnitMeasureId).IsModified = false;
-
-                dr.IsUpdate = true;
-            }
-            else
-            {
-                context.AddNew<tblICRinFeedStockUOM>(fc);
-            }
-            return fc;
+            return (e => e.intUnitMeasureId == entity.intUnitMeasureId);
         }
 
-        protected override int GetPrimaryKeyId(ref tblICRinFeedStockUOM entity)
+        public override tblICRinFeedStockUOM Process(CsvRecord record)
+        {
+            var entity = new tblICRinFeedStockUOM();
+            var valid = true;
+            valid = SetText(record, "Code", e => entity.strRinFeedStockUOMCode = e, true);
+
+            var uom = GetFieldValue(record, "Unit of Measure");
+            valid = SetLookupId<tblICUnitMeasure>(record, "Unit of Measure", (e => e.strUnitMeasure == uom), e => e.intUnitMeasureId, e => entity.intUnitMeasureId = e, true);
+
+            if (valid)
+                return entity;
+            return entity;
+        }
+
+        protected override string GetPrimaryKeyName()
+        {
+            return "intRinFeedStockUOMId";
+        }
+
+        public override int GetPrimaryKeyValue(tblICRinFeedStockUOM entity)
         {
             return entity.intRinFeedStockUOMId;
         }

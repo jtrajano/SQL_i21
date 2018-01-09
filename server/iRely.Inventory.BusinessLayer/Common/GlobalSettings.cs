@@ -25,5 +25,11 @@ namespace iRely.Inventory.BusinessLayer
 
         public bool AllowOverwriteOnImport { get; set; }
         public string LineOfBusiness { get; set; }
+        public bool AllowDuplicates { get; set; }
+        public string FileName { get; set; }
+        public string FileType { get; set; }
+        public string ImportType { get; set; }
+        public bool ContinueOnFailedImports { get; set; } = true;
+        public bool VerboseLog { get; set; } = false;
     }
 }

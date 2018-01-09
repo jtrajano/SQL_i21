@@ -1,0 +1,11 @@
+.log-row-info {
+    color: green;
+}
+
+.log-row-error {
+    color: red;
+}
+
+.log-row-warning {
+    color: rgb(170, 111, 0);
+}

@@ -11,6 +11,23 @@ Ext.define('Inventory.Utils', {
                 return Number(Math.round(number+'e'+precision)+'e-'+precision);
             }
         },
+
+        Date: {
+            getDuration: function(valueInSeconds) {
+                if(!valueInSeconds || valueInSeconds < 0)
+                    valueInSeconds = 0;
+                if(valueInSeconds < 1)
+                    return ic.utils.Math.round((valueInSeconds * 1000.0), 2).toString().concat("<em>ms</em>");    
+                else if(valueInSeconds >= 60 && valueInSeconds < 3600)    
+                    return ic.utils.Math.round((valueInSeconds / 60.0), 2).toString().concat("<em>m</em>");    
+                else if (valueInSeconds >= 3600 && valueInSeconds < 216000)
+                    return ic.utils.Math.round(((valueInSeconds / 60.0) / 60.0), 2).toString().concat("<em>h</em>");
+                else if (valueInSeconds >= 5184000)
+                    return ic.utils.Math.round((((valueInSeconds / 60.0) / 60.0)) / 24, 2).toString().concat("<em>d</em>");
+                else
+                    return ic.utils.Math.round((valueInSeconds), 2).toString().concat("<em>s</em>");
+            }
+        },
         
         ajax: function (options) {
             /* Prevent SQL injection attacks by sanitizing all the concatenated parameters in the URL path and place them to the param property of the ajax configuration. */

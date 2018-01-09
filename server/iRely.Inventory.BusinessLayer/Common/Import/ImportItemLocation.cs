@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using iRely.Common;
@@ -10,6 +13,10 @@ namespace iRely.Inventory.BusinessLayer
 {
     public class ImportItemLocation : ImportDataLogic<tblICItemLocation>
     {
+        public ImportItemLocation(DbContext context, byte[] data) : base(context, data)
+        {
+        }
+
         protected override string[] GetRequiredFields()
         {
             return new string[] {
@@ -17,764 +24,396 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
-        protected override int GetPrimaryKeyId(ref tblICItemLocation entity)
+        protected override string GetPrimaryKeyName()
+        {
+            return "intItemLocationId";
+        }
+
+        public override int GetPrimaryKeyValue(tblICItemLocation entity)
         {
             return entity.intItemLocationId;
         }
 
-        protected override tblICItemLocation ProcessRow(int row, int fieldCount, string[] headers, LumenWorks.Framework.IO.Csv.CsvReader csv, ImportDataResult dr)
+        protected override Expression<Func<tblICItemLocation, bool>> GetUniqueKeyExpression(tblICItemLocation entity)
         {
-            var fc = new tblICItemLocation();
-            bool valid = true;
-            int? intCompanyLocationId = null;
-            int? intSubLocationId = null;
-            int? intItemId = null;
+            return e => e.intItemId == entity.intItemId && e.intLocationId == entity.intLocationId;
+        }
 
-            for (var i = 0; i < fieldCount; i++)
+        public override tblICItemLocation Process(CsvRecord record)
+        {
+            var entity = new tblICItemLocation();
+            var valid = true;
+
+            var lu = GetFieldValue(record, "Item No");
+            valid = SetIntLookupId<tblICItem>(record, "Item No", e => e.strItemNo == lu, e => e.intItemId, e => entity.intItemId = e, required: true);
+            lu = GetFieldValue(record, "Location");
+            valid = SetIntLookupId<vyuSMGetCompanyLocationSearchList>(record, "Location", e => e.strLocationName == lu, e => e.intCompanyLocationId, e => entity.intLocationId = e, required: true);
+            SetText(record, "Description", e => entity.strDescription = e, required: false);
+            lu = GetFieldValue(record, "Vendor Id");
+            SetLookupId<vyuAPVendor>(record, "Vendor Id", e => e.strName == lu, e => e.intEntityId, e => entity.intVendorId = e, required: false);
+            SetText(record, "POS Description", e => entity.strDescription = e);
+            lu = GetFieldValue(record, "Storage Location");
+            SetLookupId<tblSMCompanyLocationSubLocation>(record, "Storage Location", e => e.strSubLocationName == lu && e.intCompanyLocationId == entity.intCompanyLocationId, e => e.intCompanyLocationSubLocationId, e => entity.intSubLocationId = e, required: false);
+            lu = GetFieldValue(record, "Storage Unit");
+            SetLookupId<vyuICGetStorageLocation>(record, "Storage Unit", e => e.strName == lu && e.intLocationId == entity.intCompanyLocationId && e.intSubLocationId == entity.intSubLocationId, e => e.intStorageLocationId, e => entity.intStorageLocationId = e, required: false);
+            lu = GetFieldValue(record, "Family");
+            SetLookupId<tblSTSubcategory>(record, "Family", e => e.strSubcategoryId == lu && e.strSubcategoryType == "F", e => e.intSubcategoryId, e => entity.intFamilyId = e);
+            lu = GetFieldValue(record, "Class");
+            SetLookupId<tblSTSubcategory>(record, "Class", e => e.strSubcategoryId == lu && e.strSubcategoryType == "C", e => e.intSubcategoryId, e => entity.intClassId = e);
+            lu = GetFieldValue(record, "Product Code");
+            SetLookupId<tblSTSubcategoryRegProd>(record, "Product Code", e => e.strRegProdCode == lu && e.intStoreId != 0, e => e.intRegProdId, e => entity.intProductCodeId = e);
+            SetText(record, "Passport Fuel Id 1", e => entity.strPassportFuelId1 = e);
+            SetText(record, "Passport Fuel Id 2", e => entity.strPassportFuelId2 = e);
+            SetText(record, "Passport Fuel Id 3", e => entity.strPassportFuelId3 = e);
+            SetBoolean(record, "Tax Flag 1", e => entity.ysnTaxFlag1 = e);
+            SetBoolean(record, "Tax Flag 2", e => entity.ysnTaxFlag2 = e);
+            SetBoolean(record, "Tax Flag 3", e => entity.ysnTaxFlag3 = e);
+            SetBoolean(record, "Tax Flag 4", e => entity.ysnTaxFlag4 = e);
+            SetBoolean(record, "Promotional Item", e => entity.ysnPromotionalItem = e);
+            var pi = GetFieldValue(record, "Promotion Item");
+            if (!string.IsNullOrEmpty(pi.Trim()))
             {
-                //if (!valid)
-                //    break;
-
-                string header = headers[i];
-                string value = csv[header];
-
-                string h = header.ToLower().Trim();
-                int? lu = null;
-
-                switch (h)
+                try
                 {
-                    case "item no":
-                        lu = GetLookUpId<tblICItem>(
-                            context,
-                            m => m.strItemNo == value,
-                            e => e.intItemId);
-                        intItemId = lu;
-                        if (lu != null)
-                        {
-                            fc.intItemId = (int)lu;
-                        }
-                        else
-                        {
-                            valid = false;
-                            dr.Messages.Add(new ImportDataMessage()
-                            {
-                                Column = header,
-                                Row = row,
-                                Type = TYPE_INNER_ERROR,
-                                Message = "Can't find Item with Item No.: " + value + '.',
-                                Status = STAT_REC_SKIP
-                            });
-                            dr.Info = INFO_WARN;
-                        }
-                        break;
-                    case "location":
-                        lu = GetLookUpId<vyuSMGetCompanyLocationSearchList>(
-                            context,
-                            m => m.strLocationName == value,
-                            e => (int)e.intCompanyLocationId);
-                        intCompanyLocationId = lu;
-                        if (lu != null)
-                            fc.intLocationId = (int)lu;
-                        else
-                        {
-                            valid = false;
-                            dr.Messages.Add(new ImportDataMessage()
-                            {
-                                Column = header,
-                                Row = row,
-                                Type = TYPE_INNER_ERROR,
-                                Message = "Can't find Location: " + value + '.',
-                                Status = STAT_REC_SKIP
-                            });
-                            dr.Info = INFO_WARN;
-                        }
-                        break;
-                    case "vendor id":
-                        lu = GetLookUpId<vyuAPVendor>(
-                            context,
-                            m => m.strVendorId == value,
-                            e => (int)e.intEntityId);
-                        if (lu != null)
-                            fc.intVendorId = (int)lu;
-                        else
-                        {
-                            dr.Messages.Add(new ImportDataMessage()
-                            {
-                                Column = header,
-                                Row = row,
-                                Type = TYPE_INNER_WARN,
-                                Message = "Can't find Vendor: " + value + '.',
-                                Status = STAT_INNER_COL_SKIP
-                            });
-                            dr.Info = INFO_WARN;
-                        }
-                        break;
-                    case "pos description":
-                        SetText(value, del => fc.strDescription = del);
-	                    break;
-                    case "costing method":
-                        switch (value.ToUpper().Trim())
-                        {
-                            case "AVG": fc.intCostingMethod = 1; break;
-                            case "FIFO": fc.intCostingMethod = 2; break;
-                            case "LIFO": fc.intCostingMethod = 3; break;
-                            default: 
-                                break;
-                        }
-	                    break;
-                    case "storage location":
-                        if (!string.IsNullOrEmpty(value))
-                        {
-                            lu = GetLookUpId<tblSMCompanyLocationSubLocation>(
-                                context,
-                                m => m.strSubLocationName == value && m.intCompanyLocationId == intCompanyLocationId,
-                                e => (int)e.intCompanyLocationSubLocationId);
-                            intSubLocationId = lu;
-                            if (lu != null)
-                                fc.intSubLocationId = (int)lu;
-                            else
-                            {
-                                dr.Messages.Add(new ImportDataMessage()
-                                {
-                                    Column = header,
-                                    Row = row,
-                                    Type = TYPE_INNER_WARN,
-                                    Message = "Can't find Storage Location: " + value + '.',
-                                    Status = STAT_INNER_COL_SKIP
-                                });
-                                dr.Info = INFO_WARN;
-                            }
-                        }
-                        break;
-                    case "storage unit":
-                        if (!string.IsNullOrEmpty(value))
-                        {
-                            lu = GetLookUpId<vyuICGetStorageLocation>(
-                                context,
-                                m => m.strName == value && m.intLocationId == intCompanyLocationId && m.intSubLocationId == intSubLocationId,
-                                e => (int)e.intStorageLocationId);
-                            if (lu != null)
-                                fc.intStorageLocationId = (int)lu;
-                            else
-                            {
-                                dr.Messages.Add(new ImportDataMessage()
-                                {
-                                    Column = header,
-                                    Row = row,
-                                    Type = TYPE_INNER_WARN,
-                                    Message = "Can't find Storage Unit: " + value + '.',
-                                    Status = STAT_INNER_COL_SKIP
-                                });
-                                dr.Info = INFO_WARN;
-                            }
-                        }
-	                    break;
-                    case "sale uom":
-                        int? uomId = null;
-                        if (!string.IsNullOrEmpty(value))
-                        {
-                            lu = GetLookUpId<tblICUnitMeasure>(
-                                context,
-                                m => m.strUnitMeasure == value,
-                                e => (int)e.intUnitMeasureId);
-                            uomId = lu;
-                            lu = GetLookUpId<tblICItemUOM>(
-                                context,
-                                m => m.intItemId == intItemId && m.intUnitMeasureId == uomId,
-                                e => (int)e.intItemUOMId);
-                            if (lu != null)
-                                fc.intIssueUOMId = (int)lu;
-                            else
-                            {
-                                dr.Messages.Add(new ImportDataMessage()
-                                {
-                                    Column = header,
-                                    Row = row,
-                                    Type = TYPE_INNER_WARN,
-                                    Message = "Can't find Sale UOM: " + value + '.',
-                                    Status = STAT_INNER_COL_SKIP
-                                });
-                                dr.Info = INFO_WARN;
-                            }
-                        }
-	                    break;
-                    case "purchase uom":
-                        if (!string.IsNullOrEmpty(value))
-                        {
-                            uomId = null;
-                            lu = GetLookUpId<tblICUnitMeasure>(
-                                context,
-                                m => m.strUnitMeasure == value,
-                                e => (int)e.intUnitMeasureId);
-                            uomId = lu;
-                            lu = GetLookUpId<tblICItemUOM>(
-                                context,
-                                m => m.intItemId == intItemId && m.intUnitMeasureId == uomId && m.ysnAllowPurchase,
-                                e => (int)e.intItemUOMId);
-                            if (lu != null)
-                                fc.intReceiveUOMId = (int)lu;
-                            else
-                            {
-                                dr.Messages.Add(new ImportDataMessage()
-                                {
-                                    Column = header,
-                                    Row = row,
-                                    Type = TYPE_INNER_WARN,
-                                    Message = "Can't find Purchase UOM: " + value + '.',
-                                    Status = STAT_INNER_COL_SKIP
-                                });
-                                dr.Info = INFO_WARN;
-                            }
-                        }
-	                    break;
-                    case "family":
-                        if (!string.IsNullOrEmpty(value))
-                        {
-                            lu = GetLookUpId<tblSTSubcategory>(
-                                context,
-                                m => m.strSubcategoryId == value && m.strSubcategoryType == "F",
-                                e => (int)e.intSubcategoryId);
-                            if (lu != null)
-                                fc.intFamilyId = (int)lu;
-                            else
-                            {
-                                dr.Messages.Add(new ImportDataMessage()
-                                {
-                                    Column = header,
-                                    Row = row,
-                                    Type = TYPE_INNER_WARN,
-                                    Message = "Can't find Family: " + value + '.',
-                                    Status = STAT_INNER_COL_SKIP
-                                });
-                                dr.Info = INFO_WARN;
-                            }
-                        }
-	                    break;
-                    case "class":
-                        if (!string.IsNullOrEmpty(value))
-                        {
-                            lu = GetLookUpId<tblSTSubcategory>(
-                                context,
-                                m => m.strSubcategoryId == value && m.strSubcategoryType == "C",
-                                e => (int)e.intSubcategoryId);
-                            if (lu != null)
-                                fc.intClassId = (int)lu;
-                            else
-                            {
-                                dr.Messages.Add(new ImportDataMessage()
-                                {
-                                    Column = header,
-                                    Row = row,
-                                    Type = TYPE_INNER_WARN,
-                                    Message = "Can't find Class: " + value + '.',
-                                    Status = STAT_INNER_COL_SKIP
-                                });
-                                dr.Info = INFO_WARN;
-                            }
-                        }
-	                    break;
-                    case "product code":
-                        if (!string.IsNullOrEmpty(value))
-                        {
-                            lu = GetLookUpId<tblSTSubcategoryRegProd>(
-                                context,
-                                //m => m.strRegProdCode == value && m.intStoreId != null && m.intStoreId != 0,
-                                m => m.strRegProdCode == value && m.intStoreId != 0,
-                                e => (int)e.intRegProdId);
-                            if (lu != null)
-                                fc.intProductCodeId = (int)lu;
-                            else
-                            {
-                                dr.Messages.Add(new ImportDataMessage()
-                                {
-                                    Column = header,
-                                    Row = row,
-                                    Type = TYPE_INNER_WARN,
-                                    Message = "Can't find Product Code: " + value + '.',
-                                    Status = STAT_INNER_COL_SKIP
-                                });
-                                dr.Info = INFO_WARN;
-                            }
-                        }
-	                    break;
-                    case "passport fuel id 1":
-                        SetText(value, del => fc.strPassportFuelId1 = del);
-	                    break;
-                    case "passport fuel id 2":
-                        SetText(value, del => fc.strPassportFuelId2 = del);
-	                    break;
-                    case "passport fuel id 3":
-                        SetText(value, del => fc.strPassportFuelId3 = del);
-	                    break;
-                    case "tax flag 1":
-                        SetBoolean(value, del => fc.ysnTaxFlag1 = del);
-	                    break;
-                    case "tax flag 2":
-                        SetBoolean(value, del => fc.ysnTaxFlag2 = del);
-	                    break;
-                    case "tax flag 3":
-                        SetBoolean(value, del => fc.ysnTaxFlag3 = del);
-	                    break;
-                    case "tax flag 4":
-                        SetBoolean(value, del => fc.ysnTaxFlag4 = del);
-	                    break;
-                    case "promotional item":
-                        SetBoolean(value, del => fc.ysnPromotionalItem = del);
-	                    break;
-                    case "promotion item":
-                        if (string.IsNullOrEmpty(value))
-                            break;
-                        int val;
-                        try
-                        {
-                            val = int.Parse(value);
-                        }
-                        //catch (Exception ex)
-                        catch (System.Reflection.AmbiguousMatchException)
-                        {
-                            dr.Messages.Add(new ImportDataMessage()
-                            {
-                                Column = header,
-                                Row = row,
-                                Type = TYPE_INNER_ERROR,
-                                Message = string.Format("Invalid Promotion Item: {0}.", value),
-                                Status = STAT_INNER_COL_SKIP
-                            });
-                            dr.Info = INFO_WARN;
-                            break;
-                        }
-                        lu = GetLookUpId<tblSTPromotionSalesList>(
-                            context,
-                            m => m.intPromoCode == val,
-                            e => e.intPromoSalesListId);
-                        if (lu != null)
-                            fc.intMixMatchId = (int)lu;
-                        else
-                        {
-                            dr.Messages.Add(new ImportDataMessage()
-                            {
-                                Column = header,
-                                Row = row,
-                                Type = TYPE_INNER_ERROR,
-                                Message = string.Format("Can't find Promotion Item: {0}.", value),
-                                Status = STAT_INNER_COL_SKIP
-                            });
-                            dr.Info = INFO_WARN;
-                        }
-	                    break;
-                    case "deposit required":
-                        SetBoolean(value, del => fc.ysnDepositRequired = del);
-	                    break;
-                    case "deposit plu":
-                        if (string.IsNullOrEmpty(value))
-                            break;
-                        var param = new System.Data.SqlClient.SqlParameter("@strDepositPLU", value);
-                        param.DbType = System.Data.DbType.String;
-                        var query = @"SELECT u.intItemUOMId, u.intItemId, u.intUnitMeasureId, m.strUnitMeasure, u.strUpcCode
+                    var pc = int.Parse(pi);
+                    SetLookupId<tblSTPromotionSalesList>(record, "Promotion Item", e => e.intPromoCode == pc, e => e.intPromoCode, e => entity.strPromoItemListId = e.ToString());
+                }
+                catch(Exception)
+                {
+                    var msg = new ImportDataMessage()
+                    {
+                        Column = "Promotion Item",
+                        Row = record.RecordNo,
+                        Type = Constants.TYPE_WARNING,
+                        Status = Constants.STAT_FAILED,
+                        Action = Constants.ACTION_DISCARDED,
+                        Exception = null,
+                        Value = pi,
+                        Message = $"Invalid value for Promotion Item: {pi}."
+                    };
+                    ImportResult.AddWarning(msg);
+                }
+            }
+            SetBoolean(record, "Deposit Required", e => entity.ysnDepositRequired = e);
+            SetInteger(record, "Bottle Deposit No", e => entity.intBottleDepositNo = e);
+            SetBoolean(record, "Saleable", e => entity.ysnSaleable = e);
+            SetBoolean(record, "Quantity Required", e => entity.ysnQuantityRequired = e);
+            SetBoolean(record, "Scale Item", e => entity.ysnScaleItem = e);
+            SetBoolean(record, "Food Stampable", e => entity.ysnFoodStampable = e);
+            SetBoolean(record, "Returnable", e => entity.ysnReturnable = e);
+            SetBoolean(record, "Pre Priced", e => entity.ysnPrePriced = e);
+            SetBoolean(record, "Open Priced PLU", e => entity.ysnOpenPricePLU = e);
+            SetBoolean(record, "Linked Item", e => entity.ysnLinkedItem = e);
+            SetText(record, "Vendor Category", e => entity.strVendorCategory = e);
+            SetBoolean(record, "Id Required (Liquor)", e => entity.ysnIdRequiredLiquor = e);
+            SetBoolean(record, "Id Required (Cigarrettes)", e => entity.ysnIdRequiredCigarette = e);
+            SetInteger(record, "Minimum Age", e => entity.intMinimumAge = e);
+            SetBoolean(record, "Apply Blue Law 1", e => entity.ysnApplyBlueLaw1 = e);
+            SetBoolean(record, "Apply Blue Law 2", e => entity.ysnApplyBlueLaw2 = e);
+            SetBoolean(record, "Car Wash", e => entity.ysnCarWash = e);
+            SetInteger(record, "Item Type SubCode", e => entity.intItemTypeSubCode = e);
+            SetDecimal(record, "Reorder Point", e => entity.dblReorderPoint = e);
+            SetDecimal(record, "Min Order", e => entity.dblMinOrder = e);
+            SetDecimal(record, "Suggested Qty", e => entity.dblSuggestedQty = e);
+            SetDecimal(record, "Lead Time (Days)", e => entity.dblLeadTime = e);
+            SetText(record, "Counted", e => entity.strCounted = e);
+            SetBoolean(record, "Counted Daily", e => entity.ysnCountedDaily = e);
+            SetBoolean(record, "Counte By Serial Number", e => entity.ysnCountBySINo = e);
+            SetText(record, "Serial Number Begin", e => entity.strSerialNoBegin = e);
+            SetText(record, "Serial Number End", e => entity.strSerialNoEnd = e);
+            SetBoolean(record, "Auto Calculate Freight", e => entity.ysnAutoCalculateFreight = e);
+            SetDecimal(record, "Freight Rate", e => entity.dblFreightRate = e);
+            lu = GetFieldValue(record, "Inventory Count Group");
+            SetLookupId<tblICCountGroup>(record, "Inventory Count Group", e => e.strCountGroup == lu, e => e.intCountGroupId, e => entity.intCountGroupId = e);
+
+            if (valid)
+                return entity;
+
+            return null;
+        }
+
+        public override void Initialize()
+        {
+            base.Initialize();
+            AddPipe(new ConditionalPipe(context, ImportResult));
+            AddPipe(new SaleUOMPipe(context, ImportResult));
+            AddPipe(new PurchaseUOMPipe(context, ImportResult));
+            AddPipe(new DepositPluPipe(context, ImportResult));
+            AddPipe(new ItemTypeCodePIpe(context, ImportResult));
+            AddPipe(new FreightTermPipe(context, ImportResult));
+            AddPipe(new ShipViaPipe(context, ImportResult));
+            AddPipe(new DefaultPricingPipe(context, ImportResult));
+        }
+
+        class ConditionalPipe : CsvPipe<tblICItemLocation>
+        {
+            public ConditionalPipe(DbContext context, ImportDataResult result) : base(context, result)
+            {
+            }
+
+            protected override tblICItemLocation Process(tblICItemLocation input)
+            {
+                var costingMethod = GetFieldValue("Costing Method");
+                switch (costingMethod.ToUpper().Trim())
+                {
+                    case "AVG": input.intCostingMethod = 1; break;
+                    case "FIFO": input.intCostingMethod = 2; break;
+                    case "LIFO": input.intCostingMethod = 3; break;
+                }
+
+                var ani = GetFieldValue("Allow Negative Inventory");
+                switch (ani.ToUpper().Trim())
+                {
+                    case "YES": input.intAllowNegativeInventory = 1; break;
+                    default: input.intAllowNegativeInventory = 3; break;
+                }
+
+                return input;
+            }
+        }
+
+        class SaleUOMPipe : CsvPipe<tblICItemLocation>
+        {
+            public SaleUOMPipe(DbContext context, ImportDataResult result) : base(context, result)
+            {
+            }
+
+            protected override tblICItemLocation Process(tblICItemLocation input)
+            {
+                var value = GetFieldValue("Sale UOM");
+                var lu = ImportDataLogicHelpers.GetLookUpId<tblICUnitMeasure>(Context, e => e.strUnitMeasure == value, e => e.intUnitMeasureId);
+                lu = ImportDataLogicHelpers.GetLookUpId<tblICItemUOM>(Context, e => e.intItemId == input.intItemId && e.intUnitMeasureId == lu, e => e.intItemUOMId);
+                if(lu != null)
+                    input.intIssueUOMId = lu;
+                else
+                {
+                    AddWarning("Sale UOM", $"Can't find Sale UOM: {value}.");
+                }
+                return input;
+            }
+        }
+
+        class PurchaseUOMPipe : CsvPipe<tblICItemLocation>
+        {
+            public PurchaseUOMPipe(DbContext context, ImportDataResult result) : base(context, result)
+            {
+            }
+
+            protected override tblICItemLocation Process(tblICItemLocation input)
+            {
+                var value = GetFieldValue("Purchase UOM");
+                var lu = ImportDataLogicHelpers.GetLookUpId<tblICUnitMeasure>(Context, e => e.strUnitMeasure == value, e => e.intUnitMeasureId);
+                lu = ImportDataLogicHelpers.GetLookUpId<tblICItemUOM>(Context, e => e.intItemId == input.intItemId && e.intUnitMeasureId == lu, e => e.intItemUOMId);
+                if (lu != null)
+                    input.intReceiveUOMId = lu;
+                else
+                {
+                    AddWarning("Purchase UOM", $"Can't find Purchase UOM: {value}.");
+                }
+                return input;
+            }
+        }
+
+        class DepositPluPipe : CsvPipe<tblICItemLocation>
+        {
+            public DepositPluPipe(DbContext context, ImportDataResult result) : base(context, result)
+            {
+            }
+
+            protected override tblICItemLocation Process(tblICItemLocation input)
+            {
+                var value = GetFieldValue("Deposit PLU");
+                if (!string.IsNullOrEmpty(value))
+                {
+                    var param = new System.Data.SqlClient.SqlParameter("@strDepositPLU", value);
+                    param.DbType = System.Data.DbType.String;
+                    var query = @"SELECT u.intItemUOMId, u.intItemId, u.intUnitMeasureId, m.strUnitMeasure, u.strUpcCode
 		                    FROM tblICItemUOM u
 			                    INNER JOIN tblICUnitMeasure m ON m.intUnitMeasureId = u.intUnitMeasureId
 		                    WHERE NULLIF(u.strUpcCode, '') IS NOT NULL AND m.strUnitMeasure = @strDepositPLU";
 
-                        IEnumerable<DepositPLU> storageStores = context.ContextManager.Database.SqlQuery<DepositPLU>(query, param);
-                            try
-                            {
-                                DepositPLU store = storageStores.First();
-
-                                if (store != null)
-                                    fc.intDepositPLUId = store.intItemUOMId;
-                                else
-                                {
-                                    dr.Messages.Add(new ImportDataMessage()
-                                    {
-                                        Column = header,
-                                        Row = row,
-                                        Type = TYPE_INNER_WARN,
-                                        Message = "Can't find Deposit PLU: " + value + '.',
-                                        Status = STAT_INNER_COL_SKIP
-                                    });
-                                    dr.Info = INFO_WARN;
-                                }
-                            }
-                            catch(Exception)
-                            {
-                                dr.Messages.Add(new ImportDataMessage()
-                                {
-                                    Column = header,
-                                    Row = row,
-                                    Type = TYPE_INNER_WARN,
-                                    Message = "Can't find Deposit PLU: " + value + '.',
-                                    Status = STAT_INNER_COL_SKIP
-                                });
-                                dr.Info = INFO_WARN;
-                            }
-	                    break;
-                    case "bottle deposit no:":
-                        SetInteger(value, del => fc.intBottleDepositNo = del, "Bottle Deposit No", dr, header, row);
-	                    break;
-                    case "saleable":
-                        SetBoolean(value, del => fc.ysnSaleable = del);
-	                    break;
-                    case "quantity required":
-                        SetBoolean(value, del => fc.ysnQuantityRequired = del);
-	                    break;
-                    case "scale item":
-                        SetBoolean(value, del => fc.ysnScaleItem = del);
-	                    break;
-                    case "food stampable":
-                        SetBoolean(value, del => fc.ysnFoodStampable = del);
-	                    break;
-                    case "returnable":
-                        SetBoolean(value, del => fc.ysnReturnable = del);
-	                    break;
-                    case "pre priced":
-                        SetBoolean(value, del => fc.ysnPrePriced = del);
-	                    break;
-                    case "open priced plu":
-                        SetBoolean(value, del => fc.ysnOpenPricePLU = del);
-	                    break;
-                    case "linked item":
-                        SetBoolean(value, del => fc.ysnLinkedItem = del);
-	                    break;
-                    case "vendor category":
-                        SetText(value, del => fc.strVendorCategory = del);
-	                    break;
-                    case "id required (liquor)":
-                        SetBoolean(value, del => fc.ysnIdRequiredLiquor = del);
-	                    break;
-                    case "id required (cigarrettes)":
-                        SetBoolean(value, del => fc.ysnIdRequiredCigarette = del);
-	                    break;
-                    case "minimum age":
-                        SetInteger(value, del => fc.intMinimumAge = del, "Minimum Age", dr, header, row);
-	                    break;
-                    case "apply blue law 1":
-                        SetBoolean(value, del => fc.ysnApplyBlueLaw1 = del);
-	                    break;
-                    case "apply blue law 2":
-                        SetBoolean(value, del => fc.ysnApplyBlueLaw2 = del);
-	                    break;
-                    case "car wash":
-                        SetBoolean(value, del => fc.ysnCarWash = del);
-	                    break;
-                    case "item type subcode":
-                        SetInteger(value, del => fc.intItemTypeSubCode = del, "Item Type Subcode", dr, header, row);
-	                    break;
-                    case "item type code":
-                        query = "";
-                        if (!string.IsNullOrEmpty(value))
-                        {
-                            try
-                            {
-                                val = int.Parse(value);
-                            }
-                            //catch (Exception ex)
-                            catch (System.Reflection.AmbiguousMatchException)
-                            {
-                                dr.Messages.Add(new ImportDataMessage()
-                                {
-                                    Column = header,
-                                    Row = row,
-                                    Type = TYPE_INNER_WARN,
-                                    Message = "Invalid Item Type Code: " + value + '.',
-                                    Status = STAT_INNER_COL_SKIP
-                                });
-                                dr.Info = INFO_WARN;
-                                break;
-                            }
-                            param = new System.Data.SqlClient.SqlParameter("@intRadiantItemTypeCode", val);
-                            param.DbType = System.Data.DbType.Int32;
-                            query = @"SELECT intRadiantItemTypeCodeId, 
-                                        intRadiantItemTypeCode, strDescription FROM tblSTRadiantItemTypeCode
-                                      WHERE intRadiantItemTypeCode = @intRadiantItemTypeCode";
-                            IEnumerable<RadiantItemTypeCode> itemTypes = context.ContextManager.Database.SqlQuery<RadiantItemTypeCode>(query, param);
-                            try
-                            {
-                                RadiantItemTypeCode itemType = itemTypes.First();
-
-                                if (itemType != null)
-                                    fc.intItemTypeCode = itemType.intRadiantItemTypeCodeId;
-                                else
-                                {
-                                    dr.Messages.Add(new ImportDataMessage()
-                                    {
-                                        Column = header,
-                                        Row = row,
-                                        Type = TYPE_INNER_WARN,
-                                        Message = "Can't find Item Type Code: " + value + '.',
-                                        Status = STAT_INNER_COL_SKIP
-                                    });
-                                    dr.Info = INFO_WARN;
-                                }
-                            }
-                            catch(Exception)
-                            {
-                                dr.Messages.Add(new ImportDataMessage()
-                                {
-                                    Column = header,
-                                    Row = row,
-                                    Type = TYPE_INNER_WARN,
-                                    Message = "Can't find Item Type Code: " + value + '.',
-                                    Status = STAT_INNER_COL_SKIP
-                                });
-                                dr.Info = INFO_WARN;
-                            }
-
-                        }
-                        break;
-                    case "allow negative inventory":
-                        switch (value.ToUpper().Trim())
-                        {
-                            case "YES": fc.intAllowNegativeInventory = 1; break;
-                            default:
-                                fc.intAllowNegativeInventory = 3;
-                                break;
-                        }
-	                    break;
-                    case "reorder point":
-                        SetDecimal(value, del => fc.dblReorderPoint = del, "Reorder Point", dr, header, row);
-	                    break;
-                    case "min order":
-                        SetDecimal(value, del => fc.dblMinOrder = del, "Min Order", dr, header, row);
-	                    break;
-                    case "suggested qty":
-                        SetDecimal(value, del => fc.dblSuggestedQty = del, "Suggested Qty", dr, header, row);
-	                    break;
-                    case "lead time (days)":
-                        SetDecimal(value, del => fc.dblLeadTime = del, "Lead Time (days)", dr, header, row);
-	                    break;
-                    case "inventory count group":
-                        if (!string.IsNullOrEmpty(value))
-                        {
-                            lu = GetLookUpId<tblICCountGroup>(
-                                context,
-                                m => m.strCountGroup == value,
-                                e => (int)e.intCountGroupId);
-                            if (lu != null)
-                                fc.intCountGroupId = (int)lu;
-                            else
-                            {
-                                dr.Messages.Add(new ImportDataMessage()
-                                {
-                                    Column = header,
-                                    Row = row,
-                                    Type = TYPE_INNER_WARN,
-                                    Message = "Can't find Count Group: " + value + '.',
-                                    Status = STAT_INNER_COL_SKIP
-                                });
-                                dr.Info = INFO_WARN;
-                            }
-                        }
-	                    break;
-                    case "counted":
-                        SetText(value, del => fc.strCounted = del);
-	                    break;
-                    case "counted daily":
-                        SetBoolean(value, del => fc.ysnCountedDaily = del);
-	                    break;
-                    case "count by serial number":
-                        SetBoolean(value, del => fc.ysnCountBySINo = del);
-	                    break;
-                    case "serial number begin":
-                        SetText(value, del => fc.strSerialNoBegin = del);
-	                    break;
-                    case "serial number end":
-                        SetText(value, del => fc.strSerialNoEnd = del);
-	                    break;
-                    case "auto calculate freight":
-                        SetBoolean(value, del => fc.ysnAutoCalculateFreight = del);
-	                    break;
-                    case "freight rate":
-                        SetDecimal(value, del => fc.dblFreightRate = del, "Freight Rate", dr, header, row);
-	                    break;
-                    case "freight term":
-                        query = "";
-                        if (!string.IsNullOrEmpty(value))
-                        {
-                            param = new System.Data.SqlClient.SqlParameter("@strFreightTerm", value);
-                            param.DbType = System.Data.DbType.String;
-                            query = "SELECT intFreightTermId, strFreightTerm, strFobPoint FROM tblSMFreightTerms WHERE strFreightTerm = @strFreightTerm";
-                            IEnumerable<tblSMFreightTerms> terms = context.ContextManager.Database.SqlQuery<tblSMFreightTerms>(query, param);
-                            try
-                            {
-                                tblSMFreightTerms term = terms.First();
-
-                                if (term != null)
-                                    fc.intFreightMethodId = term.intFreightTermId;
-                                else
-                                {
-                                    dr.Messages.Add(new ImportDataMessage()
-                                    {
-                                        Column = header,
-                                        Row = row,
-                                        Type = TYPE_INNER_WARN,
-                                        Message = "Can't find Freight Term: " + value + '.',
-                                        Status = STAT_INNER_COL_SKIP
-                                    });
-                                    dr.Info = INFO_WARN;
-                                }
-                            }
-                            catch(Exception)
-                            {
-                                dr.Messages.Add(new ImportDataMessage()
-                                {
-                                    Column = header,
-                                    Row = row,
-                                    Type = TYPE_INNER_WARN,
-                                    Message = "Can't find Freight Term: " + value + '.',
-                                    Status = STAT_INNER_COL_SKIP
-                                });
-                                dr.Info = INFO_WARN;
-                            }
-
-                        }
-	                    break;
-                    case "ship via":
-                        if (!string.IsNullOrEmpty(value))
-                        {
-                            param = new System.Data.SqlClient.SqlParameter("@strShipVia", value);
-                            param.DbType = System.Data.DbType.String;
-                            query = "SELECT intEntityShipViaId, strShipVia, strShippingService, strName FROM vyuEMSearchShipVia WHERE strShipVia = @strShipVia";
-                            IEnumerable<vyuEMSearchShipVia> ships = context.ContextManager.Database.SqlQuery<vyuEMSearchShipVia>(query, param );
-                            try
-                            {
-                                vyuEMSearchShipVia ship = ships.First();
-
-                                if (ship != null)
-                                    fc.intShipViaId = ship.intEntityShipViaId;
-                                else
-                                {
-                                    dr.Messages.Add(new ImportDataMessage()
-                                    {
-                                        Column = header,
-                                        Row = row,
-                                        Type = TYPE_INNER_WARN,
-                                        Message = "Can't find Ship Method: " + value + '.',
-                                        Status = STAT_INNER_COL_SKIP
-                                    });
-                                    dr.Info = INFO_WARN;
-                                } 
-                            }
-                            catch(Exception)
-                            {
-                                dr.Messages.Add(new ImportDataMessage()
-                                {
-                                    Column = header,
-                                    Row = row,
-                                    Type = TYPE_INNER_WARN,
-                                    Message = "Can't find Ship Method: " + value + '.',
-                                    Status = STAT_INNER_COL_SKIP
-                                });
-                                dr.Info = INFO_WARN;
-                            }
-                        }
-	                    break;
-                }
-            }
-
-            if (!valid)
-                return null;
-
-            if (context.GetQuery<tblICItemLocation>().Any(t => t.intLocationId == fc.intLocationId && t.intItemId == fc.intItemId))
-            {
-                if (!GlobalSettings.Instance.AllowOverwriteOnImport)
-                {
-                    dr.Info = INFO_ERROR;
-                    dr.Messages.Add(new ImportDataMessage()
+                    IEnumerable<DepositPLU> storageStores = Context.Database.SqlQuery<DepositPLU>(query, param);
+                    try
                     {
-                        Type = TYPE_INNER_ERROR,
-                        Status = STAT_REC_SKIP,
-                        Column = headers[0],
-                        Row = row,
-                        Message = "The item location already exists. The system does not allow existing records to be modified."
-                    });
-                    return null;
+                        DepositPLU store = storageStores.First();
+
+                        if (store != null)
+                            input.intDepositPLUId = store.intItemUOMId;
+                        else
+                        {
+                            AddWarning("Deposit PLU", $"Can't find Deposit PLU: {value}.");
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        AddWarning("Deposit PLU", $"Can't find Deposit PLU: {value}.");
+                    }
                 }
-
-                var entry = context.ContextManager.Entry<tblICItemLocation>(context.GetQuery<tblICItemLocation>().First(t => t.intLocationId == fc.intLocationId && t.intItemId == fc.intItemId));
-                entry.Property(e => e.intVendorId).CurrentValue = fc.intVendorId;
-                entry.Property(e => e.strDescription).CurrentValue = fc.strDescription;
-                entry.Property(e => e.intCostingMethod).CurrentValue = fc.intCostingMethod;
-                entry.Property(e => e.intSubLocationId).CurrentValue = fc.intSubLocationId;
-                entry.Property(e => e.intStorageLocationId).CurrentValue = fc.intStorageLocationId;
-                entry.Property(e => e.intIssueUOMId).CurrentValue = fc.intIssueUOMId;
-                entry.Property(e => e.intReceiveUOMId).CurrentValue = fc.intReceiveUOMId;
-                entry.Property(e => e.intFamilyId).CurrentValue = fc.intFamilyId;
-                entry.Property(e => e.intClassId).CurrentValue = fc.intClassId;
-                entry.Property(e => e.intProductCodeId).CurrentValue = fc.intProductCodeId;
-                entry.Property(e => e.strPassportFuelId1).CurrentValue = fc.strPassportFuelId1;
-                entry.Property(e => e.strPassportFuelId2).CurrentValue = fc.strPassportFuelId2;
-                entry.Property(e => e.strPassportFuelId3).CurrentValue = fc.strPassportFuelId3;
-                entry.Property(e => e.ysnTaxFlag1).CurrentValue = fc.ysnTaxFlag1;
-                entry.Property(e => e.ysnTaxFlag2).CurrentValue = fc.ysnTaxFlag2;
-                entry.Property(e => e.ysnTaxFlag3).CurrentValue = fc.ysnTaxFlag3;
-                entry.Property(e => e.ysnTaxFlag4).CurrentValue = fc.ysnTaxFlag4;
-                entry.Property(e => e.ysnPromotionalItem).CurrentValue = fc.ysnPromotionalItem;
-                entry.Property(e => e.intMixMatchId).CurrentValue = fc.intMixMatchId;
-                entry.Property(e => e.ysnDepositRequired).CurrentValue = fc.ysnDepositRequired;
-                entry.Property(e => e.intDepositPLUId).CurrentValue = fc.intDepositPLUId;
-                entry.Property(e => e.intBottleDepositNo).CurrentValue = fc.intBottleDepositNo;
-                entry.Property(e => e.ysnSaleable).CurrentValue = fc.ysnSaleable;
-                entry.Property(e => e.ysnQuantityRequired).CurrentValue = fc.ysnQuantityRequired;
-                entry.Property(e => e.ysnScaleItem).CurrentValue = fc.ysnScaleItem;
-                entry.Property(e => e.ysnFoodStampable).CurrentValue = fc.ysnFoodStampable;
-                entry.Property(e => e.ysnReturnable).CurrentValue = fc.ysnReturnable;
-                entry.Property(e => e.ysnPrePriced).CurrentValue = fc.ysnPrePriced;
-                entry.Property(e => e.ysnOpenPricePLU).CurrentValue = fc.ysnOpenPricePLU;
-                entry.Property(e => e.ysnLinkedItem).CurrentValue = fc.ysnLinkedItem;
-                entry.Property(e => e.strVendorCategory).CurrentValue = fc.strVendorCategory;
-                entry.Property(e => e.ysnIdRequiredLiquor).CurrentValue = fc.ysnIdRequiredLiquor;
-                entry.Property(e => e.ysnIdRequiredCigarette).CurrentValue = fc.ysnIdRequiredCigarette;
-                entry.Property(e => e.intMinimumAge).CurrentValue = fc.intMinimumAge;
-                entry.Property(e => e.ysnApplyBlueLaw1).CurrentValue = fc.ysnApplyBlueLaw1;
-                entry.Property(e => e.ysnApplyBlueLaw2).CurrentValue = fc.ysnApplyBlueLaw2;
-                entry.Property(e => e.ysnTaxFlag4).CurrentValue = fc.ysnTaxFlag4;
-                entry.Property(e => e.ysnCarWash).CurrentValue = fc.ysnCarWash;
-                entry.Property(e => e.intItemTypeSubCode).CurrentValue = fc.intItemTypeSubCode;
-                entry.Property(e => e.intItemTypeCode).CurrentValue = fc.intItemTypeCode;
-                entry.Property(e => e.intAllowNegativeInventory).CurrentValue = fc.intAllowNegativeInventory;
-                entry.Property(e => e.dblReorderPoint).CurrentValue = fc.dblReorderPoint;
-                entry.Property(e => e.dblMinOrder).CurrentValue = fc.dblMinOrder;
-                entry.Property(e => e.dblSuggestedQty).CurrentValue = fc.dblSuggestedQty;
-                entry.Property(e => e.dblLeadTime).CurrentValue = fc.dblLeadTime;
-                entry.Property(e => e.intCountGroupId).CurrentValue = fc.intCountGroupId;
-                entry.Property(e => e.strCounted).CurrentValue = fc.strCounted;
-                entry.Property(e => e.ysnCountedDaily).CurrentValue = fc.ysnCountedDaily;
-                entry.Property(e => e.ysnCountBySINo).CurrentValue = fc.ysnCountBySINo;
-                entry.Property(e => e.strSerialNoBegin).CurrentValue = fc.strSerialNoBegin;
-                entry.Property(e => e.strSerialNoEnd).CurrentValue = fc.strSerialNoEnd;
-                entry.Property(e => e.ysnAutoCalculateFreight).CurrentValue = fc.ysnAutoCalculateFreight;
-                entry.Property(e => e.dblFreightRate).CurrentValue = fc.dblFreightRate;
-                entry.Property(e => e.intFreightMethodId).CurrentValue = fc.intFreightMethodId;
-                entry.Property(e => e.intShipViaId).CurrentValue = fc.intShipViaId;
-                
-                entry.Property(e => e.intItemId).IsModified = false;
-                entry.Property(e => e.intItemLocationId).IsModified = false;
+                return input;
             }
-            else
-            {
-                context.AddNew<tblICItemLocation>(fc);
-                CreateDefaultPricing(fc);
-            }
-
-            return fc;
         }
 
-        private void CreateDefaultPricing(tblICItemLocation il)
+        class ItemTypeCodePIpe : CsvPipe<tblICItemLocation>
         {
-            tblICItemPricing fc = new tblICItemPricing()
+            public ItemTypeCodePIpe(DbContext context, ImportDataResult result) : base(context, result)
             {
-                strPricingMethod = "None",
-                dblLastCost = 0,
-                dblStandardCost = 0,
-                dblAverageCost = 0,
-                dblEndMonthCost = 0,
-                dblMSRPPrice = 0,
-                dblSalePrice = 0
-            };
+            }
 
-            fc.intItemId = il.intItemId;
-            fc.intItemLocationId = il.intItemLocationId;
-            context.AddNew<tblICItemPricing>(fc);
+            protected override tblICItemLocation Process(tblICItemLocation input)
+            {
+                var value = GetFieldValue("Item Type Code");
+                if (!string.IsNullOrEmpty(value))
+                {
+                    var val = 0;
+                    try
+                    {
+                        val = int.Parse(value);
+                    }
+                    //catch (Exception ex)
+                    catch (System.Reflection.AmbiguousMatchException)
+                    {
+                        AddWarning("Item Type Code", $"Can't find Item Type Code: {value}.");
+                    }
+                    var param = new System.Data.SqlClient.SqlParameter("@intRadiantItemTypeCode", val);
+                    param.DbType = System.Data.DbType.Int32;
+                    var query = @"SELECT intRadiantItemTypeCodeId, 
+                                        intRadiantItemTypeCode, strDescription FROM tblSTRadiantItemTypeCode
+                                      WHERE intRadiantItemTypeCode = @intRadiantItemTypeCode";
+                    IEnumerable<RadiantItemTypeCode> itemTypes = Context.Database.SqlQuery<RadiantItemTypeCode>(query, param);
+                    try
+                    {
+                        RadiantItemTypeCode itemType = itemTypes.First();
+
+                        if (itemType != null)
+                            input.intItemTypeCode = itemType.intRadiantItemTypeCodeId;
+                        else
+                        {
+                            AddWarning("Item Type Code", $"Can't find Item Type Code: {value}.");
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        AddWarning("Item Type Code", $"Can't find Item Type Code: {value}.");
+                    }
+                }
+                return input;
+            }
+        }
+
+        class FreightTermPipe : CsvPipe<tblICItemLocation>
+        {
+            public FreightTermPipe(DbContext context, ImportDataResult result) : base(context, result)
+            {
+            }
+
+            protected override tblICItemLocation Process(tblICItemLocation input)
+            {
+                var value = GetFieldValue("Freight Term");
+
+                if (!string.IsNullOrEmpty(value))
+                {
+                    var param = new System.Data.SqlClient.SqlParameter("@strFreightTerm", value);
+                    param.DbType = System.Data.DbType.String;
+                    var query = "SELECT intFreightTermId, strFreightTerm, strFobPoint FROM tblSMFreightTerms WHERE strFreightTerm = @strFreightTerm";
+                    IEnumerable<tblSMFreightTerms> terms = Context.Database.SqlQuery<tblSMFreightTerms>(query, param);
+                    try
+                    {
+                        tblSMFreightTerms term = terms.First();
+
+                        if (term != null)
+                            input.intFreightMethodId = term.intFreightTermId;
+                        else
+                        {
+                            AddWarning("Freight Term", $"Can't find Freight Term: {value}.");
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        AddWarning("Freight Term", $"Can't find Freight Term: {value}.");
+                    }
+                }
+                return input;
+            }
+        }
+
+        class ShipViaPipe : CsvPipe<tblICItemLocation>
+        {
+            public ShipViaPipe(DbContext context, ImportDataResult result) : base(context, result)
+            {
+            }
+
+            protected override tblICItemLocation Process(tblICItemLocation input)
+            {
+                var value = GetFieldValue("Ship Via");
+
+                if (!string.IsNullOrEmpty(value))
+                {
+                    var param = new System.Data.SqlClient.SqlParameter("@strShipVia", value);
+                    param.DbType = System.Data.DbType.String;
+                    var query = "SELECT intEntityShipViaId, strShipVia, strShippingService, strName FROM vyuEMSearchShipVia WHERE strShipVia = @strShipVia";
+                    IEnumerable<vyuEMSearchShipVia> ships = Context.Database.SqlQuery<vyuEMSearchShipVia>(query, param);
+                    try
+                    {
+                        vyuEMSearchShipVia ship = ships.First();
+
+                        if (ship != null)
+                            input.intShipViaId = ship.intEntityShipViaId;
+                        else
+                        {
+                            AddWarning("Ship Via", $"Can't find Ship Via: {value}.");
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        AddWarning("Ship Via", $"Can't find Ship Via: {value}.");
+                    }
+                }
+                return input;
+            }
+        }
+
+        class DefaultPricingPipe : CsvPipe<tblICItemLocation>
+        {
+            public DefaultPricingPipe(DbContext context, ImportDataResult result) : base(context, result)
+            {
+            }
+
+            protected override tblICItemLocation Process(tblICItemLocation input)
+            {
+                tblICItemPricing entity = new tblICItemPricing()
+                {
+                    strPricingMethod = "None",
+                    dblLastCost = 0,
+                    dblStandardCost = 0,
+                    dblAverageCost = 0,
+                    dblEndMonthCost = 0,
+                    dblMSRPPrice = 0,
+                    dblSalePrice = 0,
+                    intItemId = input.intItemId
+                };
+
+                var location = Record["Location"].ToLower();
+                if (!Context.Set<vyuICGetItemPricing>().Any(e => e.intItemId == input.intItemId && e.strLocationName.ToLower() == location))
+                {
+                    input.tblICItemPricings.Add(entity);
+                }
+                else
+                {
+                    var msg = new ImportDataMessage()
+                    {
+                        Column = "Item Pricing",
+                        Row = Record.RecordNo,
+                        Type = Constants.TYPE_WARNING,
+                        Status = Constants.STAT_FAILED,
+                        Action = Constants.ACTION_SKIPPED,
+                        Exception = null,
+                        Value = "Auto generated pricing.",
+                        Message = $"Item pricing for location '{Record["Location"]}' already exists.",
+                    };
+                    Result.AddWarning(msg);
+                }
+                return input;
+            }
         }
 
         private class RadiantItemTypeCode

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using iRely.Common;
@@ -10,245 +12,185 @@ namespace iRely.Inventory.BusinessLayer
 {
     public class ImportItemAccountCategories : ImportDataLogic<tblICCategoryAccount>
     {
+        public ImportItemAccountCategories(DbContext context, byte[] data) : base(context, data)
+        {
+        }
+
         protected override string[] GetRequiredFields()
         {
             return new string[] { "category code", "gl account category", "gl account id" };
         }
 
-        protected override tblICCategoryAccount ProcessRow(int row, int fieldCount, string[] headers, LumenWorks.Framework.IO.Csv.CsvReader csv, ImportDataResult dr)
+        protected override string GetPrimaryKeyName()
         {
-            tblICCategoryAccount fc = new tblICCategoryAccount();
-            fc.intConcurrencyId = 1;
-            string category = "";
-            string accountId = "";
-            bool valid = true;
-            string glcategory = null, account = null;
+            return "intCategoryAccountId";
+        }
 
-            for (var i = 0; i < fieldCount; i++)
+        public override int GetPrimaryKeyValue(tblICCategoryAccount entity)
+        {
+            return entity.intCategoryAccountId;
+        }
+
+        protected override Expression<Func<tblICCategoryAccount, bool>> GetUniqueKeyExpression(tblICCategoryAccount entity)
+        {
+            return (e => e.intCategoryId == entity.intCategoryId && e.intAccountCategoryId == entity.intAccountCategoryId);
+        }
+
+        public override tblICCategoryAccount Process(CsvRecord record)
+        {
+            var entity = new tblICCategoryAccount();
+            var valid = true;
+
+            var lu = GetFieldValue(record, "Category Code");
+            valid = SetIntLookupId<tblICCategory>(record, "Category Code", e => e.strCategoryCode == lu, e => e.intCategoryId, e => entity.intCategoryId = e, required: true);
+            
+            if (valid)
+                return entity;
+
+            return null;
+        }
+
+        public override void Initialize()
+        {
+            base.Initialize();
+            AddPipe(new GLAccountPipe(context, ImportResult));
+        }
+
+        class GLAccountPipe : CsvPipe<tblICCategoryAccount>
+        {
+            public GLAccountPipe(DbContext context, ImportDataResult result) : base(context, result)
             {
-                string header = headers[i];
-                string value = csv[header];
-                string h = header.ToLower().Trim();
-                int? lu = null;
-
-                switch (h)
-                {
-                    case "category":
-                    case "category code":
-                        if (string.IsNullOrEmpty(value))
-                        {
-                            valid = false;
-                            dr.Messages.Add(new ImportDataMessage()
-                            {
-                                Column = header,
-                                Row = row,
-                                Type = TYPE_INNER_ERROR,
-                                Status = STAT_REC_SKIP,
-                                Message = "Category Code should not be blank."
-                            });
-                            dr.Info = INFO_WARN;
-                            break;
-                        }
-                        lu = GetLookUpId<tblICCategory>(
-                            context,
-                            m => m.strCategoryCode == value,
-                            e => e.intCategoryId);
-                        if (lu != null)
-                        {
-                            fc.intCategoryId = (int)lu;
-                        }
-                        else
-                        {
-                            valid = false;
-                            dr.Messages.Add(new ImportDataMessage()
-                            {
-                                Column = header,
-                                Row = row,
-                                Type = TYPE_INNER_ERROR,
-                                Status = STAT_REC_SKIP,
-                                Message = "The Category Code " + value + " does not exist."
-                            });
-                            dr.Info = INFO_WARN;
-                        }
-                        break;
-                    case "account category":
-                    case "gl account category":
-                        if (string.IsNullOrEmpty(value))
-                        {
-                            valid = false;
-                            dr.Messages.Add(new ImportDataMessage()
-                            {
-                                Column = header,
-                                Row = row,
-                                Type = TYPE_INNER_ERROR,
-                                Status = STAT_REC_SKIP,
-                                Message = "GL Account Category should not be blank."
-                            });
-                            dr.Info = INFO_WARN;
-                            break;
-                        }
-                        lu = GetLookUpId<tblGLAccountCategory>(
-                            context,
-                            m => m.strAccountCategory == value,
-                            e => e.intAccountCategoryId);
-                        category = value;
-                        if (lu != null)
-                        {
-                            fc.intAccountCategoryId = (int)lu;
-                            glcategory = value;
-                        }
-                        else
-                        {
-                            valid = false;
-                            dr.Messages.Add(new ImportDataMessage()
-                            {
-                                Column = header,
-                                Row = row,
-                                Type = TYPE_INNER_ERROR,
-                                Status = STAT_REC_SKIP,
-                                Message = "The GL Account Category " + value + " does not exist."
-                            });
-                            dr.Info = INFO_WARN;
-                        }
-                        break;
-                    case "account id":
-                    case "gl account id":
-                        if (string.IsNullOrEmpty(value))
-                        {
-                            valid = false;
-                            dr.Messages.Add(new ImportDataMessage()
-                            {
-                                Column = header,
-                                Row = row,
-                                Type = TYPE_INNER_ERROR,
-                                Status = STAT_REC_SKIP,
-                                Message = "Account Id should not be blank."
-                            });
-                            dr.Info = INFO_WARN;
-                            break;
-                        }
-                        lu = GetLookUpId<tblGLAccount>(
-                            context,
-                            m => m.strAccountId == value,
-                            e => e.intAccountId);
-                        accountId = value;
-                        if (lu != null)
-                        {
-                            fc.intAccountId = (int)lu;
-                            account = value;
-                        }
-                        else
-                        {
-                            valid = false;
-                            dr.Messages.Add(new ImportDataMessage()
-                            {
-                                Column = header,
-                                Row = row,
-                                Type = TYPE_INNER_ERROR,
-                                Status = STAT_REC_SKIP,
-                                Message = "The Account Id " + value + " does not exist."
-                            });
-                            dr.Info = INFO_WARN;
-                        }
-                        break;
-                }
             }
 
-            if (fc != null && account != null && category != null)
-                valid = IsAccountMatchedForCategory(category, account, dr, "GL Account Id", row);
-
-            if (!valid)
-                return null;
-
-            
-            if (context.GetQuery<tblICCategoryAccount>().Any(t => t.intCategoryId == fc.intCategoryId && t.intAccountCategoryId == fc.intAccountCategoryId))
+            protected override tblICCategoryAccount Process(tblICCategoryAccount input)
             {
-                if (!GlobalSettings.Instance.AllowOverwriteOnImport)
+                if (input == null)
+                    return null;
+                string category = "";
+                string accountId = "";
+                string glcategory = null, account = null;
+
+                var valueCategory = GetFieldValue("GL Account Category");
+                if (string.IsNullOrEmpty(valueCategory)) return null;
+               
+                var lu = ImportDataLogicHelpers.GetLookUpId<tblGLAccountCategory>(Context, m => m.strAccountCategory == valueCategory, e => e.intAccountCategoryId);
+                category = valueCategory;
+                if (lu != null)
                 {
-                    dr.Info = INFO_ERROR;
-                    dr.Messages.Add(new ImportDataMessage()
+                    input.intAccountCategoryId = (int)lu;
+                    glcategory = valueCategory;
+                }
+                else
+                {
+                    var msg = new ImportDataMessage()
                     {
-                        Type = TYPE_INNER_ERROR,
-                        Status = STAT_REC_SKIP,
-                        Column = headers[1] + "/" + headers[2],
-                        Row = row,
-                        Message = "The record already exists: Category: " + category + ", Acct. Id: " + accountId + " . Record skipped."
-                    });
+                        Column = "GL Account Category",
+                        Row = Record.RecordNo,
+                        Type = Constants.TYPE_WARNING,
+                        Status = Constants.STAT_FAILED,
+                        Action = Constants.ACTION_SKIPPED,
+                        Exception = null,
+                        Value = valueCategory,
+                        Message = $"The GL Account Category {valueCategory} does not exist.",
+                    };
+                    Result.AddError(msg);
                     return null;
                 }
 
-                var ca = context.GetQuery<tblICCategoryAccount>().FirstOrDefault(t => t.intCategoryId == fc.intCategoryId && t.intAccountCategoryId == fc.intAccountCategoryId);
-                if (ca != null)
+                var valueId = ImportDataLogicHelpers.GetFieldValue(Record, "GL Account Id");
+                if (string.IsNullOrEmpty(valueId)) return null;
+                lu = ImportDataLogicHelpers.GetLookUpId<tblGLAccount>(Context, m => m.strAccountId == valueId, e => e.intAccountId);
+                accountId = valueId;
+                if (lu != null)
                 {
-                    var entry = context.ContextManager.Entry<tblICCategoryAccount>(ca);
-                    entry.Property(e => e.intAccountCategoryId).CurrentValue = fc.intAccountCategoryId;
-                    entry.Property(e => e.intCategoryId).CurrentValue = fc.intCategoryId;
-                    entry.Property(e => e.intAccountId).CurrentValue = fc.intAccountId;
-                    entry.State = System.Data.Entity.EntityState.Modified;
+                    input.intAccountId = (int)lu;
+                    account = valueId;
                 }
-            }
-            else
-            {
-                context.AddNew<tblICCategoryAccount>(fc);
-            }
-            return fc;
-        }
-
-        class vyuGLAccountDetail
-        {
-            public int? intAccountId { get; set; }
-            public string strAccountCategory { get; set; }
-            public string strAccountId { get; set; }
-            public string strAccountId1 { get; set; }
-            public string strAccountType { get; set; }
-            public int? intAccountCategoryId { get; set; }
-        }
-
-        private bool IsAccountMatchedForCategory(string category, string account, ImportDataResult dr, string header, int row)
-        {
-            var p2 = new System.Data.SqlClient.SqlParameter("@p2", account.Trim().Replace("-", ""));
-            p2.DbType = System.Data.DbType.String;
-            var p1 = new System.Data.SqlClient.SqlParameter("@p1", category.Trim());
-            p1.DbType = System.Data.DbType.String;
-            var query = "SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory = @p1 AND strAccountId1 = @p2";
-            IEnumerable<vyuGLAccountDetail> ships = context.ContextManager.Database.SqlQuery<vyuGLAccountDetail>(query, p1, p2);
-            try
-            {
-                vyuGLAccountDetail ship = ships.FirstOrDefault();
-
-                if (ship != null)
-                    return true;
                 else
                 {
-                    dr.Messages.Add(new ImportDataMessage()
+                    var msg = new ImportDataMessage()
                     {
-                        Column = header,
-                        Row = row,
-                        Type = TYPE_INNER_ERROR,
-                        Message = "Invalid Account Id: " + account + " or the Account Id does not belong to the '" + category + "' GL account category.",
-                        Status = STAT_REC_SKIP
-                    });
-                    dr.Info = INFO_ERROR;
+                        Column = "GL Account Id",
+                        Row = Record.RecordNo,
+                        Type = Constants.TYPE_WARNING,
+                        Status = Constants.STAT_FAILED,
+                        Action = Constants.ACTION_SKIPPED,
+                        Exception = null,
+                        Value = valueId,
+                        Message = $"The GL Account Id {valueId} does not exist.",
+                    };
+                    Result.AddError(msg);
+                    return null;
+                }
+
+                if (account != null && category != null)
+                {
+                    var valid = IsAccountMatchedForCategory(Record, category, account, Result);
+                    if (!valid)
+                        return null;
+                }
+
+                return input;
+            }
+
+            class vyuGLAccountDetail
+            {
+                public int? intAccountId { get; set; }
+                public string strAccountCategory { get; set; }
+                public string strAccountId { get; set; }
+                public string strAccountId1 { get; set; }
+                public string strAccountType { get; set; }
+                public int? intAccountCategoryId { get; set; }
+            }
+
+            private bool IsAccountMatchedForCategory(CsvRecord record, string category, string account, ImportDataResult Result)
+            {
+                var p2 = new System.Data.SqlClient.SqlParameter("@p2", account.Trim().Replace("-", ""));
+                p2.DbType = System.Data.DbType.String;
+                var p1 = new System.Data.SqlClient.SqlParameter("@p1", category.Trim());
+                p1.DbType = System.Data.DbType.String;
+                var query = "SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory = @p1 AND strAccountId1 = @p2";
+                IEnumerable<vyuGLAccountDetail> ships = Context.Database.SqlQuery<vyuGLAccountDetail>(query, p1, p2);
+                try
+                {
+                    vyuGLAccountDetail ship = ships.FirstOrDefault();
+
+                    if (ship != null)
+                        return true;
+                    else
+                    {
+                        var msg = new ImportDataMessage()
+                        {
+                            Column = "GL Account Id",
+                            Row = record.RecordNo,
+                            Type = Constants.TYPE_ERROR,
+                            Status = Constants.STAT_FAILED,
+                            Action = Constants.ACTION_SKIPPED,
+                            Exception = null,
+                            Value = account,
+                            Message = $"Invalid Account Id: {account} or the Account Id does not belong to the {category} GL account category.",
+                        };
+                        Result.AddError(msg);
+                        return false;
+                    }
+                }
+                catch (Exception e)
+                {
+                    var msg = new ImportDataMessage()
+                    {
+                        Column = "GL Account Id",
+                        Row = record.RecordNo,
+                        Type = Constants.TYPE_EXCEPTION,
+                        Status = Constants.STAT_FAILED,
+                        Action = Constants.ACTION_SKIPPED,
+                        Exception = null,
+                        Value = account,
+                        Message = $"Error validating Account Id: {account}. {e.Message}",
+                    };
+                    Result.AddError(msg);
+                    return false;
                 }
             }
-            catch (Exception e)
-            {
-                dr.Messages.Add(new ImportDataMessage()
-                {
-                    Column = header,
-                    Row = row,
-                    Type = TYPE_INNER_EXCEPTION,
-                    Message = "Error validating Account Id: " + account + ". " + e.Message,
-                    Status = STAT_REC_SKIP
-                });
-                dr.Info = INFO_ERROR;
-            }
-            return false;
-        }
-
-        protected override int GetPrimaryKeyId(ref tblICCategoryAccount entity)
-        {
-            return entity.intCategoryAccountId;
         }
     }
 }

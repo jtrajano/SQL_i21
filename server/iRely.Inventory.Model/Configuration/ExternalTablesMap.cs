@@ -128,6 +128,30 @@ namespace iRely.Inventory.Model
         }
     }
 
+    public class tbltblSMUserSecurityMap : EntityTypeConfiguration<tblSMUserSecurity>
+    {
+        public tbltblSMUserSecurityMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.intEntityId);
+
+            // Table & Column Mappings
+            this.ToTable("tblSMUserSecurity");
+            this.Property(t => t.intEntityId).HasColumnName("intEntityId");
+            this.Property(t => t.strUserName).HasColumnName("strUserName");
+            this.Property(t => t.strFullName).HasColumnName("strFullName");
+        }
+    }
+
+    public class tblEMEntityMap : EntityTypeConfiguration<tblEMEntity>
+    {
+        public tblEMEntityMap()
+        {
+            this.HasKey(e => e.intEntityId);
+            this.ToTable("tblEMEntity");
+        }
+    }
+
     public class tblSMCountryMap : EntityTypeConfiguration<tblSMCountry>
     {
         public tblSMCountryMap()

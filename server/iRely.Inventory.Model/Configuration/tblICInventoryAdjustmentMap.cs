@@ -125,7 +125,7 @@ namespace iRely.Inventory.Model
         }
     }
 
-    class vyuICGetInventoryAdjustmentDetailMap : EntityTypeConfiguration<vyuICGetInventoryAdjustmentDetail>
+    public class vyuICGetInventoryAdjustmentDetailMap : EntityTypeConfiguration<vyuICGetInventoryAdjustmentDetail>
     {
         public vyuICGetInventoryAdjustmentDetailMap()
         {

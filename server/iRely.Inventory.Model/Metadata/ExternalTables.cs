@@ -89,6 +89,13 @@ namespace iRely.Inventory.Model
         public ICollection<tblICCategoryVendor> tblICCategoryVendors { get; set; }
     }
 
+    public class tblEMEntity
+    {
+        public int intEntityId { get; set; }
+        public string strName { get; set; }
+        public string strEmail { get; set; }
+    }
+
     public class tblARCustomer
     {
         public int intEntityId { get; set; }
@@ -97,6 +104,13 @@ namespace iRely.Inventory.Model
 
         public ICollection<tblICItemCustomerXref> tblICItemCustomerXrefs { get; set; }
         public ICollection<tblICItemOwner> tblICItemOwners { get; set; }
+    }
+
+    public class tblSMUserSecurity
+    {
+        public int intEntityId { get; set; }
+        public string strUserName { get; set; }
+        public string strFullName { get; set; }
     }
 
     public class tblSMCountry : BaseEntity

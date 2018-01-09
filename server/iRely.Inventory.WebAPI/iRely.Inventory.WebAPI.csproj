@@ -22,6 +22,7 @@
     <IISExpressUseClassicPipelineMode />
     <UseGlobalApplicationHostFile />
     <WebGreaseLibPath>..\packages\WebGrease.1.5.2\lib</WebGreaseLibPath>
+    <Use64BitIISExpress />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -403,6 +404,8 @@
     <Compile Include="Controllers\CommodityController.cs" />
     <Compile Include="Controllers\CommodityUOMController.cs" />
     <Compile Include="Controllers\CompanyPreferenceController.cs" />
+    <Compile Include="Controllers\ImportLogController.cs" />
+    <Compile Include="Controllers\ImportLogDetailController.cs" />
     <Compile Include="Controllers\InventoryCountDetailController.cs" />
     <Compile Include="Controllers\InventoryReceiptChargeTaxController.cs" />
     <Compile Include="Controllers\ImportDataController.cs" />
@@ -556,6 +559,7 @@
     <Content Include="Content\themes\base\minified\jquery.ui.theme.min.css" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
+    <Content Include="App_Data\CsvToTableMap.json" />
     <None Include="Properties\PublishProfiles\1530.pubxml" />
     <None Include="Properties\PublishProfiles\1540.pubxml" />
     <None Include="Properties\PublishProfiles\1620.pubxml" />
@@ -611,7 +615,6 @@
     <Content Include="Views\Shared\_Layout.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="App_Data\" />
     <Folder Include="Models\" />
     <Folder Include="Modules\" />
   </ItemGroup>

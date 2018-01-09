@@ -23,6 +23,15 @@ Ext.define('Inventory.view.ImportDataFromCsvViewController', {
         win.close();
     },
 
+    onDownloadTemplate: function(button, e, eOpts) {
+        "use strict";
+        var me = this;
+        var win = button.up('window');
+        var params = me.formParams;
+
+        ic.icconversion.downloadTemplate(params.template, params.title);
+    },
+
     onImportButtonClick: function(button, e, eOpts) {
         "use strict";
         var me = this;
@@ -83,6 +92,9 @@ Ext.define('Inventory.view.ImportDataFromCsvViewController', {
             },
             "icimportdatafromcsv #txtBrowseFile": {
                 change: this.onTxtBrowseFileChange
+            },
+            "icimportdatafromcsv #btnDownload": {
+                click: this.onDownloadTemplate
             }
         });
     },
@@ -99,6 +111,7 @@ Ext.define('Inventory.view.ImportDataFromCsvViewController', {
                'X-File-Type': p.file.type,
                'X-Import-Type': p.importType,
                'X-Import-Allow-Overwrite': p.allowOverwrite ? "true" : "false",
+               'X-Import-Allow-Duplicates': p.allowDuplicates ? "true" : "false",
                'X-Import-Allow-LineOfBusiness': p.lineOfBusiness
             },
             data: p.file,
@@ -108,48 +121,57 @@ Ext.define('Inventory.view.ImportDataFromCsvViewController', {
             },
 
             success: function(data, status, jqXHR) {
+                var me = this;
                 iRely.Msg.close();
-                var type = 'info';
-                var msg = "File imported successfully.";
                 var json = JSON.parse(jqXHR.responseText);
-                if(json.rows === 0)
-                    msg = "There's nothing to import.";
-
-                if (json.result.Info == "warning") {
-                    type = "warning";
-                    msg = "File imported successfully with warnings.";
-                }
-                if(json.result.Info == "error") {
-                    type = "warning";
-                    msg = "File imported successfully with errors.";
-                }
-
+                var type = json.Type === "Warning" ? 'warning' : (json.Type === "Error" ? 'error' : 'info');
+                var msg = json.Description ? json.Description : json.Message + " " + json.ExceptionMessage;
                 i21.functions.showCustomDialog(type, 'ok', msg, function() {
                     //win.close();
 
-                    if (data.messages !== null && data.messages.length > 0) {
-                        iRely.Functions.openScreen('Inventory.view.ImportLogMessageBox', {
-                            data: data,
-                            title: p.title
-                        });
+                    if (json.HasMessages) {
+                        if(json.LogId && json.LogId != 0) {
+                            iRely.Functions.openScreen('Inventory.view.ImportLog', {
+                                filters: { column: 'intImportLogId', value: json.LogId },
+                                username: json.Username,
+                                action: 'view',
+                                viewConfig: { modal: true }
+                            });
+                        } else {
+                            iRely.Functions.openScreen('Inventory.view.ImportLogMessageBox', {
+                                data: json,
+                                title: p.title
+                            });
+                        }
                     }
-                    if(!iRely.Functions.isEmpty(json.result.Description)) {
-                        iRely.Functions.openScreen('Inventory.view.InventoryCount', json.result.Description);
+                    
+                    if(!iRely.Functions.isEmpty(json.ExtraScreenToOpen)) {
+                        iRely.Functions.openScreen(ExtraScreenToOpen, json.Description);
                     }
                 });
             },
             error: function(jqXHR, status, error) {
                 iRely.Msg.close();
                 var json = JSON.parse(jqXHR.responseText);
-                i21.functions.showCustomDialog('error', 'ok', 'Import failed! ' + json.info,
+                var msg = json.Description ? json.Description : json.Message + " " + json.ExceptionMessage;
+                i21.functions.showCustomDialog('error', 'ok', 'Import failed! ' + msg,
                     function() {
                         //win.close();
 
-                        if (json.messages && json.messages.length > 0) {
-                            iRely.Functions.openScreen('Inventory.view.ImportLogMessageBox', {
-                                data: json,
-                                title: p.title
-                            });
+                        if (json.HasMessages) {
+                            if(json.LogId && json.LogId != 0) {
+                                iRely.Functions.openScreen('Inventory.view.ImportLog', {
+                                    filters: { column: 'intImportLogId', value: json.LogId },
+                                    username: json.Username,
+                                    action: 'view',
+                                    viewConfig: { modal: true }
+                                });
+                            } else {
+                                iRely.Functions.openScreen('Inventory.view.ImportLogMessageBox', {
+                                    data: json,
+                                    title: p.title
+                                });
+                            }
                         }
                     }
                 );

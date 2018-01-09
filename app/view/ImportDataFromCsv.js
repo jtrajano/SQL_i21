@@ -25,7 +25,12 @@ Ext.define('Inventory.view.ImportDataFromCsv', {
         'Ext.form.Label',
         'Ext.form.field.File',
         'Ext.form.FieldSet',
-        'Ext.form.field.Checkbox'
+        'Ext.form.field.Checkbox',
+        'Ext.grid.Panel',
+        'Ext.grid.column.Number',
+        'Ext.grid.column.Date',
+        'Ext.grid.column.Boolean',
+        'Ext.view.Table'
     ],
 
     modal: true,
@@ -33,7 +38,7 @@ Ext.define('Inventory.view.ImportDataFromCsv', {
     height: 225,
     minHeight: 225,
     minWidth: 535,
-    width: 535,
+    width: 554,
     layout: 'fit',
     collapsible: true,
     title: 'Import Data from CSV',
@@ -67,6 +72,12 @@ Ext.define('Inventory.view.ImportDataFromCsv', {
                         },
                         {
                             xtype: 'button',
+                            itemId: 'btnDownload',
+                            ui: 'i21-button-toolbar-small',
+                            text: 'Download Template'
+                        },
+                        {
+                            xtype: 'button',
                             itemId: 'btnClose',
                             ui: 'i21-button-toolbar-small',
                             text: 'Close'
@@ -78,6 +89,7 @@ Ext.define('Inventory.view.ImportDataFromCsv', {
                 {
                     xtype: 'tabpanel',
                     flex: 1,
+                    itemId: 'pnlTabContainer',
                     bodyCls: 'i21-tab',
                     activeTab: 0,
                     plain: true,
@@ -115,6 +127,7 @@ Ext.define('Inventory.view.ImportDataFromCsv', {
                                     xtype: 'fieldset',
                                     flex: 1,
                                     height: 77,
+                                    hidden: true,
                                     margin: 8,
                                     padding: 8,
                                     title: 'Options',
@@ -134,6 +147,62 @@ Ext.define('Inventory.view.ImportDataFromCsv', {
                                                     anchor: '100%',
                                                     itemId: 'chbOverwrite',
                                                     boxLabel: 'Overwrite existing records'
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            xtype: 'panel',
+                            hidden: true,
+                            itemId: 'tabContentFormat',
+                            title: 'Content Format',
+                            items: [
+                                {
+                                    xtype: 'container'
+                                }
+                            ]
+                        },
+                        {
+                            xtype: 'panel',
+                            hidden: true,
+                            itemId: 'tabPreview',
+                            title: 'Preview',
+                            items: [
+                                {
+                                    xtype: 'container',
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'stretch'
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'gridpanel',
+                                            flex: 1,
+                                            itemId: 'grdPreview',
+                                            title: 'CSV File Content',
+                                            columns: [
+                                                {
+                                                    xtype: 'gridcolumn',
+                                                    dataIndex: 'string',
+                                                    text: 'String'
+                                                },
+                                                {
+                                                    xtype: 'numbercolumn',
+                                                    dataIndex: 'number',
+                                                    text: 'Number'
+                                                },
+                                                {
+                                                    xtype: 'datecolumn',
+                                                    dataIndex: 'date',
+                                                    text: 'Date'
+                                                },
+                                                {
+                                                    xtype: 'booleancolumn',
+                                                    dataIndex: 'bool',
+                                                    text: 'Boolean'
                                                 }
                                             ]
                                         }

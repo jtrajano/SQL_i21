@@ -104,6 +104,7 @@ Ext.define('Inventory.controller.Inventory', {
         Ext.Loader.loadScript("./".concat(env).concat("/app/Inventory/lib/underscore.js"));
         Ext.Loader.loadScript("./".concat(env).concat("/app/Inventory/lib/rx.all.js"));
         Ext.Loader.loadScript("./".concat(env).concat("/app/Inventory/lib/numeraljs/numeral.js"));
+        Ext.Loader.loadScript("./".concat(env).concat("/app/Inventory/lib/css/ic-styles.css"));
         
         // Ext.Ajax.request({
         //     timeout: 120000,

@@ -348,6 +348,12 @@ namespace iRely.Inventory.Model
         }
 
         private string _productCode;
+
+        public tblICItemLocation()
+        {
+            tblICItemPricings = new List<tblICItemPricing>();
+        }
+
         [NotMapped]
         public string strProductCode 
         {

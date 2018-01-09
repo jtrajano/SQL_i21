@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,7 +12,7 @@ using System.Threading.Tasks;
 namespace iRely.Inventory.Model
 {
     public partial class InventoryEntities : DbContext
-    {
+    { 
         static InventoryEntities()
         {
             Database.SetInitializer<InventoryEntities>(null);
@@ -32,6 +33,10 @@ namespace iRely.Inventory.Model
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
+            modelBuilder.Configurations.Add(new tblEMEntityMap());
+            modelBuilder.Configurations.Add(new tbltblSMUserSecurityMap());
+            modelBuilder.Configurations.Add(new tblICImportLogMap());
+            modelBuilder.Configurations.Add(new tblICImportLogDetailMap());
             modelBuilder.Configurations.Add(new vyuICInventoryReceiptTotalsMap());
             modelBuilder.Configurations.Add(new vyuICGetItemStorageLocationMap());
             modelBuilder.Configurations.Add(new vyuICLotHistoryMap());

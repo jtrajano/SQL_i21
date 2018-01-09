@@ -13,6 +13,8 @@ namespace iRely.Inventory.BusinessLayer
         public string Message { get; set; }
         public string Type { get; set; }
         public string Status { get; set; }
+        public string Value { get; set; }
+        public string Action { get; set; }
         public Exception Exception { get; set; }
     }
 }

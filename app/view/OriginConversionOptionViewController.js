@@ -17,6 +17,7 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.icoriginconversionoption',
     requires: ['Inventory.controller.Inventory'],
+    alternateClassName: 'ic.icconversion',
     initViewModel: function() {
         
     },
@@ -107,6 +108,7 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
         var win = button.up('window');
 
         var type = null;
+        var template = null;
         var originType = null;
         var grainType = null;
         var originTypes = ["UOM", "Locations", "CategoryClass", "CategoryGLAccts", "AdditionalGLAccts", "Items", "ItemGLAccts", "Balance", "RecipeFormula"];
@@ -115,80 +117,104 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
         switch (button.itemId) {
             case "btnImportFuelCategories":
                 type = "FuelCategories";
+                template = "fuelcategories";
                 break;
             case "btnImportFuelTypes":
                 type = "FuelTypes";
+                template = "fueltypes";
                 break;
             case "btnImportFuelCodes":
                 type = "FuelCodes";
+                template = "fuelcodes";
                 break;
             case "btnImportFeedStocks":
                 type = "FeedStocks";
+                template = "feedstocks";
                 break;
             case "btnImportProcessCodes":
                 type = "ProcessCodes";
+                template = "processcodes";
                 break;
             case "btnImportUnitOfMeasurement":
                 type = "UnitOfMeasurement";
+                template = "uom";
                 break;
             case "btnImportFeedStockUOM":
                 type = "FeedStockUOM";
+                template = "feedstockuom";
                 break;
             case "btnImportStorageUnitTypes":
                 type = "StorageUnitTypes";
+                template = "storageunittypes";
                 break;
             case "btnImportStorageLocations":
                 type = "StorageLocations";
+                template = "storageunits";
                 break;
             case "btnImportLineOfBusiness":
                 type = "LineOfBusiness";
+                template = "lineofbusiness";
                 break;
             case "btnImportCategories":
                 type = "Categories";
+                template = "categories";
                 break;
             case "btnImportManufacturers":
                 type = "Manufacturers";
+                template = "manufacturers";
                 break;
             case "btnImportBrands":
                 type = "Brands";
+                template = "brands";
                 break;
             case "btnImportCommodities":
                 type = "Commodities";
+                template = "commodities";
                 break;
             case "btnImportCommodityUOM":
                 type = "CommodityUOM";
+                template = "commodityuom";
                 break;
             case "btnImportItems":
                 type = "Items";
+                template = "items";
                 break;
             case "btnImportItemAccountCategories":
                 type = "ItemAccountCategories";
+                template = "accountcategories";
                 break;
             case "btnImportItemUOM":
                 type = "ItemUOM";
+                template = "itemuom";
                 break;
             case "btnImportItemAccounts":
                 type = "ItemAccounts";
+                template = "accounts";
                 break;
             case "btnImportItemContracts":
                 type = "ItemContracts";
+                template = "contractitems";
                 break;
             case "btnImportInventoryCount":
                 type = "InventoryCountDetails";
+                template = "inventorycountdetails";
                 break;
-            // case "btnImportInventoryCountDetails":
-            //     type = "InventoryCountDetails";
-            //     break;
+                // case "btnImportInventoryCountDetails":
+                //     type = "InventoryCountDetails";
+                //     break;
             case "btnImportItemPricing":
                 type = "ItemPricing";
+                template = "itempricing";
                 break;
             case "btnImportItemLocation":
                 type = "ItemLocation";
+                template = "itemlocation";
                 break;
             case "btnImportItemPricingLevels":
                 type = "ItemPricingLevels";
+                template = "itempricinglevels";
                 break;
-            /* ORIGIN CONVERSIONS */
+                /* ORIGIN CONVERSIONS */
             case "btnOriginUOM":
                 originType = 0;
                 grainType = 0;
@@ -229,6 +255,7 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
         if (type !== null) {
             iRely.Functions.openScreen('Inventory.view.ImportDataFromCsv', {
                 type: type,
+                template: template,
                 method: "POST",
                 title: button.text
             });
@@ -248,6 +275,7 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
     },
 
     ajaxRequest: function (viewModel, originTypes, type, lineOfBusiness, win) {
+        var me = this;
         iRely.Msg.showWait('Importing in progress...');
         Ext.Ajax.request({
             url: './Inventory/api/ImportData/ImportOrigins',
@@ -277,11 +305,12 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
                 i21.functions.showCustomDialog(msgtype, 'ok', msg, function() {
                     //win.close();
     
-                    if (json.result.Messages !== null && json.result.Messages.length > 0) {
-                        iRely.Functions.openScreen('Inventory.view.ImportLogMessageBox', {
-                            data: json
-                        });
-                    }
+                    if (json.result.HasMessages && json.result.LogId && json.result.LogId != 0) {
+                        // iRely.Functions.openScreen('Inventory.view.ImportLogMessageBox', {
+                        //     data: json
+                        // });
+                        me.viewLogDetails({ column: 'intImportLogId', value: json.result.LogId }, json.result.Username);
+                    }                    
                 });
             },
             failure: function(response) {
@@ -291,11 +320,12 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
                     function() {
                         //win.close();
     
-                        if (json.messages && json.messages.length > 0) {
-                            iRely.Functions.openScreen('Inventory.view.ImportLogMessageBox', {
-                                data: json
-                            });
-                        }
+                        if (json.result.HasMessages && json.result.LogId && json.result.LogId != 0) {
+                            // iRely.Functions.openScreen('Inventory.view.ImportLogMessageBox', {
+                            //     data: json
+                            // });
+                            me.viewLogDetails({ column: 'intImportLogId', value: json.result.LogId }, json.result.Username);
+                        }   
                     }
                 );
             }
@@ -315,6 +345,79 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
 
             "#cboLOB": {
                 select: this.onLOBSelect
+            },
+
+            "#btnLogs": {
+                click: this.onViewLogs
+            }
+        });
+    },
+
+    viewLogDetails: function(filter, username) {
+        "use strict";
+        var me = this;
+        iRely.Functions.openScreen('Inventory.view.ImportLog', {
+            filters: filter,
+            username: username,
+            action: 'view',
+            viewConfig: { modal: true }
+        });
+    },
+
+    onViewLogs: function(button, e, eOpts) {
+        "use strict";
+        var me = this;
+        iRely.Functions.openScreen('GlobalComponentEngine.view.FloatingSearch', {
+            searchSettings: {
+                scope: me,
+                type: 'Inventory.ImportLogs',
+                url: './inventory/api/importlog/searchimportlogs',
+                columns: [
+                    { dataIndex: 'intImportLogId', text: 'Id', flex: 1, dataType: 'numeric', key: true, hidden: true, allowNull: false, required: true },
+                    { dataIndex: 'dtmDateImported', text: 'Date Imported', flex: 1, dataType: 'date', xtype: 'datecolumn', dateFormat: 'm/d/Y g:i:s A', required: false,
+                        renderer: Ext.util.Format.dateRenderer('m/d/Y g:i:s A')
+                    },
+                    { dataIndex: 'strDescription', minWidth: 300, text: 'Description', flex: 1, dataType: 'string', required: false,
+                        renderer: function(val, meta, rec) {
+                            if(rec.get('intTotalErrors') > 0) {
+                                return '<span style="color: red">'.concat(val).concat('</span>');
+                            } else if(rec.get('intTotalErrors') === 0 && rec.get('intTotalWarnings') > 0) {
+                                return '<span style="color: orange">'.concat(val).concat('</span>');
+                            }
+                            return '<span style="color: green">'.concat(val).concat('</span>');
+                        }
+                    },
+                    { dataIndex: 'intTotalRows', text: 'Total Rows', flex: 1, dataType: 'numeric', allowNull: true, xtype: 'numbercolumn', required: false },
+                    { dataIndex: 'intRowsImported', text: 'Rows Imported', flex: 1, dataType: 'numeric', allowNull: true, xtype: 'numbercolumn', required: false },
+                    { dataIndex: 'intTotalErrors', text: 'Errors', flex: 1, dataType: 'numeric', allowNull: true, xtype: 'numbercolumn', required: false },
+                    { dataIndex: 'intTotalWarnings', text: 'Warnings', flex: 1, dataType: 'numeric', allowNull: true, xtype: 'numbercolumn', required: false },
+                    { dataIndex: 'dblTimeSpentInSeconds', text: 'Duration', flex: 1, 
+                        renderer: function(val) {
+                            if(!val) val = 0;
+                            return ic.utils.Date.getDuration(val);
+                        }
+                        , dataType: 'string', allowNull: true 
+                    },
+                    { dataIndex: 'strType', text: 'Import Type', flex: 1, dataType: 'string', required: false },
+                    { dataIndex: 'strFileType', text: 'File Type', flex: 1, dataType: 'string', required: false },
+                    { dataIndex: 'strFileName', text: 'File Name', flex: 1, dataType: 'string', required: false },
+                    { dataIndex: 'strLineOfBusiness', text: 'Line of Business', hidden: true, flex: 1, dataType: 'string', required: false },
+                    { dataIndex: 'ysnAllowDuplicates', text: 'Allow duplicates', hidden: true, flex: 1, dataType: 'boolean', xtype: 'checkcolumn', required: false },
+                    { dataIndex: 'ysnAllowOverwriteOnImport', text: 'Overwrite Existing', hidden: true, flex: 1, dataType: 'boolean', xtype: 'checkcolumn', required: false },
+                    { dataIndex: 'ysnContinueOnFailedImports', text: 'Continue on failure', hidden: true, flex: 1, dataType: 'boolean', xtype: 'checkcolumn', required: false },
+                    { dataIndex: 'strUsername', text: 'User', flex: 1, dataType: 'string', required: false }
+                ],
+                title: "Import Logs",
+                showNew: false
+            },
+            viewConfig: {
+                isSearchMenu: true,
+                listeners: {
+                    scope: me,
+                    openselectedclick: function(btn, el, sel, filter, rec, func) {
+                        me.viewLogDetails(filter, rec.data[0].get('strUsername'));
+                    }
+                }
             }
         });
     },
@@ -331,166 +434,172 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
         "use strict";
         var me= this;
         var win = button.up('window');
+        var columns = ic.icconversion.downloadTemplate(button.menuId, button.text);
+    },
 
-        var data = [];
-        var columns = getTemplateColumns(button.menuId);
-        download( data, columns, button.text + ".csv" );
+    statics: {
+        downloadTemplate: function(menuId, text) {
+            var data = [];
+            var columns = ic.icconversion.getTemplateColumns(menuId);
+            ic.icconversion.download(data, columns, text + ".csv" );    
+        },
+    
+        setFile: function( data, fileName, fileType ) {
+            // Set objects for file generation.
+            var blob, url, a, extension;
+        
+            // Get time stamp for fileName.
+            var stamp = new Date().getTime();
+        
+            // Set MIME type and encoding.
+            fileType = ( fileType || "text/csv;charset=UTF-8" );
+            extension = fileType.split( "/" )[1].split( ";" )[0];
+            // Set file name.
+            fileName = ( fileName || "CSV_Template" + stamp + "." + extension );
+        
+            // Set data on blob.
+            blob = new Blob( [ data ], { type: fileType } );
+        
+            // Set view.
+            if ( blob ) {
+                // Read blob.
+                url = window.URL.createObjectURL( blob );
+        
+                // Create link.
+                a = document.createElement( "a" );
+                // Set link on DOM.
+                document.body.appendChild( a );
+                // Set link's visibility.
+                a.style = "display: none";
+                // Set href on link.
+                a.href = url;
+                // Set file name on link.
+                a.download = fileName;
+        
+                // Trigger click of link.
+                a.click();
+        
+                // Clear.
+                window.URL.revokeObjectURL( url );
+            } else {
+                // Handle error.
+            }
+        },
+        
+        download: function( data, columns, filename ) {
+            var result = "",
+                headers = columns,
+                header = "",
+                field = "";
+        
+            // Process data.
+            $.each( data, function( index, rows ) {
+                // Set columns.
+                $.each( rows, function( name, column ) {
+                    if ( column.value ) {
+                        // Format header.
+                        header = name;
+        
+                        // Set header if not already set.
+                        if ( $.inArray( header, headers ) === -1 ) {
+                            // Set column header and delimiter.
+                            headers.push( header );
+                        }
+        
+                        // Set field.
+                        // Escape commas that will split value into columns.
+                        field = ( column.value ).replace( /,/g, "" );
+        
+                        // Set column value and delimiter.
+                        result += field + ",";
+                    }
+                });
+        
+                // Set new row.
+                result += "\n";
+            });
+        
+            // Set headers.
+            headers = headers.join( "," );
+        
+            // Ready data for reading.
+            result = headers + "\n" + result;
+        
+            ic.icconversion.setFile( result, filename );
+        },
+    
+        getTemplateColumns: function(name) {
+            switch (name.toLowerCase()) {
+                case "fuelcategories":
+                    return ["Fuel Category", "Description", "Equivalence Value"];
+                case "feedstocks":
+                    return ["Code", "Description"];
+                case "fuelcodes":
+                    return ["Code", "Description"];
+                case "processcodes":
+                    return ["Code", "Description"];
+                case "uom":
+                    return ["Unit of Measure", "Symbol", "Unit Type"];
+                case "feedstockuom":
+                    return ["Unit of Measure", "Code"];
+                case "fueltypes":
+                    return ["Fuel Category", "Feed Stock", "Batch No", "Ending Rin Gallons", "Equivalence Value", "Fuel Code",
+                        "Production Process", "Feed Stock UOM", "Feed Stock Factor", "Renewable Biomass", "Percent of Denaturant", "Deduct Denaturant"];
+                case "storageunittypes":
+                    return ["Name", "Description", "Internal Code", "Capacity UOM", "Max Weight", "Allows Picking", "Dimension UOM",
+                        "Height", "Depth", "Width", "Pallet Stack", "Pallet Columns", "Pallet Rows"];
+                case "storageunits":
+                    return ["Name", "Description", "Storage Unit Type", "Location", "Storage Location", "Parent Unit", "Restriction Type",
+                        "Aisle", "Min Batch Size", "Batch Size", "Batch Size UOM", "Commodity", "Pack Factor", "Effective Depth", "Units Per Foot", "Residual Units",
+                        "Sequence", "Active", "X Position", "Y Position", "Z Position", "Allow Consume", "Allow Multiple Items",
+                        "Allow Multiple Lots", "Merge on Move", "Cycle Counted", "Default Warehouse Staging Unit"];
+                case "lineofbusiness":
+                    return ["Line of Business", "Sales Person Id", "SIC Code", "Type", "Segment Code", "Visible on Web"];
+                case "categories":
+                    return ["Category Code", "Description", "Inventory Type", "Line of Business", "Costing Method", "Inventory Valuation",
+                        "GL Division No", "Sales Analysis"];
+                case "brands":
+                    return ["Brand Code", "Brand Name", "Manufacturer"];
+                case "manufacturers":
+                    return ["Manufacturer"];
+                case "commodities":
+                    return ["Commodity Code", "Description", "Exchange Traded", "Decimals on DPR", "Default Future Market", "Price Checks Min",
+                        "Price Checks Max", "Checkoff Tax Desc", "Checkoff All States", "Insurance Tax Desc", "Insurance All States",
+                        "Crop End Date Current", "Crop End Date New", "EDI Code", "Default Schedule Store", "Discount", "Scale Auto Dist Default"];
+                case "items":
+                    return ["Item No","Type","Short Name","Description","Manufacturer","Status","Commodity","Lot Tracking","Brand","Model No","Category","Stocked Item","Dyed Fuel","Barcode Print","MSDS Required","EPA Number","Inbound Tax","Outbound Tax","Restricted Chemical","Fuel Item","List Bundle Items Separately","Fuel Inspect Fee","RIN Required","Fuel Category","Denaturant Percentage","Tonnage Tax","Load Tracking","Mix Order","Hand Add Ingredients","Medication Tag","Ingredient Tag","Volume Rebate Group","Physical Item","Extend Pick Ticket","Export EDI","Hazard Material","Material Fee","Auto Blend","User Group Fee Percentage","Wgt Tolerance Percentage","Over Receive Tolerance Percentage","Maintenance Calculation Method","Rate","NACS Category","WIC Code","Receipt Comment Req","Count Code","Landed Cost","Lead Time","Taxable","Keywords","Case Qty","Date Ship","Tax Exempt","Drop Ship","Commissionable","Special Commission","Tank Required","Available for TM","Default Percentage Full","Patronage Category","Direct Sale"];
+                case "accountcategories":
+                    return ["Category Code", "GL Account Category", "GL Account Id"];
+                case "accounts":
+                    return ["Item No", "GL Account Category", "GL Account Id"];
+                case "itemuom":
+                    return ["Item No", "UOM", "Unit Qty", "Weight UOM", "UPC Code", "Short UPC Code", "Is Stock Unit",
+                        "Allow Purchase", "Allow Sale", "Length", "Width", "Height", "Dimension UOM",
+                        "Volume", "Volume UOM", "Max Qty"];
+                case "contractitems":
+                    return ["Item No","Location","Contract Name","Origin","Grade","Grade Type","Garden","Yield","Tolerance","Franchise"];
+                case "inventorycountdetails":
+                    return ["Location", "Count Group", "Description", "Date", "Item No", "Storage Location", "Storage Unit", 
+                        "Physical Count", "UOM", "Lot No", "Pallets", "Qty Per Pallet", "Count by Lots", "Count by Pallets", "Recount"];
+                case "itempricing":
+                    return ["Item No", "Location", "Last Cost", "Standard Cost", "Average Cost", "Pricing Method",
+                        "Amount/Percent", "Retail Price", "MSRP"];
+                case "itemlocation":
+                    return ["Item No","Location","POS Description","Vendor Id","Costing Method","Storage Location","Storage Unit",
+                        "Sale UOM","Purchase UOM","Family","Class","Product Code","Passport Fuel ID 1","Passport Fuel ID 2","Passport Fuel ID 3",
+                        "Tax Flag 1","Tax Flag 2","Tax Flag 3","Tax Flag 4","Promotional Item","Promotion Item","Deposit Required","Deposit PLU",
+                        "Bottle Deposit No:","Saleable","Quantity Required","Scale Item","Food Stampable","Returnable","Pre Priced",
+                        "Open Priced PLU","Linked Item","Vendor Category","ID Required (liquor)","ID Required (cigarrettes)","Minimum Age",
+                        "Apply Blue Law 1","Apply Blue Law 2","Car Wash","Item Type Code","Item Type Subcode","Allow Negative Inventory",
+                        "Reorder Point","Min Order","Suggested Qty","Lead Time (Days)","Inventory Count Group","Counted","Counted Daily",
+                        "Count by Serial Number","Serial Number Begin","Serial Number End","Auto Calculate Freight","Freight Rate",
+                        "Freight Term","Ship Via"];
+                case "itempricinglevels":
+                    return ["Item No", "Location", "Price Level", "UOM", "Min", "Max", "Pricing Method",
+                        "Amount/Percent", "Unit Price", "Commission On", "Comm Amount/Percent"];
+                case "commodityuom":
+                    return ["Commodity Code", "UOM", "Unit Qty", "Is Stock Unit", "Is Default UOM"]; 
+            }
+        }
     }
 });
-
-function setFile( data, fileName, fileType ) {
-    // Set objects for file generation.
-    var blob, url, a, extension;
-
-    // Get time stamp for fileName.
-    var stamp = new Date().getTime();
-
-    // Set MIME type and encoding.
-    fileType = ( fileType || "text/csv;charset=UTF-8" );
-    extension = fileType.split( "/" )[1].split( ";" )[0];
-    // Set file name.
-    fileName = ( fileName || "CSV_Template" + stamp + "." + extension );
-
-    // Set data on blob.
-    blob = new Blob( [ data ], { type: fileType } );
-
-    // Set view.
-    if ( blob ) {
-        // Read blob.
-        url = window.URL.createObjectURL( blob );
-
-        // Create link.
-        a = document.createElement( "a" );
-        // Set link on DOM.
-        document.body.appendChild( a );
-        // Set link's visibility.
-        a.style = "display: none";
-        // Set href on link.
-        a.href = url;
-        // Set file name on link.
-        a.download = fileName;
-
-        // Trigger click of link.
-        a.click();
-
-        // Clear.
-        window.URL.revokeObjectURL( url );
-    } else {
-        // Handle error.
-    }
-}
-
-function download( data, columns, filename ) {
-    var result = "",
-        headers = columns,
-        header = "",
-        field = "";
-
-    // Process data.
-    $.each( data, function( index, rows ) {
-        // Set columns.
-        $.each( rows, function( name, column ) {
-            if ( column.value ) {
-                // Format header.
-                header = name;
-
-                // Set header if not already set.
-                if ( $.inArray( header, headers ) === -1 ) {
-                    // Set column header and delimiter.
-                    headers.push( header );
-                }
-
-                // Set field.
-                // Escape commas that will split value into columns.
-                field = ( column.value ).replace( /,/g, "" );
-
-                // Set column value and delimiter.
-                result += field + ",";
-            }
-        });
-
-        // Set new row.
-        result += "\n";
-    });
-
-    // Set headers.
-    headers = headers.join( "," );
-
-    // Ready data for reading.
-    result = headers + "\n" + result;
-
-    setFile( result, filename );
-}
-
-function getTemplateColumns(name) {
-    switch (name) {
-        case "fuelcategories":
-            return ["Fuel Category", "Description", "Equivalence Value"];
-        case "feedstocks":
-            return ["Code", "Description"];
-        case "fuelcodes":
-            return ["Code", "Description"];
-        case "processcodes":
-            return ["Code", "Description"];
-        case "uom":
-            return ["Unit of Measure", "Symbol", "Unit Type"];
-        case "feedstockuom":
-            return ["Unit of Measure", "Code"];
-        case "fueltypes":
-            return ["Fuel Category", "Feed Stock", "Batch No", "Ending Rin Gallons", "Equivalence Value", "Fuel Code",
-                "Production Process", "Feed Stock UOM", "Feed Stock Factor", "Renewable Biomass", "Percent of Denaturant", "Deduct Denaturant"];
-        case "storageunittypes":
-            return ["Name", "Description", "Internal Code", "Capacity UOM", "Max Weight", "Allows Picking", "Dimension UOM",
-                "Height", "Depth", "Width", "Pallet Stack", "Pallet Columns", "Pallet Rows"];
-        case "storageunits":
-            return ["Name", "Description", "Storage Unit Type", "Location", "Storage Location", "Parent Unit", "Restriction Type",
-                "Aisle", "Min Batch Size", "Batch Size", "Batch Size UOM", "Commodity", "Pack Factor", "Effective Depth", "Units Per Foot", "Residual Units",
-                "Sequence", "Active", "X Position", "Y Position", "Z Position", "Allow Consume", "Allow Multiple Items",
-                "Allow Multiple Lots", "Merge on Move", "Cycle Counted", "Default Warehouse Staging Unit"];
-        case "lineofbusiness":
-            return ["Line of Business", "Sales Person Id", "SIC Code", "Type", "Segment Code", "Visible on Web"];
-        case "categories":
-            return ["Category Code", "Description", "Inventory Type", "Line of Business"];
-        case "brands":
-            return ["Brand Code", "Brand Name", "Manufacturer"];
-        case "manufacturers":
-            return ["Manufacturer"];
-        case "commodities":
-            return ["Commodity Code", "Description", "Exchange Traded", "Decimals on DPR", "Default Future Market", "Price Checks Min",
-                "Price Checks Max", "Checkoff Tax Desc", "Checkoff All States", "Insurance Tax Desc", "Insurance All States",
-                "Crop End Date Current", "Crop End Date New", "EDI Code", "Default Schedule Store", "Discount", "Scale Auto Dist Default"];
-        case "items":
-            return ["Item No","Type","Short Name","Description","Manufacturer","Status","Commodity","Lot Tracking","Brand","Model No","Category","Stocked Item","Dyed Fuel","Barcode Print","MSDS Required","EPA Number","Inbound Tax","Outbound Tax","Restricted Chemical","Fuel Item","List Bundle Items Separately","Fuel Inspect Fee","RIN Required","Fuel Category","Denaturant Percentage","Tonnage Tax","Load Tracking","Mix Order","Hand Add Ingredients","Medication Tag","Ingredient Tag","Volume Rebate Group","Physical Item","Extend Pick Ticket","Export EDI","Hazard Material","Material Fee","Auto Blend","User Group Fee Percentage","Wgt Tolerance Percentage","Over Receive Tolerance Percentage","Maintenance Calculation Method","Rate","NACS Category","WIC Code","Receipt Comment Req","Count Code","Landed Cost","Lead Time","Taxable","Keywords","Case Qty","Date Ship","Tax Exempt","Drop Ship","Commissionable","Special Commission","Tank Required","Available for TM","Default Percentage Full","Patronage Category","Direct Sale"];
-        case "accountcategories":
-            return ["Category", "Group", "Restricted"];
-        case "accounts":
-            return ["Item No", "Account Category", "Account Id"];
-        case "itemuom":
-            return ["Item No", "UOM", "Unit Qty", "Weight UOM", "UPC Code", "Short UPC Code", "Is Stock Unit",
-                "Allow Purchase", "Allow Sale", "Length", "Width", "Height", "Dimension UOM",
-                "Volume", "Volume UOM", "Max Qty"];
-        case "contractitems":
-            return ["Item No","Location","Contract Name","Origin","Grade","Grade Type","Garden","Yield","Tolerance","Franchise"];
-        case "inventorycountdetails":
-            return ["Location", "Count Group", "Description", "Date", "Item No", "Storage Location", "Storage Unit", 
-                "Physical Count", "UOM", "Lot No", "Pallets", "Qty Per Pallet", "Count by Lots", "Count by Pallets", "Recount"];
-        case "itempricing":
-            return ["Item No", "Location", "Last Cost", "Standard Cost", "Average Cost", "Pricing Method",
-                "Amount/Percent", "Retail Price", "MSRP"];
-        case "itemlocation":
-            return ["Item No","Location","POS Description","Vendor Id","Costing Method","Storage Location","Storage Unit",
-                "Sale UOM","Purchase UOM","Family","Class","Product Code","Passport Fuel ID 1","Passport Fuel ID 2","Passport Fuel ID 3",
-                "Tax Flag 1","Tax Flag 2","Tax Flag 3","Tax Flag 4","Promotional Item","Promotion Item","Deposit Required","Deposit PLU",
-                "Bottle Deposit No:","Saleable","Quantity Required","Scale Item","Food Stampable","Returnable","Pre Priced",
-                "Open Priced PLU","Linked Item","Vendor Category","ID Required (liquor)","ID Required (cigarrettes)","Minimum Age",
-                "Apply Blue Law 1","Apply Blue Law 2","Car Wash","Item Type Code","Item Type Subcode","Allow Negative Inventory",
-                "Reorder Point","Min Order","Suggested Qty","Lead Time (Days)","Inventory Count Group","Counted","Counted Daily",
-                "Count by Serial Number","Serial Number Begin","Serial Number End","Auto Calculate Freight","Freight Rate",
-                "Freight Term","Ship Via"];
-        case "itempricinglevels":
-            return ["Item No", "Location", "Price Level", "UOM", "Min", "Max", "Pricing Method",
-                "Amount/Percent", "Unit Price", "Commission On", "Comm Amount/Percent"];
-        case "commodityuom":
-            return ["Commodity Code", "UOM", "Unit Qty", "Is Stock Unit", "Is Default UOM"]; 
-    }
-}

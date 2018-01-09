@@ -1,8 +1,10 @@
 ﻿using iRely.Inventory.Model;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using static iRely.Inventory.BusinessLayer.ImportCategories;
@@ -11,192 +13,172 @@ namespace iRely.Inventory.BusinessLayer
 {
     public class ImportLineOfBusiness : ImportDataLogic<tblSMLineOfBusiness>
     {
-        protected override string[] GetRequiredFields()
+        public ImportLineOfBusiness(DbContext context, byte[] data) : base(context, data)
         {
-            return new string[] { "line of business" };
         }
 
-        protected override tblSMLineOfBusiness ProcessRow(int row, int fieldCount, string[] headers, LumenWorks.Framework.IO.Csv.CsvReader csv, ImportDataResult dr)
+        protected override string[] GetRequiredFields()
         {
-            tblSMLineOfBusiness fc = new tblSMLineOfBusiness();
-            fc.ysnVisibleOnWeb = true;
-            bool valid = true;
+            return new string[] { "line of business", "sales person id" };
+        }
 
-            for (var i = 0; i < fieldCount; i++)
+        protected override string GetPrimaryKeyName()
+        {
+            return "intLineOfBusinessId";
+        }
+
+        public override int GetPrimaryKeyValue(tblSMLineOfBusiness entity)
+        {
+            return entity.intLineOfBusinessId;
+        }
+
+        protected override Expression<Func<tblSMLineOfBusiness, bool>> GetUniqueKeyExpression(tblSMLineOfBusiness entity)
+        {
+            return (e => e.strLineOfBusiness == entity.strLineOfBusiness && e.intEntityId == entity.intEntityId);
+        }
+
+        public override tblSMLineOfBusiness Process(CsvRecord record)
+        {
+            var entity = new tblSMLineOfBusiness();
+            entity.ysnVisibleOnWeb = true;
+
+            var valid = true;
+
+            valid = SetText(record, "Line of Business", e => entity.strLineOfBusiness = e, required: true);
+            var lu = GetFieldValue(record, "Sales Person Id");
+            valid = SetIntLookupId<tblEMEntity>(record, "Sales Person Id", e => e.strName == lu, e => e.intEntityId, e => entity.intEntityId = e, required: true);
+
+            SetText(record, "Sic Code", e => entity.strSICCode = e);
+            SetBoolean(record, "Visible on Web", e => entity.ysnVisibleOnWeb = e);
+            SetFixedLookup(record, "Type", e => entity.strType = e, GetLobTypes(), required: false, exactMatch: false);
+
+            if (valid)
+                return entity;
+
+            return null;
+        }
+
+        public override void Initialize()
+        {
+            base.Initialize();
+            AddPipe(new SalesPersonPipe(context, ImportResult));
+            AddPipe(new SegmentCodePipe(context, ImportResult));
+        }
+
+        class SalesPersonPipe : CsvPipe<tblSMLineOfBusiness>
+        {
+            public SalesPersonPipe(DbContext context, ImportDataResult result) : base(context, result)
             {
-                //if (!valid)
-                //    break;
-                string header = headers[i];
-                string value = csv[header];
-
-                string h = header.ToLower().Trim();
-                switch (h)
-                {
-                    case "line of business":
-                        if(!SetText(value, del => fc.strLineOfBusiness = del, "Line of Business", dr, header, row, true))
-                            valid = false;
-                        break;
-                    case "sales person id":
-                        if(string.IsNullOrEmpty(value))
-                        {
-                            valid = false;
-                            dr.Messages.Add(new ImportDataMessage()
-                            {
-                                Column = header,
-                                Row = row,
-                                Type = TYPE_INNER_ERROR,
-                                Status = STAT_REC_SKIP,
-                                Message = "Sales Person Id should not be blank."
-                            });
-                            dr.Info = INFO_WARN;
-                        }
-                        int intEntitySalespersonId = 0;
-                        var sqlParam = new SqlParameter("@strSalespersonId", value);
-                        var query = "SELECT intEntityId, strSalespersonId, strName FROM vyuEMSalesperson WHERE strSalespersonId = @strSalespersonId";
-                        IEnumerable<vyuEMSalesperson> salesReps = context.ContextManager.Database.SqlQuery<vyuEMSalesperson>(query, sqlParam);
-                        try
-                        {
-                            vyuEMSalesperson salesRep = salesReps.First();
-
-                            if (salesRep != null)
-                                intEntitySalespersonId = salesRep.intEntityId;
-                            else
-                            {
-                                valid = false;
-                                dr.Messages.Add(new ImportDataMessage()
-                                {
-                                    Column = header,
-                                    Row = row,
-                                    Type = TYPE_INNER_ERROR,
-                                    Message = "Can't find Sales Person for Line of Business: " + value + '.',
-                                    Status = STAT_REC_SKIP
-                                });
-                                dr.Info = INFO_WARN;
-                            }
-                        }
-                        catch (Exception)
-                        {
-                            valid = false;
-                            dr.Messages.Add(new ImportDataMessage()
-                            {
-                                Column = header,
-                                Row = row,
-                                Type = TYPE_INNER_ERROR,
-                                Message = "Can't find Sales Person for Line of Business: " + value + '.',
-                                Status = STAT_REC_SKIP
-                            });
-                            dr.Info = INFO_WARN;
-                        }
-
-                        if (intEntitySalespersonId != 0)
-                            fc.intEntityId = intEntitySalespersonId;
-                        break;
-                    case "sic code":
-                        SetText(value, del => fc.strSICCode = del, "SIC Code", dr, header, row);
-                        break;
-                    case "visible on web":
-                        SetBoolean(value, del => fc.ysnVisibleOnWeb = del);
-                        break;
-                    case "type":
-                        if (string.IsNullOrEmpty(value))
-                            break;
-                        if(GetLobTypes().Contains(value.ToLower().Trim()))
-                        {
-                            fc.strType = value;
-                        }
-                        else
-                        {
-                            dr.Messages.Add(new ImportDataMessage()
-                            {
-                                Column = header,
-                                Row = row,
-                                Type = TYPE_INNER_WARN,
-                                Message = "Invalid Type: " + value + '.',
-                                Status = STAT_INNER_COL_SKIP
-                            });
-                            dr.Info = INFO_WARN;
-                        }
-                        break;
-                    case "segment code":
-                        if (string.IsNullOrEmpty(value))
-                            break;
-
-                        var query2 = @"SELECT asm.intAccountSegmentId, ast.intStructureType, asm.strCode, ast.strStructureName, asm.strDescription
-                            FROM tblGLAccountSegment asm
-                                INNER JOIN tblGLAccountStructure ast ON ast.intAccountStructureId = asm.intAccountStructureId
-                            WHERE ast.intStructureType = 5 AND asm.strCode = @strCode";
-                        var sqlP = new SqlParameter("@strCode", value);
-                        IEnumerable<AccountSegmentStructureVM> accountSegments = context.ContextManager.Database.SqlQuery<AccountSegmentStructureVM>(query2, sqlP);
-                        try
-                        {
-                            AccountSegmentStructureVM asm = accountSegments.First();
-
-                            if (asm != null)
-                                fc.intSegmentCodeId = asm.intAccountSegmentId;
-                            else
-                            {
-                                dr.Messages.Add(new ImportDataMessage()
-                                {
-                                    Column = header,
-                                    Row = row,
-                                    Type = TYPE_INNER_WARN,
-                                    Message = "Can't find Segment Code for Line of Business: " + value + '.',
-                                    Status = STAT_INNER_COL_SKIP
-                                });
-                                dr.Info = INFO_WARN;
-                            }
-                        }
-                        catch (Exception)
-                        {
-                            dr.Messages.Add(new ImportDataMessage()
-                            {
-                                Column = header,
-                                Row = row,
-                                Type = TYPE_INNER_WARN,
-                                Message = "Can't find Segment Code for Line of Business: " + value + '.',
-                                Status = STAT_INNER_COL_SKIP
-                            });
-                            dr.Info = INFO_WARN;
-                        }
-                        break;
-                }
             }
 
-            if(!valid)
-                return null;
-
-            if (context.GetQuery<tblSMLineOfBusiness>().Any(t => t.strLineOfBusiness == fc.strLineOfBusiness))
+            protected override tblSMLineOfBusiness Process(tblSMLineOfBusiness input)
             {
-                if (!GlobalSettings.Instance.AllowOverwriteOnImport)
+                var value = GetFieldValue("Sales Person Id");
+
+                if (string.IsNullOrEmpty(value)) return null;
+
+                var sqlParam = new SqlParameter("@strSalespersonId", value);
+                var query = "SELECT intEntityId, strSalespersonId, strName FROM vyuEMSalesperson WHERE strSalespersonId = @strSalespersonId";
+                IEnumerable<vyuEMSalesperson> salesReps = Context.Database.SqlQuery<vyuEMSalesperson>(query, sqlParam);
+                try
                 {
-                    dr.Info = INFO_ERROR;
-                    dr.Messages.Add(new ImportDataMessage()
+                    vyuEMSalesperson salesRep = salesReps.FirstOrDefault();
+
+                    if (salesRep != null)
+                        input.intEntityId = salesRep.intEntityId;
+                    else
                     {
-                        Type = TYPE_INNER_ERROR,
-                        Status = STAT_REC_SKIP,
-                        Column = headers[0],
-                        Row = row,
-                        Message = "The record already exists: " + fc.strLineOfBusiness + ". The system does not allow existing records to be modified."
-                    });
+                        var msg = new ImportDataMessage()
+                        {
+                            Column = "Sales Person Id",
+                            Row = Record.RecordNo,
+                            Type = Constants.TYPE_WARNING,
+                            Status = Constants.STAT_FAILED,
+                            Action = Constants.ACTION_SKIPPED,
+                            Exception = null,
+                            Value = value,
+                            Message = $"Can't find Sales Person Id: {value}.",
+                        };
+                        Result.AddError(msg);
+                        return null;
+                    }
+                }
+                catch (Exception)
+                {
+                    var msg = new ImportDataMessage()
+                    {
+                        Column = "Sales Person Id",
+                        Row = Record.RecordNo,
+                        Type = Constants.TYPE_WARNING,
+                        Status = Constants.STAT_FAILED,
+                        Action = Constants.ACTION_SKIPPED,
+                        Exception = null,
+                        Value = value,
+                        Message = $"Can't find Sales Person Id: {value}.",
+                    };
+                    Result.AddError(msg);
                     return null;
                 }
 
-                var entry = context.ContextManager.Entry<tblSMLineOfBusiness>(context.GetQuery<tblSMLineOfBusiness>().First(t => t.strLineOfBusiness == fc.strLineOfBusiness));
-                entry.Property(e => e.strLineOfBusiness).CurrentValue = fc.strLineOfBusiness;
-                entry.Property(e => e.strSICCode).CurrentValue = fc.strSICCode;
-                entry.Property(e => e.strType).CurrentValue = fc.strType;
-                entry.Property(e => e.ysnVisibleOnWeb).CurrentValue = fc.ysnVisibleOnWeb;
-                entry.Property(e => e.intSegmentCodeId).CurrentValue = fc.intSegmentCodeId;
-                entry.Property(e => e.intEntityId).CurrentValue = fc.intEntityId;
-
-                entry.State = System.Data.Entity.EntityState.Modified;
+                return input;
             }
-            else
+        }
+
+        class SegmentCodePipe : CsvPipe<tblSMLineOfBusiness>
+        {
+            public SegmentCodePipe(DbContext context, ImportDataResult result) : base(context, result)
             {
-                context.AddNew(fc);
             }
 
-            return fc;
+            protected override tblSMLineOfBusiness Process(tblSMLineOfBusiness input)
+            {
+                var value = GetFieldValue("Segment Code");
+                if (string.IsNullOrEmpty(value)) return input;
+                var query2 = @"SELECT asm.intAccountSegmentId, ast.intStructureType, asm.strCode, ast.strStructureName, asm.strDescription
+                            FROM tblGLAccountSegment asm
+                                INNER JOIN tblGLAccountStructure ast ON ast.intAccountStructureId = asm.intAccountStructureId
+                            WHERE ast.intStructureType = 5 AND asm.strCode = @strCode";
+                var sqlP = new SqlParameter("@strCode", value);
+                IEnumerable<AccountSegmentStructureVM> accountSegments = Context.Database.SqlQuery<AccountSegmentStructureVM>(query2, sqlP);
+                try
+                {
+                    AccountSegmentStructureVM asm = accountSegments.First();
+
+                    if (asm != null)
+                        input.intSegmentCodeId = asm.intAccountSegmentId;
+                    else
+                    {
+                        var msg = new ImportDataMessage()
+                        {
+                            Column = "Sales Person Id",
+                            Row = Record.RecordNo,
+                            Type = Constants.TYPE_WARNING,
+                            Status = Constants.STAT_FAILED,
+                            Action = Constants.ACTION_SKIPPED,
+                            Exception = null,
+                            Value = value,
+                            Message = $"Can't find Sales Person Id: {value}.",
+                        };
+                        Result.AddWarning(msg);
+                    }
+                }
+                catch (Exception)
+                {
+                    var msg = new ImportDataMessage()
+                    {
+                        Column = "Segment Code",
+                        Row = Record.RecordNo,
+                        Type = Constants.TYPE_WARNING,
+                        Status = Constants.STAT_FAILED,
+                        Action = Constants.ACTION_SKIPPED,
+                        Exception = null,
+                        Value = value,
+                        Message = $"Can't find Segment Code: {value}.",
+                    };
+                    Result.AddWarning(msg);
+                }
+                return input;
+            }
         }
 
         class AccountSegmentStructureVM
@@ -217,11 +199,6 @@ namespace iRely.Inventory.BusinessLayer
                 "grain",
                 "petroleum"
             };
-        }
-
-        protected override int GetPrimaryKeyId(ref tblSMLineOfBusiness entity)
-        {
-            return entity.intLineOfBusinessId;
         }
     }
 }

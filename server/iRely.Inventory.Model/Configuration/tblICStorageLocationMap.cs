@@ -194,7 +194,7 @@ namespace iRely.Inventory.Model
         }
     }
 
-    class vyuICGetSubLocationBinsMap : EntityTypeConfiguration<vyuICGetSubLocationBins>
+    public class vyuICGetSubLocationBinsMap : EntityTypeConfiguration<vyuICGetSubLocationBins>
     {
         public vyuICGetSubLocationBinsMap()
         {
@@ -213,7 +213,7 @@ namespace iRely.Inventory.Model
         }
     }
 
-    class vyuICGetSubLocationBinDetailsMap : EntityTypeConfiguration<vyuICGetSubLocationBinDetails>
+    public class vyuICGetSubLocationBinDetailsMap : EntityTypeConfiguration<vyuICGetSubLocationBinDetails>
     {
         public vyuICGetSubLocationBinDetailsMap()
         {
@@ -249,7 +249,7 @@ namespace iRely.Inventory.Model
         }
     }
 
-    class vyuICGetStorageBinsMap : EntityTypeConfiguration<vyuICGetStorageBins>
+    public class vyuICGetStorageBinsMap : EntityTypeConfiguration<vyuICGetStorageBins>
     {
         public vyuICGetStorageBinsMap()
         {
@@ -268,7 +268,7 @@ namespace iRely.Inventory.Model
         }
     }
 
-    class vyuICGetStorageBinDetailsMap : EntityTypeConfiguration<vyuICGetStorageBinDetails>
+    public class vyuICGetStorageBinDetailsMap : EntityTypeConfiguration<vyuICGetStorageBinDetails>
     {
         public vyuICGetStorageBinDetailsMap()
         {
@@ -304,7 +304,7 @@ namespace iRely.Inventory.Model
         }
     }
 
-    class vyuICGetStorageBinMeasurementReadingMap : EntityTypeConfiguration<vyuICGetStorageBinMeasurementReading>
+    public class vyuICGetStorageBinMeasurementReadingMap : EntityTypeConfiguration<vyuICGetStorageBinMeasurementReading>
     {
         public vyuICGetStorageBinMeasurementReadingMap()
         {
@@ -331,7 +331,7 @@ namespace iRely.Inventory.Model
         }
     }
 
-    class vyuICGetStorageLocationMap : EntityTypeConfiguration<vyuICGetStorageLocation>
+    public class vyuICGetStorageLocationMap : EntityTypeConfiguration<vyuICGetStorageLocation>
     {
         public vyuICGetStorageLocationMap()
         {

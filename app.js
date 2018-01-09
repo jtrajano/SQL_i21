@@ -24,7 +24,8 @@ Ext.application({
         'RebuildInventory',
         'LotHistory',
         'CopyItemLocation',
-        'InventoryCountDetails'
+        'InventoryCountDetails',
+        'ImportLog'
     ],
     name: 'Inventory',
 

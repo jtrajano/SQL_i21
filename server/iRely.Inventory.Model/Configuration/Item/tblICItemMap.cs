@@ -954,7 +954,7 @@ namespace iRely.Inventory.Model
         }
     }
 
-    class vyuICGetInventoryValuationSummaryMap : EntityTypeConfiguration<vyuICGetInventoryValuationSummary>
+    public class vyuICGetInventoryValuationSummaryMap : EntityTypeConfiguration<vyuICGetInventoryValuationSummary>
     {
         public vyuICGetInventoryValuationSummaryMap()
         {

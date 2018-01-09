@@ -103,7 +103,6 @@
     </Reference>
     <Reference Include="LumenWorks.Framework.IO, Version=3.8.0.0, Culture=neutral, PublicKeyToken=5ad3ea2f85776344, processorArchitecture=MSIL">
       <HintPath>..\packages\LumenWorks.Framework.IO.3.8.0\lib\net20\LumenWorks.Framework.IO.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="MailBee.NET.45, Version=10.0.45.502, Culture=neutral, PublicKeyToken=cd85b70fb26f9fc1, processorArchitecture=MSIL">
       <HintPath>..\packages\MailBee.NET.10.0.502\lib\net45\MailBee.NET.45.dll</HintPath>
@@ -157,22 +156,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Common\Common.cs" />
-    <Compile Include="Common\GlobalSettings.cs" />
-    <Compile Include="Common\Import\ImportCommodityUOM.cs" />
-    <Compile Include="Common\Import\ImportData.cs" />
-    <Compile Include="Common\Import\IImportLogic.cs" />
-    <Compile Include="Common\Import\ImportBrands.cs" />
+    <Compile Include="Common\Constants.cs" />
+    <Compile Include="Common\Import\CsvPipe.cs" />
+    <Compile Include="Common\Import\CurrentRecordTracker.cs" />
     <Compile Include="Common\Import\ImportCategories.cs" />
     <Compile Include="Common\Import\ImportCommodities.cs" />
-    <Compile Include="Common\Import\ImportDataLogic.cs" />
-    <Compile Include="Common\Import\ImportDataResult.cs" />
-    <Compile Include="Common\Import\ImportDataMessage.cs" />
+    <Compile Include="Common\Import\ImportCommodityUOM.cs" />
+    <Compile Include="Common\Import\ImportDataLogicHelpers.cs" />
+    <Compile Include="Common\Import\ImportDataSqlLogger.cs" />
     <Compile Include="Common\Import\ImportFeedStocks.cs" />
     <Compile Include="Common\Import\ImportFeedStockUOM.cs" />
     <Compile Include="Common\Import\ImportFuelCategories.cs" />
     <Compile Include="Common\Import\ImportFuelCodes.cs" />
     <Compile Include="Common\Import\ImportFuelTypes.cs" />
-    <Compile Include="Common\Import\ImportInventoryCount.cs" />
     <Compile Include="Common\Import\ImportInventoryCountDetails.cs" />
     <Compile Include="Common\Import\ImportItemAccountCategories.cs" />
     <Compile Include="Common\Import\ImportItemAccounts.cs" />
@@ -183,12 +179,32 @@
     <Compile Include="Common\Import\ImportItems.cs" />
     <Compile Include="Common\Import\ImportItemUOM.cs" />
     <Compile Include="Common\Import\ImportLineOfBusiness.cs" />
-    <Compile Include="Common\Import\ImportLogItem.cs" />
     <Compile Include="Common\Import\ImportManufacturers.cs" />
     <Compile Include="Common\Import\ImportProcessCodes.cs" />
     <Compile Include="Common\Import\ImportStorageLocations.cs" />
     <Compile Include="Common\Import\ImportStorageUnitTypes.cs" />
     <Compile Include="Common\Import\ImportUnitOfMeasurement.cs" />
+    <Compile Include="Common\Import\NonFluent\CsvRecordHandler.cs" />
+    <Compile Include="Common\Import\CsvMissingFieldsException.cs" />
+    <Compile Include="Common\Import\NonFluent\CsvPipelineBase.cs" />
+    <Compile Include="Common\Import\CsvRecord.cs" />
+    <Compile Include="Common\GlobalSettings.cs" />
+    <Compile Include="Common\Import\CsvOptions.cs" />
+    <Compile Include="Common\Import\NonFluent\CsvRecordValidator.cs" />
+    <Compile Include="Common\Import\CsvSchema.cs" />
+    <Compile Include="Common\Import\NonFluent\ICsvOperation.cs" />
+    <Compile Include="Common\Import\CsvDataReader.cs" />
+    <Compile Include="Common\Import\ImportData.cs" />
+    <Compile Include="Common\Import\IImportLogic.cs" />
+    <Compile Include="Common\Import\ImportBrands.cs" />
+    <Compile Include="Common\Import\ImportDataLogic.cs" />
+    <Compile Include="Common\Import\ImportDataResult.cs" />
+    <Compile Include="Common\Import\ImportDataMessage.cs" />
+    <Compile Include="Common\Import\ImportLogItem.cs" />
+    <Compile Include="Common\Pipeline\PipeBase.cs" />
+    <Compile Include="Common\Pipeline\IPipe.cs" />
+    <Compile Include="Common\Pipeline\IPipeChain.cs" />
+    <Compile Include="Common\Pipeline\Pipeline.cs" />
     <Compile Include="Implementation\BrandBl.cs" />
     <Compile Include="Implementation\BuildAssemblyBl.cs" />
     <Compile Include="Implementation\CategoryAccountBl.cs" />
@@ -202,6 +218,8 @@
     <Compile Include="Implementation\CommodityUOMBl.cs" />
     <Compile Include="Implementation\CompanyPreferenceBl.cs" />
     <Compile Include="Implementation\CategoryTaxBl.cs" />
+    <Compile Include="Implementation\ImportLogBl.cs" />
+    <Compile Include="Implementation\ImportLogDetailBl.cs" />
     <Compile Include="Implementation\InventoryCountDetailBl.cs" />
     <Compile Include="Implementation\InventoryReceiptChargeTaxBl.cs" />
     <Compile Include="Implementation\ItemLicenseBl.cs" />
@@ -239,6 +257,8 @@
     <Compile Include="Implementation\TagBl.cs" />
     <Compile Include="Implementation\UnitMeasureBl.cs" />
     <Compile Include="Interface\IGlobalComponentEngine.cs" />
+    <Compile Include="Interface\IImportLogBl.cs" />
+    <Compile Include="Interface\IImportLogDetailBl.cs" />
     <Compile Include="Interface\IInventoryCountDetailBl.cs" />
     <Compile Include="Interface\IInventoryReceiptChargeTaxBl.cs" />
     <Compile Include="Interface\IItemLicenseBl.cs" />
@@ -331,7 +351,6 @@
       <Name>iRely.Inventory.Model</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />

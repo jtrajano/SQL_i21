@@ -18,20 +18,22 @@ Ext.define('Inventory.view.ImportLogMessageBox', {
     alias: 'widget.icimportlogmessagebox',
 
     requires: [
+        'Inventory.view.Filter1',
+        'Inventory.view.StatusbarPaging1',
         'Ext.grid.Panel',
         'Ext.grid.column.Column',
         'Ext.view.Table',
         'Ext.grid.feature.GroupingSummary',
         'Ext.XTemplate',
-        'Ext.toolbar.Toolbar',
-        'Ext.button.Button'
+        'Ext.button.Button',
+        'Ext.toolbar.Paging'
     ],
 
     modal: true,
-    height: 375,
+    height: 630,
     minHeight: 375,
     minWidth: 672,
-    width: 672,
+    width: 982,
     layout: 'fit',
     title: 'Log Messages',
 
@@ -41,7 +43,7 @@ Ext.define('Inventory.view.ImportLogMessageBox', {
             layout: 'fit',
             items: [
                 {
-                    xtype: 'gridpanel',
+                    xtype: 'advancefiltergrid',
                     height: 150,
                     itemId: 'gridLogs',
                     columns: [
@@ -53,17 +55,9 @@ Ext.define('Inventory.view.ImportLogMessageBox', {
                         },
                         {
                             xtype: 'gridcolumn',
-                            itemId: 'colMessage',
-                            width: 250,
-                            cellWrap: true,
-                            dataIndex: 'Message',
-                            text: 'Message'
-                        },
-                        {
-                            xtype: 'gridcolumn',
                             itemId: 'colRow',
                             dataIndex: 'Row',
-                            text: 'Row'
+                            text: 'CSV Row #'
                         },
                         {
                             xtype: 'gridcolumn',
@@ -73,10 +67,31 @@ Ext.define('Inventory.view.ImportLogMessageBox', {
                         },
                         {
                             xtype: 'gridcolumn',
+                            itemId: 'colValue',
+                            dataIndex: 'Value',
+                            text: 'Value'
+                        },
+                        {
+                            xtype: 'gridcolumn',
+                            itemId: 'colMessage',
+                            width: 250,
+                            cellWrap: true,
+                            dataIndex: 'Message',
+                            text: 'Message'
+                        },
+                        {
+                            xtype: 'gridcolumn',
                             itemId: 'colStatus',
                             width: 200,
                             dataIndex: 'Status',
                             text: 'Status'
+                        },
+                        {
+                            xtype: 'gridcolumn',
+                            itemId: 'colAction',
+                            width: 200,
+                            dataIndex: 'Action',
+                            text: 'Action'
                         }
                     ],
                     features: [
@@ -84,6 +99,17 @@ Ext.define('Inventory.view.ImportLogMessageBox', {
                             ftype: 'groupingsummary',
                             groupHeaderTpl: [
                                 '{columnName}: {name}'
+                            ]
+                        }
+                    ],
+                    dockedItems: [
+                        {
+                            xtype: 'toolbar',
+                            dock: 'top',
+                            items: [
+                                {
+                                    xtype: 'filter1'
+                                }
                             ]
                         }
                     ]
@@ -104,6 +130,10 @@ Ext.define('Inventory.view.ImportLogMessageBox', {
                     text: 'Close'
                 }
             ]
+        },
+        {
+            xtype: 'statusbarpaging1',
+            dock: 'bottom'
         }
     ]
 

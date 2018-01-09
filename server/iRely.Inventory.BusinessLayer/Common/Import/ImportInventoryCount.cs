@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,191 +10,60 @@ namespace iRely.Inventory.BusinessLayer
 {
     public class ImportInventoryCount : ImportDataLogic<tblICInventoryCount>
     {
+        public ImportInventoryCount(DbContext context, byte[] data) : base(context, data)
+        {
+        }
 
         protected override string[] GetRequiredFields()
         {
             return new string[] { "location" };
         }
 
-        protected override int GetPrimaryKeyId(ref tblICInventoryCount entity)
+        protected override string GetPrimaryKeyName()
+        {
+            return "intInventoryCountId";
+        }
+
+        public override int GetPrimaryKeyValue(tblICInventoryCount entity)
         {
             return entity.intInventoryCountId;
         }
 
+        public override tblICInventoryCount Process(CsvRecord record)
+        {
+            var entity = new tblICInventoryCount()
+            {
+                ysnPosted = false,
+                intStatus = 1,
+                dtmCountDate = DateTime.Today
+            };
+
+            var valid = true;
+
+            var lu = GetFieldValue(record, "Location");
+            valid = SetLookupId<tblSMCompanyLocation>(record, "Location", e => e.strLocationName == lu, e => e.intCompanyLocationId, e => entity.intLocationId = e, required: true);
+            lu = GetFieldValue(record, "Category");
+            SetLookupId<tblICCategory>(record, "Category", e => e.strCategoryCode == lu, e => e.intCategoryId, e => entity.intCategoryId = e);
+            lu = GetFieldValue(record, "Commodity");
+            SetLookupId<tblICCommodity>(record, "Commodity", e => e.strCommodityCode == lu, e => e.intCommodityId, e => entity.intCommodityId = e);
+            lu = GetFieldValue(record, "Count Group");
+            SetLookupId<tblICCountGroup>(record, "Count Group", e => e.strCountGroup == lu, e => e.intCountGroupId, e => entity.intCountGroupId = e);
+            SetDate(record, "Count Date", e => entity.dtmCountDate = e);
+            lu = GetFieldValue(record, "Storage Location");
+            SetLookupId<tblSMCompanyLocationSubLocation>(record, "Storage Location", e => e.strSubLocationName == lu && e.strClassification == "Inventory" && e.intCompanyLocationId == entity.intLocationId, e => e.intCompanyLocationSubLocationId, e => entity.intSubLocationId = e);
+            lu = GetFieldValue(record, "Storage Unit");
+            SetLookupId<tblICStorageLocation>(record, "Storage Unit", e => e.strName == lu && e.intLocationId == entity.intLocationId && e.intSubLocationId == entity.intSubLocationId, e => e.intStorageLocationId, e => entity.intStorageLocationId = e);
+            SetText(record, "Description", e => entity.strDescription = e);
+            SetBoolean(record, "Physical Count)
+            if (valid)
+                return entity;
+
+            return null;
+        }
+
         protected override tblICInventoryCount ProcessRow(int row, int fieldCount, string[] headers, LumenWorks.Framework.IO.Csv.CsvReader csv, ImportDataResult dr)
         {
-            tblICInventoryCount fc = new tblICInventoryCount();
-            fc.ysnPosted = false;
-            fc.intStatus = 1;            
-            fc.dtmCountDate = DateTime.Today;
-
-            bool valid = true;
-
-            for (var i = 0; i < fieldCount; i++)
-            {
-                //if (!valid)
-                //    break;
-                string header = headers[i];
-                string value = csv[header];
-
-                string h = header.ToLower().Trim();
-                int? lu = null;
-
-                switch (h)
-                {
-                    case "location":
-                        if (string.IsNullOrEmpty(value))
-                        {
-                            valid = false;
-                            dr.Messages.Add(new ImportDataMessage()
-                            {
-                                Column = header,
-                                Row = row,
-                                Type = TYPE_INNER_ERROR,
-                                Status = STAT_REC_SKIP,
-                                Message = "Location should not be blank."
-                            });
-                            dr.Info = INFO_WARN;
-                            break;
-                        }
-                        lu = GetLookUpId<tblSMCompanyLocation>(
-                            context,
-                            m => m.strLocationName == value,
-                            e => e.intCompanyLocationId);
-                        if (lu != null)
-                            fc.intLocationId = (int)lu;
-                        else
-                        {
-                            valid = false;
-                            dr.Messages.Add(new ImportDataMessage()
-                            {
-                                Column = header,
-                                Row = row,
-                                Type = TYPE_INNER_ERROR,
-                                Status = STAT_REC_SKIP,
-                                Message = string.Format("Invalid Location: {0}.", value)
-                            });
-                            dr.Info = INFO_WARN;
-                        }
-                        break;
-                    case "category":
-                        if (string.IsNullOrEmpty(value))
-                            break;
-                        lu = GetLookUpId<tblICCategory>(
-                            context,
-                            m => m.strCategoryCode == value,
-                            e => e.intCategoryId);
-                        if (lu != null)
-                            fc.intCategoryId = (int)lu;
-                        else
-                        {
-                            dr.Messages.Add(new ImportDataMessage()
-                            {
-                                Column = header,
-                                Row = row,
-                                Type = TYPE_INNER_WARN,
-                                Message = "Can't find Category item: " + value + '.',
-                                Status = STAT_INNER_COL_SKIP
-                            });
-                            dr.Info = INFO_WARN;
-                        }
-                        break;
-                    case "commodity":
-                        if (string.IsNullOrEmpty(value))
-                            break;
-                        lu = GetLookUpId<tblICCommodity>(
-                            context,
-                            m => m.strCommodityCode == value,
-                            e => e.intCommodityId);
-                        if (lu != null)
-                            fc.intCommodityId = (int)lu;
-                        else
-                        {
-                            dr.Messages.Add(new ImportDataMessage()
-                            {
-                                Column = header,
-                                Row = row,
-                                Type = TYPE_INNER_WARN,
-                                Message = "Can't find Commodity: " + value + '.',
-                                Status = STAT_INNER_COL_SKIP
-                            });
-                            dr.Info = INFO_WARN;
-                        }
-                        break;
-                    case "count group":
-                        if (string.IsNullOrEmpty(value))
-                            break;
-                        lu = GetLookUpId<tblICCountGroup>(
-                            context,
-                            m => m.strCountGroup == value,
-                            e => e.intCountGroupId);
-                        if (lu != null)
-                            fc.intCountGroupId = (int)lu;
-                        else
-                        {
-                            dr.Messages.Add(new ImportDataMessage()
-                            {
-                                Column = header,
-                                Row = row,
-                                Type = TYPE_INNER_WARN,
-                                Message = "Can't find Count Group item: " + value + '.',
-                                Status = STAT_INNER_COL_SKIP
-                            });
-                            dr.Info = INFO_WARN;
-                        }
-                        break;
-                    case "count date":
-                        if (string.IsNullOrEmpty(value))
-                            break;
-                        SetDate(value, del => fc.dtmCountDate = del, "Count Date", dr, header, row);
-                        break;
-                    case "storage unit":
-                        if (string.IsNullOrEmpty(value))
-                            break;
-                        lu = GetLookUpId<tblSMCompanyLocationSubLocation>(
-                            context,
-                            m => m.strSubLocationName == value && 
-                                m.strClassification == "Inventory" &&
-                                m.intCompanyLocationId == fc.intLocationId,
-                            e => e.intCompanyLocationSubLocationId);
-                        if (lu != null)
-                            fc.intSubLocationId = (int)lu;
-                        else
-                        {
-                            dr.Messages.Add(new ImportDataMessage()
-                            {
-                                Column = header,
-                                Row = row,
-                                Type = TYPE_INNER_ERROR,
-                                Message = string.Format("Invalid Storage Location: {0}.", value),
-                                Status = STAT_INNER_COL_SKIP
-                            });
-                            dr.Info = INFO_WARN;
-                        }
-                        break;
-                    case "storage location":
-                        if (string.IsNullOrEmpty(value))
-                            break;
-                        lu = GetLookUpId<tblICStorageLocation>(
-                            context,
-                            m => m.strName == value && m.intLocationId == fc.intLocationId && 
-                                m.intSubLocationId == fc.intSubLocationId,
-                            e => e.intStorageLocationId);
-                        if (lu != null)
-                            fc.intStorageLocationId = (int)lu;
-                        else
-                        {
-                            dr.Messages.Add(new ImportDataMessage()
-                            {
-                                Column = header,
-                                Row = row,
-                                Type = TYPE_INNER_ERROR,
-                                Message = string.Format("Invalid Storage Location: {0}.", value),
-                                Status = STAT_INNER_COL_SKIP
-                            });
-                            dr.Info = INFO_WARN;
-                        }
-                        break;
+            
                     case "description":
                         fc.strDescription = value;
                         break;

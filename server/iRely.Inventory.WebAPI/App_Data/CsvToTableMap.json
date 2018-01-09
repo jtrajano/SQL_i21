@@ -1,0 +1,14 @@
+﻿{
+  "FuelCode": [
+    {
+      "name": "Code",
+      "map": "strRinFuelCode",
+      "type": "string"
+    },
+    {
+      "name": "Description",
+      "map": "strDescription",
+      "type": "string"
+    }
+  ]
+}

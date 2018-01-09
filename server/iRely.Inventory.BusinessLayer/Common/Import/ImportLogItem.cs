@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace iRely.Inventory.BusinessLayer
 {
-    public class ImportLogItem
+    public class AuditLogItem
     {
         public string Description { get; set; }
         public string FromValue { get; set; }

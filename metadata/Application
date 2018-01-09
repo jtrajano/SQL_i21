@@ -11,7 +11,8 @@
             "RebuildInventory",
             "LotHistory",
             "CopyItemLocation",
-            "InventoryCountDetails"
+            "InventoryCountDetails",
+            "ImportLog"
         ]
     },
     "configAlternates": {

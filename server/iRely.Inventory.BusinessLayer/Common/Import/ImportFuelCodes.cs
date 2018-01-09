@@ -1,7 +1,9 @@
 ﻿using iRely.Inventory.Model;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,73 +11,72 @@ namespace iRely.Inventory.BusinessLayer
 {
     public class ImportFuelCodes : ImportDataLogic<tblICRinFuel>
     {
+        public ImportFuelCodes(DbContext context, byte[] data) : base(context, data)
+        {
+        }
+
         protected override string[] GetRequiredFields()
         {
             return new string[] { "code" };
         }
 
-        protected override tblICRinFuel ProcessRow(int row, int fieldCount, string[] headers, LumenWorks.Framework.IO.Csv.CsvReader csv, ImportDataResult dr)
+        public override tblICRinFuel Process(CsvRecord record)
         {
             tblICRinFuel fc = new tblICRinFuel();
-            bool valid = true;
+            var entity = new tblICRinFuel();
+            var valid = true;
+            
+            valid = SetText(record, "Code", e => entity.strRinFuelCode = e, true);
+            SetText(record, "Description", e => entity.strDescription = e, false);
 
-            for (var i = 0; i < fieldCount; i++)
-            {
-                //if (!valid)
-                //    break;
-                string header = headers[i];
-                string value = csv[header];
+            if (valid)
+                return entity;
 
-                string h = header.ToLower().Trim();
-                switch (h)
-                {
-                    case "code":
-                        if (!SetText(value, del => fc.strRinFuelCode = del, "Code", dr, header, row, true))
-                            valid = false;
-                        if (HasLocalDuplicate(dr, header, value, row))
-                            valid = false;
-                        break;
-                    case "description":
-                        fc.strDescription = value;
-                        break;
-                }
-            }
-
-            if (!valid)
-                return null;
-
-            if (context.GetQuery<tblICRinFuel>().Any(t => t.strRinFuelCode == fc.strRinFuelCode))
-            {
-                if (!GlobalSettings.Instance.AllowOverwriteOnImport)
-                {
-                    dr.Info = INFO_ERROR;
-                    dr.Messages.Add(new ImportDataMessage()
-                    {
-                        Type = TYPE_INNER_ERROR,
-                        Status = STAT_REC_SKIP,
-                        Column = headers[0],
-                        Row = row,
-                        Message = "The record already exists: " + fc.strRinFuelCode + ". The system does not allow existing records to be modified."
-                    });
-                    return null;
-                }
-
-                var entry = context.ContextManager.Entry<tblICRinFuel>(context.GetQuery<tblICRinFuel>().First(t => t.strRinFuelCode == fc.strRinFuelCode));
-
-                entry.Property(e => e.strDescription).CurrentValue = fc.strDescription;
-                entry.State = System.Data.Entity.EntityState.Modified;
-                entry.Property(e => e.strRinFuelCode).IsModified = false;
-            }
-            else
-            {
-                context.AddNew<tblICRinFuel>(fc);
-            }
-            return fc;
+            return null;
         }
 
-        protected override int GetPrimaryKeyId(ref tblICRinFuel entity)
+        public override void Initialize()
+        {
+            base.Initialize();
+            /* Sample adding transformation pipelines */
+            //AddPipe(new MappingPipe());
+            //AddPipe(new MappingPipe2());
+        }
+
+        protected override Expression<Func<tblICRinFuel, bool>> GetUniqueKeyExpression(tblICRinFuel entity)
+        {
+            return (e => e.strRinFuelCode == entity.strRinFuelCode);
+        }
+
+        public override int GetPrimaryKeyValue(tblICRinFuel entity)
         {
             return entity.intRinFuelId;
         }
+
+        protected override string GetPrimaryKeyName()
+        {
+            return "intRinFuelId";
+        }
+
+        /* Sample Transformation Pipelines */
+        //class MappingPipe : CsvPipe<tblICRinFuel>
+        //{
+        //    protected override tblICRinFuel Process(tblICRinFuel input)
+        //    {
+        //        input.strDescription = Record["Description"];
+        //        input.strRinFuelCode = Record["Code"];
+        //        return input;
+        //    }
+        //}
+
+        //class MappingPipe2 : CsvPipe<tblICRinFuel>
+        //{
+        //    protected override tblICRinFuel Process(tblICRinFuel input)
+        //    {
+        //        input.strDescription = input.strDescription.ToUpper();
+        //        input.strRinFuelCode = input.strRinFuelCode.ToUpper();
+        //        return input;
+        //    }
+        //}
     }
 }

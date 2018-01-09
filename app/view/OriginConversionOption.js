@@ -255,6 +255,12 @@ Ext.define('Inventory.view.OriginConversionOption', {
                                             }
                                         ]
                                     }
+                                },
+                                {
+                                    xtype: 'button',
+                                    itemId: 'btnLogs',
+                                    ui: 'i21-button-toolbar-small',
+                                    text: 'View Logs'
                                 }
                             ]
                         }

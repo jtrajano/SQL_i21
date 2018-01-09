@@ -190,10 +190,13 @@
     <Compile Include="Configuration\Shipment\vyuICGetShipmentAddSalesContractPickLotMap.cs" />
     <Compile Include="Configuration\Shipment\vyuICGetShipmentAddSalesOrderMap.cs" />
     <Compile Include="Configuration\Shipment\vyuICShipmentInvoiceMap.cs" />
+    <Compile Include="Configuration\tblICImportLogDetailMap.cs" />
+    <Compile Include="Configuration\tblICImportLogMap.cs" />
     <Compile Include="Configuration\tblICM2MComputationMap.cs" />
     <Compile Include="Configuration\vyuICGetCustomerCurrency.cs" />
     <Compile Include="Configuration\vyuICItemUOMMap.cs" />
     <Compile Include="Configuration\vyuICLotHistoryMap.cs" />
+    <Compile Include="IEntityDbContext.cs" />
     <Compile Include="InventoryEntities.Views.cs" />
     <Compile Include="Metadata\Item\tblICItemLicense.cs" />
     <Compile Include="Metadata\Item\tblICItemSubLocation.cs" />
@@ -225,6 +228,8 @@
     <Compile Include="Metadata\Shipment\tblICInventoryShipmentCharge.cs" />
     <Compile Include="Metadata\Shipment\tblICInventoryShipmentItem.cs" />
     <Compile Include="Metadata\Shipment\tblICInventoryShipmentItemLot.cs" />
+    <Compile Include="Metadata\tblICImportLogDetail.cs" />
+    <Compile Include="Metadata\tblICImportLog.cs" />
     <Compile Include="Metadata\tblICM2MComputation.cs" />
     <Compile Include="Configuration\tblICParentLotMap.cs" />
     <Compile Include="Configuration\Item\tblICItemMotorFuelTaxMap.cs" />

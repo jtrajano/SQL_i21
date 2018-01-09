@@ -1,308 +1,328 @@
 ﻿using iRely.Common;
+using iRely.Inventory.Model;
 using LumenWorks.Framework.IO.Csv;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
+using System.Data.Entity.Validation;
 using System.Data.SqlClient;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace iRely.Inventory.BusinessLayer
 {
-    public abstract class ImportDataLogic<T> : IImportDataLogic
+    public abstract class ImportDataLogic<T> : IImportDataLogic where T : class
     {
-        public class InvalidItem
-        {
-            public string Message { get; set;}
-            public string Header { get;set;}
-            public string Value { get;set;}
-        }
-
-        public const string STAT_INNER_COL_SKIP = "This optional field is ignored.";
-        public const string STAT_REC_SKIP = "Record skipped";
-        public const string STAT_INNER_DEF = "Set to default value";
-        public const string STAT_INNER_AUTO = "Auto-created";
-
-        public const string STAT_INNER_SUCCESS = "Success";
-        public const string TYPE_INNER_WARN = "Warning";
-        public const string TYPE_INNER_EXCEPTION = "Exception";
-        public const string TYPE_INNER_ERROR = "Error";
-        public const string TYPE_INNER_INFO = "Info";
-
-        public const string INFO_WARN = "warning";
-        public const string INFO_ERROR = "error";
-        public const string INFO_SUCCESS = "success";
-
-        public const string ICON_ACTION_NEW = "small-new-plus";
-        public const string ICON_ACTION_EDIT = "small-edit";
-
-        protected InventoryRepository context;
+        protected DbContext context;
         protected byte[] data;
-        protected readonly List<ImportLogItem> logs = new List<ImportLogItem>();
-        protected readonly List<InvalidItem> invalidItems = new List<InvalidItem>();
-        protected readonly Dictionary<string, string> uniqueIds = new Dictionary<string, string>(new CaseInsensitiveComparer());
+        protected readonly List<AuditLogItem> logs = new List<AuditLogItem>();
+        protected readonly List<T> Entities = new List<T>();
+        protected ImportDataResult ImportResult;
 
-        private class CaseInsensitiveComparer : IEqualityComparer<string>
+        public DbContext Context { get { return context; } set { this.context = value; } }
+        public byte[] Data { get { return data; } set { this.data = value; } }
+        public List<AuditLogItem> AuditLogItems { get { return logs; } }
+        private IPipeChain<T> Pipeline { get; set; }
+        private CsvDataReader<T> reader;
+        public string Username { get; set; }
+
+        public ImportDataLogic(DbContext context, byte[] data)
         {
-            public bool Equals(string x, string y)
-            {
-                return x.ToLower().Equals(y.ToLower());
-            }
-
-            public int GetHashCode(string obj)
-            {
-                return obj.ToLower().GetHashCode();
-            }
-        }
-
-        public ImportDataLogic()
-        {
-            
-        }
-
-        public ImportDataLogic(InventoryRepository context, byte[] data)
-        {
+            Pipeline = new Pipeline<T>();
+            reader = new CsvDataReader<T>(GetRequiredFields());
+            reader.ReadNextRecord += Reader_ReadNextRecord;
             this.context = context;
             this.data = data;
-        }
-
-        public List<ImportLogItem> LogItems
-        {
-            get 
+            ImportResult = new ImportDataResult()
             {
-                return logs; 
-            }
-        }
-
-        /// <summary>
-        /// Gets the required field names that need to be present and must be filled out in the CSV template.
-        /// </summary>
-        /// <returns> Returns a string array of required field names.</returns>
-        protected abstract string[] GetRequiredFields();
-
-        /// <summary>
-        ///     Checks if the if all the required fields are present in the CSV template.
-        /// </summary>
-        /// <param name="headers">The array of headers or field names available in the CSV template.</param>
-        /// <param name="missingFields">This outputs a list of field names that were missing in the CSV template.</param>
-        /// <returns>Returns true if all required field names are present in the CSV template.</returns>
-        protected bool ValidHeaders(string[] headers, out List<string> missingFields)
-        {
-            string[] requiredFields = GetRequiredFields();
-            List<string> mf = new List<string>();
-            if (requiredFields.Length == 0)
-            {
-                missingFields = mf;
-                return true;
-            }
-
-            int validCnt = 0;
-            for (int i = 0; i < requiredFields.Length; i++)
-            {
-                string r = requiredFields[i].Trim().ToLower();
-                bool found = false;
-                for (int j = 0; j < headers.Length; j++)
-                {
-                    string h = headers[j].Trim().ToLower();
-                    if (h == r)
-                    {
-                        validCnt++;
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found)
-                    mf.Add(r);
-            }
-
-            missingFields = mf;
-            return validCnt == requiredFields.Length;
-        }
-
-        /// <summary>
-        /// Checks whether there are duplicated records or rows in the CSV template.
-        /// </summary>
-        /// <returns>Returns true if duplicates were found, false otherwise.</returns>
-        protected bool HasLocalDuplicate(ImportDataResult dr, string field, string value, int row)
-        {
-            if (string.IsNullOrEmpty(value))
-                return false;
-
-            if (uniqueIds.ContainsKey(value))
-            {
-                dr.Info = INFO_ERROR;
-                dr.Messages.Add(new ImportDataMessage()
-                {
-                    Type = TYPE_INNER_ERROR,
-                    Status = STAT_REC_SKIP,
-                    Column = field,
-                    Row = row,
-                    Message = "Duplicate record(s) found: " + value
-                });
-                return true;
-            }
-            uniqueIds.Add(value, value);
-            return false;
-        }
-        
-        public virtual ImportDataResult Import()
-        {
-            ImportDataResult dr = new ImportDataResult()
-            {
-                Info = INFO_SUCCESS
+                Type = Constants.TYPE_INFO,
+                Description = "There's nothing to import.",
+                Username = this.Username
             };
+            Initialize();
+        }
+
+        public virtual async Task OnAfterSave()
+        {
+            await Task.FromResult(0);
+        }
+
+        public virtual async Task<ImportDataResult> Import()
+        {
+            Entities.Clear();
+
+            ImportResult.Clear();
+            CurrentRecordTracker.Instance.TimeStart = DateTime.UtcNow;
+
             using (MemoryStream ms = new MemoryStream(data))
             {
-                var hasErrors = false;
-                var hasWarnings = false;
-
                 if (!ms.CanRead)
                     throw new IOException("Please select a valid file.");
-                int row = 0;
                 using (StreamReader stream = new StreamReader(ms))
                 {
-                    using (CsvReader csv = new CsvReader(stream, true))
+                    try
                     {
-                        int fieldCount = csv.FieldCount;
-                        string[] headers = csv.GetFieldHeaders();
-                        List<string> missingFields;
+                        await reader.ReadCsvAsync(stream);
 
-                        if (!ValidHeaders(headers, out missingFields))
+                        context.Set<T>().AddRange(Entities);
+                        await context.SaveChangesAsync();
+
+                        await OnAfterSave();
+
+                        CurrentRecordTracker.Instance.TimeFinished = DateTime.UtcNow;
+
+                        ImportResult.TotalRows = CurrentRecordTracker.Instance.TotalRecords;
+                        ImportResult.RowsImported = Entities.Count;
+
+                        if (ImportResult.Errors > 0)
                         {
-                            dr.Info = INFO_ERROR;
-                            dr.Description = "Invalid template format. Some fields were missing.";
-                            StringBuilder sb = new StringBuilder();
-                            foreach (string s in missingFields)
-                            {
-                                sb.Append("'" + s + "'" + ", ");
-                            }
-                            dr.Messages.Add(new ImportDataMessage()
-                            {
-                                Type = TYPE_INNER_ERROR,
-                                Status = "Import Failed",
-                                Message = "Invalid template format. Some fields were missing. Missing fields: " +
-                                    CultureInfo.CurrentCulture.TextInfo.ToTitleCase(sb.ToString().Substring(0, sb.Length - 2))
-                            });
-                            //throw new FormatException("Invalid template format.");
-                            return dr;
+                            ImportResult.Type = Constants.TYPE_ERROR;
+                            ImportResult.Description = string.Format("Import completed with {0} error(s).", ImportResult.Errors.ToString());
                         }
-
-                        uniqueIds.Clear();
-
-                        while (csv.ReadNextRecord())
+                        else if (ImportResult.Warnings > 0)
                         {
-                            row++;
-
-                            using (var transaction = context.ContextManager.Database.BeginTransaction())
+                            ImportResult.Type = Constants.TYPE_WARNING;
+                            ImportResult.Description = string.Format("Import completed with {0} warnings(s).", ImportResult.Warnings.ToString());
+                        }
+                        else
+                        {
+                            if (ImportResult.TotalRows <= 0 && ImportResult.RowsImported <= 0)
                             {
-                                try
+                                ImportResult = new ImportDataResult()
                                 {
-                                    LogItems.Clear();
-                                    dr.IsUpdate = false;
-                                    T entity = ProcessRow(row, fieldCount, headers, csv, dr);
-                                    if (entity != null)
-                                    {
-                                        context.Save();
-                                        LogTransaction(ref entity, dr);
-                                        dr.Messages.Add(new ImportDataMessage()
-                                        {
-                                            Message = "Record " + (dr.IsUpdate ? "updated" : "imported") + " successfully.",
-                                            Row = row,
-                                            Status = STAT_INNER_SUCCESS,
-                                            Type = TYPE_INNER_INFO
-                                        });
-                                        if (dr.Info == INFO_ERROR)
-                                            hasErrors = true;
-                                        if (dr.Info == INFO_WARN)
-                                            hasWarnings = true;
-                                        transaction.Commit();
-                                    }
-                                    else
-                                    {
-                                        dr.Messages.Add(new ImportDataMessage()
-                                        {
-                                            Message = "Invalid values found. Items that were auto created or modified in this record will be rolled back.",
-                                            Exception = null,
-                                            Row = row,
-                                            Status = "Record import failed.",
-                                            Type = TYPE_INNER_ERROR
-                                        });
-                                        dr.Info = INFO_ERROR;
-                                        hasErrors = true;
-                                        transaction.Rollback();
-                                        continue;
-                                    }
-                                }
-                                catch (Exception ex)
-                                {
-                                    string message = ex.Message;
-                                    if (ex.InnerException != null && ex.InnerException.InnerException != null)
-                                        message = ex.InnerException.InnerException.Message;
-                                    else
-                                        message = ex.InnerException.Message;
-                                    dr.Messages.Add(new ImportDataMessage()
-                                    {
-                                        Message = message + " Items that were auto created or modified in this record will be rolled back.",
-                                        Exception = ex,
-                                        Row = row,
-                                        Status = STAT_REC_SKIP,
-                                        Type = TYPE_INNER_EXCEPTION
-                                    });
-                                    dr.Info = INFO_ERROR;
-                                    hasErrors = true;
-                                    transaction.Rollback();
-                                    continue;
-                                }
+                                    Type = Constants.TYPE_INFO,
+                                    Description = "There's nothing to import."
+                                };
+                            }
+                            else
+                            {
+                                ImportResult.Description = "Import completed.";
                             }
                         }
                     }
+                    catch(CsvMissingFieldsException ex)
+                    {
+                        ImportResult.AddError(new ImportDataMessage()
+                        {
+                            Type = Constants.TYPE_ERROR,
+                            Value = "Template",
+                            Action = "Import aborted",
+                            Column = "",
+                            Exception = ex,
+                            Row = 1,
+                            Status = Constants.STAT_FAILED,
+                            Message = "Invalid template format. Some fields were missing. Missing fields: " + reader.Schema.GetMissingFieldsTextRepresentation()
+                        });
+                        ImportResult.Type = Constants.TYPE_ERROR;
+                        ImportResult.Description = ex.Message + (ex.InnerException != null ? " -> " + ex.InnerException.Message : "");
+                        ImportResult.Failed = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        ImportResult.Failed = true;
+                        ImportResult.Description = ex.Message + (ex.InnerException != null ? " -> " + (ex.InnerException.InnerException != null ? ex.InnerException.InnerException.Message :  ex.InnerException.Message) : "");
+                        ImportResult.Type = Constants.TYPE_EXCEPTION;
+                    }
                 }
-                dr.Rows = row;
-
-                if (hasWarnings)
-                    dr.Info = INFO_WARN;
-
-                if (hasErrors)
-                    dr.Info = INFO_ERROR;
             }
 
-            return dr;
-        }
+            ImportResult.TimeSpentInSeconds = CurrentRecordTracker.Instance.TimeElapsed;
 
-        protected virtual void LogTransaction(ref T entity, ImportDataResult dr)
-        {
-            LogItems.Clear();
-            var id = GetPrimaryKeyId(ref entity);
-            if (id != 0 && !string.IsNullOrEmpty(GetViewNamespace()))
+            try
             {
-                string details = string.Empty;
-                string comma = ",";
-                int count = 0;
-                foreach (ImportLogItem item in LogItems)
+                ImportResult.LogId = await SaveLogsToDb(ImportResult);
+            }
+            catch (DbEntityValidationException ex)
+            {
+                ImportResult.AddWarning(new ImportDataMessage()
                 {
-                    count++;
-                    if (count == LogItems.Count && count == 1)
-                        comma = "";
-                    details += "{\"change\":\"" + item.Description + "\",\"iconCls\":\"" + item.ActionIcon + "\",\"from\":\"" + item.FromValue + "\",\"to\":\"" + item.ToValue + "\",\"leaf\":true}" + comma;
+                    Type = Constants.TYPE_EXCEPTION,
+                    Value = "Save Logs",
+                    Action = "Import might be successful but logs were not written to database.",
+                    Column = "",
+                    Exception = ex,
+                    Row = 1,
+                    Status = Constants.STAT_FAILED,
+                    Message = ex.Message
+                });
+                ImportResult.Failed = true;
+                ImportResult.Type = Constants.TYPE_EXCEPTION;
+                ImportResult.Description = ex.Message + (ex.InnerException != null ? " -> " + (ex.InnerException.InnerException != null ? ex.InnerException.InnerException.Message : ex.InnerException.Message) : "");
+            }
+            catch (Exception ex)
+            {
+                ImportResult.AddWarning(new ImportDataMessage()
+                {
+                    Type = Constants.TYPE_EXCEPTION,
+                    Value = "Save Logs",
+                    Action = "Import might be successful but logs were not written to database.",
+                    Column = "",
+                    Exception = ex,
+                    Row = 1,
+                    Status = Constants.STAT_FAILED,
+                    Message = ex.Message
+                });
+                ImportResult.Failed = true;
+                ImportResult.Type = Constants.TYPE_EXCEPTION;
+                ImportResult.Description = ex.Message + (ex.InnerException != null ? " -> " + (ex.InnerException.InnerException != null ? ex.InnerException.InnerException.Message : ex.InnerException.Message) : "");
+            }
+
+            return ImportResult;
+        }
+
+        private async Task<int> SaveLogsToDb(ImportDataResult result)
+        {
+            return await ImportDataSqlLogger.GetInstance(Context).WriteLogs(result);   
+        }
+
+        private void Reader_ReadNextRecord(long recordIndex, CsvRecord record, out bool succeeded)
+        {
+            OnNextRecord(recordIndex, record, out succeeded);
+        }
+
+        protected virtual void OnNextRecord(long recordIndex, CsvRecord record, out bool succeeded)
+        {
+            CurrentRecordTracker.Instance.Record = record;
+            CurrentRecordTracker.Instance.TotalRecords = (int)recordIndex + 1;
+            succeeded = true;
+            var entity = Process(record);
+            ExecutePipes(entity);
+
+            if (entity != null)
+            {
+                if (!GlobalSettings.Instance.AllowDuplicates)
+                {
+                    var existingId = -1;
+                    if (HasDuplicates(entity))
+                    {
+                        HandleDuplicates(entity, record);
+                        return;
+                    }
+                    else if (AlreadyExists(entity, out existingId))
+                    {
+                        HandleIfAlreadyExists(entity, record, existingId);
+                        return;
+                    }
+                }
+                else
+                {
+                    // Update existing
                 }
 
-                if (string.IsNullOrEmpty(details))
-                    LogItem(id, "Imported from CSV file.", GetViewNamespace(), dr);
-                else
-                    LogItem(id, "Imported from CSV file.", GetViewNamespace(), details, dr);
+                Entities.Add(entity);
+                AddSuccessLog(entity, record);
             }
         }
 
-        protected abstract T ProcessRow(int row, int fieldCount, string[] headers, CsvReader csv, ImportDataResult dr);
-        protected abstract int GetPrimaryKeyId(ref T entity);
-        protected virtual string GetViewNamespace()
+        protected void AddSuccessLog(T entity, CsvRecord record, bool isNew = true)
         {
-            return string.Empty;
+            ImportResult.AddMessage(new ImportDataMessage()
+            {
+                Type = Constants.TYPE_INFO,
+                Status = Constants.STAT_SUCCESS,
+                Action = Constants.ACTION_INSERTED,
+                Column = "",
+                Row = record.RecordNo,
+                Value = "",
+                Exception = null,
+                Message = "Import successful."
+            });
+            ImportResult.Type = Constants.TYPE_INFO;
         }
 
+        public bool HasDuplicates(T entity)
+        {
+            var expression = GetUniqueKeyExpression(entity);
+            if (expression == null)
+                return false;
+            var hasDuplicate = Entities.AsQueryable<T>().Any<T>(expression);
+            return hasDuplicate;
+        }
+
+        public void HandleDuplicates(T entity, CsvRecord record)
+        {
+            if(GlobalSettings.Instance.ContinueOnFailedImports)
+            {
+                string fields = record.Schema.GetMissingFieldsTextRepresentation();
+                ImportResult.AddError(new ImportDataMessage()
+                {
+                    Type = Constants.TYPE_ERROR,
+                    Status = Constants.STAT_FAILED,
+                    Action = Constants.ACTION_SKIPPED,
+                    Column = fields,
+                    Row = record.RecordNo,
+                    Value = $"Values of: {fields}.",
+                    Exception = null,
+                    Message = $"Duplicate records found for record #{record.RecordNo}"
+                });
+                ImportResult.Type = Constants.TYPE_WARNING;
+            }
+            else
+                throw new ArgumentOutOfRangeException($"Duplicate records found for record #{record.RecordNo}");
+        }
+
+        public bool AlreadyExists(T entity, out int existingId)
+        {
+            var expression = GetUniqueKeyExpression(entity);
+            existingId = -1;
+
+            if (expression == null)
+                return false;
+            var found = Context.Set<T>().AsNoTracking().FirstOrDefault(expression);
+            
+            if (found != null)
+            {
+                existingId = GetPrimaryKeyValue(found);
+                return true;
+            }
+            return false;
+        }
+
+        public abstract int GetPrimaryKeyValue(T entity);
+
+        public void HandleIfAlreadyExists(T entity, CsvRecord record, int existingId)
+        {
+            if (GlobalSettings.Instance.ContinueOnFailedImports)
+            {
+                string fields = record.Schema.GetMissingFieldsTextRepresentation();
+                ImportResult.AddError(new ImportDataMessage()
+                {
+                    Type = Constants.TYPE_ERROR,
+                    Status = Constants.STAT_FAILED,
+                    Action = Constants.ACTION_SKIPPED,
+                    Column = fields,
+                    Row = record.RecordNo,
+                    Value = $"Values of: {fields}.",
+                    Exception = null,
+                    Message = $"CSV record #{record.RecordNo} already exists in the database with {GetPrimaryKeyName()} of {existingId.ToString()}."
+                });
+                ImportResult.Type = Constants.TYPE_WARNING;
+            }
+            else
+                throw new ArgumentOutOfRangeException($"Record #{record.RecordNo} already exists in the database.");
+        }
+
+        protected virtual string GetPrimaryKeyName() { return " a primary key of "; }
+
+        public virtual void Initialize() { }
+        protected abstract string[] GetRequiredFields();
+        protected virtual Expression<Func<T, bool>> GetUniqueKeyExpression(T entity) { return null; }
+        public virtual T Process(CsvRecord record) { return default(T); }
+        protected void ExecutePipes(T input) { Pipeline.Execute(input); }
+        public void AddPipe(IPipe<T> pipe) { Pipeline.Register(pipe); }
+        protected virtual string GetViewNamespace() { return string.Empty; }
+
+        protected string GetFieldValue(CsvRecord record, string key, string defaultValue = null)
+        {
+            return ImportDataLogicHelpers.GetFieldValue(record, key, defaultValue);
+        }
+
+        #region Lookups
         /// <summary>
         /// Gets the specified ID property of an existing record in the lookup table. This inserts a new record when the ID does not exists.
         /// </summary>
@@ -313,55 +333,34 @@ namespace iRely.Inventory.BusinessLayer
         /// <param name="newObject">The entity to be inserted when the ID does not exists.</param>
         /// <param name="inserted">Outputs true when a new record is inserted.</param>
         /// <returns></returns>
-        protected static int? InsertAndOrGetLookupId<J>(InventoryRepository context, Expression<Func<J, bool>> predicate, Expression<Func<J, int>> idProperty, J newObject, out bool inserted) where J : class
+        protected int? InsertAndOrGetLookupId<J>(Expression<Func<J, bool>> predicate, Expression<Func<J, int>> idProperty, J newObject, out bool inserted) where J : class
         {
-            if (context.GetQuery<J>().Any<J>(predicate))
-            {
-                inserted = false;
-                var entry = context.ContextManager.Entry<J>(context.GetQuery<J>().First<J>(predicate));
-                return entry.Property(idProperty).CurrentValue;
-            }
-            else
-            {
-                // Insert new record when cannot not found.
-                context.AddNew<J>(newObject);
-                inserted = true;
-                var entry = context.ContextManager.Entry<J>(newObject);
-                context.Save();
-                return entry.Property(idProperty).CurrentValue;
-            }
+            return ImportDataLogicHelpers.InsertAndOrGetLookupId<J>(Context, predicate, idProperty, newObject, out inserted);
         }
 
-        protected static int? GetLookUpId<J>(InventoryRepository context, Expression<Func<J, bool>> predicate, Expression<Func<J, int>> idProperty) where J : class
+        protected int? GetLookUpId<J>(Expression<Func<J, bool>> predicate, Expression<Func<J, int>> idProperty) where J : class
         {
-            if (context.GetQuery<J>().Any<J>(predicate))
-            {
-                var entry = context.ContextManager.Entry<J>(context.GetQuery<J>().First<J>(predicate));
-                return entry.Property(idProperty).CurrentValue;
-            }
-            return null;
+            return ImportDataLogicHelpers.GetLookUpId<J>(Context, predicate, idProperty);
         }
 
-        protected static J GetLookUpObject<J>(InventoryRepository context, Expression<Func<J, bool>> predicate) where J : class
+        protected int? GetLookUpId<J>(Expression<Func<J, bool>> predicate, Expression<Func<J, int?>> idProperty) where J : class
         {
-            if (context.GetQuery<J>().Any<J>(predicate))
-            {
-                var entry = context.ContextManager.Entry<J>(context.GetQuery<J>().First<J>(predicate));
-                return entry.Entity;
-            }
-            return null;
+            return ImportDataLogicHelpers.GetLookUpId<J>(Context, predicate, idProperty);
         }
 
-        protected static List<J> GetLookUps<J>(InventoryRepository context, Expression<Func<J, bool>> predicate) where J : class
+        protected J GetLookUpObject<J>(Expression<Func<J, bool>> predicate) where J : class
         {
-            if (context.GetQuery<J>().Any<J>(predicate))
-            {
-                return context.GetQuery<J>().Where<J>(predicate).ToList<J>();
-            }
-            return null;
+            return ImportDataLogicHelpers.GetLookUpObject<J>(Context, predicate);
         }
 
-        protected void LogItem(int id, string action, string viewNamespace, ImportDataResult dr)
+        protected List<J> GetLookUps<J>(Expression<Func<J, bool>> predicate) where J : class
+        {
+            return ImportDataLogicHelpers.GetLookUps<J>(Context, predicate);
+        }
+        #endregion
+
+        #region Loggers
+        protected async Task LogItem(int id, string action, string viewNamespace)
         {
             try
             {
@@ -371,7 +370,7 @@ namespace iRely.Inventory.BusinessLayer
                 //    string.Format("uspSMAuditLog @screenName = '{0}', @keyValue = {1}, @entityId = {2}, @actionType = '{3}', @actionIcon='small-import'",
                 //    viewNamespace, id.ToString(), entityId, action));
 
-                context.ContextManager.Database.ExecuteSqlCommand(
+                await context.Database.ExecuteSqlCommandAsync(
                             "uspSMAuditLog @screenName, @keyValue, @entityId, @actionType, @actionIcon",
                             new SqlParameter("screenName", viewNamespace),
                             new SqlParameter("keyValue", id.ToString()),
@@ -382,16 +381,11 @@ namespace iRely.Inventory.BusinessLayer
             }
             catch (Exception ex)
             {
-                dr.Messages.Add(new ImportDataMessage()
-                {
-                    Message = "Can't log to audit trail." + ex.Message,
-                    Type = TYPE_INNER_EXCEPTION
-                });
-                dr.Info = INFO_WARN;
+                throw new Exception($"Can't log to audit trail. {ex.Message}", ex);
             }
         }
 
-        protected void LogItem(int id, string action, string viewNamespace, string description, string fromValue, string toValue, ImportDataResult dr)
+        protected async Task LogItem(int id, string action, string viewNamespace, string description, string fromValue, string toValue)
         {
             try
             {
@@ -401,7 +395,7 @@ namespace iRely.Inventory.BusinessLayer
                 //    string.Format("uspSMAuditLog @screenName = '{0}', @keyValue = {1}, @entityId = {2}, @actionType = '{3}', @changeDescription = '{4}', @fromValue = '{5}', @toValue='{6}', @actionIcon='small-import'",
                 //    viewNamespace, id.ToString(), entityId, action, description, fromValue, toValue));
 
-                context.ContextManager.Database.ExecuteSqlCommand(
+                await context.Database.ExecuteSqlCommandAsync(
                             "uspSMAuditLog @screenName, @keyValue, @entityId, @actionType, @changeDescription, @fromValue, @toValue, @actionIcon",
                             new SqlParameter("screenName", viewNamespace),
                             new SqlParameter("keyValue", id.ToString()),
@@ -416,16 +410,11 @@ namespace iRely.Inventory.BusinessLayer
             }
             catch (Exception ex)
             {
-                dr.Messages.Add(new ImportDataMessage()
-                {
-                    Message = "Can't log to audit trail." + ex.Message,
-                    Type = TYPE_INNER_EXCEPTION
-                });
-                dr.Info = INFO_WARN;
+                throw new Exception($"Can't log to audit trail. {ex.Message}", ex);
             }
         }
 
-        protected void LogItem(int id, string action, string viewNamespace, string details, ImportDataResult dr)
+        protected async Task LogItem(int id, string action, string viewNamespace, string details)
         {
             try
             {
@@ -435,7 +424,7 @@ namespace iRely.Inventory.BusinessLayer
                 //    string.Format("uspSMAuditLog @screenName = '{0}', @keyValue = {1}, @entityId = {2}, @actionType = '{3}', @details = '{4}', @actionIcon='small-import'",
                 //    viewNamespace, id.ToString(), entityId, action, details));
 
-                context.ContextManager.Database.ExecuteSqlCommand(
+                await context.Database.ExecuteSqlCommandAsync(
                             "uspSMAuditLog @screenName, @keyValue, @entityId, @actionType, @details, @actionIcon",
                             new SqlParameter("screenName", viewNamespace),
                             new SqlParameter("keyValue", id.ToString()),
@@ -448,251 +437,104 @@ namespace iRely.Inventory.BusinessLayer
             }
             catch (Exception ex)
             {
-                dr.Messages.Add(new ImportDataMessage()
-                {
-                    Message = "Can't log to audit trail." + ex.Message,
-                    Type = TYPE_INNER_EXCEPTION
-                });
-                dr.Info = INFO_WARN;
+                throw new Exception($"Can't log to audit trail. {ex.Message}", ex);
             }
         }
 
-        protected void LogDetailedItem(int id, string action, string viewNamespace, List<ImportLogItem> items, ImportDataResult dr)
+        protected async Task LogDetailedItem(int id, string action, string viewNamespace, List<AuditLogItem> items)
         {
             string details = string.Empty;
             string comma = ",";
             int count = 0;
-            foreach (ImportLogItem item in items)
+            foreach (AuditLogItem item in items)
             {
                 count++;
-                if (count == LogItems.Count && count == 1)
+                if (count == AuditLogItems.Count && count == 1)
                     comma = "";
                 details += "{\"change\":\"" + item.Description + "\",\"iconCls\":\"" + item.ActionIcon + "\",\"from\":\"" + item.FromValue + "\",\"to\":\"" + item.ToValue + "\",\"leaf\":true}" + comma;
             }
 
             if (string.IsNullOrEmpty(details))
-                LogItem(id, "Imported from CSV file.", viewNamespace, dr);
+                await LogItem(id, "Imported from CSV file.", viewNamespace);
             else
-                LogItem(id, "Imported from CSV file.", viewNamespace, details, dr);
+                await LogItem(id, "Imported from CSV file.", viewNamespace, details);
         }
 
-        public InventoryRepository Context
+        protected virtual async Task LogTransaction(T entity)
         {
-            get
+            AuditLogItems.Clear();
+            var id = GetPrimaryKeyValue(entity);
+            if (id != 0 && !string.IsNullOrEmpty(GetViewNamespace()))
             {
-                return context;
-            }
-            set
-            {
-                this.context = value;
-            }
-        }
-
-        public byte[] Data
-        {
-            get
-            {
-                return data;
-            }
-            set
-            {
-                this.data = value;
-            }
-        }
-
-        public static void SetBoolean(string value, Action<bool> booleanDelegate)
-        {
-            try
-            {
-                if (value.Trim().ToLower() == "yes" || value.Trim().ToLower() == "no")
-                    value = value.Trim().ToLower() == "yes" ? "true" : "false";
-                if (value.Trim() == "1" || value.Trim() == "0")
-                    value = value.Trim() == "1" ? "true" : "false";
-                booleanDelegate(bool.Parse(value));
-            }
-            catch (Exception)
-            {
-                booleanDelegate(false);
-            }
-        }
-
-        public static bool SetNonZeroDecimal(string value, Action<decimal> decimalDelegate, string caption, ImportDataResult dr, string header, int row)
-        {
-            if (string.IsNullOrEmpty(value))
-                return false;
-
-            try
-            {
-                decimal val = decimal.Parse(value);
-                if (val <= 0)
+                string details = string.Empty;
+                string comma = ",";
+                int count = 0;
+                foreach (AuditLogItem item in AuditLogItems)
                 {
-                    dr.Messages.Add(new ImportDataMessage()
-                    {
-                        Column = header,
-                        Row = row,
-                        Type = TYPE_INNER_ERROR,
-                        Status = STAT_INNER_COL_SKIP,
-                        Message = string.Format("Invalid value for {0}. {1}", caption, "Should be greater than zero.")
-                    });
-                    dr.Info = INFO_WARN;
-                    return false;
+                    count++;
+                    if (count == AuditLogItems.Count && count == 1)
+                        comma = "";
+                    details += "{\"change\":\"" + item.Description + "\",\"iconCls\":\"" + item.ActionIcon + "\",\"from\":\"" + item.FromValue + "\",\"to\":\"" + item.ToValue + "\",\"leaf\":true}" + comma;
                 }
-                decimalDelegate(decimal.Parse(value));
-                return true;
-            }
-            catch (Exception ex)
-            {
-                dr.Messages.Add(new ImportDataMessage()
-                {
-                    Column = header,
-                    Row = row,
-                    Type = TYPE_INNER_ERROR,
-                    Status = STAT_INNER_COL_SKIP,
-                    Message = string.Format("Invalid value for {0}. {1}", caption, ex.Message)
-                });
-                dr.Info = INFO_WARN;
-                return false;
+
+                if (string.IsNullOrEmpty(details))
+                    await LogItem(id, "Imported from CSV file.", GetViewNamespace());
+                else
+                    await LogItem(id, "Imported from CSV file.", GetViewNamespace(), details);
             }
         }
+        #endregion
 
-        public static bool SetDecimal(string value, Action<decimal> decimalDelegate, string caption, ImportDataResult dr, string header, int row)
+        #region Value Resolvers
+        public void SetBoolean(CsvRecord record, string header, Action<bool> booleanDelegate)
         {
-            if (string.IsNullOrEmpty(value))
-                return false;
-
-            try
-            {
-                decimalDelegate(decimal.Parse(value));
-                return true;
-            }
-            catch (Exception ex)
-            {
-                dr.Messages.Add(new ImportDataMessage()
-                {
-                    Column = header,
-                    Row = row,
-                    Type = TYPE_INNER_ERROR,
-                    Status = STAT_INNER_COL_SKIP,
-                    Message = string.Format("Invalid value for {0}. {1}", caption, ex.Message)
-                });
-                dr.Info = INFO_WARN;
-                return false;
-            }
+            ImportDataLogicHelpers.SetBoolean(record, header, booleanDelegate);
         }
 
-        public static bool SetInteger(string value, Action<int> intDelegate, string caption, ImportDataResult dr, string header, int row)
+        public bool SetNonZeroDecimal(CsvRecord record, string header, Action<decimal> decimalDelegate)
         {
-            if (string.IsNullOrEmpty(value))
-                return false;
-            try
-            {
-                intDelegate(int.Parse(value));
-                return true;
-            }
-            catch (Exception ex)
-            {
-                dr.Messages.Add(new ImportDataMessage()
-                {
-                    Column = header,
-                    Row = row,
-                    Type = TYPE_INNER_ERROR,
-                    Status = STAT_INNER_COL_SKIP,
-                    Message = string.Format("Invalid value for {0}. {1}", caption, ex.Message)
-                });
-                dr.Info = INFO_WARN;
-                return false;
-            }
+            return ImportDataLogicHelpers.SetNonZeroDecimal(ImportResult, record, header, decimalDelegate);
         }
 
-        public static bool SetDate(string value, Action<DateTime> dateDelegate, string caption, ImportDataResult dr, string header, int row)
+        public bool SetDecimal(CsvRecord record, string header, Action<decimal> decimalDelegate)
         {
-            if (string.IsNullOrEmpty(value))
-                return false;
-            try
-            {
-                dateDelegate(DateTime.Parse(value));
-                return true;
-            }
-            catch (Exception ex)
-            {
-                dr.Messages.Add(new ImportDataMessage()
-                {
-                    Column = header,
-                    Row = row,
-                    Type = TYPE_INNER_ERROR,
-                    Status = STAT_INNER_COL_SKIP,
-                    Message = string.Format("Error parsing date for {0}. {1}", caption, ex.Message)
-                });
-                dr.Info = INFO_WARN;
-                return false;
-            }
+            return ImportDataLogicHelpers.SetDecimal(ImportResult, record, header, decimalDelegate);
         }
 
-        public static bool SetText(string value, Action<string> textDelegate, string caption, ImportDataResult dr, string header, int row, bool required = false)
+        public bool SetInteger(CsvRecord record, string header, Action<int> intDelegate)
         {
-            if (!string.IsNullOrEmpty(value.Trim()))
-            {
-                textDelegate(value.Trim());
-                return true;
-            }
-            else
-            {
-                dr.Messages.Add(new ImportDataMessage()
-                {
-                    Column = header,
-                    Row = row,
-                    Type = required ? TYPE_INNER_ERROR : TYPE_INNER_WARN,
-                    Status = required ? STAT_REC_SKIP : STAT_INNER_COL_SKIP,
-                    Message = string.Format(required ? "The value for {0} should not be blank." : "The value for {0} is blank.", caption)
-                });
-                dr.Info = required ? INFO_ERROR : INFO_WARN;
-                return false;
-            }
+            return ImportDataLogicHelpers.SetInteger(ImportResult, record, header, intDelegate);
         }
 
-        public static bool SetText(string value, Action<string> textDelegate)
+        public bool SetDate(CsvRecord record, string header, Action<DateTime> dateDelegate)
         {
-            if (!string.IsNullOrEmpty(value.Trim()))
-            {
-                textDelegate(value.Trim());
-                return true;
-            }
-            return false;
+            return ImportDataLogicHelpers.SetDate(ImportResult, record, header, dateDelegate);
         }
 
-        public static bool SetFixedLookup(string value, Action<string> fixedLUDelegate, string caption, IEnumerable<string> list, ImportDataResult dr, string header, int row, bool required = false)
+        public bool SetText(CsvRecord record, string header, Action<string> textDelegate, bool required = false)
         {
-            if (!string.IsNullOrEmpty(value.Trim()))
-            {
-                if (list.Any(p => p.Trim().ToLower() == value.Trim().ToLower()))
-                {
-                    fixedLUDelegate(value.Trim());
-                    return true;
-                }
-                dr.Messages.Add(new ImportDataMessage()
-                {
-                    Column = header,
-                    Row = row,
-                    Type = required ? TYPE_INNER_ERROR : TYPE_INNER_WARN,
-                    Status = required ? STAT_REC_SKIP : STAT_INNER_COL_SKIP,
-                    Message = string.Format("{0} is not a valid item in {1}.", value, caption)
-                });
-                dr.Info = required ? INFO_ERROR : INFO_WARN;
-                return false;
-            }
-            else
-            {
-                dr.Messages.Add(new ImportDataMessage()
-                {
-                    Column = header,
-                    Row = row,
-                    Type = required ? TYPE_INNER_ERROR : TYPE_INNER_WARN,
-                    Status = required ? STAT_REC_SKIP : STAT_INNER_COL_SKIP,
-                    Message = string.Format(required ? "The value for {0} should not be blank." : "The value for {0} is blank.", caption)
-                });
-                dr.Info = required ? INFO_ERROR : INFO_WARN;
-                return false;
-            }
+            return ImportDataLogicHelpers.SetText(ImportResult, record, header, textDelegate, required);
         }
+
+        public bool SetText(string value, Action<string> textDelegate)
+        {
+            return ImportDataLogicHelpers.SetText(value, textDelegate);
+        }
+
+        public bool SetIntLookupId<J>(CsvRecord record, string header, Expression<Func<J, bool>> predicate, Expression<Func<J, int?>> idProperty, Action<int> intDelegate, bool required = false) where J : class
+        {
+            return ImportDataLogicHelpers.SetIntLookupId<J>(Context, ImportResult, record, header, predicate, idProperty, intDelegate, required);
+        }
+
+        public bool SetLookupId<J>(CsvRecord record, string header, Expression<Func<J, bool>> predicate, Expression<Func<J, int?>> idProperty, Action<int?> intDelegate, bool required = false) where J : class
+        {
+            return ImportDataLogicHelpers.SetLookupId<J>(Context, ImportResult, record, header, predicate, idProperty, intDelegate, required);
+        }
+
+        public bool SetFixedLookup(CsvRecord record, string header, Action<string> fixedLUDelegate, IEnumerable<string> list, bool required = false, bool exactMatch = true)
+        {
+            return ImportDataLogicHelpers.SetFixedLookup(ImportResult, record, header, fixedLUDelegate, list, required, exactMatch);
+        }
+        #endregion
     }
 }
