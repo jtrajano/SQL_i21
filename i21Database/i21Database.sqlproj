@@ -6052,6 +6052,8 @@
     <Build Include="dbo\Stored Procedures\uspLGGetOrganicDeclarationReportDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspEMUpdateEntityType.sql" />
     <Build Include="dbo\Tables\tblTMDeliveryFillReportStaging.sql" />
+    <Build Include="dbo\Tables\tblICImportLog.sql" />
+    <Build Include="dbo\Tables\tblICImportLogDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
