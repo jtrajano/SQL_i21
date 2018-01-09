@@ -22,12 +22,6 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-BEGIN 
-	DECLARE @TransactionName AS VARCHAR(500) = 'uspICAddItemReceipt_' + CAST(NEWID() AS NVARCHAR(100));
-	BEGIN TRAN @TransactionName
-	SAVE TRAN @TransactionName
-END 
-
 DECLARE @intEntityId AS INT
 DECLARE @startingNumberId_InventoryReceipt AS INT = 23;
 DECLARE @receiptNumber AS NVARCHAR(50);
@@ -51,6 +45,27 @@ BEGIN
 	EXEC uspICRaiseError 80180;
 	GOTO _Exit;
 END 
+
+-- Check if Basket
+DECLARE @intItemId INT
+SET @intItemId = NULL
+
+SELECT TOP 1 @intItemId = i.intItemId
+FROM @ReceiptEntries r
+	INNER JOIN tblICItem i ON i.intItemId = r.intItemId
+WHERE i.ysnIsBasket = 1
+
+IF @intItemId IS NOT NULL
+BEGIN
+	EXEC uspICRaiseError 80198;
+	GOTO _Exit;
+END
+
+BEGIN 
+	DECLARE @TransactionName AS VARCHAR(500) = 'uspICAddItemReceipt_' + CAST(NEWID() AS NVARCHAR(100));
+	BEGIN TRAN @TransactionName
+	SAVE TRAN @TransactionName
+END
 
 -- Create the temp table if it does not exists. 
 IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult')) 
