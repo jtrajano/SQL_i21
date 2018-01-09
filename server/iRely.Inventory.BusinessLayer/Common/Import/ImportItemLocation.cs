@@ -13,7 +13,7 @@ namespace iRely.Inventory.BusinessLayer
 {
     public class ImportItemLocation : ImportDataLogic<tblICItemLocation>
     {
-        public ImportItemLocation(DbContext context, byte[] data) : base(context, data)
+        public ImportItemLocation(DbContext context, byte[] data, string username) : base(context, data, username)
         {
         }
 

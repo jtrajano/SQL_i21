@@ -12,7 +12,7 @@ namespace iRely.Inventory.BusinessLayer
 {
     public class ImportCommodityUOM : ImportDataLogic<tblICCommodityUnitMeasure>
     {
-        public ImportCommodityUOM(DbContext context, byte[] data) : base(context, data)
+        public ImportCommodityUOM(DbContext context, byte[] data, string username) : base(context, data, username)
         {
         }
 

@@ -14,7 +14,7 @@ namespace iRely.Inventory.BusinessLayer
     {
         private List<string> inventoryTypes;
 
-        public ImportCategories(DbContext context, byte[] data) : base(context, data)
+        public ImportCategories(DbContext context, byte[] data, string username) : base(context, data, username)
         {
             inventoryTypes = new List<string>();
             inventoryTypes.AddRange(new string[] { "Bundle", "Inventory", "Kit", "Finished Good", "Non-Inventory", "Other Charge", "Raw Material", "Service", "Software", "Comment" });

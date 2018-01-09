@@ -11,7 +11,7 @@ namespace iRely.Inventory.BusinessLayer
 {
     public class ImportItemPricingLevels : ImportDataLogic<tblICItemPricingLevel>
     {
-        public ImportItemPricingLevels(DbContext context, byte[] data) : base(context, data)
+        public ImportItemPricingLevels(DbContext context, byte[] data, string username) : base(context, data, username)
         {
         }
 

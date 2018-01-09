@@ -11,7 +11,7 @@ namespace iRely.Inventory.BusinessLayer
 {
     public class ImportFeedStocks : ImportDataLogic<tblICRinFeedStock>
     {
-        public ImportFeedStocks(DbContext context, byte[] data) : base(context, data)
+        public ImportFeedStocks(DbContext context, byte[] data, string username) : base(context, data, username)
         {
         }
 

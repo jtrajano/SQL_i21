@@ -11,7 +11,7 @@ namespace iRely.Inventory.BusinessLayer
 {
     public class ImportStorageUnitTypes : ImportDataLogic<tblICStorageUnitType>
     {
-        public ImportStorageUnitTypes(DbContext context, byte[] data) : base(context, data)
+        public ImportStorageUnitTypes(DbContext context, byte[] data, string username) : base(context, data, username)
         {
         }
 

@@ -18,7 +18,7 @@ namespace iRely.Inventory.BusinessLayer
 
         private List<string> unitTypes;
 
-        public ImportUnitOfMeasurement(DbContext context, byte[] data) : base(context, data)
+        public ImportUnitOfMeasurement(DbContext context, byte[] data, string username) : base(context, data, username)
         {
             unitTypes = new List<string>();
             unitTypes.AddRange(new string[] {

@@ -11,7 +11,7 @@ namespace iRely.Inventory.BusinessLayer
 {
     public class ImportFuelCodes : ImportDataLogic<tblICRinFuel>
     {
-        public ImportFuelCodes(DbContext context, byte[] data) : base(context, data)
+        public ImportFuelCodes(DbContext context, byte[] data, string username) : base(context, data, username)
         {
         }
 

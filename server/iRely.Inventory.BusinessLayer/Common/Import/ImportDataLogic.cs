@@ -31,18 +31,19 @@ namespace iRely.Inventory.BusinessLayer
         private CsvDataReader<T> reader;
         public string Username { get; set; }
 
-        public ImportDataLogic(DbContext context, byte[] data)
+        public ImportDataLogic(DbContext context, byte[] data, string username)
         {
             Pipeline = new Pipeline<T>();
             reader = new CsvDataReader<T>(GetRequiredFields());
             reader.ReadNextRecord += Reader_ReadNextRecord;
             this.context = context;
             this.data = data;
+            this.Username = username;
             ImportResult = new ImportDataResult()
             {
                 Type = Constants.TYPE_INFO,
                 Description = "There's nothing to import.",
-                Username = this.Username
+                Username = username
             };
             Initialize();
         }

@@ -30,7 +30,8 @@ namespace iRely.Inventory.BusinessLayer
                 var type = Type.GetType("iRely.Inventory.BusinessLayer.Import" + name);
                 if(type == null)
                     throw new Exception("Import for " + name + " is not yet supported.");
-                var instance = (IImportDataLogic)Activator.CreateInstance(type, Context.ContextManager, data);
+                var username = iRely.Common.Security.GetUserName();
+                var instance = (IImportDataLogic)Activator.CreateInstance(type, Context.ContextManager, data, username);
                 
                 //instance.Context = Context.ContextManager;
                 //instance.Data = data;

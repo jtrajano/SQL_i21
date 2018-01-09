@@ -13,7 +13,7 @@ namespace iRely.Inventory.BusinessLayer
 {
     public class ImportLineOfBusiness : ImportDataLogic<tblSMLineOfBusiness>
     {
-        public ImportLineOfBusiness(DbContext context, byte[] data) : base(context, data)
+        public ImportLineOfBusiness(DbContext context, byte[] data, string username) : base(context, data, username)
         {
         }
 

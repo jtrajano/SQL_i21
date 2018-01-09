@@ -11,7 +11,7 @@ namespace iRely.Inventory.BusinessLayer
 {
     public class ImportCommodities : ImportDataLogic<tblICCommodity>
     {
-        public ImportCommodities(DbContext context, byte[] data) : base(context, data)
+        public ImportCommodities(DbContext context, byte[] data, string username) : base(context, data, username)
         {
         }
         protected override string[] GetRequiredFields()

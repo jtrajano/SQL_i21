@@ -66,6 +66,7 @@ namespace iRely.Inventory.WebApi.Controllers
             catch (Exception ex)
             {
                 var ImportResult = new ImportDataResult();
+                ImportResult.Username = iRely.Common.Security.GetUserName();
                 ImportResult.AddWarning(new ImportDataMessage()
                 {
                     Type = Constants.TYPE_EXCEPTION,

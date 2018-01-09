@@ -11,7 +11,7 @@ namespace iRely.Inventory.BusinessLayer
 {
     public class ImportBrands : ImportDataLogic<tblICBrand>
     {
-        public ImportBrands(DbContext context, byte[] data) : base(context, data)
+        public ImportBrands(DbContext context, byte[] data, string username) : base(context, data, username)
         {
         }
 

@@ -11,7 +11,7 @@ namespace iRely.Inventory.BusinessLayer
 {
     public class ImportProcessCodes : ImportDataLogic<tblICRinProcess>
     {
-        public ImportProcessCodes(DbContext context, byte[] data) : base(context, data)
+        public ImportProcessCodes(DbContext context, byte[] data, string username) : base(context, data, username)
         {
         }
 
