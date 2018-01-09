@@ -1,11 +1,27 @@
 ﻿CREATE VIEW [dbo].[vyuCTContractCostEnquiryHedge]
 	
 AS
-	SELECT	*,
+	SELECT	o.intAssignFuturesToContractSummaryId,
+			o.intContractDetailId,
+			o.strInternalTradeNo,
+			o.dtmTransactionDate,
+			o.strFutMarketName,
+			o.strFutureMonth,
+			o.dblNoOfLots,
+			o.dblLots,
+			o.dblPrice,
+			o.dblLatestPrice,
+			o.dblGross,
+			o.dblCommission,
+			o.dblNet,
+			o.dblDefaultCurrencyFactor,
+			o.intCent,
 			dblGross / intCent AS dblGrossImpact,
 			dblNet / intCent AS dblNetImpact,
 			dblGross * dblDefaultCurrencyFactor	AS  dblGrossImpactInDefCurrency,
-			dblNet * dblDefaultCurrencyFactor		AS  dblNetImpactInDefCurrency
+			dblNet * dblDefaultCurrencyFactor		AS  dblNetImpactInDefCurrency,
+			CASE WHEN o.dblLots < 0 THEN o.dblLots ELSE 0 END dblNegLots,
+			CASE WHEN o.dblLots > 0 THEN o.dblLots ELSE 0 END dblPosLots
 	FROM
 	(
 		SELECT	intAssignFuturesToContractSummaryId,
@@ -39,11 +55,11 @@ AS
 						CASE WHEN FT.strBuySell = 'Sell' THEN -1 ELSE 1 END intProffitLoss,
 						dbo.fnCTCalculateAmountBetweenCurrency(FT.intCurrencyId,null,1,1)									AS	dblDefaultCurrencyFactor,
 						ISNULL(CY.intCent,1) AS intCent
-				FROM	tblRKAssignFuturesToContractSummary SY
-				JOIN	tblRKFutOptTransaction				FT	ON	FT.intFutOptTransactionId	=	SY.intFutOptTransactionId
-				JOIN	tblRKFutureMarket					MA	ON	MA.intFutureMarketId		=	FT.intFutureMarketId
-				JOIN	tblRKFuturesMonth					MO	ON	MO.intFutureMonthId			=	FT.intFutureMonthId
-				JOIN	tblSMCurrency						CY	ON	CY.intCurrencyID			=	FT.intCurrencyId		LEFT
-				JOIN	tblCTContractDetail					CD	ON	CD.intContractHeaderId		=	SY.intContractHeaderId
+				FROM	dbo.tblRKAssignFuturesToContractSummary SY
+				JOIN	dbo.tblCTContractDetail					CD	ON	CD.intContractHeaderId		=	SY.intContractHeaderId
+				JOIN	dbo.tblRKFutOptTransaction				FT	ON	FT.intFutOptTransactionId	=	SY.intFutOptTransactionId
+				JOIN	dbo.tblRKFutureMarket					MA	ON	MA.intFutureMarketId		=	FT.intFutureMarketId
+				JOIN	dbo.tblRKFuturesMonth					MO	ON	MO.intFutureMonthId			=	FT.intFutureMonthId
+				JOIN	dbo.tblSMCurrency						CY	ON	CY.intCurrencyID			=	FT.intCurrencyId		
 		)t
 	)o
