@@ -132,6 +132,7 @@ SELECT  TOP 10 * FROM(
 			--,ITEM.strItemNo
 			--,ITEM.strDescription
 			,PYMTDetail.intPaymentDetailId
+			,strCurrency = (SELECT strCurrency FROM tblSMCurrency WHERE intCurrencyID = F.intCurrencyId)
 	FROM	[dbo].[tblCMBankTransaction] F INNER JOIN [dbo].[tblAPPayment] PYMT
 				ON F.strTransactionId = PYMT.strPaymentRecordNum
 			INNER JOIN [dbo].[tblAPPaymentDetail] PYMTDetail
@@ -173,6 +174,7 @@ SELECT  TOP 10 * FROM(
 			--,ITEM.strItemNo
 			--,ITEM.strDescription
 			,PYMTDetail.intPaymentDetailId
+			,strCurrency = (SELECT strCurrency FROM tblSMCurrency WHERE intCurrencyID = F.intCurrencyId)
 	FROM	[dbo].[tblCMBankTransaction] F
 		INNER JOIN [dbo].[tblAPPayment] PYMT
 			ON PYMT.strPaymentRecordNum = F.strTransactionId
@@ -208,6 +210,7 @@ SELECT  TOP 10 * FROM(
 			--,ITEM.strItemNo
 			--,ITEM.strDescription
 			,PYMTDetail.intPaymentDetailId
+			,strCurrency = (SELECT strCurrency FROM tblSMCurrency WHERE intCurrencyID = F.intCurrencyId)
 	FROM	[dbo].[tblCMBankTransaction] F INNER JOIN [dbo].[tblAPPayment] PYMT
 				ON F.strTransactionId = PYMT.strPaymentRecordNum
 			INNER JOIN [dbo].[tblAPPaymentDetail] PYMTDetail

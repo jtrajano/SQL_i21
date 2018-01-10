@@ -207,6 +207,6 @@ BEGIN
 		@contact,
 		@userId,
 		@currency,
-		@subCurrencyCents
+		ISNULL(@subCurrencyCents,1)
 	RETURN;
 END

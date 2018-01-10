@@ -10,10 +10,10 @@ WITH Refund AS (
 			RCus.dblCashPayout,
 			RR.ysnQualified,
 			RCatPCat.dblVolume,
-			dblRefundAmount = CASE WHEN RCus.ysnEligibleRefund = 1 THEN ROUND((RCatPCat.dblRefundRate * RCatPCat.dblVolume),2) ELSE 0 END,
-			dblNonRefundAmount = CASE WHEN RCus.ysnEligibleRefund = 1 THEN 0 ELSE ROUND((RCatPCat.dblRefundRate * RCatPCat.dblVolume),2) END,
-			dblCashRefund = CASE WHEN RCus.ysnEligibleRefund = 1 THEN ROUND((RCatPCat.dblRefundRate * RCatPCat.dblVolume) * (RR.dblCashPayout/100),2) ELSE 0 END,
-			dblEquityRefund = CASE WHEN RCus.ysnEligibleRefund = 1 THEN ROUND((RCatPCat.dblRefundRate * RCatPCat.dblVolume) - (RCatPCat.dblRefundRate * RCatPCat.dblVolume) * (RR.dblCashPayout/100),2) ELSE 0 END
+			dblRefundAmount = CASE WHEN RCus.ysnEligibleRefund = 1 THEN ROUND((RCatPCat.dblRefundRate * RCatPCat.dblVolume), 2) ELSE 0 END,
+			dblNonRefundAmount = CASE WHEN RCus.ysnEligibleRefund = 1 THEN 0 ELSE ROUND((RCatPCat.dblRefundRate * RCatPCat.dblVolume), 2) END,
+			dblCashRefund = CASE WHEN RCus.ysnEligibleRefund = 1 THEN RCus.dblCashRefund ELSE 0 END,
+			dblEquityRefund = CASE WHEN RCus.ysnEligibleRefund = 1 THEN RCus.dblEquityRefund ELSE 0 END
 		FROM tblPATRefundCustomer RCus
 		INNER JOIN tblPATRefund R
 			ON RCus.intRefundId = R.intRefundId
@@ -39,8 +39,8 @@ SELECT	NEWID() as id,
 		dblVolume = SUM(dblVolume),
 		dblRefundAmount = SUM(dblRefundAmount),
 		dblNonRefundAmount  = SUM(dblNonRefundAmount),
-		dblCashRefund = SUM(dblCashRefund),
-		dblEquityRefund = SUM(dblEquityRefund)
+		dblCashRefund,
+		dblEquityRefund
 FROM Refund
 GROUP BY intRefundId,
 		intFiscalYearId,
@@ -49,4 +49,6 @@ GROUP BY intRefundId,
 		strRefundType,
 		strRefundDescription,
 		dblCashPayout,
+		dblCashRefund,
+		dblEquityRefund,
 		ysnQualified

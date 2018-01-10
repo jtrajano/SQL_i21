@@ -10,7 +10,7 @@ BEGIN TRY
 	DECLARE @dblIncrementBy DECIMAL(24, 6)
 	DECLARE @dblDiscountAmount DECIMAL(24, 6)
 	DECLARE @dblShrink DECIMAL(24, 6)
-	DECLARE @dblNextRowFrom DECIMAL(24, 6)
+	DECLARE @dblNextRowFrom DECIMAL(24, 6)	
 	DECLARE @dblEndingValue DECIMAL(24, 6)
 	DECLARE @dblNewDiscountAmount DECIMAL(24, 6)
 	DECLARE @dblNewShrink DECIMAL(24, 6)
@@ -131,7 +131,7 @@ BEGIN TRY
 			SET @dblDiscountAmount = NULL
 			SET @dblShrink = NULL
 			SET @dblEndingValue = NULL
-			SET @dblNextRowFrom = NULL
+			SET @dblNextRowFrom = NULL			
 
 			SELECT @dblFrom = dblFrom
 				,@dblTo = dblTo
@@ -164,6 +164,8 @@ BEGIN TRY
 						SET @dblEndingValue = @dblNextRowFrom - 0.000001
 					ELSE IF (@dblFrom + @dblIncrementBy < @dblTo)
 						SET @dblEndingValue = @dblFrom + @dblIncrementBy - 0.000001
+					ELSE IF (@dblTo < @dblNextRowFrom AND @dblNextRowFrom > 0)
+						SET @dblEndingValue = @dblNextRowFrom - 0.000001
 					ELSE
 						SET @dblEndingValue = @dblFrom + @dblIncrementBy
 
@@ -201,9 +203,7 @@ BEGIN TRY
 						IF @dblTo = @dblNextRowFrom
 							SET @dblEndingValue = @dblTo + 0.000001
 						ELSE
-							SET @dblEndingValue = @dblTo
-					--ELSE
-					--	SET @dblEndingValue = @dblTo
+							SET @dblEndingValue = CASE WHEN @dblNextRowFrom > 0 THEN  @dblNextRowFrom + 0.000001 ELSE @dblTo END
 
 					SET @dblNewDiscountAmount = ISNULL(@dblNewDiscountAmount, 0) + @dblDiscountAmount
 					SET @dblNewShrink = ISNULL(@dblNewShrink, 0) + @dblShrink
@@ -215,12 +215,12 @@ BEGIN TRY
 						,dblDiscountAmount
 						,dblShrink
 					)
-					SELECT 
+					SELECT
 						 @dblFrom
 						,@dblEndingValue
 						,@dblNewDiscountAmount
 						,@dblNewShrink
-						
+
 					SET @dblFrom = @dblFrom + @dblIncrementBy
 				END
 			END
@@ -344,7 +344,7 @@ BEGIN TRY
 		END								
 		
 	END
-	
+			
 END TRY
 
 BEGIN CATCH

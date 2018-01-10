@@ -152,7 +152,7 @@ IF(@ToOrigin = 1)
 			,[sscar_state]			= SUBSTRING(EntityLocation.[strState], 1, 2)
 			,[sscar_zip]			= SUBSTRING(EntityLocation.[strZipCode], 1, 9)
 			,[sscar_fed_id]			= SUBSTRING(P.[strFederalId], 1, 15)
-			,[sscar_trans_mode]		= [sscar_trans_mode]
+			,[sscar_trans_mode]		= ISNULL(SUBSTRING(B.strCode, 1, 2), [sscar_trans_mode])
 			,[sscar_in_sf401_yn]	= [sscar_in_sf401_yn]
 			,[sscar_trans_lic_no]	= SUBSTRING(P.[strTransporterLicense], 1, 15)
 			,[sscar_ifta_no]		= SUBSTRING(P.[strMotorCarrierIFTA], 1, 15)
@@ -172,9 +172,13 @@ IF(@ToOrigin = 1)
 				on P.intEntityId = EntityLocation.intEntityId  and ysnDefaultLocation = 1
 		INNER JOIN
 			@RecordsToUpdate A
-				ON P.[strShipViaOriginKey] = A.[strShipViaOriginKey] COLLATE Latin1_General_CI_AS 				
+				ON P.[strShipViaOriginKey] = A.[strShipViaOriginKey] COLLATE SQL_Latin1_General_CP1_CS_AS 				
+		LEFT JOIN 
+			tblSMTransportationMode B
+				ON B.strDescription = P.strTransportationMode COLLATE Latin1_General_CI_AS 
 		WHERE
-			 [sscarmst].[sscar_key] = A.[strShipViaOriginKey]  
+			[sscarmst].[sscar_key] = A.[strShipViaOriginKey]  
+			--[sscarmst].[sscar_key] COLLATE Latin1_General_CI_AS = A.[strShipViaOriginKey] COLLATE SQL_Latin1_General_CP1_CS_AS
 	
 		SET @UpdatedCount = @@ROWCOUNT				
 	END
@@ -219,7 +223,7 @@ ELSE
 			,P.[sscar_fed_id]		AS [strFederalId]
 			,P.[sscar_trans_lic_no]	AS [strTransporterLicense]
 			,P.[sscar_ifta_no]		AS [strMotorCarrierIFTA]
-			,P.[sscar_trans_mode]	AS [strTransportationMode]
+			,B.strDescription AS [strTransportationMode] --P.[sscar_trans_mode]	AS [strTransportationMode]
 			,(CASE WHEN P.[sscar_co_owned_yn] = ''Y'' 
 				THEN 1
 				ELSE 0
@@ -236,6 +240,9 @@ ELSE
 		LEFT OUTER JOIN
 			tblSMShipVia SV
 				ON P.[sscar_key] COLLATE Latin1_General_CI_AS  = SV.[strShipViaOriginKey]
+		LEFT JOIN 
+			tblSMTransportationMode B
+				ON LTRIM(RTRIM(B.strCode)) COLLATE Latin1_General_CI_AS  = LTRIM(RTRIM(P.sscar_trans_mode)) COLLATE Latin1_General_CI_AS
 		WHERE
 			SV.[strShipViaOriginKey] IS NULL
 		ORDER BY
@@ -257,7 +264,7 @@ ELSE
 			,[strFederalId]				= P.[sscar_fed_id]
 			,[strTransporterLicense]	= P.[sscar_trans_lic_no]
 			,[strMotorCarrierIFTA]		= P.[sscar_ifta_no]
-			,[strTransportationMode]	= [strTransportationMode]
+			,[strTransportationMode]	= B.strDescription --[strTransportationMode]
 			,[ysnCompanyOwnedCarrier]	= 
 										(CASE WHEN P.[sscar_co_owned_yn] = ''Y'' 
 											THEN 1
@@ -269,7 +276,10 @@ ELSE
 			[sscarmst] P
 		INNER JOIN
 			@RecordsToUpdate A
-				ON P.[sscar_key] = A.[strShipViaOriginKey]				
+				ON P.[sscar_key] = A.[strShipViaOriginKey]
+		LEFT JOIN 
+			tblSMTransportationMode B
+				ON LTRIM(RTRIM(B.strDescription)) COLLATE Latin1_General_CI_AS = LTRIM(RTRIM(P.sscar_trans_mode)) COLLATE Latin1_General_CI_AS				
 		WHERE
 			 [tblSMShipVia].[strShipViaOriginKey] = A.[strShipViaOriginKey] COLLATE Latin1_General_CI_AS  
 	 

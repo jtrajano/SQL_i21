@@ -6,6 +6,7 @@
 	,@blnValidateLotReservation BIT = 0
 	,@strNotes NVARCHAR(MAX) = NULL
 	,@dtmDate DATETIME = NULL
+	,@ysnBulkChange BIT = 0
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -151,6 +152,11 @@ BEGIN TRY
 				END
 			) = @dblNewLotQty
 	BEGIN
+		IF @ysnBulkChange = 1
+		BEGIN
+			RETURN
+		END
+
 		RAISERROR (
 				'Old and new lot qty cannot be same.'
 				,11

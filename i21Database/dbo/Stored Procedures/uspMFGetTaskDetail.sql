@@ -10,16 +10,26 @@ BEGIN
 		,L.strLotAlias
 		,PL.strParentLotNumber
 		,SL.strName
-		,(
-			(L.dblQty + T.dblPickQty) - ISNULL((
-					SELECT SUM(ISNULL(T1.dblQty, 0))
-					FROM tblMFTask T1
-					WHERE T1.intLotId = T.intLotId
-					), 0)
-			) AS dblQty
+		,L.dblQty
 		,T.dblPickQty AS dblTaskQty
 		,IUM.strUnitMeasure AS strQtyUOM
 		,T.intItemUOMId AS intQtyUOMId
+		,ISNULL((
+				SELECT SUM(ISNULL(T1.dblQty, 0))
+				FROM tblMFTask T1
+				WHERE T1.intLotId = T.intLotId
+					AND T1.intTaskId <> T.intTaskId
+				), 0) AS dblReservedQty
+		,(
+			(L.dblQty) - ISNULL((
+					SELECT SUM(ISNULL(T1.dblQty, 0))
+					FROM tblMFTask T1
+					WHERE T1.intLotId = T.intLotId
+						AND T1.intTaskId <> T.intTaskId
+					), 0)
+			) AS dblAvailableQty
+		,0.0 AS dblReservedWeight -- Not used in client
+		,0.0 AS dblAvailableWeight -- Not used in client
 	FROM tblMFTask T
 	JOIN tblICStorageLocation SL ON SL.intStorageLocationId = T.intFromStorageLocationId
 	JOIN tblICItem I ON I.intItemId = T.intItemId

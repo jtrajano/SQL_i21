@@ -61,6 +61,7 @@ BEGIN TRY
 		,@intWeightUOMId = intWeightUOMId
 		,@dblWeight = dblWeight
 		,@dblOldSourceQty = dblQty
+		,@intParentLotId = intParentLotId
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 

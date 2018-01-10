@@ -6,7 +6,7 @@ BEGIN
 		,L.strLotNumber
 		,I.strItemNo
 		,I.strDescription
-		,W.dblEnteredQty as dblQuantity
+		,W.dblEnteredQty AS dblQuantity
 		,IU.intItemUOMId
 		,U.intUnitMeasureId
 		,U.strUnitMeasure
@@ -28,6 +28,7 @@ BEGIN
 		,L.intParentLotId
 		,'STAGE' AS strTransactionName
 		,PL.strParentLotNumber
+		,1 AS intDisplayOrder
 	FROM dbo.tblMFWorkOrderInputLot W
 	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intEnteredItemUOMId
@@ -68,8 +69,13 @@ BEGIN
 		,S.intShiftId
 		,S.strShiftName
 		,IsNULL(L.intParentLotId, 0) AS intParentLotId
-		,'CONSUME' AS strTransactionName
+		,CASE 
+			WHEN intSequenceNo = 9999
+				THEN 'YIELD ADJUST '
+			ELSE 'CONSUME'
+			END AS strTransactionName
 		,PL.strParentLotNumber
+		,2 AS intDisplayOrder
 	FROM dbo.tblMFWorkOrderConsumedLot W
 	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId
@@ -82,6 +88,6 @@ BEGIN
 	LEFT JOIN dbo.tblICContainer C ON C.intContainerId = W.intContainerId
 	LEFT JOIN dbo.tblMFShift S ON S.intShiftId = W.intShiftId
 	WHERE intWorkOrderId = @intWorkOrderId
-	ORDER BY strTransactionName DESC
+	ORDER BY intDisplayOrder
 		,W.intWorkOrderInputLotId
 END

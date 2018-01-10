@@ -31,9 +31,9 @@ BEGIN TRY
 		,@strLotTracking NVARCHAR(50)
 		,@intSpecialPalletLotId INT
 		,@strLocationName NVARCHAR(50)
-		,@intStorageLocationId int
-		,@strLotNumber nvarchar(50)
-
+		,@intStorageLocationId INT
+		,@strLotNumber NVARCHAR(50)
+		,@intMachineId INT
 	DECLARE @GLEntriesForOtherCost TABLE (
 		dtmDate DATETIME
 		,intItemId INT
@@ -85,12 +85,11 @@ BEGIN TRY
 		,@intItemUOMId = intItemUOMId
 		,@dblPhysicalCount = dblPhysicalCount
 		,@intTransactionDetailId = intWorkOrderProducedLotId
-		,@intStorageLocationId=intStorageLocationId 
+		,@intStorageLocationId = intStorageLocationId
 		,@intItemId = intItemId
 	FROM tblMFWorkOrderProducedLot
 	WHERE intWorkOrderId = @intWorkOrderId
 		AND intBatchId = @intBatchId
-
 
 	SELECT @strLotTracking = strLotTracking
 	FROM dbo.tblICItem
@@ -116,7 +115,6 @@ BEGIN TRY
 	--			)
 	--	RETURN
 	--END
-
 	IF EXISTS (
 			SELECT *
 			FROM tblMFWorkOrderProducedLot
@@ -170,15 +168,15 @@ BEGIN TRY
 		RETURN
 	END
 
-	SELECT @strLotNumber=strLotNumber
+	SELECT @strLotNumber = strLotNumber
 	FROM dbo.tblICLot
 	WHERE intLotId = @intLotId
 
 	IF EXISTS (
 			SELECT *
 			FROM dbo.tblICLot
-			WHERE strLotNumber=@strLotNumber
-				AND intStorageLocationId =@intStorageLocationId 
+			WHERE strLotNumber = @strLotNumber
+				AND intStorageLocationId = @intStorageLocationId
 				AND dblQty = 0
 			)
 		AND @strLotTracking <> 'No'
@@ -461,6 +459,7 @@ BEGIN TRY
 		,@intItemUOMId = intItemUOMId
 		,@dblPhysicalCount = dblPhysicalCount
 		,@intSpecialPalletLotId = intSpecialPalletLotId
+		,@intMachineId = intMachineId
 	FROM tblMFWorkOrderProducedLot
 	WHERE intWorkOrderId = @intWorkOrderId
 		AND intBatchId = @intBatchId
@@ -493,6 +492,7 @@ BEGIN TRY
 	SET dblOutputQuantity = dblOutputQuantity - @dblQuantity
 	WHERE intWorkOrderId = @intWorkOrderId
 		AND intItemId = @intItemId
+		AND IsNULL(intMachineId, 0) = IsNULL(@intMachineId, 0)
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION

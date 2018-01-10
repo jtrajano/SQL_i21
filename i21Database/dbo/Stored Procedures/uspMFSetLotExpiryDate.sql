@@ -4,6 +4,7 @@
 	,@strReasonCode NVARCHAR(MAX) = NULL
 	,@strNotes NVARCHAR(MAX) = NULL
 	,@dtmDate DATETIME = NULL
+	,@ysnBulkChange BIT = 0
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -82,6 +83,11 @@ BEGIN TRY
 
 	IF @dtmLotExpiryDate = @dtmNewExpiryDate
 	BEGIN
+		IF @ysnBulkChange = 1
+		BEGIN
+			RETURN
+		END
+
 		RAISERROR (
 				'Old and new expiry date cannot be same.'
 				,11

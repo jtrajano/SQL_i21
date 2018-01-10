@@ -5,11 +5,11 @@ SELECT * FROM
 			 SELECT 
 			 intPaymentId				  = PYMT.intPaymentId
 			,strPaymentNo				  = PYMT.strPaymentRecordNum
-			,InboundNetWeight			  = CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 ELSE BillDtl.dblQtyOrdered												  END
-			,InboundGrossDollars		  = CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 ELSE BillDtl.dblTotal													  END
-			,InboundTax					  = CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 ELSE BillDtl.dblTax														  END
-			,InboundDiscount			  = ISNULL(BillByReceipt.dblTotal, 0)
-			,InboundNetDue				  = CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 ELSE BillDtl.dblTotal + BillDtl.dblTax + ISNULL(BillByReceipt.dblTotal, 0) END
+			,InboundNetWeight			  = SUM(CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 ELSE BillDtl.dblQtyOrdered												  END)
+			,InboundGrossDollars		  = SUM(CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 ELSE BillDtl.dblTotal													  END)
+			,InboundTax					  = SUM(CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 ELSE BillDtl.dblTax														  END)
+			,InboundDiscount			  = SUM(ISNULL(BillByReceipt.dblTotal, 0))
+			,InboundNetDue				  = SUM(CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 ELSE BillDtl.dblTotal + BillDtl.dblTax + ISNULL(BillByReceipt.dblTotal, 0) END)
 			,OutboundNetWeight			  = 0
 			,OutboundGrossDollars		  = 0
 			,OutboundTax				  = 0
@@ -75,6 +75,7 @@ SELECT * FROM
 			 				FROM tblAPPaymentDetail
 			 				WHERE intBillId IS NOT NULL
 			 				GROUP BY intPaymentId
+							HAVING  SUM(dblTotal) <> SUM(dblPayment)
 			 		   ) PartialPayment ON PartialPayment.intPaymentId = PYMT.intPaymentId
 
 			 WHERE (
@@ -82,7 +83,18 @@ SELECT * FROM
 			 		OR BillDtl.intInventoryReceiptItemId IS NOT NULL
 			 		)
 			 	AND Item.strType <> 'Other Charge' 
-			 	
+			 GROUP BY 
+			 PYMT.intPaymentId
+			,PYMT.strPaymentRecordNum
+			,Invoice.dblPayment
+			,BillByReceiptItem.dblTotal
+			,VendorPrepayment.dblVendorPrepayment
+			,Invoice.dblPayment
+			,ScaleDiscountTax.dblGradeFactorTax
+			,PartialPayment.dblPayment
+			,PartialPayment.dblPayment
+			,PartialPayment.dblTotals
+			,PYMT.dblAmountPaid 	
 
 			--------------------------------------------------------
 			-- SCALE --> Storage --> Settle Storage
@@ -180,6 +192,7 @@ SELECT * FROM
 						  FROM tblAPPaymentDetail
 						  WHERE intBillId IS NOT NULL
 						  GROUP BY intPaymentId
+						  HAVING  SUM(dblTotal) <> SUM(dblPayment)
 					    ) PartialPayment ON PartialPayment.intPaymentId=PYMT.intPaymentId
             WHERE  Item.strType <> 'Other Charge' 
 			AND

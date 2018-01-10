@@ -22,13 +22,25 @@ DECLARE @intBankAccountId AS INT
 DECLARE @xmlDocumentId AS INT
 DECLARE @companyLogo varbinary(max)
 
-DECLARE @strPhone NVARCHAR(500)
+DECLARE		@strCompanyName			NVARCHAR(500),
+			@strAddress				NVARCHAR(500),
+			@strCounty				NVARCHAR(500),
+			@strCity				NVARCHAR(500),
+			@strState				NVARCHAR(500),
+			@strZip					NVARCHAR(500),
+			@strCountry				NVARCHAR(500),
+			@strPhone				NVARCHAR(500)
 
-SELECT @strPhone = CASE 
-						WHEN LTRIM(RTRIM(strPhone)) = '' THEN NULL 
-						ELSE LTRIM(RTRIM(strPhone)) 
-				   END 
-FROM tblSMCompanySetup
+			SELECT	
+			 @strCompanyName	=	CASE WHEN LTRIM(RTRIM(strCompanyName)) = '' THEN NULL ELSE LTRIM(RTRIM(strCompanyName)) END
+			,@strAddress		=	CASE WHEN LTRIM(RTRIM(strAddress)) = ''     THEN NULL ELSE LTRIM(RTRIM(strAddress))		END
+			,@strCounty		    =	CASE WHEN LTRIM(RTRIM(strCounty)) = ''      THEN NULL ELSE LTRIM(RTRIM(strCounty))		END
+			,@strCity		    =	CASE WHEN LTRIM(RTRIM(strCity)) = ''        THEN NULL ELSE LTRIM(RTRIM(strCity))		END
+			,@strState		    =	CASE WHEN LTRIM(RTRIM(strState)) = ''       THEN NULL ELSE LTRIM(RTRIM(strState))		END
+			,@strZip			=	CASE WHEN LTRIM(RTRIM(strZip)) = ''         THEN NULL ELSE LTRIM(RTRIM(strZip))			END
+			,@strCountry		=	CASE WHEN LTRIM(RTRIM(strCountry)) = ''     THEN NULL ELSE LTRIM(RTRIM(strCountry))		END
+			,@strPhone		    =   CASE WHEN LTRIM(RTRIM(strPhone)) = ''       THEN NULL ELSE LTRIM(RTRIM(strPhone))		END 
+			FROM tblSMCompanySetup
 
 DECLARE @temp_xml_table TABLE 
 (
@@ -267,8 +279,8 @@ BEGIN
 		,intBillDetailId					= BillDtl.intBillDetailId
 		,intTransactionId					= BNKTRN.intTransactionId
 		,strTransactionId					= BNKTRN.strTransactionId
-		,strCompanyName						= COMPANY.strCompanyName
-		,strCompanyAddress					= dbo.fnConvertToFullAddress(COMPANY.strAddress, COMPANY.strCity, COMPANY.strState, COMPANY.strZip) + CHAR(13)+ CHAR(10) + @strPhone
+		,strCompanyName						= @strCompanyName
+		,strCompanyAddress					= ISNULL(@strAddress,'') + ', ' + CHAR(13)+CHAR(10) +ISNULL(@strCity,'') + ISNULL(', '+@strState,'') + ISNULL(', '+@strZip,'') + ISNULL(', '+@strCountry,'')+ CHAR(13)+ CHAR(10) + ISNULL(''+@strPhone,'') 
 		,strItemNo							= Item.strItemNo
 		,lblGrade							= CASE WHEN SC.intCommodityAttributeId >0 THEN 'Grade'				    ELSE NULL END
 		,strGrade							= CASE WHEN SC.intCommodityAttributeId >0 THEN Attribute.strDescription ELSE NULL END
@@ -378,8 +390,7 @@ BEGIN
 	LEFT JOIN tblCTContractHeader CNTRCT ON BillDtl.intContractHeaderId = CNTRCT.intContractHeaderId
 	LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityId] = ISNULL(PYMT.[intEntityVendorId], BNKTRN.intEntityId)
 	LEFT JOIN tblEMEntity ENTITY ON VENDOR.[intEntityId] = ENTITY.intEntityId
-	LEFT JOIN tblEMEntityEFTInformation EFT ON ENTITY.intEntityId = EFT.intEntityId AND EFT.ysnActive = 1
-	LEFT JOIN tblSMCompanySetup COMPANY ON COMPANY.intCompanySetupID = (SELECT TOP 1 intCompanySetupID FROM tblSMCompanySetup )
+	LEFT JOIN tblEMEntityEFTInformation EFT ON ENTITY.intEntityId = EFT.intEntityId AND EFT.ysnActive = 1	
 	LEFT JOIN tblICItemUOM ItemUOM ON BillDtl.intUnitOfMeasureId = ItemUOM.intItemUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 	LEFT JOIN tblSCTicket SC ON SC.intTicketId = INVRCPTITEM.intSourceId
@@ -455,8 +466,8 @@ BEGIN
 		,intBillDetailId					= BillDtl.intBillDetailId
 		,intTransactionId					= BNKTRN.intTransactionId
 		,strTransactionId					= BNKTRN.strTransactionId
-		,strCompanyName						= COMPANY.strCompanyName
-		,strCompanyAddress					= dbo.fnConvertToFullAddress(COMPANY.strAddress, COMPANY.strCity, COMPANY.strState, COMPANY.strZip)+ CHAR(13)+ CHAR(10) + @strPhone
+		,strCompanyName						= @strCompanyName
+		,strCompanyAddress					= ISNULL(@strAddress,'') + ', ' + CHAR(13)+CHAR(10) +ISNULL(@strCity,'') + ISNULL(', '+@strState,'') + ISNULL(', '+@strZip,'') + ISNULL(', '+@strCountry,'')+ CHAR(13)+ CHAR(10) + ISNULL(''+@strPhone,'') 
 		,strItemNo							= Item.strItemNo
 		,lblGrade							= CASE WHEN SC.intCommodityAttributeId >0 THEN 'Grade'					ELSE NULL END
 		,strGrade							= CASE WHEN SC.intCommodityAttributeId >0 THEN Attribute.strDescription ELSE NULL END
@@ -618,7 +629,6 @@ BEGIN
 	LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityId] = ISNULL(PYMT.[intEntityVendorId], BNKTRN.intEntityId)
 	LEFT JOIN tblEMEntity ENTITY ON VENDOR.[intEntityId] = ENTITY.intEntityId
 	LEFT JOIN tblEMEntityEFTInformation EFT ON ENTITY.intEntityId = EFT.intEntityId AND EFT.ysnActive = 1
-	LEFT JOIN tblSMCompanySetup COMPANY ON COMPANY.intCompanySetupID = (SELECT TOP 1 intCompanySetupID FROM tblSMCompanySetup)
 	LEFT JOIN tblICItemUOM ItemUOM ON BillDtl.intUnitOfMeasureId = ItemUOM.intItemUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 	LEFT JOIN tblEMEntityFarm EntityFarm ON EntityFarm.intEntityId=VENDOR.intEntityId AND EntityFarm.intFarmFieldId=ISNULL(SC.intFarmFieldId, 0)
@@ -636,8 +646,8 @@ BEGIN
 		,intBillDetailId					= BillDtl.intBillDetailId
 		,intTransactionId					= BNKTRN.intTransactionId
 		,strTransactionId					= BNKTRN.strTransactionId
-		,strCompanyName						= COMPANY.strCompanyName
-		,strCompanyAddress					= dbo.fnConvertToFullAddress(COMPANY.strAddress, COMPANY.strCity, COMPANY.strState, COMPANY.strZip)+ CHAR(13)+ CHAR(10) + @strPhone
+		,strCompanyName						= @strCompanyName
+		,strCompanyAddress					= ISNULL(@strAddress,'') + ', ' + CHAR(13)+CHAR(10) +ISNULL(@strCity,'') + ISNULL(', '+@strState,'') + ISNULL(', '+@strZip,'') + ISNULL(', '+@strCountry,'')+ CHAR(13)+ CHAR(10) + ISNULL(''+@strPhone,'') 
 		,strItemNo							= Item.strItemNo
 		,lblGrade							= NULL
 		,strGrade							= NULL
@@ -806,8 +816,7 @@ BEGIN
 	LEFT JOIN tblCTContractHeader CNTRCT ON BillDtl.intContractHeaderId = CNTRCT.intContractHeaderId
 	LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityId] = ISNULL(PYMT.[intEntityVendorId], BNKTRN.intEntityId)
 	LEFT JOIN tblEMEntity ENTITY ON VENDOR.[intEntityId] = ENTITY.intEntityId
-	LEFT JOIN tblEMEntityEFTInformation EFT ON ENTITY.intEntityId = EFT.intEntityId AND EFT.ysnActive = 1
-	LEFT JOIN tblSMCompanySetup COMPANY ON COMPANY.intCompanySetupID = (SELECT TOP 1 intCompanySetupID FROM tblSMCompanySetup)
+	LEFT JOIN tblEMEntityEFTInformation EFT ON ENTITY.intEntityId = EFT.intEntityId AND EFT.ysnActive = 1	
 	LEFT JOIN tblICItemUOM ItemUOM ON BillDtl.intUnitOfMeasureId = ItemUOM.intItemUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId	
 	--LEFT JOIN tblICCommodityAttribute Attribute ON Attribute.intCommodityAttributeId=SC.intCommodityAttributeId	
@@ -910,8 +919,8 @@ BEGIN
 				,intBillDetailId		    = BillDtl.intBillDetailId
 				,intTransactionId		    = BNKTRN.intTransactionId
 				,strTransactionId		    = BNKTRN.strTransactionId
-				,strCompanyName			    = COMPANY.strCompanyName
-				,strCompanyAddress		    = dbo.fnConvertToFullAddress(COMPANY.strAddress, COMPANY.strCity, COMPANY.strState, COMPANY.strZip)+ CHAR(13)+ CHAR(10) + @strPhone
+				,strCompanyName				= @strCompanyName
+				,strCompanyAddress			= ISNULL(@strAddress,'') + ', ' + CHAR(13)+CHAR(10) +ISNULL(@strCity,'') + ISNULL(', '+@strState,'') + ISNULL(', '+@strZip,'') + ISNULL(', '+@strCountry,'')+ CHAR(13)+ CHAR(10) + ISNULL(''+@strPhone,'') 
 				,strItemNo				    = Item.strItemNo
 				,lblGrade				    = CASE WHEN SC.intCommodityAttributeId >0 THEN 'Grade' ELSE NULL END
 				,strGrade				    = CASE WHEN SC.intCommodityAttributeId >0 THEN Attribute.strDescription ELSE NULL END
@@ -1019,8 +1028,7 @@ BEGIN
 			LEFT JOIN tblCTContractHeader CNTRCT ON BillDtl.intContractHeaderId = CNTRCT.intContractHeaderId
 			LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityId] = ISNULL(PYMT.[intEntityVendorId], BNKTRN.intEntityId)
 			LEFT JOIN tblEMEntity ENTITY ON VENDOR.[intEntityId] = ENTITY.intEntityId
-			LEFT JOIN tblEMEntityEFTInformation EFT ON ENTITY.intEntityId = EFT.intEntityId AND EFT.ysnActive = 1
-			LEFT JOIN tblSMCompanySetup COMPANY ON COMPANY.intCompanySetupID = ( SELECT TOP 1 intCompanySetupID FROM tblSMCompanySetup)
+			LEFT JOIN tblEMEntityEFTInformation EFT ON ENTITY.intEntityId = EFT.intEntityId AND EFT.ysnActive = 1			
 			LEFT JOIN tblICItemUOM ItemUOM ON BillDtl.intUnitOfMeasureId = ItemUOM.intItemUOMId
 			LEFT JOIN tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 			LEFT JOIN tblSCTicket SC ON SC.intTicketId = INVRCPTITEM.intSourceId
@@ -1095,8 +1103,8 @@ BEGIN
 				,intBillDetailId			 = BillDtl.intBillDetailId
 				,intTransactionId			 = BNKTRN.intTransactionId
 				,strTransactionId			 = BNKTRN.strTransactionId
-				,strCompanyName				 = COMPANY.strCompanyName
-				,strCompanyAddress			 = dbo.fnConvertToFullAddress(COMPANY.strAddress, COMPANY.strCity, COMPANY.strState, COMPANY.strZip)+ CHAR(13)+ CHAR(10) + @strPhone
+				,strCompanyName				 = @strCompanyName
+				,strCompanyAddress			 = ISNULL(@strAddress,'') + ', ' + CHAR(13)+CHAR(10) +ISNULL(@strCity,'') + ISNULL(', '+@strState,'') + ISNULL(', '+@strZip,'') + ISNULL(', '+@strCountry,'')+ CHAR(13)+ CHAR(10) + ISNULL(''+@strPhone,'') 
 				,strItemNo					 = Item.strItemNo
 				,lblGrade					 = CASE WHEN SC.intCommodityAttributeId >0 THEN 'Grade' ELSE NULL END
 				,strGrade					 = CASE WHEN SC.intCommodityAttributeId >0 THEN Attribute.strDescription ELSE NULL END
@@ -1253,8 +1261,7 @@ BEGIN
 			LEFT JOIN tblCTContractHeader CNTRCT ON BillDtl.intContractHeaderId = CNTRCT.intContractHeaderId
 			LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityId] = ISNULL(PYMT.[intEntityVendorId], BNKTRN.intEntityId)
 			LEFT JOIN tblEMEntity ENTITY ON VENDOR.[intEntityId] = ENTITY.intEntityId
-			LEFT JOIN tblEMEntityEFTInformation EFT ON ENTITY.intEntityId = EFT.intEntityId AND EFT.ysnActive = 1
-			LEFT JOIN tblSMCompanySetup COMPANY ON COMPANY.intCompanySetupID = ( SELECT TOP 1 intCompanySetupID FROM tblSMCompanySetup )
+			LEFT JOIN tblEMEntityEFTInformation EFT ON ENTITY.intEntityId = EFT.intEntityId AND EFT.ysnActive = 1			
 			LEFT JOIN tblICItemUOM ItemUOM ON BillDtl.intUnitOfMeasureId = ItemUOM.intItemUOMId
 			LEFT JOIN tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 			LEFT JOIN tblEMEntityFarm EntityFarm ON EntityFarm.intEntityId=VENDOR.intEntityId AND EntityFarm.intFarmFieldId=ISNULL(SC.intFarmFieldId, 0)	
@@ -1272,8 +1279,8 @@ BEGIN
 				,intBillDetailId			 = BillDtl.intBillDetailId
 				,intTransactionId			 = BNKTRN.intTransactionId
 				,strTransactionId			 = BNKTRN.strTransactionId
-				,strCompanyName				 = COMPANY.strCompanyName
-				,strCompanyAddress			 = dbo.fnConvertToFullAddress(COMPANY.strAddress, COMPANY.strCity, COMPANY.strState, COMPANY.strZip)+ CHAR(13)+ CHAR(10) + @strPhone
+				,strCompanyName				 = @strCompanyName
+				,strCompanyAddress			 = ISNULL(@strAddress,'') + ', ' + CHAR(13)+CHAR(10) +ISNULL(@strCity,'') + ISNULL(', '+@strState,'') + ISNULL(', '+@strZip,'') + ISNULL(', '+@strCountry,'')+ CHAR(13)+ CHAR(10) + ISNULL(''+@strPhone,'') 
 				,strItemNo					 = Item.strItemNo
 				,lblGrade					 = NULL
 				,strGrade					 = NULL
@@ -1440,8 +1447,7 @@ BEGIN
 			LEFT JOIN tblCTContractHeader CNTRCT ON BillDtl.intContractHeaderId = CNTRCT.intContractHeaderId
 			LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityId] = ISNULL(PYMT.[intEntityVendorId], BNKTRN.intEntityId)
 			LEFT JOIN tblEMEntity ENTITY ON VENDOR.[intEntityId] = ENTITY.intEntityId
-			LEFT JOIN tblEMEntityEFTInformation EFT ON ENTITY.intEntityId = EFT.intEntityId AND EFT.ysnActive = 1
-			LEFT JOIN tblSMCompanySetup COMPANY ON COMPANY.intCompanySetupID = ( SELECT TOP 1 intCompanySetupID FROM tblSMCompanySetup )
+			LEFT JOIN tblEMEntityEFTInformation EFT ON ENTITY.intEntityId = EFT.intEntityId AND EFT.ysnActive = 1			
 			LEFT JOIN tblICItemUOM ItemUOM ON BillDtl.intUnitOfMeasureId = ItemUOM.intItemUOMId
 			LEFT JOIN tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId		
 			--LEFT JOIN tblICCommodityAttribute Attribute ON Attribute.intCommodityAttributeId=SC.intCommodityAttributeId

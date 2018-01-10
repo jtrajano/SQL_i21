@@ -54,6 +54,14 @@ BEGIN
 	IF @intCategoryId IS NULL
 		SELECT @intCategoryId = 0
 
+	DECLARE @tblMFMachine TABLE (intMachineId INT)
+
+	INSERT INTO @tblMFMachine (intMachineId)
+	SELECT DISTINCT intMachineId
+	FROM tblMFWorkOrderProducedLot
+	WHERE intWorkOrderId = @intWorkOrderId
+		AND ysnProductionReversed = 0
+
 	IF @strAttributeValue = 'True'
 	BEGIN
 		SELECT 0 AS intProductionSummaryId
@@ -71,7 +79,7 @@ BEGIN
 			,SUM(dblCountOutputQuantity) AS dblCountOutputQuantity
 			,SUM(dblConsumedQuantity + dblCountQuantity + dblCountOutputQuantity) - Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) AS dblYieldQuantity
 			,CASE 
-				WHEN Sum(dblOpeningQuantity + dblOpeningOutputQuantity+ dblInputQuantity) > 0
+				WHEN Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) > 0
 					THEN Round(SUM(dblOutputQuantity + dblCountQuantity + dblCountOutputQuantity) / Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) * 100, 2)
 				ELSE 100
 				END AS dblYieldPercentage
@@ -79,16 +87,28 @@ BEGIN
 			,C.strCategoryCode
 			,C.strDescription AS strCategoryDescription
 			,UM.strUnitMeasure
+			,M.intMachineId
+			,IsNULL(M.strName, (
+					SELECT STUFF((
+								SELECT ', ' + M.strName
+								FROM tblMFMachine M
+								JOIN @tblMFMachine M1 ON M.intMachineId = M1.intMachineId
+								FOR XML PATH('')
+								), 1, 1, '')
+					)) strMachineName
 		FROM dbo.tblMFProductionSummary PS
 		JOIN dbo.tblICItem I ON I.intItemId = PS.intItemId
 		JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
-		--JOIN tblMFWorkOrderRecipeItem RI ON RI.intItemId = PS.intItemId
-		--	AND RI.intWorkOrderId = @intWorkOrderId
-		--	AND RI.intRecipeItemTypeId = 2
 		JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
 			AND IU.ysnStockUnit = 1
 		JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-		WHERE PS.intWorkOrderId = @intWorkOrderId and PS.intItemTypeId in (2,4,5)
+		LEFT JOIN tblMFMachine M ON M.intMachineId = PS.intMachineId
+		WHERE PS.intWorkOrderId = @intWorkOrderId
+			AND PS.intItemTypeId IN (
+				2
+				,4
+				,5
+				)
 		GROUP BY I.intItemId
 			,I.strItemNo
 			,I.strDescription
@@ -97,6 +117,8 @@ BEGIN
 			,C.strCategoryCode
 			,C.strDescription
 			,UM.strUnitMeasure
+			,M.intMachineId
+			,M.strName
 		
 		UNION
 		
@@ -115,7 +137,7 @@ BEGIN
 			,SUM(dblCountOutputQuantity) AS dblCountOutputQuantity
 			,SUM(dblConsumedQuantity + dblCountQuantity + dblCountOutputQuantity) - Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) AS dblYieldQuantity
 			,CASE 
-				WHEN Sum(dblOpeningQuantity + dblOpeningOutputQuantity+ dblInputQuantity) > 0
+				WHEN Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) > 0
 					THEN Round(SUM(dblConsumedQuantity + dblCountQuantity + dblCountOutputQuantity) / Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) * 100, 2)
 				ELSE 100
 				END AS dblYieldPercentage
@@ -123,17 +145,27 @@ BEGIN
 			,C.strCategoryCode
 			,C.strDescription AS strCategoryDescription
 			,UM.strUnitMeasure
+			,M.intMachineId
+			,IsNULL(M.strName, (
+					SELECT STUFF((
+								SELECT ', ' + M.strName
+								FROM tblMFMachine M
+								JOIN @tblMFMachine M1 ON M.intMachineId = M1.intMachineId
+								FOR XML PATH('')
+								), 1, 1, '')
+					)) strMachineName
 		FROM tblMFProductionSummary PS
 		JOIN dbo.tblICItem I ON I.intItemId = PS.intItemId
-		--AND I.intCategoryId <> @intCategoryId
 		JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
-		--JOIN tblMFWorkOrderRecipeItem RI ON RI.intItemId = PS.intItemId
-		--	AND RI.intWorkOrderId = @intWorkOrderId
-		--	AND RI.intRecipeItemTypeId = 1
 		JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
 			AND IU.ysnStockUnit = 1
 		JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-		WHERE PS.intWorkOrderId = @intWorkOrderId and PS.intItemTypeId in (1,3)
+		LEFT JOIN tblMFMachine M ON M.intMachineId = PS.intMachineId
+		WHERE PS.intWorkOrderId = @intWorkOrderId
+			AND PS.intItemTypeId IN (
+				1
+				,3
+				)
 		GROUP BY I.intItemId
 			,I.strItemNo
 			,I.strDescription
@@ -142,6 +174,8 @@ BEGIN
 			,C.strCategoryCode
 			,C.strDescription
 			,UM.strUnitMeasure
+			,M.intMachineId
+			,M.strName
 		ORDER BY strTransactionType
 	END
 	ELSE
@@ -161,7 +195,7 @@ BEGIN
 			,SUM(dblCountOutputQuantity) AS dblCountOutputQuantity
 			,SUM(dblOutputQuantity + dblCountQuantity + dblCountOutputQuantity) - Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) AS dblYieldQuantity
 			,CASE 
-				WHEN Sum(dblOpeningQuantity + dblOpeningOutputQuantity+ dblInputQuantity) > 0
+				WHEN Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) > 0
 					THEN Round(SUM(dblOutputQuantity + dblCountQuantity + dblCountOutputQuantity) / Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) * 100, 2)
 				ELSE 100
 				END AS dblYieldPercentage
@@ -169,18 +203,34 @@ BEGIN
 			,C.strCategoryCode
 			,C.strDescription AS strCategoryDescription
 			,UM.strUnitMeasure
+			,M.intMachineId
+			,IsNULL(M.strName, (
+					SELECT STUFF((
+								SELECT ', ' + M.strName
+								FROM tblMFMachine M
+								JOIN @tblMFMachine M1 ON M.intMachineId = M1.intMachineId
+								FOR XML PATH('')
+								), 1, 1, '')
+					)) strMachineName
 		FROM tblMFProductionSummary PS
 		JOIN dbo.tblICItem I ON I.intItemId = PS.intItemId
-			--AND I.intCategoryId <> @intCategoryId
-		JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId 
+		JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
 		JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
 			AND IU.ysnStockUnit = 1
 		JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-		WHERE intWorkOrderId = @intWorkOrderId and intItemTypeId IN (2,4,5)
+		LEFT JOIN tblMFMachine M ON M.intMachineId = PS.intMachineId
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND intItemTypeId IN (
+				2
+				,4
+				,5
+				)
 		GROUP BY C.intCategoryId
 			,C.strCategoryCode
 			,C.strDescription
 			,UM.strUnitMeasure
+			,M.intMachineId
+			,M.strName
 		
 		UNION
 		
@@ -199,7 +249,7 @@ BEGIN
 			,SUM(dblCountOutputQuantity) AS dblCountOutputQuantity
 			,SUM(dblConsumedQuantity + dblCountQuantity + dblCountOutputQuantity) - Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) AS dblYieldQuantity
 			,CASE 
-				WHEN Sum(dblOpeningQuantity + dblOpeningOutputQuantity+ dblInputQuantity) > 0
+				WHEN Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) > 0
 					THEN Round(SUM(dblConsumedQuantity + dblCountQuantity + dblCountOutputQuantity) / Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) * 100, 2)
 				ELSE 100
 				END AS dblYieldPercentage
@@ -207,15 +257,27 @@ BEGIN
 			,C.strCategoryCode
 			,C.strDescription AS strCategoryDescription
 			,UM.strUnitMeasure
+			,M.intMachineId
+			,IsNULL(M.strName, (
+					SELECT STUFF((
+								SELECT ', ' + M.strName
+								FROM tblMFMachine M
+								JOIN @tblMFMachine M1 ON M.intMachineId = M1.intMachineId
+								FOR XML PATH('')
+								), 1, 1, '')
+					)) strMachineName
 		FROM tblMFProductionSummary PS
 		JOIN dbo.tblICItem I ON I.intItemId = PS.intItemId
-			--AND I.intCategoryId <> @intCategoryId
-			--AND I.intItemId <> @intItemId
 		JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
 		JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
 			AND IU.ysnStockUnit = 1
 		JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-		WHERE intWorkOrderId = @intWorkOrderId and intItemTypeId IN (1,3)
+		LEFT JOIN tblMFMachine M ON M.intMachineId = PS.intMachineId
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND intItemTypeId IN (
+				1
+				,3
+				)
 		GROUP BY I.intItemId
 			,I.strItemNo
 			,I.strDescription
@@ -224,6 +286,8 @@ BEGIN
 			,C.strCategoryCode
 			,C.strDescription
 			,UM.strUnitMeasure
+			,M.intMachineId
+			,M.strName
 		ORDER BY strTransactionType
 	END
 END

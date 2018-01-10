@@ -1,4 +1,4 @@
-﻿Create Procedure [dbo].[uspMFStageWorkOrder] (
+﻿CREATE PROCEDURE [dbo].[uspMFStageWorkOrder] (
 	@strXML NVARCHAR(MAX)
 	,@intWorkOrderInputLotId INT = NULL OUTPUT
 	)
@@ -63,8 +63,9 @@ BEGIN TRY
 		,@intAdjustItemUOMId INT
 		,@intRecipeItemUOMId INT
 		,@dblEnteredQty NUMERIC(38, 20)
-		,@intEnteredItemUOMId int
-		,@intItemStockUOMId int
+		,@intEnteredItemUOMId INT
+		,@intItemStockUOMId INT
+		,@strMultipleMachinesShareCommonStagingLocation NVARCHAR(50)
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -122,7 +123,8 @@ BEGIN TRY
 			,dblDefaultResidueQty NUMERIC(38, 20)
 			)
 
-	Select @dblEnteredQty=@dblInputWeight,@intEnteredItemUOMId=@intInputWeightUOMId
+	SELECT @dblEnteredQty = @dblInputWeight
+		,@intEnteredItemUOMId = @intInputWeightUOMId
 
 	SELECT @strInventoryTracking = strInventoryTracking
 		,@intCategoryId = intCategoryId
@@ -163,10 +165,12 @@ BEGIN TRY
 		FROM tblICLot
 		WHERE intLotId = @intInputLotId
 
-		IF @intNewItemUOMId<>@intInputWeightUOMId and IsNULL(@intWeightUOMId,@intNewItemUOMId)<>@intInputWeightUOMId
+		IF @intNewItemUOMId <> @intInputWeightUOMId
+			AND IsNULL(@intWeightUOMId, @intNewItemUOMId) <> @intInputWeightUOMId
 		BEGIN
-			Select @dblInputWeight=dbo.fnMFConvertQuantityToTargetItemUOM(@intInputWeightUOMId, @intNewItemUOMId, @dblInputWeight)
-			Select @intInputWeightUOMId=@intNewItemUOMId
+			SELECT @dblInputWeight = dbo.fnMFConvertQuantityToTargetItemUOM(@intInputWeightUOMId, @intNewItemUOMId, @dblInputWeight)
+
+			SELECT @intInputWeightUOMId = @intNewItemUOMId
 		END
 
 		IF @dblInputWeight > @dblWeight
@@ -380,6 +384,17 @@ BEGIN TRY
 				)
 	END
 
+	SELECT @strMultipleMachinesShareCommonStagingLocation = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 102 --Multiple machines share common staging location
+
+	IF @strMultipleMachinesShareCommonStagingLocation IS NULL
+	BEGIN
+		SELECT @strMultipleMachinesShareCommonStagingLocation = 'False'
+	END
+
 	IF @intTransactionCount = 0
 		BEGIN TRANSACTION
 
@@ -420,8 +435,14 @@ BEGIN TRY
 	SELECT @intWorkOrderId
 		,@intInputItemId
 		,@intInputLotId
-		,(Case When @intInputWeightUOMId=@intNewItemUOMId  Then @dblInputWeight*@dblWeightPerQty else @dblInputWeight  End)
-		,Isnull(@intWeightUOMId,@intNewItemUOMId)
+		,(
+			CASE 
+				WHEN @intInputWeightUOMId = @intNewItemUOMId
+					THEN @dblInputWeight * @dblWeightPerQty
+				ELSE @dblInputWeight
+				END
+			)
+		,Isnull(@intWeightUOMId, @intNewItemUOMId)
 		,@dblInputWeight
 		,@intInputWeightUOMId
 		,1
@@ -486,7 +507,7 @@ BEGIN TRY
 				,@intSourceTransactionTypeId = 8
 				,@intEntityUserSecurityId = @intUserId
 				,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
-				,@strDescription=@strWorkOrderNo 
+				,@strDescription = @strWorkOrderNo
 
 			INSERT INTO dbo.tblMFWorkOrderProducedLotTransaction (
 				intWorkOrderId
@@ -556,17 +577,21 @@ BEGIN TRY
 			,@intSourceTransactionTypeId = 8
 			,@intEntityUserSecurityId = @intUserId
 			,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
-			,@strDescription=@strWorkOrderNo 
+			,@strDescription = @strWorkOrderNo
 	END
 
 	IF @strInventoryTracking = 'Item Level'
 	BEGIN
-		Select @intItemStockUOMId=intItemUOMId from tblICItemUOM Where intItemId=@intInputItemId and ysnStockUnit =1
+		SELECT @intItemStockUOMId = intItemUOMId
+		FROM tblICItemUOM
+		WHERE intItemId = @intInputItemId
+			AND ysnStockUnit = 1
 
-		IF @intItemStockUOMId<>@intInputWeightUOMId 
+		IF @intItemStockUOMId <> @intInputWeightUOMId
 		BEGIN
-			Select @dblInputWeight=dbo.fnMFConvertQuantityToTargetItemUOM(@intInputWeightUOMId, @intItemStockUOMId, @dblInputWeight)
-			Select @intInputWeightUOMId=@intItemStockUOMId
+			SELECT @dblInputWeight = dbo.fnMFConvertQuantityToTargetItemUOM(@intInputWeightUOMId, @intItemStockUOMId, @dblInputWeight)
+
+			SELECT @intInputWeightUOMId = @intItemStockUOMId
 		END
 
 		IF NOT EXISTS (
@@ -687,11 +712,23 @@ BEGIN TRY
 			AND RS.intSubstituteItemId = @intInputItemId
 	END
 
+	IF @strMultipleMachinesShareCommonStagingLocation = 'True'
+	BEGIN
+		SELECT @intMachineId = NULL
+	END
+
 	IF NOT EXISTS (
 			SELECT *
 			FROM tblMFProductionSummary
 			WHERE intWorkOrderId = @intWorkOrderId
 				AND intItemId = @intInputItemId
+				AND IsNULL(intMachineId, 0) = (
+					CASE 
+						WHEN intMachineId IS NOT NULL
+							THEN IsNULL(@intMachineId, 0)
+						ELSE IsNULL(intMachineId, 0)
+						END
+					)
 				AND intItemTypeId IN (
 					1
 					,3
@@ -714,6 +751,7 @@ BEGIN TRY
 			,dblCalculatedQuantity
 			,intCategoryId
 			,intItemTypeId
+			,intMachineId
 			)
 		SELECT @intWorkOrderId
 			,@intInputItemId
@@ -730,6 +768,7 @@ BEGIN TRY
 			,0
 			,@intCategoryId
 			,@intItemTypeId
+			,@intMachineId
 	END
 	ELSE
 	BEGIN
@@ -737,6 +776,13 @@ BEGIN TRY
 		SET dblInputQuantity = dblInputQuantity + IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intInputWeightUOMId, @intRecipeItemUOMId, @dblInputWeight), 0)
 		WHERE intWorkOrderId = @intWorkOrderId
 			AND intItemId = @intInputItemId
+			AND IsNULL(intMachineId, 0) = (
+				CASE 
+					WHEN intMachineId IS NOT NULL
+						THEN IsNULL(@intMachineId, 0)
+					ELSE IsNULL(intMachineId, 0)
+					END
+				)
 			AND intItemTypeId IN (
 				1
 				,3

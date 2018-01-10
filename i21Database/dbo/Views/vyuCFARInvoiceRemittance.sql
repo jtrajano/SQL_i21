@@ -2,7 +2,11 @@
 CREATE VIEW [dbo].[vyuCFARInvoiceRemittance]
 AS
 
-SELECT
+
+SELECT 
+*	
+FROM 
+(SELECT
  intEntityCustomerId					AS intCustomerId
 ,strCFTempInvoiceReportNumber			AS strTempInvoiceReportNumber
 ,dblCFAccountTotalAmount				AS dblAccountTotalAmount				
@@ -28,4 +32,16 @@ dblCFEligableGallon,
 strCustomerName,
 strCFEmail, 
 strCFEmailDistributionOption,
-strCustomerNumber
+strCustomerNumber) as tbl1
+
+INNER JOIN 
+
+(SELECT intEntityCustomerId,
+SUM(CASE WHEN strTransactionType IN ('Payment',
+'Discount Taken') THEN dblPayment * - 1 WHEN
+strTransactionType = 'Balance Forward' THEN dblBalance ELSE
+dblInvoiceTotal END) as dblBalance
+from
+tblARCustomerStatementStagingTable
+group by intEntityCustomerId) as tbl2
+ON tbl2.intEntityCustomerId = tbl1.intCustomerId

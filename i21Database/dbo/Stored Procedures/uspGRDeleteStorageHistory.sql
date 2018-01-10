@@ -55,6 +55,26 @@ BEGIN TRY
 				    WHERE ARD.intInvoiceId = @IntSourceKey
 			END
 
+			IF EXISTS (
+							SELECT 1
+							FROM tblARInvoiceDetail ARD
+							JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = ARD.intInvoiceId
+							JOIN tblICItem Item ON Item.intItemId = ARD.intItemId
+							JOIN tblGRStorageHistory SH ON SH.intInvoiceId = Invoice.intInvoiceId
+							WHERE ARD.intInvoiceId			 = @IntSourceKey AND ARD.intCustomerStorageId IS NOT NULL
+								AND Item.strCostType		 = 'Other Charges'
+								AND Item.strType			 = 'Other Charge'
+								AND SH.strType				 = 'Generated Fee Invoice'
+					   )
+			BEGIN
+			 
+						UPDATE CS
+						SET CS.dblFeesPaid = 0
+						FROM tblGRCustomerStorage CS
+						JOIN tblGRStorageHistory SH ON SH.intCustomerStorageId = CS.intCustomerStorageId
+						WHERE SH.intInvoiceId = @IntSourceKey AND SH.strType = 'Generated Fee Invoice'
+			END
+
 			DELETE FROM tblGRStorageHistory Where intInvoiceId=@IntSourceKey 
 
 		END 

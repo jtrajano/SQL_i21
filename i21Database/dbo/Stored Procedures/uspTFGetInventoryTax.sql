@@ -164,7 +164,7 @@ BEGIN TRY
 					, tblICInventoryReceipt.dtmReceiptDate
 					, tblSMShipVia.strShipVia
 					, tblSMShipVia.strTransporterLicense
-					, tblSMShipVia.strTransportationMode
+					, tblSMTransportationMode.strCode
 					, Vendor.strName AS strVendorName
 					, Transporter.strName AS strTransporterName
 					, Vendor.strFederalTaxId AS strVendorFEIN
@@ -210,6 +210,7 @@ BEGIN TRY
 					LEFT JOIN tblSMTaxCode AS OriginCountyTaxCode ON OriginCountyTaxCode.intTaxCodeId = tblEMEntityLocation.intCountyTaxCodeId
 					LEFT JOIN tblSMShipVia ON tblSMShipVia.intEntityId = tblICInventoryReceipt.intShipViaId
 						LEFT JOIN tblEMEntity AS Transporter ON Transporter.intEntityId = tblSMShipVia.intEntityId 
+						LEFT JOIN tblSMTransportationMode ON  tblSMTransportationMode.strDescription = tblSMShipVia.strTransportationMode
 					INNER JOIN tblTRSupplyPoint ON tblTRSupplyPoint.intEntityLocationId = tblICInventoryReceipt.intShipFromId 
 						LEFT JOIN tblTFTerminalControlNumber ON tblTFTerminalControlNumber.intTerminalControlNumberId = tblTRSupplyPoint.intTerminalControlNumberId
 					INNER JOIN tblSMCompanyLocation ON tblICInventoryReceipt.intLocationId = tblSMCompanyLocation.intCompanyLocationId
@@ -313,7 +314,7 @@ BEGIN TRY
 					, tblICInventoryReceipt.dtmReceiptDate
 					, tblSMShipVia.strShipVia
 					, tblSMShipVia.strTransporterLicense
-					, tblSMShipVia.strTransportationMode
+					, tblSMTransportationMode.strCode	
 					, Vendor.strName AS strVendorName
 					, Transporter.strName AS strTransporterName
 					, Vendor.strFederalTaxId AS strVendorFEIN
@@ -357,7 +358,8 @@ BEGIN TRY
 					INNER JOIN tblEMEntityLocation ON tblEMEntityLocation.intEntityLocationId = tblICInventoryReceipt.intShipFromId
 					LEFT JOIN tblSMTaxCode AS OriginCountyTaxCode ON OriginCountyTaxCode.intTaxCodeId = tblEMEntityLocation.intCountyTaxCodeId
 					LEFT JOIN tblSMShipVia ON tblSMShipVia.intEntityId = tblICInventoryReceipt.intShipViaId
-						LEFT JOIN tblEMEntity AS Transporter ON Transporter.intEntityId = tblSMShipVia.intEntityId 
+						LEFT JOIN tblEMEntity AS Transporter ON Transporter.intEntityId = tblSMShipVia.intEntityId
+						LEFT JOIN tblSMTransportationMode ON  tblSMTransportationMode.strDescription = tblSMShipVia.strTransportationMode
 					INNER JOIN tblTRSupplyPoint ON tblTRSupplyPoint.intEntityLocationId = tblICInventoryReceipt.intShipFromId 
 						LEFT JOIN tblTFTerminalControlNumber ON tblTFTerminalControlNumber.intTerminalControlNumberId = tblTRSupplyPoint.intTerminalControlNumberId
 					INNER JOIN tblSMCompanyLocation ON tblICInventoryReceipt.intLocationId = tblSMCompanyLocation.intCompanyLocationId

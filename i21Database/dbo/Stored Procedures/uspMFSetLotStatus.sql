@@ -4,6 +4,7 @@
 	,@strNotes NVARCHAR(MAX) = NULL
 	,@strReasonCode NVARCHAR(MAX) = NULL
 	,@dtmDate DATETIME = NULL
+	,@ysnBulkChange BIT = 0
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -49,6 +50,11 @@ BEGIN TRY
 
 	IF @intLotStatusId = @intNewLotStatusId
 	BEGIN
+		IF @ysnBulkChange = 1
+		BEGIN
+			RETURN
+		END
+
 		RAISERROR (
 				'Old and new lot status cannot be same.'
 				,16

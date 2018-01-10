@@ -546,6 +546,7 @@ BEGIN
 				,strSiteCity			
 				,strSiteType
 				,intTaxGroupId
+				,strAllowExemptionsOnExtAndRetailTrans
 			)
 			SELECT
 				intNetworkId			= @intNetworkId
@@ -559,6 +560,7 @@ BEGIN
 				,strSiteCity			= @strSiteCity	
 				,strSiteType			= 'Extended Remote'
 				,intTaxGroupId			= @intTaxGroupByState
+				,@strAllowExemptionsOnExtAndRetailTrans
 				
 
 			SET @intSiteId = SCOPE_IDENTITY();
@@ -580,6 +582,7 @@ BEGIN
 				,strControllerType	
 				,strTaxState			
 				,strSiteType
+				,strAllowExemptionsOnExtAndRetailTrans
 			)
 			SELECT
 				intNetworkId			= @intNetworkId
@@ -594,6 +597,7 @@ BEGIN
 												THEN 'Local/Network'
 											ELSE @strTransactionType
 											END)
+				,@strAllowExemptionsOnExtAndRetailTrans
 				
 
 			SET @intSiteId = SCOPE_IDENTITY();

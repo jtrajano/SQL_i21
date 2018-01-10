@@ -1124,3 +1124,39 @@ UPDATE tblQMCompanyPreference
 SET strSampleImportDateTimeFormat = 'MM DD YYYY HH:MI'
 WHERE strSampleImportDateTimeFormat IS NULL
 GO
+
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMSampleLabel WHERE strSampleLabelName = 'Inbound Sample Label')
+BEGIN
+	INSERT INTO tblQMSampleLabel(strSampleLabelName,strReportName,intControlPointId,intConcurrencyId)
+	VALUES('Inbound Sample Label','InboundSampleLabel',5,1)
+END
+GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMSampleLabel WHERE strSampleLabelName = 'Outbound Sample Label')
+BEGIN
+	INSERT INTO tblQMSampleLabel(strSampleLabelName,strReportName,intControlPointId,intConcurrencyId)
+	VALUES('Outbound Sample Label','OutboundSampleLabel',10,1)
+END
+GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMSampleLabel WHERE strSampleLabelName = 'Approval Sample Label')
+BEGIN
+	INSERT INTO tblQMSampleLabel(strSampleLabelName,strReportName,intControlPointId,intConcurrencyId)
+	VALUES('Approval Sample Label','ApprovalSampleLabel',2,1)
+END
+GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMSampleLabel WHERE strSampleLabelName = 'Receipt Sample Label')
+BEGIN
+	INSERT INTO tblQMSampleLabel(strSampleLabelName,strReportName,intControlPointId,intConcurrencyId)
+	VALUES('Receipt Sample Label','ReceiptSampleLabel',9,1)
+END
+GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMSampleLabel WHERE strSampleLabelName = 'Offer Sample Label')
+BEGIN
+	INSERT INTO tblQMSampleLabel(strSampleLabelName,strReportName,intControlPointId,intConcurrencyId)
+	VALUES('Offer Sample Label','OfferSampleLabel',1,1)
+END
+GO

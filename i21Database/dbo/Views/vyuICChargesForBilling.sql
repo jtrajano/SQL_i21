@@ -13,25 +13,25 @@ SELECT
 	,[dblOrderQty]								=	
 													CASE 
 														WHEN ISNULL(ReceiptCharge.dblAmount,0) < 0 -- Negate the qty if Charge is negative. 
-															THEN -(ReceiptCharge.dblQuantity - ISNULL(ReceiptCharge.dblQuantityBilled, 0))
-														ELSE ReceiptCharge.dblQuantity - ISNULL(ReceiptCharge.dblQuantityBilled, 0)
+															THEN -(ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(ReceiptCharge.dblQuantityBilled, 0))
+														ELSE ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(ReceiptCharge.dblQuantityBilled, 0)
 													END 
 	,[dblPOOpenReceive]							=	0
 	,[dblOpenReceive]							=	
 													CASE 
 														WHEN ISNULL(ReceiptCharge.dblAmount,0) < 0 -- Negate the qty if Charge is negative. 
-															THEN -(ReceiptCharge.dblQuantity- ISNULL(ReceiptCharge.dblQuantityBilled, 0))
-														ELSE ReceiptCharge.dblQuantity - ISNULL(ReceiptCharge.dblQuantityBilled, 0)
+															THEN -(ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(ReceiptCharge.dblQuantityBilled, 0))
+														ELSE ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(ReceiptCharge.dblQuantityBilled, 0)
 													END 
 	,[dblQuantityToBill]						=	
 													CASE 
 														WHEN ISNULL(ReceiptCharge.dblAmount,0) < 0 -- Negate the qty if Charge is negative. 
-															THEN -(ReceiptCharge.dblQuantity - ISNULL(ReceiptCharge.dblQuantityBilled, 0)) 
-														ELSE ReceiptCharge.dblQuantity - ISNULL(ReceiptCharge.dblQuantityBilled, 0)	
+															THEN -(ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(ReceiptCharge.dblQuantityBilled, 0)) 
+														ELSE ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(ReceiptCharge.dblQuantityBilled, 0)	
 													END 
 	,[dblQuantityBilled]						=	0
 	,[intLineNo]								=	1
-	,[intInventoryReceiptItemId]				=	ReceiptItem.intInventoryReceiptItemId --add for strSource reference
+	,[intInventoryReceiptItemId]				=	ISNULL(ChargesLink.intInventoryReceiptItemId, ComputedChargesLink.intInventoryReceiptItemId) 
 	,[intInventoryReceiptChargeId]				=	ReceiptCharge.intInventoryReceiptChargeId
 	,[dblUnitCost]								=	
 													CASE 
@@ -46,40 +46,18 @@ SELECT
 													END
 	,[dblTax]									=	ISNULL(ReceiptCharge.dblTax,0) 
 	,[intAccountId]								=	
-													CASE	WHEN ISNULL(ReceiptCharge.ysnInventoryCost, 0) = 0 THEN 
+													CASE	
+														WHEN ISNULL(ReceiptCharge.ysnInventoryCost, 0) = 0 THEN 
 																OtherChargeExpense.intAccountId 
-															ELSE 																
-																(
-																	-- Pick top 1 item from 'Charges per Item' and use its ap clearing account as data for Voucher (Bill). 
-																	-- Refactor this part after we put a schedule on the change on AP-1934 and IC-1648
-																	SELECT	TOP 1 
-																			OtherChargeAPClearing.intAccountId
-																	FROM	tblICInventoryReceiptItemAllocatedCharge ChargePerItem INNER JOIN tblICInventoryReceiptItem ReceiptItem
-																				ON ChargePerItem.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
-																			LEFT JOIN tblGLAccount OtherChargeAPClearing
-																				ON [dbo].[fnGetItemGLAccount](ReceiptItem.intItemId, ItemLocation.intItemLocationId, 'AP Clearing') = OtherChargeAPClearing.intAccountId
-																	WHERE	ChargePerItem.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
-																			AND ChargePerItem.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
-																)
-
+														ELSE 																
+															OtherChargeAPClearing.intAccountId
 													END 
 	,[strAccountId]								=	
-													CASE	WHEN ISNULL(ReceiptCharge.ysnInventoryCost, 0) = 0 THEN 
-																OtherChargeExpense.strAccountId
-															ELSE 
-																(
-																	-- Pick top 1 item from 'Charges per Item' and use its ap clearing account as data for Voucher (Bill). 
-																	-- Refactor this part after we put a schedule on the change on AP-1934 and IC-1648
-																	SELECT	TOP 1 
-																			OtherChargeAPClearing.strAccountId
-																	FROM	tblICInventoryReceiptItemAllocatedCharge ChargePerItem INNER JOIN tblICInventoryReceiptItem ReceiptItem
-																				ON ChargePerItem.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
-																			LEFT JOIN tblGLAccount OtherChargeAPClearing
-																				ON [dbo].[fnGetItemGLAccount](ReceiptItem.intItemId, ItemLocation.intItemLocationId, 'AP Clearing') = OtherChargeAPClearing.intAccountId
-																	WHERE	ChargePerItem.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
-																			AND ChargePerItem.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
-																)
-
+													CASE	
+														WHEN ISNULL(ReceiptCharge.ysnInventoryCost, 0) = 0 THEN 
+															OtherChargeExpense.strAccountId
+														ELSE 
+															OtherChargeAPClearing.strAccountId
 													END 
 
 	,[strName]									= Entity.strName
@@ -114,6 +92,7 @@ FROM
 			ON Vendor.[intEntityId] = Entity.intEntityId
 	) 
 		ON Vendor.[intEntityId] = ISNULL(ReceiptCharge.intEntityVendorId,  Receipt.intEntityVendorId) 
+
 	INNER JOIN tblICItemLocation ItemLocation 
 		ON ItemLocation.intItemId = Item.intItemId
 		AND ItemLocation.intLocationId = Receipt.intLocationId	
@@ -123,6 +102,9 @@ FROM
 	
 	LEFT JOIN tblGLAccount OtherChargeExpense
 		ON [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLocation.intItemLocationId, 'Other Charge Expense') = OtherChargeExpense.intAccountId
+
+	LEFT JOIN tblGLAccount OtherChargeAPClearing
+		ON [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLocation.intItemLocationId, 'AP Clearing') = OtherChargeAPClearing.intAccountId
 
 	LEFT JOIN dbo.tblSMCurrency TransCurrency 
 		ON TransCurrency.intCurrencyID = ReceiptCharge.intCurrencyId
@@ -137,21 +119,37 @@ FROM
 		ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId	
 
 	OUTER APPLY (
-		SELECT TOP 1
-			A.intInventoryReceiptItemId
-		FROM tblICInventoryReceiptItem A
-		WHERE A.intInventoryReceiptId = Receipt.intInventoryReceiptId
-	) ReceiptItem 
+		SELECT	A.intInventoryReceiptItemId
+				,c = COUNT(1) 
+		FROM	tblICInventoryReceiptItem A		
+		WHERE	A.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
+				AND A.strChargesLink = ReceiptCharge.strChargesLink
+		GROUP BY A.intInventoryReceiptItemId		
+		HAVING	COUNT(1) = 1 
+
+	) ChargesLink  
+
+	OUTER APPLY (
+		SELECT	A.intInventoryReceiptItemId
+				,c = COUNT(1) 
+		FROM	tblICInventoryReceiptChargePerItem A		
+		WHERE	A.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+		GROUP BY A.intInventoryReceiptItemId		
+		HAVING	COUNT(1) = 1 
+
+	) ComputedChargesLink 
 
 	OUTER APPLY dbo.fnICGetScaleTicketIdForReceiptCharge(Receipt.intInventoryReceiptId, Receipt.strReceiptNumber) ScaleTicket
 
-	-- Refactor this part after we put a schedule on the change on AP-1934 and IC-1648
-	--LEFT JOIN tblGLAccount OtherChargeAPClearing
-	--	ON [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLocation.intItemLocationId, 'AP Clearing') = OtherChargeAPClearing.intAccountId
-
 WHERE	ReceiptCharge.ysnAccrue = 1 
 		AND ISNULL(Receipt.ysnPosted, 0) = 1
-		AND ISNULL(ReceiptCharge.dblAmountBilled, 0) < ROUND(ReceiptCharge.dblAmount, 6) 
+		AND (
+			ISNULL(ReceiptCharge.dblAmountBilled, 0) < ROUND(ReceiptCharge.dblAmount, 6) 
+			OR (
+				ISNULL(ReceiptCharge.dblAmountBilled, 0) = 0 
+				AND ROUND(ReceiptCharge.dblAmount, 6) = 0 
+			)
+		)
 
 -- Query for 'Price' Other Charges. 
 UNION ALL 
@@ -169,30 +167,30 @@ SELECT
 													CASE 
 														WHEN ReceiptCharge.dblAmount > 0 
 															--Negate Quantity if amount is positive for Price Down charges; Amount is negated in Voucher for Price Down so no need to negate quantity for negative amount
-															THEN -(ReceiptCharge.dblQuantity - ISNULL(-ReceiptCharge.dblQuantityPriced, 0))															
+															THEN -(ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(-ReceiptCharge.dblQuantityPriced, 0))															
 														ELSE 
-															ReceiptCharge.dblQuantity - ISNULL(-ReceiptCharge.dblQuantityPriced, 0)
+															ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(-ReceiptCharge.dblQuantityPriced, 0)
 													END  
 	,[dblPOOpenReceive]							=	0
 	,[dblOpenReceive]							=		
 													CASE 
 														WHEN ReceiptCharge.dblAmount > 0 
 															--Negate Quantity if amount is positive for Price Down charges; Amount is negated in Voucher for Price Down so no need to negate quantity for negative amount
-															THEN -(ReceiptCharge.dblQuantity - ISNULL(-ReceiptCharge.dblQuantityPriced, 0))
+															THEN -(ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(-ReceiptCharge.dblQuantityPriced, 0))
 														ELSE 
-															ReceiptCharge.dblQuantity - ISNULL(-ReceiptCharge.dblQuantityPriced, 0)
+															ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(-ReceiptCharge.dblQuantityPriced, 0)
 													END 
 	,[dblQuantityToBill]						=	
 													CASE 
 														WHEN ReceiptCharge.dblAmount > 0 
 															--Negate Quantity if amount is positive for Price Down charges; Amount is negated in Voucher for Price Down so no need to negate quantity for negative amount
-															THEN -(ReceiptCharge.dblQuantity - ISNULL(-ReceiptCharge.dblQuantityPriced, 0))
+															THEN -(ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(-ReceiptCharge.dblQuantityPriced, 0))
 														ELSE 
-															ReceiptCharge.dblQuantity - ISNULL(-ReceiptCharge.dblQuantityPriced, 0)
+															ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(-ReceiptCharge.dblQuantityPriced, 0)
 													END 
 	,[dblQuantityBilled]						=	0
 	,[intLineNo]								=	1
-	,[intInventoryReceiptItemId]				=	ReceiptItem.intInventoryReceiptItemId  --add for strSource reference
+	,[intInventoryReceiptItemId]				=	ISNULL(ChargesLink.intInventoryReceiptItemId, ComputedChargesLink.intInventoryReceiptItemId)
 	,[intInventoryReceiptChargeId]				=	ReceiptCharge.intInventoryReceiptChargeId
 	,[dblUnitCost]								=	
 													CASE 
@@ -207,40 +205,18 @@ SELECT
 													END
 	,[dblTax]									=	ISNULL(ReceiptCharge.dblTax,0)
 	,[intAccountId]								=	
-													CASE	WHEN ISNULL(ReceiptCharge.ysnInventoryCost, 0) = 0 THEN 
-																OtherChargeExpense.intAccountId 
-															ELSE 																
-																(
-																	-- Pick top 1 item from 'Charges per Item' and use its ap clearing account as data for Voucher (Bill). 
-																	-- Refactor this part after we put a schedule on the change on AP-1934 and IC-1648
-																	SELECT	TOP 1 
-																			OtherChargeAPClearing.intAccountId
-																	FROM	tblICInventoryReceiptItemAllocatedCharge ChargePerItem INNER JOIN tblICInventoryReceiptItem ReceiptItem
-																				ON ChargePerItem.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
-																			LEFT JOIN tblGLAccount OtherChargeAPClearing
-																				ON [dbo].[fnGetItemGLAccount](ReceiptItem.intItemId, ItemLocation.intItemLocationId, 'AP Clearing') = OtherChargeAPClearing.intAccountId
-																	WHERE	ChargePerItem.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
-																			AND ChargePerItem.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
-																)
-
+													CASE	
+														WHEN ISNULL(ReceiptCharge.ysnInventoryCost, 0) = 0 THEN 
+															OtherChargeExpense.intAccountId 
+														ELSE 																
+															OtherChargeAPClearing.intAccountId
 													END 
 	,[strAccountId]								=	
-													CASE	WHEN ISNULL(ReceiptCharge.ysnInventoryCost, 0) = 0 THEN 
-																OtherChargeExpense.strAccountId
-															ELSE 
-																(
-																	-- Pick top 1 item from 'Charges per Item' and use its ap clearing account as data for Voucher (Bill). 
-																	-- Refactor this part after we put a schedule on the change on AP-1934 and IC-1648
-																	SELECT	TOP 1 
-																			OtherChargeAPClearing.strAccountId
-																	FROM	tblICInventoryReceiptItemAllocatedCharge ChargePerItem INNER JOIN tblICInventoryReceiptItem ReceiptItem
-																				ON ChargePerItem.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
-																			LEFT JOIN tblGLAccount OtherChargeAPClearing
-																				ON [dbo].[fnGetItemGLAccount](ReceiptItem.intItemId, ItemLocation.intItemLocationId, 'AP Clearing') = OtherChargeAPClearing.intAccountId
-																	WHERE	ChargePerItem.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
-																			AND ChargePerItem.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
-																)
-
+													CASE	
+														WHEN ISNULL(ReceiptCharge.ysnInventoryCost, 0) = 0 THEN 
+															OtherChargeExpense.strAccountId
+														ELSE 
+															OtherChargeAPClearing.strAccountId
 													END 
 
 	,[strName]									= Entity.strName
@@ -266,13 +242,16 @@ SELECT
 
 FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item 
 		ON ReceiptCharge.intChargeId = Item.intItemId
+
 	INNER JOIN tblICInventoryReceipt Receipt
 		ON ReceiptCharge.intInventoryReceiptId = Receipt.intInventoryReceiptId
+
 	INNER JOIN (
 		tblAPVendor Vendor INNER JOIN tblEMEntity Entity
 			ON Vendor.[intEntityId] = Entity.intEntityId
 	) 
 		ON Vendor.[intEntityId] = Receipt.intEntityVendorId
+
 	INNER JOIN tblICItemLocation ItemLocation 
 		ON ItemLocation.intItemId = Item.intItemId
 		AND ItemLocation.intLocationId = Receipt.intLocationId
@@ -282,6 +261,9 @@ FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item
 
 	LEFT JOIN tblGLAccount OtherChargeExpense
 		ON [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLocation.intItemLocationId, 'Other Charge Expense') = OtherChargeExpense.intAccountId
+
+	LEFT JOIN tblGLAccount OtherChargeAPClearing 
+		ON [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLocation.intItemLocationId, 'AP Clearing') = OtherChargeAPClearing.intAccountId
 
 	LEFT JOIN dbo.tblSMCurrency TransCurrency 
 		ON TransCurrency.intCurrencyID = ReceiptCharge.intCurrencyId
@@ -294,19 +276,36 @@ FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item
 
 	LEFT JOIN tblICUnitMeasure CostUOM 
 		ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId	
+
 	OUTER APPLY (
-		SELECT TOP 1
-			A.intInventoryReceiptItemId
-		FROM tblICInventoryReceiptItem A
-		WHERE A.intInventoryReceiptId = Receipt.intInventoryReceiptId
-	) ReceiptItem
+		SELECT	A.intInventoryReceiptItemId
+				,c = COUNT(1) 
+		FROM	tblICInventoryReceiptItem A		
+		WHERE	A.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
+				AND A.strChargesLink = ReceiptCharge.strChargesLink
+		GROUP BY A.intInventoryReceiptItemId		
+		HAVING	COUNT(1) = 1 
+
+	) ChargesLink
+
+	OUTER APPLY (
+		SELECT	A.intInventoryReceiptItemId
+				,c = COUNT(1) 
+		FROM	tblICInventoryReceiptChargePerItem A		
+		WHERE	A.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+		GROUP BY A.intInventoryReceiptItemId		
+		HAVING	COUNT(1) = 1 
+
+	) ComputedChargesLink 
 
 	OUTER APPLY dbo.fnICGetScaleTicketIdForReceiptCharge(Receipt.intInventoryReceiptId, Receipt.strReceiptNumber) ScaleTicket
 
-	-- Refactor this part after we put a schedule on the change on AP-1934 and IC-1648
-	--LEFT JOIN tblGLAccount OtherChargeAPClearing
-	--	ON [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLocation.intItemLocationId, 'AP Clearing') = OtherChargeAPClearing.intAccountId
-
 WHERE	ReceiptCharge.ysnPrice = 1
 		AND ISNULL(Receipt.ysnPosted, 0) = 1
-		AND ISNULL(-ReceiptCharge.dblAmountPriced, 0) < ROUND(ReceiptCharge.dblAmount, 6) 
+		AND (
+			ISNULL(-ReceiptCharge.dblAmountPriced, 0) < ROUND(ReceiptCharge.dblAmount, 6) 
+			OR (
+				ISNULL(ReceiptCharge.dblAmountPriced, 0) = 0 
+				AND ROUND(ReceiptCharge.dblAmount, 6) = 0 
+			)
+		)

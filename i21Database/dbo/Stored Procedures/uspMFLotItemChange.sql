@@ -5,6 +5,7 @@
 	,@dtmDate DATETIME
 	,@strReasonCode NVARCHAR(MAX) = NULL
 	,@strNotes NVARCHAR(MAX) = NULL
+	,@ysnBulkChange BIT = 0
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -83,6 +84,16 @@ BEGIN TRY
 	FROM dbo.tblICItem I
 	JOIN tblICCategory C ON C.intCategoryId = I.intCategoryId
 	WHERE I.intItemId = @intNewItemId
+
+	IF @intItemId = @intNewItemId
+	BEGIN
+		IF @ysnBulkChange = 1
+		BEGIN
+			SELECT @strNewLotNumber = ''
+
+			RETURN
+		END
+	END
 
 	IF NOT EXISTS (
 			SELECT 1

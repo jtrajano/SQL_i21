@@ -211,6 +211,7 @@ BEGIN
 		WHEN @msgId = 80195 THEN 'Unable to unpost %s because you need to unpost the Destination Qty first.'
 		WHEN @msgId = 80196 THEN '%s will have a negative cost. Negative cost is not allowed.'
 		WHEN @msgId = 80197 THEN 'Unable to post %s. Functional currency is not set for the company.'
+		WHEN @msgId = 80198 THEN 'Bundle contracts has to be received using "Add Orders" in the Inventory Receipt screen.'
 	END 
 
 	RETURN @msg

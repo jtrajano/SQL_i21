@@ -87,7 +87,7 @@ DECLARE @EIN NVARCHAR(50)
 
 	DECLARE @ItemDescription nvarchar(MAX)
 	SELECT @QueryScheduleCodeParam = 'SELECT ''' + REPLACE (@ScheduleCodeParam,',',''' UNION SELECT ''') + ''''
-	INSERT INTO TFScheduleCodeParam (strTempScheduleCode)
+	--INSERT INTO TFScheduleCodeParam (strTempScheduleCode)
 	EXEC(@QueryScheduleCodeParam)
 
 		SELECT @CountItems = COUNT(strFormCode) 
@@ -125,13 +125,13 @@ DECLARE @EIN NVARCHAR(50)
 							ELSE
 								BEGIN
 								-- GET SCHEDULE CODE BY PASSED PARAM
-									DECLARE @paramScheduleCode NVARCHAR(MAX)
-									SET @paramScheduleCode = (SELECT strTempScheduleCode FROM TFScheduleCodeParam WHERE strTempScheduleCode = @tplScheduleCode)
-									PRINT @paramScheduleCode
+									--DECLARE @paramScheduleCode NVARCHAR(MAX)
+									--SET @paramScheduleCode = (SELECT strTempScheduleCode FROM TFScheduleCodeParam WHERE strTempScheduleCode = @tplScheduleCode)
+									--PRINT @paramScheduleCode
 
-									SET @DetailColumnValue_gas = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = @paramScheduleCode AND strType = 'Special Fuel (Dyed and Clear Diesel Fuel, Biodiesel and Blended Biodiesel)' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
-									SET @DetailColumnValue_kerosene = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = @paramScheduleCode AND strType = 'Gasoline (Gasoline, Gasohol)' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
-									SET @DetailColumnValue_others = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = @paramScheduleCode AND strType = 'Other Products (Jet Fuel, Kerosene)' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+									SET @DetailColumnValue_gas = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = @tplScheduleCode AND strType = 'Special Fuel (Dyed and Clear Diesel Fuel, Biodiesel and Blended Biodiesel)' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+									SET @DetailColumnValue_kerosene = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = @tplScheduleCode AND strType = 'Gasoline (Gasoline, Gasohol)' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+									SET @DetailColumnValue_others = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = @tplScheduleCode AND strType = 'Other Products (Jet Fuel, Kerosene)' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 									
 									-- GAS
 									DECLARE @SmryDetailItemId NVARCHAR(MAX)

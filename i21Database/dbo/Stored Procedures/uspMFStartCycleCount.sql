@@ -30,6 +30,13 @@ BEGIN TRY
 		,@intNoOfDecimalPlacesOnConsumption INT
 		,@ysnConsumptionByRatio BIT
 		,@intPhysicalItemUOMId INT
+		,@strPrefillCountedQty NVARCHAR(50)
+		,@strMultipleMachinesShareCommonStagingLocation NVARCHAR(50)
+	DECLARE @tblMFProcessCycleCount TABLE (
+		intItemId INT
+		,intMachineId INT
+		,dblQuantity NUMERIC(38, 20)
+		)
 
 	SELECT @TRANCOUNT = @@TRANCOUNT
 
@@ -409,6 +416,7 @@ BEGIN TRY
 		,intMainItemId INT
 		,intRecipeItemId INT
 		,intMachineId INT
+		,intRowNumber INT
 		)
 	DECLARE @dblProduceQty NUMERIC(38, 20)
 		,@intProduceUOMId INT
@@ -520,6 +528,17 @@ BEGIN TRY
 			)
 	GROUP BY WP.intMachineId
 
+	SELECT @strMultipleMachinesShareCommonStagingLocation = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 102 --Multiple machines share common staging location
+
+	IF @strMultipleMachinesShareCommonStagingLocation IS NULL
+	BEGIN
+		SELECT @strMultipleMachinesShareCommonStagingLocation = 'False'
+	END
+
 	INSERT INTO @tblMFFinalProducedQtyByMachine (
 		intMachineId
 		,intStagingLocationId
@@ -527,27 +546,22 @@ BEGIN TRY
 		,dblProducePartialQty
 		,intProduceUOMId
 		)
-	SELECT intMachineId
+	SELECT CASE 
+			WHEN @strMultipleMachinesShareCommonStagingLocation = 'True'
+				THEN NULL
+			ELSE intMachineId
+			END
 		,intStagingLocationId
 		,IsNULL(SUM(dblProduceQty), 0)
 		,IsNULL(SUM(dblProducePartialQty), 0)
 		,MIN(intProduceUOMId)
 	FROM @tblMFProducedQtyByMachine
-	GROUP BY intMachineId
+	GROUP BY CASE 
+			WHEN @strMultipleMachinesShareCommonStagingLocation = 'True'
+				THEN NULL
+			ELSE intMachineId
+			END
 		,intStagingLocationId
-
-	SELECT @strMachineId = ''
-
-	SELECT @strMachineId = @strMachineId + ltrim(intMachineId) + ','
-	FROM (
-		SELECT DISTINCT intMachineId
-		FROM @tblMFFinalProducedQtyByMachine
-		) AS DT
-
-	IF Len(@strMachineId) > 1
-	BEGIN
-		SELECT @strMachineId = Left(@strMachineId, Len(@strMachineId) - 1)
-	END
 
 	SELECT @intPMStageLocationId = strAttributeValue
 	FROM tblMFManufacturingProcessAttribute
@@ -763,24 +777,45 @@ BEGIN TRY
 		,intMainItemId
 		,intRecipeItemId
 		,intMachineId
+		,intRowNumber
 		)
 	SELECT intItemId
 		,intConsumptionMethodId
 		,intStorageLocationId
-		,SUM(dblRequiredQty) Over (Partition by intItemId,intStorageLocationId)
+		,SUM(dblRequiredQty) OVER (
+			PARTITION BY intItemId
+			,intStorageLocationId
+			)
 		,ysnMainItem
 		,intItemUOMId
 		,intCategoryId
 		,intMainItemId
 		,intRecipeItemId
 		,intMachineId
+		,Row_Number() OVER (
+			PARTITION BY intItemId
+			,intStorageLocationId ORDER BY intMachineId
+			)
 	FROM @tblICItem
+
+	UPDATE @tblICFinalItem
+	SET intMachineId = NULL
+	WHERE intItemId IN (
+			SELECT intItemId
+			FROM @tblICFinalItem
+			WHERE intRowNumber > 1
+			)
+
+	DELETE
+	FROM @tblICFinalItem
+	WHERE intRowNumber > 1
 
 	DELETE t1
 	FROM @tblICFinalItem t1
 		,@tblICFinalItem t2
 	WHERE t1.intItemId = t2.intItemId
 		AND t1.intStorageLocationId = t2.intStorageLocationId
+		AND t1.intMachineId = t2.intMachineId
 		AND t1.intRecordId > t2.intRecordId
 
 	IF @ysnIncludeOutputItem = 1
@@ -795,7 +830,7 @@ BEGIN TRY
 	DECLARE @tblMFMachine TABLE (intMachineId INT)
 
 	INSERT INTO @tblMFMachine (intMachineId)
-	SELECT intMachineId
+	SELECT DISTINCT intMachineId
 	FROM tblMFWorkOrderProducedLot
 	WHERE intWorkOrderId = @intWorkOrderId
 		AND ysnProductionReversed = 0
@@ -806,7 +841,7 @@ BEGIN TRY
 			)
 	BEGIN
 		INSERT INTO @tblMFMachine (intMachineId)
-		SELECT intMachineId
+		SELECT DISTINCT intMachineId
 		FROM tblMFWorkOrderInputLot
 		WHERE intWorkOrderId = @intWorkOrderId
 			AND ysnConsumptionReversed = 0
@@ -859,6 +894,7 @@ BEGIN TRY
 		,dblQtyInProdStagingLocation NUMERIC(18, 6)
 		,intCategoryId INT
 		,dblRequiredQty NUMERIC(18, 6)
+		,intMachineId INT
 		)
 	DECLARE @tblMFLot TABLE (
 		intItemId INT
@@ -976,22 +1012,43 @@ BEGIN TRY
 		SELECT DISTINCT I.intItemId
 			,SUM(IsNULL(WI.dblQuantity, 0)) OVER (
 				PARTITION BY I.intItemId
-				,WI.intMachineId
+				,CASE 
+					WHEN @strMultipleMachinesShareCommonStagingLocation = 'True'
+						THEN NULL
+					ELSE WI.intMachineId
+					END
 				)
 			,WI.intItemUOMId
 			,(
 				SUM(IsNULL(WI.dblQuantity, 0)) OVER (
 					PARTITION BY I.intItemId
-					,WI.intMachineId
+					,CASE 
+						WHEN @strMultipleMachinesShareCommonStagingLocation = 'True'
+							THEN NULL
+						ELSE WI.intMachineId
+						END
 					) / SUM(IsNULL(WI.dblQuantity, 0)) OVER (
 					PARTITION BY I.intMainItemId
-					,WI.intMachineId
+					,CASE 
+						WHEN @strMultipleMachinesShareCommonStagingLocation = 'True'
+							THEN NULL
+						ELSE WI.intMachineId
+						END
 					)
 				) * 100
 			,I.intMainItemId
-			,WI.intMachineId
+			,CASE 
+				WHEN @strMultipleMachinesShareCommonStagingLocation = 'True'
+					THEN NULL
+				ELSE WI.intMachineId
+				END
 		FROM @tblICFinalItem I
 		JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intItemId = I.intItemId
+			AND WI.intMachineId = CASE 
+				WHEN I.intMachineId IS NOT NULL
+					THEN I.intMachineId
+				ELSE WI.intMachineId
+				END
 			AND WI.intWorkOrderId = @intWorkOrderId
 			AND WI.ysnConsumptionReversed = 0
 
@@ -1029,9 +1086,13 @@ BEGIN TRY
 		LEFT JOIN @tblMFLot L ON L.intItemId = I.intItemId
 			AND L.intStorageLocationId = I.intStorageLocationId
 		LEFT JOIN @tblMFWorkOrderInputLot WI ON WI.intItemId = I.intItemId
-			AND WI.intMachineId = I.intMachineId
+			AND IsNULL(WI.intMachineId, 0) = CASE 
+				WHEN I.intMachineId IS NOT NULL
+					THEN I.intMachineId
+				ELSE IsNULL(WI.intMachineId, 0)
+				END
 	END
-	
+
 	DELETE
 	FROM @tblICFinalItem
 	WHERE ysnMainItem = 0
@@ -1069,7 +1130,23 @@ BEGIN TRY
 		LEFT JOIN @tblMFLot L ON L.intItemId = I.intItemId
 			AND I.intStorageLocationId = L.intStorageLocationId
 		LEFT JOIN @tblMFWorkOrderInputLot WI ON WI.intItemId = I.intItemId
-			AND WI.intMachineId = I.intMachineId
+			AND IsNULL(WI.intMachineId, 0) = CASE 
+				WHEN I.intMachineId IS NOT NULL
+					THEN I.intMachineId
+				ELSE IsNULL(WI.intMachineId, 0)
+				END
+	END
+
+	SELECT @strPrefillCountedQty = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 101
+
+	IF @strPrefillCountedQty IS NULL
+		OR @strPrefillCountedQty = ''
+	BEGIN
+		SELECT @strPrefillCountedQty = 'False'
 	END
 
 	--BEGIN TRANSACTION
@@ -1111,7 +1188,18 @@ BEGIN TRY
 		,NULL
 		,NULL
 		,I.intItemId
-		,NULL
+		,(
+			CASE 
+				WHEN @strPrefillCountedQty = 'True'
+					THEN (
+							SELECT SUM(PS.dblQtyInProductionStagingLocation)
+							FROM @tblMFQtyInProductionStagingLocation PS
+							WHERE PS.intItemId = I.intItemId
+								AND PS.intStorageLocationId = I.intStorageLocationId
+							)
+				ELSE NULL
+				END
+			)
 		,(
 			SELECT SUM(PS.dblQtyInProdStagingLocation)
 			FROM @tblMFQtyInProductionStagingLocation PS
@@ -1152,6 +1240,26 @@ BEGIN TRY
 			)
 		,I.intMachineId
 	FROM @tblICFinalItem I
+	WHERE I.intMachineId IS NOT NULL
+
+	INSERT INTO tblMFProcessCycleCountMachine (
+		intCycleCountId
+		,intMachineId
+		)
+	SELECT (
+			SELECT PCC.intCycleCountId
+			FROM tblMFProcessCycleCount PCC
+			WHERE PCC.intCycleCountSessionId = @intCycleCountSessionId
+				AND PCC.intItemId = I.intItemId
+				AND PCC.intProductionStagingLocationId = I.intStorageLocationId
+			)
+		,I1.intMachineId
+	FROM @tblICFinalItem I
+		,(
+			SELECT intMachineId
+			FROM @tblMFMachine
+			) I1
+	WHERE I.intMachineId IS NULL
 
 	UPDATE dbo.tblMFWorkOrder
 	SET intCountStatusId = 10
@@ -1166,6 +1274,7 @@ BEGIN TRY
 		,dblRequiredQty
 		,intItemId
 		,intCategoryId
+		,intMachineId
 		)
 	SELECT SUm(PS.dblOpeningQty)
 		,SUM(PS.dblQtyInProdStagingLocation)
@@ -1173,9 +1282,13 @@ BEGIN TRY
 		,SUM(PS.dblRequiredQty)
 		,PS.intItemId
 		,PS.intCategoryId
+		,I.intMachineId
 	FROM @tblMFQtyInProductionStagingLocation PS
+	JOIN @tblICFinalItem I ON I.intItemId = PS.intItemId
+		AND I.intStorageLocationId = PS.intStorageLocationId
 	GROUP BY PS.intItemId
 		,PS.intCategoryId
+		,I.intMachineId
 
 	UPDATE tblMFProductionSummary
 	SET dblOpeningQuantity = CASE 
@@ -1196,6 +1309,11 @@ BEGIN TRY
 	LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RSI ON RSI.intSubstituteItemId = PSL.intItemId
 		AND RSI.intWorkOrderId = @intWorkOrderId
 	JOIN dbo.tblMFProductionSummary PS ON PS.intItemId = PSL.intItemId
+		AND IsNULL(PS.intMachineId, 0) = CASE 
+			WHEN PS.intMachineId IS NOT NULL
+				THEN PSL.intMachineId
+			ELSE IsNULL(PS.intMachineId, 0)
+			END
 		AND PS.intWorkOrderId = @intWorkOrderId
 		AND intItemTypeId IN (
 			1
@@ -1219,6 +1337,7 @@ BEGIN TRY
 		,intCategoryId
 		,intItemTypeId
 		,dblRequiredQty
+		,intMachineId
 		)
 	SELECT DISTINCT @intWorkOrderId
 		,PSL.intItemId
@@ -1251,6 +1370,7 @@ BEGIN TRY
 				END
 			)
 		,PSL.dblRequiredQty
+		,NULL --,PSL.intMachineId 
 	FROM @tblMFFinalQtyInProductionStagingLocation PSL
 	LEFT JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intItemId = PSL.intItemId
 		AND RI.intWorkOrderId = @intWorkOrderId
@@ -1259,11 +1379,114 @@ BEGIN TRY
 			FROM dbo.tblMFProductionSummary PS
 			WHERE PS.intWorkOrderId = @intWorkOrderId
 				AND PS.intItemId = PSL.intItemId
+				AND IsNULL(PS.intMachineId, 0) = CASE 
+					WHEN PS.intMachineId IS NOT NULL
+						THEN PSL.intMachineId
+					ELSE IsNULL(PS.intMachineId, 0)
+					END
 				AND intItemTypeId IN (
 					1
 					,3
 					)
 			)
+
+	IF @strPrefillCountedQty = 'True'
+	BEGIN
+		INSERT INTO @tblMFProcessCycleCount
+		SELECT intItemId
+			,PCCM.intMachineId
+			,SUM(dblQuantity)
+		FROM tblMFProcessCycleCount PCC
+		LEFT JOIN tblMFProcessCycleCountMachine PCCM ON PCCM.intCycleCountId = PCC.intCycleCountId
+		WHERE intCycleCountSessionId = @intCycleCountSessionId
+		GROUP BY PCC.intItemId
+			,PCCM.intMachineId
+
+		UPDATE tblMFProductionSummary
+		SET dblCountQuantity = CASE 
+				WHEN RI.intRecipeItemTypeId = 1
+					OR RSI.intRecipeItemTypeId = 1
+					THEN ISNULL(CC.dblQuantity, 0)
+				ELSE 0
+				END
+			,dblCountOutputQuantity = CASE 
+				WHEN RI.intRecipeItemTypeId = 2
+					THEN ISNULL(CC.dblQuantity, 0)
+				ELSE 0
+				END
+		FROM @tblMFProcessCycleCount CC
+		LEFT JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intItemId = CC.intItemId
+			AND RI.intWorkOrderId = @intWorkOrderId
+		LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RSI ON RSI.intSubstituteItemId = CC.intItemId
+			AND RSI.intWorkOrderId = @intWorkOrderId
+		JOIN dbo.tblMFProductionSummary PS ON PS.intItemId = CC.intItemId
+			AND IsNULL(PS.intMachineId, 0) = CASE 
+				WHEN PS.intMachineId IS NOT NULL
+					THEN IsNULL(CC.intMachineId, 0)
+				ELSE IsNULL(PS.intMachineId, 0)
+				END
+			AND PS.intWorkOrderId = @intWorkOrderId
+			AND PS.intItemTypeId IN (
+				1
+				,3
+				)
+
+		INSERT INTO dbo.tblMFProductionSummary (
+			intWorkOrderId
+			,intItemId
+			,dblOpeningQuantity
+			,dblOpeningOutputQuantity
+			,dblOpeningConversionQuantity
+			,dblInputQuantity
+			,dblConsumedQuantity
+			,dblOutputQuantity
+			,dblOutputConversionQuantity
+			,dblCountQuantity
+			,dblCountOutputQuantity
+			,dblCountConversionQuantity
+			,dblCalculatedQuantity
+			)
+		SELECT DISTINCT @intWorkOrderId
+			,CC.intItemId
+			,0
+			,0
+			,0
+			,0
+			,0
+			,0
+			,0
+			,CASE 
+				WHEN RI.intRecipeItemTypeId = 1
+					OR RI.intRecipeItemTypeId IS NULL
+					THEN ISNULL(CC.dblQuantity, 0)
+				ELSE 0
+				END
+			,CASE 
+				WHEN RI.intRecipeItemTypeId = 2
+					THEN ISNULL(CC.dblQuantity, 0)
+				ELSE 0
+				END
+			,0
+			,0
+		FROM @tblMFProcessCycleCount CC
+		LEFT JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intItemId = CC.intItemId
+			AND RI.intWorkOrderId = @intWorkOrderId
+		WHERE NOT EXISTS (
+				SELECT *
+				FROM dbo.tblMFProductionSummary PS
+				WHERE PS.intWorkOrderId = @intWorkOrderId
+					AND PS.intItemId = CC.intItemId
+					AND IsNULL(PS.intMachineId, 0) = CASE 
+						WHEN PS.intMachineId IS NOT NULL
+							THEN IsNULL(CC.intMachineId, 0)
+						ELSE IsNULL(PS.intMachineId, 0)
+						END
+					AND PS.intItemTypeId IN (
+						1
+						,3
+						)
+				)
+	END
 
 	--COMMIT TRANSACTION
 	EXEC sp_xml_removedocument @idoc

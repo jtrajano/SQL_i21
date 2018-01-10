@@ -639,7 +639,7 @@ BEGIN
 												 ELSE D.dblAmount--(CASE WHEN D.ysnInventoryCost = 0 THEN D.dblAmount ELSE B.dblTotal END)
 													--commented on AP-3227, taxes for other charges should not be added here as it is already part of taxes entries
 											END AS DECIMAL(18,2))
-											* ISNULL(NULLIF(B.dblRate,0),1) 
+											-- * ISNULL(NULLIF(B.dblRate,0),1) 
 											* CASE WHEN A.intTransactionType IN (2, 3, 13) THEN (-1) 
 														ELSE 1 END,      
 		[dblDebitReport]				=	0,

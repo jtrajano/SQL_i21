@@ -50,22 +50,37 @@ BEGIN
 		+ ' '
 		+ REPLICATE('0',8 - LEN(CAST((2 + ROW_NUMBER() OVER (ORDER BY (SELECT 1))) AS NVARCHAR(100)))) + CAST((2 + ROW_NUMBER() OVER (ORDER BY (SELECT 1))) AS NVARCHAR(100))
 		+ SPACE(36)
-		+ SPACE(1) --544 Page 75
+		+ SPACE(1) --544 Page 89
 		+ SPACE(1) 
 		+ SPACE(1) 
 		+ SPACE(1)
 		+ SPACE(8)
-		+ SPACE(13) --569-607
-		+ SPACE(8) --569-607
-		+ SPACE(1)
-		+ SPACE(1) -- 617
-		+ SPACE(1)
-		+ SPACE(44)
-		+ SPACE(60)
-		+ SPACE(12) -- State Income Tax Withheld
-		+ SPACE(12) -- LOcal Income Tax Withheld
-		+ SPACE(2)
-		+ SPACE(2)
+		/**--OLD--FROM 2016 SPECS--**/
+		--+ SPACE(13) --569-607
+		--+ SPACE(8) --569-607
+		--+ SPACE(1)
+		--+ SPACE(1) -- 617
+		--+ SPACE(1)
+		--+ SPACE(44)
+		--+ SPACE(60)
+		--+ SPACE(12) -- State Income Tax Withheld
+		--+ SPACE(12) -- LOcal Income Tax Withheld
+		--+ SPACE(2)
+		--+ SPACE(2)
+		/**--NEW--FROM 2017 SPECS--**/
+		+ SPACE(13) --556-568 CUSIP Number
+		+ SPACE(39) --569-607 Description of property
+		+ SPACE(8) --608-615 Date acquired
+		+ SPACE(1) --616 Loss not allowed indicator
+		+ SPACE(1) --617 Applicable check box of Form 8949
+		+ SPACE(1) --618 Applicable check box for  Collectables
+		+ SPACE(1) --619 FATCA filing requirements indicator
+		+ SPACE(43) --620-662 blank
+		+ SPACE(60) --663-722 special data entries
+		+ SPACE(12) --723-734 State Income Tax Withheld
+		+ SPACE(12) --735-746 Local Income Tax Withheld
+		+ SPACE(2) --747-748 Combined Federal/State Code
+		+ CHAR(13) + CHAR(10)
 	FROM vyuAP1099B A
 	OUTER APPLY 
 	(

@@ -991,9 +991,9 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Account Mapping' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Account Mapping', N'General Ledger', @GeneralLedgerMaintenanceParentMenuId, N'Account Mapping', N'Maintenance', N'Screen', N'GeneralLedger.view.AccountMapping', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
+	VALUES (N'Account Mapping', N'General Ledger', @GeneralLedgerMaintenanceParentMenuId, N'Account Mapping', N'Maintenance', N'Screen', N'GeneralLedger.view.AccountMapping?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'GeneralLedger.view.AccountMapping' WHERE strMenuName = N'Account Mapping' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'GeneralLedger.view.AccountMapping?showSearch=true' WHERE strMenuName = N'Account Mapping' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Audit Adjustment' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
@@ -4137,15 +4137,19 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Transacti
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'Reporting.view.ReportManager?group=Card Fueling&report=TransactionSummaryByCustomerProdPeriod&direct=true&showCriteria=true', intSort = 3 WHERE strMenuName = 'Transaction Summary By Product Category' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingReportParentMenuId
 
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Transaction' AND strModuleName = 'Card Fueling' AND ysnLeaf = 0 AND intParentMenuID = @CardFuelingCreateParentMenuId)
+BEGIN
+	EXEC uspSMIncreaseECConcurrency 0
+END
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Transaction' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingCreateParentMenuId)
 BEGIN
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'New Transaction', N'Card Fueling', @CardFuelingCreateParentMenuId, N'New Transaction', N'Create', N'Screen', N'CardFueling.view.Transaction?action=new', N'small-menu-create', 0, 0, 0, 0, 2, 1)
-
+	VALUES (N'New Transaction', N'Card Fueling', @CardFuelingCreateParentMenuId, N'New Transaction', N'Create', N'Screen', N'CardFueling.view.Transaction?action=new', N'small-menu-create', 0, 0, 0, 1, 0, 1)
 	EXEC uspSMIncreaseECConcurrency 0
 END
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = N'CardFueling.view.Transaction?action=new', intSort = 0, intRow = 1 WHERE strMenuName = 'New Transaction' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingCreateParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'CardFueling.view.Transaction?action=new', intSort = 0, ysnLeaf = 1 WHERE strMenuName = 'New Transaction' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingCreateParentMenuId
 
 /* START OF DELETION */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Batch Posting' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingMaintenanceParentMenuId

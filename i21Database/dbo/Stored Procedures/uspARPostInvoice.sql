@@ -22,7 +22,7 @@ AS
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
 SET NOCOUNT ON  
-SET XACT_ABORT ON  
+SET XACT_ABORT OFF  
 SET ANSI_WARNINGS OFF  
   
 --------------------------------------------------------------------------------------------  
@@ -3125,11 +3125,19 @@ IF @post = 1
 					,[dblForeignRate]
 					,[strRateType]
 				)
-				EXEC	dbo.uspICPostCosting  
+				--EXEC	dbo.uspICPostCosting  
+				--		@ItemsForPost  
+				--		,@batchId  
+				--		,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+				--		,@UserEntityID
+				EXEC	dbo.uspARBatchPostCosting  
 						@ItemsForPost  
 						,@batchId  
 						,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 						,@UserEntityID
+						,DEFAULT  -- Default is NULL. Used to override the GL description. 
+						,DEFAULT  -- Options are 'Aggregrate' and'Detailed'. Default is 'Detailed'. 
+
 
 				DELETE FROM ICIT
 				FROM

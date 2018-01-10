@@ -9,6 +9,7 @@
 	,@ysnUpdateOwnerOnly BIT = 0
 	,@strReasonCode NVARCHAR(MAX) = NULL
 	,@dtmDate DATETIME = NULL
+	,@ysnBulkChange BIT = 0
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -205,7 +206,6 @@ BEGIN TRY
 	--BEGIN
 	--	SELECT @intSourceId = 1
 	--		,@intSourceTransactionTypeId = 8
-
 	--	EXEC [dbo].[uspICInventoryAdjustment_CreatePostOwnerChange] @intItemId = @intItemId
 	--		,@dtmDate = @dtmDate
 	--		,@intLocationId = @intLocationId
@@ -219,7 +219,6 @@ BEGIN TRY
 	--		,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
 	--		,@strDescription = @strDescription
 	--END
-
 	IF @ysnUpdateOwnerOnly = 0
 	BEGIN
 		-- Parent Lot No. Update

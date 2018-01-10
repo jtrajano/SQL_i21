@@ -32,15 +32,45 @@ BEGIN TRY
 
 	DECLARE @tblMFProcessCycleCount TABLE (
 		intItemId INT
+		,intMachineId INT
 		,dblQuantity NUMERIC(38, 20)
 		)
 
 	INSERT INTO @tblMFProcessCycleCount
 	SELECT intItemId
+		,PCCM.intMachineId
 		,SUM(dblQuantity)
-	FROM tblMFProcessCycleCount
+	FROM tblMFProcessCycleCount PCC
+	LEFT JOIN tblMFProcessCycleCountMachine PCCM ON PCCM.intCycleCountId = PCC.intCycleCountId
 	WHERE intCycleCountSessionId = @intCycleCountSessionId
-	GROUP BY intItemId
+	GROUP BY PCC.intItemId
+		,PCCM.intMachineId
+
+	UPDATE tblMFProductionSummary
+	SET dblCountQuantity = CASE 
+			WHEN RI.intRecipeItemTypeId = 1
+				OR RSI.intRecipeItemTypeId = 1
+				THEN ISNULL(CC.dblQuantity, 0)
+			ELSE 0
+			END
+		,dblCountOutputQuantity = CASE 
+			WHEN RI.intRecipeItemTypeId = 2
+				THEN ISNULL(CC.dblQuantity, 0)
+			ELSE 0
+			END
+	FROM @tblMFProcessCycleCount CC
+	LEFT JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intItemId = CC.intItemId
+		AND RI.intWorkOrderId = @intWorkOrderId
+	LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RSI ON RSI.intSubstituteItemId = CC.intItemId
+		AND RSI.intWorkOrderId = @intWorkOrderId
+	JOIN dbo.tblMFProductionSummary PS ON PS.intItemId = CC.intItemId
+		AND IsNULL(PS.intMachineId, 0) = IsNULL(CC.intMachineId, 0)
+		AND PS.intWorkOrderId = @intWorkOrderId
+		AND PS.intItemTypeId IN (
+			1
+			,3
+			)
+		AND PS.intMachineId IS NOT NULL
 
 	UPDATE tblMFProductionSummary
 	SET dblCountQuantity = CASE 
@@ -65,58 +95,59 @@ BEGIN TRY
 			1
 			,3
 			)
+		AND PS.intMachineId IS NULL
 
-	INSERT INTO dbo.tblMFProductionSummary (
-		intWorkOrderId
-		,intItemId
-		,dblOpeningQuantity
-		,dblOpeningOutputQuantity
-		,dblOpeningConversionQuantity
-		,dblInputQuantity
-		,dblConsumedQuantity
-		,dblOutputQuantity
-		,dblOutputConversionQuantity
-		,dblCountQuantity
-		,dblCountOutputQuantity
-		,dblCountConversionQuantity
-		,dblCalculatedQuantity
-		)
-	SELECT DISTINCT @intWorkOrderId
-		,CC.intItemId
-		,0
-		,0
-		,0
-		,0
-		,0
-		,0
-		,0
-		,CASE 
-			WHEN RI.intRecipeItemTypeId = 1
-				OR RI.intRecipeItemTypeId IS NULL
-				THEN ISNULL(CC.dblQuantity, 0)
-			ELSE 0
-			END
-		,CASE 
-			WHEN RI.intRecipeItemTypeId = 2
-				THEN ISNULL(CC.dblQuantity, 0)
-			ELSE 0
-			END
-		,0
-		,0
-	FROM @tblMFProcessCycleCount CC
-	LEFT JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intItemId = CC.intItemId
-		AND RI.intWorkOrderId = @intWorkOrderId
-	WHERE NOT EXISTS (
-			SELECT *
-			FROM dbo.tblMFProductionSummary PS
-			WHERE PS.intWorkOrderId = @intWorkOrderId
-				AND PS.intItemId = CC.intItemId
-				AND PS.intItemTypeId IN (
-					1
-					,3
-					)
-			)
-
+	--INSERT INTO dbo.tblMFProductionSummary (
+	--	intWorkOrderId
+	--	,intItemId
+	--	,dblOpeningQuantity
+	--	,dblOpeningOutputQuantity
+	--	,dblOpeningConversionQuantity
+	--	,dblInputQuantity
+	--	,dblConsumedQuantity
+	--	,dblOutputQuantity
+	--	,dblOutputConversionQuantity
+	--	,dblCountQuantity
+	--	,dblCountOutputQuantity
+	--	,dblCountConversionQuantity
+	--	,dblCalculatedQuantity
+	--	)
+	--SELECT DISTINCT @intWorkOrderId
+	--	,CC.intItemId
+	--	,0
+	--	,0
+	--	,0
+	--	,0
+	--	,0
+	--	,0
+	--	,0
+	--	,CASE 
+	--		WHEN RI.intRecipeItemTypeId = 1
+	--			OR RI.intRecipeItemTypeId IS NULL
+	--			THEN ISNULL(CC.dblQuantity, 0)
+	--		ELSE 0
+	--		END
+	--	,CASE 
+	--		WHEN RI.intRecipeItemTypeId = 2
+	--			THEN ISNULL(CC.dblQuantity, 0)
+	--		ELSE 0
+	--		END
+	--	,0
+	--	,0
+	--FROM @tblMFProcessCycleCount CC
+	--LEFT JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intItemId = CC.intItemId
+	--	AND RI.intWorkOrderId = @intWorkOrderId
+	--WHERE NOT EXISTS (
+	--		SELECT *
+	--		FROM dbo.tblMFProductionSummary PS
+	--		WHERE PS.intWorkOrderId = @intWorkOrderId
+	--			AND PS.intItemId = CC.intItemId
+	--			and IsNULL(PS.intMachineId,0) =IsNULL(CC.intMachineId ,0)
+	--			AND PS.intItemTypeId IN (
+	--				1
+	--				,3
+	--				)
+	--		)
 	EXEC sp_xml_removedocument @idoc
 END TRY
 

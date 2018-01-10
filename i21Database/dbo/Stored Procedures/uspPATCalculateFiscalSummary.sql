@@ -162,7 +162,7 @@ SELECT intFiscalYear,
 		dblCashRefund,
 		dblEquityRefund,
 		dblLessFWT = CASE WHEN dblRefundAmount >= ComPref.dblMinimumRefund THEN (dblCashRefund * (dblLessFWTPercentage/100)) ELSE 0 END,
-		dblLessServiceFee = CASE WHEN dblRefundAmount >= ComPref.dblMinimumRefund OR (dblCashRefund <= ComPref.dblCutoffAmount AND ComPref.strCutoffTo = 'Cash') THEN ComPref.dblServiceFee ELSE 0 END,
+		dblLessServiceFee = CASE WHEN dblRefundAmount >= ComPref.dblMinimumRefund OR (dblCashRefund <= ComPref.dblCutoffAmount AND ComPref.strCutoffTo = 'Cash') AND dblNonRefundAmount = 0 THEN ComPref.dblServiceFee ELSE 0 END,
 		dblCheckAmount = CASE WHEN dblRefundAmount >= ComPref.dblMinimumRefund THEN 
 								(dblCashRefund - (dblCashRefund * (dblLessFWTPercentage/100)) - 
 								(CASE WHEN dblRefundAmount >= ComPref.dblServiceFee OR (dblCashRefund <= ComPref.dblCutoffAmount AND ComPref.strCutoffTo = 'Cash') THEN ComPref.dblServiceFee ELSE 0 END))
