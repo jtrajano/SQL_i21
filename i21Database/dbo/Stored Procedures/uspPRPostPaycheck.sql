@@ -1240,6 +1240,22 @@ Post_Exit:
 *****************************************/
 IF (@isSuccessful <> 0)
 BEGIN
+	/* Update the Employee Time Off Tiers and Accrued Hours */
+	SELECT DISTINCT intTypeTimeOffId INTO #tmpEmployeeTimeOff FROM tblPREmployeeTimeOff WHERE intEntityEmployeeId = @intEmployeeId
+		
+	DECLARE @intTypeTimeOffId INT
+	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEmployeeTimeOff)
+	BEGIN
+		SELECT TOP 1 @intTypeTimeOffId = intTypeTimeOffId FROM #tmpEmployeeTimeOff
+
+		EXEC uspPRUpdateEmployeeTimeOff @intTypeTimeOffId, @intEmployeeId
+		EXEC uspPRUpdateEmployeeTimeOffHours @intTypeTimeOffId, @intEmployeeId
+
+		DELETE FROM #tmpEmployeeTimeOff WHERE intTypeTimeOffId = @intTypeTimeOffId
+	END
+
+	EXEC uspPRInsertPaycheckTimeOff @intPaycheckId
+
 	IF (@ysnPost = 1) 
 	BEGIN
 		IF (@ysnRecap = 0) 
@@ -1303,22 +1319,6 @@ BEGIN
 			SET @isSuccessful = 1
 		END
 	END
-
-	/* Update the Employee Time Off Tiers and Accrued Hours */
-	SELECT DISTINCT intTypeTimeOffId INTO #tmpEmployeeTimeOff FROM tblPREmployeeTimeOff WHERE intEntityEmployeeId = @intEmployeeId
-		
-	DECLARE @intTypeTimeOffId INT
-	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEmployeeTimeOff)
-	BEGIN
-		SELECT TOP 1 @intTypeTimeOffId = intTypeTimeOffId FROM #tmpEmployeeTimeOff
-
-		EXEC uspPRUpdateEmployeeTimeOff @intTypeTimeOffId, @intEmployeeId
-		EXEC uspPRUpdateEmployeeTimeOffHours @intTypeTimeOffId, @intEmployeeId
-
-		DELETE FROM #tmpEmployeeTimeOff WHERE intTypeTimeOffId = @intTypeTimeOffId
-	END
-
-	EXEC uspPRInsertPaycheckTimeOff @intPaycheckId
 END
 END
 
