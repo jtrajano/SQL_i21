@@ -1,21 +1,19 @@
-﻿CREATE VIEW [dbo].[vyuTFGetTaxAuthorityBeginEndInventoryDetail]
+﻿CREATE VIEW [dbo].[vyuTFGetTaxAuthorityBeginEndInventory]
 
 AS
 
-SELECT Detail.intTaxAuthorityBeginEndInventoryDetailId
-	, Detail.intTaxAuthorityBeginEndInventoryId
-	, Header.intTaxAuthorityId
+SELECT Detail.intTaxAuthorityBeginEndInventoryId
+	, Detail.intTaxAuthorityId
 	, TA.strTaxAuthorityCode
 	, strTADescription = TA.strDescription
-	, Header.dtmBeginDate
-	, Header.dtmEndDate
+	, TA.dtmBeginDate
+	, TA.dtmEndDate
 	, Detail.intProductCodeId
 	, PC.strProductCode
 	, strProductCodeDescription = PC.strDescription
 	, Detail.dblBeginInventory
 	, Detail.dblEndInventory
 	, Detail.intConcurrencyId
-FROM tblTFTaxAuthorityBeginEndInventoryDetail Detail
-LEFT JOIN tblTFTaxAuthorityBeginEndInventory Header ON Header.intTaxAuthorityBeginEndInventoryId = Detail.intTaxAuthorityBeginEndInventoryId
-LEFT JOIN tblTFProductCode PC ON PC.intProductCodeId = Detail.intProductCodeId AND Header.intTaxAuthorityId = PC.intTaxAuthorityId
-LEFT JOIN tblTFTaxAuthority TA ON TA.intTaxAuthorityId = Header.intTaxAuthorityId
+FROM tblTFTaxAuthorityBeginEndInventory Detail
+LEFT JOIN tblTFProductCode PC ON PC.intProductCodeId = Detail.intProductCodeId AND Detail.intTaxAuthorityId = PC.intTaxAuthorityId
+LEFT JOIN tblTFTaxAuthority TA ON TA.intTaxAuthorityId = Detail.intTaxAuthorityId
