@@ -123,7 +123,7 @@ LEFT JOIN (
 	SELECT *
 	FROM (
 		SELECT ROW_NUMBER() OVER (
-				PARTITION BY S.intContractDetailId ORDER BY S.dtmTestingEndDate, S.intSampleId DESC
+				PARTITION BY S.intContractDetailId ORDER BY S.dtmTestingEndDate DESC, S.intSampleId DESC
 				) intRowNum
 			,S.intContractDetailId
 			,S.strSampleNumber
@@ -266,7 +266,7 @@ LEFT JOIN (
 	SELECT *
 	FROM (
 		SELECT ROW_NUMBER() OVER (
-				PARTITION BY S.intContractDetailId ORDER BY S.dtmTestingEndDate, S.intSampleId DESC
+				PARTITION BY S.intContractDetailId ORDER BY S.dtmTestingEndDate DESC, S.intSampleId DESC
 				) intRowNum
 			,S.intContractDetailId
 			,S.strSampleNumber
