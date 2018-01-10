@@ -90,7 +90,9 @@ Ext.define('Inventory.model.ReceiptItemLot', {
         { name: 'dblStatedNetPerUnit', type: 'float' },
         { name: 'dblStatedTotalNet', type: 'float' },
         { name: 'dblPhysicalVsStated', type: 'float' },
-        { name: 'strUnitMeasure', type: 'string'}
+        { name: 'strUnitMeasure', type: 'string'},
+        { name: 'dblQuantityBeforeEdit', type: 'float' , allowNull: true},
+        { name: 'dblTareWeightBeforeEdit', type: 'float' , allowNull: true}
     ],
 
     validators: [

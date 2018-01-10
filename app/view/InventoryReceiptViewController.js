@@ -1022,6 +1022,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (cepItemLots) {
             cepItemLots.on({
                 // validateedit: me.onEditLots,
+                beforeedit: me.onLotBeforeEdit,
                 edit: me.onEditLots,
                 scope: me
             });
@@ -2612,7 +2613,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     //grossQty = (lotCF * lotQty) / weightCF;
                                     grossQty = me.convertQtyBetweenUOM(lotCF, weightCF, lotQty);
                                 }
-
+                                
                                 lot.set('dblGrossWeight', grossQty);
                                 var tare = lot.get('dblTareWeight');
                                 var netTotal = grossQty - tare;
@@ -2632,10 +2633,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             // Get the Tare Qty
                             lotTare = lot.get('dblTareWeight');
                             lotTare = Ext.isNumeric(lotTare) ? lotTare : 0.00;
+                            var newTare = (lot.get('dblTareWeightBeforeEdit')/lot.get('dblQuantityBeforeEdit')) * lotQty;
+                            var newGross = (lotGross/lot.get('dblQuantityBeforeEdit')) * lotQty;
 
+                            lot.set('dblTareWeight', newTare);
+                            
                             // Calculate the total Gross and total Net
-                            totalGross += lotGross;
-                            totalNet += (lotGross - lotTare);
+                            totalGross += newGross;
+                            totalNet += (newGross - newTare);
                             ysnCalculatedInLot = 1;
                         }
                     }
@@ -3318,6 +3323,23 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     //    return subCurrencyCents;
     //},
 
+    onLotBeforeEdit: function(editor, context, eOpts) {
+        var win = editor.grid.up('window');
+        var me = win.controller;
+        var vw = win.viewModel;
+        var lot = context.record;
+
+        if (context.field === 'dblQuantity' && lot){
+            var dblQuantity = lot.get('dblQuantity');
+            dblQuantity = Ext.isNumeric(dblQuantity) ? dblQuantity : 0.00; 
+            var dblTareWeight = lot.get('dblTareWeight');
+            dblTareWeight = Ext.isNumeric(dblTareWeight) ? dblTareWeight : 0.00;
+
+            lot.set('dblQuantityBeforeEdit', dblQuantity);
+            lot.set('dblTareWeightBeforeEdit', dblTareWeight);
+        }
+    },
+
     onItemBeforeEdit: function(editor, context, eOpts){
         var win = editor.grid.up('window');
         var me = win.controller;
@@ -3502,6 +3524,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     },
 
     onEditLots: function (editor, context, eOpts) {
+        
         var me = this;
         var win = editor.grid.up('window');
         var receiptItem = win.viewModel.data.currentReceiptItem;

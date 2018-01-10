@@ -1048,7 +1048,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 return true;
             }
             else {
-                return false; 
+                return false;  
             }
             // else {
             //     switch (get('current.strReceiptType')) {       

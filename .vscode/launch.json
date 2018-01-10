@@ -22,8 +22,8 @@
             "type": "chrome",
             "request": "attach",
             "port": 9222,
-            "url": "http://localhost/16.3/i21/#/IC/InventoryTransfer?action=new&searchTab=InventoryTransfer",
-            "webRoot": "${workspaceRoot}"
+            "url": "http://localhost/owa/#/IC/InventoryReceipt?action=edit&filters%5B0%5D%5Bcolumn%5D=intInventoryReceiptId&filters%5B0%5D%5Bvalue%5D=1100%7C%5E%7C&activeTab=&totalRecords=815&recordWindowId=&searchTab=InventoryReceipt",
+            "webRoot": "${workspaceRoot}/app"
         }
     ]
 }
