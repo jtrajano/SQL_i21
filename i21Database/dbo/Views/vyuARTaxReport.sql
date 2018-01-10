@@ -120,7 +120,22 @@ FROM (
 		 , intCurrencyId			= I.intCurrencyId
 		 , intCompanyLocationId		= I.intCompanyLocationId
 		 , intShipToLocationId		= I.intShipToLocationId
-		 , TAXDETAIL.*
+		 --, TAXDETAIL.*
+		 , TAXDETAIL.intTaxCodeId
+		 , TAXDETAIL.intInvoiceId
+		 , TAXDETAIL.intInvoiceDetailId
+		 , TAXDETAIL.intItemId
+		 , TAXDETAIL.intItemUOMId
+		 , TAXDETAIL.intTaxGroupId
+		 , TAXDETAIL.strCalculationMethod
+		 , TAXDETAIL.dblRate
+		 , TAXDETAIL.dblUnitPrice
+		 , TAXDETAIL.dblQtyShipped
+		 , TAXDETAIL.dblAdjustedTax
+		 , TAXDETAIL.dblTax
+		 , TAXDETAIL.dblTotalAdjustedTax
+		 , TAXDETAIL.dblTotalTax
+		 , TAXDETAIL.ysnTaxExempt
 		 , dblTaxDifference			= (TAXDETAIL.dblAdjustedTax - TAXDETAIL.dblTax) * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType)
 		 , dblTaxAmount				= TAXDETAIL.dblAdjustedTax * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType)
 		 , dblNonTaxable			= I.dblInvoiceTotal
@@ -128,43 +143,43 @@ FROM (
 		 , dblTotalSales			= I.dblInvoiceTotal
 		 , dblTaxCollected			= ISNULL(I.dblTax, 0) * [dbo].[fnARGetInvoiceAmountMultiplier](I.strTransactionType)
 	FROM dbo.tblARInvoice I WITH (NOLOCK)
+	INNER JOIN
+		(
+		SELECT
+			 [intInvoiceDetailTaxId]	= MIN(ARIDT.[intInvoiceDetailTaxId])
+			,[intInvoiceId]				= ARID.[intInvoiceId]
+		FROM
+			tblARInvoiceDetailTax ARIDT
+		INNER JOIN
+			tblARInvoiceDetail ARID
+				ON ARIDT.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
+		GROUP BY
+			ARID.[intInvoiceId]
+		) IMIN
+			ON IMIN.[intInvoiceId] = I.[intInvoiceId]
 	INNER JOIN (
-		SELECT DISTINCT IDT.intTaxCodeId
-					  , ID.intInvoiceId
-					  , ID.intInvoiceDetailId
-					  , ID.intItemId
-					  , ID.intItemUOMId
-					  , ID.intTaxGroupId
-					  , IDT.strCalculationMethod
+		SELECT			ARIDT.intTaxCodeId
+					  , ARID.intInvoiceId
+					  , ARID.intInvoiceDetailId
+					  , ARID.intItemId
+					  , ARID.intItemUOMId
+					  , ARID.intTaxGroupId
+					  , ARIDT.strCalculationMethod
 					  , dblRate					= 0
 					  , dblUnitPrice			= 0
-					  , dblQtyShipped			= ID.dblQtyShipped
+					  , dblQtyShipped			= ARID.dblQtyShipped
 					  , dblAdjustedTax	 		= 0	 				 
 					  , dblTax					= 0
 					  , dblTotalAdjustedTax		= 0
 					  , dblTotalTax				= 0
 					  , ysnTaxExempt
-		FROM tblARInvoiceDetail ID WITH (NOLOCK)
-		JOIN (
-			SELECT intInvoiceDetailId
-				 , intTaxCodeId
-				 , strCalculationMethod
-				 , ysnTaxExempt
-			FROM dbo.tblARInvoiceDetailTax idx WITH (NOLOCK) 
-			WHERE idx.intTaxCodeId = (SELECT TOP 1 intTaxCodeId FROM tblARInvoiceDetailTax btx WHERE btx.intInvoiceDetailId = idx.intInvoiceDetailId)
-		) IDT ON ID.intInvoiceDetailId= IDT.intInvoiceDetailId
-		GROUP BY IDT.intTaxCodeId
-			   , IDT.strCalculationMethod
-			   , ID.dblPrice
-			   , ID.dblQtyShipped
-			   , ID.intInvoiceId					
-			   , ID.intInvoiceDetailId
-			   , ID.intItemId
-			   , ID.intItemUOMId
-			   , ID.intTaxGroupId
-			   , IDT.ysnTaxExempt
-	) TAXDETAIL ON I.intInvoiceId = TAXDETAIL.intInvoiceId	
-			   AND TAXDETAIL.intInvoiceDetailId = (SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail ID WHERE ID.intInvoiceId = I.intInvoiceId)	
+					  , ARIDT.[intInvoiceDetailTaxId]
+		FROM
+		tblARInvoiceDetailTax ARIDT
+		INNER JOIN
+			tblARInvoiceDetail ARID
+				ON ARIDT.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
+	) TAXDETAIL ON IMIN.[intInvoiceDetailTaxId] = TAXDETAIL.[intInvoiceDetailTaxId]	
 	WHERE I.ysnPosted = 1 
 	  AND I.dblTax = 0
 ) TAXES
