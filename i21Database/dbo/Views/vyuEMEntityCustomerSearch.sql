@@ -19,6 +19,7 @@
 	entityContact.strMobile,
 	entityContact.strEmail,
 	entityContact.strName AS strContactName,
+	entityContact.intEntityId AS intEntityContactId,
 	LOB.strLineOfBusiness,
 	entityClass.strClass,
 	ysnHasBudgetSetup = CAST(CASE WHEN (SELECT TOP 1 1 FROM tblARCustomerBudget WHERE intEntityCustomerId = cust.intEntityId) = 1 THEN 1 ELSE 0 END AS BIT),
@@ -120,5 +121,6 @@ GROUP BY
 	custTerm.strTerm,
 	cust.intSalespersonId,
 	cust.intCurrencyId,
-	cust.intTermsId
+	cust.intTermsId,
+	entityContact.intEntityId
 GO
