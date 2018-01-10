@@ -182,10 +182,16 @@ BEGIN TRY
 			SET @newLoadDistributionDetailId = SCOPE_IDENTITY()
 
 			INSERT INTO tblTRLoadBlendIngredient(intLoadDistributionDetailId
+				, strReceiptLink
+				, intSubstituteItemId
+				, ysnSubstituteItem
 				, intRecipeItemId
 				, dblQuantity
 				, intConcurrencyId)
 			SELECT @newLoadDistributionDetailId
+				, strReceiptLink
+				, intSubstituteItemId
+				, ysnSubstituteItem
 				, intRecipeItemId
 				, dblQuantity
 				, 1
