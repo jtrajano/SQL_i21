@@ -16,7 +16,7 @@ SELECT @intImportFileHeaderId = intImportFileHeaderId FROM dbo.tblSMImportFileHe
        ,[strXMLType] = 'Inbound'
        ,[strXMLInitiater] = '<?xml version="1.0"?>'
        ,[ysnActive] = 1
-       ,[intConcurrencyId] = 99
+       ,[intConcurrencyId] = 0
   WHERE intImportFileHeaderId = @intImportFileHeaderId
 
 ----DELETE FROM dbo.tblSMXMLTagAttribute
@@ -34,7 +34,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileHeader]
       ([strLayoutTitle],[strFileType],[strFieldDelimiter],[strXMLType],[strXMLInitiater],[ysnActive],[intConcurrencyId])
   VALUES 
-      ('Commander - Trans Log','XML',NULL,'Inbound','<?xml version="1.0"?>',1,99)
+      ('Commander - Trans Log','XML',NULL,'Inbound','<?xml version="1.0"?>',1,0)
 END
 --END CHECK HEADER
 
@@ -1531,7 +1531,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
-      (@intImportFileHeaderId,NULL,56,1,'trExNetProd',NULL,NULL,'Header',55,NULL,1,2)
+      (@intImportFileHeaderId,NULL,56,1,'trExNetProd',NULL,NULL,'Header',55,NULL,0,5)
 END
 ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 56 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
@@ -1547,8 +1547,8 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
        ,[strDataType] = 'Header'
        ,[intLength] = 55
        ,[strDefaultValue] = NULL
-       ,[ysnActive] = 1
-       ,[intConcurrencyId] = 2
+       ,[ysnActive] = 0
+       ,[intConcurrencyId] = 5
   WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId
 END
 
@@ -1558,7 +1558,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
-      (@intImportFileHeaderId,NULL,57,1,'trENPPcode','tblSTTranslogRebates','intTrExNetProdTrENPPcode',NULL,56,NULL,1,2)
+      (@intImportFileHeaderId,NULL,57,1,'trENPPcode','tblSTTranslogRebates','intTrExNetProdTrENPPcode',NULL,56,NULL,0,8)
 END
 ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 57 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
@@ -1574,8 +1574,8 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
        ,[strDataType] = NULL
        ,[intLength] = 56
        ,[strDefaultValue] = NULL
-       ,[ysnActive] = 1
-       ,[intConcurrencyId] = 2
+       ,[ysnActive] = 0
+       ,[intConcurrencyId] = 8
   WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId
 END
 
@@ -1585,7 +1585,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
-      (@intImportFileHeaderId,NULL,58,2,'trENPAmount','tblSTTranslogRebates','dblTrExNetProdTrENPAmount',NULL,56,NULL,1,2)
+      (@intImportFileHeaderId,NULL,58,2,'trENPAmount','tblSTTranslogRebates','dblTrExNetProdTrENPAmount',NULL,56,NULL,0,6)
 END
 ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 58 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
@@ -1601,8 +1601,8 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
        ,[strDataType] = NULL
        ,[intLength] = 56
        ,[strDefaultValue] = NULL
-       ,[ysnActive] = 1
-       ,[intConcurrencyId] = 2
+       ,[ysnActive] = 0
+       ,[intConcurrencyId] = 6
   WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId
 END
 
@@ -2827,7 +2827,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
-      (@intImportFileHeaderId,NULL,104,1,'trpPaycode','tblSTTranslogRebates','strTrpPaycode',NULL,103,NULL,1,3)
+      (@intImportFileHeaderId,NULL,104,1,'trpPaycode','tblSTTranslogRebates','strTrpPaycode',NULL,103,NULL,1,4)
 END
 ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 104 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
@@ -2844,7 +2844,7 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
        ,[intLength] = 103
        ,[strDefaultValue] = NULL
        ,[ysnActive] = 1
-       ,[intConcurrencyId] = 3
+       ,[intConcurrencyId] = 4
   WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId
 END
 
@@ -4790,7 +4790,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMXMLTagAttribute]
       ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
-      (@intImportFileColumnDetailId,1,'mop','tblSTTranslogRebates','intTrpPaycodeMop',NULL,1,2)
+      (@intImportFileColumnDetailId,1,'mop','tblSTTranslogRebates','intTrpPaycodeMop',NULL,0,3)
 END
 ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
 BEGIN
@@ -4802,8 +4802,8 @@ BEGIN
        ,[strTable] = 'tblSTTranslogRebates'
        ,[strColumnName] = 'intTrpPaycodeMop'
        ,[strDefaultValue] = NULL
-       ,[ysnActive] = 1
-       ,[intConcurrencyId] = 2
+       ,[ysnActive] = 0
+       ,[intConcurrencyId] = 3
   WHERE intTagAttributeId = @intTagAttributeId
 END
 
@@ -4812,7 +4812,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMXMLTagAttribute]
       ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
-      (@intImportFileColumnDetailId,2,'cat','tblSTTranslogRebates','intTrpPaycodeCat',NULL,1,2)
+      (@intImportFileColumnDetailId,2,'cat','tblSTTranslogRebates','intTrpPaycodeCat',NULL,0,3)
 END
 ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
 BEGIN
@@ -4824,8 +4824,8 @@ BEGIN
        ,[strTable] = 'tblSTTranslogRebates'
        ,[strColumnName] = 'intTrpPaycodeCat'
        ,[strDefaultValue] = NULL
-       ,[ysnActive] = 1
-       ,[intConcurrencyId] = 2
+       ,[ysnActive] = 0
+       ,[intConcurrencyId] = 3
   WHERE intTagAttributeId = @intTagAttributeId
 END
 
