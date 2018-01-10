@@ -1,4 +1,4 @@
-﻿GO
+﻿	GO
 	PRINT 'START OF CREATING [uspTMRecreateGeneratedCallEntryView] SP'
 GO
 
