@@ -14,7 +14,7 @@ FROM(
 		,A.strVendorProgram
 		,strItemNumber = C.strItemNo
 		,strItemDescription = C.strDescription
-		,strItemUOM = I.strUnitMeasure
+		,strUnitMeasure = I.strUnitMeasure
 		,D.dblUnitQty
 		,B.strRebateBy
 		,B.dblRebateRate
@@ -27,7 +27,7 @@ FROM(
 	INNER JOIN tblICItem C
 		ON B.intItemId = C.intItemId
 	INNER JOIN tblICItemUOM D
-		ON C.intItemId = D.intItemId
+		ON B.intItemUOMId = D.intItemUOMId
 	INNER JOIN tblICUnitMeasure I
 		ON D.intUnitMeasureId = I.intUnitMeasureId
 	INNER JOIN tblICCategory E
@@ -52,7 +52,7 @@ FROM(
 		,A.strVendorProgram
 		,strItemNumber = C.strItemNo
 		,strItemDescription = C.strDescription
-		,strItemUOM = I.strUnitMeasure
+		,strUnitMeasure = I.strUnitMeasure
 		,D.dblUnitQty
 		,B.strRebateBy
 		,B.dblRebateRate
@@ -67,7 +67,7 @@ FROM(
 	INNER JOIN tblICItem C
 		ON E.intCategoryId = C.intCategoryId
 	INNER JOIN tblICItemUOM D
-		ON C.intItemId = D.intItemId
+		ON B.intItemUOMId = D.intItemUOMId
 	INNER JOIN tblICUnitMeasure I
 		ON D.intUnitMeasureId = I.intUnitMeasureId
 	INNER JOIN tblVRVendorSetup F
@@ -89,7 +89,7 @@ FROM(
 		,A.strVendorProgram
 		,strItemNumber = ''
 		,strItemDescription = ''
-		,strItemUOM = ''
+		,strUnitMeasure = ''
 		,dblUnitQty = 0.0
 		,B.strRebateBy
 		,B.dblRebateRate
