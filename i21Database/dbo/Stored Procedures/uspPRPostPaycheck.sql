@@ -1202,8 +1202,6 @@ BEGIN
 		DELETE FROM #tmpEmployeeTimeOff WHERE intTypeTimeOffId = @intTypeTimeOffId
 	END
 
-	EXEC uspPRInsertPaycheckTimeOff @intPaycheckId
-
 	IF (@ysnPost = 1) 
 	BEGIN
 		IF (@ysnRecap = 0) 
@@ -1267,6 +1265,8 @@ BEGIN
 			SET @isSuccessful = 1
 		END
 	END
+
+	EXEC uspPRInsertPaycheckTimeOff @intPaycheckId
 END
 END
 
