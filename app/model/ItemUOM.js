@@ -47,8 +47,28 @@ Ext.define('Inventory.model.ItemUOM', {
         { name: 'dblUnitQty', type: 'float' },
         { name: 'dblSellQty', type: 'float' },
         { name: 'strDescription', type: 'string' },
-        { name: 'strUpcCode', type: 'string', allowNull: true },
-        { name: 'strLongUPCCode', type: 'string', allowNull: true },
+        { 
+            name: 'strUpcCode', 
+            type: 'string', 
+            allowNull: true, 
+            convert: function (value, record){
+                if (Ext.isString(value) && value.length > 0){
+                    return value;
+                } 
+                return null;                
+            }
+        },
+        {
+            name: 'strLongUPCCode', 
+            type: 'string', 
+            allowNull: true,
+            convert: function (value, record){
+                if (Ext.isString(value) && value.length > 0){
+                    return value;
+                } 
+                return null;                
+            }            
+        },
         { name: 'ysnStockUnit', type: 'boolean' },
         { name: 'ysnAllowPurchase', type: 'boolean' },
         { name: 'ysnAllowSale', type: 'boolean' },
