@@ -6003,6 +6003,8 @@
     <Build Include="dbo\Tables\tblCFTempAuditLog.sql" />
     <Build Include="dbo\Tables\tblCFCSUAuditLog.sql" />
     <Build Include="dbo\Stored Procedures\uspCFCardSynchronization.sql" />
+    <Build Include="dbo\Views\vyuARPOSEndOfDayReport.sql" />
+    <Build Include="dbo\Views\vyuARPOSGLSummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
