@@ -30,6 +30,53 @@ IF @transCount = 0 BEGIN TRANSACTION
 	DELETE A
 		FROM tblAPBillDetailTax A
 	WHERE intBillDetailId IN (SELECT intId FROM @billDetailIds)
+	
+	DECLARE @ParamTable AS TABLE
+		(intItemId					INT
+		,intVendorId				INT
+		,dtmTransactionDate			DATETIME
+		,dblItemCost				NUMERIC(38,20)
+		,dblQuantity				NUMERIC(38,20)
+		,intTaxGroupId				INT
+		,intCompanyLocationId		INT
+		,intVendorLocationId		INT
+		,ysnIncludeExemptedCodes	BIT
+		,intFreightTermId			INT
+		,ysnExcludeCheckOff			BIT
+		,intBillDetailId			INT)
+		
+	INSERT INTO @ParamTable
+		(intItemId
+		,intVendorId
+		,dtmTransactionDate
+		,dblItemCost
+		,dblQuantity
+		,intTaxGroupId
+		,intCompanyLocationId
+		,intVendorLocationId
+		,ysnIncludeExemptedCodes
+		,intFreightTermId
+		,ysnExcludeCheckOff
+		,intBillDetailId)
+	SELECT
+		 intItemId					= B.intItemId
+		,intVendorId				= A.intEntityVendorId
+		,dtmTransactionDate			= A.dtmDate
+		,dblItemCost				= B.dblCost
+		,dblQuantity				= CASE WHEN B.intWeightUOMId > 0 
+										THEN dbo.fnCalculateQtyBetweenUOM(B.intWeightUOMId, ISNULL(NULLIF(B.intCostUOMId,0), B.intUnitOfMeasureId), B.dblNetWeight) 
+										ELSE (CASE WHEN B.intCostUOMId > 0 THEN dbo.fnCalculateQtyBetweenUOM(B.intUnitOfMeasureId, B.intCostUOMId, B.dblQtyReceived) ELSE B.dblQtyReceived END)
+									END
+		,intTaxGroupId				= B.intTaxGroupId
+		,intCompanyLocationId		= A.intShipToId
+		,intVendorLocationId		= A.intShipFromId
+		,ysnIncludeExemptedCodes	= 0
+		,intFreightTermId			= NULL
+		,ysnExcludeCheckOff			= 0
+		,intBillDetailId			= B.intBillDetailId
+	FROM tblAPBill A
+	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+	INNER JOIN @billDetailIds C ON B.intBillDetailId = C.intId		
 
 	INSERT INTO tblAPBillDetailTax(
 		[intBillDetailId]		, 
@@ -48,7 +95,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[ysnCheckOffTax]
 	)
 	SELECT
-		[intBillDetailId]		=	B.intBillDetailId, 
+		[intBillDetailId]		=	A.intBillDetailId, 
 		--[intTaxGroupMasterId]	=	NULL, 
 		[intTaxGroupId]			=	Taxes.intTaxGroupId, 
 		[intTaxCodeId]			=	Taxes.intTaxCodeId, 
@@ -62,14 +109,19 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[ysnTaxAdjusted]		=	Taxes.ysnTaxAdjusted, 
 		[ysnSeparateOnBill]		=	Taxes.ysnSeparateOnInvoice, 
 		[ysnCheckOffTax]		=	Taxes.ysnCheckoffTax
-	FROM tblAPBill A
-	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
-	INNER JOIN @billDetailIds C ON B.intBillDetailId = C.intId
-	--LEFT JOIN tblICInventoryReceiptCharge D ON B.intInventoryReceiptChargeId = D.intInventoryReceiptChargeId
-	CROSS APPLY fnGetItemTaxComputationForVendor(B.intItemId, A.intEntityVendorId, A.dtmDate, B.dblCost, CASE WHEN B.intWeightUOMId > 0 
-										THEN dbo.fnCalculateQtyBetweenUOM(B.intWeightUOMId, ISNULL(NULLIF(B.intCostUOMId,0), B.intUnitOfMeasureId), B.dblNetWeight) 
-										ELSE (CASE WHEN B.intCostUOMId > 0 THEN dbo.fnCalculateQtyBetweenUOM(B.intUnitOfMeasureId, B.intCostUOMId, B.dblQtyReceived) ELSE B.dblQtyReceived END)
-									END, B.intTaxGroupId,A.intShipToId,A.intShipFromId, 0, NULL, 0) Taxes
+	FROM @ParamTable A	
+	CROSS APPLY fnGetItemTaxComputationForVendor
+		(intItemId
+		,intVendorId
+		,dtmTransactionDate
+		,dblItemCost
+		,dblQuantity
+		,intTaxGroupId
+		,intCompanyLocationId
+		,intVendorLocationId
+		,ysnIncludeExemptedCodes
+		,intFreightTermId
+		,ysnExcludeCheckOff) Taxes
 	WHERE Taxes.dblTax IS NOT NULL
 
 	UPDATE A
