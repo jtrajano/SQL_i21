@@ -7,7 +7,6 @@
     [ysnARInvoice] BIT NULL, 
     [ysnARStatement] BIT NULL, 
     [ysnContract] BIT NULL, 
-    [ysnLoginLogo] BIT NULL, 
     [ysnAllOtherReports] BIT NULL, 
     [intCompanyLocationId] INT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT 1
