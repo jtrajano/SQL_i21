@@ -125,12 +125,13 @@ BEGIN TRY
 			SET		CD.dblBasis				=	ISNULL(CD.dblOriginalBasis,0),
 					CD.intFutureMarketId	=	PF.intOriginalFutureMarketId,
 					CD.intFutureMonthId		=	PF.intOriginalFutureMonthId,
-					CD.intPricingTypeId		=	CASE WHEN CD.intPricingTypeId = 1 THEN 2 ELSE CD.intPricingTypeId END,
+					CD.intPricingTypeId		=	CASE WHEN CD.intPricingTypeId = 1 AND CH.intPricingTypeId <> 8 THEN 2 ELSE 8 END,
 					CD.dblFutures			=	NULL,
 					CD.dblCashPrice			=	NULL,
 					CD.dblTotalCost			=	NULL,
 					CD.intConcurrencyId		=	CD.intConcurrencyId + 1
 			FROM	tblCTContractDetail	CD
+			JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 			JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId OR CD.intSplitFromId = PF.intContractDetailId
 			WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 
@@ -391,7 +392,7 @@ BEGIN TRY
 		IF	@dblLotsUnfixed = 0
 		BEGIN
 			UPDATE	CD
-			SET		CD.intPricingTypeId		=	CASE WHEN CD.intPricingTypeId = 2 THEN 1 ELSE CD.intPricingTypeId END,
+			SET		CD.intPricingTypeId		=	1,
 					CD.dblFutures			=	dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0))  / 
 												CASE	WHEN	@intFinalCurrencyId = @intCurrencyId	THEN 1 
 														WHEN	@intFinalCurrencyId <> @intCurrencyId	
@@ -460,12 +461,13 @@ BEGIN TRY
 		ELSE
 		BEGIN
 			UPDATE	CD
-			SET		CD.intPricingTypeId		=	CASE WHEN CD.intPricingTypeId = 1 THEN 2 ELSE CD.intPricingTypeId END,
+			SET		CD.intPricingTypeId		=	CASE WHEN CD.intPricingTypeId = 1 AND CH.intPricingTypeId <> 8 THEN 2 ELSE 8 END,
 					CD.dblFutures			=	NULL,
 					CD.dblCashPrice			=	NULL,	
 					CD.dblTotalCost			=	NULL,
 					CD.intConcurrencyId		=	CD.intConcurrencyId + 1
 			FROM	tblCTContractDetail	CD
+			JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 			JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId OR CD.intSplitFromId = PF.intContractDetailId
 			WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 
