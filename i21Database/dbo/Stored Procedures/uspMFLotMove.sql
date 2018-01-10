@@ -9,6 +9,7 @@
 	,@dtmDate DATETIME = NULL
 	,@strReasonCode NVARCHAR(MAX) = NULL
 	,@strNotes NVARCHAR(MAX) = NULL
+	,@ysnBulkChange BIT = 0
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -47,9 +48,9 @@ BEGIN TRY
 		,@dblDefaultResidueQty NUMERIC(38, 20)
 		,@dblDestinationLotQty NUMERIC(38, 20)
 		,@intTransactionCount INT
-		,@strDescription nvarchar(MAX)
+		,@strDescription NVARCHAR(MAX)
 
-	Select @intTransactionCount = @@TRANCOUNT
+	SELECT @intTransactionCount = @@TRANCOUNT
 
 	SELECT @strDescription = Ltrim(isNULL(@strReasonCode, '') + ' ' + isNULL(@strNotes, ''))
 
@@ -248,6 +249,11 @@ BEGIN TRY
 	IF @intNewStorageLocationId = @intStorageLocationId
 		AND @intNewSubLocationId = @intSubLocationId
 	BEGIN
+		IF @ysnBulkChange = 1
+		BEGIN
+			RETURN
+		END
+
 		RAISERROR (
 				'The Lot already exists in the selected destination storage location. Please select a different destination storage location.'
 				,11

@@ -35,6 +35,7 @@ BEGIN TRY
 		,@strItemNo NVARCHAR(50)
 		,@strMsg NVARCHAR(MAX)
 		,@dblWeight DECIMAL(24, 10)
+		,@intMachineId INT
 
 	SELECT @dtmCurrentDateTime = GETDATE()
 
@@ -42,10 +43,17 @@ BEGIN TRY
 
 	SELECT @intDayOfYear = DATEPART(dy, @dtmCurrentDateTime)
 
-	DECLARE @tblMFWorkOrderInputLot TABLE (strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS)
+	DECLARE @tblMFWorkOrderInputLot TABLE (
+		strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,intMachineId INT
+		)
 
-	INSERT INTO @tblMFWorkOrderInputLot (strLotNumber)
-	SELECT L.strLotNumber
+	INSERT INTO @tblMFWorkOrderInputLot (
+		strLotNumber
+		,intMachineId
+		)
+	SELECT DISTINCT L.strLotNumber
+		,WI.intMachineId
 	FROM dbo.tblICLot L
 	JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intLotId = L.intLotId
 		AND WI.ysnConsumptionReversed = 0
@@ -355,10 +363,12 @@ BEGIN TRY
 		SELECT @intItemId = NULL
 			,@dblYieldQuantity = NULL
 			,@intStorageLocationId = NULL
+			,@intMachineId = NULL
 
 		SELECT @intItemId = F.intItemId
 			,@dblYieldQuantity = ABS(F.dblYieldQuantity)
-			,@intStorageLocationId = I.intStorageLocationId
+			,@intStorageLocationId = IsNULL(F.intStageLocationId, I.intStorageLocationId)
+			,@intMachineId = F.intMachineId
 		FROM tblMFProductionSummary F
 		JOIN @tblInputItem I ON I.intItemId = F.intItemId
 		WHERE F.intProductionSummaryId = @intProductionSummaryId
@@ -621,6 +631,7 @@ BEGIN TRY
 					AND L.strLotNumber IN (
 						SELECT WI.strLotNumber
 						FROM @tblMFWorkOrderInputLot WI
+						WHERE WI.intMachineId = @intMachineId
 						)
 					AND NOT EXISTS (
 						SELECT *
@@ -689,6 +700,7 @@ BEGIN TRY
 						AND L.strLotNumber IN (
 							SELECT WI.strLotNumber
 							FROM @tblMFWorkOrderInputLot WI
+							WHERE WI.intMachineId = @intMachineId
 							)
 						AND NOT EXISTS (
 							SELECT *

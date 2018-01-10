@@ -9,6 +9,7 @@
 	,@ysnProducedQtyByWeight BIT = 1
 	,@ysnFillPartialPallet BIT = 0
 	,@dblProducePartialQty NUMERIC(38, 20) = 0
+	,@intMachineId INT = NULL
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF
@@ -77,6 +78,7 @@ BEGIN TRY
 		,@intPMStageLocationId INT
 		,@intNoOfDecimalPlacesOnConsumption INT
 		,@ysnConsumptionByRatio BIT
+		,@intStageLocationId int
 
 	SELECT @intNoOfDecimalPlacesOnConsumption = intNoOfDecimalPlacesOnConsumption
 		,@ysnConsumptionByRatio = ysnConsumptionByRatio
@@ -121,6 +123,7 @@ BEGIN TRY
 	JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intLotId = L.intLotId
 		AND ysnConsumptionReversed = 0
 	WHERE WI.intWorkOrderId = @intWorkOrderId
+		AND WI.intMachineId = IsNULL(@intMachineId, intMachineId)
 
 	DECLARE @tblMFWorkOrderInputItem TABLE (
 		intItemId INT
@@ -148,11 +151,11 @@ BEGIN TRY
 		WHERE intWorkOrderId = @intWorkOrderId
 			AND ysnConsumptionReversed = 0
 	END
-	DECLARE @tblMFRMProductionStageLocation TABLE (intRMProductionStageLocationId INT)
 
+	DECLARE @tblMFRMProductionStageLocation TABLE (intRMProductionStageLocationId INT)
 	DECLARE @tblMFProductionStageLocation TABLE (intProductionStageLocationId INT)
 
-	Insert into @tblMFRMProductionStageLocation(intRMProductionStageLocationId)
+	INSERT INTO @tblMFRMProductionStageLocation (intRMProductionStageLocationId)
 	SELECT intProductionStagingLocationId
 	FROM tblMFManufacturingProcessMachine
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
@@ -162,14 +165,16 @@ BEGIN TRY
 			)
 		AND intProductionStagingLocationId IS NOT NULL
 
-
-	IF not exists(Select *from @tblMFRMProductionStageLocation)
+	IF NOT EXISTS (
+			SELECT *
+			FROM @tblMFRMProductionStageLocation
+			)
 	BEGIN
 		SELECT @intProductionStagingId = intAttributeId
 		FROM tblMFAttribute
 		WHERE strAttributeName = 'Production Staging Location'
 
-		Insert into @tblMFRMProductionStageLocation(intRMProductionStageLocationId)
+		INSERT INTO @tblMFRMProductionStageLocation (intRMProductionStageLocationId)
 		SELECT strAttributeValue
 		FROM tblMFManufacturingProcessAttribute
 		WHERE intManufacturingProcessId = @intManufacturingProcessId
@@ -214,6 +219,12 @@ BEGIN TRY
 	FROM tblICCategory
 	WHERE strCategoryCode = @strPackagingCategory
 
+	
+	If @intPMCategoryId is null
+	Begin
+		Select @intPMCategoryId=0,@strPackagingCategory=''
+	End
+
 	IF @intTransactionCount = 0
 		BEGIN TRAN
 
@@ -227,7 +238,7 @@ BEGIN TRY
 		,strLotTracking NVARCHAR(50)
 		,dblLowerToleranceReqQty NUMERIC(18, 6)
 		,intMainItemId INT
-		,intCategoryId int
+		,intCategoryId INT
 		)
 	DECLARE @tblSubstituteItem TABLE (
 		intItemRecordId INT Identity(1, 1)
@@ -415,6 +426,8 @@ BEGIN TRY
 				AND IsNull(WC.intBatchId, @intBatchId) = @intBatchId
 				AND WC.intItemId = SI.intSubstituteItemId
 				AND SI.intItemId = ri.intItemId
+				AND IsNULL(WC.ysnPosted,0) =0
+
 			--AND @ysnFillPartialPallet = 0
 			
 			UNION
@@ -424,6 +437,7 @@ BEGIN TRY
 			WHERE WC.intWorkOrderId = @intWorkOrderId
 				AND IsNull(WC.intBatchId, @intBatchId) = @intBatchId
 				AND WC.intItemId = ri.intItemId
+				AND IsNULL(WC.ysnPosted,0) =0
 			)
 	--AND @ysnFillPartialPallet = 0
 	
@@ -697,7 +711,7 @@ BEGIN TRY
 			,I.strLotTracking
 			,Round(I.dblLowerToleranceReqQty * WI.dblRatio / 100, @intNoOfDecimalPlacesOnConsumption)
 			,I.intMainItemId
-			,I.intCategoryId 
+			,I.intCategoryId
 		FROM @tblMFWorkOrderInputItem WI
 		JOIN @tblItem I ON I.intItemId = WI.intMainItemId
 		WHERE NOT EXISTS (
@@ -728,7 +742,9 @@ BEGIN TRY
 				)
 	END
 
-	Delete from @tblItem Where dblReqQty=0
+	DELETE
+	FROM @tblItem
+	WHERE dblReqQty = 0
 
 	SELECT @intItemRecordId = Min(intItemRecordId)
 	FROM @tblItem
@@ -736,7 +752,8 @@ BEGIN TRY
 	WHILE (@intItemRecordId IS NOT NULL)
 	BEGIN
 		SET @intLotRecordId = NULL
-		Select @intCategoryId=NULL
+
+		SELECT @intCategoryId = NULL
 
 		SELECT @intItemId = intItemId
 			,@dblReqQty = dblReqQty
@@ -745,35 +762,39 @@ BEGIN TRY
 			,@intConsumptionMethodId = intConsumptionMethodId
 			,@strLotTracking = strLotTracking
 			,@dblLowerToleranceReqQty = dblLowerToleranceReqQty
-			,@intCategoryId=intCategoryId
+			,@intCategoryId = intCategoryId
 		FROM @tblItem
 		WHERE intItemRecordId = @intItemRecordId
 
 		DELETE
 		FROM @tblLot
 
-		Delete from @tblMFProductionStageLocation
+		DELETE
+		FROM @tblMFProductionStageLocation
 
-		If @intConsumptionMethodId=1 and @intCategoryId=@intPMCategoryId --By Lot
-		Begin
-			Insert into @tblMFProductionStageLocation(intProductionStageLocationId)  
-			Select @intPMStageLocationId 
-		End
-		else If @intConsumptionMethodId=1 and @intCategoryId<>@intPMCategoryId --By Lot
-		Begin
-			Insert into @tblMFProductionStageLocation(intProductionStageLocationId) 
-			Select intRMProductionStageLocationId from @tblMFRMProductionStageLocation
-		End
-		else If @intConsumptionMethodId=2 --By Location
-		Begin
-			Insert into @tblMFProductionStageLocation(intProductionStageLocationId)  
-			Select @intStorageLocationId
-		End
-		else If @intConsumptionMethodId=3 --By FIFO
-		Begin
-			Insert into @tblMFProductionStageLocation(intProductionStageLocationId)  
-			Select 0
-		End
+		IF @intConsumptionMethodId = 1
+			AND @intCategoryId = @intPMCategoryId --By Lot
+		BEGIN
+			INSERT INTO @tblMFProductionStageLocation (intProductionStageLocationId)
+			SELECT @intPMStageLocationId
+		END
+		ELSE IF @intConsumptionMethodId = 1
+			AND @intCategoryId <> @intPMCategoryId --By Lot
+		BEGIN
+			INSERT INTO @tblMFProductionStageLocation (intProductionStageLocationId)
+			SELECT intRMProductionStageLocationId
+			FROM @tblMFRMProductionStageLocation
+		END
+		ELSE IF @intConsumptionMethodId = 2 --By Location
+		BEGIN
+			INSERT INTO @tblMFProductionStageLocation (intProductionStageLocationId)
+			SELECT @intStorageLocationId
+		END
+		ELSE IF @intConsumptionMethodId = 3 --By FIFO
+		BEGIN
+			INSERT INTO @tblMFProductionStageLocation (intProductionStageLocationId)
+			SELECT 0
+		END
 
 		IF @strLotTracking = 'No'
 		BEGIN
@@ -799,11 +820,13 @@ BEGIN TRY
 				,SL.intSubLocationId
 			FROM dbo.tblICItemStockUOM S
 			JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = S.intStorageLocationId
-				AND SL.ysnAllowConsume = 1 AND S.intItemId = @intItemId AND S.dblOnHand - S.dblUnitReserved > 0
+				AND SL.ysnAllowConsume = 1
+				AND S.intItemId = @intItemId
+				AND S.dblOnHand - S.dblUnitReserved > 0
 			JOIN dbo.tblICItemLocation IL ON IL.intItemLocationId = S.intItemLocationId
 			JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = S.intItemUOMId
 				AND IU.ysnStockUnit = 1
-			JOIN dbo.tblICItem I on I.intItemId =S.intItemId
+			JOIN dbo.tblICItem I ON I.intItemId = S.intItemId
 			WHERE S.intItemId = @intItemId
 				AND IL.intLocationId = @intLocationId
 				--AND (
@@ -817,7 +840,17 @@ BEGIN TRY
 				--			END
 				--		)
 				--	)
-				and  exists(Select *from @tblMFProductionStageLocation PS Where PS.intProductionStageLocationId=(Case When @intConsumptionMethodId =3 Then 0 else S.intStorageLocationId End)) 
+				AND EXISTS (
+					SELECT *
+					FROM @tblMFProductionStageLocation PS
+					WHERE PS.intProductionStageLocationId = (
+							CASE 
+								WHEN @intConsumptionMethodId = 3
+									THEN 0
+								ELSE S.intStorageLocationId
+								END
+							)
+					)
 				AND S.dblOnHand - S.dblUnitReserved > 0
 		END
 		ELSE
@@ -907,16 +940,18 @@ BEGIN TRY
 					,L.intSubLocationId
 				FROM dbo.tblICLot L
 				JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
-					AND SL.ysnAllowConsume = 1 AND L.dblQty > 0
-				JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId,R.intRestrictionId)
+					AND SL.ysnAllowConsume = 1
+					AND L.dblQty > 0
+				JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId, R.intRestrictionId)
 					AND R.strInternalCode = 'STOCK'
-				JOIN @tblSubstituteItem SI ON L.intItemId = SI.intSubstituteItemId and SI.intItemId = @intItemId
+				JOIN @tblSubstituteItem SI ON L.intItemId = SI.intSubstituteItemId
+					AND SI.intItemId = @intItemId
 				JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 				JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 				JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
 					AND BS.strPrimaryStatus = 'Active'
 				JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
-				JOIN dbo.tblICItem I on I.intItemId =L.intItemId
+				JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
 				WHERE SI.intItemId = @intItemId
 					AND L.intLocationId = @intLocationId
 					AND LS.strPrimaryStatus = 'Active'
@@ -932,7 +967,17 @@ BEGIN TRY
 					--			END
 					--		)
 					--	)
-					and  exists(Select *from @tblMFProductionStageLocation PS Where PS.intProductionStageLocationId=(Case When @intConsumptionMethodId =3 Then 0 else L.intStorageLocationId End)) 
+					AND EXISTS (
+						SELECT *
+						FROM @tblMFProductionStageLocation PS
+						WHERE PS.intProductionStageLocationId = (
+								CASE 
+									WHEN @intConsumptionMethodId = 3
+										THEN 0
+									ELSE L.intStorageLocationId
+									END
+								)
+						)
 					AND L.dblQty > 0
 					AND L.strLotNumber IN (
 						SELECT WI.strLotNumber
@@ -1023,15 +1068,17 @@ BEGIN TRY
 				,L.intSubLocationId
 			FROM dbo.tblICLot L
 			JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
-				AND SL.ysnAllowConsume = 1 AND L.intItemId = @intItemId AND L.dblQty > 0
-			JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId,R.intRestrictionId)
+				AND SL.ysnAllowConsume = 1
+				AND L.intItemId = @intItemId
+				AND L.dblQty > 0
+			JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId, R.intRestrictionId)
 				AND R.strInternalCode = 'STOCK'
 			JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 			JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 			JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
 				AND BS.strPrimaryStatus = 'Active'
 			JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
-			JOIN dbo.tblICItem I on I.intItemId =L.intItemId
+			JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
 			WHERE L.intItemId = @intItemId
 				AND L.intLocationId = @intLocationId
 				AND LS.strPrimaryStatus = 'Active'
@@ -1047,7 +1094,17 @@ BEGIN TRY
 				--			END
 				--		)
 				--	)
-				and  exists(Select *from @tblMFProductionStageLocation PS Where PS.intProductionStageLocationId=(Case When @intConsumptionMethodId =3 Then 0 else L.intStorageLocationId End)) 
+				AND EXISTS (
+					SELECT *
+					FROM @tblMFProductionStageLocation PS
+					WHERE PS.intProductionStageLocationId = (
+							CASE 
+								WHEN @intConsumptionMethodId = 3
+									THEN 0
+								ELSE L.intStorageLocationId
+								END
+							)
+					)
 				AND L.dblQty > 0
 				AND L.strLotNumber IN (
 					SELECT WI.strLotNumber
@@ -1144,16 +1201,18 @@ BEGIN TRY
 					,L.intSubLocationId
 				FROM dbo.tblICLot L
 				JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
-					AND SL.ysnAllowConsume = 1 AND L.dblQty > 0
-				JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId,R.intRestrictionId)
+					AND SL.ysnAllowConsume = 1
+					AND L.dblQty > 0
+				JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId, R.intRestrictionId)
 					AND R.strInternalCode = 'STOCK'
-				JOIN @tblSubstituteItem SI ON L.intItemId = SI.intSubstituteItemId and SI.intItemId = @intItemId
+				JOIN @tblSubstituteItem SI ON L.intItemId = SI.intSubstituteItemId
+					AND SI.intItemId = @intItemId
 				JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 				JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 				JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
 					AND BS.strPrimaryStatus = 'Active'
 				JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
-				JOIN dbo.tblICItem I on I.intItemId =L.intItemId
+				JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
 				WHERE SI.intItemId = @intItemId
 					AND L.intLocationId = @intLocationId
 					AND LS.strPrimaryStatus = 'Active'
@@ -1169,7 +1228,17 @@ BEGIN TRY
 					--			END
 					--		)
 					--	)
-					and  exists(Select *from @tblMFProductionStageLocation PS Where PS.intProductionStageLocationId=(Case When @intConsumptionMethodId =3 Then 0 else L.intStorageLocationId End)) 
+					AND EXISTS (
+						SELECT *
+						FROM @tblMFProductionStageLocation PS
+						WHERE PS.intProductionStageLocationId = (
+								CASE 
+									WHEN @intConsumptionMethodId = 3
+										THEN 0
+									ELSE L.intStorageLocationId
+									END
+								)
+						)
 					AND L.dblQty > 0
 					AND L.strLotNumber NOT IN (
 						SELECT WI.strLotNumber
@@ -1260,15 +1329,17 @@ BEGIN TRY
 				,L.intSubLocationId
 			FROM dbo.tblICLot L
 			JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
-				AND SL.ysnAllowConsume = 1 AND L.intItemId = @intItemId AND L.dblQty > 0
-			JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId,R.intRestrictionId)
+				AND SL.ysnAllowConsume = 1
+				AND L.intItemId = @intItemId
+				AND L.dblQty > 0
+			JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId, R.intRestrictionId)
 				AND R.strInternalCode = 'STOCK'
 			JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 			JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 			JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
 				AND BS.strPrimaryStatus = 'Active'
 			JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
-			JOIN dbo.tblICItem I on I.intItemId =L.intItemId
+			JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
 			WHERE L.intItemId = @intItemId
 				AND L.intLocationId = @intLocationId
 				AND LS.strPrimaryStatus = 'Active'
@@ -1284,7 +1355,17 @@ BEGIN TRY
 				--			END
 				--		)
 				--	)
-				and  exists(Select *from @tblMFProductionStageLocation PS Where PS.intProductionStageLocationId=(Case When @intConsumptionMethodId =3 Then 0 else L.intStorageLocationId End)) 
+				AND EXISTS (
+					SELECT *
+					FROM @tblMFProductionStageLocation PS
+					WHERE PS.intProductionStageLocationId = (
+							CASE 
+								WHEN @intConsumptionMethodId = 3
+									THEN 0
+								ELSE L.intStorageLocationId
+								END
+							)
+					)
 				AND L.dblQty > 0
 				AND L.strLotNumber NOT IN (
 					SELECT WI.strLotNumber
@@ -1380,14 +1461,16 @@ BEGIN TRY
 					,L.intSubLocationId
 				FROM dbo.tblICLot L
 				JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
-					AND SL.ysnAllowConsume = 1 AND L.intItemId = @intItemId AND L.dblQty = 0
-				JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId,R.intRestrictionId)
+					AND SL.ysnAllowConsume = 1
+					AND L.intItemId = @intItemId
+					AND L.dblQty = 0
+				JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId, R.intRestrictionId)
 					AND R.strInternalCode = 'STOCK'
 				JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 				JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
 					AND BS.strPrimaryStatus = 'Active'
 				JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
-				JOIN dbo.tblICItem I on I.intItemId =L.intItemId
+				JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
 				WHERE L.intItemId = @intItemId
 					AND L.intLocationId = @intLocationId
 					AND LS.strPrimaryStatus = 'Active'
@@ -1403,7 +1486,17 @@ BEGIN TRY
 					--			END
 					--		)
 					--	)
-					and  exists(Select *from @tblMFProductionStageLocation PS Where PS.intProductionStageLocationId=(Case When @intConsumptionMethodId =3 Then 0 else L.intStorageLocationId End)) 
+					AND EXISTS (
+						SELECT *
+						FROM @tblMFProductionStageLocation PS
+						WHERE PS.intProductionStageLocationId = (
+								CASE 
+									WHEN @intConsumptionMethodId = 3
+										THEN 0
+									ELSE L.intStorageLocationId
+									END
+								)
+						)
 					AND L.dblQty = 0
 				ORDER BY IsNULL(L.dtmManufacturedDate, L.dtmDateCreated) DESC
 
@@ -1689,15 +1782,17 @@ BEGIN TRY
 					,L.intSubLocationId
 				FROM dbo.tblICLot L
 				JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
-					AND SL.ysnAllowConsume = 1 AND L.intItemId = @intItemId AND L.dblQty > 0
-				JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId,R.intRestrictionId)
+					AND SL.ysnAllowConsume = 1
+					AND L.intItemId = @intItemId
+					AND L.dblQty > 0
+				JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId, R.intRestrictionId)
 					AND R.strInternalCode = 'STOCK'
 				JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 				JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 				JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
 					AND BS.strPrimaryStatus = 'Active'
 				JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
-				JOIN dbo.tblICItem I on I.intItemId =L.intItemId
+				JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
 				WHERE L.intItemId = @intItemId
 					AND L.intLocationId = @intLocationId
 					AND LS.strPrimaryStatus = 'Active'
@@ -1713,7 +1808,17 @@ BEGIN TRY
 					--			END
 					--		)
 					--	)
-					and  exists(Select *from @tblMFProductionStageLocation PS Where PS.intProductionStageLocationId=(Case When @intConsumptionMethodId =3 Then 0 else L.intStorageLocationId End)) 
+					AND EXISTS (
+						SELECT *
+						FROM @tblMFProductionStageLocation PS
+						WHERE PS.intProductionStageLocationId = (
+								CASE 
+									WHEN @intConsumptionMethodId = 3
+										THEN 0
+									ELSE L.intStorageLocationId
+									END
+								)
+						)
 					AND L.dblQty > 0
 				ORDER BY CASE 
 						WHEN @ysnPickByLotCode = 0
@@ -1745,9 +1850,10 @@ BEGIN TRY
 					,@strUnitMeasure NVARCHAR(50)
 					,@intLotUnitMeasureId INT
 					,@strLotUnitMeasure NVARCHAR(50)
-					,@intLotItemUOMId int
+					,@intLotItemUOMId INT
 
-				SELECT @strQty = CONVERT(DECIMAL(24, 4), SUM(dblQty)),@intLotItemUOMId=MIN(intItemUOMId)
+				SELECT @strQty = CONVERT(DECIMAL(24, 4), SUM(dblQty))
+					,@intLotItemUOMId = MIN(intItemUOMId)
 				FROM @tblLot
 
 				SELECT @strReqQty = CONVERT(DECIMAL(24, 4), @dblReqQty)
@@ -1799,6 +1905,7 @@ BEGIN TRY
 				,@dblSubstituteRatio = NULL
 				,@intItemUOMId = NULL
 				,@intItemIssuedUOMId = NULL
+				,@intStageLocationId=NULL
 
 			SELECT @intLotId = intLotId
 				,@intLotItemId = intItemId
@@ -1808,6 +1915,7 @@ BEGIN TRY
 				,@dblSubstituteRatio = dblSubstituteRatio
 				,@intItemUOMId = intItemUOMId
 				,@intItemIssuedUOMId = intItemIssuedUOMId
+				,@intStageLocationId=intStorageLocationId
 			FROM @tblLot
 			WHERE intLotRecordId = @intLotRecordId
 
@@ -1956,6 +2064,7 @@ BEGIN TRY
 						FROM tblMFProductionSummary
 						WHERE intWorkOrderId = @intWorkOrderId
 							AND intItemId = @intLotItemId
+							AND IsNULL(intMachineId,0) = Case When intMachineId is not null then IsNULL(@intMachineId ,0) else IsNULL(intMachineId,0) end
 							AND intItemTypeId IN (
 								1
 								,3
@@ -1982,6 +2091,8 @@ BEGIN TRY
 						,dblCalculatedQuantity
 						,intCategoryId
 						,intItemTypeId
+						,intMachineId
+						,intStageLocationId
 						)
 					SELECT @intWorkOrderId
 						,@intLotItemId
@@ -2002,13 +2113,16 @@ BEGIN TRY
 								THEN 3
 							ELSE 1
 							END
+						,@intMachineId
+						,@intStageLocationId
 				END
 				ELSE
 				BEGIN
 					UPDATE tblMFProductionSummary
-					SET dblConsumedQuantity = dblConsumedQuantity + @dblReqQty
+					SET dblConsumedQuantity = dblConsumedQuantity + @dblReqQty,intStageLocationId=@intStageLocationId
 					WHERE intWorkOrderId = @intWorkOrderId
 						AND intItemId = @intLotItemId
+						AND IsNULL(intMachineId,0) = Case When intMachineId is not null then IsNULL(@intMachineId ,0) else IsNULL(intMachineId,0) end
 						AND intItemTypeId IN (
 							1
 							,3
@@ -2085,6 +2199,7 @@ BEGIN TRY
 						FROM tblMFProductionSummary
 						WHERE intWorkOrderId = @intWorkOrderId
 							AND intItemId = @intLotItemId
+							AND IsNULL(intMachineId,0) = Case When intMachineId is not null then IsNULL(@intMachineId ,0) else IsNULL(intMachineId,0) end
 							AND intItemTypeId IN (
 								1
 								,3
@@ -2111,6 +2226,8 @@ BEGIN TRY
 						,dblCalculatedQuantity
 						,intCategoryId
 						,intItemTypeId
+						,intMachineId
+						,intStageLocationId
 						)
 					SELECT @intWorkOrderId
 						,@intLotItemId
@@ -2131,13 +2248,16 @@ BEGIN TRY
 								THEN 3
 							ELSE 1
 							END
+						,@intMachineId
+						,@intStageLocationId
 				END
 				ELSE
 				BEGIN
 					UPDATE tblMFProductionSummary
-					SET dblConsumedQuantity = dblConsumedQuantity + @dblQty
+					SET dblConsumedQuantity = dblConsumedQuantity + @dblQty,intStageLocationId=@intStageLocationId
 					WHERE intWorkOrderId = @intWorkOrderId
 						AND intItemId = @intLotItemId
+						AND IsNULL(intMachineId,0) = Case When intMachineId is not null then IsNULL(@intMachineId ,0) else IsNULL(intMachineId,0) end
 						AND intItemTypeId IN (
 							1
 							,3

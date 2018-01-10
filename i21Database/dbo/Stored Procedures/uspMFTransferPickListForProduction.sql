@@ -38,6 +38,7 @@ BEGIN TRY
 		,@dblPickQuantity NUMERIC(38, 20)
 		,@intPickUOMId INT
 		,@intQtyItemUOMId INT
+		,@intMachineId INT
 
 	IF ISNULL(@intProductionStagingLocationId, 0) = 0
 		RAISERROR (
@@ -76,6 +77,7 @@ BEGIN TRY
 		,@intBlendItemId = intItemId
 		,@dtmProductionDate = dtmPlannedDate
 		,@intShiftId = intPlannedShiftId
+		,@intMachineId = intMachineId
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -379,6 +381,7 @@ BEGIN TRY
 				FROM tblMFProductionSummary
 				WHERE intWorkOrderId = @intWorkOrderId
 					AND intItemId = @intItemId
+					AND IsNULL(intMachineId, 0) = IsNULL(@intMachineId, 0)
 				)
 		BEGIN
 			SELECT @intCategoryId = intCategoryId
@@ -416,6 +419,7 @@ BEGIN TRY
 				,dblCountConversionQuantity
 				,dblCalculatedQuantity
 				,intItemTypeId
+				,intMachineId
 				)
 			SELECT @intWorkOrderId
 				,@intItemId
@@ -431,6 +435,7 @@ BEGIN TRY
 				,0
 				,0
 				,@intItemTypeId
+				,@intMachineId
 		END
 		ELSE
 		BEGIN
@@ -438,6 +443,7 @@ BEGIN TRY
 			SET dblInputQuantity = dblInputQuantity + @dblInputWeight
 			WHERE intWorkOrderId = @intWorkOrderId
 				AND intItemId = @intItemId
+				AND IsNULL(intMachineId, 0) = IsNULL(@intMachineId, 0)
 		END
 
 		NEXT_RECORD:

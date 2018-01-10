@@ -202,7 +202,7 @@ BEGIN
 		,dtmActualProductionEndDate = @dtmCreated
 		,intStatusId = @intStatusId
 		,intStorageLocationId = @intStorageLocationId
-		,intActualShiftId=@intBusinessShiftId
+		,intActualShiftId = @intBusinessShiftId
 	WHERE intWorkOrderId = @intWorkOrderId
 
 	UPDATE dbo.tblMFWorkOrder
@@ -214,6 +214,7 @@ BEGIN
 			FROM tblMFProductionSummary
 			WHERE intWorkOrderId = @intWorkOrderId
 				AND intItemId = @intItemId
+				AND IsNULL(intMachineId, 0) = IsNULL(@intMachineId, 0)
 				AND intItemTypeId IN (
 					2
 					,4
@@ -241,6 +242,7 @@ BEGIN
 			,dblCalculatedQuantity
 			,intCategoryId
 			,intItemTypeId
+			,intMachineId
 			)
 		SELECT @intWorkOrderId
 			,@intItemId
@@ -257,6 +259,7 @@ BEGIN
 			,0
 			,@intCategoryId
 			,@intItemTypeId
+			,@intMachineId
 	END
 	ELSE
 	BEGIN
@@ -264,6 +267,7 @@ BEGIN
 		SET dblOutputQuantity = dblOutputQuantity + @dblProduceQty
 		WHERE intWorkOrderId = @intWorkOrderId
 			AND intItemId = @intItemId
+			AND IsNULL(intMachineId, 0) = IsNULL(@intMachineId, 0)
 			AND intItemTypeId IN (
 				2
 				,4
