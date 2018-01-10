@@ -44,7 +44,6 @@ WHERE	ysnPosted = 1
 		AND ysnClr = 1
 		AND intBankAccountId = @intBankAccountId
 		AND dblAmount <> 0		
-		AND ysnCheckVoid = 0
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmStatementDate, dtmDate) AS FLOAT)) AS DATETIME)
 		AND (
 			-- Filter date reconciled. 
