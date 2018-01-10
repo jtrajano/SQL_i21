@@ -13,7 +13,7 @@ DECLARE @strTransactionId NVARCHAR(50), @strBatchId NVARCHAR(50)
 SELECT TOP 1 @strBatchId = strBatchId, @strTransactionId = strTransactionId FROM @RecapTable 
 -- DELETE OLD RECAP DATA (IF IT EXISTS)
 DELETE	FROM tblGLPostRecap 
-WHERE strBatchId = @strBatchId OR strTransactionId = @strTransactionId
+WHERE dtmDateEntered < convert(nvarchar(20), GETDATE(), 101)
 
 IF NOT EXISTS (SELECT TOP 1 1 FROM @RecapTable)
 BEGIN 
