@@ -111,6 +111,7 @@ BEGIN
 		,[intItemId] INT
 		,[strItem] NVARCHAR(40) COLLATE Latin1_General_CI_AS
 		,[dblCharge] DECIMAL(24, 10)
+		,[dblFlatFee] DECIMAL(24, 10)
 		,[intInventoryShipmentId] INT NULL 
 		,[intInventoryShipmentItemId] INT NULL 
 		,[intEntityVendorId] INT NULL 
@@ -158,6 +159,7 @@ BEGIN
 				,[intItemId]
 				,[strItem]
 				,[dblCharge]
+				,[dblFlatFee]
 			)
 			EXEC uspGRUpdateGrainOpenBalanceByFIFO 
 				'Update'
@@ -205,7 +207,7 @@ BEGIN
 			,[dblRate]					= grainCharge.dblCharge
 			,[intCostUOMId]				= charge.intCostUOMId
 			,[intCurrencyId]			= dbo.fnSMGetDefaultCurrency('FUNCTIONAL') -- uspGRUpdateGrainOpenBalanceByFIFO is not returning a currency id. Use the default functional currency. 
-			,[dblAmount]				= grainCharge.dblCharge * grainCharge.dblOpenBalance
+			,[dblAmount]				= grainCharge.dblCharge * grainCharge.dblOpenBalance + ISNULL(grainCharge.dblFlatFee,0)
 			,[ysnAccrue]				= charge.ysnAccrue
 			,[intEntityVendorId]		= grainCharge.intEntityVendorId -- uspGRUpdateGrainOpenBalanceByFIFO is not returning a vendor id. So I assume all storage charges are meant to increase the receivable from shipment customer. 
 			,[ysnPrice]					= charge.ysnPrice

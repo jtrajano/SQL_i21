@@ -18,6 +18,7 @@ BEGIN TRY
 	DECLARE @dblStorageDueTotalAmount DECIMAL(24, 10)	
 	DECLARE @dblStorageBilledPerUnit DECIMAL(24, 10)
 	DECLARE @dblStorageBilledAmount DECIMAL(24, 10)
+	DECLARE @dblFlatFeeTotal		DECIMAL(24, 10)
 	
 	DECLARE @tblStorageTickets AS TABLE 
 	(
@@ -29,10 +30,11 @@ BEGIN TRY
 	(
 	  intBillStorageKey INT IDENTITY(1, 1)
 	 ,intCustomerStorageId INT
-	 ,dblAdditionalCharge DECIMAL(24,10)
-	 ,dblNewStorageDue DECIMAL(24,10)
-	 ,dblNewStorageBilled DECIMAL(24,10)
-	 ,dblStorageDueAmount  DECIMAL(24,10)		
+	 ,dblAdditionalCharge  DECIMAL(24,10)
+	 ,dblNewStorageDue	   DECIMAL(24,10)
+	 ,dblNewStorageBilled  DECIMAL(24,10)
+	 ,dblStorageDueAmount  DECIMAL(24,10)
+	 ,dblFlatFeeTotal	   DECIMAL(24,10)		
 	)
 
 	SET @strUpdateType='estimate'
@@ -60,6 +62,7 @@ BEGIN TRY
 			SET @dblStorageDueTotalAmount = NULL
 			SET @dblStorageBilledPerUnit = NULL
 			SET @dblStorageBilledAmount = NULL
+			SET @dblFlatFeeTotal = NULL
 		    
 		    SELECT @intCustomerStorageId=intCustomerStorageId FROM @tblStorageTickets
 			WHERE intTicketKey = @intTicketKey
@@ -82,9 +85,10 @@ BEGIN TRY
 			 ,@dblStorageDueTotalAmount OUTPUT
 			 ,@dblStorageBilledPerUnit OUTPUT
 			 ,@dblStorageBilledAmount OUTPUT
+			 ,@dblFlatFeeTotal OUTPUT
 			 
-			 INSERT INTO @BillStorageDiscounts(intCustomerStorageId,dblAdditionalCharge,dblNewStorageDue,dblNewStorageBilled,dblStorageDueAmount)
-			 SELECT @intCustomerStorageId,@dblStorageDuePerUnit,@dblStorageDuePerUnit,@dblStorageDuePerUnit,@dblStorageDuePerUnit
+			 INSERT INTO @BillStorageDiscounts(intCustomerStorageId,dblAdditionalCharge,dblNewStorageDue,dblNewStorageBilled,dblStorageDueAmount,dblFlatFeeTotal)
+			 SELECT @intCustomerStorageId,@dblStorageDuePerUnit,@dblStorageDuePerUnit,@dblStorageDuePerUnit,@dblStorageDuePerUnit,@dblFlatFeeTotal
 			 
 			SELECT @intTicketKey = MIN(intTicketKey)
 			FROM @tblStorageTickets
@@ -115,7 +119,7 @@ BEGIN TRY
 	 ,(ISNULL(a.dblStorageDue,0)-ISNULL(a.dblStoragePaid,0))+ISNULL(bill.dblAdditionalCharge,0) AS dblNewStorageDue
 	 ,ISNULL(a.dblStoragePaid,0) dblOldStorageBilled
 	 ,CASE WHEN @PostType='Bill Storage' THEN (a.dblStoragePaid+bill.dblAdditionalCharge) ELSE a.dblStoragePaid END  AS dblNewStorageBilled
-	 ,a.dblOpenBalance* CASE WHEN @PostType='Bill Storage' THEN bill.dblAdditionalCharge ELSE 0 END  AS dblStorageDueAmount
+	 ,a.dblOpenBalance* CASE WHEN @PostType='Bill Storage' THEN bill.dblAdditionalCharge ELSE 0 END + ISNULL(bill.dblFlatFeeTotal,0)  AS dblStorageDueAmount
 	FROM tblGRCustomerStorage a  
 	JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId  
 	JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = a.intCompanyLocationId  

@@ -25,6 +25,7 @@ BEGIN TRY
 	DECLARE @dblStorageDueTotalAmount DECIMAL(24, 10)
 	DECLARE @dblStorageBilledPerUnit DECIMAL(24, 10)
 	DECLARE @dblStorageBilledAmount DECIMAL(24, 10)
+	DECLARE @dblFlatFeeTotal		DECIMAL(24, 10)
 	DECLARE @dblTicketStorageDue DECIMAL(24, 10)
 	DECLARE @intContractDetailId INT
 	DECLARE @dblContractUnits DECIMAL(24, 10)
@@ -362,6 +363,7 @@ BEGIN TRY
 			SET @dblStorageDueTotalAmount = 0
 			SET @dblStorageBilledPerUnit = 0
 			SET @dblStorageBilledAmount = 0
+			SET @dblFlatFeeTotal = 0
 			SET @dblTicketStorageDue = 0
 
 			EXEC uspGRCalculateStorageCharge 
@@ -381,6 +383,7 @@ BEGIN TRY
 				,@dblStorageDueTotalAmount OUTPUT
 				,@dblStorageBilledPerUnit OUTPUT
 				,@dblStorageBilledAmount OUTPUT
+				,@dblFlatFeeTotal OUTPUT
 
 			IF @strStorageAdjustment = 'Override'
 				SET @dblTicketStorageDue = @dblAdjustPerUnit + @dblStorageDuePerUnit + @dblStorageDueTotalPerUnit - @dblStorageBilledPerUnit
@@ -427,13 +430,13 @@ BEGIN TRY
 				,strStorageAdjustment		= strStorageAdjustment
 				,dtmCalculateStorageThrough = dtmCalculateStorageThrough
 				,dblAdjustPerUnit		    = dblAdjustPerUnit
-				,dblStorageDue				= @dblTicketStorageDue * @dblUnits
+				,dblStorageDue				= @dblTicketStorageDue * @dblUnits + ISNULL(@dblFlatFeeTotal,0)
 				,strStorageTicket			= strStorageTicket + '/' + LTRIM(@Counter)
 				,dblSelectedUnits			= @dblUnits
 				,dblUnpaidUnits				= 0
 				,dblSettleUnits				= @dblUnits
 				,dblDiscountsDue			= @dblDiscountUnpaid * @dblUnits
-				,dblNetSettlement			= (@dblUnits * dblCashPrice) - (@dblTicketStorageDue*@dblUnits) - (@dblDiscountUnpaid * @dblUnits)
+				,dblNetSettlement			= (@dblUnits * dblCashPrice) - (@dblTicketStorageDue*@dblUnits) - (@dblDiscountUnpaid * @dblUnits)-ISNULL(@dblFlatFeeTotal,0)
 				,ysnPosted					= 0
 				,intCommodityId				= intCommodityId
 				,intCommodityStockUomId		= intCommodityStockUomId
@@ -481,6 +484,7 @@ BEGIN TRY
 			SET @dblStorageDueTotalAmount = 0
 			SET @dblStorageBilledPerUnit = 0
 			SET @dblStorageBilledAmount = 0
+			SET @dblFlatFeeTotal = 0
 			SET @dblTicketStorageDue = 0
 
 			EXEC uspGRCalculateStorageCharge 
@@ -500,6 +504,7 @@ BEGIN TRY
 				,@dblStorageDueTotalAmount OUTPUT
 				,@dblStorageBilledPerUnit OUTPUT
 				,@dblStorageBilledAmount OUTPUT
+				,@dblFlatFeeTotal OUTPUT
 
 			IF @strStorageAdjustment = 'Override'
 				SET @dblTicketStorageDue = @dblAdjustPerUnit + @dblStorageDuePerUnit + @dblStorageDueTotalPerUnit - @dblStorageBilledPerUnit
@@ -546,13 +551,13 @@ BEGIN TRY
 				,strStorageAdjustment			= strStorageAdjustment
 				,dtmCalculateStorageThrough		= dtmCalculateStorageThrough
 				,dblAdjustPerUnit				= dblAdjustPerUnit
-				,dblStorageDue					= @dblTicketStorageDue*@dblUnitsByOrderType
+				,dblStorageDue					= @dblTicketStorageDue*@dblUnitsByOrderType + ISNULL(@dblFlatFeeTotal,0)
 				,strStorageTicket				= strStorageTicket + '/' + LTRIM(@Counter)
 				,dblSelectedUnits				= @dblUnitsByOrderType
 				,dblUnpaidUnits					= @dblUnpaidUnits
 				,dblSettleUnits					= @dblUnitsByOrderType - @dblUnpaidUnits
 				,dblDiscountsDue				= @dblDiscountUnpaid * (@dblUnitsByOrderType - @dblUnpaidUnits)
-				,dblNetSettlement				= @dblContractAmount - (@dblTicketStorageDue*@dblUnitsByOrderType) - (@dblDiscountUnpaid * (@dblUnitsByOrderType - @dblUnpaidUnits))
+				,dblNetSettlement				= @dblContractAmount - (@dblTicketStorageDue*@dblUnitsByOrderType) - (@dblDiscountUnpaid * (@dblUnitsByOrderType - @dblUnpaidUnits)) - ISNULL(@dblFlatFeeTotal,0)
 				,ysnPosted						= 0
 				,intCommodityId					= intCommodityId
 				,intCommodityStockUomId			= intCommodityStockUomId

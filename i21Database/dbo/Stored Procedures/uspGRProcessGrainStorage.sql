@@ -15,12 +15,14 @@ BEGIN TRY
 	DECLARE @strProcessType NVARCHAR(30)
 	DECLARE @strUpdateType NVARCHAR(30)
 	DECLARE @intBillDiscountKey INT
+	/*
 	DECLARE @dblStorageDuePerUnit DECIMAL(24, 10)
 	DECLARE @dblStorageDueAmount DECIMAL(24, 10)
 	DECLARE @dblStorageDueTotalPerUnit DECIMAL(24, 10)
 	DECLARE @dblStorageDueTotalAmount DECIMAL(24, 10)
 	DECLARE @dblStorageBilledPerUnit DECIMAL(24, 10)
 	DECLARE @dblStorageBilledAmount DECIMAL(24, 10)
+	*/
 	
 	DECLARE @BillInvoiceKey INT
 	DECLARE @ErrorMessage NVARCHAR(250)
@@ -125,7 +127,7 @@ BEGIN TRY
 			,intItemId INT
 	)
 
-	SELECT @intBillDiscountKey = MIN(intBillDiscountKey)
+	/*SELECT @intBillDiscountKey = MIN(intBillDiscountKey)
 	FROM @BillDiscounts
 
 	WHILE @intBillDiscountKey > 0
@@ -172,7 +174,7 @@ BEGIN TRY
 		FROM @BillDiscounts
 		WHERE intBillDiscountKey > @intBillDiscountKey
 	END
-
+	*/
 	--Creating Invoice
 	
 	SELECT @intDefaultCurrencyId=intDefaultCurrencyId FROm tblSMCompanyPreference

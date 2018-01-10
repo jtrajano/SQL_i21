@@ -34,6 +34,7 @@ BEGIN TRY
 	DECLARE @intItemUOMId AS INT
 	DECLARE @intTransactionTypeId AS INT
 	DECLARE @ItemCostingTableType AS ItemCostingTableType
+	DECLARE @dblFlatFeeTotal		DECIMAL(24, 10)
 
 	SELECT @intItemUOMId = intItemUOMId
 	FROM dbo.tblICItemUOM
@@ -54,6 +55,7 @@ BEGIN TRY
 		,[intItemId] INT
 		,[strItem] NVARCHAR(40) COLLATE Latin1_General_CI_AS
 		,[dblCharge] DECIMAL(24, 10)
+		,[dblFlatFee] DECIMAL(24, 10)
 	)
 
 	SET @strUpdateType = 'estimate'
@@ -136,6 +138,7 @@ BEGIN TRY
 			SET @dblStorageBilledPerUnit = NULL
 			SET @dblStorageBilledAmount = NULL
 			SET @dblStorageUnits = NULL
+			SET @dblFlatFeeTotal = NULL
 
 			SELECT TOP 1 @intCustomerStorageId = intCustomerStorageId
 				,@dblStorageUnits = dblOpenBalance
@@ -176,6 +179,7 @@ BEGIN TRY
 				,@dblStorageDueTotalAmount OUTPUT
 				,@dblStorageBilledPerUnit OUTPUT
 				,@dblStorageBilledAmount OUTPUT
+				,@dblFlatFeeTotal OUTPUT
 			
 		 --1.Inventory	
 			IF NOT EXISTS (
@@ -236,6 +240,7 @@ BEGIN TRY
 						,[intItemId]
 						,[strItem]
 						,[dblCharge]
+						,[dblFlatFee]
 					)
 					SELECT 
 						 @intCustomerStorageId
@@ -246,7 +251,8 @@ BEGIN TRY
 						,'Storage Charge'
 						,@intStorageChargeItemId
 						,@strStorageChargeItemNo
-						,@dblStorageDueAmount + @dblStorageDueTotalAmount --(Unpaid:@dblStorageDueAmount+ Additional :@dblStorageDueTotalAmount)				
+						,@dblStorageDueAmount + @dblStorageDueTotalAmount --(Unpaid:@dblStorageDueAmount+ Additional :@dblStorageDueTotalAmount)
+						,@dblFlatFeeTotal				
 					FROM tblGRCustomerStorage a
 					JOIN tblICUnitMeasure b ON a.[intUnitMeasureId] = b.[intUnitMeasureId]
 					WHERE [intCustomerStorageId] = @intCustomerStorageId
@@ -405,7 +411,7 @@ BEGIN TRY
 			,[intInventoryShipmentId] = CASE WHEN @strSourceType = 'InventoryShipment' THEN @IntSourceKey ELSE NULL END
 			,[dblUnits] = dblOpenBalance
 			,[dtmHistoryDate] = GetDATE()
-			,[dblPaidAmount] = [dblCharge] * dblOpenBalance
+			,[dblPaidAmount] = [dblCharge] * dblOpenBalance + ISNULL(dblFlatFee,0)
 			,[strType] = CASE
 							 WHEN @strSourceType = 'Invoice' THEN 'Reduced By Invoice' 
 							 WHEN @strSourceType = 'InventoryShipment' THEN 'Reduced By Inventory Shipment'
@@ -446,7 +452,8 @@ BEGIN TRY
 			,[strItemType]
 			,[intItemId]
 			,[strItem]
-			,[dblCharge]			
+			,[dblCharge]
+			,[dblFlatFee]			
 		FROM @StorageTicketInfoByFIFO
 		
 	END

@@ -47,6 +47,7 @@ BEGIN TRY
 	DECLARE @dblStorageDueTotalAmount DECIMAL(24, 10)
 	DECLARE @dblStorageBilledPerUnit DECIMAL(24, 10)
 	DECLARE @dblStorageBilledAmount DECIMAL(24, 10)
+	DECLARE @dblFlatFeeTotal		DECIMAL(24, 10)
 	DECLARE @dblTicketStorageDue DECIMAL(24, 10)
 	DECLARE @FeeItemId INT
 	DECLARE @strFeeItem NVARCHAR(40)
@@ -443,6 +444,7 @@ BEGIN TRY
 				SET @dblStorageDueTotalAmount = 0
 				SET @dblStorageBilledPerUnit = 0
 				SET @dblStorageBilledAmount = 0
+				SET @dblFlatFeeTotal = 0
 				SET @dblTicketStorageDue = 0
 
 				EXEC uspGRCalculateStorageCharge 
@@ -462,6 +464,7 @@ BEGIN TRY
 					,@dblStorageDueTotalAmount OUTPUT
 					,@dblStorageBilledPerUnit OUTPUT
 					,@dblStorageBilledAmount OUTPUT
+					,@dblFlatFeeTotal OUTPUT
 
 				IF @strStorageAdjustment = 'Override'
 					SET @dblTicketStorageDue = @dblAdjustPerUnit + @dblStorageDuePerUnit + @dblStorageDueTotalPerUnit - @dblStorageBilledPerUnit
@@ -493,7 +496,7 @@ BEGIN TRY
 						,intContractHeaderId   = NULL
 						,intContractDetailId   = NULL
 						,dblUnits              = @dblStorageUnits
-						,dblCashPrice          = - @dblTicketStorageDue
+						,dblCashPrice          = - @dblTicketStorageDue -(ISNULL(@dblFlatFeeTotal,0)/@dblStorageUnits)
 						,intItemId             = @intStorageChargeItemId
 						,intItemType           = 2
 						,IsProcessed           = 0
@@ -1076,7 +1079,7 @@ BEGIN TRY
 				  OR
 				 (ReceiptCharge.intEntityVendorId <> SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 1)
 				)
-
+								
 				EXEC [dbo].[uspAPCreateBillData] 
 					 @userId = @intCreatedUserId
 					,@vendorId = @EntityId
