@@ -4,7 +4,7 @@ SELECT
 	a.intCustomerStorageId,
 	a.intCompanyLocationId	
 	,c.strLocationName [Loc]
-	,convert(datetime,CONVERT(VARCHAR(10),a.dtmDeliveryDate ,110),110) [Delivery Date]
+	,CONVERT(DATETIME,CONVERT(VARCHAR(10),a.dtmDeliveryDate ,110),110) [Delivery Date]
 	,a.strStorageTicketNumber [Ticket]
 	,a.intEntityId
 	,E.strName [Customer]
@@ -38,4 +38,4 @@ LEFT JOIN tblGRStorageScheduleRule c1 on c1.intStorageScheduleRuleId=a.intStorag
 JOIN tblSMCompanyLocation c ON c.intCompanyLocationId=a.intCompanyLocationId
 JOIN tblEMEntity E ON E.intEntityId=a.intEntityId
 JOIN tblICCommodity CM ON CM.intCommodityId=a.intCommodityId
-WHERE ISNULL(a.strStorageType,'') <> 'ITR' 
+WHERE ISNULL(a.strStorageType,'') <> 'ITR'  and isnull(a.intDeliverySheetId,0) =0
