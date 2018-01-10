@@ -5997,6 +5997,12 @@
     <Build Include="dbo\Functions\fnICGetCreateGLEntriesErrors.sql" />
     <Build Include="dbo\Functions\fnICFormatErrorMessage.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateCreateGLEntries.sql" />
+    <Build Include="dbo\Tables\tblCFTempCSUVehicle.sql" />
+    <Build Include="dbo\Tables\tblCFTempCSUCard.sql" />
+    <Build Include="dbo\Tables\tblCFTempCSUAuditLog.sql" />
+    <Build Include="dbo\Tables\tblCFTempAuditLog.sql" />
+    <Build Include="dbo\Tables\tblCFCSUAuditLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFCardSynchronization.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
