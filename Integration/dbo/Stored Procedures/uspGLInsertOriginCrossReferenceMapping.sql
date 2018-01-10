@@ -1,8 +1,17 @@
 ﻿CREATE PROCEDURE uspGLInsertOriginCrossReferenceMapping
 AS
 IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[glactmst]') AND type IN (N'U'))
+
 BEGIN
-EXEC('UPDATE coa
+EXEC('
+IF EXISTS (select inti21Id, count(1) from tblGLCOACrossReference group by inti21Id having count(1) > 1)
+BEGIN
+PRINT ''Inserting in cross reference mapping table was aborted due to duplicate entry in tblGLCOACrossReference''
+RETURN
+END
+
+
+UPDATE coa
 SET strOldId = CAST(CAST(glact_acct1_8 AS INT) AS NVARCHAR(50)) + ''-'' + CAST( CAST(glact_acct9_16 AS INT) AS NVARCHAR(50))
 FROM tblGLCOACrossReference coa JOIN glactmst orig ON coa.intLegacyReferenceId = orig.A4GLIdentity
 
