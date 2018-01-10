@@ -16,6 +16,9 @@ BEGIN
 		,@intInventoryShipmentId INT
 		,@strShipmentPickListNotes NVARCHAR(MAX) = ''
 		,@intCustomerEntityId INT
+		,@intWorkOrderId INT
+		,@strCellName NVARCHAR(50)
+		,@strWOItem NVARCHAR(300)
 
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
@@ -54,6 +57,17 @@ BEGIN
 	SELECT @strInventoryShipmentNo = strReferenceNo
 	FROM tblMFOrderHeader
 	WHERE intOrderHeaderId = @intOrderHeaderId
+
+	SELECT @intWorkOrderId = intWorkOrderId
+	FROM tblMFStageWorkOrder
+	WHERE intOrderHeaderId = @intOrderHeaderId
+
+	SELECT @strWOItem = I.strItemNo + ' - ' + I.strDescription
+		,@strCellName = MC.strCellName
+	FROM tblMFWorkOrder W
+	JOIN tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId
+	JOIN tblICItem I ON I.intItemId = W.intItemId
+	WHERE W.intWorkOrderId = @intWorkOrderId
 
 	SELECT @intInventoryShipmentId = intInventoryShipmentId
 		,@intCustomerEntityId = intEntityCustomerId
@@ -111,6 +125,8 @@ BEGIN
 		,@strShipmentPickListNotes AS strShipmentPickListNotes
 		,OH.strReferenceNo
 		,OH.strComment AS strInstruction
+		,ISNULL(@strWOItem, '') AS strWOItem
+		,ISNULL(@strCellName, '') AS strCellName
 	FROM tblMFOrderHeader OH
 	JOIN tblMFTask T ON T.intOrderHeaderId = OH.intOrderHeaderId
 	JOIN tblMFTaskType TT ON TT.intTaskTypeId = T.intTaskTypeId
