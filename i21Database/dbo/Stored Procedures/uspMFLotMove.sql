@@ -9,6 +9,7 @@
 	,@dtmDate DATETIME = NULL
 	,@strReasonCode NVARCHAR(MAX) = NULL
 	,@strNotes NVARCHAR(MAX) = NULL
+	,@ysnBulkChange BIT = 0
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -266,6 +267,11 @@ BEGIN TRY
 	IF @intNewStorageLocationId = @intStorageLocationId
 		AND @intNewSubLocationId = @intSubLocationId
 	BEGIN
+		IF @ysnBulkChange = 1
+		BEGIN
+			RETURN
+		END
+
 		RAISERROR (
 				'The Lot already exists in the selected destination storage location. Please select a different destination storage location.'
 				,11

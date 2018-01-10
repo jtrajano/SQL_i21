@@ -24,11 +24,11 @@ BEGIN TRY
 		,@intLocationId INT
 		,@ItemsToReserve AS dbo.ItemReservationTableType
 		,@intInventoryTransactionType AS INT = 8
-		,@intInputItemId int
-		,@intProductionStageLocationId int
-		,@intProductionStagingId int
-		,@intConsumptionStorageLocationId int
-		,@intConsumptionSubLocationId int
+		,@intInputItemId INT
+		,@intProductionStageLocationId INT
+		,@intProductionStagingId INT
+		,@intConsumptionStorageLocationId INT
+		,@intConsumptionSubLocationId INT
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -49,8 +49,8 @@ BEGIN TRY
 	SELECT @strAttributeValue = strAttributeValue
 	FROM tblMFManufacturingProcessAttribute
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
-		AND intAttributeId = 20--Is Instant Consumption
-		AND intLocationId =@intLocationId
+		AND intAttributeId = 20 --Is Instant Consumption
+		AND intLocationId = @intLocationId
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -96,14 +96,18 @@ BEGIN TRY
 			,[dblCreditReport]
 			,[dblReportingRate]
 			,[dblForeignRate]
-			,strRateType
 			)
+		--,strRateType
 		EXEC dbo.uspICUnpostCostAdjustment @intTransactionId
 			,@strTransactionId
 			,@strCostAdjustmentBatchId
 			,@intUserId
-			,0
-		IF EXISTS(SELECT *FROM @GLEntries)
+			,'Work In Progress'
+
+		IF EXISTS (
+				SELECT *
+				FROM @GLEntries
+				)
 		BEGIN
 			EXEC dbo.uspGLBookEntries @GLEntries
 				,0
@@ -186,7 +190,7 @@ BEGIN TRY
 			,[dblReportingRate]
 			,[dblForeignRate]
 			,[strRateType]
-		)
+			)
 		EXEC dbo.uspICUnpostCosting @intTransactionId
 			,@strAdjustmentNo
 			,@strBatchId
@@ -253,14 +257,17 @@ BEGIN TRY
 			,[dblReportingRate]
 			,[dblForeignRate]
 			,[strRateType]
-		)
+			)
 		EXEC dbo.uspICUnpostCosting @intBatchId
 			,@strWorkOrderNo
 			,@strBatchId
 			,@intUserId
 			,0
 
-		IF EXISTS(SELECT *FROM @GLEntries)
+		IF EXISTS (
+				SELECT *
+				FROM @GLEntries
+				)
 		BEGIN
 			EXEC dbo.uspGLBookEntries @GLEntries
 				,0
@@ -270,21 +277,35 @@ BEGIN TRY
 		FROM dbo.tblMFWorkOrderConsumedLot
 		WHERE intWorkOrderId = @intWorkOrderId
 			AND intBatchId = @intBatchId
-			AND intItemId NOT IN (Select intItemId from tblMFWorkOrderProducedLot Where intWorkOrderId = @intWorkOrderId and intSpecialPalletLotId is not null)
+			AND intItemId NOT IN (
+				SELECT intItemId
+				FROM tblMFWorkOrderProducedLot
+				WHERE intWorkOrderId = @intWorkOrderId
+					AND intSpecialPalletLotId IS NOT NULL
+				)
 
 		UPDATE tblMFProductionSummary
 		SET dblConsumedQuantity = 0
 		WHERE intWorkOrderId = @intWorkOrderId
-		And intItemTypeId IN (1,3)
+			AND intItemTypeId IN (
+				1
+				,3
+				)
 
-		DELETE FROM dbo.tblMFWorkOrderProducedLotTransaction WHERE intWorkOrderId=@intWorkOrderId
+		DELETE
+		FROM dbo.tblMFWorkOrderProducedLotTransaction
+		WHERE intWorkOrderId = @intWorkOrderId
 	END
-	Select @intInputItemId=intItemId from tblMFWorkOrderInputLot Where intWorkOrderId =@intWorkOrderId 
+
+	SELECT @intInputItemId = intItemId
+	FROM tblMFWorkOrderInputLot
+	WHERE intWorkOrderId = @intWorkOrderId
 
 	SELECT @intProductionStageLocationId = intProductionStagingLocationId
 	FROM tblMFManufacturingProcessMachine
-	WHERE intManufacturingProcessId = @intManufacturingProcessId and @intProductionStageLocationId is not null
-	
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND @intProductionStageLocationId IS NOT NULL
+
 	IF @intProductionStageLocationId IS NULL
 	BEGIN
 		SELECT @intProductionStagingId = intAttributeId
@@ -297,7 +318,6 @@ BEGIN TRY
 			AND intLocationId = @intLocationId
 			AND intAttributeId = @intProductionStagingId
 	END
-
 
 	SELECT @intConsumptionStorageLocationId = CASE 
 			WHEN RI.intConsumptionMethodId = 1
@@ -316,7 +336,6 @@ BEGIN TRY
 	SELECT @intConsumptionSubLocationId = intSubLocationId
 	FROM dbo.tblICStorageLocation
 	WHERE intStorageLocationId = @intConsumptionStorageLocationId
-
 
 	EXEC dbo.uspICCreateStockReservation @ItemsToReserve
 		,@intWorkOrderId
@@ -363,7 +382,6 @@ BEGIN TRY
 	EXEC dbo.uspICCreateStockReservation @ItemsToReserve
 		,@intWorkOrderId
 		,@intInventoryTransactionType
-
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION

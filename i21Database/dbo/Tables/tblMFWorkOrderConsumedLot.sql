@@ -28,6 +28,7 @@
 	[dtmLastModified] DATETIME NULL, 
     [intLastModifiedUserId] INT NULL,
 	[intConcurrencyId] INT NULL CONSTRAINT [DF_tblMFWorkOrderConsumedLot_intConcurrencyId] DEFAULT 0, 
+	[ysnPosted] bit NULL CONSTRAINT [DF_tblMFWorkOrderConsumedLot_ysnPosted] DEFAULT 0, 
 	CONSTRAINT [PK_tblMFWorkOrderConsumedLot_intWorkOrderConsumedLotId] PRIMARY KEY ([intWorkOrderConsumedLotId]),
 	CONSTRAINT [FK_tblMFWorkOrderConsumedLot_tblMFWorkOrder_intWorkOrderId] FOREIGN KEY ([intWorkOrderId]) REFERENCES [tblMFWorkOrder]([intWorkOrderId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblMFWorkOrderConsumedLot_tblICItem_inItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),

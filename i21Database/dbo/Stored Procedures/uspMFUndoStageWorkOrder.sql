@@ -300,12 +300,17 @@ BEGIN TRY
 			AND RS.intSubstituteItemId = @intInputItemId
 	END
 
-	Select @dblAdjustByQuantity=abs(@dblAdjustByQuantity)
+	SELECT @dblAdjustByQuantity = abs(@dblAdjustByQuantity)
 
 	UPDATE tblMFProductionSummary
 	SET dblInputQuantity = dblInputQuantity - IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intNewItemUOMId, @intRecipeItemUOMId, @dblAdjustByQuantity), 0)
 	WHERE intWorkOrderId = @intWorkOrderId
 		AND intItemId = @intInputItemId
+		AND IsNULL(intMachineId, 0) = CASE 
+			WHEN intMachineId IS NOT NULL
+				THEN IsNULL(@intMachineId, 0)
+			ELSE IsNULL(intMachineId, 0)
+			END
 
 	SELECT @intLotId = NULL
 

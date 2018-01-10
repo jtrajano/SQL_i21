@@ -5,7 +5,7 @@ CREATE PROCEDURE [dbo].[uspMFPostConsumption] @ysnPost BIT = 0
 	,@intEntityId INT = NULL
 	,@strRetBatchId NVARCHAR(40) = NULL OUT
 	,@intBatchId INT = NULL
-	,@ysnPostGL BIT=1
+	,@ysnPostGL BIT = 1
 	,@intLoadDistributionDetailId INT = NULL
 	,@dtmDate DATETIME = NULL
 AS
@@ -35,7 +35,8 @@ DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 	,@intManufacturingCellId INT
 	,@intSubLocationId INT
 
-	SELECT TOP 1 @dblDefaultResidueQty=ISNULL(dblDefaultResidueQty,0.00001) FROM tblMFCompanyPreference
+SELECT TOP 1 @dblDefaultResidueQty = ISNULL(dblDefaultResidueQty, 0.00001)
+FROM tblMFCompanyPreference
 
 DECLARE @tblMFLot TABLE (
 	intRecordId INT Identity(1, 1)
@@ -64,7 +65,6 @@ DECLARE @dblOtherCharges NUMERIC(18, 6)
 	,@intManufacturingProcessId INT
 	,@intAttributeTypeId INT
 	,@strLocationName AS NVARCHAR(50)
-
 DECLARE @GLEntriesForOtherCost TABLE (
 	dtmDate DATETIME
 	,intItemId INT
@@ -172,7 +172,8 @@ BEGIN
 END
 
 SELECT @intTransactionId = @intBatchId
-SELECT @dtmDate = ISNULL(dbo.fnGetBusinessDate(@dtmDate, @intLocationId), GETDATE()) 
+
+SELECT @dtmDate = ISNULL(dbo.fnGetBusinessDate(@dtmDate, @intLocationId), GETDATE())
 
 -- Get the next batch number
 EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH
@@ -185,42 +186,50 @@ SELECT @strRetBatchId = @strBatchId
 --------------------------------------------------------------------------------------------  
 IF @ysnPost = 1
 BEGIN
-
 	--PRINT 'Load Distribution Detail Id : '
 	--PRINT @intLoadDistributionDetailId
-
 	SELECT DISTINCT DistItem.intLoadDistributionDetailId
-		, intItemId = (
+		,intItemId = (
 			CASE 
-			WHEN BlendIngredient.ysnSubstituteItem = 1
-				THEN (
-						CASE 
-							WHEN BlendIngredient.intSubstituteItemId = Receipt.intItemId
-								THEN BlendIngredient.intSubstituteItemId
-							ELSE BlendIngredient.intIngredientItemId
-							END
-						)
-			ELSE BlendIngredient.intIngredientItemId
-			END
-		)
-		, dblQty = BlendIngredient.dblQuantity
-		, HeaderDistItem.intCompanyLocationId
-		, HeaderDistItem.dtmInvoiceDateTime
-		, strActualCostId = (CASE WHEN Receipt.strOrigin = 'Terminal'
-									THEN LoadHeader.strTransaction
-								WHEN Receipt.strOrigin = 'Location' AND HeaderDistItem.strDestination = 'Customer' AND Receipt.intCompanyLocationId = HeaderDistItem.intCompanyLocationId
-									THEN NULL
-								WHEN Receipt.strOrigin = 'Location' AND HeaderDistItem.strDestination = 'Customer' AND Receipt.intCompanyLocationId != HeaderDistItem.intCompanyLocationId
-									THEN LoadHeader.strTransaction
-								WHEN Receipt.strOrigin = 'Location' AND HeaderDistItem.strDestination = 'Location' AND Receipt.intCompanyLocationId != HeaderDistItem.intCompanyLocationId
-									THEN LoadHeader.strTransaction
-								END)
+				WHEN BlendIngredient.ysnSubstituteItem = 1
+					THEN (
+							CASE 
+								WHEN BlendIngredient.intSubstituteItemId = Receipt.intItemId
+									THEN BlendIngredient.intSubstituteItemId
+								ELSE BlendIngredient.intIngredientItemId
+								END
+							)
+				ELSE BlendIngredient.intIngredientItemId
+				END
+			)
+		,dblQty = BlendIngredient.dblQuantity
+		,HeaderDistItem.intCompanyLocationId
+		,HeaderDistItem.dtmInvoiceDateTime
+		,strActualCostId = (
+			CASE 
+				WHEN Receipt.strOrigin = 'Terminal'
+					THEN LoadHeader.strTransaction
+				WHEN Receipt.strOrigin = 'Location'
+					AND HeaderDistItem.strDestination = 'Customer'
+					AND Receipt.intCompanyLocationId = HeaderDistItem.intCompanyLocationId
+					THEN NULL
+				WHEN Receipt.strOrigin = 'Location'
+					AND HeaderDistItem.strDestination = 'Customer'
+					AND Receipt.intCompanyLocationId != HeaderDistItem.intCompanyLocationId
+					THEN LoadHeader.strTransaction
+				WHEN Receipt.strOrigin = 'Location'
+					AND HeaderDistItem.strDestination = 'Location'
+					AND Receipt.intCompanyLocationId != HeaderDistItem.intCompanyLocationId
+					THEN LoadHeader.strTransaction
+				END
+			)
 	INTO #tmpBlendIngredients
 	FROM tblTRLoadDistributionDetail DistItem
 	LEFT JOIN tblTRLoadDistributionHeader HeaderDistItem ON HeaderDistItem.intLoadDistributionHeaderId = DistItem.intLoadDistributionHeaderId
 	LEFT JOIN tblTRLoadHeader LoadHeader ON LoadHeader.intLoadHeaderId = HeaderDistItem.intLoadHeaderId
 	LEFT JOIN vyuTRGetLoadBlendIngredient BlendIngredient ON BlendIngredient.intLoadDistributionDetailId = DistItem.intLoadDistributionDetailId
-	LEFT JOIN tblTRLoadReceipt Receipt ON Receipt.intLoadHeaderId = LoadHeader.intLoadHeaderId AND Receipt.strReceiptLine = BlendIngredient.strReceiptLink
+	LEFT JOIN tblTRLoadReceipt Receipt ON Receipt.intLoadHeaderId = LoadHeader.intLoadHeaderId
+		AND Receipt.strReceiptLine = BlendIngredient.strReceiptLink
 	WHERE DistItem.intLoadDistributionDetailId = @intLoadDistributionDetailId
 		AND ISNULL(DistItem.strReceiptLink, '') = ''
 
@@ -245,7 +254,7 @@ BEGIN
 		,intStorageLocationId
 		,intSourceTransactionId
 		,strSourceTransactionId
-		,strActualCostId 
+		,strActualCostId
 		)
 	SELECT intItemId = cl.intItemId
 		,intItemLocationId = il.intItemLocationId
@@ -272,11 +281,12 @@ BEGIN
 	JOIN dbo.tblICItemUOM ItemUOM ON cl.intItemIssuedUOMId = ItemUOM.intItemUOMId
 	JOIN dbo.tblICItemLocation il ON i.intItemId = il.intItemId
 		AND il.intLocationId = @intLocationId
-	INNER JOIN dbo.tblICItemPricing IP on IP.intItemId=i.intItemId AND IP.intItemLocationId =il.intItemLocationId
+	INNER JOIN dbo.tblICItemPricing IP ON IP.intItemId = i.intItemId
+		AND IP.intItemLocationId = il.intItemLocationId
 	LEFT JOIN #tmpBlendIngredients BlendItems ON BlendItems.intItemId = cl.intItemId
 	WHERE cl.intWorkOrderId = @intWorkOrderId
 		AND ISNULL(cl.intLotId, 0) = 0
-	
+
 	DROP TABLE #tmpBlendIngredients
 
 	--Lot Tracking
@@ -325,6 +335,12 @@ BEGIN
 	JOIN dbo.tblICItemUOM ItemUOM ON l.intItemUOMId = ItemUOM.intItemUOMId
 	LEFT JOIN dbo.tblICItemUOM WeightUOM ON l.intWeightUOMId = WeightUOM.intItemUOMId
 	WHERE cl.intWorkOrderId = @intWorkOrderId
+		AND IsNULL(cl.ysnPosted, 0) = 0
+
+	UPDATE tblMFWorkOrderConsumedLot
+	SET ysnPosted = 1
+	WHERE intWorkOrderId = @intWorkOrderId
+		AND IsNULL(ysnPosted, 0) = 0
 
 	-- Call the post routine 
 	INSERT INTO @GLEntries (
@@ -366,14 +382,19 @@ BEGIN
 		,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 		,@intUserId
 
-	IF @ysnPostGL=1 AND EXISTS(Select *from @GLEntries) AND ISNULL(@ysnRecap,0)=0
+	IF @ysnPostGL = 1
+		AND EXISTS (
+			SELECT *
+			FROM @GLEntries
+			)
+		AND ISNULL(@ysnRecap, 0) = 0
 	BEGIN
 		EXEC dbo.uspGLBookEntries @GLEntries
 			,@ysnPost
 	END
 
 	IF @dblOtherCharges IS NOT NULL
-		AND @dblOtherCharges > 0 
+		AND @dblOtherCharges > 0
 		AND @strInstantConsumption = 'False'
 		AND @intAttributeTypeId = 5
 	BEGIN
@@ -401,20 +422,22 @@ BEGIN
 		INNER JOIN @OtherChargesGLAccounts ChargesGLAccounts ON Item.intItemId = ChargesGLAccounts.intChargeId
 		WHERE ChargesGLAccounts.intOtherChargeExpense IS NULL
 
-		SELECT	TOP 1 
-				@strLocationName = c.strLocationName
-		FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
-					ON il.intLocationId = c.intCompanyLocationId
-				INNER JOIN @OtherChargesGLAccounts ChargesGLAccounts
-					ON ChargesGLAccounts.intChargeId = il.intItemId
-					AND ChargesGLAccounts.intItemLocationId = il.intItemLocationId
-		WHERE	il.intItemId = @intItemId1
-				AND ChargesGLAccounts.intOtherChargeExpense IS NULL
+		SELECT TOP 1 @strLocationName = c.strLocationName
+		FROM tblICItemLocation il
+		INNER JOIN tblSMCompanyLocation c ON il.intLocationId = c.intCompanyLocationId
+		INNER JOIN @OtherChargesGLAccounts ChargesGLAccounts ON ChargesGLAccounts.intChargeId = il.intItemId
+			AND ChargesGLAccounts.intItemLocationId = il.intItemLocationId
+		WHERE il.intItemId = @intItemId1
+			AND ChargesGLAccounts.intOtherChargeExpense IS NULL
 
 		IF @intItemId1 IS NOT NULL
 		BEGIN
 			-- {Item} in {Location} is missing a GL account setup for {Account Category} account category.
-			EXEC uspICRaiseError 80008, @strItemNo1, @strLocationName, @ACCOUNT_CATEGORY_OtherChargeExpense;
+			EXEC uspICRaiseError 80008
+				,@strItemNo1
+				,@strLocationName
+				,@ACCOUNT_CATEGORY_OtherChargeExpense;
+
 			RETURN;
 		END
 
@@ -584,16 +607,19 @@ BEGIN
 			AND ISNULL(GLEntriesForOtherCost.ysnInventoryCost, 0) = 0
 			AND ISNULL(GLEntriesForOtherCost.ysnPrice, 0) = 0
 
-		IF EXISTS(SELECT *FROM @GLEntries) AND ISNULL(@ysnRecap,0)=0
+		IF EXISTS (
+				SELECT *
+				FROM @GLEntries
+				)
+			AND ISNULL(@ysnRecap, 0) = 0
 		BEGIN
 			EXEC dbo.uspGLBookEntries @GLEntries
 				,@ysnPost
 		END
-
 	END
 
 	IF @dblOtherCharges IS NOT NULL
-		AND @dblOtherCharges > 0 
+		AND @dblOtherCharges > 0
 		AND @strInstantConsumption = 'False'
 		AND @intAttributeTypeId = 5
 	BEGIN
@@ -621,20 +647,22 @@ BEGIN
 		INNER JOIN @OtherChargesGLAccounts ChargesGLAccounts ON Item.intItemId = ChargesGLAccounts.intChargeId
 		WHERE ChargesGLAccounts.intOtherChargeExpense IS NULL
 
-		SELECT	TOP 1 
-				@strLocationName = c.strLocationName
-		FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
-					ON il.intLocationId = c.intCompanyLocationId
-				INNER JOIN @OtherChargesGLAccounts ChargesGLAccounts
-					ON ChargesGLAccounts.intChargeId = il.intItemId
-					AND ChargesGLAccounts.intItemLocationId = il.intItemLocationId
-		WHERE	il.intItemId = @intItemId1
-				AND ChargesGLAccounts.intOtherChargeExpense IS NULL
+		SELECT TOP 1 @strLocationName = c.strLocationName
+		FROM tblICItemLocation il
+		INNER JOIN tblSMCompanyLocation c ON il.intLocationId = c.intCompanyLocationId
+		INNER JOIN @OtherChargesGLAccounts ChargesGLAccounts ON ChargesGLAccounts.intChargeId = il.intItemId
+			AND ChargesGLAccounts.intItemLocationId = il.intItemLocationId
+		WHERE il.intItemId = @intItemId1
+			AND ChargesGLAccounts.intOtherChargeExpense IS NULL
 
 		IF @intItemId1 IS NOT NULL
 		BEGIN
 			-- {Item} in {Location} is missing a GL account setup for {Account Category} account category.
-			EXEC uspICRaiseError 80008, @strItemNo1, @strLocationName, @ACCOUNT_CATEGORY_OtherChargeExpense;
+			EXEC uspICRaiseError 80008
+				,@strItemNo1
+				,@strLocationName
+				,@ACCOUNT_CATEGORY_OtherChargeExpense;
+
 			RETURN;
 		END
 
@@ -804,12 +832,14 @@ BEGIN
 			AND ISNULL(GLEntriesForOtherCost.ysnInventoryCost, 0) = 0
 			AND ISNULL(GLEntriesForOtherCost.ysnPrice, 0) = 0
 
-		IF EXISTS(SELECT *FROM @GLEntries)
+		IF EXISTS (
+				SELECT *
+				FROM @GLEntries
+				)
 		BEGIN
 			EXEC dbo.uspGLBookEntries @GLEntries
 				,@ysnPost
-		End
-
+		END
 	END
 
 	UPDATE dbo.tblMFWorkOrder
@@ -881,14 +911,18 @@ BEGIN
 		WHERE intRecordId > @intRecordId
 	END
 
-	If ISNULL(@ysnRecap,0)=1
-	Begin
+	IF ISNULL(@ysnRecap, 0) = 1
+	BEGIN
 		--Create Temp Table if not exists, so that insert statement for the temp table will not fail.
 		IF OBJECT_ID('tempdb..#tblRecap') IS NULL
-			Select * into #tblRecap from @GLEntries Where 1=2
+			SELECT *
+			INTO #tblRecap
+			FROM @GLEntries
+			WHERE 1 = 2
 
 		--Insert Recap Data to temp table
-		Insert Into #tblRecap
-		Select * from @GLEntries
-	End
+		INSERT INTO #tblRecap
+		SELECT *
+		FROM @GLEntries
+	END
 END
