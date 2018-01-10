@@ -5981,6 +5981,8 @@
     <Build Include="dbo\Tables\tblSMLogoPreference.sql" />
     <Build Include="dbo\Tables\tblTFTaxAuthorityBeginEndInventory.sql" />
     <Build Include="dbo\Views\vyuTFGetTaxAuthorityBeginEndInventoryDetail.sql" />
+    <Build Include="dbo\Views\vyuARPOSEndOfDayReport.sql" />
+    <Build Include="dbo\Views\vyuARPOSGLSummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
