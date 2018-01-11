@@ -1,6 +1,6 @@
 ﻿CREATE FUNCTION [dbo].[fnARGetItemsForCosting]
 (
-	 @Invoices	[dbo].[InvoicePostingTable] READONLY
+	 @Invoices	[dbo].[InvoicePostingTable] READONLY 
 	,@Post		BIT	= 0
 )
 RETURNS @returntable TABLE
@@ -154,7 +154,7 @@ WHERE
 	AND ARI.[strTransactionType] <> 'Debit Memo'							
 	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)
 	AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)
-	AND NOT(ARI.[intLoadDistributionHeaderId] IS NOT NULL AND ISNULL(ARID.[dblPrice], @ZeroDecimal) = 0)
+	--AND NOT(ARI.[intLoadDistributionHeaderId] IS NOT NULL AND ISNULL(ARID.[dblPrice], @ZeroDecimal) = 0)
 
 UNION ALL
 
@@ -221,7 +221,7 @@ WHERE
 	AND ISNULL(ARIC.[strType],'') NOT IN ('Finished Good','Comment')
 	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)	
 	AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)
-	AND NOT(ARI.[intLoadDistributionHeaderId] IS NOT NULL AND ISNULL(ARID.[dblPrice], @ZeroDecimal) = 0)
+	--AND NOT(ARI.[intLoadDistributionHeaderId] IS NOT NULL AND ISNULL(ARID.[dblPrice], @ZeroDecimal) = 0)
 																												
 	RETURN
 END
