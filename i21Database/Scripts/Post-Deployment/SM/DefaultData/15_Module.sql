@@ -27,6 +27,7 @@
 	IF EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE intModuleId = 15 AND strModule = 'Grain')
 	UPDATE tblSMModule SET strModule = N'Ticket Management' WHERE intModuleId = 15 AND strModule = 'Grain'
 
+	UPDATE tblSMModule SET strModule = N'Multi-Company', strPrefix = 'MC' WHERE strApplicationName = 'i21' AND strModule = 'Company'
 GO
 	SET IDENTITY_INSERT [dbo].[tblSMModule] ON
 
@@ -1189,15 +1190,15 @@ GO
 	       [intSort]						=		114,
 		   [strPrefix]						=		N'DM'
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Company')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Multi-Company')
 	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])
 	SELECT [intModuleId]					=		115,
 		   [strApplicationName]				=		N'i21',
-		   [strModule]						=		N'Company',
+		   [strModule]						=		N'Multi-Company',
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		1,
 	       [intSort]						=		115,
-		   [strPrefix]						=		N'C'
+		   [strPrefix]						=		N'MC'
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Vendor Rebates')
 	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix])

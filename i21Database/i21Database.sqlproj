@@ -6065,6 +6065,7 @@
     <Build Include="dbo\Views\vyuTFGetTaxAuthorityBeginEndInventoryDetail.sql" />
     <Build Include="dbo\Views\vyuARPOSEndOfDayReport.sql" />
     <Build Include="dbo\Views\vyuARPOSGLSummary.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1810_RenameCompanyToMultiCompany.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

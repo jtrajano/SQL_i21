@@ -65,6 +65,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1740_UpdatePurchasingMenus.sql
 :r .\SM\1740_UpdateSalesMenus.sql
 :r .\SM\1740_RemoveLoadScheduleResources.sql
+:r .\SM\1810_RenameCompanyToMultiCompany.sql
 
 -- Canned Report
 :r .\Reports\1_ReportDisableConstraints.sql
