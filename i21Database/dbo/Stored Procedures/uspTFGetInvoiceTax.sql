@@ -40,7 +40,7 @@ BEGIN TRY
 	WHILE EXISTS(SELECT TOP 1 1 FROM @tmpRC)
 	BEGIN
 
-		DECLARE @RCId INT
+		DECLARE @RCId INT = NULL
 
 		SELECT TOP 1 @RCId = intReportingComponentId FROM @tmpRC
 
@@ -429,7 +429,7 @@ BEGIN TRY
 		WHILE EXISTS(SELECT TOP 1 1 FROM @tmpInvoiceDetail) -- LOOP ON INVENTORY RECEIPT ITEM ID/S
 		BEGIN
 
-			DECLARE @InvoiceDetailId NVARCHAR(30), @intDetailTaxCodeId INT
+			DECLARE @InvoiceDetailId NVARCHAR(30) = NULL, @intDetailTaxCodeId INT = NULL
 
 			SELECT TOP 1 @InvoiceDetailId = intInvoiceDetailId, @intDetailTaxCodeId = intTaxCodeId FROM @tmpInvoiceDetail
 
@@ -458,7 +458,7 @@ BEGIN TRY
 			WHILE EXISTS (SELECT TOP 1 1 FROM @tblTaxCriteria) -- LOOP ON TAX CATEGORY
 			BEGIN
 
-				DECLARE @intCriteriaId INT, @strCriteriaTaxCodeId NVARCHAR(10), @strCriteria NVARCHAR(10), @intTaxCategoryId INT, @intTransTaxCategoryId INT
+				DECLARE @intCriteriaId INT = NULL, @strCriteriaTaxCodeId NVARCHAR(10) = NULL, @strCriteria NVARCHAR(10) = NULL, @intTaxCategoryId INT = NULL, @intTransTaxCategoryId INT = NULL
 				
 				SELECT TOP 1 @intCriteriaId = intCriteriaId,  @strCriteriaTaxCodeId = intTaxCodeId, @strCriteria = strCriteria, @intTaxCategoryId = intTaxCategoryId FROM @tblTaxCriteria
 
@@ -488,7 +488,7 @@ BEGIN TRY
 				ELSE
 				BEGIN
 					DECLARE @tblTempInvoiceDetail TABLE (intInvoiceDetailId INT)
-					DECLARE @QueryrInvoiceDetailId NVARCHAR(MAX)
+					DECLARE @QueryrInvoiceDetailId NVARCHAR(MAX) = NULL
 					-- Check if satisfy the tax criteria
 					SET @QueryrInvoiceDetailId =  'SELECT DISTINCT tblARInvoiceDetailTax.intInvoiceDetailId FROM tblARInvoiceDetail' +
 						' INNER JOIN tblARInvoiceDetailTax ON tblARInvoiceDetail.intInvoiceDetailId = tblARInvoiceDetailTax.intInvoiceDetailId' +
@@ -505,6 +505,9 @@ BEGIN TRY
 						DELETE FROM @tmpInvoiceTransaction WHERE intInvoiceDetailId = @InvoiceDetailId								 
 						BREAK
 					END
+
+					DELETE FROM @tblTempInvoiceDetail
+
 				END
 
 				DELETE FROM @tblTaxCriteria WHERE intCriteriaId = @intCriteriaId

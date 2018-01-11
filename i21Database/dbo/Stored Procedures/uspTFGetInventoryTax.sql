@@ -20,9 +20,8 @@ DECLARE @ErrorState INT
 
 BEGIN TRY
 
-	DECLARE @RCId INT
-		, @CompanyName NVARCHAR(250)
-		, @CompanyEIN NVARCHAR(100)
+	DECLARE @CompanyName NVARCHAR(250) = NULL
+		, @CompanyEIN NVARCHAR(100) = NULL
 
 	-- USER DEFINED TABLES
 	DECLARE @TFTransaction TFTransaction
@@ -48,6 +47,9 @@ BEGIN TRY
 
 	WHILE EXISTS(SELECT TOP 1 1 FROM @tmpRC)
 	BEGIN
+
+		DECLARE @RCId INT = NULL
+
 		SELECT TOP 1 @RCId = intReportingComponentId FROM @tmpRC
 
 		-- GET RECORDS WITH TAX CRITERIA
@@ -395,7 +397,7 @@ BEGIN TRY
 		WHILE EXISTS(SELECT TOP 1 1 FROM @tmpInventoryReceiptDetail) -- LOOP ON INVENTORY RECEIPT ITEM ID/S
 		BEGIN
 
-			DECLARE @InventoryReceiptItemId NVARCHAR(30), @intDetailTaxCodeId INT
+			DECLARE @InventoryReceiptItemId NVARCHAR(30) = NULL, @intDetailTaxCodeId INT = NULL
 
 			SELECT TOP 1 @InventoryReceiptItemId = intInventoryReceiptItemId, @intDetailTaxCodeId = intTaxCodeId FROM @tmpInventoryReceiptDetail
 
@@ -422,7 +424,7 @@ BEGIN TRY
 			WHILE EXISTS (SELECT TOP 1 1 FROM @tblTaxCriteria) -- LOOP ON TAX CATEGORY
 			BEGIN
 
-				DECLARE @intCriteriaId INT, @strCriteriaTaxCodeId NVARCHAR(10), @strCriteria NVARCHAR(10), @intTaxCategoryId INT, @intTransTaxCategoryId INT
+				DECLARE @intCriteriaId INT = NULL, @strCriteriaTaxCodeId NVARCHAR(10) = NULL, @strCriteria NVARCHAR(10) = NULL, @intTaxCategoryId INT = NULL, @intTransTaxCategoryId INT = NULL
 
 				SELECT TOP 1 @intCriteriaId = intCriteriaId,  @strCriteriaTaxCodeId = intTaxCodeId, @strCriteria = strCriteria, @intTaxCategoryId = intTaxCategoryId FROM @tblTaxCriteria
 				
@@ -452,7 +454,7 @@ BEGIN TRY
 				ELSE
 				BEGIN
 					DECLARE @tblTempInventoryReceiptDetail TABLE (intInventoryReceiptItemId INT)
-					DECLARE @QueryrReceiptItem NVARCHAR(MAX)
+					DECLARE @QueryrReceiptItem NVARCHAR(MAX) = NULL
 					-- Check if satisfy the tax criteria
 					SET @QueryrReceiptItem = 'SELECT DISTINCT tblICInventoryReceiptItemTax.intInventoryReceiptItemId FROM tblICInventoryReceiptItem' 
 							+ ' INNER JOIN tblICInventoryReceiptItemTax ON tblICInventoryReceiptItem.intInventoryReceiptItemId = tblICInventoryReceiptItemTax.intInventoryReceiptItemId'
@@ -468,6 +470,9 @@ BEGIN TRY
 						DELETE FROM @TFTransaction WHERE intInventoryReceiptItemId = @InventoryReceiptItemId								 
 						BREAK
 					END
+
+					DELETE FROM @tblTempInventoryReceiptDetail
+
 				END
 
 				DELETE FROM @tblTaxCriteria WHERE intCriteriaId = @intCriteriaId
