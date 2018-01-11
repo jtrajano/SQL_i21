@@ -191,6 +191,8 @@ END
 		,intShipFromId
 		,intSourceType
 		,intTaxGroupId
+		,intItemId
+		,dblQty
 
 	SELECT TOP 1 @intFreightItemId = intItemForFreightId FROM tblTRCompanyPreference
 	SELECT TOP 1 @intSurchargeItemId = intItemId FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId
