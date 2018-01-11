@@ -38,7 +38,7 @@ BEGIN
 					 [ysnDefaultLocation])
 			SELECT 			
 					ENT.intEntityId, 
-					(RTRIM (galsh_name)),
+					(RTRIM (galsh_ship_to))+'_'+(RTRIM (galsh_name)),
 					ISNULL(galsh_addr,'''') + CHAR(10) + ISNULL(galsh_addr2,''''),
 					LTRIM(RTRIM(galsh_city)),
 					ENT.intDefaultCountryId,
