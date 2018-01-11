@@ -54,7 +54,7 @@ SET ANSI_WARNINGS OFF
 	SAVE TRAN @TransactionName;
 
 	-----====== Begin - Build Patronage Staging Table ======-----
-	IF(@type = 1) -- PURCHASE / DIRECT IN
+	IF(@type = 1) -- PURCHASE 
 	BEGIN
 			INSERT INTO @patronageVolumeStaging
 			SELECT	ABD.intBillDetailId,
@@ -84,40 +84,6 @@ SET ANSI_WARNINGS OFF
 			CROSS APPLY tblGLFiscalYear FY
 			WHERE AB.intBillId IN (SELECT [intID] FROM @tempTransactionIds) AND AB.dtmDate BETWEEN FY.dtmDateFrom AND FY.dtmDateTo
 			AND IC.intPatronageCategoryId IS NOT NULL
-			UNION 
-			SELECT	ABD.intBillDetailId,
-					AB.intBillId,
-					dtmDate = DATEADD(dd, DATEDIFF(dd, 0, AB.dtmDate), 0),
-					FY.intFiscalYearId,
-					intCustomerPatronId = AB.intEntityVendorId,
-					IC.intItemId,
-					IC.intPatronageCategoryDirectId, 
-					PC.strPurchaseSale,
-					PC.strUnitAmount,
-					ABD.dblQtyReceived,
-					ABD.dblCost,
-					UOM.dblUnitQty,
-					ysnDirectCategory = 1
-			FROM tblAPBill AB
-			INNER JOIN tblAPBillDetail ABD
-				ON ABD.intBillId = AB.intBillId
-			INNER JOIN tblICInventoryReceiptItem IRItem
-				ON IRItem.intInventoryReceiptItemId = ABD.intInventoryReceiptItemId 
-			INNER JOIN tblICInventoryReceipt IR
-				ON IR.intInventoryReceiptId = IRItem.intInventoryReceiptId AND IR.intSourceType = 1
-			INNER JOIN tblSCTicket SC
-				ON SC.intTicketId = IRItem.intSourceId AND SC.intTicketTypeId = 8
-			INNER JOIN tblARCustomer ARC
-				ON ARC.intEntityId = AB.intEntityVendorId AND ARC.strStockStatus != ''
-			INNER JOIN tblICItem IC
-				ON IC.intItemId = ABD.intItemId
-			INNER JOIN tblICItemUOM UOM
-				ON UOM.intItemUOMId = ABD.intUnitOfMeasureId AND UOM.intItemId = IC.intItemId
-			INNER JOIN tblPATPatronageCategory PC
-				ON PC.intPatronageCategoryId = IC.intPatronageCategoryDirectId AND PC.strPurchaseSale = @TYPE_PURCHASE
-			CROSS APPLY tblGLFiscalYear FY
-			WHERE AB.intBillId IN (SELECT [intID] FROM @tempTransactionIds) AND AB.dtmDate BETWEEN FY.dtmDateFrom AND FY.dtmDateTo
-			AND IC.intPatronageCategoryDirectId IS NOT NULL
 	END
 	ELSE IF(@type = 2) -- SALE / DIRECT OUT
 	BEGIN

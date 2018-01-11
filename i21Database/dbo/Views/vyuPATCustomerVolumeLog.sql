@@ -16,8 +16,8 @@ FROM (
 		CVL.intInvoiceId,
 		CVL.ysnDirectSale,
 		CVL.ysnIsUnposted,
-		strCategorySource = CASE WHEN CVL.intBillId IS NOT NULL THEN (CASE WHEN CVL.ysnDirectSale = 1 THEN 'Direct In' ELSE 'Purchase' END)
-							ELSE (CASE WHEN CVL.ysnDirectSale = 1 THEN 'Direct Out' ELSE 'Sale' END) END,
+		strCategorySource = CASE WHEN CVL.intBillId IS NOT NULL THEN 'Purchase' 
+							ELSE (CASE WHEN CVL.ysnDirectSale = 1 THEN 'Direct' ELSE 'Sale' END) END,
 		strTransactionNo = CASE WHEN CVL.intBillId IS NOT NULL THEN APB.strBillId ELSE ARI.strInvoiceNumber END,
 		dtmTransactionDate = CASE WHEN CVL.intBillId IS NOT NULL THEN APB.dtmDate ELSE ARI.dtmDate END,
 		CVL.dblVolume
