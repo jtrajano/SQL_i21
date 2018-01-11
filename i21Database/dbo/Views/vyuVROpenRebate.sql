@@ -34,6 +34,7 @@ AS
 		,B.intConcurrencyId 
 		,I.intProgramId
 		,strRebateBy = ISNULL(M.strRebateBy,N.strRebateBy)
+		,P.strLocationName
 	FROM tblARInvoiceDetail B
 	INNER JOIN tblARInvoice A
 		ON A.intInvoiceId = B.intInvoiceId
@@ -70,6 +71,8 @@ AS
 			AND A.dtmDate <= ISNULL(M.dtmEndDate,'12/31/9999')
 	INNER JOIN tblAPVendor K 
 		ON J.intEntityId = K.intEntityId
+	INNER JOIN tblSMCompanyLocation P
+		ON A.intCompanyLocationId = P.intCompanyLocationId
 	WHERE (ISNULL(N.dblRebateRate,0) <> 0 OR ISNULL(M.dblRebateRate,0) <>0)
 		AND NOT EXISTS(SELECT TOP 1 1 FROM tblVRRebate WHERE intInvoiceDetailId = B.intInvoiceDetailId)
 		AND A.ysnPosted = 1) A

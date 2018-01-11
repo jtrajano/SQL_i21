@@ -23,6 +23,7 @@
 			,O.strSubmitted
 			,O.intProgramId
 			,O.ysnExported
+			,M.strLocationName
 		FROM tblVRRebate O
 		INNER JOIN tblARInvoiceDetail B
 			ON B.intInvoiceDetailId = O.intInvoiceDetailId
@@ -49,5 +50,7 @@
 		INNER JOIN tblVRCustomerXref L
 			ON J.intVendorSetupId = L.intVendorSetupId
 				AND A.intEntityCustomerId = L.intEntityId
+		INNER JOIN tblSMCompanyLocation M
+			ON A.intCompanyLocationId = M.intCompanyLocationId
 	GO
 
