@@ -976,6 +976,7 @@ Ext.define('Inventory.view.Category', {
                                                                     flex: 1
                                                                 }
                                                             ],
+                                                            lookUpField: true,
                                                             itemId: 'cboVendorId',
                                                             displayField: 'strVendorId',
                                                             valueField: 'strVendorId'
@@ -1051,6 +1052,7 @@ Ext.define('Inventory.view.Category', {
                                                                     flex: 1
                                                                 }
                                                             ],
+                                                            lookUpField: true,
                                                             itemId: 'cboVendorFamily',
                                                             displayField: 'strSubcategoryId',
                                                             valueField: 'strSubcategoryId'
@@ -1082,6 +1084,7 @@ Ext.define('Inventory.view.Category', {
                                                                     flex: 1
                                                                 }
                                                             ],
+                                                            lookUpField: true,
                                                             itemId: 'cboVendorSellClass',
                                                             displayField: 'strSubcategoryId',
                                                             valueField: 'strSubcategoryId'
@@ -1114,6 +1117,7 @@ Ext.define('Inventory.view.Category', {
                                                                     flex: 1
                                                                 }
                                                             ],
+                                                            lookUpField: true,
                                                             itemId: 'cboVendorOrderClass',
                                                             displayField: 'strSubcategoryId',
                                                             valueField: 'strSubcategoryId'

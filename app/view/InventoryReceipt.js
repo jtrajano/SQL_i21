@@ -1114,6 +1114,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                             hidden: true
                                                                                         }
                                                                                     ],
+                                                                                    lookUpField: true,
                                                                                     itemId: 'cboItem',
                                                                                     displayField: 'strItemNo',
                                                                                     valueField: 'strItemNo'
@@ -1915,6 +1916,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                             flex: 1
                                                                                         }
                                                                                     ],
+                                                                                    lookUpField: true,
                                                                                     itemId: 'cboLot',
                                                                                     displayField: 'strLotNumber',
                                                                                     valueField: 'strLotNumber'
@@ -1948,6 +1950,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                             hidden: true
                                                                                         }
                                                                                     ],
+                                                                                    lookUpField: true,
                                                                                     itemId: 'cboLotParent',
                                                                                     displayField: 'strParentLotNumber',
                                                                                     selectOnTab: false,
@@ -2700,6 +2703,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     flex: 1
                                                                                 }
                                                                             ],
+                                                                            lookUpField: true,
                                                                             itemId: 'cboOtherCharge',
                                                                             displayField: 'strItemNo',
                                                                             valueField: 'strItemNo'
@@ -2975,6 +2979,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     hidden: true
                                                                                 }
                                                                             ],
+                                                                            lookUpField: true,
                                                                             itemId: 'cboCostVendor',
                                                                             displayField: 'strName',
                                                                             selectOnTab: false,

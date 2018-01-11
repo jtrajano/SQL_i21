@@ -654,6 +654,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                     hidden: true
                                                                 }
                                                             ],
+                                                            lookUpField: true,
                                                             itemId: 'cboItem',
                                                             displayField: 'strItemNo',
                                                             valueField: 'strItemNo'
@@ -995,6 +996,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                     hidden: true
                                                                 }
                                                             ],
+                                                            lookUpField: true,
                                                             itemId: 'cboLot',
                                                             displayField: 'strLotNumber',
                                                             valueField: 'strLotNumber'
@@ -1163,8 +1165,8 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        dataIndex: 'strGrossNetUOM',
                                                         itemId: 'colNetUOM',
+                                                        dataIndex: 'strGrossNetUOM',
                                                         text: 'Gross/Net UOM'
                                                     },
                                                     {

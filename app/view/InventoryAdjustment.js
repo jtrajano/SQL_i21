@@ -374,6 +374,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     hidden: true
                                                                 }
                                                             ],
+                                                            lookUpField: true,
                                                             itemId: 'cboItemNo',
                                                             displayField: 'strItemNo',
                                                             valueField: 'strItemNo'
@@ -627,6 +628,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     hidden: true
                                                                 }
                                                             ],
+                                                            lookUpField: true,
                                                             itemId: 'cboLotNumber',
                                                             displayField: 'strLotNumber',
                                                             valueField: 'strLotNumber'
@@ -1234,6 +1236,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     flex: 1
                                                                 }
                                                             ],
+                                                            lookUpField: true,
                                                             itemId: 'cboNewOwner',
                                                             displayField: 'strName',
                                                             valueField: 'strName'

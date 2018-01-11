@@ -174,6 +174,7 @@ Ext.define('Inventory.view.InventoryCountDetails', {
                                                     hidden: true
                                                 }
                                             ],
+                                            lookUpField: true,
                                             reference: 'cboItem',
                                             itemId: 'cboItem',
                                             modelValidation: true,
@@ -369,6 +370,7 @@ Ext.define('Inventory.view.InventoryCountDetails', {
                                                     hidden: true
                                                 }
                                             ],
+                                            lookUpField: true,
                                             reference: 'cboLotId',
                                             itemId: 'cboLotNo',
                                             modelValidation: true,
@@ -403,6 +405,7 @@ Ext.define('Inventory.view.InventoryCountDetails', {
                                                     hidden: true
                                                 }
                                             ],
+                                            lookUpField: true,
                                             itemId: 'cboParentLotNo',
                                             modelValidation: true,
                                             fieldLabel: 'Parent Lot Id',

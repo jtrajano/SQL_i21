@@ -1178,6 +1178,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                     hidden: true
                                                                                 }
                                                                             ],
+                                                                            lookUpField: true,
                                                                             itemId: 'cboItemNo',
                                                                             displayField: 'strItemNo',
                                                                             valueField: 'strItemNo'
@@ -1834,6 +1835,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                     hidden: true
                                                                                 }
                                                                             ],
+                                                                            lookUpField: true,
                                                                             itemId: 'cboLot',
                                                                             displayField: 'strLotNumber',
                                                                             valueField: 'strLotNumber'
@@ -2063,6 +2065,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                     flex: 1
                                                                 }
                                                             ],
+                                                            lookUpField: true,
                                                             itemId: 'cboOtherCharge',
                                                             displayField: 'strItemNo',
                                                             valueField: 'strItemNo'
@@ -2283,6 +2286,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                     flex: 1
                                                                 }
                                                             ],
+                                                            lookUpField: true,
                                                             itemId: 'cboCostVendor',
                                                             displayField: 'strName',
                                                             valueField: 'strName'

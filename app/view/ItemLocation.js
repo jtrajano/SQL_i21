@@ -510,6 +510,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                                                                 }
                                                                                             ],
                                                                                             enableDrillDown: true,
+                                                                                            lookUpField: true,
                                                                                             itemId: 'cboFamily',
                                                                                             fieldLabel: 'Family',
                                                                                             labelWidth: 105,
@@ -538,6 +539,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                                                                 }
                                                                                             ],
                                                                                             enableDrillDown: true,
+                                                                                            lookUpField: true,
                                                                                             itemId: 'cboClass',
                                                                                             fieldLabel: 'Class',
                                                                                             labelWidth: 105,
@@ -573,6 +575,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                                                                 }
                                                                                             ],
                                                                                             enableDrillDown: true,
+                                                                                            lookUpField: true,
                                                                                             itemId: 'cboProductCode',
                                                                                             fieldLabel: 'Product Code',
                                                                                             labelWidth: 105,
@@ -667,6 +670,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                                                                 }
                                                                                             ],
                                                                                             enableDrillDown: true,
+                                                                                            lookUpField: true,
                                                                                             itemId: 'cboMixMatchCode',
                                                                                             fieldLabel: 'Promotion Item',
                                                                                             labelWidth: 105,
@@ -700,6 +704,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                                                                     flex: 1
                                                                                                 }
                                                                                             ],
+                                                                                            lookUpField: true,
                                                                                             itemId: 'cboDepositPLU',
                                                                                             fieldLabel: 'Deposit PLU',
                                                                                             labelWidth: 105,

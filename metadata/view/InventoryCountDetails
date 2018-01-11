@@ -315,6 +315,7 @@
                                                 "displayField": "strItemNo",
                                                 "fieldLabel": "Item No",
                                                 "itemId": "cboItem",
+                                                "lookUpField": true,
                                                 "modelValidation": true,
                                                 "reference": "cboItem",
                                                 "tabIndex": 0,
@@ -329,7 +330,8 @@
                                                 "reference": "string",
                                                 "valueField": "datafield",
                                                 "modelValidation": "boolean",
-                                                "tabIndex": "number"
+                                                "tabIndex": "number",
+                                                "lookUpField": "boolean"
                                             },
                                             "name": "MyComboBox3",
                                             "designerId": "a8c9fda6-4bf7-44b7-ab0a-23cad6b50198",
@@ -337,6 +339,11 @@
                                                 {
                                                     "group": "(Custom Properties)",
                                                     "name": "columns",
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "lookUpField",
                                                     "type": "string"
                                                 }
                                             ]
@@ -656,6 +663,7 @@
                                                 "displayField": "strLotNumber",
                                                 "fieldLabel": "Lot Id",
                                                 "itemId": "cboLotNo",
+                                                "lookUpField": true,
                                                 "modelValidation": true,
                                                 "reference": "cboLotId",
                                                 "valueField": "strLotNumber"
@@ -668,7 +676,8 @@
                                                 "itemId": "string",
                                                 "valueField": "datafield",
                                                 "modelValidation": "boolean",
-                                                "reference": "string"
+                                                "reference": "string",
+                                                "lookUpField": "boolean"
                                             },
                                             "name": "MyComboBox7",
                                             "designerId": "912f7e94-a09b-4d7e-b4f6-27fd5cf84685",
@@ -676,6 +685,11 @@
                                                 {
                                                     "group": "(Custom Properties)",
                                                     "name": "columns",
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "lookUpField",
                                                     "type": "string"
                                                 }
                                             ]
@@ -733,6 +747,7 @@
                                                 "displayField": "strParentLotNumber",
                                                 "fieldLabel": "Parent Lot Id",
                                                 "itemId": "cboParentLotNo",
+                                                "lookUpField": true,
                                                 "modelValidation": true,
                                                 "valueField": "strParentLotNumber"
                                             },
@@ -743,7 +758,8 @@
                                                 "fieldLabel": "string",
                                                 "itemId": "string",
                                                 "valueField": "datafield",
-                                                "modelValidation": "boolean"
+                                                "modelValidation": "boolean",
+                                                "lookUpField": "boolean"
                                             },
                                             "name": "MyComboBox93",
                                             "designerId": "7e9a9ce1-baea-43f9-a684-23a86ef132af",
@@ -751,6 +767,11 @@
                                                 {
                                                     "group": "(Custom Properties)",
                                                     "name": "columns",
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "lookUpField",
                                                     "type": "string"
                                                 }
                                             ]

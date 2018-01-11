@@ -1250,6 +1250,7 @@
                                                                                                 "itemId": "cboFamily",
                                                                                                 "labelWidth": 105,
                                                                                                 "layout|flex": null,
+                                                                                                "lookUpField": true,
                                                                                                 "valueField": "strFamily"
                                                                                             },
                                                                                             "configAlternates": {
@@ -1262,7 +1263,8 @@
                                                                                                 "labelWidth": "number",
                                                                                                 "layout|flex": "number",
                                                                                                 "valueField": "datafield",
-                                                                                                "scrollable": "boolean"
+                                                                                                "scrollable": "boolean",
+                                                                                                "lookUpField": "boolean"
                                                                                             },
                                                                                             "name": "MyComboBox30",
                                                                                             "designerId": "8169c3d4-f9d8-4f4d-9107-8e1d4ba22ac0",
@@ -1275,6 +1277,11 @@
                                                                                                 {
                                                                                                     "group": "(Custom Properties)",
                                                                                                     "name": "enableDrillDown",
+                                                                                                    "type": "string"
+                                                                                                },
+                                                                                                {
+                                                                                                    "group": "(Custom Properties)",
+                                                                                                    "name": "lookUpField",
                                                                                                     "type": "string"
                                                                                                 }
                                                                                             ]
@@ -1315,6 +1322,7 @@
                                                                                                 "itemId": "cboClass",
                                                                                                 "labelWidth": 105,
                                                                                                 "layout|flex": null,
+                                                                                                "lookUpField": true,
                                                                                                 "valueField": "strSubcategoryId"
                                                                                             },
                                                                                             "configAlternates": {
@@ -1327,7 +1335,8 @@
                                                                                                 "labelWidth": "number",
                                                                                                 "layout|flex": "number",
                                                                                                 "valueField": "datafield",
-                                                                                                "scrollable": "boolean"
+                                                                                                "scrollable": "boolean",
+                                                                                                "lookUpField": "boolean"
                                                                                             },
                                                                                             "name": "MyComboBox31",
                                                                                             "designerId": "393f1fb5-8d3a-44a9-9ae3-f43280c30685",
@@ -1340,6 +1349,11 @@
                                                                                                 {
                                                                                                     "group": "(Custom Properties)",
                                                                                                     "name": "enableDrillDown",
+                                                                                                    "type": "string"
+                                                                                                },
+                                                                                                {
+                                                                                                    "group": "(Custom Properties)",
+                                                                                                    "name": "lookUpField",
                                                                                                     "type": "string"
                                                                                                 }
                                                                                             ]
@@ -1387,6 +1401,7 @@
                                                                                                 "itemId": "cboProductCode",
                                                                                                 "labelWidth": 105,
                                                                                                 "layout|flex": null,
+                                                                                                "lookUpField": true,
                                                                                                 "valueField": "strProductCode"
                                                                                             },
                                                                                             "configAlternates": {
@@ -1399,7 +1414,8 @@
                                                                                                 "labelWidth": "number",
                                                                                                 "layout|flex": "number",
                                                                                                 "valueField": "datafield",
-                                                                                                "scrollable": "boolean"
+                                                                                                "scrollable": "boolean",
+                                                                                                "lookUpField": "boolean"
                                                                                             },
                                                                                             "name": "MyComboBox14",
                                                                                             "designerId": "4a795ebf-71b9-471a-a2e3-1f837376b0e8",
@@ -1412,6 +1428,11 @@
                                                                                                 {
                                                                                                     "group": "(Custom Properties)",
                                                                                                     "name": "enableDrillDown",
+                                                                                                    "type": "string"
+                                                                                                },
+                                                                                                {
+                                                                                                    "group": "(Custom Properties)",
+                                                                                                    "name": "lookUpField",
                                                                                                     "type": "string"
                                                                                                 }
                                                                                             ]
@@ -1682,6 +1703,7 @@
                                                                                                 "itemId": "cboMixMatchCode",
                                                                                                 "labelWidth": 105,
                                                                                                 "layout|flex": null,
+                                                                                                "lookUpField": true,
                                                                                                 "valueField": "intPromoSalesListId"
                                                                                             },
                                                                                             "configAlternates": {
@@ -1694,7 +1716,8 @@
                                                                                                 "labelWidth": "number",
                                                                                                 "layout|flex": "number",
                                                                                                 "valueField": "datafield",
-                                                                                                "scrollable": "boolean"
+                                                                                                "scrollable": "boolean",
+                                                                                                "lookUpField": "boolean"
                                                                                             },
                                                                                             "name": "MyComboBox32",
                                                                                             "designerId": "ce5881d7-5d7d-4fd1-84a0-4f8fc5fb2a8c",
@@ -1707,6 +1730,11 @@
                                                                                                 {
                                                                                                     "group": "(Custom Properties)",
                                                                                                     "name": "enableDrillDown",
+                                                                                                    "type": "string"
+                                                                                                },
+                                                                                                {
+                                                                                                    "group": "(Custom Properties)",
+                                                                                                    "name": "lookUpField",
                                                                                                     "type": "string"
                                                                                                 }
                                                                                             ]
@@ -1771,6 +1799,7 @@
                                                                                                 "itemId": "cboDepositPLU",
                                                                                                 "labelWidth": 105,
                                                                                                 "layout|flex": null,
+                                                                                                "lookUpField": true,
                                                                                                 "valueField": "intItemUOMId"
                                                                                             },
                                                                                             "configAlternates": {
@@ -1783,7 +1812,8 @@
                                                                                                 "labelWidth": "number",
                                                                                                 "layout|flex": "number",
                                                                                                 "valueField": "datafield",
-                                                                                                "scrollable": "boolean"
+                                                                                                "scrollable": "boolean",
+                                                                                                "lookUpField": "boolean"
                                                                                             },
                                                                                             "name": "MyComboBox72",
                                                                                             "designerId": "29a655fa-c929-4d95-be6e-035c07f4ab81",
@@ -1791,6 +1821,11 @@
                                                                                                 {
                                                                                                     "group": "(Custom Properties)",
                                                                                                     "name": "columns",
+                                                                                                    "type": "string"
+                                                                                                },
+                                                                                                {
+                                                                                                    "group": "(Custom Properties)",
+                                                                                                    "name": "lookUpField",
                                                                                                     "type": "string"
                                                                                                 }
                                                                                             ]

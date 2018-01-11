@@ -1126,6 +1126,7 @@
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strItemNo",
                                                         "itemId": "cboItemNo",
+                                                        "lookUpField": true,
                                                         "valueField": "strItemNo"
                                                     },
                                                     "configAlternates": {
@@ -1134,7 +1135,8 @@
                                                         "displayField": "datafield",
                                                         "itemId": "string",
                                                         "valueField": "datafield",
-                                                        "scrollable": "boolean"
+                                                        "scrollable": "boolean",
+                                                        "lookUpField": "boolean"
                                                     },
                                                     "name": "MyComboBox75",
                                                     "designerId": "a96629b5-7dbd-4ff9-b7b6-2281b14d734c",
@@ -1142,6 +1144,11 @@
                                                         {
                                                             "group": "(Custom Properties)",
                                                             "name": "columns",
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "lookUpField",
                                                             "type": "string"
                                                         }
                                                     ]
@@ -1558,6 +1565,7 @@
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strLotNumber",
                                                         "itemId": "cboLotNumber",
+                                                        "lookUpField": true,
                                                         "valueField": "strLotNumber",
                                                         "width": null
                                                     },
@@ -1568,7 +1576,8 @@
                                                         "itemId": "string",
                                                         "valueField": "datafield",
                                                         "width": "auto",
-                                                        "scrollable": "boolean"
+                                                        "scrollable": "boolean",
+                                                        "lookUpField": "boolean"
                                                     },
                                                     "name": "MyComboBox78",
                                                     "designerId": "628337ce-74f7-4e6f-a48b-4cc5ff714f02",
@@ -1576,6 +1585,11 @@
                                                         {
                                                             "group": "(Custom Properties)",
                                                             "name": "columns",
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "lookUpField",
                                                             "type": "string"
                                                         }
                                                     ]
@@ -3118,6 +3132,7 @@
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strName",
                                                         "itemId": "cboNewOwner",
+                                                        "lookUpField": true,
                                                         "valueField": "strName"
                                                     },
                                                     "configAlternates": {
@@ -3126,7 +3141,8 @@
                                                         "displayField": "datafield",
                                                         "itemId": "string",
                                                         "valueField": "datafield",
-                                                        "scrollable": "boolean"
+                                                        "scrollable": "boolean",
+                                                        "lookUpField": "boolean"
                                                     },
                                                     "name": "MyComboBox82",
                                                     "designerId": "ac71d926-a504-4c86-9394-ecbf90992d2e",
@@ -3134,6 +3150,11 @@
                                                         {
                                                             "group": "(Custom Properties)",
                                                             "name": "columns",
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "lookUpField",
                                                             "type": "string"
                                                         }
                                                     ]

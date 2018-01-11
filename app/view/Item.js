@@ -389,6 +389,7 @@ Ext.define('Inventory.view.Item', {
                                                                     }
                                                                 ],
                                                                 enableDrillDown: 'true',
+                                                                lookUpField: true,
                                                                 itemId: 'cboBrand',
                                                                 fieldLabel: 'Brand',
                                                                 displayField: 'strBrandCode',
@@ -424,6 +425,7 @@ Ext.define('Inventory.view.Item', {
                                                                     }
                                                                 ],
                                                                 enableDrillDown: 'true',
+                                                                lookUpField: true,
                                                                 itemId: 'cboManufacturer',
                                                                 fieldLabel: 'Manufacturer',
                                                                 displayField: 'strManufacturer',
@@ -2146,7 +2148,8 @@ Ext.define('Inventory.view.Item', {
                                                                                                 labelWidth: 125
                                                                                             },
                                                                                             {
-                                                                                                xtype: 'combobox',
+                                                                                                xtype: 'gridcombobox',
+                                                                                                lookUpField: true,
                                                                                                 disabled: true,
                                                                                                 itemId: 'cboAssociatedRecipe',
                                                                                                 fieldLabel: 'Associated Recipe',
@@ -2676,6 +2679,7 @@ Ext.define('Inventory.view.Item', {
                                                                                                 flex: 1
                                                                                             }
                                                                                         ],
+                                                                                        lookUpField: true,
                                                                                         itemId: 'txtOwner',
                                                                                         fieldLabel: 'Owner',
                                                                                         labelWidth: 125,
@@ -2704,6 +2708,7 @@ Ext.define('Inventory.view.Item', {
                                                                                                 flex: 1
                                                                                             }
                                                                                         ],
+                                                                                        lookUpField: true,
                                                                                         itemId: 'txtCustomer',
                                                                                         fieldLabel: 'Customer',
                                                                                         labelWidth: 125,
@@ -3510,6 +3515,7 @@ Ext.define('Inventory.view.Item', {
                                                                                     flex: 1
                                                                                 }
                                                                             ],
+                                                                            lookUpField: true,
                                                                             itemId: 'cboCustXrefCustomer',
                                                                             displayField: 'strCustomerNumber',
                                                                             valueField: 'strCustomerNumber'
@@ -3667,6 +3673,7 @@ Ext.define('Inventory.view.Item', {
                                                                                     flex: 1
                                                                                 }
                                                                             ],
+                                                                            lookUpField: true,
                                                                             itemId: 'cboVendorXrefVendor',
                                                                             displayField: 'strVendorId',
                                                                             valueField: 'strVendorId'
@@ -4093,6 +4100,7 @@ Ext.define('Inventory.view.Item', {
                                                                                     flex: 1
                                                                                 }
                                                                             ],
+                                                                            lookUpField: true,
                                                                             itemId: 'cboProductCode',
                                                                             displayField: 'strProductCode',
                                                                             valueField: 'strProductCode'
@@ -6064,6 +6072,7 @@ Ext.define('Inventory.view.Item', {
                                                                     flex: 1
                                                                 }
                                                             ],
+                                                            lookUpField: true,
                                                             itemId: 'cboBundleItem',
                                                             displayField: 'strItemNo',
                                                             valueField: 'strItemNo'
@@ -6762,6 +6771,7 @@ Ext.define('Inventory.view.Item', {
                                                                                     flex: 1
                                                                                 }
                                                                             ],
+                                                                            lookUpField: true,
                                                                             itemId: 'cboOwner',
                                                                             displayField: 'strCustomerNumber',
                                                                             valueField: 'strCustomerNumber'
