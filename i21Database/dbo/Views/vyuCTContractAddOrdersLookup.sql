@@ -41,7 +41,7 @@ SELECT	  CD.intContractDetailId
 		, RT.strCurrencyExchangeRateType
 		, CD.dblRate
 		, ysnBundleItem = CAST(CASE WHEN Item.strType = 'Bundle' THEN 1 ELSE 0 END AS BIT) 
-		, Item.ysnIsBasket
+		, Item.strBundleType
 		, CL.strLocationName
 		, CH.strEntityNumber
 		, dblItemUOMCF = ISNULL(IU.dblUnitQty, 0)

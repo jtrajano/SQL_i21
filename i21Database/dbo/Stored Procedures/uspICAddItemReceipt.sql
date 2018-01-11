@@ -53,7 +53,7 @@ SET @intItemId = NULL
 SELECT TOP 1 @intItemId = i.intItemId
 FROM @ReceiptEntries r
 	INNER JOIN tblICItem i ON i.intItemId = r.intItemId
-WHERE i.ysnIsBasket = 1
+WHERE i.strBundleType = 'Basket'
 
 IF @intItemId IS NOT NULL
 BEGIN

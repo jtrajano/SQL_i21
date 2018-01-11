@@ -49,7 +49,7 @@ SELECT
 	, strClass 				= Class.strDescription
 	, strProductLine 		= ProductLine.strDescription
 	, ysnUseWeighScales		= Item.ysnUseWeighScales
-	, ysnIsBasket			= Item.ysnIsBasket
+	, strBundleType			= Item.strBundleType
 	, strDimensionUOM		= mfgDimensionUOM.strUnitMeasure
 	, strWeightUOM			= mfgWeightUOM.strUnitMeasure
 	, strSecondaryStatus    = LotStatus.strSecondaryStatus
