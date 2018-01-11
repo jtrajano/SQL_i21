@@ -23,6 +23,8 @@
 			,O.strSubmitted
 			,O.intProgramId
 			,O.ysnExported
+			,J.intVendorSetupId
+			,A.intInvoiceId
 		FROM tblVRRebate O
 		INNER JOIN tblARInvoiceDetail B
 			ON B.intInvoiceDetailId = O.intInvoiceDetailId

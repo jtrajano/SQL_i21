@@ -25,6 +25,8 @@ AS
 		,B.intInvoiceDetailId
 		,B.intConcurrencyId 
 		,I.intProgramId
+		,J.intVendorSetupId 
+		,A.intInvoiceId
 	FROM tblARInvoiceDetail B
 	INNER JOIN tblARInvoice A
 		ON A.intInvoiceId = B.intInvoiceId
