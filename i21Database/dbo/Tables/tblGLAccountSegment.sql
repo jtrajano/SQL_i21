@@ -2,6 +2,7 @@
     [intAccountSegmentId]   INT            IDENTITY (1, 1) NOT NULL,
     [strCode]               NVARCHAR (20)  COLLATE Latin1_General_CI_AS NOT NULL,
     [strDescription]        NVARCHAR (255) COLLATE Latin1_General_CI_AS NULL,
+	[strChartDesc]          NVARCHAR (255) COLLATE Latin1_General_CI_AS NULL,
     [intAccountStructureId] INT            NOT NULL,
     [intAccountGroupId]     INT            NULL,
     [ysnActive]             BIT            CONSTRAINT [DF_tblGLAccountSegment_ysnActive] DEFAULT ((1)) NULL,

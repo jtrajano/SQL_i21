@@ -6,13 +6,15 @@ SELECT
 	C.strAccountCategory, 
 	S.intAccountCategoryId, 
 	S.strDescription, 
+	S.strChartDesc, 
 	G.strAccountType, 
 	S.intAccountStructureId,
     G.intAccountGroupId,
     G.strAccountGroup,
 	U.intStructureType,
 	U.strStructureName,
-	ISNULL(Mapping.c,0)  ysnUsed
+	ISNULL(Mapping.c,0)  ysnUsed,
+	S.intConcurrencyId
 FROM            
 	dbo.tblGLAccountSegment AS S LEFT OUTER JOIN
 	dbo.tblGLAccountGroup AS G ON S.intAccountGroupId = G.intAccountGroupId LEFT OUTER JOIN

@@ -189,6 +189,7 @@ BEGIN
 				INSERT tblGLAccountSegment
 					(strCode
 					,strDescription
+					,strChartDesc
 					,intAccountStructureId
 					,intAccountGroupId
 					,ysnActive
@@ -196,6 +197,7 @@ BEGIN
 					,intAccountCategoryId)
 				SELECT
 					SegmentCode
+					,CodeDescription
 					,CodeDescription
 					,@PrimaryStructureId
 					,glact_type = CASE WHEN glact_type = '''' THEN NULL ELSE glact_type END
@@ -232,12 +234,14 @@ BEGIN
 				INSERT tblGLAccountSegment
 					(strCode
 					,strDescription
+					,strChartDesc
 					,intAccountStructureId
 					,intAccountGroupId
 					,ysnActive
 					,ysnSelected)
 				SELECT
 					REPLICATE(''0'', (select len(max(SegmentCode)) from #segments) - len(SegmentCode)) + '''' + CAST(SegmentCode AS NVARCHAR(50)) SegmentCode
+					,glprc_desc
 					,glprc_desc
 					,@SegmentStructureId
 					,null
