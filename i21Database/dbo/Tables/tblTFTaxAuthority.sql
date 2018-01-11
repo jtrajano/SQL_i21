@@ -5,8 +5,8 @@
     [ysnPaperVersionAvailable]      BIT            NULL,
     [ysnFilingForThisTA]            BIT            NULL,
     [ysnElectronicVersionAvailable] BIT            NULL,
-	[dtmBeginDate] DATETIME NOT NULL, 
-    [dtmEndDate] DATETIME NOT NULL, 
+	[dtmBeginDate] DATETIME NULL, 
+    [dtmEndDate] DATETIME NULL, 
 	[intMasterId] INT NULL,
     [intConcurrencyId]              INT            CONSTRAINT [DF_tblTFTaxAuthority_intConcurrencyId] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblTFTaxAuthority] PRIMARY KEY CLUSTERED ([intTaxAuthorityId] ASC)
