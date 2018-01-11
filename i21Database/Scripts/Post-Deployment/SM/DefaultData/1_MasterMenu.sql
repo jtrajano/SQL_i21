@@ -2955,9 +2955,15 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Reassign' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementEntityParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Reassign', N'Contract Management', @ContractManagementEntityParentMenuId, N'Reassign', N'Entity', N'Screen', N'ContractManagement.view.Reassign?showSearch=true', N'small-menu-activity', 1, 1, 0, 1, 7, 0)
+	VALUES (N'Reassign', N'Contract Management', @ContractManagementEntityParentMenuId, N'Reassign', N'Activity', N'Screen', N'ContractManagement.view.Reassign?showSearch=true', N'small-menu-activity', 1, 1, 0, 1, 7, 0)
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 7, strCommand = N'ContractManagement.view.Reassign?showSearch=true',[strIcon] = 'small-menu-activity',[strCategory] = 'Activity' WHERE strMenuName = 'Reassign' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementEntityParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Broker Commission Processing' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementEntityParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Broker Commission Processing', N'Contract Management', @ContractManagementEntityParentMenuId, N'Broker Commission Processing', N'Activity', N'Screen', N'ContractManagement.view.BrokerCommissionProcessing?showSearch=true', N'small-menu-activity', 1, 1, 0, 1, 7, 0)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'ContractManagement.view.BrokerCommissionProcessing?showSearch=true' WHERE strMenuName = 'Broker Commission Processing' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementEntityParentMenuId
 
 /* Start of Delete */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Contract Options' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementMaintenanceParentMenuId
