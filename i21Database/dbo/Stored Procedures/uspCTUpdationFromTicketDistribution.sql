@@ -30,7 +30,9 @@ BEGIN TRY
 			@intScaleUnitMeasureId	INT,
 			@intItemUOMId			INT,
 			@intNewContractHeaderId	INT,
-			@ysnAutoCreateDP		BIT
+			@ysnAutoCreateDP		BIT,
+			@strScreenName			NVARCHAR(20),
+			@XML					NVARCHAR(MAX)
 
 	DECLARE @Processed TABLE
 	(
@@ -108,7 +110,9 @@ BEGIN TRY
 		BEGIN
 			IF ISNULL(@ysnAutoCreateDP ,0) = 1
 			BEGIN
-				EXEC uspCTCreateContract @intTicketId,'Scale',@intUserId,null,@intNewContractHeaderId OUTPUT
+				SET @strScreenName = CASE WHEN ISNULL(@ysnDeliverySheet,0) = 0 THEN 'Scale' ELSE 'Delivery Sheet' END
+				SET @XML = '<overrides><intEntityId>' + LTRIM(@intEntityId) + '</intEntityId></overrides>'
+				EXEC uspCTCreateContract @intTicketId,@strScreenName,@intUserId,@XML,@intNewContractHeaderId OUTPUT
 				SELECT @intContractDetailId = intContractDetailId FROM tblCTContractDetail WHERE intContractHeaderId = @intNewContractHeaderId
 			END
 			IF	ISNULL(@intContractDetailId,0) = 0

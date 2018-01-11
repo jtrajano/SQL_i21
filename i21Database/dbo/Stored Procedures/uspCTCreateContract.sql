@@ -88,18 +88,15 @@ BEGIN TRY
 	IF OBJECT_ID('tempdb..#tmpXMLHeader') IS NOT NULL  					
 		DROP TABLE #tmpXMLHeader	
 
-	--IF ISNULL(@XML,'') <> ''
-	--BEGIN
-	--	SELECT	*
-	--	INTO	#tmpXMLHeader
-	--	FROM	OPENXML(@idoc, 'tblCTContractHeaders/tblCTContractHeader',2)
-	--	WITH
-	--	(
-	--			intContractDetailId		INT,
-	--			intConcurrencyId		INT,
-	--			dblAdjAmount			NUMERIC(12,4)
-	--	)
-	--END
+	IF ISNULL(@XML,'') <> ''
+	BEGIN
+		SELECT	@intEntityId	=	intEntityId
+		FROM	OPENXML(@idoc, 'overrides',2)
+		WITH
+		(
+				intEntityId		INT
+		)
+	END
 
 	IF	@strScreenName = 'Scale'
 	BEGIN
@@ -108,7 +105,8 @@ BEGIN TRY
 			intItemId,intItemUOMId,intContractSeq,intStorageScheduleRuleId,dtmEndDate,intCompanyLocationId,dblQuantity,intContractStatusId,dblBalance,dtmStartDate,intPricingTypeId,dtmCreated,intConcurrencyId,intCreatedById,intUnitMeasureId
 		)
 		SELECT	intContractTypeId	=	CASE WHEN SC.strInOutFlag = 'I' THEN 1 ELSE 2 END,
-				intEntityId			=	SC.intEntityId,		dtmContractDate				=	SC.dtmTicketDateTime,
+				intEntityId			=	@intEntityId,		
+				dtmContractDate		=	SC.dtmTicketDateTime,
 				intCommodityId		=	CM.intCommodityId,	intCommodityUOMId			=	CU.intCommodityUnitMeasureId,
 				dblHeaderQuantity	=	0,					intSalespersonId			=	CP.intDefSalespersonId,	
 				ysnSigned			=	0,					strContractNumber			=	CAST('' AS NVARCHAR(100)),
@@ -138,6 +136,51 @@ BEGIN TRY
 		JOIN	tblSCTicketSplit			SP	ON	SP.intTicketId		=	SC.intTicketId
 												AND	SP.intCustomerId	=	ISNULL(@intEntityId,SC.intEntityId)
 		WHERE	SC.intTicketId	= @intExternalId	
+
+		SELECT	@strStartingNumber = CASE WHEN intContractTypeId = 1 THEN 'PurchaseContract' ELSE 'SaleContract' END FROM #tmpExtracted
+		EXEC	@strContractNumber = uspCTGetStartingNumber @strStartingNumber
+		UPDATE	#tmpExtracted SET strContractNumber = @strContractNumber
+	END
+
+	IF	@strScreenName = 'Delivery Sheet'
+	BEGIN
+		INSERT	INTO	#tmpExtracted
+		(	intContractTypeId,intEntityId,dtmContractDate,intCommodityId,intCommodityUOMId,dblHeaderQuantity,intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,
+			intItemId,intItemUOMId,intContractSeq,intStorageScheduleRuleId,dtmEndDate,intCompanyLocationId,dblQuantity,intContractStatusId,dblBalance,dtmStartDate,
+			intPricingTypeId,dtmCreated,intConcurrencyId,intCreatedById,intUnitMeasureId,intCurrencyId
+		)
+		SELECT	intContractTypeId	= 	SC.intTicketTypeId,
+				intEntityId			=	@intEntityId,			
+				dtmContractDate		=	SC.dtmDeliverySheetDate,
+				intCommodityId		=	CM.intCommodityId,	intCommodityUOMId			=	CU.intCommodityUnitMeasureId,
+				dblHeaderQuantity	=	0,					intSalespersonId			=	CP.intDefSalespersonId,	
+				ysnSigned			=	0,					strContractNumber			=	CAST('' AS NVARCHAR(100)),
+				ysnPrinted			=	0,
+
+				intItemId			=	SC.intItemId,		intItemUOMId				=	QU.intItemUOMId,
+				intContractSeq		=	1,					intStorageScheduleRuleId	=	ISNULL(SP.intStorageScheduleRuleId,CP.intDefStorageSchedule),
+				dtmEndDate			=	CASE	WHEN	strDefEndDateType	=	'Calender'	THEN ISNULL(CP.dtmDefEndDate,DATEADD(d, 0, DATEDIFF(d, 0, GETDATE())))
+												WHEN	strDefEndDateType	=	'None'		THEN DATEADD(d, 0, DATEDIFF(d, 0, GETDATE()))
+												WHEN	strDefEndDateType	=	'Last Date of the Start Date''s Month' THEN DATEADD(MONTH, DATEDIFF(MONTH, 0,  (GETDATE())) + 1, 0) - 1
+												ELSE	DATEADD(d, 0, DATEDIFF(d, 0, GETDATE()))
+										END,
+				intCompanyLocationId		=	SC.intCompanyLocationId, 
+				dblQuantity			=	0,					intContractStatusId			=	1,
+				dblBalance			=	0,					dtmStartDate				=	SC.dtmDeliverySheetDate,
+				intPricingTypeId	=	5,					dtmCreated					=	GETDATE(),
+				intConcurrencyId	=	1,					intCreatedById				=	@intUserId,
+				intUnitMeasureId	=	QU.intUnitMeasureId,intCurrencyId				=	SC.intCurrencyId
+												
+		FROM	tblSCDeliverySheet			SC	CROSS 
+		JOIN	tblCTCompanyPreference		CP
+		JOIN	tblICItem					IM	ON	IM.intItemId			=	SC.intItemId
+		JOIN	tblICItemUOM				QU	ON	QU.intItemId			=	SC.intItemId AND QU.ysnStockUnit = 1
+		JOIN	tblICCommodity				CM	ON	CM.intCommodityId		=	IM.intCommodityId
+		JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId		=	CM.intCommodityId
+												AND	CU.intUnitMeasureId		=	QU.intUnitMeasureId	LEFT 
+		JOIN	tblSCDeliverySheetSplit		SP	ON	SP.intDeliverySheetId	=	SC.intDeliverySheetId 
+												AND SP.intEntityId = @intEntityId
+		WHERE	SC.intDeliverySheetId	= @intExternalId	
 
 		SELECT	@strStartingNumber = CASE WHEN intContractTypeId = 1 THEN 'PurchaseContract' ELSE 'SaleContract' END FROM #tmpExtracted
 		EXEC	@strContractNumber = uspCTGetStartingNumber @strStartingNumber
