@@ -166,7 +166,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, [intEntityId], in
 
 	WHERE	ysnAllowedToShow = 1
 			AND strContractType = 'Purchase'
-			AND ISNULL(ysnIsBasket, 0) = 0
+			AND strBundleType != 'Basket'
 
     UNION ALL
 	
@@ -229,7 +229,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, [intEntityId], in
 		, intBundledItemId			= CAST(ContractItem.intItemId AS INT)
 		, strBundledItemNo			= CAST(ContractItem.strItemNo AS NVARCHAR(50))
 		, strBundledItemDescription = CAST(ContractItem.strDescription AS NVARCHAR(500))
-		, ysnIsBasket 				= ContractView.ysnIsBasket
+		, strBundleType				= ContractView.strBundleType
 	FROM tblICItemBundle BundleDetail
 		INNER JOIN tblICItem BundledItem ON BundledItem.intItemId = BundleDetail.intBundleItemId
 		INNER JOIN tblICItem ContractItem ON ContractItem.intItemId = BundleDetail.intItemId
@@ -240,7 +240,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, [intEntityId], in
 			AND BundleDetailUOM.intItemUOMId = BundleDetail.intItemUnitMeasureId
 	WHERE ContractView.strContractType = 'Purchase'
 		AND ContractView.ysnAllowedToShow = 1
-		AND ContractView.ysnIsBasket = 1
+		AND ContractView.strBundleType = 'Basket'
 
 	UNION ALL
 

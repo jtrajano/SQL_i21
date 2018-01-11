@@ -161,7 +161,6 @@ Type the overview for the table here.
 		[intM2MComputationId] INT NULL DEFAULT ((1)),
 		[intTonnageTaxUOMId] INT NULL, 
 		[ysnUseWeighScales] BIT NULL,
-		[ysnIsBasket] BIT NULL DEFAULT((0)),
 		[ysnLotWeightsRequired] BIT NULL DEFAULT((1)),
 		[intHazmatMessage] INT NULL,
     CONSTRAINT [AK_tblICItem_strItemNo] UNIQUE ([strItemNo]), 
