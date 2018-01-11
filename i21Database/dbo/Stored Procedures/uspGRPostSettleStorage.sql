@@ -1076,7 +1076,63 @@ BEGIN TRY
 				  OR
 				 (ReceiptCharge.intEntityVendorId <> SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 1)
 				)
-
+				
+				---Adding Contract Other Charges.
+				INSERT INTO @voucherDetailStorage 
+				(
+					 [intCustomerStorageId]
+					,[intItemId]
+					,[intAccountId]
+					,[dblQtyReceived]
+					,[strMiscDescription]
+					,[dblCost]
+					,[intContractHeaderId]
+					,[intContractDetailId]
+					,[intUnitOfMeasureId]
+					,[dblWeightUnitQty]
+					,[dblCostUnitQty]
+					,[dblUnitQty]
+					,[dblNetWeight]
+				 )
+				 SELECT 
+				  [intCustomerStorageId]  = SV.[intCustomerStorageId]
+				 ,[intItemId]			  = CC.[intItemId]
+				 ,[intAccountId]		  = NULL
+				 ,[dblQtyReceived]		  = CASE 
+												WHEN CC.intItemUOMId IS NOT NULL THEN  dbo.fnCTConvertQuantityToTargetItemUOM(CC.intItemId,UOM.intUnitMeasureId,@intUnitMeasureId,SV.dblUnits)
+												ELSE SV.dblUnits 
+											END
+				 ,[strMiscDescription]	  = Item.[strItemNo]
+				 ,[dblCost]				  = (
+											  CASE 
+											  		WHEN CC.intCurrencyId IS NOT NULL AND ISNULL(CC.intCurrencyId,0)<> ISNULL(CD.intInvoiceCurrencyId, CD.intCurrencyId) THEN [dbo].[fnCTCalculateAmountBetweenCurrency](CC.intCurrencyId, ISNULL(CD.intInvoiceCurrencyId, CD.intCurrencyId), CC.dblRate, 1)*-1 
+											  		ELSE  CC.dblRate * -1  
+											  END
+											 )
+											 /											
+											 (CASE 
+												WHEN CC.strCostMethod ='Per Unit' THEN 1
+												WHEN CC.strCostMethod ='Amount'	  THEN 
+																					   CASE 
+																							WHEN CC.intItemUOMId IS NOT NULL THEN  dbo.fnCTConvertQuantityToTargetItemUOM(CC.intItemId,UOM.intUnitMeasureId,@intUnitMeasureId,SV.dblUnits)
+																							ELSE SV.dblUnits 
+																						END
+											 END)
+				 ,[intContractHeaderId]	  = CD.[intContractHeaderId]
+				 ,[intContractDetailId]	  = CD.[intContractDetailId]
+				 ,[intUnitOfMeasureId]	  = CC.intItemUOMId
+				 ,[dblWeightUnitQty]	  = 1 
+				 ,[dblCostUnitQty]		  = 1 
+				 ,[dblUnitQty]			  = 1
+				 ,[dblNetWeight]		  = 0 
+				 FROM 
+				 tblCTContractCost CC 
+				 JOIN tblCTContractDetail CD ON CD.intContractDetailId =  CC.intContractDetailId
+				 JOIN @SettleVoucherCreate SV ON SV.intContractDetailId = CD.intContractDetailId AND SV.intItemType = 1
+				 JOIN tblICItem Item ON Item.intItemId = CC.intItemId
+				 LEFT JOIN tblICItemUOM UOM ON UOM.intItemUOMId = CC.intItemUOMId
+				 WHERE ISNULL(CC.ysnPrice,0) =1
+				 
 				EXEC [dbo].[uspAPCreateBillData] 
 					 @userId = @intCreatedUserId
 					,@vendorId = @EntityId
