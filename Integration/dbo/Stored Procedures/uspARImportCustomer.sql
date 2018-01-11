@@ -1254,7 +1254,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 						@intNoOfPeriods		= CASE WHEN (ptcus_budget_beg_mm < ptcus_budget_end_mm) THEN (ptcus_budget_end_mm -ptcus_budget_beg_mm) + 1
 												   WHEN (ptcus_budget_beg_mm > ptcus_budget_end_mm) THEN ((13 - ptcus_budget_beg_mm) + ptcus_budget_end_mm)
 												   ELSE 0 END, 
-						@dtmBudgetBeginDate = CASE WHEN ptcus_budget_beg_mm <> 0 THEN CONVERT(DATE, CAST(YEAR(getdate()) AS CHAR(4))+RIGHT(''00''+RTRIM(CAST(ptcus_budget_beg_mm AS CHAR(2))),2)+''01'' , 112) ELSE NULL END,
+						@dtmBudgetBeginDate = CASE WHEN ptcus_budget_beg_mm <> 0 THEN CONVERT(DATE, CAST(YEAR(getdate()) AS CHAR(4))+RIGHT(''00''+RTRIM(CAST(ptcus_budget_beg_mm AS CHAR(2))),2)+''01'' , 112) ELSE NULL END
 						--Grain Tab
 						--@strDPAContract = agcus_dpa_cnt,
 						--@dtmDPADate = (CASE WHEN agcus_dpa_rev_dt = 0 THEN NULL ELSE CONVERT(datetime,SUBSTRING(CONVERT(nvarchar,agcus_dpa_rev_dt),0,5) + ''-'' + SUBSTRING(CONVERT(nvarchar,agcus_dpa_rev_dt),5,2) + ''-'' + SUBSTRING(CONVERT(nvarchar,agcus_dpa_rev_dt),7,2)) END),
