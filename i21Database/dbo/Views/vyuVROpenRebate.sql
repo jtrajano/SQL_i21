@@ -1,6 +1,14 @@
 ﻿CREATE VIEW [dbo].[vyuVROpenRebate]
 AS  
 	SELECT 
+		*
+		,dblRebateAmount = CASE WHEN A.strRebateBy = 'Unit' THEN
+								CAST((A.dblRebateQuantity * A.dblRebateRate) AS NUMERIC(18,6))
+							ELSE
+								CAST((A.dblRebateQuantity * A.dblRebateRate * A.dblCost / 100) AS NUMERIC(18,6))
+							END
+	FROM(
+	SELECT 
 		intRowId = CAST(ROW_NUMBER() OVER(ORDER BY A.intInvoiceId) AS INT)
 		,strVendorNumber = K.strVendorId
 		,I.strProgram
@@ -12,19 +20,20 @@ AS
 		,strItemNumber = C.strItemNo
 		,strItemDescription = C.strDescription
 		,D.strCategoryCode
-		,B.dblQtyShipped
+		,dblQtyShipped = CASE WHEN A.strTransactionType = 'Credit Memo' THEN (B.dblQtyShipped * -1) ELSE B.dblQtyShipped END
 		,F.strUnitMeasure
 		,E.dblUnitQty
 		,dblCost = B.dblPrice
 		,dblRebateRate = ISNULL(M.dblRebateRate,ISNULL(N.dblRebateRate,0.0))
-		,dblRebateAmount = CASE WHEN ISNULL(M.strRebateBy,N.strRebateBy) = 'Unit' THEN
-								CAST((B.dblQtyShipped * ISNULL(M.dblRebateRate,ISNULL(N.dblRebateRate,0.0))) AS NUMERIC(18,6))
-							ELSE
-								CAST((B.dblQtyShipped * dblPrice * ISNULL(M.dblRebateRate,ISNULL(N.dblRebateRate,0.0)) / 100) AS NUMERIC(18,6))
-							END
+		,dblRebateQuantity =	CASE WHEN A.strTransactionType = 'Credit Memo' THEN 
+									CAST((dbo.fnCalculateQtyBetweenUOM(B.intItemUOMId, ISNULL(M.intItemUOMId,ISNULL(N.intItemUOMId,0.0)), B.dblQtyShipped)) AS NUMERIC(18,6)) * -1
+								ELSE
+									CAST((dbo.fnCalculateQtyBetweenUOM(B.intItemUOMId, ISNULL(M.intItemUOMId,ISNULL(N.intItemUOMId,0.0)), B.dblQtyShipped)) AS NUMERIC(18,6))
+								END
 		,B.intInvoiceDetailId
 		,B.intConcurrencyId 
 		,I.intProgramId
+		,strRebateBy = ISNULL(M.strRebateBy,N.strRebateBy)
 	FROM tblARInvoiceDetail B
 	INNER JOIN tblARInvoice A
 		ON A.intInvoiceId = B.intInvoiceId
@@ -63,7 +72,6 @@ AS
 		ON J.intEntityId = K.intEntityId
 	WHERE (ISNULL(N.dblRebateRate,0) <> 0 OR ISNULL(M.dblRebateRate,0) <>0)
 		AND NOT EXISTS(SELECT TOP 1 1 FROM tblVRRebate WHERE intInvoiceDetailId = B.intInvoiceDetailId)
-		AND A.ysnPosted = 1
+		AND A.ysnPosted = 1) A
 
 GO
-
