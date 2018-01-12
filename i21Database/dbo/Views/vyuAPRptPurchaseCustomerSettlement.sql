@@ -99,11 +99,11 @@ AS
 	BillDtl.dblCost,
 	BillDtl.dblQtyOrdered as Net,
 	UOM.strUnitMeasure,
-	BillDtl.dblTotal,
-	BillDtl.dblTax,
+	detailTransaction.dblTotal,
+	detailTransaction.dblTax,
 	CNTRCT.strContractNumber,
 	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0) AS TotalDiscount,
-	(BillDtl.dblTotal + BillDtl.dblTax +  ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0)) as NetDue,
+	(detailTransaction.dblTotal + detailTransaction.dblTax ) as NetDue,
 	Bill.strBillId as strId,
 	PYMT.intPaymentId,
 	PYMT.dblAmountPaid as CheckAmount,
@@ -127,6 +127,13 @@ AS
 	LEFT JOIN tblSMCompanySetup COMPANY ON COMPANY.intCompanySetupID = (SElECT TOP 1 intCompanySetupID FROM tblSMCompanySetup)
 	LEFT JOIN tblICItemUOM ItemUOM ON BillDtl.intUnitOfMeasureId = ItemUOM.intItemUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
+	OUTER APPLY (
+				SELECT 
+					SUM(dblTotal) AS dblTotal,
+					SUM(D.dblTax) AS dblTax
+				FROM tblAPBillDetail D
+				WHERE D.intBillId = Bill.intBillId														
+			) detailTransaction
 	WHERE Bill.ysnPosted = 1
 
 	UNION ALL 
