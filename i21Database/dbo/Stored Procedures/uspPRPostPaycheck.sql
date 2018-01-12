@@ -1240,22 +1240,11 @@ Post_Exit:
 *****************************************/
 IF (@isSuccessful <> 0)
 BEGIN
-	/* Update the Employee Time Off Tiers and Accrued Hours */
-	SELECT DISTINCT intTypeTimeOffId INTO #tmpEmployeeTimeOff FROM tblPREmployeeTimeOff WHERE intEntityEmployeeId = @intEmployeeId
-		
-	DECLARE @intTypeTimeOffId INT
-	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEmployeeTimeOff)
-	BEGIN
-		SELECT TOP 1 @intTypeTimeOffId = intTypeTimeOffId FROM #tmpEmployeeTimeOff
-
-		EXEC uspPRUpdateEmployeeTimeOff @intTypeTimeOffId, @intEmployeeId
-		EXEC uspPRUpdateEmployeeTimeOffHours @intTypeTimeOffId, @intEmployeeId
-
-		DELETE FROM #tmpEmployeeTimeOff WHERE intTypeTimeOffId = @intTypeTimeOffId
-	END
-
 	IF (@ysnPost = 1) 
 	BEGIN
+
+	DECLARE @intTypeTimeOffId INT
+
 		IF (@ysnRecap = 0) 
 		BEGIN
 			/* If Posting succeeds, mark transaction as posted */
@@ -1264,6 +1253,19 @@ BEGIN
 				,dtmPosted = (SELECT TOP 1 dtmDate FROM tblCMBankTransaction WHERE intTransactionId = @intTransactionId) 
 			WHERE strPaycheckId = @strTransactionId
 			SET @isSuccessful = 1
+
+			/* Update the Employee Time Off Tiers and Accrued Hours */
+			SELECT DISTINCT intTypeTimeOffId INTO #tmpEmployeeTimeOff FROM tblPREmployeeTimeOff WHERE intEntityEmployeeId = @intEmployeeId
+		
+			WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEmployeeTimeOff)
+			BEGIN
+				SELECT TOP 1 @intTypeTimeOffId = intTypeTimeOffId FROM #tmpEmployeeTimeOff
+
+				EXEC uspPRUpdateEmployeeTimeOff @intTypeTimeOffId, @intEmployeeId
+				EXEC uspPRUpdateEmployeeTimeOffHours @intTypeTimeOffId, @intEmployeeId
+
+				DELETE FROM #tmpEmployeeTimeOff WHERE intTypeTimeOffId = @intTypeTimeOffId
+			END
 
 			/* Delete zero amount Earnings */
 			DELETE FROM tblPRPaycheckEarning 
@@ -1297,6 +1299,19 @@ BEGIN
 				,dtmPosted = NULL 
 			WHERE strPaycheckId = @strTransactionId
 
+			/* Update the Employee Time Off Tiers and Accrued Hours */
+			SELECT DISTINCT intTypeTimeOffId INTO #tmpEmployeeTimeOff2 FROM tblPREmployeeTimeOff WHERE intEntityEmployeeId = @intEmployeeId
+		
+			WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEmployeeTimeOff2)
+			BEGIN
+				SELECT TOP 1 @intTypeTimeOffId = intTypeTimeOffId FROM #tmpEmployeeTimeOff2
+
+				EXEC uspPRUpdateEmployeeTimeOff @intTypeTimeOffId, @intEmployeeId
+				EXEC uspPRUpdateEmployeeTimeOffHours @intTypeTimeOffId, @intEmployeeId
+
+				DELETE FROM #tmpEmployeeTimeOff2 WHERE intTypeTimeOffId = @intTypeTimeOffId
+			END
+
 			/* Update the Employee Time Off Hours Used */
 			UPDATE tblPREmployeeTimeOff
 				SET	dblHoursUsed = dblHoursUsed - A.dblHours
@@ -1323,3 +1338,4 @@ END
 END
 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpEmployeeTimeOff')) DROP TABLE #tmpEmployeeTimeOff
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpEmployeeTimeOff2')) DROP TABLE #tmpEmployeeTimeOff2
