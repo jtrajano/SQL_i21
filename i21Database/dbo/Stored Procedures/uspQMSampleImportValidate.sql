@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspQMSampleImportValidate
+﻿CREATE PROCEDURE uspQMSampleImportValidate @intLoggedOnLocationId INT = NULL
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF
@@ -14,6 +14,7 @@ BEGIN TRY
 		,@strItemNumber NVARCHAR(50)
 		,@strSampleTypeName NVARCHAR(50)
 		,@strVendorName NVARCHAR(100)
+		,@strWarehouse NVARCHAR(50)
 		,@strContractNumber NVARCHAR(50)
 		,@strContainerNumber NVARCHAR(100)
 		,@strMarks NVARCHAR(100)
@@ -69,6 +70,7 @@ BEGIN TRY
 			,@strItemNumber = NULL
 			,@strSampleTypeName = NULL
 			,@strVendorName = NULL
+			,@strWarehouse = NULL
 			,@strContractNumber = NULL
 			,@strContainerNumber = NULL
 			,@strMarks = NULL
@@ -97,6 +99,7 @@ BEGIN TRY
 			,@strItemNumber = strItemNumber
 			,@strSampleTypeName = strSampleTypeName
 			,@strVendorName = strVendorName
+			,@strWarehouse = strWarehouse
 			,@strContractNumber = strContractNumber
 			,@strContainerNumber = strContainerNumber
 			,@strMarks = strMarks
@@ -240,6 +243,27 @@ BEGIN TRY
 			END
 		END
 
+		-- Warehouse
+		IF ISNULL(@strWarehouse, '') <> ''
+		BEGIN
+			IF NOT EXISTS (
+					SELECT 1
+					FROM tblSMCompanyLocationSubLocation
+					WHERE strSubLocationName = @strWarehouse
+					)
+				SELECT @strPreviousErrMsg += 'Invalid Warehouse. '
+			ELSE
+			BEGIN
+				IF NOT EXISTS (
+						SELECT 1
+						FROM tblSMCompanyLocationSubLocation
+						WHERE strSubLocationName = @strWarehouse
+							AND intCompanyLocationId = @intLoggedOnLocationId
+						)
+					SELECT @strPreviousErrMsg += 'Warehouse is not configured in the logged on location. '
+			END
+		END
+
 		-- Property Name and Value
 		IF ISNULL(@strPropertyName, '') = ''
 			SELECT @strPreviousErrMsg += 'Invalid Property Name. '
@@ -343,7 +367,8 @@ BEGIN TRY
 				,dblQuantity NUMERIC(18, 6)
 				)
 
-			DELETE FROM @ContractDetail
+			DELETE
+			FROM @ContractDetail
 
 			INSERT INTO @ContractDetail
 			SELECT intContractDetailId
@@ -512,6 +537,7 @@ BEGIN TRY
 							,strItemNumber
 							,strSampleTypeName
 							,strVendorName
+							,strWarehouse
 							,strContractNumber
 							,strContainerNumber
 							,strMarks
@@ -555,6 +581,7 @@ BEGIN TRY
 					,strItemNumber
 					,strSampleTypeName
 					,strVendorName
+					,strWarehouse
 					,strContractNumber
 					,strContainerNumber
 					,strMarks
@@ -578,6 +605,7 @@ BEGIN TRY
 					,strItemNumber
 					,strSampleTypeName
 					,strVendorName
+					,strWarehouse
 					,strContractNumber
 					,strContainerNumber
 					,strMarks
@@ -617,6 +645,7 @@ BEGIN TRY
 		,strItemNumber
 		,strSampleTypeName
 		,strVendorName
+		,strWarehouse
 		,strContractNumber
 		,strContainerNumber
 		,strMarks
