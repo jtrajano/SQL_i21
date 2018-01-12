@@ -53,7 +53,7 @@ BEGIN
 		,[intBankTransactionTypeId]  = 5
 		,[dtmDate] = ccSiteHeader.dtmDate
 		,[strMemo] = ccSiteHeader.strCcdReference
-		,[intCompanyLocationId] = ccVendorDefault.intCompanyLocationId
+		,[intCompanyLocationId] = ccSiteHeader.intCompanyLocationId
 	FROM tblCCSiteHeader ccSiteHeader
 	INNER JOIN tblCCVendorDefault ccVendorDefault ON ccVendorDefault.intVendorDefaultId = ccSiteHeader.intVendorDefaultId
 	LEFT JOIN tblAPVendor apVendor ON apVendor.[intEntityId] =  ccVendorDefault.intVendorId
