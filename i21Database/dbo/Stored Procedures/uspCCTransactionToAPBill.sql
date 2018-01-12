@@ -40,7 +40,7 @@ BEGIN
 
 			SELECT @ccdReference = ccSiteHeader.strCcdReference
 				, @dtmDate = ccSiteHeader.dtmDate
-				, @shipTo = ccVendorDefault.intCompanyLocationId
+				, @shipTo = ccSiteHeader.intCompanyLocationId
 				, @vendorId = ccVendorDefault.intVendorId
 			FROM tblCCSiteHeader ccSiteHeader
 			INNER JOIN tblCCVendorDefault ccVendorDefault ON ccVendorDefault.intVendorDefaultId = ccSiteHeader.intVendorDefaultId

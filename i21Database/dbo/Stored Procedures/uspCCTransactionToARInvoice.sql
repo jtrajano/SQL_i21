@@ -90,7 +90,7 @@ BEGIN
         ,[intSourceId] = null
         ,[strSourceId] = ccSiteDetail.intSiteDetailId
         ,[intEntityCustomerId] = ccSite.intCustomerId
-        ,[intCompanyLocationId] = ccVendor.intCompanyLocationId
+        ,[intCompanyLocationId] = ccSiteHeader.intCompanyLocationId
         ,[intCurrencyId] = ccVendor.intCurrencyId
         ,[intTermId] = ccCustomer.intTermsId
         ,[dtmDate] = ccSiteHeader.dtmDate

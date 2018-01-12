@@ -23,10 +23,10 @@ BEGIN TRY
 	
 	BEGIN TRANSACTION
 
-	SELECT @intCompanyLocationId = VD.intCompanyLocationId
+	SELECT @intCompanyLocationId = SH.intCompanyLocationId
 	FROM tblCCSiteHeader SH
-	LEFT JOIN tblCCVendorDefault VD ON VD.intVendorDefaultId = SH.intVendorDefaultId
-	LEFT JOIN tblSMUserSecurityCompanyLocationRolePermission CL ON VD.intCompanyLocationId = CL.intCompanyLocationId
+	--LEFT JOIN tblCCVendorDefault VD ON VD.intVendorDefaultId = SH.intVendorDefaultId
+	LEFT JOIN tblSMUserSecurityCompanyLocationRolePermission CL ON SH.intCompanyLocationId = CL.intCompanyLocationId
 	WHERE SH.intSiteHeaderId = @intSiteHeaderId
 		AND CL.intEntityId = @userId
 
