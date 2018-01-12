@@ -7,7 +7,7 @@
 	,@blnValidateLotReservation BIT = 0
 	,@blnInventoryMove BIT = 0
 	,@dtmDate DATETIME = NULL
-	,@strDescription nvarchar(50)=''
+	,@strDescription NVARCHAR(50) = ''
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -44,6 +44,8 @@ BEGIN TRY
 		,@intDestinationLotStatusId INT
 		,@intCategoryId INT
 		,@dblDestinationLotQty NUMERIC(38, 20)
+		,@strSubLocationName NVARCHAR(50)
+		,@strName NVARCHAR(50)
 
 	SELECT @intItemId = intItemId
 		,@intLocationId = intLocationId
@@ -244,6 +246,32 @@ BEGIN TRY
 				)
 	END
 
+	IF NOT EXISTS (
+			SELECT *
+			FROM tblICStorageLocation
+			WHERE intStorageLocationId = @intNewStorageLocationId
+				AND intSubLocationId = @intNewSubLocationId
+			)
+	BEGIN
+		SELECT @strName = strName
+		FROM tblICStorageLocation
+		WHERE intStorageLocationId = @intNewStorageLocationId
+
+		SELECT @strSubLocationName = strSubLocationName
+		FROM tblSMCompanyLocationSubLocation
+		WHERE intCompanyLocationSubLocationId = @intNewSubLocationId
+
+		SET @ErrMsg = 'The selected storage location ' + @strName + ' does not belong to selected sub location ' + @strSubLocationName + '.'
+
+		RAISERROR (
+				@ErrMsg
+				,16
+				,1
+				)
+
+		RETURN
+	END
+
 	SELECT @dblLotReservedQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(intItemUOMId, ISNULL(@intWeightUOMId, @intItemUOMId), ISNULL(dblQty, 0)))
 	FROM tblICStockReservation
 	WHERE intLotId = @intLotId
@@ -353,10 +381,11 @@ BEGIN TRY
 	IF ISNULL(@intLotStatusId, 0) <> ISNULL(@intDestinationLotStatusId, 0)
 		AND @dblDestinationLotQty = 0
 		AND NOT EXISTS (
-					SELECT *
-					FROM dbo.tblICLot
-					WHERE intLotId = @intNewLotId
-						AND intLotStatusId = @intLotStatusId)
+			SELECT *
+			FROM dbo.tblICLot
+			WHERE intLotId = @intNewLotId
+				AND intLotStatusId = @intLotStatusId
+			)
 	BEGIN
 		EXEC uspMFSetLotStatus @intNewLotId
 			,@intLotStatusId
