@@ -2,7 +2,7 @@
 	AS SELECT DISTINCT
 	cust.intEntityId, 
 	cust.strCustomerNumber, 
-	entityToCustomer.strName AS strCustomerName,
+	entityToCustomer.strName AS strName,
 	entityPhone.strPhone,
 	entityToSalesperson.strName AS strSalesPersonName,
 	cust.intSalespersonId,
@@ -12,7 +12,6 @@
 	cust.dblCreditLimit,
 	entityLocationPricingLevel.strPricingLevelName,
 	entityToCustomer.dtmOriginationDate,
-	entityLocationTerm.strTerm,
 	MAX(custInvoice.dtmDate) AS dtmLastInvoice,
 	MAX(custPayment.dtmDatePaid) AS dtmLastPayment,
 	cust.ysnActive,
@@ -45,10 +44,11 @@
 	billLocation.strCountry AS strBillToCountry,
 	cust.intShipToId,
 	cust.intBillToId,
-	strCustomerTerm = custTerm.strTerm,
+	custTerm.strTerm AS strTerm,
 	cust.intCurrencyId,
 	cust.intTermsId,
-	STUFF((SELECT '|^|' + CONVERT(VARCHAR,intLineOfBusinessId) FROM tblEMEntityLineOfBusiness te WHERE te.intEntityId = cust.intEntityId FOR XML PATH('')),1,3,'') as intLineOfBusinessIds
+	STUFF((SELECT '|^|' + CONVERT(VARCHAR,intLineOfBusinessId) FROM tblEMEntityLineOfBusiness te WHERE te.intEntityId = cust.intEntityId FOR XML PATH('')),1,3,'') as intLineOfBusinessIds,
+	entityType.Prospect AS ysnProspect
 FROM tblARCustomer cust
 INNER JOIN tblEMEntity entityToCustomer ON cust.intEntityId = entityToCustomer.intEntityId
 LEFT JOIN tblEMEntity entityToSalesperson ON cust.intSalespersonId = entityToSalesperson.intEntityId
@@ -72,7 +72,10 @@ LEFT JOIN tblSMPaymentMethod custPaymentMethod ON cust.intPaymentMethodId = cust
 LEFT JOIN tblSMTerm custTerm ON cust.intTermsId = custTerm.intTermID
 WHERE		
 		entityType.Customer = 1 -- check if entity is a customer
-		OR custInvoice.dtmDate = (SELECT MAX(dtmDate) FROM tblARInvoice x WHERE x.intEntityCustomerId = x.intEntityCustomerId)
+		OR
+		entityType.Prospect = 1
+		OR 
+		custInvoice.dtmDate = (SELECT MAX(dtmDate) FROM tblARInvoice x WHERE x.intEntityCustomerId = x.intEntityCustomerId)
 GROUP BY 
 	cust.intEntityId,
 	cust.strCustomerNumber, 
@@ -89,7 +92,6 @@ GROUP BY
 	cust.dblCreditLimit,
 	entityLocationPricingLevel.strPricingLevelName,
 	entityToCustomer.dtmOriginationDate,
-	entityLocationTerm.strTerm,
 	cust.ysnActive,
 	entityPhone.strPhone,
 	entityContact.strMobile,
@@ -123,5 +125,6 @@ GROUP BY
 	cust.intSalespersonId,
 	cust.intCurrencyId,
 	cust.intTermsId,
-	entityContact.intEntityId
+	entityContact.intEntityId,
+	entityType.Prospect
 GO
