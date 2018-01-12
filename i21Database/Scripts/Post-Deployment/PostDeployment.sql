@@ -373,6 +373,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\1730_Fix_SplitTypeEntry.sql
 :r .\EM\DataMigration\1710_1720_CCSite_migration.sql
 :r .\EM\DataMigration\1740_Moving_Farm_Info_to_Location.sql
+:r .\EM\1740_Activate_Default_Contact.sql
 
 -- Quality Module
 :r .\QM\1_MasterTables.sql
