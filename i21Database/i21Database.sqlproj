@@ -6019,6 +6019,7 @@
     <Build Include="dbo\Stored Procedures\uspMFSendNotificationEDI940.sql" />
     <Build Include="dbo\Stored Procedures\uspMFErrorNotificationEDI943.sql" />
     <Build Include="dbo\Stored Procedures\uspMFErrorNotificationEDI940.sql" />
+    <None Include="Scripts\Post-Deployment\EM\1740_Activate_Default_Contact.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
