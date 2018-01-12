@@ -16,6 +16,8 @@ GO
 		where a.intVendorDefaultId is null and a.intCompanyOwnedSiteId  = b.intCompanyOwnedSiteId
 	end
 
+	update a set a.intCompanyLocationId = b.intCompanyLocationId from tblCCSiteHeader a, tblCCVendorDefault b where a.intCompanyLocationId is null and b.intVendorDefaultId = a.intVendorDefaultId
+
 GO
 	PRINT N'End fixing Site data.'
 GO
