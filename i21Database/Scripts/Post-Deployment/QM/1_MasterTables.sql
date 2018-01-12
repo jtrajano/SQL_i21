@@ -1133,6 +1133,13 @@ BEGIN
 END
 GO
 GO
+IF NOT EXISTS(SELECT 1 FROM tblQMSampleLabel WHERE strSampleLabelName = 'Pre-Shipment Sample Label')
+BEGIN
+	INSERT INTO tblQMSampleLabel(strSampleLabelName,strReportName,intControlPointId,intConcurrencyId)
+	VALUES('Pre-Shipment Sample Label','PreShipmentSampleLabel',5,1)
+END
+GO
+GO
 IF NOT EXISTS(SELECT 1 FROM tblQMSampleLabel WHERE strSampleLabelName = 'Outbound Sample Label')
 BEGIN
 	INSERT INTO tblQMSampleLabel(strSampleLabelName,strReportName,intControlPointId,intConcurrencyId)
