@@ -5,14 +5,15 @@ SELECT [Dump Date]
 	,[Product Description]
 	,[Production Lot]
 	,Line
+	,[Work Order #]
 	,[Job #]
 	,[WSI Item]
 	,[WSI Item Description]
-	,Convert(Decimal(24,0),dblRequiredQty) AS dblRequiredQty
+	,Convert(DECIMAL(24, 0), dblRequiredQty) AS dblRequiredQty
 	,[Pallet Id]
 	,[Lot #]
 	,[Quantity]
-	,IsNULL(UM1.strUnitMeasure,[Weight UOM]) AS [Quantity UOM]
+	,IsNULL(UM1.strUnitMeasure, [Weight UOM]) AS [Quantity UOM]
 	,[Weight]
 	,[Weight UOM]
 FROM (
@@ -22,13 +23,15 @@ FROM (
 		,(
 			SELECT TOP 1 strParentLotNumber
 			FROM dbo.tblMFWorkOrderProducedLot WP
-			WHERE WP.intWorkOrderId = W.intWorkOrderId and WP.intShiftId=WI.intShiftId
+			WHERE WP.intWorkOrderId = W.intWorkOrderId
+				AND WP.intShiftId = WI.intShiftId
 			) AS [Production Lot]
 		,MC.strCellName AS Line
-		,W.strWorkOrderNo AS [Job #]
+		,W.strWorkOrderNo AS [Work Order #]
+		,W.strReferenceNo AS [Job #]
 		,I1.strItemNo AS [WSI Item]
 		,I1.strDescription [WSI Item Description]
-				,(
+		,(
 			SELECT TOP 1 CC.dblRequiredQty
 			FROM tblMFProcessCycleCount CC
 			JOIN tblMFProcessCycleCountSession PCC ON PCC.intCycleCountSessionId = CC.intCycleCountSessionId

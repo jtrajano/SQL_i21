@@ -52,6 +52,8 @@ BEGIN TRY
 		,@intSourceLocationRestrictionId INT
 		,@intDestinatinLocationRestrictionId INT
 		,@ysnChangeLotStatusOnLotMoveByStorageLocationRestrictionType BIT
+				,@strSubLocationName NVARCHAR(50)
+		,@strName NVARCHAR(50)
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -60,6 +62,7 @@ BEGIN TRY
 	SELECT TOP 1 @dblDefaultResidueQty = ISNULL(dblDefaultResidueQty, 0.00001)
 		,@ysnChangeLotStatusOnLotMoveByStorageLocationRestrictionType = isNULL(ysnChangeLotStatusOnLotMoveByStorageLocationRestrictionType, 0)
 	FROM tblMFCompanyPreference
+
 
 	SELECT @intItemId = intItemId
 		,@intLocationId = intLocationId
@@ -277,6 +280,32 @@ BEGIN TRY
 				,11
 				,1
 				)
+	END
+
+	IF NOT EXISTS (
+			SELECT *
+			FROM tblICStorageLocation
+			WHERE intStorageLocationId = @intNewStorageLocationId
+				AND intSubLocationId = @intNewSubLocationId
+			)
+	BEGIN
+		SELECT @strName = strName
+		FROM tblICStorageLocation
+		WHERE intStorageLocationId = @intNewStorageLocationId
+
+		SELECT @strSubLocationName = strSubLocationName
+		FROM tblSMCompanyLocationSubLocation
+		WHERE intCompanyLocationSubLocationId = @intNewSubLocationId
+
+		SET @ErrMsg = 'The selected storage location ' + @strName + ' does not belong to selected sub location ' + @strSubLocationName + '.'
+
+		RAISERROR (
+				@ErrMsg
+				,16
+				,1
+				)
+
+		RETURN
 	END
 
 	SELECT @dblLotReservedQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(intItemUOMId, ISNULL(@intWeightUOMId, @intItemUOMId), ISNULL(dblQty, 0)))

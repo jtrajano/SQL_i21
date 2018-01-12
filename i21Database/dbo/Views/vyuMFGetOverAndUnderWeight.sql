@@ -3,8 +3,9 @@ AS
 SELECT Rtrim(Convert(CHAR, W.dtmPlannedDate, 101)) AS [Production Date]
 	,I.strItemNo AS Item
 	,I.strDescription AS Description
-	,W.strWorkOrderNo AS [Job #]
-	,PL.strParentLotNumber AS [Production Lot]
+	,W.strWorkOrderNo AS [Work Order #]
+	,W.strReferenceNo AS [Job #]
+	,Left(WP.strParentLotNumber, 5) AS [Production Lot]
 	,IsNULL(SUM(WP.dblPhysicalCount * I.intInnerUnits), 0) AS [Good produced Pouches]
 	,IsNULL((
 			SELECT SUM(Convert(DECIMAL(24, 10), TR.strPropertyValue))
@@ -55,5 +56,6 @@ GROUP BY W.dtmPlannedDate
 	,I.strItemNo
 	,I.strDescription
 	,W.strWorkOrderNo
-	,PL.strParentLotNumber
+	,W.strReferenceNo
+	,Left(WP.strParentLotNumber, 5)
 	,W.intWorkOrderId
