@@ -21,7 +21,7 @@ INSERT INTO tblPRPaycheckTimeOff (
 SELECT
 	@intPaycheckId
 	,intEmployeeTimeOffId 
-	,intTypeTimeOffId
+	,tblPREmployeeTimeOff.intTypeTimeOffId
 	,dblRate
 	,dblPerPeriod
 	,strPeriod
@@ -29,10 +29,14 @@ SELECT
 	,dblMaxEarned 
 	,dblMaxCarryover
 	,dblHoursAccrued
-	,dblHoursUsed
-	,dblHoursYTD = dblHoursEarned - dblHoursUsed
+	,dblHoursUsed = (tblPREmployeeTimeOff.dblHoursUsed + vyuPREmployeeTimeOffUsedYTD.dblHoursUsed)
+	,dblHoursYTD = (dblHoursCarryover + dblHoursEarned) - (tblPREmployeeTimeOff.dblHoursUsed + vyuPREmployeeTimeOffUsedYTD.dblHoursUsed)
 FROM 
 	tblPREmployeeTimeOff
+	LEFT JOIN vyuPREmployeeTimeOffUsedYTD
+		ON tblPREmployeeTimeOff.intEntityEmployeeId = vyuPREmployeeTimeOffUsedYTD.intEntityEmployeeId
+		AND tblPREmployeeTimeOff.intTypeTimeOffId = vyuPREmployeeTimeOffUsedYTD.intTypeTimeOffId
+		AND vyuPREmployeeTimeOffUsedYTD.intYear = YEAR(GETDATE())
 WHERE 
-	intEntityEmployeeId = (SELECT TOP 1 intEntityEmployeeId FROM tblPRPaycheck WHERE intPaycheckId = @intPaycheckId)
+	tblPREmployeeTimeOff.intEntityEmployeeId = (SELECT TOP 1 intEntityEmployeeId FROM tblPRPaycheck WHERE intPaycheckId = @intPaycheckId)
 GO

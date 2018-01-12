@@ -26,27 +26,20 @@ SELECT @intTimeOffRequestId = @intTransactionId
 						ON TOR.intTimeOffRequestId = @intTimeOffRequestId AND EE.intEntityEmployeeId = TOR.intEntityEmployeeId
 						WHERE EE.intEmployeeTimeOffId = TOR.intTypeTimeOffId AND EE.intPayGroupId IS NOT NULL)
 		BEGIN
-			UPDATE tblPREmployeeTimeOff 
-				SET dblHoursUsed = CASE WHEN ((dblHoursUsed - tblTimeOffRequest.dblRequest) > 0) THEN dblHoursUsed - tblTimeOffRequest.dblRequest ELSE 0 END
-			FROM 
-			(SELECT TOR.intTimeOffRequestId, 
-					ET.intTypeTimeOffId, 
-					TOR.intEntityEmployeeId, 
-					TOR.dblRequest 
-				FROM tblPREmployeeTimeOff ET INNER JOIN tblPRTimeOffRequest TOR
-					ON ET.intEntityEmployeeId = TOR.intEntityEmployeeId AND ET.intTypeTimeOffId = TOR.intTypeTimeOffId) tblTimeOffRequest
-			WHERE tblPREmployeeTimeOff.intTypeTimeOffId = tblTimeOffRequest.intTypeTimeOffId
-				AND tblPREmployeeTimeOff.intEntityEmployeeId = tblTimeOffRequest.intEntityEmployeeId
-				AND tblTimeOffRequest.intTimeOffRequestId = @intTimeOffRequestId
-
 			UPDATE tblPRTimeOffRequest 
 				SET dblEarned = tblPREmployeeTimeOff.dblHoursEarned
-					,dblUsed = tblPREmployeeTimeOff.dblHoursUsed
-					,dblBalance = tblPREmployeeTimeOff.dblHoursEarned - tblPREmployeeTimeOff.dblHoursUsed
+					,dblUsed = tblPREmployeeTimeOff.dblHoursUsed + ISNULL(vyuPREmployeeTimeOffUsedYTD.dblHoursUsed, 0)
+					,dblBalance = (tblPREmployeeTimeOff.dblHoursCarryover + tblPREmployeeTimeOff.dblHoursEarned) 
+								- (tblPREmployeeTimeOff.dblHoursUsed + ISNULL(vyuPREmployeeTimeOffUsedYTD.dblHoursUsed, 0))
 			FROM tblPRTimeOffRequest 
 				INNER JOIN tblPREmployeeTimeOff 
-				ON tblPRTimeOffRequest.intEntityEmployeeId = tblPREmployeeTimeOff.intEntityEmployeeId
-				AND tblPRTimeOffRequest.intTypeTimeOffId = tblPREmployeeTimeOff.intTypeTimeOffId
+					ON tblPRTimeOffRequest.intEntityEmployeeId = tblPREmployeeTimeOff.intEntityEmployeeId
+					AND tblPRTimeOffRequest.intTypeTimeOffId = tblPREmployeeTimeOff.intTypeTimeOffId
+				LEFT JOIN vyuPREmployeeTimeOffUsedYTD
+					ON tblPREmployeeTimeOff.intEntityEmployeeId = vyuPREmployeeTimeOffUsedYTD.intEntityEmployeeId
+					AND tblPREmployeeTimeOff.intTypeTimeOffId = vyuPREmployeeTimeOffUsedYTD.intTypeTimeOffId
+					AND vyuPREmployeeTimeOffUsedYTD.intYear = YEAR(GETDATE())
+				
 			WHERE intTimeOffRequestId = @intTimeOffRequestId
 		END
 		ELSE
@@ -307,22 +300,6 @@ SELECT @intTimeOffRequestId = @intTransactionId
 								AND EL.intPayGroupId IS NOT NULL
 					WHERE 
 						tblPRPayGroupDetail.intPayGroupDetailId = @intPayGroupDetail AND tblPRPayGroupDetail.intSource = 0
-			END
-			ELSE
-			BEGIN
-				/* If Time Off is not setup to Deduct from Earning, deduct it directly from time off */
-				UPDATE tblPREmployeeTimeOff 
-					SET dblHoursUsed = dblHoursUsed + tblTimeOffRequest.dblRequest
-				FROM 
-				(SELECT TOR.intTimeOffRequestId, 
-						ET.intTypeTimeOffId, 
-						TOR.intEntityEmployeeId, 
-						TOR.dblRequest 
-				   FROM tblPREmployeeTimeOff ET INNER JOIN tblPRTimeOffRequest TOR
-					 ON ET.intEntityEmployeeId = TOR.intEntityEmployeeId AND ET.intTypeTimeOffId = TOR.intTypeTimeOffId) tblTimeOffRequest
-				WHERE tblPREmployeeTimeOff.intTypeTimeOffId = tblTimeOffRequest.intTypeTimeOffId
-					AND tblPREmployeeTimeOff.intEntityEmployeeId = tblTimeOffRequest.intEntityEmployeeId
-					AND tblTimeOffRequest.intTimeOffRequestId = @intTimeOffRequestId
 			END
 		END	
 	END

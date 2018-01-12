@@ -1247,19 +1247,6 @@ BEGIN
 			DELETE FROM tblPRPaycheckEarning 
 			WHERE intPaycheckId = @intPaycheckId AND dblTotal = 0
 
-			/* Update the Employee Time Off Hours Used */
-			UPDATE tblPREmployeeTimeOff
-				SET	dblHoursUsed = dblHoursUsed + A.dblHours
-				FROM (SELECT 
-						intPaycheckId
-						,intEmployeeTimeOffId
-						,dblHours = SUM(dblHours)
-						FROM tblPRPaycheckEarning
-						WHERE intPaycheckId = @intPaycheckId
-						GROUP BY intPaycheckId, intEmployeeTimeOffId) A
-				WHERE tblPREmployeeTimeOff.intTypeTimeOffId = A.intEmployeeTimeOffId
-					AND tblPREmployeeTimeOff.[intEntityEmployeeId] = @intEmployeeId
-
 			/* Update Paycheck Direct Deposit Distribution */
 			IF (@intBankTransactionTypeId = @DIRECT_DEPOSIT)
 				EXEC uspPRPaycheckEFTDistribution @intPaycheckId
@@ -1274,19 +1261,6 @@ BEGIN
 				ysnPosted = 0
 				,dtmPosted = NULL 
 			WHERE strPaycheckId = @strTransactionId
-
-			/* Update the Employee Time Off Hours Used */
-			UPDATE tblPREmployeeTimeOff
-				SET	dblHoursUsed = dblHoursUsed - A.dblHours
-				FROM (SELECT 
-						intPaycheckId
-						,intEmployeeTimeOffId
-						,dblHours = SUM(dblHours)
-						FROM tblPRPaycheckEarning
-						WHERE intPaycheckId = @intPaycheckId
-						GROUP BY intPaycheckId, intEmployeeTimeOffId) A
-				WHERE tblPREmployeeTimeOff.intTypeTimeOffId = A.intEmployeeTimeOffId
-					AND tblPREmployeeTimeOff.[intEntityEmployeeId] = @intEmployeeId
 
 			/* Delete Any Direct Deposit Entry */
 			IF (@intBankTransactionTypeId = @DIRECT_DEPOSIT)
