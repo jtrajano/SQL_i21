@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuICGetReceiptAddPurchaseContract]
+﻿CREATE  VIEW [dbo].[vyuICGetReceiptAddPurchaseContract]
 AS
 
 SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId, intItemId, intLineNo) AS INT)
@@ -34,22 +34,22 @@ FROM (
 		, strSubLocationName		= ContractView.strSubLocationName
 		, intStorageLocationId		= ContractView.intStorageLocationId
 		, strStorageLocationName	= ContractView.strStorageLocationName
-		, intOrderUOMId				= ItemUOM.intItemUOMId
+		, intOrderUOMId				= BasketItemUOM.intItemUOMId
 		, strOrderUOM				= ItemUnitMeasure.strUnitMeasure
 		, dblOrderUOMConvFactor		= ItemUOM.dblUnitQty
-		, intItemUOMId				= ItemUOM.intItemUOMId 
+		, intItemUOMId				= CASE WHEN ISNULL(ContractView.ysnIsBasket, 0) = 1 THEN BasketItemUOM.intItemUOMId ELSE ItemUOM.intItemUOMId END 
 		, strUnitMeasure			= ItemUnitMeasure.strUnitMeasure
 		, strUnitType				= ItemUnitMeasure.strUnitType
 		-- Gross/Net UOM -----------
 		, intWeightUOMId			= CASE WHEN ISNULL(ContractView.ysnIsBasket, 0) = 1 THEN BasketWeightUOM.intItemUOMId ELSE GrossNetUOM.intItemUOMId END  
 		, strWeightUOM				= GrossNetUnitMeasure.strUnitMeasure 
 		-- Conversion factor -------
-		, dblItemUOMConvFactor		= CASE WHEN ISNULL(ContractView.ysnIsBasket, 0) = 1 THEN BasketItemUOM.dblUnitQty ELSE ItemUOM.dblUnitQty  END  
-		, dblWeightUOMConvFactor	= CASE WHEN ISNULL(ContractView.ysnIsBasket, 0) = 1 THEN BasketWeightUOM.dblUnitQty ELSE GrossNetUOM.dblUnitQty END  
+		, dblItemUOMConvFactor		= CASE WHEN ISNULL(ContractView.ysnIsBasket, 0) = 1 THEN ItemUOM.dblUnitQty ELSE ItemUOM.dblUnitQty  END  
+		, dblWeightUOMConvFactor	= CASE WHEN ISNULL(ContractView.ysnIsBasket, 0) = 1 THEN GrossNetUOM.dblUnitQty ELSE GrossNetUOM.dblUnitQty END  
 		-- Cost UOM ----------------
 		, intCostUOMId				= CASE WHEN ISNULL(ContractView.ysnIsBasket, 0) = 1 THEN BasketCostUOM.intItemUOMId ELSE ItemCostUOM.intItemUOMId END  -- ContractView.intSeqPriceUOMId
 		, strCostUOM				= CASE WHEN ISNULL(ContractView.ysnIsBasket, 0) = 1 THEN BasketCostUnitMeasure.strUnitMeasure ELSE ItemCostUnitMeasure.strUnitMeasure END  
-		, dblCostUOMConvFactor		= CASE WHEN ISNULL(ContractView.ysnIsBasket, 0) = 1 THEN BasketCostUOM.dblUnitQty ELSE ItemCostUOM.dblUnitQty END  
+		, dblCostUOMConvFactor		= CASE WHEN ISNULL(ContractView.ysnIsBasket, 0) = 1 THEN ItemCostUOM.dblUnitQty ELSE ItemCostUOM.dblUnitQty END  
 		----------------------------
 		, intLifeTime				= CASE WHEN ISNULL(ContractView.ysnIsBasket, 0) = 1 THEN BasketItem.intLifeTime ELSE ContractView.intLifeTime END
 		, strLifeTimeType			= CASE WHEN ISNULL(ContractView.ysnIsBasket, 0) = 1 THEN BasketItem.strLifeTimeType ELSE ContractView.strLifeTimeType END
@@ -63,14 +63,14 @@ FROM (
 		, strSubCurrency			= SubCurrency.strCurrency
 		, dblGross					= 
 									CASE WHEN ISNULL(ContractView.ysnIsBasket, 0) = 1 THEN 
-										CAST(dblDetailQuantity - (dblDetailQuantity - dblBalance) AS NUMERIC(38, 20)) 
+										CAST((dblDetailQuantity - (dblDetailQuantity - dblBalance)) AS NUMERIC(38, 20)) 
 									ELSE 
 										CAST(0 AS NUMERIC(38, 20))									
 									END
 									
 		, dblNet					= 
 									CASE WHEN ISNULL(ContractView.ysnIsBasket, 0) = 1 THEN 
-										CAST(dblDetailQuantity - (dblDetailQuantity - dblBalance) AS NUMERIC(38, 20))
+										CAST((dblDetailQuantity - (dblDetailQuantity - dblBalance)) AS NUMERIC(38, 20))
 									ELSE 
 										CAST(0 AS NUMERIC(38, 20))									
 									END
