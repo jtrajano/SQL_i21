@@ -9,7 +9,8 @@ SELECT DISTINCT Rtrim(Convert(CHAR, W.dtmPlannedDate, 101)) [Dump Date]
 		WHERE WP.intWorkOrderId = W.intWorkOrderId
 		) AS [Production Lot]
 	,MC.strCellName AS Line
-	,W.strWorkOrderNo AS [Job #]
+	,W.strWorkOrderNo AS [Work Order #]
+	,W.strReferenceNo AS [Job #]
 	,I1.strItemNo AS [WSI Item]
 	,I1.strDescription [WSI Item Description]
 	,(
@@ -57,6 +58,7 @@ GROUP BY W.dtmPlannedDate
 	,I.strDescription
 	,MC.strCellName
 	,W.strWorkOrderNo
+	,W.strReferenceNo
 	,I1.strItemNo
 	,I1.strDescription
 	,UM1.strUnitMeasure

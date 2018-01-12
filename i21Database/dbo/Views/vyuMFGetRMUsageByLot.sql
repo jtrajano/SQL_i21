@@ -5,6 +5,7 @@ SELECT [Dump Date]
 	,[Product Description]
 	,[Production Lot]
 	,Line
+	,[Work Order #]
 	,[Job #]
 	,[WSI Item]
 	,[WSI Item Description]
@@ -20,10 +21,12 @@ FROM (
 		,(
 			SELECT TOP 1 strParentLotNumber
 			FROM dbo.tblMFWorkOrderProducedLot WP
-			WHERE WP.intWorkOrderId = W.intWorkOrderId and WP.intShiftId=WI.intShiftId
+			WHERE WP.intWorkOrderId = W.intWorkOrderId
+				AND WP.intShiftId = WI.intShiftId
 			) AS [Production Lot]
 		,MC.strCellName AS Line
-		,W.strWorkOrderNo AS [Job #]
+		,W.strWorkOrderNo AS [Work Order #]
+		,W.strReferenceNo AS [Job #]
 		,I1.strItemNo AS [WSI Item]
 		,I1.strDescription [WSI Item Description]
 		,IPL.strParentLotNumber AS [Lot #]
@@ -69,6 +72,7 @@ GROUP BY [Dump Date]
 	,[Product Description]
 	,[Production Lot]
 	,Line
+	,[Work Order #]
 	,[Job #]
 	,[WSI Item]
 	,[WSI Item Description]
