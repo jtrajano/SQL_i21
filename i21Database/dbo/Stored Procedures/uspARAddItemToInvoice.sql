@@ -249,6 +249,83 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 	BEGIN
 		BEGIN TRY
+
+		DECLARE  @ContractNumber	INT
+		,@ContractSeq		INT
+		,@InvoiceType		NVARCHAR(200)
+		,@TermId			INT
+		,@Pricing			NVARCHAR(250)	= NULL
+		,@ContractHeaderId	INT				= NULL
+		,@ContractDetailId	INT				= NULL
+		,@EntityCustomerId	INT
+		,@InvoiceDate		DATETIME
+
+		BEGIN TRY
+		SELECT 
+			 @EntityCustomerId	= [intEntityCustomerId]
+			,@CompanyLocationId = [intCompanyLocationId]
+			,@InvoiceDate		= [dtmDate]
+			,@CurrencyId		= [intCurrencyId]
+			,@InvoiceType		= strType
+			,@TermId			= intTermId
+		FROM
+			tblARInvoice
+		WHERE
+			intInvoiceId = @InvoiceId
+
+		IF ISNULL(@ItemUOMId, 0) = 0
+		BEGIN
+			SELECT TOP 1 @ItemUOMId = [intItemUOMId] FROM tblICItemUOM WHERE [intItemId] = @ItemId ORDER BY [ysnStockUnit] DESC, [intItemUOMId] 
+		END
+
+
+
+		EXEC dbo.[uspARGetItemPrice]  
+			 @ItemId					= @ItemId
+			,@CustomerId				= @EntityCustomerId
+			,@LocationId				= @CompanyLocationId
+			,@ItemUOMId					= @ItemUOMId
+			,@TransactionDate			= @InvoiceDate
+			,@Quantity					= @ItemQtyShipped
+			,@Price						= @ItemPrice			OUTPUT
+			,@Pricing					= @Pricing			OUTPUT
+			,@ContractHeaderId			= @ContractHeaderId	OUTPUT
+			,@ContractDetailId			= @ContractDetailId	OUTPUT
+			,@ContractNumber			= @ContractNumber		OUTPUT
+			,@ContractSeq				= @ContractSeq			OUTPUT
+			,@TermDiscount				= @ItemTermDiscount		OUTPUT
+			,@TermDiscountBy			= @ItemTermDiscountBy	OUTPUT
+			--,@AvailableQuantity			= NULL OUTPUT
+			--,@UnlimitedQuantity			= 0    OUTPUT
+			--,@OriginalQuantity			= NULL
+			--,@CustomerPricingOnly			= 0
+			--,@ItemPricingOnly				= 0
+			--,@VendorId					= NULL
+			--,@SupplyPointId				= NULL
+			--,@LastCost					= NULL
+			--,@ShipToLocationId			= NULL
+			--,@VendorLocationId			= NULL
+			--,@PricingLevelId			= NULL
+			--,@AllowQtyToExceedContract	= 0
+			,@InvoiceType				= @InvoiceType
+			,@TermId					= @TermId
+
+		IF (ISNULL(@RefreshPrice,0) = 1)
+			BEGIN
+				SET @ItemUnitPrice = @ItemPrice
+				SET @ItemPricing = @Pricing
+				SET @ItemContractHeaderId = @ContractHeaderId
+				SET @ItemContractDetailId = @ContractDetailId
+			END
+		
+		END TRY
+		BEGIN CATCH
+			SET @ErrorMessage = ERROR_MESSAGE();
+			IF ISNULL(@RaiseError,0) = 1
+				RAISERROR(@ErrorMessage, 16, 1);
+			RETURN 0;
+		END CATCH
+
 			INSERT INTO tblARInvoiceDetail
 				([intInvoiceId]
 				,[intItemId]
