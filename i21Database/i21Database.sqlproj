@@ -6005,6 +6005,7 @@
     <Build Include="dbo\Stored Procedures\uspCFCardSynchronization.sql" />
     <Build Include="dbo\Views\vyuARPOSEndOfDayReport.sql" />
     <Build Include="dbo\Views\vyuARPOSGLSummary.sql" />
+    <Build Include="dbo\Views\vyuCCVendorCombo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

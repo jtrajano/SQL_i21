@@ -15,8 +15,10 @@
 	[ysnPosted]  BIT  DEFAULT ((0)) NOT NULL,
 	[intCMBankTransactionId] INT NULL,
 	[intSort] [int] NULL,
+	[intCompanyLocationId] [int] null,
 	[intConcurrencyId] [int] NOT NULL,
 	CONSTRAINT [PK_tblCCSiteHeader] PRIMARY KEY ([intSiteHeaderId]),
 	CONSTRAINT [FK_tblCCSiteHeader_tblCCVendorDefault_intVendorDefaultId] FOREIGN KEY ([intVendorDefaultId]) REFERENCES [dbo].[tblCCVendorDefault] ([intVendorDefaultId]),
+	CONSTRAINT [FK_tblCCSiteHeader_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
 	CONSTRAINT [FK_tblCCSiteHeader_tblCMBankAccount_intBankAccountId] FOREIGN KEY ([intBankAccountId]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId])  
 )
