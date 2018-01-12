@@ -674,7 +674,7 @@ BEGIN
 					ON RTRIM(LTRIM(GA.[galoc_loc_no] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationNumber] COLLATE Latin1_General_CI_AS))	
 			LEFT JOIN
 				tblGLAccountSegment GL
-					ON GA.galoc_gl_profit_center = CAST(GL.strCode AS INT)									
+					ON GA.galoc_gl_profit_center = CAST(GL.strCode AS INT) AND GL.intAccountStructureId = (select top 1 intAccountStructureId from tblGLAccountStructure where strStructureName = ''Location'')
 			WHERE 	CL.[strLocationNumber] IS NULL AND NOT exists (SELECT * FROM aglocmst AG WHERE AG.agloc_loc_no = GA.galoc_loc_no)									
 				
 			ORDER BY
