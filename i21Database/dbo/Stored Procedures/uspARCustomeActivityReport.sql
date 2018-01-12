@@ -258,8 +258,8 @@ INNER JOIN (
 	WHERE I.ysnPosted = 1
 	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
-	AND (@strInvoiceNumber IS NULL OR I.strInvoiceNumber LIKE '%'+@strInvoiceNumber+'%')
-	AND (@strRecordNumber IS NULL OR 0 = 1)
+	--AND (@strInvoiceNumber IS NULL OR I.strInvoiceNumber LIKE '%'+@strInvoiceNumber+'%')
+	--AND (@strRecordNumber IS NULL OR 0 = 1)
 
 	UNION ALL
 
@@ -292,9 +292,9 @@ INNER JOIN (
 	  AND ysnInvoicePrepayment = 0
 	  AND ISNULL(dblAmountPaid, 0) <> 0
 	  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN @dtmDateFrom AND @dtmDateTo
-	  AND (@strPaymentMethod IS NULL OR P.strPaymentMethod LIKE '%'+@strPaymentMethod+'%')  
-	  AND (@strRecordNumber IS NULL OR P.strRecordNumber LIKE '%'+@strRecordNumber+'%')
-	  AND (@strInvoiceNumber IS NULL OR 0 = 1)
+	  --AND (@strPaymentMethod IS NULL OR P.strPaymentMethod LIKE '%'+@strPaymentMethod+'%')  
+	  --AND (@strRecordNumber IS NULL OR P.strRecordNumber LIKE '%'+@strRecordNumber+'%')
+	  --AND (@strInvoiceNumber IS NULL OR 0 = 1)
 ) TRANSACTIONS ON AGING.intEntityCustomerId = TRANSACTIONS.intEntityCustomerId
 OUTER APPLY (
 	SELECT TOP 1 P.intEntityCustomerId
