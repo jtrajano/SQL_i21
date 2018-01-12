@@ -467,6 +467,85 @@ BEGIN TRY
 		
 		DELETE FROM #DistributionDetailTable WHERE intLoadDistributionDetailId = @intLoadDistributionDetailId
 	END
+
+	-- Validate Zero values -- TR-730 & TR-909
+	SELECT DISTINCT strOrigin = CASE WHEN ISNULL(TR.intLoadReceiptId, '') != '' THEN TR.strOrigin ELSE BlendIngredient.strOrigin END
+		, dblCost = CASE WHEN ISNULL(TR.intLoadReceiptId, '') != '' THEN TR.dblUnitCost ELSE BlendIngredient.dblUnitCost END
+		, dblFreight = CASE WHEN ISNULL(TR.intLoadReceiptId, '') != '' THEN TR.dblFreightRate ELSE BlendIngredient.dblFreightRate END
+		, dblSurcharge = CASE WHEN ISNULL(TR.intLoadReceiptId, '') != '' THEN TR.dblPurSurcharge ELSE BlendIngredient.dblPurSurcharge END
+		, DD.intItemId
+		, strDestination = DH.strDestination
+		, dblPrice = DD.dblPrice
+		, dblDistFreight = DD.dblFreightRate
+		, dblDistSurcharge
+		, ysnFreightOnly = ISNULL(CustomerFreight.ysnFreightOnly, 0)
+		, strReceiptLink = CASE WHEN ISNULL(TR.intLoadReceiptId, '') != '' THEN TR.strReceiptLine ELSE BlendIngredient.strReceiptLink END
+	INTO #tmpDistributionList
+	FROM tblTRLoadHeader TL
+	LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
+	LEFT JOIN tblARCustomer Customer ON Customer.intEntityId = DH.intEntityCustomerId
+	LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = DH.intShipToLocationId
+	LEFT JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
+	LEFT JOIN tblICItem Item ON Item.intItemId = DD.intItemId
+	LEFT JOIN vyuICGetItemStock IC ON IC.intItemId = DD.intItemId AND IC.intLocationId = DH.intCompanyLocationId
+	LEFT JOIN vyuTRGetLoadReceipt TR ON TR.intLoadHeaderId = TL.intLoadHeaderId AND TR.strReceiptLine = DD.strReceiptLink
+	LEFT JOIN (
+		SELECT DistItem.intLoadDistributionDetailId
+			, HeaderDistItem.intLoadDistributionHeaderId
+			, BlendIngredient.strReceiptLink
+			, Receipt.strOrigin
+			, Receipt.dblUnitCost
+			, Receipt.dblFreightRate
+			, Receipt.dblPurSurcharge
+			, Receipt.strZipCode
+		FROM tblTRLoadDistributionDetail DistItem
+		LEFT JOIN tblTRLoadDistributionHeader HeaderDistItem ON HeaderDistItem.intLoadDistributionHeaderId = DistItem.intLoadDistributionHeaderId
+		LEFT JOIN tblTRLoadHeader LoadHeader ON LoadHeader.intLoadHeaderId = HeaderDistItem.intLoadHeaderId
+		LEFT JOIN vyuTRGetLoadBlendIngredient BlendIngredient ON BlendIngredient.intLoadDistributionDetailId = DistItem.intLoadDistributionDetailId
+		LEFT JOIN vyuTRGetLoadReceipt Receipt ON Receipt.intLoadHeaderId = LoadHeader.intLoadHeaderId AND Receipt.intItemId = BlendIngredient.intIngredientItemId
+		WHERE ISNULL(DistItem.strReceiptLink, '') = ''
+	) BlendIngredient ON BlendIngredient.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
+	LEFT JOIN tblARCustomerFreightXRef CustomerFreight ON CustomerFreight.intEntityCustomerId = DH.intEntityCustomerId
+			AND CustomerFreight.intEntityLocationId = DH.intShipToLocationId
+			AND CustomerFreight.intCategoryId = Item.intCategoryId
+			AND CustomerFreight.strZipCode = ISNULL(TR.strZipCode, BlendIngredient.strZipCode)
+	WHERE (ISNULL(TR.strOrigin, '') != '' OR ISNULL(BlendIngredient.strOrigin, '') != '')
+		AND TL.intLoadHeaderId = @intLoadHeaderId
+
+	DECLARE @errMessage NVARCHAR(250)
+		, @strLink NVARCHAR(10)
+	
+	SELECT TOP 1 @strLink = ISNULL(strReceiptLink, '') FROM #tmpDistributionList WHERE strOrigin = 'Terminal' AND strDestination = 'Customer' AND ISNULL(dblCost, 0) = 0 AND ISNULL(ysnFreightOnly, 0) = 0
+	IF ISNULL(@strLink, '') <> ''
+	BEGIN
+		SET @errMessage = 'Terminal to Customer Load cannot have a cost of zero(0). ' + @strLink + ' has a zero(0) cost.' 
+		RAISERROR(@errMessage, 16, 1)
+	END
+
+	SELECT TOP 1 @strLink = ISNULL(strReceiptLink, '') FROM #tmpDistributionList WHERE ISNULL(ysnFreightOnly, 0) = 0 AND ISNULL(dblCost, 0) = 0 AND ISNULL(dblPrice, 0) = 0
+	IF ISNULL(@strLink, '') <> ''
+	BEGIN
+		SET @errMessage = 'Cost and Price cannot be zero(0) for Non-Freight-Only Customers. ' + @strLink + ' has a zero(0) cost and price.' 
+		RAISERROR(@errMessage, 16, 1)
+	END
+
+	SELECT TOP 1 @strLink = ISNULL(strReceiptLink, '') FROM #tmpDistributionList WHERE strOrigin = 'Terminal' AND ISNULL(ysnFreightOnly, 0) = 0 AND ISNULL(dblCost, 0) = 0
+	IF ISNULL(@strLink, '') <> ''
+	BEGIN
+		SET @errMessage = 'Terminal Receipts cannot have a cost of zero(0). ' + @strLink + ' has a zero(0) cost.' 
+		RAISERROR(@errMessage, 16, 1)
+	END
+
+	SELECT TOP 1 @strLink = ISNULL(strReceiptLink, '') FROM #tmpDistributionList WHERE strDestination = 'Customer' AND ISNULL(ysnFreightOnly, 0) = 0 AND ISNULL(dblPrice, 0) = 0
+	IF ISNULL(@strLink, '') <> ''
+	BEGIN
+		SET @errMessage = 'Customer Distributions cannot have a price of zero(0). ' + @strLink + ' has a zero(0) price.' 
+		RAISERROR(@errMessage, 16, 1)
+	END
+	
+	DROP TABLE #tmpDistributionList
+	----------------------------------------------------------------------------------------
+
 	
 	SELECT intLoadReceiptId
 		, intInventoryReceiptId
