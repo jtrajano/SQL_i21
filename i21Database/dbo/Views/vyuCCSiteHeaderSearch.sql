@@ -6,7 +6,7 @@
 			, strVendorName = e.strName
 			,d.intBankAccountId
 			, SiteHeader.strApType
-			, d.intCompanyLocationId
+			, l.intCompanyLocationId
 			, l.strLocationName
 			, SiteHeader.dtmDate
 			, SiteHeader.strReference
@@ -22,4 +22,4 @@
 		LEFT join tblCCVendorDefault d on d.intVendorDefaultId = SiteHeader.intVendorDefaultId
 		LEFT join tblAPVendor v on v.intEntityId = d.intVendorId
 		LEFT join tblEMEntity e on e.intEntityId = v.intEntityId
-		LEFT JOIN tblSMCompanyLocation l ON l.intCompanyLocationId = d.intCompanyLocationId
+		LEFT JOIN tblSMCompanyLocation l ON l.intCompanyLocationId = SiteHeader.intCompanyLocationId

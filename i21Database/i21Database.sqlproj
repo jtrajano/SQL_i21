@@ -6067,6 +6067,7 @@
     <Build Include="dbo\Views\vyuARPOSGLSummary.sql" />
     <None Include="Scripts\Post-Deployment\SM\1810_RenameCompanyToMultiCompany.sql" />
     <None Include="Scripts\Post-Deployment\EM\1740_Activate_Default_Contact.sql" />
+    <Build Include="dbo\Views\vyuCCVendorCombo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
