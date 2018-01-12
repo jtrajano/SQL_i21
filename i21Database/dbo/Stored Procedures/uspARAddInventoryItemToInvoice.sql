@@ -168,54 +168,61 @@ BEGIN
 END
 	
 	
+DECLARE  @ContractNumber	INT
+		,@ContractSeq		INT
+		,@InvoiceType		NVARCHAR(200)
+		,@TermId			INT
+		,@Pricing			NVARCHAR(250)	= NULL
+		,@ContractHeaderId	INT				= NULL
+		,@ContractDetailId	INT				= NULL	
+
+BEGIN TRY
+SELECT TOP 1 @InvoiceType = strType, @TermId = intTermId FROM tblARInvoice WHERE intInvoiceId = @InvoiceId 
+EXEC dbo.[uspARGetItemPrice]  
+		@ItemId					= @ItemId
+	,@CustomerId				= @EntityCustomerId
+	,@LocationId				= @CompanyLocationId
+	,@ItemUOMId					= @ItemUOMId
+	,@TransactionDate			= @InvoiceDate
+	,@Quantity					= @ItemQtyShipped
+	,@Price						= @ItemPrice			OUTPUT
+	,@Pricing					= @Pricing			OUTPUT
+	,@ContractHeaderId			= @ContractHeaderId	OUTPUT
+	,@ContractDetailId			= @ContractDetailId	OUTPUT
+	,@ContractNumber			= @ContractNumber		OUTPUT
+	,@ContractSeq				= @ContractSeq			OUTPUT
+	,@TermDiscount				= @ItemTermDiscount		OUTPUT
+	,@TermDiscountBy			= @ItemTermDiscountBy	OUTPUT
+	--,@AvailableQuantity			= NULL OUTPUT
+	--,@UnlimitedQuantity			= 0    OUTPUT
+	--,@OriginalQuantity			= NULL
+	--,@CustomerPricingOnly			= 0
+	--,@ItemPricingOnly				= 0
+	--,@VendorId					= NULL
+	--,@SupplyPointId				= NULL
+	--,@LastCost					= NULL
+	--,@ShipToLocationId			= NULL
+	--,@VendorLocationId			= NULL
+	--,@PricingLevelId			= NULL
+	--,@AllowQtyToExceedContract	= 0
+	,@InvoiceType				= @InvoiceType
+	,@TermId					= @TermId
+
 IF (ISNULL(@RefreshPrice,0) = 1)
 	BEGIN
-		DECLARE  @ContractNumber	INT
-				,@ContractSeq		INT
-				,@InvoiceType		NVARCHAR(200)
-				,@TermId			INT
-
-		BEGIN TRY
-		SELECT TOP 1 @InvoiceType = strType, @TermId = intTermId FROM tblARInvoice WHERE intInvoiceId = @InvoiceId 
-		EXEC dbo.[uspARGetItemPrice]  
-			 @ItemId					= @ItemId
-			,@CustomerId				= @EntityCustomerId
-			,@LocationId				= @CompanyLocationId
-			,@ItemUOMId					= @ItemUOMId
-			,@TransactionDate			= @InvoiceDate
-			,@Quantity					= @ItemQtyShipped
-			,@Price						= @ItemPrice			OUTPUT
-			,@Pricing					= @ItemPricing			OUTPUT
-			,@ContractHeaderId			= @ItemContractHeaderId	OUTPUT
-			,@ContractDetailId			= @ItemContractDetailId	OUTPUT
-			,@ContractNumber			= @ContractNumber		OUTPUT
-			,@ContractSeq				= @ContractSeq			OUTPUT
-			,@TermDiscount				= @ItemTermDiscount		OUTPUT
-			,@TermDiscountBy			= @ItemTermDiscountBy	OUTPUT
-			--,@AvailableQuantity			= NULL OUTPUT
-			--,@UnlimitedQuantity			= 0    OUTPUT
-			--,@OriginalQuantity			= NULL
-			--,@CustomerPricingOnly			= 0
-			--,@ItemPricingOnly				= 0
-			--,@VendorId					= NULL
-			--,@SupplyPointId				= NULL
-			--,@LastCost					= NULL
-			--,@ShipToLocationId			= NULL
-			--,@VendorLocationId			= NULL
-			--,@PricingLevelId			= NULL
-			--,@AllowQtyToExceedContract	= 0
-			,@InvoiceType				= @InvoiceType
-			,@TermId					= @TermId
-
 		SET @ItemUnitPrice = @ItemPrice
-		END TRY
-		BEGIN CATCH
-			SET @ErrorMessage = ERROR_MESSAGE();
-			IF ISNULL(@RaiseError,0) = 1
-				RAISERROR(@ErrorMessage, 16, 1);
-			RETURN 0;
-		END CATCH
-	END	
+		SET @ItemPricing = @Pricing
+		SET @ItemContractHeaderId = @ContractHeaderId
+		SET @ItemContractDetailId = @ContractDetailId
+	END
+		
+END TRY
+BEGIN CATCH
+	SET @ErrorMessage = ERROR_MESSAGE();
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(@ErrorMessage, 16, 1);
+	RETURN 0;
+END CATCH
 
 BEGIN TRY
 	SELECT TOP 1 @existingInvoiceDetail = intInvoiceDetailId 
