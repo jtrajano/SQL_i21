@@ -22,5 +22,8 @@ BEGIN
         SET @intEnd = CHARINDEX('>', @strHTMLText, CHARINDEX('<', @strHTMLText))
         SET @intLength = (@intEnd - @intStart) + 1
     END
+    
+    set @strHTMLText = REPLACE(@strHTMLText, '&nbsp;', CHAR(13) + CHAR(10))
+
     RETURN LTRIM(RTRIM(@strHTMLText))
 END
