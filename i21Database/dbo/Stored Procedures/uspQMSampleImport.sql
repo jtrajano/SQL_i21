@@ -16,6 +16,7 @@ BEGIN TRY
 		,strItemNumber NVARCHAR(50)
 		,strSampleTypeName NVARCHAR(50)
 		,strVendorName NVARCHAR(100)
+		,strWarehouse NVARCHAR(50)
 		,strContractNumber NVARCHAR(50)
 		,strContainerNumber NVARCHAR(100)
 		,strMarks NVARCHAR(100)
@@ -32,6 +33,7 @@ BEGIN TRY
 		,@strItemNumber NVARCHAR(50)
 		,@strSampleTypeName NVARCHAR(50)
 		,@strVendorName NVARCHAR(100)
+		,@strWarehouse NVARCHAR(50)
 		,@strContractNumber NVARCHAR(50)
 		,@strContainerNumber NVARCHAR(100)
 		,@strMarks NVARCHAR(100)
@@ -68,6 +70,7 @@ BEGIN TRY
 		,@strItemNo NVARCHAR(50)
 		,@strSampleImportDateTimeFormat NVARCHAR(50)
 		,@intConvertYear INT
+		,@intCompanyLocationSubLocationId INT
 	DECLARE @FormulaProperty TABLE (
 		intTestResultId INT
 		,strFormula NVARCHAR(MAX)
@@ -105,6 +108,7 @@ BEGIN TRY
 		,strItemNumber
 		,strSampleTypeName
 		,strVendorName
+		,strWarehouse
 		,strContractNumber
 		,strContainerNumber
 		,strMarks
@@ -121,6 +125,7 @@ BEGIN TRY
 		,strItemNumber
 		,strSampleTypeName
 		,strVendorName
+		,strWarehouse
 		,strContractNumber
 		,strContainerNumber
 		,strMarks
@@ -142,6 +147,7 @@ BEGIN TRY
 			,@strItemNumber = NULL
 			,@strSampleTypeName = NULL
 			,@strVendorName = NULL
+			,@strWarehouse = NULL
 			,@strContractNumber = NULL
 			,@strContainerNumber = NULL
 			,@strMarks = NULL
@@ -174,12 +180,14 @@ BEGIN TRY
 			,@strCountry = NULL
 			,@intRepresentingUOMId = NULL
 			,@strItemNo = NULL
+			,@intCompanyLocationSubLocationId = NULL
 
 		SELECT @dtmSampleReceivedDate = dtmSampleReceivedDate
 			,@strSampleRefNo = strSampleNumber
 			,@strItemNumber = strItemNumber
 			,@strSampleTypeName = strSampleTypeName
 			,@strVendorName = strVendorName
+			,@strWarehouse = strWarehouse
 			,@strContractNumber = strContractNumber
 			,@strContainerNumber = strContainerNumber
 			,@strMarks = strMarks
@@ -213,6 +221,13 @@ BEGIN TRY
 				,@intEntityId = CH.intEntityId
 			FROM tblCTContractHeader CH
 			WHERE CH.strContractNumber = @strContractNumber
+		END
+
+		IF ISNULL(@strWarehouse, '') <> ''
+		BEGIN
+			SELECT @intCompanyLocationSubLocationId = intCompanyLocationSubLocationId
+			FROM tblSMCompanyLocationSubLocation
+			WHERE strSubLocationName = @strWarehouse
 		END
 
 		-- Template
@@ -259,7 +274,8 @@ BEGIN TRY
 				,dblQuantity NUMERIC(18, 6)
 				)
 
-			DELETE FROM @ContractDetail
+			DELETE
+			FROM @ContractDetail
 
 			INSERT INTO @ContractDetail
 			SELECT intContractDetailId
@@ -591,7 +607,7 @@ BEGIN TRY
 			,NULL
 			,@strContainerNumber
 			,@strMarks
-			,NULL
+			,@intCompanyLocationSubLocationId
 			,@strCountry
 			,NULL
 			,NULL
@@ -773,7 +789,8 @@ BEGIN TRY
 			AND SI.strSampleNumber = @strSampleRefNo
 
 		-- Calculate and update formula property value
-		DELETE FROM @FormulaProperty
+		DELETE
+		FROM @FormulaProperty
 
 		INSERT INTO @FormulaProperty
 		SELECT intTestResultId
