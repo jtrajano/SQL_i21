@@ -286,7 +286,7 @@ BEGIN TRY
 
 			SELECT @intEntityLocationId = intEntityLocationId
 			FROM tblEMEntityLocation
-			WHERE strCheckPayeeName  = @strCustomerCode
+			WHERE strCheckPayeeName = @strCustomerCode
 
 			IF @intEntityLocationId IS NULL
 			BEGIN
@@ -519,7 +519,7 @@ BEGIN TRY
 					,ysnActive
 					,strTimezone
 					,intConcurrencyId
-					,strCheckPayeeName 
+					,strCheckPayeeName
 					)
 				SELECT TOP 1 @intEntityId intEntityId
 					,strShipToState + ' ' + Ltrim(IsNULL((
@@ -621,19 +621,15 @@ BEGIN TRY
 				--	JOIN tblEMEntityLocation EL ON EL.intEntityId = E.intEntityId
 				--	WHERE ET.strType = 'Customer'
 				--		AND EL.intEntityLocationId = @intEntityLocationId
-
 				--	SELECT @intEntityId = NULL
-
 				--SELECT @intEntityId = intEntityId
 				--FROM tblEMEntity
 				--WHERE strName = @strShipToName
-
 				--	UPDATE tblMFEDI940
 				--	SET ysnNotify = 1
 				--		,intCustomerCodeType = 3
 				--	WHERE strDepositorOrderNumber = @strOrderNo
 				--END
-
 				IF NOT EXISTS (
 						SELECT *
 						FROM tblEMEntityLocation
@@ -673,6 +669,9 @@ BEGIN TRY
 					)
 			END
 
+			DELETE
+			FROM @ShipmentStagingTable
+
 			INSERT INTO @ShipmentStagingTable (
 				intOrderType
 				,intSourceType
@@ -697,7 +696,7 @@ BEGIN TRY
 				,dblForexRate
 				,dtmRequestedArrivalDate
 				)
-			SELECT intOrderType = 4
+			SELECT DISTINCT intOrderType = 4
 				,intSourceType = 0
 				,intEntityCustomerId = EL.intEntityId
 				,dtmShipDate = EDI.strShipmentDate
@@ -727,9 +726,6 @@ BEGIN TRY
 			JOIN tblICItem I ON I.strItemNo = EDI.strCustomerItemNumber
 			JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
 				AND IL.intLocationId IS NOT NULL
-			--JOIN tblEMEntity E ON E.strName = EDI.strShipToName
-			--JOIN tblEMEntityType ET ON ET.intEntityId = E.intEntityId
-			--	AND ET.strType = 'Customer'
 			JOIN tblEMEntityLocation EL ON 1 = 1
 				AND EL.intEntityLocationId = @intEntityLocationId
 			LEFT JOIN dbo.tblICUnitMeasure UM ON UM.strUnitMeasure = I.strExternalGroup
@@ -742,6 +738,9 @@ BEGIN TRY
 				,@intUserId = @intUserId;
 
 			SELECT TOP 1 @intInventoryShipmentId = intInventoryShipmentId
+			FROM #tmpAddItemShipmentResult
+
+			DELETE
 			FROM #tmpAddItemShipmentResult
 
 			IF @intInventoryShipmentId > 0
@@ -811,33 +810,7 @@ BEGIN TRY
 				SELECT @intCustomTabDetailId = [Extent1].[intCustomTabDetailId]
 				FROM [dbo].[tblSMCustomTabDetail] AS [Extent1]
 				WHERE [Extent1].[intCustomTabId] = @intCustomTabId
-					AND strFieldName = 'EDI'
-
-				--INSERT [dbo].[tblSMTransaction] (
-				--	[intScreenId]
-				--	,[strTransactionNo]
-				--	,[intEntityId]
-				--	,[intRecordId]
-				--	,[intConcurrencyId]
-				--	)
-				--SELECT @intScreenId
-				--	,@strShipmentNumber
-				--	,1
-				--	,@intInventoryShipmentId
-				--	,1
-				--			SELECT @intTransactionId = scope_identity()
-				INSERT [dbo].[tblSMTabRow] (
-					[intCustomTabId]
-					,[intTransactionId]
-					,[intSort]
-					,[intConcurrencyId]
-					)
-				SELECT @intCustomTabId
-					,@intTransactionId
-					,0
-					,1
-
-				SELECT @intTabRowId = scope_identity()
+					AND strFieldName = 'CreatedByEDI'
 
 				INSERT [dbo].[tblSMFieldValue] (
 					[intTabRowId]

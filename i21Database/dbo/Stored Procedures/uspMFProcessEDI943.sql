@@ -29,12 +29,16 @@ BEGIN TRY
 		,@strShipToCity NVARCHAR(MAX)
 		,@strShipToState NVARCHAR(MAX)
 		,@strShipToZip NVARCHAR(MAX)
-				,@intTabRowId INT
+		,@intTabRowId INT
 		,@intTransactionId INT
 		,@intScreenId INT
 		,@intCustomTabId INT
 		,@intCustomTabDetailId INT
 		,@strReceiptNumber NVARCHAR(50)
+	DECLARE @tblMFItemLineNumber TABLE (
+		intEDI943Id INT
+		,intLineNumber INT
+		)
 
 	UPDATE tblMFEDI943
 	SET strDepositorOrderNumber = REPLACE(LTRIM(REPLACE(strDepositorOrderNumber, '0', ' ')), ' ', '0')
@@ -285,7 +289,7 @@ BEGIN TRY
 
 			SELECT @intEntityLocationId = intEntityLocationId
 			FROM tblEMEntityLocation
-			WHERE strCheckPayeeName  = @strCustomerCode
+			WHERE strCheckPayeeName = @strCustomerCode
 
 			IF @intEntityLocationId IS NULL
 			BEGIN
@@ -559,7 +563,7 @@ BEGIN TRY
 				FROM tblMFEDI940
 				WHERE strDepositorOrderNumber = @strOrderNo
 
-								SELECT @intEntityLocationId = SCOPE_IDENTITY()
+				SELECT @intEntityLocationId = SCOPE_IDENTITY()
 
 				--New Customer Notification
 				UPDATE tblMFEDI943
@@ -569,8 +573,6 @@ BEGIN TRY
 							THEN 2
 						END
 				WHERE strDepositorOrderNumber = @strOrderNo
-
-
 
 				INSERT INTO tblEMEntityToContact (
 					intEntityId
@@ -644,11 +646,25 @@ BEGIN TRY
 					)
 			END
 
-			SELECT @intLineNumber = 0
+			DELETE
+			FROM @tblMFItemLineNumber
+
+			INSERT INTO @tblMFItemLineNumber
+			SELECT intEDI943Id
+				,Row_Number() OVER (
+					PARTITION BY strFileName ORDER BY intEDI943Id
+					)
+			FROM tblMFEDI943
+			WHERE strDepositorOrderNumber = @strOrderNo
 
 			UPDATE tblMFEDI943
-			SET @intLineNumber = intLineNumber = @intLineNumber + 1
+			SET intLineNumber = L.intLineNumber
+			FROM tblMFEDI943 EDI
+			JOIN @tblMFItemLineNumber L ON EDI.intEDI943Id = L.intEDI943Id
 			WHERE strDepositorOrderNumber = @strOrderNo
+
+			DELETE
+			FROM @ReceiptStagingTable
 
 			INSERT INTO @ReceiptStagingTable (
 				strReceiptType
@@ -686,7 +702,7 @@ BEGIN TRY
 				,intContainerId
 				,intFreightTermId
 				)
-			SELECT strReceiptType = 'Direct'
+			SELECT DISTINCT strReceiptType = 'Direct'
 				,intEntityVendorId = EL.intEntityId
 				,intShipFromId = EL.intEntityLocationId
 				,intLocationId = IL.intLocationId
@@ -706,12 +722,12 @@ BEGIN TRY
 					END
 				,dblGross = CASE 
 					WHEN I.ysnLotWeightsRequired = 1
-						THEN dblQtyShipped * I.dblWeight
+						THEN dbo.fnMFConvertQuantityToTargetItemUOM(IU.intItemUOMId, IU1.intItemUOMId, dblQtyShipped)
 					ELSE NULL
 					END
 				,dblNet = CASE 
 					WHEN I.ysnLotWeightsRequired = 1
-						THEN dblQtyShipped * I.dblWeight
+						THEN dbo.fnMFConvertQuantityToTargetItemUOM(IU.intItemUOMId, IU1.intItemUOMId, dblQtyShipped)
 					ELSE NULL
 					END
 				,dblCost = 0
@@ -736,17 +752,24 @@ BEGIN TRY
 			JOIN tblICItem I ON I.strItemNo = EDI.strVendorItemNumber
 			JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
 				AND IL.intLocationId IS NOT NULL
-			JOIN tblEMEntityLocation EL ON 1 = 1 and EL.intEntityLocationId =@intEntityLocationId 
+			JOIN tblEMEntityLocation EL ON 1 = 1
+				AND EL.intEntityLocationId = @intEntityLocationId
 			LEFT JOIN dbo.tblICUnitMeasure UM ON UM.strUnitMeasure = I.strExternalGroup
 			LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
 				AND UM.intUnitMeasureId = IU.intUnitMeasureId
+			LEFT JOIN dbo.tblICItemUOM IU1 ON IU1.intItemId = I.intItemId
+				AND IU1.intUnitMeasureId = I.intWeightUOMId
 			WHERE EDI.strDepositorOrderNumber = @strOrderNo
+			ORDER BY EDI.intLineNumber
 
 			EXEC dbo.uspICAddItemReceipt @ReceiptEntries = @ReceiptStagingTable
 				,@OtherCharges = @OtherCharges
 				,@intUserId = @intUserId;
 
 			SELECT TOP 1 @intInventoryReceiptId = intInventoryReceiptId
+			FROM #tmpAddItemReceiptResult
+
+			DELETE
 			FROM #tmpAddItemReceiptResult
 
 			UPDATE tblICInventoryReceipt
@@ -928,7 +951,7 @@ BEGIN TRY
 				SELECT @intCustomTabDetailId = [Extent1].[intCustomTabDetailId]
 				FROM [dbo].[tblSMCustomTabDetail] AS [Extent1]
 				WHERE [Extent1].[intCustomTabId] = @intCustomTabId
-					AND strFieldName = 'EDI'
+					AND strFieldName = 'CreatedByEDI'
 
 				INSERT [dbo].[tblSMTransaction] (
 					[intScreenId]
