@@ -88,7 +88,8 @@
 	CONSTRAINT [FK_tblSOSalesOrder_tblSMTerm_intTermId] FOREIGN KEY ([intTermId]) REFERENCES [tblSMTerm]([intTermID]),
 	CONSTRAINT [FK_tblSOSalesOrder_tblSMDocumentMaintenance_intDocumentMaintenanceId] FOREIGN KEY (intDocumentMaintenanceId) REFERENCES [tblSMDocumentMaintenance](intDocumentMaintenanceId),
 	CONSTRAINT [FK_tblSOSalesOrder_tblEMEntityLineOfBusiness_intEntityLineOfBusinessId] FOREIGN KEY (intEntityLineOfBusinessId) REFERENCES [tblEMEntityLineOfBusiness](intEntityLineOfBusinessId),
-	CONSTRAINT [FK_tblSOSalesOrder_tblCRMOpportunity_intOpportunityId] FOREIGN KEY (intOpportunityId) REFERENCES [tblCRMOpportunity](intOpportunityId)
+	CONSTRAINT [FK_tblSOSalesOrder_tblCRMOpportunity_intOpportunityId] FOREIGN KEY (intOpportunityId) REFERENCES [tblCRMOpportunity](intOpportunityId),
+	CONSTRAINT [FK_tblSOSalesOrder_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID])    
 );
 GO
 
