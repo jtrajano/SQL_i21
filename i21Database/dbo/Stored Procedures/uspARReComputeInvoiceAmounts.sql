@@ -94,8 +94,8 @@ WHERE
 	[intInvoiceId] = @InvoiceIdLocal
 
 
-IF @strTransType = 'CF Invoice' OR  @strTransType = 'CF Tran' 
-BEGIN
+--IF @strTransType = 'CF Invoice' OR  @strTransType = 'CF Tran' 
+--BEGIN
 	UPDATE
 		tblARInvoice
 	SET
@@ -133,7 +133,7 @@ BEGIN
 	WHERE
 		tblARInvoice.[intInvoiceId] = T.[intInvoiceId]
 		AND tblARInvoice.[intInvoiceId] = @InvoiceIdLocal
-END
+--END
 
 
 
