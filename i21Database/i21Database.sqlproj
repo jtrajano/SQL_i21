@@ -5769,6 +5769,7 @@
     <Build Include="dbo\Tables\tblSCDeliverySheetSplit.sql" />
     <Build Include="dbo\Views\vyuCFTopCardLockCustomer.sql" />
     <Build Include="dbo\Stored Procedures\uspCFTopCardLockCustomerReport.sql" />
+    <Build Include="dbo\Views\vyuCCVendorCombo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
