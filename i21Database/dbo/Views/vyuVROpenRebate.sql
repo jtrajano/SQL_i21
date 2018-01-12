@@ -59,8 +59,8 @@ AS
 	LEFT JOIN tblVRProgramItem N
 		ON I.intProgramId = N.intProgramId
 			AND D.intCategoryId = N.intCategoryId
-			AND A.dtmDate >= M.dtmBeginDate
-			AND A.dtmDate <= ISNULL(M.dtmEndDate,'12/31/9999')
+			AND A.dtmDate >= N.dtmBeginDate
+			AND A.dtmDate <= ISNULL(N.dtmEndDate,'12/31/9999')
 	INNER JOIN tblAPVendor K 
 		ON J.intEntityId = K.intEntityId
 	WHERE (ISNULL(N.dblRebateRate,0) <> 0 OR ISNULL(M.dblRebateRate,0) <>0)
