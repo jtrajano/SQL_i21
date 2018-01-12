@@ -20,6 +20,7 @@ SELECT intSampleImportErrorId
 	,strMarks
 	,strSampleNote
 	,strHeaderComment
+	,strWarehouse
 	,dblSequenceQuantity
 	,strQuantityUOM
 	,strSampleStatus
