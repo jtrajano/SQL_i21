@@ -38,6 +38,8 @@ BEGIN
 					WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 		WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
 	ORDER BY A.[intDocumentMaintenanceId] DESC
+			, ISNULL(A.intEntityCustomerId, -10 * A.intDocumentMaintenanceId) DESC
+			, ISNULL(A.intCompanyLocationId, -100 * A.intDocumentMaintenanceId) DESC
 
 	--2. Filter by Transaction, Location, Customer
 	IF @strDefaultComment IS NULL
@@ -51,6 +53,8 @@ BEGIN
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
 			ORDER BY A.[intDocumentMaintenanceId] DESC
+				, ISNULL(A.intEntityCustomerId, -10 * A.intDocumentMaintenanceId) DESC
+				, ISNULL(A.intCompanyLocationId, -100 * A.intDocumentMaintenanceId) DESC
 		END
 	ELSE
 	BEGIN
@@ -71,6 +75,8 @@ BEGIN
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
 			ORDER BY A.[intDocumentMaintenanceId] DESC
+				, ISNULL(A.intEntityCustomerId, -10 * A.intDocumentMaintenanceId) DESC
+				, ISNULL(A.intCompanyLocationId, -100 * A.intDocumentMaintenanceId) DESC
 		END
 	ELSE
 	BEGIN
@@ -91,6 +97,8 @@ BEGIN
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
 			ORDER BY A.[intDocumentMaintenanceId] DESC
+				, ISNULL(A.intEntityCustomerId, -10 * A.intDocumentMaintenanceId) DESC
+				, ISNULL(A.intCompanyLocationId, -100 * A.intDocumentMaintenanceId) DESC
 		END
 	ELSE
 	BEGIN
@@ -111,6 +119,8 @@ BEGIN
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
 			ORDER BY A.[intDocumentMaintenanceId] DESC
+				, ISNULL(A.intEntityCustomerId, -10 * A.intDocumentMaintenanceId) DESC
+				, ISNULL(A.intCompanyLocationId, -100 * A.intDocumentMaintenanceId) DESC
 		END
 	ELSE
 	BEGIN
@@ -131,6 +141,8 @@ BEGIN
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
 			ORDER BY A.[intDocumentMaintenanceId] DESC
+				, ISNULL(A.intEntityCustomerId, -10 * A.intDocumentMaintenanceId) DESC
+				, ISNULL(A.intCompanyLocationId, -100 * A.intDocumentMaintenanceId) DESC
 		END
 	ELSE
 	BEGIN
@@ -151,6 +163,8 @@ BEGIN
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
 			ORDER BY A.[intDocumentMaintenanceId] DESC
+				, ISNULL(A.intEntityCustomerId, -10 * A.intDocumentMaintenanceId) DESC
+				, ISNULL(A.intCompanyLocationId, -100 * A.intDocumentMaintenanceId) DESC
 		END
 	ELSE
 	BEGIN
@@ -171,6 +185,8 @@ BEGIN
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
 			ORDER BY A.[intDocumentMaintenanceId] DESC
+				, ISNULL(A.intEntityCustomerId, -10 * A.intDocumentMaintenanceId) DESC
+				, ISNULL(A.intCompanyLocationId, -100 * A.intDocumentMaintenanceId) DESC
 		END
 	ELSE
 	BEGIN
@@ -191,6 +207,8 @@ BEGIN
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE [strSource] IS NULL AND A.intDocumentMaintenanceId = @DocumentMaintenanceId
 			ORDER BY A.[intDocumentMaintenanceId] DESC
+				, ISNULL(A.intEntityCustomerId, -10 * A.intDocumentMaintenanceId) DESC
+				, ISNULL(A.intCompanyLocationId, -100 * A.intDocumentMaintenanceId) DESC
 		END
 	ELSE
 	BEGIN
@@ -215,6 +233,8 @@ BEGIN
 		AND intEntityCustomerId = @intEntityCustomerId
 		AND strType = @strType
 	ORDER BY A.[intDocumentMaintenanceId] DESC
+			, ISNULL(A.intEntityCustomerId, -10 * A.intDocumentMaintenanceId) DESC
+			, ISNULL(A.intCompanyLocationId, -100 * A.intDocumentMaintenanceId) DESC
 
 	--2. Filter by Transaction, Location, Customer
 	IF @strDefaultComment IS NULL
@@ -230,6 +250,8 @@ BEGIN
 				AND intCompanyLocationId = @intCompanyLocationId
 				AND intEntityCustomerId = @intEntityCustomerId
 			ORDER BY A.[intDocumentMaintenanceId] DESC
+				, ISNULL(A.intEntityCustomerId, -10 * A.intDocumentMaintenanceId) DESC
+				, ISNULL(A.intCompanyLocationId, -100 * A.intDocumentMaintenanceId) DESC
 		END
 	ELSE
 	BEGIN
@@ -253,6 +275,8 @@ BEGIN
 				AND intEntityCustomerId IS NULL
 				AND strType = @strType
 			ORDER BY A.[intDocumentMaintenanceId] DESC
+				, ISNULL(A.intEntityCustomerId, -10 * A.intDocumentMaintenanceId) DESC
+				, ISNULL(A.intCompanyLocationId, -100 * A.intDocumentMaintenanceId) DESC
 		END
 	ELSE
 	BEGIN
@@ -275,6 +299,8 @@ BEGIN
 				AND intCompanyLocationId = @intCompanyLocationId
 				AND intEntityCustomerId IS NULL
 			ORDER BY A.[intDocumentMaintenanceId] DESC
+				, ISNULL(A.intEntityCustomerId, -10 * A.intDocumentMaintenanceId) DESC
+				, ISNULL(A.intCompanyLocationId, -100 * A.intDocumentMaintenanceId) DESC
 		END
 	ELSE
 	BEGIN
@@ -298,6 +324,8 @@ BEGIN
 				AND intEntityCustomerId = @intEntityCustomerId
 				AND strType = @strType
 			ORDER BY A.[intDocumentMaintenanceId] DESC
+				, ISNULL(A.intEntityCustomerId, -10 * A.intDocumentMaintenanceId) DESC
+				, ISNULL(A.intCompanyLocationId, -100 * A.intDocumentMaintenanceId) DESC
 		END
 	ELSE
 	BEGIN
@@ -320,6 +348,8 @@ BEGIN
 				AND intCompanyLocationId IS NULL
 				AND intEntityCustomerId = @intEntityCustomerId
 			ORDER BY A.[intDocumentMaintenanceId] DESC
+				, ISNULL(A.intEntityCustomerId, -10 * A.intDocumentMaintenanceId) DESC
+				, ISNULL(A.intCompanyLocationId, -100 * A.intDocumentMaintenanceId) DESC
 		END
 	ELSE
 	BEGIN
@@ -343,6 +373,8 @@ BEGIN
 				AND intEntityCustomerId IS NULL		
 				AND strType = @strType
 			ORDER BY A.[intDocumentMaintenanceId] DESC
+				, ISNULL(A.intEntityCustomerId, -10 * A.intDocumentMaintenanceId) DESC
+				, ISNULL(A.intCompanyLocationId, -100 * A.intDocumentMaintenanceId) DESC
 		END
 	ELSE
 	BEGIN
@@ -365,6 +397,8 @@ BEGIN
 				AND intCompanyLocationId IS NULL
 				AND intEntityCustomerId IS NULL		
 			ORDER BY A.[intDocumentMaintenanceId] DESC
+				, ISNULL(A.intEntityCustomerId, -10 * A.intDocumentMaintenanceId) DESC
+				, ISNULL(A.intCompanyLocationId, -100 * A.intDocumentMaintenanceId) DESC
 		END
 	ELSE
 	BEGIN
@@ -385,6 +419,8 @@ BEGIN
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE [strSource] IS NULL
 			ORDER BY A.[intDocumentMaintenanceId] DESC
+				, ISNULL(A.intEntityCustomerId, -10 * A.intDocumentMaintenanceId) DESC
+				, ISNULL(A.intCompanyLocationId, -100 * A.intDocumentMaintenanceId) DESC
 		END
 	ELSE
 	BEGIN
