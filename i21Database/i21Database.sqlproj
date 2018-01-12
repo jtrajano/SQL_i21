@@ -5772,6 +5772,7 @@
     <None Include="Scripts\Post-Deployment\IC\23_Update_ActualCostId_On_InventoryTransaction.sql" />
     <Build Include="dbo\Views\vyuSMBEExportCashDiscount.sql" />
     <Build Include="dbo\Tables\tblTMDeliveryFillReportStaging.sql" />
+    <Build Include="dbo\Views\vyuCCVendorCombo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
