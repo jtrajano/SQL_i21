@@ -42,17 +42,17 @@ AS
 				SEQ.strSequenceNumber,
 				SEQ.dtmContractDate,
 				SEQ.strItemNo,
-				SEQ.strEntityName		AS  strBuyer, 
+				SEQ.strEntityName		AS  strSeller , 
 				SEQ.dtmStartDate,
 				SEQ.dtmEndDate,
 				SEQ.dblQuantity,
 				SEQ.strItemUOM,
 				SEQ.intUnitMeasureId	AS	intQtyUOMId,
 
-				HDR.strCustomerContract AS	 strBuyerRef,
-				HDR.strCPContract		AS	 strSellerRef,
+				HDR.strCustomerContract AS	strSellerRef ,
+				HDR.strCPContract		AS	strBuyerRef,
 	   
-				SEY.strName				AS	 strSeller,
+				SEY.strName				AS	strBuyer,
 
 				dbo.fnCTConvertQuantityToTargetItemUOM(SEQ.intItemId,SEQ.intUnitMeasureId,CST.intUnitMeasureId,SEQ.dblQuantity)*CST.dblRate AS dblEstimatedAmount,
 				dbo.fnCTConvertQuantityToTargetItemUOM(SEQ.intItemId,SEQ.intUnitMeasureId,CST.intUnitMeasureId,dblNet)*CST.dblRate AS dblAccruedAmount,
@@ -99,8 +99,8 @@ AS
 			(
 				SELECT	S.strCurrency,
 						S.strStatus,
-						SUM(CASE WHEN ysnReceivable = 1 THEN dblRate ELSE 0 END) dblRecEstimated, 
-						SUM(CASE WHEN ysnReceivable = 1 THEN 0 ELSE dblRate END) dblPayEstimated,
+						SUM(CASE WHEN ysnReceivable = 1 THEN dblEstimatedAmount ELSE 0 END) dblRecEstimated, 
+						SUM(CASE WHEN ysnReceivable = 1 THEN 0 ELSE dblEstimatedAmount END) dblPayEstimated,
 						SUM(CASE	WHEN	S.strStatus IN ('Not yet due', 'Due') OR ysnReceivable <> 1
 								THEN	0 
 								ELSE	dbo.fnCTConvertQuantityToTargetItemUOM(intItemId,intQtyUOMId,intCostUOMId,dblNet)*dblRate 
@@ -108,12 +108,18 @@ AS
 						SUM(CASE	WHEN	S.strStatus IN ('Not yet due', 'Due') OR ysnReceivable = 1
 								THEN	0 
 								ELSE	dbo.fnCTConvertQuantityToTargetItemUOM(intItemId,intQtyUOMId,intCostUOMId,dblNet)*dblRate 
-						END) AS dblPayActual
+						END) AS dblPayActual,
+						CASE	WHEN S.strStatus = 'Not yet due'	THEN 1
+								WHEN S.strStatus = 'Due'			THEN 2
+								WHEN S.strStatus = 'Requested'		THEN 3
+								WHEN S.strStatus = 'Received/Paid'	THEN 4
+						END	AS	intSort
 				FROM #Status S
 				LEFT JOIN #BrkgDetail B ON B.strStatus = S.strStatus AND B.strCurrency = S.strCurrency
 				GROUP BY S.strStatus,S.strCurrency
 			)t
 			WHERE strCurrency IN (SELECT DISTINCT  strCurrency FROM #BrkgDetail)
+			ORDER BY intSort
 		END
 		ELSE
 		BEGIN
@@ -136,7 +142,12 @@ AS
 								 ELSE 0 END) AS dblRecActual,
 						SUM(CASE	 WHEN ysnReceivable <> 1 AND S.strStatus = 'Requested' THEN dblReqstdAmount 
 								 WHEN ysnReceivable <> 1 AND S.strStatus = 'Received/Paid' THEN dblRcvdPaidAmount 
-								 ELSE 0 END) AS dblPayActual
+								 ELSE 0 END) AS dblPayActual,
+						CASE	WHEN S.strStatus = 'Not yet due'	THEN 1
+								WHEN S.strStatus = 'Due'			THEN 2
+								WHEN S.strStatus = 'Requested'		THEN 3
+								WHEN S.strStatus = 'Received/Paid'	THEN 4
+						END	AS	intSort
 				FROM	#Status S
 		LEFT	JOIN	vyuCTGridBrokerageCommissionDetail	B	ON	B.strStatus		=	S.strStatus 
 																AND B.strCurrency	=	S.strCurrency
@@ -144,5 +155,6 @@ AS
 				GROUP BY S.strStatus,S.strCurrency
 			)t
 			WHERE strCurrency IN (SELECT DISTINCT  strCurrency FROM vyuCTGridBrokerageCommissionDetail WHERE intBrkgCommnId = @intBrkgCommnId)
+			ORDER BY intSort
 		END
 	END

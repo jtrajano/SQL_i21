@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTProcessBrkgCommn]
-@intBrkgCommnId	INT,
+	@intBrkgCommnId	INT,
     @intUserId		INT = 1
 AS
 
@@ -54,7 +54,7 @@ BEGIN TRY
 	   RAISERROR('Invoice is already available for this batch.',16,1)
     END
 
-    IF  ISNULL(@ysnReceivable,0)	=   1
+    IF  ISNULL(@ysnReceivable,0)	=   0
     BEGIN
 	   INSERT INTO @VoucherDetailNonInventory(intItemId,dblQtyReceived,dblCost)
 	   SELECT @intVoucherItemId,1,@dblRcvdPaidAmount
@@ -77,14 +77,14 @@ BEGIN TRY
 				 strTransactionType,	strType,			  strSourceTransaction,	 strSourceId,				
 				 strPONumber,			intEntityCustomerId,  intCompanyLocationId,	 intCurrencyId,
 				 intItemId,				dblQtyOrdered,		  dblPrice,				 dtmDate,		    
-				 intEntityId,			intInvoiceId,		  intSourceId
+				 intEntityId,			intInvoiceId,		  intSourceId,			dblQtyShipped
 			 
 	   )
 
 	   SELECT	 'Invoice',				'Standard',		   'Direct',				@strBatchNumber,
 				 @strBatchNumber,		@intEntityId,		@intCompanyLocationId,  @intCurrencyId,
 				 @intInvoiceItemId,		1,				    @dblRcvdPaidAmount,		GETDATE(),	   
-				 @intEntityId,			0,				    0
+				 @intEntityId,			0,				    0,						1
 
 	   EXEC		[dbo].[uspARProcessInvoices]
 				@InvoiceEntries				=	@InvoiceEntries

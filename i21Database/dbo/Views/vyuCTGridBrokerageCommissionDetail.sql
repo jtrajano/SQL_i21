@@ -28,16 +28,16 @@ AS
 			SEQ.strSequenceNumber,
 			SEQ.dtmContractDate,
 			SEQ.strItemNo,
-			SEQ.strEntityName		 AS  strBuyer, 
+			SEQ.strEntityName		 AS  strSeller, 
 			SEQ.dtmStartDate,
 			SEQ.dtmEndDate,
 			SEQ.dblQuantity,
 			SEQ.strItemUOM,
 			SEQ.strPricingType,
 
-			HDR.strCustomerContract	AS	strBuyerRef,
-			HDR.strCPContract		AS	strSellerRef,
-			SEY.strName				AS	strSeller,
+			HDR.strCustomerContract	AS	strSellerRef,
+			HDR.strCPContract		AS	strBuyerRef,
+			SEY.strName				AS	strBuyer,
 			HDR.intContractHeaderId,
 			HDR.strContractNumber
 
