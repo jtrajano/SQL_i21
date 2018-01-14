@@ -27,5 +27,5 @@
 	CONSTRAINT [FK_tblSOSalesOrderDetailTax_tblSMTaxCode_intTaxCodeId] FOREIGN KEY ([intTaxCodeId]) REFERENCES [dbo].[tblSMTaxCode] ([intTaxCodeId]),
 	CONSTRAINT [FK_tblSOSalesOrderDetailTax_tblSMTaxClass_intTaxClassId] FOREIGN KEY ([intTaxClassId]) REFERENCES [dbo].[tblSMTaxClass] ([intTaxClassId]),
 	CONSTRAINT [FK_tblSOSalesOrderDetailTax_tblGLAccount_intSalesTaxAccountId] FOREIGN KEY ([intSalesTaxAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
-	CONSTRAINT [FK_tblSOSalesOrderDetailTax_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intUniteMeasureId]) REFERENCES [dbo].[tblICUnitMeasure] ([intUnitMeasureId])
+	CONSTRAINT [FK_tblSOSalesOrderDetailTax_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [dbo].[tblICUnitMeasure] ([intUnitMeasureId])
 )
