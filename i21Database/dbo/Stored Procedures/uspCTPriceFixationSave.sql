@@ -408,7 +408,7 @@ BEGIN TRY
 													END
 												) + 
 												(
-													CASE WHEN CD.intPricingTypeId = 8 THEN CD.dblRatio ELSE 1 END *
+													CASE WHEN CH.intPricingTypeId = 8 THEN CD.dblRatio ELSE 1 END *
 													(
 														dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0)) / 
 														CASE	WHEN	@intFinalCurrencyId = @intCurrencyId	THEN 1 
@@ -429,7 +429,7 @@ BEGIN TRY
 														END
 													) + 
 													(
-														CASE WHEN CD.intPricingTypeId = 8 THEN CD.dblRatio ELSE 1 END *
+														CASE WHEN CH.intPricingTypeId = 8 THEN CD.dblRatio ELSE 1 END *
 														(
 															dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0))  / 
 															CASE	WHEN	@intFinalCurrencyId = @intCurrencyId	THEN 1 
@@ -444,6 +444,7 @@ BEGIN TRY
 					CD.intConcurrencyId		=	CD.intConcurrencyId + 1,
 					CD.intContractStatusId	=	CASE WHEN CD.dblBalance = 0 AND ISNULL(@ysnUnlimitedQuantity,0) = 0 THEN 5 ELSE CD.intContractStatusId END
 			FROM	tblCTContractDetail	CD
+			JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 			JOIN	tblSMCurrency		CY	ON	CY.intCurrencyID = CD.intCurrencyId
 			JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId OR CD.intSplitFromId = PF.intContractDetailId
 			WHERE	PF.intPriceFixationId	=	@intPriceFixationId

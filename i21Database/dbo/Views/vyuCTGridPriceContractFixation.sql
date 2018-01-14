@@ -69,11 +69,12 @@ AS
 				BU.intCommodityUnitMeasureId	AS	intBasisCommodityUOMId,			
 				CD.intDiscountScheduleCodeId,
 				SI.strDescription				AS	strDiscountScheduleCode,
-				CD.strPricingType,
+				CASE WHEN CH.intPricingTypeId = 8 THEN 'Ratio' ELSE CD.strPricingType END AS strPricingType,
 				CD.dblRatio
 
 		FROM	tblCTPriceFixation	PF
 		JOIN	vyuCTContractSequence		CD	ON	CD.intContractDetailId	=	PF.intContractDetailId
+		JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 		JOIN	tblRKFutureMarket			MA	ON	MA.intFutureMarketId	=	CD.intFutureMarketId
 		JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID		=	MA.intCurrencyId
 		JOIN	tblICUnitMeasure			UM	ON	UM.intUnitMeasureId		=	MA.intUnitMeasureId	
@@ -137,7 +138,7 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId			=	SC.intItemId
 				NULL,			
 				CD.intDiscountScheduleCodeId,
 				SI.strDescription				AS	strDiscountScheduleCode,
-				CD.strPricingType,
+				CASE WHEN CH.intPricingTypeId = 8 THEN 'Ratio' ELSE CD.strPricingType END AS strPricingType,
 				CD.dblRatio
 
 		FROM	tblCTPriceFixation	PF	
