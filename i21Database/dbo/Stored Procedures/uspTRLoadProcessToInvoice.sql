@@ -142,6 +142,7 @@ BEGIN TRY
 		,DD.ysnFreightInPrice
 		,intTruckDriverId = CASE WHEN TL.intDriverId IS NULL THEN NULL ELSE TL.intDriverId END
 		,intTruckDriverReferenceId = CASE WHEN SC.intTruckDriverReferenceId IS NULL THEN NULL ELSE SC.intTruckDriverReferenceId END
+		,ysnImpactInventory = CASE WHEN ISNULL(CustomerFreight.ysnFreightOnly, 0) = 1 THEN 0 ELSE 1 END
 	INTO #tmpSourceTable
 	FROM tblTRLoadHeader TL
 	LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
@@ -152,7 +153,7 @@ BEGIN TRY
 	LEFT JOIN tblLGLoad LG ON LG.intLoadId = TL.intLoadId
 	LEFT JOIN vyuICGetItemStock IC ON IC.intItemId = DD.intItemId AND IC.intLocationId = DH.intCompanyLocationId
 	LEFT JOIN tblSCTruckDriverReference SC ON SC.strData = TL.strTractor
-	LEFT JOIN tblTRLoadReceipt TR ON TR.intLoadHeaderId = TL.intLoadHeaderId AND TR.strReceiptLine IN (
+	LEFT JOIN vyuTRGetLoadReceipt TR ON TR.intLoadHeaderId = TL.intLoadHeaderId AND TR.strReceiptLine IN (
 		SELECT Item 
 		FROM dbo.fnTRSplit(DD.strReceiptLink,','))
 		LEFT JOIN ( 
@@ -183,6 +184,7 @@ BEGIN TRY
 			, Receipt.strBillOfLading
 			, Receipt.intSupplyPointId
 			, Receipt.strSupplyPoint
+			, Receipt.strZipCode
 		FROM tblTRLoadDistributionDetail DistItem
 		LEFT JOIN tblTRLoadDistributionHeader HeaderDistItem ON HeaderDistItem.intLoadDistributionHeaderId = DistItem.intLoadDistributionHeaderId
 		LEFT JOIN tblTRLoadHeader LoadHeader ON LoadHeader.intLoadHeaderId = HeaderDistItem.intLoadHeaderId
@@ -190,6 +192,10 @@ BEGIN TRY
 		LEFT JOIN vyuTRGetLoadReceipt Receipt ON Receipt.intLoadHeaderId = LoadHeader.intLoadHeaderId AND Receipt.intItemId = BlendIngredient.intIngredientItemId
 		WHERE ISNULL(DistItem.strReceiptLink, '') = ''
 	) BlendIngredient ON BlendIngredient.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId AND ISNULL(DD.strReceiptLink, '') = ''
+	LEFT JOIN tblARCustomerFreightXRef CustomerFreight ON CustomerFreight.intEntityCustomerId = DH.intEntityCustomerId
+			AND CustomerFreight.intEntityLocationId = DH.intShipToLocationId
+			AND CustomerFreight.intCategoryId = Item.intCategoryId
+			AND CustomerFreight.strZipCode = ISNULL(TR.strZipCode, BlendIngredient.strZipCode)
 	WHERE TL.intLoadHeaderId = @intLoadHeaderId
 		AND DH.strDestination = 'Customer'
 
@@ -634,6 +640,7 @@ BEGIN TRY
 		,[ysnVirtualMeterReading]
 		,[ysnClearDetailTaxes]					
 		,[intTempDetailIdForTaxes]
+		,[ysnImpactInventory]
 	)
 	SELECT 
 		0 AS intId
@@ -713,6 +720,7 @@ BEGIN TRY
 		,[ysnVirtualMeterReading]				= IE.ysnVirtualMeterReading
 		,[ysnClearDetailTaxes]					= IE.ysnClearDetailTaxes
 		,[intTempDetailIdForTaxes]				= IE.intTempDetailIdForTaxes
+		,[ysnImpactInventory]					= IE.ysnImpactInventory
 	FROM #tmpSourceTableFinal IE
 	INNER JOIN tblICItem Item ON Item.intItemId = @intFreightItemId
 	WHERE ISNULL(IE.dblFreightRate, 0) != 0 AND IE.ysnFreightInPrice != 1
@@ -795,6 +803,7 @@ BEGIN TRY
 		,[intLoadDistributionHeaderId]
 		,[intTruckDriverId]
 		,[intTruckDriverReferenceId]
+		,[ysnImpactInventory]
 	)
 	SELECT
 		 [strSourceTransaction]					= TR.strSourceTransaction
@@ -874,6 +883,7 @@ BEGIN TRY
 		,[intLoadDistributionHeaderId]			= TR.intLoadDistributionHeaderId
 		,intTruckDriverId						= TR.intTruckDriverId
 		,intTruckDriverReferenceId				= TR.intTruckDriverReferenceId
+		,ysnImpactInventory						= TR.ysnImpactInventory
 	FROM #tmpSourceTableFinal TR
 	ORDER BY TR.intLoadDistributionDetailId, intId DESC
 
@@ -1105,6 +1115,7 @@ BEGIN TRY
 		,[ysnClearDetailTaxes]
 		,[intTempDetailIdForTaxes]
 		,[intLoadDistributionHeaderId]
+		,[ysnImpactInventory]
 	)
 	SELECT 
 		[strSourceTransaction]					= IE.strSourceTransaction
@@ -1174,6 +1185,7 @@ BEGIN TRY
 		,[ysnClearDetailTaxes]					= IE.ysnClearDetailTaxes
 		,[intTempDetailIdForTaxes]				= IE.intTempDetailIdForTaxes
 		,[intLoadDistributionHeaderId]			= IE.intLoadDistributionHeaderId
+		,[ysnImpactInventory]					= IE.ysnImpactInventory
 	FROM @FreightSurchargeEntries IE
 	GROUP BY [strSourceTransaction]
 		,[strSourceId]
@@ -1237,6 +1249,7 @@ BEGIN TRY
 		,[ysnClearDetailTaxes]
 		,[intTempDetailIdForTaxes]
 		,[intLoadDistributionHeaderId]
+		,[ysnImpactInventory]
 
 	DECLARE @TaxDetails AS LineItemTaxDetailStagingTable 
 

@@ -7,6 +7,7 @@ SELECT ItemLocation.intItemLocationId
 	, strItemDescription = Item.strDescription
 	, Item.strType
 	, ItemCommodity.strCommodityCode
+	, Item.intCategoryId
 	, ItemCategory.strCategoryCode
 	, ItemManufacturer.strManufacturer
 	, ItemBrand.strBrandName
