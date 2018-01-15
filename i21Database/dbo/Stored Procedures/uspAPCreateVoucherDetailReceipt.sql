@@ -530,6 +530,155 @@ IF @transCount = 0 BEGIN TRANSACTION
 		) POContractItems
 		WHERE A.ysnPosted = 1 AND voucherDetailReceipt.intInventoryReceiptType = 3
 	END
+  
+  --INVENTORY RETURN 
+	IF EXISTS(SELECT TOP 1 1 FROM @receiptItems WHERE intInventoryReceiptType = 4)
+	BEGIN
+		INSERT INTO #tempBillDetail(
+			[intBillId],
+			[intItemId],
+			[intInventoryReceiptItemId],
+			[dblQtyOrdered],
+			[dblQtyReceived],
+			[dblRate],
+			[intCurrencyExchangeRateTypeId],
+			[ysnSubCurrency],
+			[intTaxGroupId],
+			[intAccountId],
+			[dblTotal],
+			[dblCost],
+			[dblOldCost],
+			[dblNetWeight],
+			[dblNetShippedWeight],
+			[dblWeightLoss],
+			[dblFranchiseWeight],
+			[intContractDetailId],
+			[intContractHeaderId],
+			[intContractSeq],
+			[intUnitOfMeasureId],
+			[intCostUOMId],
+			[intWeightUOMId],
+			[intLineNo],
+			[dblWeightUnitQty],
+			[dblCostUnitQty],
+			[dblUnitQty],
+			[intCurrencyId],
+			[intStorageLocationId],
+			[int1099Form],
+			[int1099Category],
+			[intLoadDetailId],
+			[strBillOfLading]
+		)
+		SELECT 
+			[intBillId]					=	@voucherId,
+			[intItemId]					=	B.intItemId,
+			[intInventoryReceiptItemId]	=	B.intInventoryReceiptItemId,
+			[dblQtyOrdered]				=	ISNULL(voucherDetailReceipt.dblQtyReceived, ABS(B.dblOpenReceive - B.dblBillQty)),
+			[dblQtyReceived]			=	ISNULL(voucherDetailReceipt.dblQtyReceived, ABS(B.dblOpenReceive - B.dblBillQty)),
+			[dblForexRate]				=	ISNULL(B.dblForexRate,1),
+			[intForexRateTypeId]		=	B.intForexRateTypeId,
+			[ysnSubCurrency]			=	CASE WHEN B.ysnSubCurrency > 0 THEN 1 ELSE 0 END,
+			[intTaxGroupId]				=	B.intTaxGroupId,
+			[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, D.intItemLocationId, 'AP Clearing'),
+			[dblTotal]						=	ISNULL((CASE WHEN B.ysnSubCurrency > 0 --CHECK IF SUB-CURRENCY
+												THEN (CASE WHEN B.intWeightUOMId > 0 
+														THEN CAST(voucherDetailReceipt.dblCost / ISNULL(A.intSubCurrencyCents,1)  
+																	* (voucherDetailReceipt.dblQtyReceived * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1))) 
+																	* ItemWeightUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1) 
+															AS DECIMAL(18,2)) --Formula With Weight UOM
+														WHEN (B.intUnitMeasureId > 0 AND B.intCostUOMId > 0)
+														THEN CAST(voucherDetailReceipt.dblQtyReceived
+																	* 
+																	(voucherDetailReceipt.dblCost / ISNULL(A.intSubCurrencyCents,1)) 
+																	*  
+																	(ItemUOM.dblUnitQty/ ISNULL(ItemCostUOM.dblUnitQty,1)) 
+															AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
+														ELSE CAST(voucherDetailReceipt.dblQtyReceived
+																	* 
+																	(voucherDetailReceipt.dblCost / ISNULL(A.intSubCurrencyCents,1))  AS DECIMAL(18,2))  --Orig Calculation
+													END) 
+												ELSE (CASE WHEN B.intWeightUOMId > 0
+														THEN CAST(voucherDetailReceipt.dblCost 
+																	* (voucherDetailReceipt.dblQtyReceived * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1)))   
+																	* ItemWeightUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
+														WHEN (B.intUnitMeasureId > 0  AND B.intCostUOMId > 0)
+														THEN CAST(voucherDetailReceipt.dblQtyReceived
+																	* voucherDetailReceipt.dblCost * (ItemUOM.dblUnitQty/ ISNULL(ItemCostUOM.dblUnitQty,1))  
+															AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
+														ELSE CAST(voucherDetailReceipt.dblQtyReceived
+																	* voucherDetailReceipt.dblCost
+																AS DECIMAL(18,2))  --Orig Calculation
+													END)
+												END),0),
+			[dblCost]						=	voucherDetailReceipt.dblCost,
+			[dblOldCost]					=	CASE WHEN voucherDetailReceipt.dblCost != B.dblUnitCost THEN B.dblUnitCost ELSE 0 END,
+			[dblNetWeight]					=	CASE WHEN B.intWeightUOMId > 0 THEN  
+													-- voucherDetailReceipt.dblQtyReceived * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1))
+													(CASE WHEN B.dblBillQty > 0 
+															THEN voucherDetailReceipt.dblQtyReceived * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1)) --THIS IS FOR PARTIAL
+														ELSE B.dblNet --THIS IS FOR NO RECEIVED QTY YET BUT HAS NET WEIGHT DIFFERENT FROM GROSS
+											END)
+											ELSE 0 END,
+			[dblNetShippedWeight]		=	(CASE WHEN A.intSourceType = 2 AND loads.intLoadContainerId = B.intContainerId --Inbound Shipment
+												THEN loads.dblNetWt ELSE 0 END),
+			[dblWeightLoss]				=	ISNULL(B.dblGross - B.dblNet,0),
+			[dblFranchiseWeight]		=	CASE WHEN J.dblFranchise > 0 THEN ISNULL(B.dblGross,0) * (J.dblFranchise / 100) ELSE 0 END,
+			[intContractDetailId]		=	CASE WHEN ((A.strReceiptType = 'Purchase Contract') OR
+															( A.strReceiptType = 'Inventory Return'))
+															THEN E1.intContractDetailId 
+												ELSE NULL END,
+			[intContractHeaderId]		=	CASE WHEN ((A.strReceiptType = 'Purchase Contract') OR
+															( A.strReceiptType = 'Inventory Return' ))
+															THEN E.intContractHeaderId 
+												ELSE NULL END,
+			[intContractSeq]			=	E1.intContractSeq,
+			[intUnitOfMeasureId]		=	B.intUnitMeasureId,
+			[intCostUOMId]				=	B.intCostUOMId,
+			[intWeightUOMId]			=	B.intWeightUOMId,
+			[intLineNo]					=	ISNULL(B.intSort,0),
+			[dblWeightUnitQty]			=	ISNULL(ItemWeightUOM.dblUnitQty,0),
+			[dblCostUnitQty]			=	ABS(ISNULL(ItemCostUOM.dblUnitQty,0)),
+			[dblUnitQty]				=	ABS(ISNULL(ItemUOM.dblUnitQty,0)),
+			[intCurrencyId]				=	CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(SubCurrency.intCurrencyID,0)
+											ELSE ISNULL(A.intCurrencyId,0) END,
+			[intStorageLocationId]		=   B.intStorageLocationId,
+			[int1099Form]				=	CASE WHEN (SELECT CHARINDEX('MISC', D2.str1099Form)) > 0 THEN 1 
+													WHEN (SELECT CHARINDEX('INT', D2.str1099Form)) > 0 THEN 2 
+													WHEN (SELECT CHARINDEX('B', D2.str1099Form)) > 0 THEN 3 
+											ELSE 0
+											END,
+			[int1099Category]			=	ISNULL((SELECT TOP 1 int1099CategoryId FROM tblAP1099Category WHERE strCategory = D2.str1099Type),0),
+			[intLoadDetailId]			=	CASE WHEN A.strReceiptType = 'Purchase Contract' AND A.intSourceType = 2 THEN B.intSourceId ELSE NULL END,
+			[strBillOfLading]			= 	A.strBillOfLading
+		FROM tblICInventoryReceipt A
+		INNER JOIN tblICInventoryReceiptItem B
+			ON A.intInventoryReceiptId = B.intInventoryReceiptId
+		INNER JOIN @receiptItems voucherDetailReceipt
+			ON B.intInventoryReceiptItemId = voucherDetailReceipt.intInventoryReceiptItemId
+		INNER JOIN tblICItem C
+			ON B.intItemId = C.intItemId
+		INNER JOIN tblICItemLocation D
+			ON A.intLocationId = D.intLocationId AND B.intItemId = D.intItemId
+		LEFT JOIN (tblCTContractHeader E INNER JOIN tblCTContractDetail E1 ON E.intContractHeaderId = E1.intContractHeaderId) 
+			ON E.intEntityId = A.intEntityVendorId 
+					AND E.intContractHeaderId = B.intOrderId 
+					AND E1.intContractDetailId = B.intLineNo
+		LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = A.intCurrencyId)
+		LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G ON F.intCurrencyExchangeRateId = G.intCurrencyExchangeRateId AND G.dtmValidFromDate = (SELECT CONVERT(char(10), GETDATE(),126))
+		LEFT JOIN dbo.tblSMCurrency H ON H.intCurrencyID = A.intCurrencyId
+		LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = B.intWeightUOMId
+		LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId
+		LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = B.intCostUOMId
+		LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
+		LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = B.intUnitMeasureId
+		LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+		LEFT JOIN tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
+		LEFT JOIN tblCTWeightGrade J ON E.intWeightId = J.intWeightGradeId
+		INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityId = D2.intEntityId) ON D1.intEntityId = A.intEntityVendorId
+		LEFT JOIN tblCTWeightGrade W ON E.intWeightId = W.intWeightGradeId
+		LEFT JOIN tblLGLoadContainer loads ON loads.intLoadContainerId = B.intContainerId
+		WHERE A.ysnPosted = 1 AND voucherDetailReceipt.intInventoryReceiptType = 4
+	END  
 
 	INSERT INTO tblAPBillDetail(
 		[intBillId],
