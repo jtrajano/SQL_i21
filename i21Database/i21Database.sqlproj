@@ -6068,6 +6068,8 @@
     <None Include="Scripts\Post-Deployment\SM\1810_RenameCompanyToMultiCompany.sql" />
     <None Include="Scripts\Post-Deployment\EM\1740_Activate_Default_Contact.sql" />
     <Build Include="dbo\Views\vyuCCVendorCombo.sql" />
+    <Build Include="dbo\Tables\tblARProductRecapStagingTable.sql" />
+    <Build Include="dbo\Tables\tblARCustomerActivityStagingTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
