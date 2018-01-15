@@ -5775,7 +5775,9 @@
     <Build Include="dbo\Views\vyuCCVendorCombo.sql" />
     <Build Include="dbo\User Defined Types\TFInvoiceDetailTransaction.sql" />
     <Build Include="dbo\Views\vyuTFGetReportingComponentField.sql" />
-	<Build Include="dbo\Views\vyuPREmployeeW3.sql" />
+    <Build Include="dbo\Views\vyuPREmployeeW3.sql" />
+    <Build Include="dbo\Tables\tblARProductRecapStagingTable.sql" />
+    <Build Include="dbo\Tables\tblARCustomerActivityStagingTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
