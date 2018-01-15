@@ -835,6 +835,15 @@ BEGIN TRY
 		,@intWorkOrderId
 		,@intInventoryTransactionType
 
+	SELECT @intDestinationLotId = intLotId
+	FROM tblICLot L
+	WHERE L.strLotNumber = @strLotNumber
+		AND L.intStorageLocationId = @intConsumptionStorageLocationId
+
+	UPDATE tblMFWorkOrderInputLot
+	SET intDestinationLotId = @intDestinationLotId
+	WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
+
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION
 
