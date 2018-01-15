@@ -97,7 +97,7 @@ BEGIN TRY
 			RAISERROR('UOM does not exist.',16,1)
 		END
 
-		IF @intSourceType = 1 AND @intPricingTypeId = 5
+		IF @intSourceType IN (1,5) AND @intPricingTypeId = 5
 		BEGIN
 			EXEC	uspCTUpdateSequenceQuantity 
 					@intContractDetailId	=	@intContractDetailId,
@@ -117,7 +117,7 @@ BEGIN TRY
 
 			SELECT	@dblSchQuantityToUpdate = -@dblConvertedQty
 
-			IF ((@intSourceType IN (0,1,2,3) OR @ysnPO = 1)AND @strReceiptType <> 'Inventory Return')  OR 
+			IF ((@intSourceType IN (0,1,2,3,5) OR @ysnPO = 1)AND @strReceiptType <> 'Inventory Return')  OR 
 			   (@intSourceType IN (2) AND @strReceiptType = 'Inventory Return')
 			BEGIN					
 				EXEC	uspCTUpdateScheduleQuantity
