@@ -111,7 +111,26 @@ BEGIN
 		
 		IF(@intImportFileColumnDetailId <> @intRootImportFileColumnDetailId)
 		BEGIN
-			SET @FROMNODES = @FROMNODES + 'OUTER APPLY ' + REPLACE(@ParentTag, '-', '') + '.nodes(''' + @NamespaceVar + @strXMLTag + ''') ' + @strCompressTag + '(' + @strCompressTag + ')' + CHAR(13)
+			DECLARE @strRegisterClassName AS NVARCHAR(50) = ''
+			SET @strRegisterClassName = (SELECT strRegisterClass FROM tblSTRegister 
+										WHERE intRegisterId = 
+										(
+											SELECT intRegisterId FROM tblSTStore
+											WHERE intStoreId = 
+											(
+												SELECT intStoreId FROM tblSTCheckoutHeader
+												WHERE intCheckoutId = @intCheckoutId
+											)
+										))
+
+			IF(@strRegisterClassName = 'RADIANT')
+			BEGIN
+				SET @FROMNODES = @FROMNODES + 'CROSS APPLY ' + REPLACE(@ParentTag, '-', '') + '.nodes(''' + @NamespaceVar + @strXMLTag + ''') ' + @strCompressTag + '(' + @strCompressTag + ')' + CHAR(13)
+			END
+			ELSE IF(@strRegisterClassName <> 'RADIANT')
+			BEGIN
+				SET @FROMNODES = @FROMNODES + 'OUTER APPLY ' + REPLACE(@ParentTag, '-', '') + '.nodes(''' + @NamespaceVar + @strXMLTag + ''') ' + @strCompressTag + '(' + @strCompressTag + ')' + CHAR(13)
+			END
 		END
 
 		
@@ -279,10 +298,12 @@ Declare @xml XML = @strXML
 ' + @strRootTagNamespace + '
 
 SELECT ' + CHAR(13)
++ ' IDENTITY(int, 1, 1) AS intRowCount,' + CHAR(13)
 + @SELECTCOLUMNS
 + ' INTO #tempCheckoutInsert ' + CHAR(13)
 + ' FROM ' + CHAR(13)
 + @FROMNODES + CHAR(13)
++ ' ORDER BY intRowCount ASC'
 + ' SELECT * FROM #tempCheckoutInsert ' +  CHAR(13)
 + ' EXEC ' + @strSPName + ' ' + CAST(@intCheckoutId as nvarchar(20)) + ', ' + '@strStatusMsg OUTPUT, @intCountRows OUTPUT' +  CHAR(13)
 + ' DROP TABLE #tempCheckoutInsert ' +  CHAR(13)

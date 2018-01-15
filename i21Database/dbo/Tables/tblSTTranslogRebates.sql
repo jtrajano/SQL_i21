@@ -17,6 +17,9 @@
 	[strTransFuelPrepayCompletion] nvarchar(10) COLLATE Latin1_General_CI_AS NULL,
 	[strTermMsgSNtype] nvarchar(10) COLLATE Latin1_General_CI_AS NULL,
 	[intTermMsgSNterm] int NULL,
+
+	[intScanTransactionId] int NULL,
+
 	[intTermMsgSN] int NULL,
 	[intPeriodLevel] int NULL,
 	[intPeriodSeq] int NULL,

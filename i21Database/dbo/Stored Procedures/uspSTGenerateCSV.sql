@@ -9,7 +9,7 @@
 AS
 BEGIN
 	Begin Try
-
+			
 		--Get Vendor Name
 		DECLARE @strVendorName NVARCHAR(200)
 		SELECT @strVendorName = strName FROM tblEMEntity WHERE intEntityId = @intVendorId
@@ -46,6 +46,7 @@ BEGIN
 
 		SELECT * FROM @tblStoreIdList
 
+		
 
 		--START Loop to all store Id
 		DECLARE @intStoreIdMin int, @intStoreIdMax int
@@ -55,8 +56,9 @@ BEGIN
 		WHILE(@intStoreIdMin <= @intStoreIdMax)
 		BEGIN
 
-			IF EXISTS (SELECT * FROM tblSTTranslogRebates WHERE intStoreId = @intStoreIdMin AND CAST(dtmOpenedTime as DATE) >= @dtmBeginningDate AND CAST(dtmClosedTime as DATE) <= @dtmEndingDate AND ysnSubmitted = 0)
+			IF EXISTS (SELECT * FROM tblSTTranslogRebates WHERE intStoreId = @intStoreIdMin AND CAST(dtmDate as DATE) >= @dtmBeginningDate AND CAST(dtmDate as DATE) <= @dtmEndingDate AND ysnSubmitted = 0)
 			BEGIN
+				
 			    -- GET week ending date (SATURDAY)
 				DECLARE @NextDayID INT = 5 -- 0=Mon, 1=Tue, 2=Wed, 3=Thur, 4=Fri, 5=Sat, 6=Sun
 				DECLARE @dtmGetWeekEndingDate DATETIME
@@ -171,7 +173,10 @@ BEGIN
 								, CASE WHEN strTrpPaycode = 'CASH' THEN dblTrlLineTot ELSE 0 END as dblFinalSalesPrice
 							FROM tblSTTranslogRebates TR
 							JOIN tblSTStore ST ON ST.intStoreId = TR.intStoreId
-							WHERE TR.intStoreId = @intStoreIdMin AND CAST(TR.dtmOpenedTime as DATE) >= @dtmBeginningDate AND CAST(TR.dtmClosedTime as DATE) <= @dtmEndingDate AND ysnSubmitted = 0
+							WHERE TR.intStoreId = @intStoreIdMin 
+							AND CAST(TR.dtmDate as DATE) >= @dtmBeginningDate 
+							AND CAST(TR.dtmDate as DATE) <= @dtmEndingDate 
+							AND ysnSubmitted = 0
 					) x
 				END
 				--END Insert data from tblSTstgRebatesPMMorris
@@ -204,7 +209,7 @@ BEGIN
 						, strAccountPromotionName
 						, dblAccountDiscountAmount
 						, dblManufacturerDiscountAmount
-						--, strCouponPid
+						, strCouponPid
 						, dblCouponAmount
 						
 						, strManufacturerMultipackFlag
@@ -241,7 +246,7 @@ BEGIN
 						, x.strAccountPromotionName
 						, x.dblAccountDiscountAmount
 						, x.dblManufacturerDiscountAmount
-						--, x.strCouponPid
+						, x.strCouponPid
 						, x.dblCouponAmount
 						
 						, x.strManufacturerMultipackFlag
@@ -265,8 +270,11 @@ BEGIN
 								,  CASE WHEN ST.strZipCode IS NULL THEN '' ELSE ST.strZipCode END as strOutletZipCode
 								--, FORMAT(CAST(dtmDate AS datetime), 'yyyy-MM-dd-HH:mm:ss') as strTransactionDateTime
 								, replace(convert(NVARCHAR, dtmDate, 120), ' ', '-') as strTransactionDateTime
-								, intTermMsgSN as strMarketBasketTransactionId
-								, intTermMsgSN as strScanTransactionId
+								, CAST(intTermMsgSN AS NVARCHAR(50)) as strMarketBasketTransactionId
+
+								--, ROW_NUMBER() OVER(PARTITION BY intTermMsgSN, strTrpPaycode ORDER BY intTranslogId) as strScanTransactionId
+								, CAST(intScanTransactionId AS NVARCHAR(20)) as strScanTransactionId
+
 								, intTrTickNumPosNum as strRegisterId
 								, dblTrlQty as intQuantity
 								, dblTrlLineTot as dblPrice
@@ -284,7 +292,7 @@ BEGIN
 								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN 'COUPONS' ELSE '' END as strAccountPromotionName
 								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN dblTrpAmt ELSE 0 END as dblAccountDiscountAmount
 								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN dblTrpAmt ELSE 0 END as dblManufacturerDiscountAmount
-								--, CASE WHEN strTrpPaycode IN ('COUPONS') THEN strTrpCouponEntryMethod ELSE '' END as strCouponPid
+								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN strTrpPaycode ELSE '' END as strCouponPid
 								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN dblTrpAmt ELSE 0 END as dblCouponAmount
 
 								, 'N' as strManufacturerMultipackFlag
@@ -294,15 +302,17 @@ BEGIN
 								, '' as strManufacturerBuydownDescription
 								, 0 as dblManufacturerBuydownAmount
 								, '' as strManufacturerMultiPackDescription
-								, '123789' as strAccountLoyaltyIDNumber
+								, TR.strTrLoyaltyProgramProgramID as strAccountLoyaltyIDNumber
 								, 'Loyalty coupon desc' as strCouponDescription
 							FROM tblSTTranslogRebates TR
 							JOIN tblSTStore ST ON ST.intStoreId = TR.intStoreId
 							WHERE TR.intStoreId = @intStoreIdMin 
-							AND CAST(TR.dtmOpenedTime as DATE) >= @dtmBeginningDate 
-							AND CAST(TR.dtmClosedTime as DATE) <= @dtmEndingDate 
+							AND CAST(TR.dtmDate as DATE) >= @dtmBeginningDate
+							AND CAST(TR.dtmDate as DATE) <= @dtmEndingDate
 							AND ysnSubmitted = 0
 							AND strTrLineType = 'plu'
+							AND strTrlDept = 'CIGARETTES'
+							
 					) x
 				END
 				--END Insert data from tblSTstgRebatesRJReynolds
@@ -333,7 +343,6 @@ BEGIN
 				SET @CreateCSV = 1
 			END
 		END
-
 
 		--Convert table to CSV
 		IF(@CreateCSV = 1)
@@ -461,6 +470,7 @@ BEGIN
 				END
 				--END tblSTstgRebatesPMMorris
 
+
 				-- START tblSTstgRebatesRJReynolds
 				IF(@strTableName = 'tblSTstgRebatesRJReynolds')
 				BEGIN
@@ -470,13 +480,13 @@ BEGIN
 
 					SET @intLoopCount = 0
 
-					DECLARE @strOutletName nvarchar(50)
+					DECLARE @strOutletName nvarchar(100)
 							, @intOutletNumber int
 							, @strOutletAddressOne nvarchar(100)
 							, @strOutletAddressTwo nvarchar(100)
-							, @strOutletCity nvarchar(50)
-							, @strOutletState nvarchar(50)
-							, @strOutletZipCode nvarchar(5)
+							, @strOutletCity nvarchar(100)
+							, @strOutletState nvarchar(100)
+							, @strOutletZipCode nvarchar(10)
 							, @strTransactionDateTime nvarchar(50)
 							, @strMarketBasketTransactionId nvarchar(300)
 							, @strScanTransactionId nvarchar(300)
@@ -490,10 +500,10 @@ BEGIN
 							, @strOutletMultipackFlag nvarchar(1)
 							, @intOutletMultipackQuantity int
 							, @dblOutletMultipackDiscountAmount decimal(18, 6)
-							, @strAccountPromotionName nvarchar(50)
+							, @strAccountPromotionName nvarchar(100)
 							, @dblAccountDiscountAmount decimal(18, 6)
 							, @dblManufacturerDiscountAmount decimal(18, 6)
-							, @strCouponPid nvarchar(20)
+							, @strCouponPid nvarchar(100)
 							, @dblCouponAmount decimal(18, 6)
 
 							, @strManufacturerMultipackFlag nvarchar(1)
@@ -503,8 +513,8 @@ BEGIN
 							, @strManufacturerBuydownDescription nvarchar(100)
 							, @dblManufacturerBuydownAmount decimal(18,6)
 							, @strManufacturerMultiPackDescription nvarchar(100)
-							, @strAccountLoyaltyIDNumber nvarchar(50)
-							, @strCouponDescription nvarchar(50)
+							, @strAccountLoyaltyIDNumber nvarchar(100)
+							, @strCouponDescription nvarchar(100)
 
 					WHILE(@intMin <= @intMax)
 					BEGIN
@@ -536,15 +546,15 @@ BEGIN
 									, @strCouponPid = strCouponPid
 									, @dblCouponAmount = dblCouponAmount
 
-									, @strManufacturerMultipackFlag	= strManufacturerMultipackFlag
+									, @strManufacturerMultipackFlag	= ISNULL(strManufacturerMultipackFlag, '')
 									, @intManufacturerMultipackQuantity = intManufacturerMultipackQuantity
 									, @dblManufacturerMultipackDiscountAmount = dblManufacturerMultipackDiscountAmount
-									, @strManufacturerPromotionDescription = strManufacturerPromotionDescription
-									, @strManufacturerBuydownDescription = strManufacturerBuydownDescription
+									, @strManufacturerPromotionDescription = ISNULL(strManufacturerPromotionDescription, '') 
+									, @strManufacturerBuydownDescription = ISNULL(strManufacturerBuydownDescription, '')
 									, @dblManufacturerBuydownAmount = dblManufacturerBuydownAmount
-									, @strManufacturerMultiPackDescription = strManufacturerMultiPackDescription
-									, @strAccountLoyaltyIDNumber = strAccountLoyaltyIDNumber
-									, @strCouponDescription = strCouponDescription
+									, @strManufacturerMultiPackDescription = ISNULL(strManufacturerMultiPackDescription, '')
+									, @strAccountLoyaltyIDNumber = ISNULL(strAccountLoyaltyIDNumber, '')
+									, @strCouponDescription = ISNULL(strCouponDescription, '')
 
 							FROM tblSTstgRebatesRJReynolds WHERE intRJRId = @intMin
 
@@ -554,7 +564,7 @@ BEGIN
 														+ ',' + @strOutletMultipackFlag + ',' + CAST(@intOutletMultipackQuantity as NVARCHAR(50)) + ',' + CAST(@dblOutletMultipackDiscountAmount as NVARCHAR(50)) + ',' + @strAccountPromotionName
 														+ ',' + CAST(@dblAccountDiscountAmount as NVARCHAR(50)) + ',' + CAST(@dblManufacturerDiscountAmount as NVARCHAR(50))+ ',' + ISNULL(CAST(@strCouponPid as NVARCHAR(20)) ,'') + ',' + CAST(@dblCouponAmount as NVARCHAR(50))
 														+ ',' + @strManufacturerMultipackFlag + ',' + CAST(@intManufacturerMultipackQuantity AS NVARCHAR(50)) + ',' + CAST(@dblManufacturerMultipackDiscountAmount AS NVARCHAR(50)) + ',' + @strManufacturerPromotionDescription
-														+ ',' + @strManufacturerBuydownDescription + ',' + CAST(@dblManufacturerBuydownAmount AS NVARCHAR(50)) + ',' + @strManufacturerMultiPackDescription + ',' + @strAccountLoyaltyIDNumber + ',' + @strCouponDescription
+														+ ',' + @strManufacturerBuydownDescription + ',' + CAST(@dblManufacturerBuydownAmount AS NVARCHAR(100)) + ',' + @strManufacturerMultiPackDescription + ',' + @strAccountLoyaltyIDNumber + ',' + @strCouponDescription
 							
 							SET @intLoopCount = @intLoopCount + 1
 						END
@@ -563,6 +573,7 @@ BEGIN
 					END
 				END
 				--END tblSTstgRebatesRJReynolds
+
 
 				--START mark ysnSubmitted = 1 (mark as submitted)
 				SELECT @intStoreIdMin = MIN(intStoreId), @intStoreIdMax = MAX(intStoreId)
@@ -574,8 +585,8 @@ BEGIN
 					UPDATE tblSTTranslogRebates
 					SET ysnSubmitted = 1
 					WHERE intStoreId = @intStoreIdMin 
-					AND CAST(dtmOpenedTime as DATE) >= @dtmBeginningDate 
-					AND CAST(dtmClosedTime as DATE) <= @dtmEndingDate 
+					AND CAST(dtmDate as DATE) >= @dtmBeginningDate
+					AND CAST(dtmDate as DATE) <= @dtmEndingDate
 					AND ysnSubmitted = 0
 
 					SET @intStoreIdMin = @intStoreIdMin + 1
