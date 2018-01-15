@@ -1,16 +1,16 @@
 ﻿CREATE VIEW [dbo].[vyuARInvoiceAgingReport]
 AS
 SELECT AGING.*
-     , dblCreditLimit			= C.dblCreditLimit
-     , strShipToLocation		= dbo.fnARFormatCustomerAddress(NULL, NULL, SHIPTOLOCATION.strLocationName, SHIPTOLOCATION.strAddress, SHIPTOLOCATION.strCity, SHIPTOLOCATION.strState, SHIPTOLOCATION.strZipCode, SHIPTOLOCATION.strCountry, NULL, 0)
-	 , strBillToLocation		= dbo.fnARFormatCustomerAddress(NULL, NULL, BILLTOLOCATION.strLocationName, BILLTOLOCATION.strAddress, BILLTOLOCATION.strCity, BILLTOLOCATION.strState, BILLTOLOCATION.strZipCode, BILLTOLOCATION.strCountry, NULL, 0)
-	 , strDefaultLocation		= dbo.fnARFormatCustomerAddress(NULL, NULL, DEFAULTLOCATION.strLocationName, DEFAULTLOCATION.strAddress, DEFAULTLOCATION.strCity, DEFAULTLOCATION.strState, DEFAULTLOCATION.strZipCode, DEFAULTLOCATION.strCountry, NULL, 0)
-	 , strDefaultShipTo			= dbo.fnARFormatCustomerAddress(NULL, NULL, DEFAULTSHIPTO.strLocationName, DEFAULTSHIPTO.strAddress, DEFAULTSHIPTO.strCity, DEFAULTSHIPTO.strState, DEFAULTSHIPTO.strZipCode, DEFAULTSHIPTO.strCountry, NULL, 0)
-	 , strDefaultBillTo			= dbo.fnARFormatCustomerAddress(NULL, NULL, DEFAULTBILLTO.strLocationName, DEFAULTBILLTO.strAddress, DEFAULTBILLTO.strCity, DEFAULTBILLTO.strState, DEFAULTBILLTO.strZipCode, DEFAULTBILLTO.strCountry, NULL, 0)
+     , dblCreditLimit			= CUSTOMER.dblCreditLimit
+     , strShipToLocation		= SHIPTOLOCATION.strAddress
+	 , strBillToLocation		= BILLTOLOCATION.strAddress
+	 , strDefaultLocation		= DEFAULTLOCATION.strAddress
+	 , strDefaultShipTo			= CUSTOMER.strDefaultShipTo
+	 , strDefaultBillTo			= CUSTOMER.strDefaultBillTo
 	 , intCurrencyId			= INVOICE.intCurrencyId
 	 , strCurrency				= CUR.strCurrency
 	 , strCurrencyDescription	= CUR.strDescription
-	 , strCustomerName			= C.strName
+	 , strCustomerName			= CUSTOMER.strName
 FROM 
 (SELECT strInvoiceNumber	= A.strInvoiceNumber
      , intInvoiceId			= A.intInvoiceId
@@ -392,23 +392,62 @@ INNER JOIN (
 		 , E.strName
 		 , C.strCustomerNumber
 		 , C.dblCreditLimit
+		 , strDefaultShipTo = DEFAULTSHIPTO.strAddress
+		 , strDefaultBillTo = DEFAULTBILLTO.strAddress
 	FROM tblARCustomer C WITH (NOLOCK)
 	INNER JOIN (SELECT intEntityId
 					 , strName
 				FROM dbo.tblEMEntity
 	) E ON C.intEntityId = E.intEntityId
+	LEFT JOIN (
+		SELECT intEntityId
+			 , intEntityLocationId
+			 , strAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, strLocationName, strAddress, strCity, strState, strZipCode, strCountry, NULL, 0) 
+		FROM dbo.tblEMEntityLocation WITH (NOLOCK)
+	) DEFAULTSHIPTO ON C.intShipToId = DEFAULTSHIPTO.intEntityLocationId 
+				   AND C.intEntityId = DEFAULTSHIPTO.intEntityId
+	LEFT JOIN (
+		SELECT intEntityId
+			 , intEntityLocationId
+			 , strAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, strLocationName, strAddress, strCity, strState, strZipCode, strCountry, NULL, 0) 
+		FROM dbo.tblEMEntityLocation WITH (NOLOCK)
+	) DEFAULTBILLTO ON C.intBillToId = DEFAULTBILLTO.intEntityLocationId 
+				   AND C.intEntityId = DEFAULTBILLTO.intEntityId
 ) CUSTOMER ON AGING.intEntityCustomerId = CUSTOMER.intEntityId
-LEFT JOIN tblARInvoice INVOICE ON AGING.intInvoiceId = INVOICE.intInvoiceId AND INVOICE.ysnCancelled = 0 AND INVOICE.ysnPosted = 1
-LEFT JOIN tblEMEntityLocation SHIPTOLOCATION ON INVOICE.intShipToLocationId = SHIPTOLOCATION.intEntityLocationId AND INVOICE.intEntityCustomerId = SHIPTOLOCATION.intEntityId
-LEFT JOIN tblEMEntityLocation BILLTOLOCATION ON INVOICE.intBillToLocationId = BILLTOLOCATION.intEntityLocationId AND INVOICE.intEntityCustomerId = BILLTOLOCATION.intEntityId
-LEFT JOIN tblEMEntityLocation DEFAULTLOCATION ON AGING.intEntityCustomerId = DEFAULTLOCATION.intEntityId AND DEFAULTLOCATION.ysnDefaultLocation = 1
-LEFT JOIN tblEMEntityLocation DEFAULTSHIPTO ON C.intShipToId = DEFAULTSHIPTO.intEntityLocationId AND C.[intEntityId] = DEFAULTSHIPTO.intEntityId
-LEFT JOIN tblEMEntityLocation DEFAULTBILLTO ON C.intBillToId = DEFAULTBILLTO.intEntityLocationId AND C.[intEntityId] = DEFAULTBILLTO.intEntityId
-LEFT JOIN
-	(SELECT intCurrencyID
-		  , strCurrency
-		  , strDescription
-		FROM dbo.tblSMCurrency
-	 ) CUR ON INVOICE.intCurrencyId = CUR.intCurrencyID
+LEFT JOIN (
+	SELECT *
+	FROM dbo.tblARInvoice WITH (NOLOCK)
+	WHERE ysnCancelled = 0 
+	  AND ysnPosted = 1
+) INVOICE ON AGING.intInvoiceId = INVOICE.intInvoiceId 
+LEFT JOIN (
+	SELECT intEntityId
+		 , intEntityLocationId
+		 , strAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, strLocationName, strAddress, strCity, strState, strZipCode, strCountry, NULL, 0) 
+	FROM dbo.tblEMEntityLocation WITH (NOLOCK)
+	WHERE ysnDefaultLocation = 1
+) SHIPTOLOCATION ON INVOICE.intShipToLocationId = SHIPTOLOCATION.intEntityLocationId 
+			    AND INVOICE.intEntityCustomerId = SHIPTOLOCATION.intEntityId
+LEFT JOIN (
+	SELECT intEntityId
+		 , intEntityLocationId
+		 , strAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, strLocationName, strAddress, strCity, strState, strZipCode, strCountry, NULL, 0) 
+	FROM dbo.tblEMEntityLocation WITH (NOLOCK)
+	WHERE ysnDefaultLocation = 1
+) BILLTOLOCATION ON INVOICE.intBillToLocationId = BILLTOLOCATION.intEntityLocationId 
+                AND INVOICE.intEntityCustomerId = BILLTOLOCATION.intEntityId
+LEFT JOIN (
+	SELECT intEntityId
+		 , intEntityLocationId
+		 , strAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, strLocationName, strAddress, strCity, strState, strZipCode, strCountry, NULL, 0) 
+	FROM dbo.tblEMEntityLocation WITH (NOLOCK)
+	WHERE ysnDefaultLocation = 1
+) DEFAULTLOCATION ON AGING.intEntityCustomerId = DEFAULTLOCATION.intEntityId
+LEFT JOIN (
+	SELECT intCurrencyID
+		 , strCurrency
+		 , strDescription
+	FROM dbo.tblSMCurrency
+) CUR ON INVOICE.intCurrencyId = CUR.intCurrencyID
 WHERE INVOICE.ysnPaid = 0
 AND AGING.intInvoiceId IN (SELECT intInvoiceId FROM tblARInvoice WHERE strTransactionType NOT IN ('Cash', 'Cash Refund'))
