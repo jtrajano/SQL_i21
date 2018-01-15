@@ -29,7 +29,14 @@
 	[dblStateTax] NUMERIC(18, 6) NULL DEFAULT ((0)),
 	[dblTaxableLocal] NUMERIC(18, 6) NULL DEFAULT ((0)),
 	[dblLocalTax] NUMERIC(18, 6) NULL DEFAULT ((0)),
-    [intConcurrencyId] INT NULL DEFAULT ((1)),
+	[strState2] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL, 
+	[strLocality2] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[strStateTaxID2] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[dblTaxableState2] NUMERIC(18, 6) NULL DEFAULT ((0)),
+	[dblStateTax2] NUMERIC(18, 6) NULL DEFAULT ((0)),
+	[dblTaxableLocal2] NUMERIC(18, 6) NULL DEFAULT ((0)),
+	[dblLocalTax2] NUMERIC(18, 6) NULL DEFAULT ((0)),
+	[intConcurrencyId] INT NULL DEFAULT ((1)),
 	CONSTRAINT [FK_tblPREmployeeW2_tblPREmployee] FOREIGN KEY ([intEntityEmployeeId]) REFERENCES [dbo].[tblPREmployee] ([intEntityId]) ON DELETE CASCADE,
 )
 GO
