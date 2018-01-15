@@ -57,11 +57,9 @@ BEGIN TRY
 
 	SELECT @intDeliverySheetId = [from]
 	FROM @temp_xml_table
+	
 	WHERE [fieldname] = 'intDeliverySheetId'
-
-	SELECT @intSplitId = intSplitId FROM tblSCDeliverySheet WHERE intDeliverySheetId = @intDeliverySheetId
-
-	EXEC uspSCDeliverySheetSummary @intDeliverySheetId, @intSplitId
+	EXEC uspSCDeliverySheetSummary @intDeliverySheetId
 END TRY
 
 BEGIN CATCH
