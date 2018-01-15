@@ -4,7 +4,9 @@ AS
 SELECT 
 	B.intSiteId
 	,dblProductCost = COALESCE(B.dblCallEntryPrice
-								,(CASE WHEN A.strSpecialPricing LIKE '%Inventory - Standard Pricing%' THEN A.dblPrice + ISNULL(C. dblPriceAdjustment,0.) ELSE A.dblPrice END)) 
+								,(CASE WHEN A.strSpecialPricing LIKE '%Inventory - Standard Pricing%' OR  strSpecialPricing LIKE '%Inventory - Pricing Level%' OR strSpecialPricing LIKE '%Inventory - Special Pricing%' OR strSpecialPricing LIKE '%Inventory Promotional Pricing%'
+									THEN A.dblPrice + ISNULL(C. dblPriceAdjustment,0.) 
+									ELSE A.dblPrice END)) 
 FROM vyuTMDeliveryFillReport B
 INNER JOIN tblTMSite C
 	ON B.intSiteId = C.intSiteID
