@@ -69,7 +69,31 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
                 }
             ]
         },
-
+        ownershipTypes: {
+            autoLoad: true,
+            data: [
+                {
+                    intOwnershipType: 1,
+                    strOwnershipType: 'Own'
+                },
+                {
+                    intOwnershipType: 2,
+                    strOwnershipType: 'Storage'
+                },
+                {
+                    intOwnershipType: 3,
+                    strOwnershipType: 'Consigned Purchase'
+                },
+                {
+                    intOwnershipType: 4,
+                    strOwnershipType: 'Consigned Sale'
+                }
+            ],
+            fields: {
+                name: 'intOwnershipType',
+                name: 'strOwnershipType'
+            }
+        },
         item: {
             type: 'icbufferedstocktrackingitemview'
         },
@@ -174,6 +198,27 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
                 }
                 else {
                     return me.show;
+                }
+            }
+        },
+
+        disableOwnership: function(get){
+            var me = this;
+            var posted = get('current.ysnPosted');
+            if (posted){
+                return true;
+            }
+            else {
+                var itemId = get('grdInventoryAdjustment.selection.intItemId');
+                if (!Ext.isNumeric(itemId))
+                    return true;
+
+                var lotTracking = get('grdInventoryAdjustment.selection.strLotTracking');
+                if (lotTracking == 'No'){
+                    return false;
+                }
+                else {
+                    return true;
                 }
             }
         },

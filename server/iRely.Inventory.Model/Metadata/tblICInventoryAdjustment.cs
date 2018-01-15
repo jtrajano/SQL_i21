@@ -125,6 +125,27 @@ namespace iRely.Inventory.Model
 
         public int? intItemOwnerId { get; set; }
         public int? intNewItemOwnerId { get; set; }
+        public int? intOwnershipType { get; set; }
+
+        private string _strOwnershipType;
+        [NotMapped]
+        public string strOwnershipType
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_strOwnershipType))
+                    if (vyuICGetInventoryAdjustmentDetail != null)
+                        return vyuICGetInventoryAdjustmentDetail.strOwnershipType;
+                    else
+                        return null;
+                else
+                    return _strOwnershipType;
+            }
+            set
+            {
+                _strOwnershipType = value;
+            }
+        }
 
         // 1: Storage Location
         private string _subLocation;
@@ -684,6 +705,8 @@ namespace iRely.Inventory.Model
         public int? intSort { get; set; }
         public string strOwnerName { get; set; }
         public string strNewOwnerName { get; set; }
+        public int? intOwnershipType { get; set; }
+        public string strOwnershipType { get; set; }
 
         public tblICInventoryAdjustmentDetail tblICInventoryAdjustmentDetail { get; set; }
     }

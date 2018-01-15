@@ -483,6 +483,34 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colOwnershipType',
+                                                        width: 110,
+                                                        dataIndex: 'strDescription',
+                                                        text: 'Ownership Type',
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intOwnershipType',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Onwership Type Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strOwnershipType',
+                                                                    dataType: 'string',
+                                                                    text: 'Ownership Type',
+                                                                    hidden: false,
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            itemId: 'cboOwnershipType',
+                                                            displayField: 'strOwnershipType',
+                                                            valueField: 'strOwnershipType'
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
                                                         itemId: 'colLotNumber',
                                                         width: 90,
                                                         dataIndex: 'strLotNumber',

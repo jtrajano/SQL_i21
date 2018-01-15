@@ -66,7 +66,9 @@ Ext.define('Inventory.model.AdjustmentDetail', {
         { name: 'intItemOwnerId', type: 'int', allowNull: true },
         { name: 'intNewItemOwnerId', type: 'int', allowNull: true },
         { name: 'strOwnerName', type: 'string', allowNull: true },
-        { name: 'strNewOwnerName', type: 'string', allowNull: true }        
+        { name: 'strNewOwnerName', type: 'string', allowNull: true },
+        { name: 'intOwnershipType', type: 'int', allowNull: true, defaultValue: 1 },
+        { name: 'strOwnershipType', type: 'string', allowNull: true, defaultValue: 'Own' }
     ],
 
     validators: [

@@ -127,6 +127,23 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                     }
                 },
 
+                colOwnershipType: {
+                    dataIndex: 'strOwnershipType',
+                    editor: {
+                        defaultFilters: [
+                            {
+                                column: 'intOwnershipType',
+                                value: 4,
+                                condition: 'noteq'
+                            }
+                        ],
+                        readOnly: '{disableOwnership}',
+                        origValueField: 'intOwnershipType',
+                        origUpdateField: 'intOwnershipType',
+                        store: '{ownershipTypes}'
+                    }
+                },
+
                 colLotNumber: {
                     dataIndex: 'strLotNumber',
                     text: '{setLotNumberLabel}',
