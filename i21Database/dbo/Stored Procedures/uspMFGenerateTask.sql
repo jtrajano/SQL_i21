@@ -1134,7 +1134,8 @@ BEGIN TRY
 				)
 	END
 
-	IF @strOrderType = 'INVENTORY SHIPMENT STAGING' and @intInventoryShipmentId IS NOT NULL
+	IF @strOrderType = 'INVENTORY SHIPMENT STAGING'
+		AND @intInventoryShipmentId IS NOT NULL
 	BEGIN
 		SELECT @intTransactionId = @intInventoryShipmentId
 
@@ -1216,6 +1217,17 @@ BEGIN TRY
 		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
 			,@intOrderId
 			,34
+	END
+
+	IF EXISTS (
+			SELECT 1
+			FROM tblMFTask
+			WHERE intOrderHeaderId = @intOrderHeaderId
+			)
+	BEGIN
+		UPDATE tblMFOrderHeader
+		SET intOrderStatusId = 2
+		WHERE intOrderHeaderId = @intOrderHeaderId
 	END
 END TRY
 
