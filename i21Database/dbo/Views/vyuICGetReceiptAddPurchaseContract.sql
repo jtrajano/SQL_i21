@@ -82,7 +82,7 @@ FROM (
 		, intBundledItemId			= CASE WHEN ContractView.strBundleType = 'Basket' THEN ContractView.intItemId ELSE CAST(NULL AS INT) END 
 		, strBundledItemNo			= CASE WHEN ContractView.strBundleType = 'Basket' THEN ContractView.strItemNo ELSE CAST(NULL AS NVARCHAR(50)) END 
 		, strBundledItemDescription = CASE WHEN ContractView.strBundleType = 'Basket' THEN ContractView.strItemDescription ELSE CAST(NULL AS NVARCHAR(50)) END 
-		, strBundleType 			= ContractView.strBundleType
+		, ysnIsBasket 				= CAST(CASE ContractView.strBundleType WHEN 'Baset' THEN 1 ELSE 0 END AS BIT)
 		, ContractView.intFreightTermId
 		, ContractView.strFreightTerm
 	FROM vyuCTContractAddOrdersLookup ContractView
