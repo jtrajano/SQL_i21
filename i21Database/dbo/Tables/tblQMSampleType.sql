@@ -8,7 +8,7 @@
 	[ysnFinalApproval] BIT NOT NULL CONSTRAINT [DF_tblQMSampleType_ysnFinalApproval] DEFAULT 0, 
 	strApprovalBase NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	intSampleLabelId INT,
-	
+	ysnAdjustInventoryQtyBySampleQty BIT CONSTRAINT [DF_tblQMSampleType_ysnAdjustInventoryQtyBySampleQty] DEFAULT 0,
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMSampleType_dtmCreated] DEFAULT GetDate(),
 	[intLastModifiedUserId] [int] NULL,

@@ -25,6 +25,17 @@ BEGIN TRY
 	DECLARE @ysnEnableParentLot BIT
 	DECLARE @strMarks NVARCHAR(100)
 	DECLARE @intShipperEntityId INT
+	DECLARE @intSampleTypeId INT
+	DECLARE @intStorageLocationId INT
+	DECLARE @dblSampleQty NUMERIC(18, 6)
+	DECLARE @intSampleUOMId INT
+	DECLARE @intItemId INT
+	DECLARE @intLotId INT
+	DECLARE @dblQty NUMERIC(18, 6)
+	DECLARE @intItemUOMId INT
+	DECLARE @intCreatedUserId INT
+	DECLARE @intSampleItemUOMId INT
+	DECLARE @strReasonCode NVARCHAR(50)
 
 	SELECT @strSampleNumber = strSampleNumber
 		,@strLotNumber = strLotNumber
@@ -32,6 +43,12 @@ BEGIN TRY
 		,@intInventoryReceiptId = intInventoryReceiptId
 		,@intWorkOrderId = intWorkOrderId
 		,@strMarks = strMarks
+		,@intSampleTypeId = intSampleTypeId
+		,@intStorageLocationId = intStorageLocationId
+		,@dblSampleQty = dblSampleQty
+		,@intSampleUOMId = intSampleUOMId
+		,@intItemId = intItemId
+		,@intCreatedUserId = intCreatedUserId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			strSampleNumber NVARCHAR(30)
 			,strLotNumber NVARCHAR(50)
@@ -39,6 +56,12 @@ BEGIN TRY
 			,intInventoryReceiptId INT
 			,intWorkOrderId INT
 			,strMarks NVARCHAR(100)
+			,intSampleTypeId INT
+			,intStorageLocationId INT
+			,dblSampleQty NUMERIC(18, 6)
+			,intSampleUOMId INT
+			,intItemId INT
+			,intCreatedUserId INT
 			)
 
 	IF (
@@ -512,6 +535,40 @@ BEGIN TRY
 			)
 
 	SELECT @strSampleNumber AS strSampleNumber
+
+	IF EXISTS (
+			SELECT *
+			FROM tblQMSampleType
+			WHERE intSampleTypeId = @intSampleTypeId
+				AND ysnAdjustInventoryQtyBySampleQty = 1
+			)
+	BEGIN
+		SELECT @intLotId = intLotId
+			,@dblQty = dblQty
+			,@intItemUOMId = intItemUOMId
+		FROM tblICLot
+		WHERE strLotNumber = @strLotNumber
+			AND intStorageLocationId = @intStorageLocationId
+
+		SELECT @intSampleItemUOMId = intItemUOMId
+		FROM tblICItemUOM
+		WHERE intItemId = @intItemId
+			AND intUnitMeasureId = @intSampleUOMId
+
+		SELECT @dblQty = @dblQty + dbo.fnMFConvertQuantityToTargetItemUOM(@intSampleItemUOMId, @intItemUOMId, @dblSampleQty)
+
+		SELECT @strReasonCode = 'Sample Quantity - ' + @strSampleNumber
+
+		EXEC [uspMFLotAdjustQty] @intLotId = @intLotId
+			,@dblNewLotQty = @dblQty
+			,@intAdjustItemUOMId = @intItemUOMId
+			,@intUserId = @intCreatedUserId
+			,@strReasonCode = @strReasonCode
+			,@blnValidateLotReservation = 0
+			,@strNotes = NULL
+			,@dtmDate = @dtmBusinessDate
+			,@ysnBulkChange = 0
+	END
 
 	EXEC sp_xml_removedocument @idoc
 

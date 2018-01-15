@@ -1167,3 +1167,10 @@ BEGIN
 	VALUES('Offer Sample Label','OfferSampleLabel',1,1)
 END
 GO
+
+UPDATE tblQMSampleType
+SET ysnAdjustInventoryQtyBySampleQty = 0
+WHERE ysnAdjustInventoryQtyBySampleQty IS NULL
+GO
+
+
