@@ -6706,13 +6706,13 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intTransactionId" />
   </Operation>
-    <Operation Name="Rename Refactor" Key="dce50be9-2966-4135-a3a7-d49c03381b15" ChangeDateTime="12/26/2017 10:59:05">
+  <Operation Name="Rename Refactor" Key="dce50be9-2966-4135-a3a7-d49c03381b15" ChangeDateTime="12/26/2017 10:59:05">
     <Property Name="ElementName" Value="[dbo].[tblSMLogoPreference].[Id]" />
     <Property Name="ElementType" Value="SqlSimpleColumn" />
     <Property Name="ParentElementName" Value="[dbo].[tblSMLogoPreference]" />
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intLogoPreferenceId" />
-</Operation>
+  </Operation>
   <Operation Name="Rename Refactor" Key="314f7bb6-9319-413a-ac11-5d0dbae73872" ChangeDateTime="12/26/2017 22:27:30">
     <Property Name="ElementName" Value="[dbo].[tblTFTaxAuthorityBeginEndInventoryDetail].[Id]" />
     <Property Name="ElementType" Value="SqlSimpleColumn" />
@@ -6740,5 +6740,19 @@
     <Property Name="ParentElementName" Value="[dbo].[tblTFTaxAuthorityBeginEndInventoryDetail]" />
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[FK_tblTFTaxAuthorityBeginEndInventoryDetail_tblTFTaxAuthorityBeginEndInventory]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="ecba1a03-3a2b-4de2-9863-01550f47454a" ChangeDateTime="01/15/2018 09:24:49">
+    <Property Name="ElementName" Value="[dbo].[tblARProductRecapStagingTable].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblARProductRecapStagingTable]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intEntityCustomerId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="6783439d-5ce3-426f-8d60-a739a2520b1f" ChangeDateTime="01/15/2018 09:38:31">
+    <Property Name="ElementName" Value="[dbo].[tblARCustomerActivityStagingTable].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblARCustomerActivityStagingTable]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intEntityCustomerId" />
   </Operation>
 </Operations>

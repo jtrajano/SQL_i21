@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspARInvoiceProductRecapReport]
-	@strCustomerName NVARCHAR(MAX)	
+	  @dtmDateFrom		DATETIME = NULL
+	, @dtmDateTo		DATETIME = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -8,28 +9,28 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @tblCustomers TABLE (
-	    intEntityCustomerId			INT	  
-	  , strCustomerNumber			NVARCHAR(200) COLLATE Latin1_General_CI_AS
-	  , strCustomerName				NVARCHAR(200) COLLATE Latin1_General_CI_AS
-	  , dblCreditLimit				NUMERIC(18, 6)
-)
+IF @dtmDateFrom IS NULL
+    SET @dtmDateFrom = CAST(-53690 AS DATETIME)
 
-INSERT INTO @tblCustomers
-SELECT C.intEntityId 
-	 , C.strCustomerNumber
-	 , EC.strName
-	 , C.dblCreditLimit
-FROM tblARCustomer C WITH (NOLOCK)
-INNER JOIN (
-	SELECT intEntityId
-		 , strName
-	FROM dbo.tblEMEntity WITH (NOLOCK)
-	WHERE (@strCustomerName IS NULL OR strName LIKE '%'+ @strCustomerName +'%')
-) EC ON C.intEntityId = EC.intEntityId
-WHERE ysnActive = 1
+IF @dtmDateTo IS NULL
+    SET @dtmDateTo = GETDATE()
 
-
+TRUNCATE TABLE tblARProductRecapStagingTable
+INSERT INTO tblARProductRecapStagingTable (
+	  intEntityCustomerId
+	, strCustomerName
+	, intCompanyLocationId
+	, strLocationNumber
+	, intItemId
+	, intTaxCodeId
+	, strProductNo
+	, intSortNo
+	, strDescription
+	, strTransactionType
+	, strType
+	, dblUnits
+	, dblAmounts
+)	
 SELECT DISTINCT
 	  ABC.intEntityCustomerId
 	, ARC.strCustomerName
@@ -91,6 +92,7 @@ FROM
 			WHERE ID.intInvoiceId = ARI.intInvoiceId
 		) ARID
 		WHERE ARI.ysnPosted = 1
+		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), ARI.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
 		GROUP BY ARI.intEntityCustomerId
 			   , ARI.intCompanyLocationId
 			   , ARID.intItemId
@@ -155,6 +157,7 @@ FROM
 		  AND ARI.strType NOT IN ('Service Charge')
 		  AND ARI.strTransactionType NOT IN ('Overpayment', 'Customer Prepayment', 'Debit Memo')
 		  AND ARIDT.intTaxCodeId IS NOT NULL		
+		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), ARI.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
 		GROUP BY ARI.intEntityCustomerId
 			   , ARI.intCompanyLocationId
 			   , ARIDT.intTaxCodeId
@@ -200,6 +203,7 @@ FROM
 	WHERE ARI.ysnPosted = 1
 	  AND ARI.strType NOT IN ('Service Charge')
 	  AND ARI.strTransactionType IN ('Debit Memo')
+	  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), ARI.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
 	GROUP BY ARI.intEntityCustomerId
 		   , ARI.intCompanyLocationId
 		   , ARI.strTransactionType
@@ -220,7 +224,8 @@ FROM
 		 , strTaxCode				= NULL
 	FROM dbo.tblARInvoice ARI WITH (NOLOCK)
 	WHERE ARI.ysnPosted = 1 
-	  AND ARI.strTransactionType IN ('Overpayment', 'Customer Prepayment')		
+	  AND ARI.strTransactionType IN ('Overpayment', 'Customer Prepayment')
+	  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), ARI.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo		
 	GROUP BY ARI.intEntityCustomerId
 		   , ARI.intCompanyLocationId
 		   , ARI.strTransactionType	
@@ -242,6 +247,7 @@ FROM
 	FROM dbo.tblARInvoice ARI WITH (NOLOCK)
 	WHERE ARI.ysnPosted = 1
 	  AND ARI.strTransactionType NOT IN ('Overpayment', 'Customer Prepayment', 'Debit Memo')
+	  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), ARI.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
 	GROUP BY ARI.intEntityCustomerId
 		   , ARI.intCompanyLocationId
 
@@ -261,13 +267,19 @@ FROM
 		 , strTaxCode				= NULL
 	FROM dbo.tblARInvoice ARI WITH (NOLOCK)
 	WHERE ARI.ysnPosted = 1
-	  AND ARI.strType IN ('Service Charge')			
+	  AND ARI.strType IN ('Service Charge')
+	  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), ARI.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo			
 	GROUP BY ARI.intEntityCustomerId
 		   , ARI.intCompanyLocationId
 		   , ARI.strType
 		
 ) ABC
-INNER JOIN @tblCustomers ARC ON ABC.intEntityCustomerId = ARC.intEntityCustomerId
+INNER JOIN (
+	SELECT DISTINCT 
+		  intEntityCustomerId
+		, strCustomerName
+	FROM dbo.tblARCustomerActivityStagingTable WITH (NOLOCK)
+) ARC ON ABC.intEntityCustomerId = ARC.intEntityCustomerId
 LEFT JOIN (
 	SELECT intCompanyLocationId
 		 , strLocationNumber
