@@ -17,9 +17,9 @@
 	dtmLastModified datetime NULL CONSTRAINT DF_tblMFReasonCode_dtmLastModified DEFAULT GetDate(),
 		
 	CONSTRAINT PK_tblMFReasonCode PRIMARY KEY (intReasonCodeId),
-	CONSTRAINT AK_tblMFReasonCode_strReasonCode_intReasonTypeId UNIQUE (
+	CONSTRAINT AK_tblMFReasonCode_strReasonCode_intReasonTypeId_intTransactionTypeId UNIQUE (
 		strReasonCode,
-		intReasonTypeId),
+		intReasonTypeId,intTransactionTypeId),
 	CONSTRAINT FK_tblMFReasonCode_tblMFReasonType FOREIGN KEY (intReasonTypeId) REFERENCES tblMFReasonType(intReasonTypeId),
 	CONSTRAINT FK_tblMFReasonCode_tblICInventoryTransactionType FOREIGN KEY (intTransactionTypeId) REFERENCES tblICInventoryTransactionType(intTransactionTypeId)
 )
