@@ -5771,6 +5771,8 @@
     <Build Include="dbo\Stored Procedures\uspCFTopCardLockCustomerReport.sql" />
     <Build Include="dbo\Views\vyuCCVendorCombo.sql" />
     <Build Include="dbo\Views\vyuPREmployeeW3.sql" />
+    <Build Include="dbo\Tables\tblARProductRecapStagingTable.sql" />
+    <Build Include="dbo\Tables\tblARCustomerActivityStagingTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
