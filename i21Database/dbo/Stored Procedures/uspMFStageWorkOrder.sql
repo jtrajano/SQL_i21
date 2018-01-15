@@ -471,7 +471,7 @@ BEGIN TRY
 				,@intSourceTransactionTypeId = 8
 				,@intEntityUserSecurityId = @intUserId
 				,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
-				,@strDescription=@strWorkOrderNo 
+				,@strDescription = @strWorkOrderNo
 
 			INSERT INTO dbo.tblMFWorkOrderProducedLotTransaction (
 				intWorkOrderId
@@ -541,7 +541,7 @@ BEGIN TRY
 			,@intSourceTransactionTypeId = 8
 			,@intEntityUserSecurityId = @intUserId
 			,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
-			,@strDescription=@strWorkOrderNo 
+			,@strDescription = @strWorkOrderNo
 	END
 
 	IF @strInventoryTracking = 'Item Level'
@@ -765,6 +765,15 @@ BEGIN TRY
 	EXEC dbo.uspICCreateStockReservation @ItemsToReserve
 		,@intWorkOrderId
 		,@intInventoryTransactionType
+
+	SELECT @intDestinationLotId = intLotId
+	FROM tblICLot L
+	WHERE L.strLotNumber = @strLotNumber
+		AND L.intStorageLocationId = @intConsumptionStorageLocationId
+
+	UPDATE tblMFWorkOrderInputLot
+	SET intDestinationLotId = @intDestinationLotId
+	WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION

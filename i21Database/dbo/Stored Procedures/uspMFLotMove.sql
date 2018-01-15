@@ -27,6 +27,7 @@ BEGIN TRY
 		,@intWeightUOMId INT
 		,@intItemStockUOMId INT
 		,@dblLotReservedQty NUMERIC(38, 20)
+		,@dblWorkOrderReservedQty NUMERIC(38, 20)
 		,@dblWeight NUMERIC(38, 20)
 		,@dblLotQty NUMERIC(38, 20)
 		,@dblLotAvailableQty NUMERIC(38, 20)
@@ -299,6 +300,29 @@ BEGIN TRY
 						)
 			END
 		END
+	END
+
+	SELECT @dblWorkOrderReservedQty = SUM(dblQuantity)
+	FROM tblMFWorkOrderInputLot
+	WHERE intDestinationLotId = @intLotId
+		AND ysnConsumptionReversed = 0
+
+	IF (
+			@dblLotAvailableQty + (
+				CASE 
+					WHEN @intItemUOMId = @intMoveItemUOMId
+						AND @intWeightUOMId IS NOT NULL
+						THEN - @dblMoveQty * @dblWeightPerQty
+					ELSE - @dblMoveQty
+					END
+				)
+			) < @dblWorkOrderReservedQty
+	BEGIN
+		RAISERROR (
+				'There is reservation against this lot. Cannot proceed.'
+				,16
+				,1
+				)
 	END
 
 	IF EXISTS (
