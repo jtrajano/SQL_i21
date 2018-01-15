@@ -3093,7 +3093,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         items: [
                                                             {
                                                                 xtype: 'container',
-                                                                flex: 1,
+                                                                width: 301,
                                                                 items: [
                                                                     {
                                                                         xtype: 'numericfield',
@@ -3124,6 +3124,37 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         quantityField: true,
                                                                         itemId: 'txtInvoiceMargin',
                                                                         fieldLabel: 'Invoice Margin %',
+                                                                        labelWidth: 130,
+                                                                        readOnly: true
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                xtype: 'container',
+                                                                flex: 1,
+                                                                padding: '28 0 0 10',
+                                                                items: [
+                                                                    {
+                                                                        xtype: 'numericfield',
+                                                                        currencyField: true,
+                                                                        itemId: 'txtChargesTotal',
+                                                                        fieldLabel: 'Charges',
+                                                                        labelWidth: 130,
+                                                                        readOnly: true
+                                                                    },
+                                                                    {
+                                                                        xtype: 'numericfield',
+                                                                        currencyField: true,
+                                                                        itemId: 'txtTaxesTotal',
+                                                                        fieldLabel: 'Tax',
+                                                                        labelWidth: 130,
+                                                                        hideTrigger: true
+                                                                    },
+                                                                    {
+                                                                        xtype: 'numericfield',
+                                                                        currencyField: true,
+                                                                        itemId: 'txtChargesAmountTotal',
+                                                                        fieldLabel: 'Total',
                                                                         labelWidth: 130,
                                                                         readOnly: true
                                                                     }

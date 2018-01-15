@@ -8708,11 +8708,12 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "layout|flex": 1
+                                                        "width": 301
                                                     },
                                                     "configAlternates": {
                                                         "layout|flex": "number",
-                                                        "scrollable": "boolean"
+                                                        "scrollable": "boolean",
+                                                        "width": "auto"
                                                     },
                                                     "name": "MyContainer33",
                                                     "designerId": "114e82c5-ba0d-4b2c-a779-354023972da7",
@@ -8868,6 +8869,143 @@
                                                                 {
                                                                     "group": "(Custom Properties)",
                                                                     "name": "quantityField",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.container.Container",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "layout|flex": 1,
+                                                        "padding": "28 0 0 10"
+                                                    },
+                                                    "configAlternates": {
+                                                        "layout|flex": "number",
+                                                        "scrollable": "boolean",
+                                                        "padding": "auto"
+                                                    },
+                                                    "name": "MyContainer14",
+                                                    "designerId": "8f75e9d9-fd20-4f07-b453-52597d5bf404",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.form.field.Number",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "currencyField": true,
+                                                                "designer|createAlias": "numericfield",
+                                                                "fieldLabel": "Charges",
+                                                                "itemId": "txtChargesTotal",
+                                                                "labelWidth": 130,
+                                                                "name": null,
+                                                                "readOnly": true,
+                                                                "width": null
+                                                            },
+                                                            "configAlternates": {
+                                                                "currencyField": "boolean",
+                                                                "designer|createAlias": "string",
+                                                                "fieldLabel": "string",
+                                                                "itemId": "string",
+                                                                "labelWidth": "number",
+                                                                "name": "string",
+                                                                "readOnly": "boolean",
+                                                                "width": "auto",
+                                                                "scrollable": "boolean"
+                                                            },
+                                                            "name": "MyNumberField6",
+                                                            "designerId": "cecbeb37-581f-4f1f-a0b9-d7f6ebf7bd59",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "currencyField",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.field.Number",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "currencyField": true,
+                                                                "designer|createAlias": "numericfield",
+                                                                "fieldLabel": "Tax",
+                                                                "hideTrigger": true,
+                                                                "itemId": "txtTaxesTotal",
+                                                                "labelWidth": 130,
+                                                                "name": null,
+                                                                "readOnly": null,
+                                                                "width": null
+                                                            },
+                                                            "configAlternates": {
+                                                                "currencyField": "boolean",
+                                                                "designer|createAlias": "string",
+                                                                "fieldLabel": "string",
+                                                                "hideTrigger": "boolean",
+                                                                "itemId": "string",
+                                                                "labelWidth": "number",
+                                                                "name": "string",
+                                                                "readOnly": "boolean",
+                                                                "width": "auto",
+                                                                "scrollable": "boolean"
+                                                            },
+                                                            "name": "MyNumberField5",
+                                                            "designerId": "e898b01a-060e-4f99-9559-29c43b311428",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "currencyField",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.field.Number",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "currencyField": true,
+                                                                "designer|createAlias": "numericfield",
+                                                                "fieldLabel": "Total",
+                                                                "itemId": "txtChargesAmountTotal",
+                                                                "labelWidth": 130,
+                                                                "name": null,
+                                                                "readOnly": true,
+                                                                "width": null
+                                                            },
+                                                            "configAlternates": {
+                                                                "currencyField": "boolean",
+                                                                "designer|createAlias": "string",
+                                                                "fieldLabel": "string",
+                                                                "itemId": "string",
+                                                                "labelWidth": "number",
+                                                                "name": "string",
+                                                                "readOnly": "boolean",
+                                                                "width": "auto",
+                                                                "scrollable": "boolean"
+                                                            },
+                                                            "name": "MyNumberField7",
+                                                            "designerId": "0a10d888-e505-4bd3-bb66-b7e1bd47172f",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "currencyField",
                                                                     "type": "string"
                                                                 }
                                                             ]

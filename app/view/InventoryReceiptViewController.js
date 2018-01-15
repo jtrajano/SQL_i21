@@ -2416,6 +2416,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (txtGrossDiff) { txtGrossDiff.setValue(line.gross - line.lot.gross); }
         if (txtNetDiff) { txtNetDiff.setValue(line.net - line.lot.net); }
         
+        var txtChargesTotal = win.down("#txtChargesTotal"),
+            txtTaxesTotal = win.down("#txtTaxesTotal"),
+            txtChargesAmountTotal = win.down("#txtChargesAmountTotal");
+
+        txtChargesTotal.setValue(totalCharges);
+        txtTaxesTotal.setValue(totalChargesTax);
+        txtChargesAmountTotal.setValue(totalCharges + totalChargesTax);
     },
 
     getTaxableAmount: function (quantity, price, currentItemTax, itemTaxes) {
