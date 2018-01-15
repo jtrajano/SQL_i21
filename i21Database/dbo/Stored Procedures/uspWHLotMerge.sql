@@ -30,15 +30,20 @@ BEGIN TRY
 		,@intWeightUOMId INT
 		,@dblLotReservedQty NUMERIC(38, 20)
 		,@dblWeight NUMERIC(38, 20)
-		,@dblOldDestinationQty NUMERIC(38, 20)
 		,@dblOldSourceQty NUMERIC(38, 20)
 		,@strStorageLocationName NVARCHAR(50)
 		,@strItemNumber NVARCHAR(50)
 		,@strUnitMeasure NVARCHAR(50)
 		,@dblLotAvailableQty NUMERIC(38, 20)
-		,@dblDefaultResidueQty NUMERIC(38,20)
+		,@dblDefaultResidueQty NUMERIC(38, 20)
+		,@dtmSourceLotExpiryDate DATETIME
+		,@dtmDestinationLotExpiryDate DATETIME
+		,@intTransactionCount INT
 
-		SELECT TOP 1 @dblDefaultResidueQty=ISNULL(dblDefaultResidueQty,0.00001) FROM tblMFCompanyPreference
+	SELECT @intTransactionCount = @@TRANCOUNT
+
+	SELECT TOP 1 @dblDefaultResidueQty = ISNULL(dblDefaultResidueQty, 0.00001)
+	FROM tblMFCompanyPreference
 
 	SELECT @intItemId = intItemId
 		,@intLocationId = intLocationId
@@ -56,6 +61,7 @@ BEGIN TRY
 				THEN intItemUOMId
 			ELSE @intItemUOMId
 			END
+		,@dtmSourceLotExpiryDate = dtmExpiryDate
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
@@ -127,7 +133,7 @@ BEGIN TRY
 		,@strNewLotNumber = strLotNumber
 		,@intNewLotStatusId = intLotStatusId
 		,@dblNewLotWeightPerUnit = dblWeightPerQty
-		,@dblOldDestinationQty = dblQty
+		,@dtmDestinationLotExpiryDate = dtmExpiryDate
 	FROM tblICLot
 	WHERE intLotId = @intNewLotId
 
@@ -154,7 +160,8 @@ BEGIN TRY
 				)
 	END
 
-	BEGIN TRANSACTION
+	IF @intTransactionCount = 0
+		BEGIN TRANSACTION
 
 	EXEC uspICInventoryAdjustment_CreatePostLotMerge @intItemId = @intItemId
 		,@dtmDate = @dtmDate
@@ -256,12 +263,24 @@ BEGIN TRY
 			,@strNotes = 'Residue qty clean up'
 	END
 
-	COMMIT TRANSACTION
+	IF  @dtmDestinationLotExpiryDate > @dtmSourceLotExpiryDate
+	BEGIN
+		EXEC [uspMFSetLotExpiryDate] @intLotId = @intNewLotId
+			,@dtmNewExpiryDate = @dtmSourceLotExpiryDate
+			,@intUserId = @intUserId
+			,@strReasonCode = NULL
+			,@strNotes = NULL
+			,@dtmDate = @dtmDate
+			,@ysnBulkChange = 0
+	END
+
+	IF @intTransactionCount = 0
+		COMMIT TRANSACTION
 END TRY
 
 BEGIN CATCH
 	IF XACT_STATE() != 0
-		AND @@TRANCOUNT > 0
+		AND @intTransactionCount = 0
 		ROLLBACK TRANSACTION
 
 	SET @ErrMsg = ERROR_MESSAGE()

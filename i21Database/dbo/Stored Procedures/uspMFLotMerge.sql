@@ -44,8 +44,8 @@ BEGIN TRY
 		,@dblDefaultResidueQty NUMERIC(38, 20)
 		,@intTransactionCount INT
 		,@strDescription NVARCHAR(MAX)
-
-	SELECT @intTransactionCount = @@TRANCOUNT
+		,@dtmSourceLotExpiryDate DATETIME
+		,@dtmDestinationLotExpiryDate DATETIME
 
 	SELECT @strDescription = Ltrim(isNULL(@strReasonCode, '') + ' ' + isNULL(@strNotes, ''))
 
@@ -71,6 +71,7 @@ BEGIN TRY
 			ELSE dblWeight
 			END
 		,@intItemUOMId = intItemUOMId
+		,@dtmSourceLotExpiryDate = dtmExpiryDate
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
@@ -146,6 +147,7 @@ BEGIN TRY
 				THEN dblQty
 			ELSE dblWeight
 			END
+		,@dtmDestinationLotExpiryDate = dtmExpiryDate
 	FROM tblICLot
 	WHERE intLotId = @intNewLotId
 
@@ -294,6 +296,17 @@ BEGIN TRY
 			,@intUserId = @intUserId
 			,@strReasonCode = 'Residue qty clean up'
 			,@strNotes = 'Residue qty clean up'
+	END
+
+	IF @dtmDestinationLotExpiryDate > @dtmSourceLotExpiryDate
+	BEGIN
+		EXEC [uspMFSetLotExpiryDate] @intLotId = @intNewLotId
+			,@dtmNewExpiryDate = @dtmSourceLotExpiryDate
+			,@intUserId = @intUserId
+			,@strReasonCode = NULL
+			,@strNotes = NULL
+			,@dtmDate = @dtmDate
+			,@ysnBulkChange = 0
 	END
 
 	IF @intTransactionCount = 0
