@@ -6006,6 +6006,8 @@
     <Build Include="dbo\Views\vyuARPOSEndOfDayReport.sql" />
     <Build Include="dbo\Views\vyuARPOSGLSummary.sql" />
     <Build Include="dbo\Views\vyuCCVendorCombo.sql" />
+    <Build Include="dbo\Tables\tblARProductRecapStagingTable.sql" />
+    <Build Include="dbo\Tables\tblARCustomerActivityStagingTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
