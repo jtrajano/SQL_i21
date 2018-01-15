@@ -118,7 +118,7 @@ BEGIN TRY
 				intContractSeq		=	1,					intStorageScheduleRuleId	=	ISNULL(SP.intStorageScheduleId,ISNULL(SC.intStorageScheduleId,CP.intDefStorageSchedule)),
 				dtmEndDate			=	CASE	WHEN	strDefEndDateType	=	'Calender'	THEN ISNULL(CP.dtmDefEndDate,DATEADD(d, 0, DATEDIFF(d, 0, GETDATE())))
 												WHEN	strDefEndDateType	=	'None'		THEN DATEADD(d, 0, DATEDIFF(d, 0, GETDATE()))
-												WHEN	strDefEndDateType	=	'Last Date of the Start Date''s Month' THEN EOMONTH (GETDATE())
+												WHEN	strDefEndDateType	=	'Last Date of the Start Date''s Month' THEN DATEADD(MONTH, DATEDIFF(MONTH, 0,  (GETDATE())) + 1, 0) - 1
 												ELSE	DATEADD(d, 0, DATEDIFF(d, 0, GETDATE()))
 										END,
 				intCompanyLocationId		=	SC.intProcessingLocationId, 
