@@ -11,6 +11,7 @@
 	[intFailed] INT NULL,
 	[strDetails] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[dtmDateUpdated] DATETIME NULL,
+	[ysnComplete] BIT NULL,
 	[ysnDetail] BIT NULL,
 	[intConcurrencyId] INT NOT NULL DEFAULT 0
 )
