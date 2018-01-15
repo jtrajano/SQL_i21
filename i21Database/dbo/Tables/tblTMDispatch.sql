@@ -28,7 +28,7 @@
     [intDeliveryTermID]        INT             NULL,
     [dtmDispatchingDate]       DATETIME        NULL,
     [strWillCallStatus] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT ('Generated'), 
-    [strPricingMethod] NVARCHAR(10) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT ('Regular'), 
+    [strPricingMethod] NVARCHAR(15) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT ('Regular'), 
     [strOrderNumber] NCHAR(15) COLLATE Latin1_General_CI_AS NULL, 
     [dtmDeliveryDate] DATETIME NULL, 
     [dblDeliveryQuantity] NUMERIC(18, 6) NULL, 
