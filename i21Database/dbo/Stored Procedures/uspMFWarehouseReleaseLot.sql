@@ -58,6 +58,7 @@ BEGIN TRY
 		,@intShiftActivityId INT
 		,@intShiftActivityStatusId INT
 		,@strAttributeValueByWorkOrder NVARCHAR(50)
+		,@intNewLotStatusId int
 
 	SELECT @dtmCurrentDate = GETDATE()
 
@@ -71,6 +72,7 @@ BEGIN TRY
 		,@intUserId = intUserId
 		,@strComment = strComment
 		,@intReleaseStatusId = intReleaseStatusId
+		,@intNewLotStatusId=intLotStatusId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intLotId INT
 			,strGTINCaseBarCode NVARCHAR(50)
@@ -79,6 +81,7 @@ BEGIN TRY
 			,intUserId INT
 			,strComment NVARCHAR(MAX)
 			,intReleaseStatusId INT
+			,intLotStatusId int
 			)
 
 	IF @intLotId = 0
@@ -142,19 +145,6 @@ BEGIN TRY
 		RETURN
 	END
 
-	--IF NOT EXISTS (
-	--		SELECT 1
-	--		FROM dbo.tblMFWorkOrderProducedLot
-	--		WHERE intLotId = @intLotId
-	--		)
-	--BEGIN
-	--	RAISERROR (
-	--			51054
-	--			,11
-	--			,1
-	--			,@strLotNumber
-	--			)
-	--END
 	IF @ysnBulkRelease =0 and EXISTS (
 			SELECT 1
 			FROM dbo.tblMFWorkOrderProducedLot
@@ -305,14 +295,19 @@ BEGIN TRY
 		,intLastModifiedUserId = @intUserId
 	WHERE intLotId = @intLotId
 
-	--UPDATE tblICLot
-	--SET intLotStatusId = 1
-	--WHERE intLotId = @intLotId
-	EXEC uspMFSetLotStatus @intLotId = @intLotId
-		,@intNewLotStatusId = 1
-		,@intUserId = @intUserId
-		,@strNotes = ''
-
+	If @intNewLotStatusId IS NOT NULL
+				AND NOT EXISTS (
+					SELECT *
+					FROM dbo.tblICLot
+					WHERE intLotId = @intLotId
+						AND intLotStatusId = @intNewLotStatusId
+					)
+			BEGIN
+		EXEC uspMFSetLotStatus @intLotId = @intLotId
+			,@intNewLotStatusId = @intNewLotStatusId
+			,@intUserId = @intUserId
+			,@strNotes = ''
+	End
 	IF @strAttributeValue = 'True'
 	BEGIN
 		SELECT @intStagingLocationId = intLocationId
@@ -341,8 +336,6 @@ BEGIN TRY
 		FROM dbo.tblICItemUOM
 		WHERE intItemUOMId = @intItemUOMId
 
-		--EXEC dbo.uspSMGetStartingNumber 33
-		--	,@intBatchId OUTPUT
 		EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
 			,@intItemId = @intItemId
 			,@intManufacturingId = NULL
