@@ -56,7 +56,7 @@ namespace iRely.Inventory.Model
         public string strClass { get; set; }
         public string strProductLine { get; set; }
         public bool? ysnUseWeighScales { get; set; }
-        public bool? ysnIsBasket { get; set; }
+        public string strBundleType { get; set; }
         public string strDimensionUOM { get; set; }
         public string strWeightUOM { get; set; }
         public bool? ysnLotWeightsRequired { get; set; }
