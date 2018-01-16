@@ -22,7 +22,7 @@ BEGIN
 				SELECT DISTINCT	
 				LTRIM(RTRIM(gadsc_com_cd))+' '		
 				+ CASE 
-					WHEN a1.gacdc_desc IS NOT NULL THEN a1.gacdc_desc
+					WHEN a1.gacdc_desc IS NOT NULL THEN LTRIM(RTRIM(a1.gacdc_desc))
 						ELSE 
 							CASE 
 								WHEN ISNULL(LTRIM(RTRIM(gadsc_desc)), '') <> '' THEN LTRIM(RTRIM(gadsc_disc_cd)) + ' / ' + ISNULL(LTRIM(RTRIM(gadsc_desc)), '')
@@ -100,7 +100,7 @@ BEGIN
 			 LTRIM(RTRIM(gadsc_disc_cd)) AS strShortName
 			,LTRIM(RTRIM(gadsc_com_cd))+' '		
 			+ CASE 
-				WHEN a1.gacdc_desc IS NOT NULL THEN a1.gacdc_desc
+				WHEN a1.gacdc_desc IS NOT NULL THEN LTRIM(RTRIM(a1.gacdc_desc))
 					ELSE 
 						CASE 
 							WHEN ISNULL(LTRIM(RTRIM(gadsc_desc)), '') <> '' THEN LTRIM(RTRIM(gadsc_disc_cd)) + ' / ' + ISNULL(LTRIM(RTRIM(gadsc_desc)), '')

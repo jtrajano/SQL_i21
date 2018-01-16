@@ -161,6 +161,7 @@
     <None Include="dbo\Stored Procedures\uspGRImportScaleStation.sql" />
     <None Include="dbo\Stored Procedures\uspGRImportScaleTicket.sql" />
     <None Include="dbo\Stored Procedures\uspGRImportStorageTicket.sql" />
+    <None Include="dbo\Stored Procedures\uspGRImportCustomerSplit.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />
