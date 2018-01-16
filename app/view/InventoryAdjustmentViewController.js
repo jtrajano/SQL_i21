@@ -1022,6 +1022,9 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('intNewItemUOMId', record.get('intItemUOMId'));
             current.set('dblNewItemUOMUnitQty', record.get('dblUnitQty'));
         }
+        else if (combo.itemId === 'cboOwnershipType') {
+            me.getStockQuantity(current, win);    
+        }
         else if (combo.itemId === 'cboUOM') {
             // Recalculate the unit cost
             var currentUnitCost = current.get('dblCost')
@@ -1136,6 +1139,9 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                     if (data.data.length > 0) {
                         var stockRecord = data.data[0];
                         qty = stockRecord.dblOnHand;
+
+                        if(record.get('intOwnershipType') === 2)
+                            qty = stockRecord.dblUnitStorage;
                     }
                 }
                 else {
@@ -1659,6 +1665,9 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             "#cboSubLocation": {
                 select: this.onAdjustmentDetailSelect,
                 change: this.onSubLocationChange
+            },
+            "#cboOwnershipType": {
+                select: this.onAdjustmentDetailSelect
             },
             "#cboUOM": {
                 select: this.onAdjustmentDetailSelect,

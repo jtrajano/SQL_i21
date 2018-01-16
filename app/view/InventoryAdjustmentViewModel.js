@@ -80,14 +80,14 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
                     intOwnershipType: 2,
                     strOwnershipType: 'Storage'
                 },
-                {
-                    intOwnershipType: 3,
-                    strOwnershipType: 'Consigned Purchase'
-                },
-                {
-                    intOwnershipType: 4,
-                    strOwnershipType: 'Consigned Sale'
-                }
+                // {
+                //     intOwnershipType: 3,
+                //     strOwnershipType: 'Consigned Purchase'
+                // },
+                // {
+                //     intOwnershipType: 4,
+                //     strOwnershipType: 'Consigned Sale'
+                // }
             ],
             fields: {
                 name: 'intOwnershipType',

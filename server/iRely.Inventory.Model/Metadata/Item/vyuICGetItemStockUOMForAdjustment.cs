@@ -26,6 +26,7 @@ namespace iRely.Inventory.Model
         public decimal? dblOnHand { get; set; }
         public decimal? dblOnOrder { get; set; }
         public decimal? dblUnitQty { get; set; }
+        public decimal? dblUnitStorage { get; set; }
         public bool? ysnStockUnit { get; set; }
     }
 }

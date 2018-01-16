@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets32873a5a898d563adeb69ee2d8bf7746b0c74b4f399a987c5cb56f9cf74cfb97))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets1d79819b45dc7aae862284c517c3a3604eec25714ae819e4a1d8c0f2fa3508b5))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework 6 Power Tools", "0.9.2.0")]
-    internal sealed class ViewsForBaseEntitySets32873a5a898d563adeb69ee2d8bf7746b0c74b4f399a987c5cb56f9cf74cfb97 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets1d79819b45dc7aae862284c517c3a3604eec25714ae819e4a1d8c0f2fa3508b5 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "32873a5a898d563adeb69ee2d8bf7746b0c74b4f399a987c5cb56f9cf74cfb97"; }
+            get { return "1d79819b45dc7aae862284c517c3a3604eec25714ae819e4a1d8c0f2fa3508b5"; }
         }
 
         /// <summary>
@@ -13638,7 +13638,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemStockUOMForAdjustment
-        [CodeFirstDatabaseSchema.vyuICGetItemStockUOMForAdjustment](T1.vyuICGetItemStockUOMForAdjustment_intItemId, T1.vyuICGetItemStockUOMForAdjustment_intItemUOMId, T1.vyuICGetItemStockUOMForAdjustment_intItemStockUOMId, T1.vyuICGetItemStockUOMForAdjustment_intItemLocationId, T1.vyuICGetItemStockUOMForAdjustment_intSubLocationId, T1.vyuICGetItemStockUOMForAdjustment_intStorageLocationId, T1.vyuICGetItemStockUOMForAdjustment_strItemNo, T1.vyuICGetItemStockUOMForAdjustment_strItemDescription, T1.vyuICGetItemStockUOMForAdjustment_strType, T1.vyuICGetItemStockUOMForAdjustment_intLocationId, T1.vyuICGetItemStockUOMForAdjustment_strLocationName, T1.vyuICGetItemStockUOMForAdjustment_strUnitMeasure, T1.vyuICGetItemStockUOMForAdjustment_strUnitType, T1.vyuICGetItemStockUOMForAdjustment_strSubLocationName, T1.vyuICGetItemStockUOMForAdjustment_strStorageLocationName, T1.vyuICGetItemStockUOMForAdjustment_dblOnHand, T1.vyuICGetItemStockUOMForAdjustment_dblOnOrder, T1.vyuICGetItemStockUOMForAdjustment_dblUnitQty, T1.vyuICGetItemStockUOMForAdjustment_ysnStockUnit)
+        [CodeFirstDatabaseSchema.vyuICGetItemStockUOMForAdjustment](T1.vyuICGetItemStockUOMForAdjustment_intItemId, T1.vyuICGetItemStockUOMForAdjustment_intItemUOMId, T1.vyuICGetItemStockUOMForAdjustment_intItemStockUOMId, T1.vyuICGetItemStockUOMForAdjustment_intItemLocationId, T1.vyuICGetItemStockUOMForAdjustment_intSubLocationId, T1.vyuICGetItemStockUOMForAdjustment_intStorageLocationId, T1.vyuICGetItemStockUOMForAdjustment_strItemNo, T1.vyuICGetItemStockUOMForAdjustment_strItemDescription, T1.vyuICGetItemStockUOMForAdjustment_strType, T1.vyuICGetItemStockUOMForAdjustment_intLocationId, T1.vyuICGetItemStockUOMForAdjustment_strLocationName, T1.vyuICGetItemStockUOMForAdjustment_strUnitMeasure, T1.vyuICGetItemStockUOMForAdjustment_strUnitType, T1.vyuICGetItemStockUOMForAdjustment_strSubLocationName, T1.vyuICGetItemStockUOMForAdjustment_strStorageLocationName, T1.vyuICGetItemStockUOMForAdjustment_dblOnHand, T1.vyuICGetItemStockUOMForAdjustment_dblOnOrder, T1.vyuICGetItemStockUOMForAdjustment_dblUnitQty, T1.vyuICGetItemStockUOMForAdjustment_dblUnitStorage, T1.vyuICGetItemStockUOMForAdjustment_ysnStockUnit)
     FROM (
         SELECT 
             T.intItemId AS vyuICGetItemStockUOMForAdjustment_intItemId, 
@@ -13659,6 +13659,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.dblOnHand AS vyuICGetItemStockUOMForAdjustment_dblOnHand, 
             T.dblOnOrder AS vyuICGetItemStockUOMForAdjustment_dblOnOrder, 
             T.dblUnitQty AS vyuICGetItemStockUOMForAdjustment_dblUnitQty, 
+            T.dblUnitStorage AS vyuICGetItemStockUOMForAdjustment_dblUnitStorage, 
             T.ysnStockUnit AS vyuICGetItemStockUOMForAdjustment_ysnStockUnit, 
             True AS _from0
         FROM InventoryEntities.vyuICGetItemStockUOMForAdjustments AS T
@@ -13673,7 +13674,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemStockUOMForAdjustments
-        [iRely.Inventory.Model.vyuICGetItemStockUOMForAdjustment](T1.vyuICGetItemStockUOMForAdjustment_intItemId, T1.vyuICGetItemStockUOMForAdjustment_intItemUOMId, T1.vyuICGetItemStockUOMForAdjustment_intItemStockUOMId, T1.vyuICGetItemStockUOMForAdjustment_intItemLocationId, T1.vyuICGetItemStockUOMForAdjustment_intSubLocationId, T1.vyuICGetItemStockUOMForAdjustment_intStorageLocationId, T1.vyuICGetItemStockUOMForAdjustment_strItemNo, T1.vyuICGetItemStockUOMForAdjustment_strItemDescription, T1.vyuICGetItemStockUOMForAdjustment_strType, T1.vyuICGetItemStockUOMForAdjustment_intLocationId, T1.vyuICGetItemStockUOMForAdjustment_strLocationName, T1.vyuICGetItemStockUOMForAdjustment_strUnitMeasure, T1.vyuICGetItemStockUOMForAdjustment_strUnitType, T1.vyuICGetItemStockUOMForAdjustment_strSubLocationName, T1.vyuICGetItemStockUOMForAdjustment_strStorageLocationName, T1.vyuICGetItemStockUOMForAdjustment_dblOnHand, T1.vyuICGetItemStockUOMForAdjustment_dblOnOrder, T1.vyuICGetItemStockUOMForAdjustment_dblUnitQty, T1.vyuICGetItemStockUOMForAdjustment_ysnStockUnit)
+        [iRely.Inventory.Model.vyuICGetItemStockUOMForAdjustment](T1.vyuICGetItemStockUOMForAdjustment_intItemId, T1.vyuICGetItemStockUOMForAdjustment_intItemUOMId, T1.vyuICGetItemStockUOMForAdjustment_intItemStockUOMId, T1.vyuICGetItemStockUOMForAdjustment_intItemLocationId, T1.vyuICGetItemStockUOMForAdjustment_intSubLocationId, T1.vyuICGetItemStockUOMForAdjustment_intStorageLocationId, T1.vyuICGetItemStockUOMForAdjustment_strItemNo, T1.vyuICGetItemStockUOMForAdjustment_strItemDescription, T1.vyuICGetItemStockUOMForAdjustment_strType, T1.vyuICGetItemStockUOMForAdjustment_intLocationId, T1.vyuICGetItemStockUOMForAdjustment_strLocationName, T1.vyuICGetItemStockUOMForAdjustment_strUnitMeasure, T1.vyuICGetItemStockUOMForAdjustment_strUnitType, T1.vyuICGetItemStockUOMForAdjustment_strSubLocationName, T1.vyuICGetItemStockUOMForAdjustment_strStorageLocationName, T1.vyuICGetItemStockUOMForAdjustment_dblOnHand, T1.vyuICGetItemStockUOMForAdjustment_dblOnOrder, T1.vyuICGetItemStockUOMForAdjustment_dblUnitQty, T1.vyuICGetItemStockUOMForAdjustment_dblUnitStorage, T1.vyuICGetItemStockUOMForAdjustment_ysnStockUnit)
     FROM (
         SELECT 
             T.intItemId AS vyuICGetItemStockUOMForAdjustment_intItemId, 
@@ -13694,6 +13695,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.dblOnHand AS vyuICGetItemStockUOMForAdjustment_dblOnHand, 
             T.dblOnOrder AS vyuICGetItemStockUOMForAdjustment_dblOnOrder, 
             T.dblUnitQty AS vyuICGetItemStockUOMForAdjustment_dblUnitQty, 
+            T.dblUnitStorage AS vyuICGetItemStockUOMForAdjustment_dblUnitStorage, 
             T.ysnStockUnit AS vyuICGetItemStockUOMForAdjustment_ysnStockUnit, 
             True AS _from0
         FROM CodeFirstDatabase.vyuICGetItemStockUOMForAdjustment AS T
