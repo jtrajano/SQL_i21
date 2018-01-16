@@ -85,7 +85,7 @@ BEGIN TRY
 
 		SELECT	@dblSchQuantityToUpdate = -@dblConvertedQty
 
-		IF @intSourceType IN (0,1,2,3)
+		IF @intSourceType IN (0,1,2,3,5)
 		BEGIN					
 			EXEC	uspCTUpdateScheduleQuantity
 					@intContractDetailId	=	@intContractDetailId,

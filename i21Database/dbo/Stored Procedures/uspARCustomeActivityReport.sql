@@ -16,8 +16,8 @@ DECLARE  @dtmDateTo						AS DATETIME
 		,@strRecordNumber				AS NVARCHAR(100)
 		,@strPaymentMethod				AS NVARCHAR(100)
 		,@strAccountStatusCode			AS NVARCHAR(100)
-		,@ysnPrintRecap					AS BIT
-		,@ysnPrintDetail				AS BIT
+		,@ysnPrintRecap					AS BIT = 1
+		,@ysnPrintDetail				AS BIT = 1
 		,@intEntityCustomerId			AS INT
 
 -- Create a table variable to hold the XML data. 		
@@ -126,6 +126,58 @@ EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateFrom = @dtmDateFrom
 									    , @dtmDateTo = @dtmDateTo
 									    , @strCustomerName	= @strCustomerName
 
+TRUNCATE TABLE tblARCustomerActivityStagingTable
+INSERT INTO tblARCustomerActivityStagingTable (
+	  strReportDateRange
+	, dtmLastPaymentDate
+	, dblLastPayment
+	, intEntityCustomerId
+	, intInvoiceDetailId
+	, strCustomerNumber
+	, strCustomerName
+	, strCustomerAddress
+	, strCompanyName
+	, strCompanyAddress
+	, strTransactionNumber
+	, intTransactionId
+	, strInvoiceNumber
+	, strTransactionType
+	, strActivityType
+	, dtmTransactionDate
+	, dblPayment
+	, dblInvoiceTotal
+	, dblInvoiceSubtotal
+	, dblInvoiceLineTotal
+	, dblDiscount
+	, dblInterest
+	, intItemId
+	, strItemDescription
+	, dblQtyShipped
+	, strUnitMeasure
+	, dblTax
+	, strTaxGroup
+	, intInvoiceDetailTaxId
+	, strTaxCode
+	, dblAdjustedTax
+	, strNotes
+	, dblCreditLimit
+	, dblTotalAR
+	, dblFuture
+	, dbl0Days
+	, dbl10Days
+	, dbl30Days
+	, dbl60Days
+	, dbl90Days
+	, dbl91Days
+	, dblTotalDue
+	, dblAmountPaid
+	, dblCredits
+	, dblPrepayments
+	, dblPrepaids
+	, dtmAsOfDate
+	, ysnPrintDetail
+	, ysnPrintRecap
+)
 SELECT strReportDateRange	= 'From ' + CONVERT(NVARCHAR(50), @dtmDateFrom, 101) + ' To ' + CONVERT(NVARCHAR(50), @dtmDateTo, 101)
 	, dtmLastPaymentDate	= PAYMENT.dtmDatePaid
 	, dblLastPayment		= ISNULL(PAYMENT.dblAmountPaid, 0)
@@ -322,3 +374,8 @@ OUTER APPLY (
 	WHERE (@strAccountStatusCode IS NULL OR LEFT(strAccountStatusCode, LEN(strAccountStatusCode) - 1) LIKE '%'+@strAccountStatusCode+'%')
 ) STATUSCODES
 ORDER BY AGING.strCustomerName, TRANSACTIONS.dtmTransactionDate
+
+IF @ysnPrintRecap = 1
+	EXEC dbo.uspARInvoiceProductRecapReport @dtmDateFrom = @dtmDateFrom, @dtmDateTo = @dtmDateTo
+
+SELECT * FROM tblARCustomerActivityStagingTable
