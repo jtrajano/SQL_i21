@@ -83,6 +83,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , ysnHasProvisional		= CASE WHEN (ISNULL(PROVISIONAL.strProvisionalDescription, '')) <> '' THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 	 , strProvisional			= PROVISIONAL.strProvisionalDescription
 	 , dblTotalProvisional		= PROVISIONAL.dblProvisionalTotal
+	 , strCustomerComments		= dbo.fnEMEntityMessage(CUSTOMER.intEntityId, 'Invoice')
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
 	SELECT intEntityId

@@ -6072,6 +6072,7 @@
     <Build Include="dbo\Tables\tblARCustomerActivityStagingTable.sql" />
     <Build Include="dbo\Views\vyuCTSearchAOP.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportOutboundLetter.sql" />
+    <Build Include="dbo\Functions\fnEMEntityMessage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
