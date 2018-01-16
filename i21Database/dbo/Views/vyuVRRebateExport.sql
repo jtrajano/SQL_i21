@@ -24,6 +24,7 @@ AS
 		,L.strVendorCustomer
 		,O.intConcurrencyId
 		,B.intInvoiceDetailId
+		,strVendorName = S.strName
 	FROM tblARInvoiceDetail B
 	INNER JOIN tblARInvoice A
 		ON A.intInvoiceId = B.intInvoiceId
@@ -47,6 +48,8 @@ AS
 		ON I.intVendorSetupId = J.intVendorSetupId
 	INNER JOIN tblAPVendor K 
 		ON J.intEntityId = K.intEntityId
+	INNER JOIN tblEMEntity S
+		ON K.intEntityId = S.intEntityId
 	INNER JOIN tblVRCustomerXref L
 		ON J.intVendorSetupId = L.intVendorSetupId
 			AND A.intEntityCustomerId = L.intEntityId

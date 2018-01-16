@@ -26,6 +26,7 @@
 			,M.strLocationName
 			,J.intVendorSetupId
 			,A.intInvoiceId
+			,strVendorName = M.strName
 		FROM tblVRRebate O
 		INNER JOIN tblARInvoiceDetail B
 			ON B.intInvoiceDetailId = O.intInvoiceDetailId
@@ -49,6 +50,8 @@
 			ON I.intVendorSetupId = J.intVendorSetupId
 		INNER JOIN tblAPVendor K 
 			ON J.intEntityId = K.intEntityId
+		INNER JOIN tblEMEntity M
+			ON K.intEntityId = M.intEntityId
 		INNER JOIN tblVRCustomerXref L
 			ON J.intVendorSetupId = L.intVendorSetupId
 				AND A.intEntityCustomerId = L.intEntityId
