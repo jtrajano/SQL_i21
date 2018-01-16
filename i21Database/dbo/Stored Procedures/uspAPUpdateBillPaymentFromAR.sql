@@ -12,52 +12,8 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-IF @post = 0
-BEGIN
-	
-	UPDATE B
-		SET B.dblAmountDue = B.dblAmountDue + B.dblPayment
-	FROM tblARPayment A
-				INNER JOIN tblARPaymentDetail B 
-						ON A.intPaymentId = B.intPaymentId
-				INNER JOIN tblAPBill C
-						ON B.intBillId = C.intBillId
-				WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds)
-
 	UPDATE tblAPBill
-		SET tblAPBill.dblAmountDue = B.dblAmountDue, --(CASE WHEN C.intTransactionType !=1 THEN B.dblAmountDue * -1 ELSE B.dblAmountDue END),
-			tblAPBill.ysnPaid = 0,
-			tblAPBill.dblPayment = (C.dblPayment - B.dblPayment),
-			tblAPBill.dtmDatePaid = NULL,
-			tblAPBill.dblWithheld = 0,
-			tblAPBill.ysnPrepayHasPayment = 0 --for prepayment
-	FROM tblARPayment A
-				INNER JOIN tblARPaymentDetail B 
-						ON A.intPaymentId = B.intPaymentId
-				INNER JOIN tblAPBill C
-						ON B.intBillId = C.intBillId
-				WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds)
-END
-ELSE IF @post = 1
-BEGIN
-
-	UPDATE B
-		SET B.dblAmountDue = B.dblAmountDue - B.dblPayment
-	FROM tblARPayment A
-				INNER JOIN tblARPaymentDetail B 
-						ON A.intPaymentId = B.intPaymentId
-				INNER JOIN tblAPBill C
-						ON B.intBillId = C.intBillId
-				WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds)
-
-	UPDATE tblAPBill
-		SET tblAPBill.dblAmountDue = B.dblAmountDue,
-			tblAPBill.ysnPaid = (CASE WHEN (B.dblAmountDue) = 0 THEN 1 ELSE 0 END),
-			tblAPBill.dtmDatePaid = (CASE WHEN (B.dblAmountDue) = 0 THEN A.dtmDatePaid ELSE NULL END),
-			--tblAPBill.dblWithheld = B.dblWithheld,
-			tblAPBill.dblDiscount = (CASE WHEN B.dblAmountDue = 0 THEN B.dblDiscount ELSE 0 END),
-			tblAPBill.dblInterest = (CASE WHEN B.dblAmountDue = 0 THEN B.dblInterest ELSE 0 END),
-			tblAPBill.dblPayment = (C.dblPayment + B.dblPayment),
+		SET	tblAPBill.dblPayment = (C.dblPayment + (CASE WHEN @post = 1 THEN ABS(B.dblPayment)ELSE B.dblPayment END)),
 			tblAPBill.ysnPrepayHasPayment = 1
 	FROM tblARPayment A
 				INNER JOIN tblARPaymentDetail B 
@@ -66,4 +22,23 @@ BEGIN
 						ON B.intBillId = C.intBillId
 				WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds)
 
-END
+	UPDATE tblAPBill
+		SET tblAPBill.dblAmountDue = (tblAPBill.dblTotal + tblAPBill.dblInterest) - (tblAPBill.dblPayment + tblAPBill.dblDiscount),
+			tblAPBill.ysnPaid = (CASE WHEN ((tblAPBill.dblTotal + tblAPBill.dblInterest) - (tblAPBill.dblPayment + tblAPBill.dblDiscount)) = 0 THEN 1 ELSE 0 END),
+			tblAPBill.dtmDatePaid = (CASE WHEN ((tblAPBill.dblTotal + tblAPBill.dblInterest) - (tblAPBill.dblPayment + tblAPBill.dblDiscount)) = 0 THEN A.dtmDatePaid ELSE NULL END)			
+	FROM tblARPayment A
+				INNER JOIN tblARPaymentDetail B 
+						ON A.intPaymentId = B.intPaymentId
+				INNER JOIN tblAPBill tblAPBill
+						ON B.intBillId = tblAPBill.intBillId
+				WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds)
+
+	UPDATE B
+		SET B.dblAmountDue = -((C.dblTotal + ABS(B.dblInterest)) - (ABS(B.dblPayment) + ABS(B.dblDiscount))),
+			B.dblBaseAmountDue = [dbo].fnRoundBanker((-((C.dblTotal + ABS(B.dblInterest)) - (ABS(B.dblPayment) + ABS(B.dblDiscount))) * (CASE WHEN ISNULL(B.[dblCurrencyExchangeRate], 0) =  0 THEN 1.000000 ELSE B.[dblCurrencyExchangeRate] END)), [dbo].[fnARGetDefaultDecimal]())
+	FROM tblARPayment A
+				INNER JOIN tblARPaymentDetail B 
+						ON A.intPaymentId = B.intPaymentId
+				INNER JOIN tblAPBill C
+						ON B.intBillId = C.intBillId
+				WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds)

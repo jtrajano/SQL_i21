@@ -318,13 +318,14 @@ SET @batchIdUsed = @batchId
 						ON A.intPaymentId = P.intPaymentId					
 				WHERE
 					A.dblAmountPaid = 0
-					AND (NOT EXISTS(SELECT NULL FROM tblARInvoice WHERE strTransactionType NOT IN ('Invoice','Debit Memo') AND intInvoiceId = B.intInvoiceId)
-						AND B.dblPayment <> 0)
-					
+					AND B.intPaymentId = 107
 				GROUP BY
-					A.intPaymentId, A.strRecordNumber
+					 A.strRecordNumber
+					,A.intPaymentId			
 				HAVING
-					SUM(B.dblPayment) = 0					
+					SUM(B.dblPayment) = 0
+					AND MAX(B.dblPayment) = 0
+					AND MIN(B.dblPayment) = 0					
 
 				--Payment without detail
 				INSERT INTO 
@@ -2685,7 +2686,11 @@ IF @recap = 0
 			WHERE
 				dblPayment = 0
 				AND dblDiscount = 0
-				AND intInvoiceId IN (SELECT intInvoiceId FROM @ARReceivablePostData)	
+				AND (
+					intInvoiceId IN (SELECT intInvoiceId FROM @ARReceivablePostData)
+					OR
+					intBillId IN (SELECT intBillId FROM @ARReceivablePostData)
+					)
 
 			-- Update the posted flag in the transaction table
 			UPDATE tblARPayment
