@@ -90,7 +90,9 @@ BEGIN
 															,NULL /*---@VehicleId*/
 															,0 /*-- @DisregardExemptionSetup*/
 														   )
-		,dblFinalPrice = CASE WHEN strPricing = 'Inventory - Standard Pricing' THEN dblPrice + ISNULL(dblPriceAdjustment,0) ELSE dblPrice END
+		,dblFinalPrice = CASE WHEN strPricing = 'Inventory - Standard Pricing' OR  strPricing LIKE '%Inventory - Pricing Level%' OR strPricing LIKE '%Inventory - Special Pricing%' OR strPricing LIKE '%Inventory Promotional Pricing%'
+							THEN dblPrice + ISNULL(dblPriceAdjustment,0) 
+							ELSE dblPrice END
 	INTO #tmpUpdateDispatch1
 	FROM #tmpUpdateDispatch
 
@@ -100,6 +102,7 @@ BEGIN
 		dblPrice = dblFinalPrice
 		,strPricingMethod = CASE WHEN A.strPricing = 'Inventory - Standard Pricing' THEN 'Regular' 
 								 WHEN A.strPricing LIKE '%Contracts%' THEN 'Contract'
+								 WHEN  strPricing LIKE '%Inventory - Pricing Level%' OR strPricing LIKE '%Inventory - Special Pricing%' OR strPricing LIKE '%Inventory Promotional Pricing%' THEN 'SpecialItem'
 								 ELSE 'Special' END
 		,dblTotal = (A.dblFinalPrice * A.dblQuantity) + ISNULL(A.dblTotalTax,0.0)
 		,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
