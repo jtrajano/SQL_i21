@@ -27,6 +27,7 @@
     [dblPercent]              NUMERIC (18, 6) NULL,
     [strDispatchNotification] NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strTextMessage]          NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
+    [strDriverNumber]          NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,    
     [intAttachmentSignatureId]          INT             NULL,	
     [intConcurrencyId]        INT             CONSTRAINT [DF_tblARSalesperson_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tblARSalesperson_intEntityId] PRIMARY KEY CLUSTERED ([intEntityId] ASC),
