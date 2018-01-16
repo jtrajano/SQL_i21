@@ -6164,6 +6164,7 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\20_UpdateCommissionScheduleDetailSort.sql" />
     <None Include="Scripts\Post-Deployment\EM\030-FixSalesperson.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateOldCost.sql" />
+    <None Include="Scripts\Post-Deployment\AP\UpdateBillExported.sql" />
     <None Include="Scripts\Post-Deployment\EM\024_CleanOrphanCustomerGroup.sql" />
     <None Include="Scripts\Post-Deployment\HD\CustomField.sql" />
     <None Include="Scripts\Post-Deployment\HD\DefaultData\2_Screen.sql" />
