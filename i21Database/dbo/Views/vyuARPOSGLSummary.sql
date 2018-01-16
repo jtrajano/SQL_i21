@@ -5,6 +5,7 @@ SELECT intPOSLogId			= POSLOG.intPOSLogId
 	 , dblCredit			= SUM(GL.dblCredit)	 
 	 , strAccountId			= GLA.strAccountId
 	 , strAccountCategory	= GLA.strAccountCategory
+	 , strDescription		= GLA.strDescription
 FROM dbo.tblARPOSLog POSLOG WITH (NOLOCK)
 INNER JOIN (
 	SELECT intInvoiceId
@@ -58,9 +59,11 @@ INNER JOIN (
 		   intAccountId
 		 , strAccountId
 		 , strAccountCategory
+		 , strDescription
 	FROM dbo.vyuGLAccountDetail WITH (NOLOCK)	
 ) GLA ON GL.intAccountId = GLA.intAccountId
      AND (GLA.strAccountCategory <> 'AR Account' OR (TRANSACTIONS.strTransaction = 'Invoice' AND TRANSACTIONS.intTransactionId NOT IN (SELECT intInvoiceId FROM dbo.tblARPaymentDetail)))
 GROUP BY POSLOG.intPOSLogId
 	   , GLA.strAccountId
 	   , GLA.strAccountCategory
+	   , GLA.strDescription
