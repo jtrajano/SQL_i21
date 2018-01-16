@@ -6007,6 +6007,7 @@
     <Build Include="dbo\Views\vyuARPOSGLSummary.sql" />
     <Build Include="dbo\Views\vyuCCVendorCombo.sql" />
     <Build Include="dbo\Views\vyuCFExportAccount.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateOR7351302.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
