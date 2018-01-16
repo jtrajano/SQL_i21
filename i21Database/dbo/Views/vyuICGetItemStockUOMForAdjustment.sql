@@ -19,6 +19,7 @@ SELECT
 	, intStorageLocationId = suom.intStorageLocationId
 	, strStorageLocationName = su.strName
 	, dblOnHand = CAST(ISNULL(suom.dblOnHand, 0.00) AS NUMERIC(18, 6))
+	, dblUnitStorage = CAST(ISNULL(suom.dblUnitStorage, 0.00) AS NUMERIC(18, 6))
 	, dblOnOrder = CAST(ISNULL(suom.dblOnOrder, 0.00) AS NUMERIC(18, 6))
 	, dblUnitQty = CAST(ISNULL(uom.dblUnitQty, 0.00) AS NUMERIC(18, 6))
 	, ysnStockUnit = CAST(ISNULL(uom.ysnStockUnit, 0) AS BIT)

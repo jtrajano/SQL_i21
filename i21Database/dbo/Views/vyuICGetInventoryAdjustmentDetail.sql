@@ -35,7 +35,7 @@ SELECT
 	, dblLotWeightPerQty = Lot.dblWeightPerQty 
 	, AdjDetail.intNewLotId
 	, AdjDetail.strNewLotNumber
-	, AdjDetail.dblQuantity
+	, AdjDetail.dblQuantity --dblQuantity = CAST(CASE AdjDetail.intOwnershipType WHEN 2 THEN ItemUOM.dbl ELSE AdjDetail.dblQuantity END AS NUMERIC(38, 20))
 	, AdjDetail.dblNewQuantity
 	, AdjDetail.dblNewSplitLotQuantity
 	, AdjDetail.dblAdjustByQuantity
@@ -71,6 +71,8 @@ SELECT
 	, AdjDetail.intSort
 	, strOwnerName = LotOwnerEntity.strName
 	, strNewOwnerName = NewLotOwnerEntity.strName
+	, AdjDetail.intOwnershipType
+	, strOwnershipType = CASE AdjDetail.intOwnershipType WHEN 1 THEN 'Own' WHEN 2 THEN 'Storage' WHEN 3 THEN 'Consigned Purchase' WHEN 4 THEN 'Consigned Sale' ELSE NULL END
 FROM tblICInventoryAdjustmentDetail AdjDetail
 LEFT JOIN vyuICGetInventoryAdjustment Adj ON Adj.intInventoryAdjustmentId = AdjDetail.intInventoryAdjustmentId
 LEFT JOIN tblSMCompanyLocation NewLocation ON NewLocation.intCompanyLocationId = AdjDetail.intNewLocationId
@@ -87,7 +89,6 @@ LEFT JOIN vyuICGetItemUOM WeightUOM ON WeightUOM.intItemUOMId = AdjDetail.intWei
 LEFT JOIN vyuICGetItemUOM NewWeightUOM ON NewWeightUOM.intItemUOMId = AdjDetail.intNewWeightUOMId
 LEFT JOIN tblICLotStatus LotStatus ON LotStatus.intLotStatusId = AdjDetail.intLotStatusId
 LEFT JOIN tblICLotStatus NewLotStatus ON NewLotStatus.intLotStatusId = AdjDetail.intNewLotStatusId
-
 LEFT JOIN (
 	tblICItemOwner LotOwner INNER JOIN tblEMEntity LotOwnerEntity 
 		ON LotOwner.intOwnerId = LotOwnerEntity.intEntityId
