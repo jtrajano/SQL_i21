@@ -48,6 +48,13 @@ SELECT
 	,[W2].dblTaxableLocal		/* box 18 */
 	,[W2].dblLocalTax			/* box 19 */
 	,[W2].strLocality			/* box 20 */
+	,[W2].strState2				/* box 15_line_2 */
+	,[W2].strStateTaxID2		/* box 15_1_line_2 */
+	,[W2].dblTaxableState2		/* box 16_line_2 */
+	,[W2].dblStateTax2			/* box 17_line_2 */
+	,[W2].dblTaxableLocal2		/* box 18_line_2 */
+	,[W2].dblLocalTax2			/* box 19_line_2 */
+	,[W2].strLocality2			/* box 20_line_2 */
 FROM
 	tblPREmployeeW2 [W2]
 	INNER JOIN tblPREmployee [EMP] ON [W2].intEntityEmployeeId = [EMP].intEntityEmployeeId
