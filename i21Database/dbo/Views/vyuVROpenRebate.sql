@@ -27,6 +27,7 @@ AS
 		,I.intProgramId
 		,J.intVendorSetupId 
 		,A.intInvoiceId
+		,strVendorName = P.strName
 	FROM tblARInvoiceDetail B
 	INNER JOIN tblARInvoice A
 		ON A.intInvoiceId = B.intInvoiceId
@@ -63,6 +64,8 @@ AS
 			AND A.dtmDate <= ISNULL(N.dtmEndDate,'12/31/9999')
 	INNER JOIN tblAPVendor K 
 		ON J.intEntityId = K.intEntityId
+	INNER JOIN tblEMEntity P
+		ON K.intEntityId = P.intEntityId
 	WHERE (ISNULL(N.dblRebateRate,0) <> 0 OR ISNULL(M.dblRebateRate,0) <>0)
 		AND NOT EXISTS(SELECT TOP 1 1 FROM tblVRRebate WHERE intInvoiceDetailId = B.intInvoiceDetailId)
 		AND A.ysnPosted = 1
