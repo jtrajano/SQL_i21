@@ -351,7 +351,7 @@ BEGIN TRY
 		   ,1
 		   ,'From Delivery Sheet'
 		   ,@strUserName
-		   ,1)
+		   ,5)
 	
 	SET @intHoldCustomerStorageId = NULL
 	SELECT @intHoldCustomerStorageId = SD.intTicketFileId from tblQMTicketDiscount SD 
