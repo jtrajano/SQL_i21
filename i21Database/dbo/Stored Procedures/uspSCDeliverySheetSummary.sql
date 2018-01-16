@@ -21,6 +21,7 @@ DECLARE @intEntityId INT
 		,@NetUnits AS NUMERIC(38,6)
 		,@tmpUnits AS NUMERIC(38,6)
 		,@remainingUnits AS NUMERIC(38,6)
+		,@ticketTotalUnitQty AS NUMERIC(38,6)
 		,@Contract AS NUMERIC(38,6)
 		,@Cash AS NUMERIC(38,6)
 		,@Storage AS NUMERIC(38,6)
@@ -74,7 +75,13 @@ DELETE FROM #temp
 
 SELECT @currencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
 
-SELECT @remainingUnits = dblNet FROM tblSCDeliverySheet WHERE intDeliverySheetId = @intDeliverySheetId
+SELECT @remainingUnits = SUM(SCD.dblNet), @ticketTotalUnitQty = SUM(SCT.dblNetUnits)
+FROM tblSCDeliverySheet SCD
+INNER JOIN tblSCTicket SCT ON SCD.intDeliverySheetId = SCT.intDeliverySheetId AND SCT.strTicketStatus = 'H'
+WHERE SCD.intDeliverySheetId = 2
+
+IF @remainingUnits = 0
+	SET @remainingUnits = @ticketTotalUnitQty;
 
 --FOR ticket splits
 DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
@@ -98,9 +105,12 @@ WHILE @@FETCH_STATUS = 0
 BEGIN
 	IF ISNULL(@intEntityId,0) != 0
 	BEGIN
+		IF @NetUnits = 0
+			SET @NetUnits = @ticketTotalUnitQty;
 		SET @tmpUnits = ROUND(((@NetUnits * @SplitAverage) / 100), @currencyDecimal);
 		IF @remainingUnits < @tmpUnits
 			SET @tmpUnits = @remainingUnits;
+
 		--For priced contract
 		SET @Contract = 
 		ISNULL((SELECT SUM(IRI.dblOpenReceive) FROM tblICInventoryReceipt IR
@@ -123,7 +133,7 @@ BEGIN
 
 		--For Storage
 		SET @Storage = 0;
-		IF ISNULL((SELECT SUM((SCD.dblNet * @SplitAverage) / 100) FROM tblSCDeliverySheet SCD
+		IF ISNULL((SELECT SUM((@NetUnits * @SplitAverage) / 100) FROM tblSCDeliverySheet SCD
 		LEFT JOIN tblSCDeliverySheetSplit SCDS ON SCDS.intDeliverySheetId = SCD.intDeliverySheetId
 		LEFT JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = SCDS.intStorageScheduleTypeId AND GR.intStorageScheduleTypeId > 0
 		WHERE GR.ysnReceiptedStorage = 0 AND GR.ysnDPOwnedType = 0 AND GR.ysnGrainBankType = 0 AND GR.ysnCustomerStorage = 0
@@ -135,7 +145,7 @@ BEGIN
 
 		--For DP contract
 		SET @DP = 0;
-		IF ISNULL((SELECT SUM((SCD.dblNet * @SplitAverage) / 100) FROM tblSCDeliverySheet SCD
+		IF ISNULL((SELECT SUM((@NetUnits * @SplitAverage) / 100) FROM tblSCDeliverySheet SCD
 		LEFT JOIN tblSCDeliverySheetSplit SCDS ON SCDS.intDeliverySheetId = SCD.intDeliverySheetId
 		LEFT JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = SCDS.intStorageScheduleTypeId AND GR.intStorageScheduleTypeId > 0
 		WHERE SCDS.intEntityId = @intEntityId AND SCD.intItemId = @intItemId
@@ -158,7 +168,7 @@ BEGIN
 		
 		--For WHGB
 		SET @WHGB = 0;
-		IF ISNULL((SELECT SUM((SCD.dblNet * @SplitAverage) / 100) FROM tblSCDeliverySheet SCD
+		IF ISNULL((SELECT SUM((@NetUnits * @SplitAverage) / 100) FROM tblSCDeliverySheet SCD
 		LEFT JOIN tblSCDeliverySheetSplit SCDS ON SCDS.intDeliverySheetId = SCD.intDeliverySheetId
 		LEFT JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = SCDS.intStorageScheduleTypeId AND GR.intStorageScheduleTypeId > 0
 		WHERE (GR.ysnReceiptedStorage = 1 OR GR.ysnGrainBankType = 1) AND GR.ysnDPOwnedType = 0 AND GR.ysnCustomerStorage = 0 
