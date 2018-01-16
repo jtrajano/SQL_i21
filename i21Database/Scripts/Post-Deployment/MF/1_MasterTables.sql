@@ -3220,6 +3220,9 @@ WHERE strName LIKE 'Inventory adjustment%'
 		WHERE strReasonCode = 'Inventory was found'
 		)
 GO
-
+UPDATE tblMFLotTransactionType
+SET ysnApplyTransactionByParentLot = 0
+WHERE ysnApplyTransactionByParentLot IS NULL
+GO
 
 
