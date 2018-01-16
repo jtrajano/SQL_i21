@@ -78,7 +78,7 @@ SELECT @currencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
 SELECT @remainingUnits = SUM(SCD.dblNet), @ticketTotalUnitQty = SUM(SCT.dblNetUnits)
 FROM tblSCDeliverySheet SCD
 INNER JOIN tblSCTicket SCT ON SCD.intDeliverySheetId = SCT.intDeliverySheetId AND SCT.strTicketStatus = 'H'
-WHERE SCD.intDeliverySheetId = 2
+WHERE SCD.intDeliverySheetId = @intDeliverySheetId
 
 IF @remainingUnits = 0
 	SET @remainingUnits = @ticketTotalUnitQty;
