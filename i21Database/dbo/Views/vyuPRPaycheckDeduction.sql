@@ -53,12 +53,31 @@ SELECT
 								WHERE intPaycheckDeductionId = tblPRPaycheckDeduction.intPaycheckDeductionId 
 								AND intTypeTaxId IN (SELECT intTypeTaxId FROM tblPRPaycheckTax 
 													 WHERE intPaycheckId = tblPRPaycheck.intPaycheckId AND dblTotal > 0
-													 AND strCalculationType = 'USA State')), 0) AS BIT)
+													 AND strCalculationType = 'USA State'
+													 AND (intTypeTaxStateId NOT IN (41, 45)
+														 OR ((intTypeTaxStateId = 41 AND strVal1 = 'None' AND strVal2 = 'None')
+															OR (intTypeTaxStateId = 45 AND strVal2 = 'None (None)' AND strVal3 = 'None (None)'))
+														 )
+													 )), 0) AS BIT)
 	,ysnLocalTaxable = CAST(ISNULL((SELECT TOP 1 1 FROM tblPRPaycheckDeductionTax 
 								WHERE intPaycheckDeductionId = tblPRPaycheckDeduction.intPaycheckDeductionId 
 								AND intTypeTaxId IN (SELECT intTypeTaxId FROM tblPRPaycheckTax 
 													 WHERE intPaycheckId = tblPRPaycheck.intPaycheckId AND dblTotal > 0
 													 AND strCalculationType = 'USA Local')), 0) AS BIT)
+	,ysnSchoolDistrictTaxable = CAST(ISNULL((SELECT TOP 1 1 FROM tblPRPaycheckDeductionTax 
+								WHERE intPaycheckDeductionId = tblPRPaycheckDeduction.intPaycheckDeductionId 
+								AND intTypeTaxId IN (SELECT intTypeTaxId FROM tblPRPaycheckTax 
+													 WHERE intPaycheckId = tblPRPaycheck.intPaycheckId AND dblTotal > 0
+													 AND strCalculationType = 'USA State' 
+													 AND ((intTypeTaxStateId = 41 AND strVal1 <> 'None')
+														OR (intTypeTaxStateId = 45 AND strVal2 <> 'None (None)')))), 0) AS BIT)
+	,ysnMunicipalityTaxable = CAST(ISNULL((SELECT TOP 1 1 FROM tblPRPaycheckDeductionTax 
+								WHERE intPaycheckDeductionId = tblPRPaycheckDeduction.intPaycheckDeductionId 
+								AND intTypeTaxId IN (SELECT intTypeTaxId FROM tblPRPaycheckTax 
+													 WHERE intPaycheckId = tblPRPaycheck.intPaycheckId AND dblTotal > 0
+													 AND strCalculationType = 'USA State' 
+													 AND ((intTypeTaxStateId = 41 AND strVal2 <> 'None')
+														OR (intTypeTaxStateId = 45 AND strVal3 <> 'None (None)')))), 0) AS BIT)
 	,tblPRPaycheckDeduction.intAccountId
 	,tblPRPaycheckDeduction.intExpenseAccountId
 	,tblPRPaycheckDeduction.strPaidBy
