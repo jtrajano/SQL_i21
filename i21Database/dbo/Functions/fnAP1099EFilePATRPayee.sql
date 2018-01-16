@@ -29,9 +29,9 @@ BEGIN
 		+ dbo.fnTrimX(A.strVendorId) + SPACE(20 - LEN(dbo.fnTrimX(A.strVendorId))) -- 21-40
 		+ SPACE(4) -- 41-44
 		+ SPACE(10) -- 45-54
-		+ CASE WHEN ISNULL(A.dblDividends,0) IS NOT NULL THEN REPLICATE('0',192) -- ALL ZEROS WHEN DIRECT SALES SEE PAGE 53
-		  ELSE
-			 CASE WHEN ISNULL(A.dblDividends,0) > @maxAmount 
+		-- + CASE WHEN ISNULL(A.dblDividends,0) IS NOT NULL THEN REPLICATE('0',192) -- ALL ZEROS WHEN DIRECT SALES SEE PAGE 53
+		--   ELSE
+		+ CASE WHEN ISNULL(A.dblDividends,0) > @maxAmount --See PAGE 65 for amount codes, PAGE 75 for values
 				THEN dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblDividends,0) AS DECIMAL(18,2)) AS NVARCHAR(100))) 
 					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblDividends,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
 				ELSE 
@@ -87,7 +87,6 @@ BEGIN
 					dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblOpportunity,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))
 					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblOpportunity,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
 			END
-			+ REPLICATE('0',12) --Payment Amount 9
 			+ CASE WHEN ISNULL(A.dblAMT,0) > @maxAmount 
 				THEN dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblAMT,0) AS DECIMAL(18,2)) AS NVARCHAR(100))) 
 					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblAMT,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
@@ -102,12 +101,14 @@ BEGIN
 					dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblOther,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))
 					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblOther,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
 			END
-		+ ' '
-		+ REPLICATE('0',12) --Section 409A deferals
-		+ REPLICATE('0',12) --Section 409A income
-		+ REPLICATE('0',12)
-		+ REPLICATE('0',12) 
-		END-- 235-246
+		-- + ' '
+		+ REPLICATE('0',12) --B
+		+ REPLICATE('0',12) --C
+		+ REPLICATE('0',12) --D
+		+ REPLICATE('0',12) --E
+		+ REPLICATE('0',12) --F
+		+ REPLICATE('0',12) --G
+		-- END-- 235-246
 		+ ' '
 		+ A.strPayeeName + SPACE(40 - LEN(A.strPayeeName))
 		+ SPACE(40) -- 288-327
