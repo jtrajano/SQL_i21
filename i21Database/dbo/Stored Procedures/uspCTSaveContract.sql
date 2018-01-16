@@ -7,7 +7,7 @@ AS
 
 BEGIN TRY
 	
-	DECLARE	@ErrMsg					NVARCHAR(MAX),
+	DECLARE	@ErrMsg						NVARCHAR(MAX),
 			@intContractDetailId		INT,
 			@dblCashPrice				NUMERIC(18,6),
 			@intPricingTypeId			INT,
@@ -16,9 +16,9 @@ BEGIN TRY
 			@strContractNumber			NVARCHAR(100),
 			@dblBasis					NUMERIC(18,6),
 			@dblOriginalBasis			NUMERIC(18,6),
-			@Action					NVARCHAR(100),
-			@Condition				NVARCHAR(100),
-			@idoc					INT,
+			@Action						NVARCHAR(100),
+			@Condition					NVARCHAR(100),
+			@idoc						INT,
 			@intUniqueId				INT,
 			@strRowState				NVARCHAR(100),
 			@intNetWeightUOMId			INT,
@@ -38,17 +38,25 @@ BEGIN TRY
 			@intPriceFixationId			INT,
 			@ysnPriceChanged			BIT,
 			@dblCorrectNetWeight		NUMERIC(18,6),
-			@dblFutures				NUMERIC(18,6)
+			@dblFutures					NUMERIC(18,6),
+			@ysnAutoEvaluateMonth		BIT,
+			@intConcurrencyId			INT,
+			@intNoOfDays				INT,
+			@dtmPlannedAvalability		DATETIME,
+			@intFutureMarketId			INT
 
 	SELECT	@ysnMultiplePriceFixation	=	ysnMultiplePriceFixation,
 			@strContractNumber			=	strContractNumber,
 			@dblNoOfLots				=	dblNoOfLots,
-			@dblFutures				=	dblFutures,
-			@intPricingTypeId			=	intPricingTypeId
-	FROM		tblCTContractHeader 
+			@dblFutures					=	dblFutures,
+			@intPricingTypeId			=	intPricingTypeId,
+			@intNoOfDays				=	ISNULL(PO.intNoOfDays,0)
+	FROM	tblCTContractHeader CH
+	LEFT JOIN tblCTPosition PO ON PO.intPositionId = CH.intPositionId
 	WHERE	intContractHeaderId			=	@intContractHeaderId
 
-	SELECT @ysnFeedOnApproval	=	ysnFeedOnApproval from tblCTCompanyPreference
+
+	SELECT @ysnFeedOnApproval	=	ysnFeedOnApproval, @ysnAutoEvaluateMonth = ysnAutoEvaluateMonth from tblCTCompanyPreference
 
 	SELECT	@intContractScreenId=	intScreenId FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.Contract'
 
@@ -141,7 +149,9 @@ BEGIN TRY
 				@intCompanyLocationId = intCompanyLocationId,
 				@ysnSlice			=	ysnSlice,
 				@dblNoOfLots		=	dblNoOfLots,
-				@ysnPriceChanged	=	ysnPriceChanged
+				@ysnPriceChanged	=	ysnPriceChanged,
+				@intConcurrencyId	=	intConcurrencyId,
+				@intFutureMarketId	=	intFutureMarketId
 
 		FROM	tblCTContractDetail 
 		WHERE	intContractDetailId =	@intContractDetailId 
@@ -151,6 +161,22 @@ BEGIN TRY
 		IF ISNULL(@intNetWeightUOMId,0) > 0 AND (@dblNetWeight IS NULL OR @dblNetWeight <> @dblCorrectNetWeight)
 		BEGIN
 			UPDATE tblCTContractDetail SET dblNetWeight = @dblCorrectNetWeight WHERE intContractDetailId = @intContractDetailId
+		END
+
+		IF @intConcurrencyId = 1 AND ISNULL(@ysnAutoEvaluateMonth,0) = 1 AND @intPricingTypeId IN (1,2,3,8)
+		BEGIN
+			UPDATE tblCTContractDetail SET dtmPlannedAvailabilityDate = DATEADD(DAY,@intNoOfDays,dtmEndDate), @dtmPlannedAvalability = DATEADD(DAY,@intNoOfDays,dtmEndDate)  WHERE intContractDetailId = @intContractDetailId
+			
+			DECLARE @FutureMonthId INT
+
+			SELECT TOP 1 @FutureMonthId = intFutureMonthId FROM vyuCTFuturesMonth WHERE intFutureMarketId = @intFutureMarketId AND intYear >= CAST(SUBSTRING(LTRIM(YEAR(@dtmPlannedAvalability)),3,2) AS INT) AND intMonth >= MONTH(@dtmPlannedAvalability) AND ysnExpired <> 1 ORDER BY intYear ASC, intMonth ASC
+
+			IF @FutureMonthId IS NULL
+			BEGIN
+				SELECT TOP 1 @FutureMonthId = intFutureMonthId FROM vyuCTFuturesMonth WHERE intFutureMarketId = @intFutureMarketId AND intYear >= CAST(SUBSTRING(LTRIM(YEAR(@dtmPlannedAvalability)),3,2) AS INT) + 1 AND intMonth > 0 AND ysnExpired <> 1 ORDER BY intYear ASC, intMonth ASC
+			END
+
+			UPDATE tblCTContractDetail SET intFutureMonthId = ISNULL(@FutureMonthId,intFutureMonthId) WHERE intContractDetailId = @intContractDetailId
 		END
 
 		IF EXISTS(SELECT * FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
