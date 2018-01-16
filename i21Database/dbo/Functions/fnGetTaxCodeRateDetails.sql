@@ -9,6 +9,7 @@ RETURNS @returntable TABLE
 	 [strCalculationMethod]	NVARCHAR(30) COLLATE Latin1_General_CI_AS
 	,[intUnitMeasureId]		INT NULL
 	,[dblRate]				NUMERIC(18,6)
+	,[strUnitMeasure]		NVARCHAR(30) COLLATE Latin1_General_CI_AS
 
 )
 AS
@@ -16,14 +17,17 @@ BEGIN
 	INSERT INTO @returntable
 	SELECT TOP 1 
 		 [strCalculationMethod]
-		,[intUnitMeasureId]
-		,[dblRate]
+		,CR.[intUnitMeasureId]
+		,[dblRate],
+		UOM.[strUnitMeasure]
 	FROM 
-		tblSMTaxCodeRate
+		tblSMTaxCodeRate CR
+		LEFT JOIN tblICUnitMeasure UOM
+			ON CR.intUnitMeasureId = UOM.intUnitMeasureId
 	WHERE 
 		[intTaxCodeId] = @TaxCodeId
 		AND CASE WHEN strCalculationMethod = 'Unit' THEN
-				 CASE WHEN intUnitMeasureId = @ItemUOMId THEN 1 ELSE 0 END
+				 CASE WHEN CR.intUnitMeasureId = @ItemUOMId THEN 1 ELSE 0 END
 		ELSE
 			1
 		END = 1

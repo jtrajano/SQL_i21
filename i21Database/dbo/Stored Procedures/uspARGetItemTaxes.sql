@@ -51,6 +51,7 @@ AS
 				,[strTaxGroup]
 				,[strNotes]
 				,ISNULL([intUnitMeasureId],0)	AS [intUnitMeasureId]
+				,[strUnitMeasure] AS [strUnitMeasure]
 			FROM
 				[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @CustomerId, @TransactionDate, @ItemId, @CustomerLocationId, 1, @IsCustomerSiteTaxable, @CardId, @VehicleId, @DisregardExemptionSetup, @UOMId)
 				

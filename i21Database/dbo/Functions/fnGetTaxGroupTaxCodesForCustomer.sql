@@ -35,6 +35,7 @@ RETURNS @returntable TABLE
 	,[strTaxGroup]					NVARCHAR(100)
 	,[strNotes]						NVARCHAR(500)
 	,[intUnitMeasureId]				INT NULL
+	,[strUnitMeasure]				NVARCHAR(30)
 )
 AS
 BEGIN
@@ -67,6 +68,7 @@ BEGIN
 		,[strTaxGroup]
 		,[strNotes]
 		,[intUnitMeasureId]
+		,[strUnitMeasure]
 		)
 	SELECT
 		 [intTransactionDetailTaxId]	= 0
@@ -90,6 +92,7 @@ BEGIN
 		,[strTaxGroup]					= TG.[strTaxGroup]
 		,[strNotes]						= E.[strExemptionNotes]
 		,[intUnitMeasureId]				= R.[intUnitMeasureId]
+		,[strUnitMeasure]				= R.[strUnitMeasure]
 	FROM
 		tblSMTaxCode TC
 	INNER JOIN
