@@ -302,8 +302,8 @@ BEGIN
 								, '' as strManufacturerBuydownDescription
 								, 0 as dblManufacturerBuydownAmount
 								, '' as strManufacturerMultiPackDescription
-								, TR.strTrLoyaltyProgramProgramID as strAccountLoyaltyIDNumber
-								, 'Loyalty coupon desc' as strCouponDescription
+								, TR.strTrLoyaltyProgramTrloAccount as strAccountLoyaltyIDNumber
+								, TR.strTrLoyaltyProgramProgramID as strCouponDescription
 							FROM tblSTTranslogRebates TR
 							JOIN tblSTStore ST ON ST.intStoreId = TR.intStoreId
 							WHERE TR.intStoreId = @intStoreIdMin 
@@ -511,7 +511,7 @@ BEGIN
 							, @dblManufacturerMultipackDiscountAmount decimal(18,6)
 							, @strManufacturerPromotionDescription nvarchar(100)
 							, @strManufacturerBuydownDescription nvarchar(100)
-							, @dblManufacturerBuydownAmount decimal(18,6)
+							, @strManufacturerBuydownAmount nvarchar(100)
 							, @strManufacturerMultiPackDescription nvarchar(100)
 							, @strAccountLoyaltyIDNumber nvarchar(100)
 							, @strCouponDescription nvarchar(100)
@@ -551,7 +551,8 @@ BEGIN
 									, @dblManufacturerMultipackDiscountAmount = dblManufacturerMultipackDiscountAmount
 									, @strManufacturerPromotionDescription = ISNULL(strManufacturerPromotionDescription, '') 
 									, @strManufacturerBuydownDescription = ISNULL(strManufacturerBuydownDescription, '')
-									, @dblManufacturerBuydownAmount = dblManufacturerBuydownAmount
+									, @strManufacturerBuydownAmount = (CASE WHEN strManufacturerBuydownDescription = '' OR strManufacturerBuydownDescription IS NULL 
+																	   THEN '' ELSE CAST(dblManufacturerBuydownAmount AS NVARCHAR(100)) END)
 									, @strManufacturerMultiPackDescription = ISNULL(strManufacturerMultiPackDescription, '')
 									, @strAccountLoyaltyIDNumber = ISNULL(strAccountLoyaltyIDNumber, '')
 									, @strCouponDescription = ISNULL(strCouponDescription, '')
@@ -564,7 +565,7 @@ BEGIN
 														+ ',' + @strOutletMultipackFlag + ',' + CAST(@intOutletMultipackQuantity as NVARCHAR(50)) + ',' + CAST(@dblOutletMultipackDiscountAmount as NVARCHAR(50)) + ',' + @strAccountPromotionName
 														+ ',' + CAST(@dblAccountDiscountAmount as NVARCHAR(50)) + ',' + CAST(@dblManufacturerDiscountAmount as NVARCHAR(50))+ ',' + ISNULL(CAST(@strCouponPid as NVARCHAR(20)) ,'') + ',' + CAST(@dblCouponAmount as NVARCHAR(50))
 														+ ',' + @strManufacturerMultipackFlag + ',' + CAST(@intManufacturerMultipackQuantity AS NVARCHAR(50)) + ',' + CAST(@dblManufacturerMultipackDiscountAmount AS NVARCHAR(50)) + ',' + @strManufacturerPromotionDescription
-														+ ',' + @strManufacturerBuydownDescription + ',' + CAST(@dblManufacturerBuydownAmount AS NVARCHAR(100)) + ',' + @strManufacturerMultiPackDescription + ',' + @strAccountLoyaltyIDNumber + ',' + @strCouponDescription
+														+ ',' + @strManufacturerBuydownDescription + ',' + @strManufacturerBuydownAmount + ',' + @strManufacturerMultiPackDescription + ',' + @strAccountLoyaltyIDNumber + ',' + @strCouponDescription
 							
 							SET @intLoopCount = @intLoopCount + 1
 						END
