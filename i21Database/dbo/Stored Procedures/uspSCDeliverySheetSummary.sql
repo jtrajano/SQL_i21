@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspSCDeliverySheetSummary]
-	@intDeliverySheetId AS INT
+	@intDeliverySheetId AS INT,
+	@ysnAddHistory AS BIT = 0
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -33,7 +34,10 @@ DECLARE @intEntityId INT
 		,@WHGBScale AS NUMERIC(38,6)
 		,@Hold AS NUMERIC(38,6)
 		,@SplitAverage AS NUMERIC(38,6)
-		,@currencyDecimal INT;
+		,@currencyDecimal INT
+		,@intDeliverySheetSplitId INT
+		,@ysnPost BIT
+		,@curDate DATE;
 
 IF OBJECT_ID (N'tempdb.dbo.#tblSCDeliverySheetSummary') IS NOT NULL
    DROP TABLE #temp
@@ -73,6 +77,8 @@ ADD SplitPercentage NUMERIC(38,6)
 
 DELETE FROM #temp
 
+SET @curDate = GETDATE();
+
 SELECT @currencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
 
 SELECT @remainingUnits = SUM(SCD.dblNet), @ticketTotalUnitQty = SUM(SCT.dblNetUnits)
@@ -87,7 +93,7 @@ IF @remainingUnits = 0
 DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 FOR
 
-SELECT SCDS.intEntityId,EM.strName,SCDS.dblSplitPercent,SCDS.intStorageScheduleTypeId,SCD.dblNet, SCD.intItemId 
+SELECT SCDS.intEntityId,EM.strName,SCDS.dblSplitPercent,SCDS.intStorageScheduleTypeId,SCD.dblNet, SCD.intItemId, SCD.ysnPost, SCDS.intDeliverySheetSplitId
 FROM tblSCDeliverySheet SCD
 LEFT JOIN tblSCDeliverySheetSplit SCDS ON SCDS.intDeliverySheetId = SCD.intDeliverySheetId
 LEFT JOIN tblEMEntity EM ON EM.intEntityId = SCDS.intEntityId
@@ -98,7 +104,7 @@ SET @counter = 1
 OPEN intListCursor;
 
 -- Initial fetch attempt
-FETCH NEXT FROM intListCursor INTO @intEntityId, @strName, @SplitAverage, @intStorageScheduleTypeId, @NetUnits, @intItemId;
+FETCH NEXT FROM intListCursor INTO @intEntityId, @strName, @SplitAverage, @intStorageScheduleTypeId, @NetUnits, @intItemId, @ysnPost, @intDeliverySheetSplitId;
 
 --SPLIT
 WHILE @@FETCH_STATUS = 0
@@ -177,13 +183,21 @@ BEGIN
 		BEGIN
 			SET @WHGB = @tmpUnits;
 		END
-
+		
 		--For hold
 		SET @Hold = 0;
 		--ISNULL((SELECT SUM((SCT.dblNetUnits * @SplitAverage) / 100) FROM tblSCDeliverySheet SCD
 		--LEFT JOIN tblSCTicket SCT ON SCD.intDeliverySheetId = SCT.intDeliverySheetId AND SCT.ysnDeliverySheetPost = 0
 		--WHERE SCD.intDeliverySheetId = @intDeliverySheetId AND SCT.strTicketStatus = 'H'
 		--AND SCD.intEntityId = @intEntityId AND SCD.intItemId = @intItemId), 0)
+		
+		IF @ysnPost = 0 AND @ysnAddHistory = 1
+			IF NOT EXISTS(SELECT TOP 1 * FROM tblSCDeliverySheetHistory WHERE intDeliverySheetId = @intDeliverySheetId AND dtmDeliverySheetHistoryDate = @curDate AND intEntityId = @intEntityId )
+				INSERT INTO tblSCDeliverySheetHistory (intEntityId, dblQuantity, dblSplitPercent, intStorageScheduleTypeId, intDeliverySheetId, intDeliverySheetSplitId, dtmDeliverySheetHistoryDate, intConcurrencyId)
+				VALUES (@intEntityId, ISNULL(@tmpUnits,0), @SplitAverage, @intStorageScheduleTypeId, @intDeliverySheetId, @intDeliverySheetSplitId, GETDATE(), 1)
+			ELSE
+				UPDATE tblSCDeliverySheetHistory set intStorageScheduleTypeId = @intStorageScheduleTypeId, dblQuantity = ISNULL(@tmpUnits,0) 
+				WHERE intEntityId = @intEntityId AND intDeliverySheetId = @intDeliverySheetId
 
 		SET @remainingUnits -= @tmpUnits;
 
@@ -196,7 +210,7 @@ BEGIN
 
 	SET @counter = @counter+1
 
-	FETCH NEXT FROM intListCursor INTO @intEntityId, @strName, @SplitAverage, @intStorageScheduleTypeId, @NetUnits, @intItemId;
+	FETCH NEXT FROM intListCursor INTO @intEntityId, @strName, @SplitAverage, @intStorageScheduleTypeId, @NetUnits, @intItemId, @ysnPost, @intDeliverySheetSplitId;
 END
 
 CLOSE intListCursor;
