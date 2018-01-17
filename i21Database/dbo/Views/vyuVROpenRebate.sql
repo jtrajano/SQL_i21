@@ -77,7 +77,7 @@ AS
 	INNER JOIN tblEMEntity P
 		ON K.intEntityId = P.intEntityId
 	INNER JOIN tblSMCompanyLocation Q
-		ON A.intCompanyLocationId = P.intCompanyLocationId
+		ON A.intCompanyLocationId = Q.intCompanyLocationId
 	WHERE (ISNULL(N.dblRebateRate,0) <> 0 OR ISNULL(M.dblRebateRate,0) <>0)
 		AND NOT EXISTS(SELECT TOP 1 1 FROM tblVRRebate WHERE intInvoiceDetailId = B.intInvoiceDetailId)
 		AND A.ysnPosted = 1
