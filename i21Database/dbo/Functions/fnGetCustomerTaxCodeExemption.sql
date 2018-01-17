@@ -13,6 +13,10 @@
 	,@CardId					INT
 	,@VehicleId					INT
 	,@DisregardExemptionSetup	BIT
+	,@CompanyLocationId			INT
+	,@FreightTermId				INT
+	,@CFSiteId					INT
+	,@IsDeliver					BIT
 )
 --RETURNS NVARCHAR(500)
 RETURNS @returntable TABLE
@@ -28,15 +32,14 @@ BEGIN
 			,@ExemptionPercent	NUMERIC(18,6)
 			,@TaxExempt			BIT
 			,@InvalidSetup		BIT
+			,@State				NVARCHAR(100)
 	
 	SET @TaxCodeExemption = NULL
 	SET @ExemptionPercent = 0.00000
 	SET @TaxExempt = 0
 	SET @InvalidSetup = 0
 	SET @DisregardExemptionSetup = ISNULL(@DisregardExemptionSetup, 0)
-
-	--IF @IsCustomerSiteTaxable IS NULL
-	--	BEGIN
+	
 	--Customer
 	IF EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityId] = @CustomerId AND ISNULL([ysnTaxExempt],0) = 1)
 		SET @TaxCodeExemption = 'Customer is tax exempted; Date: ' + CONVERT(NVARCHAR(20), GETDATE(), 101) + ' ' + CONVERT(NVARCHAR(20), GETDATE(), 114)
@@ -169,6 +172,20 @@ BEGIN
 				,[dblExemptionPercent] = @ExemptionPercent
 			RETURN 	
 		END
+
+	IF ISNULL(@CFSiteId,0) <> 0 AND ISNULL(@IsDeliver,0) = 0
+		SET @State = ISNULL((SELECT TOP 1 [strTaxState] FROM tblCFSite WHERE [intSiteId] = @CFSiteId), @TaxState)
+	ELSE
+	BEGIN
+		DECLARE @FOB NVARCHAR(150)
+		SET @FOB = LOWER(RTRIM(LTRIM(ISNULL((SELECT [strFobPoint] FROM tblSMFreightTerms WHERE [intFreightTermId] = @FreightTermId),''))))
+
+		IF (ISNULL(@FreightTermId,0) <> 0 AND @FOB <> 'origin') OR (ISNULL(@FreightTermId,0) = 0 AND ISNULL(@IsDeliver,0) = 1)
+			SET @State = ISNULL((SELECT TOP 1 [strState] FROM tblEMEntityLocation WHERE	[intEntityLocationId] = @ShipToLocationId), @TaxState)
+
+		IF ISNULL(@FreightTermId,0) <> 0 AND @FOB = 'origin'
+			SET @State = ISNULL((SELECT TOP 1 strStateProvince FROM tblSMCompanyLocation WHERE	[intCompanyLocationId] = @CompanyLocationId), @TaxState)
+	END
 	
 	--Customer Tax Exemption
 	SET @ExemptionPercent = 0.00000
@@ -219,7 +236,8 @@ BEGIN
 		AND (ISNULL(TE.[intTaxClassId], 0) = 0 OR TE.[intTaxClassId] = @TaxClassId)
 		AND (ISNULL(TE.[intCardId], 0) = 0 OR TE.[intCardId] = @CardId)
 		AND (ISNULL(TE.[intVehicleId], 0) = 0 OR TE.[intVehicleId] = @VehicleId)
-		AND (LEN(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) <= 0 OR ISNULL(TE.[intTaxCodeId], 0) = 0 OR (LEN(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) > 0 AND UPPER(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) = UPPER(LTRIM(RTRIM(@TaxState)))))
+		AND (LEN(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) <= 0 OR TE.[strState] = @State)
+		--AND (LEN(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) <= 0 OR ISNULL(TE.[intTaxCodeId], 0) = 0 OR (LEN(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) > 0 AND UPPER(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) = UPPER(LTRIM(RTRIM(@TaxState)))))
 	ORDER BY
 		(
 			(CASE WHEN ISNULL(TE.[intCardId],0) = 0 THEN 0 ELSE 1 END)

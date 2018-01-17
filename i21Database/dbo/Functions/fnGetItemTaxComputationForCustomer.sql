@@ -16,6 +16,8 @@
 	,@VehicleId					INT
 	,@DisregardExemptionSetup	BIT
 	,@ExcludeCheckOff			BIT
+	,@CFSiteId					INT
+	,@IsDeliver					BIT
 )
 RETURNS @returntable TABLE
 (
@@ -129,7 +131,7 @@ BEGIN
 		,[strTaxGroup]
 		,[strNotes]
 	FROM
-		[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @CustomerId, @TransactionDate, @ItemId, @CustomerLocationId, @IncludeExemptedCodes, @IsCustomerSiteTaxable, @CardId, @VehicleId, @DisregardExemptionSetup, NULL)
+		[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @CustomerId, @TransactionDate, @ItemId, @CustomerLocationId, @IncludeExemptedCodes, @IsCustomerSiteTaxable, @CardId, @VehicleId, @DisregardExemptionSetup, NULL, @CompanyLocationId, @FreightTermId, @CFSiteId, @IsDeliver)
 															
 			
 	-- Calculate Item Tax

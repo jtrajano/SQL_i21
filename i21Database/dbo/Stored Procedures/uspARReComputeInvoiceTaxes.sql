@@ -155,7 +155,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 			,[strNotes] 
 			,1
 		FROM
-			[dbo].[fnGetItemTaxComputationForCustomer](@ItemId, @CustomerId, @TransactionDate, @ItemPrice, @QtyShipped, @TaxGroupId, @LocationId, @CustomerLocationId, 1, NULL, @SiteId, @FreightTermId, NULL, NULL, 0, 1)
+			[dbo].[fnGetItemTaxComputationForCustomer](@ItemId, @CustomerId, @TransactionDate, @ItemPrice, @QtyShipped, @TaxGroupId, @LocationId, @CustomerLocationId, 1, NULL, @SiteId, @FreightTermId, NULL, NULL, 0, 1, NULL, 1)
 		
 		SELECT
 			 @TotalItemTax		= SUM([dblAdjustedTax])

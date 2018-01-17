@@ -121,6 +121,8 @@ BEGIN
 						,@VehicleId
 						,@DisregardExemptionSetup
 						,@ExcludeCheckOff
+						,NULL --@CFSiteId
+						,1    --@IsDeliver
 					) 	
 		END
 

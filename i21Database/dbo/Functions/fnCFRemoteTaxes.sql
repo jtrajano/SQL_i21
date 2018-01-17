@@ -207,7 +207,12 @@ BEGIN
 	INNER JOIN tblSMTaxCodeRate smTaxCodeRate
 		ON smTaxCode.intTaxCodeId = smTaxCodeRate.intTaxCodeId
 	CROSS APPLY
-		[dbo].[fnGetCustomerTaxCodeExemptionDetails](@intCustomerId, @dtmTransactionDate, NULL, smTaxCode.intTaxCodeId, smTaxClass.intTaxClassId, smTaxCode.strState, @intItemId, @intItemCategoryId, @intCustomerLocationId,NULL,NULL,NULL, @DisregardExemptionSetup) E
+		[dbo].[fnGetCustomerTaxCodeExemptionDetails](@intCustomerId, @dtmTransactionDate, NULL, smTaxCode.intTaxCodeId, smTaxClass.intTaxClassId, smTaxCode.strState, @intItemId, @intItemCategoryId, @intCustomerLocationId,NULL,NULL,NULL, @DisregardExemptionSetup
+			,NULL	--@CompanyLocationId
+			,NULL	--@FreightTermId
+			,NULL	--@CFSiteId
+			,1		--@IsDeliver
+			) E
 	WHERE cfNetwork.intNetworkId = @intNetworkId
 
 	

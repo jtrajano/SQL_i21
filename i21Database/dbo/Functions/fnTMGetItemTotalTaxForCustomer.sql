@@ -35,5 +35,7 @@ BEGIN
 											,@VehicleId				
 											,@DisregardExemptionSetup
 											,0
+											,NULL
+											,1
 											)
 END

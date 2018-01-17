@@ -67,6 +67,10 @@ CROSS APPLY
 		,NULL
 		,0
 		,NULL
+		,EMEL.intWarehouseId
+		,NULL
+		,NULL
+		,1
 		) TC
 ) T
 GROUP BY 
