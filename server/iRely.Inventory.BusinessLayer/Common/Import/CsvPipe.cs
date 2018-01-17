@@ -63,8 +63,15 @@ namespace iRely.Inventory.BusinessLayer
                 Value = value,
                 Message = message
             };
-            if(Result != null)
-                Result.AddError(msg);
+            if (Result != null)
+            {
+                if (type == Constants.TYPE_WARNING)
+                    Result.AddWarning(msg);
+                else if (type == Constants.TYPE_ERROR)
+                    Result.AddError(msg);
+                else
+                    Result.AddMessage(msg);
+            }
         }
     }
 }

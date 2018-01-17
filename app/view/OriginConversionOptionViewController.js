@@ -595,7 +595,7 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
                         "Freight Term","Ship Via"];
                 case "itempricinglevels":
                     return ["Item No", "Location", "Price Level", "UOM", "Min", "Max", "Pricing Method",
-                        "Amount/Percent", "Unit Price", "Commission On", "Comm Amount/Percent"];
+                        "Amount/Percent", "Unit Price", "Commission On", "Comm Amount/Percent", "Effective Date"];
                 case "commodityuom":
                     return ["Commodity Code", "UOM", "Unit Qty", "Is Stock Unit", "Is Default UOM"]; 
             }

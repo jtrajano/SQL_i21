@@ -245,11 +245,20 @@ namespace iRely.Inventory.BusinessLayer
             return hasDuplicate;
         }
 
+        public virtual string DuplicateFoundMessage()
+        {
+            return string.Empty;
+        }
+
         public void HandleDuplicates(T entity, CsvRecord record)
         {
             if(GlobalSettings.Instance.ContinueOnFailedImports)
             {
                 string fields = record.Schema.GetMissingFieldsTextRepresentation();
+                var dupMessage = DuplicateFoundMessage();
+                var errorMessage = $"Duplicate records found for record #{record.RecordNo}";
+                if (dupMessage != string.Empty)
+                    errorMessage = $"{errorMessage}. {dupMessage}";
                 ImportResult.AddError(new ImportDataMessage()
                 {
                     Type = Constants.TYPE_ERROR,
@@ -259,7 +268,7 @@ namespace iRely.Inventory.BusinessLayer
                     Row = record.RecordNo,
                     Value = $"Values of: {fields}.",
                     Exception = null,
-                    Message = $"Duplicate records found for record #{record.RecordNo}"
+                    Message = errorMessage
                 });
                 ImportResult.Type = Constants.TYPE_WARNING;
             }

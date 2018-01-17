@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using iRely.Common;
@@ -30,6 +31,16 @@ namespace iRely.Inventory.BusinessLayer
             return entity.intItemPricingLevelId;
         }
 
+        public override string DuplicateFoundMessage()
+        {
+            return "Pricing levels cannot have the same effective date.";
+        }
+
+        protected override Expression<Func<tblICItemPricingLevel, bool>> GetUniqueKeyExpression(tblICItemPricingLevel entity)
+        {
+            return (e => e.dtmEffectiveDate == entity.dtmEffectiveDate);
+        }
+
         public override tblICItemPricingLevel Process(CsvRecord record)
         {
             var entity = new tblICItemPricingLevel();
@@ -40,6 +51,7 @@ namespace iRely.Inventory.BusinessLayer
             SetDecimal(record, "Amount/Percent", e => entity.dblAmountRate = e);
             SetDecimal(record, "Unit Price", e => entity.dblUnitPrice = e);
             SetDecimal(record, "Comm Ammount/Percent", e => entity.dblCommissionRate = e);
+            SetDate(record, "Effective Date", e => entity.dtmEffectiveDate = e);
             var lu = GetFieldValue(record, "Item No");
             valid = SetIntLookupId<tblICItem>(record, "Item No", e => e.strItemNo == lu, e => e.intItemId, e => entity.intItemId = e, required: true);
             if (valid)
@@ -103,7 +115,7 @@ namespace iRely.Inventory.BusinessLayer
                             Value = value,
                             Message = $"Invalid value for Pricing Method: {value}. Value set to default: 'None'.",
                         };
-                        Result.AddWarning(msg);
+                        AddMessage(msg.Column, msg.Message, msg.Value, msg.Type, msg.Status, msg.Action);
                         break;
                 }
                 return input;
@@ -118,6 +130,8 @@ namespace iRely.Inventory.BusinessLayer
 
             protected override tblICItemPricingLevel Process(tblICItemPricingLevel input)
             {
+                if (input == null)
+                    return input;
                 var value = GetFieldValue("Commission On");
                 switch (value.ToUpper().Trim())
                 {
@@ -145,7 +159,7 @@ namespace iRely.Inventory.BusinessLayer
                             Value = value,
                             Message = $"Invalid value for Commission: {value}. Value set to default: 'None'.",
                         };
-                        Result.AddWarning(msg);
+                        AddMessage(msg.Column, msg.Message, msg.Value, msg.Type, msg.Status, msg.Action);
                         break;
                 }
                 return input;
@@ -160,39 +174,19 @@ namespace iRely.Inventory.BusinessLayer
 
             protected override tblICItemPricingLevel Process(tblICItemPricingLevel input)
             {
+                if (input == null)
+                    return input;
                 var value = GetFieldValue("Location");
                 if(string.IsNullOrEmpty(value))
                 {
-                    var msg = new ImportDataMessage()
-                    {
-                        Column = "Location",
-                        Row = Record.RecordNo,
-                        Type = Constants.TYPE_ERROR,
-                        Status = Constants.STAT_FAILED,
-                        Action = Constants.ACTION_SKIPPED,
-                        Exception = null,
-                        Value = value,
-                        Message = $"Location should not be blank.",
-                    };
-                    Result.AddError(msg);
+                    AddError("Location", "Location should not be blank.");
                     return null;
                 }
 
                 var locationId = ImportDataLogicHelpers.GetLookUpId<tblSMCompanyLocation>(Context, m => m.strLocationName == value, e => e.intCompanyLocationId);
                 if (locationId == null)
                 {
-                    var msg = new ImportDataMessage()
-                    {
-                        Column = "Location",
-                        Row = Record.RecordNo,
-                        Type = Constants.TYPE_ERROR,
-                        Status = Constants.STAT_FAILED,
-                        Action = Constants.ACTION_SKIPPED,
-                        Exception = null,
-                        Value = value,
-                        Message = $"Can't find location {value}.",
-                    };
-                    Result.AddError(msg);
+                    AddError("Location", "Can't find location.");
                     return null;
                 }
                 
@@ -200,23 +194,11 @@ namespace iRely.Inventory.BusinessLayer
 
                 if (itemLocation != null)
                 {
-                    input.intLocationId = itemLocation.intLocationId;
-                    input.intItemLocationId = itemLocation.intItemLocationId;
+                    input.tblICItemLocation = itemLocation;
                 }
                 else
                 {
-                    var msg = new ImportDataMessage()
-                    {
-                        Column = "Location",
-                        Row = Record.RecordNo,
-                        Type = Constants.TYPE_ERROR,
-                        Status = Constants.STAT_FAILED,
-                        Action = Constants.ACTION_SKIPPED,
-                        Exception = null,
-                        Value = value,
-                        Message = $"Can't find location {value}.",
-                    };
-                    Result.AddError(msg);
+                    AddError("Location", "Can't find location.");
                     return null;
                 }
 
@@ -232,6 +214,8 @@ namespace iRely.Inventory.BusinessLayer
 
             protected override tblICItemPricingLevel Process(tblICItemPricingLevel input)
             {
+                if (input == null)
+                    return input;
                 var lu = GetFieldValue("Price Level");
                 var valid = true;
                 valid = ImportDataLogicHelpers.SetIntLookupId<tblSMCompanyLocationPricingLevel>(Context, Result, Record, "Price Level", e => e.strPricingLevelName == lu && e.intCompanyLocationId == input.intLocationId,
@@ -250,10 +234,10 @@ namespace iRely.Inventory.BusinessLayer
                         Value = lu,
                         Message = $"Invalid Price Level {lu}.",
                     };
-                    Result.AddError(msg);
+                    AddError("Location", "Invalid Price Level");
                     return null;
                 }
-
+                input.strPriceLevel = lu;
                 return input;
             }
         }
@@ -266,6 +250,8 @@ namespace iRely.Inventory.BusinessLayer
 
             protected override tblICItemPricingLevel Process(tblICItemPricingLevel input)
             {
+                if (input == null)
+                    return input;
                 var value = GetFieldValue("UOM");
                 if (string.IsNullOrEmpty(value))
                 {
@@ -280,7 +266,7 @@ namespace iRely.Inventory.BusinessLayer
                         Value = value,
                         Message = $"UOM must not be blank.",
                     };
-                    Result.AddError(msg);
+                    AddError("UOM", "UOM must not be blank.");
                     return null;
                 }
 
@@ -299,7 +285,7 @@ namespace iRely.Inventory.BusinessLayer
                         Value = value,
                         Message = $"Invalid UOM {value}.",
                     };
-                    Result.AddError(msg);
+                    AddError("UOM", "Invalid UOM");
                     return null;
                 }
                 var itemUom = ImportDataLogicHelpers.GetLookUpObject<tblICItemUOM>(Context, m => m.intUnitMeasureId == uomId && m.intItemId == input.intItemId);
@@ -321,7 +307,7 @@ namespace iRely.Inventory.BusinessLayer
                         Value = value,
                         Message = $"Invalid UOM {value}.",
                     };
-                    Result.AddError(msg);
+                    AddError("UOM", "Invalid UOM");
                     return null;
                 }
 
@@ -337,6 +323,8 @@ namespace iRely.Inventory.BusinessLayer
 
             protected override tblICItemPricingLevel Process(tblICItemPricingLevel input)
             {
+                if (input == null)
+                    return input;
                 var intItemLocationId = input.intItemLocationId;
                 var intCompanyLocationId = input.intLocationId;
                 var pricingItem = ImportDataLogicHelpers.GetLookUpObject<tblICItemPricing>(Context, m => m.intItemLocationId == intItemLocationId);
