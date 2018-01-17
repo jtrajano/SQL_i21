@@ -8,7 +8,7 @@
     [strDistributionOption] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL,
 	[intStorageScheduleRuleId] INT NULL, 
     [intConcurrencyId] INT NULL, 
-    CONSTRAINT [PK_ttblSCDeliverySheetSplit_intDeliverySheetSplitId] PRIMARY KEY ([intDeliverySheetSplitId]) ,
+    CONSTRAINT [PK_tblSCDeliverySheetSplit_intDeliverySheetSplitId] PRIMARY KEY ([intDeliverySheetSplitId]) ,
 	CONSTRAINT [FK_tblSCDeliverySheetSplit_tblSCDeliverySheet_intDeliverySheetId] FOREIGN KEY ([intDeliverySheetId]) REFERENCES [tblSCDeliverySheet]([intDeliverySheetId]),
 	CONSTRAINT [FK_tblSCDeliverySheetSplit_tblGRStorageType_intStorageScheduleTypeId] FOREIGN KEY ([intStorageScheduleTypeId]) REFERENCES [tblGRStorageType]([intStorageScheduleTypeId]),
 	CONSTRAINT [FK_tblSCDeliverySheetSplit_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [tblEMEntity]([intEntityId]),
