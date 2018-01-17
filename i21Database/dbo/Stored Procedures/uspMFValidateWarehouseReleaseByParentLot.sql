@@ -124,6 +124,10 @@ BEGIN TRY
 			,U.intUnitMeasureId
 			,R.intManufacturingProcessId
 			,@strAttributeValue AS strWarehouseReleaseLotByBatch
+			,NULL AS intNewSubLocationId
+			,NULL AS intNewStorageLocationId
+			,'' AS strSubLocationName
+			,'' AS strStorageLocationName
 		FROM tblICLot L
 		JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = L.intItemUOMId

@@ -58,7 +58,8 @@ BEGIN TRY
 		,@intShiftActivityId INT
 		,@intShiftActivityStatusId INT
 		,@strAttributeValueByWorkOrder NVARCHAR(50)
-		,@intNewLotStatusId int
+		,@intNewSubLocationId INT
+		,@intNewStorageLocationId INT
 
 	SELECT @dtmCurrentDate = GETDATE()
 
@@ -71,8 +72,9 @@ BEGIN TRY
 		,@intManufacturingProcessId = intManufacturingProcessId
 		,@intUserId = intUserId
 		,@strComment = strComment
-		,@intReleaseStatusId = intReleaseStatusId
-		,@intNewLotStatusId=intLotStatusId
+		,@intReleaseStatusId = ISNULL(intReleaseStatusId, 1)
+		,@intNewSubLocationId = intNewSubLocationId
+		,@intNewStorageLocationId = intNewStorageLocationId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intLotId INT
 			,strGTINCaseBarCode NVARCHAR(50)
@@ -81,7 +83,8 @@ BEGIN TRY
 			,intUserId INT
 			,strComment NVARCHAR(MAX)
 			,intReleaseStatusId INT
-			,intLotStatusId int
+			,intNewSubLocationId INT
+			,intNewStorageLocationId INT
 			)
 
 	IF @intLotId = 0
@@ -295,16 +298,16 @@ BEGIN TRY
 		,intLastModifiedUserId = @intUserId
 	WHERE intLotId = @intLotId
 
-	If @intNewLotStatusId IS NOT NULL
+	If @intReleaseStatusId IS NOT NULL
 				AND NOT EXISTS (
 					SELECT *
 					FROM dbo.tblICLot
 					WHERE intLotId = @intLotId
-						AND intLotStatusId = @intNewLotStatusId
+						AND intLotStatusId = @intReleaseStatusId
 					)
 			BEGIN
 		EXEC uspMFSetLotStatus @intLotId = @intLotId
-			,@intNewLotStatusId = @intNewLotStatusId
+			,@intNewLotStatusId = @intReleaseStatusId
 			,@intUserId = @intUserId
 			,@strNotes = ''
 	End
@@ -406,6 +409,17 @@ BEGIN TRY
 					END
 			WHERE intLotId = @intLotId
 		END
+	END
+
+	IF (@intNewStorageLocationId IS NOT NULL) AND (ISNULL(@intNewStorageLocationId, 0) <> @intStorageLocationId)
+	BEGIN
+		EXEC uspMFLotMove @intLotId = @intLotId
+				,@intNewSubLocationId = @intNewSubLocationId
+				,@intNewStorageLocationId = @intNewStorageLocationId
+				,@dblMoveQty = @dblReleaseQty
+				,@intMoveItemUOMId = @intItemUOMId
+				,@intUserId = @intUserId
+				,@strNotes= @strComment
 	END
 
 	COMMIT TRANSACTION

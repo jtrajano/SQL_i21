@@ -157,6 +157,10 @@ BEGIN TRY
 			,U.intUnitMeasureId
 			,R.intManufacturingProcessId
 			,@strAttributeValue as strWarehouseReleaseLotByBatch
+			,L.intSubLocationId AS intNewSubLocationId
+			,L.intStorageLocationId AS intNewStorageLocationId
+			,CSL.strSubLocationName AS strSubLocationName
+			,SL.strName AS strStorageLocationName
 		FROM tblICLot L
 		JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = L.intItemUOMId
@@ -165,6 +169,8 @@ BEGIN TRY
 		JOIN dbo.tblMFRecipe R ON R.intItemId=I.intItemId AND R.intLocationId=@intLocationId AND R.ysnActive =1
 		LEFT JOIN dbo.tblMFWorkOrderProducedLot WPL ON WPL.intLotId = L.intLotId
 		LEFT JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = WPL.intWorkOrderId
+		LEFT JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = L.intSubLocationId
+		LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 		WHERE L.intLotId = @intLotId
 	END
 END TRY
