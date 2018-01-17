@@ -21,7 +21,7 @@ DECLARE @ErrorState INT
 BEGIN TRY
 
 	DECLARE @tmpInvoiceTransaction TFInvoiceTransaction
-	DECLARE @tmpInvoiceDetail TABLE (intInvoiceDetailId INT, intTaxCodeId INT NULL)
+	DECLARE @tmpInvoiceDetail TFInvoiceDetailTransaction
 	DECLARE @tmpRC TABLE (intReportingComponentId INT)
 
 	IF @Refresh = 1
@@ -156,10 +156,10 @@ BEGIN TRY
 					, tblTFProductCode.intProductCodeId
 					, tblTFProductCode.strProductCode
 					, tblARInvoiceDetail.intItemId
-					, tblARInvoiceDetail.dblQtyShipped
-					, tblARInvoiceDetail.dblQtyShipped AS dblNet
-					, tblARInvoiceDetail.dblQtyShipped AS dblGross
-					, tblARInvoiceDetail.dblQtyShipped AS dblBillQty
+					, (CASE WHEN tblARInvoice.strTransactionType = 'Credit Memo' THEN tblARInvoiceDetail.dblQtyShipped * -1 ELSE tblARInvoiceDetail.dblQtyShipped END) AS dblQtyShipped
+					, (CASE WHEN tblARInvoice.strTransactionType = 'Credit Memo' THEN tblARInvoiceDetail.dblQtyShipped * -1 ELSE tblARInvoiceDetail.dblQtyShipped END) AS dblNet
+					, (CASE WHEN tblARInvoice.strTransactionType = 'Credit Memo' THEN tblARInvoiceDetail.dblQtyShipped * -1 ELSE tblARInvoiceDetail.dblQtyShipped END) AS dblGross
+					, (CASE WHEN tblARInvoice.strTransactionType = 'Credit Memo' THEN tblARInvoiceDetail.dblQtyShipped * -1 ELSE tblARInvoiceDetail.dblQtyShipped END) AS dblBillQty
 					, ISNULL(tblARInvoiceDetailTax.dblTax, 0.000000) AS dblTax
 					, NULL AS dblTaxExempt
 					, tblARInvoice.strInvoiceNumber
@@ -321,10 +321,10 @@ BEGIN TRY
 					, tblTFProductCode.intProductCodeId
 					, tblTFProductCode.strProductCode
 					, tblARInvoiceDetail.intItemId
-					, tblARInvoiceDetail.dblQtyShipped
-					, tblARInvoiceDetail.dblQtyShipped AS dblNet
-					, tblARInvoiceDetail.dblQtyShipped AS dblGross
-					, tblARInvoiceDetail.dblQtyShipped AS dblBillQty
+					, (CASE WHEN tblARInvoice.strTransactionType = 'Credit Memo' THEN tblARInvoiceDetail.dblQtyShipped * -1 ELSE tblARInvoiceDetail.dblQtyShipped END) AS dblQtyShipped
+					, (CASE WHEN tblARInvoice.strTransactionType = 'Credit Memo' THEN tblARInvoiceDetail.dblQtyShipped * -1 ELSE tblARInvoiceDetail.dblQtyShipped END) AS dblNet
+					, (CASE WHEN tblARInvoice.strTransactionType = 'Credit Memo' THEN tblARInvoiceDetail.dblQtyShipped * -1 ELSE tblARInvoiceDetail.dblQtyShipped END) AS dblGross
+					, (CASE WHEN tblARInvoice.strTransactionType = 'Credit Memo' THEN tblARInvoiceDetail.dblQtyShipped * -1 ELSE tblARInvoiceDetail.dblQtyShipped END) AS dblBillQty
 					, ISNULL(tblARInvoiceDetailTax.dblTax, 0.000000) AS dblTax
 					, NULL AS dblTaxExempt
 					, tblARInvoice.strInvoiceNumber
