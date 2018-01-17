@@ -227,7 +227,7 @@ BEGIN
 				,intStorageLocationId
 		)  	
 		EXEC	dbo.uspICPostInventoryAdjustmentQtyChange
-				@intTransactionId, @intEntityUserSecurityId
+				@intTransactionId, @intEntityUserSecurityId, @ysnPost
 	END 
 
 	-----------------------------------
@@ -498,6 +498,14 @@ BEGIN
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit				
 	END 
 
+	IF @adjustmentType = @ADJUSTMENT_TYPE_QuantityChange
+	BEGIN 
+		EXEC	dbo.uspICPostInventoryAdjustmentQtyChange
+				@intTransactionId
+				,@intEntityUserSecurityId
+				,@ysnPost
+	END 	
+
 	IF @adjustmentType = @ADJUSTMENT_TYPE_LotStatusChange
 	BEGIN 
 		EXEC	dbo.uspICPostInventoryAdjustmentLotStatusChange
@@ -537,11 +545,14 @@ BEGIN
 	BEGIN 
 		ROLLBACK TRAN @TransactionName
 
-		-- Save the GL Entries data into the GL Post Recap table by calling uspGLPostRecap. 
-		EXEC dbo.uspGLPostRecap 
-			@GLEntries
-			,@intEntityUserSecurityId
-		
+		IF(EXISTS(SELECT * FROM @GLEntries))
+		BEGIN
+			-- Save the GL Entries data into the GL Post Recap table by calling uspGLPostRecap. 
+			EXEC dbo.uspGLPostRecap 
+				@GLEntries
+				,@intEntityUserSecurityId
+		END
+
 		COMMIT TRAN @TransactionName
 	END 
 	ELSE 
@@ -567,7 +578,10 @@ BEGIN
 	-- If there are items for adjust, expect it to have g/l entries. 
 	IF @adjustmentTypeRequiresGLEntries = 1
 	BEGIN 
-		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
+		IF(EXISTS(SELECT * FROM @GLEntries))
+		BEGIN
+			EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
+		END
 	END
 
 	UPDATE	dbo.tblICInventoryAdjustment  

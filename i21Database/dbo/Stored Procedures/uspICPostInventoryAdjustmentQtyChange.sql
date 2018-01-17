@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE uspICPostInventoryAdjustmentQtyChange  
 	@intTransactionId INT = NULL,
-	@intEntityUserSecurityId INT = NULL
+	@intEntityUserSecurityId INT = NULL,
+	@ysnPost BIT = 0
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -30,9 +31,21 @@ DECLARE @INVENTORY_ADJUSTMENT_QuantityChange AS INT = 10
 		,@INVENTORY_ADJUSTMENT_LotStatusChange AS INT = 16
 		,@INVENTORY_ADJUSTMENT_SplitLot AS INT = 17
 		,@INVENTORY_ADJUSTMENT_ExpiryDateChange AS INT = 18
+		
+		,@OWNERSHIP_TYPE_Own AS INT = 1
+		,@OWNERSHIP_TYPE_Storage AS INT = 2
+		,@OWNERSHIP_TYPE_ConsignedPurchase AS INT = 3
+		,@OWNERSHIP_TYPE_ConsignedSale AS INT = 4
 
 DECLARE @ItemsForQtyChange AS ItemCostingTableType
+DECLARE @StorageItemsForPost AS ItemCostingTableType  
 
+-- Get the default currency ID
+DECLARE @intFunctionalCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
+DECLARE @intReturnValue AS INT 
+DECLARE @strBatchId NVARCHAR(50)
+	,@intLocationId INT
+	,@STARTING_NUMBER_BATCH AS INT = 3  
 --------------------------------------------------------------------------------
 -- Validate the UOM
 --------------------------------------------------------------------------------
@@ -69,7 +82,8 @@ END
 -------------------------------------------------------------------------------
 BEGIN 
 	SELECT	TOP 1 
-			@intItemId = Detail.intItemId
+			@intItemId = Detail.intItemId,
+			@intLocationId = Header.intLocationId
 	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
@@ -87,6 +101,13 @@ BEGIN
 		RETURN -1
 	END
 END 
+
+-- Get the next batch number
+BEGIN 
+	SET @strBatchId = NULL 
+	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intLocationId  
+	IF @@ERROR <> 0 GOTO Post_Exit;
+END
 
 DECLARE @intCreateUpdateLotError AS INT 
 
@@ -164,6 +185,7 @@ BEGIN
 				ON ItemPricing.intItemId = Detail.intItemId
 				AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId		
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
+		AND ISNULL(Detail.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
 
 END
 
@@ -187,5 +209,91 @@ SELECT	intItemId
 		,intSubLocationId
 		,intStorageLocationId
 FROM	@ItemsForQtyChange
+
+
+-- Process Storage items 
+BEGIN 
+	INSERT INTO @StorageItemsForPost (  
+			intItemId  
+			,intItemLocationId 
+			,intItemUOMId  
+			,dtmDate  
+			,dblQty  
+			,dblUOMQty  
+			,dblCost  
+			,dblSalesPrice  
+			,intCurrencyId  
+			,dblExchangeRate  
+			,intTransactionId  
+			,intTransactionDetailId   
+			,strTransactionId  
+			,intTransactionTypeId  
+			,intLotId 
+			,intSubLocationId
+			,intStorageLocationId
+			,intInTransitSourceLocationId
+			,intForexRateTypeId
+			,dblForexRate
+	)  
+	SELECT	intItemId = DetailItem.intItemId  
+			,intItemLocationId = ItemLocation.intItemLocationId
+			,intItemUOMId = DetailItem.intItemUOMId
+			,dtmDate = Header.dtmAdjustmentDate  
+			,dblQty = CASE @ysnPost WHEN 1 THEN ISNULL(DetailItem.dblNewQuantity, 0) - ISNULL(DetailItem.dblQuantity, 0) ELSE -ISNULL(DetailItem.dblAdjustByQuantity, 0) END
+			,dblUOMQty = ItemUOM.dblUnitQty		
+			,dblCost =	0.00			
+			,dblSalesPrice = 0  
+			,intCurrencyId = @intFunctionalCurrencyId  
+			,dblExchangeRate = 1  
+			,intTransactionId = Header.intInventoryAdjustmentId  
+			,intTransactionDetailId  = DetailItem.intInventoryAdjustmentDetailId
+			,strTransactionId = Header.strAdjustmentNo  
+			,intTransactionTypeId = @INVENTORY_ADJUSTMENT_QuantityChange  
+			,intLotId = DetailItem.intLotId 
+			,intSubLocationId = DetailItem.intSubLocationId -- ISNULL(DetailItemLot.intSubLocationId, DetailItem.intSubLocationId) 
+			,intStorageLocationId = DetailItem.intStorageLocationId
+			,intInTransitSourceLocationId = NULL
+			,intForexRateTypeId = NULL
+			,dblForexRate = NULL
+	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail DetailItem 
+				ON Header.intInventoryAdjustmentId = DetailItem.intInventoryAdjustmentId 					
+			INNER JOIN dbo.tblICItemLocation ItemLocation
+				ON ItemLocation.intLocationId = Header.intLocationId 
+				AND ItemLocation.intItemId = DetailItem.intItemId
+			LEFT JOIN dbo.tblICItemUOM ItemUOM 
+				ON ItemUOM.intItemUOMId = DetailItem.intItemUOMId
+			LEFT JOIN dbo.tblICItemUOM WeightUOM
+				ON WeightUOM.intItemUOMId = DetailItem.intWeightUOMId
+	WHERE	Header.intInventoryAdjustmentId = @intTransactionId   
+			AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_Own) <> @OWNERSHIP_TYPE_Own
+
+	-- Update currency fields to functional currency. 
+	BEGIN 
+		UPDATE	storageCost
+		SET		dblExchangeRate = 1
+				,dblForexRate = 1
+				,intCurrencyId = @intFunctionalCurrencyId
+		FROM	@StorageItemsForPost storageCost
+		WHERE	ISNULL(storageCost.intCurrencyId, @intFunctionalCurrencyId) = @intFunctionalCurrencyId 
+
+		UPDATE	storageCost
+		SET		dblCost = dbo.fnMultiply(dblCost, ISNULL(dblForexRate, 1)) 
+				,dblSalesPrice = dbo.fnMultiply(dblSalesPrice, ISNULL(dblForexRate, 1)) 
+				,dblValue = dbo.fnMultiply(dblValue, ISNULL(dblForexRate, 1)) 
+		FROM	@StorageItemsForPost storageCost
+		WHERE	storageCost.intCurrencyId <> @intFunctionalCurrencyId 
+	END
+
+	-- Call the post routine 
+	IF EXISTS (SELECT TOP 1 1 FROM @StorageItemsForPost) 
+	BEGIN 
+		EXEC @intReturnValue = dbo.uspICPostStorage
+				@StorageItemsForPost  
+				,@strBatchId  
+				,@intEntityUserSecurityId
+
+		IF @intReturnValue < 0 GOTO Post_Exit
+	END
+END
 
 Post_Exit:
