@@ -6077,6 +6077,9 @@
     <Build Include="dbo\Tables\tblARICT.sql" />
     <Build Include="dbo\Tables\tblARInvoiceDetailCondition.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetEntitySplitDetailForReport.sql" />
+    <Build Include="dbo\Views\vyuAPDeferredPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreateDeferredPayment.sql" />
+    <Build Include="dbo\Tables\tblAPDeferredPaymentInterest.sql" />
     <Build Include="dbo\Views\vyuLGStockValuationForBank.sql" />
   </ItemGroup>
   <ItemGroup>
