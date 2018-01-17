@@ -5774,6 +5774,7 @@
     <Build Include="dbo\Tables\tblTMDeliveryFillReportStaging.sql" />
     <Build Include="dbo\Views\vyuCCVendorCombo.sql" />
     <Build Include="dbo\User Defined Types\TFInvoiceDetailTransaction.sql" />
+    <Build Include="dbo\Views\vyuTFGetReportingComponentField.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
