@@ -75,7 +75,7 @@ BEGIN
 		,Ltrim(1 + (year(L.dtmExpiryDate) - 1) / 100) + (CONVERT(VARCHAR(6), L.dtmExpiryDate, 12)) strBestby
 	INTO #tblMFEDI945
 	FROM dbo.tblICInventoryShipment InvS
-	JOIN @tblMFOrderNo O ON O.intInventoryShipmentId = InvS.intInventoryShipmentId
+	JOIN @tblMFOrderNo O ON O.intInventoryShipmentId = InvS.intInventoryShipmentId and InvS.ysnPosted =1
 	JOIN dbo.tblICInventoryShipmentItem InvSI ON InvSI.intInventoryShipmentId = InvS.intInventoryShipmentId
 	JOIN dbo.tblICInventoryShipmentItemLot InvSL ON InvSL.intInventoryShipmentItemId = InvSI.intInventoryShipmentItemId
 	JOIN dbo.tblICLot L ON L.intLotId = InvSL.intLotId
