@@ -394,4 +394,8 @@ BEGIN
 				END
 		WHERE intLotId = @intLotId
 	END
+
+	DELETE
+	FROM tblMFEDI944
+	WHERE intInventoryReceiptId = @intInventoryReceiptId
 END

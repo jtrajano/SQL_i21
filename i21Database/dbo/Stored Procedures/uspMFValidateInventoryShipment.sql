@@ -37,5 +37,8 @@ BEGIN
 				,1
 				)
 	END
-END
 
+	DELETE
+	FROM tblMFEDI945
+	WHERE intInventoryShipmentId = @intInventoryShipmentId
+END
