@@ -73,6 +73,7 @@ SELECT SO.intSalesOrderId
 	 , intRecipeId				= SALESORDERDETAIL.intRecipeId	 
 	 , intOneLinePrintId		= SALESORDERDETAIL.intOneLinePrintId
 	 , dblTotalWeight			= ISNULL(SO.dblTotalWeight, 0)
+	 , strCustomerComments		= dbo.fnEMEntityMessage(CUSTOMER.intEntityId, 'Pick Ticket')
 FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
 LEFT JOIN (
 	SELECT intSalesOrderId
