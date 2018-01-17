@@ -6068,7 +6068,7 @@
     <None Include="Scripts\Post-Deployment\SM\1810_RenameCompanyToMultiCompany.sql" />
     <None Include="Scripts\Post-Deployment\EM\1740_Activate_Default_Contact.sql" />
     <Build Include="dbo\Views\vyuCCVendorCombo.sql" />
-    <Build Include="Scripts\Post-Deployment\EM\DataMigration\1740_Moving_Farm_Info_to_Location.sql" />
+    <None Include="Scripts\Post-Deployment\EM\DataMigration\1740_Moving_Farm_Info_to_Location.sql" />
     <Build Include="dbo\Tables\tblARProductRecapStagingTable.sql" />
     <Build Include="dbo\Tables\tblARCustomerActivityStagingTable.sql" />
     <Build Include="dbo\Views\vyuCTSearchAOP.sql" />
