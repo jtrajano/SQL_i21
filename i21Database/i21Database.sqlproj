@@ -6103,6 +6103,7 @@
     <Build Include="dbo\Tables\tblGLRequiredPrimaryCategory.sql" />
     <Build Include="dbo\Stored Procedures\uspRKPositionChangeAnalysis.sql" />
     <Build Include="dbo\Views\vyuCTCustomerContract.sql" />
+    <Build Include="dbo\Tables\tblCTSequenceHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
