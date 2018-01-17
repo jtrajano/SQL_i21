@@ -89,6 +89,8 @@ BEGIN TRY
 		BEGIN TRY
 			SELECT @strOrderNo = NULL
 
+			SELECT @intInventoryReceiptId = NULL
+
 			SELECT @strErrorMessage = ''
 
 			SELECT @strOrderNo = strOrderNo
@@ -190,6 +192,16 @@ BEGIN TRY
 				SELECT @strErrorMessage = @strErrorMessage + ' Qty UOM cannot be blank for the item number ' + @strItemNo + '. '
 			END
 
+			IF EXISTS (
+					SELECT *
+					FROM tblICInventoryReceipt
+					WHERE strWarehouseRefNo = @strOrderNo
+						AND ysnPosted = 1
+					)
+			BEGIN
+				SELECT @strErrorMessage = @strErrorMessage + ' Inventory Receipt is already posted for the order number ' + @strOrderNo + '. '
+			END
+
 			IF @strErrorMessage <> ''
 			BEGIN
 				RAISERROR (
@@ -205,86 +217,93 @@ BEGIN TRY
 					WHERE strWarehouseRefNo = @strOrderNo
 					)
 			BEGIN
-				INSERT INTO tblMFEDI943Archive (
-					intEDI943Id
-					,intTransactionId
-					,strCustomerId
-					,strType
-					,strDepositorOrderNumber
-					,dtmDate
-					,strShipmentId
-					,strActionCode
-					,strShipFromName
-					,strShipFromAddress1
-					,strShipFromAddress2
-					,strShipFromCity
-					,strShipFromState
-					,strShipFromZip
-					,strShipFromCode
-					,strTransportationMethod
-					,strSCAC
-					,dblTotalNumberofUnitsShipped
-					,dblTotalWeight
-					,strWeightUOM
-					,strVendorItemNumber
-					,strDescription
-					,dblQtyShipped
-					,strUOM
-					,dtmCreated
-					,strStatus
-					,strFileName
-					,strParentLotNumber
-					,intLineNumber
-					,strWarehouseCode
-					,intWarehouseCodeType
-					,ysnNotify
-					)
-				SELECT intEDI943Id
-					,intTransactionId
-					,strCustomerId
-					,strType
-					,strDepositorOrderNumber
-					,dtmDate
-					,strShipmentId
-					,strActionCode
-					,strShipFromName
-					,strShipFromAddress1
-					,strShipFromAddress2
-					,strShipFromCity
-					,strShipFromState
-					,strShipFromZip
-					,strShipFromCode
-					,strTransportationMethod
-					,strSCAC
-					,dblTotalNumberofUnitsShipped
-					,dblTotalWeight
-					,strWeightUOM
-					,strVendorItemNumber
-					,strDescription
-					,dblQtyShipped
-					,strUOM
-					,dtmCreated
-					,'IGNORED'
-					,strFileName
-					,strParentLotNumber
-					,intLineNumber
-					,strWarehouseCode
-					,intWarehouseCodeType
-					,ysnNotify
-				FROM tblMFEDI943
-				WHERE strDepositorOrderNumber = @strOrderNo
-
-				DELETE
-				FROM tblMFEDI943
-				WHERE strDepositorOrderNumber = @strOrderNo
-
-				SELECT @intRecordId = min(intRecordId)
-				FROM @tblMFOrderNo
-				WHERE intRecordId > @intRecordId
-
-				CONTINUE
+				SELECT @intInventoryReceiptId = intInventoryReceiptId
+				FROM tblICInventoryReceipt
+				WHERE strWarehouseRefNo = @strOrderNo
 			END
 
+			--IF EXISTS (
+			--		SELECT *
+			--		FROM tblICInventoryReceipt
+			--		WHERE strWarehouseRefNo = @strOrderNo
+			--		)
+			--BEGIN
+			--	INSERT INTO tblMFEDI943Archive (
+			--		intEDI943Id
+			--		,intTransactionId
+			--		,strCustomerId
+			--		,strType
+			--		,strDepositorOrderNumber
+			--		,dtmDate
+			--		,strShipmentId
+			--		,strActionCode
+			--		,strShipFromName
+			--		,strShipFromAddress1
+			--		,strShipFromAddress2
+			--		,strShipFromCity
+			--		,strShipFromState
+			--		,strShipFromZip
+			--		,strShipFromCode
+			--		,strTransportationMethod
+			--		,strSCAC
+			--		,dblTotalNumberofUnitsShipped
+			--		,dblTotalWeight
+			--		,strWeightUOM
+			--		,strVendorItemNumber
+			--		,strDescription
+			--		,dblQtyShipped
+			--		,strUOM
+			--		,dtmCreated
+			--		,strStatus
+			--		,strFileName
+			--		,strParentLotNumber
+			--		,intLineNumber
+			--		,strWarehouseCode
+			--		,intWarehouseCodeType
+			--		,ysnNotify
+			--		)
+			--	SELECT intEDI943Id
+			--		,intTransactionId
+			--		,strCustomerId
+			--		,strType
+			--		,strDepositorOrderNumber
+			--		,dtmDate
+			--		,strShipmentId
+			--		,strActionCode
+			--		,strShipFromName
+			--		,strShipFromAddress1
+			--		,strShipFromAddress2
+			--		,strShipFromCity
+			--		,strShipFromState
+			--		,strShipFromZip
+			--		,strShipFromCode
+			--		,strTransportationMethod
+			--		,strSCAC
+			--		,dblTotalNumberofUnitsShipped
+			--		,dblTotalWeight
+			--		,strWeightUOM
+			--		,strVendorItemNumber
+			--		,strDescription
+			--		,dblQtyShipped
+			--		,strUOM
+			--		,dtmCreated
+			--		,'IGNORED'
+			--		,strFileName
+			--		,strParentLotNumber
+			--		,intLineNumber
+			--		,strWarehouseCode
+			--		,intWarehouseCodeType
+			--		,ysnNotify
+			--	FROM tblMFEDI943
+			--	WHERE strDepositorOrderNumber = @strOrderNo
+			--	DELETE
+			--	FROM tblMFEDI943
+			--	WHERE strDepositorOrderNumber = @strOrderNo
+			--	SELECT @intRecordId = min(intRecordId)
+			--	FROM @tblMFOrderNo
+			--	WHERE intRecordId > @intRecordId
+			--	CONTINUE
+			--END
 			SELECT @intEntityLocationId = NULL
 
 			SELECT @intEntityLocationId = intEntityLocationId
@@ -563,7 +582,7 @@ BEGIN TRY
 				FROM tblMFEDI940
 				WHERE strDepositorOrderNumber = @strOrderNo
 
-				SELECT @intEntityLocationId = SCOPE_IDENTITY()
+				SELECT @intEntityLocationId = IDENT_CURRENT('tblEMEntityLocation') --SCOPE_IDENTITY()
 
 				--New Customer Notification
 				UPDATE tblMFEDI943
@@ -612,8 +631,8 @@ BEGIN TRY
 						FROM tblEMEntityLocation
 						WHERE intEntityLocationId = @intEntityLocationId
 							AND strAddress = @strShipToAddress1 + CASE 
-								WHEN IsNULL(@strShipToAddress1, '') <> ''
-									THEN ' ' + @strShipToAddress1
+								WHEN IsNULL(@strShipToAddress2, '') <> ''
+									THEN ' ' + @strShipToAddress2
 								END
 							AND strCity = @strShipToCity
 							AND strState = @strShipToState
@@ -626,7 +645,7 @@ BEGIN TRY
 						,strState = @strShipToState
 						,strZipCode = @strShipToZip
 					WHERE intEntityLocationId = @intEntityLocationId
-
+					--Update Customer Location Notification
 					UPDATE tblMFEDI943
 					SET ysnNotify = 1
 						,intWarehouseCodeType = 3
@@ -701,6 +720,7 @@ BEGIN TRY
 				,dblForexRate
 				,intContainerId
 				,intFreightTermId
+				,intInventoryReceiptId
 				)
 			SELECT DISTINCT strReceiptType = 'Direct'
 				,intEntityVendorId = EL.intEntityId
@@ -748,6 +768,7 @@ BEGIN TRY
 				,dblForexRate = NULL
 				,intContainerId = NULL
 				,intFreightTermId = NULL
+				,intInventoryReceiptId = @intInventoryReceiptId
 			FROM tblMFEDI943 EDI
 			JOIN tblICItem I ON I.strItemNo = EDI.strVendorItemNumber
 			JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
@@ -953,44 +974,92 @@ BEGIN TRY
 				WHERE [Extent1].[intCustomTabId] = @intCustomTabId
 					AND strFieldName = 'CreatedByEDI'
 
-				INSERT [dbo].[tblSMTransaction] (
-					[intScreenId]
-					,[strTransactionNo]
-					,[intEntityId]
-					,[intRecordId]
-					,[intConcurrencyId]
-					)
-				SELECT @intScreenId
-					,@strReceiptNumber
-					,1
-					,@intInventoryReceiptId
-					,1
+				IF NOT EXISTS (
+						SELECT *
+						FROM [tblSMTransaction]
+						WHERE [intScreenId] = @intScreenId
+							AND [strTransactionNo] = @strReceiptNumber
+							AND [intRecordId] = @intInventoryReceiptId
+						)
+				BEGIN
+					INSERT [dbo].[tblSMTransaction] (
+						[intScreenId]
+						,[strTransactionNo]
+						,[intEntityId]
+						,[intRecordId]
+						,[intConcurrencyId]
+						)
+					SELECT @intScreenId
+						,@strReceiptNumber
+						,1
+						,@intInventoryReceiptId
+						,1
 
-				SELECT @intTransactionId = scope_identity()
+					SELECT @intTransactionId = scope_identity()
+				END
+				ELSE
+				BEGIN
+					SELECT @intTransactionId = intTransactionId
+					FROM [tblSMTransaction]
+					WHERE [intScreenId] = @intScreenId
+						AND [strTransactionNo] = @strReceiptNumber
+						AND [intRecordId] = @intInventoryReceiptId
+				END
 
-				INSERT [dbo].[tblSMTabRow] (
-					[intCustomTabId]
-					,[intTransactionId]
-					,[intSort]
-					,[intConcurrencyId]
-					)
-				SELECT @intCustomTabId
-					,@intTransactionId
-					,0
-					,1
+				IF NOT EXISTS (
+						SELECT *
+						FROM tblSMTabRow
+						WHERE intCustomTabId = @intCustomTabId
+							AND [intTransactionId] = @intTransactionId
+						)
+				BEGIN
+					INSERT [dbo].[tblSMTabRow] (
+						[intCustomTabId]
+						,[intTransactionId]
+						,[intSort]
+						,[intConcurrencyId]
+						)
+					SELECT @intCustomTabId
+						,@intTransactionId
+						,0
+						,1
 
-				SELECT @intTabRowId = scope_identity()
+					SELECT @intTabRowId = scope_identity()
+				END
+				ELSE
+				BEGIN
+					SELECT @intTabRowId = intTabRowId
+					FROM tblSMTabRow
+					WHERE intCustomTabId = @intCustomTabId
+						AND [intTransactionId] = @intTransactionId
+				END
 
-				INSERT [dbo].[tblSMFieldValue] (
-					[intTabRowId]
-					,[intCustomTabDetailId]
-					,[strValue]
-					,[intConcurrencyId]
-					)
-				SELECT @intTabRowId
-					,@intCustomTabDetailId
-					,1
-					,1
+				IF NOT EXISTS (
+						SELECT *
+						FROM [tblSMFieldValue]
+						WHERE [intTabRowId] = @intTabRowId
+							AND [intCustomTabDetailId] = @intCustomTabDetailId
+						)
+				BEGIN
+					INSERT [dbo].[tblSMFieldValue] (
+						[intTabRowId]
+						,[intCustomTabDetailId]
+						,[strValue]
+						,[intConcurrencyId]
+						)
+					SELECT @intTabRowId
+						,@intCustomTabDetailId
+						,1
+						,1
+				END
+				ELSE
+				BEGIN
+					UPDATE [tblSMFieldValue]
+					SET [strValue] = 1
+						,[intConcurrencyId] = [intConcurrencyId] + 1
+					WHERE [intTabRowId] = @intTabRowId
+						AND [intCustomTabDetailId] = @intCustomTabDetailId
+				END
 			END
 
 			INSERT INTO tblMFEDI943Archive (
