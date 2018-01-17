@@ -64,6 +64,7 @@ DECLARE	 @Price				NUMERIC(18,6)
 		,@Pricing			NVARCHAR(250)
 		,@ContractPrice		NUMERIC(18,6)
 		,@ContractPricing	NVARCHAR(250)
+		,@ContractMaxPrice	NUMERIC(18,6)
 		,@Deviation			NUMERIC(18,6)
 		,@TermDiscount		NUMERIC(18,6)
 		,@PricingType		NVARCHAR(50)
@@ -172,9 +173,10 @@ DECLARE	 @Price				NUMERIC(18,6)
 											AND P.intItemLocationId = @ItemLocationId
 										)
 
-				IF @Price > @ContractPrice
+				IF @Price <= @ContractPrice
 				BEGIN
 					SET @Pricing = @ContractPricing + '-Max Price'
+					SET @ContractMaxPrice = @Price
 				END
 				ELSE
 				BEGIN
@@ -184,7 +186,7 @@ DECLARE	 @Price				NUMERIC(18,6)
 
 			END
 
-			IF ISNULL(@ContractPricingLevelId,0) <> 0 AND (ISNULL(@IsMaxPrice,0) = 0 OR @Pricing <> @ContractPricing + '-Max Price')
+			IF ISNULL(@ContractPricingLevelId,0) <> 0 --AND (ISNULL(@IsMaxPrice,0) = 0 OR @Pricing <> @ContractPricing + '-Max Price')
 			BEGIN 
 				SELECT TOP 1
 					 @Price				= dblPrice
@@ -207,9 +209,14 @@ DECLARE	 @Price				NUMERIC(18,6)
 						,@CurrencyId
 					);
 
-				IF 'Inventory - Pricing Level' = @Pricing AND @Price > @ContractPrice
+				IF 'Inventory - Pricing Level' = @Pricing AND @Price <= @ContractPrice
 				BEGIN
 					SET @Pricing = @ContractPricing + '-Pricing Level'
+				END
+				ELSE IF ISNULL(@IsMaxPrice,0) = 1 AND @ContractMaxPrice <= @ContractPrice
+				BEGIN 
+					SET @Pricing = @ContractPricing + '-Max Price'
+					SET @Price = @ContractMaxPrice
 				END
 				ELSE
 				BEGIN
