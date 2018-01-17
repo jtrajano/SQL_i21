@@ -6006,7 +6006,7 @@
     <Build Include="dbo\Views\vyuARPOSEndOfDayReport.sql" />
     <Build Include="dbo\Views\vyuARPOSGLSummary.sql" />
     <Build Include="dbo\Views\vyuCCVendorCombo.sql" />
-    <Build Include="Scripts\Post-Deployment\EM\DataMigration\1740_Moving_Farm_Info_to_Location.sql" />
+    <None Include="Scripts\Post-Deployment\EM\DataMigration\1740_Moving_Farm_Info_to_Location.sql" />
     <Build Include="dbo\Views\vyuCFExportAccount.sql" />
     <Build Include="dbo\Tables\tblCFCSULog.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateOR7351302.sql" />
