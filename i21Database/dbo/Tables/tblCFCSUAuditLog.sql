@@ -7,10 +7,12 @@
     [strFieldName]     NVARCHAR (200)  NULL,
     [strOldValue]      NVARCHAR (MAX)  NULL,
     [strNewValue]      NVARCHAR (MAX)  NULL,
-    [dtmUpdateDate]    NVARCHAR (MAX)  NULL,
+    [dtmUpdateDate]    DATETIME        NULL,
     [strUserName]      NVARCHAR (100)  NULL,
     [strRecord]        NVARCHAR (MAX)  NULL,
     [intConcurrencyId] INT             CONSTRAINT [DF_tblCFCSUAuditLog_intConcurrencyId] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblCFCSUAuditLog] PRIMARY KEY CLUSTERED ([intId] ASC)
 );
+
+
 

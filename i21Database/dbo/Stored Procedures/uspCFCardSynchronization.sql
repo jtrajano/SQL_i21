@@ -19,6 +19,7 @@ CREATE PROCEDURE [dbo].[uspCFCardSynchronization]
 	,@dtmExpirationDate				DATETIME		 =	 NULL
 	,@strSessionId					NVARCHAR(MAX)
 	,@strImportDate					NVARCHAR(MAX)
+	,@strNetworkParticipantId		NVARCHAR(MAX)	 =	 ''
 	--,@intUserID
 
 
@@ -28,7 +29,10 @@ BEGIN
 	DECLARE @intAccountId			INT
 	DECLARE @intSycnType			INT
 	DECLARE @strAction				NVARCHAR(MAX)	 =	 ''
+	DECLARE @dtmImportDate			DATETIME
 
+
+	SET @dtmImportDate = Convert(varchar(30),@strImportDate,102)
 
 	--VALIDATE ACCOUNT--
 	IF(ISNULL(@strAccountNumber,'') != '')
@@ -37,8 +41,19 @@ BEGIN
 	END
 	ELSE
 	BEGIN
-		-- LOGS HERE -- 
-		print 'null account number'
+		print 'Invalid account number'
+		INSERT INTO tblCFCSULog
+		(
+			 strAccountNumber
+			,strMessage
+			,strRecordId
+			,strUpdateDate
+		)
+		SELECT 
+			 @strAccountNumber
+			,'Invalid account number' as strMessage
+			,''
+			,@dtmImportDate
 		RETURN
 	END
 	
@@ -51,7 +66,39 @@ BEGIN
 
 	IF(ISNULL(@intAccountId,0) = 0)
 	BEGIN
-		print 'invalid account number'
+		print 'Invalid account number'
+		INSERT INTO tblCFCSULog
+		(
+			 strAccountNumber
+			,strMessage
+			,strRecordId
+			,strUpdateDate
+		)
+		SELECT 
+			 @strAccountNumber
+			,'Invalid account number' as strMessage
+			,''
+			,@dtmImportDate
+		RETURN
+	END
+
+	
+	IF (ISNULL(@strNetworkParticipantId,'') != ISNULL(@strParticipantNumber,'') )
+	BEGIN
+		print 'Participant id not match'
+		INSERT INTO tblCFCSULog
+		(
+			 strAccountNumber
+			,strMessage
+			,strRecordId
+			,strUpdateDate
+		)
+		SELECT 
+			 @strAccountNumber
+			,'Participant id not match' as strMessage
+			,''
+			,@dtmImportDate
+		
 		RETURN
 	END
 	
@@ -74,13 +121,41 @@ BEGIN
 		BEGIN
 			SET @intSycnType = 0
 			print 'invalid card type'
+
+			INSERT INTO tblCFCSULog
+			(
+				 strAccountNumber
+				,strMessage
+				,strRecordId
+				,strUpdateDate
+			)
+			SELECT 
+				 @strAccountNumber
+				,'Invalid card type' as strMessage
+				,''
+				,@dtmImportDate
 			RETURN
+
 		END
 	END
 	ELSE
 	BEGIN
-		print 'null card type'
+		print 'invalid card type'
+
+		INSERT INTO tblCFCSULog
+			(
+				 strAccountNumber
+				,strMessage
+				,strRecordId
+				,strUpdateDate
+			)
+			SELECT 
+				 @strAccountNumber
+				,'Invalid card type' as strMessage
+				,''
+				,@dtmImportDate
 		RETURN
+
 	END
 	--VALIDATE TYPE--
 
@@ -250,7 +325,7 @@ BEGIN
 				 ,strFieldName
 				 ,strOldValue
 				 ,strNewValue
-				 ,@strImportDate
+				 ,@dtmImportDate
 				 ,strUserName	
 				 ,strRecord = CASE
 							WHEN strTableName = 'tblCFCard' 
@@ -407,7 +482,7 @@ BEGIN
 				 ,strFieldName
 				 ,strOldValue
 				 ,strNewValue
-				 ,@strImportDate
+				 ,@dtmImportDate
 				 ,strUserName	
 				 ,strRecord = CASE
 							WHEN strTableName = 'tblCFCard' 
@@ -419,6 +494,7 @@ BEGIN
 			tblCFTempCSUAuditLog
 
 
+
 			DELETE FROM tblCFTempCSUAuditLog
 			DELETE FROM tblCFTempCSUCard
 
@@ -428,7 +504,7 @@ BEGIN
 
 		BEGIN CATCH
 
-		print ERROR_MESSAGE()
+		
 
 		ROLLBACK TRANSACTION
 		END CATCH
@@ -536,7 +612,7 @@ BEGIN
 				 ,strFieldName
 				 ,strOldValue
 				 ,strNewValue
-				 ,@strImportDate
+				 ,@dtmImportDate
 				 ,strUserName	
 				 ,strRecord = CASE
 							WHEN strTableName = 'tblCFCard' 
@@ -659,7 +735,7 @@ BEGIN
 			,strFieldName
 			,strOldValue
 			,strNewValue
-			,@strImportDate
+			,@dtmImportDate
 			,strUserName	
 			,strRecord = CASE
 							WHEN strTableName = 'tblCFCard' 
@@ -680,7 +756,17 @@ BEGIN
 
 	BEGIN CATCH
 
-	print ERROR_MESSAGE()
+	INSERT INTO tblCFCSULog(
+		 strAccountNumber
+		,strMessage
+		,strRecordId
+		,strUpdateDate
+	)
+	SELECT 
+		@strAccountNumber
+		,ERROR_MESSAGE()
+		,''
+		,@dtmImportDate
 
 	ROLLBACK TRANSACTION
 	END CATCH
