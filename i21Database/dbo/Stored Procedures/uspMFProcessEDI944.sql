@@ -41,13 +41,14 @@ BEGIN
 			FROM tblMFEDI943Archive EDI943
 			WHERE EDI943.intInventoryReceiptId = IR.intInventoryReceiptId
 			) AS dtmShippedDate
-		,SUm(dblReceived) OVER (PARTITION BY IR.intInventoryReceiptId) dblTotalReceivedQty
+		,SUM(IRI.dblOpenReceive) OVER (PARTITION BY IR.intInventoryReceiptId) dblTotalReceivedQty
 		,strItemNo
 		,strDescription
-		,dblReceived
+		,dblOpenReceive
 		,I.strExternalGroup
 	FROM dbo.tblICInventoryReceipt IR
 	JOIN dbo.tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
+		AND IR.ysnPosted = 1
 	JOIN tblICItem I ON I.intItemId = IRI.intItemId
 		AND EXISTS (
 			SELECT *
