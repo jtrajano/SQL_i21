@@ -69,6 +69,9 @@ BEGIN TRY
 
 		-- DELETE UNNECESSARY MENUS FOR DIFFERENT KIND OF ROLES -> Original statement move on the other stored procedure
 		EXEC uspSMFixUserRoleMenus @UserRoleID
+
+		-- HIDE UNAVAILABLE MENUS
+		UPDATE t SET ysnVisible = 0 FROM tblSMUserRoleMenu t WHERE ysnVisible = 1 AND ysnAvailable = 0
 		
 		UPDATE tblSMUserRoleMenu
 		SET intParentMenuId = tblPatch.intRoleParentID
