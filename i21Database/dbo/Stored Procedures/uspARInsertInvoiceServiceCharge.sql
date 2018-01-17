@@ -116,7 +116,7 @@ AS
 				,ISNULL(@dtmAsOfDate, @dateNow)
 				,[intShipViaId]
 				,NULL --[strPONumber]
-				,[intTermsId]
+				,ISNULL(@intCompTermsId, intTermsId)
 				,@dblInvoiceTotal
 				,0
 				,0
