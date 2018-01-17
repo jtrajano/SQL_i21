@@ -229,7 +229,7 @@ INSERT INTO tblARCustomerAgingStagingTable (
 )
 EXEC dbo.[uspARCustomerAgingAsOfDateReport] @strCompanyLocation = @strLocationNameLocal
 										  , @strCustomerName = @strCustomerNameLocal
- 
+
 SET @query = CAST('' AS NVARCHAR(MAX)) + '
 SELECT * 
 FROM (
@@ -612,3 +612,7 @@ FROM (
 LEFT JOIN tblARCustomerAgingStagingTable AS AGINGREPORT
 	ON MAINREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
 INNER JOIN #CUSTOMERS CUSTOMER ON MAINREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
+
+
+UPDATE tblARCustomerStatementStagingTable
+	SET strComment = dbo.fnEMEntityMessage(intEntityCustomerId, 'Statement')

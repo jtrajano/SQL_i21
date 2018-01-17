@@ -627,3 +627,7 @@ FROM (
 LEFT JOIN tblARCustomerAgingStagingTable AS AGINGREPORT 
 	ON MAINREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
 INNER JOIN #CUSTOMERS CUSTOMER ON MAINREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
+
+
+UPDATE tblARCustomerStatementStagingTable
+	SET strComment = dbo.fnEMEntityMessage(intEntityCustomerId, 'Statement')

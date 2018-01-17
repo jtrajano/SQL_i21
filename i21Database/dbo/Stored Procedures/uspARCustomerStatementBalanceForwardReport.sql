@@ -281,8 +281,8 @@ EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo = @dtmDateToLocal
 INSERT INTO @temp_aging_table
 SELECT strCustomerName
 		, strCustomerNumber
-        , intEntityCustomerId
 		, strCustomerInfo
+        , intEntityCustomerId
         , dblCreditLimit
         , dblTotalAR
         , dblFuture
@@ -794,8 +794,8 @@ IF @ysnPrintOnlyPastDueLocal = 1
 
 IF @ysnPrintZeroBalanceLocal = 0
     BEGIN
-        DELETE FROM @temp_statement_table WHERE ((((ABS(dblBalance) * 10000) - CONVERT(INT, (ABS(dblBalance) * 10000))) <> 0) OR ISNULL(dblBalance, 0) = 0) AND ISNULL(strTransactionType, '') <> 'Balance Forward'
-		DELETE FROM @temp_aging_table WHERE (((ABS(dblTotalAR) * 10000) - CONVERT(INT, (ABS(dblTotalAR) * 10000))) <> 0) OR ISNULL(dblTotalAR, 0) = 0
+        DELETE FROM @temp_statement_table WHERE ((((ABS(dblBalance) * 10000) - CONVERT(FLOAT, (ABS(dblBalance) * 10000))) <> 0) OR ISNULL(dblBalance, 0) = 0) AND ISNULL(strTransactionType, '') <> 'Balance Forward'
+		DELETE FROM @temp_aging_table WHERE (((ABS(dblTotalAR) * 10000) - CONVERT(FLOAT, (ABS(dblTotalAR) * 10000))) <> 0) OR ISNULL(dblTotalAR, 0) = 0
     END
 
 IF @ysnPrintCreditBalanceLocal = 0
@@ -1004,3 +1004,7 @@ LEFT JOIN @temp_aging_table AS AGINGREPORT
 	ON MAINREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
 INNER JOIN #CUSTOMERS CUSTOMER ON MAINREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
 ORDER BY MAINREPORT.dtmDate
+
+
+UPDATE tblARCustomerStatementStagingTable
+	SET strComment = dbo.fnEMEntityMessage(intEntityCustomerId, 'Statement')
