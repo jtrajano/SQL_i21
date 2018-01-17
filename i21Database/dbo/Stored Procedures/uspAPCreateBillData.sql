@@ -85,7 +85,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 
 	IF @type = 3
 	BEGIN
-		SELECT TOP 1 @intProducerId = intProducerId FROM @VoucherDetailReceipt rtnItem 
+		SELECT TOP 1 @intProducerId = intProducerId FROM @voucherDetailReceipt rtnItem 
 		INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptItemId =  rtnItem.intInventoryReceiptItemId
 		INNER JOIN tblCTContractDetail ctd
 						ON ri.intLineNo = ctd.intContractDetailId
