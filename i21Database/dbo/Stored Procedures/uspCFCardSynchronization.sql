@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspCFCardSynchronization]
+﻿CREATE PROCEDURE [dbo].[uspCFCardSynchronization]
 	
 	---------------------------------------------------------
 	--				INTEGRATION TO OTHER TABLE			   --
@@ -47,7 +46,7 @@ BEGIN
 			 strAccountNumber
 			,strMessage
 			,strRecordId
-			,strUpdateDate
+			,dtmUpdateDate
 		)
 		SELECT 
 			 @strAccountNumber
@@ -72,7 +71,7 @@ BEGIN
 			 strAccountNumber
 			,strMessage
 			,strRecordId
-			,strUpdateDate
+			,dtmUpdateDate
 		)
 		SELECT 
 			 @strAccountNumber
@@ -91,7 +90,7 @@ BEGIN
 			 strAccountNumber
 			,strMessage
 			,strRecordId
-			,strUpdateDate
+			,dtmUpdateDate
 		)
 		SELECT 
 			 @strAccountNumber
@@ -102,6 +101,9 @@ BEGIN
 		RETURN
 	END
 	
+
+
+
 
 	--VALIDATE ACCOUNT--
 
@@ -127,7 +129,7 @@ BEGIN
 				 strAccountNumber
 				,strMessage
 				,strRecordId
-				,strUpdateDate
+				,dtmUpdateDate
 			)
 			SELECT 
 				 @strAccountNumber
@@ -147,7 +149,7 @@ BEGIN
 				 strAccountNumber
 				,strMessage
 				,strRecordId
-				,strUpdateDate
+				,dtmUpdateDate
 			)
 			SELECT 
 				 @strAccountNumber
@@ -760,7 +762,7 @@ BEGIN
 		 strAccountNumber
 		,strMessage
 		,strRecordId
-		,strUpdateDate
+		,dtmUpdateDate
 	)
 	SELECT 
 		@strAccountNumber
@@ -773,18 +775,4 @@ BEGIN
 
 	END
 
-
-
-
-
-
-
-
-
-
-
-
-
-	
-		
 END
