@@ -23,7 +23,7 @@
 			,O.strSubmitted
 			,O.intProgramId
 			,O.ysnExported
-			,M.strLocationName
+			,SM.strLocationName
 			,J.intVendorSetupId
 			,A.intInvoiceId
 			,strVendorName = M.strName
@@ -55,7 +55,7 @@
 		INNER JOIN tblVRCustomerXref L
 			ON J.intVendorSetupId = L.intVendorSetupId
 				AND A.intEntityCustomerId = L.intEntityId
-		INNER JOIN tblSMCompanyLocation M
-			ON A.intCompanyLocationId = M.intCompanyLocationId
+		INNER JOIN tblSMCompanyLocation SM
+			ON A.intCompanyLocationId = SM.intCompanyLocationId
 	GO
 
