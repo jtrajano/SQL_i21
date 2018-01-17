@@ -13,7 +13,8 @@ BEGIN TRY
 		,@intTransactionId INT
 		,@intScreenId INT
 		,@intCustomTabId INT
-		,@intCustomTabDetailId INT
+		,@intCustomTabDetailId1 INT
+		,@intCustomTabDetailId2 INT
 		,@strShipmentNumber NVARCHAR(50)
 		,@strPONumber NVARCHAR(50)
 		,@intEntityLocationId INT
@@ -27,6 +28,16 @@ BEGIN TRY
 		,@strShipToCity NVARCHAR(MAX)
 		,@strShipToState NVARCHAR(MAX)
 		,@strShipToZip NVARCHAR(MAX)
+		,@dtmShipmentDate datetime
+		,@dtmDeliveryRequestedDate DATETIME
+		,@intFunctionalCurrencyId INT
+		,@intDefaultForexRateTypeId INT
+
+	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
+
+	SELECT TOP 1 @intDefaultForexRateTypeId = intInventoryRateTypeId
+	FROM tblSMMultiCurrency
+
 	DECLARE @ShipmentStagingTable ShipmentStagingTable
 	DECLARE @OtherCharges ShipmentChargeStagingTable
 	DECLARE @tblMFOrderNo TABLE (
@@ -59,6 +70,24 @@ BEGIN TRY
 		SELECT TOP 1 @intUserId = intEntityUserSecurityId
 		FROM tblSMUserSecurity
 
+	SELECT @intScreenId = intScreenId
+	FROM tblSMScreen
+	WHERE strNamespace = 'Inventory.view.InventoryShipment'
+
+	SELECT @intCustomTabId = intCustomTabId
+	FROM tblSMCustomTab
+	WHERE intScreenId = @intScreenId
+
+	SELECT @intCustomTabDetailId1 = Extent1.intCustomTabDetailId
+	FROM dbo.tblSMCustomTabDetail AS Extent1
+	WHERE Extent1.intCustomTabId = @intCustomTabId
+		AND strFieldName = 'CustomerPONo'
+
+	SELECT @intCustomTabDetailId2 = Extent1.intCustomTabDetailId
+	FROM dbo.tblSMCustomTabDetail AS Extent1
+	WHERE Extent1.intCustomTabId = @intCustomTabId
+		AND strFieldName = 'CreatedByEDI'
+
 	SELECT @intTransactionCount = @@TRANCOUNT
 
 	IF @intTransactionCount = 0
@@ -73,6 +102,9 @@ BEGIN TRY
 			SELECT @strOrderNo = NULL
 				,@strCustomerCode = NULL
 				,@strShipToName = NULL
+				,@intInventoryShipmentId = NULL
+				,@dtmShipmentDate=NULL
+				,@dtmDeliveryRequestedDate = NULL
 
 			SELECT @strErrorMessage = ''
 
@@ -82,6 +114,8 @@ BEGIN TRY
 
 			SELECT @strCustomerCode = strCustomerCode
 				,@strShipToName = strShipToName
+				,@dtmShipmentDate=strShipmentDate
+				,@dtmDeliveryRequestedDate = strDeliveryRequestedDate
 			FROM tblMFEDI940 EDI940
 			WHERE strDepositorOrderNumber = @strOrderNo
 
@@ -181,6 +215,16 @@ BEGIN TRY
 					SELECT @strErrorMessage = @strErrorMessage + 'Qty UOM cannot be blank for the item number ' + @strItemNo + '.'
 			END
 
+			IF EXISTS (
+					SELECT *
+					FROM tblICInventoryShipment
+					WHERE strReferenceNumber = @strOrderNo
+						AND ysnPosted = 1
+					)
+			BEGIN
+				SELECT @strErrorMessage = @strErrorMessage + ' Inventory Shipment is already posted for the order number ' + @strOrderNo + '. '
+			END
+
 			IF @strErrorMessage <> ''
 			BEGIN
 				RAISERROR (
@@ -196,106 +240,118 @@ BEGIN TRY
 					WHERE strReferenceNumber = @strOrderNo
 					)
 			BEGIN
-				INSERT INTO tblMFEDI940Archive (
-					intEDI940Id
-					,intTransactionId
-					,strCustomerId
-					,strPurpose
-					,strDepositorOrderNumber
-					,strPONumber
-					,strShipToName
-					,strShipToAddress1
-					,strShipToAddress2
-					,strShipToCity
-					,strShipToState
-					,strShipToZip
-					,strShipToCode
-					,strBuyerIdentification
-					,strPODate
-					,strDeliveryRequestedDate
-					,intLineNumber
-					,strCustomerItemNumber
-					,strUPCCaseCode
-					,strDescription
-					,dblQtyOrdered
-					,strUOM
-					,dblInnerPacksPerOuterPack
-					,dblTotalQtyOrdered
-					,dtmCreated
-					,strStatus
-					,strFileName
-					,strShipmentDate
-					,strTransportationMethod
-					,strSCAC
-					,strRouting
-					,strShipmentMethodOfPayment
-					,strCustomerCode
-					,intCustomerCodeType
-					,ysnNotify
-					)
-				SELECT intEDI940Id
-					,intTransactionId
-					,strCustomerId
-					,strPurpose
-					,strDepositorOrderNumber
-					,strPONumber
-					,strShipToName
-					,strShipToAddress1
-					,strShipToAddress2
-					,strShipToCity
-					,strShipToState
-					,strShipToZip
-					,strShipToCode
-					,strBuyerIdentification
-					,strPODate
-					,strDeliveryRequestedDate
-					,intLineNumber
-					,strCustomerItemNumber
-					,strUPCCaseCode
-					,strDescription
-					,dblQtyOrdered
-					,strUOM
-					,dblInnerPacksPerOuterPack
-					,dblTotalQtyOrdered
-					,dtmCreated
-					,'IGNORED'
-					,strFileName
-					,strShipmentDate
-					,strTransportationMethod
-					,strSCAC
-					,strRouting
-					,strShipmentMethodOfPayment
-					,strCustomerCode
-					,intCustomerCodeType
-					,ysnNotify
-				FROM tblMFEDI940
-				WHERE strDepositorOrderNumber = @strOrderNo
-
-				DELETE
-				FROM tblMFEDI940
-				WHERE strDepositorOrderNumber = @strOrderNo
-
-				SELECT @intRecordId = min(intRecordId)
-				FROM @tblMFOrderNo
-				WHERE intRecordId > @intRecordId
-
-				CONTINUE
+				SELECT @intInventoryShipmentId = intInventoryShipmentId
+				FROM tblICInventoryShipment
+				WHERE strReferenceNumber = @strOrderNo
 			END
 
+			--IF EXISTS (
+			--		SELECT *
+			--		FROM tblICInventoryShipment
+			--		WHERE strReferenceNumber = @strOrderNo
+			--		)
+			--BEGIN
+			--	INSERT INTO tblMFEDI940Archive (
+			--		intEDI940Id
+			--		,intTransactionId
+			--		,strCustomerId
+			--		,strPurpose
+			--		,strDepositorOrderNumber
+			--		,strPONumber
+			--		,strShipToName
+			--		,strShipToAddress1
+			--		,strShipToAddress2
+			--		,strShipToCity
+			--		,strShipToState
+			--		,strShipToZip
+			--		,strShipToCode
+			--		,strBuyerIdentification
+			--		,strPODate
+			--		,strDeliveryRequestedDate
+			--		,intLineNumber
+			--		,strCustomerItemNumber
+			--		,strUPCCaseCode
+			--		,strDescription
+			--		,dblQtyOrdered
+			--		,strUOM
+			--		,dblInnerPacksPerOuterPack
+			--		,dblTotalQtyOrdered
+			--		,dtmCreated
+			--		,strStatus
+			--		,strFileName
+			--		,strShipmentDate
+			--		,strTransportationMethod
+			--		,strSCAC
+			--		,strRouting
+			--		,strShipmentMethodOfPayment
+			--		,strCustomerCode
+			--		,intCustomerCodeType
+			--		,ysnNotify
+			--		)
+			--	SELECT intEDI940Id
+			--		,intTransactionId
+			--		,strCustomerId
+			--		,strPurpose
+			--		,strDepositorOrderNumber
+			--		,strPONumber
+			--		,strShipToName
+			--		,strShipToAddress1
+			--		,strShipToAddress2
+			--		,strShipToCity
+			--		,strShipToState
+			--		,strShipToZip
+			--		,strShipToCode
+			--		,strBuyerIdentification
+			--		,strPODate
+			--		,strDeliveryRequestedDate
+			--		,intLineNumber
+			--		,strCustomerItemNumber
+			--		,strUPCCaseCode
+			--		,strDescription
+			--		,dblQtyOrdered
+			--		,strUOM
+			--		,dblInnerPacksPerOuterPack
+			--		,dblTotalQtyOrdered
+			--		,dtmCreated
+			--		,'IGNORED'
+			--		,strFileName
+			--		,strShipmentDate
+			--		,strTransportationMethod
+			--		,strSCAC
+			--		,strRouting
+			--		,strShipmentMethodOfPayment
+			--		,strCustomerCode
+			--		,intCustomerCodeType
+			--		,ysnNotify
+			--	FROM tblMFEDI940
+			--	WHERE strDepositorOrderNumber = @strOrderNo
+			--	DELETE
+			--	FROM tblMFEDI940
+			--	WHERE strDepositorOrderNumber = @strOrderNo
+			--	SELECT @intRecordId = min(intRecordId)
+			--	FROM @tblMFOrderNo
+			--	WHERE intRecordId > @intRecordId
+			--	CONTINUE
+			--END
 			SELECT @intEntityLocationId = NULL
 
+			SELECT @intEntityId = NULL
+
 			SELECT @intEntityLocationId = intEntityLocationId
+				,@intEntityId = intEntityId
 			FROM tblEMEntityLocation
 			WHERE strCheckPayeeName = @strCustomerCode
 
-			IF @intEntityLocationId IS NULL
+			IF @intEntityId IS NULL
 			BEGIN
-				SELECT @intEntityId = NULL
-
 				SELECT @intEntityId = intEntityId
 				FROM tblEMEntity
 				WHERE strName = @strShipToName
+					AND strEntityNo <> ''
+			END
 
+			IF @intEntityLocationId IS NULL
+			BEGIN
 				IF @intEntityId IS NULL
 				BEGIN
 					SELECT @strEntityNo = IsNULL(Max(strEntityNo), 0) + 1
@@ -562,7 +618,7 @@ BEGIN TRY
 
 				SELECT @intEntityLocationId = SCOPE_IDENTITY()
 
-				--New Customer Notification
+				--New Customer Location Notification
 				UPDATE tblMFEDI940
 				SET ysnNotify = 1
 					,intCustomerCodeType = CASE 
@@ -636,7 +692,7 @@ BEGIN TRY
 						WHERE intEntityLocationId = @intEntityLocationId
 							AND strAddress = @strShipToAddress1 + CASE 
 								WHEN IsNULL(@strShipToAddress1, '') <> ''
-									THEN ' ' + @strShipToAddress1
+									THEN ' ' + @strShipToAddress2
 								END
 							AND strCity = @strShipToCity
 							AND strState = @strShipToState
@@ -649,99 +705,258 @@ BEGIN TRY
 						,strState = @strShipToState
 						,strZipCode = @strShipToZip
 					WHERE intEntityLocationId = @intEntityLocationId
-
+					--Update Customer Location Notification
 					UPDATE tblMFEDI940
 					SET ysnNotify = 1
-						,intCustomerCodeType = 4
+						,intCustomerCodeType = 3
 					WHERE strDepositorOrderNumber = @strOrderNo
 				END
 			END
 
-			IF NOT EXISTS (
-					SELECT 1
-					FROM tempdb..sysobjects
-					WHERE id = OBJECT_ID('tempdb..#tmpAddItemShipmentResult')
-					)
+			IF @intInventoryShipmentId IS NULL
 			BEGIN
-				CREATE TABLE #tmpAddItemShipmentResult (
-					intSourceId INT
-					,intInventoryShipmentId INT
+				IF NOT EXISTS (
+						SELECT 1
+						FROM tempdb..sysobjects
+						WHERE id = OBJECT_ID('tempdb..#tmpAddItemShipmentResult')
+						)
+				BEGIN
+					CREATE TABLE #tmpAddItemShipmentResult (
+						intSourceId INT
+						,intInventoryShipmentId INT
+						)
+				END
+
+				DELETE
+				FROM @ShipmentStagingTable
+
+				INSERT INTO @ShipmentStagingTable (
+					intOrderType
+					,intSourceType
+					,intEntityCustomerId
+					,dtmShipDate
+					,intShipFromLocationId
+					,intShipToLocationId
+					,intFreightTermId
+					,strSourceScreenName
+					,strBOLNumber
+					,strReferenceNumber
+					,intItemId
+					,intOwnershipType
+					,dblQuantity
+					,intItemUOMId
+					,intOrderId
+					,intLineNo
+					,intWeightUOMId
+					,dblUnitPrice
+					,intCurrencyId
+					,intForexRateTypeId
+					,dblForexRate
+					,dtmRequestedArrivalDate
 					)
+				SELECT DISTINCT intOrderType = 4
+					,intSourceType = 0
+					,intEntityCustomerId = EL.intEntityId
+					,dtmShipDate = EDI.strShipmentDate
+					,intShipFromLocationId = IL.intLocationId
+					,intShipToLocationId = EL.intEntityLocationId
+					,intFreightTermId = (
+						SELECT TOP 1 intFreightTermId
+						FROM tblSMFreightTerms
+						WHERE strFreightTerm = 'Deliver'
+						)
+					,strSourceScreenName = 'EDI940'
+					,strBOLNumber = ''
+					,strReferenceNumber = EDI.strDepositorOrderNumber
+					,intItemId = I.intItemId
+					,intOwnershipType = 1
+					,dblQuantity = EDI.dblQtyOrdered
+					,intItemUOMId = IU.intItemUOMId
+					,intOrderId = NULL
+					,intLineNo = EDI.intLineNumber
+					,intWeightUOMId = NULL
+					,dblUnitPrice = 0
+					,intCurrencyId = NULL
+					,intForexRateTypeId = NULL
+					,dblForexRate = NULL
+					,dtmRequestedArrivalDate = EDI.strShipmentDate
+				FROM tblMFEDI940 EDI
+				JOIN tblICItem I ON I.strItemNo = EDI.strCustomerItemNumber
+				JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
+					AND IL.intLocationId IS NOT NULL
+				JOIN tblEMEntityLocation EL ON 1 = 1
+					AND EL.intEntityLocationId = @intEntityLocationId
+				LEFT JOIN dbo.tblICUnitMeasure UM ON UM.strUnitMeasure = I.strExternalGroup
+				LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
+					AND UM.intUnitMeasureId = IU.intUnitMeasureId
+				WHERE EDI.strDepositorOrderNumber = @strOrderNo
+
+				EXEC dbo.uspICAddItemShipment @Entries = @ShipmentStagingTable
+					,@Charges = @OtherCharges
+					,@intUserId = @intUserId;
+
+				SELECT TOP 1 @intInventoryShipmentId = intInventoryShipmentId
+				FROM #tmpAddItemShipmentResult
+
+				UPDATE tblICInventoryShipment
+				SET dtmRequestedArrivalDate = @dtmDeliveryRequestedDate
+				WHERE intInventoryShipmentId = @intInventoryShipmentId
+
+				DELETE
+				FROM #tmpAddItemShipmentResult
 			END
+			ELSE
+			BEGIN
+				IF NOT EXISTS (
+						SELECT *
+						FROM tblICInventoryShipment
+						WHERE intInventoryShipmentId = @intInventoryShipmentId
+							AND intEntityCustomerId = @intEntityId
+							AND intShipToLocationId = @intEntityLocationId
+						)
+				BEGIN
+					UPDATE tblICInventoryShipment
+					SET intEntityCustomerId = @intEntityId
+						,intShipToLocationId = @intEntityLocationId
+						,dtmShipDate = @dtmShipmentDate
+						,dtmRequestedArrivalDate = @dtmDeliveryRequestedDate
+					WHERE intInventoryShipmentId = @intInventoryShipmentId
+				END
 
-			DELETE
-			FROM @ShipmentStagingTable
+				DELETE
+				FROM @ShipmentStagingTable
 
-			INSERT INTO @ShipmentStagingTable (
-				intOrderType
-				,intSourceType
-				,intEntityCustomerId
-				,dtmShipDate
-				,intShipFromLocationId
-				,intShipToLocationId
-				,intFreightTermId
-				,strSourceScreenName
-				,strBOLNumber
-				,strReferenceNumber
-				,intItemId
-				,intOwnershipType
-				,dblQuantity
-				,intItemUOMId
-				,intOrderId
-				,intLineNo
-				,intWeightUOMId
-				,dblUnitPrice
-				,intCurrencyId
-				,intForexRateTypeId
-				,dblForexRate
-				,dtmRequestedArrivalDate
-				)
-			SELECT DISTINCT intOrderType = 4
-				,intSourceType = 0
-				,intEntityCustomerId = EL.intEntityId
-				,dtmShipDate = EDI.strShipmentDate
-				,intShipFromLocationId = IL.intLocationId
-				,intShipToLocationId = EL.intEntityLocationId
-				,intFreightTermId = (
-					SELECT TOP 1 intFreightTermId
-					FROM tblSMFreightTerms
-					WHERE strFreightTerm = 'Deliver'
+				INSERT INTO @ShipmentStagingTable (
+					intOrderType
+					,intSourceType
+					,intEntityCustomerId
+					,dtmShipDate
+					,intShipFromLocationId
+					,intShipToLocationId
+					,intFreightTermId
+					,strSourceScreenName
+					,strBOLNumber
+					,strReferenceNumber
+					,intItemId
+					,intOwnershipType
+					,dblQuantity
+					,intItemUOMId
+					,intOrderId
+					,intLineNo
+					,intWeightUOMId
+					,dblUnitPrice
+					,intCurrencyId
+					,intForexRateTypeId
+					,dblForexRate
+					,dtmRequestedArrivalDate
 					)
-				,strSourceScreenName = 'EDI940'
-				,strBOLNumber = ''
-				,strReferenceNumber = EDI.strDepositorOrderNumber
-				,intItemId = I.intItemId
-				,intOwnershipType = 1
-				,dblQuantity = EDI.dblQtyOrdered
-				,intItemUOMId = IU.intItemUOMId
-				,intOrderId = NULL
-				,intLineNo = EDI.intLineNumber
-				,intWeightUOMId = NULL
-				,dblUnitPrice = 0
-				,intCurrencyId = NULL
-				,intForexRateTypeId = NULL
-				,dblForexRate = NULL
-				,dtmRequestedArrivalDate = EDI.strShipmentDate
-			FROM tblMFEDI940 EDI
-			JOIN tblICItem I ON I.strItemNo = EDI.strCustomerItemNumber
-			JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
-				AND IL.intLocationId IS NOT NULL
-			JOIN tblEMEntityLocation EL ON 1 = 1
-				AND EL.intEntityLocationId = @intEntityLocationId
-			LEFT JOIN dbo.tblICUnitMeasure UM ON UM.strUnitMeasure = I.strExternalGroup
-			LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
-				AND UM.intUnitMeasureId = IU.intUnitMeasureId
-			WHERE EDI.strDepositorOrderNumber = @strOrderNo
+				SELECT DISTINCT intOrderType = 4
+					,intSourceType = 0
+					,intEntityCustomerId = EL.intEntityId
+					,dtmShipDate = EDI.strShipmentDate
+					,intShipFromLocationId = IL.intLocationId
+					,intShipToLocationId = EL.intEntityLocationId
+					,intFreightTermId = (
+						SELECT TOP 1 intFreightTermId
+						FROM tblSMFreightTerms
+						WHERE strFreightTerm = 'Deliver'
+						)
+					,strSourceScreenName = 'EDI940'
+					,strBOLNumber = ''
+					,strReferenceNumber = EDI.strDepositorOrderNumber
+					,intItemId = I.intItemId
+					,intOwnershipType = 1
+					,dblQuantity = EDI.dblQtyOrdered
+					,intItemUOMId = IU.intItemUOMId
+					,intOrderId = NULL
+					,intLineNo = EDI.intLineNumber
+					,intWeightUOMId = NULL
+					,dblUnitPrice = 0
+					,intCurrencyId = NULL
+					,intForexRateTypeId = NULL
+					,dblForexRate = NULL
+					,dtmRequestedArrivalDate = EDI.strShipmentDate
+				FROM tblMFEDI940 EDI
+				JOIN tblICItem I ON I.strItemNo = EDI.strCustomerItemNumber
+				JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
+					AND IL.intLocationId IS NOT NULL
+				JOIN tblEMEntityLocation EL ON 1 = 1
+					AND EL.intEntityLocationId = @intEntityLocationId
+				LEFT JOIN dbo.tblICUnitMeasure UM ON UM.strUnitMeasure = I.strExternalGroup
+				LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
+					AND UM.intUnitMeasureId = IU.intUnitMeasureId
+				WHERE EDI.strDepositorOrderNumber = @strOrderNo
 
-			EXEC dbo.uspICAddItemShipment @Entries = @ShipmentStagingTable
-				,@Charges = @OtherCharges
-				,@intUserId = @intUserId;
+				DELETE
+				FROM tblICInventoryShipmentItem
+				WHERE intInventoryShipmentId = @intInventoryShipmentId
 
-			SELECT TOP 1 @intInventoryShipmentId = intInventoryShipmentId
-			FROM #tmpAddItemShipmentResult
-
-			DELETE
-			FROM #tmpAddItemShipmentResult
+				-- Insert shipment items
+				INSERT INTO tblICInventoryShipmentItem (
+					intInventoryShipmentId
+					,intItemId
+					,intOwnershipType
+					,dblQuantity
+					,intItemUOMId
+					,intOrderId
+					,intSourceId
+					,intLineNo
+					,intSubLocationId
+					,intStorageLocationId
+					,intCurrencyId
+					,intWeightUOMId
+					,dblUnitPrice
+					,intDockDoorId
+					,strNotes
+					,intGradeId
+					,intDiscountSchedule
+					,intStorageScheduleTypeId
+					,intDestinationGradeId
+					,intDestinationWeightId
+					,intForexRateTypeId
+					,dblForexRate
+					,intConcurrencyId
+					)
+				SELECT @intInventoryShipmentId
+					,se.intItemId
+					,se.intOwnershipType
+					,se.dblQuantity
+					,se.intItemUOMId
+					,se.intOrderId
+					,se.intSourceId
+					,se.intLineNo
+					,se.intSubLocationId
+					,se.intStorageLocationId
+					,se.intItemCurrencyId
+					,se.intWeightUOMId
+					,se.dblUnitPrice
+					,se.intDockDoorId
+					,se.strNotes
+					,se.intGradeId
+					,se.intDiscountSchedule
+					,se.intStorageScheduleTypeId
+					,se.intDestinationGradeId
+					,se.intDestinationWeightId
+					,intForexRateTypeId = CASE 
+						WHEN ISNULL(s.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId
+							THEN ISNULL(se.intForexRateTypeId, @intDefaultForexRateTypeId)
+						ELSE NULL
+						END
+					,dblForexRate = CASE 
+						WHEN ISNULL(s.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId
+							THEN ISNULL(se.dblForexRate, forexRate.dblRate)
+						ELSE NULL
+						END
+					,intConcurrencyId = 1
+				FROM @ShipmentStagingTable se
+				INNER JOIN tblICInventoryShipment s ON s.intInventoryShipmentId = @intInventoryShipmentId
+				-- Get the SM forex rate. 
+				OUTER APPLY dbo.fnSMGetForexRate(ISNULL(s.intCurrencyId, @intFunctionalCurrencyId), CASE 
+							WHEN ISNULL(s.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId
+								THEN ISNULL(se.intForexRateTypeId, @intDefaultForexRateTypeId)
+							ELSE NULL
+							END, se.dtmShipDate) forexRate
+			END
 
 			IF @intInventoryShipmentId > 0
 			BEGIN
@@ -755,73 +970,108 @@ BEGIN TRY
 				FROM tblMFEDI940 EDI940
 				WHERE strDepositorOrderNumber = @strOrderNo
 
-				SELECT @intScreenId = intScreenId
-				FROM tblSMScreen
-				WHERE strNamespace = 'Inventory.view.InventoryShipment'
+				SELECT @intTransactionId = NULL
 
-				SELECT @intCustomTabId = intCustomTabId
-				FROM tblSMCustomTab
+				SELECT @intTransactionId = intTransactionId
+				FROM tblSMTransaction
 				WHERE intScreenId = @intScreenId
+					AND strTransactionNo = @strShipmentNumber
+					AND intRecordId = @intInventoryShipmentId
 
-				SELECT @intCustomTabDetailId = [Extent1].[intCustomTabDetailId]
-				FROM [dbo].[tblSMCustomTabDetail] AS [Extent1]
-				WHERE [Extent1].[intCustomTabId] = @intCustomTabId
-					AND strFieldName = 'CustomerPONo'
+				IF @intTransactionId IS NULL
+				BEGIN
+					INSERT dbo.tblSMTransaction (
+						intScreenId
+						,strTransactionNo
+						,intEntityId
+						,intRecordId
+						,intConcurrencyId
+						)
+					SELECT @intScreenId
+						,@strShipmentNumber
+						,1
+						,@intInventoryShipmentId
+						,1
 
-				INSERT [dbo].[tblSMTransaction] (
-					[intScreenId]
-					,[strTransactionNo]
-					,[intEntityId]
-					,[intRecordId]
-					,[intConcurrencyId]
-					)
-				SELECT @intScreenId
-					,@strShipmentNumber
-					,1
-					,@intInventoryShipmentId
-					,1
+					SELECT @intTransactionId = scope_identity()
+				END
 
-				SELECT @intTransactionId = scope_identity()
+				SELECT @intTabRowId = NULL
 
-				INSERT [dbo].[tblSMTabRow] (
-					[intCustomTabId]
-					,[intTransactionId]
-					,[intSort]
-					,[intConcurrencyId]
-					)
-				SELECT @intCustomTabId
-					,@intTransactionId
-					,0
-					,1
+				SELECT @intTabRowId = intTabRowId
+				FROM tblSMTabRow
+				WHERE intCustomTabId = @intCustomTabId
+					AND intTransactionId = @intTransactionId
 
-				SELECT @intTabRowId = scope_identity()
+				IF @intTabRowId IS NULL
+				BEGIN
+					INSERT dbo.tblSMTabRow (
+						intCustomTabId
+						,intTransactionId
+						,intSort
+						,intConcurrencyId
+						)
+					SELECT @intCustomTabId
+						,@intTransactionId
+						,0
+						,1
 
-				INSERT [dbo].[tblSMFieldValue] (
-					[intTabRowId]
-					,[intCustomTabDetailId]
-					,[strValue]
-					,[intConcurrencyId]
-					)
-				SELECT @intTabRowId
-					,@intCustomTabDetailId
-					,@strPONumber
-					,1
+					SELECT @intTabRowId = scope_identity()
+				END
 
-				SELECT @intCustomTabDetailId = [Extent1].[intCustomTabDetailId]
-				FROM [dbo].[tblSMCustomTabDetail] AS [Extent1]
-				WHERE [Extent1].[intCustomTabId] = @intCustomTabId
-					AND strFieldName = 'CreatedByEDI'
+				IF NOT EXISTS (
+						SELECT *
+						FROM tblSMFieldValue
+						WHERE intTabRowId = @intTabRowId
+							AND intCustomTabDetailId = @intCustomTabDetailId1
+						)
+				BEGIN
+					INSERT dbo.tblSMFieldValue (
+						intTabRowId
+						,intCustomTabDetailId
+						,strValue
+						,intConcurrencyId
+						)
+					SELECT @intTabRowId
+						,@intCustomTabDetailId1
+						,@strPONumber
+						,1
+				END
+				ELSE
+				BEGIN
+					UPDATE tblSMFieldValue
+					SET strValue = @strPONumber
+						,intConcurrencyId = intConcurrencyId + 1
+					WHERE intTabRowId = @intTabRowId
+						AND intCustomTabDetailId = @intCustomTabDetailId1
+				END
 
-				INSERT [dbo].[tblSMFieldValue] (
-					[intTabRowId]
-					,[intCustomTabDetailId]
-					,[strValue]
-					,[intConcurrencyId]
-					)
-				SELECT @intTabRowId
-					,@intCustomTabDetailId
-					,1
-					,1
+				IF NOT EXISTS (
+						SELECT *
+						FROM tblSMFieldValue
+						WHERE intTabRowId = @intTabRowId
+							AND intCustomTabDetailId = @intCustomTabDetailId2
+						)
+				BEGIN
+					INSERT dbo.tblSMFieldValue (
+						intTabRowId
+						,intCustomTabDetailId
+						,strValue
+						,intConcurrencyId
+						)
+					SELECT @intTabRowId
+						,@intCustomTabDetailId2
+						,1
+						,1
+				END
+				ELSE
+				BEGIN
+					UPDATE tblSMFieldValue
+					SET strValue = 1
+						,intConcurrencyId = intConcurrencyId + 1
+					WHERE intTabRowId = @intTabRowId
+						AND intCustomTabDetailId = @intCustomTabDetailId2
+				END
 			END
 
 			INSERT INTO tblMFEDI940Archive (
