@@ -22,7 +22,7 @@ namespace iRely.Inventory.BusinessLayer
 
         protected override string[] GetRequiredFields()
         {
-            return new string[] { "category code", "inventory type", "costing method" };
+            return new string[] { "category code", "inventory type" };
         }
 
         public override tblICCategory Process(CsvRecord record)
@@ -32,8 +32,6 @@ namespace iRely.Inventory.BusinessLayer
             valid = SetText(record, "Category Code", e => entity.strCategoryCode = e, true);
             SetText(record, "Description", e => entity.strDescription = e, false);
             valid = SetFixedLookup(record, "Inventory Type", e => entity.strInventoryType = e, inventoryTypes, true);
-            SetBoolean(record, "Sales Analysis", e => entity.ysnSalesAnalysisByTon = e);
-            SetText(record, "GL Division No", e => entity.strGLDivisionNumber = e);
             var lob = GetFieldValue(record, "Line of Business");
             SetLookupId<tblSMLineOfBusiness>(record, "Line of Business", (e => e.strLineOfBusiness == lob), e => e.intLineOfBusinessId, e => entity.intLineOfBusinessId = e, false);
 
@@ -96,22 +94,23 @@ namespace iRely.Inventory.BusinessLayer
                     default:
                         if (string.IsNullOrEmpty(value.Trim()))
                         {
-                            if (entity.strInventoryType == "Inventory" || entity.strInventoryType == "Finished Good" || entity.strInventoryType == "Raw Material")
-                            {
-                                var msg = new ImportDataMessage()
-                                {
-                                    Column = "Costing Method",
-                                    Row = Record.RecordNo,
-                                    Type = Constants.TYPE_ERROR,
-                                    Status = Constants.STAT_FAILED,
-                                    Action = Constants.ACTION_SKIPPED ,
-                                    Exception = null,
-                                    Value = value,
-                                    Message = string.Format("The value for {0} should not be blank.", "Costing Method")
-                                };
-                                Result.AddError(msg);
-                                return null;
-                            }
+                            //if (entity.strInventoryType == "Inventory" || entity.strInventoryType == "Finished Good" || entity.strInventoryType == "Raw Material")
+                            //{
+                            //    var msg = new ImportDataMessage()
+                            //    {
+                            //        Column = "Costing Method",
+                            //        Row = Record.RecordNo,
+                            //        Type = Constants.TYPE_ERROR,
+                            //        Status = Constants.STAT_FAILED,
+                            //        Action = Constants.ACTION_SKIPPED ,
+                            //        Exception = null,
+                            //        Value = value,
+                            //        Message = string.Format("The value for {0} should not be blank.", "Costing Method")
+                            //    };
+                            //    Result.AddError(msg);
+                            //    return null;
+                            //}
+                            entity.intCostingMethod = null;
                         }
                         break;
                 }
