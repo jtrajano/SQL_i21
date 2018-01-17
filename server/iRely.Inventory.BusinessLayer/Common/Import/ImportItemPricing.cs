@@ -50,7 +50,7 @@ namespace iRely.Inventory.BusinessLayer
 
             var valid = true;
 
-            var lu = GetFieldValue(record, "ItemNo");
+            var lu = GetFieldValue(record, "Item No");
             valid = SetIntLookupId<tblICItem>(record, "Item No", e => e.strItemNo == lu, e => e.intItemId, e => entity.intItemId = e, required: true);
             lu = GetFieldValue(record, "Location");
             valid = SetLookupId<vyuICGetItemLocation>(record, "Location", e => e.strLocationName == lu && e.intItemId == entity.intItemId, e => e.intItemLocationId, e => entity.intItemLocationId = e, required: true);
