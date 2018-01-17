@@ -67,8 +67,8 @@ Ext.define('Inventory.model.AdjustmentDetail', {
         { name: 'intNewItemOwnerId', type: 'int', allowNull: true },
         { name: 'strOwnerName', type: 'string', allowNull: true },
         { name: 'strNewOwnerName', type: 'string', allowNull: true },
-        { name: 'intOwnershipType', type: 'int', allowNull: true, defaultValue: 1 },
-        { name: 'strOwnershipType', type: 'string', allowNull: true, defaultValue: 'Own' }
+        { name: 'intOwnershipType', type: 'int', allowNull: false, defaultValue: 1 },
+        { name: 'strOwnershipType', type: 'string', allowNull: false, defaultValue: 'Own' }
     ],
 
     validators: [
@@ -192,6 +192,13 @@ Ext.define('Inventory.model.AdjustmentDetail', {
                     errors.add({
                         field: 'strNewOwnerName',
                         message: 'New Owner Name must have a value.'
+                    })
+                }
+
+                if(iRely.Functions.isEmpty(this.get('strOwnershipType')) && (AdjustmentType == 1 || AdjustmentType == 2 || AdjustmentType == 3)) {
+                    errors.add({
+                        field: 'strOwnershipType',
+                        message: 'Ownership Type must have a value.'
                     })
                 }
             }

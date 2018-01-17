@@ -779,45 +779,29 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                         iRely.Functions.showErrorDialog("You cannot adjust the same lot multiple times.");
                         return;
                     }*/
+                    var zeroCostLineItems = _.filter(lineItems, function(x) { 
+                        return !x.dummy 
+                            && (!iRely.Functions.isEmpty(x.get('dblNewCost')) || x.modified.dblNewCost !== null) 
+                            && (x.get('dblNewCost') === 0 && x.get('intOwnershipType') === 1); 
+                    });
 
+                    var zeroCost = (zeroCostLineItems && zeroCostLineItems.length > 0);
 
-
-                    var zeroCost = false;
-                        zeroCost = Ext.Array.each(lineItems, function (detail) {
-                            if (!detail.dummy) {
-                                if(!iRely.Functions.isEmpty(detail.get('dblNewCost')) || detail.modified.dblNewCost !== null) {
-                                   /* var hasModification = !_.isUndefined(detail.modified);
-                                    var defined =  hasModification && !_.isUndefined(detail.modified.dblNewCost);
-                                    var notNull = hasModification && !_.isNull(detail.modified.dblNewCost);
-                                    var checkCost = defined && notNull;
-
-                                    if (detail.get('dblNewCost') <= 0 && (checkCost &&  (detail.modified.dblNewCost !== detail.get('dblNewCost')))) {
-                                        return true;
-                                    }*/
-
-                                    if(detail.get('dblNewCost') == 0) {
-                                        return true;
-                                    }
-                                }
+                    if (zeroCost && colNewUnitCost.hidden == false) {
+                        var msgAction = function (button) {
+                            if (button === 'yes') {
+                                action(true);
                             }
-                            return false;
-                        });
-
-                        if (zeroCost && colNewUnitCost.hidden == false) {
-                            var msgAction = function (button) {
-                                if (button === 'yes') {
-                                    action(true);
-                                }
-                                else {
-                                    win.down("#btnPost").enable();
-                                    action(false);
-                                }
-                            };
-                            iRely.Functions.showCustomDialog('question', 'yesnocancel', 'One of your line items has a zero (0) New Unit Cost.<br>Are you sure you want to set your new unit cost to zero(0)?', msgAction);
-                        }
-                        else {
-                            action(true);
-                        }
+                            else {
+                                win.down("#btnPost").enable();
+                                action(false);
+                            }
+                        };
+                        iRely.Functions.showCustomDialog('question', 'yesnocancel', 'One of your line items has a zero (0) New Unit Cost.<br>Are you sure you want to set your new unit cost to zero(0)?', msgAction);
+                    }
+                    else {
+                        action(true);
+                    }
                 }
                 else {
                      action(true);
@@ -863,6 +847,8 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             }
 
             // Clear the values for the following fields:
+            current.set('strOwnershipType', 'Own');
+            current.set('intOwnershipType', 1);
             current.set('strSubLocation', null);
             current.set('strStorageLocation', null);
             current.set('intLotId', null);
@@ -1023,7 +1009,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('dblNewItemUOMUnitQty', record.get('dblUnitQty'));
         }
         else if (combo.itemId === 'cboOwnershipType') {
-            me.getStockQuantity(current, win);    
+            me.getStockQuantity(current, win);
         }
         else if (combo.itemId === 'cboUOM') {
             // Recalculate the unit cost
@@ -1148,6 +1134,13 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                     iRely.Functions.showErrorDialog(data.message.statusText);
                 }
                 record.set('dblQuantity', qty);
+                var adjustByQuantity = record.get('dblAdjustByQuantity')
+                var newQty = null;
+
+                if (Ext.isNumeric(qty) && Ext.isNumeric(adjustByQuantity)) {
+                    newQty = qty + adjustByQuantity;
+                }
+                record.set('dblNewQuantity', newQty); 
             },
             function(error) {
                 var json = Ext.decode(error.responseText);
