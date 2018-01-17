@@ -97,6 +97,7 @@
 	[dtmDateFullyPaid]				DATETIME										NULL,
 	[intPostedById]					INT												NULL,
 	[intEntityLineOfBusinessId]		INT												NULL,
+	[intICTId]						INT												NULL,
 	[intConcurrencyId]				INT												NOT NULL	CONSTRAINT [DF_tblARInvoice_intConcurrencyId] DEFAULT ((0)),
     CONSTRAINT [PK_tblARInvoice_intInvoiceId] PRIMARY KEY CLUSTERED ([intInvoiceId] ASC),
     CONSTRAINT [FK_tblARInvoice_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
@@ -121,7 +122,8 @@
 	CONSTRAINT [FK_tblARInvoice_tblLGLoad_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES [tblLGLoad]([intLoadId]),
 	CONSTRAINT [FK_tblARInvoice_tblSCTruckDriverReference_intTruckDriverReferenceId] FOREIGN KEY ([intTruckDriverReferenceId]) REFERENCES [tblSCTruckDriverReference]([intTruckDriverReferenceId]),
 	CONSTRAINT [FK_tblARInvoice_tblARSalesperson_intTruckDriverId] FOREIGN KEY ([intTruckDriverId]) REFERENCES [tblARSalesperson]([intEntityId]),
-	CONSTRAINT [FK_tblARInvoice_tblEMEntityLineOfBusiness_intEntityLineOfBusiness] FOREIGN KEY ([intEntityLineOfBusinessId]) REFERENCES [tblEMEntityLineOfBusiness](intEntityLineOfBusinessId)
+	CONSTRAINT [FK_tblARInvoice_tblEMEntityLineOfBusiness_intEntityLineOfBusiness] FOREIGN KEY ([intEntityLineOfBusinessId]) REFERENCES [tblEMEntityLineOfBusiness](intEntityLineOfBusinessId),
+	CONSTRAINT [FK_tblARInvoice_tblARICT_intICTId] FOREIGN KEY ([intICTId]) REFERENCES [tblARICT]([intICTId])
 );
 
 
