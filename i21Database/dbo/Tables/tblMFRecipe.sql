@@ -32,8 +32,6 @@
 	CONSTRAINT [FK_tblMFRecipe_tblSMCompanyLocation_intCompanyLocationId_intLocationId] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
 	CONSTRAINT [FK_tblMFRecipe_tblMFManufacturingProcess_intManufacturingProcessId] FOREIGN KEY ([intManufacturingProcessId]) REFERENCES [tblMFManufacturingProcess]([intManufacturingProcessId]),
 	CONSTRAINT [FK_tblMFRecipe_tblARCustomer_intCustomerId] FOREIGN KEY ([intCustomerId]) REFERENCES [tblARCustomer]([intEntityId]),
-	CONSTRAINT [FK_tblMFRecipe_tblEMEntityFarm_intFarmFieldId_intFarmId] FOREIGN KEY ([intFarmId]) REFERENCES [tblEMEntityFarm]([intFarmFieldId]),
-	CONSTRAINT [FK_tblMFRecipe_tblEMEntityFarm_intFarmFieldId_intFieldId] FOREIGN KEY ([intFieldId]) REFERENCES [tblEMEntityFarm]([intFarmFieldId]),
 	CONSTRAINT [FK_tblMFRecipe_tblMFRecipeType_intRecipeTypeId] FOREIGN KEY ([intRecipeTypeId]) REFERENCES [tblMFRecipeType]([intRecipeTypeId]),
 	CONSTRAINT [FK_tblMFRecipe_tblMFMarginBy_intMarginById] FOREIGN KEY ([intMarginById]) REFERENCES [tblMFMarginBy]([intMarginById]),
 	CONSTRAINT [FK_tblMFRecipe_tblMFCostType_intCostTypeId] FOREIGN KEY ([intCostTypeId]) REFERENCES [tblMFCostType]([intCostTypeId]),

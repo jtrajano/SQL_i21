@@ -3,8 +3,9 @@
 AS
 	DECLARE @intPickListId			INT,
 			@idoc					INT,
-			@intSalesOrderId		INT 
-			
+			@intSalesOrderId		INT, 
+			@intRecipeGuideId		INT
+
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
       
@@ -43,6 +44,10 @@ AS
 	SELECT	@intSalesOrderId = [from]
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'intSalesOrderId'
+
+	SELECT	@intRecipeGuideId = [from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'intRecipeGuideId'
 
 	Set @intSalesOrderId = ISNULL(@intSalesOrderId,0)
 
@@ -153,7 +158,23 @@ Declare @tblItems AS TABLE
 	[strItemType] nvarchar(50) null,
 	[strFooterComments] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[intBatchId] INT NULL default 0,
-	[dblBatchSize] [numeric](38, 20) NULL
+	[dblBatchSize] [numeric](38, 20) NULL,
+	[strCommodityCode] nvarchar(50) null,
+	[dblNoOfAcre] [numeric](38, 20) NULL,
+	[strFarmNumber] nvarchar(50) null,
+	[strFieldNumber] nvarchar(50) null,
+	[dblLatitude] [numeric](38, 20) NULL,
+	[dblLongitude] [numeric](38, 20) NULL,
+	[strDirection] nvarchar(MAX) null,
+	[strNote] nvarchar(MAX) null,
+	[strGuaranteedAnalysis] nvarchar(MAX) null,
+	[imgFieldMapFile] VARBINARY(MAX) null,
+	[strRate] nvarchar(MAX) null,
+	[strSplitNumber] nvarchar(50) null,
+	[strOrderType] nvarchar(50) null,
+	[strTax] nvarchar(50) null,
+	[dblDensity] [numeric](38, 20) NULL,
+	[dblAvgDensity] [numeric](38, 20) NULL
 )
 
 DECLARE @tblLot TABLE (
@@ -304,6 +325,10 @@ Begin --Sales Order Pick List
 
 	Select TOP 1 @intPickListId=ISNULL(intPickListId,0),@dblBatchSize=ISNULL(dblBatchSize,0) From tblMFPickList Where intSalesOrderId=@intSalesOrderId
 
+	--Printing from Recipe Guide screen 
+	if @intRecipeGuideId>0
+		Set @intPickListId=0
+
 	Select @dblTotalPickQty=SUM(dblQtyOrdered) From tblSOSalesOrderDetail Where intSalesOrderId=@intSalesOrderId
 	
 	If @dblBatchSize > 0
@@ -405,6 +430,22 @@ Begin --Sales Order Pick List
 					,@strFooterComments
 					,0
 					,0.0
+					,null
+					,null
+					,null
+					,null
+					,null
+					,null
+					,null
+					,null
+					,null
+					,null
+					,null
+					,null
+					,null
+					,null
+					,null
+					,null
 			FROM tblMFPickList pl  
 			JOIN tblMFPickListDetail pld ON pl.intPickListId=pld.intPickListId
 			JOIN tblICItem i on pld.intItemId=i.intItemId
@@ -468,7 +509,7 @@ Begin --Sales Order Pick List
 			,so.dtmDate
 			,so.dtmDueDate
 			,so.strComments AS strSOComments
-			,@strShipTo AS strShipTo
+			,@strShipTo + (CASE WHEN @intRecipeGuideId>0 THEN CHAR(13) + c.strPhone ELSE '' END) AS strShipTo
 			,c.strPhone
 			,@strCustomerComments
 			,@ysnShowCostInSalesOrderPickList
@@ -478,6 +519,22 @@ Begin --Sales Order Pick List
 			,@strFooterComments
 			,0
 			,0.0
+			,cd.strCommodityCode
+			,rg.dblNoOfAcre
+			,ef.strLocationName
+			,ef.strFarmFieldNumber
+			,ef.dblLatitude
+			,ef.dblLongitude
+			,ef.strAddress
+			,rg.strComment
+			,rg.strGuaranteedAnalysis
+			,CASE WHEN ef.imgFieldMapFile=0x THEN NULL ELSE ef.imgFieldMapFile END
+			,null AS strRate
+			,es.strSplitNumber
+			,so.strType
+			,CASE WHEN sd.dblTotalTax>0 THEN 'Y' ELSE 'N' END
+			,dblDensity
+			,null
 			FROM tblSOSalesOrderDetail sd  
 			JOIN tblICItem i on sd.intItemId=i.intItemId
 			Join tblICItemUOM iu on sd.intItemUOMId=iu.intItemUOMId
@@ -489,8 +546,36 @@ Begin --Sales Order Pick List
 			Left Join tblSMShipVia sv on so.intShipViaId=sv.[intEntityId]
 			Left Join tblSMFreightTerms ft on so.intFreightTermId=ft.intFreightTermId
 			Left Join tblSMTerm tm on so.intTermId=tm.intTermID
+			Left Join tblMFRecipeGuide rg on rg.intRecipeGuideId=so.intRecipeGuideId AND rg.intRecipeGuideId=@intRecipeGuideId
+			Left Join tblICCommodity cd on rg.intCommodityId=cd.intCommodityId
+			Left Join tblEMEntityLocation ef on rg.intFarmId=ef.intEntityLocationId
+			Left Join tblEMEntitySplit es on so.intSplitId=es.intSplitId
 			WHERE so.intSalesOrderId=@intSalesOrderId
 		End
+
+	--Update total weigt for recipe guide print
+	If @intRecipeGuideId>0
+	Begin
+		Declare @intUnitMeasureId int
+		Declare @dblNoOfAcre NUMERIC(38,20)
+
+		--get recipe guide weigth unit measure
+		Select @intUnitMeasureId=intUOMId,@dblNoOfAcre=CASE WHEN ISNULL(dblNoOfAcre,1)=0 THEN 1 ELSE ISNULL(dblNoOfAcre,1) END
+		From tblMFRecipeGuide Where intRecipeGuideId=@intRecipeGuideId
+		Select @strUOM=strUnitMeasure From tblICUnitMeasure Where intUnitMeasureId=@intUnitMeasureId
+
+		--calculate total weight , convert so detail item uom to recipe guide weight uom
+		Select @dblTotalPickQty = SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(sd.intItemUOMId,iu.intItemUOMId,sd.dblQtyOrdered),0.0))
+		From @tblItems t join tblSOSalesOrderDetail sd on t.intSalesOrderDetailId=sd.intSalesOrderDetailId
+		Join tblSOSalesOrderDetail sd1 on t.intSalesOrderDetailId=sd1.intSalesOrderDetailId AND sd.intSalesOrderDetailId=sd1.intSalesOrderDetailId
+		join tblICItemUOM iu on sd1.intItemId=iu.intItemId AND iu.intUnitMeasureId=@intUnitMeasureId
+		Where sd.intSalesOrderId=@intSalesOrderId AND sd1.intSalesOrderId=@intSalesOrderId
+
+		--update total weight, rate(total weight/no of acres), avg density
+		Update @tblItems Set dblTotalPickQty=dbo.fnRemoveTrailingZeroes(@dblTotalPickQty) + ' ' + @strUOM,
+				strRate=dbo.fnRemoveTrailingZeroes(@dblTotalPickQty / @dblNoOfAcre) + ' ' + @strUOM + '/Acre',
+				dblAvgDensity=(Select AVG(dblDensity) From @tblItems)
+	End
 
 	Select @dblTotalCost=SUM(ISNULL(dblCost,0.0)) From @tblItems
 
@@ -542,7 +627,7 @@ Begin --Sales Order Pick List
 				,@strCompanyAddress AS strCompanyAddress
 				,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCompanyCityStateZip
 				,@strCountry AS strCompanyCountry 
-				,'','','','','','','','','',null,null,'','','','',@ysnShowCostInSalesOrderPickList,0,@intMaxOtherChargeId,'Other Charge',@strFooterComments,0,0.0
+				,'','','','','','','','','',null,null,'','','','',@ysnShowCostInSalesOrderPickList,0,@intMaxOtherChargeId,'Other Charge',@strFooterComments,0,0.0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
 		From [dbo].[fnMFGetInvoiceChargesByShipment](0,@intSalesOrderId)
 		End
 
@@ -661,6 +746,22 @@ Begin --Sales Order Pick List
 								,@strFooterComments
 								,@intBatchCounter
 								,@dblBatchSize
+								,null
+								,null
+								,null
+								,null
+								,null
+								,null
+								,null
+								,null
+								,null
+								,null
+								,null
+								,null
+								,null
+								,null
+								,null
+								,null
 						FROM tblMFPickList pl  
 						JOIN tblMFPickListDetail pld ON pl.intPickListId=pld.intPickListId
 						JOIN tblICItem i on pld.intItemId=i.intItemId
@@ -733,6 +834,22 @@ Begin --Sales Order Pick List
 								,@strFooterComments
 								,@intBatchCounter
 								,@dblBatchSize
+								,null
+								,null
+								,null
+								,null
+								,null
+								,null
+								,null
+								,null
+								,null
+								,null
+								,null
+								,null
+								,null
+								,null
+								,null
+								,null
 						FROM tblMFPickList pl  
 						JOIN tblMFPickListDetail pld ON pl.intPickListId=pld.intPickListId
 						JOIN tblICItem i on pld.intItemId=i.intItemId
