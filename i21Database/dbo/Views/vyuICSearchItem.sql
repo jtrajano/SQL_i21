@@ -53,6 +53,8 @@ SELECT Item.intItemId
 , Item.strMarketValuation
 , Item.ysnLotWeightsRequired
 --End: Commodity fields 
+, Item.strBundleType
+, Item.ysnListBundleSeparately
 FROM tblICItem Item
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
