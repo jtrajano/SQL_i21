@@ -46,6 +46,7 @@ SELECT Lot.intLotId
        , dblWeightUOMConv = ItemWeightUOM.dblUnitQty
        , Lot.dblWeightPerQty
        , OG.intCountryID intOriginId
+	   , OG.strCountry strOrigin
        , Lot.strBOLNo
        , Lot.strVessel
        , Lot.strReceiptNumber
