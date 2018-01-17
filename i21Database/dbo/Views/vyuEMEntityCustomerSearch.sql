@@ -48,7 +48,8 @@
 	cust.intCurrencyId,
 	cust.intTermsId,
 	STUFF((SELECT '|^|' + CONVERT(VARCHAR,intLineOfBusinessId) FROM tblEMEntityLineOfBusiness te WHERE te.intEntityId = cust.intEntityId FOR XML PATH('')),1,3,'') as intLineOfBusinessIds,
-	entityType.Prospect AS ysnProspect
+	entityType.Prospect AS ysnProspect,
+	cust.ysnCreditHold
 FROM tblARCustomer cust
 INNER JOIN tblEMEntity entityToCustomer ON cust.intEntityId = entityToCustomer.intEntityId
 LEFT JOIN tblEMEntity entityToSalesperson ON cust.intSalespersonId = entityToSalesperson.intEntityId
@@ -126,5 +127,6 @@ GROUP BY
 	cust.intCurrencyId,
 	cust.intTermsId,
 	entityContact.intEntityId,
-	entityType.Prospect
+	entityType.Prospect,
+	cust.ysnCreditHold
 GO
