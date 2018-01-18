@@ -1,0 +1,19 @@
+﻿CREATE TABLE [dbo].[tblICItemAddOn]
+(
+	[intItemAddOnId] INT NOT NULL IDENTITY, 
+	[intItemId] INT NOT NULL, 
+	[intAddOnItemId] INT NOT NULL, 
+	[dblQuantity] NUMERIC(38, 20) NULL DEFAULT ((0)), 
+	[intItemUOMId] INT NULL, 
+	[intConcurrencyId] INT NULL DEFAULT ((0)), 
+	CONSTRAINT [PK_tblICItemAddOn] PRIMARY KEY ([intItemAddOnId]),
+	CONSTRAINT [FK_tblICItemAddOn_Item] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
+	CONSTRAINT [FK_tblICItemAddOn_AddOn] FOREIGN KEY ([intAddOnItemId]) REFERENCES [tblICItem]([intItemId]),
+	CONSTRAINT [FK_tblICItemAddOn_tblICItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId])
+)
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblICItemAddOn_intAddOnItemId]
+	ON [dbo].[tblICItemAddOn]([intAddOnItemId] ASC)
+	INCLUDE ([intItemId])
+GO
