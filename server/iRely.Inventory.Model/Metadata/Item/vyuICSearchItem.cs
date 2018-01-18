@@ -59,5 +59,7 @@ namespace iRely.Inventory.Model
         public string strGrade { get; set; }
         public string strMarketValuation { get; set; }
         // End Commodity Tab fields
+        public string strBundleType { get; set; }
+        public bool? ysnListBundleSeparately { get; set; }
     }
 }

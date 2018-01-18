@@ -25,7 +25,8 @@ Ext.application({
         'LotHistory',
         'CopyItemLocation',
         'InventoryCountDetails',
-        'ImportLog'
+        'ImportLog',
+        'Bundle'
     ],
     name: 'Inventory',
 

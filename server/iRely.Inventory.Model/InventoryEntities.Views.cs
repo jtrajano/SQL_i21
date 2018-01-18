@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets1d79819b45dc7aae862284c517c3a3604eec25714ae819e4a1d8c0f2fa3508b5))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets340ae4b025f6f252b9353e74ba7df98e2d49d3a815e61d755e3db1f696084ef9))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -22,15 +22,15 @@ namespace Edm_EntityMappingGeneratedViews
     /// <summary>
     /// Implements a mapping view cache.
     /// </summary>
-    [GeneratedCode("Entity Framework 6 Power Tools", "0.9.2.0")]
-    internal sealed class ViewsForBaseEntitySets1d79819b45dc7aae862284c517c3a3604eec25714ae819e4a1d8c0f2fa3508b5 : DbMappingViewCache
+    [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
+    internal sealed class ViewsForBaseEntitySets340ae4b025f6f252b9353e74ba7df98e2d49d3a815e61d755e3db1f696084ef9 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "1d79819b45dc7aae862284c517c3a3604eec25714ae819e4a1d8c0f2fa3508b5"; }
+            get { return "340ae4b025f6f252b9353e74ba7df98e2d49d3a815e61d755e3db1f696084ef9"; }
         }
 
         /// <summary>
@@ -3021,7 +3021,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemBundle
-        [CodeFirstDatabaseSchema.tblICItemBundle](T1.tblICItemBundle_intItemBundleId, T1.tblICItemBundle_intItemId, T1.tblICItemBundle_intBundleItemId, T1.tblICItemBundle_strDescription, T1.tblICItemBundle_dblQuantity, T1.tblICItemBundle_intItemUnitMeasureId, T1.tblICItemBundle_ysnAddOn, T1.tblICItemBundle_dblMarkUpOrDown, T1.tblICItemBundle_dtmBeginDate, T1.tblICItemBundle_dtmEndDate, T1.tblICItemBundle_intSort, T1.tblICItemBundle_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICItemBundle](T1.tblICItemBundle_intItemBundleId, T1.tblICItemBundle_intItemId, T1.tblICItemBundle_intBundleItemId, T1.tblICItemBundle_strDescription, T1.tblICItemBundle_dblQuantity, T1.tblICItemBundle_intItemUnitMeasureId, T1.tblICItemBundle_ysnAddOn, T1.tblICItemBundle_dblMarkUpOrDown, T1.tblICItemBundle_dtmBeginDate, T1.tblICItemBundle_dtmEndDate, T1.tblICItemBundle_intConcurrencyId)
     FROM (
         SELECT 
             T.intItemBundleId AS tblICItemBundle_intItemBundleId, 
@@ -3034,7 +3034,6 @@ namespace Edm_EntityMappingGeneratedViews
             T.dblMarkUpOrDown AS tblICItemBundle_dblMarkUpOrDown, 
             T.dtmBeginDate AS tblICItemBundle_dtmBeginDate, 
             T.dtmEndDate AS tblICItemBundle_dtmEndDate, 
-            T.intSort AS tblICItemBundle_intSort, 
             T.intConcurrencyId AS tblICItemBundle_intConcurrencyId, 
             True AS _from0
         FROM InventoryEntities.tblICItemBundles AS T
@@ -7006,7 +7005,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemBundles
-        [iRely.Inventory.Model.tblICItemBundle](T1.tblICItemBundle_intItemBundleId, T1.tblICItemBundle_intItemId, T1.tblICItemBundle_intBundleItemId, T1.tblICItemBundle_strDescription, T1.tblICItemBundle_dblQuantity, T1.tblICItemBundle_intItemUnitMeasureId, T1.tblICItemBundle_ysnAddOn, T1.tblICItemBundle_dblMarkUpOrDown, T1.tblICItemBundle_dtmBeginDate, T1.tblICItemBundle_dtmEndDate, T1.tblICItemBundle_intSort, T1.tblICItemBundle_intConcurrencyId)
+        [iRely.Inventory.Model.tblICItemBundle](T1.tblICItemBundle_intItemBundleId, T1.tblICItemBundle_intItemId, T1.tblICItemBundle_intBundleItemId, T1.tblICItemBundle_strDescription, T1.tblICItemBundle_dblQuantity, T1.tblICItemBundle_intItemUnitMeasureId, T1.tblICItemBundle_ysnAddOn, T1.tblICItemBundle_dblMarkUpOrDown, T1.tblICItemBundle_dtmBeginDate, T1.tblICItemBundle_dtmEndDate, T1.tblICItemBundle_intConcurrencyId)
     FROM (
         SELECT 
             T.intItemBundleId AS tblICItemBundle_intItemBundleId, 
@@ -7019,7 +7018,6 @@ namespace Edm_EntityMappingGeneratedViews
             T.dblMarkUpOrDown AS tblICItemBundle_dblMarkUpOrDown, 
             T.dtmBeginDate AS tblICItemBundle_dtmBeginDate, 
             T.dtmEndDate AS tblICItemBundle_dtmEndDate, 
-            T.intSort AS tblICItemBundle_intSort, 
             T.intConcurrencyId AS tblICItemBundle_intConcurrencyId, 
             True AS _from0
         FROM CodeFirstDatabase.tblICItemBundle AS T
@@ -16554,23 +16552,21 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetBundleItem
-        [CodeFirstDatabaseSchema.vyuICGetBundleItem](T1.vyuICGetBundleItem_intItemBundleId, T1.vyuICGetBundleItem_intItemId, T1.vyuICGetBundleItem_strItemNo, T1.vyuICGetBundleItem_strItemDescription, T1.vyuICGetBundleItem_intBundleItemId, T1.vyuICGetBundleItem_strComponent, T1.vyuICGetBundleItem_strComponentDescription, T1.vyuICGetBundleItem_strDescription, T1.vyuICGetBundleItem_dblQuantity, T1.vyuICGetBundleItem_intItemUnitMeasureId, T1.vyuICGetBundleItem_dblConversionFactor, T1.vyuICGetBundleItem_strUnitMeasure, T1.vyuICGetBundleItem_dblUnitQty, T1.vyuICGetBundleItem_intSort)
+        [CodeFirstDatabaseSchema.vyuICGetBundleItem](T1.vyuICGetBundleItem_intItemBundleId, T1.vyuICGetBundleItem_intItemId, T1.vyuICGetBundleItem_strItemNo, T1.vyuICGetBundleItem_intBundleItemId, T1.vyuICGetBundleItem_strComponentItemNo, T1.vyuICGetBundleItem_strDescription, T1.vyuICGetBundleItem_dblQuantity, T1.vyuICGetBundleItem_intItemUnitMeasureId, T1.vyuICGetBundleItem_strUnitMeasure, T1.vyuICGetBundleItem_dblMarkUpOrDown, T1.vyuICGetBundleItem_dtmBeginDate, T1.vyuICGetBundleItem_dtmEndDate)
     FROM (
         SELECT 
             T.intItemBundleId AS vyuICGetBundleItem_intItemBundleId, 
             T.intItemId AS vyuICGetBundleItem_intItemId, 
             T.strItemNo AS vyuICGetBundleItem_strItemNo, 
-            T.strItemDescription AS vyuICGetBundleItem_strItemDescription, 
             T.intBundleItemId AS vyuICGetBundleItem_intBundleItemId, 
-            T.strComponent AS vyuICGetBundleItem_strComponent, 
-            T.strComponentDescription AS vyuICGetBundleItem_strComponentDescription, 
+            T.strComponentItemNo AS vyuICGetBundleItem_strComponentItemNo, 
             T.strDescription AS vyuICGetBundleItem_strDescription, 
             T.dblQuantity AS vyuICGetBundleItem_dblQuantity, 
             T.intItemUnitMeasureId AS vyuICGetBundleItem_intItemUnitMeasureId, 
-            T.dblConversionFactor AS vyuICGetBundleItem_dblConversionFactor, 
             T.strUnitMeasure AS vyuICGetBundleItem_strUnitMeasure, 
-            T.dblUnitQty AS vyuICGetBundleItem_dblUnitQty, 
-            T.intSort AS vyuICGetBundleItem_intSort, 
+            T.dblMarkUpOrDown AS vyuICGetBundleItem_dblMarkUpOrDown, 
+            T.dtmBeginDate AS vyuICGetBundleItem_dtmBeginDate, 
+            T.dtmEndDate AS vyuICGetBundleItem_dtmEndDate, 
             True AS _from0
         FROM InventoryEntities.vyuICGetBundleItems AS T
     ) AS T1");
@@ -16584,23 +16580,21 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetBundleItems
-        [iRely.Inventory.Model.vyuICGetBundleItem](T1.vyuICGetBundleItem_intItemBundleId, T1.vyuICGetBundleItem_intItemId, T1.vyuICGetBundleItem_strItemNo, T1.vyuICGetBundleItem_strItemDescription, T1.vyuICGetBundleItem_intBundleItemId, T1.vyuICGetBundleItem_strComponent, T1.vyuICGetBundleItem_strComponentDescription, T1.vyuICGetBundleItem_strDescription, T1.vyuICGetBundleItem_dblQuantity, T1.vyuICGetBundleItem_intItemUnitMeasureId, T1.vyuICGetBundleItem_dblConversionFactor, T1.vyuICGetBundleItem_strUnitMeasure, T1.vyuICGetBundleItem_dblUnitQty, T1.vyuICGetBundleItem_intSort)
+        [iRely.Inventory.Model.vyuICGetBundleItem](T1.vyuICGetBundleItem_intItemBundleId, T1.vyuICGetBundleItem_intItemId, T1.vyuICGetBundleItem_strItemNo, T1.vyuICGetBundleItem_intBundleItemId, T1.vyuICGetBundleItem_strComponentItemNo, T1.vyuICGetBundleItem_strDescription, T1.vyuICGetBundleItem_dblQuantity, T1.vyuICGetBundleItem_intItemUnitMeasureId, T1.vyuICGetBundleItem_strUnitMeasure, T1.vyuICGetBundleItem_dblMarkUpOrDown, T1.vyuICGetBundleItem_dtmBeginDate, T1.vyuICGetBundleItem_dtmEndDate)
     FROM (
         SELECT 
             T.intItemBundleId AS vyuICGetBundleItem_intItemBundleId, 
             T.intItemId AS vyuICGetBundleItem_intItemId, 
             T.strItemNo AS vyuICGetBundleItem_strItemNo, 
-            T.strItemDescription AS vyuICGetBundleItem_strItemDescription, 
             T.intBundleItemId AS vyuICGetBundleItem_intBundleItemId, 
-            T.strComponent AS vyuICGetBundleItem_strComponent, 
-            T.strComponentDescription AS vyuICGetBundleItem_strComponentDescription, 
+            T.strComponentItemNo AS vyuICGetBundleItem_strComponentItemNo, 
             T.strDescription AS vyuICGetBundleItem_strDescription, 
             T.dblQuantity AS vyuICGetBundleItem_dblQuantity, 
             T.intItemUnitMeasureId AS vyuICGetBundleItem_intItemUnitMeasureId, 
-            T.dblConversionFactor AS vyuICGetBundleItem_dblConversionFactor, 
             T.strUnitMeasure AS vyuICGetBundleItem_strUnitMeasure, 
-            T.dblUnitQty AS vyuICGetBundleItem_dblUnitQty, 
-            T.intSort AS vyuICGetBundleItem_intSort, 
+            T.dblMarkUpOrDown AS vyuICGetBundleItem_dblMarkUpOrDown, 
+            T.dtmBeginDate AS vyuICGetBundleItem_dtmBeginDate, 
+            T.dtmEndDate AS vyuICGetBundleItem_dtmEndDate, 
             True AS _from0
         FROM CodeFirstDatabase.vyuICGetBundleItem AS T
     ) AS T1");
@@ -17822,7 +17816,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICSearchItem
-        [CodeFirstDatabaseSchema.vyuICSearchItem](T1.vyuICSearchItem_intItemId, T1.vyuICSearchItem_strItemNo, T1.vyuICSearchItem_strType, T1.vyuICSearchItem_strDescription, T1.vyuICSearchItem_strManufacturer, T1.vyuICSearchItem_strBrandCode, T1.vyuICSearchItem_strBrandName, T1.vyuICSearchItem_strStatus, T1.vyuICSearchItem_strModelNo, T1.vyuICSearchItem_strTracking, T1.vyuICSearchItem_strLotTracking, T1.vyuICSearchItem_intCommodityId, T1.vyuICSearchItem_strCommodity, T1.vyuICSearchItem_intCategoryId, T1.vyuICSearchItem_strCategory, T1.vyuICSearchItem_ysnInventoryCost, T1.vyuICSearchItem_ysnAccrue, T1.vyuICSearchItem_ysnMTM, T1.vyuICSearchItem_intM2MComputationId, T1.vyuICSearchItem_strM2MComputation, T1.vyuICSearchItem_ysnPrice, T1.vyuICSearchItem_strCostMethod, T1.vyuICSearchItem_intOnCostTypeId, T1.vyuICSearchItem_strOnCostType, T1.vyuICSearchItem_dblAmount, T1.vyuICSearchItem_intCostUOMId, T1.vyuICSearchItem_strCostUOM, T1.vyuICSearchItem_strCostType, T1.vyuICSearchItem_strShortName, T1.vyuICSearchItem_strRequired, T1.vyuICSearchItem_ysnBasisContract, T1.vyuICSearchItem_intTonnageTaxUOMId, T1.vyuICSearchItem_strTonnageTaxUOM, T1.vyuICSearchItem_dblGAShrinkFactor, T1.vyuICSearchItem_intOriginId, T1.vyuICSearchItem_strOrigin, T1.vyuICSearchItem_intProductTypeId, T1.vyuICSearchItem_strProductType, T1.vyuICSearchItem_intRegionId, T1.vyuICSearchItem_strRegion, T1.vyuICSearchItem_intSeasonId, T1.vyuICSearchItem_strSeason, T1.vyuICSearchItem_intClassVarietyId, T1.vyuICSearchItem_strClass, T1.vyuICSearchItem_intProductLineId, T1.vyuICSearchItem_strProductLine, T1.vyuICSearchItem_intGradeId, T1.vyuICSearchItem_strGrade, T1.vyuICSearchItem_strMarketValuation)
+        [CodeFirstDatabaseSchema.vyuICSearchItem](T1.vyuICSearchItem_intItemId, T1.vyuICSearchItem_strItemNo, T1.vyuICSearchItem_strType, T1.vyuICSearchItem_strDescription, T1.vyuICSearchItem_strManufacturer, T1.vyuICSearchItem_strBrandCode, T1.vyuICSearchItem_strBrandName, T1.vyuICSearchItem_strStatus, T1.vyuICSearchItem_strModelNo, T1.vyuICSearchItem_strTracking, T1.vyuICSearchItem_strLotTracking, T1.vyuICSearchItem_intCommodityId, T1.vyuICSearchItem_strCommodity, T1.vyuICSearchItem_intCategoryId, T1.vyuICSearchItem_strCategory, T1.vyuICSearchItem_ysnInventoryCost, T1.vyuICSearchItem_ysnAccrue, T1.vyuICSearchItem_ysnMTM, T1.vyuICSearchItem_intM2MComputationId, T1.vyuICSearchItem_strM2MComputation, T1.vyuICSearchItem_ysnPrice, T1.vyuICSearchItem_strCostMethod, T1.vyuICSearchItem_intOnCostTypeId, T1.vyuICSearchItem_strOnCostType, T1.vyuICSearchItem_dblAmount, T1.vyuICSearchItem_intCostUOMId, T1.vyuICSearchItem_strCostUOM, T1.vyuICSearchItem_strCostType, T1.vyuICSearchItem_strShortName, T1.vyuICSearchItem_strRequired, T1.vyuICSearchItem_ysnBasisContract, T1.vyuICSearchItem_intTonnageTaxUOMId, T1.vyuICSearchItem_strTonnageTaxUOM, T1.vyuICSearchItem_dblGAShrinkFactor, T1.vyuICSearchItem_intOriginId, T1.vyuICSearchItem_strOrigin, T1.vyuICSearchItem_intProductTypeId, T1.vyuICSearchItem_strProductType, T1.vyuICSearchItem_intRegionId, T1.vyuICSearchItem_strRegion, T1.vyuICSearchItem_intSeasonId, T1.vyuICSearchItem_strSeason, T1.vyuICSearchItem_intClassVarietyId, T1.vyuICSearchItem_strClass, T1.vyuICSearchItem_intProductLineId, T1.vyuICSearchItem_strProductLine, T1.vyuICSearchItem_intGradeId, T1.vyuICSearchItem_strGrade, T1.vyuICSearchItem_strMarketValuation, T1.vyuICSearchItem_strBundleType, T1.vyuICSearchItem_ysnListBundleSeparately)
     FROM (
         SELECT 
             T.intItemId AS vyuICSearchItem_intItemId, 
@@ -17874,6 +17868,8 @@ namespace Edm_EntityMappingGeneratedViews
             T.intGradeId AS vyuICSearchItem_intGradeId, 
             T.strGrade AS vyuICSearchItem_strGrade, 
             T.strMarketValuation AS vyuICSearchItem_strMarketValuation, 
+            T.strBundleType AS vyuICSearchItem_strBundleType, 
+            T.ysnListBundleSeparately AS vyuICSearchItem_ysnListBundleSeparately, 
             True AS _from0
         FROM InventoryEntities.vyuICSearchItems AS T
     ) AS T1");
@@ -17887,7 +17883,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICSearchItems
-        [iRely.Inventory.Model.vyuICSearchItem](T1.vyuICSearchItem_intItemId, T1.vyuICSearchItem_strItemNo, T1.vyuICSearchItem_strType, T1.vyuICSearchItem_strDescription, T1.vyuICSearchItem_strManufacturer, T1.vyuICSearchItem_strBrandCode, T1.vyuICSearchItem_strBrandName, T1.vyuICSearchItem_strStatus, T1.vyuICSearchItem_strModelNo, T1.vyuICSearchItem_strTracking, T1.vyuICSearchItem_strLotTracking, T1.vyuICSearchItem_intCommodityId, T1.vyuICSearchItem_strCommodity, T1.vyuICSearchItem_intCategoryId, T1.vyuICSearchItem_strCategory, T1.vyuICSearchItem_ysnInventoryCost, T1.vyuICSearchItem_ysnAccrue, T1.vyuICSearchItem_ysnMTM, T1.vyuICSearchItem_intM2MComputationId, T1.vyuICSearchItem_strM2MComputation, T1.vyuICSearchItem_ysnPrice, T1.vyuICSearchItem_strCostMethod, T1.vyuICSearchItem_intOnCostTypeId, T1.vyuICSearchItem_strOnCostType, T1.vyuICSearchItem_dblAmount, T1.vyuICSearchItem_intCostUOMId, T1.vyuICSearchItem_strCostUOM, T1.vyuICSearchItem_strCostType, T1.vyuICSearchItem_strShortName, T1.vyuICSearchItem_strRequired, T1.vyuICSearchItem_ysnBasisContract, T1.vyuICSearchItem_intTonnageTaxUOMId, T1.vyuICSearchItem_strTonnageTaxUOM, T1.vyuICSearchItem_dblGAShrinkFactor, T1.vyuICSearchItem_intOriginId, T1.vyuICSearchItem_strOrigin, T1.vyuICSearchItem_intProductTypeId, T1.vyuICSearchItem_strProductType, T1.vyuICSearchItem_intRegionId, T1.vyuICSearchItem_strRegion, T1.vyuICSearchItem_intSeasonId, T1.vyuICSearchItem_strSeason, T1.vyuICSearchItem_intClassVarietyId, T1.vyuICSearchItem_strClass, T1.vyuICSearchItem_intProductLineId, T1.vyuICSearchItem_strProductLine, T1.vyuICSearchItem_intGradeId, T1.vyuICSearchItem_strGrade, T1.vyuICSearchItem_strMarketValuation)
+        [iRely.Inventory.Model.vyuICSearchItem](T1.vyuICSearchItem_intItemId, T1.vyuICSearchItem_strItemNo, T1.vyuICSearchItem_strType, T1.vyuICSearchItem_strDescription, T1.vyuICSearchItem_strManufacturer, T1.vyuICSearchItem_strBrandCode, T1.vyuICSearchItem_strBrandName, T1.vyuICSearchItem_strStatus, T1.vyuICSearchItem_strModelNo, T1.vyuICSearchItem_strTracking, T1.vyuICSearchItem_strLotTracking, T1.vyuICSearchItem_intCommodityId, T1.vyuICSearchItem_strCommodity, T1.vyuICSearchItem_intCategoryId, T1.vyuICSearchItem_strCategory, T1.vyuICSearchItem_ysnInventoryCost, T1.vyuICSearchItem_ysnAccrue, T1.vyuICSearchItem_ysnMTM, T1.vyuICSearchItem_intM2MComputationId, T1.vyuICSearchItem_strM2MComputation, T1.vyuICSearchItem_ysnPrice, T1.vyuICSearchItem_strCostMethod, T1.vyuICSearchItem_intOnCostTypeId, T1.vyuICSearchItem_strOnCostType, T1.vyuICSearchItem_dblAmount, T1.vyuICSearchItem_intCostUOMId, T1.vyuICSearchItem_strCostUOM, T1.vyuICSearchItem_strCostType, T1.vyuICSearchItem_strShortName, T1.vyuICSearchItem_strRequired, T1.vyuICSearchItem_ysnBasisContract, T1.vyuICSearchItem_intTonnageTaxUOMId, T1.vyuICSearchItem_strTonnageTaxUOM, T1.vyuICSearchItem_dblGAShrinkFactor, T1.vyuICSearchItem_intOriginId, T1.vyuICSearchItem_strOrigin, T1.vyuICSearchItem_intProductTypeId, T1.vyuICSearchItem_strProductType, T1.vyuICSearchItem_intRegionId, T1.vyuICSearchItem_strRegion, T1.vyuICSearchItem_intSeasonId, T1.vyuICSearchItem_strSeason, T1.vyuICSearchItem_intClassVarietyId, T1.vyuICSearchItem_strClass, T1.vyuICSearchItem_intProductLineId, T1.vyuICSearchItem_strProductLine, T1.vyuICSearchItem_intGradeId, T1.vyuICSearchItem_strGrade, T1.vyuICSearchItem_strMarketValuation, T1.vyuICSearchItem_strBundleType, T1.vyuICSearchItem_ysnListBundleSeparately)
     FROM (
         SELECT 
             T.intItemId AS vyuICSearchItem_intItemId, 
@@ -17939,6 +17935,8 @@ namespace Edm_EntityMappingGeneratedViews
             T.intGradeId AS vyuICSearchItem_intGradeId, 
             T.strGrade AS vyuICSearchItem_strGrade, 
             T.strMarketValuation AS vyuICSearchItem_strMarketValuation, 
+            T.strBundleType AS vyuICSearchItem_strBundleType, 
+            T.ysnListBundleSeparately AS vyuICSearchItem_ysnListBundleSeparately, 
             True AS _from0
         FROM CodeFirstDatabase.vyuICSearchItem AS T
     ) AS T1");

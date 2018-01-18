@@ -1514,40 +1514,40 @@ Ext.define('Inventory.view.ItemViewController', {
                         deleteButton : grdSpecialPricing.down('#btnDeleteSpecialPricing')
                     })
                 },
-                {
-                    key: 'tblICItemAssemblies',
-                    lazy: true, 
-                    component: Ext.create('iRely.grid.Manager', {
-                        grid: grdAssembly,
-                        deleteButton : grdAssembly.down('#btnDeleteAssembly')
-                    })
-                },
-                {
-                    key: 'tblICItemBundles',
-                    lazy: true, 
-                    component: Ext.create('iRely.grid.Manager', {
-                        grid: grdBundle,
-                        deleteButton : grdBundle.down('#btnDeleteBundle'),
-                        createRecord: me.onBundleItemCreateRecord
-                    })
-                },
-                {
-                    key: 'tblICItemKits',
-                    lazy: true, 
-                    component: Ext.create('iRely.grid.Manager', {
-                        grid: grdKit,
-                        deleteButton : grdKit.down('#btnDeleteKit')
-                    }),
-                    details: [
-                        {
-                            key: 'tblICItemKitDetails',
-                            component: Ext.create('iRely.grid.Manager', {
-                                grid: grdKitDetails,
-                                deleteButton : grdKitDetails.down('#btnDeleteKitDetail')
-                            })
-                        }
-                    ]
-                },
+                // {
+                //     key: 'tblICItemAssemblies',
+                //     lazy: true, 
+                //     component: Ext.create('iRely.grid.Manager', {
+                //         grid: grdAssembly,
+                //         deleteButton : grdAssembly.down('#btnDeleteAssembly')
+                //     })
+                // },
+                // {
+                //     key: 'tblICItemBundles',
+                //     lazy: true, 
+                //     component: Ext.create('iRely.grid.Manager', {
+                //         grid: grdBundle,
+                //         deleteButton : grdBundle.down('#btnDeleteBundle'),
+                //         createRecord: me.onBundleItemCreateRecord
+                //     })
+                // },
+                // {
+                //     key: 'tblICItemKits',
+                //     lazy: true, 
+                //     component: Ext.create('iRely.grid.Manager', {
+                //         grid: grdKit,
+                //         deleteButton : grdKit.down('#btnDeleteKit')
+                //     }),
+                //     details: [
+                //         {
+                //             key: 'tblICItemKitDetails',
+                //             component: Ext.create('iRely.grid.Manager', {
+                //                 grid: grdKitDetails,
+                //                 deleteButton : grdKitDetails.down('#btnDeleteKitDetail')
+                //             })
+                //         }
+                //     ]
+                // },
                 {
                     key: 'tblICItemOwners',
                     lazy: true, 
@@ -1679,13 +1679,16 @@ Ext.define('Inventory.view.ItemViewController', {
         action(record);
     },
 
-    show : function(config) {
+    show: function(config) {
         "use strict";
 
         var me = this,
             win = this.getView();
 
-        if (config) {
+        if (config && config.param.searchTab === 'Bundle') {
+            iRely.Functions.openScreen('Inventory.view.Bundle', config);
+        }            
+        else if (config) {
             win.show();
             var context = win.context ? win.context.initialize() : me.setupContext();
 
@@ -1703,6 +1706,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 });
             }
         }
+
     },
 
     validateRecord: function(config, action) {

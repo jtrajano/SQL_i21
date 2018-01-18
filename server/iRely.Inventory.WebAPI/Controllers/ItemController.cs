@@ -293,5 +293,11 @@ namespace iRely.Inventory.WebApi
             }
         }
 
+        [HttpGet]
+        [ActionName("SearchBundle")]
+        public async Task<HttpResponseMessage> SearchBundle(GetParameter param)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchBundle(param));
+        }
     }
 }

@@ -1227,6 +1227,9 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strGrade).HasColumnName("strGrade");
             this.Property(t => t.strMarketValuation).HasColumnName("strMarketValuation");
             // End: Commodity tab fields
+
+            this.Property(t => t.strBundleType).HasColumnName("strBundleType");
+            this.Property(t => t.ysnListBundleSeparately).HasColumnName("ysnListBundleSeparately");
         }
     }
 

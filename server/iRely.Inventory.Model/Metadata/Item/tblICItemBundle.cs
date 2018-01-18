@@ -21,66 +21,72 @@ namespace iRely.Inventory.Model
         public decimal? dblMarkUpOrDown { get; set; }
         public DateTime? dtmBeginDate { get; set; }
         public DateTime? dtmEndDate { get; set; }
-        public int? intSort { get; set; }
 
-        private string _item;
+        private string _strItemNo;
         [NotMapped]
         public string strItemNo
         {
             get
             {
-                if (string.IsNullOrEmpty(_item))
+                if (string.IsNullOrEmpty(_strItemNo))
+                    if (tblICItem != null)
+                        return tblICItem.strItemNo;
+                    else
+                        return null;
+                else
+                    return _strItemNo;
+            }
+            set
+            {
+                _strItemNo = value;
+            }
+        }
+
+        private string _strComponentItemNo;
+        [NotMapped]
+        public string strComponentItemNo {
+            get
+            {
+                if (string.IsNullOrEmpty(_strComponentItemNo))
                     if (BundleItem != null)
                         return BundleItem.strItemNo;
                     else
                         return null;
                 else
-                    return _item;
+                    return _strComponentItemNo;
             }
             set
             {
-                _item = value;
+                _strComponentItemNo = value;
             }
         }
-        private string _uom;
+
+        private string _strUnitMeasure;
         [NotMapped]
         public string strUnitMeasure
         {
             get
             {
-                if (string.IsNullOrEmpty(_uom))
+                if (string.IsNullOrEmpty(_strUnitMeasure))
                     if (tblICItemUOM != null)
-                        return tblICItemUOM.strUnitMeasure;
+                        return tblICItemUOM.tblICUnitMeasure.strUnitMeasure;
                     else
                         return null;
                 else
-                    return _uom;
+                    return _strUnitMeasure;
             }
             set
             {
-                _uom = value;
+                _strUnitMeasure = value;
             }
         }
-        private decimal _unitQty;
-        [NotMapped]
-        public decimal dblUnit
-        {
-            get
-            {
-                if (tblICItemUOM != null)
-                    return tblICItemUOM.dblUnitQty ?? 0;
-                else
-                    return 0;
-            }
-            set
-            {
-                _unitQty = value;
-            }
-        }
+
+        //public vyuICGetBundleItem vyuICGetBundleItem { get; set; }
 
         public tblICItem tblICItem { get; set; }
         public tblICItem BundleItem { get; set; }
         public tblICItemUOM tblICItemUOM { get; set; }
+
     }
 
     public class vyuICGetBundleItem
@@ -88,17 +94,15 @@ namespace iRely.Inventory.Model
         public int intItemBundleId { get; set; }
         public int intItemId { get; set; }
         public string strItemNo { get; set; }
-        public string strItemDescription { get; set; }
-        public int? intBundleItemId { get; set; }
-        public string strComponent { get; set; }
-        public string strComponentDescription { get; set; }
+        public int intBundleItemId { get; set; }
+        public string strComponentItemNo { get; set; }
         public string strDescription { get; set; }
         public decimal? dblQuantity { get; set; }
         public int? intItemUnitMeasureId { get; set; }
-        public decimal? dblConversionFactor { get; set; }
         public string strUnitMeasure { get; set; }
-        public decimal? dblUnitQty { get; set; }
-        public int? intSort { get; set; }
+        public decimal? dblMarkUpOrDown { get; set; }
+        public DateTime? dtmBeginDate { get; set; }
+        public DateTime? dtmEndDate { get; set; }
     }
 
 }

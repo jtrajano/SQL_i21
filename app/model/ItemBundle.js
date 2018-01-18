@@ -21,10 +21,9 @@ Ext.define('Inventory.model.ItemBundle', {
                         remoteFilter: true,
                         complete: true, 
                         proxy: {
-                            extraParams: { include: 'BundleItem, tblICItemUOM.tblICUnitMeasure' },
                             type: 'rest',
                             api: {
-                                read: './inventory/api/itembundle/get'
+                                read: './inventory/api/item/searchbundlecomponents'
                             },
                             reader: {
                                 type: 'json',
@@ -32,31 +31,23 @@ Ext.define('Inventory.model.ItemBundle', {
                                 messageProperty: 'message'
                             }
                         },
-                        sortOnLoad: true,
-                        sorters: {
-                            direction: 'DESC',
-                            property: 'intSort'
-                        }
+                        sortOnLoad: true
                     }
                 }
             }},
-        { name: 'intBundleItemId', type: 'int', allowNull: true },
+        { name: 'intBundleItemId', type: 'int' },
         { name: 'strDescription', type: 'string' },
         { name: 'dblQuantity', type: 'float', defaultValue: 1.00 },
         { name: 'intItemUnitMeasureId', type: 'int', allowNull: true },
-        //{ name: 'dblUnit', type: 'float' },
-        { name: 'ysnAddOn', type: 'boolean' },
         { name: 'dblMarkUpOrDown', type: 'float' },
         { name: 'dtmBeginDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d'},
         { name: 'dtmEndDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },
-        { name: 'intSort', type: 'int', allowNull: true },
-
-        { name: 'strItemNo', type: 'string'},
-        { name: 'strUnitMeasure', type: 'string'}
+        { name: 'strComponentItemNo', type: 'string' },
+        { name: 'strUnitMeasure', type: 'string' }
     ],
 
     validators: [
-        {type: 'presence', field: 'strItemNo'},
+        {type: 'presence', field: 'strComponentItemNo'},
         {type: 'presence', field: 'strUnitMeasure'}
     ]
 });

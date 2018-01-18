@@ -5396,6 +5396,7 @@ Ext.define('Inventory.view.Item', {
                                     },
                                     {
                                         xtype: 'panel',
+                                        hidden: true,
                                         itemId: 'pgeCommodity',
                                         bodyPadding: 10,
                                         title: 'Commodity',
@@ -5799,193 +5800,9 @@ Ext.define('Inventory.view.Item', {
                                     },
                                     {
                                         xtype: 'panel',
-                                        itemId: 'pgeAssembly',
+                                        itemId: 'pgeAddOn',
                                         layout: 'fit',
-                                        title: 'Assembly',
-                                        tabConfig: {
-                                            xtype: 'tab',
-                                            itemId: 'cfgAssembly'
-                                        },
-                                        items: [
-                                            {
-                                                xtype: 'advancefiltergrid',
-                                                reference: 'grdAssembly',
-                                                itemId: 'grdAssembly',
-                                                margin: -1,
-                                                columnLines: true,
-                                                dockedItems: [
-                                                    {
-                                                        xtype: 'toolbar',
-                                                        dock: 'top',
-                                                        itemId: 'tlbGridOptions',
-                                                        layout: {
-                                                            type: 'hbox',
-                                                            padding: '0 0 0 1'
-                                                        },
-                                                        items: [
-                                                            {
-                                                                xtype: 'button',
-                                                                itemId: 'btnInsertAssembly',
-                                                                tabIndex: -1,
-                                                                iconCls: 'small-insert',
-                                                                text: 'Insert'
-                                                            },
-                                                            {
-                                                                xtype: 'button',
-                                                                itemId: 'btnDeleteAssembly',
-                                                                tabIndex: -1,
-                                                                iconCls: 'small-remove',
-                                                                text: 'Remove'
-                                                            },
-                                                            {
-                                                                xtype: 'filter1'
-                                                            }
-                                                        ]
-                                                    }
-                                                ],
-                                                columns: [
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        flex: 2,
-                                                        itemId: 'colAssemblyComponent',
-                                                        dataIndex: 'string',
-                                                        text: 'Component',
-                                                        editor: {
-                                                            xtype: 'gridcombobox',
-                                                            columns: [
-                                                                {
-                                                                    dataIndex: 'intItemId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Item Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strLotTracking',
-                                                                    dataType: 'string',
-                                                                    text: 'Lot Tracking',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strItemNo',
-                                                                    dataType: 'string',
-                                                                    text: 'Item Number',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strType',
-                                                                    dataType: 'string',
-                                                                    text: 'Item Type',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strDescription',
-                                                                    dataType: 'string',
-                                                                    text: 'Description',
-                                                                    flex: 1
-                                                                }
-                                                            ],
-                                                            itemId: 'cboAssemblyItem',
-                                                            displayField: 'strItemNo',
-                                                            valueField: 'strItemNo'
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        flex: 2,
-                                                        itemId: 'colAssemblyDescription',
-                                                        dataIndex: 'string',
-                                                        text: 'Description'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        flex: 1,
-                                                        itemId: 'colAssemblyQuantity',
-                                                        width: 65,
-                                                        align: 'right',
-                                                        text: 'Quantity',
-                                                        editor: {
-                                                            xtype: 'numberfield',
-                                                            quantityField: true,
-                                                            fieldStyle: 'text-align:right',
-                                                            hideTrigger: true
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        flex: 1,
-                                                        itemId: 'colAssemblyUOM',
-                                                        width: 82,
-                                                        dataIndex: 'string',
-                                                        text: 'UOM',
-                                                        editor: {
-                                                            xtype: 'gridcombobox',
-                                                            columns: [
-                                                                {
-                                                                    dataIndex: 'intItemUOMId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Unit Of Measure Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strUnitMeasure',
-                                                                    dataType: 'string',
-                                                                    text: 'Unit Measure',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strUnitType',
-                                                                    dataType: 'string',
-                                                                    text: 'Unit Type',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    xtype: 'checkcolumn',
-                                                                    dataIndex: 'ysnStockUnit',
-                                                                    dataType: 'boolean',
-                                                                    text: 'Stock Unit',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'dblUnitQty',
-                                                                    dataType: 'float',
-                                                                    hidden: true
-                                                                }
-                                                            ],
-                                                            itemId: 'cboAssemblyUOM',
-                                                            displayField: 'strUnitMeasure',
-                                                            valueField: 'strUnitMeasure'
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        flex: 1,
-                                                        itemId: 'colAssemblyUnit',
-                                                        width: 37,
-                                                        align: 'right',
-                                                        text: 'Unit Qty'
-                                                    }
-                                                ],
-                                                viewConfig: {
-                                                    itemId: 'grvAssembly'
-                                                },
-                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
-                                                    selType: 'checkboxmodel'
-                                                }),
-                                                plugins: [
-                                                    {
-                                                        ptype: 'cellediting',
-                                                        pluginId: 'cepAssembly',
-                                                        clicksToEdit: 1
-                                                    }
-                                                ]
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        xtype: 'panel',
-                                        itemId: 'pgeBundle',
-                                        layout: 'fit',
-                                        title: 'Bundle',
+                                        title: 'Add-On',
                                         tabConfig: {
                                             xtype: 'tab',
                                             itemId: 'cfgBundle'
@@ -6020,14 +5837,6 @@ Ext.define('Inventory.view.Item', {
                                                                 tabIndex: -1,
                                                                 iconCls: 'small-remove',
                                                                 text: 'Remove'
-                                                            },
-                                                            {
-                                                                xtype: 'checkboxfield',
-                                                                itemId: 'chkListBundleSeparately',
-                                                                margin: '0 10',
-                                                                tabIndex: -1,
-                                                                fieldLabel: 'List Bundle Items Separately',
-                                                                labelWidth: 180
                                                             },
                                                             {
                                                                 xtype: 'filter1'
@@ -6145,45 +5954,6 @@ Ext.define('Inventory.view.Item', {
                                                             displayField: 'strUnitMeasure',
                                                             valueField: 'strUnitMeasure'
                                                         }
-                                                    },
-                                                    {
-                                                        xtype: 'checkcolumn',
-                                                        flex: 0.75,
-                                                        itemId: 'colBundleAddOn',
-                                                        text: 'Add-on'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        flex: 1.25,
-                                                        itemId: 'colBundleMarkUpOrDown',
-                                                        align: 'right',
-                                                        text: 'Mark Up/Down',
-                                                        editor: {
-                                                            xtype: 'numberfield',
-                                                            quantityField: true,
-                                                            fieldStyle: 'text-align:right',
-                                                            hideTrigger: true
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'datecolumn',
-                                                        flex: 1,
-                                                        itemId: 'colBundleBeginDate',
-                                                        text: 'Begin Date',
-                                                        editor: {
-                                                            xtype: 'datefield',
-                                                            itemId: 'dtmBeginDate'
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'datecolumn',
-                                                        flex: 1,
-                                                        itemId: 'colBundleEndDate',
-                                                        text: 'End Date',
-                                                        editor: {
-                                                            xtype: 'datefield',
-                                                            itemId: 'dtmEndDate'
-                                                        }
                                                     }
                                                 ],
                                                 viewConfig: {
@@ -6204,6 +5974,7 @@ Ext.define('Inventory.view.Item', {
                                     },
                                     {
                                         xtype: 'panel',
+                                        hidden: true,
                                         itemId: 'pgeKit',
                                         title: 'Kit Details',
                                         layout: {

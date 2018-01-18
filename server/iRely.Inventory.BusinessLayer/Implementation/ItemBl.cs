@@ -199,7 +199,10 @@ namespace iRely.Inventory.BusinessLayer
         public override async Task<SearchResult> Search(GetParameter param)
         {
             var query = _db.GetQuery<vyuICSearchItem>()
-                .Filter(param, true);
+                    .Where(
+                        p => (p.strType != "Bundle")
+                    )
+                    .Filter(param, true);
             var data = await query.ExecuteProjection(param, "intItemId").ToListAsync(param.cancellationToken);
 
             return new SearchResult()
@@ -208,7 +211,6 @@ namespace iRely.Inventory.BusinessLayer
                 total = await query.CountAsync(param.cancellationToken),
                 summaryData = await query.ToAggregateAsync(param.aggregates)
             };
-            
         }
 
         /// <summary>
@@ -1181,5 +1183,22 @@ namespace iRely.Inventory.BusinessLayer
             return unitConversion;
         }
 
+        public async Task<SearchResult> SearchBundle(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICSearchItem>()
+                    .Where(
+                        p => (p.strType == "Bundle")
+                    )
+                .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "intItemId").ToListAsync(param.cancellationToken);
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync(param.cancellationToken),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
+            };
+
+        }
     }
 }

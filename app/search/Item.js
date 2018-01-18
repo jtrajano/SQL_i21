@@ -225,7 +225,26 @@ Ext.define('Inventory.search.Item', {
                 { dataIndex: 'dblWeight', text: 'Weight', hidden: true, width: 100, flex: 1, dataType: 'float', xtype: 'numbercolumn' },
                 { dataIndex: 'dblVolume', text: 'Volume', hidden: true, width: 100, flex: 1, dataType: 'float', xtype: 'numbercolumn' }
             ]
-        }
+        },
+        {
+            title: 'Search Bundle',
+            type: 'Inventory.Bundle',
+            api: {
+                read: './inventory/api/item/searchbundle'
+            },
+            columns: [
+                {dataIndex: 'intItemId', text: "Item Id", flex: 1, dataType: 'numeric', key: true, hidden: true},
+                {dataIndex: 'strItemNo', text: 'Item No', width: 100, defaultSort: true, sortOrder: 'ASC', dataType: 'string', minWidth: 100},
+                {dataIndex: 'strBundleType', text: 'Type', width: 100, dataType: 'string', minWidth: 100},
+                {dataIndex: 'strDescription', text: 'Description', flex: 1, dataType: 'string', minWidth: 250},
+                {dataIndex: 'strStatus', text: 'Status', width: 100, dataType: 'string', minWidth: 100},
+                {dataIndex: 'strCategory', text: 'Category', width: 100, dataType: 'string', minWidth: 100},
+                {dataIndex: 'strCommodity', text: 'Commodity', width: 100, dataType: 'string', minWidth: 100},
+                {dataIndex: 'strManufacturer', text: 'Manufacturer', width: 100, dataType: 'string', minWidth: 100},
+                {dataIndex: 'strBrandCode', text: 'Brand', width: 100, dataType: 'string', minWidth: 100},
+                {dataIndex: 'ysnListBundleSeparately', text: 'List Separately', width: 100, dataType: 'boolean', xtype: 'checkcolumn' }
+            ]
+        }          
     ],
 
     onInventoryUOMClick: function () {
