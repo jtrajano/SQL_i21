@@ -3,7 +3,7 @@
 	[intICTId] INT IDENTITY(1,1) NOT NULL,
 	[strICTName] NVARCHAR(200) COLLATE Latin1_General_CI_AS NOT NULL, 
 	[strICTDesc] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NOT NULL, 
-	[intConcurrencyId] INT NOT NULL, 
-	CONSTRAINT [PK_tblARICT_intConditionId] PRIMARY KEY CLUSTERED ([intICTId] ASC), 
-    CONSTRAINT [UK_tblARICT_strConditionName] UNIQUE ([strICTName])
+	[intConcurrencyId] INT CONSTRAINT [DF_tblARICT_intConcurrencyId] DEFAULT ((0)) NOT NULL,
+	CONSTRAINT [PK_tblARICT_intICTId] PRIMARY KEY CLUSTERED ([intICTId] ASC), 
+    CONSTRAINT [UK_tblARICT_strICTName] UNIQUE ([strICTName])
 )
