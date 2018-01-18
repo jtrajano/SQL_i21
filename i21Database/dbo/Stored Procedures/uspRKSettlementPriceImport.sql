@@ -62,7 +62,7 @@ WHILE @mRowNumber > 0
 	SELECT @intFutureMarketId=intFutureMarketId from tblRKFutureMarket where strFutMarketName=@strMarket
 
 
-	INSERT INTO tblRKFuturesSettlementPrice VALUES(@intFutureMarketId,@strSettlementDate,1)
+		INSERT INTO tblRKFuturesSettlementPrice(intFutureMarketId,dtmPriceDate,intConcurrencyId) VALUES(@intFutureMarketId,@strSettlementDate,1)
 	SELECT @intFutureSettlementPriceId = scope_Identity()
 
 --Insert Futures Month settlement Price	
@@ -79,7 +79,7 @@ WHILE @mRowNumber > 0
 	JOIN tblRKOptionsMonth fm on fm.strOptionMonth=replace(i.strFutureMonth ,'-',' ')  and intFutureMarketId=@intFutureMarketId
 	WHERE strInstrumentType like 'Opt%' and strFutureMarket=@strMarket
 
-select * from tblRKFutSettlementPriceMarketMap
+
 SELECT @mRowNumber = MIN(intRowNum)	FROM #temp	WHERE intRowNum > @mRowNumber
 END
 
