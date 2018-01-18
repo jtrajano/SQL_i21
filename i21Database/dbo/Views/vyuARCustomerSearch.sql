@@ -62,6 +62,7 @@ SELECT intEntityId				= ENTITY.intEntityId
 	 , ysnCreditHold
 	 , intWarehouseId			= SHIPTOLOCATION.intWarehouseId
 	 , strWarehouseName			= SHIPTOLOCATION.strWarehouseName
+	 , intEntityLineOfBusinessIds = STUFF(LOB.intEntityLineOfBusinessIds,1,3,'')
 FROM tblEMEntity ENTITY
 INNER JOIN (
 	SELECT C.intEntityId
@@ -210,3 +211,4 @@ LEFT JOIN (
 		 , strPhone
 	FROM dbo.tblEMEntityLocation WITH (NOLOCK)
 ) BILLTOLOCATION ON CUSTOMER.intBillToId = BILLTOLOCATION.intEntityLocationId
+CROSS APPLY (SELECT(SELECT '|^|' + CONVERT(VARCHAR,intLineOfBusinessId) FROM tblEMEntityLineOfBusiness WHERE intEntityId = CUSTOMER.intEntityId FOR XML PATH('')) as intEntityLineOfBusinessIds) as LOB
