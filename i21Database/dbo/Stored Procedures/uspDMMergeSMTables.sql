@@ -52,4 +52,19 @@ BEGIN
 	 EXECUTE sp_executesql @SQLString;
 	 SET IDENTITY_INSERT tblSMFreightTerms OFF
 
+	 --tblSMShipVia
+    SET @SQLString = N'MERGE tblSMShipVia AS Target
+	  USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSMShipVia]) AS Source
+	  ON (Target.intEntityId = Source.intEntityId)
+	  WHEN MATCHED THEN
+	      UPDATE SET Target.strShipViaOriginKey = Source.strShipViaOriginKey, Target.strShipVia = Source.strShipVia, Target.strShippingService = Source.strShippingService, Target.strName = Source.strName, Target.strAddress = Source.strAddress, Target.strCity = Source.strCity, Target.strState = Source.strState, Target.strZipCode = Source.strZipCode, Target.strFederalId = Source.strFederalId, Target.strTransporterLicense = Source.strTransporterLicense,Target.strMotorCarrierIFTA = Source.strMotorCarrierIFTA, Target.strTransportationMode = Source.strTransportationMode, Target.ysnCompanyOwnedCarrier = Source.ysnCompanyOwnedCarrier,Target.strFreightBilledBy = Source.strFreightBilledBy,Target.ysnActive = Source.ysnActive,Target.intSort = Source.intSort,Target.intConcurrencyId = Source.intConcurrencyId
+      WHEN NOT MATCHED BY TARGET THEN
+	      INSERT (intEntityId, strShipViaOriginKey,strShipVia, strShippingService,strName,strAddress, strCity,strState, strZipCode, strFederalId, strTransporterLicense,strMotorCarrierIFTA, strTransportationMode, ysnCompanyOwnedCarrier,strFreightBilledBy,ysnActive,intSort,intConcurrencyId)
+			  VALUES(Source.intEntityId,Source.strShipViaOriginKey,Source.strShipVia, Source.strShippingService,Source.strName,Source.strAddress, Source.strCity,Source.strState, Source.strZipCode, Source.strFederalId, Source.strTransporterLicense,Source.strMotorCarrierIFTA, Source.strTransportationMode, Source.ysnCompanyOwnedCarrier,Source.strFreightBilledBy,Source.ysnActive,Source.intSort,Source.intConcurrencyId)
+	  WHEN NOT MATCHED BY SOURCE THEN
+			DELETE;'
+
+    SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+    EXECUTE sp_executesql @SQLString;
+
 END
