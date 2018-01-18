@@ -22,9 +22,6 @@ Ext.define('Inventory.view.BundleViewModel', {
                 },
                 {
                     strBundleType: 'Option'
-                },
-                {
-                    strBundleType: 'Substitute'
                 }
             ],
             fields: [
