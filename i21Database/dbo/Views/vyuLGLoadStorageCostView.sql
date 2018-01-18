@@ -6,6 +6,9 @@ SELECT L.intLoadId,
 	   LDL.intLoadDetailLotId,
 	   LOT.intLotId,
 	   LOT.strLotNumber,
+	   CH.strContractNumber, 
+	   CD.intContractSeq,
+	   CD.dtmUpdatedAvailabilityDate,
 	   LOT.dblQty,
 	   LOT.dblWeight,
 	   LDL.dblLotQuantity,
@@ -29,6 +32,8 @@ SELECT L.intLoadId,
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
+JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
+JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblICLot LOT ON LOT.intLotId = LDL.intLotId
 JOIN tblICItem I ON I.intItemId = LOT.intItemId
 JOIN tblICItemUOM IU ON IU.intItemUOMId = LOT.intItemUOMId
