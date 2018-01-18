@@ -6088,6 +6088,8 @@
     <Build Include="dbo\Views\vyuSMRecurringTransaction.sql" />
     <Build Include="dbo\Tables\tblICItemAddOn.sql" />
     <Build Include="dbo\Views\vyuICGetAddOnItem.sql" />
+    <Build Include="dbo\Tables\tblICItemSubstitute.sql" />
+    <Build Include="dbo\Views\vyuICGetSubstituteItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
