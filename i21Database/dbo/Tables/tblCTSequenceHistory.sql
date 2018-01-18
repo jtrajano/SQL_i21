@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblCTSequenceHistory]
 (
 	intSequenceHistoryId	  INT IDENTITY(1,1) NOT NULL,
+	dtmHistoryCreated		  DATETIME,
     intContractHeaderId		  INT,
     intContractDetailId		  INT,
     intContractTypeId		  INT,
@@ -8,7 +9,7 @@
     intEntityId			      INT,
     intContractStatusId		  INT,
     intCompanyLocationId	  INT,
-    inItemId				  INT,
+    intItemId				  INT,
     intPricingTypeId		  INT,
     intFutureMarketId		  INT,
     intFutureMonthId		  INT,
@@ -21,8 +22,10 @@
     dtmEndDate				  DATETIME,
     dblQuantity				  NUMERIC(18,6),
     dblBalance				  NUMERIC(18,6),
+	dblScheduleQty			  NUMERIC(18,6),
     dblFutures				  NUMERIC(18,6),
     dblBasis				  NUMERIC(18,6),	
+	dblCashPrice			  NUMERIC(18,6),
     dblLotsPriced			  NUMERIC(18,6),	 
     dblLotsUnpriced			  NUMERIC(18,6),
     dblQtyPriced			  NUMERIC(18,6),

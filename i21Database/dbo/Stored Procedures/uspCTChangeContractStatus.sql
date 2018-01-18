@@ -90,6 +90,8 @@ BEGIN TRY
 				@toValue				= '',
 				@details				= @details 		
 
+		EXEC	uspCTCreateDetailHistory	NULL, @intId
+
 		SELECT @intId = MIN(intId) FROM @ids WHERE intId > @intId
 	END
 

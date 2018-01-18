@@ -499,7 +499,8 @@ BEGIN TRY
 	
 	---------------------------------------End Allocation-------------------------
 
-	
+	EXEC	uspCTCreateDetailHistory	NULL, @intDonorId
+	EXEC	uspCTCreateDetailHistory	NULL, @intRecipientId
 	--COMMIT TRAN
 END TRY
 BEGIN CATCH

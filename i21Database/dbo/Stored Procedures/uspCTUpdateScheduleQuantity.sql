@@ -106,6 +106,8 @@ BEGIN TRY
 				@intUserId				=	@intUserId
 	END
 
+	EXEC	uspCTCreateDetailHistory	NULL,@intContractDetailId
+
 END TRY
 
 BEGIN CATCH

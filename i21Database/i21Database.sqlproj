@@ -6015,6 +6015,7 @@
     <Build Include="dbo\Tables\tblSCDeliverySheetHistory.sql" />
     <Build Include="dbo\Tables\tblCTSequenceHistory.sql" />
     <Build Include="dbo\Views\vyuSMBEExportCashDiscount.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTCreateDetailHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

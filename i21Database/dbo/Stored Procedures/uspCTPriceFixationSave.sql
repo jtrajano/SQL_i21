@@ -168,6 +168,8 @@ BEGIN TRY
 
 			UPDATE tblCTContractDetail SET intSplitFromId = NULL WHERE intSplitFromId = @intContractDetailId
 
+			EXEC	uspCTCreateDetailHistory	@intContractHeaderId,@intContractDetailId
+
 			IF	@ysnMultiplePriceFixation = 1
 			BEGIN
 
@@ -477,6 +479,8 @@ BEGIN TRY
 		SELECT @intPricingTypeId = intPricingTypeId, @dblCashPrice = dblCashPrice FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
 		
 		EXEC	uspCTSequencePriceChanged @intContractDetailId, @intUserId, 'Price Contract'
+
+		EXEC	uspCTCreateDetailHistory	@intContractHeaderId,@intContractDetailId
 
 		IF	@ysnMultiplePriceFixation = 1
 		BEGIN

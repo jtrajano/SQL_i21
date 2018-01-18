@@ -80,7 +80,8 @@ BEGIN TRY
 	EXEC uspQMTransferContractSample @intFromContractDetailId, @intToContractDetailId, @intUserId
 	EXEC uspLGTransferContractLoads @intFromContractDetailId, @intToContractDetailId, @intUserId
 
-
+	EXEC	uspCTCreateDetailHistory	NULL,@intFromContractDetailId
+	EXEC	uspCTCreateDetailHistory	NULL,@intToContractDetailId
 
 END TRY
 BEGIN CATCH       
