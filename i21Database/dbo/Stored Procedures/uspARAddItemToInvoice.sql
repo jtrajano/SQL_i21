@@ -261,6 +261,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 		,@ContractDetailId	INT				= NULL
 		,@EntityCustomerId	INT
 		,@InvoiceDate		DATETIME
+		,@SpecialPrice		NUMERIC(18,6)	= 0.000000	
 
 		BEGIN TRY
 		SELECT 
@@ -289,10 +290,10 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 			,@ItemUOMId					= @ItemUOMId
 			,@TransactionDate			= @InvoiceDate
 			,@Quantity					= @ItemQtyShipped
-			,@Price						= @ItemPrice			OUTPUT
-			,@Pricing					= @Pricing			OUTPUT
-			,@ContractHeaderId			= @ContractHeaderId	OUTPUT
-			,@ContractDetailId			= @ContractDetailId	OUTPUT
+			,@Price						= @SpecialPrice			OUTPUT
+			,@Pricing					= @Pricing				OUTPUT
+			,@ContractHeaderId			= @ContractHeaderId		OUTPUT
+			,@ContractDetailId			= @ContractDetailId		OUTPUT
 			,@ContractNumber			= @ContractNumber		OUTPUT
 			,@ContractSeq				= @ContractSeq			OUTPUT
 			,@TermDiscount				= @ItemTermDiscount		OUTPUT
@@ -314,7 +315,8 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 
 		IF (ISNULL(@RefreshPrice,0) = 1)
 			BEGIN
-				SET @ItemUnitPrice = @ItemPrice
+				SET @ItemPrice = @SpecialPrice
+				SET @ItemUnitPrice = @SpecialPrice
 				SET @ItemPricing = @Pricing
 				SET @ItemContractHeaderId = @ContractHeaderId
 				SET @ItemContractDetailId = @ContractDetailId
