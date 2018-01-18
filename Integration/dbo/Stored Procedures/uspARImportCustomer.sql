@@ -458,7 +458,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 						@dblBudgetAmountForBudgetBilling = agcus_budget_amt,
 						@strBudgetBillingBeginMonth	= agcus_budget_beg_mm,	
 						@strBudgetBillingEndMonth	= agcus_budget_end_mm,
-						@dblMonthlyBudget	= agcus_budget_amt,
+						@dblMonthlyBudget	= ISNULL(agcus_budget_amt,0),
 						@intNoOfPeriods		= CASE WHEN (agcus_budget_beg_mm < agcus_budget_end_mm) THEN (agcus_budget_end_mm -agcus_budget_beg_mm) + 1
 												   WHEN (agcus_budget_beg_mm > agcus_budget_end_mm) THEN ((13 - agcus_budget_beg_mm) + agcus_budget_end_mm)
 												   ELSE 0 END, 
@@ -1250,7 +1250,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 						@dblBudgetAmountForBudgetBilling = ptcus_budget_amt,
 						@strBudgetBillingBeginMonth	= ptcus_budget_beg_mm,
 						@strBudgetBillingEndMonth	= ptcus_budget_end_mm,
-						@dblMonthlyBudget	= ptcus_budget_amt,
+						@dblMonthlyBudget	= ISNULL(ptcus_budget_amt,0),
 						@intNoOfPeriods		= CASE WHEN (ptcus_budget_beg_mm < ptcus_budget_end_mm) THEN (ptcus_budget_end_mm -ptcus_budget_beg_mm) + 1
 												   WHEN (ptcus_budget_beg_mm > ptcus_budget_end_mm) THEN ((13 - ptcus_budget_beg_mm) + ptcus_budget_end_mm)
 												   ELSE 0 END, 
