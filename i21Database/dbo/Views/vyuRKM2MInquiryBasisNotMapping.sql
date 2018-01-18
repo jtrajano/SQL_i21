@@ -10,7 +10,7 @@ SELECT  intM2MInquiryBasisDetailId
 		,strFutMarketName
 		,strFutureMonth
 		,strItemNo
-		,strPricingType
+		,pt.strPricingType
 		,strLocationName
 		,strUnitMeasure
  FROM tblRKM2MInquiry bd

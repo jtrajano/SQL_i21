@@ -6081,6 +6081,10 @@
     <Build Include="dbo\Stored Procedures\uspAPCreateDeferredPayment.sql" />
     <Build Include="dbo\Tables\tblAPDeferredPaymentInterest.sql" />
     <Build Include="dbo\Views\vyuLGStockValuationForBank.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKM2MGLDetailPreview.sql" />
+    <Build Include="dbo\Tables\tblRKM2MPostRecap.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKM2MGLPost.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKM2MPostRecap.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
