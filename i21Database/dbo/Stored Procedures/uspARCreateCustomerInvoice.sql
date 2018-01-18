@@ -123,7 +123,7 @@
 	,@ItemDestinationGradeId		INT				= NULL
 	,@ItemDestinationWeightId		INT				= NULL
 	,@UseOriginIdAsInvoiceNumber    BIT				= 0
-	,@intEntityLineOfBusinessId		INT				= NULL
+	,@intLineOfBusinessId			INT				= NULL
 	,@intICTId						INT				= NULL
 AS
 
@@ -403,7 +403,7 @@ BEGIN TRY
 		,[intTruckDriverReferenceId]
 		,[intDocumentMaintenanceId]
 		,[intConcurrencyId]
-		,[intEntityLineOfBusinessId]
+		,[intLineOfBusinessId]
 		,[intICTId])
 	SELECT [strInvoiceNumber]			= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @InvoiceOriginId ELSE NULL END
 		,[strTransactionType]			= @TransactionType
@@ -475,7 +475,7 @@ BEGIN TRY
 		,[intTruckDriverReferenceId]	= @TruckDriverReferenceId
 		,[intDocumentMaintenanceId]		= @DocumentMaintenanceId
 		,[intConcurrencyId]				= 0
-		,[intEntityLineOfBusinessId]	= @intEntityLineOfBusinessId
+		,[intLineOfBusinessId]	= @intLineOfBusinessId
 		,[@intICTId]					= @intICTId
 	FROM	
 		tblARCustomer C

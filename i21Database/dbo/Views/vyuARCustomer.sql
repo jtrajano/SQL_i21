@@ -40,6 +40,7 @@ SELECT
 ,ysnHasBudgetSetup = cast(case when (select top 1 1 from tblARCustomerBudget where intEntityCustomerId = Cus.[intEntityId]) = 1 then 1 else 0 end as bit)
 ,intServiceChargeId
 ,strCustomerTerm = TERM.strTerm
+,STUFF(LOB.intEntityLineOfBusinessIds,1,3,'') as intEntityLineOfBusinessIds
 FROM tblEMEntity as Entity
 INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityId]
 INNER JOIN [tblEMEntityToContact] as CusToCon ON Cus.[intEntityId] = CusToCon.intEntityId and CusToCon.ysnDefaultContact = 1
@@ -50,3 +51,4 @@ LEFT JOIN [tblEMEntityLocation] as ShipToLoc ON Cus.intShipToId = ShipToLoc.intE
 LEFT JOIN [tblEMEntityLocation] as BillToLoc ON Cus.intBillToId = BillToLoc.intEntityLocationId
 LEFT JOIN tblSMPaymentMethod AS CustoPM ON Cus.intPaymentMethodId = CustoPM.intPaymentMethodID
 LEFT JOIN tblSMTerm as TERM ON TERM.intTermID = Cus.intTermsId
+CROSS APPLY (SELECT(SELECT '|^|' + CONVERT(VARCHAR,intLineOfBusinessId) FROM tblEMEntityLineOfBusiness WHERE intEntityId = Cus.intEntityId FOR XML PATH('')) as intEntityLineOfBusinessIds) as LOB

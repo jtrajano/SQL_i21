@@ -87,7 +87,7 @@ DECLARE	 @OriginalInvoiceId			INT
 		,@ItemSubCurrencyRate		NUMERIC(18,6)
 		,@ysnRecurringDuplicate		BIT = 0
 		,@intDocumentMaintenanceId		INT = NULL
-		,@intEntityLineOfBusinessId INT = NULL
+		,@intLineOfBusinessId		INT = NULL
 		,@intICTId					INT = NULL
 		
 SELECT 
@@ -139,7 +139,7 @@ SELECT
 	,@EntityContactId				= [intEntityContactId]
 	,@TotalTermDiscount				= [dblTotalTermDiscount]	
 	,@intDocumentMaintenanceId		= [intDocumentMaintenanceId]
-	,@intEntityLineOfBusinessId		= [intEntityLineOfBusinessId]
+	,@intLineOfBusinessId			= [intLineOfBusinessId]
 	,@intICTId						= [intICTId]
 FROM
 	tblARInvoice
@@ -407,7 +407,7 @@ BEGIN TRY
 		,@EntityContactId						= @EntityContactId
 		,@ItemStorageScheduleTypeId					= @StorageScheduleTypeId
 		,@DocumentMaintenanceId					= @intDocumentMaintenanceId
-		,@intEntityLineOfBusinessId				= @intEntityLineOfBusinessId
+		,@intLineOfBusinessId					= @intLineOfBusinessId
 		,@intICTId								= @intICTId
 
 END TRY

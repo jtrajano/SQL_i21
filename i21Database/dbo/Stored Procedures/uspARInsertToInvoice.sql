@@ -50,7 +50,7 @@ DECLARE @EntityCustomerId		INT,
 		@SplitId				INT,
 		@EntityContactId		INT,
 		@StorageScheduleTypeId	INT,
-		@intEntityLineOfBusinessId	INT
+		@intLineOfBusinessId		INT
 
 DECLARE @tblItemsToInvoiceUnsorted TABLE (intItemId					INT, 
 							ysnIsInventory				BIT,
@@ -457,7 +457,7 @@ SELECT TOP 1
 		@SplitId				=	intSplitId,
 		@SalesOrderComment		=   strComments,
 		@EntityContactId		=	intEntityContactId,
-		@intEntityLineOfBusinessId	= intEntityLineOfBusinessId
+		@intLineOfBusinessId		=	intLineOfBusinessId
 FROM tblSOSalesOrder WHERE intSalesOrderId = @SalesOrderId
 	
 EXEC dbo.[uspARGetDefaultComment] @CompanyLocationId, @EntityCustomerId, 'Invoice', 'Software', @SoftwareComment OUT
@@ -553,7 +553,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 							@ItemMaintenanceAmount	=	@dblNewSoftwareMaintAmt,
 							@ItemLicenseAmount		=	0,
 							@ItemPrice				=	@dblNewSoftwareMaintAmt,
-							@intEntityLineOfBusinessId = @intEntityLineOfBusinessId
+							@intLineOfBusinessId	= @intLineOfBusinessId
 							
 						DECLARE @softwareToPost NVARCHAR(MAX)
 						SET @softwareToPost = CONVERT(NVARCHAR(MAX), @intNewSoftwareInvoiceId)
@@ -607,7 +607,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[ysnRecurring]
 					,[ysnPosted]
 					,[intEntityContactId]
-					,[intEntityLineOfBusinessId]
+					,[intLineOfBusinessId]
 				)
 				SELECT
 					[intEntityCustomerId]
@@ -652,7 +652,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,1
 					,0
 					,[intEntityContactId]
-					,[intEntityLineOfBusinessId]
+					,[intLineOfBusinessId]
 				FROM
 				tblSOSalesOrder
 				WHERE intSalesOrderId = @SalesOrderId
@@ -792,7 +792,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 					,@BillToLocationId				= @BillToLocationId
 					,@SplitId						= @SplitId
 					,@EntityContactId				= @EntityContactId
-					,@intEntityLineOfBusinessId		= @intEntityLineOfBusinessId
+					,@intLineOfBusinessId			= @intLineOfBusinessId
 
 			IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0 
 				BEGIN

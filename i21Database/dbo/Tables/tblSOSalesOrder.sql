@@ -71,7 +71,7 @@
 	[dblTotalTermDiscount]		NUMERIC(18, 6)	NULL DEFAULT 0,	
 	[intDocumentMaintenanceId]  INT				NULL,
 	[intRecipeGuideId]			INT				NULL,
-	[intEntityLineOfBusinessId] INT				NULL,
+	[intLineOfBusinessId] INT				NULL,
 	[intOpportunityId]		    INT				NULL,
     CONSTRAINT [PK_tblSOSalesOrder] PRIMARY KEY CLUSTERED ([intSalesOrderId] ASC),
     CONSTRAINT [FK_tblSOSalesOrder_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
@@ -87,7 +87,7 @@
 	CONSTRAINT [FK_tblSOSalesOrder_tblEMEntitySplit_intSplitId] FOREIGN KEY ([intSplitId]) REFERENCES [dbo].[tblEMEntitySplit] ([intSplitId]),
 	CONSTRAINT [FK_tblSOSalesOrder_tblSMTerm_intTermId] FOREIGN KEY ([intTermId]) REFERENCES [tblSMTerm]([intTermID]),
 	CONSTRAINT [FK_tblSOSalesOrder_tblSMDocumentMaintenance_intDocumentMaintenanceId] FOREIGN KEY (intDocumentMaintenanceId) REFERENCES [tblSMDocumentMaintenance](intDocumentMaintenanceId),
-	CONSTRAINT [FK_tblSOSalesOrder_tblEMEntityLineOfBusiness_intEntityLineOfBusinessId] FOREIGN KEY (intEntityLineOfBusinessId) REFERENCES [tblEMEntityLineOfBusiness](intEntityLineOfBusinessId),
+	CONSTRAINT [FK_tblSOSalesOrder_tblSMLineOfBusiness_intLineOfBusinessId] FOREIGN KEY (intLineOfBusinessId) REFERENCES [tblSMLineOfBusiness](intLineOfBusinessId),
 	CONSTRAINT [FK_tblSOSalesOrder_tblCRMOpportunity_intOpportunityId] FOREIGN KEY (intOpportunityId) REFERENCES [tblCRMOpportunity](intOpportunityId),
 	CONSTRAINT [FK_tblSOSalesOrder_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID])    
 );
