@@ -6016,6 +6016,8 @@
     <Build Include="dbo\Tables\tblCTSequenceHistory.sql" />
     <Build Include="dbo\Views\vyuSMBEExportCashDiscount.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateDetailHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSendNotificationEDI940.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFErrorNotificationEDI943.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
