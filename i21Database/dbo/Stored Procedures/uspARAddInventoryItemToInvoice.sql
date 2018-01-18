@@ -100,6 +100,10 @@ DECLARE @ZeroDecimal			NUMERIC(18, 6)
 		,@InitTranCount			INT
 		,@Savepoint				NVARCHAR(32)
 
+		,@ItemName				NVARCHAR(50)
+		,@LocationName			NVARCHAR(50)
+		,@ItemLocationError		NVARCHAR(255)
+
 SET @InitTranCount = @@TRANCOUNT
 SET @Savepoint = SUBSTRING(('ARAddInventoryItemToInvoice' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
 SET @ZeroDecimal = 0.000000
@@ -142,10 +146,15 @@ IF NOT EXISTS(	SELECT NULL
 				FROM tblICItem IC INNER JOIN tblICItemLocation IL ON IC.intItemId = IL.intItemId
 				WHERE IC.[intItemId] = @ItemId AND IL.[intLocationId] = @CompanyLocationId)
 	BEGIN		
-		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR('The item was not set up to be available on the specified location!', 16, 1);
-		SET @ErrorMessage = 'The item was not set up to be available on the specified location!'
-		RETURN 0;
+		IF (ISNULL(@RaiseError,0) = 1)
+		begin
+			set @ItemName = (SELECT top 1 ltrim(rtrim(strItemNo)) FROM tblICItem where intItemId = @ItemId);
+			set @LocationName = (SELECT top 1 ltrim(rtrim(strLocationName)) FROM tblSMCompanyLocation where intCompanyLocationId = @CompanyLocationId);
+			set @ItemLocationError = 'The item (' + @ItemName + ') was not set up to be available on the specified location (' + @LocationName + ')!';
+			RAISERROR(@ItemLocationError, 16, 1);
+			SET @ErrorMessage = @ItemLocationError;
+			RETURN 0;
+		end
 	END
 
 
