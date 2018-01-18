@@ -60,10 +60,10 @@ select
         join vyuEMEntityType b
             on b.intEntityId = a.intEntityId --and b.strType IN ('Buyer')        
 		
-        left join [tblEMEntityToContact] f  
+        join [tblEMEntityToContact] f  
             on f.intEntityId = a.intEntityId --and f.ysnDefaultContact = 1  
-        left join tblEMEntity g  
-            on f.intEntityContactId = g.intEntityId
+        join tblEMEntity g  
+            on f.intEntityContactId = g.intEntityId and g.ysnActive = convert(bit,1)
 		left join tblEMEntityPhoneNumber h
 			on h.intEntityId = g.intEntityId
 		left join tblEMEntityMobileNumber i
