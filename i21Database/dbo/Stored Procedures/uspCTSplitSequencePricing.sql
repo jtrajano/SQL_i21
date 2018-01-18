@@ -126,7 +126,7 @@ BEGIN TRY
 					WHERE	@intFutOptTransactionId = intFutOptTransactionId
 					AND		intContractDetailId	= @intContractDetailId	
 					
-					EXEC	@strTradeNo	=	uspCTGetStartingNumber 'FutOpt Transaction'
+					EXEC	uspCTGetStartingNumber 'FutOpt Transaction', @strTradeNo OUTPUT
 					SET		@strTradeNo	=	LTRIM(RTRIM(@strTradeNo)) + '-H'
 					SET		@XML =	'<root><toUpdate><intNoOfContract>'+STR(@dblChildSeqLots)+'</intNoOfContract>'+
 									'<dtmTransactionDate>'+@strDate+'</dtmTransactionDate>'+
@@ -143,7 +143,7 @@ BEGIN TRY
 					EXEC uspCTCreateADuplicateRecord 'tblRKAssignFuturesToContractSummary',@intSummaryId, @intNewSummaryId OUTPUT,@XML
 				END
 
-				EXEC	@strTradeNo = uspCTGetStartingNumber 'Price Fixation Trade No'
+				EXEC	uspCTGetStartingNumber 'Price Fixation Trade No', @strTradeNo OUTPUT
 				SET		@XML =	'<root><toUpdate><strTradeNo>'+LTRIM(RTRIM(@strTradeNo))+'</strTradeNo><dblNoOfLots>'+STR(@dblChildSeqLots)+'</dblNoOfLots>'+
 								'<dblQuantity>'+STR(@dblChildSeqQty)+'</dblQuantity>'+
 								--'<dtmFixationDate>'+@strDateWithTime+'</dtmFixationDate>'+

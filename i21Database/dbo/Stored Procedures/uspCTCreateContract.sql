@@ -138,7 +138,7 @@ BEGIN TRY
 		WHERE	SC.intTicketId	= @intExternalId	
 
 		SELECT	@strStartingNumber = CASE WHEN intContractTypeId = 1 THEN 'PurchaseContract' ELSE 'SaleContract' END FROM #tmpExtracted
-		EXEC	@strContractNumber = uspCTGetStartingNumber @strStartingNumber
+		EXEC	uspCTGetStartingNumber @strStartingNumber,@strContractNumber OUTPUT
 		UPDATE	#tmpExtracted SET strContractNumber = @strContractNumber
 	END
 
@@ -183,7 +183,7 @@ BEGIN TRY
 		WHERE	SC.intDeliverySheetId	= @intExternalId	
 
 		SELECT	@strStartingNumber = CASE WHEN intContractTypeId = 1 THEN 'PurchaseContract' ELSE 'SaleContract' END FROM #tmpExtracted
-		EXEC	@strContractNumber = uspCTGetStartingNumber @strStartingNumber
+		EXEC	uspCTGetStartingNumber @strStartingNumber, @strContractNumber OUTPUT
 		UPDATE	#tmpExtracted SET strContractNumber = @strContractNumber
 	END
 

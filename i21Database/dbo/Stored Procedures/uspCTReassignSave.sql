@@ -243,7 +243,7 @@ BEGIN TRY
 		ELSE
 		BEGIN
 
-			EXEC  @strTradeNo =  uspCTGetStartingNumber 'Price Fixation Trade No'
+			EXEC  uspCTGetStartingNumber 'Price Fixation Trade No', @strTradeNo OUTPUT
 
 			SET @strXML = '<root>'
 			SET @strXML +=		'<toUpdate>' 
