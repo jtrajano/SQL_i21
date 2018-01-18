@@ -5462,6 +5462,8 @@
     <Build Include="dbo\Views\vyuMFGetPalletSSCCNo.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRegenerateTask.sql" />
     <Build Include="dbo\Views\vyuPREmployeeW3.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSendNotificationEDI940.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFErrorNotificationEDI943.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
