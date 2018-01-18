@@ -39,5 +39,6 @@ namespace iRely.Inventory.BusinessLayer
         Task<decimal> GetUnitConversion(int? fromUnitMeasureId, int? toUnitMeasureId);
         Task<SearchResult> SearchBundle(GetParameter param);
         Task<SearchResult> SearchAddOns(GetParameter param);
+        Task<SearchResult> SearchSubstitutes(GetParameter param);
     }
 }

@@ -144,6 +144,8 @@ namespace iRely.Inventory.Model
         public ICollection<tblICBuildAssembly> tblICBuildAssemblies { get; set; }
         public ICollection<tblICItemAddOn> tblICItemAddOns { get; set; }
 
+        public ICollection<tblICItemSubstitute> tblICItemSubstitutes { get; set; }
+
     }
 
     public class ItemUOMVM

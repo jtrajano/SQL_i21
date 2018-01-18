@@ -1120,40 +1120,40 @@ Ext.define('Inventory.view.ItemViewController', {
                 colCommodityEOMCost: 'dblEOMCost'
             },
 
-            //------------//
-            //Assembly Tab//
-            //------------//
-            grdAssembly: {
-                colAssemblyComponent: {
-                    dataIndex: 'strItemNo',
-                    editor: {
-                        store: '{assemblyItem}',
-                        defaultFilters: [
-                            {
-                                column: 'strLotTracking',
-                                value: 'No',
-                                conjunction: 'and'
-                            }
-                        ]
-                    }
-                },
-                colAssemblyQuantity: 'dblQuantity',
-                colAssemblyDescription: 'strItemDescription',
-                colAssemblyUOM: {
-                    dataIndex: 'strUnitMeasure',
-                    editor: {
-                        store: '{assemblyUOM}',
-                        defaultFilters: [{
-                            column: 'intItemId',
-                            value: '{grdAssembly.selection.intAssemblyItemId}'
-                        }]
-                    }
-                },
-                colAssemblyUnit: 'dblUnit'
-            },
+            // //------------//
+            // //Assembly Tab//
+            // //------------//
+            // grdAssembly: {
+            //     colAssemblyComponent: {
+            //         dataIndex: 'strItemNo',
+            //         editor: {
+            //             store: '{assemblyItem}',
+            //             defaultFilters: [
+            //                 {
+            //                     column: 'strLotTracking',
+            //                     value: 'No',
+            //                     conjunction: 'and'
+            //                 }
+            //             ]
+            //         }
+            //     },
+            //     colAssemblyQuantity: 'dblQuantity',
+            //     colAssemblyDescription: 'strItemDescription',
+            //     colAssemblyUOM: {
+            //         dataIndex: 'strUnitMeasure',
+            //         editor: {
+            //             store: '{assemblyUOM}',
+            //             defaultFilters: [{
+            //                 column: 'intItemId',
+            //                 value: '{grdAssembly.selection.intAssemblyItemId}'
+            //             }]
+            //         }
+            //     },
+            //     colAssemblyUnit: 'dblUnit'
+            // },
 
             //------------------//
-            //Bundle Details Tab//
+            // Add On Tab       //
             //------------------//
             grdAddOn: {
                 colAddOnItem: {
@@ -1203,41 +1203,87 @@ Ext.define('Inventory.view.ItemViewController', {
                 }
             },
 
-            //---------------//
-            //Kit Details Tab//
-            //---------------//
-            grdKit: {
-                colKitComponent: 'strComponent',
-                colKitInputType: {
-                    dataIndex: 'strInputType',
+            //------------------//
+            // Substitute       //
+            //------------------//
+            grdSubstitute: {
+                colSubstituteItem: {
+                    dataIndex: 'strSubstituteItemNo',
                     editor: {
-                        store: '{inputTypes}'
+                        origValueField: 'strItemNo',
+                        origUpdateField: 'strSubstituteItemNo',
+                        store: '{bundleItem}',
+                        defaultFilters: [
+                            {
+                                column: 'strType',
+                                value: 'Inventory',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intItemId',
+                                value: '{current.intItemId}',
+                                condition: 'noteq',
+                                conjunction: 'and'
+                            }                        
+                        ]
                     }
-                }
-            },
-
-            grdKitDetails: {
-                colKitItem: {
-                    dataIndex: 'strItemNo',
+                },
+                colSubstituteDescription: 'strDescription',
+                colSubstituteQuantity: 'dblQuantity',
+                colSubstituteMarkUpOrDown: 'dblMarkUpOrDown',
+                colSubstituteUOM: {
+                    dataIndex: 'strUnitMeasure',
                     editor: {
-                        store: '{kitItem}',
+                        store: '{bundleUOM}',
+                        origValueField: 'intItemUOMId',
+                        origUpdateField: 'intItemUOMId',
                         defaultFilters: [{
-                            column: 'strType',
-                            value: 'Inventory'
+                            column: 'intItemId',
+                            value: '{grdSubstitute.selection.intSubstituteItemId}',
+                            conjunction: 'or'
                         }]
                     }
                 },
-                colKitItemDescription: 'strDescription',
-                colKitItemQuantity: 'dblQuantity',
-                colKitItemUOM: {
-                    dataIndex: 'strUnitMeasure',
-                    editor: {
-                        store: '{kitUOM}'
-                    }
-                },
-                colKitItemPrice: 'dblPrice',
-                colKitItemSelected: 'ysnSelected'
-            },
+                colSubstituteBeginDate: 'dtmBeginDate',
+                colSubstituteEndDate: 'dtmEndDate'
+            },            
+
+            // //---------------//
+            // //Kit Details Tab//
+            // //---------------//
+            // grdKit: {
+            //     colKitComponent: 'strComponent',
+            //     colKitInputType: {
+            //         dataIndex: 'strInputType',
+            //         editor: {
+            //             store: '{inputTypes}'
+            //         }
+            //     }
+            // },
+
+            // grdKitDetails: {
+            //     colKitItem: {
+            //         dataIndex: 'strItemNo',
+            //         editor: {
+            //             store: '{kitItem}',
+            //             defaultFilters: [{
+            //                 column: 'strType',
+            //                 value: 'Inventory'
+            //             }]
+            //         }
+            //     },
+            //     colKitItemDescription: 'strDescription',
+            //     colKitItemQuantity: 'dblQuantity',
+            //     colKitItemUOM: {
+            //         dataIndex: 'strUnitMeasure',
+            //         editor: {
+            //             store: '{kitUOM}'
+            //         }
+            //     },
+            //     colKitItemPrice: 'dblPrice',
+            //     colKitItemSelected: 'ysnSelected'
+            // },
+
             //-------------------//
             //Factory & Lines Tab//
             //-------------------//
@@ -1330,6 +1376,7 @@ Ext.define('Inventory.view.ItemViewController', {
 
             grdAssembly = win.down('#grdAssembly'),
             grdAddOn = win.down('#grdAddOn'),
+            grdSubstitute = win.down('#grdSubstitute'),
             grdKit = win.down('#grdKit'),
             grdKitDetails = win.down('#grdKitDetails'),
             grdItemLicense = win.down('#grdItemLicense');
@@ -1506,6 +1553,15 @@ Ext.define('Inventory.view.ItemViewController', {
                     })
                 },
                 {
+                    key: 'tblICItemSubstitutes',
+                    lazy: true, 
+                    component: Ext.create('iRely.grid.Manager', {
+                        grid: grdSubstitute,
+                        deleteButton : grdSubstitute.down('#btnDeleteSubsitute'),
+                        createRecord: me.onSubstituteItemCreateRecord
+                    })
+                },                
+                {
                     key: 'tblICItemOwners',
                     lazy: true, 
                     component: Ext.create('iRely.grid.Manager', {
@@ -1627,6 +1683,11 @@ Ext.define('Inventory.view.ItemViewController', {
         var record = Ext.create('Inventory.model.ItemAddOn');
         action(record);
     },
+
+    onSubstituteItemCreateRecord: function(config, action) {
+        var record = Ext.create('Inventory.model.ItemSubstitute');
+        action(record);
+    },    
 
     createRecord: function(config, action) {
         var me = this;
@@ -4022,7 +4083,13 @@ Ext.define('Inventory.view.ItemViewController', {
     onAddOnItemHeaderClick: function (menu, column) {
         var grid = column.$initParent.grid;
 
-        i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('Inventory.view.Item', grid, 'intBundleItemId');
+        i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('Inventory.view.Item', grid, 'intAddOnItemId');
+    },
+
+    onSubstituteItemHeaderClick: function (menu, column) {
+        var grid = column.$initParent.grid;
+
+        i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('Inventory.view.Item', grid, 'intSubstituteItemId');
     },
 
     onAddOnSelect: function(combo, records, eOpts) {
@@ -4047,6 +4114,28 @@ Ext.define('Inventory.view.ItemViewController', {
         }
 
     },    
+
+    onSubstituteSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepSubstitute');
+        var current = plugin.getActiveRecord();
+        
+        if (combo.column.itemId === 'colSubstituteItem'){
+            current.set('strDescription', records[0].get('strDescription'));
+            current.set('intSubstituteItemId', records[0].get('intItemId'));
+            current.set('strSubstituteItemNo', records[0].get('strItemNo'));
+            current.set('intItemUOMId', records[0].get('intCostUOMId'));
+            current.set('strUnitMeasure', records[0].get('strCostUOM'));
+        }
+
+        else if (combo.column.itemId === 'colSubstituteUOM'){
+            current.set('strUnitMeasure', records[0].get('strUnitMeasure'));
+            current.set('intItemUOMId', records[0].get('intItemUOMId'));
+        }
+    },
 
     init: function(application) {
         this.control({
@@ -4278,7 +4367,13 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#cboAddOnUOM": {
                 select: this.onAddOnSelect
-            }
+            },
+            "#cboSubstituteItem": {
+                select: this.onSubstituteSelect
+            },
+            "#cboBundleUOM": {
+                select: this.onSubstituteSelect
+            }            
         });
 
     }

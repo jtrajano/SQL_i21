@@ -411,6 +411,7 @@
     <Compile Include="Controllers\ImportDataController.cs" />
     <Compile Include="Controllers\InventoryReceiptItemLotController.cs" />
     <Compile Include="Controllers\InventoryValuationController.cs" />
+    <Compile Include="Controllers\ItemSubstituteController.cs" />
     <Compile Include="Controllers\ItemAddOnController.cs" />
     <Compile Include="Controllers\ItemLicenseController.cs" />
     <Compile Include="Controllers\ItemSubLocationController.cs" />

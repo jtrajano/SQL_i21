@@ -5987,6 +5987,214 @@ Ext.define('Inventory.view.Item', {
                                     },
                                     {
                                         xtype: 'panel',
+                                        itemId: 'pgeSubstitute',
+                                        layout: 'fit',
+                                        title: 'Substitute',
+                                        tabConfig: {
+                                            xtype: 'tab',
+                                            itemId: 'cfgSubstitute'
+                                        },
+                                        items: [
+                                            {
+                                                xtype: 'advancefiltergrid',
+                                                reference: 'grdSubstitute',
+                                                border: false,
+                                                itemId: 'grdSubstitute',
+                                                margin: '',
+                                                columnLines: true,
+                                                dockedItems: [
+                                                    {
+                                                        xtype: 'toolbar',
+                                                        dock: 'top',
+                                                        itemId: 'tlbGridOptions',
+                                                        layout: {
+                                                            type: 'hbox',
+                                                            padding: '0 0 0 1'
+                                                        },
+                                                        items: [
+                                                            {
+                                                                xtype: 'button',
+                                                                itemId: 'btnInsertBundle',
+                                                                tabIndex: -1,
+                                                                iconCls: 'small-insert',
+                                                                text: 'Insert'
+                                                            },
+                                                            {
+                                                                xtype: 'button',
+                                                                itemId: 'btnDeleteSubsitute',
+                                                                tabIndex: -1,
+                                                                iconCls: 'small-remove',
+                                                                text: 'Remove'
+                                                            },
+                                                            {
+                                                                xtype: 'filter1'
+                                                            }
+                                                        ]
+                                                    }
+                                                ],
+                                                columns: [
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        headerDrillDownClick: 'onSubstituteItemHeaderClick',
+                                                        headerDrillDownText: 'Open',
+                                                        flex: 2,
+                                                        itemId: 'colSubstituteItem',
+                                                        dataIndex: 'string',
+                                                        text: 'Item',
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intItemId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Item Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strItemNo',
+                                                                    dataType: 'string',
+                                                                    text: 'Item No',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strType',
+                                                                    dataType: 'string',
+                                                                    text: 'Item Type',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strDescription',
+                                                                    dataType: 'string',
+                                                                    text: 'Description',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            lookUpField: true,
+                                                            itemId: 'cboSubstituteItem',
+                                                            displayField: 'strItemNo',
+                                                            valueField: 'strItemNo'
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        flex: 3,
+                                                        itemId: 'colSubstituteDescription',
+                                                        dataIndex: 'string',
+                                                        text: 'Description',
+                                                        editor: {
+                                                            xtype: 'textfield'
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        flex: 1,
+                                                        itemId: 'colSubstituteQuantity',
+                                                        align: 'right',
+                                                        text: 'Quantity',
+                                                        editor: {
+                                                            xtype: 'numberfield',
+                                                            quantityField: true,
+                                                            fieldStyle: 'text-align:right',
+                                                            hideTrigger: true
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        flex: 1,
+                                                        itemId: 'colSubstituteUOM',
+                                                        dataIndex: 'string',
+                                                        text: 'UOM',
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intItemUOMId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Unit Of Measure Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitMeasure',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Measure',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitType',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Type',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'dblUnitQty',
+                                                                    dataType: 'float',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    xtype: 'checkcolumn',
+                                                                    dataIndex: 'ysnStockUnit',
+                                                                    dataType: 'boolean',
+                                                                    text: 'Stock Unit',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            itemId: 'cboBundleUOM',
+                                                            displayField: 'strUnitMeasure',
+                                                            valueField: 'strUnitMeasure'
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        flex: 1,
+                                                        itemId: 'colSubstituteMarkUpOrDown',
+                                                        align: 'right',
+                                                        text: 'Mark Up/Down',
+                                                        editor: {
+                                                            xtype: 'numberfield',
+                                                            quantityField: true,
+                                                            fieldStyle: 'text-align:right',
+                                                            hideTrigger: true
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'datecolumn',
+                                                        flex: 1,
+                                                        itemId: 'colSubstituteBeginDate',
+                                                        text: 'Begin Date',
+                                                        editor: {
+                                                            xtype: 'datefield',
+                                                            itemId: 'dtmBeginDate'
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'datecolumn',
+                                                        flex: 1,
+                                                        itemId: 'colSubstituteEndDate',
+                                                        text: 'End Date',
+                                                        editor: {
+                                                            xtype: 'datefield',
+                                                            itemId: 'dtmEndDate'
+                                                        }
+                                                    }
+                                                ],
+                                                viewConfig: {
+                                                    itemId: 'grvSubstitute'
+                                                },
+                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                                    selType: 'checkboxmodel'
+                                                }),
+                                                plugins: [
+                                                    {
+                                                        ptype: 'cellediting',
+                                                        pluginId: 'cepSubstitute',
+                                                        clicksToEdit: 1
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        xtype: 'panel',
                                         hidden: true,
                                         itemId: 'pgeKit',
                                         title: 'Kit Details',

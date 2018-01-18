@@ -18021,6 +18021,639 @@
                             "codeClass": null,
                             "userConfig": {
                                 "bodyPadding": null,
+                                "itemId": "pgeSubstitute",
+                                "layout": "fit",
+                                "title": "Substitute"
+                            },
+                            "configAlternates": {
+                                "bodyPadding": "auto",
+                                "itemId": "string",
+                                "layout": "string",
+                                "title": "string",
+                                "scrollable": "boolean"
+                            },
+                            "name": "MyPanel42",
+                            "designerId": "f108f15e-de7b-4d23-8a24-607335d78ccb",
+                            "cn": [
+                                {
+                                    "type": "Ext.tab.Tab",
+                                    "reference": {
+                                        "name": "tabConfig",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "cfgSubstitute"
+                                    },
+                                    "configAlternates": {
+                                        "itemId": "string",
+                                        "scrollable": "boolean"
+                                    },
+                                    "name": "TabConfig15",
+                                    "designerId": "28ff7e5d-6211-4226-a052-ef05a1099399"
+                                },
+                                {
+                                    "type": "Ext.grid.Panel",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "border": false,
+                                        "columnLines": true,
+                                        "designer|createAlias": "advancefiltergrid",
+                                        "itemId": "grdSubstitute",
+                                        "margin": "",
+                                        "reference": "grdSubstitute"
+                                    },
+                                    "configAlternates": {
+                                        "columnLines": "boolean",
+                                        "designer|createAlias": "string",
+                                        "itemId": "string",
+                                        "margin": "auto",
+                                        "reference": "string",
+                                        "title": "string",
+                                        "scrollable": "boolean",
+                                        "layout|flex": "number",
+                                        "layout|region": "string",
+                                        "border": "boolean"
+                                    },
+                                    "name": "MyGridPanel11",
+                                    "designerId": "a3b4d12f-8ece-4e91-b69e-2f2bf4858dc3",
+                                    "cn": [
+                                        {
+                                            "type": "Ext.toolbar.Toolbar",
+                                            "reference": {
+                                                "name": "dockedItems",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "container|padding": "0 0 0 1",
+                                                "dock": "top",
+                                                "itemId": "tlbGridOptions"
+                                            },
+                                            "configAlternates": {
+                                                "container|padding": "auto",
+                                                "dock": "string",
+                                                "itemId": "string",
+                                                "scrollable": "boolean"
+                                            },
+                                            "name": "MyToolbar11",
+                                            "designerId": "41ba88a5-6c14-4341-a181-d78bb9fae2c2",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.button.Button",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "icon": null,
+                                                        "iconCls": "small-insert",
+                                                        "itemId": "btnInsertBundle",
+                                                        "layout|flex": null,
+                                                        "tabIndex": -1,
+                                                        "text": "Insert"
+                                                    },
+                                                    "configAlternates": {
+                                                        "icon": "string",
+                                                        "iconCls": "string",
+                                                        "itemId": "string",
+                                                        "layout|flex": "number",
+                                                        "tabIndex": "number",
+                                                        "text": "string",
+                                                        "scrollable": "boolean"
+                                                    },
+                                                    "name": "MyButton28",
+                                                    "designerId": "d4bcf33f-f0e9-483e-8ef5-b21fab637a40"
+                                                },
+                                                {
+                                                    "type": "Ext.button.Button",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "icon": null,
+                                                        "iconCls": "small-remove",
+                                                        "itemId": "btnDeleteSubsitute",
+                                                        "layout|flex": null,
+                                                        "tabIndex": -1,
+                                                        "text": "Remove"
+                                                    },
+                                                    "configAlternates": {
+                                                        "icon": "string",
+                                                        "iconCls": "string",
+                                                        "itemId": "string",
+                                                        "layout|flex": "number",
+                                                        "tabIndex": "number",
+                                                        "text": "string",
+                                                        "scrollable": "boolean"
+                                                    },
+                                                    "name": "MyButton23",
+                                                    "designerId": "d655a66e-a012-4b79-8d30-a13721fc9c11"
+                                                },
+                                                {
+                                                    "type": "linkedinstance",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "layout|flex": null
+                                                    },
+                                                    "configAlternates": {
+                                                        "layout|flex": "number",
+                                                        "scrollable": "boolean"
+                                                    },
+                                                    "name": "filter117",
+                                                    "designerId": "4418be20-efdc-4dd9-a5b2-7df9a217f6a2",
+                                                    "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "string",
+                                                "flex": 2,
+                                                "headerDrillDownClick": "onSubstituteItemHeaderClick",
+                                                "headerDrillDownText": "Open",
+                                                "itemId": "colSubstituteItem",
+                                                "text": "Item"
+                                            },
+                                            "configAlternates": {
+                                                "dataIndex": "datafield",
+                                                "flex": "number",
+                                                "itemId": "string",
+                                                "text": "string",
+                                                "scrollable": "boolean",
+                                                "headerDrillDownClick": "string",
+                                                "headerDrillDownText": "string"
+                                            },
+                                            "name": "MyColumn63",
+                                            "designerId": "984e866a-debd-4bb7-b7d4-985882c859d6",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "headerDrillDownClick",
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "headerDrillDownText",
+                                                    "type": "string"
+                                                }
+                                            ],
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intItemId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Item Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strItemNo',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Item No',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strType',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Item Type',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strDescription',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Description',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strItemNo",
+                                                        "itemId": "cboSubstituteItem",
+                                                        "lookUpField": true,
+                                                        "valueField": "strItemNo"
+                                                    },
+                                                    "configAlternates": {
+                                                        "columns": "array",
+                                                        "designer|createAlias": "string",
+                                                        "displayField": "datafield",
+                                                        "itemId": "string",
+                                                        "valueField": "datafield",
+                                                        "scrollable": "boolean",
+                                                        "lookUpField": "boolean"
+                                                    },
+                                                    "name": "MyComboBox65",
+                                                    "designerId": "4a865f30-3b78-4aeb-b08a-59404768a645",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "lookUpField",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "string",
+                                                "flex": 3,
+                                                "itemId": "colSubstituteDescription",
+                                                "text": "Description"
+                                            },
+                                            "configAlternates": {
+                                                "dataIndex": "datafield",
+                                                "flex": "number",
+                                                "itemId": "string",
+                                                "text": "string",
+                                                "scrollable": "boolean"
+                                            },
+                                            "name": "MyColumn4",
+                                            "designerId": "441c65ea-8b83-4e19-91bb-43462e89a313",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Text",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "configAlternates": {
+                                                        "scrollable": "boolean"
+                                                    },
+                                                    "name": "MyTextField43",
+                                                    "designerId": "18068cbc-06e2-4bea-ad6e-b891709abf37"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Number",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "align": "right",
+                                                "flex": 1,
+                                                "itemId": "colSubstituteQuantity",
+                                                "text": "Quantity"
+                                            },
+                                            "configAlternates": {
+                                                "align": "string",
+                                                "flex": "number",
+                                                "itemId": "string",
+                                                "text": "string",
+                                                "scrollable": "boolean"
+                                            },
+                                            "name": "MyNumberColumn15",
+                                            "designerId": "e44ab75a-42f1-438d-b9a9-0412eaa363a0",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldStyle": "text-align:right",
+                                                        "hideTrigger": true,
+                                                        "quantityField": true
+                                                    },
+                                                    "configAlternates": {
+                                                        "quantityField": "boolean",
+                                                        "fieldStyle": "string",
+                                                        "hideTrigger": "boolean",
+                                                        "scrollable": "boolean"
+                                                    },
+                                                    "name": "MyNumberField34",
+                                                    "designerId": "0ec73aaf-b594-4e35-a72e-72a74c92007d",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "quantityField",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "string",
+                                                "flex": 1,
+                                                "itemId": "colSubstituteUOM",
+                                                "text": "UOM"
+                                            },
+                                            "configAlternates": {
+                                                "dataIndex": "datafield",
+                                                "flex": "number",
+                                                "itemId": "string",
+                                                "text": "string",
+                                                "scrollable": "boolean"
+                                            },
+                                            "name": "MyColumn53",
+                                            "designerId": "2ce8074b-aa79-4516-b4a0-d3d284bc4197",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intItemUOMId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Unit Of Measure Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strUnitMeasure',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Unit Measure',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strUnitType',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Unit Type',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "    {",
+                                                            "\t\tdataIndex: 'dblUnitQty',",
+                                                            "\t\tdataType: 'float',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\txtype: 'checkcolumn',",
+                                                            "\t\tdataIndex: 'ysnStockUnit',",
+                                                            "\t\tdataType: 'boolean',",
+                                                            "\t\ttext: 'Stock Unit',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strUnitMeasure",
+                                                        "itemId": "cboBundleUOM",
+                                                        "valueField": "strUnitMeasure"
+                                                    },
+                                                    "configAlternates": {
+                                                        "columns": "array",
+                                                        "designer|createAlias": "string",
+                                                        "displayField": "datafield",
+                                                        "itemId": "string",
+                                                        "valueField": "datafield",
+                                                        "scrollable": "boolean"
+                                                    },
+                                                    "name": "MyComboBox66",
+                                                    "designerId": "45b7ae49-7405-4108-bbf8-7e9d0dc7e239",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Number",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "align": "right",
+                                                "flex": 1,
+                                                "itemId": "colSubstituteMarkUpOrDown",
+                                                "text": "Mark Up/Down"
+                                            },
+                                            "configAlternates": {
+                                                "align": "string",
+                                                "flex": "number",
+                                                "itemId": "string",
+                                                "text": "string",
+                                                "scrollable": "boolean"
+                                            },
+                                            "name": "MyNumberColumn59",
+                                            "designerId": "f2f73ac8-e8c1-4ae2-86a0-dbf9b04dfd32",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldStyle": "text-align:right",
+                                                        "hideTrigger": true,
+                                                        "quantityField": true
+                                                    },
+                                                    "configAlternates": {
+                                                        "quantityField": "boolean",
+                                                        "fieldStyle": "string",
+                                                        "hideTrigger": "boolean",
+                                                        "scrollable": "boolean"
+                                                    },
+                                                    "name": "MyNumberField34",
+                                                    "designerId": "bab0eb60-6de9-4bfb-85a0-fd3364e307af",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "quantityField",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Date",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "flex": 1,
+                                                "itemId": "colSubstituteBeginDate",
+                                                "text": "Begin Date"
+                                            },
+                                            "configAlternates": {
+                                                "flex": "number",
+                                                "itemId": "string",
+                                                "text": "string"
+                                            },
+                                            "name": "MyDateColumn3",
+                                            "designerId": "d389d41b-0773-4674-98ea-a4a237e98984",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Date",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "itemId": "dtmBeginDate"
+                                                    },
+                                                    "configAlternates": {
+                                                        "itemId": "string"
+                                                    },
+                                                    "name": "MyDateField7",
+                                                    "designerId": "dbb51e68-38e2-43ba-bd31-a22061a809b5"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Date",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "flex": 1,
+                                                "itemId": "colSubstituteEndDate",
+                                                "text": "End Date"
+                                            },
+                                            "configAlternates": {
+                                                "flex": "number",
+                                                "itemId": "string",
+                                                "text": "string"
+                                            },
+                                            "name": "MyDateColumn6",
+                                            "designerId": "f52173a7-3434-40c6-aa02-85751043fcb4",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Date",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "itemId": "dtmEndDate"
+                                                    },
+                                                    "configAlternates": {
+                                                        "itemId": "string"
+                                                    },
+                                                    "name": "MyDateField12",
+                                                    "designerId": "2284a4d4-6314-4c5f-9655-b43dee31f09e"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.view.Table",
+                                            "reference": {
+                                                "name": "viewConfig",
+                                                "type": "object"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "itemId": "grvSubstitute"
+                                            },
+                                            "configAlternates": {
+                                                "itemId": "string",
+                                                "scrollable": "boolean"
+                                            },
+                                            "name": "MyGridView11",
+                                            "designerId": "7c99f506-b47e-4f8f-a519-79f07e1fc71b"
+                                        },
+                                        {
+                                            "type": "Ext.selection.CheckboxModel",
+                                            "reference": {
+                                                "name": "selModel",
+                                                "type": "object"
+                                            },
+                                            "codeClass": "Ext.selection.CheckboxModel",
+                                            "name": "MyCheckboxSelectionModel8",
+                                            "designerId": "522cadf3-218c-473c-abd1-a9a6ae7e6197"
+                                        },
+                                        {
+                                            "type": "Ext.grid.plugin.CellEditing",
+                                            "reference": {
+                                                "name": "plugins",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "clicksToEdit": 1,
+                                                "designer|displayName": "cepSubstitute",
+                                                "pluginId": "cepSubstitute"
+                                            },
+                                            "configAlternates": {
+                                                "clicksToEdit": "number",
+                                                "designer|displayName": "string",
+                                                "pluginId": "string"
+                                            },
+                                            "name": "MyCellEditingPlugin15",
+                                            "designerId": "a852fd61-3b30-416c-a1dc-115747f31012"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.panel.Panel",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "bodyPadding": null,
                                 "container|align": "stretch",
                                 "hidden": true,
                                 "itemId": "pgeKit",

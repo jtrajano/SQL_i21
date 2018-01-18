@@ -256,6 +256,10 @@ namespace iRely.Inventory.Model
                 .WithRequired(p => p.tblICItem)
                 .HasForeignKey(p => p.intItemId);
 
+            this.HasMany(p => p.tblICItemSubstitutes)
+                .WithRequired(p => p.tblICItem)
+                .HasForeignKey(p => p.intItemId);
+
         }
     }
 

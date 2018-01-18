@@ -149,6 +149,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\Item\tblICItemSubstituteMap.cs" />
     <Compile Include="Configuration\Item\tblICItemAddOnMap.cs" />
     <Compile Include="Configuration\Item\tblICItemLicenseMap.cs" />
     <Compile Include="Configuration\Item\tblICItemSubLocationMap.cs" />
@@ -199,6 +200,7 @@
     <Compile Include="Configuration\vyuICLotHistoryMap.cs" />
     <Compile Include="IEntityDbContext.cs" />
     <Compile Include="InventoryEntities.Views.cs" />
+    <Compile Include="Metadata\Item\tblICItemSubstitute.cs" />
     <Compile Include="Metadata\Item\tblICItemAddOn.cs" />
     <Compile Include="Metadata\Item\tblICItemLicense.cs" />
     <Compile Include="Metadata\Item\tblICItemSubLocation.cs" />

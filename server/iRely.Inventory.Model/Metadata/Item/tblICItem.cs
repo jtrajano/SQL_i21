@@ -679,5 +679,8 @@ namespace iRely.Inventory.Model
         public ICollection<tblICItemLicense> tblICItemLicenses { get; set; }
         public ICollection<tblICItemAddOn> tblICItemAddOns { get; set; }
         public ICollection<tblICItemAddOn> AddOnItems { get; set; }
+        public ICollection<tblICItemSubstitute> tblICItemSubstitutes { get; set; }
+        public ICollection<tblICItemSubstitute> SubstituteItems { get; set; }
+
     }
 }
