@@ -6093,6 +6093,7 @@
     <Build Include="dbo\Stored Procedures\uspMFSendNotificationEDI940.sql" />
     <Build Include="dbo\Stored Procedures\uspMFErrorNotificationEDI943.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetDefaultFutureMarketInfoByCommodity.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFErrorNotificationEDI940.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
