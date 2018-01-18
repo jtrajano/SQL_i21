@@ -56,12 +56,12 @@ SELECT
 	,ysnSSTaxable = CAST(ISNULL((SELECT TOP 1 1 FROM tblPRPaycheckEarningTax 
 								WHERE intPaycheckEarningId = tblPRPaycheckEarning.intPaycheckEarningId 
 								AND intTypeTaxId IN (SELECT intTypeTaxId FROM tblPRPaycheckTax 
-													 WHERE intPaycheckId = tblPRPaycheck.intPaycheckId
+													 WHERE intPaycheckId = tblPRPaycheck.intPaycheckId AND dblTotal > 0
 													 AND strCalculationType = 'USA Social Security')), 0) AS BIT)
 	,ysnMedTaxable = CAST(ISNULL((SELECT TOP 1 1 FROM tblPRPaycheckEarningTax 
 								WHERE intPaycheckEarningId = tblPRPaycheckEarning.intPaycheckEarningId 
 								AND intTypeTaxId IN (SELECT intTypeTaxId FROM tblPRPaycheckTax 
-													 WHERE intPaycheckId = tblPRPaycheck.intPaycheckId
+													 WHERE intPaycheckId = tblPRPaycheck.intPaycheckId AND dblTotal > 0
 													 AND strCalculationType = 'USA Medicare')), 0) AS BIT)
 	,ysnFITTaxable = CAST(ISNULL((SELECT TOP 1 1 FROM tblPRPaycheckEarningTax 
 								WHERE intPaycheckEarningId = tblPRPaycheckEarning.intPaycheckEarningId 
