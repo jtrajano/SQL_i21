@@ -6092,6 +6092,7 @@
     <Build Include="dbo\Views\vyuICGetSubstituteItem.sql" />
     <Build Include="dbo\Stored Procedures\uspMFSendNotificationEDI940.sql" />
     <Build Include="dbo\Stored Procedures\uspMFErrorNotificationEDI943.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetDefaultFutureMarketInfoByCommodity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
