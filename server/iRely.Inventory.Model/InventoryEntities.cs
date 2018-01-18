@@ -65,6 +65,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICItemAccountMap());
             modelBuilder.Configurations.Add(new tblICItemAssemblyMap());
             modelBuilder.Configurations.Add(new tblICItemBundleMap());
+            modelBuilder.Configurations.Add(new tblICItemAddOnMap());
             modelBuilder.Configurations.Add(new tblICItemCertificationMap());
             modelBuilder.Configurations.Add(new tblICItemContractMap());
             modelBuilder.Configurations.Add(new tblICItemContractDocumentMap());
@@ -289,6 +290,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuICSearchItemMap());
             modelBuilder.Configurations.Add(new vyuICGetItemUOMByTypeMap());
             modelBuilder.Configurations.Add(new vyuICItemLicenseMap());
+            modelBuilder.Configurations.Add(new vyuICGetAddOnItemMap());
         }
     }
 }

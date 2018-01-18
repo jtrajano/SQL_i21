@@ -251,6 +251,11 @@ namespace iRely.Inventory.Model
 
             this.HasOptional(p => p.vyuICGetCompactItem)
                 .WithRequired(p => p.tblICItem);
+
+            this.HasMany(p => p.tblICItemAddOns)
+                .WithRequired(p => p.tblICItem)
+                .HasForeignKey(p => p.intItemId);
+
         }
     }
 

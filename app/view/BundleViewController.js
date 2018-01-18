@@ -77,7 +77,7 @@ Ext.define('Inventory.view.BundleViewController', {
             }, 
 
             //------------------//
-            //Bundle Details Tab//
+            // Bundle Items     //
             //------------------//
             grdBundle: {
                 colBundleItem: {
@@ -92,12 +92,12 @@ Ext.define('Inventory.view.BundleViewController', {
                                     column: 'strType',
                                     value: 'Inventory',
                                     conjunction: 'or'
-                                },
-                                {
-                                    column: 'strType',
-                                    value: 'Other Charge',
-                                    conjunction: 'or'
                                 }
+                                // {
+                                //     column: 'strType',
+                                //     value: 'Other Charge',
+                                //     conjunction: 'or'
+                                // }
                             ],
                             conjunction: 'and'
                         }, 
@@ -146,6 +146,57 @@ Ext.define('Inventory.view.BundleViewController', {
                         readOnly: '{readOnlyOnKitType}'
                     }                    
                 }
+            },
+
+            //------------------//
+            // Add Ons          //
+            //------------------//
+            grdAddOn: {
+                colAddOnItem: {
+                    dataIndex: 'strAddOnItemNo',
+                    editor: {
+                        origValueField: 'strItemNo',
+                        origUpdateField: 'strAddOnItemNo',
+                        store: '{bundleItem}',
+                        defaultFilters: [{
+                            inner: [
+                                {
+                                    column: 'strType',
+                                    value: 'Inventory',
+                                    conjunction: 'or'
+                                },
+                                {
+                                    column: 'strType',
+                                    value: 'Other Charge',
+                                    conjunction: 'or'
+                                }
+                            ],
+                            conjunction: 'and'
+                        }, 
+                        {
+                            column: 'intCommodityId',
+                            value: '{current.intCommodityId}',
+                            conjunction: 'and'
+                        }]
+                    }
+                },
+                colAddOnDescription: 'strDescription',
+                colAddOnQuantity: {
+                    dataIndex: 'dblQuantity'
+                },
+                colAddOnUOM: {
+                    dataIndex: 'strUnitMeasure',
+                    editor: {
+                        store: '{bundleUOM}',
+                        origValueField: 'intItemUOMId',
+                        origUpdateField: 'intItemUOMId',
+                        defaultFilters: [{
+                            column: 'intItemId',
+                            value: '{grdAddOn.selection.intAddOnItemId}',
+                            conjunction: 'or'
+                        }]
+                    }
+                }
             }
         }
     },
@@ -163,7 +214,8 @@ Ext.define('Inventory.view.BundleViewController', {
             store = Ext.create('Inventory.store.Item', { pageSize: 1 });
 
         var grdUOM = win.down('#grdUnitOfMeasure'),
-            grdBundle = win.down('#grdBundle');
+            grdBundle = win.down('#grdBundle'),
+            grdAddOn = win.down('#grdAddOn');
 
         win.context = Ext.create('iRely.Engine', {
             window : win,
@@ -198,7 +250,16 @@ Ext.define('Inventory.view.BundleViewController', {
                         deleteButton : grdBundle.down('#btnDeleteBundle'),
                         createRecord: me.onBundleItemCreateRecord
                     })
-                }
+                },
+                {
+                    key: 'tblICItemAddOns',
+                    lazy: true, 
+                    component: Ext.create('iRely.grid.Manager', {
+                        grid: grdAddOn,
+                        deleteButton : grdAddOn.down('#btnDeleteAddOn'),
+                        createRecord: me.onAddOnCreateRecord
+                    })
+                }                
             ]
         });
 
@@ -222,6 +283,12 @@ Ext.define('Inventory.view.BundleViewController', {
         //record.set('ysnAllowSale', true);
         action(record);
     },
+
+    onAddOnCreateRecord: function(config, action) {
+        var record = Ext.create('Inventory.model.ItemAddOn');
+        action(record);
+    },
+    
 
     createRecord: function(config, action) {
         var me = this;
@@ -440,6 +507,27 @@ Ext.define('Inventory.view.BundleViewController', {
 
     },
 
+    onAddOnSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepAddOn');
+        var current = plugin.getActiveRecord();
+        
+        if (combo.column.itemId === 'colAddOnItem'){
+            current.set('strDescription', records[0].get('strDescription'));
+            current.set('intAddOnItemId', records[0].get('intItemId'));
+            current.set('strAddOnItemNo', records[0].get('strItemNo'))
+        }
+
+        else if (combo.column.itemId === 'colAddOnUOM'){
+            current.set('strUnitMeasure', records[0].get('strUnitMeasure'));
+            current.set('intItemUOMId', records[0].get('intItemUOMId'));
+        }
+
+    },
+
     onDuplicateClick: function(button) {
         var win = button.up('window');
         var context = win.context;
@@ -652,6 +740,12 @@ Ext.define('Inventory.view.BundleViewController', {
             },
             "#cboStatus": {
                 select: this.onStatusSelect
+            }, 
+            "#cboAddOnItem": {
+                select: this.onAddOnSelect
+            },
+            "#cboAddOnUOM": {
+                select: this.onAddOnSelect
             }
         });
     }

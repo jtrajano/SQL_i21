@@ -222,6 +222,7 @@
     <Compile Include="Implementation\ImportLogDetailBl.cs" />
     <Compile Include="Implementation\InventoryCountDetailBl.cs" />
     <Compile Include="Implementation\InventoryReceiptChargeTaxBl.cs" />
+    <Compile Include="Implementation\ItemAddOnBl.cs" />
     <Compile Include="Implementation\ItemLicenseBl.cs" />
     <Compile Include="Implementation\ItemSubLocationBl.cs" />
     <Compile Include="Implementation\M2MComputationBl.cs" />
@@ -261,6 +262,7 @@
     <Compile Include="Interface\IImportLogDetailBl.cs" />
     <Compile Include="Interface\IInventoryCountDetailBl.cs" />
     <Compile Include="Interface\IInventoryReceiptChargeTaxBl.cs" />
+    <Compile Include="Interface\IItemAddOnBl.cs" />
     <Compile Include="Interface\IItemLicenseBl.cs" />
     <Compile Include="Interface\IItemSubLocationBl.cs" />
     <Compile Include="Interface\IM2MComputationBl.cs" />

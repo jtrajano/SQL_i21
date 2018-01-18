@@ -677,5 +677,7 @@ namespace iRely.Inventory.Model
         public ICollection<vyuICGetItemStock> vyuICGetItemStock { get; set; }
         public ICollection<tblICInventoryTransferDetail> tblICInventoryTransferDetails { get; set; }
         public ICollection<tblICItemLicense> tblICItemLicenses { get; set; }
+        public ICollection<tblICItemAddOn> tblICItemAddOns { get; set; }
+        public ICollection<tblICItemAddOn> AddOnItems { get; set; }
     }
 }

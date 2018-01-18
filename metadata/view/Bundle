@@ -3160,7 +3160,7 @@
                                                     "userConfig": {
                                                         "icon": null,
                                                         "iconCls": "small-remove",
-                                                        "itemId": "btnDeleteBundle",
+                                                        "itemId": "btnDeleteAddOn",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
                                                         "text": "Remove"
@@ -3272,7 +3272,7 @@
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strItemNo",
-                                                        "itemId": "cboBundleItem",
+                                                        "itemId": "cboAddOnItem",
                                                         "lookUpField": true,
                                                         "valueField": "strItemNo"
                                                     },
@@ -3460,7 +3460,7 @@
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strUnitMeasure",
-                                                        "itemId": "cboBundleUOM",
+                                                        "itemId": "cboAddOnUOM",
                                                         "valueField": "strUnitMeasure"
                                                     },
                                                     "configAlternates": {
@@ -3519,8 +3519,8 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "clicksToEdit": 1,
-                                                "designer|displayName": "cepBundle",
-                                                "pluginId": "cepBundle"
+                                                "designer|displayName": "cepAddOn",
+                                                "pluginId": "cepAddOn"
                                             },
                                             "configAlternates": {
                                                 "clicksToEdit": "number",

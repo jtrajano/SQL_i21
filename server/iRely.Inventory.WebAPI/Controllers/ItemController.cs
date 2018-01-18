@@ -299,5 +299,12 @@ namespace iRely.Inventory.WebApi
         {
             return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchBundle(param));
         }
+
+        [HttpGet]
+        [ActionName("SearchAddOns")]
+        public async Task<HttpResponseMessage> SearchAddOns(GetParameter param)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchAddOns(param));
+        }
     }
 }

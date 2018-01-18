@@ -1068,7 +1068,7 @@ Ext.define('Inventory.view.Bundle', {
                                                             },
                                                             {
                                                                 xtype: 'button',
-                                                                itemId: 'btnDeleteBundle',
+                                                                itemId: 'btnDeleteAddOn',
                                                                 tabIndex: -1,
                                                                 iconCls: 'small-remove',
                                                                 text: 'Remove'
@@ -1115,7 +1115,7 @@ Ext.define('Inventory.view.Bundle', {
                                                                 }
                                                             ],
                                                             lookUpField: true,
-                                                            itemId: 'cboBundleItem',
+                                                            itemId: 'cboAddOnItem',
                                                             displayField: 'strItemNo',
                                                             valueField: 'strItemNo'
                                                         }
@@ -1183,7 +1183,7 @@ Ext.define('Inventory.view.Bundle', {
                                                                     flex: 1
                                                                 }
                                                             ],
-                                                            itemId: 'cboBundleUOM',
+                                                            itemId: 'cboAddOnUOM',
                                                             displayField: 'strUnitMeasure',
                                                             valueField: 'strUnitMeasure'
                                                         }
@@ -1198,7 +1198,7 @@ Ext.define('Inventory.view.Bundle', {
                                                 plugins: [
                                                     {
                                                         ptype: 'cellediting',
-                                                        pluginId: 'cepBundle',
+                                                        pluginId: 'cepAddOn',
                                                         clicksToEdit: 1
                                                     }
                                                 ]

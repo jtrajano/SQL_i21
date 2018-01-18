@@ -1198,7 +1198,20 @@ namespace iRely.Inventory.BusinessLayer
                 total = await query.CountAsync(param.cancellationToken),
                 summaryData = await query.ToAggregateAsync(param.aggregates)
             };
+        }
 
+        public async Task<SearchResult> SearchAddOns(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICGetAddOnItem>()
+                    .Filter(param, true);
+            var data = await query.Execute(param, "intItemAddOnId").ToListAsync(param.cancellationToken);
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync(param.cancellationToken),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
+            };
         }
     }
 }
