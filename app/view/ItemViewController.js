@@ -1155,12 +1155,12 @@ Ext.define('Inventory.view.ItemViewController', {
             //------------------//
             //Bundle Details Tab//
             //------------------//
-            grdBundle: {
-                colBundleItem: {
-                    dataIndex: 'strItemNo',
+            grdAddOn: {
+                colAddOnItem: {
+                    dataIndex: 'strAddOnItemNo',
                     editor: {
-                        origValueField: 'intItemId',
-                        origUpdateField: 'intBundleItemId',
+                        origValueField: 'strItemNo',
+                        origUpdateField: 'strAddOnItemNo',
                         store: '{bundleItem}',
                         defaultFilters: [{
                             inner: [
@@ -1184,40 +1184,22 @@ Ext.define('Inventory.view.ItemViewController', {
                         }]
                     }
                 },
-                colBundleQuantity: {
-                    dataIndex: 'dblQuantity',
-                    editor: {
-                        readOnly: '{current.ysnIsBasket}'
-                    }  
+                colAddOnDescription: 'strDescription',
+                colAddOnQuantity: {
+                    dataIndex: 'dblQuantity'
                 },
-                colBundleDescription: 'strDescription',
-                colBundleUOM: {
+                colAddOnUOM: {
                     dataIndex: 'strUnitMeasure',
                     editor: {
                         store: '{bundleUOM}',
                         origValueField: 'intItemUOMId',
-                        origUpdateField: 'intItemUnitMeasureId',
+                        origUpdateField: 'intItemUOMId',
                         defaultFilters: [{
                             column: 'intItemId',
-                            value: '{grdBundle.selection.intBundleItemId}',
+                            value: '{grdAddOn.selection.intAddOnItemId}',
                             conjunction: 'or'
                         }]
                     }
-                },
-                colBundleAddOn:{
-                    dataIndex: 'ysnAddOn'
-                },
-                colBundleMarkUpOrDown: {
-                    dataIndex: 'dblMarkUpOrDown',
-                    hidden: '{!isSubstituteBundleType}'
-                },
-                colBundleBeginDate: {
-                    dataIndex: 'dtmBeginDate',
-                    hidden: '{!isSubstituteBundleType}'
-                },
-                colBundleEndDate: {
-                    dataIndex: 'dtmEndDate',
-                    hidden: '{!isSubstituteBundleType}'
                 }
             },
 
@@ -1347,7 +1329,7 @@ Ext.define('Inventory.view.ItemViewController', {
             grdCommodityCost = win.down('#grdCommodityCost'),
 
             grdAssembly = win.down('#grdAssembly'),
-            grdBundle = win.down('#grdBundle'),
+            grdAddOn = win.down('#grdAddOn'),
             grdKit = win.down('#grdKit'),
             grdKitDetails = win.down('#grdKitDetails'),
             grdItemLicense = win.down('#grdItemLicense');
@@ -1514,40 +1496,15 @@ Ext.define('Inventory.view.ItemViewController', {
                         deleteButton : grdSpecialPricing.down('#btnDeleteSpecialPricing')
                     })
                 },
-                // {
-                //     key: 'tblICItemAssemblies',
-                //     lazy: true, 
-                //     component: Ext.create('iRely.grid.Manager', {
-                //         grid: grdAssembly,
-                //         deleteButton : grdAssembly.down('#btnDeleteAssembly')
-                //     })
-                // },
-                // {
-                //     key: 'tblICItemBundles',
-                //     lazy: true, 
-                //     component: Ext.create('iRely.grid.Manager', {
-                //         grid: grdBundle,
-                //         deleteButton : grdBundle.down('#btnDeleteBundle'),
-                //         createRecord: me.onBundleItemCreateRecord
-                //     })
-                // },
-                // {
-                //     key: 'tblICItemKits',
-                //     lazy: true, 
-                //     component: Ext.create('iRely.grid.Manager', {
-                //         grid: grdKit,
-                //         deleteButton : grdKit.down('#btnDeleteKit')
-                //     }),
-                //     details: [
-                //         {
-                //             key: 'tblICItemKitDetails',
-                //             component: Ext.create('iRely.grid.Manager', {
-                //                 grid: grdKitDetails,
-                //                 deleteButton : grdKitDetails.down('#btnDeleteKitDetail')
-                //             })
-                //         }
-                //     ]
-                // },
+                {
+                    key: 'tblICItemAddOns',
+                    lazy: true, 
+                    component: Ext.create('iRely.grid.Manager', {
+                        grid: grdAddOn,
+                        deleteButton : grdAddOn.down('#btnDeleteAddOn'),
+                        createRecord: me.onAddOnItemCreateRecord
+                    })
+                },
                 {
                     key: 'tblICItemOwners',
                     lazy: true, 
@@ -1663,6 +1620,11 @@ Ext.define('Inventory.view.ItemViewController', {
     onBundleItemCreateRecord: function(config, action) {
         var record = Ext.create('Inventory.model.ItemBundle');
         record.set('dblQuantity', 1.00);
+        action(record);
+    },
+
+    onAddOnItemCreateRecord: function(config, action) {
+        var record = Ext.create('Inventory.model.ItemAddOn');
         action(record);
     },
 
@@ -1790,112 +1752,6 @@ Ext.define('Inventory.view.ItemViewController', {
 
     onItemTabChange: function(tabPanel, newCard, oldCard, eOpts) {
         switch (newCard.itemId) {
-        //     case 'pgeDetails':
-        //         var pgeDetails = tabPanel.down('#pgeDetails');
-        //         var grdUnitOfMeasure = pgeDetails.down('#grdUnitOfMeasure');
-        //         if (grdUnitOfMeasure.store.complete === true)
-        //             grdUnitOfMeasure.getView().refresh();
-        //         else
-        //             grdUnitOfMeasure.store.load();
-        //         break;
-
-        //     case 'pgeSetup':
-        //         var tabSetup = tabPanel.down('#tabSetup');
-        //         this.onItemTabChange(tabSetup, tabSetup.activeTab);
-
-        //     case 'pgeLocation':
-        //         var pgeLocation = tabPanel.down('#pgeLocation');
-        //         var grdLocationStore = pgeLocation.down('#grdLocationStore');
-        //         if (grdLocationStore.store.complete === true)
-        //             grdLocationStore.getView().refresh();
-        //         else
-        //             grdLocationStore.store.load();
-        //         break;
-
-        //     case 'pgeGLAccounts':
-        //         var pgeGLAccounts = tabPanel.down('#pgeGLAccounts');
-        //         var grdGlAccounts = pgeGLAccounts.down('#grdGlAccounts');
-        //         if (grdGlAccounts.store.complete === true)
-        //             grdGlAccounts.getView().refresh();
-        //         else
-        //             grdGlAccounts.store.load();
-        //         break;
-
-        //     case 'pgePOS':
-        //         var pgePOS = tabPanel.down('#pgePOS');
-        //         var grdCategory = pgePOS.down('#grdCategory');
-        //         if (grdCategory.store.complete === true)
-        //             grdCategory.getView().refresh();
-        //         else
-        //             grdCategory.store.load();
-
-        //         var grdServiceLevelAgreement = pgePOS.down('#grdServiceLevelAgreement');
-        //         if (grdServiceLevelAgreement.store.complete === true)
-        //             grdServiceLevelAgreement.getView().refresh();
-        //         else
-        //             grdServiceLevelAgreement.store.load();
-        //         break;
-
-        //     case 'pgeXref':
-        //         var pgeXref = tabPanel.down('#pgeXref');
-        //         var grdCustomerXref = pgeXref.down('#grdCustomerXref');
-        //         if (grdCustomerXref.store.complete === true)
-        //             grdCustomerXref.getView().refresh();
-        //         else
-        //             grdCustomerXref.store.load();
-
-        //         var grdVendorXref = pgeXref.down('#grdVendorXref');
-        //         if (grdVendorXref.store.complete === true)
-        //             grdVendorXref.getView().refresh();
-        //         else
-        //             grdVendorXref.store.load();
-        //         break;
-
-        //     case 'pgeContract':
-        //         var pgeContract = tabPanel.down('#pgeContract');
-        //         var grdContractItem = pgeContract.down('#grdContractItem');
-        //         if (grdContractItem.store.complete === true)
-        //             grdContractItem.getView().refresh();
-        //         else
-        //             grdContractItem.store.load();
-
-        //         var grdCertification = pgeContract.down('#grdCertification');
-        //         if (grdCertification.store.complete === true)
-        //             grdCertification.getView().refresh();
-        //         else
-        //             grdCertification.store.load();
-        //         break;
-
-        //     case 'pgeMFT':
-        //         var pgeMFT = tabPanel.down('#pgeMFT');
-        //         var grdMotorFuelTax = pgeMFT.down('#grdMotorFuelTax');
-        //         if (grdMotorFuelTax.store.complete === true)
-        //             grdMotorFuelTax.getView().refresh();
-        //         else
-        //             grdMotorFuelTax.store.load();
-        //         break;
-
-        //     case 'pgePricing':
-        //         var pgePricing = tabPanel.down('#pgePricing');
-        //         var grdPricing = pgePricing.down('#grdPricing');
-        //         if (grdPricing.store.complete === true)
-        //             grdPricing.getView().refresh();
-        //         else
-        //             grdPricing.store.load();
-
-        //         var grdPricingLevel = pgePricing.down('#grdPricingLevel');
-        //         if (grdPricingLevel.store.complete === true)
-        //             grdPricingLevel.getView().refresh();
-        //         else
-        //             grdPricingLevel.store.load();
-
-        //         var grdSpecialPricing = pgePricing.down('#grdSpecialPricing');
-        //         if (grdSpecialPricing.store.complete === true)
-        //             grdSpecialPricing.getView().refresh();
-        //         else
-        //             grdSpecialPricing.store.load();
-        //         break;
-
             case 'pgeStock':
                 var pgeStock = tabPanel.down('#pgeStock');
                 var grdStock = pgeStock.down('#grdStock');
@@ -1907,63 +1763,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 else
                     grdStock.store.load();
                 break;
-
-        //     case 'pgeCommodity':
-        //         var pgeCommodity = tabPanel.down('#pgeCommodity');
-        //         var grdCommodityCost = pgeCommodity.down('#grdCommodityCost');
-        //         if (grdCommodityCost.store.complete === true)
-        //             grdCommodityCost.getView().refresh();
-        //         else
-        //             grdCommodityCost.store.load();
-        //         break;
-
-        //     case 'pgeAssembly':
-        //         var pgeAssembly = tabPanel.down('#pgeAssembly');
-        //         var grdAssembly = pgeAssembly.down('#grdAssembly');
-        //         if (grdAssembly.store.complete === true)
-        //             grdAssembly.getView().refresh();
-        //         else
-        //             grdAssembly.store.load();
-        //         break;
-
-        //     case 'pgeBundle':
-        //         var pgeBundle = tabPanel.down('#pgeBundle');
-        //         var grdBundle = pgeBundle.down('#grdBundle');
-        //         if (grdBundle.store.complete === true)
-        //             grdBundle.getView().refresh();
-        //         else
-        //             grdBundle.store.load();
-        //         break;
-
-        //     case 'pgeKit':
-        //         var pgeKit = tabPanel.down('#pgeKit');
-        //         var grdKit = pgeKit.down('#grdKit');
-        //         if (grdKit.store.complete === true)
-        //             grdKit.getView().refresh();
-        //         else
-        //             grdKit.store.load();
-        //         break;
-
-        //     case 'pgeFactory':
-        //         var pgeFactory = tabPanel.down('#pgeFactory');
-        //         var grdFactory = pgeFactory.down('#grdFactory');
-        //         if (grdFactory.store.complete === true)
-        //             grdFactory.getView().refresh();
-        //         else
-        //             grdFactory.store.load();
-
-        //         var grdOwner = pgeFactory.down('#grdOwner');
-        //         if (grdOwner.store.complete === true)
-        //             grdOwner.getView().refresh();
-        //         else
-        //             grdOwner.store.load();
-
-        //         if (grdFactory) {
-        //             grdFactory.getSelectionModel().select(0);
-        //         }
-
-        //         break;
-
         }
     },
 
@@ -4220,11 +4019,34 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
-    onBundleItemHeaderClick: function (menu, column) {
+    onAddOnItemHeaderClick: function (menu, column) {
         var grid = column.$initParent.grid;
 
         i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('Inventory.view.Item', grid, 'intBundleItemId');
     },
+
+    onAddOnSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepAddOn');
+        var current = plugin.getActiveRecord();
+        
+        if (combo.column.itemId === 'colAddOnItem'){
+            current.set('strDescription', records[0].get('strDescription'));
+            current.set('intAddOnItemId', records[0].get('intItemId'));
+            current.set('strAddOnItemNo', records[0].get('strItemNo'));
+            current.set('intItemUOMId', records[0].get('intCostUOMId'));
+            current.set('strUnitMeasure', records[0].get('strCostUOM'));
+        }
+
+        else if (combo.column.itemId === 'colAddOnUOM'){
+            current.set('strUnitMeasure', records[0].get('strUnitMeasure'));
+            current.set('intItemUOMId', records[0].get('intItemUOMId'));
+        }
+
+    },    
 
     init: function(application) {
         this.control({
@@ -4450,6 +4272,12 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#cboWeightUOM": {
                 select: this.onManufacturingUOMSelect
+            }, 
+            "#cboAddOnItem": {
+                select: this.onAddOnSelect
+            },
+            "#cboAddOnUOM": {
+                select: this.onAddOnSelect
             }
         });
 

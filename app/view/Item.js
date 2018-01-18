@@ -194,6 +194,7 @@ Ext.define('Inventory.view.Item', {
                                                             },
                                                             {
                                                                 xtype: 'combobox',
+                                                                hidden: true,
                                                                 itemId: 'cboBundleType',
                                                                 modelValidation: true,
                                                                 fieldLabel: 'Bundle Type',
@@ -5805,13 +5806,13 @@ Ext.define('Inventory.view.Item', {
                                         title: 'Add-On',
                                         tabConfig: {
                                             xtype: 'tab',
-                                            itemId: 'cfgBundle'
+                                            itemId: 'cfgAddOn'
                                         },
                                         items: [
                                             {
                                                 xtype: 'advancefiltergrid',
-                                                reference: 'grdBundle',
-                                                itemId: 'grdBundle',
+                                                reference: 'grdAddOn',
+                                                itemId: 'grdAddOn',
                                                 margin: -1,
                                                 columnLines: true,
                                                 dockedItems: [
@@ -5833,7 +5834,7 @@ Ext.define('Inventory.view.Item', {
                                                             },
                                                             {
                                                                 xtype: 'button',
-                                                                itemId: 'btnDeleteBundle',
+                                                                itemId: 'btnDeleteAddOn',
                                                                 tabIndex: -1,
                                                                 iconCls: 'small-remove',
                                                                 text: 'Remove'
@@ -5847,10 +5848,10 @@ Ext.define('Inventory.view.Item', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        headerDrillDownClick: 'onBundleItemHeaderClick',
+                                                        headerDrillDownClick: 'onAddOnItemHeaderClick',
                                                         headerDrillDownText: 'Open',
                                                         flex: 1.7,
-                                                        itemId: 'colBundleItem',
+                                                        itemId: 'colAddOnItem',
                                                         dataIndex: 'string',
                                                         text: 'Item',
                                                         editor: {
@@ -5879,10 +5880,22 @@ Ext.define('Inventory.view.Item', {
                                                                     dataType: 'string',
                                                                     text: 'Description',
                                                                     flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intCostUOMId',
+                                                                    dataType: 'int',
+                                                                    text: 'Cost UOM',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strCostUOM',
+                                                                    dataType: 'string',
+                                                                    text: 'Cost UOM',
+                                                                    hidden: true
                                                                 }
                                                             ],
                                                             lookUpField: true,
-                                                            itemId: 'cboBundleItem',
+                                                            itemId: 'cboAddOnItem',
                                                             displayField: 'strItemNo',
                                                             valueField: 'strItemNo'
                                                         }
@@ -5890,7 +5903,7 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         flex: 2,
-                                                        itemId: 'colBundleDescription',
+                                                        itemId: 'colAddOnDescription',
                                                         dataIndex: 'string',
                                                         text: 'Description',
                                                         editor: {
@@ -5900,7 +5913,7 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         flex: 1,
-                                                        itemId: 'colBundleQuantity',
+                                                        itemId: 'colAddOnQuantity',
                                                         align: 'right',
                                                         text: 'Quantity',
                                                         editor: {
@@ -5913,7 +5926,7 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         flex: 1.25,
-                                                        itemId: 'colBundleUOM',
+                                                        itemId: 'colAddOnUOM',
                                                         dataIndex: 'string',
                                                         text: 'Unit Measure',
                                                         editor: {
@@ -5950,14 +5963,14 @@ Ext.define('Inventory.view.Item', {
                                                                     flex: 1
                                                                 }
                                                             ],
-                                                            itemId: 'cboBundleUOM',
+                                                            itemId: 'cboAddOnUOM',
                                                             displayField: 'strUnitMeasure',
                                                             valueField: 'strUnitMeasure'
                                                         }
                                                     }
                                                 ],
                                                 viewConfig: {
-                                                    itemId: 'grvBundle'
+                                                    itemId: 'grvAddOn'
                                                 },
                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                     selType: 'checkboxmodel'
@@ -5965,7 +5978,7 @@ Ext.define('Inventory.view.Item', {
                                                 plugins: [
                                                     {
                                                         ptype: 'cellediting',
-                                                        pluginId: 'cepBundle',
+                                                        pluginId: 'cepAddOn',
                                                         clicksToEdit: 1
                                                     }
                                                 ]

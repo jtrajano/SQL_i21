@@ -518,7 +518,9 @@ Ext.define('Inventory.view.BundleViewController', {
         if (combo.column.itemId === 'colAddOnItem'){
             current.set('strDescription', records[0].get('strDescription'));
             current.set('intAddOnItemId', records[0].get('intItemId'));
-            current.set('strAddOnItemNo', records[0].get('strItemNo'))
+            current.set('strAddOnItemNo', records[0].get('strItemNo'));
+            current.set('intItemUOMId', records[0].get('intCostUOMId'));
+            current.set('strUnitMeasure', records[0].get('strCostUOM'));            
         }
 
         else if (combo.column.itemId === 'colAddOnUOM'){

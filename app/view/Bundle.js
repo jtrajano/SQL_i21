@@ -1112,6 +1112,18 @@ Ext.define('Inventory.view.Bundle', {
                                                                     dataType: 'string',
                                                                     text: 'Description',
                                                                     flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intCostUOMId',
+                                                                    dataType: 'int',
+                                                                    text: 'Cost UOM',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strCostUOM',
+                                                                    dataType: 'string',
+                                                                    text: 'Cost UOM',
+                                                                    hidden: true
                                                                 }
                                                             ],
                                                             lookUpField: true,
