@@ -6085,6 +6085,7 @@
     <Build Include="dbo\Tables\tblRKM2MPostRecap.sql" />
     <Build Include="dbo\Stored Procedures\uspRKM2MGLPost.sql" />
     <Build Include="dbo\Stored Procedures\uspRKM2MPostRecap.sql" />
+    <Build Include="dbo\Views\vyuSMRecurringTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
