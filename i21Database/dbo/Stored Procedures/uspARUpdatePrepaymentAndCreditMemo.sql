@@ -14,8 +14,10 @@ SET @ZeroDecimal = 0.000000
 
 	UPDATE ARI
 	SET
-		 ARI.dblPayment		= ARI.dblPayment + ((CASE WHEN @Post = 0 THEN -1 ELSE 1 END) * ARPAC.[dblAppliedInvoiceDetailAmount])
-		,ARI.dblAmountDue	= ARI.dblInvoiceTotal - (ARI.dblPayment + ((CASE WHEN @Post = 0 THEN -1 ELSE 1 END) * ARPAC.[dblAppliedInvoiceDetailAmount]))
+		 ARI.dblPayment			= ARI.dblPayment + ((CASE WHEN @Post = 0 THEN -1 ELSE 1 END) * ARPAC.[dblAppliedInvoiceDetailAmount])
+		,ARI.dblBasePayment		= ARI.dblBasePayment + ((CASE WHEN @Post = 0 THEN -1 ELSE 1 END) * ARPAC.[dblBaseAppliedInvoiceDetailAmount])
+		,ARI.dblAmountDue		= ARI.dblInvoiceTotal - (ARI.dblPayment + ((CASE WHEN @Post = 0 THEN -1 ELSE 1 END) * ARPAC.[dblAppliedInvoiceDetailAmount]))
+		,ARI.dblBaseAmountDue	= ARI.dblBaseInvoiceTotal - (ARI.dblBasePayment + ((CASE WHEN @Post = 0 THEN -1 ELSE 1 END) * ARPAC.[dblBaseAppliedInvoiceDetailAmount]))
 	FROM
 		tblARInvoice ARI
 	INNER JOIN						

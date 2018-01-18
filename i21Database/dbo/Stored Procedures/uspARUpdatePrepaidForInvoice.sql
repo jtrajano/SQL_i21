@@ -39,7 +39,8 @@ BEGIN TRY
 	UPDATE
 		tblARInvoice
 	SET
-		[dblPayment] = @ZeroDecimal
+		 [dblPayment] = @ZeroDecimal
+		,[dblBasePayment] = @ZeroDecimal
 	WHERE
 		[intInvoiceId] = @InvoiceId 
 		
@@ -66,9 +67,13 @@ BEGIN TRY
 		,[intPrepaymentId]
 		,[intPrepaymentDetailId]
 		,[dblPostedAmount]
+		,[dblBasePostedAmount]
 		,[dblPostedDetailAmount]
+		,[dblBasePostedDetailAmount]
 		,[dblAppliedInvoiceAmount]
+		,[dblBaseAppliedInvoiceAmount]
 		,[dblAppliedInvoiceDetailAmount]
+		,[dblBaseAppliedInvoiceDetailAmount]
 		,[ysnApplied]
 		,[ysnPosted]
 		,[intRowNumber]
@@ -79,9 +84,13 @@ BEGIN TRY
 		, intPrepaymentId					= I.intInvoiceId
 		, intPrepaymentDetailId				= I.intInvoiceDetailId
 		, dblPostedAmount					= @ZeroDecimal
+		, dblBasePostedAmount				= @ZeroDecimal
 		, dblPostedDetailAmount				= @ZeroDecimal
+		, dblBasePostedDetailAmount			= @ZeroDecimal
 		, dblAppliedInvoiceAmount			= @ZeroDecimal
+		, dblBaseAppliedInvoiceAmount		= @ZeroDecimal
 		, dblAppliedInvoiceDetailAmount		= @ZeroDecimal
+		, dblBaseAppliedInvoiceDetailAmount	= @ZeroDecimal
 		, ysnApplied						= 0
 		, ysnPosted							= 0
 		, intRowNumber						= ROW_NUMBER() OVER(ORDER BY I.intInvoiceId ASC)
