@@ -103,6 +103,9 @@ BEGIN TRY
 			@intUserId				=	@intUserId,
 			@intExternalId			=	@intExternalId,
 			@strScreenName			=	@strScreenName
+
+	EXEC	uspCTCreateDetailHistory	NULL,@intContractDetailId
+
 END TRY
 
 BEGIN CATCH

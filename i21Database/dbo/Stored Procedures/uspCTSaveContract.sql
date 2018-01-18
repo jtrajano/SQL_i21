@@ -289,6 +289,7 @@ BEGIN TRY
 		UPDATE tblCTContractHeader SET dtmSigned = DATEADD(d, 0, DATEDIFF(d, 0, GETDATE())) WHERE intContractHeaderId = @intContractHeaderId		
 	END
 
+	EXEC	uspCTCreateDetailHistory	@intContractHeaderId
 END TRY
 
 BEGIN CATCH

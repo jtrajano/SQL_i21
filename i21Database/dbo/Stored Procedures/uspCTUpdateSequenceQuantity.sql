@@ -96,7 +96,7 @@ BEGIN TRY
 			intConcurrencyId	=	intConcurrencyId + 1
 	WHERE	intContractHeaderId	=	@intContractHeaderId
 	
-
+	EXEC	uspCTCreateDetailHistory	NULL,@intContractDetailId
 END TRY
 
 BEGIN CATCH

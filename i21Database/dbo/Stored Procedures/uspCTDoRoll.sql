@@ -56,6 +56,8 @@ BEGIN TRY
 	FROM	tblCTContractDetail		CD
 	JOIN	#tblCTContractDetail	TD ON TD.intContractDetailId = CD.intContractDetailId
 	
+	--EXEC	uspCTCreateDetailHistory	NULL, @intDonorId
+
 END TRY      
 
 BEGIN CATCH       

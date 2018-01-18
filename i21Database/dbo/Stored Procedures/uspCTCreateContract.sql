@@ -275,6 +275,7 @@ BEGIN TRY
 		EXEC	uspCTGetTableDataInXML '#tmpContractDetail',null,@strTblXML OUTPUT,'tblCTContractDetail'
 		EXEC	uspCTValidateContractDetail @strTblXML,'Added'
 		EXEC	uspCTInsertINTOTableFromXML 'tblCTContractDetail',@strTblXML,@intContractDetailId OUTPUT
+		EXEC	uspCTCreateDetailHistory	NULL, @intContractDetailId
 	END
 
 

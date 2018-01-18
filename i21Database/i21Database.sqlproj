@@ -6104,6 +6104,7 @@
     <Build Include="dbo\Stored Procedures\uspRKPositionChangeAnalysis.sql" />
     <Build Include="dbo\Views\vyuCTCustomerContract.sql" />
     <Build Include="dbo\Tables\tblCTSequenceHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTCreateDetailHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

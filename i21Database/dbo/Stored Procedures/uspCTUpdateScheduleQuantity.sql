@@ -134,6 +134,8 @@ BEGIN TRY
 				@strReason				=	@strReason
 	END
 
+	EXEC	uspCTCreateDetailHistory	NULL,@intContractDetailId
+
 END TRY
 
 BEGIN CATCH
