@@ -5770,6 +5770,7 @@
     <Build Include="dbo\Views\vyuCFTopCardLockCustomer.sql" />
     <Build Include="dbo\Stored Procedures\uspCFTopCardLockCustomerReport.sql" />
     <Build Include="dbo\Views\vyuCCVendorCombo.sql" />
+    <Build Include="dbo\Views\vyuPREmployeeW3.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
