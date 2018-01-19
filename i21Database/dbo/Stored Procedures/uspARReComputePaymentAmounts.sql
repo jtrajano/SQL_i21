@@ -42,7 +42,7 @@ WHERE
 UPDATE ARPD
 SET	
 	 ARPD.[dblAmountDue]		= ISNULL(ARI.[dblAmountDue], @ZeroDecimal) + ISNULL(ARPD.[dblInterest], @ZeroDecimal) - (ISNULL(ARPD.[dblPayment], @ZeroDecimal) + ISNULL(ARPD.[dblDiscount], @ZeroDecimal))
-	,ARPD.[dblBaseAmountDue]	= ISNULL(ARI.[dblBaseAmountDue], @ZeroDecimal) + ISNULL(ARPD.[dblBaseInterest], @ZeroDecimal) - (ISNULL(ARPD.[dblBasePayment], @ZeroDecimal) + ISNULL(ARPD.[dblBaseDiscount], @ZeroDecimal))
+	,ARPD.[dblBaseAmountDue]	= [dbo].fnRoundBanker(ISNULL(ISNULL(ARI.[dblAmountDue], @ZeroDecimal) + ISNULL(ARPD.[dblInterest], @ZeroDecimal) - (ISNULL(ARPD.[dblPayment], @ZeroDecimal) + ISNULL(ARPD.[dblDiscount], @ZeroDecimal)), @ZeroDecimal) * ARPD.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
 FROM
 	tblARPaymentDetail ARPD
 INNER JOIN
@@ -54,7 +54,7 @@ WHERE
 UPDATE ARPD
 SET	
 	 ARPD.[dblAmountDue]		= ISNULL(APB.[dblAmountDue], @ZeroDecimal) + ISNULL(ARPD.[dblInterest], @ZeroDecimal) - (ISNULL(ARPD.[dblPayment], @ZeroDecimal) + ISNULL(ARPD.[dblDiscount], @ZeroDecimal))
-	,ARPD.[dblBaseAmountDue]	= ISNULL(APB.[dblAmountDue], @ZeroDecimal) + ISNULL(ARPD.[dblBaseInterest], @ZeroDecimal) - (ISNULL(ARPD.[dblBasePayment], @ZeroDecimal) + ISNULL(ARPD.[dblBaseDiscount], @ZeroDecimal))
+	,ARPD.[dblBaseAmountDue]	= [dbo].fnRoundBanker(ISNULL(ISNULL(APB.[dblAmountDue], @ZeroDecimal) + ISNULL(ARPD.[dblInterest], @ZeroDecimal) - (ISNULL(ARPD.[dblPayment], @ZeroDecimal) + ISNULL(ARPD.[dblDiscount], @ZeroDecimal)), @ZeroDecimal) * ARPD.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
 FROM
 	tblARPaymentDetail ARPD
 INNER JOIN
@@ -65,10 +65,10 @@ WHERE
 
 UPDATE ARP
 SET
-	 ARP.[dblAmountPaid]			= PD.[dblPaymentTotal]
-	,ARP.[dblBaseAmountPaid]		= PD.[dblBasePaymentTotal]
-	,ARP.[dblUnappliedAmount]		= @ZeroDecimal
-	,ARP.[dblBaseUnappliedAmount]	= @ZeroDecimal
+	 ARP.[dblUnappliedAmount]		= ARP.[dblAmountPaid] - PD.[dblPaymentTotal]
+	,ARP.[dblBaseUnappliedAmount]	= ARP.[dblBaseAmountPaid] - PD.[dblBasePaymentTotal]
+	,ARP.[dblOverpayment]			= ARP.[dblAmountPaid] - PD.[dblPaymentTotal]
+	,ARP.[dblBaseOverpayment]		= ARP.[dblBaseAmountPaid] - PD.[dblBasePaymentTotal]
 FROM tblARPayment ARP
 INNER JOIN 
 	(SELECT
@@ -81,5 +81,26 @@ INNER JOIN
 		ON ARP.[intPaymentId] = PD.[intPaymentId]
 WHERE
 	EXISTS(SELECT NULL FROM @PaymentIds WHERE [intHeaderId] = ARP.[intPaymentId])
+
+--UPDATE ARP
+--SET
+--	 ARP.[dblAmountPaid]			= PD.[dblPaymentTotal]
+--	,ARP.[dblBaseAmountPaid]		= PD.[dblBasePaymentTotal]
+--	,ARP.[dblUnappliedAmount]		= @ZeroDecimal
+--	,ARP.[dblBaseUnappliedAmount]	= @ZeroDecimal
+--	,ARP.[dblOverpayment]			= @ZeroDecimal
+--	,ARP.[dblBaseOverpayment]		= @ZeroDecimal
+--FROM tblARPayment ARP
+--INNER JOIN 
+--	(SELECT
+--		 [intPaymentId]			= [intPaymentId]
+--		,[dblPaymentTotal]		= SUM([dblPayment])
+--		,[dblBasePaymentTotal]	= SUM([dblBasePayment])
+--	FROM
+--		tblARPaymentDetail GROUP BY intPaymentId
+--	) PD
+--		ON ARP.[intPaymentId] = PD.[intPaymentId]
+--WHERE
+--	EXISTS(SELECT NULL FROM @PaymentIds WHERE [intHeaderId] = ARP.[intPaymentId])
 
 END
