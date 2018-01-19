@@ -313,14 +313,14 @@ BEGIN
 								,@ErrorMessage             = @strErrorMessage OUTPUT
 								,@ItemId                   = @intItemId
 								,@ItemQtyShipped           = @dblQuantity
-								,@ItemPrice                = @dblPrice -- Question if No contract available. --msa
+								,@ItemPrice                = @dblPrebuyPrice -- Question if No contract available. --msa
 								,@ItemSiteId               = @intSiteId
 								,@TransactionType	       = @strTransactionType
 								,@Type					   = 'Tank Delivery'
 								,@ShipDate				   = @dtmDate
 								,@ItemPercentFull		   = @dblPercentFullAfterDelivery
 								,@ItemTaxGroupId		   = @intTaxGroupId	
-								,@RaiseError			   = 1 
+								,@RaiseError			   = 0 
 								,@UseOriginIdAsInvoiceNumber = 1
 								,@InvoiceOriginId         = @strOriginInvoiceNumber
 								,@ItemContractDetailId		= @intContractDetailId
@@ -356,7 +356,7 @@ BEGIN
 									,@ItemPercentFull		   = 0
 									,@ItemTaxGroupId		   = @intTaxGroupId	
 									,@ItemContractDetailId     = @intContractDetailId
-									,@RaiseError			   = 1 			
+									,@RaiseError			   = 0 			
 									,@ItemCurrencyExchangeRateTypeId = NULL			
 									,@ItemCurrencyExchangeRateId = NULL			
 									,@RecomputeTax = @ysnRecomputeTax
@@ -394,7 +394,7 @@ BEGIN
 											,@ItemPercentFull		   = 0
 											,@ItemTaxGroupId		   = @intTaxGroupId	
 											--,@ItemContractDetailId     = @intContractDetailId
-											,@RaiseError			   = 1 			
+											,@RaiseError			   = 0 			
 											,@ItemCurrencyExchangeRateTypeId = NULL			
 											,@ItemCurrencyExchangeRateId = NULL			
 											,@RecomputeTax = @ysnRecomputeTax
@@ -440,7 +440,7 @@ BEGIN
 						,@ShipDate				   = @dtmDate
 						,@ItemPercentFull		   = @dblPercentFullAfterDelivery
 						,@ItemTaxGroupId		   = @intTaxGroupId	
-						,@RaiseError			   = 1 
+						,@RaiseError			   = 0 
 						,@UseOriginIdAsInvoiceNumber = 1
 						,@InvoiceOriginId         = @strOriginInvoiceNumber
 						,@RecomputeTax = @ysnRecomputeTax
@@ -474,7 +474,7 @@ BEGIN
 							,@ItemPercentFull		   = 0
 							,@ItemTaxGroupId		   = @intTaxGroupId	
 							--,@ItemContractDetailId     = @intContractDetailId
-							,@RaiseError			   = 1 			
+							,@RaiseError			   = 0 			
 							,@ItemCurrencyExchangeRateTypeId = NULL			
 							,@ItemCurrencyExchangeRateId = NULL			
 							,@RecomputeTax = @ysnRecomputeTax
@@ -576,7 +576,7 @@ BEGIN
 				,strFileName = ''				
 				,strStatus = @strErrorMessage
 				,ysnSuccessful = 0
-				,strInvoiceNumber = ISNULL(@strNewInvoiceNumber,@strOriginInvoiceNumber)
+				,strInvoiceNumber = ''--ISNULL(@strNewInvoiceNumber,@strOriginInvoiceNumber)
 				,strItemNumber = @strItemNumber
 		ROLLBACK TRANSACTION
 					
