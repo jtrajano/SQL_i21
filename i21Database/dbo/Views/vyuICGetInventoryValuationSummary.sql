@@ -9,6 +9,7 @@ SELECT	intInventoryValuationKeyId = CAST(ROW_NUMBER() OVER (ORDER BY Item.intIte
 		,strLocationName = ISNULL(Location.strLocationName, InTransitLocation.strLocationName + ' (' + ItemLocation.strDescription + ')') 
 		,intSubLocationId = t.intSubLocationId
 		,strSubLocationName = SubLocation.strSubLocationName
+		,dtmDate = t.dtmDate
 		,dblQuantity = ISNULL(dblQuantity, 0)
 		,dblValue = ISNULL(dblValue, 0)
 		,dblLastCost = ISNULL( ROUND(dblQuantity * ItemPricing.dblLastCost, 2), 0)
@@ -25,6 +26,7 @@ FROM	tblICItem Item
 		OUTER APPLY (
 			SELECT 
 					t.intItemLocationId
+					, dtmDate = MAX(t.dtmDate)
 					, intInTransitSourceLocationId = CASE WHEN t.intItemLocationId <> t.intInTransitSourceLocationId THEN t.intInTransitSourceLocationId ELSE NULL END 
 					, t.intSubLocationId
 					, dblQuantity = SUM(t.dblQty * t.dblUOMQty) 
