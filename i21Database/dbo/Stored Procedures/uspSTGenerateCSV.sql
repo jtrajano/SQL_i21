@@ -59,6 +59,49 @@ BEGIN
 			IF EXISTS (SELECT * FROM tblSTTranslogRebates WHERE intStoreId = @intStoreIdMin AND CAST(dtmDate as DATE) >= @dtmBeginningDate AND CAST(dtmDate as DATE) <= @dtmEndingDate AND ysnSubmitted = 0)
 			BEGIN
 				
+				-------------------------------------------START GET Department
+				--// Get Department Id from Store
+				DECLARE @strDepartments AS NVARCHAR(MAX)
+				SELECT @strDepartments = strDepartment 
+				FROM tblSTStore
+				WHERE intStoreId = @intStoreIdMin
+
+				IF(@strDepartments = '')
+				BEGIN
+					SET @strCSV = ''
+					SET @strStatusMsg = 'Store does not have setup for Tobacco Department'
+					RETURN
+				END
+
+				--// Create Temp table
+				DECLARE @TempTableDepartments TABLE 
+				(
+					strDepartment NVARCHAR(100)
+				)
+
+				--// Create dynamic sqlQuery
+				DECLARE @strDynamicQuery as NVARCHAR(MAX)
+				SET @strDynamicQuery = 'SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId IN (' + @strDepartments + ')'
+
+				--// Insert to tempTable
+				INSERT @TempTableDepartments
+				EXEC (@strDynamicQuery)
+
+				IF NOT EXISTS (SELECT * FROM @TempTableDepartments)
+				BEGIN
+					SET @strCSV = ''
+					SET @strStatusMsg = 'Tobacco Department does not exist'
+					RETURN
+				END
+				-------------------------------------------END GET Department
+
+
+				-------------------------------------------START GET Retail Account Number
+				DECLARE @intRetailAccountNumber AS INT = (SELECT intRetailAccountNumber FROM tblSTRetailAccount 
+														  WHERE intEntityId = @intVendorId
+														  AND intStoreId = @intStoreIdMin)
+				-------------------------------------------END GET Retail Account Number
+
 			    -- GET week ending date (SATURDAY)
 				DECLARE @NextDayID INT = 5 -- 0=Mon, 1=Tue, 2=Wed, 3=Thur, 4=Fri, 5=Sat, 6=Sun
 				DECLARE @dtmGetWeekEndingDate DATETIME
@@ -67,6 +110,8 @@ BEGIN
 				--START Insert data from tblSTstgRebatesPMMorris
 				IF(@strTableName = 'tblSTstgRebatesPMMorris')
 				BEGIN
+					
+					
 					INSERT INTO tblSTstgRebatesPMMorris
 					(
 						intManagementOrRetailNumber
@@ -136,7 +181,8 @@ BEGIN
 					FROM
 					(
 						SELECT
-								624419 as intRCN
+								--624419 as intRCN
+								@intRetailAccountNumber AS intRCN
 								--, FORMAT(CAST(dtmClosedTime AS DATE), 'yyyyMMdd') as dtmWeekEndingDate 
 								--, FORMAT(CAST(dtmDate AS DATE), 'yyyyMMdd') as dtmTransactionDate
 								--, FORMAT(dtmDate, 'hh:mm:ss') as strTransactionTime
@@ -177,6 +223,7 @@ BEGIN
 							AND CAST(TR.dtmDate as DATE) >= @dtmBeginningDate 
 							AND CAST(TR.dtmDate as DATE) <= @dtmEndingDate 
 							AND ysnSubmitted = 0
+							AND strTrlDept COLLATE DATABASE_DEFAULT IN (SELECT strDepartment FROM @TempTableDepartments)
 					) x
 				END
 				--END Insert data from tblSTstgRebatesPMMorris
@@ -311,7 +358,8 @@ BEGIN
 							AND CAST(TR.dtmDate as DATE) <= @dtmEndingDate
 							AND ysnSubmitted = 0
 							AND strTrLineType = 'plu'
-							AND strTrlDept = 'CIGARETTES'
+							AND strTrlDept COLLATE DATABASE_DEFAULT IN (SELECT strDepartment FROM @TempTableDepartments)
+							--AND strTrlDept = 'CIGARETTES'
 							
 					) x
 				END

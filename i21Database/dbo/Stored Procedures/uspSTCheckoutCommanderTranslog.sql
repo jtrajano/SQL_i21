@@ -15,6 +15,42 @@ BEGIN
 			DECLARE @intStoreId int
 			SELECT @intStoreId = intStoreId FROM tblSTCheckoutHeader WHERE intCheckoutId = @intCheckoutId
 
+			-------------------------------------------START GET Department
+			--// Get Department Id from Store
+			DECLARE @strDepartments AS NVARCHAR(MAX)
+			SELECT @strDepartments = strDepartment 
+			FROM tblSTStore
+			WHERE intStoreId = @intStoreId
+
+			IF(@strDepartments = '')
+			BEGIN
+				SET @intCountRows = 0
+				SET @strStatusMsg = 'Store does not have setup for Tobacco Department'
+				RETURN
+			END
+
+			--// Create Temp table
+			DECLARE @TempTableDepartments TABLE 
+			(
+				strDepartment NVARCHAR(100)
+			)
+
+			--// Create dynamic sqlQuery
+			DECLARE @strDynamicQuery as NVARCHAR(MAX)
+			SET @strDynamicQuery = 'SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId IN (' + @strDepartments + ')'
+
+			--// Insert to tempTable
+			INSERT @TempTableDepartments
+			EXEC (@strDynamicQuery)
+
+			IF NOT EXISTS (SELECT * FROM @TempTableDepartments)
+			BEGIN
+				SET @intCountRows = 0
+				SET @strStatusMsg = 'Tobacco department does not exist'
+				RETURN
+			END
+			-------------------------------------------END GET Department
+
 			--Get Number of rows
 			SELECT @intCountRows = COUNT(*) 
 			FROM #tempCheckoutInsert chk
@@ -22,7 +58,9 @@ BEGIN
 			(
 				SELECT c.termMsgSN as termMsgSN
 				FROM #tempCheckoutInsert c
-				WHERE c.trlDept = 'CIGARETTES' AND (c.transtype = 'sale' OR c.transtype = 'network sale')
+				--WHERE c.trlDept = 'CIGARETTES' 
+				WHERE c.trlDept IN (SELECT strDepartment FROM @TempTableDepartments) 
+				AND (c.transtype = 'sale' OR c.transtype = 'network sale')
 				GROUP BY c.termMsgSN
 			) x ON x.termMsgSN = chk.termMsgSN
 			WHERE NOT EXISTS
@@ -35,8 +73,8 @@ BEGIN
 					AND TR.intTrTickNumPosNum = chk.posNum 
 					AND TR.intTrTickNumTrSeq  = chk.trSeq
 					AND TR.strTransType COLLATE DATABASE_DEFAULT = chk.transtype COLLATE DATABASE_DEFAULT
+					AND TR.intStoreNumber = chk.storeNumber
 			)
-			--AND chk.trlDept = 'CIGARETTES'
 
 			--PRINT 'Rows count: ' + Cast(@intCountRows as nvarchar(50))
 
@@ -347,7 +385,9 @@ BEGIN
 				(
 					SELECT c.termMsgSN as termMsgSN
 					FROM #tempCheckoutInsert c
-					WHERE c.trlDept = 'CIGARETTES' AND (c.transtype = 'sale' OR c.transtype = 'network sale')
+					--WHERE c.trlDept = 'CIGARETTES' 
+					WHERE c.trlDept IN (SELECT strDepartment FROM @TempTableDepartments)
+					AND (c.transtype = 'sale' OR c.transtype = 'network sale')
 					GROUP BY c.termMsgSN
 				) x ON x.termMsgSN = chk.termMsgSN
 				WHERE NOT EXISTS
@@ -360,9 +400,9 @@ BEGIN
 					AND TR.intTrTickNumPosNum = chk.posNum 
 					AND TR.intTrTickNumTrSeq  = chk.trSeq
 					AND TR.strTransType COLLATE DATABASE_DEFAULT = chk.transtype COLLATE DATABASE_DEFAULT
+					AND TR.intStoreNumber = chk.storeNumber
 				)
 				ORDER BY chk.termMsgSN, chk.intRowCount ASC
-				--AND chk.trlDept = 'CIGARETTES'
 
 				SET @strStatusMsg = 'Success'
 			END

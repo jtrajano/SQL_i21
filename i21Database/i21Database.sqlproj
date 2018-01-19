@@ -6094,6 +6094,9 @@
     <Build Include="dbo\Stored Procedures\uspMFErrorNotificationEDI943.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetDefaultFutureMarketInfoByCommodity.sql" />
     <Build Include="dbo\Stored Procedures\uspMFErrorNotificationEDI940.sql" />
+    <Build Include="dbo\Tables\tblSTRetailAccount.sql" />
+    <Build Include="dbo\Functions\fnSTRebateDepartment.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTRebatePreviewSubmission.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
