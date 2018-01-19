@@ -76,6 +76,7 @@ compLoc.intCompanyLocationId
 ,compLoc.intDeferredPayableId
 ,compLoc.intPettyCash
 ,compLoc.intDeferredRevenueId
+,compLoc.intDeferredPayableInterestId
 ,compLoc.strInvoiceType
 ,compLoc.strDefaultInvoicePrinter
 ,compLoc.strPickTicketType
@@ -234,6 +235,7 @@ compLoc.intCompanyLocationId
 ,ISNULL(deferredPayableId.[strAccountId], '') as strDeferredPayableId
 ,ISNULL(pettyCash.[strAccountId], '') as strPettyCash
 ,ISNULL(deferredRevenueId.[strAccountId], '') as strDeferredRevenueId
+,ISNULL(deferredPayableInterest.[strAccountId], '') as strDeferredPayableInterestId
 ,ISNULL(blendProductionDockDoorUnit.[strName], '') as strBlendProductionDockDoorUnit
 ,ISNULL(blendProductionStagingUnit.[strName], '') as strBlendProductionStagingUnit
 ,ISNULL(defaultCarrier.[strName], '') as strMFDefaultCarrier
@@ -280,6 +282,7 @@ LEFT JOIN tblGLAccount undepositedFundsId ON compLoc.intUndepositedFundsId = und
 LEFT JOIN tblGLAccount deferredPayableId ON compLoc.intDeferredPayableId = deferredPayableId.intAccountId
 LEFT JOIN tblGLAccount pettyCash ON compLoc.intPettyCash = pettyCash.intAccountId
 LEFT JOIN tblGLAccount deferredRevenueId ON compLoc.intDeferredRevenueId = deferredRevenueId.intAccountId
+LEFT JOIN tblGLAccount deferredPayableInterest ON compLoc.intDeferredPayableInterestId = deferredPayableInterest.intAccountId
 LEFT JOIN tblICStorageLocation blendProductionDockDoorUnit ON compLoc.intBlendProductionDockDoorUnitId = blendProductionDockDoorUnit.intStorageLocationId
 LEFT JOIN tblICStorageLocation blendProductionStagingUnit ON compLoc.intBlendProductionStagingUnitId = blendProductionStagingUnit.intStorageLocationId
 LEFT JOIN tblEMEntity defaultCarrier ON compLoc.intDefaultCarrierId = defaultCarrier.intEntityId

@@ -75,6 +75,7 @@
 	[intDeferredPayableId] INT NULL,
 	[intPettyCash] INT NULL,
 	[intDeferredRevenueId] INT NULL,
+	[intDeferredPayableInterestId] INT NULL,
 	[strInvoiceType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strDefaultInvoicePrinter] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strPickTicketType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
@@ -235,11 +236,12 @@
 	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount16] FOREIGN KEY([intPrepaidAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount17] FOREIGN KEY([intDeferredPayableId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount18] FOREIGN KEY([intPettyCash]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
-	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount19] FOREIGN KEY([intDeferredRevenueId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount19] FOREIGN KEY([intDeferredRevenueId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),	
 	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount20] FOREIGN KEY([intFreightIncome]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount21] FOREIGN KEY([intFreightAPAccount]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount22] FOREIGN KEY([intFreightExpenses]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]), 
-    CONSTRAINT [FK_tblSMCompanyLocation_tblSMTaxGroup] FOREIGN KEY (intTaxGroupId) REFERENCES tblSMTaxGroup(intTaxGroupId)
+    CONSTRAINT [FK_tblSMCompanyLocation_tblSMTaxGroup] FOREIGN KEY (intTaxGroupId) REFERENCES tblSMTaxGroup(intTaxGroupId),
+	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount23] FOREIGN KEY([intDeferredPayableInterestId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])
 )
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [AK_tblSMCompanyLocation_strLocationNumber] ON [tblSMCompanyLocation]([strLocationNumber]) WHERE [strLocationNumber] IS NOT NULL
