@@ -86,9 +86,9 @@ AS
 			dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,IU.intUnitMeasureId,CH.intDefaultCommodityUnitMeasureId,CD.dblQuantity)			AS	dblQtyInCommodityDefaultUOM,
 			dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,IU.intUnitMeasureId,FM.intUnitMeasureId,CD.dblQuantity)/FM.dblContractSize		AS	dblActualLots,
 			SY.intHedgedLots,
-			CD.dblNoOfLots - SY.intHedgedLots AS dblBalLotsToHedge,
-			dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,FM.intUnitMeasureId,CH.intDefaultCommodityUnitMeasureId,FM.dblContractSize * SY.intHedgedLots)	AS dblHedgeQty,
-			dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,FM.intUnitMeasureId,CH.intDefaultCommodityUnitMeasureId,FM.dblContractSize * (CD.dblNoOfLots - SY.intHedgedLots))	AS dblBalQtyToHedge,
+			CD.dblNoOfLots - ISNULL(SY.intHedgedLots,0) AS dblBalLotsToHedge,
+			dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,FM.intUnitMeasureId,CH.intDefaultCommodityUnitMeasureId,FM.dblContractSize * ISNULL(SY.intHedgedLots,0))	AS dblHedgeQty,
+			dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,FM.intUnitMeasureId,CH.intDefaultCommodityUnitMeasureId,FM.dblContractSize * (CD.dblNoOfLots - ISNULL(SY.intHedgedLots,0)))	AS dblBalQtyToHedge,
 			--Header
 	
 			CH.*
