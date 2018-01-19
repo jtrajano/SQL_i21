@@ -28,6 +28,7 @@ DECLARE @StartingNumberId_InventoryAdjustment AS INT = 30;
 DECLARE @strAdjustmentNo AS NVARCHAR(50)
 		,@intAdjustmentNo AS INT
 		,@strAvgLast AS NVARCHAR(1)
+		,@cnt AS INT
 
 DECLARE @ADJUSTMENT_TYPE_QuantityChange AS INT = 1
 		,@ADJUSTMENT_TYPE_UOMChange AS INT = 2
@@ -40,19 +41,23 @@ SET @adjdt = ISNULL(GETDATE(),@adjdt)
 
 -- Create the Adjustment header and detail record. 
 BEGIN 
-	DECLARE @intLocationId AS INT 
-	SELECT TOP 1 @intLocationId = intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber = @adjLoc
-
 	--** Fetching the next adjustment number to be assigned for the adjustment to be created from uspSMGetStartingNumber stored procedure. **
-	EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryAdjustment, @strAdjustmentNo OUTPUT, @intLocationId
+	EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryAdjustment, @strAdjustmentNo OUTPUT
 
 	select @strAvgLast = agctl_sa_cost_ind from agctlmst where agctl_key = 1
 
 	IF ( @adjLoc IS NULL or @adjLoc = '')
-	BEGIN	
-		DECLARE loc_cursor CURSOR
-		FOR
-		SELECT agloc_loc_no	FROM   aglocmst
+		BEGIN
+			DECLARE loc_cursor CURSOR
+			FOR
+			SELECT rtrim(agloc_loc_no) agloc_loc_no	FROM aglocmst
+		END	
+	ELSE
+		BEGIN
+			DECLARE loc_cursor CURSOR
+			FOR
+			SELECT @adjLoc	
+		END	
 
 		OPEN loc_cursor
 
@@ -60,8 +65,25 @@ BEGIN
 		FROM loc_cursor
 		INTO @adjLoc
 
-		WHILE @@FETCH_STATUS = 0
+	WHILE @@FETCH_STATUS = 0
+	BEGIN
+	
+	SELECT @cnt = COUNT(*)
+		FROM	tblICItem inv INNER JOIN agitmmst itm 
+					ON  inv.strItemNo COLLATE Latin1_General_CI_AS = itm.agitm_no COLLATE Latin1_General_CI_AS
+				LEFT JOIN tblICItemUOM uom 
+					on uom.intItemId = inv.intItemId 
+				left join tblICStorageLocation sl 
+					on sl.strName COLLATE Latin1_General_CI_AS = itm.agitm_binloc COLLATE Latin1_General_CI_AS	
+		WHERE	agitm_un_on_hand <> 0 
+		AND agitm_loc_no = @adjLoc
+		AND inv.strType in ('Inventory', 'Finished Good', 'Raw Material')
+	
+		IF @cnt > 0
 		BEGIN
+			--** Fetching the next adjustment number to be assigned for the adjustment to be created from uspSMGetStartingNumber stored procedure. **
+			EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryAdjustment, @strAdjustmentNo OUTPUT
+
 			INSERT INTO [dbo].[tblICInventoryAdjustment](
 				intLocationId
 				, dtmAdjustmentDate
@@ -83,40 +105,7 @@ BEGIN
 				, 1
 			)
 
-			FETCH NEXT
-			FROM loc_cursor
-			INTO @adjLoc
-
-		END
-		CLOSE loc_cursor
-
-		DEALLOCATE loc_cursor
-	END
-	ELSE
-	BEGIN 
-			INSERT INTO [dbo].[tblICInventoryAdjustment](
-				intLocationId
-				, dtmAdjustmentDate
-				, intAdjustmentType
-				, strAdjustmentNo
-				, strDescription
-				, ysnPosted
-				, intEntityId
-				, intConcurrencyId
-			)
-			VALUES (
-				(SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber = @adjLoc)
-				, @adjdt
-				, @ADJUSTMENT_TYPE_QuantityChange
-				, @strAdjustmentNo
-				, 'Begin Inventory imported by iRely'
-				, 0
-				, @intEntityUserSecurityId
-				, 1
-			)
-	END
-
-	SELECT @intAdjustmentNo = @@IDENTITY
+			SELECT @intAdjustmentNo = @@IDENTITY
 
 	INSERT INTO tblICInventoryAdjustmentDetail (
 		intInventoryAdjustmentId
@@ -125,7 +114,7 @@ BEGIN
         ,dblNewQuantity
         ,dblAdjustByQuantity
 		,intItemUOMId
-        ,dblNewCost
+        ,dblCost
 		,intSubLocationId
 		,intStorageLocationId
         ,intConcurrencyId
@@ -138,18 +127,34 @@ BEGIN
 		,agitm_un_on_hand
 		,agitm_un_on_hand
 		,uom.intItemUOMId
-		--,case when @strAvgLast = 'A' then agitm_avg_un_cost else agitm_last_un_cost end
-		,agitm_avg_un_cost
-		,sl.intSubLocationId
-		,sl.intStorageLocationId
+		,case when @strAvgLast = 'A' then agitm_avg_un_cost else agitm_last_un_cost end
+		,(select sl.intSubLocationId 
+			from 
+				tblICStorageLocation sl 
+				join tblSMCompanyLocationSubLocation cls on sl.intSubLocationId = cls.intCompanyLocationSubLocationId 
+				join tblSMCompanyLocation cl on cl.intCompanyLocationId = cls.intCompanyLocationId
+				where sl.strName COLLATE Latin1_General_CI_AS = itm.agitm_binloc COLLATE Latin1_General_CI_AS 
+				and cl.strLocationNumber COLLATE Latin1_General_CI_AS = itm.agitm_loc_no COLLATE Latin1_General_CI_AS) intSubLocationId
+		,(select sl.intSubLocationId 
+			from 
+				tblICStorageLocation sl 
+				join tblSMCompanyLocationSubLocation cls on sl.intSubLocationId = cls.intCompanyLocationSubLocationId 
+				join tblSMCompanyLocation cl on cl.intCompanyLocationId = cls.intCompanyLocationId
+				where sl.strName COLLATE Latin1_General_CI_AS = itm.agitm_binloc COLLATE Latin1_General_CI_AS 
+				and cl.strLocationNumber COLLATE Latin1_General_CI_AS = itm.agitm_loc_no COLLATE Latin1_General_CI_AS) intStorageLocationId	
+
+				--,sl.intSubLocationId
+				--,sl.intStorageLocationId
 		,1
 	FROM	tblICItem inv INNER JOIN agitmmst itm 
 				ON  inv.strItemNo COLLATE Latin1_General_CI_AS = itm.agitm_no COLLATE Latin1_General_CI_AS
 			LEFT JOIN tblICItemUOM uom 
 				on uom.intItemId = inv.intItemId 
-			left join tblICStorageLocation sl 
-				on sl.strName COLLATE Latin1_General_CI_AS = itm.agitm_binloc COLLATE Latin1_General_CI_AS	
+					--created duplicate storage location entries. converted into an inline sub query.	
+			--left join tblICStorageLocation sl 
+			--	on sl.strName COLLATE Latin1_General_CI_AS = itm.agitm_binloc COLLATE Latin1_General_CI_AS	
 	WHERE	agitm_un_on_hand <> 0 
+	AND agitm_loc_no = @adjLoc
 	AND inv.strType in ('Inventory', 'Finished Good', 'Raw Material')
 
 
@@ -169,7 +174,7 @@ BEGIN
 				,@fromValue = ''										-- Previous Value
 				,@toValue = ''											-- New Value
 	END
-END 
+
 
 	--Adjustment has to be posted. it will book inventory account. However amount is already imported during the gl import.
 	--adjustment posting will book the amount again. This has to be handled with the following steps. 
@@ -180,30 +185,93 @@ END
 
 --------------------------------------------------------------------------------------------------------------------------------------------
 -- Auto post the inventory adjustment
-BEGIN 
+			BEGIN TRY
+				EXEC dbo.uspICPostInventoryAdjustment
+					@ysnPost = 1
+					,@ysnRecap = 0
+					,@strTransactionId = @strAdjustmentNo
+					,@intEntityUserSecurityId = @intEntityUserSecurityId
+			END TRY
+			BEGIN CATCH
+				DECLARE @ErrorMessage NVARCHAR(4000);
+				DECLARE @ErrorSeverity INT;
+				DECLARE @ErrorState INT;
 
-	EXEC dbo.uspICPostInventoryAdjustment
-		@ysnPost = 1
-		,@ysnRecap = 0
-		,@strTransactionId = @strAdjustmentNo
-		,@intEntityUserSecurityId = @intEntityUserSecurityId
-END 
+				SELECT 
+					@ErrorMessage = ERROR_MESSAGE(),
+					@ErrorSeverity = ERROR_SEVERITY(),
+					@ErrorState = ERROR_STATE();
 
--- Tweak the contra-gl account used. 
-BEGIN 
-	-- Update the GL credit entries to use Inventory account id
-	UPDATE	gd
-	SET		gd.intAccountId = dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, 'Inventory') 
-	FROM	tblGLDetail gd INNER JOIN  tblICInventoryTransaction t 
-				ON gd.intJournalLineNo = t.intInventoryTransactionId
-				AND gd.strTransactionId = t.strTransactionId
-				AND gd.intTransactionId = t.intTransactionId
-				AND gd.strBatchId = t.strBatchId	
-	WHERE	t.strTransactionId = @strAdjustmentNo
-			AND t.intTransactionId = @intAdjustmentNo
-			AND gd.ysnIsUnposted = 0 
-			AND gd.dblCredit <> 0 
-END 
+				-- Use RAISERROR inside the CATCH block to return error
+				-- information about the original error that caused
+				-- execution to jump to the CATCH block.
+				RAISERROR (
+					@ErrorMessage, -- Message text.
+					@ErrorSeverity, -- Severity.
+					@ErrorState -- State.
+				);
+
+				GOTO BreakLoopWithError
+			END CATCH 
+
+			-- Tweak the contra-gl account used. 
+			BEGIN 
+				-- Update the GL credit entries to use Inventory account id
+				UPDATE	gd
+				SET		gd.intAccountId = dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, 'Inventory') 
+				FROM	tblGLDetail gd INNER JOIN  tblICInventoryTransaction t 
+							ON gd.intJournalLineNo = t.intInventoryTransactionId
+							AND gd.strTransactionId = t.strTransactionId
+							AND gd.intTransactionId = t.intTransactionId
+							AND gd.strBatchId = t.strBatchId	
+				WHERE	t.strTransactionId = @strAdjustmentNo
+						AND t.intTransactionId = @intAdjustmentNo
+						AND gd.ysnIsUnposted = 0 
+						AND gd.dblCredit <> 0 
+			END 
+		END
+		FETCH NEXT
+		FROM loc_cursor
+		INTO @adjLoc
+
+	END
+	GOTO CloseLoop
+
+	BreakLoopWithError:  
+	CLOSE loc_cursor
+	DEALLOCATE loc_cursor
+	GOTO Post_Exit 
+
+	CloseLoop:
+	CLOSE loc_cursor
+	DEALLOCATE loc_cursor
+
+END
+	--ELSE
+	--BEGIN 
+	--		INSERT INTO [dbo].[tblICInventoryAdjustment](
+	--			intLocationId
+	--			, dtmAdjustmentDate
+	--			, intAdjustmentType
+	--			, strAdjustmentNo
+	--			, strDescription
+	--			, ysnPosted
+	--			, intEntityId
+	--			, intConcurrencyId
+	--		)
+	--		VALUES (
+	--			(SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber = @adjLoc)
+	--			, @adjdt
+	--			, @ADJUSTMENT_TYPE_QuantityChange
+	--			, @strAdjustmentNo
+	--			, 'Begin Inventory imported by iRely'
+	--			, 0
+	--			, @intEntityUserSecurityId
+	--			, 1
+	--		)
+	--END
+	
+
 
 -- Rebuild the G/L Summary for that day. 
 BEGIN 
@@ -235,3 +303,7 @@ BEGIN
 			AND dbo.fnDateEquals(dtmDate, @adjdt) = 1	
 	GROUP BY intMultiCompanyId, intAccountId, dtmDate, strCode
 END
+
+Post_Exit:
+
+
