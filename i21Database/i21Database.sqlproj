@@ -6258,6 +6258,7 @@
     <Build Include="dbo\Stored Procedures\uspAPCreate1099DIVFile.sql" />
     <Build Include="dbo\Functions\fnAP1099EFileEndOfDIV.sql" />
     <None Include="Scripts\Post-Deployment\IC\24_ImplementBasketChanges.sql" />
+    <None Include="Scripts\Post-Deployment\AP\DefaultData\DeferredPaymentInterest.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
