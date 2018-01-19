@@ -6,6 +6,7 @@ SELECT
 	Item.intItemId,
 	Item.strItemNo,
 	Item.strType,
+	Item.strBundleType,
 	Item.strDescription,
 	Item.strLotTracking,
 	Item.strInventoryTracking,
@@ -139,7 +140,7 @@ SELECT
 	Item.intModuleId,
 	m.strModule,
 	Item.ysnUseWeighScales,
-	Item.ysnLotWeightsRequired
+	Item.ysnLotWeightsRequired	
 FROM	
 	tblICItem Item 
 	LEFT JOIN (
