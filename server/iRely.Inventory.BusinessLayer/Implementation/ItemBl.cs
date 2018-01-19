@@ -403,7 +403,37 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
+        public async Task<SearchResult> SearchVendorPricing(GetParameter param)
+        {
+            // Have to tweak this because tblAPVendorPricing is using intUnitMeasureId instead of intItemUOMId
+            // http://jira.irelyserver.com/browse/EM-2358
+            // Track that JIRA, if implemented correctly, uncomment the first line and remove the linq.
 
+            //var query = _db.GetQuery<tblAPVendorPricing>().Filter(param, true);
+            var query = from vp in _db.ContextManager.Set<tblAPVendorPricing>()
+                        join iu in _db.ContextManager.Set<tblICItemUOM>() on
+                            new { vp.intItemId, vp.intItemUOMId } equals
+                            new { iu.intItemId, intItemUOMId = (int)iu.intUnitMeasureId } into uom from x in uom.DefaultIfEmpty()
+                        select new {
+                            vp.intVendorPricingId,
+                            vp.intEntityVendorId,
+                            vp.intEntityLocationId,
+                            vp.intItemId,
+                            x.intItemUOMId,
+                            vp.dtmBeginDate,
+                            vp.dtmEndDate,
+                            vp.dblUnit,
+                            vp.intCurrencyId
+                        };
+
+            var data = await query.Filter(param, true).ExecuteProjection(param, "intItemId").ToListAsync();
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
+        
         /// <summary>
         /// Get Item Stock UOM Summary
         /// </summary>

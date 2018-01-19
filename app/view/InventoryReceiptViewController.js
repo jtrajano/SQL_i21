@@ -2050,6 +2050,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         //Calculate Line Total        
         var currentReceiptItem = win.viewModel.data.currentReceiptItem;
         var currentReceipt = win.viewModel.data.current;
+
+        me.resolveItemCost(currentReceipt, current);
+
         if (currentReceiptItem) {
             currentReceiptItem.set('dblLineTotal', this.calculateLineTotal(currentReceipt, currentReceiptItem));
         }
@@ -2064,6 +2067,74 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         else {
             pnlLotTracking.setVisible(true);
         }
+    },
+
+    resolveItemCost(receipt, receiptItem) {
+        ic.utils.ajax({
+            url: './inventory/api/item/searchvendorpricing',
+            filters: [
+                {
+                    column: 'intEntityVendorId',
+                    value: receipt.get('intEntityVendorId'),
+                    condition: 'eq',
+                    conjunction: 'and'
+                }, 
+                {
+                    column: 'intEntityLocationId',
+                    value: receipt.get('intShipFromId'),
+                    condition: 'eq',
+                    conjunction: 'and'
+                }, 
+                {
+                    column: 'intItemId',
+                    value: receiptItem.get('intItemId'),
+                    condition: 'eq',
+                    conjunction: 'and'
+                }, 
+                {
+                    column: 'intItemUOMId',
+                    value: receiptItem.get('intCostUOMId'),
+                    condition: 'eq',
+                    conjunction: 'and'
+                },
+                {
+                    column: 'intCurrencyId',
+                    value: receipt.get('intCurrencyId'),
+                    condition: 'eq',
+                    conjunction: 'and'
+                },
+                {
+                    column: 'dtmBeginDate',
+                    value: receipt.get('dtmReceiptDate'),
+                    condition: 'lte',
+                    conjunction: 'and'
+                },
+                {
+                    column: 'dtmEndDate',
+                    value: receipt.get('dtmReceiptDate'),
+                    condition: 'gte',
+                    conjunction: 'and'
+                }
+            ]
+        })
+        .subscribe(x => {
+            var json = JSON.parse(x.responseText);
+            var data = _.first(json.data);
+            var cost = data ? data.dblUnit : receiptItem.get('dblUnitCost');
+
+            var dblUnitQty = receiptItem.get('dblCostUOMConvFactor');
+            var dblForexRate = receiptItem.get('dblForexRate');
+
+            dblUnitQty = Ext.isNumeric(dblUnitQty) ? dblUnitQty : 0;
+            cost = Ext.isNumeric(cost) ? cost : 0;
+            dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0;
+
+            // Convert the last cost from functional currency to the transaction currency. 
+            cost = dblForexRate != 0 ? cost / dblForexRate : cost;
+            cost = i21.ModuleMgr.Inventory.roundDecimalFormat(cost, 6);
+            
+            receiptItem.set('dblUnitCost', cost);
+        });
     },
 
     calculateItemTaxes: function () {
@@ -2150,6 +2221,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         taxAmount = (taxableAmount * (itemDetailTax.dblRate / 100));
                     } else {
                         taxAmount = qtyOrdered * itemDetailTax.dblRate;
+
+                        // UOM for item taxes IC-4718
+                        if(detailRecord.get("intUnitMeasureId") == itemDetailTax.intUnitMeasureId)
+                            taxAmount = (qtyOrdered * itemDetailTax.dblRate) / dblForexRate;
 
                         // If a line is using a foreign currency, convert the tax from functional currency to the transaction currency. 
                         taxAmount = dblForexRate != 0 ? taxAmount / dblForexRate : taxAmount;
@@ -2884,6 +2959,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         { itemId: 'colTaxCode', dataIndex: 'strTaxCode', text: 'Tax Code', width: 100, dataType: 'string' },
                         { itemId: 'colCalculationMethod', dataIndex: 'strCalculationMethod', text: 'Calculation Method', width: 110, dataType: 'string' },                                
                         { itemId: 'colQty', xtype: 'numbercolumn', dataIndex: 'dblQty', text: 'Qty', width: 100, dataType: 'float' },
+                        { itemId: 'colUOM', dataIndex: 'strTaxCode', text: 'Tax Code', width: 100, dataType: 'string' },
                         { itemId: 'colCost', xtype: 'numbercolumn', dataIndex: 'dblCost', text: 'Cost', width: 100, dataType: 'float' },
                         { itemId: 'colRate', xtype: 'numbercolumn', dataIndex: 'dblRate', text: 'Rate', width: 100, dataType: 'float' },
                         { 
@@ -6296,7 +6372,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     taxAmount = (taxableAmount * (itemDetailTax.dblRate / 100));
                                 } else {
                                     taxAmount = chargeQuantity * itemDetailTax.dblRate;
-                                    
+
+                                    // UOM for other charges taxes IC-4718
+                                    if(charge.get("intUnitMeasureId") == itemDetailTax.intUnitMeasureId)
+                                        taxAmount = (chargeQuantity * itemDetailTax.dblRate) / dblForexRate;
+
                                     // If a line is using a foreign currency, convert the tax from functional currency to the charge currency. 
                                     taxAmount = dblForexRate != 0 ? taxAmount / dblForexRate : taxAmount;
                                 }

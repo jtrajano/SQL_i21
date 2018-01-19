@@ -33,6 +33,7 @@ namespace iRely.Inventory.Model
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
+            modelBuilder.Configurations.Add(new tblAPVendorPricingMap());
             modelBuilder.Configurations.Add(new tblEMEntityMap());
             modelBuilder.Configurations.Add(new tbltblSMUserSecurityMap());
             modelBuilder.Configurations.Add(new tblICImportLogMap());

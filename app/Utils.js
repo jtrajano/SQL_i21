@@ -37,6 +37,11 @@ Ext.define('Inventory.Utils', {
                     options.url = options.url.replace(urlObject.search, '');
                     options.params = _.extend(options.params ? options.params : {}, urlObject.searchObject);
                 }
+
+                // Apply dynamic filters
+                if(options.filters) {
+                    options.params = _.extend(options.params ? options.params : {}, { filter: iRely.Functions.encodeFilters(options.filters) })
+                }
             }
             /* Defaults method to 'GET' when method is not defined. */
             if (!options.method)

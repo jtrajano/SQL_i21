@@ -49,6 +49,19 @@ namespace iRely.Inventory.Model
         
     }
 
+    public class tblAPVendorPricing : BaseEntity
+    {
+        public int intVendorPricingId { get; set; }
+        public int intEntityVendorId { get; set; }
+        public int? intEntityLocationId { get; set; }
+        public int intItemId { get; set; }
+        public int intItemUOMId { get; set; }
+        public DateTime dtmBeginDate { get; set; }
+        public DateTime dtmEndDate { get; set; }
+        public decimal dblUnit { get; set; }
+        public int? intCurrencyId { get; set; }
+    }
+
     public class tblGLAccountGroup
     {
         public int intAccountGroupId { get; set; }

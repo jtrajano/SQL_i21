@@ -8,22 +8,40 @@ namespace iRely.Inventory.Model
         public tblSMCompanyLocationMap()
         {
             // Primary Key
-            this.HasKey(t => t.intCompanyLocationId);
+            HasKey(t => t.intCompanyLocationId);
 
             // Table & Column Mappings
-            this.ToTable("tblSMCompanyLocation");
-            this.Property(t => t.intCompanyLocationId).HasColumnName("intCompanyLocationId");
-            this.Property(t => t.intProfitCenter).HasColumnName("intProfitCenter");
-            this.Property(t => t.strAddress).HasColumnName("strAddress");
-            this.Property(t => t.strCity).HasColumnName("strCity");
-            this.Property(t => t.strCountry).HasColumnName("strCountry");
-            this.Property(t => t.strFax).HasColumnName("strFax");
-            this.Property(t => t.strLocationName).HasColumnName("strLocationName");
-            this.Property(t => t.strLocationType).HasColumnName("strLocationType");
-            this.Property(t => t.strPhone).HasColumnName("strPhone");
-            this.Property(t => t.strStateProvince).HasColumnName("strStateProvince");
-            this.Property(t => t.strZipPostalCode).HasColumnName("strZipPostalCode");
+            ToTable("tblSMCompanyLocation");
+            Property(t => t.intCompanyLocationId).HasColumnName("intCompanyLocationId");
+            Property(t => t.intProfitCenter).HasColumnName("intProfitCenter");
+            Property(t => t.strAddress).HasColumnName("strAddress");
+            Property(t => t.strCity).HasColumnName("strCity");
+            Property(t => t.strCountry).HasColumnName("strCountry");
+            Property(t => t.strFax).HasColumnName("strFax");
+            Property(t => t.strLocationName).HasColumnName("strLocationName");
+            Property(t => t.strLocationType).HasColumnName("strLocationType");
+            Property(t => t.strPhone).HasColumnName("strPhone");
+            Property(t => t.strStateProvince).HasColumnName("strStateProvince");
+            Property(t => t.strZipPostalCode).HasColumnName("strZipPostalCode");
             
+        }
+    }
+
+    public class tblAPVendorPricingMap : EntityTypeConfiguration<tblAPVendorPricing>
+    {
+        public tblAPVendorPricingMap()
+        {
+            ToTable("tblAPVendorPricing");
+            HasKey(t => t.intVendorPricingId);
+            Property(t => t.intVendorPricingId).HasColumnName("intVendorPricingId");
+            Property(t => t.intItemUOMId).HasColumnName("intItemUOMId");
+            Property(t => t.intItemId).HasColumnName("intItemId");
+            Property(t => t.intEntityVendorId).HasColumnName("intEntityVendorId");
+            Property(t => t.intEntityLocationId).HasColumnName("intEntityLocationId");
+            Property(t => t.intCurrencyId).HasColumnName("intCurrencyId");
+            Property(t => t.dtmBeginDate).HasColumnName("dtmBeginDate");
+            Property(t => t.dtmEndDate).HasColumnName("dtmEndDate");
+            Property(t => t.dblUnit).HasColumnName("dblUnit").HasPrecision(18, 6);
         }
     }
 
@@ -32,14 +50,14 @@ namespace iRely.Inventory.Model
         public tblGLAccountMap()
         {
             // Primary Key
-            this.HasKey(t => t.intAccountId);
+            HasKey(t => t.intAccountId);
 
             // Table & Column Mappings
-            this.ToTable("vyuGLAccountView");
-            this.Property(t => t.intAccountId).HasColumnName("intAccountId");
-            this.Property(t => t.strAccountId).HasColumnName("strAccountId");
-            this.Property(t => t.strDescription).HasColumnName("strDescription");
-            this.Property(t => t.strAccountGroup).HasColumnName("strAccountGroup");
+            ToTable("vyuGLAccountView");
+            Property(t => t.intAccountId).HasColumnName("intAccountId");
+            Property(t => t.strAccountId).HasColumnName("strAccountId");
+            Property(t => t.strDescription).HasColumnName("strDescription");
+            Property(t => t.strAccountGroup).HasColumnName("strAccountGroup");
         }
     }
 
@@ -48,21 +66,21 @@ namespace iRely.Inventory.Model
         public tblGLAccountGroupMap()
         {
             // Primary Key
-            this.HasKey(t => t.intAccountGroupId);
+            HasKey(t => t.intAccountGroupId);
 
             // Table & Column Mappings
-            this.ToTable("tblGLAccountGroup");
-            this.Property(t => t.intAccountGroupId).HasColumnName("intAccountGroupId");
-            this.Property(t => t.strAccountGroup).HasColumnName("strAccountGroup");
-            this.Property(t => t.strAccountGroupNamespace).HasColumnName("strAccountGroupNamespace");
-            this.Property(t => t.intAccountBegin).HasColumnName("intAccountBegin");
-            this.Property(t => t.intAccountEnd).HasColumnName("intAccountEnd");
-            this.Property(t => t.intAccountCategoryId).HasColumnName("intAccountCategoryId");
-            this.Property(t => t.intAccountRangeId).HasColumnName("intAccountRangeId");
-            this.Property(t => t.intEntityIdLastModified).HasColumnName("intEntityIdLastModified");
-            this.Property(t => t.intGroup).HasColumnName("intGroup");
-            this.Property(t => t.intParentGroupId).HasColumnName("intParentGroupId");
-            this.Property(t => t.strAccountType).HasColumnName("strAccountType");
+            ToTable("tblGLAccountGroup");
+            Property(t => t.intAccountGroupId).HasColumnName("intAccountGroupId");
+            Property(t => t.strAccountGroup).HasColumnName("strAccountGroup");
+            Property(t => t.strAccountGroupNamespace).HasColumnName("strAccountGroupNamespace");
+            Property(t => t.intAccountBegin).HasColumnName("intAccountBegin");
+            Property(t => t.intAccountEnd).HasColumnName("intAccountEnd");
+            Property(t => t.intAccountCategoryId).HasColumnName("intAccountCategoryId");
+            Property(t => t.intAccountRangeId).HasColumnName("intAccountRangeId");
+            Property(t => t.intEntityIdLastModified).HasColumnName("intEntityIdLastModified");
+            Property(t => t.intGroup).HasColumnName("intGroup");
+            Property(t => t.intParentGroupId).HasColumnName("intParentGroupId");
+            Property(t => t.strAccountType).HasColumnName("strAccountType");
         }
     }
 
@@ -71,15 +89,15 @@ namespace iRely.Inventory.Model
         public tblGLAccountCategoryMap()
         {
             // Primary Key
-            this.HasKey(t => t.intAccountCategoryId);
+            HasKey(t => t.intAccountCategoryId);
 
             // Table & Column Mappings
-            this.ToTable("tblGLAccountCategory");
-            this.Property(t => t.intAccountCategoryId).HasColumnName("intAccountCategoryId");
-            this.Property(t => t.strAccountCategory).HasColumnName("strAccountCategory");
-            this.Property(t => t.strAccountGroupFilter).HasColumnName("strAccountGroupFilter");
-            this.Property(t => t.ysnRestricted).HasColumnName("ysnRestricted");
-            this.Property(t => t.intConcurrencyId).HasColumnName("intConcurrencyId");
+            ToTable("tblGLAccountCategory");
+            Property(t => t.intAccountCategoryId).HasColumnName("intAccountCategoryId");
+            Property(t => t.strAccountCategory).HasColumnName("strAccountCategory");
+            Property(t => t.strAccountGroupFilter).HasColumnName("strAccountGroupFilter");
+            Property(t => t.ysnRestricted).HasColumnName("ysnRestricted");
+            Property(t => t.intConcurrencyId).HasColumnName("intConcurrencyId");
         }
     }
 
@@ -87,13 +105,13 @@ namespace iRely.Inventory.Model
     {
         public vyuSMGetCompanyLocationSearchListMap()
         {
-            this.HasKey(t => t.intCompanyLocationId);
+            HasKey(t => t.intCompanyLocationId);
 
-            this.ToTable("vyuSMGetCompanyLocationSearchList");
-            this.Property(t => t.intCompanyLocationId).HasColumnName("intCompanyLocationId");
-            this.Property(t => t.strLocationName).HasColumnName("strLocationName");
-            this.Property(t => t.strLocationNumber).HasColumnName("strLocationNumber");
-            this.Property(t => t.strLocationType).HasColumnName("strLocationType");
+            ToTable("vyuSMGetCompanyLocationSearchList");
+            Property(t => t.intCompanyLocationId).HasColumnName("intCompanyLocationId");
+            Property(t => t.strLocationName).HasColumnName("strLocationName");
+            Property(t => t.strLocationNumber).HasColumnName("strLocationNumber");
+            Property(t => t.strLocationType).HasColumnName("strLocationType");
         }
     }
 
@@ -102,14 +120,14 @@ namespace iRely.Inventory.Model
         public vyuAPVendorMap()
         {
             // Primary Key
-            this.HasKey(t => t.intEntityId);
+            HasKey(t => t.intEntityId);
 
             // Table & Column Mappings
-            this.ToTable("vyuAPVendor");
-            this.Property(t => t.intEntityId).HasColumnName("intEntityId");
-            this.Property(t => t.strName).HasColumnName("strName");
-            this.Property(t => t.strVendorAccountNum).HasColumnName("strVendorAccountNum");
-            this.Property(t => t.strVendorId).HasColumnName("strVendorId");
+            ToTable("vyuAPVendor");
+            Property(t => t.intEntityId).HasColumnName("intEntityId");
+            Property(t => t.strName).HasColumnName("strName");
+            Property(t => t.strVendorAccountNum).HasColumnName("strVendorAccountNum");
+            Property(t => t.strVendorId).HasColumnName("strVendorId");
         }
     }
 
@@ -118,13 +136,13 @@ namespace iRely.Inventory.Model
         public tblARCustomerMap()
         {
             // Primary Key
-            this.HasKey(t => t.intEntityId);
+            HasKey(t => t.intEntityId);
 
             // Table & Column Mappings
-            this.ToTable("vyuARCustomerSearch");
-            this.Property(t => t.intEntityId).HasColumnName("intEntityId");
-            this.Property(t => t.strCustomerNumber).HasColumnName("strCustomerNumber");
-            this.Property(t => t.strCustomerName).HasColumnName("strName");
+            ToTable("vyuARCustomerSearch");
+            Property(t => t.intEntityId).HasColumnName("intEntityId");
+            Property(t => t.strCustomerNumber).HasColumnName("strCustomerNumber");
+            Property(t => t.strCustomerName).HasColumnName("strName");
         }
     }
 
@@ -133,13 +151,13 @@ namespace iRely.Inventory.Model
         public tbltblSMUserSecurityMap()
         {
             // Primary Key
-            this.HasKey(t => t.intEntityId);
+            HasKey(t => t.intEntityId);
 
             // Table & Column Mappings
-            this.ToTable("tblSMUserSecurity");
-            this.Property(t => t.intEntityId).HasColumnName("intEntityId");
-            this.Property(t => t.strUserName).HasColumnName("strUserName");
-            this.Property(t => t.strFullName).HasColumnName("strFullName");
+            ToTable("tblSMUserSecurity");
+            Property(t => t.intEntityId).HasColumnName("intEntityId");
+            Property(t => t.strUserName).HasColumnName("strUserName");
+            Property(t => t.strFullName).HasColumnName("strFullName");
         }
     }
 
@@ -147,8 +165,8 @@ namespace iRely.Inventory.Model
     {
         public tblEMEntityMap()
         {
-            this.HasKey(e => e.intEntityId);
-            this.ToTable("tblEMEntity");
+            HasKey(e => e.intEntityId);
+            ToTable("tblEMEntity");
         }
     }
 
@@ -157,12 +175,12 @@ namespace iRely.Inventory.Model
         public tblSMCountryMap()
         {
             // Primary Key
-            this.HasKey(t => t.intCountryID);
+            HasKey(t => t.intCountryID);
 
             // Table & Column Mappings
-            this.ToTable("tblSMCountry");
-            this.Property(t => t.intCountryID).HasColumnName("intCountryID");
-            this.Property(t => t.strCountry).HasColumnName("strCountry");   
+            ToTable("tblSMCountry");
+            Property(t => t.intCountryID).HasColumnName("intCountryID");
+            Property(t => t.strCountry).HasColumnName("strCountry");   
         }
     }
 
@@ -171,13 +189,13 @@ namespace iRely.Inventory.Model
         public tblSMCurrencyMap()
         {
             // Primary Key
-            this.HasKey(t => t.intCurrencyID);
+            HasKey(t => t.intCurrencyID);
 
             // Table & Column Mappings
-            this.ToTable("tblSMCurrency");
-            this.Property(t => t.intCurrencyID).HasColumnName("intCurrencyID");
-            this.Property(t => t.strCurrency).HasColumnName("strCurrency");
-            this.Property(t => t.strDescription).HasColumnName("strDescription");
+            ToTable("tblSMCurrency");
+            Property(t => t.intCurrencyID).HasColumnName("intCurrencyID");
+            Property(t => t.strCurrency).HasColumnName("strCurrency");
+            Property(t => t.strDescription).HasColumnName("strDescription");
         }
     }
 
@@ -186,16 +204,16 @@ namespace iRely.Inventory.Model
         public tblSTStoreMap()
         {
             // Primary Key
-            this.HasKey(t => t.intStoreId);
+            HasKey(t => t.intStoreId);
 
             // Table & Column Mappings
-            this.ToTable("tblSTStore");
-            this.Property(t => t.intStoreId).HasColumnName("intStoreId");
-            this.Property(t => t.intStoreNo).HasColumnName("intStoreNo");
-            this.Property(t => t.strDescription).HasColumnName("strDescription");
-            this.Property(t => t.strDestrict).HasColumnName("strDestrict");
-            this.Property(t => t.strRegion).HasColumnName("strRegion");
-            this.Property(t => t.strStoreName).HasColumnName("strStoreName");
+            ToTable("tblSTStore");
+            Property(t => t.intStoreId).HasColumnName("intStoreId");
+            Property(t => t.intStoreNo).HasColumnName("intStoreNo");
+            Property(t => t.strDescription).HasColumnName("strDescription");
+            Property(t => t.strDestrict).HasColumnName("strDestrict");
+            Property(t => t.strRegion).HasColumnName("strRegion");
+            Property(t => t.strStoreName).HasColumnName("strStoreName");
         }
     }
 
@@ -204,15 +222,15 @@ namespace iRely.Inventory.Model
         public tblSTSubcategoryMap()
         {
             // Primary Key
-            this.HasKey(t => t.intSubcategoryId);
+            HasKey(t => t.intSubcategoryId);
 
             // Table & Column Mappings
-            this.ToTable("tblSTSubcategory");
-            this.Property(t => t.intSubcategoryId).HasColumnName("intSubcategoryId");
-            this.Property(t => t.strSubcategoryType).HasColumnName("strSubcategoryType");
-            this.Property(t => t.strSubcategoryId).HasColumnName("strSubcategoryId");
-            this.Property(t => t.strSubcategoryDesc).HasColumnName("strSubcategoryDesc");
-            this.Property(t => t.strSubCategoryComment).HasColumnName("strSubCategoryComment");
+            ToTable("tblSTSubcategory");
+            Property(t => t.intSubcategoryId).HasColumnName("intSubcategoryId");
+            Property(t => t.strSubcategoryType).HasColumnName("strSubcategoryType");
+            Property(t => t.strSubcategoryId).HasColumnName("strSubcategoryId");
+            Property(t => t.strSubcategoryDesc).HasColumnName("strSubcategoryDesc");
+            Property(t => t.strSubCategoryComment).HasColumnName("strSubCategoryComment");
         }
     }
 
@@ -221,15 +239,15 @@ namespace iRely.Inventory.Model
         public tblSTSubcategoryRegProdMap()
         {
             // Primary Key
-            this.HasKey(t => t.intRegProdId);
+            HasKey(t => t.intRegProdId);
 
             // Table & Column Mappings
-            this.ToTable("tblSTSubcategoryRegProd");
-            this.Property(t => t.intRegProdId).HasColumnName("intRegProdId");
-            this.Property(t => t.intStoreId).HasColumnName("intStoreId");
-            this.Property(t => t.strRegProdCode).HasColumnName("strRegProdCode");
-            this.Property(t => t.strRegProdComment).HasColumnName("strRegProdComment ");
-            this.Property(t => t.strRegProdDesc).HasColumnName("strRegProdDesc");
+            ToTable("tblSTSubcategoryRegProd");
+            Property(t => t.intRegProdId).HasColumnName("intRegProdId");
+            Property(t => t.intStoreId).HasColumnName("intStoreId");
+            Property(t => t.strRegProdCode).HasColumnName("strRegProdCode");
+            Property(t => t.strRegProdComment).HasColumnName("strRegProdComment ");
+            Property(t => t.strRegProdDesc).HasColumnName("strRegProdDesc");
         }
     }
 
@@ -238,16 +256,16 @@ namespace iRely.Inventory.Model
         public tblSTPaidOutMap()
         {
             // Primary Key
-            this.HasKey(t => t.intPaidOutId);
+            HasKey(t => t.intPaidOutId);
 
             // Table & Column Mappings
-            this.ToTable("tblSTPaidOut");
-            this.Property(t => t.intAccountId).HasColumnName("intAccountId");
-            this.Property(t => t.intPaidOutId).HasColumnName("intPaidOutId");
-            this.Property(t => t.intPaymentMethodId).HasColumnName("intPaymentMethodId");
-            this.Property(t => t.intStoreId).HasColumnName("intStoreId");
-            this.Property(t => t.strDescription).HasColumnName("strDescription");
-            this.Property(t => t.strPaidOutId).HasColumnName("strPaidOutId");
+            ToTable("tblSTPaidOut");
+            Property(t => t.intAccountId).HasColumnName("intAccountId");
+            Property(t => t.intPaidOutId).HasColumnName("intPaidOutId");
+            Property(t => t.intPaymentMethodId).HasColumnName("intPaymentMethodId");
+            Property(t => t.intStoreId).HasColumnName("intStoreId");
+            Property(t => t.strDescription).HasColumnName("strDescription");
+            Property(t => t.strPaidOutId).HasColumnName("strPaidOutId");
         }
     }
 
@@ -256,14 +274,14 @@ namespace iRely.Inventory.Model
         public tblGRStorageTypeMap()
         {
             // Primary Key
-            this.HasKey(t => t.intStorageTypeId);
+            HasKey(t => t.intStorageTypeId);
 
             // Table & Column Mappings
-            this.ToTable("tblGRStorageType");
-            this.Property(t => t.intStorageTypeId).HasColumnName("intStorageTypeId");
-            this.Property(t => t.strStorageType).HasColumnName("strStorageType");
-            this.Property(t => t.strDescription).HasColumnName("strDescription");
-            this.Property(t => t.intSort).HasColumnName("intSort");
+            ToTable("tblGRStorageType");
+            Property(t => t.intStorageTypeId).HasColumnName("intStorageTypeId");
+            Property(t => t.strStorageType).HasColumnName("strStorageType");
+            Property(t => t.strDescription).HasColumnName("strDescription");
+            Property(t => t.intSort).HasColumnName("intSort");
         }
     }
 
@@ -272,16 +290,16 @@ namespace iRely.Inventory.Model
         public tblSTPromotionSalesListMap()
         {
             // Primary Key
-            this.HasKey(t => t.intPromoSalesListId);
+            HasKey(t => t.intPromoSalesListId);
 
             // Table & Column Mappings
-            this.ToTable("tblSTPromotionSalesList");
-            this.Property(t => t.dblPromoPrice).HasColumnName("dblPromoPrice");
-            this.Property(t => t.intPromoSalesListId).HasColumnName("intPromoSalesListId");
-            this.Property(t => t.intPromoUnits).HasColumnName("intPromoUnits");
-            this.Property(t => t.intPromoCode).HasColumnName("intPromoSalesId");
-            this.Property(t => t.strDescription).HasColumnName("strPromoSalesDescription");
-            this.Property(t => t.strPromoType).HasColumnName("strPromoType");
+            ToTable("tblSTPromotionSalesList");
+            Property(t => t.dblPromoPrice).HasColumnName("dblPromoPrice");
+            Property(t => t.intPromoSalesListId).HasColumnName("intPromoSalesListId");
+            Property(t => t.intPromoUnits).HasColumnName("intPromoUnits");
+            Property(t => t.intPromoCode).HasColumnName("intPromoSalesId");
+            Property(t => t.strDescription).HasColumnName("strPromoSalesDescription");
+            Property(t => t.strPromoType).HasColumnName("strPromoType");
         }
     }
 
@@ -290,16 +308,16 @@ namespace iRely.Inventory.Model
         public tblSMStartingNumberMap()
         {
             // Primary Key
-            this.HasKey(t => t.intStartingNumberId);
+            HasKey(t => t.intStartingNumberId);
 
             // Table & Column Mappings
-            this.ToTable("tblSMStartingNumber");
-            this.Property(t => t.intNumber).HasColumnName("intNumber");
-            this.Property(t => t.intStartingNumberId).HasColumnName("intStartingNumberId");
-            this.Property(t => t.strModule).HasColumnName("strModule");
-            this.Property(t => t.strPrefix).HasColumnName("strPrefix");
-            this.Property(t => t.strTransactionType).HasColumnName("strTransactionType");
-            this.Property(t => t.ysnEnable).HasColumnName("ysnEnable");
+            ToTable("tblSMStartingNumber");
+            Property(t => t.intNumber).HasColumnName("intNumber");
+            Property(t => t.intStartingNumberId).HasColumnName("intStartingNumberId");
+            Property(t => t.strModule).HasColumnName("strModule");
+            Property(t => t.strPrefix).HasColumnName("strPrefix");
+            Property(t => t.strTransactionType).HasColumnName("strTransactionType");
+            Property(t => t.ysnEnable).HasColumnName("ysnEnable");
         }
     }
     
@@ -308,19 +326,19 @@ namespace iRely.Inventory.Model
         public tblMFQAPropertyMap()
         {
             // Primary Key
-            this.HasKey(t => t.intQAPropertyId);
+            HasKey(t => t.intQAPropertyId);
 
             // Table & Column Mappings
-            this.ToTable("tblMFQAProperty");
-            this.Property(t => t.intDecimalPlaces).HasColumnName("intDecimalPlaces");
-            this.Property(t => t.intQAPropertyId).HasColumnName("intQAPropertyId");
-            this.Property(t => t.strAnalysisType).HasColumnName("strAnalysisType");
-            this.Property(t => t.strDataType).HasColumnName("strDataType");
-            this.Property(t => t.strDescription).HasColumnName("strDescription");
-            this.Property(t => t.strListName).HasColumnName("strListName");
-            this.Property(t => t.strMandatory).HasColumnName("strMandatory");
-            this.Property(t => t.strPropertyName).HasColumnName("strPropertyName");
-            this.Property(t => t.ysnActive).HasColumnName("ysnActive");
+            ToTable("tblMFQAProperty");
+            Property(t => t.intDecimalPlaces).HasColumnName("intDecimalPlaces");
+            Property(t => t.intQAPropertyId).HasColumnName("intQAPropertyId");
+            Property(t => t.strAnalysisType).HasColumnName("strAnalysisType");
+            Property(t => t.strDataType).HasColumnName("strDataType");
+            Property(t => t.strDescription).HasColumnName("strDescription");
+            Property(t => t.strListName).HasColumnName("strListName");
+            Property(t => t.strMandatory).HasColumnName("strMandatory");
+            Property(t => t.strPropertyName).HasColumnName("strPropertyName");
+            Property(t => t.ysnActive).HasColumnName("ysnActive");
         }
     }*/
 
@@ -329,18 +347,18 @@ namespace iRely.Inventory.Model
         public tblSMCompanyLocationSubLocationMap()
         {
             // Primary Key
-            this.HasKey(t => t.intCompanyLocationSubLocationId);
+            HasKey(t => t.intCompanyLocationSubLocationId);
 
             // Table & Column Mappings
-            this.ToTable("tblSMCompanyLocationSubLocation");
-            this.Property(t => t.intCompanyLocationSubLocationId).HasColumnName("intCompanyLocationSubLocationId");
-            this.Property(t => t.intCompanyLocationId).HasColumnName("intCompanyLocationId");
-            this.Property(t => t.strSubLocationName).HasColumnName("strSubLocationName");
-            this.Property(t => t.strSubLocationDescription).HasColumnName("strSubLocationDescription");
-            this.Property(t => t.strClassification).HasColumnName("strClassification");
-            this.Property(t => t.intNewLotBin).HasColumnName("intNewLotBin");
-            this.Property(t => t.intAuditBin).HasColumnName("intAuditBin");
-            this.Property(t => t.strAddress).HasColumnName("strAddress");
+            ToTable("tblSMCompanyLocationSubLocation");
+            Property(t => t.intCompanyLocationSubLocationId).HasColumnName("intCompanyLocationSubLocationId");
+            Property(t => t.intCompanyLocationId).HasColumnName("intCompanyLocationId");
+            Property(t => t.strSubLocationName).HasColumnName("strSubLocationName");
+            Property(t => t.strSubLocationDescription).HasColumnName("strSubLocationDescription");
+            Property(t => t.strClassification).HasColumnName("strClassification");
+            Property(t => t.intNewLotBin).HasColumnName("intNewLotBin");
+            Property(t => t.intAuditBin).HasColumnName("intAuditBin");
+            Property(t => t.strAddress).HasColumnName("strAddress");
         }
     }
 
@@ -349,26 +367,26 @@ namespace iRely.Inventory.Model
         public tblSMTaxCodeMap()
         {
             // Primary Key
-            this.HasKey(t => t.intTaxCodeId);
+            HasKey(t => t.intTaxCodeId);
 
             // Table & Column Mappings
-            this.ToTable("tblSMTaxCode");
-            this.Property(t => t.intTaxCodeId).HasColumnName("intTaxCodeId");
-            this.Property(t => t.strTaxCode).HasColumnName("strTaxCode");
-            this.Property(t => t.intTaxClassId).HasColumnName("intTaxClassId");
-            this.Property(t => t.strDescription).HasColumnName("strDescription");
-            this.Property(t => t.strCalculationMethod).HasColumnName("strCalculationMethod");
-            this.Property(t => t.numRate).HasColumnName("numRate").HasPrecision(18, 6);
-            this.Property(t => t.strTaxAgency).HasColumnName("strTaxAgency");
-            this.Property(t => t.strAddress).HasColumnName("strAddress");
-            this.Property(t => t.strZipCode).HasColumnName("strZipCode");
-            this.Property(t => t.strState).HasColumnName("strState");
-            this.Property(t => t.strCity).HasColumnName("strCity");
-            this.Property(t => t.strCountry).HasColumnName("strCountry");
-            this.Property(t => t.strCounty).HasColumnName("strCounty");
-            this.Property(t => t.intSalesTaxAccountId).HasColumnName("intSalesTaxAccountId");
-            this.Property(t => t.intPurchaseTaxAccountId).HasColumnName("intPurchaseTaxAccountId");
-            this.Property(t => t.strTaxableByOtherTaxes).HasColumnName("strTaxableByOtherTaxes");
+            ToTable("tblSMTaxCode");
+            Property(t => t.intTaxCodeId).HasColumnName("intTaxCodeId");
+            Property(t => t.strTaxCode).HasColumnName("strTaxCode");
+            Property(t => t.intTaxClassId).HasColumnName("intTaxClassId");
+            Property(t => t.strDescription).HasColumnName("strDescription");
+            Property(t => t.strCalculationMethod).HasColumnName("strCalculationMethod");
+            Property(t => t.numRate).HasColumnName("numRate").HasPrecision(18, 6);
+            Property(t => t.strTaxAgency).HasColumnName("strTaxAgency");
+            Property(t => t.strAddress).HasColumnName("strAddress");
+            Property(t => t.strZipCode).HasColumnName("strZipCode");
+            Property(t => t.strState).HasColumnName("strState");
+            Property(t => t.strCity).HasColumnName("strCity");
+            Property(t => t.strCountry).HasColumnName("strCountry");
+            Property(t => t.strCounty).HasColumnName("strCounty");
+            Property(t => t.intSalesTaxAccountId).HasColumnName("intSalesTaxAccountId");
+            Property(t => t.intPurchaseTaxAccountId).HasColumnName("intPurchaseTaxAccountId");
+            Property(t => t.strTaxableByOtherTaxes).HasColumnName("strTaxableByOtherTaxes");
         }
     }
 
@@ -377,20 +395,20 @@ namespace iRely.Inventory.Model
         public tblICMaterialNMFCMap()
         {
             // Primary Key
-            this.HasKey(t => t.intMaterialNMFCId);
+            HasKey(t => t.intMaterialNMFCId);
 
             // Table & Column Mappings
-            this.ToTable("tblICMaterialNMFC");
-            this.Property(t => t.dtmLastUpdateOn).HasColumnName("dtmLastUpdateOn");
-            this.Property(t => t.intConcurrencyId).HasColumnName("intConcurrencyId");
-            this.Property(t => t.intExternalSystemId).HasColumnName("intExternalSystemId");
-            this.Property(t => t.intMaterialNMFCId).HasColumnName("intMaterialNMFCId");
-            this.Property(t => t.intSort).HasColumnName("intSort");
-            this.Property(t => t.strDisplayMember).HasColumnName("strDisplayMember");
-            this.Property(t => t.strInternalCode).HasColumnName("strInternalCode");
-            this.Property(t => t.strLastUpdateBy).HasColumnName("strLastUpdateBy");
-            this.Property(t => t.ysnDefault).HasColumnName("ysnDefault");
-            this.Property(t => t.ysnLocked).HasColumnName("ysnLocked");
+            ToTable("tblICMaterialNMFC");
+            Property(t => t.dtmLastUpdateOn).HasColumnName("dtmLastUpdateOn");
+            Property(t => t.intConcurrencyId).HasColumnName("intConcurrencyId");
+            Property(t => t.intExternalSystemId).HasColumnName("intExternalSystemId");
+            Property(t => t.intMaterialNMFCId).HasColumnName("intMaterialNMFCId");
+            Property(t => t.intSort).HasColumnName("intSort");
+            Property(t => t.strDisplayMember).HasColumnName("strDisplayMember");
+            Property(t => t.strInternalCode).HasColumnName("strInternalCode");
+            Property(t => t.strLastUpdateBy).HasColumnName("strLastUpdateBy");
+            Property(t => t.ysnDefault).HasColumnName("ysnDefault");
+            Property(t => t.ysnLocked).HasColumnName("ysnLocked");
         }
     }
 
@@ -399,20 +417,20 @@ namespace iRely.Inventory.Model
         public tblICReasonCodeMap()
         {
             // Primary Key
-            this.HasKey(t => t.intReasonCodeId);
+            HasKey(t => t.intReasonCodeId);
 
             // Table & Column Mappings
-            this.ToTable("tblICReasonCode");
-            this.Property(t => t.dtmLastUpdatedOn).HasColumnName("dtmLastUpdatedOn");
-            this.Property(t => t.intReasonCodeId).HasColumnName("intReasonCodeId");
-            this.Property(t => t.strDescription).HasColumnName("strDescription");
-            this.Property(t => t.strLastUpdatedBy).HasColumnName("strLastUpdatedBy");
-            this.Property(t => t.strLotTransactionType).HasColumnName("strLotTransactionType");
-            this.Property(t => t.strReasonCode).HasColumnName("strReasonCode");
-            this.Property(t => t.strType).HasColumnName("strType");
-            this.Property(t => t.ysnDefault).HasColumnName("ysnDefault");
-            this.Property(t => t.ysnExplanationRequired).HasColumnName("ysnExplanationRequired");
-            this.Property(t => t.ysnReduceAvailableTime).HasColumnName("ysnReduceAvailableTime");
+            ToTable("tblICReasonCode");
+            Property(t => t.dtmLastUpdatedOn).HasColumnName("dtmLastUpdatedOn");
+            Property(t => t.intReasonCodeId).HasColumnName("intReasonCodeId");
+            Property(t => t.strDescription).HasColumnName("strDescription");
+            Property(t => t.strLastUpdatedBy).HasColumnName("strLastUpdatedBy");
+            Property(t => t.strLotTransactionType).HasColumnName("strLotTransactionType");
+            Property(t => t.strReasonCode).HasColumnName("strReasonCode");
+            Property(t => t.strType).HasColumnName("strType");
+            Property(t => t.ysnDefault).HasColumnName("ysnDefault");
+            Property(t => t.ysnExplanationRequired).HasColumnName("ysnExplanationRequired");
+            Property(t => t.ysnReduceAvailableTime).HasColumnName("ysnReduceAvailableTime");
         }
     }
 
@@ -421,14 +439,14 @@ namespace iRely.Inventory.Model
         public tblICReasonCodeWorkCenterMap()
         {
             // Primary Key
-            this.HasKey(t => t.intReasonCodeWorkCenterId);
+            HasKey(t => t.intReasonCodeWorkCenterId);
 
             // Table & Column Mappings
-            this.ToTable("tblICReasonCodeWorkCenter");
-            this.Property(t => t.intReasonCodeId).HasColumnName("intReasonCodeId");
-            this.Property(t => t.intReasonCodeWorkCenterId).HasColumnName("intReasonCodeWorkCenterId");
-            this.Property(t => t.intSort).HasColumnName("intSort");
-            this.Property(t => t.strWorkCenterId).HasColumnName("strWorkCenterId");
+            ToTable("tblICReasonCodeWorkCenter");
+            Property(t => t.intReasonCodeId).HasColumnName("intReasonCodeId");
+            Property(t => t.intReasonCodeWorkCenterId).HasColumnName("intReasonCodeWorkCenterId");
+            Property(t => t.intSort).HasColumnName("intSort");
+            Property(t => t.strWorkCenterId).HasColumnName("strWorkCenterId");
         }
     }
 
@@ -437,18 +455,18 @@ namespace iRely.Inventory.Model
         public tblICContainerMap()
         {
             // Primary Key
-            this.HasKey(t => t.intContainerId);
+            HasKey(t => t.intContainerId);
 
             // Table & Column Mappings
-            this.ToTable("tblICContainer");
-            this.Property(t => t.dtmLastUpdateOn).HasColumnName("dtmLastUpdateOn");
-            this.Property(t => t.intContainerId).HasColumnName("intContainerId");
-            this.Property(t => t.intContainerTypeId).HasColumnName("intContainerTypeId");
-            this.Property(t => t.intExternalSystemId).HasColumnName("intExternalSystemId");
-            this.Property(t => t.intSort).HasColumnName("intSort");
-            this.Property(t => t.intStorageLocationId).HasColumnName("intStorageLocationId");
-            this.Property(t => t.strContainerId).HasColumnName("strContainerId");
-            this.Property(t => t.strLastUpdateBy).HasColumnName("strLastUpdateBy");
+            ToTable("tblICContainer");
+            Property(t => t.dtmLastUpdateOn).HasColumnName("dtmLastUpdateOn");
+            Property(t => t.intContainerId).HasColumnName("intContainerId");
+            Property(t => t.intContainerTypeId).HasColumnName("intContainerTypeId");
+            Property(t => t.intExternalSystemId).HasColumnName("intExternalSystemId");
+            Property(t => t.intSort).HasColumnName("intSort");
+            Property(t => t.intStorageLocationId).HasColumnName("intStorageLocationId");
+            Property(t => t.strContainerId).HasColumnName("strContainerId");
+            Property(t => t.strLastUpdateBy).HasColumnName("strLastUpdateBy");
         }
     }
 
@@ -457,32 +475,32 @@ namespace iRely.Inventory.Model
         public tblICContainerTypeMap()
         {
             // Primary Key
-            this.HasKey(t => t.intContainerTypeId);
+            HasKey(t => t.intContainerTypeId);
 
             // Table & Column Mappings
-            this.ToTable("tblICContainerType");
-            this.Property(t => t.dblDepth).HasColumnName("dblDepth").HasPrecision(18, 6);
-            this.Property(t => t.dblHeight).HasColumnName("dblHeight").HasPrecision(18, 6);
-            this.Property(t => t.dblMaxWeight).HasColumnName("dblMaxWeight").HasPrecision(18, 6);
-            this.Property(t => t.dblPalletWeight).HasColumnName("dblPalletWeight").HasPrecision(18, 6);
-            this.Property(t => t.dblWidth).HasColumnName("dblWidth").HasPrecision(18, 6);
-            this.Property(t => t.dtmLastUpdateOn).HasColumnName("dtmLastUpdateOn");
-            this.Property(t => t.intContainerTypeId).HasColumnName("intContainerTypeId");
-            this.Property(t => t.intDimensionUnitMeasureId).HasColumnName("intDimensionUnitMeasureId");
-            this.Property(t => t.intExternalSystemId).HasColumnName("intExternalSystemId");
-            this.Property(t => t.intSort).HasColumnName("intSort");
-            this.Property(t => t.intTareUnitMeasureId).HasColumnName("intTareUnitMeasureId");
-            this.Property(t => t.intWeightUnitMeasureId).HasColumnName("intWeightUnitMeasureId");
-            this.Property(t => t.strContainerDescription).HasColumnName("strContainerDescription");
-            this.Property(t => t.strDisplayMember).HasColumnName("strDisplayMember");
-            this.Property(t => t.strInternalCode).HasColumnName("strInternalCode");
-            this.Property(t => t.strLastUpdateBy).HasColumnName("strLastUpdateBy");
-            this.Property(t => t.ysnAllowMultipleItems).HasColumnName("ysnAllowMultipleItems");
-            this.Property(t => t.ysnAllowMultipleLots).HasColumnName("ysnAllowMultipleLots");
-            this.Property(t => t.ysnDefault).HasColumnName("ysnDefault");
-            this.Property(t => t.ysnLocked).HasColumnName("ysnLocked");
-            this.Property(t => t.ysnMergeOnMove).HasColumnName("ysnMergeOnMove");
-            this.Property(t => t.ysnReusable).HasColumnName("ysnReusable");
+            ToTable("tblICContainerType");
+            Property(t => t.dblDepth).HasColumnName("dblDepth").HasPrecision(18, 6);
+            Property(t => t.dblHeight).HasColumnName("dblHeight").HasPrecision(18, 6);
+            Property(t => t.dblMaxWeight).HasColumnName("dblMaxWeight").HasPrecision(18, 6);
+            Property(t => t.dblPalletWeight).HasColumnName("dblPalletWeight").HasPrecision(18, 6);
+            Property(t => t.dblWidth).HasColumnName("dblWidth").HasPrecision(18, 6);
+            Property(t => t.dtmLastUpdateOn).HasColumnName("dtmLastUpdateOn");
+            Property(t => t.intContainerTypeId).HasColumnName("intContainerTypeId");
+            Property(t => t.intDimensionUnitMeasureId).HasColumnName("intDimensionUnitMeasureId");
+            Property(t => t.intExternalSystemId).HasColumnName("intExternalSystemId");
+            Property(t => t.intSort).HasColumnName("intSort");
+            Property(t => t.intTareUnitMeasureId).HasColumnName("intTareUnitMeasureId");
+            Property(t => t.intWeightUnitMeasureId).HasColumnName("intWeightUnitMeasureId");
+            Property(t => t.strContainerDescription).HasColumnName("strContainerDescription");
+            Property(t => t.strDisplayMember).HasColumnName("strDisplayMember");
+            Property(t => t.strInternalCode).HasColumnName("strInternalCode");
+            Property(t => t.strLastUpdateBy).HasColumnName("strLastUpdateBy");
+            Property(t => t.ysnAllowMultipleItems).HasColumnName("ysnAllowMultipleItems");
+            Property(t => t.ysnAllowMultipleLots).HasColumnName("ysnAllowMultipleLots");
+            Property(t => t.ysnDefault).HasColumnName("ysnDefault");
+            Property(t => t.ysnLocked).HasColumnName("ysnLocked");
+            Property(t => t.ysnMergeOnMove).HasColumnName("ysnMergeOnMove");
+            Property(t => t.ysnReusable).HasColumnName("ysnReusable");
         }
     }
 
@@ -491,15 +509,15 @@ namespace iRely.Inventory.Model
         public tblICMeasurementMap()
         {
             // Primary Key
-            this.HasKey(t => t.intMeasurementId);
+            HasKey(t => t.intMeasurementId);
 
             // Table & Column Mappings
-            this.ToTable("tblICMeasurement");
-            this.Property(t => t.intMeasurementId).HasColumnName("intMeasurementId");
-            this.Property(t => t.intSort).HasColumnName("intSort");
-            this.Property(t => t.strDescription).HasColumnName("strDescription");
-            this.Property(t => t.strMeasurementName).HasColumnName("strMeasurementName");
-            this.Property(t => t.strMeasurementType).HasColumnName("strMeasurementType");
+            ToTable("tblICMeasurement");
+            Property(t => t.intMeasurementId).HasColumnName("intMeasurementId");
+            Property(t => t.intSort).HasColumnName("intSort");
+            Property(t => t.strDescription).HasColumnName("strDescription");
+            Property(t => t.strMeasurementName).HasColumnName("strMeasurementName");
+            Property(t => t.strMeasurementType).HasColumnName("strMeasurementType");
         }
     }
 
@@ -508,13 +526,13 @@ namespace iRely.Inventory.Model
         public tblICReadingPointMap()
         {
             // Primary Key
-            this.HasKey(t => t.intReadingPointId);
+            HasKey(t => t.intReadingPointId);
 
             // Table & Column Mappings
-            this.ToTable("tblICReadingPoint");
-            this.Property(t => t.intReadingPointId).HasColumnName("intReadingPointId");
-            this.Property(t => t.intSort).HasColumnName("intSort");
-            this.Property(t => t.strReadingPoint).HasColumnName("strReadingPoint");
+            ToTable("tblICReadingPoint");
+            Property(t => t.intReadingPointId).HasColumnName("intReadingPointId");
+            Property(t => t.intSort).HasColumnName("intSort");
+            Property(t => t.strReadingPoint).HasColumnName("strReadingPoint");
         }
     }
 
@@ -523,18 +541,18 @@ namespace iRely.Inventory.Model
         public tblICRestrictionMap()
         {
             // Primary Key
-            this.HasKey(t => t.intRestrictionId);
+            HasKey(t => t.intRestrictionId);
 
             // Table & Column Mappings
-            this.ToTable("tblICRestriction");
-            this.Property(t => t.dtmLastUpdateOn).HasColumnName("dtmLastUpdateOn");
-            this.Property(t => t.intRestrictionId).HasColumnName("intRestrictionId");
-            this.Property(t => t.intSort).HasColumnName("intSort");
-            this.Property(t => t.strDisplayMember).HasColumnName("strDisplayMember");
-            this.Property(t => t.strInternalCode).HasColumnName("strInternalCode");
-            this.Property(t => t.strLastUpdateBy).HasColumnName("strLastUpdateBy");
-            this.Property(t => t.ysnDefault).HasColumnName("ysnDefault");
-            this.Property(t => t.ysnLocked).HasColumnName("ysnLocked");
+            ToTable("tblICRestriction");
+            Property(t => t.dtmLastUpdateOn).HasColumnName("dtmLastUpdateOn");
+            Property(t => t.intRestrictionId).HasColumnName("intRestrictionId");
+            Property(t => t.intSort).HasColumnName("intSort");
+            Property(t => t.strDisplayMember).HasColumnName("strDisplayMember");
+            Property(t => t.strInternalCode).HasColumnName("strInternalCode");
+            Property(t => t.strLastUpdateBy).HasColumnName("strLastUpdateBy");
+            Property(t => t.ysnDefault).HasColumnName("ysnDefault");
+            Property(t => t.ysnLocked).HasColumnName("ysnLocked");
         }
     }
 
@@ -543,36 +561,36 @@ namespace iRely.Inventory.Model
         public tblICSkuMap()
         {
             // Primary Key
-            this.HasKey(t => t.intSKUId);
+            HasKey(t => t.intSKUId);
 
             // Table & Column Mappings
-            this.ToTable("tblICSku");
-            this.Property(t => t.dblQuantity).HasColumnName("dblQuantity").HasPrecision(18, 6);
-            this.Property(t => t.dblWeightPerUnit).HasColumnName("dblWeightPerUnit").HasPrecision(18, 6);
-            this.Property(t => t.dtmLastUpdateOn).HasColumnName("dtmLastUpdateOn");
-            this.Property(t => t.dtmProductionDate).HasColumnName("dtmProductionDate");
-            this.Property(t => t.dtmReceiveDate).HasColumnName("dtmReceiveDate");
-            this.Property(t => t.intContainerId).HasColumnName("intContainerId");
-            this.Property(t => t.intExternalSystemId).HasColumnName("intExternalSystemId");
-            this.Property(t => t.intItemId).HasColumnName("intItemId");
-            this.Property(t => t.intLayerPerPallet).HasColumnName("intLayerPerPallet");
-            this.Property(t => t.intLotId).HasColumnName("intLotId");
-            this.Property(t => t.intOwnerId).HasColumnName("intOwnerId");
-            this.Property(t => t.intParentSKUId).HasColumnName("intParentSKUId");
-            this.Property(t => t.intReasonId).HasColumnName("intReasonId");
-            this.Property(t => t.intSKUId).HasColumnName("intSKUId");
-            this.Property(t => t.intSKUStatusId).HasColumnName("intSKUStatusId");
-            this.Property(t => t.intSort).HasColumnName("intSort");
-            this.Property(t => t.intUnitMeasureId).HasColumnName("intUnitMeasureId");
-            this.Property(t => t.intUnitPerLayer).HasColumnName("intUnitPerLayer");
-            this.Property(t => t.intWeightPerUnitMeasureId).HasColumnName("intWeightPerUnitMeasureId");
-            this.Property(t => t.strBatch).HasColumnName("strBatch");
-            this.Property(t => t.strComment).HasColumnName("strComment");
-            this.Property(t => t.strLastUpdateBy).HasColumnName("strLastUpdateBy");
-            this.Property(t => t.strLotCode).HasColumnName("strLotCode");
-            this.Property(t => t.strSerialNo).HasColumnName("strSerialNo");
-            this.Property(t => t.strSKU).HasColumnName("strSKU");
-            this.Property(t => t.ysnSanitized).HasColumnName("ysnSanitized");
+            ToTable("tblICSku");
+            Property(t => t.dblQuantity).HasColumnName("dblQuantity").HasPrecision(18, 6);
+            Property(t => t.dblWeightPerUnit).HasColumnName("dblWeightPerUnit").HasPrecision(18, 6);
+            Property(t => t.dtmLastUpdateOn).HasColumnName("dtmLastUpdateOn");
+            Property(t => t.dtmProductionDate).HasColumnName("dtmProductionDate");
+            Property(t => t.dtmReceiveDate).HasColumnName("dtmReceiveDate");
+            Property(t => t.intContainerId).HasColumnName("intContainerId");
+            Property(t => t.intExternalSystemId).HasColumnName("intExternalSystemId");
+            Property(t => t.intItemId).HasColumnName("intItemId");
+            Property(t => t.intLayerPerPallet).HasColumnName("intLayerPerPallet");
+            Property(t => t.intLotId).HasColumnName("intLotId");
+            Property(t => t.intOwnerId).HasColumnName("intOwnerId");
+            Property(t => t.intParentSKUId).HasColumnName("intParentSKUId");
+            Property(t => t.intReasonId).HasColumnName("intReasonId");
+            Property(t => t.intSKUId).HasColumnName("intSKUId");
+            Property(t => t.intSKUStatusId).HasColumnName("intSKUStatusId");
+            Property(t => t.intSort).HasColumnName("intSort");
+            Property(t => t.intUnitMeasureId).HasColumnName("intUnitMeasureId");
+            Property(t => t.intUnitPerLayer).HasColumnName("intUnitPerLayer");
+            Property(t => t.intWeightPerUnitMeasureId).HasColumnName("intWeightPerUnitMeasureId");
+            Property(t => t.strBatch).HasColumnName("strBatch");
+            Property(t => t.strComment).HasColumnName("strComment");
+            Property(t => t.strLastUpdateBy).HasColumnName("strLastUpdateBy");
+            Property(t => t.strLotCode).HasColumnName("strLotCode");
+            Property(t => t.strSerialNo).HasColumnName("strSerialNo");
+            Property(t => t.strSKU).HasColumnName("strSKU");
+            Property(t => t.ysnSanitized).HasColumnName("ysnSanitized");
         }
     }
 
@@ -581,14 +599,14 @@ namespace iRely.Inventory.Model
         public tblICEquipmentLengthMap()
         {
             // Primary Key
-            this.HasKey(t => t.intEquipmentLengthId);
+            HasKey(t => t.intEquipmentLengthId);
 
             // Table & Column Mappings
-            this.ToTable("tblICEquipmentLength");
-            this.Property(t => t.intEquipmentLengthId).HasColumnName("intEquipmentLengthId");
-            this.Property(t => t.intSort).HasColumnName("intSort");
-            this.Property(t => t.strDescription).HasColumnName("strDescription");
-            this.Property(t => t.strEquipmentLength).HasColumnName("strEquipmentLength");
+            ToTable("tblICEquipmentLength");
+            Property(t => t.intEquipmentLengthId).HasColumnName("intEquipmentLengthId");
+            Property(t => t.intSort).HasColumnName("intSort");
+            Property(t => t.strDescription).HasColumnName("strDescription");
+            Property(t => t.strEquipmentLength).HasColumnName("strEquipmentLength");
         }
     }
 
@@ -597,15 +615,15 @@ namespace iRely.Inventory.Model
         public tblSMLicenseTypeMap()
         {
             //Primary Key
-            this.HasKey(t => t.intLicenseTypeId);
+            HasKey(t => t.intLicenseTypeId);
 
             //Table & Column Mappings
-            this.ToTable("tblSMLicenseType");
-            this.Property(t => t.intLicenseTypeId).HasColumnName("intLicenseTypeId");
-            this.Property(t => t.strCode).HasColumnName("strCode");
-            this.Property(t => t.strDescription).HasColumnName("strDescription");
-            this.Property(t => t.ysnRequiredForApplication).HasColumnName("ysnRequiredForApplication");
-            this.Property(t => t.ysnRequiredForPurchase).HasColumnName("ysnRequiredForPurchase");
+            ToTable("tblSMLicenseType");
+            Property(t => t.intLicenseTypeId).HasColumnName("intLicenseTypeId");
+            Property(t => t.strCode).HasColumnName("strCode");
+            Property(t => t.strDescription).HasColumnName("strDescription");
+            Property(t => t.ysnRequiredForApplication).HasColumnName("ysnRequiredForApplication");
+            Property(t => t.ysnRequiredForPurchase).HasColumnName("ysnRequiredForPurchase");
 
             
         }
