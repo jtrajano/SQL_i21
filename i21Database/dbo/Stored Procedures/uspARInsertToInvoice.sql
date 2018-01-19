@@ -50,7 +50,8 @@ DECLARE @EntityCustomerId		INT,
 		@SplitId				INT,
 		@EntityContactId		INT,
 		@StorageScheduleTypeId	INT,
-		@intLineOfBusinessId		INT
+		@intLineOfBusinessId	INT,
+		@intSalesOrderId		INT
 
 DECLARE @tblItemsToInvoiceUnsorted TABLE (intItemId					INT, 
 							ysnIsInventory				BIT,
@@ -94,7 +95,8 @@ DECLARE @tblItemsToInvoiceUnsorted TABLE (intItemId					INT,
 							intSubCurrencyId			INT,
 							dblSubCurrencyRate		    NUMERIC(18,6),
 							intCurrencyExchangeRateTypeId	INT,
-							dblCurrencyExchangeRate		    NUMERIC(18,6))
+							dblCurrencyExchangeRate		    NUMERIC(18,6),
+							intSalesOrderId				INT NULL)
 
 DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
 							intItemId					INT, 
@@ -139,7 +141,8 @@ DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
 							intSubCurrencyId			INT,
 							dblSubCurrencyRate			NUMERIC(18,6),
 							intCurrencyExchangeRateTypeId	INT,
-							dblCurrencyExchangeRate		    NUMERIC(18,6))
+							dblCurrencyExchangeRate		    NUMERIC(18,6),
+							intSalesOrderId				INT NULL)
 									
 DECLARE @tblSODSoftware TABLE(intSalesOrderDetailId		INT,
 							intInventoryShipmentItemId	INT,
@@ -197,6 +200,7 @@ SELECT intItemId					= SI.intItemId
 	 , dblSubCurrencyRate			= SOD.dblSubCurrencyRate
 	 , intCurrencyExchangeRateTypeId = SOD.intCurrencyExchangeRateTypeId
 	 , dblCurrencyExchangeRate		= SOD.dblCurrencyExchangeRate
+	 , intSalesOrderId				= SI.intSalesOrderId
 FROM tblSOSalesOrder SO 
 	INNER JOIN vyuARShippedItems SI ON SO.intSalesOrderId = SI.intSalesOrderId
 	LEFT JOIN tblSOSalesOrderDetail SOD ON SI.intSalesOrderDetailId = SOD.intSalesOrderDetailId
@@ -253,6 +257,7 @@ SELECT intItemId					= SOD.intItemId
 	 , dblSubCurrencyRate			= SOD.dblSubCurrencyRate
 	 , intCurrencyExchangeRateTypeId = SOD.intCurrencyExchangeRateTypeId
 	 , dblCurrencyExchangeRate		= SOD.dblCurrencyExchangeRate
+	 , intSalesOrderId				= NULL
 FROM tblSOSalesOrderDetail SOD
 INNER JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = SOD.intSalesOrderId
 WHERE SO.intSalesOrderId = @SalesOrderId 
@@ -303,6 +308,7 @@ SELECT intItemId					= ICSI.intItemId
 	 , dblSubCurrencyRate			= SOD.dblSubCurrencyRate
 	 , intCurrencyExchangeRateTypeId = SOD.intCurrencyExchangeRateTypeId
 	 , dblCurrencyExchangeRate		= SOD.dblCurrencyExchangeRate
+	 , intSalesOrderId				= SO.intSalesOrderId
 FROM tblICInventoryShipmentItem ICSI 
 INNER JOIN tblICInventoryShipment ICS ON ICS.intInventoryShipmentId = ICSI.intInventoryShipmentId
 INNER JOIN tblSOSalesOrderDetail SOD ON SOD.intSalesOrderDetailId = ICSI.intLineNo
@@ -356,6 +362,7 @@ SELECT intItemId					= ARSI.intItemId
 	 , dblSubCurrencyRate			= 1
 	 , intCurrencyExchangeRateTypeId = ARSI.intCurrencyExchangeRateTypeId
 	 , dblCurrencyExchangeRate		= ARSI.dblCurrencyExchangeRate
+	 , intSalesOrderId				= ARSI.intSalesOrderId
 FROM vyuARShippedItems ARSI
 LEFT JOIN tblICItem I ON ARSI.intItemId = I.intItemId
 WHERE
@@ -457,7 +464,8 @@ SELECT TOP 1
 		@SplitId				=	intSplitId,
 		@SalesOrderComment		=   strComments,
 		@EntityContactId		=	intEntityContactId,
-		@intLineOfBusinessId		=	intLineOfBusinessId
+		@intLineOfBusinessId	=	intLineOfBusinessId,
+		@intSalesOrderId		=	intSalesOrderId
 FROM tblSOSalesOrder WHERE intSalesOrderId = @SalesOrderId
 	
 EXEC dbo.[uspARGetDefaultComment] @CompanyLocationId, @EntityCustomerId, 'Invoice', 'Software', @SoftwareComment OUT
@@ -553,7 +561,8 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 							@ItemMaintenanceAmount	=	@dblNewSoftwareMaintAmt,
 							@ItemLicenseAmount		=	0,
 							@ItemPrice				=	@dblNewSoftwareMaintAmt,
-							@intLineOfBusinessId	= @intLineOfBusinessId
+							@intLineOfBusinessId	=	@intLineOfBusinessId,
+							@intSalesOrderId		=	@intSalesOrderId
 							
 						DECLARE @softwareToPost NVARCHAR(MAX)
 						SET @softwareToPost = CONVERT(NVARCHAR(MAX), @intNewSoftwareInvoiceId)
@@ -608,6 +617,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[ysnPosted]
 					,[intEntityContactId]
 					,[intLineOfBusinessId]
+					,[intSalesOrderId]
 				)
 				SELECT
 					[intEntityCustomerId]
@@ -653,6 +663,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,0
 					,[intEntityContactId]
 					,[intLineOfBusinessId]
+					,[intSalesOrderId]
 				FROM
 				tblSOSalesOrder
 				WHERE intSalesOrderId = @SalesOrderId
@@ -793,6 +804,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 					,@SplitId						= @SplitId
 					,@EntityContactId				= @EntityContactId
 					,@intLineOfBusinessId			= @intLineOfBusinessId
+					,@intSalesOrderId				= @intSalesOrderId
 
 			IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0 
 				BEGIN
