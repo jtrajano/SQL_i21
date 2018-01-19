@@ -14,6 +14,7 @@ namespace iRely.Inventory.Model
         public int intItemId { get; set; }
         public string strItemNo { get; set; }
         public string strType { get; set; }
+        public string strBundleType { get; set; }
         public string strDescription { get; set; }
         public string strLotTracking { get; set; }
         public string strInventoryTracking { get; set; }

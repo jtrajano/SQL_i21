@@ -13,6 +13,7 @@ namespace iRely.Inventory.Model
         public string strItemNo { get; set; }
         public string strItemDescription { get; set; }
         public string strType { get; set; }
+        public string strBundleType { get; set; }
         public int? intCategoryId { get; set; }
         public string strCategory { get; set; }
         public int? intCommodityId { get; set; }

@@ -424,6 +424,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intItemId).HasColumnName("intItemId");
             this.Property(t => t.strItemNo).HasColumnName("strItemNo");
             this.Property(t => t.strType).HasColumnName("strType");
+            this.Property(t => t.strBundleType).HasColumnName("strBundleType");
             this.Property(t => t.strDescription).HasColumnName("strDescription");
             this.Property(t => t.strLotTracking).HasColumnName("strLotTracking");
             this.Property(t => t.strInventoryTracking).HasColumnName("strInventoryTracking");
@@ -803,6 +804,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strItemNo).HasColumnName("strItemNo");
             this.Property(t => t.strItemDescription).HasColumnName("strItemDescription");
             this.Property(t => t.strType).HasColumnName("strType");
+            this.Property(t => t.strBundleType).HasColumnName("strBundleType");
             this.Property(t => t.intCategoryId).HasColumnName("intCategoryId");
             this.Property(t => t.strCategory).HasColumnName("strCategory");
             this.Property(t => t.intCommodityId).HasColumnName("intCommodityId");
@@ -894,6 +896,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strItemNo).HasColumnName("strItemNo");
             this.Property(t => t.strItemDescription).HasColumnName("strItemDescription");
             this.Property(t => t.strType).HasColumnName("strType");
+            this.Property(t => t.strBundleType).HasColumnName("strBundleType");
             //this.Property(t => t.strLotTracking).HasColumnName("strLotTracking");
             this.Property(t => t.intLocationId).HasColumnName("intLocationId");
             this.Property(t => t.intItemLocationId).HasColumnName("intItemLocationId");
