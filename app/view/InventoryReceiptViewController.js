@@ -801,7 +801,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     disabled: '{current.ysnPosted}',
                     dataIndex: 'ysnAccrue'
                 },
-                colPrice: {
+                colChargeEntity: {
                     disabled: '{current.ysnPosted}',
                     dataIndex: 'ysnPrice'
                 },
