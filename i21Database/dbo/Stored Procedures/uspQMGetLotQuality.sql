@@ -41,6 +41,8 @@ BEGIN TRY
 		SET @SQL = @SQL + ' AND S.intLocationId =' + @strLocationId
 	END
 
+	SET @SQL = @SQL + ' JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId  '
+
 	IF (@strUserRoleID <> '0')
 	BEGIN
 		SET @SQL = @SQL + ' JOIN tblQMSampleTypeUserRole SU ON SU.intSampleTypeId = S.intSampleTypeId AND SU.intUserRoleID =' + @strUserRoleID
@@ -99,6 +101,7 @@ BEGIN TRY
 			,S.strSampleNumber
 			,S.strSampleRefNo
 			,SS.strSecondaryStatus AS strSampleStatus
+			,ST.strSampleTypeName
 			,ISNULL(L.dblWeight,L.dblQty) AS dblLotQty
 			,U.strUnitMeasure
 			,L.dtmDateCreated
@@ -118,6 +121,8 @@ BEGIN TRY
 	BEGIN
 		SET @SQL = @SQL + ' AND S.intLocationId =' + @strLocationId
 	END
+
+	SET @SQL = @SQL + ' JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId  '
 
 	IF (@strUserRoleID <> '0')
 	BEGIN
@@ -144,7 +149,7 @@ BEGIN TRY
 	SET @SQL = @SQL + '	WHERE intRankNo > ' + @strStart + '
 			AND intRankNo <= ' + @strStart + '+' + @strLimit
 	SET @strColumnsList = 'intTotalCount,strCategoryCode,intItemId,strItemNo,strDescription,intLotId,strLotNumber'
-	SET @strColumnsList = @strColumnsList + ',strLotStatus,strLotAlias,strSampleNumber,strSampleRefNo,strSampleStatus,dblLotQty,strUnitMeasure,dtmDateCreated,intSampleId'
+	SET @strColumnsList = @strColumnsList + ',strLotStatus,strLotAlias,strSampleNumber,strSampleRefNo,strSampleStatus,strSampleTypeName,dblLotQty,strUnitMeasure,dtmDateCreated,intSampleId'
 	SET @strColumnsList = @strColumnsList + ',strComment,' + REPLACE(REPLACE(@str, '[', ''), ']', '')
 	SET @SQL = @SQL + ' SELECT   
 	intTotalCount
@@ -159,6 +164,7 @@ BEGIN TRY
 	,strSampleNumber
 	,strSampleRefNo
 	,strSampleStatus
+	,strSampleTypeName
 	,dblLotQty  
 	,strUnitMeasure
 	,dtmDateCreated
@@ -178,6 +184,7 @@ BEGIN TRY
 			,strSampleNumber
 			,strSampleRefNo
 			,strSampleStatus
+			,strSampleTypeName
 			,dblLotQty
 			,strUnitMeasure
 			,CQ.dtmDateCreated
