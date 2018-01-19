@@ -437,12 +437,12 @@ BEGIN TRY
 		,@intInputLotId
 		,(
 			CASE 
-				WHEN @intInputWeightUOMId = @intNewItemUOMId
+				WHEN @intInputWeightUOMId = IsNULL(@intNewItemUOMId,0)
 					THEN @dblInputWeight * @dblWeightPerQty
 				ELSE @dblInputWeight
 				END
 			)
-		,Isnull(@intWeightUOMId, @intNewItemUOMId)
+		,IsNULL(Isnull(@intWeightUOMId, @intNewItemUOMId),@intInputWeightUOMId)
 		,@dblInputWeight
 		,@intInputWeightUOMId
 		,1
