@@ -302,7 +302,7 @@ BEGIN TRY
 	JOIN	tblAPVendor			VR	ON	VR.intEntityId			=	CH.intEntityId			LEFT
 	JOIN	tblARCustomer		CR	ON	CR.intEntityId			=	CH.intEntityId			LEFT	
 	JOIN	tblSMCity			CT	ON	CT.intCityId			=	CH.intINCOLocationTypeId	LEFT
-	JOIN	tblSMCompanyLocationSubLocation		SL	ON	SL.intCompanyLocationSubLocationId	=		CH.intINCOLocationTypeId LEFT
+	JOIN	tblSMCompanyLocationSubLocation		SL	ON	SL.intCompanyLocationSubLocationId	=		CH.intWarehouseId LEFT
 	JOIN	(
 				SELECT		ROW_NUMBER() OVER (PARTITION BY CD.intContractHeaderId ORDER BY CD.intContractSeq ASC) AS intRowNum, 
 							CD.intContractHeaderId,

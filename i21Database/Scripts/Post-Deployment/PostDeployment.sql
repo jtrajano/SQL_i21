@@ -291,7 +291,7 @@ print 'BEGIN POST DEPLOYMENT'
 --Contract Management
 :R .\CT\1_MasterTables.sql
 :R .\CT\172To173.sql
-
+:R .\CT\174To181.sql
 --Notes Receivable
 :R .\NR\1_NoteTransType.sql
 

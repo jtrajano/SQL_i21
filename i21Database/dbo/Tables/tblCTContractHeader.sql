@@ -41,6 +41,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
     [ysnUnlimitedQuantity] BIT NULL, 
     [ysnMaxPrice] BIT NULL, 
     [intINCOLocationTypeId] INT NULL, 
+	[intWarehouseId] INT NULL, 
     [intCountryId] INT NULL, 
     [intCompanyLocationPricingLevelId] INT NULL, 
     [ysnProvisional] BIT NULL, 
