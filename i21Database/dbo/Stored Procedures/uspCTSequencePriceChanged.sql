@@ -112,15 +112,20 @@ BEGIN TRY
 				INSERT INTO @voucherDetailReceiptCharge(intInventoryReceiptChargeId)
 				SELECT intInventoryReceiptChargeId FROM tblICInventoryReceiptCharge WHERE intInventoryReceiptId = @intInventoryReceiptId
 
-				SELECT @strVendorOrderNumber = strTicketNumber FROM tblSCTicket WHERE intContractId = @intContractDetailId
+				SELECT @strVendorOrderNumber = strTicketNumber FROM tblSCTicket WHERE intTicketId = (SELECT TOP 1 intTicketId from tblSCTicketContractUsed WHERE intContractDetailId = @intContractDetailId)
+				SELECT @strVendorOrderNumber = ISNULL(strPrefix,'') + @strVendorOrderNumber FROM tblSMStartingNumber WHERE strTransactionType = 'Ticket Management' AND strModule = 'Ticket Management'
+				 
+				EXEC [uspICProcessToBill] @intInventoryReceiptId,@intUserId, @intNewBillId OUTPUT
 
-				EXEC [dbo].[uspAPCreateBillData] 
-					 @userId						=	@intUserId
-					,@vendorId						=	@intEntityId
-					,@voucherDetailReceipt			=	@voucherDetailReceipt
-					,@voucherDetailReceiptCharge	=	@voucherDetailReceiptCharge
-					,@vendorOrderNumber				=	@strVendorOrderNumber
-					,@billId						=	@intNewBillId OUTPUT
+				UPDATE tblAPBill SET strVendorOrderNumber = @strVendorOrderNumber WHERE intBillId = @intNewBillId
+
+				--EXEC [dbo].[uspAPCreateBillData] 
+				--	 @userId						=	@intUserId
+				--	,@vendorId						=	@intEntityId
+				--	,@voucherDetailReceipt			=	@voucherDetailReceipt
+				--	,@voucherDetailReceiptCharge	=	@voucherDetailReceiptCharge
+				--	,@vendorOrderNumber				=	@strVendorOrderNumber
+				--	,@billId						=	@intNewBillId OUTPUT
 
 				EXEC [dbo].[uspAPPostBill] 
 					 @post = 1
