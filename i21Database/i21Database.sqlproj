@@ -6094,6 +6094,7 @@
     <Build Include="dbo\Stored Procedures\uspMFErrorNotificationEDI943.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetDefaultFutureMarketInfoByCommodity.sql" />
     <Build Include="dbo\Stored Procedures\uspMFErrorNotificationEDI940.sql" />
+    <None Include="Scripts\Post-Deployment\IC\25_MigratePackedTypeToQuantityType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
