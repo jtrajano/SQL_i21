@@ -1,0 +1,15 @@
+﻿GO
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE UPPER(TABLE_NAME) = 'TBLSMREPORTLABELS')
+	BEGIN
+		IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMReportLabels' AND [COLUMN_NAME] = 'intLanguageId')
+		BEGIN
+			EXEC('ALTER TABLE tblSMReportLabels ADD intLanguageId INT NULL')
+			EXEC
+			('
+				UPDATE r SET intLanguageId = l.intLanguageId
+				FROM tblSMReportLabels r 
+				INNER JOIN tblSMLanguage l ON r.intReportLabelsId = l.intReportLabelId
+			')
+		END
+	END
+GO

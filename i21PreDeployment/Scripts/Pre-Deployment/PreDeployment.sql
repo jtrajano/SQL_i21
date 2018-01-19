@@ -50,6 +50,7 @@
 :r .\4_SM\10_DropTblSMApproverConfigurationForTransaction.sql
 :r .\4_SM\1730_PaymentMethod.sql
 :r .\4_SM\1740_FixMasterMenu.sql
+:r .\4_SM\1810_FixReportLabels_Language.sql
 
 -- GL
 :r .\6_GL\1_1410_to_1420.sql
