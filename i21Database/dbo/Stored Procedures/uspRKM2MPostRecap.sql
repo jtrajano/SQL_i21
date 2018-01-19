@@ -72,10 +72,12 @@ DECLARE @intCommodityId int
 DECLARE @Todate datetime 
 DECLARE @intUnitMeasureId int  
 DECLARE @intLocationId int
-SELECT @dtmGLPostDate=dtmGLPostDate,@intCurrencyId=intCurrencyId,@intCommodityId=intCommodityId,@Todate = dtmTransactionUpTo ,@strRecordName=strRecordName
-,@intLocationId=intCompanyLocationId,@intUnitMeasureId=intUnitMeasureId
+declare @strRateType nvarchar(50)
+SELECT @dtmGLPostDate=ISNULL(dtmGLPostDate,GETDATE()),@intCurrencyId=intCurrencyId,@intCommodityId=intCommodityId,@Todate = dtmTransactionUpTo ,@strRecordName=strRecordName
+,@intLocationId=intCompanyLocationId,@intUnitMeasureId=intUnitMeasureId,@strRateType=strRateType
 FROM tblRKM2MInquiry WHERE intM2MInquiryId=@intM2MInquiryId
 
+if @strRateType='Stress Test' return
 ----Derivative unrealized start
 DECLARE @Result TABLE (
 	RowNum int ,
@@ -253,6 +255,7 @@ CASE WHEN isnull(GrossPnL,0) >= 0 then @strUnrealizedGainOnFuturesId else @strUn
 		'Mark To Market-Futures Derivative','Mark To Market','Risk Management',1,1,getdate(),0,intEntityId,@strRecordName strRecordName,@intUserId intUserId,@intLocationId intLocationId,@intUnitMeasureId intUnitMeasureId
 FROM @Result t
 join tblRKFutOptTransaction tr on tr.intFutOptTransactionId=t.intFutOptTransactionId
+WHERE ISNULL(GrossPnL,0) <> 0
 
 UNION ALL
 
@@ -262,4 +265,5 @@ SELECT @intM2MInquiryId intM2MInquiryId,@dtmGLPostDate AS dtmPostDate,
 ,0.0,GrossPnL,0.0,intNet,'Mark To Market-Futures Derivative Offset',@intCurrencyId,@dtmGLPostDate,t.strInternalTradeNo,t.intFutOptTransactionId,
 'Mark To Market-Futures Derivative Offset','Mark To Market','Risk Management',1,1,getdate(),0,intEntityId,@strRecordName strRecordName,@intUserId intUserId,@intLocationId intLocationId,@intUnitMeasureId intUnitMeasureId
 FROM @Result t
-join tblRKFutOptTransaction tr on tr.intFutOptTransactionId=t.intFutOptTransactionId
+JOIN tblRKFutOptTransaction tr on tr.intFutOptTransactionId=t.intFutOptTransactionId
+WHERE ISNULL(GrossPnL,0) <> 0

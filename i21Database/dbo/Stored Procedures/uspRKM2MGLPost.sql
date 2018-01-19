@@ -1,20 +1,46 @@
 ﻿CREATE PROC uspRKM2MGLPost 
 		@intM2MInquiryId INT
 AS
+SET QUOTED_IDENTIFIER OFF
+SET ANSI_NULLS ON
+SET NOCOUNT ON
+SET XACT_ABORT ON
+SET ANSI_WARNINGS OFF
+
 BEGIN TRY
 	DECLARE @GLEntries AS RecapTableType
 	DECLARE @batchId NVARCHAR(100)
 	DECLARE @strBatchId NVARCHAR(100)
 	DECLARE @ErrMsg NVARCHAR(Max)
 
+BEGIN TRANSACTION
+
+DECLARE @intCommodityId int
+declare @dtmCurrenctGLPostDate datetime
+declare @dtmPreviousGLPostDate datetime
+declare @dtmGLReverseDate datetime
+declare @dtmPrviousGLReverseDate datetime
+SELECT @intCommodityId = intCommodityId,@dtmCurrenctGLPostDate=dtmGLPostDate,@dtmGLReverseDate=dtmGLReverseDate FROM tblRKM2MInquiry where intM2MInquiryId=@intM2MInquiryId
+SELECT TOP 1 @dtmPreviousGLPostDate=dtmGLPostDate,@dtmPrviousGLReverseDate=dtmGLReverseDate  FROM tblRKM2MInquiry where ysnPost=1 and intCommodityId=@intCommodityId order by dtmGLPostDate desc
+
+IF (@dtmGLReverseDate IS NULL)
+BEGIN
+RAISERROR('Please save the record before posting.',16,1)
+END
+SELECT @dtmCurrenctGLPostDate, @dtmPrviousGLReverseDate
+IF (@dtmCurrenctGLPostDate >= @dtmPrviousGLReverseDate)
+BEGIN
+
+RAISERROR('Current date cannot lessthan the previous post date',16,1)
+END
+
+
 	IF (@batchId IS NULL)
 	BEGIN
-		EXEC uspSMGetStartingNumber 3,@batchId OUT
+		EXEC uspSMGetStartingNumber 3, @batchId OUT
 	END
 
 	SET @strBatchId = @batchId
-
-	BEGIN TRANSACTION
 
 	INSERT INTO @GLEntries (
 		 [dtmDate]
@@ -94,3 +120,5 @@ BEGIN CATCH
 				)
 	END
 END CATCH
+
+

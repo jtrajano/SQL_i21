@@ -14,4 +14,4 @@ SELECT CONVERT(INT, ROW_NUMBER() OVER (
 	,dblExchangeRate
 	,strTransactionId,intM2MInquiryId
 FROM tblRKM2MPostRecap
-WHERE intM2MInquiryId = @intM2MInquiryId
+WHERE intM2MInquiryId = @intM2MInquiryId order by strTransactionId,strTransactionType
