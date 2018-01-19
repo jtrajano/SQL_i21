@@ -1,5 +1,12 @@
-CREATE PROCEDURE uspGLInsertAuditLog(@ysnPost BIT,@GLEntries RecapTableType READONLY)
+CREATE PROCEDURE uspGLInsertAuditLog
+(
+	@ysnPost BIT,
+	@GLEntries RecapTableType READONLY,
+	@XACT_ABORT_ON BIT = 1 
+)
 AS
+IF (@XACT_ABORT_ON  = 1) SET XACT_ABORT ON
+
 DECLARE @tbl TABLE (intTransactionId NVARCHAR(30),  intEntityId INT)
 DECLARE @intTransactionId NVARCHAR(30), @intEntityId INT
 DECLARE @strActionTyoe NVARCHAR(10)
