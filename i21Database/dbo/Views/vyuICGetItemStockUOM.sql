@@ -7,6 +7,7 @@ SELECT
 	Item.strItemNo,
 	strItemDescription = Item.strDescription,
 	strType = Item.strType,
+	Item.strBundleType,
 	Item.intCategoryId,
 	strCategory = Category.strCategoryCode,
 	Item.intCommodityId,

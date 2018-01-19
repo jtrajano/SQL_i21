@@ -7,6 +7,7 @@ SELECT
 	, strItemNo = i.strItemNo
 	, strItemDescription = i.strDescription
 	, strType = i.strType
+	, i.strBundleType
 	, strLotTracking = i.strLotTracking
 	, intLocationId = cl.intCompanyLocationId
 	, strLocationName = cl.strLocationName
