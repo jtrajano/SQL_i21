@@ -6275,9 +6275,9 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "flex": null,
-                                                "itemId": "colPrice",
-                                                "text": "Price",
-                                                "width": 40
+                                                "itemId": "colChargeEntity",
+                                                "text": "Charge Entity",
+                                                "width": 85
                                             },
                                             "configAlternates": {
                                                 "flex": "number",

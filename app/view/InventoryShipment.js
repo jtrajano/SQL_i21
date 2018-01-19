@@ -2294,9 +2294,9 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                     },
                                                     {
                                                         xtype: 'checkcolumn',
-                                                        itemId: 'colPrice',
-                                                        width: 40,
-                                                        text: 'Price'
+                                                        itemId: 'colChargeEntity',
+                                                        width: 85,
+                                                        text: 'Charge Entity'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',

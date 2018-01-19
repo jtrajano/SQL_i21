@@ -657,7 +657,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         store: '{vendor}'
                     }
                 },
-                colPrice: 'ysnPrice',
+                colChargeEntity: 'ysnPrice',                                
                 colChargeForexRateType: {
                     dataIndex: 'strForexRateType',
                     editor: {
