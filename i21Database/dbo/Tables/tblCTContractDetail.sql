@@ -131,6 +131,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[intProducerId] INT NULL,
 	[ysnClaimsToProducer] BIT,
 	[ysnRiskToProducer] BIT,
+	[ysnBackToBack] BIT,
     [dblAllocatedQty] NUMERIC(18, 6) NULL, 
     [dblReservedQty] NUMERIC(18, 6) NULL, 
     [dblAllocationAdjQty] NUMERIC(18, 6) NULL, 
