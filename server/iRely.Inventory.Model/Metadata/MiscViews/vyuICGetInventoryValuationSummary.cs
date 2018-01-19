@@ -16,6 +16,7 @@ namespace iRely.Inventory.Model
         public string strLocationName { get; set; }
         public int? intSubLocationId { get; set; }
         public string strSubLocationName { get; set; }
+        public DateTime? dtmDate { get; set; }
         public decimal? dblQuantity { get; set; }
         public decimal? dblValue { get; set; }
         public decimal? dblLastCost { get; set; }
