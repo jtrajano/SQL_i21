@@ -78,6 +78,8 @@ IF @dtmAsOfDate IS NOT NULL
 ELSE 			  
 	SET @dtmAsOfDate = CAST(FLOOR(CAST(GETDATE() AS FLOAT)) AS DATETIME)
 
+SET @strCustomerName = NULLIF(@strCustomerName, '')
+
 SELECT intInvoiceId					= I.intInvoiceId
 	 , intEntityCustomerId			= CUSTOMER.intEntityCustomerId
 	 , intPeriodsToAccrue			= intPeriodsToAccrue
@@ -103,6 +105,7 @@ INNER JOIN (
 		SELECT intEntityId
 			 , strName
 		FROM dbo.tblEMEntity
+		WHERE (@strCustomerName IS NULL OR strName LIKE '%'+ @strCustomerName +'%')
 	) E ON C.intEntityId = E.intEntityId
 ) CUSTOMER ON I.intEntityCustomerId = CUSTOMER.intEntityCustomerId
 CROSS APPLY (
