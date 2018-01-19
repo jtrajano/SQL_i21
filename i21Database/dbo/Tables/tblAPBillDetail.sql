@@ -9,6 +9,7 @@
 	[intWeightUOMId]    INT             NULL ,
 	[intItemId]    INT             NULL,
 	[intInventoryReceiptItemId]    INT             NULL,
+	[intDeferredVoucherId]			INT				NULL,
 	[intInventoryReceiptChargeId]    INT             NULL,
 	[intContractCostId]		 INT			NULL,
 	[intPaycheckHeaderId]    INT             NULL,
@@ -69,6 +70,7 @@
 	CONSTRAINT [FK_tblAPBillDetail_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]),
 	CONSTRAINT [FK_tblAPBillDetail_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblAPBillDetail_tblICInventoryReceiptCharge] FOREIGN KEY ([intInventoryReceiptChargeId]) REFERENCES [tblICInventoryReceiptCharge]([intInventoryReceiptChargeId]),
+	CONSTRAINT [FK_tblAPBillDetail_tblAPBillDeferred] FOREIGN KEY ([intDeferredVoucherId]) REFERENCES [tblAPBill]([intBillId]),
 	--TEMPORARILY REMOVED, WE'LL VERIFY THIS TO AJITH AS THIS MIGHT BECOME MANUAL DATA FIX FIRST BEFORE ENABLING AGAIN
 	--CONSTRAINT [FK_tblAPBillDetail_tblICInventoryReceiptItem_intInventoryReceiptItemId] FOREIGN KEY ([intInventoryReceiptItemId]) REFERENCES [dbo].[tblICInventoryReceiptItem] ([intInventoryReceiptItemId]),
 	CONSTRAINT [FK_tblAPBillDetail_tblCTContractHeader_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [dbo].[tblCTContractHeader] ([intContractHeaderId]),
