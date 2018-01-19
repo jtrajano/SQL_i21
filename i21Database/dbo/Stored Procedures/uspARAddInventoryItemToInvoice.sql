@@ -183,7 +183,8 @@ DECLARE  @ContractNumber	INT
 		,@TermId			INT
 		,@Pricing			NVARCHAR(250)	= NULL
 		,@ContractHeaderId	INT				= NULL
-		,@ContractDetailId	INT				= NULL	
+		,@ContractDetailId	INT				= NULL
+		,@SpecialPrice		NUMERIC(18,6)	= 0.000000	
 
 BEGIN TRY
 SELECT TOP 1 @InvoiceType = strType, @TermId = intTermId FROM tblARInvoice WHERE intInvoiceId = @InvoiceId 
@@ -194,10 +195,10 @@ EXEC dbo.[uspARGetItemPrice]
 	,@ItemUOMId					= @ItemUOMId
 	,@TransactionDate			= @InvoiceDate
 	,@Quantity					= @ItemQtyShipped
-	,@Price						= @ItemPrice			OUTPUT
-	,@Pricing					= @Pricing			OUTPUT
-	,@ContractHeaderId			= @ContractHeaderId	OUTPUT
-	,@ContractDetailId			= @ContractDetailId	OUTPUT
+	,@Price						= @SpecialPrice			OUTPUT
+	,@Pricing					= @Pricing				OUTPUT
+	,@ContractHeaderId			= @ContractHeaderId		OUTPUT
+	,@ContractDetailId			= @ContractDetailId		OUTPUT
 	,@ContractNumber			= @ContractNumber		OUTPUT
 	,@ContractSeq				= @ContractSeq			OUTPUT
 	,@TermDiscount				= @ItemTermDiscount		OUTPUT
@@ -219,7 +220,8 @@ EXEC dbo.[uspARGetItemPrice]
 
 IF (ISNULL(@RefreshPrice,0) = 1)
 	BEGIN
-		SET @ItemUnitPrice = @ItemPrice
+		SET @ItemPrice = @SpecialPrice
+		SET @ItemUnitPrice = @SpecialPrice
 		SET @ItemPricing = @Pricing
 		SET @ItemContractHeaderId = @ContractHeaderId
 		SET @ItemContractDetailId = @ContractDetailId
