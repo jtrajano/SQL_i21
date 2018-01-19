@@ -47,6 +47,7 @@ BEGIN
 			,I.strItemNo AS strMainRecipeItem
 			,ri.intRecipeItemId
 			,rt.strName as strRecipeItemType
+			,ri.intRecipeId
 		FROM dbo.tblMFRecipeItem ri
 		JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
 		JOIN dbo.tblICItem I ON I.intItemId = ri.intItemId
@@ -107,6 +108,7 @@ BEGIN
 			,I1.strItemNo AS strMainRecipeItem
 			,ri.intRecipeItemId
 			,rt.strName as strRecipeItemType
+			,ri.intRecipeId
 		FROM dbo.tblMFRecipeItem ri
 		JOIN dbo.tblMFRecipeSubstituteItem RSI ON RSI.intRecipeItemId = ri.intRecipeItemId
 			AND ri.intRecipeId = RSI.intRecipeId
@@ -197,6 +199,7 @@ BEGIN
 			,I.strItemNo AS strMainRecipeItem
 			,ri.intRecipeItemId
 			,rt.strName as strRecipeItemType
+			,ri.intRecipeId
 		FROM dbo.tblMFWorkOrderRecipeItem ri
 		JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
 			AND r.intWorkOrderId = ri.intWorkOrderId
@@ -272,6 +275,7 @@ BEGIN
 			,I1.strItemNo AS strMainRecipeItem
 			,ri.intRecipeItemId
 			,rt.strName as strRecipeItemType
+			,ri.intRecipeId
 		FROM dbo.tblMFWorkOrderRecipeItem ri
 		JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RSI ON RSI.intRecipeItemId = ri.intRecipeItemId
 			AND ri.intWorkOrderId = RSI.intWorkOrderId
