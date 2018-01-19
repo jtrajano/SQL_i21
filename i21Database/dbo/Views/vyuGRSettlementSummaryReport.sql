@@ -40,11 +40,11 @@ SELECT * FROM
 			 		   ) BillByReceipt ON BillByReceipt.intBillId = BillDtl.intBillId
 			 
 			 LEFT JOIN (
-			 				SELECT intBillId,SUM(dblTotal) dblTotal
-			 				FROM tblAPBillDetail
-			 				WHERE intInventoryReceiptChargeId IS NOT NULL AND intInventoryReceiptItemId IS NULL
-			 				GROUP BY intBillId
-			 		   ) BillByReceiptItem ON BillByReceiptItem.intBillId = BillDtl.intBillId
+			  			  SELECT intPaymentId,SUM(APD.dblPayment) dblTotal
+						  FROM tblAPPaymentDetail APD
+						  JOIN tblAPBill Bill ON Bill.intBillId =APD.intBillId AND Bill.intTransactionType =3
+						  GROUP BY intPaymentId
+					   )BillByReceiptItem ON BillByReceiptItem.intPaymentId=PYMT.intPaymentId
 			 
 			 LEFT JOIN (
 			 			 SELECT PYMT.intPaymentId ,SUM(BillDtl.dblTax) AS dblGradeFactorTax
@@ -150,13 +150,11 @@ SELECT * FROM
 				  ) tblTax ON tblTax.intBillId = Bill.intBillId
 			
 			LEFT JOIN (
-						SELECT 
-						 A.intBillId
-						,SUM(dblTotal) dblTotal
-						FROM tblAPBillDetail A
-						JOIN tblICItem B ON A.intItemId = B.intItemId  AND B.strType NOT IN('Other Charge','Inventory')
-						GROUP BY A.intBillId
-				      ) tblAdjustment ON tblAdjustment.intBillId = BillDtl.intBillId
+						 SELECT intPaymentId,SUM(APD.dblPayment) dblTotal
+						  FROM tblAPPaymentDetail APD
+						  JOIN tblAPBill Bill ON Bill.intBillId =APD.intBillId AND Bill.intTransactionType =3
+						  GROUP BY intPaymentId
+				      ) tblAdjustment ON tblAdjustment.intPaymentId=PYMT.intPaymentId  
 			
 			LEFT JOIN (
 						 SELECT
