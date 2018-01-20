@@ -556,4 +556,77 @@ BEGIN
     SELECT 1
 END
 GO
+--tblCTAmendmentApproval
+BEGIN
+  IF NOT EXISTS(SELECT 1 FROM tblCTAmendmentApproval)
+  BEGIN
+
+    SET IDENTITY_INSERT [dbo].[tblCTAmendmentApproval] ON
+
+	INSERT INTO tblCTAmendmentApproval
+	(
+		 intAmendmentApprovalId
+		,strDataIndex
+		,strDataField	
+		,intConcurrencyId
+	)
+	SELECT		intAmendmentApprovalId=1 ,strDataIndex='intEntityId'		 ,strDataField='Entity'			,intConcurrencyId =1
+	UNION  																 								
+	SELECT     intAmendmentApprovalId=2 ,strDataIndex='intPositionId'		 ,strDataField='Position'		,intConcurrencyId =1
+	UNION 																	 								
+	SELECT     intAmendmentApprovalId=3 ,strDataIndex='intContractBasisId'   ,strDataField='INCO/Ship Term' ,intConcurrencyId =1
+	UNION 																	 								
+	SELECT     intAmendmentApprovalId=4 ,strDataIndex='intTermId'		     ,strDataField='Terms'			,intConcurrencyId =1
+	UNION 																	 								
+	SELECT     intAmendmentApprovalId=5 ,strDataIndex='intGradeId'			 ,strDataField='Grades'			,intConcurrencyId =1
+	UNION 																	 								
+	SELECT     intAmendmentApprovalId=6 ,strDataIndex='intWeightId'		     ,strDataField='Weights'		,intConcurrencyId =1
+	UNION 																	 								
+	SELECT     intAmendmentApprovalId=7 ,strDataIndex='intContractStatusId' ,strDataField='Status'			,intConcurrencyId =1
+	UNION 																	 								
+	SELECT     intAmendmentApprovalId=8 ,strDataIndex='dtmStartDate'		 ,strDataField='Start Date'		,intConcurrencyId =1	
+	UNION 																	 								
+	SELECT     intAmendmentApprovalId=9 ,strDataIndex='dtmEndDate'			 ,strDataField='End Date'		,intConcurrencyId =1	
+	UNION 																	 								
+	SELECT    intAmendmentApprovalId=10 ,strDataIndex='intItemId'			 ,strDataField='Items'			,intConcurrencyId =1
+	UNION 																	 								
+	SELECT    intAmendmentApprovalId=11 ,strDataIndex='dblQuantity'		     ,strDataField='Quantity'		,intConcurrencyId =1	
+	UNION 																	 								
+	SELECT    intAmendmentApprovalId=12 ,strDataIndex='intItemUOMId'		 ,strDataField='Quantity UOM'	,intConcurrencyId =1		
+	UNION 																	 								
+	SELECT    intAmendmentApprovalId=13 ,strDataIndex='intFutureMarketId'	 ,strDataField='Futures Market'	,intConcurrencyId =1
+	UNION 																	 								
+	SELECT    intAmendmentApprovalId=14 ,strDataIndex='intCurrencyId'		 ,strDataField='Currency'		,intConcurrencyId =1
+	UNION 																	 								
+	SELECT    intAmendmentApprovalId=15 ,strDataIndex='intFutureMonthId'	 ,strDataField='Mn/Yr'			,intConcurrencyId =1
+	UNION 																	 								
+	SELECT    intAmendmentApprovalId=16 ,strDataIndex='dblFutures'			 ,strDataField='Futures'		,intConcurrencyId =1	
+	UNION 																									
+	SELECT    intAmendmentApprovalId=17 ,strDataIndex='dblBasis'			,strDataField='Basis'		    ,intConcurrencyId =1		
+	UNION 																									
+	SELECT    intAmendmentApprovalId=18 ,strDataIndex='dblCashPrice'		,strDataField='Cash Price'		,intConcurrencyId =1
+	UNION 																									
+	SELECT    intAmendmentApprovalId=19 ,strDataIndex='intPriceItemUOMId'	,strDataField='Cash Price UOM'	,intConcurrencyId =1
+
+   SET IDENTITY_INSERT [dbo].[tblCTAmendmentApproval] OFF
+  END
+
+END
+
+GO
+BEGIN
+	DECLARE @strAmendmentFields	NVARCHAR(MAX)
+	SELECT @strAmendmentFields= strAmendmentFields FROM tblCTCompanyPreference
+
+	UPDATE t1
+	SET t1.ysnAmendment = 1
+	FROM tblCTAmendmentApproval t1
+	JOIN 
+	(
+	SELECT strValues = strValues COLLATE Latin1_General_CI_AS 
+	FROM dbo.fnARGetRowsFromDelimitedValues(@strAmendmentFields)
+	) t2 ON t2.strValues = t1.strDataIndex
+
+END
+GO
 PRINT('Contract 1_MasterTables End')
