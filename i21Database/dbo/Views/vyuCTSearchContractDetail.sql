@@ -9,6 +9,7 @@ AS
 			CD.dblFutures,						
 			CD.dblBasis,						
 			CD.dblCashPrice,		
+			CD.dblRatio,
 			CD.dblRate,						
 			CD.strFobBasis,					
 			CD.strRemark,				

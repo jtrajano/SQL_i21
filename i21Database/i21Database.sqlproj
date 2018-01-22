@@ -6108,6 +6108,7 @@
     <None Include="Scripts\Post-Deployment\IC\25_MigratePackedTypeToQuantityType.sql" />
     <None Include="Scripts\Post-Deployment\IC\26_AddStockUOM.sql" />
     <Build Include="dbo\Views\vyuLGLoadScheduleForInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportAOPVsActual.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
