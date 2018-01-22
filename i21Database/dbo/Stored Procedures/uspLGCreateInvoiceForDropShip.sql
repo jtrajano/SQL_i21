@@ -109,8 +109,7 @@ BEGIN
 		,@EntityCustomerId			= LD.intCustomerEntityId
 		,@CompanyLocationId			= LD.intSCompanyLocationId 	
 		,@AccountId					= NULL
-		,@CurrencyId				= ISNULL((CASE WHEN CD.ysnUseFXPrice = 1 AND GETDATE() BETWEEN CD.dtmFXValidFrom AND CD.dtmFXValidTo THEN ISNULL(CD.intInvoiceCurrencyId, ISNULL(CD.intCurrencyId, ISNULL(CD.intBasisCurrencyId, CD.intConvPriceCurrencyId))) ELSE ISNULL(CD.intCurrencyId, ISNULL(CD.intBasisCurrencyId, CD.intConvPriceCurrencyId)) END),
-									  ISNULL(ARC.[intCurrencyId], (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0)))
+		,@CurrencyId				= L.intCurrencyId
 		,@TermId					= NULL
 		,@SourceId					= @intLoadId
 		,@PeriodsToAccrue			= 1
