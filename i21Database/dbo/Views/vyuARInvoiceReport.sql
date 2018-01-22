@@ -84,6 +84,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , strProvisional			= PROVISIONAL.strProvisionalDescription
 	 , dblTotalProvisional		= PROVISIONAL.dblProvisionalTotal
 	 , strCustomerComments		= dbo.fnEMEntityMessage(CUSTOMER.intEntityId, 'Invoice')
+	 , ysnPrintInvoicePaymentDetail = ARPREFERENCE.ysnPrintInvoicePaymentDetail
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
 	SELECT intEntityId
@@ -229,6 +230,10 @@ OUTER APPLY (
 			   , ysnIncludeEntityName
 	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ) COMPANY
+OUTER APPLY (
+	SELECT TOP 1 ysnPrintInvoicePaymentDetail
+	FROM dbo.tblARCompanyPreference WITH (NOLOCK)
+) ARPREFERENCE
 OUTER APPLY (
 	SELECT COUNT(*) AS intInvoiceDetailCount
 	FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
