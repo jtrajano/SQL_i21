@@ -65,6 +65,23 @@ WHERE
 
 UPDATE ARP
 SET
+	 ARP.[dblAmountPaid]		= PD.[dblPaymentTotal]
+	,ARP.[dblBaseAmountPaid]	= PD.[dblBasePaymentTotal]
+FROM tblARPayment ARP
+INNER JOIN 
+	(SELECT
+		 [intPaymentId]			= [intPaymentId]
+		,[dblPaymentTotal]		= SUM([dblPayment])
+		,[dblBasePaymentTotal]	= SUM([dblBasePayment])
+	FROM
+		tblARPaymentDetail GROUP BY intPaymentId
+	) PD
+		ON ARP.[intPaymentId] = PD.[intPaymentId]
+WHERE
+	EXISTS(SELECT NULL FROM @PaymentIds WHERE [intHeaderId] = ARP.[intPaymentId])
+
+UPDATE ARP
+SET
 	 ARP.[dblUnappliedAmount]		= ARP.[dblAmountPaid] - PD.[dblPaymentTotal]
 	,ARP.[dblBaseUnappliedAmount]	= ARP.[dblBaseAmountPaid] - PD.[dblBasePaymentTotal]
 	,ARP.[dblOverpayment]			= ARP.[dblAmountPaid] - PD.[dblPaymentTotal]
