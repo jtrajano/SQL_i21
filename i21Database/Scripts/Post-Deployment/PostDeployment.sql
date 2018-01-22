@@ -191,6 +191,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\DefaultData\1n_UpdateFiscalUpperBounds.sql
 :r .\GL\DefaultData\1p_CompanyPreferenceOption.sql
 :r .\GL\DefaultData\1q_InsertOriginMapping.sql
+:r .\GL\DefaultData\1r_UpdateModuleCategory.sql
 
 -- Financial Report Designer
 :r .\FRD\FRDEntryDataFix.sql

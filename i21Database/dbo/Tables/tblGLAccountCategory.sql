@@ -5,6 +5,7 @@
 	[intConcurrencyId] [int] NOT NULL
     CONSTRAINT [PK_tblGLAccountCategory] PRIMARY KEY ([intAccountCategoryId]), 
     [strAccountGroupFilter] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL, 
+	[intModuleId] INT NULL,
     [ysnRestricted] BIT NULL,
 )
 GO

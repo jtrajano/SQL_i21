@@ -6099,6 +6099,8 @@
     <Build Include="dbo\Stored Procedures\uspSTRebatePreviewSubmission.sql" />
     <None Include="Scripts\Post-Deployment\CT\174To181.sql" />
     <Build Include="dbo\Tables\tblCTAmendmentApproval.sql" />
+	<Build Include="dbo\Views\vyuGLMissingPrimaryCategories.sql" />
+    <Build Include="dbo\Tables\tblGLRequiredPrimaryCategory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -6352,5 +6354,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1q_InsertOriginMapping.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1r_UpdateModuleCategory.sql" />
   </ItemGroup>
 </Project>
