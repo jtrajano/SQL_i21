@@ -6105,6 +6105,8 @@
     <Build Include="dbo\Views\vyuCTCustomerContract.sql" />
     <Build Include="dbo\Tables\tblCTSequenceHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateDetailHistory.sql" />
+    <None Include="Scripts\Post-Deployment\IC\25_MigratePackedTypeToQuantityType.sql" />
+    <None Include="Scripts\Post-Deployment\IC\26_AddStockUOM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

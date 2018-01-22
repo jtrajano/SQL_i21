@@ -280,6 +280,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\22_Update_Qty_Cost_For_ReceiptTaxes.sql
 :r .\IC\23_Update_ActualCostId_On_InventoryTransaction.sql
 :r .\IC\24_ImplementBasketChanges.sql
+:r .\IC\25_MigratePackedTypeToQuantityType.sql
+:r .\IC\26_AddStockUOM.sql
 
 -- Patronage
 :r .\PAT\DefaultData\1_AddDefaultLetters.sql 

@@ -30,6 +30,7 @@ Type the overview for the table here.
 		[dblVolume] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[intVolumeUOMId] INT NULL,
 		[dblMaxQty] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[ysnStockUOM] BIT NULL,
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICItemUOM] PRIMARY KEY ([intItemUOMId]), 
