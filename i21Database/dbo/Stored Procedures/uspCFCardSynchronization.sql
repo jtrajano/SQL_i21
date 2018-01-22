@@ -15,10 +15,11 @@
 	,@strPINNumber					NVARCHAR(MAX)	 =   ''
 	,@strLabel						NVARCHAR(MAX)	 =   ''
 	,@strCardType 					NVARCHAR(MAX)	 =   ''
-	,@dtmExpirationDate				DATETIME		 =	 NULL
+	,@dtmExpirationDate				NVARCHAR(MAX)	 =	 ''
 	,@strSessionId					NVARCHAR(MAX)
 	,@strImportDate					NVARCHAR(MAX)
 	,@strNetworkParticipantId		NVARCHAR(MAX)	 =	 ''
+	,@intNetworkId					INT				 =   NULL
 	--,@intUserID
 
 
@@ -30,80 +31,7 @@ BEGIN
 	DECLARE @strAction				NVARCHAR(MAX)	 =	 ''
 	DECLARE @dtmImportDate			DATETIME
 
-
-	SET @dtmImportDate = Convert(varchar(30),@strImportDate,102)
-
-	--VALIDATE ACCOUNT--
-	IF(ISNULL(@strAccountNumber,'') != '')
-	BEGIN
-		SELECT TOP 1 @intAccountId = intAccountId FROM vyuCFAccountCustomer WHERE strCustomerNumber = @strAccountNumber
-	END
-	ELSE
-	BEGIN
-		print 'Invalid account number'
-		INSERT INTO tblCFCSULog
-		(
-			 strAccountNumber
-			,strMessage
-			,strRecordId
-			,dtmUpdateDate
-		)
-		SELECT 
-			 @strAccountNumber
-			,'Invalid account number' as strMessage
-			,''
-			,@dtmImportDate
-		RETURN
-	END
 	
-	
-	IF(ISNULL(@intAccountId,0) = 0)
-	BEGIN
-		SELECT TOP 1 @intAccountId = intAccountId FROM tblCFNetworkAccount WHERE strNetworkAccountId = @strAccountNumber
-	END
-
-
-	IF(ISNULL(@intAccountId,0) = 0)
-	BEGIN
-		print 'Invalid account number'
-		INSERT INTO tblCFCSULog
-		(
-			 strAccountNumber
-			,strMessage
-			,strRecordId
-			,dtmUpdateDate
-		)
-		SELECT 
-			 @strAccountNumber
-			,'Invalid account number' as strMessage
-			,''
-			,@dtmImportDate
-		RETURN
-	END
-
-	
-	IF (ISNULL(@strNetworkParticipantId,'') != ISNULL(@strParticipantNumber,'') )
-	BEGIN
-		print 'Participant id not match'
-		INSERT INTO tblCFCSULog
-		(
-			 strAccountNumber
-			,strMessage
-			,strRecordId
-			,dtmUpdateDate
-		)
-		SELECT 
-			 @strAccountNumber
-			,'Participant id not match' as strMessage
-			,''
-			,@dtmImportDate
-		
-		RETURN
-	END
-	
-
-
-
 
 	--VALIDATE ACCOUNT--
 
@@ -162,9 +90,11 @@ BEGIN
 	--VALIDATE TYPE--
 
 
+	DECLARE @strErrorRecordId NVARCHAR(MAX) = ''
 	IF(@intSycnType = 1)
 	BEGIN
 	--CHECK IF CARD EXIST--
+		SET @strErrorRecordId = 'card - ' + @strCardNumber
 		IF((SELECT COUNT(*) FROM tblCFCard where strCardNumber = @strCardNumber) = 0)
 		BEGIN
 			SET @strAction = 'addcard'
@@ -178,6 +108,7 @@ BEGIN
 	ELSE
 	BEGIN
 	--CHECK IF VEHICLE EXIST--
+		SET @strErrorRecordId = 'vehicle - ' + @strVehicleNumber
 		IF((SELECT COUNT(*) FROM tblCFVehicle where strVehicleNumber = @strVehicleNumber) = 0)
 		BEGIN
 			SET @strAction = 'addvehicle'
@@ -189,6 +120,256 @@ BEGIN
 	--CHECK IF VEHICLE EXIST--
 	END
 
+
+	
+
+	----------------------VALIDATIONS-----------------------
+	IF(@intSycnType = 1)
+	BEGIN
+
+		DECLARE @ysnCardStatus BIT = 0
+		IF(ISNULL(@strCardStatus,'') != '')
+		BEGIN
+			IF(@strCardStatus = 'V')
+			BEGIN
+				SET @ysnCardStatus = 1
+			END
+			ELSE IF(@strCardStatus = 'I')
+			BEGIN
+				SET @ysnCardStatus = 0
+			END
+			ELSE
+			BEGIN
+				print 'Invalid card status'
+				INSERT INTO tblCFCSULog
+				(
+					 strAccountNumber
+					,strMessage
+					,strRecordId
+					,dtmUpdateDate
+				)
+				SELECT 
+					 @strAccountNumber
+					,'Invalid card status' as strMessage
+					,@strErrorRecordId
+					,@dtmImportDate
+				RETURN
+			END
+		END
+		ELSE
+		BEGIN
+			print 'Invalid card status'
+			INSERT INTO tblCFCSULog
+			(
+					strAccountNumber
+				,strMessage
+				,strRecordId
+				,dtmUpdateDate
+			)
+			SELECT 
+					@strAccountNumber
+				,'Invalid card status' as strMessage
+				,@strErrorRecordId
+				,@dtmImportDate
+			RETURN
+		END
+
+
+		DECLARE @intProductAuthCode AS INT = 0
+		DECLARE @tblCFNumericProdAuth TABLE(
+			 intProductAuthId			int
+			,strNetworkGroupNumber			nvarchar(MAX)
+		)
+		DECLARE @tblCFCharProdAuth TABLE(
+			 intProductAuthId			int
+			,strNetworkGroupNumber			nvarchar(MAX)
+		)
+		IF(ISNULL(@strProductAuthCode,'') != '')
+		BEGIN
+			IF(ISNUMERIC(@strProductAuthCode) = 1)
+			BEGIN
+				INSERT INTO @tblCFNumericProdAuth(
+					intProductAuthId			
+					,strNetworkGroupNumber
+				)	
+				SELECT 
+					 intProductAuthId			
+					,strNetworkGroupNumber	
+				FROM tblCFProductAuth 
+				WHERE strNetworkGroupNumber not like '%[^0-9]%' and strNetworkGroupNumber != ''
+				AND intNetworkId = @intNetworkId
+
+				SET @intProductAuthCode =
+				(SELECT TOP 1 intProductAuthId
+				FROM @tblCFNumericProdAuth
+				WHERE CAST(strNetworkGroupNumber AS BIGINT) = CAST(@strProductAuthCode AS BIGINT))
+				
+			END
+			ELSE
+			BEGIN
+				INSERT INTO @tblCFCharProdAuth(
+					 intProductAuthId			
+					,strNetworkGroupNumber
+				)	
+				SELECT 
+					 intProductAuthId			
+					,strNetworkGroupNumber	
+				FROM tblCFProductAuth  WHERE strNetworkGroupNumber like '%[^0-9]%' and strNetworkGroupNumber != ''
+				AND intNetworkId = @intNetworkId
+
+				SET @intProductAuthCode =
+				(SELECT TOP 1 intProductAuthId
+				FROM @tblCFCharProdAuth
+				WHERE strNetworkGroupNumber = @strProductAuthCode)
+
+			END
+		END
+		ELSE
+		BEGIN 
+			print 'Invalid product auth'
+			INSERT INTO tblCFCSULog
+			(
+				 strAccountNumber
+				,strMessage
+				,strRecordId
+				,dtmUpdateDate
+			)
+			SELECT 
+				 @strAccountNumber
+				,'Invalid product auth' as strMessage
+				,@strErrorRecordId
+				,@dtmImportDate
+			RETURN
+		END
+		IF(ISNULL(@intProductAuthCode,0) = 0)
+		BEGIN
+			print 'Cannot find product auth'
+			INSERT INTO tblCFCSULog
+			(
+				 strAccountNumber
+				,strMessage
+				,strRecordId
+				,dtmUpdateDate
+			)
+			SELECT 
+				 @strAccountNumber
+				,'Cannot find product auth ' + @strProductAuthCode as strMessage
+				,@strErrorRecordId
+				,@dtmImportDate
+			RETURN
+		END
+
+
+		DECLARE @d		varchar(8)
+		DECLARE @m		varchar(2)
+		DECLARE @yr		varchar(4)
+		DECLARE @day	varchar(2)
+		IF(ISNULL(@dtmExpirationDate,'') != '')
+		BEGIN
+			SET @d = @dtmExpirationDate 
+			SET @day = '01' 
+			SET @m = SUBSTRING(@d,3,2) 
+			SET @yr = '20' + SUBSTRING(@d,1,2) 
+	
+			SET @dtmExpirationDate = CONVERT(datetime,(@m +'/'+ @day +'/'+ @yr)) 
+		END
+		ELSE
+		BEGIN
+			print 'Invalid expiration date'
+			INSERT INTO tblCFCSULog
+			(
+				 strAccountNumber
+				,strMessage
+				,strRecordId
+				,dtmUpdateDate
+			)
+			SELECT 
+				 @strAccountNumber
+				,'Invalid expiration date' as strMessage
+				,@strErrorRecordId
+				,@dtmImportDate
+			RETURN
+		END
+
+
+		IF (ISNULL(@strNetworkParticipantId,'') NOT LIKE '%'+ISNULL(@strParticipantNumber,'')+'%' )
+		BEGIN
+			print 'Participant id not match'
+			INSERT INTO tblCFCSULog
+			(
+				 strAccountNumber
+				,strMessage
+				,strRecordId
+				,dtmUpdateDate
+			)
+			SELECT 
+				 @strAccountNumber
+				,'Participant id not match' as strMessage
+				,@strErrorRecordId
+				,@dtmImportDate
+		
+			RETURN
+		END
+
+	END
+	----------------------VALIDATIONS-----------------------
+
+
+
+	---------------------DEFAULTS---------------------
+	SET @dtmImportDate = Convert(varchar(30),@strImportDate,102)
+	
+	---------------------DEFAULTS---------------------
+
+
+
+	--VALIDATE ACCOUNT--
+	IF(ISNULL(@strAccountNumber,'') != '')
+	BEGIN
+		SELECT TOP 1 @intAccountId = intAccountId FROM vyuCFAccountCustomer WHERE strCustomerNumber = @strAccountNumber
+	END
+	ELSE
+	BEGIN
+		print 'Invalid account number'
+		INSERT INTO tblCFCSULog
+		(
+			 strAccountNumber
+			,strMessage
+			,strRecordId
+			,dtmUpdateDate
+		)
+		SELECT 
+			 @strAccountNumber
+			,'Invalid account number' as strMessage
+			,@strErrorRecordId
+			,@dtmImportDate
+		RETURN
+	END
+
+
+	IF(ISNULL(@intAccountId,0) = 0)
+	BEGIN
+		SELECT TOP 1 @intAccountId = intAccountId FROM tblCFNetworkAccount WHERE strNetworkAccountId = @strAccountNumber
+	END
+
+
+	IF(ISNULL(@intAccountId,0) = 0)
+	BEGIN
+		print 'Invalid account number'
+		INSERT INTO tblCFCSULog
+		(
+			 strAccountNumber
+			,strMessage
+			,strRecordId
+			,dtmUpdateDate
+		)
+		SELECT 
+			 @strAccountNumber
+			,'Invalid account number' as strMessage
+			,@strErrorRecordId
+			,@dtmImportDate
+		RETURN
+	END
 
 
 	IF(@strAction = 'addcard')
@@ -207,14 +388,25 @@ BEGIN
 				,ysnActive
 				,dtmIssueDate
 				,strCardDescription
+				,dtmCardExpiratioYearMonth
+				,intCardLimitedCode
+				,intProductAuthId
+				,strCardPinNumber
+				,intNetworkId
 			)
 			SELECT
 				 @intAccountId
 				,@strCardNumber
 				,@intManualEntryCode
-				,1
+				,@ysnCardStatus
 				,GETDATE()
 				,@strLabel
+				,@dtmExpirationDate
+				,@strLimitCode
+				,@intProductAuthCode
+				,@strPINNumber
+				,@intNetworkId
+
 
 			SET @intAddCardIdentity = SCOPE_IDENTITY()
 
@@ -453,14 +645,27 @@ BEGIN
 
 			DELETE FROM tblCFTempCSUAuditLog
 
+
 			UPDATE tblCFTempCSUCard SET 
-			 strCardNumber = @strCardNumber
-			,intEntryCode = @intManualEntryCode
+			 strCardNumber				   = @strCardNumber
+			,intEntryCode				   = @intManualEntryCode
+			,ysnActive					   = @ysnCardStatus
+			,strCardDescription			   = @strLabel
+			,dtmCardExpiratioYearMonth	   = @dtmExpirationDate
+			,intCardLimitedCode			   = @strLimitCode
+			,intProductAuthId			   = @intProductAuthCode
+			,strCardPinNumber			   = @strPINNumber
 			WHERE strCardNumber = @strCardNumber
 
 			UPDATE tblCFCard SET 
-			 strCardNumber = @strCardNumber
-			,intEntryCode = @intManualEntryCode
+			 strCardNumber				   = @strCardNumber
+			,intEntryCode				   = @intManualEntryCode
+			,ysnActive					   = @ysnCardStatus
+			,strCardDescription			   = @strLabel
+			,dtmCardExpiratioYearMonth	   = @dtmExpirationDate
+			,intCardLimitedCode			   = @strLimitCode
+			,intProductAuthId			   = @intProductAuthCode
+			,strCardPinNumber			   = @strPINNumber
 			WHERE strCardNumber = @strCardNumber
 
 			INSERT INTO tblCFCSUAuditLog
@@ -495,8 +700,6 @@ BEGIN
 			FROM 
 			tblCFTempCSUAuditLog
 
-
-
 			DELETE FROM tblCFTempCSUAuditLog
 			DELETE FROM tblCFTempCSUCard
 
@@ -506,13 +709,11 @@ BEGIN
 
 		BEGIN CATCH
 
-		
-
 		ROLLBACK TRANSACTION
 		END CATCH
 
 	END
-
+	
 
 	IF(@strAction = 'addvehicle')
 	BEGIN
