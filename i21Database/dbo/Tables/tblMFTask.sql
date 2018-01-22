@@ -14,7 +14,7 @@
 		,[intFromStorageLocationId] INT NULL
 		,[intToStorageLocationId] INT NULL
 		,[intItemId] INT NOT NULL
-		,[intLotId] INT NOT NULL
+		,[intLotId] INT NULL
 		,[dblQty] NUMERIC(18, 6) NULL
 		,[intItemUOMId] INT NULL
 	    ,[dblWeight] NUMERIC(18, 6) NULL

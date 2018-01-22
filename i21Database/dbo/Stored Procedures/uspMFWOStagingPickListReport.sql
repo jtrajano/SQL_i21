@@ -131,7 +131,7 @@ BEGIN
 	JOIN tblMFTask T ON T.intOrderHeaderId = OH.intOrderHeaderId
 	JOIN tblMFTaskType TT ON TT.intTaskTypeId = T.intTaskTypeId
 	JOIN tblICItem I ON I.intItemId = T.intItemId
-	JOIN tblICLot L ON L.intLotId = T.intLotId
+	Left JOIN tblICLot L ON L.intLotId = T.intLotId
 	JOIN tblICItemUOM IU ON IU.intItemUOMId = T.intItemUOMId
 	JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 	LEFT JOIN tblICItemUOM WIU ON WIU.intItemUOMId = T.intWeightUOMId

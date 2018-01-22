@@ -6,24 +6,23 @@
 	,@intAssigneeId INT = 0
 	,@intItemId INT = NULL
 	,@intOrderDetailId int=NULL
+		,@intFromStorageLocationId INT = NULL
+	,@intItemUOMId INT = NULL
 AS
 BEGIN TRY
 	SET NOCOUNT ON
 
 	DECLARE @intTaskId INT
-	DECLARE @strTaskNo NVARCHAR(64)
-	DECLARE @intToStorageLocationId INT
-	DECLARE @intFromStorageLocationId INT
-	DECLARE @dblLotQty AS NUMERIC(18, 6)
-	DECLARE @intItemUOMId INT
-	DECLARE @dblLotWeight AS NUMERIC(18, 6)
-	DECLARE @intWeightUOMId INT
-	DECLARE @intDirectionId INT
-	DECLARE @intStatusId INT
-	DECLARE @dtmReleaseDate DATETIME
-	DECLARE @dblSplitAndPickWeight NUMERIC(18, 6)
-	DECLARE @dblWeightPerQty NUMERIC(18, 6)
-	DECLARE @strErrMsg NVARCHAR(MAX)
+	, @strTaskNo NVARCHAR(64)
+	, @intToStorageLocationId INT
+	, @dblLotWeight AS NUMERIC(18, 6)
+	, @intWeightUOMId INT
+	, @intDirectionId INT
+	, @intStatusId INT
+	, @dtmReleaseDate DATETIME
+	, @dblSplitAndPickWeight NUMERIC(18, 6)
+	, @dblWeightPerQty NUMERIC(18, 6)
+	, @strErrMsg NVARCHAR(MAX)
 
 	SELECT @strTaskNo = strOrderNo
 		,@intToStorageLocationId = intStagingLocationId
@@ -34,7 +33,8 @@ BEGIN TRY
 	FROM tblMFOrderDetail
 	WHERE intOrderHeaderId = @intOrderHeaderId
 		AND intItemId = @intItemId
-
+		if @intLotId is not null
+		Begin
 	SELECT @dblSplitAndPickWeight = @dblSplitAndPickQty * CASE 
 			WHEN dblWeightPerQty = 0
 				THEN 1
@@ -47,6 +47,8 @@ BEGIN TRY
 		,@intItemId = intItemId
 	FROM tblICLot
 	WHERE intLotId = @intLotId
+	end
+
 
 	INSERT INTO tblMFTask (
 		intConcurrencyId
@@ -126,17 +128,26 @@ BEGIN TRY
 		)
 
 	SET @intTaskId = SCOPE_IDENTITY()
-
-	UPDATE t
-	SET dblPickQty = CASE 
-			WHEN strTaskType = 'Put Back'
-				THEN l.dblQty - t.dblQty
-			ELSE t.dblQty
-			END
+	If @intLotId is not null
+	Begin
+		UPDATE t
+		SET dblPickQty = CASE 
+				WHEN strTaskType = 'Put Back'
+					THEN l.dblQty - t.dblQty
+				ELSE t.dblQty
+				END
+		FROM tblMFTask t
+		JOIN tblICLot l ON l.intLotId = t.intLotId
+		JOIN tblMFTaskType tt ON tt.intTaskTypeId = t.intTaskTypeId
+		WHERE intTaskId = @intTaskId
+	End
+	Else
+	Begin
+		UPDATE t
+	SET dblPickQty = t.dblQty
 	FROM tblMFTask t
-	JOIN tblICLot l ON l.intLotId = t.intLotId
-	JOIN tblMFTaskType tt ON tt.intTaskTypeId = t.intTaskTypeId
 	WHERE intTaskId = @intTaskId
+	End
 
 	SELECT @intDirectionId = intOrderDirectionId
 	FROM tblMFOrderHeader

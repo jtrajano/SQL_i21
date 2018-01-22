@@ -4,39 +4,39 @@
 AS
 BEGIN TRY
 	DECLARE @intAllowablePickDayRange INT
-	DECLARE @RequiredQty NUMERIC(18, 6)
-	DECLARE @strOrderNo NVARCHAR(100)
-	DECLARE @strOrderType NVARCHAR(50)
-	DECLARE @strOrderDirection NVARCHAR(50)
-	DECLARE @strErrMsg NVARCHAR(MAX)
-	DECLARE @intTransactionCount INT
-	DECLARE @dtmCurrentDateTime DATETIME
-	DECLARE @dtmCurrentDate DATETIME
-	DECLARE @intDayOfYear INT
-	DECLARE @intLotRecordId INT
-	DECLARE @intItemRecordId INT
-	DECLARE @intOrderDetailId INT
-	DECLARE @intItemId INT
-	DECLARE @dblRequiredQty NUMERIC(18, 6)
-	DECLARE @dblRequiredWeight NUMERIC(18, 6)
-	DECLARE @ysnStrictTracking BIT
-	DECLARE @intUserSecurityId INT
-	DECLARE @intTaskTypeId INT
-	DECLARE @intLineItemLotId INT
-	DECLARE @dblPutbackQty NUMERIC(18, 6)
-	DECLARE @dblPutbackWeight NUMERIC(18, 6)
-	DECLARE @dblQty NUMERIC(18, 6)
-	DECLARE @dblRemainingLotQty NUMERIC(18, 6)
-	DECLARE @dblWeight NUMERIC(18, 6)
-	DECLARE @dblRemainingLotWeight NUMERIC(18, 6)
-	DECLARE @intLotId INT
-	DECLARE @intTaskCount INT
-	DECLARE @ysnPickByLotCode BIT
-	DECLARE @intLotCodeStartingPosition INT
-	DECLARE @intLotCodeNoOfDigits INT
-	DECLARE @intTaskRecordId INT
-	DECLARE @dblTotalTaskWeight NUMERIC(18, 6)
-	DECLARE @dblLineItemWeight NUMERIC(18, 6)
+		,@RequiredQty NUMERIC(18, 6)
+		,@strOrderNo NVARCHAR(100)
+		,@strOrderType NVARCHAR(50)
+		,@strOrderDirection NVARCHAR(50)
+		,@strErrMsg NVARCHAR(MAX)
+		,@intTransactionCount INT
+		,@dtmCurrentDateTime DATETIME
+		,@dtmCurrentDate DATETIME
+		,@intDayOfYear INT
+		,@intLotRecordId INT
+		,@intItemRecordId INT
+		,@intOrderDetailId INT
+		,@intItemId INT
+		,@dblRequiredQty NUMERIC(18, 6)
+		,@dblRequiredWeight NUMERIC(18, 6)
+		,@ysnStrictTracking BIT
+		,@intUserSecurityId INT
+		,@intTaskTypeId INT
+		,@intLineItemLotId INT
+		,@dblPutbackQty NUMERIC(18, 6)
+		,@dblPutbackWeight NUMERIC(18, 6)
+		,@dblQty NUMERIC(18, 6)
+		,@dblRemainingLotQty NUMERIC(18, 6)
+		,@dblWeight NUMERIC(18, 6)
+		,@dblRemainingLotWeight NUMERIC(18, 6)
+		,@intLotId INT
+		,@intTaskCount INT
+		,@ysnPickByLotCode BIT
+		,@intLotCodeStartingPosition INT
+		,@intLotCodeNoOfDigits INT
+		,@intTaskRecordId INT
+		,@dblTotalTaskWeight NUMERIC(18, 6)
+		,@dblLineItemWeight NUMERIC(18, 6)
 		,@intCategoryId INT
 		,@ysnAllowPartialPallet BIT
 		,@dblSplitAndPickQty NUMERIC(18, 6)
@@ -57,6 +57,7 @@ BEGIN TRY
 		,@dtmDateCreated2 DATETIME
 		,@intPartialPickSubLocationId INT
 		,@intUnitPerPallet2 INT
+		,@intStorageLocationId INT
 
 	SELECT @ysnPickByQty = 1
 
@@ -78,6 +79,7 @@ BEGIN TRY
 		,@intCustomerLabelTypeId INT
 		,@intOrderId INT
 		,@intLocationId INT
+		,@strInventoryTracking NVARCHAR(50)
 
 	SELECT @intPackagingCategoryId = intAttributeId
 	FROM tblMFAttribute
@@ -166,6 +168,7 @@ BEGIN TRY
 			,intPreferenceId INT
 			,intParentLotId INT
 			,intUnitPerPallet INT
+			,strInventoryTracking NVARCHAR(50)
 			)
 		DECLARE @tblLot TABLE (
 			intLotRecordId INT Identity(1, 1)
@@ -180,26 +183,9 @@ BEGIN TRY
 			,dtmProductionDate DATETIME
 			,intGroupId INT
 			,intSubLocationId INT
+			,intStorageLocationId int
 			)
 
-		--IF EXISTS (
-		--		SELECT 1
-		--		FROM tblMFTask
-		--		WHERE intOrderHeaderId = @intOrderHeaderId
-		--			AND intTaskStateId NOT IN (
-		--				3
-		--				,4
-		--				)
-		--		)
-		--BEGIN
-		--	DELETE
-		--	FROM tblMFTask
-		--	WHERE intOrderHeaderId = @intOrderHeaderId
-		--		AND intTaskStateId NOT IN (
-		--			3
-		--			,4
-		--			)
-		--END
 		UPDATE tblMFOrderDetail
 		SET dblWeight = dblQty
 		WHERE dblQty > 0
@@ -222,6 +208,7 @@ BEGIN TRY
 			,intPreferenceId
 			,intParentLotId
 			,intUnitPerPallet
+			,strInventoryTracking
 			)
 		SELECT DISTINCT oh.intOrderHeaderId
 			,oli.intOrderDetailId
@@ -256,6 +243,7 @@ BEGIN TRY
 			,oli.intPreferenceId
 			,oli.intParentLotId
 			,IsNULL(i.intUnitPerLayer * i.intLayerPerPallet, 0)
+			,i.strInventoryTracking
 		FROM tblMFOrderHeader oh
 		JOIN tblMFOrderDetail oli ON oh.intOrderHeaderId = oli.intOrderHeaderId
 		JOIN tblICItem i ON i.intItemId = oli.intItemId
@@ -271,15 +259,23 @@ BEGIN TRY
 
 		WHILE (@intItemRecordId IS NOT NULL)
 		BEGIN
-			SET @intLotRecordId = NULL
-			SET @intItemId = NULL
-			SET @dblRequiredQty = NULL
-			SET @dblRequiredWeight = NULL
-			SET @dblPutbackQty = NULL
-			SET @dblPutbackWeight = NULL
-			SET @ysnStrictTracking = NULL
-			SET @dblQty = NULL
-			SET @intLineItemLotId = NULL
+			SELECT @intLotRecordId = NULL
+
+			SELECT @intItemId = NULL
+
+			SELECT @dblRequiredQty = NULL
+
+			SELECT @dblRequiredWeight = NULL
+
+			SELECT @dblPutbackQty = NULL
+
+			SELECT @dblPutbackWeight = NULL
+
+			SELECT @ysnStrictTracking = NULL
+
+			SELECT @dblQty = NULL
+
+			SELECT @intLineItemLotId = NULL
 
 			SELECT @intRequiredUOMId = NULL
 
@@ -292,6 +288,8 @@ BEGIN TRY
 			SELECT @intUnitPerPallet = NULL
 
 			SELECT @intUnitPerPallet2 = NULL
+
+			SELECT @strInventoryTracking = NULL
 
 			DELETE
 			FROM @tblLot
@@ -308,6 +306,7 @@ BEGIN TRY
 				,@intParentLotId = intParentLotId
 				,@intUnitPerPallet = intUnitPerPallet
 				,@intUnitPerPallet2 = intUnitPerPallet
+				,@strInventoryTracking = strInventoryTracking
 			FROM @tblLineItem I
 			WHERE intItemRecordId = @intItemRecordId
 
@@ -392,399 +391,531 @@ BEGIN TRY
 				SELECT @dtmDateCreated2 = @dtmDateCreated1 + @intAllowablePickDayRange
 			END
 
-			INSERT INTO @tblLot (
-				intLotId
-				,intItemId
-				,dblQty
-				,intItemUOMId
-				,dblWeight
-				,intWeightUOMId
-				,dblRemainingLotQty
-				,dblRemainingLotWeight
-				,dtmProductionDate
-				,intGroupId
-				,intSubLocationId
-				)
-			SELECT L.intLotId
-				,L.intItemId
-				,L.dblQty
-				,L.intItemUOMId
-				,L.dblWeight
-				,L.intWeightUOMId
-				,L.dblQty - (
-					SUM(ISNULL(CASE 
-								WHEN T.intTaskTypeId = 13
-									THEN L.dblQty - T.dblQty
-								ELSE T.dblQty
-								END, 0))
-					) AS dblRemainingLotQty
-				,L.dblWeight - (
-					SUM(ISNULL(CASE 
-								WHEN T.intTaskTypeId = 13
-									THEN L.dblWeight - T.dblWeight
-								ELSE T.dblWeight
-								END, 0))
-					) AS dblRemainingLotWeight
-				,L.dtmDateCreated
-				,1
-				,L.intSubLocationId
-			FROM tblICLot L
-			JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
-			JOIN tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
-				AND UT.ysnAllowPick = 1
-			LEFT JOIN tblMFTask T ON T.intLotId = L.intLotId
-				AND T.intTaskTypeId NOT IN (
-					5
-					,6
-					,8
-					,9
-					,10
-					,11
+			IF @strInventoryTracking = 'Item Level'
+			BEGIN
+				INSERT INTO @tblLot (
+					intLotId
+					,intItemId
+					,dblQty
+					,intItemUOMId
+					,dblWeight
+					,intWeightUOMId
+					,dblRemainingLotQty
+					,dblRemainingLotWeight
+					,dtmProductionDate
+					,intGroupId
+					,intSubLocationId
+					,intStorageLocationId
 					)
-			LEFT JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
-			JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
-			JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
-				AND BS.strPrimaryStatus = 'Active'
-			JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
-			JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
-			WHERE L.intLocationId = IsNULL(@intLocationId, L.intLocationId)
-				AND L.intItemId = @intItemId
-				AND L.dblQty > 0
-				AND LS.strPrimaryStatus = 'Active'
-				AND ISNULL(L.dtmExpiryDate - @intReceivedLife, @dtmCurrentDateTime) >= @dtmCurrentDateTime
-				AND (
-					(
-						@ysnPickByLotCode = 0
-						AND L.dtmDateCreated BETWEEN @dtmDateCreated1
-							AND @dtmDateCreated2
+				SELECT NULL
+					,S.intItemId
+					,S.dblOnHand
+					,S.intItemUOMId
+					,S.dblOnHand
+					,S.intItemUOMId
+					,S.dblOnHand - (
+						SUM(ISNULL(CASE 
+									WHEN T.intTaskTypeId = 13
+										THEN S.dblOnHand - T.dblQty
+									ELSE T.dblQty
+									END, 0))
+						) AS dblRemainingLotQty
+					,S.dblOnHand - (
+						SUM(ISNULL(CASE 
+									WHEN T.intTaskTypeId = 13
+										THEN S.dblOnHand - T.dblWeight
+									ELSE T.dblWeight
+									END, 0))
+						) AS dblRemainingLotWeight
+					,NULL
+					,1
+					,SL.intSubLocationId
+					,SL.intStorageLocationId
+				FROM tblICItemStockUOM S
+				JOIN tblICStorageLocation SL ON SL.intStorageLocationId = S.intStorageLocationId
+				JOIN tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
+					AND UT.ysnAllowPick = 1
+				JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = S.intItemUOMId
+					AND IU.ysnStockUnit = 1
+				JOIN dbo.tblICItemLocation IL ON IL.intItemLocationId = S.intItemLocationId
+					AND IL.intLocationId = IsNULL(@intLocationId, IL.intLocationId) and IL.intItemId=@intItemId
+				LEFT JOIN tblMFTask T ON T.intItemId = S.intItemId
+					AND T.intTaskTypeId NOT IN (
+						5
+						,6
+						,8
+						,9
+						,10
+						,11
 						)
-					OR (
-						@ysnPickByLotCode = 1
-						AND Substring(PL.strParentLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits) BETWEEN @intLotCode1
-							AND @intLotCode2
+				JOIN dbo.tblICItem I ON I.intItemId = S.intItemId
+				WHERE S.intItemId = @intItemId
+					AND S.dblOnHand > 0
+					AND SL.intRestrictionId NOT IN (
+						SELECT RT.intRestrictionId
+						FROM tblMFInventoryShipmentRestrictionType RT
 						)
-					)
-				AND ISNULL(L.intLotId, 0) = ISNULL((
+				GROUP BY S.intItemId
+					,S.dblOnHand
+					,S.intItemUOMId
+					,S.dblOnHand
+					,S.intItemUOMId
+					,S.dblOnHand
+					,SL.intSubLocationId
+					,SL.intStorageLocationId
+					,I.ysnStrictFIFO
+					,I.intUnitPerLayer
+					,I.intLayerPerPallet
+				HAVING S.dblOnHand - (
+						SUM(ISNULL(CASE 
+									WHEN T.intTaskTypeId = 13
+										THEN S.dblOnHand - T.dblWeight
+									ELSE T.dblWeight
+									END, 0))
+						) > 0
+					AND (
 						CASE 
-							WHEN @intLineItemLotId IS NULL
-								THEN L.intLotId
-							ELSE @intLineItemLotId
-							END
-						), 0)
-				AND ISNULL(L.intParentLotId, 0) = ISNULL((
-						CASE 
-							WHEN @intParentLotId IS NULL
-								THEN L.intParentLotId
-							ELSE @intParentLotId
-							END
-						), 0)
-				AND IsNULL(L.intItemOwnerId, 0) = (
-					CASE 
-						WHEN @ysnPickByItemOwner = 1
-							THEN @intItemOwnerId
-						ELSE IsNULL(L.intItemOwnerId, 0)
-						END
-					)
-				AND SL.intRestrictionId NOT IN (
-					SELECT RT.intRestrictionId
-					FROM tblMFInventoryShipmentRestrictionType RT
-					)
-			GROUP BY L.intLotId
-				,L.intItemId
-				,L.dblQty
-				,L.intItemUOMId
-				,L.dblWeight
-				,L.intWeightUOMId
-				,L.dtmDateCreated
-				,L.dtmManufacturedDate
-				,PL.strParentLotNumber
-				,I.ysnStrictFIFO
-				,I.intUnitPerLayer
-				,I.intLayerPerPallet
-				,L.intSubLocationId
-			HAVING (
-					CASE 
-						WHEN L.intWeightUOMId IS NULL
-							THEN L.dblQty
-						ELSE L.dblWeight
-						END
-					) - (
-					SUM(ISNULL(CASE 
-								WHEN T.intTaskTypeId = 13
-									THEN (
-											CASE 
-												WHEN L.intWeightUOMId IS NULL
-													THEN L.dblQty
-												ELSE L.dblWeight
-												END
-											) - T.dblWeight
-								ELSE T.dblWeight
-								END, 0))
-					) > 0
-				AND (
-					CASE 
-						WHEN IsNULL(@ysnAllowPartialPallet, 1) = 0
-							THEN (
-									CAST(CASE 
-											WHEN (
-													(I.intUnitPerLayer * I.intLayerPerPallet > 0)
-													AND (
-														(
-															L.dblQty - (
-																SUM(ISNULL(CASE 
-																			WHEN T.intTaskTypeId = 13
-																				THEN L.dblQty - T.dblQty
-																			ELSE T.dblQty
-																			END, 0))
-																)
-															) % (I.intUnitPerLayer * I.intLayerPerPallet) > 0
+							WHEN IsNULL(@ysnAllowPartialPallet, 1) = 0
+								THEN (
+										CAST(CASE 
+												WHEN (
+														(I.intUnitPerLayer * I.intLayerPerPallet > 0)
+														AND (
+															(
+																S.dblOnHand - (
+																	SUM(ISNULL(CASE 
+																				WHEN T.intTaskTypeId = 13
+																					THEN S.dblOnHand - T.dblQty
+																				ELSE T.dblQty
+																				END, 0))
+																	)
+																) % (I.intUnitPerLayer * I.intLayerPerPallet) > 0
+															)
 														)
-													)
-												THEN 1
-											ELSE 0
-											END AS BIT)
-									)
-						ELSE 1
-						END
-					) = IsNULL(@ysnAllowPartialPallet, 1)
-				AND (
-					CASE 
-						WHEN I.ysnStrictFIFO = 0
-							AND @intPreferenceId = 1
-							THEN L.dblQty - (
-									SUM(ISNULL(CASE 
-												WHEN T.intTaskTypeId = 13
-													THEN L.dblQty - T.dblQty
-												ELSE T.dblQty
-												END, 0))
-									)
-						ELSE 0
-						END
-					) = (
-					CASE 
-						WHEN I.ysnStrictFIFO = 0
-							AND @intPreferenceId = 1
-							THEN @intUnitPerPallet
-						ELSE 0
-						END
-					)
-			ORDER BY CASE 
-					WHEN I.ysnStrictFIFO = 1
-						AND @ysnPickByLotCode = 0
-						THEN ISNULL(L.dtmManufacturedDate, L.dtmDateCreated)
-					ELSE '1900-01-01'
-					END ASC
-				,CASE 
-					WHEN I.ysnStrictFIFO = 1
-						AND @ysnPickByLotCode = 1
-						THEN CAST(CASE 
-									WHEN (
-											(IsNULL(I.intUnitPerLayer, 0) * IsNULL(I.intLayerPerPallet, 0) > 0)
-											AND (L.dblQty % (I.intUnitPerLayer * I.intLayerPerPallet) > 0)
-											)
-										THEN 0
-									ELSE 1
-									END AS BIT)
-					ELSE '1'
-					END ASC
-				,CASE 
-					WHEN I.ysnStrictFIFO = 1
-						AND @ysnPickByLotCode = 1
-						THEN Substring(PL.strParentLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits)
-					ELSE '1'
-					END ASC
-				,CASE 
-					WHEN I.ysnStrictFIFO = 0
-						AND @intPreferenceId = 2
-						THEN L.dblQty
-					WHEN I.ysnStrictFIFO = 0
-						AND @intPreferenceId = 3
-						THEN ABS(L.dblQty - (
-									SUM(ISNULL(CASE 
-												WHEN T.intTaskTypeId = 13
-													THEN L.dblQty - T.dblQty
-												ELSE T.dblQty
-												END, 0))
-									) - @intUnitPerPallet)
-					ELSE 0
-					END ASC
-				,L.dtmDateCreated ASC
-
-			--- INSERT ALL THE LOTS OUTSIDE ALLOWABLE PICK DAY RANGE
-			INSERT INTO @tblLot (
-				intLotId
-				,intItemId
-				,dblQty
-				,intItemUOMId
-				,dblWeight
-				,intWeightUOMId
-				,dblRemainingLotQty
-				,dblRemainingLotWeight
-				,dtmProductionDate
-				,intGroupId
-				,intSubLocationId
-				)
-			SELECT L.intLotId
-				,L.intItemId
-				,L.dblQty
-				,L.intItemUOMId
-				,L.dblWeight
-				,L.intWeightUOMId
-				,L.dblQty - (
-					SUM(ISNULL(CASE 
-								WHEN T.intTaskTypeId = 13
-									THEN L.dblQty - T.dblQty
-								ELSE T.dblQty
-								END, 0))
-					) AS dblRemainingLotQty
-				,L.dblWeight - (
-					SUM(ISNULL(CASE 
-								WHEN T.intTaskTypeId = 13
-									THEN L.dblWeight - T.dblWeight
-								ELSE T.dblWeight
-								END, 0))
-					) AS dblRemainingLotWeight
-				,L.dtmDateCreated
-				,2
-				,L.intSubLocationId
-			FROM tblICLot L
-			JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
-			JOIN tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
-				AND UT.ysnAllowPick = 1
-			LEFT JOIN tblMFTask T ON T.intLotId = L.intLotId
-				AND T.intTaskTypeId NOT IN (
-					5
-					,6
-					,8
-					,9
-					,10
-					,11
-					)
-			LEFT JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
-			JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
-				AND BS.strPrimaryStatus = 'Active'
-			JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
-			JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
-			JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
-			WHERE L.intLocationId = IsNULL(@intLocationId, L.intLocationId)
-				AND L.intItemId = @intItemId
-				AND L.dblQty > 0
-				AND LS.strPrimaryStatus = 'Active'
-				AND ISNULL(L.dtmExpiryDate - @intReceivedLife, @dtmCurrentDateTime) >= @dtmCurrentDateTime
-				AND NOT EXISTS (
-					SELECT *
-					FROM @tblLot
-					WHERE intLotId = L.intLotId
-					)
-				AND ISNULL(L.intLotId, 0) = ISNULL((
-						CASE 
-							WHEN @intLineItemLotId IS NULL
-								THEN L.intLotId
-							ELSE @intLineItemLotId
+													THEN 1
+												ELSE 0
+												END AS BIT)
+										)
+							ELSE 1
 							END
-						), 0)
-				AND ISNULL(L.intParentLotId, 0) = ISNULL((
+						) = IsNULL(@ysnAllowPartialPallet, 1)
+				ORDER BY CASE 
+						WHEN I.ysnStrictFIFO = 1
+							AND @ysnPickByLotCode = 1
+							THEN CAST(CASE 
+										WHEN (
+												(IsNULL(I.intUnitPerLayer, 0) * IsNULL(I.intLayerPerPallet, 0) > 0)
+												AND (S.dblOnHand % (I.intUnitPerLayer * I.intLayerPerPallet) > 0)
+												)
+											THEN 0
+										ELSE 1
+										END AS BIT)
+						ELSE '1'
+						END ASC
+					,CASE 
+						WHEN I.ysnStrictFIFO = 0
+							AND @intPreferenceId = 2
+							THEN S.dblOnHand
+						WHEN I.ysnStrictFIFO = 0
+							AND @intPreferenceId = 3
+							THEN ABS(S.dblOnHand - (
+										SUM(ISNULL(CASE 
+													WHEN T.intTaskTypeId = 13
+														THEN S.dblOnHand - T.dblQty
+													ELSE T.dblQty
+													END, 0))
+										) - @intUnitPerPallet)
+						ELSE 0
+						END ASC
+			END
+			ELSE
+			BEGIN
+				INSERT INTO @tblLot (
+					intLotId
+					,intItemId
+					,dblQty
+					,intItemUOMId
+					,dblWeight
+					,intWeightUOMId
+					,dblRemainingLotQty
+					,dblRemainingLotWeight
+					,dtmProductionDate
+					,intGroupId
+					,intSubLocationId
+					,intStorageLocationId
+					)
+				SELECT L.intLotId
+					,L.intItemId
+					,L.dblQty
+					,L.intItemUOMId
+					,L.dblWeight
+					,L.intWeightUOMId
+					,L.dblQty - (
+						SUM(ISNULL(CASE 
+									WHEN T.intTaskTypeId = 13
+										THEN L.dblQty - T.dblQty
+									ELSE T.dblQty
+									END, 0))
+						) AS dblRemainingLotQty
+					,L.dblWeight - (
+						SUM(ISNULL(CASE 
+									WHEN T.intTaskTypeId = 13
+										THEN L.dblWeight - T.dblWeight
+									ELSE T.dblWeight
+									END, 0))
+						) AS dblRemainingLotWeight
+					,L.dtmDateCreated
+					,1
+					,L.intSubLocationId
+					,L.intStorageLocationId
+				FROM tblICLot L
+				JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
+				JOIN tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
+					AND UT.ysnAllowPick = 1
+				LEFT JOIN tblMFTask T ON T.intLotId = L.intLotId
+					AND T.intTaskTypeId NOT IN (
+						5
+						,6
+						,8
+						,9
+						,10
+						,11
+						)
+				LEFT JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
+				JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
+				JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
+					AND BS.strPrimaryStatus = 'Active'
+				JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
+				JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
+				WHERE L.intLocationId = IsNULL(@intLocationId, L.intLocationId)
+					AND L.intItemId = @intItemId
+					AND L.dblQty > 0
+					AND LS.strPrimaryStatus = 'Active'
+					AND ISNULL(L.dtmExpiryDate - @intReceivedLife, @dtmCurrentDateTime) >= @dtmCurrentDateTime
+					AND (
+						(
+							@ysnPickByLotCode = 0
+							AND L.dtmDateCreated BETWEEN @dtmDateCreated1
+								AND @dtmDateCreated2
+							)
+						OR (
+							@ysnPickByLotCode = 1
+							AND Substring(PL.strParentLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits) BETWEEN @intLotCode1
+								AND @intLotCode2
+							)
+						)
+					AND ISNULL(L.intLotId, 0) = ISNULL((
+							CASE 
+								WHEN @intLineItemLotId IS NULL
+									THEN L.intLotId
+								ELSE @intLineItemLotId
+								END
+							), 0)
+					AND ISNULL(L.intParentLotId, 0) = ISNULL((
+							CASE 
+								WHEN @intParentLotId IS NULL
+									THEN L.intParentLotId
+								ELSE @intParentLotId
+								END
+							), 0)
+					AND IsNULL(L.intItemOwnerId, 0) = (
 						CASE 
-							WHEN @intParentLotId IS NULL
-								THEN L.intParentLotId
-							ELSE @intParentLotId
+							WHEN @ysnPickByItemOwner = 1
+								THEN @intItemOwnerId
+							ELSE IsNULL(L.intItemOwnerId, 0)
 							END
-						), 0)
-				AND IsNULL(L.intItemOwnerId, 0) = (
-					CASE 
-						WHEN @ysnPickByItemOwner = 1
-							THEN @intItemOwnerId
-						ELSE IsNULL(L.intItemOwnerId, 0)
-						END
-					)
-				AND SL.intRestrictionId NOT IN (
-					SELECT RT.intRestrictionId
-					FROM tblMFInventoryShipmentRestrictionType RT
-					)
-			GROUP BY L.intLotId
-				,L.intItemId
-				,L.dblQty
-				,L.intItemUOMId
-				,L.dblWeight
-				,L.intWeightUOMId
-				,L.dtmDateCreated
-				,L.dtmManufacturedDate
-				,PL.strParentLotNumber
-				,I.ysnStrictFIFO
-				,I.intUnitPerLayer
-				,I.intLayerPerPallet
-				,L.intSubLocationId
-			HAVING (
-					CASE 
-						WHEN L.intWeightUOMId IS NULL
-							THEN L.dblQty
-						ELSE L.dblWeight
-						END
-					) - (
-					SUM(ISNULL(CASE 
-								WHEN T.intTaskTypeId = 13
-									THEN (
-											CASE 
-												WHEN L.intWeightUOMId IS NULL
-													THEN L.dblQty
-												ELSE L.dblWeight
-												END
-											) - L.dblWeight
-								ELSE T.dblWeight
-								END, 0))
-					) > 0
-				AND (
-					CASE 
-						WHEN IsNULL(@ysnAllowPartialPallet, 1) = 0
-							THEN (
-									CAST(CASE 
-											WHEN (
-													(I.intUnitPerLayer * I.intLayerPerPallet > 0)
-													AND (
-														(
-															L.dblQty - (
-																SUM(ISNULL(CASE 
-																			WHEN T.intTaskTypeId = 13
-																				THEN L.dblQty - T.dblQty
-																			ELSE T.dblQty
-																			END, 0))
-																)
-															) % (I.intUnitPerLayer * I.intLayerPerPallet) > 0
+						)
+					AND SL.intRestrictionId NOT IN (
+						SELECT RT.intRestrictionId
+						FROM tblMFInventoryShipmentRestrictionType RT
+						)
+				GROUP BY L.intLotId
+					,L.intItemId
+					,L.dblQty
+					,L.intItemUOMId
+					,L.dblWeight
+					,L.intWeightUOMId
+					,L.dtmDateCreated
+					,L.dtmManufacturedDate
+					,PL.strParentLotNumber
+					,I.ysnStrictFIFO
+					,I.intUnitPerLayer
+					,I.intLayerPerPallet
+					,L.intSubLocationId
+					,L.intStorageLocationId
+				HAVING (
+						CASE 
+							WHEN L.intWeightUOMId IS NULL
+								THEN L.dblQty
+							ELSE L.dblWeight
+							END
+						) - (
+						SUM(ISNULL(CASE 
+									WHEN T.intTaskTypeId = 13
+										THEN (
+												CASE 
+													WHEN L.intWeightUOMId IS NULL
+														THEN L.dblQty
+													ELSE L.dblWeight
+													END
+												) - T.dblWeight
+									ELSE T.dblWeight
+									END, 0))
+						) > 0
+					AND (
+						CASE 
+							WHEN IsNULL(@ysnAllowPartialPallet, 1) = 0
+								THEN (
+										CAST(CASE 
+												WHEN (
+														(I.intUnitPerLayer * I.intLayerPerPallet > 0)
+														AND (
+															(
+																L.dblQty - (
+																	SUM(ISNULL(CASE 
+																				WHEN T.intTaskTypeId = 13
+																					THEN L.dblQty - T.dblQty
+																				ELSE T.dblQty
+																				END, 0))
+																	)
+																) % (I.intUnitPerLayer * I.intLayerPerPallet) > 0
+															)
 														)
-													)
-												THEN 1
-											ELSE 0
-											END AS BIT)
-									)
-						ELSE 1
-						END
-					) = IsNULL(@ysnAllowPartialPallet, 1)
-			ORDER BY CASE 
-					WHEN @ysnPickByLotCode = 0
-						THEN ISNULL(L.dtmManufacturedDate, L.dtmDateCreated)
-					ELSE '1900-01-01'
-					END ASC
-				--,CASE 
-				--	WHEN @ysnPickByLotCode = 1
-				--		THEN CAST(CASE 
-				--					WHEN (
-				--							(IsNULL(I.intUnitPerLayer, 0) * IsNULL(I.intLayerPerPallet, 0) > 0)
-				--							AND (L.dblQty % (I.intUnitPerLayer * I.intLayerPerPallet) > 0)
-				--							)
-				--						THEN 0
-				--					ELSE 1
-				--					END AS BIT)
-				--	ELSE '1'
-				--	END ASC
-				,CASE 
-					WHEN @ysnPickByLotCode = 1
-						THEN Substring(PL.strParentLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits)
-					ELSE '1'
-					END ASC
-				,L.dtmDateCreated ASC
+													THEN 1
+												ELSE 0
+												END AS BIT)
+										)
+							ELSE 1
+							END
+						) = IsNULL(@ysnAllowPartialPallet, 1)
+					AND (
+						CASE 
+							WHEN I.ysnStrictFIFO = 0
+								AND @intPreferenceId = 1
+								THEN L.dblQty - (
+										SUM(ISNULL(CASE 
+													WHEN T.intTaskTypeId = 13
+														THEN L.dblQty - T.dblQty
+													ELSE T.dblQty
+													END, 0))
+										)
+							ELSE 0
+							END
+						) = (
+						CASE 
+							WHEN I.ysnStrictFIFO = 0
+								AND @intPreferenceId = 1
+								THEN @intUnitPerPallet
+							ELSE 0
+							END
+						)
+				ORDER BY CASE 
+						WHEN I.ysnStrictFIFO = 1
+							AND @ysnPickByLotCode = 0
+							THEN ISNULL(L.dtmManufacturedDate, L.dtmDateCreated)
+						ELSE '1900-01-01'
+						END ASC
+					,CASE 
+						WHEN I.ysnStrictFIFO = 1
+							AND @ysnPickByLotCode = 1
+							THEN CAST(CASE 
+										WHEN (
+												(IsNULL(I.intUnitPerLayer, 0) * IsNULL(I.intLayerPerPallet, 0) > 0)
+												AND (L.dblQty % (I.intUnitPerLayer * I.intLayerPerPallet) > 0)
+												)
+											THEN 0
+										ELSE 1
+										END AS BIT)
+						ELSE '1'
+						END ASC
+					,CASE 
+						WHEN I.ysnStrictFIFO = 1
+							AND @ysnPickByLotCode = 1
+							THEN Substring(PL.strParentLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits)
+						ELSE '1'
+						END ASC
+					,CASE 
+						WHEN I.ysnStrictFIFO = 0
+							AND @intPreferenceId = 2
+							THEN L.dblQty
+						WHEN I.ysnStrictFIFO = 0
+							AND @intPreferenceId = 3
+							THEN ABS(L.dblQty - (
+										SUM(ISNULL(CASE 
+													WHEN T.intTaskTypeId = 13
+														THEN L.dblQty - T.dblQty
+													ELSE T.dblQty
+													END, 0))
+										) - @intUnitPerPallet)
+						ELSE 0
+						END ASC
+					,L.dtmDateCreated ASC
 
-			--SELECT @intLotRecordId = MIN(intLotRecordId)
-			--FROM @tblLot
+				--- INSERT ALL THE LOTS OUTSIDE ALLOWABLE PICK DAY RANGE
+				INSERT INTO @tblLot (
+					intLotId
+					,intItemId
+					,dblQty
+					,intItemUOMId
+					,dblWeight
+					,intWeightUOMId
+					,dblRemainingLotQty
+					,dblRemainingLotWeight
+					,dtmProductionDate
+					,intGroupId
+					,intSubLocationId
+					,intStorageLocationId
+					)
+				SELECT L.intLotId
+					,L.intItemId
+					,L.dblQty
+					,L.intItemUOMId
+					,L.dblWeight
+					,L.intWeightUOMId
+					,L.dblQty - (
+						SUM(ISNULL(CASE 
+									WHEN T.intTaskTypeId = 13
+										THEN L.dblQty - T.dblQty
+									ELSE T.dblQty
+									END, 0))
+						) AS dblRemainingLotQty
+					,L.dblWeight - (
+						SUM(ISNULL(CASE 
+									WHEN T.intTaskTypeId = 13
+										THEN L.dblWeight - T.dblWeight
+									ELSE T.dblWeight
+									END, 0))
+						) AS dblRemainingLotWeight
+					,L.dtmDateCreated
+					,2
+					,L.intSubLocationId
+					,L.intStorageLocationId
+				FROM tblICLot L
+				JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
+				JOIN tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
+					AND UT.ysnAllowPick = 1
+				LEFT JOIN tblMFTask T ON T.intLotId = L.intLotId
+					AND T.intTaskTypeId NOT IN (
+						5
+						,6
+						,8
+						,9
+						,10
+						,11
+						)
+				LEFT JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
+				JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
+					AND BS.strPrimaryStatus = 'Active'
+				JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
+				JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
+				JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
+				WHERE L.intLocationId = IsNULL(@intLocationId, L.intLocationId)
+					AND L.intItemId = @intItemId
+					AND L.dblQty > 0
+					AND LS.strPrimaryStatus = 'Active'
+					AND ISNULL(L.dtmExpiryDate - @intReceivedLife, @dtmCurrentDateTime) >= @dtmCurrentDateTime
+					AND NOT EXISTS (
+						SELECT *
+						FROM @tblLot
+						WHERE intLotId = L.intLotId
+						)
+					AND ISNULL(L.intLotId, 0) = ISNULL((
+							CASE 
+								WHEN @intLineItemLotId IS NULL
+									THEN L.intLotId
+								ELSE @intLineItemLotId
+								END
+							), 0)
+					AND ISNULL(L.intParentLotId, 0) = ISNULL((
+							CASE 
+								WHEN @intParentLotId IS NULL
+									THEN L.intParentLotId
+								ELSE @intParentLotId
+								END
+							), 0)
+					AND IsNULL(L.intItemOwnerId, 0) = (
+						CASE 
+							WHEN @ysnPickByItemOwner = 1
+								THEN @intItemOwnerId
+							ELSE IsNULL(L.intItemOwnerId, 0)
+							END
+						)
+					AND SL.intRestrictionId NOT IN (
+						SELECT RT.intRestrictionId
+						FROM tblMFInventoryShipmentRestrictionType RT
+						)
+				GROUP BY L.intLotId
+					,L.intItemId
+					,L.dblQty
+					,L.intItemUOMId
+					,L.dblWeight
+					,L.intWeightUOMId
+					,L.dtmDateCreated
+					,L.dtmManufacturedDate
+					,PL.strParentLotNumber
+					,I.ysnStrictFIFO
+					,I.intUnitPerLayer
+					,I.intLayerPerPallet
+					,L.intSubLocationId
+					,L.intStorageLocationId
+				HAVING (
+						CASE 
+							WHEN L.intWeightUOMId IS NULL
+								THEN L.dblQty
+							ELSE L.dblWeight
+							END
+						) - (
+						SUM(ISNULL(CASE 
+									WHEN T.intTaskTypeId = 13
+										THEN (
+												CASE 
+													WHEN L.intWeightUOMId IS NULL
+														THEN L.dblQty
+													ELSE L.dblWeight
+													END
+												) - L.dblWeight
+									ELSE T.dblWeight
+									END, 0))
+						) > 0
+					AND (
+						CASE 
+							WHEN IsNULL(@ysnAllowPartialPallet, 1) = 0
+								THEN (
+										CAST(CASE 
+												WHEN (
+														(I.intUnitPerLayer * I.intLayerPerPallet > 0)
+														AND (
+															(
+																L.dblQty - (
+																	SUM(ISNULL(CASE 
+																				WHEN T.intTaskTypeId = 13
+																					THEN L.dblQty - T.dblQty
+																				ELSE T.dblQty
+																				END, 0))
+																	)
+																) % (I.intUnitPerLayer * I.intLayerPerPallet) > 0
+															)
+														)
+													THEN 1
+												ELSE 0
+												END AS BIT)
+										)
+							ELSE 1
+							END
+						) = IsNULL(@ysnAllowPartialPallet, 1)
+				ORDER BY CASE 
+						WHEN @ysnPickByLotCode = 0
+							THEN ISNULL(L.dtmManufacturedDate, L.dtmDateCreated)
+						ELSE '1900-01-01'
+						END ASC
+					,CASE 
+						WHEN @ysnPickByLotCode = 1
+							THEN Substring(PL.strParentLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits)
+						ELSE '1'
+						END ASC
+					,L.dtmDateCreated ASC
+			END
+
 			SET @intLotRecordId = NULL
 
 			SELECT TOP 1 @intLotRecordId = intLotRecordId
@@ -852,6 +983,20 @@ BEGIN TRY
 			BEGIN
 				SELECT @intLotItemUOMId = NULL
 
+				SELECT @intStorageLocationId = NULL
+
+				SELECT @dblQty = NULL
+
+				SELECT @intLotId = NULL
+
+				SELECT @dblRemainingLotQty = NULL
+
+				SELECT @dblWeight = NULL
+
+				SELECT @dblRemainingLotWeight = NULL
+
+				SELECT @intLotItemUOMId = NULL
+
 				SELECT @dblQty = dblQty
 					,@intLotId = intLotId
 					,@dblRemainingLotQty = dblRemainingLotQty
@@ -861,15 +1006,16 @@ BEGIN TRY
 								THEN dblQty
 							ELSE dblWeight
 							END
-						) --dblWeight
+						)
 					,@dblRemainingLotWeight = (
 						CASE 
 							WHEN intWeightUOMId IS NULL
 								THEN dblRemainingLotQty
 							ELSE dblRemainingLotWeight
 							END
-						) --dblRemainingLotWeight
+						)
 					,@intLotItemUOMId = intItemUOMId
+					,@intStorageLocationId = intStorageLocationId
 				FROM @tblLot
 				WHERE intLotRecordId = @intLotRecordId
 
@@ -880,6 +1026,10 @@ BEGIN TRY
 						,@intLotId = @intLotId
 						,@intEntityUserSecurityId = @intEntityUserSecurityId
 						,@intItemId = @intItemId
+						,@intOrderDetailId = @intOrderDetailId
+						,@intFromStorageLocationId = @intStorageLocationId
+						,@dblLotQty = @dblWeight
+						,@intItemUOMId = @intLotItemUOMId
 
 					SET @dblRequiredWeight = @dblRequiredWeight - @dblWeight
 
@@ -908,6 +1058,8 @@ BEGIN TRY
 						,@intTaskTypeId = 2
 						,@intItemId = @intItemId
 						,@intOrderDetailId = @intOrderDetailId
+						,@intFromStorageLocationId = @intStorageLocationId
+						,@intItemUOMId = @intLotItemUOMId
 
 					SET @dblRequiredQty = @dblRequiredQty - (
 							CASE 
@@ -935,6 +1087,8 @@ BEGIN TRY
 						,@intTaskTypeId = 2
 						,@intItemId = @intItemId
 						,@intOrderDetailId = @intOrderDetailId
+						,@intFromStorageLocationId = @intStorageLocationId
+						,@intItemUOMId = @intLotItemUOMId
 
 					SET @dblRequiredWeight = @dblRequiredWeight - @dblRemainingLotWeight
 
@@ -951,6 +1105,9 @@ BEGIN TRY
 						,@intEntityUserSecurityId = @intEntityUserSecurityId
 						,@intItemId = @intItemId
 						,@intOrderDetailId = @intOrderDetailId
+						,@intFromStorageLocationId = @intStorageLocationId
+						,@dblLotQty = @dblWeight
+						,@intItemUOMId = @intLotItemUOMId
 
 					SET @dblRequiredWeight = @dblRequiredWeight - @dblWeight
 
@@ -975,6 +1132,8 @@ BEGIN TRY
 							,@intTaskTypeId = 2
 							,@intItemId = @intItemId
 							,@intOrderDetailId = @intOrderDetailId
+							,@intFromStorageLocationId = @intStorageLocationId
+							,@intItemUOMId = @intLotItemUOMId
 
 						SET @dblRequiredWeight = @dblRequiredWeight - @dblRemainingLotWeight
 					END
@@ -987,6 +1146,8 @@ BEGIN TRY
 							,@intTaskTypeId = 2
 							,@intItemId = @intItemId
 							,@intOrderDetailId = @intOrderDetailId
+							,@intFromStorageLocationId = @intStorageLocationId
+							,@intItemUOMId = @intLotItemUOMId
 
 						SET @dblRequiredWeight = @dblRequiredWeight - @dblWeight
 					END

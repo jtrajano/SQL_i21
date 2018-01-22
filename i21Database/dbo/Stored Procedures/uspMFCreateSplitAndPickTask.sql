@@ -7,25 +7,24 @@
 					@intAssigneeId INT = 0,
 				    @intItemId int=NULL
 					,@intOrderDetailId int=NULL
+							,@intFromStorageLocationId INT = NULL
+	,@intItemUOMId INT = NULL
 AS
 BEGIN TRY
 	SET NOCOUNT ON
 
 	DECLARE @intTaskId INT
-	DECLARE @strTaskNo NVARCHAR(64)
-	DECLARE @intToStorageLocationId INT
-	DECLARE @intFromStorageLocationId INT
-	DECLARE @dblLotQty AS NUMERIC(18, 6)
-	DECLARE @intItemUOMId INT
-	DECLARE @dblLotWeight AS NUMERIC(18, 6)
-	DECLARE @intWeightUOMId INT
-	DECLARE @intDirectionId INT
-	--DECLARE @intItemId INT
-	DECLARE @intStatusId INT
-	DECLARE @dtmReleaseDate DATETIME
-	DECLARE @dblSplitAndPickQty NUMERIC(18,6)
-	DECLARE @dblWeightPerQty NUMERIC(18,6)
-	DECLARE @strErrMsg NVARCHAR(MAX)
+	, @strTaskNo NVARCHAR(64)
+	, @intToStorageLocationId INT
+	, @dblLotQty AS NUMERIC(18, 6)
+	, @dblLotWeight AS NUMERIC(18, 6)
+	, @intWeightUOMId INT
+	, @intDirectionId INT
+	, @intStatusId INT
+	, @dtmReleaseDate DATETIME
+	, @dblSplitAndPickQty NUMERIC(18,6)
+	, @dblWeightPerQty NUMERIC(18,6)
+	, @strErrMsg NVARCHAR(MAX)
 
 	SELECT @strTaskNo = strOrderNo, 
 	       @intToStorageLocationId = intStagingLocationId
@@ -37,21 +36,19 @@ BEGIN TRY
 	FROM tblMFOrderDetail
 	WHERE intOrderHeaderId = @intOrderHeaderId
 	and intItemId=@intItemId
-
+	if @intLotId is not null
+	Begin
 	SELECT @dblSplitAndPickQty = @dblSplitAndPickWeight/(Case When dblWeightPerQty=0 Then 1 Else dblWeightPerQty End)
 		  ,@intItemUOMId = intItemUOMId
 		  ,@intWeightUOMId = intWeightUOMId
 		  ,@dblWeightPerQty = dblWeightPerQty
-	FROM tblICLot
-	WHERE intLotId = @intLotId
-
-	SELECT @intFromStorageLocationId = intStorageLocationId
+		  ,@intFromStorageLocationId = intStorageLocationId
 		  ,@dblLotQty = dblQty
 		  ,@intItemId = intItemId
 		  ,@dblLotWeight = dblWeight
-		  ,@intItemUOMId = intItemUOMId
-		  ,@intWeightUOMId = intWeightUOMId
-	FROM tblICLot WHERE intLotId = @intLotId
+	FROM tblICLot
+	WHERE intLotId = @intLotId
+	end
 
 	INSERT INTO tblMFTask (
 		intConcurrencyId
@@ -107,17 +104,26 @@ BEGIN TRY
 		,GETDATE())
 	
 	SET @intTaskId = SCOPE_IDENTITY()
-
-	UPDATE t 
-			SET dblPickQty = 
-			CASE WHEN strTaskType = 'Put Back'
-			THEN l.dblQty - t.dblQty
-			ELSE t.dblQty END
-	FROM tblMFTask t
-	JOIN tblICLot l ON l.intLotId = t.intLotId
-	JOIN tblMFTaskType tt ON tt.intTaskTypeId = t.intTaskTypeId
-	WHERE intTaskId = @intTaskId
-
+	if @intLotId is not null
+	Begin
+		UPDATE t 
+				SET dblPickQty = 
+				CASE WHEN strTaskType = 'Put Back'
+				THEN l.dblQty - t.dblQty
+				ELSE t.dblQty END
+		FROM tblMFTask t
+		JOIN tblICLot l ON l.intLotId = t.intLotId
+		JOIN tblMFTaskType tt ON tt.intTaskTypeId = t.intTaskTypeId
+		WHERE intTaskId = @intTaskId
+	end
+	else
+	Begin
+			UPDATE t 
+				SET dblPickQty = 
+				t.dblQty 
+		FROM tblMFTask t
+		WHERE intTaskId = @intTaskId
+	End
 	SELECT @intDirectionId = intOrderDirectionId
 	FROM tblMFOrderHeader
 	WHERE intOrderHeaderId = @intOrderHeaderId
