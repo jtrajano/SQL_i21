@@ -225,7 +225,7 @@ BEGIN
 		SET @SqlSelect=@SqlSelect+',dbo.fnRemoveTrailingZeroes([' + @FourthBasisItem + ']) AS Column4'
 		
 		IF 	@FifthBasisItem  IS NOT NULL														
-		SET @SqlSelect=@SqlSelect+',dbo.fnRemoveTrailingZeroes(' + @FifthBasisItem + ']) AS Column5'
+		SET @SqlSelect=@SqlSelect+',dbo.fnRemoveTrailingZeroes([' + @FifthBasisItem + ']) AS Column5'
 		
 		IF 	@SixthBasisItem  IS NOT NULL														
 		SET @SqlSelect=@SqlSelect+',dbo.fnRemoveTrailingZeroes([' + @SixthBasisItem + ']) AS Column6'
