@@ -56,7 +56,9 @@ DECLARE @tblFinalDetail TABLE (
        ,intCommodityUnitMeasureId INT
        ,intPriceUOMId INT
        ,intCent int
-	   ,dtmPlannedAvailabilityDate datetime)
+	   ,dtmPlannedAvailabilityDate datetime
+	   ,dblPricedQty numeric(24,10),dblUnPricedQty numeric(24,10),dblPricedAmount numeric(24,10)
+	      )
 
 INSERT INTO @tblFinalDetail
 EXEC [uspRKM2MInquiryTransaction]   @intM2MBasisId  = @intM2MBasisId,

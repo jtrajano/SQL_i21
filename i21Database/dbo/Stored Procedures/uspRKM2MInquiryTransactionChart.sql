@@ -56,6 +56,7 @@ DECLARE @tblFinalDetail TABLE (
 	,intPriceUOMId INT
 	,intCent int
 	,dtmPlannedAvailabilityDate datetime
+	 ,dblPricedQty numeric(24,10),dblUnPricedQty numeric(24,10),dblPricedAmount numeric(24,10)
 	)
 
 INSERT INTO @tblFinalDetail

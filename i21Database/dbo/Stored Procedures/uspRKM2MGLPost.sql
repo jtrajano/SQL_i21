@@ -1,4 +1,4 @@
-﻿CREATE PROC uspRKM2MGLPost 
+﻿CREATE PROC [dbo].[uspRKM2MGLPost] 
 		@intM2MInquiryId INT
 AS
 SET QUOTED_IDENTIFIER OFF
@@ -16,10 +16,10 @@ BEGIN TRY
 BEGIN TRANSACTION
 
 DECLARE @intCommodityId int
-declare @dtmCurrenctGLPostDate datetime
-declare @dtmPreviousGLPostDate datetime
-declare @dtmGLReverseDate datetime
-declare @dtmPrviousGLReverseDate datetime
+DECLARE @dtmCurrenctGLPostDate DATETIME
+DECLARE @dtmPreviousGLPostDate DATETIME
+DECLARE @dtmGLReverseDate DATETIME
+DECLARE @dtmPrviousGLReverseDate DATETIME
 SELECT @intCommodityId = intCommodityId,@dtmCurrenctGLPostDate=dtmGLPostDate,@dtmGLReverseDate=dtmGLReverseDate FROM tblRKM2MInquiry where intM2MInquiryId=@intM2MInquiryId
 SELECT TOP 1 @dtmPreviousGLPostDate=dtmGLPostDate,@dtmPrviousGLReverseDate=dtmGLReverseDate  FROM tblRKM2MInquiry where ysnPost=1 and intCommodityId=@intCommodityId order by dtmGLPostDate desc
 
@@ -99,8 +99,8 @@ END
 
 	EXEC dbo.uspGLBookEntries @GLEntries,1 --@ysnPost
 
-	UPDATE tblRKM2MPostRecap SET ysnIsUnposted=1 WHERE intM2MInquiryId = @intM2MInquiryId
-	UPDATE tblRKM2MInquiry SET ysnPost=1 WHERE intM2MInquiryId = @intM2MInquiryId
+	UPDATE tblRKM2MPostRecap SET ysnIsUnposted=1,strBatchId=@strBatchId WHERE intM2MInquiryId = @intM2MInquiryId
+	UPDATE tblRKM2MInquiry SET ysnPost=1,dtmPostedDateTime=getdate(),strBatchId=@batchId WHERE intM2MInquiryId = @intM2MInquiryId
 
 	COMMIT TRAN	
 END TRY
@@ -120,5 +120,3 @@ BEGIN CATCH
 				)
 	END
 END CATCH
-
-
