@@ -7,6 +7,9 @@
 			,strEmail
 			,intContactId
 			,strEntityType = strEntityType
+			,d.intActivityId
+			,strActivityType = d.strType
+			,d.strActivityNo
 		from
 			(
 				select distinct
@@ -19,3 +22,4 @@
 				from
 					vyuEMEntityContact
 			) as result
+			left join tblSMActivity d on d.intActivityId = (select max(d.intActivityId) from tblSMActivity d where d.intEntityContactId = result.intContactId)
