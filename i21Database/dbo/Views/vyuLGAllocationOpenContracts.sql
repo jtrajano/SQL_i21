@@ -6,6 +6,7 @@ AS
 			Item.intOriginId, 
 			Country.strCountry as strItemOrigin,
 			CD.intItemId, 					
+			Item.strItemNo,
 			Item.strDescription as strItemDescription,
 			CH.intContractBasisId,
 			CB.strContractBasis	AS strINCOTerm,
