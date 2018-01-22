@@ -137,6 +137,9 @@ BEGIN TRY
 		, @DisbursementDiesel_11 NUMERIC(18, 6) = 0
 		, @DisbursementDiesel_12 NUMERIC(18, 6) = 0
 
+		, @DealerInterest NUMERIC(18, 2) = 0
+		, @DealerPenalty NUMERIC(18,2) = 0
+
 
 	IF (ISNULL(@xmlParam,'') != '')
 	BEGIN
@@ -176,20 +179,164 @@ BEGIN TRY
 
 		SELECT TOP 1 @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'OR'
 
+		-- Configuration
+		SELECT @DealerInterest = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'Line 12 Interest'
+		SELECT @DealerPenalty = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'Line 13 Penalty'
+		SELECT @DealerTotal_15 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'Line 15 Total Due Local Jurisdiction'	
+
 		SELECT @ReceiptGasoline_1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-RefinaryGasoline'
 		SELECT @ReceiptAviation_1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-RefinaryAviationGas'
 		SELECT @ReceiptJet_1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-RefinaryJetJet'
 		SELECT @ReceiptEthanol_1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-RefinaryEthanol'
 		SELECT @ReceiptDiesel_1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-RefinaryDiesel'
 
-		INSERT INTO @transaction		
+		SELECT @DealerGasoline_1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line1Gasoline'
+		SELECT @DealerAviation_1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line1AviationGas'
+		SELECT @DealerJet_1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line1JetJet'
+		SELECT @DealerEthanol_1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line1Ethanol'
+		SELECT @DealerDiesel_1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line1Diesel'
+
+		SELECT @DealerGasoline_4 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line4Gasoline'
+		SELECT @DealerAviation_4 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line4AviationGas'
+		SELECT @DealerJet_4 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line4JetJet'
+		SELECT @DealerEthanol_4 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line4Ethanol'
+		SELECT @DealerDiesel_4 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line4Diesel'
+
+		SELECT @DealerGasoline_5 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line5Gasoline'
+		SELECT @DealerAviation_5 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line5AviationGas'
+		SELECT @DealerJet_5 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line5JetJet'
+		SELECT @DealerEthanol_5 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line5Ethanol'
+		SELECT @DealerDiesel_5 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line5Diesel'
+
+		SELECT @DealerGasoline_10 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line10Gasoline'
+		SELECT @DealerAviation_10 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line10AviationGas'
+		SELECT @DealerJet_10 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line10JetJet'
+		
+		SELECT @DealerTotal_12 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line12'
+		SELECT @DealerTotal_13 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line13'
+		SELECT @DealerTotal_15 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line15'
+
+		-- Transaction
+		INSERT INTO @transaction
 		SELECT strFormCode, strScheduleCode, strType, dblReceived = SUM(ISNULL(dblReceived, 0.00))
 		FROM vyuTFGetTransaction Trans
 		WHERE Trans.uniqTransactionGuid = @Guid
 		GROUP BY strFormCode, strScheduleCode, strType
 
+		-- Receipt Gasoline
+		SELECT @ReceiptGasoline_2 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '1' AND strType = 'Gasoline'
+		SELECT @ReceiptGasoline_3 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '2' AND strType = 'Gasoline'
+		SELECT @ReceiptGasoline_4 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '3' AND strType = 'Gasoline'
+		SELECT @ReceiptGasoline_5 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '4' AND strType = 'Gasoline'
+		SET @ReceiptGasoline_6 = @ReceiptGasoline_1 + @ReceiptGasoline_2 + @ReceiptGasoline_3 + @ReceiptGasoline_4 + @ReceiptGasoline_5
 
+		-- Receipt Aviation
+		SELECT @ReceiptAviation_2 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '1' AND strType = 'Aviation Gasoline'
+		SELECT @ReceiptAviation_3 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '2' AND strType = 'Aviation Gasoline'
+		SELECT @ReceiptAviation_4 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '3' AND strType = 'Aviation Gasoline'
+		SELECT @ReceiptAviation_5 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '4' AND strType = 'Aviation Gasoline'
+		SET @ReceiptAviation_6 = @ReceiptAviation_1 + @ReceiptAviation_2 + @ReceiptAviation_3 + @ReceiptAviation_4 + @ReceiptAviation_5
 
+		-- Receipt Jet
+		SELECT @ReceiptJet_2 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '1' AND strType = 'Jet Fuel'
+		SELECT @ReceiptJet_3 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '2' AND strType = 'Jet Fuel'
+		SELECT @ReceiptJet_4 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '3' AND strType = 'Jet Fuel'
+		SELECT @ReceiptJet_5 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '4' AND strType = 'Jet Fuel'
+		SET @ReceiptJet_6 = @ReceiptJet_1 + @ReceiptJet_2 + @ReceiptJet_3 + @ReceiptJet_4 + @ReceiptJet_5
+
+		-- Receipt Ethanol
+		SELECT @ReceiptEthanol_3 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '2' AND strType = 'Ethanol'
+		SELECT @ReceiptEthanol_4 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '3' AND strType = 'Ethanol'
+		SELECT @ReceiptEthanol_5 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '4' AND strType = 'Ethanol'
+		SET @ReceiptEthanol_6 = @ReceiptEthanol_1 + @ReceiptEthanol_3 + @ReceiptEthanol_4 + @ReceiptEthanol_5
+
+		-- Receipt Diesel
+		SELECT @ReceiptDiesel_3 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '2' AND strType = 'Diesel - Undyed'
+		SELECT @ReceiptDiesel_4 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '3' AND strType = 'Diesel - Undyed'
+		SELECT @ReceiptDiesel_5 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '4' AND strType = 'Diesel - Undyed'
+		SET @ReceiptDiesel_6 = @ReceiptDiesel_1 + @ReceiptDiesel_3 + @ReceiptDiesel_4 + @ReceiptDiesel_5
+
+		-- Disbursement Gasoline
+		SELECT @DisbursementGasoline_7 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '5' AND strType = 'Gasoline'
+		SELECT @DisbursementGasoline_8 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '6' AND strType = 'Gasoline'
+		SELECT @DisbursementGasoline_9 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '7' AND strType = 'Gasoline'
+		SELECT @DisbursementGasoline_10 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '8' AND strType = 'Gasoline'
+		SELECT @DisbursementGasoline_11 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '10D' AND strType = 'Gasoline'
+		SET @DisbursementAviation_12 = @DisbursementGasoline_7 + @DisbursementGasoline_8 + @DisbursementGasoline_9 + @DisbursementGasoline_10 + @DisbursementGasoline_11
+
+		-- Disbursement Aviation
+		SELECT @DisbursementAviation_7 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '5' AND strType = 'Aviation Gasoline'
+		SELECT @DisbursementAviation_8 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '6' AND strType = 'Aviation Gasoline'
+		SELECT @DisbursementAviation_9 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '7' AND strType = 'Aviation Gasoline'
+		SELECT @DisbursementAviation_10 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '8' AND strType = 'Aviation Gasoline'
+		SELECT @DisbursementAviation_11 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '10D' AND strType = 'Aviation Gasoline'
+		SET @DisbursementAviation_12 = @DisbursementAviation_7 + @DisbursementAviation_8 + @DisbursementAviation_9 + @DisbursementAviation_10 + @DisbursementAviation_11
+
+		-- Disbursement Jet
+		SELECT @DisbursementJet_7 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '5' AND strType = 'Jet Fuel'
+		SELECT @DisbursementJet_8 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '6' AND strType = 'Jet Fuel'
+		SELECT @DisbursementJet_9 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '7' AND strType = 'Jet Fuel'
+		SELECT @DisbursementJet_10 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '8' AND strType = 'Jet Fuel'
+		SELECT @DisbursementJet_11 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '10D' AND strType = 'Jet Fuel'
+		SET @DisbursementJet_12 = @DisbursementJet_7 + @DisbursementJet_8 + @DisbursementJet_9 + @DisbursementJet_10 + @DisbursementJet_11
+
+		-- Disbursement Ethanol
+		SELECT @DisbursementEthanol_8 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '6' AND strType = 'Ethanol'
+		SELECT @DisbursementEthanol_9 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '7' AND strType = 'Ethanol'
+		SELECT @DisbursementEthanol_10 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '8' AND strType = 'Ethanol'
+		SELECT @DisbursementEthanol_11 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '10D' AND strType = 'Ethanol'
+		SET @DisbursementEthanol_12 = @DisbursementEthanol_8 + @DisbursementEthanol_9 + @DisbursementEthanol_10 + @DisbursementEthanol_11
+		
+		-- Disbursement Diesel
+		SELECT @DisbursementDiesel_8 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '6' AND strType = 'Diesel - Undyed'
+		SELECT @DisbursementDiesel_9 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '7' AND strType = 'Diesel - Undyed'
+		SELECT @DisbursementDiesel_10 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '8' AND strType = 'Diesel - Undyed'
+		SELECT @DisbursementDiesel_11 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '10D' AND strType = 'Diesel - Undyed'
+		SET @DisbursementDiesel_12 = @DisbursementDiesel_8 + @DisbursementDiesel_9 + @DisbursementDiesel_10 + @DisbursementDiesel_11
+
+		-- Dealer 
+		SET @DealerGasoline_2 = @ReceiptGasoline_6
+		SET @DealerAviation_2 = @ReceiptAviation_6
+		SET @DealerJet_2 = @ReceiptJet_6
+		SET @DealerEthanol_2 = @ReceiptEthanol_6
+		SET @DealerDiesel_2 = @ReceiptDiesel_6
+
+		SET @DealerGasoline_3 = @DisbursementGasoline_12
+		SET @DealerAviation_3 = @DisbursementAviation_12
+		SET @DealerJet_3 = @DisbursementJet_12
+		SET @DealerEthanol_3 = @DisbursementEthanol_12
+		SET @DealerDiesel_3 = @DisbursementDiesel_12
+
+		SET @DealerGasoline_7 = @DisbursementGasoline_7
+		SET @DealerAviation_7 = @DisbursementAviation_7
+		SET @DealerJet_7 = @DisbursementJet_7
+
+		SET @DealerGasoline_8 = @ReceiptGasoline_2 + @DisbursementGasoline_11
+		SET @DealerAviation_8 = @ReceiptAviation_2 + @DisbursementAviation_11
+		SET @DealerJet_8 = @ReceiptJet_2 + @DisbursementJet_11
+		
+		SET @DealerGasoline_9 = @DealerGasoline_7 - @DealerGasoline_8
+		SET @DealerAviation_9 = @DealerAviation_7 - @DealerAviation_8
+		SET @DealerJet_9 = @DealerJet_7 - @DealerJet_8
+
+		SET @DealerGasoline_11 = @DealerGasoline_9 * @DealerGasoline_10
+		SET @DealerAviation_11 = @DealerAviation_9 * @DealerAviation_10
+		SET @DealerJet_11 = @DealerJet_9 * @DealerJet_10
+
+		SET @DealerTotal_11 = @DealerGasoline_11 + @DealerAviation_11 + @DealerJet_11
+		SET @DealerTotal_12 = @DealerTotal_11 * @DealerInterest
+
+		IF(@DealerInterest > 0)
+			BEGIN
+				SET @DealerTotal_13 = @DealerTotal_11 * @DealerPenalty
+			END
+		ELSE
+			BEGIN
+				SET @DealerTotal_13 = 25
+			END
+
+		SET @DealerTotal_14 = @DealerTotal_11 + @DealerTotal_12 + @DealerTotal_13
+		SET @DealerTotal_16 = @DealerTotal_14 + @DealerTotal_15
 
 	END
 
@@ -316,6 +463,15 @@ BEGIN TRY
 		, DisbursementDiesel_11 = @DisbursementDiesel_11
 		, DisbursementDiesel_12 = @DisbursementDiesel_12
 
+		, DealerInterest = @DealerInterest
+		, DealerPenalty = @DealerPenalty
+
+		, DealerTotal_11 = @DealerTotal_11
+		, DealerTotal_12 = @DealerTotal_12
+		, DealerTotal_13 = @DealerTotal_13
+		, DealerTotal_14 = @DealerTotal_14
+		, DealerTotal_15 = @DealerTotal_15
+		, DealerTotal_16 = @DealerTotal_16
 
 END TRY
 BEGIN CATCH
