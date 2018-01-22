@@ -4,63 +4,10 @@ BEGIN
 IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBName = db_name()) = 1 and
     (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'gasctmst') = 1
 	BEGIN
-		PRINT 'Begin creating trigger'
-		EXEC ('
-			IF EXISTS (SELECT * FROM sys.triggers WHERE object_id = OBJECT_ID(N''[dbo].[trigLVConrolInsert]''))
-			BEGIN
-				DROP TRIGGER [dbo].[trigLVConrolInsert]
-			END
-		')
-
-		EXEC ('
-			CREATE TRIGGER [dbo].[trigLVConrolInsert] ON [dbo].[gasctmst]
-			AFTER INSERT
-			AS
-			BEGIN
-				INSERT INTO tblSCTicketLVStaging SELECT TOP 1 
-					LTRIM(RTRIM(SC.strTicketNumber))
-					,LTRIM(RTRIM(SC.strTicketType))
-					,LTRIM(RTRIM(SC.strInOutFlag))
-					,SC.dtmTicketDateTime
-					,LTRIM(RTRIM(SC.strTicketStatus))
-					,LTRIM(RTRIM(SC.strItemNo))
-					,LTRIM(RTRIM(SC.strLocationNumber))
-					,LTRIM(RTRIM(SC.dblGrossWeight))
-					,SC.dtmGrossDateTime
-					,LTRIM(RTRIM(SC.dblTareWeight))
-					,SC.dtmTareDateTime
-					,LTRIM(RTRIM(SC.strTicketComment))
-					,LTRIM(RTRIM(SC.strDiscountId))
-					,LTRIM(RTRIM(SC.dblFreightRate))
-					,LTRIM(RTRIM(SC.strHaulerName))
-					,LTRIM(RTRIM(SC.dblTicketFees))
-					,LTRIM(RTRIM(SC.ysnFarmerPaysFreight))
-					,LTRIM(RTRIM(SC.strCurrency))
-					,LTRIM(RTRIM(SC.strBinNumber))
-					,LTRIM(RTRIM(SC.strContractNumber))
-					,LTRIM(RTRIM(SC.intContractSequence))
-					,LTRIM(RTRIM(SC.strScaleOperatorUser))
-					,LTRIM(RTRIM(SC.strTruckName))
-					,LTRIM(RTRIM(SC.strDriverName))
-					,LTRIM(RTRIM(SC.strCustomerReference))
-					,LTRIM(RTRIM(SC.intAxleCount))
-					,LTRIM(RTRIM(SC.ysnDriverOff))
-					,LTRIM(RTRIM(SC.ysnGrossManual))
-					,LTRIM(RTRIM(SC.ysnTareManual))
-					,LTRIM(RTRIM(SC.strDistributionOption))
-					,LTRIM(RTRIM(SC.strPitNumber))
-					,LTRIM(RTRIM(SC.strTicketPool))
-					,LTRIM(RTRIM(SC.strSplitNumber))
-					,0
-				 FROM vyuSCTicketLVControlView SC 
-				INNER JOIN INSERTED IR ON SC.strTicketNumber = IR.gasct_tic_no
-			END
-		')
-		PRINT 'End creating trigger'
-
 		PRINT 'Begin creating tblSCTicketLVStaging table'
 		EXEC ('
 			IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N''tblSCTicketLVStaging'')
+			BEGIN
 				CREATE TABLE [dbo].[tblSCTicketLVStaging]
 				(
 					[intTicketId] INT NOT NULL IDENTITY, 
@@ -98,8 +45,10 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 					[strTicketPool] NVARCHAR(5) COLLATE Latin1_General_CI_AS NULL, 
 					[strSplitNumber] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,    
 					[ysnProcessedData] BIT NULL DEFAULT((0)),
+					[intOriginTicketId] INT NOT NULL
 					CONSTRAINT [PK_tblSCTicketLVStaging_intTicketId] PRIMARY KEY ([intTicketId]), 
 				)
+			END
 		')
 		PRINT 'End creating tblSCTicketLVStaging table'
 
@@ -110,8 +59,9 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 		')
 		EXEC ('
 			CREATE VIEW [dbo].[vyuSCTicketLVControlView]
-			AS SELECT 
-				gasct_tic_no AS strTicketNumber
+			AS SELECT
+				A4GLIdentity AS intTicketId 
+				,gasct_tic_no AS strTicketNumber
 				,(CASE 
 					WHEN gasct_tic_type = ''I'' THEN ''Load In''
 					WHEN gasct_tic_type = ''O'' THEN ''Load Out''
@@ -123,7 +73,7 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 					WHEN gasct_rev_dt > 1 THEN convert(datetime, convert(char(8), gasct_rev_dt))
 					ELSE NULL
 				END ) AS dtmTicketDateTime
-				, gasct_open_close_ind as strTicketStatus
+				,gasct_open_close_ind as strTicketStatus
 				,gasct_itm_no AS strItemNo
 				,gasct_loc_no AS strLocationNumber
 				,gasct_gross_wgt AS dblGrossWeight
@@ -185,6 +135,61 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 			from gasctmst
 		')
 		PRINT 'End creating vyuSCTicketLVControlView table'
+
+		PRINT 'Begin creating trigger'
+		EXEC ('
+			IF EXISTS (SELECT * FROM sys.triggers WHERE object_id = OBJECT_ID(N''[dbo].[trigLVConrolInsert]''))
+			BEGIN
+				DROP TRIGGER [dbo].[trigLVConrolInsert]
+			END
+		')
+
+		EXEC ('
+			CREATE TRIGGER [dbo].[trigLVConrolInsert] ON [dbo].[gasctmst]
+			AFTER INSERT
+			AS
+			BEGIN
+				INSERT INTO tblSCTicketLVStaging SELECT 
+					LTRIM(RTRIM(SC.strTicketNumber))
+					,LTRIM(RTRIM(SC.strTicketType))
+					,LTRIM(RTRIM(SC.strInOutFlag))
+					,SC.dtmTicketDateTime
+					,LTRIM(RTRIM(SC.strTicketStatus))
+					,LTRIM(RTRIM(SC.strItemNo))
+					,LTRIM(RTRIM(SC.strLocationNumber))
+					,SC.dblGrossWeight
+					,SC.dtmGrossDateTime
+					,SC.dblTareWeight
+					,SC.dtmTareDateTime
+					,LTRIM(RTRIM(SC.strTicketComment))
+					,LTRIM(RTRIM(SC.strDiscountId))
+					,SC.dblFreightRate
+					,LTRIM(RTRIM(SC.strHaulerName))
+					,SC.dblTicketFees
+					,SC.ysnFarmerPaysFreight
+					,LTRIM(RTRIM(SC.strCurrency))
+					,LTRIM(RTRIM(SC.strBinNumber))
+					,LTRIM(RTRIM(SC.strContractNumber))
+					,SC.intContractSequence
+					,LTRIM(RTRIM(SC.strScaleOperatorUser))
+					,LTRIM(RTRIM(SC.strTruckName))
+					,LTRIM(RTRIM(SC.strDriverName))
+					,LTRIM(RTRIM(SC.strCustomerReference))
+					,SC.intAxleCount
+					,SC.ysnDriverOff
+					,SC.ysnGrossManual
+					,SC.ysnTareManual
+					,LTRIM(RTRIM(SC.strDistributionOption))
+					,LTRIM(RTRIM(SC.strPitNumber))
+					,LTRIM(RTRIM(SC.strTicketPool))
+					,LTRIM(RTRIM(SC.strSplitNumber))
+					,0
+					,SC.intTicketId
+				FROM vyuSCTicketLVControlView SC 
+				INNER JOIN INSERTED IR ON SC.intTicketId = IR.A4GLIdentity
+			END
+		')
+		PRINT 'End creating trigger'
 	END
 END
 GO
