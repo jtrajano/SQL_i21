@@ -4,9 +4,8 @@ SELECT	E.intEntityId,
 		E.strName,
 		E.strType 				AS strEntity
 FROM	vyuEMEntity				E
-JOIN tblAPVendor V ON V.intEntityId = E.intEntityId
+LEFT JOIN tblAPVendor V ON V.intEntityId = E.intEntityId AND ISNULL(V.ysnPymtCtrlActive,0) = 1
 WHERE strType IN ('Vendor', 'Customer','Forwarding Agent','Shipping Line','Terminal')
-AND ISNULL(V.ysnPymtCtrlActive,0) = 1
 
 UNION ALL
 
