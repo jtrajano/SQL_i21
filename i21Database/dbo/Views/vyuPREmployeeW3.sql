@@ -6,7 +6,7 @@ SELECT
 	,intW2Count				 = COUNT(1) /* box C */
 	,dblAdjustedGross		 = SUM(dblAdjustedGross) /* box 1 */
 	,dblFIT					 = SUM(dblFIT) /* box 2 */
-	,dblTaxableSS			 = CONVERT(NUMERIC(18,2), (SUM(dblSSTax) / 0.062)) /* box 3 */
+	,dblTaxableSS			 = SUM(dblTaxableSS) /* box 3 */
 	,dblSSTax				 = SUM(dblSSTax) /* box 4 */
 	,dblTaxableMed			 = SUM(dblTaxableMed) /* box 5 */
 	,dblMedTax				 = SUM(dblMedTax) /* box 6 */
