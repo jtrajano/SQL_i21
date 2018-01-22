@@ -83,6 +83,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intStockUnitMeasureId).HasColumnName("intStockUnitMeasureId");
             this.Property(t => t.strStockUOM).HasColumnName("strStockUOM");
             this.Property(t => t.dblConversionToStock).HasColumnName("dblConversionToStock").HasPrecision(38, 20);
+            this.Property(t => t.intConcurrencyId).HasColumnName("intConcurrencyId");
         }
     }
 }

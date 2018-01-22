@@ -20,121 +20,180 @@ Ext.define('Inventory.view.InventoryUOMViewController', {
     config: {
         helpURL: '/display/DOC/Inventory+UOM',
         binding: {
-            bind: {
-                title: 'Inventory UOM - {current.strUnitMeasure}'
-            },
-            txtUnitMeasure: '{current.strUnitMeasure}',
-            txtSymbol: '{current.strSymbol}',
-            cboUnitType: {
-                value: '{current.strUnitType}',
-                store: '{unitTypes}'
-            },
-
-            cboDecimals: {
-                value: '{current.intDecimalPlaces}',
-                store: '{decimalPlaces}'
-            },
-
-            grdConversion: {
-                colOtherUOM: {
-                    dataIndex: 'strUnitMeasure',
+            grdUOM: {
+                colUOM: 'strUnitMeasure',
+                colUOMSymbol: 'strSymbol',
+                colUOMUnitType: {
+                    dataIndex: 'strUnitType',
                     editor: {
-                        store: '{unitMeasure}'
+                        store: '{unitTypes}'
+                    }
+                }
+                ,
+                colUOMDecimals: {
+                    dataIndex: 'intDecimalPlaces',
+                    editor: {
+                        store: '{decimalPlaces}'                 
+                    }   
+                }
+            },
+            grdConversion: {
+                colConversionTo: {
+                    dataIndex: 'strStockUOM',
+                    editor: {
+                        store: '{unitMeasure}',
+                        defaultFilters: [
+                            {
+                                column: 'intUnitMeasureId',
+                                value: '{grdUOM.selection.intUnitMeasureId}',
+                                condition: 'noteq',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'strUnitType',
+                                value: '{grdUOM.selection.strUnitType}',
+                                conjunction: 'and',
+                            }                            
+                        ]
                     }
                 },
-                colConversionToStockUOM: 'dblConversionToStock'
+                colConversion: 'dblConversionToStock'
             }
         }
     },
 
-    setupContext : function(options){
-        "use strict";
-        var me = this,
-            win = me.getView(),
-            store = Ext.create('Inventory.store.UnitMeasure', { pageSize: 1 });
-
-        var grdConversion = win.down('#grdConversion');
-
-        win.context = Ext.create('iRely.Engine', {
-            binding: me.config.binding,
-            window : win,
-            store  : store,
-            include: 'tblICUnitMeasureConversions.StockUnitMeasure, vyuICGetUOMConversions',
-            details: [
-                {
-                    key: 'tblICUnitMeasureConversions',
-                    component: Ext.create('iRely.grid.Manager', {
-                        grid: grdConversion,
-                        deleteButton : grdConversion.down('#btnDeleteConversion')
-                    })
-                }
-            ]
-        });
-
-        win.context.data.on({ currentrecordchanged: me.onCurrentRecordChanged, scope: me })
-
-        return win.context;
-    },
-
-    show : function(config) {
+    show: function(config) {
         "use strict";
 
         var me = this,
             win = this.getView();
 
         if (config) {
-            win.show();
-
             var context = win.context ? win.context.initialize() : me.setupContext();
+            context.data.load(function (records, operation, success) {
+                win.show();
+            });            
+        }
+    },    
 
-            if (config.action === 'new') {
-                context.data.addRecord();
-            } else {
-                if (config.id) {
-                    config.filters = [{
-                        column: 'intUnitMeasureId',
-                        value: config.id
-                    }];
+    setupContext: function(config){
+        "use strict";
+        var me = this,
+            win = me.getView(),
+            store = win.getViewModel().getStore('uom'), 
+            gridParent = win.down('#grdUOM'),
+            gridDetail = win.down('#grdConversion');            
+
+        store = store ? store : Ext.create('Inventory.store.UnitMeasure'); 
+
+        win.context = Ext.create('iRely.Engine', {            
+            window: win,
+            store: store,
+            binding: me.config.binding,
+            descriptor: 'grdUOM.selection',
+            validateRecord: me.validateRecord, 
+            enableAudit: true,
+            singleGridMgr: Ext.create('iRely.grid.Manager', {
+                grid: gridParent,
+                deleteButton: win.down('#btnDeleteUOM')
+            }),
+            details: [
+                {
+                    key: 'tblICUnitMeasureConversions',
+                    lazy: true,
+                    component: Ext.create('iRely.grid.Manager', {
+                        grid: gridDetail,
+                        createRecord: me.createDetailRecord,
+                        deleteButton : gridDetail.down('#btnDeleteConversion')
+                    })
                 }
-                context.data.load({
-                    filters: config.filters
-                });
+            ]
+        });
+
+        // store.on('remove', function () {
+        //     win.down('#grdUOM').getSelectionModel().select(0);
+        // });
+
+        // gridDetail.editingPlugin.on({
+        //     beforeedit: me.onCellEditingUOMConversionBeforeEdit
+        // });
+
+        // win.context.data.on({
+        //     savesuccess: Ext.bind(me.onSaveSuccess, me)
+        // });
+        
+        return win.context;
+    },
+
+    validateRecord: function (config, action) {
+        var win = config.window,
+            grdConversion = win.down('#grdConversion');
+
+        this.validateRecord(config, function (result) {
+            if (result) {
+                if (grdConversion.editingPlugin) {
+                    grdConversion.editingPlugin.completeEdit();
+                }
+                action(true);
+            }
+        });
+    },    
+
+    onSaveSuccess: function (a, b, c) {
+        var store = this.getViewModel().get('uom'),
+            items = store.data.items;
+
+            for (var i in items) {
+            var detail = items[i]._tblICUnitMeasureConversions;
+            if (detail && !detail.dummy) {
+                if (detail.loaded)
+                    detail.loaded = false;
+
+                var filters = detail.filters;
+                for (var f in filters.items) {
+                    var item = filters.items[f];
+                    item.config.value = item._value;
+                }
             }
         }
     },
 
-    onCurrentRecordChanged: function (record, store) {
-        var me = this;
-        var win = me.getView();
-        var grd = win.down('#grdConversion');
-        var col = grd.columns[0];
-        var cboUOM = col.getEditor();
+    createDetailRecord: function (config, action) {
+        "use strict";
 
-        if (!cboUOM) return; 
+        var grid = config.grid,
+            store = grid.store,
+            record = Ext.create('Inventory.model.UnitMeasureConversion');
 
-        switch(record.get('strUnitType')){
-            case 'Area':
-            case 'Length':
-                cboUOM.defaultFilters =
-                    [
-                        { dataIndex: 'intUnitMeasureId', value: record.get('intUnitMeasureId'), condition: 'noteq', conjunction: 'and' }
-                    ];
-                break;
-            case 'Quantity':
-            case 'Volume':
-            case 'Weight':
-                cboUOM.defaultFilters =
-                    [
-                        { dataIndex: 'intUnitMeasureId', value: record.get('intUnitMeasureId'), condition: 'noteq', conjunction: 'and' }
-                    ];
-                break;
-            case 'Time':
-                cboUOM.defaultFilters =
-                    [
-                        { dataIndex: 'strUnitType', value: 'Time', condition: 'eq', conjunction: 'and'}
-                    ];
-                break;
-        };
+        action(record);
+    },    
+
+    onCellEditingUOMConversionBeforeEdit: function (editor, context, eOpts) {
+        var ctx = context,
+            record = context.record,
+            data = record.data, 
+            tblICUnitMeasure = data.tblICUnitMeasure ? data.tblICUnitMeasure : {}, 
+            isDummy = tblICUnitMeasure.dummy;
+
+        if (isDummy) {
+            return false;
+        }
+    },      
+
+    onDecimalCalculationChange: function(obj, newValue, oldValue, eOpts) {
+        var win = obj.up('window');
+        if (!win) return; 
+
+        var grdConversion = win.down('#grdConversion');
+        if (!grdConversion) return; 
+        
+        var colConversion = grdConversion.down("#colConversion"); 
+        if (!colConversion) return; 
+
+        colConversion.format = i21.ModuleMgr.Inventory.createNumberFormat(newValue);
+        if (colConversion.getEditor()){
+            colConversion.getEditor().decimalPrecision = newValue;
+        }    
     },
 
     onUOMSelect: function(combo, records, eOpts) {
@@ -145,31 +204,48 @@ Ext.define('Inventory.view.InventoryUOMViewController', {
         var plugin = grid.getPlugin('cepConversion');
         var current = plugin.getActiveRecord();
 
-        if (combo.column.itemId === 'colOtherUOM')
+        if (combo.column.itemId === 'colConversionTo')
         {
             current.set('intStockUnitMeasureId', records[0].get('intUnitMeasureId'));
+            current.set('strStockUOM', records[0].get('strUnitMeasure'));
         }
-    },
+    },    
 
-    onDecimalCalculationChange: function(obj, newValue, oldValue, eOpts) {
-        var win = obj.up('window');
+    onUOMSelectionChange: function (selModel, selected, eOpts) {
+        var me = this; 
+        if (!selModel || !selModel.view) return; 
+
+        var win = selModel.view.up('window');
+        if (!win) return; 
+
         var grdConversion = win.down('#grdConversion');
-        var colConversionToStockUOM = grdConversion.columns[1];
+        if (!grdConversion) return; 
+        
+        var colConversion = grdConversion.down("#colConversion"); 
+        if (!colConversion) return; 
 
-        colConversionToStockUOM.format = i21.ModuleMgr.Inventory.createNumberFormat(newValue);
+        var current = selected && selected[0] ? selected[0] : null;
+        if (!current) return; 
 
-        if (colConversionToStockUOM.getEditor()){
-            colConversionToStockUOM.getEditor().decimalPrecision = newValue;
-        }
+        var intDecimalPlaces = current.get('intDecimalPlaces'); 
+        intDecimalPlaces = Ext.isNumeric(intDecimalPlaces) ? intDecimalPlaces : 2; 
+
+        colConversion.format = i21.ModuleMgr.Inventory.createNumberFormat(intDecimalPlaces);
+        if (colConversion.getEditor()){
+            colConversion.getEditor().decimalPrecision = intDecimalPlaces;
+        } 
     },
 
     init: function(application) {
         this.control({
-            "#cboOtherUOM": {
+            "#cboConversionTo": {
                 select: this.onUOMSelect
             },
-            "#txtDecimalPlacesForCalculation": {
+            "#cboUOMDecimals": {
                 change: this.onDecimalCalculationChange
+            },
+            "#grdUOM": {
+                selectionchange: this.onUOMSelectionChange
             }
         });
     }

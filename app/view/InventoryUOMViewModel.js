@@ -18,81 +18,52 @@ Ext.define('Inventory.view.InventoryUOMViewModel', {
     alias: 'viewmodel.icinventoryuom',
 
     requires: [
-        'Inventory.store.BufferedUnitMeasure'
+        'Inventory.store.UnitMeasure',
+        'Inventory.store.BufferedValidTargetUOM'
     ],
 
     stores: {
         unitTypes: {
-            autoLoad: true,
+            //autoLoad: true,
             data: [
                 {
-                    strDescription: 'Area'
+                    strUnitType: 'Area'
                 },{
-                    strDescription: 'Length'
+                    strUnitType: 'Length'
                 },{
-                    strDescription: 'Quantity'
+                    strUnitType: 'Quantity'
                 },{
-                    strDescription: 'Time'
+                    strUnitType: 'Time'
                 },{
-                    strDescription: 'Volume'
+                    strUnitType: 'Volume'
                 },{
-                    strDescription: 'Weight'
-                },{
-                    strDescription: 'Packed'
+                    strUnitType: 'Weight'
                 }
             ],
             fields: {
-                name: 'strDescription'
+                name: 'strUnitType'
             }
+        },
+        uom: {
+            type: 'icuom'
         },
         unitMeasure: {
-            type: 'icbuffereduom',
-            proxy: {
-                type: 'rest',
-                api: {
-                    read: '{getReadUOMApi}'
-                },
-                reader: {
-                    type: 'json',
-                    rootProperty: 'data',
-                    messageProperty: 'message'
-                }
-            }
+            type: 'icbufferedvalidtargetuom'
         },
         decimalPlaces: {
+            //autoLoad: true,
             fields: [
-                { name: 'value' }
+                { name: 'intDecimalPlaces' }
             ],
             data: [
-                { value: "0" },
-                { value: "1" },
-                { value: "2" },
-                { value: "3" },
-                { value: "4" },
-                { value: "5" },
-                { value: "6" }
+                { intDecimalPlaces: 0 },
+                { intDecimalPlaces: 1 },
+                { intDecimalPlaces: 2 },
+                { intDecimalPlaces: 3 },
+                { intDecimalPlaces: 4 },
+                { intDecimalPlaces: 5 },
+                { intDecimalPlaces: 6 }
             ]
         }
-    },
-
-    formulas: {
-        getReadUOMApi: function(get) {
-            switch(get('current.strUnitType')){
-                case 'Area':
-                case 'Length':
-                    return './Inventory/api/UnitMeasure/GetAreaLengthUOMs';
-                    break;
-                case 'Quantity':
-                case 'Volume':
-                case 'Weight':
-                case 'Packed':
-                    return './Inventory/api/UnitMeasure/GetQuantityVolumeWeightPackedAreaUOMs';
-                    break;
-                case 'Time':
-                    return './Inventory/api/UnitMeasure/GetTimeUOMs';
-                    break;
-            };
-        }
     }
-
 });

@@ -30,6 +30,7 @@ namespace iRely.Inventory.Model
         public int? intVolumeUOMId { get; set; }
         public decimal? dblMaxQty { get; set; }
         public int? intSort { get; set; }
+        public bool? ysnStockUOM { get; set; }
 
         private string _unitmeasure;
         [NotMapped]

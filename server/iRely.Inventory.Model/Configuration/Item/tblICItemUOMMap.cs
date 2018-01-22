@@ -30,6 +30,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblVolume).HasColumnName("dblVolume").HasPrecision(18, 6);
             this.Property(t => t.intVolumeUOMId).HasColumnName("intVolumeUOMId");
             this.Property(t => t.dblMaxQty).HasColumnName("dblMaxQty").HasPrecision(18, 6);
+            this.Property(t => t.ysnStockUOM).HasColumnName("ysnStockUOM");
             this.Property(t => t.intSort).HasColumnName("intSort");
 
             this.HasRequired(p => p.tblICUnitMeasure)

@@ -1,13 +1,9 @@
-/**
- * Created by rnkumashi on 22-09-2014.
- */
-
 Ext.define('Inventory.model.UnitMeasure', {
     extend: 'iRely.BaseEntity',
 
-    requires: [
+    requires: [        
         'Inventory.model.UnitMeasureConversion',
-        'Ext.data.Field'
+        'Ext.data.Field'        
     ],
 
     idProperty: 'intUnitMeasureId',

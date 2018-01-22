@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsb686ef7c66310f24992d7613951ce70077f9321c6e7eeb4b8534a3ed2adf8166))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetscdf581afe63c02ab109f28851fd3a365fcdbe8de7b29336c53ec9b73be817450))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -22,15 +22,15 @@ namespace Edm_EntityMappingGeneratedViews
     /// <summary>
     /// Implements a mapping view cache.
     /// </summary>
-    [GeneratedCode("Entity Framework 6 Power Tools", "0.9.2.0")]
-    internal sealed class ViewsForBaseEntitySetsb686ef7c66310f24992d7613951ce70077f9321c6e7eeb4b8534a3ed2adf8166 : DbMappingViewCache
+    [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
+    internal sealed class ViewsForBaseEntitySetscdf581afe63c02ab109f28851fd3a365fcdbe8de7b29336c53ec9b73be817450 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "b686ef7c66310f24992d7613951ce70077f9321c6e7eeb4b8534a3ed2adf8166"; }
+            get { return "cdf581afe63c02ab109f28851fd3a365fcdbe8de7b29336c53ec9b73be817450"; }
         }
 
         /// <summary>
@@ -3145,7 +3145,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemUOM
-        [CodeFirstDatabaseSchema.tblICItemUOM](T1.tblICItemUOM_intItemUOMId, T1.tblICItemUOM_intItemId, T1.tblICItemUOM_intUnitMeasureId, T1.tblICItemUOM_dblUnitQty, T1.tblICItemUOM_dblWeight, T1.tblICItemUOM_intWeightUOMId, T1.tblICItemUOM_strUpcCode, T1.tblICItemUOM_strLongUPCCode, T1.tblICItemUOM_ysnStockUnit, T1.tblICItemUOM_ysnAllowPurchase, T1.tblICItemUOM_ysnAllowSale, T1.tblICItemUOM_dblLength, T1.tblICItemUOM_dblWidth, T1.tblICItemUOM_dblHeight, T1.tblICItemUOM_intDimensionUOMId, T1.tblICItemUOM_dblVolume, T1.tblICItemUOM_intVolumeUOMId, T1.tblICItemUOM_dblMaxQty, T1.tblICItemUOM_intSort, T1.tblICItemUOM_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICItemUOM](T1.tblICItemUOM_intItemUOMId, T1.tblICItemUOM_intItemId, T1.tblICItemUOM_intUnitMeasureId, T1.tblICItemUOM_dblUnitQty, T1.tblICItemUOM_dblWeight, T1.tblICItemUOM_intWeightUOMId, T1.tblICItemUOM_strUpcCode, T1.tblICItemUOM_strLongUPCCode, T1.tblICItemUOM_ysnStockUnit, T1.tblICItemUOM_ysnAllowPurchase, T1.tblICItemUOM_ysnAllowSale, T1.tblICItemUOM_dblLength, T1.tblICItemUOM_dblWidth, T1.tblICItemUOM_dblHeight, T1.tblICItemUOM_intDimensionUOMId, T1.tblICItemUOM_dblVolume, T1.tblICItemUOM_intVolumeUOMId, T1.tblICItemUOM_dblMaxQty, T1.tblICItemUOM_intSort, T1.tblICItemUOM_ysnStockUOM, T1.tblICItemUOM_intConcurrencyId)
     FROM (
         SELECT 
             T.intItemUOMId AS tblICItemUOM_intItemUOMId, 
@@ -3167,6 +3167,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.intVolumeUOMId AS tblICItemUOM_intVolumeUOMId, 
             T.dblMaxQty AS tblICItemUOM_dblMaxQty, 
             T.intSort AS tblICItemUOM_intSort, 
+            T.ysnStockUOM AS tblICItemUOM_ysnStockUOM, 
             T.intConcurrencyId AS tblICItemUOM_intConcurrencyId, 
             True AS _from0
         FROM InventoryEntities.tblICItemUOMs AS T
@@ -5605,7 +5606,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetUOMConversion
-        [CodeFirstDatabaseSchema.vyuICGetUOMConversion](T1.vyuICGetUOMConversion_intUnitMeasureConversionId, T1.vyuICGetUOMConversion_intUnitMeasureId, T1.vyuICGetUOMConversion_strUnitMeasure, T1.vyuICGetUOMConversion_intStockUnitMeasureId, T1.vyuICGetUOMConversion_strStockUOM, T1.vyuICGetUOMConversion_dblConversionToStock)
+        [CodeFirstDatabaseSchema.vyuICGetUOMConversion](T1.vyuICGetUOMConversion_intUnitMeasureConversionId, T1.vyuICGetUOMConversion_intUnitMeasureId, T1.vyuICGetUOMConversion_strUnitMeasure, T1.vyuICGetUOMConversion_intStockUnitMeasureId, T1.vyuICGetUOMConversion_strStockUOM, T1.vyuICGetUOMConversion_dblConversionToStock, T1.vyuICGetUOMConversion_intConcurrencyId)
     FROM (
         SELECT 
             T.intUnitMeasureConversionId AS vyuICGetUOMConversion_intUnitMeasureConversionId, 
@@ -5614,6 +5615,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.intStockUnitMeasureId AS vyuICGetUOMConversion_intStockUnitMeasureId, 
             T.strStockUOM AS vyuICGetUOMConversion_strStockUOM, 
             T.dblConversionToStock AS vyuICGetUOMConversion_dblConversionToStock, 
+            T.intConcurrencyId AS vyuICGetUOMConversion_intConcurrencyId, 
             True AS _from0
         FROM InventoryEntities.vyuICGetUOMConversions AS T
     ) AS T1");
@@ -7177,7 +7179,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemUOMs
-        [iRely.Inventory.Model.tblICItemUOM](T1.tblICItemUOM_intItemUOMId, T1.tblICItemUOM_intItemId, T1.tblICItemUOM_intUnitMeasureId, T1.tblICItemUOM_dblUnitQty, T1.tblICItemUOM_dblWeight, T1.tblICItemUOM_intWeightUOMId, T1.tblICItemUOM_strUpcCode, T1.tblICItemUOM_strLongUPCCode, T1.tblICItemUOM_ysnStockUnit, T1.tblICItemUOM_ysnAllowPurchase, T1.tblICItemUOM_ysnAllowSale, T1.tblICItemUOM_dblLength, T1.tblICItemUOM_dblWidth, T1.tblICItemUOM_dblHeight, T1.tblICItemUOM_intDimensionUOMId, T1.tblICItemUOM_dblVolume, T1.tblICItemUOM_intVolumeUOMId, T1.tblICItemUOM_dblMaxQty, T1.tblICItemUOM_intSort, T1.tblICItemUOM_intConcurrencyId)
+        [iRely.Inventory.Model.tblICItemUOM](T1.tblICItemUOM_intItemUOMId, T1.tblICItemUOM_intItemId, T1.tblICItemUOM_intUnitMeasureId, T1.tblICItemUOM_dblUnitQty, T1.tblICItemUOM_dblWeight, T1.tblICItemUOM_intWeightUOMId, T1.tblICItemUOM_strUpcCode, T1.tblICItemUOM_strLongUPCCode, T1.tblICItemUOM_ysnStockUnit, T1.tblICItemUOM_ysnAllowPurchase, T1.tblICItemUOM_ysnAllowSale, T1.tblICItemUOM_dblLength, T1.tblICItemUOM_dblWidth, T1.tblICItemUOM_dblHeight, T1.tblICItemUOM_intDimensionUOMId, T1.tblICItemUOM_dblVolume, T1.tblICItemUOM_intVolumeUOMId, T1.tblICItemUOM_dblMaxQty, T1.tblICItemUOM_intSort, T1.tblICItemUOM_ysnStockUOM, T1.tblICItemUOM_intConcurrencyId)
     FROM (
         SELECT 
             T.intItemUOMId AS tblICItemUOM_intItemUOMId, 
@@ -7199,6 +7201,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.intVolumeUOMId AS tblICItemUOM_intVolumeUOMId, 
             T.dblMaxQty AS tblICItemUOM_dblMaxQty, 
             T.intSort AS tblICItemUOM_intSort, 
+            T.ysnStockUOM AS tblICItemUOM_ysnStockUOM, 
             T.intConcurrencyId AS tblICItemUOM_intConcurrencyId, 
             True AS _from0
         FROM CodeFirstDatabase.tblICItemUOM AS T
@@ -9570,7 +9573,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetUOMConversions
-        [iRely.Inventory.Model.vyuICGetUOMConversion](T1.vyuICGetUOMConversion_intUnitMeasureConversionId, T1.vyuICGetUOMConversion_intUnitMeasureId, T1.vyuICGetUOMConversion_strUnitMeasure, T1.vyuICGetUOMConversion_intStockUnitMeasureId, T1.vyuICGetUOMConversion_strStockUOM, T1.vyuICGetUOMConversion_dblConversionToStock)
+        [iRely.Inventory.Model.vyuICGetUOMConversion](T1.vyuICGetUOMConversion_intUnitMeasureConversionId, T1.vyuICGetUOMConversion_intUnitMeasureId, T1.vyuICGetUOMConversion_strUnitMeasure, T1.vyuICGetUOMConversion_intStockUnitMeasureId, T1.vyuICGetUOMConversion_strStockUOM, T1.vyuICGetUOMConversion_dblConversionToStock, T1.vyuICGetUOMConversion_intConcurrencyId)
     FROM (
         SELECT 
             T.intUnitMeasureConversionId AS vyuICGetUOMConversion_intUnitMeasureConversionId, 
@@ -9579,6 +9582,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.intStockUnitMeasureId AS vyuICGetUOMConversion_intStockUnitMeasureId, 
             T.strStockUOM AS vyuICGetUOMConversion_strStockUOM, 
             T.dblConversionToStock AS vyuICGetUOMConversion_dblConversionToStock, 
+            T.intConcurrencyId AS vyuICGetUOMConversion_intConcurrencyId, 
             True AS _from0
         FROM CodeFirstDatabase.vyuICGetUOMConversion AS T
     ) AS T1");

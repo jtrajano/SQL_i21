@@ -182,10 +182,14 @@ Ext.define('Inventory.view.ItemViewController', {
                     dataIndex: 'strLongUPCCode',
                     hidden: '{readOnlyForOtherCharge}'
                 },
-                colStockUnit: {
+                colBaseUnit: {
                     dataIndex: 'ysnStockUnit',
                     hidden: '{readOnlyForOtherCharge}'
                 },
+                colStockUOM: {
+                    dataIndex: 'ysnStockUOM',
+                    hidden: '{readOnlyForOtherCharge}'
+                },                
                 colAllowSale: 'ysnAllowSale',
                 colAllowPurchase: {
                     //disabled: '{readOnlyOnBundleItems}',
@@ -1954,7 +1958,7 @@ Ext.define('Inventory.view.ItemViewController', {
 
             if (checked === false && current.get('intPatronageCategoryId') > 0)
                 {
-                   iRely.Functions.showErrorDialog("Stock Unit is required for Patronage Category.");
+                   iRely.Functions.showErrorDialog("Base Unit is required for Patronage Category.");
                    return false;
                 }
         }
@@ -1962,11 +1966,22 @@ Ext.define('Inventory.view.ItemViewController', {
 
     onUOMStockUnitCheckChange: function(obj, rowIndex, checked, eOpts ) {
         var me = this;
+        var grid = obj.up('grid');
+        if (!grid || !grid.view || !grid.store || !grid.store.data) return; 
+
+        var win = obj.up('window');
+        if (!win || !win.viewModel || !win.viewModel.storeInfo) return; 
+
+        var current = grid.view.getRecord(rowIndex);
+        current = current ? current : null; 
+
+        var uomConversion = win.viewModel.storeInfo.uomConversion;
+        uomConversion = uomConversion ? uomConversion : null; 
+
+        var uoms = grid.store.data.items;
+        uoms = uoms ? uoms : null; 
+
         if (obj.dataIndex === 'ysnStockUnit'){
-            var grid = obj.up('grid');
-            var win = obj.up('window');
-            var current = grid.view.getRecord(rowIndex);
-            var uomConversion = win.viewModel.storeInfo.uomConversion;
             ic.utils.ajax({
                 url: './Inventory/api/Item/CheckStockUnit',
                 method: 'POST',
@@ -1981,13 +1996,9 @@ Ext.define('Inventory.view.ItemViewController', {
                     var jsonData = Ext.decode(successResponse.responseText);
                     if (!jsonData.success)
                     {
-                       //iRely.Functions.showErrorDialog(jsonData.message.statusText);
-
                          var result = function (button) {
                             if (button === 'yes') {
-
-                                    if (checked === true){
-                                    var uoms = grid.store.data.items;
+                                    if (checked === true){                                    
                                     if (uoms) {
                                         uoms.forEach(function(uom){
                                             if (uom === current){
@@ -2050,7 +2061,7 @@ Ext.define('Inventory.view.ItemViewController', {
 
                         if(current.get('ysnStockUnit') === false)
                             {
-                                iRely.Functions.showErrorDialog("Item has already a transaction so Stock Unit is required.");
+                                iRely.Functions.showErrorDialog("Item has already a transaction so Base Unit is required.");
                                 current.set('ysnStockUnit', true);
                             }
                         else
@@ -2059,7 +2070,7 @@ Ext.define('Inventory.view.ItemViewController', {
                                 msgBox.showCustomDialog(
                                 msgBox.dialogType.WARNING,
                                 msgBox.dialogButtonType.YESNOCANCEL,
-                                "Item has transaction/s so changing stock unit will convert the following to new stock unit:<br> <br>Existing Stock <br>Cost & Prices <br> Existing Entries in Inventory Transaction Tables<br><br><br>Conversion to new stock unit will be automatically saved. <br><br>Do you want to continue?",
+                                "Item has transaction/s so changing the base unit will convert the following to new stock unit:<br> <br>Existing Stock <br>Cost & Prices <br> Existing Entries in Inventory Transaction Tables<br><br><br>Conversion to new stock unit will be automatically saved. <br><br>Do you want to continue?",
                                 result
                                );
                             }
@@ -2068,7 +2079,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 else
                     {
 
-                            if (checked === true){
+                        if (checked === true){
                             var uoms = grid.store.data.items;
                             if (uoms) {
                                 uoms.forEach(function(uom){
@@ -2097,6 +2108,16 @@ Ext.define('Inventory.view.ItemViewController', {
                     iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
                 }
             );
+        }
+
+        else if (obj.dataIndex === 'ysnStockUOM'){
+            if (checked === true && uoms) {
+                uoms.forEach(function (uom) {
+                    if (uom !== current) {
+                        uom.set('ysnStockUOM', false);
+                    }
+                });
+            }            
         }
     },
 
@@ -4227,10 +4248,13 @@ Ext.define('Inventory.view.ItemViewController', {
             "#tabSetup": {
                 tabchange: this.onItemTabChange
             },
-            "#colStockUnit": {
+            "#colBaseUnit": {
                 beforecheckchange: this.beforeUOMStockUnitCheckChange,
                 checkchange: this.onUOMStockUnitCheckChange
             },
+            "#colStockUOM": {
+                checkchange: this.onUOMStockUnitCheckChange
+            },            
             "#colOwnerDefault": {
                 checkchange: this.onOwnerDefaultCheckChange
             },

@@ -45,5 +45,19 @@ namespace iRely.Inventory.WebApi
         {
             return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetTimeUOM(param));
         }
+
+        [HttpGet]
+        [ActionName("GetUOMConversion")]
+        public async Task<HttpResponseMessage> GetUOMConversion(GetParameter param)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetUOMConversion(param));
+        }
+
+        [HttpGet]
+        [ActionName("GetValidTargetUOM")]
+        public async Task<HttpResponseMessage> GetValidTargetUOM(GetParameter param)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetValidTargetUOM(param));
+        }
     }
 }

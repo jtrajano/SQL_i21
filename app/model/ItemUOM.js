@@ -70,6 +70,7 @@ Ext.define('Inventory.model.ItemUOM', {
             }            
         },
         { name: 'ysnStockUnit', type: 'boolean' },
+        { name: 'ysnStockUOM', type: 'boolean' },
         { name: 'ysnAllowPurchase', type: 'boolean' },
         { name: 'ysnAllowSale', type: 'boolean' },
         { name: 'dblLength', type: 'float' },

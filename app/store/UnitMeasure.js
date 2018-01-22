@@ -1,13 +1,13 @@
-/**
- * Created by rnkumashi on 22-09-2014.
- */
-
 Ext.define('Inventory.store.UnitMeasure', {
     extend: 'Ext.data.Store',
     alias: 'store.icuom',
 
     requires: [
-        'Inventory.model.UnitMeasure'
+        'Inventory.model.UnitMeasure',
+        'Inventory.model.UnitMeasureConversion',
+        'Ext.data.proxy.Rest',
+        'Ext.data.reader.Json',
+        'Ext.data.writer.Json'        
     ],
 
     constructor: function(cfg) {

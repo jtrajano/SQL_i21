@@ -15,5 +15,7 @@ namespace iRely.Inventory.BusinessLayer
         Task<SearchResult> GetAreaLengthUOM(GetParameter param);
         Task<SearchResult> GetQuantityVolumeWeightPackedAreaUOM(GetParameter param);
         Task<SearchResult> GetTimeUOM(GetParameter param);
+        Task<SearchResult> GetUOMConversion(GetParameter param);
+        Task<SearchResult> GetValidTargetUOM(GetParameter param);
     }
 }

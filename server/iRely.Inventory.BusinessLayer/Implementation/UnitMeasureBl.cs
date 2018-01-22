@@ -102,5 +102,68 @@ namespace iRely.Inventory.BusinessLayer
                 summaryData = await query.ToAggregateAsync(param.aggregates)
             };
         }
+
+        public async Task<SearchResult> GetUOMConversion(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICGetUOMConversion>()
+                    .Filter(param, true);
+            var data = await query.Execute(param, "intUnitMeasureConversionId").ToListAsync(param.cancellationToken);
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync(param.cancellationToken),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
+            };
+        }
+
+        public async Task<SearchResult> GetValidTargetUOM(GetParameter param)
+        {
+            // Create a new filter based on the supplied Unit type. 
+            string strUnitType = string.Empty;
+
+            // Find the first unit type filter. 
+            foreach (var f in param.filter)
+            {                
+                if (f.c.ToLower() == "strunittype")
+                {
+                    strUnitType = f.v;
+                    break; 
+                }
+            }
+
+            // Remove the Unit Type filter and create a new filter
+            var newFilter = new List<SearchFilter>();            
+            foreach (var f in param.filter)
+            {
+                if (f.c.ToLower() != "strunittype")
+                {
+                    newFilter.Add(
+                        new SearchFilter()
+                        {
+                            c = f.c,
+                            v = f.v,
+                            cj = f.cj,
+                            co = f.co                           
+                        }
+                    ); 
+                }
+            }
+            param.filter = newFilter;
+
+            switch (strUnitType.ToLower()) {
+                case "area":
+                case "length":
+                    return await GetAreaLengthUOM(param);
+                case "quantity":
+                case "volume":
+                case "weight":
+                    return await GetQuantityVolumeWeightPackedAreaUOM(param);
+                case "time":
+                    return await GetTimeUOM(param);
+                default:
+                    return await Search(param); 
+            }; 
+        }
     }
 }

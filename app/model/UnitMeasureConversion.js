@@ -13,7 +13,9 @@ Ext.define('Inventory.model.UnitMeasureConversion', {
 
     fields: [
         { name: 'intUnitMeasureConversionId', type: 'int'},
-        { name: 'intUnitMeasureId', type: 'int',
+        { 
+            name: 'intUnitMeasureId', 
+            type: 'int',
             reference: {
                 type: 'Inventory.model.UnitMeasure',
                 inverse: {
@@ -21,20 +23,32 @@ Ext.define('Inventory.model.UnitMeasureConversion', {
                     storeConfig: {
                         complete: true,
                         sortOnLoad: true,
+                        proxy: {
+                            type: 'rest',
+                            api: {
+                                read: './inventory/api/unitmeasure/getuomconversion'
+                            },
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data',
+                                messageProperty: 'message'
+                            }
+                        },                      
                         sorters: {
-                            direction: 'DESC',
-                            property: 'intSort'
+                            direction: 'ASC',
+                            property: 'intUnitMeasureConversionId'
                         }
                     }
                 }
             }},
         { name: 'intStockUnitMeasureId', type: 'int', allowNull: true },
         { name: 'dblConversionToStock', type: 'float' },
-        { name: 'intSort', type: 'int', allowNull: true },
-        { name: 'strUnitMeasure', type: 'string'}
+        { name: 'strUnitMeasure', type: 'string'},
+        { name: 'strStockUOM', type: 'string'}
     ],
 
     validators: [
-        {type: 'presence', field: 'strUnitMeasure'}
+        {type: 'presence', field: 'strStockUOM'},
+        {type: 'presence', field: 'dblConversionToStock'}
     ]
 });

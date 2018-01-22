@@ -95,6 +95,7 @@ namespace iRely.Inventory.Model
         public int? intStockUnitMeasureId { get; set; }
         public string strStockUOM { get; set; }
         public decimal? dblConversionToStock { get; set; }
+        public int intConcurrencyId { get; set; }
 
         public tblICUnitMeasure tblICUnitMeasure { get; set; }
     }
