@@ -55,6 +55,8 @@ BEGIN TRY
 		,@intLotCode2 INT
 		,@dtmDateCreated1 DATETIME
 		,@dtmDateCreated2 DATETIME
+		,@intPartialPickSubLocationId INT
+		,@intUnitPerPallet2 INT
 
 	SELECT @ysnPickByQty = 1
 
@@ -97,6 +99,11 @@ BEGIN TRY
 	IF @strPickByFullPallet IS NULL
 		OR @strPickByFullPallet = ''
 		SELECT @strPickByFullPallet = 'False'
+
+	SELECT @intPartialPickSubLocationId = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intAttributeId = 43
+		AND strAttributeValue IS NOT NULL
 
 	SELECT @intReceivedLife = 0
 		,@ysnPickByItemOwner = 0
@@ -172,6 +179,7 @@ BEGIN TRY
 			,dblRemainingLotWeight NUMERIC(18, 6)
 			,dtmProductionDate DATETIME
 			,intGroupId INT
+			,intSubLocationId INT
 			)
 
 		--IF EXISTS (
@@ -283,6 +291,8 @@ BEGIN TRY
 
 			SELECT @intUnitPerPallet = NULL
 
+			SELECT @intUnitPerPallet2 = NULL
+
 			DELETE
 			FROM @tblLot
 
@@ -297,6 +307,7 @@ BEGIN TRY
 				,@intPreferenceId = intPreferenceId
 				,@intParentLotId = intParentLotId
 				,@intUnitPerPallet = intUnitPerPallet
+				,@intUnitPerPallet2 = intUnitPerPallet
 			FROM @tblLineItem I
 			WHERE intItemRecordId = @intItemRecordId
 
@@ -392,6 +403,7 @@ BEGIN TRY
 				,dblRemainingLotWeight
 				,dtmProductionDate
 				,intGroupId
+				,intSubLocationId
 				)
 			SELECT L.intLotId
 				,L.intItemId
@@ -415,6 +427,7 @@ BEGIN TRY
 					) AS dblRemainingLotWeight
 				,L.dtmDateCreated
 				,1
+				,L.intSubLocationId
 			FROM tblICLot L
 			JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 			JOIN tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
@@ -488,6 +501,7 @@ BEGIN TRY
 				,I.ysnStrictFIFO
 				,I.intUnitPerLayer
 				,I.intLayerPerPallet
+				,L.intSubLocationId
 			HAVING (
 					CASE 
 						WHEN L.intWeightUOMId IS NULL
@@ -608,6 +622,7 @@ BEGIN TRY
 				,dblRemainingLotWeight
 				,dtmProductionDate
 				,intGroupId
+				,intSubLocationId
 				)
 			SELECT L.intLotId
 				,L.intItemId
@@ -631,6 +646,7 @@ BEGIN TRY
 					) AS dblRemainingLotWeight
 				,L.dtmDateCreated
 				,2
+				,L.intSubLocationId
 			FROM tblICLot L
 			JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 			JOIN tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
@@ -681,7 +697,7 @@ BEGIN TRY
 						ELSE IsNULL(L.intItemOwnerId, 0)
 						END
 					)
-									AND SL.intRestrictionId NOT IN (
+				AND SL.intRestrictionId NOT IN (
 					SELECT RT.intRestrictionId
 					FROM tblMFInventoryShipmentRestrictionType RT
 					)
@@ -697,6 +713,7 @@ BEGIN TRY
 				,I.ysnStrictFIFO
 				,I.intUnitPerLayer
 				,I.intLayerPerPallet
+				,L.intSubLocationId
 			HAVING (
 					CASE 
 						WHEN L.intWeightUOMId IS NULL
@@ -766,8 +783,70 @@ BEGIN TRY
 					END ASC
 				,L.dtmDateCreated ASC
 
-			SELECT @intLotRecordId = MIN(intLotRecordId)
-			FROM @tblLot
+			--SELECT @intLotRecordId = MIN(intLotRecordId)
+			--FROM @tblLot
+			SET @intLotRecordId = NULL
+
+			SELECT TOP 1 @intLotRecordId = intLotRecordId
+			FROM @tblLot s
+			WHERE intGroupId = 1
+				AND intSubLocationId = (
+					CASE 
+						WHEN @intPartialPickSubLocationId IS NOT NULL
+							AND @intUnitPerPallet2 > 0
+							AND @intUnitPerPallet2 <> @intUnitPerPallet
+							THEN @intPartialPickSubLocationId
+						ELSE intSubLocationId
+						END
+					)
+			ORDER BY (
+					CASE 
+						WHEN @ysnStrictTracking = 0
+							AND @intPreferenceId = 3
+							THEN ABS(dblRemainingLotQty - @intUnitPerPallet)
+						ELSE intLotRecordId
+						END
+					) ASC
+
+			IF @intLotRecordId IS NULL
+			BEGIN
+				SELECT TOP 1 @intLotRecordId = intLotRecordId
+				FROM @tblLot s
+				WHERE intGroupId = 2
+					AND intSubLocationId = (
+						CASE 
+							WHEN @intPartialPickSubLocationId IS NOT NULL
+								AND @intUnitPerPallet2 > 0
+								AND @intUnitPerPallet2 <> @intUnitPerPallet
+								THEN @intPartialPickSubLocationId
+							ELSE intSubLocationId
+							END
+						)
+				ORDER BY intLotRecordId ASC
+			END
+
+			IF @intLotRecordId IS NULL
+			BEGIN
+				SELECT TOP 1 @intLotRecordId = intLotRecordId
+				FROM @tblLot s
+				WHERE intGroupId = 1
+				ORDER BY (
+						CASE 
+							WHEN @ysnStrictTracking = 0
+								AND @intPreferenceId = 3
+								THEN ABS(dblRemainingLotQty - @intUnitPerPallet)
+							ELSE intLotRecordId
+							END
+						) ASC
+			END
+
+			IF @intLotRecordId IS NULL
+			BEGIN
+				SELECT TOP 1 @intLotRecordId = intLotRecordId
+				FROM @tblLot s
+				WHERE intGroupId = 2
+				ORDER BY intLotRecordId ASC
+			END
 
 			WHILE (@intLotRecordId IS NOT NULL)
 			BEGIN
@@ -932,6 +1011,15 @@ BEGIN TRY
 				SELECT TOP 1 @intLotRecordId = intLotRecordId
 				FROM @tblLot s
 				WHERE intGroupId = 1
+					AND intSubLocationId = (
+						CASE 
+							WHEN @intPartialPickSubLocationId IS NOT NULL
+								AND @intUnitPerPallet2 > 0
+								AND @intUnitPerPallet2 <> @intUnitPerPallet
+								THEN @intPartialPickSubLocationId
+							ELSE intSubLocationId
+							END
+						)
 				ORDER BY (
 						CASE 
 							WHEN @ysnStrictTracking = 0
@@ -940,6 +1028,38 @@ BEGIN TRY
 							ELSE intLotRecordId
 							END
 						) ASC
+
+				IF @intLotRecordId IS NULL
+				BEGIN
+					SELECT TOP 1 @intLotRecordId = intLotRecordId
+					FROM @tblLot s
+					WHERE intGroupId = 2
+						AND intSubLocationId = (
+							CASE 
+								WHEN @intPartialPickSubLocationId IS NOT NULL
+									AND @intUnitPerPallet2 > 0
+									AND @intUnitPerPallet2 <> @intUnitPerPallet
+									THEN @intPartialPickSubLocationId
+								ELSE intSubLocationId
+								END
+							)
+					ORDER BY intLotRecordId ASC
+				END
+
+				IF @intLotRecordId IS NULL
+				BEGIN
+					SELECT TOP 1 @intLotRecordId = intLotRecordId
+					FROM @tblLot s
+					WHERE intGroupId = 1
+					ORDER BY (
+							CASE 
+								WHEN @ysnStrictTracking = 0
+									AND @intPreferenceId = 3
+									THEN ABS(dblRemainingLotQty - @intUnitPerPallet)
+								ELSE intLotRecordId
+								END
+							) ASC
+				END
 
 				IF @intLotRecordId IS NULL
 				BEGIN

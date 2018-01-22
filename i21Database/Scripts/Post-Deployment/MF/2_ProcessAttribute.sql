@@ -913,14 +913,15 @@ BEGIN
     SELECT 43
         ,'Partial Quantity Sub Location'
         ,5
-        ,2
+        ,1
         ,0
         ,'select CONVERT(VARCHAR,intCompanyLocationSubLocationId) AS ValueMember,strSubLocationName AS DisplayMember from tblSMCompanyLocationSubLocation Where UPPER(strClassification)=UPPER(''Inventory'') AND intCompanyLocationId=@intLocationId'
 END
 ELSE
 UPDATE tblMFAttribute 
 	Set strAttributeName='Partial Quantity Sub Location',
-	strSQL='select CONVERT(VARCHAR,intCompanyLocationSubLocationId) AS ValueMember,strSubLocationName AS DisplayMember from tblSMCompanyLocationSubLocation Where UPPER(strClassification)=UPPER(''Inventory'') AND intCompanyLocationId=@intLocationId'
+	strSQL='select CONVERT(VARCHAR,intCompanyLocationSubLocationId) AS ValueMember,strSubLocationName AS DisplayMember from tblSMCompanyLocationSubLocation Where UPPER(strClassification)=UPPER(''Inventory'') AND intCompanyLocationId=@intLocationId',
+	intAttributeTypeId=1
 	WHERE intAttributeId = 43
 GO
 IF NOT EXISTS (
