@@ -125,7 +125,7 @@ FROM(
 				t1.strPricingType strToPricingType,		
 				(isnull(t.dblUnPricedQty,0) + isnull(t.dblPricedQty,0)) dblFromQty
 				,(isnull(t1.dblUnPricedQty,0) + isnull(t1.dblPricedQty,0)) dblToQty 
-				,(isnull(t1.dblUnPricedQty,0) + isnull(t1.dblPricedQty,0)) - (isnull(t1.dblUnPricedQty,0) + isnull(t1.dblPricedQty,0)) dblQtyDifference
+				,(isnull(t1.dblUnPricedQty,0) + isnull(t1.dblPricedQty,0)) - (isnull(t.dblUnPricedQty,0) + isnull(t.dblPricedQty,0)) dblQtyDifference
 				,isnull(t1.dblPricedAmount,0)-isnull(t.dblPricedAmount,0) dblDifference
  FROM #Fromtemp t
  FULL JOIN #Totemp t1 on t.strContractSeq=t1.strContractSeq )t
@@ -165,4 +165,4 @@ FROM(
  FULL JOIN #Totemp1 t1 on t.strContractSeq=t1.strContractSeq )t
  ORDER BY strContractSeq
 
- select * from @tblFinal
+ SELECT * FROM @tblFinal

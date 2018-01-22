@@ -183,7 +183,9 @@ END
 AS strPricingStatus, CA.strDescription as strOrgin,isnull(ysnMultiplePriceFixation,0) as ysnMultiplePriceFixation ,FM.intUnitMeasureId  intMarketUOMId,FM.intCurrencyId intMarketCurrencyId
 ,dblInvoicedQty  AS    dblInvoicedQuantity,       
 isnull(case when CD.intPricingTypeId =1 and PF.intPriceFixationId is null then CD.dblQuantity else FD.dblQuantity end,0) dblPricedQty,
-isnull(case when CD.intPricingTypeId<>1 and PF.intPriceFixationId is not null then CD.dblQuantity-isnull(FD.dblQuantity ,0) else CD.dblQuantity end,0) dblUnPricedQty,
+isnull(CASE WHEN CD.intPricingTypeId<>1 and PF.intPriceFixationId IS NOT NULL THEN ISNULL(CD.dblQuantity,0)-ISNULL(FD.dblQuantity ,0) 
+		when CD.intPricingTypeId<>1 and PF.intPriceFixationId IS NULL then ISNULL(CD.dblQuantity,0)
+		ELSE 0 end,0) dblUnPricedQty,
 isnull(case when CD.intPricingTypeId =1 and PF.intPriceFixationId is null then CD.dblCashPrice else PF.dblFinalPrice end,0) dblPricedAmount
 FROM    tblCTContractHeader                        CH     
        JOIN   tblICCommodity                           CY     ON     CY.intCommodityId                 =      CH.intCommodityId        
@@ -252,7 +254,7 @@ dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId, cuc.in
 												(	SELECT TOP 1  dblLastSettle
 												FROM tblRKFuturesSettlementPrice p
 												INNER JOIN tblRKFutSettlementPriceMarketMap pm ON p.intFutureSettlementPriceId = pm.intFutureSettlementPriceId
-												WHERE p.intFutureMarketId = intFutureMarketId AND pm.intFutureMonthId = intFutureMonthId
+												WHERE p.intFutureMarketId = cd.intFutureMarketId AND pm.intFutureMonthId = cd.intFutureMonthId
 													AND CONVERT(Nvarchar, dtmPriceDate, 111) <= CONVERT(Nvarchar, @dtmSettlemntPriceDate, 111)
 												ORDER BY dtmPriceDate DESC)	/ CASE WHEN c.ysnSubCurrency = 1 THEN 100 ELSE 1 END)
 else
@@ -272,7 +274,7 @@ else
 	dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId, PUOM.intCommodityUnitMeasureId, 
 								cd.dblFutures / CASE WHEN c1.ysnSubCurrency = 1 THEN 100 ELSE 1 END)
 FROM @GetContractDetailView cd
-JOIN tblRKFuturesMonth ffm on ffm.intFutureMonthId= cd.intFutureMonthId 
+JOIN tblRKFuturesMonth ffm on ffm.intFutureMonthId= cd.intFutureMonthId and ffm.intFutureMarketId=cd.intFutureMarketId
 JOIN tblSMCurrency c on cd.intMarketCurrencyId=c.intCurrencyID and  cd.intCommodityId= @intCommodityId
 JOIN tblSMCurrency c1 on cd.intCurrencyId=c1.intCurrencyID 
 JOIN tblICCommodityUnitMeasure cuc on cd.intCommodityId=cuc.intCommodityId and cuc.intUnitMeasureId=cd.intMarketUOMId 
@@ -890,26 +892,7 @@ END
 
 ------------- Calculation of Results ----------------------
    UPDATE #Temp set 
-   --dblResult=
-   --          CASE WHEN intContractTypeId = 1 and (dblAdjustedContractPrice <= dblMarketPrice) 
-   --               THEN abs(dblResult)
-   --               WHEN intContractTypeId = 1 and (dblAdjustedContractPrice > dblMarketPrice) 
-   --               THEN -abs(dblResult)
-   --               WHEN intContractTypeId = 2  and (dblAdjustedContractPrice >= dblMarketPrice) 
-   --               THEN abs(dblResult)
-   --               WHEN intContractTypeId = 2  and (dblAdjustedContractPrice < dblMarketPrice) 
-   --               THEN -abs(dblResult)
-   --            END ,
-   --           dblResultCash=
-   --          CASE WHEN intContractTypeId = 1 and (dblAdjustedContractPrice <= dblMarketPrice) 
-   --               THEN abs(dblResultCash)
-   --               WHEN intContractTypeId = 1 and (dblAdjustedContractPrice > dblMarketPrice) 
-   --               THEN -abs(dblResultCash)
-   --               WHEN intContractTypeId = 2  and (dblAdjustedContractPrice >= dblMarketPrice) 
-   --               THEN abs(dblResultCash)
-   --               WHEN intContractTypeId = 2  and (dblAdjustedContractPrice < dblMarketPrice) 
-   --               THEN -abs(dblResultCash)
-   --            END ,
+ 
                dblResultBasis=
              CASE WHEN intContractTypeId = 1 and (isnull(dblContractBasis,0) <= dblMarketBasis) 
                   THEN abs(dblResultBasis)
