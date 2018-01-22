@@ -6111,6 +6111,7 @@
     <Build Include="dbo\Views\vyuLGLoadScheduleForInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportAOPVsActual.sql" />
     <Build Include="dbo\Views\vyuRKGetGLAccountDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspEMUpdateEntityCredential.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
