@@ -386,6 +386,14 @@ BEGIN TRY
 		BEGIN
 			IF @dblYieldQuantity > 0
 			BEGIN
+				SELECT @dblYieldQuantity = - @dblYieldQuantity
+
+				SELECT @intSubLocationId = NULL
+
+				SELECT @intSubLocationId = intSubLocationId
+				FROM tblICStorageLocation
+				WHERE intStorageLocationId = @intStorageLocationId
+
 				EXEC [uspICInventoryAdjustment_CreatePostQtyChange]
 					-- Parameters for filtering:
 					@intItemId = @intItemId

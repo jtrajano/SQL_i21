@@ -403,6 +403,7 @@ BEGIN TRY
 		,intMainItemId INT
 		,intRecipeItemId INT
 		,intMachineId INT
+		,strLotTracking NVARCHAR(50)
 		)
 	DECLARE @tblICFinalItem TABLE (
 		intRecordId INT identity(1, 1)
@@ -417,6 +418,7 @@ BEGIN TRY
 		,intRecipeItemId INT
 		,intMachineId INT
 		,intRowNumber INT
+		,strLotTracking NVARCHAR(50)
 		)
 	DECLARE @dblProduceQty NUMERIC(38, 20)
 		,@intProduceUOMId INT
@@ -589,6 +591,7 @@ BEGIN TRY
 			,intMainItemId
 			,intRecipeItemId
 			,intMachineId
+			,strLotTracking
 			)
 		SELECT ri.intItemId
 			,ri.intConsumptionMethodId
@@ -649,6 +652,7 @@ BEGIN TRY
 			,ri.intItemId
 			,ri.intRecipeItemId
 			,M.intMachineId
+			,I.strLotTracking
 		FROM dbo.tblMFWorkOrderRecipeItem ri
 		JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
 			AND r.intWorkOrderId = ri.intWorkOrderId
@@ -736,6 +740,7 @@ BEGIN TRY
 			,RSI.intItemId
 			,RI.intRecipeItemId
 			,M.intMachineId
+			,I.strLotTracking
 		FROM dbo.tblMFWorkOrderRecipeItem RI
 		JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RSI ON RSI.intRecipeItemId = RI.intRecipeItemId
 			AND RI.intWorkOrderId = RSI.intWorkOrderId
@@ -778,6 +783,7 @@ BEGIN TRY
 		,intRecipeItemId
 		,intMachineId
 		,intRowNumber
+		,strLotTracking
 		)
 	SELECT intItemId
 		,intConsumptionMethodId
@@ -796,6 +802,7 @@ BEGIN TRY
 			PARTITION BY intItemId
 			,intStorageLocationId ORDER BY intMachineId
 			)
+		,strLotTracking
 	FROM @tblICItem
 
 	UPDATE @tblICFinalItem
@@ -905,6 +912,23 @@ BEGIN TRY
 
 	INSERT INTO @tblMFLot
 	SELECT I.intItemId
+		,SUM(IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(S.intItemUOMId, I.intItemUOMId, S.dblOnHand), 0))
+		,I.intItemUOMId
+		,I.intStorageLocationId
+	FROM @tblICFinalItem I
+	JOIN tblICItemStockUOM S ON S.intItemId = I.intItemId and I.strLotTracking ='No'
+	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = S.intItemUOMId
+				AND IU.ysnStockUnit = 1
+				JOIN dbo.tblICItemLocation IL ON IL.intItemLocationId = S.intItemLocationId
+		AND S.intStorageLocationId = I.intStorageLocationId
+		and S.dblOnHand>0
+		AND IL.intLocationId = @intLocationId
+	GROUP BY I.intItemId
+		,I.intItemUOMId
+		,I.intStorageLocationId
+
+	INSERT INTO @tblMFLot
+	SELECT I.intItemId
 		,SUM(IsNULL((
 					CASE 
 						WHEN L.intWeightUOMId IS NULL
@@ -915,7 +939,7 @@ BEGIN TRY
 		,I.intItemUOMId
 		,I.intStorageLocationId
 	FROM @tblICFinalItem I
-	JOIN tblICLot L ON L.intItemId = I.intItemId
+	JOIN tblICLot L ON L.intItemId = I.intItemId and I.strLotTracking <>'No'
 		AND L.intLotStatusId = 1
 		AND ISNULL(L.dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
 		AND L.dblQty > 0
