@@ -21,6 +21,7 @@ BEGIN
 		,I.strDescription
 		,I.strType
 		,CC.dblQuantity
+		,(CC.dblQuantity - CC.dblSystemQty) AS dblVariance
 		,CC.dblQtyInProdStagingLocation
 		,CC.dblRequiredQty
 		,CC.dblSystemQty
