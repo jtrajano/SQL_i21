@@ -1,4 +1,4 @@
-﻿GCREATE VIEW [dbo].[vyuAP1099]
+﻿CREATE VIEW [dbo].[vyuAP1099]
 AS
 SELECT
       C.strVendorId
