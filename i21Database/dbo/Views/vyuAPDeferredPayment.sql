@@ -15,7 +15,8 @@ SELECT
 	GETDATE() AS dtmLastDeferred,
 	A.dblAmountDue,
 	0 AS intDays,
-	0.00 AS dblInterest
+	0.00 AS dblInterest,
+	CAST(CASE WHEN staging.intBillId IS NOT NULL THEN 1 ELSE 0 END AS BIT) ysnSelected
 FROM tblAPBill A
 INNER JOIN tblEMEntity B ON A.intEntityVendorId = B.intEntityId
 CROSS APPLY [dbo].[fnAPGetVoucherCommodity](A.intBillId) commodity
@@ -38,4 +39,5 @@ OUTER APPLY (
 	WHERE dp.intTransactionType = 14
 	ORDER BY dp.dtmDate DESC
 ) lastDeferredPayment
+LEFT JOIN tblAPDeferredPaymentStaging staging ON staging.intBillId = A.intBillId
 WHERE A.intTransactionType = 1 AND A.ysnPosted = 1 AND A.ysnPaid = 0
