@@ -30,6 +30,15 @@ DECLARE @strUOM nVarchar(50)
 DECLARE @dblAvailableQty NUMERIC(18,6)
 DECLARE @dblSelectedQty NUMERIC(18,6)
 DECLARE @dblOverCommitQty NUMERIC(18,6)
+Declare @dblExpectedCost NUMERIC(38,20)
+Declare @dblAffordabilityCost NUMERIC(38,20)
+Declare @dblAffordabilityCostFinal NUMERIC(38,20)
+Declare @dblAffordabilityRangeMinValue NUMERIC(38,20)
+Declare @intBlendItemId INT
+Declare @intTestIdForAffordabilityRange INT
+Declare @intUserRoleIdToOverrideAffordabilityCheck INT
+Declare @intManufacturingProcessId int
+Declare @strPackagingCategoryId NVARCHAR(Max)
   
 EXEC sp_xml_preparedocument @idoc OUTPUT, @strXml
 
@@ -128,7 +137,7 @@ INSERT INTO @tblLot(
 Update @tblBlendSheet Set dblQtyToProduce=(Select sum(dblQty) from @tblLot)
 
 Select @intWorkOrderId=intWorkOrderId,@dblQtyToProduce=dblQtyToProduce,@intUserId=intUserId,@intLocationId=intLocationId,@strBlendItemNo=b.strItemNo,
-@strUOM=d.strUnitMeasure 
+@strUOM=d.strUnitMeasure,@intBlendItemId=a.intItemId 
 from @tblBlendSheet a 
 Join tblICItem b On a.intItemId=b.intItemId
 Join tblICItemUOM c on c.intItemUOMId=a.intItemUOMId
@@ -140,6 +149,26 @@ from @tblLot a join tblICLot b on a.intLotId=b.intLotId
 Declare @dblRecipeQuantity numeric(18,6)
 
 Select @dblRecipeQuantity = dblQuantity from tblMFWorkOrderRecipe Where intWorkOrderId=@intWorkOrderId
+
+Select @intManufacturingProcessId=intManufacturingProcessId 
+from tblMFWorkOrderRecipe Where intWorkOrderId=@intWorkOrderId
+
+SELECT @strPackagingCategoryId = ISNULL(pa.strAttributeValue, '')
+FROM tblMFManufacturingProcessAttribute pa
+JOIN tblMFAttribute at ON pa.intAttributeId = at.intAttributeId
+WHERE intManufacturingProcessId = @intManufacturingProcessId
+	AND intLocationId = @intLocationId
+	AND at.strAttributeName = 'Packaging Category'
+
+Select @intTestIdForAffordabilityRange=pa.strAttributeValue 
+From tblMFManufacturingProcessAttribute pa Join tblMFAttribute at on pa.intAttributeId=at.intAttributeId
+Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId 
+and at.strAttributeName='Quality Test Name To Get Blend Affordability Range'
+
+Select @intUserRoleIdToOverrideAffordabilityCheck=pa.strAttributeValue 
+From tblMFManufacturingProcessAttribute pa Join tblMFAttribute at on pa.intAttributeId=at.intAttributeId
+Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId 
+and at.strAttributeName='User Role To Override Blend Affordability Check'
 
 --Insert into @tblItem(intItemId,dblReqQty,ysnSubstituteItem)
 --Select ri.intItemId,(ri.dblCalculatedQuantity * (@dblQtyToProduce/@dblRecipeQuantity)) AS RequiredQty,0
@@ -533,6 +562,72 @@ End --End While
 End --End If Missing Item Count > 0
 
 End --End Validation #8
+
+
+--Validation #9
+If Exists(Select 1 From tblMFBlendValidation Where intBlendValidationDefaultId=9 AND intTypeId=1)
+Begin
+
+Set @strMessage=''
+
+--Get Affordability Cost
+Select @dblAffordabilityCost=(CASE Month(GETDATE()) 
+			WHEN 1 THEN bg.dblJan WHEN 2 THEN bg.dblFeb WHEN 3 THEN bg.dblMar WHEN 4 THEN bg.dblApr WHEN 5 THEN bg.dblMay WHEN 6 THEN bg.dblJun 
+			WHEN 7 THEN bg.dblJul WHEN 8 THEN bg.dblAug WHEN 9 THEN bg.dblSep WHEN 10 THEN bg.dblOct WHEN 11 THEN bg.dblNov WHEN 12 THEN bg.dblDec 
+			END)
+From tblMFBudget bg
+Where bg.intItemId=@intBlendItemId AND bg.intLocationId=@intLocationId AND bg.intYear=YEAR(GETDATE()) AND bg.intBudgetTypeId=2
+
+--Get Expected Cost
+Select @dblExpectedCost=SUM(tl.dblQty * ISNULL(l.dblLastCost,0)) / (SELECT sum(dblQty)
+			FROM @tblLot l join tblICItem i on l.intItemId=i.intItemId Where i.intCategoryId not in (Select * from dbo.[fnCommaSeparatedValueToTable](@strPackagingCategoryId)))
+From @tblLot tl Join tblICLot l on tl.intLotId=l.intLotId
+
+If ISNULL(@dblExpectedCost,0)>0 AND ISNULL(@dblAffordabilityCost,0)>0
+Begin
+	--Get Affordability Range Min Value from Item
+	Select TOP 1 @dblAffordabilityRangeMinValue = ppv.dblMinValue
+	from tblQMProduct p
+	Join tblQMProductProperty pp on p.intProductId=pp.intProductId
+	Join tblQMProductPropertyValidityPeriod ppv on pp.intProductPropertyId=ppv.intProductPropertyId
+	Where DATEPART(dy, GETDATE()) BETWEEN DATEPART(dy, ppv.dtmValidFrom) AND DATEPART(dy, ppv.dtmValidTo)
+	AND p.intProductTypeId=2 AND p.intProductValueId=@intBlendItemId AND pp.intTestId=@intTestIdForAffordabilityRange
+
+	--Get Affordability Range Min Value from Category if not available for Item
+	If ISNULL(@dblAffordabilityRangeMinValue,0.0)=0 OR @dblAffordabilityRangeMinValue IS NULL
+	Select TOP 1 @dblAffordabilityRangeMinValue = ppv.dblMinValue
+	from tblQMProduct p
+	Join tblQMProductProperty pp on p.intProductId=pp.intProductId
+	Join tblQMProductPropertyValidityPeriod ppv on pp.intProductPropertyId=ppv.intProductPropertyId
+	Where DATEPART(dy, GETDATE()) BETWEEN DATEPART(dy, ppv.dtmValidFrom) AND DATEPART(dy, ppv.dtmValidTo)
+	AND p.intProductTypeId=1 AND p.intProductValueId=(Select intCategoryId From tblICItem Where intItemId=@intBlendItemId) AND pp.intTestId=@intTestIdForAffordabilityRange
+
+	Set @dblAffordabilityCostFinal=ISNULL(@dblAffordabilityCost,0.0) + (ISNULL(@dblAffordabilityCost,0.0) * ISNULL(@dblAffordabilityRangeMinValue,0.0) / 100.0) 
+
+	Select @strMessage=a.strMessage,@intMessageTypeId=a.intMessageTypeId 
+	From tblMFBlendValidation a
+	Where intBlendValidationDefaultId=9 AND intTypeId=1
+
+	--If user has override role, then show error as warning
+	If Exists(Select 1 from tblSMUserSecurityCompanyLocationRolePermission 
+	Where intEntityId=@intUserId AND intUserRoleId=@intUserRoleIdToOverrideAffordabilityCheck AND intCompanyLocationId=@intLocationId)
+		Set @intMessageTypeId=1
+
+	If ISNULL(@dblExpectedCost,0.0)>ISNULL(@dblAffordabilityCostFinal,0.0)
+	Begin
+
+		set @strMessageFinal=@strMessage
+		Set @strMessageFinal =REPLACE(@strMessageFinal,'@1',dbo.fnRemoveTrailingZeroes(@dblAffordabilityCostFinal))
+		Set @strMessageFinal =REPLACE(@strMessageFinal,'@2', dbo.fnRemoveTrailingZeroes(@dblExpectedCost))
+
+		Insert Into @tblValidationMessages(intMessageTypeId,strMessage)
+		Values(@intMessageTypeId,@strMessageFinal)
+
+	End
+
+End --End If
+
+End --End Validation #9
 
 
 

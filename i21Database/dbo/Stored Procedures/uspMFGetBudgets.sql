@@ -35,7 +35,8 @@ Declare @tblBudgetAll table
 	intLastModifiedUserId INT,
 	dtmLastModified DATETIME,
 	intConcurrencyId INT,
-	strConfirmedUserName nvarchar(50)
+	strConfirmedUserName nvarchar(50),
+	strConfirmedByMonth nvarchar(50)
 )
 
 Declare @tblBudget table
@@ -67,7 +68,8 @@ Declare @tblBudget table
 	intLastModifiedUserId INT,
 	dtmLastModified DATETIME,
 	intConcurrencyId INT,
-	strConfirmedUserName nvarchar(50)
+	strConfirmedUserName nvarchar(50),
+	strConfirmedByMonth nvarchar(50)
 )
 
 Insert Into @tblBudgetAll
@@ -75,7 +77,7 @@ Select 0 AS intBudgetId,@intYear AS intYear,@intLocationId AS intLocationId,i.in
 bgt.intBudgetTypeId,bgt.strName AS strBudgetTypeName,bgt.strDescription AS strBudgetTypeDesc,
 NULL AS dblJan,NULL AS dblFeb,NULL AS dblMar,NULL AS dblApr,NULL AS dblMay,NULL AS dblJun,NULL AS dblJul,NULL AS dblAug,NULL AS dblSep,NULL AS dblOct,NULL AS dblNov,NULL AS dblDec,NULL AS dblYTD,
 CAST(0 AS BIT) AS ysnConfirmed,0 AS intConfirmedByMonth,0 AS intConfirmedUserId,NULL AS dtmConfirmedDate,0 AS intCreatedUserId,NULL AS dtmCreated,0 AS intLastModifiedUserId,
-NULL AS dtmLastModified,0 AS intConcurrencyId,'' AS strConfirmedUserName
+NULL AS dtmLastModified,0 AS intConcurrencyId,'' AS strConfirmedUserName,'' AS strConfirmedByMonth
 From tblICItem i --Left Join tblMFBudget bg on i.intItemId=bg.intItemId And bg.intYear=@intYear
 Cross Join tblMFBudgetType bgt 
 Join tblMFRecipe r on i.intItemId=r.intItemId And r.intLocationId=@intLocationId And r.ysnActive=1 
@@ -87,9 +89,11 @@ Insert Into @tblBudget
 Select ISNULL(bg.intBudgetId,0) AS intBudgetId,@intYear AS intYear,@intLocationId AS intLocationId,i.intItemId,bgt.intBudgetTypeId,
 bg.dblJan,bg.dblFeb,bg.dblMar,bg.dblApr,bg.dblMay,bg.dblJun,bg.dblJul,bg.dblAug,bg.dblSep,bg.dblOct,bg.dblNov,bg.dblDec,bg.dblYTD,
 CAST(ISNULL(bg.ysnConfirmed,0) AS BIT) AS ysnConfirmed,ISNULL(bg.intConfirmedByMonth,0) AS intConfirmedByMonth,bg.intConfirmedUserId,bg.dtmConfirmedDate,bg.intCreatedUserId,bg.dtmCreated,bg.intLastModifiedUserId,
-bg.dtmLastModified,ISNULL(bg.intConcurrencyId,0) AS intConcurrencyId,'' AS strConfirmedUserName 
+bg.dtmLastModified,ISNULL(bg.intConcurrencyId,0) AS intConcurrencyId,us.strUserName AS strConfirmedUserName,
+CASE WHEN bg.intConfirmedByMonth>0 THEN Left(DateName( month , DateAdd( month , bg.intConfirmedByMonth , -1 ) ),3) ELSE '' END AS strConfirmedByMonth
 From tblMFBudget bg Join tblICItem i on bg.intItemId=i.intItemId 
 Join tblMFBudgetType bgt on bg.intBudgetTypeId=bgt.intBudgetTypeId
+Left Join tblSMUserSecurity us on bg.intConfirmedUserId=us.intEntityId
 Where bg.intYear=@intYear And bg.intLocationId=@intLocationId
 
 Update bga Set bga.intBudgetId=bg.intBudgetId,
@@ -117,8 +121,10 @@ bga.intCreatedUserId=bg.intCreatedUserId,
 bga.dtmCreated=bg.dtmCreated,
 bga.intLastModifiedUserId=bg.intLastModifiedUserId,
 bga.dtmLastModified=bg.dtmLastModified,
-bga.intConcurrencyId=bg.intConcurrencyId
+bga.intConcurrencyId=bg.intConcurrencyId,
+bga.strConfirmedUserName=bg.strConfirmedUserName,
+bga.strConfirmedByMonth=bg.strConfirmedByMonth
 From @tblBudgetAll bga Join @tblBudget bg on bga.intYear=bg.intYear And bga.intLocationId=bg.intLocationId 
 And bga.intItemId=bg.intItemId And bga.intBudgetTypeId=bg.intBudgetTypeId
 
-Select * from @tblBudgetAll
+Select ROW_NUMBER() OVER(ORDER BY intItemId,intBudgetTypeId) intRowNo , * from @tblBudgetAll

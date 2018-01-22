@@ -616,6 +616,12 @@ BEGIN
 	)
 END
 GO
+IF NOT EXISTS(SELECT * FROM tblMFBlendValidationDefault WHERE intBlendValidationDefaultId = 9)
+BEGIN
+    INSERT INTO tblMFBlendValidationDefault(intBlendValidationDefaultId,strBlendValidationName,strMessage)
+    VALUES(9,'Blend Affordability Check','Projected cost of the blend is greater than the affordable cost. Affordable cost is @1 and projected cost is @2.')
+END
+GO
 UPDATE dbo.tblMFWorkOrderStatus
 SET strBackColorName = 'bc-palegreen'
 WHERE strBackColorName IS NULL

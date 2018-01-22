@@ -11,7 +11,11 @@ If @intWorkOrderId=0
 	Select a.intBlendRequirementId,a.strDemandNo,a.intItemId,b.strItemNo,b.strDescription,(a.dblQuantity - ISNULL(a.dblIssuedQty,0)) dblQuantity,
 	c.intItemUOMId,d.strUnitMeasure AS strUOM,a.dtmDueDate,a.intLocationId,
 	a.intManufacturingCellId AS intManufacturingCellId,
-	a.intMachineId,a.dblBlenderSize,g.dblStandardCost,mc.strCellName,r.intManufacturingProcessId 
+	a.intMachineId,a.dblBlenderSize,g.dblStandardCost,mc.strCellName,r.intManufacturingProcessId,
+	CASE Month(GETDATE()) 
+			WHEN 1 THEN bg.dblJan WHEN 2 THEN bg.dblFeb WHEN 3 THEN bg.dblMar WHEN 4 THEN bg.dblApr WHEN 5 THEN bg.dblMay WHEN 6 THEN bg.dblJun 
+			WHEN 7 THEN bg.dblJul WHEN 8 THEN bg.dblAug WHEN 9 THEN bg.dblSep WHEN 10 THEN bg.dblOct WHEN 11 THEN bg.dblNov WHEN 12 THEN bg.dblDec 
+		END AS dblAffordabilityCost  
 	from tblMFBlendRequirement a 
 	Join tblICItem b on a.intItemId=b.intItemId 
 	Join tblICItemUOM c on b.intItemId=c.intItemId and a.intUOMId=c.intUnitMeasureId 
@@ -21,6 +25,7 @@ If @intWorkOrderId=0
 	Left Join tblICItemPricing g on g.intItemId=b.intItemId And g.intItemLocationId=f.intItemLocationId
 	Left Join tblMFManufacturingCell mc on a.intManufacturingCellId=mc.intManufacturingCellId
 	Left Join tblMFRecipe r on a.intItemId=r.intItemId AND a.intLocationId=r.intLocationId AND r.ysnActive=1
+	Left Join tblMFBudget bg on a.intItemId=bg.intItemId AND a.intLocationId=bg.intLocationId AND bg.intYear=YEAR(GETDATE()) AND bg.intBudgetTypeId=2
 	Where a.intStatusId=1
 
 --Positive means WorkOrderId

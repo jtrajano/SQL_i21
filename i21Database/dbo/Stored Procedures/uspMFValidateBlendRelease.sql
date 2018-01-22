@@ -40,6 +40,13 @@ Declare @dtmDueDate DATETIME
 Declare @ysnLotExpiryByDueDate bit=0
 Declare @dtmLotExpiryDate DATETIME
 Declare @ysnShowAvailableLotsByStorageLocation bit
+Declare @dblExpectedCost NUMERIC(38,20)
+Declare @dblAffordabilityCost NUMERIC(38,20)
+Declare @dblAffordabilityCostFinal NUMERIC(38,20)
+Declare @dblAffordabilityRangeMinValue NUMERIC(38,20)
+Declare @intBlendItemId INT
+Declare @intTestIdForAffordabilityRange INT
+Declare @intUserRoleIdToOverrideAffordabilityCheck INT
 
 Select TOP 1 @ysnEnableParentLot=ISNULL(ysnEnableParentLot,0) From tblMFCompanyPreference
   
@@ -61,7 +68,8 @@ Declare @tblBlendSheet table
 	intLocationId int,
 	intBlendRequirementId int,
 	intItemUOMId int,
-	intUserId int
+	intUserId int,
+	dblExpectedCost NUMERIC(38,20)
 )
 
 Declare @tblItem table
@@ -154,9 +162,9 @@ Declare @tblParentLot table
 
 INSERT INTO @tblBlendSheet(
  intWorkOrderId,intItemId,intCellId,intMachineId,dtmDueDate,dblQtyToProduce,dblPlannedQuantity,dblBinSize,strComment,  
- ysnUseTemplate,ysnKittingEnabled,intLocationId,intBlendRequirementId,intItemUOMId,intUserId)
+ ysnUseTemplate,ysnKittingEnabled,intLocationId,intBlendRequirementId,intItemUOMId,intUserId,dblExpectedCost)
  Select intWorkOrderId,intItemId,intCellId,intMachineId,dtmDueDate,dblQtyToProduce,dblPlannedQuantity,dblBinSize,strComment,  
- ysnUseTemplate,ysnKittingEnabled,intLocationId,intBlendRequirementId,intItemUOMId,intUserId
+ ysnUseTemplate,ysnKittingEnabled,intLocationId,intBlendRequirementId,intItemUOMId,intUserId,dblExpectedCost
  FROM OPENXML(@idoc, 'root', 2)  
  WITH ( 
 	intWorkOrderId int, 
@@ -173,7 +181,8 @@ INSERT INTO @tblBlendSheet(
 	intLocationId int,
 	intBlendRequirementId int,
 	intItemUOMId int,
-	intUserId int
+	intUserId int,
+	dblExpectedCost NUMERIC(38,20)
 	)
 	
 INSERT INTO @tblLot(
@@ -198,7 +207,7 @@ INSERT INTO @tblLot(
 --Update @tblBlendSheet Set dblQtyToProduce=(Select sum(dblQty) from @tblLot)
 
 Select @dblQtyToProduce=dblQtyToProduce,@dblPlannedQuantity=dblPlannedQuantity,@intUserId=intUserId,@intLocationId=intLocationId,@strBlendItemNo=b.strItemNo,
-@strUOM=d.strUnitMeasure 
+@strUOM=d.strUnitMeasure,@dblExpectedCost=ROUND(a.dblExpectedCost,6,1),@intBlendItemId=a.intItemId 
 from @tblBlendSheet a 
 Join tblICItem b On a.intItemId=b.intItemId
 Join tblICItemUOM c on c.intItemUOMId=a.intItemUOMId
@@ -227,6 +236,16 @@ Select @ysnShowAvailableLotsByStorageLocation=CASE When UPPER(pa.strAttributeVal
 From tblMFManufacturingProcessAttribute pa Join tblMFAttribute at on pa.intAttributeId=at.intAttributeId
 Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId 
 and at.strAttributeName='Show Available Lots By Storage Location'
+
+Select @intTestIdForAffordabilityRange=pa.strAttributeValue 
+From tblMFManufacturingProcessAttribute pa Join tblMFAttribute at on pa.intAttributeId=at.intAttributeId
+Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId 
+and at.strAttributeName='Quality Test Name To Get Blend Affordability Range'
+
+Select @intUserRoleIdToOverrideAffordabilityCheck=pa.strAttributeValue 
+From tblMFManufacturingProcessAttribute pa Join tblMFAttribute at on pa.intAttributeId=at.intAttributeId
+Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId 
+and at.strAttributeName='User Role To Override Blend Affordability Check'
 
 Select @dtmDueDate=Convert(date,dtmDueDate) from @tblBlendSheet
 
@@ -742,6 +761,66 @@ End --End If Missing Item Count > 0
 
 End --End Validation #8
 
+
+--Validation #9
+If Exists(Select 1 From tblMFBlendValidation Where intBlendValidationDefaultId=9 AND intTypeId=1)
+Begin
+
+Set @strMessage=''
+
+--Get Affordability Cost
+Select @dblAffordabilityCost=(CASE Month(GETDATE()) 
+			WHEN 1 THEN bg.dblJan WHEN 2 THEN bg.dblFeb WHEN 3 THEN bg.dblMar WHEN 4 THEN bg.dblApr WHEN 5 THEN bg.dblMay WHEN 6 THEN bg.dblJun 
+			WHEN 7 THEN bg.dblJul WHEN 8 THEN bg.dblAug WHEN 9 THEN bg.dblSep WHEN 10 THEN bg.dblOct WHEN 11 THEN bg.dblNov WHEN 12 THEN bg.dblDec 
+			END)
+From tblMFBudget bg
+Where bg.intItemId=@intBlendItemId AND bg.intLocationId=@intLocationId AND bg.intYear=YEAR(GETDATE()) AND bg.intBudgetTypeId=2
+
+If ISNULL(@dblExpectedCost,0)>0 AND ISNULL(@dblAffordabilityCost,0)>0
+Begin
+	--Get Affordability Range Min Value from Item
+	Select TOP 1 @dblAffordabilityRangeMinValue = ppv.dblMinValue
+	from tblQMProduct p
+	Join tblQMProductProperty pp on p.intProductId=pp.intProductId
+	Join tblQMProductPropertyValidityPeriod ppv on pp.intProductPropertyId=ppv.intProductPropertyId
+	Where DATEPART(dy, GETDATE()) BETWEEN DATEPART(dy, ppv.dtmValidFrom) AND DATEPART(dy, ppv.dtmValidTo)
+	AND p.intProductTypeId=2 AND p.intProductValueId=@intBlendItemId AND pp.intTestId=@intTestIdForAffordabilityRange
+
+	--Get Affordability Range Min Value from Category if not available for Item
+	If ISNULL(@dblAffordabilityRangeMinValue,0.0)=0 OR @dblAffordabilityRangeMinValue IS NULL
+	Select TOP 1 @dblAffordabilityRangeMinValue = ppv.dblMinValue
+	from tblQMProduct p
+	Join tblQMProductProperty pp on p.intProductId=pp.intProductId
+	Join tblQMProductPropertyValidityPeriod ppv on pp.intProductPropertyId=ppv.intProductPropertyId
+	Where DATEPART(dy, GETDATE()) BETWEEN DATEPART(dy, ppv.dtmValidFrom) AND DATEPART(dy, ppv.dtmValidTo)
+	AND p.intProductTypeId=1 AND p.intProductValueId=(Select intCategoryId From tblICItem Where intItemId=@intBlendItemId) AND pp.intTestId=@intTestIdForAffordabilityRange
+
+	Set @dblAffordabilityCostFinal=ISNULL(@dblAffordabilityCost,0.0) + (ISNULL(@dblAffordabilityCost,0.0) * ISNULL(@dblAffordabilityRangeMinValue,0.0) / 100.0) 
+
+	Select @strMessage=a.strMessage,@intMessageTypeId=a.intMessageTypeId 
+	From tblMFBlendValidation a
+	Where intBlendValidationDefaultId=9 AND intTypeId=1
+
+	--If user has override role, then show error as warning
+	If Exists(Select 1 from tblSMUserSecurityCompanyLocationRolePermission 
+	Where intEntityId=@intUserId AND intUserRoleId=@intUserRoleIdToOverrideAffordabilityCheck AND intCompanyLocationId=@intLocationId)
+		Set @intMessageTypeId=1
+
+	If ISNULL(@dblExpectedCost,0.0)>ISNULL(@dblAffordabilityCostFinal,0.0)
+	Begin
+
+		set @strMessageFinal=@strMessage
+		Set @strMessageFinal =REPLACE(@strMessageFinal,'@1',dbo.fnRemoveTrailingZeroes(@dblAffordabilityCostFinal))
+		Set @strMessageFinal =REPLACE(@strMessageFinal,'@2', dbo.fnRemoveTrailingZeroes(@dblExpectedCost))
+
+		Insert Into @tblValidationMessages(intMessageTypeId,strMessage)
+		Values(@intMessageTypeId,@strMessageFinal)
+
+	End
+
+End --End If
+
+End --End Validation #9
 
 
 Select a.intRowNo,a.intMessageTypeId,a.strMessage,

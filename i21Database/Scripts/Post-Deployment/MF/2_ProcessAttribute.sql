@@ -2251,3 +2251,47 @@ BEGIN
 		,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
 END
 GO
+IF NOT EXISTS (
+        SELECT *
+        FROM dbo.tblMFAttribute
+        WHERE intAttributeId = 103
+        )
+BEGIN
+    INSERT INTO tblMFAttribute (
+        intAttributeId
+        ,strAttributeName
+        ,intAttributeDataTypeId
+        ,intAttributeTypeId
+        ,ysnMultiSelect
+        ,strSQL
+        )
+    SELECT 103
+        ,'Quality Test Name To Get Blend Affordability Range'
+        ,5
+        ,2
+        ,0
+        ,'Select convert(varchar,intTestId) as ValueMember,strTestName as DisplayMember from tblQMTest'
+END
+GO
+IF NOT EXISTS (
+        SELECT *
+        FROM dbo.tblMFAttribute
+        WHERE intAttributeId = 104
+        )
+BEGIN
+    INSERT INTO tblMFAttribute (
+        intAttributeId
+        ,strAttributeName
+        ,intAttributeDataTypeId
+        ,intAttributeTypeId
+        ,ysnMultiSelect
+        ,strSQL
+        )
+    SELECT 104
+        ,'User Role To Override Blend Affordability Check'
+        ,5
+        ,2
+        ,0
+        ,'Select convert(varchar,intUserRoleID) as ValueMember,strName as DisplayMember from tblSMUserRole'
+END
+GO
