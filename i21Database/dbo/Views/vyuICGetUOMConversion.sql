@@ -2,10 +2,16 @@
 	AS 
 
 SELECT 
-	UOMConvert.intUnitMeasureConversionId,
-	UOMConvert.intUnitMeasureId,
-	strUnitMeasure = (SELECT strUnitMeasure FROM tblICUnitMeasure WHERE intUnitMeasureId = UOMConvert.intUnitMeasureId),
-	UOMConvert.intStockUnitMeasureId,
-	strStockUOM = (SELECT strUnitMeasure FROM tblICUnitMeasure WHERE intUnitMeasureId = UOMConvert.intStockUnitMeasureId),
-	UOMConvert.dblConversionToStock
-FROM tblICUnitMeasureConversion UOMConvert
+	uc.intUnitMeasureConversionId
+	,uc.intUnitMeasureId
+	,fromUOM.strUnitMeasure 
+	,intStockUnitMeasureId = toUOM.intUnitMeasureId
+	,strStockUOM = toUOM.strUnitMeasure
+	,uc.dblConversionToStock
+	,uc.intConcurrencyId
+	,uc.intSort
+FROM 
+	tblICUnitMeasureConversion uc LEFT JOIN tblICUnitMeasure fromUOM 
+		ON uc.intUnitMeasureId = fromUOM.intUnitMeasureId
+	LEFT JOIN tblICUnitMeasure toUOM
+		ON toUOM.intUnitMeasureId = uc.intStockUnitMeasureId
