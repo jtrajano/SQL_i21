@@ -6117,6 +6117,8 @@
     <Build Include="dbo\uspAPRptTaxReport.sql" />
     <Build Include="dbo\vyuAPRptTaxReport.sql" />
     <Build Include="dbo\Functions\fnSTSeparateStringBySymbol.sql" />
+    <Build Include="dbo\Views\vyuCTGetINCOShipTerm.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTSaveINCOShipTerm.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
