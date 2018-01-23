@@ -70,9 +70,9 @@ BEGIN TRY
 
 	INSERT INTO @tblTempColumnAndValue
 	SELECT 
-		UPPER(dbo.fnSTSeparateStringToColumns(Item, 1, '|')) strDescription,
-		UPPER(dbo.fnSTSeparateStringToColumns(Item, 2, '|')) strLongUPCCode,
-		@strSymbol + CAST(CAST(dbo.fnSTSeparateStringToColumns(Item, 3, '|') AS DECIMAL(18,2)) AS NVARCHAR(50)) dblStandardCost
+		UPPER(dbo.fnSTSeparateStringBySymbol(Item, 1, '|')) strDescription,
+		UPPER(dbo.fnSTSeparateStringBySymbol(Item, 2, '|')) strLongUPCCode,
+		@strSymbol + CAST(CAST(dbo.fnSTSeparateStringBySymbol(Item, 3, '|') AS DECIMAL(18,2)) AS NVARCHAR(50)) dblStandardCost
 	FROM dbo.fnSplitString(@strXmlString, ',')
 
 

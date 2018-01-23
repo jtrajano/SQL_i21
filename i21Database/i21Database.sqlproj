@@ -6116,6 +6116,7 @@
     <Build Include="dbo\fnAPGetVoucherAmountMultiplier.sql" />
     <Build Include="dbo\uspAPRptTaxReport.sql" />
     <Build Include="dbo\vyuAPRptTaxReport.sql" />
+    <Build Include="dbo\Functions\fnSTSeparateStringBySymbol.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
