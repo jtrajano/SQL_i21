@@ -14,9 +14,6 @@ BEGIN
 		--// CREATE storeId table
 		DECLARE @tblStoreIdList TABLE (intCount int,intStoreId int)
 		
-		--TEST
-		INSERT INTO XMLDB.dbo.tblStoredProcTest(strValueOne, strValueTwo)
-		VALUES('', '1')
 
 		--// START Insert StoreId to table
 		DECLARE @strCharacter CHAR(1)
@@ -42,9 +39,6 @@ BEGIN
 		END
 		--// END Insert StoreId to table
 
-		--TEST
-		INSERT INTO XMLDB.dbo.tblStoredProcTest(strValueOne, strValueTwo)
-		VALUES('', '2')
 
 		--// CHECK if stores has address
 		IF EXISTS(SELECT * FROM tblSTStore WHERE intStoreId IN (SELECT intStoreId FROM @tblStoreIdList) AND (strAddress = '' OR strAddress IS NULL))
@@ -53,17 +47,10 @@ BEGIN
 			SET @strCSV = ''
 			SET @strStatusMsg = @strStatusMsg + ' does not have address'
 
-			--TEST
-			INSERT INTO XMLDB.dbo.tblStoredProcTest(strValueOne, strValueTwo)
-			VALUES(@strStatusMsg, 'Check')
-
 			RETURN
 		END
 		--// END CHECK if stores has address
 
-		--TEST
-		INSERT INTO XMLDB.dbo.tblStoredProcTest(strValueOne, strValueTwo)
-		VALUES('', '3')
 
 		--// START CHECK if Stores has department
 		IF EXISTS(SELECT * FROM tblSTStore WHERE intStoreId IN (SELECT intStoreId FROM @tblStoreIdList) AND (strDepartment = '' OR strDepartment IS NULL))
@@ -75,10 +62,6 @@ BEGIN
 		END
 		--// START CHECK if Stores has department
 
-		--TEST
-		INSERT INTO XMLDB.dbo.tblStoredProcTest(strValueOne, strValueTwo)
-		VALUES('', '4')
-
 		--// CHECK if has records based on filter
 		IF EXISTS (SELECT * FROM tblSTTranslogRebates WHERE intStoreId IN (SELECT intStoreId FROM @tblStoreIdList) AND CAST(dtmDate as DATE) >= @dtmBeginningDate AND CAST(dtmDate as DATE) <= @dtmEndingDate AND ysnSubmitted = 0)
 		BEGIN
@@ -87,11 +70,6 @@ BEGIN
 			--START tblSTstgRebatesPMMorris
 			IF(@strTableName = 'tblSTstgRebatesPMMorris')
 			BEGIN
-				--TEST
-				INSERT INTO XMLDB.dbo.tblStoredProcTest(strValueOne, strValueTwo)
-				VALUES('', '5')
-
-
 				SET @Delimiter = '|'
 
 				-- GET week ending date (SATURDAY)
