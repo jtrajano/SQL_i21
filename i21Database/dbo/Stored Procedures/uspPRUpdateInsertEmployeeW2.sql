@@ -4,9 +4,24 @@
 	,@intEmployeeW2Id INT = NULL OUTPUT
 AS
 
+/* Get Box 12 Data */
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpBox12Data')) DROP TABLE #tmpBox12Data
+SELECT
+	intRank = DENSE_RANK() OVER (PARTITION BY PD.intEntityEmployeeId, YEAR(PD.dtmPayDate) ORDER BY TD.strW2Code DESC)
+	,intEntityEmployeeId = PD.intEntityEmployeeId
+	,intYear = YEAR(PD.dtmPayDate)
+	,strW2Code = TD.strW2Code
+	,dblTotal = SUM(PD.dblTotal)
+INTO #tmpBox12Data
+FROM vyuPRPaycheckDeduction PD INNER JOIN tblPRTypeDeduction TD 
+	ON PD.intTypeDeductionId = TD.intTypeDeductionId AND TD.strW2Code IS NOT NULL
+WHERE intEntityEmployeeId = @intEntityEmployeeId AND YEAR(PD.dtmPayDate) = @intYear
+GROUP BY PD.intEntityEmployeeId, YEAR(PD.dtmPayDate), TD.strW2Code
+
 /* Check if Employee W-2 for the Year exists */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblPREmployeeW2 WHERE intYear = @intYear AND intEntityEmployeeId = @intEntityEmployeeId)
 BEGIN
+
 	INSERT INTO tblPREmployeeW2(
 		intEntityEmployeeId
 		,intYear
@@ -60,14 +75,14 @@ BEGIN
 		,dblDependentCare = 0
 		,dblNonqualifiedPlans = 0
 		,strOther = ''
-		,strBox12a = ''
-		,strBox12b = ''
-		,strBox12c = ''
-		,strBox12d = ''
-		,dblBox12a = 0
-		,dblBox12b = 0
-		,dblBox12c = 0
-		,dblBox12d = 0
+		,strBox12a = (SELECT ISNULL(strW2Code, '') FROM #tmpBox12Data WHERE intRank = 1)
+		,strBox12b = (SELECT ISNULL(strW2Code, '') FROM #tmpBox12Data WHERE intRank = 2)
+		,strBox12c = (SELECT ISNULL(strW2Code, '') FROM #tmpBox12Data WHERE intRank = 3)
+		,strBox12d = (SELECT ISNULL(strW2Code, '') FROM #tmpBox12Data WHERE intRank = 4)
+		,dblBox12a = (SELECT ISNULL(dblTotal, 0) FROM #tmpBox12Data WHERE intRank = 1)
+		,dblBox12b = (SELECT ISNULL(dblTotal, 0) FROM #tmpBox12Data WHERE intRank = 2)
+		,dblBox12c = (SELECT ISNULL(dblTotal, 0) FROM #tmpBox12Data WHERE intRank = 3)
+		,dblBox12d = (SELECT ISNULL(dblTotal, 0) FROM #tmpBox12Data WHERE intRank = 4)
 		,strState = ISNULL(STATETAX.strState, '')
 		,strLocality = CASE WHEN (ISNULL(LOCALTAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN ISNULL(LOCALTAX.strLocal, '') 
 							WHEN (ISNULL(SCHOOLTAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN ISNULL(SCHOOLTAX.strLocal, '')
@@ -185,16 +200,16 @@ BEGIN
 				OR (tax.intTypeTaxStateId = 45 AND tax.strVal3 <> 'None (None)'))
 			GROUP BY st.strCode, tax.intTypeTaxStateId, strEmployerStateTaxID, tax.strVal2, tax.strVal3) MUNITAX OUTER APPLY
 		(SELECT intEmployees = COUNT(DISTINCT intEntityEmployeeId),
-				dblGrossSum = SUM(dblGross) 
+				dblGrossSum = SUM(dblGross)
 		FROM tblPRPaycheck 
 		WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnPosted = 1 AND ysnVoid = 0) PCHK
 
 		/* Get created Employee W-2 941 Id */
 		SET @intEmployeeW2Id = SCOPE_IDENTITY()
+
 END
-ELSE
+ELSE /* If it exists, update the values */
 BEGIN
-	/* If it exists, update the values */
 	UPDATE tblPREmployeeW2
 	SET dblAdjustedGross = CASE WHEN (ISNULL(TXBLFIT.dblTotal, 0) - ISNULL(PRTXFIT.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLFIT.dblTotal, 0) - ISNULL(PRTXFIT.dblTotal, 0) END
 		,dblFIT = ISNULL(FIT.dblTotal, 0)
@@ -203,6 +218,14 @@ BEGIN
 		,dblTaxableSSTips = CASE WHEN (ISNULL(TXBLSSTIPS.dblTotal, 0) - ISNULL(PRTXSS.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLSSTIPS.dblTotal, 0) - ISNULL(PRTXSS.dblTotal, 0) END
 		,dblSSTax = ISNULL(SSTAX.dblTotal, 0)
 		,dblMedTax = ISNULL(MEDTAX.dblTotal, 0)
+		,strBox12a = (SELECT ISNULL(strW2Code, '') FROM #tmpBox12Data WHERE intRank = 1)
+		,strBox12b = (SELECT ISNULL(strW2Code, '') FROM #tmpBox12Data WHERE intRank = 2)
+		,strBox12c = (SELECT ISNULL(strW2Code, '') FROM #tmpBox12Data WHERE intRank = 3)
+		,strBox12d = (SELECT ISNULL(strW2Code, '') FROM #tmpBox12Data WHERE intRank = 4)
+		,dblBox12a = (SELECT ISNULL(dblTotal, 0) FROM #tmpBox12Data WHERE intRank = 1)
+		,dblBox12b = (SELECT ISNULL(dblTotal, 0) FROM #tmpBox12Data WHERE intRank = 2)
+		,dblBox12c = (SELECT ISNULL(dblTotal, 0) FROM #tmpBox12Data WHERE intRank = 3)
+		,dblBox12d = (SELECT ISNULL(dblTotal, 0) FROM #tmpBox12Data WHERE intRank = 4)
 		,strState = ISNULL(STATETAX.strState, '')
 		,strLocality = CASE WHEN (ISNULL(LOCALTAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN ISNULL(LOCALTAX.strLocal, '') 
 							WHEN (ISNULL(SCHOOLTAX.strState, '') = ISNULL(STATETAX.strState, '')) THEN ISNULL(SCHOOLTAX.strLocal, '')
@@ -319,6 +342,15 @@ BEGIN
 			AND ((tax.intTypeTaxStateId = 41 AND tax.strVal2 <> 'None')
 				OR (tax.intTypeTaxStateId = 45 AND tax.strVal3 <> 'None (None)'))
 			GROUP BY st.strCode, tax.intTypeTaxStateId, strEmployerStateTaxID, tax.strVal2, tax.strVal3) MUNITAX OUTER APPLY
+		(SELECT
+			intRank = DENSE_RANK() OVER (PARTITION BY PD.intEntityEmployeeId, YEAR(PD.dtmPayDate) ORDER BY TD.strW2Code DESC)
+			,PD.intEntityEmployeeId
+			,intYear = YEAR(PD.dtmPayDate)
+			,TD.strW2Code
+			,dblTotal = SUM(PD.dblTotal)
+			FROM vyuPRPaycheckDeduction PD INNER JOIN tblPRTypeDeduction TD 
+				ON PD.intTypeDeductionId = TD.intTypeDeductionId AND TD.strW2Code IS NOT NULL
+			GROUP BY PD.intEntityEmployeeId, YEAR(PD.dtmPayDate), TD.strW2Code) BOX12CODES OUTER APPLY
 		(SELECT intEmployees = COUNT(DISTINCT intEntityEmployeeId),
 				dblGrossSum = SUM(dblGross) 
 		FROM tblPRPaycheck 
@@ -326,6 +358,10 @@ BEGIN
 
 	/* Get the updated Employee W-2 941 Id */
 	SELECT TOP 1 @intEmployeeW2Id = intEmployeeW2Id FROM tblPREmployeeW2 WHERE intYear = @intYear AND intEntityEmployeeId = @intEntityEmployeeId
+
 END
+
+/* Clean-up Codes */
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpBox12Data')) DROP TABLE #tmpBox12Data
 
 GO
