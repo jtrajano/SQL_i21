@@ -2,6 +2,10 @@
 	@intInvoiceDetailId INT
 	,@intImportBaseEngineeringId INT
 	,@intTaxGroupId INT
+	,@ysnRecomputeTax BIT = 0
+	,@ysnOverFill BIT = 0
+	,@TotalQuantity NUMERIC(18,6) = 0
+	,@PrebuyQuantity NUMERIC(18,6) = 0
 AS
 BEGIN
 	DECLARE @dblTaxCategory1 NUMERIC(18, 6) 
@@ -23,7 +27,8 @@ BEGIN
 	DECLARE @dblTaxCategory17 NUMERIC(18, 6)  
 	DECLARE @dblTaxCategory18 NUMERIC(18, 6)  
 	DECLARE @dblTaxCategory19 NUMERIC(18, 6)  
-	DECLARE @dblTaxCategory20 NUMERIC(18, 6)  
+	DECLARE @dblTaxCategory20 NUMERIC(18, 6) 
+ 
 	DECLARE @dblTaxCategory21 NUMERIC(18, 6)  
 	DECLARE @dblTaxCategory22 NUMERIC(18, 6)  
 	DECLARE @dblTaxCategory23 NUMERIC(18, 6)  
@@ -102,37 +107,39 @@ BEGIN
 	WHERE code = @intTaxGroupId
 
 
+	--CASE WHEN ysnLoad = 1 THEN intNoOfLoad ELSE dblDetailQuantity END
+
 	SELECT TOP 1 
-		@dblTaxCategory1 = dblTaxCategory1
-		,@dblTaxCategory2 = dblTaxCategory2
-		,@dblTaxCategory3 = dblTaxCategory3
-		,@dblTaxCategory4 = dblTaxCategory4
-		,@dblTaxCategory5 = dblTaxCategory5
-		,@dblTaxCategory6 = dblTaxCategory6
-		,@dblTaxCategory7 = dblTaxCategory7  
-		,@dblTaxCategory8 = dblTaxCategory8  
-		,@dblTaxCategory9 = dblTaxCategory9  
-		,@dblTaxCategory10 = dblTaxCategory10  
-		,@dblTaxCategory11 = dblTaxCategory11  
-		,@dblTaxCategory12 = dblTaxCategory12  
-		,@dblTaxCategory13 = dblTaxCategory13  
-		,@dblTaxCategory14 = dblTaxCategory14  
-		,@dblTaxCategory15 = dblTaxCategory15  
-		,@dblTaxCategory16 = dblTaxCategory16  
-		,@dblTaxCategory17 = dblTaxCategory17  
-		,@dblTaxCategory18 = dblTaxCategory18  
-		,@dblTaxCategory19 = dblTaxCategory19  
-		,@dblTaxCategory20 = dblTaxCategory20  
-		,@dblTaxCategory21 = dblTaxCategory21  
-		,@dblTaxCategory22 = dblTaxCategory22  
-		,@dblTaxCategory23 = dblTaxCategory23  
-		,@dblTaxCategory24 = dblTaxCategory24  
-		,@dblTaxCategory25 = dblTaxCategory25  
-		,@dblTaxCategory26 = dblTaxCategory26  
-		,@dblTaxCategory27 = dblTaxCategory27  
-		,@dblTaxCategory28 = dblTaxCategory28  
-		,@dblTaxCategory29 = dblTaxCategory29  
-		,@dblTaxCategory30 = dblTaxCategory30 
+		@dblTaxCategory1 = (CASE WHEN @ysnRecomputeTax = 1  THEN ((@PrebuyQuantity/@TotalQuantity) * dblTaxCategory1 ) - (CASE WHEN @ysnOverFill = (@PrebuyQuantity/@TotalQuantity) * dblTaxCategory1 THEN 0 ELSE 0 END) ELSE dblTaxCategory1 END)
+		,@dblTaxCategory2 = (CASE WHEN @ysnRecomputeTax = 1  THEN ((@PrebuyQuantity/@TotalQuantity) * dblTaxCategory2 ) - (CASE WHEN @ysnOverFill = (@PrebuyQuantity/@TotalQuantity) * dblTaxCategory2 THEN 0 ELSE 0 END) ELSE dblTaxCategory2 END)
+		,@dblTaxCategory3 = (CASE WHEN @ysnRecomputeTax = 1  THEN ((@PrebuyQuantity/@TotalQuantity) * dblTaxCategory3 ) - (CASE WHEN @ysnOverFill = (@PrebuyQuantity/@TotalQuantity) * dblTaxCategory3 THEN 0 ELSE 0 END) ELSE dblTaxCategory3 END)
+		,@dblTaxCategory4 = (CASE WHEN @ysnRecomputeTax = 1  THEN ((@PrebuyQuantity/@TotalQuantity) * dblTaxCategory4 ) - (CASE WHEN @ysnOverFill = (@PrebuyQuantity/@TotalQuantity) * dblTaxCategory4 THEN 0 ELSE 0 END) ELSE dblTaxCategory4 END)
+		,@dblTaxCategory5 = (CASE WHEN @ysnRecomputeTax = 1  THEN ((@PrebuyQuantity/@TotalQuantity) * dblTaxCategory5 ) - (CASE WHEN @ysnOverFill = (@PrebuyQuantity/@TotalQuantity) * dblTaxCategory5 THEN 0 ELSE 0 END) ELSE dblTaxCategory5 END)
+		,@dblTaxCategory6 = (CASE WHEN @ysnRecomputeTax = 1  THEN ((@PrebuyQuantity/@TotalQuantity) * dblTaxCategory6 ) - (CASE WHEN @ysnOverFill = (@PrebuyQuantity/@TotalQuantity) * dblTaxCategory6 THEN 0 ELSE 0 END) ELSE dblTaxCategory6 END)
+		,@dblTaxCategory7 = (CASE WHEN @ysnRecomputeTax = 1  THEN ((@PrebuyQuantity/@TotalQuantity) * dblTaxCategory7 ) - (CASE WHEN @ysnOverFill = (@PrebuyQuantity/@TotalQuantity) * dblTaxCategory7 THEN 0 ELSE 0 END) ELSE dblTaxCategory7 END)
+		,@dblTaxCategory8 = (CASE WHEN @ysnRecomputeTax = 1  THEN ((@PrebuyQuantity/@TotalQuantity) * dblTaxCategory8 ) - (CASE WHEN @ysnOverFill = (@PrebuyQuantity/@TotalQuantity) * dblTaxCategory8 THEN 0 ELSE 0 END) ELSE dblTaxCategory8 END)
+		,@dblTaxCategory9 = (CASE WHEN @ysnRecomputeTax = 1  THEN ((@PrebuyQuantity/@TotalQuantity) * dblTaxCategory9 ) - (CASE WHEN @ysnOverFill = (@PrebuyQuantity/@TotalQuantity) * dblTaxCategory9 THEN 0 ELSE 0 END) ELSE dblTaxCategory9 END)
+		,@dblTaxCategory10 = (CASE WHEN @ysnRecomputeTax = 1  THEN ((@PrebuyQuantity/@TotalQuantity) * dblTaxCategory10 ) - (CASE WHEN @ysnOverFill = (@PrebuyQuantity/@TotalQuantity) * dblTaxCategory10 THEN 0 ELSE 0 END) ELSE dblTaxCategory10 END)
+		,@dblTaxCategory11 = (CASE WHEN @ysnRecomputeTax = 1  THEN ((@PrebuyQuantity/@TotalQuantity) * dblTaxCategory11 ) - (CASE WHEN @ysnOverFill = (@PrebuyQuantity/@TotalQuantity) * dblTaxCategory11 THEN 0 ELSE 0 END) ELSE dblTaxCategory11 END)
+		,@dblTaxCategory12 = (CASE WHEN @ysnRecomputeTax = 1  THEN ((@PrebuyQuantity/@TotalQuantity) * dblTaxCategory12 ) - (CASE WHEN @ysnOverFill = (@PrebuyQuantity/@TotalQuantity) * dblTaxCategory12 THEN 0 ELSE 0 END) ELSE dblTaxCategory12 END)
+		,@dblTaxCategory13 = (CASE WHEN @ysnRecomputeTax = 1  THEN ((@PrebuyQuantity/@TotalQuantity) * dblTaxCategory13 ) - (CASE WHEN @ysnOverFill = (@PrebuyQuantity/@TotalQuantity) * dblTaxCategory13 THEN 0 ELSE 0 END) ELSE dblTaxCategory13 END)
+		,@dblTaxCategory14 = (CASE WHEN @ysnRecomputeTax = 1  THEN ((@PrebuyQuantity/@TotalQuantity) * dblTaxCategory14 ) - (CASE WHEN @ysnOverFill = (@PrebuyQuantity/@TotalQuantity) * dblTaxCategory14 THEN 0 ELSE 0 END) ELSE dblTaxCategory14 END)
+		,@dblTaxCategory15 = (CASE WHEN @ysnRecomputeTax = 1  THEN ((@PrebuyQuantity/@TotalQuantity) * dblTaxCategory15 ) - (CASE WHEN @ysnOverFill = (@PrebuyQuantity/@TotalQuantity) * dblTaxCategory15 THEN 0 ELSE 0 END) ELSE dblTaxCategory15 END)
+		,@dblTaxCategory16 = (CASE WHEN @ysnRecomputeTax = 1  THEN ((@PrebuyQuantity/@TotalQuantity) * dblTaxCategory16 ) - (CASE WHEN @ysnOverFill = (@PrebuyQuantity/@TotalQuantity) * dblTaxCategory16 THEN 0 ELSE 0 END) ELSE dblTaxCategory16 END)
+		,@dblTaxCategory17 = (CASE WHEN @ysnRecomputeTax = 1  THEN ((@PrebuyQuantity/@TotalQuantity) * dblTaxCategory17 ) - (CASE WHEN @ysnOverFill = (@PrebuyQuantity/@TotalQuantity) * dblTaxCategory17 THEN 0 ELSE 0 END) ELSE dblTaxCategory17 END)
+		,@dblTaxCategory18 = (CASE WHEN @ysnRecomputeTax = 1  THEN ((@PrebuyQuantity/@TotalQuantity) * dblTaxCategory18 ) - (CASE WHEN @ysnOverFill = (@PrebuyQuantity/@TotalQuantity) * dblTaxCategory18 THEN 0 ELSE 0 END) ELSE dblTaxCategory18 END)
+		,@dblTaxCategory19 = (CASE WHEN @ysnRecomputeTax = 1  THEN ((@PrebuyQuantity/@TotalQuantity) * dblTaxCategory19 ) - (CASE WHEN @ysnOverFill = (@PrebuyQuantity/@TotalQuantity) * dblTaxCategory19 THEN 0 ELSE 0 END) ELSE dblTaxCategory19 END)
+		,@dblTaxCategory20 = (CASE WHEN @ysnRecomputeTax = 1  THEN ((@PrebuyQuantity/@TotalQuantity) * dblTaxCategory20 ) - (CASE WHEN @ysnOverFill = (@PrebuyQuantity/@TotalQuantity) * dblTaxCategory20 THEN 0 ELSE 0 END) ELSE dblTaxCategory20 END)
+		,@dblTaxCategory21 = (CASE WHEN @ysnRecomputeTax = 1  THEN ((@PrebuyQuantity/@TotalQuantity) * dblTaxCategory21 ) - (CASE WHEN @ysnOverFill = (@PrebuyQuantity/@TotalQuantity) * dblTaxCategory21 THEN 0 ELSE 0 END) ELSE dblTaxCategory21 END)
+		,@dblTaxCategory22 = (CASE WHEN @ysnRecomputeTax = 1  THEN ((@PrebuyQuantity/@TotalQuantity) * dblTaxCategory22 ) - (CASE WHEN @ysnOverFill = (@PrebuyQuantity/@TotalQuantity) * dblTaxCategory22 THEN 0 ELSE 0 END) ELSE dblTaxCategory22 END)
+		,@dblTaxCategory23 = (CASE WHEN @ysnRecomputeTax = 1  THEN ((@PrebuyQuantity/@TotalQuantity) * dblTaxCategory23 ) - (CASE WHEN @ysnOverFill = (@PrebuyQuantity/@TotalQuantity) * dblTaxCategory23 THEN 0 ELSE 0 END) ELSE dblTaxCategory23 END)
+		,@dblTaxCategory24 = (CASE WHEN @ysnRecomputeTax = 1  THEN ((@PrebuyQuantity/@TotalQuantity) * dblTaxCategory24 ) - (CASE WHEN @ysnOverFill = (@PrebuyQuantity/@TotalQuantity) * dblTaxCategory24 THEN 0 ELSE 0 END) ELSE dblTaxCategory24 END)
+		,@dblTaxCategory25 = (CASE WHEN @ysnRecomputeTax = 1  THEN ((@PrebuyQuantity/@TotalQuantity) * dblTaxCategory25 ) - (CASE WHEN @ysnOverFill = (@PrebuyQuantity/@TotalQuantity) * dblTaxCategory25 THEN 0 ELSE 0 END) ELSE dblTaxCategory25 END)
+		,@dblTaxCategory26 = (CASE WHEN @ysnRecomputeTax = 1  THEN ((@PrebuyQuantity/@TotalQuantity) * dblTaxCategory26 ) - (CASE WHEN @ysnOverFill = (@PrebuyQuantity/@TotalQuantity) * dblTaxCategory26 THEN 0 ELSE 0 END) ELSE dblTaxCategory26 END)
+		,@dblTaxCategory27 = (CASE WHEN @ysnRecomputeTax = 1  THEN ((@PrebuyQuantity/@TotalQuantity) * dblTaxCategory27 ) - (CASE WHEN @ysnOverFill = (@PrebuyQuantity/@TotalQuantity) * dblTaxCategory27 THEN 0 ELSE 0 END) ELSE dblTaxCategory27 END)
+		,@dblTaxCategory28 = (CASE WHEN @ysnRecomputeTax = 1  THEN ((@PrebuyQuantity/@TotalQuantity) * dblTaxCategory28 ) - (CASE WHEN @ysnOverFill = (@PrebuyQuantity/@TotalQuantity) * dblTaxCategory28 THEN 0 ELSE 0 END) ELSE dblTaxCategory28 END)
+		,@dblTaxCategory29 = (CASE WHEN @ysnRecomputeTax = 1  THEN ((@PrebuyQuantity/@TotalQuantity) * dblTaxCategory29 ) - (CASE WHEN @ysnOverFill = (@PrebuyQuantity/@TotalQuantity) * dblTaxCategory29 THEN 0 ELSE 0 END) ELSE dblTaxCategory29 END)
+		,@dblTaxCategory30 = (CASE WHEN @ysnRecomputeTax = 1  THEN ((@PrebuyQuantity/@TotalQuantity) * dblTaxCategory30 ) - (CASE WHEN @ysnOverFill = (@PrebuyQuantity/@TotalQuantity) * dblTaxCategory30 THEN 0 ELSE 0 END) ELSE dblTaxCategory30 END)
 	FROM tblETImportBaseEngineering
 	WHERE intImportBaseEngineeringId = @intImportBaseEngineeringId
 
@@ -204,4 +211,3 @@ BEGIN
 
 		
 END
-GO
