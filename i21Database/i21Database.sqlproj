@@ -6113,6 +6113,9 @@
     <Build Include="dbo\Views\vyuRKGetGLAccountDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspEMUpdateEntityCredential.sql" />
     <Build Include="dbo\User Defined Types\ServiceChargeInvoiceParam.sql" />
+    <Build Include="dbo\fnAPGetVoucherAmountMultiplier.sql" />
+    <Build Include="dbo\uspAPRptTaxReport.sql" />
+    <Build Include="dbo\vyuAPRptTaxReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
