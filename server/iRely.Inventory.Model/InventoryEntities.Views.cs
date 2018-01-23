@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetscdf581afe63c02ab109f28851fd3a365fcdbe8de7b29336c53ec9b73be817450))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsbf99bfb3b45637db927fc653d511d50d780ac97cc5a29ddac5d2813a73e361e7))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySetscdf581afe63c02ab109f28851fd3a365fcdbe8de7b29336c53ec9b73be817450 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetsbf99bfb3b45637db927fc653d511d50d780ac97cc5a29ddac5d2813a73e361e7 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "cdf581afe63c02ab109f28851fd3a365fcdbe8de7b29336c53ec9b73be817450"; }
+            get { return "bf99bfb3b45637db927fc653d511d50d780ac97cc5a29ddac5d2813a73e361e7"; }
         }
 
         /// <summary>
@@ -5330,7 +5330,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICCommodityUnitMeasure
-        [CodeFirstDatabaseSchema.tblICCommodityUnitMeasure](T1.tblICCommodityUnitMeasure_intCommodityUnitMeasureId, T1.tblICCommodityUnitMeasure_intCommodityId, T1.tblICCommodityUnitMeasure_intUnitMeasureId, T1.tblICCommodityUnitMeasure_dblUnitQty, T1.tblICCommodityUnitMeasure_ysnStockUnit, T1.tblICCommodityUnitMeasure_ysnDefault, T1.tblICCommodityUnitMeasure_intSort, T1.tblICCommodityUnitMeasure_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICCommodityUnitMeasure](T1.tblICCommodityUnitMeasure_intCommodityUnitMeasureId, T1.tblICCommodityUnitMeasure_intCommodityId, T1.tblICCommodityUnitMeasure_intUnitMeasureId, T1.tblICCommodityUnitMeasure_dblUnitQty, T1.tblICCommodityUnitMeasure_ysnStockUnit, T1.tblICCommodityUnitMeasure_ysnDefault, T1.tblICCommodityUnitMeasure_ysnStockUOM, T1.tblICCommodityUnitMeasure_intSort, T1.tblICCommodityUnitMeasure_intConcurrencyId)
     FROM (
         SELECT 
             T.intCommodityUnitMeasureId AS tblICCommodityUnitMeasure_intCommodityUnitMeasureId, 
@@ -5339,6 +5339,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.dblUnitQty AS tblICCommodityUnitMeasure_dblUnitQty, 
             T.ysnStockUnit AS tblICCommodityUnitMeasure_ysnStockUnit, 
             T.ysnDefault AS tblICCommodityUnitMeasure_ysnDefault, 
+            T.ysnStockUOM AS tblICCommodityUnitMeasure_ysnStockUOM, 
             T.intSort AS tblICCommodityUnitMeasure_intSort, 
             T.intConcurrencyId AS tblICCommodityUnitMeasure_intConcurrencyId, 
             True AS _from0
@@ -9297,7 +9298,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICCommodityUnitMeasures
-        [iRely.Inventory.Model.tblICCommodityUnitMeasure](T1.tblICCommodityUnitMeasure_intCommodityUnitMeasureId, T1.tblICCommodityUnitMeasure_intCommodityId, T1.tblICCommodityUnitMeasure_intUnitMeasureId, T1.tblICCommodityUnitMeasure_dblUnitQty, T1.tblICCommodityUnitMeasure_ysnStockUnit, T1.tblICCommodityUnitMeasure_ysnDefault, T1.tblICCommodityUnitMeasure_intSort, T1.tblICCommodityUnitMeasure_intConcurrencyId)
+        [iRely.Inventory.Model.tblICCommodityUnitMeasure](T1.tblICCommodityUnitMeasure_intCommodityUnitMeasureId, T1.tblICCommodityUnitMeasure_intCommodityId, T1.tblICCommodityUnitMeasure_intUnitMeasureId, T1.tblICCommodityUnitMeasure_dblUnitQty, T1.tblICCommodityUnitMeasure_ysnStockUnit, T1.tblICCommodityUnitMeasure_ysnDefault, T1.tblICCommodityUnitMeasure_ysnStockUOM, T1.tblICCommodityUnitMeasure_intSort, T1.tblICCommodityUnitMeasure_intConcurrencyId)
     FROM (
         SELECT 
             T.intCommodityUnitMeasureId AS tblICCommodityUnitMeasure_intCommodityUnitMeasureId, 
@@ -9306,6 +9307,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.dblUnitQty AS tblICCommodityUnitMeasure_dblUnitQty, 
             T.ysnStockUnit AS tblICCommodityUnitMeasure_ysnStockUnit, 
             T.ysnDefault AS tblICCommodityUnitMeasure_ysnDefault, 
+            T.ysnStockUOM AS tblICCommodityUnitMeasure_ysnStockUOM, 
             T.intSort AS tblICCommodityUnitMeasure_intSort, 
             T.intConcurrencyId AS tblICCommodityUnitMeasure_intConcurrencyId, 
             True AS _from0

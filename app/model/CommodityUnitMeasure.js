@@ -31,6 +31,7 @@ Ext.define('Inventory.model.CommodityUnitMeasure', {
         { name: 'dblUnitQty', type: 'float' },
         { name: 'ysnStockUnit', type: 'boolean' },
         { name: 'ysnDefault', type: 'boolean' },
+        { name: 'ysnStockUOM', type: 'boolean', allowNull: true  },
         { name: 'intSort', type: 'int', allowNull: true },
 
         { name: 'strUnitMeasure', type: 'string'}

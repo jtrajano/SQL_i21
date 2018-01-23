@@ -236,6 +236,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblUnitQty).HasColumnName("dblUnitQty").HasPrecision(38, 20);
             this.Property(t => t.ysnStockUnit).HasColumnName("ysnStockUnit");
             this.Property(t => t.ysnDefault).HasColumnName("ysnDefault");
+            this.Property(t => t.ysnStockUOM).HasColumnName("ysnStockUOM");
             this.Property(t => t.intSort).HasColumnName("intSort");
 
             this.HasOptional(p => p.tblICUnitMeasure)

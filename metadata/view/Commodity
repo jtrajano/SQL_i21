@@ -1843,9 +1843,9 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "flex": 1,
-                                                "itemId": "colUOMStockUnit",
+                                                "itemId": "colUOMBaseUnit",
                                                 "stopSelection": false,
-                                                "text": "Stock Unit"
+                                                "text": "Base Unit"
                                             },
                                             "configAlternates": {
                                                 "flex": "number",
@@ -1856,6 +1856,29 @@
                                             },
                                             "name": "MyCheck",
                                             "designerId": "26a91c5d-92cb-49d4-b040-a632ba5706cc"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Check",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "flex": 1,
+                                                "itemId": "colUOMStockUom",
+                                                "stopSelection": false,
+                                                "text": "Stock UOM"
+                                            },
+                                            "configAlternates": {
+                                                "flex": "number",
+                                                "itemId": "string",
+                                                "stopSelection": "boolean",
+                                                "text": "string",
+                                                "scrollable": "boolean"
+                                            },
+                                            "name": "MyCheck1",
+                                            "designerId": "fedda0f8-ec19-427f-943b-3a47cff310e4"
                                         },
                                         {
                                             "type": "Ext.grid.column.Check",

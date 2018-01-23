@@ -414,6 +414,7 @@ namespace iRely.Inventory.Model
         public decimal? dblUnitQty { get; set; }
         public bool ysnStockUnit { get; set; }
         public bool ysnDefault { get; set; }
+        public bool? ysnStockUOM { get; set; }
         public int? intSort { get; set; }
 
         private string _unitmeasure;

@@ -98,7 +98,8 @@ Ext.define('Inventory.view.CommodityViewController', {
                     }
                 },
                 colUOMUnitQty: 'dblUnitQty',
-                colUOMStockUnit: 'ysnStockUnit',
+                colUOMBaseUnit: 'ysnStockUnit',
+                colUOMStockUom: 'ysnStockUOM',
                 colUOMDefaultUOM: 'ysnDefault'
             },
 
@@ -434,7 +435,7 @@ Ext.define('Inventory.view.CommodityViewController', {
         }
     },
 
-    onUOMStockUnitCheckChange: function (obj, rowIndex, checked, eOpts) {
+    onUOMCheckChange: function (obj, rowIndex, checked, eOpts) {
         var me = this;
         var grid = obj.up('grid');
         var win = obj.up('window');
@@ -475,6 +476,15 @@ Ext.define('Inventory.view.CommodityViewController', {
                 });
             }
         }
+        else if (obj.dataIndex === 'ysnStockUOM'){
+            if (checked === true) {
+                uoms.forEach(function (uom) {
+                    if (uom !== current) {
+                        uom.set('ysnStockUOM', false);
+                    }
+                });
+            }
+        }        
     },
     
      onFutureMarketDrilldown: function(combo) {
@@ -529,11 +539,14 @@ Ext.define('Inventory.view.CommodityViewController', {
             "#txtUOMUnitQty": {
                 change: this.onUOMUnitQty
             },
-            "#colUOMStockUnit": {
-                beforecheckchange: this.onUOMStockUnitCheckChange
+            "#colUOMBaseUnit": {
+                beforecheckchange: this.onUOMCheckChange
             },
             "#colUOMDefaultUOM": {
-                beforecheckchange: this.onUOMStockUnitCheckChange
+                beforecheckchange: this.onUOMCheckChange
+            },
+            "#colUOMStockUom": {
+                beforecheckchange: this.onUOMCheckChange
             },
              "#cboFutureMarket": {
                 drilldown: this.onFutureMarketDrilldown

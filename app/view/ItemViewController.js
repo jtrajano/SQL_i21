@@ -3665,6 +3665,7 @@ Ext.define('Inventory.view.ItemViewController', {
                                         intUnitMeasureId : uom.intUnitMeasureId,
                                         dblUnitQty : uom.dblUnitQty,
                                         ysnStockUnit : uom.ysnStockUnit,
+                                        ysnStockUOM: uom.ysnStockUOM, 
                                         ysnAllowPurchase : true,
                                         ysnAllowSale : true,
                                         dblLength : 0.00,
