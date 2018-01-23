@@ -18,6 +18,7 @@ Type the overview for the table here.
 		[dblUnitQty] NUMERIC(38, 20) NULL,
 		[ysnStockUnit] BIT NULL DEFAULT ((0)), 
 		[ysnDefault] BIT NULL DEFAULT ((0)),
+		[ysnStockUOM] BIT NULL, 
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICCommodityUnitMeasure] PRIMARY KEY ([intCommodityUnitMeasureId]), 
