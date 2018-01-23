@@ -42,7 +42,7 @@ Ext.define('Inventory.view.Bundle', {
     hidden: false,
     minHeight: 650,
     minWidth: 935,
-    width: 935,
+    width: 1050,
     layout: 'fit',
     collapsible: true,
     title: 'Bundle',
@@ -399,7 +399,7 @@ Ext.define('Inventory.view.Bundle', {
                                                 items: [
                                                     {
                                                         xtype: 'panel',
-                                                        flex: 1.6,
+                                                        flex: 1,
                                                         region: 'center',
                                                         split: true,
                                                         border: true,
@@ -453,8 +453,8 @@ Ext.define('Inventory.view.Bundle', {
                                                                                 xtype: 'gridcolumn',
                                                                                 headerDrillDownClick: 'onBundleItemHeaderClick',
                                                                                 headerDrillDownText: 'Open',
+                                                                                flex: 1,
                                                                                 itemId: 'colBundleItem',
-                                                                                width: 135,
                                                                                 dataIndex: 'string',
                                                                                 text: 'Item',
                                                                                 editor: {
@@ -505,9 +505,9 @@ Ext.define('Inventory.view.Bundle', {
                                                                             {
                                                                                 xtype: 'numbercolumn',
                                                                                 itemId: 'colBundleQuantity',
-                                                                                width: 85,
+                                                                                width: 60,
                                                                                 align: 'right',
-                                                                                text: 'Quantity',
+                                                                                text: 'Qty',
                                                                                 editor: {
                                                                                     xtype: 'numberfield',
                                                                                     quantityField: true,
@@ -563,8 +563,9 @@ Ext.define('Inventory.view.Bundle', {
                                                                             {
                                                                                 xtype: 'numbercolumn',
                                                                                 itemId: 'colBundleMarkUpOrDown',
+                                                                                width: 90,
                                                                                 align: 'right',
-                                                                                text: 'Mark Up/Down',
+                                                                                text: 'Markup/down',
                                                                                 editor: {
                                                                                     xtype: 'numberfield',
                                                                                     quantityField: true,
@@ -616,7 +617,7 @@ Ext.define('Inventory.view.Bundle', {
                                                         region: 'east',
                                                         split: true,
                                                         border: true,
-                                                        flex: 0.9,
+                                                        flex: 1,
                                                         layout: 'border',
                                                         collapseDirection: 'right',
                                                         collapsible: true,
@@ -673,9 +674,8 @@ Ext.define('Inventory.view.Bundle', {
                                                                                 xtype: 'gridcolumn',
                                                                                 headerDrillDownText: 'Open Inventory UOM',
                                                                                 headerDrillDownClick: 'onUOMHeaderClick',
+                                                                                flex: 1,
                                                                                 itemId: 'colDetailUnitMeasure',
-                                                                                minWidth: 95,
-                                                                                width: 120,
                                                                                 dataIndex: 'intUnitMeasureId',
                                                                                 text: 'Unit',
                                                                                 editor: {
@@ -706,9 +706,37 @@ Ext.define('Inventory.view.Bundle', {
                                                                                 }
                                                                             },
                                                                             {
+                                                                                xtype: 'numbercolumn',
+                                                                                itemId: 'colDetailUnitQty',
+                                                                                modelValidation: true,
+                                                                                width: 90,
+                                                                                align: 'right',
+                                                                                dataIndex: 'number',
+                                                                                text: 'Unit Qty',
+                                                                                editor: {
+                                                                                    xtype: 'numberfield',
+                                                                                    quantityField: true,
+                                                                                    validateOnChange: false,
+                                                                                    fieldStyle: 'text-align:right',
+                                                                                    hideTrigger: true
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'checkcolumn',
+                                                                                itemId: 'colBaseUnit',
+                                                                                width: 60,
+                                                                                text: 'Base Unit'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'checkcolumn',
+                                                                                itemId: 'colStockUOM',
+                                                                                width: 70,
+                                                                                text: 'Stock UOM'
+                                                                            },
+                                                                            {
                                                                                 xtype: 'checkcolumn',
                                                                                 itemId: 'colAllowSale',
-                                                                                width: 80,
+                                                                                width: 70,
                                                                                 text: 'Allow Sale'
                                                                             },
                                                                             {

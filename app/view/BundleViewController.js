@@ -64,6 +64,9 @@ Ext.define('Inventory.view.BundleViewController', {
                         store: '{uomUnitMeasure}'
                     }
                 },
+                colDetailUnitQty: 'dblUnitQty',
+                colBaseUnit: 'ysnStockUnit',
+                colStockUOM: 'ysnStockUOM',
                 colAllowSale: 'ysnAllowSale',
                 colAllowPurchase: 'ysnAllowPurchase',
                 colDetailShortUPC: {
