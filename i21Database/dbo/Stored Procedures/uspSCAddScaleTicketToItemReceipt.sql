@@ -122,7 +122,11 @@ SELECT
 											END
 									END
 		,intLocationId				= SC.intProcessingLocationId
-		,intShipFromId				= (select top 1 intShipFromId from tblAPVendor where intEntityId = @intEntityId)
+		,intShipFromId				= CASE 
+										WHEN ISNULL((SELECT TOP 1 intShipFromId from tblAPVendor where intEntityId = @intEntityId), 0) > 0
+										THEN (SELECT TOP 1 intShipFromId from tblAPVendor where intEntityId = @intEntityId)
+										ELSE (SELECT TOP 1 intEntityLocationId from tblEMEntityLocation where intEntityId = @intEntityId AND ysnDefaultLocation = 1)
+									END
 		,intShipViaId				= SC.intFreightCarrierId
 		,intDiscountSchedule		= SC.intDiscountId
 		,strVendorRefNo				= 'TKT-' + SC.strTicketNumber

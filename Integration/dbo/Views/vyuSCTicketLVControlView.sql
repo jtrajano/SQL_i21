@@ -45,8 +45,8 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 					[strTicketPool] NVARCHAR(5) COLLATE Latin1_General_CI_AS NULL, 
 					[strSplitNumber] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,    
 					[ysnProcessedData] BIT NULL DEFAULT((0)),
-					[intOriginTicketId] INT NOT NULL
-					CONSTRAINT [PK_tblSCTicketLVStaging_intTicketId] PRIMARY KEY ([intTicketId]), 
+					[intOriginTicketId] INT NOT NULL,
+					CONSTRAINT [PK_tblSCTicketLVStaging_intTicketId] PRIMARY KEY ([intTicketId]) 
 				)
 			END
 		')
