@@ -940,159 +940,80 @@ FROM (
 
 	UNION ALL 
 
-	SELECT strTransactionType				= 'Load Schedule'
-	     , strTransactionNumber				= L.strLoadNumber
-	     , strShippedItemId					= 'lgis:' + CAST(L.intLoadId AS NVARCHAR(250))
-	     , intEntityCustomerId				= LD.intCustomerEntityId
-	     , intCurrencyId					= ARCC.intCurrencyId
-	     , intSalesOrderId					= NULL
-	     , intSalesOrderDetailId			= NULL
-	     , strSalesOrderNumber				= ''
-	     , dtmProcessDate					= L.dtmScheduledDate
-	     , intInventoryShipmentId			= NULL
-	     , intInventoryShipmentItemId		= NULL
-	     , intInventoryShipmentChargeId		= NULL
-	     , strInventoryShipmentNumber		= NULL
-	     , intShipmentId					= NULL
-	     , strShipmentNumber				= NULL
-	     , intLoadId						= L.intLoadId
-	     , intLoadDetailId					= LD.intLoadDetailId
-	     , intLotId							= NULL
-	     , strLoadNumber					= L.strLoadNumber
-	     , intRecipeItemId					= NULL
-	     , intContractHeaderId				= ARCC.intContractHeaderId
-	     , intContractDetailId				= ISNULL(ARCC.intContractDetailId, LD.intPContractDetailId)
-	     , intCompanyLocationId				= LD.intSCompanyLocationId
-	     , intShipToLocationId				= NULL
-	     , intFreightTermId					= ARCC.intFreightTermId
-	     , intItemId						= LD.intItemId
-	     , strItemDescription				= NULL
-	     , intItemUOMId						= ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId)
-	     , intOrderUOMId					= ARCC.intOrderUOMId
-	     , intShipmentItemUOMId				= ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId)
-		 , intWeightUOMId					= LD.intWeightItemUOMId --ARCC.intItemWeightUOMId
-		 , dblWeight						= dbo.fnCalculateQtyBetweenUOM(LD.intWeightItemUOMId, ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), 1.000000)
-		 , dblQtyShipped					= dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intOrderUOMId, LD.intWeightItemUOMId), ISNULL(ARCC.intItemUOMId, LD.intItemUOMId), LD.dblQuantity)
-		 , dblQtyOrdered					= ISNULL(LD.dblQuantity, 0)
-		 , dblShipmentQuantity				= dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intItemUOMId, ARCC.intItemUOMId), ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId), ISNULL(LD.dblQuantity, ARCC.dblShipQuantity))
-		 , dblShipmentQtyShippedTotal		= dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intItemUOMId, ARCC.intItemUOMId), ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId), ISNULL(LD.dblQuantity, ARCC.dblShipQuantity))
-		 , dblQtyRemaining					= dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intItemUOMId, ARCC.intItemUOMId), ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId), ISNULL(LD.dblQuantity, ARCC.dblShipQuantity))
-	     , dblDiscount						= 0
-	     , dblPrice							= ARCC.dblOrderPrice
-	     , dblShipmentUnitPrice				= ((ARCC.dblUnitPrice) / dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId), ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), 1))
-	     , strPricing						= ''
-	     , strVFDDocumentNumber				= NULL
-	     , dblTotalTax						= 0
-	     , dblTotal							= ((ARCC.dblUnitPrice) / dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId), ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), 1))
-											* dbo.fnCalculateQtyBetweenUOM(ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), ISNULL(LDL.dblNet,LD.dblNet))
-	     , intStorageLocationId				= NULL
-	     , intTermId						= NULL
-	     , intEntityShipViaId				= NULL
-	     , intTicketId						= NULL
-	     , intTaxGroupId					= NULL
-	     , dblGrossWt						= dbo.fnCalculateQtyBetweenUOM(ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), ISNULL(LDL.dblGross,LD.dblGross))
-	     , dblTareWt						= dbo.fnCalculateQtyBetweenUOM(ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), ISNULL(LDL.dblTare,LD.dblTare))
-	     , dblNetWt							= dbo.fnCalculateQtyBetweenUOM(ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), ISNULL(LDL.dblNet,LD.dblNet))
-	     , strPONumber						= ''
-	     , strBOLNumber						= ''
-	     , intSplitId						= NULL
-	     , intEntitySalespersonId			= NULL
-	     , ysnBlended						= NULL
-	     , intRecipeId						= NULL
-	     , intSubLocationId					= NULL
-	     , intCostTypeId					= NULL
-	     , intMarginById					= NULL
-	     , intCommentTypeId					= NULL
-	     , dblMargin						= NULL
-	     , dblRecipeQuantity				= NULL
-	     , intStorageScheduleTypeId			= NULL
-	     , intDestinationGradeId			= ARCC.intDestinationGradeId
-	     , intDestinationWeightId			= ARCC.intDestinationWeightId
-	     , intCurrencyExchangeRateTypeId	= ARCC.intCurrencyExchangeRateTypeId
-	     , intCurrencyExchangeRateId		= ARCC.intCurrencyExchangeRateId
-	     , dblCurrencyExchangeRate			= ARCC.dblCurrencyExchangeRate
-	     , intSubCurrencyId					= ARCC.intSubCurrencyId
-	     , dblSubCurrencyRate				= ARCC.dblSubCurrencyRate
-	FROM (
-		SELECT intLoadId
-			 , strLoadNumber
-			 , dtmScheduledDate
-		FROM dbo.tblLGLoad WITH (NOLOCK)
-		WHERE ysnPosted = 1
-	) L
-	JOIN (
-		SELECT intLoadId
-			 , intLoadDetailId
-			 , intCustomerEntityId
-			 , intItemId
-			 , intSContractDetailId
-			 , intItemUOMId
-			 , intWeightItemUOMId
-			 , intSCompanyLocationId
-			 , intPContractDetailId
-			 , dblQuantity
-			 , dblGross
-			 , dblTare
-			 , dblNet
-		FROM 
-			dbo.tblLGLoadDetail WITH (NOLOCK)		
-
-	) LD ON L.intLoadId  = LD.intLoadId
-	LEFT JOIN (
-		SELECT intLoadDetailId
-			 , intWeightUOMId
-			 , dblGross	= SUM(dblGross)
-			 , dblTare	= SUM(dblTare)
-			 , dblNet	= SUM(dblNet)
-		FROM dbo.tblLGLoadDetailLot WITH (NOLOCK) 
-		GROUP BY
-			 intLoadDetailId
-			,intWeightUOMId
-	) LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
-	--LEFT JOIN (
-	--	SELECT intLotId
-	--		 , intStorageLocationId
-	--	FROM dbo.tblICLot WITH (NOLOCK)
-	--) LO ON LO.intLotId = LDL.intLotId
-	--LEFT OUTER JOIN (
-	--	SELECT intInventoryShipmentItemId
-	--		 , intRecipeItemId
-	--		 , strShipmentNumber
-	--		 , intLoadDetailId
-	--	 FROM tblARInvoiceDetail WITH (NOLOCK)
-	--	 WHERE ISNULL(intLoadDetailId, 0) = 0
-	--) ARID ON LDL.intLoadDetailId = ARID.intLoadDetailId
-	LEFT OUTER JOIN (
-	SELECT intContractHeaderId
-		 , intContractDetailId
-		 , strContractNumber
-		 , intContractSeq
-		 , intDestinationGradeId
-		 , strDestinationGrade
-		 , intDestinationWeightId
-		 , strDestinationWeight
-		 , intSubCurrencyId
-		 , intCurrencyId
-		 , strUnitMeasure
-		 , intOrderUOMId
-		 , intPriceItemUOMId
-		 , intItemUOMId
-		 , strOrderUnitMeasure
-		 , intItemWeightUOMId	 
-		 , dblCashPrice
-		 , dblOrderPrice
-		 , dblUnitPrice
-		 , dblDetailQuantity
-		 , intFreightTermId			 
-		 , dblShipQuantity
-		 , dblOrderQuantity
-		 , dblSubCurrencyRate
-		 , intCurrencyExchangeRateTypeId
-		 , strCurrencyExchangeRateType
-		 , intCurrencyExchangeRateId
-		 , dblCurrencyExchangeRate
-	 FROM dbo.vyuARCustomerContract WITH (NOLOCK)
-	) ARCC ON LD.intSContractDetailId = ARCC.intContractDetailId
+	SELECT strTransactionType				= strTransactionType
+	     , strTransactionNumber				= strTransactionNumber
+	     , strShippedItemId					= strShippedItemId
+	     , intEntityCustomerId				= intEntityCustomerId
+	     , intCurrencyId					= intCurrencyId
+	     , intSalesOrderId					= intSalesOrderId
+	     , intSalesOrderDetailId			= intSalesOrderDetailId
+	     , strSalesOrderNumber				= strSalesOrderNumber
+	     , dtmProcessDate					= dtmProcessDate
+	     , intInventoryShipmentId			= intInventoryShipmentId
+	     , intInventoryShipmentItemId		= intInventoryShipmentItemId
+	     , intInventoryShipmentChargeId		= intInventoryShipmentChargeId
+	     , strInventoryShipmentNumber		= strInventoryShipmentNumber
+	     , intShipmentId					= intShipmentId
+	     , strShipmentNumber				= strShipmentNumber
+	     , intLoadId						= intLoadId
+	     , intLoadDetailId					= intLoadDetailId
+	     , intLotId							= intLotId
+	     , strLoadNumber					= strLoadNumber
+	     , intRecipeItemId					= intRecipeItemId
+	     , intContractHeaderId				= intContractHeaderId
+	     , intContractDetailId				= intContractDetailId
+	     , intCompanyLocationId				= intCompanyLocationId
+	     , intShipToLocationId				= intShipToLocationId
+	     , intFreightTermId					= intFreightTermId
+	     , intItemId						= intItemId
+	     , strItemDescription				= strItemDescription
+	     , intItemUOMId						= intItemUOMId
+	     , intOrderUOMId					= intOrderUOMId
+	     , intShipmentItemUOMId				= intShipmentItemUOMId
+		 , intWeightUOMId					= intWeightUOMId
+		 , dblWeight						= dblWeight
+		 , dblQtyShipped					= dblQtyShipped
+		 , dblQtyOrdered					= dblQtyOrdered
+		 , dblShipmentQuantity				= dblShipmentQuantity
+		 , dblShipmentQtyShippedTotal		= dblShipmentQtyShippedTotal
+		 , dblQtyRemaining					= dblQtyRemaining
+	     , dblDiscount						= dblDiscount
+	     , dblPrice							= dblPrice
+	     , dblShipmentUnitPrice				= dblShipmentUnitPrice
+	     , strPricing						= strPricing
+	     , strVFDDocumentNumber				= strVFDDocumentNumber
+	     , dblTotalTax						= dblTotalTax
+	     , dblTotal							= dblTotal
+	     , intStorageLocationId				= intStorageLocationId
+	     , intTermId						= intTermId
+	     , intEntityShipViaId				= intEntityShipViaId
+	     , intTicketId						= intTicketId
+	     , intTaxGroupId					= intTaxGroupId
+	     , dblGrossWt						= dblGrossWt
+	     , dblTareWt						= dblTareWt
+	     , dblNetWt							= dblNetWt
+	     , strPONumber						= strPONumber
+	     , strBOLNumber						= strBOLNumber
+	     , intSplitId						= intSplitId
+	     , intEntitySalespersonId			= intEntitySalespersonId
+	     , ysnBlended						= ysnBlended
+	     , intRecipeId						= intRecipeId
+	     , intSubLocationId					= intSubLocationId
+	     , intCostTypeId					= intCostTypeId
+	     , intMarginById					= intMarginById
+	     , intCommentTypeId					= intCommentTypeId
+	     , dblMargin						= dblMargin
+	     , dblRecipeQuantity				= dblRecipeQuantity
+	     , intStorageScheduleTypeId			= intStorageScheduleTypeId
+	     , intDestinationGradeId			= intDestinationGradeId
+	     , intDestinationWeightId			= intDestinationWeightId
+	     , intCurrencyExchangeRateTypeId	= intCurrencyExchangeRateTypeId
+	     , intCurrencyExchangeRateId		= intCurrencyExchangeRateId
+	     , dblCurrencyExchangeRate			= dblCurrencyExchangeRate
+	     , intSubCurrencyId					= intSubCurrencyId
+	     , dblSubCurrencyRate				= dblSubCurrencyRate
+	FROM 
+		vyuLGLoadScheduleForInvoice
 	 
 	UNION ALL
 		

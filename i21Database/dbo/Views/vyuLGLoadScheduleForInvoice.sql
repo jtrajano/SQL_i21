@@ -8,7 +8,7 @@ SELECT
 	,intCurrencyId					= ARCC.intCurrencyId --For Review - Invoice Header Currency--
 	,intSalesOrderId				= NULL
 	,intSalesOrderDetailId			= NULL
-	,strSalesOrderNumber			= ''
+	,strSalesOrderNumber			= CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,dtmProcessDate					= L.dtmScheduledDate
 	,intInventoryShipmentId			= NULL
 	,intInventoryShipmentItemId		= NULL
@@ -27,7 +27,7 @@ SELECT
 	,intShipToLocationId			= NULL
 	,intFreightTermId				= ARCC.intFreightTermId
 	,intItemId						= LD.intItemId
-	,strItemDescription				= NULL
+	,strItemDescription				= ICI.[strDescription]
 	,intItemUOMId					= ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId) --For Review--
 	,intOrderUOMId					= ARCC.intOrderUOMId
 	,intShipmentItemUOMId			= ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId) --For Review--
@@ -41,7 +41,7 @@ SELECT
 	,dblDiscount					= 0
 	,dblPrice						= ARCC.dblOrderPrice --For Review--
 	,dblShipmentUnitPrice			= ((ARCC.dblUnitPrice) / dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId), ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), 1)) --For Review--
-	,strPricing						= ''
+	,strPricing						= CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,strVFDDocumentNumber			= NULL
 	,dblTotalTax					= 0
 	,dblTotal						= ((ARCC.dblUnitPrice) / dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId), ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), 1))
@@ -54,8 +54,8 @@ SELECT
 	,dblGrossWt						= dbo.fnCalculateQtyBetweenUOM(ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), ISNULL(LDL.dblGross,LD.dblGross)) --For Review--
 	,dblTareWt						= dbo.fnCalculateQtyBetweenUOM(ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), ISNULL(LDL.dblTare,LD.dblTare)) --For Review--
 	,dblNetWt						= dbo.fnCalculateQtyBetweenUOM(ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), ISNULL(LDL.dblNet,LD.dblNet)) --For Review--
-	,strPONumber					= ''
-	,strBOLNumber					= ''
+	,strPONumber					= CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
+	,strBOLNumber					= CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,intSplitId						= NULL
 	,intEntitySalespersonId			= NULL
 	,ysnBlended						= NULL
@@ -154,3 +154,6 @@ SELECT intContractHeaderId
 	 , dblCurrencyExchangeRate
  FROM dbo.vyuARCustomerContract WITH (NOLOCK) --For Review - vyuARCustomerContract will be deleted once CT-1873 is completed--
 ) ARCC ON LD.intSContractDetailId = ARCC.intContractDetailId
+INNER JOIN
+	(SELECT [intItemId], [strItemNo], [strDescription] FROM tblICItem WITH(NOLOCK)) ICI
+		ON LD.[intItemId] = ICI.[intItemId]
