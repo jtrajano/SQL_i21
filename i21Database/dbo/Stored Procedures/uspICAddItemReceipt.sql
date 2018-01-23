@@ -601,6 +601,7 @@ BEGIN
 					ON RawData.intItemId = i.intItemId		
 				LEFT JOIN tblSMCompanyLocationSubLocation sub 
 					ON sub.intCompanyLocationSubLocationId = RawData.intSubLocationId
+					AND sub.intCompanyLocationId = RawData.intLocationId 
 		WHERE	RTRIM(LTRIM(LOWER(RawData.strReceiptType))) <> 'transfer order'
 				AND sub.intCompanyLocationSubLocationId IS NULL 		
 				AND RawData.intSubLocationId IS NOT NULL 		

@@ -1,4 +1,9 @@
-﻿CREATE PROCEDURE [dbo].[uspICProcessToInventoryShipment]
+﻿/*
+	Deprecated
+	Use uspICAddItemShipment instead. 
+*/
+
+CREATE PROCEDURE [dbo].[uspICProcessToInventoryShipment]
 	@intSourceTransactionId AS INT
 	,@strSourceType AS NVARCHAR(100) 
 	,@intEntityUserSecurityId AS INT 

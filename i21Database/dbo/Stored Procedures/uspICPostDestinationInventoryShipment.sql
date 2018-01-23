@@ -38,15 +38,22 @@ DECLARE @strDescription AS NVARCHAR(100)
 
 -- Validate the items.
 BEGIN 
-	IF EXISTS(
-		SELECT	TOP 1 1
-		FROM	@DestinationItems d INNER JOIN tblICItem i 
-					ON i.intItemId = d.intItemId
-		WHERE	i.strType NOT IN ('Inventory', 'Finished Good', 'Raw Material', 'Bundle', 'Kit')
-	)
+	DECLARE @InvalidItemId AS INT
+			,@strItemNo AS NVARCHAR(50)
+			,@strItemType AS NVARCHAR(50) 
+
+	SELECT	TOP 1 
+			@InvalidItemId = i.intItemId
+			,@strItemNo = i.strItemNo
+			,@strItemType = i.strType 
+	FROM	@DestinationItems d INNER JOIN tblICItem i 
+				ON i.intItemId = d.intItemId
+	WHERE	i.strType NOT IN ('Inventory', 'Finished Good', 'Raw Material', 'Bundle', 'Kit')
+
+	IF @InvalidItemId IS NOT NULL 
 	BEGIN
-		-- 'Shipment for non-inventory items are not allowed.'
-		EXEC uspICRaiseError 80163; 
+		-- '{Item} is set as {Item Type} type and that type is not allowed for Shipment.'
+		EXEC uspICRaiseError 80163, @strItemNo, @strItemType; 
 		GOTO _ExitWithError
 	END
 END

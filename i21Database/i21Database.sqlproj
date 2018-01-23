@@ -2533,7 +2533,6 @@
     <Build Include="dbo\Views\vyuARInvoiceAgingReport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFApproveBlendSheets.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetOnHoldBlendSheets.sql" />
-    <Build Include="dbo\Stored Procedures\uspICErrorMessages.sql" />
     <Build Include="dbo\Views\vyuARUndepositedPayment.sql" />
     <Build Include="dbo\Tables\tblICInventoryLIFOCostAdjustmentLog.sql" />
     <Build Include="dbo\Views\vyuGRGetVendors.sql" />

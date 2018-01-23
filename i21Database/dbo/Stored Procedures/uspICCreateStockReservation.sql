@@ -12,6 +12,7 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @ReservationToClear AS ItemReservationTableType
 DECLARE @ItemsToReserveAggregrate AS ItemReservationTableType
+		,@intReturn AS INT = 0 
 
 INSERT INTO @ItemsToReserveAggregrate (
 		intItemId
@@ -74,8 +75,11 @@ BEGIN
 			AND intInventoryTransactionType = @intTransactionTypeId
 
 	-- Call this SP to decrease the reserved qty. 
-	EXEC dbo.uspICIncreaseReservedQty
+	EXEC @intReturn = dbo.uspICIncreaseReservedQty
 		@ReservationToClear
+
+	IF @intReturn <> 0
+		RETURN @intReturn
 		
 	-- Clear the list (if it exists)
 	DELETE	Reservations
@@ -118,5 +122,8 @@ FROM	@ItemsToReserveAggregrate Items INNER JOIN dbo.tblICItemLocation ItemLocati
 			ON Items.intItemLocationId = ItemLocation.intItemLocationId
 
 -- Call this SP to increase the reserved qty. 
-EXEC dbo.uspICIncreaseReservedQty
+EXEC @intReturn = dbo.uspICIncreaseReservedQty
 	@ItemsToReserveAggregrate
+
+IF @intReturn <> 0
+	RETURN @intReturn
