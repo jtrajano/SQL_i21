@@ -990,3 +990,9 @@ LEFT JOIN @temp_aging_table AS AGINGREPORT
 	ON MAINREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
 INNER JOIN #CUSTOMERS CUSTOMER ON MAINREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
 ORDER BY MAINREPORT.dtmDate
+
+IF @ysnPrintZeroBalanceLocal = 0 AND @ysnPrintFromCFLocal = 0
+	BEGIN
+		DELETE FROM tblARCustomerStatementStagingTable 
+		WHERE intEntityCustomerId IN (SELECT DISTINCT intEntityCustomerId FROM tblARCustomerStatementStagingTable WHERE dblTotalAR = 0)
+	END
