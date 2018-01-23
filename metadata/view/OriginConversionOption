@@ -914,6 +914,96 @@
                                                     ]
                                                 },
                                                 {
+                                                    "type": "Ext.menu.Item",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "focusable": true,
+                                                        "itemId": "mnuBundleDetails",
+                                                        "menuId": "bundledetails",
+                                                        "text": "Item Bundles"
+                                                    },
+                                                    "configAlternates": {
+                                                        "itemId": "string",
+                                                        "text": "string",
+                                                        "scrollable": "boolean",
+                                                        "focusable": "boolean",
+                                                        "menuId": "string"
+                                                    },
+                                                    "name": "MyMenuItem25",
+                                                    "designerId": "fcfc85ab-ff1a-4895-b2d4-3fbbca54f032",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "menuId",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.menu.Item",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "focusable": true,
+                                                        "itemId": "mnuItemAddons",
+                                                        "menuId": "itemaddons",
+                                                        "text": "Item Add-ons"
+                                                    },
+                                                    "configAlternates": {
+                                                        "itemId": "string",
+                                                        "text": "string",
+                                                        "scrollable": "boolean",
+                                                        "focusable": "boolean",
+                                                        "menuId": "string"
+                                                    },
+                                                    "name": "MyMenuItem26",
+                                                    "designerId": "992f3d38-9b29-42e1-a51d-f9c9a623da6e",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "menuId",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.menu.Item",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "focusable": true,
+                                                        "itemId": "mnuItemSubstitutes",
+                                                        "menuId": "itemsubstitutes",
+                                                        "text": "Item Substitutes"
+                                                    },
+                                                    "configAlternates": {
+                                                        "itemId": "string",
+                                                        "text": "string",
+                                                        "scrollable": "boolean",
+                                                        "focusable": "boolean",
+                                                        "menuId": "string"
+                                                    },
+                                                    "name": "MyMenuItem27",
+                                                    "designerId": "307f1f9a-2289-4858-ae69-310012255639",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "menuId",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                },
+                                                {
                                                     "type": "Ext.menu.Separator",
                                                     "reference": {
                                                         "name": "items",
@@ -3313,6 +3403,294 @@
                                                             },
                                                             "name": "MyLabel9",
                                                             "designerId": "3e385d2e-a02c-4ee8-87ba-9e13273517e2"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.container.Container",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "container|align": "middle",
+                                                "container|padding": "",
+                                                "itemId": "cntImportBundleDetails",
+                                                "layout": "hbox",
+                                                "margin": "0 0 5 0"
+                                            },
+                                            "configAlternates": {
+                                                "container|align": "string",
+                                                "container|padding": "auto",
+                                                "itemId": "string",
+                                                "layout": "string",
+                                                "margin": "auto",
+                                                "scrollable": "boolean"
+                                            },
+                                            "name": "MyContainer25",
+                                            "designerId": "9ca7a92c-5076-40f0-89d2-7e57fc304c48",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.button.Button",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "height": 40,
+                                                        "itemId": "btnImportBundleDetails",
+                                                        "layout|flex": 1,
+                                                        "text": "Import Item Bundles"
+                                                    },
+                                                    "configAlternates": {
+                                                        "height": "auto",
+                                                        "itemId": "string",
+                                                        "layout|flex": "number",
+                                                        "text": "string",
+                                                        "scrollable": "boolean"
+                                                    },
+                                                    "name": "MyButton25",
+                                                    "designerId": "458b02a7-01a6-409e-a981-b3bf65c13f48"
+                                                },
+                                                {
+                                                    "type": "Ext.container.Container",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "container|align": "middle",
+                                                        "height": 40,
+                                                        "layout": "hbox",
+                                                        "layout|flex": 1,
+                                                        "padding": 10
+                                                    },
+                                                    "configAlternates": {
+                                                        "container|align": "string",
+                                                        "height": "auto",
+                                                        "layout": "string",
+                                                        "layout|flex": "number",
+                                                        "padding": "auto",
+                                                        "scrollable": "boolean"
+                                                    },
+                                                    "name": "MyContainer13",
+                                                    "designerId": "36159eab-9340-4ea9-99a5-b0c4c093d3b7",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.form.Label",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "itemId": null,
+                                                                "text": "Import Item Bundles from CSV"
+                                                            },
+                                                            "configAlternates": {
+                                                                "itemId": "string",
+                                                                "text": "string",
+                                                                "scrollable": "boolean"
+                                                            },
+                                                            "name": "MyLabel9",
+                                                            "designerId": "d746cf20-704e-47a7-81dc-ac361dea5d49"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.container.Container",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "container|align": "middle",
+                                                "container|padding": "",
+                                                "itemId": "cntImportItemAddons",
+                                                "layout": "hbox",
+                                                "margin": "0 0 5 0"
+                                            },
+                                            "configAlternates": {
+                                                "container|align": "string",
+                                                "container|padding": "auto",
+                                                "itemId": "string",
+                                                "layout": "string",
+                                                "margin": "auto",
+                                                "scrollable": "boolean"
+                                            },
+                                            "name": "MyContainer27",
+                                            "designerId": "247cd5fd-47a4-4393-99f0-d52b2b6c54b8",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.button.Button",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "height": 40,
+                                                        "itemId": "btnImportItemAddons",
+                                                        "layout|flex": 1,
+                                                        "text": "Import Item Add-ons"
+                                                    },
+                                                    "configAlternates": {
+                                                        "height": "auto",
+                                                        "itemId": "string",
+                                                        "layout|flex": "number",
+                                                        "text": "string",
+                                                        "scrollable": "boolean"
+                                                    },
+                                                    "name": "MyButton25",
+                                                    "designerId": "f36a2a45-821b-433b-9a83-0a14ba1900d1"
+                                                },
+                                                {
+                                                    "type": "Ext.container.Container",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "container|align": "middle",
+                                                        "height": 40,
+                                                        "layout": "hbox",
+                                                        "layout|flex": 1,
+                                                        "padding": 10
+                                                    },
+                                                    "configAlternates": {
+                                                        "container|align": "string",
+                                                        "height": "auto",
+                                                        "layout": "string",
+                                                        "layout|flex": "number",
+                                                        "padding": "auto",
+                                                        "scrollable": "boolean"
+                                                    },
+                                                    "name": "MyContainer13",
+                                                    "designerId": "bf5df7ca-4a92-4ae9-aa31-3f9abb88c878",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.form.Label",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "itemId": null,
+                                                                "text": "Import Item Add-ons from CSV"
+                                                            },
+                                                            "configAlternates": {
+                                                                "itemId": "string",
+                                                                "text": "string",
+                                                                "scrollable": "boolean"
+                                                            },
+                                                            "name": "MyLabel9",
+                                                            "designerId": "25e3c13a-9f14-4482-8c32-023f5528a462"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.container.Container",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "container|align": "middle",
+                                                "container|padding": "",
+                                                "itemId": "cntImportItemSubstitutes",
+                                                "layout": "hbox",
+                                                "margin": "0 0 5 0"
+                                            },
+                                            "configAlternates": {
+                                                "container|align": "string",
+                                                "container|padding": "auto",
+                                                "itemId": "string",
+                                                "layout": "string",
+                                                "margin": "auto",
+                                                "scrollable": "boolean"
+                                            },
+                                            "name": "MyContainer28",
+                                            "designerId": "2e651e91-85e6-4366-afc1-f0d073eda87e",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.button.Button",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "height": 40,
+                                                        "itemId": "btnImportItemSubstitutes",
+                                                        "layout|flex": 1,
+                                                        "text": "Import Item Subtitutes"
+                                                    },
+                                                    "configAlternates": {
+                                                        "height": "auto",
+                                                        "itemId": "string",
+                                                        "layout|flex": "number",
+                                                        "text": "string",
+                                                        "scrollable": "boolean"
+                                                    },
+                                                    "name": "MyButton25",
+                                                    "designerId": "f66a2335-022f-4b0a-b83e-777c5b57dacd"
+                                                },
+                                                {
+                                                    "type": "Ext.container.Container",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "container|align": "middle",
+                                                        "height": 40,
+                                                        "layout": "hbox",
+                                                        "layout|flex": 1,
+                                                        "padding": 10
+                                                    },
+                                                    "configAlternates": {
+                                                        "container|align": "string",
+                                                        "height": "auto",
+                                                        "layout": "string",
+                                                        "layout|flex": "number",
+                                                        "padding": "auto",
+                                                        "scrollable": "boolean"
+                                                    },
+                                                    "name": "MyContainer13",
+                                                    "designerId": "56837383-3c25-4601-82b7-2e77471b0ca7",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.form.Label",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "itemId": null,
+                                                                "text": "Import Item Substitutes from CSV"
+                                                            },
+                                                            "configAlternates": {
+                                                                "itemId": "string",
+                                                                "text": "string",
+                                                                "scrollable": "boolean"
+                                                            },
+                                                            "name": "MyLabel9",
+                                                            "designerId": "94cec827-37d3-4a15-a2c5-3faa6c90bf05"
                                                         }
                                                     ]
                                                 }

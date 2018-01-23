@@ -214,6 +214,18 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
                 type = "ItemPricingLevels";
                 template = "itempricinglevels";
                 break;
+            case "btnImportBundleDetails":
+                type = "BundleDetails";
+                template = "bundledetails";
+                break;
+            case "btnImportItemAddons":
+                type = "ItemAddons";
+                template = "itemaddons";
+                break;
+            case "btnImportItemSubstitutes":
+                type = "ItemSubstitutes";
+                template = "itemsubstitutes";
+                break;
                 /* ORIGIN CONVERSIONS */
             case "btnOriginUOM":
                 originType = 0;
@@ -598,6 +610,12 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
                         "Amount/Percent", "Unit Price", "Commission On", "Comm Amount/Percent", "Effective Date"];
                 case "commodityuom":
                     return ["Commodity Code", "UOM", "Unit Qty", "Is Stock Unit", "Is Default UOM"]; 
+                case "bundledetails":
+                    return ["Item No", "Bundle Type", "Short Name", "Description", "Status", "Commodity", "Category", "Brand", "Manufacturer", "List Separately", "Detail Item No", "Detail Qty", "Detail UOM", "Detail Mark Up/Down", "Detail Begin Date", "Detail End Date"];
+                case "itemaddons":
+                    return ["Item No", "Add-on Item No", "Add-on UOM", "Add-on Qty"];
+                case "itemsubstitutes":
+                    return ["Item No", "Substitute Item No", "Substitute UOM", "Substitute Qty", "Substitute Mark Up/Down", "Substitute Begin Date", "Substitute End Date"];
             }
         }
     }

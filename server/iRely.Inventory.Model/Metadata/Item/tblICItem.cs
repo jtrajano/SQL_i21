@@ -12,6 +12,11 @@ namespace iRely.Inventory.Model
 {
     public class tblICItem : BaseEntity
     {
+        public tblICItem() : base()
+        {
+            tblICItemBundles = new List<tblICItemBundle>();
+        }
+
         public int intItemId { get; set; }
         public string strItemNo { get; set; }
         public string strShortName { get; set; }

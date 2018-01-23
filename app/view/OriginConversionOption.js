@@ -243,6 +243,27 @@ Ext.define('Inventory.view.OriginConversionOption', {
                                                 focusable: true
                                             },
                                             {
+                                                xtype: 'menuitem',
+                                                menuId: 'bundledetails',
+                                                itemId: 'mnuBundleDetails',
+                                                text: 'Item Bundles',
+                                                focusable: true
+                                            },
+                                            {
+                                                xtype: 'menuitem',
+                                                menuId: 'itemaddons',
+                                                itemId: 'mnuItemAddons',
+                                                text: 'Item Add-ons',
+                                                focusable: true
+                                            },
+                                            {
+                                                xtype: 'menuitem',
+                                                menuId: 'itemsubstitutes',
+                                                itemId: 'mnuItemSubstitutes',
+                                                text: 'Item Substitutes',
+                                                focusable: true
+                                            },
+                                            {
                                                 xtype: 'menuseparator',
                                                 focusable: true
                                             },
@@ -1102,6 +1123,111 @@ Ext.define('Inventory.view.OriginConversionOption', {
                                                         {
                                                             xtype: 'label',
                                                             text: 'Import Item Contracts from CSV'
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            itemId: 'cntImportBundleDetails',
+                                            margin: '0 0 5 0',
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'middle',
+                                                padding: ''
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'button',
+                                                    flex: 1,
+                                                    height: 40,
+                                                    itemId: 'btnImportBundleDetails',
+                                                    text: 'Import Item Bundles'
+                                                },
+                                                {
+                                                    xtype: 'container',
+                                                    flex: 1,
+                                                    height: 40,
+                                                    padding: 10,
+                                                    layout: {
+                                                        type: 'hbox',
+                                                        align: 'middle'
+                                                    },
+                                                    items: [
+                                                        {
+                                                            xtype: 'label',
+                                                            text: 'Import Item Bundles from CSV'
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            itemId: 'cntImportItemAddons',
+                                            margin: '0 0 5 0',
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'middle',
+                                                padding: ''
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'button',
+                                                    flex: 1,
+                                                    height: 40,
+                                                    itemId: 'btnImportItemAddons',
+                                                    text: 'Import Item Add-ons'
+                                                },
+                                                {
+                                                    xtype: 'container',
+                                                    flex: 1,
+                                                    height: 40,
+                                                    padding: 10,
+                                                    layout: {
+                                                        type: 'hbox',
+                                                        align: 'middle'
+                                                    },
+                                                    items: [
+                                                        {
+                                                            xtype: 'label',
+                                                            text: 'Import Item Add-ons from CSV'
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            itemId: 'cntImportItemSubstitutes',
+                                            margin: '0 0 5 0',
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'middle',
+                                                padding: ''
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'button',
+                                                    flex: 1,
+                                                    height: 40,
+                                                    itemId: 'btnImportItemSubstitutes',
+                                                    text: 'Import Item Subtitutes'
+                                                },
+                                                {
+                                                    xtype: 'container',
+                                                    flex: 1,
+                                                    height: 40,
+                                                    padding: 10,
+                                                    layout: {
+                                                        type: 'hbox',
+                                                        align: 'middle'
+                                                    },
+                                                    items: [
+                                                        {
+                                                            xtype: 'label',
+                                                            text: 'Import Item Substitutes from CSV'
                                                         }
                                                     ]
                                                 }

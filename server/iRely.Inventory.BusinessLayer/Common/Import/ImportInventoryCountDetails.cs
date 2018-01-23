@@ -125,7 +125,8 @@ namespace iRely.Inventory.BusinessLayer
                 ImportDataLogicHelpers.SetLookupId<tblICStorageLocation>(Context, Result, Record, "Storage Unit", e => e.strName == lu, e => e.intStorageLocationId, e => child.intStorageLocationId = e);
 
                 child.strCountLine = Record.RecordNo.ToString();
-                parent.tblICInventoryCountDetails.Add(child);
+                if(valid)
+                    parent.tblICInventoryCountDetails.Add(child);
 
                 return parent;
             }
