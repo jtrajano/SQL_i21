@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspARForgiveServiceChargeInvoices] 
 	@InvoiceIds	AS NVARCHAR(MAX)	= NULL,
 	@intEntityId AS INT,
-	@ysnForgive AS BIT = 0
+	@ysnForgive AS BIT = 0,
+	@ServiceChargeParam AS [dbo].[ServiceChargeInvoiceParam] READONLY
 AS
   
 SET QUOTED_IDENTIFIER OFF  
@@ -12,13 +13,14 @@ SET ANSI_WARNINGS OFF
 
 IF ISNULL(@InvoiceIds, '') <> ''
 	BEGIN
-		DECLARE @ServiceChargeToForgive TABLE (intInvoiceId INT, strInvoiceNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS)
+		DECLARE @ServiceChargeToForgive TABLE (intInvoiceId INT, strInvoiceNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS, dtmForgiveDate DATETIME NULL)
 		DECLARE @ServiceChargeHasPayments NVARCHAR(MAX)
 
 		INSERT INTO @ServiceChargeToForgive
 		SELECT SCI.intInvoiceId
 			 , SCI.strInvoiceNumber
-		FROM dbo.fnGetRowsFromDelimitedValues(@InvoiceIds) DV
+			 , DV.dtmForgiveDate
+		FROM @ServiceChargeParam DV
 		INNER JOIN (
 			SELECT intInvoiceId
 				 , strInvoiceNumber
@@ -27,7 +29,7 @@ IF ISNULL(@InvoiceIds, '') <> ''
 			  AND ysnForgiven = (CASE WHEN @ysnForgive = 1 THEN 0 ELSE 1 END)
 			  AND ysnPaid = 0
 			  AND strType = 'Service Charge'
-		) SCI ON DV.intID = SCI.intInvoiceId
+		) SCI ON DV.intInvoiceId = SCI.intInvoiceId
 
 		IF EXISTS(SELECT NULL FROM @ServiceChargeToForgive)
 		BEGIN			
@@ -51,38 +53,13 @@ IF ISNULL(@InvoiceIds, '') <> ''
 				END
 
 			UPDATE INV
-			SET INV.ysnForgiven = @ysnForgive
+			SET INV.ysnForgiven = @ysnForgive,
+				INV.dtmForgiveDate = SCI.dtmForgiveDate
 			FROM tblARInvoice INV
 			INNER JOIN @ServiceChargeToForgive SCI ON INV.intInvoiceId = SCI.intInvoiceId
 			WHERE INV.ysnPosted = 1
 			  AND INV.ysnForgiven = CASE WHEN @ysnForgive = 1 THEN 0 ELSE 1 END
 			  AND INV.strType = 'Service Charge'
-
-			 --Audit Log
-				DECLARE @auditAction AS VARCHAR(10);
-				DECLARE @valueFrom VARCHAR(10) 
-				DECLARE @valueTo VARCHAR(10);
-
-				SELECT @valueFrom = CASE WHEN @ysnForgive = 1 THEN '0' ELSE '1' END;
-				SELECT @valueTo = CASE WHEN @ysnForgive = 1 THEN '1' ELSE '0' END;
-
-				SET @auditAction = CASE WHEN @ysnForgive = 1 THEN 'Forgive' ELSE 'Unforgive' END;
-				DECLARE @childData AS NVARCHAR(MAX)
-						SET @childData = '{"change": "tblARInvoice","children": [{"action": "' + @auditAction + '","change": "'+ @auditAction +' - Record: ' + @InvoiceIds + '","iconCls": "small-tree-modified","children": [{"change":"ysnForgive","from":"'+ @valueFrom +'","to":"'+ @valueTo +'","leaf":true,"iconCls":"small-gear"}]}]}';
-				
-
-				exec uspSMAuditLog 
-					@screenName				= 'AccountsReceivable.view.Invoice', 
-					@keyValue				= @InvoiceIds,
-					@entityId				= @intEntityId,
-					@actionType				= 'Updated',
-					@actionIcon				= 'small-tree-modified',
-					@changeDescription		=  '',
-					@fromValue				= '0',
-					@toValue				= '1',
-					@details				= @childData
-
-			--end of Audit log 
 
 			DECLARE @InvoicesToForgive TABLE (intInvoiceId INT)
 			DECLARE @BudgetToForgive TABLE (intBudgetId INT)
@@ -116,8 +93,54 @@ IF ISNULL(@InvoiceIds, '') <> ''
 					INNER JOIN @BudgetToForgive SCI ON CB.intCustomerBudgetId = SCI.intBudgetId
 				END
 
+			/****************** AUDIT LOG ******************/
+			BEGIN TRANSACTION [AUDITLOG]
+			BEGIN 
+				DECLARE @auditAction AS VARCHAR(10);
+				DECLARE @valueFrom VARCHAR(10) 
+				DECLARE @valueTo VARCHAR(10);
+				DECLARE @a VARCHAR(10);
+				DECLARE @childData AS NVARCHAR(MAX);
+				DECLARE @intInvoiceId as INT;
+				DECLARE @fromDtmForgiveDate AS DATETIME;
+				DECLARE @toDtmForgiveDate as DATETIME;
+				SELECT @valueFrom = CASE WHEN @ysnForgive = 1 THEN '0' ELSE '1' END;
+				SELECT @valueTo = CASE WHEN @ysnForgive = 1 THEN '1' ELSE '0' END;
+
+
+				SET @auditAction = CASE WHEN @ysnForgive = 1 THEN 'Forgive' ELSE 'Unforgive' END;	 
+				DECLARE @ServiceChargeAuditLogCursor as CURSOR;
+ 
+				SET @ServiceChargeAuditLogCursor = CURSOR FOR
+				SELECT C.intInvoiceId, C.dtmForgiveDate as [TO], T.dtmForgiveDate as [FROM] FROM @ServiceChargeParam C INNER JOIN tblARInvoice T ON C.intInvoiceId = T.intInvoiceId; 
+				OPEN @ServiceChargeAuditLogCursor;
+				FETCH NEXT FROM @ServiceChargeAuditLogCursor INTO @intInvoiceId, @fromDtmForgiveDate,@toDtmForgiveDate; 
+				WHILE @@FETCH_STATUS = 0
+				BEGIN
+					SET @childData = '{"change": "tblARInvoice","children": [{"action": "' + @auditAction + '","change": "'+ @auditAction +' - Record: ' + CAST(@intInvoiceId as VARCHAR(MAX)) + '","iconCls": "small-tree-modified","children": [{"change":"ysnForgive","from":"'+ @valueFrom +'","to":"'+ @valueTo +'","leaf":true,"iconCls":"small-gear"},{"change":"dtmForgiveDate","from":"'+   CASE WHEN @ysnForgive = 1 THEN '' ELSE ISNULL(CAST(@fromDtmForgiveDate AS VARCHAR(20)),'') END  +'","to":"'+ CASE WHEN @ysnForgive = 1 THEN ISNULL(CAST(@toDtmForgiveDate AS VARCHAR(20)),'') ELSE '' END +'","leaf":true,"iconCls":"small-gear"}]}]}';
+					DECLARE @strInvoiceId VARCHAR(MAX) = CAST(@intInvoiceId as VARCHAR(MAX))
+					EXEC uspSMAuditLog @screenName = 'AccountsReceivable.view.Invoice', @keyValue = @strInvoiceId, @entityId = @intEntityId, @actionType = 'Updated', @actionIcon = 'small-tree-modified', @changeDescription =  '', @fromValue = '0', @toValue = '1', @details = @childData
+				 FETCH NEXT FROM @ServiceChargeAuditLogCursor INTO @intInvoiceId, @fromDtmForgiveDate,@toDtmForgiveDate;
+				END
+ 
+				CLOSE @ServiceChargeAuditLogCursor;
+				DEALLOCATE @ServiceChargeAuditLogCursor;
+			COMMIT TRANSACTION [AUDITLOG]
+			END
+			/****************** AUDIT LOG ******************/
+
 			IF(@ysnForgive = 1)
 				BEGIN
+					DELETE FROM tblGLDetail 
+					WHERE intGLDetailId IN(
+						SELECT intGLDetailId FROM dbo.tblGLDetail GL WITH (NOLOCK)
+						INNER JOIN @ServiceChargeToForgive SCI
+							ON GL.intTransactionId = SCI.intInvoiceId
+							AND GL.strTransactionId = SCI.strInvoiceNumber
+							AND strJournalLineDescription = 'Unforgive Service Charge'
+					WHERE GL.ysnIsUnposted = 0 AND strJournalLineDescription = 'Unforgive Service Charge')
+
+
 					INSERT INTO tblGLDetail (
 						  intCompanyId
 						, dtmDate
@@ -200,14 +223,14 @@ IF ISNULL(@InvoiceIds, '') <> ''
 				END
 			ELSE
 				BEGIN
-					--DELETE FROM tblGLDetail 
-					--WHERE intGLDetailId IN(
-					--	SELECT intGLDetailId FROM dbo.tblGLDetail GL WITH (NOLOCK)
-					--	INNER JOIN @ServiceChargeToForgive SCI
-					--		ON GL.intTransactionId = SCI.intInvoiceId
-					--		AND GL.strTransactionId = SCI.strInvoiceNumber
-					--		AND strJournalLineDescription = 'Forgiven Service Charge'
-					--WHERE GL.ysnIsUnposted = 0 AND strJournalLineDescription = 'Forgiven Service Charge')
+					DELETE FROM tblGLDetail 
+					WHERE intGLDetailId IN(
+						SELECT intGLDetailId FROM dbo.tblGLDetail GL WITH (NOLOCK)
+						INNER JOIN @ServiceChargeToForgive SCI
+							ON GL.intTransactionId = SCI.intInvoiceId
+							AND GL.strTransactionId = SCI.strInvoiceNumber
+							AND strJournalLineDescription = 'Forgiven Service Charge'
+					WHERE GL.ysnIsUnposted = 0 AND strJournalLineDescription = 'Forgiven Service Charge')
 
 					INSERT INTO tblGLDetail (
 						  intCompanyId

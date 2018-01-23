@@ -6112,6 +6112,7 @@
     <Build Include="dbo\Stored Procedures\uspCTReportAOPVsActual.sql" />
     <Build Include="dbo\Views\vyuRKGetGLAccountDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspEMUpdateEntityCredential.sql" />
+    <Build Include="dbo\User Defined Types\ServiceChargeInvoiceParam.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

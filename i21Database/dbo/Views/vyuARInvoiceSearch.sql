@@ -63,7 +63,8 @@ SELECT
 									  CASE WHEN ysnPaid = 1 THEN (dblPayment - (dblPayment - (dblPayment * (dblWithholdPercent / 100))))  ELSE dblAmountDue - (dblAmountDue - (dblAmountDue * (dblWithholdPercent / 100))) END
 									  END
 	,ysnMailSent					= CASE WHEN (SELECT COUNT(1) FROM tblSMTransaction trans INNER JOIN tblSMActivity tsa on tsa.intTransactionId = trans.intTransactionId WHERE trans.intRecordId = intInvoiceId AND tsa.strType = 'Email' AND tsa.strStatus = 'Sent') > 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT)  END 
-	,strStatus				=  CASE WHEN EMAILSETUP.intEmailSetupCount > 0 THEN 'Ready' ELSE 'Email	 not Configured' END	
+	,strStatus						=  CASE WHEN EMAILSETUP.intEmailSetupCount > 0 THEN 'Ready' ELSE 'Email	 not Configured' END	
+	,dtmForgiveDate					= I.dtmForgiveDate
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (
 	SELECT intEntityId

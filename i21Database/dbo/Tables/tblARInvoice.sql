@@ -99,6 +99,7 @@
 	[intLineOfBusinessId]			INT												NULL,
 	[intICTId]						INT												NULL,
 	[intSalesOrderId]				INT												NULL,
+	[dtmForgiveDate]				DATETIME										NULL,
 	[intConcurrencyId]				INT												NOT NULL	CONSTRAINT [DF_tblARInvoice_intConcurrencyId] DEFAULT ((0)),
     CONSTRAINT [PK_tblARInvoice_intInvoiceId] PRIMARY KEY CLUSTERED ([intInvoiceId] ASC),
     CONSTRAINT [FK_tblARInvoice_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
