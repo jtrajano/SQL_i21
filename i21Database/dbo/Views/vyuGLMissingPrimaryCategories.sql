@@ -1,6 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuGLMissingPrimaryCategories]
 AS
 SELECT 
+Account.intAccountId,
 D.*,
 C.strAccountCategory,
 M.strModuleName
@@ -14,4 +15,10 @@ OUTER APPLY(
 SELECT TOP 1 intAccountSegmentId, strCode FROM
 tblGLAccountSegment  WHERE intAccountCategoryId = C.intAccountCategoryId
 )S
-WHERE D.intAccountId is  null
+OUTER APPLY (
+	SELECT TOP 1 intAccountId FROM vyuGLAccountDetail WHERE intAccountCategoryId = D.intAccountCategoryId
+)Account
+WHERE Account.intAccountId IS NULL
+GO
+
+

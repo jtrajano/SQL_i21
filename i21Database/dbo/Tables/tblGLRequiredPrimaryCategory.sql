@@ -1,10 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblGLRequiredPrimaryCategory](
 	[intRequiredPrimaryCategoryId] [int] IDENTITY(1,1) NOT NULL,
 	[intAccountCategoryId] [int] NULL,
-	[intModuleId] [int] NULL,
-	[strAccountType] [varchar](50) NULL,
-	[intAccountId] [int] NULL,
-	[strCode] [nvarchar](20) NULL,
+	[intModuleId] [int] NULL
  CONSTRAINT [PK_tblGLRequiredPrimaryCategorY] PRIMARY KEY CLUSTERED 
 (
 	[intRequiredPrimaryCategoryId] ASC
