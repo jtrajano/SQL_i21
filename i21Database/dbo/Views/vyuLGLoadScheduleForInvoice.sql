@@ -13,9 +13,9 @@ SELECT
 	,intInventoryShipmentId			= NULL
 	,intInventoryShipmentItemId		= NULL
 	,intInventoryShipmentChargeId	= NULL
-	,strInventoryShipmentNumber		= NULL
+	,strInventoryShipmentNumber		= CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,intShipmentId					= NULL
-	,strShipmentNumber				= NULL
+	,strShipmentNumber				= CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,intLoadId						= L.intLoadId
 	,intLoadDetailId				= LD.intLoadDetailId
 	,intLotId						= NULL
@@ -38,12 +38,12 @@ SELECT
 	,dblShipmentQuantity			= dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intItemUOMId, ARCC.intItemUOMId), ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId), ISNULL(LD.dblQuantity, ARCC.dblShipQuantity)) --For Review--
 	,dblShipmentQtyShippedTotal		= dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intItemUOMId, ARCC.intItemUOMId), ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId), ISNULL(LD.dblQuantity, ARCC.dblShipQuantity)) --For Review--
 	,dblQtyRemaining				= dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intItemUOMId, ARCC.intItemUOMId), ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId), ISNULL(LD.dblQuantity, ARCC.dblShipQuantity)) --For Review--
-	,dblDiscount					= 0
+	,dblDiscount					= 0.0000000
 	,dblPrice						= ARCC.dblOrderPrice --For Review--
 	,dblShipmentUnitPrice			= ((ARCC.dblUnitPrice) / dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId), ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), 1)) --For Review--
 	,strPricing						= CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
-	,strVFDDocumentNumber			= NULL
-	,dblTotalTax					= 0
+	,strVFDDocumentNumber			= CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
+	,dblTotalTax					= 0.000000
 	,dblTotal						= ((ARCC.dblUnitPrice) / dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId), ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), 1))
 										* dbo.fnCalculateQtyBetweenUOM(ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), ISNULL(LDL.dblNet,LD.dblNet)) --For Review--
 	,intStorageLocationId			= NULL
@@ -58,7 +58,7 @@ SELECT
 	,strBOLNumber					= CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,intSplitId						= NULL
 	,intEntitySalespersonId			= NULL
-	,ysnBlended						= NULL
+	,ysnBlended						= CAST(0 AS BIT)
 	,intRecipeId					= NULL
 	,intSubLocationId				= NULL
 	,intCostTypeId					= NULL
