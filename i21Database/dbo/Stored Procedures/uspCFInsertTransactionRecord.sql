@@ -185,6 +185,8 @@ BEGIN
 	DECLARE @ysnDuplicate				BIT = 0
 
 	DECLARE @ysnOnHold					BIT = 0
+
+	--DECLARE @strSiteType				NVARCHAR(MAX)
 	  
 	------------------------------------------------------------
 
@@ -216,6 +218,7 @@ BEGIN
 						,@intCustomerLocationId = intARLocationId
 						,@intTaxMasterId = intTaxGroupId
 						,@ysnSiteAcceptCreditCard = ysnSiteAcceptsMajorCreditCards
+						,@strSiteType = strSiteType
 						FROM tblCFSite
 						WHERE strSiteNumber = @strSiteId
 
@@ -229,6 +232,7 @@ BEGIN
 			SELECT TOP 1 @intCustomerLocationId = intARLocationId
 						,@intTaxMasterId = intTaxGroupId
 						,@ysnSiteAcceptCreditCard = ysnSiteAcceptsMajorCreditCards
+						,@strSiteType = strSiteType
 						FROM tblCFSite
 						WHERE intSiteId = @intSiteId
 		END
@@ -336,7 +340,14 @@ BEGIN
 	END
 	ELSE IF (@strNetworkType = 'Voyager')
 	BEGIN 
-		SET @strTransactionType = 'Extended Remote'
+		IF(ISNULL(@intSiteId,0) = 0)
+		BEGIN
+			SET @strTransactionType = 'Extended Remote'
+		END
+		ELSE
+		BEGIN
+			SET @strTransactionType = @strSiteType
+		END
 	END
 	ELSE IF (@strNetworkType = 'CFN')
 	BEGIN
