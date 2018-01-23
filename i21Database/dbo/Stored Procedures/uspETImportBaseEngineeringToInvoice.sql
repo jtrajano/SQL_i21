@@ -52,6 +52,9 @@ BEGIN
 	DECLARE @intLineItemTaxId						INT
 	DECLARE @strStatus								NVARCHAR(50)
 	DECLARE @ysnRecomputeTax						BIT
+
+	DECLARE @ysnOverFill BIT = 0
+	DECLARE @TotalRecordedQuantity 	NUMERIC(18, 6)
 	
 	DECLARE @ResultTableLog TABLE(
 		strCustomerNumber			NVARCHAR(100)
@@ -208,7 +211,7 @@ BEGIN
  			END
 
 			IF LTRIM(@strErrorMessage) != ''
-			BEGIN		
+			BEGIN
 				GOTO LOGERROR
 			END
 
@@ -231,11 +234,12 @@ BEGIN
 			SET @dblNonContractQuantity = 0
 			SET @dblPreBuyOverFill = 0
 			SET @intContractDetailId = NULL
+			SET @ysnOverFill = 0
+			SET @TotalRecordedQuantity = @dblQuantity
+
 			---Check Contracts
 			IF(@dblPrebuyQuantity > 0 OR @dblContractQuantity > 0)
 				BEGIN 
-				--IF Contract is used
-					--SET @dblNonContractQuantity = 0
 					IF(@dblPrebuyQuantity > 0)
 					    BEGIN 
 						--GEt Contracts				
@@ -276,8 +280,6 @@ BEGIN
 							 dtmStartDate
 							,intContractSeq
 
-							--print 'available' + CAST(@AvailableQuantity AS NVARCHAR(50))+ '' + CAST(@intItemId  AS NVARCHAR(50))
-
 							IF(NOT @intContractDetailId IS NULL)
 							BEGIN 
 								SET @dblNonContractQuantity = (@dblQuantity - @dblPrebuyQuantity)
@@ -285,17 +287,21 @@ BEGIN
 								IF(@AvailableQuantity>= @dblPrebuyQuantity)
 								BEGIN
 									SET @dblPreBuyOverFill = 0
-									--SET @dblPrice = @dblPrebuyPrice --override price by contract
 									SET @dblQuantity = @dblPrebuyQuantity
 								END
 								ELSE
 								BEGIN
 									SET @dblPreBuyOverFill = @dblPrebuyQuantity - @AvailableQuantity
-									--SET @dblPrice = @dblPrebuyPrice 
 									SET @dblQuantity = @AvailableQuantity
 								END
-							END
 
+								SET @dblNonContractQuantity = @dblNonContractQuantity + @dblPreBuyOverFill --(add prebuy excess if there is any)
+								
+								IF (@dblNonContractQuantity > 0 ) 
+								BEGIN
+									SET @ysnRecomputeTax = 1
+								END
+							END
 							
 							---Insert/Create Invoice 
 							
@@ -331,8 +337,8 @@ BEGIN
 								SET @intNewInvoiceDetailId = (SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intNewInvoiceId)
 
 								----Update Tax Details
-								EXEC uspETImportUpdateInvoiceDetailTaxById @intNewInvoiceDetailId, @intImportBaseEngineeringId, @intTaxGroupId
-				
+								EXEC uspETImportUpdateInvoiceDetailTaxById @intNewInvoiceDetailId, @intImportBaseEngineeringId, @intTaxGroupId, @ysnRecomputeTax, 0, @TotalRecordedQuantity,@dblQuantity
+															
 								IF 	LTRIM(@strErrorMessage) != ''
 								BEGIN		
 									--ROLLBACK TRANSACTION
@@ -361,7 +367,8 @@ BEGIN
 									,@ItemCurrencyExchangeRateId = NULL			
 									,@RecomputeTax = @ysnRecomputeTax
 									----Update Tax Details
-									EXEC uspETImportUpdateInvoiceDetailTaxById @intNewInvoiceDetailId, @intImportBaseEngineeringId, @intTaxGroupId
+									--EXEC uspETImportUpdateInvoiceDetailTaxById @intNewInvoiceDetailId, @intImportBaseEngineeringId, @intTaxGroupId
+									EXEC uspETImportUpdateInvoiceDetailTaxById @intNewInvoiceDetailId, @intImportBaseEngineeringId, @intTaxGroupId, @ysnRecomputeTax, 0, @TotalRecordedQuantity,@dblQuantity
 				
 									IF 	LTRIM(@strErrorMessage) != ''
 										BEGIN		
@@ -369,17 +376,10 @@ BEGIN
 											GOTO LOGERROR
 										END
 								END
-                            --TO DO Pre buy overfill if need to be implemented
-							----------------------------------------------------------------------------------------------------------------------------------------
-							----Prebuy overfill
-							----------------------------------------------------------------------------------------------------------------------------------------
-
-							----------------------------------------------------------------------------------------------------------------------------------------
-
-							----------------------------------------------------------------------------------------------------------------------------------------
+                            
 							----Contract overfill
 							----------------------------------------------------------------------------------------------------------------------------------------
-							SET @dblNonContractQuantity = @dblNonContractQuantity + @dblPreBuyOverFill --(add prebuy excess if there is any)
+							
 							IF(@dblNonContractQuantity > 0)
 								BEGIN
 									---- Add as line Item to Existing Invoice
@@ -398,8 +398,10 @@ BEGIN
 											,@ItemCurrencyExchangeRateTypeId = NULL			
 											,@ItemCurrencyExchangeRateId = NULL			
 											,@RecomputeTax = @ysnRecomputeTax
+									--EXEC uspETImportUpdateInvoiceDetailTaxById @intNewInvoiceDetailId, @intImportBaseEngineeringId, @intTaxGroupId
+									EXEC uspETImportUpdateInvoiceDetailTaxById @intNewInvoiceDetailId, @intImportBaseEngineeringId, @intTaxGroupId, @ysnRecomputeTax, 1, @TotalRecordedQuantity,@dblNonContractQuantity
 								END
-							EXEC uspETImportUpdateInvoiceDetailTaxById @intNewInvoiceDetailId, @intImportBaseEngineeringId, @intTaxGroupId
+							
 							----------------------------------------------------------------------------------------------------------------------------------------
 						
 						IF 	LTRIM(@strErrorMessage) != ''
@@ -453,8 +455,6 @@ BEGIN
 						--GEt the created invoice number
 						SET @strNewInvoiceNumber = (SELECT TOP 1 strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @intNewInvoiceId) 
 						SET @intNewInvoiceDetailId = (SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intNewInvoiceId)
-
-
 					END
 					
 				ELSE
@@ -490,7 +490,6 @@ BEGIN
 				
 					----Update Tax Details
 					EXEC uspETImportUpdateInvoiceDetailTaxById @intNewInvoiceDetailId, @intImportBaseEngineeringId, @intTaxGroupId
-				
                 END
 
 		--Check if any error in creating invoice 
