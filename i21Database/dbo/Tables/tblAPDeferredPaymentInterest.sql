@@ -6,5 +6,6 @@
     [dtmPaymentInvoiceDate] DATETIME NULL, 
     [dtmPaymentDueDateOverride] DATETIME NULL, 
     [strTerm] NVARCHAR(100) NULL, 
-    [dblMinimum] DECIMAL(18, 6) NOT NULL DEFAULT 0
+    [dblMinimum] DECIMAL(18, 6) NOT NULL DEFAULT 0,
+	[intConcurrencyId] INT NOT NULL DEFAULT 0
 )
