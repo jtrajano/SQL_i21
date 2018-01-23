@@ -11,6 +11,7 @@ SELECT AGING.*
 	 , strCurrency				= CUR.strCurrency
 	 , strCurrencyDescription	= CUR.strDescription
 	 , strCustomerName			= CUSTOMER.strName
+	 , strCustomerNumber		= CUSTOMER.strCustomerNumber
 FROM 
 (SELECT strInvoiceNumber	= A.strInvoiceNumber
      , intInvoiceId			= A.intInvoiceId
