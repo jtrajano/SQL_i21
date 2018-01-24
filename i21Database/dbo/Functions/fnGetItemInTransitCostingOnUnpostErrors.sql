@@ -47,7 +47,7 @@ RETURN (
 							)
 				,intErrorCode = 80003
 		WHERE	EXISTS (
-					SELECT	TOP 1 1
+					SELECT	dblQty = SUM(ISNULL(cb.dblStockIn, 0) - ISNULL(cb.dblStockOut, 0)) 
 					FROM	dbo.tblICItem Item INNER JOIN dbo.tblICItemLocation [Location]
 								ON Item.intItemId = @intItemId								
 								AND [Location].intItemLocationId = @intItemLocationId
@@ -56,7 +56,8 @@ RETURN (
 								AND cb.intItemLocationId = [Location].intItemLocationId 
 								AND cb.strTransactionId = @strTransactionId
 								AND cb.ysnIsUnposted = 0 
-					WHERE	ROUND (ISNULL(cb.dblStockIn, 0) - ISNULL(cb.dblStockOut, 0) + ISNULL(@dblQty, 0), 6) < 0
+					WHERE	ISNULL(cb.dblStockIn, 0) - ISNULL(cb.dblStockOut, 0) <> 0 
+					HAVING	ROUND(SUM(ISNULL(cb.dblStockIn, 0) - ISNULL(cb.dblStockOut, 0)) + ISNULL(@dblQty, 0), 6) < 0 
 				)
 
 		-- Check for negative stocks at the lot table. 
