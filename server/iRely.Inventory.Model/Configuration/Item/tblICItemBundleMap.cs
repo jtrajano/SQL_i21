@@ -56,4 +56,16 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dtmEndDate).HasColumnName("dtmEndDate");
         }
     }
+
+    public class vyuICGetBundleItemStockMap : EntityTypeConfiguration<vyuICGetBundleItemStock>
+    {
+        public vyuICGetBundleItemStockMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.intKey);
+
+            // Table & Column Mappings
+            this.ToTable("vyuICGetBundleItemStock");
+        }
+    }
 }

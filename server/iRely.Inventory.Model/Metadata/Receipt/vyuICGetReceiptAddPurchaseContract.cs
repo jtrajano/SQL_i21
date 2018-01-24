@@ -66,11 +66,12 @@ namespace iRely.Inventory.Model
         public int? intForexRateTypeId { get; set; }
         public decimal? dblForexRate { get; set; }
         public string strForexRateType { get; set; }
-        public bool? ysnBundleItem { get; set; }
-        public int? intBundledItemId { get; set; }
-        public string strBundledItemNo { get; set; }
-        public string strBundledItemDescription { get; set; }
-        public bool? ysnIsBasket { get; set; }
+        //public bool? ysnBundleItem { get; set; }
+        public string strBundleType { get; set; }
+        //public int? intBundledItemId { get; set; }
+        //public string strBundledItemNo { get; set; }
+        //public string strBundledItemDescription { get; set; }
+        //public bool? ysnIsBasket { get; set; }
         public int? intFreightTermId { get; set; }
         public string strFreightTerm { get; set; }
     }

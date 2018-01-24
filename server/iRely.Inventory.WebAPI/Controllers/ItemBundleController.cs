@@ -8,7 +8,7 @@ using System.Web.Http;
 
 using iRely.Inventory.Model;
 using iRely.Inventory.BusinessLayer;
-
+using System.Threading.Tasks;
 
 namespace iRely.Inventory.WebApi
 {
@@ -22,5 +22,10 @@ namespace iRely.Inventory.WebApi
             _bl = bl;
         }
 
+        public async Task<HttpResponseMessage> GetKitComponents(GetParameter param, int intItemId, int intLocationId)
+        {
+            var result = await _bl.GetKitComponents(param, intItemId, intLocationId);
+            return Request.CreateResponse(HttpStatusCode.OK, result);
+        }
     }
 }

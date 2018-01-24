@@ -105,4 +105,15 @@ namespace iRely.Inventory.Model
         public DateTime? dtmEndDate { get; set; }
     }
 
+
+    public class vyuICGetBundleItemStock : vyuICGetItemStock
+    {
+        public int intKitItemId { get; set; }
+        public string strKitItemNo { get; set; }
+        public string strKitItemDesc { get; set; }
+        public decimal? dblComponentQuantity { get; set; }
+        public decimal? dblMarkUpOrDown { get; set; }
+        public DateTime? dtmBeginDate { get; set; }
+        public DateTime? dtmEndDate { get; set; }
+    }
 }

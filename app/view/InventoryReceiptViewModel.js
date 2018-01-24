@@ -34,7 +34,8 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         'Inventory.store.BufferedReceiptItemView',
         'i21.store.CurrencyExchangeRateTypeBuffered',
         'GeneralLedger.controls.RecapTab',
-        'GeneralLedger.controls.PostHistory'
+        'GeneralLedger.controls.PostHistory',
+        'Inventory.store.BufferedBundleComponent'
     ],
 
     data: {
@@ -285,6 +286,9 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         },                  
         items: {
             type: 'icbuffereditemstockdetailview'
+        },
+        kitStore:{
+            type: 'icbufferedbundlecomponent'
         },
         itemUOM: {
             type: 'icbuffereditempricingview'

@@ -11,6 +11,6 @@ namespace iRely.Inventory.BusinessLayer
 {
     public interface IItemBundleBl : IBusinessLayer<tblICItemBundle>
     {
-
+        Task<GetObjectResult> GetKitComponents(GetParameter param, int intItemId, int intLocationId);
     }
 }
