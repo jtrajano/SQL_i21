@@ -305,13 +305,11 @@ ELSE
 					AND KitUOM.intItemUOMId = SODetail.intItemUOMId  
 
 				CROSS APPLY (				
-					SELECT	Bundle.intItemId  
-							,dblQty = dbo.fnMultiply(Bundle.dblQuantity, BundleUOM.dblUnitQty) 
-							,BundleUOM.intItemUOMId 
-					FROM	tblICItemBundle Bundle LEFT JOIN tblICItemUOM BundleUOM
-								ON Bundle.intItemId = BundleUOM.intItemId								
+					SELECT	intItemId = Bundle.intBundleItemId 
+							,dblQty = dbo.fnMultiply(Bundle.dblQuantity, KitUOM.dblUnitQty) 
+							,intItemUOMId = Bundle.intItemUnitMeasureId 
+					FROM	tblICItemBundle Bundle 
 					WHERE	Bundle.intItemId = Kit.intItemId
-							AND BundleUOM.intUnitMeasureId = KitUOM.intUnitMeasureId
 				) BundleItems 
 
 				LEFT JOIN dbo.tblICItemLocation ItemLocation 
@@ -335,14 +333,26 @@ ELSE
 				AND Kit.strBundleType = 'Kit'
 				AND KitUOM.ysnAllowSale = 1 
 
+		IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemShipmentResult')) 
+		BEGIN 
+			CREATE TABLE #tmpAddItemShipmentResult (
+				intInventoryShipmentId INT
+
+			)
+		END 
+
 		EXEC @intReturn = dbo.uspICAddItemShipment 
 				@Items
 				, @Charges
-				, @Lot
+				, @Lots
 				, @UserId	
 				
 		IF @intReturn <> 0 
 			RETURN @intReturn
+
+		SELECT	TOP 1 
+				@InventoryShipmentId = intInventoryShipmentId 
+		FROM	#tmpAddItemShipmentResult
 
 		EXEC dbo.uspSOUpdateOrderShipmentStatus @InventoryShipmentId, 'Inventory', 0
 
