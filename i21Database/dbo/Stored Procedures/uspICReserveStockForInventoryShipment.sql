@@ -12,6 +12,7 @@ DECLARE @ItemsToReserve AS dbo.ItemReservationTableType;
 DECLARE @intInventoryTransactionType AS INT
 DECLARE @strInvalidItemNo AS NVARCHAR(50) 
 DECLARE @intInvalidItemId AS INT 
+		,@intReturn AS INT = 0 
 
 DECLARE @LotType_No AS INT = 0
 		,@LotType_YesManual AS INT = 1
@@ -125,17 +126,25 @@ END
 -- Do the reservations
 BEGIN 
 	-- Validate the reservation 
-	EXEC dbo.uspICValidateStockReserves 
+	EXEC @intReturn = dbo.uspICValidateStockReserves 
 		@ItemsToReserve
 		,@strInvalidItemNo OUTPUT 
 		,@intInvalidItemId OUTPUT 
 
+	IF @intReturn <> 0 
+		RETURN @intReturn
+
 	-- If there are enough stocks, let the system create the reservations
 	IF (@intInvalidItemId IS NULL)	
 	BEGIN 
-		EXEC dbo.uspICCreateStockReservation
+		EXEC @intReturn = dbo.uspICCreateStockReservation
 			@ItemsToReserve
 			,@intTransactionId
 			,@intInventoryTransactionType
+
+		IF @intReturn <> 0 
+			RETURN @intReturn
 	END 
 END
+
+RETURN @intReturn

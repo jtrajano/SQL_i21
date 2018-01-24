@@ -29,7 +29,7 @@ BEGIN
 	IF @intItemId IS NOT NULL 
 	BEGIN 
 		EXEC uspICRaiseError 80002, @strItemNo;
-		GOTO _Exit
+		RETURN 80002
 	END 
 END 
 

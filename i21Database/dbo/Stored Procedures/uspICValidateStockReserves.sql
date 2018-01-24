@@ -100,7 +100,7 @@ IF @intInvalidItemId IS NOT NULL
 BEGIN 
 	-- 'Not enough stocks for {Item}. Reserved stocks is {Reserved Stock Qty} while On Hand Qty is {On Hand Qty}.'			
 	EXEC uspICRaiseError 80007, @strInvalidItemNo, @dblReservedQty, @dblOnHandQty
-	RETURN -1;
+	RETURN 80007;
 END 	
 
 --------------------------------------------------
@@ -194,5 +194,5 @@ IF @intInvalidItemId IS NOT NULL
 BEGIN 
 	-- 'Not enough stocks for {Item}. Reserved stocks is {Reserved Lot Qty} while Lot Qty is {Lot Qty}.'
 	EXEC uspICRaiseError 80176, @strInvalidItemNo, @dblReservedQty, @dblOnHandQty
-	RETURN -1;
+	RETURN 80176;
 END 

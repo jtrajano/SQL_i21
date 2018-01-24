@@ -176,7 +176,7 @@ BEGIN
 		WHEN @msgId = 80160 THEN 'Transaction not saved. Stocks for %s will have an over-return.'
 		WHEN @msgId = 80161 THEN 'Return no longer allowed. All of the stocks are returned.'
 		WHEN @msgId = 80162 THEN '%s is using a foreign currency. Please check if %s has a forex rate. You may also need to review the Currency Exchange Rates and check if there is a valid forex rate from %s to %s.'
-		WHEN @msgId = 80163 THEN 'Shipment for non-inventory items are not allowed.'
+		WHEN @msgId = 80163 THEN '%s is set as %s type and that type is not allowed for Shipment.'
 		WHEN @msgId = 80164 THEN 'There are no receipt items to process.'
 		WHEN @msgId = 80165 THEN 'No line of business specified.'
 		WHEN @msgId = 80166 THEN 'No type of data is specified.'
@@ -211,6 +211,10 @@ BEGIN
 		WHEN @msgId = 80195 THEN 'Unable to unpost %s because you need to unpost the Destination Qty first.'
 		WHEN @msgId = 80196 THEN '%s will have a negative cost. Negative cost is not allowed.'
 		WHEN @msgId = 80197 THEN 'Unable to post %s. Functional currency is not set for the company.'
+		WHEN @msgId = 80198 THEN 'Ship From Location is missing or invalid.'
+		WHEN @msgId = 80199 THEN 'Ship To Location is missing or invalid.'
+		WHEN @msgId = 80200 THEN 'Charge is missing or invalid.'
+		WHEN @msgId = 80201 THEN 'Lot Id provided for %s is invalid.'
 	END 
 
 	RETURN @msg

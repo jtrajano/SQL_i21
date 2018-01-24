@@ -10,9 +10,9 @@
 		@UserId				- The ID of the user.
 */
 CREATE PROCEDURE [dbo].[uspICAddItemShipment]
-	@Entries ShipmentStagingTable READONLY,
+	@Items ShipmentStagingTable READONLY,
 	@Charges ShipmentChargeStagingTable READONLY,
-	@ItemLots ShipmentItemLotStagingTable READONLY,
+	@Lots ShipmentItemLotStagingTable READONLY,
 	@intUserId INT
 AS
 
@@ -31,50 +31,51 @@ DECLARE
 
 	@intEntityId INT,
 	@CurrentShipmentId INT
+
+DECLARE @intResult INT 
 	
-IF NOT EXISTS (SELECT TOP 1 1 FROM @Entries)
+IF NOT EXISTS (SELECT TOP 1 1 FROM @Items)
 	GOTO _Exit;
 
 -- BEGIN VALIDATIONS
 BEGIN 
-	-- Validate the items. 
-	IF EXISTS(
-		SELECT TOP 1 1
-		FROM @Entries e
-			INNER JOIN tblICItem i ON i.intItemId = e.intItemId
-		WHERE i.strType NOT IN ('Inventory', 'Finished Good', 'Raw Material', 'Bundle', 'Kit')
-	)
-	BEGIN
-		-- 'Shipment for non-inventory items are not allowed.'
-		EXEC uspICRaiseError 80163; 
-		GOTO _Exit
-	END
+	DECLARE @InvalidEntityId AS INT
+			,@strCustomer AS NVARCHAR(50)
+			,@strItemNo AS NVARCHAR(50)
+			,@strItemType AS NVARCHAR(50)
+			,@InvalidItemId AS INT 
+			,@InvalidSubLocation AS INT 
+			,@InvalidStorageLocation AS INT 
+			,@InvalidVendorId AS INT 
+			,@strCharge AS NVARCHAR(50)
+			,@InvalidChargeId AS INT 
+			,@InvalidLotId AS INT
+			,@strLotNumber AS NVARCHAR(50) 
 
 	-- Validate Customer Id
 	BEGIN
-		DECLARE @id AS INT = 1
+		
 		SELECT	TOP 1 
-				@id = e.intEntityId
-		FROM	@Entries shipment LEFT JOIN tblEMEntity e
+				@InvalidEntityId = shipment.intEntityCustomerId
+		FROM	@Items shipment LEFT JOIN tblEMEntity e
 					ON shipment.intEntityCustomerId = e.intEntityId
 		WHERE	e.intEntityId IS NULL 
+				AND shipment.intEntityCustomerId IS NOT NULL
 
-		IF @id IS NULL 
+		IF @InvalidEntityId IS NOT NULL 
 		BEGIN 
 			-- 'Invalid customer record.'
 			EXEC uspICRaiseError 80184;
-			GOTO _Exit;
+			RETURN 80184
 		END 
 	END
 	
 	-- Validate Freight Term Id
 	BEGIN
-		DECLARE @strCustomer AS NVARCHAR(50)
-		
 		-- Validate the freight terms for the shipment header.
 		SELECT	TOP 1 
 				@strCustomer = e.strName
-		FROM	@Entries shipment INNER JOIN tblEMEntity e
+		FROM	@Items shipment INNER JOIN tblEMEntity e
 					ON shipment.intEntityCustomerId = e.intEntityId
 				LEFT JOIN tblSMFreightTerms f
 					ON f.intFreightTermId = shipment.intFreightTermId
@@ -84,7 +85,7 @@ BEGIN
 		BEGIN 
 			-- 'The Freight Terms for customer {Customer} is blank. Please add it at the Entity - Locations.'
 			EXEC uspICRaiseError 80183, @strCustomer;
-			GOTO _Exit;
+			RETURN 80183
 		END 
 
 		-- Validate the freight terms for the shipment charges.
@@ -100,9 +101,230 @@ BEGIN
 		BEGIN 
 			-- 'The Freight Terms for customer {Customer} is blank. Please add it at the Entity - Locations.'
 			EXEC uspICRaiseError 80183, @strCustomer;
-			GOTO _Exit;
+			RETURN 80183
 		END 
 	END
+
+	-- Validate Ship From Location Id
+	BEGIN 		
+		IF EXISTS (
+			SELECT	TOP 1 1 
+			FROM	@Items i LEFT JOIN tblSMCompanyLocation l
+						ON l.intCompanyLocationId = i.intShipFromLocationId
+			WHERE	l.intCompanyLocationId IS NULL 
+		)
+		BEGIN
+			-- 'Ship From Location is missing or invalid.'
+			EXEC uspICRaiseError 80198;
+			RETURN 80198
+		END
+	END 
+
+	-- Validate Ship To Location Id
+	BEGIN 		
+		IF EXISTS (
+			SELECT	TOP 1 1 
+			FROM	@Items i LEFT JOIN tblEMEntityLocation entityLocation
+						ON entityLocation.intEntityLocationId = i.intShipToLocationId 
+			WHERE	entityLocation.intEntityLocationId IS NULL 
+		)
+		BEGIN
+			-- 'Ship To Location is missing or invalid.'
+			EXEC uspICRaiseError 80199;
+			RETURN 80199
+		END
+	END 
+
+	-- Validate the items
+	BEGIN 
+		-- Check if item id is valid or not. 
+		IF EXISTS(
+			SELECT	TOP 1 1
+			FROM	@Items e LEFT JOIN tblICItem i 
+						ON i.intItemId = e.intItemId
+			WHERE	i.intItemId IS NULL 
+		)
+		BEGIN
+			-- 'Item id is invalid or missing.'
+			EXEC uspICRaiseError 80001; 
+			RETURN 80001
+		END
+
+		-- Check if item type is allowed for shipment. 
+		SET @InvalidItemId = NULL 
+		SELECT	TOP 1 
+				@strItemNo = i.strItemNo
+				,@strItemType = i.strType
+				,@InvalidItemId = i.intItemId  
+		FROM	@Items e INNER JOIN tblICItem i 
+					ON i.intItemId = e.intItemId
+		WHERE	i.strType NOT IN ('Inventory', 'Finished Good', 'Raw Material', 'Bundle')
+
+		IF @InvalidItemId IS NOT NULL 
+		BEGIN
+			-- '{Item} is set as {Item Type} type and that type is not allowed for Shipment.'
+			EXEC uspICRaiseError 80163, @strItemNo, @strItemType; 
+			RETURN 80163 
+		END
+
+		-- Validate Item UOM Id
+		SET @InvalidItemId = NULL
+
+		SELECT TOP 1 
+				@strItemNo = i.strItemNo
+				,@strItemType = i.strType
+				,@InvalidItemId = i.intItemId  
+		FROM	@Items RawData INNER JOIN tblICItem i
+					ON RawData.intItemId = i.intItemId
+				LEFT JOIN tblICItemUOM iu 
+					ON iu.intItemUOMId = RawData.intItemUOMId
+		WHERE	iu.intItemUOMId IS NULL 
+
+		IF @InvalidItemId IS NOT NULL 
+		BEGIN
+			-- 'Item UOM Id is invalid or missing for item {Item No}.'
+			EXEC uspICRaiseError 80120, @strItemNo;
+			RETURN 80120 
+		END
+
+		-- Validate Sub Location Id
+		SELECT TOP 1 
+				@InvalidSubLocation = RawData.intSubLocationId
+				,@strItemNo = i.strItemNo
+		FROM	@Items RawData LEFT JOIN tblICItem i 
+					ON RawData.intItemId = i.intItemId		
+				LEFT JOIN tblSMCompanyLocationSubLocation sub 
+					ON sub.intCompanyLocationSubLocationId = RawData.intSubLocationId
+					AND sub.intCompanyLocationId = RawData.intShipFromLocationId 
+		WHERE	sub.intCompanyLocationSubLocationId IS NULL 		
+				AND RawData.intSubLocationId IS NOT NULL 		
+
+		IF @InvalidSubLocation IS NOT NULL 
+		BEGIN
+			-- 'Sub Location is invalid or missing for item {Item No}.'
+			EXEC uspICRaiseError 80097, @strItemNo
+			RETURN 80097
+		END
+
+		-- Validate Storage Location Id
+		SELECT TOP 1 
+				@InvalidStorageLocation = RawData.intStorageLocationId
+				,@strItemNo = i.strItemNo 
+		FROM	@Items RawData LEFT JOIN tblICItem i 
+					ON RawData.intItemId = i.intItemId
+				LEFT JOIN tblICStorageLocation storage 
+					ON storage.intStorageLocationId = RawData.intStorageLocationId
+					AND storage.intSubLocationId = RawData.intSubLocationId -- Sub-location for the storage location must match too. 
+					AND storage.intLocationId = RawData.intShipFromLocationId
+		WHERE	storage.intStorageLocationId IS NULL 
+				AND RawData.intStorageLocationId IS NOT NULL 
+
+		IF @InvalidStorageLocation IS NOT NULL 
+		BEGIN
+			-- Storage Unit is invalid or missing for item {Item No}.
+			EXEC uspICRaiseError 80098, @strItemNo
+			RETURN 80098
+		END
+
+		-- Validate Gross/Net UOM Id
+		SET @InvalidItemId = NULL
+
+		SELECT TOP 1 
+				@InvalidItemId = RawData.intItemId
+				,@strItemNo = i.strItemNo
+		FROM	@Items RawData INNER JOIN tblICItem i 
+					ON RawData.intItemId = i.intItemId
+				LEFT JOIN tblICItemUOM iu 
+					ON iu.intItemUOMId = RawData.intWeightUOMId
+		WHERE	iu.intItemUOMId IS NULL 
+				AND RawData.intWeightUOMId IS NOT NULL 
+
+		IF @InvalidItemId IS NOT NULL 
+		BEGIN
+			-- Gross/Net UOM is invalid for item {Item}.
+			EXEC uspICRaiseError 80121, @strItemNo;
+			RETURN 80121
+		END
+	END
+
+	-- Validate the Other Charges
+	BEGIN 
+		-- Check if item id is valid or not. 
+		IF EXISTS(
+			SELECT	TOP 1 1
+			FROM	@Charges c LEFT JOIN tblICItem i 
+						ON i.intItemId = c.intChargeId
+						AND i.strType = 'Other Charge'
+			WHERE	i.intItemId IS NULL 
+		)
+		BEGIN
+			-- 'Charge is missing or invalid.'
+			EXEC uspICRaiseError 80200; 
+			RETURN 80200
+		END
+
+		-- Validate Other Charge Entity Id
+		SET @InvalidVendorId = NULL 
+		SELECT	TOP 1 
+				@InvalidVendorId = RawData.intChargeId
+				,@strCharge = charge.strItemNo 
+		FROM	@Charges RawData INNER JOIN tblICItem charge
+					ON RawData.intChargeId = charge.intItemId 
+				LEFT JOIN tblEMEntity e 
+					ON e.intEntityId = RawData.intEntityVendorId
+		WHERE	e.intEntityId IS NULL 
+				AND RawData.intEntityVendorId IS NOT NULL 
+
+		IF @InvalidVendorId IS NOT NULL
+		BEGIN
+			-- Entity Id is invalid or missing for other charge item {Other Charge Item No.}.
+			EXEC uspICRaiseError 80140, @strCharge;
+			RETURN 80140;
+		END
+
+		-- Validate Other Charge Location Id
+		SET @InvalidChargeId = NULL 
+		SELECT TOP 1 
+				@InvalidChargeId = RawData.intChargeId
+				,@strCharge = charge.strItemNo 
+		FROM	@Charges RawData INNER JOIN tblICItem charge
+					ON RawData.intChargeId = charge.intItemId 
+				LEFT JOIN tblSMCompanyLocation loc 
+					ON loc.intCompanyLocationId = RawData.intShipFromLocationId
+		WHERE	loc.intCompanyLocationId IS NULL 
+		
+		IF @InvalidChargeId IS NOT NULL
+		BEGIN
+			-- Location Id is invalid or missing for other charge item {Other Charge Item No.}.
+			EXEC uspICRaiseError 80142, @strCharge;
+			RETURN 80142
+		END		
+	END 
+
+	-- Validate the Lots 
+	BEGIN 
+		-- Validate Lot Id
+		SET @InvalidLotId = NULL
+
+		SELECT	TOP 1 
+				@InvalidLotId = ItemLot.intLotId
+				,@strItemNo = i.strItemNo  
+		FROM	@Lots ItemLot INNER JOIN @Items Item
+					ON ItemLot.intItemLotGroup = Item.intItemLotGroup
+				INNER JOIN tblICItem i
+					ON i.intItemId = Item.intItemId
+				LEFT JOIN tblICLot l
+					ON ItemLot.intLotId = l.intLotId 
+					AND Item.intItemId = l.intItemId
+		WHERE	l.intLotId IS NULL 
+
+		IF @InvalidLotId IS NOT NULL 
+		BEGIN
+			-- 'Lot Id provided for {Item No} is invalid.'
+			EXEC uspICRaiseError 80201, @strItemNo;
+			RETURN 80201
+		END
+	END 
 END 
 -- END VALIDATIONS
 
@@ -209,7 +431,7 @@ SELECT
 		, intDestinationWeightId
 		, intForexRateTypeId
 		, dblForexRate
-FROM @Entries
+FROM @Items
 
 -- 2. Charges
 INSERT INTO @ShipmentCharges(
@@ -288,7 +510,7 @@ SELECT	intOrderType
 		, dblTareWeight
 		, dblWeightPerQty
 		, strWarehouseCargoNumber
-FROM @ItemLots
+FROM @Lots
 
 -- Get the entity id
 SELECT	@intEntityId = [intEntityId]
@@ -677,16 +899,19 @@ WHERE i.strLotTracking <> 'No'
 DECLARE @intShipmentId INT
 
 DECLARE cur CURSOR LOCAL FAST_FORWARD
-	FOR 
-		SELECT DISTINCT intShipmentId FROM @ShipmentEntries
+FOR SELECT DISTINCT intShipmentId FROM @ShipmentEntries
+
 OPEN cur
 
 FETCH NEXT FROM cur INTO @intShipmentId
 
 WHILE @@FETCH_STATUS = 0
 BEGIN
- EXEC uspICReserveStockForInventoryShipment @intShipmentId
-	-- Get Next Header
+	EXEC @intResult = uspICReserveStockForInventoryShipment @intShipmentId	
+	
+	IF @intResult <> 0 
+		RETURN @intResult
+	
 	FETCH NEXT FROM cur INTO @intShipmentId
 END
 
