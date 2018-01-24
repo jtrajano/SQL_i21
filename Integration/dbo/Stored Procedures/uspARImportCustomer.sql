@@ -656,7 +656,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					) unpiv) AS P
 					JOIN tblARCustomer c ON P.agcus_key COLLATE Latin1_General_CI_AS = c.strCustomerNumber
 					join tblARAccountStatus s ON P.x COLLATE Latin1_General_CI_AS = s.strAccountStatusCode
-					WHERE agcus_cus_no = @originCustomer
+					WHERE agcus_key = @originCustomer
 					
 					if @strPhone <> ''''
 						INSERT INTO tblEMEntityPhoneNumber(intEntityId,intCountryId, strPhone) VALUES (@ContactEntityId,NULL, @strPhone)
