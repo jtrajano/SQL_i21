@@ -6120,6 +6120,7 @@
     <Build Include="dbo\Stored Procedures\uspCTSaveINCOShipTerm.sql" />
     <Build Include="dbo\Views\vyuHDTimeHoursReport.sql" />
     <Build Include="dbo\Views\vyuARPaymentBankTransaction.sql" />
+    <Build Include="dbo\Views\vyuICGetBundleItemStock.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

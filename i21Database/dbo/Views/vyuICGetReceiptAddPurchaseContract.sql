@@ -18,16 +18,21 @@ FROM (
 		, intSourceType				= CAST(0 AS INT)
 		, intSourceId				= CAST(NULL AS INT) 
 		, strSourceNumber			= CAST(NULL AS NVARCHAR(50)) 
-		, intItemId					= CASE WHEN ContractView.strBundleType = 'Basket' THEN BasketItem.intItemId ELSE ContractView.intItemId END 
-		, strItemNo					= CASE WHEN ContractView.strBundleType = 'Basket' THEN BasketItem.strItemNo ELSE ContractView.strItemNo END 
-		, strItemDescription		= CASE WHEN ContractView.strBundleType = 'Basket' THEN BasketItem.strDescription ELSE ContractView.strItemDescription END 
+		--, intItemId					= CASE WHEN ContractView.strBundleType = 'Basket' THEN BasketItem.intItemId ELSE ContractView.intItemId END 
+		--, strItemNo					= CASE WHEN ContractView.strBundleType = 'Basket' THEN BasketItem.strItemNo ELSE ContractView.strItemNo END 
+		--, strItemDescription		= CASE WHEN ContractView.strBundleType = 'Basket' THEN BasketItem.strDescription ELSE ContractView.strItemDescription END 
+		, intItemId					= ContractView.intItemId
+		, strItemNo					= ContractView.strItemNo
+		, strItemDescription		= ContractView.strItemDescription
 		, dblQtyToReceive			= ContractView.dblDetailQuantity - (ContractView.dblDetailQuantity - ContractView.dblBalance)
 		, intLoadToReceive			= ContractView.intNoOfLoad - ContractView.intLoadReceived
 		, dblUnitCost				= ContractView.dblSeqPrice
 		, dblTax					= CAST(0 AS NUMERIC(18, 6))
 		, dblLineTotal				= CAST((ContractView.dblDetailQuantity - (ContractView.dblDetailQuantity - ContractView.dblBalance)) * ContractView.dblSeqPrice AS NUMERIC(18, 6))
-		, strLotTracking			= CASE WHEN ContractView.strBundleType = 'Basket' THEN BasketItem.strLotTracking ELSE ContractView.strLotTracking END 
-		, intCommodityId			= CASE WHEN ContractView.strBundleType = 'Basket' THEN BasketItem.intCommodityId ELSE ContractView.intCommodityId END
+		--, strLotTracking			= CASE WHEN ContractView.strBundleType = 'Basket' THEN BasketItem.strLotTracking ELSE ContractView.strLotTracking END 
+		--, intCommodityId			= CASE WHEN ContractView.strBundleType = 'Basket' THEN BasketItem.intCommodityId ELSE ContractView.intCommodityId END
+		, strLotTracking			= ContractView.strLotTracking
+		, intCommodityId			= ContractView.intCommodityId
 		, intContainerId			= CAST(NULL AS INT) 
 		, strContainer				= CAST(NULL AS NVARCHAR(50)) 
 		, intSubLocationId			= ContractView.intCompanyLocationSubLocationId
@@ -37,22 +42,31 @@ FROM (
 		, intOrderUOMId				= ItemUOM.intItemUOMId
 		, strOrderUOM				= ItemUnitMeasure.strUnitMeasure
 		, dblOrderUOMConvFactor		= ItemUOM.dblUnitQty
-		, intItemUOMId				= CASE WHEN ContractView.strBundleType = 'Basket' THEN BasketItemUOM.intItemUOMId ELSE ItemUOM.intItemUOMId END 
+		--, intItemUOMId				= CASE WHEN ContractView.strBundleType = 'Basket' THEN BasketItemUOM.intItemUOMId ELSE ItemUOM.intItemUOMId END 
+		, intItemUOMId				= ItemUOM.intItemUOMId
 		, strUnitMeasure			= ItemUnitMeasure.strUnitMeasure
 		, strUnitType				= ItemUnitMeasure.strUnitType
 		-- Gross/Net UOM -----------
-		, intWeightUOMId			= CASE WHEN ContractView.strBundleType = 'Basket' THEN BasketWeightUOM.intItemUOMId ELSE GrossNetUOM.intItemUOMId END  
+		--, intWeightUOMId			= CASE WHEN ContractView.strBundleType = 'Basket' THEN BasketWeightUOM.intItemUOMId ELSE GrossNetUOM.intItemUOMId END  
+		, intWeightUOMId			= GrossNetUOM.intItemUOMId
 		, strWeightUOM				= GrossNetUnitMeasure.strUnitMeasure 
 		-- Conversion factor -------
-		, dblItemUOMConvFactor		= CASE WHEN ContractView.strBundleType = 'Basket' THEN BasketItemUOM.dblUnitQty ELSE ItemUOM.dblUnitQty  END  
-		, dblWeightUOMConvFactor	= CASE WHEN ContractView.strBundleType = 'Basket' THEN BasketWeightUOM.dblUnitQty ELSE GrossNetUOM.dblUnitQty END  
+		--, dblItemUOMConvFactor		= CASE WHEN ContractView.strBundleType = 'Basket' THEN BasketItemUOM.dblUnitQty ELSE ItemUOM.dblUnitQty  END  
+		--, dblWeightUOMConvFactor	= CASE WHEN ContractView.strBundleType = 'Basket' THEN BasketWeightUOM.dblUnitQty ELSE GrossNetUOM.dblUnitQty END  
+		, dblItemUOMConvFactor		= ItemUOM.dblUnitQty
+		, dblWeightUOMConvFactor	= GrossNetUOM.dblUnitQty
 		-- Cost UOM ----------------
-		, intCostUOMId				= CASE WHEN ContractView.strBundleType = 'Basket' THEN BasketCostUOM.intItemUOMId ELSE ItemCostUOM.intItemUOMId END  -- ContractView.intSeqPriceUOMId
-		, strCostUOM				= CASE WHEN ContractView.strBundleType = 'Basket' THEN BasketCostUnitMeasure.strUnitMeasure ELSE ItemCostUnitMeasure.strUnitMeasure END  
-		, dblCostUOMConvFactor		= CASE WHEN ContractView.strBundleType = 'Basket' THEN BasketCostUOM.dblUnitQty ELSE ItemCostUOM.dblUnitQty END  
+		--, intCostUOMId				= CASE WHEN ContractView.strBundleType = 'Basket' THEN BasketCostUOM.intItemUOMId ELSE ItemCostUOM.intItemUOMId END  -- ContractView.intSeqPriceUOMId
+		--, strCostUOM				= CASE WHEN ContractView.strBundleType = 'Basket' THEN BasketCostUnitMeasure.strUnitMeasure ELSE ItemCostUnitMeasure.strUnitMeasure END  
+		--, dblCostUOMConvFactor		= CASE WHEN ContractView.strBundleType = 'Basket' THEN BasketCostUOM.dblUnitQty ELSE ItemCostUOM.dblUnitQty END  
+		, intCostUOMId				= ItemCostUOM.intItemUOMId
+		, strCostUOM				= ItemCostUnitMeasure.strUnitMeasure
+		, dblCostUOMConvFactor		= ItemCostUOM.dblUnitQty 
 		----------------------------
-		, intLifeTime				= CASE WHEN ContractView.strBundleType = 'Basket' THEN BasketItem.intLifeTime ELSE ContractView.intLifeTime END
-		, strLifeTimeType			= CASE WHEN ContractView.strBundleType = 'Basket' THEN BasketItem.strLifeTimeType ELSE ContractView.strLifeTimeType END
+		--, intLifeTime				= CASE WHEN ContractView.strBundleType = 'Basket' THEN BasketItem.intLifeTime ELSE ContractView.intLifeTime END
+		--, strLifeTimeType			= CASE WHEN ContractView.strBundleType = 'Basket' THEN BasketItem.strLifeTimeType ELSE ContractView.strLifeTimeType END
+		, intLifeTime				= ContractView.intLifeTime
+		, strLifeTimeType			= ContractView.strLifeTimeType
 		, ysnLoad					= CAST(0 AS BIT)
 		, dblAvailableQty			= CAST(0 AS NUMERIC(38, 20))
 		, strBOL					= CAST(NULL AS NVARCHAR(50))
@@ -62,27 +76,28 @@ FROM (
 		, intCurrencyId				= dbo.fnICGetCurrency(ContractView.intContractDetailId, 0) -- 0 indicates that value is not for Sub Currency
 		, strSubCurrency			= SubCurrency.strCurrency
 		, dblGross					= 
-									CASE WHEN ContractView.strBundleType = 'Basket' THEN 
-										CAST(dbo.fnCalculateQtyBetweenUOM(ItemUOM.intItemUOMId, BasketWeightUOM.intItemUOMId, dblDetailQuantity - (dblDetailQuantity - dblBalance)) AS NUMERIC(38, 20)) 
-									ELSE 
+									--CASE WHEN ContractView.strBundleType = 'Basket' THEN 
+									--	CAST(dbo.fnCalculateQtyBetweenUOM(ItemUOM.intItemUOMId, BasketWeightUOM.intItemUOMId, dblDetailQuantity - (dblDetailQuantity - dblBalance)) AS NUMERIC(38, 20)) 
+									--ELSE 
 										CAST(0 AS NUMERIC(38, 20))									
-									END
+									--END
 									
 		, dblNet					= 
-									CASE WHEN ContractView.strBundleType = 'Basket' THEN 
-										CAST(dbo.fnCalculateQtyBetweenUOM(ItemUOM.intItemUOMId, BasketWeightUOM.intItemUOMId, dblDetailQuantity - (dblDetailQuantity - dblBalance)) AS NUMERIC(38, 20))
-									ELSE 
+									--CASE WHEN ContractView.strBundleType = 'Basket' THEN 
+									--	CAST(dbo.fnCalculateQtyBetweenUOM(ItemUOM.intItemUOMId, BasketWeightUOM.intItemUOMId, dblDetailQuantity - (dblDetailQuantity - dblBalance)) AS NUMERIC(38, 20))
+									--ELSE 
 										CAST(0 AS NUMERIC(38, 20))									
-									END
+									--END
 
 		, intForexRateTypeId		= ContractView.intRateTypeId
 		, strForexRateType			= ContractView.strCurrencyExchangeRateType
 		, dblForexRate				= ContractView.dblRate
-		, ysnBundleItem				= ContractView.ysnBundleItem
-		, intBundledItemId			= CASE WHEN ContractView.strBundleType = 'Basket' THEN ContractView.intItemId ELSE CAST(NULL AS INT) END 
-		, strBundledItemNo			= CASE WHEN ContractView.strBundleType = 'Basket' THEN ContractView.strItemNo ELSE CAST(NULL AS NVARCHAR(50)) END 
-		, strBundledItemDescription = CASE WHEN ContractView.strBundleType = 'Basket' THEN ContractView.strItemDescription ELSE CAST(NULL AS NVARCHAR(50)) END 
-		, ysnIsBasket 				= CAST(CASE ContractView.strBundleType WHEN 'Baset' THEN 1 ELSE 0 END AS BIT)
+		, strBundleType				= ContractView.strBundleType
+		--, ysnBundleItem				= ContractView.ysnBundleItem
+		--, intBundledItemId			= CASE WHEN ContractView.strBundleType = 'Basket' THEN ContractView.intItemId ELSE CAST(NULL AS INT) END 
+		--, strBundledItemNo			= CASE WHEN ContractView.strBundleType = 'Basket' THEN ContractView.strItemNo ELSE CAST(NULL AS NVARCHAR(50)) END 
+		--, strBundledItemDescription = CASE WHEN ContractView.strBundleType = 'Basket' THEN ContractView.strItemDescription ELSE CAST(NULL AS NVARCHAR(50)) END 
+		--, ysnIsBasket 				= CAST(CASE ContractView.strBundleType WHEN 'Baset' THEN 1 ELSE 0 END AS BIT)
 		, ContractView.intFreightTermId
 		, ContractView.strFreightTerm
 	FROM vyuCTContractAddOrdersLookup ContractView
@@ -95,12 +110,12 @@ FROM (
 		LEFT JOIN dbo.tblSMCurrency SubCurrency ON SubCurrency.intCurrencyID = dbo.fnICGetCurrency(ContractView.intContractDetailId, 1) -- 1 indicates that value is for Sub Currency
 
 		-- The following are bundle/basket related queries:
-		LEFT JOIN tblICItemBundle BundleItem ON BundleItem.intItemId = ContractView.intItemId
-		LEFT JOIN tblICItem BasketItem ON BasketItem.intItemId = BundleItem.intBundleItemId
-		LEFT JOIN tblICItemUOM BasketItemUOM ON BasketItemUOM.intItemId = BasketItem.intItemId AND BasketItemUOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
-		LEFT JOIN tblICItemUOM BasketWeightUOM ON BasketWeightUOM.intItemId = BasketItem.intItemId AND BasketWeightUOM.intUnitMeasureId = GrossNetUOM.intUnitMeasureId
-		LEFT JOIN dbo.tblICItemUOM BasketCostUOM ON BasketCostUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(BasketItem.intItemId, ContractView.intSeqPriceUOMId)
-		LEFT JOIN dbo.tblICUnitMeasure BasketCostUnitMeasure ON BasketCostUnitMeasure.intUnitMeasureId = BasketCostUOM.intUnitMeasureId
+		--LEFT JOIN tblICItemBundle BundleItem ON BundleItem.intItemId = ContractView.intItemId
+		--LEFT JOIN tblICItem BasketItem ON BasketItem.intItemId = BundleItem.intBundleItemId
+		--LEFT JOIN tblICItemUOM BasketItemUOM ON BasketItemUOM.intItemId = BasketItem.intItemId AND BasketItemUOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+		--LEFT JOIN tblICItemUOM BasketWeightUOM ON BasketWeightUOM.intItemId = BasketItem.intItemId AND BasketWeightUOM.intUnitMeasureId = GrossNetUOM.intUnitMeasureId
+		--LEFT JOIN dbo.tblICItemUOM BasketCostUOM ON BasketCostUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(BasketItem.intItemId, ContractView.intSeqPriceUOMId)
+		--LEFT JOIN dbo.tblICUnitMeasure BasketCostUnitMeasure ON BasketCostUnitMeasure.intUnitMeasureId = BasketCostUOM.intUnitMeasureId
 
 	WHERE ContractView.ysnAllowedToShow = 1
 		AND ContractView.strContractType = 'Purchase'
