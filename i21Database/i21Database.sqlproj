@@ -6118,6 +6118,7 @@
     <Build Include="dbo\Functions\fnSTSeparateStringBySymbol.sql" />
     <Build Include="dbo\Views\vyuCTGetINCOShipTerm.sql" />
     <Build Include="dbo\Stored Procedures\uspCTSaveINCOShipTerm.sql" />
+    <Build Include="dbo\Views\vyuHDTimeHoursReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
