@@ -55,6 +55,7 @@ AS
 	JOIN tblSMCurrency Curr ON Curr.intCurrencyID = CD.intCurrencyId
 	JOIN tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId
 	JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
-	LEFT JOIN tblSMCountry Country ON Country.intCountryID = Item.intOriginId
+	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = Item.intOriginId
+	LEFT JOIN tblSMCountry Country ON Country.intCountryID = CA.intCountryID
 	LEFT JOIN tblICCommodity Comm ON Comm.intCommodityId = CH.intCommodityId
 	WHERE CD.dblQuantity - IsNull(CD.dblAllocatedQty, 0) - IsNull(CD.dblAllocationAdjQty, 0) > 0.0
