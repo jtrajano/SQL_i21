@@ -47,6 +47,7 @@ BEGIN
 					ON fp.strFobPoint = ft.strFobPoint
 			WHERE ID.intInvoiceId = @TransactionId 
 			  AND ISNULL(ID.intInventoryShipmentItemId, 0) > 0
+			  AND I.[strType] <> 'Provisional'
 	  END
 	ELSE
 		BEGIN
