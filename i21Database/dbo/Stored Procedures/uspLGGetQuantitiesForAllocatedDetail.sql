@@ -33,8 +33,8 @@ BEGIN TRY
 			@dblPLotPickedQty	  = IsNull((SELECT SUM(PL.dblLotPickedQty) FROM tblLGPickLotDetail PL Group By PL.intAllocationDetailId Having PL.intAllocationDetailId = AD.intAllocationDetailId), 0.0),
 			@dblSLotPickedQty	  = IsNull((SELECT SUM(PL.dblSalePickedQty) FROM tblLGPickLotDetail PL Group By PL.intAllocationDetailId Having PL.intAllocationDetailId = AD.intAllocationDetailId), 0.0),
 
-			@dblPDropShippedQty	  = IsNull((SELECT SUM(DS.dblPAllocatedQty) FROM tblLGShipmentPurchaseSalesContract DS Group By DS.intAllocationDetailId Having DS.intAllocationDetailId = AD.intAllocationDetailId), 0.0),
-			@dblSDropShippedQty	  = IsNull((SELECT SUM(DS.dblSAllocatedQty) FROM tblLGShipmentPurchaseSalesContract DS Group By DS.intAllocationDetailId Having DS.intAllocationDetailId = AD.intAllocationDetailId), 0.0),
+			@dblPDropShippedQty	  = ISNULL((SELECT SUM(ISNULL(dblQuantity,0)) FROM tblLGLoadDetail WHERE intAllocationDetailId = AD.intAllocationDetailId), 0.0),
+			@dblSDropShippedQty	  = ISNULL((SELECT SUM(ISNULL(dblQuantity,0)) FROM tblLGLoadDetail WHERE intAllocationDetailId = AD.intAllocationDetailId), 0.0),
 
 			@dblPWeightPerUnit	  = IsNull([dbo].fnLGGetItemUnitConversion (CTP.intItemId, CTP.intItemUOMId, AH.intWeightUnitMeasureId), 0.0),
 			@dblSWeightPerUnit	  = IsNull([dbo].fnLGGetItemUnitConversion (CTS.intItemId, CTS.intItemUOMId, AH.intWeightUnitMeasureId), 0.0),
