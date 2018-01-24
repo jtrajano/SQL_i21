@@ -88,12 +88,12 @@ BEGIN TRY
 	SELECT GETDATE()
 		,1
 		,@intCurrencyId
-		,@intPositionId
+		,NULL
 		,2
 		,1
 		,1
 		,5
-		,@intTransportationMode
+		,1
 		,@intTransUsedBy
 		,@intEntityUserSecurityId
 		,@intWeightUnitMeasureId
