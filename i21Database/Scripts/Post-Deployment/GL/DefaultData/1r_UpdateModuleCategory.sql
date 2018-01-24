@@ -101,9 +101,36 @@ IF NOT EXISTS (SELECT TOP 1 1 FROM dbo.tblGLRequiredPrimaryCategory)
 		) M
 
 
+UPDATE  dbo.tblGLRequiredPrimaryCategory
+SET strView = 'i21.view.CompanyLocation', strTab = 'GL Accounts', strScreen = 'Company Location'
+WHERE intAccountCategoryId IN (
+	SELECT intAccountCategoryId FROM dbo.tblGLAccountCategory WHERE strAccountCategory IN(
+	'AR Account', 'AP Account', 'Vendor Prepayments',
+	 'Customer Prepayments','Service Charges','Sales Discount'
+	,'Write Off','Undeposited Funds','Deferred Revenue'))
 
 
-    
+UPDATE  dbo.tblGLRequiredPrimaryCategory
+SET strView = 'i21.view.CompanyPreference', strTab = 'System Manager', strScreen = 'Company Configuration'
+WHERE intAccountCategoryId IN (
+	SELECT intAccountCategoryId FROM dbo.tblGLAccountCategory WHERE strAccountCategory IN
+	(
+		'Unrealized Gain or Loss Accounts Receivable',
+		'Unrealized Gain or Loss Accounts Payable',
+		'Unrealized Gain or Loss Cash Management',
+		'Unrealized Gain or Loss Inventory',
+		'Unrealized Gain or Loss Contract Purchase',
+		'Unrealized Gain or Loss Contract Sales',
+		'Unrealized Gain or Loss Offset AR',
+		'Unrealized Gain or Loss Offset AP',
+		'Unrealized Gain or Loss Offset CM',
+		'Unrealized Gain or Loss Offset Inventory',
+		'Unrealized Gain or Loss Offset Contract Purchase',
+		'Unrealized Gain or Loss Offset Contract Sales',
+		'Realized Gain or Loss Payables',
+		'Realized Gain or Loss Receivables'
+	))
+
 
 
 PRINT ('Finished inserting to tblGLRequiredPrimaryCategory');
