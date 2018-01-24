@@ -98,23 +98,23 @@ BEGIN TRY
 			BEGIN
 				SELECT  @strFrom = CASE WHEN @ysnIgnoreTime = 1 THEN CONVERT(NVARCHAR(20), CAST(@strFrom AS DATETIME),101) ELSE @strFrom END
 				SELECT  @strTo = CASE WHEN @ysnIgnoreTime = 1 THEN CONVERT(NVARCHAR(20), CAST(@strTo AS DATETIME),101) ELSE @strTo END
-				SET @strClause += @strClause +  ' '+@strFromField+' BETWEEN ''' + @strFrom  + ''' AND ''' + @strTo +''' '
+				SET @strClause += @strClause +  ' ('+@strFromField+' BETWEEN ''' + @strFrom  + ''' AND ''' + @strTo +''') '
 			END
 			ELSE IF @strFrom IS NOT NULL AND @strTo IS NULL
 			BEGIN
 				SELECT  @strFrom = CASE WHEN @ysnIgnoreTime = 1 THEN CONVERT(NVARCHAR(20), CAST(@strFrom AS DATETIME),101) ELSE @strFrom END
 				IF	@strFromField = @strToField
-					SET @strClause += @strClause +  ' '+@strFromField+' = ''' + @strFrom + ''' '
+					SET @strClause += @strClause +  ' ('+@strFromField+' = ''' + @strFrom + ''') '
 				ELSE	
-					SET @strClause = @strClause +  ' ''' + @strFrom + ''' BETWEEN '+@strFromField+' AND '+@strToField
+					SET @strClause = @strClause +  ' (' + @strFromField  + ' BETWEEN '''+@strFrom+''' AND '''+@strFrom +''')'
 			END
 			ELSE IF @strFrom IS  NULL AND @strTo IS NOT NULL
 			BEGIN
 				SELECT  @strTo = CASE WHEN @ysnIgnoreTime = 1 THEN CONVERT(NVARCHAR(20), CAST(@strTo AS DATETIME),101) ELSE @strTo END
 				IF	@strFromField = @strToField
-					SET @strClause += @strClause +  ' '+@strFromField+' = ''' + @strTo + ''' '
+					SET @strClause += @strClause +  ' ('+@strFromField+' = ''' + @strTo + ''') '
 				ELSE
-					SET @strClause = @strClause +  ' ''' + @strTo + ''' BETWEEN '+@strFromField+' AND '+@strToField
+					SET @strClause = @strClause + ' (' + @strToField  + ' BETWEEN '''+@strTo+''' AND '''+@strTo +''')'  
 			END
 			ELSE
 			BEGIN
@@ -129,12 +129,12 @@ BEGIN TRY
 			BEGIN
 				SELECT @strFrom = CASE WHEN @strDatatype = 'String' THEN ''''+@strFrom+'''' ELSE @strFrom END
 				SELECT @strTo = CASE WHEN @strDatatype = 'String' THEN ''''+@strTo+'''' ELSE @strTo END
-				SET @strClause += ' '+@strFromField+' '+@strOperator+' (' + @strFrom + ','+ @strTo +') '
+				SET @strClause += ' ('+@strFromField+' '+@strOperator+' (' + @strFrom + ','+ @strTo +')) '
 			END
 			ELSE IF RTRIM(LTRIM(ISNULL(@strFrom,''))) <> ''
 			BEGIN
 				SELECT @strFrom = CASE WHEN @strDatatype = 'String' THEN ''''+@strFrom+'''' ELSE @strFrom END
-				SET @strClause += ' '+@strFromField+' '+@strOperator+' (' + @strFrom + ') '
+				SET @strClause += ' ('+@strFromField+' '+@strOperator+' (' + @strFrom + ')) '
 			END
 			ELSE
 			BEGIN
