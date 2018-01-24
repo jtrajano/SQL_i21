@@ -1271,6 +1271,16 @@ GO
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Amendment Number')
 
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 132
+			,[strTransactionType]	= N'Deferred Interest'
+			,[strPrefix]			= N'DI-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Accounts Payable'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Deferred Interest')
+	
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
 	PRINT N'END INSERT DEFAULT STARTING NUMBERS'

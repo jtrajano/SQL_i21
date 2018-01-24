@@ -941,7 +941,7 @@ BEGIN
 						SELECT intEntityId FROM dbo.tblEMEntity WHERE intEntityId IN (
 							SELECT intEntityContactId 
 							FROM dbo.tblEMEntityToContact A 
-							WHERE A.intEntityId = @intThirdPartyVendorId				
+							WHERE A.intEntityId = @intThirdPartyVendorId AND A.ysnDefaultContact = 1				
 						)
 					) EntityContract
 					WHERE	A.intInventoryReceiptId = @receiptId 

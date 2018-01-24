@@ -3,6 +3,7 @@ AS
 
 SELECT
 	A.intBillId,
+	A.intEntityVendorId,
 	ISNULL(commodity.strCommodityCode, 'None') AS strCommodityCode,
 	A.strBillId,
 	B.strName,
@@ -15,7 +16,7 @@ SELECT
 	GETDATE() AS dtmLastDeferred,
 	A.dblAmountDue,
 	0 AS intDays,
-	0.00 AS dblInterest,
+	dblInterest = dbo.fnGetInterestBasedOnTerm(A.dblTotal, A.dtmBillDate, GETDATE(), A.intTermsId),
 	CAST(CASE WHEN staging.intBillId IS NOT NULL THEN 1 ELSE 0 END AS BIT) ysnSelected
 FROM tblAPBill A
 INNER JOIN tblEMEntity B ON A.intEntityVendorId = B.intEntityId

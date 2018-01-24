@@ -80,6 +80,10 @@ IF @transCount = 0 BEGIN TRANSACTION
 	BEGIN
 		SET @startingRecordId = 124;
 	END
+	ELSE IF @type = 14
+	BEGIN
+		SET @startingRecordId = 132;
+	END
 
 	EXEC uspSMGetStartingNumber @startingRecordId, @billRecordNumber OUTPUT
 

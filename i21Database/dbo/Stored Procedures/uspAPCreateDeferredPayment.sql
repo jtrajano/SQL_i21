@@ -1,4 +1,8 @@
-﻿CREATE PROCEDURE [dbo].[uspAPCreateDeferredPayment]
+﻿CREATE PROCEDURE [dbo].[uspAPCreateDeferredPayment] (
+	@userId INT,
+	@locationId INT,
+	@voucherCreated NVARCHAR(MAX) OUTPUT
+)
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -10,9 +14,97 @@ SET ANSI_WARNINGS OFF
 BEGIN TRY
 
 DECLARE @transCount INT = @@TRANCOUNT;
+DECLARE @deferredInterestAccount INT;
+DECLARE @companyLocationId INT = @locationId;
+DECLARE @currentUser INT = @userId;
+DECLARE @voucherSelected TABLE(intBillId INT, intEntityVendorId INT, intShipToId INT, intShipFromId INT, intCurrencyId INT);
+DECLARE @vouchers TABLE(intBillId INT);
+DECLARE @voucherIds NVARCHAR(MAX);
+DECLARE @currentVoucherId INT, @currentVendorId INT, @currentCurrency INT, @currentShipTo INT, @currentShipFrom INT;
+
+SELECT @deferredInterestAccount = intDeferredPayableInterestId FROM tblSMCompanyLocation WHERE intCompanyLocationId = @companyLocationId;
+
+IF @deferredInterestAccount IS NULL OR @deferredInterestAccount <= 0
+BEGIN
+	RAISERROR('No set up found for deferred interest account on company location', 16, 1);
+	RETURN;
+END
+
 IF @transCount = 0 BEGIN TRANSACTION
 
+INSERT INTO @voucherSelected
+SELECT
+	A.intBillId
+	,A.intEntityVendorId
+	,B.intShipToId
+	,B.intShipFromId
+	,B.intCurrencyId
+FROM vyuAPDeferredPayment A
+INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
+WHERE A.ysnSelected = 1
 
+DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
+FOR
+    SELECT intBillId, intEntityVendorId, intShipToId, intShipFromId, intCurrencyId FROM @voucherSelected
+OPEN c;
+FETCH NEXT FROM c INTO @currentVoucherId, @currentVendorId, @currentShipTo, @currentShipFrom, @currentCurrency
+
+WHILE @@FETCH_STATUS = 0 
+BEGIN
+
+	DECLARE @voucherDetail AS VoucherDetailNonInventory;
+	DECLARE @voucherIdCreated INT;
+
+	INSERT INTO @voucherDetail(
+		intAccountId,
+		strMiscDescription,
+		dblQtyReceived,
+		dblCost
+	)
+	SELECT
+		intAccountId		=	@deferredInterestAccount,
+		strMiscDescription	=	'',
+		dblQtyReceived		=	1,
+		dblCost				=	A.dblInterest
+	FROM vyuAPDeferredPayment A
+	WHERE A.intBillId = @currentVoucherId
+	--CATCH EXCEPTION ON CREATING VOUCHER TO CONTINUE
+	BEGIN TRY
+		EXEC uspAPCreateBillData @userId = @currentUser,
+								@vendorId = @currentVendorId,
+								@type = 14,
+								@voucherNonInvDetails = @voucherDetail,
+								@shipTo = @currentShipTo,
+								@shipFrom = @currentShipFrom,
+								@currencyId = @currentCurrency,
+								@billId = @voucherIdCreated OUTPUT
+
+		INSERT INTO @vouchers
+		SELECT @voucherIdCreated
+
+		UPDATE A
+			SET A.intDeferredVoucherId = @currentVoucherId
+		FROM tblAPBillDetail A
+		WHERE A.intBillId = @voucherIdCreated
+		
+	END TRY
+    BEGIN CATCH
+	END CATCH
+
+    FETCH NEXT FROM c INTO @currentVoucherId, @currentVendorId, @currentShipTo, @currentShipFrom, @currentCurrency
+END
+CLOSE c; DEALLOCATE c;
+
+DELETE A
+FROM tblAPDeferredPaymentStaging A
+INNER JOIN @voucherSelected A2 ON A.intBillId = A2.intBillId
+INNER JOIN tblAPBillDetail B ON B.intDeferredVoucherId = A.intBillId
+
+SELECT @voucherIds = COALESCE(@voucherIds + ',', '') +  CONVERT(VARCHAR(12),intBillId)
+						FROM @vouchers
+						ORDER BY intBillId
+
+SET @voucherCreated = @voucherIds;
 
 IF @transCount = 0 COMMIT TRANSACTION
 END TRY
