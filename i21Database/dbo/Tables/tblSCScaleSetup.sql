@@ -61,7 +61,6 @@
     [intDefaultStorageTypeId] INT NULL, 
     [intGrainBankStorageTypeId] INT NULL, 
     [ysnRefreshLoadsOnOpen] BIT NOT NULL, 
-	[ysnAllowSplitWeights] BIT NOT NULL,
 	[ysnRequireContractForInTransitTicket] BIT NOT NULL,
 	[intDefaultFeeItemId] INT NULL,
 	[intFreightItemId] INT NULL,
