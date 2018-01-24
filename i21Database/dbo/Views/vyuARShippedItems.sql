@@ -175,6 +175,7 @@ FROM (
 		SELECT intItemId
 			 , strLotTracking
 		FROM dbo.tblICItem WITH (NOLOCK)
+		WHERE strType <> 'Bundle'
 	) I ON SOD.intItemId = I.intItemId 
 	  AND (dbo.fnIsStockTrackingItem(I.intItemId) = 0 OR ISNULL(strLotTracking, 'No') = 'No')
 	LEFT OUTER JOIN (

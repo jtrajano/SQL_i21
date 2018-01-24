@@ -6126,6 +6126,7 @@
     <Build Include="dbo\Functions\fnGetDebitUnit.sql" />
     <Build Include="dbo\Functions\fnGetCreditUnit.sql" />
     <None Include="Scripts\Post-Deployment\IC\27_RemoveAfter18.1_DataFix.sql" />
+    <Build Include="dbo\Views\vyuARGetAddOnItems.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
