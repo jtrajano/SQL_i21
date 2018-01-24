@@ -258,7 +258,7 @@ WITH ForGLEntries_CTE (
 	,intTransactionId
 	,strTransactionId
 	,dblQty
-	--,dblUOMQty
+	,dblUOMQty
 	,dblCost
 	,dblValue
 	,intTransactionTypeId
@@ -283,7 +283,7 @@ AS
 			,intTransactionId = r.intInventoryReceiptId
 			,strTransactionId = r.strReceiptNumber
 			,dblQty = t.dblQty
-			--,dblUOMQty = t.dblUOMQty
+			,dblUOMQty = t.dblUOMQty
 			,dblCost = t.dblCost
 			,dblValue = CAST(0  AS NUMERIC(18, 6)) 
 			,t.intTransactionTypeId
@@ -356,6 +356,7 @@ AS
 
 			CROSS APPLY (
 				SELECT	dblQty = -rtn.dblQtyReturned
+						,dblUOMQty = t.dblUOMQty 
 						,rtn.dblCost
 						,rtn.strBatchId
 						,rtn.intTransactionId
@@ -373,7 +374,9 @@ AS
 									,cbLot.intItemLocationId
 									,cbLot.intLotId
 									,cbLot.intItemUOMId
-							FROM	tblICInventoryLot cbLot
+									,dblUOMQty = uom.dblUnitQty
+							FROM	tblICInventoryLot cbLot LEFT JOIN tblICItemUOM uom
+										ON cbLot.intItemUOMId = uom.intItemUOMId 
 							WHERE	cbLot.intInventoryLotId = rtn.intInventoryLotId
 									AND rtn.intInventoryLotId IS NOT NULL
 							UNION ALL 
@@ -381,7 +384,9 @@ AS
 									,cbFifo.intItemLocationId
 									,intLotId = CAST(NULL AS INT) 
 									,cbFifo.intItemUOMId
-							FROM	tblICInventoryFIFO cbFifo
+									,dblUOMQty = uom.dblUnitQty
+							FROM	tblICInventoryFIFO cbFifo LEFT JOIN tblICItemUOM uom
+										ON cbFifo.intItemUOMId = uom.intItemUOMId 
 							WHERE	cbFifo.intInventoryFIFOId = rtn.intInventoryFIFOId
 									AND rtn.intInventoryFIFOId IS NOT NULL
 							UNION ALL 
@@ -389,7 +394,9 @@ AS
 									,cbLifo.intItemLocationId
 									,intLotId = CAST(NULL AS INT) 
 									,cbLifo.intItemUOMId 
-							FROM	tblICInventoryLIFO cbLifo
+									,dblUOMQty = uom.dblUnitQty
+							FROM	tblICInventoryLIFO cbLifo LEFT JOIN tblICItemUOM uom
+										ON cbLifo.intItemUOMId = uom.intItemUOMId 
 							WHERE	cbLifo.intInventoryLIFOId = rtn.intInventoryLIFOId
 									AND rtn.intInventoryLIFOId IS NOT NULL 
 							UNION ALL 
@@ -397,7 +404,9 @@ AS
 									,cbActualCost.intItemLocationId
 									,intLotId = CAST(NULL AS INT) 
 									,cbActualCost.intItemUOMId
-							FROM	tblICInventoryActualCost cbActualCost
+									,dblUOMQty = uom.dblUnitQty
+							FROM	tblICInventoryActualCost cbActualCost LEFT JOIN tblICItemUOM uom
+										ON cbActualCost.intItemUOMId = uom.intItemUOMId 
 							WHERE	cbActualCost.intInventoryActualCostId = rtn.intInventoryActualCostId
 									AND rtn.intInventoryActualCostId IS NOT NULL 				
 						) cb
@@ -445,7 +454,7 @@ AS
 			,t.intTransactionId 
 			,t.strTransactionId 
 			,t.dblQty 
-			--,dblUOMQty = t.dblUOMQty
+			,dblUOMQty = t.dblUOMQty
 			,t.dblCost 
 			,t.dblValue 
 			,t.intTransactionTypeId
@@ -512,8 +521,8 @@ SELECT
 		,intAccountId				= tblGLAccount.intAccountId
 		,dblDebit					= Credit.Value
 		,dblCredit					= Debit.Value
-		,dblDebitUnit				= 0
-		,dblCreditUnit				= 0
+		,dblDebitUnit				= CreditUnit.Value
+		,dblCreditUnit				= DebitUnit.Value
 		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblReceiptUnitCost) 
 		,strCode					= 'IC' 
 		,strReference				= '' 
@@ -583,6 +592,12 @@ FROM	ForGLEntries_CTE
 		CROSS APPLY dbo.fnGetCredit(
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblReceiptUnitCost, 0)) 
 		) CreditForeign
+		CROSS APPLY dbo.fnGetDebitUnit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
+		) DebitUnit
+		CROSS APPLY dbo.fnGetCreditUnit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
+		) CreditUnit 
 
 
 WHERE	ForGLEntries_CTE.intTransactionTypeId NOT IN (
@@ -600,8 +615,8 @@ SELECT
 		,intAccountId				= tblGLAccount.intAccountId
 		,dblDebit					= Credit.Value
 		,dblCredit					= Debit.Value
-		,dblDebitUnit				= 0
-		,dblCreditUnit				= 0
+		,dblDebitUnit				= CreditUnit.Value
+		,dblCreditUnit				= DebitUnit.Value
 		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, (ISNULL(dblCost, 0) - ISNULL(dblReceiptUnitCost, 0))) 
 		,strCode					= 'IC' 
 		,strReference				= '' 
@@ -652,6 +667,14 @@ FROM	ForGLEntries_CTE
 			,@intFunctionalCurrencyId
 			,ForGLEntries_CTE.dblForexRate
 		) CreditForeign
+		CROSS APPLY dbo.fnGetDebitUnit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
+		) DebitUnit
+		CROSS APPLY dbo.fnGetCreditUnit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
+		) CreditUnit 
+
+
 WHERE	ForGLEntries_CTE.intTransactionTypeId NOT IN (
 			@InventoryTransactionTypeId_WriteOffSold
 			, @InventoryTransactionTypeId_RevalueSold
@@ -668,8 +691,8 @@ SELECT
 		,intAccountId				= tblGLAccount.intAccountId
 		,dblDebit					= Debit.Value
 		,dblCredit					= Credit.Value
-		,dblDebitUnit				= 0
-		,dblCreditUnit				= 0
+		,dblDebitUnit				= DebitUnit.Value
+		,dblCreditUnit				= CreditUnit.Value
 		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) 
 		,strCode					= 'IC' 
 		,strReference				= '' 
@@ -721,6 +744,12 @@ FROM	ForGLEntries_CTE
 			,@intFunctionalCurrencyId
 			,ForGLEntries_CTE.dblForexRate
 		) CreditForeign
+		CROSS APPLY dbo.fnGetDebitUnit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
+		) DebitUnit
+		CROSS APPLY dbo.fnGetCreditUnit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
+		) CreditUnit 
 
 WHERE	ForGLEntries_CTE.intTransactionTypeId NOT IN (
 			@InventoryTransactionTypeId_WriteOffSold
@@ -738,8 +767,8 @@ SELECT
 		,intAccountId				= tblGLAccount.intAccountId
 		,dblDebit					= Debit.Value
 		,dblCredit					= Credit.Value
-		,dblDebitUnit				= 0
-		,dblCreditUnit				= 0
+		,dblDebitUnit				= DebitUnit.Value
+		,dblCreditUnit				= CreditUnit.Value
 		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) 
 		,strCode					= 'IC' 
 		,strReference				= '' 
@@ -791,6 +820,12 @@ FROM	ForGLEntries_CTE
 			,@intFunctionalCurrencyId
 			,ForGLEntries_CTE.dblForexRate
 		) CreditForeign
+		CROSS APPLY dbo.fnGetDebitUnit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
+		) DebitUnit
+		CROSS APPLY dbo.fnGetCreditUnit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
+		) CreditUnit 
 
 WHERE	ForGLEntries_CTE.intTransactionTypeId IN (
 			@InventoryTransactionTypeId_InventoryAdjustmentQtyChange			
@@ -806,8 +841,8 @@ SELECT
 		,intAccountId				= tblGLAccount.intAccountId
 		,dblDebit					= Debit.Value
 		,dblCredit					= Credit.Value
-		,dblDebitUnit				= 0
-		,dblCreditUnit				= 0
+		,dblDebitUnit				= DebitUnit.Value
+		,dblCreditUnit				= CreditUnit.Value
 		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
 		,strCode					= 'IAV'
 		,strReference				= ''
@@ -858,6 +893,13 @@ FROM	ForGLEntries_CTE
 			,@intFunctionalCurrencyId
 			,ForGLEntries_CTE.dblForexRate
 		) CreditForeign
+		CROSS APPLY dbo.fnGetDebitUnit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
+		) DebitUnit
+		CROSS APPLY dbo.fnGetCreditUnit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
+		) CreditUnit 
+
 WHERE	ForGLEntries_CTE.intTransactionTypeId = @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
 		AND (Debit.Value <> 0 OR Credit.Value <> 0)
 UNION ALL 
@@ -867,8 +909,8 @@ SELECT
 		,intAccountId				= tblGLAccount.intAccountId
 		,dblDebit					= Credit.Value
 		,dblCredit					= Debit.Value
-		,dblDebitUnit				= 0
-		,dblCreditUnit				= 0
+		,dblDebitUnit				= CreditUnit.Value
+		,dblCreditUnit				= DebitUnit.Value
 		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
 		,strCode					= 'IAV' 
 		,strReference				= '' 
@@ -919,6 +961,13 @@ FROM	ForGLEntries_CTE
 			,@intFunctionalCurrencyId
 			,ForGLEntries_CTE.dblForexRate
 		) CreditForeign
+		CROSS APPLY dbo.fnGetDebitUnit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
+		) DebitUnit
+		CROSS APPLY dbo.fnGetCreditUnit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
+		) CreditUnit 
+
 WHERE	ForGLEntries_CTE.intTransactionTypeId  = @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
 		AND (Debit.Value <> 0 OR Credit.Value <> 0)
 
@@ -932,8 +981,8 @@ SELECT
 		,intAccountId				= tblGLAccount.intAccountId
 		,dblDebit					= Debit.Value
 		,dblCredit					= Credit.Value
-		,dblDebitUnit				= 0
-		,dblCreditUnit				= 0
+		,dblDebitUnit				= DebitUnit.Value
+		,dblCreditUnit				= CreditUnit.Value
 		,strDescription				= ISNULL(ForGLEntries_CTE.strDescription, tblGLAccount.strDescription)
 		,strCode					= 'IAN' 
 		,strReference				= '' 
@@ -984,6 +1033,13 @@ FROM	ForGLEntries_CTE
 			,@intFunctionalCurrencyId
 			,ForGLEntries_CTE.dblForexRate
 		) CreditForeign
+		CROSS APPLY dbo.fnGetDebitUnit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
+		) DebitUnit
+		CROSS APPLY dbo.fnGetCreditUnit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
+		) CreditUnit 
+
 WHERE	ForGLEntries_CTE.intTransactionTypeId = @InventoryTransactionTypeId_AutoNegative
 		AND (Debit.Value <> 0 OR Credit.Value <> 0)
 UNION ALL 
@@ -993,8 +1049,8 @@ SELECT
 		,intAccountId				= tblGLAccount.intAccountId
 		,dblDebit					= Credit.Value
 		,dblCredit					= Debit.Value
-		,dblDebitUnit				= 0
-		,dblCreditUnit				= 0
+		,dblDebitUnit				= CreditUnit.Value 
+		,dblCreditUnit				= DebitUnit.Value 
 		,strDescription				= ISNULL(ForGLEntries_CTE.strDescription, tblGLAccount.strDescription)
 		,strCode					= 'IAN' 
 		,strReference				= '' 
@@ -1045,6 +1101,13 @@ FROM	ForGLEntries_CTE
 			,@intFunctionalCurrencyId
 			,ForGLEntries_CTE.dblForexRate
 		) CreditForeign
+		CROSS APPLY dbo.fnGetDebitUnit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
+		) DebitUnit
+		CROSS APPLY dbo.fnGetCreditUnit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
+		) CreditUnit 
+
 WHERE	ForGLEntries_CTE.intTransactionTypeId  = @InventoryTransactionTypeId_AutoNegative
 		AND (Debit.Value <> 0 OR Credit.Value <> 0)
 ;

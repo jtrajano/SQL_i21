@@ -34,9 +34,6 @@ DECLARE @AccountCategory_Inventory AS NVARCHAR(30) = 'Inventory'
 
 		,@AccountCategory_Cost_Adjustment AS NVARCHAR(30) = 'Inventory Adjustment' -- 'Auto-Variance' -- 'Cost Adjustment' -- As per Ajith, the system should re-use Auto-Negative. 
 		,@AccountCategory_Revalue_WIP AS NVARCHAR(30) = 'Work In Progress' -- 'Revalue WIP' -- As per Ajith, we should not add another category. Thus, I'm diverting it to reuse 'Work In Progress'. 
-		--,@AccountCategory_Revalue_Produced AS NVARCHAR(30) = 'Revalue Produced'
-		--,@AccountCategory_Revalue_Transfer AS NVARCHAR(30) = 'Revalue Inventory Transfer'
-		--,@AccountCategory_Revalue_Build_Assembly AS NVARCHAR(30) = 'Revalue Build Assembly'		
 
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @INV_TRANS_TYPE_Auto_Negative AS INT = 1
@@ -126,8 +123,8 @@ BEGIN
 			,intAccountId				= GLEntries.intAccountId
 			,dblDebit					= GLEntries.dblCredit	-- Reverse the Debit with Credit 
 			,dblCredit					= GLEntries.dblDebit	-- Reverse the Credit with Debit 
-			,dblDebitUnit				= 0
-			,dblCreditUnit				= 0
+			,dblDebitUnit				= GLEntries.dblCreditUnit 
+			,dblCreditUnit				= GLEntries.dblDebitUnit 
 			,strDescription				= GLEntries.strDescription
 			,strCode					= GLEntries.strCode
 			,strReference				= GLEntries.strReference
@@ -182,8 +179,8 @@ BEGIN
 			,intAccountId				= GLAccounts.intInventoryId
 			,dblDebit					= Debit.Value
 			,dblCredit					= Credit.Value
-			,dblDebitUnit				= 0
-			,dblCreditUnit				= 0
+			,dblDebitUnit				= DebitUnit.Value 
+			,dblCreditUnit				= CreditUnit.Value 
 			,strDescription				= tblGLAccount.strDescription
 			,strCode					= 'IAN' 
 			,strReference				= '' 
@@ -217,6 +214,8 @@ BEGIN
 				ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 			CROSS APPLY dbo.fnGetDebit(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Debit
 			CROSS APPLY dbo.fnGetCredit(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Credit
+			CROSS APPLY dbo.fnGetDebitUnit(dbo.fnMultiply(ISNULL(ItemTransactions.dblQty, 0), ISNULL(ItemTransactions.dblUOMQty, 0))) DebitUnit 
+			CROSS APPLY dbo.fnGetCreditUnit(dbo.fnMultiply(ISNULL(ItemTransactions.dblQty, 0), ISNULL(ItemTransactions.dblUOMQty, 0))) CreditUnit 
 	WHERE	ItemTransactions.strBatchId = @strBatchId
 			AND ItemTransactions.intTransactionTypeId = @InventoryTransactionTypeId_AutoVariance
 			AND ROUND(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0), 2) <> 0
@@ -228,8 +227,8 @@ BEGIN
 			,intAccountId				= GLAccounts.intAutoNegativeId
 			,dblDebit					= Credit.Value
 			,dblCredit					= Debit.Value
-			,dblDebitUnit				= 0
-			,dblCreditUnit				= 0
+			,dblDebitUnit				= CreditUnit.Value 
+			,dblCreditUnit				= DebitUnit.Value 
 			,strDescription				= tblGLAccount.strDescription
 			,strCode					= 'IAN' 
 			,strReference				= '' 
@@ -263,6 +262,8 @@ BEGIN
 				ON tblGLAccount.intAccountId = GLAccounts.intAutoNegativeId
 			CROSS APPLY dbo.fnGetDebit(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Debit
 			CROSS APPLY dbo.fnGetCredit(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Credit
+			CROSS APPLY dbo.fnGetDebitUnit(dbo.fnMultiply(ISNULL(ItemTransactions.dblQty, 0), ISNULL(ItemTransactions.dblUOMQty, 0))) DebitUnit 
+			CROSS APPLY dbo.fnGetCreditUnit(dbo.fnMultiply(ISNULL(ItemTransactions.dblQty, 0), ISNULL(ItemTransactions.dblUOMQty, 0))) CreditUnit 
 	WHERE	ItemTransactions.strBatchId = @strBatchId
 			AND ItemTransactions.intTransactionTypeId = @InventoryTransactionTypeId_AutoVariance
 			AND ROUND(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0), 2) <> 0

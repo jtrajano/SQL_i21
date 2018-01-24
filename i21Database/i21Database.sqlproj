@@ -6123,6 +6123,9 @@
     <Build Include="dbo\Views\vyuICGetBundleItemStock.sql" />
     <Build Include="dbo\vyuAPRptVoucherCheckOffDetail.sql" />
     <Build Include="dbo\uspAPRptVoucherCheckOffDetail.sql" />
+    <Build Include="dbo\Functions\fnGetDebitUnit.sql" />
+    <Build Include="dbo\Functions\fnGetCreditUnit.sql" />
+    <None Include="Scripts\Post-Deployment\IC\27_RemoveAfter18.1_DataFix.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

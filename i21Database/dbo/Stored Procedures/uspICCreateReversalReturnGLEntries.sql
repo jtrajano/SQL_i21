@@ -115,8 +115,8 @@ BEGIN
 			,intAccountId				= GLEntries.intAccountId
 			,dblDebit					= GLEntries.dblCredit	-- Reverse the Debit with Credit 
 			,dblCredit					= GLEntries.dblDebit	-- Reverse the Credit with Debit 
-			,dblDebitUnit				= 0
-			,dblCreditUnit				= 0
+			,dblDebitUnit				= GLEntries.dblCreditUnit 
+			,dblCreditUnit				= GLEntries.dblDebitUnit 
 			,strDescription				= GLEntries.strDescription
 			,strCode					= GLEntries.strCode
 			,strReference				= GLEntries.strReference
@@ -162,8 +162,8 @@ BEGIN
 			,intAccountId				= GLEntries.intAccountId
 			,dblDebit					= GLEntries.dblCredit	-- Reverse the Debit with Credit 
 			,dblCredit					= GLEntries.dblDebit	-- Reverse the Credit with Debit 
-			,dblDebitUnit				= 0
-			,dblCreditUnit				= 0
+			,dblDebitUnit				= GLEntries.dblCreditUnit 
+			,dblCreditUnit				= GLEntries.dblDebitUnit 
 			,strDescription				= GLEntries.strDescription
 			,strCode					= GLEntries.strCode
 			,strReference				= GLEntries.strReference
@@ -215,8 +215,8 @@ BEGIN
 			,intAccountId				= GLAccounts.intInventoryId
 			,dblDebit					= Debit.Value
 			,dblCredit					= Credit.Value
-			,dblDebitUnit				= 0
-			,dblCreditUnit				= 0
+			,dblDebitUnit				= DebitUnit.Value 
+			,dblCreditUnit				= CreditUnit.Value 
 			,strDescription				= tblGLAccount.strDescription
 			,strCode					= 'IAN' 
 			,strReference				= '' 
@@ -250,6 +250,8 @@ BEGIN
 				ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 			CROSS APPLY dbo.fnGetDebit(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Debit
 			CROSS APPLY dbo.fnGetCredit(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Credit
+			CROSS APPLY dbo.fnGetDebitUnit(dbo.fnMultiply(ISNULL(ItemTransactions.dblQty, 0), ISNULL(ItemTransactions.dblUOMQty, 0))) DebitUnit 
+			CROSS APPLY dbo.fnGetCreditUnit(dbo.fnMultiply(ISNULL(ItemTransactions.dblQty, 0), ISNULL(ItemTransactions.dblUOMQty, 0))) CreditUnit 
 
 	WHERE	ItemTransactions.strBatchId = @strBatchId
 			AND ItemTransactions.intTransactionTypeId = @InventoryTransactionTypeId_AutoVariance
@@ -262,8 +264,8 @@ BEGIN
 			,intAccountId				= GLAccounts.intAutoNegativeId
 			,dblDebit					= Credit.Value
 			,dblCredit					= Debit.Value
-			,dblDebitUnit				= 0
-			,dblCreditUnit				= 0
+			,dblDebitUnit				= CreditUnit.Value 
+			,dblCreditUnit				= DebitUnit.Value 
 			,strDescription				= tblGLAccount.strDescription
 			,strCode					= 'IAN' 
 			,strReference				= '' 
@@ -297,6 +299,8 @@ BEGIN
 				ON tblGLAccount.intAccountId = GLAccounts.intAutoNegativeId
 			CROSS APPLY dbo.fnGetDebit(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Debit
 			CROSS APPLY dbo.fnGetCredit(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Credit
+			CROSS APPLY dbo.fnGetDebitUnit(dbo.fnMultiply(ISNULL(ItemTransactions.dblQty, 0), ISNULL(ItemTransactions.dblUOMQty, 0))) DebitUnit 
+			CROSS APPLY dbo.fnGetCreditUnit(dbo.fnMultiply(ISNULL(ItemTransactions.dblQty, 0), ISNULL(ItemTransactions.dblUOMQty, 0))) CreditUnit 
 
 	WHERE	ItemTransactions.strBatchId = @strBatchId
 			AND ItemTransactions.intTransactionTypeId = @InventoryTransactionTypeId_AutoVariance
