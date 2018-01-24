@@ -138,6 +138,7 @@ BEGIN TRY
 	FROM tblMFManufacturingProcessAttribute
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
 		AND intLocationId = @intLocationId
+		AND intAttributeId = 95 -- 'Pick By Upper Tolerance Qty'
 
 	IF @strPickByUpperToleranceQty IS NULL
 	BEGIN
