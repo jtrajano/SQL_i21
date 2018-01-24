@@ -31,5 +31,5 @@ BEGIN
 		SET @result = 0
 	END
 
-	RETURN @result
+	RETURN -(abs(@result))
 END
