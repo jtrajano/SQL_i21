@@ -6121,6 +6121,8 @@
     <Build Include="dbo\Views\vyuHDTimeHoursReport.sql" />
     <Build Include="dbo\Views\vyuARPaymentBankTransaction.sql" />
     <Build Include="dbo\Views\vyuICGetBundleItemStock.sql" />
+    <Build Include="dbo\vyuAPRptVoucherCheckOffDetail.sql" />
+    <Build Include="dbo\uspAPRptVoucherCheckOffDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
