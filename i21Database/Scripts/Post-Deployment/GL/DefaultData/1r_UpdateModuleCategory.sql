@@ -88,29 +88,24 @@ IF NOT EXISTS (SELECT TOP 1 1 FROM dbo.tblGLRequiredPrimaryCategory)
     INSERT INTO dbo.tblGLRequiredPrimaryCategory
     (
         intAccountCategoryId,
-        intModuleId,
-        intAccountId
-    )
-    SELECT C.intAccountCategoryId,
-           C.intModuleId,
-           V.intAccountId
-    FROM dbo.tblGLAccountCategory C
-        JOIN dbo.tblGLAccountSegment S
-            ON S.intAccountCategoryId = C.intAccountCategoryId
-        CROSS APPLY
-    (
-        SELECT TOP 1
-               strModuleName
-        FROM dbo.tblARCustomerLicenseModule
-        WHERE intModuleId = C.intModuleId
-    ) M
-        OUTER APPLY
-    (
-        SELECT TOP 1
-               intAccountId
-        FROM dbo.tblGLAccountSegmentMapping
-        WHERE intAccountSegmentId = S.intAccountSegmentId
-    ) V;
+        intModuleId
+     )
+     SELECT C.intAccountCategoryId,
+           C.intModuleId
+     FROM dbo.tblGLAccountCategory C
+		CROSS APPLY
+		(
+			SELECT TOP 1 strModuleName
+			FROM dbo.tblARCustomerLicenseModule
+			WHERE intModuleId = C.intModuleId
+		) M
+
+
+
+
+    
+
+
 PRINT ('Finished inserting to tblGLRequiredPrimaryCategory');
 
 
