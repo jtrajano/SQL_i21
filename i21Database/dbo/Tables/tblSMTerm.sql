@@ -15,6 +15,7 @@
     [dtmDueDate]				DATETIME        NULL,
     [ysnActive]					BIT             DEFAULT ((1)) NOT NULL,
 	[ysnEnergyTrac]				BIT             DEFAULT ((0)) NOT NULL,
+	[ysnDeferredPay]			BIT             DEFAULT ((0)) NOT NULL,
     [intSort]					INT             NULL,
     [intConcurrencyId]			INT NOT NULL DEFAULT (1), 
     CONSTRAINT [PK_tblSMTerm] PRIMARY KEY CLUSTERED ([intTermID] ASC), 
@@ -149,6 +150,24 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSMTerm',
     @level2type = N'COLUMN',
     @level2name = N'dtmDueDate'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Energy Trac',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMTerm',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnEnergyTrac'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Deferred Pay',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMTerm',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnDeferredPay'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Term is Active',
