@@ -566,8 +566,8 @@ IF(@exclude IS NOT NULL)
 	END
 
 --Get Provisional Invoices
-IF ISNULL(@HasImpactForProvisional, 0) = 1
-	BEGIN
+--IF ISNULL(@HasImpactForProvisional, 0) = 1
+--	BEGIN
 		INSERT INTO @PostProvisionalData(
 			 [intInvoiceId]
 			,[strInvoiceNumber]
@@ -668,7 +668,7 @@ IF ISNULL(@HasImpactForProvisional, 0) = 1
 		WHERE strType = 'Provisional'
 		  AND ysnPosted = 1
 		  AND intInvoiceId IN (SELECT intOriginalInvoiceId FROM @PostInvoiceData WHERE ISNULL(intOriginalInvoiceId, 0) <> 0)
-	END
+	--END
 
 --------------------------------------------------------------------------------------------  
 -- Validations  
@@ -1582,8 +1582,8 @@ IF @post = 1
 		
 		BEGIN TRY
 			-- Call the post routine 
-			IF ISNULL(@HasImpactForProvisional, 0) = 1
-				BEGIN
+			--IF ISNULL(@HasImpactForProvisional, 0) = 1
+			--	BEGIN
 					INSERT INTO @GLEntries (
 						 [dtmDate]
 						,[strBatchId]
@@ -1689,7 +1689,7 @@ IF @post = 1
 					) GL ON PROV.intInvoiceId = GL.intTransactionId
 						AND PROV.strInvoiceNumber = GL.strTransactionId
 					ORDER BY GL.intGLDetailId
-				END
+				--END
 						
 			INSERT INTO @GLEntries (
 				 [dtmDate]
@@ -3447,33 +3447,33 @@ IF @post = 0
 				,intConcurrencyId
 			)
 			SELECT	
-				 GLD.dtmDate 
-				,@batchIdUsed
-				,GLD.intAccountId
+				 dtmDate						= GLD.dtmDate 
+				,strBatchId						= @batchIdUsed
+				,intAccountId					= GLD.intAccountId
 				,dblDebit						= GLD.dblCredit
 				,dblCredit						= GLD.dblDebit
 				,dblDebitUnit					= GLD.dblCreditUnit
 				,dblCreditUnit					= GLD.dblDebitUnit
 				,dblDebitForeign				= GLD.dblCreditForeign
 				,dblCreditForeign				= GLD.dblDebitForeign				
-				,GLD.strDescription
-				,GLD.strCode
-				,GLD.strReference
-				,GLD.intCurrencyId
-				,GLD.dblExchangeRate
-				,dtmDateEntered					= GETDATE()
-				,GLD.dtmTransactionDate
-				,GLD.strJournalLineDescription
-				,GLD.intJournalLineNo 
+				,strDescription					= GLD.strDescription
+				,strCode						= GLD.strCode
+				,strReference					= GLD.strReference
+				,intCurrencyId					= GLD.intCurrencyId
+				,dblExchangeRate				= GLD.dblExchangeRate
+				,dtmDateEntered					= @PostDate
+				,dtmTransactionDate				= GLD.dtmTransactionDate
+				,strJournalLineDescription		= GLD.strJournalLineDescription
+				,intJournalLineNo				= GLD.intJournalLineNo 
 				,ysnIsUnposted					= 1
 				,intUserId						= @userId
 				,intEntityId					= @UserEntityID
-				,GLD.strTransactionId
-				,GLD.intTransactionId
-				,GLD.strTransactionType
-				,GLD.strTransactionForm
-				,GLD.strModuleName
-				,GLD.intConcurrencyId
+				,strTransactionId				= GLD.strTransactionId
+				,intTransactionId				= GLD.intTransactionId
+				,strTransactionType				= GLD.strTransactionType
+				,strTransactionForm				= GLD.strTransactionForm
+				,strModuleName					= GLD.strModuleName
+				,intConcurrencyId				= GLD.intConcurrencyId
 			FROM
 				(SELECT intInvoiceId, strInvoiceNumber FROM @PostInvoiceData) PID
 			INNER JOIN
@@ -3486,7 +3486,9 @@ IF @post = 0
 			WHERE
 				GLD.ysnIsUnposted = 0				
 			ORDER BY
-				GLD.intGLDetailId		
+				GLD.intGLDetailId
+				
+			EXEC dbo.uspGLBookEntries @GLEntries, @post	
 						
 		END TRY
 		BEGIN CATCH
@@ -3494,59 +3496,59 @@ IF @post = 0
 			GOTO Do_Rollback
 		END CATCH
 		
-		BEGIN TRY			
-			DECLARE @UnPostInvoiceData TABLE  (
-				intInvoiceId int PRIMARY KEY,
-				strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
-				UNIQUE (intInvoiceId)
-			);
+		--BEGIN TRY			
+		--	DECLARE @UnPostInvoiceData TABLE  (
+		--		intInvoiceId int PRIMARY KEY,
+		--		strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+		--		UNIQUE (intInvoiceId)
+		--	);
 			
-			INSERT INTO @UnPostInvoiceData(intInvoiceId, strTransactionId)
-			SELECT DISTINCT
-				 PID.intInvoiceId
-				,PID.strInvoiceNumber
-			FROM
-				@PostInvoiceData PID				
-			INNER JOIN
-				(SELECT intInvoiceId FROM dbo.tblARInvoice WITH (NOLOCK) ) ARI
-					ON PID.intInvoiceId = ARI.intInvoiceId
+		--	INSERT INTO @UnPostInvoiceData(intInvoiceId, strTransactionId)
+		--	SELECT DISTINCT
+		--		 PID.intInvoiceId
+		--		,PID.strInvoiceNumber
+		--	FROM
+		--		@PostInvoiceData PID				
+		--	INNER JOIN
+		--		(SELECT intInvoiceId FROM dbo.tblARInvoice WITH (NOLOCK) ) ARI
+		--			ON PID.intInvoiceId = ARI.intInvoiceId
 
-			IF ISNULL(@HasImpactForProvisional, 0) = 1
-				BEGIN
-					INSERT INTO @UnPostInvoiceData(intInvoiceId, strTransactionId)
-					SELECT DISTINCT
-						 PID.intInvoiceId
-						,PID.strInvoiceNumber
-					FROM
-						@PostProvisionalData PID				
-					INNER JOIN
-						(SELECT intInvoiceId FROM dbo.tblARInvoice WITH (NOLOCK) ) ARI
-							ON PID.intInvoiceId = ARI.intInvoiceId
-				END
+		--	IF ISNULL(@HasImpactForProvisional, 0) = 1
+		--		BEGIN
+		--			INSERT INTO @UnPostInvoiceData(intInvoiceId, strTransactionId)
+		--			SELECT DISTINCT
+		--				 PID.intInvoiceId
+		--				,PID.strInvoiceNumber
+		--			FROM
+		--				@PostProvisionalData PID				
+		--			INNER JOIN
+		--				(SELECT intInvoiceId FROM dbo.tblARInvoice WITH (NOLOCK) ) ARI
+		--					ON PID.intInvoiceId = ARI.intInvoiceId
+		--		END
 
-			WHILE EXISTS(SELECT TOP 1 NULL FROM @UnPostInvoiceData ORDER BY intInvoiceId)
-				BEGIN
+		--	WHILE EXISTS(SELECT TOP 1 NULL FROM @UnPostInvoiceData ORDER BY intInvoiceId)
+		--		BEGIN
 				
-					DECLARE @intTransactionId INT
-							,@strTransactionId NVARCHAR(80);
+		--			DECLARE @intTransactionId INT
+		--					,@strTransactionId NVARCHAR(80);
 					
-					SELECT TOP 1 @intTransactionId = intInvoiceId, @strTransactionId = strTransactionId FROM @UnPostInvoiceData ORDER BY intInvoiceId					
+		--			SELECT TOP 1 @intTransactionId = intInvoiceId, @strTransactionId = strTransactionId FROM @UnPostInvoiceData ORDER BY intInvoiceId					
 
-					EXEC	dbo.uspGLInsertReverseGLEntry
-								@strTransactionId	= @strTransactionId
-								,@intEntityId		= @UserEntityID
-								,@dtmDateReverse	= @PostDate
-								,@strBatchId		= @batchIdUsed
+		--			EXEC	dbo.uspGLInsertReverseGLEntry
+		--						@strTransactionId	= @strTransactionId
+		--						,@intEntityId		= @UserEntityID
+		--						,@dtmDateReverse	= @PostDate
+		--						,@strBatchId		= @batchIdUsed
 										
-					DELETE FROM @UnPostInvoiceData WHERE intInvoiceId = @intTransactionId AND strTransactionId = @strTransactionId 
+		--			DELETE FROM @UnPostInvoiceData WHERE intInvoiceId = @intTransactionId AND strTransactionId = @strTransactionId 
 												
-				END							 
+		--		END							 
 																
-		END TRY
-		BEGIN CATCH
-			SELECT @ErrorMerssage = ERROR_MESSAGE()										
-			GOTO Do_Rollback
-		END CATCH				  
+		--END TRY
+		--BEGIN CATCH
+		--	SELECT @ErrorMerssage = ERROR_MESSAGE()										
+		--	GOTO Do_Rollback
+		--END CATCH				  
 		
 		BEGIN TRY			
 			DECLARE @UnPostICInvoiceData TABLE  (
@@ -3554,6 +3556,9 @@ IF @post = 0
 				strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 				UNIQUE (intInvoiceId)
 			);
+
+			DECLARE @intTransactionId INT
+					,@strTransactionId NVARCHAR(80);
 			
 			INSERT INTO @UnPostICInvoiceData(intInvoiceId, strTransactionId)
 			SELECT DISTINCT
