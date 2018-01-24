@@ -231,6 +231,7 @@ DECLARE @PricedContractList AS TABLE (
 	,intContractDetailId INT
 	,intCommodityUnitMeasureId INT
 	,dblRatioContractSize DECIMAL(24, 10)
+	,dblRatioQty DECIMAL(24, 10)
 	)
 
 INSERT INTO @PricedContractList
@@ -256,6 +257,7 @@ SELECT fm.strFutureMonth
 	,intContractStatusId
 	,dblDeltaPercent,cv.intContractDetailId,um.intCommodityUnitMeasureId
 	,dbo.fnCTConvertQuantityToTargetCommodityUOM(um2.intCommodityUnitMeasureId,um.intCommodityUnitMeasureId,ffm.dblContractSize) dblRatioContractSize
+	,dblRatioQty
 FROM vyuRKRiskPositionContractDetail cv
 JOIN tblRKFutureMarket ffm ON ffm.intFutureMarketId = cv.intFutureMarketId
 --JOIN tblICCommodityUnitMeasure um1 ON um1.intCommodityId = cv.intCommodityId AND um1.intUnitMeasureId = ffm.intUnitMeasureId
@@ -281,13 +283,13 @@ intCompanyLocationId  ,intFutureMarketId  ,dtmFutureMonthsDate  ,ysnExpired
 FROM (
 	SELECT strFutureMonth
 		,strAccountNumber
-		,case when intPricingTypeId=8 then  dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId, dblNoOfLot*dblRatioContractSize) else dblNoOfContract end dblNoOfContract
+		,case when intPricingTypeId=8 then  dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId, dblRatioQty ) else dblNoOfContract end dblNoOfContract
 		,strTradeNo
 		,TransactionDate
 		,TranType
 		,CustVendor
 		,dblNoOfLot
-		,case when intPricingTypeId=8 then dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId, dblNoOfLot*dblRatioContractSize) else dblQuantity end dblQuantity
+		,case when intPricingTypeId=8 then dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId, dblNoOfLot) else dblQuantity end dblQuantity
 		,intContractHeaderId
 		,intFutOptTransactionHeaderId
 		,intPricingTypeId
@@ -305,13 +307,13 @@ FROM (
 	--Parcial Priced
 	SELECT strFutureMonth
 		,strAccountNumber
-		,case when intPricingTypeId=8 then  dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId, dblFixedLots*dblRatioContractSize) else dblFixedQty end AS dblNoOfContract
+		,case when intPricingTypeId=8 then  dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId, (dblRatioQty/dblNoOfLot)* dblFixedLots) else dblFixedQty end AS dblNoOfContract
 		,strTradeNo
 		,TransactionDate
 		,TranType
 		,CustVendor
 		,dblFixedLots dblNoOfLot
-		,case when intPricingTypeId=8 then  dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId, dblFixedLots*dblRatioContractSize) else dblFixedQty end dblFixedQty
+		,case when intPricingTypeId=8 then  dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId, (dblRatioQty/dblNoOfLot)*dblFixedLots) else dblFixedQty end dblFixedQty
 		,intContractHeaderId
 		,intFutOptTransactionHeaderId
 		,1 intPricingTypeId
@@ -339,7 +341,7 @@ FROM (
 			,intCompanyLocationId
 			,intFutureMarketId
 			,dtmFutureMonthsDate
-			,ysnExpired
+			,ysnExpired,dblRatioQty
 			,isnull((
 					SELECT sum(dblLotsFixed) dblNoOfLots
 					FROM tblCTPriceFixation pf
@@ -362,13 +364,14 @@ FROM (
 	--Parcial UnPriced
 	SELECT strFutureMonth
 		,strAccountNumber
-		,case when intPricingTypeId=8 then dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId,(isnull(dblNoOfLot, 0) - isnull(dblFixedLots, 0)) * dblRatioContractSize) else dblQuantity - dblFixedQty end AS dblNoOfContract
+		,case when intPricingTypeId=8 then dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId,
+				(((dblRatioQty/dblNoOfLot)*isnull(dblNoOfLot, 0)) - ((dblRatioQty/dblNoOfLot)*isnull(dblFixedLots, 0))) ) else dblQuantity - dblFixedQty end AS dblNoOfContract
 		,strTradeNo
 		,TransactionDate
 		,TranType
 		,CustVendor
 		,isnull(dblNoOfLot, 0) - isnull(dblFixedLots, 0) dblNoOfLot
-		,case when intPricingTypeId=8 then dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId,(isnull(dblNoOfLot, 0) - isnull(dblFixedLots, 0))*dblRatioContractSize) else dblQuantity - dblFixedQty end dblQuantity
+		,case when intPricingTypeId=8 then dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId,((dblRatioQty/dblNoOfLot)*isnull(dblNoOfLot, 0) - (dblRatioQty/dblNoOfLot)*isnull(dblFixedLots, 0))) else dblQuantity - dblFixedQty end dblQuantity
 		,intContractHeaderId
 		,intFutOptTransactionHeaderId
 		,2 intPricingTypeId
@@ -396,7 +399,7 @@ FROM (
 			,cv.intCompanyLocationId
 			,cv.intFutureMarketId
 			,dtmFutureMonthsDate
-			,ysnExpired
+			,ysnExpired,dblRatioQty
 			,isnull((
 					SELECT sum(dblLotsFixed) dblNoOfLots
 					FROM tblCTPriceFixation pf

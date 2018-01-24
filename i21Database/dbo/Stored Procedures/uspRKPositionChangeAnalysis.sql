@@ -1,14 +1,31 @@
-﻿CREATE PROC [dbo].[uspRKPositionChangeAnalysis]
+﻿CREATE  PROC [dbo].[uspRKPositionChangeAnalysis]
 	@strFromBatchId nvarchar(100),
 	@strToBatchId nvarchar(100),
 	@intQuantityUOMId nvarchar(100),
-	@intPriceUOMId nvarchar(100) = null
+	@intPriceUOMId nvarchar(100) = NULL
 AS
+
 -- Physical
 SELECT c.strCommodityCode,t.strPricingType,t.intContractDetailId,strContractOrInventoryType, strContractSeq,t.intContractHeaderId,strName strvendorName,
 	strFutureMonth strFutureMonth,strLocationName,strItemNo,
-	  dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,ium1.intCommodityUnitMeasureId,isnull((dblPricedQty),0)) dblPricedQty,
-	  dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,ium1.intCommodityUnitMeasureId,isnull((dblUnPricedQty),0)) dblUnPricedQty,
+	  dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,ium1.intCommodityUnitMeasureId,
+	  	  case when @intPriceUOMId = 2 then 
+			CASE WHEN intPricingTypeId=8 THEN 
+			  dblPricedQty * isnull(cd.dblRatio,0)			
+			  ELSE isnull((dblPricedQty),0) end
+	  ELSE 
+	  isnull((dblPricedQty),0)
+	  end
+	) dblPricedQty,
+	  dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,ium1.intCommodityUnitMeasureId,
+	  	  case when @intPriceUOMId = 2 then 
+			CASE WHEN intPricingTypeId=8 THEN 
+			  dblUnPricedQty * isnull(cd.dblRatio,0)			
+			  ELSE isnull((dblUnPricedQty),0) end
+	  ELSE 
+	  isnull((dblUnPricedQty),0)
+	  end
+	) dblUnPricedQty,
 	  dblPricedAmount  INTO #Fromtemp  
 FROM tblRKM2MInquiry i
 join tblRKM2MInquiryTransaction t on i.intM2MInquiryId=t.intM2MInquiryId
@@ -18,14 +35,29 @@ join tblICItem it on it.intItemId=t.intItemId
 join tblICCommodity c on c.intCommodityId=i.intCommodityId
 JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=c.intCommodityId AND i.intUnitMeasureId=ium.intUnitMeasureId 
 JOIN tblICCommodityUnitMeasure ium1 on ium1.intCommodityId=c.intCommodityId AND ium1.intUnitMeasureId=@intQuantityUOMId
-join tblCTContractDetail cd on cd.intContractDetailId=t.intContractDetailId
+JOIN tblCTContractDetail cd on cd.intContractDetailId=t.intContractDetailId
 JOIN tblSMCompanyLocation l on l.intCompanyLocationId=cd.intCompanyLocationId
  WHERE i.strBatchId=@strFromBatchId
 
 SELECT c.strCommodityCode,t.strPricingType,t.intContractDetailId,strContractOrInventoryType, strContractSeq,t.intContractHeaderId,strName strvendorName,strFutureMonth strFutureMonth,
 		strLocationName,strItemNo,
-	  dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,ium1.intCommodityUnitMeasureId,isnull((dblPricedQty),0)) dblPricedQty,
-	  dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,ium1.intCommodityUnitMeasureId,isnull((dblUnPricedQty),0)) dblUnPricedQty,
+	  dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,ium1.intCommodityUnitMeasureId,	  case when @intPriceUOMId = 2 then 
+			CASE WHEN intPricingTypeId=8 THEN 
+			  dblPricedQty * isnull(cd.dblRatio,0)			
+			  ELSE isnull((dblPricedQty),0) end
+	  ELSE 
+	  isnull((dblPricedQty),0)
+	  end
+	) dblPricedQty,
+	  dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,ium1.intCommodityUnitMeasureId,
+	  	  case when @intPriceUOMId = 2 then 
+			CASE WHEN intPricingTypeId=8 THEN 
+			  dblUnPricedQty * isnull(cd.dblRatio,0)			
+			  ELSE isnull((dblUnPricedQty),0) end
+	  ELSE 
+	  isnull((dblUnPricedQty),0)
+	  end
+	) dblUnPricedQty,
 	  dblPricedAmount INTO #Totemp 
 FROM tblRKM2MInquiry i
 JOIN tblRKM2MInquiryTransaction t on i.intM2MInquiryId=t.intM2MInquiryId
