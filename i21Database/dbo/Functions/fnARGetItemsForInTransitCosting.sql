@@ -108,6 +108,7 @@ INNER JOIN (SELECT [intItemId], [intItemLocationId], [intItemUOMId], [intTransac
 WHERE
 	ICIT.[intFobPointId] = @FOB_DESTINATION
 	AND ISNULL(ARID.[intLoadDetailId], 0) = 0
+	AND ARI.[strType] <> 'Provisional'
 
 
 UNION ALL
@@ -141,7 +142,9 @@ FROM
 INNER JOIN 
 	(SELECT [intInvoiceId], [strInvoiceNumber], [strTransactionType], [intCurrencyId], [strImportFormat], [intCompanyLocationId], [intDistributionHeaderId], 
 		[intLoadDistributionHeaderId], [strActualCostId], [dtmShipDate], [intPeriodsToAccrue], [ysnImpactInventory], [dblSplitPercent], [intLoadId], [intFreightTermId]
-	 FROM @Invoices) ARI 
+	 FROM @Invoices
+	 WHERE
+		[strType] <> 'Provisional') ARI 
 		ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
 INNER JOIN
     (SELECT [intLoadId], [intPurchaseSale], [strLoadNumber] FROM tblLGLoad WITH (NOLOCK)) LGL
