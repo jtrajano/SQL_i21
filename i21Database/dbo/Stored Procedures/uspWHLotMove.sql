@@ -41,6 +41,10 @@ BEGIN TRY
 		,@dblDefaultResidueQty NUMERIC(38, 20)
 		,@intDestinationLotStatusId INT
 		,@dblDestinationLotQty NUMERIC(38, 20)
+		,@dblWorkOrderReservedQty NUMERIC(38, 20)
+		,@intBondStatusId INT
+		,@intStorageUnitTypeId INT
+		,@strInternalCode NVARCHAR(50)
 
 	SELECT TOP 1 @dblDefaultResidueQty = ISNULL(dblDefaultResidueQty, 0.00001)
 	FROM tblMFCompanyPreference
@@ -222,6 +226,36 @@ BEGIN TRY
 		END
 	END
 
+	SELECT @dblWorkOrderReservedQty = SUM(dblQuantity)
+	FROM tblMFWorkOrderInputLot
+	WHERE intDestinationLotId = @intLotId
+		AND ysnConsumptionReversed = 0
+
+	IF @dblWorkOrderReservedQty IS NULL
+	BEGIN
+		Select @dblWorkOrderReservedQty=0
+	END
+
+	IF (
+			@dblLotAvailableQty + (
+						(
+							CASE 
+								WHEN @intLotItemUOMId = @intItemUOMId
+									AND @intWeightUOMId IS NOT NULL
+									THEN - @dblMoveQty * @dblWeightPerQty
+								ELSE - @dblMoveQty
+								END
+							)
+						)
+			) < @dblWorkOrderReservedQty
+	BEGIN
+		RAISERROR (
+				'There is reservation against this lot. Cannot proceed.'
+				,16
+				,1
+				)
+	END
+
 	IF EXISTS (
 			SELECT *
 			FROM tblICStorageLocationCategory
@@ -238,6 +272,33 @@ BEGIN TRY
 			RAISERROR (
 					'The selected item is not allowed in the destination location.'
 					,11
+					,1
+					)
+		END
+	END
+
+	SELECT @intBondStatusId = intBondStatusId
+	FROM tblMFLotInventory
+	WHERE intLotId = @intLotId
+
+	IF @intBondStatusId = 5
+	BEGIN
+		SELECT @intStorageUnitTypeId = intStorageUnitTypeId
+		FROM tblICStorageLocation
+		WHERE intStorageLocationId = @intNewStorageLocationId
+
+		SELECT @strInternalCode = strInternalCode
+		FROM tblICStorageUnitType
+		WHERE intStorageUnitTypeId = @intStorageUnitTypeId
+
+		IF @strInternalCode IN (
+				'STAGING'
+				,'PROD_STAGING'
+				)
+		BEGIN
+			RAISERROR (
+					'Scanned lot/pallet is not bond released. Please scan bond released lot/pallet to continue.'
+					,16
 					,1
 					)
 		END
