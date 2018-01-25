@@ -6137,6 +6137,7 @@
     <Build Include="dbo\Views\vyuCFExportAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspCFCardSynchronization.sql" />
     <Build Include="dbo\Stored Procedures\uspARCreateRCVForCreditMemo.sql" />
+    <Build Include="dbo\Tables\tblCFExportValidURL.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
