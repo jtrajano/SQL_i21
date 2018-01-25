@@ -38,6 +38,9 @@ BEGIN
 
 	SET @ZeroDecimal = 0.000000
 	SELECT @ItemCategoryId = intCategoryId FROM tblICItem WHERE intItemId = @ItemId 
+
+	IF (ISNULL(@UOMId,0) = 0)
+		SET @UOMId = [dbo].[fnGetItemStockUOM](@ItemId) 
 	
 	INSERT INTO @returntable
 	SELECT

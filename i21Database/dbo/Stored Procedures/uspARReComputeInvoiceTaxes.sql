@@ -84,6 +84,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 				,@TaxGroupId			INT
 				,@ItemType				NVARCHAR(100)
 				,@SiteId				INT
+				,@ItemUOMId				INT
 
 		SELECT TOP 1
 			 @InvoiceDetailId		= [intInvoiceDetailId]
@@ -100,6 +101,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 			,@SiteId				= tblARInvoiceDetail.[intSiteId]
 			,@SubCurrencyRate		= ISNULL(tblARInvoiceDetail.[dblSubCurrencyRate], 1)
 			,@CurrencyExchangeRate	= ISNULL(tblARInvoiceDetail.[dblCurrencyExchangeRate], 1)
+			,@ItemUOMId				= tblARInvoiceDetail.intItemUOMId 
 		FROM
 			tblARInvoiceDetail
 		WHERE
@@ -163,7 +165,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 			,[strNotes] 
 			,1
 		FROM
-			[dbo].[fnGetItemTaxComputationForCustomer](@ItemId, @CustomerId, @TransactionDate, @ItemPrice, @QtyShipped, @TaxGroupId, @LocationId, @CustomerLocationId, 1, NULL, @SiteId, @FreightTermId, NULL, NULL, 0, 1, NULL, 1)
+			[dbo].[fnGetItemTaxComputationForCustomer](@ItemId, @CustomerId, @TransactionDate, @ItemPrice, @QtyShipped, @TaxGroupId, @LocationId, @CustomerLocationId, 1, NULL, @SiteId, @FreightTermId, NULL, NULL, 0, 1, NULL, 1, @ItemUOMId)
 		
 		
 		UPDATE IDT			

@@ -38,6 +38,7 @@ SELECT
 														,0
 														,NULL
 														,1
+														,NULL	-- intItemUOMId
                                                     )
 	,intSiteId = A.intSiteID
 	,M.strDeliveryTicketFormat

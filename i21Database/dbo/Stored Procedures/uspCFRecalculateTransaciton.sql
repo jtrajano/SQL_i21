@@ -1016,6 +1016,7 @@ BEGIN
 						,@intVehicleId
 						,@ysnApplyTaxExemption -- @DisregardExemptionSetup
 						,0
+						,NULL	--intItemUOMId
 					)
 
 					update @LineItemTaxDetailStagingTable set ysnTaxExempt = 0
@@ -1070,7 +1071,8 @@ BEGIN
 						,@intCardId												 
 						,@intVehicleId												 
 						, 1 --@DisregardExemptionSetup						 
-						, 0													 
+						, 0	
+						, NULL	--intItemUOMId												 
 					)
 
 				END
@@ -1136,6 +1138,7 @@ BEGIN
 					,@intVehicleId
 					,@ysnApplyTaxExemption --@DisregardExemptionSetup
 					,0
+					, NULL	--intItemUOMId												 
 				)
 
 				
@@ -1192,6 +1195,7 @@ BEGIN
 					,@intVehicleId
 					,1 --@DisregardExemptionSetup
 					,0
+					, NULL	--intItemUOMId												 
 				)
 
 				END
@@ -1323,6 +1327,7 @@ BEGIN
 					,@intVehicleId
 					,1 --@DisregardExemptionSetup
 					,0
+					, NULL	--intItemUOMId												 
 				)
 
 					INSERT INTO @tblCFCalculatedTax	
@@ -1377,6 +1382,7 @@ BEGIN
 					,@intVehicleId
 					,@ysnApplyTaxExemption -- @DisregardExemptionSetup
 					,0
+					, NULL	--intItemUOMId												 
 				)
 
 					--SELECT * FROM @tblCFCalculatedTax
@@ -1444,6 +1450,7 @@ BEGIN
 					,@intVehicleId
 					,1 --@DisregardExemptionSetup
 					,0
+					, NULL	--intItemUOMId												 
 				)
 
 					INSERT INTO @tblCFCalculatedTax	
@@ -1498,6 +1505,7 @@ BEGIN
 					,@intVehicleId
 					,@ysnApplyTaxExemption -- @DisregardExemptionSetup
 					,0
+					, NULL	--intItemUOMId												 
 				)
 
 				END
@@ -1556,6 +1564,7 @@ BEGIN
 					,@intVehicleId
 					,1 --@DisregardExemptionSetup
 					,0
+					, NULL	--intItemUOMId												 
 				)
 
 					INSERT INTO @tblCFCalculatedTax	
@@ -1610,6 +1619,7 @@ BEGIN
 					,@intVehicleId
 					,@ysnApplyTaxExemption --@DisregardExemptionSetup
 					,0
+					, NULL	--intItemUOMId												 
 				)
 
 				
@@ -1745,6 +1755,7 @@ BEGIN
 					,@intVehicleId
 					,1 --@DisregardExemptionSetup
 					,0
+					, NULL	--intItemUOMId												 
 				)
 
 					INSERT INTO @tblCFCalculatedTax	
@@ -1799,6 +1810,7 @@ BEGIN
 					,@intVehicleId
 					,@ysnApplyTaxExemption -- @DisregardExemptionSetup
 					,0
+					, NULL	--intItemUOMId												 
 				)
 
 					--SELECT * FROM @tblCFCalculatedTax
@@ -1866,6 +1878,7 @@ BEGIN
 					,@intVehicleId
 					,1 --@DisregardExemptionSetup
 					,0
+					, NULL	--intItemUOMId												 
 				)
 
 					INSERT INTO @tblCFCalculatedTax	
@@ -1920,6 +1933,7 @@ BEGIN
 					,@intVehicleId
 					,@ysnApplyTaxExemption-- @DisregardExemptionSetup
 					,0
+					, NULL	--intItemUOMId												 
 				)
 
 				END
@@ -1978,6 +1992,7 @@ BEGIN
 					,@intVehicleId
 					,1 --@DisregardExemptionSetup
 					,0
+					, NULL	--intItemUOMId												 
 				)
 
 					INSERT INTO @tblCFCalculatedTax	
@@ -2032,6 +2047,7 @@ BEGIN
 					,@intVehicleId
 					,@ysnApplyTaxExemption --@DisregardExemptionSetup
 					,0
+					, NULL	--intItemUOMId												 
 				)
 
 				

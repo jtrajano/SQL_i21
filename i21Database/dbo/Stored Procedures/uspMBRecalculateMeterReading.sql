@@ -21,6 +21,7 @@ BEGIN
 		, @LineItems LineItemTaxDetailStagingTable
 		, @TaxTotal NUMERIC(18,6)
 		, @PriceType NVARCHAR(20)
+		, @ItemUOMId INT
 
 	WHILE EXISTS ( SELECT TOP 1 1 FROM #tmpMeterReading)
 	BEGIN
@@ -38,6 +39,7 @@ BEGIN
 			, @IsReversal = (CASE WHEN strPriceType = 'Gross' THEN 1
 							ELSE 0 END)
 			, @PriceType = strPriceType
+			, @ItemUOMId = intItemUOMId 
 		FROM #tmpMeterReading
 
 		SELECT *
@@ -61,6 +63,7 @@ BEGIN
 			, NULL
 			, 0
 			, 0
+			, @ItemUOMId
 		)
 
 		SELECT @TaxTotal = ISNULL(SUM(ISNULL(dblRate, 0)), 0)

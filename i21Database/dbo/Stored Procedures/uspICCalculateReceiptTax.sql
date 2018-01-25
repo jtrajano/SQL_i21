@@ -30,6 +30,7 @@ DECLARE	@ItemId				INT
 		,@ShipFromId		INT 
 		,@TaxGroupId		INT
 		,@FreightTermId		INT
+		,@CostUOMId			INT
 
 DECLARE @Taxes AS TABLE (
 	intTransactionDetailTaxId	INT
@@ -69,7 +70,8 @@ SELECT  ReceiptItem.intItemId
 		,ReceiptItem.intInventoryReceiptItemId
 		,Receipt.intShipFromId
 		,ReceiptItem.intTaxGroupId
-		,Receipt.intFreightTermId 
+		,Receipt.intFreightTermId
+		,ReceiptItem.intCostUOMId
 FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 			ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 WHERE	Receipt.intInventoryReceiptId = @inventoryReceiptId
@@ -87,6 +89,7 @@ FETCH NEXT FROM loopReceiptItems INTO
 	,@ShipFromId
 	,@TaxGroupId
 	,@FreightTermId
+	,@CostUOMId
 
 WHILE @@FETCH_STATUS = 0
 BEGIN 
@@ -126,6 +129,7 @@ BEGIN
 		,@IncludeExemptedCodes	= NULL
 		,@SiteId				= NULL
 		,@FreightTermId			= @FreightTermId
+		,@UOMId					= @CostUOMId
 
 
 	DECLARE	@Amount	NUMERIC(38,20) 
@@ -231,7 +235,7 @@ BEGIN
 			,[dblCost]						= @Amount
 			,[intSort]						= 1
 			,[intConcurrencyId]				= 1
-	FROM	[dbo].[fnGetItemTaxComputationForVendor](@ItemId, @EntityId, @TransactionDate, @Amount, @Qty, @TaxGroupId, @LocationId, @ShipFromId, 0, @FreightTermId,0) vendorTax
+	FROM	[dbo].[fnGetItemTaxComputationForVendor](@ItemId, @EntityId, @TransactionDate, @Amount, @Qty, @TaxGroupId, @LocationId, @ShipFromId, 0, @FreightTermId,0,@CostUOMId) vendorTax
 			LEFT JOIN tblICInventoryReceiptItem ri 
 				ON ri.intInventoryReceiptItemId = @InventoryReceiptItemId
 								

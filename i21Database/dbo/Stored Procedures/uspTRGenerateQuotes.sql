@@ -268,6 +268,7 @@ BEGIN TRY
 					, NULL
 					, 0
 					, 0
+					, NULL	--intItemUOMId												 
 				)
 
 				INSERT INTO tblTRQuoteDetailTax(

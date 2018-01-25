@@ -31,6 +31,7 @@ DECLARE @InvoiceDetail AS TABLE(
 	,[intTaxGroupId]			INT
 	,[strItemType]				NVARCHAR(100)
 	,[intSiteId]				INT
+	,[intItemUOMId]				INT
 	UNIQUE ([intInvoiceDetailId])
 );
 
@@ -51,7 +52,8 @@ INSERT INTO @InvoiceDetail
 	,[dblCurrencyExchangeRate]
 	,[intTaxGroupId]
 	,[strItemType]
-	,[intSiteId])
+	,[intSiteId]
+	,[intItemUOMId])
 SELECT
 	 [intInvoiceDetailId]		= ARID.[intInvoiceDetailId]
 	,[intInvoiceId]				= ARI.[intInvoiceId]
@@ -69,6 +71,7 @@ SELECT
 	,[intTaxGroupId]			= CASE WHEN ISNULL(ARID.[intTaxGroupId],0) = 0 THEN NULL ELSE ARID.[intTaxGroupId] END
 	,[strItemType]				= ICI.[strType]
 	,[intSiteId]				= ARID.[intSiteId]
+	,[intItemUOMId]				= ARID.[intItemUOMId] 
 FROM
 	tblARInvoiceDetail ARID WITH (NOLOCK)
 INNER JOIN
@@ -146,7 +149,7 @@ SELECT
 FROM
 	@InvoiceDetail IDs
 CROSS APPLY
-	[dbo].[fnGetItemTaxComputationForCustomer](IDs.[intItemId], IDs.[intEntityCustomerId], IDs.[dtmTransactionDate], IDs.[dblPrice], IDs.[dblQtyShipped], IDs.[intTaxGroupId], IDs.[intCompanyLocationId], IDs.[intCustomerLocationId], 1, NULL, IDs.[intSiteId], IDs.[intFreightTermId], NULL, NULL, 0, 1, NULL, 1) TD
+	[dbo].[fnGetItemTaxComputationForCustomer](IDs.[intItemId], IDs.[intEntityCustomerId], IDs.[dtmTransactionDate], IDs.[dblPrice], IDs.[dblQtyShipped], IDs.[intTaxGroupId], IDs.[intCompanyLocationId], IDs.[intCustomerLocationId], 1, NULL, IDs.[intSiteId], IDs.[intFreightTermId], NULL, NULL, 0, 1, NULL, 1, IDs.[intItemUOMId]) TD
 WHERE
 	NOT (ISNULL(IDs.[intDistributionHeaderId], 0) <> 0 AND ISNULL(IDs.[strItemType],'') = 'Other Charge') OR (ISNULL(IDs.[intDistributionHeaderId],0) <> 0 AND ISNULL(IDs.[dblPrice], 0) = 0)
 		
