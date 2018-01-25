@@ -114,6 +114,8 @@ SELECT
 	dblConsignedPurchase = ISNULL(ItemStock.dblConsignedPurchase, 0),
 	dblConsignedSale = ISNULL(ItemStock.dblConsignedSale, 0),
 	dblUnitReserved = ISNULL(ItemStock.dblUnitReserved, 0),
+	dblOpenPurchaseContract = ISNULL(ItemStock.dblOpenPurchaseContract, 0),
+	dblOpenSalesContract = ISNULL(ItemStock.dblOpenSalesContract, 0),
 	dblLastCountRetail = ISNULL(ItemStock.dblLastCountRetail, 0),
 	dblAvailable = 
 				ISNULL(ItemStock.dblUnitOnHand, 0)  
