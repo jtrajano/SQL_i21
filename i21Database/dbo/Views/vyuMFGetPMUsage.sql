@@ -36,6 +36,8 @@ SELECT DISTINCT Rtrim(Convert(CHAR, W.dtmPlannedDate, 101)) [Dump Date]
 				AND WC1.intItemId = WC.intItemId
 				AND WC1.intSequenceNo = 9999
 			), 0) AS [Damaged]
+	,W.intWorkOrderId
+	,W.dtmPlannedDate
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderConsumedLot WC ON WC.intWorkOrderId = W.intWorkOrderId
 	AND intSequenceNo <> 9999
@@ -64,3 +66,4 @@ GROUP BY W.dtmPlannedDate
 	,UM1.strUnitMeasure
 	,W.intWorkOrderId
 	,WC.intItemId
+	,W.intWorkOrderId
