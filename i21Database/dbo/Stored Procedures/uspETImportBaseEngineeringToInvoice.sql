@@ -45,12 +45,16 @@ BEGIN
 	DECLARE @intNewInvoiceDetailId					INT
 	DECLARE @strNewInvoiceNumber					NVARCHAR(25)
 	DECLARE @dblNonContractQuantity					NUMERIC(18, 6)
+	DECLARE @dblPreBuyOverFill						NUMERIC(18, 6)
 	DECLARE @intContractDetailId					INT
 
 	--DECLARE @intSiteTaxId							INT
 	DECLARE @intLineItemTaxId						INT
 	DECLARE @strStatus								NVARCHAR(50)
 	DECLARE @ysnRecomputeTax						BIT
+
+	DECLARE @ysnOverFill BIT = 0
+	DECLARE @TotalRecordedQuantity 	NUMERIC(18, 6)
 	
 	DECLARE @ResultTableLog TABLE(
 		strCustomerNumber			NVARCHAR(100)
@@ -66,7 +70,7 @@ BEGIN
 		,intInvoiceId				INT
 	)
 
-
+	DECLARE @AvailableQuantity	NUMERIC(18, 6)
 
 	SET @strAllErrorMessage = ''
 
@@ -156,6 +160,7 @@ BEGIN
 			
 			--Get Item id
 			SET @intItemId = (SELECT TOP 1 intItemId FROM tblICItem WHERE strItemNo = @strItemNumber)
+			--PRINT 'ITEM: ' + @strItemNumber
 
 		    --Get Site Info
 			-- Tax id  Mismatch - IET-99 JAN192017
@@ -206,7 +211,7 @@ BEGIN
  			END
 
 			IF LTRIM(@strErrorMessage) != ''
-			BEGIN		
+			BEGIN
 				GOTO LOGERROR
 			END
 
@@ -225,16 +230,79 @@ BEGIN
 					SET @ysnRecomputeTax = 1
 				END
 		
+			SET @AvailableQuantity = 0
+			SET @dblNonContractQuantity = 0
+			SET @dblPreBuyOverFill = 0
+			SET @intContractDetailId = NULL
+			SET @ysnOverFill = 0
+			SET @TotalRecordedQuantity = @dblQuantity
+
 			---Check Contracts
 			IF(@dblPrebuyQuantity > 0 OR @dblContractQuantity > 0)
 				BEGIN 
-				--IF Contract is used
-					SET @dblNonContractQuantity = 0
 					IF(@dblPrebuyQuantity > 0)
 					    BEGIN 
 						--GEt Contracts				
-						SELECT TOP 1 @intContractDetailId = intContractDetailId FROM vyuETBEContract WHERE intEntityId = @intCustomerEntityId AND intItemId = @intItemId
+						--SELECT TOP 1 @intContractDetailId = intContractDetailId FROM vyuETBEContract WHERE intEntityId = @intCustomerEntityId AND intItemId = @intItemId
+						SELECT TOP 1 @intContractDetailId	= ARCC.[intContractDetailId]
+							-- @Price				= ARCC.[dblCashPrice]
+							--,@CurrencyId		= ARCC.[intSubCurrencyId]
+							--,@SubCurrencyRate	= ARCC.[dblSubCurrencyRate]
+							--,@SubCurrency		= ARCC.[strSubCurrency]
+							--,@ContractHeaderId	= ARCC.[intContractHeaderId]
+							--,@ContractDetailId	= ARCC.[intContractDetailId]
+							--,@ContractNumber	= ARCC.[strContractNumber]
+							--,@ContractSeq		= ARCC.[intContractSeq]
+							,@AvailableQuantity = ARCC.[dblAvailableQty]
+							--,@UnlimitedQuantity = ARCC.[ysnUnlimitedQuantity]
+							--,@PricingType		= ARCC.[strPricingType]
+							--,@ItemUOMId			= ARCC.[intItemUOMId] 
+							--,@PriceUOM			= ARCC.[strUnitMeasure] 
+							--,@termId			= ARCC.[intTermId]
+						FROM
+							[vyuARCustomerContract] ARCC
+						WHERE
+							ARCC.[intEntityCustomerId] = @intCustomerEntityId
+							--AND ARCC.[intCompanyLocationId] = @LocationId --???
+							--AND (ARCC.[intItemUOMId] = @ItemUOMId OR @ItemUOMId IS NULL) --????
+							AND ARCC.[intItemId] = @intItemId
+							--AND (((ARCC.[dblAvailableQty]) >= @dblQuantity) OR ARCC.[ysnUnlimitedQuantity] = 1 OR ISNULL(@AllowQtyToExceed,0) = 1) 
+							AND CAST(@dtmDate AS DATE) BETWEEN CAST(ARCC.[dtmStartDate] AS DATE) AND CAST(ISNULL(ARCC.[dtmEndDate], @dtmDate) AS DATE) --MSA Transaction date versus on spec's todays date.
+							--AND (((ARCC.[dblAvailableQty]) > 0) OR ARCC.[ysnUnlimitedQuantity] = 1) --???
+							--AND ARCC.[dblAvailableQty] >= @dblQuantity --MSA-- available or balance??  balance updated only upon posting - Ruben suggeste d to check available instead
+							--AND (ARCC.[dblBalance] > 0 OR ARCC.[ysnUnlimitedQuantity] = 1) --???
+							AND ARCC.[strContractStatus] NOT IN ('Cancelled', 'Unconfirmed', 'Complete')
+							--AND ARCC.[strPricingType] NOT IN ('Unit','Index') --???
+							--AND (ISNULL(@CurrencyId, 0) = 0 OR ARCC.[intCurrencyId] = @CurrencyId OR ARCC.[intSubCurrencyId] = @CurrencyId) --???
+							
+							AND (ARCC.[dblAvailableQty] > 0) 
+						ORDER BY
+							 dtmStartDate
+							,intContractSeq
 
+							IF(NOT @intContractDetailId IS NULL)
+							BEGIN 
+								SET @dblNonContractQuantity = (@dblQuantity - @dblPrebuyQuantity)
+								
+								IF(@AvailableQuantity>= @dblPrebuyQuantity)
+								BEGIN
+									SET @dblPreBuyOverFill = 0
+									SET @dblQuantity = @dblPrebuyQuantity
+								END
+								ELSE
+								BEGIN
+									SET @dblPreBuyOverFill = @dblPrebuyQuantity - @AvailableQuantity
+									SET @dblQuantity = @AvailableQuantity
+								END
+
+								SET @dblNonContractQuantity = @dblNonContractQuantity + @dblPreBuyOverFill --(add prebuy excess if there is any)
+								
+								IF (@dblNonContractQuantity > 0 ) 
+								BEGIN
+									SET @ysnRecomputeTax = 1
+								END
+							END
+							
 							---Insert/Create Invoice 
 							
 							IF (@strNewInvoiceNumber = '')
@@ -251,14 +319,14 @@ BEGIN
 								,@ErrorMessage             = @strErrorMessage OUTPUT
 								,@ItemId                   = @intItemId
 								,@ItemQtyShipped           = @dblQuantity
-								,@ItemPrice                = @dblPrebuyPrice
+								,@ItemPrice                = @dblPrebuyPrice -- Question if No contract available. --msa
 								,@ItemSiteId               = @intSiteId
 								,@TransactionType	       = @strTransactionType
 								,@Type					   = 'Tank Delivery'
 								,@ShipDate				   = @dtmDate
 								,@ItemPercentFull		   = @dblPercentFullAfterDelivery
 								,@ItemTaxGroupId		   = @intTaxGroupId	
-								,@RaiseError			   = 1 
+								,@RaiseError			   = 0 
 								,@UseOriginIdAsInvoiceNumber = 1
 								,@InvoiceOriginId         = @strOriginInvoiceNumber
 								,@ItemContractDetailId		= @intContractDetailId
@@ -269,8 +337,8 @@ BEGIN
 								SET @intNewInvoiceDetailId = (SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intNewInvoiceId)
 
 								----Update Tax Details
-								EXEC uspETImportUpdateInvoiceDetailTaxById @intNewInvoiceDetailId, @intImportBaseEngineeringId, @intTaxGroupId
-				
+								EXEC uspETImportUpdateInvoiceDetailTaxById @intNewInvoiceDetailId, @intImportBaseEngineeringId, @intTaxGroupId, @ysnRecomputeTax, 0, @TotalRecordedQuantity,@dblQuantity
+															
 								IF 	LTRIM(@strErrorMessage) != ''
 								BEGIN		
 									--ROLLBACK TRANSACTION
@@ -289,17 +357,18 @@ BEGIN
 									,@ErrorMessage = @strErrorMessage OUTPUT
 									,@ItemId                   = @intItemId
 									,@ItemQtyShipped           = @dblQuantity
-									,@ItemPrice                = @dblPrice
+									,@ItemPrice                = @dblPrebuyPrice
 									,@ItemSiteId               = @intSiteId
 									,@ItemPercentFull		   = 0
 									,@ItemTaxGroupId		   = @intTaxGroupId	
 									,@ItemContractDetailId     = @intContractDetailId
-									,@RaiseError			   = 1 			
+									,@RaiseError			   = 0 			
 									,@ItemCurrencyExchangeRateTypeId = NULL			
 									,@ItemCurrencyExchangeRateId = NULL			
 									,@RecomputeTax = @ysnRecomputeTax
 									----Update Tax Details
-									EXEC uspETImportUpdateInvoiceDetailTaxById @intNewInvoiceDetailId, @intImportBaseEngineeringId, @intTaxGroupId
+									--EXEC uspETImportUpdateInvoiceDetailTaxById @intNewInvoiceDetailId, @intImportBaseEngineeringId, @intTaxGroupId
+									EXEC uspETImportUpdateInvoiceDetailTaxById @intNewInvoiceDetailId, @intImportBaseEngineeringId, @intTaxGroupId, @ysnRecomputeTax, 0, @TotalRecordedQuantity,@dblQuantity
 				
 									IF 	LTRIM(@strErrorMessage) != ''
 										BEGIN		
@@ -307,11 +376,10 @@ BEGIN
 											GOTO LOGERROR
 										END
 								END
-
-							----------------------------------------------------------------------------------------------------------------------------------------
+                            
 							----Contract overfill
 							----------------------------------------------------------------------------------------------------------------------------------------
-							SET @dblNonContractQuantity = @dblQuantity - @dblPrebuyQuantity
+							
 							IF(@dblNonContractQuantity > 0)
 								BEGIN
 									---- Add as line Item to Existing Invoice
@@ -320,18 +388,20 @@ BEGIN
 											,@NewInvoiceDetailId = @intNewInvoiceDetailId OUTPUT
 											,@ErrorMessage = @strErrorMessage OUTPUT
 											,@ItemId                   = @intItemId
-											,@ItemQtyShipped           = @dblNonContractQuantity
+											,@ItemQtyShipped           = @dblNonContractQuantity 
 											,@ItemPrice                = @dblPrice
 											,@ItemSiteId               = @intSiteId
 											,@ItemPercentFull		   = 0
 											,@ItemTaxGroupId		   = @intTaxGroupId	
-											,@ItemContractDetailId     = @intContractDetailId
-											,@RaiseError			   = 1 			
+											--,@ItemContractDetailId     = @intContractDetailId
+											,@RaiseError			   = 0 			
 											,@ItemCurrencyExchangeRateTypeId = NULL			
 											,@ItemCurrencyExchangeRateId = NULL			
 											,@RecomputeTax = @ysnRecomputeTax
+									--EXEC uspETImportUpdateInvoiceDetailTaxById @intNewInvoiceDetailId, @intImportBaseEngineeringId, @intTaxGroupId
+									EXEC uspETImportUpdateInvoiceDetailTaxById @intNewInvoiceDetailId, @intImportBaseEngineeringId, @intTaxGroupId, @ysnRecomputeTax, 1, @TotalRecordedQuantity,@dblNonContractQuantity
 								END
-							EXEC uspETImportUpdateInvoiceDetailTaxById @intNewInvoiceDetailId, @intImportBaseEngineeringId, @intTaxGroupId
+							
 							----------------------------------------------------------------------------------------------------------------------------------------
 						
 						IF 	LTRIM(@strErrorMessage) != ''
@@ -353,8 +423,8 @@ BEGIN
 			    END
 			ELSE
 				BEGIN 
-			    ---Insert/Create Invoice 
-				IF (@strNewInvoiceNumber = '')
+					---Insert/Create Invoice 
+					IF (@strNewInvoiceNumber = '')
 					BEGIN
 						EXEC [dbo].[uspARCreateCustomerInvoice]
 						@EntityCustomerId          = @intCustomerEntityId
@@ -372,7 +442,7 @@ BEGIN
 						,@ShipDate				   = @dtmDate
 						,@ItemPercentFull		   = @dblPercentFullAfterDelivery
 						,@ItemTaxGroupId		   = @intTaxGroupId	
-						,@RaiseError			   = 1 
+						,@RaiseError			   = 0 
 						,@UseOriginIdAsInvoiceNumber = 1
 						,@InvoiceOriginId         = @strOriginInvoiceNumber
 						,@RecomputeTax = @ysnRecomputeTax
@@ -403,8 +473,8 @@ BEGIN
 							,@ItemSiteId               = @intSiteId
 							,@ItemPercentFull		   = 0
 							,@ItemTaxGroupId		   = @intTaxGroupId	
-							,@ItemContractDetailId     = @intContractDetailId
-							,@RaiseError			   = 1 			
+							--,@ItemContractDetailId     = @intContractDetailId
+							,@RaiseError			   = 0 			
 							,@ItemCurrencyExchangeRateTypeId = NULL			
 							,@ItemCurrencyExchangeRateId = NULL			
 							,@RecomputeTax = @ysnRecomputeTax
@@ -414,16 +484,13 @@ BEGIN
 							GOTO LOGERROR
 						END
 					END
-				----------------------------------------------------------------------------------------------------------------------------------------
-				----Add other item
-				----------------------------------------------------------------------------------------------------------------------------------------
+					----------------------------------------------------------------------------------------------------------------------------------------
+					----Add other item
+					----------------------------------------------------------------------------------------------------------------------------------------
 				
-				----Update Tax Details
-				EXEC uspETImportUpdateInvoiceDetailTaxById @intNewInvoiceDetailId, @intImportBaseEngineeringId, @intTaxGroupId
-				
+					----Update Tax Details
+					EXEC uspETImportUpdateInvoiceDetailTaxById @intNewInvoiceDetailId, @intImportBaseEngineeringId, @intTaxGroupId
                 END
-
-			
 
 		--Check if any error in creating invoice 
 		--Log Entry
@@ -450,6 +517,11 @@ BEGIN
 							Else
 								BEGIN
 									SET @strStatus = 'Created'
+								END
+
+                            IF (ISNULL(@dblPreBuyOverFill,0) > 0)
+								BEGIN
+									SET @strStatus = @strStatus + ', Has Contract Discrepency'
 								END
 		
 							INSERT INTO @ResultTableLog (strCustomerNumber ,strRecordId	,strSiteNumber	,dtmDate ,intLineItem ,strFileName ,strStatus ,ysnSuccessful ,strInvoiceNumber ,strItemNumber ,intInvoiceId)
@@ -503,7 +575,7 @@ BEGIN
 				,strFileName = ''				
 				,strStatus = @strErrorMessage
 				,ysnSuccessful = 0
-				,strInvoiceNumber = ''
+				,strInvoiceNumber = ''--ISNULL(@strNewInvoiceNumber,@strOriginInvoiceNumber)
 				,strItemNumber = @strItemNumber
 		ROLLBACK TRANSACTION
 					

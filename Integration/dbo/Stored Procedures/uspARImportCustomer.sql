@@ -645,18 +645,18 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			
 					SET @ContactEntityId = SCOPE_IDENTITY()
 
-					DECLARE @AccountStatusId INT
-					SET @AccountStatusId = NULL
-
-					SELECT @AccountStatusId = intAccountStatusId FROM tblARAccountStatus
-						WHERE strAccountStatusCode COLLATE Latin1_General_CI_AS = (SELECT agcus_acct_stat_x_1 COLLATE Latin1_General_CI_AS
-							FROM agcusmst WHERE agcus_key = @originCustomer)
-
-					IF @AccountStatusId IS NOT NULL
-					BEGIN			
-						INSERT INTO tblARCustomerAccountStatus (intEntityCustomerId, intAccountStatusId, intConcurrencyId)
-						SELECT @EntityId, @AccountStatusId, 1
-					END
+					INSERT INTO tblARCustomerAccountStatus
+					(intEntityCustomerId, intAccountStatusId, intConcurrencyId)
+					SELECT c.intEntityId, s.intAccountStatusId, 1
+					FROM (SELECT agcus_key, x, y	FROM agcusmst
+					UNPIVOT
+					(x FOR y IN (agcus_acct_stat_x_1, agcus_acct_stat_x_2, agcus_acct_stat_x_3, agcus_acct_stat_x_4
+					, agcus_acct_stat_x_5, agcus_acct_stat_x_6, agcus_acct_stat_x_7, agcus_acct_stat_x_8, agcus_acct_stat_x_9
+					, agcus_acct_stat_x_10)
+					) unpiv) AS P
+					JOIN tblARCustomer c ON P.agcus_key COLLATE Latin1_General_CI_AS = c.strCustomerNumber
+					join tblARAccountStatus s ON P.x COLLATE Latin1_General_CI_AS = s.strAccountStatusCode
+					WHERE agcus_key = @originCustomer
 					
 					if @strPhone <> ''''
 						INSERT INTO tblEMEntityPhoneNumber(intEntityId,intCountryId, strPhone) VALUES (@ContactEntityId,NULL, @strPhone)
@@ -1440,18 +1440,18 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 
 					SET @ContactEntityId = SCOPE_IDENTITY()
 
-					DECLARE @AccountStatusId INT
-					SET @AccountStatusId = NULL
-
-					SELECT @AccountStatusId = intAccountStatusId FROM tblARAccountStatus
-						WHERE strAccountStatusCode COLLATE Latin1_General_CI_AS = (SELECT ptcus_acct_stat_x_1 COLLATE Latin1_General_CI_AS
-							FROM ptcusmst WHERE ptcus_cus_no = @originCustomer)
-
-					IF @AccountStatusId IS NOT NULL
-					BEGIN			
-						INSERT INTO tblARCustomerAccountStatus (intEntityCustomerId, intAccountStatusId, intConcurrencyId)
-						SELECT @EntityId, @AccountStatusId, 1
-					END
+					INSERT INTO tblARCustomerAccountStatus
+					(intEntityCustomerId, intAccountStatusId, intConcurrencyId)
+					SELECT c.intEntityId, s.intAccountStatusId, 1
+					FROM (SELECT ptcus_cus_no, x, y	FROM ptcusmst
+					UNPIVOT
+					(x FOR y IN (ptcus_acct_stat_x_1, ptcus_acct_stat_x_2, ptcus_acct_stat_x_3, ptcus_acct_stat_x_4
+					, ptcus_acct_stat_x_5, ptcus_acct_stat_x_6, ptcus_acct_stat_x_7, ptcus_acct_stat_x_8, ptcus_acct_stat_x_9
+					, ptcus_acct_stat_x_10)
+					) unpiv) AS P
+					JOIN tblARCustomer c ON P.ptcus_cus_no COLLATE Latin1_General_CI_AS = c.strCustomerNumber
+					join tblARAccountStatus s ON P.x COLLATE Latin1_General_CI_AS = s.strAccountStatusCode
+					WHERE ptcus_cus_no = @originCustomer
 
 					if @strPhone <> ''''
 						INSERT INTO tblEMEntityPhoneNumber(intEntityId,intCountryId, strPhone) VALUES (@ContactEntityId,NULL, @strPhone)

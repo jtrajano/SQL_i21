@@ -112,7 +112,7 @@ SET @post = ISNULL(@post, 0)
 SET @recap = ISNULL(@recap, 0)
 SET @accrueLicense = ISNULL(@accrueLicense, 0)
 
-IF(@batchId IS NULL)
+IF(LEN(RTRIM(LTRIM(ISNULL(@batchId,'')))) = 0)
 	EXEC dbo.uspSMGetStartingNumber 3, @batchId OUT
 
 SET @batchIdUsed = @batchId
@@ -566,8 +566,8 @@ IF(@exclude IS NOT NULL)
 	END
 
 --Get Provisional Invoices
-IF ISNULL(@HasImpactForProvisional, 0) = 1
-	BEGIN
+--IF ISNULL(@HasImpactForProvisional, 0) = 1
+--	BEGIN
 		INSERT INTO @PostProvisionalData(
 			 [intInvoiceId]
 			,[strInvoiceNumber]
@@ -668,7 +668,7 @@ IF ISNULL(@HasImpactForProvisional, 0) = 1
 		WHERE strType = 'Provisional'
 		  AND ysnPosted = 1
 		  AND intInvoiceId IN (SELECT intOriginalInvoiceId FROM @PostInvoiceData WHERE ISNULL(intOriginalInvoiceId, 0) <> 0)
-	END
+	--END
 
 --------------------------------------------------------------------------------------------  
 -- Validations  
@@ -735,7 +735,7 @@ IF @post = 1 --delete this part once TM-2455 is done		-start
 								@ResultLog,
 								A.strTransactionType,
 								A.strInvoiceNumber,
-								@batchId,
+								@batchIdUsed,
 								A.intInvoiceId
 							FROM 
 								(SELECT intInvoiceId, strInvoiceNumber, strTransactionType FROM tblARInvoice WITH (NOLOCK)) A 
@@ -768,7 +768,7 @@ IF @post = 1 --delete this part once TM-2455 is done		-start
 					ELSE
 						SAVE TRANSACTION @CurrentSavepoint			
 								
-					EXEC dbo.uspARInsertPostResult @batchId, 'Invoice', @ErrorMerssage, @param
+					EXEC dbo.uspARInsertPostResult @batchIdUsed, 'Invoice', @ErrorMerssage, @param
 					
 					IF @CurrentTranCount = 0
 						BEGIN
@@ -1007,7 +1007,7 @@ BEGIN CATCH
 			ELSE
 				SAVE TRANSACTION @CurrentSavepoint
 									
-			EXEC dbo.uspARInsertPostResult @batchId, 'Invoice', @ErrorMerssage, @param
+			EXEC dbo.uspARInsertPostResult @batchIdUsed, 'Invoice', @ErrorMerssage, @param
 
 			IF @CurrentTranCount = 0
 				BEGIN
@@ -1427,7 +1427,7 @@ BEGIN TRY
 								ELSE
 									SAVE TRANSACTION @CurrentSavepoint
 									
-								EXEC dbo.uspARInsertPostResult @batchId, 'Invoice', @ErrorMerssage, @param
+								EXEC dbo.uspARInsertPostResult @batchIdUsed, 'Invoice', @ErrorMerssage, @param
 
 								IF @CurrentTranCount = 0
 									BEGIN
@@ -1476,7 +1476,7 @@ BEGIN CATCH
 			ELSE
 				SAVE TRANSACTION @CurrentSavepoint
 															
-			EXEC dbo.uspARInsertPostResult @batchId, 'Invoice', @ErrorMerssage, @param
+			EXEC dbo.uspARInsertPostResult @batchIdUsed, 'Invoice', @ErrorMerssage, @param
 
 			IF @CurrentTranCount = 0
 				BEGIN
@@ -1566,7 +1566,7 @@ IF @post = 1
 			EXEC	dbo.uspARGenerateEntriesForAccrual  
 						 @Invoices					= @Accruals
 						,@DeferredRevenueAccountId	= @DeferredRevenueAccountId
-						,@BatchId					= @batchId
+						,@BatchId					= @batchIdUsed
 						,@Code						= @CODE
 						,@UserId					= @userId
 						,@UserEntityId				= @UserEntityID
@@ -1582,8 +1582,8 @@ IF @post = 1
 		
 		BEGIN TRY
 			-- Call the post routine 
-			IF ISNULL(@HasImpactForProvisional, 0) = 1
-				BEGIN
+			--IF ISNULL(@HasImpactForProvisional, 0) = 1
+			--	BEGIN
 					INSERT INTO @GLEntries (
 						 [dtmDate]
 						,[strBatchId]
@@ -1619,7 +1619,7 @@ IF @post = 1
 						,[strRateType]
 					)
 					SELECT dtmDate						= CAST(ISNULL(P.dtmPostDate, P.dtmDate) AS DATE)
-						 , strBatchID					= @batchId
+						 , strBatchID					= @batchIdUsed
 						 , intAccountId					= GL.intAccountId
 						 , dblDebit						= GL.dblCredit
 						 , dblCredit					= GL.dblDebit
@@ -1689,7 +1689,7 @@ IF @post = 1
 					) GL ON PROV.intInvoiceId = GL.intTransactionId
 						AND PROV.strInvoiceNumber = GL.strTransactionId
 					ORDER BY GL.intGLDetailId
-				END
+				--END
 						
 			INSERT INTO @GLEntries (
 				 [dtmDate]
@@ -1728,7 +1728,7 @@ IF @post = 1
 			--DEBIT Total
 			SELECT
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
-				,strBatchID					= @batchId
+				,strBatchID					= @batchIdUsed
 				,intAccountId				= A.intAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN A.dblBaseInvoiceTotal - ISNULL(CM.[dblBaseAppliedCMAmount], @ZeroDecimal) ELSE 0 END
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE A.dblBaseInvoiceTotal - ISNULL(CM.[dblBaseAppliedCMAmount], @ZeroDecimal) END
@@ -1853,7 +1853,7 @@ IF @post = 1
 			--DEBIT Prepaids
 			SELECT
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
-				,strBatchID					= @batchId
+				,strBatchID					= @batchIdUsed
 				,intAccountId				= ARI1.intAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  ARPAC.[dblBaseAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  @ZeroDecimal ELSE ARPAC.[dblBaseAppliedInvoiceDetailAmount] END
@@ -1906,7 +1906,7 @@ IF @post = 1
 			--Debit Payment
 			SELECT
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
-				,strBatchID					= @batchId
+				,strBatchID					= @batchIdUsed
 				,intAccountId				= SMCL.intUndepositedFundsId 
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  A.dblBasePayment - ISNULL(CM.[dblBaseAppliedCMAmount], @ZeroDecimal) ELSE 0 END
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  0 ELSE A.dblBasePayment - ISNULL(CM.[dblBaseAppliedCMAmount], @ZeroDecimal) END
@@ -1973,7 +1973,7 @@ IF @post = 1
 			--Credit Prepaids
 			SELECT
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
-				,strBatchID					= @batchId
+				,strBatchID					= @batchIdUsed
 				,intAccountId				= ARI1.intAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  @ZeroDecimal ELSE ARPAC.[dblBaseAppliedInvoiceDetailAmount] END
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  ARPAC.[dblBaseAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
@@ -2024,7 +2024,7 @@ IF @post = 1
 			UNION ALL 
 			SELECT
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
-				,strBatchID					= @batchId
+				,strBatchID					= @batchIdUsed
 				,intAccountId				= B.intAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') OR (A.strTransactionType = 'Debit Memo' AND A.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN 0 ELSE ISNULL(B.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())  END
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') OR (A.strTransactionType = 'Debit Memo' AND A.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN ISNULL(B.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE 0  END
@@ -2088,7 +2088,7 @@ IF @post = 1
 			UNION ALL 
 			SELECT
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
-				,strBatchID					= @batchId
+				,strBatchID					= @batchIdUsed
 				,intAccountId				= B.intLicenseAccountId 
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 
 																									ELSE (CASE WHEN B.strMaintenanceType = 'License Only'
@@ -2226,7 +2226,7 @@ IF @post = 1
 			UNION ALL 
 			SELECT
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
-				,strBatchID					= @batchId
+				,strBatchID					= @batchIdUsed
 				,intAccountId				= @DeferredRevenueAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (CASE WHEN B.strMaintenanceType = 'License Only'
 																												THEN
@@ -2364,7 +2364,7 @@ IF @post = 1
 			UNION ALL 
 			SELECT
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
-				,strBatchID					= @batchId
+				,strBatchID					= @batchIdUsed
 				,intAccountId				= B.intMaintenanceAccountId 
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (CASE WHEN B.strMaintenanceType IN ('Maintenance Only', 'SaaS')  THEN 
 																													ISNULL(B.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())
@@ -2492,7 +2492,7 @@ IF @post = 1
 			UNION ALL 
 			SELECT			
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
-				,strBatchID					= @batchId
+				,strBatchID					= @batchIdUsed
 				,intAccountId				= B.intSalesAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL(B.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL(B.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE  0 END
@@ -2569,7 +2569,7 @@ IF @post = 1
 			UNION ALL 
 			SELECT			
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
-				,strBatchID					= @batchId
+				,strBatchID					= @batchIdUsed
 				,intAccountId				= B.intSalesAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE ISNULL(B.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(B.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE  0 END
@@ -2641,7 +2641,7 @@ IF @post = 1
 			UNION ALL 
 			SELECT
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
-				,strBatchID					= @batchId
+				,strBatchID					= @batchIdUsed
 				,intAccountId				= L.intFreightIncome
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE A.dblBaseShipping END
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN A.dblBaseShipping ELSE 0  END
@@ -2691,7 +2691,7 @@ IF @post = 1
 			--CREDIT Tax
 			SELECT			
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
-				,strBatchID					= @batchId
+				,strBatchID					= @batchIdUsed
 				,intAccountId				= ISNULL([dbo].[fnGetGLAccountIdFromProfitCenter](ISNULL(DT.intSalesTaxAccountId,TC.intSalesTaxAccountId), SMCL.intProfitCenter),ISNULL(DT.intSalesTaxAccountId,TC.intSalesTaxAccountId))
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 
 													CASE WHEN DT.dblBaseAdjustedTax < 0 THEN ABS(DT.dblBaseAdjustedTax) ELSE 0 END 
@@ -2785,7 +2785,7 @@ IF @post = 1
 			--DEBIT Discount
 			SELECT			
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
-				,strBatchID					= @batchId
+				,strBatchID					= @batchIdUsed
 				,intAccountId				= ISNULL(IST.intDiscountAccountId, @DiscountAccountId)
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN [dbo].fnRoundBanker(((D.dblDiscount/100.00) * [dbo].fnRoundBanker((D.dblQtyShipped * D.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE 0 END
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE [dbo].fnRoundBanker(((D.dblDiscount/100.00) * [dbo].fnRoundBanker((D.dblQtyShipped * D.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END
@@ -2848,7 +2848,7 @@ IF @post = 1
 			----DEBIT COGS - Inbound Shipment
 			--SELECT			
 			--	 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
-			--	,strBatchID					= @batchId
+			--	,strBatchID					= @batchIdUsed
 			--	,intAccountId				= IST.intCOGSAccountId
 			--	,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) ELSE 0 END
 			--	,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) END
@@ -2935,7 +2935,7 @@ IF @post = 1
 			----CREDIT Inventory In-Transit - Inbound Shipment
 			--SELECT			
 			--	 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
-			--	,strBatchID					= @batchId
+			--	,strBatchID					= @batchIdUsed
 			--	,intAccountId				= IST.intInventoryInTransitAccountId
 			--	,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) END
 			--	,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) ELSE 0 END
@@ -3127,12 +3127,12 @@ IF @post = 1
 				)
 				--EXEC	dbo.uspICPostCosting  
 				--		@ItemsForPost  
-				--		,@batchId  
+				--		,@batchIdUsed  
 				--		,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 				--		,@UserEntityID
 				EXEC	dbo.uspARBatchPostCosting  
 						@ItemsForPost  
-						,@batchId  
+						,@batchIdUsed  
 						,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 						,@UserEntityID
 						,DEFAULT  -- Default is NULL. Used to override the GL description. 
@@ -3253,7 +3253,7 @@ IF @post = 1
 				)
 				EXEC	dbo.uspICPostInTransitCosting  
 						@InTransitItems  
-						,@batchId  
+						,@batchIdUsed  
 						,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 						,@UserEntityID
 
@@ -3368,7 +3368,7 @@ IF @post = 1
 				)
 				EXEC	dbo.uspICPostStorage  
 						@StorageItemsForPost  
-						,@batchId  		
+						,@batchIdUsed  		
 						,@UserEntityID
 
 				DELETE FROM ICIT
@@ -3447,33 +3447,33 @@ IF @post = 0
 				,intConcurrencyId
 			)
 			SELECT	
-				 GLD.dtmDate 
-				,@batchId
-				,GLD.intAccountId
+				 dtmDate						= GLD.dtmDate 
+				,strBatchId						= @batchIdUsed
+				,intAccountId					= GLD.intAccountId
 				,dblDebit						= GLD.dblCredit
 				,dblCredit						= GLD.dblDebit
 				,dblDebitUnit					= GLD.dblCreditUnit
 				,dblCreditUnit					= GLD.dblDebitUnit
 				,dblDebitForeign				= GLD.dblCreditForeign
 				,dblCreditForeign				= GLD.dblDebitForeign				
-				,GLD.strDescription
-				,GLD.strCode
-				,GLD.strReference
-				,GLD.intCurrencyId
-				,GLD.dblExchangeRate
-				,dtmDateEntered					= GETDATE()
-				,GLD.dtmTransactionDate
-				,GLD.strJournalLineDescription
-				,GLD.intJournalLineNo 
+				,strDescription					= GLD.strDescription
+				,strCode						= GLD.strCode
+				,strReference					= GLD.strReference
+				,intCurrencyId					= GLD.intCurrencyId
+				,dblExchangeRate				= GLD.dblExchangeRate
+				,dtmDateEntered					= @PostDate
+				,dtmTransactionDate				= GLD.dtmTransactionDate
+				,strJournalLineDescription		= GLD.strJournalLineDescription
+				,intJournalLineNo				= GLD.intJournalLineNo 
 				,ysnIsUnposted					= 1
 				,intUserId						= @userId
 				,intEntityId					= @UserEntityID
-				,GLD.strTransactionId
-				,GLD.intTransactionId
-				,GLD.strTransactionType
-				,GLD.strTransactionForm
-				,GLD.strModuleName
-				,GLD.intConcurrencyId
+				,strTransactionId				= GLD.strTransactionId
+				,intTransactionId				= GLD.intTransactionId
+				,strTransactionType				= GLD.strTransactionType
+				,strTransactionForm				= GLD.strTransactionForm
+				,strModuleName					= GLD.strModuleName
+				,intConcurrencyId				= GLD.intConcurrencyId
 			FROM
 				(SELECT intInvoiceId, strInvoiceNumber FROM @PostInvoiceData) PID
 			INNER JOIN
@@ -3486,7 +3486,9 @@ IF @post = 0
 			WHERE
 				GLD.ysnIsUnposted = 0				
 			ORDER BY
-				GLD.intGLDetailId		
+				GLD.intGLDetailId
+				
+			EXEC dbo.uspGLBookEntries @GLEntries, @post	
 						
 		END TRY
 		BEGIN CATCH
@@ -3494,58 +3496,59 @@ IF @post = 0
 			GOTO Do_Rollback
 		END CATCH
 		
-		BEGIN TRY			
-			DECLARE @UnPostInvoiceData TABLE  (
-				intInvoiceId int PRIMARY KEY,
-				strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
-				UNIQUE (intInvoiceId)
-			);
+		--BEGIN TRY			
+		--	DECLARE @UnPostInvoiceData TABLE  (
+		--		intInvoiceId int PRIMARY KEY,
+		--		strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+		--		UNIQUE (intInvoiceId)
+		--	);
 			
-			INSERT INTO @UnPostInvoiceData(intInvoiceId, strTransactionId)
-			SELECT DISTINCT
-				 PID.intInvoiceId
-				,PID.strInvoiceNumber
-			FROM
-				@PostInvoiceData PID				
-			INNER JOIN
-				(SELECT intInvoiceId FROM dbo.tblARInvoice WITH (NOLOCK) ) ARI
-					ON PID.intInvoiceId = ARI.intInvoiceId
+		--	INSERT INTO @UnPostInvoiceData(intInvoiceId, strTransactionId)
+		--	SELECT DISTINCT
+		--		 PID.intInvoiceId
+		--		,PID.strInvoiceNumber
+		--	FROM
+		--		@PostInvoiceData PID				
+		--	INNER JOIN
+		--		(SELECT intInvoiceId FROM dbo.tblARInvoice WITH (NOLOCK) ) ARI
+		--			ON PID.intInvoiceId = ARI.intInvoiceId
 
-			IF ISNULL(@HasImpactForProvisional, 0) = 1
-				BEGIN
-					INSERT INTO @UnPostInvoiceData(intInvoiceId, strTransactionId)
-					SELECT DISTINCT
-						 PID.intInvoiceId
-						,PID.strInvoiceNumber
-					FROM
-						@PostProvisionalData PID				
-					INNER JOIN
-						(SELECT intInvoiceId FROM dbo.tblARInvoice WITH (NOLOCK) ) ARI
-							ON PID.intInvoiceId = ARI.intInvoiceId
-				END
+		--	IF ISNULL(@HasImpactForProvisional, 0) = 1
+		--		BEGIN
+		--			INSERT INTO @UnPostInvoiceData(intInvoiceId, strTransactionId)
+		--			SELECT DISTINCT
+		--				 PID.intInvoiceId
+		--				,PID.strInvoiceNumber
+		--			FROM
+		--				@PostProvisionalData PID				
+		--			INNER JOIN
+		--				(SELECT intInvoiceId FROM dbo.tblARInvoice WITH (NOLOCK) ) ARI
+		--					ON PID.intInvoiceId = ARI.intInvoiceId
+		--		END
 
-			WHILE EXISTS(SELECT TOP 1 NULL FROM @UnPostInvoiceData ORDER BY intInvoiceId)
-				BEGIN
+		--	WHILE EXISTS(SELECT TOP 1 NULL FROM @UnPostInvoiceData ORDER BY intInvoiceId)
+		--		BEGIN
 				
-					DECLARE @intTransactionId INT
-							,@strTransactionId NVARCHAR(80);
+		--			DECLARE @intTransactionId INT
+		--					,@strTransactionId NVARCHAR(80);
 					
-					SELECT TOP 1 @intTransactionId = intInvoiceId, @strTransactionId = strTransactionId FROM @UnPostInvoiceData ORDER BY intInvoiceId					
+		--			SELECT TOP 1 @intTransactionId = intInvoiceId, @strTransactionId = strTransactionId FROM @UnPostInvoiceData ORDER BY intInvoiceId					
 
-					EXEC	dbo.uspGLInsertReverseGLEntry
-								@strTransactionId	= @strTransactionId
-								,@intEntityId		= @UserEntityID
-								,@dtmDateReverse	= NULL
+		--			EXEC	dbo.uspGLInsertReverseGLEntry
+		--						@strTransactionId	= @strTransactionId
+		--						,@intEntityId		= @UserEntityID
+		--						,@dtmDateReverse	= @PostDate
+		--						,@strBatchId		= @batchIdUsed
 										
-					DELETE FROM @UnPostInvoiceData WHERE intInvoiceId = @intTransactionId AND strTransactionId = @strTransactionId 
+		--			DELETE FROM @UnPostInvoiceData WHERE intInvoiceId = @intTransactionId AND strTransactionId = @strTransactionId 
 												
-				END							 
+		--		END							 
 																
-		END TRY
-		BEGIN CATCH
-			SELECT @ErrorMerssage = ERROR_MESSAGE()										
-			GOTO Do_Rollback
-		END CATCH				  
+		--END TRY
+		--BEGIN CATCH
+		--	SELECT @ErrorMerssage = ERROR_MESSAGE()										
+		--	GOTO Do_Rollback
+		--END CATCH				  
 		
 		BEGIN TRY			
 			DECLARE @UnPostICInvoiceData TABLE  (
@@ -3553,6 +3556,9 @@ IF @post = 0
 				strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 				UNIQUE (intInvoiceId)
 			);
+
+			DECLARE @intTransactionId INT
+					,@strTransactionId NVARCHAR(80);
 			
 			INSERT INTO @UnPostICInvoiceData(intInvoiceId, strTransactionId)
 			SELECT DISTINCT
@@ -3597,7 +3603,7 @@ IF @post = 0
 					EXEC	dbo.uspICUnpostCosting
 								@intTransactionIdIC
 								,@strTransactionIdIC
-								,@batchId
+								,@batchIdUsed
 								,@UserEntityID
 								,@recap 
 				END
@@ -3608,7 +3614,7 @@ IF @post = 0
 					EXEC	dbo.uspICUnpostStorage
 							@intTransactionId
 							,@strTransactionId
-							,@batchId
+							,@batchIdUsed
 							,@UserEntityID
 							,@recap
 				END					
@@ -3726,7 +3732,7 @@ IF @recap = 1
 					ELSE
 						SAVE TRANSACTION @CurrentSavepoint
 
-					EXEC dbo.uspARInsertPostResult @batchId, 'Invoice', @ErrorMerssage, @param		
+					EXEC dbo.uspARInsertPostResult @batchIdUsed, 'Invoice', @ErrorMerssage, @param		
 				IF @CurrentTranCount = 0
 					BEGIN
 						IF (XACT_STATE()) = -1
@@ -3822,7 +3828,7 @@ IF @recap = 0
 						@PostSuccessfulMsg
 						,PID.strTransactionType
 						,PID.strInvoiceNumber
-						,@batchId
+						,@batchIdUsed
 						,PID.intInvoiceId
 					FROM
 						@PostInvoiceData PID					
@@ -3925,7 +3931,7 @@ IF @recap = 0
 						@PostSuccessfulMsg
 						,PID.strTransactionType
 						,PID.strInvoiceNumber
-						,@batchId
+						,@batchIdUsed
 						,PID.intInvoiceId
 					FROM
 						@PostInvoiceData PID
@@ -4158,7 +4164,7 @@ Do_Rollback:
 			ELSE
 				SAVE TRANSACTION @CurrentSavepoint
 
-			EXEC uspARInsertPostResult @batchId, 'Invoice', @ErrorMerssage, @param								
+			EXEC uspARInsertPostResult @batchIdUsed, 'Invoice', @ErrorMerssage, @param								
 
 			IF @CurrentTranCount = 0
 				BEGIN

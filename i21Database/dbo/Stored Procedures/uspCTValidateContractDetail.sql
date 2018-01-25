@@ -55,7 +55,8 @@ BEGIN TRY
 			@intItemLocationId			INT, 
 			@intItemStockUOMId			INT, 
 			@dblUnitOnHand				NUMERIC(18,6), 
-			@strUnitMeasure				NVARCHAR(50)
+			@strUnitMeasure				NVARCHAR(50),
+			@dblAllocatedQty			NUMERIC(18,6)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @XML 
 	
@@ -156,7 +157,8 @@ BEGIN TRY
 				@intNewProducerId		=	ISNULL(@intNewProducerId,CD.intProducerId),
 				@ysnSlice				=	ISNULL(@ysnSlice,CD.ysnSlice),
 				@intNewShipperId		=	ISNULL(@intNewShipperId,CD.intShipperId),
-				@intNewShippingLineId	=	ISNULL(@intNewShippingLineId,CD.intShippingLineId)
+				@intNewShippingLineId	=	ISNULL(@intNewShippingLineId,CD.intShippingLineId),
+				@dblAllocatedQty		=	CD.dblAllocatedQty
 
 		FROM	tblCTContractDetail	CD
 		JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId	LEFT
@@ -324,6 +326,14 @@ BEGIN TRY
 		BEGIN
 			SELECT	@strNumber = strContractStatus FROM tblCTContractStatus WHERE intContractStatusId	=	@intNewStatusId
 			SET @ErrMsg = 'Cannot change status of Sequence '+LTRIM(@intContractSeq)+' to '+@strNumber+' as loads are associated with the sequence.'
+			RAISERROR(@ErrMsg,16,1) 
+		END
+
+		IF @intNewStatusId IN (6) AND @intOldStatusId NOT IN (6) AND ISNULL(@dblAllocatedQty,0) > 0 AND
+		@dblAllocatedQty > @dblNewQuantity - @dblNewBalance
+		BEGIN
+			SELECT	@strNumber = strContractStatus FROM tblCTContractStatus WHERE intContractStatusId	=	@intNewStatusId
+			SET @ErrMsg = 'Cannot change status of Sequence '+LTRIM(@intContractSeq)+' to '+@strNumber+' as allocation of '+dbo.fnRemoveTrailingZeroes(@dblAllocatedQty)+' quantity is available for this sequence.'
 			RAISERROR(@ErrMsg,16,1) 
 		END
 

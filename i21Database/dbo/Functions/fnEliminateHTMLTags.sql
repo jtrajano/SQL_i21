@@ -11,7 +11,9 @@ BEGIN
     DECLARE @intStart	INT
 		  , @intEnd		INT
 		  , @intLength	INT
-	
+	--added the </p> replace, what it does is that p is a single line and the redactor treat this one as a one liner then the succedding should be in a new line?
+    --MDG    
+    set @strHTMLText = REPLACE(@strHTMLText, '</p>',  CHAR(13) + CHAR(10))
     SET @intStart = CHARINDEX('<', @strHTMLText)
     SET @intEnd = CHARINDEX('>', @strHTMLText, CHARINDEX('<', @strHTMLText))
     SET @intLength = (@intEnd - @intStart) + 1
@@ -23,7 +25,7 @@ BEGIN
         SET @intLength = (@intEnd - @intStart) + 1
     END
     
-    set @strHTMLText = REPLACE(@strHTMLText, '&nbsp;', CHAR(13) + CHAR(10))
+    set @strHTMLText = REPLACE(@strHTMLText, '&nbsp;', '')
 
     RETURN LTRIM(RTRIM(@strHTMLText))
 END
