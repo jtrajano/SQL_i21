@@ -31,7 +31,8 @@ BEGIN
 	RETURN
 END
 
-SET @UserEntityId = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @UserId),@UserId)
+--SET @UserEntityId = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @UserId),@UserId)
+SET @UserEntityId = @UserId
 
 
 SELECT 

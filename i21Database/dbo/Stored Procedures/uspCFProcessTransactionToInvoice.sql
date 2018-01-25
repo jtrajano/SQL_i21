@@ -18,7 +18,8 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @UserEntityId INT
-SET @UserEntityId = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @UserId),@UserId)
+--SET @UserEntityId = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @UserId),@UserId)
+SET @UserEntityId = @UserId
 
 DECLARE @LogId INT
 
