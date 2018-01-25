@@ -36,15 +36,15 @@ BEGIN TRY
 	WHERE
 		tblARPrepaidAndCredit.[intInvoiceId] = @InvoiceId
 		
-	UPDATE
+	/*UPDATE
 		tblARInvoice
 	SET
 		 [dblPayment] = @ZeroDecimal
 		,[dblBasePayment] = @ZeroDecimal
 	WHERE
 		[intInvoiceId] = @InvoiceId 
-		
-	EXEC [dbo].uspARReComputeInvoiceAmounts @InvoiceId = @InvoiceId
+	*/	
+	--EXEC [dbo].uspARReComputeInvoiceAmounts @InvoiceId = @InvoiceId
 END TRY
 BEGIN CATCH	
 	SET @ErrorSeverity = ERROR_SEVERITY()

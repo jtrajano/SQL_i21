@@ -266,7 +266,7 @@ SET @batchIdUsed = @batchId
 					,[intDetailId]						= NULL
 				 FROM @ARReceivablePostData
 
-				EXEC [dbo].[uspARReComputePaymentAmounts] @PaymentIds = @PaymentIds
+				--EXEC [dbo].[uspARReComputePaymentAmounts] @PaymentIds = @PaymentIds
 
 				--Undeposited Funds Account
 				INSERT INTO 
