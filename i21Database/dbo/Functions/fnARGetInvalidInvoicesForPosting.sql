@@ -18,7 +18,10 @@ AS
 BEGIN
 
 DECLARE @ZeroDecimal DECIMAL(18,6)
-SET @ZeroDecimal = 0.000000	
+		,@ImpactForProvisional BIT
+
+SET @ZeroDecimal = 0.000000
+SELECT TOP 1 @ImpactForProvisional = ISNULL(ysnImpactForProvisional,0) FROM tblARCompanyPreference
 
 IF(ISNULL(@Post,0)) = 1
 	BEGIN
@@ -486,6 +489,23 @@ IF(ISNULL(@Post,0)) = 1
 		WHERE
 			ISNULL(I.[intPeriodsToAccrue],0) > 1
 			AND ISNULL(ICI.[strType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
+
+
+		UNION
+		--Provisional Invoice Posting
+		SELECT
+			 [intInvoiceId]			= I.[intInvoiceId]
+			,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+			,[strTransactionType]	= I.[strTransactionType]
+			,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+			,[intItemId]			= I.[intItemId]
+			,[strBatchId]			= I.[strBatchId]
+			,[strPostingError]		= 'Posting Provisional Invoice is disabled in Company Configuration.'
+		FROM 
+			@Invoices I					
+		WHERE
+			I.[strType] = 'Provisional'
+			AND @ImpactForProvisional = 0
 
 
 		UNION
