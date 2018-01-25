@@ -342,15 +342,6 @@ BEGIN
 			AND ((tax.intTypeTaxStateId = 41 AND tax.strVal2 <> 'None')
 				OR (tax.intTypeTaxStateId = 45 AND tax.strVal3 <> 'None (None)'))
 			GROUP BY st.strCode, tax.intTypeTaxStateId, strEmployerStateTaxID, tax.strVal2, tax.strVal3) MUNITAX OUTER APPLY
-		(SELECT
-			intRank = DENSE_RANK() OVER (PARTITION BY PD.intEntityEmployeeId, YEAR(PD.dtmPayDate) ORDER BY TD.strW2Code DESC)
-			,PD.intEntityEmployeeId
-			,intYear = YEAR(PD.dtmPayDate)
-			,TD.strW2Code
-			,dblTotal = SUM(PD.dblTotal)
-			FROM vyuPRPaycheckDeduction PD INNER JOIN tblPRTypeDeduction TD 
-				ON PD.intTypeDeductionId = TD.intTypeDeductionId AND TD.strW2Code IS NOT NULL
-			GROUP BY PD.intEntityEmployeeId, YEAR(PD.dtmPayDate), TD.strW2Code) BOX12CODES OUTER APPLY
 		(SELECT intEmployees = COUNT(DISTINCT intEntityEmployeeId),
 				dblGrossSum = SUM(dblGross) 
 		FROM tblPRPaycheck 
