@@ -194,6 +194,9 @@ BEGIN
 		  ,@strPhone AS strCompanyPhone
 		  ,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCityStateZip
 		  ,HEM.strName AS strShipVia
+		  ,dbo.fnSMGetCompanyLogo('FullHeaderLogo') AS blbFullHeaderLogo
+		  ,dbo.fnSMGetCompanyLogo('FullFooterLogo') AS blbFullFooterLogo
+		  ,CASE WHEN CP.ysnFullHeaderLogo = 1 THEN 'true' else 'false' END ysnFullHeaderLogo		  
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
@@ -201,5 +204,6 @@ BEGIN
 	LEFT JOIN tblEMEntity EM ON EM.intEntityId = LD.intCustomerEntityId
 	LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = LD.intCustomerEntityLocationId
 	LEFT JOIN tblEMEntity HEM ON HEM.intEntityId = LW.intHaulerEntityId
+	CROSS APPLY tblLGCompanyPreference CP
 	WHERE strLoadNumber = @strLoadNumber
 END
