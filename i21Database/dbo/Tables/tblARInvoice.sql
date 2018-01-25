@@ -69,7 +69,7 @@
 	[ysnImpactInventory]			BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnImpactInventory] DEFAULT ((1)),		
 	[ysnImportedFromOrigin]			BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnImportedFromOrigin] DEFAULT ((0)),		
 	[ysnImportedAsPosted]			BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnImportedAsPosted] DEFAULT ((0)),		
-	[ysnExported]					BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnExported] DEFAULT ((0)),
+	[ysnExported]					BIT												NULL,	
 	[ysnCancelled]					BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnCancelled] DEFAULT ((0)),	
 	[intPaymentId]					INT												NULL,
 	[intSplitId]					INT												NULL,
