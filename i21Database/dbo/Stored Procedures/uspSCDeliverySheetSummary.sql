@@ -196,7 +196,8 @@ BEGIN
 				INSERT INTO tblSCDeliverySheetHistory (intEntityId, dblQuantity, dblSplitPercent, intStorageScheduleTypeId, intDeliverySheetId, intDeliverySheetSplitId, dtmDeliverySheetHistoryDate, intConcurrencyId)
 				VALUES (@intEntityId, ISNULL(@tmpUnits,0), @SplitAverage, @intStorageScheduleTypeId, @intDeliverySheetId, @intDeliverySheetSplitId, GETDATE(), 1)
 			ELSE
-				UPDATE tblSCDeliverySheetHistory set intStorageScheduleTypeId = @intStorageScheduleTypeId, dblQuantity = ISNULL(@tmpUnits,0) 
+				UPDATE tblSCDeliverySheetHistory set intStorageScheduleTypeId = @intStorageScheduleTypeId
+				, dblQuantity = ISNULL(@tmpUnits,0) , dblSplitPercent = ISNULL(@SplitAverage,0) 
 				WHERE intEntityId = @intEntityId AND intDeliverySheetId = @intDeliverySheetId
 
 		SET @remainingUnits -= @tmpUnits;
