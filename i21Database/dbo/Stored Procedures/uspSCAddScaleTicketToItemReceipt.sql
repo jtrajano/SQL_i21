@@ -348,13 +348,10 @@ WHERE SCTicket.intTicketId = @intTicketId
 		,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = RE.intContractDetailId)
 		,[intContractDetailId]				= RE.intContractDetailId
 		,[ysnAccrue]						= CASE 
-												WHEN @ysnDeductFeesCusVen = 1 THEN 1
-												WHEN @ysnDeductFeesCusVen = 0 THEN 0
-											END
-		,[ysnPrice]							= CASE 
 												WHEN @ysnDeductFeesCusVen = 1 THEN 0
-												WHEN @ysnDeductFeesCusVen = 0 THEN 1
+                                                WHEN @ysnDeductFeesCusVen = 0 THEN 1
 											END
+		,[ysnPrice]							= @ysnDeductFeesCusVen
 		,[strChargesLink]					= RE.strChargesLink
 	FROM @ReceiptStagingTable RE
 	INNER JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
@@ -446,7 +443,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 																		WHEN IC.strCostMethod = 'Amount' THEN 
 																		CASE
 																			WHEN RE.ysnIsStorage = 1 THEN 0
-																			WHEN RE.ysnIsStorage = 0 THEN ROUND (LoadCost.dblRate  * dbo.fnCalculateQtyBetweenUOM(LoadCost.intItemUOMId, dbo.fnGetMatchingItemUOMId(RE.intItemId, LoadCost.intItemUOMId), SC.dblGrossUnits), 2)
+																			WHEN RE.ysnIsStorage = 0 THEN LoadCost.dblRate
+																			--ROUND (LoadCost.dblRate  * dbo.fnCalculateQtyBetweenUOM(LoadCost.intItemUOMId, dbo.fnGetMatchingItemUOMId(RE.intItemId, LoadCost.intItemUOMId), SC.dblGrossUnits), 2)
 																		END
 																	END						
 								,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = @intLoadContractId)
@@ -580,7 +578,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 																		WHEN IC.strCostMethod = 'Amount' THEN 
 																		CASE
 																			WHEN RE.ysnIsStorage = 1 THEN 0
-																			WHEN RE.ysnIsStorage = 0 THEN ROUND (ContractCost.dblRate * dbo.fnCalculateQtyBetweenUOM(ContractCost.intItemUOMId, dbo.fnGetMatchingItemUOMId(RE.intItemId, ContractCost.intItemUOMId), SC.dblGrossUnits), 2)
+																			WHEN RE.ysnIsStorage = 0 THEN ContractCost.dblRate
+																			--ROUND (ContractCost.dblRate * dbo.fnCalculateQtyBetweenUOM(ContractCost.intItemUOMId, dbo.fnGetMatchingItemUOMId(RE.intItemId, ContractCost.intItemUOMId), SC.dblGrossUnits), 2)
 																		END
 																	END
 								,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ContractCost.intContractDetailId)
@@ -847,10 +846,10 @@ IF ISNULL(@intFreightItemId,0) = 0
 																	END
 								,[dblAmount]						=  CASE
 																		WHEN IC.strCostMethod = 'Per Unit' THEN 0
-																		WHEN IC.strCostMethod = 'Amount' THEN 
+																		WHEN IC.strCostMethod = 'Amount' THEN
 																		CASE
 																			WHEN RE.ysnIsStorage = 1 THEN 0
-																			WHEN RE.ysnIsStorage = 0 THEN ROUND (RE.dblFreightRate * SC.dblGrossUnits, 2)
+																			WHEN RE.ysnIsStorage = 0 THEN  RE.dblFreightRate --ROUND (RE.dblFreightRate * SC.dblGrossUnits, 2)
 																		END
 																	END
 								,[intContractHeaderId]				= NULL
