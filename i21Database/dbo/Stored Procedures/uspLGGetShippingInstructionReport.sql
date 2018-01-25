@@ -742,6 +742,9 @@ FROM (
 		,CD.strERPPONumber
 		,Basis.strContractBasis
 		,Basis.strDescription AS strContractBasisDescription
+		,dbo.fnSMGetCompanyLogo('FullHeaderLogo') AS blbFullHeaderLogo
+		,dbo.fnSMGetCompanyLogo('FullFooterLogo') AS blbFullFooterLogo
+		,CASE WHEN CP.ysnFullHeaderLogo = 1 THEN 'true' else 'false' END ysnFullHeaderLogo	
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
@@ -802,6 +805,7 @@ FROM (
 	LEFT JOIN tblICUnitMeasure LoadUnit ON LoadUnit.intUnitMeasureId = L.intLoadingUnitMeasureId
 	LEFT JOIN tblICUnitMeasure DisUnit ON DisUnit.intUnitMeasureId = L.intDischargeUnitMeasureId
 	LEFT JOIN tblCTContractBasis Basis ON Basis.intContractBasisId = CH.intContractBasisId
+	CROSS APPLY tblLGCompanyPreference CP
 	WHERE L.intLoadId = @intLoadId
 	) tbl
 END

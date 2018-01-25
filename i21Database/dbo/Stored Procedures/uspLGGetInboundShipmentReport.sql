@@ -277,7 +277,10 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				strCertificationName = (SELECT TOP 1 strCertificationName
 										FROM tblICCertification CER
 										JOIN tblCTContractCertification CTCER ON CTCER.intCertificationId = CER.intCertificationId
-										WHERE CTCER.intContractDetailId = CD.intContractDetailId) 
+										WHERE CTCER.intContractDetailId = CD.intContractDetailId),
+				dbo.fnSMGetCompanyLogo('FullHeaderLogo') AS blbFullHeaderLogo,
+				dbo.fnSMGetCompanyLogo('FullFooterLogo') AS blbFullFooterLogo,
+				CASE WHEN CP.ysnFullHeaderLogo = 1 THEN 'true' else 'false' END ysnFullHeaderLogo	 
 		FROM		tblLGLoad L
 		JOIN		tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN		tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
@@ -304,6 +307,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 		LEFT JOIN   tblEMEntity SLETC ON SLETC .intEntityId = SLEC.intEntityContactId
 		LEFT JOIN	tblSMCurrency InsuranceCur ON InsuranceCur.intCurrencyID = L.intInsuranceCurrencyId
 		LEFT JOIN	tblLGWarehouseInstructionHeader WI ON WI.intShipmentId = L.intLoadId
+		CROSS APPLY tblLGCompanyPreference CP
 		WHERE L.strLoadNumber = @strTrackingNumber
 	END
 	ELSE
@@ -465,7 +469,10 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				strCertificationName = (SELECT TOP 1 strCertificationName
 										FROM tblICCertification CER
 										JOIN tblCTContractCertification CTCER ON CTCER.intCertificationId = CER.intCertificationId
-										WHERE CTCER.intContractDetailId = CD.intContractDetailId) 
+										WHERE CTCER.intContractDetailId = CD.intContractDetailId),
+				dbo.fnSMGetCompanyLogo('FullHeaderLogo') AS blbFullHeaderLogo,
+				dbo.fnSMGetCompanyLogo('FullFooterLogo') AS blbFullFooterLogo,
+				CASE WHEN CP.ysnFullHeaderLogo = 1 THEN 'true' else 'false' END ysnFullHeaderLogo	 
 		FROM		tblLGLoad L
 		JOIN		tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN		tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
@@ -501,6 +508,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 		LEFT JOIN	tblSMCurrency InsuranceCur ON InsuranceCur.intCurrencyID = L.intInsuranceCurrencyId
 		LEFT JOIN	tblLGWarehouseInstructionHeader WI ON WI.intShipmentId = L.intLoadId
 		LEFT JOIN	tblCTContractBasis Basis ON Basis.intContractBasisId = CH.intContractBasisId
+		CROSS APPLY tblLGCompanyPreference CP
 		WHERE LW.intLoadWarehouseId = @intLoadWarehouseId
 	END
 END
