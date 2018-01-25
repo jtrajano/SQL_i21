@@ -1577,7 +1577,7 @@ SELECT
 			ON P1.[ptpay_acct_no] = GL.[strExternalId]
 	left  JOIN
 		[tblSMCompanyLocation] CL
-			ON P1.[ptpye_loc_no] COLLATE Latin1_General_CI_AS = CL.[strLocationNumber] COLLATE Latin1_General_CI_AS
+			ON P1.[ptpay_loc_no] COLLATE Latin1_General_CI_AS = CL.[strLocationNumber] COLLATE Latin1_General_CI_AS
 	LEFT OUTER JOIN
 		[tblSMPaymentMethod] P
 			ON P1.[ptpay_pay_type] COLLATE Latin1_General_CI_AS = P.strPaymentMethodCode COLLATE Latin1_General_CI_AS
