@@ -8,6 +8,8 @@
 	@intSCAccountId				INT = 0,
 	@dtmAsOfDate				DATETIME = NULL,
 	@strCalculation				NVARCHAR(25) = '',
+	@dtmServiceChargeDate		DATETIME = NULL,
+	@dtmServiceChargePostDate	DATETIME = NULL,
 	@tblTypeServiceCharge		[dbo].[ServiceChargeTableType] READONLY,
 	@tblTypeServiceChargeByCB	[dbo].[ServiceChargeTableType] READONLY
 AS 
@@ -106,14 +108,14 @@ AS
 			SELECT 
 				 @intEntityCustomerId
 				,NULL --[strInvoiceOriginId]
-				,ISNULL(@dtmAsOfDate, @dateNow)
-				,[dbo].fnGetDueDateBasedOnTerm(ISNULL(@dtmAsOfDate, @dateNow), ISNULL(@intCompTermsId, intTermsId))
-				,ISNULL(@dtmAsOfDate, @dateNow)
+				,ISNULL(@dtmServiceChargeDate, @dateNow)
+				,[dbo].fnGetDueDateBasedOnTerm(ISNULL(@dtmServiceChargeDate, @dateNow), ISNULL(@intCompTermsId, intTermsId))
+				,ISNULL(@dtmServiceChargePostDate, @dateNow)
 				,@intCurrencyId
 				,@intCompanyLocationId
 				,[intSalespersonId]
 				,[intEntityContactId]
-				,ISNULL(@dtmAsOfDate, @dateNow)
+				,ISNULL(@dtmServiceChargeDate, @dateNow)
 				,[intShipViaId]
 				,NULL --[strPONumber]
 				,ISNULL(@intCompTermsId, intTermsId)

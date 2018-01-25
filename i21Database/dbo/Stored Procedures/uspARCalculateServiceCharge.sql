@@ -9,6 +9,8 @@
 	@scAccountId		INT = 0,
 	@currencyId			INT = 0,
 	@locationId			INT = 0,
+	@serviceChargeDate	DATE,
+	@serviceChargePostDate	DATE,
 	@batchId			NVARCHAR(100) = NULL OUTPUT,
 	@totalAmount		NUMERIC(18,6) = NULL OUTPUT,
 	@upToDateCustomer 	BIT = 0
@@ -366,7 +368,7 @@ AS
 
 							DELETE FROM @tempTblTypeServiceCharge WHERE ISNULL(dblAmountDue, @zeroDecimal) = @zeroDecimal OR ISNULL(dblTotalAmount, @zeroDecimal) = @zeroDecimal
 
-							EXEC dbo.uspARInsertInvoiceServiceCharge @isRecap, @batchId, @entityId, @locationId, @currencyId, @arAccountId, @scAccountId, @asOfDate, @calculation, @tblTypeServiceCharge, @tempTblTypeServiceCharge
+							EXEC dbo.uspARInsertInvoiceServiceCharge @isRecap, @batchId, @entityId, @locationId, @currencyId, @arAccountId, @scAccountId, @asOfDate, @calculation, @serviceChargeDate, @serviceChargePostDate, @tblTypeServiceCharge, @tempTblTypeServiceCharge
 
 							DELETE FROM @tblTypeServiceCharge WHERE intEntityCustomerId = @entityId
 						END
