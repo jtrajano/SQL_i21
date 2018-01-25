@@ -44,7 +44,16 @@
     strPricingType			  NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     strPricingStatus		  NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     strCurrencypair			  NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
-
+	
+	intContractBasisId       INT,
+	intGradeId				 INT,
+	intItemUOMId			 INT,
+	intPositionId			 INT,
+	intPriceItemUOMId        INT,
+	intTermId				 INT,
+	intWeightId				 INT,
+	strAmendmentNumber		 NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	strAmendmentComment		 NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL,
     intConcurrencyId		  INT,
 
     CONSTRAINT [PK_tblCTSequenceHistory_intSequenceHistoryId] PRIMARY KEY CLUSTERED (intSequenceHistoryId ASC),

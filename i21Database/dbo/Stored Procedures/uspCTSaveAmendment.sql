@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTSaveAmendment]
-
+ @intUserId INT
 AS
 
 BEGIN TRY
@@ -14,6 +14,8 @@ BEGIN TRY
 										), 1, 2, '')
 
 	UPDATE tblCTCompanyPreference SET  strAmendmentFields =  RTRIM(LTRIM(@strAmendmentFields))
+	
+	UPDATE tblCTAmendmentApprovalLog SET intLastModifiedById = @intUserId WHERE intLastModifiedById IS NULL
 
 END TRY
 

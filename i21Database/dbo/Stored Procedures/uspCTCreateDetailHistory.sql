@@ -20,7 +20,14 @@ BEGIN TRY
 			,dblBasis,						dblLotsPriced,					dblLotsUnpriced,					dblQtyPriced,				dblQtyUnpriced
 			,dblFinalPrice,					dtmFXValidFrom,					dtmFXValidTo,						dblRate,					strCommodity
 			,strContractNumber,				intContractSeq,					strLocation,						strContractType,		    strPricingType
-			,dblScheduleQty,				dtmHistoryCreated,				dblCashPrice,						strPricingStatus					
+			,dblScheduleQty,				dtmHistoryCreated,				dblCashPrice,						strPricingStatus
+			,intContractBasisId  
+			,intGradeId			
+			,intItemUOMId		
+			,intPositionId		
+			,intPriceItemUOMId   
+			,intTermId			
+			,intWeightId		
 		)
 
 		SELECT   
@@ -37,7 +44,13 @@ BEGIN TRY
 							AND PF.intPriceFixationId IS NOT NULL THEN	 'Parially Priced'
 					ELSE	'Unpriced'
 			END
-
+		    ,intContractBasisId   = CH.intContractBasisId
+			,intGradeId			  = CH.intGradeId
+			,intItemUOMId		  = CD.intItemUOMId
+			,intPositionId		  = CH.intPositionId
+			,intPriceItemUOMId    = CD.intPriceItemUOMId
+			,intTermId			  = CH.intTermId
+			,intWeightId		  = CH.intWeightId
 		FROM	tblCTContractDetail			CD
 		JOIN	tblCTContractHeader			CH  ON  CH.intContractHeaderId	=	CD.intContractHeaderId
 		JOIN	tblICCommodity				CO  ON  CO.intCommodityId		=	CH.intCommodityId
