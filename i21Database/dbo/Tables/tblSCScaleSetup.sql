@@ -639,15 +639,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = 'ysnAllowZeroWeights'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Allow Split Weights',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblSCScaleSetup',
-    @level2type = N'COLUMN',
-    @level2name = N'ysnAllowSplitWeights'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Require Contract for In-Transit Tickets',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
