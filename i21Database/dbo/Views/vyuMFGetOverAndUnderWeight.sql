@@ -43,6 +43,8 @@ SELECT Rtrim(Convert(CHAR, W.dtmPlannedDate, 101)) AS [Production Date]
 				AND TR.intProductValueId = W.intWorkOrderId
 				AND ISNUMERIC(TR.strPropertyValue) = 1
 			), 0) [Total sweeps (lb)]
+	,W.intWorkOrderId
+	,W.dtmPlannedDate
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderProducedLot WP ON WP.intWorkOrderId = W.intWorkOrderId
 	AND W.intStatusId = 13
@@ -58,4 +60,5 @@ GROUP BY W.dtmPlannedDate
 	,W.strWorkOrderNo
 	,W.strReferenceNo
 	,Left(WP.strParentLotNumber, 5)
+	,W.intWorkOrderId
 	,W.intWorkOrderId
