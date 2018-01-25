@@ -16,6 +16,8 @@ SELECT [Dump Date]
 	,IsNULL(UM1.strUnitMeasure, [Weight UOM]) AS [Quantity UOM]
 	,[Weight]
 	,[Weight UOM]
+	,intWorkOrderId
+	,dtmPlannedDate
 FROM (
 	SELECT Rtrim(Convert(CHAR, W.dtmPlannedDate, 101)) [Dump Date]
 		,I.strItemNo [Product]
@@ -54,6 +56,8 @@ FROM (
 			) AS intItemUOMId
 		,WI.dblQuantity AS [Weight]
 		,UM.strUnitMeasure [Weight UOM]
+		,W.intWorkOrderId
+		,W.dtmPlannedDate
 	FROM dbo.tblMFWorkOrder W
 	JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intWorkOrderId = W.intWorkOrderId
 		AND WI.ysnConsumptionReversed = 0
