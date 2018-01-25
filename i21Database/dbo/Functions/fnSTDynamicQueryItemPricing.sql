@@ -4,11 +4,12 @@
 	, @strOldData NVARCHAR(250)
 	, @strNewData NVARCHAR(250)
 
-	, @strCompanyLocationId NVARCHAR(250)
-	, @strVendorId NVARCHAR(250)
-	, @strCategoryId NVARCHAR(250)
-	, @strFamilyId NVARCHAR(250)
-	, @strClassId NVARCHAR(250)
+	, @strCompanyLocationId NVARCHAR(MAX)
+	, @strVendorId NVARCHAR(MAX)
+	, @strCategoryId NVARCHAR(MAX)
+	, @strFamilyId NVARCHAR(MAX)
+	, @strClassId NVARCHAR(MAX)
+
 	, @intUpcCode INT
 	, @strRegion NVARCHAR(250)
 	, @strDistrict NVARCHAR(250)
@@ -58,7 +59,7 @@ AS BEGIN
 
 		   IF ((@strCompanyLocationId != '') AND (@strCompanyLocationId IS NOT NULL))
 		   BEGIN 
-				SET @strGeneratedSql = @strGeneratedSql + ' and IL.intLocationId IN (' + CAST(@strCompanyLocationId as NVARCHAR(250)) + ')'
+				SET @strGeneratedSql = @strGeneratedSql + ' and IL.intLocationId IN (' + CAST(@strCompanyLocationId as NVARCHAR(MAX)) + ')'
 		   END
 		 
 		   IF ((@strVendorId != '') AND (@strVendorId IS NOT NULL))
@@ -66,7 +67,7 @@ AS BEGIN
 			   SET @strGeneratedSql = @strGeneratedSql + ' and  IP.intItemLocationId 
 															IN (select intItemLocationId from tblICItemLocation where intVendorId 
 															IN (select intEntityId from tblEMEntity where intEntityId 
-   															IN (' + CAST(@strVendorId as NVARCHAR) + ')' + '))'
+   															IN (' + CAST(@strVendorId as NVARCHAR(MAX)) + ')' + '))'
 		   END
 
 		   IF ((@strCategoryId != '') AND (@strCategoryId IS NOT NULL))
@@ -74,7 +75,7 @@ AS BEGIN
 				SET @strGeneratedSql = @strGeneratedSql +  ' and IP.intItemId  
 															 IN (select intItemId from tblICItem where intCategoryId 
 															 IN (select intCategoryId from tblICCategory where intCategoryId 
-															 IN (' + CAST(@strCategoryId as NVARCHAR) + ')' + '))'
+															 IN (' + CAST(@strCategoryId as NVARCHAR(MAX)) + ')' + '))'
 		   END
 
 		   IF ((@strFamilyId != '') AND (@strFamilyId IS NOT NULL))
@@ -82,7 +83,7 @@ AS BEGIN
 				 SET @strGeneratedSql = @strGeneratedSql + ' and IP.intItemLocationId 
 															IN (select intItemLocationId from tblICItemLocation where intFamilyId 
 															IN (select intFamilyId from tblICItemLocation where intFamilyId 
-															IN (' + CAST(@strFamilyId as NVARCHAR) + ')' + '))' 
+															IN (' + CAST(@strFamilyId as NVARCHAR(MAX)) + ')' + '))' 
 		   END
 
 		   IF ((@strClassId != '') AND (@strClassId IS NOT NULL))
@@ -90,7 +91,7 @@ AS BEGIN
 				 SET @strGeneratedSql = @strGeneratedSql + ' and IP.intItemLocationId 
 															 IN (select intItemLocationId from tblICItemLocation where intClassId 
 															 IN (select intClassId from tblICItemLocation where intClassId 
-															 IN (' + CAST(@strClassId as NVARCHAR) + ')' + '))'
+															 IN (' + CAST(@strClassId as NVARCHAR(MAX)) + ')' + '))'
 		   END
 	    
 		   IF (@intUpcCode IS NOT NULL)
