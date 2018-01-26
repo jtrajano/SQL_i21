@@ -14,7 +14,7 @@ SELECT
 	,dblTotal = SUM(PD.dblTotal)
 INTO #tmpBox12Data
 FROM vyuPRPaycheckDeduction PD INNER JOIN tblPRTypeDeduction TD 
-	ON PD.intTypeDeductionId = TD.intTypeDeductionId AND TD.strW2Code IS NOT NULL
+	ON PD.intTypeDeductionId = TD.intTypeDeductionId AND PD.strPaidBy = 'Employee' AND TD.strW2Code IS NOT NULL
 WHERE intEntityEmployeeId = @intEntityEmployeeId AND YEAR(PD.dtmPayDate) = @intYear
 GROUP BY PD.intEntityEmployeeId, YEAR(PD.dtmPayDate), TD.strW2Code
 
