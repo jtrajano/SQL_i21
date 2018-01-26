@@ -255,22 +255,11 @@
 	LEFT JOIN (SELECT L.intLoadId
 				,L.strLoadNumber
 				,LD.intLoadDetailId
-				,PCD.intContractDetailId AS intPContractDetailId
-				,PCD.intContractHeaderId AS intPContractHeaderId
-				,SCD.intContractDetailId AS intSContractDetailId
-				,SCD.intContractHeaderId AS intSContractHeaderId
-				,EV.intEntityId AS intVendorId
-				,EV.strName AS strVendorName
-				,EC.intEntityId AS intCustomerId
-				,EC.strName AS strCustomerName
 				,LD.intItemId
 				,LD.intItemUOMId
 				,LD.dblGross
 				,LD.dblTare
 				,LD.dblNet
-				,UM.strUnitMeasure AS strItemUOM
-				,WIU.intItemUOMId AS intWeightUOMId
-				,WUM.strUnitMeasure AS strWeightUOM
 				,VEL.intEntityLocationId AS intVendorLocationId
 				,VEL.strLocationName AS strShipFrom
 				,VEL.strLocationName AS strVendorLocationName
@@ -279,15 +268,7 @@
 				,CEL.strLocationName AS strCustomerLocationName
 			FROM tblLGLoad L
 			JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
-			LEFT JOIN tblCTContractDetail PCD ON PCD.intContractDetailId = LD.intPContractDetailId
-			LEFT JOIN tblCTContractDetail SCD ON SCD.intContractDetailId = LD.intSContractDetailId
-			LEFT JOIN tblEMEntity EV ON EV.intEntityId = LD.intVendorEntityId
 			LEFT JOIN tblEMEntityLocation VEL ON VEL.intEntityLocationId = LD.intVendorEntityLocationId
-			LEFT JOIN tblEMEntity EC ON EC.intEntityId = LD.intCustomerEntityId
 			LEFT JOIN tblEMEntityLocation CEL ON CEL.intEntityLocationId = LD.intVendorEntityLocationId
-			LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
-			LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-			LEFT JOIN tblICItemUOM WIU ON WIU.intItemUOMId = LD.intWeightItemUOMId
-			LEFT JOIN tblICUnitMeasure WUM ON WUM.intUnitMeasureId = WIU.intUnitMeasureId
 	) LGD on LGD.intLoadId = SCT.intLoadId
 	
