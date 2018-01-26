@@ -175,7 +175,14 @@ BEGIN
 			AND tax.strPaidBy = 'Employee' AND tax.strCalculationType = 'USA Local' AND ysnVoid = 0 GROUP BY st.strCode, strEmployerStateTaxID, lc.strLocalName) LOCALTAX OUTER APPLY
 		(SELECT strState = st.strCode
 				,strLocal = CASE WHEN (tax.intTypeTaxStateId = 41) THEN tax.strVal1
-								 WHEN (tax.intTypeTaxStateId = 45) THEN tax.strVal2
+								 WHEN (tax.intTypeTaxStateId = 45) THEN 
+									ISNULL((SELECT TOP 1 
+												CASE WHEN (tax.strVal3 = 'None (None)') 
+												THEN SUBSTRING(strPSDCode, 1, 4)
+												ELSE strPSDCode END
+											FROM tblPRTypeTaxStatePSDCode 
+											WHERE strSchoolDistrict = tax.strVal2 AND strMunicipality IN (tax.strVal3, 'None (None)'))
+									, tax.strVal2)
 								 ELSE '' END
 				,strEmployerStateTaxID, 
 				dblTotal = SUM(tax.dblTotal) 
@@ -185,19 +192,23 @@ BEGIN
 			AND tax.strPaidBy = 'Employee' AND tax.strCalculationType = 'USA State' AND ysnVoid = 0 
 			AND ((tax.intTypeTaxStateId = 41 AND tax.strVal1 <> 'None')
 				OR (tax.intTypeTaxStateId = 45 AND tax.strVal2 <> 'None (None)'))
-			GROUP BY st.strCode, tax.intTypeTaxStateId, strEmployerStateTaxID, tax.strVal1, tax.strVal2) SCHOOLTAX OUTER APPLY
+			GROUP BY st.strCode, tax.intTypeTaxStateId, strEmployerStateTaxID, tax.strVal1, tax.strVal2, tax.strVal3) SCHOOLTAX OUTER APPLY
 		(SELECT strState = st.strCode
 		,strLocal = CASE WHEN (tax.intTypeTaxStateId = 41) THEN tax.strVal2
-						 WHEN (tax.intTypeTaxStateId = 45) THEN tax.strVal3
+						 WHEN (tax.intTypeTaxStateId = 45) THEN 
+							ISNULL((SELECT TOP 1 strPSDCode
+										FROM tblPRTypeTaxStatePSDCode 
+										WHERE strMunicipality = tax.strVal3)
+								,tax.strVal3)
 						 ELSE '' END
-		,strEmployerStateTaxID, 
-		dblTotal = SUM(tax.dblTotal) 
+		,strEmployerStateTaxID
+		,dblTotal = SUM(tax.dblTotal) 
 			FROM vyuPRPaycheckTax tax INNER JOIN tblPRTypeTaxState st ON tax.intTypeTaxStateId = st.intTypeTaxStateId
 				INNER JOIN tblPRTypeTax tt ON tax.intTypeTaxId = tt.intTypeTaxId
 			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId 
 			AND tax.strPaidBy = 'Employee' AND tax.strCalculationType = 'USA State' AND ysnVoid = 0 
 			AND ((tax.intTypeTaxStateId = 41 AND tax.strVal2 <> 'None')
-				OR (tax.intTypeTaxStateId = 45 AND tax.strVal3 <> 'None (None)'))
+				OR (tax.intTypeTaxStateId = 45 AND tax.strVal2 = 'None (None)' AND tax.strVal3 <> 'None (None)'))
 			GROUP BY st.strCode, tax.intTypeTaxStateId, strEmployerStateTaxID, tax.strVal2, tax.strVal3) MUNITAX OUTER APPLY
 		(SELECT intEmployees = COUNT(DISTINCT intEntityEmployeeId),
 				dblGrossSum = SUM(dblGross)
@@ -318,7 +329,14 @@ BEGIN
 			AND tax.strPaidBy = 'Employee' AND tax.strCalculationType = 'USA Local' AND ysnVoid = 0 GROUP BY st.strCode, strEmployerStateTaxID, lc.strLocalName) LOCALTAX OUTER APPLY
 		(SELECT strState = st.strCode
 				,strLocal = CASE WHEN (tax.intTypeTaxStateId = 41) THEN tax.strVal1
-								 WHEN (tax.intTypeTaxStateId = 45) THEN tax.strVal2
+								 WHEN (tax.intTypeTaxStateId = 45) THEN 
+									ISNULL((SELECT TOP 1 
+												CASE WHEN (tax.strVal3 = 'None (None)') 
+												THEN SUBSTRING(strPSDCode, 1, 4)
+												ELSE strPSDCode END
+											FROM tblPRTypeTaxStatePSDCode 
+											WHERE strSchoolDistrict = tax.strVal2 AND strMunicipality IN (tax.strVal3, 'None (None)'))
+									, tax.strVal2)
 								 ELSE '' END
 				,strEmployerStateTaxID, 
 				dblTotal = SUM(tax.dblTotal) 
@@ -328,24 +346,29 @@ BEGIN
 			AND tax.strPaidBy = 'Employee' AND tax.strCalculationType = 'USA State' AND ysnVoid = 0 
 			AND ((tax.intTypeTaxStateId = 41 AND tax.strVal1 <> 'None')
 				OR (tax.intTypeTaxStateId = 45 AND tax.strVal2 <> 'None (None)'))
-			GROUP BY st.strCode, tax.intTypeTaxStateId, strEmployerStateTaxID, tax.strVal1, tax.strVal2) SCHOOLTAX OUTER APPLY
+			GROUP BY st.strCode, tax.intTypeTaxStateId, strEmployerStateTaxID, tax.strVal1, tax.strVal2, tax.strVal3) SCHOOLTAX OUTER APPLY
 		(SELECT strState = st.strCode
 		,strLocal = CASE WHEN (tax.intTypeTaxStateId = 41) THEN tax.strVal2
-						 WHEN (tax.intTypeTaxStateId = 45) THEN tax.strVal3
+						 WHEN (tax.intTypeTaxStateId = 45) THEN 
+							ISNULL((SELECT TOP 1 strPSDCode
+										FROM tblPRTypeTaxStatePSDCode 
+										WHERE strMunicipality = tax.strVal3)
+								,tax.strVal3)
 						 ELSE '' END
-		,strEmployerStateTaxID, 
-		dblTotal = SUM(tax.dblTotal) 
+		,strEmployerStateTaxID
+		,dblTotal = SUM(tax.dblTotal) 
 			FROM vyuPRPaycheckTax tax INNER JOIN tblPRTypeTaxState st ON tax.intTypeTaxStateId = st.intTypeTaxStateId
 				INNER JOIN tblPRTypeTax tt ON tax.intTypeTaxId = tt.intTypeTaxId
 			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId 
 			AND tax.strPaidBy = 'Employee' AND tax.strCalculationType = 'USA State' AND ysnVoid = 0 
 			AND ((tax.intTypeTaxStateId = 41 AND tax.strVal2 <> 'None')
-				OR (tax.intTypeTaxStateId = 45 AND tax.strVal3 <> 'None (None)'))
+				OR (tax.intTypeTaxStateId = 45 AND tax.strVal2 = 'None (None)' AND tax.strVal3 <> 'None (None)'))
 			GROUP BY st.strCode, tax.intTypeTaxStateId, strEmployerStateTaxID, tax.strVal2, tax.strVal3) MUNITAX OUTER APPLY
 		(SELECT intEmployees = COUNT(DISTINCT intEntityEmployeeId),
 				dblGrossSum = SUM(dblGross) 
 		FROM tblPRPaycheck 
 		WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnPosted = 1 AND ysnVoid = 0) PCHK
+	WHERE intYear = @intYear AND intEntityEmployeeId = @intEntityEmployeeId
 
 	/* Get the updated Employee W-2 941 Id */
 	SELECT TOP 1 @intEmployeeW2Id = intEmployeeW2Id FROM tblPREmployeeW2 WHERE intYear = @intYear AND intEntityEmployeeId = @intEntityEmployeeId
