@@ -98,7 +98,7 @@ BEGIN TRY
 				,ShipmentItem.strItemDescription
 				,Lot.strLotNumber
 				,Lot.strLotAlias
-				,ISNULL(ShipmentItemLot.dblLotQty, ISNULL(ShipmentItem.dblQtyToShip, 0)) AS dblQty
+				,ISNULL(ShipmentItemLot.dblQuantityShipped, ISNULL(ShipmentItem.dblQtyToShip, 0)) AS dblQty
 				,ISNULL(ShipmentItemLot.strLotUOM, ShipmentItem.strUnitMeasure) AS strUOM
 				,ISNULL(ShipmentItemLot.dblNetWeight,0) AS dblNetWeight
 				,SUM(ShipmentItemLot.dblNetWeight) OVER() AS dblTotalWeight
