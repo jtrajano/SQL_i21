@@ -37,3 +37,10 @@
     CONSTRAINT [FK_tblICInventoryShipmentCharge_tblICInventoryShipment] FOREIGN KEY ([intInventoryShipmentId]) REFERENCES [tblICInventoryShipment]([intInventoryShipmentId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblICInventoryShipmentCharge_tblSMCurrencyExchangeRateType] FOREIGN KEY ([intForexRateTypeId]) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId])
 )
+GO 
+
+CREATE NONCLUSTERED INDEX [IX_tblICInventoryShipmentCharge]
+	ON [dbo].[tblICInventoryShipmentCharge]([intInventoryShipmentId] ASC)
+	INCLUDE ([intChargeId]);
+
+GO

@@ -43,7 +43,7 @@
 GO
 
 CREATE NONCLUSTERED INDEX [IX_tblICInventoryReceiptCharge]
-	ON [dbo].[tblICInventoryReceiptCharge]([intInventoryReceiptChargeId] ASC)
-	INCLUDE ([intInventoryReceiptId]);
+	ON [dbo].[tblICInventoryReceiptCharge]([intInventoryReceiptId] ASC)
+	INCLUDE ([intChargeId]);
 
 GO
