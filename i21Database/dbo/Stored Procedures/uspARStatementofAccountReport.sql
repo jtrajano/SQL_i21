@@ -182,7 +182,7 @@ IF @strStatementFormat = 'Balance Forward'
 			, @ysnEmailOnly					= @ysnEmailOnly
 			, @strPaymentMethod			= @strPaymentMethod
 	END
-ELSE IF ISNULL(@strStatementFormat, 'Open Item') IN ('Open Item', 'Running Balance')
+ELSE IF ISNULL(@strStatementFormat, 'Open Item') IN ('Open Item', 'Running Balance', 'Open Item - Lazer')
 	BEGIN
 		EXEC dbo.uspARCustomerStatementReport
 		      @dtmDateTo					= @dtmDateTo
