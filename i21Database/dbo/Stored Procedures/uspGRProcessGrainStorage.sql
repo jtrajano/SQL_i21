@@ -46,6 +46,8 @@ BEGIN TRY
 	DECLARE @IntCommodityId INT
 	DECLARE @intStorageChargeItemId INT
 
+	DECLARE @intTicketId INT
+
 	EXEC sp_xml_preparedocument @idoc OUTPUT,@strXml
 
 	DECLARE @BillDiscounts AS TABLE 
@@ -245,6 +247,7 @@ BEGIN TRY
 
 			SELECT @intItemUOMId=intItemUOMId FROM tblICItemUOM WHERE intItemId=@ItemId AND intUnitMeasureId=@intCommodityStockUOMId
 
+			SELECT @intTicketId=intTicketId FROM tblGRCustomerStorage WHERE intCustomerStorageId=@intCustomerStorageId
 			
 			UPDATE BD 
 			SET BD.intOriginalUnitMeasureId=CS.intUnitMeasureId 
@@ -396,7 +399,7 @@ BEGIN TRY
 					,[intContractHeaderId] = NULL
 					,[intContractDetailId] = NULL
 					,[intShipmentPurchaseSalesContractId] = NULL
-					,[intTicketId] = NULL
+					,[intTicketId] = @intTicketId
 					,[intTicketHoursWorkedId] = NULL
 					,[intSiteId] = NULL
 					,[strBillingBy] = ''
