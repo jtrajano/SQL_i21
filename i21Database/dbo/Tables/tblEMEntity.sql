@@ -22,6 +22,7 @@
     [strNotes]         NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [strContactMethod] NVARCHAR (20)  COLLATE Latin1_General_CI_AS NULL,
     [strTimezone]      NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+	[intLanguageId]    INT NULL,
 	[strEntityNo]      NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[strContactType]   NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,	
 	[intDefaultLocationId]       INT            NULL,
@@ -43,7 +44,7 @@
 	--CONSTRAINT [FK_tblEMEntity_tblEMEntityLocation] FOREIGN KEY ([intDefaultLocationId]) REFERENCES [tblEMEntityLocation]([intEntityLocationId]),
 	CONSTRAINT [FK_tblSMCountry_tblEMEntity] FOREIGN KEY ([intDefaultCountryId]) REFERENCES [tblSMCountry]([intCountryID]),
 	CONSTRAINT [FK_tblEMEntityClass_tblEMEntity] FOREIGN KEY ([intEntityClassId]) REFERENCES [tblEMEntityClass]([intEntityClassId]),
-
+	CONSTRAINT [FK_tblSMLanguage_tblEMEntity] FOREIGN KEY ([intLanguageId]) REFERENCES [tblSMLanguage]([intLanguageId]),
     CONSTRAINT [PK_dbo.tblEMEntity] PRIMARY KEY CLUSTERED ([intEntityId] ASC)
 );
 
