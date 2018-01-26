@@ -63,7 +63,7 @@ BEGIN
 	)
 	SELECT
 		intAccountId		=	@deferredInterestAccount,
-		strMiscDescription	=	'',
+		strMiscDescription	=	'Deferred Interest',
 		dblQtyReceived		=	1,
 		dblCost				=	A.dblInterest
 	FROM vyuAPDeferredPayment A
@@ -81,6 +81,14 @@ BEGIN
 
 		INSERT INTO @vouchers
 		SELECT @voucherIdCreated
+
+		--UPDATE THE VOUCHER INTEREST DATE AND INTEREST ACCRUED THRU
+		UPDATE A
+			SET A.dtmDeferredInterestDate = deferredInterest.dtmPaymentDueDateOverride,
+			A.dtmInterestAccruedThru = deferredInterest.dtmCalculationDate
+		FROM tblAPBill A
+		CROSS APPLY tblAPDeferredPaymentInterest deferredInterest
+		WHERE A.intBillId = @currentVoucherId
 
 		UPDATE A
 			SET A.intDeferredVoucherId = @currentVoucherId

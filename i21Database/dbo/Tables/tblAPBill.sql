@@ -24,6 +24,8 @@
     [dtmDatePaid]          DATETIME        NULL ,
 	[dtmApprovalDate]       DATETIME        NULL ,
     [dtmDiscountDate]      DATETIME        NULL,
+	[dtmDeferredInterestDate]      DATETIME        NULL,
+	[dtmInterestAccruedThru]      DATETIME        NULL,
     [intUserId]            INT             NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
     [dtmBillDate] DATETIME NOT NULL DEFAULT GETDATE(), 
