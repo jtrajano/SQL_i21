@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets05a1297e247e04a1550e23819cecdc46f2fb14b01722e9e1323b0a92a44ab674))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsd909c0262136fbc98cc16277ef4ffc3718e228c9f306386eaba75d2e061591c9))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets05a1297e247e04a1550e23819cecdc46f2fb14b01722e9e1323b0a92a44ab674 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetsd909c0262136fbc98cc16277ef4ffc3718e228c9f306386eaba75d2e061591c9 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "05a1297e247e04a1550e23819cecdc46f2fb14b01722e9e1323b0a92a44ab674"; }
+            get { return "d909c0262136fbc98cc16277ef4ffc3718e228c9f306386eaba75d2e061591c9"; }
         }
 
         /// <summary>
@@ -14208,7 +14208,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetInventoryValuationSummary
-        [CodeFirstDatabaseSchema.vyuICGetInventoryValuationSummary](T1.vyuICGetInventoryValuationSummary_intInventoryValuationKeyId, T1.vyuICGetInventoryValuationSummary_intItemId, T1.vyuICGetInventoryValuationSummary_strItemNo, T1.vyuICGetInventoryValuationSummary_strItemDescription, T1.vyuICGetInventoryValuationSummary_intItemLocationId, T1.vyuICGetInventoryValuationSummary_strLocationName, T1.vyuICGetInventoryValuationSummary_intSubLocationId, T1.vyuICGetInventoryValuationSummary_strSubLocationName, T1.vyuICGetInventoryValuationSummary_dtmDate, T1.vyuICGetInventoryValuationSummary_dblQuantity, T1.vyuICGetInventoryValuationSummary_dblValue, T1.vyuICGetInventoryValuationSummary_dblLastCost, T1.vyuICGetInventoryValuationSummary_dblStandardCost, T1.vyuICGetInventoryValuationSummary_dblAverageCost, T1.vyuICGetInventoryValuationSummary_dblQuantityInStockUOM, T1.vyuICGetInventoryValuationSummary_strStockUOM, T1.vyuICGetInventoryValuationSummary_strCategoryCode, T1.vyuICGetInventoryValuationSummary_strCommodityCode, T1.vyuICGetInventoryValuationSummary_strInTransitLocationName, T1.vyuICGetInventoryValuationSummary_intLocationId, T1.vyuICGetInventoryValuationSummary_intInTransitLocationId)
+        [CodeFirstDatabaseSchema.vyuICGetInventoryValuationSummary](T1.vyuICGetInventoryValuationSummary_intInventoryValuationKeyId, T1.vyuICGetInventoryValuationSummary_intItemId, T1.vyuICGetInventoryValuationSummary_strItemNo, T1.vyuICGetInventoryValuationSummary_strItemDescription, T1.vyuICGetInventoryValuationSummary_intItemLocationId, T1.vyuICGetInventoryValuationSummary_strLocationName, T1.vyuICGetInventoryValuationSummary_intYear, T1.vyuICGetInventoryValuationSummary_intMonth, T1.vyuICGetInventoryValuationSummary_strMonthYear, T1.vyuICGetInventoryValuationSummary_dblQuantity, T1.vyuICGetInventoryValuationSummary_dblValue, T1.vyuICGetInventoryValuationSummary_dblLastCost, T1.vyuICGetInventoryValuationSummary_dblStandardCost, T1.vyuICGetInventoryValuationSummary_dblAverageCost, T1.vyuICGetInventoryValuationSummary_dblQuantityInStockUOM, T1.vyuICGetInventoryValuationSummary_strStockUOM, T1.vyuICGetInventoryValuationSummary_strCategoryCode, T1.vyuICGetInventoryValuationSummary_strCommodityCode, T1.vyuICGetInventoryValuationSummary_strInTransitLocationName, T1.vyuICGetInventoryValuationSummary_intLocationId, T1.vyuICGetInventoryValuationSummary_intInTransitLocationId)
     FROM (
         SELECT 
             T.intInventoryValuationKeyId AS vyuICGetInventoryValuationSummary_intInventoryValuationKeyId, 
@@ -14217,9 +14217,9 @@ namespace Edm_EntityMappingGeneratedViews
             T.strItemDescription AS vyuICGetInventoryValuationSummary_strItemDescription, 
             T.intItemLocationId AS vyuICGetInventoryValuationSummary_intItemLocationId, 
             T.strLocationName AS vyuICGetInventoryValuationSummary_strLocationName, 
-            T.intSubLocationId AS vyuICGetInventoryValuationSummary_intSubLocationId, 
-            T.strSubLocationName AS vyuICGetInventoryValuationSummary_strSubLocationName, 
-            T.dtmDate AS vyuICGetInventoryValuationSummary_dtmDate, 
+            T.intYear AS vyuICGetInventoryValuationSummary_intYear, 
+            T.intMonth AS vyuICGetInventoryValuationSummary_intMonth, 
+            T.strMonthYear AS vyuICGetInventoryValuationSummary_strMonthYear, 
             T.dblQuantity AS vyuICGetInventoryValuationSummary_dblQuantity, 
             T.dblValue AS vyuICGetInventoryValuationSummary_dblValue, 
             T.dblLastCost AS vyuICGetInventoryValuationSummary_dblLastCost, 
@@ -14245,7 +14245,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetInventoryValuationSummaries
-        [iRely.Inventory.Model.vyuICGetInventoryValuationSummary](T1.vyuICGetInventoryValuationSummary_intInventoryValuationKeyId, T1.vyuICGetInventoryValuationSummary_intItemId, T1.vyuICGetInventoryValuationSummary_strItemNo, T1.vyuICGetInventoryValuationSummary_strItemDescription, T1.vyuICGetInventoryValuationSummary_intItemLocationId, T1.vyuICGetInventoryValuationSummary_strLocationName, T1.vyuICGetInventoryValuationSummary_intSubLocationId, T1.vyuICGetInventoryValuationSummary_strSubLocationName, T1.vyuICGetInventoryValuationSummary_dtmDate, T1.vyuICGetInventoryValuationSummary_dblQuantity, T1.vyuICGetInventoryValuationSummary_dblValue, T1.vyuICGetInventoryValuationSummary_dblLastCost, T1.vyuICGetInventoryValuationSummary_dblStandardCost, T1.vyuICGetInventoryValuationSummary_dblAverageCost, T1.vyuICGetInventoryValuationSummary_dblQuantityInStockUOM, T1.vyuICGetInventoryValuationSummary_strStockUOM, T1.vyuICGetInventoryValuationSummary_strCategoryCode, T1.vyuICGetInventoryValuationSummary_strCommodityCode, T1.vyuICGetInventoryValuationSummary_strInTransitLocationName, T1.vyuICGetInventoryValuationSummary_intLocationId, T1.vyuICGetInventoryValuationSummary_intInTransitLocationId)
+        [iRely.Inventory.Model.vyuICGetInventoryValuationSummary](T1.vyuICGetInventoryValuationSummary_intInventoryValuationKeyId, T1.vyuICGetInventoryValuationSummary_intItemId, T1.vyuICGetInventoryValuationSummary_strItemNo, T1.vyuICGetInventoryValuationSummary_strItemDescription, T1.vyuICGetInventoryValuationSummary_intItemLocationId, T1.vyuICGetInventoryValuationSummary_strLocationName, T1.vyuICGetInventoryValuationSummary_intYear, T1.vyuICGetInventoryValuationSummary_intMonth, T1.vyuICGetInventoryValuationSummary_strMonthYear, T1.vyuICGetInventoryValuationSummary_dblQuantity, T1.vyuICGetInventoryValuationSummary_dblValue, T1.vyuICGetInventoryValuationSummary_dblLastCost, T1.vyuICGetInventoryValuationSummary_dblStandardCost, T1.vyuICGetInventoryValuationSummary_dblAverageCost, T1.vyuICGetInventoryValuationSummary_dblQuantityInStockUOM, T1.vyuICGetInventoryValuationSummary_strStockUOM, T1.vyuICGetInventoryValuationSummary_strCategoryCode, T1.vyuICGetInventoryValuationSummary_strCommodityCode, T1.vyuICGetInventoryValuationSummary_strInTransitLocationName, T1.vyuICGetInventoryValuationSummary_intLocationId, T1.vyuICGetInventoryValuationSummary_intInTransitLocationId)
     FROM (
         SELECT 
             T.intInventoryValuationKeyId AS vyuICGetInventoryValuationSummary_intInventoryValuationKeyId, 
@@ -14254,9 +14254,9 @@ namespace Edm_EntityMappingGeneratedViews
             T.strItemDescription AS vyuICGetInventoryValuationSummary_strItemDescription, 
             T.intItemLocationId AS vyuICGetInventoryValuationSummary_intItemLocationId, 
             T.strLocationName AS vyuICGetInventoryValuationSummary_strLocationName, 
-            T.intSubLocationId AS vyuICGetInventoryValuationSummary_intSubLocationId, 
-            T.strSubLocationName AS vyuICGetInventoryValuationSummary_strSubLocationName, 
-            T.dtmDate AS vyuICGetInventoryValuationSummary_dtmDate, 
+            T.intYear AS vyuICGetInventoryValuationSummary_intYear, 
+            T.intMonth AS vyuICGetInventoryValuationSummary_intMonth, 
+            T.strMonthYear AS vyuICGetInventoryValuationSummary_strMonthYear, 
             T.dblQuantity AS vyuICGetInventoryValuationSummary_dblQuantity, 
             T.dblValue AS vyuICGetInventoryValuationSummary_dblValue, 
             T.dblLastCost AS vyuICGetInventoryValuationSummary_dblLastCost, 
