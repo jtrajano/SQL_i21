@@ -6146,6 +6146,7 @@
     <Build Include="dbo\Views\vyuCTAmendmentApprovalLog.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportAmendment.sql" />
     <Build Include="dbo\Views\vyuARGetSalesOrderItems.sql" />
+    <Build Include="dbo\Tables\tblSCDeliverySheetHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
