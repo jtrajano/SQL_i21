@@ -19,7 +19,10 @@ SELECT
 	,dblTaxableState		 = SUM(dblTaxableState) /* box 16 */
 	,dblStateTax			 = SUM(dblStateTax) /* box 17 */
 	,dblTaxableLocal		 = SUM(dblTaxableLocal) /* box 18 */
-	,dblLocalTax			 = SUM(dblLocalTax) /* box 19 */
+	,dblLocalTax			 = CASE WHEN (ISNULL(strLocality, '') <> ISNULL(strLocality2, '')) 
+								THEN SUM(dblLocalTax) + SUM(dblLocalTax2) 
+								ELSE SUM(dblLocalTax) 
+								END  /* box 19 */
 FROM
 	vyuPREmployeeW2 
 	LEFT JOIN
