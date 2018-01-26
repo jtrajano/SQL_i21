@@ -17,6 +17,8 @@ SELECT intSalesOrderId			= SO.intSalesOrderId
 	 , intCurrencyExchangeRateTypeId = SODETAIL.intCurrencyExchangeRateTypeId
 	 , intCurrencyExchangeRateId = SODETAIL.intCurrencyExchangeRateId
 	 , intSubCurrencyId			= SODETAIL.intSubCurrencyId
+	 , dblQtyOrdered			= SODETAIL.dblQtyOrdered
+	 , dblQtyShipped			= SODETAIL.dblQtyShipped
 	 , dblQtyRemaining			= SODETAIL.dblQtyRemaining
 	 , dblPrice					= SODETAIL.dblPrice
 	 , dblBasePrice				= SODETAIL.dblBasePrice
@@ -29,10 +31,13 @@ SELECT intSalesOrderId			= SO.intSalesOrderId
 	 , strDescription			= CASE WHEN ISNULL(SODETAIL.intItemId, 0) <> 0 THEN ITEM.strDescription ELSE SODETAIL.strItemDescription END
 	 , strPricing				= SODETAIL.strPricing
 	 , strVFDDocumentNumber		= SODETAIL.strVFDDocumentNumber
+	 , strType					= ITEM.strType
+	 , strBundleType			= ITEM.strBundleType
 	 , intContractSeq			= CONTRACTS.intContractSeq
 	 , strContractNumber		= CONTRACTS.strContractNumber
 	 , strItemNo				= ITEM.strItemNo
-	 , strUnitMeasure			= ITEM.strUnitMeasure
+	 , strUnitMeasure			= UOM.strUnitMeasure
+	 , dtmDate					= SO.dtmDate
 	 , ysnBlended				= SODETAIL.ysnBlended
 FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
 INNER JOIN (
@@ -51,6 +56,8 @@ INNER JOIN (
 		 , intCurrencyExchangeRateTypeId
 		 , intCurrencyExchangeRateId
 		 , intSubCurrencyId
+		 , dblQtyOrdered
+		 , dblQtyShipped
 		 , dblQtyRemaining = dblQtyOrdered - dblQtyShipped
 		 , dblPrice
 		 , dblBasePrice
@@ -77,25 +84,25 @@ INNER JOIN (
 ) LOCATION ON SO.intCompanyLocationId = LOCATION.intCompanyLocationId
 LEFT JOIN (
 	SELECT IC.intItemId
-		 , ICUOM.intItemUOMId
 		 , strDescription
 		 , strItemNo
-		 , strUnitMeasure
-	FROM dbo.tblICItem IC WITH (NOLOCK)
-	INNER JOIN (
-		SELECT intItemId
-			 , intUnitMeasureId
-			 , intItemUOMId
-		FROM dbo.tblICItemUOM WITH (NOLOCK)
-	) ICUOM ON IC.intItemId = ICUOM.intItemId
-	INNER JOIN (
-		SELECT intUnitMeasureId
-			 , strUnitMeasure
-		FROM dbo.tblICUnitMeasure WITH (NOLOCK)
-	) UOM ON ICUOM.intUnitMeasureId = UOM.intUnitMeasureId
-	WHERE dbo.fnIsStockTrackingItem(IC.intItemId) = 0 OR ISNULL(strLotTracking, 'No') = 'No' OR IC.strType = 'Bundle'
+		 , strType
+		 , strLotTracking
+		 , strBundleType
+	FROM dbo.tblICItem IC WITH (NOLOCK)	
 ) ITEM ON SODETAIL.intItemId = ITEM.intItemId
-      AND SODETAIL.intItemUOMId = ITEM.intItemUOMId
+LEFT JOIN (
+	SELECT intItemId
+		 , intUnitMeasureId
+		 , intItemUOMId
+	FROM dbo.tblICItemUOM WITH (NOLOCK)
+) ICUOM ON SODETAIL.intItemId = ICUOM.intItemId
+       AND SODETAIL.intItemUOMId = ICUOM.intItemUOMId
+INNER JOIN (
+	SELECT intUnitMeasureId
+		 , strUnitMeasure
+	FROM dbo.tblICUnitMeasure WITH (NOLOCK)
+) UOM ON ICUOM.intUnitMeasureId = UOM.intUnitMeasureId
 LEFT JOIN (
 	SELECT CH.intContractHeaderId
 		 , CD.intContractDetailId
@@ -112,3 +119,4 @@ LEFT JOIN (
 	       AND SODETAIL.intContractDetailId = CONTRACTS.intContractDetailId
 WHERE SO.strTransactionType = 'Order'
   AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
+  AND ((dbo.fnIsStockTrackingItem(SODETAIL.intItemId) = 0 OR ISNULL(strLotTracking, 'No') = 'No') OR (SODETAIL.intItemId IS NULL AND ISNULL(SODETAIL.strItemDescription, '') <> ''))
