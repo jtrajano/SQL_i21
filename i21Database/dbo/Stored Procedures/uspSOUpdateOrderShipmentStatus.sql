@@ -5,10 +5,11 @@
 AS
 BEGIN
 
+DECLARE @tblSOToUpdate			Id
 DECLARE	@strOrderStatus			NVARCHAR(50) = 'Open'	  
 	  , @dblTotalQtyOrdered		NUMERIC(18,6) = 0
 	  , @dblTotalQtyShipped		NUMERIC(18,6) = 0
-	  , @intSalesOrderId		INT = NULL
+	  , @intSalesOrderId		INT = NULL	  
 
 IF @strTransactionType = 'Sales Order' 
 	SET @intSalesOrderId = @intTransactionId
@@ -130,24 +131,60 @@ ELSE
 		WHERE intSalesOrderId = @intTransactionId
 	END
 
-SELECT @dblTotalQtyOrdered = SUM(dblQtyOrdered)
-     , @dblTotalQtyShipped = SUM(CASE WHEN dblQtyShipped > dblQtyOrdered THEN dblQtyOrdered ELSE dblQtyShipped END) 
-FROM tblSOSalesOrderDetail WHERE intSalesOrderId = @intSalesOrderId 
-GROUP BY intSalesOrderId
+IF @strTransactionType = 'Invoice'
+	BEGIN
+		INSERT INTO @tblSOToUpdate
+		SELECT DISTINCT SOD.intSalesOrderId
+		FROM tblARInvoiceDetail ID
+		INNER JOIN tblSOSalesOrderDetail SOD ON ID.intSalesOrderDetailId = SOD.intSalesOrderDetailId
+		WHERE ID.intSalesOrderDetailId IS NOT NULL
+		  AND ID.intInvoiceId = @intTransactionId
+	END
+ELSE IF @strTransactionType = 'Inventory'
+	BEGIN
+		INSERT INTO @tblSOToUpdate
+		SELECT DISTINCT SOD.intSalesOrderId
+		FROM tblICInventoryShipmentItem ISI
+		INNER JOIN tblSOSalesOrderDetail SOD ON ISI.intLineNo = SOD.intSalesOrderDetailId AND ISI.intOrderId = SOD.intSalesOrderId
+		WHERE ISI.intLineNo IS NOT NULL
+		  AND ISI.intOrderId IS NOT NULL
+		  AND ISI.intInventoryShipmentId = @intTransactionId
+	END
+ELSE
+	BEGIN
+		INSERT INTO @tblSOToUpdate
+		SELECT @intSalesOrderId
+	END
 
-IF (@dblTotalQtyShipped = 0)
-	SET @strOrderStatus = 'Open'
-ELSE IF @dblTotalQtyShipped < @dblTotalQtyOrdered
-	SET @strOrderStatus = 'Partial'
-ELSE IF @dblTotalQtyShipped = @dblTotalQtyOrdered OR @dblTotalQtyShipped > @dblTotalQtyOrdered
-	SET @strOrderStatus = 'Closed'
+WHILE EXISTS (SELECT TOP 1 NULL FROM @tblSOToUpdate)
+	BEGIN
+		DECLARE @intSOToUpdate INT = NULL
+		
+		SELECT TOP 1 @intSOToUpdate = intId FROM @tblSOToUpdate
+		SET @dblTotalQtyOrdered = 0
+		SET @dblTotalQtyShipped = 0
 
-UPDATE tblSOSalesOrder
-SET strOrderStatus = @strOrderStatus
-	, dtmProcessDate = GETDATE()
-	, ysnProcessed   = CASE WHEN @strOrderStatus <> 'Open' THEN 1 ELSE 0 END
-	, ysnShipped     = CASE WHEN @strOrderStatus = 'Open' THEN 0 ELSE ysnShipped END
-WHERE intSalesOrderId = @intSalesOrderId
+		SELECT @dblTotalQtyOrdered = SUM(dblQtyOrdered)
+			 , @dblTotalQtyShipped = SUM(CASE WHEN dblQtyShipped > dblQtyOrdered THEN dblQtyOrdered ELSE dblQtyShipped END) 
+		FROM tblSOSalesOrderDetail WHERE intSalesOrderId = @intSOToUpdate 
+		GROUP BY intSalesOrderId
+
+		IF (@dblTotalQtyShipped = 0)
+			SET @strOrderStatus = 'Open'
+		ELSE IF @dblTotalQtyShipped < @dblTotalQtyOrdered
+			SET @strOrderStatus = 'Partial'
+		ELSE IF @dblTotalQtyShipped = @dblTotalQtyOrdered OR @dblTotalQtyShipped > @dblTotalQtyOrdered
+			SET @strOrderStatus = 'Closed'
+
+		UPDATE tblSOSalesOrder
+		SET strOrderStatus = @strOrderStatus
+			, dtmProcessDate = GETDATE()
+			, ysnProcessed   = CASE WHEN @strOrderStatus <> 'Open' THEN 1 ELSE 0 END
+			, ysnShipped     = CASE WHEN @strOrderStatus = 'Open' THEN 0 ELSE ysnShipped END
+		WHERE intSalesOrderId = @intSOToUpdate
+
+		DELETE FROM @tblSOToUpdate WHERE intId = @intSOToUpdate
+	END
 		
 	RETURN;
 END
