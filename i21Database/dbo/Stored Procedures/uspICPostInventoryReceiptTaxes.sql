@@ -90,6 +90,26 @@ BEGIN
 			LEFT JOIN dbo.tblICInventoryTransactionType TransType
 				ON TransType.intTransactionTypeId = @intTransactionTypeId
 	WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
+	UNION ALL 
+	SELECT	DISTINCT 
+			ChargeItem.intChargeId
+			,ItemLocation.intItemLocationId
+			,NULL
+			,TaxCode.intPurchaseTaxAccountId
+			,@strBatchId
+	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge ChargeItem
+				ON Receipt.intInventoryReceiptId = ChargeItem.intInventoryReceiptId
+			INNER JOIN dbo.tblICItemLocation ItemLocation
+				ON ItemLocation.intItemId = ChargeItem.intChargeId
+				AND ItemLocation.intLocationId = Receipt.intLocationId							
+			INNER JOIN dbo.tblICInventoryReceiptChargeTax ChargeTaxes
+				ON ReceiptItem.intInventoryReceiptChargeId = ChargeTaxes.intInventoryReceiptChargeId
+			INNER JOIN dbo.tblSMTaxCode TaxCode
+				ON TaxCode.intTaxCodeId = ChargeTaxes.intTaxCodeId
+			LEFT JOIN dbo.tblICInventoryTransactionType TransType
+				ON TransType.intTransactionTypeId = @intTransactionTypeId
+	WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
+
 	;
 
 END 

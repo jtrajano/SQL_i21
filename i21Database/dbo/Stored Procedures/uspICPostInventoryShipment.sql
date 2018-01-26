@@ -776,6 +776,50 @@ BEGIN
 			IF @intReturnValue < 0 GOTO With_Rollback_Exit
 		END
 	END 
+
+	-- Post the Taxes from the Other Charges
+	BEGIN 
+		INSERT INTO @GLEntries (
+			[dtmDate] 
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+			,[dblDebitForeign]	
+			,[dblDebitReport]	
+			,[dblCreditForeign]	
+			,[dblCreditReport]	
+			,[dblReportingRate]	
+			,[dblForeignRate]
+			,[strRateType]
+		)	
+		EXEC dbo.uspICPostInventoryShipmentTaxes 
+			@intTransactionId
+			,@strBatchId
+			,@intEntityUserSecurityId
+			,@INVENTORY_SHIPMENT_TYPE
+			,1	
+	END
 END   
 
 --------------------------------------------------------------------------------------------  
@@ -882,6 +926,52 @@ BEGIN
 				,@INVENTORY_SHIPMENT_TYPE
 				,@ysnPost
 				
+			IF @intReturnValue < 0 GOTO With_Rollback_Exit
+		END
+
+		-- Unpost the Taxes from the Other Charges
+		BEGIN 
+			INSERT INTO @GLEntries (
+				[dtmDate] 
+				,[strBatchId]
+				,[intAccountId]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[strDescription]
+				,[strCode]
+				,[strReference]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[dtmDateEntered]
+				,[dtmTransactionDate]
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[ysnIsUnposted]
+				,[intUserId]
+				,[intEntityId]
+				,[strTransactionId]
+				,[intTransactionId]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]
+				,[intConcurrencyId]
+				,[dblDebitForeign]	
+				,[dblDebitReport]	
+				,[dblCreditForeign]	
+				,[dblCreditReport]	
+				,[dblReportingRate]	
+				,[dblForeignRate]
+				,[strRateType]
+			)	
+			EXEC dbo.uspICPostInventoryShipmentTaxes 
+				@intTransactionId
+				,@strBatchId
+				,@intEntityUserSecurityId
+				,@INVENTORY_SHIPMENT_TYPE
+				,0
+
 			IF @intReturnValue < 0 GOTO With_Rollback_Exit
 		END
 
