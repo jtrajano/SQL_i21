@@ -6162,6 +6162,7 @@
     <Build Include="dbo\Tables\tblCTSequenceAmendmentLog.sql" />
     <Build Include="dbo\Functions\fnCTGetAvgSamplePropertyValue.sql" />
     <Build Include="dbo\Views\vyuTMMobileBillingOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetLotDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

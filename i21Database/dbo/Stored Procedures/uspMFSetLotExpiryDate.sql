@@ -203,6 +203,7 @@ BEGIN TRY
 			,@intSourceTransactionTypeId
 			,@intUserId
 			,@intInventoryAdjustmentId OUTPUT
+			,@strDescription
 
 		EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmDate
 			,@intTransactionTypeId = 18
