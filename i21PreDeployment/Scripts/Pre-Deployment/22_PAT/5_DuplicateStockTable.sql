@@ -5,6 +5,8 @@ BEGIN
 	IF EXISTS(SELECT TOP 1 1 FROM [dbo].[tblPATCustomerStock]) AND ((SELECT CASE WHEN MAX(strVersionNo) like '17%' THEN 1 ELSE 0 END FROM tblSMBuildNumber) = 1)
 	BEGIN
 		EXEC('
+			IF EXISTS(SELECT 1 FROM sys.tables WHERE name = ''tmptblPATCustomerStock'') DROP TABLE tmptblPATCustomerStock
+
 			CREATE TABLE [dbo].[tmptblPATCustomerStock](
 				[inttmpCustomerStockId] [int] IDENTITY(1,1) NOT NULL,
 				[intCustomerStockId] [int] NULL,

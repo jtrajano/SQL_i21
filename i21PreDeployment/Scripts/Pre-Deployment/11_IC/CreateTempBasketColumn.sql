@@ -4,6 +4,7 @@ BEGIN
 	EXEC('
 		IF EXISTS(SELECT TOP 1 1 FROM tblICItem WHERE strType = ''Bundle'' AND ysnIsBasket = 1)
 		BEGIN
+			IF EXISTS(SELECT 1 FROM sys.tables WHERE name = ''tmptblICItem'') DROP TABLE tmptblICItem
 
 			CREATE TABLE tmptblICItem (
 				[inttmptblICItemId] [INT] IDENTITY(1,1) NOT NULL,
