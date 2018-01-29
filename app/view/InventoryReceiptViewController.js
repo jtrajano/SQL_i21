@@ -7503,7 +7503,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var current = me.getViewModel().data.current;
         var receiptItemCount = 0;
         
+        
         var currentCurrencyId = current.get('intCurrencyId');
+        var strReceiptType = current.get('strReceiptType');
         currencyCurrencyId = currentCurrencyId ? currentCurrencyId : 0;
 
         if (current){
@@ -7517,7 +7519,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }
         }
 
-        if (receiptItemCount > 0 && currencyCurrencyId != functionalCurrencyId){
+        if (receiptItemCount > 0 && currencyCurrencyId != functionalCurrencyId && strReceiptType != 'Inventory Return'){
             var buttonAction = function (button) {
                 if (button === 'yes') {
                     var items = current.tblICInventoryReceiptItems().data.items; 
