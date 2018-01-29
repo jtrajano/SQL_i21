@@ -6155,6 +6155,9 @@
     <Build Include="dbo\Views\vyuICGetShipmentChargeTaxDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspSMRefreshUserRoleMenus.sql" />
     <Build Include="dbo\Stored Procedures\uspSMRefreshContactRoleMenus.sql" />
+    <Build Include="dbo\Tables\tblSMLogoPreference.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMGetLogoPreference.sql" />
+
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
