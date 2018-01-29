@@ -50,6 +50,7 @@
     [intConcurrencyId]                      INT             CONSTRAINT [DF_tblCFNetwork_intConcurrencyId] DEFAULT ((1)) NULL,
     [strDownloadFileName]                   NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strAllowExemptionsOnExtAndRetailTrans] NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strExportValidURL]					    NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [ysnPostForeignSales]                   BIT             NULL,
     CONSTRAINT [PK_tblCFNetwork] PRIMARY KEY CLUSTERED ([intNetworkId] ASC),
     CONSTRAINT [FK_tblCFNetwork_tblARCustomer] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
