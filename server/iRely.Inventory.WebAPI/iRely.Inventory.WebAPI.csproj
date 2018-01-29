@@ -407,6 +407,7 @@
     <Compile Include="Controllers\ImportLogController.cs" />
     <Compile Include="Controllers\ImportLogDetailController.cs" />
     <Compile Include="Controllers\InventoryCountDetailController.cs" />
+    <Compile Include="Controllers\InventoryShipmentChargeTaxController.cs" />
     <Compile Include="Controllers\InventoryReceiptChargeTaxController.cs" />
     <Compile Include="Controllers\ImportDataController.cs" />
     <Compile Include="Controllers\InventoryReceiptItemLotController.cs" />
@@ -463,6 +464,7 @@
     <Compile Include="Controllers\StorageUnitTypeController.cs" />
     <Compile Include="Controllers\TagController.cs" />
     <Compile Include="Controllers\UnitMeasureController.cs" />
+    <Compile Include="Controllers\InventoryShipmentItemLotController.cs" />    
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>

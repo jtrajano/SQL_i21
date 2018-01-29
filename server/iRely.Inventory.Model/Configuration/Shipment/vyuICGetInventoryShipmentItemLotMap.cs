@@ -39,7 +39,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strLotTracking).HasColumnName("strLotTracking");
             this.Property(t => t.intCommodityId).HasColumnName("intCommodityId");
             this.Property(t => t.strOrderUOM).HasColumnName("strOrderUOM");
-            this.Property(t => t.strUnitMeasure).HasColumnName("strUnitMeasure");
+            this.Property(t => t.strItemUOM).HasColumnName("strItemUOM");
             this.Property(t => t.dblItemUOMConv).HasColumnName("dblItemUOMConv").HasPrecision(38, 20);
             this.Property(t => t.strUnitType).HasColumnName("strUnitType");
             this.Property(t => t.strWeightUOM).HasColumnName("strWeightUOM");
@@ -59,14 +59,16 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intSubLocationId).HasColumnName("intSubLocationId");
             this.Property(t => t.strSubLocationName).HasColumnName("strSubLocationName");
             this.Property(t => t.intStorageLocationId).HasColumnName("intStorageLocationId");
-            this.Property(t => t.strStorageLocationName).HasColumnName("strStorageLocationName");
-            this.Property(t => t.dblLotQty).HasColumnName("dblLotQty").HasPrecision(38, 20);
+            this.Property(t => t.strStorageLocation).HasColumnName("strStorageLocation");
+            this.Property(t => t.dblQuantityShipped).HasColumnName("dblQuantityShipped").HasPrecision(38, 20);
             this.Property(t => t.strLotUOM).HasColumnName("strLotUOM");
             this.Property(t => t.dblGrossWeight).HasColumnName("dblGrossWeight").HasPrecision(38, 20);
             this.Property(t => t.dblTareWeight).HasColumnName("dblTareWeight").HasPrecision(38, 20);
             this.Property(t => t.dblNetWeight).HasColumnName("dblNetWeight").HasPrecision(38, 20);
             this.Property(t => t.intCurrencyId).HasColumnName("intCurrencyId");
             this.Property(t => t.strCurrency).HasColumnName("strCurrency");
+            this.Property(t => t.dblAvailableQty).HasColumnName("dblAvailableQty").HasPrecision(38, 20);
+            this.Property(t => t.strWarehouseCargoNumber).HasColumnName("strWarehouseCargoNumber");
         }
     }
 }

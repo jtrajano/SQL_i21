@@ -31,7 +31,7 @@ namespace iRely.Inventory.Model
         public string strLotTracking { get; set; }
         public int? intCommodityId { get; set; }
         public string strOrderUOM { get; set; }
-        public string strUnitMeasure { get; set; }
+        public string strItemUOM { get; set; }
         public decimal? dblItemUOMConv { get; set; }
         public string strUnitType { get; set; }
         public string strWeightUOM { get; set; }
@@ -51,13 +51,15 @@ namespace iRely.Inventory.Model
         public int? intSubLocationId { get; set; }
         public string strSubLocationName { get; set; }
         public int? intStorageLocationId { get; set; }
-        public string strStorageLocationName { get; set; }
-        public decimal? dblLotQty { get; set; }
+        public string strStorageLocation { get; set; }
+        public decimal? dblQuantityShipped { get; set; }
         public string strLotUOM { get; set; }
         public decimal? dblGrossWeight { get; set; }
         public decimal? dblTareWeight { get; set; }
         public decimal? dblNetWeight { get; set; }
         public int? intCurrencyId { get; set; }
         public string strCurrency { get; set; }
+        public decimal? dblAvailableQty { get; set; }
+        public string strWarehouseCargoNumber { get; set;  }
     }
 }

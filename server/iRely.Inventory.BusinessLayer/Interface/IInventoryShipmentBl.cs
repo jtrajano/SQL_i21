@@ -21,5 +21,7 @@ namespace iRely.Inventory.BusinessLayer
         Task<SearchResult> SearchShipmentInvoice(GetParameter param);
         Task<SearchResult> SearchCustomerCurrency(GetParameter param, int? entityId);
         SaveResult UpdateShipmentInvoice();
+        Task<GetObjectResult> GetShipmentCharges(GetParameter param);
+        Task<GetObjectResult> GetShipmentItems(GetParameter param);
     }
 }

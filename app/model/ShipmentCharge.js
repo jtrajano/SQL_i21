@@ -5,6 +5,7 @@ Ext.define('Inventory.model.ShipmentCharge', {
     extend: 'iRely.BaseEntity',
 
     requires: [
+        'Inventory.model.ShipmentChargeTax',
         'Ext.data.Field'
     ],
 
@@ -19,6 +20,17 @@ Ext.define('Inventory.model.ShipmentCharge', {
                     role: 'tblICInventoryShipmentCharges',
                     storeConfig: {
                         complete: true,
+                        remoteFilter: true,
+                        proxy: {
+                            type: 'rest',
+                            api: {
+                                read: './inventory/api/inventoryshipment/getshipmentcharges'
+                            },
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data'
+                            }
+                        },
                         sortOnLoad: true,
                         sorters: {
                             direction: 'DESC',
@@ -44,7 +56,10 @@ Ext.define('Inventory.model.ShipmentCharge', {
         { name: 'intForexRateTypeId', type: 'int', allowNull: true },
         { name: 'strForexRateType', type: 'string'},
         { name: 'dblForexRate', type: 'float', allowNull: true }, 
-        { name: 'dblQuantity', type: 'float', allowNull: true }          
+        { name: 'dblQuantity', type: 'float', allowNull: true },
+        { name: 'dblTax', type: 'float', allowNull: true },
+        { name: 'ysnAccrue', type: 'boolean' },
+        { name: 'ysnPrice', type: 'boolean' }
     ],
 
     validators: [

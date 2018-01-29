@@ -10,6 +10,10 @@ namespace iRely.Inventory.Model
 {
     public class tblICInventoryShipmentCharge : BaseEntity
     {
+        public tblICInventoryShipmentCharge()
+        {
+            this.tblICInventoryShipmentChargeTaxes = new List<tblICInventoryShipmentChargeTax>();
+        }
         public int intInventoryShipmentChargeId { get; set; }
         public int intInventoryShipmentId { get; set; }
         public int? intContractId { get; set; }
@@ -20,6 +24,9 @@ namespace iRely.Inventory.Model
         public int? intCostUOMId { get; set; }
         public int? intCurrencyId { get; set; }
         public decimal? dblAmount { get; set; }
+        public decimal? dblAmountBilled { get; set; }
+        public decimal? dblAmountPaid { get; set; }
+        public decimal? dblAmountPriced { get; set; }
         public string strAllocatePriceBy { get; set; }
         public bool? ysnAccrue { get; set; }
         public int? intEntityVendorId { get; set; }
@@ -28,7 +35,11 @@ namespace iRely.Inventory.Model
         public int? intForexRateTypeId { get; set; }
         public decimal? dblForexRate { get; set; }
         public decimal? dblQuantity { get; set; }
-
+        public decimal? dblQuantityBilled { get; set; }
+        public decimal? dblQuantityPriced { get; set; }
+        public int? intTaxGroupId { get; set; }
+        public decimal? dblTax { get; set; }
+        public decimal? dblAdjustedTax { get; set; }
         private string _contractNo;
         [NotMapped]
         public string strContractNumber
@@ -218,7 +229,28 @@ namespace iRely.Inventory.Model
             }
         }
 
+        private string _chargeTaxGroup;
+        [NotMapped]
+        public string strTaxGroup
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_chargeTaxGroup))
+                    if (vyuICGetInventoryShipmentCharge != null)
+                        return vyuICGetInventoryShipmentCharge.strTaxGroup;
+                    else
+                        return null;
+                else
+                    return _chargeTaxGroup;
+            }
+            set
+            {
+                _chargeTaxGroup = value;
+            }
+        }
+
         public tblICInventoryShipment tblICInventoryShipment { get; set; }
         public vyuICGetInventoryShipmentCharge vyuICGetInventoryShipmentCharge { get; set; }
+        public ICollection<tblICInventoryShipmentChargeTax> tblICInventoryShipmentChargeTaxes { get; set; }
     }
 }

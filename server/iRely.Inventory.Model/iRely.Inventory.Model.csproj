@@ -179,9 +179,11 @@
     <Compile Include="Configuration\Receipt\vyuICInventoryReceiptLookUpMap.cs" />
     <Compile Include="Configuration\Receipt\vyuICInventoryReceiptTotals.cs" />
     <Compile Include="Configuration\Receipt\vyuICInventoryReceiptTotalsMap.cs" />
+    <Compile Include="Configuration\Shipment\tblICInventoryShipmentChargeTaxMap.cs" />
     <Compile Include="Configuration\Shipment\tblICInventoryShipmentChargeMap.cs" />
     <Compile Include="Configuration\Shipment\tblICInventoryShipmentItemLotMap.cs" />
     <Compile Include="Configuration\Shipment\tblICInventoryShipmentItemMap.cs" />
+    <Compile Include="Configuration\Shipment\vyuICGetInventoryShipmentChargeTaxMap.cs" />
     <Compile Include="Configuration\Shipment\vyuICGetInventoryShipmentChargeMap.cs" />
     <Compile Include="Configuration\Shipment\vyuICGetInventoryShipmentItemLotMap.cs" />
     <Compile Include="Configuration\Shipment\vyuICGetInventoryShipmentItemMap.cs" />
@@ -229,9 +231,11 @@
     <Compile Include="Metadata\Receipt\vyuICGetReceiptAddTransferOrder.cs" />
     <Compile Include="Metadata\Receipt\vyuICInventoryReceiptItemLookUp.cs" />
     <Compile Include="Metadata\Receipt\vyuICInventoryReceiptLookUp.cs" />
+    <Compile Include="Metadata\Shipment\tblICInventoryShipmentChargeTax.cs" />
     <Compile Include="Metadata\Shipment\tblICInventoryShipmentCharge.cs" />
     <Compile Include="Metadata\Shipment\tblICInventoryShipmentItem.cs" />
     <Compile Include="Metadata\Shipment\tblICInventoryShipmentItemLot.cs" />
+    <Compile Include="Metadata\Shipment\vyuICGetInventoryShipmentChargeTax.cs" />
     <Compile Include="Metadata\tblICImportLogDetail.cs" />
     <Compile Include="Metadata\tblICImportLog.cs" />
     <Compile Include="Metadata\tblICM2MComputation.cs" />

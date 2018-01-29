@@ -1754,7 +1754,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         xtype: 'gridcolumn',
                                                                         itemId: 'colLotID',
                                                                         width: 110,
-                                                                        dataIndex: 'strLotID',
+                                                                        dataIndex: 'strLotNumber',
                                                                         text: 'Lot Number',
                                                                         editor: {
                                                                             xtype: 'gridcombobox',
@@ -1921,8 +1921,9 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        flex: 1,
                                                                         itemId: 'colWarehouseCargoNumber',
-                                                                        width: 130,
+                                                                        minWidth: 100,
                                                                         dataIndex: 'strWarehouseCargoNumber',
                                                                         text: 'Warehouse Cargo No.',
                                                                         editor: {
@@ -2015,6 +2016,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colContract',
+                                                        width: 100,
                                                         text: 'Contract No',
                                                         editor: {
                                                             xtype: 'gridcombobox',
@@ -2042,6 +2044,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                         headerDrillDownClick: 'onItemHeaderClick',
                                                         headerDrillDownText: 'Open',
                                                         itemId: 'colOtherCharge',
+                                                        width: 100,
                                                         text: 'Other Charges',
                                                         editor: {
                                                             xtype: 'gridcombobox',
@@ -2074,11 +2077,13 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colOnCostType',
+                                                        width: 100,
                                                         text: 'On Cost'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colCostMethod',
+                                                        width: 100,
                                                         text: 'Price Method',
                                                         editor: {
                                                             xtype: 'gridcombobox',
@@ -2098,6 +2103,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colChargeCurrency',
+                                                        width: 100,
                                                         text: 'Cost Currency',
                                                         editor: {
                                                             xtype: 'gridcombobox',
@@ -2186,6 +2192,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colQuantity',
+                                                        width: 85,
                                                         text: 'Quantity',
                                                         editor: {
                                                             xtype: 'numericfield',
@@ -2195,6 +2202,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colRate',
+                                                        width: 85,
                                                         text: 'Rate',
                                                         editor: {
                                                             xtype: 'numericfield',
@@ -2204,6 +2212,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colCostUOM',
+                                                        width: 90,
                                                         text: 'UOM',
                                                         editor: {
                                                             xtype: 'gridcombobox',
@@ -2242,6 +2251,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colChargeAmount',
+                                                        width: 100,
                                                         text: 'Amount',
                                                         editor: {
                                                             xtype: 'numericfield',
@@ -2301,6 +2311,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colAllocatePriceBy',
+                                                        width: 100,
                                                         text: 'Allocate Price By',
                                                         editor: {
                                                             xtype: 'gridcombobox',
@@ -2316,6 +2327,47 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                             displayField: 'strAllocatePriceBy',
                                                             valueField: 'strAllocatePriceBy'
                                                         }
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colChargeTaxGroup',
+                                                        width: 100,
+                                                        dataIndex: 'strTaxGroup',
+                                                        text: 'Tax Group',
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intTaxGroupId',
+                                                                    dataType: 'numeric',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strTaxGroup',
+                                                                    dataType: 'string',
+                                                                    text: 'Tax Group',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strDescription',
+                                                                    dataType: 'string',
+                                                                    text: 'Description',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            itemId: 'cboChargeTaxGroup',
+                                                            displayField: 'strTaxGroup',
+                                                            selectOnTab: false,
+                                                            valueField: 'strTaxGroup'
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        flex: 1,
+                                                        itemId: 'colChargeTax',
+                                                        minWidth: 90,
+                                                        dataIndex: 'dblTax',
+                                                        text: 'Tax'
                                                     }
                                                 ],
                                                 viewConfig: {

@@ -20,10 +20,16 @@ Ext.define('Inventory.model.ShipmentItem', {
                     role: 'tblICInventoryShipmentItems',
                     storeConfig: {
                         complete: true,
-                        sortOnLoad: true,
-                        sorters: {
-                            direction: 'DESC',
-                            property: 'intSort'
+                        remoteFilter: true,
+                        proxy: {
+                            type: 'rest',
+                            api: {
+                                read: './inventory/api/inventoryshipment/getshipmentitems'
+                            },
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data'
+                            }
                         }
                     }
                 }
@@ -47,10 +53,6 @@ Ext.define('Inventory.model.ShipmentItem', {
 
         { name: 'intDestinationWeightId', type: 'int', allowNull: true },
         { name: 'intDestinationGradeId', type: 'int', allowNull: true },
-        //{ name: 'intDestinationQtyUOMId', type: 'int', allowNull: true },
-        //{ name: 'strDestinationQtyUOM', type: 'string' },
-        //{ name: 'dblDestinationGrossQty', type: 'float' },
-        //{ name: 'dblDestinationNetQty', type: 'float' },
         { name: 'strItemNo', type: 'string'},
         { name: 'strUnitMeasure', type: 'string'},
         { name: 'strWeightUOM', type: 'string'},

@@ -15,6 +15,7 @@ Ext.define('Inventory.model.ShipmentItemLot', {
         { name: 'intInventoryShipmentItemId', type: 'int',
             reference: {
                 type: 'Inventory.model.ShipmentItem',
+                role: 'tblICInventoryShipmentItem',
                 inverse: {
                     role: 'tblICInventoryShipmentItemLots',
                     storeConfig: {
@@ -23,8 +24,32 @@ Ext.define('Inventory.model.ShipmentItemLot', {
                         sorters: {
                             direction: 'DESC',
                             property: 'intSort'
+                        },
+                        autoLoad: false,
+                        proxy: {
+                            api: {
+                                create: './inventory/api/inventoryshipmentitemlot/post',
+                                read: './inventory/api/inventoryshipmentitemlot/searchshipmentlots',
+                                update: './inventory/api/inventoryshipmentitemlot/put',
+                                destroy: './inventory/api/inventoryshipmentitemlot/delete'
+                            },
+                            type: 'rest',
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data',
+                                messageProperty: 'message'
+                            },
+                            writer: {
+                                type: 'json',
+                                allowSingle: false
+                            },
+                            sortOnLoad: true,
+                            sorters: {
+                                direction: 'DESC',
+                                property: 'intSort'
+                            }
                         }
-                    }
+                    }                    
                 }
             }
         },
@@ -46,7 +71,7 @@ Ext.define('Inventory.model.ShipmentItemLot', {
         { name: 'strWarehouseCargoNumber', type: 'string' },
         { name: 'intSort', type: 'int', allowNull: true },
         { name: 'strLotId', type: 'string'},
-        { name: 'strUnitMeasure', type: 'string'},
+        { name: 'strItemUOM', type: 'string'},
         { name: 'dblWeightPerQty', type: 'float' }
     ],
 

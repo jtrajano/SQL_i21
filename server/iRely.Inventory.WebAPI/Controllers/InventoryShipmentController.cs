@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 using iRely.Inventory.Model;
 using iRely.Inventory.BusinessLayer;
+using System.Web.Http.ModelBinding;
 
 namespace iRely.Inventory.WebApi
 {
@@ -170,6 +171,20 @@ namespace iRely.Inventory.WebApi
                     button = result.Exception.Button.ToString()
                 }
             });
+        }
+
+        [HttpGet]
+        public async Task<HttpResponseMessage> GetShipmentItems([ModelBinder] GetParameter param)
+        {
+            var result = await _bl.GetShipmentItems(param);
+            return Request.CreateResponse(HttpStatusCode.OK, result);
+        }
+
+        [HttpGet]
+        public async Task<HttpResponseMessage> GetShipmentCharges([ModelBinder] GetParameter param)
+        {
+            var result = await _bl.GetShipmentCharges(param);
+            return Request.CreateResponse(HttpStatusCode.OK, result);
         }
     }
 }

@@ -296,6 +296,9 @@ namespace iRely.Inventory.Model
 
             modelBuilder.Configurations.Add(new tblICItemSubstituteMap());
             modelBuilder.Configurations.Add(new vyuICGetSubstituteItemMap());
+
+            modelBuilder.Configurations.Add(new tblICInventoryShipmentChargeTaxMap());
+            modelBuilder.Configurations.Add(new vyuICGetInventoryShipmentChargeTaxMap());
         }
     }
 }

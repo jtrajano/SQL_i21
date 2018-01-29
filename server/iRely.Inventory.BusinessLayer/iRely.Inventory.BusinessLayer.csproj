@@ -248,6 +248,8 @@
     <Compile Include="Implementation\ImportLogBl.cs" />
     <Compile Include="Implementation\ImportLogDetailBl.cs" />
     <Compile Include="Implementation\InventoryCountDetailBl.cs" />
+    <Compile Include="Implementation\InventoryShipmentItemLotBl.cs" />
+    <Compile Include="Implementation\InventoryShipmentChargeTaxBl.cs" />
     <Compile Include="Implementation\InventoryReceiptChargeTaxBl.cs" />
     <Compile Include="Implementation\ItemSubstituteBl.cs" />
     <Compile Include="Implementation\ItemAddOnBl.cs" />
@@ -289,6 +291,8 @@
     <Compile Include="Interface\IImportLogBl.cs" />
     <Compile Include="Interface\IImportLogDetailBl.cs" />
     <Compile Include="Interface\IInventoryCountDetailBl.cs" />
+    <Compile Include="Interface\IInventoryShipmentItemLotBl.cs" />
+    <Compile Include="Interface\IInventoryShipmentChargeTaxBl.cs" />
     <Compile Include="Interface\IInventoryReceiptChargeTaxBl.cs" />
     <Compile Include="Interface\IItemSubstituteBl.cs" />
     <Compile Include="Interface\IItemAddOnBl.cs" />

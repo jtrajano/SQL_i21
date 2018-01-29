@@ -28,7 +28,8 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         'ContractManagement.store.WeightGradeBuffered',
         'i21.store.CurrencyExchangeRateTypeBuffered',
         'GeneralLedger.controls.RecapTab',
-        'GeneralLedger.controls.PostHistory'        
+        'GeneralLedger.controls.PostHistory',
+        'i21.store.TaxGroupBuffered',
         //'AccountsReceivable.common.ARFunctions'
     ],
 
@@ -234,6 +235,9 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         },
         currency: {
             type: 'currencybuffered'
+        },
+        taxGroup: {
+            type: 'smtaxgroupbuffered'
         }        
     },
 
@@ -639,6 +643,14 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
                     break;
 
             }        
-        }              
+        },
+        readyOnlyChargeTaxGroup: function(get) {
+            if(get('grdCharges.selection.ysnAccrue')) {
+                return false;
+            }
+            else {
+                return true;
+            }
+        }
     } 
 });

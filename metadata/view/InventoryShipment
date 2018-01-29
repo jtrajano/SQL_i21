@@ -4630,7 +4630,7 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "dataIndex": "strLotID",
+                                                                "dataIndex": "strLotNumber",
                                                                 "flex": null,
                                                                 "itemId": "colLotID",
                                                                 "text": "Lot Number",
@@ -5110,10 +5110,10 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "dataIndex": "strWarehouseCargoNumber",
-                                                                "flex": null,
+                                                                "flex": 1,
                                                                 "itemId": "colWarehouseCargoNumber",
-                                                                "text": "Warehouse Cargo No.",
-                                                                "width": 130
+                                                                "minWidth": 100,
+                                                                "text": "Warehouse Cargo No."
                                                             },
                                                             "configAlternates": {
                                                                 "dataIndex": "datafield",
@@ -5121,7 +5121,8 @@
                                                                 "itemId": "string",
                                                                 "text": "string",
                                                                 "width": "auto",
-                                                                "scrollable": "boolean"
+                                                                "scrollable": "boolean",
+                                                                "minWidth": "number"
                                                             },
                                                             "name": "MyColumn2",
                                                             "designerId": "08d4ee5b-d6ba-4b4d-a43c-5af3d65d1109",
@@ -5418,13 +5419,15 @@
                                             "userConfig": {
                                                 "flex": null,
                                                 "itemId": "colContract",
-                                                "text": "Contract No"
+                                                "text": "Contract No",
+                                                "width": 100
                                             },
                                             "configAlternates": {
                                                 "flex": "number",
                                                 "itemId": "string",
                                                 "text": "string",
-                                                "scrollable": "boolean"
+                                                "scrollable": "boolean",
+                                                "width": "auto"
                                             },
                                             "name": "MyColumn70",
                                             "designerId": "b837a8da-dae7-4ac5-9a43-f022ecd6c722",
@@ -5485,11 +5488,11 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "flex": null,
                                                 "headerDrillDownClick": "onItemHeaderClick",
                                                 "headerDrillDownText": "Open",
                                                 "itemId": "colOtherCharge",
-                                                "text": "Other Charges"
+                                                "text": "Other Charges",
+                                                "width": 100
                                             },
                                             "configAlternates": {
                                                 "flex": "number",
@@ -5497,7 +5500,8 @@
                                                 "headerDrillDownText": "string",
                                                 "itemId": "string",
                                                 "text": "string",
-                                                "scrollable": "boolean"
+                                                "scrollable": "boolean",
+                                                "width": "auto"
                                             },
                                             "name": "MyColumn5",
                                             "designerId": "fc361cc3-8fb9-47c0-bacd-c9e25c7efc2b",
@@ -5586,13 +5590,15 @@
                                             "userConfig": {
                                                 "flex": null,
                                                 "itemId": "colOnCostType",
-                                                "text": "On Cost"
+                                                "text": "On Cost",
+                                                "width": 100
                                             },
                                             "configAlternates": {
                                                 "flex": "number",
                                                 "itemId": "string",
                                                 "text": "string",
-                                                "scrollable": "boolean"
+                                                "scrollable": "boolean",
+                                                "width": "auto"
                                             },
                                             "name": "MyColumn46",
                                             "designerId": "909c030c-83bf-44cf-a089-fe200213158c"
@@ -5607,13 +5613,15 @@
                                             "userConfig": {
                                                 "flex": null,
                                                 "itemId": "colCostMethod",
-                                                "text": "Price Method"
+                                                "text": "Price Method",
+                                                "width": 100
                                             },
                                             "configAlternates": {
                                                 "flex": "number",
                                                 "itemId": "string",
                                                 "text": "string",
-                                                "scrollable": "boolean"
+                                                "scrollable": "boolean",
+                                                "width": "auto"
                                             },
                                             "name": "MyColumn11",
                                             "designerId": "1dcffb56-9aa7-4cb4-9c68-21b043708bc3",
@@ -5670,12 +5678,14 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "itemId": "colChargeCurrency",
-                                                "text": "Cost Currency"
+                                                "text": "Cost Currency",
+                                                "width": 100
                                             },
                                             "configAlternates": {
                                                 "itemId": "string",
                                                 "text": "string",
-                                                "scrollable": "boolean"
+                                                "scrollable": "boolean",
+                                                "width": "auto"
                                             },
                                             "name": "MyColumn55",
                                             "designerId": "82a72f8e-9096-4c27-98b9-8e8403884f9d",
@@ -5902,14 +5912,16 @@
                                                 "flex": null,
                                                 "format": null,
                                                 "itemId": "colQuantity",
-                                                "text": "Quantity"
+                                                "text": "Quantity",
+                                                "width": 85
                                             },
                                             "configAlternates": {
                                                 "flex": "number",
                                                 "format": "string",
                                                 "itemId": "string",
                                                 "text": "string",
-                                                "scrollable": "boolean"
+                                                "scrollable": "boolean",
+                                                "width": "auto"
                                             },
                                             "name": "MyNumberColumn26",
                                             "designerId": "66726572-7f95-47b7-af16-28252a0f76c2",
@@ -5954,14 +5966,16 @@
                                                 "flex": null,
                                                 "format": null,
                                                 "itemId": "colRate",
-                                                "text": "Rate"
+                                                "text": "Rate",
+                                                "width": 85
                                             },
                                             "configAlternates": {
                                                 "flex": "number",
                                                 "format": "string",
                                                 "itemId": "string",
                                                 "text": "string",
-                                                "scrollable": "boolean"
+                                                "scrollable": "boolean",
+                                                "width": "auto"
                                             },
                                             "name": "MyNumberColumn45",
                                             "designerId": "980a9b7c-d039-47fb-8bea-dcf4f086d06c",
@@ -6005,13 +6019,15 @@
                                             "userConfig": {
                                                 "flex": null,
                                                 "itemId": "colCostUOM",
-                                                "text": "UOM"
+                                                "text": "UOM",
+                                                "width": 90
                                             },
                                             "configAlternates": {
                                                 "flex": "number",
                                                 "itemId": "string",
                                                 "text": "string",
-                                                "scrollable": "boolean"
+                                                "scrollable": "boolean",
+                                                "width": "auto"
                                             },
                                             "name": "MyColumn45",
                                             "designerId": "8c9c4122-b60c-443a-b2c9-9112d9b344fa",
@@ -6088,13 +6104,15 @@
                                             "userConfig": {
                                                 "flex": null,
                                                 "itemId": "colChargeAmount",
-                                                "text": "Amount"
+                                                "text": "Amount",
+                                                "width": 100
                                             },
                                             "configAlternates": {
                                                 "flex": "number",
                                                 "itemId": "string",
                                                 "text": "string",
-                                                "scrollable": "boolean"
+                                                "scrollable": "boolean",
+                                                "width": "auto"
                                             },
                                             "name": "MyNumberColumn46",
                                             "designerId": "59fc20a5-db1f-4c31-8aa6-37e91a6b04e6",
@@ -6290,53 +6308,6 @@
                                             "designerId": "7344297e-a8a8-4ca5-9a5d-727f5204d7b1"
                                         },
                                         {
-                                            "type": "Ext.view.Table",
-                                            "reference": {
-                                                "name": "viewConfig",
-                                                "type": "object"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "itemId": "grvCharges"
-                                            },
-                                            "configAlternates": {
-                                                "itemId": "string",
-                                                "scrollable": "boolean"
-                                            },
-                                            "name": "MyGridView41",
-                                            "designerId": "b86521fe-d283-429a-9de5-bde3210eba35"
-                                        },
-                                        {
-                                            "type": "Ext.grid.plugin.CellEditing",
-                                            "reference": {
-                                                "name": "plugins",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "clicksToEdit": 1,
-                                                "designer|displayName": "cepCharges",
-                                                "pluginId": "cepCharges"
-                                            },
-                                            "configAlternates": {
-                                                "clicksToEdit": "number",
-                                                "designer|displayName": "string",
-                                                "pluginId": "string"
-                                            },
-                                            "name": "MyCellEditingPlugin22",
-                                            "designerId": "8109640d-0ee5-490f-bfd7-c2e2507ec77a"
-                                        },
-                                        {
-                                            "type": "Ext.selection.CheckboxModel",
-                                            "reference": {
-                                                "name": "selModel",
-                                                "type": "object"
-                                            },
-                                            "codeClass": null,
-                                            "name": "MyCheckboxSelectionModel12",
-                                            "designerId": "4c3edbb7-9d52-4154-b525-6470c3a77921"
-                                        },
-                                        {
                                             "type": "Ext.grid.column.Column",
                                             "reference": {
                                                 "name": "columns",
@@ -6346,13 +6317,15 @@
                                             "userConfig": {
                                                 "flex": null,
                                                 "itemId": "colAllocatePriceBy",
-                                                "text": "Allocate Price By"
+                                                "text": "Allocate Price By",
+                                                "width": 100
                                             },
                                             "configAlternates": {
                                                 "flex": "number",
                                                 "itemId": "string",
                                                 "text": "string",
-                                                "scrollable": "boolean"
+                                                "scrollable": "boolean",
+                                                "width": "auto"
                                             },
                                             "name": "MyColumn",
                                             "designerId": "bfd3d180-b9ed-43d0-ba31-53d787a9907e",
@@ -6399,6 +6372,158 @@
                                                     ]
                                                 }
                                             ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "strTaxGroup",
+                                                "itemId": "colChargeTaxGroup",
+                                                "text": "Tax Group",
+                                                "width": 100
+                                            },
+                                            "configAlternates": {
+                                                "dataIndex": "datafield",
+                                                "itemId": "string",
+                                                "text": "string",
+                                                "width": "auto",
+                                                "scrollable": "boolean"
+                                            },
+                                            "name": "MyColumn61",
+                                            "designerId": "9ea2dc63-7ed5-42af-9641-17557621a0a6",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "{",
+                                                            "dataIndex: 'intTaxGroupId',",
+                                                            "dataType: 'numeric',",
+                                                            "hidden: true",
+                                                            "},",
+                                                            "{",
+                                                            "dataIndex: 'strTaxGroup',",
+                                                            "dataType: 'string',",
+                                                            "text: 'Tax Group',",
+                                                            "flex: 1",
+                                                            "},",
+                                                            "{",
+                                                            "dataIndex: 'strDescription',",
+                                                            "dataType: 'string',",
+                                                            "text: 'Description',",
+                                                            "flex: 1",
+                                                            "}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strTaxGroup",
+                                                        "itemId": "cboChargeTaxGroup",
+                                                        "selectOnTab": false,
+                                                        "valueField": "strTaxGroup"
+                                                    },
+                                                    "configAlternates": {
+                                                        "columns": "array",
+                                                        "designer|createAlias": "string",
+                                                        "displayField": "datafield",
+                                                        "itemId": "string",
+                                                        "valueField": "datafield",
+                                                        "scrollable": "boolean",
+                                                        "selectOnTab": "boolean"
+                                                    },
+                                                    "name": "MyComboBox24",
+                                                    "designerId": "e356b6d5-20ec-4721-81f8-89942fbac2f6",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Number",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "dblTax",
+                                                "flex": 1,
+                                                "itemId": "colChargeTax",
+                                                "minWidth": 90,
+                                                "text": "Tax"
+                                            },
+                                            "configAlternates": {
+                                                "dataIndex": "datafield",
+                                                "itemId": "string",
+                                                "text": "string",
+                                                "width": "auto",
+                                                "scrollable": "boolean",
+                                                "flex": "number",
+                                                "minWidth": "number"
+                                            },
+                                            "name": "MyNumberColumn18",
+                                            "designerId": "92ffefc8-d1cd-4c25-8a4a-336af29c8311"
+                                        },
+                                        {
+                                            "type": "Ext.view.Table",
+                                            "reference": {
+                                                "name": "viewConfig",
+                                                "type": "object"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "itemId": "grvCharges"
+                                            },
+                                            "configAlternates": {
+                                                "itemId": "string",
+                                                "scrollable": "boolean"
+                                            },
+                                            "name": "MyGridView41",
+                                            "designerId": "b86521fe-d283-429a-9de5-bde3210eba35"
+                                        },
+                                        {
+                                            "type": "Ext.grid.plugin.CellEditing",
+                                            "reference": {
+                                                "name": "plugins",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "clicksToEdit": 1,
+                                                "designer|displayName": "cepCharges",
+                                                "pluginId": "cepCharges"
+                                            },
+                                            "configAlternates": {
+                                                "clicksToEdit": "number",
+                                                "designer|displayName": "string",
+                                                "pluginId": "string"
+                                            },
+                                            "name": "MyCellEditingPlugin22",
+                                            "designerId": "8109640d-0ee5-490f-bfd7-c2e2507ec77a"
+                                        },
+                                        {
+                                            "type": "Ext.selection.CheckboxModel",
+                                            "reference": {
+                                                "name": "selModel",
+                                                "type": "object"
+                                            },
+                                            "codeClass": null,
+                                            "name": "MyCheckboxSelectionModel12",
+                                            "designerId": "4c3edbb7-9d52-4154-b525-6470c3a77921"
                                         }
                                     ]
                                 }
