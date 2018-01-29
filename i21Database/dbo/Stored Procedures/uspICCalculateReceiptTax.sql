@@ -249,6 +249,7 @@ BEGIN
 		,@ShipFromId
 		,@TaxGroupId
 		,@FreightTermId
+		,@CostUOMId
 END 
 
 -- Calculate the tax per line item 
