@@ -58,13 +58,14 @@ SELECT
 	,strCurrencyDescription			= CUR.strDescription
 	,dblWithholdingTax				= CASE WHEN (I.strTransactionType  IN ('Credit Memo','Customer Prepayment', 'Overpayment'))
 									  THEN
-									  CASE WHEN ysnPaid = 1 THEN (dblPayment - (dblPayment - (dblPayment * (dblWithholdPercent / 100)))) * -1 ELSE (dblAmountDue - (dblAmountDue - (dblAmountDue * (dblWithholdPercent / 100)))) * -1 END
+									  CASE WHEN ysnPaid = 1 THEN (I.dblPayment - (I.dblPayment - (I.dblPayment * (dblWithholdPercent / 100)))) * -1 ELSE (I.dblAmountDue - (I.dblAmountDue - (I.dblAmountDue * (dblWithholdPercent / 100)))) * -1 END
 									  ELSE
-									  CASE WHEN ysnPaid = 1 THEN (dblPayment - (dblPayment - (dblPayment * (dblWithholdPercent / 100))))  ELSE dblAmountDue - (dblAmountDue - (dblAmountDue * (dblWithholdPercent / 100))) END
+									  CASE WHEN ysnPaid = 1 THEN (I.dblPayment - (I.dblPayment - (I.dblPayment * (dblWithholdPercent / 100))))  ELSE I.dblAmountDue - (I.dblAmountDue - (I.dblAmountDue * (dblWithholdPercent / 100))) END
 									  END
 	,ysnMailSent					= CASE WHEN (SELECT COUNT(1) FROM tblSMTransaction trans INNER JOIN tblSMActivity tsa on tsa.intTransactionId = trans.intTransactionId WHERE trans.intRecordId = intInvoiceId AND tsa.strType = 'Email' AND tsa.strStatus = 'Sent') > 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT)  END 
 	,strStatus						=  CASE WHEN EMAILSETUP.intEmailSetupCount > 0 THEN 'Ready' ELSE 'Email	 not Configured' END	
 	,dtmForgiveDate					= I.dtmForgiveDate
+	,strSalesOrderNumber			= SO.strSalesOrderNumber
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (
 	SELECT intEntityId
@@ -142,3 +143,5 @@ OUTER APPLY (
 ) EMAILSETUP
 INNER JOIN tblSMCompanyLocation companylocation
 	ON companylocation.intCompanyLocationId = I.intCompanyLocationId
+LEFT JOIN tblSOSalesOrder SO
+	ON I.intSalesOrderId = SO.intSalesOrderId
