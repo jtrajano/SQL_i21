@@ -19,10 +19,7 @@ SELECT
 	,dblTaxableState		 = SUM(dblTaxableState) /* box 16 */
 	,dblStateTax			 = SUM(dblStateTax) /* box 17 */
 	,dblTaxableLocal		 = SUM(dblTaxableLocal) /* box 18 */
-	,dblLocalTax			 = CASE WHEN (ISNULL(strLocality, '') <> ISNULL(strLocality2, '')) 
-								THEN SUM(ISNULL(dblLocalTax, 0)) + SUM(ISNULL(dblLocalTax2, 0)) 
-								ELSE SUM(ISNULL(dblLocalTax, 0)) 
-								END  /* box 19 */
+	,dblLocalTax			 = SUM(dblLocalTax) + SUM(ISNULL(dblLocalTax2, 0)) /* box 19 */
 FROM
 	vyuPREmployeeW2 
 	LEFT JOIN
@@ -40,6 +37,6 @@ FROM
 	ON vyuPREmployeeW2.intYear = tblDefferedCompensation.intYear
 GROUP BY
 	vyuPREmployeeW2.intYear
-	,strLocality
-	,strLocality2
 	,tblDefferedCompensation.dblDefferedCompensation
+
+GO
