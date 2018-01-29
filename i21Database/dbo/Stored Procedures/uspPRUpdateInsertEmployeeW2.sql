@@ -163,10 +163,14 @@ BEGIN
 			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Medicare' AND ysnVoid = 0) MEDTAX OUTER APPLY
 		(SELECT intRank = DENSE_RANK() OVER (ORDER BY st.strCode), strState = st.strCode, strEmployerStateTaxID, dblTotal = SUM(tax.dblTotal) 
 			FROM vyuPRPaycheckTax tax 
-			INNER JOIN tblPRTypeTaxState st ON tax.intTypeTaxStateId = st.intTypeTaxStateId
-			INNER JOIN tblPRTypeTax tt ON tax.intTypeTaxId = tt.intTypeTaxId
+				INNER JOIN tblPRTypeTaxState st ON tax.intTypeTaxStateId = st.intTypeTaxStateId
+				INNER JOIN tblPRTypeTax tt ON tax.intTypeTaxId = tt.intTypeTaxId
 			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId 
-			AND tax.strPaidBy = 'Employee' AND tax.strCalculationType = 'USA State' AND ysnVoid = 0 GROUP BY st.strCode, strEmployerStateTaxID) STATETAX OUTER APPLY
+				AND tax.strPaidBy = 'Employee' AND tax.strCalculationType = 'USA State' AND ysnVoid = 0 
+				AND (tax.intTypeTaxStateId NOT IN (41, 45)
+					OR ((tax.intTypeTaxStateId = 41 AND tax.strVal1 = 'None' AND tax.strVal2 = 'None')
+					OR (tax.intTypeTaxStateId = 45 AND tax.strVal2 = 'None (None)' AND tax.strVal3 = 'None (None)'))) 
+			GROUP BY st.strCode, strEmployerStateTaxID) STATETAX OUTER APPLY
 		(SELECT intRank = DENSE_RANK() OVER (ORDER BY lc.strLocalName), strState = st.strCode, strLocal = lc.strLocalName, strEmployerStateTaxID, dblTotal = SUM(tax.dblTotal) 
 			FROM vyuPRPaycheckTax tax INNER JOIN tblPRTypeTaxState st ON tax.intTypeTaxStateId = st.intTypeTaxStateId
 				INNER JOIN tblPRTypeTax tt ON tax.intTypeTaxId = tt.intTypeTaxId
@@ -317,10 +321,14 @@ BEGIN
 			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Medicare' AND ysnVoid = 0) MEDTAX OUTER APPLY
 		(SELECT intRank = DENSE_RANK() OVER (ORDER BY st.strCode), strState = st.strCode, strEmployerStateTaxID, dblTotal = SUM(tax.dblTotal) 
 			FROM vyuPRPaycheckTax tax 
-			INNER JOIN tblPRTypeTaxState st ON tax.intTypeTaxStateId = st.intTypeTaxStateId
-			INNER JOIN tblPRTypeTax tt ON tax.intTypeTaxId = tt.intTypeTaxId
+				INNER JOIN tblPRTypeTaxState st ON tax.intTypeTaxStateId = st.intTypeTaxStateId
+				INNER JOIN tblPRTypeTax tt ON tax.intTypeTaxId = tt.intTypeTaxId
 			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId 
-			AND tax.strPaidBy = 'Employee' AND tax.strCalculationType = 'USA State' AND ysnVoid = 0 GROUP BY st.strCode, strEmployerStateTaxID) STATETAX OUTER APPLY
+				AND tax.strPaidBy = 'Employee' AND tax.strCalculationType = 'USA State' AND ysnVoid = 0 
+				AND (tax.intTypeTaxStateId NOT IN (41, 45)
+					OR ((tax.intTypeTaxStateId = 41 AND tax.strVal1 = 'None' AND tax.strVal2 = 'None')
+					OR (tax.intTypeTaxStateId = 45 AND tax.strVal2 = 'None (None)' AND tax.strVal3 = 'None (None)'))) 
+			GROUP BY st.strCode, strEmployerStateTaxID) STATETAX OUTER APPLY
 		(SELECT intRank = DENSE_RANK() OVER (ORDER BY lc.strLocalName), strState = st.strCode, strLocal = lc.strLocalName, strEmployerStateTaxID, dblTotal = SUM(tax.dblTotal) 
 			FROM vyuPRPaycheckTax tax INNER JOIN tblPRTypeTaxState st ON tax.intTypeTaxStateId = st.intTypeTaxStateId
 				INNER JOIN tblPRTypeTax tt ON tax.intTypeTaxId = tt.intTypeTaxId
