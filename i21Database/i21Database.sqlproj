@@ -5980,7 +5980,7 @@
     <Build Include="dbo\Functions\fnARGetDefaultCommentTable.sql" />
     <Build Include="dbo\Tables\tblSMLogoPreference.sql" />
     <Build Include="dbo\Tables\tblTFTaxAuthorityBeginEndInventory.sql" />
-    <Build Include="dbo\Views\vyuTFGetTaxAuthorityBeginEndInventoryDetail.sql" />
+    <Build Include="dbo\Views\vyuTFGetTaxAuthorityBeginEndInventory.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRegenerateTask.sql" />
     <Build Include="dbo\Views\vyuMFOrderHeaderNotMapped.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportSampleLabelbyControlPoint.sql" />
