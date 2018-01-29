@@ -212,6 +212,7 @@ BEGIN
 					,@ShipFromId
 					,@TaxGroupId
 					,@FreightTermId
+					,@CostUOMId
 			END 
 
 			CLOSE loopReceiptChargeItems;
