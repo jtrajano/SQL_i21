@@ -3,18 +3,20 @@
 	,@intOrderHeaderId INT OUTPUT
 AS
 BEGIN TRY
-	DECLARE @strErrMsg NVARCHAR(MAX)
-	DECLARE @intInventoryShipmentItemId INT
-	DECLARE @strInventoryShipmentNo NVARCHAR(100)
 	DECLARE @tblMFOrderHeader TABLE (intOrderHeaderId INT)
-	DECLARE @intShipFromLocationId INT
-	DECLARE @strOrderNo NVARCHAR(100)
-	DECLARE @OrderHeaderInformation AS OrderHeaderInformation
-	DECLARE @OrderDetailInformation AS OrderDetailInformation
-	DECLARE @intStageLocationId INT
-	DECLARE @dtmCurrentDate DATETIME
-	DECLARE @strUserName NVARCHAR(100)
+	DECLARE @strErrMsg NVARCHAR(MAX)
+		,@intInventoryShipmentItemId INT
+		,@strInventoryShipmentNo NVARCHAR(100)
+		,@intShipFromLocationId INT
+		,@strOrderNo NVARCHAR(100)
+		,@OrderHeaderInformation AS OrderHeaderInformation
+		,@OrderDetailInformation AS OrderDetailInformation
+		,@intStageLocationId INT
+		,@dtmCurrentDate DATETIME
+		,@strUserName NVARCHAR(100)
 		,@strReferenceNo NVARCHAR(50)
+		,@strItemNo NVARCHAR(50)
+		,@intItemId INT
 
 	SELECT @strInventoryShipmentNo = strShipmentNumber
 		,@intShipFromLocationId = intShipFromLocationId
@@ -110,7 +112,7 @@ BEGIN TRY
 		,SHI.intItemUOMId
 		,dbo.fnMFConvertQuantityToTargetItemUOM(SHI.intItemUOMId, IU.intItemUOMId, SHI.dblQuantity)
 		,IU.intItemUOMId
-		,dbo.fnMFConvertQuantityToTargetItemUOM(SHI.intItemUOMId, IU.intItemUOMId, 1)--1/(Case When IU.dblUnitQty=0 then 1 else IU.dblUnitQty End)
+		,dbo.fnMFConvertQuantityToTargetItemUOM(SHI.intItemUOMId, IU.intItemUOMId, 1) --1/(Case When IU.dblUnitQty=0 then 1 else IU.dblUnitQty End)
 		,I.intUnitPerLayer
 		,I.intLayerPerPallet
 		,(
@@ -125,9 +127,48 @@ BEGIN TRY
 	FROM dbo.tblICInventoryShipment ISH
 	JOIN tblICInventoryShipmentItem SHI ON SHI.intInventoryShipmentId = ISH.intInventoryShipmentId
 	JOIN dbo.tblICItem I ON I.intItemId = SHI.intItemId
-	JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
+	Left JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
 		AND IU.intUnitMeasureId = I.intWeightUOMId
 	WHERE ISH.intInventoryShipmentId = @intInventoryShipmentId
+
+	IF EXISTS (
+			SELECT *
+			FROM @OrderDetailInformation
+			WHERE intWeightUOMId IS NULL
+			)
+	BEGIN
+		SELECT @intItemId = intItemId
+		FROM @OrderDetailInformation
+		WHERE intWeightUOMId IS NULL
+
+		SELECT @strItemNo = strItemNo
+		FROM tblICItem
+		WHERE intItemId = @intItemId
+
+		SELECT @strErrMsg = 'Weight is not configured for the item ' + @strItemNo + ' in the item configuration'
+
+		RAISERROR (
+				@strErrMsg
+				,16
+				,1
+				)
+
+		RETURN
+	END
+
+	IF NOT EXISTS (
+			SELECT *
+			FROM @OrderDetailInformation
+			)
+	BEGIN
+		RAISERROR (
+				'There is no item to create a pick list for the selected inventory shipment.'
+				,16
+				,1
+				)
+
+		RETURN
+	END
 
 	EXEC dbo.uspMFCreateStagingOrderDetail @OrderDetailInformation = @OrderDetailInformation
 

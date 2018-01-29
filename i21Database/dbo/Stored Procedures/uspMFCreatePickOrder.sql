@@ -457,13 +457,27 @@ BEGIN TRY
 						AND DATEPART(dy, ri.dtmValidTo)
 					)
 				)
-			AND ri.intConsumptionMethodId IN (1)
+			AND ri.intConsumptionMethodId = 1
 		--,2
 		GROUP BY ri.intItemId
 			,ri.intItemUOMId
 			,I.intUnitPerLayer
 			,I.intLayerPerPallet
 			,C.intCategoryId
+
+		IF NOT EXISTS (
+				SELECT *
+				FROM @OrderDetail
+				)
+		BEGIN
+			RAISERROR (
+					'There is no input item to create a pick list. Please check the recipe input item set up.'
+					,16
+					,1
+					)
+
+			RETURN
+		END
 
 		DECLARE @tblMFRequiredQty TABLE (
 			intItemId INT
@@ -542,7 +556,7 @@ BEGIN TRY
 						THEN 0
 					ELSE dblWeight - R.dblRemainingQty
 					END
-				,dblSurplusQtyInStageLocation=R.dblRemainingQty
+				,dblSurplusQtyInStageLocation = R.dblRemainingQty
 			FROM @OrderDetail OD
 			LEFT JOIN @tblMFRemainingQty R ON R.intItemId = OD.intItemId
 		END
