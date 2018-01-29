@@ -450,5 +450,6 @@
     <None Include="dbo\Stored Procedures\uspARImportDefaultTaxItems.sql" />
     <Build Include="dbo\Functions\fnCTConvertYNToBit.sql" />
     <Build Include="dbo\Functions\fnCTConvertToDateTime.sql" />
+    <None Include="dbo\Stored Procedures\uspRKImportFutureMarket.sql" />
   </ItemGroup>
 </Project>

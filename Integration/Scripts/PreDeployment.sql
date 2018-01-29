@@ -260,6 +260,9 @@
 :r "..\dbo\Stored Procedures\uspTRImportSupplyPointRackPriceEquation.sql"
 :r "..\dbo\Stored Procedures\uspTRImportTruck.sql" 
 
+--RISK MANAGEMENT
+:r "..\dbo\Stored Procedures\uspRKImportFutureMarket.sql" 
+
 --LOGISTICS
 :r "..\dbo\Stored Procedures\uspLGImportEquipmentType.sql"
 

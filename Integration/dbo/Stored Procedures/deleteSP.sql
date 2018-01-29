@@ -66,3 +66,6 @@ IF EXISTS (select top 1 1 from sys.procedures where name = 'uspARImportDefaultTa
 	DROP PROCEDURE uspARImportDefaultTaxItems
 GO
 
+IF EXISTS(select top 1 1 from sys.procedures where name = 'uspRKImportFutureMarket')
+	DROP PROCEDURE uspRKImportFutureMarket
+GO
