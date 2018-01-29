@@ -39,6 +39,7 @@
     [intRouteId] INT NULL, 
     [ysnReceived] BIT NOT NULL DEFAULT 0, 
     [ysnLeakCheckRequired] BIT NOT NULL DEFAULT 0, 
+    [dtmReceivedDate] DATETIME NULL, 
     CONSTRAINT [PK_tblTMDispatch] PRIMARY KEY CLUSTERED ([intDispatchID] ASC),
     CONSTRAINT [FK_tblTMDispatch_tblTMSite1] FOREIGN KEY ([intSiteID]) REFERENCES [dbo].[tblTMSite] ([intSiteID]),
 	CONSTRAINT [FK_tblTMDispatch_tblLGRoute] FOREIGN KEY ([intRouteId]) REFERENCES [dbo].[tblLGRoute] ([intRouteId])

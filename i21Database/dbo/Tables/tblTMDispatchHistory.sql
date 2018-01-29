@@ -42,6 +42,7 @@
     [ysnLeakCheckRequired]		BIT NOT NULL DEFAULT 0, 
 	[dblOriginalPercentLeft]	NUMERIC(18, 6) NULL, 
 	[dtmCreated]				DATETIME NOT NULL DEFAULT GETDATE(),
+    [dtmReceivedDate] DATETIME NULL, 
     CONSTRAINT [PK_tblTMDispatchHistory] PRIMARY KEY CLUSTERED ([intDispatchSyncId] ASC), 
 );
 
