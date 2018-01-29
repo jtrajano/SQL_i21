@@ -214,6 +214,7 @@ BEGIN
 			INSERT INTO tblARCustomerAgingStagingTable (
 				  strCustomerName
 				, strCustomerNumber
+				, strCustomerInfo 
 				, strInvoiceNumber
 				, strRecordNumber
 				, intInvoiceId

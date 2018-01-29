@@ -6,6 +6,7 @@
 	,@ItemId				INT
 	,@ShipFromLocationId	INT
 	,@IncludeExemptedCodes	BIT
+	,@UOMId					INT = NULL
 )
 RETURNS @returntable TABLE
 (
@@ -37,6 +38,9 @@ BEGIN
 
 	SET @ZeroDecimal = 0.000000
 	SELECT @ItemCategoryId = intCategoryId FROM tblICItem WHERE intItemId = @ItemId 
+
+	IF (ISNULL(@UOMId,0) = 0)
+		SET @UOMId = [dbo].[fnGetItemStockUOM](@ItemId) 
 	
 	INSERT INTO @returntable
 	SELECT
@@ -70,7 +74,7 @@ BEGIN
 	CROSS APPLY
 		[dbo].[fnGetVendorTaxCodeExemptionDetails](@VendorId, @TransactionDate, TG.[intTaxGroupId], TC.[intTaxCodeId], TC.[intTaxClassId], TC.[strState], @ItemId, @ItemCategoryId, @ShipFromLocationId) E
 	CROSS APPLY
-		[dbo].[fnGetTaxCodeRateDetails](TC.[intTaxCodeId], @TransactionDate, NULL) R		
+		[dbo].[fnGetTaxCodeRateDetails](TC.[intTaxCodeId], @TransactionDate, @UOMId) R		
 	WHERE
 		TG.intTaxGroupId = @TaxGroupId
 		AND (ISNULL(E.ysnTaxExempt,0) = 0 OR ISNULL(@IncludeExemptedCodes,0) = 1)

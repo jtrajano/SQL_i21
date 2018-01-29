@@ -30,6 +30,7 @@ SET ANSI_WARNINGS OFF
 	
 DECLARE  @ZeroDecimal	NUMERIC(18, 6)	
 		,@InvoiceDate	DATETIME
+		,@ItemUOMId		INT
 		,@InitTranCount	INT
 		,@Savepoint		NVARCHAR(32)
 
@@ -39,7 +40,8 @@ SET @Savepoint = SUBSTRING(('ARAddInvoiceTaxDetail' + CONVERT(VARCHAR, @InitTran
 SET @ZeroDecimal = 0.000000
 
 SELECT 
-	@InvoiceDate = [dtmDate]
+	@InvoiceDate = ARI.[dtmDate]
+	,@ItemUOMId	 = ARID.[intItemUOMId]
 FROM
 	tblARInvoice ARI
 INNER JOIN
@@ -85,7 +87,7 @@ SELECT TOP 1
 FROM
 	tblSMTaxCode
 	CROSS APPLY
-		[dbo].[fnGetTaxCodeRateDetails]([intTaxCodeId], @InvoiceDate, NULL) TRD		
+		[dbo].[fnGetTaxCodeRateDetails]([intTaxCodeId], @InvoiceDate, @ItemUOMId) TRD		
 WHERE
 	[intTaxCodeId] = @TaxCodeId
 
@@ -155,7 +157,7 @@ BEGIN TRY
 	FROM
 		tblSMTaxCode
 	CROSS APPLY
-		[dbo].[fnGetTaxCodeRateDetails]([intTaxCodeId], @InvoiceDate, NULL) TRD		
+		[dbo].[fnGetTaxCodeRateDetails]([intTaxCodeId], @InvoiceDate, @ItemUOMId) TRD		
 	WHERE
 		[intTaxCodeId] = @TaxCodeId 
 			

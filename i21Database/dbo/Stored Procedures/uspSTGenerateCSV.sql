@@ -13,7 +13,6 @@ BEGIN
 
 		--// CREATE storeId table
 		DECLARE @tblStoreIdList TABLE (intCount int,intStoreId int)
-		
 
 		--// START Insert StoreId to table
 		DECLARE @strCharacter CHAR(1)
@@ -38,7 +37,6 @@ BEGIN
 			 SET @strStoreIdList = SUBSTRING(@strStoreIdList, @EndIndex + 1, LEN(@strStoreIdList))
 		END
 		--// END Insert StoreId to table
-
 
 		--// CHECK if stores has address
 		IF EXISTS(SELECT * FROM tblSTStore WHERE intStoreId IN (SELECT intStoreId FROM @tblStoreIdList) AND (strAddress = '' OR strAddress IS NULL))
@@ -70,6 +68,7 @@ BEGIN
 			--START tblSTstgRebatesPMMorris
 			IF(@strTableName = 'tblSTstgRebatesPMMorris')
 			BEGIN
+
 				SET @Delimiter = '|'
 
 				-- GET week ending date (SATURDAY)
@@ -93,14 +92,15 @@ BEGIN
 				--		+ '' + @Delimiter + '0' + @Delimiter
 				--		+ (CASE WHEN TR.strTrpPaycode = 'CASH' THEN CAST(TR.dblTrlLineTot AS NVARCHAR(50)) ELSE '0' END) + CHAR(13)
 				INSERT INTO tblSTstgRebatesPMMorris
-				SELECT STRT.intRetailAccountNumber AS intRCN
+				SELECT DISTINCT STRT.intRetailAccountNumber AS intRCN
 								, replace(convert(NVARCHAR, DATEADD(DAY, (DATEDIFF(DAY, @NextDayID, @dtmEndingDate) / 7) * 7 + 7, @NextDayID), 111), '/', '') as dtmWeekEndingDate
 								, replace(convert(NVARCHAR, dtmDate, 111), '/', '') as dtmTransactionDate 
 								, convert(NVARCHAR, dtmDate, 108) as strTransactionTime
 								, intTermMsgSN as strTransactionIdCode
 								, ST.intStoreNo as strStoreNumber
 								, ST.strDescription as strStoreName
-								, ST.strAddress as strStoreAddress
+								--, ST.strAddress as strStoreAddress
+								, REPLACE(REPLACE(REPLACE(ST.strAddress, CHAR(10), ''), CHAR(13), ''), @Delimiter, '') as strStoreAddress
 								, ST.strCity as strStoreCity
 								, UPPER(LEFT(ST.strState, 2)) as strStoreState
 								, ST.strZipCode as intStoreZipCode
@@ -124,7 +124,7 @@ BEGIN
 								, '' as strMFGDealNameTHREE
 								, 0 as dblMFGDealDiscountAmountTHREE
 								, CASE WHEN strTrpPaycode = 'CASH' THEN dblTrlLineTot ELSE 0 END as dblFinalSalesPrice
-							FROM tblSTTranslogRebates TR
+				FROM tblSTTranslogRebates TR
 				JOIN tblSTStore ST ON ST.intStoreId = TR.intStoreId
 				JOIN tblSTRetailAccount STRT ON STRT.intStoreId = ST.intStoreId AND STRT.intEntityId = @intVendorId
 				JOIN tblEMEntity EM ON EM.intEntityId = @intVendorId
@@ -163,39 +163,43 @@ BEGIN
 					--		+ TR.strTrLoyaltyProgramTrloAccount + @Delimiter + TR.strTrLoyaltyProgramProgramID + @Delimiter
 					--		+ CHAR(13)
 					INSERT INTO tblSTstgRebatesRJReynolds
-					SELECT CASE WHEN ST.strDescription IS NULL THEN '' ELSE REPLACE(ST.strDescription, ',', ' ') END as strOutletName
+					SELECT DISTINCT (CASE WHEN ST.strDescription IS NULL THEN '' ELSE REPLACE(ST.strDescription, @Delimiter, '') END) as strOutletName
 								, ST.intStoreNo as intOutletNumber
-								, CASE WHEN ST.strAddress IS NULL THEN '' ELSE REPLACE(ST.strAddress, ',', ' ') END as strOutletAddressOne
+								, REPLACE(REPLACE(REPLACE(ST.strAddress, CHAR(10), ''), CHAR(13), ''), @Delimiter, '') as strOutletAddressOne
 								, '' as strOutletAddressTwo
-								, CASE WHEN ST.strCity IS NULL THEN '' ELSE ST.strCity END as strOutletCity
+								, CASE WHEN ST.strCity IS NULL THEN '' ELSE REPLACE(ST.strCity, @Delimiter, '') END as strOutletCity
 								, UPPER(LEFT(ST.strState, 2)) as strOutletState
 								,  CASE WHEN ST.strZipCode IS NULL THEN '' ELSE ST.strZipCode END as strOutletZipCode
-								--, FORMAT(CAST(dtmDate AS datetime), 'yyyy-MM-dd-HH:mm:ss') as strTransactionDateTime
 								, replace(convert(NVARCHAR, dtmDate, 120), ' ', '-') as strTransactionDateTime
 								, CAST(intTermMsgSN AS NVARCHAR(50)) as strMarketBasketTransactionId
-
-								--, ROW_NUMBER() OVER(PARTITION BY intTermMsgSN, strTrpPaycode ORDER BY intTranslogId) as strScanTransactionId
 								, CAST(intScanTransactionId AS NVARCHAR(20)) as strScanTransactionId
-
 								, CAST(intTrTickNumPosNum AS NVARCHAR(50)) as strRegisterId
 								, dblTrlQty as intQuantity
-								, dblTrlLineTot as dblPrice
+								, dblTrlUnitPrice as dblPrice
 								, strTrlUPC as strUpcCode
 								, REPLACE(strTrlDesc, ',', ' ') as strUpcDescription
 								, 'PACK' as strUnitOfMeasure
 								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN 'Y' ELSE 'N' END as strPromotionFlag
-								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN 'Y' ELSE 'N' END as strOutletMultipackFlag
 
-								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN 
-									(CASE WHEN dblTrlQty > 1 THEN dblTrlQty ELSE 2 END)
-								  ELSE 0 END as intOutletMultipackQuantity
+								, CASE WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer')
+									THEN 'Y' ELSE 'N' END as strOutletMultipackFlag
+								, CASE WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer')
+									THEN dblTrlMatchLineTrlMatchQuantity ELSE 0 END as intOutletMultipackQuantity
+									--(CASE WHEN dblTrlQty > 1 THEN dblTrlQty ELSE 2 END)
+								  --ELSE 0 END as intOutletMultipackQuantity
+								, CASE WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer')
+									THEN dblTrlMatchLineTrlPromoAmount ELSE 0 END as dblOutletMultipackDiscountAmount
 
-								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN dblTrpAmt ELSE 0 END as dblOutletMultipackDiscountAmount
-								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN 'COUPONS' ELSE '' END as strAccountPromotionName
-								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN dblTrpAmt ELSE 0 END as dblAccountDiscountAmount
+								--, CASE WHEN strTrpPaycode IN ('COUPONS') THEN 'COUPONS' ELSE '' END as strAccountPromotionName --21
+								, CASE WHEN strTrlDesc like '% OFF%' THEN strTrlDesc ELSE '' END as strAccountPromotionName --21
+								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN dblTrpAmt ELSE 0 END as dblAccountDiscountAmount --22
+
 								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN dblTrpAmt ELSE 0 END as dblManufacturerDiscountAmount
-								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN strTrpPaycode ELSE '' END as strCouponPid
-								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN dblTrpAmt ELSE 0 END as dblCouponAmount
+
+								, CASE WHEN strTrpPaycode = 'COUPONS' AND strTrlMatchLineTrlPromotionIDPromoType IS NULL AND strTrlUPCEntryType = 'scanned'
+									THEN strTrlUPC ELSE '' END as strCouponPid --24
+								, CASE WHEN strTrpPaycode = 'COUPONS' AND strTrlMatchLineTrlPromotionIDPromoType IS NULL AND strTrlUPCEntryType = 'scanned'
+									THEN dblTrpAmt ELSE 0 END as dblCouponAmount --25
 
 								, 'N' as strManufacturerMultipackFlag
 								, 0 as intManufacturerMultipackQuantity

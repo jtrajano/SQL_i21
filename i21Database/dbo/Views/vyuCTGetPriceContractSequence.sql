@@ -65,7 +65,8 @@ AS
 				CD.intDiscountScheduleCodeId,
 				SI.strDescription				AS	strDiscountScheduleCode,
 				CD.strPricingType,
-				CD.dblRatio
+				CD.dblRatio,
+				CD.dblAppliedQty
 
 		FROM	vyuCTContractSequence		CD
 		JOIN	tblICItemUOM				IM	ON	IM.intItemUOMId		=	CD.intPriceItemUOMId
@@ -115,7 +116,8 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId		=	SC.intItemId
 				CD.intDiscountScheduleCodeId,
 				SI.strDescription				AS	strDiscountScheduleCode,
 				CD.strPricingType,
-				CD.dblRatio
+				CD.dblRatio,
+				CD.dblAppliedQty
 
 		FROM	tblCTContractHeader			CH	
 		JOIN	tblCTContractType			CT	ON	CT.intContractTypeId	=	CH.intContractTypeId

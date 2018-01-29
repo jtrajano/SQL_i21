@@ -70,10 +70,13 @@ BEGIN TRY
 	FROM
 		@TaxDetails TD
 	INNER JOIN
+		tblARInvoiceDetail ARID
+			ON TD.[intDetailId] = ARID.[intInvoiceDetailId]
+	INNER JOIN
 		tblSMTaxCode SMTC
 			ON TD.[intTaxCodeId] = SMTC.[intTaxCodeId]
 	CROSS APPLY
-		[dbo].[fnGetTaxCodeRateDetails](SMTC.[intTaxCodeId], TD.[dtmDate], NULL) TRD		
+		[dbo].[fnGetTaxCodeRateDetails](SMTC.[intTaxCodeId], TD.[dtmDate], ARID.[intItemUOMId]) TRD		
 			
 END TRY
 BEGIN CATCH

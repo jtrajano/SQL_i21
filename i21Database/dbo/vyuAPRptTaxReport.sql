@@ -14,16 +14,10 @@ SELECT APB.strBillId
 	   ,SMC.strDescription
 	   ,TAXDETAIL.*
 	   ,dblTaxDifference = (TAXDETAIL.dblAdjustedTax - TAXDETAIL.dblTax) * [dbo].[fnAPGetVoucherAmountMultiplier](APB.intTransactionType)
-	   ,dblTaxAmount     = TAXDETAIL.dblAdjustedTax * [dbo].[fnAPGetVoucherAmountMultiplier](APB.intTransactionType)
+	   ,dblTaxAmount     = TAXTOTAL.dblTotalTax--TAXDETAIL.dblAdjustedTax * [dbo].[fnAPGetVoucherAmountMultiplier](APB.intTransactionType)
 	   ,dblNonTaxable    = (CASE WHEN TAXDETAIL.dblAdjustedTax = 0.000000 AND ISNULL(TAXTOTAL.dblTotalAdjustedTax, 0.000000) = 0.000000 THEN  (TAXDETAIL.dblSubTotal) / ISNULL(TAXTOTAL.intTaxCodeCount, 1.000000) ELSE 0.000000 END) * [dbo].[fnAPGetVoucherAmountMultiplier](APB.intTransactionType)
-	   ,dblTaxable       = (CASE WHEN TAXDETAIL.dblAdjustedTax > 0.000000 THEN  (TAXDETAIL.dblSubTotal) * (TAXDETAIL.dblAdjustedTax/ISNULL(TAXTOTAL.dblTotalAdjustedTax, 1.000000)) ELSE 0.000000 END) * [dbo].[fnAPGetVoucherAmountMultiplier](APB.intTransactionType)
-	   ,dblTotalVoucher = (
-						(CASE WHEN TAXDETAIL.dblAdjustedTax = 0.000000 AND ISNULL(TAXTOTAL.dblTotalAdjustedTax, 0.000000) = 0.000000 THEN  (TAXDETAIL.dblSubTotal) / ISNULL(TAXTOTAL.intTaxCodeCount, 1.000000) ELSE 0.000000 END)
-						+
-						(CASE WHEN TAXDETAIL.dblAdjustedTax > 0.000000 THEN  (TAXDETAIL.dblSubTotal) * (TAXDETAIL.dblAdjustedTax/ISNULL(TAXTOTAL.dblTotalAdjustedTax, 1.000000)) ELSE 0.000000 END)
-					   )
-					   * [dbo].[fnARGetInvoiceAmountMultiplier](APB.intTransactionType)
-
+	   ,dblTaxable       = TAXDETAIL.dblSubTotal--(CASE WHEN TAXDETAIL.dblAdjustedTax > 0.000000 THEN  (TAXDETAIL.dblSubTotal) * (TAXDETAIL.dblAdjustedTax/ISNULL(TAXTOTAL.dblTotalAdjustedTax, 1.000000)) ELSE 0.000000 END) * [dbo].[fnAPGetVoucherAmountMultiplier](APB.intTransactionType)
+	   ,dblTotalVoucher  = APB.dblTotal * [dbo].[fnARGetInvoiceAmountMultiplier](APB.intTransactionType)
 	   ,dblTaxCollected  = ISNULL(APB.dblTax, 0) * [dbo].[fnAPGetVoucherAmountMultiplier](APB.intTransactionType)
 FROM dbo.tblAPBill APB
 INNER JOIN dbo.tblAPVendor V ON APB.intEntityVendorId = V.intEntityId

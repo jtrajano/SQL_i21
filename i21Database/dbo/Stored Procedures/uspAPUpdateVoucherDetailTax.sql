@@ -43,7 +43,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 		,ysnIncludeExemptedCodes	BIT
 		,intFreightTermId			INT
 		,ysnExcludeCheckOff			BIT
-		,intBillDetailId			INT)
+		,intBillDetailId			INT
+		,intItemUOMId				INT)
 		
 	INSERT INTO @ParamTable
 		(intItemId
@@ -57,7 +58,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 		,ysnIncludeExemptedCodes
 		,intFreightTermId
 		,ysnExcludeCheckOff
-		,intBillDetailId)
+		,intBillDetailId
+		,intItemUOMId)
 	SELECT
 		 intItemId					= B.intItemId
 		,intVendorId				= A.intEntityVendorId
@@ -74,6 +76,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		,intFreightTermId			= NULL
 		,ysnExcludeCheckOff			= 0
 		,intBillDetailId			= B.intBillDetailId
+		,intItemUOMId				= B.intCostUOMId
 	FROM tblAPBill A
 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 	INNER JOIN @billDetailIds C ON B.intBillDetailId = C.intId		
@@ -121,7 +124,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 		,intVendorLocationId
 		,ysnIncludeExemptedCodes
 		,intFreightTermId
-		,ysnExcludeCheckOff) Taxes
+		,ysnExcludeCheckOff
+		,intItemUOMId) Taxes
 	WHERE Taxes.dblTax IS NOT NULL
 
 	UPDATE A

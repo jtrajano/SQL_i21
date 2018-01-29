@@ -26,6 +26,9 @@
 [intShippingAdviceReportFormat] INT NULL,
 [intInsuranceLetterReportFormat] INT NULL,
 [intCarrierShipmentOrderReportFormat] INT NULL,
+[intDebitNoteReportFormat] INT NULL,
+[intCreditNoteReportFormat] INT NULL,
+[intOrganicDeclarationReportFormat] INT NULL,
 [ysnAlertApprovedQty] [bit] NULL,
 [ysnUpdateVesselInfo] [bit] NULL,
 [ysnValidateExternalPONo] [bit] NULL,
@@ -48,6 +51,7 @@
 [ysnLoadContainerTypeByOrigin] BIT,
 [ysnRestrictIncreaseSeqQty] BIT,
 [intNumberOfDecimalPlaces] INT,
+[ysnFullHeaderLogo] BIT,
 
 CONSTRAINT [PK_tblLGCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId]), 
 CONSTRAINT [FK_tblLGCompanyPreference_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]),

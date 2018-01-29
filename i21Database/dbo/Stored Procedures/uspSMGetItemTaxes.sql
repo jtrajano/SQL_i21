@@ -14,6 +14,7 @@
 	,@DisregardExemptionSetup	BIT				= 0
 	,@CFSiteId					INT				= NULL
 	,@IsDeliver					BIT				= NULL
+	,@UOMId						INT				= NULL
 AS
 
 BEGIN
@@ -79,7 +80,7 @@ BEGIN
 				,[strTaxGroup]
 				,[strNotes]
 			FROM
-				[dbo].[fnGetTaxGroupTaxCodesForVendor](@TaxGroupId, @EntityId, @TransactionDate, @ItemId, @BillShipToLocationId, @IncludeExemptedCodes)
+				[dbo].[fnGetTaxGroupTaxCodesForVendor](@TaxGroupId, @EntityId, @TransactionDate, @ItemId, @BillShipToLocationId, @IncludeExemptedCodes, @UOMId)
 					
 			RETURN 1
 		END

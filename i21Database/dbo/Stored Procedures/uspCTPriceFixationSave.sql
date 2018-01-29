@@ -464,7 +464,7 @@ BEGIN TRY
 		ELSE
 		BEGIN
 			UPDATE	CD
-			SET		CD.intPricingTypeId		=	CASE WHEN CD.intPricingTypeId = 1 AND CH.intPricingTypeId <> 8 THEN 2 ELSE 8 END,
+			SET		CD.intPricingTypeId		=	CASE WHEN CH.intPricingTypeId <> 8 THEN 2 ELSE 8 END,
 					CD.dblFutures			=	NULL,
 					CD.dblCashPrice			=	NULL,	
 					CD.dblTotalCost			=	NULL,

@@ -6130,6 +6130,26 @@
     <Build Include="dbo\Tables\tblSCTicketLVStaging.sql" />
     <Build Include="dbo\Tables\tblICInventoryShipmentChargeTax.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryShipmentChargeTax.sql" />
+    <Build Include="dbo\Tables\tblCFTempCSUVehicle.sql" />
+    <Build Include="dbo\Tables\tblCFTempCSUCard.sql" />
+    <Build Include="dbo\Tables\tblCFTempCSUAuditLog.sql" />
+    <Build Include="dbo\Tables\tblCFTempAuditLog.sql" />
+    <Build Include="dbo\Tables\tblCFCSULog.sql" />
+    <Build Include="dbo\Tables\tblCFCSUAuditLog.sql" />
+    <Build Include="dbo\Views\vyuCFExportAccount.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFCardSynchronization.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCreateRCVForCreditMemo.sql" />
+    <Build Include="dbo\Tables\tblCFExportValidURL.sql" />
+    <Build Include="dbo\Stored Procedures\uspICIncreaseOpenPurchaseContractQty.sql" />
+    <Build Include="dbo\User Defined Types\ItemsOpenPurchaseContractTableType.sql" />
+    <Build Include="dbo\Tables\tblCTAmendmentApprovalLog.sql" />
+    <Build Include="dbo\Triggers\trgAfterUpdatetblCTAmendmentApproval.sql" />
+    <Build Include="dbo\Views\vyuCTAmendmentHistory.sql" />
+    <Build Include="dbo\Views\vyuCTAmendmentApprovalLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportAmendment.sql" />
+    <Build Include="dbo\Views\vyuARGetSalesOrderItems.sql" />
+    <Build Include="dbo\Tables\tblSCDeliverySheetHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMGetReportLabel.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

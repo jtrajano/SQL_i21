@@ -94,200 +94,200 @@ SELECT id							= NEWID()
 	 , dblSubCurrencyRate			= ISNULL(ISNULL(SHIPPEDITEMS.dblSubCurrencyRate, CAST(CURRENCY.intCent AS NUMERIC(18,6))), 1.000000)
 	 , strSubCurrency				= CURRENCY.strCurrency
 FROM (
-	SELECT strTransactionType				= 'Sales Order'
-		 , strTransactionNumber				= SO.strSalesOrderNumber
-		 , strShippedItemId					= 'arso:' + CAST(SO.intSalesOrderId AS NVARCHAR(250))
-		 , intEntityCustomerId				= SO.intEntityCustomerId
-		 , intCurrencyId					= SO.intCurrencyId
-		 , intSalesOrderId					= SO.intSalesOrderId
-		 , intSalesOrderDetailId			= SOD.intSalesOrderDetailId
-		 , strSalesOrderNumber				= SO.strSalesOrderNumber
-		 , dtmProcessDate					= SO.dtmDate
-		 , intInventoryShipmentId			= NULL
-		 , intInventoryShipmentItemId		= NULL
-		 , intInventoryShipmentChargeId		= NULL
-		 , strInventoryShipmentNumber		= ''	
-		 , intShipmentId					= NULL
-		 , strShipmentNumber				= NULL
-		 , intLoadId						= NULL
-		 , intLoadDetailId					= NULL
-		 , intLotId							= NULL
-		 , strLoadNumber					= NULL
-		 , intRecipeItemId 					= SOD.intRecipeItemId
-		 , intContractHeaderId				= SOD.intContractHeaderId
-		 , intContractDetailId				= SOD.intContractDetailId
-		 , intCompanyLocationId				= SO.intCompanyLocationId
-		 , intShipToLocationId				= SO.intShipToLocationId
-		 , intFreightTermId					= SO.intFreightTermId
-		 , intItemId						= SOD.intItemId
-		 , strItemDescription				= SOD.strItemDescription
-		 , intItemUOMId						= SOD.intItemUOMId
-		 , intOrderUOMId					= SOD.intItemUOMId
-		 , intShipmentItemUOMId				= SOD.intItemUOMId
-		 , intWeightUOMId					= NULL
-		 , dblWeight						= NULL
-		 , dblQtyShipped					= SOD.dblQtyShipped
-		 , dblQtyOrdered					= SOD.dblQtyOrdered
-		 , dblShipmentQuantity				= SOD.dblQtyOrdered - ISNULL(SOD.dblQtyShipped, 0.000000)	
-		 , dblShipmentQtyShippedTotal		= SOD.dblQtyShipped
-		 , dblQtyRemaining					= SOD.dblQtyOrdered - ISNULL(SOD.dblQtyShipped, 0.000000)
-		 , dblDiscount						= SOD.dblDiscount 
-		 , dblPrice							= SOD.dblPrice
-		 , dblShipmentUnitPrice				= SOD.dblPrice
-		 , strPricing						= SOD.strPricing
-		 , strVFDDocumentNumber				= SOD.strVFDDocumentNumber
-		 , dblTotalTax						= SOD.dblTotalTax
-		 , dblTotal							= SOD.dblTotal
-		 , intStorageLocationId				= SOD.intStorageLocationId
-		 , intTermId						= SO.intTermId		 
-		 , intEntityShipViaId				= SO.intShipViaId 		 
-		 , intTicketId						= NULL
-		 , intTaxGroupId					= SOD.intTaxGroupId		 
-		 , dblGrossWt						= 0.00
-		 , dblTareWt						= 0.00
-		 , dblNetWt							= 0.00
-		 , strPONumber						= SO.strPONumber
-		 , strBOLNumber						= SO.strBOLNumber
-		 , intSplitId						= SO.intSplitId
-		 , intEntitySalespersonId			= SO.intEntitySalespersonId
-		 , ysnBlended						= SOD.ysnBlended
-		 , intRecipeId						= SOD.intRecipeId
-		 , intSubLocationId					= SOD.intSubLocationId
-		 , intCostTypeId					= SOD.intCostTypeId
-		 , intMarginById					= SOD.intMarginById
-		 , intCommentTypeId					= SOD.intCommentTypeId
-		 , dblMargin						= SOD.dblMargin
-		 , dblRecipeQuantity				= SOD.dblRecipeQuantity
-		 , intStorageScheduleTypeId			= SOD.intStorageScheduleTypeId
-		 , intDestinationGradeId			= NULL
-		 , intDestinationWeightId			= NULL
-		 , intCurrencyExchangeRateTypeId	= SOD.intCurrencyExchangeRateTypeId
-		 , intCurrencyExchangeRateId		= SOD.intCurrencyExchangeRateId
-		 , dblCurrencyExchangeRate			= SOD.dblCurrencyExchangeRate
-		 , intSubCurrencyId					= SOD.intSubCurrencyId
-		 , dblSubCurrencyRate				= SOD.dblSubCurrencyRate
-	FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
-	INNER JOIN (
-		SELECT *
-		FROM dbo.tblSOSalesOrderDetail
-	) SOD ON SO.intSalesOrderId = SOD.intSalesOrderId
-	INNER JOIN (
-		SELECT intItemId
-			 , strLotTracking
-		FROM dbo.tblICItem WITH (NOLOCK)
-		WHERE strType <> 'Bundle'
-	) I ON SOD.intItemId = I.intItemId 
-	  AND (dbo.fnIsStockTrackingItem(I.intItemId) = 0 OR ISNULL(strLotTracking, 'No') = 'No')
-	LEFT OUTER JOIN (
-		SELECT intLineNo
-			 , H.intInventoryShipmentId
-		FROM dbo.tblICInventoryShipmentItem D WITH (NOLOCK)
-		INNER JOIN (
-			SELECT intInventoryShipmentId
-			FROM dbo.tblICInventoryShipment WITH (NOLOCK)
-			WHERE intOrderType = 2
-		) H ON H.intInventoryShipmentId = D.intInventoryShipmentId
-	) ISD ON SOD.intSalesOrderDetailId = ISD.intLineNo	
-	WHERE SO.strTransactionType = 'Order' 
-	  AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
-	  AND ((SOD.dblQtyOrdered - ISNULL(SOD.dblQtyShipped, 0.000000) <> 0.000000) OR (ISNULL(ISD.intLineNo,0) = 0))
+	--SELECT strTransactionType				= 'Sales Order'
+	--	 , strTransactionNumber				= SO.strSalesOrderNumber
+	--	 , strShippedItemId					= 'arso:' + CAST(SO.intSalesOrderId AS NVARCHAR(250))
+	--	 , intEntityCustomerId				= SO.intEntityCustomerId
+	--	 , intCurrencyId					= SO.intCurrencyId
+	--	 , intSalesOrderId					= SO.intSalesOrderId
+	--	 , intSalesOrderDetailId			= SOD.intSalesOrderDetailId
+	--	 , strSalesOrderNumber				= SO.strSalesOrderNumber
+	--	 , dtmProcessDate					= SO.dtmDate
+	--	 , intInventoryShipmentId			= NULL
+	--	 , intInventoryShipmentItemId		= NULL
+	--	 , intInventoryShipmentChargeId		= NULL
+	--	 , strInventoryShipmentNumber		= ''	
+	--	 , intShipmentId					= NULL
+	--	 , strShipmentNumber				= NULL
+	--	 , intLoadId						= NULL
+	--	 , intLoadDetailId					= NULL
+	--	 , intLotId							= NULL
+	--	 , strLoadNumber					= NULL
+	--	 , intRecipeItemId 					= SOD.intRecipeItemId
+	--	 , intContractHeaderId				= SOD.intContractHeaderId
+	--	 , intContractDetailId				= SOD.intContractDetailId
+	--	 , intCompanyLocationId				= SO.intCompanyLocationId
+	--	 , intShipToLocationId				= SO.intShipToLocationId
+	--	 , intFreightTermId					= SO.intFreightTermId
+	--	 , intItemId						= SOD.intItemId
+	--	 , strItemDescription				= SOD.strItemDescription
+	--	 , intItemUOMId						= SOD.intItemUOMId
+	--	 , intOrderUOMId					= SOD.intItemUOMId
+	--	 , intShipmentItemUOMId				= SOD.intItemUOMId
+	--	 , intWeightUOMId					= NULL
+	--	 , dblWeight						= NULL
+	--	 , dblQtyShipped					= SOD.dblQtyShipped
+	--	 , dblQtyOrdered					= SOD.dblQtyOrdered
+	--	 , dblShipmentQuantity				= SOD.dblQtyOrdered - ISNULL(SOD.dblQtyShipped, 0.000000)	
+	--	 , dblShipmentQtyShippedTotal		= SOD.dblQtyShipped
+	--	 , dblQtyRemaining					= SOD.dblQtyOrdered - ISNULL(SOD.dblQtyShipped, 0.000000)
+	--	 , dblDiscount						= SOD.dblDiscount 
+	--	 , dblPrice							= SOD.dblPrice
+	--	 , dblShipmentUnitPrice				= SOD.dblPrice
+	--	 , strPricing						= SOD.strPricing
+	--	 , strVFDDocumentNumber				= SOD.strVFDDocumentNumber
+	--	 , dblTotalTax						= SOD.dblTotalTax
+	--	 , dblTotal							= SOD.dblTotal
+	--	 , intStorageLocationId				= SOD.intStorageLocationId
+	--	 , intTermId						= SO.intTermId		 
+	--	 , intEntityShipViaId				= SO.intShipViaId 		 
+	--	 , intTicketId						= NULL
+	--	 , intTaxGroupId					= SOD.intTaxGroupId		 
+	--	 , dblGrossWt						= 0.00
+	--	 , dblTareWt						= 0.00
+	--	 , dblNetWt							= 0.00
+	--	 , strPONumber						= SO.strPONumber
+	--	 , strBOLNumber						= SO.strBOLNumber
+	--	 , intSplitId						= SO.intSplitId
+	--	 , intEntitySalespersonId			= SO.intEntitySalespersonId
+	--	 , ysnBlended						= SOD.ysnBlended
+	--	 , intRecipeId						= SOD.intRecipeId
+	--	 , intSubLocationId					= SOD.intSubLocationId
+	--	 , intCostTypeId					= SOD.intCostTypeId
+	--	 , intMarginById					= SOD.intMarginById
+	--	 , intCommentTypeId					= SOD.intCommentTypeId
+	--	 , dblMargin						= SOD.dblMargin
+	--	 , dblRecipeQuantity				= SOD.dblRecipeQuantity
+	--	 , intStorageScheduleTypeId			= SOD.intStorageScheduleTypeId
+	--	 , intDestinationGradeId			= NULL
+	--	 , intDestinationWeightId			= NULL
+	--	 , intCurrencyExchangeRateTypeId	= SOD.intCurrencyExchangeRateTypeId
+	--	 , intCurrencyExchangeRateId		= SOD.intCurrencyExchangeRateId
+	--	 , dblCurrencyExchangeRate			= SOD.dblCurrencyExchangeRate
+	--	 , intSubCurrencyId					= SOD.intSubCurrencyId
+	--	 , dblSubCurrencyRate				= SOD.dblSubCurrencyRate
+	--FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
+	--INNER JOIN (
+	--	SELECT *
+	--	FROM dbo.tblSOSalesOrderDetail
+	--) SOD ON SO.intSalesOrderId = SOD.intSalesOrderId
+	--INNER JOIN (
+	--	SELECT intItemId
+	--		 , strLotTracking
+	--	FROM dbo.tblICItem WITH (NOLOCK)
+	--	WHERE strType <> 'Bundle'
+	--) I ON SOD.intItemId = I.intItemId 
+	--  AND (dbo.fnIsStockTrackingItem(I.intItemId) = 0 OR ISNULL(strLotTracking, 'No') = 'No')
+	--LEFT OUTER JOIN (
+	--	SELECT intLineNo
+	--		 , H.intInventoryShipmentId
+	--	FROM dbo.tblICInventoryShipmentItem D WITH (NOLOCK)
+	--	INNER JOIN (
+	--		SELECT intInventoryShipmentId
+	--		FROM dbo.tblICInventoryShipment WITH (NOLOCK)
+	--		WHERE intOrderType = 2
+	--	) H ON H.intInventoryShipmentId = D.intInventoryShipmentId
+	--) ISD ON SOD.intSalesOrderDetailId = ISD.intLineNo	
+	--WHERE SO.strTransactionType = 'Order' 
+	--  AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
+	--  AND ((SOD.dblQtyOrdered - ISNULL(SOD.dblQtyShipped, 0.000000) <> 0.000000) OR (ISNULL(ISD.intLineNo,0) = 0))
 	
-	UNION ALL
+	--UNION ALL
 
-	SELECT strTransactionType				= 'Sales Order'
-		 , strTransactionNumber				= SO.strSalesOrderNumber
-		 , strShippedItemId					= 'arso:' + CAST(SO.intSalesOrderId AS NVARCHAR(250))
-		 , intEntityCustomerId				= SO.intEntityCustomerId
-		 , intCurrencyId					= SO.intCurrencyId
-		 , intSalesOrderId					= SO.intSalesOrderId
-		 , intSalesOrderDetailId			= SOD.intSalesOrderDetailId
-		 , strSalesOrderNumber				= SO.strSalesOrderNumber
-		 , dtmProcessDate					= SO.dtmDate
-		 , intInventoryShipmentId			= NULL
-		 , intInventoryShipmentItemId		= NULL
-		 , intInventoryShipmentChargeId		= NULL
-		 , strInventoryShipmentNumber		= ''	
-		 , intShipmentId					= NULL
-		 , strShipmentNumber				= NULL
-		 , intLoadId						= NULL
-		 , intLoadDetailId					= NULL
-		 , intLotId							= NULL
-		 , strLoadNumber					= NULL
-		 , intRecipeItemId					= NULL
-		 , intContractHeaderId				= SOD.intContractHeaderId
-		 , intContractDetailId				= SOD.intContractDetailId
-		 , intCompanyLocationId				= SO.intCompanyLocationId
-		 , intShipToLocationId				= SO.intShipToLocationId
-		 , intFreightTermId					= SO.intFreightTermId
-		 , intItemId						= SOD.intItemId
-		 , strItemDescription				= SOD.strItemDescription
-		 , intItemUOMId						= SOD.intItemUOMId
-		 , intOrderUOMId					= SOD.intItemUOMId
-		 , intShipmentItemUOMId				= SOD.intItemUOMId
-		 , intWeightUOMId					= NULL
-		 , dblWeight						= NULL
-		 , dblQtyShipped					= SOD.dblQtyShipped
-		 , dblQtyOrdered					= SOD.dblQtyOrdered
-		 , dblShipmentQuantity				= SOD.dblQtyOrdered - ISNULL(SOD.dblQtyShipped, 0.000000)
-		 , dblShipmentQtyShippedTotal		= SOD.dblQtyShipped
-		 , dblQtyRemaining					= SOD.dblQtyOrdered - ISNULL(SOD.dblQtyShipped, 0.000000)
-		 , dblDiscount						= SOD.dblDiscount
-		 , dblPrice							= SOD.dblPrice
-		 , dblShipmentUnitPrice				= SOD.dblPrice
-		 , strPricing						= SOD.strPricing
-		 , strVFDDocumentNumber				= SOD.strVFDDocumentNumber
-		 , dblTotalTax						= SOD.dblTotalTax
-		 , dblTotal							= SOD.dblTotal
-		 , intStorageLocationId				= SOD.intStorageLocationId
-		 , intTermId						= SO.intTermId
-		 , intEntityShipViaId				= SO.intEntityId
-		 , intTicketId						= NULL
-		 , intTaxGroupId					= SOD.intTaxGroupId
-		 , dblGrossWt						= 0.00	
-		 , dblTareWt						= 0.00
-		 , dblNetWt							= 0.00
-		 , strPONumber						= SO.strPONumber
-		 , strBOLNumber						= SO.strBOLNumber
-		 , intSplitId						= SO.intSplitId
-		 , intEntitySalespersonId			= SO.intEntitySalespersonId
-		 , ysnBlended						= SOD.ysnBlended
-		 , intRecipeId						= SOD.intRecipeId
-		 , intSubLocationId					= SOD.intSubLocationId
-		 , intCostTypeId					= SOD.intCostTypeId
-		 , intMarginById					= SOD.intMarginById
-		 , intCommentTypeId					= SOD.intCommentTypeId
-		 , dblMargin						= SOD.dblMargin
-		 , dblRecipeQuantity				= SOD.dblRecipeQuantity
-		 , intStorageScheduleTypeId			= SOD.intStorageScheduleTypeId
-		 , intDestinationGradeId			= NULL
-		 , intDestinationWeightId			= NULL
-		 , intCurrencyExchangeRateTypeId	= SOD.intCurrencyExchangeRateTypeId
-		 , intCurrencyExchangeRateId		= SOD.intCurrencyExchangeRateId
-		 , dblCurrencyExchangeRate			= SOD.dblCurrencyExchangeRate
-		 , intSubCurrencyId					= SOD.intSubCurrencyId
-		 , dblSubCurrencyRate				= SOD.dblSubCurrencyRate
-	FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
-	INNER JOIN (
-		SELECT *
-		FROM dbo.tblSOSalesOrderDetail
-		WHERE intItemId IS NULL 
-			AND strItemDescription <> ''
-	) SOD ON SO.intSalesOrderId = SOD.intSalesOrderId
-	WHERE SO.strTransactionType = 'Order' 
-	  AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
-	  AND SOD.dblQtyOrdered - ISNULL(SOD.dblQtyShipped, 0.000000) <> 0.000000
-	  AND SOD.intSalesOrderDetailId NOT IN (SELECT intSalesOrderDetailId
-											FROM (SELECT intInvoiceId
-													   , intSalesOrderDetailId
-													   , dblQtyShipped 
-												  FROM dbo.tblARInvoiceDetail WITH (NOLOCK)) ID
-												  INNER JOIN (
-														SELECT intInvoiceId 
-														FROM tblARInvoice WITH (NOLOCK)
-												  ) I ON ID.intInvoiceId = I.intInvoiceId 
-												WHERE SOD.dblQtyOrdered <= ID.dblQtyShipped)
+	--SELECT strTransactionType				= 'Sales Order'
+	--	 , strTransactionNumber				= SO.strSalesOrderNumber
+	--	 , strShippedItemId					= 'arso:' + CAST(SO.intSalesOrderId AS NVARCHAR(250))
+	--	 , intEntityCustomerId				= SO.intEntityCustomerId
+	--	 , intCurrencyId					= SO.intCurrencyId
+	--	 , intSalesOrderId					= SO.intSalesOrderId
+	--	 , intSalesOrderDetailId			= SOD.intSalesOrderDetailId
+	--	 , strSalesOrderNumber				= SO.strSalesOrderNumber
+	--	 , dtmProcessDate					= SO.dtmDate
+	--	 , intInventoryShipmentId			= NULL
+	--	 , intInventoryShipmentItemId		= NULL
+	--	 , intInventoryShipmentChargeId		= NULL
+	--	 , strInventoryShipmentNumber		= ''	
+	--	 , intShipmentId					= NULL
+	--	 , strShipmentNumber				= NULL
+	--	 , intLoadId						= NULL
+	--	 , intLoadDetailId					= NULL
+	--	 , intLotId							= NULL
+	--	 , strLoadNumber					= NULL
+	--	 , intRecipeItemId					= NULL
+	--	 , intContractHeaderId				= SOD.intContractHeaderId
+	--	 , intContractDetailId				= SOD.intContractDetailId
+	--	 , intCompanyLocationId				= SO.intCompanyLocationId
+	--	 , intShipToLocationId				= SO.intShipToLocationId
+	--	 , intFreightTermId					= SO.intFreightTermId
+	--	 , intItemId						= SOD.intItemId
+	--	 , strItemDescription				= SOD.strItemDescription
+	--	 , intItemUOMId						= SOD.intItemUOMId
+	--	 , intOrderUOMId					= SOD.intItemUOMId
+	--	 , intShipmentItemUOMId				= SOD.intItemUOMId
+	--	 , intWeightUOMId					= NULL
+	--	 , dblWeight						= NULL
+	--	 , dblQtyShipped					= SOD.dblQtyShipped
+	--	 , dblQtyOrdered					= SOD.dblQtyOrdered
+	--	 , dblShipmentQuantity				= SOD.dblQtyOrdered - ISNULL(SOD.dblQtyShipped, 0.000000)
+	--	 , dblShipmentQtyShippedTotal		= SOD.dblQtyShipped
+	--	 , dblQtyRemaining					= SOD.dblQtyOrdered - ISNULL(SOD.dblQtyShipped, 0.000000)
+	--	 , dblDiscount						= SOD.dblDiscount
+	--	 , dblPrice							= SOD.dblPrice
+	--	 , dblShipmentUnitPrice				= SOD.dblPrice
+	--	 , strPricing						= SOD.strPricing
+	--	 , strVFDDocumentNumber				= SOD.strVFDDocumentNumber
+	--	 , dblTotalTax						= SOD.dblTotalTax
+	--	 , dblTotal							= SOD.dblTotal
+	--	 , intStorageLocationId				= SOD.intStorageLocationId
+	--	 , intTermId						= SO.intTermId
+	--	 , intEntityShipViaId				= SO.intEntityId
+	--	 , intTicketId						= NULL
+	--	 , intTaxGroupId					= SOD.intTaxGroupId
+	--	 , dblGrossWt						= 0.00	
+	--	 , dblTareWt						= 0.00
+	--	 , dblNetWt							= 0.00
+	--	 , strPONumber						= SO.strPONumber
+	--	 , strBOLNumber						= SO.strBOLNumber
+	--	 , intSplitId						= SO.intSplitId
+	--	 , intEntitySalespersonId			= SO.intEntitySalespersonId
+	--	 , ysnBlended						= SOD.ysnBlended
+	--	 , intRecipeId						= SOD.intRecipeId
+	--	 , intSubLocationId					= SOD.intSubLocationId
+	--	 , intCostTypeId					= SOD.intCostTypeId
+	--	 , intMarginById					= SOD.intMarginById
+	--	 , intCommentTypeId					= SOD.intCommentTypeId
+	--	 , dblMargin						= SOD.dblMargin
+	--	 , dblRecipeQuantity				= SOD.dblRecipeQuantity
+	--	 , intStorageScheduleTypeId			= SOD.intStorageScheduleTypeId
+	--	 , intDestinationGradeId			= NULL
+	--	 , intDestinationWeightId			= NULL
+	--	 , intCurrencyExchangeRateTypeId	= SOD.intCurrencyExchangeRateTypeId
+	--	 , intCurrencyExchangeRateId		= SOD.intCurrencyExchangeRateId
+	--	 , dblCurrencyExchangeRate			= SOD.dblCurrencyExchangeRate
+	--	 , intSubCurrencyId					= SOD.intSubCurrencyId
+	--	 , dblSubCurrencyRate				= SOD.dblSubCurrencyRate
+	--FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
+	--INNER JOIN (
+	--	SELECT *
+	--	FROM dbo.tblSOSalesOrderDetail
+	--	WHERE intItemId IS NULL 
+	--		AND strItemDescription <> ''
+	--) SOD ON SO.intSalesOrderId = SOD.intSalesOrderId
+	--WHERE SO.strTransactionType = 'Order' 
+	--  AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
+	--  AND SOD.dblQtyOrdered - ISNULL(SOD.dblQtyShipped, 0.000000) <> 0.000000
+	--  AND SOD.intSalesOrderDetailId NOT IN (SELECT intSalesOrderDetailId
+	--										FROM (SELECT intInvoiceId
+	--												   , intSalesOrderDetailId
+	--												   , dblQtyShipped 
+	--											  FROM dbo.tblARInvoiceDetail WITH (NOLOCK)) ID
+	--											  INNER JOIN (
+	--													SELECT intInvoiceId 
+	--													FROM tblARInvoice WITH (NOLOCK)
+	--											  ) I ON ID.intInvoiceId = I.intInvoiceId 
+	--											WHERE SOD.dblQtyOrdered <= ID.dblQtyShipped)
 	 
-	UNION ALL
+	--UNION ALL
 
 	SELECT strTransactionType				= 'Inventory Shipment'
 		 , strTransactionNumber				= SHP.strShipmentNumber

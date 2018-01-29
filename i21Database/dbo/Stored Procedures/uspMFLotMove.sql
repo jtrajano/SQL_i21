@@ -55,6 +55,9 @@ BEGIN TRY
 		,@ysnChangeLotStatusOnLotMoveByStorageLocationRestrictionType BIT
 				,@strSubLocationName NVARCHAR(50)
 		,@strName NVARCHAR(50)
+		,@intBondStatusId INT
+		,@intStorageUnitTypeId INT
+		,@strInternalCode NVARCHAR(50)
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -343,6 +346,11 @@ BEGIN TRY
 	WHERE intDestinationLotId = @intLotId
 		AND ysnConsumptionReversed = 0
 
+	IF @dblWorkOrderReservedQty IS NULL
+	BEGIN
+		SELECT @dblWorkOrderReservedQty = 0
+	END
+
 	IF (
 			@dblLotAvailableQty + (
 				CASE 
@@ -359,6 +367,33 @@ BEGIN TRY
 				,16
 				,1
 				)
+	END
+
+	SELECT @intBondStatusId = intBondStatusId
+	FROM tblMFLotInventory
+	WHERE intLotId = @intLotId
+
+	IF @intBondStatusId = 5
+	BEGIN
+		SELECT @intStorageUnitTypeId = intStorageUnitTypeId
+		FROM tblICStorageLocation
+		WHERE intStorageLocationId = @intNewStorageLocationId
+
+		SELECT @strInternalCode = strInternalCode
+		FROM tblICStorageUnitType
+		WHERE intStorageUnitTypeId = @intStorageUnitTypeId
+
+		IF @strInternalCode IN (
+				'STAGING'
+				,'PROD_STAGING'
+				)
+		BEGIN
+			RAISERROR (
+					'Scanned lot/pallet is not bond released. Please scan bond released lot/pallet to continue.'
+					,16
+					,1
+					)
+		END
 	END
 
 	IF EXISTS (

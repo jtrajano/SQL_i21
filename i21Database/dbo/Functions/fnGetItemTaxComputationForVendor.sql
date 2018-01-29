@@ -11,6 +11,7 @@
 	,@IncludeExemptedCodes	BIT
 	,@FreightTermId			INT
 	,@ExcludeCheckOff		BIT
+	,@ItemUOMId				INT = NULL
 )
 RETURNS @returntable TABLE
 (
@@ -111,7 +112,7 @@ BEGIN
 		,[strTaxGroup]
 		,[strNotes]
 	FROM
-		[dbo].[fnGetTaxGroupTaxCodesForVendor](@TaxGroupId, @VendorId, @TransactionDate, @ItemId, @VendorLocationId, @IncludeExemptedCodes)
+		[dbo].[fnGetTaxGroupTaxCodesForVendor](@TaxGroupId, @VendorId, @TransactionDate, @ItemId, @VendorLocationId, @IncludeExemptedCodes, @ItemUOMId)
 												
 			
 	-- Calculate Item Tax

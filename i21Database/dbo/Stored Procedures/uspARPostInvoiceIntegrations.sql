@@ -40,7 +40,7 @@ EXEC dbo.[uspCTInvoicePosted] @ItemsFromInvoice, @intUserId
 
 --Prepaids
 
-EXEC dbo.[uspARUpdatePrepaymentAndCreditMemo] @intTransactionId, @ysnPost
+--EXEC dbo.[uspARUpdatePrepaymentAndCreditMemo] @intTransactionId, @ysnPost
 
 UPDATE ARID
 SET

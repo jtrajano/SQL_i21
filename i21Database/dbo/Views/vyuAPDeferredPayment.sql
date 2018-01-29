@@ -13,15 +13,20 @@ SELECT
 	A.dtmDueDate,
 	ticket.strTicketNumber,
 	0.00 AS dblDeferred,
-	GETDATE() AS dtmLastDeferred,
+	A.dtmInterestAccruedThru AS dtmLastDeferred, --date of last interest date calculation, if there's no voucher interest yet, this should be blank
 	A.dblAmountDue,
 	0 AS intDays,
-	dblInterest = dbo.fnGetInterestBasedOnTerm(A.dblTotal, A.dtmBillDate, GETDATE(), A.intTermsId),
-	CAST(CASE WHEN staging.intBillId IS NOT NULL THEN 1 ELSE 0 END AS BIT) ysnSelected
+	dblInterest = dbo.fnGetInterestBasedOnTerm(A.dblTotal, deferredInterest.dtmPaymentPostDate, deferredInterest.dtmCalculationDate, deferredTerm.intTermID),
+	CAST(CASE WHEN staging.intBillId IS NOT NULL THEN 1 ELSE 0 END AS BIT) ysnSelected,
+	B.str1099Form,
+	B.str1099Type
 FROM tblAPBill A
 INNER JOIN tblEMEntity B ON A.intEntityVendorId = B.intEntityId
+INNER JOIN tblAPVendor C ON B.intEntityId = C.intEntityId
+INNER JOIN tblSMTerm term ON A.intTermsId = term.intTermID
 CROSS APPLY [dbo].[fnAPGetVoucherCommodity](A.intBillId) commodity
-LEFT JOIN tblSMTerm term ON A.intTermsId = term.intTermID
+CROSS APPLY tblAPDeferredPaymentInterest deferredInterest
+INNER JOIN tblSMTerm deferredTerm ON deferredInterest.strTerm = deferredTerm.strTerm
 OUTER APPLY (
 	SELECT 
 		SUBSTRING(
@@ -41,4 +46,4 @@ OUTER APPLY (
 	ORDER BY dp.dtmDate DESC
 ) lastDeferredPayment
 LEFT JOIN tblAPDeferredPaymentStaging staging ON staging.intBillId = A.intBillId
-WHERE A.intTransactionType = 1 AND A.ysnPosted = 1 AND A.ysnPaid = 0
+WHERE A.intTransactionType = 1 AND A.ysnPosted = 1 AND A.ysnPaid = 0 AND term.ysnDeferredPay = 1

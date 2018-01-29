@@ -40,7 +40,8 @@ AS
 				CC.strReferenceNo,
 				CC.strRemarks,			
 				IM.strCostType,
-				IM.ysnInventoryCost
+				IM.ysnInventoryCost,
+				CH.strContractNumber
 
 	FROM		tblCTContractCost	CC
 	JOIN		tblCTContractDetail CD ON CD.intContractDetailId	=	CC.intContractDetailId

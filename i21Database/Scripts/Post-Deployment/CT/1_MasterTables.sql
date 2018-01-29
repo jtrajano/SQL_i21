@@ -629,4 +629,11 @@ BEGIN
 
 END
 GO
+IF EXISTS(SELECT 1 FROM tblCTAmendmentApproval WHERE strType IS NULL)
+BEGIN
+   UPDATE tblCTAmendmentApproval SET strType ='1.Header'   WHERE intAmendmentApprovalId   IN(1,2,3,4,5,6)
+   UPDATE tblCTAmendmentApproval SET strType ='2.Sequence' WHERE intAmendmentApprovalId   IN(7,8,9,10,11,12)
+   UPDATE tblCTAmendmentApproval SET strType ='3.Pricing'  WHERE intAmendmentApprovalId   IN(13,14,15,16,17,18,19)
+END
+GO
 PRINT('Contract 1_MasterTables End')

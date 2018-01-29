@@ -35,7 +35,9 @@ BEGIN TRY
 			@intProducerId			INT,
 			@ysnMultiplePriceFixation	BIT,
 			@dblNoOfLots			NUMERIC(18,6),
-			@dblLotsFixed			NUMERIC(18,6)
+			@dblLotsFixed			NUMERIC(18,6),
+			@intYear				INT,
+			@intFiscalYearId		INT
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @XML 
 	
@@ -240,6 +242,14 @@ BEGIN TRY
 			RAISERROR(@ErrMsg,16,1)
 		END
 		--End Active check
+
+		SELECT	@intYear = YEAR(@dtmContractDate)
+		SELECT @intFiscalYearId = intFiscalYearId FROM tblGLFiscalYear WHERE strFiscalYear = LTRIM(@intYear)
+		IF EXISTS(SELECT * FROM tblGLFiscalYearPeriod WHERE intFiscalYearId = @intFiscalYearId AND @dtmContractDate BETWEEN dtmStartDate AND dtmEndDate AND ysnCTOpen = 0)
+		BEGIN
+			SET @ErrMsg = 'Selected contract date is in a fiscal period that has been closed.'
+			RAISERROR(@ErrMsg,16,1)
+		END
 	END
 	IF @RowState = 'Modified'
 	BEGIN

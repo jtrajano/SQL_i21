@@ -170,7 +170,7 @@ BEGIN
 			intInventoryReceiptItemId	INT,
 			intContractDetailId			INT,
 			intItemUOMId				INT,
-			dblQty						NUMERIC(12,4)	
+			dblQty						NUMERIC(12,4)
 		)
 
 		INSERT INTO @tblToProcess(
@@ -180,7 +180,7 @@ BEGIN
 			dblQty
 		)
 		-- Changed Quantity/UOM
-		SELECT 
+		SELECT
 			currentSnapshot.intInventoryReceiptItemId,
 			currentSnapshot.intLineNo,
 			currentSnapshot.intItemUOMId,
@@ -373,6 +373,39 @@ BEGIN
 		IF @intReturnValue < 0 GOTO _Exit 
 	END 
 END 
+
+-- Reduce Open Purchase Contract Qty if IR is processed through Purchase Contract and source is not from Inbound Shipment
+IF @ReceiptType = @ReceiptType_PurchaseContract AND @SourceType <> @SourceType_InboundShipment
+BEGIN
+	DECLARE @ItemsOpenPurchaseContract AS ItemsOpenPurchaseContractTableType
+
+	IF @ForDelete = 0
+	BEGIN
+		INSERT INTO @ItemsOpenPurchaseContract(intItemId, intItemLocationId, intItemUOMId, dblQty, intTransactionId, strTransactionId, intTransactionTypeId)
+		SELECT ri.intItemId, 
+			l.intItemLocationId, 
+			p.intItemUOMId, 
+			-p.dblQty, 
+			p.intInventoryReceiptItemId, 
+			r.strReceiptNumber, 10 -- 10 is the Id of the Open Purchase Contract in tblICTransactionType table
+		FROM @tblToProcess p
+			INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptItemId = p.intInventoryReceiptItemId
+			INNER JOIN tblICInventoryReceipt r ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+			INNER JOIN tblICItemLocation l ON l.intItemId = ri.intItemId
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @ItemsOpenPurchaseContract(intItemId, intItemLocationId, intItemUOMId, dblQty, intTransactionId, strTransactionId, intTransactionTypeId)
+		SELECT log.intItemId, loc.intItemLocationId, log.intItemUOMId, log.dblQuantity, log.intTransactionId, '', 10
+		FROM tblICTransactionDetailLog log
+			INNER JOIN tblICItemLocation loc ON loc.intItemId = log.intItemId
+		WHERE log.intTransactionId = @ReceiptId
+			AND log.strTransactionType = 'Inventory Receipt'
+	END
+
+	--Uncomment this when Contract has implemented Open Purchase Contract
+	--EXEC dbo.uspICIncreaseOpenPurchaseContractQty @ItemsOpenPurchaseContract
+END
 
 -- Delete the data snapshot. 
 DELETE	FROM tblICTransactionDetailLog 

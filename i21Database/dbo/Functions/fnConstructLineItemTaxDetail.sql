@@ -18,6 +18,7 @@
 	,@VehicleId					INT								= NULL
 	,@DisregardExemptionSetup	BIT								= 0
 	,@ExcludeCheckOff			BIT								= 0
+	,@ItemUOMId					INT								= NULL
 )
 RETURNS @returntable TABLE
 (
@@ -123,6 +124,7 @@ BEGIN
 						,@ExcludeCheckOff
 						,NULL --@CFSiteId
 						,1    --@IsDeliver
+						,@ItemUOMId
 					) 	
 		END
 
@@ -159,8 +161,8 @@ BEGIN
 		,[intTaxCodeId]				= LITE.[intTaxCodeId]
 		,[intTaxClassId]			= ISNULL(LITE.[intTaxClassId], SMTC.[intTaxClassId])
 		,[strTaxableByOtherTaxes]	= ISNULL(LITE.[strTaxableByOtherTaxes], SMTC.[strTaxableByOtherTaxes])
-		,[strCalculationMethod]		= ISNULL(LITE.[strCalculationMethod], (SELECT [strCalculationMethod] FROM [dbo].[fnGetTaxCodeRateDetails](LITE.[intTaxCodeId], @TransactionDate, NULL)))
-		,[dblRate]					= ISNULL(ISNULL(LITE.[dblRate], (SELECT [dblRate] FROM [dbo].[fnGetTaxCodeRateDetails](LITE.[intTaxCodeId], @TransactionDate, NULL))), @ZeroDecimal)
+		,[strCalculationMethod]		= ISNULL(LITE.[strCalculationMethod], (SELECT [strCalculationMethod] FROM [dbo].[fnGetTaxCodeRateDetails](LITE.[intTaxCodeId], @TransactionDate, @ItemUOMId)))
+		,[dblRate]					= ISNULL(ISNULL(LITE.[dblRate], (SELECT [dblRate] FROM [dbo].[fnGetTaxCodeRateDetails](LITE.[intTaxCodeId], @TransactionDate, @ItemUOMId))), @ZeroDecimal)
 		,[dblExemptionPercent]		= @ZeroDecimal
 		,[dblTax]					= LITE.[dblTax]
 		,[dblAdjustedTax]			= LITE.[dblAdjustedTax]

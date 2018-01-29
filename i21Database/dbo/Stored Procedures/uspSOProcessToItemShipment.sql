@@ -68,7 +68,8 @@ IF @Unship = 1
 IF NOT EXISTS(SELECT 1 FROM tblSOSalesOrderDetail SOD
 				LEFT JOIN tblICItem IC ON SOD.intItemId = IC.intItemId 
 		WHERE intSalesOrderId = @SalesOrderId 
-		AND (dbo.fnIsStockTrackingItem(SOD.intItemId) = 1 OR (dbo.fnIsStockTrackingItem(SOD.intItemId) = 0 AND IC.strType = 'Bundle')) 
+		AND (dbo.fnIsStockTrackingItem(SOD.intItemId) = 1 OR (dbo.fnIsStockTrackingItem(SOD.intItemId) = 0 AND IC.strType = 'Bundle'))
+		AND (IC.strType = 'Bundle' AND ISNULL(IC.strBundleType, 'Kit') = 'Kit')
 		AND (dblQtyOrdered - dblQtyShipped > 0)
 		AND SOD.[intSalesOrderDetailId] NOT IN (SELECT ISNULL(tblARInvoiceDetail.[intSalesOrderDetailId],0) 
 				FROM tblARInvoiceDetail INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId 
@@ -78,41 +79,16 @@ IF NOT EXISTS(SELECT 1 FROM tblSOSalesOrderDetail SOD
         RETURN
 	END
 ELSE
-	--BEGIN
-	--	EXEC dbo.uspICProcessToInventoryShipment
-	--			 @intSourceTransactionId = @SalesOrderId
-	--			,@strSourceType = 'Sales Order'
-	--			,@intEntityUserSecurityId = @UserId
-	--			,@InventoryShipmentId = @ShipmentId OUTPUT
-		
-	--	SET @InventoryShipmentId = @ShipmentId
-
-	--	IF @@ERROR > 0 
-	--		RETURN 0;
-
-	--	EXEC dbo.uspSOUpdateOrderShipmentStatus @InventoryShipmentId, 'Inventory', 0
-
-	--	UPDATE tblSOSalesOrder
-	--	SET dtmProcessDate = GETDATE()
-	--	  , ysnProcessed   = 1
-	--	  , ysnShipped     = 1
-	--	WHERE intSalesOrderId = @SalesOrderId
-	
-	--	RETURN 1
-	--END
 	BEGIN 
-		DECLARE @Items ShipmentStagingTable
-				,@Charges ShipmentChargeStagingTable
-				,@Lots ShipmentItemLotStagingTable
-				,@intReturn AS INT 
-
-		DECLARE @SALES_CONTRACT AS NVARCHAR(50) = 'Sales Contract'
-				,@SALES_ORDER AS NVARCHAR(50) = 'Sales Order'
-				,@TRANSFER_ORDER AS NVARCHAR(50) = 'Transfer Order'
-				,@SALES_ORDER_TYPE AS INT = 2
+		DECLARE @Items				ShipmentStagingTable
+			  , @Charges			ShipmentChargeStagingTable
+			  , @Lots				ShipmentItemLotStagingTable			  
+			  , @SALES_ORDER		NVARCHAR(50) = 'Sales Order'
+			  , @SALES_ORDER_TYPE	INT = 2
+			  , @intReturn			INT 
 
 		INSERT INTO @Items (
-			intOrderType 
+			  intOrderType 
 			, intSourceType
 			, intEntityCustomerId
 			, dtmShipDate
@@ -160,15 +136,14 @@ ELSE
 			, dblForexRate	
 		)
 		-- Insert stock keeping items, except kit items. 
-		SELECT
-			intOrderType					= @SALES_ORDER_TYPE
+		SELECT intOrderType					= 1
 			, intSourceType					= 0
 			, intEntityCustomerId			= SO.intEntityCustomerId
 			, dtmShipDate					= SO.dtmDate
 			, intShipFromLocationId			= SO.intCompanyLocationId
 			, intShipToLocationId			= SO.intShipToLocationId
 			, intFreightTermId				= SO.intFreightTermId
-			, strSourceScreenName			= @SALES_ORDER
+			, strSourceScreenName			= 'Sales Order'
 			, strReferenceNumber			= SO.strSalesOrderNumber
 			, dtmRequestedArrivalDate		= NULL
 			, intShipToCompanyLocationId	= NULL
@@ -187,165 +162,68 @@ ELSE
 			, strFreeTime					= NULL
 			, strReceivedBy					= NULL
 			, strComment					= SO.strComments
-			, intItemId						= SODetail.intItemId
-			, intOwnershipType				= CASE WHEN SODetail.intStorageScheduleTypeId IS NULL THEN 1 ELSE 2 END
-			, dblQuantity					= SODetail.dblQtyOrdered - ISNULL(InvoiceDetail.dblQtyShipped, SODetail.dblQtyShipped)
-			, intItemUOMId					= ItemUOM.intItemUOMId
+			, intItemId						= SODETAIL.intItemId
+			, intOwnershipType				= CASE WHEN SODETAIL.intStorageScheduleTypeId IS NULL THEN 1 ELSE 2 END
+			, dblQuantity					= SODETAIL.dblQtyOrdered - ISNULL(INVOICEDETAIL.dblQtyShipped, SODETAIL.dblQtyShipped)
+			, intItemUOMId					= ITEMUOM.intItemUOMId
 			, intItemLotGroup				= NULL
-			, intOrderId					= SODetail.intSalesOrderId
+			, intOrderId					= SODETAIL.intSalesOrderId
 			, intSourceId					= NULL
-			, intLineNo						= SODetail.intSalesOrderDetailId
-			, intSubLocationId				= COALESCE(SODetail.intSubLocationId, StorageLocation.intSubLocationId, ItemLocation.intSubLocationId)
-			, intStorageLocationId			= COALESCE(SODetail.intStorageLocationId, ItemLocation.intStorageLocationId)
-			, intCurrencyId					= SO.[intCurrencyId] 
+			, intLineNo						= SODETAIL.intSalesOrderDetailId
+			, intSubLocationId				= COALESCE(SODETAIL.intSubLocationId, STORAGELOCATION.intSubLocationId, ITEMLOCATION.intSubLocationId)
+			, intStorageLocationId			= COALESCE(SODETAIL.intStorageLocationId, ITEMLOCATION.intStorageLocationId)
+			, intCurrencyId					= SO.intCurrencyId
 			, intWeightUOMId				= NULL
-			, dblUnitPrice					= SODetail.dblPrice
+			, dblUnitPrice					= SODETAIL.dblPrice
 			, intDockDoorId					= NULL
-			, strNotes						= SODetail.strComments
+			, strNotes						= SODETAIL.strComments
 			, intGradeId					= NULL
 			, intDiscountSchedule			= NULL
-			, intStorageScheduleTypeId		= SODetail.intStorageScheduleTypeId
-			, intForexRateTypeId			= SODetail.intCurrencyExchangeRateTypeId
-			, dblForexRate					= SODetail.dblCurrencyExchangeRate
-			FROM 
-				dbo.tblSOSalesOrder SO	INNER JOIN dbo.tblSOSalesOrderDetail SODetail 
-					ON SO.intSalesOrderId = SODetail.intSalesOrderId
-
-				INNER JOIN tblICItem i 
-					ON i.intItemId = SODetail.intItemId 
-
-				INNER JOIN dbo.tblICItemUOM ItemUOM 
-					ON ItemUOM.intItemId = SODetail.intItemId 
-					AND ItemUOM.intItemUOMId = SODetail.intItemUOMId 
-
-				INNER JOIN dbo.tblICItemLocation ItemLocation 
-					ON ItemLocation.intItemId = SODetail.intItemId 
-					AND SO.intCompanyLocationId = ItemLocation.intLocationId
-
-				LEFT JOIN tblSMCompanyLocationSubLocation SubLocation
-					ON SubLocation.intCompanyLocationId = ItemLocation.intLocationId
-					AND SubLocation.intCompanyLocationSubLocationId = SODetail.intSubLocationId				
-
-				LEFT JOIN dbo.tblICStorageLocation StorageLocation 
-					ON StorageLocation.intLocationId = ItemLocation.intLocationId
-					AND StorageLocation.intSubLocationId = SubLocation.intCompanyLocationSubLocationId
-					AND StorageLocation.intStorageLocationId = SODetail.intStorageLocationId	
-
-				OUTER APPLY (
-					SELECT	intSalesOrderDetailId, SUM(dblQtyShipped) AS dblQtyShipped
-					FROM	tblARInvoiceDetail ID
-					WHERE	ID.intSalesOrderDetailId = SODetail.intSalesOrderDetailId
-					GROUP BY ID.intSalesOrderDetailId
-				) InvoiceDetail 
-					
-			WHERE	
-				SODetail.intSalesOrderId = @SalesOrderId
-				AND dbo.fnIsStockTrackingItem(SODetail.intItemId) = 1
-				AND (SODetail.dblQtyOrdered - ISNULL(InvoiceDetail.dblQtyShipped, SODetail.dblQtyShipped)) > 0			
-				AND ISNULL(i.strBundleType, '') <> 'Kit'
-
-		-- Insert all the components of the Kit item. 
-		UNION ALL 
-		SELECT
-			intOrderType					= @SALES_ORDER_TYPE
-			, intSourceType					= 0
-			, intEntityCustomerId			= SO.intEntityCustomerId
-			, dtmShipDate					= SO.dtmDate
-			, intShipFromLocationId			= SO.intCompanyLocationId
-			, intShipToLocationId			= SO.intShipToLocationId
-			, intFreightTermId				= SO.intFreightTermId
-			, strSourceScreenName			= @SALES_ORDER
-			, strReferenceNumber			= SO.strSalesOrderNumber
-			, dtmRequestedArrivalDate		= NULL
-			, intShipToCompanyLocationId	= NULL
-			, strBOLNumber					= SO.strBOLNumber
-			, intShipViaId					= SO.intShipViaId
-			, strVessel						= NULL
-			, strProNumber					= NULL
-			, strDriverId					= NULL
-			, strSealNumber					= NULL
-			, strDeliveryInstruction		= NULL
-			, dtmAppointmentTime			= NULL
-			, dtmDepartureTime				= NULL
-			, dtmArrivalTime				= NULL
-			, dtmDeliveredDate				= NULL
-			, dtmFreeTime					= NULL
-			, strFreeTime					= NULL
-			, strReceivedBy					= NULL
-			, strComment					= SO.strComments
-			, intItemId						= BundleItems.intItemId
-			, intOwnershipType				= CASE WHEN SODetail.intStorageScheduleTypeId IS NULL THEN 1 ELSE 2 END
-			, dblQuantity					= dbo.fnMultiply(SODetail.dblQtyOrdered, BundleItems.dblQty)  --SODetail.dblQtyOrdered - ISNULL(InvoiceDetail.dblQtyShipped, SODetail.dblQtyShipped)
-			, intItemUOMId					= BundleItems.intItemUOMId
-			, intItemLotGroup				= NULL
-			, intOrderId					= SODetail.intSalesOrderId
-			, intSourceId					= NULL
-			, intLineNo						= SODetail.intSalesOrderDetailId
-			, intSubLocationId				= COALESCE(SubLocation.intCompanyLocationSubLocationId, StorageLocation.intSubLocationId, ItemLocation.intSubLocationId)
-			, intStorageLocationId			= COALESCE(StorageLocation.intStorageLocationId, ItemLocation.intStorageLocationId)
-			, intCurrencyId					= SO.[intCurrencyId] 
-			, intWeightUOMId				= NULL
-			, dblUnitPrice					= SODetail.dblPrice
-			, intDockDoorId					= NULL
-			, strNotes						= SODetail.strComments
-			, intGradeId					= NULL
-			, intDiscountSchedule			= NULL
-			, intStorageScheduleTypeId		= SODetail.intStorageScheduleTypeId
-			, intForexRateTypeId			= SODetail.intCurrencyExchangeRateTypeId
-			, dblForexRate					= SODetail.dblCurrencyExchangeRate
-			FROM 
-				dbo.tblSOSalesOrder SO	INNER JOIN dbo.tblSOSalesOrderDetail SODetail 
-					ON SO.intSalesOrderId = SODetail.intSalesOrderId
-
-				INNER JOIN tblICItem Kit
-					ON Kit.intItemId = SODetail.intItemId 
-
-				INNER JOIN dbo.tblICItemUOM KitUOM 
-					ON KitUOM.intItemId = Kit.intItemId 
-					AND KitUOM.intItemUOMId = SODetail.intItemUOMId  
-
-				CROSS APPLY (				
-					SELECT	intItemId = Bundle.intBundleItemId 
-							,dblQty = dbo.fnMultiply(Bundle.dblQuantity, KitUOM.dblUnitQty) 
-							,intItemUOMId = Bundle.intItemUnitMeasureId 
-					FROM	tblICItemBundle Bundle 
-					WHERE	Bundle.intItemId = Kit.intItemId
-				) BundleItems 
-
-				LEFT JOIN dbo.tblICItemLocation ItemLocation 
-					ON ItemLocation.intItemId = BundleItems.intItemId 
-					AND SO.intCompanyLocationId = ItemLocation.intLocationId
-
-				LEFT JOIN tblSMCompanyLocationSubLocation SubLocation
-					ON SubLocation.intCompanyLocationId = ItemLocation.intLocationId
-					AND SubLocation.intCompanyLocationSubLocationId = SODetail.intSubLocationId				
-
-				LEFT JOIN dbo.tblICStorageLocation StorageLocation 
-					ON StorageLocation.intLocationId = ItemLocation.intLocationId
-					AND StorageLocation.intSubLocationId = SubLocation.intCompanyLocationSubLocationId
-					AND StorageLocation.intStorageLocationId = SODetail.intStorageLocationId				
-					
-			WHERE	
-				SODetail.intSalesOrderId = @SalesOrderId
-				AND dbo.fnIsStockTrackingItem(BundleItems.intItemId) = 1
-				--AND (SODetail.dblQtyOrdered - ISNULL(InvoiceDetail.dblQtyShipped, SODetail.dblQtyShipped)) > 0
-				AND ISNULL(Kit.ysnListBundleSeparately, 0) = 1
-				AND Kit.strBundleType = 'Kit'
-				AND KitUOM.ysnAllowSale = 1 
+			, intStorageScheduleTypeId		= SODETAIL.intStorageScheduleTypeId
+			, intForexRateTypeId			= SODETAIL.intCurrencyExchangeRateTypeId
+			, dblForexRate					= SODETAIL.dblCurrencyExchangeRate
+	FROM dbo.tblSOSalesOrder SO	
+	INNER JOIN dbo.tblSOSalesOrderDetail SODETAIL 
+		ON SO.intSalesOrderId = SODETAIL.intSalesOrderId
+	INNER JOIN tblICItem ITEM
+		ON ITEM.intItemId = SODETAIL.intItemId 
+		AND ((ITEM.strType <> 'Bundle' AND dbo.fnIsStockTrackingItem(SODETAIL.intItemId) = 1) 
+		  OR (ITEM.strType = 'Bundle' AND ISNULL(ITEM.strBundleType, 'Kit') = 'Kit'))
+		AND ISNULL(ITEM.ysnListBundleSeparately, 0) = 0
+	INNER JOIN dbo.tblICItemUOM ITEMUOM 
+		ON ITEMUOM.intItemId = SODETAIL.intItemId 
+		AND ITEMUOM.intItemUOMId = SODETAIL.intItemUOMId 
+	INNER JOIN dbo.tblICItemLocation ITEMLOCATION 
+		ON ITEMLOCATION.intItemId = SODETAIL.intItemId 
+		AND SO.intCompanyLocationId = ITEMLOCATION.intLocationId
+	LEFT JOIN tblSMCompanyLocationSubLocation SUBLOCATION
+		ON SUBLOCATION.intCompanyLocationId = ITEMLOCATION.intLocationId
+		AND SUBLOCATION.intCompanyLocationSubLocationId = SODETAIL.intSubLocationId				
+	LEFT JOIN dbo.tblICStorageLocation STORAGELOCATION 
+		ON STORAGELOCATION.intLocationId = ITEMLOCATION.intLocationId
+		AND STORAGELOCATION.intSubLocationId = SUBLOCATION.intCompanyLocationSubLocationId
+		AND STORAGELOCATION.intStorageLocationId = SODETAIL.intStorageLocationId	
+	OUTER APPLY (
+		SELECT intSalesOrderDetailId
+				, dblQtyShipped = SUM(dblQtyShipped)
+		FROM dbo.tblARInvoiceDetail ID
+		WHERE ID.intSalesOrderDetailId = SODETAIL.intSalesOrderDetailId
+		GROUP BY ID.intSalesOrderDetailId
+	) INVOICEDETAIL
+	WHERE SO.intSalesOrderId = @SalesOrderId
+	  AND (SODETAIL.dblQtyOrdered - ISNULL(INVOICEDETAIL.dblQtyShipped, SODETAIL.dblQtyShipped)) > 0
 
 		IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemShipmentResult')) 
 		BEGIN 
 			CREATE TABLE #tmpAddItemShipmentResult (
 				intInventoryShipmentId INT
-
 			)
 		END 
 
-		EXEC @intReturn = dbo.uspICAddItemShipment 
-				@Items
-				, @Charges
-				, @Lots
-				, @UserId	
+		EXEC @intReturn = dbo.uspICAddItemShipment @Items		= @Items
+												 , @Charges		= @Charges
+												 , @Lots		= @Lots
+												 , @intUserId	= @UserId	
 				
 		IF @intReturn <> 0 
 			RETURN @intReturn

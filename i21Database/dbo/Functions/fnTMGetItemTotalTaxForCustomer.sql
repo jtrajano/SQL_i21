@@ -37,5 +37,6 @@ BEGIN
 											,0
 											,NULL
 											,1
+											,NULL	-- intItemUOMId
 											)
 END

@@ -64,8 +64,8 @@ AS
 				CD.strBook,
 				CD.strSubBook,
 				CD.dblRatio,
-				0.0 AS dblVolume
-
+				0.0 AS dblVolume,
+				NULL AS intItemId
 		FROM	vyuCTSearchContractDetail	CD
 		JOIN	tblCTContractCost			CC	ON	CC.intContractDetailId	=	CD.intContractDetailId
 		JOIN	tblICItem					BI	ON	BI.intItemId			=	CC.intItemId
@@ -135,7 +135,9 @@ AS
 				AO.strYear,
 				AO.dtmFromDate,
 				AO.dtmToDate,
-				AD.dblVolume
+				AD.dblVolume,
+				DL.intItemId
+
 		INTO	##BasisComponentTemp
 		FROM	vyuCTSearchContractDetail	CD
 		JOIN	tblCTContractDetail			DL	ON  DL.intContractDetailId	 =	CD.intContractDetailId
@@ -161,13 +163,13 @@ AS
 		SELECT	strContractSeq,strERPPONumber,dtmStartDate,dtmEndDate,strCustomerVendor,strItemNo,dblDetailQuantity,strItemUOM,dblNetWeight,strWeightUOM,dtmContractDate,
 				strContractItemName,strContractItemNo,strFutMarketName,strFutureMonth,dblFutures,strCurrency,'Basis',dblBasis dblRate,NULL AS dblEstimate,strPriceUOM,dblBasis,
 				dblCashPrice,2,strInternalComment,intContractDetailId,Position,dtmPlannedAvailabilityDate,strProductType,strContractBasis,strContractStatus,
-				strCommodityCode,strBook,strSubBook,dblRatio,strYear,dtmFromDate,dtmToDate,dblVolume
+				strCommodityCode,strBook,strSubBook,dblRatio,strYear,dtmFromDate,dtmToDate,dblVolume,intItemId
 		FROM	##BasisComponentTemp
 		UNION ALL
 		SELECT	strContractSeq,strERPPONumber,dtmStartDate,dtmEndDate,strCustomerVendor,strItemNo,dblDetailQuantity,strItemUOM,dblNetWeight,strWeightUOM,dtmContractDate,
 				strContractItemName,strContractItemNo,strFutMarketName,strFutureMonth,dblFutures,strCurrency,'Cash Price',dblCashPrice dblRate,NULL AS dblEstimate,strPriceUOM,dblBasis,
 				dblCashPrice,3,strInternalComment,intContractDetailId,Position,dtmPlannedAvailabilityDate,strProductType,strContractBasis,strContractStatus,
-				strCommodityCode,strBook,strSubBook,dblRatio,strYear,dtmFromDate,dtmToDate,dblVolume
+				strCommodityCode,strBook,strSubBook,dblRatio,strYear,dtmFromDate,dtmToDate,dblVolume,intItemId
 		FROM	##BasisComponentTemp
 	)t
 	
@@ -182,6 +184,7 @@ AS
 		<mapping><fieldname>FiscalYear</fieldname><fromField>strYear</fromField><toField></toField><ignoreTime></ignoreTime></mapping>
 		<mapping><fieldname>FromDate</fieldname><fromField>dtmFromDate</fromField><toField></toField><ignoreTime>1</ignoreTime></mapping>
 		<mapping><fieldname>ToDate</fieldname><fromField>dtmToDate</fromField><toField></toField><ignoreTime>1</ignoreTime></mapping>
+		<mapping><fieldname>strItemNo</fieldname><fromField>strItemNo</fromField><toField></toField><ignoreTime>1</ignoreTime></mapping>
 	</mappings>'
 
 	IF ISNULL(@intContractDetailId,'') <> ''
@@ -195,7 +198,7 @@ AS
 			   ,@strMappingXML = @strMappingXML
 			   ,@strClause = @Condition OUTPUT
 	END
-	
+	--SELECT @Condition
 	IF LEN(LTRIM(RTRIM(ISNULL(@Condition,'')))) > 0
 	BEGIN
 		--SELECT @Condition = REPLACE(@Condition,'dtmToDate)','dtmToDate OR dtmFromDate = ''1900-01-01 00:00:00.000'' OR dtmToDate = ''1900-01-01 00:00:00.000'')')

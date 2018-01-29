@@ -31,9 +31,9 @@ BEGIN TRY
 	--Declare xmlParam holder
 	DECLARE @temp_xml_table TABLE 
 	(  
-			[fieldname]		NVARCHAR(50),  
+			[fieldname]		NVARCHAR(MAX),  
 			condition		NVARCHAR(20),        
-			[from]			NVARCHAR(50), 
+			[from]			NVARCHAR(MAX), 
 			[to]			NVARCHAR(50),  
 			[join]			NVARCHAR(10),  
 			[begingroup]	NVARCHAR(50),  
@@ -49,9 +49,9 @@ BEGIN TRY
 	SELECT	*  
 	FROM	OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2)  
 	WITH (  
-				[fieldname]		NVARCHAR(50),  
+				[fieldname]		NVARCHAR(MAX),  
 				condition		NVARCHAR(20),        
-				[from]			NVARCHAR(50), 
+				[from]			NVARCHAR(MAX), 
 				[to]			NVARCHAR(50),  
 				[join]			NVARCHAR(10),  
 				[begingroup]	NVARCHAR(50),  
@@ -728,6 +728,10 @@ BEGIN TRY
 END TRY
 
 BEGIN CATCH
+	--TEST
+	INSERT INTO XMLDB.dbo.tblStoredProcTest(strValueOne, strValueTwo)
+	VALUES('', ERROR_MESSAGE())
+
 	SET @ErrMsg = ERROR_MESSAGE()  
 	RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')  
 END CATCH

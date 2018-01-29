@@ -1,14 +1,15 @@
-﻿CREATE FUNCTION dbo.fnSTDynamicQueryItemData 
+﻿CREATE FUNCTION [dbo].[fnSTDynamicQueryItemData] 
 (
 	@strChangeDescription VARCHAR(250)
 	, @strOldData NVARCHAR(250)
 	, @strNewData NVARCHAR(250)
 
-	, @strCompanyLocationId NVARCHAR(250)
-	, @strVendorId NVARCHAR(250)
-	, @strCategoryId NVARCHAR(250)
-	, @strFamilyId NVARCHAR(250)
-	, @strClassId NVARCHAR(250)
+	, @strCompanyLocationId NVARCHAR(MAX)
+	, @strVendorId NVARCHAR(MAX)
+	, @strCategoryId NVARCHAR(MAX)
+	, @strFamilyId NVARCHAR(MAX)
+	, @strClassId NVARCHAR(MAX)
+
 	, @intUpcCode INT
 	, @strDescription NVARCHAR(250)
 	, @dblPriceBetween1 DECIMAL(18, 6)
@@ -42,12 +43,12 @@ AS BEGIN
 
 		   IF (@strCompanyLocationId <> '')
 		   BEGIN 
-				SET @strGeneratedSql = @strGeneratedSql + ' and c.intCompanyLocationId IN (' + CAST(@strCompanyLocationId as NVARCHAR(250)) + ')'
+				SET @strGeneratedSql = @strGeneratedSql + ' and c.intCompanyLocationId IN (' + CAST(@strCompanyLocationId as NVARCHAR(MAX)) + ')'
 		   END
 		 
 		   IF (@strVendorId <> '')
 		   BEGIN 
-			   SET @strGeneratedSql = @strGeneratedSql + ' and a.intVendorId IN (' + CAST(@strVendorId as NVARCHAR(250)) + ')'
+			   SET @strGeneratedSql = @strGeneratedSql + ' and a.intVendorId IN (' + CAST(@strVendorId as NVARCHAR(MAX)) + ')'
 		   END
 
 		   IF (@strCategoryId <> '')
@@ -55,17 +56,17 @@ AS BEGIN
 				SET @strGeneratedSql = @strGeneratedSql +  ' and a.intItemId  
 				IN (select intItemId from tblICItem where intCategoryId IN
 				(select intCategoryId from tblICCategory where intCategoryId 
-				IN (' + CAST(@strCategoryId as NVARCHAR(250)) + ')' + '))'
+				IN (' + CAST(@strCategoryId as NVARCHAR(MAX)) + ')' + '))'
 		   END
 
 		   IF (@strFamilyId <> '')
 		   BEGIN
-				 SET @strGeneratedSql = @strGeneratedSql + ' and  a.intFamilyId IN (' + CAST(@strFamilyId as NVARCHAR(250)) + ')'
+				 SET @strGeneratedSql = @strGeneratedSql + ' and  a.intFamilyId IN (' + CAST(@strFamilyId as NVARCHAR(MAX)) + ')'
 		   END
 
 		   IF (@strClassId <> '')
 		   BEGIN
-				 SET @strGeneratedSql = @strGeneratedSql + ' and  a.intClassId IN (' + CAST(@strClassId as NVARCHAR(250)) + ')'
+				 SET @strGeneratedSql = @strGeneratedSql + ' and  a.intClassId IN (' + CAST(@strClassId as NVARCHAR(MAX)) + ')'
 		   END
 	    
 		   IF (@intUpcCode IS NOT NULL)

@@ -25,7 +25,8 @@ AS
 			CY.intCurrencyID	AS	intCurrencyId,
 			CY.strCurrency,
 			CY.ysnSubCurrency,
-			MY.strCurrency		AS	strMainCurrency
+			MY.strCurrency		AS	strMainCurrency,
+			ISNULL(V.strFLOId,U.strFLOId) AS strFLOId
 
 	FROM	tblEMEntity				E
 	CROSS APPLY	(SELECT TOP 1 * FROM tblSMCompanyPreference) SC	

@@ -1730,8 +1730,8 @@ IF @post = 1
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchIdUsed
 				,intAccountId				= A.intAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN A.dblBaseInvoiceTotal - ISNULL(CM.[dblBaseAppliedCMAmount], @ZeroDecimal) ELSE 0 END
-				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE A.dblBaseInvoiceTotal - ISNULL(CM.[dblBaseAppliedCMAmount], @ZeroDecimal) END
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN A.dblBaseInvoiceTotal - ISNULL(0, @ZeroDecimal) ELSE 0 END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE A.dblBaseInvoiceTotal - ISNULL(0, @ZeroDecimal) END
 				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  
 																								(
 																									SELECT
@@ -1805,10 +1805,10 @@ IF @post = 1
 				,strTransactionForm			= @SCREEN_NAME
 				,strModuleName				= @MODULE_NAME
 				,intConcurrencyId			= 1
-				,[dblDebitForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN A.dblInvoiceTotal - ISNULL(CM.[dblAppliedCMAmount], @ZeroDecimal) ELSE 0 END
-				,[dblDebitReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN A.dblInvoiceTotal - ISNULL(CM.[dblAppliedCMAmount], @ZeroDecimal) ELSE 0 END
-				,[dblCreditForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE A.dblInvoiceTotal - ISNULL(CM.[dblAppliedCMAmount], @ZeroDecimal) END
-				,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE A.dblInvoiceTotal - ISNULL(CM.[dblAppliedCMAmount], @ZeroDecimal) END
+				,[dblDebitForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN A.dblInvoiceTotal - ISNULL(@ZeroDecimal, @ZeroDecimal) ELSE 0 END
+				,[dblDebitReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN A.dblInvoiceTotal - ISNULL(@ZeroDecimal, @ZeroDecimal) ELSE 0 END
+				,[dblCreditForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE A.dblInvoiceTotal - ISNULL(@ZeroDecimal, @ZeroDecimal) END
+				,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE A.dblInvoiceTotal - ISNULL(@ZeroDecimal, @ZeroDecimal) END
 				,[dblReportingRate]			= 0
 				,[dblForeignRate]			= 0
 				,[strRateType]				= ''
@@ -1820,26 +1820,26 @@ IF @post = 1
 					ON A.[intEntityCustomerId] = C.[intEntityId]
 			INNER JOIN 
 				(SELECT intInvoiceId FROM @PostInvoiceData )	P ON A.intInvoiceId = P.intInvoiceId	
-			LEFT OUTER JOIN
-				(
-				--Credit Memo Prepaids
-				SELECT
-					 [dblAppliedCMAmount]		= SUM(ISNULL(ARPAC.[dblAppliedInvoiceDetailAmount],@ZeroDecimal))
-					,[dblBaseAppliedCMAmount]	= SUM(ISNULL(ARPAC.[dblBaseAppliedInvoiceDetailAmount],@ZeroDecimal))
-					,[intInvoiceId]				= A.[intInvoiceId] 
-				FROM
-					(SELECT [intInvoiceId], [intPrepaymentId], [dblAppliedInvoiceDetailAmount], [dblBaseAppliedInvoiceDetailAmount] FROM tblARPrepaidAndCredit WITH (NOLOCK)
-					 WHERE ISNULL([ysnApplied],0) = 1 AND [dblAppliedInvoiceDetailAmount] <> @ZeroDecimal) ARPAC
-				INNER JOIN
-					(SELECT [intInvoiceId] FROM tblARInvoice WITH (NOLOCK)) A
-						ON ARPAC.[intInvoiceId] = A.[intInvoiceId] 						
-				INNER JOIN
-					(SELECT [intInvoiceId], strTransactionType FROM tblARInvoice WITH (NOLOCK) WHERE strTransactionType IN ('Credit Memo', 'Credit Note')) ARI1
-						ON ARPAC.[intPrepaymentId] = ARI1.[intInvoiceId]	
-				GROUP BY
-					A.[intInvoiceId]
-				) CM
-					ON A.[intInvoiceId] = CM.[intInvoiceId]
+			-- LEFT OUTER JOIN
+			-- 	(
+			-- 	--Credit Memo Prepaids
+			-- 	SELECT
+			-- 		 [dblAppliedCMAmount]		= SUM(ISNULL(ARPAC.[dblAppliedInvoiceDetailAmount],@ZeroDecimal))
+			-- 		,[dblBaseAppliedCMAmount]	= SUM(ISNULL(ARPAC.[dblBaseAppliedInvoiceDetailAmount],@ZeroDecimal))
+			-- 		,[intInvoiceId]				= A.[intInvoiceId] 
+			-- 	FROM
+			-- 		(SELECT [intInvoiceId], [intPrepaymentId], [dblAppliedInvoiceDetailAmount], [dblBaseAppliedInvoiceDetailAmount] FROM tblARPrepaidAndCredit WITH (NOLOCK)
+			-- 		 WHERE ISNULL([ysnApplied],0) = 1 AND [dblAppliedInvoiceDetailAmount] <> @ZeroDecimal) ARPAC
+			-- 	INNER JOIN
+			-- 		(SELECT [intInvoiceId] FROM tblARInvoice WITH (NOLOCK)) A
+			-- 			ON ARPAC.[intInvoiceId] = A.[intInvoiceId] 						
+			-- 	INNER JOIN
+			-- 		(SELECT [intInvoiceId], strTransactionType FROM tblARInvoice WITH (NOLOCK) WHERE strTransactionType IN ('Credit Memo', 'Credit Note')) ARI1
+			-- 			ON ARPAC.[intPrepaymentId] = ARI1.[intInvoiceId]	
+			-- 	GROUP BY
+			-- 		A.[intInvoiceId]
+			-- 	) CM
+			-- 		ON A.[intInvoiceId] = CM.[intInvoiceId]
 			WHERE
 				ISNULL(A.intPeriodsToAccrue,0) <= 1
 				AND (
@@ -1849,7 +1849,7 @@ IF @post = 1
 					)
 
 
-			UNION ALL
+			/*UNION ALL
 			--DEBIT Prepaids
 			SELECT
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
@@ -1900,7 +1900,7 @@ IF @post = 1
 				(SELECT intInvoiceId FROM @PostInvoiceData ) P ON A.intInvoiceId = P.intInvoiceId
 			WHERE
 				ISNULL(A.intPeriodsToAccrue,0) <= 1			
-
+			*/
 			UNION ALL
 
 			--Debit Payment
@@ -1908,8 +1908,8 @@ IF @post = 1
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchIdUsed
 				,intAccountId				= SMCL.intUndepositedFundsId 
-				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  A.dblBasePayment - ISNULL(CM.[dblBaseAppliedCMAmount], @ZeroDecimal) ELSE 0 END
-				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  0 ELSE A.dblBasePayment - ISNULL(CM.[dblBaseAppliedCMAmount], @ZeroDecimal) END
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  A.dblBasePayment - ISNULL(@ZeroDecimal, @ZeroDecimal) ELSE 0 END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  0 ELSE A.dblBasePayment - ISNULL(@ZeroDecimal, @ZeroDecimal) END
 				,dblDebitUnit				= @ZeroDecimal
 				,dblCreditUnit				= @ZeroDecimal					
 				,strDescription				= A.strComments
@@ -1930,10 +1930,10 @@ IF @post = 1
 				,strTransactionForm			= @SCREEN_NAME
 				,strModuleName				= @MODULE_NAME
 				,intConcurrencyId			= 1
-				,[dblDebitForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  A.dblPayment - ISNULL(CM.[dblAppliedCMAmount], @ZeroDecimal) ELSE 0 END
-				,[dblDebitReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  A.dblPayment - ISNULL(CM.[dblAppliedCMAmount], @ZeroDecimal) ELSE 0 END
-				,[dblCreditForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  0 ELSE A.dblPayment - ISNULL(CM.[dblAppliedCMAmount], @ZeroDecimal) END
-				,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  0 ELSE A.dblPayment - ISNULL(CM.[dblAppliedCMAmount], @ZeroDecimal) END
+				,[dblDebitForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  A.dblPayment - ISNULL(@ZeroDecimal, @ZeroDecimal) ELSE 0 END
+				,[dblDebitReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  A.dblPayment - ISNULL(@ZeroDecimal, @ZeroDecimal) ELSE 0 END
+				,[dblCreditForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  0 ELSE A.dblPayment - ISNULL(@ZeroDecimal, @ZeroDecimal) END
+				,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  0 ELSE A.dblPayment - ISNULL(@ZeroDecimal, @ZeroDecimal) END
 				,[dblReportingRate]			= 0
 				,[dblForeignRate]			= 0
 				,[strRateType]				= ''	  			
@@ -1947,7 +1947,7 @@ IF @post = 1
 			INNER JOIN
 				(SELECT intCompanyLocationId, intUndepositedFundsId FROM tblSMCompanyLocation WITH (NOLOCK)) SMCL
 					ON A.intCompanyLocationId = SMCL.intCompanyLocationId
-			LEFT OUTER JOIN
+			/*LEFT OUTER JOIN
 				(
 				--Credit Memo Prepaids
 				SELECT
@@ -1964,12 +1964,12 @@ IF @post = 1
 				GROUP BY
 					A.[intInvoiceId]
 				) CM
-					ON A.[intInvoiceId] = CM.[intInvoiceId] 
+					ON A.[intInvoiceId] = CM.[intInvoiceId] */
 			WHERE
 				ISNULL(A.intPeriodsToAccrue,0) <= 1
-				AND (A.dblPayment - ISNULL(CM.[dblAppliedCMAmount], @ZeroDecimal)) <> @ZeroDecimal
+				AND (A.dblPayment - ISNULL(@ZeroDecimal, @ZeroDecimal)) <> @ZeroDecimal
 			
-			UNION ALL
+			/*UNION ALL
 			--Credit Prepaids
 			SELECT
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
@@ -2019,7 +2019,7 @@ IF @post = 1
 				(SELECT intInvoiceId FROM @PostInvoiceData) P ON A.intInvoiceId = P.intInvoiceId
 			WHERE
 				ISNULL(A.intPeriodsToAccrue,0) <= 1
-					
+			*/		
 			--CREDIT MISC
 			UNION ALL 
 			SELECT
@@ -3789,8 +3789,8 @@ IF @recap = 0
 	BEGIN			 
 		BEGIN TRY 
 			IF @post = 0
-				BEGIN
-
+				BEGIN					
+					/* 
 					UPDATE ARI
 					SET
 						ARI.dblPayment	= (CASE WHEN ARI.dblInvoiceTotal = @ZeroDecimal OR ARI.strTransactionType IN ('Cash', 'Cash Refund' ) 
@@ -3802,6 +3802,7 @@ IF @recap = 0
 						(SELECT intInvoiceId FROM @PostInvoiceData) PID
 					INNER JOIN
 						(SELECT intInvoiceId, strTransactionType, dblPayment, dblInvoiceTotal FROM dbo.tblARInvoice WITH (NOLOCK)) ARI ON PID.intInvoiceId = ARI.intInvoiceId 
+					*/
 
 
 					UPDATE ARI
@@ -3983,7 +3984,23 @@ IF @recap = 0
 								DELETE FROM @TankDeliveryForSync WHERE intInvoiceId = @intInvoiceForSyncId
 																												
 							END 							
-								
+						
+
+						
+						DECLARE @idInvoice TABLE(
+							id int
+						)
+						INSERT INTO @idInvoice(id)
+						select intInvoiceId From @PostInvoiceData
+						DECLARE @curIdInvoice INT
+						WHILE EXISTS(SELECT TOP 1 1 FROM @idInvoice)
+						BEGIN
+							SELECT TOP 1 @curIdInvoice = id FROM @idInvoice
+								EXEC uspARCreateRCVForCreditMemo 					
+									@intInvoiceId = @curIdInvoice,
+									@intUserId = @userId
+							DELETE FROM @idInvoice where id = @curIdInvoice
+						END
 																
 					END TRY
 					BEGIN CATCH
