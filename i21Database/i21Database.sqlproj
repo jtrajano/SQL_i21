@@ -6158,6 +6158,7 @@
     <Build Include="dbo\Tables\tblSMLogoPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspSMGetLogoPreference.sql" />
     <Build Include="dbo\Tables\tblCTSequenceAmendmentLog.sql" />
+    <Build Include="dbo\Functions\fnCTGetAvgSamplePropertyValue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
