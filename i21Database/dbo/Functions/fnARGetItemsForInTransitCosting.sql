@@ -108,7 +108,11 @@ INNER JOIN (SELECT [intItemId], [intItemLocationId], [intItemUOMId], [intTransac
 WHERE
 	ICIT.[intFobPointId] = @FOB_DESTINATION
 	AND ISNULL(ARID.[intLoadDetailId], 0) = 0
-	AND ARI.[strType] <> 'Provisional'
+	AND (
+			(ARI.[strType] <> 'Provisional' AND EXISTS(SELECT NULL FROM tblARInvoice I WHERE I.[intInvoiceId] = ARI.[intOriginalInvoiceId] AND I.[strType] = 'Provisional' AND I.[ysnPosted] = 0))
+		OR
+			(ARI.[strType] = 'Provisional' AND ARI.[ysnImpactForProvisional] = 1)
+		)
 
 
 UNION ALL
@@ -142,10 +146,14 @@ FROM
 INNER JOIN 
 	(SELECT [intInvoiceId], [strInvoiceNumber], [strTransactionType], [intCurrencyId], [strImportFormat], [intCompanyLocationId], [intDistributionHeaderId], 
 		[intLoadDistributionHeaderId], [strActualCostId], [dtmShipDate], [intPeriodsToAccrue], [ysnImpactInventory], [dblSplitPercent], [intLoadId], [intFreightTermId]
-	 FROM @Invoices
+	 FROM @Invoices INV
 	 WHERE
-		[strType] <> 'Provisional') ARI 
-		ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
+		((INV.[strType] <> 'Provisional' AND EXISTS(SELECT NULL FROM tblARInvoice I WHERE I.[intInvoiceId] = INV.[intOriginalInvoiceId] AND I.[strType] = 'Provisional' AND I.[ysnPosted] = 0))
+			OR
+		(INV.[strType] = 'Provisional' AND INV.[ysnImpactForProvisional] = 1)
+		)
+			) ARI 
+			ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
 INNER JOIN
     (SELECT [intLoadId], [intPurchaseSale], [strLoadNumber] FROM tblLGLoad WITH (NOLOCK)) LGL
 		ON LGL.[intLoadId] = ARI.[intLoadId]

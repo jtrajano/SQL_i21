@@ -86,7 +86,7 @@ SET @DefaultCurrencyId = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPre
 
 SELECT TOP 1 @DiscountAccountId = intDiscountAccountId 
 		   , @DeferredRevenueAccountId = intDeferredRevenueAccountId
-		   , @HasImpactForProvisional = ysnImpactForProvisional
+		   , @HasImpactForProvisional = ISNULL(ysnImpactForProvisional,0)
 FROM dbo.tblARCompanyPreference WITH (NOLOCK)
 
 DECLARE @ErrorMerssage NVARCHAR(MAX)
@@ -173,6 +173,7 @@ IF (@param IS NOT NULL)
 				,[strPostingMessage]
 				,[intUserId]
 				,[ysnAllowOtherUserToPost]
+				,[ysnImpactForProvisional]
 			)
 			 SELECT
 				 [intInvoiceId]					= ARI.[intInvoiceId]
@@ -222,6 +223,7 @@ IF (@param IS NOT NULL)
 				,[strPostingMessage]			= ''
 				,[intUserId]					= @UserEntityID
 				,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost
+				,[ysnImpactForProvisional]		= @HasImpactForProvisional
 			FROM
 				dbo.tblARInvoice ARI WITH (NOLOCK) 
 			WHERE
@@ -278,6 +280,7 @@ IF (@param IS NOT NULL)
 				,[strPostingMessage]
 				,[intUserId]
 				,[ysnAllowOtherUserToPost]
+				,[ysnImpactForProvisional]
 			)
 			 SELECT
 				 [intInvoiceId]					= ARI.[intInvoiceId]
@@ -327,6 +330,7 @@ IF (@param IS NOT NULL)
 				,[strPostingMessage]			= ''
 				,[intUserId]					= @UserEntityID
 				,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost
+				,[ysnImpactForProvisional]		= @HasImpactForProvisional
 			FROM
 				dbo.tblARInvoice ARI WITH (NOLOCK) 
 			WHERE
@@ -385,6 +389,7 @@ IF(@beginDate IS NOT NULL)
 				,[strPostingMessage]
 				,[intUserId]
 				,[ysnAllowOtherUserToPost]
+				,[ysnImpactForProvisional]
 			)
 			 SELECT
 				 [intInvoiceId]					= ARI.[intInvoiceId]
@@ -434,6 +439,7 @@ IF(@beginDate IS NOT NULL)
 				,[strPostingMessage]			= ''
 				,[intUserId]					= @UserEntityID
 				,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost
+				,[ysnImpactForProvisional]		= @HasImpactForProvisional
 			FROM
 				dbo.tblARInvoice ARI WITH (NOLOCK) 
 			WHERE
@@ -492,6 +498,7 @@ IF(@beginTransaction IS NOT NULL)
 				,[strPostingMessage]
 				,[intUserId]
 				,[ysnAllowOtherUserToPost]
+				,[ysnImpactForProvisional]
 			)
 			 SELECT
 				 [intInvoiceId]					= ARI.[intInvoiceId]
@@ -541,6 +548,7 @@ IF(@beginTransaction IS NOT NULL)
 				,[strPostingMessage]			= ''
 				,[intUserId]					= @UserEntityID
 				,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost
+				,[ysnImpactForProvisional]		= @HasImpactForProvisional
 			FROM
 				dbo.tblARInvoice ARI WITH (NOLOCK) 
 			WHERE
@@ -615,7 +623,8 @@ IF(@exclude IS NOT NULL)
 			,[strBatchId]
 			,[strPostingMessage]
 			,[intUserId]
-			,[ysnAllowOtherUserToPost])
+			,[ysnAllowOtherUserToPost]
+			,[ysnImpactForProvisional])
 			SELECT
 			 [intInvoiceId]					= ARI.[intInvoiceId]
 			,[strInvoiceNumber]				= ARI.[strInvoiceNumber]
@@ -664,6 +673,7 @@ IF(@exclude IS NOT NULL)
 			,[strPostingMessage]			= ''
 			,[intUserId]					= @UserEntityID
 			,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost
+			,[ysnImpactForProvisional]		= @HasImpactForProvisional
 		FROM dbo.tblARInvoice ARI WITH (NOLOCK) 
 		WHERE strType = 'Provisional'
 		  AND ysnPosted = 1
@@ -930,6 +940,7 @@ BEGIN TRY
 							,[strPostingMessage]
 							,[intUserId]
 							,[ysnAllowOtherUserToPost]
+							,[ysnImpactForProvisional]
 						)
 						 SELECT DISTINCT
 							 [intInvoiceId]					= ARI.[intInvoiceId]
@@ -977,7 +988,8 @@ BEGIN TRY
 							,[strBatchId]					= @batchIdUsed
 							,[strPostingMessage]			= ''
 							,[intUserId]					= @UserEntityID
-							,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost											
+							,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost
+							,[ysnImpactForProvisional]		= @HasImpactForProvisional									
 						FROM dbo.tblARInvoice ARI WITH (NOLOCK)
 						INNER JOIN dbo.fnGetRowsFromDelimitedValues(@invoicesToAdd) DV ON ARI.intInvoiceId = DV.intID
 						WHERE ARI.[ysnPosted] = 0 
@@ -1685,7 +1697,9 @@ IF @post = 1
 							 , dblReportingRate
 							 , dblForeignRate
 						FROM tblGLDetail WITH (NOLOCK)
-						WHERE ysnIsUnposted = 0
+						WHERE 
+							ysnIsUnposted = 0
+							AND strModuleName = @MODULE_NAME
 					) GL ON PROV.intInvoiceId = GL.intTransactionId
 						AND PROV.strInvoiceNumber = GL.strTransactionId
 					ORDER BY GL.intGLDetailId
