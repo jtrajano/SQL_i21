@@ -6153,6 +6153,7 @@
     <Build Include="dbo\Tables\tblSMBatchPostingLog.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryShipmentTaxes.sql" />
     <Build Include="dbo\Views\vyuICGetShipmentChargeTaxDetails.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMRefreshUserRoleMenus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

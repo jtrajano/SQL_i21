@@ -6,34 +6,41 @@
 	WHERE ISNULL(strDashboardRole, '') = ''
 
 GO
-
 	-- Add the SQL Server custom messages
 	--EXEC dbo.uspSMErrorMessages
 	--EXEC dbo.uspICErrorMessages
-GO
+--GO
+	---- Update User Role and User Security Menus
+	--DECLARE @currentRow INT
+	--DECLARE @totalRows INT
 
-	-- Update User Role and User Security Menus
-	DECLARE @currentRow INT
-	DECLARE @totalRows INT
+	--SET @currentRow = 1
+	--SELECT @totalRows = Count(*) FROM [tblSMUserRole] WHERE (strRoleType NOT IN ('Contact Admin', 'Contact') OR strRoleType IS NULL) AND intUserRoleID <> 999
 
-	SET @currentRow = 1
-	SELECT @totalRows = Count(*) FROM [tblSMUserRole] WHERE (strRoleType NOT IN ('Contact Admin', 'Contact') OR strRoleType IS NULL) AND intUserRoleID <> 999
+	--WHILE (@currentRow <= @totalRows)
+	--BEGIN
 
-	WHILE (@currentRow <= @totalRows)
+	--Declare @roleId INT
+	--SELECT @roleId = intUserRoleID FROM (  
+	--	SELECT ROW_NUMBER() OVER(ORDER BY intUserRoleID ASC) AS 'ROWID', *
+	--	FROM [tblSMUserRole] WHERE (strRoleType NOT IN ('Contact Admin', 'Contact') OR strRoleType IS NULL) AND intUserRoleID <> 999
+	--) a
+	--WHERE ROWID = @currentRow
+
+	--PRINT N'Executing uspSMUpdateUserRoleMenus'
+	--Exec uspSMUpdateUserRoleMenus @roleId, 1, 0
+
+	--SET @currentRow = @currentRow + 1
+	--END
+
+	PRINT N'START REFRESHING USER ROLE MENUS'
+	IF OBJECT_ID('tempdb..#updateUserRoleMenus') IS NOT NULL
 	BEGIN
+		EXEC [uspSMRefreshUserRoleMenus]
 
-	Declare @roleId INT
-	SELECT @roleId = intUserRoleID FROM (  
-		SELECT ROW_NUMBER() OVER(ORDER BY intUserRoleID ASC) AS 'ROWID', *
-		FROM [tblSMUserRole] WHERE (strRoleType NOT IN ('Contact Admin', 'Contact') OR strRoleType IS NULL) AND intUserRoleID <> 999
-	) a
-	WHERE ROWID = @currentRow
-
-	PRINT N'Executing uspSMUpdateUserRoleMenus'
-	Exec uspSMUpdateUserRoleMenus @roleId, 1, 0
-
-	SET @currentRow = @currentRow + 1
-	END
+		IF OBJECT_ID('tempdb..#updateUserRoleMenus') IS NOT NULL DROP TABLE #updateUserRoleMenus
+	END	
+	PRINT N'END REFRESHING USER ROLE MENUS'
 
 GO
 	-- Reset Demo User Roles and permissions
@@ -127,6 +134,9 @@ GO
 	-- MIGRATE USER TYPE FROM tblSMPreferences to tblSMUserPreference
 	EXEC uspSMMigrateUserPreference
 GO
+
+
+	
 
 	-- Update User Preference
 	DECLARE @currentRow INT

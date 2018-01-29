@@ -3,6 +3,9 @@
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Voucher Checkoff Detail' AND strModuleName = 'Accounts Payable')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
+		
+		IF OBJECT_ID('tempdb..#updateUserRoleMenus') IS NOT NULL DROP TABLE #updateUserRoleMenus
+		CREATE TABLE #updateUserRoleMenus (ysnUpdate BIT)
 	END
 GO
 
