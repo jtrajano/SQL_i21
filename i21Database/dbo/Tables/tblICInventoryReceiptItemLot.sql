@@ -54,6 +54,13 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICInventoryReceiptItemLot_tblICLot] FOREIGN KEY ([intLotId]) REFERENCES [tblICLot]([intLotId]), 
 		CONSTRAINT [FK_tblICInventoryReceiptItemLot_tblICStorageLocation] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]) 
 	)
+	GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryReceiptItemLot_intInventoryReceiptItemId]
+		ON [dbo].[tblICInventoryReceiptItemLot]([intInventoryReceiptItemId] ASC)
+		INCLUDE (intLotId)
+
+	GO
 
 --	GO
 --	EXEC sp_addextendedproperty @name = N'MS_Description',

@@ -6128,6 +6128,8 @@
     <None Include="Scripts\Post-Deployment\IC\27_RemoveAfter18.1_DataFix.sql" />
     <Build Include="dbo\Views\vyuARGetAddOnItems.sql" />
     <Build Include="dbo\Tables\tblSCTicketLVStaging.sql" />
+    <Build Include="dbo\Tables\tblICInventoryShipmentChargeTax.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryShipmentChargeTax.sql" />
     <Build Include="dbo\Tables\tblCFTempCSUVehicle.sql" />
     <Build Include="dbo\Tables\tblCFTempCSUCard.sql" />
     <Build Include="dbo\Tables\tblCFTempCSUAuditLog.sql" />
@@ -6149,6 +6151,7 @@
     <Build Include="dbo\Tables\tblSCDeliverySheetHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspSMGetReportLabel.sql" />
     <Build Include="dbo\Tables\tblSMBatchPostingLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryShipmentTaxes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

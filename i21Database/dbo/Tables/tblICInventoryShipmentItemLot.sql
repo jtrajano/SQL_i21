@@ -28,6 +28,13 @@ Type the overview for the table here.
 	)
 
 	GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryShipmentItemLot_intInventoryShipmentItemId]
+		ON [dbo].[tblICInventoryShipmentItemLot]([intInventoryShipmentItemId] ASC)
+		INCLUDE (intLotId)
+
+	GO
+
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Identity Field',
 		@level0type = N'SCHEMA',

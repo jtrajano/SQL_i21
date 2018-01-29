@@ -24,10 +24,10 @@ SELECT ShipmentItem.intInventoryShipmentId
 	, ShipmentItem.strLotTracking
 	, ShipmentItem.intCommodityId
 	, ShipmentItem.strOrderUOM
-	, ShipmentItem.strUnitMeasure
+	, Lot.strItemUOM
 	, ShipmentItem.dblItemUOMConv
 	, ShipmentItem.strUnitType
-	, ShipmentItem.strWeightUOM
+	, Lot.strWeightUOM
 	, ShipmentItem.dblWeightItemUOMConv
 	, ShipmentItem.dblQtyOrdered
     , ShipmentItem.dblQtyAllocated
@@ -45,14 +45,16 @@ SELECT ShipmentItem.intInventoryShipmentId
 	, Lot.intSubLocationId
 	, Lot.strSubLocationName
 	, Lot.intStorageLocationId
-	, strStorageLocationName = Lot.strStorageLocation
-	, dblLotQty = ShipmentItemLot.dblQuantityShipped
+	, Lot.strStorageLocation
+	, ShipmentItemLot.dblQuantityShipped
 	, strLotUOM = Lot.strItemUOM
 	, ShipmentItemLot.dblGrossWeight
 	, ShipmentItemLot.dblTareWeight
 	, dblNetWeight = ISNULL(ShipmentItemLot.dblGrossWeight, 0) - ISNULL(ShipmentItemLot.dblTareWeight, 0)
 	, ShipmentItem.intCurrencyId
 	, ShipmentItem.strCurrency
+	, Lot.dblAvailableQty
+	, ShipmentItemLot.strWarehouseCargoNumber 
 FROM tblICInventoryShipmentItemLot ShipmentItemLot
 	LEFT JOIN vyuICGetInventoryShipmentItem ShipmentItem ON ShipmentItem.intInventoryShipmentItemId = ShipmentItemLot.intInventoryShipmentItemId
 	LEFT JOIN vyuICGetLot Lot ON Lot.intLotId = ShipmentItemLot.intLotId
