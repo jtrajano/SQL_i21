@@ -16,7 +16,10 @@ SELECT
 	A.dtmInterestAccruedThru AS dtmLastDeferred, --date of last interest date calculation, if there's no voucher interest yet, this should be blank
 	A.dblAmountDue,
 	0 AS intDays,
-	dblInterest = dbo.fnGetInterestBasedOnTerm(A.dblTotal, deferredInterest.dtmPaymentPostDate, deferredInterest.dtmCalculationDate, deferredTerm.intTermID),
+	dblInterest = CAST(A.dblTotal * ((deferredTerm.dblAPR / 100) / 12) * 
+			(CASE WHEN DATEDIFF(MONTH, deferredInterest.dtmCalculationDate, deferredInterest.dtmPaymentDueDateOverride) = 0 
+				THEN 1 ELSE DATEDIFF(MONTH, deferredInterest.dtmCalculationDate, deferredInterest.dtmPaymentDueDateOverride) END) 
+		AS DECIMAL(18,2)),
 	CAST(CASE WHEN staging.intBillId IS NOT NULL THEN 1 ELSE 0 END AS BIT) ysnSelected,
 	B.str1099Form,
 	B.str1099Type

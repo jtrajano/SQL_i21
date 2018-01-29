@@ -82,18 +82,28 @@ BEGIN
 		INSERT INTO @vouchers
 		SELECT @voucherIdCreated
 
-		--UPDATE THE VOUCHER INTEREST DATE AND INTEREST ACCRUED THRU
+		--UPDATE THE VOUCHER INTEREST DATE AND INTEREST ACCRUED THRU OF EXISTING VOUCHER
 		UPDATE A
-			SET A.dtmDeferredInterestDate = deferredInterest.dtmPaymentDueDateOverride,
-			A.dtmInterestAccruedThru = deferredInterest.dtmCalculationDate
+			SET A.dtmDate = deferredInterest.dtmPaymentInvoiceDate,
+				A.drmDueDate = deferredInterest.dtmPaymentDueDateOverride, 
+				A.intTermsId = term.intTermID
 		FROM tblAPBill A
 		CROSS APPLY tblAPDeferredPaymentInterest deferredInterest
-		WHERE A.intBillId = @currentVoucherId
+		INNER JOIN tblSMTerm term ON deferredInterest.strTerm = term.strTerm
+		WHERE A.intBillId = @voucherIdCreated
 
 		UPDATE A
 			SET A.intDeferredVoucherId = @currentVoucherId
 		FROM tblAPBillDetail A
 		WHERE A.intBillId = @voucherIdCreated
+
+		UPDATE A
+			SET A.dtmDeferredInterestDate = deferredInterest.dtmPaymentDueDateOverride,
+				A.dtmInterestAccruedThru = deferredInterest.dtmCalculationDate
+		FROM tblAPBill A
+		CROSS APPLY tblAPDeferredPaymentInterest deferredInterest
+		INNER JOIN tblSMTerm term ON deferredInterest.strTerm = term.strTerm
+		WHERE A.intBillId = @currentVoucherId
 		
 	END TRY
     BEGIN CATCH
