@@ -2664,16 +2664,33 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     flex: 1
                                                                                 },
                                                                                 {
+                                                                                    dataIndex: 'intContractSeq',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Contract Sequence',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strItemNo',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Other Charges',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
                                                                                     dataIndex: 'intContractHeaderId',
                                                                                     dataType: 'numeric',
                                                                                     hidden: true
-                                                                                },
-                                                                                
+                                                                                }
                                                                             ],
+                                                                            lookUpField: true,
                                                                             itemId: 'cboContract',
                                                                             displayField: 'strContractNumber',
                                                                             valueField: 'strContractNumber'
                                                                         }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colSequence',
+                                                                        text: 'Sequence'
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',

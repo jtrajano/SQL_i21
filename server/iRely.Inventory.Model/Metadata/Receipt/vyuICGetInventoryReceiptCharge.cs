@@ -12,6 +12,7 @@ namespace iRely.Inventory.Model
         public int intInventoryReceiptId { get; set; }
         public int? intContractId { get; set; }
         public string strContractNumber { get; set; }
+        public int? intContractSeq { get; set; }
         public string strItemNo { get; set; }
         public string strItemDescription { get; set; }
         public bool? ysnInventoryCost { get; set; }

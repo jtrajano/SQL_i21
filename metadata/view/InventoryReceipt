@@ -7451,22 +7451,35 @@
                                                                     "userConfig": {
                                                                         "columns": [
                                                                             "[",
-                                                                            "{",
-                                                                            "dataIndex: 'strContractNumber',",
-                                                                            "dataType: 'string',",
-                                                                            "text: 'Contract Number',",
-                                                                            "flex: 1",
-                                                                            "},",
-                                                                            "{",
-                                                                            "dataIndex: 'intContractHeaderId',",
-                                                                            "dataType: 'numeric',",
-                                                                            "hidden: true",
-                                                                            "},",
+                                                                            "    {",
+                                                                            "        dataIndex: 'strContractNumber',",
+                                                                            "        dataType: 'string',",
+                                                                            "        text: 'Contract Number',",
+                                                                            "        flex: 1",
+                                                                            "    },",
+                                                                            "    {",
+                                                                            "        dataIndex: 'intContractSeq',",
+                                                                            "        dataType: 'numeric',",
+                                                                            "        text: 'Contract Sequence',",
+                                                                            "        flex: 1",
+                                                                            "    },",
+                                                                            "    {",
+                                                                            "        dataIndex: 'strItemNo',",
+                                                                            "        dataType: 'string',",
+                                                                            "        text: 'Other Charges',",
+                                                                            "        flex: 1",
+                                                                            "    },",
+                                                                            "    {",
+                                                                            "        dataIndex: 'intContractHeaderId',",
+                                                                            "        dataType: 'numeric',",
+                                                                            "        hidden: true",
+                                                                            "    }",
                                                                             "]"
                                                                         ],
                                                                         "designer|createAlias": "gridcombobox",
                                                                         "displayField": "strContractNumber",
                                                                         "itemId": "cboContract",
+                                                                        "lookUpField": true,
                                                                         "valueField": "strContractNumber"
                                                                     },
                                                                     "configAlternates": {
@@ -7475,7 +7488,8 @@
                                                                         "displayField": "datafield",
                                                                         "itemId": "string",
                                                                         "valueField": "datafield",
-                                                                        "scrollable": "boolean"
+                                                                        "scrollable": "boolean",
+                                                                        "lookUpField": "boolean"
                                                                     },
                                                                     "name": "MyComboBox22",
                                                                     "designerId": "a687b55c-ffd7-4ef8-81fc-368977bfb100",
@@ -7484,10 +7498,33 @@
                                                                             "group": "(Custom Properties)",
                                                                             "name": "columns",
                                                                             "type": "string"
+                                                                        },
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "lookUpField",
+                                                                            "type": "string"
                                                                         }
                                                                     ]
                                                                 }
                                                             ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "itemId": "colSequence",
+                                                                "text": "Sequence"
+                                                            },
+                                                            "configAlternates": {
+                                                                "itemId": "string",
+                                                                "text": "string"
+                                                            },
+                                                            "name": "MyColumn55",
+                                                            "designerId": "a4171353-a980-4c95-b757-81617c0a15c5"
                                                         },
                                                         {
                                                             "type": "Ext.grid.column.Column",

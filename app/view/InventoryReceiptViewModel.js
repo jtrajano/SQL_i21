@@ -30,6 +30,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         'ContractManagement.store.ContractDetailViewBuffered',
         'ContractManagement.store.ContractDetailView',
         'ContractManagement.store.ContractHeaderViewBuffered',
+        'ContractManagement.store.ContractCostBuffered',
         'Logistics.store.BufferedShipmentReceiptContracts',
         'Inventory.store.BufferedReceiptItemView',
         'i21.store.CurrencyExchangeRateTypeBuffered',
@@ -307,6 +308,9 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         },
         orderNumbers: {
             type: 'purchaseorderdetailbuffered'
+        },
+        contractCost: {
+            type: 'ctcontractcostbuffered'
         },
         purchaseContract: {
             type: 'ctcontractdetailviewbuffered'

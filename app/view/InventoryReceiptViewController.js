@@ -706,21 +706,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     editor: {
                         origValueField: 'intContractHeaderId',
                         origUpdateField: 'intContractId',
-                        store: '{contract}',
-                        defaultFilters: [
-                            {
-                                column: 'strContractType',
-                                value: 'Purchase',
-                                conjunction: 'and'
-                            },
-                            {
-                                column: 'intEntityId',
-                                value: '{current.intEntityVendorId}',
-                                conjunction: 'and'
-                            }
-                        ]
+                        store: '{contractCost}'
                     }
                 },
+                colSequence: 'intContractSeq',
                 colOtherCharge: {
                     dataIndex: 'strItemNo',
                     editor: {
@@ -5769,6 +5758,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                                                         intInventoryReceiptId: currentVM.get('intInventoryReceiptId'),
                                                                         intContractId: order.get('intOrderId'),
                                                                         intContractDetailId: otherCharge.intContractDetailId,
+                                                                        intContractSeq: contract.get('intContractSeq'),
                                                                         intChargeId: otherCharge.intItemId,
                                                                         ysnInventoryCost: inventoryCost,
                                                                         strCostMethod: otherCharge.strCostMethod,
@@ -7557,6 +7547,38 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }    
     },
 
+    onCboContractSelect: function(combo, records, eOpts){
+        var me = this,
+            win = me.getView(),
+            vm = me.getViewModel(),
+            current = vm.data.current,
+            grdCharges = combo.up('grid');
+            activeGridRecord = grdCharges.editingPlugin.getActiveRecord(),
+            selectedRec = records[0],
+            costMethod = selectedRec.get('strCostMethod');
+
+        activeGridRecord.set('intContractId', selectedRec.get('intContractHeaderId'));
+        activeGridRecord.set('strContractNumber', selectedRec.get('strContractNumber'));
+        activeGridRecord.set('intContractDetailId', selectedRec.get('intContractDetailId'));
+        activeGridRecord.set('intContractSeq', selectedRec.get('intContractSeq'));
+        activeGridRecord.set('intChargeId', selectedRec.get('intItemId'));
+        activeGridRecord.set('ysnInventoryCost', selectedRec.get('ysnInventoryCost'));
+        activeGridRecord.set('strCostMethod', costMethod);
+        activeGridRecord.set('dblRate', costMethod == "Amount" ? 0 : selectedRec.get('dblRate'));
+        activeGridRecord.set('intCostUOMId', selectedRec.get('intItemUOMId'));
+        activeGridRecord.set('intEntityVendorId', selectedRec.get('intVendorId'));
+        activeGridRecord.set('dblAmount', costMethod == "Amount" ? selectedRec.get('dblRate') : 0,
+        activeGridRecord.set('strAllocateCostBy', 'Unit'));
+        activeGridRecord.set('ysnAccrue', selectedRec.get('ysnAccrue'));
+        activeGridRecord.set('ysnPrice', selectedRec.get('ysnPrice'));
+        activeGridRecord.set('strItemNo', selectedRec.get('strItemNo'));
+        activeGridRecord.set('intCurrencyId', selectedRec.get('intCurrencyId'));
+        activeGridRecord.set('strCurrency', selectedRec.get('strCurrency'));
+        //ysnSubCurrency: otherCharge.ysnSubCurrency,
+        activeGridRecord.set('strCostUOM', selectedRec.get('strUOM'));
+        activeGridRecord.set('strVendorName', selectedRec.get('strVendorName'));
+    },
+
     init: function (application) {
         this.control({
             "#cboVendor": {
@@ -7811,6 +7833,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#btnFetch": {
                 click: this.onFetchClicked
+            },
+            "#cboContract": {
+                select: this.onCboContractSelect
             }
         })
     }

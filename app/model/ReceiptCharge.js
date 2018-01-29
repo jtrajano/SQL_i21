@@ -42,6 +42,7 @@ Ext.define('Inventory.model.ReceiptCharge', {
         },
         { name: 'intContractId', type: 'int', allowNull: true },
    //     { name: 'intContractDetailId', type: 'int', allowNull: true },
+        { name: 'intContractSeq', type: 'int', allowNull: true },
         { name: 'intChargeId', type: 'int', allowNull: true },
         { name: 'ysnInventoryCost', type: 'boolean' },
         { name: 'strCostMethod', type: 'string' },
