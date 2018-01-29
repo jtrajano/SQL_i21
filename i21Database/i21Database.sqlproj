@@ -6148,6 +6148,7 @@
     <Build Include="dbo\Views\vyuARGetSalesOrderItems.sql" />
     <Build Include="dbo\Tables\tblSCDeliverySheetHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspSMGetReportLabel.sql" />
+    <Build Include="dbo\Tables\tblSMBatchPostingLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
