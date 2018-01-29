@@ -100,7 +100,7 @@ BEGIN TRY
 
 								UPDATE tblCTSequenceAmendmentLog
 								SET strAmendmentNumber=@strAmendmentNumber
-								FROM tblCTSequenceHistory SH 
+								FROM tblCTSequenceAmendmentLog SH 
 								JOIN @tblSequenceHistoryId tblSequenceHistory ON tblSequenceHistory.intSequenceAmendmentLogId = SH.intSequenceAmendmentLogId
 								WHERE SH.strAmendmentNumber IS NULL AND SH.intContractHeaderId = @intMinContractHeaderId
 
