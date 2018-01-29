@@ -52,7 +52,7 @@
 	intPriceItemUOMId        INT,
 	intTermId				 INT,
 	intWeightId				 INT,
-	strAmendmentNumber		 NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	intUserId				 INT,
 	strAmendmentComment		 NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL,
     intConcurrencyId		  INT,
 

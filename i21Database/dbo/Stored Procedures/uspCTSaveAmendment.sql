@@ -8,10 +8,10 @@ BEGIN TRY
 			@strAmendmentFields	NVARCHAR(MAX)
 
 	SELECT  @strAmendmentFields= STUFF((
-										SELECT DISTINCT ', ' + LTRIM(RTRIM(strDataIndex))
+										SELECT DISTINCT ',' + LTRIM(RTRIM(strDataIndex))
 										FROM tblCTAmendmentApproval WHERE ISNULL(ysnAmendment,0) =1
 										FOR XML PATH('')
-										), 1, 2, '')
+										), 1, 1, '')
 
 	UPDATE tblCTCompanyPreference SET  strAmendmentFields =  RTRIM(LTRIM(@strAmendmentFields))
 	

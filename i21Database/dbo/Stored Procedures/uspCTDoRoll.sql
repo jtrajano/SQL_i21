@@ -14,7 +14,7 @@ BEGIN TRY
 			@Basis					DECIMAL(12,4),
 			@FutureMarketId			INT,
 			@FuturesMonth			NVARCHAR(50),
-			@ContractOptHeaderId	INT,
+			@ContractHeaderId		INT,
 			@CurrentQty				DECIMAL(12,4),
 			@ContractSeq			INT,
 	        @Count					INT 
@@ -57,6 +57,18 @@ BEGIN TRY
 	JOIN	#tblCTContractDetail	TD ON TD.intContractDetailId = CD.intContractDetailId
 	
 	--EXEC	uspCTCreateDetailHistory	NULL, @intDonorId
+
+	  SELECT @ContractDetailId = MIN(intContractDetailId) FROM #tblCTContractDetail
+	  
+	  WHILE @ContractDetailId >0
+	  BEGIN
+			SET @ContractHeaderId= NULL
+			SELECT @ContractHeaderId = intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = @ContractDetailId
+			
+			EXEC uspCTCreateDetailHistory	@ContractHeaderId, @ContractDetailId
+
+			SELECT @ContractDetailId = MIN(intContractDetailId) FROM #tblCTContractDetail  WHERE intContractDetailId > @ContractDetailId
+	  END
 
 END TRY      
 

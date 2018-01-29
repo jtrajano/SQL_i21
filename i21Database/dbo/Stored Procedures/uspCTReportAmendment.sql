@@ -19,7 +19,7 @@ BEGIN TRY
 			@strSequenceHistoryId	     NVARCHAR(10),
 			@xmlDocumentId			     INT,
 			@strAmendmentNumber			 NVARCHAR(50),
-			@intMinHistoryId			 INT
+			@intMinContractHeaderId		 INT
 			
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -34,40 +34,17 @@ BEGIN TRY
 			[begingroup]	NVARCHAR(50),  
 			[endgroup]		NVARCHAR(50),  
 			[datatype]		NVARCHAR(50) 
+	)
+
+	DECLARE @tblSequenceHistoryId TABLE
+	(
+	  intSequenceAmendmentLogId INT
 	)  
-    DECLARE @tblSequenceHistoryId TABLE
+    DECLARE @tblAmendment TABLE
 	(
-	  intSequenceHistoryId INT
+	   intContractHeaderId INT
 	)
 	
-	INSERT INTO @tblSequenceHistoryId
-	(
-	  intSequenceHistoryId
-	)
-	SELECT strValues FROM dbo.fnARGetRowsFromDelimitedValues(@strSequenceHistoryId)
-	
-	SELECT @intMinHistoryId=MIN(intSequenceHistoryId) FROM @tblSequenceHistoryId
-	
-	IF EXISTS(SELECT 1 FROM tblCTSequenceHistory WHERE intSequenceHistoryId=@intMinHistoryId AND strAmendmentNumber IS NOT NULL)
-	BEGIN
-	   SELECT @strAmendmentNumber=strAmendmentNumber FROM tblCTSequenceHistory WHERE intSequenceHistoryId=@intMinHistoryId
-	END
-	ELSE
-	BEGIN
-		SELECT @strAmendmentNumber = strPrefix+LTRIM(intNumber)
-		FROM tblSMStartingNumber
-		WHERE [strTransactionType] = N'Amendment Number'
-
-		UPDATE tblSMStartingNumber
-		SET intNumber = intNumber + 1
-		WHERE [strTransactionType] = N'Amendment Number'
-
-		UPDATE tblCTSequenceHistory
-		SET strAmendmentNumber=@strAmendmentNumber
-		WHERE intSequenceHistoryId IN(SELECT intSequenceHistoryId FROM @tblSequenceHistoryId)
-
-	END
-
 	EXEC sp_xml_preparedocument @xmlDocumentId output, @xmlParam  
   
 	INSERT INTO @temp_xml_table  
@@ -82,11 +59,56 @@ BEGIN TRY
 				[begingroup]	NVARCHAR(50),  
 				[endgroup]		NVARCHAR(50),  
 				[datatype]		NVARCHAR(50)  
-	)  
-    
+	)
 	SELECT	@strSequenceHistoryId = [from]
 	FROM	@temp_xml_table   
-	WHERE	[fieldname] = 'strSequenceHistoryId' 
+	WHERE	[fieldname] = 'strSequenceHistoryId'
+
+	INSERT INTO @tblSequenceHistoryId
+	(
+	  intSequenceAmendmentLogId
+	)
+	SELECT strValues FROM dbo.fnARGetRowsFromDelimitedValues(@strSequenceHistoryId)
+	
+	WHILE 
+				EXISTS(
+						SELECT 1 FROM tblCTSequenceAmendmentLog SH 
+						JOIN @tblSequenceHistoryId tblSequenceHistory ON tblSequenceHistory.intSequenceAmendmentLogId = SH.intSequenceAmendmentLogId
+						WHERE SH.strAmendmentNumber IS NULL 
+					  )
+	BEGIN
+					  
+					  INSERT INTO @tblAmendment(intContractHeaderId)
+					  SELECT DISTINCT SH.intContractHeaderId 
+					  FROM tblCTSequenceAmendmentLog SH 
+					  JOIN @tblSequenceHistoryId tblSequenceHistory ON tblSequenceHistory.intSequenceAmendmentLogId = SH.intSequenceAmendmentLogId
+					  WHERE SH.strAmendmentNumber IS NULL
+
+					  SELECT @intMinContractHeaderId=MIN(intContractHeaderId) FROM @tblAmendment
+					  
+					  WHILE @intMinContractHeaderId >0
+					  BEGIN
+								SET @strAmendmentNumber=NULL
+
+								SELECT @strAmendmentNumber = strPrefix+LTRIM(intNumber)
+								FROM tblSMStartingNumber
+								WHERE [strTransactionType] = N'Amendment Number'
+
+								UPDATE tblSMStartingNumber
+								SET intNumber = intNumber + 1
+								WHERE [strTransactionType] = N'Amendment Number'
+
+								UPDATE tblCTSequenceAmendmentLog
+								SET strAmendmentNumber=@strAmendmentNumber
+								FROM tblCTSequenceHistory SH 
+								JOIN @tblSequenceHistoryId tblSequenceHistory ON tblSequenceHistory.intSequenceAmendmentLogId = SH.intSequenceAmendmentLogId
+								WHERE SH.strAmendmentNumber IS NULL AND SH.intContractHeaderId = @intMinContractHeaderId
+
+								SELECT @intMinContractHeaderId=MIN(intContractHeaderId) FROM @tblAmendment WHERE intContractHeaderId >@intMinContractHeaderId
+					  END
+	   
+
+	END
 
 	SELECT	@strCompanyName	=	CASE WHEN LTRIM(RTRIM(strCompanyName)) = '' THEN NULL ELSE LTRIM(RTRIM(strCompanyName)) END,
 			@strAddress		=	CASE WHEN LTRIM(RTRIM(strAddress)) = '' THEN NULL ELSE LTRIM(RTRIM(strAddress)) END,
@@ -97,9 +119,20 @@ BEGIN TRY
 			@strCountry		=	CASE WHEN LTRIM(RTRIM(strCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(strCountry)) END
 	FROM	tblSMCompanySetup
 
-	SELECT	
-	
-			 strA  =  @strCompanyName + ', '  + CHAR(13)+CHAR(10) +
+	SELECT	DISTINCT
+			strC =   
+					 CASE	
+					 		WHEN	CH.intContractTypeId  =	1	THEN	'BUYER'
+					 		WHEN	CH.intContractTypeId  =	2   THEN	'SELLER'
+					 END
+
+		    ,strD = 
+					 CASE	
+							WHEN	CH.intContractTypeId  =	1   THEN	'SELLER'
+					 		WHEN	CH.intContractTypeId  =	2   THEN	'BUYER'
+					 END
+
+		    ,strA  =  @strCompanyName + ', '  + CHAR(13)+CHAR(10) +
 					 ISNULL(@strAddress,'') + ', ' + CHAR(13)+CHAR(10) +
 					 ISNULL(@strCity,'') + ISNULL(', '+@strState,'') + ISNULL(', '+@strZip,'') + ISNULL(', '+@strCountry,'')
 
@@ -118,15 +151,15 @@ BEGIN TRY
 			
 			,dtmContractDate   =  Convert(Nvarchar,GetDATE(),101)
 			,strContractNumber = AH.strContractNumber
-			,AccountNum		  = EY.strVendorAccountNum
-			,strAmendmentNumber = @strAmendmentNumber
+			,AccountNum		  =   EY.strVendorAccountNum
+			,strAmendmentNumber = AH.strAmendmentNumber
 			,strConfirmMessage = 'We Confirm ADJUSTMENT from you as follows:'
 			,dtmHistoryCreated = AH.dtmHistoryCreated
 			,strItemChanged	   = AH.strItemChanged
 			,strOldValue       = AH.strOldValue
 			,strNewValue	   = AH.strNewValue
-			,strBuyer          = @strCompanyName
-			,strSeller		   = AH.strEntityName	
+			,strE			   = @strCompanyName
+			,strF		       = AH.strEntityName	
 			,dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
 
 	FROM	vyuCTAmendmentHistory AH
@@ -143,7 +176,7 @@ BEGIN TRY
 																ELSE 0
 															END
 														)
-	JOIN @tblSequenceHistoryId tblSequenceHistory ON tblSequenceHistory.intSequenceHistoryId = AH.intSequenceHistoryId
+	JOIN @tblSequenceHistoryId tblSequenceHistory ON tblSequenceHistory.intSequenceAmendmentLogId = AH.intSequenceAmendmentLogId
 
 END TRY
 
