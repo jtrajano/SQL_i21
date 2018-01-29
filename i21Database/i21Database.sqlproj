@@ -6154,6 +6154,7 @@
     <Build Include="dbo\Stored Procedures\uspICPostInventoryShipmentTaxes.sql" />
     <Build Include="dbo\Views\vyuICGetShipmentChargeTaxDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspSMRefreshUserRoleMenus.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMRefreshContactRoleMenus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
