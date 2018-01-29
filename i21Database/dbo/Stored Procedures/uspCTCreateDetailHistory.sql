@@ -169,7 +169,7 @@ BEGIN TRY
 	
     SET @intSequenceHistoryId = SCOPE_IDENTITY()
 	
-	IF EXISTS(SELECT 1 tblSMUserSecurityRequireApprovalFor WHERE intEntityUserSecurityId =@intLastModifiedById AND intApprovalListId=@intApprovalListId )
+	IF EXISTS(SELECT 1 FROM tblSMUserSecurityRequireApprovalFor WHERE [intEntityUserSecurityId] =@intLastModifiedById AND [intApprovalListId]=@intApprovalListId )
 	BEGIN
 	  INSERT INTO tblCTSequenceAmendmentLog
 	  (
