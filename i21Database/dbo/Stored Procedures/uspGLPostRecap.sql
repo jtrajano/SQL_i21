@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE uspGLPostRecap
 	@RecapTable RecapTableType READONLY 
-	,@intEntityUserSecurityId AS INT = NULL 
+	,@intEntityUserSecurityId AS INT = NULL
+	,@ysnBatch BIT = 0
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -12,6 +13,8 @@ SET XACT_ABORT ON
 DECLARE @strTransactionId NVARCHAR(50), @strBatchId NVARCHAR(50)
 SELECT TOP 1 @strBatchId = strBatchId, @strTransactionId = strTransactionId FROM @RecapTable 
 -- DELETE OLD RECAP DATA (IF IT EXISTS)
+IF (@ysnBatch = 0)
+	DELETE FROM tblGLPostRecap WHERE strBatchId = @strBatchId OR strTransactionId = @strTransactionId 
 DELETE	FROM tblGLPostRecap 
 WHERE dtmDateEntered < convert(nvarchar(20), GETDATE(), 101)
 
