@@ -1,5 +1,13 @@
 ﻿GO
-
+	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Top Card Lock Customer' AND strModuleName = 'Card Fueling' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strModuleName = 'Card Fueling' AND strMenuName = 'Maintenance'))
+	BEGIN
+		EXEC uspSMIncreaseECConcurrency 0
+		
+		IF OBJECT_ID('tempdb..#updateUserRoleMenus') IS NOT NULL DROP TABLE #updateUserRoleMenus
+		CREATE TABLE #updateUserRoleMenus (ysnUpdate BIT)
+	END
+GO
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Bank File Formats'	AND strModuleName = 'Cash Management' AND (strCommand = 'CashManagement.controller.BankFileFormat' OR strCommand = 'CashManagement.view.BankFileFormat' OR strCommand = 'CashManagement.view.BankFileFormat?showSearch=true'))
 	BEGIN
 		DELETE FROM tblSMMasterMenu
