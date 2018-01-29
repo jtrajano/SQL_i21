@@ -8,6 +8,7 @@ BEGIN TRY
 		DECLARE @intSequenceHistoryId INT
 		DECLARE @intApprovalListId INT
 		DECLARE @intLastModifiedById INT
+		DECLARE @ysnAmdWoAppvl BIT
 	
 		DECLARE @tblHeader AS TABLE 
 		(
@@ -45,7 +46,8 @@ BEGIN TRY
 		END
 		
 		SELECT @intLastModifiedById = intLastModifiedById FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId
-		SELECT @intApprovalListId =intApprovalListId  FROM tblSMApprovalList WHERE strApprovalList ='Contract Amendment'
+		SELECT @intApprovalListId   = intApprovalListId  FROM tblSMApprovalList WHERE strApprovalList ='Contract Amendment'
+		SELECT @ysnAmdWoAppvl	    = ISNULL(ysnAmdWoAppvl,0) FROM tblCTCompanyPreference
 
 		DELETE FROM @tblHeader
 		DELETE FROM @tblDetail
@@ -169,7 +171,7 @@ BEGIN TRY
 	
     SET @intSequenceHistoryId = SCOPE_IDENTITY()
 	
-	IF EXISTS(SELECT 1 FROM tblSMUserSecurityRequireApprovalFor WHERE [intEntityUserSecurityId] =@intLastModifiedById AND [intApprovalListId]=@intApprovalListId )
+	IF EXISTS(SELECT 1 FROM tblSMUserSecurityRequireApprovalFor WHERE [intEntityUserSecurityId] =@intLastModifiedById AND [intApprovalListId]=@intApprovalListId ) OR (@ysnAmdWoAppvl = 1)
 	BEGIN
 	  INSERT INTO tblCTSequenceAmendmentLog
 	  (
