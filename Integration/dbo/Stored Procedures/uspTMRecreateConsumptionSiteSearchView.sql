@@ -75,6 +75,9 @@ BEGIN
 				,strGlobalJulianCalendar = R.strDescription
 				,intCustomerEntityId = B.intCustomerNumber
 				,strSiteAccountStatus = A.strAcctStatus
+				,AA.strLostCustomerReason
+				,A.ysnLostCustomer
+				,A.dtmLostCustomerDate
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID
@@ -112,6 +115,8 @@ BEGIN
 					ON A.intGlobalJulianCalendarId = R.intGlobalJulianCalendarId
 				LEFT JOIN vwlocmst S
 					ON A.intLocationId = S.A4GLIdentity
+				LEFT JOIN tblTMLostCustomerReason AA
+					ON A.intLostCustomerReasonId = AA.intLostCustomerReasonId
 				
 		')
 	END
@@ -162,6 +167,9 @@ BEGIN
 				,strGlobalJulianCalendar = R.strDescription
 				,intCustomerEntityId = B.intCustomerNumber
 				,strSiteAccountStatus = A.strAcctStatus
+				,AA.strLostCustomerReason
+				,A.ysnLostCustomer
+				,A.dtmLostCustomerDate
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID
@@ -208,6 +216,8 @@ BEGIN
 					ON G.intEntityId = EP.intEntityId  
 				LEFT JOIN tblTMGlobalJulianCalendar R
 					ON A.intGlobalJulianCalendarId = R.intGlobalJulianCalendarId
+				LEFT JOIN tblTMLostCustomerReason AA
+					ON A.intLostCustomerReasonId = AA.intLostCustomerReasonId
 				WHERE ISNULL(D.ysnActive,0) = 1
 		')
 	END

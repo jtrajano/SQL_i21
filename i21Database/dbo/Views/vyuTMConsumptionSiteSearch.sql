@@ -51,6 +51,9 @@ AS
 	,strGlobalJulianCalendar = R.strDescription
 	,intCustomerEntityId = B.intCustomerNumber
 	,strSiteAccountStatus = A.strAcctStatus
+	,AA.strLostCustomerReason
+	,A.ysnLostCustomer
+	,A.dtmLostCustomerDate
 	FROM tblTMSite A
 	INNER JOIN tblTMCustomer B
 		ON A.intCustomerID = B.intCustomerID
@@ -97,5 +100,7 @@ AS
 		ON G.intEntityId = EP.intEntityId  
 	LEFT JOIN tblTMGlobalJulianCalendar R
 		ON A.intGlobalJulianCalendarId = R.intGlobalJulianCalendarId
+	LEFT JOIN tblTMLostCustomerReason AA
+		ON A.intLostCustomerReasonId = AA.intLostCustomerReasonId
 	WHERE ISNULL(D.ysnActive,0) = 1
 GO
