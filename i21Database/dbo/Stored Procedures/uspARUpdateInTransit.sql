@@ -11,6 +11,12 @@ BEGIN
 	SET ANSI_WARNINGS OFF
 
 	DECLARE @tblItemsToUpdate InTransitTableType
+			,@HasImpactForProvisional   BIT
+	
+	SELECT TOP 1 
+		@HasImpactForProvisional = ISNULL(ysnImpactForProvisional,0)
+	FROM 
+		tblARCompanyPreference WITH (NOLOCK)
 
 	IF @IsShipped = 0
 		BEGIN
@@ -46,8 +52,12 @@ BEGIN
 				LEFT JOIN tblICFobPoint fp
 					ON fp.strFobPoint = ft.strFobPoint
 			WHERE ID.intInvoiceId = @TransactionId 
-			  AND ISNULL(ID.intInventoryShipmentItemId, 0) > 0
-			  AND I.[strType] <> 'Provisional'
+			AND ISNULL(ID.intInventoryShipmentItemId, 0) > 0
+			AND (
+					(I.[strType] <> 'Provisional' AND EXISTS(SELECT NULL FROM tblARInvoice ARI WHERE ARI.[intInvoiceId] = I.[intOriginalInvoiceId] AND ARI.[strType] = 'Provisional' AND ARI.[ysnPosted] = 0))
+				OR
+					(I.[strType] = 'Provisional' AND @HasImpactForProvisional = 1)
+				)
 	  END
 	ELSE
 		BEGIN

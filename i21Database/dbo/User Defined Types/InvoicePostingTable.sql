@@ -47,4 +47,5 @@
 	,[strPostingMessage]			NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL
 	,[intUserId]					INT				NULL
 	,[ysnAllowOtherUserToPost]		BIT				NULL
+	,[ysnImpactForProvisional]		BIT				NULL
 )

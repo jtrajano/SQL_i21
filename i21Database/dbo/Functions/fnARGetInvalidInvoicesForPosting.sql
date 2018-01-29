@@ -18,10 +18,8 @@ AS
 BEGIN
 
 DECLARE @ZeroDecimal DECIMAL(18,6)
-		,@ImpactForProvisional BIT
 
 SET @ZeroDecimal = 0.000000
-SELECT TOP 1 @ImpactForProvisional = ISNULL(ysnImpactForProvisional,0) FROM tblARCompanyPreference
 
 IF(ISNULL(@Post,0)) = 1
 	BEGIN
@@ -505,7 +503,7 @@ IF(ISNULL(@Post,0)) = 1
 			@Invoices I					
 		WHERE
 			I.[strType] = 'Provisional'
-			AND @ImpactForProvisional = 0
+			AND ISNULL(I.[ysnImpactForProvisional],0) = 0
 
 
 		UNION
