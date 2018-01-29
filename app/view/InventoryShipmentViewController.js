@@ -3767,6 +3767,100 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         }
     },
 
+    onChargeTaxDetailsClick: function (button, e, eOpts) {
+        var win = button.up('window');
+        var grd = win.down('#grdCharges');
+        var me = this;
+        var selected = grd.getSelectionModel().getSelection();
+        var context = win.context;
+
+        // Validate the selected charge record. 
+        if (!selected || selected.length <= 0) {
+            iRely.Functions.showErrorDialog('Please select an Other Charge to view.');
+            return; 
+        }
+
+        // Get the current record. 
+        var current = selected[0];        
+        if (!current || current.dummy) {
+            iRely.Functions.showErrorDialog('Please select an Other Charge to view.');
+            return;             
+        }
+                
+        var ShipmentChargeId = current.get('intInventoryShipmentChargeId');
+        var ShipmentId = current.get('intInventoryShipmentId');
+
+        var showChargeTaxScreen = function () {
+            iRely.Functions.openScreen('GlobalComponentEngine.view.FloatingSearch', {
+                searchSettings: {
+                    scope: me,
+                    type: 'Inventory.Shipment.ChargesTaxDetails',
+                    url: './inventory/api/inventoryShipment/getchargetaxdetails?ShipmentChargeId=' + ShipmentChargeId + '&ShipmentId=' + ShipmentId,
+                    columns: [
+                        //{ itemId: 'colKey', dataIndex: 'intKey', text: "Key", flex: 1, dataType: 'numeric', key: true, hidden: true },
+                        { itemId: 'colInventoryShipmentChargeTaxId', dataIndex: 'intInventoryShipmentChargeTaxId', text: "Shipment Charge Tax Id", flex: 1, dataType: 'numeric', key: true, hidden: true },
+                        { itemId: 'colChargeId', dataIndex: 'intChargeId', text: "Charge Id", flex: 1, dataType: 'numeric', key: true, hidden: true },
+                        { itemId: 'colItemNo', dataIndex: 'strItemNo', text: 'Other Charges', width: 100, dataType: 'string'},
+                        { itemId: 'colTaxGroup', dataIndex: 'strTaxGroup', text: 'Tax Group', width: 85, dataType: 'string' },
+                        { itemId: 'colTaxClass', dataIndex: 'strTaxClass', text: 'Tax Class', width: 100, dataType: 'string' },
+                        { itemId: 'colTaxCode', dataIndex: 'strTaxCode', text: 'Tax Code', width: 100, dataType: 'string' },
+                        { itemId: 'colCalculationMethod', dataIndex: 'strCalculationMethod', text: 'Calculation Method', width: 110, dataType: 'string' },                                
+                        { itemId: 'colQty', xtype: 'numbercolumn', dataIndex: 'dblQty', text: 'Qty', width: 100, dataType: 'float' },
+                        { itemId: 'colCost', xtype: 'numbercolumn', dataIndex: 'dblCost', text: 'Cost', width: 100, dataType: 'float' },
+                        { itemId: 'colRate', xtype: 'numbercolumn', dataIndex: 'dblRate', text: 'Rate', width: 100, dataType: 'float' },
+                        { 
+                            itemId: 'colCheckoff', 
+                            xtype: 'checkcolumn', 
+                            dataIndex: 'ysnCheckoffTax', 
+                            text: 'Checkoff', 
+                            width: 100, 
+                            dataType: 'boolean',
+                            listeners: {
+                                beforecheckchange: function(me, rowIndex, checked, record, e, eOpts){
+                                    // Return false so that checkbox value can't be changed. 
+                                    return false; 
+                                }
+                            }                                    
+                        },
+                        { itemId: 'colTax', xtype: 'numbercolumn', dataIndex: 'dblTax', text: 'Tax', width: 100, dataType: 'float' },
+                        { 
+                            itemId: 'colTaxAdjusted', 
+                            xtype: 'checkcolumn', 
+                            dataIndex: 'ysnTaxAdjusted', 
+                            text: 'Adjusted', 
+                            width: 100, 
+                            dataType: 'boolean',
+                            listeners: {
+                                beforecheckchange: function(me, rowIndex, checked, record, e, eOpts){
+                                    // Return false so that checkbox value can't be changed. 
+                                    return false; 
+                                }
+                            }                                    
+                        }                                
+                    ],
+                    title: "Charges Tax Details",
+                    showNew: false,
+                    showOpenSelected: false
+                }
+            });
+        }
+
+        var task = new Ext.util.DelayedTask(function () {
+            // If there is no data change, show charge tax details screen
+            if (!context.data.hasChanges()) {
+                showChargeTaxScreen();
+            }
+
+            // Save has data changes first before showing charge tax details screen
+            context.data.saveRecord({
+                successFn: function () {
+                    showChargeTaxScreen();
+                }
+            });
+        });
+        task.delay(10);            
+    },    
+
     init: function(application) {
         this.control({
             "#cboShipFromAddress":{
@@ -3897,6 +3991,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             },
             "#cboChargeTaxGroup": {
                 select: this.onChargeSelect
+            },
+            "#btnChargeTaxDetails": {
+                click: this.onChargeTaxDetailsClick
             }            
         })
     }

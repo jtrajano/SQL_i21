@@ -2006,6 +2006,13 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 text: 'Calculate'
                                                             },
                                                             {
+                                                                xtype: 'button',
+                                                                itemId: 'btnChargeTaxDetails',
+                                                                tabIndex: -1,
+                                                                iconCls: 'small-open',
+                                                                text: 'View Tax Details'
+                                                            },
+                                                            {
                                                                 xtype: 'filter1',
                                                                 width: 198
                                                             }

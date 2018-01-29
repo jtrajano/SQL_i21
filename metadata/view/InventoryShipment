@@ -5386,6 +5386,31 @@
                                                     "designerId": "6e1c70ed-d711-4301-82ce-91b6969bcdac"
                                                 },
                                                 {
+                                                    "type": "Ext.button.Button",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "iconCls": "small-open",
+                                                        "itemId": "btnChargeTaxDetails",
+                                                        "layout|flex": null,
+                                                        "tabIndex": -1,
+                                                        "text": "View Tax Details"
+                                                    },
+                                                    "configAlternates": {
+                                                        "iconCls": "string",
+                                                        "itemId": "string",
+                                                        "layout|flex": "number",
+                                                        "tabIndex": "number",
+                                                        "text": "string",
+                                                        "scrollable": "boolean"
+                                                    },
+                                                    "name": "MyButton26",
+                                                    "designerId": "760a4712-d701-4ff2-9a02-c326bda90729"
+                                                },
+                                                {
                                                     "type": "linkedinstance",
                                                     "reference": {
                                                         "name": "items",

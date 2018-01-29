@@ -636,5 +636,20 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
+        public async Task<SearchResult> GetChargeTaxDetails(GetParameter param, int ChargeId, int ShipmentId)
+        {
+            var query = _db.GetQuery<vyuICGetShipmentChargeTaxDetails>()
+                    .Where(p => p.intInventoryShipmentChargeId == ChargeId && p.intInventoryShipmentId == ShipmentId)
+                    .Filter(param, true);
+
+            var data = await query.ExecuteProjection(param, "intInventoryShipmentChargeTaxId").ToListAsync(param.cancellationToken);
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync(param.cancellationToken),
+                summaryData = await query.ToAggregateAsync(param.aggregates)
+            };
+        }
     }
 }
