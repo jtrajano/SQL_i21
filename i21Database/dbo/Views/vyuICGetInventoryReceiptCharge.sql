@@ -5,6 +5,7 @@ SELECT ReceiptCharge.intInventoryReceiptChargeId
 	, ReceiptCharge.intInventoryReceiptId
 	, ReceiptCharge.intContractId
 	, Contract.strContractNumber
+	, ContractDetail.intContractSeq
 	, Charge.strItemNo
 	, strItemDescription = Charge.strDescription
 	, ReceiptCharge.ysnInventoryCost
@@ -41,6 +42,7 @@ FROM tblICInventoryReceiptCharge ReceiptCharge
 	LEFT JOIN vyuICGetOtherCharges Charge ON Charge.intItemId = ReceiptCharge.intChargeId
 	LEFT JOIN vyuAPVendor Vendor ON Vendor.[intEntityId] = ReceiptCharge.intEntityVendorId
 	LEFT JOIN tblCTContractHeader Contract ON Contract.intContractHeaderId = ReceiptCharge.intContractId	
+	LEFT JOIN tblCTContractDetail ContractDetail ON ContractDetail.intContractDetailId = ReceiptCharge.intContractDetailId
 	LEFT JOIN tblSMTaxGroup SMTaxGroup ON SMTaxGroup.intTaxGroupId = ReceiptCharge.intTaxGroupId
 	LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
 	LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = Receipt.intLocationId
