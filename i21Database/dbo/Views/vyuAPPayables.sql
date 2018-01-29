@@ -11,8 +11,8 @@ SELECT
 	, A.intBillId 
 	, A.strBillId 
 	, 0 AS dblAmountPaid 
-	, CASE WHEN A.intTransactionType != 1 THEN (B.dblTotal + B.dblTax) *  B.dblRate * -1 
-				ELSE (B.dblTotal + B.dblTax) * B.dblRate
+	, CASE WHEN A.intTransactionType != 1 THEN (B.dblTotal) *  B.dblRate * -1 
+				ELSE (B.dblTotal) * B.dblRate
 		END AS dblTotal
 	, CASE WHEN A.intTransactionType != 1 THEN A.dblAmountDue * -1 ELSE A.dblAmountDue
 		END AS dblAmountDue 
@@ -47,6 +47,36 @@ WHERE A.ysnPosted = 1 AND intTransactionType NOT IN (7, 2)  AND A.ysnOrigin = 0
 -- 	, A.intAccountId
 -- 	, EC.strClass
 -- 	, dblRate
+--Taxes, Separate the tax and use the detail tax to match with GL calculation
+UNION ALL
+SELECT 
+	A.dtmDate	
+	, A.intBillId 
+	, A.strBillId 
+	, 0 AS dblAmountPaid 
+	, ROUND(CASE WHEN A.intTransactionType != 1 THEN ISNULL(NULLIF(C.dblAdjustedTax,0), C.dblTax) *  B.dblRate * -1 
+				ELSE ISNULL(NULLIF(C.dblAdjustedTax,0), C.dblTax) * B.dblRate
+		END,2) AS dblTotal
+	, CASE WHEN A.intTransactionType != 1 THEN A.dblAmountDue * -1 ELSE A.dblAmountDue
+		END AS dblAmountDue 
+	, dblWithheld = 0
+	, dblDiscount = 0 
+	, dblInterest = 0 
+	, C1.strVendorId 
+	, isnull(C1.strVendorId,'') + ' - ' + isnull(C2.strName,'') as strVendorIdName 
+	, A.dtmDueDate
+	, A.ysnPosted 
+	, A.ysnPaid
+	, A.intAccountId
+	, EC.strClass
+FROM dbo.tblAPBill A
+INNER JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] = C2.intEntityId)
+	ON C1.[intEntityId] = A.[intEntityVendorId]
+INNER JOIN dbo.tblAPBillDetail B ON B.intBillId = A.intBillId
+INNER JOIN dbo.tblAPBillDetailTax C ON B.intBillDetailId = C.intBillDetailId
+LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId	
+WHERE A.ysnPosted = 1 AND intTransactionType NOT IN (7, 2)  AND A.ysnOrigin = 0
+--ORIGIN
 UNION ALL
 SELECT 
 	A.dtmDate	
