@@ -103,7 +103,7 @@ BEGIN
 				ON ItemLocation.intItemId = ChargeItem.intChargeId
 				AND ItemLocation.intLocationId = Receipt.intLocationId							
 			INNER JOIN dbo.tblICInventoryReceiptChargeTax ChargeTaxes
-				ON ReceiptItem.intInventoryReceiptChargeId = ChargeTaxes.intInventoryReceiptChargeId
+				ON ChargeItem.intInventoryReceiptChargeId = ChargeTaxes.intInventoryReceiptChargeId
 			INNER JOIN dbo.tblSMTaxCode TaxCode
 				ON TaxCode.intTaxCodeId = ChargeTaxes.intTaxCodeId
 			LEFT JOIN dbo.tblICInventoryTransactionType TransType
