@@ -40,7 +40,8 @@ FROM	tblICItem Item
 						ON t.intItemLocationId = l.intItemLocationId
 					LEFT JOIN tblICItemUOM iuStock 
 						ON iuStock.intItemId = t.intItemId
-						AND iuStock.ysnStockUnit = 1
+						--AND iuStock.ysnStockUnit = 1
+						AND iuStock.ysnStockUOM = 1
 					LEFT JOIN tblICUnitMeasure umStock
 						ON iuStock.intUnitMeasureId = umStock.intUnitMeasureId
 			WHERE	Item.intItemId = t.intItemId
