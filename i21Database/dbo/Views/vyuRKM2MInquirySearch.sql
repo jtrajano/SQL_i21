@@ -3,7 +3,8 @@
 AS 
 
 SELECT i.intM2MInquiryId,i.strRecordName,b.dtmM2MBasisDate,p.dtmPriceDate,m.strUnitMeasure,m1.strUnitMeasure as strPriceUOM,c.strCurrency,
-	   i.dtmTransactionUpTo,i.strRateType,cc.strCommodityCode,cl.strLocationName,z.strMarketZoneCode,ysnPost,i.strPricingType,dtmLastReversalPostDate
+	   i.dtmTransactionUpTo,i.strRateType,cc.strCommodityCode,cl.strLocationName,z.strMarketZoneCode,ysnPost,i.strPricingType,dtmLastReversalPostDate,
+	   strBatchId,dtmGLReverseDate,dtmGLPostDate
 FROM tblRKM2MInquiry i
 JOIN tblICUnitMeasure m on m.intUnitMeasureId=i.intUnitMeasureId
 JOIN tblICUnitMeasure m1 on m1.intUnitMeasureId=i.intPriceItemUOMId
