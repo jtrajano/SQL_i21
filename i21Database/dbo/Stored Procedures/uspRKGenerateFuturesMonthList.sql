@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE uspRKGenerateFuturesMonthList     
 	
- @FutureMarketId  INT  ,  
+ @FutureMarketId  INT  , 
+ @intCommodityMarketId INT, 
  @intFutureMonthsToOpen INT,  
  @intOptMonthsToOpen INT    
 AS    
@@ -69,8 +70,8 @@ IF OBJECT_ID('tempdb..##AllowedMonths') IS NOT NULL
  INTO ##AllowedMonths      
  FROM ( SELECT ysnFutJan, ysnFutFeb, ysnFutMar, ysnFutApr, ysnFutMay, ysnFutJun,    
       ysnFutJul, ysnFutAug, ysnFutSep, ysnFutOct, ysnFutNov, ysnFutDec    
-    FROM tblRKFutureMarket    
-    WHERE intFutureMarketId = @FutureMarketId    
+    FROM tblRKCommodityMarketMapping    
+    WHERE intFutureMarketId = @FutureMarketId   and intCommodityMarketId = @intCommodityMarketId 
    ) p    
    UNPIVOT    
    (    
@@ -201,7 +202,8 @@ IF OBJECT_ID('tempdb..##AllowedMonths') IS NOT NULL
  INSERT INTO tblRKFuturesMonth(    
         intConcurrencyId,    
         strFutureMonth,    
-        intFutureMarketId,    
+        intFutureMarketId,
+		intCommodityMarketId,    
         dtmFutureMonthsDate,    
         strSymbol,    
         intYear,    
@@ -214,7 +216,8 @@ IF OBJECT_ID('tempdb..##AllowedMonths') IS NOT NULL
 SELECT * FROM (            
 SELECT distinct t.intConcurrencyId,    
   ltrim(rtrim(t.strMonthName collate Latin1_General_CI_AS))+' ' + Right(t.StrYear,2) as  strFMonth,    
-  t.intFutureMarketId,    
+  t.intFutureMarketId,  
+  intCommodityMarketId = @intCommodityMarketId,  
   t.dtmFutureMonthsDate,    
   t.strSymbol,    
   Right(StrYear,2) strYear,    
@@ -224,11 +227,11 @@ SELECT distinct t.intConcurrencyId,
   isnull(t.dtmSpotDate,'') as dtmSpotDate,    
   t.ysnExpired     
 FROM #Temp t)t 
-WHERE t.strFMonth not in(SELECT strFutureMonth collate Latin1_General_CI_AS from tblRKFuturesMonth where intFutureMarketId=@FutureMarketId)  
+WHERE t.strFMonth not in(SELECT strFutureMonth collate Latin1_General_CI_AS from tblRKFuturesMonth where intCommodityMarketId=@intCommodityMarketId)  
 order by convert(datetime,'01 '+strFMonth) asc  
 IF @intOptMonthsToOpen >0    
 BEGIN  
- EXEC uspRKGenerateOptionsMonthList @FutureMarketId,@intOptMonthsToOpen
-END  
-    
+ EXEC uspRKGenerateOptionsMonthList @FutureMarketId,@intCommodityMarketId,@intOptMonthsToOpen
+END
+
 END

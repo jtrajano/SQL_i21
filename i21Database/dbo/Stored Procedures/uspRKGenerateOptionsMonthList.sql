@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE uspRKGenerateOptionsMonthList 
  @FutureMarketId  INT  ,  
+ @intCommodityMarketId INT, 
  @intOptMonthsToOpen INT
 AS  
 BEGIN  
@@ -66,8 +67,8 @@ IF OBJECT_ID('tempdb..##AllowedMonths') IS NOT NULL
  INTO ##AllowedMonths    
  FROM ( SELECT ysnOptJan, ysnOptFeb, ysnOptMar, ysnOptApr, ysnOptMay, ysnOptJun,  
       ysnOptJul, ysnOptAug, ysnOptSep, ysnOptOct, ysnOptNov, ysnOptDec  
-    FROM tblRKFutureMarket  
-    WHERE intFutureMarketId = @FutureMarketId  
+    FROM tblRKCommodityMarketMapping
+    WHERE intFutureMarketId = @FutureMarketId  and intCommodityMarketId = @intCommodityMarketId
    ) p  
    UNPIVOT  
    (  
@@ -167,6 +168,7 @@ IF OBJECT_ID('tempdb..##AllowedMonths') IS NOT NULL
  INSERT INTO tblRKOptionsMonth(  
         intConcurrencyId,  
         intFutureMarketId,  
+		intCommodityMarketId,
         strOptionMonth,  
         intYear,  
         intFutureMonthId,  
@@ -176,6 +178,7 @@ IF OBJECT_ID('tempdb..##AllowedMonths') IS NOT NULL
 SELECT * FROM (          
 SELECT distinct t.intConcurrencyId,  
 	t.intFutureMarketId,  
+	 intCommodityMarketId = @intCommodityMarketId,  
 	ltrim(rtrim(t.strMonthName collate Latin1_General_CI_AS))+' ' + Right(t.StrYear,2) as  strOMonth,  
 	Right(StrYear,2) strYear,   
 	(SElECT TOP 1 intFutureMonthId FROM tblRKFuturesMonth WHERE intFutureMarketId = @FutureMarketId AND dtmFutureMonthsDate >= convert(datetime,Ltrim(Rtrim(StrYear))+'-'+REPLACE(strMonthId,' ','')+'-01') ORDER BY dtmFutureMonthsDate ASC) AS intFutureMonthId,
@@ -183,6 +186,6 @@ SELECT distinct t.intConcurrencyId,
 	NULL as dtmExpirationDate,
 	@strOptSymbol+''+strSymbol+''+Right(StrYear,2) as symbol     
 FROM #Temp t)t    
-WHERE t.strOMonth not in(SELECT strOptionMonth collate Latin1_General_CI_AS from tblRKOptionsMonth where intFutureMarketId=@FutureMarketId)  
+WHERE t.strOMonth not in(SELECT strOptionMonth collate Latin1_General_CI_AS from tblRKOptionsMonth where intCommodityMarketId =@intCommodityMarketId)  
   order by convert(datetime,'01 '+strOMonth) asc
 END
