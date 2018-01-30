@@ -85,7 +85,7 @@ BEGIN
 		--UPDATE THE VOUCHER INTEREST DATE AND INTEREST ACCRUED THRU OF EXISTING VOUCHER
 		UPDATE A
 			SET A.dtmDate = deferredInterest.dtmPaymentInvoiceDate,
-				A.drmDueDate = deferredInterest.dtmPaymentDueDateOverride, 
+				A.dtmDueDate = deferredInterest.dtmPaymentDueDateOverride, 
 				A.intTermsId = term.intTermID
 		FROM tblAPBill A
 		CROSS APPLY tblAPDeferredPaymentInterest deferredInterest
