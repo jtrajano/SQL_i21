@@ -10,10 +10,14 @@ bd.intM2MInquiryId,
 		,strFutureMonth
 		,strName strEntityName
 		,strItemNo		
- FROM tblRKM2MInquiryTransaction bd
+		,mz.strMarketZoneCode strMarketZoneCode
+		,strLocationName strLocationName
+FROM tblRKM2MInquiryTransaction bd
 join tblRKM2MInquiry mb on mb.intM2MInquiryId=bd.intM2MInquiryId
 join tblICCommodity c on c.intCommodityId=bd.intCommodityId
 join tblEMEntity e on e.intEntityId=bd.intEntityId
 LEFT JOIN tblICItem i on i.intItemId=bd.intItemId
 LEFT JOIN tblRKFutureMarket m on m.intFutureMarketId=bd.intFutureMarketId
 LEFT JOIN tblRKFuturesMonth mo on mo.intFutureMonthId=bd.intFutureMonthId
+LEFT JOIN tblARMarketZone mz on mz.intMarketZoneId=bd.intMarketZoneId
+LEFT JOIN tblSMCompanyLocation co on co.intCompanyLocationId=bd.intCompanyLocationId
