@@ -27,13 +27,13 @@ END
 ELSE
 BEGIN
 	SELECT TOP 1 @originId = intAccountSystemId FROM tblGLAccountSystem WHERE strAccountSystemDescription = ''Origin''
+	DELETE FROM tblGLCrossReferenceMapping WHERE intAccountSystemId = @originId AND intAccountId IN (
+			SELECT intAccountId FROM tblGLCrossReferenceMapping WHERE intAccountSystemId =@originId GROUP BY intAccountId HAVING COUNT(1) > 1)
 END
 	MERGE dbo.tblGLCrossReferenceMapping as map
 	USING dbo.tblGLCOACrossReference AS coa
 	ON map.intAccountId = coa.inti21Id 
-	AND map.intAccountSystemId = @originId
-	AND coa.ysnOrigin =1
-	WHEN MATCHED THEN
+	WHEN MATCHED AND map.intAccountSystemId = @originId AND coa.ysnOrigin =1 THEN
 		UPDATE SET strOldAccountId = coa.strOldId
 	WHEN NOT MATCHED THEN
 		INSERT (
