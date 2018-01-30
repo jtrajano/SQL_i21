@@ -202,7 +202,7 @@ SELECT intItemId					= SI.intItemId
 	 , dblCurrencyExchangeRate		= SOD.dblCurrencyExchangeRate
 	 , intSalesOrderId				= SI.intSalesOrderId
 FROM tblSOSalesOrder SO 
-	INNER JOIN vyuARShippedItems SI ON SO.intSalesOrderId = SI.intSalesOrderId
+	INNER JOIN vyuARGetSalesOrderItems SI ON SO.intSalesOrderId = SI.intSalesOrderId
 	LEFT JOIN tblSOSalesOrderDetail SOD ON SI.intSalesOrderDetailId = SOD.intSalesOrderDetailId
 	LEFT JOIN tblICItem I ON SI.intItemId = I.intItemId
 	LEFT JOIN tblICInventoryShipmentItem ISHI ON SOD.intSalesOrderDetailId = ISHI.intLineNo
@@ -210,7 +210,7 @@ WHERE ISNULL(I.strLotTracking, 'No') = 'No'
 	AND SO.intSalesOrderId = @SalesOrderId
 	AND SI.dblQtyRemaining <> @dblZeroAmount
 	AND (ISNULL(ISHI.intLineNo, 0) = 0 OR ISHI.dblQuantity < SOD.dblQtyOrdered)
-	AND (ISNULL(SI.intRecipeItemId, 0) = 0)	
+	AND (ISNULL(SI.intRecipeId, 0) = 0)	
 
 --GET COMMENT ITEMS FROM SALES ORDER
 INSERT INTO @tblItemsToInvoiceUnsorted
@@ -340,7 +340,7 @@ SELECT intItemId					= ARSI.intItemId
 	 , intTaxGroupId				= NULL
 	 , intSalesOrderDetailId		= ARSI.intSalesOrderDetailId
 	 , intInventoryShipmentItemId	= NULL
-	 , intRecipeItemId				= ARSI.intRecipeItemId
+	 , intRecipeItemId				= ARSI.intRecipeId
 	 , intRecipeId					= ARSI.intRecipeId
 	 , intSubLocationId				= NULL
 	 , intCostTypeId				= NULL
@@ -353,7 +353,7 @@ SELECT intItemId					= ARSI.intItemId
 	 , dtmMaintenanceDate			= NULL
 	 , strItemType					= I.strType
 	 , strSalesOrderNumber			= ARSI.strSalesOrderNumber
-	 , strShipmentNumber			= ARSI.strShipmentNumber
+	 , strShipmentNumber			= ''
 	 , dblContractBalance			= 0
 	 , dblContractAvailable			= 0
 	 , intEntityCustomerId			= NULL
@@ -363,11 +363,11 @@ SELECT intItemId					= ARSI.intItemId
 	 , intCurrencyExchangeRateTypeId = ARSI.intCurrencyExchangeRateTypeId
 	 , dblCurrencyExchangeRate		= ARSI.dblCurrencyExchangeRate
 	 , intSalesOrderId				= ARSI.intSalesOrderId
-FROM vyuARShippedItems ARSI
+FROM vyuARGetSalesOrderItems ARSI
 LEFT JOIN tblICItem I ON ARSI.intItemId = I.intItemId
 WHERE
 	ARSI.intSalesOrderId = @SalesOrderId
-	AND ISNULL(ARSI.intRecipeItemId,0) <> 0
+	AND ISNULL(ARSI.intRecipeId,0) <> 0
 
 IF EXISTS (SELECT NULL FROM @tblItemsToInvoiceUnsorted WHERE ISNULL(intRecipeId, 0) > 0)
 	BEGIN

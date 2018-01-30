@@ -5,6 +5,7 @@ SELECT intSalesOrderId			= SO.intSalesOrderId
 	 , intCompanyLocationId		= SO.intCompanyLocationId
      , intSalesOrderDetailId	= SODETAIL.intSalesOrderDetailId
 	 , intItemId				= SODETAIL.intItemId
+	 , strItemDescription		= SODETAIL.strItemDescription
 	 , intItemUOMId				= SODETAIL.intItemUOMId
 	 , intContractHeaderId		= SODETAIL.intContractHeaderId
 	 , intContractDetailId		= SODETAIL.intContractDetailId
@@ -39,6 +40,7 @@ SELECT intSalesOrderId			= SO.intSalesOrderId
 	 , strUnitMeasure			= UOM.strUnitMeasure
 	 , dtmDate					= SO.dtmDate
 	 , ysnBlended				= SODETAIL.ysnBlended
+	 , intTaxGroupId			= SODETAIL.intTaxGroupId
 FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
 INNER JOIN (
 	SELECT intSalesOrderId
@@ -68,6 +70,7 @@ INNER JOIN (
 		 , strPricing
 		 , strVFDDocumentNumber
 		 , ysnBlended
+		 , intTaxGroupId
 	FROM dbo.tblSOSalesOrderDetail WITH (NOLOCK)
 	WHERE dblQtyShipped < dblQtyOrdered
 	 AND (ISNULL(intItemId, 0) <> 0 OR ISNULL(strItemDescription, '') <> '') 
