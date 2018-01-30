@@ -307,6 +307,12 @@ BEGIN TRY
 		SET @DealerEthanol_3 = @DisbursementEthanol_12
 		SET @DealerDiesel_3 = @DisbursementDiesel_12
 
+		SET @DealerGasoline_6 = @DealerGasoline_1 + @DealerGasoline_2 + @DealerGasoline_3 + @DealerGasoline_4 + @DealerGasoline_5
+		SET @DealerAviation_6 = @DealerAviation_1 + @DealerAviation_2 + @DealerAviation_3 + @DealerAviation_4 + @DealerAviation_5
+		SET @DealerJet_6 = @DealerJet_1 + @DealerJet_2 + @DealerJet_3 + @DealerJet_4 + @DealerJet_5
+		SET @DealerEthanol_6 = @DealerEthanol_1 + @DealerEthanol_2 + @DealerEthanol_3 + @DealerEthanol_4 + @DealerEthanol_5
+		SET @DealerDiesel_6 = @DealerDiesel_1 + @DealerDiesel_2 + @DealerDiesel_3 + @DealerDiesel_4 + @DealerDiesel_5
+
 		SET @DealerGasoline_7 = @DisbursementGasoline_7
 		SET @DealerAviation_7 = @DisbursementAviation_7
 		SET @DealerJet_7 = @DisbursementJet_7
