@@ -155,6 +155,7 @@ BEGIN TRY
 			,strAmendmentNumber = AH.strAmendmentNumber
 			,strConfirmMessage = 'We Confirm ADJUSTMENT from you as follows:'
 			,dtmHistoryCreated = AH.dtmHistoryCreated
+			,intContractSeq    = CD.intContractSeq
 			,strItemChanged	   = AH.strItemChanged
 			,strOldValue       = AH.strOldValue
 			,strNewValue	   = AH.strNewValue
@@ -177,6 +178,7 @@ BEGIN TRY
 															END
 														)
 	JOIN @tblSequenceHistoryId tblSequenceHistory ON tblSequenceHistory.intSequenceAmendmentLogId = AH.intSequenceAmendmentLogId
+	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = AH.intContractDetailId
 
 END TRY
 
