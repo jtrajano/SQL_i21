@@ -6164,6 +6164,7 @@
     <Build Include="dbo\Views\vyuTMMobileBillingOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetLotDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateOR7351302.sql" />
+    <Build Include="dbo\Views\vyuARGetSubstituteItems.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
