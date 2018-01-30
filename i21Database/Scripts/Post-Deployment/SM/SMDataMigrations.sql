@@ -6,34 +6,39 @@
 	WHERE ISNULL(strDashboardRole, '') = ''
 
 GO
-
 	-- Add the SQL Server custom messages
 	--EXEC dbo.uspSMErrorMessages
 	--EXEC dbo.uspICErrorMessages
-GO
+--GO
+	---- Update User Role and User Security Menus
+	--DECLARE @currentRow INT
+	--DECLARE @totalRows INT
 
-	-- Update User Role and User Security Menus
-	DECLARE @currentRow INT
-	DECLARE @totalRows INT
+	--SET @currentRow = 1
+	--SELECT @totalRows = Count(*) FROM [tblSMUserRole] WHERE (strRoleType NOT IN ('Contact Admin', 'Contact') OR strRoleType IS NULL) AND intUserRoleID <> 999
 
-	SET @currentRow = 1
-	SELECT @totalRows = Count(*) FROM [tblSMUserRole] WHERE (strRoleType NOT IN ('Contact Admin', 'Contact') OR strRoleType IS NULL) AND intUserRoleID <> 999
+	--WHILE (@currentRow <= @totalRows)
+	--BEGIN
 
-	WHILE (@currentRow <= @totalRows)
+	--Declare @roleId INT
+	--SELECT @roleId = intUserRoleID FROM (  
+	--	SELECT ROW_NUMBER() OVER(ORDER BY intUserRoleID ASC) AS 'ROWID', *
+	--	FROM [tblSMUserRole] WHERE (strRoleType NOT IN ('Contact Admin', 'Contact') OR strRoleType IS NULL) AND intUserRoleID <> 999
+	--) a
+	--WHERE ROWID = @currentRow
+
+	--PRINT N'Executing uspSMUpdateUserRoleMenus'
+	--Exec uspSMUpdateUserRoleMenus @roleId, 1, 0
+
+	--SET @currentRow = @currentRow + 1
+	--END
+
+	PRINT N'START REFRESHING USER ROLE MENUS'
+	IF OBJECT_ID('tempdb..#updateUserRoleMenus') IS NOT NULL
 	BEGIN
-
-	Declare @roleId INT
-	SELECT @roleId = intUserRoleID FROM (  
-		SELECT ROW_NUMBER() OVER(ORDER BY intUserRoleID ASC) AS 'ROWID', *
-		FROM [tblSMUserRole] WHERE (strRoleType NOT IN ('Contact Admin', 'Contact') OR strRoleType IS NULL) AND intUserRoleID <> 999
-	) a
-	WHERE ROWID = @currentRow
-
-	PRINT N'Executing uspSMUpdateUserRoleMenus'
-	Exec uspSMUpdateUserRoleMenus @roleId, 1, 0
-
-	SET @currentRow = @currentRow + 1
-	END
+		EXEC [uspSMRefreshUserRoleMenus]
+	END	
+	PRINT N'END REFRESHING USER ROLE MENUS'
 
 GO
 	-- Reset Demo User Roles and permissions
@@ -44,12 +49,12 @@ GO
 	SELECT TOP 1 @AdminId = intUserRoleID FROM tblSMUserRole WHERE strName = 'ADMIN'
 	--SELECT TOP 1 @UserId = intUserRoleID FROM tblSMUserRole WHERE strName = 'USER'
 
+	EXEC uspSMUpdateUserRoleMenus @AdminId
+	--EXEC uspSMUpdateUserRoleMenus @UserId
+
 	UPDATE tblSMUserRoleMenu
 	SET ysnVisible = 1
 	WHERE intUserRoleId IN (@AdminId)--, @UserId)
-
-	EXEC uspSMUpdateUserRoleMenus @AdminId
-	--EXEC uspSMUpdateUserRoleMenus @UserId
 
 GO
 	-- Add Help Desk role menus if not existing
@@ -127,6 +132,9 @@ GO
 	-- MIGRATE USER TYPE FROM tblSMPreferences to tblSMUserPreference
 	EXEC uspSMMigrateUserPreference
 GO
+
+
+	
 
 	-- Update User Preference
 	DECLARE @currentRow INT
@@ -515,18 +523,27 @@ GO
 		VALUES('System Manager', 'Migrate All Entity Roles - tblEMEntityToContact', 'Migrate All Entity Roles - tblEMEntityToContact', GETDATE())
 	END	
 GO
-	-- UPDATE ALL CONTACT ADMIN AND CONTACTS BASED ON PORTAL DEFAULT
-	PRINT N'BUILDING PORTAL DEFAULT AND ALL CONTACTS'
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMUserRoleMenu WHERE intUserRoleId = 999)
+	PRINT N'START REFRESHING CONTACT ROLE MENUS'
+	IF OBJECT_ID('tempdb..#updateUserRoleMenus') IS NOT NULL
 	BEGIN
-		PRINT N'BUILDING PORTAL DEFAULT FOR THE FIRST TIME'
-		EXEC uspSMUpdateUserRoleMenus 999, 1, 1
-	END
-	ELSE
-	BEGIN
-		PRINT N'BUILDING PORTAL DEFAULT'
-		EXEC uspSMUpdateUserRoleMenus 999, 1, 0
-	END
+		EXEC [uspSMRefreshContactRoleMenus]
+
+		IF OBJECT_ID('tempdb..#updateUserRoleMenus') IS NOT NULL DROP TABLE #updateUserRoleMenus
+	END	
+	PRINT N'END REFRESHING CONTACT ROLE MENUS'
+
+	---- UPDATE ALL CONTACT ADMIN AND CONTACTS BASED ON PORTAL DEFAULT
+	--PRINT N'BUILDING PORTAL DEFAULT AND ALL CONTACTS'
+	--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMUserRoleMenu WHERE intUserRoleId = 999)
+	--BEGIN
+	--	PRINT N'BUILDING PORTAL DEFAULT FOR THE FIRST TIME'
+	--	EXEC uspSMUpdateUserRoleMenus 999, 1, 1
+	--END
+	--ELSE
+	--BEGIN
+	--	PRINT N'BUILDING PORTAL DEFAULT'
+	--	EXEC uspSMUpdateUserRoleMenus 999, 1, 0
+	--END
 
 --	-- UPDATE ALL CONTACTS BASED ON THEIR CONTACT ADMINISTRATOR
 --	DECLARE @currentRow INT
