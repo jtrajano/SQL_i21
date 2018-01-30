@@ -30,11 +30,12 @@ SET il.ysnLockedInventory = @ysnLocked
 FROM tblICItemLocation il
 	INNER JOIN tblICInventoryCountDetail cd ON cd.intInventoryCountId = cd.intInventoryCountId
 		AND cd.intItemLocationId = il.intItemLocationId
+	INNER JOIN tblICItem i ON i.intItemId = cd.intItemId
 WHERE cd.intInventoryCountId = @intTransactionId
 	AND cd.intSubLocationId IS NULL
 	AND cd.intStorageLocationId IS NULL
 	AND cd.intItemLocationId IS NOT NULL
-	AND cd.intLotId IS NULL
+	AND i.strLotTracking = 'No'
 
 -- Lock Non-lotted items by Sub Location
 IF @ysnLocked = 1
@@ -43,9 +44,10 @@ BEGIN
 	SELECT c.intInventoryCountId, cd.strCountLine, cd.intSubLocationId, GETDATE(), @intSecurityUserId
 	FROM tblICInventoryCount c
 		INNER JOIN tblICInventoryCountDetail cd ON cd.intInventoryCountId = c.intInventoryCountId
+		INNER JOIN tblICItem i ON i.intItemId = cd.intItemId
 	WHERE c.intInventoryCountId = @intTransactionId
 		AND (cd.intSubLocationId IS NOT NULL AND cd.intStorageLocationId IS NULL)
-		AND cd.intLotId IS NULL
+		AND i.strLotTracking = 'No'
 END
 ELSE
 BEGIN
@@ -61,9 +63,10 @@ BEGIN
 	SELECT c.intInventoryCountId, cd.strCountLine, cd.intStorageLocationId, GETDATE(), @intSecurityUserId
 	FROM tblICInventoryCount c
 		INNER JOIN tblICInventoryCountDetail cd ON cd.intInventoryCountId = c.intInventoryCountId
+		INNER JOIN tblICItem i ON i.intItemId = cd.intItemId
 	WHERE c.intInventoryCountId = @intTransactionId
 		AND cd.intStorageLocationId IS NOT NULL
-		AND cd.intLotId IS NULL
+		AND i.strLotTracking = 'No'
 END
 ELSE
 BEGIN
