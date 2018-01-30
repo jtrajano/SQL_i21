@@ -51,29 +51,21 @@ END
 IF EXISTS(SELECT * FROM sys.tables WHERE object_id = object_id('tblPREmployeeRank'))
 BEGIN
 	EXEC ('
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblPREmployee)
-		INSERT INTO tblPREmployeeRank
-			(intRank
-			,strDescription
-			,intConcurrencyId
-			)
-		SELECT
-			intRank = 0
-			,strDescription =  ''(unranked)''
-			,intConcurrencyId = 1
-	ELSE
-		INSERT INTO tblPREmployeeRank
-			(intRank
-			,strDescription
-			,intConcurrencyId
-			)
-		SELECT DISTINCT
-			intRank = intRank
-			,strDescription = CASE WHEN (intRank = 0) THEN ''(unranked)'' ELSE ''Rank '' + CAST(intRank AS NVARCHAR(5)) END
-			,intConcurrencyId = 1
-		FROM tblPREmployee
-		WHERE intRank 
-		NOT IN (SELECT DISTINCT intRank FROM tblPREmployeeRank)
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblPREmployeeRank WHERE intRank = 0)
+	INSERT INTO tblPREmployeeRank (intRank, strDescription, intConcurrencyId) SELECT 0, ''(unranked)'', 1 
+
+	INSERT INTO tblPREmployeeRank
+		(intRank
+		,strDescription
+		,intConcurrencyId
+		)
+	SELECT DISTINCT
+		intRank = intRank
+		,strDescription = ''Rank '' + CAST(intRank AS NVARCHAR(5))
+		,intConcurrencyId = 1
+	FROM tblPREmployee
+	WHERE intRank <> 0 AND
+		intRank NOT IN (SELECT DISTINCT intRank FROM tblPREmployeeRank)
 	')
 END
 
