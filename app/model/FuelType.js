@@ -25,19 +25,20 @@ Ext.define('Inventory.model.FuelType', {
         { name: 'dblPercentDenaturant', type: 'float'},
         { name: 'ysnDeductDenaturant', type: 'boolean'},
 
+        {name: 'strFuelCategory', type: 'string'},
         {name: 'strRinFuelTypeCodeId', type: 'string'},
-        {name: 'strRinFeedStockId', type: 'string'},
-        {name: 'strRinFuelId', type: 'string'},
-        {name: 'strRinProcessId', type: 'string'},
-        {name: 'strRinFeedStockUOMId', type: 'string'}
+        {name: 'strFeedStock', type: 'string'}, //{name: 'strRinFeedStockId', type: 'string'},
+        {name: 'strFuelCode', type: 'string'}, //{name: 'strRinFuelId', type: 'string'},
+        {name: 'strProcessCode', type: 'string'}, //{name: 'strRinProcessId', type: 'string'},
+        {name: 'strFeedStockUOM', type: 'string'} //{name: 'strRinFeedStockUOMId', type: 'string'}
     ],
 
     validators: [
-        {type: 'presence', field: 'intFuelTypeId'},
-        {type: 'presence', field: 'intRinFuelCategoryId'},
-        {type: 'presence', field: 'intRinFeedStockId'},
-        {type: 'presence', field: 'intRinFuelId'},
-        {type: 'presence', field: 'intRinProcessId'},
-        {type: 'presence', field: 'intRinFeedStockUOMId'}
+        //{type: 'presence', field: 'intFuelTypeId'},
+        {type: 'presence', field: 'strFuelCategory'},
+        {type: 'presence', field: 'strFeedStock'},
+        {type: 'presence', field: 'strFuelCode'},
+        {type: 'presence', field: 'strProcessCode'},
+        {type: 'presence', field: 'strFeedStockUOM'}
     ]
 });
