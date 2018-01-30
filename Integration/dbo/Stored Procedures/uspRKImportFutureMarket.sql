@@ -11,8 +11,8 @@ BEGIN
 		BEGIN 
 			SELECT @Total = COUNT (*) WHERE NOT EXISTS (SELECT strFutMarketName FROM tblRKFutureMarket WHERE strFutMarketName = 'CBOT') 
 			SELECT @Total = @Total + COUNT (*) WHERE NOT EXISTS (SELECT strFutMarketName FROM tblRKFutureMarket WHERE strFutMarketName = 'KCBT') 
-			SELECT @Total = @Total + COUNT (*) WHERE NOT EXISTS (SELECT strFutMarketName FROM tblRKFutureMarket WHERE strFutMarketName = 'MGEX') UNION ALL
-			SELECT @Total = @Total + COUNT (*) WHERE NOT EXISTS (SELECT strFutMarketName FROM tblRKFutureMarket WHERE strFutMarketName = 'WINNIPEG') UNION ALL
+			SELECT @Total = @Total + COUNT (*) WHERE NOT EXISTS (SELECT strFutMarketName FROM tblRKFutureMarket WHERE strFutMarketName = 'MGEX')
+			SELECT @Total = @Total + COUNT (*) WHERE NOT EXISTS (SELECT strFutMarketName FROM tblRKFutureMarket WHERE strFutMarketName = 'WINNIPEG')
 			SELECT @Total = @Total + COUNT (*) WHERE NOT EXISTS (SELECT strFutMarketName FROM tblRKFutureMarket WHERE strFutMarketName = 'NEW YORK')
 
 			RETURN
