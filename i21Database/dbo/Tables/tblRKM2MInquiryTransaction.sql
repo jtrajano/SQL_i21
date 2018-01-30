@@ -36,11 +36,15 @@
 	[dblPricedQty] NUMERIC(24, 6) NULL,
 	[dblUnPricedQty] NUMERIC(24, 6) NULL,
 	[dblPricedAmount] NUMERIC(24, 6) NULL,
+	[intCompanyLocationId] int NULL,
+	[intMarketZoneId] int NULL,
     CONSTRAINT [PK_tblRKM2MInquiryTransaction_intM2MInquiryTransactionId] PRIMARY KEY (intM2MInquiryTransactionId),
 	CONSTRAINT [FK_tblRKM2MInquiryTransaction_tblRKM2MInquiry_intM2MInquiryId] FOREIGN KEY([intM2MInquiryId])REFERENCES [dbo].[tblRKM2MInquiry] (intM2MInquiryId) ON DELETE CASCADE,  
 	CONSTRAINT [FK_tblRKM2MInquiryTransaction_tblRKFutureMarket_intFutureMarketId] FOREIGN KEY(intFutureMarketId)REFERENCES [dbo].[tblRKFutureMarket] (intFutureMarketId),
 	CONSTRAINT [FK_tblRKM2MInquiryTransaction_tblRKFuturesMonth_intFutureMonthId] FOREIGN KEY(intFutureMonthId)REFERENCES [dbo].[tblRKFuturesMonth] (intFutureMonthId),
 	CONSTRAINT [FK_tblRKM2MInquiryTransaction_tblICCommodity_intCommodityId] FOREIGN KEY([intCommodityId])REFERENCES [dbo].[tblICCommodity] ([intCommodityId]),	
 	CONSTRAINT [FK_tblRKM2MInquiryTransaction_tblICItem_intItemId] FOREIGN KEY([intItemId])REFERENCES [dbo].[tblICItem] ([intItemId]),	
-	CONSTRAINT [FK_tblRKM2MInquiryTransaction_tblEMEntity_intEntityId] FOREIGN KEY([intEntityId])REFERENCES [dbo].tblEMEntity ([intEntityId])
+	CONSTRAINT [FK_tblRKM2MInquiryTransaction_tblEMEntity_intEntityId] FOREIGN KEY([intEntityId])REFERENCES [dbo].tblEMEntity ([intEntityId]),
+	CONSTRAINT [FK_tblRKM2MInquiryTransaction_tblARMarketZone_intMarketZoneId] FOREIGN KEY(intMarketZoneId)REFERENCES [dbo].[tblARMarketZone] (intMarketZoneId),
+	CONSTRAINT [FK_tblRKM2MInquiryTransaction_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY(intCompanyLocationId)REFERENCES [dbo].[tblSMCompanyLocation] (intCompanyLocationId)
 )
