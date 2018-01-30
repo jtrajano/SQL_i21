@@ -58,6 +58,9 @@ DECLARE @tblFinalDetail TABLE (
        ,intCent int
 	   ,dtmPlannedAvailabilityDate datetime
 	   ,dblPricedQty numeric(24,10),dblUnPricedQty numeric(24,10),dblPricedAmount numeric(24,10)
+	   	,intMarketZoneId int  ,intCompanyLocationId int
+	,strMarketZoneCode NVARCHAR(200) COLLATE Latin1_General_CI_AS
+	,strLocationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
 	      )
 
 INSERT INTO @tblFinalDetail
