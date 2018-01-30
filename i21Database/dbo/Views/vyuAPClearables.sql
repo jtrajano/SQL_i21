@@ -91,7 +91,7 @@ SELECT DISTINCT
 	,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
 	,dblQtyToReceive = ISNULL(ReceiptCharge.dblQuantity,1)
 	,dblQtyVouchered = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN ISNULL(Bill.dblQtyReceived,1) ELSE 0 END 
-	,dblQtyToVoucher = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN 0 ELSE (ReceiptCharge.dblQuantity - ISNULL(ReceiptCharge.dblQuantityBilled, 1))  END 
+	,dblQtyToVoucher = (ISNULL(ReceiptCharge.dblQuantity,0) - ISNULL(ReceiptCharge.dblQuantityBilled, 0))
 	,dblAmountToVoucher = CAST(((ISNULL(dblAmount,0)) + (ISNULL(dblTax,0))) AS DECIMAL (18,2)) 
 	, 0 AS dblChargeAmount	
 	, ''AS strContainer
@@ -165,7 +165,7 @@ SELECT DISTINCT
 	,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
 	, dblQtyToReceive = ISNULL(-ReceiptCharge.dblQuantity,-1)
 	, dblQtyVouchered = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN ISNULL(-ReceiptCharge.dblQuantityBilled,-1) ELSE 0 END 
-	, dblQtyToVoucher = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN 0 ELSE  -(ReceiptCharge.dblQuantity - ISNULL(ReceiptCharge.dblQuantityBilled, 1)) END 
+	, dblQtyToVoucher = -(ISNULL(ReceiptCharge.dblQuantity,0) - ISNULL(ReceiptCharge.dblQuantityBilled, 0)) 
 	, dblAmountToVoucher = CAST(( (ISNULL(dblAmount,0)* -1) + (ISNULL(dblTax,0)* -1)) AS DECIMAL (18,2)) 
 	, 0 AS dblChargeAmount	
 	, ''AS strContainer
@@ -239,7 +239,7 @@ SELECT DISTINCT
 	,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
 	, dblQtyToReceive = ISNULL(ReceiptCharge.dblQuantity,1)
 	, dblQtyVouchered = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN ISNULL(Bill.dblQtyReceived,1) ELSE 0 END 
-	, dblQtyToVoucher = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN 0 ELSE (ReceiptCharge.dblQuantity - ISNULL(ReceiptCharge.dblQuantityBilled, 1)) END 
+	, dblQtyToVoucher = (ISNULL(ReceiptCharge.dblQuantity,0) - ISNULL(ReceiptCharge.dblQuantityBilled, 0))
 	, dblAmountToVoucher =  CAST(((ISNULL(dblAmount,0)) + (ISNULL(ReceiptCharge.dblTax,0))) AS DECIMAL (18,2)) 
 	, 0 AS dblChargeAmount	
 	, ''AS strContainer
@@ -315,7 +315,7 @@ SELECT DISTINCT
 	,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
 	, dblQtyToReceive = ISNULL(ShipmentCharge.dblQuantity,1)
 	, dblQtyVouchered = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN ISNULL(ShipmentCharge.dblQuantityBilled,1) ELSE 0 END 
-	, dblQtyToVoucher = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN 0 ELSE (ShipmentCharge.dblQuantity - ISNULL(ShipmentCharge.dblQuantityBilled, 0)) END 
+	, dblQtyToVoucher = (ISNULL(ShipmentCharge.dblQuantity,0) - ISNULL(ShipmentCharge.dblQuantityBilled, 0)) 
 	, dblAmountToVoucher =  CAST(((ISNULL(dblAmount,0)) /*+ (ISNULL(ReceiptCharge.dblTax,0))*/) AS DECIMAL (18,2)) 
 	, 0 AS dblChargeAmount	
 	, ''AS strContainer
