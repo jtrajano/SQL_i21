@@ -127,6 +127,27 @@ SELECT CP.intCompanyPreferenceId
 		WHEN 2
 			THEN ''
 		END strCarrierShipmentOrderReportFormat
+	,CP.intDebitNoteReportFormat
+	,CASE CP.intDebitNoteReportFormat
+		WHEN 1
+			THEN 'Debit Note Report Format - 1'
+		WHEN 2
+			THEN ''
+		END strDebitNoteReportFormat
+	,CP.intCreditNoteReportFormat
+	,CASE CP.intCreditNoteReportFormat
+		WHEN 1
+			THEN 'Credit Note Report Format - 1'
+		WHEN 2
+			THEN ''
+		END strCreditNoteReportFormat
+	,CP.intOrganicDeclarationReportFormat
+	,CASE CP.intOrganicDeclarationReportFormat
+		WHEN 1
+			THEN 'Organic Declaration Report Format - 1'
+		WHEN 2
+			THEN ''
+		END strOrganicDeclarationReportFormat
 	,CP.strSignature
 	,CP.ysnContractSlspnOnEmail
 	,CP.ysnHighwayOnly
@@ -177,6 +198,7 @@ SELECT CP.intCompanyPreferenceId
 	,CAST(ISNULL(ysnLoadContainerTypeByOrigin,0) AS BIT) ysnLoadContainerTypeByOrigin
 	,CAST(ISNULL(ysnRestrictIncreaseSeqQty,0) AS BIT) ysnRestrictIncreaseSeqQty
 	,ISNULL(CP.intNumberOfDecimalPlaces,4) intNumberOfDecimalPlaces
+	,CP.ysnFullHeaderLogo
 FROM tblLGCompanyPreference CP
 LEFT JOIN tblICCommodity CO ON CO.intCommodityId = CP.intCommodityId
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CP.intWeightUOMId
