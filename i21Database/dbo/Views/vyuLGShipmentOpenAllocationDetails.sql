@@ -98,8 +98,10 @@ FROM (
 	LEFT JOIN tblSMCompanyLocation SCL ON SCL.intCompanyLocationId = CDS.intCompanyLocationId
 	LEFT JOIN tblCTPosition PP ON PP.intPositionId = CHP.intPositionId
 	LEFT JOIN tblCTPosition PS ON PS.intPositionId = CHS.intPositionId
-	LEFT JOIN tblSMCountry CP ON CP.intCountryID = ITP.intOriginId
-	LEFT JOIN tblSMCountry CS ON CS.intCountryID = ITS.intOriginId
+	LEFT JOIN tblICCommodityAttribute CAP ON CAP.intCommodityAttributeId = ITP.intOriginId
+	LEFT JOIN tblSMCountry CP ON CP.intCountryID = CAP.intCountryID
+	LEFT JOIN tblICCommodityAttribute CAS ON CAS.intCommodityAttributeId = ITS.intOriginId
+	LEFT JOIN tblSMCountry CS ON CS.intCountryID = CAS.intCountryID
 	WHERE ((AD.dblPAllocatedQty - IsNull(LD.dblPShippedQuantity, 0) + IsNull(PL.dblLotPickedQty, 0)) > 0)
 		AND ((AD.dblSAllocatedQty - IsNull(LD.dblSShippedQuantity, 0) - IsNull(PLS.dblSalePickedQty, 0)) > 0)
 	  ) tbl 
