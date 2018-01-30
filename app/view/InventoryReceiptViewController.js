@@ -2040,7 +2040,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var currentReceiptItem = win.viewModel.data.currentReceiptItem;
         var currentReceipt = win.viewModel.data.current;
 
-        me.resolveItemCost(currentReceipt, current);
+        me.resolveItemCost(win.viewModel, currentReceipt, current);
 
         if (currentReceiptItem) {
             currentReceiptItem.set('dblLineTotal', this.calculateLineTotal(currentReceipt, currentReceiptItem));
@@ -2058,7 +2058,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
-    resolveItemCost(receipt, receiptItem) {
+    resolveItemCost(vm, receipt, receiptItem) {
         ic.utils.ajax({
             url: './inventory/api/item/searchvendorpricing',
             filters: [
@@ -7509,21 +7509,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }
         }
 
-        if (receiptItemCount > 0 && currencyCurrencyId != functionalCurrencyId && strReceiptType != 'Inventory Return'){
+        if (receiptItemCount > 0 && ((currencyCurrencyId != functionalCurrencyId && strReceiptType != 'Inventory Return'))){
             var buttonAction = function (button) {
                 if (button === 'yes') {
-                    var items = current.tblICInventoryReceiptItems().data.items; 
-                    for (var i = items.length - 1; i >= 0; i--){
-                        if (!items[i].dummy){
-                            var item = items[i];
-                            // Remove the taxes related to the item. 
-                            if (item){
-                                item.tblICInventoryReceiptItemTaxes().removeAll();                                
-                            }
-                            // and then remove the item itself. 
-                            current.tblICInventoryReceiptItems().removeAt(i);
-                        }
-                    }
+                    me.clearItems(current);    
                 }
                 else {                    
                     dtmReceiptDate.suspendEvent('change');                                        
@@ -7532,6 +7521,63 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 }
             };       
             iRely.Functions.showCustomDialog('question', 'yesno', 'Changing the date while using a foreign currency will clear all the items. Do you want to continue?', buttonAction);
+        }
+
+        me.checkVendorCost(me.getViewModel(), current, dtmReceiptDate, oldValue);
+    },
+
+    checkVendorCost(vm, receipt, dtmReceiptDate, oldValue) {
+        var me = this;
+        ic.utils.ajax({
+            url: './inventory/api/item/searchvendorpricing',
+            filters: [
+                {
+                    column: 'intEntityVendorId',
+                    value: receipt.get('intEntityVendorId'),
+                    condition: 'eq',
+                    conjunction: 'and'
+                }, 
+                {
+                    column: 'intEntityLocationId',
+                    value: receipt.get('intShipFromId'),
+                    condition: 'eq',
+                    conjunction: 'and'
+                }
+            ]
+        })
+        .subscribe(x => {
+            var json = JSON.parse(x.responseText);
+            var data = _.first(json.data);
+            if(data) {
+                var buttonAction = function (button) {
+                    if (button === 'yes') {
+                        me.clearItems(receipt);    
+                    }
+                    else {                    
+                        if(dtmReceiptDate) {
+                            dtmReceiptDate.suspendEvent('change');                                        
+                            dtmReceiptDate.setValue(oldValue);
+                            dtmReceiptDate.blur();
+                        }
+                    }
+                };   
+                iRely.Functions.showCustomDialog('question', 'yesno', 'Changing the date while using vendor pricing will clear all the items. Do you want to continue?', buttonAction);    
+            }
+        });
+    },
+
+    clearItems(current) {
+        var items = current.tblICInventoryReceiptItems().data.items; 
+        for (var i = items.length - 1; i >= 0; i--){
+            if (!items[i].dummy){
+                var item = items[i];
+                // Remove the taxes related to the item. 
+                if (item){
+                    item.tblICInventoryReceiptItemTaxes().removeAll();                                
+                }
+                // and then remove the item itself. 
+                current.tblICInventoryReceiptItems().removeAt(i);
+            }
         }
     },
 
