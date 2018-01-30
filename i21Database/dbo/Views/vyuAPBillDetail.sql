@@ -13,6 +13,7 @@ SELECT
 		 WHEN 9 THEN '1099 Adjustment'
 		 WHEN 11 THEN 'Claim'
 		 WHEN 13 THEN 'Basis Advance'
+		 WHEN 14 THEN 'Deferred Interest'
 		 ELSE 'Invalid Type'
 	END AS strTransactionType,
 	G2.strName,

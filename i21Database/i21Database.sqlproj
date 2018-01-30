@@ -6169,6 +6169,8 @@
     <Build Include="dbo\Tables\tblSTCigaretteRebateProgramsDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetImportedSessionSummary.sql" />
     <Build Include="dbo\Views\vyuCTImportSession.sql" />
+    <Build Include="dbo\Tables\tblAPBillDeferredInterest.sql" />
+    <Build Include="dbo\Views\vyuAPBillDeferredInterest.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

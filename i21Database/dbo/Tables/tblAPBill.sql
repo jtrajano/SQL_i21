@@ -54,6 +54,7 @@
 	[strShipFromCountry] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, 
 	[strShipFromPhone] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, 
     [intShipFromId] INT NULL , 
+	[intDeferredVoucherId] INT NULL , 
 	[intPayToAddressId] INT NULL,
 	[intVoucherDifference] INT NULL,
 	[intShipToId] INT NULL , 
@@ -94,7 +95,7 @@
 	CONSTRAINT [FK_tblAPBill_intPurchaseOrderId] FOREIGN KEY ([intPurchaseOrderId]) REFERENCES tblPOPurchase([intPurchaseId]),
 	CONSTRAINT [FK_tblAPBill_intPayToAddressId] FOREIGN KEY ([intPayToAddressId]) REFERENCES tblEMEntityLocation([intEntityLocationId]),
 	CONSTRAINT [FK_tblAPBill_intStoreLocationId] FOREIGN KEY ([intStoreLocationId]) REFERENCES tblSMCompanyLocation([intCompanyLocationId]),
-
+	CONSTRAINT [FK_tblAPBill_intDeferredVoucherId] FOREIGN KEY ([intDeferredVoucherId]) REFERENCES tblAPBill([intBillId])
 );
 GO
 CREATE NONCLUSTERED INDEX [IX_intBillBatchId]
