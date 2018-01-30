@@ -793,7 +793,7 @@ Ext.define('Inventory.view.Item', {
                                                                 dock: 'top',
                                                                 itemId: 'lblGLNote',
                                                                 padding: 5,
-                                                                text: 'Note: You can choose not to setup your Item\'s GL Accounts if the Category specified for this Item has it\'s own GL Account setup on the Category screen. If there is no Category specified, or the Category has no GL Account setup, then it will look into the Commodity. If there is no Commodity, or Commodity GL Accounts setup, then it will look into the default GL Accounts for the Company Locations.'
+                                                                text: 'GL Accounts can be set up for Category instead of every item. Only accounts specific to the item is required to be set up here. GL accounts setup in Item overrides Category.'
                                                             }
                                                         ],
                                                         items: [
