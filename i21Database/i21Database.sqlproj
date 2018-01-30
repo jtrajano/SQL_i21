@@ -6165,6 +6165,8 @@
     <Build Include="dbo\Stored Procedures\uspMFGetLotDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateOR7351302.sql" />
     <Build Include="dbo\Views\vyuARGetSubstituteItems.sql" />
+    <Build Include="dbo\Tables\tblSTCigaretteRebatePrograms.sql" />
+    <Build Include="dbo\Tables\tblSTCigaretteRebateProgramsDetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
