@@ -25,12 +25,14 @@ AS
 	DECLARE @intCreatedBillId INT
 	DECLARE @APbatchIdUsed NVARCHAR(100)
 	DECLARE @APDate DATETIME
+	DECLARE @intDetailAccount INT
 	SET @ysnSuccess = 0
 
 	SET @strReimbursementType = 'AR'
 	SELECT TOP 1 
 		@strReimbursementType = strReimbursementType
 		,@intVendorId = intEntityId
+		,@intDetailAccount = intAccountId
 	FROM tblVRVendorSetup WHERE intEntityId = (
 												SELECT TOP 1 intEntityId 
 												FROM tblBBBuyback 
@@ -54,6 +56,7 @@ AS
 			,intItemId
 			,[dblQtyShipped]
 			,[dblPrice]
+			,[intSalesAccountId]
 		)
 		SELECT 
 			[strSourceTransaction] = 'Direct'
@@ -69,6 +72,7 @@ AS
 			,intItemId = B.intItemId
 			,[dblQtyShipped] = 1
 			,[dblPrice] = B.dblReimbursementAmount
+			,[intSalesAccountId] = @intDetailAccount
 		FROM tblBBBuybackCharge B
 		INNER JOIN tblBBBuyback A
 			ON B.intBuybackId = A.intBuybackId
@@ -125,7 +129,7 @@ AS
 			,[dblCost]			
 		)	
 		SELECT 
-			[intAccountId]	=  [dbo].[fnGetItemGLAccount](A.intItemId, C.intItemLocationId, 'Other Charge Income')	
+			[intAccountId]	=  ISNULL(@intDetailAccount,[dbo].[fnGetItemGLAccount](A.intItemId, C.intItemLocationId, 'Other Charge Income'))
 			,[intItemId]	= A.intItemId	
 			,[strMiscDescription]  = B.strDescription
 			,[dblQtyReceived] = 1	
