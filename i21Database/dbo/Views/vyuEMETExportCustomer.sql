@@ -45,5 +45,5 @@
 		LEFT JOIN [tblEMEntityLocation] as BillToLoc ON Cus.intBillToId = BillToLoc.intEntityLocationId
 		LEFT JOIN tblSMTerm as SMTerm ON SMTerm.intTermID = Loc.intTermsId
 		LEFT JOIN tblARAccountStatus AS AcctStat ON AcctStat.intAccountStatusId = Cus.intAccountStatusId
-		LEFT JOIN tblEMEntityPhoneNumber AS EMPhone ON Entity.intEntityId = EMPhone.intEntityId
+		LEFT JOIN tblEMEntityPhoneNumber AS EMPhone ON CusToCon.intEntityContactId = EMPhone.intEntityId
 		LEFT JOIN tblSMTaxCode TaxCode on Cus.intTaxCodeId = TaxCode.intTaxCodeId 
