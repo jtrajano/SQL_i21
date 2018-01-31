@@ -41,6 +41,15 @@ EXEC dbo.[uspCTInvoicePosted] @ItemsFromInvoice, @intUserId
 --Prepaids
 
 --EXEC dbo.[uspARUpdatePrepaymentAndCreditMemo] @intTransactionId, @ysnPost
+--Auto Apply
+IF @ysnPost = 1
+	BEGIN
+		DECLARE @tblInvoiceIds Id
+		INSERT INTO @tblInvoiceIds
+		SELECT @intTransactionId
+
+		EXEC dbo.uspARAutoApplyPrepaids @tblInvoiceIds = @tblInvoiceIds
+	END
 
 UPDATE ARID
 SET

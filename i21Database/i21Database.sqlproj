@@ -6172,6 +6172,7 @@
     <Build Include="dbo\Tables\tblAPBillDeferredInterest.sql" />
     <Build Include="dbo\Views\vyuAPBillDeferredInterest.sql" />
     <Build Include="dbo\Stored Procedures\uspCRMUpdateOpportunityQuote.sql" />
+    <Build Include="dbo\Stored Procedures\uspARAutoApplyPrepaids.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
