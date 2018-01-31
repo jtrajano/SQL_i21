@@ -174,7 +174,13 @@ Declare @tblItems AS TABLE
 	[strOrderType] nvarchar(50) null,
 	[strTax] nvarchar(50) null,
 	[dblDensity] [numeric](38, 20) NULL,
-	[dblAvgDensity] [numeric](38, 20) NULL
+	[dblAvgDensity] [numeric](38, 20) NULL,
+	[intNoOfBatches] INT NULL,
+	[strApplicator] nvarchar(MAX) null,
+	[strLicenseNo] nvarchar(MAX) null,
+	[strMethodOfApp] nvarchar(MAX) null,
+	[dblCubicFeet] [numeric](38, 20) NULL,
+	[strEPANumber] nvarchar(MAX) null
 )
 
 DECLARE @tblLot TABLE (
@@ -446,6 +452,12 @@ Begin --Sales Order Pick List
 					,null
 					,null
 					,null
+					,null
+					,null
+					,null
+					,null
+					,null
+					,null
 			FROM tblMFPickList pl  
 			JOIN tblMFPickListDetail pld ON pl.intPickListId=pld.intPickListId
 			JOIN tblICItem i on pld.intItemId=i.intItemId
@@ -535,6 +547,12 @@ Begin --Sales Order Pick List
 			,CASE WHEN sd.dblTotalTax>0 THEN 'Y' ELSE 'N' END
 			,dblDensity
 			,null
+			,rg.intNoOfBatches
+			,ca.strName
+			,ca.strLicenseNo
+			,ma.strName
+			,null
+			,i.strEPANumber
 			FROM tblSOSalesOrderDetail sd  
 			JOIN tblICItem i on sd.intItemId=i.intItemId
 			Join tblICItemUOM iu on sd.intItemUOMId=iu.intItemUOMId
@@ -550,6 +568,8 @@ Begin --Sales Order Pick List
 			Left Join tblICCommodity cd on rg.intCommodityId=cd.intCommodityId
 			Left Join tblEMEntityLocation ef on rg.intFarmId=ef.intEntityLocationId
 			Left Join tblEMEntitySplit es on so.intSplitId=es.intSplitId
+			Left Join vyuEMCustomerApplicator ca on so.intEntityApplicatorId=ca.intEntityId
+			Left Join tblMFMethodOfApp ma on rg.intMethodOfAppId=ma.intMethodOfAppId
 			WHERE so.intSalesOrderId=@intSalesOrderId
 		End
 
@@ -558,6 +578,8 @@ Begin --Sales Order Pick List
 	Begin
 		Declare @intUnitMeasureId int
 		Declare @dblNoOfAcre NUMERIC(38,20)
+		Declare @dblTotalWeight NUMERIC(38,20)
+		Declare @dblTotalDensity NUMERIC(38,20)
 
 		--get recipe guide weigth unit measure
 		Select @intUnitMeasureId=intUOMId,@dblNoOfAcre=CASE WHEN ISNULL(dblNoOfAcre,1)=0 THEN 1 ELSE ISNULL(dblNoOfAcre,1) END
@@ -565,16 +587,22 @@ Begin --Sales Order Pick List
 		Select @strUOM=strUnitMeasure From tblICUnitMeasure Where intUnitMeasureId=@intUnitMeasureId
 
 		--calculate total weight , convert so detail item uom to recipe guide weight uom
-		Select @dblTotalPickQty = SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(sd.intItemUOMId,iu.intItemUOMId,sd.dblQtyOrdered),0.0))
+		Select @dblTotalPickQty = SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(sd.intItemUOMId,iu.intItemUOMId,sd.dblQtyOrdered),0.0)),
+			   @dblTotalWeight  = SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(sd.intItemUOMId,iu.intItemUOMId,sd.dblQtyOrdered),0.0) * ISNULL(t.dblNoOfAcre,0.0)),
+			   @dblTotalDensity = SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(sd.intItemUOMId,iu.intItemUOMId,sd.dblQtyOrdered),0.0) * ISNULL(t.dblNoOfAcre,0.0) * ISNULL(t.dblDensity,0.0))
 		From @tblItems t join tblSOSalesOrderDetail sd on t.intSalesOrderDetailId=sd.intSalesOrderDetailId
 		Join tblSOSalesOrderDetail sd1 on t.intSalesOrderDetailId=sd1.intSalesOrderDetailId AND sd.intSalesOrderDetailId=sd1.intSalesOrderDetailId
 		join tblICItemUOM iu on sd1.intItemId=iu.intItemId AND iu.intUnitMeasureId=@intUnitMeasureId
 		Where sd.intSalesOrderId=@intSalesOrderId AND sd1.intSalesOrderId=@intSalesOrderId
 
+		if @dblTotalDensity is null OR @dblTotalDensity=0
+			Set @dblTotalDensity=1
+
 		--update total weight, rate(total weight/no of acres), avg density
 		Update @tblItems Set dblTotalPickQty=dbo.fnRemoveTrailingZeroes(@dblTotalPickQty) + ' ' + @strUOM,
 				strRate=dbo.fnRemoveTrailingZeroes(@dblTotalPickQty / @dblNoOfAcre) + ' ' + @strUOM + '/Acre',
-				dblAvgDensity=(Select AVG(dblDensity) From @tblItems)
+				dblAvgDensity=(Select SUM(ISNULL(CAST(dblPickQuantity AS NUMERIC(38,20)),0.0) * ISNULL(dblDensity,0.0)) From @tblItems) / (Select SUM(ISNULL(CAST(dblPickQuantity AS NUMERIC(38,20)),0.0)) From @tblItems),
+				dblCubicFeet = (@dblTotalWeight/(@dblTotalDensity/@dblTotalWeight))
 	End
 
 	Select @dblTotalCost=SUM(ISNULL(dblCost,0.0)) From @tblItems
@@ -627,7 +655,7 @@ Begin --Sales Order Pick List
 				,@strCompanyAddress AS strCompanyAddress
 				,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCompanyCityStateZip
 				,@strCountry AS strCompanyCountry 
-				,'','','','','','','','','',null,null,'','','','',@ysnShowCostInSalesOrderPickList,0,@intMaxOtherChargeId,'Other Charge',@strFooterComments,0,0.0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+				,'','','','','','','','','',null,null,'','','','',@ysnShowCostInSalesOrderPickList,0,@intMaxOtherChargeId,'Other Charge',@strFooterComments,0,0.0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
 		From [dbo].[fnMFGetInvoiceChargesByShipment](0,@intSalesOrderId)
 		End
 
@@ -762,6 +790,12 @@ Begin --Sales Order Pick List
 								,null
 								,null
 								,null
+								,null
+								,null
+								,null
+								,null
+								,null
+								,null
 						FROM tblMFPickList pl  
 						JOIN tblMFPickListDetail pld ON pl.intPickListId=pld.intPickListId
 						JOIN tblICItem i on pld.intItemId=i.intItemId
@@ -834,6 +868,12 @@ Begin --Sales Order Pick List
 								,@strFooterComments
 								,@intBatchCounter
 								,@dblBatchSize
+								,null
+								,null
+								,null
+								,null
+								,null
+								,null
 								,null
 								,null
 								,null

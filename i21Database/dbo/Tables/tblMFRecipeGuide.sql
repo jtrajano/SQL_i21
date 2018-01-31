@@ -8,6 +8,11 @@
 	[intFieldId] INT NULL,
 	[intCommodityId] INT NULL,
 	[intUOMId] INT NULL,
+	[intMethodOfAppId] INT NULL,
+	[intManufacturingCellId] INT NULL,
+	[dblBatchSize] NUMERIC(18, 6) NULL, 
+	[intNoOfBatches] INT NULL,
+	[ysnAllowOverMixerSize] BIT NULL DEFAULT ((0)),
 	[dtmExpiryDate] DATETIME NULL,
 	[dtmApplicableDate] DATETIME NULL,
 	[intCostTypeId] INT NULL,
@@ -24,4 +29,6 @@
 	CONSTRAINT [FK_tblMFRecipeGuide_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]),
 	CONSTRAINT [FK_tblMFRecipeGuide_tblMFCostType_intCostTypeId] FOREIGN KEY ([intCostTypeId]) REFERENCES [tblMFCostType]([intCostTypeId]),
 	CONSTRAINT [FK_tblMFRecipeGuide_tblICUnitMeasure_intUOMId] FOREIGN KEY ([intUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
+	CONSTRAINT [FK_tblMFRecipeGuide_tblMFMethodOfApp_intMethodOfAppId] FOREIGN KEY ([intMethodOfAppId]) REFERENCES [tblMFMethodOfApp]([intMethodOfAppId]),
+	CONSTRAINT [FK_tblMFRecipeGuide_tblMFManufacturingCell_intManufacturingCellId] FOREIGN KEY ([intManufacturingCellId]) REFERENCES [tblMFManufacturingCell]([intManufacturingCellId]),
 )

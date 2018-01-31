@@ -26,6 +26,12 @@ Type the overview for the table here.
 		[ysnIncludeEfficiency] BIT NOT NULL CONSTRAINT [DF_tblMFManufacturingCell_ysnIncludeEfficiency] DEFAULT 1, 
 		[dblWastageFactor] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblWastageCost] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[strMixerType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+		[dblVolume] NUMERIC(18, 6) NULL, 
+		[intVolumeUOMId] INT NULL, 
+		[dblMaxBatchSize] NUMERIC(18, 6) NULL, 
+		[intMaxBatchSizeUOMId] INT NULL, 
+		[ysnAllowOverMixerSize] BIT NULL DEFAULT ((0)), 
 		[intCreatedUserId] [int] NULL,
 		[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblMFManufacturingCell_dtmCreated] DEFAULT GetDate(),
 		[intLastModifiedUserId] [int] NULL,
@@ -37,6 +43,8 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblMFManufacturingCell_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
 		CONSTRAINT [FK_tblMFManufacturingCell_StandardUnitMeasure] FOREIGN KEY ([intStdUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
 		CONSTRAINT [FK_tblMFManufacturingCell_CapacityUnitMeasure] FOREIGN KEY ([intStdCapacityRateId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
+		CONSTRAINT [FK_tblMFManufacturingCell_VolumeUnitMeasure] FOREIGN KEY ([intVolumeUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
+		CONSTRAINT [FK_tblMFManufacturingCell_MaxBatchSizeUnitMeasure] FOREIGN KEY ([intMaxBatchSizeUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
 	)
 
 	GO

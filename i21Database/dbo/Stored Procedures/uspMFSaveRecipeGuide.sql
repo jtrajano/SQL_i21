@@ -36,6 +36,11 @@ BEGIN TRY
 		,strGuaranteedAnalysis nvarchar(max) COLLATE Latin1_General_CI_AS
 		,strComment nvarchar(max) COLLATE Latin1_General_CI_AS
 		,intUserId int
+		,intMethodOfAppId int
+		,intManufacturingCellId int
+		,dblBatchSize numeric(18,6)
+		,intNoOfBatches int
+		,ysnAllowOverMixerSize bit
 		)
 	DECLARE @tblItemNutrient TABLE (
 		intRecipeGuideNutrientId INT
@@ -62,6 +67,11 @@ BEGIN TRY
 		,strGuaranteedAnalysis
 		,strComment
 		,intUserId
+		,intMethodOfAppId
+		,intManufacturingCellId
+		,dblBatchSize
+		,intNoOfBatches
+		,ysnAllowOverMixerSize
 		)
 	SELECT intRecipeGuideId
 		,strName
@@ -78,6 +88,11 @@ BEGIN TRY
 		,strGuaranteedAnalysis
 		,strComment
 		,intUserId
+		,intMethodOfAppId
+		,intManufacturingCellId
+		,dblBatchSize
+		,intNoOfBatches
+		,ysnAllowOverMixerSize
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 		intRecipeGuideId int
 		,strName nvarchar(250)
@@ -94,6 +109,11 @@ BEGIN TRY
 		,strGuaranteedAnalysis nvarchar(max)
 		,strComment nvarchar(max)
 		,intUserId int
+		,intMethodOfAppId int
+		,intManufacturingCellId int
+		,dblBatchSize numeric(18,6)
+		,intNoOfBatches int
+		,ysnAllowOverMixerSize bit
 			)
 
 	INSERT INTO @tblItemNutrient (
@@ -127,10 +147,10 @@ BEGIN TRY
 	Begin
 		Insert Into tblMFRecipeGuide(strName,intSalesOrderId,intCustomerId,intFarmId,intFieldId,intCommodityId,
 					intUOMId,dtmExpiryDate,dtmApplicableDate,intCostTypeId,dblNoOfAcre,strGuaranteedAnalysis,strComment,
-					intCreatedUserId,dtmCreated,intLastModifiedUserId,dtmLastModified)
+					intCreatedUserId,dtmCreated,intLastModifiedUserId,dtmLastModified,intMethodOfAppId,intManufacturingCellId,dblBatchSize,intNoOfBatches,ysnAllowOverMixerSize)
 		Select strName,intSalesOrderId,intCustomerId,intFarmId,intFieldId,intCommodityId,
 					intUOMId,dtmExpiryDate,dtmApplicableDate,intCostTypeId,dblNoOfAcre,strGuaranteedAnalysis,strComment,
-					intUserId,GETDATE(),intUserId,GETDATE()
+					intUserId,GETDATE(),intUserId,GETDATE(),intMethodOfAppId,intManufacturingCellId,dblBatchSize,intNoOfBatches,ysnAllowOverMixerSize
 		From @tblRecipeGuide
 
 		Select @intRecipeGuideId=SCOPE_IDENTITY()
@@ -145,7 +165,8 @@ BEGIN TRY
 
 		Update rg Set rg.intSalesOrderId=trg.intSalesOrderId,rg.intCustomerId=trg.intCustomerId,rg.intFarmId=trg.intFarmId,rg.intFieldId=trg.intFieldId,rg.intCommodityId=trg.intCommodityId,
 					rg.intUOMId=trg.intUOMId,rg.dtmExpiryDate=trg.dtmExpiryDate,rg.dtmApplicableDate=trg.dtmApplicableDate,rg.intCostTypeId=trg.intCostTypeId,
-					rg.dblNoOfAcre=trg.dblNoOfAcre,rg.strGuaranteedAnalysis=trg.strGuaranteedAnalysis,rg.strComment=trg.strComment
+					rg.dblNoOfAcre=trg.dblNoOfAcre,rg.strGuaranteedAnalysis=trg.strGuaranteedAnalysis,rg.strComment=trg.strComment,rg.intMethodOfAppId=trg.intMethodOfAppId,
+					rg.intManufacturingCellId=trg.intManufacturingCellId,rg.dblBatchSize=trg.dblBatchSize,rg.intNoOfBatches=trg.intNoOfBatches,rg.ysnAllowOverMixerSize=trg.ysnAllowOverMixerSize
 		From tblMFRecipeGuide rg Join @tblRecipeGuide trg on rg.strName=trg.strName
 
 		Update n Set n.dblProposed=tn.dblProposed,n.dblActual=tn.dblActual,n.dblPercentage=tn.dblPercentage
