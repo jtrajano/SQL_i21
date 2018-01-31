@@ -6176,6 +6176,8 @@
     <None Include="Scripts\Post-Deployment\RM\02_DataFix.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetAmendmentHistory.sql" />
     <Build Include="dbo\Tables\tblMFMethodOfApp.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetDebitNoteReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetDebitNoteDetailReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
