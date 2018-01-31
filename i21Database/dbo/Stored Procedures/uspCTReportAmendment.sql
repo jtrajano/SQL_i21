@@ -16,7 +16,7 @@ BEGIN TRY
 			@strState				     NVARCHAR(500),
 			@strZip					     NVARCHAR(500),
 			@strCountry				     NVARCHAR(500),
-			@strSequenceHistoryId	     NVARCHAR(10),
+			@strSequenceHistoryId	     NVARCHAR(MAX),
 			@xmlDocumentId			     INT,
 			@strAmendmentNumber			 NVARCHAR(50),
 			@intMinContractHeaderId		 INT
