@@ -1,17 +1,13 @@
 ﻿CREATE VIEW [dbo].[vyuICGetInventoryValuationSummary]
 AS
 
-SELECT	intInventoryValuationKeyId = CAST(ROW_NUMBER() OVER (ORDER BY t.intYear DESC, t.intMonth DESC) AS INT)
+SELECT	intInventoryValuationKeyId = CAST(ROW_NUMBER() OVER (ORDER BY Item.intItemId) AS INT)
 		,Item.intItemId
 		,strItemNo = Item.strItemNo
 		,strItemDescription = Item.strDescription 
 		,intItemLocationId = t.intItemLocationId
 		,strLocationName = ISNULL(Location.strLocationName, InTransitLocation.strLocationName + ' (' + ItemLocation.strDescription + ')') 
-		--,intSubLocationId = t.intSubLocationId
-		--,strSubLocationName = SubLocation.strSubLocationName
-		,t.intYear
-		,t.intMonth
-		,strMonthYear = FORMAT(t.dtmMaxDate, 'MMM yyyy')
+		,strMonthYear = FORMAT(t.dtmMaxDate, 'yyyy-MM')
 		,dblQuantity = ISNULL(dblQuantity, 0)
 		,dblValue = ISNULL(dblValue, 0)
 		,dblLastCost = ISNULL( ROUND(dblQuantity * ItemPricing.dblLastCost, 2), 0)
@@ -29,8 +25,6 @@ FROM	tblICItem Item
 			SELECT 
 					t.intItemLocationId
 					,dtmMaxDate = MAX(t.dtmDate)
-					,intYear = YEAR(t.dtmDate)
-					,intMonth = MONTH(t.dtmDate)
 					, intInTransitSourceLocationId = CASE WHEN t.intItemLocationId <> t.intInTransitSourceLocationId THEN t.intInTransitSourceLocationId ELSE NULL END 
 					, dblQuantity = SUM(t.dblQty * t.dblUOMQty) 
 					, dblValue = SUM(ROUND(ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0), 2))
@@ -47,8 +41,6 @@ FROM	tblICItem Item
 			WHERE	Item.intItemId = t.intItemId
 			GROUP BY 
 				t.intItemLocationId
-				,YEAR(t.dtmDate)
-				,MONTH(t.dtmDate)
 				,CASE WHEN t.intItemLocationId <> t.intInTransitSourceLocationId THEN t.intInTransitSourceLocationId ELSE NULL END  
 				,umStock.strUnitMeasure
 		) t							
