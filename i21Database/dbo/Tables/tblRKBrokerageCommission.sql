@@ -12,6 +12,8 @@
     [dblOptCommission] NUMERIC(18, 6) NULL, 
     [intOptCurrencyId] INT NULL,
     [intFutureMarketId] INT NOT NULL, 	
+	[intCommodityMarketId] INT NULL, 
+	[strProductType] NVARCHAR(MAX),
 	[dblMinAmount] NUMERIC(18, 6) NULL, 
 	[dblMaxAmount] NUMERIC(18, 6) NULL,
 	[dblPercenatage] NUMERIC(18, 6) NULL,	
