@@ -13,7 +13,7 @@ Post-Deployment Script Template
 :r "..\dbo\Views\vyuAPOriginCCDTransaction.sql"
 
 --General Ledger
-:r "..\Scripts\GL\1a_OriginCrossReferenceMapping.sql"
+:r "..\dbo\Stored Procedures\uspGLInsertOriginCrossReferenceMapping.sql"
 :r "..\dbo\Stored Procedures\uspGLImportOriginCOA.sql"
 :r "..\dbo\Stored Procedures\uspGLImportOriginHistoricalJournal.sql"
 :r "..\dbo\Stored Procedures\uspGLGetImportOriginHistoricalJournalError.sql"
