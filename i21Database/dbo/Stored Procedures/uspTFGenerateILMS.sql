@@ -100,11 +100,11 @@ BEGIN TRY
 			, Blend.intBlendAgendItemId
 			, Blend.strBlendAgentItemNo
 			, strBlendingAgentColAProductCode = CASE WHEN AgentCode.strProductCode != '285' THEN NULL ELSE AgentCode.strProductCode END
-			, dblBlending_a = CASE WHEN AgentCode.strProductCode != '285' THEN NULL ELSE ROUND(Blend.dblBlendAgentQty, 0) END 
+			, dblBlending_a = CASE WHEN AgentCode.strProductCode != '285' THEN (CASE WHEN AgentCode2.strProductCode != '285' THEN NULL ELSE ROUND(Blend.dblBlendAgent2Qty, 0) END) ELSE ROUND(Blend.dblBlendAgentQty, 0) END 
 			, strBlendingAgentColBProductCode = CASE WHEN (AgentCode.strProductCode != '145' AND AgentCode.strProductCode != '073') THEN NULL ELSE AgentCode.strProductCode END
-			, dblBlending_b = CASE WHEN (AgentCode.strProductCode != '145' AND AgentCode.strProductCode != '073') THEN NULL ELSE ROUND(Blend.dblBlendAgentQty, 0) END 
+			, dblBlending_b = CASE WHEN (AgentCode.strProductCode != '145' AND AgentCode.strProductCode != '073') THEN (CASE WHEN (AgentCode2.strProductCode != '145' AND AgentCode2.strProductCode != '073') THEN NULL ELSE ROUND(Blend.dblBlendAgent2Qty, 0) END) ELSE ROUND(Blend.dblBlendAgentQty, 0) END 
 			, strBlendingAgentColCProductCode = CASE WHEN AgentCode.strProductCode != '999' THEN NULL ELSE AgentCode.strProductCode END
-			, dblBlending_c = CASE WHEN AgentCode.strProductCode != '999' THEN NULL ELSE ROUND(Blend.dblBlendAgentQty, 0) END 
+			, dblBlending_c = CASE WHEN AgentCode.strProductCode != '999' THEN (CASE WHEN AgentCode2.strProductCode != '999' THEN NULL ELSE ROUND(Blend.dblBlendAgent2Qty, 0) END) ELSE ROUND(Blend.dblBlendAgentQty, 0) END 
 			, Blend.intFinishedGoodItemId
 			, Blend.strFinishedGoodItemNo
 			, strEndProductProductCode = FGCode.strProductCode
@@ -116,6 +116,8 @@ BEGIN TRY
 		INNER JOIN tblTFProductCode PrimaryCode ON PrimaryCode.intProductCodeId = PrimaryItem.intProductCodeId
 		INNER JOIN tblICItemMotorFuelTax AgentItem ON AgentItem.intItemId = Blend.intBlendAgendItemId
 		INNER JOIN tblTFProductCode AgentCode ON AgentCode.intProductCodeId = AgentItem.intProductCodeId
+		LEFT JOIN tblICItemMotorFuelTax AgentItem2 ON AgentItem2.intItemId = Blend.intBlendAgent2ItemId
+		LEFT JOIN tblTFProductCode AgentCode2 ON AgentCode2.intProductCodeId = AgentItem2.intProductCodeId
 		INNER JOIN tblICItemMotorFuelTax FGItem ON FGItem.intItemId = Blend.intFinishedGoodItemId
 		INNER JOIN tblTFProductCode FGCode ON FGCode.intProductCodeId = FGItem.intProductCodeId
 		WHERE CAST(FLOOR(CAST(Blend.dtmBlendDate AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)
