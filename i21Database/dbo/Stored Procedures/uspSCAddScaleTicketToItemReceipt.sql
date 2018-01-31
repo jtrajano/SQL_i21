@@ -150,7 +150,8 @@ SELECT
 		,dtmDate					= SC.dtmTicketDateTime
 		,dblQty						= LI.dblQty
 		,dblCost					= CASE
-										WHEN CNT.intPricingTypeId = 2 THEN ISNULL(dbo.fnRKGetFutureAndBasisPriceForDate(SC.intCommodityId,SC.intProcessingLocationId,SC.dtmTicketDateTime,2,LI.dblCost),0)
+										--WHEN CNT.intPricingTypeId = 2 THEN ISNULL(dbo.fnRKGetFutureAndBasisPriceForDate(SC.intCommodityId,SC.intProcessingLocationId,SC.dtmTicketDateTime,2,LI.dblCost),0)
+										WHEN CNT.intPricingTypeId = 2 THEN ISNULL(dbo.fnRKGetLatestClosingPrice(CNT.intFutureMarketId,CNT.intFutureMonthId,GETDATE()),0) + LI.dblCost
 										ELSE LI.dblCost
 									END
 		,dblExchangeRate			= 1 -- Need to check this

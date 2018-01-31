@@ -146,7 +146,8 @@ SELECT
 		,dtmDate					= LI.dtmDate
 		,dblQty						= LI.dblQty
 		,dblCost					= CASE
-										WHEN CNT.intPricingTypeId = 2 THEN ISNULL(dbo.fnRKGetFutureAndBasisPriceForDate(IC.intCommodityId,SCD.intCompanyLocationId,SCD.dtmDeliverySheetDate,2,LI.dblCost),0)
+										--WHEN CNT.intPricingTypeId = 2 THEN ISNULL(dbo.fnRKGetFutureAndBasisPriceForDate(IC.intCommodityId,SCD.intCompanyLocationId,SCD.dtmDeliverySheetDate,2,LI.dblCost),0)
+										WHEN CNT.intPricingTypeId = 2 THEN ISNULL(dbo.fnRKGetLatestClosingPrice(CNT.intFutureMarketId,CNT.intFutureMonthId,GETDATE()),0) + LI.dblCost
 										ELSE LI.dblCost
 									END
 		,dblExchangeRate			= 1 -- Need to check this
