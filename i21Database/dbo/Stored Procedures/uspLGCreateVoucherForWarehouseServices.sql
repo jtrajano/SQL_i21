@@ -21,6 +21,8 @@ BEGIN TRY
 	DECLARE @intLoadId INT
 	DECLARE @intPurchaseSale INT
 	DECLARE @intReceiptCount INT
+	DECLARE @intAPClearingAccountId INT
+
 	DECLARE @voucherDetailData TABLE (
 		intItemRecordId INT Identity(1, 1)
 		,intVendorEntityId INT
@@ -198,17 +200,25 @@ BEGIN TRY
 		RAISERROR ('Please configure ''AP Account'' for the company location.',16,1)
 	END
 
-	IF EXISTS (
-			SELECT 1
-			FROM tblICItem I
-			LEFT JOIN tblICItemAccount IA ON IA.intItemId = I.intItemId
-			LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = IA.intAccountCategoryId
-			WHERE strAccountCategory IS NULL
-				AND I.intItemId IN (
-					SELECT intItemId
-					FROM @distinctItem
-					)
-			)
+	SELECT @intAPClearingAccountId = APAccount
+	FROM (
+		SELECT [dbo].[fnGetItemGLAccount](LWS.intItemId, ItemLoc.intItemLocationId, 'AP Clearing') APAccount
+		FROM tblLGLoad L
+		JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+		JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
+				WHEN L.intPurchaseSale = 2
+					THEN LD.intSContractDetailId
+				ELSE LD.intPContractDetailId
+				END
+		LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = LD.intItemId
+			AND ItemLoc.intLocationId = CD.intCompanyLocationId
+		LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
+		LEFT JOIN tblLGLoadWarehouseServices LWS ON LWS.intLoadWarehouseId = LW.intLoadWarehouseId
+		WHERE L.intLoadId = @intLoadId
+		) tb
+	WHERE APAccount IS NULL
+
+	IF(ISNULL(@intAPClearingAccountId,0)>0)
 	BEGIN
 		RAISERROR ('''AP Clearing'' is not configured for one or more item(s).',11,1);
 	END
@@ -241,10 +251,10 @@ BEGIN TRY
 			,@voucherDetailLoadNonInv = @VoucherDetailLoadNonInv
 			,@billId = @intBillId OUTPUT
 
-		UPDATE tblLGLoadCost
+		UPDATE tblLGLoadWarehouseServices
 		SET intBillId = @intBillId
-		WHERE intLoadCostId IN (
-				SELECT intLoadCostId
+		WHERE intLoadWarehouseServicesId IN (
+				SELECT intWarehouseServicesId
 				FROM @voucherDetailData
 				)
 

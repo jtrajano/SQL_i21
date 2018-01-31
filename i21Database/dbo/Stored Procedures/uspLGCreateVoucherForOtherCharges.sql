@@ -20,6 +20,8 @@ BEGIN TRY
 	DECLARE @strLoadNumber NVARCHAR(100)
 	DECLARE @intMinVendorRecordId INT
 	DECLARE @intReceiptCount INT
+	DECLARE @intAPClearingAccountId INT
+
 	DECLARE @voucherDetailData TABLE (
 		intItemRecordId INT Identity(1, 1)
 		,intVendorEntityId INT
@@ -161,17 +163,24 @@ BEGIN TRY
 	SELECT DISTINCT intVendorEntityId
 	FROM @voucherDetailData
 
-	IF EXISTS (
-			SELECT 1
-			FROM tblICItem I
-			LEFT JOIN tblICItemAccount IA ON IA.intItemId = I.intItemId
-			LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = IA.intAccountCategoryId
-			WHERE strAccountCategory IS NULL
-				AND I.intItemId IN (
-					SELECT intItemId
-					FROM @distinctItem
-					)
-			)
+	SELECT @intAPClearingAccountId = APAccount
+	FROM (
+		SELECT [dbo].[fnGetItemGLAccount](LC.intItemId, ItemLoc.intItemLocationId, 'AP Clearing') APAccount
+		FROM tblLGLoad L
+		JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+		JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
+				WHEN L.intPurchaseSale = 2
+					THEN LD.intSContractDetailId
+				ELSE LD.intPContractDetailId
+				END
+		LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = LD.intItemId
+			AND ItemLoc.intLocationId = CD.intCompanyLocationId
+		LEFT JOIN tblLGLoadCost LC ON LC.intLoadId = L.intLoadId
+		WHERE L.intLoadId = @intLoadId
+		) tb
+	WHERE APAccount IS NULL
+
+	IF(ISNULL(@intAPClearingAccountId,0)>0)
 	BEGIN
 		RAISERROR ('''AP Clearing'' is not configured for one or more item(s).',11,1);
 	END
