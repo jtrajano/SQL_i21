@@ -34,7 +34,6 @@ Ext.define('Inventory.view.Bundle', {
         'Ext.selection.CheckboxModel',
         'Ext.grid.plugin.CellEditing',
         'Ext.grid.column.Check',
-        'Ext.form.Label',
         'Ext.toolbar.Paging',
         'EntityManagement.common.combo.LicenseType'
     ],
@@ -930,12 +929,10 @@ Ext.define('Inventory.view.Bundle', {
                                     },
                                     {
                                         xtype: 'panel',
+                                        flex: 1,
                                         itemId: 'pgeSetup',
+                                        layout: 'fit',
                                         title: 'Setup',
-                                        layout: {
-                                            type: 'hbox',
-                                            align: 'stretch'
-                                        },
                                         tabConfig: {
                                             xtype: 'tab',
                                             itemId: 'cfgSetup'
@@ -943,37 +940,30 @@ Ext.define('Inventory.view.Bundle', {
                                         items: [
                                             {
                                                 xtype: 'tabpanel',
-                                                flex: 1,
-                                                itemId: 'tabItem',
+                                                itemId: 'tabSetup',
+                                                bodyCls: 'i21-tab',
                                                 activeTab: 0,
+                                                plain: true,
                                                 items: [
                                                     {
                                                         xtype: 'panel',
+                                                        border: false,
                                                         itemId: 'pgeGLAccounts',
                                                         padding: 5,
                                                         layout: 'fit',
                                                         title: 'GL Accounts',
-                                                        dockedItems: [
-                                                            {
-                                                                xtype: 'label',
-                                                                dock: 'top',
-                                                                itemId: 'lblGLNote',
-                                                                padding: 5,
-                                                                text: 'GL Accounts can be set up for Category instead of every item. Only accounts specific to the item is required to be set up here. GL accounts setup in Item overrides Category.'
-                                                            }
-                                                        ],
                                                         items: [
                                                             {
                                                                 xtype: 'panel',
                                                                 border: true,
+                                                                layout: 'fit',
                                                                 items: [
                                                                     {
                                                                         xtype: 'advancefiltergrid',
                                                                         reference: 'grdGlAccounts',
                                                                         itemId: 'grdGlAccounts',
-                                                                        margin: -1,
+                                                                        title: 'GL Accounts can be set up for Category instead of every item. Only accounts specific to the item is required to be set up here. GL accounts setup in Item overrides Category.',
                                                                         columnLines: true,
-                                                                        forceFit: true,
                                                                         dockedItems: [
                                                                             {
                                                                                 xtype: 'toolbar',
@@ -1106,6 +1096,7 @@ Ext.define('Inventory.view.Bundle', {
                                                     },
                                                     {
                                                         xtype: 'panel',
+                                                        border: false,
                                                         itemId: 'pgeLocation',
                                                         title: 'Location',
                                                         layout: {
@@ -1128,7 +1119,7 @@ Ext.define('Inventory.view.Bundle', {
                                                                         reference: 'grdLocationStore',
                                                                         itemId: 'grdLocationStore',
                                                                         margin: -1,
-                                                                        width: 593,
+                                                                        width: 700,
                                                                         title: 'Company Locations',
                                                                         columnLines: true,
                                                                         dockedItems: [
@@ -1196,7 +1187,9 @@ Ext.define('Inventory.view.Bundle', {
                                                                                         ],
                                                                                         itemId: 'cboCopyLocation',
                                                                                         margin: '0 0 0 5',
+                                                                                        width: 180,
                                                                                         fieldLabel: 'Copy Location',
+                                                                                        labelWidth: 84,
                                                                                         displayField: 'strLocationName',
                                                                                         valueField: 'intItemLocationId'
                                                                                     }

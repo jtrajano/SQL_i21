@@ -2762,9 +2762,9 @@
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "container|align": "stretch",
+                                "flex": 1,
                                 "itemId": "pgeSetup",
-                                "layout": "hbox",
+                                "layout": "fit",
                                 "title": "Setup"
                             },
                             "configAlternates": {
@@ -2772,7 +2772,8 @@
                                 "itemId": "string",
                                 "layout": "string",
                                 "title": "string",
-                                "scrollable": "boolean"
+                                "scrollable": "boolean",
+                                "flex": "number"
                             },
                             "name": "MyPanel23",
                             "designerId": "743434fc-add9-48ce-ad09-50a6166a9787",
@@ -2804,15 +2805,19 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "activeTab": 0,
-                                        "designer|displayName": "tabSetup",
-                                        "itemId": "tabItem",
-                                        "layout|flex": 1
+                                        "bodyCls": [
+                                            "i21-tab"
+                                        ],
+                                        "itemId": "tabSetup",
+                                        "plain": true
                                     },
                                     "configAlternates": {
                                         "activeTab": "auto",
                                         "designer|displayName": "string",
                                         "itemId": "string",
-                                        "layout|flex": "number"
+                                        "layout|flex": "number",
+                                        "bodyCls": "typedarray",
+                                        "plain": "boolean"
                                     },
                                     "name": "MyTabPanel4",
                                     "designerId": "fa92cb51-6dfe-4c03-b5bc-7c35a0c3b7b3",
@@ -2825,6 +2830,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "border": false,
                                                 "itemId": "pgeGLAccounts",
                                                 "layout": "fit",
                                                 "padding": 5,
@@ -2835,35 +2841,12 @@
                                                 "layout": "string",
                                                 "title": "string",
                                                 "scrollable": "boolean",
-                                                "padding": "auto"
+                                                "padding": "auto",
+                                                "border": "boolean"
                                             },
                                             "name": "MyPanel41",
                                             "designerId": "5cecdce4-935a-48f5-8442-d61ba28498f6",
                                             "cn": [
-                                                {
-                                                    "type": "Ext.form.Label",
-                                                    "reference": {
-                                                        "name": "dockedItems",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "dock": "top",
-                                                        "itemId": "lblGLNote",
-                                                        "padding": 5,
-                                                        "text": "GL Accounts can be set up for Category instead of every item. Only accounts specific to the item is required to be set up here. GL accounts setup in Item overrides Category."
-                                                    },
-                                                    "configAlternates": {
-                                                        "style": "string",
-                                                        "dock": "string",
-                                                        "itemId": "string",
-                                                        "padding": "auto",
-                                                        "text": "string",
-                                                        "scrollable": "boolean"
-                                                    },
-                                                    "name": "MyLabel2",
-                                                    "designerId": "5fdba035-3be8-4fb0-96a3-69dc832bc9c0"
-                                                },
                                                 {
                                                     "type": "Ext.tab.Tab",
                                                     "reference": {
@@ -2889,14 +2872,16 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "border": true,
-                                                        "designer|displayName": "container"
+                                                        "designer|displayName": "container",
+                                                        "layout": "fit"
                                                     },
                                                     "configAlternates": {
-                                                        "border": "boolean",
-                                                        "designer|displayName": "string"
+                                                        "border": "auto",
+                                                        "designer|displayName": "string",
+                                                        "layout": "string"
                                                     },
-                                                    "name": "MyPanel4",
-                                                    "designerId": "1cd7da25-7b23-423b-8cf3-20ae944ee889",
+                                                    "name": "MyPanel1",
+                                                    "designerId": "059b222d-bab4-49e0-b688-4ba19c7ef9e5",
                                                     "cn": [
                                                         {
                                                             "type": "Ext.grid.Panel",
@@ -2908,11 +2893,9 @@
                                                             "userConfig": {
                                                                 "columnLines": true,
                                                                 "designer|createAlias": "advancefiltergrid",
-                                                                "forceFit": true,
                                                                 "itemId": "grdGlAccounts",
-                                                                "margin": -1,
                                                                 "reference": "grdGlAccounts",
-                                                                "title": null
+                                                                "title": "GL Accounts can be set up for Category instead of every item. Only accounts specific to the item is required to be set up here. GL accounts setup in Item overrides Category."
                                                             },
                                                             "configAlternates": {
                                                                 "columnLines": "boolean",
@@ -3294,6 +3277,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "border": false,
                                                 "container|align": "stretch",
                                                 "itemId": "pgeLocation",
                                                 "layout": "hbox",
@@ -3304,7 +3288,8 @@
                                                 "itemId": "string",
                                                 "layout": "string",
                                                 "title": "string",
-                                                "scrollable": "boolean"
+                                                "scrollable": "boolean",
+                                                "border": "boolean"
                                             },
                                             "name": "MyPanel44",
                                             "designerId": "4a8d700f-0a81-48e8-9330-865823e108b9",
@@ -3362,7 +3347,7 @@
                                                                 "margin": -1,
                                                                 "reference": "grdLocationStore",
                                                                 "title": "Company Locations",
-                                                                "width": 593
+                                                                "width": 700
                                                             },
                                                             "configAlternates": {
                                                                 "columnLines": "boolean",
@@ -3544,9 +3529,11 @@
                                                                                 "displayField": "strLocationName",
                                                                                 "fieldLabel": "Copy Location",
                                                                                 "itemId": "cboCopyLocation",
+                                                                                "labelWidth": 84,
                                                                                 "layout|flex": null,
                                                                                 "margin": "0 0 0 5",
-                                                                                "valueField": "intItemLocationId"
+                                                                                "valueField": "intItemLocationId",
+                                                                                "width": 180
                                                                             },
                                                                             "configAlternates": {
                                                                                 "columns": "array",
@@ -3557,7 +3544,9 @@
                                                                                 "layout|flex": "number",
                                                                                 "margin": "auto",
                                                                                 "valueField": "datafield",
-                                                                                "scrollable": "boolean"
+                                                                                "scrollable": "boolean",
+                                                                                "labelWidth": "number",
+                                                                                "width": "auto"
                                                                             },
                                                                             "name": "MyComboBox76",
                                                                             "designerId": "0f3a8f47-fcb7-4aab-aefc-55ef597596da",
