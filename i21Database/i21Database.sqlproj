@@ -6173,6 +6173,7 @@
     <Build Include="dbo\Views\vyuAPBillDeferredInterest.sql" />
     <Build Include="dbo\Stored Procedures\uspCRMUpdateOpportunityQuote.sql" />
     <Build Include="dbo\Stored Procedures\uspARAutoApplyPrepaids.sql" />
+    <None Include="Scripts\Post-Deployment\RM\02_DataFix.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

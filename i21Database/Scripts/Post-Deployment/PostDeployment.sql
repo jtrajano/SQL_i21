@@ -421,6 +421,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 --RiskManagement
 :R .\RM\01_MasterScript.sql
+:R .\RM\02_DataFix.sql
 
 --FRM
 :r .\FRM\DefaultData\1_OfflineMenu.sql
