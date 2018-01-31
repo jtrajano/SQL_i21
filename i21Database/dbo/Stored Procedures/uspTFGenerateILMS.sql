@@ -15,14 +15,29 @@ DECLARE @ErrorState INT
 BEGIN TRY
 
 	DECLARE @Output TABLE(
-			dtmBlendedDate DATE
-			, dblPrimary_a NUMERIC
-			, dblPrimary_b NUMERIC
-			, dblPrimary_c NUMERIC
-			, dblBlending_a NUMERIC
-			, dblBlending_b NUMERIC
-			, dblBlending_c NUMERIC
-			, dblTotalEnd NUMERIC
+			intBlendTransactionId INT
+			, strBlendTransactionNo NVARCHAR(50)
+			, dtmBlendingDate DATE
+			, intPrimaryItemId INT
+			, strPrimaryItemNo NVARCHAR(50)
+			, strPrimaryProductColAProductCode NVARCHAR(50)
+			, dblPrimary_a NUMERIC(18,6)
+			, strPrimaryProductColBProductCode NVARCHAR(50)
+			, dblPrimary_b NUMERIC(18,6)
+			, strPrimaryProductColCProductCode NVARCHAR(50)
+			, dblPrimary_c NUMERIC(18,6)
+			, intBlendAgendItemId INT
+			, strBlendAgentItemNo NVARCHAR(50)
+			, strBlendingAgentColAProductCode NVARCHAR(50)
+			, dblBlending_a NUMERIC(18,6)
+			, strBlendingAgentColBProductCode NVARCHAR(50)
+			, dblBlending_b NUMERIC(18,6)
+			, strBlendingAgentColCProductCode NVARCHAR(50)
+			, dblBlending_c NUMERIC(18,6)
+			, intFinishedGoodItemId INT
+			, strFinishedGoodItemNo NVARCHAR(50)
+			, strEndProductProductCode NVARCHAR(50)
+			, dblTotalEnd NUMERIC(18,6)
 			, dtmFromDate DATE
 			, dtmToDate DATE)
 
@@ -71,28 +86,28 @@ BEGIN TRY
 
 		INSERT INTO @Output
 		SELECT 
-			--Blend.intBlendTransactionId
-			--, Blend.strBlendTransactionNo
-			dtmBlendingDate = Blend.dtmBlendDate
-			--, Blend.intPrimaryItemId
-			--, Blend.strPrimaryItemNo
-			--, strPrimaryProductColAProductCode = CASE WHEN PrimaryCode.strProductCode != '160' THEN NULL ELSE PrimaryCode.strProductCode END
+			Blend.intBlendTransactionId
+			, Blend.strBlendTransactionNo
+			, dtmBlendingDate = Blend.dtmBlendDate
+			, Blend.intPrimaryItemId
+			, Blend.strPrimaryItemNo
+			, strPrimaryProductColAProductCode = CASE WHEN PrimaryCode.strProductCode != '160' THEN NULL ELSE PrimaryCode.strProductCode END
 			, dblPrimary_a = CASE WHEN PrimaryCode.strProductCode != '160' THEN NULL ELSE ROUND(Blend.dblPrimaryQty, 0) END 
-			--, strPrimaryProductColBProductCode = CASE WHEN PrimaryCode.strProductCode != '228' THEN NULL ELSE PrimaryCode.strProductCode END
+			, strPrimaryProductColBProductCode = CASE WHEN PrimaryCode.strProductCode != '228' THEN NULL ELSE PrimaryCode.strProductCode END
 			, dblPrimary_b = CASE WHEN PrimaryCode.strProductCode != '228' THEN NULL ELSE ROUND(Blend.dblPrimaryQty, 0) END 
-			--, strPrimaryProductColCProductCode = CASE WHEN PrimaryCode.strProductCode != '999' THEN NULL ELSE PrimaryCode.strProductCode END
+			, strPrimaryProductColCProductCode = CASE WHEN PrimaryCode.strProductCode != '999' THEN NULL ELSE PrimaryCode.strProductCode END
 			, dblPrimary_c = CASE WHEN PrimaryCode.strProductCode != '999' THEN NULL ELSE ROUND(Blend.dblPrimaryQty, 0) END 
-			--, Blend.intBlendAgendItemId
-			--, Blend.strBlendAgentItemNo
-			--, strBlendingAgentColAProductCode = CASE WHEN AgentCode.strProductCode != '285' THEN NULL ELSE AgentCode.strProductCode END
-			, dblBlending_a = CASE WHEN AgentCode.strProductCode != '285' THEN NULL ELSE ROUND(Blend.dblBlendAgentQty, 0) END 
-			--, strBlendingAgentColBProductCode = CASE WHEN (AgentCode.strProductCode != '145' AND AgentCode.strProductCode != '073') THEN NULL ELSE AgentCode.strProductCode END
-			, dblBlending_b = CASE WHEN (AgentCode.strProductCode != '145' AND AgentCode.strProductCode != '073') THEN NULL ELSE ROUND(Blend.dblBlendAgentQty, 0) END 
-			--, strBlendingAgentColCProductCode = CASE WHEN AgentCode.strProductCode != '999' THEN NULL ELSE AgentCode.strProductCode END
-			, dblBlending_c = CASE WHEN AgentCode.strProductCode != '999' THEN NULL ELSE ROUND(Blend.dblBlendAgentQty, 0) END 
-			--, Blend.intFinishedGoodItemId
-			--, Blend.strFinishedGoodItemNo
-			--, strEndProductProductCode = FGCode.strProductCode
+			, Blend.intBlendAgendItemId
+			, Blend.strBlendAgentItemNo
+			, strBlendingAgentColAProductCode = CASE WHEN AgentCode.strProductCode != '285' THEN NULL ELSE AgentCode.strProductCode END
+			, dblBlending_a = CASE WHEN AgentCode.strProductCode != '285' THEN (CASE WHEN AgentCode2.strProductCode != '285' THEN NULL ELSE ROUND(Blend.dblBlendAgent2Qty, 0) END) ELSE ROUND(Blend.dblBlendAgentQty, 0) END 
+			, strBlendingAgentColBProductCode = CASE WHEN (AgentCode.strProductCode != '145' AND AgentCode.strProductCode != '073') THEN NULL ELSE AgentCode.strProductCode END
+			, dblBlending_b = CASE WHEN (AgentCode.strProductCode != '145' AND AgentCode.strProductCode != '073') THEN (CASE WHEN (AgentCode2.strProductCode != '145' AND AgentCode2.strProductCode != '073') THEN NULL ELSE ROUND(Blend.dblBlendAgent2Qty, 0) END) ELSE ROUND(Blend.dblBlendAgentQty, 0) END 
+			, strBlendingAgentColCProductCode = CASE WHEN AgentCode.strProductCode != '999' THEN NULL ELSE AgentCode.strProductCode END
+			, dblBlending_c = CASE WHEN AgentCode.strProductCode != '999' THEN (CASE WHEN AgentCode2.strProductCode != '999' THEN NULL ELSE ROUND(Blend.dblBlendAgent2Qty, 0) END) ELSE ROUND(Blend.dblBlendAgentQty, 0) END 
+			, Blend.intFinishedGoodItemId
+			, Blend.strFinishedGoodItemNo
+			, strEndProductProductCode = FGCode.strProductCode
 			, dblTotalEnd = ROUND(Blend.dblFinishedGoodQty, 0)
 			, dtmFromDate = @DateFrom
 			, dtmToDate = @DateTo
@@ -101,6 +116,8 @@ BEGIN TRY
 		INNER JOIN tblTFProductCode PrimaryCode ON PrimaryCode.intProductCodeId = PrimaryItem.intProductCodeId
 		INNER JOIN tblICItemMotorFuelTax AgentItem ON AgentItem.intItemId = Blend.intBlendAgendItemId
 		INNER JOIN tblTFProductCode AgentCode ON AgentCode.intProductCodeId = AgentItem.intProductCodeId
+		LEFT JOIN tblICItemMotorFuelTax AgentItem2 ON AgentItem2.intItemId = Blend.intBlendAgent2ItemId
+		LEFT JOIN tblTFProductCode AgentCode2 ON AgentCode2.intProductCodeId = AgentItem2.intProductCodeId
 		INNER JOIN tblICItemMotorFuelTax FGItem ON FGItem.intItemId = Blend.intFinishedGoodItemId
 		INNER JOIN tblTFProductCode FGCode ON FGCode.intProductCodeId = FGItem.intProductCodeId
 		WHERE CAST(FLOOR(CAST(Blend.dtmBlendDate AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)
