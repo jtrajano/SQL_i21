@@ -63,6 +63,7 @@ SELECT
 	, dblWithheld = 0
 	, dblDiscount = 0 
 	, dblInterest = 0 
+	, dblPrepaidAmount = 0
 	, C1.strVendorId 
 	, isnull(C1.strVendorId,'') + ' - ' + isnull(C2.strName,'') as strVendorIdName 
 	, A.dtmDueDate
