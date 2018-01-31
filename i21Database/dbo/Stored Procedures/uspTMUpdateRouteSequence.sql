@@ -9,8 +9,11 @@ BEGIN
 			,intDriverID = A.[intDriverEntityId]
 			,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
 			,strWillCallStatus = CASE WHEN A.intRouteId IS NULL THEN 'Generated' ELSE 'Routed' END
+			,ysnReceived = 0
+			,dtmReceivedDate = NULL
 	FROM @RouteOrder A
 	WHERE tblTMDispatch.intDispatchID = A.intOrderId
+
 
 	---Update Site
 	UPDATE tblTMSite
