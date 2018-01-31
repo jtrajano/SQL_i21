@@ -271,7 +271,7 @@ BEGIN
 			--INNER JOIN tblGLAccountGroup E ON D.intAccountGroupId = E.intAccountGroupId
 			INNER JOIN vyuGLAccountDetail GLD ON B.intAccountId = GLD.intAccountId
 		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
-		AND GLD.intAccountCategoryId IN (1, 2, 5)
+		AND GLD.intAccountCategoryId IN (1, 2, 5, 27)
 
 		--VALIDATE EXPENSE ACCOUNT USED IF ACTIVE DETAIL
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
