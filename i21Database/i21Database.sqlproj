@@ -6011,6 +6011,7 @@
     <Build Include="dbo\Tables\tblSCDeliverySheetHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspSMRefreshUserRoleMenus.sql" />
     <Build Include="dbo\Stored Procedures\uspSMRefreshContactRoleMenus.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLInsertOriginCrossReferenceMapping.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
