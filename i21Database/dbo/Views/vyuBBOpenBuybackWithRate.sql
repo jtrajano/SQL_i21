@@ -25,7 +25,7 @@ AS
 							   WHEN ISNULL(Q.dblRatePerUnit,0.0) <> 0 THEN Q.dblRatePerUnit
 							   ELSE 0.0
 						  END
-		,intChargedItemId = N.intItemId
+		,intChargedItemId = N.[strCharge]
 		,strChargedItem = R.strItemNo
 		,strChargedItemDescription = R.strDescription
 		,M.intProgramId
@@ -70,7 +70,7 @@ AS
 	INNER JOIN tblBBProgramCharge N
 		ON M.intProgramId = N.intProgramId
 	LEFT JOIN tblICItem R
-		ON N.intItemId = R.intItemId
+		ON N.[strCharge] = R.intItemId
 	LEFT JOIN tblBBRate O
 		ON N.intProgramChargeId = O.intProgramChargeId
 			AND D.intEntityLocationId = O.intCustomerLocationId

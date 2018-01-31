@@ -34,7 +34,7 @@ AS
 	INNER JOIN tblBBProgramCharge L
 		ON E.intProgramChargeId = L.intProgramChargeId
 	INNER JOIN tblICItem M
-		ON L.intItemId = M.intItemId
+		ON L.[strCharge] = M.intItemId
 	INNER JOIN tblBBCustomerLocationXref N
 		ON C.intShipToLocationId = N.intEntityLocationId
 
