@@ -426,6 +426,7 @@ FROM
 	LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = B.intCostUOMId
 	LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
 	LEFT JOIN tblSMShipVia E ON A.intShipViaId = E.[intEntityId]
+	--FOR REVIEW, JOINING FOR CONTRACT IS ALREADY DEFINED ABOVE
 	LEFT JOIN (tblCTContractHeader F1 INNER JOIN tblCTContractDetail F2 ON F1.intContractHeaderId = F2.intContractHeaderId) 
 		ON F1.intEntityId = A.intEntityVendorId AND B.intItemId = F2.intItemId AND B.intLineNo = ISNULL(F2.intContractDetailId,0)
 	LEFT JOIN tblSCTicket G ON (CASE WHEN A.intSourceType = 1 THEN B.intSourceId ELSE 0 END) = G.intTicketId
@@ -457,7 +458,9 @@ FROM
 	) Loads
 	WHERE A.strReceiptType IN ('Direct','Purchase Contract','Inventory Return') AND A.ysnPosted = 1 AND B.dblBillQty != B.dblOpenReceive 
 	AND 1 = (CASE WHEN A.strReceiptType = 'Purchase Contract' THEN
-						CASE WHEN ISNULL(F1.intContractTypeId,1) = 1 THEN 1 ELSE 0 END
+						CASE WHEN ISNULL(F1.intContractTypeId,1) = 1 
+									AND F1.intPricingTypeId NOT IN (2, 3, 4) --AP-4971
+							THEN 1 ELSE 0 END
 					ELSE 1 END)
 	AND B.dblOpenReceive > 0 --EXCLUDE NEGATIVE
 	AND ((Billed.dblQty < B.dblOpenReceive) OR Billed.dblQty IS NULL)
