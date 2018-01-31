@@ -103,6 +103,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[dtmEventStartDate] [datetime] NULL,
 	[dtmPlannedAvailabilityDate] [datetime] NULL,
 	[dtmUpdatedAvailabilityDate]  [datetime] NULL,
+	[dtmM2MDate]  [datetime] NULL,
 	[intBookId] INT NULL,
 	[intSubBookId] INT NULL,
 
