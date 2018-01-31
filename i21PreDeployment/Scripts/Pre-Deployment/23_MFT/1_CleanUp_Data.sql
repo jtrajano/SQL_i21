@@ -214,6 +214,11 @@ BEGIN
 	END
 END
 
+IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFTaxAuthorityBeginEndInventoryDetail') 
+BEGIN
+	EXEC('DROP TABLE tblTFTaxAuthorityBeginEndInventoryDetail')
+END
+
 
 PRINT('MFT Cleanup - END')
 
