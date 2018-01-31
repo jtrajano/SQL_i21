@@ -269,9 +269,9 @@ BEGIN
 			LEFT JOIN tblICItem C ON B.intItemId = C.intItemId
 			--INNER JOIN tblGLAccount D ON B.intAccountId = D.intAccountId
 			--INNER JOIN tblGLAccountGroup E ON D.intAccountGroupId = E.intAccountGroupId
-			INNER JOIN vyuGLAccountDetail GLD ON B.intAccountId = GLD.intAccountId
+			LEFT JOIN vyuGLAccountDetail GLD ON B.intAccountId = GLD.intAccountId
 		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
-		AND GLD.intAccountCategoryId IN (1, 2, 5, 27)
+		AND GLD.intAccountCategoryId IN (1, 2, 5, 27) OR B.intAccountId IS NULL
 
 		--VALIDATE EXPENSE ACCOUNT USED IF ACTIVE DETAIL
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
