@@ -26,6 +26,9 @@ SET @DateOnly = CAST(GETDATE() AS DATE)
 SET @DateNow = GETDATE()
 
 
+DECLARE  @InitTranCount	INT
+SET @InitTranCount = @@TRANCOUNT
+
 IF @AsOfDate IS NULL
 	SET @AsOfDate = @DateOnly
 ELSE
@@ -165,7 +168,7 @@ IF (DATEPART(dd, @AsOfDate) = 31)
 
 DELETE FROM @ARCustomerAgingStagingTable
 WHERE
-	[strInvoiceNumber] IN (SELECT strInvoiceNumber FROM tblARInvoice WHERE strType IN ('CF Tran'))
+	[strInvoiceNumber] IN (SELECT strInvoiceNumber FROM tblARInvoice WHERE strTransactionType NOT IN ('Invoice', 'Cash'))
 
 DELETE FROM @ARCustomerAgingStagingTable
 WHERE
@@ -210,7 +213,7 @@ SELECT
 FROM
 	@ARCustomerAgingStagingTable A
 INNER JOIN
-	(SELECT [intInvoiceId], [intCurrencyId] FROM tblARInvoice) ARI
+	(SELECT [intInvoiceId], [intCurrencyId] FROM tblARInvoice WHERE ysnPosted = 1) ARI
 		ON A.[intInvoiceId] = ARI.[intInvoiceId]
 GROUP BY
      A.[intEntityCustomerId]
@@ -232,10 +235,22 @@ DECLARE @VendorId AS INT
         ,@PostingSuccessful AS BIT
 		,@ErrorMessage AS NVARCHAR(250)
 
-	
-IF ISNULL(@Preview,0) = 1
-	BEGIN TRANSACTION
 
+/*SELECT '#Remove Checking the customer aging table'	
+SELECT * FROM @ARCustomerAgingStagingTable*/
+DECLARE @TransName NVARCHAR(100)
+SELECT @TransName = 'Payout' + CAST(NEWID() AS NVARCHAR(40))
+
+IF ISNULL(@Preview,0) = 1
+BEGIN
+	IF @InitTranCount = 0
+		BEGIN TRANSACTION
+	ELSE
+		SAVE TRANSACTION @TransName
+
+	-- BEGIN TRANSACTION @TransName
+	-- SAVE TRAN @TransName
+END
 
 IF ISNULL(@PayBalance,0) = 1
     BEGIN
@@ -542,6 +557,8 @@ ELSE
 				vyuARInvoicesForPayment IFP
 					ON CB.[intInvoiceId] = IFP.[intInvoiceId]
 
+
+
 			EXEC [dbo].[uspARProcessPayments]
 					@PaymentEntries	= @EntriesForPayment
 				,@UserId			= 1
@@ -576,9 +593,7 @@ ELSE
 			WHERE
 				[intIntegrationLogId] = @LogId
 				AND [ysnHeader] = 1
-		END			
-
-        RETURN @CreditBalancePayOutId;
+		END	
 	END
 
 IF ISNULL(@Preview,0) = 1
@@ -595,6 +610,36 @@ IF ISNULL(@Preview,0) = 1
 			[intConcurrencyId] [int] NOT NULL)
 
 		DELETE FROM @ARCreditBalancePayOutDetail
+		
+		DECLARE @ARCreditBalancePayOut AS TABLE(
+			[intCreditBalancePayOutId]      INT                 IDENTITY (1, 1) NOT NULL,
+			[dtmAsOfDate]                   DATETIME            NULL,
+			[ysnPayBalance]                 BIT                 NOT NULL,
+			[ysnPreview]                    BIT                 NOT NULL,
+			[dblOpenARBalance]              NUMERIC (18, 6)     NULL,
+			[intEntityId]                   INT                 NOT NULL,
+			[dtmDate]                       DATETIME            NOT NULL
+		)
+
+		/*INSERT INTO @ARCreditBalancePayOut (
+			dtmAsOfDate,
+			ysnPayBalance,
+			ysnPreview,
+			dblOpenARBalance,
+			intEntityId,
+			dtmDate
+		)
+		SELECT 
+			dtmAsOfDate,
+			ysnPayBalance,
+			ysnPreview,
+			dblOpenARBalance,
+			intEntityId,
+			dtmDate
+		FROM 
+			tblARCreditBalancePayOut			
+		WHERE
+			[intCreditBalancePayOutId] = @CreditBalancePayOutId*/
 
 		INSERT INTO @ARCreditBalancePayOutDetail
 			([intCreditBalancePayOutId]
@@ -620,9 +665,44 @@ IF ISNULL(@Preview,0) = 1
 			[intCreditBalancePayOutId] = @CreditBalancePayOutId
 		ORDER BY
 			[intCreditBalancePayOutDetailId]
-
-		ROLLBACK TRANSACTION
-
+				
+		--ROLLBACK TRANSACTION @TransName
+		IF @InitTranCount = 0
+			BEGIN
+				IF (XACT_STATE()) = -1
+					ROLLBACK TRANSACTION
+				IF (XACT_STATE()) = 1
+					COMMIT TRANSACTION
+			END		
+		ELSE
+			BEGIN
+				IF (XACT_STATE()) = -1
+					ROLLBACK TRANSACTION  @TransName
+				--IF (XACT_STATE()) = 1
+				--	COMMIT TRANSACTION  @Savepoint
+			END	
+		
+		DECLARE @PayOutId INT
+		INSERT INTO tblARCreditBalancePayOut(
+			dtmAsOfDate,
+			ysnPayBalance,
+			ysnPreview,
+			dblOpenARBalance,
+			intEntityId,
+			dtmDate
+		)
+		SELECT TOP 1
+			dtmAsOfDate,
+			ysnPayBalance,
+			ysnPreview,
+			dblOpenARBalance,
+			intEntityId,
+			dtmDate
+		FROM 
+			@ARCreditBalancePayOut
+		
+		SET @PayOutId = @@IDENTITY
+		
 		INSERT INTO tblARCreditBalancePayOutDetail
 			([intCreditBalancePayOutId]
 			,[intEntityCustomerId]
@@ -635,7 +715,7 @@ IF ISNULL(@Preview,0) = 1
 		SELECT
 			 [intCreditBalancePayOutId]
 			,[intEntityCustomerId]
-			,[intPaymentId]
+			,null
 			,[intBillId]
 			,[ysnProcess]
 			,[ysnSuccess]
@@ -648,6 +728,6 @@ IF ISNULL(@Preview,0) = 1
 	END
 	
 
-RETURN 1;
+RETURN @CreditBalancePayOutId;
 	
 END
