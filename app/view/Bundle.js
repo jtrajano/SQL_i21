@@ -34,6 +34,7 @@ Ext.define('Inventory.view.Bundle', {
         'Ext.selection.CheckboxModel',
         'Ext.grid.plugin.CellEditing',
         'Ext.grid.column.Check',
+        'Ext.form.Label',
         'Ext.toolbar.Paging',
         'EntityManagement.common.combo.LicenseType'
     ],
@@ -929,135 +930,1373 @@ Ext.define('Inventory.view.Bundle', {
                                     },
                                     {
                                         xtype: 'panel',
-                                        itemId: 'pgeLocation',
-                                        title: 'Location',
+                                        itemId: 'pgeSetup',
+                                        title: 'Setup',
                                         layout: {
                                             type: 'hbox',
                                             align: 'stretch'
                                         },
                                         tabConfig: {
                                             xtype: 'tab',
-                                            hidden: true,
-                                            itemId: 'cfgLocation'
+                                            itemId: 'cfgSetup'
                                         },
                                         items: [
                                             {
-                                                xtype: 'advancefiltergrid',
-                                                flex: 3,
-                                                reference: 'grdLocationStore',
-                                                itemId: 'grdLocationStore',
-                                                margin: -1,
-                                                width: 593,
-                                                title: 'Company Locations',
-                                                columnLines: true,
-                                                dockedItems: [
+                                                xtype: 'tabpanel',
+                                                flex: 1,
+                                                itemId: 'tabItem',
+                                                activeTab: 0,
+                                                items: [
                                                     {
-                                                        xtype: 'toolbar',
-                                                        dock: 'top',
-                                                        itemId: 'tlbGridOptions',
+                                                        xtype: 'panel',
+                                                        itemId: 'pgeGLAccounts',
+                                                        padding: 5,
+                                                        layout: 'fit',
+                                                        title: 'GL Accounts',
+                                                        dockedItems: [
+                                                            {
+                                                                xtype: 'label',
+                                                                dock: 'top',
+                                                                itemId: 'lblGLNote',
+                                                                padding: 5,
+                                                                text: 'GL Accounts can be set up for Category instead of every item. Only accounts specific to the item is required to be set up here. GL accounts setup in Item overrides Category.'
+                                                            }
+                                                        ],
+                                                        items: [
+                                                            {
+                                                                xtype: 'panel',
+                                                                border: true,
+                                                                items: [
+                                                                    {
+                                                                        xtype: 'advancefiltergrid',
+                                                                        reference: 'grdGlAccounts',
+                                                                        itemId: 'grdGlAccounts',
+                                                                        margin: -1,
+                                                                        columnLines: true,
+                                                                        forceFit: true,
+                                                                        dockedItems: [
+                                                                            {
+                                                                                xtype: 'toolbar',
+                                                                                dock: 'top',
+                                                                                itemId: 'tlbGridOptions',
+                                                                                layout: {
+                                                                                    type: 'hbox',
+                                                                                    padding: '0 0 0 1'
+                                                                                },
+                                                                                items: [
+                                                                                    {
+                                                                                        xtype: 'button',
+                                                                                        itemId: 'btnAddRequiredAccounts',
+                                                                                        tabIndex: -1,
+                                                                                        iconCls: 'small-insert',
+                                                                                        text: 'Add Required'
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'button',
+                                                                                        itemId: 'btnInsertGlAccounts',
+                                                                                        tabIndex: -1,
+                                                                                        iconCls: 'small-insert',
+                                                                                        text: 'Insert'
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'button',
+                                                                                        itemId: 'btnDeleteGlAccounts',
+                                                                                        tabIndex: -1,
+                                                                                        iconCls: 'small-remove',
+                                                                                        text: 'Remove'
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'filter1'
+                                                                                    }
+                                                                                ]
+                                                                            }
+                                                                        ],
+                                                                        columns: [
+                                                                            {
+                                                                                xtype: 'gridcolumn',
+                                                                                flex: 1,
+                                                                                itemId: 'colGLAccountCategory',
+                                                                                dataIndex: 'string',
+                                                                                text: 'Account Category',
+                                                                                editor: {
+                                                                                    xtype: 'gridcombobox',
+                                                                                    columns: [
+                                                                                        {
+                                                                                            dataIndex: 'intAccountCategoryId',
+                                                                                            dataType: 'numeric',
+                                                                                            text: 'Account Category Id',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strAccountCategory',
+                                                                                            dataType: 'string',
+                                                                                            text: 'Account Category',
+                                                                                            flex: 1
+                                                                                        }
+                                                                                    ],
+                                                                                    itemId: 'cboAccountCategory',
+                                                                                    displayField: 'strAccountCategory',
+                                                                                    valueField: 'strAccountCategory'
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'gridcolumn',
+                                                                                flex: 1,
+                                                                                itemId: 'colGLAccountId',
+                                                                                dataIndex: 'string',
+                                                                                text: 'Account Id',
+                                                                                editor: {
+                                                                                    xtype: 'glaccountcombobox',
+                                                                                    columns: [
+                                                                                        {
+                                                                                            dataIndex: 'intAccountId',
+                                                                                            dataType: 'numeric',
+                                                                                            text: 'Account Id',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strAccountId',
+                                                                                            dataType: 'string',
+                                                                                            text: 'Account Id',
+                                                                                            flex: 1
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strDescription',
+                                                                                            dataType: 'string',
+                                                                                            text: 'Description',
+                                                                                            flex: 1
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strAccountType',
+                                                                                            dataType: 'string',
+                                                                                            text: 'Account Type',
+                                                                                            flex: 1
+                                                                                        }
+                                                                                    ],
+                                                                                    pickerWidth: 630,
+                                                                                    itemId: 'cboGLAccountId',
+                                                                                    displayField: 'strAccountId',
+                                                                                    valueField: 'strAccountId'
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'gridcolumn',
+                                                                                flex: 1,
+                                                                                itemId: 'colDescription',
+                                                                                text: 'Description'
+                                                                            }
+                                                                        ],
+                                                                        viewConfig: {
+                                                                            itemId: 'grvGlAccounts'
+                                                                        },
+                                                                        selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                                                            selType: 'checkboxmodel'
+                                                                        }),
+                                                                        plugins: [
+                                                                            {
+                                                                                ptype: 'cellediting',
+                                                                                pluginId: 'cepAccount',
+                                                                                clicksToEdit: 1
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                ]
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        xtype: 'panel',
+                                                        itemId: 'pgeLocation',
+                                                        title: 'Location',
                                                         layout: {
                                                             type: 'hbox',
-                                                            padding: '0 0 0 1'
+                                                            align: 'stretch'
+                                                        },
+                                                        tabConfig: {
+                                                            xtype: 'tab',
+                                                            itemId: 'cfgLocation'
                                                         },
                                                         items: [
                                                             {
-                                                                xtype: 'button',
-                                                                itemId: 'btnAddLocation',
-                                                                tabIndex: -1,
-                                                                iconCls: 'small-insert',
-                                                                text: 'Insert'
-                                                            },
-                                                            {
-                                                                xtype: 'button',
-                                                                itemId: 'btnAddMultipleLocation',
-                                                                tabIndex: -1,
-                                                                iconCls: 'small-insert',
-                                                                text: 'Add Multiple'
-                                                            },
-                                                            {
-                                                                xtype: 'button',
-                                                                itemId: 'btnEditLocation',
-                                                                tabIndex: -1,
-                                                                iconCls: 'small-open',
-                                                                text: 'View'
-                                                            },
-                                                            {
-                                                                xtype: 'button',
-                                                                itemId: 'btnDeleteLocation',
-                                                                tabIndex: -1,
-                                                                iconCls: 'small-remove',
-                                                                text: 'Remove'
-                                                            },
-                                                            {
-                                                                xtype: 'gridcombobox',
-                                                                columns: [
+                                                                xtype: 'panel',
+                                                                border: true,
+                                                                padding: 5,
+                                                                layout: 'fit',
+                                                                items: [
                                                                     {
-                                                                        dataIndex: 'intItemLocationId',
-                                                                        dataType: 'numeric',
-                                                                        hidden: true
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'intItemId',
-                                                                        dataType: 'numeric',
-                                                                        hidden: true
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'intLocationId',
-                                                                        dataType: 'numeric',
-                                                                        hidden: true
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strLocationName',
-                                                                        dataType: 'string',
-                                                                        text: 'Location Name',
-                                                                        flex: 1
+                                                                        xtype: 'advancefiltergrid',
+                                                                        reference: 'grdLocationStore',
+                                                                        itemId: 'grdLocationStore',
+                                                                        margin: -1,
+                                                                        width: 593,
+                                                                        title: 'Company Locations',
+                                                                        columnLines: true,
+                                                                        dockedItems: [
+                                                                            {
+                                                                                xtype: 'toolbar',
+                                                                                dock: 'top',
+                                                                                itemId: 'tlbGridOptions',
+                                                                                layout: {
+                                                                                    type: 'hbox',
+                                                                                    padding: '0 0 0 1'
+                                                                                },
+                                                                                items: [
+                                                                                    {
+                                                                                        xtype: 'button',
+                                                                                        itemId: 'btnAddLocation',
+                                                                                        tabIndex: -1,
+                                                                                        iconCls: 'small-insert',
+                                                                                        text: 'Insert'
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'button',
+                                                                                        itemId: 'btnAddMultipleLocation',
+                                                                                        tabIndex: -1,
+                                                                                        iconCls: 'small-insert',
+                                                                                        text: 'Add Multiple'
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'button',
+                                                                                        itemId: 'btnEditLocation',
+                                                                                        tabIndex: -1,
+                                                                                        iconCls: 'small-open',
+                                                                                        text: 'View'
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'button',
+                                                                                        itemId: 'btnDeleteLocation',
+                                                                                        tabIndex: -1,
+                                                                                        iconCls: 'small-remove',
+                                                                                        text: 'Remove'
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'gridcombobox',
+                                                                                        columns: [
+                                                                                            {
+                                                                                                dataIndex: 'intItemLocationId',
+                                                                                                dataType: 'numeric',
+                                                                                                hidden: true
+                                                                                            },
+                                                                                            {
+                                                                                                dataIndex: 'intItemId',
+                                                                                                dataType: 'numeric',
+                                                                                                hidden: true
+                                                                                            },
+                                                                                            {
+                                                                                                dataIndex: 'intLocationId',
+                                                                                                dataType: 'numeric',
+                                                                                                hidden: true
+                                                                                            },
+                                                                                            {
+                                                                                                dataIndex: 'strLocationName',
+                                                                                                dataType: 'string',
+                                                                                                text: 'Location Name',
+                                                                                                flex: 1
+                                                                                            }
+                                                                                        ],
+                                                                                        itemId: 'cboCopyLocation',
+                                                                                        margin: '0 0 0 5',
+                                                                                        fieldLabel: 'Copy Location',
+                                                                                        displayField: 'strLocationName',
+                                                                                        valueField: 'intItemLocationId'
+                                                                                    }
+                                                                                ]
+                                                                            }
+                                                                        ],
+                                                                        columns: [
+                                                                            {
+                                                                                xtype: 'gridcolumn',
+                                                                                flex: 1,
+                                                                                itemId: 'colLocationLocation',
+                                                                                dataIndex: 'string',
+                                                                                text: 'Location'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'gridcolumn',
+                                                                                flex: 2,
+                                                                                itemId: 'colLocationPOSDescription',
+                                                                                dataIndex: 'string',
+                                                                                text: 'POS Description'
+                                                                            }
+                                                                        ],
+                                                                        viewConfig: {
+                                                                            itemId: 'grvLocationStore'
+                                                                        },
+                                                                        selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                                                            selType: 'checkboxmodel'
+                                                                        })
                                                                     }
-                                                                ],
-                                                                itemId: 'cboCopyLocation',
-                                                                margin: '0 0 0 5',
-                                                                fieldLabel: 'Copy Location',
-                                                                displayField: 'strLocationName',
-                                                                valueField: 'intItemLocationId'
+                                                                ]
+                                                            },
+                                                            {
+                                                                xtype: 'panel',
+                                                                flex: 1,
+                                                                border: true,
+                                                                padding: '5 5 5 0',
+                                                                items: [
+                                                                    {
+                                                                        xtype: 'advancefiltergrid',
+                                                                        itemId: 'grdItemSubLocations',
+                                                                        title: 'Storage Locations',
+                                                                        forceFit: true,
+                                                                        dockedItems: [
+                                                                            {
+                                                                                xtype: 'toolbar',
+                                                                                dock: 'top',
+                                                                                itemId: 'tlbGridOptions1',
+                                                                                layout: {
+                                                                                    type: 'hbox',
+                                                                                    padding: '0 0 0 1'
+                                                                                },
+                                                                                items: [
+                                                                                    {
+                                                                                        xtype: 'button',
+                                                                                        itemId: 'btnAddItemSubLocation',
+                                                                                        tabIndex: -1,
+                                                                                        iconCls: 'small-insert',
+                                                                                        text: 'Insert'
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'button',
+                                                                                        itemId: 'btnDeleteItemSubLocation',
+                                                                                        tabIndex: -1,
+                                                                                        iconCls: 'small-remove',
+                                                                                        text: 'Remove'
+                                                                                    }
+                                                                                ]
+                                                                            }
+                                                                        ],
+                                                                        columns: [
+                                                                            {
+                                                                                xtype: 'gridcolumn',
+                                                                                itemId: 'colsubSubLocationName',
+                                                                                width: 244,
+                                                                                text: 'Storage Location',
+                                                                                editor: {
+                                                                                    xtype: 'gridcombobox',
+                                                                                    columns: [
+                                                                                        {
+                                                                                            dataIndex: 'intCompanyLocationSubLocationId',
+                                                                                            dataType: 'numeric',
+                                                                                            text: 'Storage Location Id',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'intCompanyLocationId',
+                                                                                            dataType: 'numeric',
+                                                                                            text: 'Location Id',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strSubLocationName',
+                                                                                            dataType: 'string',
+                                                                                            text: 'Storage Location Name',
+                                                                                            flex: 1
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strSubLocationDescription',
+                                                                                            dataType: 'string',
+                                                                                            text: 'Description',
+                                                                                            flex: 1
+                                                                                        }
+                                                                                    ],
+                                                                                    itemId: 'cboItemSubLocations',
+                                                                                    displayField: 'strSubLocationName',
+                                                                                    valueField: 'strSubLocationName'
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'gridcolumn',
+                                                                                hidden: true,
+                                                                                itemId: 'colsubItemSubLocationId',
+                                                                                dataIndex: 'intItemSubLocationId',
+                                                                                text: 'Id'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'gridcolumn',
+                                                                                hidden: true,
+                                                                                itemId: 'colsubSubLocationId',
+                                                                                dataIndex: 'intSubLocationId',
+                                                                                text: 'Storage Location Id'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'gridcolumn',
+                                                                                hidden: true,
+                                                                                itemId: 'colsubItemLocationId',
+                                                                                dataIndex: 'intItemLocationId',
+                                                                                text: 'Item Location Id'
+                                                                            }
+                                                                        ],
+                                                                        viewConfig: {
+                                                                            itemId: 'grvItemSubLocations'
+                                                                        },
+                                                                        selModel: {
+                                                                            selType: 'checkboxmodel'
+                                                                        },
+                                                                        plugins: [
+                                                                            {
+                                                                                ptype: 'cellediting',
+                                                                                pluginId: 'cepItemSubLocations',
+                                                                                clicksToEdit: 1
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                ]
                                                             }
                                                         ]
                                                     }
-                                                ],
-                                                columns: [
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        xtype: 'panel',
+                                        itemId: 'pgePricing',
+                                        title: 'Pricing',
+                                        layout: {
+                                            type: 'vbox',
+                                            align: 'stretch'
+                                        },
+                                        tabConfig: {
+                                            xtype: 'tab',
+                                            itemId: 'cfgPricing'
+                                        },
+                                        items: [
+                                            {
+                                                xtype: 'panel',
+                                                flex: 1,
+                                                border: true,
+                                                padding: 5,
+                                                layout: 'fit',
+                                                items: [
                                                     {
-                                                        xtype: 'gridcolumn',
-                                                        flex: 1,
-                                                        itemId: 'colLocationLocation',
-                                                        dataIndex: 'string',
-                                                        text: 'Location'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        flex: 2,
-                                                        itemId: 'colLocationPOSDescription',
-                                                        dataIndex: 'string',
-                                                        text: 'POS Description'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colLocationVendor',
-                                                        minWidth: 150,
-                                                        dataIndex: 'string',
-                                                        text: 'Default Vendor'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colLocationCostingMethod',
-                                                        minWidth: 150,
-                                                        dataIndex: 'string',
-                                                        text: 'Costing Method'
+                                                        xtype: 'advancefiltergrid',
+                                                        itemId: 'grdPricing',
+                                                        margin: -1,
+                                                        columnLines: true,
+                                                        dockedItems: [
+                                                            {
+                                                                xtype: 'toolbar',
+                                                                dock: 'top',
+                                                                itemId: 'tlbGridOptions',
+                                                                layout: {
+                                                                    type: 'hbox',
+                                                                    padding: '0 0 0 1'
+                                                                },
+                                                                items: [
+                                                                    {
+                                                                        xtype: 'button',
+                                                                        hidden: true,
+                                                                        itemId: 'btnInsertPricing',
+                                                                        tabIndex: -1,
+                                                                        arrowVisible: false,
+                                                                        iconCls: 'small-insert',
+                                                                        text: 'Insert'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'button',
+                                                                        hidden: true,
+                                                                        itemId: 'btnDeletePricing',
+                                                                        tabIndex: -1,
+                                                                        iconCls: 'small-remove',
+                                                                        text: 'Remove'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'filter1'
+                                                                    }
+                                                                ]
+                                                            }
+                                                        ],
+                                                        columns: [
+                                                            {
+                                                                xtype: 'gridcolumn',
+                                                                flex: 1,
+                                                                itemId: 'colPricingLocation',
+                                                                width: 120,
+                                                                dataIndex: 'string',
+                                                                text: 'Location',
+                                                                editor: {
+                                                                    xtype: 'gridcombobox',
+                                                                    columns: [
+                                                                        {
+                                                                            dataIndex: 'intItemLocationId',
+                                                                            dataType: 'numeric',
+                                                                            text: 'Item Location Id',
+                                                                            hidden: true
+                                                                        },
+                                                                        {
+                                                                            dataIndex: 'intLocationId',
+                                                                            dataType: 'numeric',
+                                                                            text: 'Location Id',
+                                                                            hidden: true
+                                                                        },
+                                                                        {
+                                                                            dataIndex: 'strLocationName',
+                                                                            dataType: 'string',
+                                                                            text: 'Location Name',
+                                                                            flex: 1
+                                                                        },
+                                                                        {
+                                                                            dataIndex: 'strLocationType',
+                                                                            dataType: 'string',
+                                                                            text: 'Location Type',
+                                                                            flex: 1
+                                                                        }
+                                                                    ],
+                                                                    itemId: 'cboPricingLocation',
+                                                                    displayField: 'strLocationName',
+                                                                    valueField: 'strLocationName'
+                                                                }
+                                                            },
+                                                            {
+                                                                xtype: 'numbercolumn',
+                                                                flex: 0.8,
+                                                                hidden: true,
+                                                                itemId: 'colPricingLastCost',
+                                                                width: 80,
+                                                                align: 'right',
+                                                                dataIndex: 'string',
+                                                                text: 'Last Cost',
+                                                                editor: {
+                                                                    xtype: 'numberfield',
+                                                                    quantityField: true,
+                                                                    itemId: 'txtLastCost'
+                                                                }
+                                                            },
+                                                            {
+                                                                xtype: 'numbercolumn',
+                                                                flex: 0.8,
+                                                                hidden: true,
+                                                                itemId: 'colPricingStandardCost',
+                                                                width: 120,
+                                                                align: 'right',
+                                                                dataIndex: 'string',
+                                                                text: 'Standard Cost',
+                                                                editor: {
+                                                                    xtype: 'numberfield',
+                                                                    quantityField: true,
+                                                                    itemId: 'txtStandardCost'
+                                                                }
+                                                            },
+                                                            {
+                                                                xtype: 'numbercolumn',
+                                                                flex: 0.8,
+                                                                hidden: true,
+                                                                itemId: 'colPricingAverageCost',
+                                                                width: 90,
+                                                                align: 'right',
+                                                                dataIndex: 'string',
+                                                                text: 'Average Cost',
+                                                                editor: {
+                                                                    xtype: 'numberfield',
+                                                                    quantityField: true,
+                                                                    itemId: 'txtAverageCost'
+                                                                }
+                                                            },
+                                                            {
+                                                                xtype: 'numbercolumn',
+                                                                hidden: true,
+                                                                itemId: 'colPricingEOMCost',
+                                                                width: 85,
+                                                                align: 'right',
+                                                                dataIndex: 'string',
+                                                                text: 'EOM Cost',
+                                                                editor: {
+                                                                    xtype: 'numberfield',
+                                                                    currencyField: true
+                                                                }
+                                                            },
+                                                            {
+                                                                xtype: 'gridcolumn',
+                                                                flex: 1,
+                                                                itemId: 'colPricingMethod',
+                                                                width: 120,
+                                                                dataIndex: 'string',
+                                                                text: 'Pricing Method',
+                                                                editor: {
+                                                                    xtype: 'combobox',
+                                                                    itemId: 'cboPricingMethod',
+                                                                    displayField: 'strDescription',
+                                                                    valueField: 'strDescription'
+                                                                }
+                                                            },
+                                                            {
+                                                                xtype: 'numbercolumn',
+                                                                flex: 0.8,
+                                                                itemId: 'colPricingAmount',
+                                                                width: 110,
+                                                                align: 'right',
+                                                                dataIndex: 'string',
+                                                                text: 'Amount/Percent',
+                                                                editor: {
+                                                                    xtype: 'numberfield',
+                                                                    currencyField: true
+                                                                }
+                                                            },
+                                                            {
+                                                                xtype: 'numbercolumn',
+                                                                flex: 0.8,
+                                                                itemId: 'colPricingRetailPrice',
+                                                                width: 80,
+                                                                align: 'right',
+                                                                dataIndex: 'string',
+                                                                text: 'Retail Price',
+                                                                editor: {
+                                                                    xtype: 'numberfield',
+                                                                    quantityField: true
+                                                                }
+                                                            },
+                                                            {
+                                                                xtype: 'numbercolumn',
+                                                                flex: 0.8,
+                                                                itemId: 'colPricingMSRP',
+                                                                width: 80,
+                                                                align: 'right',
+                                                                dataIndex: 'string',
+                                                                text: 'MSRP',
+                                                                editor: {
+                                                                    xtype: 'numberfield',
+                                                                    currencyField: true
+                                                                }
+                                                            }
+                                                        ],
+                                                        viewConfig: {
+                                                            itemId: 'grvLocationStore'
+                                                        },
+                                                        plugins: [
+                                                            {
+                                                                ptype: 'cellediting',
+                                                                pluginId: 'cepPricing',
+                                                                clicksToEdit: 1
+                                                            }
+                                                        ],
+                                                        selModel: {
+                                                            selType: 'checkboxmodel'
+                                                        }
                                                     }
-                                                ],
-                                                viewConfig: {
-                                                    itemId: 'grvLocationStore'
-                                                },
-                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
-                                                    selType: 'checkboxmodel'
-                                                })
+                                                ]
+                                            },
+                                            {
+                                                xtype: 'tabpanel',
+                                                flex: 1,
+                                                itemId: 'tabPricing',
+                                                padding: 5,
+                                                bodyCls: 'i21-tab',
+                                                activeTab: 0,
+                                                plain: true,
+                                                items: [
+                                                    {
+                                                        xtype: 'panel',
+                                                        layout: 'fit',
+                                                        title: 'Pricing Level',
+                                                        items: [
+                                                            {
+                                                                xtype: 'panel',
+                                                                border: true,
+                                                                padding: 5,
+                                                                layout: 'fit',
+                                                                items: [
+                                                                    {
+                                                                        xtype: 'advancefiltergrid',
+                                                                        reference: 'grdPricingLevel',
+                                                                        itemId: 'grdPricingLevel',
+                                                                        columnLines: true,
+                                                                        dockedItems: [
+                                                                            {
+                                                                                xtype: 'toolbar',
+                                                                                dock: 'top',
+                                                                                itemId: 'tlbGridOptions',
+                                                                                layout: {
+                                                                                    type: 'hbox',
+                                                                                    padding: '0 0 0 1'
+                                                                                },
+                                                                                items: [
+                                                                                    {
+                                                                                        xtype: 'button',
+                                                                                        itemId: 'btnInsertPricingLevel',
+                                                                                        tabIndex: -1,
+                                                                                        iconCls: 'small-insert',
+                                                                                        text: 'Insert'
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'button',
+                                                                                        itemId: 'btnDeletePricingLevel',
+                                                                                        tabIndex: -1,
+                                                                                        iconCls: 'small-remove',
+                                                                                        text: 'Remove'
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'filter1'
+                                                                                    }
+                                                                                ]
+                                                                            }
+                                                                        ],
+                                                                        columns: [
+                                                                            {
+                                                                                xtype: 'gridcolumn',
+                                                                                itemId: 'colPricingLevelLocation',
+                                                                                dataIndex: 'strFieldName',
+                                                                                text: 'Location',
+                                                                                editor: {
+                                                                                    xtype: 'gridcombobox',
+                                                                                    columns: [
+                                                                                        {
+                                                                                            dataIndex: 'intItemLocationId',
+                                                                                            dataType: 'numeric',
+                                                                                            text: 'Item Location Id',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'intLocationId',
+                                                                                            dataType: 'numeric',
+                                                                                            text: 'Location Id',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strLocationName',
+                                                                                            dataType: 'string',
+                                                                                            text: 'Location Name',
+                                                                                            flex: 1
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strLocationType',
+                                                                                            dataType: 'string',
+                                                                                            text: 'Location Type',
+                                                                                            flex: 1
+                                                                                        }
+                                                                                    ],
+                                                                                    itemId: 'cboPricingLevelLocation',
+                                                                                    displayField: 'strLocationName',
+                                                                                    valueField: 'strLocationName'
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'gridcolumn',
+                                                                                itemId: 'colPricingLevelPriceLevel',
+                                                                                dataIndex: 'strFieldName',
+                                                                                text: 'Price Level',
+                                                                                editor: {
+                                                                                    xtype: 'gridcombobox',
+                                                                                    columns: [
+                                                                                        {
+                                                                                            dataIndex: 'intCompanyLocationPricingLevelId',
+                                                                                            dataType: 'numeric',
+                                                                                            text: 'Key Id',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'intCompanyLocationId',
+                                                                                            dataType: 'numeric',
+                                                                                            text: 'Location Id',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strPricingLevelName',
+                                                                                            dataType: 'string',
+                                                                                            text: 'Pricing Level',
+                                                                                            flex: 1
+                                                                                        }
+                                                                                    ],
+                                                                                    itemId: 'cboPricingLevelLevel',
+                                                                                    displayField: 'strPricingLevelName',
+                                                                                    valueField: 'strPricingLevelName'
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'gridcolumn',
+                                                                                itemId: 'colPricingLevelUOM',
+                                                                                dataIndex: 'strFieldName',
+                                                                                text: 'UOM',
+                                                                                editor: {
+                                                                                    xtype: 'gridcombobox',
+                                                                                    columns: [
+                                                                                        {
+                                                                                            dataIndex: 'intItemUOMId',
+                                                                                            dataType: 'numeric',
+                                                                                            text: 'Unit Of Measure Id',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strUnitMeasure',
+                                                                                            dataType: 'string',
+                                                                                            text: 'Unit Measure',
+                                                                                            flex: 1
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strUnitType',
+                                                                                            dataType: 'string',
+                                                                                            text: 'Unit Type',
+                                                                                            flex: 1
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strUpcCode',
+                                                                                            dataType: 'string',
+                                                                                            text: 'UPC',
+                                                                                            flex: 1
+                                                                                        },
+                                                                                        {
+                                                                                            xtype: 'checkcolumn',
+                                                                                            dataIndex: 'ysnStockUnit',
+                                                                                            dataType: 'boolean',
+                                                                                            text: 'Stock Unit',
+                                                                                            flex: 1
+                                                                                        }
+                                                                                    ],
+                                                                                    itemId: 'cboPricingLevelUOM',
+                                                                                    displayField: 'strUnitMeasure',
+                                                                                    valueField: 'strUnitMeasure'
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'gridcolumn',
+                                                                                itemId: 'colPricingLevelUPC',
+                                                                                width: 50,
+                                                                                dataIndex: 'strFieldName',
+                                                                                text: 'UPC'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numbercolumn',
+                                                                                hidden: true,
+                                                                                itemId: 'colPricingLevelUnits',
+                                                                                align: 'right',
+                                                                                dataIndex: 'strFieldName',
+                                                                                text: 'Unit Qty'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numbercolumn',
+                                                                                itemId: 'colPricingLevelMin',
+                                                                                width: 50,
+                                                                                align: 'right',
+                                                                                dataIndex: 'strFieldName',
+                                                                                text: 'Min Qty',
+                                                                                editor: {
+                                                                                    xtype: 'numberfield',
+                                                                                    quantityField: true,
+                                                                                    fieldStyle: 'text-align:right',
+                                                                                    hideTrigger: true
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numbercolumn',
+                                                                                itemId: 'colPricingLevelMax',
+                                                                                width: 61,
+                                                                                align: 'right',
+                                                                                dataIndex: 'strFieldName',
+                                                                                text: 'Max Qty',
+                                                                                editor: {
+                                                                                    xtype: 'numberfield',
+                                                                                    quantityField: true,
+                                                                                    fieldStyle: 'text-align:right',
+                                                                                    hideTrigger: true
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'gridcolumn',
+                                                                                itemId: 'colPricingLevelMethod',
+                                                                                minWidth: 150,
+                                                                                dataIndex: 'strFieldName',
+                                                                                text: 'Pricing Method',
+                                                                                editor: {
+                                                                                    xtype: 'combobox',
+                                                                                    itemId: 'cboPricingLevelMethod',
+                                                                                    displayField: 'strDescription',
+                                                                                    queryMode: 'local',
+                                                                                    valueField: 'strDescription'
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'gridcolumn',
+                                                                                itemId: 'colPricingLevelCurrency',
+                                                                                minWidth: 80,
+                                                                                dataIndex: 'strCurrency',
+                                                                                text: 'Currency',
+                                                                                editor: {
+                                                                                    xtype: 'gridcombobox',
+                                                                                    columns: [
+                                                                                        {
+                                                                                            dataIndex: 'intCurrencyID',
+                                                                                            dataType: 'numeric',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strCurrency',
+                                                                                            dataType: 'string',
+                                                                                            text: 'Currency',
+                                                                                            flex: 1
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strDescription',
+                                                                                            dataType: 'string',
+                                                                                            text: 'Description',
+                                                                                            flex: 1
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'ysnSubCurrency',
+                                                                                            dataType: 'boolean',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'intMainCurrencyId',
+                                                                                            dataType: 'numeric',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'intSubCurrencyCent',
+                                                                                            dataType: 'numeric',
+                                                                                            text: 'SubCurrency Cent',
+                                                                                            hidden: true
+                                                                                        }
+                                                                                    ],
+                                                                                    itemId: 'cboPricingLevelCurrency',
+                                                                                    displayField: 'strCurrency',
+                                                                                    valueField: 'strCurrency'
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numbercolumn',
+                                                                                itemId: 'colPricingLevelAmount',
+                                                                                minWidth: 110,
+                                                                                align: 'right',
+                                                                                dataIndex: 'strFieldName',
+                                                                                text: 'Amount/Percent',
+                                                                                editor: {
+                                                                                    xtype: 'numberfield',
+                                                                                    currencyField: true,
+                                                                                    fieldStyle: 'text-align:right',
+                                                                                    hideTrigger: true
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numbercolumn',
+                                                                                itemId: 'colPricingLevelUnitPrice',
+                                                                                align: 'right',
+                                                                                dataIndex: 'strFieldName',
+                                                                                text: 'Retail Price',
+                                                                                editor: {
+                                                                                    xtype: 'numberfield',
+                                                                                    quantityField: true,
+                                                                                    fieldStyle: 'text-align:right',
+                                                                                    hideTrigger: true
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'datecolumn',
+                                                                                itemId: 'colPricingLevelEffectiveDate',
+                                                                                width: 80,
+                                                                                defaultWidth: 80,
+                                                                                text: 'Effective Date',
+                                                                                editor: {
+                                                                                    xtype: 'datefield'
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'gridcolumn',
+                                                                                itemId: 'colPricingLevelCommissionOn',
+                                                                                dataIndex: 'strFieldName',
+                                                                                text: 'Commission On',
+                                                                                editor: {
+                                                                                    xtype: 'combobox',
+                                                                                    itemId: 'cboPricingLevelCommissionOn',
+                                                                                    displayField: 'strDescription',
+                                                                                    queryMode: 'local',
+                                                                                    valueField: 'strDescription'
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numbercolumn',
+                                                                                itemId: 'colPricingLevelCommissionRate',
+                                                                                minWidth: 145,
+                                                                                align: 'right',
+                                                                                dataIndex: 'strFieldName',
+                                                                                text: 'Comm Amount/Percent',
+                                                                                editor: {
+                                                                                    xtype: 'numberfield',
+                                                                                    currencyField: true,
+                                                                                    fieldStyle: 'text-align:right',
+                                                                                    hideTrigger: true
+                                                                                }
+                                                                            }
+                                                                        ],
+                                                                        viewConfig: {
+                                                                            itemId: 'grvPricingLevel'
+                                                                        },
+                                                                        selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                                                            selType: 'checkboxmodel',
+                                                                            mode: 'SINGLE'
+                                                                        }),
+                                                                        plugins: [
+                                                                            {
+                                                                                ptype: 'cellediting',
+                                                                                pluginId: 'cepPricingLevel',
+                                                                                clicksToEdit: 1
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                ]
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        xtype: 'panel',
+                                                        layout: 'fit',
+                                                        title: 'Promotional Pricing',
+                                                        items: [
+                                                            {
+                                                                xtype: 'panel',
+                                                                border: true,
+                                                                padding: 5,
+                                                                layout: 'fit',
+                                                                items: [
+                                                                    {
+                                                                        xtype: 'advancefiltergrid',
+                                                                        itemId: 'grdSpecialPricing',
+                                                                        margin: -1,
+                                                                        columnLines: true,
+                                                                        dockedItems: [
+                                                                            {
+                                                                                xtype: 'toolbar',
+                                                                                dock: 'top',
+                                                                                itemId: 'tlbGridOptions',
+                                                                                layout: {
+                                                                                    type: 'hbox',
+                                                                                    padding: '0 0 0 1'
+                                                                                },
+                                                                                items: [
+                                                                                    {
+                                                                                        xtype: 'button',
+                                                                                        itemId: 'btnDeleteSpecialPricing',
+                                                                                        tabIndex: -1,
+                                                                                        iconCls: 'small-remove',
+                                                                                        text: 'Remove'
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'filter1'
+                                                                                    }
+                                                                                ]
+                                                                            }
+                                                                        ],
+                                                                        columns: [
+                                                                            {
+                                                                                xtype: 'gridcolumn',
+                                                                                itemId: 'colSpecialPricingLocation',
+                                                                                dataIndex: 'strFieldName',
+                                                                                text: 'Location',
+                                                                                editor: {
+                                                                                    xtype: 'gridcombobox',
+                                                                                    columns: [
+                                                                                        {
+                                                                                            dataIndex: 'intItemLocationId',
+                                                                                            dataType: 'numeric',
+                                                                                            text: 'Item Location Id',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'intLocationId',
+                                                                                            dataType: 'numeric',
+                                                                                            text: 'Location Id',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strLocationName',
+                                                                                            dataType: 'string',
+                                                                                            text: 'Location Name',
+                                                                                            flex: 1
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strLocationType',
+                                                                                            dataType: 'string',
+                                                                                            text: 'Location Type',
+                                                                                            flex: 1
+                                                                                        }
+                                                                                    ],
+                                                                                    itemId: 'cboSpecialPricingLocation',
+                                                                                    displayField: 'strLocationName',
+                                                                                    valueField: 'strLocationName'
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'gridcolumn',
+                                                                                itemId: 'colSpecialPricingPromotionType',
+                                                                                width: 101,
+                                                                                dataIndex: 'strFieldName',
+                                                                                text: 'Promotion Type',
+                                                                                editor: {
+                                                                                    xtype: 'combobox',
+                                                                                    itemId: 'cboSpecialPricingPromotionType',
+                                                                                    displayField: 'strDescription',
+                                                                                    queryMode: 'local',
+                                                                                    valueField: 'strDescription'
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'gridcolumn',
+                                                                                itemId: 'colSpecialPricingUnit',
+                                                                                dataIndex: 'strFieldName',
+                                                                                text: 'UOM',
+                                                                                editor: {
+                                                                                    xtype: 'gridcombobox',
+                                                                                    columns: [
+                                                                                        {
+                                                                                            dataIndex: 'intItemUOMId',
+                                                                                            dataType: 'numeric',
+                                                                                            text: 'Unit Of Measure Id',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strUnitMeasure',
+                                                                                            dataType: 'string',
+                                                                                            text: 'Unit Measure',
+                                                                                            flex: 1
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strUnitType',
+                                                                                            dataType: 'string',
+                                                                                            text: 'Unit Type',
+                                                                                            flex: 1
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'dblUnitQty',
+                                                                                            dataType: 'string',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strUpcCode',
+                                                                                            dataType: 'string',
+                                                                                            text: 'UPC',
+                                                                                            flex: 1
+                                                                                        },
+                                                                                        {
+                                                                                            xtype: 'checkcolumn',
+                                                                                            dataIndex: 'ysnStockUnit',
+                                                                                            dataType: 'boolean',
+                                                                                            text: 'Stock Unit',
+                                                                                            flex: 1
+                                                                                        }
+                                                                                    ],
+                                                                                    itemId: 'cboSpecialPricingUOM',
+                                                                                    displayField: 'strUnitMeasure',
+                                                                                    valueField: 'strUnitMeasure'
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'gridcolumn',
+                                                                                itemId: 'colSpecialPricingUPC',
+                                                                                width: 80,
+                                                                                dataIndex: 'strFieldName',
+                                                                                text: 'UPC'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numbercolumn',
+                                                                                itemId: 'colSpecialPricingQty',
+                                                                                width: 89,
+                                                                                align: 'right',
+                                                                                dataIndex: 'strFieldName',
+                                                                                text: 'Discount Units',
+                                                                                editor: {
+                                                                                    xtype: 'numberfield',
+                                                                                    quantityField: true,
+                                                                                    fieldStyle: 'text-align:right',
+                                                                                    hideTrigger: true
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'gridcolumn',
+                                                                                itemId: 'colSpecialPricingDiscountBy',
+                                                                                width: 74,
+                                                                                dataIndex: 'strFieldName',
+                                                                                text: 'Discount By',
+                                                                                editor: {
+                                                                                    xtype: 'combobox',
+                                                                                    itemId: 'cboSpecialPricingDiscountBy',
+                                                                                    displayField: 'strDescription',
+                                                                                    queryMode: 'local',
+                                                                                    valueField: 'strDescription'
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numbercolumn',
+                                                                                itemId: 'colSpecialPricingDiscountRate',
+                                                                                width: 150,
+                                                                                align: 'right',
+                                                                                dataIndex: 'strFieldName',
+                                                                                text: 'Discount Amount/Percent',
+                                                                                editor: {
+                                                                                    xtype: 'numberfield',
+                                                                                    currencyField: true,
+                                                                                    itemId: 'txtSpecialPricingDiscount',
+                                                                                    fieldStyle: 'text-align:right',
+                                                                                    hideTrigger: true
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'gridcolumn',
+                                                                                itemId: 'colSpecialPricingCurrency',
+                                                                                minWidth: 80,
+                                                                                dataIndex: 'strCurrency',
+                                                                                text: 'Currency',
+                                                                                editor: {
+                                                                                    xtype: 'gridcombobox',
+                                                                                    columns: [
+                                                                                        {
+                                                                                            dataIndex: 'intCurrencyID',
+                                                                                            dataType: 'numeric',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strCurrency',
+                                                                                            dataType: 'string',
+                                                                                            text: 'Currency',
+                                                                                            flex: 1
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strDescription',
+                                                                                            dataType: 'string',
+                                                                                            text: 'Description',
+                                                                                            flex: 1
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'ysnSubCurrency',
+                                                                                            dataType: 'boolean',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'intMainCurrencyId',
+                                                                                            dataType: 'numeric',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'intSubCurrencyCent',
+                                                                                            dataType: 'numeric',
+                                                                                            text: 'SubCurrency Cent',
+                                                                                            hidden: true
+                                                                                        }
+                                                                                    ],
+                                                                                    itemId: 'cboSpecialPricingCurrency',
+                                                                                    displayField: 'strCurrency',
+                                                                                    valueField: 'strCurrency'
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numbercolumn',
+                                                                                itemId: 'colSpecialPricingUnitPrice',
+                                                                                width: 69,
+                                                                                align: 'right',
+                                                                                dataIndex: 'strFieldName',
+                                                                                text: 'Retail Price',
+                                                                                editor: {
+                                                                                    xtype: 'numberfield',
+                                                                                    quantityField: true,
+                                                                                    itemId: 'txtSpecialPricingUnitPrice',
+                                                                                    fieldStyle: 'text-align:right',
+                                                                                    hideTrigger: true,
+                                                                                    decimalPrecision: 6
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numbercolumn',
+                                                                                autoRender: true,
+                                                                                itemId: 'colSpecialPricingDiscountedPrice',
+                                                                                width: 110,
+                                                                                align: 'right',
+                                                                                dataIndex: 'strFieldName',
+                                                                                text: 'Discounted Price',
+                                                                                format: '0,000.000000'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'datecolumn',
+                                                                                itemId: 'colSpecialPricingBeginDate',
+                                                                                width: 80,
+                                                                                text: 'Begin Date',
+                                                                                editor: {
+                                                                                    xtype: 'datefield'
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'datecolumn',
+                                                                                itemId: 'colSpecialPricingEndDate',
+                                                                                width: 80,
+                                                                                text: 'End Date',
+                                                                                editor: {
+                                                                                    xtype: 'datefield'
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numbercolumn',
+                                                                                itemId: 'colSpecialPricingDiscQty',
+                                                                                width: 90,
+                                                                                align: 'right',
+                                                                                dataIndex: 'strFieldName',
+                                                                                text: 'Disc thru Qty',
+                                                                                editor: {
+                                                                                    xtype: 'numberfield',
+                                                                                    quantityField: true,
+                                                                                    fieldStyle: 'text-align:right',
+                                                                                    hideTrigger: true
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numbercolumn',
+                                                                                itemId: 'colSpecialPricingDiscAmount',
+                                                                                width: 90,
+                                                                                align: 'right',
+                                                                                dataIndex: 'strFieldName',
+                                                                                text: 'Disc thru Amt',
+                                                                                editor: {
+                                                                                    xtype: 'numberfield',
+                                                                                    currencyField: true,
+                                                                                    fieldStyle: 'text-align:right',
+                                                                                    hideTrigger: true
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numbercolumn',
+                                                                                itemId: 'colSpecialPricingAccumQty',
+                                                                                width: 90,
+                                                                                align: 'right',
+                                                                                dataIndex: 'strFieldName',
+                                                                                text: 'Accum. Qty',
+                                                                                editor: {
+                                                                                    xtype: 'numberfield',
+                                                                                    quantityField: true,
+                                                                                    fieldStyle: 'text-align:right',
+                                                                                    hideTrigger: true
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numbercolumn',
+                                                                                itemId: 'colSpecialPricingAccumAmount',
+                                                                                width: 112,
+                                                                                align: 'right',
+                                                                                dataIndex: 'strFieldName',
+                                                                                text: 'Accum. Amount',
+                                                                                editor: {
+                                                                                    xtype: 'numberfield',
+                                                                                    currencyField: true,
+                                                                                    fieldStyle: 'text-align:right',
+                                                                                    hideTrigger: true
+                                                                                }
+                                                                            }
+                                                                        ],
+                                                                        viewConfig: {
+                                                                            itemId: 'grvRebateDiscount'
+                                                                        },
+                                                                        selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                                                            selType: 'checkboxmodel',
+                                                                            mode: 'SINGLE'
+                                                                        }),
+                                                                        plugins: [
+                                                                            {
+                                                                                ptype: 'cellediting',
+                                                                                pluginId: 'cepSpecialPricing',
+                                                                                clicksToEdit: 1
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                ]
+                                                            }
+                                                        ]
+                                                    }
+                                                ]
                                             }
                                         ]
                                     },
