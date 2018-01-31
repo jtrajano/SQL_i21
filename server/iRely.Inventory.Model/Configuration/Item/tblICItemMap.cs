@@ -982,10 +982,6 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strItemDescription).HasColumnName("strItemDescription");
             this.Property(t => t.intItemLocationId).HasColumnName("intItemLocationId");
             this.Property(t => t.strLocationName).HasColumnName("strLocationName");
-            //this.Property(t => t.intSubLocationId).HasColumnName("intSubLocationId");
-            //this.Property(t => t.strSubLocationName).HasColumnName("strSubLocationName");
-            this.Property(t => t.intYear).HasColumnName("intYear");
-            this.Property(t => t.intMonth).HasColumnName("intMonth");
             this.Property(t => t.strMonthYear).HasColumnName("strMonthYear");
             this.Property(t => t.dblQuantity).HasColumnName("dblQuantity").HasPrecision(38, 20);
             this.Property(t => t.dblValue).HasColumnName("dblValue").HasPrecision(38, 20);
