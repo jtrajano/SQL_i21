@@ -190,6 +190,8 @@
 		ELSE 0 
 		END
 	 AS BIT) AS ysnFeesActive
+	 ,SCSetup.intScaleProcessing
+	 ,SCSetup.ysnActive AS ysnScaleStationActive
 	 
 	,CT.strShowContractNumber
 	,CT.intContractDetailSequence
