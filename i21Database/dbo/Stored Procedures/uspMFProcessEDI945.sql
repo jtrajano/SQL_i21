@@ -12,7 +12,7 @@ BEGIN
 		,strOrderNo
 		,strShipmentNo
 		)
-	SELECT InvS.intInventoryShipmentId
+	SELECT TOP 1 InvS.intInventoryShipmentId
 		,InvS.strReferenceNumber
 		,InvS.strShipmentNumber
 	FROM tblICInventoryShipment InvS
@@ -27,6 +27,21 @@ BEGIN
 			FROM tblMFEDI945 EDI945
 			WHERE EDI945.intInventoryShipmentId = InvS.intInventoryShipmentId
 			)
+	ORDER BY InvS.intInventoryShipmentId
+
+	IF NOT EXISTS (
+			SELECT *
+			FROM @tblMFOrderNo
+			)
+	BEGIN
+		RAISERROR (
+				'No data to export.'
+				,16
+				,1
+				)
+
+		RETURN
+	END
 
 	SELECT 945 AS strTransactionId
 		,'Wholesome Sweetners' AS strCustomerId
@@ -36,7 +51,8 @@ BEGIN
 		,dtmShipDate dtmShipmentDate
 		,strShipmentNumber strShipmentId
 		,E.strName
-		,EL.strAddress AS strShipToAddress
+		,EDI.strShipToAddress1 AS strShipToAddress1
+		,EDI.strShipToAddress2 AS strShipToAddress2
 		,EL.strCity AS strShipToCity
 		,EL.strState AS strShipToState
 		,EL.strZipCode AS strShipToZipCode
@@ -69,13 +85,14 @@ BEGIN
 				ELSE InvSL.dblQuantityShipped
 				END
 			) AS dblQtyShipped
-		,I.strExternalGroup strUOM
+		,UM.strUnitMeasure strUOM
 		,PL.strParentLotNumber strParentLotNumber
 		,L.strLotNumber
 		,Ltrim(1 + (year(L.dtmExpiryDate) - 1) / 100) + (CONVERT(VARCHAR(6), L.dtmExpiryDate, 12)) strBestby
 	INTO #tblMFEDI945
 	FROM dbo.tblICInventoryShipment InvS
-	JOIN @tblMFOrderNo O ON O.intInventoryShipmentId = InvS.intInventoryShipmentId and InvS.ysnPosted =1
+	JOIN @tblMFOrderNo O ON O.intInventoryShipmentId = InvS.intInventoryShipmentId
+		AND InvS.ysnPosted = 1
 	JOIN dbo.tblICInventoryShipmentItem InvSI ON InvSI.intInventoryShipmentId = InvS.intInventoryShipmentId
 	JOIN dbo.tblICInventoryShipmentItemLot InvSL ON InvSL.intInventoryShipmentItemId = InvSI.intInventoryShipmentItemId
 	JOIN dbo.tblICLot L ON L.intLotId = InvSL.intLotId
@@ -84,6 +101,8 @@ BEGIN
 	JOIN dbo.tblEMEntity E ON E.intEntityId = InvS.intEntityCustomerId
 	JOIN dbo.tblEMEntityLocation EL ON EL.intEntityLocationId = InvS.intShipToLocationId
 	JOIN tblICItem I ON I.intItemId = InvSI.intItemId
+	JOIN tblICItemUOM IU ON IU.intItemUOMId = InvSI.intItemUOMId
+	JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 	LEFT JOIN tblMFEDI940Archive EDI ON EDI.intInventoryShipmentItemId = InvSI.intInventoryShipmentItemId
 
 	SELECT *
@@ -94,89 +113,183 @@ BEGIN
 			FROM @tblMFOrderNo
 			)
 
-	SELECT DISTINCT DT.strTransactionId
-		,DT.strCustomerId
-		,DT.strType
-		,DT.strDepositorOrderNumber
-		,DT.strPurchaseOrderNumber
-		,DT.dtmShipmentDate
-		,DT.strShipmentId
-		,DT.strName
-		,DT.strShipToAddress
-		,DT.strShipToCity
-		,DT.strShipToState
-		,DT.strShipToZipCode
-		,DT.strShipToCode
-		,DT.strShipmentId
-		,DT.dtmShippedDate
-		,DT.strTransportationMethod
-		,DT.strSCAC
-		,DT.strRouting
-		,DT.strShipmentMethodOfPayment
-		,DT.strTotalPalletsLoaded
-		,DT.dblTotalUnitsShipped
-		,DT.dblTotalWeight
-		,DT.strWeightUOM
-		,DT.intLineNo
-		,DT.strSSCCNo
-		,DT.strOrderStatus
-		,DT.strUPCCaseCode
-		,DT.strItemNo
-		,DT.strDescription
-		,DT.dblQtyOrdered
-		,DT.dblQtyShipped
-		,DT.dblQtyDifference
-		,DT.strUOM
-		,DT.strParentLotNumber AS strLotNumber
-		,DT.strBestBy
-	FROM (
-		SELECT EDI.strTransactionId
-			,EDI.strCustomerId
-			,EDI.strType
-			,EDI.strDepositorOrderNumber
-			,EDI.strPurchaseOrderNumber
-			,EDI.dtmShipmentDate
-			--,EDI.strShipmentId
-			,EDI.strName
-			,EDI.strShipToAddress
-			,EDI.strShipToCity
-			,EDI.strShipToState
-			,EDI.strShipToZipCode
-			,EDI.strShipToCode
-			,EDI.strShipmentId
-			,EDI.dtmShippedDate
-			,EDI.strTransportationMethod
-			,EDI.strSCAC
-			,EDI.strRouting
-			,EDI.strShipmentMethodOfPayment
-			,EDI.strTotalPalletsLoaded
-			,EDI.dblTotalUnitsShipped
-			,EDI.dblTotalWeight
-			,EDI.strWeightUOM
-			,EDI.intLineNo
-			,SSCCNo.strSSCCNo
-			,EDI.strOrderStatus
-			,EDI.strUPCCaseCode
-			,EDI.strItemNo
-			,EDI.strDescription
-			,EDI.dblQtyOrdered
-			,SUM(EDI.dblQtyShipped) OVER (
-				PARTITION BY EDI.strShipmentId
+	IF EXISTS (
+			SELECT *
+			FROM #tblMFSSCCNo
+			)
+	BEGIN
+		SELECT DISTINCT DT.strTransactionId
+			,DT.strCustomerId
+			,DT.strType
+			,DT.strDepositorOrderNumber
+			,DT.strPurchaseOrderNumber
+			,DT.dtmShipmentDate
+			,DT.strShipmentId
+			,DT.strName
+			,DT.strShipToAddress1
+			,DT.strShipToAddress2
+			,DT.strShipToCity
+			,DT.strShipToState
+			,DT.strShipToZipCode
+			,DT.strShipToCode
+			,DT.strShipmentId
+			,DT.dtmShippedDate
+			,DT.strTransportationMethod
+			,DT.strSCAC
+			,DT.strRouting
+			,DT.strShipmentMethodOfPayment
+			,DT.strTotalPalletsLoaded
+			,[dbo].[fnRemoveTrailingZeroes](DT.dblTotalUnitsShipped) AS dblTotalUnitsShipped
+			,DT.dblTotalWeight
+			,DT.strWeightUOM
+			,DT.intLineNo
+			,DT.strSSCCNo
+			,DT.strOrderStatus
+			,DT.strUPCCaseCode
+			,DT.strItemNo
+			,DT.strDescription
+			,[dbo].[fnRemoveTrailingZeroes](DT.dblQtyOrdered) AS dblQtyOrdered
+			,[dbo].[fnRemoveTrailingZeroes](DT.dblQtyShipped) AS dblQtyShipped
+			,[dbo].[fnRemoveTrailingZeroes](DT.dblQtyDifference) AS dblQtyDifference
+			,DT.strUOM
+			,DT.strParentLotNumber AS strLotNumber
+			,DT.strBestBy
+		FROM (
+			SELECT EDI.strTransactionId
+				,EDI.strCustomerId
+				,EDI.strType
+				,EDI.strDepositorOrderNumber
+				,EDI.strPurchaseOrderNumber
+				,EDI.dtmShipmentDate
+				,EDI.strName
+				,EDI.strShipToAddress1
+				,EDI.strShipToAddress2
+				,EDI.strShipToCity
+				,EDI.strShipToState
+				,EDI.strShipToZipCode
+				,EDI.strShipToCode
+				,EDI.strShipmentId
+				,EDI.dtmShippedDate
+				,EDI.strTransportationMethod
+				,EDI.strSCAC
+				,EDI.strRouting
+				,EDI.strShipmentMethodOfPayment
+				,EDI.strTotalPalletsLoaded
+				,EDI.dblTotalUnitsShipped
+				,EDI.dblTotalWeight
+				,EDI.strWeightUOM
+				,EDI.intLineNo
+				,Right(Ltrim(RTrim(REPLACE(REPLACE(REPLACE(SSCCNo.strSSCCNo, '(', ''), ')', ''), ' ', ''))), 18) AS strSSCCNo
+				,EDI.strOrderStatus
+				,EDI.strUPCCaseCode
+				,EDI.strItemNo
+				,EDI.strDescription
+				,EDI.dblQtyOrdered
+				,SUM(EDI.dblQtyShipped) OVER (
+					PARTITION BY EDI.strShipmentId
+					,EDI.strParentLotNumber
+					,EDI.strItemNo
+					,Right(Ltrim(RTrim(REPLACE(REPLACE(REPLACE(SSCCNo.strSSCCNo, '(', ''), ')', ''), ' ', ''))), 18)
+					) dblQtyShipped
+				,EDI.dblQtyOrdered - SUM(EDI.dblQtyShipped) OVER (
+					PARTITION BY EDI.strShipmentId
+					,EDI.strItemNo
+					) AS dblQtyDifference
+				,EDI.strUOM
 				,EDI.strParentLotNumber
+				,EDI.strBestBy
+			FROM #tblMFEDI945 EDI
+			LEFT JOIN #tblMFSSCCNo SSCCNo ON SSCCNo.strLotNumber = EDI.strLotNumber
+			) AS DT
+		ORDER BY DT.strDepositorOrderNumber
+			,DT.intLineNo
+	END
+	ELSE
+	BEGIN
+		SELECT DISTINCT DT.strTransactionId
+			,DT.strCustomerId
+			,DT.strType
+			,DT.strDepositorOrderNumber
+			,DT.strPurchaseOrderNumber
+			,DT.dtmShipmentDate
+			,DT.strShipmentId
+			,DT.strName
+			,DT.strShipToAddress1
+			,DT.strShipToAddress2
+			,DT.strShipToCity
+			,DT.strShipToState
+			,DT.strShipToZipCode
+			,DT.strShipToCode
+			,DT.strShipmentId
+			,DT.dtmShippedDate
+			,DT.strTransportationMethod
+			,DT.strSCAC
+			,DT.strRouting
+			,DT.strShipmentMethodOfPayment
+			,DT.strTotalPalletsLoaded
+			,[dbo].[fnRemoveTrailingZeroes](DT.dblTotalUnitsShipped) AS dblTotalUnitsShipped
+			,DT.dblTotalWeight
+			,DT.strWeightUOM
+			,DT.intLineNo
+			,DT.strSSCCNo
+			,DT.strOrderStatus
+			,DT.strUPCCaseCode
+			,DT.strItemNo
+			,DT.strDescription
+			,[dbo].[fnRemoveTrailingZeroes](DT.dblQtyOrdered) AS dblQtyOrdered
+			,[dbo].[fnRemoveTrailingZeroes](DT.dblQtyShipped) AS dblQtyShipped
+			,[dbo].[fnRemoveTrailingZeroes](DT.dblQtyDifference) AS dblQtyDifference
+			,DT.strUOM
+			,DT.strParentLotNumber AS strLotNumber
+			,DT.strBestBy
+		FROM (
+			SELECT EDI.strTransactionId
+				,EDI.strCustomerId
+				,EDI.strType
+				,EDI.strDepositorOrderNumber
+				,EDI.strPurchaseOrderNumber
+				,EDI.dtmShipmentDate
+				,EDI.strName
+				,EDI.strShipToAddress1
+				,EDI.strShipToAddress2
+				,EDI.strShipToCity
+				,EDI.strShipToState
+				,EDI.strShipToZipCode
+				,EDI.strShipToCode
+				,EDI.strShipmentId
+				,EDI.dtmShippedDate
+				,EDI.strTransportationMethod
+				,EDI.strSCAC
+				,EDI.strRouting
+				,EDI.strShipmentMethodOfPayment
+				,EDI.strTotalPalletsLoaded
+				,EDI.dblTotalUnitsShipped
+				,EDI.dblTotalWeight
+				,EDI.strWeightUOM
+				,EDI.intLineNo
+				,NULL AS strSSCCNo
+				,EDI.strOrderStatus
+				,EDI.strUPCCaseCode
 				,EDI.strItemNo
-				) dblQtyShipped
-			,EDI.dblQtyOrdered - SUM(EDI.dblQtyShipped) OVER (
-				PARTITION BY EDI.strShipmentId
-				,EDI.strItemNo
-				) AS dblQtyDifference
-			,EDI.strUOM
-			,EDI.strParentLotNumber
-			,EDI.strBestBy
-		FROM #tblMFEDI945 EDI
-		LEFT JOIN #tblMFSSCCNo SSCCNo ON SSCCNo.strLotNumber = EDI.strLotNumber
-		) AS DT
-	ORDER BY DT.strDepositorOrderNumber
-		,DT.intLineNo
+				,EDI.strDescription
+				,EDI.dblQtyOrdered
+				,SUM(EDI.dblQtyShipped) OVER (
+					PARTITION BY EDI.strShipmentId
+					,EDI.strParentLotNumber
+					,EDI.strItemNo
+					) dblQtyShipped
+				,EDI.dblQtyOrdered - SUM(EDI.dblQtyShipped) OVER (
+					PARTITION BY EDI.strShipmentId
+					,EDI.strItemNo
+					) AS dblQtyDifference
+				,EDI.strUOM
+				,EDI.strParentLotNumber
+				,EDI.strBestBy
+			FROM #tblMFEDI945 EDI
+			) AS DT
+		ORDER BY DT.strDepositorOrderNumber
+			,DT.intLineNo
+	END
 
 	INSERT INTO tblMFEDI945 (
 		intInventoryShipmentId

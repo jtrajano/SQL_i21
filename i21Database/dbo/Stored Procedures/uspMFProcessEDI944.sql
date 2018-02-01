@@ -10,7 +10,7 @@ BEGIN
 		intInventoryReceiptId
 		,strOrderNo
 		)
-	SELECT IR.intInventoryReceiptId
+	SELECT TOP 1 IR.intInventoryReceiptId
 		,IR.strWarehouseRefNo
 	FROM tblICInventoryReceipt IR
 	WHERE ysnPosted = 1
@@ -24,13 +24,28 @@ BEGIN
 			FROM tblMFEDI944 EDI944
 			WHERE EDI944.intInventoryReceiptId = IR.intInventoryReceiptId
 			)
+	ORDER BY IR.intInventoryReceiptId
+
+	IF NOT EXISTS (
+			SELECT *
+			FROM @tblMFOrderNo
+			)
+	BEGIN
+		RAISERROR (
+				'No data to export.'
+				,16
+				,1
+				)
+
+		RETURN
+	END
 
 	SELECT 944 AS strTransactionId
 		,'Wholesome Sweetners' AS strCustomerId
 		,'J' AS strType
-		,dtmReceiptDate dtmDate
-		,strReceiptNumber strWarehouseReceiptNumber
-		,strWarehouseRefNo strDepositorOrderNumber
+		,IR.dtmReceiptDate dtmDate
+		,IR.strReceiptNumber strWarehouseReceiptNumber
+		,IR.strWarehouseRefNo strDepositorOrderNumber
 		,(
 			SELECT TOP 1 strShipmentId
 			FROM tblMFEDI943Archive EDI943
@@ -41,15 +56,17 @@ BEGIN
 			FROM tblMFEDI943Archive EDI943
 			WHERE EDI943.intInventoryReceiptId = IR.intInventoryReceiptId
 			) AS dtmShippedDate
-		,SUM(IRI.dblOpenReceive) OVER (PARTITION BY IR.intInventoryReceiptId) dblTotalReceivedQty
-		,strItemNo
-		,strDescription
-		,dblOpenReceive
-		,I.strExternalGroup
+		,[dbo].[fnRemoveTrailingZeroes](SUM(IRI.dblOpenReceive) OVER (PARTITION BY IR.intInventoryReceiptId)) dblTotalReceivedQty
+		,I.strItemNo
+		,I.strDescription
+		,[dbo].[fnRemoveTrailingZeroes](IRI.dblOpenReceive) dblReceived
+		,UM.strUnitMeasure strUOM
 	FROM dbo.tblICInventoryReceipt IR
 	JOIN dbo.tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
 		AND IR.ysnPosted = 1
 	JOIN tblICItem I ON I.intItemId = IRI.intItemId
+	JOIN tblICItemUOM IU ON IU.intItemUOMId = IRI.intUnitMeasureId
+	JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 		AND EXISTS (
 			SELECT *
 			FROM @tblMFOrderNo O
