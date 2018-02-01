@@ -248,6 +248,17 @@
 :r "..\dbo\Stored Procedures\uspGRImportWeightGrades.sql"
 :r "..\dbo\Stored Procedures\uspGRImportShipTo.sql"
 :r "..\dbo\Views\vyuSCTicketLVControlView.sql"
+:r "..\dbo\Stored Procedures\uspGRImportStorageSchedule.sql"
+:r "..\dbo\Stored Procedures\uspGRImportDiscountCode.sql"
+:r "..\dbo\Stored Procedures\uspGRImportDiscountSchedule.sql"
+:r "..\dbo\Stored Procedures\uspGRImportDiscountTable.sql"
+:r "..\dbo\Stored Procedures\uspGRImportStorageTicket.sql"
+:r "..\dbo\Stored Procedures\uspGRImportScaleStation.sql"
+:r "..\dbo\Stored Procedures\uspGRImportScaleTicket.sql"
+:r "..\dbo\Stored Procedures\uspGRImportCustomerSplit.sql"
+
+
+
 
 --MANUFACTURING RECIPE
 :r "..\dbo\Stored Procedures\uspMFImportRecipe.sql" 
