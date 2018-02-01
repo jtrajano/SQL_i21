@@ -140,6 +140,10 @@ BEGIN TRY
 		, @DealerInterest NUMERIC(18, 2) = 0
 		, @DealerPenalty NUMERIC(18,2) = 0
 
+		, @dtmFrom DATE
+		, @dtmTo DATE
+		, @LicenseNumber NVARCHAR(50)
+
 
 	IF (ISNULL(@xmlParam,'') != '')
 	BEGIN
@@ -180,48 +184,53 @@ BEGIN TRY
 		SELECT TOP 1 @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'OR'
 
 		-- Configuration
-		SELECT @DealerInterest = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'Line 12 Interest'
-		SELECT @DealerPenalty = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'Line 13 Penalty'
-		SELECT @DealerTotal_15 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'Line 15 Total Due Local Jurisdiction'	
+		SELECT TOP 1 @LicenseNumber = strConfiguration FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = 'MF-360-LicenseNumber'
 
-		SELECT @ReceiptGasoline_1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-RefinaryGasoline'
-		SELECT @ReceiptAviation_1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-RefinaryAviationGas'
-		SELECT @ReceiptJet_1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-RefinaryJetJet'
-		SELECT @ReceiptEthanol_1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-RefinaryEthanol'
-		SELECT @ReceiptDiesel_1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-RefinaryDiesel'
+		SELECT @DealerInterest = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1302-LicenseNumber'
+		SELECT @DealerPenalty = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = 'Line 13 Penalty'
+		SELECT @DealerTotal_15 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = 'Line 15 Total Due Local Jurisdiction'	 
 
-		SELECT @DealerGasoline_1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line1Gasoline'
-		SELECT @DealerAviation_1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line1AviationGas'
-		SELECT @DealerJet_1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line1JetJet'
-		SELECT @DealerEthanol_1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line1Ethanol'
-		SELECT @DealerDiesel_1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line1Diesel'
+		SELECT @ReceiptGasoline_1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1302-RefinaryGasoline'
+		SELECT @ReceiptAviation_1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1302-RefinaryAviationGas'
+		SELECT @ReceiptJet_1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1302-RefinaryJetJet'
+		SELECT @ReceiptEthanol_1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1302-RefinaryEthanol'
+		SELECT @ReceiptDiesel_1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1302-RefinaryDiesel'
 
-		SELECT @DealerGasoline_4 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line4Gasoline'
-		SELECT @DealerAviation_4 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line4AviationGas'
-		SELECT @DealerJet_4 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line4JetJet'
-		SELECT @DealerEthanol_4 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line4Ethanol'
-		SELECT @DealerDiesel_4 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line4Diesel'
+		SELECT @DealerGasoline_1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1302-Line1Gasoline'
+		SELECT @DealerAviation_1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1302-Line1AviationGas'
+		SELECT @DealerJet_1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1302-Line1JetJet'
+		SELECT @DealerEthanol_1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1302-Line1Ethanol'
+		SELECT @DealerDiesel_1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1302-Line1Diesel'
 
-		SELECT @DealerGasoline_5 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line5Gasoline'
-		SELECT @DealerAviation_5 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line5AviationGas'
-		SELECT @DealerJet_5 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line5JetJet'
-		SELECT @DealerEthanol_5 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line5Ethanol'
-		SELECT @DealerDiesel_5 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line5Diesel'
+		SELECT @DealerGasoline_4 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1302-Line4Gasoline'
+		SELECT @DealerAviation_4 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1302-Line4AviationGas'
+		SELECT @DealerJet_4 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1302-Line4JetJet'
+		SELECT @DealerEthanol_4 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1302-Line4Ethanol'
+		SELECT @DealerDiesel_4 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1302-Line4Diesel'
 
-		SELECT @DealerGasoline_10 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line10Gasoline'
-		SELECT @DealerAviation_10 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line10AviationGas'
-		SELECT @DealerJet_10 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line10JetJet'
+		SELECT @DealerGasoline_5 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1302-Line5Gasoline'
+		SELECT @DealerAviation_5 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1302-Line5AviationGas'
+		SELECT @DealerJet_5 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1302-Line5JetJet'
+		SELECT @DealerEthanol_5 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1302-Line5Ethanol'
+		SELECT @DealerDiesel_5 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1302-Line5Diesel'
+
+		SELECT @DealerGasoline_10 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1302-Line10Gasoline'
+		SELECT @DealerAviation_10 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1302-Line10AviationGas'
+		SELECT @DealerJet_10 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1302-Line10JetJet'
 		
-		SELECT @DealerTotal_12 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line12'
-		SELECT @DealerTotal_13 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line13'
-		SELECT @DealerTotal_15 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '735-1302-Line15'
+		SELECT @DealerTotal_12 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1302-Line12'
+		SELECT @DealerTotal_13 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1302-Line13'
+		SELECT @DealerTotal_15 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1302-Line15'
 
 		-- Transaction
 		INSERT INTO @transaction
-		SELECT strFormCode, strScheduleCode, strType, dblReceived = SUM(ISNULL(dblReceived, 0.00))
+		SELECT strFormCode, strScheduleCode, strType, dblReceived = SUM(ISNULL(dblQtyShipped, 0.00))
 		FROM vyuTFGetTransaction Trans
 		WHERE Trans.uniqTransactionGuid = @Guid
 		GROUP BY strFormCode, strScheduleCode, strType
+
+		SELECT @dtmFrom = MIN(dtmReportingPeriodBegin) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid
+		SELECT @dtmTo = MAX(dtmReportingPeriodEnd) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid
 
 		-- Receipt Gasoline
 		SELECT @ReceiptGasoline_2 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '1' AND strType = 'Gasoline'
@@ -478,6 +487,10 @@ BEGIN TRY
 		, DealerTotal_14 = @DealerTotal_14
 		, DealerTotal_15 = @DealerTotal_15
 		, DealerTotal_16 = @DealerTotal_16
+
+		, dtmFrom = @dtmFrom
+		, dtmTo = @dtmTo
+		, LicenseNumber = @LicenseNumber
 
 END TRY
 BEGIN CATCH
