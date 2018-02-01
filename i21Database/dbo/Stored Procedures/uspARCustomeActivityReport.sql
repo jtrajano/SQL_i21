@@ -373,9 +373,9 @@ OUTER APPLY (
 	) SC (strAccountStatusCode)
 	WHERE (@strAccountStatusCode IS NULL OR LEFT(strAccountStatusCode, LEN(strAccountStatusCode) - 1) LIKE '%'+@strAccountStatusCode+'%')
 ) STATUSCODES
-ORDER BY AGING.strCustomerName, TRANSACTIONS.dtmTransactionDate
+ORDER BY TRANSACTIONS.dtmTransactionDate
 
 IF @ysnPrintRecap = 1
 	EXEC dbo.uspARInvoiceProductRecapReport @dtmDateFrom = @dtmDateFrom, @dtmDateTo = @dtmDateTo
 
-SELECT * FROM tblARCustomerActivityStagingTable
+SELECT * FROM tblARCustomerActivityStagingTable ORDER BY dtmTransactionDate
