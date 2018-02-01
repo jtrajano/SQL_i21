@@ -274,33 +274,7 @@ order by CL.intCompanyLocationId, srt
 -- Section 5
 ------------------------------------------------------------------------------------------------------------------
 --price level 1
-INSERT INTO [dbo].[tblICItemPricingLevel] (
-	[intItemId]
-	,[intItemLocationId]
-	,strPriceLevel
-	,intItemUnitMeasureId
-	,dblUnit
-	,strPricingMethod
-	,dblAmountRate
-	,dblUnitPrice
-	,[intConcurrencyId]
-	)
-SELECT inv.intItemId
-	,iloc.intItemLocationId
-	,PL.strPricingLevelName strPricingLevel
-	,(select IU.intItemUOMId from tblICItemUOM IU join tblICUnitMeasure U on U.intUnitMeasureId = IU.intUnitMeasureId
-	where IU.intItemId = inv.intItemId
-	and U.strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS = itm.ptitm_unit COLLATE SQL_Latin1_General_CP1_CS_AS) uom
-	,1 dblUnit
-	,'Fixed Dollar Amount' PricingMethod
-	,0
-	,ptitm_prc1
-	,1 ConcurrencyId
-	FROM ptitmmst AS itm INNER JOIN tblICItem AS inv ON (itm.ptitm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS)
-	 INNER JOIN tblSMCompanyLocation AS loc ON (itm.ptitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = loc.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS) 
-	 INNER JOIN tblICItemLocation AS iloc ON (loc.intCompanyLocationId = iloc.intLocationId	AND iloc.intItemId = inv.intItemId)
-	 join tblSMCompanyLocationPricingLevel PL on PL.intCompanyLocationId = iloc.intLocationId 
-	 where PL.intSort = 1 and ptitm_prc1 > 0
+This is the retail price and is imported as standard pricing
 ---------------------------------------------------------------------------------------------------------------------
 --price level 2
 INSERT INTO [dbo].[tblICItemPricingLevel] (
@@ -319,9 +293,9 @@ SELECT inv.intItemId
 	,PL.strPricingLevelName strPricingLevel
 	,(select IU.intItemUOMId from tblICItemUOM IU join tblICUnitMeasure U on U.intUnitMeasureId = IU.intUnitMeasureId
 	where IU.intItemId = inv.intItemId
-	and U.strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS = itm.ptitm_unit COLLATE SQL_Latin1_General_CP1_CS_AS) uom
+	and U.strSymbol COLLATE SQL_Latin1_General_CP1_CS_AS = itm.ptitm_unit COLLATE SQL_Latin1_General_CP1_CS_AS) uom
 	,1 dblUnit
-	,'Fixed Dollar Amount' PricingMethod
+	,'None' PricingMethod
 	,0
 	,ptitm_prc2
 	,1 ConcurrencyId
@@ -349,9 +323,9 @@ SELECT inv.intItemId
 	,PL.strPricingLevelName strPricingLevel
 	,(select IU.intItemUOMId from tblICItemUOM IU join tblICUnitMeasure U on U.intUnitMeasureId = IU.intUnitMeasureId
 	where IU.intItemId = inv.intItemId
-	and U.strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS = itm.ptitm_unit COLLATE SQL_Latin1_General_CP1_CS_AS) uom
+	and U.strSymbol COLLATE SQL_Latin1_General_CP1_CS_AS = itm.ptitm_unit COLLATE SQL_Latin1_General_CP1_CS_AS) uom
 	,1 dblUnit
-	,'Fixed Dollar Amount' PricingMethod
+	,'None' PricingMethod
 	,0
 	,ptitm_prc3
 	,1 ConcurrencyId
