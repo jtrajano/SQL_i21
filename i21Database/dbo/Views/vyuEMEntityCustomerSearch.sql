@@ -49,9 +49,7 @@
 	cust.intTermsId,
 	STUFF((SELECT '|^|' + CONVERT(VARCHAR,intLineOfBusinessId) FROM tblEMEntityLineOfBusiness te WHERE te.intEntityId = cust.intEntityId FOR XML PATH('')),1,3,'') as intLineOfBusinessIds,
 	entityType.Prospect AS ysnProspect,
-	cust.ysnCreditHold,
-	intSiteId = CAST(CASE WHEN (SELECT COUNT(intSiteID) FROM vyuARCustomerConsumptionSite WHERE intEntityId = cust.intEntityId) =1 THEN tmSite.intSiteID ELSE NULL END AS INT),
-	strSiteNumber =  CAST(CASE WHEN (SELECT COUNT(intSiteID) FROM vyuARCustomerConsumptionSite WHERE intEntityId = cust.intEntityId) =1 THEN tmSite.strSiteNumber ELSE NULL END AS VARCHAR(10))
+	cust.ysnCreditHold
 FROM tblARCustomer cust
 INNER JOIN tblEMEntity entityToCustomer ON cust.intEntityId = entityToCustomer.intEntityId
 LEFT JOIN tblEMEntity entityToSalesperson ON cust.intSalespersonId = entityToSalesperson.intEntityId
@@ -73,7 +71,6 @@ LEFT JOIN tblSMLineOfBusiness LOB ON entityLOB.intLineOfBusinessId = LOB.intLine
 LEFT JOIN tblEMEntityClass entityClass ON entityToCustomer.intEntityClassId = entityClass.intEntityClassId
 LEFT JOIN tblSMPaymentMethod custPaymentMethod ON cust.intPaymentMethodId = custPaymentMethod.intPaymentMethodID
 LEFT JOIN tblSMTerm custTerm ON cust.intTermsId = custTerm.intTermID
-LEFT JOIN vyuARCustomerConsumptionSite tmSite ON cust.intEntityId = tmSite.intEntityId
 WHERE		
 		entityType.Customer = 1 -- check if entity is a customer
 		OR
@@ -131,7 +128,5 @@ GROUP BY
 	cust.intTermsId,
 	entityContact.intEntityId,
 	entityType.Prospect,
-	cust.ysnCreditHold,
-	tmSite.intSiteID,
-	tmSite.strSiteNumber
+	cust.ysnCreditHold
 GO

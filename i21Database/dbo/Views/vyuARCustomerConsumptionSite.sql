@@ -25,6 +25,7 @@ SELECT
 		ORDER BY intSiteDeviceID ASC)
 		AS [dblConversionFactor] 
 	,TMS.[ysnActive] 
+	,TMS.intProduct AS intItemId
 FROM
 	tblTMSite TMS
 INNER JOIN
