@@ -13,10 +13,10 @@ Ext.define('Inventory.view.BundleViewModel', {
         'Inventory.store.BufferedCategory',
         'Inventory.store.BufferedItemLocation',
         'Inventory.store.BufferedCommodity',
-        'GeneralLedger.store.BufAccountCategoryGroup',
         'i21.store.CompanyLocationSubLocationBuffered',
         'i21.store.CompanyLocationPricingLevelBuffered',
-        'i21.store.CurrencyBuffered'
+        'i21.store.CurrencyBuffered',
+        'GeneralLedger.store.BufAccountCategoryGroup'        
     ],
 
     stores: {
@@ -292,7 +292,10 @@ Ext.define('Inventory.view.BundleViewModel', {
             ]
         },
 
-        
+        accountCategoryList: {
+            autoLoad: true,
+            type: 'glbufaccountcategorygroup'
+        },        
     },    
 
     formulas: {

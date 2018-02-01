@@ -1971,6 +1971,35 @@ Ext.define('Inventory.view.BundleViewController', {
         }
     },
 
+    addAccountCategory: function(current, category, categoryList) {
+        if (categoryList) {
+            var exists = Ext.Array.findBy(current.tblICItemAccounts().data.items, function (row) {
+                if (category === row.get('strAccountCategory')) {
+                    return true;
+                }
+            });
+            if (!exists) {
+                var category = categoryList.findRecord('strAccountCategory', category);
+                if(category) {
+                    var newItemAccount = Ext.create('Inventory.model.ItemAccount', {
+                        intItemId: current.get('intItemId'),
+                        intAccountCategoryId: category.get('intAccountCategoryId'),
+                        strAccountCategory: category.get('strAccountCategory')
+                    });
+                    current.tblICItemAccounts().add(newItemAccount);
+                }
+            }
+        }
+    },    
+
+    onAddRequiredAccountClick: function(button, e, eOpts) {
+        var win = button.up('window');
+        var me = win.getController()
+        var current = win.getViewModel().data.current;
+        var accountCategoryList = win.getViewModel().storeInfo.accountCategoryList;
+        me.addAccountCategory(current, 'Sales Account', accountCategoryList);
+    },
+
     init: function(application) {
         this.control({
             "#cboType": {
@@ -2094,7 +2123,10 @@ Ext.define('Inventory.view.BundleViewController', {
             },
             "#colStockUOM": {
                 checkchange: this.onUOMStockUnitCheckChange
-            },             
+            },
+            "#btnAddRequiredAccounts": {
+                click: this.onAddRequiredAccountClick
+            },
         });
     }
 });
