@@ -236,7 +236,9 @@ BEGIN
 					CASE	WHEN	CC.strCostMethod = 'Per Unit'	THEN 
 							dbo.fnCTConvertQuantityToTargetItemUOM(CC.intItemId,@intUnitMeasureId,CU.intUnitMeasureId,1)*CC.dblRate
 						WHEN	CC.strCostMethod = 'Amount'		THEN
-							CC.dblRate
+							CC.dblRate/
+                            dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CD.intUnitMeasureId,@intUnitMeasureId,CD.dblQuantity)
+
 					END /
 					CASE WHEN OY.ysnSubCurrency = 1 THEN 100 ELSE 1 END	 * -1 AS	dblPrice,
 					ISNULL(MY.strCurrency,CY.strCurrency) AS strCurrency,
@@ -246,7 +248,7 @@ BEGIN
 					CH.dtmContractDate,
 					CC.strCostMethod strType,
 					CASE WHEN CC.strCostMethod = 'Amount' THEN  CC.dblRate ELSE dblTranValue END *-1 AS dblTranValue,
-					CC.intItemId * 999999 AS intSort
+					99999999 + AD.intPContractDetailId AS intSort
 					
 
 			FROM	@tblLGAllocationDetail	AD 
