@@ -148,7 +148,7 @@ Ext.define('Inventory.view.BundleViewController', {
                     editor: {
                         readOnly: '{readOnlyOnKitType}'
                     }                    
-                }
+                }                
             },
 
             //------------------//
@@ -200,7 +200,49 @@ Ext.define('Inventory.view.BundleViewController', {
                         }]
                     }
                 }
+            }, 
+
+            //--------------//
+            //GL Account Tab//
+            //--------------//
+            grdGlAccounts: {
+                colGLAccountCategory: {
+                    dataIndex: 'strAccountCategory',
+                    editor: {
+                        store: '{accountCategory}',
+                        defaultFilters: [{
+                            column: 'strAccountCategoryGroupCode',
+                            value: 'INV'
+                        },
+                        {
+                            column: 'strAccountCategory',
+                            value: 'Write-Off Sold',
+                            conjunction: 'and',
+                            condition: 'noteq'
+                        },
+                        {
+                            column: 'strAccountCategory',
+                            value: 'Revalue Sold',
+                            conjunction: 'and',
+                            condition: 'noteq'
+                        }]
+                    }
+                },
+                colGLAccountId: {
+                    dataIndex: 'strAccountId',
+                    editor: {
+                        defaultFilters: [
+                            {
+                                column: 'strAccountCategory',
+                                value: '{accountCategoryFilter}',
+                                conjunction: 'and'
+                            }
+                        ]
+                    }
+                },
+                colDescription: 'strDescription'
             }
+
         }
     },
 
@@ -218,7 +260,9 @@ Ext.define('Inventory.view.BundleViewController', {
 
         var grdUOM = win.down('#grdUnitOfMeasure'),
             grdBundle = win.down('#grdBundle'),
-            grdAddOn = win.down('#grdAddOn');
+            grdAddOn = win.down('#grdAddOn'),
+            grdGlAccounts = win.down('#grdGlAccounts');
+
 
         win.context = Ext.create('iRely.Engine', {
             window : win,
@@ -230,7 +274,6 @@ Ext.define('Inventory.view.BundleViewController', {
             fieldTitle: 'strItemNo',
             enableAudit: true,
             enableCustomTab: true,
-
 
             enableActivity: true,
             createTransaction: Ext.bind(me.createTransaction, me),
@@ -262,7 +305,15 @@ Ext.define('Inventory.view.BundleViewController', {
                         deleteButton : grdAddOn.down('#btnDeleteAddOn'),
                         createRecord: me.onAddOnCreateRecord
                     })
-                }                
+                },
+                {
+                    key: 'tblICItemAccounts',
+                    lazy: true, 
+                    component: Ext.create('iRely.grid.Manager', {
+                        grid: grdGlAccounts,
+                        deleteButton : grdGlAccounts.down('#btnDeleteGlAccounts')
+                    })
+                }
             ]
         });
 
@@ -585,19 +636,20 @@ Ext.define('Inventory.view.BundleViewController', {
                                 current.tblICItemUOMs().removeAll();
                                 uoms.forEach(function(uom){
                                     var newItemUOM = Ext.create('Inventory.model.ItemUOM', {
-                                        intItemId : current.get('intItemId'),
+                                        intItemId: current.get('intItemId'),
                                         strUnitMeasure: uom.strUnitMeasure,
-                                        intUnitMeasureId : uom.intUnitMeasureId,
-                                        // dblUnitQty : uom.dblUnitQty,
-                                        // ysnStockUnit : uom.ysnStockUnit,
-                                        ysnAllowPurchase : true,
-                                        ysnAllowSale : true,
-                                        dblLength : 0.00,
-                                        dblWidth : 0.00,
-                                        dblHeight : 0.00,
-                                        dblVolume : 0.00,
-                                        dblMaxQty : 0.00,
-                                        intSort : uom.intSort
+                                        intUnitMeasureId: uom.intUnitMeasureId,
+                                        dblUnitQty: uom.dblUnitQty,
+                                        ysnStockUnit: uom.ysnStockUnit,
+                                        ysnStockUOM: uom.ysnStockUOM, 
+                                        ysnAllowPurchase: true,
+                                        ysnAllowSale: true,
+                                        dblLength: 0.00,
+                                        dblWidth: 0.00,
+                                        dblHeight: 0.00,
+                                        dblVolume: 0.00,
+                                        dblMaxQty: 0.00,
+                                        intSort: uom.intSort
                                     });
                                     current.tblICItemUOMs().add(newItemUOM);
                                 });
@@ -706,6 +758,26 @@ Ext.define('Inventory.view.BundleViewController', {
         i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('Inventory.view.Item', grid, 'intBundleItemId');
     },
 
+    onGLAccountSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepAccount');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colGLAccountId') {
+            current.set('intAccountId', records[0].get('intAccountId'));
+            current.set('strDescription', records[0].get('strDescription'));
+        }
+        else if (combo.column.itemId === 'colGLAccountCategory') {
+            current.set('intAccountCategoryId', records[0].get('intAccountCategoryId'));
+            current.set('intAccountId', null);
+            current.set('strAccountId', null);
+            current.set('strDescription', null);
+        }
+    },    
+
     init: function(application) {
         this.control({
             "#cboType": {
@@ -751,7 +823,13 @@ Ext.define('Inventory.view.BundleViewController', {
             },
             "#cboAddOnUOM": {
                 select: this.onAddOnSelect
-            }
+            },
+            "#cboGLAccountId": {
+                select: this.onGLAccountSelect
+            },
+            "#cboAccountCategory": {
+                select: this.onGLAccountSelect
+            }                        
         });
     }
 });

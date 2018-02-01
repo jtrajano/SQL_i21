@@ -10,7 +10,8 @@ Ext.define('Inventory.view.BundleViewModel', {
         'Inventory.store.BufferedUnitMeasure',
         'Inventory.store.BufferedBrand',
         'Inventory.store.BufferedCommodity',
-        'Inventory.store.BufferedCategory'
+        'Inventory.store.BufferedCategory',
+        'GeneralLedger.store.BufAccountCategoryGroup'
     ],
 
     stores: {
@@ -101,7 +102,11 @@ Ext.define('Inventory.view.BundleViewModel', {
         
         bundleUOM: {
             type: 'icbuffereditemunitmeasure'
-        }
+        },
+
+        accountCategory: {
+            type: 'glbufaccountcategorygroup'
+        }        
     },    
 
     formulas: {
@@ -119,8 +124,20 @@ Ext.define('Inventory.view.BundleViewModel', {
 
         readOnlyOnKitType: function (get){
             return get('current.strBundleType') == 'Kit';
-        }
-        
+        },
+
+        accountCategoryFilter: function(get) {
+            var category = get('grdGlAccounts.selection.strAccountCategory');
+            switch(category) {
+                case 'AP Clearing':
+                case 'Inventory':
+                case 'Work In Progress':
+                case 'Inventory In-Transit':
+                    return category;
+                default:
+                    return 'General|^|' + category;
+            }
+        }        
 
     }
 
