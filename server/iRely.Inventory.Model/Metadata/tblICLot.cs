@@ -147,6 +147,7 @@ namespace iRely.Inventory.Model
         public int? intLotStatusId { get; set; }
         public string strLotStatus { get; set; }
         public string strLotPrimaryStatus { get; set; }
+        public int? intOwnershipType { get; set; }
 
         public string strOwnerName { get; set; }
         public int? intItemOwnerId { get; set; }

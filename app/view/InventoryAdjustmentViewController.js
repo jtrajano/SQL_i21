@@ -994,6 +994,10 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('strNewSubLocation', null);
             current.set('intNewStorageLocationId', null);
             current.set('strNewStorageLocation', null);
+            var iowt = record.get('intOwnershipType');
+            var sowt = iowt === 1 ? 'Own' : 'Storage';
+            current.set('intOwnershipType', iowt);
+            current.set('strOwnershipType', sowt);
             
         }
         else if (combo.itemId === 'cboNewUOM') {
@@ -1017,6 +1021,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 , currentItemUOMUnitQty = current.get('dblItemUOMUnitQty')
                 , selectedItemUOMUnitQty = record.get('dblUnitQty')
                 , selectedOnHandQty = record.get('dblOnHand')
+                , selectedOnStorageQty = record.get('dblUnitStorage')
                 , newUnitCost;
 
             if (Ext.isNumeric(currentUnitCost)
@@ -1040,8 +1045,11 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             var adjustByQuantity = current.get('dblAdjustByQuantity')
             newQty = null;
 
-            if (Ext.isNumeric(selectedOnHandQty) && Ext.isNumeric(adjustByQuantity)) {
-                newQty = selectedOnHandQty + adjustByQuantity;
+            var qty = selectedOnHandQty;
+            if(current.get('intOwnershipType') === 2)
+                qty = selectedOnStorageQty;
+            if (Ext.isNumeric(qty) && Ext.isNumeric(adjustByQuantity)) {
+                newQty = qty + adjustByQuantity;
             }
 
             current.set('dblNewQuantity', newQty);
@@ -1055,7 +1063,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             }
 
             //Set Available Quantity Per UOm
-            current.set('dblQuantity', record.get('dblOnHand'));
+            current.set('dblQuantity', qty);
         }
 
         else if (combo.itemId === 'cboNewWeightUOM') {
