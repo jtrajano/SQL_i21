@@ -16,6 +16,7 @@ IF EXISTS(SELECT NULL FROM @InvoiceIds WHERE [strSourceTransaction] IN ('Card Fu
 BEGIN
 	DELETE FROM @IIDs
 	INSERT INTO @IIDs SELECT * FROM @InvoiceIds WHERE [strSourceTransaction] IN ('Card Fueling Transaction','CF Tran','CF Invoice')
+
 	DELETE FROM ARTD
 	FROM
 		tblARTransactionDetail ARTD WITH (NOLOCK)

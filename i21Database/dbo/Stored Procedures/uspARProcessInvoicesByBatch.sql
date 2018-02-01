@@ -30,8 +30,12 @@ BEGIN
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
 SET NOCOUNT ON  
-SET XACT_ABORT OFF  
 SET ANSI_WARNINGS OFF
+
+IF @RaiseError = 1
+	SET XACT_ABORT ON
+ELSE
+	SET XACT_ABORT OFF
 
 DECLARE @CurrentErrorMessage	NVARCHAR(250)
 		,@ZeroDecimal			NUMERIC(18, 6)
@@ -44,10 +48,6 @@ SET @DateNow = CAST(GETDATE() AS DATE)
 SET @InitTranCount = @@TRANCOUNT
 SET @Savepoint = SUBSTRING(('ARProcessInvoicesByBatch' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
 
---#mark modification 101
-DECLARE @NewBathId NVARCHAR(40)
-EXEC dbo.uspSMGetStartingNumber 3, @NewBathId OUT
---#mark modification 101
 
 DECLARE @SourceColumn AS NVARCHAR (500)
 		,@SourceTable AS NVARCHAR (500)	
@@ -59,6 +59,9 @@ BEGIN
 	ELSE
 		SAVE TRANSACTION @Savepoint
 END
+
+DECLARE @NewBathId NVARCHAR(40)
+EXEC dbo.uspSMGetStartingNumber 3, @NewBathId OUT
 
 BEGIN TRY
 	IF OBJECT_ID('tempdb..#TempInvoiceEntries') IS NOT NULL DROP TABLE #TempInvoiceEntries	
@@ -173,6 +176,8 @@ BEGIN TRY
 			,@UnPostedExistingCount			= 0
 			,@BatchIdForExistingUnPostRecap	= ''
 			,@RecapUnPostedExistingCount	= 0
+			,@RaiseError					= @RaiseError
+			,@TranErrorMessage				= @ErrorMessage		OUTPUT
 			,@NewIntegrationLogId			= @IntegrationLogId	OUTPUT
 
 

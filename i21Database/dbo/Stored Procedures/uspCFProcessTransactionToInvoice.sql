@@ -135,7 +135,6 @@ INSERT INTO @EntriesForInvoice(
 	,[ysnUseOriginIdAsInvoiceNumber]
 	,[strPONumber]
 	,[strBOLNumber]
-	,[strDeliverPickup]
 	,[strComments]
 	,[intShipToLocationId]
 	,[intBillToLocationId]
@@ -225,7 +224,6 @@ SELECT
 	,[ysnUseOriginIdAsInvoiceNumber]		= 1
 	,[strPONumber]							= cfTrans.strPONumber
 	,[strBOLNumber]							= ''
-	,[strDeliverPickup]						= cfTrans.strDeliveryPickupInd
 	,[strComments]							= ''
 	,[intShipToLocationId]					= I.[intShipToLocationId]
 	,[intBillToLocationId]					= I.[intBillToLocationId]
@@ -374,7 +372,6 @@ INSERT INTO @InvoiceEntriesTEMP(
 ,[ysnUseOriginIdAsInvoiceNumber]
 ,[strPONumber]
 ,[strBOLNumber]
-,[strDeliverPickup]
 ,[strComments]
 ,[intShipToLocationId]
 ,[intBillToLocationId]
@@ -458,7 +455,6 @@ ROW_NUMBER() OVER(ORDER BY intEntityCustomerId ASC)
 ,[ysnUseOriginIdAsInvoiceNumber]
 ,[strPONumber]
 ,[strBOLNumber]
-,[strDeliverPickup]
 ,[strComments]
 ,[intShipToLocationId]
 ,[intBillToLocationId]

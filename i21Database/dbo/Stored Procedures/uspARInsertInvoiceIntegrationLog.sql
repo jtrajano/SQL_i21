@@ -14,16 +14,29 @@
 	,@UnPostedExistingCount			INT				= 0
 	,@BatchIdForExistingUnPostRecap	NVARCHAR(50)	= ''
 	,@RecapUnPostedExistingCount	INT				= 0
-	,@NewIntegrationLogId			INT				= 0	OUTPUT
+	,@RaiseError					BIT				= 0
+	,@TranErrorMessage				NVARCHAR(250)	= NULL	OUTPUT
+	,@NewIntegrationLogId			INT				= NULL	OUTPUT
 AS
 BEGIN
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
-SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+IF @RaiseError = 1
+	SET XACT_ABORT ON
+ELSE
+	SET XACT_ABORT OFF
 
+DECLARE  @InitTranCount			INT
+		,@Savepoint				NVARCHAR(32)
+
+SET @InitTranCount = @@TRANCOUNT
+SET @Savepoint = SUBSTRING(('ARInsertInvoiceIntegrationLog' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
+
+
+BEGIN TRY
 	INSERT INTO [tblARInvoiceIntegrationLog]
 		([dtmDate]
 		,[intEntityId]
@@ -62,6 +75,40 @@ SET ANSI_WARNINGS OFF
 		,[intConcurrencyId]					= 1
 
 	SET @NewIntegrationLogId = SCOPE_IDENTITY()
+END TRY
+BEGIN CATCH
+	IF ISNULL(@RaiseError,0) = 0
+	BEGIN
+		IF @InitTranCount = 0
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION
+		ELSE
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION @Savepoint
+	END
+
+	SET @TranErrorMessage = ERROR_MESSAGE();
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(@TranErrorMessage, 16, 1);
+	RETURN 0;
+END CATCH
+
+IF ISNULL(@RaiseError,0) = 0
+BEGIN
+
+	IF @InitTranCount = 0
+		BEGIN
+			IF (XACT_STATE()) = -1
+				ROLLBACK TRANSACTION
+			IF (XACT_STATE()) = 1
+				COMMIT TRANSACTION
+		END		
+	ELSE
+		BEGIN
+			IF (XACT_STATE()) = -1
+				ROLLBACK TRANSACTION  @Savepoint
+		END	
+END
 	
 RETURN 1
 END
