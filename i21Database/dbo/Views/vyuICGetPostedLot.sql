@@ -29,6 +29,7 @@ SELECT	intLotId				= Lot.intLotId
 		,strLotPrimaryStatus	= LotStatus.strPrimaryStatus
 		,strOwnerName			= entity.strName
 		,intItemOwnerId			= Lot.intItemOwnerId
+		,intOwnershipType		= Lot.intOwnershipType
 FROM	dbo.tblICLot Lot INNER JOIN tblICItem Item 
 			ON Item.intItemId = Lot.intItemId
 		LEFT JOIN tblSMCompanyLocation Location 
