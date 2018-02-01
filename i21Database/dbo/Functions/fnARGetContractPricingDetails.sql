@@ -33,17 +33,20 @@ RETURNS @returntable TABLE
 AS
 BEGIN
 
-DECLARE	 @Price				NUMERIC(18,6)
-		,@Pricing			NVARCHAR(250)
-		,@ContractNumber	NVARCHAR(50)
-		,@ContractSeq		INT
-		,@AvailableQuantity	NUMERIC(18,6)
-		,@UnlimitedQuantity	BIT
-		,@PricingType		NVARCHAR(50)
-		,@SubCurrencyRate	NUMERIC(18,6)
-		,@SubCurrency		NVARCHAR(40)
-		,@PriceUOM			NVARCHAR(50)
-		,@termId			INT
+DECLARE	 @Price					NUMERIC(18,6)
+		,@Pricing				NVARCHAR(250)
+		,@ContractNumber		NVARCHAR(50)
+		,@ContractSeq			INT
+		,@AvailableQuantity		NUMERIC(18,6)
+		,@UnlimitedQuantity		BIT
+		,@PricingType			NVARCHAR(50)
+		,@SubCurrencyRate		NUMERIC(18,6)
+		,@SubCurrency			NVARCHAR(40)
+		,@PriceUOM				NVARCHAR(50)
+		,@termId				INT
+		,@LimitContractLocation	BIT = 0
+
+	SET @LimitContractLocation = ISNULL((SELECT TOP 1 ysnLimitCTByLocation FROM dbo.tblCTCompanyPreference), 0)
 
 	IF ISNULL(@ContractDetailId,0) <> 0 AND ISNULL(@ContractHeaderId,0) = 0
 	BEGIN
@@ -71,7 +74,7 @@ DECLARE	 @Price				NUMERIC(18,6)
 		[vyuARCustomerContract] ARCC
 	WHERE
 		ARCC.[intEntityCustomerId] = @CustomerId
-		AND ARCC.[intCompanyLocationId] = @LocationId
+		AND (@LimitContractLocation = 0 OR ARCC.[intCompanyLocationId] = @LocationId)
 		AND (ARCC.[intItemUOMId] = @ItemUOMId OR @ItemUOMId IS NULL)
 		AND ARCC.[intItemId] = @ItemId
 		AND ((ISNULL(@OriginalQuantity,0.00) + ARCC.[dblAvailableQty] >= @Quantity) OR ARCC.[ysnUnlimitedQuantity] = 1 OR ISNULL(@AllowQtyToExceed,0) = 1)
@@ -153,7 +156,7 @@ DECLARE	 @Price				NUMERIC(18,6)
 		[vyuARCustomerContract] ARCC
 	WHERE
 		ARCC.[intEntityCustomerId] = @CustomerId
-		AND ARCC.[intCompanyLocationId] = @LocationId
+		AND (@LimitContractLocation = 0 OR ARCC.[intCompanyLocationId] = @LocationId)
 		AND (ARCC.[intItemUOMId] = @ItemUOMId OR @ItemUOMId IS NULL)
 		AND ARCC.[intItemId] = @ItemId
 		AND (((ARCC.[dblAvailableQty]) >= @Quantity) OR ARCC.[ysnUnlimitedQuantity] = 1 OR ISNULL(@AllowQtyToExceed,0) = 1)
