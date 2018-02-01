@@ -566,6 +566,12 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     hidden: true
                                                                 },
                                                                 {
+                                                                    dataIndex: 'intOwnershipType',
+                                                                    text: 'Ownership Type',
+                                                                    flex: 1,
+                                                                    dataType: 'numeric'
+                                                                },
+                                                                {
                                                                     dataIndex: 'intWeightUOMId',
                                                                     dataType: 'numeric',
                                                                     text: 'Weight UOM Id',

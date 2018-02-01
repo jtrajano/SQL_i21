@@ -136,6 +136,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strLotPrimaryStatus).HasColumnName("strLotPrimaryStatus");
             this.Property(t => t.strOwnerName).HasColumnName("strOwnerName");
             this.Property(t => t.intItemOwnerId).HasColumnName("intItemOwnerId");
+            this.Property(t => t.intOwnershipType).HasColumnName("intOwnershipType");
         }
     }
 }
