@@ -1117,6 +1117,7 @@ Ext.define('Inventory.view.Bundle', {
                                                                     {
                                                                         xtype: 'advancefiltergrid',
                                                                         reference: 'grdLocationStore',
+                                                                        border: false,
                                                                         itemId: 'grdLocationStore',
                                                                         margin: -1,
                                                                         width: 700,
@@ -1229,6 +1230,7 @@ Ext.define('Inventory.view.Bundle', {
                                                                 items: [
                                                                     {
                                                                         xtype: 'advancefiltergrid',
+                                                                        border: false,
                                                                         itemId: 'grdItemSubLocations',
                                                                         title: 'Storage Locations',
                                                                         forceFit: true,

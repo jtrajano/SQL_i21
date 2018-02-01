@@ -11,7 +11,10 @@ Ext.define('Inventory.view.BundleViewModel', {
         'Inventory.store.BufferedBrand',
         'Inventory.store.BufferedCommodity',
         'Inventory.store.BufferedCategory',
-        'GeneralLedger.store.BufAccountCategoryGroup'
+        'Inventory.store.BufferedItemLocation',
+        'Inventory.store.BufferedCommodity',
+        'GeneralLedger.store.BufAccountCategoryGroup',
+        'i21.store.CompanyLocationSubLocationBuffered',
     ],
 
     stores: {
@@ -106,7 +109,34 @@ Ext.define('Inventory.view.BundleViewModel', {
 
         accountCategory: {
             type: 'glbufaccountcategorygroup'
-        }        
+        },
+
+        copyLocation: {
+            type: 'icbuffereditemlocation'
+        },
+
+        subLocations: {
+            type: 'smcompanylocationsublocationbuffered'
+        },
+
+        commodityList: {
+            autoLoad: true,
+            type: 'icbufferedcommodity',
+            proxy: {
+                extraParams: {
+                    include: 'tblICCommodityUnitMeasures.tblICUnitMeasure, tblICCommodityAccounts.tblGLAccount, tblICCommodityAccounts.tblGLAccountCategory'
+                },
+                type: 'rest',
+                api: {
+                    read: './Inventory/api/Commodity/Search'
+                },
+                reader: {
+                    type: 'json',
+                    rootProperty: 'data',
+                    messageProperty: 'message'
+                }
+            }
+        }
     },    
 
     formulas: {

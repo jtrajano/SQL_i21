@@ -3341,6 +3341,7 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "border": false,
                                                                 "columnLines": true,
                                                                 "designer|createAlias": "advancefiltergrid",
                                                                 "itemId": "grdLocationStore",
@@ -3358,7 +3359,8 @@
                                                                 "reference": "string",
                                                                 "title": "string",
                                                                 "width": "auto",
-                                                                "scrollable": "boolean"
+                                                                "scrollable": "boolean",
+                                                                "border": "boolean"
                                                             },
                                                             "name": "MyGridPanel2",
                                                             "designerId": "dbc1b78f-409c-4d7a-876c-3871c3c2664d",
@@ -3667,6 +3669,7 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "border": false,
                                                                 "designer|createAlias": "advancefiltergrid",
                                                                 "forceFit": true,
                                                                 "itemId": "grdItemSubLocations",
@@ -3682,7 +3685,8 @@
                                                                 "margin": "auto",
                                                                 "padding": "auto",
                                                                 "title": "string",
-                                                                "scrollable": "boolean"
+                                                                "scrollable": "boolean",
+                                                                "border": "boolean"
                                                             },
                                                             "name": "MyGridPanel18",
                                                             "designerId": "35c1eca7-d069-442a-8f26-78d4e37d3fcb",
