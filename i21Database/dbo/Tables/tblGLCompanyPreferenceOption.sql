@@ -9,7 +9,7 @@
 	[ysnConsolidatingParent] [bit] NULL,
 	[intDefaultVisibleOldAccountSystemId] INT NULL,
 	[intDBVersion] INT NULL,
-	[ysnHistoricalJournalImported] INT NULL
+	[ysnHistoricalJournalImported] BIT NULL,
     CONSTRAINT [PK_tblGLCompanyPreferenceOption] PRIMARY KEY ([intCompanyPreferenceOptionId])
 )
 GO

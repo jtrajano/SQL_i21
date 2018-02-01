@@ -152,6 +152,7 @@
     <None Include="Scripts\AP\UpdateImportedBills1099.sql" />
     <None Include="Scripts\SM\InsertOriginTaxClassXRef.sql" />
     <None Include="dbo\Stored Procedures\uspGLImportOriginHistoricalJournal.sql" />
+	<Build Include="dbo\Stored Procedures\uspGLUpdateOldAccountId.sql" />
     <None Include="dbo\Stored Procedures\uspCMImportBanksFromOrigin.sql" />
     <None Include="dbo\Stored Procedures\uspGRImportStorageSchedule.sql" />
     <None Include="dbo\Stored Procedures\uspGRImportDiscountSchedule.sql" />
