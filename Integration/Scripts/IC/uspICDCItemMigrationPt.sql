@@ -274,7 +274,7 @@ order by CL.intCompanyLocationId, srt
 -- Section 5
 ------------------------------------------------------------------------------------------------------------------
 --price level 1
-This is the retail price and is imported as standard pricing
+--This is the retail price and is imported as standard pricing
 ---------------------------------------------------------------------------------------------------------------------
 --price level 2
 INSERT INTO [dbo].[tblICItemPricingLevel] (
