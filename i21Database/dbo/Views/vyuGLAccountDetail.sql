@@ -2,7 +2,7 @@
 AS
 	SELECT      TOP 1000000 
 				account.intConcurrencyId,account.strAccountId,replace(account.strAccountId,'-','') strAccountId1,
-				map.strOldAccountId,replace(map.strOldAccountId,'-','') strOldAccountId1,
+				account.strOldAccountId,replace(account.strOldAccountId,'-','') strOldAccountId1,
 				account.strDescription, grp.strAccountGroup, grp.strAccountType, cat.strAccountCategory, 
                 account.strComments, account.strCashFlow, account.ysnActive, account.ysnSystem, account.ysnRevalue, u.intAccountUnitId, 
                 u.strUOMCode, account.intAccountId, account.intCurrencyID, account.intCurrencyExchangeRateTypeId, account.strNote, 
@@ -17,8 +17,7 @@ FROM            dbo.tblGLAccount account INNER JOIN
                 dbo.tblSMCurrency curr ON account.intCurrencyID = curr.intCurrencyID LEFT OUTER JOIN
                 dbo.tblGLAccountUnit u ON account.intAccountUnitId = u.intAccountUnitId LEFT OUTER JOIN
 				dbo.tblGLCOACrossReference coa ON account.intAccountId =coa.inti21Id LEFT OUTER JOIN
-                dbo.tblGLAccountGroup grp ON account.intAccountGroupId = grp.intAccountGroupId LEFT OUTER JOIN
-				dbo.tblGLCrossReferenceMapping map ON account.intAccountId = map.intAccountId  
-				and map.intAccountSystemId in (select [intDefaultVisibleOldAccountSystemId] from tblGLCompanyPreferenceOption)
+                dbo.tblGLAccountGroup grp ON account.intAccountGroupId = grp.intAccountGroupId
+				
 WHERE        (struc.strType = 'Primary')
 GO
