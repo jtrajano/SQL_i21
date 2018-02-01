@@ -40,8 +40,8 @@ BEGIN TRY
 		,intLineNumber INT
 		)
 
-	UPDATE tblMFEDI943
-	SET strDepositorOrderNumber = REPLACE(LTRIM(REPLACE(strDepositorOrderNumber, '0', ' ')), ' ', '0')
+	--UPDATE tblMFEDI943
+	--SET strDepositorOrderNumber = REPLACE(LTRIM(REPLACE(strDepositorOrderNumber, '0', ' ')), ' ', '0')
 
 	DECLARE @ReceiptStagingTable ReceiptStagingTable
 	DECLARE @OtherCharges ReceiptOtherChargesTableType
@@ -162,29 +162,26 @@ BEGIN TRY
 				SELECT @strErrorMessage = @strErrorMessage + ' Qty shipped cannot be blank for the item number ' + @strItemNo + '. '
 			END
 
-			IF EXISTS (
+			IF NOT EXISTS (
 					SELECT *
 					FROM tblMFEDI943 EDI943
+					JOIN tblICItem I ON I.strItemNo = EDI943.strVendorItemNumber
+					JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
+					JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+						AND UM.strUnitMeasure = EDI943.strUOM
 					WHERE strDepositorOrderNumber = @strOrderNo
-						AND NOT EXISTS (
-							SELECT *
-							FROM tblICItem I
-							WHERE I.strItemNo = EDI943.strVendorItemNumber
-								AND I.strExternalGroup <> ''
-							)
 					)
 			BEGIN
 				SELECT @strItemNo = ''
 
 				SELECT @strItemNo = @strItemNo + strVendorItemNumber + ', '
 				FROM tblMFEDI943 EDI943
+				JOIN tblICItem I ON I.strItemNo = EDI943.strVendorItemNumber
+				JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
+				LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+					AND UM.strUnitMeasure = EDI943.strUOM
 				WHERE strDepositorOrderNumber = @strOrderNo
-					AND NOT EXISTS (
-						SELECT *
-						FROM tblICItem I
-						WHERE I.strItemNo = EDI943.strVendorItemNumber
-							AND I.strExternalGroup <> ''
-						)
+					AND UM.intUnitMeasureId IS NULL
 
 				IF len(@strItemNo) > 0
 					SELECT @strItemNo = Left(@strItemNo, len(@strItemNo) - 1)
@@ -645,6 +642,7 @@ BEGIN TRY
 						,strState = @strShipToState
 						,strZipCode = @strShipToZip
 					WHERE intEntityLocationId = @intEntityLocationId
+
 					--Update Customer Location Notification
 					UPDATE tblMFEDI943
 					SET ysnNotify = 1
@@ -775,7 +773,7 @@ BEGIN TRY
 				AND IL.intLocationId IS NOT NULL
 			JOIN tblEMEntityLocation EL ON 1 = 1
 				AND EL.intEntityLocationId = @intEntityLocationId
-			LEFT JOIN dbo.tblICUnitMeasure UM ON UM.strUnitMeasure = I.strExternalGroup
+			LEFT JOIN dbo.tblICUnitMeasure UM ON UM.strUnitMeasure = EDI.strUOM
 			LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
 				AND UM.intUnitMeasureId = IU.intUnitMeasureId
 			LEFT JOIN dbo.tblICItemUOM IU1 ON IU1.intItemId = I.intItemId
@@ -1096,41 +1094,47 @@ BEGIN TRY
 				,strWarehouseCode
 				,intWarehouseCodeType
 				,ysnNotify
+				,intInventoryReceiptItemId
 				)
-			SELECT intEDI943Id
-				,intTransactionId
-				,strCustomerId
-				,strType
-				,strDepositorOrderNumber
-				,dtmDate
-				,strShipmentId
-				,strActionCode
-				,strShipFromName
-				,strShipFromAddress1
-				,strShipFromAddress2
-				,strShipFromCity
-				,strShipFromState
-				,strShipFromZip
-				,strShipFromCode
-				,strTransportationMethod
-				,strSCAC
-				,dblTotalNumberofUnitsShipped
-				,dblTotalWeight
-				,strWeightUOM
-				,strVendorItemNumber
-				,strDescription
-				,dblQtyShipped
-				,strUOM
-				,dtmCreated
+			SELECT EDI943.intEDI943Id
+				,EDI943.intTransactionId
+				,EDI943.strCustomerId
+				,EDI943.strType
+				,EDI943.strDepositorOrderNumber
+				,EDI943.dtmDate
+				,EDI943.strShipmentId
+				,EDI943.strActionCode
+				,EDI943.strShipFromName
+				,EDI943.strShipFromAddress1
+				,EDI943.strShipFromAddress2
+				,EDI943.strShipFromCity
+				,EDI943.strShipFromState
+				,EDI943.strShipFromZip
+				,EDI943.strShipFromCode
+				,EDI943.strTransportationMethod
+				,EDI943.strSCAC
+				,EDI943.dblTotalNumberofUnitsShipped
+				,EDI943.dblTotalWeight
+				,EDI943.strWeightUOM
+				,EDI943.strVendorItemNumber
+				,EDI943.strDescription
+				,EDI943.dblQtyShipped
+				,EDI943.strUOM
+				,EDI943.dtmCreated
 				,'SUCCESS'
 				,@intInventoryReceiptId
-				,strFileName
-				,strParentLotNumber
-				,intLineNumber
-				,strWarehouseCode
-				,intWarehouseCodeType
-				,ysnNotify
-			FROM tblMFEDI943
+				,EDI943.strFileName
+				,EDI943.strParentLotNumber
+				,EDI943.intLineNumber
+				,EDI943.strWarehouseCode
+				,EDI943.intWarehouseCodeType
+				,EDI943.ysnNotify
+				,RI.intInventoryReceiptItemId
+			FROM tblMFEDI943 EDI943
+			JOIN tblICItem I ON I.strItemNo = EDI943.strVendorItemNumber
+			JOIN tblICInventoryReceiptItem RI ON RI.intItemId = I.intItemId
+				AND RI.intInventoryReceiptId = @intInventoryReceiptId
+				--AND EDI943.intLineNumber = RI.intLineNo
 			WHERE strDepositorOrderNumber = @strOrderNo
 
 			DELETE

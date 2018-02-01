@@ -28,7 +28,7 @@ BEGIN TRY
 		,@strShipToCity NVARCHAR(MAX)
 		,@strShipToState NVARCHAR(MAX)
 		,@strShipToZip NVARCHAR(MAX)
-		,@dtmShipmentDate datetime
+		,@dtmShipmentDate DATETIME
 		,@dtmDeliveryRequestedDate DATETIME
 		,@intFunctionalCurrencyId INT
 		,@intDefaultForexRateTypeId INT
@@ -45,8 +45,8 @@ BEGIN TRY
 		,strOrderNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		)
 
-	UPDATE tblMFEDI940
-	SET strDepositorOrderNumber = REPLACE(LTRIM(REPLACE(strDepositorOrderNumber, '0', ' ')), ' ', '0')
+	--UPDATE tblMFEDI940
+	--SET strDepositorOrderNumber = REPLACE(LTRIM(REPLACE(strDepositorOrderNumber, '0', ' ')), ' ', '0')
 
 	DECLARE @tblMFSession TABLE (intEDI940Id INT)
 
@@ -103,7 +103,7 @@ BEGIN TRY
 				,@strCustomerCode = NULL
 				,@strShipToName = NULL
 				,@intInventoryShipmentId = NULL
-				,@dtmShipmentDate=NULL
+				,@dtmShipmentDate = NULL
 				,@dtmDeliveryRequestedDate = NULL
 
 			SELECT @strErrorMessage = ''
@@ -114,7 +114,7 @@ BEGIN TRY
 
 			SELECT @strCustomerCode = strCustomerCode
 				,@strShipToName = strShipToName
-				,@dtmShipmentDate=strShipmentDate
+				,@dtmShipmentDate = strShipmentDate
 				,@dtmDeliveryRequestedDate = strDeliveryRequestedDate
 			FROM tblMFEDI940 EDI940
 			WHERE strDepositorOrderNumber = @strOrderNo
@@ -185,29 +185,26 @@ BEGIN TRY
 					SELECT @strErrorMessage = @strErrorMessage + 'Qty Ordered cannot be blank for the item number ' + @strItemNo + '.'
 			END
 
-			IF EXISTS (
+			IF NOT EXISTS (
 					SELECT *
 					FROM tblMFEDI940 EDI940
+					JOIN tblICItem I ON I.strItemNo = EDI940.strCustomerItemNumber
+					JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
+					JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+						AND UM.strUnitMeasure = EDI940.strUOM
 					WHERE strDepositorOrderNumber = @strOrderNo
-						AND NOT EXISTS (
-							SELECT *
-							FROM tblICItem I
-							WHERE I.strItemNo = EDI940.strCustomerItemNumber
-								AND I.strExternalGroup <> ''
-							)
 					)
 			BEGIN
 				SELECT @strItemNo = ''
 
 				SELECT @strItemNo = @strItemNo + strCustomerItemNumber + ', '
 				FROM tblMFEDI940 EDI940
+				JOIN tblICItem I ON I.strItemNo = EDI940.strCustomerItemNumber
+				JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
+				LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+					AND UM.strUnitMeasure = EDI940.strUOM
 				WHERE strDepositorOrderNumber = @strOrderNo
-					AND NOT EXISTS (
-						SELECT *
-						FROM tblICItem I
-						WHERE I.strItemNo = EDI940.strCustomerItemNumber
-							AND I.strExternalGroup <> ''
-						)
+					AND UM.intUnitMeasureId IS NULL
 
 				IF @strErrorMessage <> ''
 					SELECT @strErrorMessage = @strErrorMessage + ' Qty UOM cannot be blank for the item number ' + @strItemNo + '.'
@@ -705,6 +702,7 @@ BEGIN TRY
 						,strState = @strShipToState
 						,strZipCode = @strShipToZip
 					WHERE intEntityLocationId = @intEntityLocationId
+
 					--Update Customer Location Notification
 					UPDATE tblMFEDI940
 					SET ysnNotify = 1
@@ -786,7 +784,7 @@ BEGIN TRY
 					AND IL.intLocationId IS NOT NULL
 				JOIN tblEMEntityLocation EL ON 1 = 1
 					AND EL.intEntityLocationId = @intEntityLocationId
-				LEFT JOIN dbo.tblICUnitMeasure UM ON UM.strUnitMeasure = I.strExternalGroup
+				LEFT JOIN dbo.tblICUnitMeasure UM ON UM.strUnitMeasure = EDI.strUOM
 				LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
 					AND UM.intUnitMeasureId = IU.intUnitMeasureId
 				WHERE EDI.strDepositorOrderNumber = @strOrderNo
@@ -882,7 +880,7 @@ BEGIN TRY
 					AND IL.intLocationId IS NOT NULL
 				JOIN tblEMEntityLocation EL ON 1 = 1
 					AND EL.intEntityLocationId = @intEntityLocationId
-				LEFT JOIN dbo.tblICUnitMeasure UM ON UM.strUnitMeasure = I.strExternalGroup
+				LEFT JOIN dbo.tblICUnitMeasure UM ON UM.strUnitMeasure = EDI.strUOM
 				LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
 					AND UM.intUnitMeasureId = IU.intUnitMeasureId
 				WHERE EDI.strDepositorOrderNumber = @strOrderNo

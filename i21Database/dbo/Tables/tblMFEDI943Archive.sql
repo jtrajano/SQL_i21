@@ -33,4 +33,5 @@
 	,intWarehouseCodeType int
 	,ysnNotify bit
 	,ysnSentEMail bit
+	,intInventoryReceiptItemId int
 	)
