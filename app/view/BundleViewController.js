@@ -1417,6 +1417,560 @@ Ext.define('Inventory.view.BundleViewController', {
         }
     },    
 
+    getSalePrice: function (price, errorCallback) {
+        var salePrice = 0;
+        switch (price.pricingMethod) {
+            case "None":
+                salePrice = price.standardCost;
+                break;
+            case "Fixed Dollar Amount":
+                salePrice = price.standardCost + price.amount;
+                break;
+            case "Markup Standard Cost":
+                salePrice = (price.standardCost * (price.amount / 100)) + price.standardCost;
+                break;
+            case "Percent of Margin":
+                salePrice = price.amount < 100 ? (price.standardCost / (1 - (price.amount / 100))) : errorCallback();
+                break;
+            case "Markup Last Cost":
+                salePrice = (price.lastCost * (price.amount / 100)) + price.lastCost;
+                break;
+            case "Markup Avg Cost":
+                salePrice = (price.avgCost * (price.amount / 100)) + price.avgCost;
+                break;
+            }
+        //return salePrice;
+        return ic.utils.Math.round(salePrice, 6);
+    },
+
+    getPricingLevelUnitPrice: function (price) {
+        var unitPrice = price.salePrice;
+        var msrpPrice = price.msrpPrice;
+        var standardCost = price.standardCost;
+        var lastCost = price.lastCost;
+        var avgCost = price.avgCost;
+        var amt = price.amount;
+        var qty = 1 //This will now default to 1 based on IC-2642.
+        var retailPrice = 0;
+        switch (price.pricingMethod) {
+            case 'Discount Retail Price':
+                unitPrice = unitPrice - (unitPrice * (amt / 100));
+                retailPrice = unitPrice * qty
+                break;
+            case 'MSRP Discount':
+                msrpPrice = msrpPrice - (msrpPrice * (amt / 100));
+                retailPrice = msrpPrice * qty
+                break;
+            case 'Percent of Margin (MSRP)':
+                var percent = amt / 100;
+                unitPrice = ((msrpPrice - standardCost) * percent) + standardCost;
+                retailPrice = unitPrice * qty;
+                break;
+            case 'Fixed Dollar Amount':
+                unitPrice = (standardCost + amt);
+                retailPrice = unitPrice * qty;
+                break;
+            case 'Markup Standard Cost':
+                var markup = (standardCost * (amt / 100));
+                unitPrice = (standardCost + markup);
+                retailPrice = unitPrice * qty;
+                break;
+            case 'Percent of Margin':
+                unitPrice = (standardCost / (1 - (amt / 100)));
+                retailPrice = unitPrice * qty;
+                break;
+            case 'None':
+                break;
+            case 'Markup Last Cost':
+                var markup = (lastCost * (amt / 100));
+                unitPrice = (lastCost + markup);
+                retailPrice = unitPrice * qty;
+                break;
+            case 'Markup Avg Cost':
+                var markup = (avgCost * (amt / 100));
+                unitPrice = (avgCost + markup);
+                retailPrice = unitPrice * qty;
+                break;
+            default:
+                retailPrice = 0;
+                break;
+        }
+        //return retailPrice;
+        return ic.utils.Math.round(retailPrice, 6);
+    },
+
+    updatePricing: function (pricing, data, validationCallback) {
+        var me = this;
+        var salePrice = me.getSalePrice({
+            standardCost: data.standardCost,
+            lastCost: data.lastCost,
+            avgCost: data.avgCost,
+            amount: data.amount,
+            pricingMethod: data.pricingMethod
+        }, validationCallback);
+
+        if (iRely.Functions.isEmpty(data.pricingMethod) || data.pricingMethod === 'None') {
+            pricing.set('dblAmountPercent', 0.00);
+        }
+        pricing.set('dblSalePrice', salePrice);
+    },
+
+    updatePricingLevel: function (item, pricing, data) {
+        var me = this;
+        _.each(item.tblICItemPricingLevels().data.items, function (p) {
+            if (p.data.intItemLocationId === pricing.data.intItemLocationId 
+                && p.data.intCurrencyId === i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId')
+            ) {
+                var retailPrice = me.getPricingLevelUnitPrice({
+                    pricingMethod: p.data.strPricingMethod,
+                    salePrice: data.unitPrice,
+                    msrpPrice: data.msrpPrice,
+                    standardCost: data.standardCost,
+                    lastCost: data.lastCost,
+                    avgCost: data.avgCost,
+                    amount: p.data.dblAmountRate,
+                    qty: p.data.dblUnit
+                });
+                p.set('dblUnitPrice', retailPrice);
+            }
+        });
+    },
+
+
+    onPricingChange: function (e, newValue, oldValue) {
+        var vm = this.view.viewModel;
+        var currentItem = vm.data.current;
+        var cep = e.ownerCt.editingPlugin;
+        var currentPricing = cep.activeRecord;
+        var me = this;
+        var win = cep.grid.up('window');
+        var grdPricing = win.down('#grdPricing');
+
+        var data = {
+            unitPrice: currentPricing.data.dblSalePrice,
+            msrpPrice: currentPricing.data.dblMSRPPrice,
+            standardCost: newValue,
+            lastCost: currentPricing.data.dblLastCost,
+            avgCost: currentPricing.data.dblAverageCost,
+            pricingMethod: currentPricing.data.strPricingMethod,
+            amount: currentPricing.data.dblAmountPercent
+        };
+        this.updatePricing(currentPricing, data, function () {
+            win.context.data.validator.validateGrid(grdPricing);
+        });
+        this.updatePricingLevel(currentItem, currentPricing, data);
+    },
+
+    onPricingLocationSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var win = combo.up('window');
+        var grid = combo.up('grid');
+        var grdPricing = win.down('#grdPricing');
+        var grdUnitOfMeasure = win.down('#grdUnitOfMeasure');
+        var plugin = grid.getPlugin('cepPricing');
+        var current = plugin.getActiveRecord();
+
+        if (combo.itemId === 'cboPricingLocation'){
+            current.set('intItemLocationId', records[0].get('intItemLocationId'));
+            current.set('intCompanyLocationId', records[0].get('intCompanyLocationId'));
+        }
+    },
+    
+    onPricingLevelSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var win = combo.up('window');
+        var grid = combo.up('grid');
+        var grdPricing = win.down('#grdPricing');
+        var grdUnitOfMeasure = win.down('#grdUnitOfMeasure');
+        var plugin = grid.getPlugin('cepPricingLevel');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colPricingLevelLocation'){
+            current.set('intItemLocationId', records[0].get('intItemLocationId'));
+            current.set('intLocationId', records[0].get('intLocationId'));
+        }
+        else if (combo.column.itemId === 'colPricingLevelUOM') {
+            current.set('intItemUnitMeasureId', records[0].get('intItemUOMId'));
+            current.set('strUPC', records[0].get('strUpcCode'));
+
+            if (grdUnitOfMeasure.store){
+                var record = grdUnitOfMeasure.store.findRecord('intItemUOMId', records[0].get('intItemUOMId'));
+                if (record){
+                    current.set('dblUnit', record.get('dblUnitQty'));
+                }
+            }
+        }
+        else if (combo.column.itemId === 'colPricingLevelCurrency'){
+            current.set('intCurrencyId', records[0].get('intCurrencyID'));
+
+            if (records[0].get('intCurrencyID') !== i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId')) {
+                current.set('dblUnitPrice', 0);
+            }
+        }
+    },
+
+    onSpecialPricingSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var win = combo.up('window');
+        var grdPricing = win.down('#grdPricing');
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepSpecialPricing');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colSpecialPricingLocation'){
+            current.set('intItemLocationId', records[0].get('intItemLocationId'));
+
+            if (grdPricing.store){
+                var record = grdPricing.store.findRecord('intItemLocationId', records[0].get('intItemLocationId'));
+                if (record){
+                    current.set('dblUnitAfterDiscount', record.get('dblSalePrice'));
+                }
+            }
+            current.set('dtmBeginDate', i21.ModuleMgr.Inventory.getTodayDate());
+        }
+        else if (combo.column.itemId === 'colSpecialPricingUnit') {
+            current.set('intItemUnitMeasureId', records[0].get('intItemUOMId'));
+            current.set('strUPC', records[0].get('strUpcCode'));
+            current.set('dblUnit', records[0].get('dblUnitQty'));
+
+            if (grdPricing.store){
+                var record = grdPricing.store.findRecord('intItemLocationId', current.get('intItemLocationId'));
+                if (record){
+                    current.set('dblUnitAfterDiscount', (records[0].get('dblUnitQty') * record.get('dblSalePrice')));
+                }
+            }
+        }
+        else if (combo.column.itemId === 'colSpecialPricingDiscountBy') {
+            if (records.get('strDescription') === 'Percent') {
+                var discount = current.get('dblUnitAfterDiscount') * current.get('dblDiscount') / 100;
+                var discPrice = current.get('dblUnitAfterDiscount') - discount;
+                current.set('dblDiscountedPrice', discPrice);
+            }
+            else if (records.get('strDescription') === 'Amount') {
+                var discount = current.get('dblDiscount');
+                var discPrice = current.get('dblUnitAfterDiscount') - discount;
+                current.set('dblDiscountedPrice', discPrice);
+            }
+            else if (records.get('strDescription') === 'Terms Rate') {
+                var discount = current.get('dblUnitAfterDiscount') * current.get('dblDiscount') / 100;
+                var discPrice = current.get('dblUnitAfterDiscount') - discount;
+                current.set('dblDiscountedPrice', discPrice);
+            }
+            else { current.set('dblDiscountedPrice', 0.00); }
+        }
+
+        else if (combo.column.itemId === 'colSpecialPricingCurrency'){
+            current.set('intCurrencyId', records[0].get('intCurrencyID'));
+        }
+    },
+
+    onSpecialPricingBeforeQuery: function (obj) {
+        if (obj.combo) {
+            var store = obj.combo.store;
+            var win = obj.combo.up('window');
+            var grid = win.down('#grdSpecialPricing');
+            if (store) {
+                store.remoteFilter = true;
+                store.remoteSort = true;
+            }
+
+            if (obj.combo.itemId === 'cboSpecialPricingDiscountBy') {
+                var promotionType = grid.selection.data.strPromotionType;
+                store.clearFilter();
+                store.filterBy(function (rec, id) {
+                    if (promotionType !== 'Terms Discount' && promotionType !== '') {
+                        if (rec.get('strDescription') !== 'Terms Rate')
+                            return true;
+                        return false;
+                    }
+                    return true;
+                });
+            }
+        }
+    },    
+
+    onSpecialPricingDiscountChange: function(obj, newValue, oldValue, eOpts){
+        var grid = obj.up('grid');
+        var plugin = grid.getPlugin('cepSpecialPricing');
+        var record = plugin.getActiveRecord();
+
+        if (obj.itemId === 'txtSpecialPricingDiscount') {
+            if (record.get('strDiscountBy') === 'Percent') {
+                var discount = record.get('dblUnitAfterDiscount') * newValue / 100;
+                var discPrice = record.get('dblUnitAfterDiscount') - discount;
+                record.set('dblDiscountedPrice', discPrice);
+            }
+            else if (record.get('strDiscountBy') === 'Amount') {
+                var discount = newValue;
+                var discPrice = record.get('dblUnitAfterDiscount') - discount;
+                record.set('dblDiscountedPrice', discPrice);
+            }
+            else if (record.get('strDiscountBy') === 'Terms Rate') {
+                var discount = record.get('dblUnitAfterDiscount') * newValue / 100;
+                var discPrice = record.get('dblUnitAfterDiscount') - discount;
+                record.set('dblDiscountedPrice', discPrice);
+            }
+            else { record.set('dblDiscountedPrice', 0.00); }
+        }
+        else if (obj.itemId === 'txtSpecialPricingUnitPrice') {
+            if (record.get('strDiscountBy') === 'Percent') {
+                var discount = newValue * record.get('dblDiscount') / 100;
+                var discPrice = newValue - discount;
+                record.set('dblDiscountedPrice', discPrice);
+            }
+            else if (record.get('strDiscountBy') === 'Amount') {
+                var discount = record.get('dblDiscount');
+                var discPrice = newValue - discount;
+                record.set('dblDiscountedPrice', discPrice);
+            }
+            else if (record.get('strDiscountBy') === 'Terms Rate') {
+                var discount = newValue * record.get('dblDiscount') / 100;
+                var discPrice = newValue - discount;
+                record.set('dblDiscountedPrice', discPrice);
+            }
+            else { record.set('dblDiscountedPrice', 0.00); }
+        }
+    },
+
+    onPricingGridColumnBeforeRender: function(column) {
+        "use strict";
+        if (!column) return false;
+        var me = this,
+            win = column.up('window');
+
+        // Show or hide the editor based on the selected Field type.
+        column.getEditor = function(record) {
+            var vm = win.viewModel;
+            if (!record) return false;
+            var columnId = column.itemId;
+
+            switch (columnId) {
+                case 'colPricingAmount' :
+                    if (record.get('strPricingMethod') === 'None') {
+                        return false;
+                    }
+                    else {
+                        return Ext.create('Ext.grid.CellEditor', {
+                            field: Ext.widget({
+                                xtype: 'numberfield',
+                                currencyField: true
+                            })
+                        });
+                    }
+                    break;
+            }
+        };
+    },
+
+    getConversionValue: function (unitMeasureId, stockUnitMeasureId, callback) {
+        if (!Ext.isNumeric(unitMeasureId))
+            return;
+
+        if (!Ext.isNumeric(stockUnitMeasureId))
+            return;
+
+        iRely.Msg.showWait('Converting units...');
+        ic.utils.ajax({
+            url: './Inventory/api/Item/GetUnitConversion',
+            method: 'Post',
+            params: {
+                intFromUnitMeasureId: unitMeasureId,
+                intToUnitMeasureId: stockUnitMeasureId
+            }
+        })
+        .subscribe(
+            function (successResponse) {
+                var jsonData = Ext.decode(successResponse.responseText);
+                var result = jsonData && jsonData.message ? jsonData.message.data : 0.00; 
+                if (Ext.isNumeric(result) && callback) {
+                    callback(result);
+                }
+                iRely.Msg.close();
+            },
+
+            function (failureResponse) {
+                 var jsonData = Ext.decode(failureResponse.responseText);
+                 iRely.Msg.close();
+                 iRely.Functions.showErrorDialog(jsonData.message.statusText);
+            }
+        );
+    },            
+
+    beforeUOMStockUnitCheckChange:function(obj, rowIndex, checked, eOpts ){
+        if (obj.dataIndex === 'ysnStockUnit') {
+            var grid = obj.up('grid');
+            var win = obj.up('window');
+            var current = win.viewModel.data.current;
+
+            if (checked === false && current.get('intPatronageCategoryId') > 0)
+                {
+                   iRely.Functions.showErrorDialog("Base Unit is required for Patronage Category.");
+                   return false;
+                }
+        }
+    },    
+
+    onUOMStockUnitCheckChange: function(obj, rowIndex, checked, eOpts ) {
+        var me = this;
+        var grid = obj.up('grid');
+        if (!grid || !grid.view || !grid.store || !grid.store.data) return; 
+
+        var win = obj.up('window');
+        if (!win || !win.viewModel || !win.viewModel.storeInfo) return; 
+
+        var current = grid.view.getRecord(rowIndex);
+        current = current ? current : null; 
+
+        var uomConversion = win.viewModel.storeInfo.uomConversion;
+        uomConversion = uomConversion ? uomConversion : null; 
+
+        var uoms = grid.store.data.items;
+        uoms = uoms ? uoms : null; 
+
+        if (obj.dataIndex === 'ysnStockUnit'){
+            ic.utils.ajax({
+                url: './Inventory/api/Item/CheckStockUnit',
+                method: 'POST',
+                params: {
+                    ItemId: current.get('intItemId'),
+                    ItemStockUnit: current.get('ysnStockUnit'),
+                    ItemUOMId: current.get('intItemUOMId')
+                }
+            })
+            .subscribe(
+                function(successResponse) {
+                    var jsonData = Ext.decode(successResponse.responseText);
+                    if (!jsonData.success)
+                    {
+                         var result = function (button) {
+                            if (button === 'yes') {
+                                    if (checked === true){                                    
+                                    if (uoms) {
+                                        uoms.forEach(function(uom){
+                                            if (uom === current){
+                                                current.set('dblUnitQty', 1);
+                                            }
+                                            if (uom !== current){
+                                                uom.set('ysnStockUnit', false);
+                                                var unitMeasureId = current.get('intUnitMeasureId');
+                                                me.getConversionValue(uom.get('intUnitMeasureId'), unitMeasureId, function (value) {
+
+                                                    uom.set('dblUnitQty', value);
+                                                });
+                                            }
+                                        });
+                                    }
+                                }
+                                else {
+                                    if (current){
+                                        current.set('dblUnitQty', 1);
+                                    }
+                                }
+                                ic.utils.ajax({
+                                    url: './Inventory/api/Item/ConvertItemToNewStockUnit',
+                                    method: 'POST',
+                                    params: {
+                                        ItemId: current.get('intItemId'),
+                                        ItemUOMId: current.get('intItemUOMId')
+                                    }
+                                })
+                                .subscribe(
+                                    function(successResponse) {
+                                        var jsonData = Ext.decode(successResponse.responseText);
+                                        if (!jsonData.success)
+                                            {
+                                                iRely.Functions.showErrorDialog(jsonData.message.statusText);
+                                            }
+                                        else
+                                            {
+                                                iRely.Functions.showCustomDialog('information', 'ok', 'Conversion to new stock unit has been completed.');
+                                                var context = me.view.context;
+                                                var vm = me.getViewModel();
+                                                vm.data.current.dirty = false;
+                                                context.screenMgr.toolbarMgr.provideFeedBack(iRely.Msg.SAVED);
+                                            }
+                                    },
+                                    function(failureResponse) {
+                                         var jsonData = Ext.decode(failureResponse.responseText);
+                                        iRely.Functions.showErrorDialog('Connection Failed!');
+                                    }
+                                );
+                            }
+
+                            else
+                                {
+                                    current.set('ysnStockUnit', false);
+                                }
+                        };
+
+                        if(current.get('ysnStockUnit') === false)
+                        {
+                            iRely.Functions.showErrorDialog("Item has already a transaction so Base Unit is required.");
+                            current.set('ysnStockUnit', true);
+                        }
+                        else
+                        {
+                            var msgBox = iRely.Functions;
+                            msgBox.showCustomDialog(
+                            msgBox.dialogType.WARNING,
+                            msgBox.dialogButtonType.YESNOCANCEL,
+                            "Item has transaction/s so changing the base unit will convert the following to new stock unit:<br> <br>Existing Stock <br>Cost & Prices <br> Existing Entries in Inventory Transaction Tables<br><br><br>Conversion to new stock unit will be automatically saved. <br><br>Do you want to continue?",
+                            result
+                            );
+                        }
+                    }
+
+                else
+                    {
+
+                        if (checked === true){
+                            var uoms = grid.store.data.items;
+                            if (uoms) {
+                                uoms.forEach(function(uom){
+                                    if (uom === current){
+                                        current.set('dblUnitQty', 1);
+                                    }
+                                    if (uom !== current){
+                                        uom.set('ysnStockUnit', false);
+                                        var unitMeasureId = current.get('intUnitMeasureId');
+                                        me.getConversionValue(uom.get('intUnitMeasureId'), unitMeasureId, function (value) {
+                                            uom.set('dblUnitQty', value);
+                                        });
+                                    }
+                                });
+                            }
+                        }
+                        else {
+                            if (current){
+                                current.set('dblUnitQty', 1);
+                            }
+                        }
+                    }
+                },
+                function(failureResponse) {
+                    var jsonData = Ext.decode(failureResponse.responseText);
+                    iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+                }
+            );
+        }
+
+        else if (obj.dataIndex === 'ysnStockUOM'){
+            if (checked === true && uoms) {
+                uoms.forEach(function (uom) {
+                    if (uom !== current) {
+                        uom.set('ysnStockUOM', false);
+                    }
+                });
+            }            
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboType": {
@@ -1485,7 +2039,62 @@ Ext.define('Inventory.view.BundleViewController', {
             "#btnEditLocation": {
                 click: this.onEditLocationClick
             },
-
+            "#txtStandardCost": {
+                change: this.onPricingChange
+            },
+            "#txtPricingMSRP": {
+                change: this.onPricingChange
+            },
+            "#cboPricingLocation": {
+                select: this.onPricingLocationSelect
+            },
+            "#cboPricingLevelLocation": {
+                select: this.onPricingLevelSelect
+            },
+            "#cboPricingLevelUOM": {
+                select: this.onPricingLevelSelect
+            },
+            "#cboPricingLevelMethod": {
+                select: this.onPricingLevelSelect
+            },
+            "#cboPricingLevelCommissionOn": {
+                select: this.onPricingLevelSelect
+            },
+             "#cboPricingLevelCurrency": {
+                select: this.onPricingLevelSelect
+            },
+            "#cboSpecialPricingLocation": {
+                select: this.onSpecialPricingSelect
+            },
+            "#cboSpecialPricingPromotionType": {
+                select: this.onSpecialPricingSelect
+            },
+            "#cboSpecialPricingUOM": {
+                select: this.onSpecialPricingSelect
+            },
+            "#cboSpecialPricingDiscountBy": {
+                select: this.onSpecialPricingSelect,
+                beforequery: this.onSpecialPricingBeforeQuery
+            },
+            "#cboSpecialPricingCurrency": {
+                select: this.onSpecialPricingSelect
+            },
+            "#txtSpecialPricingDiscount": {
+                change: this.onSpecialPricingDiscountChange
+            },
+            "#txtSpecialPricingUnitPrice": {
+                change: this.onSpecialPricingDiscountChange
+            },
+            "#colPricingAmount": {
+                beforerender: this.onPricingGridColumnBeforeRender
+            },
+            "#colBaseUnit": {
+                beforecheckchange: this.beforeUOMStockUnitCheckChange,
+                checkchange: this.onUOMStockUnitCheckChange
+            },
+            "#colStockUOM": {
+                checkchange: this.onUOMStockUnitCheckChange
+            },             
         });
     }
 });

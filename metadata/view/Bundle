@@ -4385,6 +4385,61 @@
                                                         "align": "right",
                                                         "dataIndex": "string",
                                                         "flex": 0.8,
+                                                        "itemId": "colPricingMSRP",
+                                                        "text": "MSRP",
+                                                        "width": 80
+                                                    },
+                                                    "configAlternates": {
+                                                        "align": "string",
+                                                        "dataIndex": "datafield",
+                                                        "flex": "number",
+                                                        "itemId": "string",
+                                                        "text": "string",
+                                                        "width": "auto",
+                                                        "scrollable": "boolean"
+                                                    },
+                                                    "name": "MyNumberColumn44",
+                                                    "designerId": "0c1a32ae-3f64-4353-8baa-4c878fe39653",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.form.field.Number",
+                                                            "reference": {
+                                                                "name": "editor",
+                                                                "type": "object"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "currencyField": true,
+                                                                "designer|createAlias": "numberfield"
+                                                            },
+                                                            "configAlternates": {
+                                                                "currencyField": "boolean",
+                                                                "designer|createAlias": "string",
+                                                                "scrollable": "boolean"
+                                                            },
+                                                            "name": "MyNumberField57",
+                                                            "designerId": "1e5acf74-6726-4f83-9954-7606e19cd285",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "currencyField",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.grid.column.Number",
+                                                    "reference": {
+                                                        "name": "columns",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "align": "right",
+                                                        "dataIndex": "string",
+                                                        "flex": 0.8,
                                                         "format": null,
                                                         "hidden": true,
                                                         "itemId": "colPricingAverageCost",
@@ -4654,61 +4709,6 @@
                                                                 {
                                                                     "group": "(Custom Properties)",
                                                                     "name": "quantityField",
-                                                                    "type": "string"
-                                                                }
-                                                            ]
-                                                        }
-                                                    ]
-                                                },
-                                                {
-                                                    "type": "Ext.grid.column.Number",
-                                                    "reference": {
-                                                        "name": "columns",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "align": "right",
-                                                        "dataIndex": "string",
-                                                        "flex": 0.8,
-                                                        "itemId": "colPricingMSRP",
-                                                        "text": "MSRP",
-                                                        "width": 80
-                                                    },
-                                                    "configAlternates": {
-                                                        "align": "string",
-                                                        "dataIndex": "datafield",
-                                                        "flex": "number",
-                                                        "itemId": "string",
-                                                        "text": "string",
-                                                        "width": "auto",
-                                                        "scrollable": "boolean"
-                                                    },
-                                                    "name": "MyNumberColumn44",
-                                                    "designerId": "0c1a32ae-3f64-4353-8baa-4c878fe39653",
-                                                    "cn": [
-                                                        {
-                                                            "type": "Ext.form.field.Number",
-                                                            "reference": {
-                                                                "name": "editor",
-                                                                "type": "object"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "currencyField": true,
-                                                                "designer|createAlias": "numberfield"
-                                                            },
-                                                            "configAlternates": {
-                                                                "currencyField": "boolean",
-                                                                "designer|createAlias": "string",
-                                                                "scrollable": "boolean"
-                                                            },
-                                                            "name": "MyNumberField57",
-                                                            "designerId": "1e5acf74-6726-4f83-9954-7606e19cd285",
-                                                            "customConfigs": [
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "currencyField",
                                                                     "type": "string"
                                                                 }
                                                             ]

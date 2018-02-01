@@ -1475,6 +1475,19 @@ Ext.define('Inventory.view.Bundle', {
                                                             {
                                                                 xtype: 'numbercolumn',
                                                                 flex: 0.8,
+                                                                itemId: 'colPricingMSRP',
+                                                                width: 80,
+                                                                align: 'right',
+                                                                dataIndex: 'string',
+                                                                text: 'MSRP',
+                                                                editor: {
+                                                                    xtype: 'numberfield',
+                                                                    currencyField: true
+                                                                }
+                                                            },
+                                                            {
+                                                                xtype: 'numbercolumn',
+                                                                flex: 0.8,
                                                                 hidden: true,
                                                                 itemId: 'colPricingAverageCost',
                                                                 width: 90,
@@ -1538,19 +1551,6 @@ Ext.define('Inventory.view.Bundle', {
                                                                 editor: {
                                                                     xtype: 'numberfield',
                                                                     quantityField: true
-                                                                }
-                                                            },
-                                                            {
-                                                                xtype: 'numbercolumn',
-                                                                flex: 0.8,
-                                                                itemId: 'colPricingMSRP',
-                                                                width: 80,
-                                                                align: 'right',
-                                                                dataIndex: 'string',
-                                                                text: 'MSRP',
-                                                                editor: {
-                                                                    xtype: 'numberfield',
-                                                                    currencyField: true
                                                                 }
                                                             }
                                                         ],
