@@ -182,30 +182,30 @@ SELECT DISTINCT @intFreightItemId = SCSetup.intFreightItemId, @intHaulerId = SCT
 FROM tblSCScaleSetup SCSetup LEFT JOIN tblSCTicket SCTicket ON SCSetup.intScaleSetupId = SCTicket.intScaleSetupId 
 WHERE SCTicket.intDeliverySheetId = @intDeliverySheetId
 
---FOR DISCOUNT CHARGES
+	--FOR DISCOUNT CHARGES
 		INSERT INTO @OtherCharges
 		(
-				[intEntityVendorId] 
-				,[strBillOfLadding] 
-				,[strReceiptType] 
-				,[intLocationId] 
-				,[intShipViaId] 
-				,[intShipFromId] 
-				,[intCurrencyId]
-				,[intCostCurrencyId]  	
-				,[intChargeId]
-				,[intForexRateTypeId]
-				,[dblForexRate] 
-				,[ysnInventoryCost] 
-				,[strCostMethod] 
-				,[dblRate] 
-				,[intCostUOMId] 
-				,[intOtherChargeEntityVendorId] 
-				,[dblAmount] 
-				,[intContractHeaderId]
-				,[intContractDetailId] 
-				,[ysnAccrue]
-				,[ysnPrice]
+			[intEntityVendorId] 
+			,[strBillOfLadding] 
+			,[strReceiptType] 
+			,[intLocationId] 
+			,[intShipViaId] 
+			,[intShipFromId] 
+			,[intCurrencyId]
+			,[intCostCurrencyId]  	
+			,[intChargeId]
+			,[intForexRateTypeId]
+			,[dblForexRate] 
+			,[ysnInventoryCost] 
+			,[strCostMethod] 
+			,[dblRate] 
+			,[intCostUOMId] 
+			,[intOtherChargeEntityVendorId] 
+			,[dblAmount] 
+			,[intContractHeaderId]
+			,[intContractDetailId] 
+			,[ysnAccrue]
+			,[ysnPrice]
 		)
 		SELECT	
 		[intEntityVendorId]					= RE.intEntityVendorId
@@ -281,10 +281,7 @@ WHERE SCTicket.intDeliverySheetId = @intDeliverySheetId
 												WHEN QM.dblDiscountAmount > 0 THEN 1
 											END
 		FROM @ReceiptStagingTable RE
-		OUTER APPLY(
-			SELECT DISTINCT * FROM tblSCTicket WHERE intDeliverySheetId = RE.intSourceId
-		) SC
-		LEFT JOIN tblQMTicketDiscount QM ON QM.intTicketId = SC.intTicketId
+		LEFT JOIN tblQMTicketDiscount QM ON QM.intTicketFileId = RE.intSourceId AND QM.strSourceType = 'Delivery Sheet'
 		LEFT JOIN tblGRDiscountScheduleCode GR ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
 		LEFT JOIN tblICItem IC ON IC.intItemId = GR.intItemId
 		LEFT JOIN tblICItemUOM UM ON UM.intItemId = GR.intItemId AND UM.intUnitMeasureId = GR.intUnitMeasureId
@@ -293,27 +290,27 @@ WHERE SCTicket.intDeliverySheetId = @intDeliverySheetId
 		--Insert record for fee
 		INSERT INTO @OtherCharges
 		(
-				[intEntityVendorId] 
-				,[strBillOfLadding] 
-				,[strReceiptType] 
-				,[intLocationId] 
-				,[intShipViaId] 
-				,[intShipFromId] 
-				,[intCurrencyId]
-				,[intCostCurrencyId]  	
-				,[intChargeId]
-				,[intForexRateTypeId]
-				,[dblForexRate]  
-				,[ysnInventoryCost] 
-				,[strCostMethod] 
-				,[dblRate] 
-				,[intCostUOMId] 
-				,[intOtherChargeEntityVendorId] 
-				,[dblAmount] 
-				,[intContractHeaderId]
-				,[intContractDetailId] 
-				,[ysnAccrue]
-				,[ysnPrice]
+			[intEntityVendorId] 
+			,[strBillOfLadding] 
+			,[strReceiptType] 
+			,[intLocationId] 
+			,[intShipViaId] 
+			,[intShipFromId] 
+			,[intCurrencyId]
+			,[intCostCurrencyId]  	
+			,[intChargeId]
+			,[intForexRateTypeId]
+			,[dblForexRate]  
+			,[ysnInventoryCost] 
+			,[strCostMethod] 
+			,[dblRate] 
+			,[intCostUOMId] 
+			,[intOtherChargeEntityVendorId] 
+			,[dblAmount] 
+			,[intContractHeaderId]
+			,[intContractDetailId] 
+			,[ysnAccrue]
+			,[ysnPrice]
 		)
 		SELECT	
 		[intEntityVendorId]					= RE.intEntityVendorId
@@ -346,16 +343,13 @@ WHERE SCTicket.intDeliverySheetId = @intDeliverySheetId
 		,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = RE.intContractDetailId)
 		,[intContractDetailId]				= RE.intContractDetailId
 		,[ysnAccrue]						= CASE 
-												WHEN @ysnDeductFeesCusVen = 1 THEN 1
-												WHEN @ysnDeductFeesCusVen = 0 THEN 0
-											END
-		,[ysnPrice]							= CASE 
 												WHEN @ysnDeductFeesCusVen = 1 THEN 0
-												WHEN @ysnDeductFeesCusVen = 0 THEN 1
+                                                WHEN @ysnDeductFeesCusVen = 0 THEN 1
 											END
+		,[ysnPrice]							= @ysnDeductFeesCusVen
 		FROM @ReceiptStagingTable RE
 		OUTER APPLY(
-			SELECT DISTINCT * FROM tblSCTicket WHERE intDeliverySheetId = RE.intSourceId
+			SELECT SUM(dblTicketFees) AS dblTicketFees,intScaleSetupId FROM tblSCTicket WHERE intDeliverySheetId = RE.intSourceId GROUP BY intScaleSetupId
 		) SC
 		INNER JOIN tblSCScaleSetup SCSetup ON SCSetup.intScaleSetupId = SC.intScaleSetupId
 		INNER JOIN tblICItem IC ON IC.intItemId = SCSetup.intDefaultFeeItemId

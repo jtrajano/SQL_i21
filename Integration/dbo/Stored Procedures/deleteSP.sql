@@ -69,3 +69,27 @@ GO
 IF EXISTS(select top 1 1 from sys.procedures where name = 'uspRKImportFutureMarket')
 	DROP PROCEDURE uspRKImportFutureMarket
 GO
+IF EXISTS(select top 1 1 from sys.procedures where name = 'uspGRImportStorageSchedule')
+	DROP PROCEDURE uspGRImportStorageSchedule
+GO
+IF EXISTS(select top 1 1 from sys.procedures where name = 'uspGRImportDiscountCode')
+	DROP PROCEDURE uspGRImportDiscountCode
+GO
+IF EXISTS(select top 1 1 from sys.procedures where name = 'uspGRImportDiscountSchedule')
+	DROP PROCEDURE uspGRImportDiscountSchedule
+GO
+IF EXISTS(select top 1 1 from sys.procedures where name = 'uspGRImportDiscountTable')
+	DROP PROCEDURE uspGRImportDiscountTable
+GO
+IF EXISTS(select top 1 1 from sys.procedures where name = 'uspGRImportStorageTicket')
+	DROP PROCEDURE uspGRImportStorageTicket
+GO
+IF EXISTS(select top 1 1 from sys.procedures where name = 'uspGRImportScaleStation')
+	DROP PROCEDURE uspGRImportScaleStation
+GO
+IF EXISTS(select top 1 1 from sys.procedures where name = 'uspGRImportScaleTicket')
+	DROP PROCEDURE uspGRImportScaleTicket
+GO
+IF EXISTS(select top 1 1 from sys.procedures where name = 'uspGRImportCustomerSplit')
+	DROP PROCEDURE uspGRImportCustomerSplit
+GO
