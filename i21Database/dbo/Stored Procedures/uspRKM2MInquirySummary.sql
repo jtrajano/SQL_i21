@@ -55,6 +55,7 @@ DECLARE @tblFinalDetail TABLE (
 							strOrgin NVARCHAR(200) COLLATE Latin1_General_CI_AS,
 							strPosition NVARCHAR(200) COLLATE Latin1_General_CI_AS,		
 							strPeriod NVARCHAR(200) COLLATE Latin1_General_CI_AS,
+							strPeriodTo NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 							strPriOrNotPriOrParPriced NVARCHAR(200) COLLATE Latin1_General_CI_AS,
 							intPricingTypeId INT,
 							strPricingType NVARCHAR(200) COLLATE Latin1_General_CI_AS,
