@@ -113,7 +113,6 @@ INSERT INTO @UnsortedEntriesForInvoice
 	,[strInvoiceOriginId]
 	,[strPONumber]
 	,[strBOLNumber]
-	,[strDeliverPickup]
 	,[strComments]
 	,[intShipToLocationId]
 	,[intBillToLocationId]
@@ -224,7 +223,6 @@ SELECT
 	,[strInvoiceOriginId]					= NULL 
 	,[strPONumber]							= @PONumber 
 	,[strBOLNumber]							= @BOLNumber 
-	,[strDeliverPickup]						= NULL 
 	,[strComments]							= @Comments 
 	,[intShipToLocationId]					= @ShipToLocationId 
 	,[intBillToLocationId]					= NULL
@@ -343,7 +341,6 @@ SELECT
 	,[strInvoiceOriginId]					= NULL 
 	,[strPONumber]							= @PONumber 
 	,[strBOLNumber]							= @BOLNumber 
-	,[strDeliverPickup]						= NULL 
 	,[strComments]							= @Comments 
 	,[intShipToLocationId]					= @ShipToLocationId 
 	,[intBillToLocationId]					= NULL
@@ -468,7 +465,6 @@ SELECT
 	,[strInvoiceOriginId]					= NULL 
 	,[strPONumber]							= @PONumber 
 	,[strBOLNumber]							= @BOLNumber 
-	,[strDeliverPickup]						= NULL 
 	,[strComments]							= @Comments 
 	,[intShipToLocationId]					= @ShipToLocationId 
 	,[intBillToLocationId]					= NULL

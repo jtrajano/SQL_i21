@@ -96,7 +96,6 @@ SELECT * FROM #tmpForeignTransactionId
 					,[ysnUseOriginIdAsInvoiceNumber]
 					,[strPONumber]
 					,[strBOLNumber]
-					,[strDeliverPickup]
 					,[strComments]
 					,[intShipToLocationId]
 					,[intBillToLocationId]
@@ -185,7 +184,6 @@ SELECT * FROM #tmpForeignTransactionId
 					,[ysnUseOriginIdAsInvoiceNumber]		= 1
 					,[strPONumber]							= ''
 					,[strBOLNumber]							= ''
-					,[strDeliverPickup]						= cfTrans.strDeliveryPickupInd
 					,[strComments]							= ''
 					,[intShipToLocationId]					= I.[intShipToLocationId]
 					,[intBillToLocationId]					= I.[intBillToLocationId]

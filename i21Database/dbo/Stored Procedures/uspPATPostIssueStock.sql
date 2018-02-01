@@ -280,7 +280,6 @@ BEGIN
 				,[strInvoiceOriginId]
 				,[strPONumber]
 				,[strBOLNumber]
-				,[strDeliverPickup]
 				,[strComments]
 				,[intShipToLocationId]
 				,[intBillToLocationId]
@@ -357,7 +356,6 @@ BEGIN
 				,[strInvoiceOriginId]					= ''
 				,[strPONumber]							= ''
 				,[strBOLNumber]							= ''
-				,[strDeliverPickup]						= ''
 				,[strComments]							= CS.strCertificateNo
 				,[intShipToLocationId]					= NULL
 				,[intBillToLocationId]					= NULL

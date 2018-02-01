@@ -47,7 +47,6 @@ BEGIN TRY
 		,@InvoiceOriginId NVARCHAR(8)
 		,@PONumber NVARCHAR(25)
 		,@BOLNumber NVARCHAR(50)
-		,@DeliverPickup NVARCHAR(100)
 		,@Comments NVARCHAR(max)
 		,@FooterComments NVARCHAR(max)
 		,@ShipToLocationId INT
@@ -105,7 +104,6 @@ BEGIN TRY
 		,[strInvoiceOriginId]
 		,[strPONumber]
 		,[strBOLNumber]
-		,[strDeliverPickup]
 		,[strComments]
 		,[intShipToLocationId]
 		,[intBillToLocationId]
@@ -207,7 +205,6 @@ BEGIN TRY
 		,[strInvoiceOriginId] = @InvoiceOriginId
 		,[strPONumber] = @PONumber
 		,[strBOLNumber] = @BOLNumber
-		,[strDeliverPickup] = @DeliverPickup
 		,[strComments] = @Comments
 		,[intShipToLocationId] = @ShipToLocationId
 		,[intBillToLocationId] = @BillToLocationId

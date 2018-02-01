@@ -58,7 +58,6 @@ BEGIN
 			,[strInvoiceOriginId]
 			,[strPONumber]
 			,[strBOLNumber]
-			,[strDeliverPickup]
 			,[strComments]
 			,[intShipToLocationId]
 			,[intBillToLocationId]
@@ -137,7 +136,6 @@ BEGIN
 			,[strInvoiceOriginId]					= ''
 			,[strPONumber]							= NULL
 			,[strBOLNumber]							= ''
-			,[strDeliverPickup]						= 'Pickup'
 			,[strComments]							= ''
 			,[intShipToLocationId]					= MRDetail.intEntityLocationId
 			,[intBillToLocationId]					= NULL

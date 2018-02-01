@@ -55,7 +55,6 @@ DECLARE
 	,@InvoiceOriginId			NVARCHAR(8)
 	,@PONumber					NVARCHAR(25)
 	,@BOLNumber					NVARCHAR(50)
-	,@DeliverPickup				NVARCHAR(100)
 	,@Comments					NVARCHAR(max)
 	,@FooterComments			NVARCHAR(max)
 	,@ShipToLocationId			INT
@@ -127,7 +126,6 @@ DECLARE
 		,@InvoiceOriginId			= NULL
 		,@PONumber					= NULL --SO.[strPONumber]
 		,@BOLNumber					= L.strBLNumber
-		,@DeliverPickup				= NULL
 		,@Comments					= L.strLoadNumber + ' : ' + L.strCustomerReference
 		,@FooterComments			= NULL
 		,@ShipToLocationId			= NULL
@@ -188,7 +186,6 @@ DECLARE
 		,[strInvoiceOriginId]
 		,[strPONumber]
 		,[strBOLNumber]
-		,[strDeliverPickup]
 		,[strComments]
 		,[intShipToLocationId]
 		,[intBillToLocationId]
@@ -288,7 +285,6 @@ DECLARE
 		,[strInvoiceOriginId]					= @InvoiceOriginId 
 		,[strPONumber]							= @PONumber 
 		,[strBOLNumber]							= @BOLNumber 
-		,[strDeliverPickup]						= @DeliverPickup 
 		,[strComments]							= @Comments 
 		,[intShipToLocationId]					= @ShipToLocationId 
 		,[intBillToLocationId]					= @BillToLocationId

@@ -43,7 +43,6 @@ INSERT INTO @EntriesForInvoice(
 	,[strInvoiceOriginId]
 	,[strPONumber]
 	,[strBOLNumber]
-	,[strDeliverPickup]
 	,[strComments]
 	,[intShipToLocationId]
 	,[intBillToLocationId]
@@ -117,7 +116,6 @@ SELECT
 	,[strInvoiceOriginId]				= NULL
 	,[strPONumber]						= ''
 	,[strBOLNumber]						= ''
-	,[strDeliverPickup]					= ''
 	,[strComments]						= D.strComments
 	,[intShipToLocationId]				= ISNULL(SL1.[intEntityLocationId], EL.[intEntityLocationId])
 	,[intBillToLocationId]				= ISNULL(BL1.[intEntityLocationId], EL.[intEntityLocationId])

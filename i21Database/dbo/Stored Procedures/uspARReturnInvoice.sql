@@ -45,7 +45,6 @@ BEGIN TRY
 		,[ysnUseOriginIdAsInvoiceNumber]
 		,[strPONumber]
 		,[strBOLNumber]
-		--,[strDeliverPickup]
 		,[strComments]
 		,[intShipToLocationId]
 		,[intBillToLocationId]
@@ -181,7 +180,6 @@ BEGIN TRY
 		,[ysnUseOriginIdAsInvoiceNumber]		= 0
 		,[strPONumber]							= ARI.[strPONumber]
 		,[strBOLNumber]							= ARI.[strBOLNumber]
-		--,[strDeliverPickup]						= ARI.[strDeliverPickup]
 		,[strComments]							= ARI.[strComments]
 		,[intShipToLocationId]					= ARI.[intShipToLocationId]
 		,[intBillToLocationId]					= ARI.[intBillToLocationId]

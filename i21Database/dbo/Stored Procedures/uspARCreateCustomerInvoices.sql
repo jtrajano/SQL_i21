@@ -53,7 +53,6 @@ INSERT INTO @InvoicesToGenerate (
 	,[ysnUseOriginIdAsInvoiceNumber]
 	,[strPONumber]
 	,[strBOLNumber]
-	,[strDeliverPickup]
 	,[strComments]
 	,[intShipToLocationId]
 	,[intBillToLocationId]
@@ -191,7 +190,6 @@ SELECT
 	,[ysnUseOriginIdAsInvoiceNumber]	= [ysnUseOriginIdAsInvoiceNumber]
 	,[strPONumber]						= [strPONumber]
 	,[strBOLNumber]						= [strBOLNumber]
-	,[strDeliverPickup]					= [strDeliverPickup]
 	,[strComments]						= [strComments]
 	,[intShipToLocationId]				= [intShipToLocationId]
 	,[intBillToLocationId]				= [intBillToLocationId]
@@ -636,14 +634,6 @@ WHERE
 UPDATE
 	@InvoicesToGenerate
 SET
-	[strDeliverPickup] = ISNULL((SELECT TOP 1 SMCL.strDeliverPickupDefault FROM tblSMCompanyLocation SMCL WHERE SMCL.intCompanyLocationId = [intCompanyLocationId]),'')
-WHERE
-	[strDeliverPickup] IS NULL 
-	OR LTRIM(RTRIM([strDeliverPickup])) = ''
-
-UPDATE
-	@InvoicesToGenerate
-SET
 	[strComments] = [dbo].[fnARGetDefaultComment](intCompanyLocationId, intEntityCustomerId, strTransactionType, strType, 'Header', intDocumentMaintenanceId, 0)
 WHERE
 	[strComments] IS NULL 
@@ -980,7 +970,6 @@ USING
 		,[strInvoiceOriginId]			= ITG.strInvoiceOriginId
 		,[strPONumber]					= ITG.strPONumber
 		,[strBOLNumber]					= ITG.strBOLNumber
-		,[strDeliverPickup]				= ITG.strDeliverPickup
 		,[strComments]					= CASE WHEN ISNULL(ITG.strComments, '') = '' THEN dbo.fnARGetDefaultComment(ITG.intCompanyLocationId, ARC.intEntityId, ITG.strTransactionType, ITG.strType, 'Header', NULL, 0) ELSE ITG.strComments END
 		,[strFooterComments]			= dbo.fnARGetDefaultComment(ITG.intCompanyLocationId, ARC.intEntityId, ITG.strTransactionType, ITG.strType, 'Footer', NULL, 0)
 		,[intShipToLocationId]			= ISNULL(ITG.intShipToLocationId, ISNULL(SL1.[intEntityLocationId], EL.[intEntityLocationId]))
@@ -1111,7 +1100,6 @@ INSERT(
 	,[strInvoiceOriginId]
 	,[strPONumber]
 	,[strBOLNumber]
-	--,[strDeliverPickup]
 	,[strComments]
 	,[strFooterComments]
 	,[intShipToLocationId]
@@ -1201,7 +1189,6 @@ VALUES(
 	,[strInvoiceOriginId]
 	,[strPONumber]
 	,[strBOLNumber]
-	--,[strDeliverPickup]
 	,[strComments]
 	,[strFooterComments]
 	,[intShipToLocationId]
@@ -1378,7 +1365,6 @@ BEGIN TRY
 		,[ysnUseOriginIdAsInvoiceNumber]
 		,[strPONumber]
 		,[strBOLNumber]
-		,[strDeliverPickup]
 		,[strComments]
 		,[intShipToLocationId]
 		,[intBillToLocationId]
@@ -1517,7 +1503,6 @@ BEGIN TRY
 		,[ysnUseOriginIdAsInvoiceNumber]		= ITG.[ysnUseOriginIdAsInvoiceNumber]
 		,[strPONumber]							= ITG.[strPONumber]
 		,[strBOLNumber]							= ITG.[strBOLNumber]
-		,[strDeliverPickup]						= ITG.[strDeliverPickup]
 		,[strComments]							= ITG.[strComments]
 		,[intShipToLocationId]					= ITG.[intShipToLocationId]
 		,[intBillToLocationId]					= ITG.[intBillToLocationId]

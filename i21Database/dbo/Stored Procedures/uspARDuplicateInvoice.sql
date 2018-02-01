@@ -60,7 +60,6 @@ DECLARE	 @OriginalInvoiceId			INT
 		,@InvoiceOriginId			NVARCHAR(8)
 		,@PONumber					NVARCHAR(25)
 		,@BOLNumber					NVARCHAR(50)
-		,@DeliverPickup				NVARCHAR(100)
 		,@Comments					NVARCHAR(MAX)
 		,@FooterComments			NVARCHAR(MAX)
 		,@ShipToLocationId			INT
@@ -110,7 +109,6 @@ SELECT
 	,@InvoiceOriginId				= ''	--[strInvoiceOriginId]
 	,@PONumber						= [strPONumber]
 	,@BOLNumber						= [strBOLNumber]
-	--,@DeliverPickup					= [strDeliverPickup]
 	,@Comments						= CASE WHEN [ysnRecurring] = 1 AND @ForRecurring = 1
 												THEN [strComments]
 										   WHEN @IsCancel = 1
@@ -342,7 +340,6 @@ BEGIN TRY
 		,@InvoiceOriginId						= @InvoiceOriginId
 		,@PONumber								= @PONumber
 		,@BOLNumber								= @BOLNumber
-		--,@DeliverPickUp							= @DeliverPickup
 		,@Comment								= @Comments
 		,@ShipToLocationId						= @ShipToLocationId
 		,@BillToLocationId						= @BillToLocationId

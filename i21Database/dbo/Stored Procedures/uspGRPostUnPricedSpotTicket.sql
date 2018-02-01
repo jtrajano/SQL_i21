@@ -311,7 +311,6 @@ BEGIN TRY
 					,[strInvoiceOriginId]
 					,[strPONumber]
 					,[strBOLNumber]
-					,[strDeliverPickup]
 					,[strComments]
 					,[intShipToLocationId]
 					,[intBillToLocationId]
@@ -386,7 +385,6 @@ BEGIN TRY
 					,[strInvoiceOriginId]					= NULL --''
 					,[strPONumber]							= NULL --''
 					,[strBOLNumber]							= NULL --''
-					,[strDeliverPickup]						= NULL --''
 					,[strComments]							= NULL --''
 					,[intShipToLocationId]					= NULL
 					,[intBillToLocationId]					= NULL

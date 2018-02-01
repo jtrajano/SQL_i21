@@ -406,7 +406,6 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[strInvoiceOriginId]
 							,[strPONumber]
 							,[strBOLNumber]
-							,[strDeliverPickup]
 							,[strComments]
 							,[intShipToLocationId]
 							,[intBillToLocationId]
@@ -492,7 +491,6 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[strInvoiceOriginId]		= @OriginId
 							,[strPONumber]				= @PONumber
 							,[strBOLNumber]				= @BOLNumber
-							,[strDeliverPickup]			= NULL
 							,[strComments]				= @Comment
 							,[intShipToLocationId]		= NULL
 							,[intBillToLocationId]		= NULL

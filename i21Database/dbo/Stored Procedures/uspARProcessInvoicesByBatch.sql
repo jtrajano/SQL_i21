@@ -149,7 +149,7 @@ BEGIN CATCH
 	END
 
 	SET @ErrorMessage = ERROR_MESSAGE();
-	--IF ISNULL(@RaiseError,0) = 1
+	IF ISNULL(@RaiseError,0) = 1
 		RAISERROR(@ErrorMessage, 16, 1);
 	RETURN 0;
 END CATCH
@@ -191,7 +191,7 @@ BEGIN CATCH
 	END
 
 	SET @ErrorMessage = ERROR_MESSAGE();
-	--IF ISNULL(@RaiseError,0) = 1
+	IF ISNULL(@RaiseError,0) = 1
 		RAISERROR(@ErrorMessage, 16, 1);
 	RETURN 0;
 END CATCH
@@ -228,7 +228,6 @@ BEGIN
 		,[ysnUseOriginIdAsInvoiceNumber]
 		,[strPONumber]
 		,[strBOLNumber]
-		,[strDeliverPickup]
 		,[strComments]
 		,[intShipToLocationId]
 		,[intBillToLocationId]
@@ -359,7 +358,6 @@ BEGIN
 		,[ysnUseOriginIdAsInvoiceNumber]	= IE.[ysnUseOriginIdAsInvoiceNumber]
 		,[strPONumber]						= IE.[strPONumber]
 		,[strBOLNumber]						= IE.[strBOLNumber]
-		,[strDeliverPickup]					= IE.[strDeliverPickup]
 		,[strComments]						= IE.[strComments]
 		,[intShipToLocationId]				= IE.[intShipToLocationId]
 		,[intBillToLocationId]				= IE.[intBillToLocationId]
@@ -563,7 +561,6 @@ BEGIN
 			,[ysnUseOriginIdAsInvoiceNumber]
 			,[strPONumber]
 			,[strBOLNumber]
-			,[strDeliverPickup]
 			,[strComments]
 			,[intShipToLocationId]
 			,[intBillToLocationId]
@@ -701,7 +698,6 @@ BEGIN
 			,[ysnUseOriginIdAsInvoiceNumber]		= ITG.[ysnUseOriginIdAsInvoiceNumber]
 			,[strPONumber]							= ARI.[strPONumber]
 			,[strBOLNumber]							= ARI.[strBOLNumber]
-			,[strDeliverPickup]						= ARI.[strDeliverPickup]
 			,[strComments]							= ARI.[strComments]
 			,[intShipToLocationId]					= ARI.[intShipToLocationId]
 			,[intBillToLocationId]					= ARI.[intBillToLocationId]
@@ -856,7 +852,6 @@ BEGIN
 				,[strInvoiceOriginId]
 				,[strPONumber]
 				,[strBOLNumber]
-				--,[strDeliverPickup]
 				,[strComments]
 				,[intShipToLocationId]
 				,[intBillToLocationId]
@@ -1167,7 +1162,6 @@ BEGIN
 		,[ysnUseOriginIdAsInvoiceNumber]
 		,[strPONumber]
 		,[strBOLNumber]
-		,[strDeliverPickup]
 		,[strComments]
 		,[intShipToLocationId]
 		,[intBillToLocationId]
@@ -1299,7 +1293,6 @@ BEGIN
 		,[ysnUseOriginIdAsInvoiceNumber]	= IE.[ysnUseOriginIdAsInvoiceNumber]
 		,[strPONumber]						= IE.[strPONumber]
 		,[strBOLNumber]						= IE.[strBOLNumber]
-		,[strDeliverPickup]					= IE.[strDeliverPickup]
 		,[strComments]						= IE.[strComments]
 		,[intShipToLocationId]				= IE.[intShipToLocationId]
 		,[intBillToLocationId]				= IE.[intBillToLocationId]

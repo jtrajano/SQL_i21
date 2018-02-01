@@ -584,7 +584,6 @@ BEGIN TRY
 		,[strInvoiceOriginId]
 		,[strPONumber]
 		,[strBOLNumber]
-		,[strDeliverPickup]
 		,[strComments]
 		,[intShipToLocationId]
 		,[intBillToLocationId]
@@ -663,7 +662,6 @@ BEGIN TRY
 		,[strInvoiceOriginId]					= IE.strInvoiceOriginId
 		,[strPONumber]							= IE.strPONumber
 		,[strBOLNumber]							= IE.strBOLNumber
-		,[strDeliverPickup]						= IE.strDeliverPickup
 		,[strComments]							= IE.strComments
 		,[intShipToLocationId]					= IE.intShipToLocationId
 		,[intBillToLocationId]					= IE.intBillToLocationId
@@ -744,7 +742,6 @@ BEGIN TRY
 		,[strInvoiceOriginId]
 		,[strPONumber]
 		,[strBOLNumber]
-		,[strDeliverPickup]
 		,[strComments]
 		,[intShipToLocationId]
 		,[intBillToLocationId]
@@ -824,7 +821,6 @@ BEGIN TRY
 		,[strInvoiceOriginId]					= TR.strInvoiceOriginId
 		,[strPONumber]							= TR.strPONumber
 		,[strBOLNumber]							= TR.strBOLNumber
-		,[strDeliverPickup]						= TR.strDeliverPickup
 		,[strComments]							= TR.strComments
 		,[intShipToLocationId]					= TR.intShipToLocationId
 		,[intBillToLocationId]					= TR.intBillToLocationId
@@ -910,7 +906,6 @@ BEGIN TRY
 			,[strInvoiceOriginId]
 			,[strPONumber]
 			,[strBOLNumber]
-			,[strDeliverPickup]
 			,[strComments]
 			,[intShipToLocationId]
 			,[intBillToLocationId]
@@ -985,7 +980,6 @@ BEGIN TRY
 			,[strInvoiceOriginId]					= IE.strInvoiceOriginId
 			,[strPONumber]							= IE.strPONumber
 			,[strBOLNumber]							= IE.strBOLNumber
-			,[strDeliverPickup]						= IE.strDeliverPickup
 			,[strComments]							= IE.strComments
 			,[intShipToLocationId]					= IE.intShipToLocationId
 			,[intBillToLocationId]					= IE.intBillToLocationId
@@ -1066,7 +1060,6 @@ BEGIN TRY
 		,[strInvoiceOriginId]
 		,[strPONumber]
 		,[strBOLNumber]
-		,[strDeliverPickup]
 		,[strComments]
 		,[intShipToLocationId]
 		,[intBillToLocationId]
@@ -1136,7 +1129,6 @@ BEGIN TRY
 		,[strInvoiceOriginId]					= IE.strInvoiceOriginId
 		,[strPONumber]							= IE.strPONumber
 		,[strBOLNumber]							= IE.strBOLNumber
-		,[strDeliverPickup]						= IE.strDeliverPickup
 		,[strComments]							= IE.strComments
 		,[intShipToLocationId]					= IE.intShipToLocationId
 		,[intBillToLocationId]					= IE.intBillToLocationId
@@ -1204,7 +1196,6 @@ BEGIN TRY
 		,[strInvoiceOriginId]
 		,[strPONumber]
 		,[strBOLNumber]
-		,[strDeliverPickup]
 		,[strComments]
 		,[intShipToLocationId]
 		,[intBillToLocationId]

@@ -40,7 +40,6 @@ DECLARE
 	,@InvoiceOriginId					NVARCHAR(16)	= NULL
 	,@PONumber							NVARCHAR(50)	= ''
 	,@BOLNumber							NVARCHAR(50)	= ''
-	,@DeliverPickUp						NVARCHAR(100)	= NULL
 	,@Comment							NVARCHAR(500)	= ''			
 	,@ShipToLocationId					INT				= NULL
 	,@BillToLocationId					INT				= NULL
@@ -129,7 +128,6 @@ SELECT TOP 1
 	,@InvoiceOriginId					= NULL
 	,@PONumber							= ''
 	,@BOLNumber							= ''
-	,@DeliverPickUp						= NULL
 	,@Comment							= ARP.strRecordNumber			
 	,@ShipToLocationId					= NULL
 	,@BillToLocationId					= NULL
@@ -226,7 +224,6 @@ EXEC [dbo].[uspARCreateCustomerInvoice]
 	,@InvoiceOriginId					= @InvoiceOriginId
 	,@PONumber							= @PONumber
 	,@BOLNumber							= @BOLNumber
-	,@DeliverPickUp						= @DeliverPickUp
 	,@Comment							= @Comment
 	,@ShipToLocationId					= @ShipToLocationId
 	,@BillToLocationId					= @BillToLocationId

@@ -99,7 +99,6 @@ BEGIN TRY
 		,[strInvoiceOriginId]
 		,[strPONumber]
 		,[strBOLNumber]
-		--,[strDeliverPickup]
 		,[strComments]
 		,[intShipToLocationId]
 		,[intBillToLocationId]
@@ -193,7 +192,6 @@ BEGIN TRY
 		,[strInvoiceOriginId]				= @InvoiceNumber
 		,[strPONumber]						= @PONumber
 		,[strBOLNumber]						= @BOLNumber
-		--,[strDeliverPickup]					= @DeliverPickup
 		,[strComments]						= @Comments
 		,[intShipToLocationId]				= @ShipToLocationId
 		,[intBillToLocationId]				= @BillToLocationId
@@ -306,7 +304,6 @@ SELECT
 		,[strInvoiceOriginId]				= @InvoiceNumber
 		,[strPONumber]						= @PONumber
 		,[strBOLNumber]						= @BOLNumber
-		--,[strDeliverPickup]					= @DeliverPickup
 		,[strComments]						= @Comments
 		,[intShipToLocationId]				= @ShipToLocationId
 		,[intBillToLocationId]				= @BillToLocationId

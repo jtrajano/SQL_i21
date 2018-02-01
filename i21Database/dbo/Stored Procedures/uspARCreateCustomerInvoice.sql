@@ -22,7 +22,6 @@
 	,@InvoiceOriginId				NVARCHAR(25)	= NULL
 	,@PONumber						NVARCHAR(50)	= ''
 	,@BOLNumber						NVARCHAR(50)	= ''
-	,@DeliverPickUp					NVARCHAR(100)	= NULL
 	,@Comment						NVARCHAR(500)	= ''			
 	,@ShipToLocationId				INT				= NULL
 	,@BillToLocationId				INT				= NULL
@@ -150,8 +149,6 @@ SET @Savepoint = SUBSTRING(('ARCreateCustomerInvoice' + CONVERT(VARCHAR, @InitTr
 SET @ZeroDecimal = 0.000000
 SELECT @DateOnly = CAST(GETDATE() AS DATE)
 
-IF @DeliverPickUp IS NULL OR LTRIM(RTRIM(@DeliverPickUp)) = ''
-	SET @DeliverPickUp = ISNULL((SELECT TOP 1 strDeliverPickupDefault FROM tblSMCompanyLocation WHERE intCompanyLocationId = @CompanyLocationId),'')
 	
 IF ISNULL(@Comment, '') = ''
 	BEGIN
@@ -364,7 +361,6 @@ BEGIN TRY
 		,[strInvoiceOriginId]
 		,[strPONumber]
 		,[strBOLNumber]
-		--,[strDeliverPickup]
 		,[strComments]
 		,[strFooterComments]
 		,[intShipToLocationId]
@@ -437,7 +433,6 @@ BEGIN TRY
 		,[strInvoiceOriginId]			= @InvoiceOriginId
 		,[strPONumber]					= @PONumber
 		,[strBOLNumber]					= @BOLNumber
-		--,[strDeliverPickup]				= @DeliverPickUp
 		,[strComments]					= CASE WHEN ISNULL(@Comment, '') = '' THEN dbo.fnARGetDefaultComment(@CompanyLocationId, C.[intEntityId], @TransactionType, @Type, 'Header', NULL, 0) ELSE @Comment END
 		,[strFooterComments]			= dbo.fnARGetDefaultComment(@CompanyLocationId, C.[intEntityId], @TransactionType, @Type, 'Footer', NULL, 0)
 		,[intShipToLocationId]			= ISNULL(@ShipToLocationId, ISNULL(SL1.[intEntityLocationId], EL.[intEntityLocationId]))

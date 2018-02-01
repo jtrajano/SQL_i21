@@ -91,7 +91,6 @@ BEGIN
 			,[ysnUseOriginIdAsInvoiceNumber]
 			,[strPONumber]
 			,[strBOLNumber]
-			,[strDeliverPickup]
 			,[strComments]
 			,[intShipToLocationId]
 			,[intBillToLocationId]
@@ -175,7 +174,6 @@ BEGIN
 			,[ysnUseOriginIdAsInvoiceNumber]		= 0
 			,[strPONumber]							= NULL
 			,[strBOLNumber]							= ''
-			,[strDeliverPickup]						= NULL
 			,[strComments]							= ''
 			,[intShipToLocationId]					= NULL
 			,[intBillToLocationId]					= NULL

@@ -46,7 +46,6 @@ INSERT INTO @EntriesForInvoice
 	,[strInvoiceOriginId]
 	,[strPONumber]
 	,[strBOLNumber]
-	,[strDeliverPickup]
 	,[strComments]
 	,[intShipToLocationId]
 	,[intBillToLocationId]
@@ -140,7 +139,6 @@ SELECT
 	,[strInvoiceOriginId]					= NULL 
 	,[strPONumber]							= NULL 
 	,[strBOLNumber]							= NULL 
-	,[strDeliverPickup]						= NULL 
 	,[strComments]							= CTCHV.[strContractNumber] 
 	,[intShipToLocationId]					= NULL 
 	,[intBillToLocationId]					= NULL

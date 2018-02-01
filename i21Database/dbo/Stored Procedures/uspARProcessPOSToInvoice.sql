@@ -37,7 +37,6 @@ INSERT INTO @EntriesForInvoice(
 	,[strInvoiceOriginId]
 	,[strPONumber]
 	,[strBOLNumber]
-	,[strDeliverPickup]
 	,[strComments]
 	,[intShipToLocationId]
 	,[intBillToLocationId]
@@ -120,7 +119,6 @@ SELECT
 	,[strInvoiceOriginId]					= ''
 	,[strPONumber]							= '' --Check this one
 	,[strBOLNumber]							= ''
-	,[strDeliverPickup]						= ''
 	,[strComments]							= POS.strReceiptNumber
 	,[intShipToLocationId]					= NULL
 	,[intBillToLocationId]					= NULL

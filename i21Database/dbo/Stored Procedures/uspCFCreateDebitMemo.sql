@@ -71,7 +71,6 @@ BEGIN
 			,[ysnUseOriginIdAsInvoiceNumber]
 			,[strPONumber]
 			,[strBOLNumber]
-			,[strDeliverPickup]
 			,[strComments]
 			,[intShipToLocationId]
 			,[intBillToLocationId]
@@ -155,7 +154,6 @@ BEGIN
 			,[ysnUseOriginIdAsInvoiceNumber]		= 1
 			,[strPONumber]							= NULL
 			,[strBOLNumber]							= ''
-			,[strDeliverPickup]						= NULL
 			,[strComments]							= ''
 			,[intShipToLocationId]					= NULL
 			,[intBillToLocationId]					= NULL
@@ -252,7 +250,6 @@ BEGIN
 			,[ysnUseOriginIdAsInvoiceNumber]
 			,[strPONumber]
 			,[strBOLNumber]
-			,[strDeliverPickup]
 			,[strComments]
 			,[intShipToLocationId]
 			,[intBillToLocationId]
@@ -339,7 +336,6 @@ BEGIN
 			,[ysnUseOriginIdAsInvoiceNumber]		= 1
 			,[strPONumber]							= NULL
 			,[strBOLNumber]							= ''
-			,[strDeliverPickup]						= NULL
 			,[strComments]							= ''
 			,[intShipToLocationId]					= NULL
 			,[intBillToLocationId]					= NULL
@@ -442,7 +438,6 @@ BEGIN
 		,[ysnUseOriginIdAsInvoiceNumber]
 		,[strPONumber]
 		,[strBOLNumber]
-		,[strDeliverPickup]
 		,[strComments]
 		,[intShipToLocationId]
 		,[intBillToLocationId]
@@ -527,7 +522,6 @@ BEGIN
 		,[ysnUseOriginIdAsInvoiceNumber]
 		,[strPONumber]
 		,[strBOLNumber]
-		,[strDeliverPickup]
 		,[strComments]
 		,[intShipToLocationId]
 		,[intBillToLocationId]

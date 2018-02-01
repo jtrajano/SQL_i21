@@ -545,7 +545,6 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 							@ShipViaId				=	@ShipViaId,  	   
 							@PONumber				=	@PONumber,
 							@BOLNumber				=	@BOLNumber,
-							@DeliverPickUp			=	@DeliverPickUp,							
 							@ShipToLocationId		=	@ShipToLocationId,
 							@BillToLocationId		=	@BillToLocationId,
 							@PeriodsToAccrue		=	@intAccrualPeriod,
@@ -797,7 +796,6 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 					,@InvoiceOriginId				= @InvoiceOriginId
 					,@PONumber						= @PONumber
 					,@BOLNumber						= @BOLNumber
-					,@DeliverPickUp					= @DeliverPickUp
 					,@Comment						= @InvoiceComment
 					,@ShipToLocationId				= @ShipToLocationId
 					,@BillToLocationId				= @BillToLocationId
