@@ -6180,6 +6180,7 @@
     <Build Include="dbo\Stored Procedures\uspLGGetDebitNoteDetailReport.sql" />
     <Build Include="dbo\Views\vyuPREmployeeTimeOffUsedYTD.sql" />
     <Build Include="dbo\Views\vyuPREmployeeW3.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateOR7351334M.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
