@@ -1461,7 +1461,6 @@ Ext.define('Inventory.view.Bundle', {
                                                             {
                                                                 xtype: 'numbercolumn',
                                                                 flex: 0.8,
-                                                                hidden: true,
                                                                 itemId: 'colPricingStandardCost',
                                                                 width: 120,
                                                                 align: 'right',

@@ -15,6 +15,8 @@ Ext.define('Inventory.view.BundleViewModel', {
         'Inventory.store.BufferedCommodity',
         'GeneralLedger.store.BufAccountCategoryGroup',
         'i21.store.CompanyLocationSubLocationBuffered',
+        'i21.store.CompanyLocationPricingLevelBuffered',
+        'i21.store.CurrencyBuffered'
     ],
 
     stores: {
@@ -136,7 +138,161 @@ Ext.define('Inventory.view.BundleViewModel', {
                     messageProperty: 'message'
                 }
             }
-        }
+        },
+
+        pricingLocation: {
+            type: 'icbuffereditemlocation'
+        },        
+
+        pricingPricingMethods: {
+            data: [
+                {
+                    strDescription: 'None'
+                },
+                {
+                    strDescription: 'Fixed Dollar Amount'
+                },
+                {
+                    strDescription: 'Markup Standard Cost'
+                },
+                {
+                    strDescription: 'Percent of Margin'
+                }
+                // {
+                //     strDescription: 'Markup Last Cost'
+                // },
+                // {
+                //     strDescription: 'Markup Avg Cost'
+                // }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
+
+        pricingLevelLocation: {
+            type: 'icbuffereditemlocation'
+        },      
+        
+        pricingLevel: {
+            type: 'smcompanylocationpricinglevelbuffered'
+        },
+        
+        pricingLevelUOM: {
+            type: 'icbuffereditemunitmeasure'
+        },
+
+        pricingMethods: {
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'None'
+                },
+                {
+                    strDescription: 'Fixed Dollar Amount'
+                },
+                {
+                    strDescription: 'Markup Standard Cost'
+                },
+                {
+                    strDescription: 'Percent of Margin'
+                },
+                {
+                    strDescription: 'Discount Retail Price'
+                },
+                {
+                    strDescription: 'MSRP Discount'
+                },
+                {
+                    strDescription: 'Percent of Margin (MSRP)'
+                }
+                // {
+                //     strDescription: 'Markup Last Cost'
+                // },
+                // {
+                //     strDescription: 'Markup Avg Cost'
+                // }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },        
+        
+        commissionsOn:{
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Percent'
+                },{
+                    strDescription: 'Units'
+                },{
+                    strDescription: 'Amount'
+                },{
+                    strDescription: 'Gross Profit'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },        
+
+        currency: {
+            type: 'currencybuffered'
+        },
+
+        specialPricingLocation: {
+            type: 'icbuffereditemlocation'
+        },
+        
+        promotionTypes:{
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Rebate'
+                },{
+                    strDescription: 'Discount'
+                },{
+                    strDescription: 'Vendor Discount'
+                },{
+                    strDescription: 'Terms Discount'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
+
+        specialPricingUOM: {
+            type: 'icbuffereditemunitmeasure'
+        },
+
+        discountsBy:{
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Percent'
+                },{
+                    strDescription: 'Amount'
+                },{
+                    strDescription: 'Terms Rate'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
+
+        
     },    
 
     formulas: {

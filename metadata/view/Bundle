@@ -4325,7 +4325,6 @@
                                                         "dataIndex": "string",
                                                         "flex": 0.8,
                                                         "format": null,
-                                                        "hidden": true,
                                                         "itemId": "colPricingStandardCost",
                                                         "text": "Standard Cost",
                                                         "width": 120

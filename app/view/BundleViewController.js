@@ -281,8 +281,168 @@ Ext.define('Inventory.view.BundleViewController', {
                         ]
                     }
                 }
-            }
+            },
 
+            //-----------//
+            //Pricing Tab//
+            //-----------//
+            grdPricing: {
+                colPricingLocation: {
+                    dataIndex: 'strLocationName',
+                    editor: {
+                        readOnly: true,
+                        store: '{pricingLocation}',
+                        defaultFilters: [{
+                            column: 'intItemId',
+                            value: '{current.intItemId}'
+                        }]
+                    }
+                },
+                colPricingUOM: 'strUnitMeasure',
+                colPricingUPC: 'strUPC',
+                colPricingLastCost: 'dblLastCost',
+                colPricingStandardCost: 'dblStandardCost',
+                colPricingAverageCost: 'dblAverageCost',
+                colPricingEOMCost: 'dblEndMonthCost',
+                colPricingMethod: {
+                    dataIndex: 'strPricingMethod',
+                    editor: {
+                        store: '{pricingPricingMethods}'
+                    }
+                },
+                colPricingAmount: {
+                    dataIndex: 'dblAmountPercent'
+                },
+                colPricingRetailPrice: {
+                    dataIndex: 'dblSalePrice'
+                },
+                colPricingMSRP: 'dblMSRPPrice'
+            },
+            grdPricingLevel: {
+                colPricingLevelLocation: {
+                    dataIndex: 'strLocationName',
+                    editor: {
+                        store: '{pricingLevelLocation}',
+                        defaultFilters: [{
+                            column: 'intItemId',
+                            value: '{current.intItemId}'
+                        }]
+                    }
+                },
+                colPricingLevelPriceLevel: {
+                    dataIndex: 'strPriceLevel',
+                    editor: {
+                        store: '{pricingLevel}',
+                        defaultFilters: [{
+                            column: 'intCompanyLocationId',
+                            value: '{grdPricingLevel.selection.intLocationId}'
+                        }]
+                    }
+                },
+                colPricingLevelUOM: {
+                    //hidden: true,
+                    dataIndex: 'strUnitMeasure',
+                    editor: {
+                        store: '{pricingLevelUOM}',
+                        defaultFilters: [{
+                            column: 'intItemId',
+                            value: '{current.intItemId}'
+                        }]
+                    }
+                },
+                colPricingLevelUPC: 'strUPC',
+                colPricingLevelUnits: {
+                    dataIndex: 'dblUnit',
+                    hidden: true
+                },
+                colPricingLevelMin: 'dblMin',
+                colPricingLevelMax: 'dblMax',
+                colPricingLevelMethod: {
+                    dataIndex: 'strPricingMethod',
+                    editor: {
+                        store: '{pricingMethods}'
+                    }
+                },
+                colPricingLevelAmount: 'dblAmountRate',
+                colPricingLevelUnitPrice: 'dblUnitPrice',
+                colPricingLevelEffectiveDate: 'dtmEffectiveDate',
+                colPricingLevelCommissionOn: {
+                    dataIndex: 'strCommissionOn',
+                    editor: {
+                        store: '{commissionsOn}'
+                    }
+                },
+                colPricingLevelCommissionRate: 'dblCommissionRate',
+                colPricingLevelCurrency: {
+                    dataIndex: 'strCurrency',
+                    editor: {
+                        store: '{currency}',
+                        defaultFilters: [{
+                            column: 'ysnSubCurrency',
+                            value: false
+                        }]
+                    }
+                }
+            },
+
+            grdSpecialPricing: {
+                colSpecialPricingLocation: {
+                    dataIndex: 'strLocationName',
+                    editor: {
+                        store: '{specialPricingLocation}',
+                        defaultFilters: [{
+                            column: 'intItemId',
+                            value: '{current.intItemId}'
+                        }]
+                    }
+                },
+                colSpecialPricingPromotionType: {
+                    dataIndex: 'strPromotionType',
+                    editor: {
+                        store: '{promotionTypes}'
+                    }
+                },
+                colSpecialPricingUnit: {
+                    //hidden: true,
+                    dataIndex: 'strUnitMeasure',
+                    editor: {
+                        store: '{specialPricingUOM}',
+                        defaultFilters: [{
+                            column: 'intItemId',
+                            value: '{current.intItemId}'
+                        }]
+                    }
+                },
+                colSpecialPricingUPC: 'strUPC',
+                colSpecialPricingQty: {
+                    dataIndex: 'dblUnit'
+                },
+                colSpecialPricingDiscountBy: {
+                    dataIndex: 'strDiscountBy',
+                    editor: {
+                        store: '{discountsBy}'
+                    }
+                },
+                colSpecialPricingDiscountRate: 'dblDiscount',
+                colSpecialPricingUnitPrice: 'dblUnitAfterDiscount',
+                colSpecialPricingDiscountedPrice: 'dblDiscountedPrice',
+                colSpecialPricingBeginDate: 'dtmBeginDate',
+                colSpecialPricingEndDate: 'dtmEndDate',
+                colSpecialPricingDiscQty: 'dblDiscountThruQty',
+                colSpecialPricingDiscAmount: 'dblDiscountThruAmount',
+                colSpecialPricingAccumQty: 'dblAccumulatedQty',
+                colSpecialPricingAccumAmount: 'dblAccumulatedAmount',
+                colSpecialPricingCurrency: {
+                    dataIndex: 'strCurrency',
+                    editor: {
+                        store: '{currency}',
+                        defaultFilters: [{
+                            column: 'ysnSubCurrency',
+                            value: false
+                        }]
+                    }
+                }
+            },            
         }
     },
 
@@ -303,8 +463,10 @@ Ext.define('Inventory.view.BundleViewController', {
             grdAddOn = win.down('#grdAddOn'),
             grdGlAccounts = win.down('#grdGlAccounts'),
             grdLocationStore = win.down('#grdLocationStore'),
-            grdItemSubLocations = win.down('#grdItemSubLocations');
-
+            grdItemSubLocations = win.down('#grdItemSubLocations')
+            grdPricing = win.down('#grdPricing'),
+            grdPricingLevel = win.down('#grdPricingLevel'),
+            grdSpecialPricing = win.down('#grdSpecialPricing');
 
         win.context = Ext.create('iRely.Engine', {
             window : win,
@@ -374,7 +536,32 @@ Ext.define('Inventory.view.BundleViewController', {
                         grid: grdGlAccounts,
                         deleteButton : grdGlAccounts.down('#btnDeleteGlAccounts')
                     })
-                }
+                },
+                {
+                    key: 'tblICItemPricings',
+                    lazy: true, 
+                    component: Ext.create('iRely.grid.Manager', {
+                        grid: grdPricing,
+                        deleteButton : grdPricing.down('#btnDeletePricing')
+                    })
+                },
+                {
+                    key: 'tblICItemPricingLevels',
+                    lazy: true, 
+                    component: Ext.create('iRely.grid.Manager', {
+                        grid: grdPricingLevel,
+                        deleteButton : grdPricingLevel.down('#btnDeletePricingLevel')
+                    })
+                },
+                {
+                    key: 'tblICItemSpecialPricings',
+                    lazy: true, 
+                    component: Ext.create('iRely.grid.Manager', {
+                        grid: grdSpecialPricing,
+                        deleteButton : grdSpecialPricing.down('#btnDeleteSpecialPricing')
+                    })
+                },
+                
             ]
         });
 
