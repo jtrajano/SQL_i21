@@ -357,21 +357,21 @@ BEGIN TRY
 			END
 
 			--- INSERT ALL THE LOTS WITHIN THE ALLOWABLE PICK DAY RANGE
-			IF @ysnPickByLotCode = 1
-			BEGIN
-				SELECT @intLotCode1 = MIN(Substring(PL.strParentLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits))
-				FROM tblICLot L
-				JOIN tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
-				WHERE L.intItemId = @intItemId
-					AND dblQty > 0
+			--IF @ysnPickByLotCode = 1
+			--BEGIN
+			--	SELECT @intLotCode1 = MIN(Substring(PL.strParentLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits))
+			--	FROM tblICLot L
+			--	JOIN tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
+			--	WHERE L.intItemId = @intItemId
+			--		AND dblQty > 0
 
-				SELECT @dtmDateCreated1 = DATEADD(day, CAST(RIGHT(@intLotCode1, 3) AS INT) - 1, CONVERT(DATETIME, LEFT(@intLotCode1, 2) + '0101', 112))
+			--	SELECT @dtmDateCreated1 = DATEADD(day, CAST(RIGHT(@intLotCode1, 3) AS INT) - 1, CONVERT(DATETIME, LEFT(@intLotCode1, 2) + '0101', 112))
 
-				SELECT @dtmDateCreated2 = @dtmDateCreated1 + @intAllowablePickDayRange
+			--	SELECT @dtmDateCreated2 = @dtmDateCreated1 + @intAllowablePickDayRange
 
-				SELECT @intLotCode2 = RIGHT(CAST(YEAR(@dtmDateCreated2) AS CHAR(4)), 2) + RIGHT('000' + CAST(DATEPART(dy, @dtmDateCreated2) AS VARCHAR(3)), 3)
-			END
-			ELSE
+			--	SELECT @intLotCode2 = RIGHT(CAST(YEAR(@dtmDateCreated2) AS CHAR(4)), 2) + RIGHT('000' + CAST(DATEPART(dy, @dtmDateCreated2) AS VARCHAR(3)), 3)
+			--END
+			--ELSE
 			BEGIN
 				SELECT @dtmDateCreated1 = MIN(dtmDateCreated)
 				FROM tblICLot
@@ -441,18 +441,10 @@ BEGIN TRY
 				AND L.dblQty > 0
 				AND LS.strPrimaryStatus = 'Active'
 				AND ISNULL(L.dtmExpiryDate - @intReceivedLife, @dtmCurrentDateTime) >= @dtmCurrentDateTime
-				AND (
-					(
-						@ysnPickByLotCode = 0
-						AND L.dtmDateCreated BETWEEN @dtmDateCreated1
+				AND 
+					 L.dtmDateCreated BETWEEN @dtmDateCreated1
 							AND @dtmDateCreated2
-						)
-					OR (
-						@ysnPickByLotCode = 1
-						AND Substring(PL.strParentLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits) BETWEEN @intLotCode1
-							AND @intLotCode2
-						)
-					)
+					
 				AND ISNULL(L.intLotId, 0) = ISNULL((
 						CASE 
 							WHEN @intLineItemLotId IS NULL

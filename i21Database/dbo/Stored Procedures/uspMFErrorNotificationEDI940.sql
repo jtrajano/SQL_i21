@@ -8,7 +8,7 @@ BEGIN
 			)
 	BEGIN
 		RAISERROR (
-				'No data.'
+				'Execution completed. Please check log for messages.'
 				,16
 				,1
 				)
