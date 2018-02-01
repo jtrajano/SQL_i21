@@ -12,8 +12,11 @@
 	cust.dblCreditLimit,
 	entityLocationPricingLevel.strPricingLevelName,
 	entityToCustomer.dtmOriginationDate,
-	MAX(custInvoice.dtmDate) AS dtmLastInvoice,
-	MAX(custPayment.dtmDatePaid) AS dtmLastPayment,
+	--MAX(custInvoice.dtmDate) AS dtmLastInvoice,
+	--MAX(custPayment.dtmDatePaid) AS dtmLastPayment,
+	dtmLastInvoice = (SELECT MAX(INV.dtmDate) FROM tblARInvoice INV WHERE INV.intEntityCustomerId = cust.intEntityId ),
+	dtmLastPayment = (SELECT MAX(PAYMENT.dtmDatePaid) FROM tblARPayment PAYMENT WHERE PAYMENT.intEntityCustomerId = cust.intEntityId ),
+	
 	cust.ysnActive,
 	entityContact.strMobile,
 	entityContact.strEmail,
@@ -64,8 +67,8 @@ LEFT JOIN tblSMCurrency custCurrency ON cust.intCurrencyId = custCurrency.intCur
 LEFT JOIN tblSMCompanyLocation entityLocation ON custLocation.intWarehouseId = entityLocation.intCompanyLocationId
 LEFT JOIN vyuEMEntityType entityType ON cust.intEntityId = entityType.intEntityId
 LEFT JOIN tblSMCompanyLocationPricingLevel entityLocationPricingLevel ON cust.intCompanyLocationPricingLevelId = entityLocationPricingLevel.intCompanyLocationPricingLevelId
-LEFT JOIN tblARInvoice custInvoice ON cust.intEntityId = custInvoice.intEntityCustomerId
-LEFT JOIN tblARPayment custPayment ON cust.intEntityId = custPayment.intEntityCustomerId
+/*LEFT JOIN tblARInvoice custInvoice ON cust.intEntityId = custInvoice.intEntityCustomerId
+LEFT JOIN tblARPayment custPayment ON cust.intEntityId = custPayment.intEntityCustomerId*/
 LEFT JOIN tblEMEntityLineOfBusiness entityLOB ON cust.intEntityId = entityLOB.intEntityId
 LEFT JOIN tblSMLineOfBusiness LOB ON entityLOB.intLineOfBusinessId = LOB.intLineOfBusinessId
 LEFT JOIN tblEMEntityClass entityClass ON entityToCustomer.intEntityClassId = entityClass.intEntityClassId
@@ -75,9 +78,9 @@ WHERE
 		entityType.Customer = 1 -- check if entity is a customer
 		OR
 		entityType.Prospect = 1
-		OR 
-		custInvoice.dtmDate = (SELECT MAX(dtmDate) FROM tblARInvoice x WHERE x.intEntityCustomerId = x.intEntityCustomerId)
-GROUP BY 
+		/*OR 
+		custInvoice.dtmDate = (SELECT MAX(dtmDate) FROM tblARInvoice x WHERE x.intEntityCustomerId = x.intEntityCustomerId)*/
+/*GROUP BY 
 	cust.intEntityId,
 	cust.strCustomerNumber, 
 	entityToCustomer.strName, 
@@ -128,5 +131,5 @@ GROUP BY
 	cust.intTermsId,
 	entityContact.intEntityId,
 	entityType.Prospect,
-	cust.ysnCreditHold
+	cust.ysnCreditHold*/
 GO
