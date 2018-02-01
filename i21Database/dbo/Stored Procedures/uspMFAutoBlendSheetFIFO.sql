@@ -522,6 +522,14 @@ BEGIN TRY
 			) ORDER BY ysnIsSubstitute
 		IF @idoc <> 0 EXEC sp_xml_removedocument @idoc
 
+		Update ti Set ti.intItemUOMId=ri.intItemUOMId 
+		From @tblInputItem ti Join tblMFRecipeItem ri on ti.intRecipeItemId=ri.intRecipeItemId
+		Where ti.intItemUOMId is null
+
+		Update ti Set ti.strLotTracking=i.strLotTracking
+		From @tblInputItem ti Join tblICItem i on ti.intItemId=i.intItemId
+		Where ISNULL(ti.strLotTracking,'')=''
+
 		--update substitute ratio
 		If ISNULL(@intWorkOrderId,0)>0
 			Update ti Set ti.dblSubstituteRatio=rs.dblSubstituteRatio,ti.dblMaxSubstituteRatio=rs.dblMaxSubstituteRatio 
