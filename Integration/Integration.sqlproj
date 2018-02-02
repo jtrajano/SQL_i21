@@ -450,5 +450,6 @@
     <Build Include="dbo\Functions\fnCTConvertYNToBit.sql" />
     <Build Include="dbo\Functions\fnCTConvertToDateTime.sql" />
     <None Include="dbo\Stored Procedures\uspRKImportFutureMarket.sql" />
+    <None Include="Scripts\IC\uspICDCCommoditySetupPt.sql" />
   </ItemGroup>
 </Project>
