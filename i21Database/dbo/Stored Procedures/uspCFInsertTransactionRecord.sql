@@ -349,6 +349,17 @@ BEGIN
 			SET @strTransactionType = @strSiteType
 		END
 	END
+	ELSE IF (@strNetworkType = 'Wright Express')
+	BEGIN 
+		IF(ISNULL(@intSiteId,0) = 0)
+		BEGIN
+			SET @strTransactionType = 'Extended Remote'
+		END
+		ELSE
+		BEGIN
+			SET @strTransactionType = @strSiteType
+		END
+	END
 	ELSE IF (@strNetworkType = 'CFN')
 	BEGIN
 		IF(@strTransactionType = 'R')
@@ -477,7 +488,7 @@ BEGIN
 	-- if transaction is remote or ext remote				  --
 	------------------------------------------------------------
 	IF ((@intSiteId IS NULL OR @intSiteId = 0) AND @intNetworkId != 0 AND (@strPPSiteType = 'N' OR @strPPSiteType = 'R') AND @strNetworkType = 'PacPride')
-		BEGIN 
+	BEGIN 
 			
 			INSERT INTO tblCFSite
 			(
@@ -608,6 +619,53 @@ BEGIN
 												THEN 'Local/Network'
 											ELSE @strTransactionType
 											END)
+				,@strAllowExemptionsOnExtAndRetailTrans
+				
+
+			SET @intSiteId = SCOPE_IDENTITY();
+			SET @ysnSiteCreated = 1;
+	END
+	ELSE IF ((@intSiteId IS NULL OR @intSiteId = 0) AND @intNetworkId != 0 AND @strNetworkType = 'Wright Express')
+	BEGIN
+		DECLARE @intWEXTaxGroupByState INT = NULL
+
+		IF(@intTaxGroupByState IS NULL)
+		BEGIN
+			SELECT TOP 1 @intWEXTaxGroupByState = intTaxGroupId FROM tblCFNetworkSiteTaxGroup WHERE intNetworkId = @intNetworkId AND strState = @strSiteState
+		END
+		
+		IF(@intTaxGroupByState IS NULL)
+		BEGIN
+			SELECT TOP 1 @intWEXTaxGroupByState = intTaxGroupId FROM tblCFNetworkSiteTaxGroup WHERE intNetworkId = @intNetworkId AND (strState IS NULL OR strState = '')
+		END
+
+		INSERT INTO tblCFSite
+			(
+				 intNetworkId		
+				,strSiteNumber	
+				,strSiteName
+				,strDeliveryPickup	
+				,intARLocationId	
+				,strControllerType	
+				,strTaxState		
+				,strSiteAddress		
+				,strSiteCity			
+				,strSiteType
+				,intTaxGroupId
+				,strAllowExemptionsOnExtAndRetailTrans
+			)
+			SELECT
+				intNetworkId			= @intNetworkId
+				,strSiteNumber			= @strSiteId
+				,strSiteName			= @strSiteName
+				,strDeliveryPickup		= 'Pickup'
+				,intARLocationId		= @intNetworkLocation
+				,strControllerType		= 'AutoGas'
+				,strTaxState			= @strSiteState
+				,strSiteAddress			= @strSiteAddress	
+				,strSiteCity			= @strSiteCity	
+				,strSiteType			= 'Extended Remote'
+				,intTaxGroupId			= @intWEXTaxGroupByState
 				,@strAllowExemptionsOnExtAndRetailTrans
 				
 

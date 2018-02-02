@@ -50,13 +50,17 @@
     [intConcurrencyId]                      INT             CONSTRAINT [DF_tblCFNetwork_intConcurrencyId] DEFAULT ((1)) NULL,
     [strDownloadFileName]                   NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strAllowExemptionsOnExtAndRetailTrans] NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-	[strExportValidURL]					    NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [ysnPostForeignSales]                   BIT             NULL,
+    [strExportValidURL]                     NVARCHAR (MAX)  NULL,
+    [intAdvanceMappingId]                   INT             NULL,
     CONSTRAINT [PK_tblCFNetwork] PRIMARY KEY CLUSTERED ([intNetworkId] ASC),
     CONSTRAINT [FK_tblCFNetwork_tblARCustomer] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
+    CONSTRAINT [FK_tblCFNetwork_tblCFAdvanceMapping] FOREIGN KEY ([intAdvanceMappingId]) REFERENCES [dbo].[tblCFAdvanceMapping] ([intAdvanceMappingId]),
     CONSTRAINT [FK_tblCFNetwork_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
     CONSTRAINT [FK_tblCFNetwork_tblSMImportFileHeader] FOREIGN KEY ([intImportMapperId]) REFERENCES [dbo].[tblSMImportFileHeader] ([intImportFileHeaderId])
 );
+
+
 
 
 

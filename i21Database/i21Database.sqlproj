@@ -6155,6 +6155,8 @@
     <Build Include="dbo\Tables\tblSMBatchPostingLog.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryShipmentTaxes.sql" />
     <Build Include="dbo\Views\vyuICGetShipmentChargeTaxDetails.sql" />
+    <Build Include="dbo\Tables\tblCFAdvanceMappingDetail.sql" />
+    <Build Include="dbo\Tables\tblCFAdvanceMapping.sql" />
     <Build Include="dbo\Stored Procedures\uspSMRefreshUserRoleMenus.sql" />
     <Build Include="dbo\Stored Procedures\uspSMRefreshContactRoleMenus.sql" />
     <Build Include="dbo\Tables\tblSMLogoPreference.sql" />
