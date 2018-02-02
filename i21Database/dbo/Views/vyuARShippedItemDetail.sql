@@ -76,7 +76,7 @@ LEFT OUTER JOIN (
 		 , intCompanyLocationId
 		 , intTermId
 		 , intShipViaId
-	 FROM dbo.vyuARCustomerContract WITH (NOLOCK)
+	 FROM dbo.vyuCTCustomerContract WITH (NOLOCK)
 	) ARCC ON LS.[intContractDetailId] = ARCC.intContractDetailId
 INNER JOIN
 	(SELECT [intItemId], [strItemNo], [strDescription] FROM tblICItem WITH(NOLOCK)) ICI

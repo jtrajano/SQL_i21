@@ -77,7 +77,7 @@ DECLARE	 @Price						NUMERIC(18,6)
 		,@IsMaxPrice		= ARCC.[ysnMaxPrice]
 		,@ContractPricingLevelId = ARCC.[intCompanyLocationPricingLevelId]
 	FROM
-		[vyuARCustomerContract] ARCC
+		[vyuCTCustomerContract] ARCC
 	WHERE
 		ARCC.[intEntityCustomerId] = @CustomerId
 		AND (@LimitContractLocation = 0 OR ARCC.[intCompanyLocationId] = @LocationId)
@@ -167,7 +167,7 @@ DECLARE	 @Price						NUMERIC(18,6)
 		,@IsMaxPrice		= ARCC.[ysnMaxPrice]
 		,@ContractPricingLevelId = ARCC.[intCompanyLocationPricingLevelId]
 	FROM
-		[vyuARCustomerContract] ARCC
+		[vyuCTCustomerContract] ARCC
 	WHERE
 		ARCC.[intEntityCustomerId] = @CustomerId
 		AND (@LimitContractLocation = 0 OR ARCC.[intCompanyLocationId] = @LocationId)

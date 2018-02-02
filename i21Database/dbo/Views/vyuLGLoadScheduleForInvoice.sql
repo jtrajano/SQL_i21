@@ -152,7 +152,7 @@ SELECT intContractHeaderId
 	 , strCurrencyExchangeRateType
 	 , intCurrencyExchangeRateId
 	 , dblCurrencyExchangeRate
- FROM dbo.vyuARCustomerContract WITH (NOLOCK) --For Review - vyuARCustomerContract will be deleted once CT-1873 is completed--
+ FROM dbo.vyuCTCustomerContract WITH (NOLOCK) --For Review - vyuARCustomerContract will be deleted once CT-1873 is completed--
 ) ARCC ON LD.intSContractDetailId = ARCC.intContractDetailId
 INNER JOIN
 	(SELECT [intItemId], [strItemNo], [strDescription] FROM tblICItem WITH(NOLOCK)) ICI

@@ -612,7 +612,7 @@ FROM (
 			 , strCurrencyExchangeRateType
 			 , intCurrencyExchangeRateId
 			 , dblCurrencyExchangeRate
-		 FROM dbo.vyuARCustomerContract WITH (NOLOCK)
+		 FROM dbo.vyuCTCustomerContract WITH (NOLOCK)
 	) ARCC ON ICISI.intLineNo = ARCC.intContractDetailId 
 		  AND ICIS.intOrderType = 1
 	LEFT OUTER JOIN (
@@ -1408,7 +1408,7 @@ LEFT OUTER JOIN (
 		 , strCurrencyExchangeRateType
 		 , intCurrencyExchangeRateId
 		 , dblCurrencyExchangeRate
-	 FROM dbo.vyuARCustomerContract WITH (NOLOCK)
+	 FROM dbo.vyuCTCustomerContract WITH (NOLOCK)
 ) CUSTOMERCONTRACT ON SHIPPEDITEMS.intContractHeaderId = CUSTOMERCONTRACT.intContractHeaderId 
 				  AND SHIPPEDITEMS.intContractDetailId = CUSTOMERCONTRACT.intContractDetailId
 LEFT OUTER JOIN (

@@ -12,7 +12,7 @@ SELECT intContractHeaderId
 	 , intCurrencyId
      , strCurrency
 
-FROM vyuARCustomerContract
+FROM vyuCTCustomerContract
 GROUP BY intContractHeaderId
        , intCompanyLocationId
 	   , intEntityCustomerId

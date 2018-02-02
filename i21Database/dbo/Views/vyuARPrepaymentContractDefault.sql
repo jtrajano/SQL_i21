@@ -64,7 +64,7 @@ SELECT
 	,[intDestinationWeightId]	= CustCon.[intDestinationWeightId]
 	,[strDestinationWeight]		= CustCon.[strDestinationWeight]
 
-FROM [vyuARCustomerContract] CustCon
+FROM [vyuCTCustomerContract] CustCon
 INNER JOIN [vyuARCustomerSearch] ARC ON CustCon.intEntityCustomerId = ARC.[intEntityId]
 LEFT OUTER JOIN tblSMTerm SMT ON CustCon.[intTermId] = SMT.[intTermID]
 WHERE CustCon.intCurrencyId = (SELECT TOP 1 ISNULL(SMC.intMainCurrencyId, SMC.intCurrencyID) [intCurrencyID]

@@ -260,7 +260,7 @@ BEGIN
 							--,@PriceUOM			= ARCC.[strUnitMeasure] 
 							--,@termId			= ARCC.[intTermId]
 						FROM
-							[vyuARCustomerContract] ARCC
+							[vyuCTCustomerContract] ARCC
 						WHERE
 							ARCC.[intEntityCustomerId] = @intCustomerEntityId
 							--AND ARCC.[intCompanyLocationId] = @LocationId --???

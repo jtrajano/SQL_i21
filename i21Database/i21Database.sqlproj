@@ -932,7 +932,7 @@
     <Build Include="dbo\Stored Procedures\uspGLCreateRecurringJournal.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateAccountIDDivider.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateAccountIDStructure.sql" />
-	<Build Include="dbo\Stored Procedures\uspGLUpdateOldAccountId.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLUpdateOldAccountId.sql" />
     <Build Include="dbo\Stored Procedures\uspARPostInvoice.sql" />
     <Build Include="dbo\Functions\fnGetItemGLAccountAsTable.sql" />
     <Build Include="dbo\Views\vyuSMContacts.sql" />
@@ -4328,7 +4328,6 @@
     <Build Include="dbo\Views\vyuARCollectionOverdueReport.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\23_AddDefaultCollectionLetters.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\24_AddDefaultPlaceHolders.sql" />
-    <Build Include="dbo\Views\vyuARCustomerContract.sql" />
     <Build Include="dbo\Functions\fnARRemoveSpecialChars.sql" />
     <Build Include="dbo\Functions\fnARSplitValues.sql" />
     <Build Include="dbo\User Defined Types\ItemCostingZeroStockTableType.sql" />
