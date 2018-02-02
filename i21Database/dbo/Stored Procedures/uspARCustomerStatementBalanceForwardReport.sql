@@ -520,7 +520,7 @@ FROM vyuARCustomerSearch C
 										   WHEN strTransactionType = ''Customer Prepayment'' THEN 0.00
 										   ELSE I.dblInvoiceTotal 
 									  END - ISNULL(TOTALPAYMENT.dblPayment, 0)
-			 , dblPayment			= CASE WHEN strTransactionType = ''Customer Prepayment'' THEN I.dblInvoiceTotal ELSE 0.00 END
+			 , dblPayment			= CASE WHEN strTransactionType = ''Customer Prepayment'' THEN I.dblInvoiceTotal ELSE ' + CASE WHEN @ysnPrintFromCFLocal = 1 THEN '0.00' ELSE 'CASE WHEN I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0) = 0 THEN ISNULL(TOTALPAYMENT.dblPayment, 0) ELSE 0.00 END' END +' END
 			 , dtmDate				= I.dtmDate
 			 , dtmDueDate			= I.dtmDueDate
 			 , dtmShipDate			= I.dtmShipDate
@@ -723,6 +723,7 @@ IF @ysnPrintFromCFLocal = 1
 ELSE 
 	BEGIN
 		UPDATE @temp_statement_table SET dblBalance = dblPayment * -1 WHERE strTransactionType IN ('Customer Prepayment', 'Payment')
+		UPDATE @temp_statement_table SET dblBalance = dblInvoiceTotal WHERE strTransactionType IN ('Invoice', 'Debit Memo') AND dblBalance <> 0
 	END
 
 INSERT INTO @temp_statement_table(
