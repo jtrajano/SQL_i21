@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspGLUpdateOldAccountId]
+CREATE PROCEDURE [dbo].[uspGLUpdateOldAccountId]
 AS
 BEGIN
 ;WITH XREF AS
