@@ -277,6 +277,7 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
         var context = Ext.create('iRely.Engine', {
             window: win,
             store: store,
+            enableScreenOptimization: false,
             binding: me.config.binding,
             createRecord: me.onCreateRecord
         });

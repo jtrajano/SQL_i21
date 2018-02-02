@@ -496,6 +496,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             window: win,
             store: store,
             enableActivity: true,
+            enableScreenOptimization: false,
             onPageChange: me.onPageChange,
             enableAttachment: true,
             attachment: Ext.create('iRely.attachment.Manager', {
