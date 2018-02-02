@@ -137,14 +137,14 @@ ELSE
 			, dblForexRate	
 		)
 		-- Insert stock keeping items, except kit items. 
-		SELECT intOrderType					= 1
+		SELECT intOrderType					= @SALES_ORDER_TYPE
 			, intSourceType					= 0
 			, intEntityCustomerId			= SO.intEntityCustomerId
 			, dtmShipDate					= SO.dtmDate
 			, intShipFromLocationId			= SO.intCompanyLocationId
 			, intShipToLocationId			= SO.intShipToLocationId
 			, intFreightTermId				= SO.intFreightTermId
-			, strSourceScreenName			= 'Sales Order'
+			, strSourceScreenName			= @SALES_ORDER
 			, strReferenceNumber			= SO.strSalesOrderNumber
 			, dtmRequestedArrivalDate		= NULL
 			, intShipToCompanyLocationId	= NULL
