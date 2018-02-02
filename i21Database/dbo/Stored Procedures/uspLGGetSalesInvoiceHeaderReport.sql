@@ -70,7 +70,16 @@ BEGIN
 		CB.strContractBasis,
 		C.strFLOId,
 		Inv.dblInvoiceTotal,
-		Inv.strTransactionType
+		Inv.strTransactionType,
+		L.strBLNumber,
+		L.dtmBLDate,
+		L.strOriginPort,
+		L.strDestinationPort,
+		L.strShippingMode,
+		L.strMVessel,
+		L.dtmETAPOD,
+		L.intNumberOfContainers,
+		ShippingLine.strName AS strShippingLineName
 	FROM tblARInvoice Inv
 	JOIN vyuCTEntity EN ON EN.intEntityId = Inv.intEntityCustomerId
 	JOIN tblARCustomer C ON C.intEntityId = Inv.intEntityCustomerId
@@ -82,5 +91,6 @@ BEGIN
 	LEFT JOIN tblCTContractDetail CD on CD.intContractDetailId = LD.intSContractDetailId
 	LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	LEFT JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
+	LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
 	WHERE Inv.intInvoiceId = @intInvoiceId
 END
