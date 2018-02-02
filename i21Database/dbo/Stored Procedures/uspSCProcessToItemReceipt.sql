@@ -575,7 +575,9 @@ BEGIN TRY
 						)
 					)
 		END 
-
+		SELECT @total = COUNT(*) FROM @voucherItems;
+		IF (@total > 0)
+		BEGIN
 		EXEC [dbo].[uspAPCreateBillData]
 				@userId = @intUserId
 				,@vendorId = @intEntityId
@@ -586,6 +588,7 @@ BEGIN TRY
 				,@shipFrom = @intShipFrom
 				,@currencyId = @intCurrencyId
 				,@billId = @intBillId OUTPUT
+		END
 
 		IF ISNULL(@intBillId , 0) != 0
 		BEGIN
