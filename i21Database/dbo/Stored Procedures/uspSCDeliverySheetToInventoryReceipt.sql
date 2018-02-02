@@ -363,11 +363,10 @@ END
 						,[intTaxGroupId] = ri.intTaxGroupId
 				FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
 							ON r.intInventoryReceiptId = ri.intInventoryReceiptId
-						LEFT JOIN tblCTContractHeader CT ON CT.intContractHeaderId = ri.intOrderId 
+						LEFT JOIN tblCTContractHeader CT ON CT.intContractHeaderId = ri.intOrderId AND (CT.intPricingTypeId <= 1 OR CT.intPricingTypeId = 6)
 				WHERE	r.ysnPosted = 1
 						AND r.intInventoryReceiptId = @InventoryReceiptId
 						AND ri.intOwnershipType = 1		
-						AND (CT.intPricingTypeId <= 1 OR CT.intPricingTypeId = 6)
 			END 
 
 			-- Assemble the Other Charges
