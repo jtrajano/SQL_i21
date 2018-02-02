@@ -451,5 +451,8 @@
     <Build Include="dbo\Functions\fnCTConvertToDateTime.sql" />
     <None Include="dbo\Stored Procedures\uspRKImportFutureMarket.sql" />
     <None Include="Scripts\IC\uspICDCCommoditySetupPt.sql" />
+    <None Include="dbo\Stored Procedures\uspCTImportContract.sql" />
+    <None Include="dbo\Stored Procedures\uspCTImportContractPlanPt.sql" />
+    <None Include="dbo\Stored Procedures\uspCTImportContractText.sql" />
   </ItemGroup>
 </Project>

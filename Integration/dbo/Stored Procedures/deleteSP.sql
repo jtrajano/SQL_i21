@@ -93,3 +93,12 @@ GO
 IF EXISTS(select top 1 1 from sys.procedures where name = 'uspGRImportCustomerSplit')
 	DROP PROCEDURE uspGRImportCustomerSplit
 GO
+IF EXISTS(select top 1 1 from sys.procedures where name = 'uspGRImportCustomerSplit')
+	DROP PROCEDURE uspCTImportContract
+GO
+IF EXISTS(select top 1 1 from sys.procedures where name = 'uspGRImportCustomerSplit')
+	DROP PROCEDURE uspCTImportContractPlanPt
+GO
+IF EXISTS(select top 1 1 from sys.procedures where name = 'uspGRImportCustomerSplit')
+	DROP PROCEDURE uspCTImportContractText
+GO

@@ -257,8 +257,10 @@
 :r "..\dbo\Stored Procedures\uspGRImportScaleTicket.sql"
 :r "..\dbo\Stored Procedures\uspGRImportCustomerSplit.sql"
 
-
-
+--CONTRACT
+:r "..\dbo\Stored Procedures\uspCTImportContract.sql"
+:r "..\dbo\Stored Procedures\uspCTImportContractPlanPt.sql"
+:r "..\dbo\Stored Procedures\uspCTImportContractText.sql"
 
 --MANUFACTURING RECIPE
 :r "..\dbo\Stored Procedures\uspMFImportRecipe.sql" 
