@@ -635,3 +635,6 @@ GO
 		VALUES('System Manager', 'Update Sub Location Country - Company Location', 'Update Sub Location Country - Company Location', GETDATE())
 	END
 GO
+	PRINT N'CHANGING USER DISABLED TO DISABLED USER IN tblSMUserLogin'
+	UPDATE tblSMUserLogin SET strResult = 'Disabled User' WHERE strResult = 'User Disabled'
+GO
