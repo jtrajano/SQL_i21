@@ -20,6 +20,7 @@
 [ysnNoClaim] [bit] NULL,
 [intContractDetailId] INT NULL,
 [intBillId] INT NULL,
+[intInvoiceId] INT NULL,
 [dblFranchise] NUMERIC(18, 6) NULL,
 [dblSeqPriceConversionFactoryWeightUOM] NUMERIC(18, 6) NULL,
 

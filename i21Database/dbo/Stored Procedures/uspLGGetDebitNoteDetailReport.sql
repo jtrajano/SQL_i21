@@ -32,8 +32,8 @@ SELECT DISTINCT WC.intWeightClaimId,
 	   CH.strContractNumber +'/'+LTRIM(CD.intContractSeq) strContractNumberWithSeq,
 	   WCD.dblFromNet,
 	   WCD.dblToNet,
-	   ((WCD.dblFromNet-WCD.dblToNet)/WCD.dblFromNet)*100 AS dblLossPercentage,
-	   (WCD.dblClaimableWt)*-1 dblWeightLossExceedingFranchise,
+	   ABS(((WCD.dblFromNet-WCD.dblToNet)/WCD.dblFromNet)*100) AS dblLossPercentage,
+	   ABS((WCD.dblClaimableWt)) dblWeightLossExceedingFranchise,
 	   CDV.dblSeqPrice,
 	   CDV.strSeqPriceUOM,
 	   CDV.strSeqCurrency,
@@ -50,7 +50,7 @@ FROM tblLGWeightClaim WC
 JOIN tblLGWeightClaimDetail WCD ON WC.intWeightClaimId = WCD.intWeightClaimId
 JOIN tblCTContractDetail CD ON CD.intContractDetailId = WCD.intContractDetailId
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
+JOIN tblLGLoadDetail LD ON (CASE WHEN CH.intContractTypeId = 1 THEN LD.intPContractDetailId ELSE LD.intSContractDetailId END) = CD.intContractDetailId
 JOIN tblLGLoad L ON LD.intLoadId= L.intLoadId
 CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) CDV
 LEFT JOIN tblAPBill B ON B.intBillId = WCD.intBillId

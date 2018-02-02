@@ -10,7 +10,29 @@ BEGIN TRY
 	SET XACT_ABORT ON
 	SET ANSI_WARNINGS OFF
 
---	BEGIN TRANSACTION
+	DECLARE @strWeightClaimNo NVARCHAR(100)
+	DECLARE @strErrorMessage NVARCHAR(4000);
+	DECLARE @intErrorSeverity INT;
+	DECLARE @intErrorState INT;
+
+		SELECT @strWeightClaimNo = strReferenceNumber
+		FROM tblLGWeightClaim
+		WHERE intWeightClaimId = @intWeightClaimId
+
+		IF EXISTS (
+				SELECT TOP 1 1
+				FROM tblLGWeightClaimDetail WCD
+				JOIN tblARInvoice INV ON INV.intInvoiceId = WCD.intInvoiceId
+				WHERE WCD.intWeightClaimId = @intWeightClaimId
+				)
+		BEGIN
+				DECLARE @ErrorMessage NVARCHAR(250)
+
+				SET @ErrorMessage = 'Invoice was already created for ' + @strWeightClaimNo;
+
+				RAISERROR(@ErrorMessage, 16, 1);
+				RETURN 0;
+		END
 
 	DECLARE @ZeroDecimal DECIMAL(18, 6)
 		,@DateOnly DATETIME
@@ -326,20 +348,19 @@ BEGIN TRY
 			FROM fnGetRowsFromDelimitedValues(@CreatedIvoices)
 			)
 
+	UPDATE tblLGWeightClaimDetail
+	SET intInvoiceId = @NewInvoiceId
+	WHERE intWeightClaimId = @intWeightClaimId
+
 	RETURN @NewInvoiceId
 
 --	COMMIT TRANSACTION
 END TRY
 
 BEGIN CATCH
-	SET @strErrMsg = ERROR_MESSAGE()
+	--IF @@TRANCOUNT >0
+	--	ROLLBACK TRANSACTION
 
---	ROLLBACK TRANSACTION
-
-	IF @strErrMsg != ''
-	BEGIN
-		SET @strErrMsg = @strErrMsg
-
-		RAISERROR (@strErrMsg,16,1,'WITH NOWAIT')
-	END
+	SELECT @strErrorMessage = ERROR_MESSAGE(),@intErrorSeverity = ERROR_SEVERITY(),@intErrorState = ERROR_STATE();
+	RAISERROR (@strErrorMessage,@intErrorSeverity,@intErrorState)
 END CATCH
