@@ -225,6 +225,13 @@ DECLARE @NewId INT
 	,@AddDetailError NVARCHAR(MAX)
 
 BEGIN TRY
+	
+	UPDATE tblARInvoice
+		SET
+			[ysnPosted]		= 1
+	WHERE
+		[intInvoiceId] = @InvoiceId 
+
 	EXEC [dbo].[uspARCreateCustomerPayment]
 		 @EntityCustomerId	= @EntityCustomerId
 		,@CompanyLocationId	= @CompanyLocationId
@@ -268,6 +275,12 @@ BEGIN TRY
 					RAISERROR(@ErrorMessage, 16, 1);
 				RETURN 0;
 			END
+		
+		UPDATE tblARInvoice
+		SET
+			[intPaymentId]	= @NewId
+		WHERE
+			[intInvoiceId] = @InvoiceId 
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0
@@ -287,12 +300,6 @@ BEGIN CATCH
 END CATCH
 
 
-UPDATE tblARInvoice
-SET
-	[ysnPosted]		= 1
-	,[intPaymentId]	= @NewId
-WHERE
-	[intInvoiceId] = @InvoiceId 
 		  
 SET @PaymentId = @NewId		                 
 IF ISNULL(@RaiseError,0) = 0
