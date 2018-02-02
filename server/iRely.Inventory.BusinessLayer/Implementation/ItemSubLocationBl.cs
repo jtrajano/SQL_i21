@@ -13,11 +13,17 @@ namespace iRely.Inventory.BusinessLayer
 {
     public class ItemSubLocationBl : BusinessLayer<tblICItemSubLocation>, IItemSubLocationBl
     {
-        public ItemSubLocationBl(IRepository repository)
-            : base(repository)
-        {
+        //public ItemSubLocationBl(IRepository repository)
+        //    : base(repository)
+        //{
 
+        //}
+        #region Constructor
+        public ItemSubLocationBl(IInventoryRepository db) : base(db)
+        {
+            _db = db;
         }
+        #endregion
 
         public async Task<SearchResult> SearchItemSubLocations(GetParameter param)
         {

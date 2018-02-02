@@ -10,7 +10,13 @@ Ext.define('Inventory.view.BundleViewModel', {
         'Inventory.store.BufferedUnitMeasure',
         'Inventory.store.BufferedBrand',
         'Inventory.store.BufferedCommodity',
-        'Inventory.store.BufferedCategory'
+        'Inventory.store.BufferedCategory',
+        'Inventory.store.BufferedItemLocation',
+        'Inventory.store.BufferedCommodity',
+        'i21.store.CompanyLocationSubLocationBuffered',
+        'i21.store.CompanyLocationPricingLevelBuffered',
+        'i21.store.CurrencyBuffered',
+        'GeneralLedger.store.BufAccountCategoryGroup'        
     ],
 
     stores: {
@@ -101,7 +107,195 @@ Ext.define('Inventory.view.BundleViewModel', {
         
         bundleUOM: {
             type: 'icbuffereditemunitmeasure'
-        }
+        },
+
+        accountCategory: {
+            type: 'glbufaccountcategorygroup'
+        },
+
+        copyLocation: {
+            type: 'icbuffereditemlocation'
+        },
+
+        subLocations: {
+            type: 'smcompanylocationsublocationbuffered'
+        },
+
+        commodityList: {
+            autoLoad: true,
+            type: 'icbufferedcommodity',
+            proxy: {
+                extraParams: {
+                    include: 'tblICCommodityUnitMeasures.tblICUnitMeasure, tblICCommodityAccounts.tblGLAccount, tblICCommodityAccounts.tblGLAccountCategory'
+                },
+                type: 'rest',
+                api: {
+                    read: './Inventory/api/Commodity/Search'
+                },
+                reader: {
+                    type: 'json',
+                    rootProperty: 'data',
+                    messageProperty: 'message'
+                }
+            }
+        },
+
+        pricingLocation: {
+            type: 'icbuffereditemlocation'
+        },        
+
+        pricingPricingMethods: {
+            data: [
+                {
+                    strDescription: 'None'
+                },
+                {
+                    strDescription: 'Fixed Dollar Amount'
+                },
+                {
+                    strDescription: 'Markup Standard Cost'
+                },
+                {
+                    strDescription: 'Percent of Margin'
+                }
+                // {
+                //     strDescription: 'Markup Last Cost'
+                // },
+                // {
+                //     strDescription: 'Markup Avg Cost'
+                // }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
+
+        pricingLevelLocation: {
+            type: 'icbuffereditemlocation'
+        },      
+        
+        pricingLevel: {
+            type: 'smcompanylocationpricinglevelbuffered'
+        },
+        
+        pricingLevelUOM: {
+            type: 'icbuffereditemunitmeasure'
+        },
+
+        pricingMethods: {
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'None'
+                },
+                {
+                    strDescription: 'Fixed Dollar Amount'
+                },
+                {
+                    strDescription: 'Markup Standard Cost'
+                },
+                {
+                    strDescription: 'Percent of Margin'
+                },
+                {
+                    strDescription: 'Discount Retail Price'
+                },
+                {
+                    strDescription: 'MSRP Discount'
+                },
+                {
+                    strDescription: 'Percent of Margin (MSRP)'
+                }
+                // {
+                //     strDescription: 'Markup Last Cost'
+                // },
+                // {
+                //     strDescription: 'Markup Avg Cost'
+                // }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },        
+        
+        commissionsOn:{
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Percent'
+                },{
+                    strDescription: 'Units'
+                },{
+                    strDescription: 'Amount'
+                },{
+                    strDescription: 'Gross Profit'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },        
+
+        currency: {
+            type: 'currencybuffered'
+        },
+
+        specialPricingLocation: {
+            type: 'icbuffereditemlocation'
+        },
+        
+        promotionTypes:{
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Rebate'
+                },{
+                    strDescription: 'Discount'
+                },{
+                    strDescription: 'Vendor Discount'
+                },{
+                    strDescription: 'Terms Discount'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
+
+        specialPricingUOM: {
+            type: 'icbuffereditemunitmeasure'
+        },
+
+        discountsBy:{
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Percent'
+                },{
+                    strDescription: 'Amount'
+                },{
+                    strDescription: 'Terms Rate'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
+
+        accountCategoryList: {
+            autoLoad: true,
+            type: 'glbufaccountcategorygroup'
+        },        
     },    
 
     formulas: {
@@ -119,8 +313,20 @@ Ext.define('Inventory.view.BundleViewModel', {
 
         readOnlyOnKitType: function (get){
             return get('current.strBundleType') == 'Kit';
-        }
-        
+        },
+
+        accountCategoryFilter: function(get) {
+            var category = get('grdGlAccounts.selection.strAccountCategory');
+            switch(category) {
+                case 'AP Clearing':
+                case 'Inventory':
+                case 'Work In Progress':
+                case 'Inventory In-Transit':
+                    return category;
+                default:
+                    return 'General|^|' + category;
+            }
+        }        
 
     }
 
