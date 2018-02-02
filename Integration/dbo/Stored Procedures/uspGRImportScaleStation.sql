@@ -319,7 +319,7 @@ BEGIN
 		 ,intDefaultStorageTypeId
 		 ,intGrainBankStorageTypeId
 		 ,ysnRefreshLoadsOnOpen
-		 ,ysnAllowSplitWeights
+		 ,ysnMultipleWeights
 		 ,ysnRequireContractForInTransitTicket
 		 ,intDefaultFeeItemId
 		 ,intFreightItemId
@@ -435,7 +435,7 @@ BEGIN
 	  ,intDefaultStorageTypeId				  = @intDefaultStorageTypeId
 	  ,intGrainBankStorageTypeId			  = @intGrainBankStorageTypeId
 	  ,ysnRefreshLoadsOnOpen				  = dbo.fnCTConvertYNToBit(gasci_ref_load_cnt_yn,0)
-	  ,ysnAllowSplitWeights					  = dbo.fnCTConvertYNToBit(gasci_allow_spl_weighs_yn,0)
+	  ,ysnMultipleWeights					  = dbo.fnCTConvertYNToBit(gasci_allow_spl_weighs_yn,0)
 	  ,ysnRequireContractForInTransitTicket   = @ysnRequireContractForInTransitTicket
 	  ,intDefaultFeeItemId					  = NULL
 	  ,intFreightItemId						  = NULL
