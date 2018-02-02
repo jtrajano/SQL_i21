@@ -28,7 +28,7 @@ SELECT
 		,strFutMarketName
 		,strFutureMonth
 		,strItemNo
-		,strPricingType
+		,pt.strPricingType
 		,strLocationName
 		,strUnitMeasure
 FROM tblRKM2MBasisDetail bd
