@@ -9,10 +9,10 @@ SELECT  dv.strSequenceNumber,dv.intItemId,
 		dvp.dblBasis dblPurchaseBasis,
 		dv.dblBasis dblSaleBasis,
 		isnull(ad.dblSAllocatedQty,0) dblAllocatedQty,
-		(SELECT	DISTINCT sum(ID.dblQtyShipped) FROM	tblARInvoiceDetail		ID 
-			where ID.intContractDetailId =ad.intSContractDetailId)	dblInvoiceQty,					
-		(SELECT sum(isnull(pc.dblAmount,0)) from vyuCTContractCostEnquiryCost pc where pc.intContractDetailId=ad.intPContractDetailId) dblPurchaseCost,
-		(SELECT sum(isnull(sc.dblAmount,0)) from vyuCTContractCostEnquiryCost sc where sc.intContractDetailId=ad.intSContractDetailId) dblSaleCost,
+		(SELECT	DISTINCT SUM(ID.dblQtyShipped) FROM	tblARInvoiceDetail		ID 
+		 WHERE ID.intContractDetailId =ad.intSContractDetailId)	dblInvoiceQty,					
+		(SELECT sum(isnull(pc.dblAmount,0)) FROM vyuCTContractCostEnquiryCost pc WHERE pc.intContractDetailId=ad.intPContractDetailId) dblPurchaseCost,
+		(SELECT sum(isnull(sc.dblAmount,0)) FROM vyuCTContractCostEnquiryCost sc WHERE sc.intContractDetailId=ad.intSContractDetailId) dblSaleCost,
 		0.0 as dblActualProfit,
 		dv.intContractDetailId,
 		ad.intPContractDetailId,
@@ -20,7 +20,8 @@ SELECT  dv.strSequenceNumber,dv.intItemId,
 		dvp.intPriceUomId intSItemUOMId
 		,dv.intPriceUomId,dv.ysnSubCurrency
 		,'With Allocation' strAllocationType
-FROM  tblLGAllocationDetail ad 
+		,dv.strSalespersonName
+FROM tblLGAllocationDetail ad 
 JOIN vyuRKPnLContractDetailView dv on dv.intContractDetailId=ad.intSContractDetailId 
 JOIN vyuRKPnLContractDetailView dvp on dvp.intContractDetailId=ad.intPContractDetailId 
 
@@ -44,10 +45,10 @@ SELECT  dv.strSequenceNumber,dv.intItemId,
 		dv.intPriceUomId intSItemUOMId
 		,dv.intPriceUomId,dv.ysnSubCurrency
 		,'Without Allocation' strAllocationType
+		,dv.strSalespersonName
 FROM  tblLGLoadDetail					ad
 		JOIN	tblLGLoadDetailLot				DL	ON	ad.intLoadDetailId				=	DL.intLoadDetailId
 		JOIN	tblICItemUOM					IU	ON	IU.intItemUOMId					=	DL.intItemUOMId
 		JOIN	tblICInventoryReceiptItemLot	IL	ON	IL.intLotId						=	DL.intLotId
 		JOIN	tblICInventoryReceiptItem		RI	ON	RI.intInventoryReceiptItemId	=	IL.intInventoryReceiptItemId
 		JOIN	vyuRKPnLContractDetailView		dv  on dv.intContractDetailId=ad.intSContractDetailId 
-	
