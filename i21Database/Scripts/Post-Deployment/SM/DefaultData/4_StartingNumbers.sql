@@ -1279,7 +1279,17 @@ GO
 			,[strModule]			= 'Accounts Payable'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Deferred Interest')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Deferred Interest')	
+	
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 133
+			,[strTransactionType]	= N'Mark To Market'
+			,[strPrefix]			= N'M2M-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Risk Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Mark To Market')
 	
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
