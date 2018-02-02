@@ -440,6 +440,5 @@
     <None Include="dbo\Views\vyuSCTicketLVControlView.sql" />
     <None Include="dbo\Stored Procedures\uspARImportCustomerComments.sql" />
     <None Include="dbo\Stored Procedures\uspARImportDefaultTaxItems.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLUpdateOldAccountId.sql" />
   </ItemGroup>
 </Project>
