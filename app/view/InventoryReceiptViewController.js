@@ -5758,8 +5758,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                                                                 if (!exists) {
                                                                     var inventoryCost = otherCharge.ysnInventoryCost ? true : false,
-                                                                        chargesLinkInc = 1,
-                                                                        strChargesLink = vm.get('strChargesLink');
+                                                                        strChargesLink = vm.get('chargesLink');
                                                                     
                                                                     var newReceiptCharge = Ext.create('Inventory.model.ReceiptCharge', {
                                                                         intInventoryReceiptId: currentVM.get('intInventoryReceiptId'),
@@ -5788,6 +5787,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                                                     });
                                                                     currentVM.tblICInventoryReceiptCharges().add(newReceiptCharge);
                                                                     newReceiptItem.set('strChargesLink', strChargesLink);
+                                                                    vm.set('chargesLink', 1);
                                                                 }
                                                             });
                                                         }
