@@ -96,6 +96,20 @@ BEGIN TRY
 			SELECT *
 			FROM dbo.tblMFWorkOrder
 			WHERE intWorkOrderId = @intWorkOrderId
+				AND intCountStatusId = 10
+			)
+	BEGIN
+		RAISERROR (
+				'The cycle count is already started by other user. you cannot continue.'
+				,11
+				,1
+				)
+	END
+
+	IF EXISTS (
+			SELECT *
+			FROM dbo.tblMFWorkOrder
+			WHERE intWorkOrderId = @intWorkOrderId
 				AND intCountStatusId = 13
 			)
 	BEGIN
