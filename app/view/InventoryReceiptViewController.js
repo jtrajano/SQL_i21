@@ -709,7 +709,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         store: '{contractCost}'
                     }
                 },
-                colSequence: 'intContractSeq',
+                colSequence: {
+                    dataIndex: 'intContractSeq',
+                    hidden: '{hideContractColumn}'
+                },
                 colOtherCharge: {
                     dataIndex: 'strItemNo',
                     editor: {
@@ -5577,6 +5580,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     scope: me,
                     openselectedclick: function(button, e, result) {
                         var win = me.getView();
+                        var vm = me.getViewModel();
                         var currentVM = me.getViewModel().data.current;
                         var basketErrors = [];
                         var addedBasketItem = currentVM.tblICInventoryReceiptItems().data;
@@ -5753,13 +5757,17 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                                                 });
 
                                                                 if (!exists) {
-                                                                    var inventoryCost = otherCharge.ysnInventoryCost ? true : false; 
+                                                                    var inventoryCost = otherCharge.ysnInventoryCost ? true : false,
+                                                                        chargesLinkInc = 1,
+                                                                        strChargesLink = vm.get('strChargesLink');
+                                                                    
                                                                     var newReceiptCharge = Ext.create('Inventory.model.ReceiptCharge', {
                                                                         intInventoryReceiptId: currentVM.get('intInventoryReceiptId'),
                                                                         intContractId: order.get('intOrderId'),
                                                                         intContractDetailId: otherCharge.intContractDetailId,
                                                                         intContractSeq: contract.get('intContractSeq'),
                                                                         intChargeId: otherCharge.intItemId,
+                                                                        strChargesLink: strChargesLink,
                                                                         ysnInventoryCost: inventoryCost,
                                                                         strCostMethod: otherCharge.strCostMethod,
                                                                         dblRate: otherCharge.strCostMethod == "Amount" ? 0 : otherCharge.dblRate,
@@ -5779,6 +5787,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                                                                     });
                                                                     currentVM.tblICInventoryReceiptCharges().add(newReceiptCharge);
+                                                                    newReceiptItem.set('strChargesLink', strChargesLink);
                                                                 }
                                                             });
                                                         }
