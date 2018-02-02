@@ -214,3 +214,38 @@ INNER JOIN dbo.tblAPBill C ON B.intTransactionId = C.intBillId
 INNER JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId) ON A.intEntityVendorId = D.[intEntityId]
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
 WHERE A.ysnPosted = 1 AND C.intTransactionType = 2
+UNION ALL
+--PAYMENT MADE TO AR
+SELECT A.dtmDatePaid AS dtmDate,   
+	 B.intBillId,   
+	 C.strBillId ,
+	 CASE WHEN C.intTransactionType NOT IN (1,2) AND B.dblPayment > 0
+			THEN (CASE WHEN (E.intBankTransactionTypeId <> 19 OR E.intBankTransactionTypeId <> 116 OR E.intBankTransactionTypeId IS NULL)
+						 THEN B.dblPayment * -1 ELSE B.dblPayment END)
+			WHEN C.intTransactionType NOT IN (1,2) AND B.dblPayment < 0 AND (E.intBankTransactionTypeId = 116 OR E.intBankTransactionTypeId = 19)
+				THEN B.dblPayment * -1 --MAKE THE REVERSAL DEBIT MEMO TRANSACTION POSITIVE
+			ELSE B.dblPayment * A.dblExchangeRate END AS dblAmountPaid,     
+	 dblTotal = 0 
+	, dblAmountDue = 0 
+	, dblWithheld = 0
+	, CASE WHEN C.intTransactionType NOT IN (1,2) AND abs(B.dblDiscount) > 0 THEN B.dblDiscount * -1 ELSE B.dblDiscount END AS dblDiscount
+	, CASE WHEN C.intTransactionType NOT IN (1,2) AND abs(B.dblInterest) > 0 THEN B.dblInterest * -1 ELSE B.dblInterest END AS dblInterest 
+	, dblPrepaidAmount = 0 
+	, D.strVendorId 
+	, isnull(D.strVendorId,'') + ' - ' + isnull(D2.strName,'') as strVendorIdName 
+	, C.dtmDueDate 
+	, C.ysnPosted 
+	, C.ysnPaid
+	, B.intAccountId
+	, EC.strClass
+FROM dbo.tblARPayment  A
+ LEFT JOIN dbo.tblARPaymentDetail B ON A.intPaymentId = B.intPaymentId
+ LEFT JOIN dbo.tblAPBill C ON B.intBillId = C.intBillId
+ LEFT JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId)
+ 	ON A.[intEntityCustomerId] = D.[intEntityId]
+LEFT JOIN dbo.tblCMBankTransaction E
+	ON A.strRecordNumber = E.strTransactionId
+LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
+ WHERE A.ysnPosted = 1  
+	AND C.ysnPosted = 1
+	

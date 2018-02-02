@@ -422,6 +422,20 @@ BEGIN
 		)
 		AND (B.intAccountsPayableRealizedId IS NULL OR B.intAccountsPayableRealizedId = 0)
 
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 
+			'You cannot Post/Unpost transactions you did not create. Please contact your local administrator.',
+			'Payable',
+			A.strPaymentRecordNum,
+			A.intPaymentId
+		FROM tblAPPayment A 
+		OUTER APPLY ( 
+			SELECT ysnAllowUserSelfPost FROM tblSMUserPreference WHERE intEntityUserSecurityId = @userId
+		) userPref 
+		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
+		AND userPref.ysnAllowUserSelfPost = 1
+		AND A.intEntityId != @userId
+
 	END
 	ELSE
 	BEGIN
