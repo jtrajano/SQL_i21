@@ -1,6 +1,7 @@
 ﻿CREATE PROC [dbo].[uspRKGetM2MBasisOnDate]
 	 @intM2MBasisId INT,
 	 @intCommodityId INT= NULL,
+	 @strPricingType nvarchar(30),
 	 @strItemIds nvarchar(max),
 	 @strPeriodTos nvarchar(max)  ,
 	 @strLocationIds nvarchar(max),
@@ -10,7 +11,7 @@ AS
 
 
 SELECT bd.intM2MBasisDetailId, c.strCommodityCode,	i.strItemNo,		ca.strDescription as strOriginDest,		fm.strFutMarketName, '' as strFutureMonth,
-		bd.strPeriodTo,		strLocationName,		strMarketZoneCode,		strCurrency,		strPricingType,
+		bd.strPeriodTo,		strLocationName,		strMarketZoneCode,		strCurrency,		b.strPricingType,
 		strContractInventory,		strContractType,strUnitMeasure,
 		bd.intCommodityId,		bd.intItemId, bd.strOriginDest,		bd.intFutureMarketId,		bd.intFutureMonthId,
 		bd.intCompanyLocationId,		bd.intMarketZoneId,		bd.intCurrencyId,	bd.intPricingTypeId,		bd.strContractInventory,
@@ -29,6 +30,7 @@ LEFT JOIN tblARMarketZone mz on mz.intMarketZoneId=bd.intMarketZoneId
 LEFT JOIN tblICUnitMeasure um on um.intUnitMeasureId=bd.intUnitMeasureId
 WHERE b.intM2MBasisId= @intM2MBasisId
  and  c.intCommodityId=case when isnull(@intCommodityId,0) = 0 then c.intCommodityId else @intCommodityId end 
+ and b.strPricingType = @strPricingType
  and bd.intItemId IN(select Ltrim(rtrim(Item)) Collate Latin1_General_CI_AS from [dbo].[fnSplitString](@strItemIds, ',')) --added this be able to filter by item (RM-739)
  and bd.strPeriodTo IN(select Ltrim(rtrim(Item)) Collate Latin1_General_CI_AS from [dbo].[fnSplitString](@strPeriodTos, ',')) --added this be able to filter by period to (RM-739)
  and ISNULL(bd.intCompanyLocationId,0) IN(select case when Item = '' then 0 else Ltrim(rtrim(Item)) Collate Latin1_General_CI_AS end  from [dbo].[fnSplitString](@strLocationIds, ',')) --added this be able to filter by location to (RM-739)
