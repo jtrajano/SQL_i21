@@ -3,7 +3,7 @@
  */
 
 Ext.define('Inventory.store.Manufacturer', {
-    extend: 'Ext.data.Store',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     alias: 'store.icmanufacturer',
 
     requires: [

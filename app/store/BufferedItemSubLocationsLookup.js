@@ -1,5 +1,5 @@
 Ext.define('Inventory.store.BufferedItemSubLocationsLookup', {
-    extend: 'Ext.data.BufferedStore',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     alias: 'store.icbuffereditemsublocationslookup',
 
     requires: [

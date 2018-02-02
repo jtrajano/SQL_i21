@@ -2,7 +2,7 @@
  * Created by LZabala on 11/3/2015.
  */
 Ext.define('Inventory.store.ItemStockSummary', {
-    extend: 'Ext.data.Store',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     alias: 'store.icitemstocksummary',
 
     requires: [

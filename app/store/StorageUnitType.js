@@ -2,7 +2,7 @@
  * Created by rnkumashi on 19-09-2014.
  */
 Ext.define('Inventory.store.StorageUnitType', {
-    extend: 'Ext.data.Store',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
 
     requires: [
         'Inventory.model.StorageUnitType'

@@ -2,7 +2,7 @@
  * Created by LZabala on 1/27/2015.
  */
 Ext.define('Inventory.store.BufferedCategoryAccount', {
-    extend: 'Ext.data.BufferedStore',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     alias: 'store.icbufferedcategoryaccount',
 
     requires: [

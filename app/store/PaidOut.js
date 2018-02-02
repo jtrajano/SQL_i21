@@ -2,7 +2,7 @@
  * Created by LZabala on 11/4/2014.
  */
 Ext.define('Inventory.store.PaidOut', {
-    extend: 'Ext.data.BufferedStore',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     alias: 'store.storepaidout',
 
     constructor: function(cfg) {

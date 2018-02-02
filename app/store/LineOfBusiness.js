@@ -2,7 +2,7 @@
  * Created by LZabala on 10/30/2014.
  */
 Ext.define('Inventory.store.LineOfBusiness', {
-    extend: 'Ext.data.Store',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     alias: 'store.iclineofbusiness',
 
     requires: [

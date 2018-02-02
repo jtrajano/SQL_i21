@@ -1,5 +1,5 @@
 Ext.define('Inventory.store.BufferedItemAccountView', {
-    extend: 'Ext.data.BufferedStore',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     alias: 'store.icbuffereditemaccountview',
 
     requires: [

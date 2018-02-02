@@ -2,7 +2,7 @@
  * Created by LZabala on 11/11/2014.
  */
 Ext.define('Inventory.store.BufferedRegionAttribute', {
-    extend: 'Ext.data.BufferedStore',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     alias: 'store.icbufferedregionattribute',
 
     requires: [

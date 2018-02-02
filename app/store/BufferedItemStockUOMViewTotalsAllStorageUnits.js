@@ -1,5 +1,5 @@
 Ext.define('Inventory.store.BufferedItemStockUOMViewTotalsAllStorageUnits', {
-    extend: 'Ext.data.BufferedStore',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     alias: 'store.icbuffereditemstockuomviewtotalsallstorageunits',
 
     requires: [

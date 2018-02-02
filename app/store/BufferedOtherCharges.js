@@ -2,7 +2,7 @@
  * Created by LZabala on 4/17/2015.
  */
 Ext.define('Inventory.store.BufferedOtherCharges', {
-    extend: 'Ext.data.BufferedStore',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     alias: 'store.icbufferedothercharges',
 
     requires: [

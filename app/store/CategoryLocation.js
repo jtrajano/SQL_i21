@@ -2,7 +2,7 @@
  * Created by LZabala on 11/3/2014.
  */
 Ext.define('Inventory.store.CategoryLocation', {
-    extend: 'Ext.data.Store',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     alias: 'store.iccategorylocation',
 
     requires: [

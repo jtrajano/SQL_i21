@@ -2,7 +2,7 @@
  * Created by LZabala on 9/3/2015.
  */
 Ext.define('Inventory.store.Lot', {
-    extend: 'Ext.data.Store',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     alias: 'store.iclot',
 
     requires: [

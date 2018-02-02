@@ -2,7 +2,7 @@
  * Created by LZabala on 10/28/2014.
  */
 Ext.define('Inventory.store.CommodityAttribute', {
-    extend: 'Ext.data.Store',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     alias: 'store.iccommodityattribute',
 
     requires: [

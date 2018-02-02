@@ -1,5 +1,5 @@
 Ext.define('Inventory.store.BufferedItemMotorFuelTax', {
-    extend: 'Ext.data.BufferedStore',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     alias: 'store.icbuffereditemmotorfueltax',
 
     requires: [

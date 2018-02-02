@@ -1,5 +1,5 @@
 Ext.define('Inventory.store.ImportLog', {
-    extend: 'Ext.data.Store',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     alias: 'store.icimportlog',
 
     requires: [

@@ -2,7 +2,7 @@
  * Created by LZabala on 10/1/2014.
  */
 Ext.define('Inventory.store.CountGroup', {
-    extend: 'Ext.data.Store',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     alias: 'store.iccountgroup',
 
     requires: [

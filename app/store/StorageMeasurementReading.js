@@ -3,7 +3,7 @@
  */
 
 Ext.define('Inventory.store.StorageMeasurementReading', {
-    extend: 'Ext.data.Store',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     alias: 'store.icstoragemeasurementreading',
 
     requires: [

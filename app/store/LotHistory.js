@@ -1,5 +1,5 @@
 Ext.define('Inventory.store.LotHistory', {
-    extend: 'Ext.data.BufferedStore',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     alias: 'store.iclothistory',
 
     requires: [

@@ -2,7 +2,7 @@
  * Created by LZabala on 11/14/2014.
  */
 Ext.define('Inventory.store.BufferedItemUnitMeasure', {
-    extend: 'Ext.data.BufferedStore',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     alias: 'store.icbuffereditemunitmeasure',
 
     requires: [

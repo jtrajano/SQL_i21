@@ -2,7 +2,7 @@
  * Created by LZabala on 4/16/2015.
  */
 Ext.define('Inventory.store.Transfer', {
-    extend: 'Ext.data.Store',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     alias: 'store.ictransfer',
 
     requires: [

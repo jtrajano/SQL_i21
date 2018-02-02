@@ -2,7 +2,7 @@
  * Created by LZabala on 1/28/2015.
  */
 Ext.define('Inventory.store.BufferedItemPricingView', {
-    extend: 'Ext.data.BufferedStore',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     alias: 'store.icbuffereditempricingview',
 
     requires: [

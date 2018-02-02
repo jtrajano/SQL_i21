@@ -2,7 +2,7 @@
  * Created by LZabala on 10/22/2015.
  */
 Ext.define('Inventory.store.InventoryCount', {
-    extend: 'Ext.data.Store',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     alias: 'store.icinventorycount',
 
     requires: [

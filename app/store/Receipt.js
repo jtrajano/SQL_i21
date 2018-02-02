@@ -2,7 +2,7 @@
  * Created by LZabala on 10/10/2014.
  */
 Ext.define('Inventory.store.Receipt', {
-    extend: 'Ext.data.Store',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     alias: 'store.icreceipt',
 
     requires: [

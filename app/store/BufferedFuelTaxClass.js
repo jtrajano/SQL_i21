@@ -2,7 +2,7 @@
  * Created by LZabala on 11/12/2014.
  */
 Ext.define('Inventory.store.BufferedFuelTaxClass', {
-    extend: 'Ext.data.BufferedStore',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     alias: 'store.icbufferedfueltaxclass',
 
     requires: [

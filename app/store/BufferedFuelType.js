@@ -2,7 +2,7 @@
  * Created by LZabala on 11/12/2014.
  */
 Ext.define('Inventory.store.BufferedFuelType', {
-    extend: 'Ext.data.BufferedStore',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     alias: 'store.icbufferedfueltype',
 
     requires: [

@@ -1,5 +1,5 @@
 Ext.define('Inventory.store.FiscalPeriod', {
-    extend: 'Ext.data.Store',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     alias: 'store.icfiscalperiod',
 
     requires: [

@@ -2,7 +2,7 @@
  * Created by LZabala on 11/14/2014.
  */
 Ext.define('Inventory.store.BufferedItemUPC', {
-    extend: 'Ext.data.BufferedStore',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     alias: 'store.icbuffereditemupc',
 
     requires: [

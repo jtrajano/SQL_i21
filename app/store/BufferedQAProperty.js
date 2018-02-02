@@ -2,7 +2,7 @@
  * Created by LZabala on 12/16/2014.
  */
 Ext.define('Inventory.store.BufferedQAProperty', {
-    extend: 'Ext.data.BufferedStore',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     alias: 'store.icbufferedqaproperty',
 
     requires: [

@@ -2,7 +2,7 @@
  * Created by LZabala on 10/23/2015.
  */
 Ext.define('Inventory.store.ItemStockUOMView', {
-    extend: 'Ext.data.Store',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     alias: 'store.icitemstockuomview',
 
     requires: [

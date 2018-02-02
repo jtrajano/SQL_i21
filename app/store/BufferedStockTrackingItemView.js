@@ -1,5 +1,5 @@
 Ext.define('Inventory.store.BufferedStockTrackingItemView', {
-    extend: 'Ext.data.BufferedStore',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     alias: 'store.icbufferedstocktrackingitemview',
 
     requires: [
