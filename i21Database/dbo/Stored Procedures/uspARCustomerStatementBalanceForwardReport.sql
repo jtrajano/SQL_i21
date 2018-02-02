@@ -145,6 +145,7 @@ END
 SELECT intEntityCustomerId  = intEntityId
 	 , strCustomerNumber	= CAST(strCustomerNumber COLLATE Latin1_General_CI_AS AS NVARCHAR(200))
 	 , strCustomerName		= CAST('' COLLATE Latin1_General_CI_AS AS NVARCHAR(200))
+	 , strStatementFormat	= CAST(strStatementFormat COLLATE Latin1_General_CI_AS AS NVARCHAR(100))
 	 , dblCreditLimit
 	 , dblARBalance
 INTO #CUSTOMERS
@@ -175,6 +176,7 @@ IF @strCustomerNumberLocal IS NOT NULL
 		SELECT TOP 1 intEntityCustomerId	= C.intEntityId 
 			       , strCustomerNumber		= C.strCustomerNumber
 				   , strCustomerName		= EC.strName
+				   , strStatementFormat	= C.strStatementFormat
 				   , dblCreditLimit			= C.dblCreditLimit
 				   , dblARBalance			= C.dblARBalance		
 		FROM tblARCustomer C WITH (NOLOCK)
@@ -215,6 +217,7 @@ ELSE
 		SELECT intEntityCustomerId	= C.intEntityId 
 			 , strCustomerNumber	= C.strCustomerNumber
 			 , strCustomerName		= EC.strName
+			 , strStatementFormat	= C.strStatementFormat
 			 , dblCreditLimit		= C.dblCreditLimit
 			 , dblARBalance			= C.dblARBalance
 		FROM tblARCustomer C WITH (NOLOCK)
