@@ -55,6 +55,7 @@ DECLARE @PhysicalFuturesResult TABLE (
 	,dblBasisUSD NUMERIC(18, 6)
 	,dblCostUSD NUMERIC(18, 6)
 	,strUnitMeasure nvarchar(200)
+	,intContractDetailId int
 	)
 
 INSERT INTO @PhysicalFuturesResult (
@@ -75,6 +76,7 @@ INSERT INTO @PhysicalFuturesResult (
 	,intSort
 	,dblTransactionValue
 	,dblForecast
+	,intContractDetailId
 
 	)
 EXEC uspRKPNLPhysicalFuturesResult @intContractDetailId
