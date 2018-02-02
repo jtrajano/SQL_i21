@@ -23,8 +23,6 @@ SET ANSI_WARNINGS OFF
 
 IF @RaiseError = 1
 	SET XACT_ABORT ON
-ELSE
-	SET XACT_ABORT OFF
   
 --------------------------------------------------------------------------------------------  
 -- Initialize   
@@ -2900,7 +2898,11 @@ IF @Post = 1
 		BEGIN
 			BEGIN TRY
 				UPDATE @GLEntries SET [dtmDateEntered] = @PostDate 
-				EXEC dbo.uspGLBookEntries @GLEntries, @Post
+				EXEC dbo.uspGLBookEntries
+					 @GLEntries		= @GLEntries
+					,@ysnPost		= @Post
+					,@XACT_ABORT_ON = @RaiseError
+
 			END TRY
 			BEGIN CATCH
 				SELECT @ErrorMerssage = ERROR_MESSAGE()										

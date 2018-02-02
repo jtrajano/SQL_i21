@@ -23,8 +23,7 @@ SET ANSI_WARNINGS OFF
 
 IF @RaiseError = 1
 	SET XACT_ABORT ON
-ELSE
-	SET XACT_ABORT OFF
+
 
 DECLARE @ZeroDecimal NUMERIC(18, 6)
 		,@BasePayment NUMERIC(18, 6)
@@ -65,7 +64,7 @@ IF NOT EXISTS(SELECT NULL FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId)
 		RETURN 0;
 	END
 	
-IF NOT EXISTS(SELECT NULL FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId AND [ysnPosted] = 1 -- (([ysnPosted] = 1 AND [strTransactionType] <> 'Customer Prepayment') OR ([ysnPosted] = 0 AND [strTransactionType] = 'Customer Prepayment')))
+IF NOT EXISTS(SELECT NULL FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId AND [ysnPosted] = 1) -- (([ysnPosted] = 1 AND [strTransactionType] <> 'Customer Prepayment') OR ([ysnPosted] = 0 AND [strTransactionType] = 'Customer Prepayment')))
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR('The invoice provided is not yet posted!', 16, 1);

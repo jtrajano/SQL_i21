@@ -26,8 +26,6 @@ SET ANSI_WARNINGS OFF
 
 IF @raiseError = 1
 	SET XACT_ABORT ON
-ELSE
-	SET XACT_ABORT OFF
   
 --------------------------------------------------------------------------------------------  
 -- Initialize   
@@ -3418,7 +3416,10 @@ IF @post = 1
 				CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebitUnit, 0) - ISNULL(GLEntries.dblCreditUnit, 0)) DebitUnit
 				CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebitUnit, 0) - ISNULL(GLEntries.dblCreditUnit, 0))  CreditUnit
 
-				EXEC dbo.uspGLBookEntries @GLEntries, @post
+				EXEC	dbo.uspGLBookEntries
+							 @GLEntries		= @GLEntries
+							,@ysnPost		= @post
+							,@XACT_ABORT_ON = @raiseError
 			END TRY
 			BEGIN CATCH
 				SELECT @ErrorMerssage = ERROR_MESSAGE()										
@@ -3506,7 +3507,10 @@ IF @post = 0
 			ORDER BY
 				GLD.intGLDetailId
 				
-			EXEC dbo.uspGLBookEntries @GLEntries, @post	
+			EXEC	dbo.uspGLBookEntries
+					 @GLEntries		= @GLEntries
+					,@ysnPost		= @post
+					,@XACT_ABORT_ON = @raiseError
 						
 		END TRY
 		BEGIN CATCH

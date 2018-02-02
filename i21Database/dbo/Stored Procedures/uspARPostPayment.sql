@@ -26,8 +26,6 @@ SET ANSI_WARNINGS OFF
 
 IF @raiseError = 1
 	SET XACT_ABORT ON
-ELSE
-	SET XACT_ABORT OFF
   
 --------------------------------------------------------------------------------------------  
 -- Initialize   
