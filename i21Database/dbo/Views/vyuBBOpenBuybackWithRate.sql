@@ -20,26 +20,13 @@ AS
 		,B.intInvoiceDetailId
 		,C.intEntityId
 		,B.intItemId
-		,dblRatePerUnit = CASE WHEN ISNULL(O.dblRatePerUnit,0.0) <> 0 THEN O.dblRatePerUnit
-							   WHEN ISNULL(P.dblRatePerUnit,0.0) <> 0 THEN P.dblRatePerUnit
-							   WHEN ISNULL(Q.dblRatePerUnit,0.0) <> 0 THEN Q.dblRatePerUnit
-							   ELSE 0.0
-						  END
-		,intChargedItemId = N.[strCharge]
-		,strChargedItem = R.strItemNo
-		,strChargedItemDescription = R.strDescription
+		,dblRatePerUnit = P.dblRate
+		,strCharge = N.[strCharge]
 		,M.intProgramId
 		,M.strProgramId
-		,dblReimbursementAmount = CAST(((CASE WHEN ISNULL(O.dblRatePerUnit,0.0) <> 0 THEN O.dblRatePerUnit
-											   WHEN ISNULL(P.dblRatePerUnit,0.0) <> 0 THEN P.dblRatePerUnit
-											   WHEN ISNULL(Q.dblRatePerUnit,0.0) <> 0 THEN Q.dblRatePerUnit
-											   ELSE 0.0
-										 END)
-										* B.dblQtyShipped) AS NUMERIC(18,6))
-		,intProgramRateId = CASE WHEN ISNULL(O.intRateId,0) <> 0 THEN O.intRateId
-							   WHEN ISNULL(P.intRateId,0) <> 0 THEN P.intRateId
-							   WHEN ISNULL(Q.intRateId,0) <> 0 THEN Q.intRateId
-							END
+		,dblReimbursementAmount = CAST((P.dblRate * B.dblQtyShipped) AS NUMERIC(18,6))
+		,intProgramRateId = P.intProgramRateId
+		,dblItemCost = 5.0
 	FROM tblARInvoice A
 	INNER JOIN tblARInvoiceDetail B
 		ON A.intInvoiceId = B.intInvoiceId
@@ -69,29 +56,11 @@ AS
 		ON C.intVendorSetupId = M.intVendorSetupId
 	INNER JOIN tblBBProgramCharge N
 		ON M.intProgramId = N.intProgramId
-	LEFT JOIN tblICItem R
-		ON N.[strCharge] = R.intItemId
-	LEFT JOIN tblBBRate O
-		ON N.intProgramChargeId = O.intProgramChargeId
-			AND D.intEntityLocationId = O.intCustomerLocationId
-			AND B.intItemId = O.intItemId
-			AND J.intUnitMeasureId = O.intUnitMeasureId
-	LEFT JOIN tblBBRate P
-		ON N.intProgramChargeId = P.intProgramChargeId
-			AND B.intItemId = P.intItemId
-			AND J.intUnitMeasureId = P.intUnitMeasureId
-	LEFT JOIN tblBBRate Q
-		ON N.intProgramChargeId =Q.intProgramChargeId
-			AND J.intUnitMeasureId = Q.intUnitMeasureId
+	OUTER APPLY dbo.fnBBGetChargeRates(N.intProgramChargeId,D.intEntityLocationId,B.intItemId,J.intUnitMeasureId,A.dtmDate) P
 	WHERE B.dblPrice = 0
-		AND NOT EXISTS(SELECT TOP 1 1 FROM tblBBBuybackDetail WHERE intInvoiceDetailId = B.intInvoiceDetailId AND intProgramRateId = (CASE WHEN ISNULL(O.intRateId,0) <> 0 THEN O.intRateId
-																																			WHEN ISNULL(P.intRateId,0) <> 0 THEN P.intRateId
-																																			WHEN ISNULL(Q.intRateId,0) <> 0 THEN Q.intRateId
-																																		END))
+		AND NOT EXISTS(SELECT TOP 1 1 FROM tblBBBuybackDetail WHERE intInvoiceDetailId = B.intInvoiceDetailId)
 		AND NOT EXISTS(SELECT TOP 1 1 FROM tblBBBuybackExcluded WHERE intInvoiceDetailId = B.intInvoiceDetailId)
 		AND B.strBuybackSubmitted <> 'E'
 		AND A.ysnPosted = 1
-		AND (O.intRateId IS NOT NULL OR P.intRateId IS NOT NULL OR Q.intRateId IS NOT NULL)
-
 GO
 

@@ -10,8 +10,6 @@ AS
 		,strItemDescription = D.strDescription
 		,strCategoryCode = F.strCategoryCode
 		,strUnitMeasure = H.strUnitMeasure
-		,strChargeItemDescription = M.strDescription
-		,intChargedItemId = M.intItemId
 	FROM tblBBBuybackDetail A
 	INNER JOIN tblARInvoiceDetail B
 		ON A.intInvoiceDetailId = B.intInvoiceDetailId
@@ -19,7 +17,7 @@ AS
 		ON B.intInvoiceId = C.intInvoiceId
 	INNER JOIN tblICItem D
 		ON A.intItemId = D.intItemId
-	INNER JOIN tblBBRate E
+	LEFT JOIN tblBBRate E
 		ON A.intProgramRateId = E.intRateId
 	INNER JOIN tblICCategory F
 		ON D.intCategoryId = F.intCategoryId
@@ -31,10 +29,6 @@ AS
 		ON C.intEntityCustomerId = J.intEntityId
 	INNER JOIN tblEMEntityLocation K
 		ON C.intShipToLocationId = K.intEntityLocationId
-	INNER JOIN tblBBProgramCharge L
-		ON E.intProgramChargeId = L.intProgramChargeId
-	INNER JOIN tblICItem M
-		ON L.[strCharge] = M.intItemId
 	INNER JOIN tblBBCustomerLocationXref N
 		ON C.intShipToLocationId = N.intEntityLocationId
 

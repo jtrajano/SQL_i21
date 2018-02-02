@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblBBBuybackCharge](
 	[intBuybackChargeId] [int] IDENTITY(1,1) NOT NULL,
-	[intItemId] INT NOT NULL, 
+	[strCharge] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intBuybackId] INT NOT NULL, 
     [dblReimbursementAmount] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
     [intBillId] INT NULL, 
