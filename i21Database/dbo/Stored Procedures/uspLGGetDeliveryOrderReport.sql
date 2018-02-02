@@ -194,6 +194,7 @@ BEGIN
 		  ,@strPhone AS strCompanyPhone
 		  ,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCityStateZip
 		  ,HEM.strName AS strShipVia
+		  ,L.strComments
 		  ,dbo.fnSMGetCompanyLogo('FullHeaderLogo') AS blbFullHeaderLogo
 		  ,dbo.fnSMGetCompanyLogo('FullFooterLogo') AS blbFullFooterLogo
 		  ,CASE WHEN CP.ysnFullHeaderLogo = 1 THEN 'true' else 'false' END ysnFullHeaderLogo		  
