@@ -46,6 +46,7 @@ BEGIN
 		WHERE	LD.intSContractDetailId = @intSContractDetailId
 	END
 
+
 	SELECT @strPContractDetailId = COALESCE(@strPContractDetailId + ',', '') + CAST(intPContractDetailId AS NVARCHAR(50)) FROM   @tblLGAllocationDetail WHERE intSContractDetailId	=	@intSContractDetailId
 	SELECT @strDetailIds = @strPContractDetailId + ',' + LTRIM(@intSContractDetailId)
 
@@ -57,7 +58,7 @@ BEGIN
 			CASE	WHEN strType IN ('Amount')	THEN dblTranValue  / dblFX
 					WHEN strType IN ('Per Unit') THEN ISNULL(dblAllocatedQty,dblBooked) * dblPrice / dblFX
 					ELSE ISNULL(dblAllocatedQty,dblBooked) * dblPrice * dblFX	
-			END AS	dblForecast
+			END AS	dblForecast,@intSContractDetailId as intContractDetailId
 	FROM
 	(
 		SELECT	TP.strContractType + ' - ' + CH.strContractNumber strContractType,
