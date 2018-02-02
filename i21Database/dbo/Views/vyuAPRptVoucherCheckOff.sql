@@ -10,7 +10,8 @@ SELECT	DISTINCT
 			,intTicketId
 			,strTicketNumber = SC.strTicketNumber
 			,APB.strVendorOrderNumber
-			,StateOfOrigin = ISNULL((SELECT strFullAddress = [dbo].[fnAPFormatAddress](NULL,NULL,NULL,NULL, APB.strShipFromCity, APB.strShipFromState, NULL, NULL, NULL)),'N/A')
+			--,StateOfOrigin = ISNULL((SELECT strFullAddress = [dbo].[fnAPFormatAddress](NULL,NULL,NULL,NULL, APB.strShipFromCity, APB.strShipFromState, NULL, NULL, NULL)),'N/A')
+			,StateOfOrigin = ISNULL((SELECT strFullAddress = [dbo].[fnAPFormatAddress](NULL,NULL,NULL,NULL, EL.strCity, EL.strState, NULL, NULL, NULL)),'N/A')
 			,Location = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](NULL,NULL, NULL, NULL, APB.strShipToCity, APB.strShipToState,NULL, NULL, NULL))
 			,BillDate = APB.dtmBillDate
 			,PostDate = APB.dtmBillDate
@@ -35,6 +36,7 @@ SELECT	DISTINCT
 			LEFT JOIN dbo.tblICInventoryReceipt IR ON IRE.intInventoryReceiptId = IR.intInventoryReceiptId 
 			LEFT JOIN dbo.tblSCTicket SC ON IRE.intSourceId = SC.intTicketId
 			LEFT JOIN dbo.tblICCommodity C ON C.intCommodityId = IE.intCommodityId
+			INNER JOIN dbo.tblEMEntityLocation EL ON  EL.intEntityLocationId = APB.intShipFromId --AND EL.ysnDefaultLocation = 1
 			 OUTER APPLY(
 			SELECT TOP 1 
 						 B1.dtmDatePaid,
