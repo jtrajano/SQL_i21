@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq.Expressions;
 using iRely.Common;
 using System.Data.SqlClient;
+using System.Globalization;
 
 namespace iRely.Inventory.BusinessLayer
 {
@@ -43,6 +44,11 @@ namespace iRely.Inventory.BusinessLayer
             }
         }
 
+        private async Task<int> SaveLogsToDb(ImportDataResult result)
+        {
+            return await ImportDataSqlLogger.GetInstance(Context.ContextManager).WriteLogs(result);
+        }
+
         public async Task<ImportDataResult> ImportOrigins(string type)
         {
             var sql = string.Empty;
@@ -56,25 +62,52 @@ namespace iRely.Inventory.BusinessLayer
 
             var res = new ImportDataResult()
             {
-                Description = "Import from Origin",
+                Description = $"Import {CultureInfo.CurrentCulture.TextInfo.ToTitleCase(type)} from Origin for {CultureInfo.CurrentCulture.TextInfo.ToTitleCase(lob)}.",
                 Type = Constants.TYPE_INFO
             };
 
             try
             {
                 await Context.ContextManager.Database.ExecuteSqlCommandAsync(sql, pLob, pType, pEntityId);
+                var msg = new ImportDataMessage()
+                {
+                    Column = "",
+                    Row = -1,
+                    Type = Constants.TYPE_INFO,
+                    Status = Constants.STAT_SUCCESS,
+                    Action = Constants.ACTION_INSERTED,
+                    Value = "",
+                    Message = $"Import {CultureInfo.CurrentCulture.TextInfo.ToTitleCase(type)} from Origin for {CultureInfo.CurrentCulture.TextInfo.ToTitleCase(lob)} successful."
+                };
+                res.Type = Constants.TYPE_INFO;
+                res.Description = $"Import {CultureInfo.CurrentCulture.TextInfo.ToTitleCase(type)} from Origin for {CultureInfo.CurrentCulture.TextInfo.ToTitleCase(lob)} successful.";
+                res.AddMessage(msg);
             }
             catch (Exception ex)
             {
+                var msg = new ImportDataMessage()
+                {
+                    Column = $"Error Importing {CultureInfo.CurrentCulture.TextInfo.ToTitleCase(type)} from Origin for {CultureInfo.CurrentCulture.TextInfo.ToTitleCase(lob)}.",
+                    Row = -1,
+                    Type = Constants.TYPE_ERROR,
+                    Status = Constants.STAT_FAILED,
+                    Action = Constants.ACTION_DISCARDED,
+                    Exception = ex.InnerException == null ? ex : ex.InnerException,
+                    Value = "",
+                    Message = ex.InnerException == null ? ex.Message : ex.InnerException.Message,
+                };
                 res.Type = Constants.TYPE_ERROR;
                 res.Description = ex.Message;
-                res.Messages.Add(new ImportDataMessage()
-                {
-                    Type = "Error",
-                    Status = "Import Failed",
-                    Message = ex.Message,
-                    Exception = ex
-                });
+                res.AddError(msg);
+            }
+
+            try
+            {
+                await SaveLogsToDb(res);
+            }
+            catch
+            {
+
             }
 
             return res;

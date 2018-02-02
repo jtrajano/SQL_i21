@@ -40,8 +40,9 @@ namespace iRely.Inventory.WebApi.Controllers
         public async Task<HttpResponseMessage> ImportOrigins()
         {
             var type = Request.Headers.GetValues("X-Import-Type").First();
-            var fileType = Request.Headers.GetValues("X-File-Type").First();
-            GlobalSettings.Instance.FileType = fileType;
+            GlobalSettings.Instance.FileType = "SQL query";
+            GlobalSettings.Instance.FileName = "Origin";
+            GlobalSettings.Instance.ImportType = type;
             GlobalSettings.Instance.LineOfBusiness = Request.Headers.GetValues("X-Import-LineOfBusiness").First();
             ImportDataResult output = await bl.ImportOrigins(type);
             return Request.CreateResponse(HttpStatusCode.OK, output);

@@ -282,62 +282,81 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
         }
     },
 
-    importFromOrigins: function(viewModel, originTypes, type, lineOfBusiness, win) {
-        this.ajaxRequest(viewModel, originTypes, type, lineOfBusiness, win);
+    importFromOrigins: function(viewModel, originTypes, originType, lineOfBusiness, win) {
+        this.ajaxRequest(viewModel, originTypes, originType, lineOfBusiness, win);
     },
 
-    ajaxRequest: function (viewModel, originTypes, type, lineOfBusiness, win) {
+    ajaxRequest: function (viewModel, originTypes, originType, lineOfBusiness, win) {
         var me = this;
-        iRely.Msg.showWait('Importing in progress...');
-        Ext.Ajax.request({
+        jQuery.ajax({
             url: './Inventory/api/ImportData/ImportOrigins',
             method: 'post',
             headers: {
                 'Content-Type': 'multipart/form-data',
                 'Authorization': iRely.Configuration.Security.AuthToken,
-                'X-Import-Type': originTypes[type],
+                'X-Import-Type': originTypes[originType],
                 'X-Import-LineOfBusiness': lineOfBusiness
             },
-            success: function(response) {
+            beforeSend: function(jqXHR, settings) {
+                iRely.Msg.showWait('Importing in progress...');
+            },
+            success: function(data, status, jqXHR) {
+                var me = this;
                 iRely.Msg.close();
-                var msgtype = 'info';
-                var msg = "File imported successfully.";
-                var json = JSON.parse(response.responseText);
-                if (json.result.Info == "warning") {
-                    msgtype = "warning";
-                    msg = "File imported successfully with warnings.";
+                var json = JSON.parse(jqXHR.responseText);
+                var type = json.Type === "Warning" ? 'warning' : (json.Type === "Error" ? 'error' : 'info');
+                var msg = json.Description ? json.Description : json.Message + " " + json.ExceptionMessage;
+                if(json.Errors === 0) {
+                    viewModel.set('lineOfBusiness', lineOfBusiness);
+                    viewModel.set('currentTask', originTypes[originType+1]);
                 }
-                if(json.result.Info == "error") {
-                    msgtype = "warning";
-                    msg = "File imported successfully with errors.";
-                }
-                viewModel.set('lineOfBusiness', lineOfBusiness);
-                viewModel.set('currentTask', originTypes[type+1]);
-    
-                i21.functions.showCustomDialog(msgtype, 'ok', msg, function() {
+                i21.functions.showCustomDialog(type, 'ok', msg, function() {
                     //win.close();
-    
-                    if (json.result.HasMessages && json.result.LogId && json.result.LogId != 0) {
-                        // iRely.Functions.openScreen('Inventory.view.ImportLogMessageBox', {
-                        //     data: json
-                        // });
-                        me.viewLogDetails({ column: 'intImportLogId', value: json.result.LogId }, json.result.Username);
-                    }                    
+                    
+                    if (json.HasMessages) {
+                        if(json.LogId && json.LogId != 0) {
+                            iRely.Functions.openScreen('Inventory.view.ImportLog', {
+                                filters: { column: 'intImportLogId', value: json.LogId },
+                                username: json.Username,
+                                action: 'view',
+                                viewConfig: { modal: true }
+                            });
+                        } else {
+                            iRely.Functions.openScreen('Inventory.view.ImportLogMessageBox', {
+                                data: json,
+                                title: p.title
+                            });
+                        }
+                    }
+                    
+                    if(!iRely.Functions.isEmpty(json.ExtraScreenToOpen)) {
+                        iRely.Functions.openScreen(ExtraScreenToOpen, json.Description);
+                    }
                 });
             },
-            failure: function(response) {
+            error: function(jqXHR, status, error) {
                 iRely.Msg.close();
-                var json = JSON.parse(response.responseText);
-                i21.functions.showCustomDialog('error', 'ok', 'Import failed! ' + json.info,
+                var json = JSON.parse(jqXHR.responseText);
+                var msg = json.Description ? json.Description : json.Message + " " + json.ExceptionMessage;
+                i21.functions.showCustomDialog('error', 'ok', 'Import failed! ' + msg,
                     function() {
                         //win.close();
-    
-                        if (json.result.HasMessages && json.result.LogId && json.result.LogId != 0) {
-                            // iRely.Functions.openScreen('Inventory.view.ImportLogMessageBox', {
-                            //     data: json
-                            // });
-                            me.viewLogDetails({ column: 'intImportLogId', value: json.result.LogId }, json.result.Username);
-                        }   
+
+                        if (json.HasMessages) {
+                            if(json.LogId && json.LogId != 0) {
+                                iRely.Functions.openScreen('Inventory.view.ImportLog', {
+                                    filters: { column: 'intImportLogId', value: json.LogId },
+                                    username: json.Username,
+                                    action: 'view',
+                                    viewConfig: { modal: true }
+                                });
+                            } else {
+                                iRely.Functions.openScreen('Inventory.view.ImportLogMessageBox', {
+                                    data: json,
+                                    title: p.title
+                                });
+                            }
+                        }
                     }
                 );
             }
