@@ -65,16 +65,22 @@ IF @Unship = 1
 	END
 
 --VALIDATE IF THERE ARE STOCK ITEMS TO SHIP
-IF NOT EXISTS(SELECT 1 FROM tblSOSalesOrderDetail SOD
-				LEFT JOIN tblICItem IC ON SOD.intItemId = IC.intItemId 
-		WHERE intSalesOrderId = @SalesOrderId 
-		--AND (dbo.fnIsStockTrackingItem(SOD.intItemId) = 1 OR (dbo.fnIsStockTrackingItem(SOD.intItemId) = 0 AND IC.strType = 'Bundle'))
-		--AND (IC.strType = 'Bundle' AND ISNULL(IC.strBundleType, 'Kit') = 'Kit')
-		AND (dbo.fnIsStockTrackingItem(SOD.intItemId) = 1 OR (dbo.fnIsStockTrackingItem(SOD.intItemId) = 0 AND (IC.strType = 'Bundle' AND ISNULL(IC.strBundleType, 'Kit') = 'Kit')))
-		AND (dblQtyOrdered - dblQtyShipped > 0)
-		AND SOD.[intSalesOrderDetailId] NOT IN (SELECT ISNULL(tblARInvoiceDetail.[intSalesOrderDetailId],0) 
-				FROM tblARInvoiceDetail INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId 
-				WHERE SOD.dblQtyOrdered <= tblARInvoiceDetail.dblQtyShipped))
+IF(OBJECT_ID('tempdb..#ITEMSTOSHIP') IS NOT NULL)
+BEGIN
+    DROP TABLE #ITEMSTOSHIP
+END
+
+SELECT SOD.intItemId
+	 , IC.strBundleType
+	 , IC.strType
+INTO #ITEMSTOSHIP
+FROM tblSOSalesOrderDetail SOD
+INNER JOIN tblICItem IC ON SOD.intItemId = IC.intItemId 
+WHERE intSalesOrderId = @SalesOrderId 
+AND (dbo.fnIsStockTrackingItem(SOD.intItemId) = 1 OR (dbo.fnIsStockTrackingItem(SOD.intItemId) = 0 AND (IC.strType = 'Bundle' AND ISNULL(IC.strBundleType, 'Kit') = 'Kit')))
+AND (dblQtyOrdered - dblQtyShipped > 0)
+
+IF NOT EXISTS(SELECT TOP 1 NULL FROM #ITEMSTOSHIP)
 	BEGIN
 		RAISERROR('Shipping Failed. There is no shippable item on this sales order.', 16, 1);
         RETURN
