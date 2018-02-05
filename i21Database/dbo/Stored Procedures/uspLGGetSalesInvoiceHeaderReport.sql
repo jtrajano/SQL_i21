@@ -79,7 +79,8 @@ BEGIN
 		L.strMVessel,
 		L.dtmETAPOD,
 		L.intNumberOfContainers,
-		ShippingLine.strName AS strShippingLineName
+		ShippingLine.strName AS strShippingLineName,
+		CASE WHEN L.intPurchaseSale = 2 THEN 'OUTBOUND' WHEN L.intPurchaseSale = 3 THEN 'DROP SHIP' END AS strShipmentType
 	FROM tblARInvoice Inv
 	JOIN vyuCTEntity EN ON EN.intEntityId = Inv.intEntityCustomerId
 	JOIN tblARCustomer C ON C.intEntityId = Inv.intEntityCustomerId
