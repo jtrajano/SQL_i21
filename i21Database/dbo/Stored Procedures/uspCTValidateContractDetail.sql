@@ -56,7 +56,11 @@ BEGIN TRY
 			@intItemStockUOMId			INT, 
 			@dblUnitOnHand				NUMERIC(18,6), 
 			@strUnitMeasure				NVARCHAR(50),
-			@dblAllocatedQty			NUMERIC(18,6)
+			@dblAllocatedQty			NUMERIC(18,6),
+			@dtmM2MDate					DATETIME,
+			@dtmNewM2MDate				DATETIME,
+			@dtmM2MBatchDate			DATETIME,
+			@ysnM2MDateChanged			BIT
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @XML 
 	
@@ -85,7 +89,8 @@ BEGIN TRY
 			@intNewProducerId			=	intProducerId,
 			@ysnSlice					=	ysnSlice,
 			@intNewShipperId			=	intShipperId,
-			@intNewShippingLineId		=	intShippingLineId
+			@intNewShippingLineId		=	intShippingLineId,
+			@dtmNewM2MDate				=	dtmM2MDate
 
 	FROM	OPENXML(@idoc, 'tblCTContractDetails/tblCTContractDetail',2)
 	WITH
@@ -115,7 +120,8 @@ BEGIN TRY
 			intProducerId				INT,
 			ysnSlice					BIT,
 			intShipperId				INT,
-			intShippingLineId			INT
+			intShippingLineId			INT,
+			dtmM2MDate					DATETIME
 	)  
 
 	IF @intNewCompanyLocationId = 0 SET @intNewCompanyLocationId = NULL
@@ -158,7 +164,9 @@ BEGIN TRY
 				@ysnSlice				=	ISNULL(@ysnSlice,CD.ysnSlice),
 				@intNewShipperId		=	ISNULL(@intNewShipperId,CD.intShipperId),
 				@intNewShippingLineId	=	ISNULL(@intNewShippingLineId,CD.intShippingLineId),
-				@dblAllocatedQty		=	CD.dblAllocatedQty
+				@dblAllocatedQty		=	CD.dblAllocatedQty,
+				@dtmM2MDate				=	CD.dtmM2MDate,
+				@ysnM2MDateChanged		=	CASE WHEN ISNULL(@dtmNewM2MDate,CD.dtmM2MDate) <> CD.dtmM2MDate THEN 1 ELSE 0 END
 
 		FROM	tblCTContractDetail	CD
 		JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId	LEFT
@@ -357,6 +365,20 @@ BEGIN TRY
 				END
 			END
 		END
+
+		IF	@ysnM2MDateChanged = 1
+		BEGIN 
+			SELECT @dtmM2MBatchDate = MAX(IQ.dtmCreateDateTime) FROM tblRKM2MInquiryTransaction IT
+			JOIN tblRKM2MInquiry IQ ON IT.intM2MInquiryId = IT.intM2MInquiryId
+			WHERE intContractDetailId = @intContractDetailId
+
+			IF @dtmNewM2MDate < @dtmM2MBatchDate
+			BEGIN
+				SET @ErrMsg = 'M2M date for sequence ' + LTRIM(@intContractSeq) + ' should not be prior to the M2M inquiry date ' + CONVERT(NVARCHAR(20),@dtmM2MBatchDate,106) + '.' 
+				RAISERROR(@ErrMsg,16,1) 
+			END
+		END
+
 	END
 
 	IF @RowState  = 'Delete'
