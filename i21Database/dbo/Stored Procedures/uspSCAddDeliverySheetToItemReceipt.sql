@@ -182,7 +182,7 @@ SELECT DISTINCT @intFreightItemId = SCSetup.intFreightItemId, @intHaulerId = SCT
 FROM tblSCScaleSetup SCSetup LEFT JOIN tblSCTicket SCTicket ON SCSetup.intScaleSetupId = SCTicket.intScaleSetupId 
 WHERE SCTicket.intDeliverySheetId = @intDeliverySheetId
 
-	--FOR DISCOUNT CHARGES
+		--FOR DISCOUNT CHARGES
 		INSERT INTO @OtherCharges
 		(
 			[intEntityVendorId] 
@@ -287,7 +287,7 @@ WHERE SCTicket.intDeliverySheetId = @intDeliverySheetId
 		LEFT JOIN tblICItemUOM UM ON UM.intItemId = GR.intItemId AND UM.intUnitMeasureId = GR.intUnitMeasureId
 		WHERE RE.intSourceId = @intDeliverySheetId AND QM.dblDiscountAmount != 0 AND RE.ysnIsStorage = 0
 
-		--Insert record for fee
+		--FOR FEE CHARGES
 		INSERT INTO @OtherCharges
 		(
 			[intEntityVendorId] 
@@ -340,7 +340,7 @@ WHERE SCTicket.intDeliverySheetId = @intDeliverySheetId
 													WHEN RE.ysnIsStorage = 0 THEN SC.dblTicketFees
 												END
 											END
-		,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = RE.intContractDetailId)
+		,[intContractHeaderId]				= RE.intContractHeaderId
 		,[intContractDetailId]				= RE.intContractDetailId
 		,[ysnAccrue]						= CASE 
 												WHEN @ysnDeductFeesCusVen = 1 THEN 0
@@ -432,8 +432,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 													END
 													ELSE 0
 												END
-			,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ContractCost.intContractDetailId)
-			,[intContractDetailId]				= ContractCost.intContractDetailId
+			,[intContractHeaderId]				= RE.intContractHeaderId
+			,[intContractDetailId]				= RE.intContractDetailId
 			,[ysnAccrue]						= ContractCost.ysnAccrue
 			,[ysnPrice]							= ContractCost.ysnPrice
 			FROM tblCTContractCost ContractCost
@@ -497,8 +497,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 													END
 													ELSE 0
 												END
-			,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ContractCost.intContractDetailId)
-			,[intContractDetailId]				= ContractCost.intContractDetailId
+			,[intContractHeaderId]				= RE.intContractHeaderId
+			,[intContractDetailId]				= RE.intContractDetailId
 			,[ysnAccrue]						= ContractCost.ysnAccrue
 			,[ysnPrice]							= ContractCost.ysnPrice
 			FROM tblCTContractCost ContractCost
