@@ -29,8 +29,8 @@ AS
 					, strCurrencyExchangeRateType		=	ER.strCurrencyExchangeRateType
 					, intCurrencyExchangeRateId			=	CD.intCurrencyExchangeRateId
 					, dblCurrencyExchangeRate			=	CD.dblRate
-					, intSubCurrencyId					=  CASE WHEN AD.ysnSeqSubCurrency = 1 THEN AD.intSeqCurrencyId ELSE NULL END
-					, dblSubCurrencyRate				=  CASE WHEN AD.ysnSeqSubCurrency = 1 THEN CU.intCent ELSE NULL END
+					, intSubCurrencyId					=   CASE WHEN AD.ysnSeqSubCurrency = 1 THEN AD.intSeqCurrencyId ELSE NULL END
+					, dblSubCurrencyRate				=   CASE WHEN AD.ysnSeqSubCurrency = 1 THEN CU.intCent ELSE NULL END
 					, strSubCurrency					=	CASE WHEN AD.ysnSeqSubCurrency = 1 THEN AD.strSeqCurrency ELSE NULL END
 					, dblOrderPrice						=	AD.dblSeqPrice
 					, intPriceItemUOMId					=	AD.intSeqPriceUOMId
@@ -55,6 +55,8 @@ AS
 					, strWeightUnitMeasure				=	WM.strUnitMeasure
 					, ysnMaxPrice						=	CH.ysnMaxPrice
 					, intCompanyLocationPricingLevelId	=	CH.intCompanyLocationPricingLevelId
+					, strType							=	IM.strType
+					, strBundleType						=	IM.strBundleType
     
 			FROM	tblCTContractDetail				CD
 			JOIN	tblCTContractHeader				CH	ON  CH.intContractHeaderId				=   CD.intContractHeaderId
