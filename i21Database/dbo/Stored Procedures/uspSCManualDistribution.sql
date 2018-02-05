@@ -408,7 +408,9 @@ END
 
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
-		SELECT @intPricingTypeId = intPricingTypeId FROM vyuCTContractDetailView where intContractHeaderId = @intOrderId; 
+		SELECT @intPricingTypeId = intPricingTypeId FROM vyuCTContractDetailView CT
+		INNER JOIN tblSCTicket SC ON SC.intContractId = CT.intContractDetailId
+		where intContractHeaderId = @intOrderId; 
 		IF ISNULL(@intInventoryReceiptItemId , 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6) AND ISNULL(@intOwnershipType,0) = 1
 		BEGIN
 			EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intUserId;
