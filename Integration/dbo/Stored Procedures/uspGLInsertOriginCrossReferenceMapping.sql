@@ -31,6 +31,7 @@ END
 ELSE
 BEGIN
 	SELECT TOP 1 @originId = intAccountSystemId FROM tblGLAccountSystem WHERE strAccountSystemDescription = ''Origin''
+	UPDATE tblGLAccountSystem SET ysnSystem = 1 WHERE intAccountSystemId = @originId
 END
 	MERGE dbo.tblGLCrossReferenceMapping as map
 	USING dbo.tblGLCOACrossReference AS coa
