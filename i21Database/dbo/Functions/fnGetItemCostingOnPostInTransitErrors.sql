@@ -106,5 +106,27 @@ RETURN (
 		WHERE	Item.intItemId = @intItemId
 				AND ISNULL(@dblCost, 0) < 0
 
+		-- '{Item} is a bundle type and it is not allowed to receive nor reduce stocks.'
+		UNION ALL 
+		SELECT	intItemId = @intItemId
+				,intItemLocationId = @intItemLocationId
+				,strText = dbo.fnFormatMessage(
+							dbo.fnICGetErrorMessage(80202)
+							, Item.strItemNo
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+						) 
+				,intErrorCode = 80202				
+		FROM	tblICItem Item
+		WHERE	Item.intItemId = @intItemId
+				AND Item.strType = 'Bundle'
+
 	) AS Query		
 )

@@ -216,6 +216,7 @@ BEGIN
 		WHEN @msgId = 80199 THEN 'Ship To Location is missing or invalid.'
 		WHEN @msgId = 80200 THEN 'Charge is missing or invalid.'
 		WHEN @msgId = 80201 THEN 'Lot Id provided for %s is invalid.'
+		WHEN @msgId = 80202 THEN '%s is a bundle type and it is not allowed to receive nor reduce stocks.'
 	END 
 
 	RETURN @msg

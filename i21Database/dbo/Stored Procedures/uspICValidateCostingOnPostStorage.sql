@@ -174,3 +174,19 @@ BEGIN
 	EXEC uspICRaiseError 80196, @strItemNo
 	RETURN -1
 END 
+
+-- Check if system is trying to post stocks for bundle types
+SELECT @strItemNo = NULL, @intItemId = NULL
+SELECT TOP 1 
+		@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END 
+		,@intItemId = Item.intItemId
+FROM	#FoundErrors Errors INNER JOIN tblICItem Item
+			ON Errors.intItemId = Item.intItemId
+WHERE	intErrorCode = 80202
+
+IF @intItemId IS NOT NULL 
+BEGIN 
+	-- '{Item} is a bundle type and it is not allowed to receive nor reduce stocks.'
+	EXEC uspICRaiseError 80202, @strItemNo
+	RETURN -1
+END 
