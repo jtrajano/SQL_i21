@@ -50,7 +50,17 @@ Ext.define('Inventory.model.ReceiptCharge', {
         { name: 'intCostUOMId', type: 'int', allowNull: true },
         { name: 'dblAmount', type: 'float' },
         { name: 'strAllocateCostBy', type: 'string' },
-        { name: 'ysnAccrue', type: 'boolean' },
+        { 
+            name: 'ysnAccrue', 
+            type: 'boolean',
+            convert: function(value, record){
+                if(record){
+                    return record.get('intEntityVendorId') ? true : false;
+                } else {
+                    return value;
+                }
+            }
+        },
         { name: 'intEntityVendorId', type: 'int', allowNull: true },
         { name: 'ysnPrice', type: 'boolean' },
         { name: 'intSort', type: 'int', allowNull: true },
@@ -136,12 +146,12 @@ Ext.define('Inventory.model.ReceiptCharge', {
                 iRely.Functions.isEmpty(this.get('intEntityVendorId')) !== true &&
                 this.get('intEntityVendorId') === ReceiptVendorId) {
                 errors.add({
-                    field: 'ysnAccrue',
-                    message: this.get('strItemNo') + '  is both a payable and deductible to the bill of the same vendor.<br>Please correct the accrue or price checkbox.'
+                    field: 'strVendorName',
+                    message: this.get('strItemNo') + '  is both a payable and deductible to the bill of the same vendor.<br>Please select another vendor or change price checkbox.'
                 })
                 errors.add({
                     field: 'ysnPrice',
-                    message: this.get('strItemNo') + '  is both a payable and deductible to the bill of the same vendor.<br>Please correct the accrue or price checkbox.'
+                    message: this.get('strItemNo') + '  is both a payable and deductible to the bill of the same vendor.<br>Please select another vendor or change price checkbox.'
                 })
             }
 
@@ -169,7 +179,7 @@ Ext.define('Inventory.model.ReceiptCharge', {
                 this.get('strCostType') !== 'Discount'
             ) {
                 errors.add({
-                    field: 'ysnAccrue',
+                    field: 'strVendorName',
                     message: 'Cannot add expense ' + this.get('strItemNo') + ' to Inventory and pass it on to the vendor.<br>Change Inventory Cost or Price setup.'
                 })
                 errors.add({

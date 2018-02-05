@@ -953,16 +953,6 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                     break;
             }
         },
-        readOnlyAccrue: function (get) {
-            switch (get('grdCharges.selection.ysnAccrue')) {
-                case true:
-                    return false;
-                    break;
-                default:
-                    return true;
-                    break;
-            }
-        },
         readOnlyUnitCost: function (get) {
             if (iRely.Functions.isEmpty(get('grdInventoryReceipt.selection.strItemNo'))) {
                return true;

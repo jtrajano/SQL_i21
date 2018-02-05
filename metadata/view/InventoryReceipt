@@ -8255,44 +8255,6 @@
                                                             ]
                                                         },
                                                         {
-                                                            "type": "Ext.grid.column.Check",
-                                                            "reference": {
-                                                                "name": "columns",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "flex": null,
-                                                                "itemId": "colAccrue",
-                                                                "text": "Accrue",
-                                                                "width": 50
-                                                            },
-                                                            "configAlternates": {
-                                                                "flex": "number",
-                                                                "itemId": "string",
-                                                                "text": "string",
-                                                                "width": "auto",
-                                                                "scrollable": "boolean"
-                                                            },
-                                                            "name": "MyCheck",
-                                                            "designerId": "811ab515-1f3a-4953-9b04-a0354e778ab7",
-                                                            "cn": [
-                                                                {
-                                                                    "type": "Ext.form.field.Checkbox",
-                                                                    "reference": {
-                                                                        "name": "editor",
-                                                                        "type": "object"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "configAlternates": {
-                                                                        "scrollable": "boolean"
-                                                                    },
-                                                                    "name": "MyCheckbox40",
-                                                                    "designerId": "a5f086a9-b6da-494d-9cec-144ca0999d8c"
-                                                                }
-                                                            ]
-                                                        },
-                                                        {
                                                             "type": "Ext.grid.column.Column",
                                                             "reference": {
                                                                 "name": "columns",

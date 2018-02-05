@@ -2952,15 +2952,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         }
                                                                     },
                                                                     {
-                                                                        xtype: 'checkcolumn',
-                                                                        itemId: 'colAccrue',
-                                                                        width: 50,
-                                                                        text: 'Accrue',
-                                                                        editor: {
-                                                                            xtype: 'checkboxfield'
-                                                                        }
-                                                                    },
-                                                                    {
                                                                         xtype: 'gridcolumn',
                                                                         headerDrillDownClick: 'onVendorHeaderClick',
                                                                         headerDrillDownText: 'Open',
