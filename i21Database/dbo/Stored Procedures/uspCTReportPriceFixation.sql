@@ -66,8 +66,10 @@ BEGIN TRY
 	WHERE	[fieldname] = 'intPriceFixationId'
 
 	SELECT  @intContractHeaderId= intContractHeaderId FROM tblCTPriceFixation WHERE intPriceFixationId=@intPriceFixationId
-	SELECT  @IntNoOFUniFormItemUOM=COUNT(DISTINCT intItemUOMId)  FROM tblCTContractDetail WHERE intContractHeaderId= @intContractHeaderId
-	SELECT  @IntNoOFUniFormNetWeightUOM=COUNT(DISTINCT intNetWeightUOMId)  FROM tblCTContractDetail WHERE intContractHeaderId= @intContractHeaderId
+	SELECT  @IntNoOFUniFormItemUOM=COUNT(DISTINCT intUnitMeasureId)  FROM tblCTContractDetail  WHERE intContractHeaderId= @intContractHeaderId
+	SELECT  @IntNoOFUniFormNetWeightUOM=COUNT(DISTINCT U.intUnitMeasureId)  FROM tblCTContractDetail D
+	JOIN	tblICItemUOM	U	ON	U.intItemUOMId	=	D.intNetWeightUOMId
+	WHERE intContractHeaderId= @intContractHeaderId
 	SELECT  @TotalQuantity = dblQuantity FROM tblCTContractHeader WHERE intContractHeaderId=@intContractHeaderId
 	SELECT  @TotalNetQuantity =SUM(dblNetWeight) FROM tblCTContractDetail WHERE intContractHeaderId=@intContractHeaderId
 	
