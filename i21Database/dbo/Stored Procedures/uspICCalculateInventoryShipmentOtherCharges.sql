@@ -65,6 +65,7 @@ BEGIN
 			,[strAllocatePriceBy]
 			,[ysnAccrue]
 			,[ysnPrice]
+			,[strChargesLink]
 	)
 	SELECT	[intInventoryShipmentId]		= ShipmentItem.intInventoryShipmentId
 			,[intInventoryShipmentChargeId]	= Charge.intInventoryShipmentChargeId
@@ -90,6 +91,7 @@ BEGIN
 			,[strAllocatePriceBy]			= Charge.strAllocatePriceBy
 			,[ysnAccrue]					= Charge.ysnAccrue
 			,[ysnPrice]						= Charge.ysnPrice
+			,[strChargesLink]					= Charge.strChargesLink
 	FROM	tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentItem ShipmentItem 
 				ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 			INNER JOIN dbo.tblICInventoryShipmentCharge Charge	
@@ -107,6 +109,26 @@ BEGIN
 							Shipment.intOrderType = 1 -- Sales Contract 
 							AND Charge.intContractId IS NULL 
 							AND ShipmentItem.intOrderId IS NULL 
+							AND Charge.strChargesLink IS NULL
+							AND ShipmentItem.strChargesLink IS NULL
+						THEN 
+							1
+
+						WHEN
+							Shipment.intOrderType = 1 -- Sales Contract
+							AND Charge.intContractId IS NULL 
+							AND ShipmentItem.intOrderId IS NULL 
+							AND Charge.strChargesLink = ShipmentItem.strChargesLink
+						THEN
+							1
+							
+						WHEN 
+							Shipment.intOrderType = 1 -- Sales Contract 
+							AND Charge.intContractId IS NOT NULL 
+							AND ShipmentItem.intOrderId = Charge.intContractId
+							AND ShipmentItem.intLineNo = Charge.intContractDetailId
+							AND Charge.strChargesLink IS NULL
+							AND ShipmentItem.strChargesLink IS NULL
 						THEN 
 							1
 						
@@ -115,12 +137,22 @@ BEGIN
 							AND Charge.intContractId IS NOT NULL 
 							AND ShipmentItem.intOrderId = Charge.intContractId
 							AND ShipmentItem.intLineNo = Charge.intContractDetailId
+							AND Charge.strChargesLink = ShipmentItem.strChargesLink
 						THEN 
 							1
-						
+
 						WHEN 
 							ISNULL(Shipment.intOrderType, 1) <> 1 
 							AND Charge.intContractId IS NULL 
+							AND Charge.strChargesLink IS NULL
+							AND ShipmentItem.strChargesLink IS NULL
+						THEN 
+							1
+
+						WHEN 
+							ISNULL(Shipment.intOrderType, 1) <> 1 
+							AND Charge.intContractId IS NULL 
+							AND Charge.strChargesLink = ShipmentItem.strChargesLink
 						THEN 
 							1
 						
@@ -187,6 +219,7 @@ BEGIN
 			,[strAllocatePriceBy]
 			,[ysnAccrue]
 			,[ysnPrice]
+			,[strChargesLink]
 	)
 	SELECT	[intInventoryShipmentId]			= ShipmentItem.intInventoryShipmentId
 			,[intInventoryShipmentChargeId]	= Charge.intInventoryShipmentChargeId
@@ -219,6 +252,7 @@ BEGIN
 			,[strAllocatePriceBy]			= Charge.strAllocatePriceBy
 			,[ysnAccrue]					= Charge.ysnAccrue
 			,[ysnPrice]						= Charge.ysnPrice
+			,[strChargesLink]				= Charge.strChargesLink
 	FROM	dbo.tblICInventoryShipmentItem ShipmentItem INNER JOIN dbo.tblICInventoryShipmentCharge Charge	
 				ON ShipmentItem.intInventoryShipmentId = Charge.intInventoryShipmentId
 			INNER JOIN dbo.tblICItem ChargeItem 
@@ -236,6 +270,16 @@ BEGIN
 							Shipment.intOrderType = 1 -- Sales Contract 
 							AND Charge.intContractId IS NULL 
 							AND ShipmentItem.intOrderId IS NULL 
+							AND Charge.strChargesLink IS NULL
+							AND ShipmentItem.strChargesLink IS NULL
+						THEN 
+							1
+
+						WHEN 
+							Shipment.intOrderType = 1 -- Sales Contract 
+							AND Charge.intContractId IS NULL 
+							AND ShipmentItem.intOrderId IS NULL 
+							AND Charge.strChargesLink = ShipmentItem.strChargesLink
 						THEN 
 							1
 						
@@ -244,12 +288,32 @@ BEGIN
 							AND Charge.intContractId IS NOT NULL 
 							AND ShipmentItem.intOrderId = Charge.intContractId
 							AND ShipmentItem.intLineNo = Charge.intContractDetailId
+							AND Charge.strChargesLink IS NULL 
+							AND ShipmentItem.strChargesLink IS NULL 
 						THEN 
 							1
 						
 						WHEN 
+							Shipment.intOrderType = 1
+							AND Charge.intContractId IS NOT NULL 
+							AND ShipmentItem.intOrderId = Charge.intContractId
+							AND ShipmentItem.intLineNo = Charge.intContractDetailId
+							AND Charge.strChargesLink = ShipmentItem.strChargesLink 
+						THEN 
+							1
+
+						WHEN 
 							ISNULL(Shipment.intOrderType, 1) <> 1 
 							AND Charge.intContractId IS NULL 
+							AND Charge.strChargesLink IS NULL
+							AND ShipmentItem.strChargesLink IS NULL
+						THEN 
+							1
+
+						WHEN 
+							ISNULL(Shipment.intOrderType, 1) <> 1 
+							AND Charge.intContractId IS NULL 
+							AND Charge.strChargesLink = ShipmentItem.strChargesLink
 						THEN 
 							1
 						
@@ -282,6 +346,7 @@ BEGIN
 			,[strAllocatePriceBy]
 			,[ysnAccrue]
 			,[ysnPrice]
+			,[strChargesLink]
 	)
 	SELECT	[intInventoryShipmentId]			= Shipment.intInventoryShipmentId
 			,[intInventoryShipmentChargeId]	= Charge.intInventoryShipmentChargeId
@@ -295,6 +360,7 @@ BEGIN
 			,[strAllocatePriceBy]			= Charge.strAllocatePriceBy
 			,[ysnAccrue]					= Charge.ysnAccrue
 			,[ysnPrice]						= Charge.ysnPrice
+			,[strChargesLink]				= Charge.strChargesLink
 	FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentCharge Charge	
 				ON Shipment.intInventoryShipmentId = Charge.intInventoryShipmentId
 			INNER JOIN dbo.tblICItem ChargeItem 

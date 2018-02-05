@@ -13,6 +13,7 @@
 	[strAllocatePriceBy] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[ysnAccrue] BIT NULL DEFAULT ((0)),
 	[ysnPrice] BIT NULL DEFAULT ((0)),
+	[strChargesLink] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
 	CONSTRAINT [PK_tblICInventoryShipmentChargePerItem] PRIMARY KEY ([intInventoryShipmentChargePerItemId]), 
 	CONSTRAINT [FK_tblICInventoryShipmentChargePerItem_tblICInventoryShipmentItem] FOREIGN KEY ([intInventoryShipmentItemId]) REFERENCES [tblICInventoryShipmentItem]([intInventoryShipmentItemId]) ON DELETE CASCADE, 
 	CONSTRAINT [FK_tblICInventoryShipmentChargePerItem_tblAPVendor] FOREIGN KEY ([intEntityVendorId]) REFERENCES [tblAPVendor]([intEntityId]),

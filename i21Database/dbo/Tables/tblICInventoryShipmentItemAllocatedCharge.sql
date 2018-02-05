@@ -8,6 +8,7 @@
 	[dblAmount] NUMERIC(38, 20) NULL DEFAULT ((0)), 
 	[ysnAccrue] BIT NULL DEFAULT ((0)),
 	[ysnPrice] BIT NULL DEFAULT ((0)),	
+	[strChargesLink] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
 	CONSTRAINT [PK_tblICInventoryShipmentItemAllocatedCharge] PRIMARY KEY ([intInventoryShipmentItemAllocatedChargeId]),
 	CONSTRAINT [FK_tblICInventoryShipmentItemAllocatedCharge_tblAPVendor] FOREIGN KEY ([intEntityVendorId]) REFERENCES [tblAPVendor]([intEntityId]), 
     CONSTRAINT [FK_tblICInventoryShipmentItemAllocatedCharge_tblICInventoryShipment] FOREIGN KEY ([intInventoryShipmentId]) REFERENCES [tblICInventoryShipment]([intInventoryShipmentId]) ON DELETE CASCADE

@@ -38,6 +38,7 @@ Type the overview for the table here.
 		[dblForexRate] NUMERIC(18, 6) NULL,
 		[dblDestinationQuantity] NUMERIC(18, 6) NULL,
 		[strItemType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+		[strChargesLink] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
 		[intConcurrencyId] INT NULL DEFAULT ((0)),		
 		CONSTRAINT [PK_tblICInventoryShipmentItem] PRIMARY KEY ([intInventoryShipmentItemId]), 
 		CONSTRAINT [FK_tblICInventoryShipmentItem_tblICInventoryShipment] FOREIGN KEY ([intInventoryShipmentId]) REFERENCES [tblICInventoryShipment]([intInventoryShipmentId]) ON DELETE CASCADE, 

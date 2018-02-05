@@ -25,6 +25,7 @@
 	,ysnPrice BIT NULL
 	,intForexRateTypeId INT NULL
 	,dblForexRate NUMERIC(18, 6) NULL
+	,strChargesLink NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL 
 
 	-- Fields for Internal Use Only
 	,intHeaderId INT NULL
