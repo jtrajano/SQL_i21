@@ -442,51 +442,52 @@ namespace iRely.Inventory.BusinessLayer
 
         public async Task<GetObjectResult> GetShipmentCharges(GetParameter param)
         {
-            var query = _db.GetQuery<tblICInventoryShipmentCharge>().Filter(param);
-            var data = await query
-                .Select(s => new {
-                    s.intInventoryShipmentChargeId
-                    ,s.intInventoryShipmentId
-                    ,s.intContractId
-                    ,s.intContractDetailId
-                    ,s.intChargeId
-                    ,s.strCostMethod
-                    ,s.dblRate
-                    ,s.intCostUOMId
-                    ,s.intCurrencyId
-                    ,s.dblAmount
-                    ,s.ysnAccrue
-                    ,s.intEntityVendorId
-                    ,s.ysnPrice
-                    ,s.dblAmountBilled
-                    ,s.dblAmountPaid
-                    ,s.dblAmountPriced
-                    ,s.intSort
-                    ,s.dblTax
-                    ,s.intConcurrencyId
-                    ,s.intTaxGroupId
-                    ,s.intForexRateTypeId
-                    ,s.dblForexRate
-                    ,s.dblQuantity
-                    ,s.strAllocatePriceBy
-                    ,strContractNumber = s.vyuICGetInventoryShipmentCharge.strContractNumber
-                    ,strItemNo = s.vyuICGetInventoryShipmentCharge.strItemNo
-                    ,strItemDescription = s.vyuICGetInventoryShipmentCharge.strItemDescription
-                    ,strCostUOM = s.vyuICGetInventoryShipmentCharge.strCostUOM
-                    ,strUnitType = s.vyuICGetInventoryShipmentCharge.strUnitType
-                    ,strOnCostType = s.vyuICGetInventoryShipmentCharge.strOnCostType
-                    ,strVendorId = s.vyuICGetInventoryShipmentCharge.strVendorId
-                    ,strVendorName = s.vyuICGetInventoryShipmentCharge.strVendorName
-                    ,strCurrency = s.vyuICGetInventoryShipmentCharge.strCurrency
-                    ,strTaxGroup = s.vyuICGetInventoryShipmentCharge.strTaxGroup
-                    ,strForexRateType = s.vyuICGetInventoryShipmentCharge.strForexRateType
-                    ,strCostType = s.vyuICGetInventoryShipmentCharge.strCostType
-                    ,tblICInventoryShipmentChargeTaxes = s.tblICInventoryShipmentChargeTaxes
-                }).AsNoTracking().ToListAsync(param.cancellationToken);
+            var query = _db.GetQuery<vyuICGetInventoryShipmentCharge>().Filter(param);
+            var key = Methods.GetPrimaryKey<vyuICGetInventoryShipmentCharge>(_db.ContextManager);
+            //var data = await query
+                //.Select(s => new {
+                //    s.intInventoryShipmentChargeId
+                //    ,s.intInventoryShipmentId
+                //    ,s.intContractId
+                //    ,s.intContractDetailId
+                //    ,s.intChargeId
+                //    ,s.strCostMethod
+                //    ,s.dblRate
+                //    ,s.intCostUOMId
+                //    ,s.intCurrencyId
+                //    ,s.dblAmount
+                //    ,s.ysnAccrue
+                //    ,s.intEntityVendorId
+                //    ,s.ysnPrice
+                //    ,s.dblAmountBilled
+                //    ,s.dblAmountPaid
+                //    ,s.dblAmountPriced
+                //    ,s.intSort
+                //    ,s.dblTax
+                //    ,s.intConcurrencyId
+                //    ,s.intTaxGroupId
+                //    ,s.intForexRateTypeId
+                //    ,s.dblForexRate
+                //    ,s.dblQuantity
+                //    ,s.strAllocatePriceBy
+                //    ,strContractNumber = s.vyuICGetInventoryShipmentCharge.strContractNumber
+                //    ,strItemNo = s.vyuICGetInventoryShipmentCharge.strItemNo
+                //    ,strItemDescription = s.vyuICGetInventoryShipmentCharge.strItemDescription
+                //    ,strCostUOM = s.vyuICGetInventoryShipmentCharge.strCostUOM
+                //    ,strUnitType = s.vyuICGetInventoryShipmentCharge.strUnitType
+                //    ,strOnCostType = s.vyuICGetInventoryShipmentCharge.strOnCostType
+                //    ,strVendorId = s.vyuICGetInventoryShipmentCharge.strVendorId
+                //    ,strVendorName = s.vyuICGetInventoryShipmentCharge.strVendorName
+                //    ,strCurrency = s.vyuICGetInventoryShipmentCharge.strCurrency
+                //    ,strTaxGroup = s.vyuICGetInventoryShipmentCharge.strTaxGroup
+                //    ,strForexRateType = s.vyuICGetInventoryShipmentCharge.strForexRateType
+                //    ,strCostType = s.vyuICGetInventoryShipmentCharge.strCostType
+                //    ,tblICInventoryShipmentChargeTaxes = s.tblICInventoryShipmentChargeTaxes
+                //}).AsNoTracking().ToListAsync(param.cancellationToken);
 
             return new GetObjectResult()
             {
-                data = data,
+                data = await query.Execute(param, key, "DESC").ToListAsync(param.cancellationToken).ConfigureAwait(false),
                 total = await query.CountAsync(param.cancellationToken)
             };
         }
@@ -503,6 +504,7 @@ namespace iRely.Inventory.BusinessLayer
                     s.intSourceId,
                     s.intLineNo,
                     s.intItemId,
+                    s.strChargesLink,
                     s.intSubLocationId,
                     s.intStorageLocationId,
                     s.intOwnershipType,
@@ -522,6 +524,7 @@ namespace iRely.Inventory.BusinessLayer
                     s.dblDestinationQuantity,
                     s.intForexRateTypeId,
                     s.dblForexRate,
+                    s.intConcurrencyId,
 
                     // PROJECTED 
                     s.vyuICGetInventoryShipmentItem.strOrderNumber,
@@ -607,6 +610,7 @@ namespace iRely.Inventory.BusinessLayer
                             s.intEntityId,
                             s.intCreatedUserId,
                             s.intShipToCompanyLocationId,
+                            s.intConcurrencyId,
 
                             // PROJECTION
                             s.vyuICGetInventoryShipmentLookUp.strShipFromLocation,

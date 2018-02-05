@@ -40,6 +40,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblQuantity).HasColumnName("dblQuantity").HasPrecision(18, 6);
             this.Property(t => t.dblQuantityBilled).HasColumnName("dblQuantityBilled").HasPrecision(18, 6);
             this.Property(t => t.dblQuantityPriced).HasColumnName("dblQuantityPriced").HasPrecision(18, 6);
+            this.Property(t => t.strChargesLink).HasColumnName("strChargesLink");
 
             this.HasOptional(p => p.vyuICGetInventoryShipmentCharge)
                 .WithRequired(p => p.tblICInventoryShipmentCharge);

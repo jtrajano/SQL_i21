@@ -59,7 +59,8 @@ Ext.define('Inventory.model.ShipmentCharge', {
         { name: 'dblQuantity', type: 'float', allowNull: true },
         { name: 'dblTax', type: 'float', allowNull: true },
         { name: 'ysnAccrue', type: 'boolean' },
-        { name: 'ysnPrice', type: 'boolean' }
+        { name: 'ysnPrice', type: 'boolean' },
+        { name: 'strChargesLink', type: 'string' }
     ],
 
     validators: [

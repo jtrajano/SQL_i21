@@ -487,7 +487,15 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 colForexRate: {
                     dataIndex: 'dblForexRate' 
                 },
-                colDestinationQuantity: 'dblDestinationQuantity'                  
+                colDestinationQuantity: 'dblDestinationQuantity',
+                colItemChargesLink:  {
+                    dataIndex: 'strChargesLink',
+                    editor: {
+                        origValueField: 'strChargesLink',
+                        origUpdateField: 'strChargesLink',
+                        store: '{chargesItemLink}'                        
+                    }
+                }                     
             },
 
             btnRemoveLot: {
@@ -684,7 +692,15 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 },
                 colChargeTax: {
                     dataIndex: 'dblTax'
-                }
+                },
+                colChargesLink: {
+                    dataIndex: 'strChargesLink',
+                    editor: {
+                        origValueField: 'strChargesLink',
+                        origUpdateField: 'strChargesLink',
+                        store: '{chargesLink}'                        
+                    }
+                }  
             },
             pgePostPreview: {
                 title: '{pgePreviewTitle}'
@@ -827,6 +843,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 if (cboOrderType) cboOrderType.focus();
             });
             task.delay(500);
+            
+            me.getViewModel().set('chargesLinkInc', 0);
             
         }
     },
@@ -2636,7 +2654,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         var OrderType = cboOrderType.getRawValue().toString();
         var SourceType = cboSourceType.getRawValue().toString();
         var ContractStore = win.viewModel.storeInfo.salesContractList;
-        var me = this;
+        var newISItem;
+        var me = this, vm = me.getViewModel();
 
         iRely.Functions.openScreen('GlobalComponentEngine.view.FloatingSearch', {
             searchSettings: {
@@ -2817,8 +2836,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                                             newItem.set('strSubLocationName', null);
                                                             newItem.set('strStorageLocationName', null);
                                                         }
-    
-                                                        currentVM.tblICInventoryShipmentItems().add(newItem);
+                                                        
+                                                        newISItem = currentVM.tblICInventoryShipmentItems().add(newRecord);
+                                                        newISItem = newISItem.length > 0 ? newISItem[0] : null;
                                                     }
                                                 });
                                             }
@@ -2911,7 +2931,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                         newRecord.strSubLocationName = null;
                                         newRecord.strStorageLocationName = null;
                                     }
-                                    currentVM.tblICInventoryShipmentItems().add(newRecord);
+                                    newISItem = currentVM.tblICInventoryShipmentItems().add(newRecord);
+                                    newISItem = newISItem.length > 0 ? newISItem[0] : null;
+
                                 }        
                             }
     
@@ -2934,6 +2956,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                             Ext.each(result, function (contract) {
                                                 var contractCosts = contract.get('tblCTContractCosts');
                                                 if (contractCosts) {
+                                                    vm.set('chargesLinkInc', 1);
                                                     Ext.each(contractCosts, function (otherCharge) {
                                                         var shipmentCharges = currentVM.tblICInventoryShipmentCharges().data.items;
                                                         var exists = Ext.Array.findBy(shipmentCharges, function (row) {
@@ -2944,11 +2967,14 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                                         });
     
                                                         if (!exists) {
+                                                            var chargesLink = 'CL-'.concat(vm.get('chargesLinkConst'));
+
                                                             var newCost = Ext.create('Inventory.model.ShipmentCharge', {
                                                                 intInventoryReceiptId: currentVM.get('intInventoryShipmentId'),
                                                                 intContractId: order.get('intOrderId'),
                                                                 intContractDetailId: otherCharge.intContractDetailId,//order.get('intOrderId'),
                                                                 intChargeId: otherCharge.intItemId,
+                                                                strChargesLink: chargesLink,
                                                                 ysnInventoryCost: false,
                                                                 strCostMethod: otherCharge.strCostMethod,
                                                                 dblRate: otherCharge.dblRate,
@@ -2966,8 +2992,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                                                 strContractNumber: order.get('strOrderNumber')
                                                             });
                                                             currentVM.tblICInventoryShipmentCharges().add(newCost);
+
+                                                            newISItem.set('strChargesLink', chargesLink);
                                                         }
                                                     });
+                                                    
                                                 }
                                             });
                                         }

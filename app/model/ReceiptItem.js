@@ -91,7 +91,8 @@ Ext.define('Inventory.model.ReceiptItem', {
         
         { name: 'dblOpenReceiveBeforeEdit', type: 'float', allowNull: true},
         { name: 'dblGrossBeforeEdit', type: 'float', allowNull: true},
-        { name: 'dblNetBeforeEdit', type: 'float', allowNull: true}
+        { name: 'dblNetBeforeEdit', type: 'float', allowNull: true},
+        { name: 'strChargesLink', type: 'string' }
     ],
 
     validators: [
