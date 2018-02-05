@@ -150,7 +150,7 @@ IF OBJECT_ID('tempdb..#tmpDuplicateBillDetail') IS NOT NULL DROP TABLE #tmpDupli
 
 DECLARE @billDetailTaxes TABLE(intCreatedBillDetailId INT, originalBillDetailId INT)
 
-SELECT * INTO #tmpDuplicateBillDetail FROM tblAPBillDetail WHERE intBillId = @billId
+SELECT * INTO #tmpDuplicateBillDetail FROM tblAPBillDetail WHERE intBillId = @billId ORDER BY intBillDetailId
 --ALTER TABLE #tmpDuplicateBillDetail DROP COLUMN intBillDetailId
 
 UPDATE A
