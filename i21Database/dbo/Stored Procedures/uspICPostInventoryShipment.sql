@@ -493,8 +493,11 @@ BEGIN
 					ON Lot.intLotId = DetailLot.intLotId            
 				LEFT JOIN tblICItemUOM LotItemUOM
 					ON LotItemUOM.intItemUOMId = Lot.intItemUOMId            			
+				LEFT JOIN tblICItem i
+					ON DetailItem.intItemId = i.intItemId
 		WHERE   Header.intInventoryShipmentId = @intTransactionId
 				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_OWN) = @OWNERSHIP_TYPE_OWN
+				AND i.strType <> 'Bundle' -- Do not include Bundle items in the item costing. Bundle components are the ones included in the item costing. 
 
 		-- Call the post routine 
 		IF EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)
@@ -762,9 +765,12 @@ BEGIN
 					ON Lot.intLotId = DetailLot.intLotId            
 				LEFT JOIN tblICItemUOM LotItemUOM
 					ON LotItemUOM.intItemUOMId = Lot.intItemUOMId            
+				LEFT JOIN tblICItem i
+					ON DetailItem.intItemId = i.intItemId
 		WHERE   Header.intInventoryShipmentId = @intTransactionId
 				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_OWN) <> @OWNERSHIP_TYPE_OWN
-
+				AND i.strType <> 'Bundle' -- Do not include Bundle items in the storage costing. Bundle components are the ones included in the storage costing. 
+				
 		-- Call the post routine 
 		IF EXISTS (SELECT TOP 1 1 FROM @StorageItemsForPost) 
 		BEGIN 

@@ -100,8 +100,10 @@ BEGIN
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
 				ON ReceiptItem.intInventoryReceiptId = Charge.intInventoryReceiptId
-			INNER JOIN dbo.tblICItem Item 
-				ON Item.intItemId = Charge.intChargeId				
+			INNER JOIN dbo.tblICItem ChargeItem 
+				ON ChargeItem.intItemId = Charge.intChargeId
+			INNER JOIN tblICItem Item
+				ON Item.intItemId = ReceiptItem.intItemId
 	WHERE	ReceiptItem.intInventoryReceiptId = @intInventoryReceiptId
 			AND Charge.strCostMethod = @COST_METHOD_PER_UNIT
 			AND 
@@ -162,8 +164,10 @@ BEGIN
 							0
 				END 				
 			)
-			AND Item.intOnCostTypeId IS NULL 
+			AND ChargeItem.intOnCostTypeId IS NULL 
 			AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
+			-- Do not include Bundle types when calculating the other charges. 
+			AND Item.strType <> 'Bundle' 
 
 	-- Check if the calculated values are valid. 
 	BEGIN 
@@ -253,10 +257,12 @@ BEGIN
 			,[strChargesLink]				= Charge.strChargesLink
 	FROM	dbo.tblICInventoryReceiptItem ReceiptItem INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
 				ON ReceiptItem.intInventoryReceiptId = Charge.intInventoryReceiptId
-			INNER JOIN dbo.tblICItem Item 
-				ON Item.intItemId = Charge.intChargeId
+			INNER JOIN dbo.tblICItem ChargeItem 
+				ON ChargeItem.intItemId = Charge.intChargeId
 			INNER JOIN tblICInventoryReceipt Receipt
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId	
+			INNER JOIN tblICItem Item
+				ON Item.intItemId = ReceiptItem.intItemId
 	WHERE	ReceiptItem.intInventoryReceiptId = @intInventoryReceiptId
 			AND Charge.strCostMethod = @COST_METHOD_PERCENTAGE
 			AND 
@@ -317,8 +323,11 @@ BEGIN
 							0
 				END 				
 			)
-			AND Item.intOnCostTypeId IS NULL 
+			AND ChargeItem.intOnCostTypeId IS NULL 
 			AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
+			-- Do not include Bundle types when calculating the other charges. 
+			AND Item.strType <> 'Bundle' 
+
 END 
 
 -- Calculate the cost method for "Amount" or Fixed Amount. 
@@ -355,11 +364,12 @@ BEGIN
 			,[strChargesLink]				= Charge.strChargesLink
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
 				ON Receipt.intInventoryReceiptId = Charge.intInventoryReceiptId
-			INNER JOIN dbo.tblICItem Item 
-				ON Item.intItemId = Charge.intChargeId				
+			INNER JOIN dbo.tblICItem ChargeItem 
+				ON ChargeItem.intItemId = Charge.intChargeId			
 	WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
 			AND Charge.strCostMethod = @COST_METHOD_AMOUNT
-			AND Item.intOnCostTypeId IS NULL 			
+			AND ChargeItem.intOnCostTypeId IS NULL
+
 END 
 
 -- Update the Other Charge amounts

@@ -668,9 +668,12 @@ BEGIN
 				LEFT JOIN dbo.tblICItemLocation InTransitSourceLocation 
 					ON InTransitSourceLocation.intItemId = DetailItem.intItemId 
 					AND InTransitSourceLocation.intLocationId = Header.intTransferorId
+				LEFT JOIN tblICItem i 
+					ON DetailItem.intItemId = i.intItemId 
 
 		WHERE	Header.intInventoryReceiptId = @intTransactionId   
 				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
+				AND i.strType <> 'Bundle' -- Do not include Bundle items in the item costing. Bundle components are the ones included in the item costing. 
 
 		-- Update currency fields to functional currency. 
 		BEGIN 
@@ -757,11 +760,15 @@ BEGIN
 						AND il.intItemId = ri.intItemId 
 					LEFT JOIN tblICItemUOM iu 
 						ON iu.intItemUOMId = ri.intUnitMeasureId
+					LEFT JOIN tblICItem i 
+						ON ri.intItemId = i.intItemId 
+
 			WHERE	r.strReceiptNumber = @strTransactionId
 					AND t.ysnIsUnposted = 0 
 					AND t.intFobPointId = @FOB_ORIGIN
 					AND t.dblQty > 0
-
+					AND i.strType <> 'Bundle' -- Do not include Bundle items in the in-transit costing. Bundle components are the ones included in the in-transit costing. 
+					
 			IF EXISTS (SELECT TOP 1 1 FROM @ItemsForInTransitCosting)
 			BEGIN 
 				-- Call the post routine for the In-Transit costing. 
@@ -875,9 +882,12 @@ BEGIN
 						AND t.intTransactionDetailId = td.intInventoryTransferDetailId
 					LEFT JOIN tblICItemUOM iu 
 						ON iu.intItemUOMId = ri.intUnitMeasureId
+					LEFT JOIN tblICItem i 
+						ON ri.intItemId = i.intItemId 
 			WHERE	r.strReceiptNumber = @strTransactionId
 					AND t.ysnIsUnposted = 0 
 					AND t.dblQty > 0
+					AND i.strType <> 'Bundle' -- Do not include Bundle items in the in-transit costing. Bundle components are the ones included in the in-transit costing. 
 
 			IF EXISTS (SELECT TOP 1 1 FROM @ItemsForTransferOrder)
 			BEGIN 
@@ -1422,7 +1432,7 @@ BEGIN
 				,intForexRateTypeId = DetailItem.intForexRateTypeId
 				,dblForexRate = DetailItem.dblForexRate
 		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
-					ON Header.intInventoryReceiptId = DetailItem.intInventoryReceiptId 					
+					ON Header.intInventoryReceiptId = DetailItem.intInventoryReceiptId 
 				INNER JOIN dbo.tblICItemLocation ItemLocation
 					ON ItemLocation.intLocationId = Header.intLocationId 
 					AND ItemLocation.intItemId = DetailItem.intItemId
@@ -1449,8 +1459,11 @@ BEGIN
 				LEFT JOIN dbo.tblICItemLocation InTransitSourceLocation 
 					ON InTransitSourceLocation.intItemId = DetailItem.intItemId 
 					AND InTransitSourceLocation.intLocationId = Header.intTransferorId
+				LEFT JOIN tblICItem i
+					ON DetailItem.intItemId = i.intItemId
 		WHERE	Header.intInventoryReceiptId = @intTransactionId   
 				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_Own) <> @OWNERSHIP_TYPE_Own
+				AND i.strType <> 'Bundle' -- Do not include Bundle items in the in-transit costing. Bundle components are the ones included in the in-transit costing. 
 
 		-- Update currency fields to functional currency. 
 		BEGIN 

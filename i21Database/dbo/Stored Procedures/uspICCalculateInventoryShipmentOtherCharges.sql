@@ -94,8 +94,10 @@ BEGIN
 				ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 			INNER JOIN dbo.tblICInventoryShipmentCharge Charge	
 				ON ShipmentItem.intInventoryShipmentId = Charge.intInventoryShipmentId
+			INNER JOIN dbo.tblICItem ChargeItem 
+				ON ChargeItem.intItemId = Charge.intChargeId	
 			INNER JOIN dbo.tblICItem Item 
-				ON Item.intItemId = Charge.intChargeId		
+				ON Item.intItemId = ShipmentItem.intItemId
 	WHERE	ShipmentItem.intInventoryShipmentId = @intInventoryShipmentId
 			AND Charge.strCostMethod = @COST_METHOD_PER_UNIT
 			AND 
@@ -126,8 +128,15 @@ BEGIN
 							0
 				END 				
 			)
-			AND Item.intOnCostTypeId IS NULL 
+			AND ChargeItem.intOnCostTypeId IS NULL 
 			AND ISNULL(ShipmentItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
+			-- Do not include Kit Components when calculating the other charges. 
+			AND 1 = 
+				CASE	
+					WHEN Item.strType <> 'Bundle' AND ShipmentItem.strItemType = 'Kit' THEN 0
+					ELSE 1
+				END
+
 
 	-- Check if the calculated values are valid. 
 	BEGIN 
@@ -212,10 +221,12 @@ BEGIN
 			,[ysnPrice]						= Charge.ysnPrice
 	FROM	dbo.tblICInventoryShipmentItem ShipmentItem INNER JOIN dbo.tblICInventoryShipmentCharge Charge	
 				ON ShipmentItem.intInventoryShipmentId = Charge.intInventoryShipmentId
-			INNER JOIN dbo.tblICItem Item 
-				ON Item.intItemId = Charge.intChargeId				
+			INNER JOIN dbo.tblICItem ChargeItem 
+				ON ChargeItem.intItemId = Charge.intChargeId				
 			INNER JOIN tblICInventoryShipment Shipment 
 				ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
+			INNER JOIN dbo.tblICItem Item 
+				ON Item.intItemId = ShipmentItem.intItemId
 	WHERE	ShipmentItem.intInventoryShipmentId = @intInventoryShipmentId
 			AND Charge.strCostMethod = @COST_METHOD_PERCENTAGE
 			AND 
@@ -246,8 +257,14 @@ BEGIN
 							0
 				END 				
 			)
-			AND Item.intOnCostTypeId IS NULL 
+			AND ChargeItem.intOnCostTypeId IS NULL 
 			AND ISNULL(ShipmentItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
+			-- Do not include Kit Components when calculating the other charges. 
+			AND 1 = 
+				CASE	
+					WHEN Item.strType <> 'Bundle' AND ShipmentItem.strItemType = 'Kit' THEN 0
+					ELSE 1
+				END
 END 
 
 -- Calculate the cost method for "Amount" or Fixed Amount. 
@@ -280,11 +297,11 @@ BEGIN
 			,[ysnPrice]						= Charge.ysnPrice
 	FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentCharge Charge	
 				ON Shipment.intInventoryShipmentId = Charge.intInventoryShipmentId
-			INNER JOIN dbo.tblICItem Item 
-				ON Item.intItemId = Charge.intChargeId				
+			INNER JOIN dbo.tblICItem ChargeItem 
+				ON ChargeItem.intItemId = Charge.intChargeId				
 	WHERE	Shipment.intInventoryShipmentId = @intInventoryShipmentId
 			AND Charge.strCostMethod = @COST_METHOD_AMOUNT
-			AND Item.intOnCostTypeId IS NULL 			
+			AND ChargeItem.intOnCostTypeId IS NULL 			
 END 
 
 -- Update the Other Charge amounts
