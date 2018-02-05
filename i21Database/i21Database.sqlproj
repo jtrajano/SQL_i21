@@ -5971,7 +5971,6 @@
     <Build Include="dbo\Views\vyuMFGetPutawayDate.sql" />
     <Build Include="dbo\Views\vyuCTGridBrokerageCommissionDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspCTSaveBrokerageCommission.sql" />
-    <Build Include="dbo\Tables\tblARInvoiceAccrual.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportCmmerciaInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProvisionalCommission.sql" />
     <Build Include="dbo\Stored Procedures\uspCTSubagentStatement.sql" />
@@ -6186,6 +6185,7 @@
     <Build Include="dbo\Stored Procedures\uspSCDeliverySheetReceived.sql" />
     <Build Include="dbo\Functions\fnBBGetChargeRates.sql" />
     <Build Include="dbo\Views\vyuCRMCampaignEntitySalesOrder.sql" />
+    <Build Include="dbo\Tables\tblARInvoiceAccrual.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
