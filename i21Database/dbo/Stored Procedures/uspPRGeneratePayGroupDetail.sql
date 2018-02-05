@@ -60,17 +60,17 @@ BEGIN
 											THEN (SELECT TOP 1 intWorkersCompensationId FROM tblPREmployee WHERE [intEntityId] = tblPREmployeeEarning.intEntityEmployeeId) 
 											ELSE NULL END
 			,strCalculationType
-			,dblDefaultHours = CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours ELSE dblDefaultHours END					
-			,dblHoursToProcess = CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours ELSE dblHoursToProcess END
+			,dblDefaultHours = CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours ELSE (dblDefaultHours + @dblOverrideHours) END					
+			,dblHoursToProcess = CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours ELSE (dblHoursToProcess + @dblOverrideHours) END
 			,dblRateAmount
 			,dblTotal = ROUND(CASE WHEN (strCalculationType IN ('Rate Factor', 'Overtime') AND intEmployeeEarningLinkId IS NOT NULL) THEN 
 							CASE WHEN ((SELECT TOP 1 strCalculationType FROM tblPRTypeEarning WHERE intTypeEarningId = tblPREmployeeEarning.intEmployeeEarningLinkId) = 'Hourly Rate') THEN
-								CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours ELSE dblHoursToProcess END * dblRateAmount
+								CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours ELSE (dblHoursToProcess + @dblOverrideHours) END * dblRateAmount
 							ELSE
 								dblRateAmount
 							END
 						WHEN (strCalculationType = 'Hourly Rate') THEN
-							CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours ELSE dblHoursToProcess END * dblRateAmount
+							CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours ELSE (dblHoursToProcess + @dblOverrideHours) END * dblRateAmount
 						ELSE
 							dblRateAmount
 						END, 2)
