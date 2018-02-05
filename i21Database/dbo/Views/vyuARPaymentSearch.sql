@@ -30,6 +30,7 @@ SELECT
     ,strCurrencyDescription	= SMC.strDescription
 	,P.strPaymentInfo
 	,P.ysnProcessedToNSF
+	,strTransactionId		= ARP.strTransactionId
 FROM (SELECT intPaymentId
 		   , strRecordNumber 
 		   , intEntityId
@@ -90,3 +91,5 @@ LEFT OUTER JOIN (SELECT intCurrencyID
 					  , strDescription 
 				 FROM dbo.tblSMCurrency WITH (NOLOCK)
 ) SMC ON P.intCurrencyId = SMC.intCurrencyID
+LEFT OUTER JOIN vyuARPaymentBankTransaction ARP
+	ON ARP.intPaymentId = P.intPaymentId
