@@ -38,7 +38,7 @@ DECLARE @id INT,
 		@sstxt_pur_sls_ind	NVARCHAR(50),
 		@sstxt_type_ind	NVARCHAR(50),
 		@sstxt_txt_id	NVARCHAR(50),
-		@sql NVARCHAR(MAX)
+		@SQL NVARCHAR(MAX)
 
 
 IF OBJECT_ID('tempdb..##sstxtmst') IS NOT NULL  									
