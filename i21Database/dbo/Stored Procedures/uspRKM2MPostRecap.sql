@@ -202,7 +202,7 @@ UNION ALL
 SELECT @intM2MInquiryId intM2MInquiryId,@dtmGLPostDate AS dtmPostDate,
 	CASE WHEN isnull(dblResultBasis,0) >= 0 then @intUnrealizedGainOnInventoryIntransitIOSId  else @intUnrealizedLossOnInventoryIntransitIOSId end intAccountId,
 	CASE WHEN isnull(dblResultBasis,0) >= 0 then @strUnrealizedGainOnInventoryBasisIOSId  else @strUnrealizedLossOnInventoryIntransitIOSId end strAccountId
-,0.0,dblResultBasis,0.0,dblOpenQty,'Mark To Market-Basis Intransit Offset',@intCurrencyId,@dtmGLPostDate, strContractSeq,intContractDetailId,
+,dblResultBasis,0.0,dblOpenQty,0.0,'Mark To Market-Basis Intransit Offset',@intCurrencyId,@dtmGLPostDate, strContractSeq,intContractDetailId,
 'Mark To Market-Basis Intransit Offset','Mark To Market','Risk Management',1,1,getdate(),0,intEntityId,@strRecordName strRecordName,@intUserId intUserId,@intLocationId intLocationId,@intUnitMeasureId intUnitMeasureId
 FROM tblRKM2MInquiryTransaction where intM2MInquiryId=@intM2MInquiryId and strContractOrInventoryType in('In-transit(P)','In-transit(S)')
 and strPricingType <> 'Cash'  and isnull(dblResultBasis,0) <> 0
