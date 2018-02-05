@@ -222,9 +222,10 @@ IF ISNULL(@ysnRecap, 0) = 0
 			ON A.[intJournalId] = B.[intJournalId]
 		WHERE B.[intJournalId] IN (SELECT [intJournalId] FROM @tmpValidJournals)
 		
-		EXEC uspGLBookEntries @GLEntries, @ysnPost
+		DECLARE @PostResult INT
+		EXEC @PostResult = uspGLBookEntries @GLEntries, @ysnPost
 		
-		IF @@ERROR <> 0	GOTO Post_Rollback;
+		IF @@ERROR <> 0 OR @PostResult <> 0	GOTO Post_Rollback;
 	END
 ELSE
 	BEGIN
