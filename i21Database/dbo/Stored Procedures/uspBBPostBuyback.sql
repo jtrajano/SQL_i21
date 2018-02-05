@@ -53,7 +53,7 @@ AS
 			,intEntityId
 			,intCompanyLocationId
 			,ysnPost
-			,intItemId
+			--,intItemId
 			,[dblQtyShipped]
 			,[dblPrice]
 			,[intSalesAccountId]
@@ -69,7 +69,7 @@ AS
 										THEN (SELECT TOP 1 intWarehouseId FROM vyuARCustomerSearch WHERE intEntityId = A.intEntityId) 
 									ELSE @CompanyLocation END
 			,ysnPost = 1
-			,intItemId = B.intItemId
+			--,intItemId = B.intItemId
 			,[dblQtyShipped] = 1
 			,[dblPrice] = B.dblReimbursementAmount
 			,[intSalesAccountId] = @intDetailAccount
@@ -123,20 +123,20 @@ AS
 
 		INSERT INTO @voucherNonInvDetails(
 			[intAccountId]		
-			,[intItemId]			
+			--,[intItemId]			
 			,[strMiscDescription]
 			,[dblQtyReceived]	
 			,[dblCost]			
 		)	
 		SELECT 
-			[intAccountId]	=  ISNULL(@intDetailAccount,[dbo].[fnGetItemGLAccount](A.intItemId, C.intItemLocationId, 'Other Charge Income'))
-			,[intItemId]	= A.intItemId	
+			[intAccountId]	=  ISNULL(@intDetailAccount,[dbo].[fnGetItemGLAccount](1, C.intItemLocationId, 'Other Charge Income'))
+			--,[intItemId]	= A.intItemId	
 			,[strMiscDescription]  = B.strDescription
 			,[dblQtyReceived] = 1	
 			,[dblCost]	 = A.dblReimbursementAmount		
 		FROM tblBBBuybackCharge A
 		INNER JOIN tblICItem B
-			ON A.intItemId = B.intItemId
+			ON 1 = B.intItemId
 		INNER JOIN tblICItemLocation C
 			ON B.intItemId = C.intItemId
 				AND intLocationId =  @CompanyLocation
@@ -156,7 +156,7 @@ AS
 		SET intBuybackChargeId = A.intBuybackChargeId
 		FROM tblBBBuybackCharge A
 		WHERE A.intBuybackId = @intBuyBackId
-			AND tblAPBillDetail.intItemId = A.intItemId
+			AND tblAPBillDetail.intItemId = 1
 			AND tblAPBillDetail.intBillId = @intCreatedBillId
 
 		SET @strCreatedInvoices = @intCreatedBillId
