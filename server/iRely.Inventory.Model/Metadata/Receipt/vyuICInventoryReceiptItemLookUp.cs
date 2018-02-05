@@ -27,6 +27,8 @@ namespace iRely.Inventory.Model
         public string strGrade { get; set; }
         public int? intCommodityId { get; set; }
         public string strWeightUOM { get; set; }
+        public int? intWeightUOMId { get; set; }
+        public int? intWeightUnitMeasureId { get; set; }
         public string strContainer { get; set; }
         public decimal? dblItemUOMConvFactor { get; set; }
         public decimal? dblWeightUOMConvFactor { get; set; }

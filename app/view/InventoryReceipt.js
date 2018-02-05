@@ -1099,6 +1099,11 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                             hidden: true
                                                                                         },
                                                                                         {
+                                                                                            dataIndex: 'intItemUOMId',
+                                                                                            dataType: 'numeric',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
                                                                                             dataIndex: 'dblGrossUOMConvFactor',
                                                                                             dataType: 'float',
                                                                                             hidden: true
@@ -1246,7 +1251,13 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                                 {
                                                                                                     dataIndex: 'intItemUnitMeasureId',
                                                                                                     dataType: 'numeric',
-                                                                                                    text: 'Unit Of Measure Id',
+                                                                                                    text: 'Item Unit Of Measure Id',
+                                                                                                    hidden: true
+                                                                                                },
+                                                                                                {
+                                                                                                    dataIndex: 'intUnitMeasureId',
+                                                                                                    dataType: 'numeric',
+                                                                                                    text: 'Unit of Measure Id',
                                                                                                     hidden: true
                                                                                                 },
                                                                                                 {
@@ -1405,6 +1416,12 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                             dataType: 'string',
                                                                                             text: 'Unit Measure',
                                                                                             flex: 1
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'intUnitMeasureId',
+                                                                                            dataType: 'numeric',
+                                                                                            text: 'intUnitMeasureId',
+                                                                                            hidden: true
                                                                                         },
                                                                                         {
                                                                                             dataIndex: 'strUnitType',

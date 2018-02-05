@@ -1887,6 +1887,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('strLotTracking', records[0].get('strLotTracking'));
             current.set('strUnitMeasure', records[0].get('strReceiveUOM'));
             current.set('intUnitMeasureId', records[0].get('intReceiveUOMId'));
+            current.set('intItemUOMId', records[0].get('intReceiveUnitMeasureId'))
             current.set('strCostUOM', records[0].get('strReceiveUOM'));
             current.set('intCostUOMId', records[0].get('intReceiveUOMId'));
             current.set('intWeightUOMId', records[0].get('intGrossUOMId'));
@@ -1963,7 +1964,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                 });
             }
-
+            current.set('intWeightUnitMeasureId', records[0].get('intUnitMeasureId'));
             // Calculate the default gross/net qty. 
             me.calculateGrossNet(current, 1);
         }
@@ -2138,6 +2139,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (!masterRecord) return;
         if (!detailRecord) return;
         if (iRely.Functions.isEmpty(detailRecord.get('intItemId'))) return;
+        var itemTaxUOMId = null;
         //if (detailRecord.get('intOwnershipType') === 2) return; // Do not compute the tax if item ownership is Storage. 
 
         //if (reset !== false) reset = true;
@@ -2178,6 +2180,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 netWgtCF = detailRecord.get('dblWeightUOMConvFactor'),
                 valueCostCF;
 
+            var receiptUOMId = detailRecord.get("intItemUOMId");
+            
             // Calculate Cost UOM Conversion Factor with respect to the Item UOM..
             if (iRely.Functions.isEmpty(detailRecord.get('intWeightUOMId'))) {
                 // Sanitize the cost conversion factor.
@@ -2197,6 +2201,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : 1;
 
                 unitCost = unitCost * (netWgtCF / costCF);
+                receiptUOMId = detailRecord.get('intWeightUnitMeasureId');
             }
 
             // Do not compute the tax if item ownership is 'Storage'. 
@@ -2214,12 +2219,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     } else {
                         taxAmount = qtyOrdered * itemDetailTax.dblRate;
 
-                        // UOM for item taxes IC-4718
-                        if(detailRecord.get("intUnitMeasureId") == itemDetailTax.intUnitMeasureId)
-                            taxAmount = (qtyOrdered * itemDetailTax.dblRate) / dblForexRate;
-
                         // If a line is using a foreign currency, convert the tax from functional currency to the transaction currency. 
                         taxAmount = dblForexRate != 0 ? taxAmount / dblForexRate : taxAmount;
+                        itemTaxUOMId = receiptUOMId;
                     }
 
                     if (itemDetailTax.ysnCheckoffTax) {
@@ -2256,6 +2258,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         strTaxableByOtherTaxes: itemDetailTax.strTaxableByOtherTaxes,
                         strCalculationMethod: itemDetailTax.strCalculationMethod,
                         dblRate: itemDetailTax.dblRate,
+                        //intUnitMeasureId: itemTaxUOMId, IC-4798 blocked by SM-3785
+                        intUnitMeasureId: receiptUOMId,
                         dblTax: itemDetailTax.dblTax,
                         dblAdjustedTax: itemDetailTax.dblAdjustedTax,
                         intTaxAccountId: itemDetailTax.intTaxAccountId,
@@ -2279,7 +2283,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             detailRecord.set('dblTax', totalItemTax);
             detailRecord.set('dblLineTotal', me.calculateLineTotal(masterRecord, detailRecord));
         }
-
+        
         if (detailRecord) {
             var current = {
                 ItemId: detailRecord.get('intItemId'),
@@ -2292,7 +2296,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 FreightTermId: masterRecord.get('intFreightTermId'),
                 CardId: null,
                 VehicleId: null,
-                IncludeExemptedCodes: false
+                IncludeExemptedCodes: false,
+                UOMId: detailRecord.get('intWeightUOMId') ? detailRecord.get('intWeightUnitMeasureId') : detailRecord.get('intItemUOMId')  // IMPORTANT!!!!!This is not intItemUOMId, this is intUnitMeasureId. Mapping of field names is wrong since intUnitMeasureId was originally mapped to item uom id (Need to correct this in the future)
             };
 
             iRely.Functions.getItemTaxes(current, computeItemTax, me);            
@@ -2951,7 +2956,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         { itemId: 'colTaxCode', dataIndex: 'strTaxCode', text: 'Tax Code', width: 100, dataType: 'string' },
                         { itemId: 'colCalculationMethod', dataIndex: 'strCalculationMethod', text: 'Calculation Method', width: 110, dataType: 'string' },                                
                         { itemId: 'colQty', xtype: 'numbercolumn', dataIndex: 'dblQty', text: 'Qty', width: 100, dataType: 'float' },
-                        { itemId: 'colUOM', dataIndex: 'strTaxCode', text: 'Tax Code', width: 100, dataType: 'string' },
+                        { itemId: 'colUOM', dataIndex: 'strUnitMeasure', text: 'Unit of Measure', width: 100, dataType: 'string' },
                         { itemId: 'colCost', xtype: 'numbercolumn', dataIndex: 'dblCost', text: 'Cost', width: 100, dataType: 'float' },
                         { itemId: 'colRate', xtype: 'numbercolumn', dataIndex: 'dblRate', text: 'Rate', width: 100, dataType: 'float' },
                         { 
@@ -6378,10 +6383,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 } else {
                                     taxAmount = chargeQuantity * itemDetailTax.dblRate;
 
-                                    // UOM for other charges taxes IC-4718
-                                    if(charge.get("intUnitMeasureId") == itemDetailTax.intUnitMeasureId)
-                                        taxAmount = (chargeQuantity * itemDetailTax.dblRate) / dblForexRate;
-
                                     // If a line is using a foreign currency, convert the tax from functional currency to the charge currency. 
                                     taxAmount = dblForexRate != 0 ? taxAmount / dblForexRate : taxAmount;
                                 }
@@ -6462,7 +6463,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 FreightTermId: current.get('intFreightTermId'),
                                 CardId: null,
                                 VehicleId: null,
-                                IncludeExemptedCodes: false
+                                IncludeExemptedCodes: false//,
+                                //UOMId: itemDetailTax.intItemUOMId
                          };
                          iRely.Functions.getItemTaxes(currentCharge, computeItemTax, me);
                     }
@@ -7194,11 +7196,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var win = me.getView().screenMgr.window;
         var grid = win.down('#grdInventoryReceipt');
         var current = plugin.getActiveRecord();
-
+        
         current.set('intUnitMeasureId', records[0].get('intItemUnitMeasureId'));
+        current.set('intItemUOMId', records[0].get('intUnitMeasureId'));
         current.set('dblItemUOMConvFactor', records[0].get('dblUnitQty'));
         current.set('strUnitType', records[0].get('strUnitType'));
-
         current.set('ysnQtyUOMChanged', true);
 
         if (current.get('dblWeightUOMConvFactor') === 0) {

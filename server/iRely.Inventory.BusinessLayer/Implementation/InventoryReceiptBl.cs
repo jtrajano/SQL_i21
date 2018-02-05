@@ -211,6 +211,7 @@ namespace iRely.Inventory.BusinessLayer
                         : "Own",
                     intCommodityId = s.vyuICInventoryReceiptItemLookUp.intCommodityId,
                     strWeightUOM = s.vyuICInventoryReceiptItemLookUp.strWeightUOM,
+                    intWeightUnitMeasureId = s.vyuICInventoryReceiptItemLookUp.intWeightUnitMeasureId,
                     strContainer = s.vyuICInventoryReceiptItemLookUp.strContainer,
                     dblItemUOMConvFactor = s.vyuICInventoryReceiptItemLookUp.dblItemUOMConvFactor,
                     dblWeightUOMConvFactor = s.vyuICInventoryReceiptItemLookUp.dblWeightUOMConvFactor,

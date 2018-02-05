@@ -56,7 +56,9 @@ Ext.define('Inventory.model.ReceiptItemTax', {
         { name: 'strTaxCode', type: 'string' },
         { name: 'dblQty', type: 'float' },
         { name: 'dblCost', type: 'float' },                
-        { name: 'intSort', type: 'int', allowNull: true }
+        { name: 'intSort', type: 'int', allowNull: true },
+        { name: 'intUnitMeasureId', type: 'int', allowNull: true },
+        { name: 'strUnitMeasure', type: 'string' }
     ],
 
     validators: [

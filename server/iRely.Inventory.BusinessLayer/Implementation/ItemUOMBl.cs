@@ -96,6 +96,7 @@ namespace iRely.Inventory.BusinessLayer
                     {
                         intItemUOMId = ItemUOM.intItemUOMId,
                         strUnitMeasure = UOM.strUnitMeasure,
+                        intUnitMeasureId = UOM.intUnitMeasureId,
                         strUnitType = UOM.strUnitType,
                         intItemId = ItemUOM.intItemId,
                         dblUnitQty = ItemUOM.dblUnitQty ?? 0,
