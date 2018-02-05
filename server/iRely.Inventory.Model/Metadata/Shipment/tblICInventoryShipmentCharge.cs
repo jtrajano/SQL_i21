@@ -40,6 +40,7 @@ namespace iRely.Inventory.Model
         public int? intTaxGroupId { get; set; }
         public decimal? dblTax { get; set; }
         public decimal? dblAdjustedTax { get; set; }
+        public string strChargesLink { get; set; }
         private string _contractNo;
         [NotMapped]
         public string strContractNumber

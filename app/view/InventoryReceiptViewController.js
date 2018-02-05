@@ -1133,8 +1133,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                 });
             }
+            debugger;
+            me.getViewModel().set('chargesLinkInc', 0);
         }
+
     },
+
     onPageChange: function (pagingStatusBar, record, eOpts) {
         var win = pagingStatusBar.up('window');
         var grd = win.down('#grdLotTracking');
@@ -1200,7 +1204,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     createRecord: function (config, action) {
         var win = config.window;
         win.down("#txtWeightLossMsgValue").setValue("");
-
+        
         var today = new Date();
         var newRecord = Ext.create('Inventory.model.Receipt');
         var defaultReceiptType = i21.ModuleMgr.Inventory.getCompanyPreference('strReceiptType');
@@ -5752,6 +5756,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                                         var contractCosts = contract.get('tblCTContractCosts');
                                                         var contractCosts = _.filter(contractCosts, function (c) { return !c.ysnBasis; });
                                                         if (contractCosts) {
+                                                            vm.set('chargesLinkInc', 1);
                                                             Ext.each(contractCosts, function (otherCharge) {
                                                                 var receiptCharges = currentVM.tblICInventoryReceiptCharges().data.items;
                                                                 var exists = Ext.Array.findBy(receiptCharges, function (row) {
@@ -5763,7 +5768,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                                                                 if (!exists) {
                                                                     var inventoryCost = otherCharge.ysnInventoryCost ? true : false,
-                                                                        strChargesLink = vm.get('chargesLink');
+                                                                        chargesLink = 'CL-'.concat(vm.get('chargesLinkConst'));
                                                                     
                                                                     var newReceiptCharge = Ext.create('Inventory.model.ReceiptCharge', {
                                                                         intInventoryReceiptId: currentVM.get('intInventoryReceiptId'),
@@ -5771,7 +5776,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                                                         intContractDetailId: otherCharge.intContractDetailId,
                                                                         intContractSeq: contract.get('intContractSeq'),
                                                                         intChargeId: otherCharge.intItemId,
-                                                                        strChargesLink: strChargesLink,
+                                                                        strChargesLink: chargesLink,
                                                                         ysnInventoryCost: inventoryCost,
                                                                         strCostMethod: otherCharge.strCostMethod,
                                                                         dblRate: otherCharge.strCostMethod == "Amount" ? 0 : otherCharge.dblRate,
@@ -5791,10 +5796,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                                                                     });
                                                                     currentVM.tblICInventoryReceiptCharges().add(newReceiptCharge);
-                                                                    newReceiptItem.set('strChargesLink', strChargesLink);
-                                                                    vm.set('chargesLink', 1);
+                                                                    newReceiptItem.set('strChargesLink', chargesLink);
                                                                 }
                                                             });
+
                                                         }
                                                     });
                                                 }

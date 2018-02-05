@@ -34,7 +34,8 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
     ],
 
     data: {
-        triggerAddRemoveLineItem: false
+        triggerAddRemoveLineItem: false,
+        chargesLinkConst: 0
     },
 
     stores: {
@@ -238,6 +239,122 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         },
         taxGroup: {
             type: 'smtaxgroupbuffered'
+        },
+        chargesLink: {
+            autoLoad: true,
+            data: [
+                {strChargesLink: 'CL-1'},
+                {strChargesLink: 'CL-2'},
+                {strChargesLink: 'CL-3'},
+                {strChargesLink: 'CL-4'},
+                {strChargesLink: 'CL-5'},
+                {strChargesLink: 'CL-6'},
+                {strChargesLink: 'CL-7'},
+                {strChargesLink: 'CL-8'},
+                {strChargesLink: 'CL-9'},
+                {strChargesLink: 'CL-10'},
+                {strChargesLink: 'CL-11'},
+                {strChargesLink: 'CL-12'},
+                {strChargesLink: 'CL-13'},
+                {strChargesLink: 'CL-14'},
+                {strChargesLink: 'CL-15'},
+                {strChargesLink: 'CL-16'},
+                {strChargesLink: 'CL-17'},
+                {strChargesLink: 'CL-18'},
+                {strChargesLink: 'CL-19'},
+                {strChargesLink: 'CL-20'},
+                {strChargesLink: 'CL-21'},
+                {strChargesLink: 'CL-22'},
+                {strChargesLink: 'CL-23'},
+                {strChargesLink: 'CL-24'},
+                {strChargesLink: 'CL-25'},          
+                {strChargesLink: 'CL-26'},
+                {strChargesLink: 'CL-27'},
+                {strChargesLink: 'CL-28'},
+                {strChargesLink: 'CL-29'},
+                {strChargesLink: 'CL-30'},
+                {strChargesLink: 'CL-31'},
+                {strChargesLink: 'CL-32'},
+                {strChargesLink: 'CL-33'},
+                {strChargesLink: 'CL-34'},
+                {strChargesLink: 'CL-35'},
+                {strChargesLink: 'CL-36'},
+                {strChargesLink: 'CL-37'},
+                {strChargesLink: 'CL-38'},
+                {strChargesLink: 'CL-39'},
+                {strChargesLink: 'CL-40'},
+                {strChargesLink: 'CL-41'},
+                {strChargesLink: 'CL-42'},
+                {strChargesLink: 'CL-43'},
+                {strChargesLink: 'CL-44'},
+                {strChargesLink: 'CL-45'},
+                {strChargesLink: 'CL-46'},
+                {strChargesLink: 'CL-47'},
+                {strChargesLink: 'CL-48'},
+                {strChargesLink: 'CL-49'},
+                {strChargesLink: 'CL-50'},                          
+            ],
+            fields: {
+                name: 'strChargesLink'
+            }
+        },
+        chargesItemLink: {
+            autoLoad: true,
+            data: [
+                {strChargesLink: 'CL-1'},
+                {strChargesLink: 'CL-2'},
+                {strChargesLink: 'CL-3'},
+                {strChargesLink: 'CL-4'},
+                {strChargesLink: 'CL-5'},
+                {strChargesLink: 'CL-6'},
+                {strChargesLink: 'CL-7'},
+                {strChargesLink: 'CL-8'},
+                {strChargesLink: 'CL-9'},
+                {strChargesLink: 'CL-10'},
+                {strChargesLink: 'CL-11'},
+                {strChargesLink: 'CL-12'},
+                {strChargesLink: 'CL-13'},
+                {strChargesLink: 'CL-14'},
+                {strChargesLink: 'CL-15'},
+                {strChargesLink: 'CL-16'},
+                {strChargesLink: 'CL-17'},
+                {strChargesLink: 'CL-18'},
+                {strChargesLink: 'CL-19'},
+                {strChargesLink: 'CL-20'},
+                {strChargesLink: 'CL-21'},
+                {strChargesLink: 'CL-22'},
+                {strChargesLink: 'CL-23'},
+                {strChargesLink: 'CL-24'},
+                {strChargesLink: 'CL-25'},          
+                {strChargesLink: 'CL-26'},
+                {strChargesLink: 'CL-27'},
+                {strChargesLink: 'CL-28'},
+                {strChargesLink: 'CL-29'},
+                {strChargesLink: 'CL-30'},
+                {strChargesLink: 'CL-31'},
+                {strChargesLink: 'CL-32'},
+                {strChargesLink: 'CL-33'},
+                {strChargesLink: 'CL-34'},
+                {strChargesLink: 'CL-35'},
+                {strChargesLink: 'CL-36'},
+                {strChargesLink: 'CL-37'},
+                {strChargesLink: 'CL-38'},
+                {strChargesLink: 'CL-39'},
+                {strChargesLink: 'CL-40'},
+                {strChargesLink: 'CL-41'},
+                {strChargesLink: 'CL-42'},
+                {strChargesLink: 'CL-43'},
+                {strChargesLink: 'CL-44'},
+                {strChargesLink: 'CL-45'},
+                {strChargesLink: 'CL-46'},
+                {strChargesLink: 'CL-47'},
+                {strChargesLink: 'CL-48'},
+                {strChargesLink: 'CL-49'},
+                {strChargesLink: 'CL-50'},                          
+            ],
+            fields: {
+                name: 'strChargesLink'
+            }
         }        
     },
 
@@ -252,6 +369,16 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
 
         hasCustomerStorage: function(get) {
             return get('grdInventoryShipment.selection.strStorageTypeDescription');
+        },
+
+        chargesLinkInc:{
+            get: function(get){
+                return 'CL-'.concat(get('chargesLinkConst'));
+            },
+            set: function(value){
+                var inc = value == 0 ? 0 : this.get('chargesLinkConst') + value;
+                this.set('chargesLinkConst', inc);
+            }
         },
 
         getShipButtonText: function(get) {

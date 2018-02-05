@@ -74,7 +74,8 @@ Ext.define('Inventory.model.ShipmentItem', {
         { name: 'intForexRateTypeId', type: 'int', allowNull: true },
         { name: 'strForexRateType', type: 'string'},
         { name: 'dblForexRate', type: 'float', allowNull: true },
-        { name: 'dblDestinationQuantity', type: 'float', allowNull: true }
+        { name: 'dblDestinationQuantity', type: 'float', allowNull: true },
+        { name: 'strChargesLink', type: 'string' }
     ],
 
     validators: [

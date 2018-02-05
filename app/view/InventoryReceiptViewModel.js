@@ -44,7 +44,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         weightLoss: 0,
         modifiedOnPosted: undefined,
         locationFromTransferOrder: null,
-        chargesLinkInc: 1
+        chargesLinkConst: 0
     },
 
     stores: {
@@ -480,15 +480,16 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             return get('current.strReceiptNumber');
         },
 
-        chargesLink:{
+        chargesLinkInc:{
             get: function(get){
-                return 'CL-'.concat(get('chargesLinkInc'));
+                return 'CL-'.concat(get('chargesLinkConst'));
             },
             set: function(value){
-                var inc = this.get('chargesLinkInc') + value;
-                this.set('chargesLinkInc', inc);
+                var inc = value == 0 ? 0 : this.get('chargesLinkConst') + value;
+                this.set('chargesLinkConst', inc);
             }
         },
+
         receiptTitle: function(get) {
             var screenTitle = 'Inventory Receipt - ';
             if (get('current.strReceiptType') === 'Inventory Return'){
