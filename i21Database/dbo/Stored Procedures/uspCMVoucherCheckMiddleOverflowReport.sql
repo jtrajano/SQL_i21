@@ -57,7 +57,7 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
   
 -- Declare the variables.  
 DECLARE @intBankAccountId AS INT
-		,@strTransactionId AS NVARCHAR(40)
+		,@strTransactionId AS NVARCHAR(MAX)
 		,@strBatchId AS NVARCHAR(40)
   
 -- Declare the variables for the XML parameter  
@@ -67,8 +67,8 @@ DECLARE @xmlDocumentId AS INT
 DECLARE @temp_xml_table TABLE (  
  [fieldname] NVARCHAR(50)  
  ,condition NVARCHAR(20)        
- ,[from] NVARCHAR(50)  
- ,[to] NVARCHAR(50)  
+ ,[from] NVARCHAR(MAX)  
+ ,[to] NVARCHAR(MAX)  
  ,[join] NVARCHAR(10)  
  ,[begingroup] NVARCHAR(50)  
  ,[endgroup] NVARCHAR(50)  
@@ -85,8 +85,8 @@ FROM OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2)
 WITH (  
  [fieldname] nvarchar(50)  
  , condition nvarchar(20)  
- , [from] nvarchar(50)  
- , [to] nvarchar(50)  
+ , [from] nvarchar(MAX)  
+ , [to] nvarchar(MAX)  
  , [join] nvarchar(10)  
  , [begingroup] nvarchar(50)  
  , [endgroup] nvarchar(50)  
