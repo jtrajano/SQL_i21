@@ -331,7 +331,7 @@ BEGIN TRY
 					,[strInvoiceOriginId]
 					,[strPONumber]
 					,[strBOLNumber]
-					,[strDeliverPickup]
+					--,[strDeliverPickup]
 					,[strComments]
 					,[intShipToLocationId]
 					,[intBillToLocationId]
@@ -406,7 +406,7 @@ BEGIN TRY
 					,[strInvoiceOriginId]					= NULL --''
 					,[strPONumber]							= NULL --''
 					,[strBOLNumber]							= NULL --''
-					,[strDeliverPickup]						= NULL --''
+					--,[strDeliverPickup]						= NULL --''
 					,[strComments]							= NULL --''
 					,[intShipToLocationId]					= NULL
 					,[intBillToLocationId]					= NULL
@@ -496,7 +496,7 @@ BEGIN TRY
 					,[strInvoiceOriginId]					= NULL --''
 					,[strPONumber]							= NULL --''
 					,[strBOLNumber]							= NULL --''
-					,[strDeliverPickup]						= NULL --''
+					--,[strDeliverPickup]						= NULL --''
 					,[strComments]							= NULL --''
 					,[intShipToLocationId]					= NULL
 					,[intBillToLocationId]					= NULL
@@ -593,7 +593,7 @@ BEGIN TRY
 					,[strInvoiceOriginId]					= NULL --''
 					,[strPONumber]							= NULL --''
 					,[strBOLNumber]							= NULL --''
-					,[strDeliverPickup]						= NULL --''
+					--,[strDeliverPickup]						= NULL --''
 					,[strComments]							= NULL --''
 					,[intShipToLocationId]					= NULL
 					,[intBillToLocationId]					= NULL
