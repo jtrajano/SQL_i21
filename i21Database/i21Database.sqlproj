@@ -6186,6 +6186,8 @@
     <Build Include="dbo\Functions\fnBBGetChargeRates.sql" />
     <Build Include="dbo\Views\vyuCRMCampaignEntitySalesOrder.sql" />
     <Build Include="dbo\Tables\tblARInvoiceAccrual.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFLotReceiptPutaway.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFPrintReceiptLabel.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
