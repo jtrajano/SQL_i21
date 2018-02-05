@@ -45,7 +45,8 @@ AS
 	IF(@strReimbursementType = 'AR')
 	BEGIN
 		INSERT INTO @EntriesForInvoice(
-			[strSourceTransaction]
+			[strTransactionType]
+			,[strSourceTransaction]
 			,[intSourceId]
 			,[strSourceId]
 			,intEntityCustomerId
@@ -53,13 +54,15 @@ AS
 			,intEntityId
 			,intCompanyLocationId
 			,ysnPost
-			--,intItemId
+			,intItemId
 			,[dblQtyShipped]
 			,[dblPrice]
 			,[intSalesAccountId]
+			,[strItemDescription]
 		)
 		SELECT 
-			[strSourceTransaction] = 'Direct'
+			[strTransactionType] = 'Debit Memo'
+			,[strSourceTransaction] = 'Direct'
 			,[intSourceId] = A.intBuybackId
 			,[strSourceId] = A.strReimbursementNo
 			,intEntityCustomerId = A.intEntityId
@@ -69,13 +72,16 @@ AS
 										THEN (SELECT TOP 1 intWarehouseId FROM vyuARCustomerSearch WHERE intEntityId = A.intEntityId) 
 									ELSE @CompanyLocation END
 			,ysnPost = 1
-			--,intItemId = B.intItemId
-			,[dblQtyShipped] = 1
-			,[dblPrice] = B.dblReimbursementAmount
+			,intItemId = CASE WHEN B.strCharge = 'Inventory' THEN B.intItemId ELSE NULL END
+			,[dblQtyShipped] = B.dblBuybackQuantity
+			,[dblPrice] = B.dblBuybackRate
 			,[intSalesAccountId] = @intDetailAccount
-		FROM tblBBBuybackCharge B
+			,[strItemDescription] = CASE WHEN B.strCharge = 'Inventory' THEN NULL ELSE B.strCharge END
+		FROM tblBBBuybackDetail B
 		INNER JOIN tblBBBuyback A
 			ON B.intBuybackId = A.intBuybackId
+		INNER JOIN tblVRVendorSetup C
+			ON A.intEntityId = C.intEntityId
 		WHERE A.intBuybackId = @intBuyBackId
 
 		EXEC [dbo].[uspARProcessInvoices] @InvoiceEntries = @EntriesForInvoice
@@ -117,26 +123,27 @@ AS
 	END
 	ELSE 
 	BEGIN
+		-----AP Reimbursement Type
 		SELECT TOP 1
 			@strReimbursementNo = strReimbursementNo
 		FROM tblBBBuyback
 
 		INSERT INTO @voucherNonInvDetails(
 			[intAccountId]		
-			--,[intItemId]			
+			,[intItemId]			
 			,[strMiscDescription]
 			,[dblQtyReceived]	
 			,[dblCost]			
 		)	
 		SELECT 
 			[intAccountId]	=  ISNULL(@intDetailAccount,[dbo].[fnGetItemGLAccount](1, C.intItemLocationId, 'Other Charge Income'))
-			--,[intItemId]	= A.intItemId	
-			,[strMiscDescription]  = B.strDescription
-			,[dblQtyReceived] = 1	
-			,[dblCost]	 = A.dblReimbursementAmount		
-		FROM tblBBBuybackCharge A
+			,[intItemId]	= CASE WHEN A.strCharge = 'Inventory' THEN A.intItemId ELSE NULL END
+			,[strMiscDescription]  = CASE WHEN A.strCharge = 'Inventory' THEN B.strDescription ELSE A.strCharge END
+			,[dblQtyReceived] = A.dblBuybackQuantity	
+			,[dblCost]	 = A.dblBuybackRate		
+		FROM tblBBBuybackDetail A
 		INNER JOIN tblICItem B
-			ON 1 = B.intItemId
+			ON A.intItemId = B.intItemId
 		INNER JOIN tblICItemLocation C
 			ON B.intItemId = C.intItemId
 				AND intLocationId =  @CompanyLocation
