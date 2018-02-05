@@ -6185,6 +6185,7 @@
     <Build Include="dbo\Stored Procedures\uspTFGenerateOR7351334M.sql" />
     <Build Include="dbo\Stored Procedures\uspSCDeliverySheetReceived.sql" />
     <Build Include="dbo\Functions\fnBBGetChargeRates.sql" />
+    <Build Include="dbo\Views\vyuCRMCampaignEntitySalesOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
