@@ -15,6 +15,8 @@ SELECT	ReceiptItem.intInventoryReceiptId
 		, strGrade = Grade.strDescription
 		, Item.intCommodityId
 		, strWeightUOM = WeightUOM.strUnitMeasure
+		, intWeightUnitMeasureId = WeightUOM.intUnitMeasureId
+		, intWeightUOMId = ReceiptItem.intWeightUOMId
 		, dblItemUOMConvFactor = ISNULL(ItemUOM.dblUnitQty, 0)
 		, dblWeightUOMConvFactor = ISNULL(ItemWeightUOM.dblUnitQty, 0)
 		, dblGrossMargin = (

@@ -25,10 +25,16 @@
 	ReceiptItemTax.ysnCheckoffTax,
 	ReceiptItemTax.intSort,
 	ReceiptItemTax.dblQty,
-	ReceiptItemTax.dblCost
+	ReceiptItemTax.dblCost,
+	ReceiptItemTax.intUnitMeasureId,
+	UnitMeasure.strUnitMeasure
 FROM tblICInventoryReceiptItemTax ReceiptItemTax
 	LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptItemTax.intInventoryReceiptItemId
 	LEFT JOIN tblICItem Item ON Item.intItemId = ReceiptItem.intItemId
 	LEFT JOIN tblSMTaxGroup TaxGroup ON TaxGroup.intTaxGroupId = ReceiptItemTax.intTaxGroupId
 	LEFT JOIN tblSMTaxClass TaxClass ON TaxClass.intTaxClassId = ReceiptItemTax.intTaxClassId
 	LEFT JOIN tblSMTaxCode TaxCode ON TaxCode.intTaxCodeId = ReceiptItemTax.intTaxCodeId
+	LEFT JOIN tblSMTaxCodeRate TaxCodeRate ON TaxCodeRate.intTaxCodeId = TaxCode.intTaxCodeId
+		AND TaxCodeRate.intUnitMeasureId = ReceiptItemTax.intUnitMeasureId
+	LEFT JOIN tblICUnitMeasure UnitMeasure ON UnitMeasure.intUnitMeasureId = ReceiptItemTax.intUnitMeasureId
+		
