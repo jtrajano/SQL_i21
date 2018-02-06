@@ -68,7 +68,94 @@ BEGIN
 	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@vygerImportHeader, SCOPE_IDENTITY(), 18, 0, NULL, NULL, NULL, NULL, 2, NULL, 1, 2)
 	
 END
-	-----------Voyager-------------
+-----------Voyager-------------
+
+
+------------WEX14-----------
+DECLARE @WEX14ImportHeader INT
+IF ((SELECT COUNT(*) FROM tblSMImportFileHeader WHERE strLayoutTitle = 'WEX-14') =  0)
+BEGIN
+
+	INSERT [dbo].[tblSMImportFileHeader] ([strLayoutTitle], [strFileType], [strFieldDelimiter], [strXMLType], [strXMLInitiater], [ysnActive], [intConcurrencyId]) VALUES (N'WEX-14', N'Delimiter', N'Space', NULL, NULL, 1, 1)
+	SET @WEX14ImportHeader = SCOPE_IDENTITY();
+
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@WEX14ImportHeader, N'Tax Code', 0, 265, NULL, NULL, 1, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@WEX14ImportHeader, SCOPE_IDENTITY(), 1, NULL, NULL, NULL, NULL, NULL, 4, NULL, 0, 1)
+	
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@WEX14ImportHeader, N'Tax Rate', NULL, 278, NULL, NULL, 1, N'5 Implied Decimals', NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@WEX14ImportHeader, SCOPE_IDENTITY(), 2, NULL, NULL, NULL, NULL, NULL, 7, NULL, 0, 1)
+
+END
+------------WEX14-----------
+
+
+------------WEX12-----------
+DECLARE @WEX12ImportHeader INT
+IF ((SELECT COUNT(*) FROM tblSMImportFileHeader WHERE strLayoutTitle = 'WEX-12') =  0)
+BEGIN
+
+	INSERT [dbo].[tblSMImportFileHeader] ([strLayoutTitle], [strFileType], [strFieldDelimiter], [strXMLType], [strXMLInitiater], [ysnActive], [intConcurrencyId]) VALUES (N'WEX-12', N'Delimiter', N'Space', NULL, NULL, 1, 24)
+	SET @WEX12ImportHeader = SCOPE_IDENTITY();
+
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@WEX12ImportHeader, N'Card Number', 0, 52, NULL, NULL, 3, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@WEX12ImportHeader, SCOPE_IDENTITY(), 1, NULL, NULL, N'tblCFCard', N'strCardNumber', NULL, 9, NULL, 0, 2)
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@WEX12ImportHeader, N'Transaction Date', 0, 91, NULL, NULL, 3, N'YYYYMMDDHHMMSS', NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@WEX12ImportHeader, SCOPE_IDENTITY(), 2, NULL, NULL, N'tblCFTransaction', N'dtmTransactionDate', NULL, 14, NULL, 0, 2)
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@WEX12ImportHeader, N'Vehicle Number', 0, 432, NULL, NULL, 4, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@WEX12ImportHeader, SCOPE_IDENTITY(), 3, NULL, NULL, N'tblCFVehicle', N'strVehicleNumber', NULL, 6, NULL, 0, 3)
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@WEX12ImportHeader, N'Pump Number', 0, 392, NULL, NULL, 3, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@WEX12ImportHeader, SCOPE_IDENTITY(), 4, NULL, NULL, N'tblCFTransaction', N'strVehicleNumber', NULL, 12, NULL, 0, 2)
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@WEX12ImportHeader, N'Sequence Number', 0, 454, NULL, NULL, 3, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@WEX12ImportHeader, SCOPE_IDENTITY(), 5, NULL, NULL, N'tblCFTransaction', N'strSequenceNumber', NULL, 4, NULL, 0, 2)
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@WEX12ImportHeader, N'Site Number', 0, 565, NULL, NULL, 3, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@WEX12ImportHeader, SCOPE_IDENTITY(), 6, NULL, NULL, N'tblCFSite', N'strSiteNumber', NULL, 8, NULL, 0, 2)
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@WEX12ImportHeader, N'Odometer', 0, 578, NULL, NULL, 3, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@WEX12ImportHeader, SCOPE_IDENTITY(), 7, NULL, NULL, N'tblCFTransaction', N'intOdometer', NULL, 6, NULL, 0, 2)
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@WEX12ImportHeader, N'Product Id', 0, 604, NULL, NULL, 4, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@WEX12ImportHeader, SCOPE_IDENTITY(), 8, NULL, NULL, N'tblCFItem', N'strProductNumber', NULL, 3, NULL, 0, 4)
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@WEX12ImportHeader, N'Quantity', 0, 672, NULL, NULL, 4, N'3 Implied Decimals', NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@WEX12ImportHeader, SCOPE_IDENTITY(), 9, NULL, NULL, N'tblCFTransaction', N'dblQuantity', NULL, 9, NULL, 0, 3)
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@WEX12ImportHeader, N'Total Amount', 0, 682, NULL, NULL, 5, N'3 Implied Decimals', NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@WEX12ImportHeader, SCOPE_IDENTITY(), 10, NULL, NULL, N'tblCFTransaction', N'dblOriginalTotalPrice', NULL, 9, NULL, 0, 5)
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@WEX12ImportHeader, N'Transaction Type', 0, 573, NULL, NULL, 1, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@WEX12ImportHeader, SCOPE_IDENTITY(), 11, NULL, NULL, N'tblCFTransaction', N'strTransactionType', NULL, 1, NULL, 0, 1)
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@WEX12ImportHeader, N'Billing Date', 0, 105, NULL, NULL, 1, N'YYYYMMDD', NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@WEX12ImportHeader, SCOPE_IDENTITY(), 12, NULL, NULL, N'tblCFTransaction', N'dtmBillingDate', NULL, 8, NULL, 0, 1)
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@WEX12ImportHeader, N'Site Name', 0, 470, NULL, NULL, 1, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@WEX12ImportHeader, SCOPE_IDENTITY(), 13, NULL, NULL, N'tblCFSite', N'strSiteName', NULL, 20, NULL, 0, 1)
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@WEX12ImportHeader, N'Site Address', 0, 490, NULL, NULL, 1, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@WEX12ImportHeader, SCOPE_IDENTITY(), 14, NULL, NULL, N'tblCFSite', N'strSiteAddress', NULL, 20, NULL, 0, 1)
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@WEX12ImportHeader, N'Site City', 0, 510, NULL, NULL, 1, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@WEX12ImportHeader, SCOPE_IDENTITY(), 15, NULL, NULL, N'tblCFSite', N'strSiteCity', NULL, 18, NULL, 0, 1)
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@WEX12ImportHeader, N'strSiteState', 0, 528, NULL, 0, 3, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@WEX12ImportHeader, SCOPE_IDENTITY(), 18, NULL, NULL, N'tblCFTransaction', N'strMiscellaneous', NULL, 12, NULL, 0, 1)
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@WEX12ImportHeader, N'Miscellaneous', 0, 816, NULL, NULL, 1, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@WEX12ImportHeader, SCOPE_IDENTITY(), 19, NULL, NULL, NULL, NULL, NULL, 2, NULL, 0, 1)
+	
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@WEX12ImportHeader, N'strTaxState', 0, 528, NULL, NULL, 1, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@WEX12ImportHeader, SCOPE_IDENTITY(), 20, NULL, NULL, NULL, NULL, NULL, 2, NULL, 0, 1)
+	
+END
+------------WEX12-----------
+
 
 -----------Pac Pride CSU------------
 DECLARE @PacPrideCSU INT
