@@ -2324,7 +2324,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 CardId: null,
                 VehicleId: null,
                 IncludeExemptedCodes: false,
-                UOMId: detailRecord.get('intWeightUOMId') ? detailRecord.get('intWeightUnitMeasureId') : detailRecord.get('intItemUOMId')  // IMPORTANT!!!!!This is not intItemUOMId, this is intUnitMeasureId. Mapping of field names is wrong since intUnitMeasureId was originally mapped to item uom id (Need to correct this in the future)
+                UOMId: detailRecord.get('intWeightUOMId') ? (detailRecord.get('intWeightUnitMeasureId') ? detailRecord.get('intWeightUnitMeasureId') : detailRecord.get('intItemUOMId')) : detailRecord.get('intItemUOMId')  // IMPORTANT!!!!!This is not intItemUOMId, this is intUnitMeasureId. Mapping of field names is wrong since intUnitMeasureId was originally mapped to item uom id (Need to correct this in the future)
             };
 
             iRely.Functions.getItemTaxes(current, computeItemTax, me);            
