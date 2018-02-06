@@ -24,11 +24,11 @@ DECLARE @currentVoucherId INT, @currentVendorId INT, @currentCurrency INT, @curr
 
 SELECT @deferredInterestAccount = intDeferredPayableInterestId FROM tblSMCompanyLocation WHERE intCompanyLocationId = @companyLocationId;
 
-IF @deferredInterestAccount IS NULL OR @deferredInterestAccount <= 0
-BEGIN
-	RAISERROR('No set up found for deferred interest account on company location', 16, 1);
-	RETURN;
-END
+-- IF @deferredInterestAccount IS NULL OR @deferredInterestAccount <= 0
+-- BEGIN
+-- 	RAISERROR('No set up found for deferred interest account on company location', 16, 1);
+-- 	RETURN;
+-- END
 
 IF @transCount = 0 BEGIN TRANSACTION
 
@@ -62,7 +62,7 @@ BEGIN
 		dblCost
 	)
 	SELECT
-		intAccountId		=	@deferredInterestAccount,
+		intAccountId		=	A.intDeferredAccountId,
 		strMiscDescription	=	'Deferred Interest',
 		dblQtyReceived		=	1,
 		dblCost				=	A.dblInterest

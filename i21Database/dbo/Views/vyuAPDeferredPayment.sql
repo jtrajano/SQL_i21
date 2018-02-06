@@ -19,7 +19,8 @@ SELECT
 	dblInterest,
 	ysnSelected,
 	str1099Form,
-	str1099Type
+	str1099Type,
+	intDeferredPayableInterestId AS intDeferredAccountId
 FROM (
 	SELECT
 		A.intBillId,
@@ -43,7 +44,8 @@ FROM (
 		CAST(CASE WHEN staging.intBillId IS NOT NULL THEN 1 ELSE 0 END AS BIT) ysnSelected,
 		B.str1099Form,
 		B.str1099Type,
-		deferredInterest.dblMinimum
+		deferredInterest.dblMinimum,
+		loc.intDeferredPayableInterestId
 	FROM tblAPBill A
 	INNER JOIN tblEMEntity B ON A.intEntityVendorId = B.intEntityId
 	INNER JOIN tblAPVendor C ON B.intEntityId = C.intEntityId
@@ -70,6 +72,7 @@ FROM (
 		ORDER BY dp.dtmDate DESC
 	) lastDeferredPayment
 	LEFT JOIN tblAPDeferredPaymentStaging staging ON staging.intBillId = A.intBillId
+	LEFT JOIN tblSMCompanyLocation loc ON A.intShipToId = loc.intCompanyLocationId
 WHERE A.intTransactionType = 1 AND A.ysnPosted = 1 AND A.ysnPaid = 0 AND term.ysnDeferredPay = 1	
 ) deferredInterest
 WHERE dblInterest >= dblMinimum
