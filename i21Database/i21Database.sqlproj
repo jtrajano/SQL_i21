@@ -6195,6 +6195,9 @@
     <Build Include="dbo\Functions\fnGLGetCMGLDetailBalance.sql" />
     <Build Include="dbo\Views\vyuSMBEExportCashDiscount.sql" />
     <Build Include="dbo\Views\vyuAPVoucherCheckOffDetail.sql" />
+    <Build Include="dbo\User Defined Types\TFReportTransaction.sql" />
+    <Build Include="dbo\User Defined Types\TFReportOR7351334MSub.sql" />
+    <Build Include="dbo\User Defined Types\TFReportOR7351334MSubSummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
