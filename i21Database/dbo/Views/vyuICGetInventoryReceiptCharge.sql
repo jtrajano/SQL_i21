@@ -12,6 +12,7 @@ SELECT ReceiptCharge.intInventoryReceiptChargeId
 	, ReceiptCharge.strCostMethod
 	, ReceiptCharge.dblRate
 	, strCostUOM = UOM.strUnitMeasure
+	, intCostUnitMeasureId = UOM.intUnitMeasureId
 	, strUnitType = UOM.strUnitType
 	, Currency.ysnSubCurrency -- ReceiptCharge.ysnSubCurrency
 	, intCurrencyId = ISNULL(ReceiptCharge.intCurrencyId, Receipt.intCurrencyId) 
@@ -38,6 +39,15 @@ SELECT ReceiptCharge.intInventoryReceiptChargeId
 	, ReceiptCharge.strChargesLink
 	, ReceiptCharge.dblQuantity
 	, ReceiptCharge.intConcurrencyId
+	, ReceiptCharge.intChargeId
+	, ReceiptCharge.intCostUOMId
+	, ReceiptCharge.dblAmountBilled
+	, ReceiptCharge.dblAmountPaid
+	, ReceiptCharge.dblAmountPriced
+	, ReceiptCharge.intSort
+	, ReceiptCharge.intTaxGroupId
+	, ReceiptCharge.intForexRateTypeId
+	, ReceiptCharge.dblForexRate
 FROM tblICInventoryReceiptCharge ReceiptCharge
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = ReceiptCharge.intCostUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
