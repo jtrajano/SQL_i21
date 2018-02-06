@@ -59,6 +59,21 @@ BEGIN TRY
 		,@intShrinkCalculationOptionId AS intShrinkCalculationOptionId
 		,@strCalculationShrinkOption AS strCalculationShrinkOption
 	END
+	ELSE IF NOT EXISTS(SELECT 1 FROM tblGRDiscountScheduleLine WHERE intDiscountScheduleCodeId = @intDiscountScheduleCodeId)
+	BEGIN
+				SELECT
+				 1 AS intExtendedKey
+				,0.0 AS dblFrom
+				,0.0 AS dblTo
+				,0.0 AS dblDiscountAmount
+				,0.0 AS dblShrink
+				,'Success' AS strMessage 
+				,@intDiscountCalculationOptionId AS intDiscountCalculationOptionId
+				,@strCalculationDiscountOption AS strCalculationDiscountOption
+				,@strDiscountChargeType AS strDiscountChargeType
+				,@intShrinkCalculationOptionId AS intShrinkCalculationOptionId
+				,@strCalculationShrinkOption AS strCalculationShrinkOption	
+	END
 	ELSE
 	BEGIN
 		DECLARE @tblIncrementalTab AS TABLE 
