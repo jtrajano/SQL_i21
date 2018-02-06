@@ -13,6 +13,7 @@
 	, @strCustomerIds					AS NVARCHAR(MAX)	= NULL
 	, @ysnEmailOnly						AS BIT				= NULL
 	, @strPaymentMethod					AS NVARCHAR(100)	= NULL
+	, @ysnIncludeWriteOffPayment    	AS BIT 				= 1
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -33,6 +34,7 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @ysnIncludeBudgetLocal				AS BIT				= 0
 	  , @ysnPrintOnlyPastDueLocal			AS BIT				= 0
 	  , @ysnActiveCustomersLocal			AS BIT				= 0
+	  , @ysnIncludeWriteOffPaymentLocal		AS BIT				= 0
 	  , @strCustomerNumberLocal				AS NVARCHAR(MAX)	= NULL
 	  , @strLocationNameLocal				AS NVARCHAR(MAX)	= NULL
 	  , @strAccountStatusCodeLocal			AS NVARCHAR(MAX)	= NULL
@@ -115,6 +117,7 @@ SET @ysnPrintCreditBalanceLocal			= ISNULL(@ysnPrintCreditBalance, 1)
 SET @ysnIncludeBudgetLocal				= ISNULL(@ysnIncludeBudget, 0)
 SET @ysnPrintOnlyPastDueLocal			= ISNULL(@ysnPrintOnlyPastDue, 0)
 SET @ysnActiveCustomersLocal			= ISNULL(@ysnActiveCustomers, 0)
+SET @ysnIncludeWriteOffPaymentLocal		= ISNULL(@ysnIncludeWriteOffPayment, 0)
 SET @strCustomerNumberLocal				= NULLIF(@strCustomerNumber, '')
 SET @strAccountStatusCodeLocal			= NULLIF(@strAccountStatusCode, '')
 SET @strLocationNameLocal				= NULLIF(@strLocationName, '')
@@ -451,14 +454,37 @@ IF @ysnPrintOnlyPastDueLocal = 1
 
 IF @ysnPrintZeroBalanceLocal = 0
     BEGIN
-        DELETE FROM @temp_statement_table WHERE (((ABS(dblBalance) * 10000) - CONVERT(INT, (ABS(dblBalance) * 10000))) <> 0) OR ISNULL(dblBalance, 0) = 0
-		DELETE FROM tblARCustomerAgingStagingTable WHERE (((ABS(dblTotalAR) * 10000) - CONVERT(INT, (ABS(dblTotalAR) * 10000))) <> 0) OR ISNULL(dblTotalAR, 0) = 0
+        DELETE FROM @temp_statement_table WHERE (((ABS(dblBalance) * 10000) - CONVERT(FLOAT, (ABS(dblBalance) * 10000))) <> 0) OR ISNULL(dblBalance, 0) = 0
+		DELETE FROM tblARCustomerAgingStagingTable WHERE (((ABS(dblTotalAR) * 10000) - CONVERT(FLOAT, (ABS(dblTotalAR) * 10000))) <> 0) OR ISNULL(dblTotalAR, 0) = 0
     END
 
 IF @ysnPrintCreditBalanceLocal = 0
 	BEGIN
 		DELETE FROM @temp_statement_table WHERE strTransactionType IN ('Credit Memo', 'Customer Prepayment', 'Overpayment')		 
 	END
+
+
+IF @ysnIncludeWriteOffPaymentLocal = 0 
+BEGIN
+	DECLARE @intPaymentMethodId INT
+	
+	SELECT @intPaymentMethodId = intPaymentMethodID 
+		FROM tblSMPaymentMethod 
+			WHERE UPPER(strPaymentMethod) = UPPER('Write Off')
+
+	DECLARE @PaymentIdAvail table( id int)
+
+	insert into @PaymentIdAvail
+	select intPaymentId 
+		from @temp_statement_table where intPaymentId is not null
+
+	DELETE FROM @temp_statement_table 
+		WHERE intPaymentId in (SELECT intPaymentId 
+									FROM tblARPayment 
+										WHERE intPaymentMethodId = @intPaymentMethodId
+											and intPaymentId in (select id from @PaymentIdAvail)
+										)
+END
 
 INSERT INTO @temp_cf_table (
 	  intInvoiceId

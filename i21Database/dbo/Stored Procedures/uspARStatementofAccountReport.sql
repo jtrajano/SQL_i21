@@ -33,6 +33,7 @@ DECLARE  @dtmDateTo						AS DATETIME
 		,@ysnPrintOnlyPastDue			AS BIT
 		,@ysnEmailOnly					AS BIT
 		,@ysnActiveCustomers			AS BIT
+		,@ysnIncludeWriteOffPayment		AS BIT
 		,@xmlDocumentId					AS INT
 		,@query							AS NVARCHAR(MAX)
 		,@filter						AS NVARCHAR(MAX) = ''
@@ -146,6 +147,10 @@ SELECT @strPaymentMethod = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM @temp_xml_table
 WHERE [fieldname] = 'strPaymentMethod'
 
+SELECT @ysnIncludeWriteOffPayment = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'ysnIncludeWriteOffPayment'
+
 -- SANITIZE THE DATE AND REMOVE THE TIME.
 IF @dtmDateTo IS NOT NULL
 	SET @dtmDateTo = CAST(FLOOR(CAST(@dtmDateTo AS FLOAT)) AS DATETIME)	
@@ -181,6 +186,7 @@ IF @strStatementFormat = 'Balance Forward'
 			, @strCustomerIds				= @strCustomerIds
 			, @ysnEmailOnly					= @ysnEmailOnly
 			, @strPaymentMethod			= @strPaymentMethod
+			, @ysnIncludeWriteOffPayment = @ysnIncludeWriteOffPayment
 	END
 ELSE IF ISNULL(@strStatementFormat, 'Open Item') IN ('Open Item', 'Running Balance', 'Open Item - Lazer')
 	BEGIN
@@ -200,6 +206,7 @@ ELSE IF ISNULL(@strStatementFormat, 'Open Item') IN ('Open Item', 'Running Balan
 			, @strCustomerIds				= @strCustomerIds
 			, @ysnEmailOnly					= @ysnEmailOnly
 			, @strPaymentMethod				= @strPaymentMethod
+			, @ysnIncludeWriteOffPayment 	= @ysnIncludeWriteOffPayment
 	END
 ELSE IF @strStatementFormat = 'Payment Activity'
 	BEGIN
@@ -218,6 +225,7 @@ ELSE IF @strStatementFormat = 'Payment Activity'
 			, @strCustomerIds				= @strCustomerIds
 			, @ysnEmailOnly					= @ysnEmailOnly
 			, @strPaymentMethod				= @strPaymentMethod
+			, @ysnIncludeWriteOffPayment 	= @ysnIncludeWriteOffPayment
 	END
 
 INSERT INTO @temp_SOA_table
