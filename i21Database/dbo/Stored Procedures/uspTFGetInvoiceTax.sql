@@ -145,7 +145,8 @@ BEGIN TRY
 				, strDiversionNumber
 				, strDiversionOriginalDestinationState
 				, strTransactionType
-				, intTransactionNumberId)
+				, intTransactionNumberId
+				, ysnDiversion)
 			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInvoiceDetailId, intTaxAuthorityId, intProductCodeId DESC) AS intId, *
 			FROM (SELECT DISTINCT tblARInvoiceDetail.intInvoiceDetailId
 					, tblTFReportingComponent.intTaxAuthorityId
@@ -177,14 +178,14 @@ BEGIN TRY
 					--, tblARAccountStatus.strAccountStatusCode
 					, tblSMShipVia.strShipVia
 					, tblSMShipVia.strTransporterLicense
-					, tblSMShipVia.strTransportationMode
+					, tblSMTransportationMode.strCode
 					, Transporter.strName AS strTransporterName
 					, Transporter.strFederalTaxId AS strTransporterFEIN
 					, NULL AS strConsignorName
 					, NULL AS strConsignorFEIN
 					, NULL AS strTerminalControlNumber
-					, NULL AS strVendorName
-					, NULL AS strVendorFederalTaxId
+					, tblSMCompanySetup.strCompanyName AS strVendorName
+					, tblSMCompanySetup.strEin AS strVendorFederalTaxId
 					, tblSMCompanySetup.strCompanyName
 					, tblSMCompanySetup.strAddress
 					, tblSMCompanySetup.strCity
@@ -202,10 +203,11 @@ BEGIN TRY
 					, strCustomerStreetAddress = tblEMEntityLocation.strAddress
 					, strCustomerZipCode = tblEMEntityLocation.strZipCode
 					, strReportingComponentNote = tblTFReportingComponent.strNote
-					, strDiversionNumber = NULL
-					, strDiversionOriginalDestinationState = NULL
+					, strDiversionNumber = tblTRLoadHeader.strDiversionNumber
+					, strDiversionOriginalDestinationState = tblTRState.strStateAbbreviation
 					, strTransactionType = 'Invoice'
 					, intTransactionNumberId = tblARInvoiceDetail.intInvoiceDetailId
+					, ysnDiversion = tblTRLoadHeader.ysnDiversion
 				FROM tblTFReportingComponent
 				INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 				INNER JOIN tblICItemMotorFuelTax ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
@@ -214,8 +216,12 @@ BEGIN TRY
 					LEFT JOIN tblARInvoiceDetailTax ON tblARInvoiceDetailTax.intInvoiceDetailId= tblARInvoiceDetail.intInvoiceDetailId
 				INNER JOIN tblTFReportingComponentCriteria ON tblTFReportingComponentCriteria.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 				INNER JOIN tblARInvoice ON tblARInvoice.intInvoiceId = tblARInvoiceDetail.intInvoiceId
+					LEFT JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadDistributionHeaderId = tblARInvoice.intLoadDistributionHeaderId
+						LEFT JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadDistributionHeader.intLoadHeaderId
+							LEFT JOIN tblTRState ON tblTRState.intStateId = tblTRLoadHeader.intStateId
 					LEFT JOIN tblSMShipVia ON tblSMShipVia.intEntityId = tblARInvoice.intShipViaId
 						LEFT JOIN  tblEMEntity AS Transporter ON Transporter.intEntityId = tblSMShipVia.intEntityId
+						LEFT JOIN tblSMTransportationMode ON  tblSMTransportationMode.strDescription = tblSMShipVia.strTransportationMode
 					INNER JOIN tblSMCompanyLocation ON tblSMCompanyLocation.intCompanyLocationId = tblARInvoice.intCompanyLocationId
 					INNER JOIN tblARCustomer ON tblARInvoice.intEntityCustomerId = tblARCustomer.intEntityId
 						INNER JOIN tblEMEntity ON tblEMEntity.intEntityId = tblARCustomer.intEntityId
@@ -310,7 +316,8 @@ BEGIN TRY
 				, strDiversionNumber
 				, strDiversionOriginalDestinationState
 				, strTransactionType
-				, intTransactionNumberId)
+				, intTransactionNumberId
+				, ysnDiversion)
 			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInvoiceDetailId, intTaxAuthorityId, intProductCodeId DESC) AS intId, *
 			FROM (SELECT DISTINCT tblARInvoiceDetail.intInvoiceDetailId
 					, tblTFReportingComponent.intTaxAuthorityId
@@ -342,14 +349,14 @@ BEGIN TRY
 					--, tblARAccountStatus.strAccountStatusCode
 					, tblSMShipVia.strShipVia
 					, tblSMShipVia.strTransporterLicense
-					, tblSMShipVia.strTransportationMode
+					, tblSMTransportationMode.strCode
 					, Transporter.strName AS strTransporterName
 					, Transporter.strFederalTaxId AS strTransporterFEIN
 					, NULL AS strConsignorName
 					, NULL AS strConsignorFEIN
 					, NULL AS strTerminalControlNumber
-					, NULL AS strVendorName
-					, NULL AS strVendorFederalTaxId
+					, tblSMCompanySetup.strCompanyName AS strVendorName
+					, tblSMCompanySetup.strEin AS strVendorFederalTaxId
 					, tblSMCompanySetup.strCompanyName
 					, tblSMCompanySetup.strAddress
 					, tblSMCompanySetup.strCity
@@ -367,10 +374,11 @@ BEGIN TRY
 					, strCustomerStreetAddress = tblEMEntityLocation.strAddress
 					, strCustomerZipCode = tblEMEntityLocation.strZipCode
 					, strReportingComponentNote = tblTFReportingComponent.strNote
-					, strDiversionNumber = NULL
-					, strDiversionOriginalDestinationState = NULL
+					, strDiversionNumber = tblTRLoadHeader.strDiversionNumber
+					, strDiversionOriginalDestinationState = tblTRState.strStateAbbreviation
 					, strTransactionType = 'Invoice'
 					, intTransactionNumberId = tblARInvoiceDetail.intInvoiceDetailId
+					, ysnDiversion = tblTRLoadHeader.ysnDiversion
 				FROM tblTFReportingComponent
 				INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 				INNER JOIN tblICItemMotorFuelTax ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
@@ -378,8 +386,12 @@ BEGIN TRY
 				INNER JOIN tblARInvoiceDetail ON tblARInvoiceDetail.intItemId = tblICItemMotorFuelTax.intItemId
 					LEFT JOIN tblARInvoiceDetailTax ON tblARInvoiceDetailTax.intInvoiceDetailId= tblARInvoiceDetail.intInvoiceDetailId
 				INNER JOIN tblARInvoice ON tblARInvoice.intInvoiceId = tblARInvoiceDetail.intInvoiceId
+					LEFT JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadDistributionHeaderId = tblARInvoice.intLoadDistributionHeaderId
+						LEFT JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadDistributionHeader.intLoadHeaderId
+							LEFT JOIN tblTRState ON tblTRState.intStateId = tblTRLoadHeader.intStateId
 					LEFT JOIN tblSMShipVia ON tblSMShipVia.intEntityId = tblARInvoice.intShipViaId
 						LEFT JOIN tblEMEntity AS Transporter ON Transporter.intEntityId = tblSMShipVia.intEntityId
+						LEFT JOIN tblSMTransportationMode ON  tblSMTransportationMode.strDescription = tblSMShipVia.strTransportationMode
 					INNER JOIN tblSMCompanyLocation ON tblSMCompanyLocation.intCompanyLocationId = tblARInvoice.intCompanyLocationId
 					INNER JOIN tblARCustomer ON tblARInvoice.intEntityCustomerId = tblARCustomer.intEntityId
 						INNER JOIN tblEMEntity ON tblEMEntity.intEntityId = tblARCustomer.intEntityId
@@ -421,6 +433,9 @@ BEGIN TRY
 
 			SELECT TOP 1 @InvoiceDetailId = intInvoiceDetailId, @intDetailTaxCodeId = intTaxCodeId FROM @tmpInvoiceDetail
 
+			-- Diversion
+			UPDATE @tmpInvoiceTransaction SET dblQtyShipped = (dblQtyShipped * -1) WHERE intInvoiceDetailId = @InvoiceDetailId AND ysnDiversion = 1 AND strFormCode = 'SF-900' AND strScheduleCode = '11' AND (strOriginState = 'IN' AND strDiversionOriginalDestinationState <> 'IN')
+
 			DECLARE @tblTaxCriteria TABLE (
 				intCriteriaId INT,
 				intTaxCategoryId INT,
@@ -436,7 +451,7 @@ BEGIN TRY
 					FROM tblTFReportingComponent
 					INNER JOIN tblTFReportingComponentCriteria ON tblTFReportingComponentCriteria.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 					INNER JOIN tblTFTaxCategory ON tblTFTaxCategory.intTaxCategoryId = tblTFReportingComponentCriteria.intTaxCategoryId
-					INNER JOIN tblSMTaxCode ON tblSMTaxCode.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId
+					LEFT JOIN tblSMTaxCode ON tblSMTaxCode.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId
 					WHERE tblTFReportingComponent.intReportingComponentId = @RCId
 				) Transactions
 
@@ -595,7 +610,7 @@ BEGIN TRY
 				--, NULL AS strAccountStatusCode
 				, tblSMShipVia.strShipVia
 				, tblSMShipVia.strTransporterLicense
-				, tblSMShipVia.strTransportationMode
+				, tblSMTransportationMode.strCode
 				, tblEMEntity.strName AS strTransporterName
 				, tblEMEntity.strFederalTaxId AS strTransporterFEIN
 				, tblEMEntity.strName AS strConsignorName
@@ -644,6 +659,7 @@ BEGIN TRY
 			INNER JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadReceipt.intLoadHeaderId
 				LEFT JOIN tblSMShipVia ON tblTRLoadHeader.intShipViaId = tblSMShipVia.intEntityId 
 				LEFT JOIN tblEMEntity ON tblSMShipVia.intEntityId = tblEMEntity.intEntityId 
+				LEFT JOIN tblSMTransportationMode ON  tblSMTransportationMode.strDescription = tblSMShipVia.strTransportationMode
 			INNER JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId AND tblICInventoryTransfer.intToLocationId = tblTRLoadDistributionHeader.intCompanyLocationId
 				INNER JOIN tblSMCompanyLocation ON tblTRLoadDistributionHeader.intCompanyLocationId = tblSMCompanyLocation.intCompanyLocationId
 			LEFT JOIN tblTFReportingComponentCriteria ON tblTFReportingComponentCriteria.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
@@ -805,13 +821,14 @@ BEGIN TRY
 
 		DELETE FROM @tmpInvoiceTransaction
 		DELETE FROM @tmpRC WHERE intReportingComponentId = @RCId
-	END
 
-	EXEC uspTFProcessBeforePreview @Guid = @Guid
+		EXEC uspTFProcessBeforePreview @Guid = @Guid
 		, @ReportingComponentId = @ReportingComponentId
 		, @DateFrom = @DateFrom
 		, @DateTo = @DateTo
-		
+
+	END
+
 END TRY
 BEGIN CATCH
 	SELECT 

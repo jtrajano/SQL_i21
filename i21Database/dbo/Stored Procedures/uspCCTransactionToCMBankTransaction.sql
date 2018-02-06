@@ -34,6 +34,7 @@ BEGIN
 	INSERT INTO @CCRItemToCMItem VALUES (@intSiteHeaderId,'Dealer Sites Net')
 	INSERT INTO @CCRItemToCMItem VALUES (@intSiteHeaderId,'Company Owned Gross')
 	INSERT INTO @CCRItemToCMItem VALUES (@intSiteHeaderId,'Company Owned Fees')
+	INSERT INTO @CCRItemToCMItem VALUES (@intSiteHeaderId,'Dealer Sites Shared Fees')
 
 	EXEC uspSMGetStartingNumber 13, @strTransactionId OUT
 
@@ -80,12 +81,15 @@ BEGIN
 	    ,(CASE WHEN ccItem.strItem = 'Dealer Sites Net' AND ccSite.strSiteType = 'Dealer Site' THEN ccSite.intAccountId 
 			WHEN ccItem.strItem = 'Company Owned Gross' AND ccSite.strSiteType = 'Company Owned' THEN ccSite.intCreditCardReceivableAccountId  
 			WHEN ccItem.strItem = 'Company Owned Fees' AND ccSite.strSiteType = 'Company Owned' THEN ccSite.intFeeExpenseAccountId
+			WHEN ccItem.strItem = 'Dealer Sites Net' AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN ccSite.intAccountId 
+			WHEN ccItem.strItem = 'Dealer Sites Shared Fees' AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN ccSite.intFeeExpenseAccountId
 			ELSE null END)  AS intBankAccountId
 		,ccItem.strItem
-		,(CASE WHEN ccItem.strItem = 'Company Owned Fees' AND ccSite.strSiteType = 'Company Owned' THEN ccSiteDetail.dblFees 
-			ELSE null END) dblDebit
+		,(CASE WHEN ccItem.strItem = 'Company Owned Fees' AND ccSite.strSiteType = 'Company Owned' THEN ccSiteDetail.dblFees ELSE null END) dblDebit
 		,(CASE WHEN ccItem.strItem = 'Dealer Sites Net' AND ccSite.strSiteType = 'Dealer Site' THEN ccSiteDetail.dblNet 
-			WHEN ccItem.strItem = 'Company Owned Gross' AND ccSite.strSiteType = 'Company Owned' THEN ccSiteDetail.dblGross 
+			WHEN ccItem.strItem = 'Company Owned Gross' AND ccSite.strSiteType = 'Company Owned' THEN ccSiteDetail.dblGross
+			WHEN ccItem.strItem = 'Dealer Sites Net' AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN ccSiteDetail.dblNet
+			WHEN ccItem.strItem = 'Dealer Sites Shared Fees' AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN ccSiteDetail.dblFees - (ccSiteDetail.dblFees * (ccSite.dblSharedFeePercentage / 100))
 			ELSE null END) dblCredit
 	FROM tblCCSiteHeader ccSiteHeader
 		LEFT JOIN tblCCSiteDetail ccSiteDetail ON ccSiteDetail.intSiteHeaderId = ccSiteHeader.intSiteHeaderId

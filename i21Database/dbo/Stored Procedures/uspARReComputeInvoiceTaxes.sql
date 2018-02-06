@@ -181,6 +181,20 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 		WHERE
 			IDT.[intInvoiceDetailId] = @InvoiceDetailId
 		
+		
+		UPDATE IDT			
+		SET
+			 [ysnTaxAdjusted]		= 1
+			,[dblAdjustedTax]		= ATC.[dblAdjustedTax]
+			,[dblBaseAdjustedTax]	= [dbo].fnRoundBanker(ATC.[dblAdjustedTax] * @CurrencyExchangeRate, [dbo].[fnARGetDefaultDecimal]())
+		FROM
+			[tblARInvoiceDetailTax] IDT
+		INNER JOIN
+			@AdjustedTaxCode ATC
+				ON IDT.[intTaxCodeId] = ATC.[intTaxCodeId] 
+		WHERE
+			IDT.[intInvoiceDetailId] = @InvoiceDetailId
+		
 		SELECT
 			 @TotalItemTax		= SUM([dblAdjustedTax])
 			,@TotalBaseItemTax	= SUM([dblBaseAdjustedTax])

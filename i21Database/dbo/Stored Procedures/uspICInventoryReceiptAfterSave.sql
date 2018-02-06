@@ -184,7 +184,7 @@ BEGIN
 			currentSnapshot.intInventoryReceiptItemId,
 			currentSnapshot.intLineNo,
 			currentSnapshot.intItemUOMId,
-			CASE WHEN (ISNULL(currentSnapshot.ysnLoad, 0) = 0) THEN dbo.fnCalculateQtyBetweenUOM(currentSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (CASE WHEN @ForDelete = 1 THEN currentSnapshot.dblOpenReceive ELSE (currentSnapshot.dblOpenReceive - previousSnapshot.dblOpenReceive) END))
+			CASE WHEN (ISNULL(currentSnapshot.ysnLoad, 0) = 0) THEN CASE WHEN Item.ysnIsBasket = 1 THEN (CASE WHEN @ForDelete = 1 THEN currentSnapshot.dblOpenReceive ELSE (currentSnapshot.dblOpenReceive - previousSnapshot.dblOpenReceive) END) ELSE dbo.fnCalculateQtyBetweenUOM(currentSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (CASE WHEN @ForDelete = 1 THEN currentSnapshot.dblOpenReceive ELSE (currentSnapshot.dblOpenReceive - previousSnapshot.dblOpenReceive) END)) END
 				ELSE currentSnapshot.intLoadReceive END 
 		FROM 
 			#tmpAfterSaveReceiptItems currentSnapshot
@@ -193,6 +193,7 @@ BEGIN
 				AND previousSnapshot.intInventoryReceiptItemId = currentSnapshot.intInventoryReceiptItemId
 			INNER JOIN tblCTContractDetail ContractDetail
 				ON ContractDetail.intContractDetailId = currentSnapshot.intLineNo
+			LEFT JOIN tblICItem Item ON Item.intItemId = ContractDetail.intItemId
 		WHERE
 			currentSnapshot.intLineNo IS NOT NULL
 			AND currentSnapshot.intLineNo = previousSnapshot.intLineNo
@@ -205,7 +206,7 @@ BEGIN
 			currentSnapshot.intInventoryReceiptItemId
 			,currentSnapshot.intLineNo
 			,currentSnapshot.intItemUOMId
-			,CASE WHEN (ISNULL(currentSnapshot.ysnLoad, 0) = 0) THEN dbo.fnCalculateQtyBetweenUOM(currentSnapshot.intItemUOMId, previousSnapshot.intItemUOMId, currentSnapshot.dblOpenReceive)
+			,CASE WHEN (ISNULL(currentSnapshot.ysnLoad, 0) = 0) THEN CASE WHEN Item.ysnIsBasket = 1 THEN currentSnapshot.dblOpenReceive ELSE dbo.fnCalculateQtyBetweenUOM(currentSnapshot.intItemUOMId, previousSnapshot.intItemUOMId, currentSnapshot.dblOpenReceive) END
 				ELSE currentSnapshot.intLoadReceive END
 		FROM 
 			#tmpAfterSaveReceiptItems currentSnapshot
@@ -214,6 +215,7 @@ BEGIN
 				AND previousSnapshot.intInventoryReceiptItemId = currentSnapshot.intInventoryReceiptItemId
 			INNER JOIN tblCTContractDetail ContractDetail
 				ON ContractDetail.intContractDetailId = currentSnapshot.intLineNo
+			LEFT JOIN tblICItem Item ON Item.intItemId = ContractDetail.intItemId
 		WHERE
 			currentSnapshot.intLineNo IS NOT NULL
 			AND currentSnapshot.intLineNo <> previousSnapshot.intLineNo		
@@ -225,7 +227,7 @@ BEGIN
 			currentSnapshot.intInventoryReceiptItemId
 			,previousSnapshot.intLineNo
 			,previousSnapshot.intItemUOMId
-			,CASE WHEN (ISNULL(previousSnapshot.ysnLoad, 0) = 0) THEN dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (previousSnapshot.dblOpenReceive * -1))
+			,CASE WHEN (ISNULL(previousSnapshot.ysnLoad, 0) = 0) THEN CASE WHEN Item.ysnIsBasket = 1 THEN (previousSnapshot.dblOpenReceive * -1) ELSE dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (previousSnapshot.dblOpenReceive * -1)) END
 				ELSE previousSnapshot.intLoadReceive END
 		FROM 
 			#tmpAfterSaveReceiptItems currentSnapshot
@@ -234,6 +236,7 @@ BEGIN
 				AND previousSnapshot.intInventoryReceiptItemId = currentSnapshot.intInventoryReceiptItemId
 			INNER JOIN tblCTContractDetail ContractDetail
 				ON ContractDetail.intContractDetailId = currentSnapshot.intLineNo
+			LEFT JOIN tblICItem Item ON Item.intItemId = ContractDetail.intItemId
 		WHERE
 			currentSnapshot.intLineNo IS NOT NULL
 			AND currentSnapshot.intLineNo <> previousSnapshot.intLineNo
@@ -245,7 +248,7 @@ BEGIN
 			currentSnapshot.intInventoryReceiptItemId
 			,previousSnapshot.intLineNo
 			,previousSnapshot.intItemUOMId
-			,CASE WHEN (ISNULL(previousSnapshot.ysnLoad, 0) = 0) THEN dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (previousSnapshot.dblOpenReceive * -1))
+			,CASE WHEN (ISNULL(previousSnapshot.ysnLoad, 0) = 0) THEN CASE WHEN Item.ysnIsBasket = 1 THEN (previousSnapshot.dblOpenReceive * -1) ELSE dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (previousSnapshot.dblOpenReceive * -1)) END
 				ELSE previousSnapshot.intLoadReceive END
 		FROM 
 			#tmpAfterSaveReceiptItems currentSnapshot
@@ -254,6 +257,7 @@ BEGIN
 				AND previousSnapshot.intInventoryReceiptItemId = currentSnapshot.intInventoryReceiptItemId
 			INNER JOIN tblCTContractDetail ContractDetail
 				ON ContractDetail.intContractDetailId = currentSnapshot.intLineNo
+			LEFT JOIN tblICItem Item ON Item.intItemId = ContractDetail.intItemId
 		WHERE
 			currentSnapshot.intLineNo IS NULL
 			AND previousSnapshot.intLineNo IS NOT NULL
@@ -264,12 +268,13 @@ BEGIN
 			previousSnapshot.intInventoryReceiptItemId
 			,previousSnapshot.intLineNo
 			,previousSnapshot.intItemUOMId
-			,CASE WHEN (ISNULL(previousSnapshot.ysnLoad, 0) = 0) THEN dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (previousSnapshot.dblOpenReceive * -1))
+			,CASE WHEN (ISNULL(previousSnapshot.ysnLoad, 0) = 0) THEN CASE WHEN Item.ysnIsBasket = 1 THEN  (previousSnapshot.dblOpenReceive * -1) ELSE dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (previousSnapshot.dblOpenReceive * -1)) END
 				ELSE previousSnapshot.intLoadReceive END
 		FROM 
 			#tmpBeforeSaveReceiptItems previousSnapshot
 			INNER JOIN tblCTContractDetail ContractDetail
 				ON ContractDetail.intContractDetailId = previousSnapshot.intLineNo
+			LEFT JOIN tblICItem Item ON Item.intItemId = ContractDetail.intItemId
 		WHERE
 			previousSnapshot.intLineNo IS NOT NULL
 			AND previousSnapshot.intInventoryReceiptItemId NOT IN (SELECT intInventoryReceiptItemId FROM #tmpAfterSaveReceiptItems)
@@ -280,12 +285,13 @@ BEGIN
 			currentSnapshot.intInventoryReceiptItemId
 			,currentSnapshot.intLineNo
 			,currentSnapshot.intItemUOMId
-			,CASE WHEN (ISNULL(currentSnapshot.ysnLoad, 0) = 0) THEN dbo.fnCalculateQtyBetweenUOM(currentSnapshot.intItemUOMId, ContractDetail.intItemUOMId, currentSnapshot.dblOpenReceive)
+			,CASE WHEN (ISNULL(currentSnapshot.ysnLoad, 0) = 0) THEN CASE WHEN Item.ysnIsBasket = 1 THEN currentSnapshot.dblOpenReceive ELSE dbo.fnCalculateQtyBetweenUOM(currentSnapshot.intItemUOMId, ContractDetail.intItemUOMId, currentSnapshot.dblOpenReceive) END
 				ELSE currentSnapshot.intLoadReceive END
 		FROM 
 			#tmpAfterSaveReceiptItems currentSnapshot
 			INNER JOIN tblCTContractDetail ContractDetail
 				ON ContractDetail.intContractDetailId = currentSnapshot.intLineNo
+			LEFT JOIN tblICItem Item ON Item.intItemId = ContractDetail.intItemId
 		WHERE
 			currentSnapshot.intLineNo IS NOT NULL
 			AND currentSnapshot.intInventoryReceiptItemId NOT IN (SELECT intInventoryReceiptItemId FROM #tmpBeforeSaveReceiptItems)

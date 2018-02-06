@@ -100,8 +100,7 @@ BEGIN TRY
 			ELSE
 			BEGIN
 				SELECT @intLoadContractId = LGLD.intPContractDetailId, @dblLoadScheduledUnits = LGLD.dblQuantity FROM tblLGLoad LGL
-				INNER JOIN tblLGLoadDetail LGLD
-				ON LGL.intLoadId = LGLD.intLoadId 
+				INNER JOIN tblLGLoadDetail LGLD ON LGL.intLoadId = LGLD.intLoadId 
 				WHERE LGL.intLoadId = @intLoadId
 			END
 			IF @intLoadContractId IS NULL
@@ -110,7 +109,7 @@ BEGIN TRY
 				GOTO _Exit
 			END
 			BEGIN
-			SET @dblLoadScheduledUnits = @dblLoadScheduledUnits * -1;
+				SET @dblLoadScheduledUnits = @dblLoadScheduledUnits * -1;
 				EXEC uspCTUpdateScheduleQuantity @intLoadContractId, @dblLoadScheduledUnits, @intUserId, @intTicketId, 'Scale'
 			END
 			BEGIN

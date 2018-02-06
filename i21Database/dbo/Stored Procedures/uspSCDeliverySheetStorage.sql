@@ -351,7 +351,7 @@ BEGIN TRY
 		   ,1
 		   ,'From Delivery Sheet'
 		   ,@strUserName
-		   ,1)
+		   ,5)
 	
 	SET @intHoldCustomerStorageId = NULL
 	SELECT @intHoldCustomerStorageId = SD.intTicketFileId from tblQMTicketDiscount SD 
@@ -408,47 +408,40 @@ BEGIN TRY
 	END
 	
 	IF @intGRStorageId > 0
-	 BEGIN
-			SELECT @strDistributionOption = GR.strStorageTypeCode FROM tblGRStorageType GR WHERE intStorageScheduleTypeId = @intGRStorageId
-		END
+	BEGIN
+		SELECT @strDistributionOption = GR.strStorageTypeCode FROM tblGRStorageType GR WHERE intStorageScheduleTypeId = @intGRStorageId
+	END
 
-		SELECT
-		intItemId = SCD.intItemId
-		,intLocationId = ItemLocation.intItemLocationId 
-		,intItemUOMId = ItemUOM.intItemUOMId
-		,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
-		,dblQty = @dblNetUnits 
-		,dblUOMQty = ItemUOM.dblUnitQty
-		,dblCost = 
-		CASE 
-			WHEN ISNULL(@intDPContractId,0) > 0 THEN ISNULL(dbo.fnRKGetFutureAndBasisPrice(1,IC.intCommodityId,LEFT(DATENAME(MONTH, CNT.dtmEndDate), 3) + ' ' + RIGHT('0' + DATENAME(YEAR, CNT.dtmEndDate), 4),3,ICC.intFutureMarketId,SCD.intDeliverySheetId,0),0)
-			WHEN ISNULL(@intDPContractId,0) = 0 THEN 0
-		END
-		,dblSalesPrice = 0
-		,intCurrencyId = SCD.intCurrencyId
-		,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
-		,intTransactionId = SCD.intDeliverySheetId
-		,intTransactionDetailId =
-		CASE 
-			WHEN ISNULL(@intDPContractId,0) > 0 THEN @intDPContractId
-			WHEN ISNULL(@intDPContractId,0) = 0 THEN NULL
-		END
-		,strTransactionId = SCD.strDeliverySheetNumber
-		,intTransactionTypeId = 3 
-		,intLotId = NULL 
-		,intSubLocationId = NULL
-		,intStorageLocationId = NULL
-		,ysnIsStorage = CASE  WHEN ISNULL(@intDPContractId,0) > 0 THEN 0 WHEN ISNULL(@intDPContractId,0) = 0 THEN 1 END
-		,strSourceTransactionId  = @strDistributionOption
-		FROM tblSCDeliverySheet SCD 
-		INNER JOIN tblICItem IC ON IC.intItemId = SCD.intItemId
-		INNER JOIN tblICItemUOM ItemUOM ON IC.intItemId = ItemUOM.intItemId
-		INNER JOIN dbo.tblICItemLocation ItemLocation ON SCD.intItemId = ItemLocation.intItemId AND SCD.intCompanyLocationId = ItemLocation.intLocationId
-		INNER JOIN dbo.tblICCommodity ICC ON ICC.intCommodityId = IC.intCommodityId
-		OUTER APPLY(
-			SELECT * FROM dbo.vyuCTContractDetailView WHERE intContractDetailId = @intDPContractId
-		) CNT
-		WHERE SCD.intDeliverySheetId = @intDeliverySheetId AND ItemUOM.ysnStockUnit = 1
+	SELECT
+	intItemId = SCD.intItemId
+	,intLocationId = ItemLocation.intItemLocationId 
+	,intItemUOMId = ItemUOM.intItemUOMId
+	,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
+	,dblQty = @dblNetUnits 
+	,dblUOMQty = ItemUOM.dblUnitQty
+	,dblCost = 0
+	,dblSalesPrice = 0
+	,intCurrencyId = SCD.intCurrencyId
+	,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
+	,intTransactionId = SCD.intDeliverySheetId
+	,intTransactionDetailId =
+	CASE 
+		WHEN ISNULL(@intDPContractId,0) > 0 THEN @intDPContractId
+		WHEN ISNULL(@intDPContractId,0) = 0 THEN NULL
+	END
+	,strTransactionId = SCD.strDeliverySheetNumber
+	,intTransactionTypeId = 3 
+	,intLotId = NULL 
+	,intSubLocationId = NULL
+	,intStorageLocationId = NULL
+	,ysnIsStorage = 1
+	,strSourceTransactionId  = @strDistributionOption
+	FROM tblSCDeliverySheet SCD 
+	INNER JOIN tblICItem IC ON IC.intItemId = SCD.intItemId
+	INNER JOIN tblICItemUOM ItemUOM ON IC.intItemId = ItemUOM.intItemId
+	INNER JOIN dbo.tblICItemLocation ItemLocation ON SCD.intItemId = ItemLocation.intItemId AND SCD.intCompanyLocationId = ItemLocation.intLocationId
+	INNER JOIN dbo.tblICCommodity ICC ON ICC.intCommodityId = IC.intCommodityId
+	WHERE SCD.intDeliverySheetId = @intDeliverySheetId AND ItemUOM.ysnStockUnit = 1
 	
 	CONTINUEISH:
 

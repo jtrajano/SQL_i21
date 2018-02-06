@@ -15,8 +15,9 @@ BEGIN TRY
 			[intContractDetailId] [INT]
 			UNIQUE ([intInventoryReceiptItemId])
 		);
-		INSERT INTO #tmpItemReceiptItemIds(intInventoryReceiptItemId, dblQtyToReceive, intContractDetailId) SELECT intInventoryReceiptItemId, dblQtyToReceive, intLineNo FROM vyuICGetInventoryReceiptItem 
-		WHERE intInventoryReceiptId = @intInventoryReceiptId AND strSourceType = 'Delivery Sheet' and intLineNo > 0
+		INSERT INTO #tmpItemReceiptItemIds(intInventoryReceiptItemId, dblQtyToReceive, intContractDetailId) SELECT intInventoryReceiptItemId, dblOpenReceive, intLineNo FROM tblICInventoryReceiptItem IRI
+		INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId 
+		WHERE IR.intInventoryReceiptId = @intInventoryReceiptId AND IR.intSourceType = 5 AND IRI.intLineNo > 0  AND IRI.intOwnershipType = 1
 
 		-- Iterate and process records
 		DECLARE @Id INT = NULL,

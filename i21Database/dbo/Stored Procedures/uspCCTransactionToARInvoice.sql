@@ -101,8 +101,12 @@ BEGIN
         ,[intItemId] = CASE WHEN ccItem.strItem = 'Dealer Site Credits' THEN @intDealerSiteCreditItem ELSE (CASE WHEN ccSite.ysnPostNetToArCustomer = 0 THEN @intDealerSiteFeeItem ELSE -1 END) END
         ,[strItemDescription] = ccItem.strItem
         ,[dblQtyShipped] = CASE WHEN ccItem.strItem = 'Dealer Site Fees' THEN -1 ELSE 1 END
-        ,[dblPrice] = CASE WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 1 THEN ccSiteDetail.dblNet WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 0 THEN ccSiteDetail.dblGross ELSE (CASE WHEN ccSite.ysnPostNetToArCustomer = 0 THEN ccSiteDetail.dblFees ELSE 0 END) END
-        ,[intTaxGroupId] = null
+        ,[dblPrice] = CASE WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 1 AND ccSite.strSiteType != 'Dealer Site Shared Fees' THEN ccSiteDetail.dblNet 
+			WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 0 AND ccSite.strSiteType != 'Dealer Site Shared Fees' THEN ccSiteDetail.dblGross
+			WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 1 AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN ccSiteDetail.dblNet + (ccSiteDetail.dblFees * (ccSite.dblSharedFeePercentage / 100))
+			WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 0 AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN ccSiteDetail.dblGross - (ccSiteDetail.dblFees * (ccSite.dblSharedFeePercentage / 100))
+			ELSE (CASE WHEN ccSite.ysnPostNetToArCustomer = 0 THEN ccSiteDetail.dblFees ELSE 0 END) END
+		,[intTaxGroupId] = null
         ,[ysnRecomputeTax] = 0
         ,[intSiteDetailId] = ccSiteDetail.intSiteDetailId
         ,[ysnInventory] = 1

@@ -212,7 +212,8 @@ END
 ELSE
 BEGIN
 	SET @dateFrom = CONVERT(VARCHAR(10), '1/1/1900', 110)
-	SET @dateTo = CONVERT(VARCHAR(10), '1/1/2100', 110)
+	--SET @dateTo = CONVERT(VARCHAR(10), '1/1/2100', 110)
+	SET @dateTo = GETDATE()
 END
 
 DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmDate'

@@ -32,12 +32,19 @@ DECLARE @InventoryReceiptId INT
 		,@intLoadId INT
 		,@intLoadDetailId INT
 		,@intLoadContractId INT
-		,@dblLoadScheduledUnits AS NUMERIC(12,4)
+		,@dblLoadScheduledUnits AS NUMERIC(38,20)
+		,@dblDeliveredQuantity AS NUMERIC(38,20)
 		,@intInventoryTransferId AS INT
 		,@intMatchTicketId AS INT;
 
 BEGIN TRY
-		SELECT @intLoadId = LGLD.intLoadId ,@intLoadDetailId = LGLD.intLoadDetailId, @dblLoadScheduledUnits = LGLD.dblDeliveredQuantity 
+		SELECT @intLoadId = LGLD.intLoadId ,@intLoadDetailId = LGLD.intLoadDetailId
+		, @dblDeliveredQuantity = LGLD.dblDeliveredQuantity
+		, @dblLoadScheduledUnits = LGLD.dblQuantity
+		, @intLoadContractId = 
+				CASE WHEN @strInOutFlag = 'I' THEN LGLD.intPContractDetailId
+					WHEN @strInOutFlag = 'O' THEN LGLD.intSContractDetailId
+				END
 		FROM tblLGLoad LGL INNER JOIN vyuLGLoadDetailView LGLD ON LGL.intLoadId = LGLD.intLoadId 
 		WHERE LGL.intTicketId = @intTicketId
 
@@ -207,6 +214,9 @@ BEGIN TRY
 		IF ISNULL(@intLoadDetailId,0) > 0
 		BEGIN
 			EXEC [dbo].[uspLGUpdateLoadDetails] @intLoadDetailId, 1 , @intTicketId, NULL, 0;
+			SET @dblDeliveredQuantity = @dblDeliveredQuantity * -1;
+			EXEC uspCTUpdateScheduleQuantity @intLoadContractId, @dblDeliveredQuantity, @intUserId, @intTicketId, 'Scale'
+			EXEC uspCTUpdateScheduleQuantity @intLoadContractId, @dblLoadScheduledUnits, @intUserId, @intLoadDetailId, 'Load Schedule'
 		END
 	_Exit:
 

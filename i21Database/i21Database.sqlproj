@@ -6192,6 +6192,8 @@
     <Build Include="dbo\Views\vyuRKGetOptionMonthSearch.sql" />
     <Build Include="dbo\Tables\tblPRTypeTaxStatePSDCode.sql" />
     <Build Include="dbo\Views\vyuCRMLostRevenueSalesperson.sql" />
+    <Build Include="dbo\Functions\fnGLGetCMGLDetailBalance.sql" />
+    <Build Include="dbo\Views\vyuSMBEExportCashDiscount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

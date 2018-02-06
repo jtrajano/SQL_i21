@@ -908,7 +908,7 @@ where FP.intTaxAuthorityId = @TaxAuthorityId
 		, intFrequency
 		, intMasterId
 	)
-	SELECT intFilingPacketId = 0, strFormCode = 'R-5346', strScheduleCode = '', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 182887
+	SELECT intFilingPacketId = 0, strFormCode = 'R-5346', strScheduleCode = 'R5346', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 182887
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'R-5346', strScheduleCode = 'G-23', strType = 'Aviation Fuels', ysnStatus = 1, intFrequency = 1, intMasterId = 182876
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'R-5346', strScheduleCode = 'G-23', strType = 'Dyed Diesel', ysnStatus = 1, intFrequency = 1, intMasterId = 182875
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'R-5346', strScheduleCode = 'G-23', strType = 'Gasohol', ysnStatus = 1, intFrequency = 1, intMasterId = 182872
@@ -924,7 +924,7 @@ where FP.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'R-5346', strScheduleCode = 'G-25', strType = 'Gasohol', ysnStatus = 1, intFrequency = 1, intMasterId = 182882
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'R-5346', strScheduleCode = 'G-25', strType = 'Gasoline', ysnStatus = 1, intFrequency = 1, intMasterId = 182883
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'R-5346', strScheduleCode = 'G-25', strType = 'Undyed Diesel', ysnStatus = 1, intFrequency = 1, intMasterId = 182884
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'R-5399', strScheduleCode = '', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 182903
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'R-5399', strScheduleCode = 'R5399', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 182903
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'R-5399', strScheduleCode = 'A-1', strType = 'Gasohol', ysnStatus = 1, intFrequency = 1, intMasterId = 182888
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'R-5399', strScheduleCode = 'A-1', strType = 'Gasoline', ysnStatus = 1, intFrequency = 1, intMasterId = 182889
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'R-5399', strScheduleCode = 'A-1', strType = 'Undyed Diesel', ysnStatus = 1, intFrequency = 1, intMasterId = 182890
