@@ -973,9 +973,9 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        dataIndex: 'strOrderNumber',
                                                                         itemId: 'colSourceNumber',
                                                                         width: 90,
-                                                                        dataIndex: 'strOrderNumber',
                                                                         text: 'Source No.',
                                                                         editor: {
                                                                             xtype: 'gridcombobox',
@@ -1066,6 +1066,13 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                             displayField: 'strSalesOrderNumber',
                                                                             valueField: 'strSalesOrderNumber'
                                                                         }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colItemType',
+                                                                        defaultWidth: 80,
+                                                                        dataIndex: 'strItemType',
+                                                                        text: 'Item Type'
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',

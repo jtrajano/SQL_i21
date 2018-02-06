@@ -320,5 +320,19 @@ namespace iRely.Inventory.WebApi
         {
             return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchSubstitutes(param));
         }
+
+        [HttpGet]
+        [ActionName("GetItemAddOns")]
+        public async Task<HttpResponseMessage> GetItemAddOns(GetParameter param, int intItemId, int intLocationId)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetItemAddOns(param, intItemId, intLocationId));
+        }
+
+        [HttpGet]
+        [ActionName("GetItemSubstitutes")]
+        public async Task<HttpResponseMessage> GetItemSubstitutes(GetParameter param, int intItemId, int intLocationId)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetItemSubstitutes(param, intItemId, intLocationId));
+        }
     }
 }

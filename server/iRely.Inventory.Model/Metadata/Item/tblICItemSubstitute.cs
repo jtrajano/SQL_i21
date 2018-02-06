@@ -102,4 +102,21 @@ namespace iRely.Inventory.Model
         public string strUnitMeasure { get; set; }
     }
 
+    public class vyuICGetSubstituteComponentStock : vyuICGetItemStock
+    {
+        public int intParentKey { get; set; }
+        public int intItemSubstituteId { get; set; }
+        public int intParentItemSubstituteId { get; set; }
+        public string strParentItemSubstitute { get; set; }
+        public string strParentItemSubstituteDesc { get; set; }
+        public int? intSubstituteItemUOMId { get; set; }
+        public decimal? dblSubstituteItemUOMId { get; set; }
+        public string strSubstituteItemUOM { get; set; }
+        public int? intSubstituteComponent { get; set; }
+        public decimal? dblSubstituteComponentQty { get; set; }
+        public decimal? dblSubstituteMarkUpOrDown { get; set; }
+        public DateTime? dtmSubstituteBeginDate { get; set; }
+        public DateTime? dtmSubstituteEndDate { get; set; }
+    }
+
 }

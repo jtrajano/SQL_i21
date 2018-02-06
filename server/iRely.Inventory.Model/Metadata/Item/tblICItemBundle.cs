@@ -106,14 +106,80 @@ namespace iRely.Inventory.Model
     }
 
 
-    public class vyuICGetBundleItemStock : vyuICGetItemStock
+    public class vyuICGetBundleItemStock
     {
-        public int intKitItemId { get; set; }
-        public string strKitItemNo { get; set; }
-        public string strKitItemDesc { get; set; }
+        public int intKey { get; set; }
+        public int? intBundleItemId { get; set; }
+        public string strBundleItemNo { get; set; }
+        public string strBundleItemDesc { get; set; }
+        public string strBundleType { get; set; }
+
+        public int? intItemId { get; set; }
         public decimal? dblComponentQuantity { get; set; }
+        public int? intBundleUOMId { get; set; }
+        public string strBundleUOM { get; set; }
+        public string strBundleUOMType { get; set; }
         public decimal? dblMarkUpOrDown { get; set; }
         public DateTime? dtmBeginDate { get; set; }
+
         public DateTime? dtmEndDate { get; set; }
+
+        public string strItemNo { get; set; }
+        public string strType { get; set; }
+        public string strDescription { get; set; }
+        public string strLotTracking { get; set; }
+        public string strInventoryTracking { get; set; }
+        public string strStatus { get; set; }
+        public int? intLocationId { get; set; }
+        public int? intItemLocationId { get; set; }
+        public int? intSubLocationId { get; set; }
+        public int? intCategoryId { get; set; }
+        public string strCategoryCode { get; set; }
+        public int? intCommodityId { get; set; }
+        public string strCommodityCode { get; set; }
+        public string strStorageLocationName { get; set; }
+        public string strSubLocationName { get; set; }
+        public int? intStorageLocationId { get; set; }
+        public string strLocationName { get; set; }
+        public string strLocationType { get; set; }
+        public int? intStockUOMId { get; set; }
+        public string strStockUOM { get; set; }
+        public string strStockUOMType { get; set; }
+        public decimal? dblStockUnitQty { get; set; }
+        public string strAllowNegativeInventory { get; set; }
+        public int? intCostingMethod { get; set; }
+        public string strCostingMethod { get; set; }
+        public decimal? dblAmountPercent { get; set; }
+        public decimal? dblSalePrice { get; set; }
+        public decimal? dblMSRPPrice { get; set; }
+        public string strPricingMethod { get; set; }
+        public decimal? dblLastCost { get; set; }
+        public decimal? dblStandardCost { get; set; }
+        public decimal? dblAverageCost { get; set; }
+        public decimal? dblEndMonthCost { get; set; }
+
+        public int? intGrossUOMId { get; set; }
+        public decimal? dblGrossUOMConvFactor { get; set; }
+        public string strGrossUOMType { get; set; }
+        public string strGrossUOM { get; set; }
+        public string strGrossUPC { get; set; }
+        public string strGrossLongUPC { get; set; }
+
+        public decimal? dblDefaultFull { get; set; }
+        public bool? ysnAvailableTM { get; set; }
+        public decimal? dblMaintenanceRate { get; set; }
+        public string strMaintenanceCalculationMethod { get; set; }
+        public decimal? dblOverReceiveTolerance { get; set; }
+        public decimal? dblWeightTolerance { get; set; }
+        public int? intGradeId { get; set; }
+        public string strGrade { get; set; }
+        public int? intLifeTime { get; set; }
+        public string strLifeTimeType { get; set; }
+        public bool? ysnListBundleSeparately { get; set; }
+        public string strRequired { get; set; }
+        public int? intTonnageTaxUOMId { get; set; }
+        public int? intModuleId { get; set; }
+        public bool? ysnUseWeighScales { get; set; }
+        public bool? ysnLotWeightsRequired { get; set; }
     }
 }

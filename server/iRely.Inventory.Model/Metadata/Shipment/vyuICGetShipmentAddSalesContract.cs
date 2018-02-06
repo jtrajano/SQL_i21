@@ -24,6 +24,7 @@ namespace iRely.Inventory.Model
         public int? intItemId { get; set; }
         public string strItemNo { get; set; }
         public string strItemDescription { get; set; }
+        public string strBundleType { get; set; }
         public string strLotTracking { get; set; }
         public int? intCommodityId { get; set; }
         public int? intSubLocationId { get; set; }

@@ -2992,6 +2992,28 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "dataIndex": "strItemType",
+                                                                "defaultWidth": 80,
+                                                                "itemId": "colItemType",
+                                                                "text": "Item Type"
+                                                            },
+                                                            "configAlternates": {
+                                                                "dataIndex": "datafield",
+                                                                "defaultWidth": "number",
+                                                                "itemId": "string",
+                                                                "text": "string"
+                                                            },
+                                                            "name": "MyColumn69",
+                                                            "designerId": "7c3b7704-7777-40c2-8060-e791d7fd1b2f"
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
                                                                 "dataIndex": "strItemNumber",
                                                                 "headerDrillDownClick": "onItemHeaderClick",
                                                                 "headerDrillDownText": "Open",
@@ -3531,7 +3553,8 @@
                                                                         "lookupValueField": "string",
                                                                         "updateField": "string",
                                                                         "valueField": "string",
-                                                                        "scrollable": "boolean"
+                                                                        "scrollable": "boolean",
+                                                                        "bind": "object"
                                                                     },
                                                                     "name": "MyNumberField73",
                                                                     "designerId": "1ef4a5f9-37a6-4dc1-975a-867090c64fce",

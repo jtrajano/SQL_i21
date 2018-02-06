@@ -221,6 +221,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     hidden: '{checkHideSourceNo}',
                     dataIndex: 'strSourceNumber'
                 },
+                colItemType: 'strItemType',
                 colItemNumber: {
                     dataIndex: 'strItemNo',
                     editor: {
@@ -238,6 +239,12 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     }
                 },
                 colDescription: 'strItemDescription',
+                colGumQuantity: {
+                    dataIndex: 'dblQuantity',
+                    editor:{
+                        readOnly: '{isBundleComponent}'
+                    }
+                },
                 colCustomerStorage: {
                     dataIndex: 'strStorageTypeDescription',
                     editor: {
@@ -401,6 +408,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     editor: {
                         readOnly: '{disableFieldInShipmentGrid}',
                         readOnly: '{hasCustomerStorage}',
+                        readOnly: '{isBundleComponent}',
                         origValueField: 'intOwnershipType',
                         origUpdateField: 'intOwnershipType',
                         store: '{ownershipTypes}'
@@ -424,6 +432,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     dataIndex: 'strUnitMeasure',
                     editor: {
                         readOnly: '{disableFieldInShipmentGrid}',
+                        readOnly: '{isBundleComponent}',
                         store: '{itemUOM}',
                         defaultFilters: [
                             {
@@ -443,6 +452,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     dataIndex: 'strWeightUOM',
                     editor: {
                         readOnly: '{disableFieldInShipmentGrid}',
+                        readOnly: '{isBundleComponent}',
                         origValueField: 'intItemUOMId',
                         origUpdateField: 'intWeightUOMId',
                         store: '{weightUOM}',
@@ -457,7 +467,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     dataIndex: 'dblUnitPrice',
                     //hidden: '{hideFunctionalCurrencyColumn}',
                     editor: {
-                        readOnly: '{disableFieldInShipmentGrid}'
+                        readOnly: '{disableFieldInShipmentGrid}',
+                        readOnly: '{isBundleComponent}'
                     }
                 },
                 // colForeignUnitPrice: {
@@ -481,7 +492,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     editor: {
                         origValueField: 'intCurrencyExchangeRateTypeId',
                         origUpdateField: 'intForexRateTypeId',
-                        store: '{forexRateType}'
+                        store: '{forexRateType}',
+                        readOnly: '{isBundleComponent}'
                     }
                 },
                 colForexRate: {
@@ -493,7 +505,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     editor: {
                         origValueField: 'strChargesLink',
                         origUpdateField: 'strChargesLink',
-                        store: '{chargesItemLink}'                        
+                        store: '{chargesItemLink}',
+                        readOnly: '{isBundleComponent}'                           
                     }
                 }                     
             },
@@ -698,7 +711,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     editor: {
                         origValueField: 'strChargesLink',
                         origUpdateField: 'strChargesLink',
-                        store: '{chargesLink}'                        
+                        store: '{chargesLink}'                   
                     }
                 }  
             },
@@ -1057,7 +1070,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         if (current && record){            
             current.set('intEntityCustomerId', record.get('intEntityId'));
             current.set('strCustomerName', record.get('strName'));
-            current.set('intFreightTermId', record.get('intFreightTermId'));
+            current.set('intFreightTermId', record.get('intFreightTermId') != 0 ? record.get('intFreightTermId') : null);
             current.set('strFreightTerm', record.get('strFreightTerm'));
             
             // If Order Type is a 'Transfer Order', do not populate the ship to. 
@@ -1204,7 +1217,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         }
     },
 
-    getItemSalesPrice: function(cfg, successFn, failureFn){
+    getItemSalesPrice: function(cfg, successFn, failureFn, currentItem){
         // Sanitize parameters; 
         cfg = cfg ? cfg : {}; 
         successFn = successFn && (successFn instanceof Function) ? successFn : function(){ /*empty function*/ };
@@ -1235,10 +1248,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         })
         .subscribe(
             function(response){
-                successFn(response);                
+                successFn(response, currentItem);                
             },
             function(response) {
-                failureFn(response);
+                failureFn(response, currentItem);
             }
         );
     },
@@ -1249,6 +1262,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
         var me = this;
         var win = combo.up('window');
+        var viewModel = me.getViewModel();
+        var currentVM = viewModel.data.current;
         var grid = combo.up('grid');
         var plugin = grid.getPlugin('cepItem');
         var current = plugin.getActiveRecord();
@@ -1374,6 +1389,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 pnlLotTracking.setHidden(false);
             }                    
                     
+            me.getItemAddOns(current, records[0], currentVM, currentVM.tblICInventoryShipmentItems());
+
+            me.getItemSubstitutes(current, records[0], currentVM, currentVM.tblICInventoryShipmentItems());
         }
         else if (combo.itemId === 'cboUOM') {
             var dblUnitQty = records[0].get('dblUnitQty');
@@ -2664,7 +2682,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 url: './inventory/api/inventoryshipment/getaddorders?customerid=' + CustomerId + '&ordertype=' + OrderType + '&sourcetype=' + SourceType,
                 hiddenRequired: true,
                 columns: [
-                    {dataIndex: 'intLineNo', text: 'intLineNo', width: 100, dataType: 'numeric', defaultSort: true, sortOrder: 'DESC', key: true, hidden: true },
+                    { dataIndex: 'intLineNo', text: 'intLineNo', width: 100, dataType: 'numeric', defaultSort: true, sortOrder: 'DESC', key: true, hidden: true },
                     
                     { dataIndex: 'strOrderNumber', text: 'Order Number', width: 100, dataType: 'string' },
                     { dataIndex: 'strSourceNumber', text: 'Source Number', width: 100, dataType: 'string' },
@@ -2676,6 +2694,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     { dataIndex: 'intItemId', text: 'Item Id', width: 100, dataType: 'numeric', hidden: true, allowNull: true },
                     { dataIndex: 'strItemNo', text: 'Item No', width: 100, dataType: 'string' },
                     { dataIndex: 'strItemDescription', text: 'Item Description', width: 100, dataType: 'string' },
+                    { dataIndex: 'strBundleType', text: 'Bundle Type', width: 150, dataType: 'string', required: true },
                     { dataIndex: 'strLotTracking', text: 'Lot Tracking', width: 100, dataType: 'string' },
                     { dataIndex: 'intCommodityId', text: 'Commodity Id', width: 100, dataType: 'numeric', hidden: true, allowNull: true },
                     { dataIndex: 'intSubLocationId', text: 'SubLocation Id', width: 100, dataType: 'numeric', hidden: true, allowNull: true, allowNull: true },
@@ -2878,140 +2897,149 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                     if (txtShipToAddress) txtShipToAddress.setValue(order.get('strShipToAddress'));
 
                                 } 
-    
-                                if (isValidToAdd){
-                                    var newRecord = {
-                                        intInventoryShipmentId: currentVM.get('intInventoryShipmentId'),
-                                        intOrderId: order.get('intOrderId'),
-                                        intSourceId: order.get('intSourceId'),
-                                        intLineNo: order.get('intLineNo'),
-                                        intItemId: order.get('intItemId'),
-                                        intSubLocationId: order.get('intSubLocationId'),
-                                        intStorageLocationId: order.get('intStorageLocationId'),
-                                        dblQuantity: order.get('dblQtyToShip'),
-                                        intItemUOMId: order.get('intItemUOMId'),
-                                        intWeightUOMId: order.get('intWeightUOMId'),
-                                        dblUnitPrice: order.get('dblUnitPrice'),
-                                        strItemNo: order.get('strItemNo'),
-                                        strUnitMeasure: order.get('strItemUOM'),
-                                        strWeightUOM: order.get('strWeightUOM'),
-                                        strSubLocationName: order.get('strSubLocationName'),
-                                        strStorageLocationName: order.get('strStorageLocationName'),
-                                        strOrderNumber: order.get('strOrderNumber'),
-                                        strSourceNumber: order.get('strSourceNumber'),
-                                        strItemDescription: order.get('strItemDescription'),
-                                        strGrade: order.get('strGrade'),
-                                        dblQtyOrdered: order.get('dblQtyOrdered'),
-                                        strOrderUOM: order.get('strOrderUOM'),
-                                        dblLineTotal: order.get('dblLineTotal'),
-                                        dblQtyAllocated: order.get('dblQtyAllocated'),
-                                        dblOrderUnitPrice: order.get('dblPrice'),
-                                        dblOrderDiscount: order.get('dblDiscount'),
-                                        dblOrderTotal: order.get('dblTotal'),
-                                        strLotTracking: order.get('strLotTracking'),
-                                        dblItemUOMConv: order.get('dblItemUOMConv'),
-                                        dblWeightItemUOMConv: order.get('dblWeightItemUOMConv'),
-                                        intDestinationGradeId: order.get('intDestinationGradeId'),
-                                        strDestinationGrades: order.get('strDestinationGrades'),
-                                        intDestinationWeightId: order.get('intDestinationWeightId'),
-                                        strDestinationWeights: order.get('strDestinationWeights'),
-                                        strOwnershipType: 'Own',
-                                        intOwnershipType: 1,
-                                        intCommodityId: order.get('intCommodityId'),
-                                        intForexRateTypeId: order.get('intForexRateTypeId'),
-                                        strForexRateType: order.get('strForexRateType'),
-                                        dblForexRate: order.get('dblForexRate')                                
-                                    };
 
-                                    // Check if the shipment location matches the location of the order.
-                                    // If not, clear the sub and storage location.
-                                    if (currentVM.get('intShipFromLocationId') != order.get('intLocationId') ){
-                                        newRecord.intSubLocationId = null;
-                                        newRecord.intStorageLocationId = null;
-                                        newRecord.strSubLocationName = null;
-                                        newRecord.strStorageLocationName = null;
-                                    }
-                                    newISItem = currentVM.tblICInventoryShipmentItems().add(newRecord);
-                                    newISItem = newISItem.length > 0 ? newISItem[0] : null;
+                                if (isValidToAdd) {
+                                    // if(order.get('strBundleType') !== null) {
+                                    //     me.getBundleComponents(order, currentVM, currentVM.tblICInventoryShipmentItems(), me);
+                                    // } else {
+                                        var newRecord = {
+                                            intInventoryShipmentId: currentVM.get('intInventoryShipmentId'),
+                                            intOrderId: order.get('intOrderId'),
+                                            intSourceId: order.get('intSourceId'),
+                                            intLineNo: order.get('intLineNo'),
+                                            intItemId: order.get('intItemId'),
+                                            intSubLocationId: order.get('intSubLocationId'),
+                                            intStorageLocationId: order.get('intStorageLocationId'),
+                                            dblQuantity: order.get('dblQtyToShip'),
+                                            intItemUOMId: order.get('intItemUOMId'),
+                                            intWeightUOMId: order.get('intWeightUOMId'),
+                                            dblUnitPrice: order.get('dblUnitPrice'),
+                                            strItemNo: order.get('strItemNo'),
+                                            strUnitMeasure: order.get('strItemUOM'),
+                                            strWeightUOM: order.get('strWeightUOM'),
+                                            strSubLocationName: order.get('strSubLocationName'),
+                                            strStorageLocationName: order.get('strStorageLocationName'),
+                                            strOrderNumber: order.get('strOrderNumber'),
+                                            strSourceNumber: order.get('strSourceNumber'),
+                                            strItemDescription: order.get('strItemDescription'),
+                                            strGrade: order.get('strGrade'),
+                                            dblQtyOrdered: order.get('dblQtyOrdered'),
+                                            strOrderUOM: order.get('strOrderUOM'),
+                                            dblLineTotal: order.get('dblLineTotal'),
+                                            dblQtyAllocated: order.get('dblQtyAllocated'),
+                                            dblOrderUnitPrice: order.get('dblPrice'),
+                                            dblOrderDiscount: order.get('dblDiscount'),
+                                            dblOrderTotal: order.get('dblTotal'),
+                                            strLotTracking: order.get('strLotTracking'),
+                                            dblItemUOMConv: order.get('dblItemUOMConv'),
+                                            dblWeightItemUOMConv: order.get('dblWeightItemUOMConv'),
+                                            intDestinationGradeId: order.get('intDestinationGradeId'),
+                                            strDestinationGrades: order.get('strDestinationGrades'),
+                                            intDestinationWeightId: order.get('intDestinationWeightId'),
+                                            strDestinationWeights: order.get('strDestinationWeights'),
+                                            strOwnershipType: 'Own',
+                                            intOwnershipType: 1,
+                                            intCommodityId: order.get('intCommodityId'),
+                                            intForexRateTypeId: order.get('intForexRateTypeId'),
+                                            strForexRateType: order.get('strForexRateType'),
+                                            dblForexRate: order.get('dblForexRate')                                
+                                        };
 
-                                }        
-                            }
-    
-                            if (OrderType === 'Sales Contract' && isValidToAdd) {
-                                ContractStore.load({
-                                    filters: [
-                                        {
-                                            column: 'intContractDetailId',
-                                            value: order.get('intLineNo'),
-                                            conjunction: 'and'
-                                        },
-                                        {
-                                            column: 'intContractHeaderId',
-                                            value: order.get('intOrderId'),
-                                            conjunction: 'and'
+                                        // Check if the shipment location matches the location of the order.
+                                        // If not, clear the sub and storage location.
+                                        if (currentVM.get('intShipFromLocationId') != order.get('intLocationId') ){
+                                            newRecord.intSubLocationId = null;
+                                            newRecord.intStorageLocationId = null;
+                                            newRecord.strSubLocationName = null;
+                                            newRecord.strStorageLocationName = null;
                                         }
-                                    ],
-                                    callback: function (result) {
-                                        if (result) {
-                                            Ext.each(result, function (contract) {
-                                                var contractCosts = contract.get('tblCTContractCosts');
-                                                if (contractCosts) {
-                                                    vm.set('chargesLinkInc', 1);
-                                                    Ext.each(contractCosts, function (otherCharge) {
-                                                        var shipmentCharges = currentVM.tblICInventoryShipmentCharges().data.items;
-                                                        var exists = Ext.Array.findBy(shipmentCharges, function (row) {
-                                                            if ((row.get('intContractId') === order.get('intOrderId')
-                                                                && row.get('intChargeId') === otherCharge.intItemId)) {
-                                                                return true;
-                                                            }
-                                                        });
-    
-                                                        if (!exists) {
-                                                            var chargesLink = 'CL-'.concat(vm.get('chargesLinkConst'));
+                                        
+                                        if(order.get('strBundleType') == 'Kit') {
+                                            newISItem = currentVM.tblICInventoryShipmentItems().add(newRecord);
+                                            newISItem = newISItem.length > 0 ? newISItem[0] : null;
+                                            newISItem.set('strItemType', order.get('strBundleType'));
+                                        }
+                                        if(order.get('strBundleType') !== null)
+                                            me.getBundleComponents(order, currentVM, currentVM.tblICInventoryShipmentItems(), me);
+                                    }        
+                                
+                                    if (OrderType === 'Sales Contract' && isValidToAdd) {
+                                        ContractStore.load({
+                                            filters: [
+                                                {
+                                                    column: 'intContractDetailId',
+                                                    value: order.get('intLineNo'),
+                                                    conjunction: 'and'
+                                                },
+                                                {
+                                                    column: 'intContractHeaderId',
+                                                    value: order.get('intOrderId'),
+                                                    conjunction: 'and'
+                                                }
+                                            ],
+                                            callback: function (result) {
+                                                if (result) {
+                                                    Ext.each(result, function (contract) {
+                                                        var contractCosts = contract.get('tblCTContractCosts');
+                                                        if (contractCosts) {
+                                                            vm.set('chargesLinkInc', 1);
+                                                            Ext.each(contractCosts, function (otherCharge) {
+                                                                var shipmentCharges = currentVM.tblICInventoryShipmentCharges().data.items;
+                                                                var exists = Ext.Array.findBy(shipmentCharges, function (row) {
+                                                                    if ((row.get('intContractId') === order.get('intOrderId')
+                                                                        && row.get('intChargeId') === otherCharge.intItemId)) {
+                                                                        return true;
+                                                                    }
+                                                                });
+            
+                                                                if (!exists) {
+                                                                    var chargesLink = 'CL-'.concat(vm.get('chargesLinkConst'));
 
-                                                            var newCost = Ext.create('Inventory.model.ShipmentCharge', {
-                                                                intInventoryReceiptId: currentVM.get('intInventoryShipmentId'),
-                                                                intContractId: order.get('intOrderId'),
-                                                                intContractDetailId: otherCharge.intContractDetailId,//order.get('intOrderId'),
-                                                                intChargeId: otherCharge.intItemId,
-                                                                strChargesLink: chargesLink,
-                                                                ysnInventoryCost: false,
-                                                                strCostMethod: otherCharge.strCostMethod,
-                                                                dblRate: otherCharge.dblRate,
-                                                                intCostUOMId: otherCharge.intItemUOMId,
-                                                                intEntityVendorId: otherCharge.intVendorId,
-                                                                dblAmount: 0,
-                                                                strAllocatePriceBy: 'Unit',
-                                                                ysnAccrue: otherCharge.ysnAccrue,
-                                                                ysnPrice: otherCharge.ysnPrice,
-                                                                strItemNo: otherCharge.strItemNo,
-                                                                intCurrencyId: otherCharge.intCurrencyId,
-                                                                strCurrency: otherCharge.strCurrency,
-                                                                strCostUOM: otherCharge.strUOM,
-                                                                strVendorId: otherCharge.strVendorName,
-                                                                strContractNumber: order.get('strOrderNumber')
+                                                                    var newCost = Ext.create('Inventory.model.ShipmentCharge', {
+                                                                        intInventoryReceiptId: currentVM.get('intInventoryShipmentId'),
+                                                                        intContractId: order.get('intOrderId'),
+                                                                        intContractDetailId: otherCharge.intContractDetailId,//order.get('intOrderId'),
+                                                                        intChargeId: otherCharge.intItemId,
+                                                                        strChargesLink: chargesLink,
+                                                                        ysnInventoryCost: false,
+                                                                        strCostMethod: otherCharge.strCostMethod,
+                                                                        dblRate: otherCharge.dblRate,
+                                                                        intCostUOMId: otherCharge.intItemUOMId,
+                                                                        intEntityVendorId: otherCharge.intVendorId,
+                                                                        dblAmount: 0,
+                                                                        strAllocatePriceBy: 'Unit',
+                                                                        ysnAccrue: otherCharge.ysnAccrue,
+                                                                        ysnPrice: otherCharge.ysnPrice,
+                                                                        strItemNo: otherCharge.strItemNo,
+                                                                        intCurrencyId: otherCharge.intCurrencyId,
+                                                                        strCurrency: otherCharge.strCurrency,
+                                                                        strCostUOM: otherCharge.strUOM,
+                                                                        strVendorId: otherCharge.strVendorName,
+                                                                        strContractNumber: order.get('strOrderNumber')
+                                                                    });
+                                                                    currentVM.tblICInventoryShipmentCharges().add(newCost);
+
+                                                                    newISItem.set('strChargesLink', chargesLink);
+                                                                }
                                                             });
-                                                            currentVM.tblICInventoryShipmentCharges().add(newCost);
-
-                                                            newISItem.set('strChargesLink', chargesLink);
+                                                            
                                                         }
                                                     });
-                                                    
                                                 }
-                                            });
-                                        }
+                                            }
+                                        });    
                                     }
-                                });    
-                            }
+                                }
 
-                            if(freightTermsError.length > 0){
-                                iRely.Functions.showCustomDialog(
-                                    iRely.Functions.dialogType.WARNING,
-                                    iRely.Functions.dialogButtonType.OK,
-                                    'Unable to add orders. Only orders of the same freight terms can be shipped.',
-                                    function(b) { }
-                                );                            
-                            }                               
+                                if(freightTermsError.length > 0){
+                                    iRely.Functions.showCustomDialog(
+                                        iRely.Functions.dialogType.WARNING,
+                                        iRely.Functions.dialogButtonType.OK,
+                                        'Unable to add orders. Only orders of the same freight terms can be shipped.',
+                                        function(b) { }
+                                    );                            
+                                }  
+                                                         
                         });
                     }
                 }
@@ -3889,6 +3917,512 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         });
         task.delay(10);            
     },    
+
+    getBundleComponents: function(selectedItem, current, itemDetailStore, scope){
+        'use strict';
+        var me = this,
+            bundleType = selectedItem.get('strBundleType'),
+            screenTitle = bundleType + ' - ' + selectedItem.get('strItemNo'),
+            locationId = current.get('intShipFromLocationId'),
+            bundleItemId = selectedItem.get('intItemId');
+
+        if(bundleType == 'Kit') {
+            var bundleComponentStore = Ext.create('Inventory.store.BufferedBundleComponent');
+            bundleComponentStore.getProxy().api.read = './inventory/api/itembundle/getbundlecomponents';
+            bundleComponentStore.getProxy().extraParams = {
+                intBundleItemId: bundleItemId,
+                intLocationId: locationId
+            };
+            bundleComponentStore.load({
+                callback: function(records, operation, success) {
+                    
+                    Ext.Array.forEach(records, function(rec){
+                        var componentQty = rec.get('dblComponentQuantity') * selectedItem.get('dblQtyToShip');
+                        
+                        var itemModel = Ext.create(itemDetailStore.role.type, {
+                                intInventoryShipmentId: current.get('intInventoryShipmentId'),
+                                intLineNo: selectedItem.get('intLineNo'),
+                                intOrderId: selectedItem.get('intOrderId'),
+                                intSourceId: selectedItem.get('intSourceId'),
+                                strOrderNumber: selectedItem.get('strOrderNumber'),
+                                strSourceNumber: selectedItem.get('strSourceNumber'),
+                                strItemType: selectedItem.get('strItemNo') + ' - Component',
+                                //dtmDate: order.get('dtmDate'),
+                                dblQuantity: componentQty,
+                                intItemId: rec.get('intItemId'),
+                                strItemNo: rec.get('strItemNo'),
+                                strItemDescription: rec.get('strDescription'),
+                                dblQtyOrdered: componentQty,
+                                // intLoadReceive: rec.get('intLoadToReceive'),
+                                dblUnitPrice: 0,// rec.get('dblSalePrice'),
+                                // dblTax: s.get('dblTax'),
+                                dblLineTotal: 0,//componentQty * rec.get('dblSalePrice'),
+                                strLotTracking: rec.get('strLotTracking'),
+                                // intContainerId: rec.get('intContainerId'),
+                                // strContainer: rec.get('strContainer'),
+                                intSubLocationId: selectedItem.get('intSubLocationId'),
+                                strSubLocationName: selectedItem.get('strSubLocationName'),
+                                intStorageLocationId: selectedItem.get('intStorageLocationId'),
+                                strStorageLocationName: selectedItem.get('strStorageLocationName'),
+                                intItemUOMId: selectedItem.get('intItemUOMId'),
+                                strUnitMeasure: selectedItem.get('strItemUOM'),
+                                strOrderUOM: selectedItem.get('strOrderUOM'),
+                                strWeightUOM: selectedItem.get('strWeightUOM'),
+                                intWeightUOMId: selectedItem.get('intWeightUOMId'),
+                                dblItemUOMConv: selectedItem.get('dblItemUOMConv'),
+                                dblWeightItemUOMConv: selectedItem.get('dblWeightItemUOMConv'),
+                                intDestinationGradeId: selectedItem.get('intDestinationGradeId'),
+                                strDestinationGrades: selectedItem.get('strDestinationGrades'),
+                                intDestinationWeightId: selectedItem.get('intDestinationWeightId'),
+                                strDestinationWeights: selectedItem.get('strDestinationWeights'),
+                                intGradeId: rec.get('intGradeId'),
+                                strGrade: rec.get('strGrade'),
+                                strOwnershipType: 'Own',
+                                intOwnershipType: 1,
+                                intCommodityId: rec.get('intCommodityId'),
+                                intForexRateTypeId: selectedItem.get('intForexRateTypeId'),
+                                strForexRateType: selectedItem.get('strForexRateType'),
+                                dblForexRate: selectedItem.get('dblForexRate')
+                        });
+
+                        var newItem = itemDetailStore.add(itemModel);
+                        newItem = newItem[0];
+                        
+                    });
+                }
+            });
+        } else {
+            var isValidToAdd = true;
+            var filter = _.filter(itemDetailStore.data.items, function(x) { return x.get('intOrderId') === selectedItem.get('intOrderId') && !x.dummy; });
+            
+            if(filter.length > 0) 
+                isValidToAdd = false; 
+
+            if(!isValidToAdd){
+                iRely.Functions.showCustomDialog(
+                    iRely.Functions.dialogType.WARNING,
+                    iRely.Functions.dialogButtonType.OK,
+                    'You should only add one basket item per order.'
+                );
+                return;
+            }
+            var searchURL = './inventory/api/itembundle/getbundlecomponents?intBundleItemId=' + bundleItemId +
+                    '&intLocationId=' + locationId;
+            
+            iRely.Functions.openScreen('GlobalComponentEngine.view.FloatingSearch', {
+                searchSettings: {
+                    scope: me,
+                    type: 'Inventory.GetAddOrders',
+                    url: searchURL,
+                    columns: [
+                            { dataIndex: 'intKey', text: 'Key', dataType: 'numeric', key: true, hidden: true },
+                            { dataIndex: 'intItemId', text: '', dataType: 'numeric', hidden: true, required: true },
+                            { dataIndex: 'strItemNo', text: 'Item No', width: 100, dataType: 'string' },
+                            { dataIndex: 'strDescription', text: 'Item Description', width: 100, dataType: 'string' },
+                            { xtype: 'numbercolumn', dataIndex: 'dblComponentQuantity', text: 'Component Quantity', width: 100, dataType: 'float' },
+                            { xtype: 'numbercolumn', dataIndex: 'dblMarkUpOrDown', text: 'Mark Up/Down', width: 100, dataType: 'float' },
+                            { dataIndex: 'dtmBeginDate', text: 'Begin Date', width: 100, dataType: 'date', required: true, xtype: 'datecolumn' },
+                            { dataIndex: 'dtmEndDate', text: 'End Date', width: 100, dataType: 'date', required: true, xtype: 'datecolumn' },
+                            //{ xtype: 'numbercolumn', dataIndex: 'dblLastCost', text: 'Cost', width: 100, dataType: 'float' },
+                            { dataIndex: 'strLotTracking', text: 'Lot Tracking', width: 100, dataType: 'string' },
+                            { dataIndex: 'intCommodityId', text: 'Commodity Id', dataType: 'numeric', hidden: true, required: true, allowNull: true },
+                            { dataIndex: 'intContainerId', text: 'Container Id', dataType: 'numeric', hidden: true, required: true, allowNull: true },
+                            { dataIndex: 'strContainer', text: 'Container', width: 100, dataType: 'string', required: true },
+                            { dataIndex: 'intSubLocationId', text: 'Storage Location Id', dataType: 'numeric', hidden: true, required: true, allowNull: true },
+                            { dataIndex: 'strSubLocationName', text: 'Storage Location', width: 100, dataType: 'string', required: true },
+                            { dataIndex: 'intStorageLocationId', text: 'Storage Unit Id', dataType: 'numeric', hidden: true, required: true, allowNull: true },
+                            { dataIndex: 'strStorageLocationName', text: 'Storage Unit', width: 100, dataType: 'string', required: true },
+                            { dataIndex: 'strOrderUOM', text: 'Order UOM', width: 100, dataType: 'string', hidden: true, required: true },
+                            //{ xtype: 'numbercolumn', dataIndex: 'dblOrderUOMConvFactor', text: 'Order UOM Conversion Factor', width: 100, dataType: 'float', hidden: true, required: true },
+                            { dataIndex: 'intItemUOMId', text: 'Item UOM Id', dataType: 'numeric', hidden: true, required: true, allowNull: true },
+                            { dataIndex: 'strUnitMeasure', text: 'Unit Measure', width: 100, dataType: 'string', hidden: true, required: true },
+                            // { dataIndex: 'strOrderUOM', text: 'Order UOM', width: 100, dataType: 'string', hidden: true, required: true },
+                            // { dataIndex: 'strReceiveUOMType', text: 'Receive UOM', width: 100, dataType: 'string', hidden: true, required: true },
+                            { dataIndex: 'strGrossUOM', text: 'Gross UOM', width: 100, dataType: 'string', hidden: true, required: true },
+                            { dataIndex: 'intGrossUOMId', text: 'Gross UOM Id', dataType: 'numeric', hidden: true, required: true, allowNull: true },
+                            //{ xtype: 'numbercolumn', dataIndex: 'dblItemUOMConvFactor', text: 'Item UOM Conversion Factor', width: 100, dataType: 'float', hidden: true, required: true },
+                            //{ xtype: 'numbercolumn', dataIndex: 'dblWeightUOMConvFactor', text: 'Weight UOM Conversion Factor', width: 100, dataType: 'float', hidden: true, required: true },
+                            // { dataIndex: 'intReceiveUOMId', text: 'Receive UOM Id', dataType: 'numeric', hidden: true, required: true },
+                            // { dataIndex: 'strReceiveUOM', text: 'Receive UOM', width: 100, dataType: 'string', hidden: true, required: true },
+                            //{ xtype: 'numbercolumn', dataIndex: 'dblCostUOMConvFactor', text: 'Cost UOM Conversion Factor', width: 100, dataType: 'float' },
+                            { dataIndex: 'intGradeId', text: 'Grade Id', dataType: 'numeric', hidden: true, required: true, allowNull: true },
+                            { dataIndex: 'strGrade', text: 'Grade', width: 100, dataType: 'string' },
+                    ],
+                    title: screenTitle,
+                    showNew: false,
+                    singleSelection: true
+                },
+                viewConfig: {
+                    listeners: {
+                        scope: me,
+                        openselectedclick: function(button, e, result) {
+                            Ext.Array.forEach(result, function(rec){
+                                var componentQty = rec.get('dblComponentQuantity') * selectedItem.get('dblQtyToShip'),
+                                    markUpOrDownCost = 0;
+
+                                if(rec.get('dtmBeginDate') && rec.get('dtmBeginDate') && 
+                                    (Ext.Date.between(current.get('dtmShipDate'), rec.get('dtmBeginDate'), rec.get('dtmEndDate'))))
+                                    markUpOrDownCost = rec.get('dblMarkUpOrDown');
+                                
+                                var itemCost = (selectedItem.get('dblPrice') + markUpOrDownCost)
+                                    * (selectedItem.get('intCostUOMId') ? selectedItem.get('dblCostUOMConvFactor') : selectedItem.get('dblOrderUOMConvFactor'));
+                                    
+                                    var itemModel = Ext.create(itemDetailStore.role.type, {
+                                        intInventoryShipmentId: current.get('intInventoryShipmentId'),
+                                        intLineNo: selectedItem.get('intLineNo'),
+                                        intOrderId: selectedItem.get('intOrderId'),
+                                        intSourceId: selectedItem.get('intSourceId'),
+                                        strOrderNumber: selectedItem.get('strOrderNumber'),
+                                        strSourceNumber: selectedItem.get('strSourceNumber'),
+                                        //dtmDate: order.get('dtmDate'),
+                                        dblQuantity: componentQty,
+                                        intItemId: rec.get('intItemId'),
+                                        strItemNo: rec.get('strItemNo'),
+                                        strItemDescription: rec.get('strDescription'),
+                                        dblQtyOrdered: componentQty,
+                                        // intLoadReceive: rec.get('intLoadToReceive'),
+                                        dblUnitPrice: itemCost,
+                                        // dblTax: s.get('dblTax'),
+                                        dblLineTotal: itemCost * componentQty,
+                                        strLotTracking: rec.get('strLotTracking'),
+                                        // intContainerId: rec.get('intContainerId'),
+                                        // strContainer: rec.get('strContainer'),
+                                        intSubLocationId: selectedItem.get('intSubLocationId'),
+                                        strSubLocationName: selectedItem.get('strSubLocationName'),
+                                        intStorageLocationId: selectedItem.get('intStorageLocationId'),
+                                        strStorageLocationName: selectedItem.get('strStorageLocationName'),
+                                        intItemUOMId: rec.get('intBundleUOMId'),
+                                        strUnitMeasure: rec.get('strBundleUOM'),
+                                        strOrderUOM: selectedItem.get('strOrderUOM'),
+                                        strWeightUOM: rec.get('strWeightUOM'),
+                                        intWeightUOMId: rec.get('intWeightUOMId'),
+                                        dblItemUOMConv: selectedItem.get('dblItemUOMConv'),
+                                        dblWeightItemUOMConv: selectedItem.get('dblWeightItemUOMConv'),
+                                        intDestinationGradeId: selectedItem.get('intDestinationGradeId'),
+                                        strDestinationGrades: selectedItem.get('strDestinationGrades'),
+                                        intDestinationWeightId: selectedItem.get('intDestinationWeightId'),
+                                        strDestinationWeights: selectedItem.get('strDestinationWeights'),
+                                        intGradeId: rec.get('intGradeId'),
+                                        strGrade: rec.get('strGrade'),
+                                        strOwnershipType: 'Own',
+                                        intOwnershipType: 1,
+                                        intCommodityId: rec.get('intCommodityId'),
+                                        intForexRateTypeId: selectedItem.get('intForexRateTypeId'),
+                                        strForexRateType: selectedItem.get('strForexRateType'),
+                                        dblForexRate: selectedItem.get('dblForexRate')
+                                });
+                                
+                                var newItem = itemDetailStore.add(itemModel);
+                                newItem = newItem[0];
+
+                            });
+                        } 
+                    }
+                }
+            });
+        }
+    },
+
+    getItemAddOns: function(editingRecord, selectedItem, current, itemDetailStore){
+        var me = this,
+            bundleType = selectedItem.get('strBundleType'),
+            locationId = current.get('intShipFromLocationId'),
+            itemAddOnId = selectedItem.get('intItemId');
+
+        var intRateType = i21.ModuleMgr.SystemManager.getCompanyPreference('intInventoryRateTypeId');
+
+        // Get the functional currency:
+        var functionalCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');  
+
+        var transactionCurrencyId = current.get('intCurrencyId');
+        var customerId = current.get('intEntityCustomerId');            
+        var shipFromLocationId = current.get('intShipFromLocationId');
+        var shipToLocationId = current.get('intShipToLocationId');            
+        var dtmShipDate = current.get('dtmShipDate');
+
+        // Get the customer cost from the hierarchy.  
+        var customerPriceCfg = {
+            ItemId: null,
+            CustomerId: customerId,
+            CurrencyId: transactionCurrencyId,
+            LocationId: shipFromLocationId,
+            TransactionDate: dtmShipDate,
+            Quantity: 0,
+            ShipToLocationId: shipToLocationId,
+            ItemUOMId: null
+        };
+
+        var processForexRateOnSuccess = function(successResponse, isItemRetailPrice, currentItem){
+            if (successResponse && successResponse.length > 0 ){
+                var dblForexRate = successResponse[0].dblRate;
+                var strRateType = successResponse[0].strRateType;             
+                var dblUnitPrice = currentItem.get('dblUnitPrice')
+                dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0;                       
+
+                // Convert the sales price to the transaction currency.
+                // and round it to six decimal places.  
+                if (transactionCurrencyId != functionalCurrencyId && isItemRetailPrice){
+                    dblUnitPrice = dblForexRate != 0 ?  dblUnitPrice / dblForexRate : 0;
+                    dblUnitPrice = i21.ModuleMgr.Inventory.roundDecimalFormat(dblUnitPrice, 6);
+                }
+                
+                currentItem.set('intForexRateTypeId', intRateType);
+                currentItem.set('strForexRateType', strRateType);
+                currentItem.set('dblForexRate', dblForexRate);
+                currentItem.set('dblUnitPrice', dblUnitPrice);                                 
+            }
+        }            
+
+        var processCustomerPriceOnSuccess = function(successResponse, currentItem){
+            var jsonData = Ext.decode(successResponse.responseText);
+            var isItemRetailPrice = true;                
+
+            // If there is a customer cost, replace dblUnitPrice with the customer sales price. 
+            var itemPricing = jsonData ? jsonData.itemPricing : null;
+            if (itemPricing) {
+                var dblUnitPrice = itemPricing.dblPrice; 
+                currentItem.set('dblUnitPrice', dblUnitPrice);
+
+                if (itemPricing.strPricing !== 'Inventory - Standard Pricing'){
+                    isItemRetailPrice = false;
+                }                    
+            }
+
+            // If transaction currency is a foreign currency, get the default forex rate type, forex rate, and convert the last cost to the transaction currency. 
+            if (transactionCurrencyId != functionalCurrencyId && intRateType){
+                // Do ajax call to retrieve the forex rate. 
+                iRely.Functions.getForexRate(
+                    transactionCurrencyId,
+                    intRateType,
+                    dtmShipDate,
+                    function(successResponse){
+                        processForexRateOnSuccess(successResponse, isItemRetailPrice);
+                    },
+                    function(failureResponse){              
+                        iRely.Functions.showErrorDialog('Something went wrong while getting the forex data.');
+                    }
+                );                      
+            }
+
+        };
+
+        var processCustomerPriceOnFailure = function(failureResponse){
+            var jsonData = Ext.decode(failureResponse.responseText);
+            iRely.Functions.showErrorDialog('Something went wrong while getting the item price from the customer pricing hierarchy.');
+        };   
+        
+        ic.utils.ajax({
+            url: './inventory/api/item/getitemaddons',
+            params: {
+                intItemId: itemAddOnId,
+                intLocationId: locationId,
+            },
+            method: 'get'
+        }).subscribe(
+            function (successResponse) {
+                var result = Ext.decode(successResponse.responseText);
+                if(current && itemDetailStore){
+                    editingRecord.set('dblQuantity', 1);
+                    Ext.Array.forEach(result.data, function(rec){
+      
+                        var itemDetail = Ext.create(itemDetailStore.role.type, {
+                                intInventoryShipmentId: current.get('intInventoryShipmentId'),
+                                strItemType: selectedItem.get('strItemNo') + ' - Add On',
+                                intItemTypeLinkId: editingRecord.get('intInventoryShipmentId'),
+                                dblComponentQty: rec.dblAddOnComponentQty,
+                                dblQuantity: rec.dblAddOnComponentQty,
+                                intItemId: rec.intItemId,
+                                strItemNo: rec.strItemNo,
+                                strItemDescription: rec.strDescription,
+                                intItemUOMId: rec.intAddOnItemUOMId,
+                                strUnitMeasure: rec.strAddOnItemUOM,
+                                dblItemUOMConvFactor: rec.dblAddOnItemUOMId,
+                                strLotTracking: rec.strLotTracking,
+                                intSubLocationId: rec.intSubLocationId,
+                                strSubLocationName: rec.strSubLocationName,
+                                intStorageLocationId: rec.intStorageLocationId,
+                                strStorageLocationName: rec.strStorageLocationName,
+                                intGradeId: rec.intGradeId,
+                                strGrade: rec.strGrade,
+                                intCommodityId: rec.intCommodityId,
+                                strOwnershipType: 'Own',
+                                intOwnershipType: 1,
+                        });
+                        
+                        itemDetailStore.add(itemDetail);
+
+                        customerPriceCfg.ItemId = rec.intItemId;
+                        customerPriceCfg.Quantity = rec.dblAddOnComponentQty; 
+                        customerPriceCfg.ItemUOMId = rec.intAddOnItemUOMId;
+                        
+                        me.getItemSalesPrice(customerPriceCfg, processCustomerPriceOnSuccess, processCustomerPriceOnFailure, itemDetail);
+
+                    });
+                }
+
+
+            },function (failureResponse) {
+                var jsonData = Ext.decode(failureResponse.responseText);
+                
+                iRely.Functions.showErrorDialog('Something went wrong while getting the Add On Items.');
+            }
+        );
+    },
+
+    getItemSubstitutes: function(editingRecord, selectedItem, current, itemDetailStore){
+        var me = this,
+            bundleType = selectedItem.get('strBundleType'),
+            locationId = current.get('intShipFromLocationId'),
+            itemAddOnId = selectedItem.get('intItemId');
+
+        var intRateType = i21.ModuleMgr.SystemManager.getCompanyPreference('intInventoryRateTypeId');
+
+        // Get the functional currency:
+        var functionalCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');  
+
+        var transactionCurrencyId = current.get('intCurrencyId');
+        var customerId = current.get('intEntityCustomerId');            
+        var shipFromLocationId = current.get('intShipFromLocationId');
+        var shipToLocationId = current.get('intShipToLocationId');            
+        var dtmShipDate = current.get('dtmShipDate');
+
+        // Get the customer cost from the hierarchy.  
+        var customerPriceCfg = {
+            ItemId: null,
+            CustomerId: customerId,
+            CurrencyId: transactionCurrencyId,
+            LocationId: shipFromLocationId,
+            TransactionDate: dtmShipDate,
+            Quantity: 0,
+            ShipToLocationId: shipToLocationId,
+            ItemUOMId: null
+        };
+
+        var processForexRateOnSuccess = function(successResponse, isItemRetailPrice, currentItem){
+            if (successResponse && successResponse.length > 0 ){
+                var dblForexRate = successResponse[0].dblRate;
+                var strRateType = successResponse[0].strRateType;             
+                var dblUnitPrice = currentItem.get('dblUnitPrice')
+                dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0;                       
+
+                // Convert the sales price to the transaction currency.
+                // and round it to six decimal places.  
+                if (transactionCurrencyId != functionalCurrencyId && isItemRetailPrice){
+                    dblUnitPrice = dblForexRate != 0 ?  dblUnitPrice / dblForexRate : 0;
+                    dblUnitPrice = i21.ModuleMgr.Inventory.roundDecimalFormat(dblUnitPrice, 6);
+                }
+                
+                currentItem.set('intForexRateTypeId', intRateType);
+                currentItem.set('strForexRateType', strRateType);
+                currentItem.set('dblForexRate', dblForexRate);
+                currentItem.set('dblUnitPrice', dblUnitPrice);                                 
+            }
+        }            
+
+        var processCustomerPriceOnSuccess = function(successResponse, currentItem){
+            var jsonData = Ext.decode(successResponse.responseText);
+            var isItemRetailPrice = true;                
+
+            // If there is a customer cost, replace dblUnitPrice with the customer sales price. 
+            var itemPricing = jsonData ? jsonData.itemPricing : null;
+            if (itemPricing) {
+                var dblUnitPrice = itemPricing.dblPrice; 
+                currentItem.set('dblUnitPrice', dblUnitPrice);
+
+                if (itemPricing.strPricing !== 'Inventory - Standard Pricing'){
+                    isItemRetailPrice = false;
+                }                    
+            }
+
+            // If transaction currency is a foreign currency, get the default forex rate type, forex rate, and convert the last cost to the transaction currency. 
+            if (transactionCurrencyId != functionalCurrencyId && intRateType){
+                // Do ajax call to retrieve the forex rate. 
+                iRely.Functions.getForexRate(
+                    transactionCurrencyId,
+                    intRateType,
+                    dtmShipDate,
+                    function(successResponse){
+                        processForexRateOnSuccess(successResponse, isItemRetailPrice);
+                    },
+                    function(failureResponse){              
+                        iRely.Functions.showErrorDialog('Something went wrong while getting the forex data.');
+                    }
+                );                      
+            }
+
+        };
+
+        var processCustomerPriceOnFailure = function(failureResponse){
+            var jsonData = Ext.decode(failureResponse.responseText);
+            iRely.Functions.showErrorDialog('Something went wrong while getting the item price from the customer pricing hierarchy.');
+        };   
+        
+        ic.utils.ajax({
+            url: './inventory/api/item/getitemsubstitutes',
+            params: {
+                intItemId: itemAddOnId,
+                intLocationId: locationId,
+            },
+            method: 'get'
+        }).subscribe(
+            function (successResponse) {
+                var result = Ext.decode(successResponse.responseText);
+                if(current && itemDetailStore){
+                    editingRecord.set('dblQuantity', 1);
+                    Ext.Array.forEach(result.data, function(rec){
+                        // var componentQty = rec.get('dblComponentQuantity') * selectedItem.get('dblQtyToShip'),
+                        //             markUpOrDownCost = 0;
+
+                        // if(rec.get('dtmBeginDate') && rec.get('dtmBeginDate') && 
+                        //     (Ext.Date.between(current.get('dtmShipDate'), rec.get('dtmBeginDate'), rec.get('dtmEndDate'))))
+                        //     markUpOrDownCost = rec.get('dblMarkUpOrDown');
+                        
+                        // var itemCost = (selectedItem.get('dblPrice') + markUpOrDownCost)
+                        //     * (selectedItem.get('intCostUOMId') ? selectedItem.get('dblCostUOMConvFactor') : selectedItem.get('dblOrderUOMConvFactor'));
+
+                        var itemDetail = Ext.create(itemDetailStore.role.type, {
+                                intInventoryShipmentId: current.get('intInventoryShipmentId'),
+                                strItemType: selectedItem.get('strItemNo') + ' - Substitute',
+                                intItemTypeLinkId: editingRecord.get('intInventoryShipmentId'),
+                                dblComponentQty: rec.dblSubstituteComponentQty,
+                                dblQuantity: rec.dblSubstituteComponentQty,
+                                intItemId: rec.intItemId,
+                                strItemNo: rec.strItemNo,
+                                strItemDescription: rec.strDescription,
+                                intItemUOMId: rec.intSubstituteItemUOMId,
+                                strUnitMeasure: rec.strSubstituteItemUOM,
+                                dblItemUOMConvFactor: rec.dblSubstituteItemUOMId,
+                                strLotTracking: rec.strLotTracking,
+                                intSubLocationId: rec.intSubLocationId,
+                                strSubLocationName: rec.strSubLocationName,
+                                intStorageLocationId: rec.intStorageLocationId,
+                                strStorageLocationName: rec.strStorageLocationName,
+                                intGradeId: rec.intGradeId,
+                                strGrade: rec.strGrade,
+                                intCommodityId: rec.intCommodityId,
+                                strOwnershipType: 'Own',
+                                intOwnershipType: 1,
+                        });
+                        
+                        itemDetailStore.add(itemDetail);
+
+                        customerPriceCfg.ItemId = rec.intItemId;
+                        customerPriceCfg.Quantity = rec.dblSubstituteComponentQty; 
+                        customerPriceCfg.ItemUOMId = rec.intSubstituteItemUOMId;
+                        
+                        me.getItemSalesPrice(customerPriceCfg, processCustomerPriceOnSuccess, processCustomerPriceOnFailure, itemDetail);
+
+                    });
+                }
+
+
+            },function (failureResponse) {
+                var jsonData = Ext.decode(failureResponse.responseText);
+                
+                iRely.Functions.showErrorDialog('Something went wrong while getting the Add On Items.');
+            }
+        );
+    },
 
     init: function(application) {
         this.control({

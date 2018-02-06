@@ -293,9 +293,11 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuICGetItemUOMByTypeMap());
             modelBuilder.Configurations.Add(new vyuICItemLicenseMap());
             modelBuilder.Configurations.Add(new vyuICGetAddOnItemMap());
+            modelBuilder.Configurations.Add(new vyuICGetAddOnComponentStockMap());
 
             modelBuilder.Configurations.Add(new tblICItemSubstituteMap());
             modelBuilder.Configurations.Add(new vyuICGetSubstituteItemMap());
+            modelBuilder.Configurations.Add(new vyuICGetSubstituteComponentStockMap());
 
             modelBuilder.Configurations.Add(new tblICInventoryShipmentChargeTaxMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryShipmentChargeTaxMap());

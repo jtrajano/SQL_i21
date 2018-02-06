@@ -3308,7 +3308,8 @@
                                                                                 "lookupValueField": "string",
                                                                                 "updateField": "string",
                                                                                 "valueField": "string",
-                                                                                "scrollable": "boolean"
+                                                                                "scrollable": "boolean",
+                                                                                "bind": "object"
                                                                             },
                                                                             "name": "MyNumberField3",
                                                                             "designerId": "ca3a9854-2f7b-40c9-ba24-31ff5d960f3c",
@@ -8483,7 +8484,7 @@
                                                             ]
                                                         },
                                                         {
-                                                            "type": "Ext.grid.column.Check",
+                                                            "type": "Ext.grid.column.Column",
                                                             "reference": {
                                                                 "name": "columns",
                                                                 "type": "array"
@@ -8502,21 +8503,55 @@
                                                                 "width": "auto",
                                                                 "scrollable": "boolean"
                                                             },
-                                                            "name": "MyCheck5",
+                                                            "name": "MyColumn58",
                                                             "designerId": "58de2b34-7d00-4617-a58d-2d6fdad77514",
                                                             "cn": [
                                                                 {
-                                                                    "type": "Ext.form.field.Checkbox",
+                                                                    "type": "Ext.form.field.ComboBox",
                                                                     "reference": {
                                                                         "name": "editor",
                                                                         "type": "object"
                                                                     },
                                                                     "codeClass": null,
-                                                                    "configAlternates": {
-                                                                        "scrollable": "boolean"
+                                                                    "userConfig": {
+                                                                        "columns": [
+                                                                            "[",
+                                                                            "    {",
+                                                                            "        dataIndex: 'strChargeEntity',",
+                                                                            "        dataType: 'string',",
+                                                                            "        text: 'Charge Entity',",
+                                                                            "        flex: 1",
+                                                                            "    }",
+                                                                            "]"
+                                                                        ],
+                                                                        "designer|createAlias": "gridcombobox",
+                                                                        "displayField": "strChargeEntity",
+                                                                        "itemId": "cboChargeEntity",
+                                                                        "pickerWidth": 70,
+                                                                        "valueField": "strChargeEntity"
                                                                     },
-                                                                    "name": "MyCheckbox41",
-                                                                    "designerId": "e9588d15-d8e5-4963-ae13-302dd76eb483"
+                                                                    "configAlternates": {
+                                                                        "columns": "array",
+                                                                        "pickerWidth": "number",
+                                                                        "designer|createAlias": "string",
+                                                                        "displayField": "datafield",
+                                                                        "itemId": "string",
+                                                                        "valueField": "datafield"
+                                                                    },
+                                                                    "name": "MyComboBox16",
+                                                                    "designerId": "a42156c9-84bb-4bf6-a310-23cc0cb6c693",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "columns",
+                                                                            "type": "string"
+                                                                        },
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "pickerWidth",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
                                                                 }
                                                             ]
                                                         },

@@ -95,4 +95,26 @@ namespace iRely.Inventory.Model
         public string strUnitMeasure { get; set; }
     }
 
+    public class vyuICGetAddOnComponentStock : vyuICGetItemStock
+    {
+        public int intParentKey { get; set; }
+        public int intAddOnItemId { get; set; }
+
+        public int intParentItemAddOnId { get; set; }
+
+        public string strParentItemAddOn { get; set; }
+
+        public string strParentItemAddOnDesc { get; set; }
+
+        public int? intAddOnItemUOMId { get; set; }
+
+        public decimal? dblAddOnItemUOMId { get; set; }
+
+        public string strAddOnItemUOM { get; set; }
+
+        public int? intAddOnComponent { get; set; }
+
+        public decimal? dblAddOnComponentQty { get; set; }
+    }
+
 }

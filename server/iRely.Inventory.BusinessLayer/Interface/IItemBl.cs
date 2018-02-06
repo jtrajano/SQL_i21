@@ -41,5 +41,7 @@ namespace iRely.Inventory.BusinessLayer
         Task<SearchResult> SearchBundle(GetParameter param);
         Task<SearchResult> SearchAddOns(GetParameter param);
         Task<SearchResult> SearchSubstitutes(GetParameter param);
+        Task<GetObjectResult> GetItemAddOns(GetParameter param, int intItemId, int intLocationId);
+        Task<GetObjectResult> GetItemSubstitutes(GetParameter param, int intItemId, int intLocationId);
     }
 }

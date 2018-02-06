@@ -20,10 +20,10 @@ namespace iRely.Inventory.BusinessLayer
         #endregion
 
 
-        #region
-        public async Task<GetObjectResult> GetKitComponents(GetParameter param, int intKitItemId, int intLocationId)
+        #region Custom Get Methods
+        public async Task<GetObjectResult> GetBundleComponents(GetParameter param, int intBundleItemId, int intLocationId)
         {
-            var query = _db.GetQuery<vyuICGetBundleItemStock>().Filter(param, true).Where(w => w.intKitItemId == intKitItemId && w.intLocationId == intLocationId);
+            var query = _db.GetQuery<vyuICGetBundleItemStock>().Filter(param, true).Where(w => w.intBundleItemId == intBundleItemId && w.intLocationId == intLocationId);
             var key = Methods.GetPrimaryKey<vyuICGetBundleItemStock>(_db.ContextManager);
 
             return new GetObjectResult()

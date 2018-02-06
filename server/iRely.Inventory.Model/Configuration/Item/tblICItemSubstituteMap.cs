@@ -55,4 +55,14 @@ namespace iRely.Inventory.Model
 
         }
     }
+
+    public class vyuICGetSubstituteComponentStockMap : EntityTypeConfiguration<vyuICGetSubstituteComponentStock>
+    {
+        public vyuICGetSubstituteComponentStockMap()
+        {
+            this.HasKey(t => t.intParentKey);
+
+            this.ToTable("vyuICGetSubstituteComponentStock");
+        }
+    }
 }

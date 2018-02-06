@@ -48,4 +48,14 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strUnitMeasure).HasColumnName("strUnitMeasure");
         }
     }
+
+    public class vyuICGetAddOnComponentStockMap : EntityTypeConfiguration<vyuICGetAddOnComponentStock>
+    {
+        public vyuICGetAddOnComponentStockMap()
+        {
+            this.HasKey(t => t.intParentKey);
+
+            this.ToTable("vyuICGetAddOnComponentStock");
+        }
+    }
 }

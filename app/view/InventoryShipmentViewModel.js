@@ -381,6 +381,15 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
             }
         },
 
+        isBundleComponent: function(get){
+            if (!iRely.Functions.isEmpty(get('grdInventoryShipment.selection.strItemType'))) {
+                return true;
+            }
+            else {
+                return false;  
+            }
+        },
+
         getShipButtonText: function(get) {
             if (get('current.ysnPosted')) {
                 return 'Unpost';

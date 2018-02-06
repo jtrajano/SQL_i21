@@ -3040,12 +3040,24 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         }
                                                                     },
                                                                     {
-                                                                        xtype: 'checkcolumn',
+                                                                        xtype: 'gridcolumn',
                                                                         itemId: 'colChargeEntity',
                                                                         width: 85,
                                                                         text: 'Charge Entity',
                                                                         editor: {
-                                                                            xtype: 'checkboxfield'
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'strChargeEntity',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Charge Entity',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            pickerWidth: 70,
+                                                                            itemId: 'cboChargeEntity',
+                                                                            displayField: 'strChargeEntity',
+                                                                            valueField: 'strChargeEntity'
                                                                         }
                                                                     },
                                                                     {

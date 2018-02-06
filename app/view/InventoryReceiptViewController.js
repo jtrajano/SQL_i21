@@ -1456,17 +1456,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 var current = vm.data.current;
 
                 if (current) {
-                    //Validate Accrue - Temporary
-                    // if (current) {
-                    //     var details = current.tblICInventoryReceiptCharges().data.items;
-                    //     debugger;
-                    //     details = _.filter(details, function(x) { return !x.dummy; });
-                    //     if (details.length > 0) {
-                    //         Ext.each(details, function (rec, idx) {
-                    //             rec.set('ysnAccrue', '');
-                    //         });
-                    //     }
-                    // }
 
                     //Validate Unit Cost in not zero
                     if (current.get('strReceiptType') !== 'Purchase Contract') {
@@ -7315,14 +7304,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         me.calculateGrossNet(current, 1);
     },
 
-    getKitComponents: function(selectedItem, current, itemDetailStore, scope){
+    getBundleComponents: function(selectedItem, current, itemDetailStore, scope){
         'use strict';
         var me = this,
-            kitType = selectedItem.get('strBundleType'),
-            screenTitle = kitType + ' - ' + selectedItem.get('strItemNo'),
+            bundleType = selectedItem.get('strBundleType'),
+            screenTitle = bundleType + ' - ' + selectedItem.get('strItemNo'),
             locationId = current.get('intLocationId'),
-            kitItemId = selectedItem.get('intItemId');
-            //receiptItemStore = current.tblICInventoryReceiptItems();
+            bundleItemId = selectedItem.get('intItemId');
 
         var addItemLotFunc = function(newItem, selectedRecord){
             if (!iRely.Functions.isEmpty(newItem.get('strLotTracking')) && newItem.get('strLotTracking') !== 'No') {
@@ -7353,11 +7341,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }
         };
 
-        if(kitType == 'Kit'){
+        if(bundleType == 'Kit'){
             var bundleComponentStore = Ext.create('Inventory.store.BufferedBundleComponent');
-            bundleComponentStore.getProxy().api.read = './inventory/api/itembundle/getkitcomponents';
+            bundleComponentStore.getProxy().api.read = './inventory/api/itembundle/getbundlecomponents';
             bundleComponentStore.getProxy().extraParams = {
-                intItemId: kitItemId,
+                intBundleItemId: bundleItemId,
                 intLocationId: locationId
             };
             bundleComponentStore.load({
@@ -7381,14 +7369,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 strItemDescription: rec.get('strDescription'),
                                 dblOpenReceive: componentQty,
                                 // intLoadReceive: rec.get('intLoadToReceive'),
-                                dblUnitCost: rec.get('dblReceiveLastCost'),
-                                dblUnitRetail: rec.get('dblReceiveLastCost'),
+                                dblUnitCost: rec.get('dblLastCost'),
+                                dblUnitRetail: rec.get('dblLastCost'),
                                 // dblTax: s.get('dblTax'),
                                 // dblLineTotal: rec.get('dblLineTotal'),
                                 strLotTracking: rec.get('strLotTracking'),
                                 intCommodityId: rec.get('intCommodityId'),
-                                intContainerId: rec.get('intContainerId'),
-                                strContainer: rec.get('strContainer'),
+                                // intContainerId: rec.get('intContainerId'),
+                                // strContainer: rec.get('strContainer'),
                                 intSubLocationId: selectedItem.get('intSubLocationId'),
                                 strSubLocationName: selectedItem.get('strSubLocationName'),
                                 intStorageLocationId: selectedItem.get('intStorageLocationId'),
@@ -7399,7 +7387,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 strUnitMeasure: selectedItem.get('strUnitMeasure'),
                                 strUnitType: selectedItem.get('strUnitType'),
                                 strWeightUOM: rec.get('strGrossUOM'),
-                                intWeightUOMId: rec.get('intWeightUOMId'),
+                                intWeightUOMId: rec.get('intGrossUOMId'),
                                 dblItemUOMConvFactor: selectedItem.get('dblItemUOMConvFactor'),
                                 dblWeightUOMConvFactor: selectedItem.get('dblWeightUOMConvFactor'),
                                 intCostUOMId: selectedItem.get('intCostUOMId') ? selectedItem.get('intCostUOMId') : selectedItem.get('intOrderUOM'),
@@ -7451,7 +7439,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 );
                 return;
             }
-            var searchURL = './inventory/api/itembundle/getkitcomponents?intItemId=' + kitItemId +
+
+            var searchURL = './inventory/api/itembundle/getbundlecomponents?intBundleItemId=' + bundleItemId +
                     '&intLocationId=' + locationId;
             
             iRely.Functions.openScreen('GlobalComponentEngine.view.FloatingSearch', {
@@ -7465,31 +7454,37 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             { dataIndex: 'strItemNo', text: 'Item No', width: 100, dataType: 'string' },
                             { dataIndex: 'strDescription', text: 'Item Description', width: 100, dataType: 'string' },
                             { xtype: 'numbercolumn', dataIndex: 'dblComponentQuantity', text: 'Component Quantity', width: 100, dataType: 'float' },
+                            { dataIndex: 'intBundleUOMId', text: 'Bundle UOM Id', dataType: 'numeric', hidden: true, required: true, allowNull: true },
+                            { dataIndex: 'strBundleUOM', text: 'Bundle UOM', width: 100, dataType: 'string' },
+                            { dataIndex: 'strBundleUOMType', text: 'Bundle UOM Type', width: 100, dataType: 'string' },
                             { xtype: 'numbercolumn', dataIndex: 'dblMarkUpOrDown', text: 'Mark Up/Down', width: 100, dataType: 'float' },
                             { dataIndex: 'dtmBeginDate', text: 'Begin Date', width: 100, dataType: 'date', required: true, xtype: 'datecolumn' },
                             { dataIndex: 'dtmEndDate', text: 'End Date', width: 100, dataType: 'date', required: true, xtype: 'datecolumn' },
+                            
                             //{ xtype: 'numbercolumn', dataIndex: 'dblLastCost', text: 'Cost', width: 100, dataType: 'float' },
                             { dataIndex: 'strLotTracking', text: 'Lot Tracking', width: 100, dataType: 'string' },
+                            { dataIndex: 'strGrossUOM', text: 'Gross UOM', width: 100, dataType: 'string', hidden: true, required: true },
+                            { dataIndex: 'intGrossUOMId', text: 'Gross UOM Id', dataType: 'numeric', hidden: true, required: true, allowNull: true },
                             { dataIndex: 'intCommodityId', text: 'Commodity Id', dataType: 'numeric', hidden: true, required: true, allowNull: true },
-                            { dataIndex: 'intContainerId', text: 'Container Id', dataType: 'numeric', hidden: true, required: true, allowNull: true },
-                            { dataIndex: 'strContainer', text: 'Container', width: 100, dataType: 'string', hidden: true, required: true },
+                            { dataIndex: 'strCommodityCode', text: 'Commodity', width: 100, dataType: 'string' },
+                            // { dataIndex: 'intContainerId', text: 'Container Id', dataType: 'numeric', hidden: true, required: true, allowNull: true },
+                            // { dataIndex: 'strContainer', text: 'Container', width: 100, dataType: 'string', hidden: true, required: true },
                             { dataIndex: 'intSubLocationId', text: 'Storage Location Id', dataType: 'numeric', hidden: true, required: true, allowNull: true },
                             { dataIndex: 'strSubLocationName', text: 'Storage Location', width: 100, dataType: 'string', hidden: true, required: true },
                             { dataIndex: 'intStorageLocationId', text: 'Storage Unit Id', dataType: 'numeric', hidden: true, required: true, allowNull: true },
                             { dataIndex: 'strStorageLocationName', text: 'Storage Unit', width: 100, dataType: 'string', hidden: true, required: true },
-                            { dataIndex: 'strOrderUOM', text: 'Order UOM', width: 100, dataType: 'string', hidden: true, required: true },
-                            { xtype: 'numbercolumn', dataIndex: 'dblOrderUOMConvFactor', text: 'Order UOM Conversion Factor', width: 100, dataType: 'float', hidden: true, required: true },
-                            { dataIndex: 'intItemUOMId', text: 'Item UOM Id', dataType: 'numeric', hidden: true, required: true, allowNull: true },
-                            { dataIndex: 'strUnitMeasure', text: 'Unit Measure', width: 100, dataType: 'string', hidden: true, required: true },
-                            { dataIndex: 'strOrderUOM', text: 'Order UOM', width: 100, dataType: 'string', hidden: true, required: true },
-                            { dataIndex: 'strReceiveUOMType', text: 'Receive UOM', width: 100, dataType: 'string', hidden: true, required: true },
-                            { dataIndex: 'strGrossUOM', text: 'Gross UOM', width: 100, dataType: 'string', hidden: true, required: true },
-                            { dataIndex: 'intGrossUOMId', text: 'Gross UOM Id', dataType: 'numeric', hidden: true, required: true, allowNull: true },
-                            { xtype: 'numbercolumn', dataIndex: 'dblItemUOMConvFactor', text: 'Item UOM Conversion Factor', width: 100, dataType: 'float', hidden: true, required: true },
-                            { xtype: 'numbercolumn', dataIndex: 'dblWeightUOMConvFactor', text: 'Weight UOM Conversion Factor', width: 100, dataType: 'float', hidden: true, required: true },
-                            { dataIndex: 'intReceiveUOMId', text: 'Receive UOM Id', dataType: 'numeric', hidden: true, required: true },
-                            { dataIndex: 'strReceiveUOM', text: 'Receive UOM', width: 100, dataType: 'string', hidden: true, required: true },
-                            { xtype: 'numbercolumn', dataIndex: 'dblCostUOMConvFactor', text: 'Cost UOM Conversion Factor', width: 100, dataType: 'float' },
+                            //{ xtype: 'numbercolumn', dataIndex: 'dblOrderUOMConvFactor', text: 'Order UOM Conversion Factor', width: 100, dataType: 'float', hidden: true, required: true },
+                            { dataIndex: 'intStockUOMId', text: 'Stock UOM Id', dataType: 'numeric', hidden: true, required: true, allowNull: true },
+                            { dataIndex: 'strStockUOM', text: 'Stock UOM', width: 100, dataType: 'string', hidden: true, required: true },
+                            { dataIndex: 'strStockUOMType', text: 'Stock UOM Type', width: 100, dataType: 'string', hidden: true, required: true },
+                            //{ dataIndex: 'strOrderUOM', text: 'Order UOM', width: 100, dataType: 'string', hidden: true, required: true },
+                            { xtype: 'numbercolumn', dataIndex: 'dblStockUnitQty', text: 'Stock Unit Qty', width: 100, dataType: 'float', hidden: true, required: true },
+                            //{ dataIndex: 'strReceiveUOMType', text: 'Receive UOM', width: 100, dataType: 'string', hidden: true, required: true },
+                            // { xtype: 'numbercolumn', dataIndex: 'dblItemUOMConvFactor', text: 'Item UOM Conversion Factor', width: 100, dataType: 'float', hidden: true, required: true },
+                            // { xtype: 'numbercolumn', dataIndex: 'dblWeightUOMConvFactor', text: 'Weight UOM Conversion Factor', width: 100, dataType: 'float', hidden: true, required: true },
+                            // { dataIndex: 'intReceiveUOMId', text: 'Receive UOM Id', dataType: 'numeric', hidden: true, required: true },
+                            // { dataIndex: 'strReceiveUOM', text: 'Receive UOM', width: 100, dataType: 'string', hidden: true, required: true },
+                            //{ xtype: 'numbercolumn', dataIndex: 'dblCostUOMConvFactor', text: 'Cost UOM Conversion Factor', width: 100, dataType: 'float' },
                             { dataIndex: 'intGradeId', text: 'Grade Id', dataType: 'numeric', hidden: true, required: true, allowNull: true },
                             { dataIndex: 'strGrade', text: 'Grade', width: 100, dataType: 'string' },
                     ],
@@ -7506,12 +7501,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     markUpOrDownCost = 0;
 
                                 if(rec.get('dtmBeginDate') && rec.get('dtmBeginDate') && 
-                                    (Ext.Date.between(current.get('dtmReceiptDate'), rec.get('dtmBeginDate'), rec.get('dtmBeginDate'))))
+                                    (Ext.Date.between(current.get('dtmReceiptDate'), rec.get('dtmBeginDate'), rec.get('dtmEndDate'))))
                                     markUpOrDownCost = rec.get('dblMarkUpOrDown');
                                 
                                 var itemCost = (selectedItem.get('dblUnitCost') + markUpOrDownCost)
                                     * (selectedItem.get('intCostUOMId') ? selectedItem.get('dblCostUOMConvFactor') : selectedItem.get('dblOrderUOMConvFactor'));
-                                    debugger;
+                                    
                                 var IRItemModel = Ext.create(itemDetailStore.role.type,{
                                         intInventoryReceiptId: current.get('intInventoryReceiptId'),
                                         intLineNo: selectedItem.get('intLineNo'),
@@ -7533,8 +7528,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                         // dblLineTotal: rec.get('dblLineTotal'),
                                         strLotTracking: rec.get('strLotTracking'),
                                         intCommodityId: rec.get('intCommodityId'),
-                                        intContainerId: rec.get('intContainerId'),
-                                        strContainer: rec.get('strContainer'),
+                                        // intContainerId: rec.get('intContainerId'),
+                                        // strContainer: rec.get('strContainer'),
                                         intSubLocationId: selectedItem.get('intSubLocationId'),
                                         strSubLocationName: selectedItem.get('strSubLocationName'),
                                         intStorageLocationId: selectedItem.get('intStorageLocationId'),
@@ -7545,7 +7540,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                         strUnitMeasure: rec.get('strStockUOM'),
                                         strUnitType: rec.get('strStockUOMType'),
                                         strWeightUOM: rec.get('strGrossUOM'),
-                                        intWeightUOMId: rec.get('intWeightUOMId'),
+                                        intWeightUOMId: rec.get('intGrossUOMId'),
                                         dblItemUOMConvFactor: rec.get('dblStockUnitQty'),
                                         dblWeightUOMConvFactor: rec.get('dblStockUnitQty'),
                                         intCostUOMId: rec.get('intStockUOMId'),

@@ -22,9 +22,9 @@ namespace iRely.Inventory.WebApi
             _bl = bl;
         }
 
-        public async Task<HttpResponseMessage> GetKitComponents(GetParameter param, int intItemId, int intLocationId)
+        public async Task<HttpResponseMessage> GetBundleComponents(GetParameter param, int intBundleItemId, int intLocationId)
         {
-            var result = await _bl.GetKitComponents(param, intItemId, intLocationId);
+            var result = await _bl.GetBundleComponents(param, intBundleItemId, intLocationId);
             return Request.CreateResponse(HttpStatusCode.OK, result);
         }
     }
