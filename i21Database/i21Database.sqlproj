@@ -6191,6 +6191,7 @@
     <Build Include="dbo\Stored Procedures\uspCTReportSugarContract.sql" />
     <Build Include="dbo\Views\vyuRKGetOptionMonthSearch.sql" />
     <Build Include="dbo\Tables\tblPRTypeTaxStatePSDCode.sql" />
+    <Build Include="dbo\Views\vyuCRMLostRevenueSalesperson.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
