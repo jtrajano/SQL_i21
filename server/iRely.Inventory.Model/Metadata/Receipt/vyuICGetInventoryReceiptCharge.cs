@@ -44,6 +44,16 @@ namespace iRely.Inventory.Model
         public string strChargesLink { get; set; }
         public decimal? dblQuantity { get; set; }
         public int intConcurrencyId { get; set; }
+        public int? intChargeId { get; set; }
+	    public int? intCostUOMId { get; set; }
+        public decimal? dblAmountBilled { get; set; }
+        public decimal? dblAmountPaid { get; set; }
+        public decimal? dblAmountPriced { get; set; }
+        public int? intSort { get; set; }
+        public int? intTaxGroupId { get; set; }
+        public int? intForexRateTypeId { get; set; }
+        public decimal? dblForexRate { get; set; }
+        public int? intCostUnitMeasureId { get; set; }
 
         public tblICInventoryReceiptCharge tblICInventoryReceiptCharge { get; set; }
     }

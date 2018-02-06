@@ -6492,8 +6492,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 FreightTermId: current.get('intFreightTermId'),
                                 CardId: null,
                                 VehicleId: null,
-                                IncludeExemptedCodes: false//,
-                                //UOMId: itemDetailTax.intItemUOMId
+                                IncludeExemptedCodes: false,
+                                UOMId: charge.get('intCostUnitMeasureId')
                          };
                          iRely.Functions.getItemTaxes(currentCharge, computeItemTax, me);
                     }

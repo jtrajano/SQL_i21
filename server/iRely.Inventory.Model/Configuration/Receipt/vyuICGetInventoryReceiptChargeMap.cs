@@ -47,8 +47,18 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strChargesLink).HasColumnName("strChargesLink");
             this.Property(t => t.dblQuantity).HasColumnName("dblQuantity").HasPrecision(18, 6);
             this.Property(t => t.intConcurrencyId).HasColumnName("intConcurrencyId");
-            // this.Property(t => t.strCurrency).HasColumnName("strCurrency");
-            // this.Property(t => t.intCent).HasColumnName("intCent");
+            this.Property(t => t.intChargeId).HasColumnName("intChargeId");
+            this.Property(t => t.intCostUOMId).HasColumnName("intCostUOMId");
+            this.Property(t => t.dblAmountBilled).HasColumnName("dblAmountBilled");
+            this.Property(t => t.dblAmountPaid).HasColumnName("dblAmountPaid");
+            this.Property(t => t.dblAmountPriced).HasColumnName("dblAmountPriced");
+            this.Property(t => t.intSort).HasColumnName("intSort");
+            this.Property(t => t.intTaxGroupId).HasColumnName("intTaxGroupId");
+            this.Property(t => t.intForexRateTypeId).HasColumnName("intForexRateTypeId");
+            this.Property(t => t.dblForexRate).HasColumnName("dblForexRate");
+            this.Property(t => t.intCostUnitMeasureId).HasColumnName("intCostUnitMeasureId");
+        // this.Property(t => t.strCurrency).HasColumnName("strCurrency");
+        // this.Property(t => t.intCent).HasColumnName("intCent");
 
         }
     }    
