@@ -25,6 +25,7 @@ BEGIN
 				SELECT DISTINCT
 					strEntityNo = A.vwsls_slsmn_id
 					,intEntityId = A.A4GLIdentity
+					,strName = A.vwsls_name
 					,intConcurrencyId = 0
 				FROM vwslsmst A
 				INNER JOIN tblTMSite B
@@ -42,6 +43,7 @@ BEGIN
 			SELECT DISTINCT
 				A.strEntityNo
 				,A.intEntityId
+				,strName = A.strName
 				,intConcurrencyId = 0
 			FROM tblEMEntity A
 			INNER JOIN tblEMEntityType B
