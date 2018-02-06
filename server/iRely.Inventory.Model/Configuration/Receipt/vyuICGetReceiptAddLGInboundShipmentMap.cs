@@ -83,6 +83,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intFreightTermId).HasColumnName("intFreightTermId");
             this.Property(t => t.strFreightTerm).HasColumnName("strFreightTerm");
             this.Property(t => t.strMarkings).HasColumnName("strMarkings");
+            this.Property(t => t.strBundleType).HasColumnName("strBundleType");
         }
     }
 }

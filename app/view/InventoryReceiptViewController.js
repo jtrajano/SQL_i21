@@ -5623,7 +5623,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         
                         Ext.each(result, function (order) {
                             //isValidToAdd = true; 
-                            if(order.get('strBundleType') !== null){
+                            var strBundleType = order.get('strBundleType'); 
+
+                            if(strBundleType){
                                 me.getKitComponents(order, currentVM, currentVM.tblICInventoryReceiptItems(), me);
                             } else {
 
