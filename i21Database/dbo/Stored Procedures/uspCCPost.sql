@@ -18,6 +18,9 @@ DECLARE @billId INT
 DECLARE @InvoicesId NVARCHAR(MAX)
 DECLARE @bankTransactionId INT
 DECLARE @intCompanyLocationId INT
+DECLARE @intAPAccount INT;
+DECLARE @strCompanyLocation NVARCHAR(50);
+DECLARE @strAPAccountErrorMessage NVARCHAR(255);
 
 BEGIN TRY
 	
@@ -36,6 +39,13 @@ BEGIN TRY
 		BEGIN
 			RAISERROR('Invalid Vendor Company Location Id found!',16,1)
 		END
+	END
+
+	select @intAPAccount = isnull(intAPAccount,0), @strCompanyLocation = rtrim(ltrim(strLocationName)) from tblSMCompanyLocation where intCompanyLocationId = @intCompanyLocationId;
+	IF(@intAPAccount = 0)
+	BEGIN
+		set @strAPAccountErrorMessage = 'Please setup AP Account for Vendor Company Location (' + @strCompanyLocation + ').';
+		RAISERROR(@strAPAccountErrorMessage,16,1)
 	END
 	
 	-- AP Transaction and Posting
