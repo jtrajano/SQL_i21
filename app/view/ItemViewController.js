@@ -4159,6 +4159,37 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
+    onFactorySelect: function (combo, records, eOpts) {
+        var me = this;
+
+        if (records.length <= 0)
+            return;
+
+        var win = combo.up('window');
+        if (!win) return; 
+
+        var grid = combo.up('grid');
+        if (!grid) return; 
+
+        var plugin = grid.getPlugin('cepFactory');
+        if (!plugin) return; 
+
+        var current = plugin.getActiveRecord();
+        if (!current) return; 
+
+        if (combo.itemId === 'cboFactory') {
+            if (current.tblICItemFactoryManufacturingCells()) {
+                var mfgCells = current.tblICItemFactoryManufacturingCells().data.items; 
+                for (var i = mfgCells.length - 1; i >= 0; i--){
+                    if (!mfgCells[i].dummy){
+                        current.tblICItemFactoryManufacturingCells().removeAt(i);
+                    }
+                }                
+            }
+
+        }
+    },    
+
     init: function(application) {
         this.control({
             "#cboType": {
@@ -4398,7 +4429,10 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#cboBundleUOM": {
                 select: this.onSubstituteSelect
-            }            
+            }, 
+            "#cboFactory": {
+                select: this.onFactorySelect
+            }
         });
 
     }
