@@ -6198,6 +6198,7 @@
     <Build Include="dbo\User Defined Types\TFReportTransaction.sql" />
     <Build Include="dbo\User Defined Types\TFReportOR7351334MSub.sql" />
     <Build Include="dbo\User Defined Types\TFReportOR7351334MSubSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspETTranslateDigitalDispatcher.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
