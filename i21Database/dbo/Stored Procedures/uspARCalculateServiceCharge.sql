@@ -12,6 +12,7 @@
 	@batchId			NVARCHAR(100) = NULL OUTPUT,
 	@totalAmount		NUMERIC(18,6) = NULL OUTPUT
 AS
+	SET NOCOUNT ON
 	CREATE TABLE #tmpCustomers (intEntityId INT, intServiceChargeId INT, intTermId INT)	
 	DECLARE @tblTypeServiceCharge	  [dbo].[ServiceChargeTableType]
 	DECLARE @tempTblTypeServiceCharge [dbo].[ServiceChargeTableType]	
@@ -125,15 +126,46 @@ AS
 			RETURN 0
 		END
 
+	DECLARE @totalAR Table(
+		intEntityId INT,
+		dblTotalAR NUMERIC(18, 6)
+
+	)
+	INSERT INTO @totalAR(
+		intEntityId,
+		dblTotalAR
+	)
+	SELECT AGING.intEntityCustomerId,
+		SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl120Days) + SUM(dbl121Days) + SUM(dblCredits) + SUM(dblPrepayments) 
+	FROM tblARCustomerAgingStagingTable AGING
+	INNER JOIN (
+		SELECT intEntityId
+				, dtmLastServiceCharge = ISNULL(dtmLastServiceCharge, '01/01/1900')
+		FROM tblARCustomer
+	) C ON C.intEntityId = AGING.intEntityCustomerId	
+	WHERE YEAR(dtmLastServiceCharge) * 100 + MONTH(dtmLastServiceCharge) < YEAR(@asOfDate) * 100 + MONTH(@asOfDate)
+
+	GROUP BY AGING.intEntityCustomerId
+	
+
+	SELECT * FROM @totalAR
+
 	--PROCESS EACH CUSTOMER
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpCustomers)
 		BEGIN
 			DECLARE @entityId			INT,
 					@serviceChargeId	INT
 
-			SELECT TOP 1 @entityId = intEntityId,
-						 @serviceChargeId = intServiceChargeId
-			FROM #tmpCustomers
+			DECLARE @dblTotalAR			NUMERIC(18, 6) = 0		
+
+			SELECT TOP 1 @entityId = C.intEntityId,
+						 @serviceChargeId = C.intServiceChargeId,
+						 @dblMinimumSC = ISNULL(SC.dblMinimumCharge, 0),
+						 @dblMinFinanceSC = ISNULL(SC.dblMinimumFinanceCharge, 0),
+						 @dblTotalAR = ISNULL(D.dblTotalAR, 0)
+			FROM #tmpCustomers C
+				LEFT JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId 
+				LEFT JOIN  @totalAR D on C.intEntityId = D.intEntityId
 
 			DELETE FROM @tempTblTypeServiceCharge
 
@@ -212,26 +244,11 @@ AS
 								AND ((@ysnChargeonCharge = 0 AND I.strType NOT IN ('Service Charge')) OR (@ysnChargeonCharge = 1))
 						END
 					ELSE
-						BEGIN
-							DECLARE @dblTotalAR			NUMERIC(18, 6) = 0								  
-
-							SELECT @dblTotalAR = SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl120Days) + SUM(dbl121Days) + SUM(dblCredits) + SUM(dblPrepayments) 
-							FROM tblARCustomerAgingStagingTable AGING
-							INNER JOIN (
-								SELECT intEntityId
-									 , dtmLastServiceCharge = ISNULL(dtmLastServiceCharge, '01/01/1900')
-								FROM tblARCustomer
-							) C ON C.intEntityId = AGING.intEntityCustomerId
-							WHERE AGING.intEntityCustomerId = @entityId
-							AND YEAR(dtmLastServiceCharge) * 100 + MONTH(dtmLastServiceCharge) < YEAR(@asOfDate) * 100 + MONTH(@asOfDate)
-
-							SELECT TOP 1 @dblMinimumSC = ISNULL(dblMinimumCharge, 0)
-									   , @dblMinFinanceSC = ISNULL(dblMinimumFinanceCharge, 0)
-							FROM tblARCustomer C 
-								INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId WHERE C.[intEntityId] = @entityId
-			
+						BEGIN	
+									
 							IF ISNULL(@dblTotalAR, 0) > 0
 								BEGIN
+									print 'goes here'
 									INSERT INTO @tempTblTypeServiceCharge
 									SELECT intInvoiceId			= AGING.intInvoiceId
 										 , intBudgetId			= NULL
@@ -250,7 +267,7 @@ AS
 																			SC.dblPercentage
 						 											END, dbo.fnARGetDefaultDecimal())
 									FROM tblARCustomerAgingStagingTable AGING
-										INNER JOIN tblARCustomer C ON AGING.intEntityCustomerId = C.[intEntityId]
+										INNER JOIN #tmpCustomers C ON AGING.intEntityCustomerId = C.[intEntityId]
 										INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId										
 									WHERE AGING.intEntityCustomerId = @entityId
 
@@ -278,13 +295,13 @@ AS
 								 									CASE WHEN dblMinimumCharge > 
 																			CASE WHEN ISNULL(dblMinimumFinanceCharge, 0) > CB.dblBudgetAmount
 																				 THEN 0
-																				 ELSE ((dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, dbo.fnGetDueDateBasedOnTerm(CASE WHEN ISNULL(CB.ysnForgiven, 0) = 0 THEN CB.dtmBudgetDate ELSE CB.dtmCalculated END, C.intTermsId), @asOfDate) * CB.dblBudgetAmount
+																				 ELSE ((dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, dbo.fnGetDueDateBasedOnTerm(CASE WHEN ISNULL(CB.ysnForgiven, 0) = 0 THEN CB.dtmBudgetDate ELSE CB.dtmCalculated END, C.intTermId), @asOfDate) * CB.dblBudgetAmount
 																			END
 								 										 THEN dblMinimumCharge
 								 										 ELSE 
 																			CASE WHEN ISNULL(dblMinimumFinanceCharge, 0) > CB.dblBudgetAmount
 																				 THEN 0
-																				 ELSE ((dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, dbo.fnGetDueDateBasedOnTerm(CASE WHEN ISNULL(CB.ysnForgiven, 0) = 0 THEN CB.dtmBudgetDate ELSE CB.dtmCalculated END, C.intTermsId), @asOfDate) * CB.dblBudgetAmount
+																				 ELSE ((dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, dbo.fnGetDueDateBasedOnTerm(CASE WHEN ISNULL(CB.ysnForgiven, 0) = 0 THEN CB.dtmBudgetDate ELSE CB.dtmCalculated END, C.intTermId), @asOfDate) * CB.dblBudgetAmount
 																			END
 								 									END
 								 								ELSE 0
@@ -293,11 +310,11 @@ AS
 								 							dblPercentage
 								 					END, dbo.fnARGetDefaultDecimal())
 							FROM tblARCustomerBudget CB
-								INNER JOIN tblARCustomer C ON CB.intEntityCustomerId = C.[intEntityId]	
+								INNER JOIN #tmpCustomers C ON CB.intEntityCustomerId = C.[intEntityId]	
 								INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId
 								INNER JOIN [tblEMEntityLocation] EL ON CB.intEntityCustomerId = EL.intEntityId AND EL.ysnDefaultLocation = 1	
 							WHERE CB.intEntityCustomerId = @entityId
-								AND DATEADD(DAY, SC.intGracePeriod, dbo.fnGetDueDateBasedOnTerm(CASE WHEN ISNULL(CB.ysnForgiven, 0) = 0 AND ISNULL(CB.ysnCalculated, 0) = 0 THEN CB.dtmBudgetDate ELSE CB.dtmCalculated END, C.intTermsId)) < @asOfDate
+								AND DATEADD(DAY, SC.intGracePeriod, dbo.fnGetDueDateBasedOnTerm(CASE WHEN ISNULL(CB.ysnForgiven, 0) = 0 AND ISNULL(CB.ysnCalculated, 0) = 0 THEN CB.dtmBudgetDate ELSE CB.dtmCalculated END, C.intTermId)) < @asOfDate
 								AND CB.dblBudgetAmount > @zeroDecimal
 								AND (CB.ysnCalculated = 0 OR CB.ysnForgiven = 1)
 						END
