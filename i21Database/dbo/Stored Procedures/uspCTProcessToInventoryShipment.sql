@@ -60,7 +60,8 @@ AS
 				dblUnitPrice,
 				intCurrencyId,
 				intForexRateTypeId,
-				dblForexRate
+				dblForexRate,
+				strChargesLink
 		)	
 		SELECT	intOrderType			=	1,
 				intSourceType			=	0,
@@ -82,7 +83,8 @@ AS
 				dblUnitPrice			=	ISNULL(AD.dblSeqPrice * AD.dblQtyToPriceUOMConvFactor,0),
 				intCurrencyId			=	AD.intSeqCurrencyId,
 				intForexRateTypeId		=	CD.intRateTypeId,
-				dblForexRate			=	CD.dblRate
+				dblForexRate			=	CD.dblRate,
+				strChargesLink			=	'CL-' + LTRIM(CD.intContractSeq)
 
 		FROM	tblCTContractDetail			CD	
 		JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
@@ -109,7 +111,8 @@ AS
 				dblAmount,
 				ysnAccrue,
 				intEntityVendorId,
-				ysnPrice
+				ysnPrice,
+				strChargesLink
 		) 
 		
 		SELECT	intOrderType			=	1,
@@ -129,7 +132,8 @@ AS
 				dblAmount				=	0,
 				ysnAccrue				=	CC.ysnAccrue,
 				intEntityVendorId		=	CC.intVendorId,
-				ysnPrice				=	CC.ysnPrice
+				ysnPrice				=	CC.ysnPrice,
+				strChargesLink			=	'CL-' + LTRIM(CD.intContractSeq)
 								
 		FROM	vyuCTContractCostView	CC
 		JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
