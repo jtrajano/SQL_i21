@@ -11,9 +11,11 @@ BEGIN TRY
 	DECLARE @strErrMsg NVARCHAR(MAX)
 	DECLARE @strExternalShipmentNumber NVARCHAR(100)
 	DECLARE @strFOBPoint NVARCHAR(50)
+	DECLARE @intSourceType INT
 
 	SELECT @intPurchaseSale = intPurchaseSale
 		  ,@strLoadNumber = strLoadNumber
+		  ,@intSourceType = intSourceType
 	FROM tblLGLoad
 	WHERE intLoadId = @intLoadId
 
@@ -27,27 +29,70 @@ BEGIN TRY
 	JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId 
 	WHERE intLoadId = @intLoadId
 
-	IF @intPurchaseSale = 1
+	IF ISNULL(@intSourceType,0) = 1
 	BEGIN
-		
-		IF ISNULL(@ysnValidateExternalShipmentNo,0) = 1 
+		UPDATE tblLGLoad SET ysnPosted = @ysnPost, dtmPostedDate=GETDATE() WHERE intLoadId = @intLoadId
+	END
+	ELSE 
+	BEGIN
+		IF @intPurchaseSale = 1
 		BEGIN
-			SELECT @strExternalShipmentNumber = strExternalShipmentNumber
-			FROM tblLGLoad
-			WHERE intLoadId = @intLoadId
-
-			IF(ISNULL(@strExternalShipmentNumber,'') = '')
+		
+			IF ISNULL(@ysnValidateExternalShipmentNo,0) = 1 
 			BEGIN
-				RAISERROR('External shipment no. has not been received. Cannot continue.', 16, 1)
+				SELECT @strExternalShipmentNumber = strExternalShipmentNumber
+				FROM tblLGLoad
+				WHERE intLoadId = @intLoadId
+
+				IF(ISNULL(@strExternalShipmentNumber,'') = '')
+				BEGIN
+					RAISERROR('External shipment no. has not been received. Cannot continue.', 16, 1)
+				END
+			END
+		
+			IF(ISNULL(@strFOBPoint,'') = 'Origin')
+			BEGIN		
+				EXEC uspLGPostInTransitCosting 
+					 @intLoadId = @intLoadId
+					,@ysnPost = @ysnPost
+					,@intPurchaseSale = 1
+					,@intEntityUserSecurityId = @intEntityUserSecurityId
+
+				-- Increase the Inbound In-Transit Qty.
+				EXEC uspLGUpdateInboundIntransitQty 
+					@intLoadId = @intLoadId
+					,@ysnInventorize = @ysnPost
+					,@ysnUnShip = @ysnUnShip
+					,@intEntityUserSecurityId = @intEntityUserSecurityId
+			END
+
+			IF(@ysnPost = 0)
+			BEGIN
+				UPDATE tblLGLoad SET intShipmentStatus = 2, ysnPosted = @ysnPost, dtmPostedDate = NULL WHERE intLoadId = @intLoadId
+			END
+			ELSE 
+			BEGIN
+				UPDATE tblLGLoad SET intShipmentStatus = 3, ysnPosted = @ysnPost, dtmPostedDate = GETDATE() WHERE intLoadId = @intLoadId
 			END
 		END
-		
-		IF(ISNULL(@strFOBPoint,'') = 'Origin')
-		BEGIN		
+		ELSE IF @intPurchaseSale = 2
+		BEGIN
+				EXEC uspLGPostInventoryShipment 
+						@ysnPost = @ysnPost
+					   ,@strTransactionId = @strLoadNumber
+					   ,@intEntityUserSecurityId = @intEntityUserSecurityId
+
+				IF(@ysnPost = 0)
+				BEGIN
+					UPDATE tblLGLoad SET intShipmentStatus = 1, ysnPosted = @ysnPost, dtmPostedDate = GETDATE() WHERE intLoadId = @intLoadId
+				END
+		END
+		ELSE IF @intPurchaseSale = 3
+		BEGIN
 			EXEC uspLGPostInTransitCosting 
-				 @intLoadId = @intLoadId
+				@intLoadId = @intLoadId
 				,@ysnPost = @ysnPost
-				,@intPurchaseSale = 1
+				,@intPurchaseSale = @intPurchaseSale
 				,@intEntityUserSecurityId = @intEntityUserSecurityId
 
 			-- Increase the Inbound In-Transit Qty.
@@ -56,45 +101,9 @@ BEGIN TRY
 				,@ysnInventorize = @ysnPost
 				,@ysnUnShip = @ysnUnShip
 				,@intEntityUserSecurityId = @intEntityUserSecurityId
+
+			UPDATE tblLGLoad SET ysnPosted = @ysnPost, dtmPostedDate=GETDATE() WHERE intLoadId = @intLoadId
 		END
-
-		IF(@ysnPost = 0)
-		BEGIN
-			UPDATE tblLGLoad SET intShipmentStatus = 2, ysnPosted = @ysnPost, dtmPostedDate = NULL WHERE intLoadId = @intLoadId
-		END
-		ELSE 
-		BEGIN
-			UPDATE tblLGLoad SET intShipmentStatus = 3, ysnPosted = @ysnPost, dtmPostedDate = GETDATE() WHERE intLoadId = @intLoadId
-		END
-	END
-	ELSE IF @intPurchaseSale = 2
-	BEGIN
-			EXEC uspLGPostInventoryShipment 
-					@ysnPost = @ysnPost
-				   ,@strTransactionId = @strLoadNumber
-				   ,@intEntityUserSecurityId = @intEntityUserSecurityId
-
-			IF(@ysnPost = 0)
-			BEGIN
-				UPDATE tblLGLoad SET intShipmentStatus = 1, ysnPosted = @ysnPost, dtmPostedDate = GETDATE() WHERE intLoadId = @intLoadId
-			END
-	END
-	ELSE IF @intPurchaseSale = 3
-	BEGIN
-		EXEC uspLGPostInTransitCosting 
-			@intLoadId = @intLoadId
-			,@ysnPost = @ysnPost
-			,@intPurchaseSale = @intPurchaseSale
-			,@intEntityUserSecurityId = @intEntityUserSecurityId
-
-		-- Increase the Inbound In-Transit Qty.
-		EXEC uspLGUpdateInboundIntransitQty 
-			@intLoadId = @intLoadId
-			,@ysnInventorize = @ysnPost
-			,@ysnUnShip = @ysnUnShip
-			,@intEntityUserSecurityId = @intEntityUserSecurityId
-
-		UPDATE tblLGLoad SET ysnPosted = @ysnPost, dtmPostedDate=GETDATE() WHERE intLoadId = @intLoadId
 	END
 END TRY
 
