@@ -94,6 +94,7 @@ SELECT	ShipmentItem.intInventoryShipmentId
 		,ShipmentItem.intItemId
 		,ShipmentItem.intItemUOMId
 		,ShipmentItem.dblQuantity
+		,ShipmentItem.strItemType
 INTO	#tmpShipmentItems
 FROM	tblICInventoryShipmentItem ShipmentItem LEFT JOIN tblICInventoryShipment Shipment 
 			ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
@@ -182,6 +183,7 @@ BEGIN
 				ON ContractDetail.intContractDetailId = currentSnapshot.intLineNo
 	WHERE	currentSnapshot.intLineNo IS NULL
 			AND previousSnapshot.intLineNo IS NOT NULL
+
 			
 	--Deleted Item
 	UNION ALL	
@@ -191,9 +193,10 @@ BEGIN
 			,dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (-previousSnapshot.dblQuantity))
 	FROM	#tmpLogShipmentItems previousSnapshot INNER JOIN tblCTContractDetail ContractDetail
 				ON ContractDetail.intContractDetailId = previousSnapshot.intLineNo
+			INNER JOIN tblICInventoryShipmentItem ShipmentItem ON ShipmentItem.intInventoryShipmentItemId = previousSnapshot.intInventoryShipmentItemId
 	WHERE	previousSnapshot.intLineNo IS NOT NULL
 			AND previousSnapshot.intInventoryShipmentItemId NOT IN (SELECT intInventoryShipmentItemId FROM #tmpShipmentItems)
-		
+			AND ShipmentItem.strItemType IS NULL --temporary
 	
 	--Added Item
 	UNION ALL
@@ -205,6 +208,7 @@ BEGIN
 				ON ContractDetail.intContractDetailId = currentSnapshot.intLineNo
 	WHERE	currentSnapshot.intLineNo IS NOT NULL
 			AND currentSnapshot.intInventoryShipmentItemId NOT IN (SELECT intInventoryShipmentItemId FROM #tmpLogShipmentItems)
+			AND currentSnapshot.strItemType IS NULL --temporary
 
 	-- Iterate and process records
 	DECLARE @Id INT = NULL,

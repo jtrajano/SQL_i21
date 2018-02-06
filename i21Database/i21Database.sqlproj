@@ -6204,6 +6204,8 @@
     <Build Include="dbo\Views\vyuQMLotStorageLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportCoffeeJDE.sql" />
     <Build Include="dbo\Views\vyuRKGetFutureMonth.sql" />
+    <Build Include="dbo\Views\vyuICGetAddOnComponentStock.sql" />
+    <Build Include="dbo\Views\vyuICGetSubstituteComponentStock.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

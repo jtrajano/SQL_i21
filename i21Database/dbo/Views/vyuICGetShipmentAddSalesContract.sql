@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuICGetShipmentAddSalesContract]
 AS
--- intKey = CAST(ROW_NUMBER() OVER(ORDER BY intCompanyLocationId, intEntityId, intContractDetailId) AS INT)
+--intKey = CAST(ROW_NUMBER() OVER(ORDER BY intCompanyLocationId, intEntityId, intContractDetailId) AS INT)
 SELECT	strOrderType = 'Sales Contract'
 		, strSourceType = 'None'
 		, intLocationId = intCompanyLocationId
@@ -13,11 +13,12 @@ SELECT	strOrderType = 'Sales Contract'
 		, strOrderNumber = strContractNumber
 		, intSourceId = NULL
 		, strSourceNumber = NULL
-		, intItemId
-		, strItemNo
-		, strItemDescription
-		, strLotTracking
-		, intCommodityId
+		, Item.intItemId
+		, Item.strItemNo
+		, strItemDescription = Item.strDescription
+		, Item.strBundleType
+		, Item.strLotTracking
+		, Item.intCommodityId
 		, intSubLocationId = intCompanyLocationSubLocationId
 		, strSubLocationName
 		, intStorageLocationId
@@ -53,6 +54,7 @@ SELECT	strOrderType = 'Sales Contract'
 		, ContractView.intFreightTermId
 		, ContractView.strFreightTerm
 FROM	vyuCTContractAddOrdersLookup ContractView
+INNER JOIN tblICItem Item ON Item.intItemId = ContractView.intItemId
 WHERE	ysnAllowedToShow = 1
 		AND strContractType = 'Sale'
 		AND ContractView.dblAvailableQty > 0
