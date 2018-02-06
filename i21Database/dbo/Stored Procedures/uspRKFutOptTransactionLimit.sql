@@ -1,108 +1,84 @@
-﻿CREATE PROC uspRKFutOptTransactionLimit @strXml NVARCHAR(max)
+﻿CREATE PROC uspRKFutOptTransactionLimit 
+       @strXml nvarchar(max)       
 AS
-DECLARE @idoc INT
 
-EXEC sp_xml_preparedocument @idoc OUTPUT
-	,@strXml
+DECLARE @idoc int     
+EXEC sp_xml_preparedocument @idoc OUTPUT, @strXml    
 
-DECLARE @tblTransaction TABLE (intFutOptTransactionId INT)
+DECLARE @tblTransaction table          
+  (     
+  intFutOptTransactionId Int  
+  )    
+  
+INSERT INTO @tblTransaction  
+SELECT    
+ intFutOptTransactionId
+  FROM OPENXML(@idoc,'root/Transaction', 2)        
+ WITH      
+ (    
+ [intFutOptTransactionId] INT
+)  
 
-INSERT INTO @tblTransaction
-SELECT intFutOptTransactionId
-FROM OPENXML(@idoc, 'root/Transaction', 2) WITH ([intFutOptTransactionId] INT)
+SELECT intFutureMarketId,intCommodityId,intFutureMonthId,intBookId,intSubBookId INTO #temp  FROM tblRKFutOptTransaction WHERE intFutOptTransactionId IN(SELECT intFutOptTransactionId FROM @tblTransaction)
 
-SELECT intFutOptTransactionId
-	,intFutureMonthId
-INTO #temp
-FROM tblRKFutOptTransaction
-WHERE intFutOptTransactionId IN (
-		SELECT intFutOptTransactionId
-		FROM @tblTransaction
-		)
+SELECT  CONVERT(INT,ROW_NUMBER() OVER(ORDER BY strFutMarketName ASC)) intRowNumber ,* from (
+SELECT * FROM (
+SELECT strFutMarketName,strFutureMonth,strCommodityCode,strBook,strSubBook, sum(dblOpenContract1) dblOpenContract,dblLimit FROM (
+SELECT 
+       fm.strFutMarketName
+       ,m.strFutureMonth
+       ,c.strCommodityCode
+       ,b.strBook
+       ,sb.strSubBook       
+       ,case when strBuySell= 'Buy' then intNoOfContract else -intNoOfContract end dblOpenContract1
+       ,dblLimit
+FROM tblRKFutOptTransaction fot 
+JOIN tblCTBook b ON b.intBookId = fot.intBookId and isnull(b.ysnLimitForMonth,0) = 1
+JOIN tblCTLimit l on b.intBookId = l.intBookId AND fot.intFutureMarketId=l.intFutureMarketId 
+                                                              AND fot.intFutureMonthId=l.intFutureMonthId 
+                                                              and fot.intSubBookId=l.intSubBookId
+                                                              AND fot.intCommodityId=l.intCommodityId                                                             
 
-SELECT CONVERT(INT, ROW_NUMBER() OVER (
-			ORDER BY strFutMarketName ASC
-			)) intRowNumber
-	,*
-FROM (
-	SELECT *
-	FROM (
-		SELECT strFutMarketName
-			,strFutureMonth
-			,strCommodityCode
-			,strBook
-			,strSubBook
-			,sum(dblOpenContract1) dblOpenContract
-			,dblLimit
-		FROM (
-			SELECT fm.strFutMarketName
-				,m.strFutureMonth
-				,c.strCommodityCode
-				,b.strBook
-				,sb.strSubBook
-				,CASE WHEN strBuySell = 'Buy' THEN intNoOfContract ELSE - intNoOfContract END dblOpenContract1
-				,dblLimit
-			FROM tblRKFutOptTransaction fot
-			JOIN tblCTLimit l ON fot.intBookId = l.intBookId AND fot.intFutureMarketId = l.intFutureMarketId AND fot.intFutureMonthId = l.intFutureMonthId AND fot.intSubBookId = l.intSubBookId AND fot.intCommodityId = l.intCommodityId
-			JOIN tblCTBook b ON b.intBookId = l.intBookId AND isnull(ysnLimitForMonth, 0) = 1
-			JOIN tblRKFutureMarket fm ON fm.intFutureMarketId = l.intFutureMarketId
-			JOIN tblRKFuturesMonth m ON m.intFutureMonthId = l.intFutureMonthId
-			JOIN tblICCommodity c ON c.intCommodityId = l.intCommodityId
-			JOIN tblCTSubBook sb ON sb.intSubBookId = l.intSubBookId
-			WHERE fot.intBookId IS NOT NULL AND fot.intSubBookId IS NOT NULL AND fot.intFutOptTransactionId IN (
-					SELECT intFutOptTransactionId
-					FROM @tblTransaction
-					) AND fot.intFutureMonthId IN (
-					SELECT intFutureMonthId
-					FROM #temp
-					)
-			) t
-		GROUP BY strFutMarketName
-			,strFutureMonth
-			,strCommodityCode
-			,strBook
-			,strSubBook
-			,dblLimit
-		) t1
-	WHERE dblOpenContract > dblLimit
-	
-	UNION
-	
-	SELECT *
-	FROM (
-		SELECT strFutMarketName
-			,strFutureMonth
-			,strCommodityCode
-			,strBook
-			,strSubBook
-			,sum(dblOpenContract1) dblOpenContract
-			,dblLimit
-		FROM (
-			SELECT fm.strFutMarketName
-				,NULL strFutureMonth
-				,c.strCommodityCode
-				,b.strBook
-				,sb.strSubBook
-				,CASE WHEN strBuySell = 'Buy' THEN intNoOfContract ELSE - intNoOfContract END dblOpenContract1
-				,dblLimit
-			FROM vyuRKGetOpenContract oc
-			JOIN tblRKFutOptTransaction fot ON oc.intFutOptTransactionId = fot.intFutOptTransactionId
-			JOIN tblCTLimit l ON fot.intBookId = l.intBookId AND fot.intFutureMarketId = l.intFutureMarketId AND fot.intSubBookId = l.intSubBookId AND fot.intCommodityId = l.intCommodityId
-			JOIN tblCTBook b ON b.intBookId = l.intBookId AND isnull(ysnLimitForMonth, 0) = 0
-			JOIN tblRKFutureMarket fm ON fm.intFutureMarketId = l.intFutureMarketId
-			JOIN tblICCommodity c ON c.intCommodityId = l.intCommodityId
-			JOIN tblCTSubBook sb ON sb.intSubBookId = l.intSubBookId
-			WHERE fot.intBookId IS NOT NULL AND fot.intSubBookId IS NOT NULL AND fot.intFutOptTransactionId IN (
-					SELECT intFutOptTransactionId
-					FROM @tblTransaction
-					)
-			) t1
-		GROUP BY strFutMarketName
-			,strFutureMonth
-			,strCommodityCode
-			,strBook
-			,strSubBook
-			,dblLimit
-		) t
-	WHERE dblOpenContract > dblLimit
-	) t1
+JOIN tblRKFutureMarket fm ON fm.intFutureMarketId = fot.intFutureMarketId
+JOIN tblRKFuturesMonth m ON m.intFutureMonthId = fot.intFutureMonthId
+JOIN tblICCommodity c ON c.intCommodityId = fot.intCommodityId
+JOIN tblCTSubBook sb ON sb.intSubBookId = fot.intSubBookId
+WHERE fot.intBookId IS NOT NULL AND fot.intSubBookId IS NOT NULL 
+       AND fot.intFutureMarketId IN(SELECT intFutureMarketId FROM #temp)
+           AND fot.intCommodityId IN(SELECT intCommodityId FROM #temp)
+       AND fot.intFutureMonthId in(SELECT intFutureMonthId FROM #temp)
+           AND fot.intBookId in(SELECT intBookId FROM #temp)
+              AND fot.intSubBookId in(SELECT intSubBookId FROM #temp)
+) t
+group by strFutMarketName,strFutureMonth,strCommodityCode,strBook,strSubBook, dblLimit
+)t1
+where dblOpenContract > dblLimit
+
+UNION
+
+SELECT * FROM (
+SELECT strFutMarketName,strFutureMonth,strCommodityCode,strBook,strSubBook, sum(dblOpenContract1) dblOpenContract,dblLimit FROM (
+SELECT 
+       fm.strFutMarketName
+       ,null strFutureMonth
+       ,c.strCommodityCode
+       ,b.strBook
+       ,sb.strSubBook       
+       ,case when strBuySell= 'Buy' then intNoOfContract else -intNoOfContract end dblOpenContract1
+       ,dblLimit
+FROM  tblRKFutOptTransaction fot
+JOIN tblCTLimit l on fot.intBookId = l.intBookId AND fot.intFutureMarketId=l.intFutureMarketId                                                        
+                                                              and fot.intSubBookId=l.intSubBookId
+                                                              AND fot.intCommodityId=l.intCommodityId                                                              
+JOIN tblCTBook b ON b.intBookId = fot.intBookId and isnull(ysnLimitForMonth,0) = 0
+JOIN tblRKFutureMarket fm ON fm.intFutureMarketId = fot.intFutureMarketId
+JOIN tblICCommodity c ON c.intCommodityId = fot.intCommodityId
+JOIN tblCTSubBook sb ON sb.intSubBookId = fot.intSubBookId
+WHERE fot.intBookId IS NOT NULL AND fot.intSubBookId IS NOT NULL
+       AND fot.intFutureMarketId IN(SELECT intFutureMarketId FROM #temp)
+          AND fot.intCommodityId IN(SELECT intCommodityId FROM #temp)
+                  AND fot.intBookId in(SELECT intBookId FROM #temp)
+              AND fot.intSubBookId in(SELECT intSubBookId FROM #temp)
+          )t1
+GROUP BY 
+ strFutMarketName,strFutureMonth,strCommodityCode,strBook,strSubBook,dblLimit) t where dblOpenContract > dblLimit )t1
