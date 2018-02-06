@@ -67,7 +67,7 @@ BEGIN
 	WHERE SOD.intSalesOrderId = @intSalesOrderId
 	GROUP BY SOD.intItemUOMId
 
-	UPDATE tblSOSalesOrderDetailId
+	UPDATE tblSOSalesOrderDetail
 	SET dblQtyOrdered = ISNULL(dbo.fnCalculateQtyBetweenUOM(@intItemUOMId, @intScaleUOMId, @dblNetWeight - @dblTotalTreatment), 0)
 	WHERE intSalesOrderDetailId = @intSalesOrderDetailId
 	  AND intSalesOrderId = @intSalesOrderId
