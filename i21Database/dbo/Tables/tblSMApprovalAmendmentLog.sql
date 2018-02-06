@@ -9,5 +9,6 @@
 	[intEntityId]					[int]											NOT NULL,
 	[dtmDate]						[datetime]										NOT NULL,
 	[intConcurrencyId]				[int]											NOT NULL DEFAULT (1), 
+	CONSTRAINT [PK_tblSMApprovalAmendmentLog] PRIMARY KEY CLUSTERED ([intApprovalAmendmentLogId] ASC),
 	CONSTRAINT [FK_tblSMApprovalAmendmentLog_tblSMTransaction] FOREIGN KEY ([intTransactionId]) REFERENCES [tblSMTransaction]([intTransactionId]) ON DELETE CASCADE
 )
