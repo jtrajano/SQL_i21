@@ -148,7 +148,7 @@ AS
 	GROUP BY AGING.intEntityCustomerId
 	
 
-	SELECT * FROM @totalAR
+	--SELECT * FROM @totalAR
 
 	--PROCESS EACH CUSTOMER
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpCustomers)
@@ -248,7 +248,7 @@ AS
 									
 							IF ISNULL(@dblTotalAR, 0) > 0
 								BEGIN
-									print 'goes here'
+									--print 'goes here'
 									INSERT INTO @tempTblTypeServiceCharge
 									SELECT intInvoiceId			= AGING.intInvoiceId
 										 , intBudgetId			= NULL
