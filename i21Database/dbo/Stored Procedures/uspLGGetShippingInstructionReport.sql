@@ -256,6 +256,47 @@ SELECT *
 					THEN ''
 				ELSE 'E-mail: ' + strSecondNotifyMail
 				END)) strSecondNotifyInfo
+	,LTRIM(RTRIM(CASE 
+				WHEN ISNULL(strThirdNotifyText, '') = ''
+					THEN ''
+				ELSE strThirdNotifyText + CHAR(13)
+				END + CASE 
+				WHEN ISNULL(strThirdNotify, '') = ''
+					THEN ''
+				ELSE strThirdNotify + CHAR(13)
+				END + CASE 
+				WHEN ISNULL(strThirdNotifyAddress, '') = ''
+					THEN ''
+				ELSE strThirdNotifyAddress + CHAR(13)
+				END + CASE 
+				WHEN ISNULL(strThirdNotifyCity, '') = ''
+					THEN ''
+				ELSE strThirdNotifyCity + CHAR(13)
+				END + CASE 
+				WHEN ISNULL(strThirdNotifyZipCode, '') = ''
+					THEN ''
+				ELSE strThirdNotifyZipCode + CHAR(13)
+				END + CASE 
+				WHEN ISNULL(strThirdNotifyCountry, '') = ''
+					THEN ''
+				ELSE strThirdNotifyCountry + CHAR(13)
+				END + CASE 
+				WHEN ISNULL(strThirdNotifyMobile, '') = ''
+					THEN ''
+				ELSE 'Mobile: ' + strThirdNotifyMobile + CHAR(13)
+				END + CASE 
+				WHEN ISNULL(strThirdNotifyPhone, '') = ''
+					THEN ''
+				ELSE 'Phone: ' + strThirdNotifyPhone + CHAR(13)
+				END + CASE 
+				WHEN ISNULL(strThirdNotifyFax, '') = ''
+					THEN ''
+				ELSE 'Fax: ' + strThirdNotifyFax + CHAR(13)
+				END + CASE 
+				WHEN ISNULL(strThirdNotifyMail, '') = ''
+					THEN ''
+				ELSE 'E-mail: ' + strThirdNotifyMail
+				END)) strThirdNotifyInfo
 	,strBOLInstructionText = @strBOLInstructionText
 	,strContainerTypePackingDescription = strContainerType + ' in ' + strPackingDescription
 	,strFullName = @strFullName
@@ -324,6 +365,7 @@ FROM (
 		,L.dtmISFReceivedDate
 		,FLNP.strText AS strFirstNotifyText
 		,SLNP.strText AS strSecondNotifyText
+		,TLNP.strText AS strThirdNotifyText
 		,ISNULL(CLNP.strText, '') AS strConsigneeText
 		,CASE FLNP.strType
 			WHEN 'Bank'
@@ -585,6 +627,136 @@ FROM (
 				THEN ISNULL(SNLocation.strZipCode, '')
 			ELSE ''
 			END strSecondNotifyZipCode
+		,CASE TLNP.strType
+			WHEN 'Bank'
+				THEN ISNULL(ThirdNotifyBank.strBankName, '')
+			WHEN 'Company'
+				THEN ISNULL(ThirdNotifyCompany.strCompanyName, '')
+			WHEN 'Vendor'
+				THEN ISNULL(ThirdNotify.strName, '')
+			WHEN 'Customer'
+				THEN ISNULL(ThirdNotify.strName, '')
+			WHEN 'Forwarding Agent'
+				THEN ISNULL(ThirdNotify.strName, '')
+			ELSE ''
+			END strThirdNotify
+		,CASE TLNP.strType
+			WHEN 'Bank'
+				THEN ISNULL(ThirdNotifyBank.strEmail, '')
+			WHEN 'Company'
+				THEN ISNULL(TNCompanyLocation.strEmail, ThirdNotifyCompany.strEmail)
+			WHEN 'Vendor'
+				THEN ISNULL(ThirdNotify.strEmail, '')
+			WHEN 'Customer'
+				THEN ISNULL(ThirdNotify.strEmail, '')
+			WHEN 'Forwarding Agent'
+				THEN ISNULL(ThirdNotify.strEmail, '')
+			ELSE ''
+			END strThirdNotifyMail
+		,CASE TLNP.strType
+			WHEN 'Bank'
+				THEN ISNULL(ThirdNotifyBank.strFax, '')
+			WHEN 'Company'
+				THEN ISNULL(SNCompanyLocation.strFax, ThirdNotifyCompany.strFax)
+			WHEN 'Vendor'
+				THEN ISNULL(ThirdNotify.strFax, '')
+			WHEN 'Customer'
+				THEN ISNULL(ThirdNotify.strFax, '')
+			WHEN 'Forwarding Agent'
+				THEN ISNULL(ThirdNotify.strFax, '')
+			ELSE ''
+			END strThirdNotifyFax
+		,CASE TLNP.strType
+			WHEN 'Bank'
+				THEN ''
+			WHEN 'Company'
+				THEN ''
+			WHEN 'Vendor'
+				THEN ISNULL(ThirdNotify.strMobile, '')
+			WHEN 'Customer'
+				THEN ISNULL(ThirdNotify.strMobile, '')
+			WHEN 'Forwarding Agent'
+				THEN ISNULL(ThirdNotify.strMobile, '')
+			ELSE ''
+			END strThirdNotifyMobile
+		,CASE TLNP.strType
+			WHEN 'Bank'
+				THEN ISNULL(ThirdNotifyBank.strPhone, '')
+			WHEN 'Company'
+				THEN ISNULL(SNCompanyLocation.strPhone, ThirdNotifyCompany.strPhone)
+			WHEN 'Vendor'
+				THEN ISNULL(ThirdNotifyContactEntity.strPhone, '')
+			WHEN 'Customer'
+				THEN ISNULL(ThirdNotifyContactEntity.strPhone, '')
+			WHEN 'Forwarding Agent'
+				THEN ISNULL(ThirdNotifyContactEntity.strPhone, '')
+			ELSE ''
+			END strThirdNotifyPhone
+		,CASE TLNP.strType
+			WHEN 'Bank'
+				THEN ISNULL(ThirdNotifyBank.strAddress, '')
+			WHEN 'Company'
+				THEN ISNULL(TNCompanyLocation.strAddress, ThirdNotifyCompany.strAddress)
+			WHEN 'Vendor'
+				THEN ISNULL(TNLocation.strAddress, '')
+			WHEN 'Customer'
+				THEN ISNULL(TNLocation.strAddress, '')
+			WHEN 'Forwarding Agent'
+				THEN ISNULL(TNLocation.strAddress, '')
+			ELSE ''
+			END strThirdNotifyAddress
+		,CASE TLNP.strType
+			WHEN 'Bank'
+				THEN ISNULL(ThirdNotifyBank.strCity, '')
+			WHEN 'Company'
+				THEN ISNULL(TNCompanyLocation.strCity, ThirdNotifyCompany.strCity)
+			WHEN 'Vendor'
+				THEN ISNULL(TNLocation.strCity, '')
+			WHEN 'Customer'
+				THEN ISNULL(TNLocation.strCity, '')
+			WHEN 'Forwarding Agent'
+				THEN ISNULL(TNLocation.strCity, '')
+			ELSE ''
+			END strThirdNotifyCity
+		,CASE TLNP.strType
+			WHEN 'Bank'
+				THEN ISNULL(ThirdNotifyBank.strCountry, '')
+			WHEN 'Company'
+				THEN ISNULL(TNCompanyLocation.strCountry, ThirdNotifyCompany.strCountry)
+			WHEN 'Vendor'
+				THEN ISNULL(TNLocation.strCountry, '')
+			WHEN 'Customer'
+				THEN ISNULL(TNLocation.strCountry, '')
+			WHEN 'Forwarding Agent'
+				THEN ISNULL(TNLocation.strCountry, '')
+			ELSE ''
+			END strThirdNotifyCountry
+		,CASE TLNP.strType
+			WHEN 'Bank'
+				THEN ISNULL(ThirdNotifyBank.strState, '')
+			WHEN 'Company'
+				THEN ''
+			WHEN 'Vendor'
+				THEN ISNULL(TNLocation.strState, '')
+			WHEN 'Customer'
+				THEN ISNULL(TNLocation.strState, '')
+			WHEN 'Forwarding Agent'
+				THEN ISNULL(TNLocation.strState, '')
+			ELSE ''
+			END strThirdNotifyState
+		,CASE TLNP.strType
+			WHEN 'Bank'
+				THEN ISNULL(ThirdNotifyBank.strZipCode, '')
+			WHEN 'Company'
+				THEN ISNULL(TNCompanyLocation.strZipPostalCode, ThirdNotifyCompany.strZip)
+			WHEN 'Vendor'
+				THEN ISNULL(TNLocation.strZipCode, '')
+			WHEN 'Customer'
+				THEN ISNULL(TNLocation.strZipCode, '')
+			WHEN 'Forwarding Agent'
+				THEN ISNULL(TNLocation.strZipCode, '')
+			ELSE ''
+			END strThirdNotifyZipCode
 		,CASE CLNP.strType
 			WHEN 'Bank'
 				THEN ISNULL(ConsigneeNotifyBank.strBankName, '')
@@ -777,6 +949,8 @@ FROM (
 		AND FLNP.strNotifyOrConsignee = 'First Notify'
 	LEFT JOIN tblLGLoadNotifyParties SLNP ON L.intLoadId = SLNP.intLoadId
 		AND SLNP.strNotifyOrConsignee = 'Second Notify'
+	LEFT JOIN tblLGLoadNotifyParties TLNP ON L.intLoadId = TLNP.intLoadId
+		AND TLNP.strNotifyOrConsignee = 'Third Notify'
 	LEFT JOIN tblLGLoadNotifyParties CLNP ON L.intLoadId = CLNP.intLoadId
 		AND CLNP.strNotifyOrConsignee = 'Consignee'
 	LEFT JOIN tblEMEntity FirstNotify ON FirstNotify.intEntityId = FLNP.intEntityId
@@ -793,6 +967,13 @@ FROM (
 	LEFT JOIN tblSMCompanySetup SecondNotifyCompany ON SecondNotifyCompany.intCompanySetupID = SLNP.intCompanySetupID
 	LEFT JOIN tblSMCompanyLocation SNCompanyLocation ON SNCompanyLocation.intCompanyLocationId = SLNP.intCompanyLocationId
 	LEFT JOIN tblEMEntityLocation SNLocation ON SNLocation.intEntityLocationId = SLNP.intEntityLocationId
+	LEFT JOIN tblEMEntity ThirdNotify ON ThirdNotify.intEntityId = TLNP.intEntityId
+	LEFT JOIN tblEMEntityToContact ThirdNotifyContact ON ThirdNotifyContact.intEntityId = ThirdNotify.intEntityId
+	LEFT JOIN tblEMEntity ThirdNotifyContactEntity ON ThirdNotifyContactEntity.intEntityId = ThirdNotifyContact.intEntityContactId
+	LEFT JOIN tblCMBank ThirdNotifyBank ON ThirdNotifyBank.intBankId = TLNP.intBankId
+	LEFT JOIN tblSMCompanySetup ThirdNotifyCompany ON ThirdNotifyCompany.intCompanySetupID = TLNP.intCompanySetupID
+	LEFT JOIN tblSMCompanyLocation TNCompanyLocation ON TNCompanyLocation.intCompanyLocationId = TLNP.intCompanyLocationId
+	LEFT JOIN tblEMEntityLocation TNLocation ON TNLocation.intEntityLocationId = TLNP.intEntityLocationId	
 	LEFT JOIN tblEMEntity ConsigneeNotify ON ConsigneeNotify.intEntityId = CLNP.intEntityId
 	LEFT JOIN tblEMEntityToContact ConsigneeNotifyContact ON ConsigneeNotifyContact.intEntityId = ConsigneeNotify.intEntityId
 	LEFT JOIN tblEMEntity ConsigneeNotifyContactEntity ON ConsigneeNotifyContactEntity.intEntityId = ConsigneeNotifyContact.intEntityContactId
