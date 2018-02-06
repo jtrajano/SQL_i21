@@ -89,9 +89,13 @@ BEGIN
 				ON ShipmentItems.intItemUOMId = ItemUOM.intItemUOMId
 			LEFT JOIN dbo.tblICStorageLocation StorageLocation 
 				ON StorageLocation.intStorageLocationId = ShipmentItems.intStorageLocationId
+			INNER JOIN tblICItem Item 
+				ON Item.intItemId = ShipmentItems.intItemId
 	WHERE	Shipment.intInventoryShipmentId = @intTransactionId
 			AND dbo.fnGetItemLotType(ShipmentItems.intItemId) = @LotType_No
 			AND ISNULL(ShipmentItems.intOwnershipType, @Ownership_Own) = @Ownership_Own
+			AND Item.strBundleType IS NULL
+			
 
 	-- Lot Tracked items 
 	UNION ALL 
@@ -119,8 +123,11 @@ BEGIN
 				ON Lot.intLotId = ShipmentItemLots.intLotId
 			LEFT JOIN dbo.tblICStorageLocation StorageLocation 
 				ON StorageLocation.intStorageLocationId = ShipmentItems.intStorageLocationId
+			INNER JOIN tblICItem Item
+				ON Item.intItemId = ShipmentItems.intItemId
 	WHERE	Shipment.intInventoryShipmentId = @intTransactionId
 			AND ISNULL(ShipmentItems.intOwnershipType, @Ownership_Own) = @Ownership_Own
+			AND Item.strBundleType IS NULL
 END
 
 -- Do the reservations
