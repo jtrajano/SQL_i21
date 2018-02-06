@@ -187,6 +187,7 @@ BEGIN
 		,ysnInvalid						BIT
 		,dblGrossTransferCost			NUMERIC(18,6)
 		,dblNetTransferCost				NUMERIC(18,6)
+		,intFreightTermId				INT
 	);
 
 	IF ((SELECT COUNT(*) FROM tempdb..sysobjects WHERE name = '##tblCFTransactionTaxType') = 1)
@@ -3329,6 +3330,11 @@ BEGIN
 	END
 	ELSE
 	BEGIN
+
+	
+	DECLARE @companyConfigFreightTermId	INT = NULL
+	SELECT TOP 1 @companyConfigFreightTermId = intFreightTermId FROM tblCFCompanyPreference
+	
 	---------------------------------------------------
 	--					PRICING OUT					 --
 	---------------------------------------------------
@@ -3374,46 +3380,48 @@ BEGIN
 			,ysnInvalid
 			,dblGrossTransferCost
 			,dblNetTransferCost
+			,intFreightTermId
 			)
 			SELECT
-			 @intItemId					AS intItemId
-			,@intProductId				AS intProductId		
-			,@strProductNumber			AS strProductNumber	
-			,@strItemId					AS strItemId			
-			,@intCustomerId				AS intCustomerId
-			,@intLocationId				AS intLocationId
-			,@dblQuantity				AS dblQuantity
-			,@intItemUOMId				AS intItemUOMId
-			,@dtmTransactionDate		AS dtmTransactionDate
-			,@strTransactionType		AS strTransactionType
-			,@intNetworkId				AS intNetworkId
-			,@intSiteId					AS intSiteId
-			,@dblTransferCost			AS dblTransferCost
-			,@dblInventoryCost			AS dblInventoryCost
-			,@dblOriginalPrice			AS dblOriginalPrice
-			,@dblPrice					AS dblPrice				
-			,@strPriceMethod			AS strPriceMethod		
-			,@dblAvailableQuantity		AS dblAvailableQuantity	
-			,@intContractHeaderId		AS intContractHeaderId	
-			,@intContractDetailId		AS intContractDetailId	
-			,@strContractNumber			AS strContractNumber		
-			,@intContractSeq			AS intContractSeq		
-			,@strPriceBasis				AS strPriceBasis	
-			,@intPriceProfileId			AS intPriceProfileId	
-			,@intPriceIndexId 			AS intPriceIndexId 	
-			,@intSiteGroupId 			AS intSiteGroupId 	
-			,@strPriceProfileId			AS strPriceProfileId	
-			,@strPriceIndexId			AS strPriceIndexId	
-			,@strSiteGroup				AS strSiteGroup		
-			,@dblPriceProfileRate		AS dblPriceProfileRate
-			,@dblPriceIndexRate			AS dblPriceIndexRate	
-			,@dtmPriceIndexDate			AS dtmPriceIndexDate	
-			,@dblMargin					AS dblMargin
-			,@dblAdjustmentRate			AS dblAdjustmentRate
-			,@ysnDuplicate				AS ysnDuplicate
-			,@ysnInvalid				AS ysnInvalid
-			,@dblGrossTransferCost		AS dblGrossTransferCost
-			,@dblNetTransferCost		AS dblNetTransferCost
+			 @intItemId					 AS intItemId
+			,@intProductId				 AS intProductId		
+			,@strProductNumber			 AS strProductNumber	
+			,@strItemId					 AS strItemId			
+			,@intCustomerId				 AS intCustomerId
+			,@intLocationId				 AS intLocationId
+			,@dblQuantity				 AS dblQuantity
+			,@intItemUOMId				 AS intItemUOMId
+			,@dtmTransactionDate		 AS dtmTransactionDate
+			,@strTransactionType		 AS strTransactionType
+			,@intNetworkId				 AS intNetworkId
+			,@intSiteId					 AS intSiteId
+			,@dblTransferCost			 AS dblTransferCost
+			,@dblInventoryCost			 AS dblInventoryCost
+			,@dblOriginalPrice			 AS dblOriginalPrice
+			,@dblPrice					 AS dblPrice				
+			,@strPriceMethod			 AS strPriceMethod		
+			,@dblAvailableQuantity		 AS dblAvailableQuantity	
+			,@intContractHeaderId		 AS intContractHeaderId	
+			,@intContractDetailId		 AS intContractDetailId	
+			,@strContractNumber			 AS strContractNumber		
+			,@intContractSeq			 AS intContractSeq		
+			,@strPriceBasis				 AS strPriceBasis	
+			,@intPriceProfileId			 AS intPriceProfileId	
+			,@intPriceIndexId 			 AS intPriceIndexId 	
+			,@intSiteGroupId 			 AS intSiteGroupId 	
+			,@strPriceProfileId			 AS strPriceProfileId	
+			,@strPriceIndexId			 AS strPriceIndexId	
+			,@strSiteGroup				 AS strSiteGroup		
+			,@dblPriceProfileRate		 AS dblPriceProfileRate
+			,@dblPriceIndexRate			 AS dblPriceIndexRate	
+			,@dtmPriceIndexDate			 AS dtmPriceIndexDate	
+			,@dblMargin					 AS dblMargin
+			,@dblAdjustmentRate			 AS dblAdjustmentRate
+			,@ysnDuplicate				 AS ysnDuplicate
+			,@ysnInvalid				 AS ysnInvalid
+			,@dblGrossTransferCost		 AS dblGrossTransferCost
+			,@dblNetTransferCost		 AS dblNetTransferCost
+			,@companyConfigFreightTermId AS intFreightTermId
 		END
 	ELSE
 		BEGIN
@@ -3456,6 +3464,7 @@ BEGIN
 			,@ysnInvalid				AS ysnInvalid
 			,@dblGrossTransferCost		AS dblGrossTransferCost
 			,@dblNetTransferCost		AS dblNetTransferCost
+			,@companyConfigFreightTermId AS intFreightTermId
 		END
 	---------------------------------------------------
 	--					PRICING OUT					 --

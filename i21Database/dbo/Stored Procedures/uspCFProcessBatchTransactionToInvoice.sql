@@ -20,6 +20,7 @@ DECLARE @TaxDetails AS LineItemTaxDetailStagingTable
 DECLARE @ysnRemoteTransaction INT
 
 DECLARE @companyConfigTermId	INT = NULL
+DECLARE @companyConfigFreightTermId	INT = NULL
 
 SELECT TOP 1 @companyConfigTermId = intTermsCode FROM tblCFCompanyPreference
 IF(ISNULL(@companyConfigTermId,0) = 0)
@@ -30,6 +31,17 @@ BEGIN
 
 	RETURN
 END
+
+SELECT TOP 1 @companyConfigFreightTermId = intFreightTermId FROM tblCFCompanyPreference
+IF(ISNULL(@companyConfigFreightTermId,0) = 0)
+BEGIN
+	SET @ErrorMessage = 'Freight Terms needs setup on Company Configuration for Card Fueling.'
+	SET @CreatedIvoices = NULL
+	SET @UpdatedIvoices = NULL
+
+	RETURN
+END
+
 
 --SET @UserEntityId = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @UserId),@UserId)
 SET @UserEntityId = @UserId
@@ -177,7 +189,7 @@ SELECT * FROM #tmpForeignTransactionId
 					,[dtmDueDate]							= NULL
 					,[dtmShipDate]							= cfTrans.dtmTransactionDate
 					,[intEntitySalespersonId]				= cfCardAccount.intSalesPersonId
-					,[intFreightTermId]						= I.[intFreightTermId] 
+					,[intFreightTermId]						= @companyConfigFreightTermId--I.[intFreightTermId] 
 					,[intShipViaId]							= I.[intShipViaId] 
 					,[intPaymentMethodId]					= I.[intPaymentMethodId]
 					,[strInvoiceOriginId]					= cfTrans.strTransactionId

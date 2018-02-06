@@ -28,6 +28,7 @@ DECLARE @ysnRemoteTransaction INT
 DECLARE @strItemTermDiscountBy NVARCHAR(MAX)
 
 DECLARE @companyConfigTermId	INT = NULL
+DECLARE @companyConfigFreightTermId	INT = NULL
 DECLARE @invalid				BIT = 0
 DECLARE @transactionDate		DATETIME
 DECLARE @intCardId				INT
@@ -36,6 +37,16 @@ SELECT TOP 1 @companyConfigTermId = intTermsCode FROM tblCFCompanyPreference
 IF(ISNULL(@companyConfigTermId,0) = 0)
 BEGIN
 	SET @ErrorMessage = 'Term code is required.'
+	SET @CreatedIvoices = NULL
+	SET @UpdatedIvoices = NULL
+
+	RETURN
+END
+
+SELECT TOP 1 @companyConfigFreightTermId = intFreightTermId FROM tblCFCompanyPreference
+IF(ISNULL(@companyConfigFreightTermId,0) = 0)
+BEGIN
+	SET @ErrorMessage = 'Freight Terms needs setup on Company Configuration for Card Fueling.'
 	SET @CreatedIvoices = NULL
 	SET @UpdatedIvoices = NULL
 
@@ -217,7 +228,7 @@ SELECT
 	,[dtmDueDate]							= NULL
 	,[dtmShipDate]							= cfTrans.dtmTransactionDate
 	,[intEntitySalespersonId]				= cfCardAccount.intSalesPersonId
-	,[intFreightTermId]						= I.[intFreightTermId]
+	,[intFreightTermId]						= @companyConfigFreightTermId --I.[intFreightTermId]
 	,[intShipViaId]							= I.[intShipViaId]
 	,[intPaymentMethodId]					= I.[intPaymentMethodId]
 	,[strInvoiceOriginId]					= cfTrans.strTransactionId
