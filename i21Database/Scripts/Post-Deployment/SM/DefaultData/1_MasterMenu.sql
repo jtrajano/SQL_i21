@@ -1,6 +1,6 @@
 ﻿GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Cigarette Rebate Programs' AND strModuleName = 'Store' AND strCommand = N'Store.view.CigaretteRebatePrograms?showSearch=true' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Store'))
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Delivery Sheets (Portal)' AND strModuleName = 'Ticket Management' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Scale (Portal)' AND strModuleName = 'Ticket Management' AND intParentMenuID = 0))
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -5881,6 +5881,20 @@ IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Storage (Port
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @TKStorageMenuId)
 	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@TKStorageMenuId, 1)
+END
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Delivery Sheets (Portal)' AND strModuleName = 'Ticket Management' AND intParentMenuID = @ScalePortalParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Delivery Sheets (Portal)', N'Ticket Management', @ScalePortalParentMenuId, N'Delivery Sheets (Portal)', N'Portal Menu', N'Screen', N'Grain.view.DeliverySheet?showSearch=true', N'small-menu-portal', 1, 0, 0, 1, 2, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'Grain.view.DeliverySheet?showSearch=true' WHERE strMenuName = 'Delivery Sheets (Portal)' AND strModuleName = 'Ticket Management' AND intParentMenuID = @ScalePortalParentMenuId
+
+DECLARE @TKDeliverySheetsMenuId INT
+SELECT  @TKDeliverySheetsMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Delivery Sheets (Portal)' AND strModuleName = 'Ticket Management' AND intParentMenuID = @ScalePortalParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Delivery Sheets (Portal)' AND strModuleName = 'Ticket Management' AND intParentMenuID = @ScalePortalParentMenuId)
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @TKDeliverySheetsMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@TKDeliverySheetsMenuId, 1)
 END
 
 /* Logistics */

@@ -13,7 +13,7 @@ BEGIN
 	END
 	ELSE IF @role = 1
 	BEGIN
-		DECLARE @roleType NVARCHAR
+		DECLARE @roleType NVARCHAR(15)
 		SELECT @roleType = strRoleType FROM tblSMUserRole WHERE intUserRoleID = @id
 
 		IF @roleType = 'Contact'
