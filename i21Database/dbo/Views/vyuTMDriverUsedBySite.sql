@@ -6,6 +6,7 @@ AS
 SELECT DISTINCT
 	A.strEntityNo
 	,A.intEntityId
+	,strName = A.strName
 	,intConcurrencyId = 0
 FROM tblEMEntity A
 INNER JOIN [tblEMEntityType] B
