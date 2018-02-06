@@ -46,36 +46,39 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLCompanyPreferenceOption)
 	
 UPDATE tblGLCompanyPreferenceOption SET intDefaultVisibleOldAccountSystemId = 1 WHERE intDefaultVisibleOldAccountSystemId IS NULL
 END')
-
 	
 GO
-	DECLARE @originId INT
-	SELECT TOP 1 @originId = intAccountSystemId FROM tblGLAccountSystem WHERE strAccountSystemDescription = 'Origin'
-	--DELETE duplicate intAccountId, strOldAccountId in origin Account System where ysnInbound = 1
+PRINT('Started deleting duplicates in tblGLCrossReferenceMapping')
+GO
 
-	;WITH dup AS
+	;WITH exempt AS
 	(
-		SELECT strOldAccountId, intAccountId FROM dbo.tblGLCrossReferenceMapping WHERE intAccountSystemId =@originId  AND ysnInbound = 1
-		GROUP BY strOldAccountId, intAccountId HAVING COUNT(1) > 1
-	),
-	exempt AS
-	(
-		SELECT m.intCrossReferenceMappingId, d.strOldAccountId, d.intAccountId FROM dbo.tblGLCrossReferenceMapping m JOIN dup d ON d.strOldAccountId =m.strOldAccountId AND
-		 m.intAccountId = d.intAccountId WHERE intAccountSystemId =@originId  AND ysnInbound = 1
-	),
-	del AS
-	(
-		SELECT intCrossReferenceMappingId FROM dbo.tblGLCrossReferenceMapping m JOIN dup d ON d.strOldAccountId =m.strOldAccountId AND
-		 m.intAccountId = d.intAccountId WHERE intAccountSystemId =@originId  AND ysnInbound = 1
-		 AND m.intCrossReferenceMappingId NOT IN (SELECT m.intCrossReferenceMappingId FROM exempt) 
+		SELECT MIN(intCrossReferenceMappingId) intCrossReferenceMappingId, strOldAccountId, intAccountId, intAccountSystemId, ysnInbound, ysnOutbound FROM dbo.tblGLCrossReferenceMapping
+		GROUP BY strOldAccountId, intAccountId , intAccountSystemId,ysnInbound, ysnOutbound HAVING COUNT(1) > 1  
 	)
-	DELETE FROM dbo.tblGLCrossReferenceMapping WHERE intCrossReferenceMappingId IN (SELECT intCrossReferenceMappingId FROM	del)
+	,dup AS
+	(
+		SELECT a.intCrossReferenceMappingId a1, c.intCrossReferenceMappingId  a2 FROM dbo.tblGLCrossReferenceMapping a 
+		JOIN exempt b ON a.strOldAccountId = b.strOldAccountId AND a.intAccountId = b.intAccountId
+		AND a.intAccountSystemId = b.intAccountSystemId AND a.ysnInbound = b.ysnInbound AND a.ysnOutbound = b.ysnOutbound
+		LEFT JOIN exempt c ON c.intCrossReferenceMappingId = a.intCrossReferenceMappingId
+	)
+	DELETE FROM dbo.tblGLCrossReferenceMapping  WHERE intCrossReferenceMappingId IN(SELECT a1 FROM dup WHERE a2 IS null)
+GO
+	PRINT('Finished deleting duplicates in tblGLCrossReferenceMapping')
+GO
+	PRINT('Started generating origin cross reference mapping')
 GO
 	EXEC dbo.uspGLInsertOriginCrossReferenceMapping
 GO
+	PRINT('Finished generating origin cross reference mapping')
+GO
+	PRINT('Started updating old account id in tblGLAccount')
+GO
 	--update strOldAccountId column in tblGLAccount
 	EXEC dbo.uspGLUpdateOldAccountId
-
+GO
+	PRINT('Finished updating old account id in tblGLAccount')
 GO
 
 
