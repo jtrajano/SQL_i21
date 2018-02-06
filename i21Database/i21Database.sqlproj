@@ -6194,6 +6194,7 @@
     <Build Include="dbo\Views\vyuCRMLostRevenueSalesperson.sql" />
     <Build Include="dbo\Functions\fnGLGetCMGLDetailBalance.sql" />
     <Build Include="dbo\Views\vyuSMBEExportCashDiscount.sql" />
+    <Build Include="dbo\Views\vyuAPVoucherCheckOffDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
