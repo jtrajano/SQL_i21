@@ -72,6 +72,7 @@ FROM (
 		, ysnIsBasket = CAST(0 AS BIT)
 		, POView.intFreightTermId
 		, POView.strFreightTerm
+		, POView.strBundleType
 	FROM	vyuPODetails POView LEFT JOIN dbo.tblICItemUOM ItemUOM
 				ON POView.intUnitOfMeasureId = ItemUOM.intItemUOMId
 			LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure

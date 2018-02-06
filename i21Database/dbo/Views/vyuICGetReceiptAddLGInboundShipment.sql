@@ -74,8 +74,12 @@ FROM (
 		, LogisticsView.intFreightTermId
 		, LogisticsView.strFreightTerm 
 		, strMarkings               = LogisticsView.strMarks
-	FROM	vyuLGLoadContainerReceiptContracts LogisticsView LEFT JOIN dbo.tblSMCurrency Currency 
+		, Item.strBundleType 
+	FROM	vyuLGLoadContainerReceiptContracts LogisticsView 
+			LEFT JOIN dbo.tblSMCurrency Currency 
 				ON Currency.strCurrency = ISNULL(LogisticsView.strCurrency, LogisticsView.strMainCurrency) 
+			LEFT JOIN tblICItem Item
+				ON Item.intItemId = LogisticsView.intItemId			
 			LEFT JOIN dbo.tblICItemUOM ItemUOM 
 				ON LogisticsView.intItemUOMId = ItemUOM.intItemUOMId
 			LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure 
