@@ -8,7 +8,7 @@
 print('/*******************  BEGIN Risk Management Data Fixes *******************/')
 
 
---This will migrate the data from tblRKFutureMarket to tblRKCommodityMarketMapping. This is related to thid jira RM-735
+--This will migrate the data from tblRKFutureMarket to tblRKCommodityMarketMapping. This is related to this jira RM-735
 IF NOT EXISTS (SELECT * FROM tblEMEntityPreferences WHERE strPreference = 'RM data migration from Future Market to Commodity Market Mapping')
 BEGIN
 
@@ -95,7 +95,7 @@ BEGIN
 END
 
 
---This will fix all old transaction to be included as one batch in the Archive File tab of Process Payment. This is related to this jira key CM-1904
+--This will fix all commission entry to include Commodity Market Id and Product Type.This is related to this jira RM-423 
 IF NOT EXISTS (SELECT * FROM tblEMEntityPreferences WHERE strPreference = 'RM data fix for Brokerage Commission')
 BEGIN
 
@@ -111,6 +111,24 @@ BEGIN
 
     --Insert into EM Preferences. This will serve as the checking if the datafix will be executed or not.
     INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('RM data fix for Brokerage Commission','1')
-END    
+END  
+
+--This will fix  Future Settlement Price to include Commodity Market Id. This is related to this jira key RM-730
+IF NOT EXISTS (SELECT * FROM tblEMEntityPreferences WHERE strPreference = 'RM data fix for Future Settlement Price')
+BEGIN
+
+	
+	UPDATE
+	FSP
+	SET FSP.intCommodityMarketId = ComMarMap.intCommodityMarketId
+	FROM 
+		tblRKFuturesSettlementPrice AS FSP
+		INNER JOIN tblRKCommodityMarketMapping AS ComMarMap
+			ON FSP.intFutureMarketId = ComMarMap.intFutureMarketId
+	WHERE FSP.intCommodityMarketId IS NULL
+
+    --Insert into EM Preferences. This will serve as the checking if the datafix will be executed or not.
+    INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('RM data fix for Future Settlement Price','1')
+END   
 
 print('/*******************  END Risk Management Data Fixess *******************/')

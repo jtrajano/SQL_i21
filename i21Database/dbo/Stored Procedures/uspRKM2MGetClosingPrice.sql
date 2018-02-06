@@ -5,7 +5,7 @@
    @strFutureMonthIds nvarchar(max)
 AS  
 
-SELECT CONVERT(INT,intRowNum) as intRowNum,intFutureMarketId,strFutMarketName,intFutureMonthId,strFutureMonth,dblClosingPrice,intConcurrencyId from (
+SELECT CONVERT(INT,intRowNum) as intRowNum,intFutureMarketId,strFutMarketName,intFutureMonthId,strFutureMonth,dblClosingPrice,intFutSettlementPriceMonthId,intConcurrencyId from (
 	SELECT 
 		ROW_NUMBER() OVER(ORDER BY f.intFutureMarketId DESC) AS intRowNum
 		,f.intFutureMarketId
@@ -13,6 +13,14 @@ SELECT CONVERT(INT,intRowNum) as intRowNum,intFutureMarketId,strFutMarketName,in
 		,f.strFutMarketName
 		,fm.strFutureMonth
 		,dblClosingPrice = (SELECT TOP 1 dblLastSettle
+							FROM tblRKFuturesSettlementPrice p
+							INNER JOIN tblRKFutSettlementPriceMarketMap pm ON p.intFutureSettlementPriceId = pm.intFutureSettlementPriceId
+							WHERE p.intFutureMarketId = f.intFutureMarketId
+								AND pm.intFutureMonthId = fm.intFutureMonthId
+								AND CONVERT(Nvarchar, dtmPriceDate, 111) <= CONVERT(Nvarchar, @dtmPriceDate, 111)
+								AND p.strPricingType = @strPricingType
+							ORDER BY dtmPriceDate DESC)
+		,intFutSettlementPriceMonthId = (SELECT TOP 1 intFutSettlementPriceMonthId
 							FROM tblRKFuturesSettlementPrice p
 							INNER JOIN tblRKFutSettlementPriceMarketMap pm ON p.intFutureSettlementPriceId = pm.intFutureSettlementPriceId
 							WHERE p.intFutureMarketId = f.intFutureMarketId

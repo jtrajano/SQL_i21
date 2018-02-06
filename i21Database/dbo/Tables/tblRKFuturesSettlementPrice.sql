@@ -2,6 +2,7 @@
 (
 	[intFutureSettlementPriceId] INT IDENTITY(1,1) NOT NULL, 
     [intFutureMarketId] INT NOT NULL, 
+	[intCommodityMarketId] INT  NULL, 
     [dtmPriceDate] DATETIME NOT NULL, 
 	[strPricingType] [nvarchar](30) COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId] INT NOT NULL, 

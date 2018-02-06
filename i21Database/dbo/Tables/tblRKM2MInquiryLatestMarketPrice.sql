@@ -5,6 +5,7 @@
     [intConcurrencyId] INT NOT NULL, 
     [intFutureMarketId] INT  NULL, 
     [intFutureMonthId] INT  NULL,
+	[intFutSettlementPriceMonthId] INT  NULL,
     [dblClosingPrice] NUMERIC(18, 6) NULL, 
     
     CONSTRAINT [PK_tblRKM2MInquiryLatestMarketPrice_intM2MInquiryLatestMarketPriceId] PRIMARY KEY (intM2MInquiryLatestMarketPriceId),
