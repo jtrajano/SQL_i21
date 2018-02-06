@@ -20,7 +20,6 @@ AS SELECT SC.intTicketId, (CASE WHEN
 	SC.intProcessingLocationId,
 	SC.strScaleOperatorUser,
 	SC.intEntityScaleOperatorId,
-	SC.strPurchaseOrderNumber,
 	SC.strTruckName,
 	SC.strDriverName, 
 	SC.ysnDriverOff,

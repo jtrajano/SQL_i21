@@ -132,6 +132,37 @@ BEGIN
 	UPDATE tblGRStorageSchedulePeriod SET strFeeType='Per Unit' WHERE strFeeType IN('Price','Weight')
 END
 GO
+IF NOT EXISTS(SELECT 1 FROM tblGRStorageType WHERE strStorageTypeCode = 'SO')
+BEGIN
+	SET IDENTITY_INSERT [dbo].[tblGRStorageType] ON
+
+	INSERT INTO tblGRStorageType
+	(
+	 intStorageScheduleTypeId
+	,strStorageTypeDescription
+	,strStorageTypeCode
+	,ysnReceiptedStorage
+	,intConcurrencyId
+	,strOwnedPhysicalStock
+	,ysnDPOwnedType
+	,ysnGrainBankType
+	,ysnActive
+	,ysnCustomerStorage
+	)
+	SELECT 
+	-7 AS intStorageScheduleTypeId
+	,'Sales Order' AS strStorageTypeDescription
+	,'SO'strStorageTypeCode
+	, 0 AS ysnReceiptedStorage
+	,1 AS intConcurrencyId
+	,'Customer' AS strOwnedPhysicalStock
+	,0 AS ysnDPOwnedType
+	,0 AS ysnGrainBankType
+	,1 AS ysnActive
+	,0 AS ysnCustomerStorage
+
+    SET IDENTITY_INSERT [dbo].[tblGRStorageType] OFF
+END
 GO
 IF NOT EXISTS(SELECT 1 FROM tblGRStorageType WHERE strStorageTypeCode IN ('DEF','CNT','SPT','SPL','HLD','LOD'))
 BEGIN
@@ -231,12 +262,11 @@ BEGIN
 	,0 AS ysnGrainBankType
 	,1 AS ysnActive
 	,0 AS ysnCustomerStorage
-
+	
     SET IDENTITY_INSERT [dbo].[tblGRStorageType] OFF
-
 END
 GO
-IF EXISTS(SELECT 1 FROM tblGRStorageType WHERE strStorageTypeCode IN ('DEF','CNT','SPT','SPL','HLD','LOD'))
+IF EXISTS(SELECT 1 FROM tblGRStorageType WHERE strStorageTypeCode IN ('DEF','CNT','SPT','SPL','HLD','LOD','SO'))
 BEGIN
 	UPDATE tblSCTicket set intStorageScheduleTypeId = (SELECT GR.intStorageScheduleTypeId FROM tblGRStorageType GR WHERE GR.strStorageTypeCode = strDistributionOption) WHERE intStorageScheduleTypeId < 0
 END

@@ -18,7 +18,6 @@
     ,SCTicket.intProcessingLocationId
     ,SCTicket.strScaleOperatorUser
     ,SCTicket.intEntityScaleOperatorId
-    ,SCTicket.strPurchaseOrderNumber
     ,SCTicket.strTruckName
     ,SCTicket.strDriverName
     ,SCTicket.ysnDriverOff

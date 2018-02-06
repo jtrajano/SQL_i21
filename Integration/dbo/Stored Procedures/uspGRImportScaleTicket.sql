@@ -46,7 +46,6 @@ BEGIN
 	,intProcessingLocationId
 	,strScaleOperatorUser
 	,intEntityScaleOperatorId
-	,strPurchaseOrderNumber
 	,strTruckName
 	,strDriverName
 	,ysnDriverOff
@@ -140,7 +139,6 @@ BEGIN
 	,intProcessingLocationId   = CL.intCompanyLocationId
 	,strScaleOperatorUser	   = ISNULL(gasct_weigher,'')
 	,intEntityScaleOperatorId  = 0
-	,strPurchaseOrderNumber	   = NULL
 	,strTruckName			   = gasct_truck_id
 	,strDriverName			   = gasct_driver
 	,ysnDriverOff			   = dbo.fnCTConvertYNToBit(gasct_driver_on_yn,0)

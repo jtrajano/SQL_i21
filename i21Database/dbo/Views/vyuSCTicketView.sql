@@ -26,7 +26,6 @@
        ,SCT.intProcessingLocationId
        ,SCT.strScaleOperatorUser
        ,SCT.intEntityScaleOperatorId
-       ,SCT.strPurchaseOrderNumber
        ,SCT.strTruckName
        ,SCT.strDriverName
        ,SCT.ysnDriverOff
@@ -127,6 +126,7 @@
 	   ,SCT.strFreightSettlement
 	   ,SCT.intDeliverySheetId
 	   ,SCT.strElevatorReceiptNumber
+	   ,SCT.intSalesOrderDetailId
 	   ,(SCT.dblGrossWeight + ISNULL(SCT.dblGrossWeight1, 0) + ISNULL(SCT.dblGrossWeight2, 0)) AS dblTotalGrossWeight
 	   ,(SCT.dblTareWeight + ISNULL(SCT.dblTareWeight1, 0) + ISNULL(SCT.dblTareWeight2, 0)) AS dblTotalTareWeight
 	   ,((SCT.dblGrossWeight + ISNULL(SCT.dblGrossWeight1, 0) + ISNULL(SCT.dblGrossWeight2, 0)) - (SCT.dblTareWeight + ISNULL(SCT.dblTareWeight1, 0) + ISNULL(SCT.dblTareWeight2, 0))) AS dblTotalNetWeight
@@ -156,36 +156,40 @@
 	   ,ICIS.strShipmentNumber
 	   ,EMEntityFarm.strFarmDescription
 	   ,ICCA.strDescription AS strGrade
+	   ,SO.strSalesOrderNumber
+	   ,SO.intSalesOrderId
   from ((tblSCTicket SCT
-	left join tblEMEntity EMEntity
+	LEFT JOIN tblEMEntity EMEntity
        on (EMEntity.intEntityId = SCT.intEntityId)
-	left join tblEMEntitySplit EMSplit
+	LEFT JOIN tblEMEntitySplit EMSplit
        on ([EMSplit].intSplitId = SCT.intSplitId)
-	left join tblSCScaleSetup SCSetup
+	LEFT JOIN tblSCScaleSetup SCSetup
        on (SCSetup.intScaleSetupId = SCT.intScaleSetupId)
-	left join tblSMCompanyLocation SMC
+	LEFT JOIN tblSMCompanyLocation SMC
        on (SMC.intCompanyLocationId = SCT.intProcessingLocationId))
-	left join tblSCListTicketTypes SCListTicket
+	LEFT JOIN tblSCListTicketTypes SCListTicket
        on (SCListTicket.intTicketType = SCT.intTicketType AND SCListTicket.strInOutIndicator = SCT.strInOutFlag)
-	left join tblGRStorageType GRStorage
+	LEFT JOIN tblGRStorageType GRStorage
        on (GRStorage.strStorageTypeCode = SCT.strDistributionOption)
-	left join tblSMCompanyLocationSubLocation SMCSubLocation
+	LEFT JOIN tblSMCompanyLocationSubLocation SMCSubLocation
        on (SMCSubLocation.intCompanyLocationSubLocationId = SCT.intSubLocationId))
-	left join tblSCTicketPool SCTPool
+	LEFT JOIN tblSCTicketPool SCTPool
        on SCTPool.intTicketPoolId = SCT.intTicketPoolId
-	left join tblGRDiscountId GRDiscountId
+	LEFT JOIN tblGRDiscountId GRDiscountId
        on GRDiscountId.intDiscountId = SCT.intDiscountId
-	left join tblICStorageLocation ICStorageLocation
+	LEFT JOIN tblICStorageLocation ICStorageLocation
        on ICStorageLocation.intStorageLocationId = SCT.intStorageLocationId
-	left join tblGRStorageScheduleRule GRSSR
+	LEFT JOIN tblGRStorageScheduleRule GRSSR
        on GRSSR.intStorageScheduleRuleId = SCT.intStorageScheduleId
-	left join tblICInventoryReceipt IR
+	LEFT JOIN tblICInventoryReceipt IR
 	   on  IR.intInventoryReceiptId = SCT.intInventoryReceiptId
-	left join tblICInventoryShipment ICIS
+	LEFT JOIN tblICInventoryShipment ICIS
 	   on  ICIS.intInventoryShipmentId = SCT.intInventoryShipmentId
-	left join tblEMEntityFarm EMEntityFarm
+	LEFT JOIN tblEMEntityFarm EMEntityFarm
 	   on EMEntityFarm.intFarmFieldId = SCT.intFarmFieldId
-	left join tblSCDeliverySheet SCD
+	LEFT JOIN tblSCDeliverySheet SCD
 	   on SCD.intDeliverySheetId = SCT.intDeliverySheetId
-	left join tblICCommodityAttribute ICCA 
+	LEFT JOIN tblICCommodityAttribute ICCA 
 	   on ICCA.intCommodityAttributeId = SCT.intCommodityAttributeId
+	LEFT JOIN vyuARGetSalesOrdersToWeight SO
+	   on SO.intSalesOrderDetailId = SCT.intSalesOrderDetailId

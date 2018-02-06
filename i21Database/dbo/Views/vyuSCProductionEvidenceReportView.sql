@@ -19,7 +19,6 @@
 	SC.intProcessingLocationId,
 	SC.strScaleOperatorUser,
 	SC.intEntityScaleOperatorId,
-	SC.strPurchaseOrderNumber,
 	SC.ysnGrossManual,
 	SC.dblGrossWeight, 
 	SC.dtmGrossDateTime,

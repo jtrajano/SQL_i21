@@ -14,7 +14,6 @@
     [intProcessingLocationId] INT NULL, 
     [strScaleOperatorUser] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intEntityScaleOperatorId] INT NULL, 
-    [strPurchaseOrderNumber] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL, 
     [strTruckName] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL, 
     [strDriverName] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL, 
     [ysnDriverOff] BIT NULL, 
@@ -134,6 +133,7 @@
     [ysnDeliverySheetPost] BIT NOT NULL DEFAULT 0, 
     [intLotId] INT NULL, 
     [strLotNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL DEFAULT '',
+	[intSalesOrderDetailId] INT NULL, 
     CONSTRAINT [PK_tblSCTicket_intTicketId] PRIMARY KEY ([intTicketId]), 
     CONSTRAINT [UK_tblSCTicket_intTicketPoolId_strTicketNumber] UNIQUE ([intTicketPoolId], [intTicketType], [strInOutFlag], [strTicketNumber]),
 	CONSTRAINT [FK_tblSCScaleSetup_tblSMCompanyLocation_intTicketLocationId] FOREIGN KEY ([intTicketLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
@@ -159,7 +159,8 @@
 	CONSTRAINT [FK_tblSCTicket_tblSCDeliverySheet_intDeliverySheetId] FOREIGN KEY (intDeliverySheetId) REFERENCES [tblSCDeliverySheet](intDeliverySheetId),
 	CONSTRAINT [FK_tblSCTicket_tblICCommodityAttribute_intCommodityAttributeId] FOREIGN KEY (intCommodityAttributeId) REFERENCES [tblICCommodityAttribute](intCommodityAttributeId),
 	CONSTRAINT [UK_tblSCTicket_intTicketPoolId_strTicketNumber_strOfflineGuid] UNIQUE ([strOfflineGuid],[intTicketPoolId], [intTicketType], [strInOutFlag], [strTicketNumber]),
-	CONSTRAINT [FK_tblSCTicket_tblICLot_intLotId] FOREIGN KEY (intLotId) REFERENCES [tblICLot](intLotId)
+	CONSTRAINT [FK_tblSCTicket_tblICLot_intLotId] FOREIGN KEY (intLotId) REFERENCES [tblICLot](intLotId),
+	CONSTRAINT [FK_tblSCTicket_tblSOSalesOrderDetail_intSalesOrderDetailId] FOREIGN KEY ([intSalesOrderDetailId]) REFERENCES [tblSOSalesOrderDetail]
 )
 
 GO
@@ -279,15 +280,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSCTicket',
     @level2type = N'COLUMN',
     @level2name = N'intEntityScaleOperatorId'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Purchase Order Number',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblSCTicket',
-    @level2type = N'COLUMN',
-    @level2name = N'strPurchaseOrderNumber'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Truck Name',

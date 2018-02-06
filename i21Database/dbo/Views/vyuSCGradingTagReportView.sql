@@ -14,7 +14,6 @@
 	tblSCTicket.intProcessingLocationId,
 	tblSCTicket.strScaleOperatorUser,
 	tblSCTicket.intEntityScaleOperatorId,
-	tblSCTicket.strPurchaseOrderNumber,
 	tblSCTicket.strTruckName,
 	tblSCTicket.strDriverName,
 	tblSCTicket.ysnDriverOff,

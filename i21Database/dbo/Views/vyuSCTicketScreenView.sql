@@ -14,7 +14,6 @@
 	,SCT.intProcessingLocationId
 	,SCT.strScaleOperatorUser
 	,SCT.intEntityScaleOperatorId
-	,SCT.strPurchaseOrderNumber
 	,SCT.strTruckName
 	,SCT.strDriverName
 	,SCT.ysnDriverOff
@@ -132,6 +131,7 @@
 	,(SELECT SCMatch.strTicketNumber FROM tblSCTicket SCMatch WHERE SCMatch.intTicketId = SCT.intMatchTicketId) AS strMatchTicketNumber
     ,SCT.intLotId
     ,SCT.strLotNumber
+    ,SCT.intSalesOrderDetailId
 
 	,SMC.strLocationName AS strProcessingLocationName
 	,SMC.strDiscountScheduleType AS strDefaultLocationSchedule
@@ -210,6 +210,10 @@
 	,CAST (0 AS BIT) ysnDateModified
 	,SCT.intConcurrencyId
 	,SCT.strOfflineGuid
+	,SO.strSalesOrderNumber
+	,SO.strLocationName as strSOCompanyLocation
+	,SO.intCompanyLocationId AS intSOCompanyLocation
+	,SO.intSalesOrderId
   FROM tblSCTicket SCT
 	LEFT JOIN tblSCTicketPool SCTPool on SCTPool.intTicketPoolId = SCT.intTicketPoolId
 	LEFT JOIN tblSCScaleSetup SCSetup on SCSetup.intScaleSetupId = SCT.intScaleSetupId
@@ -274,4 +278,5 @@
 			INNER JOIN tblEMEntityLocation VEL ON VEL.intEntityLocationId = LD.intVendorEntityLocationId
 			INNER JOIN tblEMEntityLocation CEL ON CEL.intEntityLocationId = LD.intVendorEntityLocationId
 	) LGD on LGD.intLoadId = SCT.intLoadId AND LGD.intTicketId = SCT.intTicketId
+	LEFT JOIN vyuARGetSalesOrdersToWeight SO on SO.intSalesOrderDetailId = SCT.intSalesOrderDetailId
 	
