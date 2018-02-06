@@ -173,7 +173,13 @@ INNER JOIN
 WHERE
     NOT EXISTS(SELECT NULL FROM tblAPVendorTerm APVT WHERE APVT.[intEntityVendorId] = APV.[intEntityId] AND APVT.[intTermId] = APV.[intTermsId])
     
-    
+
+INSERT INTO tblEMEntityType ( intEntityId, strType, intConcurrencyId)
+SELECT  intId, 'Vendor', 0
+    FROM @CustomerIds C
+        WHERE C.intId not in (SELECT intEntityId FROM tblEMEntityType WHERE strType = 'Vendor')
+
+
 EXEC [dbo].[uspSMInsertAuditLogs] @LogEntries = @VendorLog
 
 END

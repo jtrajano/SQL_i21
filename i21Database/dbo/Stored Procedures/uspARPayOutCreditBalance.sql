@@ -174,12 +174,26 @@ DELETE FROM @ARCustomerAgingStagingTable
 WHERE
 	[intEntityCustomerId] NOT IN (SELECT [intEntityId] FROM @Customers)
 
+
+
+
+
 DELETE FROM @ARCustomerAgingStagingTable
 WHERE
-	[intEntityCustomerId] IN (SELECT [intEntityCustomerId] FROM  @ARCustomerAgingStagingTable  GROUP BY [intEntityCustomerId] HAVING SUM([dblTotalAR]) > @OpenARBalance)
+	[intEntityCustomerId] IN (SELECT [intEntityCustomerId] 
+								FROM  @ARCustomerAgingStagingTable  
+									GROUP BY [intEntityCustomerId] HAVING SUM(
+														[dbl0Days] + 
+														[dbl10Days] + 
+														[dbl30Days] + 
+														[dbl60Days] + 
+														[dbl90Days] + 
+														[dbl120Days] + 
+														[dbl121Days]
+										) >= @OpenARBalance)
 
 
-
+					
 DECLARE @CustomerBalances AS TABLE
 (
     [intId]                     INT IDENTITY,
@@ -208,7 +222,14 @@ SELECT
     ,[intCurrencyId]        = ARI.[intCurrencyId]
     ,[intEntityCustomerId]  = A.[intEntityCustomerId]
     ,[intCompanyLocationId] = A.[intCompanyLocationId]
-    ,[dblTotalAR]           = SUM(A.[dblTotalAR])
+    ,[dblTotalAR]           = SUM(
+									[dbl0Days] + 
+									[dbl10Days] + 
+									[dbl30Days] + 
+									[dbl60Days] + 
+									[dbl90Days] + 
+									[dbl120Days] + 
+									[dbl121Days])
 	,[ysnProcessed]         = 0
 FROM
 	@ARCustomerAgingStagingTable A
@@ -258,7 +279,7 @@ IF ISNULL(@PayBalance,0) = 1
 		SET @PostingSuccessful = 0
 		DECLARE @EntityIds AS [Id]
 		INSERT INTO @EntityIds([intId])
-		SELECT CB.[intEntityCustomerId] FROM @CustomerBalances CB WHERE NOT EXISTS(SELECT NULL FROM tblAPVendor APV WHERE CB.[intEntityCustomerId] = APV.[intEntityId])
+		SELECT DISTINCT CB.[intEntityCustomerId] FROM @CustomerBalances CB WHERE NOT EXISTS(SELECT NULL FROM tblAPVendor APV WHERE CB.[intEntityCustomerId] = APV.[intEntityId])
 
         EXEC [dbo].[uspEMConvertCustomerToVendor] @CustomerIds = @EntityIds, @UserId = @UserId
 
@@ -278,8 +299,9 @@ IF ISNULL(@PayBalance,0) = 1
 				@CustomerBalances CB
 			INNER JOIN
 				(SELECT [intInvoiceId], [intAccountId] FROM tblARInvoice) ARI
-					ON CB.[intInvoiceId] = ARI.[intInvoiceId]
-
+					ON CB.[intInvoiceId] = ARI.[intInvoiceId]				
+			WHERE [ysnProcessed] = 0
+			
             DECLARE @VoucherDetailNonInventory AS VoucherDetailNonInventory
             DELETE FROM @VoucherDetailNonInventory
 
@@ -351,7 +373,7 @@ IF ISNULL(@PayBalance,0) = 1
 				,[intConcurrencyId])
 			SELECT
 				 [intCreditBalancePayOutId]	= @CreditBalancePayOutId
-				,[intEntityCustomerId]		= APB.intEntityId 
+				,[intEntityCustomerId]		= APB.intEntityVendorId 
 				,[intPaymentId]				= NULL
 				,[intBillId]				= APB.[intBillId]
 				,[intInvoiceId]             = APBD.[intInvoiceId]
@@ -365,7 +387,7 @@ IF ISNULL(@PayBalance,0) = 1
 				tblAPBillDetail APBD
 					ON APB.[intBillId] = APBD.[intBillId]
 			WHERE
-				APB.[intEntityId] IN (SELECT intID FROM [dbo].[fnGetRowsFromDelimitedValues](@IdList))
+				APB.[intBillId] IN (SELECT intID FROM [dbo].[fnGetRowsFromDelimitedValues](@IdList))
 		END
 
 
@@ -681,7 +703,7 @@ IF ISNULL(@Preview,0) = 1
 				--IF (XACT_STATE()) = 1
 				--	COMMIT TRANSACTION  @Savepoint
 			END	
-		
+		/*
 		DECLARE @PayOutId INT
 		INSERT INTO tblARCreditBalancePayOut(
 			dtmAsOfDate,
@@ -724,7 +746,7 @@ IF ISNULL(@Preview,0) = 1
 		FROM
 			@ARCreditBalancePayOutDetail
 		ORDER BY
-			[intCreditBalancePayOutDetailId]
+			[intCreditBalancePayOutDetailId]*/
 	END
 	
 
