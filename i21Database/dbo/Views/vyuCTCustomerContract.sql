@@ -23,8 +23,14 @@ AS
 					, strUnitMeasure					=	QM.strUnitMeasure
 					, intPricingTypeId					=	PT.intPricingTypeId
 					, strPricingType					=	PT.strPricingType	 
-					, dblCashPrice						=	AD.dblSeqPrice
-					, dblUnitPrice						=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,AD.intSeqPriceUOMId,AD.dblSeqPrice)/CASE WHEN ISNULL(CD.dblQuantity,1) = 0 THEN 1 ELSE ISNULL(CD.dblQuantity,1) END
+					, dblCashPrice						=	CASE	WHEN	CD.intPricingTypeId = 2 
+																	THEN	dbo.fnRKGetLatestClosingPrice(CD.intFutureMarketId,CD.intFutureMonthId,GETDATE())
+																	ELSE	AD.dblSeqPrice
+															END
+					, dblUnitPrice						=	CASE	WHEN	CD.intPricingTypeId = 2 
+																	THEN	dbo.fnRKGetLatestClosingPrice(CD.intFutureMarketId,CD.intFutureMonthId,GETDATE())
+																	ELSE	AD.dblSeqPrice
+															END
 					, intCurrencyExchangeRateTypeId		=	CD.intRateTypeId
 					, strCurrencyExchangeRateType		=	ER.strCurrencyExchangeRateType
 					, intCurrencyExchangeRateId			=	CD.intCurrencyExchangeRateId
