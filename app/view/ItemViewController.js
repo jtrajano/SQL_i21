@@ -4177,7 +4177,14 @@ Ext.define('Inventory.view.ItemViewController', {
         var current = plugin.getActiveRecord();
         if (!current) return; 
 
+        var record = records[0];
+        if (!record) return; 
+
         if (combo.itemId === 'cboFactory') {
+            // Do not remove the manufacturing cells if it is the same factory name. 
+            if (current.get('strLocationName') == record.get('strLocationName'))
+                return; 
+
             if (current.tblICItemFactoryManufacturingCells()) {
                 var mfgCells = current.tblICItemFactoryManufacturingCells().data.items; 
                 for (var i = mfgCells.length - 1; i >= 0; i--){
