@@ -70,10 +70,21 @@ BEGIN
 	  FROM gactlmst
 	  WHERE gactl_key = '1'
 	  AND gactl_stor_desc_1 != '            '
+	  AND NOT EXISTS (SELECT strStorageTypeCode FROM tblGRStorageType where strStorageTypeCode = '1'))
 
-	  UNION ALL
-
-	  SELECT
+	INSERT INTO [dbo].[tblGRStorageType] 
+	(
+		 strStorageTypeDescription
+		, strStorageTypeCode
+		, ysnReceiptedStorage
+		, intConcurrencyId
+		, strOwnedPhysicalStock
+		, ysnDPOwnedType
+		, ysnGrainBankType
+		, ysnActive
+		, ysnCustomerStorage
+	)
+	  ( SELECT
 		LTRIM(RTRIM(gactl_stor_desc_2)),
 		2,
 		CONVERT(bit, 0),
@@ -96,8 +107,21 @@ BEGIN
 	  FROM gactlmst
 	  WHERE gactl_key = '1'
 	  AND gactl_stor_desc_2 != '            '
-	  UNION ALL
-	  SELECT
+	  AND NOT EXISTS (SELECT strStorageTypeCode FROM tblGRStorageType where strStorageTypeCode = '2'))
+	  
+	INSERT INTO [dbo].[tblGRStorageType] 
+	(
+		 strStorageTypeDescription
+		, strStorageTypeCode
+		, ysnReceiptedStorage
+		, intConcurrencyId
+		, strOwnedPhysicalStock
+		, ysnDPOwnedType
+		, ysnGrainBankType
+		, ysnActive
+		, ysnCustomerStorage
+	)
+	  ( SELECT
 		LTRIM(RTRIM(gactl_stor_desc_3)),
 		3,
 		CONVERT(bit, 0),
@@ -120,8 +144,21 @@ BEGIN
 	  FROM gactlmst
 	  WHERE gactl_key = '1'
 	  AND gactl_stor_desc_3 != '            '
-	  UNION ALL
-	  SELECT
+	  AND NOT EXISTS (SELECT strStorageTypeCode FROM tblGRStorageType where strStorageTypeCode = '3'))
+	  
+	INSERT INTO [dbo].[tblGRStorageType] 
+	(
+		 strStorageTypeDescription
+		, strStorageTypeCode
+		, ysnReceiptedStorage
+		, intConcurrencyId
+		, strOwnedPhysicalStock
+		, ysnDPOwnedType
+		, ysnGrainBankType
+		, ysnActive
+		, ysnCustomerStorage
+	)
+	  (	SELECT
 		LTRIM(RTRIM(gactl_stor_desc_4)),
 		4,
 		CONVERT(bit, 0),
@@ -144,8 +181,21 @@ BEGIN
 	  FROM gactlmst
 	  WHERE gactl_key = '1'
 	  AND gactl_stor_desc_4 != '            '
-	  UNION ALL
-	  SELECT
+	  AND NOT EXISTS (SELECT strStorageTypeCode FROM tblGRStorageType where strStorageTypeCode = '4'))
+	  
+	INSERT INTO [dbo].[tblGRStorageType] 
+	(
+		 strStorageTypeDescription
+		, strStorageTypeCode
+		, ysnReceiptedStorage
+		, intConcurrencyId
+		, strOwnedPhysicalStock
+		, ysnDPOwnedType
+		, ysnGrainBankType
+		, ysnActive
+		, ysnCustomerStorage
+	)
+	  ( SELECT
 		LTRIM(RTRIM(gactl_stor_desc_5)),
 		5,
 		CONVERT(bit, 0),
@@ -168,8 +218,21 @@ BEGIN
 	  FROM gactlmst
 	  WHERE gactl_key = '1'
 	  AND gactl_stor_desc_5 != '            '
-	  UNION ALL
-	  SELECT
+	  AND NOT EXISTS (SELECT strStorageTypeCode FROM tblGRStorageType where strStorageTypeCode = '5'))
+
+	INSERT INTO [dbo].[tblGRStorageType] 
+	(
+		 strStorageTypeDescription
+		, strStorageTypeCode
+		, ysnReceiptedStorage
+		, intConcurrencyId
+		, strOwnedPhysicalStock
+		, ysnDPOwnedType
+		, ysnGrainBankType
+		, ysnActive
+		, ysnCustomerStorage
+	)
+	  ( SELECT
 		LTRIM(RTRIM(gactl_stor_desc_6)),
 		6,
 		CONVERT(bit, 1),
@@ -192,8 +255,21 @@ BEGIN
 	  FROM gactlmst
 	  WHERE gactl_key = '1'
 	  AND gactl_stor_desc_6 != '            '
-	  UNION ALL
-	  SELECT
+	  AND NOT EXISTS (SELECT strStorageTypeCode FROM tblGRStorageType where strStorageTypeCode = '6'))
+	  
+	INSERT INTO [dbo].[tblGRStorageType] 
+	(
+		 strStorageTypeDescription
+		, strStorageTypeCode
+		, ysnReceiptedStorage
+		, intConcurrencyId
+		, strOwnedPhysicalStock
+		, ysnDPOwnedType
+		, ysnGrainBankType
+		, ysnActive
+		, ysnCustomerStorage
+	)
+	  ( SELECT
 		LTRIM(RTRIM(gactl_stor_desc_7)),
 		7,
 		CONVERT(bit, 1),
@@ -216,8 +292,21 @@ BEGIN
 	  FROM gactlmst
 	  WHERE gactl_key = '1'
 	  AND gactl_stor_desc_7 != '            '
-	  UNION ALL
-	  SELECT
+	  AND NOT EXISTS (SELECT strStorageTypeCode FROM tblGRStorageType where strStorageTypeCode = '7'))
+	  
+	INSERT INTO [dbo].[tblGRStorageType] 
+	(
+		 strStorageTypeDescription
+		, strStorageTypeCode
+		, ysnReceiptedStorage
+		, intConcurrencyId
+		, strOwnedPhysicalStock
+		, ysnDPOwnedType
+		, ysnGrainBankType
+		, ysnActive
+		, ysnCustomerStorage
+	)
+	  ( SELECT
 		LTRIM(RTRIM(gactl_stor_desc_8)),
 		8,
 		CONVERT(bit, 1),
@@ -239,7 +328,8 @@ BEGIN
 		CONVERT(bit, 0)
 	  FROM gactlmst
 	  WHERE gactl_key = '1'
-	  AND gactl_stor_desc_8 != '            ')
+	  AND gactl_stor_desc_8 != '            '
+	  AND NOT EXISTS (SELECT strStorageTypeCode FROM tblGRStorageType where strStorageTypeCode = '8'))
 
 	  ---1. If any Storage Type is assocaited with Only "S" Storage Ticket and not with any "P" Storage Ticket then make the Offsite as Checked.
 	  IF EXISTS(SELECT Distinct gastr_stor_type FROM gastrmst WHERE  gastr_pur_sls_ind='S' AND gastr_stor_type NOT IN (SELECT Distinct gastr_stor_type FROM gastrmst WHERE  gastr_pur_sls_ind='P'))
