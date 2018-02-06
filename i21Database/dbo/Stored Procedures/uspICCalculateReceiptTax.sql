@@ -202,6 +202,7 @@ BEGIN
 		,[strTaxCode]
 		,[dblQty]
 		,[dblCost]
+		,[intUnitMeasureId]
 		,[intSort]
 		,[intConcurrencyId]				
 	)
@@ -236,6 +237,7 @@ BEGIN
 			,[strTaxCode]					= vendorTax.[strTaxCode]
 			,[dblQty]						= @Qty
 			,[dblCost]						= @Amount
+			,[intUnitMeasureId]				= @CostUnitMeasureId
 			,[intSort]						= 1
 			,[intConcurrencyId]				= 1
 	FROM	[dbo].[fnGetItemTaxComputationForVendor](@ItemId, @EntityId, @TransactionDate, @Amount, @Qty, @TaxGroupId, @LocationId, @ShipFromId, 0, @FreightTermId,0,@CostUnitMeasureId) vendorTax
