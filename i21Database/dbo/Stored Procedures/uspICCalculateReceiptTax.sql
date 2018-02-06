@@ -31,6 +31,7 @@ DECLARE	@ItemId				INT
 		,@TaxGroupId		INT
 		,@FreightTermId		INT
 		,@CostUOMId			INT
+		,@CostUnitMeasureId INT
 
 DECLARE @Taxes AS TABLE (
 	intTransactionDetailTaxId	INT
@@ -72,8 +73,10 @@ SELECT  ReceiptItem.intItemId
 		,ReceiptItem.intTaxGroupId
 		,Receipt.intFreightTermId
 		,ReceiptItem.intCostUOMId
+		,CostItemUOM.intUnitMeasureId
 FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 			ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+			LEFT OUTER JOIN tblICItemUOM CostItemUOM ON CostItemUOM.intItemUOMId = ReceiptItem.intCostUOMId
 WHERE	Receipt.intInventoryReceiptId = @inventoryReceiptId
 		AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) <> @OWNERSHIP_TYPE_Storage -- Do not compute tax if item ownership is Storage. 
 
@@ -90,6 +93,7 @@ FETCH NEXT FROM loopReceiptItems INTO
 	,@TaxGroupId
 	,@FreightTermId
 	,@CostUOMId
+	,@CostUnitMeasureId
 
 WHILE @@FETCH_STATUS = 0
 BEGIN 
@@ -129,8 +133,7 @@ BEGIN
 		,@IncludeExemptedCodes	= NULL
 		,@SiteId				= NULL
 		,@FreightTermId			= @FreightTermId
-		,@UOMId					= @CostUOMId
-
+		,@UOMId					= @CostUnitMeasureId
 
 	DECLARE	@Amount	NUMERIC(38,20) 
 			,@Qty	NUMERIC(38,20)
@@ -235,7 +238,7 @@ BEGIN
 			,[dblCost]						= @Amount
 			,[intSort]						= 1
 			,[intConcurrencyId]				= 1
-	FROM	[dbo].[fnGetItemTaxComputationForVendor](@ItemId, @EntityId, @TransactionDate, @Amount, @Qty, @TaxGroupId, @LocationId, @ShipFromId, 0, @FreightTermId,0,@CostUOMId) vendorTax
+	FROM	[dbo].[fnGetItemTaxComputationForVendor](@ItemId, @EntityId, @TransactionDate, @Amount, @Qty, @TaxGroupId, @LocationId, @ShipFromId, 0, @FreightTermId,0,@CostUnitMeasureId) vendorTax
 			LEFT JOIN tblICInventoryReceiptItem ri 
 				ON ri.intInventoryReceiptItemId = @InventoryReceiptItemId
 								
@@ -250,6 +253,7 @@ BEGIN
 		,@TaxGroupId
 		,@FreightTermId
 		,@CostUOMId
+		,@CostUnitMeasureId
 END 
 
 -- Calculate the tax per line item 
