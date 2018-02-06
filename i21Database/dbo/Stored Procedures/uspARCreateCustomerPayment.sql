@@ -167,6 +167,7 @@ BEGIN TRY
 		,[dblOverpayment]
 		,[dblBaseOverpayment]
 		,[dblBalance]
+		,[strReceivePaymentType]
 		,[strRecordNumber]
 		,[strPaymentInfo]
 		,[strNotes]
@@ -192,6 +193,7 @@ BEGIN TRY
 		,[dblOverpayment]				= @ZeroDecimal
 		,[dblBaseOverpayment]			= @ZeroDecimal
 		,[dblBalance]					= @ZeroDecimal
+		,[strReceivePaymentType]		= 'Cash Receipts'
 		,[strRecordNumber]				= CASE WHEN ISNULL(@UseOriginalIdAsPaymentNumber, 0) = 1 THEN @PaymentOriginalId ELSE NULL END
 		,[strPaymentInfo]				= @PaymentInfo
 		,[strNotes]						= @Notes
