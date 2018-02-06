@@ -6200,6 +6200,8 @@
     <Build Include="dbo\User Defined Types\TFReportOR7351334MSubSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspETTranslateDigitalDispatcher.sql" />
     <Build Include="dbo\Views\vyuRKFutSettlementPriceMarketMap.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSampleDelete.sql" />
+    <Build Include="dbo\Views\vyuQMLotStorageLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

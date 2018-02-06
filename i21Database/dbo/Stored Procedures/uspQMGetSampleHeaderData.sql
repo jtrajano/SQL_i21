@@ -213,12 +213,15 @@ BEGIN
 		,@strWorkOrderNo AS strWorkOrderNo
 		,@strReceiptNumber AS strReceiptNumber
 		,@strContainerNumber AS strContainerNumber
+		,L.intStorageLocationId
+		,SL.strName AS strStorageLocationName
 	FROM tblICLot L
 	JOIN tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 	JOIN tblICItem I ON I.intItemId = L.intItemId
 	JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
 		AND IU.ysnStockUnit = 1
 	JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IU.intUnitMeasureId
+	JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
 	WHERE L.intLotId = @intProductValueId
 END

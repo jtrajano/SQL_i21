@@ -9,6 +9,7 @@ SELECT S.intSampleTypeId
 			) AS INT) AS intRowNo
 	,CP.strControlPointName
 	,SU.intUserRoleID
+	,S.ysnAdjustInventoryQtyBySampleQty
 FROM tblQMSampleType S
 JOIN tblQMControlPoint CP ON CP.intControlPointId = S.intControlPointId
 JOIN tblQMSampleTypeUserRole SU ON SU.intSampleTypeId = S.intSampleTypeId

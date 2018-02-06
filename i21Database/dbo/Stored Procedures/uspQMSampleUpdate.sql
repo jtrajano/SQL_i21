@@ -16,6 +16,10 @@ BEGIN TRY
 	DECLARE @intSampleId INT
 	DECLARE @strMarks NVARCHAR(100)
 	DECLARE @intShipperEntityId INT
+	DECLARE @ysnEnableParentLot BIT
+
+	SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0)
+	FROM tblQMCompanyPreference
 
 	SELECT @intSampleId = intSampleId
 		,@strMarks = strMarks
@@ -89,6 +93,8 @@ BEGIN TRY
 		,intCountryID = x.intCountryID
 		,ysnIsContractCompleted = x.ysnIsContractCompleted
 		,intLotStatusId = x.intLotStatusId
+		,intStorageLocationId = x.intStorageLocationId
+		,ysnAdjustInventoryQtyBySampleQty = x.ysnAdjustInventoryQtyBySampleQty
 		,intEntityId = x.intEntityId
 		,intShipperEntityId = @intShipperEntityId
 		,strShipmentNumber = x.strShipmentNumber
@@ -135,6 +141,8 @@ BEGIN TRY
 			,intCountryID INT
 			,ysnIsContractCompleted BIT
 			,intLotStatusId INT
+			,intStorageLocationId INT
+			,ysnAdjustInventoryQtyBySampleQty BIT
 			,intEntityId INT
 			,strShipmentNumber NVARCHAR(30)
 			,strLotNumber NVARCHAR(50)

@@ -134,6 +134,8 @@ BEGIN TRY
 		AND @dtmCreated BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
 			AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
 
+	SELECT @ysnEnableParentLot = ysnEnableParentLot
+	FROM dbo.tblQMCompanyPreference
 	-- Inventory Receipt / Work Order No
 	-- Creating sample from other screens should take value directly from xml
 	IF ISNULL(@intInventoryReceiptId, 0) = 0
@@ -141,9 +143,6 @@ BEGIN TRY
 	BEGIN
 		IF ISNULL(@strLotNumber, '') <> ''
 		BEGIN
-			SELECT @ysnEnableParentLot = ysnEnableParentLot
-			FROM dbo.tblQMCompanyPreference
-
 			IF @ysnEnableParentLot = 0 -- Lot
 			BEGIN
 				SELECT TOP 1 @intInventoryReceiptId = RI.intInventoryReceiptId
@@ -242,6 +241,8 @@ BEGIN TRY
 		,intCountryID
 		,ysnIsContractCompleted
 		,intLotStatusId
+		,intStorageLocationId
+		,ysnAdjustInventoryQtyBySampleQty
 		,intEntityId
 		,intShipperEntityId
 		,strShipmentNumber
@@ -297,6 +298,8 @@ BEGIN TRY
 		,intCountryID
 		,ysnIsContractCompleted
 		,intLotStatusId
+		,intStorageLocationId
+		,ysnAdjustInventoryQtyBySampleQty
 		,intEntityId
 		,@intShipperEntityId
 		,strShipmentNumber
@@ -350,6 +353,8 @@ BEGIN TRY
 			,intCountryID INT
 			,ysnIsContractCompleted BIT
 			,intLotStatusId INT
+			,intStorageLocationId INT
+			,ysnAdjustInventoryQtyBySampleQty BIT
 			,intEntityId INT
 			,strShipmentNumber NVARCHAR(30)
 			,strLotNumber NVARCHAR(50)
@@ -537,11 +542,11 @@ BEGIN TRY
 	SELECT @strSampleNumber AS strSampleNumber
 
 	IF EXISTS (
-			SELECT *
+			SELECT 1
 			FROM tblQMSampleType
 			WHERE intSampleTypeId = @intSampleTypeId
 				AND ysnAdjustInventoryQtyBySampleQty = 1
-			)
+			) AND ISNULL(@dblSampleQty, 0) > 0 AND @ysnEnableParentLot = 0 -- Lot
 	BEGIN
 		SELECT @intLotId = intLotId
 			,@dblQty = dblQty
@@ -555,7 +560,27 @@ BEGIN TRY
 		WHERE intItemId = @intItemId
 			AND intUnitMeasureId = @intSampleUOMId
 
-		SELECT @dblQty = @dblQty + dbo.fnMFConvertQuantityToTargetItemUOM(@intSampleItemUOMId, @intItemUOMId, @dblSampleQty)
+		IF @intSampleItemUOMId IS NULL
+		BEGIN
+			RAISERROR (
+					'Sample quantity UOM is not configured for the selected item. '
+					,16
+					,1
+					)
+		END
+
+		SELECT @dblSampleQty = dbo.fnMFConvertQuantityToTargetItemUOM(@intSampleItemUOMId, @intItemUOMId, @dblSampleQty)
+
+		IF @dblSampleQty > @dblQty
+		BEGIN
+			RAISERROR (
+					'Sample quantity cannot be greater than lot / pallet quantity. '
+					,16
+					,1
+					)
+		END
+
+		SELECT @dblQty = @dblQty - @dblSampleQty
 
 		SELECT @strReasonCode = 'Sample Quantity - ' + @strSampleNumber
 

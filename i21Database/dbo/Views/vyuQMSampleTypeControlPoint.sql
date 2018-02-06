@@ -10,6 +10,7 @@ AS (
 		,P.intProductTypeId
 		,P.intProductValueId
 		,P.ysnActive
+		,ST.ysnAdjustInventoryQtyBySampleQty
 	FROM tblQMProductControlPoint PC
 	JOIN tblQMSampleType ST ON ST.intSampleTypeId = PC.intSampleTypeId
 	JOIN tblQMProduct P ON P.intProductId = PC.intProductId
@@ -33,6 +34,7 @@ FROM (
 		,2 AS intProductTypeId -- Configuring as 2 to not to change client filter
 		,I.intItemId AS intProductValueId
 		,P.ysnActive
+		,ST.ysnAdjustInventoryQtyBySampleQty
 	FROM tblQMProductControlPoint PC
 	JOIN tblQMSampleType ST ON ST.intSampleTypeId = PC.intSampleTypeId
 	JOIN tblQMProduct P ON P.intProductId = PC.intProductId

@@ -1173,4 +1173,7 @@ SET ysnAdjustInventoryQtyBySampleQty = 0
 WHERE ysnAdjustInventoryQtyBySampleQty IS NULL
 GO
 
-
+UPDATE tblQMSample
+SET ysnAdjustInventoryQtyBySampleQty = 0
+WHERE ysnAdjustInventoryQtyBySampleQty IS NULL
+GO
