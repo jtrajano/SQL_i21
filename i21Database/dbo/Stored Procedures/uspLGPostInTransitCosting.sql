@@ -183,7 +183,7 @@ BEGIN TRY
 			--	AND strTransactionId = @strLoadNumber
 		END
 
-	IF @intPurchaseSale = 3
+	IF @intPurchaseSale > 3
 	BEGIN
 		DECLARE @ItemsForPost AS ItemCostingTableType
 		DECLARE @StorageItemsForPost AS ItemCostingTableType
