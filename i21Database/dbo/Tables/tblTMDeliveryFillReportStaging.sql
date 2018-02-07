@@ -71,7 +71,7 @@
 	dblNextDeliveryGallons NUMERIC(18,6) NOT NULL,
 	intGroupSiteCount INT NULL,
 	intUserId INT NOT NULL,
-	[strDateTimeId] NVARCHAR(50) NOT NULL
+	[strDateTimeId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
 
 
     CONSTRAINT [PK_tblTMDeliveryFillReportStaging] PRIMARY KEY CLUSTERED ([intDeliveryFillReportStagingId] ASC), 
