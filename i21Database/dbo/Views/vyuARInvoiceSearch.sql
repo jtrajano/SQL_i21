@@ -52,8 +52,8 @@ SELECT
 	,strUserEntered					= USERENTERED.strName
 	,intEntityContactId				= I.intEntityContactId
 	,strContactName					= EC.strName
-	,strTicketNumbers				= dbo.fnARGetScaleTicketNumbersFromInvoice(I.intInvoiceId)
-	,strCustomerReferences			= dbo.fnARGetCustomerReferencesFromInvoice(I.intInvoiceId)
+	,strTicketNumbers				= SCALETICKETS.strTicketNumbers
+	,strCustomerReferences			= CUSTOMERREFERENCES.strCustomerReferences
 	,ysnHasEmailSetup				= CASE WHEN EMAILSETUP.intEmailSetupCount > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END	
 	,strCurrencyDescription			= CUR.strDescription
 	,dblWithholdingTax				= CASE WHEN (I.strTransactionType  IN ('Credit Memo','Customer Prepayment', 'Overpayment'))
@@ -62,8 +62,8 @@ SELECT
 									  ELSE
 									  CASE WHEN ysnPaid = 1 THEN (I.dblPayment - (I.dblPayment - (I.dblPayment * (dblWithholdPercent / 100))))  ELSE I.dblAmountDue - (I.dblAmountDue - (I.dblAmountDue * (dblWithholdPercent / 100))) END
 									  END
-	,ysnMailSent					= CASE WHEN (SELECT COUNT(1) FROM tblSMTransaction trans INNER JOIN tblSMActivity tsa on tsa.intTransactionId = trans.intTransactionId WHERE trans.intRecordId = intInvoiceId AND tsa.strType = 'Email' AND tsa.strStatus = 'Sent') > 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT)  END 
-	,strStatus						=  CASE WHEN EMAILSETUP.intEmailSetupCount > 0 THEN 'Ready' ELSE 'Email	 not Configured' END	
+	,ysnMailSent					= CASE WHEN ISNULL(EMAILSTATUS.intTransactionCount, 0) > 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT)  END 
+	,strStatus						= CASE WHEN EMAILSETUP.intEmailSetupCount > 0 THEN 'Ready' ELSE 'Email not Configured.' END	
 	,dtmForgiveDate					= I.dtmForgiveDate
 	,strSalesOrderNumber			= SO.strSalesOrderNumber
 FROM dbo.tblARInvoice I WITH (NOLOCK)
@@ -82,9 +82,10 @@ LEFT OUTER JOIN (
 		 , strTerm
 	FROM dbo.tblSMTerm WITH (NOLOCK)
 ) T ON I.intTermId = T.intTermID 
-LEFT OUTER JOIN (
+INNER JOIN (
 	SELECT intCompanyLocationId
 		 , strLocationName
+		 , dblWithholdPercent
 	FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
 ) L ON I.intCompanyLocationId  = L.intCompanyLocationId 
 LEFT OUTER JOIN (
@@ -141,7 +142,47 @@ OUTER APPLY (
 	  AND ISNULL(strEmail, '') <> '' 
 	  AND strEmailDistributionOption LIKE '%' + I.strTransactionType + '%'
 ) EMAILSETUP
-INNER JOIN tblSMCompanyLocation companylocation
-	ON companylocation.intCompanyLocationId = I.intCompanyLocationId
-LEFT JOIN tblSOSalesOrder SO
-	ON I.intSalesOrderId = SO.intSalesOrderId
+LEFT OUTER JOIN (
+	SELECT intSalesOrderId
+		 , strSalesOrderNumber
+	FROM dbo.tblSOSalesOrder 
+) SO ON I.intSalesOrderId = SO.intSalesOrderId
+OUTER APPLY (
+	SELECT intTransactionCount = COUNT(*) 
+	FROM tblSMTransaction SMT 
+	INNER JOIN tblSMActivity SMA on SMA.intTransactionId = SMT.intTransactionId 
+	WHERE SMT.intRecordId = intInvoiceId 
+	  AND SMA.strType = 'Email' 
+	  AND SMA.strStatus = 'Sent'
+) EMAILSTATUS
+OUTER APPLY (
+	SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1)
+	FROM (
+		SELECT CAST(T.strTicketNumber AS VARCHAR(200))  + ', '
+		FROM dbo.tblARInvoiceDetail ID WITH(NOLOCK)		
+		INNER JOIN (
+			SELECT intTicketId
+				 , strTicketNumber 
+			FROM dbo.tblSCTicket WITH(NOLOCK)
+		) T ON ID.intTicketId = T.intTicketId
+		WHERE ID.intInvoiceId = I.intInvoiceId
+		GROUP BY ID.intInvoiceId, ID.intTicketId, T.strTicketNumber
+		FOR XML PATH ('')
+	) INV (strTicketNumber)
+) SCALETICKETS
+OUTER APPLY (
+	SELECT strCustomerReferences = LEFT(strCustomerReference, LEN(strCustomerReference) - 1)
+	FROM (
+		SELECT CAST(T.strCustomerReference AS VARCHAR(200))  + ', '
+		FROM dbo.tblARInvoiceDetail ID WITH(NOLOCK)		
+		INNER JOIN (
+			SELECT intTicketId
+				 , strCustomerReference 
+			FROM dbo.tblSCTicket WITH(NOLOCK)
+			WHERE ISNULL(strCustomerReference, '') <> ''
+		) T ON ID.intTicketId = T.intTicketId
+		WHERE ID.intInvoiceId = I.intInvoiceId
+		GROUP BY ID.intInvoiceId, ID.intTicketId, T.strCustomerReference
+		FOR XML PATH ('')
+	) INV (strCustomerReference)
+) CUSTOMERREFERENCES
