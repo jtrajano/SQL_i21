@@ -63,6 +63,7 @@ SELECT
 										  END
 								  END
 	,ysnACHActive					=  ISNULL(ysnACHActive, 0)
+	,dblInvoiceDiscountAvailable
 FROM
 	(
 		SELECT 
@@ -112,6 +113,7 @@ FROM
 			,intPaymentMethodId				= ARC.intPaymentMethodId	
 			,strPaymentMethod				= SMP.strPaymentMethod
 			,ysnACHActive					= EFT.ysnActive
+			,dblInvoiceDiscountAvailable	= CASE WHEN ARI.[strTransactionType] IN ('Invoice', 'Debit Memo') THEN ARI.[dblDiscountAvailable] ELSE CAST(0 AS DECIMAL(18,6)) END
 		FROM
 			[tblARInvoice] ARI
 		INNER JOIN
@@ -205,6 +207,7 @@ FROM
 			,intPaymentMethodId			= APV.intPaymentMethodId	
 			,strPaymentMethod			= SMP.strPaymentMethod
 			,ysnACHActive				= EFT.ysnActive
+			,dblInvoiceDiscountAvailable= CAST(0 AS DECIMAL(18,6))
 		FROM
 			tblAPBill APB
 		INNER JOIN
