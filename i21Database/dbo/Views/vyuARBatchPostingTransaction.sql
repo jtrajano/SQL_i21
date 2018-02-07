@@ -6,25 +6,34 @@ SELECT
 	,GL.strTransactionType
 	,dblEntriesCount			= COUNT(AR.intTransactionId)  
 	,dblTotalAmount				= SUM(AR.dblTotal) 
-	,AR.strUserName
+	,strUserName				= E.strName
 	,AR.strLocationName	
 	,intCurrencyId				= AR.intCurrencyID
 	,AR.strCurrency
 	,AR.strCurrencyDescription
 FROM
-	(SELECT 
-		strBatchId
+	(SELECT DISTINCT
+		  strBatchId
 		, strCode
 		, intTransactionId
 		, strTransactionId
 		, dtmDate
-		, dtmDateEntered
+		, dtmDateEntered = CAST(dtmDateEntered AS DATE)
+		, intEntityId
 		, strTransactionType
 		, intAccountId
 	 FROM
 		tblGLDetail
 	 WHERE
 		ysnIsUnposted = 0) GL
+INNER JOIN 
+	(
+		SELECT 
+			 intEntityId
+			,strName
+		FROM 
+			tblEMEntity
+	) E ON GL.intEntityId = E.intEntityId			
 INNER JOIN
 	(
 		SELECT
@@ -33,7 +42,6 @@ INNER JOIN
 			,intTransactionId		= INV.intInvoiceId
 			,strTransactionId		= INV.strInvoiceNumber
 			,intAccountId			= INV.intAccountId
-			,strUserName			= E.strName 
 			,strLocationName		= LOC.strLocationName
 			,intCurrencyID			= SMC.intCurrencyID
 			,strCurrency			= SMC.strCurrency
@@ -42,7 +50,6 @@ INNER JOIN
 			(SELECT 
 				intInvoiceId
 				, strInvoiceNumber
-				, intEntityId
 				, intAccountId
 				, intCompanyLocationId
 				, dblInvoiceTotal	
@@ -50,13 +57,7 @@ INNER JOIN
 			 FROM 
 				tblARInvoice
 			 WHERE
-				ysnPosted = 1) INV
-			 LEFT OUTER JOIN 
-				(SELECT 
-					intEntityId
-					, strName
-				 FROM 
-					tblEMEntity) E ON INV.intEntityId = E.intEntityId								
+				ysnPosted = 1) INV			 						
 			 LEFT OUTER JOIN 	
 				 (SELECT 
 					intCompanyLocationId
@@ -78,7 +79,6 @@ INNER JOIN
 			,intTransactionId	= AR.intPaymentId
 			,strTransactionId	= AR.strRecordNumber
 			,intAccountId		= AR.intAccountId
-			,strUserName		= E.strName 
 			,strLocationName	= LOC.strLocationName
 			,intCurrencyID			= SMC.intCurrencyID
 			,strCurrency			= SMC.strCurrency
@@ -88,20 +88,13 @@ INNER JOIN
 				intPaymentId
 				, strRecordNumber
 				, intAccountId
-				, intEntityId
 				, dblAmountPaid
 				, intLocationId
 				, intCurrencyId
 			 FROM 
 				tblARPayment
 			 WHERE 
-				ysnPosted = 1) AR
-			LEFT OUTER JOIN 
-				(SELECT 
-					intEntityId
-					, strName
-				 FROM 
-					tblEMEntity) E ON AR.intEntityId = E.intEntityId			
+				ysnPosted = 1) AR		
 			LEFT OUTER JOIN 
 				(SELECT
 					intCompanyLocationId
@@ -115,17 +108,17 @@ INNER JOIN
 				FROM 
 					tblSMCurrency) SMC ON AR.intCurrencyId = SMC.intCurrencyID	
 	) AR
-ON GL.intTransactionId = AR.intTransactionId
+ON GL.intTransactionId = AR.intTransactionId	
 AND GL.strTransactionType IN ('Invoice','Receive Payments', 'Credit Memo')
 AND GL.strCode = 'AR'		
 AND GL.strTransactionId = AR.strTransactionId
 AND GL.intAccountId = AR.intAccountId		
 GROUP BY
 	 GL.strBatchId
-	,GL.dtmDate
+	--,GL.dtmDate
 	,GL.dtmDateEntered
 	,GL.strTransactionType 
-	,AR.strUserName
+	,E.strName
 	,AR.strLocationName
 	,AR.intCurrencyID
 	,AR.strCurrency
