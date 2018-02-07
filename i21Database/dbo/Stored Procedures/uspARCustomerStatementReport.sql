@@ -253,7 +253,7 @@ FROM (
 		 , dblMonthlyBudget				= ISNULL([dbo].[fnARGetCustomerBudget](C.intEntityId, I.dtmDate), 0)
 		 , dblRunningBalance			= SUM(CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN I.dblInvoiceTotal * -1 ELSE (CASE WHEN I.strType = ''CF Tran'' THEN 0 ELSE I.dblInvoiceTotal END) END - ISNULL(TOTALPAYMENT.dblPayment, 0)) OVER (PARTITION BY I.intEntityCustomerId'+ @queryRunningBalance +')
 		 , strCustomerNumber			= C.strCustomerNumber
-		 , strDisplayName				= CASE WHEN C.strStatementFormat <> ''Running Balance'' THEN C.strName ELSE ISNULL(C.strCheckPayeeName, C.strName) END
+		 , strDisplayName				= CASE WHEN C.strStatementFormat <> ''Running Balance'' THEN C.strName ELSE ISNULL(NULLIF(C.strCheckPayeeName, ''''), C.strName) END
 		 , strName						= C.strName
 		 , strBOLNumber					= I.strBOLNumber
 		 , dblCreditLimit				= C.dblCreditLimit
