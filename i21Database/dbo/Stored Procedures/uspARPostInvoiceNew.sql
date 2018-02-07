@@ -190,6 +190,7 @@ DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.'
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Receivable'
 DECLARE @SCREEN_NAME NVARCHAR(25) = 'Invoice'
 DECLARE @CODE NVARCHAR(25) = 'AR'
+DECLARE @POSTDESC NVARCHAR(10) = 'Posted '
 
 
 
@@ -1839,7 +1840,7 @@ IF @Post = 1
 				,dblExchangeRate			= 0
 				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
-				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
+				,strJournalLineDescription	= @POSTDESC + A.strTransactionType 
 				,intJournalLineNo			= A.intInvoiceId
 				,ysnIsUnposted				= 0
 				,intUserId					= @UserId
@@ -1965,7 +1966,7 @@ IF @Post = 1
 				,dblExchangeRate			= 0
 				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
-				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
+				,strJournalLineDescription	= @POSTDESC + A.strTransactionType 
 				,intJournalLineNo			= A.intInvoiceId
 				,ysnIsUnposted				= 0
 				,intUserId					= @UserId
@@ -2698,7 +2699,7 @@ IF @Post = 1
 				,dblExchangeRate			= 1
 				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
-				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
+				,strJournalLineDescription	= @POSTDESC + A.strTransactionType 
 				,intJournalLineNo			= A.intInvoiceId
 				,ysnIsUnposted				= 0
 				,intUserId					= @UserId
@@ -2756,7 +2757,7 @@ IF @Post = 1
 				,dblExchangeRate			= 1
 				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
-				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
+				,strJournalLineDescription	= @POSTDESC + A.strTransactionType 
 				,intJournalLineNo			= DT.intInvoiceDetailTaxId
 				,ysnIsUnposted				= 0
 				,intUserId					= @UserId
@@ -2842,7 +2843,7 @@ IF @Post = 1
 				,dblExchangeRate			= 1
 				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
-				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
+				,strJournalLineDescription	= @POSTDESC + A.strTransactionType 
 				,intJournalLineNo			= D.intInvoiceDetailId
 				,ysnIsUnposted				= 0
 				,intUserId					= @UserId
@@ -2949,33 +2950,33 @@ IF @Post = 0
 				,intConcurrencyId
 			)
 			SELECT	
-				 GLD.dtmDate 
-				,@BatchId
-				,GLD.intAccountId
+				 dtmDate						= GLD.dtmDate 
+				,strBatchId						= @BatchId
+				,intAccountId					= GLD.intAccountId
 				,dblDebit						= GLD.dblCredit
 				,dblCredit						= GLD.dblDebit
 				,dblDebitUnit					= GLD.dblCreditUnit
 				,dblCreditUnit					= GLD.dblDebitUnit
 				,dblDebitForeign				= GLD.dblCreditForeign
 				,dblCreditForeign				= GLD.dblDebitForeign				
-				,GLD.strDescription
-				,GLD.strCode
-				,GLD.strReference
-				,GLD.intCurrencyId
-				,GLD.dblExchangeRate
-				,dtmDateEntered					= GETDATE()
-				,GLD.dtmTransactionDate
-				,GLD.strJournalLineDescription
-				,GLD.intJournalLineNo 
+				,strDescription					= GLD.strDescription
+				,strCode						= GLD.strCode
+				,strReference					= GLD.strReference
+				,intCurrencyId					= GLD.intCurrencyId
+				,dblExchangeRate				= GLD.dblExchangeRate
+				,dtmDateEntered					= @PostDate
+				,dtmTransactionDate				= GLD.dtmTransactionDate
+				,strJournalLineDescription		= REPLACE(GLD.strJournalLineDescription, @POSTDESC, 'Unposted ')
+				,intJournalLineNo				= GLD.intJournalLineNo 
 				,ysnIsUnposted					= 1
 				,intUserId						= @UserId
 				,intEntityId					= @UserEntityID
-				,GLD.strTransactionId
-				,GLD.intTransactionId
-				,GLD.strTransactionType
-				,GLD.strTransactionForm
-				,GLD.strModuleName
-				,GLD.intConcurrencyId
+				,strTransactionId				= GLD.strTransactionId
+				,intTransactionId				= GLD.intTransactionId
+				,strTransactionType				= GLD.strTransactionType
+				,strTransactionForm				= GLD.strTransactionForm
+				,strModuleName					= GLD.strModuleName
+				,intConcurrencyId				= GLD.intConcurrencyId
 			FROM
 				(SELECT intInvoiceId, [strInvoiceNumber] FROM @PostInvoiceData) PID
 			INNER JOIN

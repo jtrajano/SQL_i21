@@ -59,6 +59,7 @@ DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.'
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Receivable'
 DECLARE @SCREEN_NAME NVARCHAR(25) = 'Invoice'
 DECLARE @CODE NVARCHAR(25) = 'AR'
+DECLARE @POSTDESC NVARCHAR(10) = 'Posted '
 
 DECLARE @UserEntityID				INT
 		,@DiscountAccountId			INT
@@ -703,106 +704,6 @@ SELECT
 	,[strPostingError]
 FROM 
 	[dbo].[fnARGetInvalidInvoicesForPosting](@PostInvoiceData, @post, @recap)
-
-IF @post = 1 --delete this part once TM-2455 is done		-start
-	BEGIN											
-		BEGIN TRY
-			DECLARE @TankDelivery TABLE (
-					intInvoiceId INT,
-					UNIQUE (intInvoiceId));
-							
-			INSERT INTO @TankDelivery					
-			SELECT DISTINCT
-				I.intInvoiceId
-			FROM
-				(SELECT intInvoiceId FROM tblARInvoice WITH (NOLOCK)) I
-			INNER JOIN
-				(SELECT intInvoiceId, intSiteId FROM tblARInvoiceDetail WITH (NOLOCK)) D
-					ON I.intInvoiceId = D.intInvoiceId		
-			INNER JOIN
-				(SELECT intSiteID FROM tblTMSite WITH (NOLOCK)) TMS
-					ON D.intSiteId = TMS.intSiteID 
-			INNER JOIN 
-				@PostInvoiceData B
-					ON I.intInvoiceId = B.intInvoiceId
-							
-			WHILE EXISTS(SELECT TOP 1 NULL FROM @TankDelivery ORDER BY intInvoiceId)
-				BEGIN
-						
-					DECLARE  @intInvoiceId INT
-							,@ResultLog NVARCHAR(MAX)
-									
-					SET @ResultLog = 'OK'
-							
-					SELECT TOP 1 @intInvoiceId = intInvoiceId FROM @TankDelivery ORDER BY intInvoiceId
-
-					EXEC dbo.uspTMValidateInvoiceForSync @intInvoiceId, @ResultLog OUT
-											
-					DELETE FROM @TankDelivery WHERE intInvoiceId = @intInvoiceId
-							
-					IF NOT(@ResultLog = 'OK' OR RTRIM(LTRIM(@ResultLog)) = '')
-						BEGIN
-							INSERT INTO @InvalidInvoiceData([strPostingError], [strTransactionType], [strInvoiceNumber], [strBatchId], [intInvoiceId])
-							SELECT
-								@ResultLog,
-								A.strTransactionType,
-								A.strInvoiceNumber,
-								@batchIdUsed,
-								A.intInvoiceId
-							FROM 
-								(SELECT intInvoiceId, strInvoiceNumber, strTransactionType FROM tblARInvoice WITH (NOLOCK)) A 
-							INNER JOIN 
-								@PostInvoiceData B
-									ON A.intInvoiceId = B.intInvoiceId
-							WHERE
-								A.intInvoiceId = @intInvoiceId									
-						END														
-				END 							
-							
-															
-		END TRY
-		BEGIN CATCH
-			SELECT @ErrorMerssage = ERROR_MESSAGE()
-			IF @raiseError = 0
-				BEGIN
-					IF @InitTranCount = 0
-						IF (XACT_STATE()) <> 0
-							ROLLBACK TRANSACTION
-					ELSE
-						IF (XACT_STATE()) <> 0
-							ROLLBACK TRANSACTION @Savepoint
-												
-					SET @CurrentTranCount = @@TRANCOUNT
-					SET @CurrentSavepoint = SUBSTRING(('uspARPostInvoiceNew' + CONVERT(VARCHAR, @CurrentTranCount)), 1, 32)										
-			
-					IF @CurrentTranCount = 0
-						BEGIN TRANSACTION
-					ELSE
-						SAVE TRANSACTION @CurrentSavepoint			
-								
-					EXEC dbo.uspARInsertPostResult @batchIdUsed, 'Invoice', @ErrorMerssage, @param
-					
-					IF @CurrentTranCount = 0
-						BEGIN
-							IF (XACT_STATE()) = -1
-								ROLLBACK TRANSACTION
-							IF (XACT_STATE()) = 1
-								COMMIT TRANSACTION
-						END		
-					ELSE
-						BEGIN
-							IF (XACT_STATE()) = -1
-								ROLLBACK TRANSACTION  @CurrentSavepoint
-							--IF (XACT_STATE()) = 1
-							--	COMMIT TRANSACTION  @Savepoint
-						END	
-				END						
-			IF @raiseError = 1
-				RAISERROR(@ErrorMerssage, 11, 1)
-				
-			GOTO Post_Exit
-		END CATCH
-	END --delete this part once TM-2455 is done		-end
 		
 SELECT @totalInvalid = COUNT(*) FROM @InvalidInvoiceData
 
@@ -1810,7 +1711,7 @@ IF @post = 1
 				,dblExchangeRate			= 0
 				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
-				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
+				,strJournalLineDescription	= @POSTDESC + A.strTransactionType 
 				,intJournalLineNo			= A.intInvoiceId
 				,ysnIsUnposted				= 0
 				,intUserId					= @userId
@@ -1935,7 +1836,7 @@ IF @post = 1
 				,dblExchangeRate			= 0
 				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
-				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
+				,strJournalLineDescription	= @POSTDESC + A.strTransactionType 
 				,intJournalLineNo			= A.intInvoiceId
 				,ysnIsUnposted				= 0
 				,intUserId					= @userId
@@ -2670,7 +2571,7 @@ IF @post = 1
 				,dblExchangeRate			= 1
 				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
-				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
+				,strJournalLineDescription	= @POSTDESC + A.strTransactionType 
 				,intJournalLineNo			= A.intInvoiceId
 				,ysnIsUnposted				= 0
 				,intUserId					= @userId
@@ -2728,7 +2629,7 @@ IF @post = 1
 				,dblExchangeRate			= 1
 				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
-				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
+				,strJournalLineDescription	= @POSTDESC + A.strTransactionType 
 				,intJournalLineNo			= DT.intInvoiceDetailTaxId
 				,ysnIsUnposted				= 0
 				,intUserId					= @userId
@@ -2814,7 +2715,7 @@ IF @post = 1
 				,dblExchangeRate			= 1
 				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
-				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
+				,strJournalLineDescription	= @POSTDESC + A.strTransactionType 
 				,intJournalLineNo			= D.intInvoiceDetailId
 				,ysnIsUnposted				= 0
 				,intUserId					= @userId
@@ -3482,7 +3383,7 @@ IF @post = 0
 				,dblExchangeRate				= GLD.dblExchangeRate
 				,dtmDateEntered					= @PostDate
 				,dtmTransactionDate				= GLD.dtmTransactionDate
-				,strJournalLineDescription		= GLD.strJournalLineDescription
+				,strJournalLineDescription		= REPLACE(GLD.strJournalLineDescription, @POSTDESC, 'Unposted ')
 				,intJournalLineNo				= GLD.intJournalLineNo 
 				,ysnIsUnposted					= 1
 				,intUserId						= @userId
