@@ -2661,7 +2661,6 @@
     <Build Include="dbo\User Defined Types\VoucherDetailNonInvContract.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetailNonInvContract.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryValuationSummary.sql" />
-    <Build Include="dbo\Functions\fnARGetInvoiceNumbersFromPayment.sql" />
     <Build Include="dbo\Views\vyuTRQuoteReport.sql" />
     <Build Include="dbo\Tables\tblAPCompanyPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspLGProcessToBill.sql" />
@@ -4636,10 +4635,6 @@
     <Build Include="dbo\Tables\tblCRMOpportunityLob.sql" />
     <Build Include="dbo\Stored Procedures\uspLGUpdateContainerLinkInSample.sql" />
     <Build Include="dbo\Views\vyuLGOpenPickLots.sql" />
-    <Build Include="dbo\Functions\fnARGetScaleTicketNumbersFromInvoice.sql" />
-    <Build Include="dbo\Functions\fnARGetCustomerReferencesFromInvoice.sql" />
-    <Build Include="dbo\Functions\fnARGetScaleTicketNumbersFromPayment.sql" />
-    <Build Include="dbo\Functions\fnARGetCustomerReferencesFromPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspCFImportUnpostedTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInsertDiscountScheduleRecord.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInsertPriceProfileRecord.sql" />

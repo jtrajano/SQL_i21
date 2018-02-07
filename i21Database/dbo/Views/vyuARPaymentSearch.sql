@@ -16,15 +16,15 @@ SELECT
     ,dblDiscount            = ISNULL(PD.dblDiscount, 0)
 	,P.ysnPosted
 	,strPaymentType			= 'Payment'
-	,strInvoices			= dbo.fnARGetInvoiceNumbersFromPayment(P.intPaymentId)
+	,strInvoices			= INVOICES.strInvoiceNumber
 	,P.intLocationId 
 	,CL.strLocationName
 	,dtmBatchDate			= P.dtmBatchDate
 	,strBatchId				= P.strBatchId
 	,strUserEntered			= POSTEDBY.strName
 	,strEnteredBy			= EM.strName
-	,strTicketNumbers		= dbo.fnARGetScaleTicketNumbersFromPayment(P.intPaymentId)
-	,strCustomerReferences	= dbo.fnARGetCustomerReferencesFromPayment(P.intPaymentId)
+	,strTicketNumbers		= SCALETICKETS.strTicketNumbers
+	,strCustomerReferences	= CUSTOMERREFERENCES.strCustomerReferences
 	,intCurrencyId			= P.intCurrencyId
 	,strCurrency			= SMC.strCurrency
     ,strCurrencyDescription	= SMC.strDescription
@@ -93,3 +93,55 @@ LEFT OUTER JOIN (SELECT intCurrencyID
 ) SMC ON P.intCurrencyId = SMC.intCurrencyID
 LEFT OUTER JOIN vyuARPaymentBankTransaction ARP
 	ON ARP.intPaymentId = P.intPaymentId
+OUTER APPLY (
+	SELECT strInvoiceNumber = LEFT(strInvoiceNumber, LEN(strInvoiceNumber) - 1)
+	FROM (
+		SELECT CAST(I.strInvoiceNumber AS VARCHAR(200))  + ', '
+		FROM dbo.tblARInvoice I WITH(NOLOCK)
+		INNER JOIN (
+			SELECT intInvoiceId
+			FROM dbo.tblARPaymentDetail WITH (NOLOCK)
+			WHERE intPaymentId = P.intPaymentId
+		) DETAILS ON I.intInvoiceId = DETAILS.intInvoiceId
+		FOR XML PATH ('')
+	) INV (strInvoiceNumber)
+) INVOICES
+OUTER APPLY (
+	SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1)
+	FROM (
+		SELECT CAST(T.strTicketNumber AS VARCHAR(200))  + ', '
+		FROM dbo.tblARInvoiceDetail ID WITH(NOLOCK)
+		INNER JOIN (
+			SELECT intInvoiceId
+			FROM dbo.tblARPaymentDetail WITH (NOLOCK)
+			WHERE intPaymentId = P.intPaymentId
+		) DETAILS ON ID.intInvoiceId = DETAILS.intInvoiceId
+		INNER JOIN (
+			SELECT intTicketId
+				 , strTicketNumber 
+			FROM dbo.tblSCTicket WITH(NOLOCK)
+		) T ON ID.intTicketId = T.intTicketId
+		GROUP BY ID.intInvoiceId, ID.intTicketId, T.strTicketNumber
+		FOR XML PATH ('')
+	) INV (strTicketNumber)
+) SCALETICKETS
+OUTER APPLY (
+	SELECT strCustomerReferences = LEFT(strCustomerReference, LEN(strCustomerReference) - 1)
+	FROM (
+		SELECT CAST(T.strCustomerReference AS VARCHAR(200))  + ', '
+		FROM dbo.tblARInvoiceDetail ID WITH(NOLOCK)
+		INNER JOIN (
+			SELECT intInvoiceId
+			FROM dbo.tblARPaymentDetail WITH (NOLOCK)
+			WHERE intPaymentId = P.intPaymentId
+		) DETAILS ON ID.intInvoiceId = DETAILS.intInvoiceId
+		INNER JOIN (
+			SELECT intTicketId
+				 , strCustomerReference 
+			FROM dbo.tblSCTicket WITH(NOLOCK)
+			WHERE ISNULL(strCustomerReference, '') <> ''
+		) T ON ID.intTicketId = T.intTicketId
+		GROUP BY ID.intInvoiceId, ID.intTicketId, T.strCustomerReference
+		FOR XML PATH ('')
+	) INV (strCustomerReference)
+) CUSTOMERREFERENCES

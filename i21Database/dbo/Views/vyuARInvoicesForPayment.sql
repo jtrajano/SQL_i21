@@ -101,8 +101,8 @@ FROM
 			,[intPaymentId]				= ARI.[intPaymentId]
 			,[dblTotalTermDiscount]		= ARI.[dblTotalTermDiscount]
 			,[strInvoiceReportNumber]	= CFT.strInvoiceReportNumber
-			,[strTicketNumbers]			= dbo.fnARGetScaleTicketNumbersFromInvoice(ARI.intInvoiceId)
-			,[strCustomerReferences]	= dbo.fnARGetCustomerReferencesFromInvoice(ARI.intInvoiceId)
+			,[strTicketNumbers]			= SCALETICKETS.strTicketNumbers
+			,[strCustomerReferences]	= CUSTOMERREFERENCES.strCustomerReferences
 			,[intTermId]				= ARI.[intTermId]
 			,[ysnExcludeForPayment]     = (CASE WHEN ARI.strTransactionType = 'Customer Prepayment' AND (EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE intInvoiceId = ARI.intInvoiceId AND ISNULL(ysnRestricted, 0) = 1))
 												THEN CONVERT(BIT, 1)
@@ -152,6 +152,37 @@ FROM
 				FROM
 					tblEMEntityEFTInformation
 			) EFT ON CE.intEntityId = EFT.intEntityId				
+		OUTER APPLY (
+			SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1)
+			FROM (
+				SELECT CAST(T.strTicketNumber AS VARCHAR(200))  + ', '
+				FROM dbo.tblARInvoiceDetail ID WITH(NOLOCK)		
+				INNER JOIN (
+					SELECT intTicketId
+						 , strTicketNumber 
+					FROM dbo.tblSCTicket WITH(NOLOCK)
+				) T ON ID.intTicketId = T.intTicketId
+				WHERE ID.intInvoiceId = ARI.intInvoiceId
+				GROUP BY ID.intInvoiceId, ID.intTicketId, T.strTicketNumber
+				FOR XML PATH ('')
+			) INV (strTicketNumber)
+		) SCALETICKETS
+		OUTER APPLY (
+			SELECT strCustomerReferences = LEFT(strCustomerReference, LEN(strCustomerReference) - 1)
+			FROM (
+				SELECT CAST(T.strCustomerReference AS VARCHAR(200))  + ', '
+				FROM dbo.tblARInvoiceDetail ID WITH(NOLOCK)		
+				INNER JOIN (
+					SELECT intTicketId
+						 , strCustomerReference 
+					FROM dbo.tblSCTicket WITH(NOLOCK)
+					WHERE ISNULL(strCustomerReference, '') <> ''
+				) T ON ID.intTicketId = T.intTicketId
+				WHERE ID.intInvoiceId = ARI.intInvoiceId
+				GROUP BY ID.intInvoiceId, ID.intTicketId, T.strCustomerReference
+				FOR XML PATH ('')
+			) INV (strCustomerReference)
+		) CUSTOMERREFERENCES
 		WHERE
 			[ysnPosted] = 1
 			AND ysnCancelled = 0
