@@ -73,7 +73,54 @@ BEGIN TRY
 
 
 	--PricebookFile @StoreId @Register, @Category, @BeginingChangeDate, @EndingChangeDate, @ExportEntirePricebookFile
-	IF(@ysnPricebookFile = 1)
+	IF(@ysnExportEntirePricebookFile = 1)
+		BEGIN
+			INSERT INTO @tableGetItems
+			SELECT strActionType
+					, strUpcCode
+					, strDescription
+					, dblSalePrice
+					, ysnSalesTaxed
+					, ysnIdRequiredLiquor
+					, ysnIdRequiredCigarette
+					, strRegProdCode 
+					, intItemId 
+			FROM  
+			(
+			SELECT *,
+					rn = ROW_NUMBER() OVER(PARTITION BY t.intItemId ORDER BY (SELECT NULL))
+				FROM 
+					(
+						SELECT 
+						CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
+						--, IUOM.strUpcCode AS strUpcCode
+						, IUOM.strLongUPCCode AS strUpcCode
+						, I.strDescription AS strDescription
+						, Prc.dblSalePrice AS dblSalePrice
+						, IL.ysnTaxFlag1 AS ysnSalesTaxed
+						, IL.ysnIdRequiredLiquor AS ysnIdRequiredLiquor
+						, IL.ysnIdRequiredCigarette AS ysnIdRequiredCigarette
+						, SubCat.strRegProdCode AS strRegProdCode
+						, I.intItemId AS intItemId
+							   FROM tblICItem I
+							   JOIN tblICCategory Cat ON Cat.intCategoryId = I.intCategoryId
+							   JOIN @tablePricebookFileOne tmpItem ON tmpItem.intItemId = I.intItemId
+							   JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
+							   LEFT JOIN tblSTSubcategoryRegProd SubCat ON SubCat.intRegProdId = IL.intProductCodeId
+							   JOIN tblSTStore ST ON ST.intStoreId = SubCat.intStoreId
+							   JOIN tblSMCompanyLocation L ON L.intCompanyLocationId = IL.intLocationId
+							   JOIN tblICItemUOM IUOM ON IUOM.intItemId = I.intItemId
+							   JOIN tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId
+							   JOIN tblSTRegister R ON R.intStoreId = ST.intStoreId
+							   JOIN tblICItemPricing Prc ON Prc.intItemLocationId = IL.intItemLocationId
+							   JOIN tblICItemSpecialPricing SplPrc ON SplPrc.intItemId = I.intItemId
+						WHERE I.ysnFuelItem = 0 AND R.intRegisterId = @intRegisterId AND ST.intStoreId = @intStoreId
+						AND I.intItemId NOT IN (SELECT intItemId FROM @tableGetItems) 
+					) as t
+			) t1
+			WHERE rn = 1
+		END
+	ELSE IF(@ysnPricebookFile = 1)
 		BEGIN
 			INSERT INTO @tableGetItems
 			SELECT strActionType
