@@ -576,10 +576,11 @@ Ext.define('Inventory.view.Item', {
                                                         xtype: 'checkcolumn',
                                                         itemId: 'colBaseUnit',
                                                         width: 90,
-                                                        text: 'Base Unit'
+                                                        text: 'Stock Unit'
                                                     },
                                                     {
                                                         xtype: 'checkcolumn',
+                                                        hidden: true,
                                                         itemId: 'colStockUOM',
                                                         width: 90,
                                                         text: 'Stock UOM'

@@ -99,7 +99,10 @@ Ext.define('Inventory.view.CommodityViewController', {
                 },
                 colUOMUnitQty: 'dblUnitQty',
                 colUOMBaseUnit: 'ysnStockUnit',
-                colUOMStockUom: 'ysnStockUOM',
+                colUOMStockUom: {
+                    dataIndex: 'ysnStockUOM',
+                    hidden: true // TODO: Hide it for now. Show it again in 18.3
+                },
                 colUOMDefaultUOM: 'ysnDefault'
             },
 

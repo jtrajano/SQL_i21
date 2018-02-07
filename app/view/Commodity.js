@@ -651,12 +651,13 @@ Ext.define('Inventory.view.Commodity', {
                                                         xtype: 'checkcolumn',
                                                         flex: 1,
                                                         itemId: 'colUOMBaseUnit',
-                                                        text: 'Base Unit',
+                                                        text: 'Stock Unit',
                                                         stopSelection: false
                                                     },
                                                     {
                                                         xtype: 'checkcolumn',
                                                         flex: 1,
+                                                        hidden: true,
                                                         itemId: 'colUOMStockUom',
                                                         text: 'Stock UOM',
                                                         stopSelection: false
