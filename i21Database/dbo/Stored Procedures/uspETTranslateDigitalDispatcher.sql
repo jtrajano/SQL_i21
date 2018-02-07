@@ -152,7 +152,7 @@ BEGIN
 							,[intEntitySalespersonId]
 							,[intFreightTermId]
 							,[intPaymentMethodId]
-							,[strDeliverPickup]
+							--,[strDeliverPickup]
 							,[intShipToLocationId]
 							,[intBillToLocationId]
 							,[ysnTemplate]
@@ -247,7 +247,7 @@ BEGIN
 							,[intPaymentMethodId]		= NULL
 							
 							
-							,[strDeliverPickup]			= NULL
+							--,[strDeliverPickup]			= NULL
 							
 							,[intShipToLocationId]		= NULL
 							,[intBillToLocationId]		= NULL
