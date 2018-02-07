@@ -4956,7 +4956,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('intChargeId', record.get('intItemId'));
             current.set('ysnInventoryCost', record.get('ysnInventoryCost'));
             //current.set('ysnAccrue', record.get('ysnAccrue'));
-            current.set('ysnPrice', record.get('ysnPrice'));
+            //current.set('ysnPrice', record.get('ysnPrice'));
 
             // If other charge is accrue, default the vendor and currency from the transaction vendor and currency. 
             // if (record.get('ysnAccrue') === true) {
@@ -4966,8 +4966,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             //     current.set('strCurrency', masterRecord.get('strCurrency'));
             // }
             // else {
-                current.set('intEntityVendorId', null);
-                current.set('strVendorName', null);
+                current.set('intEntityVendorId', masterRecord.get('intEntityVendorId'));
+                current.set('strVendorName', masterRecord.get('strVendorName'));
                 current.set('intCurrencyId', functionalCurrencyId);
                 current.set('strCurrency', strFunctionalCurrency);
                 chargeCurrencyId = functionalCurrencyId;
@@ -5794,17 +5794,17 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                                                         strCostMethod: otherCharge.strCostMethod,
                                                                         dblRate: otherCharge.strCostMethod == "Amount" ? 0 : otherCharge.dblRate,
                                                                         intCostUOMId: otherCharge.intItemUOMId,
-                                                                        intEntityVendorId: otherCharge.intVendorId,
+                                                                        intEntityVendorId: otherCharge.intVendorId ? otherCharge.intVendorId : currentVM.get('intEntityVendorId'),
                                                                         dblAmount: otherCharge.strCostMethod == "Amount" ? otherCharge.dblRate : 0,
                                                                         strAllocateCostBy: 'Unit',
                                                                         ysnAccrue: otherCharge.intVendorId ? true : false,
-                                                                        ysnPrice: otherCharge.ysnPrice,
+                                                                        //ysnPrice: otherCharge.ysnPrice,
                                                                         strItemNo: otherCharge.strItemNo,
                                                                         intCurrencyId: otherCharge.intCurrencyId,
                                                                         strCurrency: otherCharge.strCurrency,
                                                                         ysnSubCurrency: otherCharge.ysnSubCurrency,
                                                                         strCostUOM: otherCharge.strUOM,
-                                                                        strVendorName: otherCharge.strVendorName,
+                                                                        strVendorName: otherCharge.strVendorName ? otherCharge.strVendorName : currentVM.get('strVendorName'),
                                                                         strContractNumber: order.get('strOrderNumber')
 
                                                                     });
@@ -7919,17 +7919,27 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         activeGridRecord.set('strCostMethod', costMethod);
         activeGridRecord.set('dblRate', costMethod == "Amount" ? 0 : selectedRec.get('dblRate'));
         activeGridRecord.set('intCostUOMId', selectedRec.get('intItemUOMId'));
-        activeGridRecord.set('intEntityVendorId', selectedRec.get('intVendorId'));
         activeGridRecord.set('dblAmount', costMethod == "Amount" ? selectedRec.get('dblRate') : 0,
         activeGridRecord.set('strAllocateCostBy', 'Unit'));
-        activeGridRecord.set('ysnAccrue', selectedRec.get('intVendorId') ? true : false);
-        activeGridRecord.set('ysnPrice', selectedRec.get('ysnPrice'));
+        //activeGridRecord.set('ysnPrice', selectedRec.get('ysnPrice'));
         activeGridRecord.set('strItemNo', selectedRec.get('strItemNo'));
         activeGridRecord.set('intCurrencyId', selectedRec.get('intCurrencyId'));
         activeGridRecord.set('strCurrency', selectedRec.get('strCurrency'));
         //ysnSubCurrency: otherCharge.ysnSubCurrency,
         activeGridRecord.set('strCostUOM', selectedRec.get('strUOM'));
-        activeGridRecord.set('strVendorName', selectedRec.get('strVendorName'));
+        activeGridRecord.set('intEntityVendorId', selectedRec.get('intVendorId') ? selectedRec.get('intVendorId') : current.get('intEntityVendorId'));
+        activeGridRecord.set('strVendorName', selectedRec.get('strVendorName') ? selectedRec.get('strVendorName') : current.get('strVendorName'));
+
+        me.assignChargesLinkToOtherCharge(selectedRec.get('intContractDetailId'), activeGridRecord, current.tblICInventoryReceiptItems());
+    },
+
+    assignChargesLinkToOtherCharge: function(contractDetailId, activeGridRecord, receiptItems){
+        var contractHeader = _.filter(receiptItems.data.items, function(x) { 
+            return x.get('intLineNo') == contractDetailId && !x.dummy; 
+        });
+
+        if(contractHeader.length == 1)
+            activeGridRecord.set('strChargesLink', contractHeader[0].get('strChargesLink'));
     },
 
     init: function (application) {
