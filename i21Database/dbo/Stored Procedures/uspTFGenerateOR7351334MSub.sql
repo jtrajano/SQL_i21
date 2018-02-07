@@ -68,8 +68,8 @@ BEGIN TRY
 			Inventory.strOregonFacilityNumber, 
 			Inventory.strProductCode,
 			CASE WHEN B.lineValue = 'Line 3' THEN Inventory.strProductCode 
-				WHEN B.lineValue = 'Line 4' THEN CONVERT(NVARCHAR(30), Inventory.dblBeginInventory) 
-				WHEN B.lineValue = 'Line 7' THEN CONVERT(NVARCHAR(30), Inventory.dblEndInventory) ELSE NULL END AS data,
+				WHEN B.lineValue = 'Line 4' THEN CONVERT(NVARCHAR(30), CONVERT(NUMERIC(18, 0), Inventory.dblBeginInventory)) 
+				WHEN B.lineValue = 'Line 7' THEN CONVERT(NVARCHAR(30), CONVERT(NUMERIC(18, 0),Inventory.dblEndInventory)) ELSE NULL END AS data,
 			Inventory.dtmBeginDate, 
 			Inventory.dtmEndDate
 		FROM dbo.vyuTFGetTaxAuthorityBeginEndInventory Inventory

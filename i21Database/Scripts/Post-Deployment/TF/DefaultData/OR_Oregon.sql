@@ -246,7 +246,7 @@ where intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '735-1334M', strFormName = 'Use Fuel Seller Tax Report (Diesel Report)', strScheduleCode = '6RTL', strScheduleName = 'Gallons Sold Non-taxable - Retail', strType = 'Biodiesel - Undyed', strNote = '', strTransactionType = 'Invoice', intSort = 830, strSPInventory = 'uspTFGetInventoryTax', strSPInvoice = 'uspTFGetInvoiceTax', strSPRunReport = NULL, intMasterId = 372645, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '735-1334M', strFormName = 'Use Fuel Seller Tax Report (Diesel Report)', strScheduleCode = '10G', strScheduleName = 'Gallons of Other Authorized Tax-exempt Sales (B20 from Used Cooking Oil)', strType = 'Used Cooking Oil - Undyed', strNote = '', strTransactionType = 'Invoice', intSort = 840, strSPInventory = 'uspTFGetInventoryTax', strSPInvoice = 'uspTFGetInvoiceTax', strSPRunReport = NULL, intMasterId = 372646, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '735-1334M', strFormName = 'Use Fuel Seller Tax Report (Diesel Report)', strScheduleCode = '10G', strScheduleName = 'Gallons of Other Authorized Tax-exempt Sales (B20 from Used Cooking Oil)', strType = 'Used Cooking Oil - Dyed', strNote = '', strTransactionType = 'Invoice', intSort = 850, strSPInventory = 'uspTFGetInventoryTax', strSPInvoice = 'uspTFGetInvoiceTax', strSPRunReport = NULL, intMasterId = 372647, intComponentTypeId = 1
-	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '735-1334M', strFormName = 'Use Fuel Seller Tax Report (Diesel Report)', strScheduleCode = '', strScheduleName = 'Main Form', strType = '', strNote = 'Main Form', strTransactionType = NULL, intSort = 860, strSPInventory = 'uspTFGetInventoryTax', strSPInvoice = 'uspTFGetInvoiceTax', strSPRunReport = NULL, intMasterId = 372648, intComponentTypeId = 2
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '735-1334M', strFormName = 'Use Fuel Seller Tax Report (Diesel Report)', strScheduleCode = '7351334M', strScheduleName = 'Main Form', strType = '', strNote = 'Main Form', strTransactionType = NULL, intSort = 860, strSPInventory = 'uspTFGetInventoryTax', strSPInvoice = 'uspTFGetInvoiceTax', strSPRunReport = NULL, intMasterId = 372648, intComponentTypeId = 2
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'XML', strFormName = 'Oregon (OR) XML', strScheduleCode = '', strScheduleName = 'Oregon (OR) XML', strType = '', strNote = '', strTransactionType = '', intSort = 900, strSPInventory = 'uspTFGetInventoryTax', strSPInvoice = 'uspTFGetInvoiceTax', strSPRunReport = NULL, intMasterId = 371119, intComponentTypeId = 6
 
 	EXEC uspTFUpgradeReportingComponents @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponent = @ReportingComponent
@@ -3635,7 +3635,7 @@ where FP.intTaxAuthorityId = @TaxAuthorityId
 		, intFrequency
 		, intMasterId
 	)
-	SELECT intFilingPacketId = 0, strFormCode = '735-1302', strScheduleCode = '', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 372975
+	SELECT intFilingPacketId = 0, strFormCode = '735-1302', strScheduleCode = '7351302', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 372975
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '735-1302', strScheduleCode = '1', strType = 'Aviation Gasoline', ysnStatus = 1, intFrequency = 1, intMasterId = 372905
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '735-1302', strScheduleCode = '1', strType = 'Gasoline', ysnStatus = 1, intFrequency = 1, intMasterId = 372904
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '735-1302', strScheduleCode = '1', strType = 'Jet Fuel', ysnStatus = 1, intFrequency = 1, intMasterId = 372906
@@ -3707,7 +3707,7 @@ where FP.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '735-1302', strScheduleCode = '8', strType = 'Ethanol', ysnStatus = 1, intFrequency = 1, intMasterId = 372953
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '735-1302', strScheduleCode = '8', strType = 'Gasoline', ysnStatus = 1, intFrequency = 1, intMasterId = 372950
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '735-1302', strScheduleCode = '8', strType = 'Jet Fuel', ysnStatus = 1, intFrequency = 1, intMasterId = 372952
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '735-1334M', strScheduleCode = '', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 372989
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '735-1334M', strScheduleCode = '735-1334M', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 372989
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '735-1334M', strScheduleCode = '10G', strType = 'Used Cooking Oil - Dyed', ysnStatus = 1, intFrequency = 1, intMasterId = 372988
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '735-1334M', strScheduleCode = '10G', strType = 'Used Cooking Oil - Undyed', ysnStatus = 1, intFrequency = 1, intMasterId = 372987
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '735-1334M', strScheduleCode = '2', strType = 'Biodiesel - Dyed', ysnStatus = 1, intFrequency = 1, intMasterId = 372977
