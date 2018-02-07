@@ -1,5 +1,4 @@
 ﻿CREATE PROCEDURE uspRKPnLBySalesContractSummary
-
 		@intContractDetailId int = null,
 		@intUnitMeasureId int = null
 AS
@@ -26,6 +25,7 @@ DECLARE @PhysicalFuturesResult TABLE (
 	,dblCostUSD NUMERIC(18, 6)
 	,strUnitMeasure nvarchar(200)
 	,intContractDetailId int
+	,ysnPosted Bit
 	)
 
 INSERT INTO @PhysicalFuturesResult (
@@ -46,7 +46,8 @@ INSERT INTO @PhysicalFuturesResult (
 	,intSort
 	,dblTransactionValue
 	,dblForecast
-	,intContractDetailId
+	,intContractDetailId,
+	ysnPosted
 	)
 EXEC uspRKPNLPhysicalFuturesResult @intContractDetailId, @intUnitMeasureId
 

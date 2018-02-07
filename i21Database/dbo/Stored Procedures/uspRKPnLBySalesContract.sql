@@ -66,6 +66,7 @@ FROM(
 	,dblCostUSD NUMERIC(24, 10)
 	,strUnitMeasure nvarchar(200)
 	,intContractDetailId int
+	,ysnPosted Bit
 	)
 		
 	 DECLARE @Detail AS TABLE 
@@ -91,7 +92,7 @@ WHILE @mRowNumber > 0
 
 	 INSERT INTO @PhysicalFuturesResult (
 			intRowNum,strContractType,strNumber,strDescription,strConfirmed,dblAllocatedQty,dblPrice,strCurrency,dblFX
-			,dblBooked,dblAccounting,dtmDate,strType,dblTranValue,intSort,dblTransactionValue,dblForecast,intContractDetailId)
+			,dblBooked,dblAccounting,dtmDate,strType,dblTranValue,intSort,dblTransactionValue,dblForecast,intContractDetailId,ysnPosted)
 EXEC uspRKPNLPhysicalFuturesResult @intContractDetailId, @intPriceUOMId	 
 	
 	SELECT @mRowNumber = MIN(intId)	FROM @Detail	WHERE intId > @mRowNumber
@@ -102,4 +103,3 @@ dblAllocatedQty,dblBalanceToInvoice,intContractDetailId,dblInvoiceQty,
 isnull((select sum(dblAccounting) from @PhysicalFuturesResult a where a.intContractDetailId=t.intContractDetailId),0.0) dblActualProfit,
 isnull((select sum(dblForecast) from @PhysicalFuturesResult a where a.intContractDetailId=t.intContractDetailId),0.0) dblEstimatedProfit, 
 strSalespersonName FROM #temp t
-
