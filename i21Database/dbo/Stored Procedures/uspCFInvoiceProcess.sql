@@ -211,6 +211,37 @@ BEGIN TRY
 	END
 
 
+	INSERT INTO tblCFInvoiceProcessHistory
+	(
+			intCustomerId
+		,intInvoiceId
+		,intPaymentId
+		,strCustomerNumber
+		,strCustomerName
+		,strInvoiceNumber
+		,strPaymentNumber
+		,dblInvoiceAmount
+		,dblTotalQuantity
+		,dblDiscountEligibleQuantity
+		,dblDiscountAmount
+	)
+	SELECT
+		 intCustomerId
+		,intInvoiceId
+		,intPaymentId
+		,ent.strEntityNo
+		,ent.strName
+		,strInvoiceReportNumber
+		,strPaymentId
+		,dblInvoiceAmount
+		,dblInvoiceQuantity
+		,dblInvoiceQuantity
+		,dblInvoiceDiscount
+	FROM tblCFInvoiceProcessResult as ipr
+	INNER JOIN tblEMEntity as ent
+	ON ipr.intCustomerId = ent.intEntityId
+
+
 	----------DROP TEMPORARY TABLE----------
 	IF OBJECT_ID(N'tempdb..#tblCFInvoice', N'U') IS NOT NULL 
 	DROP TABLE #tblCFInvoice

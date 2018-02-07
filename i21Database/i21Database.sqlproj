@@ -6206,6 +6206,7 @@
     <Build Include="dbo\Views\vyuRKGetFutureMonth.sql" />
     <Build Include="dbo\Views\vyuICGetAddOnComponentStock.sql" />
     <Build Include="dbo\Views\vyuICGetSubstituteComponentStock.sql" />
+    <Build Include="dbo\Tables\tblCFInvoiceProcessHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateOR7351334MSub.sql" />
   </ItemGroup>
   <ItemGroup>
