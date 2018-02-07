@@ -46,18 +46,18 @@ BEGIN
 	GOTO _Exit;
 END 
 
--- Check if Basket
-DECLARE @intItemId INT
-SET @intItemId = NULL
+-- Check if Bundle
+DECLARE @intItemId INT;
+SET @intItemId = NULL;
 
 SELECT TOP 1 @intItemId = i.intItemId
 FROM @ReceiptEntries r
 	INNER JOIN tblICItem i ON i.intItemId = r.intItemId
-WHERE i.strBundleType = 'Basket'
+WHERE i.strBundleType IS NOT NULL
 
 IF @intItemId IS NOT NULL
 BEGIN
-	EXEC uspICRaiseError 80198;
+	EXEC uspICRaiseError 80203, 'Inventory Receipt';
 	GOTO _Exit;
 END
 
