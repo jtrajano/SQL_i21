@@ -380,6 +380,7 @@ INSERT INTO @ShipmentEntries(
 		, intDestinationWeightId
 		, intForexRateTypeId
 		, dblForexRate
+		, strChargesLink
 )
 SELECT 
 		intOrderType
@@ -431,6 +432,7 @@ SELECT
 		, intDestinationWeightId
 		, intForexRateTypeId
 		, dblForexRate
+		, strChargesLink
 FROM @Items
 
 -- 2. Charges
@@ -455,6 +457,7 @@ INSERT INTO @ShipmentCharges(
 		, ysnPrice
 		, intForexRateTypeId 
 		, dblForexRate 
+		, strChargesLink
 )
 SELECT 
 		intOrderType
@@ -477,6 +480,7 @@ SELECT
 		, ysnPrice
 		, intForexRateTypeId 
 		, dblForexRate 
+		, strChargesLink
 FROM @Charges
 
 -- 3. Item Lots
@@ -774,6 +778,7 @@ INSERT INTO tblICInventoryShipmentItem(
 	, intDestinationWeightId
 	, intForexRateTypeId
 	, dblForexRate
+	, strChargesLink
 	, intConcurrencyId
 )
 SELECT 
@@ -799,6 +804,7 @@ SELECT
 	, se.intDestinationWeightId
 	, intForexRateTypeId = CASE WHEN ISNULL(s.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId THEN ISNULL(se.intForexRateTypeId, @intDefaultForexRateTypeId) ELSE NULL END 
 	, dblForexRate = CASE WHEN ISNULL(s.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId THEN ISNULL(se.dblForexRate, forexRate.dblRate)  ELSE NULL END 
+	, strChargesLink
 	, intConcurrencyId = 1
 FROM @ShipmentEntries se INNER JOIN tblICInventoryShipment s
 		ON se.intShipmentId = s.intInventoryShipmentId
@@ -825,6 +831,7 @@ INSERT INTO tblICInventoryShipmentCharge(
 	, intCurrencyId
 	, intForexRateTypeId 
 	, dblForexRate 
+	, strChargesLink
 	, intConcurrencyId
 )
 SELECT 
@@ -842,6 +849,7 @@ SELECT
 	, ISNULL(sc.intCurrency, @intFunctionalCurrencyId)
 	, intForexRateTypeId = CASE WHEN ISNULL(sc.intCurrency, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId THEN ISNULL(sc.intForexRateTypeId, @intDefaultForexRateTypeId) ELSE NULL END  
 	, dblForexRate = CASE WHEN ISNULL(sc.intCurrency, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId THEN ISNULL(sc.dblForexRate, forexRate.dblRate) ELSE NULL END   
+	, strChargesLink
 	, intConcurrencyId = 1
 FROM @ShipmentCharges sc INNER JOIN tblICInventoryShipment s
 		ON sc.intShipmentId = s.intInventoryShipmentId 
