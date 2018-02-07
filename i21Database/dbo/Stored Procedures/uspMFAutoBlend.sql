@@ -1073,6 +1073,22 @@ BEGIN TRY
 			,@intLotId = @intBlendLotId OUT
 			,@strLotNumber = @strLotNumber OUT
 			
+		If @strOrderType='LOAD DISTRIBUTION'
+		Begin
+			If (Select Count(1) From tblTRLoadBlendIngredient Where intLoadDistributionDetailId=@intLoadDistributionDetailId) 
+				<> (Select Count(1) From tblMFWorkOrderConsumedLot Where intWorkOrderId=@intWorkOrderId)
+				RAISERROR('All the ingredients found in Transport are not consumed.',16,1)
+
+			If Exists(
+				Select 1 From
+					(Select intItemId,SUM(dblRequiredQty) dblQuantity From @tblInputItem group by intItemId) t1
+				Join 
+					(Select intItemId,SUM(dblQuantity) dblQuantity From tblMFWorkOrderConsumedLot Where intWorkOrderId=@intWorkOrderId group by intItemId) t2
+					on t1.intItemId=t2.intItemId
+					Where t1.dblQuantity<>t2.dblQuantity
+				)
+				RAISERROR('Quantity mismatch between Transport Ingredient and Blend Consumption.',16,1)
+		End
 
 		IF @strOrderType='SALES ORDER'
 			SELECT	@intWorkOrderId = MIN(intWorkOrderId) 
