@@ -187,8 +187,9 @@ Ext.define('Inventory.view.ItemViewController', {
                     hidden: '{readOnlyForOtherCharge}'
                 },
                 colStockUOM: {
-                    dataIndex: 'ysnStockUOM',
-                    hidden: '{readOnlyForOtherCharge}'
+                    dataIndex: 'ysnStockUOM',                    
+                    hidden: true // TODO: Hide it for now. Show it again in 18.3
+                    //hidden: '{readOnlyForOtherCharge}'                    
                 },                
                 colAllowSale: 'ysnAllowSale',
                 colAllowPurchase: {

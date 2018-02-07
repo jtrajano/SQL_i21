@@ -66,7 +66,10 @@ Ext.define('Inventory.view.BundleViewController', {
                 },
                 colDetailUnitQty: 'dblUnitQty',
                 colBaseUnit: 'ysnStockUnit',
-                colStockUOM: 'ysnStockUOM',
+                colStockUOM: {
+                    dataIndex: 'ysnStockUOM',
+                    hidden: true 
+                },
                 colAllowSale: 'ysnAllowSale',
                 colAllowPurchase: 'ysnAllowPurchase',
                 colDetailShortUPC: {

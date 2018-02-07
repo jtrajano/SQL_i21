@@ -1845,7 +1845,7 @@
                                                 "flex": 1,
                                                 "itemId": "colUOMBaseUnit",
                                                 "stopSelection": false,
-                                                "text": "Base Unit"
+                                                "text": "Stock Unit"
                                             },
                                             "configAlternates": {
                                                 "flex": "number",
@@ -1866,6 +1866,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "flex": 1,
+                                                "hidden": true,
                                                 "itemId": "colUOMStockUom",
                                                 "stopSelection": false,
                                                 "text": "Stock UOM"
@@ -1875,7 +1876,8 @@
                                                 "itemId": "string",
                                                 "stopSelection": "boolean",
                                                 "text": "string",
-                                                "scrollable": "boolean"
+                                                "scrollable": "boolean",
+                                                "hidden": "boolean"
                                             },
                                             "name": "MyCheck1",
                                             "designerId": "fedda0f8-ec19-427f-943b-3a47cff310e4"

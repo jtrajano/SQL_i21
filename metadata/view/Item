@@ -1695,7 +1695,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "itemId": "colBaseUnit",
-                                                "text": "Base Unit",
+                                                "text": "Stock Unit",
                                                 "width": 90
                                             },
                                             "configAlternates": {
@@ -1715,6 +1715,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "hidden": true,
                                                 "itemId": "colStockUOM",
                                                 "text": "Stock UOM",
                                                 "width": 90
@@ -1723,7 +1724,8 @@
                                                 "itemId": "string",
                                                 "text": "string",
                                                 "width": "auto",
-                                                "scrollable": "boolean"
+                                                "scrollable": "boolean",
+                                                "hidden": "boolean"
                                             },
                                             "name": "MyCheck1",
                                             "designerId": "fe0820ce-62b4-4df3-b477-23e6a858c0ef"

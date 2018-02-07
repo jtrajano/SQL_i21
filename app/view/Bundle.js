@@ -725,10 +725,11 @@ Ext.define('Inventory.view.Bundle', {
                                                                                 xtype: 'checkcolumn',
                                                                                 itemId: 'colBaseUnit',
                                                                                 width: 60,
-                                                                                text: 'Base Unit'
+                                                                                text: 'Stock Unit'
                                                                             },
                                                                             {
                                                                                 xtype: 'checkcolumn',
+                                                                                hidden: true,
                                                                                 itemId: 'colStockUOM',
                                                                                 width: 70,
                                                                                 text: 'Stock UOM'
