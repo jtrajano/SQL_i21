@@ -14,7 +14,7 @@ SELECT intReportingComponentConfigurationId
 	, strDescription = REPLACE(strDescription, '<value>', ISNULL(strConfiguration, ''))
 	, RCC.strScheduleCode
 	, strConfiguration
-	, ysnConfiguration
+	, ysnConfiguration = (CASE WHEN ysnOutputDesigner = 1 THEN CAST(1 AS BIT) ELSE RCC.ysnConfiguration END)
 	, ysnUserDefinedValue
 	, strLastIndexOf
 	, strSegment
