@@ -111,7 +111,7 @@ BEGIN TRY
 			SELECT TOP 1 @strFacilityNumber = strFacilityNumber, @strProductCode = strProductCode, @dtmBeginDate = dtmBeginDate, @dtmEndDate = dtmEndDate FROM @ReportSummary
 
 			-- Line 5
-			SELECT  @dblTotalLine5 = SUM(ISNULL(dblReceived,0)) FROM @transaction WHERE strProductCode = @strProductCode
+			SELECT @dblTotalLine5 = ISNULL(SUM(dblReceived), 0) FROM @transaction WHERE strProductCode = @strProductCode
 			UPDATE @Report SET strData = CONVERT(NVARCHAR(30), ISNULL(@dblTotalLine5, 0)) WHERE strFacilityNumber = @strFacilityNumber AND strProductCode = @strProductCode AND dtmBeginDate = @dtmBeginDate AND dtmEndDate = @dtmEndDate AND strLine = 'Line 5'				
 			
 			-- Line 4
