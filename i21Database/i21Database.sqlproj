@@ -5787,6 +5787,7 @@
     <Build Include="dbo\Tables\tblARProductRecapStagingTable.sql" />
     <Build Include="dbo\Tables\tblARCustomerActivityStagingTable.sql" />
     <Build Include="dbo\Tables\tblPRTypeTaxStatePSDCode.sql" />
+    <Build Include="dbo\Functions\fnGRGetDiscountCodeReadings.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -10,7 +10,7 @@ SELECT
 	,SUM(dblAmount) AS Amount
 	,SUM(dblTax) AS Tax
 FROM (
-		 SELECT 
+		 SELECT DISTINCT
 		 intPaymentId
 		,strDiscountCode
 		,strDiscountCodeDescription
@@ -59,7 +59,7 @@ FROM (
 				 WHERE BillDtl.intInventoryReceiptChargeId IS NOT NULL AND Item.strType = 'Other Charge'
         UNION ALL
 		
-		SELECT 
+		SELECT
 			 intPaymentId = PYMT.intPaymentId
 			,strId = Bill.strBillId
 			,intBillId = BillDtl.intBillId
@@ -95,4 +95,5 @@ FROM (
 GROUP BY intPaymentId
 	,strDiscountCode
 	,strDiscountCodeDescription
+
 
