@@ -53,8 +53,8 @@ FROM 	tblICItem i
 			FROM	tblICItemUOM iuStock INNER JOIN tblICUnitMeasure umStock
 						ON iuStock.intUnitMeasureId = umStock.intUnitMeasureId
 			WHERE	iuStock.intItemId = i.intItemId
-					--AND iuStock.ysnStockUnit = 1
-					AND iuStock.ysnStockUOM = 1
+					AND iuStock.ysnStockUnit = 1 -- TODO: In 18.3, change it to use the [Stock UOM] instead of [Stock Unit]. 
+					--AND iuStock.ysnStockUOM = 1
 		) iuStock
 		LEFT JOIN tblICCategory c 
 			ON c.intCategoryId = i.intCategoryId
