@@ -6,7 +6,7 @@
 		,a.strTitle
 		,a.strMobile
 		,a.strPhone
-		,a.ysnActive
+		,c.ysnActive
 		,a.strName
 		,a.strEmail
 		,a.strEntityNo
@@ -14,7 +14,10 @@
 	from
 		tblEMEntity a
 		,tblEMEntityType b
+		,tblARSalesperson c
 	where
-		a.ysnActive = convert(bit, 1)
-		and b.intEntityId = a.intEntityId
+		b.intEntityId = a.intEntityId
 		and b.strType = 'Salesperson'
+		and c.intEntityId = a.intEntityId
+		and c.ysnActive = convert(bit, 1)
+		and a.ysnActive = convert(bit, 1)
