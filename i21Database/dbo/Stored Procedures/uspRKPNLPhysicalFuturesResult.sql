@@ -50,8 +50,22 @@ BEGIN
 	SELECT @strPContractDetailId = COALESCE(@strPContractDetailId + ',', '') + CAST(intPContractDetailId AS NVARCHAR(50)) FROM   @tblLGAllocationDetail WHERE intSContractDetailId	=	@intSContractDetailId
 	SELECT @strDetailIds = @strPContractDetailId + ',' + LTRIM(@intSContractDetailId)
 
-	SELECT	CONVERT(int,ROW_NUMBER() OVER (ORDER BY strContractType)) intRowNum,
-			*,
+	SELECT	CONVERT(int,ROW_NUMBER() OVER (ORDER BY strContractType)) intRowNum
+			,strContractType
+			,strNumber
+			,strDescription
+			,strConfirmed
+			,dblAllocatedQty
+			,dblPrice
+			,strCurrency
+			,dblFX
+			,dblBooked
+			,dblAccounting
+			,dtmDate
+			,strType
+			,dblTranValue
+			,intSort
+			,CAST(ysnPosted AS BIT) ysnPosted,
 			CASE	WHEN strType IN ('Invoice') THEN dblAccounting 
 					WHEN strType IN ('Amount')	THEN dblTranValue 
 			ELSE ISNULL(dblAllocatedQty,dblBooked) * dblPrice	END AS	dblTransactionValue,
