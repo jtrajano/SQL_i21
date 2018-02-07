@@ -38,12 +38,16 @@ BEGIN TRY
 			@strShipmentNumber				NVARCHAR(50),
 			@intBillDetailId				INT,
 			@strVendorOrderNumber			NVARCHAR(50),
-			@ysnBillPosted					BIT
+			@ysnBillPosted					BIT,
+			@intCompanyLocationId			INT,
+			@dblTotal						NUMERIC(18,6),
+			@ysnRequireApproval				BIT
 
 	SELECT	@dblCashPrice			=	dblCashPrice, 
 			@intPricingTypeId		=	intPricingTypeId, 
 			@intLastModifiedById	=	ISNULL(intLastModifiedById,intCreatedById),
-			@intContractHeaderId	=	intContractHeaderId
+			@intContractHeaderId	=	intContractHeaderId,
+			@intCompanyLocationId	=	intCompanyLocationId
 	FROM	tblCTContractDetail 
 	WHERE	intContractDetailId		=	@intContractDetailId
 	
@@ -137,16 +141,28 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
-				IF ISNULL(@ysnBillPosted,0) = 1
-				BEGIN
-					EXEC [dbo].[uspAPPostBill] @post = 0,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
-				END
+				SELECT @dblTotal = SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = @intBillId
+				EXEC	[dbo].[uspSMTransactionCheckIfRequiredApproval]
+						@type					=	N'AccountsPayable.view.Voucher',
+						@transactionEntityId	=	@intEntityId,
+						@currentUserEntityId	=	@intUserId,
+						@locationId				=	@intCompanyLocationId,
+						@amount					=	@dblTotal,
+						@requireApproval		=	@ysnRequireApproval OUTPUT
 
-				EXEC uspAPUpdateCost @intBillDetailId,@dblCashPrice,1
-
-				IF ISNULL(@ysnBillPosted,0) = 1
+				IF  ISNULL(@ysnRequireApproval , 0) = 0
 				BEGIN
-					EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
+					IF ISNULL(@ysnBillPosted,0) = 1
+					BEGIN
+						EXEC [dbo].[uspAPPostBill] @post = 0,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
+					END
+
+					EXEC uspAPUpdateCost @intBillDetailId,@dblCashPrice,1
+
+					IF ISNULL(@ysnBillPosted,0) = 1
+					BEGIN
+						EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
+					END
 				END
 			END
 
