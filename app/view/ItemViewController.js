@@ -2451,6 +2451,12 @@ Ext.define('Inventory.view.ItemViewController', {
         var screenName = 'Inventory.view.ItemLocation';
 
         var current = win.getViewModel().data.current;
+        var stockUOM = _.findWhere(current.tblICItemUOMs().data.items, function(x){ return x.get(ysnStockUnit) && !x.dummy});
+        if(!win.defaultUOM && stockUOM)
+            stockUOM = {
+                intItemUOMId: stockUOM.get('intItemUOMId')
+            };
+
         if (action === 'edit'){
             iRely.Functions.openScreen(screenName, {
                 viewConfig: {
@@ -2555,7 +2561,7 @@ Ext.define('Inventory.view.ItemViewController', {
                     }
                 },
                 itemId: current.get('intItemId'),
-                defaultUOM: win.defaultUOM,
+                defaultUOM: win.defaultUOM ? win.defaultUOM : stockUOM,
                 action: action
             });
         }
