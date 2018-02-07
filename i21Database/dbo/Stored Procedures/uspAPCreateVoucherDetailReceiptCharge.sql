@@ -133,6 +133,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		SELECT TOP 1 ysnCheckoffTax FROM tblICInventoryReceiptChargeTax IRCT
 		WHERE IRCT.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
 	)  IRCT
+	WHERE A.intEntityVendorId = @voucherVendor --PARAMETER TO DISTINGUISH CORRECT CHARGES PER VENDOR
 	-- OUTER APPLY(
 	-- 	SELECT ysnPrice FROM #tmpReceiptChargeData RC
 	-- 	WHERE RC.intInventoryReceiptId = A.intInventoryReceiptId AND RC.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
