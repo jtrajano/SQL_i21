@@ -88,7 +88,8 @@ BEGIN
 				AD.dtmAllocatedDate AS dtmDate,
 				'Purchase Allocated'	AS strType,
 				0.0 AS dblTranValue, --Dummy
-				9999999 + AD.intPContractDetailId AS intSort
+				9999999 + AD.intPContractDetailId AS intSort,
+				CAST(0 AS BIT) ysnPosted
 				
 
 		FROM	@tblLGAllocationDetail	AD 
@@ -128,7 +129,8 @@ BEGIN
 					ID.dblTotal AS dblAccounting,
 					IV.dtmDate AS dtmDate,
 					'Invoice'	AS strType,
-					0.0 AS dblTranValue --Dummy
+					0.0 AS dblTranValue, --Dummy
+					IV.ysnPosted
 
 			FROM	tblARInvoiceDetail		ID 
 			JOIN	tblARInvoice			IV	ON	IV.intInvoiceId			=	ID.intInvoiceId
@@ -159,8 +161,8 @@ BEGIN
 				IV.dtmDate AS dtmDate,
 				'Supp. Invoice'	AS strType,
 				0.0 AS dblTranValue, --Dummy
-				9999999 + AD.intPContractDetailId AS intSort
-				
+				9999999 + AD.intPContractDetailId AS intSort,
+				IV.ysnPosted
 				
 		FROM	@tblLGAllocationDetail	AD
 		JOIN	tblAPBillDetail			ID	ON	ID.intContractDetailId	=	AD.intPContractDetailId
@@ -202,7 +204,8 @@ BEGIN
 					NULL AS dblAccounting,
 					AD.dtmAllocatedDate AS dtmDate,
 					'Sales Allocated'	AS strType,
-					0.0 AS dblTranValue --Dummy
+					0.0 AS dblTranValue, --Dummy
+					CAST(0 AS BIT) ysnPosted
 
 			FROM	@tblLGAllocationDetail	AD 
 			JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId	=	@intSContractDetailId
@@ -227,7 +230,7 @@ BEGIN
 
 		UNION ALL
 
-		SELECT strItemNo, strBillId, strDescription, strConfirmed, SUM(dblAllocatedQty) dblAllocatedQty, dblPrice, strCurrency, dblFX, dblBooked, dblAccounting, dtmContractDate, strType,dblTranValue, intSort
+		SELECT strItemNo, strBillId, strDescription, strConfirmed, SUM(dblAllocatedQty) dblAllocatedQty, dblPrice, strCurrency, dblFX, dblBooked, dblAccounting, dtmContractDate, strType,dblTranValue, intSort, ysnPosted
 		FROM(
 			SELECT	IM.strItemNo,
 					strBillId,
@@ -248,8 +251,8 @@ BEGIN
 					CH.dtmContractDate,
 					CC.strCostMethod strType,
 					CASE WHEN CC.strCostMethod = 'Amount' THEN  CC.dblRate ELSE dblTranValue END *-1 AS dblTranValue,
-					99999999 + AD.intPContractDetailId AS intSort
-					
+					99999999 + AD.intPContractDetailId AS intSort,
+					CAST(0 AS BIT) ysnPosted
 
 			FROM	@tblLGAllocationDetail	AD 
 			JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId	IN	(AD.intPContractDetailId, AD.intSContractDetailId)
@@ -280,7 +283,7 @@ BEGIN
 					)						BL	ON	BL.intContractCostId = CC.intContractCostId	
 			WHERE	intSContractDetailId	IN (SELECT * FROM dbo.fnSplitString(@strDetailIds,',')) AND ISNULL(MC.strM2MComputation,'No')	=	'No'
 		)d
-		GROUP BY strItemNo, strBillId, strDescription, strConfirmed, dblPrice, strCurrency, dblFX, dblBooked, dblAccounting, dtmContractDate, intSort, strType, dblTranValue
+		GROUP BY strItemNo, strBillId, strDescription, strConfirmed, dblPrice, strCurrency, dblFX, dblBooked, dblAccounting, dtmContractDate, intSort, strType, dblTranValue, ysnPosted
 	)t
 	ORDER by intSort,strDescription
 END
