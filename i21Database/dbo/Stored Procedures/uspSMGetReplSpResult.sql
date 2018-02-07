@@ -1,0 +1,14 @@
+﻿
+
+CREATE PROCEDURE [dbo].[uspSMGetReplSpResult] 
+@result int OUT
+AS
+BEGIN
+    SET QUOTED_IDENTIFIER OFF
+	SET ANSI_NULLS ON
+	SET NOCOUNT ON
+	SET XACT_ABORT ON
+
+	SELECT  @result = result FROM tblSMReplicationSPResult;
+END
+
