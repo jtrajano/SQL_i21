@@ -226,11 +226,7 @@ BEGIN
 			)
 		SELECT intItemId = LoadDetail.intItemId
 			,intItemLocationId = dbo.fnICGetItemLocation(LoadDetail.intItemId, LoadDetail.intSCompanyLocationId)
-			,intItemUOMId = CASE 
-				WHEN Lot.intLotId IS NULL
-					THEN ItemUOM.intItemUOMId
-				ELSE LotItemUOM.intItemUOMId
-				END
+			,intItemUOMId = ItemUOM.intItemUOMId
 			,dtmDate = dbo.fnRemoveTimeOnDate(LOAD.dtmScheduledDate)
 			,dblQty = - 1 * CASE 
 				WHEN Lot.intLotId IS NULL
@@ -348,11 +344,7 @@ BEGIN
 			)
 		SELECT intItemId = LoadDetail.intItemId
 			,intItemLocationId = dbo.fnICGetItemLocation(LoadDetail.intItemId, LoadDetail.intSCompanyLocationId)
-			,intItemUOMId = CASE 
-				WHEN Lot.intLotId IS NULL
-					THEN ItemUOM.intItemUOMId
-				ELSE LotItemUOM.intItemUOMId
-				END
+			,intItemUOMId = ItemUOM.intItemUOMId
 			,dtmDate = dbo.fnRemoveTimeOnDate(LOAD.dtmScheduledDate)
 			,dblQty = - 1 * CASE 
 				WHEN Lot.intLotId IS NULL
@@ -620,11 +612,7 @@ BEGIN
 		)
 	SELECT intItemId = LoadDetail.intItemId
 		,intItemLocationId = dbo.fnICGetItemLocation(LoadDetail.intItemId, LoadDetail.intSCompanyLocationId)
-		,intItemUOMId = CASE 
-			WHEN Lot.intLotId IS NULL
-				THEN ItemUOM.intItemUOMId
-			ELSE LotItemUOM.intItemUOMId
-			END
+		,intItemUOMId = ItemUOM.intItemUOMId
 		,dtmDate = dbo.fnRemoveTimeOnDate(LOAD.dtmScheduledDate)
 		,dblQty = - 1 * CASE 
 			WHEN Lot.intLotId IS NULL
@@ -708,11 +696,7 @@ BEGIN
 			)
 		SELECT intItemId = LoadDetail.intItemId
 			,intItemLocationId = dbo.fnICGetItemLocation(LoadDetail.intItemId, LoadDetail.intSCompanyLocationId)
-			,intItemUOMId = CASE 
-				WHEN Lot.intLotId IS NULL
-					THEN ItemUOM.intItemUOMId
-				ELSE LotItemUOM.intItemUOMId
-				END
+			,intItemUOMId = ItemUOM.intItemUOMId
 			,dtmDate = dbo.fnRemoveTimeOnDate(LOAD.dtmScheduledDate)
 			,dblQty = CASE 
 				WHEN Lot.intLotId IS NULL
@@ -833,11 +817,7 @@ BEGIN
 			)
 		SELECT intItemId = LoadDetail.intItemId
 			,intItemLocationId = dbo.fnICGetItemLocation(LoadDetail.intItemId, LoadDetail.intSCompanyLocationId)
-			,intItemUOMId = CASE 
-				WHEN Lot.intLotId IS NULL
-					THEN ItemUOM.intItemUOMId
-				ELSE LotItemUOM.intItemUOMId
-				END
+			,intItemUOMId = ItemUOM.intItemUOMId
 			,dtmDate = dbo.fnRemoveTimeOnDate(LOAD.dtmScheduledDate)
 			,dblQty = CASE 
 				WHEN Lot.intLotId IS NULL
