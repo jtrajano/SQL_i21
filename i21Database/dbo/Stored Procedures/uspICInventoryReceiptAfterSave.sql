@@ -184,7 +184,7 @@ BEGIN
 			currentSnapshot.intInventoryReceiptItemId,
 			currentSnapshot.intLineNo,
 			currentSnapshot.intItemUOMId,
-			CASE WHEN (ISNULL(currentSnapshot.ysnLoad, 0) = 0) THEN CASE WHEN Item.ysnIsBasket = 1 THEN (CASE WHEN @ForDelete = 1 THEN currentSnapshot.dblOpenReceive ELSE (currentSnapshot.dblOpenReceive - previousSnapshot.dblOpenReceive) END) ELSE dbo.fnCalculateQtyBetweenUOM(currentSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (CASE WHEN @ForDelete = 1 THEN currentSnapshot.dblOpenReceive ELSE (currentSnapshot.dblOpenReceive - previousSnapshot.dblOpenReceive) END)) END
+			CASE WHEN (ISNULL(currentSnapshot.ysnLoad, 0) = 0) THEN dbo.fnCalculateQtyBetweenUOM(currentSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (CASE WHEN @ForDelete = 1 THEN currentSnapshot.dblOpenReceive ELSE (currentSnapshot.dblOpenReceive - previousSnapshot.dblOpenReceive) END))
 				ELSE currentSnapshot.intLoadReceive END 
 		FROM 
 			#tmpAfterSaveReceiptItems currentSnapshot
@@ -206,7 +206,7 @@ BEGIN
 			currentSnapshot.intInventoryReceiptItemId
 			,currentSnapshot.intLineNo
 			,currentSnapshot.intItemUOMId
-			,CASE WHEN (ISNULL(currentSnapshot.ysnLoad, 0) = 0) THEN CASE WHEN Item.ysnIsBasket = 1 THEN currentSnapshot.dblOpenReceive ELSE dbo.fnCalculateQtyBetweenUOM(currentSnapshot.intItemUOMId, previousSnapshot.intItemUOMId, currentSnapshot.dblOpenReceive) END
+			,CASE WHEN (ISNULL(currentSnapshot.ysnLoad, 0) = 0) THEN dbo.fnCalculateQtyBetweenUOM(currentSnapshot.intItemUOMId, previousSnapshot.intItemUOMId, currentSnapshot.dblOpenReceive)
 				ELSE currentSnapshot.intLoadReceive END
 		FROM 
 			#tmpAfterSaveReceiptItems currentSnapshot
@@ -227,7 +227,7 @@ BEGIN
 			currentSnapshot.intInventoryReceiptItemId
 			,previousSnapshot.intLineNo
 			,previousSnapshot.intItemUOMId
-			,CASE WHEN (ISNULL(previousSnapshot.ysnLoad, 0) = 0) THEN CASE WHEN Item.ysnIsBasket = 1 THEN (previousSnapshot.dblOpenReceive * -1) ELSE dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (previousSnapshot.dblOpenReceive * -1)) END
+			,CASE WHEN (ISNULL(previousSnapshot.ysnLoad, 0) = 0) THEN dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (previousSnapshot.dblOpenReceive * -1))
 				ELSE previousSnapshot.intLoadReceive END
 		FROM 
 			#tmpAfterSaveReceiptItems currentSnapshot
@@ -248,7 +248,7 @@ BEGIN
 			currentSnapshot.intInventoryReceiptItemId
 			,previousSnapshot.intLineNo
 			,previousSnapshot.intItemUOMId
-			,CASE WHEN (ISNULL(previousSnapshot.ysnLoad, 0) = 0) THEN CASE WHEN Item.ysnIsBasket = 1 THEN (previousSnapshot.dblOpenReceive * -1) ELSE dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (previousSnapshot.dblOpenReceive * -1)) END
+			,CASE WHEN (ISNULL(previousSnapshot.ysnLoad, 0) = 0) THEN dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (previousSnapshot.dblOpenReceive * -1))
 				ELSE previousSnapshot.intLoadReceive END
 		FROM 
 			#tmpAfterSaveReceiptItems currentSnapshot
@@ -268,7 +268,7 @@ BEGIN
 			previousSnapshot.intInventoryReceiptItemId
 			,previousSnapshot.intLineNo
 			,previousSnapshot.intItemUOMId
-			,CASE WHEN (ISNULL(previousSnapshot.ysnLoad, 0) = 0) THEN CASE WHEN Item.ysnIsBasket = 1 THEN  (previousSnapshot.dblOpenReceive * -1) ELSE dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (previousSnapshot.dblOpenReceive * -1)) END
+			,CASE WHEN (ISNULL(previousSnapshot.ysnLoad, 0) = 0) THEN dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (previousSnapshot.dblOpenReceive * -1))
 				ELSE previousSnapshot.intLoadReceive END
 		FROM 
 			#tmpBeforeSaveReceiptItems previousSnapshot
@@ -285,7 +285,7 @@ BEGIN
 			currentSnapshot.intInventoryReceiptItemId
 			,currentSnapshot.intLineNo
 			,currentSnapshot.intItemUOMId
-			,CASE WHEN (ISNULL(currentSnapshot.ysnLoad, 0) = 0) THEN CASE WHEN Item.ysnIsBasket = 1 THEN currentSnapshot.dblOpenReceive ELSE dbo.fnCalculateQtyBetweenUOM(currentSnapshot.intItemUOMId, ContractDetail.intItemUOMId, currentSnapshot.dblOpenReceive) END
+			,CASE WHEN (ISNULL(currentSnapshot.ysnLoad, 0) = 0) THEN dbo.fnCalculateQtyBetweenUOM(currentSnapshot.intItemUOMId, ContractDetail.intItemUOMId, currentSnapshot.dblOpenReceive)
 				ELSE currentSnapshot.intLoadReceive END
 		FROM 
 			#tmpAfterSaveReceiptItems currentSnapshot
