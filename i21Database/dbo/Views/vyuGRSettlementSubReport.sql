@@ -1,10 +1,59 @@
 ﻿CREATE VIEW [dbo].[vyuGRSettlementSubReport]
 AS
-SELECT *
-FROM (
-	SELECT 
+SELECT 
+ intBillDetailId
+,strId
+,intItemId
+,strDiscountCode
+,strDiscountCodeDescription
+,SUM(dblDiscountAmount) dblDiscountAmount
+,SUM(dblShrinkPercent) dblShrinkPercent
+,dblGradeReading
+,SUM(dblAmount) dblAmount
+,SUM(dblTax) dblTax
+,SUM(dblNetTotal) dblNetTotal
+FROM
+(
+
+	 SELECT 
+	 t1.intBillDetailId
+	,t3.strId
+	,t3.intBillId
+	,t3.intItemId
+	,t3.strDiscountCode
+	,t3.strDiscountCodeDescription
+	,t3.dblDiscountAmount * (t1.dblQtyOrdered / t2.dblTotalQty) dblDiscountAmount
+	,t3.dblShrinkPercent * (t1.dblQtyOrdered / t2.dblTotalQty) dblShrinkPercent
+	,t3.dblGradeReading
+	,t3.dblAmount * (t1.dblQtyOrdered / t2.dblTotalQty)dblAmount
+	,t3.intInventoryReceiptItemId
+	,t3.intInventoryReceiptChargeId
+	,t3.intContractDetailId
+	,t3.dblTax
+	,t3.dblNetTotal* (t1.dblQtyOrdered / t2.dblTotalQty) dblNetTotal
+	FROM (
+			 SELECT 
+			 BillDtl.intBillDetailId
+			,BillDtl.dblQtyOrdered
+			,Bill.intBillId
+			FROM tblAPBillDetail BillDtl
+			JOIN tblAPBill Bill ON BillDtl.intBillId = Bill.intBillId
+			JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId AND Item.strType <> 'Other Charge'
+		  ) t1
+LEFT JOIN (
+			 SELECT A.intBillId
+			,SUM(dblQtyOrdered) dblTotalQty
+			 FROM tblAPBillDetail A
+			 JOIN tblICItem B ON A.intItemId = B.intItemId AND B.strType <> 'Other Charge'
+			 GROUP BY A.intBillId
+		  ) t2 ON t1.intBillId = t2.intBillId
+LEFT JOIN
+
+(SELECT * FROM
+	( SELECT 
 		 strId = Bill.strBillId
 		,intBillId = BillDtl.intBillId
+		,intBillDetailId  = BillDtl.intBillDetailId
 		,intItemId = BillDtl.intItemId
 		,strDiscountCode =Item.strShortName
 		,strDiscountCodeDescription= Item.strItemNo
@@ -13,11 +62,13 @@ FROM (
 								WHEN INVRCPTCHR.strCostMethod = 'Amount' THEN INVRCPTCHR.dblAmount
 							 END
 		,dblShrinkPercent = ISNULL(ScaleDiscount.dblShrinkPercent, 0)
-		,dblGradeReading =  ISNULL(ScaleDiscount.dblGradeReading, 0)
+		,dblGradeReading =  ISNULL(dbo.fnRemoveTrailingZeroes(ScaleDiscount.dblGradeReading), 'N/A')
 		,dblAmount = BillDtl.dblTotal
 		,intInventoryReceiptItemId = ISNULL(BillDtl.intInventoryReceiptItemId, 0)
 		,intInventoryReceiptChargeId = ISNULL(BillDtl.intInventoryReceiptChargeId, 0)
 		,intContractDetailId = ISNULL(BillDtl.intContractDetailId, 0)
+		,dblTax = BillDtl.dblTax
+		,dblNetTotal = BillDtl.dblTotal+ BillDtl.dblTax
 	FROM tblAPBillDetail BillDtl
 	JOIN tblAPBill Bill ON BillDtl.intBillId = Bill.intBillId
 	JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId
@@ -42,6 +93,7 @@ FROM (
 	SELECT 
 		 strId = Inv.strInvoiceNumber
 		,intInvoiceId=InvDtl.intInvoiceId
+		,intInvoiceDetailId  = InvDtl.intInvoiceDetailId
 		,intItemId = InvDtl.intItemId
 		,strDiscountCode = Item.strShortName 
 		,strDiscountCodeDescription = Item.strItemNo
@@ -85,7 +137,7 @@ FROM (
 						END
 					AND DS.intItemId = InvDtl.intItemId
 				), 0)
-		,dblGradeReading = ISNULL((
+		,dblGradeReading = ISNULL(dbo.fnRemoveTrailingZeroes((
 				SELECT dblGradeReading
 				FROM tblQMTicketDiscount TD
 				JOIN tblGRDiscountScheduleCode DS ON TD.intDiscountScheduleCodeId = DS.intDiscountScheduleCodeId
@@ -104,8 +156,10 @@ FROM (
 								)
 						END
 					AND DS.intItemId = InvDtl.intItemId
-				), 0)
+				)), 'N/A')
 		,InvDtl.dblTotal AS dblAmount
+		,0
+		,0
 		,0
 		,0
 		,0
@@ -123,16 +177,19 @@ FROM (
 	SELECT 
 		 strId = Bill.strBillId
 		,intBillId = BillDtl.intBillId
-		,intItemId = BillDtl.intItemId
+		,intBillDetailId  = BillDtl.intBillDetailId
+		,intItemId = BillDtl.intItemId		
 		,strDiscountCode = Item.strShortName
 		,strDiscountCodeDescription = Item.strItemNo
 		,dblDiscountAmount = BillDtl.dblCost
 		,dblShrinkPercent = ISNULL(StorageDiscount.dblShrinkPercent, 0)
-		,dblGradeReading =  ISNULL(StorageDiscount.dblGradeReading, 0)
+		,dblGradeReading =  ISNULL(dbo.fnRemoveTrailingZeroes(StorageDiscount.dblGradeReading),'N/A')
 		,dblAmount = BillDtl.dblTotal
 		,intInventoryReceiptItemId = 0 
 		,intInventoryReceiptChargeId = 0 
 		,intContractDetailId = ISNULL(BillDtl.intContractDetailId, 0)
+		,dblTax = BillDtl.dblTax
+		,dblNetTotal = BillDtl.dblTotal+ BillDtl.dblTax
 	FROM tblAPBillDetail BillDtl
 	JOIN tblAPBill Bill ON BillDtl.intBillId = Bill.intBillId
 	JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId AND Item.strType = 'Other Charge'
@@ -149,8 +206,10 @@ FROM (
 		  ) StorageDiscount ON StorageDiscount.intTicketFileId = BillDtl.intCustomerStorageId AND StorageDiscount.intItemId = BillDtl.intItemId
       WHERE Item.strType = 'Other Charge'
 	) tbl 
-GROUP BY strId
+GROUP BY 
+	 strId
 	,intBillId
+	,intBillDetailId
 	,intItemId
 	,strDiscountCode
 	,strDiscountCodeDescription
@@ -161,3 +220,15 @@ GROUP BY strId
 	,intInventoryReceiptItemId
 	,intInventoryReceiptChargeId
 	,intContractDetailId
+	,dblTax
+	,dblNetTotal)t3 ON  t3.intBillId =t2.intBillId AND t3.intBillId =t1.intBillId
+	WHERE t3.intItemId IS NOT NULL 
+)t
+	
+ GROUP BY 
+ intBillDetailId
+,strId
+,intItemId
+,strDiscountCode
+,strDiscountCodeDescription
+,dblGradeReading
