@@ -68,11 +68,7 @@ BEGIN TRY
 
 		DECLARE @TaxAuthorityId INT, @Guid NVARCHAR(100)
 
-		DECLARE @transaction TABLE(
-			 strFormCode NVARCHAR(100)
-			,strScheduleCode NVARCHAR(100)
-			,strType  NVARCHAR(100)
-			,dblReceived NUMERIC)
+		DECLARE @transaction TFReportTransaction
 
 		SELECT TOP 1 @Guid = [from] FROM @Params WHERE [fieldname] = 'strGuid'
 
@@ -83,7 +79,7 @@ BEGIN TRY
 
 		
 		-- Transaction
-		INSERT INTO @transaction
+		INSERT INTO @transaction (strFormCode, strScheduleCode, strType, dblReceived)
 		SELECT strFormCode, strScheduleCode, strType, dblReceived = SUM(ISNULL(dblQtyShipped, 0.00))
 		FROM vyuTFGetTransaction Trans
 		WHERE Trans.uniqTransactionGuid = @Guid
@@ -121,6 +117,7 @@ BEGIN TRY
 		, dtmFrom = @dtmFrom
 		, dtmTo = @dtmTo
 		, LicenseNumber = @LicenseNumber
+		, strGuid = @Guid
 
 END TRY
 BEGIN CATCH
