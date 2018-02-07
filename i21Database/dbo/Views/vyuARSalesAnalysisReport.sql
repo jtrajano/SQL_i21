@@ -210,6 +210,7 @@ FROM
 		WHERE ARI.ysnPosted = 1 
 		  AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Service Charge')
 		  AND ISNULL(ICI.strType, '') <> 'Software'
+		  AND ISNULL(ARID.intStorageScheduleTypeId, 0) = 0
 
 UNION ALL
 
@@ -495,6 +496,7 @@ FROM
 		  AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund')
 		  AND ICI.strType = 'Software'
 		  AND ARID.strMaintenanceType IN ('License/Maintenance', 'License Only')
+		  AND ISNULL(ARID.intStorageScheduleTypeId, 0) = 0
 
 UNION ALL
 
@@ -779,6 +781,7 @@ FROM
 		  AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund')
 		  AND ICI.strType = 'Software'
 		  AND ARID.strMaintenanceType IN ('License/Maintenance', 'Maintenance Only', 'SaaS')
+		  AND ISNULL(ARID.intStorageScheduleTypeId, 0) = 0
 
 UNION ALL
 
@@ -1063,6 +1066,7 @@ FROM
 		  AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Service Charge')
 		  AND ISNULL(ICI.strType, '') = 'Software'
 		  AND ISNULL(ARID.strMaintenanceType  ,'') =''
+		  AND ISNULL(ARID.intStorageScheduleTypeId, 0) = 0
 
 	) AS SAR
 LEFT JOIN 
