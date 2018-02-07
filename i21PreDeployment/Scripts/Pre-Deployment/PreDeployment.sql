@@ -69,6 +69,7 @@
 :r .\7_AR\8_FixARPaymentData_applying_card_info_constraint.sql
 :r .\7_AR\9_FixNRCompanyPreference.sql
 :r .\7_AR\10_FixInvoiceSOLineOfBusiness.sql
+:r .\7_AR\11_FixSalesOrderNullysnQuote.sql
 
 -- AP
 :r .\8_AP\DropAPViews.sql
