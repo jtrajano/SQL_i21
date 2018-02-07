@@ -2954,13 +2954,19 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                             newRecord.strStorageLocationName = null;
                                         }
                                         
-                                        if(order.get('strBundleType') == 'Kit') {
+                                        var strBundleType = order.get('strBundleType'); 
+
+                                        if(strBundleType == 'Kit') {
                                             newISItem = currentVM.tblICInventoryShipmentItems().add(newRecord);
                                             newISItem = newISItem.length > 0 ? newISItem[0] : null;
                                             newISItem.set('strItemType', order.get('strBundleType'));
                                         }
-                                        if(order.get('strBundleType') !== null)
+                                        else if(strBundleType){
                                             me.getBundleComponents(order, currentVM, currentVM.tblICInventoryShipmentItems(), me);
+                                        }    
+                                        else {
+                                            currentVM.tblICInventoryShipmentItems().add(newRecord);
+                                        }                                        
                                     }        
                                 
                                     if (OrderType === 'Sales Contract' && isValidToAdd) {
