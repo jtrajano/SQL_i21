@@ -39,8 +39,10 @@ BEGIN TRY
 		intEDI943Id INT
 		,intLineNumber INT
 		)
+
 	--UPDATE tblMFEDI943
 	--SET strDepositorOrderNumber = REPLACE(LTRIM(REPLACE(strDepositorOrderNumber, '0', ' ')), ' ', '0')
+
 	DECLARE @ReceiptStagingTable ReceiptStagingTable
 	DECLARE @OtherCharges ReceiptOtherChargesTableType
 	DECLARE @tblMFOrderNo TABLE (
@@ -48,10 +50,6 @@ BEGIN TRY
 		,strOrderNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		)
 	DECLARE @tblMFSession TABLE (intEDI943Id INT)
-	DECLARE @tblMFItem TABLE (
-		intItemId INT
-		,strItemNo NVARCHAR(50)
-		)
 
 	INSERT INTO @tblMFSession (intEDI943Id)
 	SELECT intEDI943Id
@@ -168,12 +166,9 @@ BEGIN TRY
 					SELECT *
 					FROM tblMFEDI943 EDI943
 					JOIN tblICItem I ON I.strItemNo = EDI943.strVendorItemNumber
-					JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
+					JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
 					JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-						AND (
-							UM.strUnitType <> 'Weight'
-							OR UM.strUnitMeasure = EDI943.strUOM
-							)
+						AND UM.strUnitMeasure = EDI943.strUOM
 					WHERE strDepositorOrderNumber = @strOrderNo
 					)
 			BEGIN
@@ -182,12 +177,9 @@ BEGIN TRY
 				SELECT @strItemNo = @strItemNo + strVendorItemNumber + ', '
 				FROM tblMFEDI943 EDI943
 				JOIN tblICItem I ON I.strItemNo = EDI943.strVendorItemNumber
-				JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
+				JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
 				LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-					AND (
-						UM.strUnitType <> 'Weight'
-						OR UM.strUnitMeasure = EDI943.strUOM
-						)
+					AND UM.strUnitMeasure = EDI943.strUOM
 				WHERE strDepositorOrderNumber = @strOrderNo
 					AND UM.intUnitMeasureId IS NULL
 
@@ -195,55 +187,6 @@ BEGIN TRY
 					SELECT @strItemNo = Left(@strItemNo, len(@strItemNo) - 1)
 
 				SELECT @strErrorMessage = @strErrorMessage + ' Qty UOM cannot be blank for the item number ' + @strItemNo + '. '
-			END
-
-			DELETE
-			FROM @tblMFItem
-
-			INSERT INTO @tblMFItem (
-				intItemId
-				,strItemNo
-				)
-			SELECT DISTINCT I.intItemId
-				,I.strItemNo
-			FROM tblMFEDI943 EDI943
-			JOIN tblICItem I ON I.strItemNo = EDI943.strVendorItemNumber
-			WHERE strDepositorOrderNumber = @strOrderNo
-
-			IF EXISTS (
-					SELECT I.intItemId
-						,count(*)
-					FROM @tblMFItem I
-					JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
-					JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-						AND UM.strUnitType <> 'Weight'
-					GROUP BY I.intItemId
-					HAVING count(*) > 1
-					)
-				AND NOT EXISTS (
-					SELECT *
-					FROM tblMFEDI943 EDI943
-					JOIN tblICItem I ON I.strItemNo = EDI943.strVendorItemNumber
-					JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
-					JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-						AND UM.strUnitMeasure = EDI943.strUOM
-					WHERE strDepositorOrderNumber = @strOrderNo
-					)
-			BEGIN
-				SELECT @strItemNo = ''
-
-				SELECT @strItemNo = @strItemNo + strItemNo + ', '
-				FROM @tblMFItem I
-				JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
-				JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-					AND UM.strUnitType <> 'Weight'
-				GROUP BY strItemNo
-				HAVING count(*) > 1
-
-				IF len(@strItemNo) > 0
-					SELECT @strItemNo = Left(@strItemNo, len(@strItemNo) - 1)
-
-				SELECT @strErrorMessage = @strErrorMessage + ' Multiple Pack UOM for the item number ' + @strItemNo + ' are configured. Please configure only one Pack UOM. '
 			END
 
 			IF EXISTS (
@@ -276,24 +219,101 @@ BEGIN TRY
 				WHERE strWarehouseRefNo = @strOrderNo
 			END
 
+			--IF EXISTS (
+			--		SELECT *
+			--		FROM tblICInventoryReceipt
+			--		WHERE strWarehouseRefNo = @strOrderNo
+			--		)
+			--BEGIN
+			--	INSERT INTO tblMFEDI943Archive (
+			--		intEDI943Id
+			--		,intTransactionId
+			--		,strCustomerId
+			--		,strType
+			--		,strDepositorOrderNumber
+			--		,dtmDate
+			--		,strShipmentId
+			--		,strActionCode
+			--		,strShipFromName
+			--		,strShipFromAddress1
+			--		,strShipFromAddress2
+			--		,strShipFromCity
+			--		,strShipFromState
+			--		,strShipFromZip
+			--		,strShipFromCode
+			--		,strTransportationMethod
+			--		,strSCAC
+			--		,dblTotalNumberofUnitsShipped
+			--		,dblTotalWeight
+			--		,strWeightUOM
+			--		,strVendorItemNumber
+			--		,strDescription
+			--		,dblQtyShipped
+			--		,strUOM
+			--		,dtmCreated
+			--		,strStatus
+			--		,strFileName
+			--		,strParentLotNumber
+			--		,intLineNumber
+			--		,strWarehouseCode
+			--		,intWarehouseCodeType
+			--		,ysnNotify
+			--		)
+			--	SELECT intEDI943Id
+			--		,intTransactionId
+			--		,strCustomerId
+			--		,strType
+			--		,strDepositorOrderNumber
+			--		,dtmDate
+			--		,strShipmentId
+			--		,strActionCode
+			--		,strShipFromName
+			--		,strShipFromAddress1
+			--		,strShipFromAddress2
+			--		,strShipFromCity
+			--		,strShipFromState
+			--		,strShipFromZip
+			--		,strShipFromCode
+			--		,strTransportationMethod
+			--		,strSCAC
+			--		,dblTotalNumberofUnitsShipped
+			--		,dblTotalWeight
+			--		,strWeightUOM
+			--		,strVendorItemNumber
+			--		,strDescription
+			--		,dblQtyShipped
+			--		,strUOM
+			--		,dtmCreated
+			--		,'IGNORED'
+			--		,strFileName
+			--		,strParentLotNumber
+			--		,intLineNumber
+			--		,strWarehouseCode
+			--		,intWarehouseCodeType
+			--		,ysnNotify
+			--	FROM tblMFEDI943
+			--	WHERE strDepositorOrderNumber = @strOrderNo
+			--	DELETE
+			--	FROM tblMFEDI943
+			--	WHERE strDepositorOrderNumber = @strOrderNo
+			--	SELECT @intRecordId = min(intRecordId)
+			--	FROM @tblMFOrderNo
+			--	WHERE intRecordId > @intRecordId
+			--	CONTINUE
+			--END
 			SELECT @intEntityLocationId = NULL
 
-			SELECT @intEntityId = NULL
-
 			SELECT @intEntityLocationId = intEntityLocationId
-				,@intEntityId = intEntityId
 			FROM tblEMEntityLocation
 			WHERE strCheckPayeeName = @strCustomerCode
 
 			IF @intEntityLocationId IS NULL
 			BEGIN
-				IF @intEntityId IS NULL
-				BEGIN
-					SELECT @intEntityId = intEntityId
-					FROM tblEMEntity
-					WHERE strName = @strShipToName
-						AND strEntityNo <> ''
-				END
+				SELECT @intEntityId = NULL
+
+				SELECT @intEntityId = intEntityId
+				FROM tblEMEntity
+				WHERE strName = @strShipToName
 
 				IF @intEntityId IS NULL
 				BEGIN
@@ -521,32 +541,32 @@ BEGIN TRY
 					,strCheckPayeeName
 					)
 				SELECT TOP 1 @intEntityId intEntityId
-					,strShipFromState + ' ' + Ltrim(IsNULL((
+					,strShipToState + ' ' + Ltrim(IsNULL((
 								SELECT Count(*)
 								FROM tblEMEntity E
 								JOIN tblEMEntityType ET ON ET.intEntityId = E.intEntityId
 								JOIN tblEMEntityLocation EL ON EL.intEntityId = E.intEntityId
-									AND EL.strState = strShipFromState
+									AND EL.strState = strShipToState
 								WHERE ET.strType = 'Vendor'
-									AND E.strName = strShipFromName
+									AND E.strName = strShipToName
 								), 0) + row_number() OVER (
 							PARTITION BY @intEntityId
-							,strShipFromState ORDER BY strShipFromState
+							,strShipToState ORDER BY strShipToState
 							)) strLocationName
-					,strShipFromAddress1 + CASE 
-						WHEN IsNULL(strShipFromAddress2, '') <> ''
-							THEN ' ' + strShipFromAddress2
+					,strShipToAddress1 + CASE 
+						WHEN IsNULL(strShipToAddress2, '') <> ''
+							THEN ' ' + strShipToAddress2
 						END strAddress
-					,strShipFromCity strCity
+					,strShipToCity strCity
 					,'United States' strCountry
-					,strShipFromState strState
-					,strShipFromZip strZipCode
+					,strShipToState strState
+					,strShipToZip strZipCode
 					,1 intTermsId
 					,(
 						CASE 
 							WHEN row_number() OVER (
 									PARTITION BY @intEntityId
-									,strShipFromState ORDER BY strShipFromState
+									,strShipToState ORDER BY strShipToState
 									) = 1
 								THEN 1
 							ELSE 0
@@ -555,8 +575,8 @@ BEGIN TRY
 					,1 ysnActive
 					,'(UTC-06:00) Central Time (US & Canada)' strTimezone
 					,1 intConcurrencyId
-					,strWarehouseCode strCheckPayeeName
-				FROM tblMFEDI943
+					,strCustomerCode strCheckPayeeName
+				FROM tblMFEDI940
 				WHERE strDepositorOrderNumber = @strOrderNo
 
 				SELECT @intEntityLocationId = IDENT_CURRENT('tblEMEntityLocation') --SCOPE_IDENTITY()
@@ -595,12 +615,12 @@ BEGIN TRY
 					,@strShipToState = NULL
 					,@strShipToZip = NULL
 
-				SELECT @strShipToAddress1 = strShipFromAddress1
-					,@strShipToAddress2 = strShipFromAddress2
-					,@strShipToCity = strShipFromCity
-					,@strShipToState = strShipFromState
-					,@strShipToZip = strShipFromZip
-				FROM tblMFEDI943
+				SELECT @strShipToAddress1 = strShipToAddress1
+					,@strShipToAddress2 = strShipToAddress2
+					,@strShipToCity = strShipToCity
+					,@strShipToState = strShipToState
+					,@strShipToZip = strShipToZip
+				FROM tblMFEDI940
 				WHERE strDepositorOrderNumber = @strOrderNo
 
 				IF NOT EXISTS (
@@ -753,116 +773,12 @@ BEGIN TRY
 				AND IL.intLocationId IS NOT NULL
 			JOIN tblEMEntityLocation EL ON 1 = 1
 				AND EL.intEntityLocationId = @intEntityLocationId
-			JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
-			JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-				AND UM.strUnitMeasure = EDI.strUOM
+			LEFT JOIN dbo.tblICUnitMeasure UM ON UM.strUnitMeasure = EDI.strUOM
+			LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
+				AND UM.intUnitMeasureId = IU.intUnitMeasureId
 			LEFT JOIN dbo.tblICItemUOM IU1 ON IU1.intItemId = I.intItemId
 				AND IU1.intUnitMeasureId = I.intWeightUOMId
 			WHERE EDI.strDepositorOrderNumber = @strOrderNo
-			ORDER BY EDI.intLineNumber
-
-			INSERT INTO @ReceiptStagingTable (
-				strReceiptType
-				,intEntityVendorId
-				,intShipFromId
-				,intLocationId
-				,strBillOfLadding
-				,intItemId
-				,intItemLocationId
-				,intItemUOMId
-				,intContractHeaderId
-				,intContractDetailId
-				,dtmDate
-				,intShipViaId
-				,dblQty
-				,intGrossNetUOMId
-				,dblGross
-				,dblNet
-				,dblCost
-				,intCostUOMId
-				,intCurrencyId
-				,intSubCurrencyCents
-				,dblExchangeRate
-				,intLotId
-				,intSubLocationId
-				,intStorageLocationId
-				,ysnIsStorage
-				,intSourceId
-				,intSourceType
-				,strSourceId
-				,strSourceScreenName
-				,ysnSubCurrency
-				,intForexRateTypeId
-				,dblForexRate
-				,intContainerId
-				,intFreightTermId
-				,intInventoryReceiptId
-				)
-			SELECT DISTINCT strReceiptType = 'Direct'
-				,intEntityVendorId = EL.intEntityId
-				,intShipFromId = EL.intEntityLocationId
-				,intLocationId = IL.intLocationId
-				,strBillOfLadding = NULL
-				,intItemId = I.intItemId
-				,intItemLocationId = IL.intItemLocationId
-				,intItemUOMId = IU.intItemUOMId
-				,intContractHeaderId = NULL
-				,intContractDetailId = NULL
-				,dtmDate = GETDATE()
-				,intShipViaId = NULL
-				,dblQty = dblQtyShipped
-				,intGrossNetUOMId = CASE 
-					WHEN I.ysnLotWeightsRequired = 1
-						THEN I.intWeightUOMId
-					ELSE NULL
-					END
-				,dblGross = CASE 
-					WHEN I.ysnLotWeightsRequired = 1
-						THEN dbo.fnMFConvertQuantityToTargetItemUOM(IU.intItemUOMId, IU1.intItemUOMId, dblQtyShipped)
-					ELSE NULL
-					END
-				,dblNet = CASE 
-					WHEN I.ysnLotWeightsRequired = 1
-						THEN dbo.fnMFConvertQuantityToTargetItemUOM(IU.intItemUOMId, IU1.intItemUOMId, dblQtyShipped)
-					ELSE NULL
-					END
-				,dblCost = 0
-				,intCostUOMId = NULL
-				,intCurrencyId = NULL
-				,intSubCurrencyCents = 1
-				,dblExchangeRate = 1
-				,intLotId = NULL
-				,intSubLocationId = intSubLocationId
-				,intStorageLocationId = intStorageLocationId
-				,ysnIsStorage = 0
-				,intSourceId = EDI.intLineNumber
-				,intSourceType = 0
-				,strSourceId = EDI.strDepositorOrderNumber
-				,strSourceScreenName = 'EDI943'
-				,ysnSubCurrency = NULL
-				,intForexRateTypeId = NULL
-				,dblForexRate = NULL
-				,intContainerId = NULL
-				,intFreightTermId = NULL
-				,intInventoryReceiptId = @intInventoryReceiptId
-			FROM tblMFEDI943 EDI
-			JOIN tblICItem I ON I.strItemNo = EDI.strVendorItemNumber
-			JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
-				AND IL.intLocationId IS NOT NULL
-			JOIN tblEMEntityLocation EL ON 1 = 1
-				AND EL.intEntityLocationId = @intEntityLocationId
-			JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
-			JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-				AND UM.strUnitType <> 'Weight'
-				AND UM.strUnitMeasure <> EDI.strUOM
-			LEFT JOIN dbo.tblICItemUOM IU1 ON IU1.intItemId = I.intItemId
-				AND IU1.intUnitMeasureId = I.intWeightUOMId
-			WHERE EDI.strDepositorOrderNumber = @strOrderNo
-				AND NOT EXISTS (
-					SELECT *
-					FROM @ReceiptStagingTable RST
-					WHERE RST.intItemId = I.intItemId
-					)
 			ORDER BY EDI.intLineNumber
 
 			EXEC dbo.uspICAddItemReceipt @ReceiptEntries = @ReceiptStagingTable
@@ -1218,6 +1134,7 @@ BEGIN TRY
 			JOIN tblICItem I ON I.strItemNo = EDI943.strVendorItemNumber
 			JOIN tblICInventoryReceiptItem RI ON RI.intItemId = I.intItemId
 				AND RI.intInventoryReceiptId = @intInventoryReceiptId
+				--AND EDI943.intLineNumber = RI.intLineNo
 			WHERE strDepositorOrderNumber = @strOrderNo
 
 			DELETE
