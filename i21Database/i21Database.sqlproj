@@ -6201,6 +6201,7 @@
     <Build Include="dbo\Views\vyuRKGetFutureMonth.sql" />
     <Build Include="dbo\Views\vyuICGetAddOnComponentStock.sql" />
     <Build Include="dbo\Views\vyuICGetSubstituteComponentStock.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRRegeneratePaycheckPanelViews.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
