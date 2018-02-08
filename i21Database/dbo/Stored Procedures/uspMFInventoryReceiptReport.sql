@@ -142,8 +142,8 @@ BEGIN
 	LEFT JOIN tblICInventoryReceiptItemLot RIL ON RIL.intInventoryReceiptItemId = RI.intInventoryReceiptItemId
 	LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = R.intLocationId
 	LEFT JOIN tblEMEntity E ON E.intEntityId = R.intEntityVendorId
-	LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = E.intEntityId
-	LEFT JOIN tblSMShipVia S ON S.intEntityId = R.intShipViaId
+	LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = E.intEntityId and EL.intEntityLocationId=R.intShipFromId
+	LEFT JOIN tblSMShipVia S ON S.intEntityShipViaId = R.intShipViaId
 	LEFT JOIN tblICItem I ON I.intItemId = RI.intItemId
 	LEFT JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = RIL.intItemUnitMeasureId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IUOM.intUnitMeasureId
