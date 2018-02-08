@@ -100,7 +100,7 @@ BEGIN
 				NUll AS dblBooked,
 				NULL AS dblAccounting,
 				AD.dtmAllocatedDate AS dtmDate,
-				'Purchase Allocated'	AS strType,
+				'3 Purchase Allocated'	AS strType,
 				0.0 AS dblTranValue, --Dummy
 				9999999 + AD.intPContractDetailId AS intSort,
 				CAST(0 AS BIT) ysnPosted
@@ -142,7 +142,7 @@ BEGIN
 					dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId,QU.intUnitMeasureId,@intUnitMeasureId, ID.dblQtyShipped) AS dblBooked,
 					ID.dblTotal AS dblAccounting,
 					IV.dtmDate AS dtmDate,
-					'Invoice'	AS strType,
+					'2 Invoice'	AS strType,
 					0.0 AS dblTranValue, --Dummy
 					IV.ysnPosted
 
@@ -173,7 +173,7 @@ BEGIN
 				dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId,QU.intUnitMeasureId,@intUnitMeasureId, ID.dblQtyReceived)*-1 AS dblBooked,
 				ID.dblTotal *-1 AS dblAccounting,
 				IV.dtmDate AS dtmDate,
-				'Supp. Invoice'	AS strType,
+				'4 Supp. Invoice'	AS strType,
 				0.0 AS dblTranValue, --Dummy
 				9999999 + AD.intPContractDetailId AS intSort,
 				IV.ysnPosted
@@ -217,7 +217,7 @@ BEGIN
 					NUll AS dblBooked,
 					NULL AS dblAccounting,
 					AD.dtmAllocatedDate AS dtmDate,
-					'Sales Allocated'	AS strType,
+					'1 Sales Allocated'	AS strType,
 					0.0 AS dblTranValue, --Dummy
 					CAST(0 AS BIT) ysnPosted
 
@@ -244,7 +244,7 @@ BEGIN
 
 		UNION ALL
 
-		SELECT strItemNo, strBillId, strDescription, strConfirmed, SUM(dblAllocatedQty) dblAllocatedQty, dblPrice, strCurrency, dblFX, dblBooked, dblAccounting, dtmContractDate, strType,dblTranValue, intSort, ysnPosted
+		SELECT TOP 100 PERCENT strItemNo, strBillId, strDescription, strConfirmed, SUM(dblAllocatedQty) dblAllocatedQty, dblPrice, strCurrency, dblFX, dblBooked, dblAccounting, dtmContractDate, strType,dblTranValue, intSort, ysnPosted
 		FROM(
 			SELECT	IM.strItemNo,
 					strBillId,
@@ -298,6 +298,7 @@ BEGIN
 			WHERE	intSContractDetailId	IN (SELECT * FROM dbo.fnSplitString(@strDetailIds,',')) AND ISNULL(MC.strM2MComputation,'No')	=	'No'
 		)d
 		GROUP BY strItemNo, strBillId, strDescription, strConfirmed, dblPrice, strCurrency, dblFX, dblBooked, dblAccounting, dtmContractDate, intSort, strType, dblTranValue, ysnPosted
+		ORDER BY strItemNo
 	)t
-	ORDER by intSort,strDescription
+	ORDER by intSort,strType
 END
