@@ -260,6 +260,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\UpdateTaxGroupId.sql
 :r .\AP\UpdateBillDetailRate.sql
 :r .\AP\DeleteInvalidBasisAdvanceStaging.sql
+:r .\AP\CleanBasisAdvance.sql
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 

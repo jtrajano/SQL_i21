@@ -70,7 +70,7 @@ OUTER APPLY (
         ,@userId
         ,13
         ,DEFAULT
-        ,DEFAULT
+        ,basisAdvance.intCurrencyId
         ,DEFAULT
         ,basisAdvance.intShipFromId
         ,basisAdvance.intCompanyLocationId
@@ -108,6 +108,7 @@ INSERT (
     [dtmDate]				,
     [dtmBillDate]			,
     [intAccountId]			,
+    [intCurrencyId]			,
     [intEntityId]			,
     [intEntityVendorId]		,
     [intTransactionType]	,
@@ -142,6 +143,7 @@ VALUES (
     [dtmDate]				,
     [dtmBillDate]			,
     [intAccountId]			,
+    [intCurrencyId]			,
     [intEntityId]			,
     [intEntityVendorId]		,
     [intTransactionType]	,
