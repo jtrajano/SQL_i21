@@ -42,7 +42,6 @@ SET ANSI_WARNINGS OFF
 BEGIN TRY
 
 DECLARE @startingRecordId INT;
-DECLARE @intProducerId AS INT;
 DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
 
@@ -86,16 +85,6 @@ IF @transCount = 0 BEGIN TRANSACTION
 	END
 
 	EXEC uspSMGetStartingNumber @startingRecordId, @billRecordNumber OUTPUT
-
-	IF @type = 3
-	BEGIN
-		SELECT TOP 1 @intProducerId = intProducerId FROM @voucherDetailReceipt rtnItem 
-		INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptItemId =  rtnItem.intInventoryReceiptItemId
-		INNER JOIN tblCTContractDetail ctd
-						ON ri.intLineNo = ctd.intContractDetailId
-		WHERE  ctd.ysnClaimsToProducer = 1 
-				AND ri.intOrderId IS NOT NULL  
-	END
 
 	SELECT 
 		[intTermsId]			=	A.[intTermsId],
@@ -188,13 +177,6 @@ IF @transCount = 0 BEGIN TRANSACTION
 	--EXEC uspAPUpdateVoucherTax @billId
 	--EXEC uspAPUpdateVoucherContract @billId
 
-	-- Check if the inventory return needs to use the producer as the vendor for the debit memo. 
-	IF @intProducerId IS NOT NULL 
-		BEGIN
-			UPDATE dbo.tblAPBill 
-			SET [intEntityVendorId] = @intProducerId
-			WHERE intBillId = @billId
-		END
 
 	--UPDATE the term if detail has contract
 	DECLARE @contractTermId INT;
