@@ -39,16 +39,17 @@ BEGIN TRY
 	FROM tblSMMultiCurrency
 
 	DECLARE @ShipmentStagingTable ShipmentStagingTable
+	DECLARE @FinalShipmentStagingTable ShipmentStagingTable
 	DECLARE @OtherCharges ShipmentChargeStagingTable
 	DECLARE @tblMFOrderNo TABLE (
 		intRecordId INT identity(1, 1)
 		,strOrderNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		)
-
-	--UPDATE tblMFEDI940
-	--SET strDepositorOrderNumber = REPLACE(LTRIM(REPLACE(strDepositorOrderNumber, '0', ' ')), ' ', '0')
-
 	DECLARE @tblMFSession TABLE (intEDI940Id INT)
+	DECLARE @tblMFItem TABLE (
+		intItemId INT
+		,strItemNo NVARCHAR(50)
+		)
 
 	INSERT INTO @tblMFSession (intEDI940Id)
 	SELECT intEDI940Id
@@ -150,10 +151,7 @@ BEGIN TRY
 				IF len(@strItemNo) > 0
 					SELECT @strItemNo = Left(@strItemNo, len(@strItemNo) - 1)
 
-				IF @strErrorMessage <> ''
-					SELECT @strErrorMessage = @strErrorMessage + ' Item Number(s) ' + @strItemNo + ' does not exist.'
-				ELSE
-					SELECT @strErrorMessage = @strErrorMessage + 'Item Number(s) ' + @strItemNo + ' does not exist.'
+				SELECT @strErrorMessage = @strErrorMessage + ' Item Number(s) ' + @strItemNo + ' does not exist.'
 			END
 
 			IF EXISTS (
@@ -179,19 +177,19 @@ BEGIN TRY
 				IF len(@strItemNo) > 0
 					SELECT @strItemNo = Left(@strItemNo, len(@strItemNo) - 1)
 
-				IF @strErrorMessage <> ''
-					SELECT @strErrorMessage = @strErrorMessage + ' Qty Ordered cannot be blank for the item number ' + @strItemNo + '.'
-				ELSE
-					SELECT @strErrorMessage = @strErrorMessage + 'Qty Ordered cannot be blank for the item number ' + @strItemNo + '.'
+				SELECT @strErrorMessage = @strErrorMessage + ' Qty Ordered cannot be blank for the item number ' + @strItemNo + '.'
 			END
 
 			IF NOT EXISTS (
 					SELECT *
 					FROM tblMFEDI940 EDI940
 					JOIN tblICItem I ON I.strItemNo = EDI940.strCustomerItemNumber
-					JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
+					JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
 					JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-						AND UM.strUnitMeasure = EDI940.strUOM
+						AND (
+							UM.strUnitType <> 'Weight'
+							OR UM.strUnitMeasure = EDI940.strUOM
+							)
 					WHERE strDepositorOrderNumber = @strOrderNo
 					)
 			BEGIN
@@ -200,16 +198,62 @@ BEGIN TRY
 				SELECT @strItemNo = @strItemNo + strCustomerItemNumber + ', '
 				FROM tblMFEDI940 EDI940
 				JOIN tblICItem I ON I.strItemNo = EDI940.strCustomerItemNumber
-				JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
+				JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
 				LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-					AND UM.strUnitMeasure = EDI940.strUOM
+					AND (
+						UM.strUnitType <> 'Weight'
+						OR UM.strUnitMeasure = EDI940.strUOM
+						)
 				WHERE strDepositorOrderNumber = @strOrderNo
 					AND UM.intUnitMeasureId IS NULL
 
-				IF @strErrorMessage <> ''
-					SELECT @strErrorMessage = @strErrorMessage + ' Qty UOM cannot be blank for the item number ' + @strItemNo + '.'
-				ELSE
-					SELECT @strErrorMessage = @strErrorMessage + 'Qty UOM cannot be blank for the item number ' + @strItemNo + '.'
+				SELECT @strErrorMessage = @strErrorMessage + 'Qty UOM cannot be blank for the item number ' + @strItemNo + '.'
+			END
+
+			DELETE
+			FROM @tblMFItem
+
+			INSERT INTO @tblMFItem (
+				intItemId
+				,strItemNo
+				)
+			SELECT DISTINCT I.intItemId
+				,I.strItemNo
+			FROM tblMFEDI940 EDI940
+			JOIN tblICItem I ON I.strItemNo = EDI940.strCustomerItemNumber
+			WHERE strDepositorOrderNumber = @strOrderNo
+
+			IF EXISTS (
+					SELECT I.intItemId
+						,Count(*)
+					FROM @tblMFItem I
+					JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
+					JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+						AND UM.strUnitType <> 'Weight'
+					GROUP BY I.intItemId
+					HAVING Count(*) > 1
+					)
+				AND NOT EXISTS (
+					SELECT *
+					FROM tblMFEDI940 EDI940
+					JOIN tblICItem I ON I.strItemNo = EDI940.strCustomerItemNumber
+					JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
+					JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+						AND UM.strUnitMeasure = EDI940.strUOM
+					WHERE strDepositorOrderNumber = @strOrderNo
+					)
+			BEGIN
+				SELECT @strItemNo = ''
+
+				SELECT @strItemNo = @strItemNo + strItemNo + ', '
+				FROM @tblMFItem I
+				JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
+				JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+					AND UM.strUnitType <> 'Weight'
+				GROUP BY strItemNo
+				HAVING Count(*) > 1
+
+				SELECT @strErrorMessage = ' Multiple Pack UOM for the item number ' + @strItemNo + ' are configured. Please configure only one Pack UOM. '
 			END
 
 			IF EXISTS (
@@ -242,94 +286,6 @@ BEGIN TRY
 				WHERE strReferenceNumber = @strOrderNo
 			END
 
-			--IF EXISTS (
-			--		SELECT *
-			--		FROM tblICInventoryShipment
-			--		WHERE strReferenceNumber = @strOrderNo
-			--		)
-			--BEGIN
-			--	INSERT INTO tblMFEDI940Archive (
-			--		intEDI940Id
-			--		,intTransactionId
-			--		,strCustomerId
-			--		,strPurpose
-			--		,strDepositorOrderNumber
-			--		,strPONumber
-			--		,strShipToName
-			--		,strShipToAddress1
-			--		,strShipToAddress2
-			--		,strShipToCity
-			--		,strShipToState
-			--		,strShipToZip
-			--		,strShipToCode
-			--		,strBuyerIdentification
-			--		,strPODate
-			--		,strDeliveryRequestedDate
-			--		,intLineNumber
-			--		,strCustomerItemNumber
-			--		,strUPCCaseCode
-			--		,strDescription
-			--		,dblQtyOrdered
-			--		,strUOM
-			--		,dblInnerPacksPerOuterPack
-			--		,dblTotalQtyOrdered
-			--		,dtmCreated
-			--		,strStatus
-			--		,strFileName
-			--		,strShipmentDate
-			--		,strTransportationMethod
-			--		,strSCAC
-			--		,strRouting
-			--		,strShipmentMethodOfPayment
-			--		,strCustomerCode
-			--		,intCustomerCodeType
-			--		,ysnNotify
-			--		)
-			--	SELECT intEDI940Id
-			--		,intTransactionId
-			--		,strCustomerId
-			--		,strPurpose
-			--		,strDepositorOrderNumber
-			--		,strPONumber
-			--		,strShipToName
-			--		,strShipToAddress1
-			--		,strShipToAddress2
-			--		,strShipToCity
-			--		,strShipToState
-			--		,strShipToZip
-			--		,strShipToCode
-			--		,strBuyerIdentification
-			--		,strPODate
-			--		,strDeliveryRequestedDate
-			--		,intLineNumber
-			--		,strCustomerItemNumber
-			--		,strUPCCaseCode
-			--		,strDescription
-			--		,dblQtyOrdered
-			--		,strUOM
-			--		,dblInnerPacksPerOuterPack
-			--		,dblTotalQtyOrdered
-			--		,dtmCreated
-			--		,'IGNORED'
-			--		,strFileName
-			--		,strShipmentDate
-			--		,strTransportationMethod
-			--		,strSCAC
-			--		,strRouting
-			--		,strShipmentMethodOfPayment
-			--		,strCustomerCode
-			--		,intCustomerCodeType
-			--		,ysnNotify
-			--	FROM tblMFEDI940
-			--	WHERE strDepositorOrderNumber = @strOrderNo
-			--	DELETE
-			--	FROM tblMFEDI940
-			--	WHERE strDepositorOrderNumber = @strOrderNo
-			--	SELECT @intRecordId = min(intRecordId)
-			--	FROM @tblMFOrderNo
-			--	WHERE intRecordId > @intRecordId
-			--	CONTINUE
-			--END
 			SELECT @intEntityLocationId = NULL
 
 			SELECT @intEntityId = NULL
@@ -657,32 +613,6 @@ BEGIN TRY
 				FROM tblMFEDI940
 				WHERE strDepositorOrderNumber = @strOrderNo
 
-				--IF NOT EXISTS (
-				--		SELECT *
-				--		FROM tblEMEntity E
-				--		JOIN tblEMEntityType ET ON ET.intEntityId = E.intEntityId
-				--		JOIN tblEMEntityLocation EL ON EL.intEntityId = E.intEntityId
-				--		WHERE ET.strType = 'Customer'
-				--			AND EL.intEntityLocationId = @intEntityLocationId
-				--			AND E.strName = @strShipToName
-				--		)
-				--BEGIN
-				--	UPDATE E
-				--	SET E.strName = @strShipToName
-				--	FROM tblEMEntity E
-				--	JOIN tblEMEntityType ET ON ET.intEntityId = E.intEntityId
-				--	JOIN tblEMEntityLocation EL ON EL.intEntityId = E.intEntityId
-				--	WHERE ET.strType = 'Customer'
-				--		AND EL.intEntityLocationId = @intEntityLocationId
-				--	SELECT @intEntityId = NULL
-				--SELECT @intEntityId = intEntityId
-				--FROM tblEMEntity
-				--WHERE strName = @strShipToName
-				--	UPDATE tblMFEDI940
-				--	SET ysnNotify = 1
-				--		,intCustomerCodeType = 3
-				--	WHERE strDepositorOrderNumber = @strOrderNo
-				--END
 				IF NOT EXISTS (
 						SELECT *
 						FROM tblEMEntityLocation
@@ -728,6 +658,9 @@ BEGIN TRY
 				DELETE
 				FROM @ShipmentStagingTable
 
+				DELETE
+				FROM @FinalShipmentStagingTable
+
 				INSERT INTO @ShipmentStagingTable (
 					intOrderType
 					,intSourceType
@@ -784,12 +717,127 @@ BEGIN TRY
 					AND IL.intLocationId IS NOT NULL
 				JOIN tblEMEntityLocation EL ON 1 = 1
 					AND EL.intEntityLocationId = @intEntityLocationId
-				LEFT JOIN dbo.tblICUnitMeasure UM ON UM.strUnitMeasure = EDI.strUOM
-				LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
-					AND UM.intUnitMeasureId = IU.intUnitMeasureId
+				JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
+				JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+					AND UM.strUnitMeasure = EDI.strUOM
 				WHERE EDI.strDepositorOrderNumber = @strOrderNo
 
-				EXEC dbo.uspICAddItemShipment @Entries = @ShipmentStagingTable
+				INSERT INTO @ShipmentStagingTable (
+					intOrderType
+					,intSourceType
+					,intEntityCustomerId
+					,dtmShipDate
+					,intShipFromLocationId
+					,intShipToLocationId
+					,intFreightTermId
+					,strSourceScreenName
+					,strBOLNumber
+					,strReferenceNumber
+					,intItemId
+					,intOwnershipType
+					,dblQuantity
+					,intItemUOMId
+					,intOrderId
+					,intLineNo
+					,intWeightUOMId
+					,dblUnitPrice
+					,intCurrencyId
+					,intForexRateTypeId
+					,dblForexRate
+					,dtmRequestedArrivalDate
+					)
+				SELECT DISTINCT intOrderType = 4
+					,intSourceType = 0
+					,intEntityCustomerId = EL.intEntityId
+					,dtmShipDate = EDI.strShipmentDate
+					,intShipFromLocationId = IL.intLocationId
+					,intShipToLocationId = EL.intEntityLocationId
+					,intFreightTermId = (
+						SELECT TOP 1 intFreightTermId
+						FROM tblSMFreightTerms
+						WHERE strFreightTerm = 'Deliver'
+						)
+					,strSourceScreenName = 'EDI940'
+					,strBOLNumber = ''
+					,strReferenceNumber = EDI.strDepositorOrderNumber
+					,intItemId = I.intItemId
+					,intOwnershipType = 1
+					,dblQuantity = EDI.dblQtyOrdered
+					,intItemUOMId = IU.intItemUOMId
+					,intOrderId = NULL
+					,intLineNo = EDI.intLineNumber
+					,intWeightUOMId = NULL
+					,dblUnitPrice = 0
+					,intCurrencyId = NULL
+					,intForexRateTypeId = NULL
+					,dblForexRate = NULL
+					,dtmRequestedArrivalDate = EDI.strShipmentDate
+				FROM tblMFEDI940 EDI
+				JOIN tblICItem I ON I.strItemNo = EDI.strCustomerItemNumber
+				JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
+					AND IL.intLocationId IS NOT NULL
+				JOIN tblEMEntityLocation EL ON 1 = 1
+					AND EL.intEntityLocationId = @intEntityLocationId
+				JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
+				JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+					AND UM.strUnitType <> 'Weight'
+				WHERE EDI.strDepositorOrderNumber = @strOrderNo
+					AND NOT EXISTS (
+						SELECT *
+						FROM @ShipmentStagingTable SST
+						WHERE SST.intItemId = I.intItemId
+						)
+
+				INSERT INTO @FinalShipmentStagingTable (
+					intOrderType
+					,intSourceType
+					,intEntityCustomerId
+					,dtmShipDate
+					,intShipFromLocationId
+					,intShipToLocationId
+					,intFreightTermId
+					,strSourceScreenName
+					,strBOLNumber
+					,strReferenceNumber
+					,intItemId
+					,intOwnershipType
+					,dblQuantity
+					,intItemUOMId
+					,intOrderId
+					,intLineNo
+					,intWeightUOMId
+					,dblUnitPrice
+					,intCurrencyId
+					,intForexRateTypeId
+					,dblForexRate
+					,dtmRequestedArrivalDate
+					)
+				SELECT intOrderType
+					,intSourceType
+					,intEntityCustomerId
+					,dtmShipDate
+					,intShipFromLocationId
+					,intShipToLocationId
+					,intFreightTermId
+					,strSourceScreenName
+					,strBOLNumber
+					,strReferenceNumber
+					,intItemId
+					,intOwnershipType
+					,dblQuantity
+					,intItemUOMId
+					,intOrderId
+					,intLineNo
+					,intWeightUOMId
+					,dblUnitPrice
+					,intCurrencyId
+					,intForexRateTypeId
+					,dblForexRate
+					,dtmRequestedArrivalDate
+				FROM @ShipmentStagingTable
+				ORDER BY intLineNo
+
+				EXEC dbo.uspICAddItemShipment @Entries = @FinalShipmentStagingTable
 					,@Charges = @OtherCharges
 					,@intUserId = @intUserId;
 
@@ -824,6 +872,9 @@ BEGIN TRY
 				DELETE
 				FROM @ShipmentStagingTable
 
+				DELETE
+				FROM @FinalShipmentStagingTable
+
 				INSERT INTO @ShipmentStagingTable (
 					intOrderType
 					,intSourceType
@@ -880,10 +931,76 @@ BEGIN TRY
 					AND IL.intLocationId IS NOT NULL
 				JOIN tblEMEntityLocation EL ON 1 = 1
 					AND EL.intEntityLocationId = @intEntityLocationId
-				LEFT JOIN dbo.tblICUnitMeasure UM ON UM.strUnitMeasure = EDI.strUOM
-				LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
-					AND UM.intUnitMeasureId = IU.intUnitMeasureId
+				JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
+				JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+					AND UM.strUnitMeasure = EDI.strUOM
 				WHERE EDI.strDepositorOrderNumber = @strOrderNo
+
+				INSERT INTO @ShipmentStagingTable (
+					intOrderType
+					,intSourceType
+					,intEntityCustomerId
+					,dtmShipDate
+					,intShipFromLocationId
+					,intShipToLocationId
+					,intFreightTermId
+					,strSourceScreenName
+					,strBOLNumber
+					,strReferenceNumber
+					,intItemId
+					,intOwnershipType
+					,dblQuantity
+					,intItemUOMId
+					,intOrderId
+					,intLineNo
+					,intWeightUOMId
+					,dblUnitPrice
+					,intCurrencyId
+					,intForexRateTypeId
+					,dblForexRate
+					,dtmRequestedArrivalDate
+					)
+				SELECT DISTINCT intOrderType = 4
+					,intSourceType = 0
+					,intEntityCustomerId = EL.intEntityId
+					,dtmShipDate = EDI.strShipmentDate
+					,intShipFromLocationId = IL.intLocationId
+					,intShipToLocationId = EL.intEntityLocationId
+					,intFreightTermId = (
+						SELECT TOP 1 intFreightTermId
+						FROM tblSMFreightTerms
+						WHERE strFreightTerm = 'Deliver'
+						)
+					,strSourceScreenName = 'EDI940'
+					,strBOLNumber = ''
+					,strReferenceNumber = EDI.strDepositorOrderNumber
+					,intItemId = I.intItemId
+					,intOwnershipType = 1
+					,dblQuantity = EDI.dblQtyOrdered
+					,intItemUOMId = IU.intItemUOMId
+					,intOrderId = NULL
+					,intLineNo = EDI.intLineNumber
+					,intWeightUOMId = NULL
+					,dblUnitPrice = 0
+					,intCurrencyId = NULL
+					,intForexRateTypeId = NULL
+					,dblForexRate = NULL
+					,dtmRequestedArrivalDate = EDI.strShipmentDate
+				FROM tblMFEDI940 EDI
+				JOIN tblICItem I ON I.strItemNo = EDI.strCustomerItemNumber
+				JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
+					AND IL.intLocationId IS NOT NULL
+				JOIN tblEMEntityLocation EL ON 1 = 1
+					AND EL.intEntityLocationId = @intEntityLocationId
+				JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
+				JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+					AND UM.strUnitType <> 'Weight'
+				WHERE EDI.strDepositorOrderNumber = @strOrderNo
+					AND NOT EXISTS (
+						SELECT *
+						FROM @ShipmentStagingTable SST
+						WHERE SST.intItemId = I.intItemId
+						)
 
 				DELETE
 				FROM tblICInventoryShipmentItem
@@ -954,6 +1071,7 @@ BEGIN TRY
 								THEN ISNULL(se.intForexRateTypeId, @intDefaultForexRateTypeId)
 							ELSE NULL
 							END, se.dtmShipDate) forexRate
+				ORDER BY se.intLineNo
 			END
 
 			IF @intInventoryShipmentId > 0
