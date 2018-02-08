@@ -31,14 +31,18 @@ BEGIN TRY
 	-----------------------------------------------------------
 	-- EXECUTING THIS SP's WILL INSERT RECORDS ON TEMP TABLES--
 	-----------------------------------------------------------
+	
+	DELETE FROM tblCFInvoiceReportTempTable
 	EXEC "dbo"."uspCFInvoiceReport"			@xmlParam	=	@xmlParam
 
 	--SELECT 'tblCFInvoiceReportTempTable',* FROM tblCFInvoiceReportTempTable
-
+	
+	DELETE FROM tblCFInvoiceSummaryTempTable
 	EXEC "dbo"."uspCFInvoiceReportSummary"	@xmlParam	=	@xmlParam
 
 	--SELECT 'tblCFInvoiceSummaryTempTable',* FROM tblCFInvoiceSummaryTempTable
-
+	
+	DELETE FROM tblCFInvoiceDiscountTempTable
 	EXEC "dbo"."uspCFInvoiceReportDiscount" @xmlParam	=	@xmlParam
 
 	--SELECT 'tblCFInvoiceDiscountTempTable',* FROM tblCFInvoiceDiscountTempTable
@@ -46,6 +50,7 @@ BEGIN TRY
 
 	-- INSERT CALCULATED INVOICES TO STAGING TABLE --
 	-----------------------------------------------------------
+	DELETE FROM tblCFInvoiceStagingTable
 	INSERT INTO tblCFInvoiceStagingTable
 	(
 	 intCustomerGroupId
@@ -794,12 +799,23 @@ BEGIN TRY
 END TRY 
 BEGIN CATCH
 	
-	IF (@@TRANCOUNT > 0) ROLLBACK TRANSACTION 
-  
 	SELECT   
 		@CatchErrorMessage = ERROR_MESSAGE(),  
 		@CatchErrorSeverity = ERROR_SEVERITY(),  
 		@CatchErrorState = ERROR_STATE();  
+
+		
+
+		print @CatchErrorMessage
+		print @CatchErrorSeverity
+		print @CatchErrorState
+
+	IF (@@TRANCOUNT > 0) ROLLBACK TRANSACTION 
+  
+	--SELECT   
+	--	@CatchErrorMessage = ERROR_MESSAGE(),  
+	--	@CatchErrorSeverity = ERROR_SEVERITY(),  
+	--	@CatchErrorState = ERROR_STATE();  
 
 	-------------CLEAN TEMP TABLES------------
 	DELETE FROM tblCFInvoiceReportTempTable
@@ -808,6 +824,11 @@ BEGIN CATCH
 	DELETE FROM tblCFInvoiceStagingTable
 	DELETE FROM tblCFInvoiceFeeStagingTable
 	------------------------------------------
+
+	RAISERROR (@CatchErrorMessage,@CatchErrorSeverity,@CatchErrorState)
+
+	
+	
 
 END CATCH
 END

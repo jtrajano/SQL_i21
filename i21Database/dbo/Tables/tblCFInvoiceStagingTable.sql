@@ -142,6 +142,10 @@
 );
 
 
+GO
+CREATE UNIQUE NONCLUSTERED INDEX [intTransactionId]
+    ON [dbo].[tblCFInvoiceStagingTable]([intTransactionId] ASC);
+
 
 
 
