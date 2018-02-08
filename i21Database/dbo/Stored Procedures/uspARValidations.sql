@@ -245,7 +245,7 @@
 				,@logDate
 				,@key 
 			FROM agivcmst WHERE agivc_slsmn_no COLLATE SQL_Latin1_General_CP1_CS_AS  NOT IN 
-					(select strSalespersonId  COLLATE SQL_Latin1_General_CP1_CS_AS from tblARSalesperson) 
+					(select strSalespersonId  COLLATE SQL_Latin1_General_CP1_CS_AS from tblARSalesperson where strSalespersonId is not null) 
 		 END
 
 		IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptivcmst')
@@ -266,7 +266,7 @@
 				,@logDate
 				,@key 
 			FROM ptivcmst WHERE ptivc_sold_by COLLATE SQL_Latin1_General_CP1_CS_AS  NOT IN 
-					(select strSalespersonId  COLLATE SQL_Latin1_General_CP1_CS_AS from tblARSalesperson) 
+					(select strSalespersonId  COLLATE SQL_Latin1_General_CP1_CS_AS from tblARSalesperson where strSalespersonId is not null) 
 		 END
 		RETURN;	
 	END
