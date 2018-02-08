@@ -203,7 +203,7 @@ IF @ysnGA = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TAB
 				CONVERT(DATETIME, LEFT(CASE WHEN ISNULL(gacnt_user_rev_dt,'19000101') = '0' THEN '19000101' ELSE ISNULL(gacnt_user_rev_dt,'19000101') END,8)) dtmCreated,
 				1
 		FROM gacntmst				CT
-		JOIN tblCTContractHeader    CH	ON	LTRIM(RTRIM(strContractNumber)) collate Latin1_General_CI_AS = LTRIM(RtRIM(gacnt_cnt_no))+'_'+CAST(CT.A4GLIdentity AS CHAR(6)) collate Latin1_General_CI_AS
+		JOIN tblCTContractHeader    CH	ON	LTRIM(RTRIM(strContractNumber)) collate Latin1_General_CI_AS = LTRIM(RtRIM(gacnt_cnt_no))+'_'+LTRIM(RtRIM(gacnt_cus_no))+'_'+CAST(CT.gacnt_seq_no AS CHAR(3)) collate Latin1_General_CI_AS
 		JOIN tblCTPricingType		PT	ON	PT.strPricingType	=	CASE	WHEN LTRIM(RTRIM(ISNULL(gacnt_pbhcu_ind,''))) = ''	 THEN 'DP (Priced Later)' 
 																				WHEN LTRIM(RTRIM(ISNULL(gacnt_pbhcu_ind,''))) = 'B'  THEN 'Basis' 
 																				WHEN LTRIM(RTRIM(ISNULL(gacnt_pbhcu_ind,''))) = 'H'  THEN 'HTA' 
