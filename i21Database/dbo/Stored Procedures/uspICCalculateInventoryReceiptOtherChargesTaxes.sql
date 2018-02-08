@@ -21,7 +21,8 @@ BEGIN
 					,@ShipFromId		INT 
 					,@TaxGroupId		INT
 					,@FreightTermId		INT
-					,@CostUOMId			INT
+					,@TaxUOMId			INT
+					,@TaxUnitMeasureId INT
 
 			DECLARE @Taxes AS TABLE (
 				--id						INT
@@ -59,8 +60,10 @@ BEGIN
 					,Charge.intTaxGroupId --,ISNULL(Charge.intTaxGroupId, Receipt.intTaxGroupId)
 					,Receipt.intFreightTermId
 					,Charge.intCostUOMId 
-			FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge Charge
-						ON Receipt.intInventoryReceiptId = Charge.intInventoryReceiptId
+					,CostUOM.intUnitMeasureId
+			FROM dbo.tblICInventoryReceipt Receipt 
+				INNER JOIN dbo.tblICInventoryReceiptCharge Charge ON Receipt.intInventoryReceiptId = Charge.intInventoryReceiptId
+				LEFT OUTER JOIN tblICItemUOM CostUOM ON CostUOM.intItemUOMId = Charge.intCostUOMId
 			WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
 
 			OPEN loopReceiptChargeItems;
@@ -75,7 +78,8 @@ BEGIN
 				,@ShipFromId
 				,@TaxGroupId
 				,@FreightTermId
-				,@CostUOMId
+				,@TaxUOMId
+				,@TaxUnitMeasureId
 
 			WHILE @@FETCH_STATUS = 0
 			BEGIN 
@@ -120,7 +124,7 @@ BEGIN
 					,@IncludeExemptedCodes	= NULL
 					,@SiteId				= NULL
 					,@FreightTermId			= @FreightTermId
-					,@UOMId					= @CostUOMId
+					,@UOMId					= @TaxUnitMeasureId
 
 				-- Fields used in the calculation of the taxes
 				DECLARE	@Amount	NUMERIC(38,20) 
@@ -162,6 +166,7 @@ BEGIN
 					,[strTaxCode]
 					,[dblQty]
 					,[dblCost]
+					,[intUnitMeasureId]
 					,[intSort]
 					,[intConcurrencyId]				
 				)
@@ -196,9 +201,10 @@ BEGIN
 						,[strTaxCode]					= vendorTax.[strTaxCode]
 						,[dblQty]						= @Qty
 						,[dblCost]						= @Cost
+						,[intUnitMeasureId]				= @TaxUnitMeasureId
 						,[intSort]						= 1
 						,[intConcurrencyId]				= 1
-				FROM	[dbo].[fnGetItemTaxComputationForVendor](@ItemId, @EntityId, @TransactionDate, @Cost, @Qty, @TaxGroupId, @LocationId, @ShipFromId, 0, @FreightTermId, 0, @CostUOMId) vendorTax
+				FROM	[dbo].[fnGetItemTaxComputationForVendor](@ItemId, @EntityId, @TransactionDate, @Cost, @Qty, @TaxGroupId, @LocationId, @ShipFromId, 0, @FreightTermId, 0, @TaxUnitMeasureId) vendorTax
 						LEFT JOIN tblICInventoryReceiptCharge rc 
 							ON rc.intInventoryReceiptChargeId = @InventoryReceiptChargeId
 
@@ -212,7 +218,8 @@ BEGIN
 					,@ShipFromId
 					,@TaxGroupId
 					,@FreightTermId
-					,@CostUOMId
+					,@TaxUOMId
+					,@TaxUnitMeasureId
 			END 
 
 			CLOSE loopReceiptChargeItems;
