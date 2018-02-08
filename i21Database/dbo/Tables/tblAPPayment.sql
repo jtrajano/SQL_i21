@@ -49,3 +49,27 @@ CREATE NONCLUSTERED INDEX [IX_tblAPPayment_intVendorId_intPaymentId] ON [dbo].[t
 	[dtmDatePaid] ASC
 )
 WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_rptAging_1] ON [dbo].[tblAPPayment]
+(
+	[ysnPrepay] ASC,
+	[ysnPosted] ASC,
+	[intPaymentId] ASC,
+	[strPaymentRecordNum] ASC,
+	[intEntityVendorId] ASC,
+	[dtmDatePaid] ASC
+)WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+GO
+CREATE STATISTICS [ST_rptAging_1] ON [dbo].[tblAPPayment]([strPaymentRecordNum], [intEntityVendorId], [intPaymentId], [ysnPosted])
+GO
+CREATE STATISTICS [ST_rptAging_2] ON [dbo].[tblAPPayment]([ysnPrepay], [ysnPosted], [dtmDatePaid])
+GO
+CREATE STATISTICS [ST_rptAging_3] ON [dbo].[tblAPPayment]([intEntityVendorId], [ysnPrepay], [ysnPosted])
+GO
+CREATE STATISTICS [ST_rptAging_4] ON [dbo].[tblAPPayment]([ysnPosted], [ysnPrepay], [strPaymentRecordNum], [intEntityVendorId], [intPaymentId], [dtmDatePaid])
+GO
+CREATE STATISTICS [ST_rptAging_5] ON [dbo].[tblAPPayment]([intPaymentId], [ysnPrepay])
+GO
+CREATE STATISTICS [ST_rptAging_6] ON [dbo].[tblAPPayment]([ysnPosted], [strPaymentRecordNum], [intEntityVendorId])
+GO
+CREATE STATISTICS [ST_rptAging_7] ON [dbo].[tblAPPayment]([dtmDatePaid], [ysnPrepay])
