@@ -12,7 +12,7 @@ BEGIN
 		,strOrderNo
 		,strShipmentNo
 		)
-	SELECT TOP 1 InvS.intInventoryShipmentId
+	SELECT InvS.intInventoryShipmentId
 		,InvS.strReferenceNumber
 		,InvS.strShipmentNumber
 	FROM tblICInventoryShipment InvS
@@ -85,7 +85,7 @@ BEGIN
 				ELSE InvSL.dblQuantityShipped
 				END
 			) AS dblQtyShipped
-		,UM.strUnitMeasure strUOM
+		,EDI.strUOM
 		,PL.strParentLotNumber strParentLotNumber
 		,L.strLotNumber
 		,Ltrim(1 + (year(L.dtmExpiryDate) - 1) / 100) + (CONVERT(VARCHAR(6), L.dtmExpiryDate, 12)) strBestby
@@ -101,10 +101,12 @@ BEGIN
 	JOIN dbo.tblEMEntity E ON E.intEntityId = InvS.intEntityCustomerId
 	JOIN dbo.tblEMEntityLocation EL ON EL.intEntityLocationId = InvS.intShipToLocationId
 	JOIN tblICItem I ON I.intItemId = InvSI.intItemId
-	JOIN tblICItemUOM IU ON IU.intItemUOMId = InvSI.intItemUOMId
-	JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 	LEFT JOIN tblMFEDI940Archive EDI ON EDI.intInventoryShipmentItemId = InvSI.intInventoryShipmentItemId
-
+	AND EDI.intEDI940Id IN (
+			SELECT MAX(EDI1.intEDI940Id)
+			FROM tblMFEDI940Archive EDI1
+			WHERE EDI1.intInventoryShipmentItemId = InvSI.intInventoryShipmentItemId
+			)
 	SELECT *
 	INTO #tblMFSSCCNo
 	FROM dbo.vyuMFGetPalletSSCCNo
