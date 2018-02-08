@@ -44,6 +44,11 @@ SELECT	@INVENTORY_INVOICE_TYPE = intTransactionTypeId
 FROM	tblICInventoryTransactionType WITH (NOLOCK)
 WHERE	strName = 'Invoice'
 
+DECLARE @CREDIT_MEMO_INVOICE_TYPE AS INT = 45
+SELECT	@CREDIT_MEMO_INVOICE_TYPE = intTransactionTypeId 
+FROM	tblICInventoryTransactionType WITH (NOLOCK)
+WHERE	strName = 'Credit Memo'
+
 DECLARE	@AVERAGECOST AS INT	= 1
 		--,@FIFO AS INT		= 2
 		--,@LIFO AS INT		= 3
@@ -113,7 +118,7 @@ SELECT
 	,[intTransactionId]			= ARI.[intInvoiceId]
 	,[intTransactionDetailId]	= ARID.[intInvoiceDetailId]
 	,[strTransactionId]			= ARI.[strInvoiceNumber]
-	,[intTransactionTypeId]		= @INVENTORY_INVOICE_TYPE
+	,[intTransactionTypeId]		= CASE WHEN ARI.strTransactionType = 'Credit Memo' THEN @CREDIT_MEMO_INVOICE_TYPE ELSE @INVENTORY_INVOICE_TYPE END
 	,[intLotId]					= ARID.[intLotId]
 	,[intSubLocationId]			= ARID.[intCompanyLocationSubLocationId]
 	,[intStorageLocationId]		= ARID.[intStorageLocationId]
@@ -181,7 +186,7 @@ SELECT
 	,[intTransactionId]			= ARI.[intInvoiceId]
 	,[intTransactionDetailId]	= ARID.[intInvoiceDetailId]
 	,[strTransactionId]			= ARI.[strInvoiceNumber]
-	,[intTransactionTypeId]		= @INVENTORY_INVOICE_TYPE
+	,[intTransactionTypeId]		= CASE WHEN ARI.strTransactionType = 'Credit Memo' THEN @CREDIT_MEMO_INVOICE_TYPE ELSE @INVENTORY_INVOICE_TYPE END
 	,[intLotId]					= NULL 
 	,[intSubLocationId]			= ARID.[intCompanyLocationSubLocationId]
 	,[intStorageLocationId]		= ARID.[intStorageLocationId]
