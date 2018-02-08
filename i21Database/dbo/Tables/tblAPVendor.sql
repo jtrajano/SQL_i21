@@ -75,6 +75,12 @@ CREATE NONCLUSTERED INDEX [IX_intVendorId]
 	WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
 
 GO
+CREATE NONCLUSTERED INDEX [IX_rptAging_1] ON [dbo].[tblAPVendor]
+(
+	[intEntityId] ASC
+)
+INCLUDE ( 	[strVendorId]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
 			@value = N'Information about the Vendor',
 			@level0type = N'SCHEMA',
