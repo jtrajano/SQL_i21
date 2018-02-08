@@ -319,6 +319,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\PR\DataFixes\UpdateEarningDeductionTaxId.sql
 :r .\PR\DataFixes\UpdatePaycheckTotalHours.sql
 :r .\PR\DataFixes\UpdateOldData.sql
+:r .\PR\Reports\DashboardPanelViews.sql
 :r .\PR\Reports\SubReports\PaycheckEarningSubReport.sql
 :r .\PR\Reports\SubReports\PaycheckTaxSubReport.sql
 :r .\PR\Reports\SubReports\PaycheckDeductionSubReport.sql

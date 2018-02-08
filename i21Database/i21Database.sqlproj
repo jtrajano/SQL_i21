@@ -6365,6 +6365,7 @@
     <None Include="Scripts\Post-Deployment\IC\24_ImplementBasketChanges.sql" />
     <None Include="Scripts\Post-Deployment\AP\DefaultData\DeferredPaymentInterest.sql" />
     <Build Include="dbo\Stored Procedures\uspGLInsertOriginCrossReferenceMapping.sql" />
+    <None Include="Scripts\Post-Deployment\PR\Reports\DashboardPanelViews.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
