@@ -15,6 +15,9 @@ DECLARE @billId INT;
 DECLARE @billRecordNumber NVARCHAR(50);
 DECLARE @voucherIds AS Id;
 
+DECLARE @rateType INT;
+DECLARE @rate DECIMAL(18,6);
+
 CREATE TABLE #tmpVoucherCreated(intBillId INT, intTicketId INT, intContractDetailId INT)
 
 DECLARE @transCount INT = @@TRANCOUNT;
@@ -174,6 +177,11 @@ VALUES (
 )
 OUTPUT inserted.intBillId, Source.intTicketId, Source.intContractDetailId INTO #tmpVoucherCreated;
 
+SELECT TOP 1
+    @rateType = A.intRateTypeId,
+    @rate = A.dblRate
+FROM tblAPBasisAdvanceDummyHeader A
+
 IF OBJECT_ID('tempdb..#tmpBillDetailData') IS NOT NULL DROP TABLE #tmpBillDetailData
 SELECT
     [intBillId]                         = voucherCreated.intBillId,
@@ -186,10 +194,10 @@ SELECT
     -- [intInventoryReceiptItemId]         = receiptItem.intInventoryReceiptItemId,
     [dblQtyOrdered]                     = 1,--receiptItem.dblOpenReceive,
     [dblQtyReceived]                    = 1,--receiptItem.dblOpenReceive,
-    [dblRate]                           = ISNULL(receiptItem.dblForexRate,1),
-    [intCurrencyExchangeRateTypeId]     = receiptItem.intForexRateTypeId,
-    [ysnSubCurrency]                    = receiptItem.ysnSubCurrency,
-    [intTaxGroupId]                     = receiptItem.intTaxGroupId,
+    [dblRate]                           = @rate,
+    [intCurrencyExchangeRateTypeId]     = @rateType,
+    [ysnSubCurrency]                    = NULL,
+    [intTaxGroupId]                     = NULL,
     [intAccountId]                      = loc.intAPAccount,
     [dblTotal]                          = basisAdvance.dblAmountToAdvance,
     [dblContractCost]                   = basisAdvance.dblFuturesPrice + basisAdvance.dblUnitBasis,
@@ -216,7 +224,6 @@ INNER JOIN vyuAPBasisAdvance basisAdvance
 INNER JOIN tblSMCompanyLocation loc ON basisAdvance.intCompanyLocationId = loc.intCompanyLocationId
 INNER JOIN tblICInventoryReceiptItem receiptItem
     ON basisAdvance.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
-
 
 MERGE INTO tblAPBillDetail
 USING (SELECT * FROM #tmpBillDetailData) AS Source
