@@ -25,13 +25,13 @@ SELECT TOP 1
 FROM tblAPBill voucher
 WHERE voucher.intBillId = @voucherId
 
---Filter the records per vendor and currency
+--Filter the records per currency
 INSERT INTO @receiptItems
 SELECT A.*
 FROM @voucherDetailReceipt A
 INNER JOIN tblICInventoryReceiptItem B ON A.intInventoryReceiptItemId = B.intInventoryReceiptItemId
 INNER JOIN tblICInventoryReceipt C ON B.intInventoryReceiptId = C.intInventoryReceiptId
-WHERE C.intEntityVendorId = @voucherVendor AND C.intCurrencyId = @voucherCurrency
+WHERE C.intCurrencyId = @voucherCurrency --RETURN AND RECEIPT
 
 CREATE TABLE #tempBillDetail (
     [intBillId]       				INT             NOT NULL,
