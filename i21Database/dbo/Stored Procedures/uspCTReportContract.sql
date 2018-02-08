@@ -185,101 +185,110 @@ BEGIN TRY
 	IF @strAmendedColumns IS NULL SELECT @strAmendedColumns = ''
 	IF ISNULL(@ysnPrinted,0) = 0 SELECT @strAmendedColumns = ''
 	 
-	SELECT	CH.intContractHeaderId,
+	SELECT	 intContractHeaderId					= CH.intContractHeaderId
+			,strCaption								= TP.strContractType + ' Contract:- ' + CH.strContractNumber
+			,strTeaCaption							= @strCompanyName + ' - '+TP.strContractType+' Contract' 
+			,strAtlasDeclaration					= 'We confirm having'			   + CASE WHEN CH.intContractTypeId = 1	   THEN ' bought from '   ELSE ' sold to ' END + 'you as follows:'
+			,strPurchaseOrder						= TP.strContractType + ' Order:- ' + CASE WHEN CM.strCommodityCode = 'Tea' THEN SQ.strERPPONumber ELSE NULL        END
+			,dtmContractDate						= CH.dtmContractDate
+			,strAssociation							= 'The contract has been closed on the conditions of the '+ AN.strComment + ' ('+AN.strName+')'+' latest edition.'
+			,strBuyerRefNo							= CASE WHEN CH.intContractTypeId = 1 THEN CH.strContractNumber ELSE CH.strCustomerContract END
+			,strSellerRefNo							= CASE WHEN CH.intContractTypeId = 2 THEN CH.strContractNumber ELSE CH.strCustomerContract END
+			,strContractNumber						= CH.strContractNumber
+			,strCustomerContract					= CH.strCustomerContract
+			,strContractBasis						= CB.strContractBasis
+			,strContractBasisDesc					= CB.strContractBasis+' '+CASE WHEN CB.strINCOLocationType = 'City' THEN CT.strCity ELSE SL.strSubLocationName END
+			,strLocationName						= SQ.strLocationName			
+			,strCropYear							= CY.strCropYear
+			,srtLoadingPoint						= SQ.srtLoadingPoint + ' :' 
+			,strLoadingPointName					= SQ.strLoadingPointName
+			,strShipper								= SQ.strShipper
+			,srtDestinationPoint					= SQ.srtDestinationPoint + ' :' 
+			,strDestinationPointName				= SQ.strDestinationPointName
+			,strLoadingAndDestinationPointName		= SQ.strLoadingPointName + ' to ' + SQ.strDestinationPointName
+			,strWeight								= W1.strWeightGradeDesc 
+			,strTerm							    = TM.strTerm
+			,strGrade								= W2.strWeightGradeDesc
+			,strQaulityAndInspection				= 'Quality as per approved sample ' + ' - ' + W2.strWeightGradeDesc + ' and subject to consignment conforming to ' + @strCompanyName + '''s standard quality criteria.'
+			,strContractDocuments					= @strContractDocuments
+			,strArbitration							= 'Rules of arbitration of '+ AN.strComment + '  as per latest edition for quality and principle. ' 
+														+ CHAR(13)+CHAR(10) +
+														'Place of jurisdiction is ' + AB.strState +', '+RY.strCountry
 
-			TP.strContractType + ' Contract:- ' + CH.strContractNumber AS strCaption,
-			@strCompanyName + ' - '+TP.strContractType+' Contract' AS strTeaCaption,
-			'We confirm having'+CASE WHEN CH.intContractTypeId = 1 THEN ' bought from ' ELSE ' sold to ' END + 'you as follows:' AS strAtlasDeclaration,
-			TP.strContractType + ' Order:- ' + CASE WHEN CM.strCommodityCode = 'Tea' THEN SQ.strERPPONumber ELSE NULL END AS strPurchaseOrder,
-			CH.dtmContractDate,
-			'The contract has been closed on the conditions of the '+ AN.strComment + ' ('+AN.strName+')'+' latest edition.' strAssociation,
-			CASE WHEN CH.intContractTypeId = 1 THEN CH.strContractNumber ELSE CH.strCustomerContract END AS strBuyerRefNo,
-			CASE WHEN CH.intContractTypeId = 2 THEN CH.strContractNumber ELSE CH.strCustomerContract END AS strSellerRefNo,
-			CH.strContractNumber,
-			CH.strCustomerContract,
-			CB.strContractBasis,
-			CB.strContractBasis+' '+CASE WHEN CB.strINCOLocationType = 'City' THEN CT.strCity ELSE SL.strSubLocationName END AS strContractBasisDesc,
-			SQ.strLocationName,			
-			CY.strCropYear,
-			SQ.srtLoadingPoint + ' :' srtLoadingPoint,
-			SQ.strLoadingPointName,
-			SQ.strShipper,
-			SQ.srtDestinationPoint + ' :' srtDestinationPoint,
-			SQ.strDestinationPointName,
-			SQ.strLoadingPointName + ' to ' + SQ.strDestinationPointName AS strLoadingAndDestinationPointName,
-
-			W1.strWeightGradeDesc AS	strWeight,
-			TM.strTerm,
-			W2.strWeightGradeDesc AS	strGrade,
-			'Quality as per approved sample ' + ' - ' + W2.strWeightGradeDesc + ' and subject to consignment conforming to ' + @strCompanyName + '''s standard quality criteria.' AS strQaulityAndInspection,
-
-			@strContractDocuments strContractDocuments,
-			'Rules of arbitration of '+ AN.strComment + '  as per latest edition for quality and principle. ' + CHAR(13)+CHAR(10) +
-			'Place of jurisdiction is ' + AB.strState +', '+RY.strCountry AS strArbitration,
-			@strCompanyName + ', '  + CHAR(13)+CHAR(10) +
-			ISNULL(@strAddress,'') + ', ' + CHAR(13)+CHAR(10) +
-			ISNULL(@strCity,'') + ISNULL(', '+@strState,'') + ISNULL(', '+@strZip,'') + ISNULL(', '+@strCountry,'')
-			AS	strCompanyAddress,
-			LTRIM(RTRIM(EY.strEntityName)) + ', ' + CHAR(13)+CHAR(10) +
-			ISNULL(LTRIM(RTRIM(EY.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
-			ISNULL(LTRIM(RTRIM(EY.strEntityCity)),'') + 
-			ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityState)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityState)) END,'') + 
-			ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityZipCode)) END,'') + 
-			ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityCountry)) END,'') +
-			CASE WHEN @ysnFairtrade = 1 THEN
-				ISNULL( CHAR(13)+CHAR(10) +'FLO ID: '+CASE WHEN LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) = '' THEN NULL ELSE LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) END,'')
-			ELSE '' END
-			AS	strOtherPartyAddress,
+			,strCompanyAddress						=   @strCompanyName + ', '		  + CHAR(13)+CHAR(10) +
+														ISNULL(@strAddress,'') + ', ' + CHAR(13)+CHAR(10) +
+														ISNULL(@strCity,'') + ISNULL(', '+@strState,'') + ISNULL(', '+@strZip,'') + ISNULL(', '+@strCountry,'')
 			
-			CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END AS strBuyer,
-			CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END AS strSeller,
-			CH.dblQuantity,
-			SQ.strCurrency,
-			'To be covered by ' + IB.strInsuranceBy AS strInsuranceBy,			
-			CH.strPrintableRemarks,			
-			AN.strComment	AS strArbitrationComment,
-			dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo,
-			dbo.fnSMGetCompanyLogo('Footer') AS blbFooterLogo,
-			PR.strName AS strProducer,
-			PO.strPosition,
-			CASE WHEN LTRIM(RTRIM(SQ.strFixationBy)) = '' THEN NULL ELSE SQ.strFixationBy END+'''s Call ('+SQ.strFutMarketName+')' strCaller,
-			CASE WHEN ISNULL(SQ.strFixationBy,'') <> '' AND CH.intPricingTypeId = 2 THEN SQ.strFixationBy +'''s Call vs '+dbo.fnRemoveTrailingZeroes(SQ.dblTotalNoOfLots)+' lots(s) of '+SQ.strFutMarketName + ' futures' ELSE NULL END strAtlasCaller,
-			CASE WHEN LTRIM(RTRIM(SQ.strFixationBy)) = '' THEN NULL 
-			ELSE 
-				CASE WHEN CH.intPricingTypeId=2 THEN SQ.strFixationBy +'''s Call ('+SQ.strFutMarketName+')'
-				ELSE NULL END
-			END strCallerDesc,
-			@strContractConditions AS strContractConditions,
-			CASE WHEN ISNULL(CB.strContractBasis,'') <>'' THEN 'Condition :' ELSE NULL END AS lblCondition,
-			CASE WHEN ISNULL(PR.strName,'') <>'' THEN 'Shipper :' ELSE NULL END AS lblProducer,
-			CASE WHEN ISNULL(SQ.strLoadingPointName,'') <>'' THEN SQ.srtLoadingPoint + ' :'  ELSE NULL END AS lblLoadingPoint,
-			CASE WHEN ISNULL(PO.strPosition,'') <>'' THEN 'Position :' ELSE NULL END AS lblPosition,			
-			CASE WHEN (CH.intContractTypeId = 2 AND ISNULL(CH.strContractNumber,'') <>'') OR (CH.intContractTypeId <> 2 AND ISNULL(CH.strCustomerContract,'') <>'') THEN  'Seller Ref No. :' ELSE NULL END AS lblSellerRefNo,
-			CASE WHEN ISNULL(CY.strCropYear,'') <>'' THEN 'Crop Year :' ELSE NULL END AS lblCropYear,
-			CASE WHEN ISNULL(SQ.strShipper,'') <>'' THEN 'Shipper :' ELSE NULL END AS lblShipper,
-			CASE WHEN ISNULL(SQ.strDestinationPointName,'') <>'' THEN SQ.srtDestinationPoint + ' :'  ELSE NULL END AS lblDestinationPoint,			
-			CASE WHEN ISNULL(SQ.strFixationBy,'') <>'' AND ISNULL(SQ.strFutMarketName,'') <>'' AND CH.intPricingTypeId=2 THEN 'Pricing :' ELSE NULL END AS lblPricing,
-			CASE WHEN ISNULL(W1.strWeightGradeDesc,'') <>'' THEN 'Weighing:' ELSE NULL END AS lblWeighing,
-			CASE WHEN ISNULL(TM.strTerm,'') <>'' THEN 'Payment Terms:' ELSE NULL END AS lblTerm,
-			CASE WHEN ISNULL(IB.strInsuranceBy,'') <>'' THEN 'Insurance:' ELSE NULL END AS lblInsurance,
-			CASE WHEN ISNULL(AN.strComment,'') <>'' AND ISNULL(AB.strState,'') <>'' AND ISNULL(RY.strCountry,'') <>'' THEN 'Arbitration:' ELSE NULL END AS lblArbitration,
-			CASE WHEN ISNULL(@strContractConditions,'') <>'' THEN 'Conditions:' ELSE NULL END AS lblContractCondition,
-			SQ.strLocationName+', '+CONVERT(CHAR(11),CH.dtmContractDate,13) AS strLocationWithDate,
-	        CASE WHEN LEN(LTRIM(RTRIM(@strAmendedColumns))) = 0 THEN
-			'The contract has been closed on the conditions of the '+ AN.strComment + ' ('+AN.strName+')'+' latest edition and the particular conditions mentioned below.' 
-		    ELSE
-				'Subject - Contract Amendment as of '+ CONVERT(NVARCHAR(15),@dtmApproved,106) + CHAR(13) + CHAR(10) + 'The field/s highlighted in bold have been amended.'
-			END strCondition,
-			PO.strPosition +ISNULL(' ('+CASE WHEN SQ.strPackingDescription = '' THEN NULL ELSE SQ.strPackingDescription END+') ','') AS strPositionWithPackDesc,
-			ISNULL(TX.strText,'') +' '+ ISNULL(CH.strPrintableRemarks,'') AS strText,
-			SQ.strContractCompanyName,
-			SQ.strContractPrintSignOff,
-			LTRIM(RTRIM(EY.strEntityName))AS strCompanyName,
-			@strApprovalText AS strApprovalText,
-			CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @FirstApprovalSign ELSE NULL END AS FirstApprovalSign,
-			CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @SecondApprovalSign ELSE NULL END AS SecondApprovalSign,
-
-			@strAmendedColumns strAmendedColumns
+			,strOtherPartyAddress					=   LTRIM(RTRIM(EY.strEntityName)) + ', '				+ CHAR(13)+CHAR(10) +
+														ISNULL(LTRIM(RTRIM(EY.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
+														ISNULL(LTRIM(RTRIM(EY.strEntityCity)),'') + 
+														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityState)) = ''   THEN NULL ELSE LTRIM(RTRIM(EY.strEntityState))   END,'') + 
+														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityZipCode)) END,'') + 
+														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityCountry)) END,'') +
+														CASE WHEN @ysnFairtrade = 1 THEN
+															ISNULL( CHAR(13)+CHAR(10) +'FLO ID: '+CASE WHEN LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) = '' THEN NULL ELSE LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) END,'')
+														ELSE '' END
+			
+			,strBuyer							    = CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END
+			,strSeller							    = CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END
+			,dblQuantity						    = CH.dblQuantity
+			,strCurrency						    = SQ.strCurrency
+			,strInsuranceBy						    = 'To be covered by ' + IB.strInsuranceBy			
+			,strPrintableRemarks				    = CH.strPrintableRemarks			
+			,strArbitrationComment				    = AN.strComment	
+			,blbHeaderLogo						    = dbo.fnSMGetCompanyLogo('Header')
+			,blbFooterLogo						    = dbo.fnSMGetCompanyLogo('Footer') 
+			,strProducer							= PR.strName
+			,strPosition							= PO.strPosition
+			,strContractConditions				    = @strContractConditions
+			,lblAtlasLocation						= CASE WHEN ISNULL(SQ.strLoadingPointName,'') <>''     THEN 'Location :'					ELSE NULL END
+			,lblContractDocuments					= CASE WHEN ISNULL(@strContractDocuments,'') <>''	   THEN 'Documents Required :'			ELSE NULL END
+			,lblArbitrationComment					= CASE WHEN ISNULL(AN.strComment,'') <>''			   THEN 'Contract :'					ELSE NULL END
+			,lblPrintableRemarks					= CASE WHEN ISNULL(CH.strPrintableRemarks,'') <>''	   THEN 'Notes/Remarks :'				ELSE NULL END
+			,lblContractBasis						= CASE WHEN ISNULL(CB.strContractBasis,'') <>''		   THEN 'Price Basis :'					ELSE NULL END
+			,lblContractText						= CASE WHEN ISNULL(TX.strText,'') <>''				   THEN 'Others :'						ELSE NULL END
+			,lblCondition						    = CASE WHEN ISNULL(CB.strContractBasis,'') <>''		   THEN 'Condition :'					ELSE NULL END
+			,lblProducer							= CASE WHEN ISNULL(PR.strName,'') <>''				   THEN 'Shipper :'						ELSE NULL END
+			,lblLoadingPoint						= CASE WHEN ISNULL(SQ.strLoadingPointName,'') <>''     THEN SQ.srtLoadingPoint + ' :'		ELSE NULL END
+			,lblPosition							= CASE WHEN ISNULL(PO.strPosition,'') <>''		       THEN 'Position :'					ELSE NULL END
+			,lblCropYear							= CASE WHEN ISNULL(CY.strCropYear,'') <>''			   THEN 'Crop Year :'				    ELSE NULL END
+			,lblShipper								= CASE WHEN ISNULL(SQ.strShipper,'') <>''			   THEN 'Shipper :'					    ELSE NULL END 
+			,lblDestinationPoint					= CASE WHEN ISNULL(SQ.strDestinationPointName,'') <>'' THEN SQ.srtDestinationPoint + ' :'   ELSE NULL END
+			,lblWeighing						    = CASE WHEN ISNULL(W1.strWeightGradeDesc,'') <>''	   THEN 'Weighing :'					ELSE NULL END
+			,lblTerm								= CASE WHEN ISNULL(TM.strTerm,'') <>''				   THEN 'Payment Terms :'				ELSE NULL END
+			,lblGrade								= CASE WHEN ISNULL(W2.strWeightGradeDesc,'') <>''	   THEN 'Approval term :'				ELSE NULL END
+			,lblInsurance							= CASE WHEN ISNULL(IB.strInsuranceBy,'') <>''		   THEN 'Insurance:'					ELSE NULL END
+			,lblContractCondition					= CASE WHEN ISNULL(@strContractConditions,'') <>''	   THEN 'Conditions:'					ELSE NULL END
+			,strLocationWithDate					= SQ.strLocationName+', '+CONVERT(CHAR(11),CH.dtmContractDate,13)
+			,strContractText						= ISNULL(TX.strText,'') 
+	        ,strCondition							=	CASE WHEN LEN(LTRIM(RTRIM(@strAmendedColumns))) = 0 THEN
+																'The contract has been closed on the conditions of the '+ AN.strComment + ' ('+AN.strName+')'+' latest edition and the particular conditions mentioned below.' 
+														ELSE
+																'Subject - Contract Amendment as of '+ CONVERT(NVARCHAR(15),@dtmApproved,106) + CHAR(13) + CHAR(10) + 'The field/s highlighted in bold have been amended.'
+														END
+			
+			,strPositionWithPackDesc			    = PO.strPosition +ISNULL(' ('+CASE WHEN SQ.strPackingDescription = '' THEN NULL ELSE SQ.strPackingDescription END+') ','')
+			,strText							    = ISNULL(TX.strText,'') +' '+ ISNULL(CH.strPrintableRemarks,'') 
+			,strContractCompanyName					= SQ.strContractCompanyName
+			,strContractPrintSignOff			    = SQ.strContractPrintSignOff
+			,strCompanyName							= LTRIM(RTRIM(EY.strEntityName))
+			,strApprovalText					    = @strApprovalText
+			,FirstApprovalSign						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @FirstApprovalSign  ELSE NULL END
+			,SecondApprovalSign						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @SecondApprovalSign ELSE NULL END
+			,strAmendedColumns						= @strAmendedColumns
+			,lblArbitration							= CASE WHEN ISNULL(AN.strComment,'') <>''	 AND ISNULL(AB.strState,'') <>''		 AND ISNULL(RY.strCountry,'') <>'' THEN 'Arbitration:'  ELSE NULL END
+			,lblPricing								= CASE WHEN ISNULL(SQ.strFixationBy,'') <>'' AND ISNULL(SQ.strFutMarketName,'') <>'' AND CH.intPricingTypeId=2		   THEN 'Pricing :'		ELSE NULL END
+			,strCaller								= CASE WHEN LTRIM(RTRIM(SQ.strFixationBy)) = '' THEN NULL ELSE SQ.strFixationBy END+'''s Call ('+SQ.strFutMarketName+')' 
+			,lblBuyerRefNo							= CASE WHEN (CH.intContractTypeId = 1 AND ISNULL(CH.strContractNumber,'') <>'') OR (CH.intContractTypeId <> 1 AND ISNULL(CH.strCustomerContract,'') <>'') THEN  'Buyer Ref No. :'  ELSE NULL END
+			,lblSellerRefNo							= CASE WHEN (CH.intContractTypeId = 2 AND ISNULL(CH.strContractNumber,'') <>'') OR (CH.intContractTypeId <> 2 AND ISNULL(CH.strCustomerContract,'') <>'') THEN  'Seller Ref No. :' ELSE NULL END
+			,strAtlasCaller							= CASE WHEN ISNULL(SQ.strFixationBy,'') <> '' AND CH.intPricingTypeId = 2 THEN SQ.strFixationBy +'''s Call vs '+dbo.fnRemoveTrailingZeroes(SQ.dblTotalNoOfLots)+' lots(s) of '+SQ.strFutMarketName + ' futures' ELSE NULL END
+			,strCallerDesc						    = CASE WHEN LTRIM(RTRIM(SQ.strFixationBy)) = '' THEN NULL 
+													  ELSE 
+													  	  CASE WHEN CH.intPricingTypeId=2 THEN SQ.strFixationBy +'''s Call ('+SQ.strFutMarketName+')'
+													  	  ELSE NULL END
+													  END 
+		
+		     
 
 	FROM	tblCTContractHeader CH
 	JOIN	tblICCommodity		CM	ON	CM.intCommodityId		=	CH.intCommodityId
