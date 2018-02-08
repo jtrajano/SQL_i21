@@ -1908,6 +1908,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('intCostUOMId', records[0].get('intReceiveUOMId'));
             current.set('intWeightUOMId', records[0].get('intGrossUOMId'));
             current.set('strWeightUOM', records[0].get('strGrossUOM'));
+            current.set('intWeightUnitMeasureId', records[0].get('intGrossUnitMeasureId')); 
             current.set('dblWeightUOMConvFactor', records[0].get('dblGrossUOMConvFactor'));
             current.set('dblUnitCost', dblLastCost);
             current.set('dblUnitRetail', dblLastCost);
