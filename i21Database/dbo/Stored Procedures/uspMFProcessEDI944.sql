@@ -10,7 +10,7 @@ BEGIN
 		intInventoryReceiptId
 		,strOrderNo
 		)
-	SELECT IR.intInventoryReceiptId
+	SELECT TOP 1 IR.intInventoryReceiptId
 		,IR.strWarehouseRefNo
 	FROM tblICInventoryReceipt IR
 	WHERE ysnPosted = 1
@@ -46,24 +46,28 @@ BEGIN
 		,IR.dtmReceiptDate dtmDate
 		,IR.strReceiptNumber strWarehouseReceiptNumber
 		,IR.strWarehouseRefNo strDepositorOrderNumber
-		,EDI.strShipmentId AS strShipmentId
-		,EDI.dtmDate AS dtmShippedDate
+		,(
+			SELECT TOP 1 strShipmentId
+			FROM tblMFEDI943Archive EDI943
+			WHERE EDI943.intInventoryReceiptId = IR.intInventoryReceiptId
+			) AS strShipmentId
+		,(
+			SELECT TOP 1 dtmDate
+			FROM tblMFEDI943Archive EDI943
+			WHERE EDI943.intInventoryReceiptId = IR.intInventoryReceiptId
+			) AS dtmShippedDate
 		,[dbo].[fnRemoveTrailingZeroes](SUM(IRI.dblOpenReceive) OVER (PARTITION BY IR.intInventoryReceiptId)) dblTotalReceivedQty
 		,I.strItemNo
 		,I.strDescription
 		,[dbo].[fnRemoveTrailingZeroes](IRI.dblOpenReceive) dblReceived
-		,EDI.strUOM
+		,UM.strUnitMeasure strUOM
 	FROM dbo.tblICInventoryReceipt IR
 	JOIN dbo.tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
 		AND IR.ysnPosted = 1
 	JOIN tblICItem I ON I.intItemId = IRI.intItemId
-	LEFT JOIN tblMFEDI943Archive EDI ON EDI.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId
-		AND EDI.intEDI943Id IN (
-			SELECT MAX(EDI1.intEDI943Id)
-			FROM tblMFEDI943Archive EDI1
-			WHERE EDI1.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId
-			)
-	WHERE EXISTS (
+	JOIN tblICItemUOM IU ON IU.intItemUOMId = IRI.intUnitMeasureId
+	JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+		AND EXISTS (
 			SELECT *
 			FROM @tblMFOrderNo O
 			WHERE O.strOrderNo = IR.strWarehouseRefNo
