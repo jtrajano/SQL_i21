@@ -400,11 +400,10 @@ BEGIN
 	LEFT JOIN tblICCommodityAttribute Attribute ON Attribute.intCommodityAttributeId=SC.intCommodityAttributeId
 	
 	LEFT JOIN (
-				SELECT intBillId,SUM(dblTotal) dblTotal
-				FROM tblAPBillDetail
-				WHERE intInventoryReceiptChargeId IS NOT NULL
-				GROUP BY intBillId
-			  )BillByReceipt ON BillByReceipt.intBillId=BillDtl.intBillId
+				SELECT intBillDetailId,SUM(dblAmount) dblTotal 
+				FROM vyuGRSettlementSubReport 
+				GROUP BY intBillDetailId
+			  )BillByReceipt ON BillByReceipt.intBillDetailId=BillDtl.intBillDetailId
 	
 	LEFT JOIN (
 				SELECT intBillId,SUM(dblTotal) dblTotal
@@ -1037,11 +1036,10 @@ BEGIN
 			LEFT JOIN tblEMEntityFarm EntityFarm ON EntityFarm.intEntityId=VENDOR.intEntityId AND EntityFarm.intFarmFieldId=ISNULL(SC.intFarmFieldId, 0)
 			LEFT JOIN tblICCommodityAttribute Attribute ON Attribute.intCommodityAttributeId=SC.intCommodityAttributeId
 			LEFT JOIN (
-						SELECT intBillId,SUM(dblTotal) dblTotal
-						FROM tblAPBillDetail
-						WHERE intInventoryReceiptChargeId IS NOT NULL
-						GROUP BY intBillId
-					  )BillByReceipt ON BillByReceipt.intBillId=BillDtl.intBillId
+						SELECT intBillDetailId,SUM(dblAmount) dblTotal 
+						FROM vyuGRSettlementSubReport 
+						GROUP BY intBillDetailId
+					  )BillByReceipt ON BillByReceipt.intBillDetailId=BillDtl.intBillDetailId
 			LEFT JOIN (
 						SELECT intBillId,SUM(dblTotal) dblTotal
 						FROM tblAPBillDetail
