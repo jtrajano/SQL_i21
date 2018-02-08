@@ -186,6 +186,10 @@ USING	(
 		SELECT id = 44
 				,name = 'Storage Settlement'
 				,form = 'Storage Settlement'
+		UNION ALL
+		SELECT id = 45
+				,name = 'Credit Memo'
+				,form = 'Credit Memo'
 
 ) AS InventoryTransactionTypeHardValues
 	ON  InventoryTransactionTypes.intTransactionTypeId = InventoryTransactionTypeHardValues.id
