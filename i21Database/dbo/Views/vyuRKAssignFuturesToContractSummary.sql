@@ -29,8 +29,9 @@ SELECT cs.intAssignFuturesToContractSummaryId,
 		cd.intContractDetailId,
 		ch.intContractHeaderId,
 		fot.intFutOptTransactionId,
-		cs.ysnIsHedged
-		,fot.intFutOptTransactionHeaderId,fot.dtmCreateDateTime   	
+		cs.ysnIsHedged,
+		fot.intFutOptTransactionHeaderId,
+		fot.dtmCreateDateTime   	
 FROM tblRKAssignFuturesToContractSummary cs
 JOIN tblCTContractDetail cd ON  cs.intContractDetailId=cd.intContractDetailId  
 join tblCTContractHeader ch on cd.intContractHeaderId = ch.intContractHeaderId
@@ -48,7 +49,7 @@ JOIN tblSMCompanyLocation scl on scl.intCompanyLocationId=fot.intLocationId
 LEFT JOIN tblCTBook b on cd.intBookId=b.intBookId
 LEFT JOIN tblCTSubBook sb on cd.intSubBookId=sb.intSubBookId 
 LEFT JOIN tblCTBook b1 on fot.intBookId=b1.intBookId
-LEFT JOIN tblCTSubBook sb1 on fot.intSubBookId=sb.intSubBookId  where isnull(ch.ysnMultiplePriceFixation,0) = 0
+LEFT JOIN tblCTSubBook sb1 on fot.intSubBookId=sb1.intSubBookId  where isnull(ch.ysnMultiplePriceFixation,0) = 0
 
 UNION 
 
