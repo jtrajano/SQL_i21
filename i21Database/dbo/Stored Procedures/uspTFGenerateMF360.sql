@@ -185,7 +185,7 @@ BEGIN TRY
 			END
 			ELSE IF @TemplateItemId = 'MF-360-Summary-005'
 			BEGIN
-				SET @Query = 'SELECT strColumnValue * ' + @TemplateConfiguration + ' FROM tblTFTransactionSummary WHERE intItemNumber IN (''' + @ScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
+				SET @Query = 'SELECT CONVERT(NUMERIC(18,2), strColumnValue * ' + @TemplateConfiguration + ') FROM tblTFTransactionSummary WHERE intItemNumber IN (''' + @ScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
 				INSERT INTO @tblTempSummaryTotal
 				EXEC(@Query)
 			END
