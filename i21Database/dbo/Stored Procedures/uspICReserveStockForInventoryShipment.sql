@@ -94,8 +94,7 @@ BEGIN
 	WHERE	Shipment.intInventoryShipmentId = @intTransactionId
 			AND dbo.fnGetItemLotType(ShipmentItems.intItemId) = @LotType_No
 			AND ISNULL(ShipmentItems.intOwnershipType, @Ownership_Own) = @Ownership_Own
-			AND Item.strBundleType IS NULL
-			
+			AND Item.strType <> 'Bundle' -- Do not make reservations on bundle types			
 
 	-- Lot Tracked items 
 	UNION ALL 
@@ -127,7 +126,7 @@ BEGIN
 				ON Item.intItemId = ShipmentItems.intItemId
 	WHERE	Shipment.intInventoryShipmentId = @intTransactionId
 			AND ISNULL(ShipmentItems.intOwnershipType, @Ownership_Own) = @Ownership_Own
-			AND Item.strBundleType IS NULL
+			AND Item.strType <> 'Bundle' -- Do not make reservations on bundle types
 END
 
 -- Do the reservations

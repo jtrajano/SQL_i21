@@ -98,7 +98,17 @@ SELECT	ShipmentItem.intInventoryShipmentId
 INTO	#tmpShipmentItems
 FROM	tblICInventoryShipmentItem ShipmentItem LEFT JOIN tblICInventoryShipment Shipment 
 			ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
+		LEFT JOIN tblICItem Item
+			ON Item.intItemId = ShipmentItem.intItemId
 WHERE	ShipmentItem.intInventoryShipmentId = @ShipmentId
+		-- When updating the contracts, include the following items based on the conditions below:
+		-- 1. Item is the same one in the contract sequence. 
+		-- 2. Do not include the component of the bundle. 
+		AND 1 = 
+			CASE WHEN ISNULL(ShipmentItem.strItemType, '') <> '' AND Item.strType = 'Bundle' THEN 1
+				 WHEN ISNULL(ShipmentItem.strItemType, '') <> '' THEN 0
+				 ELSE 1
+			END 
 		
 -- Call the CT sp only if Shipment type is a 'Sales Contract' and NOT Logistics (Inbound Shipment) and NOT Scale (Scale Ticket)
 -- Logistics (Inbound Shipment) and Scale (Scale Ticket) will be calling uspCTUpdateScheduleQuantity on their own. 
@@ -193,10 +203,8 @@ BEGIN
 			,dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (-previousSnapshot.dblQuantity))
 	FROM	#tmpLogShipmentItems previousSnapshot INNER JOIN tblCTContractDetail ContractDetail
 				ON ContractDetail.intContractDetailId = previousSnapshot.intLineNo
-			INNER JOIN tblICInventoryShipmentItem ShipmentItem ON ShipmentItem.intInventoryShipmentItemId = previousSnapshot.intInventoryShipmentItemId
 	WHERE	previousSnapshot.intLineNo IS NOT NULL
 			AND previousSnapshot.intInventoryShipmentItemId NOT IN (SELECT intInventoryShipmentItemId FROM #tmpShipmentItems)
-			AND ShipmentItem.strItemType IS NULL --temporary
 	
 	--Added Item
 	UNION ALL
@@ -208,7 +216,6 @@ BEGIN
 				ON ContractDetail.intContractDetailId = currentSnapshot.intLineNo
 	WHERE	currentSnapshot.intLineNo IS NOT NULL
 			AND currentSnapshot.intInventoryShipmentItemId NOT IN (SELECT intInventoryShipmentItemId FROM #tmpLogShipmentItems)
-			AND currentSnapshot.strItemType IS NULL --temporary
 
 	-- Iterate and process records
 	DECLARE @Id INT = NULL,
