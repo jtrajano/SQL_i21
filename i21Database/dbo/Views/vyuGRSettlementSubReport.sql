@@ -1,16 +1,31 @@
 ﻿CREATE VIEW [dbo].[vyuGRSettlementSubReport]
 AS
 SELECT 
+ intBillDetailId
+,strId
+,intItemId
+,strDiscountCode
+,strDiscountCodeDescription
+,SUM(dblDiscountAmount) dblDiscountAmount
+,SUM(dblShrinkPercent) dblShrinkPercent
+,dblGradeReading
+,SUM(dblAmount) dblAmount
+,SUM(dblTax) dblTax
+,SUM(dblNetTotal) dblNetTotal
+FROM
+(
+
+	 SELECT 
 	 t1.intBillDetailId
 	,t3.strId
 	,t3.intBillId
 	,t3.intItemId
 	,t3.strDiscountCode
 	,t3.strDiscountCodeDescription
-	,t3.dblDiscountAmount
-	,t3.dblShrinkPercent
+	,t3.dblDiscountAmount * (t1.dblQtyOrdered / t2.dblTotalQty) dblDiscountAmount
+	,t3.dblShrinkPercent * (t1.dblQtyOrdered / t2.dblTotalQty) dblShrinkPercent
 	,t3.dblGradeReading
-	,t3.dblAmount * (t1.dblQtyOrdered / t2.dblTotalQty) dblAmount
+	,t3.dblAmount * (t1.dblQtyOrdered / t2.dblTotalQty)dblAmount
 	,t3.intInventoryReceiptItemId
 	,t3.intInventoryReceiptChargeId
 	,t3.intContractDetailId
@@ -47,7 +62,7 @@ LEFT JOIN
 								WHEN INVRCPTCHR.strCostMethod = 'Amount' THEN INVRCPTCHR.dblAmount
 							 END
 		,dblShrinkPercent = ISNULL(ScaleDiscount.dblShrinkPercent, 0)
-		,dblGradeReading =  ISNULL(ScaleDiscount.dblGradeReading, 0)
+		,dblGradeReading =  ISNULL(dbo.fnRemoveTrailingZeroes(ScaleDiscount.dblGradeReading), 'N/A')
 		,dblAmount = BillDtl.dblTotal
 		,intInventoryReceiptItemId = ISNULL(BillDtl.intInventoryReceiptItemId, 0)
 		,intInventoryReceiptChargeId = ISNULL(BillDtl.intInventoryReceiptChargeId, 0)
@@ -122,7 +137,7 @@ LEFT JOIN
 						END
 					AND DS.intItemId = InvDtl.intItemId
 				), 0)
-		,dblGradeReading = ISNULL((
+		,dblGradeReading = ISNULL(dbo.fnRemoveTrailingZeroes((
 				SELECT dblGradeReading
 				FROM tblQMTicketDiscount TD
 				JOIN tblGRDiscountScheduleCode DS ON TD.intDiscountScheduleCodeId = DS.intDiscountScheduleCodeId
@@ -141,7 +156,7 @@ LEFT JOIN
 								)
 						END
 					AND DS.intItemId = InvDtl.intItemId
-				), 0)
+				)), 'N/A')
 		,InvDtl.dblTotal AS dblAmount
 		,0
 		,0
@@ -168,7 +183,7 @@ LEFT JOIN
 		,strDiscountCodeDescription = Item.strItemNo
 		,dblDiscountAmount = BillDtl.dblCost
 		,dblShrinkPercent = ISNULL(StorageDiscount.dblShrinkPercent, 0)
-		,dblGradeReading =  ISNULL(StorageDiscount.dblGradeReading, 0)
+		,dblGradeReading =  ISNULL(dbo.fnRemoveTrailingZeroes(StorageDiscount.dblGradeReading),'N/A')
 		,dblAmount = BillDtl.dblTotal
 		,intInventoryReceiptItemId = 0 
 		,intInventoryReceiptChargeId = 0 
@@ -207,4 +222,13 @@ GROUP BY
 	,intContractDetailId
 	,dblTax
 	,dblNetTotal)t3 ON  t3.intBillId =t2.intBillId AND t3.intBillId =t1.intBillId
-	WHERE t3.intItemId IS NOT NULL
+	WHERE t3.intItemId IS NOT NULL 
+)t
+	
+ GROUP BY 
+ intBillDetailId
+,strId
+,intItemId
+,strDiscountCode
+,strDiscountCodeDescription
+,dblGradeReading
