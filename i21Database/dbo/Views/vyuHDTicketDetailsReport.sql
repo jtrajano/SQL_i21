@@ -1,5 +1,19 @@
 ﻿CREATE VIEW [dbo].[vyuHDTicketDetailsReport]
 	AS
+		select
+			strCustomerNumber
+			,strCustomerName
+			,strContactName
+			,intTicketId
+			,strTicketNumber
+			,strCommentBy
+			,strCommentByLocation
+			,dtmCommentDate
+			,strComment = REPLACE(strComment,'./Export/CRM/', ((select top 1 isnull(stri21Link, '.') from tblHDSetting) + '/Export/CRM/'))
+			,intTicketCommentId
+			,strDraft
+		from
+		(
 	    select
 			ltrim(rtrim(entity.strEntityNo)) strCustomerNumber
 			,ltrim(rtrim(entity.strName)) strCustomerName
@@ -18,3 +32,4 @@
 			left outer join tblEMEntity entity on entity.intEntityId = t.intCustomerId
 			left outer join tblEMEntity entityContact on entityContact.intEntityId = t.intCustomerContactId
 			left outer join vyuHDUserDetail u on u.intEntityId = tc.intCreatedUserEntityId
+		) as result
