@@ -5615,7 +5615,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             var strBundleType = order.get('strBundleType'); 
 
                             if(strBundleType){
-                                me.getKitComponents(order, currentVM, currentVM.tblICInventoryReceiptItems(), me);
+                                me.getBundleComponents(order, currentVM, currentVM.tblICInventoryReceiptItems(), me);
                             } else {
 
                                 // if(order.get('ysnIsBasket')) {
