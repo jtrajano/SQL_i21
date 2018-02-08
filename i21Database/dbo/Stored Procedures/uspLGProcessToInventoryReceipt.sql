@@ -45,6 +45,14 @@ BEGIN TRY
 	FROM tblLGLoad
 	WHERE intLoadId = @intLoadId
 
+	IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult'))
+	BEGIN
+		CREATE TABLE #tmpAddItemReceiptResult (
+			intSourceId INT
+			,intInventoryReceiptId INT
+			)
+	END
+
 	IF ISNULL(@intLoadSourceType,0) = 1
 	BEGIN
 		IF EXISTS (
@@ -257,14 +265,6 @@ BEGIN TRY
 					END
 			WHERE L.intLoadId = @intLoadId
 				AND LD.dblQuantity-ISNULL(LD.dblDeliveredQuantity,0) > 0 
-		END
-
-		IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult'))
-		BEGIN
-			CREATE TABLE #tmpAddItemReceiptResult (
-				intSourceId INT
-				,intInventoryReceiptId INT
-				)
 		END
 	
 		IF NOT EXISTS(SELECT TOP 1 1 FROM @ReceiptStagingTable)
@@ -558,18 +558,6 @@ BEGIN TRY
 			FROM tblLGLoadDetail LD
 			JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
 			WHERE LD.intItemUOMId <> LDCL.intItemUOMId AND LD.intLoadId = @intLoadId
-		END
-
-		IF OBJECT_ID('tempdb..#tmpAddItemReceiptResult') IS NOT NULL
-			DROP TABLE #tmpAddItemReceiptResult
-
-
-		IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult1'))
-		BEGIN
-			CREATE TABLE #tmpAddItemReceiptResult1 (
-				intSourceId INT
-				,intInventoryReceiptId INT
-				)
 		END
 	
 		IF EXISTS (SELECT 1 FROM tblLGLoadDetailContainerLink WHERE intLoadId = @intLoadId)
@@ -940,7 +928,7 @@ BEGIN TRY
 									,@intUserId = @intEntityUserSecurityId;
 
 		SELECT TOP 1 @intInventoryReceiptId = intInventoryReceiptId
-		FROM #tmpAddItemReceiptResult1
+		FROM #tmpAddItemReceiptResult
 
 		SELECT @intMinInvRecItemId = MIN(intInventoryReceiptItemId)
 		FROM tblICInventoryReceiptItem
