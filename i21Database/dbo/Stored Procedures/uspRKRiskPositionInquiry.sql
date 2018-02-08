@@ -1286,30 +1286,34 @@ UPDATE @List
 SET intOrderByHeading = 13
 WHERE Selection IN ('Switch position', 'Futures required')
 
-DECLARE @ListFinal AS TABLE (
-	intRowNumber1 INT identity(1, 1)
-	,intRowNumber INT
-	,Selection NVARCHAR(Max) COLLATE Latin1_General_CI_AS
-	,PriceStatus NVARCHAR(Max) COLLATE Latin1_General_CI_AS
-	,strFutureMonth NVARCHAR(Max) COLLATE Latin1_General_CI_AS
-	,strAccountNumber NVARCHAR(Max) COLLATE Latin1_General_CI_AS
-	,dblNoOfContract DECIMAL(24, 10)
-	,strTradeNo NVARCHAR(200) COLLATE Latin1_General_CI_AS
-	,TransactionDate DATETIME
-	,TranType NVARCHAR(Max) COLLATE Latin1_General_CI_AS
-	,CustVendor NVARCHAR(Max) COLLATE Latin1_General_CI_AS
-	,dblNoOfLot DECIMAL(24, 10)
-	,dblQuantity DECIMAL(24, 10)
-	,intOrderByHeading INT
-	,intContractHeaderId INT
-	,intFutOptTransactionHeaderId INT
-	)
 
-INSERT INTO @ListFinal
+ INSERT INTO @List(Selection
+		,PriceStatus
+		,strFutureMonth
+		,strAccountNumber
+		,dblNoOfContract
+		,strTradeNo
+		,TransactionDate
+		,TranType
+		,CustVendor
+		,dblNoOfLot
+		,dblQuantity
+		,intContractHeaderId
+		,intFutOptTransactionHeaderId,intOrderByHeading)
+ SELECT DISTINCT 'Physical position / Basis risk',
+'a. Unpriced - (Balance to be Priced)',strFutureMonth, NULL,
+ NULL, NULL, getdate(), NULL, NULL, NULL, NULL, NULL, NULL,1
+FROM @List  WHERE strFutureMonth
+ NOT IN (SELECT DISTINCT strFutureMonth FROM @List WHERE Selection = 'Physical position / Basis risk' AND PriceStatus = 'a. Unpriced - (Balance to be Priced)')
+
+select * from ( 
 SELECT intRowNumber
 	,Selection
 	,PriceStatus
 	,strFutureMonth
+	,cast(CASE WHEN  strFutureMonth ='Previous' THEN '01/01/1900' 
+		WHEN  strFutureMonth ='Total' THEN '01/01/9999'
+		else CONVERT(DATETIME,'01 '+strFutureMonth) END as datetime)strFutureMonthOrder
 	,strAccountNumber
 	,CONVERT(DOUBLE PRECISION, ROUND(dblNoOfContract, @intDecimal)) AS dblNoOfContract
 	,strTradeNo
@@ -1322,47 +1326,4 @@ SELECT intRowNumber
 	,intContractHeaderId
 	,intFutOptTransactionHeaderId
 FROM @List
-WHERE Selection NOT IN ('Switch position', 'Futures required')
-ORDER BY CASE WHEN strFutureMonth <> 'Previous' THEN CONVERT(DATETIME, '01 ' + strFutureMonth) END
-	,intOrderByHeading
-	,PriceStatus ASC
-
-INSERT INTO @ListFinal
-SELECT intRowNumber
-	,Selection
-	,PriceStatus
-	,strFutureMonth
-	,strAccountNumber
-	,CONVERT(DOUBLE PRECISION, ROUND(dblNoOfContract, @intDecimal)) AS dblNoOfContract
-	,strTradeNo
-	,TransactionDate
-	,TranType
-	,CustVendor
-	,dblNoOfLot
-	,dblQuantity
-	,intOrderByHeading
-	,intContractHeaderId
-	,intFutOptTransactionHeaderId
-FROM @List
-WHERE Selection IN ('Switch position', 'Futures required')
-ORDER BY CASE WHEN strFutureMonth <> 'Previous' THEN CONVERT(DATETIME, '01 ' + strFutureMonth) END
-	,intOrderByHeading
-	,PriceStatus ASC
-
-SELECT intRowNumber
-	,Selection
-	,PriceStatus
-	,strFutureMonth
-	,strAccountNumber
-	,CONVERT(DOUBLE PRECISION, ROUND(dblNoOfContract, @intDecimal)) AS dblNoOfContract
-	,strTradeNo
-	,TransactionDate
-	,TranType
-	,CustVendor
-	,dblNoOfLot
-	,dblQuantity
-	,intOrderByHeading
-	,intContractHeaderId
-	,intFutOptTransactionHeaderId
-FROM @ListFinal
-order by intRowNumber1 asc	   
+	)t  order by intOrderByHeading,strFutureMonthOrder
