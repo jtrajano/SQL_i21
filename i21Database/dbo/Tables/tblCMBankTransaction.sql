@@ -79,4 +79,10 @@ CREATE NONCLUSTERED INDEX [IX_tblCMBankTransaction_strTransactionId]
 GO
 CREATE NONCLUSTERED INDEX [IX_tblCMBankTransaction_intBankStatementImportId]
     ON [dbo].[tblCMBankTransaction]([intBankStatementImportId] ASC);
+GO
 
+CREATE NONCLUSTERED INDEX [IX_rptAging_1] ON [dbo].[tblCMBankTransaction]
+(
+	[strTransactionId] ASC
+)
+INCLUDE ( 	[intBankTransactionTypeId]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]

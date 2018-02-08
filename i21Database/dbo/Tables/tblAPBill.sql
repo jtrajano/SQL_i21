@@ -110,3 +110,123 @@ CREATE NONCLUSTERED INDEX [IX_intVendorId]
     ON [dbo].[tblAPBill]([intEntityVendorId] ASC)
 	INCLUDE ([intBillId], dtmBillDate, ysnPosted, [strVendorOrderNumber], [intAccountId]) WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
 GO
+CREATE NONCLUSTERED INDEX [IX_rptAging_1] ON [dbo].[tblAPBill]
+(
+	[intBillId] ASC,
+	[ysnPosted] ASC,
+	[intTransactionType] ASC,
+	[ysnPaid] ASC,
+	[strBillId] ASC,
+	[dtmDueDate] ASC
+)WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_rptAging_2] ON [dbo].[tblAPBill]
+(
+	[intBillId] ASC,
+	[ysnPosted] ASC,
+	[intTransactionType] ASC,
+	[ysnPaid] ASC,
+	[strBillId] ASC,
+	[dtmDueDate] ASC,
+	[intEntityVendorId] ASC,
+	[dtmDate] ASC,
+	[intAccountId] ASC
+)WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_rptAging_3] ON [dbo].[tblAPBill]
+(
+	[ysnPosted] ASC,
+	[intBillId] ASC,
+	[intEntityVendorId] ASC,
+	[dtmDate] ASC,
+	[strBillId] ASC,
+	[dtmDueDate] ASC,
+	[intAccountId] ASC,
+	[ysnPaid] ASC,
+	[intTransactionType] ASC
+)
+INCLUDE ( 	[dblTotal],[dblAmountDue]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX [IX_rptAging_4] ON [dbo].[tblAPBill]
+(
+	[ysnOrigin] ASC,
+	[intBillId] ASC,
+	[ysnPosted] ASC,
+	[intTransactionType] ASC,
+	[intEntityVendorId] ASC,
+	[ysnPaid] ASC,
+	[dtmDate] ASC,
+	[strBillId] ASC,
+	[dtmDueDate] ASC,
+	[intAccountId] ASC
+)
+INCLUDE ( 	[dblTotal],
+	[dblAmountDue],
+	[dblTax]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX [IX_rptAging_5] ON [dbo].[tblAPBill]
+(
+	[intTransactionType] ASC,
+	[ysnOrigin] ASC,
+	[ysnPosted] ASC,
+	[dtmDate] ASC,
+	[intBillId] ASC,
+	[strBillId] ASC,
+	[dtmDueDate] ASC,
+	[ysnPaid] ASC,
+	[intAccountId] ASC
+)
+INCLUDE ( 	[dblTotal],
+	[dblAmountDue],
+	[intEntityVendorId],
+	[dblTax]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_rptAging_6] ON [dbo].[tblAPBill]
+(
+	[intEntityVendorId] ASC,
+	[intTransactionType] ASC,
+	[ysnOrigin] ASC,
+	[ysnPosted] ASC,
+	[ysnPaid] ASC,
+	[intBillId] ASC,
+	[dtmDate] ASC,
+	[strBillId] ASC,
+	[dtmDueDate] ASC,
+	[intAccountId] ASC
+)
+INCLUDE ( 	[dblTotal],
+	[dblAmountDue],
+	[dblTax]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+GO
+CREATE STATISTICS [ST_rptAging_1] ON [dbo].[tblAPBill]([intEntityVendorId], [intTransactionType], [ysnPosted], [ysnPaid], [intBillId], [ysnOrigin], [dtmDate], [strBillId], [dtmDueDate], [intAccountId])
+GO
+CREATE STATISTICS [ST_rptAging_2] ON [dbo].[tblAPBill]([intTransactionType], [ysnPosted], [intBillId], [strBillId], [dtmDueDate])
+GO
+CREATE STATISTICS [ST_rptAging_3] ON [dbo].[tblAPBill]([intEntityVendorId], [ysnPosted], [intBillId], [intTransactionType])
+GO
+CREATE STATISTICS [ST_rptAging_4] ON [dbo].[tblAPBill]([ysnPosted], [intTransactionType], [ysnPaid], [intBillId], [strBillId], [dtmDueDate], [intEntityVendorId])
+GO
+CREATE STATISTICS [ST_rptAging_5] ON [dbo].[tblAPBill]([ysnPosted], [dtmDate], [intBillId], [strBillId])
+GO
+CREATE STATISTICS [ST_rptAging_6] ON [dbo].[tblAPBill]([dtmDate], [intBillId], [strBillId], [dtmDueDate], [ysnPosted], [intAccountId])
+GO
+CREATE STATISTICS [ST_rptAging_7] ON [dbo].[tblAPBill]([dtmDate], [intBillId], [strBillId], [dtmDueDate], [ysnPosted], [ysnPaid], [intAccountId], [intTransactionType])
+GO
+CREATE STATISTICS [ST_rptAging_8] ON [dbo].[tblAPBill]([intTransactionType], [ysnOrigin], [ysnPosted], [ysnPaid], [intEntityVendorId])
+GO
+CREATE STATISTICS [ST_rptAging_9] ON [dbo].[tblAPBill]([intTransactionType], [ysnPosted], [ysnPaid])
+GO
+CREATE STATISTICS [ST_rptAging_10] ON [dbo].[tblAPBill]([intTransactionType], [ysnPosted], [dtmDate], [intBillId], [strBillId], [dtmDueDate], [ysnPaid])
+GO
+CREATE STATISTICS [ST_rptAging_11] ON [dbo].[tblAPBill]([intBillId], [intTransactionType], [ysnOrigin]) 
+GO
+CREATE STATISTICS [ST_rptAging_12] ON [dbo].[tblAPBill]([intBillId], [ysnPaid], [ysnPosted], [intTransactionType], [ysnOrigin])
+GO
+CREATE STATISTICS [ST_rptAging_13] ON [dbo].[tblAPBill]([intBillId], [strBillId], [dtmDueDate], [ysnPosted], [ysnPaid])
+GO
+CREATE STATISTICS [ST_rptAging_14] ON [dbo].[tblAPBill]([intBillId], [intEntityVendorId], [ysnPosted], [intTransactionType], [ysnPaid], [dtmDate], [strBillId], [dtmDueDate], [intAccountId])
+GO
+CREATE STATISTICS [ST_rptAging_15] ON [dbo].[tblAPBill]([intBillId], [intEntityVendorId], [ysnPosted], [dtmDate], [strBillId], [dtmDueDate], [intAccountId], [ysnPaid])
+GO
