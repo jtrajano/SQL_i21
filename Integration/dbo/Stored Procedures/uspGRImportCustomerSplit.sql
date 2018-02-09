@@ -13,8 +13,11 @@ BEGIN
 	--================================================
 	IF (@Checking = 1)
 	BEGIN
-		SELECT @Total = COUNT(1)
-		FROM sssplmst
+		
+		IF EXISTS(SELECT 1 FROM tblEMEntitySplit)
+			SELECT @Total = 0
+		ELSE  
+			SELECT @Total = COUNT(1)FROM sssplmst
 
 		RETURN @Total
 	END

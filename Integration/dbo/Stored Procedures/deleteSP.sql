@@ -72,6 +72,9 @@ GO
 IF EXISTS(select top 1 1 from sys.procedures where name = 'uspGRImportStorageSchedule')
 	DROP PROCEDURE uspGRImportStorageSchedule
 GO
+IF EXISTS(select top 1 1 from sys.procedures where name = 'uspGRImportDiscountAndStorageChargeItem')
+	DROP PROCEDURE uspGRImportDiscountAndStorageChargeItem
+GO
 IF EXISTS(select top 1 1 from sys.procedures where name = 'uspGRImportDiscountCode')
 	DROP PROCEDURE uspGRImportDiscountCode
 GO

@@ -15,8 +15,10 @@ BEGIN
 	IF (@Checking = 1)
 	BEGIN
 		
-		SELECT @Total = COUNT(1)
-		FROM gasctmst 
+		IF EXISTS(SELECT 1 FROM tblSCTicket)
+			SELECT @Total = 0
+		ELSE
+			SELECT @Total = COUNT(1) FROM gasctmst 
 				
 		RETURN @Total
 
