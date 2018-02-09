@@ -151,15 +151,11 @@ BEGIN
 		FROM tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
 
-		SELECT @strPackagingCategory = strAttributeValue
+		SELECT @intPMCategoryId = strAttributeValue
 		FROM tblMFManufacturingProcessAttribute
 		WHERE intManufacturingProcessId = @intManufacturingProcessId
 			AND intLocationId = @intLocationId
 			AND intAttributeId = 46 --Packaging Category
-
-		SELECT @intPMCategoryId = intCategoryId
-		FROM tblICCategory
-		WHERE strCategoryCode = @strPackagingCategory
 
 		SELECT I.strItemNo
 			,I.strDescription

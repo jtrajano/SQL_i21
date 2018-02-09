@@ -136,15 +136,11 @@ BEGIN TRY
 		AND intLocationId = @intLocationId
 		AND intAttributeId = 90 --PM Production Staging Location
 
-	SELECT @strPMCategoryCode = strAttributeValue
+	SELECT @intPMCategoryId = strAttributeValue
 	FROM tblMFManufacturingProcessAttribute
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
 		AND intLocationId = @intLocationId
 		AND intAttributeId = 46 --Packaging Category
-
-	SELECT @intPMCategoryId = intCategoryId
-	FROM tblICCategory
-	WHERE strCategoryCode = @strPMCategoryCode
 
 	SELECT @intAttributeId = intAttributeId
 	FROM tblMFAttribute
