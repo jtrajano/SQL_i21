@@ -85,7 +85,17 @@ BEGIN
 			ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 		LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource 
 			ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+		LEFT JOIN tblICItem Item
+			ON Item.intItemId = ReceiptItem.intItemId
 	WHERE ReceiptItem.intInventoryReceiptId = @ReceiptId
+		-- When updating the contracts, include the following items based on the conditions below:
+		-- 1. Item is the same one in the contract sequence. 
+		-- 2. Do not include the component of the bundle. 
+		AND 1 = 
+			CASE WHEN ISNULL(ReceiptItem.strItemType, '') <> '' AND Item.strType = 'Bundle' THEN 1
+				 WHEN ISNULL(ReceiptItem.strItemType, '') <> '' THEN 0
+				 ELSE 1
+			END 
 
 	-- Create snapshot of Receipt Items before Save
 	SELECT 
@@ -96,7 +106,7 @@ BEGIN
 		,intSourceType
 		,intSourceId = intSourceNumberId
 		,intLineNo
-		,intItemId
+		,Item.intItemId
 		,intItemUOMId
 		,dblOpenReceive = dblQuantity
 		,ysnLoad
@@ -105,10 +115,17 @@ BEGIN
 		,dblGross 
 		,intSourceInventoryDetailId
 	INTO #tmpBeforeSaveReceiptItems
-	FROM tblICTransactionDetailLog
+	FROM tblICTransactionDetailLog TransactionDetail
+		LEFT JOIN tblICItem Item ON Item.intItemId = TransactionDetail.intItemId
 	WHERE 
 		intTransactionId = @ReceiptId
 		AND strTransactionType = 'Inventory Receipt'
+		AND 1 = 
+			CASE WHEN ISNULL(TransactionDetail.strItemType, '') <> '' AND Item.strType = 'Bundle' THEN 1
+				 WHEN ISNULL(TransactionDetail.strItemType, '') <> '' THEN 0
+				 ELSE 1
+			END 
+
 END 
 
 IF @ForDelete = 1
