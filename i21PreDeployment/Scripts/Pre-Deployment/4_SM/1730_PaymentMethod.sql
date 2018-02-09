@@ -51,7 +51,7 @@
 			UNION ALL 
 			SELECT 2, ''ACH'', NULL, NULL, NULL, 1, 0
 			UNION ALL 
-			SELECT 3, ''Debit memos and Payments'', NULL, 0, NULL, 1, 0
+			SELECT 3, ''Debit Memos and Payments'', NULL, 0, NULL, 1, 0
 			UNION ALL 
 			SELECT 4, ''Credit'', NULL, NULL, NULL, 1, 0
 			UNION ALL 

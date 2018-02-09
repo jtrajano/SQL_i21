@@ -8,7 +8,7 @@ Usage:
 @paymentMethod
 	1 - Check
 	2 - eCheck
-	3 - Debit memos and Payments
+	3 - Debit Memos and Payments
 	4 - ACH
 	5 - Write Off
 @paymentInfo - Usually use for echeck
