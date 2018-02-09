@@ -831,6 +831,7 @@ INSERT INTO tblICInventoryShipmentCharge(
 	, intCurrencyId
 	, intForexRateTypeId 
 	, dblForexRate 
+	, strAllocatePriceBy
 	, strChargesLink
 	, intConcurrencyId
 )
@@ -849,6 +850,7 @@ SELECT
 	, ISNULL(sc.intCurrency, @intFunctionalCurrencyId)
 	, intForexRateTypeId = CASE WHEN ISNULL(sc.intCurrency, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId THEN ISNULL(sc.intForexRateTypeId, @intDefaultForexRateTypeId) ELSE NULL END  
 	, dblForexRate = CASE WHEN ISNULL(sc.intCurrency, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId THEN ISNULL(sc.dblForexRate, forexRate.dblRate) ELSE NULL END   
+	, ISNULL(sc.strAllocatePriceBy, 'Unit')
 	, strChargesLink
 	, intConcurrencyId = 1
 FROM @ShipmentCharges sc INNER JOIN tblICInventoryShipment s
@@ -914,12 +916,21 @@ OPEN cur
 FETCH NEXT FROM cur INTO @intShipmentId
 
 WHILE @@FETCH_STATUS = 0
-BEGIN
-	EXEC @intResult = uspICReserveStockForInventoryShipment @intShipmentId	
-	
-	IF @intResult <> 0 
-		RETURN @intResult
-	
+BEGIN	
+	-- Calculate the Stock Reservation 
+	EXEC @intResult = uspICReserveStockForInventoryShipment @intShipmentId		
+	IF @intResult <> 0 RETURN @intResult
+
+	-- Calculate the other charges
+	BEGIN 			
+		-- Calculate the other charges. 
+		EXEC @intResult = dbo.uspICCalculateInventoryShipmentOtherCharges @intShipmentId			
+		IF @intResult <> 0 RETURN @intResult
+
+		-- Calculate the surcharges
+		EXEC @intResult = dbo.uspICCalculateInventoryShipmentSurchargeOnOtherCharges @intShipmentId
+		IF @intResult <> 0 RETURN @intResult
+	END 	
 	FETCH NEXT FROM cur INTO @intShipmentId
 END
 
