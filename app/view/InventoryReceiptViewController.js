@@ -234,6 +234,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     hidden: '{checkHideSourceNo}',
                     dataIndex: 'strSourceNumber'
                 },
+                colItemType: 'strItemType',
                 colItemNo: {
                     dataIndex: 'strItemNo',
                     editor: {
@@ -5612,274 +5613,285 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         var isValidToAdd = true; 
                         
                         Ext.each(result, function (order) {
-                            //isValidToAdd = true; 
-                            var strBundleType = order.get('strBundleType'); 
+                            //isValidToAdd = true;
+                            var strBundleType = order.get('strBundleType');
 
-                            if(strBundleType){
-                                me.getBundleComponents(order, currentVM, currentVM.tblICInventoryReceiptItems(), me);
-                            } else {
+                            // if(order.get('ysnIsBasket')) {
+                            //     var filter = _.filter(addedBasketItem.items, function(x) { return x.get('intOrderId') === order.get('intOrderId') && !x.dummy; });
 
-                                // if(order.get('ysnIsBasket')) {
-                                //     var filter = _.filter(addedBasketItem.items, function(x) { return x.get('intOrderId') === order.get('intOrderId') && !x.dummy; });
+                            //     if(filter.length > 0) {
+                            //         var foundError = _.filter(addedBasketItem, function(x) { return x && x.orderId === order.get('intOrderId'); });
+                            //         if(foundError.length === 0) {
+                            //             basketErrors.push({
+                            //                 orderId: order.get('intOrderId'),
+                            //                 itemNo: order.get('strItemNo'),
+                            //                 orderNo: order.get('strOrderNumber'),
+                            //                 basketNo: order.get('strBundledItemNo'),
+                            //                 msg: 'You should not add bundled item "'
+                            //                     .concat(order.get('strItemNo'))
+                            //                     .concat('" from basket "')
+                            //                     .concat(order.get('strBundledItemNo'))
+                            //                     .concat('" with an order number: "')
+                            //                     .concat(order.get('strOrderNumber'))
+                            //                     .concat('". There is already a bundled item added from this basket. Only one bundled item from a basket per order should be added.')
+                            //             });
+                            //             isValidToAdd = false; 
+                            //         }
+                            //     }
+                            //}
+                            
+                            // Check if the Order's Freight Terms is the same with the Receipt Freight Terms
+                            addOrderFreightTerms = order.get('intFreightTermId');                            
+                            if (receiptFreightTerms != addOrderFreightTerms
+                                && (
+                                    ReceiptType === 'Purchase Order'
+                                    || (ReceiptType === 'Purchase Contract' && (SourceType == 0 || SourceType == 2) ) 
+                                )
+                            ){
+                                freightTermsError.push({
+                                    orderId: order.get('intOrderId'),
+                                    orderFreightTerm: addOrderFreightTerms
+                                });
+                                isValidToAdd = false; 
+                            }                            
 
-                                //     if(filter.length > 0) {
-                                //         var foundError = _.filter(addedBasketItem, function(x) { return x && x.orderId === order.get('intOrderId'); });
-                                //         if(foundError.length === 0) {
-                                //             basketErrors.push({
-                                //                 orderId: order.get('intOrderId'),
-                                //                 itemNo: order.get('strItemNo'),
-                                //                 orderNo: order.get('strOrderNumber'),
-                                //                 basketNo: order.get('strBundledItemNo'),
-                                //                 msg: 'You should not add bundled item "'
-                                //                     .concat(order.get('strItemNo'))
-                                //                     .concat('" from basket "')
-                                //                     .concat(order.get('strBundledItemNo'))
-                                //                     .concat('" with an order number: "')
-                                //                     .concat(order.get('strOrderNumber'))
-                                //                     .concat('". There is already a bundled item added from this basket. Only one bundled item from a basket per order should be added.')
-                                //             });
-                                //             isValidToAdd = false; 
-                                //         }
-                                //     }
-                                //}
-                                
-                                // Check if the Order's Freight Terms is the same with the Receipt Freight Terms
-                                addOrderFreightTerms = order.get('intFreightTermId');                            
-                                if (receiptFreightTerms != addOrderFreightTerms
-                                    && (
-                                        ReceiptType === 'Purchase Order'
-                                        || (ReceiptType === 'Purchase Contract' && (SourceType == 0 || SourceType == 2) ) 
-                                    )
-                                ){
-                                    freightTermsError.push({
-                                        orderId: order.get('intOrderId'),
-                                        orderFreightTerm: addOrderFreightTerms
-                                    });
-                                    isValidToAdd = false; 
-                                }                            
+                            if (isValidToAdd){
+                                var newRecord = {
+                                    intInventoryReceiptId: currentVM.get('intInventoryReceiptId'),
+                                    intLineNo: order.get('intLineNo'),
+                                    intOrderId: order.get('intOrderId'),
+                                    strOrderNumber: order.get('strOrderNumber'),
+                                    dtmDate: order.get('dtmDate'),
+                                    dblOrderQty: order.get('dblOrdered'),
+                                    dblReceived: order.get('dblReceived'),
+                                    intSourceId: order.get('intSourceId'),
+                                    strSourceNumber: order.get('strSourceNumber'),
+                                    intItemId: order.get('intItemId'),
+                                    strItemNo: order.get('strItemNo'),
+                                    strItemDescription: order.get('strItemDescription'),
+                                    dblOpenReceive: order.get('dblQtyToReceive'),
+                                    intLoadReceive: order.get('intLoadToReceive'),
+                                    dblUnitCost: strBundleType == 'Kit' ? 0 : order.get('dblUnitCost'),//order.get('dblUnitCost')
+                                    dblUnitRetail: strBundleType == 'Kit' ? 0 : order.get('dblUnitCost'),//order.get('dblUnitCost')
+                                    dblTax: order.get('dblTax'),
+                                    dblLineTotal: strBundleType == 'Kit' ? 0 : order.get('dblUnitCost'),//order.get('dblLineTotal'),
+                                    strLotTracking: order.get('strLotTracking'),
+                                    intCommodityId: order.get('intCommodityId'),
+                                    intContainerId: order.get('intContainerId'),
+                                    strContainer: order.get('strContainer'),
+                                    intSubLocationId: order.get('intSubLocationId'),
+                                    strSubLocationName: order.get('strSubLocationName'),
+                                    intStorageLocationId: order.get('intStorageLocationId'),
+                                    strStorageLocationName: order.get('strStorageLocationName'),
+                                    strOrderUOM: order.get('strOrderUOM'),
+                                    dblOrderUOMConvFactor: order.get('dblOrderUOMConvFactor'),
+                                    intUnitMeasureId: order.get('intItemUOMId'),
+                                    strUnitMeasure: order.get('strUnitMeasure'),
+                                    strUnitType: order.get('strUnitType'),
+                                    strWeightUOM: order.get('strWeightUOM'),
+                                    intWeightUOMId: order.get('intWeightUOMId'),
+                                    dblItemUOMConvFactor: order.get('dblItemUOMConvFactor'),
+                                    dblWeightUOMConvFactor: order.get('dblWeightUOMConvFactor'),
+                                    intCostUOMId: order.get('intCostUOMId'),
+                                    strCostUOM: order.get('strCostUOM'),
+                                    dblCostUOMConvFactor: order.get('dblCostUOMConvFactor'),
+                                    dblGrossMargin: order.get('dblGrossMargin'),
+                                    //intGradeId: order.get('intGradeId'),
+                                    //strGrade: order.get('strGrade'),
+                                    intLifeTime: order.get('intLifeTime'),
+                                    strLifeTimeType: order.get('strLifeTimeType'),
+                                    ysnLoad: order.get('ysnLoad'),
+                                    dblAvailableQty: order.get('dblAvailableQty'),
+                                    intOwnershipType: 1,
+                                    strOwnershipType: 'Own',
+                                    dblFranchise: order.get('dblFranchise'),
+                                    dblContainerWeightPerQty: order.get('dblContainerWeightPerQty'),
+                                    intContainerWeightUOMId: order.get('intWeightUOMId'),
+                                    dblContainerWeightUOMConvFactor: order.get('dblWeightUOMConvFactor'),
+                                    ysnSubCurrency: order.get('ysnSubCurrency'),
+                                    strSubCurrency: order.get('strSubCurrency'),
+                                    dblGross: order.get('dblGross'),
+                                    dblNet: order.get('dblNet'),
+                                    intForexRateTypeId: order.get('intForexRateTypeId'),
+                                    strForexRateType: order.get('strForexRateType'),
+                                    dblForexRate: order.get('dblForexRate'),
+                                };
+                                currentVM.set('strBillOfLading', order.get('strBOL'));
 
-                                if (isValidToAdd){
-                                    var newRecord = {
-                                        intInventoryReceiptId: currentVM.get('intInventoryReceiptId'),
-                                        intLineNo: order.get('intLineNo'),
-                                        intOrderId: order.get('intOrderId'),
-                                        strOrderNumber: order.get('strOrderNumber'),
-                                        dtmDate: order.get('dtmDate'),
-                                        dblOrderQty: order.get('dblOrdered'),
-                                        dblReceived: order.get('dblReceived'),
-                                        intSourceId: order.get('intSourceId'),
-                                        strSourceNumber: order.get('strSourceNumber'),
-                                        intItemId: order.get('intItemId'),
-                                        strItemNo: order.get('strItemNo'),
-                                        strItemDescription: order.get('strItemDescription'),
-                                        dblOpenReceive: order.get('dblQtyToReceive'),
-                                        intLoadReceive: order.get('intLoadToReceive'),
-                                        dblUnitCost: order.get('dblUnitCost'),
-                                        dblUnitRetail: order.get('dblUnitCost'),
-                                        dblTax: order.get('dblTax'),
-                                        dblLineTotal: order.get('dblLineTotal'),
-                                        strLotTracking: order.get('strLotTracking'),
-                                        intCommodityId: order.get('intCommodityId'),
-                                        intContainerId: order.get('intContainerId'),
-                                        strContainer: order.get('strContainer'),
-                                        intSubLocationId: order.get('intSubLocationId'),
-                                        strSubLocationName: order.get('strSubLocationName'),
-                                        intStorageLocationId: order.get('intStorageLocationId'),
-                                        strStorageLocationName: order.get('strStorageLocationName'),
-                                        strOrderUOM: order.get('strOrderUOM'),
-                                        dblOrderUOMConvFactor: order.get('dblOrderUOMConvFactor'),
-                                        intUnitMeasureId: order.get('intItemUOMId'),
-                                        strUnitMeasure: order.get('strUnitMeasure'),
-                                        strUnitType: order.get('strUnitType'),
-                                        strWeightUOM: order.get('strWeightUOM'),
-                                        intWeightUOMId: order.get('intWeightUOMId'),
-                                        dblItemUOMConvFactor: order.get('dblItemUOMConvFactor'),
-                                        dblWeightUOMConvFactor: order.get('dblWeightUOMConvFactor'),
-                                        intCostUOMId: order.get('intCostUOMId'),
-                                        strCostUOM: order.get('strCostUOM'),
-                                        dblCostUOMConvFactor: order.get('dblCostUOMConvFactor'),
-                                        dblGrossMargin: order.get('dblGrossMargin'),
-                                        //intGradeId: order.get('intGradeId'),
-                                        //strGrade: order.get('strGrade'),
-                                        intLifeTime: order.get('intLifeTime'),
-                                        strLifeTimeType: order.get('strLifeTimeType'),
-                                        ysnLoad: order.get('ysnLoad'),
-                                        dblAvailableQty: order.get('dblAvailableQty'),
-                                        intOwnershipType: 1,
-                                        strOwnershipType: 'Own',
-                                        dblFranchise: order.get('dblFranchise'),
-                                        dblContainerWeightPerQty: order.get('dblContainerWeightPerQty'),
-                                        intContainerWeightUOMId: order.get('intWeightUOMId'),
-                                        dblContainerWeightUOMConvFactor: order.get('dblWeightUOMConvFactor'),
-                                        ysnSubCurrency: order.get('ysnSubCurrency'),
-                                        strSubCurrency: order.get('strSubCurrency'),
-                                        dblGross: order.get('dblGross'),
-                                        dblNet: order.get('dblNet'),
-                                        intForexRateTypeId: order.get('intForexRateTypeId'),
-                                        strForexRateType: order.get('strForexRateType'),
-                                        dblForexRate: order.get('dblForexRate'),
-                                    };
-                                    currentVM.set('strBillOfLading', order.get('strBOL'));
-
-                                    if (ReceiptType === 'Transfer Order') {
-                                        if ((me.getViewModel().data.locationFromTransferOrder === null && currentVM.phantom) || (me.getViewModel().data.locationFromTransferOrder === null &&
-                                            currentVM.get('intLocationId') === null)) {
+                                if (ReceiptType === 'Transfer Order') {
+                                    if ((me.getViewModel().data.locationFromTransferOrder === null && currentVM.phantom) || (me.getViewModel().data.locationFromTransferOrder === null &&
+                                        currentVM.get('intLocationId') === null)) {
+                                        currentVM.set('intLocationId', order.get('intEntityVendorId'));
+                                        currentVM.set('strLocationName', order.get('strVendorName'));
+                                        me.getViewModel().set('locationFromTransferOrder', order.get('strVendorName'));
+                                    } else {
+                                        if (currentVM.get('intLocationId') === null) {
                                             currentVM.set('intLocationId', order.get('intEntityVendorId'));
                                             currentVM.set('strLocationName', order.get('strVendorName'));
                                             me.getViewModel().set('locationFromTransferOrder', order.get('strVendorName'));
-                                        } else {
-                                            if (currentVM.get('intLocationId') === null) {
-                                                currentVM.set('intLocationId', order.get('intEntityVendorId'));
-                                                currentVM.set('strLocationName', order.get('strVendorName'));
-                                                me.getViewModel().set('locationFromTransferOrder', order.get('strVendorName'));
-                                            }
                                         }
                                     }
+                                }
 
-                                    // Add the item record.
-                                    var newReceiptItems = currentVM.tblICInventoryReceiptItems().add(newRecord);
+                                // Add the item record.
 
-                                    // Calculate the line total
-                                    var newReceiptItem = newReceiptItems.length > 0 ? newReceiptItems[0] : null;
-                                    newReceiptItem.set('dblLineTotal', me.calculateLineTotal(currentVM, newReceiptItem));
+                                if(strBundleType == 'Kit'){
+                                    currentVM.tblICInventoryReceiptItems().add(newRecord);
+                                    me.getBundleComponents(order, currentVM, currentVM.tblICInventoryReceiptItems());
+                                } else if(strBundleType == 'Option') {
+                                    me.getBundleComponents(order, currentVM, currentVM.tblICInventoryReceiptItems());
+                                } else {
+                                    currentVM.tblICInventoryReceiptItems().add(newRecord);
+                                }
 
-                                    // Calculate the taxes
-                                    win.viewModel.data.currentReceiptItem = newReceiptItem;
-                                    me.calculateItemTaxes();
+                                //var newReceiptItems = currentVM.tblICInventoryReceiptItems().add(newRecord);
 
-                                    // Calculate the Wgt or Volume Gain/Loss 
-                                    me.calculateWtGainLoss(win);
+                                // Calculate the line total
+                                //var newReceiptItem = newReceiptItems.length > 0 ? newReceiptItems[0] : null;
 
-                                    if (ReceiptType === 'Purchase Contract') {
-                                        ContractStore.load({
-                                            filters: [
-                                                {
-                                                    column: 'intContractDetailId',
-                                                    value: order.get('intLineNo'),
-                                                    conjunction: 'and'
-                                                },
-                                                {
-                                                    column: 'intContractHeaderId',
-                                                    value: order.get('intOrderId'),
-                                                    conjunction: 'and'
-                                                }
-                                            ],
-                                            callback: function (result) {
-                                                if (result) {
-                                                    Ext.each(result, function (contract) {
-                                                        var contractCosts = contract.get('tblCTContractCosts');
-                                                        var contractCosts = _.filter(contractCosts, function (c) { return !c.ysnBasis; });
-                                                        if (contractCosts) {
-                                                            vm.set('chargesLinkInc', 1);
-                                                            Ext.each(contractCosts, function (otherCharge) {
-                                                                var receiptCharges = currentVM.tblICInventoryReceiptCharges().data.items;
-                                                                var exists = Ext.Array.findBy(receiptCharges, function (row) {
-                                                                    if ((row.get('intContractId') === order.get('intOrderId')
-                                                                        && row.get('intChargeId') === otherCharge.intItemId)) {
-                                                                        return true;
-                                                                    }
-                                                                });
+                                var newReceiptItem = currentVM.tblICInventoryReceiptItems().findRecord('intOrderId', newRecord.intOrderId);
+                                newReceiptItem.set('dblLineTotal', me.calculateLineTotal(currentVM, newReceiptItem));
 
-                                                                if (!exists) {
-                                                                    var inventoryCost = otherCharge.ysnInventoryCost ? true : false,
-                                                                        chargesLink = 'CL-'.concat(vm.get('chargesLinkConst'));
-                                                                    
-                                                                    var newReceiptCharge = Ext.create('Inventory.model.ReceiptCharge', {
-                                                                        intInventoryReceiptId: currentVM.get('intInventoryReceiptId'),
-                                                                        intContractId: order.get('intOrderId'),
-                                                                        intContractDetailId: otherCharge.intContractDetailId,
-                                                                        intContractSeq: contract.get('intContractSeq'),
-                                                                        intChargeId: otherCharge.intItemId,
-                                                                        strChargesLink: chargesLink,
-                                                                        ysnInventoryCost: inventoryCost,
-                                                                        strCostMethod: otherCharge.strCostMethod,
-                                                                        dblRate: otherCharge.strCostMethod == "Amount" ? 0 : otherCharge.dblRate,
-                                                                        intCostUOMId: otherCharge.intItemUOMId,
-                                                                        intEntityVendorId: otherCharge.intVendorId ? otherCharge.intVendorId : currentVM.get('intEntityVendorId'),
-                                                                        dblAmount: otherCharge.strCostMethod == "Amount" ? otherCharge.dblRate : 0,
-                                                                        strAllocateCostBy: 'Unit',
-                                                                        ysnAccrue: otherCharge.intVendorId ? true : false,
-                                                                        //ysnPrice: otherCharge.ysnPrice,
-                                                                        strItemNo: otherCharge.strItemNo,
-                                                                        intCurrencyId: otherCharge.intCurrencyId,
-                                                                        strCurrency: otherCharge.strCurrency,
-                                                                        ysnSubCurrency: otherCharge.ysnSubCurrency,
-                                                                        strCostUOM: otherCharge.strUOM,
-                                                                        strVendorName: otherCharge.strVendorName ? otherCharge.strVendorName : currentVM.get('strVendorName'),
-                                                                        strContractNumber: order.get('strOrderNumber')
+                                if(newReceiptItem.get('strBundleType') == 'Kit')
+                                    newReceiptItem.set('strItemType', order.get('strBundleType'));
 
-                                                                    });
-                                                                    currentVM.tblICInventoryReceiptCharges().add(newReceiptCharge);
-                                                                    newReceiptItem.set('strChargesLink', chargesLink);
+                                // Calculate the taxes
+                                win.viewModel.data.currentReceiptItem = newReceiptItem;
+                                me.calculateItemTaxes();
+
+                                // Calculate the Wgt or Volume Gain/Loss 
+                                me.calculateWtGainLoss(win);
+
+                                if (ReceiptType === 'Purchase Contract') {
+                                    ContractStore.load({
+                                        filters: [
+                                            {
+                                                column: 'intContractDetailId',
+                                                value: order.get('intLineNo'),
+                                                conjunction: 'and'
+                                            },
+                                            {
+                                                column: 'intContractHeaderId',
+                                                value: order.get('intOrderId'),
+                                                conjunction: 'and'
+                                            }
+                                        ],
+                                        callback: function (result) {
+                                            if (result) {
+                                                Ext.each(result, function (contract) {
+                                                    var contractCosts = contract.get('tblCTContractCosts');
+                                                    var contractCosts = _.filter(contractCosts, function (c) { return !c.ysnBasis; });
+                                                    if (contractCosts) {
+                                                        vm.set('chargesLinkInc', 1);
+                                                        Ext.each(contractCosts, function (otherCharge) {
+                                                            var receiptCharges = currentVM.tblICInventoryReceiptCharges().data.items;
+                                                            var exists = Ext.Array.findBy(receiptCharges, function (row) {
+                                                                if ((row.get('intContractId') === order.get('intOrderId')
+                                                                    && row.get('intChargeId') === otherCharge.intItemId)) {
+                                                                    return true;
                                                                 }
                                                             });
 
-                                                        }
-                                                    });
-                                                }
+                                                            if (!exists) {
+                                                                var inventoryCost = otherCharge.ysnInventoryCost ? true : false,
+                                                                    chargesLink = 'CL-'.concat(vm.get('chargesLinkConst'));
+                                                                
+                                                                var newReceiptCharge = Ext.create('Inventory.model.ReceiptCharge', {
+                                                                    intInventoryReceiptId: currentVM.get('intInventoryReceiptId'),
+                                                                    intContractId: order.get('intOrderId'),
+                                                                    intContractDetailId: otherCharge.intContractDetailId,
+                                                                    intContractSeq: contract.get('intContractSeq'),
+                                                                    intChargeId: otherCharge.intItemId,
+                                                                    strChargesLink: chargesLink,
+                                                                    ysnInventoryCost: inventoryCost,
+                                                                    strCostMethod: otherCharge.strCostMethod,
+                                                                    dblRate: otherCharge.strCostMethod == "Amount" ? 0 : otherCharge.dblRate,
+                                                                    intCostUOMId: otherCharge.intItemUOMId,
+                                                                    intEntityVendorId: otherCharge.intVendorId ? otherCharge.intVendorId : currentVM.get('intEntityVendorId'),
+                                                                    dblAmount: otherCharge.strCostMethod == "Amount" ? otherCharge.dblRate : 0,
+                                                                    strAllocateCostBy: 'Unit',
+                                                                    ysnAccrue: otherCharge.intVendorId ? true : false,
+                                                                    //ysnPrice: otherCharge.ysnPrice,
+                                                                    strItemNo: otherCharge.strItemNo,
+                                                                    intCurrencyId: otherCharge.intCurrencyId,
+                                                                    strCurrency: otherCharge.strCurrency,
+                                                                    ysnSubCurrency: otherCharge.ysnSubCurrency,
+                                                                    strCostUOM: otherCharge.strUOM,
+                                                                    strVendorName: otherCharge.strVendorName ? otherCharge.strVendorName : currentVM.get('strVendorName'),
+                                                                    strContractNumber: order.get('strOrderNumber')
+
+                                                                });
+                                                                currentVM.tblICInventoryReceiptCharges().add(newReceiptCharge);
+                                                                newReceiptItem.set('strChargesLink', chargesLink);
+                                                            }
+                                                        });
+
+                                                    }
+                                                });
                                             }
-                                        });
+                                        }
+                                    });
+                                }
+
+                                if (!!order.get('strLotTracking') && order.get('strLotTracking') !== 'No' && newReceiptItem.get('intWeightUOMId') === null) {
+                                    //Set default value for Gross/Net UOM
+                                    newReceiptItem.set('intWeightUOMId', order.get('intItemUOMId'));
+                                    newReceiptItem.set('strWeightUOM', order.get('strUnitMeasure'));
+                                    newReceiptItem.set('dblGross', order.get('dblQtyToReceive'));
+                                    newReceiptItem.set('dblNet', order.get('dblQtyToReceive'));
+                                    newReceiptItem.set('dblWeightUOMConvFactor', order.get('dblItemUOMConvFactor'));
+
+                                    //Calculate Line Total
+                                    var currentReceipt = win.viewModel.data.current;
+                                    newReceiptItem.set('dblLineTotal', me.calculateLineTotal(currentReceipt, newReceiptItem));
+                                }
+
+                                if (order.get('intWeightUOMId') !== null) {
+                                    if (order.get('dblGross') === 0 && order.get('dblNet') !== 0) {
+                                        newReceiptItem.set('dblGross', order.get('dblNet'));
                                     }
 
-                                    if (!!order.get('strLotTracking') && order.get('strLotTracking') !== 'No' && newReceiptItem.get('intWeightUOMId') === null) {
-                                        //Set default value for Gross/Net UOM
-                                        newReceiptItem.set('intWeightUOMId', order.get('intItemUOMId'));
-                                        newReceiptItem.set('strWeightUOM', order.get('strUnitMeasure'));
-                                        newReceiptItem.set('dblGross', order.get('dblQtyToReceive'));
-                                        newReceiptItem.set('dblNet', order.get('dblQtyToReceive'));
-                                        newReceiptItem.set('dblWeightUOMConvFactor', order.get('dblItemUOMConvFactor'));
-
-                                        //Calculate Line Total
-                                        var currentReceipt = win.viewModel.data.current;
-                                        newReceiptItem.set('dblLineTotal', me.calculateLineTotal(currentReceipt, newReceiptItem));
+                                    else if (order.get('dblGross') !== 0 && order.get('dblNet') === 0) {
+                                        newReceiptItem.set('dblNet', order.get('dblGross'));
                                     }
 
-                                    if (order.get('intWeightUOMId') !== null) {
-                                        if (order.get('dblGross') === 0 && order.get('dblNet') !== 0) {
-                                            newReceiptItem.set('dblGross', order.get('dblNet'));
-                                        }
-
-                                        else if (order.get('dblGross') !== 0 && order.get('dblNet') === 0) {
-                                            newReceiptItem.set('dblNet', order.get('dblGross'));
-                                        }
-
-                                        else if (order.get('dblGross') === 0 && order.get('dblNet') === 0) {
-                                            var currentReceiptItem = win.viewModel.data.currentReceiptItem;
-                                            me.calculateGrossNet(currentReceiptItem, 1);
-                                        }
-                                    }
-
-                                    //Add default values to lot if item is lot-tracked
-                                    if (!iRely.Functions.isEmpty(order.get('strLotTracking')) && order.get('strLotTracking') !== 'No') {
-                                        var currentReceiptItemVM = me.getViewModel().data.currentReceiptItem;
-
-                                        var newReceiptItemLot = Ext.create('Inventory.model.ReceiptItemLot', {
-                                            intLotId: order.get('intLotId'),
-                                            strLotNumber: order.get('strLotNumber'),
-                                            dtmExpiryDate: order.get('dtmExpiryDate'),
-                                            dtmManufacturedDate: order.get('dtmManufacturedDate'),
-                                            strLotAlias: order.get('strLotAlias'),
-                                            intParentLotId: order.get('intParentLotId'),
-                                            strParentLotNumber: order.get('strParentLotNumber'),
-                                            intInventoryReceiptItemId: newReceiptItem.get('intInventoryReceiptItemId'),
-                                            intSubLocationId: newReceiptItem.get('intSubLocationId'),
-                                            intStorageLocationId: newReceiptItem.get('intStorageLocationId'),
-                                            dblQuantity: newReceiptItem.get('dblOpenReceive'),
-                                            dblGrossWeight: newReceiptItem.get('dblGross'),
-                                            dblTareWeight: newReceiptItem.get('dblGross') - newReceiptItem.get('dblNet'),
-                                            dblNetWeight: newReceiptItem.get('dblNet'),
-                                            intItemUnitMeasureId: newReceiptItem.get('intUnitMeasureId'),
-                                            strWeightUOM: newReceiptItem.get('strWeightUOM'),
-                                            strStorageLocation: newReceiptItem.get('strStorageLocationName'),
-                                            strSubLocationName: newReceiptItem.get('strSubLocationName'),
-                                            strUnitMeasure: newReceiptItem.get('strUnitMeasure'),
-                                            dblLotUOMConvFactor: newReceiptItem.get('dblItemUOMConvFactor'),
-                                            strMarkings: order.get('strMarkings')
-                                        });
-                                        currentReceiptItemVM.tblICInventoryReceiptItemLots().add(newReceiptItemLot);
+                                    else if (order.get('dblGross') === 0 && order.get('dblNet') === 0) {
+                                        var currentReceiptItem = win.viewModel.data.currentReceiptItem;
+                                        me.calculateGrossNet(currentReceiptItem, 1);
                                     }
                                 }
+
+                                //Add default values to lot if item is lot-tracked
+                                if (!iRely.Functions.isEmpty(order.get('strLotTracking')) && order.get('strLotTracking') !== 'No') {
+                                    var currentReceiptItemVM = me.getViewModel().data.currentReceiptItem;
+
+                                    var newReceiptItemLot = Ext.create('Inventory.model.ReceiptItemLot', {
+                                        intLotId: order.get('intLotId'),
+                                        strLotNumber: order.get('strLotNumber'),
+                                        dtmExpiryDate: order.get('dtmExpiryDate'),
+                                        dtmManufacturedDate: order.get('dtmManufacturedDate'),
+                                        strLotAlias: order.get('strLotAlias'),
+                                        intParentLotId: order.get('intParentLotId'),
+                                        strParentLotNumber: order.get('strParentLotNumber'),
+                                        intInventoryReceiptItemId: newReceiptItem.get('intInventoryReceiptItemId'),
+                                        intSubLocationId: newReceiptItem.get('intSubLocationId'),
+                                        intStorageLocationId: newReceiptItem.get('intStorageLocationId'),
+                                        dblQuantity: newReceiptItem.get('dblOpenReceive'),
+                                        dblGrossWeight: newReceiptItem.get('dblGross'),
+                                        dblTareWeight: newReceiptItem.get('dblGross') - newReceiptItem.get('dblNet'),
+                                        dblNetWeight: newReceiptItem.get('dblNet'),
+                                        intItemUnitMeasureId: newReceiptItem.get('intUnitMeasureId'),
+                                        strWeightUOM: newReceiptItem.get('strWeightUOM'),
+                                        strStorageLocation: newReceiptItem.get('strStorageLocationName'),
+                                        strSubLocationName: newReceiptItem.get('strSubLocationName'),
+                                        strUnitMeasure: newReceiptItem.get('strUnitMeasure'),
+                                        dblLotUOMConvFactor: newReceiptItem.get('dblItemUOMConvFactor'),
+                                        strMarkings: order.get('strMarkings')
+                                    });
+                                    currentReceiptItemVM.tblICInventoryReceiptItemLots().add(newReceiptItemLot);
+                                }
                             }
+                        
                         });
 
                         if(basketErrors.length > 0) {
@@ -7305,7 +7317,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         me.calculateGrossNet(current, 1);
     },
 
-    getBundleComponents: function(selectedItem, current, itemDetailStore, scope){
+    getBundleComponents: function(selectedItem, current, itemDetailStore){
         'use strict';
         var me = this,
             bundleType = selectedItem.get('strBundleType'),
@@ -7355,19 +7367,20 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     Ext.Array.forEach(records, function(rec){
                         var componentQty = rec.get('dblComponentQuantity') * selectedItem.get('dblQtyToReceive');
 
-                        var IRItemModel = Ext.create(itemDetailStore.role.type, {
+                        var itemModel = Ext.create(itemDetailStore.role.type, {
                                 intInventoryReceiptId: current.get('intInventoryReceiptId'),
-                                //intLineNo: order.get('intLineNo'),
+                                intLineNo: selectedItem.get('intLineNo'),
                                 intOrderId: selectedItem.get('intOrderId'),
                                 strOrderNumber: selectedItem.get('strOrderNumber'),
+                                strItemType: selectedItem.get('strItemNo') + ' - Component',
                                 //dtmDate: order.get('dtmDate'),
                                 dblOrderQty: componentQty,
-                                dblReceived: selectedItem.get('dblReceived'),
+                                //dblReceived: selectedItem.get('dblReceived'),
                                 intSourceId: selectedItem.get('intSourceId'),
                                 strSourceNumber: selectedItem.get('strSourceNumber'),
-                                intItemId: rec.get('intItemId'),
-                                strItemNo: rec.get('strItemNo'),
-                                strItemDescription: rec.get('strDescription'),
+                                intItemId: rec.get('intComponentItemId'),
+                                strItemNo: rec.get('strComponentItemNo'),
+                                strItemDescription: rec.get('strComponentDescription'),
                                 dblOpenReceive: componentQty,
                                 // intLoadReceive: rec.get('intLoadToReceive'),
                                 dblUnitCost: rec.get('dblLastCost'),
@@ -7382,18 +7395,18 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 strSubLocationName: selectedItem.get('strSubLocationName'),
                                 intStorageLocationId: selectedItem.get('intStorageLocationId'),
                                 strStorageLocationName: selectedItem.get('strStorageLocationName'),
-                                strOrderUOM: selectedItem.get('strOrderUOM'),
-                                dblOrderUOMConvFactor: selectedItem.get('dblOrderUOMConvFactor'),
-                                intUnitMeasureId: selectedItem.get('intOrderUOMId'),
-                                strUnitMeasure: selectedItem.get('strUnitMeasure'),
-                                strUnitType: selectedItem.get('strUnitType'),
-                                strWeightUOM: rec.get('strGrossUOM'),
-                                intWeightUOMId: rec.get('intGrossUOMId'),
-                                dblItemUOMConvFactor: selectedItem.get('dblItemUOMConvFactor'),
-                                dblWeightUOMConvFactor: selectedItem.get('dblWeightUOMConvFactor'),
-                                intCostUOMId: selectedItem.get('intCostUOMId') ? selectedItem.get('intCostUOMId') : selectedItem.get('intOrderUOM'),
-                                strCostUOM: selectedItem.get('intCostUOMId') ? selectedItem.get('strCostUOM') : selectedItem.get('strOrderUOM') ,
-                                dblCostUOMConvFactor: selectedItem.get('intCostUOMId') ? selectedItem.get('dblCostUOMConvFactor') : selectedItem.get('dblOrderUOMConvFactor'),
+                                strOrderUOM: rec.get('strComponentUOM'),
+                                dblOrderUOMConvFactor: rec.get('dblComponentConvFactor'),
+                                intUnitMeasureId: rec.get('intComponentUOMId'),
+                                strUnitMeasure: rec.get('strComponentUOM'),
+                                strUnitType: rec.get('strComponentUOMType'),
+                                //strWeightUOM: rec.get('strComponentUOM'),
+                                //intWeightUOMId: rec.get('intComponentUOMId'),
+                                dblItemUOMConvFactor: rec.get('dblComponentConvFactor'),
+                                //dblWeightUOMConvFactor: rec.get('dblComponentConvFactor'),
+                                intCostUOMId: rec.get('intComponentUOMId'),
+                                strCostUOM: rec.get('strComponentUOM'),
+                                dblCostUOMConvFactor: rec.get('dblComponentConvFactor'),
                                 // dblGrossMargin: order.get('dblGrossMargin'),
                                 intGradeId: null,
                                 strGrade: null,
@@ -7416,10 +7429,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 dblForexRate: selectedItem.get('dblForexRate')
                         });
 
-                        var newItem = itemDetailStore.add(IRItemModel);
+                        var newItem = itemDetailStore.add(itemModel);
                         newItem = newItem[0];
-                        newItem.set('dblLineTotal', scope.calculateLineTotal(current, newItem));
-                        scope.calculateItemTaxes();
+                        newItem.set('dblLineTotal', me.calculateLineTotal(current, newItem));
+                        me.calculateItemTaxes();
                         addItemLotFunc(newItem, rec);
                         
                     });
@@ -7508,7 +7521,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 var itemCost = (selectedItem.get('dblUnitCost') + markUpOrDownCost)
                                     * (selectedItem.get('intCostUOMId') ? selectedItem.get('dblCostUOMConvFactor') : selectedItem.get('dblOrderUOMConvFactor'));
                                     
-                                var IRItemModel = Ext.create(itemDetailStore.role.type,{
+                                var itemModel = Ext.create(itemDetailStore.role.type,{
                                         intInventoryReceiptId: current.get('intInventoryReceiptId'),
                                         intLineNo: selectedItem.get('intLineNo'),
                                         intOrderId: selectedItem.get('intOrderId'),
@@ -7535,18 +7548,18 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                         strSubLocationName: selectedItem.get('strSubLocationName'),
                                         intStorageLocationId: selectedItem.get('intStorageLocationId'),
                                         strStorageLocationName: selectedItem.get('strStorageLocationName'),
-                                        strOrderUOM: selectedItem.get('strOrderUOM'),
-                                        dblOrderUOMConvFactor: selectedItem.get('dblOrderUOMConvFactor'),
-                                        intUnitMeasureId: rec.get('intStockUOMId'),
-                                        strUnitMeasure: rec.get('strStockUOM'),
-                                        strUnitType: rec.get('strStockUOMType'),
-                                        strWeightUOM: rec.get('strGrossUOM'),
-                                        intWeightUOMId: rec.get('intGrossUOMId'),
-                                        dblItemUOMConvFactor: rec.get('dblStockUnitQty'),
-                                        dblWeightUOMConvFactor: rec.get('dblStockUnitQty'),
-                                        intCostUOMId: rec.get('intStockUOMId'),
-                                        strCostUOM: rec.get('strStockUOM'),
-                                        dblCostUOMConvFactor: rec.get('dblStockUnitQty'),
+                                        strOrderUOM: rec.get('strComponentUOM'),
+                                        dblOrderUOMConvFactor: rec.get('dblComponentConvFactor'),
+                                        intUnitMeasureId: rec.get('intComponentUOMId'),
+                                        strUnitMeasure: rec.get('strComponentUOM'),
+                                        strUnitType: rec.get('strComponentUOMType'),
+                                        strWeightUOM: rec.get('strComponentUOM'),
+                                        intWeightUOMId: rec.get('intComponentUOMId'),
+                                        dblItemUOMConvFactor: rec.get('dblComponentConvFactor'),
+                                        dblWeightUOMConvFactor: rec.get('dblComponentConvFactor'),
+                                        intCostUOMId: rec.get('intComponentUOMId'),
+                                        strCostUOM: rec.get('strComponentUOM'),
+                                        dblCostUOMConvFactor: rec.get('dblComponentConvFactor'),
                                         // dblGrossMargin: order.get('dblGrossMargin'),
                                         intGradeId: rec.get('intGradeId'),
                                         strGrade: rec.get('strGrade'),
@@ -7569,10 +7582,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                         dblForexRate: selectedItem.get('dblForexRate')
                                 });
                                 
-                                var newItem = itemDetailStore.add(IRItemModel);
+                                var newItem = itemDetailStore.add(itemModel);
                                 newItem = newItem[0];
-                                newItem.set('dblLineTotal', scope.calculateLineTotal(current, newItem));
-                                scope.calculateItemTaxes();
+                                newItem.set('dblLineTotal', me.calculateLineTotal(current, newItem));
+                                me.calculateItemTaxes();
 
                                 addItemLotFunc(newItem, rec);
                             });

@@ -185,6 +185,7 @@ namespace iRely.Inventory.BusinessLayer
                     s.intForexRateTypeId,
                     s.dblForexRate,
                     s.strChargesLink,
+                    s.strItemType,
 
                     // PROJECTED
                     strItemNo = s.tblICItem.strItemNo,

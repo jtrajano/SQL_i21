@@ -963,6 +963,12 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcolumn',
+                                                                                itemId: 'colItemType',
+                                                                                dataIndex: 'strItemType',
+                                                                                text: 'Item Type'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'gridcolumn',
                                                                                 headerDrillDownClick: 'onItemHeaderClick',
                                                                                 headerDrillDownText: 'Open',
                                                                                 itemId: 'colItemNo',
