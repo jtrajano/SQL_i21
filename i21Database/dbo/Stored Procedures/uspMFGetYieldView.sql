@@ -297,16 +297,12 @@ BEGIN TRY
 	FROM tblMFAttribute
 	WHERE strAttributeName = 'Packaging Category'
 
-	SELECT @strPackagingCategory = strAttributeValue
+	SELECT @intCategoryId = strAttributeValue
 	FROM tblMFManufacturingProcessAttribute
 	WHERE intLocationId = @intLocationId
 		AND intAttributeId = @intPackagingCategoryId
 		AND strAttributeValue <> ''
-
-	SELECT @intCategoryId = intCategoryId
-	FROM tblICCategory
-	WHERE strCategoryCode = @strPackagingCategory
-
+	
 	IF @strMode = 'Run'
 		AND @ysnIncludeIngredientItem = 0
 	BEGIN

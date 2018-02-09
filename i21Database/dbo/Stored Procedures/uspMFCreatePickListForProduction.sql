@@ -329,9 +329,8 @@ BEGIN
 	WHERE intRowNo = @intMinItem
 
 	IF (
-			SELECT c.strCategoryCode
+			SELECT i.intCategoryId
 			FROM tblICItem i
-			JOIN tblICCategory c ON i.intCategoryId = c.intCategoryId
 			WHERE i.intItemId = @intItemId
 			) = @strPackagingCategory
 	BEGIN

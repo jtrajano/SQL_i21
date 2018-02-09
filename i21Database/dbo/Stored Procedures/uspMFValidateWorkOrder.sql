@@ -105,15 +105,11 @@ SELECT @intPackagingCategoryId = intAttributeId
 FROM tblMFAttribute
 WHERE strAttributeName = 'Packaging Category'
 
-SELECT @strPackagingCategory = strAttributeValue
+SELECT @intPMCategoryId = strAttributeValue
 FROM tblMFManufacturingProcessAttribute
 WHERE intManufacturingProcessId = @intManufacturingProcessId
 	AND intLocationId = @intLocationId
 	AND intAttributeId = @intPackagingCategoryId
-
-SELECT @intPMCategoryId = intCategoryId
-FROM tblICCategory
-WHERE strCategoryCode = @strPackagingCategory
 
 DECLARE @tblMFItem TABLE (
 	intItemId INT

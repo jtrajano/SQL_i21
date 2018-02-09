@@ -85,13 +85,9 @@ BEGIN TRY
 	FROM tblMFAttribute
 	WHERE strAttributeName = 'Packaging Category'
 
-	SELECT @strPackagingCategory = strAttributeValue
+	SELECT @intPMCategoryId = strAttributeValue
 	FROM tblMFManufacturingProcessAttribute
 	WHERE intAttributeId = @intPackagingCategoryId
-
-	SELECT @intPMCategoryId = intCategoryId
-	FROM tblICCategory
-	WHERE strCategoryCode = @strPackagingCategory
 
 	SELECT @strPickByFullPallet = strAttributeValue
 	FROM tblMFManufacturingProcessAttribute

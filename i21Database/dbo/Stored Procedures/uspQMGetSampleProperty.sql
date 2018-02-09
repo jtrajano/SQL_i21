@@ -158,15 +158,11 @@ BEGIN
 		IF @strLotCode1 <> ''
 			SELECT @strLotCode = Left(@strLotCode1, len(@strLotCode1) - 1)
 
-		SELECT @strPackagingCategory = strAttributeValue
+		SELECT @intPMCategoryId = strAttributeValue
 		FROM tblMFManufacturingProcessAttribute
 		WHERE intManufacturingProcessId = @intManufacturingProcessId
 			AND intLocationId = @intLocationId
 			AND intAttributeId = 46 --Packaging Category
-
-		SELECT @intPMCategoryId = intCategoryId
-		FROM tblICCategory
-		WHERE strCategoryCode = @strPackagingCategory
 
 		SELECT @strRawMaterial = ''
 
