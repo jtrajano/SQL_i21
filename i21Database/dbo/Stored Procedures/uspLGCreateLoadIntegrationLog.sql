@@ -698,7 +698,7 @@ BEGIN TRY
 
 				UPDATE tblLGLoad SET dtmPlannedAvailabilityDate = @dtmCurrentETAPOD WHERE intLoadId = @intLoadId
 
-				IF NOT EXISTS(SELECT 1 FROM tblLGLoad WHERE intLoadShippingInstructionId = @intLoadId)
+				IF NOT EXISTS(SELECT 1 FROM tblLGLoad WHERE intLoadShippingInstructionId = @intLoadId AND intShipmentStatus <> 10)
 				BEGIN
 					IF ((@dtmCurrentETAPOD IS NOT NULL) AND (ISNULL(@dtmCurrentETAPOD,'') <> ISNULL(@dtmCurrentPlannedAvailabilityDate,'')))
 					BEGIN
