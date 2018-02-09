@@ -38,7 +38,8 @@ BEGIN TRY
 			@intLastApprovedContractId INT,
 			@intPrevApprovedContractId INT,
 			@strAmendedColumns NVARCHAR(MAX),
-			@intContractDetailId INT			
+			@intContractDetailId INT,
+			@TotalAtlasLots		 INT	
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -184,6 +185,12 @@ BEGIN TRY
 
 	IF @strAmendedColumns IS NULL SELECT @strAmendedColumns = ''
 	IF ISNULL(@ysnPrinted,0) = 0 SELECT @strAmendedColumns = ''
+	
+	SELECT @TotalAtlasLots= CEILING(SUM(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, UOM.intUnitMeasureId, MA.intUnitMeasureId, CD.dblQuantity) / MA.dblContractSize))
+							FROM tblCTContractDetail CD
+							JOIN tblICItemUOM UOM ON UOM.intItemUOMId = CD.intItemUOMId
+							JOIN tblRKFutureMarket MA ON MA.intFutureMarketId = CD.intFutureMarketId
+							WHERE CD.intContractHeaderId = @intContractHeaderId
 	 
 	SELECT	 intContractHeaderId					= CH.intContractHeaderId
 			,strCaption								= TP.strContractType + ' Contract:- ' + CH.strContractNumber
@@ -281,7 +288,7 @@ BEGIN TRY
 			,strCaller								= CASE WHEN LTRIM(RTRIM(SQ.strFixationBy)) = '' THEN NULL ELSE SQ.strFixationBy END+'''s Call ('+SQ.strFutMarketName+')' 
 			,lblBuyerRefNo							= CASE WHEN (CH.intContractTypeId = 1 AND ISNULL(CH.strContractNumber,'') <>'') OR (CH.intContractTypeId <> 1 AND ISNULL(CH.strCustomerContract,'') <>'') THEN  'Buyer Ref No. :'  ELSE NULL END
 			,lblSellerRefNo							= CASE WHEN (CH.intContractTypeId = 2 AND ISNULL(CH.strContractNumber,'') <>'') OR (CH.intContractTypeId <> 2 AND ISNULL(CH.strCustomerContract,'') <>'') THEN  'Seller Ref No. :' ELSE NULL END
-			,strAtlasCaller							= CASE WHEN ISNULL(SQ.strFixationBy,'') <> '' AND CH.intPricingTypeId = 2 THEN SQ.strFixationBy +'''s Call vs '+dbo.fnRemoveTrailingZeroes(SQ.dblTotalNoOfLots)+' lots(s) of '+SQ.strFutMarketName + ' futures' ELSE NULL END
+			,strAtlasCaller							= CASE WHEN ISNULL(SQ.strFixationBy,'') <> '' AND CH.intPricingTypeId = 2 THEN SQ.strFixationBy +'''s Call vs '+LTRIM(@TotalAtlasLots)+' lots(s) of '+SQ.strFutMarketName + ' futures' ELSE NULL END
 			,strCallerDesc						    = CASE WHEN LTRIM(RTRIM(SQ.strFixationBy)) = '' THEN NULL 
 													  ELSE 
 													  	  CASE WHEN CH.intPricingTypeId=2 THEN SQ.strFixationBy +'''s Call ('+SQ.strFutMarketName+')'
@@ -336,7 +343,7 @@ BEGIN TRY
 				JOIN		tblEMEntity				TT	ON	TT.intEntityId				=	CD.intShipperId				LEFT
 				JOIN		tblSMCurrency			CY	ON	CY.intCurrencyID			=	CD.intCurrencyId			LEFT
 				JOIN		tblRKFutureMarket		MA	ON	MA.intFutureMarketId		=	CD.intFutureMarketId		
-			)					SQ	ON	SQ.intContractHeaderId	=	CH.intContractHeaderId	AND  SQ.intRowNum = 1 
+			)					SQ	ON	SQ.intContractHeaderId	=	CH.intContractHeaderId	AND  SQ.intRowNum = 1
 	WHERE	CH.intContractHeaderId	=	@intContractHeaderId
 	
 	SELECT @ysnFeedOnApproval = ysnFeedOnApproval FROM tblCTCompanyPreference
