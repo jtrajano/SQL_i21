@@ -256,6 +256,7 @@
 :r "..\dbo\Stored Procedures\uspGRImportScaleStation.sql"
 :r "..\dbo\Stored Procedures\uspGRImportScaleTicket.sql"
 :r "..\dbo\Stored Procedures\uspGRImportCustomerSplit.sql"
+:r "..\dbo\Stored Procedures\uspGRImportDiscountAndStorageChargeItem.sql"
 
 --CONTRACT
 :r "..\dbo\Stored Procedures\uspCTImportContract.sql"

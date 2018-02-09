@@ -12,8 +12,11 @@ BEGIN
 	--================================================
 	IF (@Checking = 1)
 	BEGIN
-		SELECT @Total = COUNT(1)
-		FROM ( SELECT DISTINCT gadsc_disc_schd_no,gadsc_com_cd,gadsc_currency FROM gadscmst )t
+		
+		IF EXISTS(SELECT 1 FROM tblGRDiscountSchedule)
+			SELECT @Total = 0
+		ELSE  
+			SELECT @Total = COUNT(1) FROM ( SELECT DISTINCT gadsc_disc_schd_no,gadsc_com_cd,gadsc_currency FROM gadscmst )t
 
 		RETURN @Total
 	END

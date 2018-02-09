@@ -14,8 +14,10 @@ BEGIN
 			IF (@Checking = 1)
 			BEGIN
 				
-				SELECT @Total = COUNT(1)
-				FROM gastrmst WHERE gastr_un_bal >0 
+				IF EXISTS(SELECT 1 FROM tblGRCustomerStorage)
+					SELECT @Total = 0
+				ELSE
+					SELECT @Total = COUNT(1)FROM gastrmst WHERE gastr_un_bal >0 
 										
 				RETURN @Total
 						

@@ -14,12 +14,15 @@ BEGIN
 	--================================================
 	IF (@Checking = 1)
 	BEGIN
-		
-		SELECT @Total = COUNT(1)
-		FROM gascimst SC
-		JOIN tblSCTicketPool TP ON TP.strTicketPool collate Latin1_General_CI_AS = SC.gasci_scale_pool OR  TP.strTicketPool collate Latin1_General_CI_AS = SC.gasci_loc_no + SC.gasci_scale_station
-		JOIN tblSMCompanyLocation CL ON CL.strLocationNumber collate Latin1_General_CI_AS  = SC.gasci_loc_no
-		JOIN tblICUnitMeasure UM ON UM.strUnitMeasure collate Latin1_General_CI_AS = SC.gasci_wgt_desc OR UM.strUnitMeasure+ 'S' collate Latin1_General_CI_AS = gasci_wgt_desc
+
+		IF EXISTS(SELECT 1 FROM tblSCScaleSetup)
+			SELECT @Total = 0
+		ELSE
+			SELECT @Total = COUNT(1)
+			FROM gascimst SC
+			JOIN tblSCTicketPool TP ON TP.strTicketPool collate Latin1_General_CI_AS = SC.gasci_scale_pool OR  TP.strTicketPool collate Latin1_General_CI_AS = SC.gasci_loc_no + SC.gasci_scale_station
+			JOIN tblSMCompanyLocation CL ON CL.strLocationNumber collate Latin1_General_CI_AS  = SC.gasci_loc_no
+			JOIN tblICUnitMeasure UM ON UM.strUnitMeasure collate Latin1_General_CI_AS = SC.gasci_wgt_desc OR UM.strUnitMeasure+ 'S' collate Latin1_General_CI_AS = gasci_wgt_desc
 		
 		RETURN @Total
 	END
