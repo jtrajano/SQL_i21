@@ -81,3 +81,7 @@
 )
 
 GO
+
+CREATE INDEX [IX_tblTFTransaction_uniqTransactionGuid] ON [dbo].[tblTFTransaction] ([uniqTransactionGuid])
+
+GO

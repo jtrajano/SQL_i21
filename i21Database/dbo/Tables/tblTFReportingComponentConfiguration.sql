@@ -19,3 +19,9 @@
     CONSTRAINT [PK_tblTFReportingComponentConfiguration] PRIMARY KEY ([intReportingComponentConfigurationId] ASC),
 	CONSTRAINT [FK_tblTFReportingComponentConfiguration_tblTFReportingComponent] FOREIGN KEY([intReportingComponentId]) REFERENCES [dbo].[tblTFReportingComponent] ([intReportingComponentId]) ON DELETE CASCADE
 )
+
+GO
+
+CREATE INDEX [IX_tblTFReportingComponentConfiguration_strTemplateItemId] ON [dbo].[tblTFReportingComponentConfiguration] ([strTemplateItemId])
+
+GO

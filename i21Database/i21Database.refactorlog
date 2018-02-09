@@ -6720,4 +6720,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intLogoPreferenceId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="9fd5205c-9e46-4fd3-92ea-2004a555cfd5" ChangeDateTime="02/09/2018 02:45:53">
+    <Property Name="ElementName" Value="[dbo].[tblTFTransaction].[IX_tblTFTransaction_Column]" />
+    <Property Name="ElementType" Value="SqlIndex" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTransaction]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[IX_tblTFTransaction_uniqTransactionGuid]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="547fe674-d6b7-4064-b214-85cd9386d53e" ChangeDateTime="02/09/2018 02:54:22">
+    <Property Name="ElementName" Value="[dbo].[tblTFReportingComponentConfiguration].[IX_tblTFReportingComponentConfiguration_Column]" />
+    <Property Name="ElementType" Value="SqlIndex" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFReportingComponentConfiguration]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[IX_tblTFReportingComponentConfiguration_strTemplateItemId]" />
+  </Operation>
 </Operations>
