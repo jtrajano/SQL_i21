@@ -973,9 +973,9 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
-                                                                        dataIndex: 'strOrderNumber',
                                                                         itemId: 'colSourceNumber',
                                                                         width: 90,
+                                                                        dataIndex: 'strOrderNumber',
                                                                         text: 'Source No.',
                                                                         editor: {
                                                                             xtype: 'gridcombobox',
