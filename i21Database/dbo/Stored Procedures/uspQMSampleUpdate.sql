@@ -485,7 +485,7 @@ BEGIN TRY
 					)
 		END
 
-		SELECT @dblQty = @dblQty + (@dblSampleQty-@dblOldSampleQty)
+		SELECT @dblQty = @dblQty - (@dblSampleQty-@dblOldSampleQty)
 
 		SELECT @strReasonCode = 'Sample Quantity - ' + @strSampleNumber
 
