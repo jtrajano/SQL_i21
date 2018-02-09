@@ -79,7 +79,41 @@ Ext.define('Inventory.search.InventoryShipment', {
                     width: 80
 
                 }
-            ]
+            ],
+            listeners: {
+                beforesearchrefresh: function(view, action) {
+                    var panel1 = view.down('panel');
+                    if (!panel1) return true; 
+
+                    var panel2 = panel1.down('panel');
+                    if (!panel2) return true; 
+
+                    var activeTab = panel2.getActiveTab();
+                    if (!activeTab) return true; 
+                    
+                    var grid = activeTab.down('grid');
+                    if (!grid) return true; 
+
+                    if (grid && grid.url == './Inventory/api/InventoryShipment/SearchShipmentInvoice') {
+                        ic.utils.ajax({
+                            url: './Inventory/api/InventoryShipment/UpdateShipmentInvoice',
+                            method: 'post'  
+                        })
+                        .subscribe(
+                            function(successResponse) {
+                                action(true);
+                            }
+                            , function(failureResponse) {
+                                var jsonData = Ext.decode(failureResponse.responseText);
+                                iRely.Functions.showErrorDialog(jsonData.message.statusText);
+                            }
+                        );     
+                        return false; 
+                    }                    
+
+                    return true; 
+                }
+            }             
         },
         {
             title: 'Details',
@@ -170,15 +204,7 @@ Ext.define('Inventory.search.InventoryShipment', {
                 { dataIndex: 'dtmLastInvoiceDate', text: 'Last Invoice Date', width: 120, dataType: 'date', xtype: 'datecolumn' },
                 { dataIndex: 'strFilterString', text: 'Voucher Nos.', flex: 1, dataType: 'string', required: true, hidden: true }               
                 
-            ],
-            buttons: [
-                {
-                    text: 'Refresh Invoices',
-                    itemId: 'btnRefreshInvoices',
-                    clickHandler: 'onRefreshInvoicesClick',
-                    width: 400
-                }                        
-            ]                                        
+            ]
         }
     ],
 
@@ -233,34 +259,6 @@ Ext.define('Inventory.search.InventoryShipment', {
         iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityCustomer', { action: 'view' });
     },
     
-    onRefreshInvoicesClick: function (control) {
-        ic.utils.ajax({
-            url: './Inventory/api/InventoryShipment/UpdateShipmentInvoice',
-            method: 'post'  
-        })
-        .subscribe(
-            function(successResponse) {
-                var jsonData = Ext.decode(successResponse.responseText);
-                var panel = control.up('panel');
-                
-                if (panel && panel.url == './Inventory/api/InventoryShipment/SearchShipmentInvoice'){
-                    var store = panel ? panel.getStore() : null;
-                    if (store){
-                        store.reload({
-                            callback: function(){
-                                panel.getView().refresh();
-                            }
-                        });                    
-                    }
-                }                
-            }
-            , function(failureResponse) {
-                var jsonData = Ext.decode(failureResponse.responseText);
-                iRely.Functions.showErrorDialog(jsonData.message.statusText);
-            }
-        );        
-    },
-
     /* Drilldown Handlers */
     onViewShipmentNo: function (value, record) {
         i21.ModuleMgr.Inventory.showScreen(value, 'ShipmentNo');
