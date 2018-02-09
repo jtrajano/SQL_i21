@@ -6202,6 +6202,7 @@
     <Build Include="dbo\Views\vyuICGetSubstituteComponentStock.sql" />
     <Build Include="dbo\Stored Procedures\uspPRRegeneratePaycheckPanelViews.sql" />
     <None Include="Scripts\Post-Deployment\EM\1810_Set_Default_Language.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1810_UpdatePortalMenus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
