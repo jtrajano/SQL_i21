@@ -10,6 +10,7 @@
 	[intSourceType] INT NOT NULL DEFAULT((0)),
     [intLineNo] INT NULL, 
     [intItemId] INT NULL, 
+	[strItemType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intItemUOMId] INT NULL, 
     [dblQuantity] NUMERIC(38, 20) NOT NULL DEFAULT ((0)), 
 	[ysnLoad] BIT NULL DEFAULT((0)),

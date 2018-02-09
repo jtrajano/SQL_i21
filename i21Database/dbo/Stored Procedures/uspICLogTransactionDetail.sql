@@ -43,6 +43,7 @@ BEGIN
 				,intSourceType
 				,intLineNo
 				,intItemId
+				,strItemType
 				,intItemUOMId
 				,dblQuantity
 				,ysnLoad
@@ -66,6 +67,7 @@ BEGIN
 				intSourceType = Receipt.intSourceType,
 				ReceiptItem.intLineNo,
 				ReceiptItem.intItemId,
+				ReceiptItem.strItemType,
 				ReceiptItem.intUnitMeasureId,
 				ReceiptItem.dblOpenReceive,
 				ReceiptItemSource.ysnLoad,
@@ -95,6 +97,7 @@ BEGIN
 				,intSourceType
 				,intLineNo
 				,intItemId
+				,strItemType
 				,intItemUOMId
 				,dblQuantity
 			)
@@ -107,6 +110,7 @@ BEGIN
 				Shipment.intSourceType,
 				ShipmentItem.intLineNo,
 				ShipmentItem.intItemId,
+				ShipmentItem.strItemType,
 				ShipmentItem.intItemUOMId,
 				ShipmentItem.dblQuantity
 			FROM tblICInventoryShipmentItem ShipmentItem
