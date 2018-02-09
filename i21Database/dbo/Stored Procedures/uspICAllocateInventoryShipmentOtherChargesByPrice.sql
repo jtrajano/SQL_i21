@@ -75,6 +75,7 @@ BEGIN
 							,CalculatedCharge.intInventoryShipmentId
 							,CalculatedCharge.intInventoryShipmentChargeId
 							,CalculatedCharge.ysnPrice
+							,Charge.strChargesLink
 					FROM	dbo.tblICInventoryShipmentChargePerItem CalculatedCharge INNER JOIN tblICInventoryShipmentCharge Charge
 								ON CalculatedCharge.intInventoryShipmentChargeId = Charge.intInventoryShipmentChargeId					
 					WHERE	CalculatedCharge.intInventoryShipmentId = @intInventoryShipmentId
@@ -82,25 +83,30 @@ BEGIN
 							AND CalculatedCharge.intContractId IS NULL 
 					GROUP BY 
 						CalculatedCharge.ysnAccrue
-						, CalculatedCharge.intEntityVendorId
-						, CalculatedCharge.intInventoryShipmentId
-						, CalculatedCharge.intInventoryShipmentChargeId
-						, CalculatedCharge.ysnPrice
+						,CalculatedCharge.intEntityVendorId
+						,CalculatedCharge.intInventoryShipmentId
+						,CalculatedCharge.intInventoryShipmentChargeId
+						,CalculatedCharge.ysnPrice
+						,Charge.strChargesLink
 				) CalculatedCharges 
 					ON ShipmentItem.intInventoryShipmentId = CalculatedCharges.intInventoryShipmentId
 				LEFT JOIN (
 					SELECT	dblTotalCost = SUM(dbo.fnMultiply(ISNULL(ShipmentItem.dblQuantity, 0), ISNULL(ShipmentItem.dblUnitPrice, 0)))
 							,ShipmentItem.intInventoryShipmentId 
+							,ShipmentItem.strChargesLink
 					FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentItem ShipmentItem
 								ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 					WHERE	Shipment.intInventoryShipmentId = @intInventoryShipmentId
-					GROUP BY ShipmentItem.intInventoryShipmentId 
+					GROUP BY ShipmentItem.intInventoryShipmentId, ShipmentItem.strChargesLink
 				) TotalCostOfItemsPerContract 
 					ON TotalCostOfItemsPerContract.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId 
+					AND ISNULL(TotalCostOfItemsPerContract.strChargesLink, '') = ISNULL(ShipmentItem.strChargesLink, '') 
+
 	) AS Source_Query  
 		ON ShipmentItemAllocatedCharge.intInventoryShipmentId = Source_Query.intInventoryShipmentId
 		AND ShipmentItemAllocatedCharge.ysnAccrue = Source_Query.ysnAccrue	
 		AND ShipmentItemAllocatedCharge.ysnPrice = Source_Query.ysnPrice
+		AND ISNULL(ShipmentItemAllocatedCharge.strChargesLink, '') = ISNULL(Source_Query.strChargesLink, '') 
 
 	-- Add the other charge to an existing allocation. 
 	WHEN MATCHED AND ISNULL(Source_Query.dblTotalCost, 0) <> 0 THEN 
@@ -126,6 +132,7 @@ BEGIN
 			,[dblAmount]
 			,[ysnAccrue]
 			,[ysnPrice]
+			,[strChargesLink]
 		)
 		VALUES (
 			Source_Query.intInventoryShipmentId
@@ -141,6 +148,7 @@ BEGIN
 			)
 			,Source_Query.ysnAccrue
 			,Source_Query.ysnPrice
+			,Source_Query.strChargesLink
 		)
 	;
 END 

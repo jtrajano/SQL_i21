@@ -73,6 +73,7 @@ BEGIN
 							,CalculatedCharge.intInventoryShipmentId
 							,CalculatedCharge.intInventoryShipmentChargeId
 							,CalculatedCharge.ysnPrice
+							,Charge.strChargesLink
 					FROM	dbo.tblICInventoryShipmentChargePerItem CalculatedCharge INNER JOIN tblICInventoryShipmentCharge Charge
 								ON CalculatedCharge.intInventoryShipmentChargeId = Charge.intInventoryShipmentChargeId			
 					WHERE	CalculatedCharge.intInventoryShipmentId = @intInventoryShipmentId
@@ -80,15 +81,17 @@ BEGIN
 							AND CalculatedCharge.intContractId IS NULL 
 					GROUP BY 
 							CalculatedCharge.ysnAccrue
-							, CalculatedCharge.intEntityVendorId
-							, CalculatedCharge.intInventoryShipmentId
-							, CalculatedCharge.intInventoryShipmentChargeId
-							, CalculatedCharge.ysnPrice
+							,CalculatedCharge.intEntityVendorId
+							,CalculatedCharge.intInventoryShipmentId
+							,CalculatedCharge.intInventoryShipmentChargeId
+							,CalculatedCharge.ysnPrice
+							,Charge.strChargesLink
 				) CalculatedCharges 
 					ON ShipmentItem.intInventoryShipmentId = CalculatedCharges.intInventoryShipmentId
 				LEFT JOIN (
 					SELECT  dblTotalStockUnit = SUM(dbo.fnCalculateStockUnitQty(ShipmentItem.dblQuantity, ItemUOM.dblUnitQty))
 							,ShipmentItem.intInventoryShipmentId 
+							,ShipmentItem.strChargesLink
 					FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentItem ShipmentItem 
 								ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId	
 							INNER JOIN dbo.tblICItemUOM ItemUOM
@@ -98,12 +101,12 @@ BEGIN
 								AND StockUOM.ysnStockUnit = 1
 							LEFT JOIN dbo.tblICItemUOM GrossNetUOM
 								ON GrossNetUOM.intItemUOMId = ShipmentItem.intWeightUOMId
-
 					WHERE	Shipment.intInventoryShipmentId = @intInventoryShipmentId
 							AND StockUOM.intItemUOMId IS NOT NULL 
-					GROUP BY ShipmentItem.intInventoryShipmentId
+					GROUP BY ShipmentItem.intInventoryShipmentId, ShipmentItem.strChargesLink
 				) TotalStockUnitOfItems 
 					ON TotalStockUnitOfItems.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId 
+					AND ISNULL(TotalStockUnitOfItems.strChargesLink, '') = ISNULL(ShipmentItem.strChargesLink, '')
 
 				LEFT JOIN dbo.tblICItemUOM ItemUOM	
 					ON ItemUOM.intItemUOMId = ShipmentItem.intItemUOMId 
@@ -114,6 +117,7 @@ BEGIN
 		AND ShipmentItemAllocatedCharge.intEntityVendorId = Source_Query.intEntityVendorId
 		AND ShipmentItemAllocatedCharge.ysnAccrue = Source_Query.ysnAccrue
 		AND ShipmentItemAllocatedCharge.ysnPrice = Source_Query.ysnPrice
+		AND ISNULL(ShipmentItemAllocatedCharge.strChargesLink, '') = ISNULL(Source_Query.strChargesLink, '')
 
 	-- Add the other charge to an existing allocation. 
 	WHEN MATCHED AND ISNULL(Source_Query.dblTotalStockUnit, 0) <> 0 THEN 
@@ -138,6 +142,7 @@ BEGIN
 			,[dblAmount]
 			,[ysnAccrue]
 			,[ysnPrice]
+			,[strChargesLink]
 		)
 		VALUES (
 			Source_Query.intInventoryShipmentId
@@ -152,6 +157,7 @@ BEGIN
 			)
 			,Source_Query.ysnAccrue
 			,Source_Query.ysnPrice
+			,Source_Query.strChargesLink
 		)
 	;
 END 
