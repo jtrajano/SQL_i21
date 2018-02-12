@@ -2,7 +2,7 @@
 AS
 SELECT fm.intFutureMarketId
 	,strFutMarketName
-	,mm.strFutSymbol AS strFutSymbol
+	,fm.strFutSymbol AS strFutSymbol
 	,um1.intUnitMeasureId
 	,um1.strUnitMeasure
 	,c.intCurrencyID intCurrencyId
@@ -11,8 +11,8 @@ SELECT fm.intFutureMarketId
 	,um.intUnitMeasureId intForecastWeeklyConsumptionUOMId
 	,mm.intCommodityId intCommodityMarketId
 	,co.strCommodityCode
-	,mm.dblContractSize
-	,mm.strOptMarketName
+	,fm.dblContractSize
+	,fm.strOptMarketName
 	,fm.ysnOptions
 FROM tblRKFutureMarket fm
 INNER JOIN tblRKCommodityMarketMapping mm ON fm.intFutureMarketId = mm.intFutureMarketId
