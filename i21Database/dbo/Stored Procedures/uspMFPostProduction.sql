@@ -160,7 +160,13 @@ BEGIN
 		SELECT @dblNewCost = [dbo].[fnMFGetTotalStockValueFromTransactionBatch](@intTransactionId, @strBatchId)
 
 		SET @dblNewCost = ABS(@dblNewCost)
-		SET @dblNewUnitCost = ABS(@dblNewCost) / @dblProduceQty
+		--For Blend use WorkOrder Qty
+		If Exists (Select 1 From tblMFWorkOrder w 
+					Join tblMFManufacturingProcess mp on w.intManufacturingProcessId=mp.intManufacturingProcessId 
+					Where w.intWorkOrderId=@intWorkOrderId AND mp.intAttributeTypeId=2)
+			SET @dblNewUnitCost = ABS(@dblNewCost) / (Select dblQuantity From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId)
+		Else
+			SET @dblNewUnitCost = ABS(@dblNewCost) / @dblProduceQty
 	END
 END
 
