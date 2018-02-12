@@ -141,6 +141,17 @@ BEGIN
 END
 GO
 
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFHandheldMenuItem
+		WHERE strHandheldMenuItemName = 'Receipt Put Away'
+		)
+BEGIN
+	INSERT INTO tblMFHandheldMenuItem
+	VALUES ('Receipt Put Away')
+END
+GO
+
 INSERT INTO tblMFHaldheldUserMenuItemMap
 SELECT b.intEntityId
  ,intHandheldMenuItemId
