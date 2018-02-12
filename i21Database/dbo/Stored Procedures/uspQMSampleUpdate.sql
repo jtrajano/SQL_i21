@@ -451,7 +451,7 @@ BEGIN TRY
 
 	IF @ysnAdjustInventoryQtyBySampleQty=1
 		AND ISNULL(@dblSampleQty, 0) > 0
-		AND @ysnEnableParentLot = 0 -- Lot
+		AND @ysnEnableParentLot = 0 AND ISNULL(@strLotNumber, '') <> '' -- Lot
 	BEGIN
 		SELECT @intLotId = intLotId
 			,@dblQty = dblQty
