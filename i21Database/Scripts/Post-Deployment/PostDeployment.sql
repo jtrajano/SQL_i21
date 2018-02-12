@@ -193,6 +193,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\DefaultData\1p_CompanyPreferenceOption.sql
 :r .\GL\DefaultData\1q_InsertOriginMapping.sql
 :r .\GL\DefaultData\1r_UpdateModuleCategory.sql
+:r .\GL\DefaultData\1s_UpdateChartDescription.sql
 
 -- Financial Report Designer
 :r .\FRD\FRDEntryDataFix.sql

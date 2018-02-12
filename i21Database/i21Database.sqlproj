@@ -6462,4 +6462,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1r_UpdateModuleCategory.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1s_UpdateChartDescription.sql" />
+  </ItemGroup>
 </Project>
