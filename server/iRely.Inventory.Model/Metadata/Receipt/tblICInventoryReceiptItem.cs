@@ -50,6 +50,7 @@ namespace iRely.Inventory.Model
         public decimal? dblForexRate { get; set; }
         public bool? ysnLotWeightsRequired { get; set; }
         public string strChargesLink { get; set; }
+        public string strItemType { get; set; }
 
         //private string _ownershipType;
         //[NotMapped]

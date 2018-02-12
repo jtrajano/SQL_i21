@@ -2962,7 +2962,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                             newISItem.set('strItemType', order.get('strBundleType'));
                                         }
                                         else if(strBundleType){
-                                            me.getBundleComponents(order, currentVM, currentVM.tblICInventoryShipmentItems(), me);
+                                            me.getBundleComponents(order, currentVM, currentVM.tblICInventoryShipmentItems());
                                         }    
                                         else {
                                             currentVM.tblICInventoryShipmentItems().add(newRecord);
@@ -3924,7 +3924,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         task.delay(10);            
     },    
 
-    getBundleComponents: function(selectedItem, current, itemDetailStore, scope){
+    getBundleComponents: function(selectedItem, current, itemDetailStore){
         'use strict';
         var me = this,
             bundleType = selectedItem.get('strBundleType'),

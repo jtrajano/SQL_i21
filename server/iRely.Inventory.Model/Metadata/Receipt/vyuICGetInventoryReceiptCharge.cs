@@ -29,6 +29,7 @@ namespace iRely.Inventory.Model
         public string strVendorId { get; set; }
         public string strVendorName { get; set; }
         public bool? ysnPrice { get; set; }
+        public string strChargeEntity { get; set; }
         public bool? ysnSubCurrency { get; set; }
         public string strCurrency { get; set; }
         //   public int? intCent { get; set; }

@@ -46,6 +46,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblForexRate).HasColumnName("dblForexRate").HasPrecision(18, 6);
             this.Property(t => t.ysnLotWeightsRequired).HasColumnName("ysnLotWeightsRequired");
             this.Property(t => t.strChargesLink).HasColumnName("strChargesLink");
+            this.Property(t => t.strItemType).HasColumnName("strItemType");
 
             this.HasOptional(p => p.vyuICInventoryReceiptItemLookUp)
                 .WithRequired(p => p.tblICInventoryReceiptItem);

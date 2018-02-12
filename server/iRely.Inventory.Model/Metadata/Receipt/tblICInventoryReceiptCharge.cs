@@ -28,6 +28,7 @@ namespace iRely.Inventory.Model
         public bool? ysnAccrue { get; set; }
         public int? intEntityVendorId { get; set; }
         public bool? ysnPrice { get; set; }
+        public string strChargeEntity { get; set; }
         public decimal? dblAmountBilled { get; set; }
         public decimal? dblAmountPaid { get; set; }
         public decimal? dblAmountPriced { get; set; }

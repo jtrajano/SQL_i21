@@ -408,7 +408,25 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 }
             ]
         },
-
+        chargeEntityTypes: {
+            autoLoad: true,
+            data: [
+                {
+                    strChargeEntity: 'No'
+                },
+                {
+                    strChargeEntity: 'Add'
+                },
+                {
+                    strChargeEntity: 'Reduce'
+                }
+            ],
+            fields: [
+                { 
+                    name: 'strChargeEntity'
+                }
+            ]
+        },
         equipmentLength: {
             type: 'icbufferedequipmentlength'
         },
