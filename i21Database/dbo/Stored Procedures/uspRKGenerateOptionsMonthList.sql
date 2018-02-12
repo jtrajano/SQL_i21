@@ -67,8 +67,8 @@ IF OBJECT_ID('tempdb..##AllowedMonths') IS NOT NULL
  INTO ##AllowedMonths    
  FROM ( SELECT ysnOptJan, ysnOptFeb, ysnOptMar, ysnOptApr, ysnOptMay, ysnOptJun,  
       ysnOptJul, ysnOptAug, ysnOptSep, ysnOptOct, ysnOptNov, ysnOptDec  
-    FROM tblRKCommodityMarketMapping
-    WHERE intFutureMarketId = @FutureMarketId  and intCommodityMarketId = @intCommodityMarketId
+    FROM tblRKFutureMarket
+    WHERE intFutureMarketId = @FutureMarketId  --and intCommodityMarketId = @intCommodityMarketId
    ) p  
    UNPIVOT  
    (  
