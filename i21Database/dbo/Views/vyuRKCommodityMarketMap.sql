@@ -14,6 +14,6 @@ SELECT
 from tblRKFutureMarket m 
 JOIN tblRKCommodityMarketMapping mm on m.intFutureMarketId=mm.intFutureMarketId
 JOIN tblICCommodity ic on ic.intCommodityId=mm.intCommodityId
-INNER JOIN tblSMCurrency c ON c.intCurrencyID = mm.intCurrencyId
-INNER JOIN tblICUnitMeasure um1 ON mm.intUnitMeasureId = um1.intUnitMeasureId
-LEFT JOIN tblICUnitMeasure um ON mm.intForecastWeeklyConsumptionUOMId = um.intUnitMeasureId
+INNER JOIN tblSMCurrency c ON c.intCurrencyID = m.intCurrencyId
+INNER JOIN tblICUnitMeasure um1 ON m.intUnitMeasureId = um1.intUnitMeasureId
+LEFT JOIN tblICUnitMeasure um ON m.intForecastWeeklyConsumptionUOMId = um.intUnitMeasureId
