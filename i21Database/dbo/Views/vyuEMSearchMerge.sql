@@ -14,7 +14,7 @@ strZipCode = C.strZipCode,
 strEntityType = D.strType,
 strEntityNoType = REPLACE(A.strEntityNo,' ','') + ' ' + D.strType,
 strEntityIdType = CAST(A.intEntityId AS NVARCHAR) + ' ' + D.strType,
-strLineOfBusiness = dbo.fnEMGetEntityLineOfBusiness(B.intEntityId)
+strLineOfBusiness = dbo.fnEMGetEntityLineOfBusiness(A.intEntityId)
 FROM tblEMEntity A	
 JOIN [tblEMEntityToContact] AB
 	ON A.intEntityId = AB.intEntityId and AB.ysnDefaultContact = 1
