@@ -23,6 +23,10 @@
 	,intInventoryAdjustmentId int
 	,intOldItemOwnerId INT
 	,intNewItemOwnerId INT
+	,strOldLotAlias nvarchar(50)
+	,strNewLotAlias nvarchar(50)
+	,strOldVendorLotNumber nvarchar(50)
+	,strNewVendorLotNumber nvarchar(50)
 	,CONSTRAINT PK_tblMFInventoryAdjustment PRIMARY KEY (intAdjustmentId)
 	,CONSTRAINT FK_tblMFInventoryAdjustment_tblICItem_intItemId FOREIGN KEY (intItemId) REFERENCES tblICItem(intItemId)
 	,CONSTRAINT FK_tblMFInventoryAdjustment_tblICItem_intOldItemId FOREIGN KEY (intOldItemId) REFERENCES tblICItem(intItemId)

@@ -8,7 +8,7 @@ BEGIN
 		DROP TABLE #tempLotHistoryFinal
 
 	CREATE TABLE #tempLotHistory (
-		intRecordId int identity(1,1) primary key clustered
+		intRecordId INT identity(1, 1) PRIMARY KEY CLUSTERED
 		,dtmDateTime DATETIME
 		,strLotNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,strItem NVARCHAR(50) COLLATE Latin1_General_CI_AS
@@ -45,8 +45,8 @@ BEGIN
 		,strNewOwnerName NVARCHAR(100)
 		)
 
-		CREATE TABLE #tempLotHistoryFinal (
-		intRecordId int identity(1,1) primary key clustered
+	CREATE TABLE #tempLotHistoryFinal (
+		intRecordId INT identity(1, 1) PRIMARY KEY CLUSTERED
 		,dtmDateTime DATETIME
 		,strLotNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,strItem NVARCHAR(50) COLLATE Latin1_General_CI_AS
@@ -178,10 +178,10 @@ BEGIN
 		,NULL AS strOldOwnerName
 		,NULL AS strNewOwnerName
 	FROM tblICLot l
-	JOIN tblICInventoryTransaction ilt ON ilt.intLotId = l.intLotId 
+	JOIN tblICInventoryTransaction ilt ON ilt.intLotId = l.intLotId
 	JOIN tblICInventoryTransactionType itt ON itt.intTransactionTypeId = ilt.intTransactionTypeId
 	LEFT JOIN tblICInventoryAdjustmentDetail iad ON ilt.intTransactionDetailId = iad.intInventoryAdjustmentDetailId
-	Left JOIN tblICInventoryAdjustment IA on IA.intInventoryAdjustmentId =iad.intInventoryAdjustmentId 
+	LEFT JOIN tblICInventoryAdjustment IA ON IA.intInventoryAdjustmentId = iad.intInventoryAdjustmentId
 	JOIN tblICItem i ON i.intItemId = ISNULL((
 				CASE 
 					WHEN ilt.intTransactionTypeId = 15
@@ -224,7 +224,8 @@ BEGIN
 	SELECT @intPrevLotId = @intLotId
 
 	WHILE @intSplitFromLotId IS NOT NULL
-		AND @ysnLotHistoryByStorageLocation = 0 and @intPrevLotId>@intSplitFromLotId
+		AND @ysnLotHistoryByStorageLocation = 0
+		AND @intPrevLotId > @intSplitFromLotId
 	BEGIN
 		SELECT @intLotId1 = NULL
 
@@ -276,27 +277,27 @@ BEGIN
 					END) AS dblTransactionQty
 			,um.strUnitMeasure AS strTransactionQtyUOM
 			,CASE 
-			WHEN ilt.intTransactionTypeId IN (
-					4
-					,5
-					,8
-					,9
-					,23
-					)
-				THEN ilt.strTransactionId
-			WHEN ilt.intTransactionTypeId IN (
-					17
-					,19
-					,20
-					)
-				THEN (
-						CASE 
-							WHEN iad.intNewLotId = @intLotId
-								THEN L1.strLotNumber
-							ELSE iad.strNewLotNumber
-							END
+				WHEN ilt.intTransactionTypeId IN (
+						4
+						,5
+						,8
+						,9
+						,23
 						)
-			END AS strRelatedLotId
+					THEN ilt.strTransactionId
+				WHEN ilt.intTransactionTypeId IN (
+						17
+						,19
+						,20
+						)
+					THEN (
+							CASE 
+								WHEN iad.intNewLotId = @intLotId
+									THEN L1.strLotNumber
+								ELSE iad.strNewLotNumber
+								END
+							)
+				END AS strRelatedLotId
 			,CASE 
 				WHEN iad.intNewItemId IS NULL
 					THEN NULL
@@ -332,7 +333,7 @@ BEGIN
 		JOIN tblICInventoryTransaction ilt ON ilt.intLotId = l.intLotId
 		JOIN tblICInventoryTransactionType itt ON itt.intTransactionTypeId = ilt.intTransactionTypeId
 		LEFT JOIN tblICInventoryAdjustmentDetail iad ON ilt.intTransactionDetailId = iad.intInventoryAdjustmentDetailId
-		Left JOIN tblICInventoryAdjustment IA on IA.intInventoryAdjustmentId =iad.intInventoryAdjustmentId 
+		LEFT JOIN tblICInventoryAdjustment IA ON IA.intInventoryAdjustmentId = iad.intInventoryAdjustmentId
 		JOIN tblICItem i ON i.intItemId = ISNULL((
 					CASE 
 						WHEN ilt.intTransactionTypeId = 15
@@ -374,15 +375,6 @@ BEGIN
 		,c.strCategoryCode
 		,clsl.strSubLocationName AS strSubLocation
 		,sl.strName AS strStorageLocation
-		--,CASE 
-		--	WHEN iad.intLotStatusId <> iad.intNewLotStatusId
-		--		THEN 'Inventory Adjustment - Lot Status Change'
-		--	WHEN iad.dtmExpiryDate <> iad.dtmNewExpiryDate
-		--		THEN 'Inventory Adjustment - Expiry Date Change'
-		--	WHEN iad.intItemOwnerId <> iad.intNewItemOwnerId
-		--		THEN 'Inventory Adjustment - Owner Change'
-		--	ELSE ''
-		--	END AS strTransaction
 		,CASE 
 			WHEN ia.intAdjustmentType = 4
 				THEN 'Inventory Adjustment - Lot Status Change'
@@ -426,7 +418,6 @@ BEGIN
 		,e2.strEntityNo + ' - ' + e2.strName AS strNewOwnerName
 	FROM tblICInventoryAdjustment ia
 	LEFT JOIN tblICInventoryAdjustmentDetail iad ON ia.intInventoryAdjustmentId = iad.intInventoryAdjustmentId
-	--Left JOIN tblICInventoryAdjustment IA on IA.intInventoryAdjustmentId =iad.intInventoryAdjustmentId 
 	LEFT JOIN tblICLot l ON l.intLotId = iad.intLotId
 	LEFT JOIN tblICItem i ON i.intItemId = l.intItemId
 	LEFT JOIN tblICItemUOM ium ON ium.intItemUOMId = l.intItemUOMId
@@ -449,97 +440,139 @@ BEGIN
 	WHERE l.intLotId = @intLotId
 		AND (
 			ia.intAdjustmentType = 4
-			OR
-			ia.intAdjustmentType = 6
-			OR
-			ia.intAdjustmentType = 9
-		)
-		--AND (
-		--	(
-		--		iad.dtmNewExpiryDate IS NOT NULL
-		--		AND iad.dtmExpiryDate IS NOT NULL
-		--		)
-		--	OR (
-		--		iad.intLotStatusId IS NOT NULL
-		--		AND iad.intNewLotStatusId IS NOT NULL
-		--		)
-		--	OR (
-		--		iad.intItemOwnerId IS NOT NULL
-		--		AND iad.intNewItemOwnerId IS NOT NULL
-		--		)
-		--	)
+			OR ia.intAdjustmentType = 6
+			OR ia.intAdjustmentType = 9
+			)
 
-	Insert into #tempLotHistoryFinal(dtmDateTime 
-		,strLotNo 
-		,strItem 
-		,strDescription 
-		,strCategoryCode 
-		,strSubLocation 
-		,strStorageLocation 
-		,strTransaction 
-		,dblWeight 
-		,dblTransactionWeight 
-		,strTransactionWeightUOM 
-		,dblQuantity 
-		,dblTransactionQty 
-		,strTransactionQtyUOM 
-		,strRelatedLotId 
+	INSERT INTO #tempLotHistory
+	SELECT IA.dtmDate
+		,L.strLotNumber AS strLotNo
+		,I.strItemNo AS strItemNo
+		,I.strDescription AS strDescription
+		,C.strCategoryCode
+		,CLSL.strSubLocationName AS strSubLocation
+		,SL.strName AS strStorageLocation
+		,CASE 
+			WHEN IA.intTransactionTypeId = 101
+				THEN 'Inventory Adjustment - Lot Alias Change'
+			WHEN IA.intTransactionTypeId = 102
+				THEN 'Inventory Adjustment - Vendor Lot Number Change'
+			END AS strTransaction
+		,CONVERT(NUMERIC(38, 20), 0.0) AS dblWeight
+		,CONVERT(NUMERIC(38, 20), ISNULL(IA.dblQty, 0)) * L.dblWeightPerQty AS dblTransactionWeight
+		,UM.strUnitMeasure AS strTransactionWeightUOM
+		,CONVERT(NUMERIC(38, 20), 0.0) AS dblQuantity
+		,CONVERT(NUMERIC(38, 20), ISNULL(IA.dblQty, 0)) AS dblTransactionQty
+		,UM1.strUnitMeasure AS strTransactionQtyUOM
+		,NULL AS strRelatedLotId
+		,NULL AS strPreviousItem
+		,NULL AS strSourceSubLocation
+		,NULL AS strSourceStorageLocation
+		,NULL AS strNewStatus
+		,NULL AS strOldStatus
+		,IA.strNewLotAlias AS strNewLotAlias
+		,IA.strOldLotAlias AS strOldLotAlias
+		,NULL AS dtmNewExpiryDate
+		,NULL AS dtmOldExpiryDate
+		,'' AS strNewVendorNo
+		,'' AS strOldVendorNo
+		,IA.strNewVendorLotNumber AS strNewVendorLotNo
+		,IA.strOldVendorLotNumber AS strOldVendorLotNo
+		,isNULL(IA.strReason, '') + ' ' + isNULL(IA.strNote, '') AS strNotes
+		,US.strUserName AS strUser
+		,NULL AS strBatchId
+		,IA.dtmDate AS dtmTransactionDate
+		,NULL AS strOldOwnerName
+		,NULL AS strNewOwnerName
+	FROM tblMFInventoryAdjustment IA
+	JOIN tblICLot L ON L.intLotId = IA.intSourceLotId
+	JOIN tblICItem I ON I.intItemId = L.intItemId
+	JOIN tblICItemUOM IU ON IU.intItemUOMId = L.intItemUOMId
+	JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+	JOIN tblICItemUOM IU1 ON IU1.intItemUOMId = IsNULL(L.intWeightUOMId, L.intItemUOMId)
+	JOIN tblICUnitMeasure UM1 ON UM1.intUnitMeasureId = IU1.intUnitMeasureId
+	JOIN tblICCategory C ON C.intCategoryId = I.intCategoryId
+	JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = L.intSubLocationId
+	LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
+	LEFT JOIN tblSMUserSecurity US ON US.[intEntityId] = IA.intUserId
+	WHERE L.intLotId = @intLotId
+		AND (
+			IA.intTransactionTypeId = 101
+			OR IA.intTransactionTypeId = 102
+			)
+
+	INSERT INTO #tempLotHistoryFinal (
+		dtmDateTime
+		,strLotNo
+		,strItem
+		,strDescription
+		,strCategoryCode
+		,strSubLocation
+		,strStorageLocation
+		,strTransaction
+		,dblWeight
+		,dblTransactionWeight
+		,strTransactionWeightUOM
+		,dblQuantity
+		,dblTransactionQty
+		,strTransactionQtyUOM
+		,strRelatedLotId
 		,strPreviousItem
-		,strSourceSubLocation 
-		,strSourceStorageLocation 
-		,strNewStatus 
-		,strOldStatus 
-		,strNewLotAlias 
-		,strOldLotAlias 
-		,dtmNewExpiryDate 
-		,dtmOldExpiryDate 
-		,strNewVendorNo 
-		,strOldVendorNo 
-		,strNewVendorLotNo 
-		,strOldVendorLotNo 
-		,strNotes 
-		,strUser 
+		,strSourceSubLocation
+		,strSourceStorageLocation
+		,strNewStatus
+		,strOldStatus
+		,strNewLotAlias
+		,strOldLotAlias
+		,dtmNewExpiryDate
+		,dtmOldExpiryDate
+		,strNewVendorNo
+		,strOldVendorNo
+		,strNewVendorLotNo
+		,strOldVendorLotNo
+		,strNotes
+		,strUser
 		,strBatchId
 		,dtmTransactionDate
 		,strOldOwnerName
-		,strNewOwnerName)
-	SELECT dtmDateTime 
-		,strLotNo 
-		,strItem 
-		,strDescription 
-		,strCategoryCode 
-		,strSubLocation 
-		,strStorageLocation 
-		,strTransaction 
-		,dblWeight 
-		,dblTransactionWeight 
-		,strTransactionWeightUOM 
-		,dblQuantity 
-		,dblTransactionQty 
-		,strTransactionQtyUOM 
-		,strRelatedLotId 
+		,strNewOwnerName
+		)
+	SELECT dtmDateTime
+		,strLotNo
+		,strItem
+		,strDescription
+		,strCategoryCode
+		,strSubLocation
+		,strStorageLocation
+		,strTransaction
+		,dblWeight
+		,dblTransactionWeight
+		,strTransactionWeightUOM
+		,dblQuantity
+		,dblTransactionQty
+		,strTransactionQtyUOM
+		,strRelatedLotId
 		,strPreviousItem
-		,strSourceSubLocation 
-		,strSourceStorageLocation 
-		,strNewStatus 
-		,strOldStatus 
-		,strNewLotAlias 
-		,strOldLotAlias 
-		,dtmNewExpiryDate 
-		,dtmOldExpiryDate 
-		,strNewVendorNo 
-		,strOldVendorNo 
-		,strNewVendorLotNo 
-		,strOldVendorLotNo 
-		,strNotes 
-		,strUser 
+		,strSourceSubLocation
+		,strSourceStorageLocation
+		,strNewStatus
+		,strOldStatus
+		,strNewLotAlias
+		,strOldLotAlias
+		,dtmNewExpiryDate
+		,dtmOldExpiryDate
+		,strNewVendorNo
+		,strOldVendorNo
+		,strNewVendorLotNo
+		,strOldVendorLotNo
+		,strNotes
+		,strUser
 		,strBatchId
 		,dtmTransactionDate
 		,strOldOwnerName
 		,strNewOwnerName
 	FROM #tempLotHistory LH
 	ORDER BY LH.dtmDateTime ASC
-
 
 	DECLARE @strStorageLocation NVARCHAR(50)
 
@@ -600,5 +633,5 @@ BEGIN
 	END
 
 	SELECT *
-	FROM #tempLotHistoryFinal 
+	FROM #tempLotHistoryFinal
 END
