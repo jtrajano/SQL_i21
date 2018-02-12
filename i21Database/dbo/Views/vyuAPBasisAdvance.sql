@@ -27,6 +27,7 @@ SELECT TOP 100 PERCENT * FROM (
         ,commodity.strDescription
         ,0.00 AS dblFuture
         ,cur.strCurrency
+        ,ctd.intCurrencyId
         ,ISNULL(receiptItem.dblOpenReceive,0) AS dblQuantity
         ,(ISNULL(basisFutures.dblPrice, 0) + ISNULL(ctd.dblBasis,0)) * ISNULL(receiptItem.dblOpenReceive,0) AS dblGross
         ,ISNULL(taxes.dblTax,0.00) AS dblTax
@@ -63,7 +64,7 @@ SELECT TOP 100 PERCENT * FROM (
     INNER JOIN tblRKFutureMarket futureMarket ON ctd.intFutureMarketId = futureMarket.intFutureMarketId
     INNER JOIN tblRKFuturesMonth futureMonth ON ctd.intFutureMonthId = futureMonth.intFutureMonthId
     INNER JOIN tblICCommodity commodity ON ticket.intCommodityId = commodity.intCommodityId
-    INNER JOIN tblSMCurrency cur ON ticket.intCurrencyId = cur.intCurrencyID
+    INNER JOIN tblSMCurrency cur ON ctd.intCurrencyId = cur.intCurrencyID
     INNER JOIN (tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure uom ON itemUOM.intUnitMeasureId = uom.intUnitMeasureId)
         ON itemUOM.intItemId = ticket.intItemId AND itemUOM.ysnStockUnit = 1
     OUTER APPLY (
