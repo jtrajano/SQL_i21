@@ -117,14 +117,14 @@ BEGIN
 			--Get Item id
 			SET @intItemId = (SELECT TOP 1 intItemId FROM tblICItem WHERE strItemNo = @strItemNumber)
 
-			--Invoice Number
-			SET @stri21InvoiceNumber = CONCAT ((SELECT TOP 1 strPrefix FROM tblSMStartingNumber  WHERE strTransactionType = 'Truck Billing' AND strModule = 'Energy Trac') , REPLACE(@strInvoiceNumber,'-', '') )  
-			
+				--Invoice Number
+			SET @stri21InvoiceNumber =  CONCAT ((SELECT TOP 1 strPrefix COLLATE Latin1_General_CI_AS FROM tblSMStartingNumber  WHERE strTransactionType COLLATE Latin1_General_CI_AS = 'Truck Billing' AND strModule COLLATE Latin1_General_CI_AS = 'Energy Trac') , REPLACE(@strInvoiceNumber COLLATE Latin1_General_CI_AS,'-', '') )  
+						
 			--Get Entity ID of the Driver
-			SET @intDriverEntityId = (SELECT TOP 1 intEntityId FROM tblEMEntity WHERE strEntityNo = @strDriverNumber)
+			SET @intDriverEntityId = (SELECT TOP 1 intEntityId FROM tblEMEntity WHERE strEntityNo COLLATE Latin1_General_CI_AS = @strDriverNumber )
 			
 			--Get Location Id
-			SET @intLocationId = (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber = @strLocation)
+			SET @intLocationId = (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber COLLATE Latin1_General_CI_AS = @strLocation)
 			
 			--------Get Item Unit Measure Id = ()
 			------SET @intUnitMeasureId = (SELECT TOP 1 intUnitMeasureId FROM tblICUnitMeasure WHERE strSymbol = @strUOM)
