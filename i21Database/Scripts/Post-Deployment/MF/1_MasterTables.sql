@@ -3244,3 +3244,32 @@ BEGIN
 	WHERE intAttributeId = 46
 END
 GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFLotTransactionType
+		WHERE intTransactionTypeId = 101
+		) --Lot Alias
+BEGIN
+	INSERT INTO tblMFLotTransactionType
+	SELECT 101
+		,0
+		,0
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFLotTransactionType
+		WHERE intTransactionTypeId = 102
+		) --Vendor Lot Number
+BEGIN
+	INSERT INTO tblMFLotTransactionType
+	SELECT 102
+		,0
+		,0
+END
+GO
+
+
+
