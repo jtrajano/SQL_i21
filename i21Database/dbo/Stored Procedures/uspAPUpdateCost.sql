@@ -127,7 +127,7 @@ UPDATE Voucher
 FROM tblAPBill Voucher
 WHERE Voucher.intBillId = @voucherId
 
-COMMIT TRANSACTION
+IF @transCount = 0 COMMIT TRANSACTION
 
 END TRY
 BEGIN CATCH
