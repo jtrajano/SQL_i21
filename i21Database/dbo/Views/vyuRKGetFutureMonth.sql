@@ -19,5 +19,5 @@ SELECT top 100 percent s.intFutureMonthId,
 FROM tblRKFuturesMonth s
 join tblRKFutureMarket m on m.intFutureMarketId=s.intFutureMarketId
 join tblRKCommodityMarketMapping mm on m.intFutureMarketId=mm.intFutureMarketId
-join tblICCommodity c on mm.intCommodityMarketId=c.intCommodityId
+join tblICCommodity c on mm.intCommodityId=c.intCommodityId
 order by 1 desc
