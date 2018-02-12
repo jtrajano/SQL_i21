@@ -6385,7 +6385,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 taxGroupName = null;
 
                             charge.tblICInventoryReceiptChargeTaxes().removeAll();
-
+                            var unitMeasureId = charge.get('intCostUnitMeasureId');
                             Ext.Array.each(itemTaxes, function (itemDetailTax) {
                                 var taxableAmount = charge.get('dblAmount');
                                 var taxAmount = 0.00;
@@ -6440,6 +6440,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     strTaxCode: itemDetailTax.strTaxCode,
                                     strTaxableByOtherTaxes: itemDetailTax.strTaxableByOtherTaxes,
                                     strCalculationMethod: itemDetailTax.strCalculationMethod,
+                                    intUnitMeasureId: unitMeasureId,
                                     dblRate: itemDetailTax.dblRate,
                                     dblTax: itemDetailTax.dblTax,
                                     dblAdjustedTax: itemDetailTax.dblAdjustedTax,
@@ -6852,6 +6853,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         { itemId: 'colTaxGroup', dataIndex: 'strTaxGroup', text: 'Tax Group', width: 85, dataType: 'string' },
                         { itemId: 'colTaxClass', dataIndex: 'strTaxClass', text: 'Tax Class', width: 100, dataType: 'string' },
                         { itemId: 'colTaxCode', dataIndex: 'strTaxCode', text: 'Tax Code', width: 100, dataType: 'string' },
+                        { itemId: 'colUnitMeasureId', dataIndex: 'intUnitMeasureId', text: 'Unit Measure Id', dataType: 'numeric', hidden: true },
+                        { itemId: 'colUnitMeasure', dataIndex: 'strUnitMeasure', text: 'Unit Measure', dataType: 'string' },
                         { itemId: 'colCalculationMethod', dataIndex: 'strCalculationMethod', text: 'Calculation Method', width: 110, dataType: 'string' },                                
                         { itemId: 'colQty', xtype: 'numbercolumn', dataIndex: 'dblQty', text: 'Qty', width: 100, dataType: 'float' },
                         { itemId: 'colCost', xtype: 'numbercolumn', dataIndex: 'dblCost', text: 'Cost', width: 100, dataType: 'float' },

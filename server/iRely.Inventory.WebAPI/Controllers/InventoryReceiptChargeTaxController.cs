@@ -12,7 +12,7 @@ using iRely.Inventory.BusinessLayer;
 
 namespace iRely.Inventory.WebApi
 {
-    public class InventoryReceiptChargeTaxController : BaseApiController<tblICInventoryReceiptChargeTax>
+    public class InventoryReceiptChargeTaxController : BaseController<tblICInventoryReceiptChargeTax>
     {
         private IInventoryReceiptChargeTaxBl _bl;
 
