@@ -6207,6 +6207,7 @@
     <Build Include="dbo\Stored Procedures\uspMFSetVendorLotNumber.sql" />
     <Build Include="dbo\Stored Procedures\uspMFSetLotAlias.sql" />
     <Build Include="dbo\Stored Procedures\uspPRRegeneratePaycheckPanelViews.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSetLotDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
