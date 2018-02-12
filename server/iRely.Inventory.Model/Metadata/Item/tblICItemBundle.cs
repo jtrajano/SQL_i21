@@ -114,19 +114,20 @@ namespace iRely.Inventory.Model
         public string strBundleItemDesc { get; set; }
         public string strBundleType { get; set; }
 
-        public int? intItemId { get; set; }
+        public int? intComponentItemId { get; set; }
+        public string strComponentItemNo { get; set; }
+        public string strComponentType { get; set; }
+        public string strComponentDescription { get; set; }
         public decimal? dblComponentQuantity { get; set; }
-        public int? intBundleUOMId { get; set; }
-        public string strBundleUOM { get; set; }
-        public string strBundleUOMType { get; set; }
+        public int? intComponentUOMId { get; set; }
+        public string strComponentUOM { get; set; }
+        public string strComponentUOMType { get; set; }
+        public decimal? dblComponentConvFactor { get; set; }
         public decimal? dblMarkUpOrDown { get; set; }
         public DateTime? dtmBeginDate { get; set; }
-
         public DateTime? dtmEndDate { get; set; }
 
-        public string strItemNo { get; set; }
-        public string strType { get; set; }
-        public string strDescription { get; set; }
+
         public string strLotTracking { get; set; }
         public string strInventoryTracking { get; set; }
         public string strStatus { get; set; }

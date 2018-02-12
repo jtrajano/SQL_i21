@@ -1167,26 +1167,7 @@ Ext.define('Inventory.view.ItemViewController', {
                         origValueField: 'strItemNo',
                         origUpdateField: 'strAddOnItemNo',
                         store: '{bundleItem}',
-                        defaultFilters: [{
-                            inner: [
-                                {
-                                    column: 'strType',
-                                    value: 'Inventory',
-                                    conjunction: 'or'
-                                },
-                                {
-                                    column: 'strType',
-                                    value: 'Other Charge',
-                                    conjunction: 'or'
-                                }
-                            ],
-                            conjunction: 'and'
-                        }, 
-                        {
-                            column: 'intCommodityId',
-                            value: '{current.intCommodityId}',
-                            conjunction: 'and'
-                        }]
+                        defaultFilters: '{addOnItemFilter}'
                     }
                 },
                 colAddOnDescription: 'strDescription',

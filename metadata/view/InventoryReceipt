@@ -2654,6 +2654,26 @@
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
+                                                                        "dataIndex": "strItemType",
+                                                                        "itemId": "colItemType",
+                                                                        "text": "Item Type"
+                                                                    },
+                                                                    "configAlternates": {
+                                                                        "dataIndex": "datafield",
+                                                                        "itemId": "string",
+                                                                        "text": "string"
+                                                                    },
+                                                                    "name": "MyColumn71",
+                                                                    "designerId": "1dcddf29-eea8-4bb3-b0f2-50c9d4250375"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.grid.column.Column",
+                                                                    "reference": {
+                                                                        "name": "columns",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
                                                                         "dataIndex": "strItemNo",
                                                                         "headerDrillDownClick": "onItemHeaderClick",
                                                                         "headerDrillDownText": "Open",
