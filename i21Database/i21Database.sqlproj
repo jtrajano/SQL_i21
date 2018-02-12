@@ -6205,6 +6205,7 @@
     <None Include="Scripts\Post-Deployment\SM\1810_UpdatePortalMenus.sql" />
     <Build Include="dbo\Stored Procedures\uspMFSetVendorLotNumber.sql" />
     <Build Include="dbo\Stored Procedures\uspMFSetLotAlias.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSetLotDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
