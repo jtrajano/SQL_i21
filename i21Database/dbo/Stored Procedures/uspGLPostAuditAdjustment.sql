@@ -376,10 +376,10 @@ IF ISNULL(@ysnRecap, 0) = 0
 			WHERE A.[intJournalId] IN (SELECT TOP 1 [intJournalId] FROM @tmpValidJournals)
 			
 		END
-		
-		EXEC uspGLBookEntries @GLEntries,1
+		DECLARE @PostResult INT
+		EXEC @PostResult = uspGLBookEntries @GLEntries,1
 
-		IF @@ERROR <> 0	GOTO Post_Rollback;
+		IF @@ERROR <> 0 OR @PostResult <> 0 GOTO Post_Rollback;
 	END
 ELSE
 	BEGIN
