@@ -462,7 +462,7 @@ END
 				DROP TABLE ##tmpItemReceiptIds
 
 			CREATE TABLE #tmpItemReceiptIds (
-				[intEntityVendorId] [INT] PRIMARY KEY
+				[intEntityVendorId] INT
 				,[intInventoryReceiptChargeId] INT
 				,[dblQtyReceived] NUMERIC(38,20)
 				,[dblCost] NUMERIC(38,20) 
