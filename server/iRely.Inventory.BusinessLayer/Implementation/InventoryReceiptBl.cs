@@ -257,57 +257,82 @@ namespace iRely.Inventory.BusinessLayer
 
         public async Task<GetObjectResult> GetReceiptCharges(GetParameter param)
         {
-            var query = _db.GetQuery<vyuICGetInventoryReceiptCharge>().Filter(param);
             var key = Methods.GetPrimaryKey<vyuICGetInventoryReceiptCharge>(_db.ContextManager);
-            //var data = await query
-            //    .Select(s => new {
-            //        s.intInventoryReceiptChargeId
-            //        , s.intInventoryReceiptId
-            //        , s.intContractId
-            //        , s.intContractDetailId
-            //        , s.intChargeId
-            //        , s.ysnInventoryCost
-            //        , s.strCostMethod
-            //        , s.dblRate
-            //        , s.intCostUOMId
-            //        , s.ysnSubCurrency
-            //        , s.intCurrencyId
-            //        , s.dblAmount
-            //        , s.strAllocateCostBy
-            //        , s.ysnAccrue
-            //        , s.intEntityVendorId
-            //        , s.ysnPrice
-            //        , s.dblAmountBilled
-            //        , s.dblAmountPaid
-            //        , s.dblAmountPriced
-            //        , s.intSort
-            //        , s.dblTax
-            //        , s.intConcurrencyId
-            //        , s.intTaxGroupId
-            //        , s.intForexRateTypeId
-            //        , s.dblForexRate
-            //        , s.dblQuantity
-            //        , s.strChargesLink
-            //        , strContractNumber = s.vyuICGetInventoryReceiptCharge.strContractNumber
-            //        , strItemNo = s.vyuICGetInventoryReceiptCharge.strItemNo
-            //        , strItemDescription = s.vyuICGetInventoryReceiptCharge.strItemDescription
-		          //  , strCostUOM = s.vyuICGetInventoryReceiptCharge.strCostUOM
-            //        , strUnitType = s.vyuICGetInventoryReceiptCharge.strUnitType
-            //        , strOnCostType = s.vyuICGetInventoryReceiptCharge.strOnCostType
-            //        , strVendorId = s.vyuICGetInventoryReceiptCharge.strVendorId
-            //        , strVendorName = s.vyuICGetInventoryReceiptCharge.strVendorName
-            //        , strCurrency = s.vyuICGetInventoryReceiptCharge.strCurrency
-            //        , strTaxGroup = s.vyuICGetInventoryReceiptCharge.strTaxGroup
-            //        , strForexRateType = s.vyuICGetInventoryReceiptCharge.strForexRateType
-            //        , strCostType = s.vyuICGetInventoryReceiptCharge.strCostType
-            //        //, tblICInventoryReceiptChargeTaxes = s.tblICInventoryReceiptChargeTaxes
-            //    }).AsNoTracking().ToListAsync(param.cancellationToken);
-
-            return new GetObjectResult()
+            try
             {
-                data = await query.Execute(param, key, "DESC").ToListAsync(param.cancellationToken).ConfigureAwait(false),
-                total = await query.CountAsync(param.cancellationToken)
-            };
+                var query = _db.GetQuery<tblICInventoryReceiptCharge>()
+                    .Select(s => new
+                    {
+                        s.dblAmount,
+                        s.dblAmountBilled,
+                        s.dblAmountPaid,
+                        s.dblAmountPriced,
+                        s.dblForexRate,
+                        s.dblQuantity,
+                        s.dblRate,
+                        s.dblTax,
+                        s.intChargeId,
+                        s.intConcurrencyId,
+                        s.intContractId,
+                        s.intCostUOMId,
+                        s.intEntityVendorId,
+                        s.intForexRateTypeId,
+                        s.intInventoryReceiptChargeId,
+                        s.intInventoryReceiptId,
+                        s.intSort,
+                        s.intTaxGroupId,
+                        s.strAllocateCostBy,
+                        s.strChargesLink,
+                        s.strCostMethod,
+                        s.ysnAccrue,
+                        s.ysnInventoryCost,
+                        s.ysnPrice,
+                        s.ysnSubCurrency,
+                        s.vyuICGetInventoryReceiptCharge.dtmReceiptDate,
+                        s.vyuICGetInventoryReceiptCharge.intContractSeq,
+                        s.vyuICGetInventoryReceiptCharge.intCostUnitMeasureId,
+                        s.vyuICGetInventoryReceiptCharge.intOnCostTypeId,
+                        s.vyuICGetInventoryReceiptCharge.strBillOfLading,
+                        s.vyuICGetInventoryReceiptCharge.strContractNumber,
+                        s.vyuICGetInventoryReceiptCharge.strCostType,
+                        s.vyuICGetInventoryReceiptCharge.strCostUOM,
+                        s.vyuICGetInventoryReceiptCharge.strCurrency,
+                        s.vyuICGetInventoryReceiptCharge.strForexRateType,
+                        s.vyuICGetInventoryReceiptCharge.strItemDescription,
+                        s.vyuICGetInventoryReceiptCharge.strItemNo,
+                        s.vyuICGetInventoryReceiptCharge.strLocationName,
+                        s.vyuICGetInventoryReceiptCharge.strOnCostType,
+                        s.vyuICGetInventoryReceiptCharge.strReceiptNumber,
+                        s.vyuICGetInventoryReceiptCharge.strReceiptVendor,
+                        s.vyuICGetInventoryReceiptCharge.strTaxGroup,
+                        s.vyuICGetInventoryReceiptCharge.strUnitType,
+                        s.vyuICGetInventoryReceiptCharge.strVendorId,
+                        s.vyuICGetInventoryReceiptCharge.strVendorName,
+                        s.vyuICGetInventoryReceiptCharge.tblICInventoryReceiptCharge.tblICInventoryReceiptChargeTaxes
+                    })
+                    .Filter(param)
+                    .AsNoTracking();
+
+                return new GetObjectResult
+                {
+                    data = await query.Execute(param, key, "DESC").ToListAsync(param.cancellationToken),
+                    total = await query.CountAsync(param.cancellationToken)
+                };
+            }
+            catch(Exception ex)
+            {
+                return await Task.FromResult(new GetObjectResult
+                {
+                    data = ex.Message + (ex.InnerException != null ? ex.InnerException.Message : ""),
+                    success = false,
+                    total = 0
+                });
+            }
+            //return new GetObjectResult()
+            //{
+            //    data = await query.Execute(param, key, "DESC").ToListAsync(param.cancellationToken),
+            //    total = await query.CountAsync(param.cancellationToken)
+            //};
         }
 
         public override async Task<BusinessResult<tblICInventoryReceipt>> SaveAsync(bool continueOnConflict)

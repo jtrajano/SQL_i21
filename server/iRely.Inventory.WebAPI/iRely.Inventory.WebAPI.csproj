@@ -392,6 +392,7 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\BrandController.cs" />
     <Compile Include="Controllers\BuildAssemblyController.cs" />
     <Compile Include="Controllers\CategoryAccountController.cs" />
@@ -464,7 +465,7 @@
     <Compile Include="Controllers\StorageUnitTypeController.cs" />
     <Compile Include="Controllers\TagController.cs" />
     <Compile Include="Controllers\UnitMeasureController.cs" />
-    <Compile Include="Controllers\InventoryShipmentItemLotController.cs" />    
+    <Compile Include="Controllers\InventoryShipmentItemLotController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>

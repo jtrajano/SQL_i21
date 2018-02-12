@@ -13,7 +13,7 @@ using System.Web.Http.ModelBinding;
 
 namespace iRely.Inventory.WebApi
 {
-    public class InventoryReceiptController : BaseApiController<tblICInventoryReceipt>
+    public class InventoryReceiptController : BaseController<tblICInventoryReceipt>
     {
         private IInventoryReceiptBl _bl;
 
@@ -40,6 +40,11 @@ namespace iRely.Inventory.WebApi
         [HttpGet]
         public async Task<HttpResponseMessage> GetReceiptCharges([ModelBinder] GetParameter param)
         {
+            if (!ModelState.IsValid)
+            {
+                var errorList = GetErrorListFromModelState(ModelState);
+                return await Task.FromResult(Request.CreateResponse(HttpStatusCode.BadRequest, errorList));
+            }
             var result = await _bl.GetReceiptCharges(param);
             return Request.CreateResponse(HttpStatusCode.OK, result);
         }

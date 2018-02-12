@@ -24,5 +24,7 @@ namespace iRely.Inventory.Model
         public decimal? dblCost { get; set; }
         public bool? ysnTaxAdjusted { get; set; }
         public bool? ysnCheckoffTax { get; set; }
+        public int? intUnitMeasureId { get; set; }
+        public string strUnitMeasure { get; set; }
     }
 }
