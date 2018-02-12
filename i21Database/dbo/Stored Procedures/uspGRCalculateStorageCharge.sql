@@ -131,6 +131,8 @@ BEGIN TRY
 		SET @ErrMsg = 'For test Processtype only, DeliveryDate must and should be supplied.'
 		RAISERROR (@ErrMsg,16,1)
 	END
+	
+	SET @dblFlatFeeTotal = ISNULL(@dblFlatFeeTotal, 0)
 
 	IF @intCustomerStorageId > 0
 	BEGIN
@@ -677,7 +679,7 @@ BEGIN TRY
 				,[CalculatedNumberOfDays]			= @CalculatedNumberOfDays 
 				,[dblStorageRate]					= @dblStorageRate
 				,[dblStorageDuePerUnit]				= @dblStorageRate * ISNULL(@CalculatedNumberOfDays,0)
-				,[dblCummulativeStorageDuePerUnit]	= @dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+				,[dblCummulativeStorageDuePerUnit]	= @dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 			END
 			
 			SELECT @intSchedulePeriodId = MIN(intSchedulePeriodId)
@@ -1079,7 +1081,7 @@ BEGIN TRY
 								WHEN @FirstMonthFullChargeApplicable=1 THEN @dblStorageRate 
 								ELSE (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
 							  END
-							,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+							,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 							,@TotalMonthsApplicableForStorageCharge
 							
 							SET @dtmDeliveryDate =CASE 
@@ -1133,7 +1135,7 @@ BEGIN TRY
 									WHEN @FirstMonthFullChargeApplicable=1 THEN @dblStorageRate 
 									ELSE (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0))) + 1)
 								  END
-								,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+								,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 								,@TotalMonthsApplicableForStorageCharge
 								
 								SET @dtmDeliveryDate =DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0)) + 1	
@@ -1170,7 +1172,7 @@ BEGIN TRY
 											,'Full Month'
 											,DATEDIFF(MONTH, @dtmDeliveryDate, @dtmEndingDate) + 1
 											,@dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, @dtmEndingDate) + 1)
-											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 											,@TotalMonthsApplicableForStorageCharge
 													
 										SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmEndingDate) + 1, 0)) + 1
@@ -1205,7 +1207,7 @@ BEGIN TRY
 											,'Full Month'
 											,DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1
 											,@dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
-											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 											,@TotalMonthsApplicableForStorageCharge
 											
 										SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0)) + 1
@@ -1254,7 +1256,7 @@ BEGIN TRY
 											WHEN @strLastMonth = 'Full Month' THEN @dblStorageRate 
 											ELSE (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
 										 END 
-										,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+										,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 										,@TotalMonthsApplicableForStorageCharge
 
 										SET @dtmDeliveryDate =CASE 
@@ -1299,7 +1301,7 @@ BEGIN TRY
 											,'Full Month'
 											,DATEDIFF(MONTH, @dtmDeliveryDate, @dtmEndingDate) + 1
 											,@dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, @dtmEndingDate) + 1)
-											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 											,@TotalMonthsApplicableForStorageCharge
 											
 										SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmEndingDate) + 1, 0)) + 1
@@ -1334,7 +1336,7 @@ BEGIN TRY
 											,'Full Month'
 											,DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1
 											,@dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
-											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 											,@TotalMonthsApplicableForStorageCharge
 											
 										SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0)) + 1
@@ -1367,7 +1369,7 @@ BEGIN TRY
 											WHEN @strLastMonth = 'Full Month' THEN @dblStorageRate 
 											ELSE (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
 										 END 
-										,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+										,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 										,@TotalMonthsApplicableForStorageCharge
 
 										SET @dtmDeliveryDate =CASE 
@@ -1444,7 +1446,7 @@ BEGIN TRY
 								WHEN @FirstMonthFullChargeApplicable=1 THEN @dblStorageRate 
 								ELSE (@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
 							  END
-							,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+							,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 							,@TotalMonthsApplicableForStorageCharge
 							
 							SET @dtmDeliveryDate =CASE 
@@ -1486,7 +1488,7 @@ BEGIN TRY
 									,'Full Month'
 									,1
 									,@dblStorageRate
-									,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+									,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 									,@TotalMonthsApplicableForStorageCharge
 									
 									SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0)) + 1
@@ -1520,7 +1522,7 @@ BEGIN TRY
 									,'Number of Days'
 									,DATEDIFF(DAY, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0))) + 1
 									,(@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0))) + 1)
-									,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+									,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 									,@TotalMonthsApplicableForStorageCharge
 									
 									SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0)) + 1
@@ -1561,7 +1563,7 @@ BEGIN TRY
 										,'Full Month'
 										,DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1
 										,@dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
-										,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+										,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 										,@TotalMonthsApplicableForStorageCharge
 											
 										SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0)) + 1
@@ -1596,7 +1598,7 @@ BEGIN TRY
 											,'Full Month'
 											,1
 											,@dblStorageRate
-											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 											,@TotalMonthsApplicableForStorageCharge
 											
 											SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate) + 1, 0)) + 1
@@ -1630,7 +1632,7 @@ BEGIN TRY
 											,'Number of Days'
 											,DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1
 											,(@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
-											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 											,@TotalMonthsApplicableForStorageCharge
 											
 											SET @dtmDeliveryDate = @StorageChargeDate + 1
@@ -1668,7 +1670,7 @@ BEGIN TRY
 											,'Full Month'
 											,1
 											,@dblStorageRate
-											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 											,@TotalMonthsApplicableForStorageCharge
 											
 											SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate) + 1, 0)) + 1
@@ -1702,7 +1704,7 @@ BEGIN TRY
 											,'Number of Days'
 											,DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1
 											,(@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
-											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 											,@TotalMonthsApplicableForStorageCharge
 											
 											SET @dtmDeliveryDate = @StorageChargeDate + 1
@@ -1746,7 +1748,7 @@ BEGIN TRY
 										,'Full Month'
 										,DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1
 										,@dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
-										,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+										,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 										,@TotalMonthsApplicableForStorageCharge
 											
 										SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0)) + 1
@@ -1781,7 +1783,7 @@ BEGIN TRY
 											,'Full Month'
 											,1
 											,@dblStorageRate
-											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 											,@TotalMonthsApplicableForStorageCharge
 											
 											SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate) + 1, 0)) + 1
@@ -1815,7 +1817,7 @@ BEGIN TRY
 											,'Number of Days'
 											,DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1
 											,(@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
-											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 											,@TotalMonthsApplicableForStorageCharge
 											
 											SET @dtmDeliveryDate = @StorageChargeDate + 1
@@ -1853,7 +1855,7 @@ BEGIN TRY
 											,'Full Month'
 											,1
 											,@dblStorageRate
-											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 											,@TotalMonthsApplicableForStorageCharge
 											
 											SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate) + 1, 0)) + 1
@@ -1887,7 +1889,7 @@ BEGIN TRY
 											,'Number of Days'
 											,DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1
 											,(@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
-											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 											,@TotalMonthsApplicableForStorageCharge
 											
 											SET @dtmDeliveryDate = @StorageChargeDate + 1
@@ -1953,7 +1955,7 @@ BEGIN TRY
 								,'Full Month'
 								,1										
 								,@dblStorageRate
-								,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+								,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 								,@TotalMonthsApplicableForStorageCharge										
 									
 								SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0)) + 1
@@ -1989,7 +1991,7 @@ BEGIN TRY
 										,'Full Month'
 										,1
 										,@dblStorageRate
-										,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+										,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 										,@TotalMonthsApplicableForStorageCharge										
 									
 									SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0)) + 1
@@ -2024,7 +2026,7 @@ BEGIN TRY
 										,'Number of Days'
 										,DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1
 										,(@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
-										,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+										,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 										,@TotalMonthsApplicableForStorageCharge
 											
 										SET @dtmDeliveryDate = DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1 									
@@ -2065,7 +2067,7 @@ BEGIN TRY
 									,'Full Month'
 									,1
 									,@dblStorageRate
-									,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+									,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 									,@TotalMonthsApplicableForStorageCharge
 											
 									SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0)) + 1
@@ -2100,7 +2102,7 @@ BEGIN TRY
 									,'Number of Days'
 									,DATEDIFF(DAY, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0))) + 1
 									,(@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0))) + 1)
-									,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+									,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 									,@TotalMonthsApplicableForStorageCharge
 										
 									SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0)) + 1
@@ -2138,7 +2140,7 @@ BEGIN TRY
 										,'Full Month'
 										,DATEDIFF(MONTH, @dtmDeliveryDate, @dtmEndingDate) + 1
 										,@dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, @dtmEndingDate) + 1)
-										,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+										,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 										,@TotalMonthsApplicableForStorageCharge
 										
 										SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmEndingDate) + 1, 0)) + 1
@@ -2173,7 +2175,7 @@ BEGIN TRY
 										,'Full Month'
 										,(DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
 										,@dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
-										,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+										,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 										,@TotalMonthsApplicableForStorageCharge
 										
 										SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0)) + 1
@@ -2208,7 +2210,7 @@ BEGIN TRY
 											,'Full Month'
 											,1
 											,@dblStorageRate
-											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 											,@TotalMonthsApplicableForStorageCharge
 											
 											SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate) + 1, 0)) + 1
@@ -2243,7 +2245,7 @@ BEGIN TRY
 												,'Number of Days'
 												,DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1
 												,(@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
-												,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+												,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 												,@TotalMonthsApplicableForStorageCharge
 												
 												SET @dtmDeliveryDate = @StorageChargeDate + 1
@@ -2286,7 +2288,7 @@ BEGIN TRY
 										,'Full Month'
 										,DATEDIFF(MONTH, @dtmDeliveryDate, @dtmEndingDate) + 1
 										,@dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, @dtmEndingDate) + 1)
-										,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+										,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 										,@TotalMonthsApplicableForStorageCharge
 												
 										SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmEndingDate) + 1, 0)) + 1
@@ -2321,7 +2323,7 @@ BEGIN TRY
 										,'Full Month'
 										,DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1
 										,@dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
-										,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+										,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 										,@TotalMonthsApplicableForStorageCharge
 												
 										SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0)) + 1
@@ -2356,7 +2358,7 @@ BEGIN TRY
 											,'Full Month'
 											,1
 											,@dblStorageRate
-											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 											,@TotalMonthsApplicableForStorageCharge								
 												
 										SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate) + 1, 0)) + 1
@@ -2391,7 +2393,7 @@ BEGIN TRY
 											,'Number of Days'
 											,DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1
 											,(@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
-											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 											,@TotalMonthsApplicableForStorageCharge
 												
 											SET @dtmDeliveryDate = @StorageChargeDate + 1
@@ -2442,7 +2444,7 @@ BEGIN TRY
 							,'Full Month'
 							,1
 							,@dblStorageRate
-							,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+							,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 							,@TotalMonthsApplicableForStorageCharge											
 											
 												
@@ -2479,7 +2481,7 @@ BEGIN TRY
 								,'Full Month'
 								,1
 								,@dblStorageRate
-								,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+								,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 								,@TotalMonthsApplicableForStorageCharge
 													
 								SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0)) + 1
@@ -2513,7 +2515,7 @@ BEGIN TRY
 								,'Number of Days'
 								,DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1
 								,(@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
-								,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+								,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 								,@TotalMonthsApplicableForStorageCharge
 												
 								SET @dtmDeliveryDate = @StorageChargeDate + 1
@@ -2554,7 +2556,7 @@ BEGIN TRY
 								,'Full Month'
 								,1
 								,@dblStorageRate
-								,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+								,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 								,@TotalMonthsApplicableForStorageCharge
 													
 								SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0)) + 1
@@ -2588,7 +2590,7 @@ BEGIN TRY
 								,'Number of Days'
 								,(DATEDIFF(DAY, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0))) + 1)
 								,(@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0))) + 1)
-								,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+								,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 								,@TotalMonthsApplicableForStorageCharge	s
 												
 								SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0)) + 1
@@ -2624,7 +2626,7 @@ BEGIN TRY
 								,'Full Month'
 								,DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1
 								,@dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
-								,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+								,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 								,@TotalMonthsApplicableForStorageCharge
 												
 								SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0)) + 1
@@ -2660,7 +2662,7 @@ BEGIN TRY
 									,'Full Month'
 									,1
 									,@dblStorageRate
-									,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+									,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 									,@TotalMonthsApplicableForStorageCharge												
 												
 									SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate) + 1, 0)) + 1
@@ -2694,7 +2696,7 @@ BEGIN TRY
 									,'Number of Days'
 									,DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1
 									,(@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
-									,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+									,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 									,@TotalMonthsApplicableForStorageCharge										
 												 
 												
@@ -2734,7 +2736,7 @@ BEGIN TRY
 								,'Full Month'
 								,DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1
 								,@dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
-								,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+								,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 								,@TotalMonthsApplicableForStorageCharge												
 												
 								SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0)) + 1
@@ -2769,7 +2771,7 @@ BEGIN TRY
 									,'Full Month'
 									,1
 									,@dblStorageRate
-									,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+									,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 									,@TotalMonthsApplicableForStorageCharge												
 												
 									SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate) + 1, 0)) + 1
@@ -2803,7 +2805,7 @@ BEGIN TRY
 									,'Number of Days'
 									,DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1
 									,(@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
-									,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+									,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 									,@TotalMonthsApplicableForStorageCharge	
 												
 									SET @dtmDeliveryDate = @StorageChargeDate + 1
@@ -2861,7 +2863,7 @@ BEGIN TRY
 								,'Full Month'
 								,1
 								,@dblStorageRate
-								,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+								,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 								,@TotalMonthsApplicableForStorageCharge
 		
 								SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0)) + 1
@@ -2897,7 +2899,7 @@ BEGIN TRY
 									,'Full Month'
 									,1
 									,@dblStorageRate
-									,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+									,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 									,@TotalMonthsApplicableForStorageCharge
 									
 									SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0)) + 1
@@ -2931,7 +2933,7 @@ BEGIN TRY
 									,'Number of Days'
 									,DATEDIFF(DAY, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0))) + 1
 									,(@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0))) + 1)
-									,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+									,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 									,@TotalMonthsApplicableForStorageCharge
 										
 									SET @dtmDeliveryDate = @StorageChargeDate + 1
@@ -2972,7 +2974,7 @@ BEGIN TRY
 									,'Full Month'
 									,1
 									,@dblStorageRate
-									,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+									,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 									,@TotalMonthsApplicableForStorageCharge
 									
 									SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0)) + 1
@@ -3006,7 +3008,7 @@ BEGIN TRY
 									,'Number of Days'
 									,DATEDIFF(DAY, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0))) + 1
 									,(@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0))) + 1)
-									,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+									,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 									,@TotalMonthsApplicableForStorageCharge
 									
 									SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @dtmDeliveryDate) + 1, 0)) + 1
@@ -3047,7 +3049,7 @@ BEGIN TRY
 										,'Full Month'
 										,DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1
 										,@dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
-										,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+										,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 										,@TotalMonthsApplicableForStorageCharge
 											
 										SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0)) + 1
@@ -3082,7 +3084,7 @@ BEGIN TRY
 											,'Full Month'
 											,1
 											,@dblStorageRate
-											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 											,@TotalMonthsApplicableForStorageCharge
 											
 											SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate) + 1, 0)) + 1
@@ -3116,7 +3118,7 @@ BEGIN TRY
 											,'Number of Days'
 											,DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1
 											,(@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
-											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 											,@TotalMonthsApplicableForStorageCharge
 											
 											SET @dtmDeliveryDate = @StorageChargeDate + 1
@@ -3154,7 +3156,7 @@ BEGIN TRY
 											,'Full Month'
 											,1
 											,@dblStorageRate
-											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 											,@TotalMonthsApplicableForStorageCharge
 											
 											SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate) + 1, 0)) + 1
@@ -3188,7 +3190,7 @@ BEGIN TRY
 											,'Number of Days'
 											,DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1
 											,(@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
-											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 											,@TotalMonthsApplicableForStorageCharge
 											
 											SET @dtmDeliveryDate = @StorageChargeDate + 1
@@ -3232,7 +3234,7 @@ BEGIN TRY
 										,'Full Month'
 										,DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1
 										,@dblStorageRate * (DATEDIFF(MONTH, @dtmDeliveryDate, DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0))) + 1)
-										,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+										,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 										,@TotalMonthsApplicableForStorageCharge
 											
 										SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate), 0)) + 1
@@ -3267,7 +3269,7 @@ BEGIN TRY
 											,'Full Month'
 											,1
 											,@dblStorageRate
-											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 											,@TotalMonthsApplicableForStorageCharge
 											
 											SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate) + 1, 0)) + 1
@@ -3301,7 +3303,7 @@ BEGIN TRY
 											,'Number of Days'
 											,DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1
 											,(@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
-											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 											,@TotalMonthsApplicableForStorageCharge
 											
 											SET @dtmDeliveryDate = @StorageChargeDate + 1
@@ -3339,7 +3341,7 @@ BEGIN TRY
 											,'Full Month'
 											,1
 											,@dblStorageRate
-											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 											,@TotalMonthsApplicableForStorageCharge
 											
 											SET @dtmDeliveryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, @StorageChargeDate) + 1, 0)) + 1
@@ -3373,7 +3375,7 @@ BEGIN TRY
 											,'Number of Days'
 											,DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1
 											,(@dblStorageRate/DATEDIFF(dd,@dtmDeliveryDate,DATEADD(m,1,@dtmDeliveryDate))) * (DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1)
-											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFeeRate ELSE 0 END
+											,@dblStorageDuePerUnit + CASE WHEN @strFeeType = 'Flat' THEN @dblFlatFeeTotal ELSE 0 END
 											,@TotalMonthsApplicableForStorageCharge
 											
 											SET @dtmDeliveryDate = @StorageChargeDate + 1
