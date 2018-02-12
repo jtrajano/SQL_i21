@@ -1,5 +1,5 @@
-﻿CREATE PROCEDURE [uspMFSetLotExpiryDate] @intLotId INT
-	,@dtmNewExpiryDate DATETIME
+﻿CREATE PROCEDURE uspMFSetVendorLotNumber @intLotId INT
+	,@strNewVendorLotNumber NVARCHAR(50)
 	,@intUserId INT
 	,@strReasonCode NVARCHAR(MAX) = NULL
 	,@strNotes NVARCHAR(MAX) = NULL
@@ -9,14 +9,6 @@ AS
 BEGIN TRY
 	DECLARE @intItemId INT
 		,@intLocationId INT
-		,@intSubLocationId INT
-		,@intStorageLocationId INT
-		,@strLotNumber NVARCHAR(50)
-		,@intSourceId INT
-		,@intSourceTransactionTypeId INT
-		,@intLotStatusId INT
-		,@dtmLotExpiryDate DATETIME
-		,@dtmLotCreateDate DATETIME
 		,@intInventoryAdjustmentId INT
 		,@TransactionCount INT
 		,@ErrMsg NVARCHAR(MAX)
@@ -26,6 +18,7 @@ BEGIN TRY
 		,@strDescription NVARCHAR(MAX)
 		,@intTransactionCount INT
 		,@ysnApplyTransactionByParentLot BIT
+		,@strVendorLotNumber NVARCHAR(50)
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -33,28 +26,19 @@ BEGIN TRY
 
 	DECLARE @tblLotsWithSameParentLot TABLE (
 		intLotRecordId INT Identity(1, 1)
-		,strLotNumber NVARCHAR(100)
 		,intLotId INT
-		,intParentLotId INT
-		,intSubLocationId INT
-		,intStorageLocationId INT
-		,intLocationId INT
 		)
 
 	SELECT @intItemId = intItemId
 		,@intLocationId = intLocationId
-		,@intSubLocationId = intSubLocationId
-		,@intStorageLocationId = intStorageLocationId
-		,@strLotNumber = strLotNumber
-		,@dtmLotExpiryDate = dtmExpiryDate
-		,@dtmLotCreateDate = dtmDateCreated
+		,@strVendorLotNumber = strVendorLotNo
 		,@intParentLotId = intParentLotId
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
 	SELECT @ysnApplyTransactionByParentLot = IsNULL(ysnApplyTransactionByParentLot, 0)
 	FROM tblMFLotTransactionType
-	WHERE intTransactionTypeId = 18 --Inventory Adjustment - Expiry Date Change
+	WHERE intTransactionTypeId = 101 --Inventory Adjustment - Lot Alias
 
 	IF @ysnApplyTransactionByParentLot = 1
 	BEGIN
@@ -62,7 +46,7 @@ BEGIN TRY
 		FROM tblICLot
 		WHERE intParentLotId = @intParentLotId
 			AND intItemId = @intItemId
-			AND intLocationId=@intLocationId
+			AND intLocationId = @intLocationId
 	END
 	ELSE
 	BEGIN
@@ -72,19 +56,7 @@ BEGIN TRY
 	IF @dtmDate IS NULL
 		SELECT @dtmDate = GETDATE()
 
-	SELECT @intSourceId = 1
-		,@intSourceTransactionTypeId = 8
-
-	IF ISNULL(@strLotNumber, '') = ''
-	BEGIN
-		RAISERROR (
-				'Supplied lot is not available.'
-				,11
-				,1
-				)
-	END
-
-	IF @dtmLotExpiryDate = @dtmNewExpiryDate
+	IF @strVendorLotNumber = @strNewVendorLotNumber
 	BEGIN
 		IF @ysnBulkChange = 1
 		BEGIN
@@ -92,29 +64,7 @@ BEGIN TRY
 		END
 
 		RAISERROR (
-				'Old and new expiry date cannot be same.'
-				,11
-				,1
-				)
-	END
-
-	IF @dtmLotCreateDate > @dtmNewExpiryDate
-	BEGIN
-		RAISERROR (
-				'Expiry date should be later than the create date.'
-				,11
-				,1
-				)
-	END
-
-	IF EXISTS (
-			SELECT 1
-			FROM tblWHSKU
-			WHERE intLotId = @intLotId
-			)
-	BEGIN
-		RAISERROR (
-				'This lot is being managed in warehouse. All transactions should be done in warehouse module. You can only change the lot status from inventory view.'
+				'Old and new lot alias cannot be same.'
 				,11
 				,1
 				)
@@ -125,58 +75,38 @@ BEGIN TRY
 
 	IF (@intChildLotCount > 1)
 	BEGIN
+		UPDATE tblICLot
+		SET strVendorLotNo = @strNewVendorLotNumber
+		WHERE intParentLotId = @intParentLotId
+			AND intItemId = @intItemId
+			AND intLocationId = @intLocationId
+
 		INSERT INTO @tblLotsWithSameParentLot
-		SELECT strLotNumber
-			,intLotId
-			,intParentLotId
-			,intSubLocationId
-			,intStorageLocationId
-			,intLocationId
+		SELECT intLotId
 		FROM tblICLot
 		WHERE intParentLotId = @intParentLotId
-		AND intItemId = @intItemId
-			AND intLocationId=@intLocationId
+			AND intItemId = @intItemId
+			AND intLocationId = @intLocationId
 
 		SELECT @intLotRecordId = MIN(intLotRecordId)
 		FROM @tblLotsWithSameParentLot
 
 		WHILE (@intLotRecordId IS NOT NULL)
 		BEGIN
-			SET @strLotNumber = NULL
-			SET @intSubLocationId = NULL
-			SET @intStorageLocationId = NULL
-			SET @intLocationId = NULL
-
-			SELECT @strLotNumber = strLotNumber
-				,@intSubLocationId = intSubLocationId
-				,@intStorageLocationId = intStorageLocationId
-				,@intLocationId = intLocationId
+			SELECT @intLotId = intLotId
 			FROM @tblLotsWithSameParentLot
 			WHERE intLotRecordId = @intLotRecordId
 
-			EXEC uspICInventoryAdjustment_CreatePostExpiryDateChange @intItemId
-				,@dtmDate
-				,@intLocationId
-				,@intSubLocationId
-				,@intStorageLocationId
-				,@strLotNumber
-				,@dtmNewExpiryDate
-				,@intSourceId
-				,@intSourceTransactionTypeId
-				,@intUserId
-				,@intInventoryAdjustmentId OUTPUT
-				,@strDescription
-
 			EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmDate
-				,@intTransactionTypeId = 18
+				,@intTransactionTypeId = 102
 				,@intItemId = @intItemId
 				,@intSourceLotId = @intLotId
 				,@intDestinationLotId = NULL
 				,@dblQty = NULL
 				,@intItemUOMId = NULL
 				,@intOldItemId = NULL
-				,@dtmOldExpiryDate = @dtmLotExpiryDate
-				,@dtmNewExpiryDate = @dtmNewExpiryDate
+				,@dtmOldExpiryDate = NULL
+				,@dtmNewExpiryDate = NULL
 				,@intOldLotStatusId = NULL
 				,@intNewLotStatusId = NULL
 				,@intUserId = @intUserId
@@ -184,6 +114,10 @@ BEGIN TRY
 				,@strReason = @strReasonCode
 				,@intLocationId = @intLocationId
 				,@intInventoryAdjustmentId = @intInventoryAdjustmentId
+				,@strOldLotAlias = NULL
+				,@strNewLotAlias = NULL
+				,@strOldVendorLotNumber = @strVendorLotNumber
+				,@strNewVendorLotNumber = @strNewVendorLotNumber
 
 			SELECT @intLotRecordId = MIN(intLotRecordId)
 			FROM @tblLotsWithSameParentLot
@@ -192,29 +126,20 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
-		EXEC uspICInventoryAdjustment_CreatePostExpiryDateChange @intItemId
-			,@dtmDate
-			,@intLocationId
-			,@intSubLocationId
-			,@intStorageLocationId
-			,@strLotNumber
-			,@dtmNewExpiryDate
-			,@intSourceId
-			,@intSourceTransactionTypeId
-			,@intUserId
-			,@intInventoryAdjustmentId OUTPUT
-			,@strDescription
+		UPDATE tblICLot
+		SET strVendorLotNo = @strNewVendorLotNumber
+		WHERE intLotId = @intLotId
 
 		EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmDate
-			,@intTransactionTypeId = 18
+			,@intTransactionTypeId = 102
 			,@intItemId = @intItemId
 			,@intSourceLotId = @intLotId
 			,@intDestinationLotId = NULL
 			,@dblQty = NULL
 			,@intItemUOMId = NULL
 			,@intOldItemId = NULL
-			,@dtmOldExpiryDate = @dtmLotExpiryDate
-			,@dtmNewExpiryDate = @dtmNewExpiryDate
+			,@dtmOldExpiryDate = NULL
+			,@dtmNewExpiryDate = NULL
 			,@intOldLotStatusId = NULL
 			,@intNewLotStatusId = NULL
 			,@intUserId = @intUserId
@@ -222,6 +147,10 @@ BEGIN TRY
 			,@strReason = @strReasonCode
 			,@intLocationId = @intLocationId
 			,@intInventoryAdjustmentId = @intInventoryAdjustmentId
+			,@strOldLotAlias = NULL
+			,@strNewLotAlias = NULL
+			,@strOldVendorLotNumber = @strVendorLotNumber
+			,@strNewVendorLotNumber = @strNewVendorLotNumber
 	END
 
 	IF @intTransactionCount = 0
@@ -242,3 +171,4 @@ BEGIN CATCH
 			,'WITH NOWAIT'
 			)
 END CATCH
+

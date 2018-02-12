@@ -18,6 +18,10 @@
 	,@intInventoryAdjustmentId INT
 	,@intOldItemOwnerId INT = NULL
 	,@intNewItemOwnerId INT = NULL
+	,@strOldLotAlias nvarchar(50)= NULL
+	,@strNewLotAlias nvarchar(50)= NULL
+	,@strOldVendorLotNumber nvarchar(50)= NULL
+	,@strNewVendorLotNumber nvarchar(50)= NULL
 	)
 AS
 BEGIN TRY
@@ -63,6 +67,10 @@ BEGIN TRY
 		,intInventoryAdjustmentId
 		,intOldItemOwnerId
 		,intNewItemOwnerId
+		,strOldLotAlias 
+		,strNewLotAlias 
+		,strOldVendorLotNumber 
+		,strNewVendorLotNumber 
 		)
 	SELECT @dtmDate
 		,@intTransactionTypeId
@@ -87,6 +95,10 @@ BEGIN TRY
 		,@intInventoryAdjustmentId
 		,@intOldItemOwnerId
 		,@intNewItemOwnerId
+		,@strOldLotAlias 
+		,@strNewLotAlias 
+		,@strOldVendorLotNumber 
+		,@strNewVendorLotNumber 
 END TRY
 
 BEGIN CATCH
