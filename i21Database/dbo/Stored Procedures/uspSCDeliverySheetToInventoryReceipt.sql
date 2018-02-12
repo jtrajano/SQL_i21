@@ -53,7 +53,10 @@ DECLARE @intInventoryReceiptItemId AS INT
 		,@intShipFrom AS INT
 		,@intCurrencyId AS INT
 		,@intHaulerId INT
-		,@intInventoryReceiptChargeId INT;
+		,@intInventoryReceiptChargeId INT
+		,@dblQtyReceived NUMERIC (38,20)
+		,@dblInventoryReceiptCost NUMERIC (38,20)
+		,@intTaxId INT;
 
 BEGIN 
 	SELECT DISTINCT	@intTicketItemUOMId = UM.intItemUOMId, @intItemId = SC.intItemId
@@ -461,25 +464,36 @@ END
 			CREATE TABLE #tmpItemReceiptIds (
 				[intEntityVendorId] [INT] PRIMARY KEY
 				,[intInventoryReceiptChargeId] INT
+				,[dblQtyReceived] NUMERIC(38,20)
+				,[dblCost] NUMERIC(38,20) 
+				,[intTaxGroupId] INT
 				UNIQUE ([intInventoryReceiptChargeId])
 			);
-			INSERT INTO #tmpItemReceiptIds([intEntityVendorId],[intInventoryReceiptChargeId]) 
-			SELECT rc.intEntityVendorId, rc.intInventoryReceiptChargeId
+			INSERT INTO #tmpItemReceiptIds([intEntityVendorId],[intInventoryReceiptChargeId],[dblQtyReceived],[dblCost],[intTaxGroupId]) 
+			SELECT rc.intEntityVendorId
+				  ,rc.intInventoryReceiptChargeId
+				  ,rc.dblQuantity - ISNULL(rc.dblQuantityBilled, 0) 
+				  ,CASE 
+						WHEN rc.strCostMethod = 'Per Unit' THEN rc.dblRate
+						ELSE rc.dblAmount
+					END
+				  ,rc.intTaxGroupId
 			FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptCharge rc
 						ON r.intInventoryReceiptId = rc.intInventoryReceiptId
 			WHERE	r.ysnPosted = 1
 					AND r.intInventoryReceiptId = @InventoryReceiptId
 					AND rc.ysnAccrue = 1 
+					AND rc.intEntityVendorId != r.intEntityVendorId
 
 			DECLARE ListThirdPartyVendor CURSOR LOCAL FAST_FORWARD
 			FOR
-			SELECT [intEntityVendorId],[intInventoryReceiptChargeId]
+			SELECT [intEntityVendorId],[intInventoryReceiptChargeId],[dblQtyReceived],[dblCost],[intTaxGroupId]
 			FROM #tmpItemReceiptIds;
 		
 			OPEN ListThirdPartyVendor;
 
 			-- Initial fetch attempt
-			FETCH NEXT FROM ListThirdPartyVendor INTO @intHaulerId, @intInventoryReceiptChargeId;
+			FETCH NEXT FROM ListThirdPartyVendor INTO @intHaulerId, @intInventoryReceiptChargeId, @dblQtyReceived, @dblInventoryReceiptCost, @intTaxId;
 			WHILE @@FETCH_STATUS = 0
 			BEGIN
 				INSERT INTO @thirdPartyVoucher (
@@ -488,19 +502,7 @@ END
 					,[dblCost]
 					,[intTaxGroupId]
 				)
-				SELECT	[intInventoryReceiptChargeId] = rc.intInventoryReceiptChargeId
-						,[dblQtyReceived] = rc.dblQuantity - ISNULL(rc.dblQuantityBilled, 0) 
-						,[dblCost] = 
-							CASE 
-								WHEN rc.strCostMethod = 'Per Unit' THEN rc.dblRate
-								ELSE rc.dblAmount
-							END 
-						,[intTaxGroupId] = rc.intTaxGroupId
-				FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptCharge rc
-						ON r.intInventoryReceiptId = rc.intInventoryReceiptId
-				WHERE	r.ysnPosted = 1
-						AND r.intInventoryReceiptId = @InventoryReceiptId
-						AND rc.ysnAccrue = 1 
+				VALUES(@intInventoryReceiptChargeId, @dblQtyReceived, @dblInventoryReceiptCost, @intTaxId)
 
 				SELECT @total = COUNT(*) FROM @thirdPartyVoucher;
 				IF (@total > 0)
@@ -541,7 +543,7 @@ END
 					END
 					DELETE FROM @thirdPartyVoucher
 				END
-				FETCH NEXT FROM ListThirdPartyVendor INTO @intHaulerId,@intInventoryReceiptChargeId;
+				FETCH NEXT FROM ListThirdPartyVendor INTO @intHaulerId,@intInventoryReceiptChargeId, @dblQtyReceived, @dblInventoryReceiptCost, @intTaxId;
 			END
 
 		END
