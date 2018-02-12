@@ -31,6 +31,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strAllocateCostBy).HasColumnName("strAllocateCostBy");
             this.Property(t => t.ysnAccrue).HasColumnName("ysnAccrue");
             this.Property(t => t.ysnPrice).HasColumnName("ysnPrice");
+            this.Property(t => t.strChargeEntity).HasColumnName("strChargeEntity");
             this.Property(t => t.intSort).HasColumnName("intSort");
 
             this.Property(t => t.ysnSubCurrency).HasColumnName("ysnSubCurrency");
