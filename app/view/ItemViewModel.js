@@ -993,6 +993,35 @@ Ext.define('Inventory.view.ItemViewModel', {
                 return true;
             }
         },
+
+        addOnItemFilter: function(get){
+            var itemId = get('current.intItemId');
+            
+            return [
+                // {
+                //     inner: [
+                //         {
+                //             column: 'strType',
+                //             value: 'Inventory',
+                //             conjunction: 'or'
+                //         },
+                //         {
+                //             column: 'strType',
+                //             value: 'Other Charge',
+                //             conjunction: 'or'
+                //         }
+                //     ],
+                //     conjunction: 'and'
+                // }, 
+                {
+                    column: 'intItemId',
+                    value: itemId,
+                    condition: 'noteq',
+                    conjunction: 'and'
+                }
+            ];
+        },
+
         hideBuildAssembly: function (get) {
             return true;
 //            if (get('current.strLotTracking') === 'No' && get('current.strType') === 'Assembly/Blend') {
