@@ -39,7 +39,7 @@ JOIN tblEMEntity em on ba.intEntityId=em.intEntityId and em.strName=ti.strName
 JOIN tblICCommodity c on c.strCommodityCode=ti.strCommodityCode
 JOIN tblSMCompanyLocation l on l.strLocationName=ti.strLocationName 
 JOIN vyuHDSalesPerson sp on sp.strName=ti.strSalespersonId and sp.strSalesPersonType=  'Sales Rep Entity' and sp.ysnActiveSalesPerson=1
-JOIN tblSMCurrency cur on fm.intCurrencyId=cur.intCurrencyID and cur.strCurrency=ti.strCurrency 
+JOIN tblSMCurrency cur on  cur.strCurrency=ti.strCurrency 
 JOIN tblRKFuturesMonth m on m.strFutureMonth=replace(ti.strFutureMonth,'-',' ') and m.intFutureMarketId=fm.intFutureMarketId
 Left JOIN tblRKOptionsMonth om on om.strOptionMonth=replace(ti.strOptionMonth,'-',' ') and om.intFutureMarketId=fm.intFutureMarketId 
 LEFT JOIN tblCTBook b on b.strBook=ti.strBook
