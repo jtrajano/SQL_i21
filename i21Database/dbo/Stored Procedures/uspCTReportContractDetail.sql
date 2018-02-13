@@ -59,59 +59,57 @@ BEGIN TRY
 	
 
 
-	SELECT	CD.intContractHeaderId,
-			CD.intContractSeq,
-			CONVERT(NVARCHAR(50),dtmStartDate,106) + ' - ' + CONVERT(NVARCHAR(50),dtmEndDate,106) strPeriod,
-			LTRIM(CD.dblQuantity) + ' ' + UM.strUnitMeasure strQunatity,
-			CD.dblQuantity,
-			CASE	WHEN	CD.intPricingTypeId IN (1,6) THEN LTRIM(CAST(CD.dblCashPrice AS NUMERIC(18, 6))) + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ' net' 
-					WHEN 	CD.intPricingTypeId = 2	THEN LTRIM(CAST(CD.dblBasis AS NUMERIC(18, 2))) + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ', ' + MO.strFutureMonth + CASE WHEN ISNULL(CH.ysnMultiplePriceFixation,0) = 0 THEN ' ('+ LTRIM(CAST(CD.dblNoOfLots AS INT)) +' Lots)' ELSE '' END 	
-			END	AS	strPrice,
-			CASE	WHEN	CD.intPricingTypeId IN (1,6) THEN LTRIM(CAST(CD.dblCashPrice AS NUMERIC(18, 6))) + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ' net' 
-					WHEN 	CD.intPricingTypeId = 2	THEN LTRIM(CAST(CD.dblBasis AS NUMERIC(18, 2))) + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ', ' + MO.strFutureMonth  	
-			END	AS	strAtlasPrice,
-			ISNULL(IC.strContractItemName,IM.strDescription) strDescription,
-			BM.strBagMark,
-			CD.strReference,
-			GETDATE() AS dtmETD,
-			CH.dtmContractDate,
-			EF.strFieldNumber strGarden,
-			CD.strGrade,
-			CD.dblNetWeight,
-			NU.strUnitMeasure strWeightUOM,
-			dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intNetWeightUOMId,1) dblUnitQty,
-			CD.dblCashPrice,
-			CY.strCurrency,
-			CD.dblTotalCost,
-			PU.strUnitMeasure strPriceUOM,
-			CASE 
-				WHEN UM.strUnitType='Quantity' THEN LTRIM(dbo.fnRemoveTrailingZeroes(CD.dblQuantity)) + ' bags/ ' + UM.strUnitMeasure+CASE WHEN CD.dblNetWeight IS NOT NULL THEN  ' (' ELSE '' END + ISNULL(LTRIM(dbo.fnRemoveTrailingZeroes(CD.dblNetWeight)),'')+ ' '+ ISNULL(U7.strUnitMeasure,'') +CASE WHEN U7.strUnitMeasure IS NOT NULL THEN   ')' ELSE '' END  
-				ELSE ISNULL(LTRIM(dbo.fnRemoveTrailingZeroes(CD.dblNetWeight)),'')+ ' '+ ISNULL(U7.strUnitMeasure,'') 
-			END
-			AS  strQuantityDesc,
-			CASE	WHEN	CD.intPricingTypeId IN (1,6) THEN LTRIM(CAST(CD.dblCashPrice AS NUMERIC(18, 2))) + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ' net' 
-					WHEN 	CD.intPricingTypeId = 2	THEN LTRIM(CAST(CD.dblBasis AS NUMERIC(18, 2))) + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ', ' + MO.strFutureMonth + CASE WHEN ISNULL(CH.ysnMultiplePriceFixation,0) = 0 THEN ' ('+ LTRIM(CAST(CD.dblNoOfLots AS INT)) +' Lots)' ELSE '' END 	
-			END	AS	strPriceDesc,
-			CASE 
-			WHEN ISNULL(ysnMultiplePriceFixation,0)=1 THEN
-				CASE 
-					WHEN UM.strUnitType='Quantity' AND @IntNoOFUniFormItemUOM=1 THEN LTRIM(dbo.fnRemoveTrailingZeroes(@TotalQuantity)) + ' bags/ ' + UM.strUnitMeasure+CASE WHEN CD.dblNetWeight IS NOT NULL AND @IntNoOFUniFormNetWeightUOM=1 THEN  ' (' ELSE '' END + ISNULL(LTRIM(dbo.fnRemoveTrailingZeroes(@TotalNetQuantity)),'')+ ' '+ ISNULL(U7.strUnitMeasure,'') +CASE WHEN U7.strUnitMeasure IS NOT NULL THEN   ')' ELSE '' END  
-					ELSE CASE WHEN @IntNoOFUniFormNetWeightUOM=1 THEN ISNULL(LTRIM(dbo.fnRemoveTrailingZeroes(@TotalNetQuantity)),'')+ ' '+ ISNULL(U7.strUnitMeasure,'') ELSE '' END
-				END
-			ELSE 
-				NULL 
-			END
-			AS  strTotalDesc,
-			CASE	WHEN	CD.intPricingTypeId = 1 THEN NULL
-					WHEN 	CD.intPricingTypeId = 2	THEN 'Lots :'
-			END	AS	lblLots,
-			CASE	WHEN	CD.intPricingTypeId = 1 THEN NULL
-					WHEN 	CD.intPricingTypeId = 2	THEN dbo.fnRemoveTrailingZeroes(@dblNoOfLots)
-			END	AS	dblNoOfLots,
-			AM.strAmendedColumns,
-			CO.strCommodityCode,
-			CD.strERPBatchNumber,
-			CD.strItemSpecification
+	SELECT	intContractHeaderId		= CD.intContractHeaderId,
+			intContractSeq			= CD.intContractSeq,
+			strPeriod				= CONVERT(NVARCHAR(50),dtmStartDate,106) + ' - ' + CONVERT(NVARCHAR(50),dtmEndDate,106),
+			strQunatity				= LTRIM(dbo.fnRemoveTrailingZeroes(CD.dblQuantity)) + ' ' + UM.strUnitMeasure,
+			dblQuantity				= CD.dblQuantity,
+			strPrice				= CASE	WHEN	CD.intPricingTypeId IN (1,6) THEN LTRIM(CAST(CD.dblCashPrice AS NUMERIC(18, 6))) + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ' net' 
+											WHEN 	CD.intPricingTypeId = 2	THEN LTRIM(CAST(CD.dblBasis AS NUMERIC(18, 2))) + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ', ' + MO.strFutureMonth + CASE WHEN ISNULL(CH.ysnMultiplePriceFixation,0) = 0 THEN ' ('+ LTRIM(CAST(CD.dblNoOfLots AS INT)) +' Lots)' ELSE '' END 	
+									  END,
+			strAtlasPrice			= CASE	WHEN	CD.intPricingTypeId IN (1,6) THEN LTRIM(CAST(CD.dblCashPrice AS NUMERIC(18, 6))) + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ' net' 
+											WHEN 	CD.intPricingTypeId = 2	THEN LTRIM(CAST(CD.dblBasis AS NUMERIC(18, 2))) + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ', ' + MO.strFutureMonth  	
+									  END,
+			strDescription			= ISNULL(IC.strContractItemName,IM.strDescription),
+			strBagMark				= BM.strBagMark,
+			strReference			= CD.strReference,
+			dtmETD					= GETDATE(),
+			dtmContractDate			= CH.dtmContractDate,
+			strGarden				= EF.strFieldNumber ,
+			strGrade				= CD.strGrade,
+			dblNetWeight			= CD.dblNetWeight,
+			strWeightUOM			= NU.strUnitMeasure,
+			dblUnitQty				= dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intNetWeightUOMId,1),
+			dblCashPrice			= CD.dblCashPrice,
+			strCurrency				= CY.strCurrency,
+			dblTotalCost			= CD.dblTotalCost,
+			strPriceUOM				= PU.strUnitMeasure ,
+			strQuantityDesc			= CASE 
+											WHEN UM.strUnitType='Quantity' THEN LTRIM(dbo.fnRemoveTrailingZeroes(CD.dblQuantity)) + ' bags/ ' + UM.strUnitMeasure+CASE WHEN CD.dblNetWeight IS NOT NULL THEN  ' (' ELSE '' END + ISNULL(LTRIM(dbo.fnRemoveTrailingZeroes(CD.dblNetWeight)),'')+ ' '+ ISNULL(U7.strUnitMeasure,'') +CASE WHEN U7.strUnitMeasure IS NOT NULL THEN   ')' ELSE '' END  
+											ELSE ISNULL(LTRIM(dbo.fnRemoveTrailingZeroes(CD.dblNetWeight)),'')+ ' '+ ISNULL(U7.strUnitMeasure,'') 
+									  END,
+			strPriceDesc			= CASE	WHEN	CD.intPricingTypeId IN (1,6) THEN LTRIM(CAST(CD.dblCashPrice AS NUMERIC(18, 2))) + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ' net' 
+											WHEN 	CD.intPricingTypeId = 2	THEN LTRIM(CAST(CD.dblBasis AS NUMERIC(18, 2))) + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ', ' + MO.strFutureMonth + CASE WHEN ISNULL(CH.ysnMultiplePriceFixation,0) = 0 THEN ' ('+ LTRIM(CAST(CD.dblNoOfLots AS INT)) +' Lots)' ELSE '' END 	
+									  END,
+			strTotalDesc			= CASE 
+											WHEN ISNULL(ysnMultiplePriceFixation,0)=1 THEN
+												CASE 
+													WHEN UM.strUnitType='Quantity' AND @IntNoOFUniFormItemUOM=1 THEN LTRIM(dbo.fnRemoveTrailingZeroes(@TotalQuantity)) + ' bags/ ' + UM.strUnitMeasure+CASE WHEN CD.dblNetWeight IS NOT NULL AND @IntNoOFUniFormNetWeightUOM=1 THEN  ' (' ELSE '' END + ISNULL(LTRIM(dbo.fnRemoveTrailingZeroes(@TotalNetQuantity)),'')+ ' '+ ISNULL(U7.strUnitMeasure,'') +CASE WHEN U7.strUnitMeasure IS NOT NULL THEN   ')' ELSE '' END  
+													ELSE CASE WHEN @IntNoOFUniFormNetWeightUOM=1 THEN ISNULL(LTRIM(dbo.fnRemoveTrailingZeroes(@TotalNetQuantity)),'')+ ' '+ ISNULL(U7.strUnitMeasure,'') ELSE '' END
+												END
+											ELSE 
+												NULL 
+									  END,
+			lblLots					= CASE	WHEN	CD.intPricingTypeId = 1 THEN NULL
+											WHEN 	CD.intPricingTypeId = 2	THEN 'Lots :'
+									  END,
+			dblNoOfLots				= CASE	WHEN	CD.intPricingTypeId = 1 THEN NULL
+											WHEN 	CD.intPricingTypeId = 2	THEN dbo.fnRemoveTrailingZeroes(@dblNoOfLots)
+									  END,
+			strAmendedColumns		= AM.strAmendedColumns,
+			strCommodityCode		= CO.strCommodityCode,
+			strERPBatchNumber		= CD.strERPBatchNumber,
+			strItemSpecification	= CD.strItemSpecification
 
 	FROM	tblCTContractDetail CD	
 	JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId	
