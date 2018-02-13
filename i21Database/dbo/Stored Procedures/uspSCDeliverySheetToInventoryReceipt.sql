@@ -56,7 +56,9 @@ DECLARE @intInventoryReceiptItemId AS INT
 		,@intInventoryReceiptChargeId INT
 		,@dblQtyReceived NUMERIC (38,20)
 		,@dblInventoryReceiptCost NUMERIC (38,20)
-		,@intTaxId INT;
+		,@intTaxId INT
+		,@vendorOrderNumber NVARCHAR(50)
+		,@voucherDate DATETIME;
 
 BEGIN 
 	SELECT DISTINCT	@intTicketItemUOMId = UM.intItemUOMId, @intItemId = SC.intItemId
@@ -336,6 +338,8 @@ SELECT	@strTransactionId = IR.strReceiptNumber
 		,@intShipFrom = IR.intShipFromId
 		,@intShipTo = IR.intLocationId
 		,@intCurrencyId = IR.intCurrencyId
+		,@vendorOrderNumber = IR.strVendorRefNo
+		,@voucherDate = IR.dtmReceiptDate
 FROM	dbo.tblICInventoryReceipt IR	        
 WHERE	IR.intInventoryReceiptId = @InventoryReceiptId		
 END
@@ -430,6 +434,8 @@ END
 						,@voucherDetailReceiptCharge = @voucherOtherCharges
 						,@shipTo = @intShipTo
 						,@shipFrom = @intShipFrom
+						,@vendorOrderNumber = @vendorOrderNumber
+						,@voucherDate = @voucherDate
 						,@currencyId = @intCurrencyId
 						,@billId = @intBillId OUTPUT
 			END
@@ -516,6 +522,8 @@ END
 					,@shipTo = @intLocationId
 					,@shipFrom = @intShipFrom
 					,@currencyId = @intCurrencyId
+					,@vendorOrderNumber = @vendorOrderNumber
+					,@voucherDate = @voucherDate
 					,@billId = @intBillId OUTPUT
 
 					IF ISNULL(@intBillId , 0) != 0

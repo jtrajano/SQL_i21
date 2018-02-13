@@ -63,7 +63,9 @@ DECLARE @intInventoryReceiptItemId AS INT
 		,@intInventoryReceiptChargeId INT
 		,@dblQtyReceived NUMERIC (38,20)
 		,@dblInventoryReceiptCost NUMERIC (38,20)
-		,@intTaxId INT;
+		,@intTaxId INT
+		,@vendorOrderNumber NVARCHAR(50)
+		,@voucherDate DATETIME;
 
 BEGIN
 	SELECT	@intTicketUOM = UOM.intUnitMeasureId, @intItemId = SC.intItemId
@@ -385,8 +387,11 @@ BEGIN
 	EXEC dbo.uspSCAddScaleTicketToItemReceipt @intTicketId, @intUserId, @ItemsForItemReceipt, @intEntityId, @strReceiptType, @InventoryReceiptId OUTPUT; 
 END
 
-	SELECT	@strTransactionId = IR.strReceiptNumber, @intLocationId = IR.intLocationId
-	, @intShipFrom = IR.intShipFromId 
+	SELECT	@strTransactionId = IR.strReceiptNumber
+	, @intLocationId = IR.intLocationId
+	, @intShipFrom = IR.intShipFromId
+	, @vendorOrderNumber = IR.strVendorRefNo 
+	, @voucherDate = IR.dtmReceiptDate
 	FROM	dbo.tblICInventoryReceipt IR	        
 	WHERE	IR.intInventoryReceiptId = @InventoryReceiptId
 	
@@ -477,6 +482,8 @@ END
 				,@voucherDetailReceiptCharge = @voucherOtherCharges
 				,@shipTo = @intLocationId
 				,@shipFrom = @intShipFrom
+				,@vendorOrderNumber = @vendorOrderNumber
+				,@voucherDate = @voucherDate
 				,@currencyId = @intCurrencyId
 				,@billId = @intBillId OUTPUT
 		END
@@ -563,6 +570,8 @@ END
 				,@voucherDetailReceiptCharge = @thirdPartyVoucher
 				,@shipTo = @intLocationId
 				,@shipFrom = @intShipFrom
+				,@vendorOrderNumber = @vendorOrderNumber
+				,@voucherDate = @voucherDate
 				,@currencyId = @intCurrencyId
 				,@billId = @intBillId OUTPUT
 

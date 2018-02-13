@@ -72,7 +72,9 @@ DECLARE @intInventoryReceiptItemId AS INT
 		,@intInventoryReceiptChargeId INT
 		,@dblQtyReceived NUMERIC (38,20)
 		,@dblInventoryReceiptCost NUMERIC (38,20)
-		,@intTaxId INT;
+		,@intTaxId INT
+		,@vendorOrderNumber NVARCHAR(50)
+		,@voucherDate DATETIME;
 
 BEGIN
     SELECT TOP 1 @intLoadId = ST.intLoadId, @dblTicketFreightRate = ST.dblFreightRate, @intScaleStationId = ST.intScaleSetupId,
@@ -496,6 +498,7 @@ BEGIN TRY
 			,@intShipFrom = IR.intShipFromId
 			,@intShipTo = IR.intLocationId
 			,@intCurrencyId = IR.intCurrencyId
+			,@vendorOrderNumber = IR.strVendorRefNo
 	FROM	dbo.tblICInventoryReceipt IR	        
 	WHERE	IR.intInventoryReceiptId = @InventoryReceiptId		
 
@@ -591,6 +594,8 @@ BEGIN TRY
 				,@voucherDetailReceiptCharge = @voucherOtherCharges
 				,@shipTo = @intShipTo
 				,@shipFrom = @intShipFrom
+				,@vendorOrderNumber = @vendorOrderNumber
+				,@voucherDate = @voucherDate
 				,@currencyId = @intCurrencyId
 				,@billId = @intBillId OUTPUT
 		END
@@ -678,6 +683,8 @@ BEGIN TRY
 			,@voucherDetailReceiptCharge = @thirdPartyVoucher
 			,@shipTo = @intLocationId
 			,@shipFrom = @intShipFrom
+			,@vendorOrderNumber = @vendorOrderNumber
+			,@voucherDate = @voucherDate
 			,@currencyId = @intCurrencyId
 			,@billId = @intBillId OUTPUT
 
