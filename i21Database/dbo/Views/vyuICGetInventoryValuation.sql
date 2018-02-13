@@ -128,8 +128,9 @@ FROM 	tblICItem i
 			)  
 WHERE	i.strType NOT IN (
 			'Other Charge'
-			, 'Non-Inventory'
-			, 'Service'
-			, 'Software'
-			, 'Comment'
+			,'Non-Inventory'
+			,'Service'
+			,'Software'
+			,'Comment'
+			,'Bundle'
 		)
