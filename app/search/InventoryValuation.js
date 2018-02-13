@@ -20,6 +20,7 @@ Ext.define('Inventory.search.InventoryValuation', {
                 { dataIndex: 'strCostingMethod', text: 'Costing Method', allowSort: false, flex: 1, dataType: 'string' },
                 { xtype: 'datecolumn', dataIndex: 'dtmDate', text: 'Date', allowSort: false, flex: 1, dataType: 'date' },
                 { dataIndex: 'strTransactionType', text: 'Transaction Type', allowSort: false, flex: 1, dataType: 'string' },
+                { dataIndex: 'ysnInTransit', text: 'In-Transit', flex: 0.5, dataType: 'boolean', xtype: 'checkcolumn' },
                 { dataIndex: 'strTransactionId', text: 'Transaction Id', allowSort: false, flex: 1, dataType: 'string', drillDownText: 'View Transaction', drillDownClick: 'onViewTransaction' },
                 { xtype: 'numbercolumn', format: '#,##0.000000', summaryType: 'sum', dataIndex: 'dblBeginningQtyBalance', text: 'Begin Qty', allowSort: false, flex: 1.25, dataType: 'float', renderer: function(value) { return Ext.util.Format.number(value, '#,##0.00'); } },
                 { xtype: 'numbercolumn', format: '#,##0.000000', summaryType: 'sum', dataIndex: 'dblQuantityInStockUOM', text: 'Qty', allowSort: false, flex: .75, dataType: 'float', renderer: function(value) { return Ext.util.Format.number(value, '#,##0.00'); } },

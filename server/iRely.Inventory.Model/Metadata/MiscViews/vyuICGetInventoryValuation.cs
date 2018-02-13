@@ -15,6 +15,7 @@ namespace iRely.Inventory.Model
         public string strItemDescription { get; set; }
         public int? intCategoryId { get; set; }
         public string strCategory { get; set; }
+        public int? intLocationId { get; set; }
         public int? intItemLocationId { get; set; }
         public string strLocationName { get; set; }
         public int? intSubLocationId { get; set; }
@@ -42,5 +43,6 @@ namespace iRely.Inventory.Model
         public string strEntity { get; set; }
         public string strLotNumber { get; set; }
         public string strAdjustedTransaction { get; set; }
+        public bool? ysnInTransit { get; set; }
     }
 }
