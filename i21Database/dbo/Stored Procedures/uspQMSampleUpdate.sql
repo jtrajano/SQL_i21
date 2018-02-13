@@ -95,6 +95,7 @@ BEGIN TRY
 	UPDATE tblQMSample
 	SET intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
 		,intSampleTypeId = x.intSampleTypeId
+		,strSampleRefNo = x.strSampleRefNo
 		,intProductTypeId = x.intProductTypeId
 		,intProductValueId = x.intProductValueId
 		,intSampleStatusId = x.intSampleStatusId
@@ -143,6 +144,7 @@ BEGIN TRY
 		,dtmLastModified = x.dtmLastModified
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intSampleTypeId INT
+			,strSampleRefNo NVARCHAR(30)
 			,intProductTypeId INT
 			,intProductValueId INT
 			,intSampleStatusId INT
