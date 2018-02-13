@@ -52,7 +52,9 @@
 	cust.intTermsId,
 	STUFF((SELECT '|^|' + CONVERT(VARCHAR,intLineOfBusinessId) FROM tblEMEntityLineOfBusiness te WHERE te.intEntityId = cust.intEntityId FOR XML PATH('')),1,3,'') as intLineOfBusinessIds,
 	entityType.Prospect AS ysnProspect,
-	cust.ysnCreditHold
+	cust.ysnCreditHold,
+	custLocation.intFreightTermId,
+	fTerms.strFreightTerm
 FROM tblARCustomer cust
 INNER JOIN tblEMEntity entityToCustomer ON cust.intEntityId = entityToCustomer.intEntityId
 LEFT JOIN tblEMEntity entityToSalesperson ON cust.intSalespersonId = entityToSalesperson.intEntityId
@@ -74,6 +76,7 @@ LEFT JOIN tblSMLineOfBusiness LOB ON entityLOB.intLineOfBusinessId = LOB.intLine
 LEFT JOIN tblEMEntityClass entityClass ON entityToCustomer.intEntityClassId = entityClass.intEntityClassId
 LEFT JOIN tblSMPaymentMethod custPaymentMethod ON cust.intPaymentMethodId = custPaymentMethod.intPaymentMethodID
 LEFT JOIN tblSMTerm custTerm ON cust.intTermsId = custTerm.intTermID
+LEFT JOIN tblSMFreightTerms fTerms ON custLocation.intFreightTermId = fTerms.intFreightTermId
 WHERE		
 		entityType.Customer = 1 -- check if entity is a customer
 		OR
