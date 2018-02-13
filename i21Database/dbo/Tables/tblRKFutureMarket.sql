@@ -49,7 +49,8 @@ CREATE TABLE [dbo].[tblRKFutureMarket](
     CONSTRAINT [PK_tblRKFutureMarket_intFutureMarketId] PRIMARY KEY CLUSTERED ([intFutureMarketId] ASC),
 	CONSTRAINT [FK_tblRKFutureMarket_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY([intUnitMeasureId]) REFERENCES [dbo].[tblICUnitMeasure] ([intUnitMeasureId]),
 	CONSTRAINT [FK_tblRKFutureMarket_tblSMCurrency_intCurrencyId] FOREIGN KEY([intCurrencyId])REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID]),
-	CONSTRAINT [FK_tblRKFutureMarket_tblICUnitMeasure_intForecastWeeklyConsumptionUOMId] FOREIGN KEY([intForecastWeeklyConsumptionUOMId]) REFERENCES [dbo].[tblICUnitMeasure] ([intUnitMeasureId])
+	CONSTRAINT [FK_tblRKFutureMarket_tblICUnitMeasure_intForecastWeeklyConsumptionUOMId] FOREIGN KEY([intForecastWeeklyConsumptionUOMId]) REFERENCES [dbo].[tblICUnitMeasure] ([intUnitMeasureId]),
+	CONSTRAINT [UQ_tblRKFutureMarket_strFutMarketName] UNIQUE NONCLUSTERED ([strFutMarketName] ASC)
 )
 GO
 
