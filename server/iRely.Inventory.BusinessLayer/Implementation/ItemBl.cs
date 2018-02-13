@@ -806,7 +806,7 @@ namespace iRely.Inventory.BusinessLayer
                 itemFromPreviousPage = previousPage.strItemNo;
                 intInventoryTransactionIdFromPreviousPage = previousPage.intInventoryTransactionId.ToString();
 
-                priorBalanceFilter.RemoveAll(p => p.c == "strItemNo" || p.c == "strLocationName" || p.c == "intInventoryTransactionId");
+                priorBalanceFilter.RemoveAll(p => p.c == "strItemNo" || p.c == "strLocationName" || p.c == "intInventoryTransactionId" || p.c == "ysnintransit");
 
                 priorBalanceFilter.Add(
                     new SearchFilter()
@@ -835,6 +835,25 @@ namespace iRely.Inventory.BusinessLayer
                         cj = "And"
                     }
                 );
+
+                foreach (var f in param.filter)
+                {
+                    // Add the In-Transit to the balance query. 
+                    switch (f.c.ToLower()) {
+                        case "ysnintransit":
+                            priorBalanceFilter.Add(
+                                new SearchFilter()
+                                {
+                                    c = f.c,
+                                    v = f.v,
+                                    cj = "And"
+                                }
+                            );
+                            break; 
+                        default:
+                            break;
+                    }
+                }
 
                 // Get the beginning qty and balances
                 var openingBalanceQuery = GetOpeningBalances(priorBalanceFilter);
@@ -867,7 +886,7 @@ namespace iRely.Inventory.BusinessLayer
                         dblBeginningBalance = 0;
                         dblBeginningQty = 0;
 
-                        priorBalanceFilter.RemoveAll(p => p.c == "strItemNo" || p.c == "strLocationName" || p.c == "intInventoryTransactionId");
+                        priorBalanceFilter.RemoveAll(p => p.c == "strItemNo" || p.c == "strLocationName" || p.c == "intInventoryTransactionId" || p.c == "ysnintransit");
 
                         priorBalanceFilter.Add(
                             new SearchFilter()
@@ -895,7 +914,27 @@ namespace iRely.Inventory.BusinessLayer
                                 co = "lt",
                                 cj = "And"
                             }
-                        );                        
+                        );
+
+                        foreach (var f in param.filter)
+                        {
+                            // Add the In-Transit to the balance query. 
+                            switch (f.c.ToLower())
+                            {
+                                case "ysnintransit":
+                                    priorBalanceFilter.Add(
+                                        new SearchFilter()
+                                        {
+                                            c = f.c,
+                                            v = f.v,
+                                            cj = "And"
+                                        }
+                                    );
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
 
                         var priorBalanceQuery = GetOpeningBalances(priorBalanceFilter);
 
