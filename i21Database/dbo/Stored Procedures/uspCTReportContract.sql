@@ -39,7 +39,8 @@ BEGIN TRY
 			@intPrevApprovedContractId INT,
 			@strAmendedColumns NVARCHAR(MAX),
 			@intContractDetailId INT,
-			@TotalAtlasLots		 INT	
+			@TotalAtlasLots		 INT,
+			@strSequenceHistoryId	     NVARCHAR(MAX)	
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -55,7 +56,11 @@ BEGIN TRY
 			[endgroup]		NVARCHAR(50),  
 			[datatype]		NVARCHAR(50) 
 	)  
-  
+	
+	DECLARE @tblSequenceHistoryId TABLE
+	(
+	  intSequenceAmendmentLogId INT
+	)
   
 	EXEC sp_xml_preparedocument @xmlDocumentId output, @xmlParam  
   
@@ -77,6 +82,20 @@ BEGIN TRY
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'intContractHeaderId'
 	
+	SELECT	@strSequenceHistoryId = [from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'strSequenceHistoryId'
+
+	INSERT INTO @tblSequenceHistoryId
+	(
+	  intSequenceAmendmentLogId
+	)
+	SELECT strValues FROM dbo.fnARGetRowsFromDelimitedValues(@strSequenceHistoryId)
+
+	SELECT	@intContractHeaderId = intContractHeaderId
+	FROM	tblCTSequenceAmendmentLog   
+	WHERE	intSequenceAmendmentLogId = (SELECT MIN(intSequenceAmendmentLogId) FROM @tblSequenceHistoryId)
+
 	SELECT @intScreenId=intScreenId FROM tblSMScreen WHERE ysnApproval=1 AND strNamespace='ContractManagement.view.Contract'--ContractManagement.view.ContractAmendment
 	SELECT @intTransactionId=intTransactionId,@IsFullApproved = ysnOnceApproved FROM tblSMTransaction WHERE intScreenId=@intScreenId AND intRecordId=@intContractHeaderId
 
@@ -183,6 +202,19 @@ BEGIN TRY
 		 SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId AND intContractDetailId > @intContractDetailId
 	 END
 
+	IF @strAmendedColumns IS NULL AND EXISTS(SELECT 1 FROM @tblSequenceHistoryId)
+	BEGIN
+		 SELECT  @strAmendedColumns= STUFF((
+											SELECT DISTINCT ',' + LTRIM(RTRIM(AAP.strDataIndex))
+											FROM tblCTAmendmentApproval AAP
+											JOIN tblCTSequenceAmendmentLog AL ON AL.intAmendmentApprovalId =AAP.intAmendmentApprovalId
+											JOIN @tblSequenceHistoryId SH ON SH.intSequenceAmendmentLogId  = AL.intSequenceAmendmentLogId  
+											WHERE ISNULL(AAP.ysnAmendment,0) =1
+											FOR XML PATH('')
+											), 1, 1, '')
+
+	END
+
 	IF @strAmendedColumns IS NULL SELECT @strAmendedColumns = ''
 	IF ISNULL(@ysnPrinted,0) = 0 SELECT @strAmendedColumns = ''
 	
@@ -255,6 +287,7 @@ BEGIN TRY
 			,lblContractBasis						= CASE WHEN ISNULL(CB.strContractBasis,'') <>''		   THEN 'Price Basis :'					ELSE NULL END
 			,lblContractText						= CASE WHEN ISNULL(TX.strText,'') <>''				   THEN 'Others :'						ELSE NULL END
 			,lblCondition						    = CASE WHEN ISNULL(CB.strContractBasis,'') <>''		   THEN 'Condition :'					ELSE NULL END
+			,lblAtlasProducer						= CASE WHEN ISNULL(PR.strName,'') <>''				   THEN 'Producer :'					ELSE NULL END
 			,lblProducer							= CASE WHEN ISNULL(PR.strName,'') <>''				   THEN 'Shipper :'						ELSE NULL END
 			,lblLoadingPoint						= CASE WHEN ISNULL(SQ.strLoadingPointName,'') <>''     THEN SQ.srtLoadingPoint + ' :'		ELSE NULL END
 			,lblPosition							= CASE WHEN ISNULL(PO.strPosition,'') <>''		       THEN 'Position :'					ELSE NULL END
