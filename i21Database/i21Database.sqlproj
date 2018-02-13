@@ -6008,6 +6008,7 @@
     <Build Include="dbo\Views\vyuCCVendorCombo.sql" />
     <Build Include="dbo\Tables\tblARProductRecapStagingTable.sql" />
     <Build Include="dbo\Tables\tblARCustomerActivityStagingTable.sql" />
+    <Build Include="dbo\Views\vyuLGGetShipmentContainerContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
