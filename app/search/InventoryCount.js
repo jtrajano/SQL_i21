@@ -122,8 +122,7 @@ Ext.define('Inventory.search.InventoryCount', {
     },
 
     onOpenCountGroupClick: function(e) {
-        var panel = e.up('panel');
-        var grid = panel ? panel.query('#grdSearch') : null;
+        var grid = e.up('panel');
         grid = _.filter(grid, { url: './Inventory/api/CountGroup/Search' });
         if(grid && grid.length > 0) {
             grid = grid[0];
