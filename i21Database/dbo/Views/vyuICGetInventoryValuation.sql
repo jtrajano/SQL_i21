@@ -8,8 +8,9 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 		,strItemDescription			= i.strDescription
 		,i.intCategoryId
 		,strCategory				= c.strCategoryCode
+		,intLocationId				= ISNULL(InTransitLocation.intCompanyLocationId, [Location].intCompanyLocationId) 
 		,t.intItemLocationId
-		,strLocationName			= ISNULL(Location.strLocationName, InTransitLocation.strLocationName + ' (' + ItemLocation.strDescription + ')') 
+		,strLocationName			= ISNULL(InTransitLocation.strLocationName, [Location].strLocationName) --ISNULL([Location].strLocationName, InTransitLocation.strLocationName + ' (' + ItemLocation.strDescription + ')') 
 		,t.intSubLocationId
 		,subLoc.strSubLocationName
 		,t.intStorageLocationId
@@ -45,6 +46,7 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 		,strEntity					= e.strName										
 		,strLotNumber				= l.strLotNumber
 		,strAdjustedTransaction		= t.strRelatedTransactionId
+		,ysnInTransit				= CAST(CASE WHEN InTransitLocation.intCompanyLocationId IS NOT NULL THEN 1 ELSE 0 END AS BIT) 
 FROM 	tblICItem i 
 		CROSS APPLY (
 			SELECT	TOP 1 
@@ -65,8 +67,8 @@ FROM 	tblICItem i
 		LEFT JOIN tblICStorageLocation strgLoc 
 			ON strgLoc.intStorageLocationId = t.intStorageLocationId
 		LEFT JOIN (
-			tblICItemLocation ItemLocation LEFT JOIN tblSMCompanyLocation Location 
-				ON Location.intCompanyLocationId = ItemLocation.intLocationId		
+			tblICItemLocation ItemLocation LEFT JOIN tblSMCompanyLocation [Location] 
+				ON [Location].intCompanyLocationId = ItemLocation.intLocationId		
 		)
 			ON t.intItemLocationId = ItemLocation.intItemLocationId
 		LEFT JOIN (
