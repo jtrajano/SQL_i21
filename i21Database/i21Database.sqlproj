@@ -6025,6 +6025,7 @@
     <Build Include="dbo\Stored Procedures\uspSMRefreshContactRoleMenus.sql" />
     <Build Include="dbo\Stored Procedures\uspGLInsertOriginCrossReferenceMapping.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateOldAccountId.sql" />
+    <Build Include="dbo\Views\vyuLGGetShipmentContainerContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
