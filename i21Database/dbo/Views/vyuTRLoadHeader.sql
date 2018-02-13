@@ -22,12 +22,14 @@ SELECT TL.intLoadHeaderId
 	, Item.intItemId
 	, strItem = Item.strItemNo
 	, dblQuantity = CASE WHEN SP.strGrossOrNet = 'Gross' THEN TR.dblGross
-						WHEN SP.strGrossOrNet = 'Net' THEN TR.dblNet END
+						WHEN SP.strGrossOrNet = 'Net' THEN TR.dblNet
+						ELSE TR.dblGross END
 	, dblPrice = NULL
 	, dblCost = TR.dblUnitCost
 	, dblMargin = NULL
 	, dblTotalFreight = CASE WHEN SP.strGrossOrNet = 'Gross' THEN (dblGross * dblFreightRate * (1 + dblPurSurcharge / 100))
-						WHEN SP.strGrossOrNet = 'Net' THEN (dblNet * dblFreightRate * (1 + dblPurSurcharge / 100)) END
+						WHEN SP.strGrossOrNet = 'Net' THEN (dblNet * dblFreightRate * (1 + dblPurSurcharge / 100)) 
+						ELSE (dblGross * dblFreightRate * (1 + dblPurSurcharge / 100)) END
 	, strDriver = Driver.strName
 	, dtmDateTime = TL.dtmLoadDateTime
 	, TL.ysnPosted
