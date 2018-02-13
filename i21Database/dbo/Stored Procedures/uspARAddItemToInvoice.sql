@@ -66,7 +66,6 @@
 	,@ItemSalesAccountId			INT				= NULL
 	,@ItemSiteId					INT				= NULL												
 	,@ItemBillingBy					NVARCHAR(200)	= NULL
-	,@ItemBOLNumber					NVARCHAR(100)	= NULL
 	,@ItemPercentFull				NUMERIC(18,6)	= 0.000000
 	,@ItemNewMeterReading			NUMERIC(18,6)	= 0.000000
 	,@ItemPreviousMeterReading		NUMERIC(18,6)	= 0.000000
@@ -195,7 +194,6 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemOriginalInvoiceDetailId	= @ItemOriginalInvoiceDetailId
 			,@ItemSiteId					= @ItemSiteId
 			,@ItemBillingBy					= @ItemBillingBy
-			,@ItemBOLNumber					= @ItemBOLNumber
 			,@ItemPercentFull				= @ItemPercentFull
 			,@ItemNewMeterReading			= @ItemNewMeterReading
 			,@ItemPreviousMeterReading		= @ItemPreviousMeterReading
@@ -355,7 +353,6 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,[strVFDDocumentNumber]
 				,[intSiteId]
 				,[strBillingBy]
-				,[strBOLNumber]
 				,[dblNewMeterReading]
 				,[dblPercentFull]
 				,[intPerformerId]
@@ -409,7 +406,6 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemVFDDocumentNumber
 				,@ItemSiteId
 				,@ItemBillingBy
-				,@ItemBOLNumber
 				,@ItemNewMeterReading
 				,@ItemPercentFull
 				,@ItemPerformerId							
@@ -527,7 +523,6 @@ ELSE IF((LEN(RTRIM(LTRIM(@ItemDescription))) > 0 OR ISNULL(@ItemPrice,@ZeroDecim
 			,@ItemSalesAccountId			= @ItemSalesAccountId
 			,@ItemStorageScheduleTypeId		= @ItemStorageScheduleTypeId
 			,@ItemTicketId					= @ItemTicketId
-			,@ItemBOLNumber					= @ItemBOLNumber
 
 			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN
