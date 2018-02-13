@@ -15,7 +15,7 @@ SELECT * FROM
 			,OutboundTax				  = 0
 			,OutboundDiscount			  = 0
 			,OutboundNetDue				  = 0
-			,SalesAdjustment			  = Invoice.dblPayment
+			,SalesAdjustment			  = ISNULL(Invoice.dblPayment,0)
 			,VoucherAdjustment			  = ISNULL(BillByReceiptItem.dblTotal, 0)
 			,dblVendorPrepayment		  = CASE WHEN ISNULL(VendorPrepayment.dblVendorPrepayment, 0) <> 0 THEN VendorPrepayment.dblVendorPrepayment			     ELSE NULL END
 			,lblVendorPrepayment		  = CASE WHEN ISNULL(VendorPrepayment.dblVendorPrepayment, 0) <> 0 THEN 'Vendor Prepay'									     ELSE NULL END
@@ -115,7 +115,7 @@ SELECT * FROM
 			   ,OutboundTax		             = 0
 			   ,OutboundDiscount	         = 0 
 			   ,OutboundNetDue		         = 0 
-			   ,SalesAdjustment              = Invoice.dblPayment 
+			   ,SalesAdjustment              = ISNULL(Invoice.dblPayment,0) 
 			   ,VoucherAdjustment            = ISNULL(tblAdjustment.dblTotal, 0) 
 			   ,dblVendorPrepayment          = CASE WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN VendorPrepayment.dblVendorPrepayment				 ELSE NULL END 
 			   ,lblVendorPrepayment          = CASE WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN 'Vendor Prepay'									 ELSE NULL END
