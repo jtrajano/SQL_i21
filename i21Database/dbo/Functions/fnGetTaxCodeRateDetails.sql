@@ -16,28 +16,44 @@ AS
 BEGIN	
 	INSERT INTO @returntable
 	SELECT TOP 1 
-		 [strCalculationMethod]
-		,CR.[intUnitMeasureId]
-		,[dblRate],
-		UOM.[strUnitMeasure]
+		 [strCalculationMethod]	= SMTCR.[strCalculationMethod]
+		,[intUnitMeasureId]		= SMTCR.[intUnitMeasureId]
+		,[dblRate]				= SMTCR.[dblRate]
+		,[strUnitMeasure]		= UOM.[strUnitMeasure]
 	FROM 
-		tblSMTaxCodeRate CR
-		LEFT JOIN tblICUnitMeasure UOM
-			ON CR.intUnitMeasureId = UOM.intUnitMeasureId
+		tblSMTaxCodeRate SMTCR
+	LEFT OUTER JOIN
+		(
+		SELECT
+			 ICUOM.[intItemUOMId]
+			,ICUM.[intUnitMeasureId]
+			,ICUM.[strUnitMeasure]
+		FROM
+			tblICItemUOM ICUOM
+		INNER JOIN
+			tblICUnitMeasure ICUM
+				ON ICUOM.[intUnitMeasureId] = ICUM.[intUnitMeasureId]
+		) UOM
+			ON SMTCR.[intUnitMeasureId] = UOM.[intUnitMeasureId]
 	WHERE 
-		[intTaxCodeId] = @TaxCodeId
-		AND CASE WHEN strCalculationMethod = 'Unit' THEN
-				 CASE WHEN CR.intUnitMeasureId = @ItemUOMId THEN 1 ELSE 0 END
-		ELSE
-			1
-		END = 1
-		--AND CASE WHEN intUnitMeasureId IS NOT NULL THEN 
-		--			CASE WHEN intUnitMeasureId = @ItemUOMId THEN 1 ELSE 0 END
-		--	ELSE 1 END = 1
+		SMTCR.[intTaxCodeId] = @TaxCodeId
+		AND ( 
+				(UOM.[intItemUOMId] = @ItemUOMId AND @ItemUOMId IS NOT NULL) 
+			OR 
+				(@ItemUOMId IS NULL AND (SMTCR.[strCalculationMethod] <> 'Unit' OR SMTCR.[intUnitMeasureId] IS NULL)) 
+			OR 
+				(@ItemUOMId IS NOT NULL  AND SMTCR.[strCalculationMethod] <> 'Unit') 				
+			)
 		AND CAST(@TransactionDate AS DATE) >= CAST([dtmEffectiveDate]  AS DATE)
 	ORDER BY 
-		 [dtmEffectiveDate] DESC
-		,[dblRate] DESC					
+		 (CASE 
+			WHEN SMTCR.[strCalculationMethod] = 'Unit' AND (UOM.[intItemUOMId] = @ItemUOMId AND @ItemUOMId IS NOT NULL)  THEN 4
+			WHEN @ItemUOMId IS NULL AND (SMTCR.[strCalculationMethod] = 'Unit' AND SMTCR.[intUnitMeasureId] IS NULL)  THEN 3
+			WHEN @ItemUOMId IS NULL AND (SMTCR.[strCalculationMethod] <> 'Unit' OR SMTCR.[intUnitMeasureId] IS NULL)  THEN 2
+			ELSE 1
+		 END) DESC
+		,SMTCR.[dtmEffectiveDate] DESC
+		,SMTCR.[dblRate] DESC					
 		
 	RETURN
 			
