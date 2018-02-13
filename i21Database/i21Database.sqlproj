@@ -6215,6 +6215,7 @@
     <Build Include="dbo\Tables\tblSMRepInitStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspSMRepRestoreSubscription.sql" />
     <Build Include="dbo\Functions\fnSMRepDatabaseExists.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\32_ReplicationInitStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
