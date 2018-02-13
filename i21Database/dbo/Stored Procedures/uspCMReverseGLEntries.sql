@@ -7,6 +7,7 @@ CREATE PROCEDURE uspCMReverseGLEntries
 	,@strCode			NVARCHAR(10) = NULL
 	,@dtmDateReverse	DATETIME = NULL 
 	,@intUserId			INT = NULL 
+	,@newBatchId		NVARCHAR(40)
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -75,7 +76,7 @@ SELECT	[strTransactionId]
 		,[intTransactionId]
 		-- If date is provided, use date reverse as the date for unposting the transaction.
 		,dtmDate = ISNULL(@dtmDateReverse, [dtmDate]) 
-		,[strBatchId]
+		,@newBatchId 
 		,[intAccountId]
 		,[dblDebit] = [dblCredit]		-- (Debit -> Credit)
 		,[dblCredit] = [dblDebit]		-- (Debit <- Credit)
