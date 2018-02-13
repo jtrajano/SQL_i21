@@ -223,6 +223,7 @@ BEGIN TRY
 		,intSampleTypeId
 		,strSampleNumber
 		,intParentSampleId
+		,strSampleRefNo
 		,intProductTypeId
 		,intProductValueId
 		,intSampleStatusId
@@ -280,6 +281,7 @@ BEGIN TRY
 		,intSampleTypeId
 		,@strSampleNumber
 		,intParentSampleId
+		,strSampleRefNo
 		,intProductTypeId
 		,intProductValueId
 		,intSampleStatusId
@@ -335,6 +337,7 @@ BEGIN TRY
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intSampleTypeId INT
 			,intParentSampleId INT
+			,strSampleRefNo NVARCHAR(30)
 			,intProductTypeId INT
 			,intProductValueId INT
 			,intSampleStatusId INT
