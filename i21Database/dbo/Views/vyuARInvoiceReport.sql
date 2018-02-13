@@ -22,10 +22,12 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , strShipTo				= dbo.fnARFormatCustomerAddress(NULL, NULL, INV.strShipToLocationName, INV.strShipToAddress, INV.strShipToCity, INV.strShipToState, INV.strShipToZipCode, INV.strShipToCountry, CUSTOMER.strName, CUSTOMER.ysnIncludeEntityName)
 	 , strSalespersonName		= SALESPERSON.strName
 	 , strPONumber				= INV.strPONumber
-	 , strBOLNumber				= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0
-									THEN INVOICEDETAIL.strBOLNumber
-									ELSE NULL
-								  END
+	 , strBOLNumber				= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN
+									(CASE WHEN INV.strBOLNumber IS NOT NULL AND LEN(RTRIM(LTRIM(ISNULL(INV.strBOLNumber,'')))) > 0
+										  THEN INV.strBOLNumber
+										ELSE INVOICEDETAIL.strBOLNumber									
+								    END)
+								  ELSE NULL END
 	 , strShipVia				= SHIPVIA.strName
 	 , strTerm					= TERM.strTerm
 	 , dtmShipDate				= INV.dtmShipDate
@@ -132,7 +134,7 @@ LEFT JOIN (
 		 , ITEM.strInvoiceComments
 		 , strItemType			= ITEM.strType
 		 , strItemDescription	= CASE WHEN ISNULL(ID.strItemDescription, '') <> '' THEN ID.strItemDescription ELSE ITEM.strDescription END
-		 , strBOLNumber			= CASE WHEN ISNULL(ID.intSalesOrderDetailId, 0) > 0 THEN SO.strBOLNumber ELSE ID.strBOLNumber END
+		 , SO.strBOLNumber
 		 , RECIPE.intRecipeId
 		 , RECIPE.intOneLinePrintId
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)

@@ -38,7 +38,6 @@
 	,@ItemDestinationGradeId		INT				= NULL
 	,@ItemDestinationWeightId		INT				= NULL
 	,@ItemTicketId					INT				= NULL
-	,@ItemBOLNumber					NVARCHAR(100)	= NULL
 AS
 
 BEGIN
@@ -184,8 +183,7 @@ BEGIN TRY
 		,[intDestinationGradeId]
 		,[intDestinationWeightId]
 		,[dblItemTermDiscount]
-		,[strItemTermDiscountBy]
-		,[strBOLNumber])
+		,[strItemTermDiscountBy])
 	SELECT
 		 [intInvoiceId]						= @InvoiceId
 		,[intItemId]						= @ItemId
@@ -254,7 +252,6 @@ BEGIN TRY
 		,[intDestinationWeightId]			= @ItemDestinationWeightId
 		,[dblItemTermDiscount]				= @ItemTermDiscount
 		,[strItemTermDiscountBy]			= @ItemTermDiscountBy
-		,[strBOLNumber]						= @ItemBOLNumber
 			
 END TRY
 BEGIN CATCH
