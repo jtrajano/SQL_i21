@@ -248,28 +248,36 @@ Ext.define('Inventory.model.Item', {
         }
         
         if(this.get('strType') !== 'Comment' && (this.get('strStatus') === null || this.get('strStatus') === ''))
-            {
-               errors.add({
-                    field: 'strStatus',
-                    message: 'Status must be present' 
-               })
-            }
+        {
+            errors.add({
+                field: 'strStatus',
+                message: 'Status must be present' 
+            })
+        }
         
         if(this.get('strType') !== 'Comment' && (this.get('strInventoryTracking') === null || this.get('strInventoryTracking') === ''))
-            {
-               errors.add({
-                    field: 'strInventoryTracking',
-                    message: 'Inventory Tracking must be present' 
-               })
-            }
+        {
+            errors.add({
+                field: 'strInventoryTracking',
+                message: 'Inventory Tracking must be present' 
+            })
+        }
         
         if(this.get('strType') !== 'Comment' && (this.get('strLotTracking') === null || this.get('strLotTracking') === ''))
-            {
-               errors.add({
-                    field: 'strLotTracking',
-                    message: 'Lot Tracking must be present' 
-               })
-            }
+        {
+            errors.add({
+                field: 'strLotTracking',
+                message: 'Lot Tracking must be present' 
+            })
+        }
+
+        if(this.get('strType') !== 'Comment' && (this.get('strDescription') === null || this.get('strDescription') === ''))
+        {
+            errors.add({
+                field: 'strDescription',
+                message: 'Description must be present' 
+            })
+        }            
         
         return errors;
     }
