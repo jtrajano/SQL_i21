@@ -9,5 +9,5 @@
 	SET XACT_ABORT ON
 	
 	BEGIN
-		SELECT @status intStatus FROM tblSMRepInitStatus
+		SELECT @status = intStatus FROM tblSMRepInitStatus
 	END
