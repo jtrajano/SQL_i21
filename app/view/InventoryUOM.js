@@ -73,13 +73,6 @@ Ext.define('Inventory.view.InventoryUOM', {
                                 items: [
                                     {
                                         xtype: 'button',
-                                        itemId: 'btnNew',
-                                        tabIndex: -1,
-                                        ui: 'i21-button-toolbar-small',
-                                        text: 'New'
-                                    },
-                                    {
-                                        xtype: 'button',
                                         itemId: 'btnSave',
                                         tabIndex: -1,
                                         ui: 'i21-button-toolbar-small',
