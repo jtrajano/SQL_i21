@@ -54,10 +54,6 @@ SELECT E.intEntityId
 	 EL.strAddress + CHAR(13) +  
 	 EL.strZipCode + ' ' + EL.strCity + CHAR(13) + 
 	 EL.strState + ' ' + EL.strCountry AS strBuyerFullAddress
-	,E.strName  + CHAR(13) +  
-	 EL.strAddress + CHAR(13) +  
-	 EL.strZipCode + ' ' + EL.strCity + CHAR(13) + 
-	 EL.strState + ' ' + EL.strCountry AS strDeliveryAddress
 	,LOAD.intSCompanyLocationId
 	,LOAD.intCustomerEntityId
 	,LOAD.intCustomerEntityLocationId
@@ -77,7 +73,21 @@ SELECT E.intEntityId
 	,dbo.fnSMGetCompanyLogo('OrganicDeclarationHeader') AS blbHeaderLogo
 	,dbo.fnSMGetCompanyLogo('OrganicDeclarationFooter') AS blbFooterLogo
 	,'015611' AS strCompanyNumberSupplier
-	,'Skal (NL-BIO-01), Zwolle, Netherlands' AS strAuthoritySupplier
+	,FWE.strName + CASE 
+		WHEN ISNULL(FWEL.strCity, '') <> ''
+			THEN ', ' + FWEL.strCity
+		END + CASE 
+		WHEN ISNULL(FWEL.strCountry, '') <> ''
+			THEN ', ' + FWEL.strCountry
+		END AS strAuthoritySupplier
+	,CEL.intEntityLocationId
+	,E.intDefaultLocationId
+	,CASE 
+		WHEN CEL.intEntityLocationId <> E.intDefaultLocationId
+			THEN E.strName + CHAR(13) + CEL.strAddress + CHAR(13) + CEL.strZipCode + ' ' + CEL.strCity + CHAR(13) + CEL.strState + ' ' + CEL.strCountry
+		ELSE NULL
+		END AS strDeliveryAddress
+
 FROM tblEMEntity E
 JOIN (
 	SELECT TOP 1 LD.intSCompanyLocationId
@@ -85,9 +95,13 @@ JOIN (
 		,LD.intCustomerEntityLocationId
 		,L.intLoadId
 		,L.strLoadNumber
+		,L.intForwardingAgentEntityId
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	WHERE L.intLoadId = @intLoadId
 	) LOAD ON LOAD.intCustomerEntityId = E.intEntityId
-LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = ISNULL(LOAD.intCustomerEntityLocationId,E.intDefaultLocationId)
+LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = E.intDefaultLocationId
 LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = LOAD.intSCompanyLocationId
+LEFT JOIN tblEMEntity FWE ON FWE.intEntityId = LOAD.intForwardingAgentEntityId
+LEFT JOIN tblEMEntityLocation FWEL ON FWEL.intEntityId = FWE.intEntityId
+LEFT JOIN tblEMEntityLocation CEL ON CEL.intEntityLocationId = LOAD.intCustomerEntityLocationId
