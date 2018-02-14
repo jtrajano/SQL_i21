@@ -302,7 +302,7 @@ BEGIN TRY
 		    
 			SET @SqlQuery1 = dbo.fnSTDynamicQueryRebateOrDiscount
 				(
-					'Accumlated Amount'
+					'Accumulated Amount'
 					, 'CAST(IP.dblAccumulatedAmount AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))'
 					, 'CAST(' + CAST(@dblAccumAmount AS NVARCHAR(250)) + ' AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))'
 					, @strCompanyLocationId
@@ -325,7 +325,7 @@ BEGIN TRY
 
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryRebateOrDiscount
 				(
-					'Accumlated Quantity'
+					'Accumulated Quantity'
 					, 'CAST(IP.dblAccumulatedQty AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))'
 					, 'CAST(' + CAST(@dblAccumlatedQty AS NVARCHAR(250)) + ' AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))'
 					, @strCompanyLocationId
@@ -728,10 +728,6 @@ BEGIN TRY
 END TRY
 
 BEGIN CATCH
-	--TEST
-	INSERT INTO XMLDB.dbo.tblStoredProcTest(strValueOne, strValueTwo)
-	VALUES('', ERROR_MESSAGE())
-
 	SET @ErrMsg = ERROR_MESSAGE()  
 	RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')  
 END CATCH
