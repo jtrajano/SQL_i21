@@ -1589,6 +1589,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var win = combo.up('window');
         var current = win.viewModel.data.current;
 
+        if (!current) return; 
+
         if (current) {
             // If Vendor has its own Currency, use it. Otherwise, stick to the default currency. 
             var vendorCurrency = records[0].get('intCurrencyId');
@@ -1652,6 +1654,32 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 break;
         }
         if (isHidden === false) {
+            var shipTo = current.get('strLocationName'); 
+            if (shipTo) {
+                this.showAddOrders(win);
+            }            
+        }
+    },
+
+    onLocationSelect: function (combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+
+        if (!current) return; 
+
+        var grdInventoryReceiptCount = 0; 
+        if (current.tblICInventoryReceiptItems()) {
+            Ext.Array.each(current.tblICInventoryReceiptItems().data.items, function (row) {
+                if (!row.dummy) {
+                    grdInventoryReceiptCount++;
+                }
+            });
+        }
+
+        if (grdInventoryReceiptCount == 0){
             this.showAddOrders(win);
         }
     },
@@ -7977,7 +8005,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#cboLocation": {
                 drilldown: this.onLocationDrilldown,
-                beforeselect: this.onLocationBeforeSelect
+                beforeselect: this.onLocationBeforeSelect,
+                select: this.onLocationSelect
             },
             "#cboCurrency": {
                 drilldown: this.onCurrencyDrilldown,
