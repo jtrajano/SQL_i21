@@ -234,7 +234,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     hidden: '{checkHideSourceNo}',
                     dataIndex: 'strSourceNumber'
                 },
-                colItemType: 'strItemType',
+                colItemType: {
+                    dataIndex: 'strItemType',
+                    hidden: true
+                },
                 colItemNo: {
                     dataIndex: 'strItemNo',
                     editor: {
@@ -5790,9 +5793,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 //var newReceiptItem = newReceiptItems.length > 0 ? newReceiptItems[0] : null;
 
                                 var newReceiptItem = currentVM.tblICInventoryReceiptItems().findRecord('intOrderId', newRecord.intOrderId);
-                                newReceiptItem.set('dblLineTotal', me.calculateLineTotal(currentVM, newReceiptItem));
+                                
+                                if(newReceiptItem)
+                                    newReceiptItem.set('dblLineTotal', me.calculateLineTotal(currentVM, newReceiptItem));
 
-                                if(newReceiptItem.get('strBundleType') == 'Kit')
+                                if(newReceiptItem && newReceiptItem.get('strBundleType') == 'Kit')
                                     newReceiptItem.set('strItemType', order.get('strBundleType'));
 
                                 // Calculate the taxes
@@ -7363,6 +7368,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     getBundleComponents: function(selectedItem, current, itemDetailStore){
         'use strict';
         var me = this,
+            win = me.getView(),
             bundleType = selectedItem.get('strBundleType'),
             screenTitle = bundleType + ' - ' + selectedItem.get('strItemNo'),
             locationId = current.get('intLocationId'),
@@ -7507,13 +7513,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     url: searchURL,
                     columns: [
                             { dataIndex: 'intKey', text: 'Key', dataType: 'numeric', key: true, hidden: true },
-                            { dataIndex: 'intItemId', text: '', dataType: 'numeric', hidden: true, required: true },
-                            { dataIndex: 'strItemNo', text: 'Item No', width: 100, dataType: 'string' },
-                            { dataIndex: 'strDescription', text: 'Item Description', width: 100, dataType: 'string' },
-                            { xtype: 'numbercolumn', dataIndex: 'dblComponentQuantity', text: 'Component Quantity', width: 100, dataType: 'float' },
-                            { dataIndex: 'intBundleUOMId', text: 'Bundle UOM Id', dataType: 'numeric', hidden: true, required: true, allowNull: true },
-                            { dataIndex: 'strBundleUOM', text: 'Bundle UOM', width: 100, dataType: 'string' },
-                            { dataIndex: 'strBundleUOMType', text: 'Bundle UOM Type', width: 100, dataType: 'string' },
+                            { dataIndex: 'intComponentItemId', text: '', dataType: 'numeric', hidden: true, required: true },
+                            { dataIndex: 'strComponentItemNo', text: 'Item No', width: 100, dataType: 'string' },
+                            { dataIndex: 'strComponentDescription', text: 'Item Description', width: 130, dataType: 'string' },
+                            { xtype: 'numbercolumn', dataIndex: 'dblComponentQuantity', text: 'Component Quantity', width: 100, dataType: 'float', required: true, hidden: true  },
+                            { dataIndex: 'intComponentUOMId', text: 'Bundle UOM Id', dataType: 'numeric', hidden: true, required: true, allowNull: true },
+                            { dataIndex: 'strComponentUOM', text: 'Bundle UOM', width: 100, dataType: 'string' },
+                            { dataIndex: 'strComponentUOMType', text: 'Bundle UOM Type', width: 110, dataType: 'string' },
+                            { xtype: 'numbercolumn', dataIndex: 'dblComponentConvFactor', text: 'Conversion Factor', width: 100, dataType: 'float', required: true, hidden: true },
                             { xtype: 'numbercolumn', dataIndex: 'dblMarkUpOrDown', text: 'Mark Up/Down', width: 100, dataType: 'float' },
                             { dataIndex: 'dtmBeginDate', text: 'Begin Date', width: 100, dataType: 'date', required: true, xtype: 'datecolumn' },
                             { dataIndex: 'dtmEndDate', text: 'End Date', width: 100, dataType: 'date', required: true, xtype: 'datecolumn' },
@@ -7574,9 +7581,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                         dblReceived: selectedItem.get('dblReceived'),
                                         intSourceId: selectedItem.get('intSourceId'),
                                         strSourceNumber: selectedItem.get('strSourceNumber'),
-                                        intItemId: rec.get('intItemId'),
-                                        strItemNo: rec.get('strItemNo'),
-                                        strItemDescription: rec.get('strDescription'),
+                                        intItemId: rec.get('intComponentItemId'),
+                                        strItemNo: rec.get('strComponentItemNo'),
+                                        strItemDescription: rec.get('strComponentDescription'),
                                         dblOpenReceive: componentQty,
                                         // intLoadReceive: rec.get('intLoadToReceive'),
                                         dblUnitCost: i21.ModuleMgr.Inventory.roundDecimalFormat(itemCost, 6),
@@ -7628,6 +7635,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 var newItem = itemDetailStore.add(itemModel);
                                 newItem = newItem[0];
                                 newItem.set('dblLineTotal', me.calculateLineTotal(current, newItem));
+
+                                win.viewModel.data.currentReceiptItem = newItem;
                                 me.calculateItemTaxes();
 
                                 addItemLotFunc(newItem, rec);
