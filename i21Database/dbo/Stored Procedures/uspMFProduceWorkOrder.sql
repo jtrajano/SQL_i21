@@ -386,6 +386,22 @@ BEGIN
 	END
 	ELSE
 	BEGIN
+		SELECT @ysnProducedQtyByUnitCount = ysnProducedQtyByUnitCount
+		FROM tblMFCompanyPreference
+
+		IF @ysnProducedQtyByUnitCount IS NULL
+			SELECT @ysnProducedQtyByUnitCount = 0
+
+		IF @ysnProducedQtyByUnitCount = 1
+			OR @intProduceUOMKey IS NULL
+			OR @intProduceUOMKey = 0
+		BEGIN
+			SELECT @dblUnitQty = 0
+
+			SELECT @dblProduceQty = 0
+				,@intProduceUOMKey = NULL
+		END
+
 		EXEC uspMFPostConsumptionProduction @intWorkOrderId = @intWorkOrderId
 			,@intItemId = @intItemId
 			,@strLotNumber = @strLotNumber

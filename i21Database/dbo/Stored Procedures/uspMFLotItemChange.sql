@@ -36,6 +36,35 @@ BEGIN TRY
 		,@ysnGenerateNewParentLotOnChangeItem BIT
 		,@intParentLotId INT
 		,@strDescription NVARCHAR(MAX)
+		,@strXML NVARCHAR(MAX)
+		,@strOutputLotNumber NVARCHAR(50)
+		,@strRetBatchId NVARCHAR(50)
+		,@strWorkOrderNo NVARCHAR(50)
+		,@intWorkOrderId INT
+		,@intBatchId INT
+		,@intProducedLotId INT
+		,@dblPhysicalCount NUMERIC(18, 6)
+		,@dblTareWeight NUMERIC(18, 6)
+		,@dblUnitQty NUMERIC(18, 6)
+		,@intPhysicalItemUOMId INT
+		,@dblProduceQty NUMERIC(18, 6)
+		,@intProduceUnitMeasureId INT
+		,@intManufacturingProcessId INT
+		,@dtmPlannedDate DATETIME
+		,@intPlannedShiftId INT
+		,@strVendorLotNo NVARCHAR(50)
+		,@dblReadingQuantity NUMERIC(18, 6)
+		,@intContainerId INT
+		,@intMachineId INT
+		,@strParentLotNumber NVARCHAR(50)
+		,@strReferenceNo NVARCHAR(50)
+		,@intCurrentStatusId INT
+		,@strInstantConsumption NVARCHAR(50)
+		,@intOldProduceItemUOMId INT
+		,@intOldPhysicalItemUOMId INT
+		,@intOldProduceUnitMeasureId INT
+		,@intOldPhysicalUnitMeasureId INT
+		,@intProduceItemUOMId INT
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -50,6 +79,7 @@ BEGIN TRY
 		,@dblAdjustByQuantity = - dblQty
 		,@intAdjustItemUOMId = intItemUOMId
 		,@intParentLotId = intParentLotId
+		,@intLotStatusId = intLotStatusId
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
@@ -146,55 +176,224 @@ BEGIN TRY
 	SELECT @intSourceId = 1
 		,@intSourceTransactionTypeId = 8
 
+	SELECT @intWorkOrderId = intWorkOrderId
+		,@intBatchId = intBatchId
+		,@intProducedLotId = intLotId
+		,@intOldProduceItemUOMId = intItemUOMId
+		,@dblPhysicalCount = dblPhysicalCount
+		,@intOldPhysicalItemUOMId = intPhysicalItemUOMId
+		,@dblTareWeight = dblTareWeight
+		,@intContainerId = intContainerId
+		,@intMachineId = intMachineId
+		,@strParentLotNumber = strParentLotNumber
+		,@strReferenceNo = strReferenceNo
+		,@dtmPlannedDate = dtmProductionDate
+		,@intPlannedShiftId = intShiftId
+	FROM tblMFWorkOrderProducedLot WP
+	WHERE intLotId IN (
+			SELECT intLotId
+			FROM tblICLot
+			WHERE strLotNumber = @strLotNumber
+			)
+
+	Select @dblUnitQty=dblWeight 
+	from tblICItem
+	Where intItemId=@intNewItemId 
+
+	Select @dblProduceQty=@dblPhysicalCount*@dblUnitQty
+
+	SELECT @intOldProduceUnitMeasureId = intUnitMeasureId
+	FROM tblICItemUOM
+	WHERE intItemUOMId = @intOldProduceItemUOMId
+
+	SELECT @intOldPhysicalUnitMeasureId = intUnitMeasureId
+	FROM tblICItemUOM
+	WHERE intItemUOMId = @intOldPhysicalItemUOMId
+
+	SELECT @intProduceItemUOMId = intItemUOMId
+	FROM tblICItemUOM
+	WHERE intItemId = @intNewItemId
+		AND intUnitMeasureId = @intOldProduceUnitMeasureId
+
+	SELECT @intPhysicalItemUOMId = intItemUOMId
+	FROM tblICItemUOM
+	WHERE intItemId = @intNewItemId
+		AND intUnitMeasureId = @intOldPhysicalUnitMeasureId
+
 	IF @intTransactionCount = 0
 		BEGIN TRANSACTION
 
-	EXEC uspICInventoryAdjustment_CreatePostItemChange @intItemId = @intItemId
-		,@dtmDate = @dtmDate
-		,@intLocationId = @intLocationId
-		,@intSubLocationId = @intSubLocationId
-		,@intStorageLocationId = @intStorageLocationId
-		,@strLotNumber = @strLotNumber
-		,@dblAdjustByQuantity = @dblAdjustByQuantity
-		,@intNewItemId = @intNewItemId
-		,@intNewSubLocationId = @intSubLocationId
-		,@intNewStorageLocationId = @intStorageLocationId
-		,@intItemUOMId = @intAdjustItemUOMId
-		,@intSourceId = @intSourceId
-		,@intSourceTransactionTypeId = @intSourceTransactionTypeId
-		,@intEntityUserSecurityId = @intUserId
-		,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
-		,@strDescription = @strDescription
-
-	SELECT TOP 1 @strNewLotNumber = strLotNumber
-		,@intNewLotId = intLotId
-	FROM tblICLot
-	WHERE intSplitFromLotId = @intLotId
-	ORDER BY intLotId DESC
-
-	EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmDate
-		,@intTransactionTypeId = 15
-		,@intItemId = @intNewItemId
-		,@intSourceLotId = @intLotId
-		,@intDestinationLotId = @intNewLotId
-		,@dblQty = @dblAdjustByQuantity
-		,@intItemUOMId = @intAdjustItemUOMId
-		,@intOldItemId = @intItemId
-		,@dtmOldExpiryDate = NULL
-		,@dtmNewExpiryDate = NULL
-		,@intOldLotStatusId = NULL
-		,@intNewLotStatusId = NULL
-		,@intUserId = @intUserId
-		,@strNote = @strNotes
-		,@strReason = @strReasonCode
-		,@intLocationId = @intLocationId
-		,@intInventoryAdjustmentId = @intInventoryAdjustmentId
-
-	IF @ysnGenerateNewParentLotOnChangeItem = 0
+	IF @intWorkOrderId IS NULL
 	BEGIN
-		UPDATE tblICLot
-		SET intParentLotId = @intParentLotId
-		WHERE intLotId = @intNewLotId
+		EXEC uspICInventoryAdjustment_CreatePostItemChange @intItemId = @intItemId
+			,@dtmDate = @dtmDate
+			,@intLocationId = @intLocationId
+			,@intSubLocationId = @intSubLocationId
+			,@intStorageLocationId = @intStorageLocationId
+			,@strLotNumber = @strLotNumber
+			,@dblAdjustByQuantity = @dblAdjustByQuantity
+			,@intNewItemId = @intNewItemId
+			,@intNewSubLocationId = @intSubLocationId
+			,@intNewStorageLocationId = @intStorageLocationId
+			,@intItemUOMId = @intAdjustItemUOMId
+			,@intSourceId = @intSourceId
+			,@intSourceTransactionTypeId = @intSourceTransactionTypeId
+			,@intEntityUserSecurityId = @intUserId
+			,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+			,@strDescription = @strDescription
+
+		SELECT TOP 1 @strNewLotNumber = strLotNumber
+			,@intNewLotId = intLotId
+		FROM tblICLot
+		WHERE intSplitFromLotId = @intLotId
+		ORDER BY intLotId DESC
+
+		EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmDate
+			,@intTransactionTypeId = 15
+			,@intItemId = @intNewItemId
+			,@intSourceLotId = @intLotId
+			,@intDestinationLotId = @intNewLotId
+			,@dblQty = @dblAdjustByQuantity
+			,@intItemUOMId = @intAdjustItemUOMId
+			,@intOldItemId = @intItemId
+			,@dtmOldExpiryDate = NULL
+			,@dtmNewExpiryDate = NULL
+			,@intOldLotStatusId = NULL
+			,@intNewLotStatusId = NULL
+			,@intUserId = @intUserId
+			,@strNote = @strNotes
+			,@strReason = @strReasonCode
+			,@intLocationId = @intLocationId
+			,@intInventoryAdjustmentId = @intInventoryAdjustmentId
+
+		IF @ysnGenerateNewParentLotOnChangeItem = 0
+		BEGIN
+			UPDATE tblICLot
+			SET intParentLotId = @intParentLotId
+			WHERE intLotId = @intNewLotId
+		END
+	END
+	ELSE
+	BEGIN
+		SELECT @strXML = '<root><intWorkOrderId>' + Ltrim(@intWorkOrderId) + '</intWorkOrderId><intBatchId>' + Ltrim(@intBatchId) + '</intBatchId><intLotId>' + Ltrim(@intProducedLotId) + '</intLotId><intUserId>' + Ltrim(@intUserId) + '</intUserId><ysnForceUndo>1</ysnForceUndo></root>'
+
+		SELECT @intManufacturingProcessId = intManufacturingProcessId
+			,@strWorkOrderNo = strWorkOrderNo
+			,@strVendorLotNo = strVendorLotNo
+			,@intCurrentStatusId = intStatusId
+		FROM tblMFWorkOrder
+		WHERE intWorkOrderId = @intWorkOrderId
+
+		SELECT @strInstantConsumption = strAttributeValue
+		FROM tblMFManufacturingProcessAttribute
+		WHERE intManufacturingProcessId = @intManufacturingProcessId
+			AND intLocationId = @intLocationId
+			AND intAttributeId = 20 --Is Instant Consumption
+
+		IF @strInstantConsumption = 'False'
+		BEGIN
+			RAISERROR (
+					'Change item is not allowed.'
+					,16
+					,1
+					)
+
+			RETURN
+		END
+
+		EXEC dbo.uspMFUndoPallet @strXML = @strXML
+
+		SELECT @strXML = '<root>'
+
+		SELECT @strXML = @strXML + '<intWorkOrderId>' + Ltrim(@intWorkOrderId) + '</intWorkOrderId>'
+
+		SELECT @strXML = @strXML + '<intManufacturingProcessId>' + Ltrim(@intManufacturingProcessId) + '</intManufacturingProcessId>'
+
+		SELECT @strXML = @strXML + '<dtmPlannedDate>' + Ltrim(@dtmPlannedDate) + '</dtmPlannedDate>'
+
+		SELECT @strXML = @strXML + '<intPlannedShiftId>' + Ltrim(@intPlannedShiftId) + '</intPlannedShiftId>'
+
+		SELECT @strXML = @strXML + '<intItemId>' + Ltrim(@intNewItemId) + '</intItemId>'
+
+		SELECT @strXML = @strXML + '<dblProduceQty>' + Ltrim(@dblProduceQty) + '</dblProduceQty>'
+
+		SELECT @strXML = @strXML + '<intProduceUnitMeasureId>' + Ltrim(@intProduceItemUOMId) + '</intProduceUnitMeasureId>'
+
+		SELECT @strXML = @strXML + '<dblTareWeight>' + Ltrim(@dblTareWeight) + '</dblTareWeight>'
+
+		SELECT @strXML = @strXML + '<dblUnitQty>' + Ltrim(@dblUnitQty) + '</dblUnitQty>'
+
+		SELECT @strXML = @strXML + '<dblPhysicalCount>' + Ltrim(@dblPhysicalCount) + '</dblPhysicalCount>'
+
+		SELECT @strXML = @strXML + '<intPhysicalItemUOMId>' + Ltrim(@intPhysicalItemUOMId) + '</intPhysicalItemUOMId>'
+
+		SELECT @strXML = @strXML + '<intUserId>' + Ltrim(@intUserId) + '</intUserId>'
+
+		SELECT @strXML = @strXML + '<strOutputLotNumber>' + Ltrim(@strLotNumber) + '</strOutputLotNumber>'
+
+		IF @strVendorLotNo IS NOT NULL
+			SELECT @strXML = @strXML + '<strVendorLotNo>' + Ltrim(@strVendorLotNo) + '</strVendorLotNo>'
+
+		SELECT @strXML = @strXML + '<dblReadingQuantity>' + Ltrim(@dblProduceQty) + '</dblReadingQuantity>'
+
+		SELECT @strXML = @strXML + '<intLocationId>' + Ltrim(@intLocationId) + '</intLocationId>'
+
+		SELECT @strXML = @strXML + '<intStorageLocationId>' + Ltrim(@intStorageLocationId) + '</intStorageLocationId>'
+
+		SELECT @strXML = @strXML + '<intSubLocationId>' + Ltrim(@intSubLocationId) + '</intSubLocationId>'
+
+		IF @intContainerId IS NOT NULL
+			SELECT @strXML = @strXML + '<intContainerId >' + Ltrim(@intContainerId) + '</intContainerId >'
+
+		SELECT @strXML = @strXML + '<ysnSubLotAllowed>False</ysnSubLotAllowed>'
+
+		SELECT @strXML = @strXML + '<intProductionTypeId>2</intProductionTypeId>'
+
+		SELECT @strXML = @strXML + '<intMachineId>' + Ltrim(@intMachineId) + '</intMachineId>'
+
+		SELECT @strXML = @strXML + '<ysnLotAlias>False</ysnLotAlias>'
+
+		SELECT @strXML = @strXML + '<strLotAlias>' + Ltrim(@strWorkOrderNo) + '</strLotAlias>'
+
+		SELECT @strXML = @strXML + '<strParentLotNumber>' + Ltrim(@strParentLotNumber) + '</strParentLotNumber>'
+
+		IF @strReferenceNo IS NOT NULL
+			SELECT @strXML = @strXML + '<strReferenceNo>' + Ltrim(@strReferenceNo) + '</strReferenceNo>'
+
+		SELECT @strXML = @strXML + '<intStatusId>10</intStatusId>'
+
+		SELECT @strXML = @strXML + '<ysnPostProduction>0</ysnPostProduction>'
+
+		SELECT @strXML = @strXML + '<intLotStatusId>' + Ltrim(@intLotStatusId) + '</intLotStatusId>'
+
+		SELECT @strXML = @strXML + '<ysnFillPartialPallet>False</ysnFillPartialPallet>'
+
+		SELECT @strXML = @strXML + '</root>'
+
+		IF @strXML IS NULL
+		BEGIN
+			RAISERROR (
+					'Unable to change the item.'
+					,16
+					,1
+					)
+
+			RETURN
+		END
+
+		EXEC [dbo].[uspMFCompleteWorkOrder] @strXML = @strXML
+			,@strOutputLotNumber = @strOutputLotNumber OUTPUT
+			,@intParentLotId = @intParentLotId OUTPUT
+			,@dtmCurrentDate = NULL
+			,@ysnRecap = 0
+			,@strRetBatchId = @strRetBatchId OUTPUT
+
+		IF @intCurrentStatusId <> 10
+		BEGIN
+			UPDATE tblMFWorkOrder
+			SET intStatusId = @intCurrentStatusId
+			WHERE intWorkOrderId = @intWorkOrderId
+		END
 	END
 
 	IF @intTransactionCount = 0
