@@ -190,8 +190,8 @@ BEGIN TRY
 					, tblEMEntityLocation.strState AS strOriginState
 					, tblEMEntityLocation.strCity AS strOriginCity
 					, OriginCountyTaxCode.strCounty AS strOriginCounty
-					, tblSMCompanyLocation.strStateProvince
-					, tblSMCompanyLocation.strCity AS strDestinationCity
+					, CASE WHEN tblTRLoadDistributionHeader.strDestination IS NULL THEN tblSMCompanyLocation.strStateProvince WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN BulkLocation.strStateProvince ELSE CustomerLocation.strState END strDestinationState
+					, CASE WHEN tblTRLoadDistributionHeader.strDestination IS NULL THEN tblSMCompanyLocation.strCity WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN BulkLocation.strCity ELSE CustomerLocation.strCity END strDestinationCity
 					, NULL AS strDestinationCounty
 					, tblTFTerminalControlNumber.strTerminalControlNumber
 					, strTransporterIdType = 'FEIN'
@@ -348,8 +348,8 @@ BEGIN TRY
 					, tblEMEntityLocation.strState AS strOriginState
 					, tblEMEntityLocation.strCity AS strOriginCity
 					, OriginCountyTaxCode.strCounty AS strOriginCounty
-					, tblSMCompanyLocation.strStateProvince
-					, tblSMCompanyLocation.strCity AS strDestinationCity
+					, CASE WHEN tblTRLoadDistributionHeader.strDestination IS NULL THEN tblSMCompanyLocation.strStateProvince WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN BulkLocation.strStateProvince ELSE CustomerLocation.strState END strDestinationState
+					, CASE WHEN tblTRLoadDistributionHeader.strDestination IS NULL THEN tblSMCompanyLocation.strCity WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN BulkLocation.strCity ELSE CustomerLocation.strCity END strDestinationCity
 					, NULL AS strDestinationCounty
 					, tblTFTerminalControlNumber.strTerminalControlNumber
 					, strTransporterIdType = 'FEIN'
