@@ -104,8 +104,8 @@ BEGIN TRY
 				, strScheduleCode
 				, strType
 				, intItemId
-				, intProductCodeId
-				, strProductCode
+				--, intProductCodeId
+				--, strProductCode
 				, strBillOfLading
 				, dblReceived
 				, dblGross
@@ -156,8 +156,8 @@ BEGIN TRY
 					, tblTFReportingComponent.strScheduleCode
 					, strType = tblTFReportingComponent.strType
 					, tblICInventoryReceiptItem.intItemId
-					, tblTFReportingComponentProductCode.intProductCodeId
-					, tblTFProductCode.strProductCode
+					--, tblTFReportingComponentProductCode.intProductCodeId
+					--, tblTFProductCode.strProductCode
 					, tblICInventoryReceipt.strBillOfLading
 					, tblICInventoryReceiptItem.dblReceived
 					, tblICInventoryReceiptItem.dblGross
@@ -253,8 +253,8 @@ BEGIN TRY
 				, strScheduleCode
 				, strType
 				, intItemId
-				, intProductCodeId
-				, strProductCode
+				--, intProductCodeId
+				--, strProductCode
 				, strBillOfLading
 				, dblReceived
 				, dblGross
@@ -305,8 +305,8 @@ BEGIN TRY
 					, tblTFReportingComponent.strScheduleCode
 					, strType = tblTFReportingComponent.strType
 					, tblICInventoryReceiptItem.intItemId
-					, tblTFReportingComponentProductCode.intProductCodeId
-					, tblTFProductCode.strProductCode
+					--, tblTFReportingComponentProductCode.intProductCodeId
+					--, tblTFProductCode.strProductCode
 					, tblICInventoryReceipt.strBillOfLading
 					, tblICInventoryReceiptItem.dblReceived
 					, tblICInventoryReceiptItem.dblGross
@@ -541,8 +541,14 @@ BEGIN TRY
 			SELECT DISTINCT @Guid
 				, intItemId
 				, intReportingComponentId
-				, intProductCodeId
-				, strProductCode
+				, intProductCodeId = (SELECT TOP 1 vyuTFGetReportingComponentProductCode.intProductCodeId 
+                    FROM vyuTFGetReportingComponentProductCode INNER JOIN tblICItemMotorFuelTax 
+                    ON tblICItemMotorFuelTax.intProductCodeId = vyuTFGetReportingComponentProductCode.intProductCodeId 
+                    WHERE intReportingComponentId = Trans.intReportingComponentId and tblICItemMotorFuelTax.intItemId = Trans.intItemId)
+                , strProductCode = (SELECT TOP 1 vyuTFGetReportingComponentProductCode.strProductCode 
+                    FROM vyuTFGetReportingComponentProductCode INNER JOIN tblICItemMotorFuelTax 
+                    ON tblICItemMotorFuelTax.intProductCodeId = vyuTFGetReportingComponentProductCode.intProductCodeId 
+                    WHERE intReportingComponentId = Trans.intReportingComponentId and tblICItemMotorFuelTax.intItemId = Trans.intItemId)
 				, strBillOfLading
 				, CONVERT(DECIMAL(18), dblReceived)
 				, strTaxCategory
@@ -593,7 +599,7 @@ BEGIN TRY
 				, intTransactionNumberId
 				, strVendorLicenseNumber
 				, CONVERT(DECIMAL(18), dblGross)
-			FROM @TFTransaction
+			FROM @TFTransaction Trans
 		END
 
 		IF (NOT EXISTS(SELECT TOP 1 1 FROM @TFTransaction WHERE intReportingComponentId = @RCId ) AND @IsEdi = 0)

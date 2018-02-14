@@ -93,8 +93,8 @@ BEGIN TRY
 				, intReportingComponentId
 				, strScheduleCode
 				, strType
-				, intProductCode
-				, strProductCode
+				--, intProductCode
+				--, strProductCode
 				, intItemId
 				, dblQtyShipped
 				, dblGross
@@ -146,15 +146,15 @@ BEGIN TRY
 				, strDiversionOriginalDestinationState
 				, strTransactionType
 				, intTransactionNumberId)
-			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInvoiceDetailId, intTaxAuthorityId, intProductCodeId DESC) AS intId, *
+			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInvoiceDetailId, intTaxAuthorityId) AS intId, *
 			FROM (SELECT DISTINCT tblARInvoiceDetail.intInvoiceDetailId
 					, tblTFReportingComponent.intTaxAuthorityId
 					, tblTFReportingComponent.strFormCode
 					, tblTFReportingComponent.intReportingComponentId
 					, tblTFReportingComponent.strScheduleCode
 					, tblTFReportingComponent.strType
-					, tblTFProductCode.intProductCodeId
-					, tblTFProductCode.strProductCode
+					--, tblTFProductCode.intProductCodeId
+					--, tblTFProductCode.strProductCode
 					, tblARInvoiceDetail.intItemId
 					, (CASE WHEN tblARInvoice.strTransactionType = 'Credit Memo' THEN tblARInvoiceDetail.dblQtyShipped * -1 ELSE tblARInvoiceDetail.dblQtyShipped END) AS dblQtyShipped
 					, (CASE WHEN tblARInvoice.strTransactionType = 'Credit Memo' THEN tblARInvoiceDetail.dblQtyShipped * -1 ELSE tblARInvoiceDetail.dblQtyShipped END) AS dblNet
@@ -258,8 +258,8 @@ BEGIN TRY
 				, intReportingComponentId
 				, strScheduleCode
 				, strType
-				, intProductCode
-				, strProductCode
+				--, intProductCode
+				--, strProductCode
 				, intItemId
 				, dblQtyShipped
 				, dblGross
@@ -311,15 +311,15 @@ BEGIN TRY
 				, strDiversionOriginalDestinationState
 				, strTransactionType
 				, intTransactionNumberId)
-			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInvoiceDetailId, intTaxAuthorityId, intProductCodeId DESC) AS intId, *
+			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInvoiceDetailId, intTaxAuthorityId) AS intId, *
 			FROM (SELECT DISTINCT tblARInvoiceDetail.intInvoiceDetailId
 					, tblTFReportingComponent.intTaxAuthorityId
 					, tblTFReportingComponent.strFormCode
 					, tblTFReportingComponent.intReportingComponentId
 					, tblTFReportingComponent.strScheduleCode
 					, tblTFReportingComponent.strType
-					, tblTFProductCode.intProductCodeId
-					, tblTFProductCode.strProductCode
+					--, tblTFProductCode.intProductCodeId
+					--, tblTFProductCode.strProductCode
 					, tblARInvoiceDetail.intItemId
 					, (CASE WHEN tblARInvoice.strTransactionType = 'Credit Memo' THEN tblARInvoiceDetail.dblQtyShipped * -1 ELSE tblARInvoiceDetail.dblQtyShipped END) AS dblQtyShipped
 					, (CASE WHEN tblARInvoice.strTransactionType = 'Credit Memo' THEN tblARInvoiceDetail.dblQtyShipped * -1 ELSE tblARInvoiceDetail.dblQtyShipped END) AS dblNet
@@ -511,8 +511,8 @@ BEGIN TRY
 			, intReportingComponentId
 			, strScheduleCode
 			, strType
-			, intProductCode
-			, strProductCode
+			--, intProductCode
+			--, strProductCode
 			, intItemId
 			, dblQtyShipped
 			, dblGross
@@ -564,15 +564,15 @@ BEGIN TRY
 			, strDiversionOriginalDestinationState
 			, strTransactionType
 			, intTransactionNumberId)
-		SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intTaxAuthorityId, intProductCodeId DESC) AS intId, *
+		SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intTaxAuthorityId) AS intId, *
 		FROM (SELECT DISTINCT NULL AS intInvoiceDetailId
 				, tblTFReportingComponent.intTaxAuthorityId
 				, tblTFReportingComponent.strFormCode
 				, tblTFReportingComponent.intReportingComponentId
 				, tblTFReportingComponent.strScheduleCode
 				, tblTFReportingComponent.strType
-				, tblTFProductCode.intProductCodeId
-				, tblTFProductCode.strProductCode
+				--, tblTFProductCode.intProductCodeId
+				--, tblTFProductCode.strProductCode
 				, tblICInventoryTransferDetail.intItemId
 				, tblICInventoryTransferDetail.dblQuantity AS dblQtyShipped
 				, tblICInventoryTransferDetail.dblQuantity AS dblGross
@@ -729,8 +729,14 @@ BEGIN TRY
 				, intTransactionNumberId)
 			SELECT DISTINCT @Guid
 				, intReportingComponentId
-				, intProductCode
-				, strProductCode
+				, intProductCodeId = (SELECT TOP 1 vyuTFGetReportingComponentProductCode.intProductCodeId 
+                    FROM vyuTFGetReportingComponentProductCode INNER JOIN tblICItemMotorFuelTax 
+                    ON tblICItemMotorFuelTax.intProductCodeId = vyuTFGetReportingComponentProductCode.intProductCodeId 
+                    WHERE intReportingComponentId = Trans.intReportingComponentId and tblICItemMotorFuelTax.intItemId = Trans.intItemId)
+                , strProductCode = (SELECT TOP 1 vyuTFGetReportingComponentProductCode.strProductCode 
+                    FROM vyuTFGetReportingComponentProductCode INNER JOIN tblICItemMotorFuelTax 
+                    ON tblICItemMotorFuelTax.intProductCodeId = vyuTFGetReportingComponentProductCode.intProductCodeId 
+                    WHERE intReportingComponentId = Trans.intReportingComponentId and tblICItemMotorFuelTax.intItemId = Trans.intItemId)
 				, intItemId
 				, CONVERT(DECIMAL(18), dblQtyShipped)
 				, CONVERT(DECIMAL(18), dblGross)
@@ -782,7 +788,7 @@ BEGIN TRY
 				, strDiversionOriginalDestinationState
 				, strTransactionType
 				, intTransactionNumberId
-			FROM @tmpInvoiceTransaction ORDER BY strProductCode
+			FROM @tmpInvoiceTransaction Trans
 		END
 		
 		IF(NOT EXISTS (SELECT TOP 1 1 FROM @tmpInvoiceTransaction WHERE intReportingComponentId = @RCId) AND @IsEdi = 0)
