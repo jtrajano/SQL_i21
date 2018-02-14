@@ -2966,6 +2966,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                         }    
                                         else {
                                             currentVM.tblICInventoryShipmentItems().add(newRecord);
+                                            newISItem = currentVM.tblICInventoryShipmentItems().findRecord('intOrderId', newRecord.intOrderId);
                                         }                                        
                                     }        
                                 
@@ -3009,10 +3010,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                                                         strChargesLink: chargesLink,
                                                                         ysnInventoryCost: false,
                                                                         strCostMethod: otherCharge.strCostMethod,
-                                                                        dblRate: otherCharge.dblRate,
+                                                                        dblQuantity: otherCharge.strCostMethod == 'Amount' ? 1 : order.get('dblQtyToShip'),
+                                                                        dblRate: otherCharge.strCostMethod == 'Amount' ? 0 : otherCharge.dblRate,
                                                                         intCostUOMId: otherCharge.intItemUOMId,
                                                                         intEntityVendorId: otherCharge.intVendorId,
-                                                                        dblAmount: 0,
+                                                                        dblAmount: otherCharge.strCostMethod == 'Amount' ? otherCharge.dblRate : 0,
                                                                         strAllocatePriceBy: 'Unit',
                                                                         ysnAccrue: otherCharge.ysnAccrue,
                                                                         ysnPrice: otherCharge.ysnPrice,
