@@ -87,6 +87,7 @@ Declare @intLotId int
 Declare @dblAvailableQty numeric(38,20)
 Declare @intPickListDetailId int
 Declare @intBatchCounter INT=1
+Declare @strCustomerMessages nvarchar(max)
 
 	DECLARE @strCompanyName NVARCHAR(100)
 		,@strCompanyAddress NVARCHAR(100)
@@ -373,6 +374,16 @@ Begin --Sales Order Pick List
 		Join tblSMDocumentMaintenance d on dm.intDocumentMaintenanceId=d.intDocumentMaintenanceId
 		Where d.intEntityCustomerId = (Select intEntityCustomerId From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId)
 		AND dm.ysnPickList=1 AND dm.strHeaderFooter='Header'
+
+	Set @strCustomerMessages=dbo.fnEMEntityMessage((Select intEntityCustomerId From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId), 'Pick Ticket')
+
+	If ISNULL(@strCustomerMessages,'')<>''
+	Begin
+		If ISNULL(@strCustomerComments,'')=''
+			Set @strCustomerComments=@strCustomerMessages
+		Else
+			Set @strCustomerComments = @strCustomerComments + CHAR(13) + @strCustomerMessages
+	End
 
 	Select @strFooterComments=COALESCE(@strFooterComments, '') + dm.strMessage + CHAR(13)
 	From tblSMDocumentMaintenanceMessage dm 
