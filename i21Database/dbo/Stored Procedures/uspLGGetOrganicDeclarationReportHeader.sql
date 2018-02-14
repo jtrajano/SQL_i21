@@ -4,6 +4,7 @@ AS
 	DECLARE @intLoadId INT
 	DECLARE @xmlDocumentId INT 
 	DECLARE @strUserName NVARCHAR(100)
+	DECLARE @strSKALCompanyNo NVARCHAR(100)
 
 IF LTRIM(RTRIM(@xmlParam)) = ''
 	SET @xmlParam = NULL
@@ -43,6 +44,10 @@ FROM OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2) WITH (
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'strUserName' 
 
+	SELECT @strSKALCompanyNo = strInternalNotes 
+	FROM tblSMCompanyLocation 
+	WHERE ISNULL(strInternalNotes,'') <> ''
+
 SELECT E.intEntityId
 	,E.strName AS strCustomerName
 	,EL.strAddress
@@ -72,7 +77,7 @@ SELECT E.intEntityId
 	,'( ' + @strUserName + ' )' AS strUserName
 	,dbo.fnSMGetCompanyLogo('OrganicDeclarationHeader') AS blbHeaderLogo
 	,dbo.fnSMGetCompanyLogo('OrganicDeclarationFooter') AS blbFooterLogo
-	,'015611' AS strCompanyNumberSupplier
+	,@strSKALCompanyNo AS strCompanyNumberSupplier
 	,FWE.strName + CASE 
 		WHEN ISNULL(FWEL.strCity, '') <> ''
 			THEN ', ' + FWEL.strCity
@@ -87,7 +92,6 @@ SELECT E.intEntityId
 			THEN E.strName + CHAR(13) + CEL.strAddress + CHAR(13) + CEL.strZipCode + ' ' + CEL.strCity + CHAR(13) + CEL.strState + ' ' + CEL.strCountry
 		ELSE NULL
 		END AS strDeliveryAddress
-
 FROM tblEMEntity E
 JOIN (
 	SELECT TOP 1 LD.intSCompanyLocationId
