@@ -15,7 +15,7 @@
 	dtmCreated datetime NULL CONSTRAINT DF_tblMFReasonCode_dtmCreated DEFAULT GetDate(),
 	intLastModifiedUserId int NULL,
 	dtmLastModified datetime NULL CONSTRAINT DF_tblMFReasonCode_dtmLastModified DEFAULT GetDate(),
-		
+	ysnAutoCreated bit CONSTRAINT DF_tblMFReasonCode_ysnAutoCreated Default 0,
 	CONSTRAINT PK_tblMFReasonCode PRIMARY KEY (intReasonCodeId),
 	CONSTRAINT AK_tblMFReasonCode_strReasonCode_intReasonTypeId_intTransactionTypeId UNIQUE (
 		strReasonCode,
