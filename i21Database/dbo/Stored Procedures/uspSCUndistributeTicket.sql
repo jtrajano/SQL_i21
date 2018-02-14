@@ -69,14 +69,15 @@ BEGIN TRY
 
 				WHILE @@FETCH_STATUS = 0
 				BEGIN
-					SELECT @intInventoryReceiptItemId = intInventoryReceiptItemId FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId = @InventoryReceiptId AND dblUnitCost > 0
 					IF OBJECT_ID (N'tempdb.dbo.#tmpVoucherDetail') IS NOT NULL
                         DROP TABLE #tmpVoucherDetail
 					CREATE TABLE #tmpVoucherDetail (
 						[intBillId] [INT] PRIMARY KEY,
 						UNIQUE ([intBillId])
 					);
-					INSERT INTO #tmpVoucherDetail(intBillId)SELECT DISTINCT(intBillId) FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
+					INSERT INTO #tmpVoucherDetail(intBillId)SELECT DISTINCT(AP.intBillId) FROM tblAPBillDetail AP
+					LEFT JOIN tblICInventoryReceiptItem IC ON IC.intInventoryReceiptItemId = AP.intInventoryReceiptItemId
+					WHERE IC.intInventoryReceiptId = @InventoryReceiptId
 					
 					DECLARE voucherCursor CURSOR LOCAL FAST_FORWARD
 					FOR
