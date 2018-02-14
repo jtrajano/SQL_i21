@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspCFCreateDebitMemo](
 	 @entityId					INT			   = NULL
+	,@username					NVARCHAR(MAX)
 	,@ErrorMessage				NVARCHAR(250)  = NULL OUTPUT
 	,@CreatedIvoices			NVARCHAR(MAX)  = NULL OUTPUT
 	,@UpdatedIvoices			NVARCHAR(MAX)  = NULL OUTPUT
@@ -215,6 +216,7 @@ BEGIN
 			,[strDocumentNumber]					= strTempInvoiceReportNumber
 		FROM tblCFInvoiceStagingTable
 		WHERE ISNULL(intInvoiceId,0) != 0
+		AND strUserId = @username
 		GROUP BY 
 		intCustomerId
 		,strTempInvoiceReportNumber
@@ -684,6 +686,7 @@ BEGIN
 			,@dblAccountTotalDiscount = SUM(dblDiscount)
 			FROM tblCFInvoiceStagingTable 
 			WHERE intCustomerId = @intEntityCustomerId AND ISNULL(intInvoiceId,0) != 0
+			AND strUserId = @username
 			GROUP BY
 			 intCustomerId
 			,strTempInvoiceReportNumber
