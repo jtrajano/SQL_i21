@@ -36,7 +36,9 @@ LEFT JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId=ot.intFutureMarket
  LEFT JOIN tblSMCurrency cur on cur.intCurrencyID=bc.intFutCurrencyId
 LEFT JOIN tblRKBrokerageAccount ba on ot.intBrokerageAccountId=ba.intBrokerageAccountId AND ba.intEntityId = ot.intEntityId  AND ot.intInstrumentTypeId =1
 LEFT JOIN tblCTBook b on b.intBookId=ot.intBookId
-LEFT JOIN tblCTSubBook sb on sb.intSubBookId=ot.intSubBookId and intSelectedInstrumentTypeId=1 )t)t1  where dblBalanceLot > 0
+LEFT JOIN tblCTSubBook sb on sb.intSubBookId=ot.intSubBookId and intSelectedInstrumentTypeId=1 
+where  dtmTransactionDate between bc.dtmEffectiveDate and bc.dtmEndDate --This filter is to get the correct commission based on date
+)t)t1  where dblBalanceLot > 0
 
 UNION 
 
