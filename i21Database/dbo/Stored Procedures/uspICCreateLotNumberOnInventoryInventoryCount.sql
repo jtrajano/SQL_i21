@@ -69,10 +69,12 @@ BEGIN
 			,[strParentLotAlias]		= Detail.strParentLotAlias
 	FROM tblICInventoryCount Header
 		INNER JOIN tblICInventoryCountDetail Detail ON Detail.intInventoryCountId = Header.intInventoryCountId
+		INNER JOIN tblICItem Item ON Item.intItemId = Detail.intItemId
 		LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = Detail.intItemId
 			AND ItemLocation.intLocationId = Header.intLocationId
 	WHERE Header.intInventoryCountId = @intTransactionId
 		AND Detail.intLotId IS NULL
+		AND Item.strLotTracking <> 'No'
 END 
 
 -- Call the common stored procedure that will create or update the lot master table
