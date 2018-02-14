@@ -4,6 +4,7 @@
 	[intConcurrencyId] INT NOT NULL, 
 	[intMatchFuturesPSHeaderId] INT NOT NULL, 
 	[dblMatchQty] NUMERIC(18, 6) NOT NULL,
+	[dblFutCommission] NUMERIC(18, 6) NOT NULL DEFAULT 0,
 	[intLFutOptTransactionId] INT NOT NULL,
 	[intSFutOptTransactionId] INT NOT NULL,			 
 	[dtmMatchedDate] DATETIME NULL, 
