@@ -47,7 +47,19 @@ Ext.define('Inventory.model.ItemBundle', {
     ],
 
     validators: [
-        {type: 'presence', field: 'strComponentItemNo'},
-        {type: 'presence', field: 'strUnitMeasure'}
-    ]
+        {type: 'presence', field: 'strComponentItemNo'}
+    ],
+
+    validate: function(options){
+        var errors = this.callParent(arguments),
+            current = this.getAssociatedData();
+        
+        if(current && current.intItem.strBundleType != 'Option'){
+            errors.add({
+                field: 'strUnitMeasure',
+                message: 'Must be present.'
+            });
+        }
+
+    }
 });
