@@ -13,8 +13,11 @@ BEGIN
 	--================================================
 	IF (@Checking = 1)
 	BEGIN
-		SELECT @Total = COUNT(1)
-		FROM gachrmst
+		
+		IF EXISTS(SELECT 1 FROM tblGRStorageScheduleRule)
+			SELECT @Total = 0
+		ELSE  
+			SELECT @Total = COUNT(1) FROM gachrmst
 
 		RETURN @Total
 	END
@@ -70,7 +73,7 @@ BEGIN
 		,strLocation		  = LTRIM(RTRIM(gachr_loc_no))
 		,intCommodityId		  = Com.intCommodityId
 		,strCommodityCode	  = LTRIM(RTRIM(gachr_com_cd))
-		,intStorageType		  = gachr_stor_type
+		,intStorageType		  = StorageType.intStorageScheduleTypeId
 		,strStorageScheduleNo = LTRIM(RTRIM(gachr_stor_schd_no))
 		,strDescription		  = LTRIM(RTRIM(ISNULL(gachr_desc, gachr_stor_schd_no)))
 		,intAllowanceDays     = gachr_allow_days
@@ -82,6 +85,7 @@ BEGIN
 	FROM gachrmst a
 	JOIN tblICCommodity Com ON Com.strCommodityCode = LTRIM(RTRIM(a.gachr_com_cd)) COLLATE Latin1_General_CS_AS
 	JOIN tblSMCurrency Cur ON Cur.strCurrency = LTRIM(RTRIM(a.gachr_currency)) COLLATE Latin1_General_CS_AS
+	JOIN tblGRStorageType StorageType ON StorageType.strStorageTypeCode =LTRIM(RTRIM(a.gachr_stor_type)) COLLATE Latin1_General_CS_AS
 
 	INSERT INTO @tblStoragePeriod 
 	(

@@ -6,8 +6,8 @@ SELECT
 	c.intCommodityId,
 	c.strCommodityCode,
 	fm.strFutMarketName,	
-	mm.strFutSymbol,
-	mm.dblContractSize,
+	fm.strFutSymbol,
+	fm.dblContractSize,
 	um.intUnitMeasureId,
 	um.strUnitMeasure,
 	sm.intCurrencyID,
@@ -16,6 +16,6 @@ SELECT
 FROM tblICCommodity c
 JOIN tblRKCommodityMarketMapping mm on c.intCommodityId=mm.intCommodityId
 JOIN tblRKFutureMarket fm on fm.intFutureMarketId=mm.intFutureMarketId
-JOIN tblICUnitMeasure um on mm.intUnitMeasureId=um.intUnitMeasureId
-JOIN tblSMCurrency sm on sm.intCurrencyID= mm.intCurrencyId
+JOIN tblICUnitMeasure um on fm.intUnitMeasureId=um.intUnitMeasureId
+JOIN tblSMCurrency sm on sm.intCurrencyID= fm.intCurrencyId
 

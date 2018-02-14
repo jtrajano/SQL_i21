@@ -22,8 +22,10 @@ BEGIN
 		RETURN @Total
 	END
 
-	BEGIN		
-		 
+	BEGIN	
+			----Create Discount and Storage Charge Items	
+			EXEC uspGRImportDiscountAndStorageChargeItem
+
 			DECLARE @intDiscountScheduleId INT
 			DECLARE @strCurrency NVARCHAR(50)
 			DECLARE @strCommodityCode NVARCHAR(50)

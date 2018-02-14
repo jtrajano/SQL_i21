@@ -62,7 +62,6 @@
 	,@ItemOriginalInvoiceDetailId	INT				= NULL		
 	,@ItemSiteId					INT				= NULL												
 	,@ItemBillingBy					NVARCHAR(200)	= NULL
-	,@ItemBOLNumber					NVARCHAR(100)	= NULL
 	,@ItemPercentFull				NUMERIC(18,6)	= 0.000000
 	,@ItemNewMeterReading			NUMERIC(18,6)	= 0.000000
 	,@ItemPreviousMeterReading		NUMERIC(18,6)	= 0.000000
@@ -324,7 +323,6 @@ BEGIN TRY
 				,[intOriginalInvoiceDetailId]
 				,[intSiteId]
 				,[strBillingBy]
-				,[strBOLNumber]
 				,[dblPercentFull]
 				,[dblNewMeterReading]
 				,[dblPreviousMeterReading]
@@ -409,7 +407,6 @@ BEGIN TRY
 				,[intOriginalInvoiceDetailId]		= @ItemOriginalInvoiceDetailId 
 				,[intSiteId]						= @ItemSiteId
 				,[strBillingBy]						= @ItemBillingBy
-				,[strBOLNumber]						= @ItemBOLNumber
 				,[dblPercentFull]					= @ItemPercentFull
 				,[dblNewMeterReading]				= @ItemNewMeterReading
 				,[dblPreviousMeterReading]			= @ItemPreviousMeterReading

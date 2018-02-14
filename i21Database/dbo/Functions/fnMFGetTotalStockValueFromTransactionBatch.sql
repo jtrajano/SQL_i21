@@ -22,6 +22,7 @@ BEGIN
 	FROM	[dbo].[tblICInventoryTransaction] A
 	WHERE	A.intTransactionId = @intTransactionId
 			AND A.strBatchId = @strBatchId
+			AND A.intTransactionTypeId = 8
 
 	RETURN ISNULL(@Value, 0)
 END

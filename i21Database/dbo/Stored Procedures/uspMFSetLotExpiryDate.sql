@@ -218,8 +218,8 @@ BEGIN TRY
 			,@intOldLotStatusId = NULL
 			,@intNewLotStatusId = NULL
 			,@intUserId = @intUserId
-			,@strNote = NULL
-			,@strReason = NULL
+			,@strNote = @strNotes
+			,@strReason = @strReasonCode
 			,@intLocationId = @intLocationId
 			,@intInventoryAdjustmentId = @intInventoryAdjustmentId
 	END

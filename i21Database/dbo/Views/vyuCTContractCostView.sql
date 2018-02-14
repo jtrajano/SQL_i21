@@ -41,7 +41,8 @@ AS
 				CC.strRemarks,			
 				IM.strCostType,
 				IM.ysnInventoryCost,
-				CH.strContractNumber
+				CH.strContractNumber,
+				MY.strCurrency	AS	strMainCurrency
 
 	FROM		tblCTContractCost	CC
 	JOIN		tblCTContractDetail CD ON CD.intContractDetailId	=	CC.intContractDetailId
@@ -50,6 +51,7 @@ AS
 	LEFT JOIN	tblICItemUOM		IU ON IU.intItemUOMId			=	CC.intItemUOMId
 	LEFT JOIN	tblICUnitMeasure	UM ON UM.intUnitMeasureId		=	IU.intUnitMeasureId
 	LEFT JOIN	tblSMCurrency		CY ON CY.intCurrencyID			=	CC.intCurrencyId
+	LEFT JOIN	tblSMCurrency		MY ON MY.intCurrencyID			=	CY.intMainCurrencyId
 	LEFT JOIN	tblEMEntity			EY ON EY.intEntityId			=	CC.intVendorId
 	LEFT JOIN	tblEMEntityType		ET ON ET.intEntityId			=	EY.intEntityId
 									  AND ET.strType = 'Vendor'

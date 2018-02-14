@@ -7,7 +7,8 @@
 	@strFooterComment		NVARCHAR(500) = NULL OUTPUT,
 	@DocumentMaintenanceId	INT = NULL,
 	@intDocumentUsedId		INT = NULL OUTPUT,
-	@strDocumentUsedCode	NVARCHAR(10) = NULL OUTPUT
+	@strDocumentUsedCode	NVARCHAR(10) = NULL OUTPUT,
+	@strDocumentUsedTitle	NVARCHAR(50) = NULL OUTPUT
 AS
 
 SELECT TOP 1 @strHeaderComment =  strDefaultComment,
@@ -17,7 +18,8 @@ SELECT TOP 1 @strHeaderComment =  strDefaultComment,
 
 IF @intDocumentUsedId IS NOT NULL
 BEGIN
-	SELECT TOP 1 @strDocumentUsedCode = strCode FROM tblSMDocumentMaintenance 
+	SELECT TOP 1 @strDocumentUsedCode = strCode,
+		@strDocumentUsedTitle = strTitle FROM tblSMDocumentMaintenance 
 		WHERE intDocumentMaintenanceId = @intDocumentUsedId
 END
 

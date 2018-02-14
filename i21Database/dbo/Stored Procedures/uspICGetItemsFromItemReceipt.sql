@@ -52,4 +52,8 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 			ON ItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 		LEFT JOIN dbo.tblICItemUOM LotItemtUOM
 			ON LotItemtUOM.intItemUOMId = ItemLot.intItemUnitMeasureId
+		LEFT JOIN tblICItem Item ON Item.intItemId = ReceiptItem.intItemId
 WHERE	Receipt.intInventoryReceiptId = @intReceiptId		
+		AND 1 = CASE WHEN ISNULL(ReceiptItem.strItemType,'') <> '' AND Item.strType = 'Bundle' THEN 1
+					WHEN  ISNULL(ReceiptItem.strItemType,'') <> '' THEN 0
+					ELSE 1 END

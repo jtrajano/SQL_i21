@@ -41,15 +41,11 @@ BEGIN
 	FROM tblMFAttribute
 	WHERE strAttributeName = 'Packaging Category'
 
-	SELECT @strPackagingCategory = strAttributeValue
+	SELECT @intCategoryId = strAttributeValue
 	FROM tblMFManufacturingProcessAttribute
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
 		AND intLocationId = @intLocationId
 		AND intAttributeId = @intPackagingCategoryId
-
-	SELECT @intCategoryId = intCategoryId
-	FROM dbo.tblICCategory
-	WHERE strCategoryCode = @strPackagingCategory
 
 	IF @intCategoryId IS NULL
 		SELECT @intCategoryId = 0

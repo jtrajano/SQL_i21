@@ -78,7 +78,18 @@
 				)
 				FROM tblSMUserRoleMenu roleMenu
 				INNER JOIN tblSMMasterMenu masterMenu ON roleMenu.intMenuId = masterMenu.intMenuID
-				WHERE masterMenu.strMenuName = ''Orders (Portal)'' AND intUserRoleId = @userRoleId
+				WHERE masterMenu.strMenuName = ''Purchase Orders (Portal)'' AND intUserRoleId = @userRoleId
+			END
+
+			IF EXISTS(SELECT TOP 1 1 FROM tblSMUserRoleMenu rm INNER JOIN tblSMMasterMenu mm ON rm.intMenuId = mm.intMenuID WHERE intUserRoleId = @userRoleId AND strMenuName = ''Sales Orders'')
+			BEGIN
+				UPDATE roleMenu SET ysnVisible =
+				(
+					SELECT COUNT(*) FROM tblSMUserRoleMenu rm INNER JOIN tblSMMasterMenu mm ON rm.intMenuId = mm.intMenuID WHERE intUserRoleId = @userRoleId AND rm.ysnVisible = 1 AND strMenuName = ''Sales Orders''
+				)
+				FROM tblSMUserRoleMenu roleMenu
+				INNER JOIN tblSMMasterMenu masterMenu ON roleMenu.intMenuId = masterMenu.intMenuID
+				WHERE masterMenu.strMenuName = ''Sales Orders (Portal)'' AND intUserRoleId = @userRoleId
 			END
 
 			IF EXISTS(SELECT TOP 1 1 FROM tblSMUserRoleMenu rm INNER JOIN tblSMMasterMenu mm ON rm.intMenuId = mm.intMenuID WHERE intUserRoleId = @userRoleId AND strMenuName = ''Vouchers'')

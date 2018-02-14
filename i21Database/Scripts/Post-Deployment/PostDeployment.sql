@@ -66,6 +66,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1740_UpdateSalesMenus.sql
 :r .\SM\1740_RemoveLoadScheduleResources.sql
 :r .\SM\1810_RenameCompanyToMultiCompany.sql
+:r .\SM\1810_UpdatePortalMenus.sql
 
 -- Canned Report
 :r .\Reports\1_ReportDisableConstraints.sql
@@ -192,6 +193,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\DefaultData\1p_CompanyPreferenceOption.sql
 :r .\GL\DefaultData\1q_InsertOriginMapping.sql
 :r .\GL\DefaultData\1r_UpdateModuleCategory.sql
+:r .\GL\DefaultData\1s_UpdateChartDescription.sql
 
 -- Financial Report Designer
 :r .\FRD\FRDEntryDataFix.sql
@@ -260,6 +262,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\UpdateTaxGroupId.sql
 :r .\AP\UpdateBillDetailRate.sql
 :r .\AP\DeleteInvalidBasisAdvanceStaging.sql
+:r .\AP\CleanBasisAdvance.sql
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 
@@ -283,6 +286,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\25_MigratePackedTypeToQuantityType.sql
 :r .\IC\26_AddStockUOM.sql
 :r .\IC\27_RemoveAfter18.1_DataFix.sql 
+:r .\IC\28_UpdateChargeEntity.sql 
 
 -- Patronage
 :r .\PAT\DefaultData\1_AddDefaultLetters.sql 
@@ -319,6 +323,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\PR\DataFixes\UpdateEarningDeductionTaxId.sql
 :r .\PR\DataFixes\UpdatePaycheckTotalHours.sql
 :r .\PR\DataFixes\UpdateOldData.sql
+:r .\PR\Reports\DashboardPanelViews.sql
 :r .\PR\Reports\SubReports\PaycheckEarningSubReport.sql
 :r .\PR\Reports\SubReports\PaycheckTaxSubReport.sql
 :r .\PR\Reports\SubReports\PaycheckDeductionSubReport.sql
@@ -379,6 +384,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\DataMigration\1710_1720_CCSite_migration.sql
 :r .\EM\DataMigration\1740_Moving_Farm_Info_to_Location.sql
 :r .\EM\1740_Activate_Default_Contact.sql
+:r .\EM\1810_Set_Default_Language.sql
 
 -- Quality Module
 :r .\QM\1_MasterTables.sql

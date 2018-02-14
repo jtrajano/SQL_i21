@@ -88,7 +88,8 @@ BEGIN
 			INNER JOIN tblICItem Item
 				ON Item.intItemId = OtherCharge.intChargeId
 	WHERE	OtherCharge.ysnAccrue = 1
-			AND OtherCharge.ysnPrice = 1
+			--AND OtherCharge.ysnPrice = 1
+			AND 1 = CASE WHEN OtherCharge.strChargeEntity = 'Add' OR OtherCharge.strChargeEntity = 'Reduce' THEN 1 ELSE 0 END 
 			AND OtherCharge.ysnInventoryCost = 1
 			AND ISNULL(OtherCharge.intEntityVendorId, Receipt.intEntityVendorId) = Receipt.intEntityVendorId
 			AND Receipt.intInventoryReceiptId = @intInventoryReceiptId
@@ -115,7 +116,8 @@ BEGIN
 			AND (
 				-- Do not allow if third party or receipt vendor is going to pay the other charge and cost is passed-on to the item cost. 
 				(
-					OtherCharge.ysnPrice = 1
+					--OtherCharge.ysnPrice = 1
+					1 = CASE WHEN OtherCharge.strChargeEntity = 'Add' OR OtherCharge.strChargeEntity = 'Reduce' THEN 1 ELSE 0 END
 					AND OtherCharge.ysnInventoryCost = 1
 					AND ISNULL(Item.strCostType, '') <> 'Discount' 
 				)
@@ -189,7 +191,8 @@ BEGIN
 				ON cc.intCurrencyID =  OtherCharge.intCurrencyId
 			LEFT JOIN tblSMCurrency rc
 				ON rc.intCurrencyID =  Receipt.intCurrencyId
-	WHERE	ISNULL(OtherCharge.ysnPrice, 0) = 1 
+	--WHERE	ISNULL(OtherCharge.ysnPrice, 0) = 1 
+	WHERE	1 = CASE WHEN OtherCharge.strChargeEntity = 'Add' OR OtherCharge.strChargeEntity = 'Reduce' THEN 1 ELSE 0 END
 			AND OtherCharge.intCurrencyId IS NOT NULL 
 			AND OtherCharge.intCurrencyId <> Receipt.intCurrencyId
 
@@ -472,6 +475,7 @@ BEGIN
 		,strTransactionForm
 		,ysnAccrue
 		,ysnPrice
+		,strChargeEntity
 		,ysnInventoryCost
 		,dblForexRate
 		,strRateType
@@ -502,6 +506,7 @@ BEGIN
 				,strTransactionForm = @strTransactionForm
 				,AllocatedOtherCharges.ysnAccrue
 				,AllocatedOtherCharges.ysnPrice
+				,AllocatedOtherCharges.strChargeEntity
 				,AllocatedOtherCharges.ysnInventoryCost
 				,dblForexRate = ISNULL(ReceiptCharges.dblForexRate, 1) 
 				,strRateType = currencyRateType.strCurrencyExchangeRateType
@@ -613,19 +618,31 @@ BEGIN
 			INNER JOIN dbo.tblGLAccount GLAccount
 				ON GLAccount.intAccountId = ItemGLAccounts.intInventoryId
 			CROSS APPLY dbo.fnGetDebitFunctional(				
-				CASE WHEN InventoryCostCharges.ysnPrice = 1 THEN -InventoryCostCharges.dblCost ELSE InventoryCostCharges.dblCost END 
+				--CASE WHEN InventoryCostCharges.ysnPrice = 1 THEN -InventoryCostCharges.dblCost ELSE InventoryCostCharges.dblCost END 
+				CASE WHEN InventoryCostCharges.strChargeEntity = 'Reduce' THEN -InventoryCostCharges.dblCost
+					 ELSE InventoryCostCharges.dblCost END
 				,InventoryCostCharges.intCurrencyId
 				,@intFunctionalCurrencyId
 				,InventoryCostCharges.dblForexRate
 			) Debit
 			CROSS APPLY dbo.fnGetCreditFunctional(
-				CASE WHEN InventoryCostCharges.ysnPrice = 1 THEN -InventoryCostCharges.dblCost ELSE InventoryCostCharges.dblCost END 
+				--CASE WHEN InventoryCostCharges.ysnPrice = 1 THEN -InventoryCostCharges.dblCost ELSE InventoryCostCharges.dblCost END 
+				CASE WHEN InventoryCostCharges.strChargeEntity = 'Reduce' THEN -InventoryCostCharges.dblCost
+					 ELSE InventoryCostCharges.dblCost END
 				,InventoryCostCharges.intCurrencyId
 				,@intFunctionalCurrencyId
 				,InventoryCostCharges.dblForexRate
 			) Credit
-			CROSS APPLY dbo.fnGetDebit(CASE WHEN InventoryCostCharges.ysnPrice = 1 THEN -InventoryCostCharges.dblCost ELSE InventoryCostCharges.dblCost END) DebitForeign
-			CROSS APPLY dbo.fnGetCredit(CASE WHEN InventoryCostCharges.ysnPrice = 1 THEN -InventoryCostCharges.dblCost ELSE InventoryCostCharges.dblCost END) CreditForeign
+			--CROSS APPLY dbo.fnGetDebit(CASE WHEN InventoryCostCharges.ysnPrice = 1 THEN -InventoryCostCharges.dblCost ELSE InventoryCostCharges.dblCost END) DebitForeign
+			CROSS APPLY dbo.fnGetDebit(
+				CASE WHEN InventoryCostCharges.strChargeEntity = 'Reduce' THEN -InventoryCostCharges.dblCost 
+					ELSE InventoryCostCharges.dblCost END
+				) DebitForeign
+			--CROSS APPLY dbo.fnGetCredit(CASE WHEN InventoryCostCharges.ysnPrice = 1 THEN -InventoryCostCharges.dblCost ELSE InventoryCostCharges.dblCost END) CreditForeign
+			CROSS APPLY dbo.fnGetCredit(
+				CASE WHEN InventoryCostCharges.strChargeEntity = 'Reduce' THEN -InventoryCostCharges.dblCost 
+				ELSE InventoryCostCharges.dblCost END
+			) CreditForeign
 
 	WHERE	ISNULL(InventoryCostCharges.ysnAccrue, 0) = 0 
 			AND ISNULL(InventoryCostCharges.ysnInventoryCost, 0) = 1
@@ -670,19 +687,29 @@ BEGIN
 			INNER JOIN dbo.tblGLAccount GLAccount
 				ON GLAccount.intAccountId = OtherChargesGLAccounts.intOtherChargeExpense
 			CROSS APPLY dbo.fnGetDebitFunctional(
-				CASE WHEN InventoryCostCharges.ysnPrice = 1 THEN -InventoryCostCharges.dblCost ELSE InventoryCostCharges.dblCost END 
+				--CASE WHEN InventoryCostCharges.ysnPrice = 1 THEN -InventoryCostCharges.dblCost ELSE InventoryCostCharges.dblCost END 
+				CASE WHEN InventoryCostCharges.strChargeEntity = 'Reduce' THEN -InventoryCostCharges.dblCost ELSE InventoryCostCharges.dblCost END 
 				,InventoryCostCharges.intCurrencyId
 				,@intFunctionalCurrencyId
 				,InventoryCostCharges.dblForexRate
 			) Debit
 			CROSS APPLY dbo.fnGetCreditFunctional(
-				CASE WHEN InventoryCostCharges.ysnPrice = 1 THEN -InventoryCostCharges.dblCost ELSE InventoryCostCharges.dblCost END 
+				--CASE WHEN InventoryCostCharges.ysnPrice = 1 THEN -InventoryCostCharges.dblCost ELSE InventoryCostCharges.dblCost END 
+				CASE WHEN InventoryCostCharges.strChargeEntity = 'Reduce' THEN -InventoryCostCharges.dblCost ELSE InventoryCostCharges.dblCost END 
 				,InventoryCostCharges.intCurrencyId
 				,@intFunctionalCurrencyId
 				,InventoryCostCharges.dblForexRate
 			) Credit
-			CROSS APPLY dbo.fnGetDebit(CASE WHEN InventoryCostCharges.ysnPrice = 1 THEN -InventoryCostCharges.dblCost ELSE InventoryCostCharges.dblCost END) DebitForeign
-			CROSS APPLY dbo.fnGetCredit(CASE WHEN InventoryCostCharges.ysnPrice = 1 THEN -InventoryCostCharges.dblCost ELSE InventoryCostCharges.dblCost END) CreditForeign
+			--CROSS APPLY dbo.fnGetDebit(CASE WHEN InventoryCostCharges.ysnPrice = 1 THEN -InventoryCostCharges.dblCost ELSE InventoryCostCharges.dblCost END) DebitForeign
+			CROSS APPLY dbo.fnGetDebit(
+				CASE WHEN InventoryCostCharges.strChargeEntity = 'Reduce' THEN -InventoryCostCharges.dblCost 
+				ELSE InventoryCostCharges.dblCost END
+			) DebitForeign
+			--CROSS APPLY dbo.fnGetCredit(CASE WHEN InventoryCostCharges.ysnPrice = 1 THEN -InventoryCostCharges.dblCost ELSE InventoryCostCharges.dblCost END) CreditForeign
+			CROSS APPLY dbo.fnGetCredit(
+				CASE WHEN InventoryCostCharges.strChargeEntity = 'Reduce' THEN -InventoryCostCharges.dblCost 
+				ELSE InventoryCostCharges.dblCost END
+			) CreditForeign
 
 	WHERE	ISNULL(InventoryCostCharges.ysnAccrue, 0) = 0 
 			AND ISNULL(InventoryCostCharges.ysnInventoryCost, 0) = 1
@@ -822,6 +849,7 @@ BEGIN
 		,strTransactionForm 
 		,ysnAccrue
 		,ysnPrice
+		,strChargeEntity
 		,ysnInventoryCost
 		,dblForexRate 
 		,strRateType 
@@ -849,6 +877,7 @@ BEGIN
 				,strTransactionForm = @strTransactionForm
 				,ReceiptCharges.ysnAccrue
 				,ReceiptCharges.ysnPrice
+				,ReceiptCharges.strChargeEntity
 				,ReceiptCharges.ysnInventoryCost
 				,dblForexRate = ISNULL(ReceiptCharges.dblForexRate, 1) 
 				,strRateType = currencyRateType.strCurrencyExchangeRateType
@@ -965,7 +994,8 @@ BEGIN
 
 	WHERE	ISNULL(NonInventoryCostCharges.ysnAccrue, 0) = 0 -- @COST_BILLED_BY_None 
 			AND ISNULL(NonInventoryCostCharges.ysnInventoryCost, 0) = 0
-			AND ISNULL(NonInventoryCostCharges.ysnPrice, 0) = 0
+			--AND ISNULL(NonInventoryCostCharges.ysnPrice, 0) = 0
+			AND NonInventoryCostCharges.strChargeEntity = 'No'
 
 	UNION ALL 
 	SELECT	
@@ -1023,7 +1053,8 @@ BEGIN
 
 	WHERE	ISNULL(NonInventoryCostCharges.ysnAccrue, 0) = 0 -- @COST_BILLED_BY_None 
 			AND ISNULL(NonInventoryCostCharges.ysnInventoryCost, 0) = 0
-			AND ISNULL(NonInventoryCostCharges.ysnPrice, 0) = 0
+			--AND ISNULL(NonInventoryCostCharges.ysnPrice, 0) = 0
+			AND NonInventoryCostCharges.strChargeEntity = 'No'
 
 	-------------------------------------------------------------------------------------------
 	-- Accrue Other Charge to Vendor 
@@ -1205,7 +1236,8 @@ BEGIN
 			) Credit
 			CROSS APPLY dbo.fnGetDebit(NonInventoryCostCharges.dblCost) DebitForeign
 			CROSS APPLY dbo.fnGetCredit(NonInventoryCostCharges.dblCost) CreditForeign
-	WHERE	ISNULL(NonInventoryCostCharges.ysnPrice, 0) = 1
+	--WHERE	ISNULL(NonInventoryCostCharges.ysnPrice, 0) = 1
+	WHERE	1 = CASE WHEN NonInventoryCostCharges.strChargeEntity = 'Add' OR NonInventoryCostCharges.strChargeEntity = 'Reduce' THEN 1 ELSE 0 END
 
 	UNION ALL 
 	SELECT	
@@ -1260,7 +1292,8 @@ BEGIN
 			) Credit
 			CROSS APPLY dbo.fnGetDebit(NonInventoryCostCharges.dblCost) DebitForeign
 			CROSS APPLY dbo.fnGetCredit(NonInventoryCostCharges.dblCost) CreditForeign
-	WHERE	ISNULL(NonInventoryCostCharges.ysnPrice, 0) = 1	
+	WHERE	--ISNULL(NonInventoryCostCharges.ysnPrice, 0) = 1	
+			1 = CASE WHEN NonInventoryCostCharges.strChargeEntity = 'Add' OR  NonInventoryCostCharges.strChargeEntity = 'Reduce' THEN 1	ELSE 0 END
 
 	SELECT	[dtmDate] 
 			,[strBatchId]

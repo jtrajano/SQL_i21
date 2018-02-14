@@ -6202,6 +6202,13 @@
     <Build Include="dbo\Views\vyuICGetSubstituteComponentStock.sql" />
     <Build Include="dbo\Tables\tblCFInvoiceProcessHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateOR7351334MSub.sql" />
+    <None Include="Scripts\Post-Deployment\EM\1810_Set_Default_Language.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1810_UpdatePortalMenus.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSetVendorLotNumber.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSetLotAlias.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRRegeneratePaycheckPanelViews.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSetLotDetail.sql" />
+    <Build Include="dbo\Functions\fnSCFreightCalculation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -6365,6 +6372,9 @@
     <None Include="Scripts\Post-Deployment\IC\24_ImplementBasketChanges.sql" />
     <None Include="Scripts\Post-Deployment\AP\DefaultData\DeferredPaymentInterest.sql" />
     <Build Include="dbo\Stored Procedures\uspGLInsertOriginCrossReferenceMapping.sql" />
+    <None Include="Scripts\Post-Deployment\IC\28_UpdateChargeEntity.sql" />
+    <None Include="Scripts\Post-Deployment\PR\Reports\DashboardPanelViews.sql" />
+    <None Include="Scripts\Post-Deployment\AP\CleanBasisAdvance.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
@@ -6459,5 +6469,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1r_UpdateModuleCategory.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1s_UpdateChartDescription.sql" />
   </ItemGroup>
 </Project>

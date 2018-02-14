@@ -10,6 +10,8 @@
 	,@strReasonCode NVARCHAR(MAX) = NULL
 	,@dtmDate DATETIME = NULL
 	,@ysnBulkChange BIT = 0
+	,@strNewLotAlias nvarchar(50)=NULL
+	,@strNewVendorLotNumber nvarchar(50)=NULL
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -36,6 +38,8 @@ BEGIN TRY
 		,@strOldNotes NVARCHAR(MAX)
 		,@intTransactionCount INT
 		,@strDescription NVARCHAR(MAX)
+		,@strLotAlias nvarchar(50)
+		,@strVendorLotNumber nvarchar(50)
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -48,6 +52,8 @@ BEGIN TRY
 		,@intLocationId = intLocationId
 		,@intLotStatusId = intLotStatusId
 		,@dtmExpiryDate = dtmExpiryDate
+		,@strLotAlias=strLotAlias 
+		,@strVendorLotNumber=strVendorLotNo 
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
@@ -202,23 +208,6 @@ BEGIN TRY
 		END
 	END
 
-	--IF @intNewItemOwnerId <> ISNULL(@intOldLotItemOwnerId, 0)
-	--BEGIN
-	--	SELECT @intSourceId = 1
-	--		,@intSourceTransactionTypeId = 8
-	--	EXEC [dbo].[uspICInventoryAdjustment_CreatePostOwnerChange] @intItemId = @intItemId
-	--		,@dtmDate = @dtmDate
-	--		,@intLocationId = @intLocationId
-	--		,@intSubLocationId = @intSubLocationId
-	--		,@intStorageLocationId = @intStorageLocationId
-	--		,@strLotNumber = @strLotNumber
-	--		,@intNewOwnerId = @intOwnerId
-	--		,@intSourceId = @intSourceId
-	--		,@intSourceTransactionTypeId = @intSourceTransactionTypeId
-	--		,@intEntityUserSecurityId = @intUserId
-	--		,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
-	--		,@strDescription = @strDescription
-	--END
 	IF @ysnUpdateOwnerOnly = 0
 	BEGIN
 		-- Parent Lot No. Update
@@ -301,6 +290,28 @@ BEGIN TRY
 			WHERE intLotId = @intLotId
 		END
 	END
+
+	if IsNULL(@strLotAlias,'') <>IsNULL(@strNewLotAlias,'') 
+	Begin
+		EXEC dbo.uspMFSetLotAlias @intLotId =@intLotId
+				,@strNewLotAlias =@strNewLotAlias
+				,@intUserId =@intUserId
+				,@strReasonCode  = NULL
+				,@strNotes = NULL
+				,@dtmDate = NULL
+				,@ysnBulkChange = 0
+	End
+
+	if IsNULL(@strVendorLotNumber,'') <>IsNULL(@strNewVendorLotNumber,'') 
+	Begin
+		EXEC dbo.uspMFSetVendorLotNumber @intLotId =@intLotId
+				,@strNewVendorLotNumber =@strNewVendorLotNumber
+				,@intUserId =@intUserId
+				,@strReasonCode  = NULL
+				,@strNotes = NULL
+				,@dtmDate = NULL
+				,@ysnBulkChange = 0
+	End
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION

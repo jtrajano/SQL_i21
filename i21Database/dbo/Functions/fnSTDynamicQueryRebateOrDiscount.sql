@@ -90,7 +90,7 @@ AS BEGIN
 				END
 		   END
 
-		   ELSE IF(@strChangeDescription = 'Rebate Amount' OR @strChangeDescription = 'Accumlated Amount' OR @strChangeDescription = 'Accumlated Quantity')
+		   ELSE IF(@strChangeDescription = 'Rebate Amount' OR @strChangeDescription = 'Accumulated Amount' OR @strChangeDescription = 'Accumulated Quantity')
 		   BEGIN
 				IF(@strPromotionType = 'Vendor Rebate')
 				BEGIN
@@ -98,7 +98,7 @@ AS BEGIN
 				END	
 		   END
 
-		   ELSE IF(@strChangeDescription = 'Discount Amount' OR @strChangeDescription = 'Discount through amount' OR @strChangeDescription = 'Discoount through quantity')
+		   ELSE IF(@strChangeDescription = 'Discount Amount' OR @strChangeDescription = 'Discount through amount' OR @strChangeDescription = 'Discount through quantity')
 		   BEGIN
 				IF(@strPromotionType = 'Vendor Discount')
 				BEGIN

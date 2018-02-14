@@ -223,6 +223,7 @@ BEGIN TRY
 		,intSampleTypeId
 		,strSampleNumber
 		,intParentSampleId
+		,strSampleRefNo
 		,intProductTypeId
 		,intProductValueId
 		,intSampleStatusId
@@ -280,6 +281,7 @@ BEGIN TRY
 		,intSampleTypeId
 		,@strSampleNumber
 		,intParentSampleId
+		,strSampleRefNo
 		,intProductTypeId
 		,intProductValueId
 		,intSampleStatusId
@@ -335,6 +337,7 @@ BEGIN TRY
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intSampleTypeId INT
 			,intParentSampleId INT
+			,strSampleRefNo NVARCHAR(30)
 			,intProductTypeId INT
 			,intProductValueId INT
 			,intSampleStatusId INT
@@ -546,7 +549,7 @@ BEGIN TRY
 			FROM tblQMSampleType
 			WHERE intSampleTypeId = @intSampleTypeId
 				AND ysnAdjustInventoryQtyBySampleQty = 1
-			) AND ISNULL(@dblSampleQty, 0) > 0 AND @ysnEnableParentLot = 0 -- Lot
+			) AND ISNULL(@dblSampleQty, 0) > 0 AND @ysnEnableParentLot = 0 AND ISNULL(@strLotNumber, '') <> '' -- Lot
 	BEGIN
 		SELECT @intLotId = intLotId
 			,@dblQty = dblQty

@@ -344,7 +344,7 @@ BEGIN
 			,[dblCredit]			= B.dblCredit
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
-			,[strDescription]		= B.strDescription
+			,[strDescription]		= A.strMemo
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= NULL
 			,[intCurrencyId]		= A.intCurrencyId
@@ -377,7 +377,7 @@ END
 ELSE IF @ysnPost = 0
 BEGIN
 	-- Reverse the G/L entries
-	EXEC dbo.uspCMReverseGLEntries @strTransactionId, @GL_DETAIL_CODE, NULL, @intUserId	
+	EXEC dbo.uspCMReverseGLEntries @strTransactionId, @GL_DETAIL_CODE, NULL, @intUserId,@strBatchId
 	IF @@ERROR <> 0	GOTO Post_Rollback
 	
 	-- Update the posted flag in the transaction table

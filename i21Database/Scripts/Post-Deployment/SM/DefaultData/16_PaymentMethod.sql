@@ -6,6 +6,10 @@
 		INSERT INTO tblSMPaymentMethod([intPaymentMethodID], [strPaymentMethod], [strPaymentMethodCode], [intAccountId], [strPrintOption], [ysnActive], [intSort])
 		VALUES(1, 'Write Off', NULL, NULL, NULL, 1, 0)
 	END
+	ELSE
+	BEGIN
+		UPDATE tblSMPaymentMethod SET strPaymentMethod = 'Write Off' WHERE strPaymentMethod = 'Write Off'
+	END
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMPaymentMethod WHERE strPaymentMethod = 'ACH')
 	BEGIN
@@ -13,10 +17,14 @@
 		VALUES(2, 'ACH', NULL, NULL, NULL, 1, 0)
 	END
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMPaymentMethod WHERE strPaymentMethod = 'Debit memos and Payments')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMPaymentMethod WHERE strPaymentMethod = 'Debit Memos and Payments')
 	BEGIN
 		INSERT INTO tblSMPaymentMethod([intPaymentMethodID], [strPaymentMethod], [strPaymentMethodCode], [intAccountId], [strPrintOption], [ysnActive], [intSort])
-		VALUES(3, 'Debit memos and Payments', NULL, NULL, NULL, 1, 0)
+		VALUES(3, 'Debit Memos and Payments', NULL, NULL, NULL, 1, 0)
+	END
+	ELSE
+	BEGIN
+		UPDATE tblSMPaymentMethod SET strPaymentMethod = 'Debit Memos and Payments' WHERE strPaymentMethod = 'Debit Memos and Payments'
 	END
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMPaymentMethod WHERE strPaymentMethod = 'Credit')

@@ -92,7 +92,8 @@ BEGIN
 		)
 
 		INSERT INTO #Segments
-		SELECT a.strCode, a.strDescription, a.intAccountStructureId, a.intAccountSegmentId, a.intAccountSegmentId AS strAccountSegmentId
+		SELECT a.strCode, 
+		a.strChartDesc,a.intAccountStructureId, a.intAccountSegmentId, a.intAccountSegmentId AS strAccountSegmentId
 		FROM tblGLTempAccountToBuild x
 		LEFT JOIN tblGLAccountSegment a 
 		ON x.intAccountSegmentId = a.intAccountSegmentId

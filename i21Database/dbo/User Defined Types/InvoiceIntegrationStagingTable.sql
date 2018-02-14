@@ -160,7 +160,6 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[intOriginalInvoiceDetailId]			INT												NULL		-- Key Value from tblARInvoiceDetail (Provisional)
 	,[intSiteId]							INT												NULL		-- Key Value from tblTMSite (Tank MAnagement)
 	,[strBillingBy]							NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL		-- tblTMSite.[strBillingBy] (Tank MAnagement)
-	,[strBOLNumberLineItem]					NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL		-- BOL Number for Invoice Detail
 	,[dblPercentFull]						NUMERIC(18, 6)									NULL
 	,[dblNewMeterReading]					NUMERIC(18, 6)									NULL		
 	,[dblPreviousMeterReading]				NUMERIC(18, 6)									NULL		-- tblTMSite.[dblLastMeterReading] (Tank MAnagement)

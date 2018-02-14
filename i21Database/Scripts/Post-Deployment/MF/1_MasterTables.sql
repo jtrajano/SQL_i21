@@ -3230,5 +3230,46 @@ UPDATE tblMFLotTransactionType
 SET ysnApplyTransactionByParentLot = 0
 WHERE ysnApplyTransactionByParentLot IS NULL
 GO
+IF EXISTS (
+		SELECT *
+		FROM tblMFManufacturingProcessAttribute
+		WHERE intAttributeId = 46
+			AND isNumeric(strAttributeValue) = 0
+		)
+BEGIN
+	UPDATE M
+	SET strAttributeValue = C.intCategoryId
+	FROM tblMFManufacturingProcessAttribute M
+	JOIN tblICCategory C ON C.strCategoryCode = M.strAttributeValue
+	WHERE intAttributeId = 46
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFLotTransactionType
+		WHERE intTransactionTypeId = 101
+		) --Lot Alias
+BEGIN
+	INSERT INTO tblMFLotTransactionType
+	SELECT 101
+		,0
+		,0
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFLotTransactionType
+		WHERE intTransactionTypeId = 102
+		) --Vendor Lot Number
+BEGIN
+	INSERT INTO tblMFLotTransactionType
+	SELECT 102
+		,0
+		,0
+END
+GO
+
 
 

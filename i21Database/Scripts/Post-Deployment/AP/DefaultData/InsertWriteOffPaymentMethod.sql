@@ -4,7 +4,7 @@ USING
 (
 VALUES 
 	(N'Write Off', 1),
-	(N'Debit memos and Payments', 1)
+	(N'Debit Memos and Payments', 1)
 )
 AS Source (strPaymentMethod, ysnActive)
 ON Target.strPaymentMethod = Source.strPaymentMethod 

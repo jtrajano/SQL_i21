@@ -150,6 +150,22 @@ Begin
 	From @tblRequiredQty t join @tblHandAddIngredient h on t.intRecipeItemId=h.intRecipeItemId
 	join tblICItem i on t.intItemId=i.intItemId
 	Where ISNULL(i.ysnHandAddIngredient,0)=1
+
+	--Adjust the Qty difference between Qty To Produce and Sum of Consume Qty
+	Declare @dblSumOfConsumeQty NUMERIC(38,20)
+	Declare @dblQtyDiff NUMERIC(38,20)
+	Select @dblSumOfConsumeQty=SUM(dblRequiredQty) From @tblRequiredQty
+	Set @dblQtyDiff = @dblQtyToProduce - @dblSumOfConsumeQty
+	If @dblQtyDiff<>0
+	Begin
+		Update t Set t.dblRequiredQty=t.dblRequiredQty+@dblQtyDiff
+		From 
+		(
+			Select TOP 1 t.* 
+			From @tblRequiredQty t join tblICItem i on t.intItemId=i.intItemId
+			Where ISNULL(i.ysnHandAddIngredient,0)=0 Order By dblRequiredQty Desc		
+		) t
+	End
 End
 
 Declare @tblPhysicalQty table

@@ -549,7 +549,7 @@ END
 IF NOT EXISTS(SELECT 1
 				FROM tblRKFutOptTransactionImport ti
 				JOIN tblRKFutureMarket fm on fm.strFutMarketName=ti.strFutMarketName 
-				join tblSMCurrency c on c.intCurrencyID=fm.intCurrencyId and c.strCurrency=ti.strCurrency
+				join tblSMCurrency c on c.strCurrency=ti.strCurrency
 				WHERE intFutOptTransactionId =@mRowNumber)
 		BEGIN
 			IF NOT EXISTS(SELECT * FROM tblRKFutOptTransactionImport_ErrLog where intFutOptTransactionId=@mRowNumber)

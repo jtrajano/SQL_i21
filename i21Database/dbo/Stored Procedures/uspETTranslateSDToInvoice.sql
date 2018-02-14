@@ -346,7 +346,7 @@ BEGIN
 						,strFileName = ''				
 						,strStatus = 'Successfully created ' + @strNewInvoiceNumber  +
 						-- Tank consumption site
-						ISNULL((SELECT '<br>' + 'Unable to find a tank consumption site for item no. ' + ICI.strItemNo
+						ISNULL((SELECT  TOP 1 '<br>' + 'Unable to find a tank consumption site for item no. ' + ICI.strItemNo
 						FROM
 							tblARInvoice ARI
 						INNER JOIN tblARInvoiceDetail ARID

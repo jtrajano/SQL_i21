@@ -22,9 +22,13 @@ SELECT
 						 LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 						 LEFT JOIN tblCTAssociation ASN ON ASN.intAssociationId = CH.intAssociationId
 						 LEFT JOIN tblLGWeightClaimDetail WCD ON WCD.intContractDetailId = CD.intContractDetailId
-						 WHERE WCD.intWeightClaimId = WC.intWeightClaimId)
+						 WHERE WCD.intWeightClaimId = WC.intWeightClaimId),
+	intBillOrInvoiceId = B.intBillOrInvoiceId
 FROM tblLGWeightClaim WC
 JOIN tblLGLoad Load ON Load.intLoadId = WC.intLoadId
 JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = Load.intWeightUnitMeasureId
-
-
+JOIN (SELECT DISTINCT WC.intWeightClaimId
+			,ISNULL(WCD.intBillId, WCD.intInvoiceId) intBillOrInvoiceId
+	  FROM tblLGWeightClaim WC
+	  JOIN tblLGWeightClaimDetail WCD ON WC.intWeightClaimId = WCD.intWeightClaimId
+	  )B ON B.intWeightClaimId = WC.intWeightClaimId

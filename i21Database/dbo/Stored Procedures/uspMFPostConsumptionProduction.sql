@@ -405,15 +405,15 @@ BEGIN
 		FROM #GeneratedLotItems
 		WHERE intDetailId = @intBatchId
 
-		EXEC dbo.uspMFCreateUpdateParentLotNumber @strParentLotNumber = @strParentLotNumber
-			,@strParentLotAlias = ''
-			,@intItemId = @intItemId
-			,@dtmExpiryDate = @dtmExpiryDate
-			,@intLotStatusId = 1
-			,@intEntityUserSecurityId = @intUserId
-			,@intLotId = @intLotId
-			,@intSubLocationId = @intSubLocationId
-			,@intLocationId = @intLocationId
+		--EXEC dbo.uspMFCreateUpdateParentLotNumber @strParentLotNumber = @strParentLotNumber
+		--	,@strParentLotAlias = ''
+		--	,@intItemId = @intItemId
+		--	,@dtmExpiryDate = @dtmExpiryDate
+		--	,@intLotStatusId = 1
+		--	,@intEntityUserSecurityId = @intUserId
+		--	,@intLotId = @intLotId
+		--	,@intSubLocationId = @intSubLocationId
+		--	,@intLocationId = @intLocationId
 	END
 
 	IF @dblOtherCharges IS NOT NULL

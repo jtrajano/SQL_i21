@@ -5,60 +5,79 @@ SELECT	intInventoryValuationKeyId = CAST(ROW_NUMBER() OVER (ORDER BY Item.intIte
 		,Item.intItemId
 		,strItemNo = Item.strItemNo
 		,strItemDescription = Item.strDescription 
-		,intItemLocationId = t.intItemLocationId
-		,strLocationName = ISNULL(Location.strLocationName, InTransitLocation.strLocationName + ' (' + ItemLocation.strDescription + ')') 
-		,strMonthYear = FORMAT(t.dtmMaxDate, 'yyyy-MM')
+		,ItemLocation.intItemLocationId
+		,strLocationName = 
+				CASE WHEN t.ysnInTransit = 1 THEN 
+						[Location].strLocationName + ' (In-Transit)'
+					ELSE 
+						[Location].strLocationName
+				END 
+		,strMonthYear = FORMAT(DATEFROMPARTS(t.intYear, t.intMonth, 1), 'yyyy-MM')  
 		,dblQuantity = ISNULL(dblQuantity, 0)
 		,dblValue = ISNULL(dblValue, 0)
 		,dblLastCost = ISNULL( ROUND(dblQuantity * ItemPricing.dblLastCost, 2), 0)
 		,dblStandardCost = ISNULL( ROUND(dblQuantity * ItemPricing.dblStandardCost, 2),0)
 		,dblAverageCost = ISNULL( ROUND(dblQuantity * ItemPricing.dblAverageCost, 2),0)
-		,t.strStockUOM
+		,strStockUOM = umStock.strUnitMeasure
 		,t.dblQuantityInStockUOM
 		,Category.strCategoryCode
 		,Commodity.strCommodityCode
-		,strInTransitLocationName = InTransitLocation.strLocationName
-		,intLocationId = Location.intCompanyLocationId
-		,intInTransitLocationId = InTransitLocation.intCompanyLocationId
+		,strInTransitLocationName = ''
+		,t.intLocationId
+		,intInTransitLocationId = null  
+		,t.ysnInTransit
 FROM	tblICItem Item 
+		LEFT JOIN tblICCategory Category 
+			ON Category.intCategoryId = Item.intCategoryId
+
+		LEFT JOIN tblICCommodity Commodity 
+			ON Commodity.intCommodityId = Item.intCommodityId
+
 		OUTER APPLY (
 			SELECT 
-					t.intItemLocationId
-					,dtmMaxDate = MAX(t.dtmDate)
-					, intInTransitSourceLocationId = CASE WHEN t.intItemLocationId <> t.intInTransitSourceLocationId THEN t.intInTransitSourceLocationId ELSE NULL END 
-					, dblQuantity = SUM(t.dblQty * t.dblUOMQty) 
-					, dblValue = SUM(ROUND(ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0), 2))
-					, strStockUOM = umStock.strUnitMeasure
-					, dblQuantityInStockUOM = SUM(ISNULL(dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, iuStock.intItemUOMId, t.dblQty), 0))
+					intLocationId = ISNULL(InTransit.intLocationId, l.intLocationId) 
+					,ysnInTransit = CASE WHEN l.intLocationId IS NULL THEN 1 ELSE 0 END 
+					,intMonth = MONTH(t.dtmDate)
+					,intYear = YEAR(t.dtmDate) 
+					,dblQuantity = SUM(ISNULL(t.dblQty, 0)) 
+					,dblQuantityInStockUOM = SUM(ISNULL(t.dblQty, 0) * ISNULL(t.dblUOMQty, 1)) 
+					,dblValue = SUM(ROUND(ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0), 2))					
 			FROM	tblICInventoryTransaction t INNER JOIN tblICItemLocation l
 						ON t.intItemLocationId = l.intItemLocationId
-					LEFT JOIN tblICItemUOM iuStock 
-						ON iuStock.intItemId = t.intItemId
-						AND iuStock.ysnStockUnit = 1  -- TODO: In 18.3, change it to use the [Stock UOM] instead of [Stock Unit]. 
-						--AND iuStock.ysnStockUOM = 1
-					LEFT JOIN tblICUnitMeasure umStock
-						ON iuStock.intUnitMeasureId = umStock.intUnitMeasureId
+					LEFT JOIN tblICItemLocation InTransit
+						ON InTransit.intItemLocationId = t.intInTransitSourceLocationId
+						AND t.intInTransitSourceLocationId IS NOT NULL 
 			WHERE	Item.intItemId = t.intItemId
 			GROUP BY 
-				t.intItemLocationId
-				,CASE WHEN t.intItemLocationId <> t.intInTransitSourceLocationId THEN t.intInTransitSourceLocationId ELSE NULL END  
-				,umStock.strUnitMeasure
+				ISNULL(InTransit.intLocationId, l.intLocationId) 
+				,CASE WHEN l.intLocationId IS NULL THEN 1 ELSE 0 END 
+				,MONTH(t.dtmDate)
+				,YEAR(t.dtmDate) 
 		) t							
-		LEFT JOIN (
-			tblICItemLocation ItemLocation LEFT JOIN tblSMCompanyLocation Location 
-				ON Location.intCompanyLocationId = ItemLocation.intLocationId		
-		)
-			ON t.intItemLocationId = ItemLocation.intItemLocationId
-		LEFT JOIN (
-			tblICItemLocation InTransitItemLocation INNER JOIN tblSMCompanyLocation InTransitLocation 
-				ON InTransitLocation.intCompanyLocationId = InTransitItemLocation.intLocationId	
-		)
-			ON t.intInTransitSourceLocationId = InTransitItemLocation.intItemLocationId
+
+		LEFT JOIN tblICItemLocation ItemLocation 
+			ON ItemLocation.intLocationId = t.intLocationId
+			AND ItemLocation.intItemId = Item.intItemId 
 
 		LEFT JOIN tblICItemPricing ItemPricing 
-			ON ItemPricing.intItemLocationId = t.intItemLocationId
-		
-		LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
-		LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
+			ON ItemPricing.intItemLocationId = ItemLocation.intItemLocationId	
 
-WHERE	Item.strType NOT IN ('Other Charge', 'Non-Inventory', 'Service', 'Software', 'Comment')
+		LEFT JOIN tblSMCompanyLocation [Location]
+			ON [Location].intCompanyLocationId = t.intLocationId
+
+		LEFT JOIN tblICItemUOM iuStock 
+			ON iuStock.intItemId = Item.intItemId
+			AND iuStock.ysnStockUnit = 1  -- TODO: In 18.3, change it to use the [Stock UOM] instead of [Stock Unit]. 
+
+			--AND iuStock.ysnStockUOM = 1
+		LEFT JOIN tblICUnitMeasure umStock
+			ON iuStock.intUnitMeasureId = umStock.intUnitMeasureId
+
+WHERE	Item.strType NOT IN (
+			'Other Charge'
+			,'Non-Inventory'
+			,'Service'
+			,'Software'
+			,'Comment'
+			,'Bundle'
+		)

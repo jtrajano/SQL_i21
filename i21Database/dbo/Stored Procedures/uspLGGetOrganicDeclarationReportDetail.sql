@@ -20,12 +20,7 @@ SELECT L.strLoadNumber
 	,'Net Weight in ' + ISNULL(WUM.strSymbol, '') AS strNetWeightColumn
 	,PCH.strContractNumber AS strPContractNumber
 	,PCH.strContractNumber + '/' + LTRIM(PCD.intContractSeq) AS strPContractNumberSeq
-	,(
-		SELECT TOP 1 LC.strMarks
-		FROM tblLGLoadDetailContainerLink LDCL
-		JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
-		WHERE LDCL.intLoadDetailId = LD.intLoadDetailId
-		) AS strMarks
+	,IRIL.strMarkings AS strMarks
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId

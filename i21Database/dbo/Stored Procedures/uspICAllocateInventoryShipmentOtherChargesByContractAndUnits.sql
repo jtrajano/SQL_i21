@@ -74,25 +74,33 @@ BEGIN
 							,CalculatedCharge.intInventoryShipmentId
 							,CalculatedCharge.intInventoryShipmentChargeId
 							,CalculatedCharge.ysnPrice
+							,Charge.strChargesLink
 					FROM	dbo.tblICInventoryShipmentChargePerItem CalculatedCharge INNER JOIN tblICInventoryShipmentCharge Charge
 								ON CalculatedCharge.intInventoryShipmentChargeId = Charge.intInventoryShipmentChargeId				
 					WHERE	CalculatedCharge.intInventoryShipmentId = @intInventoryShipmentId
 							AND CalculatedCharge.strAllocatePriceBy = @ALLOCATE_PRICE_BY_Unit
 							AND CalculatedCharge.intContractId IS NOT NULL 
 					GROUP BY CalculatedCharge.ysnAccrue
-							, CalculatedCharge.intContractId
-							, CalculatedCharge.intContractDetailId
-							, CalculatedCharge.intEntityVendorId
-							, CalculatedCharge.intInventoryShipmentId
-							, CalculatedCharge.intInventoryShipmentChargeId
-							, CalculatedCharge.ysnPrice
+							,CalculatedCharge.intContractId
+							,CalculatedCharge.intContractDetailId
+							,CalculatedCharge.intEntityVendorId
+							,CalculatedCharge.intInventoryShipmentId
+							,CalculatedCharge.intInventoryShipmentChargeId
+							,CalculatedCharge.ysnPrice
+							,Charge.strChargesLink
 				) CalculatedCharges 
-					ON CalculatedCharges.intContractId = ShipmentItem.intOrderId 
-					--AND CalculatedCharges.intContractDetailId = ShipmentItem.intLineNo //removing this because Shipment could have many contract details/sequences per contract
+					ON CalculatedCharges.intContractId = ShipmentItem.intOrderId 					
+					AND 1 = 
+						CASE 
+							WHEN CalculatedCharges.intContractDetailId = ShipmentItem.intLineNo THEN 1
+							WHEN CalculatedCharges.strChargesLink = ShipmentItem.strChargesLink THEN 1 
+							ELSE 0 
+						END					
 				LEFT JOIN (
 					SELECT	dblTotalUnits = SUM(ISNULL(ShipmentItem.dblQuantity, 0))
 							,ShipmentItem.intOrderId 
 							,ShipmentItem.intLineNo
+							,ShipmentItem.strChargesLink 
 					FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentItem ShipmentItem
 								ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 								AND Shipment.intOrderType = @SHIPMENT_TYPE_SalesContract
@@ -100,10 +108,15 @@ BEGIN
 								ON ItemUOM.intItemUOMId = ShipmentItem.intItemUOMId 
 					WHERE	Shipment.intInventoryShipmentId = @intInventoryShipmentId
 							AND ShipmentItem.intOrderId IS NOT NULL 
-					GROUP BY ShipmentItem.intOrderId, ShipmentItem.intLineNo
+					GROUP BY ShipmentItem.intOrderId, ShipmentItem.intLineNo, ShipmentItem.strChargesLink 
 				) TotalUnitsOfItemsPerContract 
 					ON TotalUnitsOfItemsPerContract.intOrderId = ShipmentItem.intOrderId 
-					AND TotalUnitsOfItemsPerContract.intLineNo = ShipmentItem.intLineNo
+					AND 1 = 
+						CASE 
+							WHEN TotalUnitsOfItemsPerContract.intLineNo = ShipmentItem.intLineNo THEN 1
+							WHEN TotalUnitsOfItemsPerContract.strChargesLink = ShipmentItem.strChargesLink THEN 1 
+							ELSE 0 
+						END 
 
 	) AS Source_Query  
 		ON ShipmentItemAllocatedCharge.intInventoryShipmentId = Source_Query.intInventoryShipmentId
@@ -133,6 +146,7 @@ BEGIN
 			,[dblAmount]
 			,[ysnAccrue]
 			,[ysnPrice]
+			,[strChargesLink]
 		)
 		VALUES (
 			Source_Query.intInventoryShipmentId
@@ -148,6 +162,7 @@ BEGIN
 			)
 			,Source_Query.ysnAccrue
 			,Source_Query.ysnPrice
+			,Source_Query.strChargesLink
 		)
 	;
 END 
