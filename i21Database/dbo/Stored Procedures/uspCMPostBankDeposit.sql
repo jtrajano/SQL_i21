@@ -338,7 +338,7 @@ BEGIN
 			,[dblCredit]			= 0
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
-			,[strDescription]		= GLAccnt.strDescription 
+			,[strDescription]		= A.strMemo
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= ISNULL(Entity.strName, A.strPayee)
 			,[intCurrencyId]		= A.intCurrencyId
@@ -372,7 +372,7 @@ BEGIN
 			,[dblCredit]			= B.dblCredit
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
-			,[strDescription]		= B.strDescription
+			,[strDescription]		= A.strMemo
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= Entity.strEntityNo
 			,[intCurrencyId]		= A.intCurrencyId
