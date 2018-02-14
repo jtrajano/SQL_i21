@@ -576,6 +576,11 @@ Ext.define('Inventory.view.BundleViewController', {
             return '<a style="color: #005FB2;text-decoration: none;" onMouseOut="this.style.textDecoration=\'none\'" onMouseOver="this.style.textDecoration=\'underline\'" href="javascript:void(0);">' + value + '</a>';
         };
 
+        var cepPricingLevel = grdPricingLevel.getPlugin('cepPricingLevel');
+        if (cepPricingLevel){
+            me.mon(cepPricingLevel, 'edit', me.onEditPricingLevel, me);
+        }        
+
         return win.context;
     },
 
@@ -1542,7 +1547,6 @@ Ext.define('Inventory.view.BundleViewController', {
         });
     },
 
-
     onPricingChange: function (e, newValue, oldValue) {
         var vm = this.view.viewModel;
         var currentItem = vm.data.current;
@@ -1552,18 +1556,60 @@ Ext.define('Inventory.view.BundleViewController', {
         var win = cep.grid.up('window');
         var grdPricing = win.down('#grdPricing');
 
-        var data = {
-            unitPrice: currentPricing.data.dblSalePrice,
-            msrpPrice: currentPricing.data.dblMSRPPrice,
-            standardCost: newValue,
-            lastCost: currentPricing.data.dblLastCost,
-            avgCost: currentPricing.data.dblAverageCost,
-            pricingMethod: currentPricing.data.strPricingMethod,
-            amount: currentPricing.data.dblAmountPercent
-        };
+        if (!e.dataIndex)
+            return; 
+
+        var data = {};
+        switch (e.dataIndex) {
+            case "dblStandardCost":
+                data = {
+                    unitPrice: currentPricing.data.dblSalePrice,
+                    msrpPrice: currentPricing.data.dblMSRPPrice,
+                    standardCost: newValue,
+                    lastCost: currentPricing.data.dblLastCost,
+                    avgCost: currentPricing.data.dblAverageCost,
+                    pricingMethod: currentPricing.data.strPricingMethod,
+                    amount: currentPricing.data.dblAmountPercent
+                };    
+                break;             
+            case "dblAmountPercent":
+                data = {
+                    unitPrice: currentPricing.data.dblSalePrice,
+                    msrpPrice: currentPricing.data.dblMSRPPrice,
+                    standardCost: currentPricing.data.dblStandardCost,
+                    lastCost: currentPricing.data.dblLastCost,
+                    avgCost: currentPricing.data.dblAverageCost,
+                    pricingMethod: currentPricing.data.strPricingMethod,
+                    amount: newValue
+                };    
+                break;                 
+            case "dblMSRPPrice":
+                data = {
+                    unitPrice: currentPricing.data.dblSalePrice,
+                    msrpPrice: newValue, 
+                    standardCost: currentPricing.data.dblStandardCost,
+                    lastCost: currentPricing.data.dblLastCost,
+                    avgCost: currentPricing.data.dblAverageCost,
+                    pricingMethod: currentPricing.data.strPricingMethod,
+                    amount: currentPricing.data.dblAmountPercent
+                };    
+                break;
+            default: 
+                data = {
+                    unitPrice: currentPricing.data.dblSalePrice,
+                    msrpPrice: currentPricing.data.dblMSRPPrice,
+                    standardCost: currentPricing.data.dblStandardCost,
+                    lastCost: currentPricing.data.dblLastCost,
+                    avgCost: currentPricing.data.dblAverageCost,
+                    pricingMethod: currentPricing.data.strPricingMethod,
+                    amount: currentPricing.data.dblAmountPercent
+                };              
+        }
+
         this.updatePricing(currentPricing, data, function () {
             win.context.data.validator.validateGrid(grdPricing);
         });
+
         this.updatePricingLevel(currentItem, currentPricing, data);
     },
 
@@ -1762,12 +1808,16 @@ Ext.define('Inventory.view.BundleViewController', {
                         return false;
                     }
                     else {
-                        return Ext.create('Ext.grid.CellEditor', {
+                        var editor = Ext.create('Ext.grid.CellEditor', {
                             field: Ext.widget({
                                 xtype: 'numberfield',
-                                currencyField: true
+                                currencyField: true,
+                                dataIndex: 'dblAmountPercent'
                             })
                         });
+
+                        column.mon(editor.field, 'change', me.onPricingChange, me); 
+                        return editor; 
                     }
                     break;
             }
@@ -2006,6 +2056,68 @@ Ext.define('Inventory.view.BundleViewController', {
         me.addAccountCategory(current, 'Sales Account', accountCategoryList);
     },
 
+    onEditPricingLevel: function (editor, context, eOpts) {
+        var me = this;
+        if (context.field === 'strPricingMethod' || context.field === 'dblAmountRate' || context.field === 'strCurrency') {
+            if (context.record) {
+                var win = context.grid.up('window');
+                var grdPricing = win.down('#grdPricing');
+                var pricingItems = grdPricing.store.data.items;
+                var pricingMethod = context.record.get('strPricingMethod');
+                var amount = context.record.get('dblAmountRate');
+
+                if (context.field === 'strPricingMethod') {
+                    pricingMethod = context.value;
+                }
+                else if (context.field === 'dblAmountRate') {
+                    amount = context.value;
+                }
+
+                if (pricingItems) {
+                    var locationId = context.record.get('intItemLocationId');
+                    if (locationId > 0) {
+                        var selectedLoc = Ext.Array.findBy(pricingItems, function (row) {
+                            if (row.get('intItemLocationId') === locationId) {
+                                return true;
+                            }
+                        });
+                        if (selectedLoc) {
+                            var unitPrice = selectedLoc.get('dblSalePrice');
+                            var msrpPrice = selectedLoc.get('dblMSRPPrice');
+                            var standardCost = selectedLoc.get('dblStandardCost');
+                            var lastCost = selectedLoc.get('dblLastCost');
+                            var avgCost = selectedLoc.get('dblAverageCost');
+                            var qty = context.record.get('dblUnit');
+                            var retailPrice = me.getPricingLevelUnitPrice({
+                                pricingMethod: pricingMethod,
+                                salePrice: unitPrice,
+                                msrpPrice: msrpPrice,
+                                standardCost: standardCost,
+                                lastCost: lastCost,
+                                avgCost: avgCost,
+                                amount: amount,
+                                qty: qty
+                            });
+                            if (context.record.get('intCurrencyId') === i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId')) {
+                                context.record.set('dblUnitPrice', retailPrice);
+                            }
+                            else {
+                                if (context.field === 'strCurrency') {
+                                    context.record.set('dblUnitPrice', 0);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (iRely.Functions.isEmpty(context.record.get('strCurrency'))) {
+            context.record.set('intCurrencyId', i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId'));
+            context.record.set('strCurrency', i21.ModuleMgr.SystemManager.getCompanyPreference('strDefaultCurrency'));
+        }
+    },    
+
     init: function(application) {
         this.control({
             "#cboType": {
@@ -2132,7 +2244,7 @@ Ext.define('Inventory.view.BundleViewController', {
             },
             "#btnAddRequiredAccounts": {
                 click: this.onAddRequiredAccountClick
-            },
+            }
         });
     }
 });
