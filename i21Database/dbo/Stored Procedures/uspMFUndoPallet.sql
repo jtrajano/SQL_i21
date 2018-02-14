@@ -34,6 +34,9 @@ BEGIN TRY
 		,@intStorageLocationId INT
 		,@strLotNumber NVARCHAR(50)
 		,@intMachineId INT
+		,@intManufacturingProcessId int
+		,@strInstantConsumption nvarchar(50)
+
 	DECLARE @GLEntriesForOtherCost TABLE (
 		dtmDate DATETIME
 		,intItemId INT
@@ -78,6 +81,7 @@ BEGIN TRY
 
 	SELECT @strTransactionId = strWorkOrderNo
 		,@intLocationId = intLocationId
+		,@intManufacturingProcessId=intManufacturingProcessId 
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -177,6 +181,7 @@ BEGIN TRY
 			FROM dbo.tblICLot
 			WHERE strLotNumber = @strLotNumber
 				AND intStorageLocationId = @intStorageLocationId
+				and intItemId=@intItemId
 				AND dblQty = 0
 			)
 		AND @strLotTracking <> 'No'
@@ -493,6 +498,41 @@ BEGIN TRY
 	WHERE intWorkOrderId = @intWorkOrderId
 		AND intItemId = @intItemId
 		AND IsNULL(intMachineId, 0) = IsNULL(@intMachineId, 0)
+
+	SELECT @strInstantConsumption = strAttributeValue
+		FROM tblMFManufacturingProcessAttribute
+		WHERE intManufacturingProcessId = @intManufacturingProcessId
+			AND intLocationId = @intLocationId
+			AND intAttributeId = 20 --Is Instant Consumption
+
+			DECLARE @tblMFWorkOrderConsumedLot table(  
+					intWorkOrderId int,  
+					intItemId int,  
+					dblQuantity int 
+					,intMachineId int 
+				   ); 
+
+		IF @strInstantConsumption = 'True'
+		BEGIN
+			DELETE
+			FROM dbo.tblMFWorkOrderConsumedLot
+			OUTPUT deleted.intWorkOrderId,  
+				   deleted.intItemId,  
+				   deleted.dblQuantity, 
+				   deleted.intMachineId 
+			INTO @tblMFWorkOrderConsumedLot
+			WHERE intWorkOrderId = @intWorkOrderId
+				AND intBatchId = @intBatchId
+
+			UPDATE PS
+			SET dblConsumedQuantity = dblConsumedQuantity - WC.dblQuantity
+			from tblMFProductionSummary PS
+			JOIN @tblMFWorkOrderConsumedLot WC on PS.intWorkOrderId =WC.intWorkOrderId and PS.intItemId=WC.intItemId 
+			and IsNULL(PS.intMachineId, 0) = IsNULL(WC.intMachineId, 0)
+			WHERE PS.intWorkOrderId = @intWorkOrderId
+				AND PS.intItemId = @intItemId
+				AND IsNULL(PS.intMachineId, 0) = IsNULL(@intMachineId, 0)
+		END
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION
