@@ -2766,6 +2766,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 
                                 lot.set('dblGrossWeight', grossQty);
                                 var tare = lot.get('dblTareWeight');
+
+                                grossQty = Ext.isNumeric(grossQty) ? grossQty : 0.00;
+                                tare = Ext.isNumeric(tare) ? tare : 0.00;
+
                                 var netTotal = grossQty - tare;
                                 lot.set('dblNetWeight', netTotal);
                             }
@@ -2783,8 +2787,15 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             // Get the Tare Qty
                             lotTare = lot.get('dblTareWeight');
                             lotTare = Ext.isNumeric(lotTare) ? lotTare : 0.00;
-                            var newTare = (lot.get('dblTareWeightBeforeEdit')/lot.get('dblQuantityBeforeEdit')) * lotQty;
-                            var newGross = (lotGross/lot.get('dblQuantityBeforeEdit')) * lotQty;
+
+                            var dblTareWeightBeforeEdit = lot.get('dblTareWeightBeforeEdit'); 
+                            dblTareWeightBeforeEdit = Ext.isNumeric(dblTareWeightBeforeEdit) ? dblTareWeightBeforeEdit : 0.00;
+
+                            var dblQuantityBeforeEdit = lot.get('dblQuantityBeforeEdit');
+                            dblQuantityBeforeEdit = Ext.isNumeric(dblQuantityBeforeEdit) ? dblQuantityBeforeEdit : 0.00;
+
+                            var newTare = (dblQuantityBeforeEdit != 0 ? dblTareWeightBeforeEdit / dblQuantityBeforeEdit : 0) * lotQty;
+                            var newGross = (dblQuantityBeforeEdit != 0 ? lotGross / dblQuantityBeforeEdit : 0) * lotQty;
 
                             lot.set('dblTareWeight', newTare);
                             
@@ -2827,6 +2838,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             else {
                 totalGross = me.convertQtyBetweenUOM(receiptUOMCF, weightUOMCF, receiptItemQty);
             }
+            totalGross = Ext.isNumeric(totalGross) ? totalGross : 0.00;
             totalNet = totalGross;
 
             record.set('dblGross', totalGross);
