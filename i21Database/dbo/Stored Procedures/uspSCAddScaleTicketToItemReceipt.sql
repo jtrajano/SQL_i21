@@ -922,7 +922,13 @@ IF ISNULL(@intFreightItemId,0) = 0
 																	WHEN IC.strCostMethod = 'Amount' THEN 
 																	CASE
 																		WHEN RE.ysnIsStorage = 1 THEN 0
-																		WHEN RE.ysnIsStorage = 0 THEN ROUND (SC.dblFreightRate * SC.dblGrossUnits, 2)
+																		WHEN RE.ysnIsStorage = 0 THEN 
+																		CASE 
+																			WHEN ISNULL(CT.intContractCostId,0) = 0 THEN 
+																				dbo.fnSCFreightCalculation(RE.dblQty,SC.dblNetUnits,SC.dblGrossUnits, SC.dblFreightRate)
+																			ELSE 
+																				ROUND (CT.dblRate  * dbo.fnCalculateQtyBetweenUOM(CT.intItemUOMId, dbo.fnGetMatchingItemUOMId(SCS.intFreightItemId, CT.intItemUOMId), dbo.fnSCFreightCalculation(RE.dblQty,SC.dblNetUnits,SC.dblGrossUnits, null)), 2)
+																		END
 																	END
 																END
 							,[intContractHeaderId]				= RE.intContractHeaderId
@@ -934,7 +940,12 @@ IF ISNULL(@intFreightItemId,0) = 0
 							LEFT JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
 							LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
 							LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
-							WHERE RE.intContractDetailId IS NOT NULL AND SC.dblFreightRate != 0
+							OUTER APPLY(
+								SELECT * FROM tblCTContractCost WHERE intContractDetailId = RE.intContractDetailId 
+								AND dblRate != 0 
+								AND intItemId = @intFreightItemId
+							) CT
+							WHERE SC.dblFreightRate != 0
 						END
 					ELSE
 						BEGIN
@@ -987,7 +998,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 																	WHEN IC.strCostMethod = 'Amount' THEN 
 																	CASE
 																		WHEN RE.ysnIsStorage = 1 THEN 0
-																		WHEN RE.ysnIsStorage = 0 THEN ROUND (ContractCost.dblRate  * dbo.fnCalculateQtyBetweenUOM(ContractCost.intItemUOMId, dbo.fnGetMatchingItemUOMId(RE.intItemId, ContractCost.intItemUOMId), SC.dblGrossUnits), 2)
+																		WHEN RE.ysnIsStorage = 0 THEN ROUND (ContractCost.dblRate  * dbo.fnCalculateQtyBetweenUOM(ContractCost.intItemUOMId, dbo.fnGetMatchingItemUOMId(SCS.intFreightItemId, ContractCost.intItemUOMId), SC.dblGrossUnits), 2)
 																	END
 																	ELSE 0
 																END

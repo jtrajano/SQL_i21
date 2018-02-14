@@ -6208,6 +6208,7 @@
     <Build Include="dbo\Stored Procedures\uspMFSetLotAlias.sql" />
     <Build Include="dbo\Stored Procedures\uspPRRegeneratePaycheckPanelViews.sql" />
     <Build Include="dbo\Stored Procedures\uspMFSetLotDetail.sql" />
+    <Build Include="dbo\Functions\fnSCFreightCalculation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
