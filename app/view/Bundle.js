@@ -1483,7 +1483,8 @@ Ext.define('Inventory.view.Bundle', {
                                                                 text: 'MSRP',
                                                                 editor: {
                                                                     xtype: 'numberfield',
-                                                                    currencyField: true
+                                                                    currencyField: true,
+                                                                    itemId: 'txtPricingMSRP'
                                                                 }
                                                             },
                                                             {
@@ -1538,7 +1539,8 @@ Ext.define('Inventory.view.Bundle', {
                                                                 text: 'Amount/Percent',
                                                                 editor: {
                                                                     xtype: 'numberfield',
-                                                                    currencyField: true
+                                                                    currencyField: true,
+                                                                    itemId: 'txtPricingAmountPercent'
                                                                 }
                                                             },
                                                             {
@@ -1857,6 +1859,7 @@ Ext.define('Inventory.view.Bundle', {
                                                                                 editor: {
                                                                                     xtype: 'numberfield',
                                                                                     currencyField: true,
+                                                                                    itemId: 'txtPricingLevelAmountPercent',
                                                                                     fieldStyle: 'text-align:right',
                                                                                     hideTrigger: true
                                                                                 }

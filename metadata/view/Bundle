@@ -4412,12 +4412,14 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "currencyField": true,
-                                                                "designer|createAlias": "numberfield"
+                                                                "designer|createAlias": "numberfield",
+                                                                "itemId": "txtPricingMSRP"
                                                             },
                                                             "configAlternates": {
                                                                 "currencyField": "boolean",
                                                                 "designer|createAlias": "string",
-                                                                "scrollable": "boolean"
+                                                                "scrollable": "boolean",
+                                                                "itemId": "string"
                                                             },
                                                             "name": "MyNumberField57",
                                                             "designerId": "1e5acf74-6726-4f83-9954-7606e19cd285",
@@ -4637,13 +4639,15 @@
                                                             "userConfig": {
                                                                 "currencyField": true,
                                                                 "decimalPrecision": null,
-                                                                "designer|createAlias": "numberfield"
+                                                                "designer|createAlias": "numberfield",
+                                                                "itemId": "txtPricingAmountPercent"
                                                             },
                                                             "configAlternates": {
                                                                 "currencyField": "boolean",
                                                                 "decimalPrecision": "number",
                                                                 "designer|createAlias": "string",
-                                                                "scrollable": "boolean"
+                                                                "scrollable": "boolean",
+                                                                "itemId": "string"
                                                             },
                                                             "name": "MyNumberField58",
                                                             "designerId": "e11154fb-b193-44aa-9b6e-876f2e3242e1",
@@ -5574,7 +5578,8 @@
                                                                                 "decimalPrecision": null,
                                                                                 "designer|createAlias": "numberfield",
                                                                                 "fieldStyle": "text-align:right",
-                                                                                "hideTrigger": true
+                                                                                "hideTrigger": true,
+                                                                                "itemId": "txtPricingLevelAmountPercent"
                                                                             },
                                                                             "configAlternates": {
                                                                                 "currencyField": "boolean",
@@ -5582,7 +5587,8 @@
                                                                                 "designer|createAlias": "string",
                                                                                 "fieldStyle": "string",
                                                                                 "hideTrigger": "boolean",
-                                                                                "scrollable": "boolean"
+                                                                                "scrollable": "boolean",
+                                                                                "itemId": "string"
                                                                             },
                                                                             "name": "MyNumberField27",
                                                                             "designerId": "a878b8ed-7337-414f-ba46-a7499dde60a4",
