@@ -69,4 +69,4 @@ JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
 LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
 LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CASE WHEN LD.intSSubLocationId IS NULL THEN CD.intSubLocationId ELSE LD.intSSubLocationId END
-WHERE L.intPurchaseSale IN (2)
+WHERE L.intPurchaseSale IN (2,3)
