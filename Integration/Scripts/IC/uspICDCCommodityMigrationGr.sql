@@ -73,11 +73,6 @@ select rtrim(gacom_com_cd), rtrim(gacom_desc), 'Inventory' strInventoryType, 1 C
 from gacommst oc
 where NOT EXISTS (select agitm_no from agitmmst where agitm_ga_com_cd = oc.gacom_com_cd)
 
---Setup a category for each commodity, to match the inventory item while importing Contracts
-insert into tblICCategory (strCategoryCode, strDescription, strInventoryType, intCostingMethod, strInventoryTracking, intConcurrencyId)
-select rtrim(gacom_com_cd), rtrim(gacom_desc), 'Inventory' strInventoryType, 1 CostingMethod, 'Item Level' InventoryTracking, 1 intConcurrencyId
-from gacommst oc
-where EXISTS (select agitm_no from agitmmst where agitm_ga_com_cd = oc.gacom_com_cd)
 
 ----===============================STEP 5===================================
 ----Import GL accounts for the category from origin commodity setup
@@ -95,17 +90,6 @@ from gacommst oc
 join tblICCommodity ic on ic.strCommodityCode COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oc.gacom_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS
 join tblICCategory icat on icat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oc.gacom_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS
 where NOT EXISTS (select agitm_no from agitmmst where agitm_ga_com_cd = oc.gacom_com_cd))
-
---Setup a category for each commodity, to match the inventory item while importing Contracts
-insert into tblICItem 
-(strItemNo, strDescription, strType, strInventoryTracking, strLotTracking, intCommodityId, intCategoryId, strStatus,
-intLifeTime)
-(select rtrim(gacom_com_cd), rtrim(gacom_desc), 'Inventory' strInventoryType, 'Item Level' InventoryTracking, 'No' LotTracking,
-ic.intCommodityId, icat.intCategoryId, 'Active' Status, 1
-from gacommst oc 
-join tblICCommodity ic on ic.strCommodityCode COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oc.gacom_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS
-join tblICCategory icat on icat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oc.gacom_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS
-where EXISTS (select agitm_no from agitmmst where agitm_ga_com_cd = oc.gacom_com_cd))
 
 
 ----=======================STEP 7===========================================
