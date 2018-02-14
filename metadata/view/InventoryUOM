@@ -132,37 +132,6 @@
                             "userConfig": {
                                 "designer|displayName": null,
                                 "icon": null,
-                                "itemId": "btnNew",
-                                "layout|flex": null,
-                                "tabIndex": -1,
-                                "text": "New",
-                                "ui": "i21-button-toolbar-small",
-                                "width": null
-                            },
-                            "configAlternates": {
-                                "designer|displayName": "string",
-                                "icon": "string",
-                                "itemId": "string",
-                                "layout|flex": "number",
-                                "tabIndex": "number",
-                                "text": "string",
-                                "ui": "string",
-                                "width": "auto",
-                                "scrollable": "boolean"
-                            },
-                            "name": "MyButton156",
-                            "designerId": "3977acb1-b999-40ca-b01d-8b5873c9722d"
-                        },
-                        {
-                            "type": "Ext.button.Button",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "designer|displayName": null,
-                                "icon": null,
                                 "itemId": "btnSave",
                                 "layout|flex": null,
                                 "tabIndex": -1,
