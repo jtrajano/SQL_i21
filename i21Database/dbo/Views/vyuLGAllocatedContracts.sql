@@ -95,6 +95,8 @@ SELECT
 							WHERE LD.intAllocationDetailId = ALD.intAllocationDetailId AND L.ysnPosted = 1 AND L.intPurchaseSale IN (2, 3)), 0)
 	,dblBalanceToDeliver = ALD.dblSAllocatedQty - IsNull((SELECT SUM(LD.dblQuantity) FROM tblLGLoadDetail LD JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 							WHERE LD.intAllocationDetailId = ALD.intAllocationDetailId AND L.ysnPosted = 1 AND L.intPurchaseSale IN (2, 3)), 0)
+	,PCO.strCountry AS strPOrigin
+	,SCO.strCountry AS strSOrigin
 FROM tblLGAllocationDetail ALD
 JOIN tblLGAllocationHeader ALH ON ALH.intAllocationHeaderId = ALD.intAllocationHeaderId
 LEFT JOIN tblICCommodity Comm ON Comm.intCommodityId = ALH.intCommodityId
@@ -106,6 +108,8 @@ LEFT JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = PCT.intContractHe
 LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = PCT.intItemUOMId
 LEFT JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId
 LEFT JOIN tblICItem IM ON IM.intItemId = PCT.intItemId
+LEFT JOIN tblICCommodityAttribute PCA ON PCA.intCommodityAttributeId = IM.intOriginId
+LEFT JOIN tblSMCountry PCO ON PCO.intCountryID = PCA.intCountryID
 LEFT JOIN tblCTContractBasis PCB ON PCB.intContractBasisId = PCH.intContractBasisId
 LEFT JOIN tblCTContractStatus PCS ON PCS.intContractStatusId = PCT.intContractStatusId
 LEFT JOIN vyuCTEntity PEY ON PEY.intEntityId = PCH.intEntityId AND PEY.strEntityType = 'Vendor'
@@ -121,6 +125,8 @@ LEFT JOIN tblCTContractHeader SCH ON SCH.intContractHeaderId = SCT.intContractHe
 LEFT JOIN tblICItemUOM SIU ON SIU.intItemUOMId = SCT.intItemUOMId
 LEFT JOIN tblICUnitMeasure U3 ON U3.intUnitMeasureId = SIU.intUnitMeasureId
 LEFT JOIN tblICItem SIM ON SIM.intItemId = SCT.intItemId
+LEFT JOIN tblICCommodityAttribute SCA ON SCA.intCommodityAttributeId = SIM.intOriginId
+LEFT JOIN tblSMCountry SCO ON SCO.intCountryID = SCA.intCountryID
 LEFT JOIN tblCTContractBasis SCB ON SCB.intContractBasisId = SCH.intContractBasisId
 LEFT JOIN tblCTContractStatus SCS ON SCS.intContractStatusId = SCT.intContractStatusId
 LEFT JOIN vyuCTEntity SEY ON SEY.intEntityId = SCH.intEntityId AND SEY.strEntityType = 'Customer'
