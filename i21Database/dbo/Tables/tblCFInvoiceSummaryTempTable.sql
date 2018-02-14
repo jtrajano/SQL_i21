@@ -19,8 +19,12 @@
     [TotalLC]                      NUMERIC (18, 6) NULL,
     [ysnIncludeInQuantityDiscount] BIT             NULL,
     [intAccountId]                 INT             NULL,
-    [intTransactionId]             INT             NULL
+    [intTransactionId]             INT             NULL,
+    [strGuid]                      NVARCHAR (MAX)  NULL,
+    [strUserId]                    NVARCHAR (MAX)  NULL
 );
+
+
 
 
 
