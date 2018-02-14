@@ -487,6 +487,7 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
         vm.set('current.strUnitMeasure', rec.get('strStockUOM'));
         vm.set('current.intItemLocationId', rec.get('intItemLocationId'));
         vm.set('current.ysnLotted', rec.get('strLotTracking') !== 'No');
+        vm.set('current.dblLastCost', rec.get('dblLastCost'));
         vm.set('isLotted', rec.get('strLotTracking') !== 'No');
 
         me.getTotalLocationStockOnHand(
