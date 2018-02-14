@@ -1510,7 +1510,8 @@ Ext.define('Inventory.view.ItemViewController', {
                     lazy: true, 
                     component: Ext.create('iRely.grid.Manager', {
                         grid: grdPricing,
-                        deleteButton : grdPricing.down('#btnDeletePricing')
+                        deleteButton : grdPricing.down('#btnDeletePricing'),
+                        position: 'none'
                     })
                 },
                 {

@@ -547,7 +547,8 @@ Ext.define('Inventory.view.BundleViewController', {
                     lazy: true, 
                     component: Ext.create('iRely.grid.Manager', {
                         grid: grdPricing,
-                        deleteButton : grdPricing.down('#btnDeletePricing')
+                        deleteButton : grdPricing.down('#btnDeletePricing'),
+                        position: 'none'
                     })
                 },
                 {
