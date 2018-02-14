@@ -116,6 +116,7 @@ Ext.define('Inventory.view.BundleViewController', {
                 },
                 colBundleQuantity: {
                     dataIndex: 'dblQuantity',
+                    hidden: '{isOptionType}',
                     editor: {
                         readOnly: '{current.isOptionType}'
                     }  
@@ -123,6 +124,7 @@ Ext.define('Inventory.view.BundleViewController', {
                 colBundleDescription: 'strDescription',
                 colBundleUOM: {
                     dataIndex: 'strUnitMeasure',
+                    hidden: '{isOptionType}',
                     editor: {
                         store: '{bundleUOM}',
                         origValueField: 'intItemUOMId',
