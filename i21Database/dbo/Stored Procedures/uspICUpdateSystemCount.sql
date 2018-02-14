@@ -2,7 +2,7 @@
 AS
 
 UPDATE cd
-SET cd.dblSystemCount = s.dblOnHand
+SET cd.dblSystemCount = ISNULL(s.dblOnHand, 0)
 FROM tblICInventoryCountDetail cd
 	INNER JOIN tblICInventoryCount c ON cd.intInventoryCountId = c.intInventoryCountId
 	INNER JOIN (
@@ -27,6 +27,33 @@ FROM tblICInventoryCountDetail cd
 	) s ON s.intItemId = cd.intItemId
 		AND s.intLocationId = c.intLocationId
 WHERE c.intImportFlagInternal = 1
+
+-- Update Last Cost
+UPDATE cd
+SET cd.dblLastCost = ISNULL(dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, cd.intItemUOMId, ISNULL(ItemLot.dblLastCost, ItemPricing.dblLastCost)), 0)
+FROM tblICInventoryCountDetail cd
+	INNER JOIN tblICInventoryCount c ON c.intInventoryCountId = cd.intInventoryCountId
+	INNER JOIN dbo.tblICItemLocation ItemLocation ON ItemLocation.intLocationId = c.intLocationId 
+		AND ItemLocation.intItemId = cd.intItemId
+	LEFT JOIN dbo.tblICItemPricing ItemPricing ON ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
+	LEFT JOIN dbo.tblICItemUOM ItemUOM ON cd.intItemUOMId = ItemUOM.intItemUOMId
+	LEFT JOIN dbo.tblICItem Item ON Item.intItemId = cd.intItemId
+	LEFT JOIN dbo.tblICLot ItemLot ON ItemLot.intLotId = cd.intLotId AND Item.strLotTracking <> 'No'
+	LEFT JOIN dbo.tblICItemUOM StockUOM ON cd.intItemId = StockUOM.intItemId AND StockUOM.ysnStockUnit = 1
+WHERE c.intImportFlagInternal = 1
+
+-- Others
+UPDATE c
+SET c.strCountBy = 'Item'
+FROM tblICInventoryCount c
+WHERE c.intImportFlagInternal = 1
+
+-- Delete Items with blank uom
+DELETE cd
+FROM tblICInventoryCountDetail cd
+	INNER JOIN tblICInventoryCount c ON c.intInventoryCountId = cd.intInventoryCountId
+WHERE cd.intItemUOMId IS NULL
+	AND c.intImportFlagInternal = 1
 
 -- Cleanup
 -- Delete invalid details
