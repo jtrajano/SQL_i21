@@ -32,8 +32,9 @@ BEGIN TRY
 				, dblScheduleQty = @dblScheduleQty
 				, dblUnitPrice = CT.dblFutures
 				, dblUnitBasis = CT.dblBasis
-				, dblFreightRate = CTCost.dblRate
-				, intHaulerId = CTCost.intVendorId
+				, dblFreightRate = ISNULL(CTCost.dblRate,SC.dblFreightRate)
+				, intHaulerId = ISNULL(CTCost.intVendorId,SC.intHaulerId)
+				, ysnFarmerPaysFreight = ISNULL(CTCost.ysnPrice,SC.ysnFarmerPaysFreight)
 				FROM tblSCTicket SC 
 				INNER JOIN tblSCScaleSetup SCS ON SCS.intScaleSetupId = SC.intScaleSetupId
 				INNER JOIN vyuCTContractDetailView CT ON SC.intContractId = CT.intContractDetailId 
