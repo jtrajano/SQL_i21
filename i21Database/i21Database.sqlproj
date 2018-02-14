@@ -6207,6 +6207,7 @@
     <Build Include="dbo\Stored Procedures\uspMFSetLotAlias.sql" />
     <Build Include="dbo\Stored Procedures\uspMFSetLotDetail.sql" />
     <Build Include="dbo\Functions\fnSCFreightCalculation.sql" />
+    <Build Include="dbo\Views\vyuLGAllocationDetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
