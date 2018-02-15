@@ -25,9 +25,10 @@ BEGIN TRY
 				@ysnPO							BIT,
 				@ysnLoad						BIT,
 				@intPricingTypeId				INT,
-				@strScreenName					NVARCHAR(50)
+				@strScreenName					NVARCHAR(50),
+				@intContainerId					INT
 
-	SELECT @strReceiptType = strReceiptType,@intSourceType = intSourceType FROM @ItemsFromInventoryReceipt
+	SELECT @strReceiptType = strReceiptType,@intSourceType = intSourceType, @intContainerId = intContainerId FROM @ItemsFromInventoryReceipt
 
 	SELECT @strScreenName = CASE WHEN @strReceiptType = 'Inventory Return' THEN 'Receipt Return' ELSE 'Inventory Receipt' END
 
@@ -126,6 +127,15 @@ BEGIN TRY
 						@intUserId				=	@intUserId,
 						@intExternalId			=	@intInventoryReceiptDetailId,
 						@strScreenName			=	@strScreenName
+			END
+
+			IF(@intSourceType IN (2) AND @ReceiptType = 'Inventory Return')
+			BEGIN
+				EXEC uspLGRejectContainer @intLoadContainerId = @intContainerId
+										 ,@intContractDetailId = @intContractDetailId
+										 ,@ysnRejectContainer = 1
+										 ,@intEntityUserId = @intUserId
+										 ,@strScreenName = 'Inventory Return'
 			END
 		END
 		

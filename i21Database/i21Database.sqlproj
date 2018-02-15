@@ -6210,6 +6210,7 @@
     <Build Include="dbo\Views\vyuLGAllocationDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetActualItemByLot.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetInventoryItemTaxes.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGRejectContainer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
