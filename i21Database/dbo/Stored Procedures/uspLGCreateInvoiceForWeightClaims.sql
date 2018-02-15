@@ -257,10 +257,10 @@ BEGIN TRY
 		,[intOrderUOMId] = CD.intNetWeightUOMId
 		,[dblQtyOrdered] = WCD.dblFromNet
 		,[intItemUOMId] = CD.intNetWeightUOMId
-		,[dblQtyShipped] = WCD.dblClaimableWt
+		,[dblQtyShipped] = dbo.fnCTConvertQtyToTargetItemUOM(LD.intWeightItemUOMId,CD.intNetWeightUOMId,ABS(WCD.dblClaimableWt))
 		,[dblDiscount] = 0
 		,[dblItemWeight] = WCD.dblClaimableWt
-		,[intItemWeightUOMId] = CD.intNetWeightUOMId
+		,[intItemWeightUOMId] = LD.intWeightItemUOMId
 		,[dblPrice] = WCD.dblUnitPrice
 		,[dblUnitPrice] = WCD.dblUnitPrice
 		,[strPricing] = 'Inventory Shipment Item Price'
@@ -309,7 +309,7 @@ BEGIN TRY
 		,[intCurrencyExchangeRateId] = ARID.[intCurrencyExchangeRateId]
 		,[dblCurrencyExchangeRate] = ARID.[dblCurrencyExchangeRate]
 		,[intSubCurrencyId] = WCD.intCurrencyId
-		,[dblSubCurrencyRate] = NULL
+		,[dblSubCurrencyRate] = CASE WHEN CUR.ysnSubCurrency = 1 THEN 100 ELSE 1 END
 	FROM tblLGWeightClaim WC
 	JOIN tblLGWeightClaimDetail WCD ON WCD.intWeightClaimId = WC.intWeightClaimId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = WCD.intContractDetailId
@@ -325,6 +325,7 @@ BEGIN TRY
 		FROM tblARInvoiceDetail WITH (NOLOCK)
 		WHERE ISNULL(intLoadDetailId, 0) = 0
 		) ARID ON ARID.intLoadDetailId = LD.intLoadDetailId
+	LEFT JOIN tblSMCurrency CUR ON CUR.intCurrencyID = WCD.intCurrencyId
 	WHERE WC.intWeightClaimId = @intWeightClaimId
 
 	DECLARE @LineItemTaxEntries LineItemTaxDetailStagingTable
