@@ -8154,13 +8154,13 @@
                                                                                     "]"
                                                                                 ],
                                                                                 "designer|createAlias": "gridcombobox",
-                                                                                "displayField": "strCustomerNumber",
+                                                                                "displayField": "strName",
                                                                                 "fieldLabel": "Owner",
                                                                                 "itemId": "txtOwner",
                                                                                 "labelWidth": 125,
                                                                                 "layout|flex": null,
                                                                                 "lookUpField": true,
-                                                                                "valueField": "intEntityId"
+                                                                                "valueField": "strName"
                                                                             },
                                                                             "configAlternates": {
                                                                                 "columns": "array",
@@ -10784,10 +10784,10 @@
                                                                             "]"
                                                                         ],
                                                                         "designer|createAlias": "gridcombobox",
-                                                                        "displayField": "strCustomerNumber",
+                                                                        "displayField": "strName",
                                                                         "itemId": "cboCustXrefCustomer",
                                                                         "lookUpField": true,
-                                                                        "valueField": "strCustomerNumber"
+                                                                        "valueField": "strName"
                                                                     },
                                                                     "configAlternates": {
                                                                         "columns": "array",
@@ -11244,10 +11244,10 @@
                                                                             "]"
                                                                         ],
                                                                         "designer|createAlias": "gridcombobox",
-                                                                        "displayField": "strVendorId",
+                                                                        "displayField": "strName",
                                                                         "itemId": "cboVendorXrefVendor",
                                                                         "lookUpField": true,
-                                                                        "valueField": "strVendorId"
+                                                                        "valueField": "strName"
                                                                     },
                                                                     "configAlternates": {
                                                                         "columns": "array",

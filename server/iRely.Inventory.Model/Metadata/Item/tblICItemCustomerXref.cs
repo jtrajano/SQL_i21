@@ -39,25 +39,45 @@ namespace iRely.Inventory.Model
                 _location = value;
             }
         }
-        private string _customer;
+        private string _customerNumber;
         [NotMapped]
         public string strCustomerNumber
         {
             get
             {
-                if (string.IsNullOrEmpty(_customer))
+                if (string.IsNullOrEmpty(_customerNumber))
                     if (tblARCustomer != null)
                         return tblARCustomer.strCustomerNumber;
                     else
                         return null;
                 else
-                    return _customer;
+                    return _customerNumber;
             }
             set
             {
-                _customer = value;
+                _customerNumber = value;
             }
         }
+        private string _customerName;
+        [NotMapped]
+        public string strCustomerName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_customerName))
+                    if (tblARCustomer != null)
+                        return tblARCustomer.strCustomerName;
+                    else
+                        return null;
+                else
+                    return _customerName;
+            }
+            set
+            {
+                _customerName = value;
+            }
+        }
+
 
         public tblICItem tblICItem { get; set; }
         public tblICItemLocation tblICItemLocation { get; set; }

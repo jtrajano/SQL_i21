@@ -2706,8 +2706,8 @@ Ext.define('Inventory.view.Item', {
                                                                                         itemId: 'txtOwner',
                                                                                         fieldLabel: 'Owner',
                                                                                         labelWidth: 125,
-                                                                                        displayField: 'strCustomerNumber',
-                                                                                        valueField: 'intEntityId'
+                                                                                        displayField: 'strName',
+                                                                                        valueField: 'strName'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'gridcombobox',
@@ -3540,8 +3540,8 @@ Ext.define('Inventory.view.Item', {
                                                                             ],
                                                                             lookUpField: true,
                                                                             itemId: 'cboCustXrefCustomer',
-                                                                            displayField: 'strCustomerNumber',
-                                                                            valueField: 'strCustomerNumber'
+                                                                            displayField: 'strName',
+                                                                            valueField: 'strName'
                                                                         }
                                                                     },
                                                                     {
@@ -3698,8 +3698,8 @@ Ext.define('Inventory.view.Item', {
                                                                             ],
                                                                             lookUpField: true,
                                                                             itemId: 'cboVendorXrefVendor',
-                                                                            displayField: 'strVendorId',
-                                                                            valueField: 'strVendorId'
+                                                                            displayField: 'strName',
+                                                                            valueField: 'strName'
                                                                         }
                                                                     },
                                                                     {

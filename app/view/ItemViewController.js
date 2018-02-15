@@ -639,7 +639,7 @@ Ext.define('Inventory.view.ItemViewController', {
                     }
                 },
                 colCustomerXrefCustomer: {
-                    dataIndex: 'strCustomerNumber',
+                    dataIndex: 'strCustomerName',
                     editor: {
                         store: '{custXrefCustomer}',
                         origValueField: 'intEntityId',
@@ -664,7 +664,7 @@ Ext.define('Inventory.view.ItemViewController', {
                     }
                 },
                 colVendorXrefVendor: {
-                    dataIndex: 'strVendorId',
+                    dataIndex: 'strVendorName',
                     editor: {
                         store: '{vendorXrefVendor}',
                         origValueField: 'intEntityId',
