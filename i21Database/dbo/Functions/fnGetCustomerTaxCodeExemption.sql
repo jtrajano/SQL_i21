@@ -173,12 +173,13 @@ BEGIN
 			RETURN 	
 		END
 
-	IF ISNULL(@CFSiteId,0) <> 0 AND ISNULL(@IsDeliver,0) = 0
+	DECLARE @FOB NVARCHAR(150)
+		SET @FOB = LOWER(RTRIM(LTRIM(ISNULL((SELECT [strFobPoint] FROM tblSMFreightTerms WHERE [intFreightTermId] = @FreightTermId),''))))
+
+	IF ISNULL(@CFSiteId,0) <> 0 AND (ISNULL(@IsDeliver,0) = 0 OR @FOB = 'origin')
 		SET @State = ISNULL((SELECT TOP 1 [strTaxState] FROM tblCFSite WHERE [intSiteId] = @CFSiteId), @TaxState)
 	ELSE
-	BEGIN
-		DECLARE @FOB NVARCHAR(150)
-		SET @FOB = LOWER(RTRIM(LTRIM(ISNULL((SELECT [strFobPoint] FROM tblSMFreightTerms WHERE [intFreightTermId] = @FreightTermId),''))))
+	BEGIN		
 
 		IF (ISNULL(@FreightTermId,0) <> 0 AND @FOB <> 'origin') OR (ISNULL(@FreightTermId,0) = 0 AND ISNULL(@IsDeliver,0) = 1)
 			SET @State = ISNULL((SELECT TOP 1 [strState] FROM tblEMEntityLocation WHERE	[intEntityLocationId] = @ShipToLocationId), @TaxState)

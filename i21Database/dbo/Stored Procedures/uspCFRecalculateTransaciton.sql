@@ -136,6 +136,9 @@ BEGIN
 	DECLARE @ysnCaptiveSite					BIT
 	DECLARE @ysnActive						BIT
 
+	DECLARE @companyConfigFreightTermId	INT = NULL
+	SELECT TOP 1 @companyConfigFreightTermId = intFreightTermId FROM tblCFCompanyPreference
+
 
 	
 
@@ -1012,12 +1015,14 @@ BEGIN
 						,NULL
 						,1
 						,NULL
-						,NULL
+						,@companyConfigFreightTermId
 						,@intCardId		
 						,@intVehicleId
 						,@ysnApplyTaxExemption -- @DisregardExemptionSetup
 						,0
 						,NULL	--intItemUOMId
+						,@intSiteId
+						,0		--@IsDeliver
 					)
 
 					update @LineItemTaxDetailStagingTable set ysnTaxExempt = 0
@@ -1068,12 +1073,14 @@ BEGIN
 						,NULL												 
 						,1													 
 						,NULL												 
-						,NULL												 
+						,@companyConfigFreightTermId												 
 						,@intCardId												 
 						,@intVehicleId												 
 						, 1 --@DisregardExemptionSetup						 
 						, 0	
-						, NULL	--intItemUOMId												 
+						, NULL	--intItemUOMId		
+						,@intSiteId
+						,0		--@IsDeliver										 
 					)
 
 				END
@@ -1134,12 +1141,14 @@ BEGIN
 					,NULL
 					,1
 					,NULL
-					,NULL
+					,@companyConfigFreightTermId
 					,@intCardId		
 					,@intVehicleId
 					,@ysnApplyTaxExemption --@DisregardExemptionSetup
 					,0
-					, NULL	--intItemUOMId												 
+					, NULL	--intItemUOMId			
+					,@intSiteId
+					,0		--@IsDeliver									 
 				)
 
 				
@@ -1191,12 +1200,14 @@ BEGIN
 					,NULL
 					,1
 					,NULL
-					,NULL
+					,@companyConfigFreightTermId
 					,@intCardId		
 					,@intVehicleId
 					,1 --@DisregardExemptionSetup
 					,0
-					, NULL	--intItemUOMId												 
+					, NULL	--intItemUOMId
+					,@intSiteId
+					,0		--@IsDeliver										 
 				)
 
 				END
@@ -1323,12 +1334,14 @@ BEGIN
 					,NULL
 					,1
 					,NULL
-					,NULL
+					,@companyConfigFreightTermId
 					,@intCardId		
 					,@intVehicleId
 					,1 --@DisregardExemptionSetup
 					,0
-					, NULL	--intItemUOMId												 
+					, NULL	--intItemUOMId
+					,@intSiteId
+					,0		--@IsDeliver											 
 				)
 
 					INSERT INTO @tblCFCalculatedTax	
@@ -1378,12 +1391,14 @@ BEGIN
 					,NULL
 					,1
 					,NULL
-					,NULL
+					,@companyConfigFreightTermId
 					,@intCardId		
 					,@intVehicleId
 					,@ysnApplyTaxExemption -- @DisregardExemptionSetup
 					,0
-					, NULL	--intItemUOMId												 
+					, NULL	--intItemUOMId
+					,@intSiteId
+					,0		--@IsDeliver											 
 				)
 
 					--SELECT * FROM @tblCFCalculatedTax
@@ -1446,12 +1461,14 @@ BEGIN
 					,NULL
 					,1
 					,NULL
-					,NULL
+					,@companyConfigFreightTermId
 					,@intCardId		
 					,@intVehicleId
 					,1 --@DisregardExemptionSetup
 					,0
-					, NULL	--intItemUOMId												 
+					, NULL	--intItemUOMId
+					,@intSiteId
+					,0		--@IsDeliver											 
 				)
 
 					INSERT INTO @tblCFCalculatedTax	
@@ -1501,12 +1518,14 @@ BEGIN
 					,NULL
 					,1
 					,NULL
-					,NULL
+					,@companyConfigFreightTermId
 					,@intCardId		
 					,@intVehicleId
 					,@ysnApplyTaxExemption -- @DisregardExemptionSetup
 					,0
-					, NULL	--intItemUOMId												 
+					, NULL	--intItemUOMId	
+					,@intSiteId
+					,0		--@IsDeliver											 
 				)
 
 				END
@@ -1560,12 +1579,14 @@ BEGIN
 					,@intLocationId
 					,1
 					,NULL
-					,NULL
+					,@companyConfigFreightTermId
 					,@intCardId		
 					,@intVehicleId
 					,1 --@DisregardExemptionSetup
 					,0
-					, NULL	--intItemUOMId												 
+					, NULL	--intItemUOMId		
+					,@intSiteId
+					,0		--@IsDeliver										 
 				)
 
 					INSERT INTO @tblCFCalculatedTax	
@@ -1615,12 +1636,14 @@ BEGIN
 					,@intLocationId
 					,1
 					,NULL
-					,NULL
+					,@companyConfigFreightTermId
 					,@intCardId		
 					,@intVehicleId
 					,@ysnApplyTaxExemption --@DisregardExemptionSetup
 					,0
-					, NULL	--intItemUOMId												 
+					, NULL	--intItemUOMId
+					,@intSiteId
+					,0		--@IsDeliver									 
 				)
 
 				
@@ -1751,12 +1774,14 @@ BEGIN
 					,NULL
 					,1
 					,NULL
-					,NULL
+					,@companyConfigFreightTermId
 					,@intCardId		
 					,@intVehicleId
 					,1 --@DisregardExemptionSetup
 					,0
-					, NULL	--intItemUOMId												 
+					, NULL	--intItemUOMId
+					,@intSiteId
+					,0		--@IsDeliver											 
 				)
 
 					INSERT INTO @tblCFCalculatedTax	
@@ -1806,12 +1831,14 @@ BEGIN
 					,NULL
 					,1
 					,NULL
-					,NULL
+					,@companyConfigFreightTermId
 					,@intCardId		
 					,@intVehicleId
 					,@ysnApplyTaxExemption -- @DisregardExemptionSetup
 					,0
-					, NULL	--intItemUOMId												 
+					, NULL	--intItemUOMId		
+					,@intSiteId
+					,0		--@IsDeliver										 
 				)
 
 					--SELECT * FROM @tblCFCalculatedTax
@@ -1874,12 +1901,14 @@ BEGIN
 					,NULL
 					,1
 					,NULL
-					,NULL
+					,@companyConfigFreightTermId
 					,@intCardId		
 					,@intVehicleId
 					,1 --@DisregardExemptionSetup
 					,0
-					, NULL	--intItemUOMId												 
+					, NULL	--intItemUOMId
+					,@intSiteId
+					,0		--@IsDeliver											 
 				)
 
 					INSERT INTO @tblCFCalculatedTax	
@@ -1929,12 +1958,14 @@ BEGIN
 					,NULL
 					,1
 					,NULL
-					,NULL
+					,@companyConfigFreightTermId
 					,@intCardId		
 					,@intVehicleId
 					,@ysnApplyTaxExemption-- @DisregardExemptionSetup
 					,0
-					, NULL	--intItemUOMId												 
+					, NULL	--intItemUOMId
+					,@intSiteId
+					,0		--@IsDeliver										 
 				)
 
 				END
@@ -1988,12 +2019,14 @@ BEGIN
 					,@intLocationId
 					,1
 					,NULL
-					,NULL
+					,@companyConfigFreightTermId
 					,@intCardId		
 					,@intVehicleId
 					,1 --@DisregardExemptionSetup
 					,0
-					, NULL	--intItemUOMId												 
+					, NULL	--intItemUOMId
+					,@intSiteId
+					,0		--@IsDeliver											 
 				)
 
 					INSERT INTO @tblCFCalculatedTax	
@@ -2043,12 +2076,14 @@ BEGIN
 					,@intLocationId
 					,1
 					,NULL
-					,NULL
+					,@companyConfigFreightTermId
 					,@intCardId		
 					,@intVehicleId
 					,@ysnApplyTaxExemption --@DisregardExemptionSetup
 					,0
-					, NULL	--intItemUOMId												 
+					, NULL	--intItemUOMId
+					,@intSiteId
+					,0		--@IsDeliver										 
 				)
 
 				
@@ -3332,8 +3367,7 @@ BEGIN
 	BEGIN
 
 	
-	DECLARE @companyConfigFreightTermId	INT = NULL
-	SELECT TOP 1 @companyConfigFreightTermId = intFreightTermId FROM tblCFCompanyPreference
+	
 	
 	---------------------------------------------------
 	--					PRICING OUT					 --
