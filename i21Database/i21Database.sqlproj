@@ -5789,6 +5789,7 @@
     <Build Include="dbo\Tables\tblPRTypeTaxStatePSDCode.sql" />
     <Build Include="dbo\Functions\fnGRGetDiscountCodeReadings.sql" />
     <Build Include="dbo\Functions\fnSCFreightCalculation.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetCaseLabelCount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
