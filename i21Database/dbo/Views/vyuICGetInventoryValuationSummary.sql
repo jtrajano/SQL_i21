@@ -12,7 +12,13 @@ SELECT	intInventoryValuationKeyId = CAST(ROW_NUMBER() OVER (ORDER BY Item.intIte
 					ELSE 
 						[Location].strLocationName
 				END 
-		,strMonthYear = FORMAT(DATEFROMPARTS(t.intYear, t.intMonth, 1), 'yyyy-MM')  
+		,strMonthYear = 
+			--FORMAT(
+			--	--DATEFROMPARTS(t.intYear, t.intMonth, 1)
+			--	CAST(RTRIM(t.intYear * 10000 + t.intMonth * 100 + 1) AS DATETIME)
+			--	, 'yyyy-MM'
+			--)  
+			CONVERT(NVARCHAR(7), CAST(RTRIM(t.intYear * 10000 + t.intMonth * 100 + 1) AS DATETIME), 120)
 		,dblQuantity = ISNULL(dblQuantity, 0)
 		,dblValue = ISNULL(dblValue, 0)
 		,dblLastCost = ISNULL( ROUND(dblQuantity * ItemPricing.dblLastCost, 2), 0)
