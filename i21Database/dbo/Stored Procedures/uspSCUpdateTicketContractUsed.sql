@@ -41,6 +41,10 @@ BEGIN TRY
 				LEFT JOIN tblCTContractCost CTCost ON CT.intContractDetailId = CTCost.intContractDetailId AND CTCost.intItemId = SCS.intFreightItemId
 				WHERE intTicketId = @intTicketId AND SC.intContractId = @intContractDetailId AND SC.strDistributionOption != 'SPL'
 			END
+			ELSE
+			BEGIN 
+				UPDATE tblSCTicket SET dblScheduleQty = @dblScheduleQty WHERE intTicketId = @intTicketId
+			END
 		END
 	ELSE
 	BEGIN
