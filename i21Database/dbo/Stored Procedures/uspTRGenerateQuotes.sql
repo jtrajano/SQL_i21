@@ -268,7 +268,9 @@ BEGIN TRY
 					, NULL
 					, 0
 					, 0
-					, NULL	--intItemUOMId												 
+					, NULL	--intItemUOMId
+					, NULL  --@CFSiteId
+					, 0		--@IsDeliver
 				)
 
 				INSERT INTO tblTRQuoteDetailTax(

@@ -64,6 +64,8 @@ BEGIN
 			, 0
 			, 0
 			, @ItemUOMId
+			,NULL   --@CFSiteId
+			,0		--@IsDeliver
 		)
 
 		SELECT @TaxTotal = ISNULL(SUM(ISNULL(dblRate, 0)), 0)

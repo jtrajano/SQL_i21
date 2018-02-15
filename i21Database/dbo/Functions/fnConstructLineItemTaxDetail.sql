@@ -19,6 +19,8 @@
 	,@DisregardExemptionSetup	BIT								= 0
 	,@ExcludeCheckOff			BIT								= 0
 	,@ItemUOMId					INT								= NULL
+	,@CFSiteId					INT								= NULL
+	,@IsDeliver					BIT								= 0
 )
 RETURNS @returntable TABLE
 (
@@ -122,8 +124,8 @@ BEGIN
 						,@VehicleId
 						,@DisregardExemptionSetup
 						,@ExcludeCheckOff
-						,NULL --@CFSiteId
-						,1    --@IsDeliver
+						,@CFSiteId
+						,@IsDeliver
 						,@ItemUOMId
 					) 	
 		END
