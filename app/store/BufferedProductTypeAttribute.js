@@ -2,7 +2,7 @@
  * Created by LZabala on 11/11/2014.
  */
 Ext.define('Inventory.store.BufferedProductTypeAttribute', {
-    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseBufferedStore',
     alias: 'store.icbufferedproducttypeattribute',
 
     requires: [

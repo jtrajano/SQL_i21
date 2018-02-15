@@ -2,7 +2,7 @@
  * Created by LZabala on 11/12/2014.
  */
 Ext.define('Inventory.store.BufferedInventoryTag', {
-    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseBufferedStore',
     alias: 'store.icbufferedtag',
 
     requires: [

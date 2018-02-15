@@ -2,7 +2,7 @@
  * Created by LZabala on 2/9/2015.
  */
 Ext.define('Inventory.store.BufferedPackedUOM', {
-    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseBufferedStore',
     alias: 'store.icbufferedpackeduom',
 
     requires: [

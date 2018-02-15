@@ -2,7 +2,7 @@
  * Created by LZabala on 11/24/2014.
  */
 Ext.define('Inventory.store.BufferedRestriction', {
-    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseBufferedStore',
     alias: 'store.icbufferedrestriction',
 
     requires: [

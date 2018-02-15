@@ -1,5 +1,5 @@
 Ext.define('Inventory.store.BufferedStorageUnitStock', {
-    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseBufferedStore',
     alias: 'store.icbufferedstorageunitstock',
 
     requires: [

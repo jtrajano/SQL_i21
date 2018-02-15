@@ -1,5 +1,5 @@
 Ext.define('Inventory.store.BufferedItemStockViewWithComments', {
-    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseBufferedStore',
     alias: 'store.icbuffereditemstockviewwithcomments',
     requires: [
         'Inventory.model.ItemStockView'

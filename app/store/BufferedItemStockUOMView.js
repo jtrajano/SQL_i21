@@ -2,7 +2,7 @@
  * Created by LZabala on 4/21/2015.
  */
 Ext.define('Inventory.store.BufferedItemStockUOMView', {
-    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseBufferedStore',
     alias: 'store.icbuffereditemstockuomview',
 
     requires: [

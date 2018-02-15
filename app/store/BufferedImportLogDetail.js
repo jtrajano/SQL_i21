@@ -1,5 +1,5 @@
 Ext.define('Inventory.store.BufferedImportLogDetail', {
-    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
+    extend: 'GlobalComponentEngine.store.MultiCompanyBaseBufferedStore',
     alias: 'store.icbufferedimportlogdetail',
 
     requires: [
