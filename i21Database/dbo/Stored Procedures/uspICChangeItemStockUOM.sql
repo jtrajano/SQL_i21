@@ -45,7 +45,7 @@ BEGIN
 	END 
 END
 
--- Remeber the original UOM Id. 
+-- Remember the original UOM Id. 
 BEGIN 
 	DECLARE @OriginalStockItemUOMId AS INT 
 
@@ -114,6 +114,8 @@ BEGIN
 	UPDATE	ItemUOM
 	SET		dblUnitQty = 
 					CASE	WHEN (dblUnitQty > @dblNewStockUnit_UnitQty OR dblUnitQty = 1) AND @dblNewStockUnit_UnitQty <> 0 THEN  
+								dbo.fnDivide(dblUnitQty, @dblNewStockUnit_UnitQty) 
+							WHEN (dblUnitQty < @dblNewStockUnit_UnitQty) AND dblUnitQty <> 1 AND @dblNewStockUnit_UnitQty <> 0 THEN 
 								dbo.fnDivide(dblUnitQty, @dblNewStockUnit_UnitQty) 
 							WHEN dblUnitQty = @dblNewStockUnit_UnitQty THEN  
 								1
