@@ -28,7 +28,7 @@ BEGIN TRY
 				@strScreenName					NVARCHAR(50),
 				@intContainerId					INT
 
-	SELECT @strReceiptType = strReceiptType,@intSourceType = intSourceType, @intContainerId = intContainerId FROM @ItemsFromInventoryReceipt
+	SELECT @strReceiptType = strReceiptType,@intSourceType = intSourceType FROM @ItemsFromInventoryReceipt
 
 	SELECT @strScreenName = CASE WHEN @strReceiptType = 'Inventory Return' THEN 'Receipt Return' ELSE 'Inventory Receipt' END
 
@@ -46,13 +46,14 @@ BEGIN TRY
 		intInventoryReceiptDetailId INT,
 		intContractDetailId			INT,
 		intItemUOMId				INT,
-		dblQty						NUMERIC(18,6)	
+		dblQty						NUMERIC(18,6),
+		intContainerId				INT
 	)
 
 	IF @strReceiptType IN ('Purchase Contract','Inventory Return')
 	BEGIN
-		INSERT	INTO @tblToProcess (intInventoryReceiptDetailId,intContractDetailId,intItemUOMId,dblQty)
-		SELECT 	intInventoryReceiptDetailId,intLineNo,intItemUOMId,CASE WHEN @ysnLoad=1 THEN IR.intLoadReceive ELSE dblQty END
+		INSERT	INTO @tblToProcess (intInventoryReceiptDetailId,intContractDetailId,intItemUOMId,dblQty, intContainerId)
+		SELECT 	intInventoryReceiptDetailId,intLineNo,intItemUOMId,CASE WHEN @ysnLoad=1 THEN IR.intLoadReceive ELSE dblQty END, intContainerId
 		FROM	@ItemsFromInventoryReceipt IR
 		WHERE	ISNULL(intLineNo,0) > 0
 	END
@@ -73,12 +74,14 @@ BEGIN TRY
 		SELECT	@intContractDetailId			=	NULL,
 				@intFromItemUOMId				=	NULL,
 				@dblQty							=	NULL,
-				@intInventoryReceiptDetailId	=	NULL
+				@intInventoryReceiptDetailId	=	NULL,
+				@intContainerId					=	NULL
 
 		SELECT	@intContractDetailId			=	intContractDetailId,
 				@intFromItemUOMId				=	intItemUOMId,
 				@dblQty							=	dblQty,
-				@intInventoryReceiptDetailId	=	intInventoryReceiptDetailId
+				@intInventoryReceiptDetailId	=	intInventoryReceiptDetailId, 
+				@intContainerId					=	intContainerId
 		FROM	@tblToProcess 
 		WHERE	intUniqueId						=	 @intUniqueId
 
@@ -129,7 +132,7 @@ BEGIN TRY
 						@strScreenName			=	@strScreenName
 			END
 
-			IF(@intSourceType IN (2) AND @ReceiptType = 'Inventory Return')
+			IF(@intSourceType IN (2) AND @strReceiptType = 'Inventory Return')
 			BEGIN
 				EXEC uspLGRejectContainer @intLoadContainerId = @intContainerId
 										 ,@intContractDetailId = @intContractDetailId
