@@ -6213,6 +6213,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetActualItemByLot.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetInventoryItemTaxes.sql" />
     <Build Include="dbo\Stored Procedures\uspLGRejectContainer.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetCaseLabelCount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
