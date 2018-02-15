@@ -62,7 +62,14 @@ WHILE @mRowNumber > 0
 	SELECT @intFutureMarketId=intFutureMarketId from tblRKFutureMarket where strFutMarketName=@strMarket
 
 
-		INSERT INTO tblRKFuturesSettlementPrice(intFutureMarketId,dtmPriceDate,intConcurrencyId) VALUES(@intFutureMarketId,@strSettlementDate,1)
+	DECLARE @intCommodityId INT = NULL
+	SELECT @intCommodityId=intCommodityId FROM tblRKFutureMarket m
+	JOIN tblRKCommodityMarketMapping mm on m.intFutureMarketId=mm.intFutureMarketId 
+	WHERE m.intFutureMarketId=@intFutureMarketId
+
+  INSERT INTO tblRKFuturesSettlementPrice(intFutureMarketId,dtmPriceDate,intConcurrencyId,intCommodityMarketId,strPricingType)
+   VALUES(@intFutureMarketId,@strSettlementDate,1,@intCommodityId,'Mark To Market')
+
 	SELECT @intFutureSettlementPriceId = scope_Identity()
 
 --Insert Futures Month settlement Price	
