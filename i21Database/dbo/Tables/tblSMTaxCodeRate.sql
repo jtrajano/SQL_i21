@@ -7,5 +7,6 @@
     [dblRate] NUMERIC(18, 6) NOT NULL, 
     [dtmEffectiveDate] DATETIME NOT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT 1, 
-    CONSTRAINT [FK_tblSMTaxCodeRate_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
+    CONSTRAINT [FK_tblSMTaxCodeRate_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
+    CONSTRAINT [AK_tblSMTaxCodeRate__intTaxCodeId_dtmEffectiveDate] UNIQUE ([intTaxCodeId],[dtmEffectiveDate])
 )
