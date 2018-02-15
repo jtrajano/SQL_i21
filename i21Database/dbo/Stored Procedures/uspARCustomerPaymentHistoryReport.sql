@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspARCustomerPaymentHistoryReport]
-	@xmlParam NVARCHAR(MAX) = NULL
+	@xmlParam NVARCHAR(MAX) = NULL,
+	@customerId INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -229,7 +230,7 @@ INNER JOIN (
 		FROM dbo.vyuARCustomerContacts WITH (NOLOCK)
 		WHERE ysnDefaultContact = 1
 	) CC ON E.intEntityId = CC.intEntityId
-	WHERE (@strCustomerName IS NULL OR E.strName LIKE '%'+@strCustomerName+'%')
+	WHERE  (( @customerId IS NULL AND (@strCustomerName IS NULL OR E.strName LIKE '%'+@strCustomerName+'%'))OR E.intEntityId = @customerId)
 ) CUSTOMER ON PAYMENTS.intEntityCustomerId = CUSTOMER.intEntityId
 OUTER APPLY (
 	SELECT TOP 1 strCompanyName
