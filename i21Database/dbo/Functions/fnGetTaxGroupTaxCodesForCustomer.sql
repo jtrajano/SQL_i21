@@ -50,8 +50,8 @@ BEGIN
 	SET @ZeroDecimal = 0.000000
 	SELECT @ItemCategoryId = intCategoryId FROM tblICItem WHERE intItemId = @ItemId
 
-	IF (ISNULL(@ItemUOMId,0) = 0)
-		SET @ItemUOMId = [dbo].[fnGetItemStockUOM](@ItemId) 
+	-- IF (ISNULL(@ItemUOMId,0) = 0)
+	-- 	SET @ItemUOMId = [dbo].[fnGetItemStockUOM](@ItemId) 
 	
 	INSERT INTO @returntable
 		([intTransactionDetailTaxId]
