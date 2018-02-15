@@ -1840,7 +1840,12 @@ Ext.define('Inventory.view.ItemViewController', {
                     current.set('strCommodityCode', null);
                 }
             }
-            if(current.get('strType') !== record.get('strType')) {
+
+            else if (record.get('strType') == 'Comment'){
+                current.set('strCategory', 'Comment');
+            }
+
+            if (current.get('strType') !== record.get('strType')) {
                 current.set('strCategory', null);
                 current.set('intCategoryId', null);
             }

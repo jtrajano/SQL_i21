@@ -186,11 +186,14 @@ Ext.define('Inventory.model.Item', {
         { name: 'intTonnageTaxUOMId', type: 'int', allowNull: true },
         { name: 'ysnUseWeighScales', type: 'boolean' },
         { name: 'ysnIsBasket', type: 'boolean' },
-        { name: 'ysnLotWeightsRequired', type: 'boolean', defaultValue: true }
+        { name: 'ysnLotWeightsRequired', type: 'boolean', defaultValue: true },
+        { name: 'strCategory', type: 'string' }
     ],
 
     validators: [
         {type: 'presence', field: 'strItemNo'},
+        {type: 'presence', field: 'strCategory'},
+
         //{type: 'presence', field: 'strDescription'},
        // {type: 'presence', field: 'strStatus'},
        // {type: 'presence', field: 'intCategoryId'},

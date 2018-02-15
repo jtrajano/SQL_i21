@@ -214,7 +214,9 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_category))
-                    if (vyuICGetCompactItem != null)
+                    if (strType == "Comment")
+                        return "Comment";
+                    else if (vyuICGetCompactItem != null)
                         return vyuICGetCompactItem.strCategory;
                     else
                         return null;
