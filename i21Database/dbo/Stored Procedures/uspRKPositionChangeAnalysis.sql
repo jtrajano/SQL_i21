@@ -1,4 +1,4 @@
-﻿CREATE  PROC [dbo].[uspRKPositionChangeAnalysis]
+﻿CREATE PROC [dbo].[uspRKPositionChangeAnalysis]
 	@strFromBatchId nvarchar(100),
 	@strToBatchId nvarchar(100),
 	@intQuantityUOMId nvarchar(100),
@@ -74,7 +74,7 @@ WHERE i.strBatchId=@strToBatchId
 SELECT c.strCommodityCode,'' strPricingType,ft.intFutOptTransactionId intContractDetailId,
 		'Future '+case when strBuySell = 'Buy' then '(Long)' else '(short)' end strContractOrInventoryType,strInternalTradeNo strContractSeq,intFutOptTransactionHeaderId intContractHeaderId,strName strvendorName,
 	  strFutureMonth strFutureMonth,strLocationName,
-	  dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,ium1.intCommodityUnitMeasureId,(t.dblDebitUnit* m.dblContractSize))  dblQty
+	  dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,ium1.intCommodityUnitMeasureId,(t.dblDebitUnit* m.dblContractSize))  dblQty,t.dblPrice dblPricedAmount
 	   INTO #Fromtemp1  
 FROM tblRKM2MInquiry i
 JOIN tblRKM2MPostRecap t on i.intM2MInquiryId=t.intM2MInquiryId
@@ -91,7 +91,7 @@ WHERE i.strBatchId=@strFromBatchId and strTransactionType ='Mark To Market-Futur
  SELECT c.strCommodityCode,'' strPricingType,ft.intFutOptTransactionId intContractDetailId,
 		'Future '+case when strBuySell = 'Buy' then '(Long)' else '(short)' end strContractOrInventoryType,strInternalTradeNo strContractSeq,intFutOptTransactionHeaderId intContractHeaderId,strName strvendorName,
 	  strFutureMonth strFutureMonth,strLocationName, 
-	  dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,ium1.intCommodityUnitMeasureId,(t.dblDebitUnit* m.dblContractSize))  dblQty 
+	  dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,ium1.intCommodityUnitMeasureId,(t.dblDebitUnit* m.dblContractSize))  dblQty,t.dblPrice  dblPricedAmount
 	  INTO #Totemp1 
 FROM tblRKM2MInquiry i
 JOIN tblRKM2MPostRecap t on i.intM2MInquiryId=t.intM2MInquiryId
@@ -183,16 +183,16 @@ FROM(
 				null strToItem,
 				null dblFromPricedQty,
 				null dblFromUnpricedQty,
-				null dblFromPricedAmount,  
+				t.dblPricedAmount dblFromPricedAmount,  
 				t.strPricingType strFromPricingType,
 				t1.strPricingType strToPricingType,	
 				null dblToPricedQty,
 				null dblToUnpricedQty,
-				null dblToPricedAmount,								
+				t1.dblPricedAmount dblToPricedAmount,								
 				t.dblQty dblFromQty,
 				t1.dblQty	dblToQty,
 				isnull(t1.dblQty,0)-isnull(t.dblQty,0) dblQtyDifference,
-				null dblDifference
+				isnull(t1.dblPricedAmount,0)-isnull(t.dblPricedAmount,0)  dblDifference
  FROM #Fromtemp1 t
  FULL JOIN #Totemp1 t1 on t.strContractSeq=t1.strContractSeq )t
  ORDER BY strContractSeq
