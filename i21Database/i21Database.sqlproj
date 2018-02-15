@@ -6013,6 +6013,7 @@
     <Build Include="dbo\Stored Procedures\uspSMRefreshContactRoleMenus.sql" />
     <Build Include="dbo\Stored Procedures\uspGLInsertOriginCrossReferenceMapping.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateOldAccountId.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetCaseLabelCount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
