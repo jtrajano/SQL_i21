@@ -35,8 +35,7 @@ FROM
 			) dblAdditionalCost,
 			PF.intFinalPriceUOMId
 			
-	FROM	tblCTPriceFixationDetail	FD
-	JOIN	tblCTPriceFixation			PF	ON	PF.intPriceFixationId	=	FD.intPriceFixationId
+	FROM	tblCTPriceFixation			PF
 	JOIN	vyuCTContractDetailView		CD	ON	CD.intContractHeaderId	=	PF.intContractHeaderId
 	JOIN	tblICItemUOM				IM	ON	IM.intItemUOMId			=	CD.intPriceItemUOMId
 	JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId		=	CD.intCommodityId		AND 
