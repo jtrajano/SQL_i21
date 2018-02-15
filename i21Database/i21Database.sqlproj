@@ -6211,6 +6211,8 @@
     <Build Include="dbo\Functions\fnSCFreightCalculation.sql" />
     <Build Include="dbo\Views\vyuLGAllocationDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetActualItemByLot.sql" />
+    <Build Include="dbo\Functions\fnICGetReceiptItemTaxes.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetInventoryItemTaxes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

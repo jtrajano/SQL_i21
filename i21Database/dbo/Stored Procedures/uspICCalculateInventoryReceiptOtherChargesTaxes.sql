@@ -89,7 +89,7 @@ BEGIN
 				-- Clear the contents of the table variable.
 				DELETE FROM @Taxes
 
-				-- Get the taxes from uspSMGetItemTaxes
+				-- Get the taxes from uspICGetInventoryItemTaxes
 				INSERT INTO @Taxes (
 					--id
 					--,intInvoiceDetailId
@@ -113,7 +113,7 @@ BEGIN
 					,[strTaxGroup]
 					,[strNotes]
 				)
-				EXEC dbo.uspSMGetItemTaxes
+				EXEC dbo.uspICGetInventoryItemTaxes
 					 @ItemId				= @ItemId
 					,@LocationId			= @LocationId
 					,@TransactionDate		= @TransactionDate
