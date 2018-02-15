@@ -2022,10 +2022,16 @@ Ext.define('Inventory.view.ItemViewController', {
                                         else
                                             {
                                                 iRely.Functions.showCustomDialog('information', 'ok', 'Conversion to new stock unit has been completed.');
-                                                var context = me.view.context;
-                                                var vm = me.getViewModel();
-                                                vm.data.current.dirty = false;
-                                                context.screenMgr.toolbarMgr.provideFeedBack(iRely.Msg.SAVED);
+                                                grid.store.load({
+                                                    callback: function (records, options, success) {
+                                                        if (success){
+                                                            var context = me.view.context;
+                                                            var vm = me.getViewModel();
+                                                            vm.data.current.dirty = false;
+                                                            context.screenMgr.toolbarMgr.provideFeedBack(iRely.Msg.SAVED);    
+                                                        }
+                                                    }   
+                                                });
                                             }
                                     },
                                     function(failureResponse) {
