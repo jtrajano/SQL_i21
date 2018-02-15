@@ -89,7 +89,7 @@ SELECT strRecordNumber				= ARI.strInvoiceNumber
 	  , strTransactionType			= ARI.strTransactionType
 	  , strType						= ARI.strType
 	  , strItemDescription			= ARID.strItemDescription	  
-	  , intItemAccountId			= ISNULL(ARID.intSalesAccountId, ARID.intAccountId) 
+	  , intItemAccountId			= CASE WHEN ICI.strType IN ('Non-Inventory','Service','Other Charge') THEN ISNULL(ARID.intAccountId, ARID.intSalesAccountId) ELSE ISNULL(ARID.intSalesAccountId, ARID.intAccountId) END
 	  , dblQtyOrdered				= ARID.dblQtyOrdered
 	  , dblQtyShipped				= ARID.dblQtyShipped
 	  , dblStandardCost				= (CASE WHEN ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
