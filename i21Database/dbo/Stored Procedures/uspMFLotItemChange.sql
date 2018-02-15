@@ -6,6 +6,7 @@
 	,@strReasonCode NVARCHAR(MAX) = NULL
 	,@strNotes NVARCHAR(MAX) = NULL
 	,@ysnBulkChange BIT = 0
+	,@ysnProducedItemChange BIT = 0
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -176,54 +177,10 @@ BEGIN TRY
 	SELECT @intSourceId = 1
 		,@intSourceTransactionTypeId = 8
 
-	SELECT @intWorkOrderId = intWorkOrderId
-		,@intBatchId = intBatchId
-		,@intProducedLotId = intLotId
-		,@intOldProduceItemUOMId = intItemUOMId
-		,@dblPhysicalCount = dblPhysicalCount
-		,@intOldPhysicalItemUOMId = intPhysicalItemUOMId
-		,@dblTareWeight = dblTareWeight
-		,@intContainerId = intContainerId
-		,@intMachineId = intMachineId
-		,@strParentLotNumber = strParentLotNumber
-		,@strReferenceNo = strReferenceNo
-		,@dtmPlannedDate = dtmProductionDate
-		,@intPlannedShiftId = intShiftId
-	FROM tblMFWorkOrderProducedLot WP
-	WHERE intLotId IN (
-			SELECT intLotId
-			FROM tblICLot
-			WHERE strLotNumber = @strLotNumber
-			)
-
-	Select @dblUnitQty=dblWeight 
-	from tblICItem
-	Where intItemId=@intNewItemId 
-
-	Select @dblProduceQty=@dblPhysicalCount*@dblUnitQty
-
-	SELECT @intOldProduceUnitMeasureId = intUnitMeasureId
-	FROM tblICItemUOM
-	WHERE intItemUOMId = @intOldProduceItemUOMId
-
-	SELECT @intOldPhysicalUnitMeasureId = intUnitMeasureId
-	FROM tblICItemUOM
-	WHERE intItemUOMId = @intOldPhysicalItemUOMId
-
-	SELECT @intProduceItemUOMId = intItemUOMId
-	FROM tblICItemUOM
-	WHERE intItemId = @intNewItemId
-		AND intUnitMeasureId = @intOldProduceUnitMeasureId
-
-	SELECT @intPhysicalItemUOMId = intItemUOMId
-	FROM tblICItemUOM
-	WHERE intItemId = @intNewItemId
-		AND intUnitMeasureId = @intOldPhysicalUnitMeasureId
-
 	IF @intTransactionCount = 0
 		BEGIN TRANSACTION
 
-	IF @intWorkOrderId IS NULL
+	IF @ysnProducedItemChange = 0
 	BEGIN
 		EXEC uspICInventoryAdjustment_CreatePostItemChange @intItemId = @intItemId
 			,@dtmDate = @dtmDate
@@ -275,6 +232,65 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
+		SELECT @intWorkOrderId = intWorkOrderId
+			,@intBatchId = intBatchId
+			,@intProducedLotId = intLotId
+			,@intOldProduceItemUOMId = intItemUOMId
+			,@dblPhysicalCount = dblPhysicalCount
+			,@intOldPhysicalItemUOMId = intPhysicalItemUOMId
+			,@dblTareWeight = dblTareWeight
+			,@intContainerId = intContainerId
+			,@intMachineId = intMachineId
+			,@strParentLotNumber = strParentLotNumber
+			,@strReferenceNo = strReferenceNo
+			,@dtmPlannedDate = dtmProductionDate
+			,@intPlannedShiftId = intShiftId
+		FROM tblMFWorkOrderProducedLot WP
+		WHERE intLotId IN (
+				SELECT intLotId
+				FROM tblICLot
+				WHERE strLotNumber = @strLotNumber
+				)
+
+		IF @dblPhysicalCount <> Abs(@dblAdjustByQuantity)
+		BEGIN
+			RAISERROR (
+					'Item change is not allowed for this pallet. Qty is adjusted.'
+					,16
+					,1
+					)
+		END
+
+		SELECT @dblUnitQty = dblWeight
+		FROM tblICItem
+		WHERE intItemId = @intNewItemId
+
+		SELECT @dblProduceQty = @dblPhysicalCount * @dblUnitQty
+
+		SELECT @intOldProduceUnitMeasureId = intUnitMeasureId
+		FROM tblICItemUOM
+		WHERE intItemUOMId = @intOldProduceItemUOMId
+
+		SELECT @intOldPhysicalUnitMeasureId = intUnitMeasureId
+		FROM tblICItemUOM
+		WHERE intItemUOMId = @intOldPhysicalItemUOMId
+
+		IF @intOldProduceUnitMeasureId = @intOldPhysicalUnitMeasureId
+		BEGIN
+			SELECT @dblUnitQty = 1
+				,@dblProduceQty = @dblPhysicalCount
+		END
+
+		SELECT @intProduceItemUOMId = intItemUOMId
+		FROM tblICItemUOM
+		WHERE intItemId = @intNewItemId
+			AND intUnitMeasureId = @intOldProduceUnitMeasureId
+
+		SELECT @intPhysicalItemUOMId = intItemUOMId
+		FROM tblICItemUOM
+		WHERE intItemId = @intNewItemId
+			AND intUnitMeasureId = @intOldPhysicalUnitMeasureId
+
 		SELECT @strXML = '<root><intWorkOrderId>' + Ltrim(@intWorkOrderId) + '</intWorkOrderId><intBatchId>' + Ltrim(@intBatchId) + '</intBatchId><intLotId>' + Ltrim(@intProducedLotId) + '</intLotId><intUserId>' + Ltrim(@intUserId) + '</intUserId><ysnForceUndo>1</ysnForceUndo></root>'
 
 		SELECT @intManufacturingProcessId = intManufacturingProcessId
