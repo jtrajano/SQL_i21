@@ -78,6 +78,25 @@ namespace iRely.Inventory.Model
                 _unitmeasure = value;
             }
         }
+        private string _vendorName;
+        [NotMapped]
+        public string strVendorName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_vendorName))
+                    if (vyuAPVendor != null)
+                        return vyuAPVendor.strName;
+                    else
+                        return null;
+                else
+                    return _vendorName;
+            }
+            set
+            {
+                _vendorName = value;
+            }
+        }
 
         public tblICItem tblICItem { get; set; }
         public tblICItemLocation tblICItemLocation { get; set; }
