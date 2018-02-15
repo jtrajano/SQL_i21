@@ -33,6 +33,7 @@
 	[intM2MInquiryId]			INT				 NULL,
 	[intSourceLocationId]		INT NULL,
 	[intSourceUOMId]			INT NULL,
+	[dblPrice]                  NUMERIC (18, 6)  NULL,
 		
  CONSTRAINT [PK_tblM2MPostRecap] PRIMARY KEY CLUSTERED 
 (
