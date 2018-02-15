@@ -71,7 +71,7 @@ BEGIN TRY
 			MA.strFutMarketName,
 			MO.strFutureMonth,
 			dbo.fnRemoveTrailingZeroes(PF.[dblLotsFixed]) AS dblLotsFixed,
-			PD.dtmFixationDate,
+			(SELECT TOP 1 dtmFixationDate FROM tblCTPriceFixationDetail WHERE intPriceFixationId = 35) AS dtmFixationDate,
 			CONVERT(NVARCHAR(50),dtmStartDate,106) + ' - ' + CONVERT(NVARCHAR(50),dtmEndDate,106) strPeriod,
 			LTRIM(RTRIM(EY.strEntityName)) + ', ' + CHAR(13)+CHAR(10) +
 				ISNULL(LTRIM(RTRIM(EY.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
@@ -80,26 +80,27 @@ BEGIN TRY
 				ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityZipCode)) END,'') + 
 				ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityCountry)) END,'')
 			AS	strOtherPartyAddress,
-			PD.strNotes,
+			(SELECT TOP 1 strNotes FROM tblCTPriceFixationDetail WHERE intPriceFixationId = 35) AS strNotes,
 			CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END AS strBuyer,
 			CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END AS strSeller,
 			dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
 	
 	FROM	tblCTPriceFixation			PF
-	JOIN	tblCTPriceFixationDetail	PD	ON	PD.intPriceFixationId			=	PF.intPriceFixationId
 	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	PF.intContractHeaderId
 	JOIN	(
 				SELECT		ROW_NUMBER() OVER (PARTITION BY intContractHeaderId ORDER BY intContractSeq ASC) AS intRowNum, 
 							intContractHeaderId,
 							dtmStartDate,
-							dtmEndDate
+							dtmEndDate,
+							intFutureMarketId,
+							intFutureMonthId		
 				FROM		tblCTContractDetail
 			)							CD	ON	CD.intContractHeaderId	=	CH.intContractHeaderId	AND  
 												CD.intRowNum			=	1		
 	JOIN	vyuCTEntity					EY	ON	EY.intEntityId			=	CH.intEntityId	AND
 												EY.strEntityType		=	(CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)	LEFT
-	JOIN	tblRKFutureMarket			MA	ON	MA.intFutureMarketId	=	PD.intFutureMarketId	
-	JOIN	tblRKFuturesMonth			MO	ON	MO.intFutureMonthId		=	PD.intFutureMonthId															
+	JOIN	tblRKFutureMarket			MA	ON	MA.intFutureMarketId	=	CD.intFutureMarketId	
+	JOIN	tblRKFuturesMonth			MO	ON	MO.intFutureMonthId		=	CD.intFutureMonthId															
 	WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 	
 
