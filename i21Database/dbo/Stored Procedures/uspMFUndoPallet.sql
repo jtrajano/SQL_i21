@@ -181,7 +181,6 @@ BEGIN TRY
 			FROM dbo.tblICLot
 			WHERE strLotNumber = @strLotNumber
 				AND intStorageLocationId = @intStorageLocationId
-				and intItemId=@intItemId
 				AND dblQty > 0
 			)
 		AND @strLotTracking <> 'No'
