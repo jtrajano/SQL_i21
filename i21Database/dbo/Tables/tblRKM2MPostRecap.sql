@@ -35,8 +35,6 @@
 	[intSourceUOMId]			INT NULL,
 	[dblPrice]                  NUMERIC (18, 6)  NULL,
 		
- CONSTRAINT [PK_tblM2MPostRecap] PRIMARY KEY CLUSTERED 
-(
-	[intM2MTransactionId] ASC
-)
+	CONSTRAINT [PK_tblM2MPostRecap] PRIMARY KEY CLUSTERED ([intM2MTransactionId] ASC),
+	CONSTRAINT [FK_tblRKM2MPostRecap_tblRKM2MInquiry_intM2MInquiryId] FOREIGN KEY([intM2MInquiryId])REFERENCES [dbo].[tblRKM2MInquiry] (intM2MInquiryId) ON DELETE CASCADE
 );
