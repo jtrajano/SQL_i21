@@ -8,5 +8,5 @@ strFutureMonth strFutureMonthYearWOSymbol,op.intFutureMonthId,strOptionMonth as 
 ,CONVERT(DATETIME,'01 '+strOptionMonth) as dtmMonthYear 
 	    FROM tblRKOptionsMonth op 
 JOIN tblRKFuturesMonth fm on fm.intFutureMonthId=op.intFutureMonthId
-JOIN tblRKFutureMarket m on m.intFutureMarketId=op.intFutureMarketId and isnull(ysnMonthExpired,0) =0
+JOIN tblRKFutureMarket m on m.intFutureMarketId=op.intFutureMarketId 
 ORDER BY CONVERT(DATETIME,'01 '+strOptionMonth) ASC)t
