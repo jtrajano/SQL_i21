@@ -199,6 +199,7 @@ SELECT CP.intCompanyPreferenceId
 	,CAST(ISNULL(ysnRestrictIncreaseSeqQty,0) AS BIT) ysnRestrictIncreaseSeqQty
 	,ISNULL(CP.intNumberOfDecimalPlaces,4) intNumberOfDecimalPlaces
 	,CP.ysnFullHeaderLogo
+	,CP.ysnContainerNoUnique
 FROM tblLGCompanyPreference CP
 LEFT JOIN tblICCommodity CO ON CO.intCommodityId = CP.intCommodityId
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CP.intWeightUOMId

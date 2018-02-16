@@ -576,6 +576,7 @@ END
 			FETCH NEXT FROM ListThirdPartyVendor INTO @intHaulerId,@intInventoryReceiptChargeId, @dblQtyReceived, @dblInventoryReceiptCost, @intTaxId;
 		END
 
+		END
 		CLOSE ListThirdPartyVendor;
 		DEALLOCATE ListThirdPartyVendor;
 _Exit:
