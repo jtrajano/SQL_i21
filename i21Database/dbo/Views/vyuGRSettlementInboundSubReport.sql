@@ -10,7 +10,7 @@ SELECT
 	,SUM(dblAmount) AS Amount
 	,SUM(dblTax) AS Tax
 FROM (
-		 SELECT DISTINCT
+		 SELECT  
 		 intPaymentId
 		,strDiscountCode
 		,strDiscountCodeDescription
@@ -28,10 +28,7 @@ FROM (
 			,intItemId = BillDtl.intItemId
 			,strDiscountCode = Item.strShortName 
 			,strDiscountCodeDescription = Item.strItemNo
-			,dblDiscountAmount = CASE 
-										WHEN INVRCPTCHR.strCostMethod = 'Per Unit' THEN INVRCPTCHR.dblRate
-										WHEN INVRCPTCHR.strCostMethod = 'Amount' THEN INVRCPTCHR.dblAmount
-								 END
+			,dblDiscountAmount = BillDtl.dblTotal
 			,dblShrinkPercent = ISNULL(ScaleDiscount.dblShrinkPercent, 0)
 			,dblGradeReading =  ISNULL(ScaleDiscount.dblGradeReading, 0)			
 			,dblAmount = BillDtl.dblTotal 
@@ -45,7 +42,10 @@ FROM (
 		JOIN tblICInventoryReceiptCharge INVRCPTCHR ON BillDtl.intInventoryReceiptChargeId = INVRCPTCHR.intInventoryReceiptChargeId
 		JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId
 		JOIN tblICInventoryReceipt INVRCPT ON INVRCPTCHR.intInventoryReceiptId = INVRCPT.intInventoryReceiptId
-		JOIN tblICInventoryReceiptItem INVRCPTITEM ON INVRCPT.intInventoryReceiptId = INVRCPTITEM.intInventoryReceiptId		
+		JOIN (
+				SELECT intSourceId,intInventoryReceiptId,ROW_NUMBER() OVER (PARTITION BY intInventoryReceiptId ORDER BY intSourceId) intRowNum
+				FROM	tblICInventoryReceiptItem
+			 )  INVRCPTITEM ON INVRCPTITEM.intInventoryReceiptId =INVRCPT.intInventoryReceiptId AND INVRCPTITEM.intRowNum =1
 		LEFT JOIN (
 					SELECT 
 					QM.intTicketId
