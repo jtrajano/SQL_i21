@@ -13,6 +13,9 @@ Declare @dblCashPriceInStockUOM NUMERIC(38,20)
 Declare @dblUnitQtyFrom NUMERIC(38,20)
 Declare @dblUnitQtyTo NUMERIC(38,20)
 Declare @intFromItemUOMId int
+Declare @strType NVARCHAR(50)
+
+Select @strType=strType From tblICItem Where intItemId=@intItemId
 
 If ISNULL(@intCostTypeId,0)=0
 	Set @intCostTypeId=1
@@ -28,7 +31,10 @@ Begin
 	Select TOP 1 @intItemStockUOMId=intItemUOMId
 	From tblICItemUOM Where intItemId=@intItemId AND ysnStockUnit=1
 
-	Select @dblCostInTargetUOM=dbo.fnMFConvertCostToTargetItemUOM(@intItemStockUOMId,@intToItemUOMId,@dblCost)
+	If @strType='Other Charge'
+		Select @dblCostInTargetUOM=@dblCost
+	Else
+		Select @dblCostInTargetUOM=dbo.fnMFConvertCostToTargetItemUOM(@intItemStockUOMId,@intToItemUOMId,@dblCost)
 
 	Set @dblCostInTargetUOM=ISNULL(@dblCostInTargetUOM,0)
 End
