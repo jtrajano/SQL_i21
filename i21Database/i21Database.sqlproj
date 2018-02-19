@@ -6210,12 +6210,12 @@
     <Build Include="dbo\Stored Procedures\uspSMReplicationLogReaderSetUp.sql" />
     <Build Include="dbo\Stored Procedures\uspSMReplicationOption.sql" />
     <Build Include="dbo\Tables\tblSMReplicationSPResult.sql" />
-    <None Include="Scripts\Post-Deployment\SM\DefaultData\31_ReplicationResult.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\32_ReplicationResult.sql" />
     <Build Include="dbo\Stored Procedures\uspSMRepInitializationStatus.sql" />
     <Build Include="dbo\Tables\tblSMRepInitStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspSMRepRestoreSubscription.sql" />
     <Build Include="dbo\Functions\fnSMRepDatabaseExists.sql" />
-    <None Include="Scripts\Post-Deployment\SM\DefaultData\32_ReplicationInitStatus.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\33_ReplicationInitStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspSMRepUpdateInitStatus.sql" />
   </ItemGroup>
   <ItemGroup>
