@@ -4,7 +4,7 @@ SELECT intSalesOrderId			= SO.intSalesOrderId
 	 , strSalesOrderNumber		= SO.strSalesOrderNumber
 	 , intQuoteTemplateId		= TEMPLATE.intQuoteTemplateId
 	 , intQuoteTemplateDetailId	= TEMPLATE.intQuoteTemplateDetailId
-	 , intQuotePageId			= ISNULL(TEMPLATE.intQuotePageId, 0)
+	 , intLetterId				= ISNULL(TEMPLATE.intLetterId, 0)
      , strSectionName			= ISNULL(TEMPLATE.strSectionName, 'Quote Order')
      , intSort					= TEMPLATE.intSort
 	 , dtmDate					= SO.dtmDate
@@ -18,7 +18,7 @@ LEFT JOIN (
 		SELECT intQuoteTemplateId
 			 , intQuoteTemplateDetailId
 			 , intSort
-			 , intQuotePageId
+			 , intLetterId
 			 , strSectionName
 		FROM dbo.tblARQuoteTemplateDetail WITH (NOLOCK)
 	) QTD ON QT.intQuoteTemplateId = QTD.intQuoteTemplateId

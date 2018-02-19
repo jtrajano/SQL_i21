@@ -3439,7 +3439,6 @@
     <Build Include="dbo\Stored Procedures\uspAPUpdatePaymentAmountDue.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateBillPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdatePaymentBankTransaction.sql" />
-    <Build Include="dbo\Stored Procedures\uspARDuplicateQuotePage.sql" />
     <Build Include="dbo\Stored Procedures\uspCMCreateBankTransactionEntries.sql" />
     <Build Include="dbo\User Defined Types\BankTransactionTable.sql" />
     <Build Include="dbo\User Defined Types\BankTransactionDetailTable.sql" />
@@ -3462,7 +3461,6 @@
     <Build Include="dbo\Tables\tblLGLoadNotifyParties.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportArrivalForm.sql" />
     <Build Include="dbo\Stored Procedures\uspICRepostCosting.sql" />
-    <Build Include="dbo\Tables\tblARQuotePage.sql" />
     <Build Include="dbo\Stored Procedures\uspTRFixRackPrices.sql" />
     <Build Include="dbo\Stored Procedures\uspTMGenerateEquipmentUsageAnalysis.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\Layout\CallEntryPrintOut.sql" />
@@ -6212,6 +6210,8 @@
     <Build Include="dbo\Views\vyuLGAllocationDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetActualItemByLot.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetInventoryItemTaxes.sql" />
+    <Build Include="dbo\Views\vyuARQuoteLetter.sql" />
+    <Build Include="dbo\Functions\fnARConvertPlaceHolder.sql" />
     <Build Include="dbo\Stored Procedures\uspLGRejectContainer.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetCaseLabelCount.sql" />
   </ItemGroup>

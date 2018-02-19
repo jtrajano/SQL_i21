@@ -217,11 +217,11 @@ LEFT JOIN (
 		 , strFobPoint
 	FROM dbo.tblSMFreightTerms WITH (NOLOCK)
 ) FREIGHT ON INV.intFreightTermId = FREIGHT.intFreightTermId
-LEFT JOIN (SELECT 
-			strCode,
-			strMessage
-		  FROM	
-		  vyuARDocumentMaintenanceMessage) Comments ON INV.strComments = Comments.strCode
+LEFT JOIN (
+	SELECT strCode
+		 , strMessage
+	FROM vyuARDocumentMaintenanceMessage
+) Comments ON INV.strComments = Comments.strCode
 OUTER APPLY (
 	SELECT TOP 1 strCompanyName 
 			   , strAddress
