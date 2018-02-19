@@ -2229,7 +2229,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 netWgtCF = detailRecord.get('dblWeightUOMConvFactor'),
                 valueCostCF;
 
-            var receiptUOMId = detailRecord.get("intItemUOMId");
+            var receiptUOMId = detailRecord.get("intUnitMeasureId");
             
             // Calculate Cost UOM Conversion Factor with respect to the Item UOM..
             if (iRely.Functions.isEmpty(detailRecord.get('intWeightUOMId'))) {
@@ -2250,7 +2250,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : 1;
 
                 unitCost = unitCost * (netWgtCF / costCF);
-                receiptUOMId = detailRecord.get('intWeightUnitMeasureId');
+                receiptUOMId = detailRecord.get('intWeightUOMId');
             }
 
             // Do not compute the tax if item ownership is 'Storage'. 
@@ -2346,7 +2346,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 CardId: null,
                 VehicleId: null,
                 IncludeExemptedCodes: false,
-                UOMId: detailRecord.get('intWeightUOMId') ? (detailRecord.get('intWeightUnitMeasureId') ? detailRecord.get('intWeightUnitMeasureId') : detailRecord.get('intItemUOMId')) : detailRecord.get('intItemUOMId')  // IMPORTANT!!!!!This is not intItemUOMId, this is intUnitMeasureId. Mapping of field names is wrong since intUnitMeasureId was originally mapped to item uom id (Need to correct this in the future)
+                UOMId: detailRecord.get('intWeightUOMId') ? (detailRecord.get('intWeightUOMId') ? detailRecord.get('intWeightUOMId') : detailRecord.get('intUnitMeasureId')) : detailRecord.get('intUnitMeasureId')  // IMPORTANT!!!!!This is not intItemUOMId, this is intUnitMeasureId. Mapping of field names is wrong since intUnitMeasureId was originally mapped to item uom id (Need to correct this in the future)
             };
 
             iRely.Functions.getItemTaxes(current, computeItemTax, me);            
@@ -6442,7 +6442,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 taxGroupName = null;
 
                             charge.tblICInventoryReceiptChargeTaxes().removeAll();
-                            var unitMeasureId = charge.get('intCostUnitMeasureId');
+                            var unitMeasureId = charge.get('intCostUOMId');
                             Ext.Array.each(itemTaxes, function (itemDetailTax) {
                                 var taxableAmount = charge.get('dblAmount');
                                 var taxAmount = 0.00;
@@ -6541,7 +6541,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 CardId: null,
                                 VehicleId: null,
                                 IncludeExemptedCodes: false,
-                                UOMId: charge.get('intCostUnitMeasureId')
+                                UOMId: charge.get('intCostUOMId')
                          };
                          iRely.Functions.getItemTaxes(currentCharge, computeItemTax, me);
                     }
