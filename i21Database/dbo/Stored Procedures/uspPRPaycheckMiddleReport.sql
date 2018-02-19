@@ -134,36 +134,22 @@ SELECT DISTINCT
 	dblNetYTD = Sum(ISNULL(tblPaycheckYTD.dblNetPayTotalYTD, 0))
 FROM 
 	tblSMCompanySetup, 
-	(SELECT DISTINCT
-		tblPRPaycheck.intPaycheckId, 
+	(SELECT
+		intPaycheckId, 
 		strPaycheckId,
 		intEntityEmployeeId,
 		dtmDateFrom,
 		dtmDateTo,
 		dtmPayDate,
-		dblGross = Sum (tblPRPaycheckEarning.dblTotal), 
+		dblGross, 
 		dblTaxTotal,
 		dblDeductionTotal,
 		dblNetPayTotal,
 		ysnVoid 
 	FROM 
 		tblPRPaycheck
-		LEFT JOIN tblPRPaycheckEarning 
-			ON tblPRPaycheck.intPaycheckId = tblPRPaycheckEarning.intPaycheckId
 	WHERE 
-		tblPRPaycheck.ysnPosted = 1 AND tblPRPaycheck.ysnVoid = 0
-		AND tblPRPaycheckEarning.strCalculationType NOT IN ('Reimbursement', 'Fringe Benefit') 
-	GROUP BY
-		tblPRPaycheck.intPaycheckId,
-		strPaycheckId,
-		intEntityEmployeeId,
-		dtmDateFrom,
-		dtmDateTo,
-		dtmPayDate,
-		dblTaxTotal,
-		dblDeductionTotal,
-		dblNetPayTotal,
-		ysnVoid) [tblPRPaycheck] 
+		ysnPosted = 1 AND ysnVoid = 0) [tblPRPaycheck] 
 	LEFT JOIN 
 		(SELECT 
 			tblPREmployee.*,
