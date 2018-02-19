@@ -160,6 +160,10 @@ namespace iRely.Inventory.BusinessLayer
                 }
                 else if (result.BaseException.Message.Contains("unique index 'AK_tblICItemUOM_strUpcCode'"))
                 {
+                    msg = "Short UPC Code must be unique per item per UOM.";
+                }
+                else if (result.BaseException.Message.Contains("unique index 'AK_tblICItemUOM_strLongUPCCode'"))
+                {
                     msg = "UPC Code must be unique per item per UOM.";
                 }
                 else if (result.BaseException.Message.Contains("The DELETE statement conflicted with the REFERENCE constraint \"FK_tblICItemLocation_tblICUnitMeasure_Issue\""))
