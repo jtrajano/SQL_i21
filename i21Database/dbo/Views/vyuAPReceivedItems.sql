@@ -1185,7 +1185,7 @@ FROM
 		,[intContractSequence]						=	NULL
 		,[intScaleTicketId]							=	A.intScaleTicketId
 		,[strScaleTicketNumber]						=	A.strScaleTicketNumber
-		,[intShipmentId]							=	NULL
+		,[intShipmentId]							=	ISNULL(A.intInventoryShipmentItemId,0)
 		,[intShipmentContractQtyId]					=	NULL
   		,[intUnitMeasureId]							=	A.intCostUnitMeasureId
 		,[strUOM]									=	NULL
