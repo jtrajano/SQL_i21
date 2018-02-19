@@ -309,7 +309,7 @@ BEGIN TRY
 		IF @strInstantConsumption = 'False'
 		BEGIN
 			RAISERROR (
-					'Change item is not allowed.'
+					'Item change is not allowed when instant consumption is false.'
 					,16
 					,1
 					)
