@@ -94,7 +94,7 @@ BEGIN TRY
 		JOIN	tblICInventoryReceiptItem	RI	ON	RI.intInventoryReceiptId		=	IR.intInventoryReceiptId
    LEFT	JOIN	tblAPBillDetail				BD	ON	BD.intInventoryReceiptItemId	=	RI.intInventoryReceiptItemId
    LEFT	JOIN	tblAPBill					BL	ON	BL.intBillId					=	BD.intBillId
-		WHERE	RI.intLineNo = @intContractDetailId AND IR.strReceiptType = 'Purchase Contract' --AND RI.dblUnitCost <> ISNULL(@dblCashPrice,0) 
+		WHERE	RI.intLineNo = @intContractDetailId AND IR.strReceiptType = 'Purchase Contract'  AND BD.intInventoryReceiptChargeId IS NULL
 
 		SELECT	@intInventoryReceiptId = MIN(intInventoryReceiptId) FROM #tblReceipt
 
@@ -130,6 +130,10 @@ BEGIN TRY
 				--	,@voucherDetailReceiptCharge	=	@voucherDetailReceiptCharge
 				--	,@vendorOrderNumber				=	@strVendorOrderNumber
 				--	,@billId						=	@intNewBillId OUTPUT
+
+				SELECT @intBillDetailId = intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intNewBillId AND intInventoryReceiptChargeId IS NULL
+
+				EXEC uspAPUpdateCost @intBillDetailId,@dblCashPrice,1
 
 				EXEC [dbo].[uspAPPostBill] 
 					 @post = 1
