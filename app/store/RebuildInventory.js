@@ -1,5 +1,5 @@
 Ext.define('Inventory.store.RebuildInventory', {
-    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
+    extend: 'Ext.data.Store',
     alias: 'store.icrebuildinventory',
 
     requires: [
