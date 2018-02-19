@@ -38,18 +38,18 @@ BEGIN
 	WHERE 
 		SMTCR.[intTaxCodeId] = @TaxCodeId
 		AND ( 
-				(UOM.[intItemUOMId] = @ItemUOMId AND @ItemUOMId IS NOT NULL) 
+				(SMTCR.[strCalculationMethod] = 'Unit' AND (UOM.[intItemUOMId] = @ItemUOMId AND @ItemUOMId IS NOT NULL)) 
 			OR 
-				(@ItemUOMId IS NULL AND (SMTCR.[strCalculationMethod] <> 'Unit' OR SMTCR.[intUnitMeasureId] IS NULL)) 
+				(SMTCR.[strCalculationMethod] = 'Unit' AND SMTCR.[intUnitMeasureId] IS NULL) 
 			OR 
-				(@ItemUOMId IS NOT NULL  AND SMTCR.[strCalculationMethod] <> 'Unit') 				
+				(SMTCR.[strCalculationMethod] <> 'Unit')
 			)
 		AND CAST(@TransactionDate AS DATE) >= CAST([dtmEffectiveDate]  AS DATE)
 	ORDER BY 
 		 (CASE 
-			WHEN SMTCR.[strCalculationMethod] = 'Unit' AND (UOM.[intItemUOMId] = @ItemUOMId AND @ItemUOMId IS NOT NULL)  THEN 4
-			WHEN @ItemUOMId IS NULL AND (SMTCR.[strCalculationMethod] = 'Unit' AND SMTCR.[intUnitMeasureId] IS NULL)  THEN 3
-			WHEN @ItemUOMId IS NULL AND (SMTCR.[strCalculationMethod] <> 'Unit' OR SMTCR.[intUnitMeasureId] IS NULL)  THEN 2
+			WHEN SMTCR.[strCalculationMethod] = 'Unit' AND (UOM.[intItemUOMId] = @ItemUOMId AND @ItemUOMId IS NOT NULL) THEN 4
+			WHEN SMTCR.[strCalculationMethod] = 'Unit' AND SMTCR.[intUnitMeasureId] IS NULL THEN 3
+			WHEN SMTCR.[strCalculationMethod] <> 'Unit' THEN 2
 			ELSE 1
 		 END) DESC
 		,SMTCR.[dtmEffectiveDate] DESC
