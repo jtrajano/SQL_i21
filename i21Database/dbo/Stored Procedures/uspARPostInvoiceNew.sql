@@ -990,7 +990,7 @@ FROM tblARInvoice I
 WHERE I.intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
 AND ID.ysnBlended <> @Post
 AND ICI.ysnAutoBlend = 1
-AND ISNULL(ICI.strType,'') = 'Finished Good'
+--AND ISNULL(ICI.strType,'') = 'Finished Good' --AR-6677
 
 DECLARE @intFGInvoiceId		INT
 DECLARE @strFGInvoiceNumber	NVARCHAR(50)

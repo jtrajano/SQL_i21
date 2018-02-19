@@ -1012,7 +1012,7 @@ IF(ISNULL(@Post,0)) = 1
 			@Invoices I
 				ON ARID.[intInvoiceId] = I.[intInvoiceId]		
 		INNER JOIN
-			(SELECT [intItemId], [strItemNo] FROM tblICItem WITH (NOLOCK)) ICI
+			(SELECT [intItemId], [strItemNo], [ysnAutoBlend] FROM tblICItem WITH (NOLOCK)) ICI
 				ON ARIC.[intComponentItemId] = ICI.[intItemId]
 		LEFT OUTER JOIN
 			(SELECT [intCOGSAccountId], [intItemId], [intLocationId] FROM vyuARGetItemAccount WITH (NOLOCK)) ARIA
@@ -1028,7 +1028,7 @@ IF(ISNULL(@Post,0)) = 1
 			AND ISNULL(ARIC.[intComponentItemId],0) <> 0
 			AND (ISNULL(ARIA.[intCOGSAccountId], 0) = 0 OR GLA.[intAccountId] IS NULL)
 			AND I.[strTransactionType] <> 'Debit Memo'	
-			AND ISNULL(ARIC.[strType],'') NOT IN ('Finished Good','Comment')			
+			AND (ISNULL(ARIC.[strType],'') NOT IN ('Finished Good','Comment') OR ICI.[ysnAutoBlend] <> 1)
 					
 
 		UNION
@@ -1084,7 +1084,7 @@ IF(ISNULL(@Post,0)) = 1
 			@Invoices I
 				ON ARID.[intInvoiceId] = I.[intInvoiceId]
 		INNER JOIN
-			(SELECT [intItemId], [strItemNo] FROM tblICItem WITH (NOLOCK)) ICI
+			(SELECT [intItemId], [strItemNo], [ysnAutoBlend] FROM tblICItem WITH (NOLOCK)) ICI
 				ON ARIC.[intComponentItemId] = ICI.[intItemId]
 		LEFT OUTER JOIN
 			(SELECT [intItemUOMId] FROM tblICItemUOM WITH (NOLOCK)) ICIUOM
@@ -1103,7 +1103,7 @@ IF(ISNULL(@Post,0)) = 1
 			AND ISNULL(ARIC.[intComponentItemId],0) <> 0
 			AND (ISNULL(ARIA.[intInventoryInTransitAccountId], 0) = 0 OR GLA.[intAccountId] IS NULL)
 			AND I.[strTransactionType] <> 'Debit Memo'																		
-			AND ISNULL(ARIC.[strType],'') NOT IN ('Finished Good','Comment')
+			AND (ISNULL(ARIC.[strType],'') NOT IN ('Finished Good','Comment') OR ICI.[ysnAutoBlend] <> 1)
 
 
 		UNION
@@ -1672,7 +1672,7 @@ INNER JOIN
 WHERE 
 	ARID.[ysnBlended] <> @Post
 	AND ICI.[ysnAutoBlend] = 1
-	AND ISNULL(ICI.[strType],'') = 'Finished Good'
+	--AND ISNULL(ICI.[strType],'') = 'Finished Good' --AR-6677
 
 INSERT INTO @returntable(
 	 [intInvoiceId]
