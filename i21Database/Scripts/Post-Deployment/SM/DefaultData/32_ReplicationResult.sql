@@ -2,10 +2,10 @@
 
 BEGIN
 
-	DECLARE @count INT
-	SELECT @count = COUNT(*) FROM tblSMReplicationSPResult  
+	DECLARE @count3 INT
+	SELECT @count3 = COUNT(*) FROM tblSMReplicationSPResult  
 
-		IF @count = 0
+		IF @count3 = 0
 		BEGIN
 	
 

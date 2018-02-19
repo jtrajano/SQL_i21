@@ -1,9 +1,9 @@
 ﻿PRINT N'*** BEGIN - INSERT DEFAULT Replication Init  ***'
 BEGIN
-	DECLARE @count INT
-	SELECT @count = COUNT(*) FROM tblSMRepInitStatus
+	DECLARE @count2 INT
+	SELECT @count2 = COUNT(*) FROM tblSMRepInitStatus
 
-		IF @count > 0
+		IF @count2 > 0
 			BEGIN
 	
 				UPDATE tblSMRepInitStatus SET intStatus = 1
