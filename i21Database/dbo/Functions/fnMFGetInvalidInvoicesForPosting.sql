@@ -403,7 +403,7 @@ BEGIN
 				ORDER BY L.dtmDateCreated
 			END
 
-			IF (SELECT COUNT(1) FROM @tblLot)=0
+			IF (SELECT COUNT(1) FROM @tblLot)=0 AND @strRawItemTrackingType <> 'No'
 			BEGIN
 				SELECT	@strItemNo=strItemNo 
 				FROM	tblICItem 
