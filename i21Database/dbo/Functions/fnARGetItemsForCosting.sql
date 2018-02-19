@@ -88,7 +88,7 @@ SELECT
 	,[dblUOMQty]				= ItemUOM.dblUnitQty
 	-- If item is using average costing, it must use the average cost. 
 	-- Otherwise, it must use the last cost value of the item. 
-	,[dblCost]					= ISNULL(dbo.fnMultiply (dbo.fnMultiply (	CASE WHEN ISNULL(IST.[strType],'') = 'Finished Good' AND ARID.[ysnBlended] = 1 
+	,[dblCost]					= ISNULL(dbo.fnMultiply (dbo.fnMultiply (	CASE WHEN ARID.[ysnBlended] = 1 
 																	THEN (
 																		SELECT SUM(ICIT.[dblCost]) 
 																		FROM
@@ -155,7 +155,7 @@ WHERE
 	AND (ARID.[intInventoryShipmentItemId] IS NULL OR ARID.[intInventoryShipmentItemId] = 0)
 	AND (ARID.[intLoadDetailId] IS NULL OR ARID.[intLoadDetailId] = 0)
 	AND ARID.[intItemId] IS NOT NULL AND ARID.[intItemId] <> 0
-	AND (ISNULL(IST.[strType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment') OR (ISNULL(IST.[strType],'') = 'Finished Good' AND ARID.[ysnBlended] = 1))
+	AND (ISNULL(IST.[strType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment') OR (ARID.[ysnBlended] = 1))
 	AND ARI.[strTransactionType] <> 'Debit Memo'							
 	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)
 	AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)
@@ -204,7 +204,7 @@ INNER JOIN
 	(SELECT [intInvoiceId], [strInvoiceNumber], [dtmShipDate], [strTransactionType], [intCompanyLocationId], [intCurrencyId], [intDistributionHeaderId], [intLoadDistributionHeaderId], [strActualCostId], [strImportFormat], [dblSplitPercent], [intLoadId] FROM @Invoices) ARI
 		ON ARID.[intInvoiceId] = ARI.[intInvoiceId] AND ARIC.[intCompanyLocationId] = ARI.[intCompanyLocationId]		
 INNER JOIN
-	(SELECT [intItemId] FROM tblICItem WITH (NOLOCK)) ICI
+	(SELECT [intItemId], [ysnAutoBlend] FROM tblICItem WITH (NOLOCK)) ICI
 		ON ARIC.[intComponentItemId] = ICI.[intItemId]
 LEFT OUTER JOIN
 	(SELECT [intItemUOMId], [dblUnitQty] FROM tblICItemUOM WITH (NOLOCK)) ICIUOM
@@ -223,7 +223,7 @@ WHERE
 	AND ISNULL(ARID.[intItemId],0) <> 0
 	AND ISNULL(ARIC.[intComponentItemId],0) <> 0
 	AND ARI.[strTransactionType] <> 'Debit Memo'
-	AND ISNULL(ARIC.[strType],'') NOT IN ('Finished Good','Comment')
+	AND (ISNULL(ARIC.[strType],'') NOT IN ('Finished Good','Comment') OR ICI.[ysnAutoBlend] <> 1)
 	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)	
 	AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)
 	--AND NOT(ARI.[intLoadDistributionHeaderId] IS NOT NULL AND ISNULL(ARID.[dblPrice], @ZeroDecimal) = 0)

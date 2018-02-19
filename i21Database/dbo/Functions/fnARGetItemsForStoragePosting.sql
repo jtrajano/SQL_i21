@@ -74,7 +74,7 @@ SELECT
 	,[dblUOMQty]					= ItemUOM.[dblUnitQty]
 	-- If item is using average costing, it must use the average cost. 
 	-- Otherwise, it must use the last cost value of the item. 
-	,[dblCost]					= ISNULL(dbo.fnMultiply (	CASE WHEN ISNULL(IST.[strType],'') = 'Finished Good' AND ARID.[ysnBlended] = 1 
+	,[dblCost]					= ISNULL(dbo.fnMultiply (	CASE WHEN ARID.[ysnBlended] = 1 
 																THEN (
 																	SELECT SUM(ICIT.[dblCost]) 
 																	FROM
@@ -133,7 +133,7 @@ WHERE
 	AND (ARID.[intInventoryShipmentItemId] IS NULL OR ARID.[intInventoryShipmentItemId] = 0)
 	AND (ARID.[intLoadDetailId] IS NULL OR ARID.[intLoadDetailId] = 0)
 	AND ARID.[intItemId] IS NOT NULL AND ARID.[intItemId] <> 0
-	AND (ISNULL(IST.[strType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle') OR (ISNULL(IST.[strType],'') = 'Finished Good' AND ARID.[ysnBlended] = 1))
+	AND (ISNULL(IST.[strType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle') OR (ARID.[ysnBlended] = 1))
 	AND ARI.[strTransactionType] <> 'Debit Memo'
 	AND (ARID.[intStorageScheduleTypeId] IS NOT NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) <> 0)
 	AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)
