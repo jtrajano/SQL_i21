@@ -3317,10 +3317,11 @@ IF @post = 1
 				CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebitUnit, 0) - ISNULL(GLEntries.dblCreditUnit, 0)) DebitUnit
 				CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebitUnit, 0) - ISNULL(GLEntries.dblCreditUnit, 0))  CreditUnit
 
-				EXEC	dbo.uspGLBookEntries
-							 @GLEntries		= @GLEntries
-							,@ysnPost		= @post
-							,@XACT_ABORT_ON = @raiseError
+				IF EXISTS ( SELECT TOP 1 1 FROM @GLEntries)
+					EXEC	dbo.uspGLBookEntries
+								 @GLEntries		= @GLEntries
+								,@ysnPost		= @post
+								,@XACT_ABORT_ON = @raiseError
 			END TRY
 			BEGIN CATCH
 				SELECT @ErrorMerssage = ERROR_MESSAGE()										
@@ -3407,11 +3408,11 @@ IF @post = 0
 				GLD.ysnIsUnposted = 0				
 			ORDER BY
 				GLD.intGLDetailId
-				
-			EXEC	dbo.uspGLBookEntries
-					 @GLEntries		= @GLEntries
-					,@ysnPost		= @post
-					,@XACT_ABORT_ON = @raiseError
+			IF EXISTS ( SELECT TOP 1 1 FROM @GLEntries)	
+				EXEC	dbo.uspGLBookEntries
+						@GLEntries		= @GLEntries
+						,@ysnPost		= @post
+						,@XACT_ABORT_ON = @raiseError
 						
 		END TRY
 		BEGIN CATCH
