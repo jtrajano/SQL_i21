@@ -122,7 +122,7 @@ BEGIN
 		,[strTaxGroup]
 		,[strNotes]
 	)
-	EXEC dbo.uspICGetInventoryItemTaxes
+	EXEC dbo.uspSMGetItemTaxes
 		 @ItemId				= @ItemId
 		,@LocationId			= @LocationId
 		,@TransactionDate		= @TransactionDate
@@ -133,7 +133,7 @@ BEGIN
 		,@IncludeExemptedCodes	= NULL
 		,@SiteId				= NULL
 		,@FreightTermId			= @FreightTermId
-		,@UOMId					= @TaxUnitMeasureId
+		,@UOMId					= @TaxUOMId
 
 	DECLARE	@Amount	NUMERIC(38,20) 
 			,@Qty	NUMERIC(38,20)
@@ -237,10 +237,10 @@ BEGIN
 			,[strTaxCode]					= vendorTax.[strTaxCode]
 			,[dblQty]						= @Qty
 			,[dblCost]						= @Amount
-			,[intUnitMeasureId]				= @TaxUnitMeasureId
+			,[intUnitMeasureId]				= @TaxUOMId
 			,[intSort]						= 1
 			,[intConcurrencyId]				= 1
-	FROM	[dbo].[fnGetItemTaxComputationForVendor](@ItemId, @EntityId, @TransactionDate, @Amount, @Qty, @TaxGroupId, @LocationId, @ShipFromId, 0, @FreightTermId,0,@TaxUnitMeasureId) vendorTax
+	FROM	[dbo].[fnGetItemTaxComputationForVendor](@ItemId, @EntityId, @TransactionDate, @Amount, @Qty, @TaxGroupId, @LocationId, @ShipFromId, 0, @FreightTermId,0,@TaxUOMId) vendorTax
 			LEFT JOIN tblICInventoryReceiptItem ri 
 				ON ri.intInventoryReceiptItemId = @InventoryReceiptItemId
 								
