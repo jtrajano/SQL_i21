@@ -29,8 +29,22 @@ DECLARE @ErrorSeverity	INT
 		,@ErrorNumber	INT
 		,@ErrorState	INT
 		,@ErrorMessage	NVARCHAR(MAX)
+
+
+DECLARE @AppliedInvoices TABLE(
+	intPrepaymentId INT,
+	intInvoiceId INT
+)		
+BEGIN TRY
+
+	INSERT INTO @AppliedInvoices(intPrepaymentId, intInvoiceId)
+	SELECT intPrepaymentId, intInvoiceId FROM
+		tblARPrepaidAndCredit
+	WHERE
+		tblARPrepaidAndCredit.[intInvoiceId] = @InvoiceId 
+			and ysnApplied = 1 
+			and ysnPosted = 0
 		
-BEGIN TRY	
 	DELETE FROM
 		tblARPrepaidAndCredit
 	WHERE
@@ -128,6 +142,12 @@ BEGIN TRY
 		  AND I.intInvoiceId <> @InvoiceId
 	) I
 
+	UPDATE A SET ysnApplied = 1
+		FROM tblARPrepaidAndCredit A
+			JOIN @AppliedInvoices B
+				ON A.intPrepaymentId = B.intPrepaymentId
+					AND A.intInvoiceId = B.intInvoiceId
+		
 END TRY
 BEGIN CATCH	
 	SET @ErrorSeverity = ERROR_SEVERITY()
