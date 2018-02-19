@@ -317,26 +317,19 @@ BEGIN TRY
 				SELECT 
 						NULL
 						,''
-						,sd.intItemId
-						,dbo.fnMFConvertQuantityToTargetItemUOM(sd.intItemUOMId,@intRecipeItemUOMId,sd.dblAvailableQty)
-						- (Select ISNULL(SUM(ISNULL(dblQty,0)),0) From @tblPickedLot Where intItemId=sd.intItemId)
-						,sd.intLocationId
-						,sd.intSubLocationId
-						,sd.intStorageLocationId
+						,@intRawItemId
+						,@dblRequiredQty
+						,@intLocationId
+						,NULL
+						,NULL
 						,NULL
 						,NULL
 						,0
-						,sd.dblUnitQty
+						,1
 						,''
 						,0
 						,@intRecipeItemUOMId
 						,0 
-				FROM	vyuMFGetItemStockDetail sd 
-				WHERE	sd.intItemId=@intRawItemId 
-						AND sd.dblAvailableQty > .01 
-						AND sd.intLocationId = @intLocationId 
-						AND ISNULL(sd.ysnStockUnit,0) = 1 
-				ORDER BY sd.intItemStockUOMId
 			END
 			ELSE
 			BEGIN 
@@ -396,7 +389,7 @@ BEGIN TRY
 				ORDER BY L.dtmDateCreated
 			END
 
-			IF (SELECT COUNT(1) FROM @tblLot)=0
+			IF (SELECT COUNT(1) FROM @tblLot)=0 AND @strRawItemTrackingType <> 'No'
 			BEGIN
 				SELECT	@strItemNo=strItemNo 
 				FROM	tblICItem 
