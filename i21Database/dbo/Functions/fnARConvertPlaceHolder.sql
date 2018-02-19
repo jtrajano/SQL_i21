@@ -1,13 +1,13 @@
 ﻿CREATE FUNCTION [dbo].[fnARConvertPlaceHolder]
 (
-	  @blbMessage			VARBINARY		= NULL
+	  @blbMessage			VARBINARY(MAX)	= NULL
 	, @intTransactionId		INT				= NULL
 	, @strTransactionType	NVARCHAR(100)	= NULL
 )
-RETURNS VARBINARY AS 
+RETURNS VARBINARY(MAX) AS 
 BEGIN
-	DECLARE @blbConvertedMessage	VARBINARY		= NULL
-		  , @strTempMessage			NVARCHAR(MAX)	= NULL
+	DECLARE @blbConvertedMessage	VARBINARY(MAX)	= NULL
+		  , @strTempMessage			VARCHAR(MAX)	= NULL
 		  , @strCustomerName		NVARCHAR(100)	= ''
 		  , @strCustomerAddress		NVARCHAR(200)	= ''
 		  , @strCustomerPhone		NVARCHAR(100)	= ''
@@ -140,7 +140,7 @@ BEGIN
 	SET @strTempMessage = REPLACE(@strTempMessage, '[CreatedByPhone]', @strCreatedByPhone)
 	SET @strTempMessage = REPLACE(@strTempMessage, '[CreatedByEmail]', @strCreatedByEmail)
 
-	SET @blbConvertedMessage = CAST(@strTempMessage AS VARBINARY)
+	SET @blbConvertedMessage = CAST(@strTempMessage AS VARBINARY(MAX))
 
 	RETURN @blbConvertedMessage
 END

@@ -6210,7 +6210,6 @@
     <Build Include="dbo\Views\vyuLGAllocationDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetActualItemByLot.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetInventoryItemTaxes.sql" />
-    <Build Include="dbo\Views\vyuARQuoteLetter.sql" />
     <Build Include="dbo\Functions\fnARConvertPlaceHolder.sql" />
     <Build Include="dbo\Stored Procedures\uspLGRejectContainer.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetCaseLabelCount.sql" />
