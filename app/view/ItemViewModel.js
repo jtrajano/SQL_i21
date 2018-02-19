@@ -1177,7 +1177,7 @@ Ext.define('Inventory.view.ItemViewModel', {
             }
         },
         pgeCommodityHide: function(get) {
-            if (get('current.strCommodity')) {
+            if (get('current.strCommodityCode')) {
                 return false;
             }
             else {
