@@ -719,7 +719,7 @@ SELECT strContractOrInventoryType,strCommodityCode,intCommodityId,strItemNo,intI
 												
 				,sum(dblOpenQty) dblOpenQty,sum(dblOpenQty)	dblResult 
 FROM(
-              SELECT DISTINCT      'Inventory - Ram' as strContractOrInventoryType, iv.strLocationName,                 
+              SELECT DISTINCT      'Inventory' as strContractOrInventoryType, iv.strLocationName,                 
 					  c.strCommodityCode,
 					  iv.intCommodityId,
 					  iv.strItemNo,
