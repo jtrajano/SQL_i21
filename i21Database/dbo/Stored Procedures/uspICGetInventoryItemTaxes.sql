@@ -27,7 +27,7 @@ DECLARE @intItemUOMId INT
 SELECT @intItemUOMId = im.intItemUOMId
 FROM tblICItemUOM im
 	INNER JOIN tblICUnitMeasure um ON um.intUnitMeasureId = im.intUnitMeasureId
-WHERE um.intUnitMeasureId = @UOMId
+WHERE um.intUnitMeasureId = @UOMId AND im.intItemId = @ItemId
 
 RETURN EXEC dbo.uspSMGetItemTaxes
 	 @ItemId					= @ItemId						
