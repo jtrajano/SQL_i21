@@ -1773,6 +1773,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     current.set('intTaxGroupId', jsonData.message.taxGroupId);
                     current.set('strTaxGroup', jsonData.message.taxGroupN);
                 }
+
+                if (Ext.isFunction(cfg.successFn)){
+                    cfg.successFn(); 
+                }
             }
             , function (failureResponse) {
                 var jsonData = Ext.decode(failureResponse.responseText);
@@ -5777,7 +5781,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 }
 
                                 // Add the item record.
-
                                 if(strBundleType == 'Kit'){
                                     currentVM.tblICInventoryReceiptItems().add(newRecord);
                                     me.getBundleComponents(order, currentVM, currentVM.tblICInventoryReceiptItems());
@@ -5787,22 +5790,31 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     currentVM.tblICInventoryReceiptItems().add(newRecord);
                                 }
 
-                                //var newReceiptItems = currentVM.tblICInventoryReceiptItems().add(newRecord);
-
-                                // Calculate the line total
-                                //var newReceiptItem = newReceiptItems.length > 0 ? newReceiptItems[0] : null;
-
                                 var newReceiptItem = currentVM.tblICInventoryReceiptItems().findRecord('intOrderId', newRecord.intOrderId);
                                 
+                                // Calculate the line total
                                 if(newReceiptItem)
                                     newReceiptItem.set('dblLineTotal', me.calculateLineTotal(currentVM, newReceiptItem));
 
+                                // Assign the bundle type
                                 if(newReceiptItem && newReceiptItem.get('strBundleType') == 'Kit')
-                                    newReceiptItem.set('strItemType', order.get('strBundleType'));
-
-                                // Calculate the taxes
+                                    newReceiptItem.set('strItemType', order.get('strBundleType'));                                
+                                
                                 win.viewModel.data.currentReceiptItem = newReceiptItem;
-                                me.calculateItemTaxes();
+                                
+                                // Get the default tax group from the Vendor setup
+                                var taxCfg = {
+                                    freightTermId: currentRecord.get('intFreightTermId'),
+                                    locationId: currentRecord.get('intLocationId'),
+                                    entityVendorId: currentRecord.get('intEntityVendorId'),
+                                    entityLocationId: currentRecord.get('intShipFromId'),
+                                    itemId: newReceiptItem.get('intItemId'),
+                                    successFn: function(){
+                                        // Calculate the taxes after getting the default tax group. 
+                                        me.calculateItemTaxes();
+                                    }
+                                };
+                                me.getDefaultReceiptTaxGroupId(newReceiptItem, taxCfg);  
 
                                 // Calculate the Wgt or Volume Gain/Loss 
                                 me.calculateWtGainLoss(win);
