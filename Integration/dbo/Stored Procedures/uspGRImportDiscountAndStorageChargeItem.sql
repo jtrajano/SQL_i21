@@ -45,6 +45,15 @@ BEGIN
 			JOIN tblICCommodity Com ON Com.strCommodityCode = LTRIM(RTRIM(t.gacom_com_cd)) COLLATE Latin1_General_CS_AS
 			LEFT JOIN tblICItem Item ON Item.strItemNo=LTRIM(RTRIM(ISNULL(t.gacom_desc,gacom_com_cd)))+' Storage' COLLATE  Latin1_General_CS_AS 
 			WHERE Item.strItemNo IS NULL
+			
+			UNION
+
+			SELECT 
+			 strItemNo = LTRIM(RTRIM(ISNULL(t.gacom_desc,gacom_com_cd)))+' Freight'
+			FROM gacommst t
+			JOIN tblICCommodity Com ON Com.strCommodityCode = LTRIM(RTRIM(t.gacom_com_cd)) COLLATE Latin1_General_CS_AS
+			LEFT JOIN tblICItem Item ON Item.strItemNo=LTRIM(RTRIM(ISNULL(t.gacom_desc,gacom_com_cd)))+' Freight' COLLATE  Latin1_General_CS_AS 
+			WHERE Item.strItemNo IS NULL
 		)t
 
 		RETURN @Total
@@ -150,6 +159,33 @@ BEGIN
 		JOIN tblICCommodity Com ON Com.strCommodityCode = LTRIM(RTRIM(t.gacom_com_cd)) COLLATE Latin1_General_CS_AS
 		LEFT JOIN tblICItem Item ON Item.strItemNo=LTRIM(RTRIM(ISNULL(t.gacom_desc,gacom_com_cd)))+' Storage' COLLATE  Latin1_General_CS_AS 
 		WHERE Item.strItemNo IS NULL
+		UNION
+		--- Freight Chargers
+		SELECT 
+		 strItemNo				= LTRIM(RTRIM(ISNULL(t.gacom_desc,gacom_com_cd)))+' Freight'
+		,strShortName			= 'Freight'
+		,strType				= 'Other Charge'
+		,strDescription			= LTRIM(RTRIM(ISNULL(t.gacom_desc,gacom_com_cd)))+' Freight Charge'
+		,strStatus				= 'Active'	
+		,strInventoryTracking	= 'Item Level'
+		,strLotTracking			= 'No'  
+		,[intLifeTime]			= 0 
+		,[ysnLandedCost]		= 0  		
+		,[ysnTaxable]			= 0 
+		,[ysnDropShip]			= 0 
+		,[ysnCommisionable]		= 0 
+		,[ysnSpecialCommission] = 0 
+		,[intCommodityId]	    = Com.intCommodityId 
+		,[strCostMethod]		= 'Amount'  
+		,strCostType			= 'Freight Charge'
+		,[ysnAccrue]			= 0
+		,[ysnPrice]				= 0 	
+		,intConcurrencyId		= 1  
+		FROM gacommst t
+		JOIN tblICCommodity Com ON Com.strCommodityCode = LTRIM(RTRIM(t.gacom_com_cd)) COLLATE Latin1_General_CS_AS
+		LEFT JOIN tblICItem Item ON Item.strItemNo=LTRIM(RTRIM(ISNULL(t.gacom_desc,gacom_com_cd)))+' Freight' COLLATE  Latin1_General_CS_AS 
+		WHERE Item.strItemNo IS NULL		
+		
     END
 
 END
