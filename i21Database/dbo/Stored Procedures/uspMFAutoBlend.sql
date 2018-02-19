@@ -525,44 +525,7 @@ BEGIN TRY
 
 		IF @strRawItemTrackingType = 'No'
 		BEGIN 
-			IF @strOrderType='LOAD DISTRIBUTION'
-				INSERT INTO @tblLot (
-					 intLotId
-					,strLotNumber
-					,intItemId
-					,dblQty
-					,intLocationId
-					,intSubLocationId
-					,intStorageLocationId
-					,dtmCreateDate
-					,dtmExpiryDate
-					,dblUnitCost
-					,dblWeightPerQty
-					,strCreatedBy
-					,intParentLotId
-					,intItemUOMId
-					,intItemIssuedUOMId
-				)
-				SELECT 
-						0
-						,''
-						,t.intItemId
-						,t.dblRequiredQty
-						,@intLocationId
-						,NULL
-						,NULL
-						,NULL
-						,NULL
-						,0
-						,1
-						,''
-						,0
-						,t.intItemUOMId
-						,0 
-				FROM	@tblInputItem t
-				WHERE t.intItemId=@intRawItemId
-			ELSE
-				INSERT INTO @tblLot (
+			INSERT INTO @tblLot (
 				 intLotId
 				,strLotNumber
 				,intItemId
@@ -582,25 +545,21 @@ BEGIN TRY
 			SELECT 
 					0
 					,''
-					,sd.intItemId
-					,dbo.fnMFConvertQuantityToTargetItemUOM(sd.intItemUOMId,@intRecipeItemUOMId,sd.dblAvailableQty)
-					,sd.intLocationId
-					,sd.intSubLocationId
-					,sd.intStorageLocationId
+					,t.intItemId
+					,t.dblRequiredQty
+					,@intLocationId
+					,NULL
+					,NULL
 					,NULL
 					,NULL
 					,0
-					,sd.dblUnitQty
+					,1
 					,''
 					,0
-					,@intRecipeItemUOMId
+					,t.intItemUOMId
 					,0 
-			FROM	vyuMFGetItemStockDetail sd 
-			WHERE	sd.intItemId=@intRawItemId 
-					AND sd.dblAvailableQty > .01 
-					AND sd.intLocationId = @intLocationId 
-					AND ISNULL(sd.ysnStockUnit,0) = 1 
-			ORDER BY sd.intItemStockUOMId
+			FROM	@tblInputItem t
+			WHERE t.intItemId=@intRawItemId
 		END
 		ELSE
 		BEGIN 
@@ -657,7 +616,7 @@ BEGIN TRY
 			ORDER BY L.dtmDateCreated
 		END
 
-		IF (SELECT COUNT(1) FROM @tblLot)=0 AND @strOrderType IN ('SALES ORDER','INVOICE')
+		IF (SELECT COUNT(1) FROM @tblLot)=0 AND @strOrderType IN ('SALES ORDER','INVOICE') AND @strRawItemTrackingType <> 'No'
 		BEGIN
 			SELECT	@strItemNo=strItemNo 
 			FROM	tblICItem 
@@ -751,24 +710,6 @@ BEGIN TRY
 		FROM	@tblInputItem 
 		WHERE	ysnIsSubstitute = 0 
 				AND intRowNo>@intMinItem
-	END
-
-	IF @strOrderType IN ('SALES ORDER','INVOICE')
-	BEGIN
-		--Check for Max produce qty using available inventory
-		SELECT	@dblMaxProduceQty = ISNULL(MIN(ISNULL(dblMaxProduceQty,0)),0) 
-		FROM	@tblInputItem 
-		WHERE	ISNULL(dblMaxProduceQty,0) > 0
-
-		IF @dblMaxProduceQty > 0
-		BEGIN
-			IF @dblQtyToProduce <> @dblMaxProduceQty
-				BEGIN
-					SET @dblMaxQtyToProduce=@dblMaxProduceQty
-					SET @ErrMsg = 'Maximum of ' + CONVERT(VARCHAR,@dblMaxProduceQty) + ' can be produced using the available inventory.'
-					RAISERROR(@ErrMsg,16,1)
-				END
-		END
 	END
 
 	BEGIN TRAN
