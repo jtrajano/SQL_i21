@@ -113,7 +113,7 @@ BEGIN
 					,[strTaxGroup]
 					,[strNotes]
 				)
-				EXEC dbo.uspICGetInventoryItemTaxes
+				EXEC dbo.uspSMGetItemTaxes
 					 @ItemId				= @ItemId
 					,@LocationId			= @LocationId
 					,@TransactionDate		= @TransactionDate
