@@ -119,7 +119,7 @@ BEGIN TRY
 
 		SELECT TOP 1 @Guid = [from] FROM @Params WHERE [fieldname] = 'strGuid'
 
-		SELECT TOP 1 @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'OR'
+		SELECT TOP 1 @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'OH'
 
 		-- Configuration
 		SELECT @OhioAccountNo = strConfiguration FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strFormCode = 'EX2' AND strTemplateItemId = 'EX2-OHEX2AcctNumber'
