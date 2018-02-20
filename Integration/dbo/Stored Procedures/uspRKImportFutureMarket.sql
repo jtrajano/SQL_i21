@@ -75,3 +75,4 @@ BEGIN
 										= SUBSTRING(gacnt_bot_option,1,3)+' '+SUBSTRING(gacnt_bot_option,4,2) COLLATE SQL_Latin1_General_CP1_CS_AS
 		WHERE gacnt_bot_option IS NOT NULL AND FMN.intFutureMonthId is NULL
 END
+GO
