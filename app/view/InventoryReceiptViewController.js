@@ -2802,8 +2802,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             var dblQuantityBeforeEdit = lot.get('dblQuantityBeforeEdit');
                             dblQuantityBeforeEdit = Ext.isNumeric(dblQuantityBeforeEdit) ? dblQuantityBeforeEdit : 0.00;
 
-                            var newTare = (dblQuantityBeforeEdit != 0 ? dblTareWeightBeforeEdit / dblQuantityBeforeEdit : 0) * lotQty;
-                            var newGross = (dblQuantityBeforeEdit != 0 ? lotGross / dblQuantityBeforeEdit : 0) * lotQty;
+                            var newTare = dblQuantityBeforeEdit != 0 ? (dblTareWeightBeforeEdit / dblQuantityBeforeEdit * lotQty) : lotTare;
+                            var newGross = dblQuantityBeforeEdit != 0 ? (lotGross / dblQuantityBeforeEdit * lotQty) : lotGross;
 
                             lot.set('dblTareWeight', newTare);
                             
