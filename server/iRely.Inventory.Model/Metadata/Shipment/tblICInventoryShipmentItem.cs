@@ -42,6 +42,8 @@ namespace iRely.Inventory.Model
         public decimal? dblForexRate { get; set; }
         public string strChargesLink { get; set; }
         public string strItemType { get; set; }
+        public int? intParentItemLinkId { get; set; }
+        public int? intChildItemLinkId { get; set; }
         //private int? _decimalPlaces;
         //[NotMapped]
         //public int? intDecimalPlaces

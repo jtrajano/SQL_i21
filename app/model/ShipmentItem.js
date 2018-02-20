@@ -76,8 +76,18 @@ Ext.define('Inventory.model.ShipmentItem', {
         { name: 'dblForexRate', type: 'float', allowNull: true },
         { name: 'dblDestinationQuantity', type: 'float', allowNull: true },
         { name: 'strChargesLink', type: 'string' },
-        { name: 'strItemType', type: 'string' },
-        { name: 'dblComponentQty', type: 'float' }
+        {
+            name: 'strItemType', 
+            type: 'string',
+            allowNull: true,
+            convert: function(value, record) {
+                return !iRely.Functions.isEmpty(value) ? value : null;
+            } 
+        },
+        { name: 'dblComponentQty', type: 'float' },
+        { name: 'intParentItemLinkId', type: 'int', allowNull: true },
+        { name: 'intChildItemLinkId', type: 'int', allowNull: true }
+
     ],
 
     validators: [

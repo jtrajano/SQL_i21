@@ -11,6 +11,6 @@ namespace iRely.Inventory.BusinessLayer
 {
     public interface IItemAddOnBl : IBusinessLayer<tblICItemAddOn>
     {
-
+        Task<GetObjectResult> GetItemAddOns(int intItemId, int intItemUOMId, int intLocationId, decimal? dblQuantity);
     }
 }

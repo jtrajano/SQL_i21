@@ -14,6 +14,7 @@ namespace iRely.Inventory.Model
         public int intItemSubstituteId { get; set; }
         public int intItemId { get; set; }
         public int? intSubstituteItemId { get; set; }
+        public string strDescription { get; set; }
         public decimal? dblQuantity { get; set; }
         public decimal? dblMarkUpOrDown { get; set; }
         public int? intItemUOMId { get; set; }

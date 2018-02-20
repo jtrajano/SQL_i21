@@ -381,13 +381,24 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
             }
         },
 
-        isBundleComponent: function(get){
-            if (!iRely.Functions.isEmpty(get('grdInventoryShipment.selection.strItemType'))) {
+        isItemComponent: function(get){
+            var linkType = get('grdInventoryShipment.selection.strItemType'),
+                childLinkId = get('grdInventoryShipment.selection.intChildItemLinkId');
+
+            if (!iRely.Functions.isEmpty(linkType) && Ext.isNumber(childLinkId))
                 return true;
-            }
-            else {
-                return false;  
-            }
+            else 
+                return false;
+        },
+
+        isItemOption: function(get){
+            var linkType = get('grdInventoryShipment.selection.strItemType'),
+                childLinkId = get('grdInventoryShipment.selection.intChildItemLinkId');
+
+            if (!iRely.Functions.isEmpty(linkType) && linkType.charAt(0) != 'S' && Ext.isNumber(childLinkId))
+                return true;
+            else 
+                return false;
         },
 
         getShipButtonText: function(get) {

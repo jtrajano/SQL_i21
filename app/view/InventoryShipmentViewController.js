@@ -221,11 +221,15 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     hidden: '{checkHideSourceNo}',
                     dataIndex: 'strSourceNumber'
                 },
-                colItemType: 'strItemType',
+                colItemType: {
+                    dataIndex: 'strItemType',
+                    hidden: true,
+                },
                 colItemNumber: {
                     dataIndex: 'strItemNo',
                     editor: {
                         readOnly: '{readOnlyItemDropdown}',
+                        readOnly: '{isItemComponent}',
                         store: '{items}', 
                         defaultFilters: [{
                             column: 'intLocationId',
@@ -242,7 +246,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 colGumQuantity: {
                     dataIndex: 'dblQuantity',
                     editor:{
-                        readOnly: '{isBundleComponent}'
+                        readOnly: '{isItemOption}'
                     }
                 },
                 colCustomerStorage: {
@@ -408,7 +412,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     editor: {
                         readOnly: '{disableFieldInShipmentGrid}',
                         readOnly: '{hasCustomerStorage}',
-                        readOnly: '{isBundleComponent}',
+                        readOnly: '{isItemComponent}',
                         origValueField: 'intOwnershipType',
                         origUpdateField: 'intOwnershipType',
                         store: '{ownershipTypes}'
@@ -432,7 +436,6 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     dataIndex: 'strUnitMeasure',
                     editor: {
                         readOnly: '{disableFieldInShipmentGrid}',
-                        readOnly: '{isBundleComponent}',
                         store: '{itemUOM}',
                         defaultFilters: [
                             {
@@ -452,7 +455,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     dataIndex: 'strWeightUOM',
                     editor: {
                         readOnly: '{disableFieldInShipmentGrid}',
-                        readOnly: '{isBundleComponent}',
+                        //readOnly: '{isItemComponent}',
                         origValueField: 'intItemUOMId',
                         origUpdateField: 'intWeightUOMId',
                         store: '{weightUOM}',
@@ -467,8 +470,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     dataIndex: 'dblUnitPrice',
                     //hidden: '{hideFunctionalCurrencyColumn}',
                     editor: {
-                        readOnly: '{disableFieldInShipmentGrid}',
-                        readOnly: '{isBundleComponent}'
+                        readOnly: '{disableFieldInShipmentGrid}'
                     }
                 },
                 // colForeignUnitPrice: {
@@ -493,7 +495,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         origValueField: 'intCurrencyExchangeRateTypeId',
                         origUpdateField: 'intForexRateTypeId',
                         store: '{forexRateType}',
-                        readOnly: '{isBundleComponent}'
+                        readOnly: '{isItemComponent}'
                     }
                 },
                 colForexRate: {
@@ -505,8 +507,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     editor: {
                         origValueField: 'strChargesLink',
                         origUpdateField: 'strChargesLink',
-                        store: '{chargesItemLink}',
-                        readOnly: '{isBundleComponent}'                           
+                        store: '{chargesItemLink}',                   
                     }
                 }                     
             },
@@ -750,7 +751,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     lazy: true,
                     component: Ext.create('iRely.grid.Manager', {
                         grid: grdInventoryShipment,
-                        deleteButton: grdInventoryShipment.down('#btnRemoveItem')
+                        deleteButton: grdInventoryShipment.down('#btnRemoveItem'),
+                        deleteRecord: Ext.bind(me.onShipmentItemDelete, me)
                     }),
                     details: [
                         {
@@ -795,6 +797,36 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             txtShipQty.on('change', me.onCalculateGrossWeight);
         }
         return win.context;
+    },
+
+    onShipmentItemDelete: function(action) {
+        var me = this,
+            win = me.getView(),
+            grdInventoryShipment = win.down('#grdInventoryShipment'),
+            grdStore = grdInventoryShipment.getStore(),
+            selectedRecords = grdInventoryShipment.getSelectionModel().getSelection(),
+            records = Ext.clone(selectedRecords);
+        
+        Ext.Array.forEach(selectedRecords, function(rec){
+            if(!iRely.Functions.isEmpty(rec.get('strItemType')) && rec.get('intParentItemLinkId')){
+
+                var childItems = _.filter(grdStore.data.items, function(x){
+                    return !iRely.Functions.isEmpty(x.get('strItemType'))
+                        && x.get('intChildItemLinkId')
+                        && x.get('intChildItemLinkId') == rec.get('intParentItemLinkId') 
+                        && x.get('intInventoryShipmentItemId') != rec.get('intInventoryShipmentItemId')
+                        && !x.dummy;
+                });
+
+                if(childItems.length > 0) {
+                    childItems.forEach(function(item){
+                        records.push(item);
+                    });
+                }
+            }
+        });
+
+        action(records);
     },
 
     onCalculateGrossWeight: function(obj, newValue, oldValue, eOpts) {
@@ -1388,7 +1420,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             else {
                 pnlLotTracking.setHidden(false);
             }                    
-                    
+            
+
             me.getItemAddOns(current, records[0], currentVM, currentVM.tblICInventoryShipmentItems());
 
             me.getItemSubstitutes(current, records[0], currentVM, currentVM.tblICInventoryShipmentItems());
@@ -2899,9 +2932,6 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                 } 
 
                                 if (isValidToAdd) {
-                                    // if(order.get('strBundleType') !== null) {
-                                    //     me.getBundleComponents(order, currentVM, currentVM.tblICInventoryShipmentItems(), me);
-                                    // } else {
                                         var newRecord = {
                                             intInventoryShipmentId: currentVM.get('intInventoryShipmentId'),
                                             intOrderId: order.get('intOrderId'),
@@ -2957,12 +2987,12 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                         var strBundleType = order.get('strBundleType'); 
 
                                         if(strBundleType == 'Kit') {
-                                            newISItem = currentVM.tblICInventoryShipmentItems().add(newRecord);
-                                            newISItem = newISItem.length > 0 ? newISItem[0] : null;
-                                            newISItem.set('strItemType', order.get('strBundleType'));
+                                            currentVM.tblICInventoryShipmentItems().add(newRecord);
+                                            newISItem = currentVM.tblICInventoryShipmentItems().findRecord('intOrderId', newRecord.intOrderId);
+                                            me.getBundleComponents(newISItem, order, currentVM, currentVM.tblICInventoryShipmentItems());
                                         }
                                         else if(strBundleType){
-                                            me.getBundleComponents(order, currentVM, currentVM.tblICInventoryShipmentItems());
+                                            me.getBundleComponents(newISItem, order, currentVM, currentVM.tblICInventoryShipmentItems());
                                         }    
                                         else {
                                             currentVM.tblICInventoryShipmentItems().add(newRecord);
@@ -3678,6 +3708,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     // Do an ajax call to retrieve the latest sales price from the pricing hierarchy. 
                     me.getItemSalesPrice(customerPriceCfg, processCustomerPriceOnSuccess, processCustomerPriceOnFailure);
                 }
+
+                me.calculateLinkedItems(currentHeader, currentItem);
             }
         }       
     },
@@ -3926,79 +3958,150 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         task.delay(10);            
     },    
 
-    getBundleComponents: function(selectedItem, current, itemDetailStore){
+    calculateLinkedItems: function(current, activeRecord){
+        var parentLinkId = activeRecord.get('intParentItemLinkId'),
+            itemDetailStore = current.tblICInventoryShipmentItems(),
+            linkType = activeRecord.get('strItemType'),
+            searchURL;
+
+        if(!Ext.isNumber(parentLinkId) || linkType.charAt(0) == 'O' || linkType.charAt(0) == 'S')
+            return;
+        
+        var itemId = activeRecord.get('intItemId'),
+            itemUOMId = activeRecord.get('intItemUOMId'),
+            locationId = current.get('intShipFromLocationId'),
+            quantity = activeRecord.get('dblQuantity');
+
+        switch(linkType.charAt(0)){
+            case 'K':
+                searchURL = './inventory/api/itembundle/getbundlecomponents?intItemId=' + itemId + '&intItemUOMId=' + itemUOMId 
+                    + '&intLocationId=' + locationId + '&dblQuantity=' +  quantity;
+                break;
+            case 'A':
+                searchURL = './inventory/api/itemaddon/getitemaddons?intItemId=' + itemId + '&intItemUOMId=' + itemUOMId 
+                    + '&intLocationId=' + locationId + '&dblQuantity=' +  quantity;
+                break;
+            // case 'S':
+            //     searchURL = './inventory/api/itemsubstitute/getitemsubstitutes?intItemId=' + itemId + '&intItemUOMId=' + itemUOMId 
+            //         + '&intLocationId=' + locationId + '&dblQuantity=' +  quantity;
+            //     break;
+        }
+
+        ic.utils.ajax({
+            url: searchURL,
+            method: 'get'
+        }).subscribe(
+            function(successResponse){
+                var result = Ext.decode(successResponse.responseText);
+                Ext.Array.forEach(result.data, function(rec) {
+                    var childRecord = _.find(itemDetailStore.data.items, function(x){
+                        return x.get('intItemId') == rec.intComponentItemId &&  x.get('intItemUOMId') == rec.intComponentUOMId && x.get('intChildItemLinkId') == parentLinkId && !x.dummy;
+                    });
+
+                    if(childRecord){
+                        var dblQty = 0;
+                        switch(linkType.charAt(0)){
+                            case 'K': dblQty = rec.dblBundleComponentQty; break;
+                            case 'A': dblQty = rec.dblAddOnComponentQty; break;
+                            case 'S': dblQty = rec.dblSubstituteComponentQty; break;
+                            default: dblQty = 0; break;
+
+                        }
+                        childRecord.set('dblQuantity', dblQty);
+                        childRecord.set('dblLineTotal', dblQty * childRecord.get('dblUnitPrice'));
+                    }
+
+                });
+            },
+            function (failureResponse) {
+                var jsonData = Ext.decode(failureResponse.responseText);
+                iRely.Functions.showErrorDialog('Something went wrong while getting the Components of the Kit item.');
+            }
+        );
+
+    },
+
+    getBundleComponents: function(addedRecord, selectedItem, current, itemDetailStore){
         'use strict';
         var me = this,
             bundleType = selectedItem.get('strBundleType'),
             screenTitle = bundleType + ' - ' + selectedItem.get('strItemNo'),
             locationId = current.get('intShipFromLocationId'),
-            bundleItemId = selectedItem.get('intItemId');
+            bundleItemId = selectedItem.get('intItemId'),
+            itemUOMId = selectedItem.get('intOrderUOMId'),
+            orderQty = selectedItem.get('dblQtyToShip');
 
+        var searchURL = './inventory/api/itembundle/getbundlecomponents?intItemId=' + bundleItemId + '&intItemUOMId=' + itemUOMId 
+            + '&intLocationId=' + locationId + '&dblQuantity=' + orderQty;
+        
         if(bundleType == 'Kit') {
-            var bundleComponentStore = Ext.create('Inventory.store.BufferedBundleComponent');
-            bundleComponentStore.getProxy().api.read = './inventory/api/itembundle/getbundlecomponents';
-            bundleComponentStore.getProxy().extraParams = {
-                intBundleItemId: bundleItemId,
-                intLocationId: locationId
-            };
-            bundleComponentStore.load({
-                callback: function(records, operation, success) {
-                    
-                    Ext.Array.forEach(records, function(rec){
-                        var componentQty = rec.get('dblComponentQuantity') * selectedItem.get('dblQtyToShip');
+
+            ic.utils.ajax({
+                url: searchURL,
+                method: 'get'
+            }).subscribe(
+                function(successResponse){
+                    var result = Ext.decode(successResponse.responseText);
+                    addedRecord.set('dblUnitPrice', 0);
+                    addedRecord.set('strItemType', 'Kit');
+
+                    Ext.Array.forEach(result.data, function(rec) {
+                        var componentQty = rec.dblBundleComponentQty;
+                        var itemCost = rec.dblSalePrice;
                         
                         var itemModel = Ext.create(itemDetailStore.role.type, {
                                 intInventoryShipmentId: current.get('intInventoryShipmentId'),
-                                intLineNo: selectedItem.get('intLineNo'),
-                                intOrderId: selectedItem.get('intOrderId'),
-                                intSourceId: selectedItem.get('intSourceId'),
-                                strOrderNumber: selectedItem.get('strOrderNumber'),
-                                strSourceNumber: selectedItem.get('strSourceNumber'),
-                                strItemType: selectedItem.get('strItemNo') + ' - Component',
-                                //dtmDate: order.get('dtmDate'),
+                                intChildItemLinkId: addedRecord.get('intInventoryShipmentId'),
+                                strItemType: bundleType + ' Item',
+                                // intLineNo: selectedItem.get('intLineNo'),
+                                // intOrderId: selectedItem.get('intOrderId'),
+                                // intSourceId: selectedItem.get('intSourceId'),
+                                // strOrderNumber: selectedItem.get('strOrderNumber'),
+                                // strSourceNumber: selectedItem.get('strSourceNumber'),
                                 dblQuantity: componentQty,
-                                intItemId: rec.get('intItemId'),
-                                strItemNo: rec.get('strItemNo'),
-                                strItemDescription: rec.get('strDescription'),
+                                intItemId: rec.intComponentItemId,
+                                strItemNo: rec.strComponentItemNo,
+                                strItemDescription: rec.strComponentDescription,
                                 dblQtyOrdered: componentQty,
-                                // intLoadReceive: rec.get('intLoadToReceive'),
-                                dblUnitPrice: 0,// rec.get('dblSalePrice'),
-                                // dblTax: s.get('dblTax'),
-                                dblLineTotal: 0,//componentQty * rec.get('dblSalePrice'),
-                                strLotTracking: rec.get('strLotTracking'),
-                                // intContainerId: rec.get('intContainerId'),
-                                // strContainer: rec.get('strContainer'),
+                                dblUnitPrice: itemCost,
+                                dblLineTotal: componentQty * itemCost,
+                                strLotTracking: rec.strLotTracking,
                                 intSubLocationId: selectedItem.get('intSubLocationId'),
                                 strSubLocationName: selectedItem.get('strSubLocationName'),
                                 intStorageLocationId: selectedItem.get('intStorageLocationId'),
                                 strStorageLocationName: selectedItem.get('strStorageLocationName'),
-                                intItemUOMId: selectedItem.get('intItemUOMId'),
-                                strUnitMeasure: selectedItem.get('strItemUOM'),
                                 strOrderUOM: selectedItem.get('strOrderUOM'),
-                                strWeightUOM: selectedItem.get('strWeightUOM'),
-                                intWeightUOMId: selectedItem.get('intWeightUOMId'),
-                                dblItemUOMConv: selectedItem.get('dblItemUOMConv'),
-                                dblWeightItemUOMConv: selectedItem.get('dblWeightItemUOMConv'),
+                                intItemUOMId: rec.intComponentUOMId,
+                                strUnitMeasure: rec.strComponentUOM,
+                                strWeightUOM: rec.strComponentUOM,
+                                intWeightUOMId: rec.intComponentItemId,
+                                dblItemUOMConv: rec.dblComponentConvFactor,
+                                dblWeightItemUOMConv: rec.dblComponentConvFactor,
                                 intDestinationGradeId: selectedItem.get('intDestinationGradeId'),
                                 strDestinationGrades: selectedItem.get('strDestinationGrades'),
                                 intDestinationWeightId: selectedItem.get('intDestinationWeightId'),
                                 strDestinationWeights: selectedItem.get('strDestinationWeights'),
-                                intGradeId: rec.get('intGradeId'),
-                                strGrade: rec.get('strGrade'),
+                                intGradeId: rec.intGradeId,
+                                strGrade: rec.strGrade,
                                 strOwnershipType: 'Own',
                                 intOwnershipType: 1,
-                                intCommodityId: rec.get('intCommodityId'),
+                                intCommodityId: rec.intCommodityId,
                                 intForexRateTypeId: selectedItem.get('intForexRateTypeId'),
                                 strForexRateType: selectedItem.get('strForexRateType'),
                                 dblForexRate: selectedItem.get('dblForexRate')
                         });
 
-                        var newItem = itemDetailStore.add(itemModel);
-                        newItem = newItem[0];
+                        itemDetailStore.add(itemModel);
                         
+                        addedRecord.set('intParentItemLinkId', addedRecord.get('intInventoryShipmentId'));
                     });
+                },
+                function (failureResponse) {
+                    var jsonData = Ext.decode(failureResponse.responseText);
+                    iRely.Functions.showErrorDialog('Something went wrong while getting the Components of the Kit item.');
                 }
-            });
+            );
+
         } else {
             var isValidToAdd = true;
             var filter = _.filter(itemDetailStore.data.items, function(x) { return x.get('intOrderId') === selectedItem.get('intOrderId') && !x.dummy; });
@@ -4014,8 +4117,6 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 );
                 return;
             }
-            var searchURL = './inventory/api/itembundle/getbundlecomponents?intBundleItemId=' + bundleItemId +
-                    '&intLocationId=' + locationId;
             
             iRely.Functions.openScreen('GlobalComponentEngine.view.FloatingSearch', {
                 searchSettings: {
@@ -4024,14 +4125,19 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     url: searchURL,
                     columns: [
                             { dataIndex: 'intKey', text: 'Key', dataType: 'numeric', key: true, hidden: true },
-                            { dataIndex: 'intItemId', text: '', dataType: 'numeric', hidden: true, required: true },
-                            { dataIndex: 'strItemNo', text: 'Item No', width: 100, dataType: 'string' },
-                            { dataIndex: 'strDescription', text: 'Item Description', width: 100, dataType: 'string' },
+                            { dataIndex: 'intComponentItemId', text: '', dataType: 'numeric', hidden: true, required: true },
+                            { dataIndex: 'strComponentItemNo', text: 'Item No', width: 100, dataType: 'string' },
+                            { dataIndex: 'strComponentDescription', text: 'Item Description', width: 100, dataType: 'string' },
                             { xtype: 'numbercolumn', dataIndex: 'dblComponentQuantity', text: 'Component Quantity', width: 100, dataType: 'float' },
                             { xtype: 'numbercolumn', dataIndex: 'dblMarkUpOrDown', text: 'Mark Up/Down', width: 100, dataType: 'float' },
                             { dataIndex: 'dtmBeginDate', text: 'Begin Date', width: 100, dataType: 'date', required: true, xtype: 'datecolumn' },
                             { dataIndex: 'dtmEndDate', text: 'End Date', width: 100, dataType: 'date', required: true, xtype: 'datecolumn' },
-                            //{ xtype: 'numbercolumn', dataIndex: 'dblLastCost', text: 'Cost', width: 100, dataType: 'float' },
+                            
+                            { dataIndex: 'intComponentUOMId', text: 'Component UOM Id', dataType: 'numeric', hidden: true, required: true },
+                            { dataIndex: 'strComponentUOM', text: 'Item UOM', width: 100, dataType: 'string' },
+                            { dataIndex: 'strComponentUOMType', text: 'Item UOM Type', width: 100, dataType: 'string' },
+                            { xtype: 'numbercolumn', dataIndex: 'dblComponentConvFactor', text: 'Component UOM Conversion Factor', width: 100, dataType: 'float', hidden: true, required: true },
+
                             { dataIndex: 'strLotTracking', text: 'Lot Tracking', width: 100, dataType: 'string' },
                             { dataIndex: 'intCommodityId', text: 'Commodity Id', dataType: 'numeric', hidden: true, required: true, allowNull: true },
                             { dataIndex: 'intContainerId', text: 'Container Id', dataType: 'numeric', hidden: true, required: true, allowNull: true },
@@ -4040,19 +4146,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                             { dataIndex: 'strSubLocationName', text: 'Storage Location', width: 100, dataType: 'string', required: true },
                             { dataIndex: 'intStorageLocationId', text: 'Storage Unit Id', dataType: 'numeric', hidden: true, required: true, allowNull: true },
                             { dataIndex: 'strStorageLocationName', text: 'Storage Unit', width: 100, dataType: 'string', required: true },
-                            { dataIndex: 'strOrderUOM', text: 'Order UOM', width: 100, dataType: 'string', hidden: true, required: true },
-                            //{ xtype: 'numbercolumn', dataIndex: 'dblOrderUOMConvFactor', text: 'Order UOM Conversion Factor', width: 100, dataType: 'float', hidden: true, required: true },
+
                             { dataIndex: 'intItemUOMId', text: 'Item UOM Id', dataType: 'numeric', hidden: true, required: true, allowNull: true },
                             { dataIndex: 'strUnitMeasure', text: 'Unit Measure', width: 100, dataType: 'string', hidden: true, required: true },
-                            // { dataIndex: 'strOrderUOM', text: 'Order UOM', width: 100, dataType: 'string', hidden: true, required: true },
-                            // { dataIndex: 'strReceiveUOMType', text: 'Receive UOM', width: 100, dataType: 'string', hidden: true, required: true },
                             { dataIndex: 'strGrossUOM', text: 'Gross UOM', width: 100, dataType: 'string', hidden: true, required: true },
                             { dataIndex: 'intGrossUOMId', text: 'Gross UOM Id', dataType: 'numeric', hidden: true, required: true, allowNull: true },
-                            //{ xtype: 'numbercolumn', dataIndex: 'dblItemUOMConvFactor', text: 'Item UOM Conversion Factor', width: 100, dataType: 'float', hidden: true, required: true },
-                            //{ xtype: 'numbercolumn', dataIndex: 'dblWeightUOMConvFactor', text: 'Weight UOM Conversion Factor', width: 100, dataType: 'float', hidden: true, required: true },
-                            // { dataIndex: 'intReceiveUOMId', text: 'Receive UOM Id', dataType: 'numeric', hidden: true, required: true },
-                            // { dataIndex: 'strReceiveUOM', text: 'Receive UOM', width: 100, dataType: 'string', hidden: true, required: true },
-                            //{ xtype: 'numbercolumn', dataIndex: 'dblCostUOMConvFactor', text: 'Cost UOM Conversion Factor', width: 100, dataType: 'float' },
                             { dataIndex: 'intGradeId', text: 'Grade Id', dataType: 'numeric', hidden: true, required: true, allowNull: true },
                             { dataIndex: 'strGrade', text: 'Grade', width: 100, dataType: 'string' },
                     ],
@@ -4065,7 +4163,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         scope: me,
                         openselectedclick: function(button, e, result) {
                             Ext.Array.forEach(result, function(rec){
-                                var componentQty = rec.get('dblComponentQuantity') * selectedItem.get('dblQtyToShip'),
+                                var componentQty = selectedItem.get('dblQtyToShip'),
                                     markUpOrDownCost = 0;
 
                                 if(rec.get('dtmBeginDate') && rec.get('dtmBeginDate') && 
@@ -4077,35 +4175,32 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                     
                                     var itemModel = Ext.create(itemDetailStore.role.type, {
                                         intInventoryShipmentId: current.get('intInventoryShipmentId'),
+                                        strItemType: 'Option',
+                                        intParentItemLinkId: rec.get('intItemBundleId'),
                                         intLineNo: selectedItem.get('intLineNo'),
                                         intOrderId: selectedItem.get('intOrderId'),
                                         intSourceId: selectedItem.get('intSourceId'),
                                         strOrderNumber: selectedItem.get('strOrderNumber'),
                                         strSourceNumber: selectedItem.get('strSourceNumber'),
-                                        //dtmDate: order.get('dtmDate'),
                                         dblQuantity: componentQty,
-                                        intItemId: rec.get('intItemId'),
-                                        strItemNo: rec.get('strItemNo'),
-                                        strItemDescription: rec.get('strDescription'),
+                                        intItemId: rec.get('intComponentItemId'),
+                                        strItemNo: rec.get('strComponentItemNo'),
+                                        strItemDescription: rec.get('strComponentDescription'),
                                         dblQtyOrdered: componentQty,
-                                        // intLoadReceive: rec.get('intLoadToReceive'),
                                         dblUnitPrice: itemCost,
-                                        // dblTax: s.get('dblTax'),
                                         dblLineTotal: itemCost * componentQty,
                                         strLotTracking: rec.get('strLotTracking'),
-                                        // intContainerId: rec.get('intContainerId'),
-                                        // strContainer: rec.get('strContainer'),
                                         intSubLocationId: selectedItem.get('intSubLocationId'),
                                         strSubLocationName: selectedItem.get('strSubLocationName'),
                                         intStorageLocationId: selectedItem.get('intStorageLocationId'),
                                         strStorageLocationName: selectedItem.get('strStorageLocationName'),
-                                        intItemUOMId: rec.get('intBundleUOMId'),
-                                        strUnitMeasure: rec.get('strBundleUOM'),
+                                        intItemUOMId: rec.get('intComponentUOMId'),
+                                        strUnitMeasure: rec.get('strComponentUOM'),
                                         strOrderUOM: selectedItem.get('strOrderUOM'),
-                                        strWeightUOM: rec.get('strWeightUOM'),
-                                        intWeightUOMId: rec.get('intWeightUOMId'),
-                                        dblItemUOMConv: selectedItem.get('dblItemUOMConv'),
-                                        dblWeightItemUOMConv: selectedItem.get('dblWeightItemUOMConv'),
+                                        strWeightUOM: rec.get('strComponentUOM'),
+                                        intWeightUOMId: rec.get('intComponentUOMId'),
+                                        dblItemUOMConv: rec.get('dblComponentConvFactor'),
+                                        dblWeightItemUOMConv: rec.get('dblComponentConvFactor'),
                                         intDestinationGradeId: selectedItem.get('intDestinationGradeId'),
                                         strDestinationGrades: selectedItem.get('strDestinationGrades'),
                                         intDestinationWeightId: selectedItem.get('intDestinationWeightId'),
@@ -4133,9 +4228,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
     getItemAddOns: function(editingRecord, selectedItem, current, itemDetailStore){
         var me = this,
+            win = me.getView(),
             bundleType = selectedItem.get('strBundleType'),
             locationId = current.get('intShipFromLocationId'),
-            itemAddOnId = selectedItem.get('intItemId');
+            itemAddOnId = selectedItem.get('intItemId'),
+            itemUOMId = selectedItem.get('intIssueUOMId');
 
         var intRateType = i21.ModuleMgr.SystemManager.getCompanyPreference('intInventoryRateTypeId');
 
@@ -4220,31 +4317,36 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         };   
         
         ic.utils.ajax({
-            url: './inventory/api/item/getitemaddons',
-            params: {
-                intItemId: itemAddOnId,
-                intLocationId: locationId,
-            },
+            url: './inventory/api/itemaddon/getitemaddons?intItemId=' + itemAddOnId + '&intItemUOMId=' + itemUOMId 
+                + '&intLocationId=' + locationId + '&dblQuantity=1',
             method: 'get'
         }).subscribe(
             function (successResponse) {
                 var result = Ext.decode(successResponse.responseText);
-                if(current && itemDetailStore){
+                if(current && itemDetailStore && result.data.length > 0){
+                    editingRecord.set('intParentItemLinkId', editingRecord.get('intInventoryShipmentItemId'));
+                    editingRecord.set('strItemType', 'Add-On');
                     editingRecord.set('dblQuantity', 1);
-                    Ext.Array.forEach(result.data, function(rec){
+                    win.down('#colItemNumber').focus();
+
+                    var recordIdx = itemDetailStore.findBy(function(rec){
+                        return rec.id == editingRecord.id;
+                    });
+
+                    Ext.Array.forEach(result.data, function(rec, idx){
       
                         var itemDetail = Ext.create(itemDetailStore.role.type, {
                                 intInventoryShipmentId: current.get('intInventoryShipmentId'),
-                                strItemType: selectedItem.get('strItemNo') + ' - Add On',
-                                intItemTypeLinkId: editingRecord.get('intInventoryShipmentId'),
+                                strItemType: 'Add-On Item',
+                                intChildItemLinkId: editingRecord.get('intInventoryShipmentItemId'),
                                 dblComponentQty: rec.dblAddOnComponentQty,
                                 dblQuantity: rec.dblAddOnComponentQty,
-                                intItemId: rec.intItemId,
-                                strItemNo: rec.strItemNo,
-                                strItemDescription: rec.strDescription,
-                                intItemUOMId: rec.intAddOnItemUOMId,
-                                strUnitMeasure: rec.strAddOnItemUOM,
-                                dblItemUOMConvFactor: rec.dblAddOnItemUOMId,
+                                intItemId: rec.intComponentItemId,
+                                strItemNo: rec.strComponentItemNo,
+                                strItemDescription: rec.strComponentDescription,
+                                intItemUOMId: rec.intComponentUOMId,
+                                strUnitMeasure: rec.strComponentUOM,
+                                dblItemUOMConvFactor: rec.dblComponentConvFactor,
                                 strLotTracking: rec.strLotTracking,
                                 intSubLocationId: rec.intSubLocationId,
                                 strSubLocationName: rec.strSubLocationName,
@@ -4257,14 +4359,13 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                 intOwnershipType: 1,
                         });
                         
-                        itemDetailStore.add(itemDetail);
+                        itemDetailStore.insert(recordIdx + (idx + 1), itemDetail);
 
                         customerPriceCfg.ItemId = rec.intItemId;
                         customerPriceCfg.Quantity = rec.dblAddOnComponentQty; 
                         customerPriceCfg.ItemUOMId = rec.intAddOnItemUOMId;
                         
                         me.getItemSalesPrice(customerPriceCfg, processCustomerPriceOnSuccess, processCustomerPriceOnFailure, itemDetail);
-
                     });
                 }
 
@@ -4279,9 +4380,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
     getItemSubstitutes: function(editingRecord, selectedItem, current, itemDetailStore){
         var me = this,
+            win = me.getView(),
             bundleType = selectedItem.get('strBundleType'),
             locationId = current.get('intShipFromLocationId'),
-            itemAddOnId = selectedItem.get('intItemId');
+            itemSubstituteId = selectedItem.get('intItemId'),
+            itemUOMId = selectedItem.get('intIssueUOMId');
 
         var intRateType = i21.ModuleMgr.SystemManager.getCompanyPreference('intInventoryRateTypeId');
 
@@ -4366,18 +4469,23 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         };   
         
         ic.utils.ajax({
-            url: './inventory/api/item/getitemsubstitutes',
-            params: {
-                intItemId: itemAddOnId,
-                intLocationId: locationId,
-            },
+            url: './inventory/api/itemsubstitute/getitemsubstitutes?intItemId=' + itemSubstituteId + '&intItemUOMId=' + itemUOMId 
+                + '&intLocationId=' + locationId + '&dblQuantity=1',
             method: 'get'
         }).subscribe(
             function (successResponse) {
                 var result = Ext.decode(successResponse.responseText);
-                if(current && itemDetailStore){
+                if(current && itemDetailStore && result.data.length > 0) {
+                    editingRecord.set('intParentItemLinkId', editingRecord.get('intInventoryShipmentItemId'));
+                    editingRecord.set('strItemType', 'Substitute');
                     editingRecord.set('dblQuantity', 1);
-                    Ext.Array.forEach(result.data, function(rec){
+                    win.down('#colItemNumber').focus();
+
+                    var recordIdx = itemDetailStore.findBy(function(rec){
+                            return rec.id == editingRecord.id;
+                        });
+
+                    Ext.Array.forEach(result.data, function(rec, idx){
                         // var componentQty = rec.get('dblComponentQuantity') * selectedItem.get('dblQtyToShip'),
                         //             markUpOrDownCost = 0;
 
@@ -4390,16 +4498,17 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
                         var itemDetail = Ext.create(itemDetailStore.role.type, {
                                 intInventoryShipmentId: current.get('intInventoryShipmentId'),
-                                strItemType: selectedItem.get('strItemNo') + ' - Substitute',
-                                intItemTypeLinkId: editingRecord.get('intInventoryShipmentId'),
+                                strItemType: 'Substitute Item',
+                                intChildItemLinkId: editingRecord.get('intInventoryShipmentItemId'),
+                                strItemLink: 'S',
                                 dblComponentQty: rec.dblSubstituteComponentQty,
                                 dblQuantity: rec.dblSubstituteComponentQty,
-                                intItemId: rec.intItemId,
-                                strItemNo: rec.strItemNo,
-                                strItemDescription: rec.strDescription,
-                                intItemUOMId: rec.intSubstituteItemUOMId,
-                                strUnitMeasure: rec.strSubstituteItemUOM,
-                                dblItemUOMConvFactor: rec.dblSubstituteItemUOMId,
+                                intItemId: rec.intComponentItemId,
+                                strItemNo: rec.strComponentItemNo,
+                                strItemDescription: rec.strComponentDescription,
+                                intItemUOMId: rec.intComponentUOMId,
+                                strUnitMeasure: rec.strComponentUOM,
+                                dblItemUOMConvFactor: rec.dblComponentConvFactor,
                                 strLotTracking: rec.strLotTracking,
                                 intSubLocationId: rec.intSubLocationId,
                                 strSubLocationName: rec.strSubLocationName,
@@ -4411,15 +4520,14 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                 strOwnershipType: 'Own',
                                 intOwnershipType: 1,
                         });
-                        
-                        itemDetailStore.add(itemDetail);
+
+                        itemDetailStore.insert(recordIdx + (idx + 1), itemDetail);
 
                         customerPriceCfg.ItemId = rec.intItemId;
                         customerPriceCfg.Quantity = rec.dblSubstituteComponentQty; 
                         customerPriceCfg.ItemUOMId = rec.intSubstituteItemUOMId;
                         
                         me.getItemSalesPrice(customerPriceCfg, processCustomerPriceOnSuccess, processCustomerPriceOnFailure, itemDetail);
-
                     });
                 }
 
@@ -4427,7 +4535,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             },function (failureResponse) {
                 var jsonData = Ext.decode(failureResponse.responseText);
                 
-                iRely.Functions.showErrorDialog('Something went wrong while getting the Add On Items.');
+                iRely.Functions.showErrorDialog('Something went wrong while getting the Substitute Items.');
             }
         );
     },
