@@ -1,10 +1,36 @@
 ﻿CREATE VIEW [dbo].[vyuGRSettlementSummaryReport]
 AS
-SELECT * FROM 
+SELECT  
+ intPaymentId				    = intPaymentId	
+,strPaymentNo				    = strPaymentNo
+,InboundNetWeight			    = SUM(InboundNetWeight)
+,InboundGrossDollars		    = SUM(InboundGrossDollars)
+,InboundTax					    = SUM(InboundTax)
+,InboundDiscount			    = SUM(InboundDiscount)
+,InboundNetDue				    = SUM(InboundNetDue)
+,OutboundNetWeight			    = OutboundNetWeight		
+,OutboundGrossDollars		    = OutboundGrossDollars	
+,OutboundTax				    = OutboundTax			
+,OutboundDiscount			    = OutboundDiscount		
+,OutboundNetDue				    = OutboundNetDue			
+,SalesAdjustment			    = SalesAdjustment	
+,VoucherAdjustment			    = VoucherAdjustment
+,dblVendorPrepayment		    = SUM(dblVendorPrepayment)	 
+,lblVendorPrepayment		    = lblVendorPrepayment		 
+,dblCustomerPrepayment		    = dblCustomerPrepayment		 
+,lblCustomerPrepayment		    = lblCustomerPrepayment		 
+,dblGradeFactorTax			    = dblGradeFactorTax			 
+,lblFactorTax				    = lblFactorTax				 
+,dblPartialPrepaymentSubTotal   = dblPartialPrepaymentSubTotal
+,lblPartialPrepayment		    = lblPartialPrepayment		 
+,dblPartialPrepayment		    = dblPartialPrepayment		 
+,CheckAmount				    = CheckAmount				 			
+FROM 
 (
 			 SELECT 
 			 intPaymentId				  = PYMT.intPaymentId
 			,strPaymentNo				  = PYMT.strPaymentRecordNum
+			,strBillId					  = Bill.strBillId
 			,InboundNetWeight			  = SUM(CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 ELSE BillDtl.dblQtyOrdered												  END)
 			,InboundGrossDollars		  = SUM(CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 ELSE BillDtl.dblTotal													  END)
 			,InboundTax					  = SUM(CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 ELSE BillDtl.dblTax														  END)
@@ -86,6 +112,7 @@ SELECT * FROM
 			 GROUP BY 
 			 PYMT.intPaymentId
 			,PYMT.strPaymentRecordNum
+			,Bill.strBillId
 			,BillByReceipt.dblTotal
 			,Invoice.dblPayment
 			,BillByReceiptItem.dblTotal
@@ -106,6 +133,7 @@ SELECT * FROM
 			SELECT DISTINCT
 			    intPaymentId		         = PYMT.intPaymentId
 			   ,strPaymentNo		         = PYMT.strPaymentRecordNum
+			   ,strBillId				     = Bill.strBillId
 			   ,InboundNetWeight	         = SUM(BillDtl.dblQtyOrdered)
 			   ,InboundGrossDollars          = SUM(BillDtl.dblTotal) 
 			   ,InboundTax					 = SUM(BillDtl.dblTax) 
@@ -202,6 +230,7 @@ SELECT * FROM
 			GROUP BY 
 			 PYMT.intPaymentId
 			,PYMT.strPaymentRecordNum
+			,Bill.strBillId
 			,tblOtherCharge.dblTotal
 			,Invoice.dblPayment
 			,tblAdjustment.dblTotal
@@ -214,5 +243,22 @@ SELECT * FROM
 			,PYMT.dblAmountPaid 
 						
  ) t							
-			
-
+GROUP BY 			
+ intPaymentId	
+,strPaymentNo
+,OutboundNetWeight		
+,OutboundGrossDollars	
+,OutboundTax			
+,OutboundDiscount		
+,OutboundNetDue			
+,SalesAdjustment	
+,VoucherAdjustment		 
+,lblVendorPrepayment		 
+,dblCustomerPrepayment		 
+,lblCustomerPrepayment		 
+,dblGradeFactorTax			 
+,lblFactorTax				 
+,dblPartialPrepaymentSubTotal
+,lblPartialPrepayment		 
+,dblPartialPrepayment		 
+,CheckAmount
