@@ -115,7 +115,27 @@ BEGIN
 				ShipmentItem.dblQuantity
 			FROM tblICInventoryShipmentItem ShipmentItem
 				LEFT JOIN tblICInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
-			WHERE ShipmentItem.intInventoryShipmentId = @TransactionId
+			WHERE ShipmentItem.intInventoryShipmentId = 274 AND ShipmentItem.intChildItemLinkId IS NULL AND ShipmentItem.strItemType != 'Option'
+			UNION ALL
+			--FOR OPTION ITEMS
+			SELECT 'Inventory Shipment',
+				ShipmentItem.intInventoryShipmentId, 
+				ShipmentItem.intInventoryShipmentItemId,
+				ShipmentItem.intOrderId,
+				Shipment.intOrderType,
+				ShipmentItem.intSourceId,
+				Shipment.intSourceType,
+				ShipmentItem.intLineNo,
+				ItemBundle.intItemId,
+				ShipmentItem.strItemType,
+				ItemBundleUOM.intItemUOMId,
+				ShipmentItem.dblQuantity
+			FROM tblICInventoryShipmentItem ShipmentItem
+				LEFT JOIN tblICInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
+				INNER JOIN tblICItemBundle ItemBundle ON ItemBundle.intItemBundleId = ShipmentItem.intParentItemLinkId AND ItemBundle.intBundleItemId = ShipmentItem.intItemId
+				INNER JOIN tblICItem ItemBundleDetail ON ItemBundleDetail.intItemId = ItemBundle.intItemId
+				LEFT JOIN tblICItemUOM ItemBundleUOM ON ItemBundleUOM.intItemUOMId = [dbo].[fnGetMatchingItemUOMId](ItemBundle.intItemId, ItemBundle.intItemUnitMeasureId)
+			WHERE ShipmentItem.intInventoryShipmentId = @TransactionId AND ShipmentItem.intChildItemLinkId IS NULL AND ItemBundleDetail.strBundleType = 'Option'
 		END
 	END
 
