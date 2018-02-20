@@ -54,7 +54,7 @@ IF ISNULL(@InvoiceIds, '') <> ''
 
 			UPDATE INV
 			SET INV.ysnForgiven = @ysnForgive,
-				INV.dtmForgiveDate = SCI.dtmForgiveDate
+				INV.dtmForgiveDate =  CASE WHEN @ysnForgive = 1 THEN ISNULL(SCI.dtmForgiveDate, GETDATE()) ELSE NULL END
 			FROM tblARInvoice INV
 			INNER JOIN @ServiceChargeToForgive SCI ON INV.intInvoiceId = SCI.intInvoiceId
 			WHERE INV.ysnPosted = 1
