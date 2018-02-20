@@ -11,6 +11,6 @@ namespace iRely.Inventory.BusinessLayer
 {
     public interface IItemSubstituteBl : IBusinessLayer<tblICItemSubstitute>
     {
-
+        Task<GetObjectResult> GetItemSubstitutes(int intItemId, int intItemUOMId, int intLocationId, decimal? dblQuantity);
     }
 }

@@ -15,11 +15,12 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intItemSubstituteId).HasColumnName("intItemSubstituteId");
             this.Property(t => t.intItemId).HasColumnName("intItemId");
             this.Property(t => t.intSubstituteItemId).HasColumnName("intSubstituteItemId");
+            this.Property(t => t.strDescription).HasColumnName("strDescription");
             this.Property(t => t.dblQuantity).HasColumnName("dblQuantity").HasPrecision(38, 20);
+            this.Property(t => t.intItemUOMId).HasColumnName("intItemUOMId");
             this.Property(t => t.dblMarkUpOrDown).HasColumnName("dblMarkUpOrDown").HasPrecision(38, 20);
             this.Property(t => t.dtmBeginDate).HasColumnName("dtmBeginDate");
             this.Property(t => t.dtmEndDate).HasColumnName("dtmEndDate");
-            this.Property(t => t.intItemUOMId).HasColumnName("intItemUOMId");
 
             this.HasOptional(p => p.SubstituteItem)
                 .WithMany(p => p.SubstituteItems)

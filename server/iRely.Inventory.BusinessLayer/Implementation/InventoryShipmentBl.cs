@@ -525,6 +525,8 @@ namespace iRely.Inventory.BusinessLayer
                     s.intForexRateTypeId,
                     s.dblForexRate,
                     s.strItemType,
+                    s.intParentItemLinkId,
+                    s.intChildItemLinkId,
                     s.intConcurrencyId,
 
                     // PROJECTED 

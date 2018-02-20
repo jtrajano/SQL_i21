@@ -22,9 +22,16 @@ namespace iRely.Inventory.WebApi
             _bl = bl;
         }
 
-        public async Task<HttpResponseMessage> GetBundleComponents(GetParameter param, int intBundleItemId, int intLocationId)
+        //public async Task<HttpResponseMessage> GetBundleComponents(GetParameter param, int intBundleItemId, int intLocationId)
+        //{
+        //    var result = await _bl.GetBundleComponents(param, intBundleItemId, intLocationId);
+        //    return Request.CreateResponse(HttpStatusCode.OK, result);
+        //}
+
+        [HttpGet]
+        public async Task<HttpResponseMessage> GetBundleComponents(int intItemId, int intItemUOMId, int intLocationId, decimal? dblQuantity)
         {
-            var result = await _bl.GetBundleComponents(param, intBundleItemId, intLocationId);
+            var result = await _bl.GetBundleComponents(intItemId, intItemUOMId, intLocationId, dblQuantity);
             return Request.CreateResponse(HttpStatusCode.OK, result);
         }
     }

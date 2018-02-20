@@ -1301,29 +1301,30 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
-        public async Task<GetObjectResult> GetItemAddOns(GetParameter param, int intItemId, int intLocationId)
-        {
-            var query = _db.GetQuery<vyuICGetAddOnComponentStock>().Filter(param, true).Where(w => w.intParentItemAddOnId == intItemId && w.intLocationId == intLocationId);
-            var key = Methods.GetPrimaryKey<vyuICGetAddOnComponentStock>(_db.ContextManager);
+        //public async Task<GetObjectResult> GetItemAddOns(GetParameter param, int intItemId, int intLocationId)
+        //{
+        //    var query = _db.GetQuery<vyuICGetAddOnComponentStock>().Filter(param, true).Where(w => w.intParentItemAddOnId == intItemId && w.intLocationId == intLocationId);
+        //    var key = Methods.GetPrimaryKey<vyuICGetAddOnComponentStock>(_db.ContextManager);
 
-            return new GetObjectResult()
-            {
-                data = await query.Execute(param, key, "DESC").ToListAsync(param.cancellationToken).ConfigureAwait(false),
-                total = await query.CountAsync(param.cancellationToken)
-            };
-        }
+        //    return new GetObjectResult()
+        //    {
+        //        data = await query.Execute(param, key, "DESC").ToListAsync(param.cancellationToken).ConfigureAwait(false),
+        //        total = await query.CountAsync(param.cancellationToken)
+        //    };
+        //}
 
-        public async Task<GetObjectResult> GetItemSubstitutes(GetParameter param, int intItemId, int intLocationId)
-        {
-            var query = _db.GetQuery<vyuICGetSubstituteComponentStock>().Filter(param, true).Where(w => w.intParentItemSubstituteId == intItemId && w.intLocationId == intLocationId);
-            var key = Methods.GetPrimaryKey<vyuICGetSubstituteComponentStock>(_db.ContextManager);
+        //public async Task<GetObjectResult> GetItemSubstitutes(GetParameter param, int intItemId, int intLocationId)
+        //{
+        //    var query = _db.GetQuery<vyuICGetSubstituteComponentStock>().Filter(param, true).Where(w => w.intParentItemSubstituteId == intItemId && w.intLocationId == intLocationId);
+        //    var key = Methods.GetPrimaryKey<vyuICGetSubstituteComponentStock>(_db.ContextManager);
 
-            return new GetObjectResult()
-            {
-                data = await query.Execute(param, key, "DESC").ToListAsync(param.cancellationToken).ConfigureAwait(false),
-                total = await query.CountAsync(param.cancellationToken)
-            };
-        }
+        //    return new GetObjectResult()
+        //    {
+        //        data = await query.Execute(param, key, "DESC").ToListAsync(param.cancellationToken).ConfigureAwait(false),
+        //        total = await query.CountAsync(param.cancellationToken)
+        //    };
+        //}
+
     }
 
 }
