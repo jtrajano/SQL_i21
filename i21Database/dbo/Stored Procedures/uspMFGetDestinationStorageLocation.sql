@@ -22,6 +22,11 @@ BEGIN
 			,SL.intSubLocationId
 		FROM dbo.tblICStorageLocation SL
 		WHERE intLocationId = @intLocationId
+			AND NOT EXISTS (
+				SELECT *
+				FROM tblICStorageLocation SL1
+				WHERE SL1.intParentStorageLocationId = SL.intStorageLocationId
+				)
 			AND strName LIKE @strName + '%'
 			AND SL.intStorageLocationId = (
 				CASE 
@@ -39,6 +44,11 @@ BEGIN
 			,SL.intSubLocationId
 		FROM dbo.tblICStorageLocation SL
 		WHERE intLocationId = @intLocationId
+			AND NOT EXISTS (
+				SELECT *
+				FROM tblICStorageLocation SL1
+				WHERE SL1.intParentStorageLocationId = SL.intStorageLocationId
+				)
 			AND strName LIKE @strName + '%'
 			AND SL.intStorageLocationId = (
 				CASE 
