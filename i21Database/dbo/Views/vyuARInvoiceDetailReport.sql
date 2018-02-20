@@ -3,6 +3,7 @@ AS
 SELECT I.intInvoiceId
 	 , I.intEntityCustomerId
 	 , I.intCompanyLocationId
+	 , strLocationName				= L.strLocationName
 	 , strType				= CASE WHEN ISNULL(I.intOriginalInvoiceId, 0) <> 0 THEN 'Final'
 								   WHEN I.strType = 'Provisional' THEN 'Provisional'
 								   ELSE 'Direct' 
@@ -67,3 +68,4 @@ LEFT JOIN (SELECT CTH.intContractHeaderId
 					 ) CTD ON CTH.intContractHeaderId = CTD.intContractHeaderId
 			) CT ON ID.intContractHeaderId = CT.intContractHeaderId
 				AND ID.intContractDetailId = CT.intContractDetailId
+LEFT JOIN tblSMCompanyLocation L ON I.intCompanyLocationId = L.intCompanyLocationId
