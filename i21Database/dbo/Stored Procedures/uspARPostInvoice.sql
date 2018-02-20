@@ -1262,7 +1262,7 @@ BEGIN TRY
 			WHERE I.intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
 			AND ID.ysnBlended <> @post
 			AND ICI.ysnAutoBlend = 1
-			AND ISNULL(ICI.strType,'') = 'Finished Good'
+			--AND ISNULL(ICI.strType,'') = 'Finished Good' --AR-6677
 
 			WHILE EXISTS (SELECT NULL FROM @FinishedGoodItems)
 				BEGIN
@@ -3317,10 +3317,11 @@ IF @post = 1
 				CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebitUnit, 0) - ISNULL(GLEntries.dblCreditUnit, 0)) DebitUnit
 				CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebitUnit, 0) - ISNULL(GLEntries.dblCreditUnit, 0))  CreditUnit
 
-				EXEC	dbo.uspGLBookEntries
-							 @GLEntries		= @GLEntries
-							,@ysnPost		= @post
-							,@XACT_ABORT_ON = @raiseError
+				IF EXISTS ( SELECT TOP 1 1 FROM @GLEntries)
+					EXEC	dbo.uspGLBookEntries
+								 @GLEntries		= @GLEntries
+								,@ysnPost		= @post
+								,@XACT_ABORT_ON = @raiseError
 			END TRY
 			BEGIN CATCH
 				SELECT @ErrorMerssage = ERROR_MESSAGE()										
@@ -3407,11 +3408,23 @@ IF @post = 0
 				GLD.ysnIsUnposted = 0				
 			ORDER BY
 				GLD.intGLDetailId
-				
-			EXEC	dbo.uspGLBookEntries
-					 @GLEntries		= @GLEntries
-					,@ysnPost		= @post
-					,@XACT_ABORT_ON = @raiseError
+
+
+			UPDATE GLD
+			SET
+				GLD.ysnIsUnposted = 1
+			FROM
+				tblGLDetail GLD
+			INNER JOIN
+				(SELECT intInvoiceId, strInvoiceNumber FROM @PostInvoiceData) PID
+					ON PID.intInvoiceId = GLD.intTransactionId
+					AND PID.strInvoiceNumber = GLD.strTransactionId
+
+			IF EXISTS ( SELECT TOP 1 1 FROM @GLEntries)	
+				EXEC	dbo.uspGLBookEntries
+						@GLEntries		= @GLEntries
+						,@ysnPost		= @post
+						,@XACT_ABORT_ON = @raiseError
 						
 		END TRY
 		BEGIN CATCH

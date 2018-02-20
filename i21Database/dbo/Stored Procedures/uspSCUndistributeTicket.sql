@@ -35,7 +35,9 @@ DECLARE @InventoryReceiptId INT
 		,@dblLoadScheduledUnits AS NUMERIC(38,20)
 		,@dblDeliveredQuantity AS NUMERIC(38,20)
 		,@intInventoryTransferId AS INT
-		,@intMatchTicketId AS INT;
+		,@intMatchTicketId AS INT
+		,@strXml NVARCHAR(MAX)
+		,@intSettleStorageId INT;
 
 BEGIN TRY
 		SELECT @intLoadId = LGLD.intLoadId ,@intLoadDetailId = LGLD.intLoadDetailId
@@ -50,6 +52,38 @@ BEGIN TRY
 
 		IF @strInOutFlag = 'I'
 			BEGIN
+				IF OBJECT_ID (N'tempdb.dbo.#tmpSettleStorage') IS NOT NULL
+                    DROP TABLE #tmpSettleStorage
+				CREATE TABLE #tmpSettleStorage (
+					[intSettleStorageId] INT PRIMARY KEY,
+					UNIQUE ([intSettleStorageId])
+				);
+				INSERT INTO #tmpSettleStorage(intSettleStorageId) SELECT GRS.intSettleStorageId from tblGRSettleStorage GRS
+					INNER JOIN tblGRSettleStorageTicket GRT ON GRT.intSettleStorageId = GRS.intSettleStorageId
+					INNER JOIN tblGRCustomerStorage GRC ON GRC.intCustomerStorageId = GRT.intCustomerStorageId
+				WHERE GRC.intTicketId = @intTicketId
+
+				DECLARE settleStorageCursor CURSOR LOCAL FAST_FORWARD
+				FOR
+				SELECT intSettleStorageId FROM #tmpSettleStorage
+
+				OPEN settleStorageCursor;
+
+				FETCH NEXT FROM settleStorageCursor INTO @intSettleStorageId;
+
+				WHILE @@FETCH_STATUS = 0
+				BEGIN
+					SET @strXml = '<root><intSettleStorageId>'+  CAST(@intSettleStorageId as nvarchar(20)) + '</intSettleStorageId>
+					<intEntityUserSecurityId>' + CAST(@intUserId as nvarchar(20)) + '</intEntityUserSecurityId></root>';
+
+					EXEC [dbo].[uspGRUnPostSettleStorage] @strXml;
+
+					FETCH NEXT FROM settleStorageCursor INTO @intSettleStorageId;
+				END
+
+				CLOSE settleStorageCursor  
+				DEALLOCATE settleStorageCursor 
+
 				CREATE TABLE #tmpItemReceiptIds (
 					[intInventoryReceiptId] [INT] PRIMARY KEY,
 					[strReceiptNumber] [VARCHAR](100),
@@ -105,7 +139,7 @@ BEGIN TRY
 					END
 
 					CLOSE voucherCursor  
-					DEALLOCATE voucherCursor 
+					DEALLOCATE voucherCursor
 
 					EXEC [dbo].[uspICPostInventoryReceipt] 0, 0, @strTransactionId, @intUserId
 					EXEC [dbo].[uspGRReverseOnReceiptDelete] @InventoryReceiptId

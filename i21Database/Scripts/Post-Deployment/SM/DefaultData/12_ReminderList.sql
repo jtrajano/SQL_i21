@@ -621,7 +621,7 @@ BEGIN
 			[strQuery]  		=        N'SELECT SI.intDeviceInterfaceFileId FROM tblSCDeviceInterfaceFile SI 
 											INNER JOIN tblSCScaleDevice SD ON SD.intPhysicalEquipmentId = SI.intScaleDeviceId
 											INNER JOIN tblSCScaleSetup SS ON SD.intScaleDeviceId = SS.intInScaleDeviceId
-											OUTER APPLY( SELECT intEntityContactId FROM tblEMEntityToContact WHERE intEntityId = {0} AND ysnPortalAccess = 1) EM 
+											OUTER APPLY( SELECT intEntityContactId FROM tblEMEntityToContact WHERE intEntityContactId = {0} AND ysnPortalAccess = 1) EM 
 											WHERE DATEDIFF(SECOND,dtmScaleTime,GETDATE()) >= 15 AND ISNULL(EM.intEntityContactId,0) = 0',
 			[strNamespace]      =        N'',
 			[intSort]           =        @intMaxSortOrder + 1
@@ -632,7 +632,7 @@ BEGIN
 			[strQuery]  		=        N'SELECT SI.intDeviceInterfaceFileId FROM tblSCDeviceInterfaceFile SI 
 											INNER JOIN tblSCScaleDevice SD ON SD.intPhysicalEquipmentId = SI.intScaleDeviceId
 											INNER JOIN tblSCScaleSetup SS ON SD.intScaleDeviceId = SS.intOutScaleDeviceId
-											OUTER APPLY( SELECT intEntityContactId FROM tblEMEntityToContact WHERE intEntityId = {0} AND ysnPortalAccess = 1) EM 
+											OUTER APPLY( SELECT intEntityContactId FROM tblEMEntityToContact WHERE intEntityContactId = {0} AND ysnPortalAccess = 1) EM 
 											WHERE DATEDIFF(SECOND,dtmScaleTime,GETDATE()) >= 15 AND ISNULL(EM.intEntityContactId,0) = 0',
 			[strNamespace]      =        N'',
 			[intSort]           =        @intMaxSortOrder + 2
@@ -648,7 +648,7 @@ BEGIN
 			[strQuery]  		=        N'SELECT SI.intDeviceInterfaceFileId FROM tblSCDeviceInterfaceFile SI 
 											INNER JOIN tblSCScaleDevice SD ON SD.intPhysicalEquipmentId = SI.intScaleDeviceId
 											INNER JOIN tblSCScaleSetup SS ON SD.intScaleDeviceId = SS.intInScaleDeviceId
-											OUTER APPLY( SELECT intEntityContactId FROM tblEMEntityToContact WHERE intEntityId = {0} AND ysnPortalAccess = 1) EM 
+											OUTER APPLY( SELECT intEntityContactId FROM tblEMEntityToContact WHERE intEntityContactId = {0} AND ysnPortalAccess = 1) EM 
 											WHERE DATEDIFF(SECOND,dtmScaleTime,GETDATE()) >= 15 AND ISNULL(EM.intEntityContactId,0) = 0',
 			[strNamespace]      =        N'',
 			[intSort]           =        @intMaxSortOrder + 1
@@ -659,7 +659,7 @@ BEGIN
 			[strQuery]  		=        N'SELECT SI.intDeviceInterfaceFileId FROM tblSCDeviceInterfaceFile SI 
 											INNER JOIN tblSCScaleDevice SD ON SD.intPhysicalEquipmentId = SI.intScaleDeviceId
 											INNER JOIN tblSCScaleSetup SS ON SD.intScaleDeviceId = SS.intOutScaleDeviceId
-											OUTER APPLY( SELECT intEntityContactId FROM tblEMEntityToContact WHERE intEntityId = {0} AND ysnPortalAccess = 1) EM 
+											OUTER APPLY( SELECT intEntityContactId FROM tblEMEntityToContact WHERE intEntityContactId = {0} AND ysnPortalAccess = 1) EM 
 											WHERE DATEDIFF(SECOND,dtmScaleTime,GETDATE()) >= 15 AND ISNULL(EM.intEntityContactId,0) = 0',
 			[strNamespace]      =        N'',
 			[intSort]           =        @intMaxSortOrder + 2

@@ -98,7 +98,7 @@ BEGIN TRY
 		DECLARE @TotalLine8 NVARCHAR(100) = NULL
 		INSERT INTO @Report EXECUTE sp_executesql N'uspTFGenerateOR7351334MSub @xmlParam = @xmlParam', N'@xmlParam NVARCHAR(MAX) ', @xmlParam = @xmlParam
 
-		SELECT @Line_1 = SUM(CONVERT(NUMERIC(18, 0), strData)) FROM @Report WHERE strLine ='Line 8'	
+		SELECT @Line_1 = SUM(CONVERT(NUMERIC(18, 0), dblHandled)) FROM @Report
 		SELECT @Line_3 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '5CRD'
 		SELECT @Line_4 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '5FLT'
 

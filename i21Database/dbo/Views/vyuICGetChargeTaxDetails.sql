@@ -30,5 +30,6 @@ FROM (
 			LEFT JOIN dbo.tblSMTaxClass TaxClass ON TaxClass.intTaxClassId = TaxCode.intTaxClassId
 			LEFT JOIN tblSMTaxCodeRate TaxCodeRate ON TaxCodeRate.intTaxCodeId = TaxCode.intTaxCodeId
 				AND TaxCodeRate.intUnitMeasureId = ChargeTax.intUnitMeasureId
-			LEFT JOIN tblICUnitMeasure UnitMeasure ON UnitMeasure.intUnitMeasureId = ChargeTax.intUnitMeasureId
+			LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = ChargeTax.intUnitMeasureId
+			LEFT JOIN tblICUnitMeasure UnitMeasure ON UnitMeasure.intUnitMeasureId = ItemUOM.intUnitMeasureId
 ) tblChargeTaxDetails

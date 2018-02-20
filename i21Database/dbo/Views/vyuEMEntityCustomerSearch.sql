@@ -54,7 +54,9 @@
 	entityType.Prospect AS ysnProspect,
 	cust.ysnCreditHold,
 	custLocation.intFreightTermId,
-	fTerms.strFreightTerm
+	fTerms.strFreightTerm,
+	custLocation.intShipViaId,
+	strShipViaName = shipVia.strShipVia
 FROM tblARCustomer cust
 INNER JOIN tblEMEntity entityToCustomer ON cust.intEntityId = entityToCustomer.intEntityId
 LEFT JOIN tblEMEntity entityToSalesperson ON cust.intSalespersonId = entityToSalesperson.intEntityId
@@ -77,6 +79,7 @@ LEFT JOIN tblEMEntityClass entityClass ON entityToCustomer.intEntityClassId = en
 LEFT JOIN tblSMPaymentMethod custPaymentMethod ON cust.intPaymentMethodId = custPaymentMethod.intPaymentMethodID
 LEFT JOIN tblSMTerm custTerm ON cust.intTermsId = custTerm.intTermID
 LEFT JOIN tblSMFreightTerms fTerms ON custLocation.intFreightTermId = fTerms.intFreightTermId
+LEFT JOIN tblSMShipVia shipVia on custLocation.intShipViaId = shipVia.intEntityId
 WHERE		
 		entityType.Customer = 1 -- check if entity is a customer
 		OR

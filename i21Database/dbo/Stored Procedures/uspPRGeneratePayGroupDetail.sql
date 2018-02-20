@@ -52,36 +52,51 @@ BEGIN
 			,intConcurrencyId)
 		SELECT 
 			@intPayGroupId
-			,intEntityEmployeeId
-			,intEmployeeEarningId
-			,intTypeEarningId
-			,intDepartmentId = (SELECT TOP 1 intDepartmentId FROM tblPREmployeeDepartment WHERE intEntityEmployeeId = tblPREmployeeEarning.intEntityEmployeeId ORDER BY intEmployeeDepartmentId ASC)
-			,intWorkersCompensationId = CASE WHEN (strCalculationType IN ('Hourly Rate', 'Overtime', 'Fixed Amount')) 
-											THEN (SELECT TOP 1 intWorkersCompensationId FROM tblPREmployee WHERE [intEntityId] = tblPREmployeeEarning.intEntityEmployeeId) 
+			,EE.intEntityEmployeeId
+			,EE.intEmployeeEarningId
+			,EE.intTypeEarningId
+			,intDepartmentId = (SELECT TOP 1 intDepartmentId FROM tblPREmployeeDepartment WHERE intEntityEmployeeId = EE.intEntityEmployeeId ORDER BY intEmployeeDepartmentId ASC)
+			,intWorkersCompensationId = CASE WHEN (EE.strCalculationType IN ('Hourly Rate', 'Overtime', 'Fixed Amount')) 
+											THEN (SELECT TOP 1 intWorkersCompensationId FROM tblPREmployee WHERE [intEntityId] = EE.intEntityEmployeeId) 
 											ELSE NULL END
-			,strCalculationType
-			,dblDefaultHours = CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours ELSE (dblDefaultHours + @dblOverrideHours) END					
-			,dblHoursToProcess = CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours ELSE (dblHoursToProcess + @dblOverrideHours) END
-			,dblRateAmount
-			,dblTotal = ROUND(CASE WHEN (strCalculationType IN ('Rate Factor', 'Overtime') AND intEmployeeEarningLinkId IS NOT NULL) THEN 
-							CASE WHEN ((SELECT TOP 1 strCalculationType FROM tblPRTypeEarning WHERE intTypeEarningId = tblPREmployeeEarning.intEmployeeEarningLinkId) = 'Hourly Rate') THEN
-								CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours ELSE (dblHoursToProcess + @dblOverrideHours) END * dblRateAmount
-							ELSE
-								dblRateAmount
-							END
-						WHEN (strCalculationType = 'Hourly Rate') THEN
-							CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours ELSE (dblHoursToProcess + @dblOverrideHours) END * dblRateAmount
-						ELSE
-							dblRateAmount
-						END, 2)
+			,EE.strCalculationType
+			,dblDefaultHours = CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours ELSE (EE.dblDefaultHours + @dblOverrideHours) END					
+			,dblHoursToProcess = CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours ELSE (EE.dblHoursToProcess + @dblOverrideHours) END
+			,EE.dblRateAmount
+			,dblTotal = ROUND(CASE WHEN (EE.strCalculationType IN ('Hourly Rate', 'Overtime')) THEN
+									CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours 
+										ELSE (EE.dblHoursToProcess + @dblOverrideHours) 
+										END * EE.dblRateAmount
+								WHEN (EE.strCalculationType IN ('Rate Factor')) THEN 
+									CASE WHEN (ELink.strCalculationType = 'Hourly Rate') THEN
+											CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours 
+											ELSE (EE.dblHoursToProcess + @dblOverrideHours) 
+											END * EE.dblRateAmount
+										WHEN (ELink.strCalculationType = 'Fixed Amount') THEN
+											CASE WHEN (ELink.dblDefaultHours > 0) THEN
+													CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours 
+													ELSE (EE.dblHoursToProcess + @dblOverrideHours) 
+													END * EE.dblRateAmount
+												ELSE 
+													EE.dblRateAmount
+												END
+										ELSE
+											0
+										END
+								ELSE
+									EE.dblRateAmount
+								END, 2)
 			,@dtmDateFrom
 			,@dtmDateTo
-			,intSort
+			,EE.intSort
 			,1
-		FROM tblPREmployeeEarning
-		WHERE intPayGroupId = @intPayGroupId
-			AND (ysnDefault = 1 OR dblDefaultHours > 0)
-			AND intEmployeeEarningId NOT IN (SELECT intEmployeeEarningId FROM tblPRPayGroupDetail 
+		FROM tblPREmployeeEarning EE
+			LEFT JOIN tblPREmployeeEarning ELink 
+				ON EE.intEntityEmployeeId = ELink.intEntityEmployeeId
+				 AND EE.intTypeEarningId = ELink.intTypeEarningId
+		WHERE EE.intPayGroupId = @intPayGroupId
+			AND (EE.ysnDefault = 1 OR EE.dblDefaultHours > 0)
+			AND EE.intEmployeeEarningId NOT IN (SELECT intEmployeeEarningId FROM tblPRPayGroupDetail 
 												WHERE intPayGroupId = @intPayGroupId
 												AND dtmDateFrom >= ISNULL(@dtmDateFrom, dtmDateFrom) AND dtmDateFrom <= ISNULL(@dtmDateTo, dtmDateTo))
 

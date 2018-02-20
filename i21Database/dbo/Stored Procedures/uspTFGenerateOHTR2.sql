@@ -15,60 +15,57 @@ DECLARE @ErrorState INT
 BEGIN TRY
 
 	DECLARE @Name NVARCHAR(100)
-		, @Address NVARCHAR(250)
-		, @City NVARCHAR(50)
-		, @State NVARCHAR(50)
-		, @ZipCode NVARCHAR(50)
-		, @Email NVARCHAR(50)
 		, @TIN NVARCHAR(50)
 		, @OhioAccountNo NVARCHAR(50)
-		, @Period DATETIME
-		, @AmmendedReturn BIT
+		, @dtmFrom DATE
+		, @dtmTo DATE
 	
-		, @Gasoline_1B NUMERIC(18, 6) = 0.00
-		, @Gasoline_2E NUMERIC(18, 6) = 0.00
-		, @Gasoline_7A NUMERIC(18, 6) = 0.00
-		, @Gasoline_7D NUMERIC(18, 6) = 0.00
+		, @Gasoline_14A NUMERIC(18, 6) = 0.00
+		, @Gasoline_14B NUMERIC(18, 6) = 0.00
+		, @Gasoline_14C NUMERIC(18, 6) = 0.00
+		, @Gasoline_4 NUMERIC(18, 6) = 0.00
 		
-		, @ClearDiesel_1B NUMERIC(18, 6) = 0.00
-		, @ClearDiesel_2E NUMERIC(18, 6) = 0.00
-		, @ClearDiesel_7A NUMERIC(18, 6) = 0.00
-		, @ClearDiesel_7D NUMERIC(18, 6) = 0.00
+		, @ClearDiesel_14A NUMERIC(18, 6) = 0.00
+		, @ClearDiesel_14B NUMERIC(18, 6) = 0.00
+		, @ClearDiesel_14C NUMERIC(18, 6) = 0.00
+		, @ClearDiesel_4 NUMERIC(18, 6) = 0.00
 
-		, @LowSulfur_1B NUMERIC(18, 6) = 0.00
-		, @LowSulfur_2E NUMERIC(18, 6) = 0.00
-		, @LowSulfur_7A NUMERIC(18, 6) = 0.00
-		, @LowSulfur_7D NUMERIC(18, 6) = 0.00
+		, @LowSulfur_14A NUMERIC(18, 6) = 0.00
+		, @LowSulfur_14B NUMERIC(18, 6) = 0.00
+		, @LowSulfur_14C NUMERIC(18, 6) = 0.00
+		, @LowSulfur_4 NUMERIC(18, 6) = 0.00
 
-		, @HighSulfur_1B NUMERIC(18, 6) = 0.00
-		, @HighSulfur_2E NUMERIC(18, 6) = 0.00
-		, @HighSulfur_7A NUMERIC(18, 6) = 0.00
-		, @HighSulfur_7D NUMERIC(18, 6) = 0.00
+		, @HighSulfur_14A NUMERIC(18, 6) = 0.00
+		, @HighSulfur_14B NUMERIC(18, 6) = 0.00
+		, @HighSulfur_14C NUMERIC(18, 6) = 0.00
+		, @HighSulfur_4 NUMERIC(18, 6) = 0.00
 
-		, @Kerosene_1B NUMERIC(18, 6) = 0.00
-		, @Kerosene_2E NUMERIC(18, 6) = 0.00
-		, @Kerosene_7A NUMERIC(18, 6) = 0.00
-		, @Kerosene_7D NUMERIC(18, 6) = 0.00
+		, @Kerosene_14A NUMERIC(18, 6) = 0.00
+		, @Kerosene_14B NUMERIC(18, 6) = 0.00
+		, @Kerosene_14C NUMERIC(18, 6) = 0.00
+		, @Kerosene_4 NUMERIC(18, 6) = 0.00
 
-		, @CNG_1B NUMERIC(18, 6) = 0.00
-		, @CNG_2E NUMERIC(18, 6) = 0.00
-		, @CNG_7A NUMERIC(18, 6) = 0.00
-		, @CNG_7D NUMERIC(18, 6) = 0.00
+		, @CNG_14A NUMERIC(18, 6) = 0.00
+		, @CNG_14B NUMERIC(18, 6) = 0.00
+		, @CNG_14C NUMERIC(18, 6) = 0.00
+		, @CNG_4 NUMERIC(18, 6) = 0.00
 
-		, @LNG_1B NUMERIC(18, 6) = 0.00
-		, @LNG_2E NUMERIC(18, 6) = 0.00
-		, @LNG_7A NUMERIC(18, 6) = 0.00
-		, @LNG_7D NUMERIC(18, 6) = 0.00
+		, @LNG_14A NUMERIC(18, 6) = 0.00
+		, @LNG_14B NUMERIC(18, 6) = 0.00
+		, @LNG_14C NUMERIC(18, 6) = 0.00
+		, @LNG_4 NUMERIC(18, 6) = 0.00
 
-		, @Propane_1B NUMERIC(18, 6) = 0.00
-		, @Propane_2E NUMERIC(18, 6) = 0.00
-		, @Propane_7A NUMERIC(18, 6) = 0.00
-		, @Propane_7D NUMERIC(18, 6) = 0.00
+		, @Propane_14A NUMERIC(18, 6) = 0.00
+		, @Propane_14B NUMERIC(18, 6) = 0.00
+		, @Propane_14C NUMERIC(18, 6) = 0.00
+		, @Propane_4 NUMERIC(18, 6) = 0.00
 
-		, @Other_1B NUMERIC(18, 6) = 0.00
-		, @Other_2E NUMERIC(18, 6) = 0.00
-		, @Other_7A NUMERIC(18, 6) = 0.00
-		, @Other_7D NUMERIC(18, 6) = 0.00
+		, @Other_14A NUMERIC(18, 6) = 0.00
+		, @Other_14B NUMERIC(18, 6) = 0.00
+		, @Other_14C NUMERIC(18, 6) = 0.00
+		, @Other_4 NUMERIC(18, 6) = 0.00
+
+		, @Total_5 NUMERIC(18, 6) = 0.00
 
 	IF (ISNULL(@xmlParam,'') != '')
 	BEGIN		
@@ -96,144 +93,133 @@ BEGIN TRY
 			, [endgroup] NVARCHAR(50)
 			, [datatype] NVARCHAR(50))
 
-		DECLARE @DateFrom DATETIME
-		, @DateTo DATETIME
-		, @TaxAuthorityId INT
+		DECLARE @TaxAuthorityId INT
 		, @Guid NVARCHAR(100)
-		
 
-		SELECT TOP 1 @DateFrom = [from],  @DateTo = [to] FROM @Params WHERE [fieldname] = 'dtmDate'
+		DECLARE @transaction TFReportTransaction
+
 		SELECT TOP 1 @Guid = [from] FROM @Params WHERE [fieldname] = 'strGuid'
+
 		SELECT TOP 1 @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'OH'
-				
-		SELECT * 
-		INTO #tmpTransactions
+		
+		-- Configuration
+		SELECT @OhioAccountNo = strConfiguration FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strFormCode = 'TR2' AND strTemplateItemId = 'TR2-OHTR2AcctNumber'	
+
+		-- Transaction
+		INSERT INTO @transaction (strFormCode, strScheduleCode, strType, dblReceived)
+		SELECT strFormCode, strScheduleCode, strType, dblReceived = SUM(ISNULL(dblQtyShipped, 0.00))
 		FROM vyuTFGetTransaction Trans
 		WHERE Trans.uniqTransactionGuid = @Guid
-			AND CAST(FLOOR(CAST(Trans.dtmDate AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)
-			AND CAST(FLOOR(CAST(Trans.dtmDate AS FLOAT))AS DATETIME) <= CAST(FLOOR(CAST(@DateTo AS FLOAT))AS DATETIME)
-			AND Trans.intTaxAuthorityId = @TaxAuthorityId
-
-		SELECT strFormCode, strScheduleCode, strType, dblReceived = SUM(ISNULL(dblReceived, 0.00)), dblBillQty = SUM(ISNULL(dblBillQty, 0.00)), dblQtyShipped = SUM(ISNULL(dblQtyShipped, 0.00)), dblTax = SUM(ISNULL(dblTax, 0.00)), dblTaxExempt = SUM(ISNULL(dblTaxExempt, 0.00))
-		INTO #tmpTotals
-		FROM #tmpTransactions
 		GROUP BY strFormCode, strScheduleCode, strType
 
-		SELECT TOP 1 @Name = strTaxPayerName
-			, @TIN = strTaxPayerFEIN
-			, @Period = dtmReportingPeriodBegin
-		FROM #tmpTransactions
+		-- Transaction Info
+		SELECT TOP 1  @Name = strTaxPayerName, @TIN = strTaxPayerFEIN FROM vyuTFGetTransaction Trans WHERE Trans.uniqTransactionGuid = @Guid
+		SELECT @dtmFrom = MIN(dtmReportingPeriodBegin) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid
+		SELECT @dtmTo = MAX(dtmReportingPeriodEnd) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid
 
-		SELECT @Gasoline_1B = CASE WHEN strFormCode = 'TR2' AND strScheduleCode = '1B' AND strType = 'Gasoline' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @Gasoline_2E = CASE WHEN strFormCode = 'TR2' AND strScheduleCode = '2E' AND strType = 'Gasoline' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @Gasoline_7A = CASE WHEN strFormCode = 'TR2' AND strScheduleCode = '7A' AND strType = 'Gasoline' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @Gasoline_7D = CASE WHEN strFormCode = 'TR2' AND strScheduleCode = '7D' AND strType = 'Gasoline' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
+		SELECT @Gasoline_14A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14A' AND strType = 'Gasoline'
+		SELECT @Gasoline_14B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14B' AND strType = 'Gasoline'
+		SELECT @Gasoline_14C = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14C' AND strType = 'Gasoline'
+		SET @Gasoline_4 = @Gasoline_14A + @Gasoline_14B + @Gasoline_14C
 
-			, @ClearDiesel_1B = CASE WHEN strFormCode = 'TR2' AND strScheduleCode = '1B' AND strType = 'Clear Diesel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @ClearDiesel_2E = CASE WHEN strFormCode = 'TR2' AND strScheduleCode = '2E' AND strType = 'Clear Diesel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @ClearDiesel_7A = CASE WHEN strFormCode = 'TR2' AND strScheduleCode = '7A' AND strType = 'Clear Diesel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @ClearDiesel_7D = CASE WHEN strFormCode = 'TR2' AND strScheduleCode = '7D' AND strType = 'Clear Diesel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
+		SELECT @ClearDiesel_14A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14A' AND strType = 'Clear Diesel'
+		SELECT @ClearDiesel_14B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14B' AND strType = 'Clear Diesel'
+		SELECT @ClearDiesel_14C = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14C' AND strType = 'Clear Diesel'
+		SET @ClearDiesel_4 = @ClearDiesel_14A + @ClearDiesel_14B + @ClearDiesel_14C
+		
+		SELECT @LowSulfur_14A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14A' AND strType = 'Low Sulfur Dyed Diesel'
+		SELECT @LowSulfur_14B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14B' AND strType = 'Low Sulfur Dyed Diesel'
+		SELECT @LowSulfur_14C = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14C' AND strType = 'Low Sulfur Dyed Diesel'
+		SET @LowSulfur_4 = @LowSulfur_14A + @LowSulfur_14B + @LowSulfur_14C
 
-			, @LowSulfur_1B = CASE WHEN strFormCode = 'TR2' AND strScheduleCode = '1B' AND strType = 'Low Sulfur Dyed Diesel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @LowSulfur_2E = CASE WHEN strFormCode = 'TR2' AND strScheduleCode = '2E' AND strType = 'Low Sulfur Dyed Diesel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @LowSulfur_7A = CASE WHEN strFormCode = 'TR2' AND strScheduleCode = '7A' AND strType = 'Low Sulfur Dyed Diesel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @LowSulfur_7D = CASE WHEN strFormCode = 'TR2' AND strScheduleCode = '7D' AND strType = 'Low Sulfur Dyed Diesel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
+		SELECT @HighSulfur_14A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14A' AND strType = 'High Sulfur Dyed Diesel'
+		SELECT @HighSulfur_14B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14B' AND strType = 'High Sulfur Dyed Diesel'
+		SELECT @HighSulfur_14C = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14C' AND strType = 'High Sulfur Dyed Diesel'
+		SET @HighSulfur_4 = @HighSulfur_14A + @HighSulfur_14B + @HighSulfur_14C
 
-			, @HighSulfur_1B = CASE WHEN strFormCode = 'TR2' AND strScheduleCode = '1B' AND strType = 'High Sulfur Dyed Diesel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @HighSulfur_2E = CASE WHEN strFormCode = 'TR2' AND strScheduleCode = '2E' AND strType = 'High Sulfur Dyed Diesel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @HighSulfur_7A = CASE WHEN strFormCode = 'TR2' AND strScheduleCode = '7A' AND strType = 'High Sulfur Dyed Diesel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @HighSulfur_7D = CASE WHEN strFormCode = 'TR2' AND strScheduleCode = '7D' AND strType = 'High Sulfur Dyed Diesel' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
+		SELECT @Kerosene_14A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14A' AND strType = 'Kerosene'
+		SELECT @Kerosene_14B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14B' AND strType = 'Kerosene'
+		SELECT @Kerosene_14C = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14C' AND strType = 'Kerosene'
+		SET @Kerosene_4 = @Kerosene_14A + @Kerosene_14B + @Kerosene_14C
 
-			, @Kerosene_1B = CASE WHEN strFormCode = 'TR2' AND strScheduleCode = '1B' AND strType = 'Kerosene' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @Kerosene_2E = CASE WHEN strFormCode = 'TR2' AND strScheduleCode = '2E' AND strType = 'Kerosene' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @Kerosene_7A = CASE WHEN strFormCode = 'TR2' AND strScheduleCode = '7A' AND strType = 'Kerosene' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @Kerosene_7D = CASE WHEN strFormCode = 'TR2' AND strScheduleCode = '7D' AND strType = 'Kerosene' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
+		SELECT @CNG_14A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14A' AND strType = 'CNG'
+		SELECT @CNG_14B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14B' AND strType = 'CNG'
+		SELECT @CNG_14C = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14C' AND strType = 'CNG'
+		SET @CNG_4 = @CNG_14A + @CNG_14B + @CNG_14C
 
-			, @CNG_1B = CASE WHEN strFormCode = 'TR2' AND strScheduleCode = '1B' AND strType = 'CNG' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @CNG_2E = CASE WHEN strFormCode = 'TR2' AND strScheduleCode = '2E' AND strType = 'CNG' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @CNG_7A = CASE WHEN strFormCode = 'TR2' AND strScheduleCode = '7A' AND strType = 'CNG' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @CNG_7D = CASE WHEN strFormCode = 'TR2' AND strScheduleCode = '7D' AND strType = 'CNG' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
+		SELECT @LNG_14A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14A' AND strType = 'LNG'
+		SELECT @LNG_14B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14B' AND strType = 'LNG'
+		SELECT @LNG_14C = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14C' AND strType = 'LNG'
+		SET @LNG_4 = @LNG_14A + @LNG_14B + @LNG_14C
 
-			, @LNG_1B = CASE WHEN strFormCode = 'TR2' AND strScheduleCode = '1B' AND strType = 'LNG' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @LNG_2E = CASE WHEN strFormCode = 'TR2' AND strScheduleCode = '2E' AND strType = 'LNG' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @LNG_7A = CASE WHEN strFormCode = 'TR2' AND strScheduleCode = '7A' AND strType = 'LNG' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @LNG_7D = CASE WHEN strFormCode = 'TR2' AND strScheduleCode = '7D' AND strType = 'LNG' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
+		SELECT @Propane_14A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14A' AND strType = 'Propane'
+		SELECT @Propane_14B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14B' AND strType = 'Propane'
+		SELECT @Propane_14C = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14C' AND strType = 'Propane'
+		SET @Propane_4 = @Propane_14A + @Propane_14B + @Propane_14C
 
-			, @Propane_1B = CASE WHEN strFormCode = 'TR2' AND strScheduleCode = '1B' AND strType = 'Propane' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @Propane_2E = CASE WHEN strFormCode = 'TR2' AND strScheduleCode = '2E' AND strType = 'Propane' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @Propane_7A = CASE WHEN strFormCode = 'TR2' AND strScheduleCode = '7A' AND strType = 'Propane' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @Propane_7D = CASE WHEN strFormCode = 'TR2' AND strScheduleCode = '7D' AND strType = 'Propane' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
+		SELECT @Other_14A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14A' AND strType = 'Other'
+		SELECT @Other_14B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14B' AND strType = 'Other'
+		SELECT @Other_14C = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14C' AND strType = 'Other'
+		SET @Other_4 = @Other_14A + @Other_14B + @Other_14C
 
-			, @Other_1B = CASE WHEN strFormCode = 'TR2' AND strScheduleCode = '1B' AND strType = 'Other' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @Other_2E = CASE WHEN strFormCode = 'TR2' AND strScheduleCode = '2E' AND strType = 'Other' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @Other_7A = CASE WHEN strFormCode = 'TR2' AND strScheduleCode = '7A' AND strType = 'Other' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-			, @Other_7D = CASE WHEN strFormCode = 'TR2' AND strScheduleCode = '7D' AND strType = 'Other' THEN ISNULL(dblReceived, 0.00) ELSE 0.00 END
-		FROM #tmpTotals
+		SET @Total_5 = @Gasoline_4 + @ClearDiesel_4 + @LowSulfur_4 + @HighSulfur_4 + @Kerosene_4 + @CNG_4 + @LNG_4 + @Propane_4 + @Other_4
 
-		SELECT @OhioAccountNo = strConfiguration
-		FROM vyuTFGetReportingComponentConfiguration
-		WHERE intTaxAuthorityId = @TaxAuthorityId
-			AND strFormCode = 'TR2' AND strTemplateItemId = 'TR2-OHTR2AcctNumber'
+		DELETE @transaction
 
-		DROP TABLE #tmpTotals
-		DROP TABLE #tmpTransactions
 	END
 
 	SELECT Name = @Name
-		, [Address] = @Address
-		, City = @City
-		, [State] = @State
-		, ZipCode = @ZipCode
-		, Email = @Email
 		, TIN = @TIN
 		, OhioAccountNo = @OhioAccountNo
-		, Period = @Period
-		, AmmendedReturn = @AmmendedReturn
+		, dtmFrom = @dtmFrom
+		, dtmTo = @dtmFrom
 	
-		, Gasoline_1B = @Gasoline_1B
-		, Gasoline_2E = @Gasoline_2E
-		, Gasoline_7A = @Gasoline_7A
-		, Gasoline_7D = @Gasoline_7D
+		, Gasoline_14A = @Gasoline_14A
+		, Gasoline_14B = @Gasoline_14B
+		, Gasoline_14C = @Gasoline_14C
+		, Gasoline_4 = @Gasoline_4
 		
-		, ClearDiesel_1B = @ClearDiesel_1B
-		, ClearDiesel_2E = @ClearDiesel_2E
-		, ClearDiesel_7A = @ClearDiesel_7A
-		, ClearDiesel_7D = @ClearDiesel_7D
+		, ClearDiesel_14A = @ClearDiesel_14A
+		, ClearDiesel_14B = @ClearDiesel_14B
+		, ClearDiesel_14C = @ClearDiesel_14C
+		, ClearDiesel_4 = @ClearDiesel_4
 
-		, LowSulfur_1B = @LowSulfur_1B
-		, LowSulfur_2E = @LowSulfur_2E
-		, LowSulfur_7A = @LowSulfur_7A
-		, LowSulfur_7D = @LowSulfur_7D
+		, LowSulfur_14A = @LowSulfur_14A
+		, LowSulfur_14B = @LowSulfur_14B
+		, LowSulfur_14C = @LowSulfur_14C
+		, LowSulfur_4 = @LowSulfur_4
 
-		, HighSulfur_1B = @HighSulfur_1B
-		, HighSulfur_2E = @HighSulfur_2E
-		, HighSulfur_7A = @HighSulfur_7A
-		, HighSulfur_7D = @HighSulfur_7D
+		, HighSulfur_14A = @HighSulfur_14A
+		, HighSulfur_14B = @HighSulfur_14B
+		, HighSulfur_14C = @HighSulfur_14C
+		, HighSulfur_4 = @HighSulfur_4
 
-		, Kerosene_1B = @Kerosene_1B
-		, Kerosene_2E = @Kerosene_2E
-		, Kerosene_7A = @Kerosene_7A
-		, Kerosene_7D = @Kerosene_7D
+		, Kerosene_14A = @Kerosene_14A
+		, Kerosene_14B = @Kerosene_14B
+		, Kerosene_14C = @Kerosene_14C
+		, Kerosene_4 = @Kerosene_4
 
-		, CNG_1B = @CNG_1B
-		, CNG_2E = @CNG_2E
-		, CNG_7A = @CNG_7A
-		, CNG_7D = @CNG_7D
+		, CNG_14A = @CNG_14A
+		, CNG_14B = @CNG_14B
+		, CNG_14C = @CNG_14C
+		, CNG_4 = @CNG_4
 
-		, LNG_1B = @LNG_1B
-		, LNG_2E = @LNG_2E
-		, LNG_7A = @LNG_7A
-		, LNG_7D = @LNG_7D
+		, LNG_14A = @LNG_14A
+		, LNG_14B = @LNG_14B
+		, LNG_14C = @LNG_14C
+		, LNG_4 = @LNG_4
 
-		, Propane_1B = @Propane_1B
-		, Propane_2E = @Propane_2E
-		, Propane_7A = @Propane_7A
-		, Propane_7D = @Propane_7D
+		, Propane_14A = @Propane_14A
+		, Propane_14B = @Propane_14B
+		, Propane_14C = @Propane_14C
+		, Propane_4 = @Propane_4
 
-		, Other_1B = @Other_1B
-		, Other_2E = @Other_2E
-		, Other_7A = @Other_7A
-		, Other_7D = @Other_7D
+		, Other_14A = @Other_14A
+		, Other_14B = @Other_14B
+		, Other_14C = @Other_14C
+		, Other_4 = @Other_4
+
+		, Total_5 = @Total_5
 
 END TRY
 BEGIN CATCH

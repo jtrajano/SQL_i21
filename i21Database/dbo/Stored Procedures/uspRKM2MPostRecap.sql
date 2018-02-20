@@ -246,13 +246,17 @@ FROM tblRKM2MInquiryTransaction where intM2MInquiryId=@intM2MInquiryId and strCo
 and strPricingType = 'Cash'  and isnull(dblResultCash,0) <> 0
 
 -- Derivative Transaction
-UNION ALL
+INSERT INTO tblRKM2MPostRecap (intM2MInquiryId,
+	[dtmDate] ,[intAccountId] ,[strAccountId],[dblDebit],[dblCredit],[dblDebitUnit]  ,[dblCreditUnit]  ,[strDescription], [intCurrencyId]  ,[dtmTransactionDate],
+	[strTransactionId]  ,[intTransactionId] ,[strTransactionType],[strTransactionForm],[strModuleName] ,[intConcurrencyId],[dblExchangeRate],[dtmDateEntered],
+	[ysnIsUnposted],intEntityId,strReference,intUserId,[intSourceLocationId],[intSourceUOMId],dblPrice)
 
 SELECT @intM2MInquiryId intM2MInquiryId, @dtmGLPostDate AS dtmPostDate,
 CASE WHEN isnull(GrossPnL,0) >= 0 then @intUnrealizedGainOnFuturesId else @intUnrealizedLossOnFuturesId end intAccountId,
 CASE WHEN isnull(GrossPnL,0) >= 0 then @strUnrealizedGainOnFuturesId else @strUnrealizedLossOnFuturesId end strAccountId
 ,GrossPnL,0.0,intNet,0.0,'Mark To Market-Futures Derivative',@intCurrencyId,@dtmGLPostDate,t.strInternalTradeNo,t.intFutOptTransactionId,
-		'Mark To Market-Futures Derivative','Mark To Market','Risk Management',1,1,getdate(),0,intEntityId,@strRecordName strRecordName,@intUserId intUserId,@intLocationId intLocationId,@intUnitMeasureId intUnitMeasureId
+		'Mark To Market-Futures Derivative','Mark To Market','Risk Management',1,1,getdate(),0,intEntityId,@strRecordName strRecordName,@intUserId intUserId,
+		@intLocationId intLocationId,@intUnitMeasureId intUnitMeasureId,tr.dblPrice
 FROM @Result t
 join tblRKFutOptTransaction tr on tr.intFutOptTransactionId=t.intFutOptTransactionId
 WHERE ISNULL(GrossPnL,0) <> 0
@@ -263,7 +267,8 @@ SELECT @intM2MInquiryId intM2MInquiryId,@dtmGLPostDate AS dtmPostDate,
 	CASE WHEN isnull(GrossPnL,0) >= 0 then @intUnrealizedGainOnFuturesId else @intUnrealizedLossOnFuturesId end intAccountId,
 	CASE WHEN isnull(GrossPnL,0) >= 0 then @strUnrealizedGainOnFuturesId else @strUnrealizedLossOnFuturesId end strAccountId
 ,0.0,GrossPnL,0.0,intNet,'Mark To Market-Futures Derivative Offset',@intCurrencyId,@dtmGLPostDate,t.strInternalTradeNo,t.intFutOptTransactionId,
-'Mark To Market-Futures Derivative Offset','Mark To Market','Risk Management',1,1,getdate(),0,intEntityId,@strRecordName strRecordName,@intUserId intUserId,@intLocationId intLocationId,@intUnitMeasureId intUnitMeasureId
+'Mark To Market-Futures Derivative Offset','Mark To Market','Risk Management',1,1,getdate(),0,intEntityId,@strRecordName strRecordName,@intUserId intUserId,
+@intLocationId intLocationId,@intUnitMeasureId intUnitMeasureId,tr.dblPrice
 FROM @Result t
 JOIN tblRKFutOptTransaction tr on tr.intFutOptTransactionId=t.intFutOptTransactionId
 WHERE ISNULL(GrossPnL,0) <> 0

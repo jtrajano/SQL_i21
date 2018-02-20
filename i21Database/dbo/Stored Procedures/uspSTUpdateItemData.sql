@@ -216,6 +216,19 @@ BEGIN TRY
 				, intChildId INT
 			)
 
+			--Declare @tblTempItemGLAccount table holder
+			DECLARE @tblTempItemGLAccount TABLE 
+			(
+				strLocation NVARCHAR(250)
+				, strUpc NVARCHAR(50)
+				, strItemDescription NVARCHAR(250)
+				, strChangeDescription NVARCHAR(100)
+				, strOldData NVARCHAR(MAX)
+				, strNewData NVARCHAR(MAX)
+				, intParentId INT
+				, intChildId INT
+			)
+
 			--Declare ParentId holder
 			DECLARE @tblId TABLE 
 			(
@@ -260,9 +273,6 @@ BEGIN TRY
 	 -----------------------------------Handle Dynamic Query 1
 	 IF (@strTaxFlag1ysn IS NOT NULL)
 	 BEGIN
-		 --IF (@strDepositRequiredysn IS NOT NULL)
-		 --BEGIN
-		 --END
 		 SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 				(
 					'Tax Flag1'
@@ -280,10 +290,6 @@ BEGIN TRY
 					, 'd.intItemId'
 					, 'a.intItemLocationId' 
 				)
-
-				----TEST
-				--INSERT INTO TestDatabase.dbo.tblPerson(strFirstName, strLastName)
-				--VALUES(@SqlQuery1, 'Tax Flag1')
 
 			INSERT @tblTempOne
 			EXEC (@SqlQuery1) 
@@ -1190,7 +1196,39 @@ BEGIN TRY
 			)
 
 		INSERT @tblTempOne
+		EXEC (@SqlQuery1)
+		
+		-- =====================================================================================================
+		-- START Check if 'Cost of Goods Exist on selected Item records
+		INSERT @tblTempItemGLAccount
 		EXEC (@SqlQuery1) 
+
+		IF NOT EXISTS(SELECT * FROM @tblTempItemGLAccount WHERE strChangeDescription = 'Cost of Goods Sold Account')
+		BEGIN
+			SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
+				(
+					'Add New Cost of Goods Sold Account'
+					, ''''''
+					, '( select strAccountId from tblGLAccount where intAccountId =  CAST( ' +  CAST(LTRIM(@intNewGLPurchaseAccount) AS NVARCHAR(50)) +' AS INT))'
+					, @strCompanyLocationId
+					, @strVendorId
+					, @strCategoryId
+					, @Family
+					, @strClassId
+					, @intUpcCode
+					, @strDescription
+					, @dblPriceBetween1
+					, @dblPriceBetween2
+					, 'd.intItemId'
+					, 'e.intItemAccountId'
+				)
+
+			-- Insert here for getting intItemId's
+			INSERT @tblTempOne
+			EXEC (@SqlQuery1) 
+		END
+		-- END Check if 'Cost of Goods Exist on selected Item records
+		-- ===================================================================================================== 
 	 END
 
 
@@ -1219,6 +1257,39 @@ BEGIN TRY
 
 		INSERT @tblTempOne
 		EXEC (@SqlQuery1) 
+
+		-- =====================================================================================================
+		-- START Check if 'Sales Account Exist on selected Item records
+		INSERT @tblTempItemGLAccount
+		EXEC (@SqlQuery1) 
+
+		IF NOT EXISTS(SELECT * FROM @tblTempItemGLAccount WHERE strChangeDescription = 'Sales Account')
+		BEGIN
+			SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
+				(
+					'Add New Sales Account'
+					, ''''''
+					, '( select strAccountId from tblGLAccount where intAccountId =  CAST( ' +  CAST(LTRIM(@intNewGLSalesAccount) AS NVARCHAR(50)) +' AS INT))'
+					, @strCompanyLocationId
+					, @strVendorId
+					, @strCategoryId
+					, @Family
+					, @strClassId
+					, @intUpcCode
+					, @strDescription
+					, @dblPriceBetween1
+					, @dblPriceBetween2
+					, 'd.intItemId'
+					, 'e.intItemAccountId'
+				)
+
+			-- Insert here for getting intItemId's
+			INSERT @tblTempOne
+			EXEC (@SqlQuery1) 
+
+		END
+		-- END Check if 'Sales Account Exist on selected Item records
+		-- =====================================================================================================
 	 END
 
 
@@ -1261,7 +1332,7 @@ BEGIN TRY
 
 
 
-	 ---Update Logic-------
+--Update Logic-------
 --PRINT 'Update Logic 01'		      
 IF((@strYsnPreview != 'Y') AND (@UpdateCount > 0))
    BEGIN
@@ -1790,7 +1861,6 @@ IF((@strYsnPreview != 'Y') AND (@UpdateCount > 0))
 	 END	  
 END
 
-
 --PRINT 'Update Logic 02'	
 IF((@strYsnPreview != 'Y')
 AND(@UpdateCount > 0))
@@ -1896,7 +1966,7 @@ BEGIN
 				BEGIN
 					SET @SqlQuery1 = ' update tblICItemAccount set '  
 
-					SET @SqlQuery1 = @SqlQuery1 + ' intAccountId = ''' + LTRIM(@intNewGLPurchaseAccount) + '''' 
+					SET @SqlQuery1 = @SqlQuery1 + ' intAccountId = ' + LTRIM(@intNewGLPurchaseAccount) + ''
 
 					SET @SqlQuery1 = @SqlQuery1 + ' where 1=1 ' 
 
@@ -1943,7 +2013,9 @@ BEGIN
 					IF ((@strDescription IS NOT NULL)
 					and (@strDescription != ''))
 		 			BEGIN
-					  SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.strDescription like ''%' + LTRIM(@strDescription) + '%'' '
+					  --SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.strDescription like ''%' + LTRIM(@strDescription) + '%'' '
+					  SET @SqlQuery1 = @SqlQuery1 +  ' AND tblICItemAccount.intItemId IN 
+						   (SELECT intItemId FROM tblICItem WHERE strDescription like ''%' + LTRIM(@strDescription) + '%'')'
 					END
 
 					IF (@dblPriceBetween1 IS NOT NULL) 
@@ -1978,7 +2050,7 @@ BEGIN
 				BEGIN
 					SET @SqlQuery1 = ' update tblICItemAccount set '  
 
-					SET @SqlQuery1 = @SqlQuery1 + ' intAccountId = ''' + LTRIM(@intNewGLSalesAccount) + '''' 
+					SET @SqlQuery1 = @SqlQuery1 + ' intAccountId = ' + LTRIM(@intNewGLSalesAccount) + '' 
 
 					SET @SqlQuery1 = @SqlQuery1 + ' where 1=1 ' 
 
@@ -2023,7 +2095,9 @@ BEGIN
 					IF ((@strDescription IS NOT NULL)
 					and (@strDescription != ''))
 		 			BEGIN
-					  SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.strDescription like ''%' + LTRIM(@strDescription) + '%'' '
+					  --SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.strDescription like ''%' + LTRIM(@strDescription) + '%'' '
+					  SET @SqlQuery1 = @SqlQuery1 +  ' AND tblICItemAccount.intItemId IN 
+						   (SELECT intItemId FROM tblICItem WHERE strDescription like ''%' + LTRIM(@strDescription) + '%'')'
 					END
 
 					IF (@dblPriceBetween1 IS NOT NULL) 
@@ -2131,7 +2205,45 @@ BEGIN
 			 --END
 	  END
 END
-  
+ 
+ --Insert to tblICItemAccount
+IF(@strYsnPreview != 'Y' AND @intNewGLPurchaseAccount IS NOT NULL)
+BEGIN
+	SET @strAccountCategory = 'Cost of Goods'
+	IF EXISTS(SELECT * FROM dbo.tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory)
+	BEGIN
+		SELECT @intAccountCategoryId = intAccountCategoryId FROM dbo.tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+		
+		DECLARE @strAddCostOfGoods AS NVARCHAR(100) = 'Add New Cost of Goods Sold Account'
+
+		IF EXISTS (SELECT * FROM @tblTempOne WHERE strChangeDescription = @strAddCostOfGoods)
+		BEGIN
+			DECLARE @intItemIdCostOfGoods AS INT = (SELECT TOP 1 intParentId FROM @tblTempOne WHERE strChangeDescription = @strAddCostOfGoods)
+
+			INSERT INTO tblICItemAccount(intItemId, intAccountCategoryId, intAccountId, intConcurrencyId)
+			VALUES(@intItemIdCostOfGoods, @intAccountCategoryId, @intNewGLPurchaseAccount, 0)
+		END
+	END 
+END
+
+IF(@strYsnPreview != 'Y' AND @intNewGLSalesAccount IS NOT NULL)
+BEGIN
+	SET @strAccountCategory = 'Sales Account'
+	IF EXISTS(SELECT * FROM dbo.tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory)
+	BEGIN
+		SELECT @intAccountCategoryId = intAccountCategoryId FROM dbo.tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+		
+		DECLARE @strAddSalesAccount AS NVARCHAR(100) = 'Add New Sales Account'
+
+		IF EXISTS (SELECT * FROM @tblTempOne WHERE strChangeDescription = @strAddSalesAccount)
+		BEGIN
+			DECLARE @intItemIdSalesAccount AS INT = (SELECT TOP 1 intParentId FROM @tblTempOne WHERE strChangeDescription = @strAddSalesAccount)
+
+			INSERT INTO tblICItemAccount(intItemId, intAccountCategoryId, intAccountId, intConcurrencyId)
+			VALUES(@intItemIdSalesAccount, @intAccountCategoryId, @intNewGLSalesAccount, 0)
+		END
+	END 
+END
 
 
     --AUDIT LOG
@@ -2186,6 +2298,7 @@ END
 
 						ELSE IF(@strChangeDescription = 'Cost of Goods Sold Account' OR @strChangeDescription = 'Sales Account')
 						BEGIN
+
 							SET @ChildTableAuditLog = @ChildTableAuditLog + '{"change":"intAccountId","from":"' + @strOldData + '","to":"' + @strNewData + '","leaf":true,"iconCls":"small-gear","isField":true,"keyValue":' + CAST(@intChildId AS NVARCHAR(50)) + ',"associationKey":"tblICItemAccounts","changeDescription":"' + @strChangeDescription + '","hidden":false},'
 						END
 
@@ -2287,18 +2400,20 @@ SELECT DISTINCT strLocation
 FROM @tblTempOne
 
 
---For displaying changes made after update
-SELECT DISTINCT strLocation
-	  , strUpc
-	  , strItemDescription
-	  , strChangeDescription
-	  , strOldData
-	  , strNewData 
-FROM @tblTempOne
+----For displaying changes made after update
+--SELECT DISTINCT strLocation
+--	  , strUpc
+--	  , strItemDescription
+--	  , strChangeDescription
+--	  , strOldData
+--	  , strNewData 
+--FROM @tblTempOne
 
 
 --OLD
 --SELECT  @RecCount as RecCount,  @UpdateCount as UpdateItemDataCount	
+
+--PRINT 'FINISH'
 
 END TRY
 

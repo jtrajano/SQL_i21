@@ -178,11 +178,10 @@ BEGIN
 	SELECT strCommodityCode,strInternalTradeNo,intFutOptTransactionHeaderId,'Net Hedge','Future' strContractType,strLocationName, strFutureMonth,
 	HedgedQty,@intCommodityUnitMeasureId intFromCommodityUnitMeasureId,@intCommodityId intCommodityId,strAccountNumber,strTranType,intBrokerageAccountId,strInstrumentType,dblNoOfLot
 	FROM (
-				 SELECT strCommodityCode,strInternalTradeNo,intFutOptTransactionHeaderId,f.intCommodityId,dtmFutureMonthsDate,
+		SELECT strCommodityCode,strInternalTradeNo,intFutOptTransactionHeaderId,f.intCommodityId,dtmFutureMonthsDate,
 		dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc1.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,  
-		case when f.strBuySell = 'Buy' then ISNULL(intOpenContract, 0) else ISNULL(intOpenContract, 0) end
-			 * 	 dblContractSize) AS HedgedQty,
-		l.strLocationName,left(strFutureMonth,4) + convert(nvarchar,DATEPART(yyyy,fm.dtmFutureMonthsDate)) strFutureMonth,m.intUnitMeasureId,
+		case when f.strBuySell = 'Buy' then ISNULL(intOpenContract, 0) else ISNULL(intOpenContract, 0) end	 * 	 dblContractSize) AS HedgedQty,
+		l.strLocationName,left(strFutureMonth,4) +  '20'+convert(nvarchar(2),intYear) strFutureMonth,m.intUnitMeasureId,
 		e.strName + '-' + ba.strAccountNumber strAccountNumber,strBuySell as strTranType,f.intBrokerageAccountId,
 		case when f.intInstrumentTypeId = 1 then 'Futures' else 'Options ' end as strInstrumentType,
 		case when f.strBuySell = 'Buy' then ISNULL(intOpenContract, 0) else ISNULL(intOpenContract, 0) end dblNoOfLot 
@@ -209,7 +208,7 @@ BEGIN
 	INSERT INTO @tempFinal (strCommodityCode,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strContractType,strLocationName,strContractEndMonth,dblTotal,
 							intFromCommodityUnitMeasureId,intCommodityId,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType)	
 		SELECT DISTINCT strCommodityCode,ft.strInternalTradeNo,intFutOptTransactionHeaderId,'Net Hedge' ,'Future',strLocationName,
-				 left(strFutureMonth,4) + convert(nvarchar,DATEPART(yyyy,fm.dtmFutureMonthsDate)) strFutureMonth, 				
+				 left(strFutureMonth,4) +  '20'+convert(nvarchar(2),intYear) strFutureMonth, 				
 				CASE WHEN ft.strBuySell = 'Buy' THEN (
 						ft.intNoOfContract - isnull((SELECT sum(intMatchQty) FROM tblRKOptionsMatchPnS l
 						WHERE l.intLFutOptTransactionId = ft.intFutOptTransactionId	), 0)

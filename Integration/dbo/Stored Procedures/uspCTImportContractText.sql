@@ -100,3 +100,4 @@ BEGIN
 																	 WHEN LTRIM(RTRIM(ISNULL(sstxt_type_ind, ''))) = 'P'THEN 'Priced'
 																	 WHEN LTRIM(RTRIM(ISNULL(sstxt_type_ind, ''))) = 'U'THEN 'Unit' END
 END
+GO

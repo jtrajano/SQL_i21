@@ -40,7 +40,8 @@ BEGIN TRY
 			@strAmendedColumns			 NVARCHAR(MAX),			
 			@strSequenceHistoryId	     NVARCHAR(MAX),
 			@strAmendmentNumber			 NVARCHAR(50),
-			@intContractDetailId INT			
+			@intContractDetailId		 INT,
+			@strDetailAmendedColumns	 NVARCHAR(MAX)			
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -210,6 +211,15 @@ BEGIN TRY
 											WHERE ISNULL(AAP.ysnAmendment,0) =1
 											FOR XML PATH('')
 											), 1, 1, '')
+		
+		SELECT @strDetailAmendedColumns = STUFF((
+										  		SELECT DISTINCT ',' + LTRIM(RTRIM(AAP.strDataIndex))
+										  		FROM tblCTAmendmentApproval AAP
+										  		JOIN tblCTSequenceAmendmentLog AL ON AL.intAmendmentApprovalId =AAP.intAmendmentApprovalId
+										  		JOIN @tblSequenceHistoryId SH ON SH.intSequenceAmendmentLogId  = AL.intSequenceAmendmentLogId 
+										  		WHERE ISNULL(AAP.ysnAmendment,0) =1 AND AAP.intAmendmentApprovalId BETWEEN 7 AND 19
+										  		FOR XML PATH('')
+										  		), 1, 1, '')
 
 	END
 	IF @strAmendedColumns IS NULL SELECT @strAmendedColumns = ''
@@ -308,7 +318,8 @@ BEGIN TRY
 			CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @FirstApprovalSign ELSE NULL END AS FirstApprovalSign,
 			CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @SecondApprovalSign ELSE NULL END AS SecondApprovalSign,
 
-			@strAmendedColumns strAmendedColumns
+			@strAmendedColumns strAmendedColumns,
+			@strDetailAmendedColumns strDetailAmendedColumns
 
 	FROM	tblCTContractHeader CH
 	JOIN	tblICCommodity		CM	ON	CM.intCommodityId		=	CH.intCommodityId

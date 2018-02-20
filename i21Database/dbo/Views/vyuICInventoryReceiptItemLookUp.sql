@@ -47,7 +47,7 @@ SELECT	ReceiptItem.intInventoryReceiptId
 							WHEN rtn.strReceiptType = 'Transfer Order'
 								THEN TransferView.strTransferNo
 							WHEN rtn.strReceiptType = 'Direct'
-								THEN NULL
+								THEN rtn.strReceiptNumber 
 							ELSE 
 								NULL 
 					END 
@@ -240,6 +240,7 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 		OUTER APPLY (
 			SELECT	dblQtyReturned = ri.dblOpenReceive - ISNULL(ri.dblQtyReturned, 0) 
 					,r.strReceiptType
+					,r.strReceiptNumber
 			FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
 						ON r.intInventoryReceiptId = ri.intInventoryReceiptId				
 			WHERE	r.intInventoryReceiptId = Receipt.intSourceInventoryReceiptId

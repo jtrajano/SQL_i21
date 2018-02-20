@@ -8,7 +8,7 @@ SELECT * FROM
 			,InboundNetWeight			  = SUM(CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 ELSE BillDtl.dblQtyOrdered												  END)
 			,InboundGrossDollars		  = SUM(CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 ELSE BillDtl.dblTotal													  END)
 			,InboundTax					  = SUM(CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 ELSE BillDtl.dblTax														  END)
-			,InboundDiscount			  = SUM(ISNULL(BillByReceipt.dblTotal, 0))
+			,InboundDiscount			  = ISNULL(BillByReceipt.dblTotal, 0)
 			,InboundNetDue				  = SUM(CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 ELSE BillDtl.dblTotal + BillDtl.dblTax + ISNULL(BillByReceipt.dblTotal, 0) END)
 			,OutboundNetWeight			  = 0
 			,OutboundGrossDollars		  = 0
@@ -86,6 +86,7 @@ SELECT * FROM
 			 GROUP BY 
 			 PYMT.intPaymentId
 			,PYMT.strPaymentRecordNum
+			,BillByReceipt.dblTotal
 			,Invoice.dblPayment
 			,BillByReceiptItem.dblTotal
 			,VendorPrepayment.dblVendorPrepayment
@@ -108,7 +109,7 @@ SELECT * FROM
 			   ,InboundNetWeight	         = SUM(BillDtl.dblQtyOrdered)
 			   ,InboundGrossDollars          = SUM(BillDtl.dblTotal) 
 			   ,InboundTax					 = SUM(BillDtl.dblTax) 
-			   ,InboundDiscount				 = SUM(ISNULL(tblOtherCharge.dblTotal, 0))
+			   ,InboundDiscount				 = ISNULL(tblOtherCharge.dblTotal, 0)
 			   ,InboundNetDue		         = SUM(BillDtl.dblTotal + ISNULL(tblTax.dblTax, 0) + ISNULL(tblOtherCharge.dblTotal, 0))
 			   ,OutboundNetWeight	         = 0 
 			   ,OutboundGrossDollars         = 0 
@@ -201,6 +202,7 @@ SELECT * FROM
 			GROUP BY 
 			 PYMT.intPaymentId
 			,PYMT.strPaymentRecordNum
+			,tblOtherCharge.dblTotal
 			,Invoice.dblPayment
 			,tblAdjustment.dblTotal
 			,VendorPrepayment.dblVendorPrepayment

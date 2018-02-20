@@ -546,6 +546,7 @@ BEGIN TRY
 					,strShipToAddress1 + CASE 
 						WHEN IsNULL(strShipToAddress2, '') <> ''
 							THEN ' ' + strShipToAddress2
+							Else ''
 						END strAddress
 					,strShipToCity strCity
 					,'United States' strCountry
@@ -618,8 +619,9 @@ BEGIN TRY
 						FROM tblEMEntityLocation
 						WHERE intEntityLocationId = @intEntityLocationId
 							AND strAddress = @strShipToAddress1 + CASE 
-								WHEN IsNULL(@strShipToAddress1, '') <> ''
+								WHEN IsNULL(@strShipToAddress2, '') <> ''
 									THEN ' ' + @strShipToAddress2
+									Else ''
 								END
 							AND strCity = @strShipToCity
 							AND strState = @strShipToState
@@ -627,7 +629,11 @@ BEGIN TRY
 						)
 				BEGIN
 					UPDATE tblEMEntityLocation
-					SET strAddress = @strShipToAddress1 + ' ' + @strShipToAddress2
+					SET strAddress = @strShipToAddress1 + CASE 
+								WHEN IsNULL(@strShipToAddress2, '') <> ''
+									THEN ' ' + @strShipToAddress2
+									Else ''
+								END
 						,strCity = @strShipToCity
 						,strState = @strShipToState
 						,strZipCode = @strShipToZip

@@ -36,5 +36,6 @@ FROM tblICInventoryReceiptItemTax ReceiptItemTax
 	LEFT JOIN tblSMTaxCode TaxCode ON TaxCode.intTaxCodeId = ReceiptItemTax.intTaxCodeId
 	LEFT JOIN tblSMTaxCodeRate TaxCodeRate ON TaxCodeRate.intTaxCodeId = TaxCode.intTaxCodeId
 		AND TaxCodeRate.intUnitMeasureId = ReceiptItemTax.intUnitMeasureId
-	LEFT JOIN tblICUnitMeasure UnitMeasure ON UnitMeasure.intUnitMeasureId = ReceiptItemTax.intUnitMeasureId
+	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = ReceiptItemTax.intUnitMeasureId
+	LEFT JOIN tblICUnitMeasure UnitMeasure ON UnitMeasure.intUnitMeasureId = ItemUOM.intUnitMeasureId
 		
