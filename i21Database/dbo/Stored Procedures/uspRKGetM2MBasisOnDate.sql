@@ -1,13 +1,109 @@
 ﻿CREATE PROC [dbo].[uspRKGetM2MBasisOnDate]
-	 @intM2MBasisId INT,
-	 @intCommodityId INT= NULL,
-	 @strPricingType nvarchar(30),
-	 @strItemIds nvarchar(max),
-	 @strPeriodTos nvarchar(max)  ,
-	 @strLocationIds nvarchar(max),
-	 @strZoneIds nvarchar(max) 
+		@intM2MBasisId INT,
+		@intFutureSettlementPriceId int = null,
+        @intQuantityUOMId int = null,
+        @intPriceUOMId int = null,
+        @intCurrencyUOMId int= null,
+        @dtmTransactionDateUpTo datetime= null,
+        @strRateType nvarchar(200)= null,
+		@strPricingType nvarchar(50),
+        @intCommodityId int=Null,
+        @intLocationId int= null,
+        @intMarketZoneId int= null
 
 AS
+
+
+	DECLARE @#tempInquiryTransaction TABLE (
+							intRowNum INT,
+							intConcurrencyId INT,	
+							intContractHeaderId INT,	
+							intContractDetailId INT,	
+							strContractOrInventoryType NVARCHAR(200) COLLATE Latin1_General_CI_AS,
+							strContractSeq NVARCHAR(200) COLLATE Latin1_General_CI_AS,
+							strEntityName NVARCHAR(200) COLLATE Latin1_General_CI_AS,
+							intEntityId INT,
+							intFutureMarketId INT,
+							strFutMarketName NVARCHAR(200) COLLATE Latin1_General_CI_AS,	
+							intFutureMonthId INT,
+							strFutureMonth NVARCHAR(200) COLLATE Latin1_General_CI_AS,
+							dblOpenQty NUMERIC(24, 10),
+							strCommodityCode NVARCHAR(200) COLLATE Latin1_General_CI_AS,
+							intCommodityId INT,
+							intItemId INT,	
+							strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS,	
+							strOrgin NVARCHAR(200) COLLATE Latin1_General_CI_AS,
+							strPosition NVARCHAR(200) COLLATE Latin1_General_CI_AS,		
+							strPeriod NVARCHAR(200) COLLATE Latin1_General_CI_AS,
+							strPeriodTo NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+							strPriOrNotPriOrParPriced NVARCHAR(200) COLLATE Latin1_General_CI_AS,
+							intPricingTypeId INT,
+							strPricingType NVARCHAR(200) COLLATE Latin1_General_CI_AS,
+							dblContractBasis NUMERIC(24, 10),
+							dblFutures NUMERIC(24, 10),
+							dblCash NUMERIC(24, 10), 
+							dblCosts NUMERIC(24, 10),
+							dblMarketBasis NUMERIC(24, 10), 
+							dblFuturePrice NUMERIC(24, 10),
+							intContractTypeId INT,
+							dblAdjustedContractPrice NUMERIC(24, 10),
+							dblCashPrice NUMERIC(24, 10), 
+							dblMarketPrice NUMERIC(24, 10),
+							dblResult NUMERIC(24, 10),
+							dblResultBasis NUMERIC(24, 10),
+							dblMarketFuturesResult NUMERIC(24, 10),
+							dblResultCash NUMERIC(24, 10),
+							dblContractPrice NUMERIC(24, 10)
+							,intQuantityUOMId INT
+							,intCommodityUnitMeasureId INT
+							,intPriceUOMId INT
+							,intCent int
+							,dtmPlannedAvailabilityDate datetime
+							,dblPricedQty numeric(24,10),dblUnPricedQty numeric(24,10)
+							,dblPricedAmount numeric(24,10)
+							,intCompanyLocationId int
+							,intMarketZoneId int 
+							,strMarketZoneCode NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,strLocationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
+						)
+
+
+INSERT INTO @#tempInquiryTransaction 
+exec uspRKM2MInquiryTransaction 
+	 @intM2MBasisId= @intM2MBasisId
+	,@intFutureSettlementPriceId= @intFutureSettlementPriceId
+	,@intQuantityUOMId= @intQuantityUOMId
+	,@intPriceUOMId= @intPriceUOMId
+	,@intCurrencyUOMId= @intCurrencyUOMId
+	,@dtmTransactionDateUpTo= @dtmTransactionDateUpTo
+	,@strRateType=@strRateType
+	,@intCommodityId= @intCommodityId
+	,@intLocationId= @intLocationId
+	,@intMarketZoneId= @intMarketZoneId 
+
+
+DECLARE
+		  @strItemIds nvarchar(max)
+		 ,@strPeriodTos nvarchar(max) 
+		 ,@strLocationIds nvarchar(max)
+		 ,@strZoneIds nvarchar(max) 
+
+	--Get the unique items from transactions
+	SELECT @strItemIds = COALESCE(@strItemIds+',' ,'') + ISNULL(intItemId,'') FROM(
+		SELECT DISTINCT  CASE WHEN intItemId = NULL THEN '' ELSE CONVERT(NVARCHAR(50),intItemId) END as intItemId FROM @#tempInquiryTransaction
+	) tbl
+	
+	SELECT @strPeriodTos = COALESCE(@strPeriodTos+',' ,'') + CONVERT(NVARCHAR(50),strPeriodTo) FROM(
+		SELECT DISTINCT strPeriodTo FROM @#tempInquiryTransaction
+	) tbl
+
+	SELECT @strLocationIds = COALESCE(@strLocationIds+',' ,'') + ISNULL(intCompanyLocationId,'') FROM(
+		SELECT DISTINCT  CASE WHEN intCompanyLocationId = NULL THEN '' ELSE CONVERT(NVARCHAR(50),intCompanyLocationId) END as intCompanyLocationId FROM @#tempInquiryTransaction
+	) tbl
+
+	SELECT @strZoneIds = COALESCE(@strZoneIds+',' ,'') + ISNULL(intMarketZoneId,'') FROM(
+		SELECT DISTINCT  CASE WHEN intMarketZoneId = NULL THEN '' ELSE CONVERT(NVARCHAR(50),intMarketZoneId) END as intMarketZoneId FROM @#tempInquiryTransaction
+	) tbl
 
 
 DECLARE @strEvaluationBy NVARCHAR(50)
@@ -32,12 +128,35 @@ END
 
 
 
-SELECT bd.intM2MBasisDetailId, c.strCommodityCode,	i.strItemNo,		ca.strDescription as strOriginDest,		fm.strFutMarketName, '' as strFutureMonth,
-		bd.strPeriodTo,		strLocationName,		strMarketZoneCode,		strCurrency,		b.strPricingType,
-		strContractInventory,		strContractType,strUnitMeasure,
-		bd.intCommodityId,		bd.intItemId, bd.strOriginDest,		bd.intFutureMarketId,		bd.intFutureMonthId,
-		bd.intCompanyLocationId,		bd.intMarketZoneId,		bd.intCurrencyId,	bd.intPricingTypeId,		bd.strContractInventory,
-		bd.intContractTypeId,		bd.dblCashOrFuture,		bd.dblBasisOrDiscount,		bd.intUnitMeasureId	,i.strMarketValuation ,0 as intConcurrencyId	
+SELECT 
+	 bd.intM2MBasisDetailId
+	,c.strCommodityCode
+	,i.strItemNo
+	,ca.strDescription as strOriginDest
+	,fm.strFutMarketName
+	,'' as strFutureMonth
+	,bd.strPeriodTo
+	,strLocationName
+	,strMarketZoneCode
+	,strCurrency
+	,b.strPricingType
+	,strContractInventory
+	,strContractType
+	,strUnitMeasure
+	,bd.intCommodityId
+	,bd.intItemId
+	,bd.intFutureMarketId
+	,bd.intFutureMonthId
+	,bd.intCompanyLocationId
+	,bd.intMarketZoneId
+	,bd.intCurrencyId
+	,bd.intPricingTypeId
+	,bd.intContractTypeId
+	,bd.dblCashOrFuture
+	,bd.dblBasisOrDiscount
+	,bd.intUnitMeasureId
+	,i.strMarketValuation
+	,0 as intConcurrencyId	
 FROM tblRKM2MBasis b
 JOIN tblRKM2MBasisDetail bd on b.intM2MBasisId=bd.intM2MBasisId
 LEFT JOIN tblICCommodity c on c.intCommodityId=bd.intCommodityId
@@ -58,4 +177,3 @@ WHERE b.intM2MBasisId= @intM2MBasisId
  and ISNULL(bd.intCompanyLocationId,0) IN(select case when Item = '' then 0 else Ltrim(rtrim(Item)) Collate Latin1_General_CI_AS end  from [dbo].[fnSplitString](@strLocationIds, ',')) --added this be able to filter by location to (RM-739)
  and ISNULL(bd.intMarketZoneId,0) IN(select case when Item = '' then 0 else Ltrim(rtrim(Item)) Collate Latin1_General_CI_AS end  from [dbo].[fnSplitString](@strZoneIds, ',')) --added this be able to filter by zone to (RM-739)
 order by i.strMarketValuation,fm.strFutMarketName,strCommodityCode,strItemNo,strLocationName, convert(datetime,'01 '+strPeriodTo)
-
