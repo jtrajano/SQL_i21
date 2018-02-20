@@ -40,7 +40,8 @@ BEGIN TRY
 			@strAmendedColumns NVARCHAR(MAX),
 			@intContractDetailId INT,
 			@TotalAtlasLots		 INT,
-			@strSequenceHistoryId	     NVARCHAR(MAX)	
+			@strSequenceHistoryId	     NVARCHAR(MAX),
+			@strDetailAmendedColumns	 NVARCHAR(MAX)	
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -212,6 +213,15 @@ BEGIN TRY
 											WHERE ISNULL(AAP.ysnAmendment,0) =1
 											FOR XML PATH('')
 											), 1, 1, '')
+        
+		SELECT @strDetailAmendedColumns = STUFF((
+										  		SELECT DISTINCT ',' + LTRIM(RTRIM(AAP.strDataIndex))
+										  		FROM tblCTAmendmentApproval AAP
+										  		JOIN tblCTSequenceAmendmentLog AL ON AL.intAmendmentApprovalId =AAP.intAmendmentApprovalId
+										  		JOIN @tblSequenceHistoryId SH ON SH.intSequenceAmendmentLogId  = AL.intSequenceAmendmentLogId 
+										  		WHERE ISNULL(AAP.ysnAmendment,0) =1 AND AAP.intAmendmentApprovalId BETWEEN 7 AND 19
+										  		FOR XML PATH('')
+										  		), 1, 1, '')
 
 	END
 
@@ -327,7 +337,7 @@ BEGIN TRY
 													  	  CASE WHEN CH.intPricingTypeId=2 THEN SQ.strFixationBy +'''s Call ('+SQ.strFutMarketName+')'
 													  	  ELSE NULL END
 													  END 
-		
+			,strDetailAmendedColumns				= @strDetailAmendedColumns
 		     
 
 	FROM	tblCTContractHeader CH
