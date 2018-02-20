@@ -124,41 +124,6 @@ BEGIN
 	RAISERROR('Cannot find the transaction.', 11, 1)
 	GOTO Post_Rollback
 END 
-
--- Validate the date against the FY Periods
-IF EXISTS (SELECT 1 WHERE [dbo].isOpenAccountingDate(@dtmDate) = 0) AND @ysnRecap = 0
-BEGIN 
-	-- Unable to find an open fiscal year period to match the transaction date.
-	RAISERROR('Unable to find an open fiscal year period to match the transaction date.', 11, 1)
-	GOTO Post_Rollback
-END
-
--- Validate the date against the FY Periods per module
-IF EXISTS (SELECT 1 WHERE [dbo].isOpenAccountingDateByModule(@dtmDate,@MODULE_NAME) = 0) AND @ysnRecap = 0
-BEGIN 
-	-- Unable to find an open fiscal year period to match the transaction date and the given module.
-	IF @ysnPost = 1
-	BEGIN
-		--You cannot %s transaction under a closed module.
-		RAISERROR('You cannot %s transaction under a closed module.', 11, 1, 'Post')
-		GOTO Post_Rollback
-	END
-	ELSE
-	BEGIN
-		--You cannot %s transaction under a closed module.
-		RAISERROR('You cannot %s transaction under a closed module.', 11, 1, 'Unpost')
-		GOTO Post_Rollback
-	END
-END
-
--- Check the amount in Misc Check. See if it is balanced. 
-IF ISNULL(@dblAmountDetailTotal, 0) <> ISNULL(@dblAmount, 0) AND @ysnRecap = 0
-BEGIN
-	-- The debit and credit amounts are not balanced.
-	RAISERROR('The debit and credit amounts are not balanced.', 11, 1)
-	GOTO Post_Rollback
-END 
-
 -- Check if the transaction is already posted
 IF @ysnPost = 1 AND @ysnTransactionPostedFlag = 1
 BEGIN 
@@ -174,26 +139,58 @@ BEGIN
 	RAISERROR('The transaction is already unposted.', 11, 1)
 	GOTO Post_Rollback
 END 
-
--- Check if the transaction is already reconciled
-IF @ysnPost = 0 AND @ysnRecap = 0 AND @ysnTransactionClearedFlag = 1
+IF @ysnRecap = 0
 BEGIN
-	-- 'The transaction is already cleared.'
-	RAISERROR('The transaction is already cleared.', 11, 1)
-	GOTO Post_Rollback
-END
+-- Validate the date against the FY Periods
+	IF EXISTS (SELECT 1 WHERE [dbo].isOpenAccountingDate(@dtmDate) = 0)
+	BEGIN 
+		-- Unable to find an open fiscal year period to match the transaction date.
+		RAISERROR('Unable to find an open fiscal year period to match the transaction date.', 11, 1)
+		GOTO Post_Rollback
+	END
 
--- Check if the Check is already voided.
-IF @ysnRecap = 0 AND @ysnCheckVoid = 1
-BEGIN
-	-- 'Check is already voided.'
-	RAISERROR('Check is already voided.', 11, 1)
-	GOTO Post_Rollback
-END
+	-- Validate the date against the FY Periods per module
+	IF EXISTS (SELECT 1 WHERE [dbo].isOpenAccountingDateByModule(@dtmDate,@MODULE_NAME) = 0)
+	BEGIN 
+		-- Unable to find an open fiscal year period to match the transaction date and the given module.
+		IF @ysnPost = 1
+		BEGIN
+			--You cannot %s transaction under a closed module.
+			RAISERROR('You cannot %s transaction under a closed module.', 11, 1, 'Post')
+			GOTO Post_Rollback
+		END
+		ELSE
+		BEGIN
+			--You cannot %s transaction under a closed module.
+			RAISERROR('You cannot %s transaction under a closed module.', 11, 1, 'Unpost')
+			GOTO Post_Rollback
+		END
+	END
 
--- Check if the bank account is inactive
-IF @ysnRecap = 0 
-BEGIN
+	-- Check the amount in Misc Check. See if it is balanced. 
+	IF ISNULL(@dblAmountDetailTotal, 0) <> ISNULL(@dblAmount, 0)
+	BEGIN
+		-- The debit and credit amounts are not balanced.
+		RAISERROR('The debit and credit amounts are not balanced.', 11, 1)
+		GOTO Post_Rollback
+	END 
+	-- Check if the transaction is already reconciled
+	IF @ysnPost = 0 AND @ysnTransactionClearedFlag = 1
+	BEGIN
+		-- 'The transaction is already cleared.'
+		RAISERROR('The transaction is already cleared.', 11, 1)
+		GOTO Post_Rollback
+	END
+
+	-- Check if the Check is already voided.
+	IF @ysnCheckVoid = 1
+	BEGIN
+		-- 'Check is already voided.'
+		RAISERROR('Check is already voided.', 11, 1)
+		GOTO Post_Rollback
+	END
+
+	-- Check if the bank account is inactive
 	SELECT	@ysnBankAccountIdInactive = 1
 	FROM	tblCMBankAccount
 	WHERE	intBankAccountId = @intBankAccountId
@@ -205,49 +202,49 @@ BEGIN
 		RAISERROR('The bank account or its associated GL account is inactive.', 11, 1)
 		GOTO Post_Rollback
 	END
-END 
+	
 
--- Check Company preference: Allow User Self Post
-IF @ysnAllowUserSelfPost = 1 AND @intEntityId <> @intCreatedEntityId AND @ysnRecap = 0 
-BEGIN 
-	-- 'You cannot %s transactions you did not create. Please contact your local administrator.'
-	IF @ysnPost = 1	
+	-- Check Company preference: Allow User Self Post
+	IF @ysnAllowUserSelfPost = 1 AND @intEntityId <> @intCreatedEntityId
 	BEGIN 
-		RAISERROR('You cannot %s transactions you did not create. Please contact your local administrator.', 11, 1, 'Post')
+		-- 'You cannot %s transactions you did not create. Please contact your local administrator.'
+		IF @ysnPost = 1	
+		BEGIN 
+			RAISERROR('You cannot %s transactions you did not create. Please contact your local administrator.', 11, 1, 'Post')
+			GOTO Post_Rollback
+		END 
+		IF @ysnPost = 0
+		BEGIN
+			RAISERROR('You cannot %s transactions you did not create. Please contact your local administrator.', 11, 1, 'Unpost')
+			GOTO Post_Rollback		
+		END
+	END 
+
+	-- Check if amount is zero. 
+	IF @dblAmount = 0 AND @ysnPost = 1
+	BEGIN 
+		-- Cannot post a zero-value transaction.
+		RAISERROR('Cannot post a zero-value transaction.', 11, 1)
 		GOTO Post_Rollback
 	END 
+
+	-- Check if transaction is under check printing. 
 	IF @ysnPost = 0
 	BEGIN
-		RAISERROR('You cannot %s transactions you did not create. Please contact your local administrator.', 11, 1, 'Unpost')
-		GOTO Post_Rollback		
-	END
-END 
-
--- Check if amount is zero. 
-IF @dblAmount = 0 AND @ysnPost = 1 AND @ysnRecap = 0
-BEGIN 
-	-- Cannot post a zero-value transaction.
-	RAISERROR('Cannot post a zero-value transaction.', 11, 1)
-	GOTO Post_Rollback
-END 
-
--- Check if transaction is under check printing. 
-IF @ysnPost = 0 AND @ysnRecap = 0
-BEGIN
-	IF EXISTS (
-			SELECT	TOP 1 1 
-			FROM	tblCMBankTransaction a INNER JOIN tblCMCheckPrintJobSpool b
-						ON a.intBankAccountId = b.intBankAccountId
-						AND a.intTransactionId = b.intTransactionId
-			WHERE	a.intTransactionId = @intTransactionId 
-		)
-	BEGIN
-		-- Unable to unpost while check printing is in progress.
-		RAISERROR('Unable to unpost while check printing is in progress.', 11, 1)
-		GOTO Post_Rollback
-	END
-END 
-
+		IF EXISTS (
+				SELECT	TOP 1 1 
+				FROM	tblCMBankTransaction a INNER JOIN tblCMCheckPrintJobSpool b
+							ON a.intBankAccountId = b.intBankAccountId
+							AND a.intTransactionId = b.intTransactionId
+				WHERE	a.intTransactionId = @intTransactionId 
+			)
+		BEGIN
+			-- Unable to unpost while check printing is in progress.
+			RAISERROR('Unable to unpost while check printing is in progress.', 11, 1)
+			GOTO Post_Rollback
+		END
+	END 
+END
 --=====================================================================================================================================
 -- 	PROCESSING OF THE G/L ENTRIES. 
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -354,28 +351,12 @@ BEGIN
 			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 				ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId
 	WHERE	A.strTransactionId = @strTransactionId		
-
-	
 	IF @@ERROR <> 0	GOTO Post_Rollback
-	
-	-- Update the posted flag in the transaction table
-	UPDATE tblCMBankTransaction
-	SET		ysnPosted = 1
-			,intConcurrencyId += 1 
-	WHERE	strTransactionId = @strTransactionId
-	
 END
 ELSE IF @ysnPost = 0
 BEGIN
 	-- Reverse the G/L entries
 	EXEC dbo.uspCMReverseGLEntries @strTransactionId, @GL_DETAIL_CODE, NULL, @intUserId, @strBatchId
-	IF @@ERROR <> 0	GOTO Post_Rollback
-	
-	-- Update the posted flag in the transaction table
-	UPDATE tblCMBankTransaction
-	SET		ysnPosted = 0
-			,intConcurrencyId += 1 
-	WHERE	strTransactionId = @strTransactionId
 	IF @@ERROR <> 0	GOTO Post_Rollback
 END
 
@@ -384,65 +365,73 @@ END
 ---------------------------------------------------------------------------------------------------------------------------------------
 --EXEC dbo.uspCMBookGLEntries @ysnPost, @ysnRecap, @isSuccessful OUTPUT, @message_id OUTPUT
 --IF @isSuccessful = 0 GOTO Post_Rollback
-INSERT INTO @GLEntries(
-			[strTransactionId]
-			,[intTransactionId]
-			,[intAccountId]
-			,[strDescription]
-			,[strReference]	
-			,[dtmTransactionDate]
-			,[dblDebit]
-			,[dblCredit]
-			,[dblDebitUnit]
-			,[dblCreditUnit]
-			,[dtmDate]
-			,[ysnIsUnposted]
-			,[intConcurrencyId]	
-			,[intCurrencyId]
-			,[dblExchangeRate]
-			,[intUserId]
-			,[intEntityId]			
-			,[dtmDateEntered]
-			,[strBatchId]
-			,[strCode]			
-			,[strJournalLineDescription]
-			,[intJournalLineNo]
-			,[strTransactionType]
-			,[strTransactionForm]
-			,[strModuleName]	
-			) 
-SELECT
-			[strTransactionId]
-			,[intTransactionId]
-			,[intAccountId]
-			,[strDescription]
-			,[strReference]	
-			,[dtmTransactionDate]
-			,[dblDebit]
-			,[dblCredit]
-			,[dblDebitUnit]
-			,[dblCreditUnit]
-			,[dtmDate]
-			,[ysnIsUnposted]
-			,[intConcurrencyId]	
-			,[intCurrencyId]
-			,[dblExchangeRate]
-			,[intUserId]
-			,[intEntityId]			
-			,[dtmDateEntered]
-			,[strBatchId]
-			,[strCode]			
-			,[strJournalLineDescription]
-			,[intJournalLineNo]
-			,[strTransactionType]
-			,[strTransactionForm]
-			,[strModuleName]	 
-FROM #tmpGLDetail
+IF @ysnRecap = 0
+BEGIN
+	INSERT INTO @GLEntries(
+				[strTransactionId]
+				,[intTransactionId]
+				,[intAccountId]
+				,[strDescription]
+				,[strReference]	
+				,[dtmTransactionDate]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[dtmDate]
+				,[ysnIsUnposted]
+				,[intConcurrencyId]	
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[intUserId]
+				,[intEntityId]			
+				,[dtmDateEntered]
+				,[strBatchId]
+				,[strCode]			
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]	
+				) 
+	SELECT
+				[strTransactionId]
+				,[intTransactionId]
+				,[intAccountId]
+				,[strDescription]
+				,[strReference]	
+				,[dtmTransactionDate]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[dtmDate]
+				,[ysnIsUnposted]
+				,[intConcurrencyId]	
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[intUserId]
+				,[intEntityId]			
+				,[dtmDateEntered]
+				,[strBatchId]
+				,[strCode]			
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]	 
+	FROM #tmpGLDetail
+	DECLARE @PostResult INT
 
-EXEC uspGLBookEntries @GLEntries, @ysnPost
+	EXEC @PostResult = uspGLBookEntries @GLEntries, @ysnPost
 		
-IF @@ERROR <> 0	GOTO Post_Rollback
-
+	IF @@ERROR <> 0	 OR @PostResult <> 0 GOTO Post_Rollback
+	UPDATE tblCMBankTransaction
+	SET		ysnPosted = @ysnPost
+			,intConcurrencyId += 1 
+	WHERE	strTransactionId = @strTransactionId
+	IF @@ERROR <> 0	GOTO Post_Rollback
+END
 --=====================================================================================================================================
 -- 	Check if process is only a RECAP
 ---------------------------------------------------------------------------------------------------------------------------------------
