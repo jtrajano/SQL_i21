@@ -1245,7 +1245,8 @@ BEGIN TRY
 										   , intItemUOMId			INT
 										   , intLocationId			INT
 										   , intSublocationId		INT
-										   , intStorageLocationId	INT)
+										   , intStorageLocationId	INT
+										   , dtmPostDate			DATETIME)
 
 		
 			INSERT INTO @FinishedGoodItems
@@ -1255,7 +1256,8 @@ BEGIN TRY
 				 , ID.intItemUOMId
 				 , I.intCompanyLocationId
 				 , ICL.intSubLocationId
-				 , ID.intStorageLocationId 
+				 , ID.intStorageLocationId
+				 ,I.dtmPostDate
 			FROM tblARInvoice I
 				INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
 				INNER JOIN tblICItem ICI ON ID.intItemId = ICI.intItemId
@@ -1275,6 +1277,7 @@ BEGIN TRY
 						  , @intLocationId			INT
 						  , @intSublocationId		INT
 						  , @intStorageLocationId	INT
+						  , @dtmPostDate			DATETIME
 			
 					SELECT TOP 1 
 						  @intInvoiceDetailId	= intInvoiceDetailId
@@ -1284,6 +1287,7 @@ BEGIN TRY
 						, @intLocationId		= intLocationId
 						, @intSublocationId		= intSublocationId
 						, @intStorageLocationId	= intStorageLocationId
+						, @dtmPostDate			= dtmPostDate 
 					FROM @FinishedGoodItems 
 				  
 					BEGIN TRY
@@ -1299,7 +1303,8 @@ BEGIN TRY
 								@intSubLocationId		= @intSublocationId,
 								@intStorageLocationId	= @intStorageLocationId,
 								@intUserId				= @userId,
-								@dblMaxQtyToProduce		= @dblMaxQuantity OUT		
+								@dblMaxQtyToProduce		= @dblMaxQuantity OUT,
+								@dtmDate				= @dtmPostDate
 
 							IF ISNULL(@dblMaxQuantity, 0) > 0
 								BEGIN
@@ -1313,7 +1318,8 @@ BEGIN TRY
 										@intSubLocationId		= @intSublocationId,
 										@intStorageLocationId	= @intStorageLocationId,
 										@intUserId				= @userId,
-										@dblMaxQtyToProduce		= @dblMaxQuantity OUT
+										@dblMaxQtyToProduce		= @dblMaxQuantity OUT,
+										@dtmDate				= @dtmPostDate
 								END
 						END
 					ELSE
