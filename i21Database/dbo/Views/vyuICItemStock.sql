@@ -21,4 +21,4 @@ FROM	tblICItemStock s
 			WHERE	l.intItemLocationId = s.intItemLocationId
 					AND l.intItemId = s.intItemId
 		) locationName
-
+WHERE	locationName.strLocationName IS NOT NULL 
