@@ -1,9 +1,96 @@
 ﻿CREATE PROC [dbo].[uspRKM2MGetClosingPrice]   
-   @dtmPriceDate DateTime ,
-   @intCommodityId int= null,
-   @strPricingType nvarchar(30),
-   @strFutureMonthIds nvarchar(max)
+  		@intM2MBasisId INT,
+		@intFutureSettlementPriceId int = null,
+        @intQuantityUOMId int = null,
+        @intPriceUOMId int = null,
+        @intCurrencyUOMId int= null,
+        @dtmTransactionDateUpTo datetime= null,
+        @strRateType nvarchar(200)= null,
+		@strPricingType nvarchar(50),
+        @intCommodityId int=Null,
+        @intLocationId int= null,
+        @intMarketZoneId int= null
 AS  
+
+
+DECLARE @#tempInquiryTransaction TABLE (
+							intRowNum INT,
+							intConcurrencyId INT,	
+							intContractHeaderId INT,	
+							intContractDetailId INT,	
+							strContractOrInventoryType NVARCHAR(200) COLLATE Latin1_General_CI_AS,
+							strContractSeq NVARCHAR(200) COLLATE Latin1_General_CI_AS,
+							strEntityName NVARCHAR(200) COLLATE Latin1_General_CI_AS,
+							intEntityId INT,
+							intFutureMarketId INT,
+							strFutMarketName NVARCHAR(200) COLLATE Latin1_General_CI_AS,	
+							intFutureMonthId INT,
+							strFutureMonth NVARCHAR(200) COLLATE Latin1_General_CI_AS,
+							dblOpenQty NUMERIC(24, 10),
+							strCommodityCode NVARCHAR(200) COLLATE Latin1_General_CI_AS,
+							intCommodityId INT,
+							intItemId INT,	
+							strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS,	
+							strOrgin NVARCHAR(200) COLLATE Latin1_General_CI_AS,
+							strPosition NVARCHAR(200) COLLATE Latin1_General_CI_AS,		
+							strPeriod NVARCHAR(200) COLLATE Latin1_General_CI_AS,
+							strPeriodTo NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+							strPriOrNotPriOrParPriced NVARCHAR(200) COLLATE Latin1_General_CI_AS,
+							intPricingTypeId INT,
+							strPricingType NVARCHAR(200) COLLATE Latin1_General_CI_AS,
+							dblContractBasis NUMERIC(24, 10),
+							dblFutures NUMERIC(24, 10),
+							dblCash NUMERIC(24, 10), 
+							dblCosts NUMERIC(24, 10),
+							dblMarketBasis NUMERIC(24, 10), 
+							dblFuturePrice NUMERIC(24, 10),
+							intContractTypeId INT,
+							dblAdjustedContractPrice NUMERIC(24, 10),
+							dblCashPrice NUMERIC(24, 10), 
+							dblMarketPrice NUMERIC(24, 10),
+							dblResult NUMERIC(24, 10),
+							dblResultBasis NUMERIC(24, 10),
+							dblMarketFuturesResult NUMERIC(24, 10),
+							dblResultCash NUMERIC(24, 10),
+							dblContractPrice NUMERIC(24, 10)
+							,intQuantityUOMId INT
+							,intCommodityUnitMeasureId INT
+							,intPriceUOMId INT
+							,intCent int
+							,dtmPlannedAvailabilityDate datetime
+							,dblPricedQty numeric(24,10),dblUnPricedQty numeric(24,10)
+							,dblPricedAmount numeric(24,10)
+							,intCompanyLocationId int
+							,intMarketZoneId int 
+							,strMarketZoneCode NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,strLocationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
+						)
+
+
+INSERT INTO @#tempInquiryTransaction 
+exec uspRKM2MInquiryTransaction 
+	 @intM2MBasisId= @intM2MBasisId
+	,@intFutureSettlementPriceId= @intFutureSettlementPriceId
+	,@intQuantityUOMId= @intQuantityUOMId
+	,@intPriceUOMId= @intPriceUOMId
+	,@intCurrencyUOMId= @intCurrencyUOMId
+	,@dtmTransactionDateUpTo= @dtmTransactionDateUpTo
+	,@strRateType=@strRateType
+	,@intCommodityId= @intCommodityId
+	,@intLocationId= @intLocationId
+	,@intMarketZoneId= @intMarketZoneId 
+
+	DECLARE
+		  @dtmPriceDate datetime
+		 ,@strFutureMonthIds nvarchar(max)
+
+
+	SELECT @dtmPriceDate = dtmPriceDate FROM tblRKFuturesSettlementPrice WHERE intFutureSettlementPriceId = @intFutureSettlementPriceId
+
+	SELECT @strFutureMonthIds = COALESCE(@strFutureMonthIds+',' ,'') + ISNULL(intFutureMonthId,'') FROM(
+		SELECT DISTINCT  CASE WHEN intFutureMonthId = NULL THEN '' ELSE CONVERT(NVARCHAR(50),intFutureMonthId) END as intFutureMonthId FROM @#tempInquiryTransaction
+	) tbl
+
 
 SELECT CONVERT(INT,intRowNum) as intRowNum,intFutureMarketId,strFutMarketName,intFutureMonthId,strFutureMonth,dblClosingPrice,intFutSettlementPriceMonthId,intConcurrencyId from (
 	SELECT 
