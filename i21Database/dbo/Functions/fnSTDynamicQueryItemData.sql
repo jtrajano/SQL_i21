@@ -37,7 +37,7 @@ AS BEGIN
 						   + ' JOIN tblICItemUOM b ON a.intItemId = b.intItemId' + CHAR(13)
 						   + ' JOIN tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId' + CHAR(13)
 						   + ' JOIN tblICItem d ON a.intItemId = d.intItemId' + CHAR(13)
-						   + ' JOIN tblICItemAccount e ON a.intItemId = e.intItemId ' + CHAR(13)
+						   + ' LEFT JOIN tblICItemAccount e ON a.intItemId = e.intItemId ' + CHAR(13) --Will use left join, not all items has GL Account
 
 		   SET @strGeneratedSql = @strGeneratedSql + ' WHERE 1=1 ' 
 
@@ -115,6 +115,24 @@ AS BEGIN
 
 					SELECT @intAccountCategoryId = intAccountCategoryId FROM dbo.tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
 					SET @strGeneratedSql = @strGeneratedSql +  ' and e.intAccountCategoryId = ' + CAST(@intAccountCategoryId AS NVARCHAR(50)) + ' '
+				END 
+		   END
+		   ELSE IF(@strChangeDescription = 'Add New Cost of Goods Sold Account')
+		   BEGIN
+				SET @strAccountCategory = 'Cost of Goods'
+				IF EXISTS(SELECT * FROM dbo.tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory)
+				BEGIN
+					SELECT @intAccountCategoryId = intAccountCategoryId FROM dbo.tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+					SET @strGeneratedSql = @strGeneratedSql +  ' and (e.intAccountCategoryId IS NULL OR e.intAccountCategoryId != ' + CAST(@intAccountCategoryId AS NVARCHAR(50)) + ') '
+				END 
+		   END
+		   ELSE IF(@strChangeDescription = 'Add New Sales Account')
+		   BEGIN
+				SET @strAccountCategory = 'Sales Account'
+				IF EXISTS(SELECT * FROM dbo.tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory)
+				BEGIN
+					SELECT @intAccountCategoryId = intAccountCategoryId FROM dbo.tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+					SET @strGeneratedSql = @strGeneratedSql +  ' and (e.intAccountCategoryId IS NULL OR e.intAccountCategoryId != ' + CAST(@intAccountCategoryId AS NVARCHAR(50)) + ') '
 				END 
 		   END
 		   --For now Variance account will be remove
