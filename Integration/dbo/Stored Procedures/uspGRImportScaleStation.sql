@@ -451,3 +451,4 @@ BEGIN
 	  JOIN tblICUnitMeasure UM ON UM.strUnitMeasure collate Latin1_General_CI_AS = SC.gasci_wgt_desc OR UM.strUnitMeasure+ 'S' collate Latin1_General_CI_AS = gasci_wgt_desc
 
 END
+GO

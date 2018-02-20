@@ -100,3 +100,4 @@ BEGIN
 		 WHERE t.Entity IS NOT NULL AND t.Percentage >0
 
 END
+GO

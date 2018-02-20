@@ -27,3 +27,4 @@ null 'intCategoryId',
 (select intItemId from tblICItem where strItemNo = rtrim(ptcpl_itm_class) collate Latin1_General_CI_AS) 'intItemId', ptcpl_price, 1 'ysnActive', 1 'intConcurrencyId'
 from ptcplmst
 
+GO

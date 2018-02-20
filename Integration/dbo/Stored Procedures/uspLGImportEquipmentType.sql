@@ -37,5 +37,4 @@ BEGIN
 	ORDER BY x.strEquipmentType ASC	
 END	
 
-
-
+GO
