@@ -990,6 +990,7 @@ BEGIN TRY
 					,[intContractHeaderId]
 					,[intContractDetailId]
 					,[intUnitOfMeasureId]
+					,[intCostUOMId]
 					,[dblWeightUnitQty]
 					,[dblCostUnitQty]
 					,[dblUnitQty]
@@ -1005,6 +1006,7 @@ BEGIN TRY
 					,[intContractHeaderId]		= a.[intContractHeaderId]
 					,[intContractDetailId]		= a.[intContractDetailId]
 					,[intUnitOfMeasureId]		= b.intItemUOMId
+					,[intCostUOMId]				= b.intItemUOMId
 					,[dblWeightUnitQty]			= 1 
 					,[dblCostUnitQty]			= 1 
 					,[dblUnitQty]				= 1
@@ -1028,6 +1030,7 @@ BEGIN TRY
 					,[intContractHeaderId]
 					,[intContractDetailId]
 					,[intUnitOfMeasureId]
+					,[intCostUOMId]
 					,[dblWeightUnitQty]
 					,[dblCostUnitQty]
 					,[dblUnitQty]
@@ -1057,6 +1060,7 @@ BEGIN TRY
 				,[intContractHeaderId] = NULL
 				,[intContractDetailId] = NULL
 				,[intUnitOfMeasureId] = ReceiptCharge.intCostUOMId
+				,[intCostUOMId]	= ReceiptCharge.intCostUOMId
 				,[dblWeightUnitQty] = 1
 				,[dblCostUnitQty] = 1
 				,[dblUnitQty] =1
@@ -1093,6 +1097,7 @@ BEGIN TRY
 					,[intContractHeaderId]
 					,[intContractDetailId]
 					,[intUnitOfMeasureId]
+					,[intCostUOMId]
 					,[dblWeightUnitQty]
 					,[dblCostUnitQty]
 					,[dblUnitQty]
@@ -1125,6 +1130,7 @@ BEGIN TRY
 				 ,[intContractHeaderId]	  = CD.[intContractHeaderId]
 				 ,[intContractDetailId]	  = CD.[intContractDetailId]
 				 ,[intUnitOfMeasureId]	  = CC.intItemUOMId
+				 ,[intCostUOMId]		  = CC.intItemUOMId
 				 ,[dblWeightUnitQty]	  = 1 
 				 ,[dblCostUnitQty]		  = 1 
 				 ,[dblUnitQty]			  = 1
