@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTReportContractDetail]
 	
-	@intContractHeaderId INT
+	 @intContractHeaderId INT
+	,@strDetailAmendedColumns NVARCHAR(MAX) = NULL
 	
 AS
 
@@ -106,7 +107,7 @@ BEGIN TRY
 			dblNoOfLots				= CASE	WHEN	CD.intPricingTypeId = 1 THEN NULL
 											WHEN 	CD.intPricingTypeId = 2	THEN dbo.fnRemoveTrailingZeroes(@dblNoOfLots)
 									  END,
-			strAmendedColumns		= AM.strAmendedColumns,
+			strAmendedColumns		= CASE WHEN ISNULL(@strDetailAmendedColumns,'') <>'' THEN @strDetailAmendedColumns ELSE  AM.strAmendedColumns END,
 			strCommodityCode		= CO.strCommodityCode,
 			strERPBatchNumber		= CD.strERPBatchNumber,
 			strItemSpecification	= CD.strItemSpecification
