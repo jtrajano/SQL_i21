@@ -14,12 +14,15 @@ BEGIN
 		  , @strCustomerAccount		NVARCHAR(100)	= ''
 		  , @dblCustomerAccount		NVARCHAR(100)	= CONVERT(NVARCHAR(100), 0.00)
 		  ,	@dtmDate				NVARCHAR(100)	= CONVERT(NVARCHAR(100), GETDATE(), 110)
+		  , @dtmExpirationDate		NVARCHAR(100)	= CONVERT(NVARCHAR(100), GETDATE(), 110)
 		  , @dtmTransactionDate		NVARCHAR(100)	= CONVERT(NVARCHAR(100), GETDATE(), 110)
 		  , @strTransactionNumber	NVARCHAR(100)	= ''
 		  , @dblTransactionAmount	NVARCHAR(100)	= CONVERT(NVARCHAR(100), 0.00)
 		  , @dblTransactionTotal	NVARCHAR(100)	= CONVERT(NVARCHAR(100), 0.00)
 		  , @dblCustomerTotalAR		NVARCHAR(100)	= CONVERT(NVARCHAR(100), 0.00)
 		  , @strTerm				NVARCHAR(100)	= ''
+		  , @strContactName			NVARCHAR(100)	= ''
+		  , @strCurrentUser			NVARCHAR(100)	= ''
 		  , @strCompanyName			NVARCHAR(100)	= ''
 		  , @strCreatedByName		NVARCHAR(100)	= ''
 		  , @strCreatedByPhone		NVARCHAR(100)	= ''
@@ -37,12 +40,14 @@ BEGIN
 							   , @strCustomerAccount	= CUSTOMER.strAccountNumber
 							   , @dblCustomerAccount	= CONVERT(NVARCHAR(100), ISNULL(CUSTOMER.dblARBalance, 0.00))
 							   , @dtmDate				= CONVERT(NVARCHAR(100), ISNULL(SO.dtmDate, GETDATE()), 110)
+							   , @dtmExpirationDate		= CONVERT(NVARCHAR(100), ISNULL(SO.dtmExpirationDate, GETDATE()), 110)
 							   , @dtmTransactionDate	= CONVERT(NVARCHAR(100), ISNULL(SO.dtmDate, GETDATE()), 110)
 							   , @strTransactionNumber	= SO.strSalesOrderNumber
 							   , @dblTransactionAmount	= CONVERT(NVARCHAR(100), ISNULL(SO.dblSalesOrderTotal, 0.00))
 							   , @dblTransactionTotal	= CONVERT(NVARCHAR(100), ISNULL(SO.dblSalesOrderTotal, 0.00))
 							   , @dblCustomerTotalAR	= CONVERT(NVARCHAR(100), ISNULL(CUSTOMER.dblARBalance, 0.00))	
 							   , @strTerm				= TERM.strTerm
+							   , @strContactName		= CONTACT.strName
 							   , @strCompanyName		= COMPANY.strCompanyName
 							   , @strCreatedByName		= CREATEDBY.strName
 							   , @strCreatedByPhone		= CREATEDBY.strPhone
@@ -57,6 +62,11 @@ BEGIN
 							 , dblARBalance
 						FROM dbo.vyuARCustomerSearch
 					) CUSTOMER ON SO.intEntityCustomerId = CUSTOMER.intEntityCustomerId
+					LEFT JOIN (
+						SELECT intEntityId
+							 , strName
+						FROM dbo.tblEMEntity
+					) CONTACT ON SO.intEntityContactId = CONTACT.intEntityId
 					INNER JOIN (
 						SELECT intEntityId
 							 , strName
@@ -89,6 +99,7 @@ BEGIN
 							   , @dblTransactionTotal	= CONVERT(NVARCHAR(100), ISNULL(INV.dblInvoiceTotal, 0.00))
 							   , @dblCustomerTotalAR	= CONVERT(NVARCHAR(100), ISNULL(CUSTOMER.dblARBalance, 0.00))	
 							   , @strTerm				= TERM.strTerm
+							   , @strContactName		= CONTACT.strName
 							   , @strCompanyName		= COMPANY.strCompanyName
 							   , @strCreatedByName		= CREATEDBY.strName
 							   , @strCreatedByPhone		= CREATEDBY.strPhone
@@ -103,6 +114,11 @@ BEGIN
 							 , dblARBalance
 						FROM dbo.vyuARCustomerSearch
 					) CUSTOMER ON INV.intEntityCustomerId = CUSTOMER.intEntityCustomerId
+					LEFT JOIN (
+						SELECT intEntityId
+							 , strName
+						FROM dbo.tblEMEntity
+					) CONTACT ON SO.intEntityContactId = CONTACT.intEntityId
 					INNER JOIN (
 						SELECT intEntityId
 							 , strName
@@ -129,6 +145,7 @@ BEGIN
 	SET @strTempMessage = REPLACE(@strTempMessage, '[AccountNumber]', @strCustomerAccount)
 	SET @strTempMessage = REPLACE(@strTempMessage, '[AccountBalance]', @dblCustomerAccount)
 	SET @strTempMessage = REPLACE(@strTempMessage, '[Date]', @dtmDate)
+	SET @strTempMessage = REPLACE(@strTempMessage, '[ExpirationDate]', @dtmExpirationDate)	
 	SET @strTempMessage = REPLACE(@strTempMessage, '[TransactionDate]', @dtmTransactionDate)
 	SET @strTempMessage = REPLACE(@strTempMessage, '[TransactionNumber]', @strTransactionNumber)
 	SET @strTempMessage = REPLACE(@strTempMessage, '[TransactionAmount]', @dblTransactionAmount)
@@ -136,6 +153,8 @@ BEGIN
 	SET @strTempMessage = REPLACE(@strTempMessage, '[EntityTotal]', @dblCustomerTotalAR)
 	SET @strTempMessage = REPLACE(@strTempMessage, '[Term]', @strTerm)
 	SET @strTempMessage = REPLACE(@strTempMessage, '[CompanyName]', @strCompanyName)
+	SET @strTempMessage = REPLACE(@strTempMessage, '[ContactName]', @strContactName)
+	SET @strTempMessage = REPLACE(@strTempMessage, '[CurrentUser]', @strCurrentUser)
 	SET @strTempMessage = REPLACE(@strTempMessage, '[CreatedByName]', @strCreatedByName)
 	SET @strTempMessage = REPLACE(@strTempMessage, '[CreatedByPhone]', @strCreatedByPhone)
 	SET @strTempMessage = REPLACE(@strTempMessage, '[CreatedByEmail]', @strCreatedByEmail)
