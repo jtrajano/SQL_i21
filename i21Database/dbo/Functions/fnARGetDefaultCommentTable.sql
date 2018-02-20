@@ -429,6 +429,14 @@ BEGIN
 		RETURN
 	END
 
+	IF @strDefaultComment IS NOT NULL	
+	BEGIN
+		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId)
+		VALUES( @strDefaultComment, @intDocumentMaintenanceId)
+		RETURN
+	END
+
+
 END
 	
 	RETURN
