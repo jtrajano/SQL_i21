@@ -3408,6 +3408,18 @@ IF @post = 0
 				GLD.ysnIsUnposted = 0				
 			ORDER BY
 				GLD.intGLDetailId
+
+
+			UPDATE GLD
+			SET
+				GLD.ysnIsUnposted = 1
+			FROM
+				tblGLDetail GLD
+			INNER JOIN
+				(SELECT intInvoiceId, strInvoiceNumber FROM @PostInvoiceData) PID
+					ON PID.intInvoiceId = GLD.intTransactionId
+					AND PID.strInvoiceNumber = GLD.strTransactionId
+
 			IF EXISTS ( SELECT TOP 1 1 FROM @GLEntries)	
 				EXEC	dbo.uspGLBookEntries
 						@GLEntries		= @GLEntries
