@@ -115,7 +115,7 @@ BEGIN
 				ShipmentItem.dblQuantity
 			FROM tblICInventoryShipmentItem ShipmentItem
 				LEFT JOIN tblICInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
-			WHERE ShipmentItem.intInventoryShipmentId = 274 AND ShipmentItem.intChildItemLinkId IS NULL AND ShipmentItem.strItemType != 'Option'
+			WHERE ShipmentItem.intInventoryShipmentId = @TransactionId AND ShipmentItem.intChildItemLinkId IS NULL AND ShipmentItem.strItemType != 'Option'
 			UNION ALL
 			--FOR OPTION ITEMS
 			SELECT 'Inventory Shipment',
