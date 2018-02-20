@@ -13,6 +13,7 @@ SELECT
 	WC.strWCCode,
 	WC.strDescription,
 	WC.dblRate,
+	WC.strCalculationType,
 	dblWCTotal = CASE WHEN (WC.strCalculationType = 'Per Hour') THEN 
 					CAST((PE.dblHours * WC.dblRate) AS NUMERIC(18, 6))
 				 ELSE

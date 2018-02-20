@@ -196,7 +196,9 @@ ELSE
 		ON ITEM.intItemId = SODETAIL.intItemId 
 		AND ((ITEM.strType <> 'Bundle' AND dbo.fnIsStockTrackingItem(SODETAIL.intItemId) = 1) 
 		  OR (ITEM.strType = 'Bundle' AND ISNULL(ITEM.strBundleType, 'Kit') = 'Kit'))
-		AND ISNULL(ITEM.ysnListBundleSeparately, 0) = 0
+		AND  CASE WHEN (ITEM.strType = 'Bundle') THEN 
+				CASE WHEN ISNULL(ITEM.ysnListBundleSeparately, 0) = 0 THEN 1 ELSE 0 END
+			 ELSE 1 END = 1
 	INNER JOIN dbo.tblICItemUOM ITEMUOM 
 		ON ITEMUOM.intItemId = SODETAIL.intItemId 
 		AND ITEMUOM.intItemUOMId = SODETAIL.intItemUOMId 
