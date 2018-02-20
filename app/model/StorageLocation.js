@@ -42,12 +42,16 @@ Ext.define('Inventory.model.StorageLocation', {
         { name: 'dblPackFactor', type: 'float'},
         { name: 'dblEffectiveDepth', type: 'float'},
         { name: 'dblUnitPerFoot', type: 'float'},
-        { name: 'dblResidualUnit', type: 'float'}
+        { name: 'dblResidualUnit', type: 'float'},
+        { name: 'strStorageUnitType', type: 'string'},
+        { name: 'strLocation', type: 'string'},
+        { name: 'strSubLocation', type: 'string'}
     ],
 
     validators: [
         {type: 'presence', field: 'strName'},
-        {type: 'presence', field: 'intLocationId'},
-        {type: 'presence', field: 'intSubLocationId'}
+        {type: 'presence', field: 'strStorageUnitType'},
+        {type: 'presence', field: 'strLocation'},
+        {type: 'presence', field: 'strSubLocation'}
     ]
 });
