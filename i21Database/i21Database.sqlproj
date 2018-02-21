@@ -6481,4 +6481,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1s_UpdateChartDescription.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\NM_NewMexico.sql" />
+  </ItemGroup>
 </Project>
