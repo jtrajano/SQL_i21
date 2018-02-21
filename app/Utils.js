@@ -29,6 +29,10 @@ Ext.define('Inventory.Utils', {
             }
         },
         
+        nullOrDefault: function(value, defaultValue) {
+            return value ? value : defaultValue;
+        },
+
         ajax: function (options) {
             /* Prevent SQL injection attacks by sanitizing all the concatenated parameters in the URL path and place them to the param property of the ajax configuration. */
             if(!options.forceUrlParams) {

@@ -32,6 +32,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblCost).HasColumnName("dblCost");
             this.Property(t => t.ysnCheckoffTax).HasColumnName("ysnCheckoffTax");
             this.Property(t => t.ysnTaxAdjusted).HasColumnName("ysnTaxAdjusted");
+            Property(t => t.intUnitMeasureId).HasColumnName("intUnitMeasureId");
+            Property(t => t.strUnitMeasure).HasColumnName("strUnitMeasure");
         }
     }
 }
