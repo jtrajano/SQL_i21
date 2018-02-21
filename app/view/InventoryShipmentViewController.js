@@ -2991,7 +2991,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                             newISItem = currentVM.tblICInventoryShipmentItems().findRecord('intOrderId', newRecord.intOrderId);
                                             me.getBundleComponents(newISItem, order, currentVM, currentVM.tblICInventoryShipmentItems());
                                         }
-                                        else if(strBundleType){
+                                        else if(strBundleType == 'Option'){
                                             me.getBundleComponents(newISItem, order, currentVM, currentVM.tblICInventoryShipmentItems());
                                         }    
                                         else {
@@ -4051,7 +4051,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         
                         var itemModel = Ext.create(itemDetailStore.role.type, {
                                 intInventoryShipmentId: current.get('intInventoryShipmentId'),
-                                intChildItemLinkId: addedRecord.get('intInventoryShipmentId'),
+                                intChildItemLinkId: addedRecord.get('intInventoryShipmentItemId'),
                                 strItemType: bundleType + ' Item',
                                 // intLineNo: selectedItem.get('intLineNo'),
                                 // intOrderId: selectedItem.get('intOrderId'),
@@ -4093,7 +4093,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
                         itemDetailStore.add(itemModel);
                         
-                        addedRecord.set('intParentItemLinkId', addedRecord.get('intInventoryShipmentId'));
+                        addedRecord.set('intParentItemLinkId', addedRecord.get('intInventoryShipmentItemId'));
                     });
                 },
                 function (failureResponse) {
@@ -4124,7 +4124,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     type: 'Inventory.GetAddOrders',
                     url: searchURL,
                     columns: [
-                            { dataIndex: 'intKey', text: 'Key', dataType: 'numeric', key: true, hidden: true },
+                            { dataIndex: 'intItemBundleId', text: 'Key', dataType: 'numeric', key: true, hidden: true },
                             { dataIndex: 'intComponentItemId', text: '', dataType: 'numeric', hidden: true, required: true },
                             { dataIndex: 'strComponentItemNo', text: 'Item No', width: 100, dataType: 'string' },
                             { dataIndex: 'strComponentDescription', text: 'Item Description', width: 100, dataType: 'string' },

@@ -47,6 +47,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnLotWeightsRequired).HasColumnName("ysnLotWeightsRequired");
             this.Property(t => t.strChargesLink).HasColumnName("strChargesLink");
             this.Property(t => t.strItemType).HasColumnName("strItemType");
+            this.Property(t => t.intParentItemLinkId).HasColumnName("intParentItemLinkId");
+            this.Property(t => t.intChildItemLinkId).HasColumnName("intChildItemLinkId");
 
             this.HasOptional(p => p.vyuICInventoryReceiptItemLookUp)
                 .WithRequired(p => p.tblICInventoryReceiptItem);
