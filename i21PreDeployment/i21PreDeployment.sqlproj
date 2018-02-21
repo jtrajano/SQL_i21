@@ -337,4 +337,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\11_IC\Remove_Duplicate_Item_Owners.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\4_SM\1810_Delete_Duplicate_Tax_Code_Rate.sql" />
+  </ItemGroup>
 </Project>
