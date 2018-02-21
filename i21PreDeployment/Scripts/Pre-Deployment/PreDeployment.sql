@@ -62,6 +62,7 @@
 :r .\6_GL\CleanCrossReferenceMapping.sql
 
 -- AR
+:r .\7_AR\1_FixInvoiceAndSalesOrderNumberUniqueConstraint.sql
 :r .\7_AR\3_fnARGetCustomerDefaultContact.sql
 :r .\7_AR\4_UpdateInvoicePaymentMethod.sql
 :r .\7_AR\5_InvoiceCurrencyCleanUp.sql
