@@ -2988,7 +2988,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
                                         if(strBundleType == 'Kit') {
                                             currentVM.tblICInventoryShipmentItems().add(newRecord);
-                                            newISItem = currentVM.tblICInventoryShipmentItems().findRecord('intOrderId', newRecord.intOrderId);
+                                            newISItem = currentVM.tblICInventoryShipmentItems().findRecord('intLineNo', newRecord.intLineNo);
                                             me.getBundleComponents(newISItem, order, currentVM, currentVM.tblICInventoryShipmentItems());
                                         }
                                         else if(strBundleType == 'Option'){
@@ -2996,7 +2996,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                         }    
                                         else {
                                             currentVM.tblICInventoryShipmentItems().add(newRecord);
-                                            newISItem = currentVM.tblICInventoryShipmentItems().findRecord('intOrderId', newRecord.intOrderId);
+                                            newISItem = currentVM.tblICInventoryShipmentItems().findRecord('intLineNo', newRecord.intLineNo);
                                         }                                        
                                     }        
                                 
