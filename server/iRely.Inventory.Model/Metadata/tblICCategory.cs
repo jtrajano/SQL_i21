@@ -275,6 +275,51 @@ namespace iRely.Inventory.Model
         public ICollection<tblICCategoryVendor> tblICCategoryVendors { get; set; }
     }
 
+    public class vyuICCategoryLocation : BaseEntity
+    {
+        public int intCategoryLocationId { get; set; }
+        public int intCategoryId { get; set; }
+        public int? intLocationId { get; set; }
+        public int? intRegisterDepartmentId { get; set; }
+        public bool ysnUpdatePrices { get; set; }
+        public bool ysnUseTaxFlag1 { get; set; }
+        public bool ysnUseTaxFlag2 { get; set; }
+        public bool ysnUseTaxFlag3 { get; set; }
+        public bool ysnUseTaxFlag4 { get; set; }
+        public bool ysnBlueLaw1 { get; set; }
+        public bool ysnBlueLaw2 { get; set; }
+        public int? intNucleusGroupId { get; set; }
+        public decimal? dblTargetGrossProfit { get; set; }
+        public decimal? dblTargetInventoryCost { get; set; }
+        public decimal? dblCostInventoryBOM { get; set; }
+        public decimal? dblLowGrossMarginAlert { get; set; }
+        public decimal? dblHighGrossMarginAlert { get; set; }
+        public DateTime? dtmLastInventoryLevelEntry { get; set; }
+        public bool ysnNonRetailUseDepartment { get; set; }
+        public bool ysnReportNetGross { get; set; }
+        public bool ysnDepartmentForPumps { get; set; }
+        public int? intConvertPaidOutId { get; set; }
+        public bool ysnDeleteFromRegister { get; set; }
+        public bool ysnDeptKeyTaxed { get; set; }
+        public int? intProductCodeId { get; set; }
+        public int? intFamilyId { get; set; }
+        public int? intClassId { get; set; }
+        public bool ysnFoodStampable { get; set; }
+        public bool ysnReturnable { get; set; }
+        public bool ysnSaleable { get; set; }
+        public bool ysnPrePriced { get; set; }
+        public bool ysnIdRequiredLiquor { get; set; }
+        public bool ysnIdRequiredCigarette { get; set; }
+        public int? intMinimumAge { get; set; }
+        public int? intSort { get; set; }
+        public string strLocationName { get; set; }
+        public int? intCompanyLocationId { get; set; }
+        public string strProductCodeId { get; set; }
+        public string strFamilyId { get; set; }
+        public string strClassId { get; set; }
+
+    }
+
     public class CategoryLocationVM
     {
         public int intCategoryLocationId { get; set; }

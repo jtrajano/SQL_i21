@@ -23,8 +23,8 @@ Ext.define('Inventory.view.CategoryLocation', {
         'Ext.tab.Panel',
         'Ext.tab.Tab',
         'Ext.form.field.ComboBox',
-        'Ext.form.field.Checkbox',
         'Ext.form.field.Number',
+        'Ext.form.field.Checkbox',
         'Ext.form.field.Date',
         'Ext.toolbar.Paging'
     ],
@@ -178,10 +178,12 @@ Ext.define('Inventory.view.CategoryLocation', {
                                                     valueField: 'intCompanyLocationId'
                                                 },
                                                 {
-                                                    xtype: 'textfield',
+                                                    xtype: 'numberfield',
                                                     itemId: 'txtCashRegisterDepartment',
                                                     fieldLabel: 'Cash Register Department',
-                                                    labelWidth: 165
+                                                    labelWidth: 165,
+                                                    allowDecimals: false,
+                                                    allowExponential: false
                                                 },
                                                 {
                                                     xtype: 'checkboxfield',

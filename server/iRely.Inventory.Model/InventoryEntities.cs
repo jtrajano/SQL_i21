@@ -48,6 +48,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICCategoryTaxMap());
             modelBuilder.Configurations.Add(new tblICCategoryAccountMap());
             modelBuilder.Configurations.Add(new tblICCategoryLocationMap());
+            modelBuilder.Configurations.Add(new vyuICCategoryLocationMap());
             modelBuilder.Configurations.Add(new tblICCategoryVendorMap());
             modelBuilder.Configurations.Add(new tblICCategoryUOMMap());
             modelBuilder.Configurations.Add(new tblICCertificationMap());

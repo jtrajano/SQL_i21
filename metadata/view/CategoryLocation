@@ -485,13 +485,15 @@
                                                     ]
                                                 },
                                                 {
-                                                    "type": "Ext.form.field.Text",
+                                                    "type": "Ext.form.field.Number",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "allowDecimals": false,
+                                                        "allowExponential": false,
                                                         "fieldLabel": "Cash Register Department",
                                                         "itemId": "txtCashRegisterDepartment",
                                                         "labelWidth": 165,
@@ -504,9 +506,11 @@
                                                         "labelWidth": "number",
                                                         "layout|flex": "number",
                                                         "maxWidth": "number",
-                                                        "scrollable": "boolean"
+                                                        "scrollable": "boolean",
+                                                        "allowDecimals": "boolean",
+                                                        "allowExponential": "boolean"
                                                     },
-                                                    "name": "MyTextField64",
+                                                    "name": "MyNumberField17",
                                                     "designerId": "4842972c-e5f4-47f8-bcdb-7262c3bb0a1e"
                                                 },
                                                 {
