@@ -340,4 +340,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\7_AR\12_MoveQuotePagesToLetters.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\4_SM\1810_Delete_Duplicate_Tax_Code_Rate.sql" />
+  </ItemGroup>
 </Project>
