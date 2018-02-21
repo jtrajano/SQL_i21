@@ -26,8 +26,11 @@ BEGIN
 
 	WHILE (@intCounter <= @intPeriodsAccrue + 1)
 		BEGIN
-			INSERT @tblMonthlyAccrual
-			SELECT @intInvoiceId, CONVERT(CHAR(4), @dtmPostDate, 100) + CONVERT(CHAR(4), @dtmPostDate, 120), @dblRunningAccrualBalance
+			IF (@dtmPostDate >= @dtmAsOfDate)
+				BEGIN
+					INSERT @tblMonthlyAccrual
+					SELECT @intInvoiceId, CONVERT(CHAR(4), @dtmPostDate, 100) + CONVERT(CHAR(4), @dtmPostDate, 120), @dblRunningAccrualBalance
+				END
 
 			SET @intCounter = @intCounter + 1
 			SET @dtmPostDate = DATEADD(MONTH, 1, @dtmPostDate)

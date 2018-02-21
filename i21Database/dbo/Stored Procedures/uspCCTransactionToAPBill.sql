@@ -72,7 +72,7 @@ BEGIN
 			LEFT JOIN tblCCSiteDetail ccSiteDetail ON ccSiteDetail.intSiteHeaderId = ccSiteHeader.intSiteHeaderId
 			LEFT JOIN vyuCCSite ccSite ON ccSite.intSiteId = ccSiteDetail.intSiteId
 			LEFT JOIN @CCRItemToAPItem ccItem ON ccItem.intSiteHeaderId = ccSiteHeader.intSiteHeaderId 
-			WHERE ccSiteHeader.intSiteHeaderId = @intSiteHeaderId) A
+			WHERE ccSiteHeader.intSiteHeaderId = @intSiteHeaderId and ccSiteHeader.strApType <> 'Cash Deposited') A
 			WHERE intAccountId IS NOT NULL
 			GROUP BY  intAccountId, intSiteDetailId, strItem 
 

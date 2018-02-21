@@ -176,6 +176,8 @@ BEGIN
 	DECLARE @FOB NVARCHAR(150)
 		SET @FOB = LOWER(RTRIM(LTRIM(ISNULL((SELECT [strFobPoint] FROM tblSMFreightTerms WHERE [intFreightTermId] = @FreightTermId),''))))
 
+	SET @State = @TaxState
+
 	IF ISNULL(@CFSiteId,0) <> 0 AND (ISNULL(@IsDeliver,0) = 0 OR @FOB = 'origin')
 		SET @State = ISNULL((SELECT TOP 1 [strTaxState] FROM tblCFSite WHERE [intSiteId] = @CFSiteId), @TaxState)
 	ELSE
@@ -237,7 +239,7 @@ BEGIN
 		AND (ISNULL(TE.[intTaxClassId], 0) = 0 OR TE.[intTaxClassId] = @TaxClassId)
 		AND (ISNULL(TE.[intCardId], 0) = 0 OR TE.[intCardId] = @CardId)
 		AND (ISNULL(TE.[intVehicleId], 0) = 0 OR TE.[intVehicleId] = @VehicleId)
-		AND (LEN(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) <= 0 OR TE.[strState] = @State)
+		AND (LEN(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) <= 0 OR TE.[strState] = @State OR LEN(LTRIM(RTRIM(ISNULL(@State,'')))) <= 0 )
 		--AND (LEN(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) <= 0 OR ISNULL(TE.[intTaxCodeId], 0) = 0 OR (LEN(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) > 0 AND UPPER(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) = UPPER(LTRIM(RTRIM(@TaxState)))))
 	ORDER BY
 		(

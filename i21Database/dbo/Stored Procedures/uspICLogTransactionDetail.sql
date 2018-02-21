@@ -78,7 +78,38 @@ BEGIN
 			FROM tblICInventoryReceiptItem ReceiptItem
 				LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 				LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
-			WHERE ReceiptItem.intInventoryReceiptId = @TransactionId
+			WHERE ReceiptItem.intInventoryReceiptId = @TransactionId AND ReceiptItem.intChildItemLinkId IS NULL AND ReceiptItem.strItemType != 'Option'
+			UNION ALL
+			SELECT 'Inventory Receipt',
+				ReceiptItem.intInventoryReceiptId, 
+				ReceiptItem.intInventoryReceiptItemId,
+				ReceiptItem.intOrderId,
+				intOrderType = (
+					CASE WHEN Receipt.strReceiptType = 'Purchase Contract' THEN @OrderType_PurchaseContract
+						WHEN Receipt.strReceiptType = 'Purchase Order' THEN @OrderType_PurchaseOrder
+						WHEN Receipt.strReceiptType = 'Transfer Order' THEN @OrderType_TransferOrder
+						WHEN Receipt.strReceiptType = 'Direct' THEN @OrderType_Direct
+						WHEN Receipt.strReceiptType = 'Inventory Return' THEN @OrderType_InventoryReturn
+					END), 
+				ReceiptItem.intSourceId,
+				intSourceType = Receipt.intSourceType,
+				ReceiptItem.intLineNo,
+				ItemBundleDetail.intItemId,
+				ReceiptItem.strItemType,
+				ItemBundleUOM.intItemUOMId,
+				ReceiptItem.dblOpenReceive,
+				ReceiptItemSource.ysnLoad,
+				ReceiptItem.intLoadReceive,
+				ReceiptItem.dblNet,
+				ReceiptItem.dblGross, 
+				ReceiptItem.intSourceInventoryReceiptItemId 
+			FROM tblICInventoryReceiptItem ReceiptItem
+				LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+				LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+				INNER JOIN tblICItemBundle ItemBundle ON ItemBundle.intItemBundleId = ReceiptItem.intParentItemLinkId AND ItemBundle.intBundleItemId = ReceiptItem.intItemId
+				INNER JOIN tblICItem ItemBundleDetail ON ItemBundleDetail.intItemId = ItemBundle.intItemId
+				LEFT JOIN tblICItemUOM ItemBundleUOM ON ItemBundleUOM.intItemUOMId = [dbo].[fnGetMatchingItemUOMId](ItemBundle.intItemId, ReceiptItem.intUnitMeasureId)
+			WHERE ReceiptItem.intInventoryReceiptId = @TransactionId AND ReceiptItem.intChildItemLinkId IS NULL AND ItemBundleDetail.strBundleType = 'Option'
 		END
 	END
 	ELSE IF (@TransactionType = @TransactionType_Shipment)
@@ -134,7 +165,7 @@ BEGIN
 				LEFT JOIN tblICInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 				INNER JOIN tblICItemBundle ItemBundle ON ItemBundle.intItemBundleId = ShipmentItem.intParentItemLinkId AND ItemBundle.intBundleItemId = ShipmentItem.intItemId
 				INNER JOIN tblICItem ItemBundleDetail ON ItemBundleDetail.intItemId = ItemBundle.intItemId
-				LEFT JOIN tblICItemUOM ItemBundleUOM ON ItemBundleUOM.intItemUOMId = [dbo].[fnGetMatchingItemUOMId](ItemBundle.intItemId, ItemBundle.intItemUnitMeasureId)
+				LEFT JOIN tblICItemUOM ItemBundleUOM ON ItemBundleUOM.intItemUOMId = [dbo].[fnGetMatchingItemUOMId](ItemBundle.intItemId, ShipmentItem.intItemUOMId)
 			WHERE ShipmentItem.intInventoryShipmentId = @TransactionId AND ShipmentItem.intChildItemLinkId IS NULL AND ItemBundleDetail.strBundleType = 'Option'
 		END
 	END

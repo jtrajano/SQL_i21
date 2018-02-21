@@ -85,17 +85,41 @@ BEGIN
 			ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 		LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource 
 			ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
-		LEFT JOIN tblICItem Item
-			ON Item.intItemId = ReceiptItem.intItemId
-	WHERE ReceiptItem.intInventoryReceiptId = @ReceiptId
-		-- When updating the contracts, include the following items based on the conditions below:
-		-- 1. Item is the same one in the contract sequence. 
-		-- 2. Do not include the component of the bundle. 
-		AND 1 = 
-			CASE WHEN ISNULL(ReceiptItem.strItemType, '') <> '' AND Item.strType = 'Bundle' THEN 1
-				 WHEN ISNULL(ReceiptItem.strItemType, '') <> '' THEN 0
-				 ELSE 1
-			END 
+	WHERE ReceiptItem.intInventoryReceiptId = @ReceiptId AND ReceiptItem.strItemType != 'Option'
+	UNION ALL
+	SELECT
+		ReceiptItem.intInventoryReceiptId,
+		ReceiptItem.intInventoryReceiptItemId,
+		intOrderType = (
+			CASE WHEN Receipt.strReceiptType = 'Purchase Contract' THEN @ReceiptType_PurchaseContract
+				WHEN Receipt.strReceiptType = 'Purchase Order' THEN @ReceiptType_PurchaseOrder
+				WHEN Receipt.strReceiptType = 'Transfer Order' THEN @ReceiptType_TransferOrder
+				WHEN Receipt.strReceiptType = 'Direct' THEN @ReceiptType_Direct
+			END),
+		ReceiptItem.intOrderId,
+		Receipt.intSourceType,
+		ReceiptItem.intSourceId,
+		ReceiptItem.intLineNo,
+		ItemBundle.intItemId,
+		intItemUOMId = ItemBundleUOM.intItemUOMId,
+		ReceiptItem.dblOpenReceive,
+		ReceiptItemSource.ysnLoad,
+		ReceiptItem.intLoadReceive,
+		ReceiptItem.dblNet,
+		ReceiptItem.dblGross, 
+		intSourceInventoryDetailId = ReceiptItem.intSourceInventoryReceiptItemId
+	FROM 
+		tblICInventoryReceiptItem ReceiptItem
+		LEFT JOIN tblICInventoryReceipt Receipt 
+			ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+		LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource 
+			ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+		INNER JOIN tblICItemBundle ItemBundle 
+			ON ItemBundle.intItemBundleId = ReceiptItem.intParentItemLinkId AND ReceiptItem.intItemId = ItemBundle.intBundleItemId
+		INNER JOIN tblICItemUOM ItemBundleUOM
+			ON ItemBundleUOM.intItemId = ItemBundle.intItemId AND ItemBundleUOM.ysnStockUnit = 1
+		WHERE ReceiptItem.intInventoryReceiptId = @ReceiptId
+
 
 	-- Create snapshot of Receipt Items before Save
 	SELECT 
@@ -106,7 +130,7 @@ BEGIN
 		,intSourceType
 		,intSourceId = intSourceNumberId
 		,intLineNo
-		,Item.intItemId
+		,intItemId
 		,intItemUOMId
 		,dblOpenReceive = dblQuantity
 		,ysnLoad
@@ -116,15 +140,15 @@ BEGIN
 		,intSourceInventoryDetailId
 	INTO #tmpBeforeSaveReceiptItems
 	FROM tblICTransactionDetailLog TransactionDetail
-		LEFT JOIN tblICItem Item ON Item.intItemId = TransactionDetail.intItemId
+		--LEFT JOIN tblICItem Item ON Item.intItemId = TransactionDetail.intItemId
 	WHERE 
 		intTransactionId = @ReceiptId
 		AND strTransactionType = 'Inventory Receipt'
-		AND 1 = 
-			CASE WHEN ISNULL(TransactionDetail.strItemType, '') <> '' AND Item.strType = 'Bundle' THEN 1
-				 WHEN ISNULL(TransactionDetail.strItemType, '') <> '' THEN 0
-				 ELSE 1
-			END 
+		--AND 1 = 
+		--	CASE WHEN ISNULL(TransactionDetail.strItemType, '') <> '' AND Item.strType = 'Bundle' THEN 1
+		--		 WHEN ISNULL(TransactionDetail.strItemType, '') <> '' THEN 0
+		--		 ELSE 1
+		--	END 
 
 END 
 
@@ -197,7 +221,7 @@ BEGIN
 			dblQty
 		)
 		-- Changed Quantity/UOM
-		SELECT
+		SELECT 
 			currentSnapshot.intInventoryReceiptItemId,
 			currentSnapshot.intLineNo,
 			currentSnapshot.intItemUOMId,
@@ -219,7 +243,7 @@ BEGIN
 		
 		--New Contract Selected
 		UNION ALL 
-		SELECT
+		SELECT 
 			currentSnapshot.intInventoryReceiptItemId
 			,currentSnapshot.intLineNo
 			,currentSnapshot.intItemUOMId
@@ -240,7 +264,7 @@ BEGIN
 
 		--Replaced Contract
 		UNION ALL
-		SELECT
+		SELECT 
 			currentSnapshot.intInventoryReceiptItemId
 			,previousSnapshot.intLineNo
 			,previousSnapshot.intItemUOMId
@@ -261,7 +285,7 @@ BEGIN
 		
 		--Removed Contract
 		UNION ALL
-		SELECT
+		SELECT 
 			currentSnapshot.intInventoryReceiptItemId
 			,previousSnapshot.intLineNo
 			,previousSnapshot.intItemUOMId
@@ -298,7 +322,7 @@ BEGIN
 
 		--Added Item
 		UNION ALL
-		SELECT
+		SELECT 
 			currentSnapshot.intInventoryReceiptItemId
 			,currentSnapshot.intLineNo
 			,currentSnapshot.intItemUOMId
@@ -313,7 +337,6 @@ BEGIN
 			currentSnapshot.intLineNo IS NOT NULL
 			AND currentSnapshot.intInventoryReceiptItemId NOT IN (SELECT intInventoryReceiptItemId FROM #tmpBeforeSaveReceiptItems)
 	END
-
 	BEGIN 
 		-- Iterate and process records
 		DECLARE @Id INT = NULL,

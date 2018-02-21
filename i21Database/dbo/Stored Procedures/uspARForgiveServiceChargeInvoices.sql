@@ -104,6 +104,7 @@ IF ISNULL(@InvoiceIds, '') <> ''
 				DECLARE @intInvoiceId as INT;
 				DECLARE @fromDtmForgiveDate AS DATETIME;
 				DECLARE @toDtmForgiveDate as DATETIME;
+				DECLARE @invoiceNo AS VARCHAR(10);
 				SELECT @valueFrom = CASE WHEN @ysnForgive = 1 THEN '0' ELSE '1' END;
 				SELECT @valueTo = CASE WHEN @ysnForgive = 1 THEN '1' ELSE '0' END;
 
@@ -112,15 +113,15 @@ IF ISNULL(@InvoiceIds, '') <> ''
 				DECLARE @ServiceChargeAuditLogCursor as CURSOR;
  
 				SET @ServiceChargeAuditLogCursor = CURSOR FOR
-				SELECT C.intInvoiceId, C.dtmForgiveDate as [TO], T.dtmForgiveDate as [FROM] FROM @ServiceChargeParam C INNER JOIN tblARInvoice T ON C.intInvoiceId = T.intInvoiceId; 
+				SELECT C.intInvoiceId, C.dtmForgiveDate as [TO], T.dtmForgiveDate as [FROM], T.strInvoiceNumber FROM @ServiceChargeParam C INNER JOIN tblARInvoice T ON C.intInvoiceId = T.intInvoiceId; 
 				OPEN @ServiceChargeAuditLogCursor;
-				FETCH NEXT FROM @ServiceChargeAuditLogCursor INTO @intInvoiceId, @fromDtmForgiveDate,@toDtmForgiveDate; 
+				FETCH NEXT FROM @ServiceChargeAuditLogCursor INTO @intInvoiceId, @fromDtmForgiveDate,@toDtmForgiveDate, @invoiceNo; 
 				WHILE @@FETCH_STATUS = 0
 				BEGIN
-					SET @childData = '{"change": "tblARInvoice","children": [{"action": "' + @auditAction + '","change": "'+ @auditAction +' - Record: ' + CAST(@intInvoiceId as VARCHAR(MAX)) + '","iconCls": "small-tree-modified","children": [{"change":"ysnForgive","from":"'+ @valueFrom +'","to":"'+ @valueTo +'","leaf":true,"iconCls":"small-gear"},{"change":"dtmForgiveDate","from":"'+   CASE WHEN @ysnForgive = 1 THEN '' ELSE ISNULL(CAST(@fromDtmForgiveDate AS VARCHAR(20)),'') END  +'","to":"'+ CASE WHEN @ysnForgive = 1 THEN ISNULL(CAST(@toDtmForgiveDate AS VARCHAR(20)),'') ELSE '' END +'","leaf":true,"iconCls":"small-gear"}]}]}';
+					SET @childData = '{"change": "tblARInvoice","children": [{"action": "' + @auditAction + '","change": "'+ @auditAction +' - Invoice No: ' + CAST(@invoiceNo as VARCHAR(MAX)) + '","iconCls": "small-tree-modified","children": [{"change":"ysnForgive","from":"'+ @valueFrom +'","to":"'+ @valueTo +'","leaf":true,"iconCls":"small-gear"},{"change":"dtmForgiveDate","from":"'+   CASE WHEN @ysnForgive = 1 THEN '' ELSE ISNULL(CAST(@fromDtmForgiveDate AS VARCHAR(20)),'') END  +'","to":"'+ CASE WHEN @ysnForgive = 1 THEN ISNULL(CAST(@toDtmForgiveDate AS VARCHAR(20)),'') ELSE '' END +'","leaf":true,"iconCls":"small-gear"}]}]}';
 					DECLARE @strInvoiceId VARCHAR(MAX) = CAST(@intInvoiceId as VARCHAR(MAX))
 					EXEC uspSMAuditLog @screenName = 'AccountsReceivable.view.Invoice', @keyValue = @strInvoiceId, @entityId = @intEntityId, @actionType = 'Updated', @actionIcon = 'small-tree-modified', @changeDescription =  '', @fromValue = '0', @toValue = '1', @details = @childData
-				 FETCH NEXT FROM @ServiceChargeAuditLogCursor INTO @intInvoiceId, @fromDtmForgiveDate,@toDtmForgiveDate;
+				 FETCH NEXT FROM @ServiceChargeAuditLogCursor INTO @intInvoiceId, @fromDtmForgiveDate,@toDtmForgiveDate, @invoiceNo;
 				END
  
 				CLOSE @ServiceChargeAuditLogCursor;

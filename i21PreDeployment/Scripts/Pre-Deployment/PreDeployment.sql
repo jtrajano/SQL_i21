@@ -51,6 +51,7 @@
 :r .\4_SM\1730_PaymentMethod.sql
 :r .\4_SM\1740_FixMasterMenu.sql
 :r .\4_SM\1810_FixReportLabels_Language.sql
+:r .\4_SM\1810_Delete_Duplicate_Tax_Code_Rate.sql
 
 -- GL
 :r .\6_GL\1_1410_to_1420.sql
@@ -61,6 +62,7 @@
 :r .\6_GL\CleanCrossReferenceMapping.sql
 
 -- AR
+:r .\7_AR\1_FixInvoiceAndSalesOrderNumberUniqueConstraint.sql
 :r .\7_AR\3_fnARGetCustomerDefaultContact.sql
 :r .\7_AR\4_UpdateInvoicePaymentMethod.sql
 :r .\7_AR\5_InvoiceCurrencyCleanUp.sql

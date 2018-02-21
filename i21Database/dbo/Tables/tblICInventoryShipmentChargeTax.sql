@@ -29,6 +29,7 @@ Type the overview for the table here.
 		[strTaxCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		[dblQty] NUMERIC(38, 20) NULL DEFAULT ((1)),
 		[dblCost] NUMERIC(18, 6) NULL DEFAULT ((0)),
+		[intUnitMeasureId] INT NULL,
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICInventoryShipmentChargeTax] PRIMARY KEY ([intInventoryShipmentChargeTaxId]), 
