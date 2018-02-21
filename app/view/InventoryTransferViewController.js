@@ -552,6 +552,8 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
     },
 
     onTransferDetailSelect: function(combo, records, eOpts) {
+        var me = this;
+        
         if (records.length <= 0)
             return;
 
@@ -559,8 +561,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
         var grid = combo.up('grid');
         var plugin = grid.getPlugin('cepItem');
         var current = plugin.getActiveRecord();
-        var me = this;
-        
+                
         if (combo.itemId === 'cboItem') {
             current.set('intItemId', records[0].get('intItemId'));
             current.set('strDescription', records[0].get('strDescription'));
@@ -607,6 +608,8 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                     break;
             }
             current.set('strNewLotStatus', strNewLotStatus);
+
+            me.mapGrossNet(current);
         }
         else if (combo.itemId === 'cboFromSubLocation') {
             current.set('intFromSubLocationId', records[0].get('intSubLocationId'));
