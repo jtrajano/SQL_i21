@@ -2127,7 +2127,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
-    resolveItemCost(vm, receipt, receiptItem) {
+    resolveItemCost: function(vm, receipt, receiptItem) {
         ic.utils.ajax({
             url: './inventory/api/item/searchvendorpricing',
             filters: [
@@ -2175,7 +2175,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 }
             ]
         })
-        .subscribe(x => {
+        .subscribe(function(x) {
             var json = JSON.parse(x.responseText);
             var data = _.first(json.data);
             var cost = data ? data.dblUnit : receiptItem.get('dblUnitCost');
@@ -7959,7 +7959,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 }
             ]
         })
-        .subscribe(x => {
+        .subscribe(function(x) {
             var json = JSON.parse(x.responseText);
             var data = _.first(json.data);
             if(data) {
