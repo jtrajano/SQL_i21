@@ -6217,8 +6217,7 @@
     <Build Include="dbo\Stored Procedures\uspICGetItemAddOns.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetBundleComponents.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetItemSubtitutes.sql" />
-    <Build Include="dbo\Views\vyuARBundleItemsReport.sql" />
-    <Build Include="dbo\Views\vyuICCategoryLocation.sql" />
+    <Build Include="dbo\Views\vyuARInvoicePaymentInfo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
