@@ -18,12 +18,31 @@ Ext.define('Inventory.model.CategoryAccount', {
                 inverse: {
                     role: 'tblICCategoryAccounts',
                     storeConfig: {
-                        complete: true,
+                        // complete: true,
+                        // sortOnLoad: true,
+                        // sorters: {
+                        //     direction: 'DESC',
+                        //     property: 'intSort'
+                        // }
+                        remoteFilter: true,
+                        complete: true,                        
+                        proxy: {
+                            extraParams: { include: 'tblGLAccount, tblGLAccountCategory' },
+                            type: 'rest',
+                            api: {
+                                read: './inventory/api/categoryaccount/get'
+                            },
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data',
+                                messageProperty: 'message'
+                            }
+                        },
                         sortOnLoad: true,
                         sorters: {
-                            direction: 'DESC',
+                            direction: 'ASC',
                             property: 'intSort'
-                        }
+                        }                        
                     }
                 }
             }},
