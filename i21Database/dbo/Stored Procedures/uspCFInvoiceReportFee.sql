@@ -1,6 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspCFInvoiceReportFee](
 	@xmlParam NVARCHAR(MAX)=null
-	,@UserId NVARCHAR(MAX)
 )
 AS
 BEGIN
@@ -972,8 +971,7 @@ BEGIN
 				,dtmTransactionDate		
 				,dtmInvoiceDate			
 				,dtmStartDate			
-				,dtmEndDate		
-				,strUserId		
+				,dtmEndDate				
 			)
 			SELECT
 			 tbl1.intFeeLoopId			
@@ -998,7 +996,6 @@ BEGIN
 			,tbl1.dtmInvoiceDate			
 			,tbl1.dtmStartDate			
 			,tbl1.dtmEndDate
-			,@UserId
 			FROM ##tblCFInvoiceFeeOutput AS tbl1
 			inner join 
 			(

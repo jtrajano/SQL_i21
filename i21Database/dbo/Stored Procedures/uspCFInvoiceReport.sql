@@ -1,6 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspCFInvoiceReport](
-	 @xmlParam NVARCHAR(MAX)=null
-	,@UserId NVARCHAR(MAX)
+	@xmlParam NVARCHAR(MAX)=null
 )
 AS
 BEGIN
@@ -650,7 +649,6 @@ BEGIN
 		,ysnDepartmentGrouping
 		,ysnSummaryByDeptVehicleProd
 		,ysnPostedCSV
-		,strUserId
 		)
 		SELECT
 		 intCustomerGroupId			
@@ -737,7 +735,6 @@ BEGIN
 		,ysnDepartmentGrouping
 		,ysnSummaryByDeptVehicleProd		
 		,ysnPostedCSV
-		,@UserId
 	    FROM #tblCFTempInvoiceReportSummary 
 		where intTransactionId in (SELECT intTransactionId FROM @tblCFFilterIds)
 

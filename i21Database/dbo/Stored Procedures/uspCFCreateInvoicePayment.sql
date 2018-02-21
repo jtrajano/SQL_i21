@@ -1,6 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspCFCreateInvoicePayment](
 	 @entityId					INT			   = NULL
-	,@username					NVARCHAR(MAX)
 	,@ErrorMessage				NVARCHAR(250)  = NULL	OUTPUT
 	,@CreatedIvoices			NVARCHAR(MAX)  = NULL	OUTPUT
 	,@UpdatedIvoices			NVARCHAR(MAX)  = NULL	OUTPUT
@@ -154,7 +153,6 @@ BEGIN
 		LEFT OUTER JOIN tblARInvoice I
 		ON cfTrans.intInvoiceId = I.intInvoiceId
 		WHERE ISNULL(I.intInvoiceId,0) != 0
-		AND strUserId = @username
 		--------------------------------------
 
 		--select * From @EntriesForPayment

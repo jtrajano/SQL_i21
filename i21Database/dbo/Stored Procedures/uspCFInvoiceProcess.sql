@@ -1,6 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspCFInvoiceProcess](
-	 @entityId					INT			   = NULL
-	,@username					NVARCHAR(MAX)  
+	@entityId					INT			   = NULL
 	,@ErrorMessage				NVARCHAR(250)  = NULL	OUTPUT
 	,@CreatedIvoices			NVARCHAR(MAX)  = NULL	OUTPUT
 	,@UpdatedIvoices			NVARCHAR(MAX)  = NULL	OUTPUT
@@ -87,7 +86,7 @@ BEGIN TRY
 	--EXEC "dbo"."uspCFInvoiceReportDiscount" @xmlParam=@xmlParam
 	--------------------------------------
 
-	UPDATE tblCFTransaction SET strInvoiceReportNumber = strTempInvoiceReportNumber WHERE intTransactionId IN (SELECT intTransactionId FROM tblCFInvoiceStagingTable WHERE ISNULL(intInvoiceId,0) != 0 AND strUserId = @username) -- AND (strTransactionType != 'Foreign Sale' OR ISNULL(ysnPostForeignSales,0) != 0)
+	UPDATE tblCFTransaction SET strInvoiceReportNumber = strTempInvoiceReportNumber WHERE intTransactionId IN (SELECT intTransactionId FROM tblCFInvoiceStagingTable WHERE ISNULL(intInvoiceId,0) != 0) -- AND (strTransactionType != 'Foreign Sale' OR ISNULL(ysnPostForeignSales,0) != 0)
 	SELECT TOP 1 @dtmInvoiceDate = dtmInvoiceDate FROM #tblCFInvoice
 
 	------------GROUP BY CUSTOMER-----------
@@ -122,7 +121,6 @@ BEGIN TRY
 
 	EXEC	@return_value = [dbo].[uspCFCreateInvoicePayment]
 			 @entityId				= @entityId
-			,@username				= @username
 			,@ErrorMessage			= @ErrorMessage			OUTPUT
 			,@CreatedIvoices		= @CreatedIvoices		OUTPUT
 			,@UpdatedIvoices		= @UpdatedIvoices		OUTPUT
@@ -143,12 +141,11 @@ BEGIN TRY
 	END
 
 	EXEC	@return_value = [dbo].[uspCFCreateDebitMemo]
-			@entityId		= @entityId,
-			@username		= @username,
-			@ErrorMessage	= @ErrorMessage OUTPUT,
+			@entityId = @entityId,
+			@ErrorMessage = @ErrorMessage OUTPUT,
 			@CreatedIvoices = @CreatedIvoices OUTPUT,
 			@UpdatedIvoices = @UpdatedIvoices OUTPUT,
-			@ysnDevMode		= @ysnDevMode
+			@ysnDevMode = @ysnDevMode
 
 	SELECT	'Debit Memo'			AS 'Process'
 			,@ErrorMessage			AS 'ErrorMessage'
