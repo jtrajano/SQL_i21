@@ -106,7 +106,7 @@ INNER JOIN (
 		SELECT intEntityId
 			 , strName
 		FROM dbo.tblEMEntity
-		WHERE (@strCustomerName IS NULL OR strName LIKE '%'+ @strCustomerName +'%')
+		WHERE (@strCustomerName IS NULL OR strName = @strCustomerName)
 	) E ON C.intEntityId = E.intEntityId
 ) CUSTOMER ON I.intEntityCustomerId = CUSTOMER.intEntityCustomerId
 CROSS APPLY (

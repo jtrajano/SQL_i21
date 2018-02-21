@@ -69,7 +69,7 @@ ELSE
 			SELECT intEntityId
 				 , strName
 			FROM dbo.tblEMEntity WITH (NOLOCK)
-			WHERE (@strCustomerNameLocal IS NULL OR strName LIKE '%'+ @strCustomerNameLocal +'%')
+			WHERE (@strCustomerNameLocal IS NULL OR strName = @strCustomerNameLocal)
 		) EC ON C.intEntityId = EC.intEntityId
 		OUTER APPLY (
 			SELECT strAccountStatusCode = LEFT(strAccountStatusCode, LEN(strAccountStatusCode) - 1)
@@ -95,7 +95,7 @@ IF ISNULL(@strSalespersonLocal, '') <> ''
 		INNER JOIN (
 			SELECT intEntityId
 			FROM dbo.tblEMEntity WITH (NOLOCK)
-			WHERE (@strSalespersonLocal IS NULL OR strName LIKE '%'+ @strSalespersonLocal +'%')
+			WHERE (@strSalespersonLocal IS NULL OR strName = @strSalespersonLocal)
 		) ES ON SP.intEntityId = ES.intEntityId
 	END
 
@@ -103,7 +103,7 @@ IF ISNULL(@strCompanyLocationLocal, '') <> ''
 	BEGIN
 		SELECT TOP 1 @intCompanyLocationId = intCompanyLocationId
 		FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
-		WHERE (@strCompanyLocationLocal IS NULL OR strLocationName LIKE '%'+ @strCompanyLocationLocal +'%')
+		WHERE (@strCompanyLocationLocal IS NULL OR strLocationName = @strCompanyLocationLocal)
 	END
 
 --DROP TEMP TABLES
