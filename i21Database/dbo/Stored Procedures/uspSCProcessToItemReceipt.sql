@@ -81,7 +81,7 @@ DECLARE @intInventoryReceiptItemId AS INT
 BEGIN
     SELECT TOP 1 @intLoadId = ST.intLoadId, @dblTicketFreightRate = ST.dblFreightRate, @intScaleStationId = ST.intScaleSetupId,
 	@ysnDeductFreightFarmer = ST.ysnFarmerPaysFreight, @intLocationId = ST.intProcessingLocationId
-	, @dblGrossUnits = SC.dblGrossUnits, @dblTicketNetUnits = SC.dblNetUnits
+	, @dblGrossUnits = ST.dblGrossUnits, @dblTicketNetUnits = ST.dblNetUnits
 	FROM dbo.tblSCTicket ST WHERE
 	ST.intTicketId = @intTicketId
 END
