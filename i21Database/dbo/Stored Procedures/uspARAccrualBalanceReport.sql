@@ -95,6 +95,7 @@ SELECT intInvoiceId					= I.intInvoiceId
 	 , dblInvoiceTotal
 	 , dblMonthlyAccrual			= dbo.fnRoundBanker(dblInvoiceTotal / intPeriodsToAccrue, 2)
 	 , dblRunningAccrualBalance		= dbo.fnRoundBanker(ACCRUAL.dblRunningAccrualBalance, 2)
+	 , dtmAsOfDate					= @dtmAsOfDate
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (
 	SELECT intEntityCustomerId	= C.intEntityId
