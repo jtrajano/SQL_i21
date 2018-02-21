@@ -82,6 +82,8 @@ BEGIN
 			ORDER BY strAccountId
 		END
 
+		DECLARE @tblAccount TABLE (intAccountId INT)
+
 		-- +++++ INSERT SEGMENT MAPPING +++++ --
 		WHILE EXISTS(SELECT 1 FROM tblGLTempAccount WHERE intUserId = @intUserId)
 		BEGIN
@@ -110,7 +112,9 @@ BEGIN
 					UPDATE tblGLAccountStructure SET ysnBuild = 1 WHERE intAccountStructureId = (SELECT intAccountStructureId FROM tblGLAccountSegment WHERE intAccountSegmentId = @segmentId)
 					
 				END
-		
+				
+				INSERT INTO @tblAccount Values(@accountId)
+
 				DELETE FROM tblGLTempAccount WHERE cntId = @Id
 			END
 		END
@@ -119,6 +123,21 @@ BEGIN
 		DELETE FROM tblGLTempAccount WHERE intUserId = @intUserId
 
 		EXEC uspGLAccountOriginSync @intUserId
+
+		UPDATE account
+		SET account.strOldAccountId = cref.strOldAccountId
+		FROM tblGLAccount account 
+		JOIN @tblAccount temp ON temp.intAccountId = account.intAccountId
+		CROSS APPLY (
+			SELECT TOP 1 intDefaultVisibleOldAccountSystemId FROM tblGLCompanyPreferenceOption
+		)pref
+		CROSS APPLY(
+			SELECT TOP 1 strOldAccountId FROM tblGLCrossReferenceMapping WHERE intAccountId = account.intAccountId
+			AND intAccountSystemId = pref.intDefaultVisibleOldAccountSystemId
+			AND ysnInbound = 1
+		)cref
+
+
 		EXEC uspGLBuildTempCOASegment
 	')
 END
