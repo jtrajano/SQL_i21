@@ -590,7 +590,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
     createRecord: function (config, action) {
         var today = new Date();
         var newRecord = Ext.create('Inventory.model.InventoryCount');
-        var defaultLocation = iRely.Configuration.Application.CurrentLocation; 
+        var defaultLocation = iRely.config.Security.CurrentDefaultLocation; 
 
         newRecord.set('dtmCountDate', today);
         newRecord.set('intStatus', 1);

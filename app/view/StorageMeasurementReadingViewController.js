@@ -133,7 +133,7 @@ Ext.define('Inventory.view.StorageMeasurementReadingViewController', {
         "use strict";
         var today = new i21.ModuleMgr.Inventory.getTodayDate();
         var newRecord = Ext.create('Inventory.model.StorageMeasurementReading');
-        var defaultLocation = iRely.Configuration.Application.CurrentLocation; 
+        var defaultLocation = iRely.config.Security.CurrentDefaultLocation; 
 
         newRecord.set('dtmDate', today);
 
