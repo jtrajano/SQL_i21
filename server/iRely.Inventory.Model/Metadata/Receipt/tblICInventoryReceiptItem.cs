@@ -51,6 +51,8 @@ namespace iRely.Inventory.Model
         public bool? ysnLotWeightsRequired { get; set; }
         public string strChargesLink { get; set; }
         public string strItemType { get; set; }
+        public int? intParentItemLinkId { get; set; }
+        public int? intChildItemLinkId { get; set; }
 
         //private string _ownershipType;
         //[NotMapped]

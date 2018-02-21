@@ -95,7 +95,16 @@ Ext.define('Inventory.model.ReceiptItem', {
         { name: 'dblGrossBeforeEdit', type: 'float', allowNull: true},
         { name: 'dblNetBeforeEdit', type: 'float', allowNull: true},
         { name: 'strChargesLink', type: 'string' },
-        { name: 'strItemType', type: 'string'}
+        {
+            name: 'strItemType', 
+            type: 'string',
+            allowNull: true,
+            convert: function(value, record) {
+                return !iRely.Functions.isEmpty(value) ? value : null;
+            } 
+        },
+        { name: 'intParentItemLinkId', type: 'int', allowNull: true },
+        { name: 'intChildItemLinkId', type: 'int', allowNull: true }
     ],
 
     validators: [
