@@ -98,7 +98,27 @@ SELECT	ShipmentItem.intInventoryShipmentId
 INTO	#tmpShipmentItems
 FROM	tblICInventoryShipmentItem ShipmentItem LEFT JOIN tblICInventoryShipment Shipment 
 			ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
-WHERE	ShipmentItem.intInventoryShipmentId = @ShipmentId
+WHERE	ShipmentItem.intInventoryShipmentId = @ShipmentId AND ShipmentItem.strItemType != 'Option'
+UNION ALL
+--FOR OPTION
+SELECT	ShipmentItem.intInventoryShipmentId
+		,ShipmentItem.intInventoryShipmentItemId
+		,Shipment.intOrderType
+		,ShipmentItem.intOrderId
+		,Shipment.intSourceType
+		,ShipmentItem.intSourceId
+		,ShipmentItem.intLineNo
+		,ItemBundle.intItemId
+		,ItemBundleUOM.intItemUOMId
+		,ShipmentItem.dblQuantity
+		--,ShipmentItem.strItemType
+FROM	tblICInventoryShipmentItem ShipmentItem LEFT JOIN tblICInventoryShipment Shipment 
+			ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
+		INNER JOIN tblICItemBundle ItemBundle 
+			ON ItemBundle.intItemBundleId = ShipmentItem.intParentItemLinkId AND ShipmentItem.intItemId = ItemBundle.intBundleItemId
+		INNER JOIN tblICItemUOM ItemBundleUOM
+			ON ItemBundleUOM.intItemId = ItemBundle.intItemId AND ItemBundleUOM.ysnStockUnit = 1
+		WHERE ShipmentItem.intInventoryShipmentId = @ShipmentId
 		
 -- Call the CT sp only if Shipment type is a 'Sales Contract' and NOT Logistics (Inbound Shipment) and NOT Scale (Scale Ticket)
 -- Logistics (Inbound Shipment) and Scale (Scale Ticket) will be calling uspCTUpdateScheduleQuantity on their own. 
