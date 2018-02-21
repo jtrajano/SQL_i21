@@ -455,6 +455,15 @@ BEGIN TRY
 		AND ISNULL(@dblSampleQty, 0) > 0
 		AND @ysnEnableParentLot = 0 AND ISNULL(@strLotNumber, '') <> '' -- Lot
 	BEGIN
+		IF @intStorageLocationId IS NULL
+		BEGIN
+			RAISERROR (
+					'Storage Unit cannot be empty. '
+					,16
+					,1
+					)
+		END
+
 		SELECT @intLotId = intLotId
 			,@dblQty = dblQty
 			,@intItemUOMId = intItemUOMId

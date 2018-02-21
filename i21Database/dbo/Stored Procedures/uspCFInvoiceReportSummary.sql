@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspCFInvoiceReportSummary](
 	@xmlParam NVARCHAR(MAX)=null
+	,@UserId NVARCHAR(MAX)
 )
 AS
 BEGIN 
@@ -239,6 +240,7 @@ BEGIN
 				,ysnIncludeInQuantityDiscount
 				,intAccountId
 				,intTransactionId
+				,strUserId
 			)
 			SELECT 
 				intDiscountScheduleId
@@ -262,6 +264,7 @@ BEGIN
 				,ysnIncludeInQuantityDiscount
 				,intAccountId
 				,intTransactionId
+				,''' +@UserId+'''
 			FROM #tblCFTempInvoiceReportSummary ' + @whereClause)
 
 			IF OBJECT_ID('tempdb..#tblCFTempInvoiceReportSummary') IS NOT NULL

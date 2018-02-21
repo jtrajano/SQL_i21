@@ -6213,6 +6213,10 @@
     <Build Include="dbo\Functions\fnARConvertPlaceHolder.sql" />
     <Build Include="dbo\Stored Procedures\uspLGRejectContainer.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetCaseLabelCount.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKInsertM2MInquiryDetails.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetItemAddOns.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetBundleComponents.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetItemSubtitutes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

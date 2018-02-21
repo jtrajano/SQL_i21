@@ -248,3 +248,5 @@ BEGIN
 		,intSort				= intSort
 	FROM @tblStoragePeriod
 END
+
+GO

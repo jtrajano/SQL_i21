@@ -144,28 +144,26 @@ INSERT INTO @Result (
 	,dblBasisUSD
 	,strUnitMeasure
 	)
-select intContractHeaderId,intContractDetailId,strSequenceNumber,
-strContractType,dblQty,dblUSD,dblBasis,dblAllocatedQty,
-case when dblUSD =0 then 0 else dblInvoicePrice end dblInvoicePrice,dblBasisUSD,strUnitMeasure
- from (
+SELECT intContractHeaderId,intContractDetailId,strSequenceNumber,strContractType,dblQty,dblUSD,dblBasis,dblAllocatedQty,
+CASE WHEN dblUSD =0 THEN 0 ELSE dblInvoicePrice end dblInvoicePrice,dblBasisUSD,strUnitMeasure
+ FROM (
 SELECT DISTINCT intContractHeaderId
 	,intContractDetailId
 	,strSequenceNumber
 	,'Purchase' strContractType
 ,(SELECT ISNULL(SUM(dblBooked), 0)	FROM @PhysicalFuturesResult	WHERE strDescription = 'Invoice') dblQty
-		,(SELECT ISNULL(SUM(dblAccounting), 0)		FROM @PhysicalFuturesResult		WHERE strDescription = 'Supp. Invoice')  dblUSD
+,(SELECT ISNULL(SUM(dblAccounting), 0)		FROM @PhysicalFuturesResult		WHERE strDescription = 'Supp. Invoice')  dblUSD
 	,(sum(dbo.fnCTConvertQuantityToTargetItemUOM(d.intItemId, @intPriceUOMId, intPriceUomId, dblAllocatedQty * dblBasis)) / sum(dblAllocatedQty)) / CASE WHEN isnull(ysnSubCurrency, 0) = @ysnSubCurrency THEN 1 WHEN isnull(ysnSubCurrency, 0) = 1 THEN 100 ELSE 0.01 END dblBasis
 	,@dblAllocatedQty dblAllocatedQty
 	,@dblPricePurchase dblInvoicePrice
 	,(sum(dbo.fnCTConvertQuantityToTargetItemUOM(d.intItemId, 3, intPriceUomId, dblAllocatedQty * dblBasis)) / sum(dblAllocatedQty)) / CASE WHEN isnull(ysnSubCurrency, 0) = 1 THEN 100 ELSE 1 END as dblBasisUSD
 	,@strUnitMeasure strUnitMeasure
 FROM vyuRKPnLGetAllocationDetail d
-WHERE intContractTypeId = 2 AND intContractDetailId = @intContractDetailId
+WHERE  intContractDetailId = @intContractDetailId and intContractTypeId=1
 GROUP BY intContractHeaderId
 	,intContractDetailId
 	,strSequenceNumber
 	,ysnSubCurrency)t
-
 
 DECLARE @dblSaleBasis NUMERIC(18, 6)
 DECLARE @dblPurchaseBasis NUMERIC(18, 6)
@@ -183,10 +181,6 @@ SELECT @dblSaleBasisUSD = sum(dblBasisUSD) ,@dblSaleBasis = sum(dblBasis),@dblQt
 		@dblUSDInvoice=sum(dblUSD),@dblInvoicePrice=sum(dblInvoicePrice)
 FROM @Result
 WHERE strContractType = 'Invoices'
-
-SELECT @dblPurchaseBasisUSD = sum(dblBasisUSD),@dblPurchaseBasis = sum(dblBasis),@dblPurchasePrice=sum(dblInvoicePrice),@dblUSDPurchase=sum(dblUSD)
-FROM @Result
-WHERE strContractType = 'Purchase'
 
 SELECT @dblPurchaseBasisUSD = sum(dblBasisUSD),@dblPurchaseBasis = sum(dblBasis),@dblPurchasePrice=sum(dblInvoicePrice),@dblUSDPurchase=sum(dblUSD)
 FROM @Result
@@ -386,18 +380,74 @@ FROM (
 	LEFT JOIN tblSMCurrency c on c.intCurrencyID=m.intCurrencyId
 	LEFT JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = t.intFutureMonthId
 	WHERE intSContractDetailId = @intContractDetailId
+
+UNION ALL
+	SELECT DISTINCT TP.strContractType
+		,CH.strContractNumber + ' - ' + convert(NVARCHAR(100), CD.intContractSeq)
+		,CD.intContractDetailId
+		,CD.dblQuantity
+		,sum(LD.dblQuantity) OVER (PARTITION BY CD.intContractDetailId) dblSAllocatedQty
+		,(sum(LD.dblQuantity) OVER (PARTITION BY CD.intContractDetailId) / CD.dblQuantity) * 100 AS dblContractPercentage
+		,fm.strFutureMonth + ' - ' + strBuySell strFutureMonth
+		,strInternalTradeNo
+		,dblAssignedLots
+		,t.dblPrice dblContractPrice
+		,((isnull(cs.dblAssignedLots, 0) + isnull(cs.intHedgedLots, 0)) * (sum(LD.dblQuantity) OVER (PARTITION BY CD.intContractDetailId) / CD.dblQuantity * 100)) / 100 intNoOfLots
+		,t.dblPrice
+		,t.intFutureMarketId
+		,t.intFutureMonthId
+		,dbo.fnRKGetLatestClosingPrice(t.intFutureMarketId, t.intFutureMonthId, @dtmToDate) dtmLatestSettlementPrice
+		,m.dblContractSize
+		,isnull(ysnSubCurrency,0)  ysnSubCurrency
+	FROM tblLGLoad AD
+	JOIN tblLGLoadDetail LD on AD.intLoadId=LD.intLoadId
+	JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId and  CD.intContractDetailId= @intContractDetailId
+	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+	JOIN tblCTContractType TP ON TP.intContractTypeId = CH.intContractTypeId
+	LEFT JOIN tblCTPriceFixation PF ON PF.intContractDetailId = CASE WHEN CH.ysnMultiplePriceFixation = 1 THEN PF.intContractDetailId ELSE CD.intContractDetailId END AND PF.intContractHeaderId = CD.intContractHeaderId
+	LEFT JOIN tblRKAssignFuturesToContractSummary cs ON cs.intContractDetailId = CD.intContractDetailId
+	LEFT JOIN tblRKFutOptTransaction t ON t.intFutOptTransactionId = cs.intFutOptTransactionId
+	LEFT JOIN tblRKFutureMarket m ON m.intFutureMarketId = t.intFutureMarketId
+	LEFT JOIN tblSMCurrency c on c.intCurrencyID=m.intCurrencyId
+	LEFT JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = t.intFutureMonthId
+	WHERE intSContractDetailId = @intContractDetailId
+
+	UNION ALL
+	SELECT DISTINCT TP.strContractType
+		,CH.strContractNumber + ' - ' + convert(NVARCHAR(100), CD.intContractSeq)
+		,CD.intContractDetailId
+		,CD.dblQuantity
+		,sum(LD.dblQuantity) OVER (PARTITION BY CD.intContractDetailId) dblSAllocatedQty
+		,(sum(LD.dblQuantity) OVER (PARTITION BY CD.intContractDetailId) / CD.dblQuantity) * 100 AS dblContractPercentage
+		,fm.strFutureMonth + ' - ' + strBuySell strFutureMonth
+		,strInternalTradeNo
+		,dblAssignedLots
+		,t.dblPrice dblContractPrice
+		,-((isnull(cs.dblAssignedLots, 0) + isnull(cs.intHedgedLots, 0)) * (sum(LD.dblQuantity) OVER (PARTITION BY CD.intContractDetailId) / CD.dblQuantity * 100)) / 100 intNoOfLots
+		,t.dblPrice
+		,t.intFutureMarketId
+		,t.intFutureMonthId
+		,dbo.fnRKGetLatestClosingPrice(t.intFutureMarketId, t.intFutureMonthId, @dtmToDate) dtmLatestSettlementPrice
+		,m.dblContractSize
+		,isnull(ysnSubCurrency,0)  ysnSubCurrency
+	FROM tblLGLoad AD
+		JOIN tblLGLoadDetail LD on AD.intLoadId=LD.intLoadId 
+		join tblLGLoadDetailLot LDL on LDL.intLoadDetailId=LD.intLoadDetailId
+		join tblICInventoryReceiptItemLot IL on IL.intLotId=LDL.intLotId
+		join tblICInventoryReceiptItem RI on RI.intInventoryReceiptItemId=IL.intInventoryReceiptItemId
+		JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId	=	RI.intLineNo
+		JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
+		JOIN	tblCTContractType		TP	ON	TP.intContractTypeId	=	CH.intContractTypeId
+		LEFT JOIN	tblCTPriceFixation		PF	ON	PF.intContractDetailId	=	CASE	WHEN CH.ysnMultiplePriceFixation = 1 
+																					THEN PF.intContractDetailId
+																					ELSE CD.intContractDetailId	END	AND PF.intContractHeaderId	=	CD.intContractHeaderId	
+		LEFT JOIN tblRKAssignFuturesToContractSummary cs on cs.intContractDetailId=CD.intContractDetailId
+		LEFT JOIN tblRKFutOptTransaction t on t.intFutOptTransactionId=cs.intFutOptTransactionId
+		LEFT JOIN tblRKFutureMarket m on m.intFutureMarketId=t.intFutureMarketId
+		LEFT JOIN tblRKFuturesMonth fm on fm.intFutureMonthId=t.intFutureMonthId			
+	WHERE intSContractDetailId = @intContractDetailId
 	) t
 
---INSERT INTO @Result (
---	strContractType
---	,dblInvoicePrice
---	,dblPriceVariation,
---	strUOMVariation
---	)
---SELECT 'Futures Impact - Rate',(sum(dblUSD)/(select sum(dblAllocatedQty) from @Result where strContractType ='PO Costs'))* case when @ysnSubCurrency = 1 then 100 else 1 end,
---	(sum(dblUSD)/(select sum(dblAllocatedQty) from @Result where strContractType ='PO Costs'))* case when @ysnSubCurrency = 1 then 100 else 1 end
---	,@strUnitMeasure
--- from @Result where strContractType= 'Futures Impact - USD'
 
 ---- Profit
 

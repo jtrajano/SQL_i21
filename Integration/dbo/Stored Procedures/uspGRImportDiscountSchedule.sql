@@ -43,3 +43,4 @@ BEGIN
 		AND Sch.strDiscountDescription IS NULL
 		AND Sch.intCommodityId IS NULL
 END
+GO

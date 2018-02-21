@@ -565,6 +565,38 @@ BEGIN
 		,[dblCalculatedTax]					NUMERIC(18,6)
 		,[dblOriginalTax]					NUMERIC(18,6)
 	)
+	
+	DECLARE @tblCFCalculatedTaxExempt				TABLE
+	(
+		 [intTransactionDetailTaxId]		INT
+		,[intInvoiceDetailId]				INT
+		,[intTransactionDetailId]  			INT
+		,[intTaxGroupMasterId]				INT
+		,[intTaxGroupId]					INT
+		,[intTaxCodeId]						INT
+		,[intTaxClassId]					INT
+		,[strTaxableByOtherTaxes]			NVARCHAR(MAX)
+		,[strCalculationMethod]				NVARCHAR(MAX)
+		,[dblRate]							NUMERIC(18,6)
+		,[dblTax]							NUMERIC(18,6)
+		,[dblAdjustedTax]					NUMERIC(18,6)
+		,[dblExemptionPercent]				NUMERIC(18,6)
+		,[intSalesTaxAccountId]    			INT
+		,[intTaxAccountId]    				INT
+		,[ysnSeparateOnInvoice]				BIT
+		,[ysnCheckoffTax]					BIT
+		,[strTaxCode]						NVARCHAR(MAX)
+		,[ysnTaxExempt]						BIT		
+		,[ysnInvalidSetup]					BIT
+		,[strTaxGroup]						NVARCHAR(MAX)
+		,[ysnInvalid]						BIT
+		,[strReason]						NVARCHAR(MAX)
+		,[strNotes]							NVARCHAR(MAX)
+		,[strTaxExemptReason]				NVARCHAR(MAX)
+		,[dblCalculatedTax]					NUMERIC(18,6)
+		,[dblOriginalTax]					NUMERIC(18,6)
+	)
+
 	DECLARE @tblCFRemoteOriginalTax			TABLE
 	(
 		 [intTransactionDetailTaxId]		INT
@@ -1841,6 +1873,62 @@ BEGIN
 					,0		--@IsDeliver										 
 				)
 
+
+				INSERT INTO @tblCFCalculatedTaxExempt	
+				(
+					 [intTaxGroupId]				
+					,[intTaxCodeId]					
+					,[intTaxClassId]				
+					,[strTaxableByOtherTaxes]		
+					,[strCalculationMethod]			
+					,[dblRate]			
+					,[dblExemptionPercent]			
+					,[dblTax]						
+					,[dblAdjustedTax]				
+					,[intSalesTaxAccountId]    			
+					,[ysnCheckoffTax]
+					,[ysnTaxExempt]
+					,[ysnInvalidSetup]				
+					,[strNotes]							
+				)	
+				SELECT 
+					 [intTaxGroupId]			
+					,[intTaxCodeId]				
+					,[intTaxClassId]			
+					,[strTaxableByOtherTaxes]	
+					,[strCalculationMethod]		
+					,[dblRate]					
+					,[dblExemptionPercent]		
+					,[dblTax]					
+					,[dblAdjustedTax]			
+					,[intTaxAccountId]			
+					,[ysnCheckoffTax]				
+					,[ysnTaxExempt]					
+					,[ysnInvalidSetup]				
+					,[strNotes]						
+				FROM [fnConstructLineItemTaxDetail] 
+				(
+					 @dblQuantity
+					,(@dblPrice * @dblQuantity)
+					,@LineItemTaxDetailStagingTable
+					,1
+					,@intItemId
+					,@intCustomerId
+					,@intLocationId
+					,@intTaxGroupId
+					,0
+					,@dtmTransactionDate
+					,NULL
+					,1
+					,NULL
+					,NULL
+					,@intCardId		
+					,@intVehicleId
+					,1 -- @DisregardExemptionSetup
+					,0
+				)
+
+					--SELECT * FROM @tblCFCalculatedTaxExempt
 					--SELECT * FROM @tblCFCalculatedTax
 					--SELECT * FROM @tblCFOriginalTax
 
@@ -2408,11 +2496,13 @@ BEGIN
 	WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL
 
 	SELECT 
-	 @totalCalculatedTaxExempt = ISNULL(SUM(dblOriginalTax),0)
+	 @totalCalculatedTaxExempt = ISNULL(SUM(cftx.dblTax),0)
 	FROM
-	@tblCFTransactionTax
-	WHERE ysnTaxExempt = 1 AND 
-	(ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL)
+	@tblCFTransactionTax as cft
+	INNER JOIN @tblCFCalculatedTaxExempt as cftx
+	ON cft.intTaxClassId = cftx.intTaxClassId
+	WHERE cft.ysnTaxExempt = 1 AND 
+	(cft.ysnInvalidSetup = 0 OR cft.ysnInvalidSetup IS NULL)
 	
 
 	SET @dblGrossTransferCost = ISNULL(@dblTransferCost,0)
@@ -2468,10 +2558,15 @@ BEGIN
 		END
 	ELSE IF @strPriceMethod = 'Network Cost'
 	BEGIN
+
+	--Original Net Price = Round( (Round(Gross Transfer Cost * Quantity,2) - Original Taxes) / Quantity, 6)
+	--Calc Gross Price = Gross Transfer Cost
+	--Calc Net Price = Round( (Round(Gross Transfer Cost * Quantity,2) - (Calc Taxes) )/ Quantity,6)
+
  
 	DECLARE @dblNetworkCostGrossPrice NUMERIC(18,6)
 	SET @dblNetworkCostGrossPrice = ISNULL(@TransferCost,0)
-	SET @dblImportFileGrossPrice = ROUND((ISNULL(@TransferCost,0) - (ISNULL(@totalOriginalTax,0) / @dblQuantity)) + ISNULL(@dblAdjustments,0) + (ISNULL(@totalCalculatedTax,0) / @dblQuantity) , 6)
+	SET @dblImportFileGrossPrice = @dblNetworkCostGrossPrice --ROUND((ISNULL(@TransferCost,0) - (ISNULL(@totalOriginalTax,0) / @dblQuantity)) + ISNULL(@dblAdjustments,0) + (ISNULL(@totalCalculatedTax,0) / @dblQuantity) , 6)
  
 	IF(ISNULL(@ysnForceRounding,0) = 1) 
 	BEGIN
@@ -2490,9 +2585,9 @@ BEGIN
 	),
 	(
 	'Net Price'
-	,ROUND((((@dblNetworkCostGrossPrice * @dblQuantity) - (@totalOriginalTax) ) / @dblQuantity),6)
+	,ROUND(((ROUND((@dblNetworkCostGrossPrice * @dblQuantity),2) - (ISNULL(@totalOriginalTax,0))) / @dblQuantity),6)
 	--,ROUND((((@dblImportFileGrossPrice * @dblQuantity) - (@totalCalculatedTaxExempt + @totalCalculatedTax) ) / @dblQuantity),6)
-	,ROUND((((@dblImportFileGrossPrice * @dblQuantity) - (ISNULL(@totalCalculatedTax,0))) / @dblQuantity),6)
+	,ROUND(((ROUND((@dblImportFileGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0))) / @dblQuantity),6)
 	),
 	(
 	'Total Amount'
