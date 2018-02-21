@@ -1,6 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuARSalesOrderReport]
 AS
-SELECT SO.intSalesOrderId	 
+SELECT intSalesOrderId			= SO.intSalesOrderId
+	 , intCompanyLocationId		= SO.intCompanyLocationId
 	 , strCompanyName			= CASE WHEN L.strUseLocationAddress = 'Letterhead' THEN '' ELSE COMPANY.strCompanyName END
 	 , strCompanyAddress		= CASE WHEN L.strUseLocationAddress IS NULL OR L.strUseLocationAddress = 'No' OR L.strUseLocationAddress = '' OR L.strUseLocationAddress = 'Always'
 											THEN dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, COMPANY.strAddress, COMPANY.strCity, COMPANY.strState, COMPANY.strZip, COMPANY.strCountry, NULL, COMPANY.ysnIncludeEntityName)
@@ -74,6 +75,7 @@ SELECT SO.intSalesOrderId
 	 , intOneLinePrintId		= SALESORDERDETAIL.intOneLinePrintId
 	 , dblTotalWeight			= ISNULL(SO.dblTotalWeight, 0)
 	 , strCustomerComments		= dbo.fnEMEntityMessage(CUSTOMER.intEntityId, 'Pick Ticket')
+	 , ysnListBundleSeparately	= ISNULL(SALESORDERDETAIL.ysnListBundleSeparately, CONVERT(BIT, 0))
 FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
 LEFT JOIN (
 	SELECT intSalesOrderId
@@ -103,12 +105,14 @@ LEFT JOIN (
 		 , dblContractBalance		= CASE WHEN ISNULL(SD.intCommentTypeId, 0) = 0 THEN CASE WHEN SD.dblContractBalance = 0 THEN CD.dblBalance ELSE SD.dblContractBalance END ELSE NULL END
 		 , strContractNumber		= CASE WHEN ISNULL(SD.intCommentTypeId, 0) = 0 THEN CH.strContractNumber ELSE NULL END
 		 , strCategoryDescription   = CASE WHEN I.intCategoryId IS NULL THEN 'No Item Category' ELSE ICC.strCategoryCode + ' - ' + ICC.strDescription END
+		 , ysnListBundleSeparately	= I.ysnListBundleSeparately
 	FROM dbo.tblSOSalesOrderDetail SD WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intItemId
 		     , intCategoryId
 			 , strItemNo
 			 , strType
+			 , ysnListBundleSeparately
 		FROM dbo.tblICItem WITH (NOLOCK) 
 	) I ON SD.intItemId = I.intItemId
 	LEFT JOIN (
