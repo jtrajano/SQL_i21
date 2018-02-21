@@ -98,6 +98,19 @@ BEGIN
     EXEC('UPDATE tblTFReportingComponent SET intComponentTypeId = 4 WHERE intComponentTypeId = 5')
 END
 
+-- Clean up of all non-unique strTemplateItemId in tblTFReportingComponentConfiguration
+IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFReportingComponentConfiguration' AND COLUMN_NAME = 'strTemplateItemId') 
+BEGIN
+	PRINT('Cleanup of non-unique TemplateItemId in tblTFReportingComponentConfiguration')
+
+	EXEC('UPDATE tblTFReportingComponentConfiguration SET strTemplateItemId = intMasterId WHERE intReportingComponentConfigurationId IN (
+		SELECT A.intReportingComponentConfigurationId FROM tblTFReportingComponentConfiguration A
+		INNER JOIN (SELECT intReportingComponentId, strTemplateItemId FROM tblTFReportingComponentConfiguration 
+		GROUP BY intReportingComponentId, strTemplateItemId
+		HAVING COUNT(strTemplateItemId) > 1) B 
+		ON A.intReportingComponentId = B.intReportingComponentId AND A.strTemplateItemId = B.strTemplateItemId)')
+END
+
 IF NOT EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSMCleanupLog') 
 BEGIN
 	PRINT('Create tblSMCleanupLog')

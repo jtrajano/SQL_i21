@@ -17,7 +17,8 @@
 	[intMasterId] INT NULL,
 	[intConcurrencyId] INT DEFAULT((1)) NULL, 
     CONSTRAINT [PK_tblTFReportingComponentConfiguration] PRIMARY KEY ([intReportingComponentConfigurationId] ASC),
-	CONSTRAINT [FK_tblTFReportingComponentConfiguration_tblTFReportingComponent] FOREIGN KEY([intReportingComponentId]) REFERENCES [dbo].[tblTFReportingComponent] ([intReportingComponentId]) ON DELETE CASCADE
+	CONSTRAINT [FK_tblTFReportingComponentConfiguration_tblTFReportingComponent] FOREIGN KEY([intReportingComponentId]) REFERENCES [dbo].[tblTFReportingComponent] ([intReportingComponentId]) ON DELETE CASCADE, 
+    CONSTRAINT [UK_tblTFReportingComponentConfiguration_1] UNIQUE ([intReportingComponentId], [strTemplateItemId]) 
 )
 
 GO
