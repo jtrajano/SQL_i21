@@ -399,6 +399,7 @@
     <Compile Include="Controllers\CategoryController.cs" />
     <Compile Include="Controllers\CategoryLocationController.cs" />
     <Compile Include="Controllers\CategoryUOMController.cs" />
+    <Compile Include="Controllers\CategoryTaxController.cs" />
     <Compile Include="Controllers\CategoryVendorController.cs" />
     <Compile Include="Controllers\CertificationController.cs" />
     <Compile Include="Controllers\CommodityAttributeController.cs" />

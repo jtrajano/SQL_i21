@@ -8,7 +8,7 @@ Ext.define('Inventory.model.CategoryLocation', {
         'Ext.data.Field'
     ],
 
-    idProperty: 'intCategoryStoreId',
+    idProperty: 'intCategoryLocationId',
 
     fields: [
         { name: 'intCategoryLocationId', type: 'int'},
@@ -19,11 +19,12 @@ Ext.define('Inventory.model.CategoryLocation', {
                     role: 'tblICCategoryLocations',
                     storeConfig: {
                         complete: true,
-                        remoteFilter: true,
+                        remoteFilter: true,                        
                         proxy: {
+                            extraParams: { include: 'tblSMCompanyLocation' },
                             type: 'rest',
                             api: {
-                                read: '../inventory/api/categorylocation/get'
+                                read: './inventory/api/categorylocation/get'
                             },
                             reader: {
                                 type: 'json',

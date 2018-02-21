@@ -149,7 +149,7 @@ Ext.define('Inventory.view.CategoryViewController', {
                         store: '{vendor}'
                     }
                 },
-                colVendorDepartment: 'strVendorDepartment',
+                colVendorCategory: 'strVendorDepartment',
                 colVendorAddOrderUPC: 'ysnAddOrderingUPC',
                 colVendorUpdateExisting: 'ysnUpdateExistingRecords',
                 colVendorAddNew: 'ysnAddNewRecords',
@@ -228,21 +228,22 @@ Ext.define('Inventory.view.CategoryViewController', {
         win.context = Ext.create('iRely.Engine', {
             window : win,
             store  : store,
-            include: 'tblSMLineOfBusiness, tblICCategoryAccounts.tblGLAccount, ' +
-                'tblICCategoryAccounts.tblGLAccountCategory, ' +
-                'tblICCategoryLocations.tblSMCompanyLocation, ' +
-                'tblICCategoryTaxes.vyuICGetCategoryTax, ' +
-                'tblICCategoryVendors.vyuAPVendor, ' +
-                'tblICCategoryVendors.Family, ' +
-                'tblICCategoryVendors.SellClass, ' +
-                'tblICCategoryVendors.OrderClass, ' +
-                'tblICCategoryVendors.tblICCategoryLocation.tblSMCompanyLocation',
-                // 'tblICCategoryUOMs.tblICUnitMeasure',
+            // include: 'tblSMLineOfBusiness, tblICCategoryAccounts.tblGLAccount, ' +
+            //     'tblICCategoryAccounts.tblGLAccountCategory, ' +
+            //     'tblICCategoryLocations.tblSMCompanyLocation, ' +
+            //     'tblICCategoryTaxes.vyuICGetCategoryTax, ' +
+            //     'tblICCategoryVendors.vyuAPVendor, ' +
+            //     'tblICCategoryVendors.Family, ' +
+            //     'tblICCategoryVendors.SellClass, ' +
+            //     'tblICCategoryVendors.OrderClass, ' +
+            //     'tblICCategoryVendors.tblICCategoryLocation.tblSMCompanyLocation',
+            //     // 'tblICCategoryUOMs.tblICUnitMeasure',
             createRecord : me.createRecord,
             binding: me.config.binding,
             details: [
                 {
                     key: 'tblICCategoryAccounts',
+                    lazy: true,
                     component: Ext.create('iRely.grid.Manager', {
                         grid: win.down('#grdGlAccounts'),
                         deleteButton : win.down('#btnDeleteGlAccounts')
@@ -250,6 +251,7 @@ Ext.define('Inventory.view.CategoryViewController', {
                 },
                 {
                     key: 'tblICCategoryLocations',
+                    lazy: true,
                     component: Ext.create('iRely.grid.Manager', {
                         grid: win.down('#grdLocation'),
                         deleteButton : win.down('#btnDeleteLocation'),
@@ -258,6 +260,7 @@ Ext.define('Inventory.view.CategoryViewController', {
                 },
                 {
                     key: 'tblICCategoryVendors',
+                    lazy: true,
                     component: Ext.create('iRely.grid.Manager', {
                         grid: win.down('#grdVendorCategoryXref'),
                         deleteButton : win.down('#btnDeleteVendorCategoryXref')
@@ -272,6 +275,7 @@ Ext.define('Inventory.view.CategoryViewController', {
                 // },
                 {
                     key: 'tblICCategoryTaxes',
+                    lazy: true,
                     component: Ext.create('iRely.grid.Manager', {
                         grid: win.down('#grdTax'),
                         deleteButton : win.down('#btnDeleteTax')

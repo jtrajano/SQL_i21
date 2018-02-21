@@ -18,12 +18,31 @@ Ext.define('Inventory.model.CategoryTax', {
                 inverse: {
                     role: 'tblICCategoryTaxes',
                     storeConfig: {
-                        complete: true,
+                        // complete: true,
+                        // sortOnLoad: true,
+                        // sorters: {
+                        //     direction: 'DESC',
+                        //     property: 'intSort'
+                        // }
+                        remoteFilter: true,
+                        complete: true,                        
+                        proxy: {
+                            extraParams: { include: 'vyuICGetCategoryTax' },
+                            type: 'rest',
+                            api: {
+                                read: './inventory/api/categorytax/get'
+                            },
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data',
+                                messageProperty: 'message'
+                            }
+                        },
                         sortOnLoad: true,
                         sorters: {
-                            direction: 'DESC',
+                            direction: 'ASC',
                             property: 'intSort'
-                        }
+                        }                         
                     }
                 }
             }},

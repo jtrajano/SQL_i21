@@ -18,12 +18,31 @@ Ext.define('Inventory.model.CategoryVendor', {
                 inverse: {
                     role: 'tblICCategoryVendors',
                     storeConfig: {
-                        complete: true,
+                        // complete: true,
+                        // sortOnLoad: true,
+                        // sorters: {
+                        //     direction: 'DESC',
+                        //     property: 'intSort'
+                        // }
+                        remoteFilter: true,
+                        complete: true,                        
+                        proxy: {
+                            extraParams: { include: 'vyuAPVendor, Family, SellClass, OrderClass, tblICCategoryLocation.tblSMCompanyLocation' },
+                            type: 'rest',
+                            api: {
+                                read: './inventory/api/categoryvendor/get'
+                            },
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data',
+                                messageProperty: 'message'
+                            }
+                        },
                         sortOnLoad: true,
                         sorters: {
-                            direction: 'DESC',
+                            direction: 'ASC',
                             property: 'intSort'
-                        }
+                        }                            
                     }
                 }
             }},
