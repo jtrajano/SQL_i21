@@ -118,7 +118,7 @@ BEGIN
 						SELECT intEntityId
 							 , strName
 						FROM dbo.tblEMEntity
-					) CONTACT ON SO.intEntityContactId = CONTACT.intEntityId
+					) CONTACT ON INV.intEntityContactId = CONTACT.intEntityId
 					INNER JOIN (
 						SELECT intEntityId
 							 , strName
