@@ -29,9 +29,9 @@ Ext.define('Inventory.view.CategoryLocationViewModel', {
         location: {
             type: 'companylocationbuffered'
         },
-        //paidout: {
+        // paidout: {
         //    type: 'storepaidout'
-        //},
+        // },
         class: {
             type: 'stsubcategorybuffered'
         },

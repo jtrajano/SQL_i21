@@ -11,6 +11,6 @@ namespace iRely.Inventory.BusinessLayer
 {
     public interface ICategoryLocationBl : IBusinessLayer<tblICCategoryLocation>
     {
-        
+        Task<GetObjectResult> GetCategoryLocation(GetParameter param);
     }
 }

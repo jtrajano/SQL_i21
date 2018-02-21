@@ -72,7 +72,12 @@ Ext.define('Inventory.model.CategoryLocation', {
         { name: 'ysnIdRequiredLiquor', type: 'boolean' },
         { name: 'ysnIdRequiredCigarette', type: 'boolean' },
         { name: 'intMinimumAge', type: 'int', allowNull: true },
-        { name: 'intSort', type: 'int', allowNull: true }
+        { name: 'intSort', type: 'int', allowNull: true },
+        { name: 'strLocationName', stype: 'string'},
+        { name: 'intCompanyLocationId', type: 'int', allowNull: true },
+        { name: 'strProductCodeId', stype: 'string'},
+        { name: 'strFamilyId', stype: 'string'},
+        { name: 'strClassId', stype: 'string'}
     ],
 
     validators: [

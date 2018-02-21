@@ -20,7 +20,7 @@ Ext.define('Inventory.view.CategoryLocationViewController', {
     config: {
         binding: {
             cboLocation: {
-                value: '{current.intLocationId}',
+                value: '{current.strLocationName}',
                 store: '{location}'
             },
             txtCashRegisterDepartment: '{current.intRegisterDepartmentId}',
@@ -43,12 +43,13 @@ Ext.define('Inventory.view.CategoryLocationViewController', {
             chkDepartmentForPumps: '{current.ysnDepartmentForPumps}',
             cboConvertToPaidout: {
                 value: '{current.intConvertPaidOutId}',
-                store: '{paidout}'
+                store: '{paidout}',
+                disabled: true
             },
             chkDeleteFromRegister: '{current.ysnDeleteFromRegister}',
             chkDepartmentKeyTaxed: '{current.ysnDeptKeyTaxed}',
             cboDefaultProductCode: {
-                value: '{current.intProductCodeId}',
+                value: '{current.strProductCodeId}',//'{current.intProductCodeId}',
                 store: '{product}',
                 defaultFilters: [
                     {
@@ -58,7 +59,7 @@ Ext.define('Inventory.view.CategoryLocationViewController', {
                 ]
             },
             cboDefaultFamily: {
-                value: '{current.intFamilyId}',
+                value: '{current.strFamilyId}', //'{current.intFamilyId}',
                 store: '{family}',
                 defaultFilters: [{
                     column: 'strSubcategoryType',
@@ -67,7 +68,7 @@ Ext.define('Inventory.view.CategoryLocationViewController', {
                 }]
             },
             cboDefaultClass: {
-                value: '{current.intClassId}',
+                value: '{current.strClassId}', //'{current.intClassId}',
                 store: '{class}',
                 defaultFilters: [{
                     column: 'strSubcategoryType',
@@ -93,6 +94,7 @@ Ext.define('Inventory.view.CategoryLocationViewController', {
         win.context = Ext.create('iRely.Engine', {
             window : win,
             store  : store,
+            //include: 'tblSMCompanyLocation',
             binding: me.config.binding,
             createRecord: {
                 fn: me.createRecord,
@@ -130,10 +132,99 @@ Ext.define('Inventory.view.CategoryLocationViewController', {
 
     createRecord: function(config, action) {
         var me = this;
-        var record = Ext.create('Inventory.model.CategoryLocation');
-        record.set('intCategoryId', me.intCategoryId);
-        if (app.DefaultLocation > 0)
-            record.set('intLocationId', app.DefaultLocation);
-        action(record);
-    }
+        var win = config.window; 
+        //var cboLocation = win.down('#cboLocation'); 
+
+        var newRecord = Ext.create('Inventory.model.CategoryLocation');
+        newRecord.set('intCategoryId', me.intCategoryId);
+
+        var defaultLocation = iRely.Configuration.Application.CurrentLocation; 
+
+        // Set the default company location. 
+        if (defaultLocation){
+            newRecord.set('intLocationId', defaultLocation);
+
+            // Get the display value for the company location. 
+            Ext.create('i21.store.CompanyLocationBuffered', {
+                storeId: 'icItemLocationCompanyLocation',
+                autoLoad: {
+                    filters: [
+                        {
+                            dataIndex: 'intCompanyLocationId',
+                            value: defaultLocation,
+                            condition: 'eq'
+                        }
+                    ],
+                    params: {
+                        columns: 'strLocationName:intCompanyLocationId:'
+                    },
+                    callback: function(records, operation, success){
+                        var record; 
+                        if (records && records.length > 0) {
+                            record = records[0];
+                        }
+
+                        if(success && record){
+                            newRecord.set('strLocationName', record.get('strLocationName'));
+                            newRecord.set('intLocationId', record.get('intCompanyLocationId'));
+                        }
+                    }
+                }
+            });            
+        }  
+
+        action(newRecord);
+    },
+
+    onComboSelect: function (combo, records, eOpts) {
+        var me = this;
+
+        if (!combo) return;         
+        
+        var win = combo.up('window');
+        if (!win) return; 
+
+        var current = win.viewModel.data.current;
+        if (!current) return; 
+
+        if (!records || records.length <= 0) return;
+        
+        var record = records[0];
+
+        if (combo.itemId === 'cboLocation'){
+            current.set('strLocationName', record.get('strLocationName'));
+            current.set('intLocationId', record.get('intCompanyLocationId'));    
+        }
+        else if (combo.itemId === 'cboDefaultProductCode'){
+            current.set('strProductCodeId', record.get('strRegProdCode'));
+            current.set('intProductCodeId', record.get('intRegProdId'));    
+        }
+        else if (combo.itemId === 'cboDefaultFamily'){
+            current.set('strFamilyId', record.get('strSubcategoryId'));
+            current.set('intFamilyId', record.get('intSubcategoryId'));    
+        }
+        else if (combo.itemId === 'cboDefaultClass'){
+            current.set('strClassId', record.get('strSubcategoryId'));
+            current.set('intClassId', record.get('intSubcategoryId'));    
+        }
+
+    },  
+
+    init: function(application) {
+        this.control({
+            "#cboLocation": {
+                select: this.onComboSelect
+            },
+            "#cboDefaultProductCode": {
+                select: this.onComboSelect
+            },
+            "#cboDefaultFamily": {
+                select: this.onComboSelect
+            },
+            "#cboDefaultClass": {
+                select: this.onComboSelect
+            },
+
+        });
+    }    
 });

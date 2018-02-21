@@ -79,5 +79,18 @@ namespace iRely.Inventory.BusinessLayer
                 }
             };
         }
+
+        public async Task<GetObjectResult> GetCategoryLocation(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICCategoryLocation>().Filter(param, true);
+            var key = Methods.GetPrimaryKey<vyuICCategoryLocation>(_db.ContextManager);
+
+            return new GetObjectResult()
+            {
+                data = await query.Execute(param, key).ToListAsync().ConfigureAwait(false),
+                total = await query.CountAsync().ConfigureAwait(false)
+            };
+
+        }
     }
 }
