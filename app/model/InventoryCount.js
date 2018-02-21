@@ -45,5 +45,17 @@ Ext.define('Inventory.model.InventoryCount', {
 
     validators: [
         { type: 'presence', field: 'intLocationId' }
-    ]
+    ],
+
+    validate: function (options) {
+        var errors = this.callParent(arguments);
+        if (!this.get('intLocationId')) {
+            errors.add({
+                field: 'strLocation',
+                message: 'Location must be present.'
+            });
+        }
+
+        return errors;
+    }
 });
