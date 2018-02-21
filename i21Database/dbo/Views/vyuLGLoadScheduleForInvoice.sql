@@ -40,20 +40,20 @@ SELECT
 	,dblQtyRemaining				= dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intItemUOMId, ARCC.intItemUOMId), ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId), ISNULL(LD.dblQuantity, ARCC.dblShipQuantity)) --For Review--
 	,dblDiscount					= 0.0000000
 	,dblPrice						= ARCC.dblOrderPrice --For Review--
-	,dblShipmentUnitPrice			= ((ARCC.dblUnitPrice) / dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId), ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), 1)) --For Review--
+	,dblShipmentUnitPrice			= ((ARCC.dblUnitPrice) / dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId), ISNULL(LD.intWeightItemUOMId, LDL.intWeightUOMId), 1)) --For Review--
 	,strPricing						= CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,strVFDDocumentNumber			= CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,dblTotalTax					= 0.000000
-	,dblTotal						= ((ARCC.dblUnitPrice) / dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId), ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), 1))
-										* dbo.fnCalculateQtyBetweenUOM(ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), ISNULL(LDL.dblNet,LD.dblNet)) --For Review--
+	,dblTotal						= ((ARCC.dblUnitPrice) / dbo.fnCalculateQtyBetweenUOM(ISNULL(ARCC.intPriceItemUOMId,LD.intItemUOMId), ISNULL(LD.intWeightItemUOMId, LDL.intWeightUOMId), 1))
+										* dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intWeightItemUOMId,LDL.intWeightUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), ISNULL(LDL.dblNet,LD.dblNet)) --For Review--
 	,intStorageLocationId			= NULL
 	,intTermId						= NULL
 	,intEntityShipViaId				= NULL
 	,intTicketId					= NULL
 	,intTaxGroupId					= NULL
-	,dblGrossWt						= dbo.fnCalculateQtyBetweenUOM(ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), ISNULL(LDL.dblGross,LD.dblGross)) --For Review--
-	,dblTareWt						= dbo.fnCalculateQtyBetweenUOM(ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), ISNULL(LDL.dblTare,LD.dblTare)) --For Review--
-	,dblNetWt						= dbo.fnCalculateQtyBetweenUOM(ISNULL(LDL.intWeightUOMId, LD.intWeightItemUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), ISNULL(LDL.dblNet,LD.dblNet)) --For Review--
+	,dblGrossWt						= dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intWeightItemUOMId, LDL.intWeightUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), ISNULL(LDL.dblGross,LD.dblGross)) --For Review--
+	,dblTareWt						= dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intWeightItemUOMId, LDL.intWeightUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), ISNULL(LDL.dblTare,LD.dblTare)) --For Review--
+	,dblNetWt						= dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intWeightItemUOMId, LDL.intWeightUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), ISNULL(LDL.dblNet,LD.dblNet)) --For Review--
 	,strPONumber					= CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,strBOLNumber					= CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,intSplitId						= NULL
