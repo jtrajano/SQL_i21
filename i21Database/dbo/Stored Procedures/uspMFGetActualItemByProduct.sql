@@ -56,6 +56,10 @@ BEGIN
 			I.intItemId = RI.intItemId
 			OR I.intItemId = SI.intSubstituteItemId
 			)
+		AND I.strType NOT IN (
+			'Other Charge'
+			,'Service'
+			)
 	LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = RI.intItemUOMId
 		AND IU.intItemId = I.intItemId
 	LEFT JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = SI.intItemUOMId
