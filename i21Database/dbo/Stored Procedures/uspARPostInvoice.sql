@@ -718,7 +718,8 @@ IF(@totalInvalid > 0)
 			,[strBatchId]
 			,[intInvoiceId]
 		FROM
-			@InvalidInvoiceData
+			@InvalidInvoiceData 
+				ORDER BY strPostingError DESC
 
 		SET @invalidCount = @totalInvalid
 
