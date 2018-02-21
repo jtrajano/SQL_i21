@@ -129,9 +129,11 @@ BEGIN
 				WHERE inti21Id = @Id_update		
 
 				--sync cross reference mapping with the newly built account
-				INSERT INTO tblGLCrossReferenceMapping (strOldAccountId,intAccountId, intAccountSystemId, intConcurrencyId)
-				SELECT strOldId, inti21Id,1,1 FROM tblGLCOACrossReference
-				WHERE inti21Id = @Id_update
+				DECLARE @originId int
+				SELECT @originId = intAccountSystemId FROM tblGLAccountSystem WHERE strAccountSystemDescription = ''Origin''
+				IF @originId IS NOT NULL
+					INSERT INTO tblGLCrossReferenceMapping (strOldAccountId,intAccountId, intAccountSystemId, intConcurrencyId)
+					SELECT strOldId, inti21Id,@originId,1 FROM tblGLCOACrossReference WHERE inti21Id = @Id_update
 				
 				--RETAIN THE ORIGINAL VALUE OF glact_acct1_8 IN CASE LENGHT ADJUSTMENT WAS MADE
 				UPDATE A
