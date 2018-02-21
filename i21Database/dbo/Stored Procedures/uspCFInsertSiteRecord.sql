@@ -60,6 +60,7 @@ BEGIN
 	DECLARE @intTaxGroup							  INT = 0
 	DECLARE @intARCashCustomer						  INT = 0
 	DECLARE @intImportMapping						  INT = 0
+	DECLARE @strNetworkType							  NVARCHAR(50)
 	---------------------------------------------------------
 	DECLARE @strAllowExemptionsOnExtAndRetailTrans	  NVARCHAR(50)
 	---------------------------------------------------------
@@ -121,7 +122,9 @@ BEGIN
 	--Account
 	IF (@strNetworkId != '')
 		BEGIN 
-			SELECT @intNetworkId = n.intNetworkId
+			SELECT 
+			 @intNetworkId = n.intNetworkId
+			,@strNetworkType = strNetworkType
 			FROM tblCFNetwork as n
 			WHERE strNetwork = @strNetworkId
 
@@ -410,12 +413,15 @@ BEGIN
 	
 	---------------------------------------------------------
 
-	--PP SiteType
-	IF (@strPPSiteType not in ('Network','Exclusive','Retail'))
-	BEGIN 
-		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
-		VALUES (@strSiteNumber,'Invalid PP SiteType '+ @strPPSiteType +'. Value should be Network or Exclusive or Retail only')
-		SET @ysnHasError = 1
+	IF (@strNetworkType = 'PacPride')
+	BEGIN
+		--PP SiteType
+		IF (@strPPSiteType not in ('Network','Exclusive','Retail'))
+		BEGIN 
+			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+			VALUES (@strSiteNumber,'Invalid PP SiteType '+ @strPPSiteType +'. Value should be Network or Exclusive or Retail only')
+			SET @ysnHasError = 1
+		END
 	END
 	
 	---------------------------------------------------------
