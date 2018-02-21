@@ -6216,6 +6216,7 @@
     <Build Include="dbo\Stored Procedures\uspICGetBundleComponents.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetItemSubtitutes.sql" />
     <Build Include="dbo\Stored Procedures\uspRKInsertM2MInquiryDetails.sql" />
+    <Build Include="dbo\Views\vyuICCategoryLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
