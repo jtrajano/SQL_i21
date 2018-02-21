@@ -9,6 +9,7 @@
 	,strWarehouseRefNo nvarchar(50) COLLATE Latin1_General_CI_AS NULL
 	,strReceiptNumber nvarchar(50) COLLATE Latin1_General_CI_AS NULL
 	,dtmReceiptDate datetime NULL DEFAULT (getdate())
+	,dtmLastMoveDate datetime
 	CONSTRAINT [PK_tblMFLotInventory] PRIMARY KEY ([intLotInventoryId]), 
 	CONSTRAINT [AK_tblMFLotInventory_intLotId] UNIQUE ([intLotId]), 
 	CONSTRAINT [FK_tblMFLotInventory_tblICLot] FOREIGN KEY ([intLotId]) REFERENCES [tblICLot]([intLotId]) ON DELETE CASCADE,

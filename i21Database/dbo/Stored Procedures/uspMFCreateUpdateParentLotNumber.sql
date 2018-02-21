@@ -314,6 +314,7 @@ BEGIN
 			,strWarehouseRefNo
 			,strReceiptNumber
 			,dtmReceiptDate
+			,dtmLastMoveDate 
 			)
 		SELECT @intLotId
 			,@intBondStatusId
@@ -321,6 +322,7 @@ BEGIN
 			,@strWarehouseRefNo
 			,@strReceiptNumber
 			,@dtmReceiptDate
+			,@dtmCurrentDateTime
 	END
 	ELSE
 	BEGIN
@@ -392,6 +394,7 @@ BEGIN
 							)
 				ELSE intBondStatusId
 				END
+			,dtmLastMoveDate =@dtmCurrentDateTime
 		WHERE intLotId = @intLotId
 	END
 

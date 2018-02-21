@@ -476,6 +476,10 @@ BEGIN TRY
 		,@intLocationId = @intLocationId
 		,@intInventoryAdjustmentId = @intInventoryAdjustmentId
 
+		Update tblMFLotInventory
+		Set dtmLastMoveDate =@dtmDate
+		WHERE intLotId = @intNewLotId
+
 	IF ISNULL(@intLotStatusId, 0) <> ISNULL(@intDestinationLotStatusId, 0)
 		AND @dblDestinationLotQty = 0
 		AND NOT EXISTS (
