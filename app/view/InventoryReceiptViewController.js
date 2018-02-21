@@ -5786,13 +5786,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 // Add the item record.
                                 if(strBundleType == 'Kit'){
                                     currentVM.tblICInventoryReceiptItems().add(newRecord);
-                                    newReceiptItem = currentVM.tblICInventoryReceiptItems().findRecord('intOrderId', newRecord.intOrderId);
+                                    newReceiptItem = currentVM.tblICInventoryReceiptItems().findRecord('intLineNo', newRecord.intLineNo);
                                     me.getBundleComponents(newReceiptItem, order, currentVM, currentVM.tblICInventoryReceiptItems());
                                 } else if(strBundleType == 'Option') {
                                     me.getBundleComponents(newReceiptItem, order, currentVM, currentVM.tblICInventoryReceiptItems());
                                 } else {
                                     currentVM.tblICInventoryReceiptItems().add(newRecord);
-                                    newReceiptItem = currentVM.tblICInventoryReceiptItems().findRecord('intOrderId', newRecord.intOrderId);
+                                    newReceiptItem = currentVM.tblICInventoryReceiptItems().findRecord('intLineNo', newRecord.intLineNo);
                                 }
 
                                 //newReceiptItem = currentVM.tblICInventoryReceiptItems().findRecord('intOrderId', newRecord.intOrderId);
