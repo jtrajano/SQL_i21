@@ -2365,7 +2365,10 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                         xtype: 'checkcolumn',
                                                         itemId: 'colChargeEntity',
                                                         width: 85,
-                                                        text: 'Charge Entity'
+                                                        text: 'Charge Entity',
+                                                        editor: {
+                                                            xtype: 'checkboxfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',

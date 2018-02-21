@@ -3242,7 +3242,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                 taxGroupName = null;
 
                             charge.tblICInventoryShipmentChargeTaxes().removeAll();
-
+                            var unitMeasureId = charge.get('intCostUOMId');
                             Ext.Array.each(itemTaxes, function (itemDetailTax) {
                                 var taxableAmount = charge.get('dblAmount');
                                 var taxAmount = 0.00;
@@ -3258,10 +3258,6 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                     taxAmount = (taxableAmount * (itemDetailTax.dblRate / 100));
                                 } else {
                                     taxAmount = chargeQuantity * itemDetailTax.dblRate;
-
-                                    // UOM for other charges taxes IC-4718
-                                    if(charge.get("intUnitMeasureId") == itemDetailTax.intUnitMeasureId)
-                                        taxAmount = (chargeQuantity * itemDetailTax.dblRate) / dblForexRate;
 
                                     // If a line is using a foreign currency, convert the tax from functional currency to the charge currency. 
                                     taxAmount = dblForexRate != 0 ? taxAmount / dblForexRate : taxAmount;
@@ -3303,6 +3299,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                     strCalculationMethod: itemDetailTax.strCalculationMethod,
                                     dblRate: itemDetailTax.dblRate,
                                     dblTax: itemDetailTax.dblTax,
+                                    intUnitMeasureId: unitMeasureId,
                                     dblAdjustedTax: itemDetailTax.dblAdjustedTax,
                                     intTaxAccountId: itemDetailTax.intTaxAccountId,
                                     ysnTaxAdjusted: itemDetailTax.ysnTaxAdjusted,
@@ -3343,7 +3340,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                 FreightTermId: current.get('intFreightTermId'),
                                 CardId: null,
                                 VehicleId: null,
-                                IncludeExemptedCodes: false
+                                IncludeExemptedCodes: false,
+                                UOMId: charge.get('intCostUOMId')
                          };
                          iRely.Functions.getItemTaxes(currentCharge, computeItemTax, me);
                     }
@@ -3902,6 +3900,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         { itemId: 'colTaxClass', dataIndex: 'strTaxClass', text: 'Tax Class', width: 100, dataType: 'string' },
                         { itemId: 'colTaxCode', dataIndex: 'strTaxCode', text: 'Tax Code', width: 100, dataType: 'string' },
                         { itemId: 'colCalculationMethod', dataIndex: 'strCalculationMethod', text: 'Calculation Method', width: 110, dataType: 'string' },                                
+                        { itemId: 'colUnitMeasureId', dataIndex: 'intUnitMeasureId', text: 'Unit Measure Id', dataType: 'numeric', hidden: true },
+                        { itemId: 'colUnitMeasure', dataIndex: 'strUnitMeasure', text: 'Unit Measure', dataType: 'string' },                 
                         { itemId: 'colQty', xtype: 'numbercolumn', dataIndex: 'dblQty', text: 'Qty', width: 100, dataType: 'float' },
                         { itemId: 'colCost', xtype: 'numbercolumn', dataIndex: 'dblCost', text: 'Cost', width: 100, dataType: 'float' },
                         { itemId: 'colRate', xtype: 'numbercolumn', dataIndex: 'dblRate', text: 'Rate', width: 100, dataType: 'float' },

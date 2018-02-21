@@ -442,139 +442,167 @@ namespace iRely.Inventory.BusinessLayer
 
         public async Task<GetObjectResult> GetShipmentCharges(GetParameter param)
         {
-            var query = _db.GetQuery<vyuICGetInventoryShipmentCharge>().Filter(param);
             var key = Methods.GetPrimaryKey<vyuICGetInventoryShipmentCharge>(_db.ContextManager);
-            //var data = await query
-                //.Select(s => new {
-                //    s.intInventoryShipmentChargeId
-                //    ,s.intInventoryShipmentId
-                //    ,s.intContractId
-                //    ,s.intContractDetailId
-                //    ,s.intChargeId
-                //    ,s.strCostMethod
-                //    ,s.dblRate
-                //    ,s.intCostUOMId
-                //    ,s.intCurrencyId
-                //    ,s.dblAmount
-                //    ,s.ysnAccrue
-                //    ,s.intEntityVendorId
-                //    ,s.ysnPrice
-                //    ,s.dblAmountBilled
-                //    ,s.dblAmountPaid
-                //    ,s.dblAmountPriced
-                //    ,s.intSort
-                //    ,s.dblTax
-                //    ,s.intConcurrencyId
-                //    ,s.intTaxGroupId
-                //    ,s.intForexRateTypeId
-                //    ,s.dblForexRate
-                //    ,s.dblQuantity
-                //    ,s.strAllocatePriceBy
-                //    ,strContractNumber = s.vyuICGetInventoryShipmentCharge.strContractNumber
-                //    ,strItemNo = s.vyuICGetInventoryShipmentCharge.strItemNo
-                //    ,strItemDescription = s.vyuICGetInventoryShipmentCharge.strItemDescription
-                //    ,strCostUOM = s.vyuICGetInventoryShipmentCharge.strCostUOM
-                //    ,strUnitType = s.vyuICGetInventoryShipmentCharge.strUnitType
-                //    ,strOnCostType = s.vyuICGetInventoryShipmentCharge.strOnCostType
-                //    ,strVendorId = s.vyuICGetInventoryShipmentCharge.strVendorId
-                //    ,strVendorName = s.vyuICGetInventoryShipmentCharge.strVendorName
-                //    ,strCurrency = s.vyuICGetInventoryShipmentCharge.strCurrency
-                //    ,strTaxGroup = s.vyuICGetInventoryShipmentCharge.strTaxGroup
-                //    ,strForexRateType = s.vyuICGetInventoryShipmentCharge.strForexRateType
-                //    ,strCostType = s.vyuICGetInventoryShipmentCharge.strCostType
-                //    ,tblICInventoryShipmentChargeTaxes = s.tblICInventoryShipmentChargeTaxes
-                //}).AsNoTracking().ToListAsync(param.cancellationToken);
-
-            return new GetObjectResult()
+            try
             {
-                data = await query.Execute(param, key, "DESC").ToListAsync(param.cancellationToken).ConfigureAwait(false),
-                total = await query.CountAsync(param.cancellationToken)
-            };
+                var query = _db.GetQuery<tblICInventoryShipmentCharge>()
+                        .Select(s => new
+                        {
+                              s.intInventoryShipmentChargeId
+                            , s.intInventoryShipmentId
+                            , s.intContractId
+                            , s.intContractDetailId
+                            , s.intChargeId
+                            , s.strCostMethod
+                            , s.dblRate
+                            , s.intCostUOMId
+                            , s.intCurrencyId
+                            , s.dblAmount
+                            , s.dblAmountBilled
+                            , s.dblAmountPaid
+                            , s.dblAmountPriced
+                            , s.strAllocatePriceBy
+                            , s.ysnAccrue
+                            , s.intEntityVendorId
+                            , s.ysnPrice
+                            , s.intSort
+                            , s.intForexRateTypeId
+                            , s.dblForexRate
+                            , s.dblQuantity
+                            , s.dblQuantityBilled
+                            , s.dblQuantityPriced
+                            , s.intTaxGroupId
+                            , s.dblTax
+                            , s.dblAdjustedTax
+                            , s.strChargesLink
+                            , s.vyuICGetInventoryShipmentCharge.strContractNumber
+                            , s.vyuICGetInventoryShipmentCharge.strCostType
+                            , s.vyuICGetInventoryShipmentCharge.strCostUOM
+                            , s.vyuICGetInventoryShipmentCharge.strCurrency
+                            , s.vyuICGetInventoryShipmentCharge.strForexRateType
+                            , s.vyuICGetInventoryShipmentCharge.strItemDescription
+                            , s.vyuICGetInventoryShipmentCharge.strItemNo
+                            , s.vyuICGetInventoryShipmentCharge.strOnCostType
+                            , s.vyuICGetInventoryShipmentCharge.strTaxGroup
+                            , s.vyuICGetInventoryShipmentCharge.strUnitType
+                            , s.vyuICGetInventoryShipmentCharge.strVendorId
+                            , s.vyuICGetInventoryShipmentCharge.strVendorName
+                            , s.tblICInventoryShipmentChargeTaxes
+                        })
+                        .Filter(param)
+                        .AsNoTracking();
+                return new GetObjectResult
+                {
+                    data = await query.Execute(param, key, "DESC").ToListAsync(param.cancellationToken),
+                    total = await query.CountAsync(param.cancellationToken)
+                };
+            }
+            catch(Exception ex)
+            {
+                return await Task.FromResult(new GetObjectResult
+                {
+                    data = ex.Message + (ex.InnerException != null ? ex.InnerException.Message : ""),
+                    success = false,
+                    total = 0
+                });
+            }
         }
 
         public async Task<GetObjectResult> GetShipmentItems(GetParameter param)
         {
             var query = _db.GetQuery<tblICInventoryShipmentItem>().Filter(param);
-            var data = await query
-                .Select(s => new
-                {
-                    s.intInventoryShipmentItemId,
-                    s.intInventoryShipmentId,
-                    s.intOrderId,
-                    s.intSourceId,
-                    s.intLineNo,
-                    s.intItemId,
-                    s.strChargesLink,
-                    s.intSubLocationId,
-                    s.intStorageLocationId,
-                    s.intOwnershipType,
-                    s.dblQuantity,
-                    s.intItemUOMId,
-                    s.intCurrencyId,
-                    s.intWeightUOMId,
-                    s.dblUnitPrice,
-                    s.intDockDoorId,
-                    s.strNotes,
-                    s.intGradeId,
-                    s.intDiscountSchedule,
-                    s.intSort,
-                    s.intStorageScheduleTypeId,
-                    s.intDestinationGradeId,
-                    s.intDestinationWeightId,
-                    s.dblDestinationQuantity,
-                    s.intForexRateTypeId,
-                    s.dblForexRate,
-                    s.strItemType,
-                    s.intParentItemLinkId,
-                    s.intChildItemLinkId,
-                    s.intConcurrencyId,
-
-                    // PROJECTED 
-                    s.vyuICGetInventoryShipmentItem.strOrderNumber,
-                    s.vyuICGetInventoryShipmentItem.strSourceNumber,
-                    s.vyuICGetInventoryShipmentItem.strItemNo,
-                    s.vyuICGetInventoryShipmentItem.strItemDescription,
-                    s.vyuICGetInventoryShipmentItem.strSubLocationName,
-                    s.vyuICGetInventoryShipmentItem.strStorageLocationName,
-                    strOwnershipType = 
-                        s.intOwnershipType == 1 ? "Own"
-                        : s.intOwnershipType == 2 ? "Storage"
-                        : s.intOwnershipType == 3 ? "Consigned Purchase"
-                        : s.intOwnershipType == 4 ? "Consigned Sale"
-                        : "Own",
-                    s.vyuICGetInventoryShipmentItem.strUnitMeasure,
-                    s.vyuICGetInventoryShipmentItem.strCurrency,
-                    s.vyuICGetInventoryShipmentItem.strWeightUOM,
-                    s.vyuICGetInventoryShipmentItem.strDockDoor,
-                    s.vyuICGetInventoryShipmentItem.strGrade,
-                    s.vyuICGetInventoryShipmentItem.strDiscountSchedule,
-                    s.vyuICGetInventoryShipmentItem.strStorageTypeDescription,
-                    s.vyuICGetInventoryShipmentItem.strDestinationGrades,
-                    s.vyuICGetInventoryShipmentItem.strDestinationWeights,
-                    s.vyuICGetInventoryShipmentItem.strForexRateType,
-
-                    s.vyuICGetInventoryShipmentItem.intDecimalPlaces,
-                    s.vyuICGetInventoryShipmentItem.intUnitMeasureId,
-                    s.vyuICGetInventoryShipmentItem.strOrderUOM,
-                    s.vyuICGetInventoryShipmentItem.dblQtyOrdered,
-                    s.vyuICGetInventoryShipmentItem.dblQtyAllocated,
-                    dblOrderUnitPrice = s.vyuICGetInventoryShipmentItem.dblUnitPrice,
-                    dblOrderDiscount = s.vyuICGetInventoryShipmentItem.dblDiscount,
-                    dblOrderTotal = s.vyuICGetInventoryShipmentItem.dblTotal,
-                    dblUnitCost = s.vyuICGetInventoryShipmentItem.dblUnitCost,
-                    s.vyuICGetInventoryShipmentItem.strLotTracking,
-                    s.vyuICGetInventoryShipmentItem.dblItemUOMConv,
-                    s.vyuICGetInventoryShipmentItem.dblWeightItemUOMConv,
-                    s.vyuICGetInventoryShipmentItem.intCommodityId
-                })
-                .AsNoTracking()
-                .ToListAsync(param.cancellationToken);
-
-            return new GetObjectResult()
+            try
             {
-                data = data,
-                total = await query.CountAsync(param.cancellationToken)
-            };
+                var data = await query
+                    .Select(s => new
+                    {
+                        s.intInventoryShipmentItemId,
+                        s.intInventoryShipmentId,
+                        s.intOrderId,
+                        s.intSourceId,
+                        s.intLineNo,
+                        s.intItemId,
+                        s.strChargesLink,
+                        s.intSubLocationId,
+                        s.intStorageLocationId,
+                        s.intOwnershipType,
+                        s.dblQuantity,
+                        s.intItemUOMId,
+                        s.intCurrencyId,
+                        s.intWeightUOMId,
+                        s.dblUnitPrice,
+                        s.intDockDoorId,
+                        s.strNotes,
+                        s.intGradeId,
+                        s.intDiscountSchedule,
+                        s.intSort,
+                        s.intStorageScheduleTypeId,
+                        s.intDestinationGradeId,
+                        s.intDestinationWeightId,
+                        s.dblDestinationQuantity,
+                        s.intForexRateTypeId,
+                        s.dblForexRate,
+                        s.strItemType,
+                        s.intParentItemLinkId,
+                        s.intChildItemLinkId,
+                        s.intConcurrencyId,
+
+                        // PROJECTED 
+                        s.vyuICGetInventoryShipmentItem.strOrderNumber,
+                        s.vyuICGetInventoryShipmentItem.strSourceNumber,
+                        s.vyuICGetInventoryShipmentItem.strItemNo,
+                        s.vyuICGetInventoryShipmentItem.strItemDescription,
+                        s.vyuICGetInventoryShipmentItem.strSubLocationName,
+                        s.vyuICGetInventoryShipmentItem.strStorageLocationName,
+                        strOwnershipType =
+                            s.intOwnershipType == 1 ? "Own"
+                            : s.intOwnershipType == 2 ? "Storage"
+                            : s.intOwnershipType == 3 ? "Consigned Purchase"
+                            : s.intOwnershipType == 4 ? "Consigned Sale"
+                            : "Own",
+                        s.vyuICGetInventoryShipmentItem.strUnitMeasure,
+                        s.vyuICGetInventoryShipmentItem.strCurrency,
+                        s.vyuICGetInventoryShipmentItem.strWeightUOM,
+                        s.vyuICGetInventoryShipmentItem.strDockDoor,
+                        s.vyuICGetInventoryShipmentItem.strGrade,
+                        s.vyuICGetInventoryShipmentItem.strDiscountSchedule,
+                        s.vyuICGetInventoryShipmentItem.strStorageTypeDescription,
+                        s.vyuICGetInventoryShipmentItem.strDestinationGrades,
+                        s.vyuICGetInventoryShipmentItem.strDestinationWeights,
+                        s.vyuICGetInventoryShipmentItem.strForexRateType,
+
+                        s.vyuICGetInventoryShipmentItem.intDecimalPlaces,
+                        s.vyuICGetInventoryShipmentItem.intUnitMeasureId,
+                        s.vyuICGetInventoryShipmentItem.strOrderUOM,
+                        s.vyuICGetInventoryShipmentItem.dblQtyOrdered,
+                        s.vyuICGetInventoryShipmentItem.dblQtyAllocated,
+                        dblOrderUnitPrice = s.vyuICGetInventoryShipmentItem.dblUnitPrice,
+                        dblOrderDiscount = s.vyuICGetInventoryShipmentItem.dblDiscount,
+                        dblOrderTotal = s.vyuICGetInventoryShipmentItem.dblTotal,
+                        dblUnitCost = s.vyuICGetInventoryShipmentItem.dblUnitCost,
+                        s.vyuICGetInventoryShipmentItem.strLotTracking,
+                        s.vyuICGetInventoryShipmentItem.dblItemUOMConv,
+                        s.vyuICGetInventoryShipmentItem.dblWeightItemUOMConv,
+                        s.vyuICGetInventoryShipmentItem.intCommodityId
+                    })
+                    .AsNoTracking()
+                    .ToListAsync(param.cancellationToken);
+
+                return new GetObjectResult()
+                {
+                    data = data,
+                    total = await query.CountAsync(param.cancellationToken)
+                };
+            }
+            catch(Exception ex)
+            {
+                return await Task.FromResult(new GetObjectResult
+                {
+                    data = ex.Message + (ex.InnerException != null ? ex.InnerException.Message : ""),
+                    success = false,
+                    total = 0
+                });
+            }
         }
 
         public override async Task<GetObjectResult> GetAsync(GetParameter param)

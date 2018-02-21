@@ -52,6 +52,7 @@ Ext.define('Inventory.model.ShipmentChargeTax', {
         { name: 'strTaxCode', type: 'string' },
         { name: 'dblQty', type: 'float' },
         { name: 'dblCost', type: 'float' },               
+        { name: 'intUnitMeasureId', type: 'int', allowNull: true },
         { name: 'intSort', type: 'int', allowNull: true }
     ]
 });

@@ -27,7 +27,7 @@ namespace iRely.Inventory.Model
         public int? intSort { get; set; }
         public decimal? dblQty { get; set; }
         public decimal? dblCost { get; set; }
-
+        public int? intUnitMeasureId { get; set; }
         public tblICInventoryShipmentCharge tblICInventoryShipmentCharge { get; set; }
     }
 }
