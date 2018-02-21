@@ -1085,6 +1085,7 @@ SELECT LD.intItemId
 		SELECT TOP (1) intItemLocationId
 		FROM tblICItemLocation
 		WHERE intItemId = LD.intItemId
+			AND intLocationId = CT.intCompanyLocationId
 		)
 	,CT.intItemUOMId
 	,LDL.intLotId
