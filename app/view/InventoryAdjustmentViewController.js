@@ -674,7 +674,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
     createRecord: function (config, action) {
         var today = new Date();
         var newRecord = Ext.create('Inventory.model.Adjustment');
-        var defaultLocation = iRely.Configuration.Application.CurrentLocation; 
+        var defaultLocation = iRely.config.Security.CurrentDefaultLocation; 
 
         newRecord.set('intAdjustmentType', '1');
         newRecord.set('dtmAdjustmentDate', today);

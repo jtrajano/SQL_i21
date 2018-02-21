@@ -1222,7 +1222,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var defaultReceiptType = i21.ModuleMgr.Inventory.getCompanyPreference('strReceiptType');
         var defaultSourceType = i21.ModuleMgr.Inventory.getCompanyPreference('intReceiptSourceType');
         var defaultCurrency = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
-        var defaultLocation = iRely.Configuration.Application.CurrentLocation; 
+        var defaultLocation = iRely.config.Security.CurrentDefaultLocation; 
 
         if (defaultCurrency){
             newRecord.set('intCurrencyId', defaultCurrency);

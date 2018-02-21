@@ -136,9 +136,9 @@ Ext.define('Inventory.view.CategoryLocationViewController', {
         //var cboLocation = win.down('#cboLocation'); 
 
         var newRecord = Ext.create('Inventory.model.CategoryLocation');
-        newRecord.set('intCategoryId', me.intCategoryId);
+        newRecord.set('intCategoryId', me.intCategoryId);   
 
-        var defaultLocation = iRely.Configuration.Application.CurrentLocation; 
+        var defaultLocation = iRely.config.Security.CurrentDefaultLocation; 
 
         // Set the default company location. 
         if (defaultLocation){

@@ -279,7 +279,7 @@ Ext.define('Inventory.view.ItemLocationViewController', {
 
     createRecord: function(config, action) {
         var me = this;
-        var defaultLocation = iRely.Configuration.Application.CurrentLocation; 
+        var defaultLocation = iRely.config.Security.CurrentDefaultLocation; 
 
         var newRecord = Ext.create('Inventory.model.ItemLocation');
         newRecord.set('intItemId', me.intItemId);
