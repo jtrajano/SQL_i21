@@ -35,7 +35,7 @@ BEGIN TRY
 	)
 
 	INSERT INTO #PrimaryAccounts
-	SELECT a.strCode,'', '', a.strDescription, b.strAccountGroup, a.intAccountGroupId, x.intAccountSegmentId, a.intAccountStructureId, x.intAccountSegmentId AS strAccountSegmentId
+	SELECT a.strCode,'', '', a.strChartDesc , b.strAccountGroup, a.intAccountGroupId, x.intAccountSegmentId, a.intAccountStructureId, x.intAccountSegmentId AS strAccountSegmentId
 	FROM tblGLTempAccountToBuild x
 	LEFT JOIN tblGLAccountSegment a 
 	ON x.intAccountSegmentId = a.intAccountSegmentId
@@ -83,7 +83,7 @@ BEGIN TRY
 
 
 	INSERT INTO #Segments
-	SELECT a.strCode, [strDescription] = CASE WHEN a.[strDescription] <> '' THEN  a.[strDescription] ELSE 'REMOVE_DIVIDER' END
+	SELECT a.strCode, [strDescription] = CASE WHEN a.[strChartDesc] <> '' THEN  a.[strChartDesc] ELSE 'REMOVE_DIVIDER' END
 		  ,a.intAccountStructureId, a.intAccountSegmentId, a.intAccountSegmentId AS strAccountSegmentId
 	FROM tblGLTempAccountToBuild x
 	LEFT JOIN tblGLAccountSegment a 
