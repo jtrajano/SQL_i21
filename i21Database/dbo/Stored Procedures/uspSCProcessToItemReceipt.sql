@@ -32,6 +32,7 @@ DECLARE @ItemsForItemReceipt AS ItemCostingTableType
 		,@voucherItems AS VoucherDetailReceipt 
 		,@voucherOtherCharges AS VoucherDetailReceiptCharge
 		,@thirdPartyVoucher AS VoucherDetailReceiptCharge
+		,@prePayId AS Id
 DECLARE @intTicketId AS INT = @intSourceTransactionId
 DECLARE @dblRemainingUnits AS NUMERIC(38, 20)
 DECLARE @dblRemainingQuantity AS NUMERIC(38, 20)
@@ -632,6 +633,22 @@ BEGIN TRY
 
 	IF ISNULL(@intBillId , 0) != 0
 	BEGIN
+		INSERT INTO @prePayId(
+			[intId]
+		)
+		SELECT 
+			[intId] = dbo.fnCTGetPrepaidIds(CT.intContractHeaderId)
+		FROM #tmpReceiptItem tmp 
+		INNER JOIN tblCTContractDetail CT ON CT.intContractDetailId = tmp.intContractDetailId
+		GROUP BY CT.intContractHeaderId
+		
+		SELECT @total = COUNT(*) FROM @prePayId;
+		IF (@total > 0)
+		BEGIN
+			EXEC uspAPApplyPrepaid @intBillId, @prePayId
+			update tblAPBillDetail set intScaleTicketId = @intTicketId WHERE intBillId = @intBillId
+		END
+
 		SELECT @dblTotal = SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = @intBillId
 
 		EXEC [dbo].[uspSMTransactionCheckIfRequiredApproval]

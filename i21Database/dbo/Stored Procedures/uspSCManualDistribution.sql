@@ -26,15 +26,10 @@ DECLARE @LineItems AS ScaleTransactionTableType
 		,@voucherItems AS VoucherDetailReceipt 
 		,@voucherOtherCharges AS VoucherDetailReceiptCharge
 		,@thirdPartyVoucher AS VoucherDetailReceiptCharge
-DECLARE @intDirectType AS INT = 3
-DECLARE @intTicketUOM INT
+		,@prePayId AS Id
 DECLARE @intTicketItemUOMId INT
 DECLARE @strReceiptType AS NVARCHAR(100)
 DECLARE @intLoadId INT
-DECLARE @dblTicketFreightRate AS DECIMAL (9, 6)
-DECLARE @intScaleStationId AS INT
-DECLARE @intFreightItemId AS INT
-DECLARE @intFreightVendorId AS INT
 DECLARE @ysnIsStorage AS BIT
 DECLARE @intLoadContractId AS INT
 DECLARE @dblLoadScheduledUnits AS NUMERIC(38, 20)
@@ -42,8 +37,7 @@ DECLARE @strInOutFlag AS NVARCHAR(100)
 DECLARE @strLotTracking AS NVARCHAR(100)
 DECLARE @intItemId AS INT
 DECLARE @intStorageScheduleId AS INT
-DECLARE @intInventoryReceiptItemId AS INT
-		,@intOrderId INT
+DECLARE @intOrderId INT
 		,@intOwnershipType INT
 		,@intPricingTypeId INT
 		,@intBillId AS INT
@@ -70,26 +64,16 @@ DECLARE @intInventoryReceiptItemId AS INT
 		,@dblNetUnits AS NUMERIC(38, 20);
 
 BEGIN
-	SELECT	@intTicketUOM = UOM.intUnitMeasureId, @intItemId = SC.intItemId
-	, @dblGrossUnits = SC.dblGrossUnits, @dblNetUnits = SC.dblNetUnits
+	SELECT	
+		@intTicketItemUOMId = UM.intItemUOMId
+		, @intLoadId = SC.intLoadId
+		, @intItemId = SC.intItemId
+		, @dblGrossUnits = SC.dblGrossUnits
+		, @dblNetUnits = SC.dblNetUnits
 	FROM	dbo.tblSCTicket SC	        
 			JOIN dbo.tblICItemUOM UOM ON SC.intItemId = UOM.intItemId
 	WHERE	SC.intTicketId = @intTicketId AND UOM.ysnStockUnit = 1		
 END
-
-BEGIN 
-	SELECT	@intTicketItemUOMId = UM.intItemUOMId, @intLoadId = SC.intLoadId
-		FROM	dbo.tblICItemUOM UM	
-	      JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
-	WHERE	UM.ysnStockUnit = 1 AND SC.intTicketId = @intTicketId
-END
-
---BEGIN 
---	SELECT	@intTicketItemUOMId = UM.intItemUOMId
---	FROM	dbo.tblICItemUOM UM	
---			JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
---	WHERE	UM.intUnitMeasureId = @intTicketUOM AND SC.intTicketId = @intTicketId
---END
 
 BEGIN TRY
 DECLARE @intId INT;
@@ -525,6 +509,22 @@ END
 
 	IF ISNULL(@intBillId , 0) != 0
 	BEGIN
+		INSERT INTO @prePayId(
+			[intId]
+		)
+		SELECT 
+			[intId] = dbo.fnCTGetPrepaidIds(CT.intContractHeaderId)
+		FROM #tmpReceiptItem tmp 
+		INNER JOIN tblCTContractDetail CT ON CT.intContractDetailId = tmp.intContractDetailId
+		GROUP BY CT.intContractHeaderId
+		
+		SELECT @total = COUNT(*) FROM @prePayId;
+		IF (@total > 0)
+		BEGIN
+			EXEC uspAPApplyPrepaid @intBillId, @prePayId
+			update tblAPBillDetail set intScaleTicketId = @intTicketId WHERE intBillId = @intBillId
+		END
+
 		SELECT @dblTotal = SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = @intBillId
 
 		EXEC [dbo].[uspSMTransactionCheckIfRequiredApproval]
