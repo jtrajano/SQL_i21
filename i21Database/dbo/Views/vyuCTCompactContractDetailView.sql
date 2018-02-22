@@ -12,6 +12,7 @@ AS
 			,CD.dblBalance
 			,ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0) AS dblAvailableQty
 			,PT.strPricingType
+			,CD.intContractSeq
 	FROM	tblCTContractDetail				CD	
 	CROSS APPLY tblCTCompanyPreference			CP	
 	LEFT JOIN	vyuCTContractHeaderView			CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId				
