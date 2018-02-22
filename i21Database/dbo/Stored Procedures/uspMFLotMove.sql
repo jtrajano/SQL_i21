@@ -10,6 +10,8 @@
 	,@strReasonCode NVARCHAR(MAX) = NULL
 	,@strNotes NVARCHAR(MAX) = NULL
 	,@ysnBulkChange BIT = 0
+	,@ysnSourceLotEmptyOut BIT = 0
+	,@ysnDestinationLotEmptyOut BIT = 0
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -53,11 +55,13 @@ BEGIN TRY
 		,@intSourceLocationRestrictionId INT
 		,@intDestinatinLocationRestrictionId INT
 		,@ysnChangeLotStatusOnLotMoveByStorageLocationRestrictionType BIT
-				,@strSubLocationName NVARCHAR(50)
+		,@strSubLocationName NVARCHAR(50)
 		,@strName NVARCHAR(50)
 		,@intBondStatusId INT
 		,@intStorageUnitTypeId INT
 		,@strInternalCode NVARCHAR(50)
+		,@intDestinationLotId INT
+		,@intDestinationItemUOMId int
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -66,7 +70,6 @@ BEGIN TRY
 	SELECT TOP 1 @dblDefaultResidueQty = ISNULL(dblDefaultResidueQty, 0.00001)
 		,@ysnChangeLotStatusOnLotMoveByStorageLocationRestrictionType = isNULL(ysnChangeLotStatusOnLotMoveByStorageLocationRestrictionType, 0)
 	FROM tblMFCompanyPreference
-
 
 	SELECT @intItemId = intItemId
 		,@intLocationId = intLocationId
@@ -435,6 +438,27 @@ BEGIN TRY
 	IF @intTransactionCount = 0
 		BEGIN TRANSACTION
 
+	IF @ysnDestinationLotEmptyOut = 1
+		AND (
+			SELECT dblQty
+			FROM dbo.tblICLot
+			WHERE intStorageLocationId = @intNewStorageLocationId
+				AND dblQty > 0
+			) > 0
+	BEGIN
+		SELECT @intDestinationLotId = intLotId,@intDestinationItemUOMId =intItemUOMId
+		FROM dbo.tblICLot
+		WHERE intStorageLocationId = @intNewStorageLocationId
+			AND dblQty > 0
+
+		EXEC dbo.uspMFLotAdjustQty @intLotId = @intDestinationLotId
+			,@dblNewLotQty = 0
+			,@intAdjustItemUOMId = @intDestinationItemUOMId
+			,@intUserId = @intUserId
+			,@strReasonCode = 'Destination Empty out'
+			,@strNotes = 'Destination Empty out'
+	END
+
 	EXEC uspICInventoryAdjustment_CreatePostLotMove @intItemId
 		,@dtmDate
 		,@intLocationId
@@ -616,7 +640,8 @@ BEGIN TRY
 	IF @intSourceLocationRestrictionId <> @intDestinatinLocationRestrictionId
 		AND @ysnChangeLotStatusOnLotMoveByStorageLocationRestrictionType = 1
 	BEGIN
-		SELECT @intLotStatusId=NULL
+		SELECT @intLotStatusId = NULL
+
 		SELECT @intLotStatusId = intLotStatusId
 		FROM tblMFStorageLocationRestrictionTypeLotStatus
 		WHERE intRestrictionId = @intDestinatinLocationRestrictionId
@@ -634,6 +659,21 @@ BEGIN TRY
 				,@intUserId = @intUserId
 				,@strNotes = ''
 		END
+	END
+
+	IF @ysnSourceLotEmptyOut = 1
+		AND (
+			SELECT dblQty
+			FROM dbo.tblICLot
+			WHERE intLotId = @intLotId
+			) > 0
+	BEGIN
+		EXEC dbo.uspMFLotAdjustQty @intLotId = @intLotId
+			,@dblNewLotQty = 0
+			,@intAdjustItemUOMId = @intItemUOMId
+			,@intUserId = @intUserId
+			,@strReasonCode = 'Source Empty out'
+			,@strNotes = 'Source Empty out'
 	END
 
 	IF @intTransactionCount = 0
