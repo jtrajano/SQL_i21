@@ -99,6 +99,16 @@ BEGIN TRY
 		,@strNewLotAlias 
 		,@strOldVendorLotNumber 
 		,@strNewVendorLotNumber 
+
+	Update tblMFLotInventory
+	Set dtmLastMoveDate =@dtmDate
+	WHERE intLotId =@intSourceLotId
+
+	if @intDestinationLotId is not null
+	Update tblMFLotInventory
+	Set dtmLastMoveDate =@dtmDate
+	WHERE intLotId =@intDestinationLotId
+
 END TRY
 
 BEGIN CATCH
