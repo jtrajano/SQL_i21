@@ -59,6 +59,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intContainerWeightUOMId).HasColumnName("intContainerWeightUOMId");
             this.Property(t => t.dblContainerWeightUOMConvFactor).HasColumnName("dblContainerWeightUOMConvFactor").HasPrecision(38, 20);
             this.Property(t => t.ysnLotWeightsRequired).HasColumnName("ysnLotWeightsRequired");
+            this.Property(t => t.intContractSeq).HasColumnName("intContractSeq");
         }
     }    
 }

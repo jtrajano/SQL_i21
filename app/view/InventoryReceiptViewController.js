@@ -230,6 +230,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     dataIndex: 'strOrderNumber',
                     text: '{colOrderNumberColumnText}'
                 },
+                colItemSequence: {
+                    hidden: '{checkHideItemSequence}',
+                    dataIndex: 'intContractSeq'
+                },
                 colSourceNumber: {
                     hidden: '{checkHideSourceNo}',
                     dataIndex: 'strSourceNumber'
@@ -921,28 +925,55 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         // Update the summary fields whenever the receipt item data changed.
         me.getViewModel().bind('{current.tblICInventoryReceiptItems}', function (store) {
-            store.on('update', function () {
-                me.showSummaryTotals(win);
-                me.showOtherCharges(win);
-            });
+            // store.on('update', function () {
+            //     me.showSummaryTotals(win);
+            //     me.showOtherCharges(win);
+            // });
 
-            store.on('datachanged', function () {
-                me.showSummaryTotals(win);
-                me.showOtherCharges(win);
-            });
+            // store.on('datachanged', function () {
+            //     me.showSummaryTotals(win);
+            //     me.showOtherCharges(win);
+            // });
+            store.mon(store, {
+                update: function(){
+                    me.showSummaryTotals(win);
+                    me.showOtherCharges(win);                    
+                }
+            });            
+
+            store.mon(store, {
+                datachanged: function(){
+                    me.showSummaryTotals(win);
+                    me.showOtherCharges(win);                    
+                }
+            });              
         });
 
         // Update the summary fields whenever the other charges data changed.
         me.getViewModel().bind('{current.tblICInventoryReceiptCharges}', function (store) {
-            store.on('update', function () {
-                me.showSummaryTotals(win);
-                me.showOtherCharges(win);
-            });
+            // store.on('update', function () {
+            //     me.showSummaryTotals(win);
+            //     me.showOtherCharges(win);
+            // });
 
-            store.on('datachanged', function () {
-                me.showSummaryTotals(win);
-                me.showOtherCharges(win);
-            });
+            // store.on('datachanged', function () {
+            //     me.showSummaryTotals(win);
+            //     me.showOtherCharges(win);
+            // });
+
+            store.mon(store, {
+                update: function(){
+                    me.showSummaryTotals(win);
+                    me.showOtherCharges(win);                    
+                }
+            });            
+
+            store.mon(store, {
+                datachanged: function(){
+                    me.showSummaryTotals(win);
+                    me.showOtherCharges(win);                    
+                }
+            });              
         });
 
         //'vyuICGetInventoryReceipt,' +
@@ -1024,45 +1055,62 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         var cepItemLots = grdLotTracking.getPlugin('cepItemLots');
         if (cepItemLots) {
-            cepItemLots.on({
-                // validateedit: me.onEditLots,
+            // cepItemLots.on({
+            //     // validateedit: me.onEditLots,
+            //     beforeedit: me.onLotBeforeEdit,
+            //     edit: me.onEditLots,
+            //     scope: me
+            // });
+
+            grdLotTracking.mon(cepItemLots, {
                 beforeedit: me.onLotBeforeEdit,
                 edit: me.onEditLots,
                 scope: me
-            });
+            });             
         }
 
         var cepItem = grdInventoryReceipt.getPlugin('cepItem');
         if (cepItem) {
-            cepItem.on({
+            // cepItem.on({
+            //     beforeedit: me.onItemBeforeEdit,
+            //     edit: me.onItemEdit, // @Todo: This event is fired 
+            //     scope: me
+            // });
+
+            grdInventoryReceipt.mon(cepItem, {
                 beforeedit: me.onItemBeforeEdit,
                 edit: me.onItemEdit, // @Todo: This event is fired 
                 scope: me
-            });
+            });             
         }
 
         var cepCharges = grdCharges.getPlugin('cepCharges');
         if (cepCharges) {
-            cepCharges.on({
+            // cepCharges.on({
+            //     validateedit: me.onChargeValidateEdit,
+            //     //edit: me.onChargeEdit,
+            //     scope: me
+            // });
+
+            grdCharges.mon(cepCharges, {
                 validateedit: me.onChargeValidateEdit,
-                //edit: me.onChargeEdit,
                 scope: me
-            });
+            });                 
         }
 
-        var colReceived = grdInventoryReceipt.columns[5];
-        var txtReceived = colReceived.getEditor();
-        if (txtReceived) {
-            txtReceived.on('change', me.onCalculateTotalAmount);
-        }
-        var colUnitCost = grdInventoryReceipt.columns[7];
-        var txtUnitCost = colUnitCost.getEditor();
-        if (txtUnitCost) {
-            txtUnitCost.on('change', me.onCalculateTotalAmount);
-        }
+        // var colReceived = grdInventoryReceipt.columns[5];
+        // var txtReceived = colReceived.getEditor();
+        // if (txtReceived) {
+        //     txtReceived.on('change', me.onCalculateTotalAmount);
+        // }
+        // var colUnitCost = grdInventoryReceipt.columns[7];
+        // var txtUnitCost = colUnitCost.getEditor();
+        // if (txtUnitCost) {
+        //     txtUnitCost.on('change', me.onCalculateTotalAmount);
+        // }
 
         var colOrderNumber = grdInventoryReceipt.columns[0];
-        var colSourceNumber = grdInventoryReceipt.columns[1];
+        var colSourceNumber = grdInventoryReceipt.columns[2];
         colOrderNumber.renderer = this.onRenderNumRef;
         colSourceNumber.renderer = this.onRenderNumRef;
 
@@ -4844,10 +4892,15 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             });
 
             if (cboLotUOM) {
-                cboLotUOM.on({
+                // cboLotUOM.on({
+                //     select: me.onLotSelect,
+                //     scope: me
+                // });
+
+                column.mon(cboLotUOM, {
                     select: me.onLotSelect,
                     scope: me
-                });
+                });                  
             }
 
             /*  switch (UOMType) {

@@ -234,6 +234,7 @@ namespace iRely.Inventory.BusinessLayer
                     strPricingType = s.vyuICInventoryReceiptItemLookUp.strPricingType,
                     strTaxGroup = s.vyuICInventoryReceiptItemLookUp.strTaxGroup,
                     strForexRateType = s.vyuICInventoryReceiptItemLookUp.strForexRateType,
+                    intContractSeq = s.vyuICInventoryReceiptItemLookUp.intContractSeq,
                     tblICInventoryReceiptItemTaxes = s.tblICInventoryReceiptItemTaxes
                 })
                 .AsNoTracking()
