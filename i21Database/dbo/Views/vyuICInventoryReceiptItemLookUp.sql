@@ -201,6 +201,30 @@ SELECT	ReceiptItem.intInventoryReceiptId
 		, intContainerWeightUOMId = LogisticsView.intWeightUOMId
 		, dblContainerWeightUOMConvFactor = LogisticsView.dblWeightUOMConvFactor
 		, Item.ysnLotWeightsRequired
+		, intContractSeq = (
+				CASE WHEN Receipt.strReceiptType = 'Purchase Contract'
+					THEN ContractView.intContractSeq
+				--WHEN Receipt.strReceiptType = 'Purchase Order'
+				--	THEN POView.strPurchaseOrderNumber
+				--WHEN Receipt.strReceiptType = 'Transfer Order'
+				--	THEN TransferView.strTransferNo
+				--WHEN Receipt.strReceiptType = 'Direct'
+				--	THEN NULL
+				WHEN Receipt.strReceiptType = 'Inventory Return' THEN 
+					CASE	WHEN rtn.strReceiptType = 'Purchase Contract' 
+								THEN ContractView.intContractSeq							
+							--WHEN rtn.strReceiptType = 'Purchase Order'
+							--	THEN POView.strPurchaseOrderNumber
+							--WHEN rtn.strReceiptType = 'Transfer Order'
+							--	THEN TransferView.strTransferNo
+							--WHEN rtn.strReceiptType = 'Direct'
+							--	THEN rtn.strReceiptNumber 
+							ELSE 
+								NULL 
+					END 
+				ELSE NULL
+				END
+			)
 
 FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 			ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
@@ -280,6 +304,7 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 					,dblBalance
 					,dblAvailableQty
 					,strPricingType
+					,intContractSeq
 			FROM	vyuCTCompactContractDetailView ContractView
 			WHERE	ContractView.intContractDetailId = ReceiptItem.intLineNo
 					AND (
