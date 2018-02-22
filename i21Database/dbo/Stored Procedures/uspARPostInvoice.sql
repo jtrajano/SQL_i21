@@ -1265,7 +1265,8 @@ BEGIN TRY
 			WHERE I.intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
 			AND ID.ysnBlended <> @post
 			AND ICI.ysnAutoBlend = 1
-			--AND ISNULL(ICI.strType,'') = 'Finished Good' --AR-6677
+			AND I.strTransactionType NOT IN ('Credit Memo', 'Customer Prepayment', 'Overpayment')
+			--AND ISNULL(ICI.strType,'') = 'Finished Good' --AR-6677			
 
 			WHILE EXISTS (SELECT NULL FROM @FinishedGoodItems)
 				BEGIN
