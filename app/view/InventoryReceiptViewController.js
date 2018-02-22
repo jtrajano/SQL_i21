@@ -4907,14 +4907,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }
 
             // If currentReceiptItem is valid, show the lot panel. Otherwise, hide it. 
-            var hide = vm.data.currentReceiptItem ? false : true;
-            pnlLotTracking.suspendLayouts(); 
-            if (pnlLotTracking){
-                var task = new Ext.util.DelayedTask(function () {
-                    pnlLotTracking.setHidden(hide);    
-                    pnlLotTracking.resumeLayouts();
-                });
-                task.delay(1);    
+            var hide = vm.data.currentReceiptItem ? false : true;            
+            if (pnlLotTracking) {
+                pnlLotTracking.setHidden(hide);    
             }
 
             // Calcualte the Weight Gain/Loss per line item. 
