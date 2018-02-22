@@ -6218,6 +6218,10 @@
     <Build Include="dbo\Stored Procedures\uspICGetBundleComponents.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetItemSubtitutes.sql" />
     <Build Include="dbo\Views\vyuARInvoicePaymentInfo.sql" />
+    <Build Include="dbo\Views\vyuICCategoryLocation.sql" />
+    <Build Include="dbo\Functions\fnICGetTransWeightedAveCost.sql" />
+    <Build Include="dbo\Functions\fnTRGetLoadTransferWeightedAveCost.sql" />
+    <Build Include="dbo\Functions\fnTRGetLoadReceiptWeightedAveCost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
