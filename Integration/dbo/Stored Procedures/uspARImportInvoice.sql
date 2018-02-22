@@ -8,7 +8,8 @@ CREATE PROCEDURE uspARImportInvoice
 	@Total INT = 0 OUTPUT,
 	@StartDate DATETIME = NULL,
 	@EndDate DATETIME = NULL,
-	@Posted INT = 0
+	@Posted INT = 0, 
+	@OutputMessage NVARCHAR(4000) = '' OUTPUT
 	AS
 BEGIN
 	--================================================
@@ -69,7 +70,7 @@ BEGIN
 		
 		IF(@Sucess = 0)
 		BEGIN
-			RAISERROR(@Message,16,1)
+			SET @OutputMessage = @Message
 			RETURN
 		END
 	
