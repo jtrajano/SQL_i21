@@ -98,7 +98,7 @@ SELECT	ShipmentItem.intInventoryShipmentId
 INTO	#tmpShipmentItems
 FROM	tblICInventoryShipmentItem ShipmentItem LEFT JOIN tblICInventoryShipment Shipment 
 			ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
-WHERE	ShipmentItem.intInventoryShipmentId = @ShipmentId AND ShipmentItem.strItemType != 'Option'
+WHERE	ShipmentItem.intInventoryShipmentId = @ShipmentId AND (ShipmentItem.strItemType IS NULL OR ShipmentItem.strItemType != 'Option')
 UNION ALL
 --FOR OPTION
 SELECT	ShipmentItem.intInventoryShipmentId

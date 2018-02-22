@@ -85,7 +85,7 @@ BEGIN
 			ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 		LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource 
 			ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
-	WHERE ReceiptItem.intInventoryReceiptId = @ReceiptId AND ReceiptItem.strItemType != 'Option'
+	WHERE ReceiptItem.intInventoryReceiptId = @ReceiptId AND (ReceiptItem.strItemType IS NULL OR ReceiptItem.strItemType != 'Option')
 	UNION ALL
 	SELECT
 		ReceiptItem.intInventoryReceiptId,
