@@ -254,6 +254,7 @@
 :r "..\dbo\Stored Procedures\uspGRImportDiscountSchedule.sql"
 :r "..\dbo\Stored Procedures\uspGRImportDiscountTable.sql"
 :r "..\dbo\Stored Procedures\uspGRImportStorageTicket.sql"
+:r "..\dbo\Stored Procedures\uspGRImportTicketPool.sql"
 :r "..\dbo\Stored Procedures\uspGRImportScaleStation.sql"
 :r "..\dbo\Stored Procedures\uspGRImportScaleTicket.sql"
 :r "..\dbo\Stored Procedures\uspGRImportCustomerSplit.sql"
