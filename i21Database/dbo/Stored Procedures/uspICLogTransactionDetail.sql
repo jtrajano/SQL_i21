@@ -78,7 +78,7 @@ BEGIN
 			FROM tblICInventoryReceiptItem ReceiptItem
 				LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 				LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
-			WHERE ReceiptItem.intInventoryReceiptId = @TransactionId AND ReceiptItem.intChildItemLinkId IS NULL AND ReceiptItem.strItemType != 'Option'
+			WHERE ReceiptItem.intInventoryReceiptId = @TransactionId AND ReceiptItem.intChildItemLinkId IS NULL AND (ReceiptItem.strItemType IS NULL OR ReceiptItem.strItemType != 'Option')
 			UNION ALL
 			SELECT 'Inventory Receipt',
 				ReceiptItem.intInventoryReceiptId, 
@@ -146,7 +146,7 @@ BEGIN
 				ShipmentItem.dblQuantity
 			FROM tblICInventoryShipmentItem ShipmentItem
 				LEFT JOIN tblICInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
-			WHERE ShipmentItem.intInventoryShipmentId = @TransactionId AND ShipmentItem.intChildItemLinkId IS NULL AND ShipmentItem.strItemType != 'Option'
+			WHERE ShipmentItem.intInventoryShipmentId = @TransactionId AND ShipmentItem.intChildItemLinkId IS NULL AND (ShipmentItem.strItemType IS NULL OR ShipmentItem.strItemType != 'Option')
 			UNION ALL
 			--FOR OPTION ITEMS
 			SELECT 'Inventory Shipment',
