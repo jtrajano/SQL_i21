@@ -194,7 +194,7 @@ BEGIN
 			,strSourceTransactionId		= SourceLot.strTransactionId
 			,intSourceTransactionTypeId = SourceLot.intSourceTransactionTypeId
 			,strContainerNo			= SourceLot.strContainerNo
-			,strCondition			= SourceLot.strCondition
+			,strCondition			= ISNULL(TransferItem.strLotCondition, SourceLot.strCondition)
 			,[intWeightUOMId] 		= TransferItem.intGrossNetUOMId
 			,[dblWeight]   			= 
 				CASE 
