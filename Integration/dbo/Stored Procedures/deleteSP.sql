@@ -87,6 +87,9 @@ GO
 IF EXISTS(select top 1 1 from sys.procedures where name = 'uspGRImportStorageTicket')
 	DROP PROCEDURE uspGRImportStorageTicket
 GO
+IF EXISTS(select top 1 1 from sys.procedures where name = 'uspGRImportTicketPool')
+	DROP PROCEDURE uspGRImportTicketPool
+GO
 IF EXISTS(select top 1 1 from sys.procedures where name = 'uspGRImportScaleStation')
 	DROP PROCEDURE uspGRImportScaleStation
 GO
