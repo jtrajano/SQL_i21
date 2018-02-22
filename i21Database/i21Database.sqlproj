@@ -6224,6 +6224,7 @@
     <Build Include="dbo\Functions\fnTRGetLoadTransferWeightedAveCost.sql" />
     <Build Include="dbo\Functions\fnTRGetLoadReceiptWeightedAveCost.sql" />
     <Build Include="dbo\Stored Procedures\uspSMUpdateUserPassword.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKM2MInqTranExpMonthValidation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
