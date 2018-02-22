@@ -262,6 +262,8 @@ BEGIN
 					,@EntitySalespersonId			INT
 					,@ItemSubCurrencyId				INT
 					,@ItemSubCurrencyRate			NUMERIC(18,8)
+					,@ItemSubLocationId				INT
+					,@ItemStorageLocationId			INT
 
 			SELECT TOP 1 @InvoiceDetailId = [intInvoiceDetailId] FROM @InvoiceDetails ORDER BY [intInvoiceDetailId]
 			
@@ -306,6 +308,8 @@ BEGIN
 								,[intTaxGroupId]
 								,[intSubCurrencyId]
 								,[dblSubCurrencyRate]
+								,[intStorageLocationId]
+								,[intSubLocationId]
 								,[intConcurrencyId])
 							SELECT
 								 @NewInvoiceId
@@ -349,6 +353,8 @@ BEGIN
 								,[intTaxGroupId]
 								,[intSubCurrencyId]
 								,[dblSubCurrencyRate]
+								,[intStorageLocationId]
+								,[intSubLocationId]
 								,1
 							FROM
 								tblARInvoiceDetail
@@ -426,7 +432,9 @@ BEGIN
 						,@ItemWeight					= [dblItemWeight]
 						,@EntitySalespersonId			= [intEntitySalespersonId]
 						,@ItemSubCurrencyId				= [intSubCurrencyId]
-						,@ItemSubCurrencyId				= [dblSubCurrencyRate]
+						,@ItemSubCurrencyRate			= [dblSubCurrencyRate]
+						,@ItemSubLocationId				= [intSubLocationId]
+						,@ItemStorageLocationId			= [intStorageLocationId]
 					FROM
 						tblARInvoiceDetail
 					WHERE
@@ -461,6 +469,9 @@ BEGIN
 						,@ItemTaxGroupId				= @ItemTaxGroupId		
 						,@ItemSubCurrencyId				= @ItemSubCurrencyId
 						,@ItemSubCurrencyRate			= @ItemSubCurrencyRate	
+						,@ItemSublocationId				= @ItemSubLocationId
+						,@ItemStorageLocationId			= @ItemStorageLocationId
+
 						IF LEN(ISNULL(@ErrorMessage,'')) > 0
 							BEGIN
 								RAISERROR(@ErrorMessage, 11, 1);
