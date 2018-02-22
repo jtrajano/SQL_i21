@@ -8,7 +8,7 @@ SELECT
 ,strDiscountCodeDescription
 ,SUM(dblDiscountAmount) dblDiscountAmount
 ,SUM(dblShrinkPercent) dblShrinkPercent
-,dblGradeReading
+,ISNULL(dblGradeReading,'N/A')dblGradeReading
 ,SUM(dblAmount) dblAmount
 ,SUM(dblTax) dblTax
 ,SUM(dblNetTotal) dblNetTotal
@@ -25,9 +25,7 @@ FROM
 	,t3.dblDiscountAmount * (t1.dblQtyOrdered / t2.dblTotalQty) dblDiscountAmount
 	,t3.dblShrinkPercent * (t1.dblQtyOrdered / t2.dblTotalQty) dblShrinkPercent
 	,t3.dblGradeReading
-	,t3.dblAmount * (t1.dblQtyOrdered / t2.dblTotalQty)dblAmount
-	,t3.intInventoryReceiptItemId
-	,t3.intInventoryReceiptChargeId
+	,t3.dblAmount * (t1.dblQtyOrdered / t2.dblTotalQty)dblAmount	
 	,t3.intContractDetailId
 	,t3.dblTax
 	,t3.dblNetTotal* (t1.dblQtyOrdered / t2.dblTotalQty) dblNetTotal
@@ -58,23 +56,39 @@ LEFT JOIN
 		,strDiscountCode =Item.strShortName
 		,strDiscountCodeDescription= Item.strItemNo
 		,dblDiscountAmount = CASE 
-								WHEN INVRCPTCHR.strCostMethod = 'Per Unit' THEN INVRCPTCHR.dblRate
-								WHEN INVRCPTCHR.strCostMethod = 'Amount' THEN INVRCPTCHR.dblAmount
+							 	WHEN INVRCPTCHR.strCostMethod IS NOT NULL THEN 
+							 													CASE 
+							 														WHEN INVRCPTCHR.strCostMethod = 'Per Unit' THEN INVRCPTCHR.dblRate
+							 														WHEN INVRCPTCHR.strCostMethod = 'Amount'   THEN INVRCPTCHR.dblAmount
+							 													END
+							 	ELSE BillDtl.dblCost
 							 END
-		,dblShrinkPercent = ISNULL(ScaleDiscount.dblShrinkPercent, 0)
-		,dblGradeReading =  ISNULL(dbo.fnRemoveTrailingZeroes(ScaleDiscount.dblGradeReading), 'N/A')
+		
+		,dblShrinkPercent = CASE 
+								WHEN INVRCPTCHR.strCostMethod IS NOT NULL THEN ISNULL(ScaleDiscount.dblShrinkPercent, 0)
+								WHEN StrgHstry.intBillId	  IS NOT NULL THEN ISNULL(StorageDiscount.dblShrinkPercent, 0)
+								ELSE 0
+							END
+		
+		,dblGradeReading =  CASE 
+								WHEN INVRCPTCHR.strCostMethod IS NOT NULL THEN dbo.fnRemoveTrailingZeroes(ScaleDiscount.dblGradeReading)
+								WHEN StrgHstry.intBillId	  IS NOT NULL THEN dbo.fnRemoveTrailingZeroes(StorageDiscount.dblGradeReading)
+								ELSE 'N/A'
+							END
+
 		,dblAmount = BillDtl.dblTotal
-		,intInventoryReceiptItemId = ISNULL(BillDtl.intInventoryReceiptItemId, 0)
-		,intInventoryReceiptChargeId = ISNULL(BillDtl.intInventoryReceiptChargeId, 0)
 		,intContractDetailId = ISNULL(BillDtl.intContractDetailId, 0)
 		,dblTax = BillDtl.dblTax
 		,dblNetTotal = BillDtl.dblTotal+ BillDtl.dblTax
+
 	FROM tblAPBillDetail BillDtl
 	JOIN tblAPBill Bill ON BillDtl.intBillId = Bill.intBillId
 	JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId
-	JOIN tblICInventoryReceiptCharge INVRCPTCHR ON BillDtl.intInventoryReceiptChargeId = INVRCPTCHR.intInventoryReceiptChargeId	
-	JOIN tblICInventoryReceipt INVRCPT ON INVRCPTCHR.intInventoryReceiptId = INVRCPT.intInventoryReceiptId
-	JOIN tblICInventoryReceiptItem INVRCPTITEM ON INVRCPT.intInventoryReceiptId = INVRCPTITEM.intInventoryReceiptId
+	LEFT JOIN tblICInventoryReceiptCharge INVRCPTCHR ON INVRCPTCHR.intInventoryReceiptChargeId = BillDtl.intInventoryReceiptChargeId	
+	LEFT JOIN tblICInventoryReceipt INVRCPT ON INVRCPT.intInventoryReceiptId = INVRCPTCHR.intInventoryReceiptId
+	LEFT JOIN tblICInventoryReceiptItem INVRCPTITEM ON INVRCPTITEM.intInventoryReceiptId = INVRCPT.intInventoryReceiptId
+	LEFT JOIN tblGRStorageHistory StrgHstry ON StrgHstry.intBillId = Bill.intBillId
+	
 	LEFT JOIN (
 			    SELECT 
 				QM.intTicketId
@@ -86,114 +100,7 @@ LEFT JOIN
 				WHERE QM.strSourceType = 'Scale'
 		  ) ScaleDiscount 
 	 ON ScaleDiscount.intTicketId = INVRCPTITEM.intSourceId AND ScaleDiscount.intItemId = INVRCPTCHR.intChargeId AND INVRCPT.intSourceType = 1
-	WHERE BillDtl.intInventoryReceiptChargeId IS NOT NULL AND Item.strType = 'Other Charge'	
 	
-	UNION ALL
-	
-	SELECT 
-		 strId = Inv.strInvoiceNumber
-		,intInvoiceId=InvDtl.intInvoiceId
-		,intInvoiceDetailId  = InvDtl.intInvoiceDetailId
-		,intItemId = InvDtl.intItemId
-		,strDiscountCode = Item.strShortName 
-		,strDiscountCodeDescription = Item.strItemNo
-		,dblDiscountAmount = ISNULL((
-				SELECT dblDiscountAmount
-				FROM tblQMTicketDiscount TD
-				JOIN tblGRDiscountScheduleCode DS ON TD.intDiscountScheduleCodeId = DS.intDiscountScheduleCodeId
-				WHERE TD.intTicketId = CASE 
-						WHEN INVSHIP.intSourceType = 4
-							THEN (
-									SELECT TOP 1 SC.intTicketId
-									FROM tblGRCustomerStorage GR
-									JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId
-									WHERE intCustomerStorageId = INVSHIPITEM.intSourceId
-									)
-						ELSE (
-								SELECT TOP 1 SC.intTicketId
-								FROM tblSCTicket SC
-								WHERE intTicketId = INVSHIPITEM.intSourceId
-								)
-						END
-					AND DS.intItemId = InvDtl.intItemId
-				), 0)
-		,dblShrinkPercent = ISNULL((
-				SELECT dblShrinkPercent
-				FROM tblQMTicketDiscount TD
-				JOIN tblGRDiscountScheduleCode DS ON TD.intDiscountScheduleCodeId = DS.intDiscountScheduleCodeId
-				WHERE TD.intTicketId = CASE 
-						WHEN INVSHIP.intSourceType = 4
-							THEN (
-									SELECT TOP 1 SC.intTicketId
-									FROM tblGRCustomerStorage GR
-									JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId
-									WHERE intCustomerStorageId = INVSHIPITEM.intSourceId
-									)
-						ELSE (
-								SELECT TOP 1 SC.intTicketId
-								FROM tblSCTicket SC
-								WHERE intTicketId = INVSHIPITEM.intSourceId
-								)
-						END
-					AND DS.intItemId = InvDtl.intItemId
-				), 0)
-		,dblGradeReading = ISNULL(dbo.fnRemoveTrailingZeroes((
-				SELECT dblGradeReading
-				FROM tblQMTicketDiscount TD
-				JOIN tblGRDiscountScheduleCode DS ON TD.intDiscountScheduleCodeId = DS.intDiscountScheduleCodeId
-				WHERE TD.intTicketId = CASE 
-						WHEN INVSHIP.intSourceType = 4
-							THEN (
-									SELECT TOP 1 SC.intTicketId
-									FROM tblGRCustomerStorage GR
-									JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId
-									WHERE intCustomerStorageId = INVSHIPITEM.intSourceId
-									)
-						ELSE (
-								SELECT TOP 1 SC.intTicketId
-								FROM tblSCTicket SC
-								WHERE intTicketId = INVSHIPITEM.intSourceId
-								)
-						END
-					AND DS.intItemId = InvDtl.intItemId
-				)), 'N/A')
-		,InvDtl.dblTotal AS dblAmount
-		,0
-		,0
-		,0
-		,0
-		,0
-	FROM tblARInvoiceDetail InvDtl
-	JOIN tblARInvoice Inv ON InvDtl.intInvoiceId = Inv.intInvoiceId
-	JOIN tblICInventoryShipmentCharge INVSHIPCHR ON InvDtl.intInventoryShipmentChargeId = INVSHIPCHR.intInventoryShipmentChargeId
-	JOIN tblICItem Item ON InvDtl.intItemId = Item.intItemId
-	JOIN tblICInventoryShipment INVSHIP ON INVSHIPCHR.intInventoryShipmentId = INVSHIP.intInventoryShipmentId
-	JOIN tblICInventoryShipmentItem INVSHIPITEM ON INVSHIP.intInventoryShipmentId = INVSHIPITEM.intInventoryShipmentId
-	JOIN tblSCTicket TICKET ON INVSHIPITEM.intSourceId = TICKET.intTicketId	
-	WHERE InvDtl.intInventoryShipmentChargeId IS NOT NULL
-	
-	UNION ALL
-	
-	SELECT 
-		 strId = Bill.strBillId
-		,intBillId = BillDtl.intBillId
-		,intBillDetailId  = BillDtl.intBillDetailId
-		,intItemId = BillDtl.intItemId		
-		,strDiscountCode = Item.strShortName
-		,strDiscountCodeDescription = Item.strItemNo
-		,dblDiscountAmount = BillDtl.dblCost
-		,dblShrinkPercent = ISNULL(StorageDiscount.dblShrinkPercent, 0)
-		,dblGradeReading =  ISNULL(dbo.fnRemoveTrailingZeroes(StorageDiscount.dblGradeReading),'N/A')
-		,dblAmount = BillDtl.dblTotal
-		,intInventoryReceiptItemId = 0 
-		,intInventoryReceiptChargeId = 0 
-		,intContractDetailId = ISNULL(BillDtl.intContractDetailId, 0)
-		,dblTax = BillDtl.dblTax
-		,dblNetTotal = BillDtl.dblTotal+ BillDtl.dblTax
-	FROM tblAPBillDetail BillDtl
-	JOIN tblAPBill Bill ON BillDtl.intBillId = Bill.intBillId
-	JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId AND Item.strType = 'Other Charge'
-	JOIN tblGRStorageHistory StrgHstry ON Bill.intBillId = StrgHstry.intBillId
 	LEFT JOIN (
 				 SELECT 
 				 QM.intTicketFileId
@@ -204,7 +111,8 @@ LEFT JOIN
 				JOIN tblGRDiscountScheduleCode DCode ON DCode.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
 				WHERE QM.strSourceType = 'Storage'
 		  ) StorageDiscount ON StorageDiscount.intTicketFileId = BillDtl.intCustomerStorageId AND StorageDiscount.intItemId = BillDtl.intItemId
-      WHERE Item.strType = 'Other Charge'
+
+	WHERE  Item.strType = 'Other Charge'
 	) tbl 
 GROUP BY 
 	 strId
@@ -216,12 +124,10 @@ GROUP BY
 	,dblDiscountAmount
 	,dblShrinkPercent
 	,dblGradeReading
-	,dblAmount
-	,intInventoryReceiptItemId
-	,intInventoryReceiptChargeId
+	,dblAmount	
 	,intContractDetailId
 	,dblTax
-	,dblNetTotal)t3 ON  t3.intBillId =t2.intBillId AND t3.intBillId =t1.intBillId
+	,dblNetTotal )t3 ON  t3.intBillId =t2.intBillId AND t3.intBillId =t1.intBillId
 	WHERE t3.intItemId IS NOT NULL 
 )t
 	
