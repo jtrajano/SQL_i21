@@ -38,7 +38,11 @@ Ext.define('Inventory.model.ItemBundle', {
         { name: 'intBundleItemId', type: 'int' },
         { name: 'strDescription', type: 'string' },
         { name: 'dblQuantity', type: 'float', defaultValue: 1.00 },
-        { name: 'intItemUnitMeasureId', type: 'int', allowNull: true },
+        { 
+            name: 'intItemUnitMeasureId', 
+            type: 'int', 
+            allowNull: true
+        },
         { name: 'dblMarkUpOrDown', type: 'float' },
         { name: 'dtmBeginDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d'},
         { name: 'dtmEndDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },
@@ -54,12 +58,14 @@ Ext.define('Inventory.model.ItemBundle', {
         var errors = this.callParent(arguments),
             current = this.getAssociatedData();
         
-        if(current && current.intItem.strBundleType != 'Option'){
+        if(current && current.intItem.strBundleType == 'Kit' && iRely.Functions.isEmpty(this.get('strUnitMeasure'))){
             errors.add({
                 field: 'strUnitMeasure',
                 message: 'Must be present.'
             });
         }
+
+        return errors;
 
     }
 });
