@@ -181,6 +181,8 @@ UPDATE tblFRRowDesign SET strRelatedRows = ''
 	WHERE strRelatedRows IS NULL
 UPDATE tblFRRowDesign SET strAccountsUsed = '' 
 	WHERE strAccountsUsed IS NULL
+UPDATE tblFRRowDesign SET strOverrideFormatMask = '' 
+	WHERE strOverrideFormatMask IS NULL
 
 GO
 	PRINT N'END NULL TO EMPTY STRING'
