@@ -772,6 +772,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 xtype: 'container',
                                                                 flex: 3,
                                                                 region: 'center',
+                                                                itemId: 'pnlItem',
                                                                 layout: {
                                                                     type: 'vbox',
                                                                     align: 'stretch'

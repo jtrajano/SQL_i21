@@ -2220,6 +2220,7 @@
                                                         "border": null,
                                                         "container|align": "stretch",
                                                         "designer|displayName": "Item Grid",
+                                                        "itemId": "pnlItem",
                                                         "layout": "vbox",
                                                         "layout|flex": 3,
                                                         "layout|region": "center"
@@ -2231,7 +2232,8 @@
                                                         "layout": "string",
                                                         "layout|flex": "number",
                                                         "layout|region": "string",
-                                                        "scrollable": "boolean"
+                                                        "scrollable": "boolean",
+                                                        "itemId": "string"
                                                     },
                                                     "name": "MyContainer37",
                                                     "designerId": "bb68f82d-f48a-4b92-802f-1170061268f1",
