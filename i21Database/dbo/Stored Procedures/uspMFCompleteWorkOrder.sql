@@ -529,142 +529,145 @@ BEGIN TRY
 
 		SET @intWorkOrderId = SCOPE_IDENTITY()
 
-		SELECT @intAttributeId = NULL
-
-		SELECT @intAttributeId = intAttributeId
-		FROM dbo.tblMFAttribute
-		WHERE strAttributeName = 'Is Input Quantity Read Only'
-
-		SELECT @strInputQuantityReadOnly = strAttributeValue
-		FROM tblMFManufacturingProcessAttribute
-		WHERE intManufacturingProcessId = @intManufacturingProcessId
-			AND intLocationId = @intLocationId
-			AND intAttributeId = @intAttributeId
-
-		IF @strInputQuantityReadOnly = 'True'
+		IF @intInputItemId IS NOT NULL
 		BEGIN
-			SELECT @dblInputWeight = ri.dblCalculatedQuantity * (
-					(
-						CASE 
-							WHEN r.intItemUOMId = @intProduceUnitMeasureId
-								THEN @dblProduceQty
-							ELSE @dblPhysicalCount
-							END
-						) / r.dblQuantity
+			SELECT @intAttributeId = NULL
+
+			SELECT @intAttributeId = intAttributeId
+			FROM dbo.tblMFAttribute
+			WHERE strAttributeName = 'Is Input Quantity Read Only'
+
+			SELECT @strInputQuantityReadOnly = strAttributeValue
+			FROM tblMFManufacturingProcessAttribute
+			WHERE intManufacturingProcessId = @intManufacturingProcessId
+				AND intLocationId = @intLocationId
+				AND intAttributeId = @intAttributeId
+
+			IF @strInputQuantityReadOnly = 'True'
+			BEGIN
+				SELECT @dblInputWeight = ri.dblCalculatedQuantity * (
+						(
+							CASE 
+								WHEN r.intItemUOMId = @intProduceUnitMeasureId
+									THEN @dblProduceQty
+								ELSE @dblPhysicalCount
+								END
+							) / r.dblQuantity
+						)
+				FROM dbo.tblMFRecipeItem ri
+				JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
+				LEFT JOIN dbo.tblMFRecipeSubstituteItem rs ON rs.intRecipeItemId = ri.intRecipeItemId
+				WHERE r.intItemId = @intItemId
+					AND r.intLocationId = @intLocationId
+					AND r.ysnActive = 1
+					AND (
+						ri.intItemId = @intInputLotItemId
+						OR rs.intSubstituteItemId = @intInputLotItemId
+						)
+			END
+
+			SELECT @strInputItemLotTracking = strInventoryTracking
+			FROM dbo.tblICItem
+			WHERE intItemId = @intInputItemId
+
+			IF @strInputItemLotTracking = 'Lot Level'
+			BEGIN
+				INSERT INTO dbo.tblMFWorkOrderConsumedLot (
+					intWorkOrderId
+					,intItemId
+					,intLotId
+					,dblQuantity
+					,intItemUOMId
+					,dblIssuedQuantity
+					,intItemIssuedUOMId
+					,intBatchId
+					,intSequenceNo
+					,dtmCreated
+					,intCreatedUserId
+					,dtmLastModified
+					,intLastModifiedUserId
+					,intSubLocationId
+					,intStorageLocationId
+					,dtmActualInputDateTime
+					,intShiftId
 					)
-			FROM dbo.tblMFRecipeItem ri
-			JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
-			LEFT JOIN dbo.tblMFRecipeSubstituteItem rs ON rs.intRecipeItemId = ri.intRecipeItemId
-			WHERE r.intItemId = @intItemId
-				AND r.intLocationId = @intLocationId
-				AND r.ysnActive = 1
-				AND (
-					ri.intItemId = @intInputLotItemId
-					OR rs.intSubstituteItemId = @intInputLotItemId
+				SELECT @intWorkOrderId
+					,intItemId
+					,intLotId
+					,CASE 
+						WHEN @dblInputWeight = 0
+							THEN (
+									CASE 
+										WHEN L.intWeightUOMId IS NOT NULL
+											THEN L.dblWeight
+										ELSE L.dblQty
+										END
+									)
+						ELSE @dblInputWeight
+						END
+					,ISNULL(intWeightUOMId, intItemUOMId)
+					,CASE 
+						WHEN @dblInputWeight = 0
+							THEN (
+									CASE 
+										WHEN L.intWeightUOMId IS NOT NULL
+											THEN L.dblWeight
+										ELSE L.dblQty
+										END
+									)
+						ELSE @dblInputWeight
+						END
+					,ISNULL(intWeightUOMId, intItemUOMId)
+					,@intBatchId
+					,1
+					,@dtmCurrentDate
+					,@intUserId
+					,@dtmCurrentDate
+					,@intUserId
+					,intSubLocationId
+					,intStorageLocationId
+					,@dtmPlannedDate
+					,@intPlannedShiftId
+				FROM dbo.tblICLot L
+				WHERE intLotId = @intInputLotId
+			END
+			ELSE
+			BEGIN
+				INSERT INTO dbo.tblMFWorkOrderConsumedLot (
+					intWorkOrderId
+					,intItemId
+					,intLotId
+					,dblQuantity
+					,intItemUOMId
+					,dblIssuedQuantity
+					,intItemIssuedUOMId
+					,intBatchId
+					,intSequenceNo
+					,dtmCreated
+					,intCreatedUserId
+					,dtmLastModified
+					,intLastModifiedUserId
+					,intStorageLocationId
+					,dtmActualInputDateTime
+					,intShiftId
 					)
-		END
-
-		SELECT @strInputItemLotTracking = strInventoryTracking
-		FROM dbo.tblICItem
-		WHERE intItemId = @intInputItemId
-
-		IF @strInputItemLotTracking = 'Lot Level'
-		BEGIN
-			INSERT INTO dbo.tblMFWorkOrderConsumedLot (
-				intWorkOrderId
-				,intItemId
-				,intLotId
-				,dblQuantity
-				,intItemUOMId
-				,dblIssuedQuantity
-				,intItemIssuedUOMId
-				,intBatchId
-				,intSequenceNo
-				,dtmCreated
-				,intCreatedUserId
-				,dtmLastModified
-				,intLastModifiedUserId
-				,intSubLocationId
-				,intStorageLocationId
-				,dtmActualInputDateTime
-				,intShiftId
-				)
-			SELECT @intWorkOrderId
-				,intItemId
-				,intLotId
-				,CASE 
-					WHEN @dblInputWeight = 0
-						THEN (
-								CASE 
-									WHEN L.intWeightUOMId IS NOT NULL
-										THEN L.dblWeight
-									ELSE L.dblQty
-									END
-								)
-					ELSE @dblInputWeight
-					END
-				,ISNULL(intWeightUOMId, intItemUOMId)
-				,CASE 
-					WHEN @dblInputWeight = 0
-						THEN (
-								CASE 
-									WHEN L.intWeightUOMId IS NOT NULL
-										THEN L.dblWeight
-									ELSE L.dblQty
-									END
-								)
-					ELSE @dblInputWeight
-					END
-				,ISNULL(intWeightUOMId, intItemUOMId)
-				,@intBatchId
-				,1
-				,@dtmCurrentDate
-				,@intUserId
-				,@dtmCurrentDate
-				,@intUserId
-				,intSubLocationId
-				,intStorageLocationId
-				,@dtmPlannedDate
-				,@intPlannedShiftId
-			FROM dbo.tblICLot L
-			WHERE intLotId = @intInputLotId
-		END
-		ELSE
-		BEGIN
-			INSERT INTO dbo.tblMFWorkOrderConsumedLot (
-				intWorkOrderId
-				,intItemId
-				,intLotId
-				,dblQuantity
-				,intItemUOMId
-				,dblIssuedQuantity
-				,intItemIssuedUOMId
-				,intBatchId
-				,intSequenceNo
-				,dtmCreated
-				,intCreatedUserId
-				,dtmLastModified
-				,intLastModifiedUserId
-				,intStorageLocationId
-				,dtmActualInputDateTime
-				,intShiftId
-				)
-			SELECT @intWorkOrderId
-				,@intInputItemId
-				,NULL
-				,@dblInputWeight
-				,@intInputItemUOMId
-				,@dblInputWeight
-				,@intInputItemUOMId
-				,@intBatchId
-				,1
-				,@dtmCurrentDate
-				,@intUserId
-				,@dtmCurrentDate
-				,@intUserId
-				,@intStorageLocationId
-				,@dtmPlannedDate
-				,@intPlannedShiftId
+				SELECT @intWorkOrderId
+					,@intInputItemId
+					,NULL
+					,@dblInputWeight
+					,@intInputItemUOMId
+					,@dblInputWeight
+					,@intInputItemUOMId
+					,@intBatchId
+					,1
+					,@dtmCurrentDate
+					,@intUserId
+					,@dtmCurrentDate
+					,@intUserId
+					,@intStorageLocationId
+					,@dtmPlannedDate
+					,@intPlannedShiftId
+			END
 		END
 
 		EXEC dbo.uspMFCopyRecipe @intItemId = @intItemId
