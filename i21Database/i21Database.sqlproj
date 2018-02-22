@@ -6217,6 +6217,9 @@
     <Build Include="dbo\Stored Procedures\uspICGetItemSubtitutes.sql" />
     <Build Include="dbo\Stored Procedures\uspRKInsertM2MInquiryDetails.sql" />
     <Build Include="dbo\Views\vyuICCategoryLocation.sql" />
+    <Build Include="dbo\Functions\fnICGetTransWeightedAveCost.sql" />
+    <Build Include="dbo\Functions\fnTRGetLoadTransferWeightedAveCost.sql" />
+    <Build Include="dbo\Functions\fnTRGetLoadReceiptWeightedAveCost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
