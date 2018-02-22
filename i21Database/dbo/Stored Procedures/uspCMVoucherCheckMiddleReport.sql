@@ -132,7 +132,7 @@ SELECT	CHK.dtmDate
 					ELSE
 						CHK.strPayee
 					END
-		,strAmountInWords = LTRIM(RTRIM(REPLACE(CHK.strAmountInWords, '*', ''))) + REPLICATE(' *', 30)
+		,strAmountInWords = LTRIM(RTRIM(REPLACE(CHK.strAmountInWords, '*', ''))) + REPLICATE(' *', (113 - LEN(LTRIM(RTRIM(REPLACE(CHK.strAmountInWords, '*', '')))))/2)
 		,CHK.strMemo
 		,CHK.strTransactionId
 		,CHK.intTransactionId
