@@ -427,15 +427,14 @@ IF @ysnIncludeBudgetLocal = 1
 		EXEC sp_executesql @queryBudget
 	END
 
-IF @ysnPrintOnlyPastDueLocal = 0
-	BEGIN		
-		DELETE FROM @temp_statement_table WHERE DATEDIFF(DAYOFYEAR, dtmDueDate, @dtmDateToLocal) > 0		
+IF @ysnPrintOnlyPastDueLocal = 1
+	BEGIN
+		DELETE FROM @temp_statement_table WHERE strTransactionType = 'Invoice' AND dblPastDue <= 0
+
+		UPDATE tblARCustomerAgingStagingTable
+		SET dbl0Days = 0
 	END
-	
-ELSE IF @ysnPrintOnlyPastDueLocal = 1
-BEGIN
-	DELETE FROM @temp_statement_table WHERE strTransactionType = 'Invoice' AND dblPastDue <= 0
-END
+
 
 IF @ysnPrintZeroBalanceLocal = 0
 	BEGIN
