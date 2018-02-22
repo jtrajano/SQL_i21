@@ -728,7 +728,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         xtype: 'gridcombobox',
                                                                         columns: [
                                                                             {
-                                                                                dataIndex: 'intEntityShipViaId',
+                                                                                dataIndex: 'intEntityId',
                                                                                 dataType: 'numeric',
                                                                                 text: 'Ship Via Id',
                                                                                 hidden: true
@@ -752,7 +752,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         fieldLabel: 'Ship Via',
                                                                         labelWidth: 110,
                                                                         displayField: 'strShipVia',
-                                                                        valueField: 'intEntityShipViaId'
+                                                                        valueField: 'intEntityId'
                                                                     },
                                                                     {
                                                                         xtype: 'textfield',
@@ -2365,10 +2365,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                         xtype: 'checkcolumn',
                                                         itemId: 'colChargeEntity',
                                                         width: 85,
-                                                        text: 'Charge Entity',
-                                                        editor: {
-                                                            xtype: 'checkboxfield'
-                                                        }
+                                                        text: 'Charge Entity'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
