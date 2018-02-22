@@ -697,6 +697,14 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 return false;
             }
         },
+        checkHideItemSequence: function (get) {
+            if (get('current.strReceiptType') === 'Purchase Contract') {
+                return false;
+            }
+            else {
+                return true;
+            }
+        },        
         checkShowContractOnly: function (get) {
             if (get('current.strReceiptType') === 'Purchase Contract') {
                 return false;

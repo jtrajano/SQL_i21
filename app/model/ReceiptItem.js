@@ -104,7 +104,8 @@ Ext.define('Inventory.model.ReceiptItem', {
             } 
         },
         { name: 'intParentItemLinkId', type: 'int', allowNull: true },
-        { name: 'intChildItemLinkId', type: 'int', allowNull: true }
+        { name: 'intChildItemLinkId', type: 'int', allowNull: true },
+        { name: 'intContractSeq', type: 'int', allowNull: true }
     ],
 
     validators: [

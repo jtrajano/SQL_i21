@@ -2498,6 +2498,26 @@
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
+                                                                        "hidden": true,
+                                                                        "itemId": "colItemSequence",
+                                                                        "text": "Sequence"
+                                                                    },
+                                                                    "configAlternates": {
+                                                                        "hidden": "boolean",
+                                                                        "itemId": "string",
+                                                                        "text": "string"
+                                                                    },
+                                                                    "name": "MyColumn61",
+                                                                    "designerId": "04407a00-5131-4a75-a42e-cee2523d03b9"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.grid.column.Column",
+                                                                    "reference": {
+                                                                        "name": "columns",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
                                                                         "dataIndex": "strSourceNumber",
                                                                         "itemId": "colSourceNumber",
                                                                         "text": "Source No.",
