@@ -4042,7 +4042,6 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             }).subscribe(
                 function(successResponse){
                     var result = Ext.decode(successResponse.responseText);
-                    addedRecord.set('dblUnitPrice', 0);
                     addedRecord.set('strItemType', 'Kit');
 
                     Ext.Array.forEach(result.data, function(rec) {
@@ -4057,20 +4056,20 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                 // intOrderId: selectedItem.get('intOrderId'),
                                 // intSourceId: selectedItem.get('intSourceId'),
                                 // strOrderNumber: selectedItem.get('strOrderNumber'),
-                                // strSourceNumber: selectedItem.get('strSourceNumber'),
+                                // strSourceNumber: selectedItem:.get('strSourceNumber'),
                                 dblQuantity: componentQty,
                                 intItemId: rec.intComponentItemId,
                                 strItemNo: rec.strComponentItemNo,
                                 strItemDescription: rec.strComponentDescription,
-                                dblQtyOrdered: componentQty,
-                                dblUnitPrice: itemCost,
-                                dblLineTotal: componentQty * itemCost,
+                                //dblQtyOrdered: componentQty,
+                                dblUnitPrice: 0,//itemCost,
+                                dblLineTotal: 0,//componentQty * itemCost,
                                 strLotTracking: rec.strLotTracking,
                                 intSubLocationId: selectedItem.get('intSubLocationId'),
                                 strSubLocationName: selectedItem.get('strSubLocationName'),
                                 intStorageLocationId: selectedItem.get('intStorageLocationId'),
                                 strStorageLocationName: selectedItem.get('strStorageLocationName'),
-                                strOrderUOM: selectedItem.get('strOrderUOM'),
+                                //strOrderUOM: selectedItem.get('strOrderUOM'),
                                 intItemUOMId: rec.intComponentUOMId,
                                 strUnitMeasure: rec.strComponentUOM,
                                 strWeightUOM: rec.strComponentUOM,
