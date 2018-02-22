@@ -2118,10 +2118,45 @@ Ext.define('Inventory.view.BundleViewController', {
         }
     },    
 
+    onBundleTypeSelect: function(combo, records){
+        var me = this,
+            win = me.getView(),
+            vm = me.getViewModel(),
+            current = vm.data.current,
+            tblICItemBundles = current.tblICItemBundles();
+
+        if(records.get('strBundleType') == 'Option'){
+            var getBlankItemUOMs = _.filter(tblICItemBundles.data.items, function(item){
+                return item.get('intItemUnitMeasureId') && !item.dummy;
+            });
+
+            if(getBlankItemUOMs.length> 0) {
+                getBlankItemUOMs.forEach(function(item){
+                    item.set('intItemUnitMeasureId', null);
+                    item.set('strUnitMeasure', '');
+                });
+            }
+        } else {
+            var getBlankItemUOMs = _.filter(tblICItemBundles.data.items, function(item){
+                return !item.get('intItemUnitMeasureId') && !item.dummy;
+            });
+
+            if(getBlankItemUOMs.length> 0) {
+                getBlankItemUOMs.forEach(function(item){
+                    item.dirty = true;
+                });
+            }
+        }
+
+    },
+
     init: function(application) {
         this.control({
             "#cboType": {
                 select: this.onInventoryTypeSelect
+            },
+            "#cboBundleType":{
+                select: this.onBundleTypeSelect
             },
             "#cboDetailUnitMeasure": {
                 select: this.onUOMUnitMeasureSelect
