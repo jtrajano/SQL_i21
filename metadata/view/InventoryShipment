@@ -1949,7 +1949,7 @@
                                                                 "columns": [
                                                                     "[",
                                                                     "\t{",
-                                                                    "\t\tdataIndex: 'intEntityShipViaId',",
+                                                                    "\t\tdataIndex: 'intEntityId',",
                                                                     "\t\tdataType: 'numeric',",
                                                                     "\t\ttext: 'Ship Via Id',",
                                                                     "\t\thidden: true",
@@ -1978,7 +1978,7 @@
                                                                 "layout|margins": null,
                                                                 "margin": "0 5 0 0",
                                                                 "name": null,
-                                                                "valueField": "intEntityShipViaId",
+                                                                "valueField": "intEntityId",
                                                                 "width": null
                                                             },
                                                             "configAlternates": {

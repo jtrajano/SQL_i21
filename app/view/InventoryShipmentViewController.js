@@ -156,7 +156,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             },
             cboShipVia: {
                 value: '{current.strShipVia}',
-                origValueField: 'intEntityShipViaId',
+                origValueField: 'intEntityId',
                 origUpdateField: 'intShipViaId',
                 store: '{shipVia}',
                 readOnly: '{current.ysnPosted}'
@@ -4539,6 +4539,22 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         );
     },
 
+    onShipViaSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var record = records[0];
+        if (!record)
+            return; 
+
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+        
+        if (current){
+            current.set('intShipViaId', record.get('intEntityId'));
+        }
+    },    
+
     init: function(application) {
         this.control({
             "#cboShipFromAddress":{
@@ -4672,7 +4688,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             },
             "#btnChargeTaxDetails": {
                 click: this.onChargeTaxDetailsClick
-            }            
+            },
+            "#cboShipVia": {
+                select: this.onShipViaSelect
+            }
         })
     }
 
