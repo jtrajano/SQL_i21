@@ -521,7 +521,7 @@ BEGIN
 
                             IF (ISNULL(@dblPreBuyOverFill,0) > 0)
 								BEGIN
-									SET @strStatus = @strStatus + ', Has Contract Discrepency'
+									SET @strStatus = @strStatus + ', Has Contract Discrepancy'
 								END
 		
 							INSERT INTO @ResultTableLog (strCustomerNumber ,strRecordId	,strSiteNumber	,dtmDate ,intLineItem ,strFileName ,strStatus ,ysnSuccessful ,strInvoiceNumber ,strItemNumber ,intInvoiceId)
