@@ -119,6 +119,7 @@ BEGIN
 		INNER JOIN tblICItem i ON i.intItemId = il.intItemId
 		LEFT JOIN vyuICGetItemStockSummary stock ON stock.intItemId = i.intItemId
 			AND uom.intItemUOMId = stock.intItemUOMId
+			AND stock.intItemLocationId = il.intItemLocationId
 	WHERE il.intLocationId = @intLocationId
 		AND ((stock.dblOnHand > 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
 		AND (i.intCategoryId = @intCategoryId OR ISNULL(@intCategoryId, 0) = 0)
