@@ -39,7 +39,7 @@ FROM(
 	FROM vyuRKPnLGetAllocationDetail d 
 	JOIN tblICItemUOM u on u.intItemUOMId=d.intPItemUOMId
 	LEFT JOIN @Result r on d.intContractDetailId=r.intContractDetailId
-	WHERE strAllocationType=@strAllocationType
+	WHERE strAllocationType=@strAllocationType  and intContractTypeId=2
 ) t
  )t1 GROUP BY strSequenceNumber,strItemNo,strEntityName,dblDetailQuantity,intContractDetailId,dblActualProfit,strSalespersonName
 
