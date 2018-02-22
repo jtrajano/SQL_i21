@@ -58,7 +58,7 @@ FROM (
 		,SCurrency.ysnSubCurrency
 		,(ISNULL(AD.dblPAllocatedQty, 0) - ISNULL(LD.dblPShippedQuantity, 0)) AS dblAvailableAllocationQty
 		,dbo.fnLGGetItemUnitConversion(CDP.intItemId,CDP.intItemUOMId,CDS.intUnitMeasureId) dblQtyConversionFactor
-		,(CDP.dblQuantity-CDP.dblScheduleQty) dblAvailableContractQty
+		,(ISNULL(CDP.dblQuantity,0)-ISNULL(CDP.dblScheduleQty,0)) dblAvailableContractQty
 	FROM tblLGAllocationDetail AD
 	JOIN tblLGAllocationHeader AH ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
 	JOIN tblCTContractDetail CDP ON CDP.intContractDetailId = AD.intPContractDetailId
