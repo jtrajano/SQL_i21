@@ -2430,7 +2430,7 @@ Ext.define('Inventory.view.ItemViewController', {
         var screenName = 'Inventory.view.ItemLocation';
 
         var current = win.getViewModel().data.current;
-        var stockUOM = _.findWhere(current.tblICItemUOMs().data.items, function(x){ return x.get(ysnStockUnit) && !x.dummy});
+        var stockUOM = _.find(current.tblICItemUOMs().data.items, function(x){ return x.get('ysnStockUnit') && !x.dummy});
         if(!win.defaultUOM && stockUOM)
             stockUOM = {
                 intItemUOMId: stockUOM.get('intItemUOMId')
