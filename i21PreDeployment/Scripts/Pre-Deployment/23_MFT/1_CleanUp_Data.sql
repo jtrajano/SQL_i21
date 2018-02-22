@@ -96,6 +96,7 @@ IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFRep
 BEGIN
 	PRINT('Update obsolete Component Type')
     EXEC('UPDATE tblTFReportingComponent SET intComponentTypeId = 4 WHERE intComponentTypeId = 5')
+	EXEC('UPDATE tblTFReportingComponent SET intComponentTypeId = 4 WHERE intComponentTypeId = 7')
 END
 
 -- Clean up of all non-unique strTemplateItemId in tblTFReportingComponentConfiguration
@@ -103,12 +104,16 @@ IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFRep
 BEGIN
 	PRINT('Cleanup of non-unique TemplateItemId in tblTFReportingComponentConfiguration')
 
-	EXEC('UPDATE tblTFReportingComponentConfiguration SET strTemplateItemId = intMasterId WHERE intReportingComponentConfigurationId IN (
+	EXEC('UPDATE tblTFReportingComponentConfiguration SET strTemplateItemId = NEWID() WHERE intReportingComponentConfigurationId IN (
 		SELECT A.intReportingComponentConfigurationId FROM tblTFReportingComponentConfiguration A
 		INNER JOIN (SELECT intReportingComponentId, strTemplateItemId FROM tblTFReportingComponentConfiguration 
 		GROUP BY intReportingComponentId, strTemplateItemId
 		HAVING COUNT(strTemplateItemId) > 1) B 
 		ON A.intReportingComponentId = B.intReportingComponentId AND A.strTemplateItemId = B.strTemplateItemId)')
+
+	EXEC('UPDATE tblTFReportingComponentConfiguration SET strTemplateItemId = NEWID() WHERE strTemplateItemId IS NULL')
+
+	EXEC('DELETE tblTFReportingComponentConfiguration WHERE intMasterId IS NULL')
 END
 
 IF NOT EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSMCleanupLog') 
