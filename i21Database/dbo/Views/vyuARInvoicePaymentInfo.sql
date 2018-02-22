@@ -38,14 +38,14 @@ SELECT I.intInvoiceId
 	   , I.intCurrencyId
 	   , strCurrency = CUR.strCurrency
 FROM tblARInvoice I 
-	RIGHT OUTER JOIN(
+	LEFT JOIN (
 		SELECT intInvoiceId
 		, dblPayment 
 		, MAX(intPaymentId) intPaymentId
 		FROM tblARPaymentDetail
 		GROUP BY intInvoiceId, dblPayment
 	) PD ON I.intInvoiceId = PD.intInvoiceId
-	RIGHT OUTER JOIN (
+	INNER JOIN (
 		SELECT intPaymentId, intPaymentMethodId, strPaymentMethod, strBatchId FROM tblARPayment
 	) P ON PD.intPaymentId = P.intPaymentId
 	LEFT JOIN (
