@@ -1,20 +1,31 @@
-﻿CREATE PROCEDURE uspMFGetLotInputOutputDetails @intLotId INT
+﻿CREATE PROCEDURE uspMFGetLotInputOutputDetails @intLotId INT = NULL
+	,@intBatchId INT = NULL
 AS
 BEGIN
-	DECLARE @intBatchId INT
-		,@intWorkOrderId INT
+	DECLARE @intWorkOrderId INT
 
-	SELECT @intBatchId = wopl.intBatchId
-		,@intWorkOrderId = intWorkOrderId
-	FROM tblMFWorkOrderProducedLot wopl
-	WHERE wopl.intLotId = @intLotId
+	IF @intBatchId IS NULL
+	BEGIN
+		SELECT @intBatchId = wopl.intBatchId
+			,@intWorkOrderId = intWorkOrderId
+		FROM tblMFWorkOrderProducedLot wopl
+		WHERE wopl.intLotId = @intLotId
+	END
+	ELSE
+	BEGIN
+		SELECT @intWorkOrderId = intWorkOrderId
+		FROM tblMFWorkOrderProducedLot wopl
+		WHERE wopl.intBatchId = @intBatchId
+	END
 
-	SELECT CONVERT(INT, Row_Number() OVER (Order by strType Desc)) AS intRowNo
+	SELECT CONVERT(INT, Row_Number() OVER (
+				ORDER BY strType DESC
+				)) AS intRowNo
 		,DT.*
 	FROM (
-		SELECT wopl.intLotId
+		SELECT IsNULL(wopl.intLotId, 0) AS intLotId
 			,wopl.intWorkOrderId
-			,l.strLotNumber
+			,IsNULL(l.strLotNumber, '') AS strLotNumber
 			,'OUTPUT' AS strType
 			,wo.strWorkOrderNo
 			,i.strItemNo
@@ -34,8 +45,8 @@ BEGIN
 			AND ysnStockUnit = 1
 		JOIN tblICUnitMeasure um ON um.intUnitMeasureId = iu.intUnitMeasureId
 		JOIN tblSMUserSecurity us ON us.[intEntityId] = wopl.intCreatedUserId
-		JOIN tblICLot l ON l.intLotId = wopl.intLotId
-		WHERE wopl.intLotId = @intLotId
+		LEFT JOIN tblICLot l ON l.intLotId = wopl.intLotId
+		WHERE wopl.intBatchId = @intBatchId
 		
 		UNION ALL
 		
