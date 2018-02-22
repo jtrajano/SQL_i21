@@ -6222,6 +6222,27 @@
     <Build Include="dbo\Functions\fnICGetTransWeightedAveCost.sql" />
     <Build Include="dbo\Functions\fnTRGetLoadTransferWeightedAveCost.sql" />
     <Build Include="dbo\Functions\fnTRGetLoadReceiptWeightedAveCost.sql" />
+    <Build Include="dbo\Tables\tblSMRepInitStatus.sql" />
+    <Build Include="dbo\Tables\tblSMReplicationSPResult.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\32_ReplicationResult.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\33_ReplicationInitStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMRepAddArticle.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMRepAddDistributor.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMRepAdddistributorDB.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMRepAddLogReaderAgent.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMRepAddPublication.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMRepAddSubscription.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMRepCredentialFromParent.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMRepEncryptPassword.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMRepExtendedDist.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMRepGetDistributor.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMRepHelpLogReaderAgent.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMRepInitializationStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMReplicateCredential.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMReplicationLogReaderSetUp.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMReplicationOption.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMRepRestoreSubscription.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMRepUpdateInitStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
