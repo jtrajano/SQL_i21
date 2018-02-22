@@ -562,7 +562,10 @@ END
 	INSERT INTO #tmpItemReceiptIds([intEntityVendorId],[intInventoryReceiptChargeId],[dblQtyReceived],[dblCost],[intTaxGroupId]) 
 	SELECT rc.intEntityVendorId
 			,rc.intInventoryReceiptChargeId
-			,dbo.fnSCFreightCalculation(tmp.dblQtyReceived, @dblNetUnits, @dblGrossUnits,null) 
+			,CASE 
+				WHEN rc.strCostMethod = 'Per Unit' THEN dbo.fnSCFreightCalculation(tmp.dblQtyReceived, @dblNetUnits, @dblGrossUnits,null) 
+				ELSE rc.dblQuantity - ISNULL(-rc.dblQuantityPriced, 0)
+			END
 			,CASE 
 				WHEN rc.strCostMethod = 'Per Unit' THEN rc.dblRate
 				ELSE rc.dblAmount
