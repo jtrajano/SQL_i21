@@ -47,7 +47,7 @@ BEGIN
 		,@dblDefaultResidueQty NUMERIC(18, 6)
 		,@ACCOUNT_CATEGORY_OtherChargeExpense AS NVARCHAR(30) = 'Other Charge Expense'
 		,@ACCOUNT_CATEGORY_OtherChargeIncome AS NVARCHAR(30) = 'Other Charge Income'
-		,@ACCOUNT_CATEGORY_Inventory AS NVARCHAR(30) = 'Inventory'
+		,@ACCOUNT_CATEGORY_Inventory AS NVARCHAR(30) = 'Work In Progress'
 		,@OtherChargesGLAccounts AS dbo.ItemOtherChargesGLAccount
 		,@intItemId1 INT
 		,@strItemNo1 AS NVARCHAR(50)
