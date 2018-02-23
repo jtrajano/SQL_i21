@@ -6227,6 +6227,8 @@
     <Build Include="dbo\Stored Procedures\uspRKM2MInqTranExpMonthValidation.sql" />
     <Build Include="dbo\Views\vyuRKGetFutureSettlementPriceString.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateNM41164.sql" />
+    <Build Include="dbo\Tables\tblFRBudgetSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDBudgetSummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
