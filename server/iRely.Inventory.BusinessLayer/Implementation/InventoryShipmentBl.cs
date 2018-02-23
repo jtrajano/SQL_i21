@@ -475,6 +475,7 @@ namespace iRely.Inventory.BusinessLayer
                             , s.dblTax
                             , s.dblAdjustedTax
                             , s.strChargesLink
+                            , s.intConcurrencyId
                             , s.vyuICGetInventoryShipmentCharge.strContractNumber
                             , s.vyuICGetInventoryShipmentCharge.strCostType
                             , s.vyuICGetInventoryShipmentCharge.strCostUOM

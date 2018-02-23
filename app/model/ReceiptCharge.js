@@ -87,7 +87,7 @@ Ext.define('Inventory.model.ReceiptCharge', {
         { name: 'dblForexRate', type: 'float', allowNull: true }, 
         { name: 'strCostType', type: 'string' },
         { name: 'dblQuantity', type: 'float', allowNull: true },
-        { name: 'strChargesLink', type: 'string' },
+        { name: 'strChargesLink', type: 'string', allowNull: true },
         { name: 'intCostUnitMeasureId', type: 'int', allowNull: true },
     ],
 
