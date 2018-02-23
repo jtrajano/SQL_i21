@@ -105,6 +105,8 @@ SELECT CH.strContractNumber
 			THEN 'Full Shipment Created'
 		WHEN 10
 			THEN 'Cancelled'
+		WHEN 11
+			THEN 'Invoiced'
 		ELSE ''
 		END COLLATE Latin1_General_CI_AS
 	,strCalenderInfo = LOAD.[strLoadNumber] + ' - ' + CASE 
@@ -136,6 +138,8 @@ SELECT CH.strContractNumber
 			THEN 'Full Shipment Created'
 		WHEN 10
 			THEN 'Cancelled'
+		WHEN 11
+			THEN 'Invoiced'
 		ELSE ''
 		END + CASE 
 		WHEN ISNULL(LOAD.strExternalLoadNumber, '') <> ''
