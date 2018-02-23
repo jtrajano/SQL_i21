@@ -132,7 +132,7 @@ SELECT	CHK.dtmDate
 					ELSE
 						CHK.strPayee
 					END
-		,strAmountInWords = LTRIM(RTRIM(REPLACE(CHK.strAmountInWords, '*', ''))) + REPLICATE(' *', (113 - LEN(LTRIM(RTRIM(REPLACE(CHK.strAmountInWords, '*', '')))))/2)
+		,strAmountInWords = AmtInWords.Val
 		,CHK.strMemo
 		,CHK.strTransactionId
 		,CHK.intTransactionId
@@ -209,6 +209,10 @@ FROM	dbo.tblCMBankTransaction CHK
 		LEFT JOIN [tblEMEntityLocation] LOCATION
 			ON VENDOR.[intEntityId] = LOCATION.intEntityId AND ysnDefaultLocation = 1 
 		LEFT JOIN tblSMCompanySetup COMPANY ON COMPANY.intCompanySetupID = (SElECT TOP 1 intCompanySetupID FROM tblSMCompanySetup)
+		OUTER APPLY
+		(
+			SELECT LTRIM(RTRIM(REPLACE(CHK.strAmountInWords, '*', ''))) + REPLICATE(' *', (100 - LEN(LTRIM(RTRIM(REPLACE(CHK.strAmountInWords, '*', '')))))/2) Val
+		)AmtInWords
 WHERE	CHK.intBankAccountId = @intBankAccountId
 		AND CHK.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionId))
 		--AND PRINTSPOOL.strBatchId = ISNULL(@strBatchId, PRINTSPOOL.strBatchId)
