@@ -7,9 +7,9 @@ BEGIN
 	select
 		@strLinesOfBusiness = COALESCE(@strLinesOfBusiness + ', ', '') + b.strLineOfBusiness
 	from 
-		tblARCustomerLineOfBusiness a, tblSMLineOfBusiness b
+		tblEMEntityLineOfBusiness a, tblSMLineOfBusiness b
 	where
-		a.intEntityCustomerId = @intEntityCustomerId
+		a.intEntityId = @intEntityCustomerId
 		and b.intLineOfBusinessId = a.intLineOfBusinessId
 
 	RETURN @strLinesOfBusiness

@@ -7,7 +7,7 @@
 		,intCustomerContactId = i.intEntityId
 		,strCustomerName = b.strName
 		,a.ysnActive
-		,strLineOfBusiness = dbo.fnCRMCoalesceLinesOfBusiness(e.intEntityCustomerId)
+		,strLineOfBusiness = dbo.fnCRMCoalesceLinesOfBusiness(a.intEntityId)
 		,strModule = dbo.fnCRMCoalesceModule(e.intEntityCustomerId,e.strCompanyId)
 		,e.strCompanyId
 		,intNumberOfUser = isnull(e.intNumberOfUser,0)
