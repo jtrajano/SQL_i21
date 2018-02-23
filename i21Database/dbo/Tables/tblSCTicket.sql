@@ -136,7 +136,7 @@
 	[intSalesOrderDetailId] INT NULL, 
 	[ysnReadyToTransfer] BIT NOT NULL DEFAULT 0, 
     CONSTRAINT [PK_tblSCTicket_intTicketId] PRIMARY KEY ([intTicketId]), 
-    CONSTRAINT [UK_tblSCTicket_intTicketPoolId_strTicketNumber] UNIQUE ([intTicketPoolId], [intTicketType], [strInOutFlag], [strTicketNumber]),
+    CONSTRAINT [UK_tblSCTicket_intTicketPoolId_strTicketNumber] UNIQUE ([intTicketPoolId], [intTicketType], [strInOutFlag], [strTicketNumber],[intEntityId],[intProcessingLocationId]),
 	CONSTRAINT [FK_tblSCScaleSetup_tblSMCompanyLocation_intTicketLocationId] FOREIGN KEY ([intTicketLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
 	CONSTRAINT [FK_tblSCScaleSetup_tblSMCompanyLocation_intProcessingLocationId] FOREIGN KEY ([intProcessingLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
     CONSTRAINT [FK_tblSCTicket_tblSCTicketPool_intTicketPoolId] FOREIGN KEY ([intTicketPoolId]) REFERENCES [tblSCTicketPool]([intTicketPoolId]), 
@@ -159,7 +159,7 @@
 	CONSTRAINT [FK_tblSCTicket_tblSCListTicketTypes_intTicketTypeId] FOREIGN KEY (intTicketTypeId) REFERENCES [tblSCListTicketTypes](intTicketTypeId),
 	CONSTRAINT [FK_tblSCTicket_tblSCDeliverySheet_intDeliverySheetId] FOREIGN KEY (intDeliverySheetId) REFERENCES [tblSCDeliverySheet](intDeliverySheetId),
 	CONSTRAINT [FK_tblSCTicket_tblICCommodityAttribute_intCommodityAttributeId] FOREIGN KEY (intCommodityAttributeId) REFERENCES [tblICCommodityAttribute](intCommodityAttributeId),
-	CONSTRAINT [UK_tblSCTicket_intTicketPoolId_strTicketNumber_strOfflineGuid] UNIQUE ([strOfflineGuid],[intTicketPoolId], [intTicketType], [strInOutFlag], [strTicketNumber]),
+	CONSTRAINT [UK_tblSCTicket_intTicketPoolId_strTicketNumber_strOfflineGuid] UNIQUE ([strOfflineGuid],[intTicketPoolId], [intTicketType], [strInOutFlag], [strTicketNumber],[intEntityId],[intProcessingLocationId]),
 	CONSTRAINT [FK_tblSCTicket_tblICLot_intLotId] FOREIGN KEY (intLotId) REFERENCES [tblICLot](intLotId),
 	CONSTRAINT [FK_tblSCTicket_tblSOSalesOrderDetail_intSalesOrderDetailId] FOREIGN KEY ([intSalesOrderDetailId]) REFERENCES [tblSOSalesOrderDetail]
 )
