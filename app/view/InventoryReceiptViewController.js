@@ -5868,142 +5868,68 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     me.calculateWtGainLoss(win);
                                 }
 
+                                if (ReceiptType === 'Purchase Contract' && strBundleType != 'Option' && newReceiptItem) {
+                                    me.addContractOtherCharges(currentVM, newReceiptItem, order);
+                                }
 
-                                // Assign the bundle type
-                                // if(newReceiptItem && newReceiptItem.get('strBundleType') == 'Kit')
-                                //     newReceiptItem.set('strItemType', order.get('strBundleType'));                                
-                                
-                               
+                                if (!!order.get('strLotTracking') && order.get('strLotTracking') !== 'No' && newReceiptItem.get('intWeightUOMId') === null) {
+                                    //Set default value for Gross/Net UOM
+                                    newReceiptItem.set('intWeightUOMId', order.get('intItemUOMId'));
+                                    newReceiptItem.set('strWeightUOM', order.get('strUnitMeasure'));
+                                    newReceiptItem.set('dblGross', order.get('dblQtyToReceive'));
+                                    newReceiptItem.set('dblNet', order.get('dblQtyToReceive'));
+                                    newReceiptItem.set('dblWeightUOMConvFactor', order.get('dblItemUOMConvFactor'));
 
-                                if (ReceiptType === 'Purchase Contract') {
-                                    ContractStore.load({
-                                        filters: [
-                                            {
-                                                column: 'intContractDetailId',
-                                                value: order.get('intLineNo'),
-                                                conjunction: 'and'
-                                            },
-                                            {
-                                                column: 'intContractHeaderId',
-                                                value: order.get('intOrderId'),
-                                                conjunction: 'and'
-                                            }
-                                        ],
-                                        callback: function (result) {
-                                            if (result) {
-                                                Ext.each(result, function (contract) {
-                                                    var contractCosts = contract.get('tblCTContractCosts');
-                                                    var contractCosts = _.filter(contractCosts, function (c) { return !c.ysnBasis; });
-                                                    if (contractCosts) {
-                                                        vm.set('chargesLinkInc', 1);
-                                                        Ext.each(contractCosts, function (otherCharge) {
-                                                            var receiptCharges = currentVM.tblICInventoryReceiptCharges().data.items;
-                                                            var exists = Ext.Array.findBy(receiptCharges, function (row) {
-                                                                if ((row.get('intContractId') === order.get('intOrderId')
-                                                                    && row.get('intChargeId') === otherCharge.intItemId)) {
-                                                                    return true;
-                                                                }
-                                                            });
+                                    //Calculate Line Total
+                                    var currentReceipt = win.viewModel.data.current;
+                                    newReceiptItem.set('dblLineTotal', me.calculateLineTotal(currentReceipt, newReceiptItem));
+                                }
 
-                                                            if (!exists) {
-                                                                var inventoryCost = otherCharge.ysnInventoryCost ? true : false,
-                                                                    chargesLink = 'CL-'.concat(vm.get('chargesLinkConst'));
-                                                                
-                                                                var newReceiptCharge = Ext.create('Inventory.model.ReceiptCharge', {
-                                                                    intInventoryReceiptId: currentVM.get('intInventoryReceiptId'),
-                                                                    intContractId: order.get('intOrderId'),
-                                                                    intContractDetailId: otherCharge.intContractDetailId,
-                                                                    intContractSeq: contract.get('intContractSeq'),
-                                                                    intChargeId: otherCharge.intItemId,
-                                                                    strChargesLink: chargesLink,
-                                                                    ysnInventoryCost: inventoryCost,
-                                                                    strCostMethod: otherCharge.strCostMethod,
-                                                                    dblRate: otherCharge.strCostMethod == "Amount" ? 0 : otherCharge.dblRate,
-                                                                    intCostUOMId: otherCharge.intItemUOMId,
-                                                                    intEntityVendorId: otherCharge.intVendorId ? otherCharge.intVendorId : currentVM.get('intEntityVendorId'),
-                                                                    dblAmount: otherCharge.strCostMethod == "Amount" ? otherCharge.dblRate : 0,
-                                                                    strAllocateCostBy: 'Unit',
-                                                                    ysnAccrue: otherCharge.intVendorId ? true : false,
-                                                                    //ysnPrice: otherCharge.ysnPrice,
-                                                                    strItemNo: otherCharge.strItemNo,
-                                                                    intCurrencyId: otherCharge.intCurrencyId,
-                                                                    strCurrency: otherCharge.strCurrency,
-                                                                    ysnSubCurrency: otherCharge.ysnSubCurrency,
-                                                                    strCostUOM: otherCharge.strUOM,
-                                                                    strVendorName: otherCharge.strVendorName ? otherCharge.strVendorName : currentVM.get('strVendorName'),
-                                                                    strContractNumber: order.get('strOrderNumber')
-
-                                                                });
-                                                                currentVM.tblICInventoryReceiptCharges().add(newReceiptCharge);
-                                                                newReceiptItem.set('strChargesLink', chargesLink);
-                                                            }
-                                                        });
-
-                                                    }
-                                                });
-                                            }
-                                        }
-                                    });
-                                
-
-                                    if (!!order.get('strLotTracking') && order.get('strLotTracking') !== 'No' && newReceiptItem.get('intWeightUOMId') === null) {
-                                        //Set default value for Gross/Net UOM
-                                        newReceiptItem.set('intWeightUOMId', order.get('intItemUOMId'));
-                                        newReceiptItem.set('strWeightUOM', order.get('strUnitMeasure'));
-                                        newReceiptItem.set('dblGross', order.get('dblQtyToReceive'));
-                                        newReceiptItem.set('dblNet', order.get('dblQtyToReceive'));
-                                        newReceiptItem.set('dblWeightUOMConvFactor', order.get('dblItemUOMConvFactor'));
-
-                                        //Calculate Line Total
-                                        var currentReceipt = win.viewModel.data.current;
-                                        newReceiptItem.set('dblLineTotal', me.calculateLineTotal(currentReceipt, newReceiptItem));
+                                if (order.get('intWeightUOMId') !== null) {
+                                    if (order.get('dblGross') === 0 && order.get('dblNet') !== 0) {
+                                        newReceiptItem.set('dblGross', order.get('dblNet'));
                                     }
 
-                                    if (order.get('intWeightUOMId') !== null) {
-                                        if (order.get('dblGross') === 0 && order.get('dblNet') !== 0) {
-                                            newReceiptItem.set('dblGross', order.get('dblNet'));
-                                        }
-
-                                        else if (order.get('dblGross') !== 0 && order.get('dblNet') === 0) {
-                                            newReceiptItem.set('dblNet', order.get('dblGross'));
-                                        }
-
-                                        else if (order.get('dblGross') === 0 && order.get('dblNet') === 0) {
-                                            var currentReceiptItem = win.viewModel.data.currentReceiptItem;
-                                            me.calculateGrossNet(currentReceiptItem, 1);
-                                        }
+                                    else if (order.get('dblGross') !== 0 && order.get('dblNet') === 0) {
+                                        newReceiptItem.set('dblNet', order.get('dblGross'));
                                     }
 
-                                    //Add default values to lot if item is lot-tracked
-                                    if (!iRely.Functions.isEmpty(order.get('strLotTracking')) && order.get('strLotTracking') !== 'No') {
-                                        var currentReceiptItemVM = me.getViewModel().data.currentReceiptItem;
-
-                                        var newReceiptItemLot = Ext.create('Inventory.model.ReceiptItemLot', {
-                                            intLotId: order.get('intLotId'),
-                                            strLotNumber: order.get('strLotNumber'),
-                                            dtmExpiryDate: order.get('dtmExpiryDate'),
-                                            dtmManufacturedDate: order.get('dtmManufacturedDate'),
-                                            strLotAlias: order.get('strLotAlias'),
-                                            intParentLotId: order.get('intParentLotId'),
-                                            strParentLotNumber: order.get('strParentLotNumber'),
-                                            intInventoryReceiptItemId: newReceiptItem.get('intInventoryReceiptItemId'),
-                                            intSubLocationId: newReceiptItem.get('intSubLocationId'),
-                                            intStorageLocationId: newReceiptItem.get('intStorageLocationId'),
-                                            dblQuantity: newReceiptItem.get('dblOpenReceive'),
-                                            dblGrossWeight: newReceiptItem.get('dblGross'),
-                                            dblTareWeight: newReceiptItem.get('dblGross') - newReceiptItem.get('dblNet'),
-                                            dblNetWeight: newReceiptItem.get('dblNet'),
-                                            intItemUnitMeasureId: newReceiptItem.get('intUnitMeasureId'),
-                                            strWeightUOM: newReceiptItem.get('strWeightUOM'),
-                                            strStorageLocation: newReceiptItem.get('strStorageLocationName'),
-                                            strSubLocationName: newReceiptItem.get('strSubLocationName'),
-                                            strUnitMeasure: newReceiptItem.get('strUnitMeasure'),
-                                            dblLotUOMConvFactor: newReceiptItem.get('dblItemUOMConvFactor'),
-                                            strMarkings: order.get('strMarkings')
-                                        });
-                                        currentReceiptItemVM.tblICInventoryReceiptItemLots().add(newReceiptItemLot);
+                                    else if (order.get('dblGross') === 0 && order.get('dblNet') === 0) {
+                                        var currentReceiptItem = win.viewModel.data.currentReceiptItem;
+                                        me.calculateGrossNet(currentReceiptItem, 1);
                                     }
                                 }
+
+                                //Add default values to lot if item is lot-tracked
+                                if (!iRely.Functions.isEmpty(order.get('strLotTracking')) && order.get('strLotTracking') !== 'No') {
+                                    var currentReceiptItemVM = me.getViewModel().data.currentReceiptItem;
+
+                                    var newReceiptItemLot = Ext.create('Inventory.model.ReceiptItemLot', {
+                                        intLotId: order.get('intLotId'),
+                                        strLotNumber: order.get('strLotNumber'),
+                                        dtmExpiryDate: order.get('dtmExpiryDate'),
+                                        dtmManufacturedDate: order.get('dtmManufacturedDate'),
+                                        strLotAlias: order.get('strLotAlias'),
+                                        intParentLotId: order.get('intParentLotId'),
+                                        strParentLotNumber: order.get('strParentLotNumber'),
+                                        intInventoryReceiptItemId: newReceiptItem.get('intInventoryReceiptItemId'),
+                                        intSubLocationId: newReceiptItem.get('intSubLocationId'),
+                                        intStorageLocationId: newReceiptItem.get('intStorageLocationId'),
+                                        dblQuantity: newReceiptItem.get('dblOpenReceive'),
+                                        dblGrossWeight: newReceiptItem.get('dblGross'),
+                                        dblTareWeight: newReceiptItem.get('dblGross') - newReceiptItem.get('dblNet'),
+                                        dblNetWeight: newReceiptItem.get('dblNet'),
+                                        intItemUnitMeasureId: newReceiptItem.get('intUnitMeasureId'),
+                                        strWeightUOM: newReceiptItem.get('strWeightUOM'),
+                                        strStorageLocation: newReceiptItem.get('strStorageLocationName'),
+                                        strSubLocationName: newReceiptItem.get('strSubLocationName'),
+                                        strUnitMeasure: newReceiptItem.get('strUnitMeasure'),
+                                        dblLotUOMConvFactor: newReceiptItem.get('dblItemUOMConvFactor'),
+                                        strMarkings: order.get('strMarkings')
+                                    });
+                                    currentReceiptItemVM.tblICInventoryReceiptItemLots().add(newReceiptItemLot);
+                                }
+                                
                             }
                         });
 
@@ -6052,6 +5978,81 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         });
     },
 
+    addContractOtherCharges: function(current, adddedItemDetail, selectedOrder){
+        var me = this,
+            vm = me.getViewModel(),
+            ContractStore = vm.get('purchaseContractList');
+
+        ContractStore.load({
+            filters: [
+                {
+                    column: 'intContractDetailId',
+                    value: selectedOrder.get('intLineNo'),
+                    conjunction: 'and'
+                },
+                {
+                    column: 'intContractHeaderId',
+                    value: selectedOrder.get('intOrderId'),
+                    conjunction: 'and'
+                }
+            ],
+            callback: function (result) {
+                if (result) {
+                    Ext.each(result, function (contract) {
+                        var contractCosts = contract.get('tblCTContractCosts');
+                        var contractCosts = _.filter(contractCosts, function (c) { return !c.ysnBasis; });
+                        if (contractCosts) {
+                            vm.set('chargesLinkInc', 1);
+                            Ext.each(contractCosts, function (otherCharge) {
+                                var receiptCharges = current.tblICInventoryReceiptCharges().data.items;
+                                var exists = Ext.Array.findBy(receiptCharges, function (row) {
+                                    if ((row.get('intContractId') === selectedOrder.get('intOrderId')
+                                        && row.get('intChargeId') === otherCharge.intItemId)) {
+                                        return true;
+                                    }
+                                });
+
+                                if (!exists) {
+                                    var inventoryCost = otherCharge.ysnInventoryCost ? true : false,
+                                        chargesLink = 'CL-'.concat(vm.get('chargesLinkConst'));
+                                    
+                                    var newReceiptCharge = Ext.create('Inventory.model.ReceiptCharge', {
+                                        intInventoryReceiptId: current.get('intInventoryReceiptId'),
+                                        intContractId: selectedOrder.get('intOrderId'),
+                                        intContractDetailId: otherCharge.intContractDetailId,
+                                        intContractSeq: contract.get('intContractSeq'),
+                                        intChargeId: otherCharge.intItemId,
+                                        strChargesLink: chargesLink,
+                                        ysnInventoryCost: inventoryCost,
+                                        strCostMethod: otherCharge.strCostMethod,
+                                        dblRate: otherCharge.strCostMethod == "Amount" ? 0 : otherCharge.dblRate,
+                                        intCostUOMId: otherCharge.intItemUOMId,
+                                        intEntityVendorId: otherCharge.intVendorId ? otherCharge.intVendorId : current.get('intEntityVendorId'),
+                                        dblAmount: otherCharge.strCostMethod == "Amount" ? otherCharge.dblRate : 0,
+                                        strAllocateCostBy: 'Unit',
+                                        ysnAccrue: otherCharge.intVendorId ? true : false,
+                                        //ysnPrice: otherCharge.ysnPrice,
+                                        strItemNo: otherCharge.strItemNo,
+                                        intCurrencyId: otherCharge.intCurrencyId,
+                                        strCurrency: otherCharge.strCurrency,
+                                        ysnSubCurrency: otherCharge.ysnSubCurrency,
+                                        strCostUOM: otherCharge.strUOM,
+                                        strVendorName: otherCharge.strVendorName ? otherCharge.strVendorName : current.get('strVendorName'),
+                                        strContractNumber: selectedOrder.get('strOrderNumber')
+
+                                    });
+                                    current.tblICInventoryReceiptCharges().add(newReceiptCharge);
+                                    adddedItemDetail.set('strChargesLink', chargesLink);
+                                }
+                            });
+
+                        }
+                    });
+                }
+            }
+        });
+    },
+    
     onReplicateBalanceLotClick: function (button) {
         var me = this;
         var win = button.up('window');
@@ -7712,6 +7713,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 // Calculate the Wgt or Volume Gain/Loss 
                                 me.calculateWtGainLoss(win);
                                 addItemLotFunc(addedRecord, rec);
+                                me.addContractOtherCharges(current, addedRecord, selectedItem);
                             });
                         } 
                     }
