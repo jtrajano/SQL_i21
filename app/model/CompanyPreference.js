@@ -20,6 +20,9 @@ Ext.define('Inventory.model.CompanyPreference', {
         { name: 'intShipmentOrderType', type: 'int', allowNull: true},
         { name: 'intShipmentSourceType', type: 'int', allowNull: true},
         { name: 'strOriginLastTask', type: 'string' },
-        { name: 'strOriginLineOfBusiness', type: 'string' }
+        { name: 'strOriginLineOfBusiness', type: 'string' },
+        { name: 'ysnAllowDuplicates', type: 'boolean', allowNull: true, defaultValue: false },
+        { name: 'ysnOverwrite', type: 'boolean', allowNull: true, defaultValue: true },
+        { name: 'ysnAllowDuplicates', type: 'boolean', allowNull: true, defaultValue: false }
     ]
 });

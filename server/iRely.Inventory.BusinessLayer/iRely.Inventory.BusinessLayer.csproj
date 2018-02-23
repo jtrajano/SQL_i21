@@ -183,6 +183,7 @@
     <Compile Include="Common\Constants.cs" />
     <Compile Include="Common\Import\CsvPipe.cs" />
     <Compile Include="Common\Import\CurrentRecordTracker.cs" />
+    <Compile Include="Common\Import\DataContextExtensions.cs" />
     <Compile Include="Common\Import\ImportBundleDetails.cs" />
     <Compile Include="Common\Import\ImportCategories.cs" />
     <Compile Include="Common\Import\ImportCommodities.cs" />

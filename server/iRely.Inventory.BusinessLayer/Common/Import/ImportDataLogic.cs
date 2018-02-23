@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace iRely.Inventory.BusinessLayer
 {
-    public abstract class ImportDataLogic<T> : IImportDataLogic where T : class
+    public abstract class ImportDataLogic<T> : IImportDataLogic where T : class, IBaseEntity
     {
         protected DbContext context;
         protected byte[] data;
@@ -56,7 +56,7 @@ namespace iRely.Inventory.BusinessLayer
         public virtual async Task<ImportDataResult> Import()
         {
             Entities.Clear();
-
+            Context.Configuration.AutoDetectChangesEnabled = false;
             ImportResult.Clear();
             CurrentRecordTracker.Instance.TimeStart = DateTime.UtcNow;
 
@@ -69,8 +69,10 @@ namespace iRely.Inventory.BusinessLayer
                     try
                     {
                         await reader.ReadCsvAsync(stream);
-
-                        context.Set<T>().AddRange(Entities);
+                        if (Entities.Count > 0)
+                        {
+                            context.Set<T>().AddRange(Entities);
+                        }
                         await context.SaveChangesAsync();
 
                         await OnAfterSave();
@@ -120,14 +122,14 @@ namespace iRely.Inventory.BusinessLayer
                             Message = "Invalid template format. Some fields were missing. Missing fields: " + reader.Schema.GetMissingFieldsTextRepresentation()
                         });
                         ImportResult.Type = Constants.TYPE_ERROR;
-                        ImportResult.Description = ex.Message + (ex.InnerException != null ? " -> " + ex.InnerException.Message : "");
+                        SetLogExceptionDescription(ImportResult, ex);
                         ImportResult.Failed = true;
                     }
                     catch (Exception ex)
                     {
                         ImportResult.Failed = true;
-                        ImportResult.Description = ex.Message + (ex.InnerException != null ? " -> " + (ex.InnerException.InnerException != null ? ex.InnerException.InnerException.Message :  ex.InnerException.Message) : "");
                         ImportResult.Type = Constants.TYPE_EXCEPTION;
+                        SetLogExceptionDescription(ImportResult, ex);
                     }
                 }
             }
@@ -153,7 +155,7 @@ namespace iRely.Inventory.BusinessLayer
                 });
                 ImportResult.Failed = true;
                 ImportResult.Type = Constants.TYPE_EXCEPTION;
-                ImportResult.Description = ex.Message + (ex.InnerException != null ? " -> " + (ex.InnerException.InnerException != null ? ex.InnerException.InnerException.Message : ex.InnerException.Message) : "");
+                SetLogExceptionDescription(ImportResult, ex);
             }
             catch (Exception ex)
             {
@@ -170,10 +172,16 @@ namespace iRely.Inventory.BusinessLayer
                 });
                 ImportResult.Failed = true;
                 ImportResult.Type = Constants.TYPE_EXCEPTION;
-                ImportResult.Description = ex.Message + (ex.InnerException != null ? " -> " + (ex.InnerException.InnerException != null ? ex.InnerException.InnerException.Message : ex.InnerException.Message) : "");
+                SetLogExceptionDescription(ImportResult, ex);
             }
 
             return ImportResult;
+        }
+
+        protected void SetLogExceptionDescription(ImportDataResult result, Exception ex)
+        {
+            var msg = ex.Message + (ex.InnerException != null ? " -> " + (ex.InnerException.InnerException != null ? ex.InnerException.InnerException.Message : ex.InnerException.Message) : "");
+            ImportResult.Description = msg;
         }
 
         private async Task<int> SaveLogsToDb(ImportDataResult result)
@@ -198,25 +206,87 @@ namespace iRely.Inventory.BusinessLayer
             {
                 if (!GlobalSettings.Instance.AllowDuplicates)
                 {
-                    var existingId = -1;
                     if (HasDuplicates(entity))
                     {
                         HandleDuplicates(entity, record);
                         return;
                     }
-                    else if (AlreadyExists(entity, out existingId))
+                    else 
                     {
-                        HandleIfAlreadyExists(entity, record, existingId);
-                        return;
+                        var foundId = -1;
+                        T foundEntity = null;
+                        var exists = AlreadyExists(entity, out foundId, out foundEntity);
+                        if (exists)
+                        {
+                            if (GlobalSettings.Instance.AllowOverwriteOnImport)
+                            {
+                                if (foundEntity != null && foundId > 0)
+                                {
+                                    TransformeEntity(ref foundEntity, ref entity, "intConcurrencyId");
+                                    TransformeEntity(ref foundEntity, ref entity, GetPrimaryKeyName());
+                                    if (context.Entry<T>(entity).State == EntityState.Unchanged)
+                                    {
+                                        context.Entry<T>(entity).State = EntityState.Modified;
+                                        AddSuccessLog(entity, record, false);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                HandleIfAlreadyExists(entity, record, foundId);
+                                return;
+                            }
+                        }
                     }
                 }
                 else
                 {
-                    // Update existing
-                }
 
-                Entities.Add(entity);
-                AddSuccessLog(entity, record);
+                    var foundId = -1;
+                    T foundEntity = null;
+                    var exists = AlreadyExists(entity, out foundId, out foundEntity);
+                    if (exists)
+                    {
+                        if (GlobalSettings.Instance.AllowOverwriteOnImport)
+                        {
+                            if (foundEntity != null && foundId > 0)
+                            {
+                                TransformeEntity(ref foundEntity, ref entity, "intConcurrencyId");
+                                TransformeEntity(ref foundEntity, ref entity, GetPrimaryKeyName());
+                                if (context.Entry<T>(entity).State == EntityState.Unchanged)
+                                {
+                                    context.Entry<T>(entity).State = EntityState.Modified;
+                                    AddSuccessLog(entity, record, false);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            HandleIfAlreadyExists(entity, record, foundId);
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        Entities.Add(entity);
+                        AddSuccessLog(entity, record);
+                    }
+                }
+            }
+        }
+
+        private void TransformeEntity(ref T e, ref T n, string fieldName)
+        {
+            PropertyInfo epi = e.GetType().GetProperty(fieldName);
+            PropertyInfo npi = n.GetType().GetProperty(fieldName);
+
+            if(epi != null)
+            {
+                var concurrencyId = epi.GetValue(e, null);
+                if(npi != null)
+                {
+                    npi.SetValue(n, Convert.ChangeType(concurrencyId, epi.PropertyType), null);
+                }
             }
         }
 
@@ -226,12 +296,12 @@ namespace iRely.Inventory.BusinessLayer
             {
                 Type = Constants.TYPE_INFO,
                 Status = Constants.STAT_SUCCESS,
-                Action = Constants.ACTION_INSERTED,
+                Action = isNew ? Constants.ACTION_INSERTED : Constants.ACTION_UPDATED,
                 Column = "",
                 Row = record.RecordNo,
                 Value = "",
                 Exception = null,
-                Message = "Import successful."
+                Message = isNew ? "Import successful." : "Update successful."
             });
             ImportResult.Type = Constants.TYPE_INFO;
         }
@@ -274,6 +344,24 @@ namespace iRely.Inventory.BusinessLayer
             }
             else
                 throw new ArgumentOutOfRangeException($"Duplicate records found for record #{record.RecordNo}");
+        }
+
+        public bool AlreadyExists(T entity, out int existingId, out T foundEntity)
+        {
+            var expression = GetUniqueKeyExpression(entity);
+            existingId = -1;
+            foundEntity = null;
+
+            if (expression == null)
+                return false;
+            foundEntity = Context.Set<T>().AsNoTracking().FirstOrDefault(expression);
+
+            if (foundEntity != null)
+            {
+                existingId = GetPrimaryKeyValue(foundEntity);
+                return true;
+            }
+            return false;
         }
 
         public bool AlreadyExists(T entity, out int existingId)

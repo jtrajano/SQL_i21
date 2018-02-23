@@ -11,6 +11,7 @@ namespace iRely.Inventory.Model
     public class tblICImportLog : BaseEntity
     {
         public int intImportLogId { get; set; }
+        [MaxLength]
         public string strDescription { get; set; }
         public string strType { get; set; }
         public string strFileType { get; set; }

@@ -12,6 +12,7 @@ namespace iRely.Inventory.BusinessLayer
         public const string ACTION_DISCARDED = "Value discarded";
         public const string ACTION_DEFAULTED = "Value set to default";
         public const string ACTION_INSERTED = "Record inserted";
+        public const string ACTION_UPDATED = "Record updated";
         public const string ACTION_AUTO_GENERATED = "Value auto-generated";
         public const string ACTION_SKIPPED = "Record skipped";
 

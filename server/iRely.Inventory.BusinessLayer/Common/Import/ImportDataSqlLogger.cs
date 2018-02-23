@@ -26,7 +26,7 @@ namespace iRely.Inventory.BusinessLayer
         {
             var log = new tblICImportLog()
             {
-                strDescription = result.Description,
+                strDescription = result.Description.Length > 1000 ? result.Description.Substring(0, 999) : result.Description,
                 intTotalRows = result.TotalRows,
                 intRowsImported = result.RowsImported,
                 intTotalErrors = result.Errors,

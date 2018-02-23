@@ -23,6 +23,43 @@ Ext.define('Inventory.view.ImportDataFromCsvViewController', {
         win.close();
     },
 
+    config: {
+        binding: {
+            chbOverwrite: {
+                value: '{ysnOverwrite}'
+            },
+            chbAllowDuplicates: {
+                value: '{ysnAllowDuplicates}',
+                disabled: '{ysnOverwrite}'
+            },
+            chbVerbose: '{ysnVerbose}'
+        }
+    },
+
+    show: function(cfg) {
+        var me = this;
+        var win = me.getView();
+        me.formParams = cfg.param;
+        me.getView().setTitle(cfg.param.title + ' from CSV File');
+        
+        win.show();
+        var context = me.setupContext();
+        context.data.load();
+    },
+    
+    setupContext: function(options) {
+        var me = this,
+            win = me.getView();
+        
+        win.context = Ext.create('iRely.Engine', {
+            window: win,
+            store: Ext.create('Inventory.store.CompanyPreference'),
+            binding: me.config.binding
+        });
+
+        return win.context;
+    },
+
     onDownloadTemplate: function(button, e, eOpts) {
         "use strict";
         var me = this;
@@ -42,6 +79,8 @@ Ext.define('Inventory.view.ImportDataFromCsvViewController', {
         var txtBrowseFile = win.down("#txtBrowseFile");
         var fileInput = txtBrowseFile.extractFileInput();
         var chbOverwrite = win.down("#chbOverwrite");
+        var chbAllowDuplicates = win.down("#chbAllowDuplicates");
+        var chbVerbose = win.down("#chbVerbose");
         
         if(fileInput && fileInput.files.length > 0) {
             if (txtBrowseFile.isValid()) {
@@ -52,6 +91,8 @@ Ext.define('Inventory.view.ImportDataFromCsvViewController', {
                         file: file,
                         importType: params.type,
                         allowOverwrite: chbOverwrite.checked,
+                        allowDuplicates: chbAllowDuplicates.checked,
+                        verboseLogging: chbVerbose.checked,
                         lineOfBusiness: params.lineOfBusiness,
                         params: params.params,
                         method: params.method,
@@ -73,12 +114,6 @@ Ext.define('Inventory.view.ImportDataFromCsvViewController', {
         "use strict";
         var newValue = value.replace(/C:\\fakepath\\/g, '');
         field.setRawValue(newValue);
-    },
-
-    show: function(cfg) {
-        var me = this;
-        me.formParams = cfg.param;
-        me.getView().setTitle(cfg.param.title + ' from CSV File');
     },
 
     init: function(application) {
@@ -112,6 +147,7 @@ Ext.define('Inventory.view.ImportDataFromCsvViewController', {
                'X-Import-Type': p.importType,
                'X-Import-Allow-Overwrite': p.allowOverwrite ? "true" : "false",
                'X-Import-Allow-Duplicates': p.allowDuplicates ? "true" : "false",
+               'X-Import-Enable-Verbose-Logging': p.verboseLogging ? "true" : "false",
                'X-Import-Allow-LineOfBusiness': p.lineOfBusiness
             },
             data: p.file,
