@@ -3,6 +3,7 @@ AS
 
 SELECT ShipmentItem.intInventoryShipmentId
 	, ShipmentItem.intInventoryShipmentItemId
+	, intContractSeq = ShipmentItemSource.intContractSeq
 	, Shipment.strOrderType
 	, Shipment.strSourceType
 	, Shipment.strShipmentNumber

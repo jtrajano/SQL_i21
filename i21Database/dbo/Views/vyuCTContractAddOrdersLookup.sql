@@ -1,6 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuCTContractAddOrdersLookup]
 AS
 SELECT	  CD.intContractDetailId
+		, CD.intContractSeq
 		, CH.strContractNumber
 		, CH.dtmContractDate
 		, U1.strUnitMeasure	AS strItemUOM
