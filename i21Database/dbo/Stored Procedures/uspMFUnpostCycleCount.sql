@@ -116,6 +116,8 @@ BEGIN TRY
 
 	UPDATE tblMFWorkOrder
 	SET intCountStatusId = 10
+		,strBatchId = NULL
+		,intBatchID = NULL
 	WHERE intWorkOrderId = @intWorkOrderId
 
 	SELECT @intYieldCostId = intAttributeId
