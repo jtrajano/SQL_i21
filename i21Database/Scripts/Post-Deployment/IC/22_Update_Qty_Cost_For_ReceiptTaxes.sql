@@ -126,3 +126,86 @@ WHERE	ISNULL(rc.dblQuantityPriced, 0) = 0
 		AND rc.dblAmountPriced <> 0 
 
 GO 
+
+-- After adding the dblQty and dblCost to tblICInventoryShipmentChargeTax, 
+-- the system needs to populate the data for the Qty and Cost. 
+UPDATE	sct
+SET		sct.dblCost = 
+				CASE 
+					WHEN sc.strCostMethod = 'Per Unit' THEN
+						ISNULL(sc.dblRate, 0)
+					ELSE 
+						sc.dblAmount
+				END 
+		,sct.dblQty = 
+				CASE 
+					WHEN sc.strCostMethod = 'Per Unit' AND ISNULL(sc.dblRate, 0) <> 0 THEN
+						dbo.fnDivide(
+							sc.dblAmount
+							,sc.dblRate
+						)
+
+					ELSE 
+						1
+				END 
+FROM	tblICInventoryShipmentChargeTax sct INNER JOIN tblICInventoryShipmentCharge sc
+			ON sct.intInventoryShipmentChargeId = sc.intInventoryShipmentChargeId
+WHERE	ISNULL(sct.dblCost, 0) = 0 
+		AND sc.dblAmount <> 0 
+
+GO 
+
+-- Update the Quantity of the other charges. 
+UPDATE	sc 
+SET		sc.dblQuantity = 
+			CASE 
+				WHEN sc.strCostMethod = 'Per Unit' AND ISNULL(sc.dblRate, 0) <> 0 THEN
+					dbo.fnDivide(
+						sc.dblAmount
+						,sc.dblRate
+					)
+
+				ELSE 
+					1
+			END 	
+FROM	tblICInventoryShipmentCharge sc
+WHERE	ISNULL(sc.dblQuantity, 0) = 0 
+		AND sc.dblAmount <> 0 
+
+GO 
+
+-- Update the Quantity Billed for the other charges. 
+UPDATE	sc 
+SET		sc.dblQuantityBilled = 
+			CASE 
+				WHEN sc.strCostMethod = 'Per Unit' AND ISNULL(sc.dblRate, 0) <> 0 THEN
+					dbo.fnDivide(
+						sc.dblAmountBilled
+						,sc.dblRate
+					)
+				ELSE 
+					1
+			END 	
+FROM	tblICInventoryShipmentCharge sc
+WHERE	ISNULL(sc.dblQuantityBilled, 0) = 0 
+		AND sc.dblAmountBilled <> 0 
+
+GO 
+
+-- Update the Quantity Priced for the other charges. 
+UPDATE	sc 
+SET		sc.dblQuantityPriced = 
+			CASE 
+				WHEN sc.strCostMethod = 'Per Unit' AND ISNULL(sc.dblRate, 0) <> 0 THEN
+					dbo.fnDivide(
+						sc.dblAmountPriced
+						,sc.dblRate
+					)
+				ELSE 
+					1
+			END 	
+FROM	tblICInventoryShipmentCharge sc
+WHERE	ISNULL(sc.dblQuantityPriced, 0) = 0 
+		AND sc.dblAmountPriced <> 0 
+
+GO 
