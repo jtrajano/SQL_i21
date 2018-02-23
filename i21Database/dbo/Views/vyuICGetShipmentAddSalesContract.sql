@@ -53,6 +53,7 @@ SELECT	strOrderType = 'Sales Contract'
 		, dblForexRate = ContractView.dblRate
 		, ContractView.intFreightTermId
 		, ContractView.strFreightTerm
+		, ContractView.intContractSeq
 FROM	vyuCTContractAddOrdersLookup ContractView
 INNER JOIN tblICItem Item ON Item.intItemId = ContractView.intItemId
 WHERE	ysnAllowedToShow = 1
