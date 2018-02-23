@@ -77,6 +77,25 @@ BEGIN TRY
 			,ysnForceUndo BIT
 			)
 
+	IF EXISTS (
+			SELECT 1
+			FROM tblMFWorkOrderProducedLot
+			WHERE intWorkOrderId = @intWorkOrderId
+				AND intBatchId = @intBatchId
+			GROUP BY intWorkOrderId
+				,intBatchId
+			HAVING Count(*) > 1
+			)
+	BEGIN
+		RAISERROR (
+				'Unable to reverse the selected lot/pallet.'
+				,11
+				,1
+				)
+
+		RETURN
+	END
+
 	SELECT @intTransactionId = @intBatchId
 
 	SELECT @strTransactionId = strWorkOrderNo

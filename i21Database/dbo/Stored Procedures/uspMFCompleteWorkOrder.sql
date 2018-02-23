@@ -90,6 +90,7 @@ BEGIN TRY
 		,@intSpecialPalletLotId INT
 		,@strComputeGrossWeight NVARCHAR(50)
 		,@dblProducePartialQty NUMERIC(38, 20)
+		,@intAttributeTypeId INT
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -329,7 +330,12 @@ BEGIN TRY
 		AND intLocationId = @intLocationId
 		AND intAttributeId = @intAttributeId
 
+	SELECT @intAttributeTypeId = intAttributeTypeId
+	FROM tblMFManufacturingProcess
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+
 	IF @strInstantConsumption = 'False'
+		AND @intAttributeTypeId = 2 --Blending
 	BEGIN
 		SELECT @intBatchId = intBatchID
 		FROM tblMFWorkOrder
