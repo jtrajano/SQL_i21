@@ -49,7 +49,7 @@ SELECT InvCountDetail.intInventoryCountDetailId,
 	CountGroup.strCountGroup,
 	InvCountDetail.dblQtyReceived,
 	InvCountDetail.dblQtySold,
-	InvCountDetail.intSort
+	InvCountDetail.intSort, InvCountDetail.intConcurrencyId
 FROM tblICInventoryCountDetail InvCountDetail
 	LEFT JOIN tblICInventoryCount InvCount ON InvCount.intInventoryCountId = InvCountDetail.intInventoryCountId
 	LEFT JOIN tblICCountGroup CountGroup ON CountGroup.intCountGroupId = InvCountDetail.intCountGroupId
