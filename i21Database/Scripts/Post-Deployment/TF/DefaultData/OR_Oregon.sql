@@ -94,7 +94,7 @@ where intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intTaxCategoryId = 0, strState = 'OR', strTaxCategory = 'OR - Eugene Diesel', intMasterId = 372077
 	UNION ALL SELECT intTaxCategoryId = 0, strState = 'OR', strTaxCategory = 'OR - Hood River Gasoline', intMasterId = 372078
 	UNION ALL SELECT intTaxCategoryId = 0, strState = 'OR', strTaxCategory = 'OR - Hood River Diesel', intMasterId = 372079
-	UNION ALL SELECT intTaxCategoryId = 0, strState = 'OR ', strTaxCategory = 'OR - Milwaukie Gasoline', intMasterId = 372080
+	UNION ALL SELECT intTaxCategoryId = 0, strState = 'OR', strTaxCategory = 'OR - Milwaukie Gasoline', intMasterId = 372080
 	UNION ALL SELECT intTaxCategoryId = 0, strState = 'OR', strTaxCategory = 'OR - Milwaukie Diesel', intMasterId = 372081
 	UNION ALL SELECT intTaxCategoryId = 0, strState = 'OR', strTaxCategory = 'OR - Newport Gasoline', intMasterId = 372082
 	UNION ALL SELECT intTaxCategoryId = 0, strState = 'OR', strTaxCategory = 'OR - Newport Diesel', intMasterId = 372083

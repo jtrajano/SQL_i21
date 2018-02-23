@@ -1159,6 +1159,45 @@ BEGIN
 			GOTO _Exit_With_Rollback;
 		END
 
+		-- Validate if the sub currency matches with its Main and Receipt Currency. 
+		-- Ex. If it is USC, then RawHeaderData.intCurrencyId and tblSMCurrency.intMainCurrencyId should be USD. 
+		-- If RawHeaderData.intCurrencyId and tblSMCurrency.intMainCurrencyId aren't USD, then throw the error. 
+		BEGIN 
+			DECLARE @strCharge AS NVARCHAR(50)
+					,@strSubCurrency AS NVARCHAR(50)
+					,@strReceiptCurrency AS NVARCHAR(50)
+					,@intBadSubCurrency AS INT 
+					
+			SELECT	TOP 1 
+					@strCharge = charge.strItemNo
+					,@intBadSubCurrency = subCurrency.intCurrencyID
+					,@strSubCurrency = subCurrency.strCurrency
+					,@strReceiptCurrency = receiptCurrency.strCurrency
+			FROM	@OtherCharges RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
+						ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0)
+						AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
+						AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
+						AND ISNULL(RawHeaderData.Location,0) = ISNULL(RawData.intLocationId,0)
+						AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)		   
+						AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
+						AND ISNULL(RawHeaderData.Currency, @intFunctionalCurrencyId) = ISNULL(RawData.intCurrencyId, @intFunctionalCurrencyId)
+					LEFT JOIN tblSMCurrency subCurrency
+						ON subCurrency.intCurrencyID = RawData.intCostCurrencyId
+					LEFT JOIN tblSMCurrency receiptCurrency
+						ON receiptCurrency.intCurrencyID = ISNULL(RawData.intCurrencyId, @intFunctionalCurrencyId)
+					LEFT JOIN tblICItem charge
+						ON charge.intItemId = RawData.intChargeId
+			WHERE	RawData.ysnSubCurrency = 1	
+					AND ISNULL(RawData.intCurrencyId, @intFunctionalCurrencyId) <> ISNULL(subCurrency.intMainCurrencyId, @intFunctionalCurrencyId) 
+
+			IF (@intBadSubCurrency IS NOT NULL)
+			BEGIN 
+				--'Please check {Other Charge}. It is using {Sub Currency} but it is not a sub currency of {Receipt Currency}.'
+				EXEC uspICRaiseError 80204, @strCharge, @strSubCurrency, @strReceiptCurrency;
+				GOTO _Exit_With_Rollback;
+			END 
+		END 
+
 		-- Insert the Other Charges
 		INSERT INTO dbo.tblICInventoryReceiptCharge (
 				[intInventoryReceiptId]
@@ -1192,16 +1231,68 @@ BEGIN
 				,[dblRate]					= RawData.dblRate
 				,[intCostUOMId]				= RawData.intCostUOMId
 				,[intEntityVendorId]		= ISNULL(RawData.intOtherChargeEntityVendorId, RawData.intEntityVendorId) 
-				,[dblAmount]				= RawData.dblAmount
+				,[dblAmount]				= --RawData.dblAmount
+							-- If [Cost Method] = 'Amount' and Sub Currency, convert the amount to the receipt currency. 
+							CASE 
+								WHEN RawData.strCostMethod = 'Amount' AND RawData.ysnSubCurrency = 1 THEN 
+									CASE 
+										WHEN CostCurrency.intCent <> 0 THEN RawData.dblAmount / CostCurrency.intCent 
+										ELSE 0.00
+									END 
+								ELSE 
+									RawData.dblAmount
+							END 
+
+
 				,[strAllocateCostBy]		= RawData.strAllocateCostBy
 				,[ysnAccrue]				= RawData.ysnAccrue
 				,[ysnPrice]					= RawData.ysnPrice
-				,[ysnSubCurrency]			= ISNULL(RawData.ysnSubCurrency, 0) 
-				,[intCurrencyId]			= COALESCE(RawData.intCostCurrencyId, RawData.intCurrencyId, @intFunctionalCurrencyId) 
-				,[intCent]					= CostCurrency.intCent
+				,[ysnSubCurrency]			= 
+							-- If [Cost Method] = 'Amount' and Sub Currency, convert the amount to the receipt currency. 
+							CASE 
+								WHEN RawData.strCostMethod = 'Amount' AND RawData.ysnSubCurrency = 1 THEN 
+									0
+								ELSE 
+									ISNULL(RawData.ysnSubCurrency, 0) 
+							END 
+
+				,[intCurrencyId]			= 
+							-- If [Cost Method] = 'Amount' and Sub Currency, convert the amount to the receipt currency. 
+							CASE 
+								WHEN RawData.strCostMethod = 'Amount' AND RawData.ysnSubCurrency = 1 THEN 
+									COALESCE(RawData.intCurrencyId, @intFunctionalCurrencyId) 
+								ELSE 
+									COALESCE(RawData.intCostCurrencyId, RawData.intCurrencyId, @intFunctionalCurrencyId) 
+							END 
+					
+				,[intCent]					= 
+							-- If [Cost Method] = 'Amount' and Sub Currency, convert the amount to the receipt currency. 
+							CASE 
+								WHEN RawData.strCostMethod = 'Amount' AND RawData.ysnSubCurrency = 1 THEN 
+									1
+								ELSE 
+									CostCurrency.intCent
+							END 
+
 				,[intTaxGroupId]			= ISNULL(RawData.intTaxGroupId, taxHierarcy.intTaxGroupId)
-				,[intForexRateTypeId]		= CASE WHEN COALESCE(RawData.intCostCurrencyId, RawData.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(RawData.ysnSubCurrency, 0) = 0 THEN ISNULL(RawData.intForexRateTypeId, @intDefaultForexRateTypeId) ELSE NULL END 
-				,[dblForexRate]				= CASE WHEN COALESCE(RawData.intCostCurrencyId, RawData.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(RawData.ysnSubCurrency, 0) = 0 THEN ISNULL(RawData.dblForexRate, forexRate.dblRate) ELSE NULL END 
+				,[intForexRateTypeId]		= 
+							-- If [Cost Method] = 'Amount' and Sub Currency, convert the amount to the receipt currency. 
+							CASE 
+								WHEN RawData.strCostMethod = 'Amount' AND RawData.ysnSubCurrency = 1 THEN 
+									CASE WHEN COALESCE(RawData.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(RawData.ysnSubCurrency, 0) = 0 THEN ISNULL(RawData.intForexRateTypeId, @intDefaultForexRateTypeId) ELSE NULL END 
+								ELSE 
+									CASE WHEN COALESCE(RawData.intCostCurrencyId, RawData.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(RawData.ysnSubCurrency, 0) = 0 THEN ISNULL(RawData.intForexRateTypeId, @intDefaultForexRateTypeId) ELSE NULL END 
+							END 
+							
+				,[dblForexRate]				= 
+							-- If [Cost Method] = 'Amount' and Sub Currency, convert the amount to the receipt currency. 
+							CASE 
+								WHEN RawData.strCostMethod = 'Amount' AND RawData.ysnSubCurrency = 1 THEN 
+									CASE WHEN COALESCE(RawData.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(RawData.ysnSubCurrency, 0) = 0 THEN ISNULL(RawData.dblForexRate, forexRate.dblRate) ELSE NULL END 
+								ELSE 
+									CASE WHEN COALESCE(RawData.intCostCurrencyId, RawData.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(RawData.ysnSubCurrency, 0) = 0 THEN ISNULL(RawData.dblForexRate, forexRate.dblRate) ELSE NULL END 
+							END 
+				
 				,[strChargesLink]			= RawData.strChargesLink
 
 		FROM	@OtherCharges RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
