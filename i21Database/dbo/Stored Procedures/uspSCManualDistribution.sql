@@ -65,8 +65,6 @@ SELECT
 	@intTicketItemUOMId = UOM.intItemUOMId
 	, @intLoadId = SC.intLoadId
 	, @intItemId = SC.intItemId
-	, @dblGrossUnits = SC.dblGrossUnits
-	, @dblNetUnits = SC.dblNetUnits
 FROM	dbo.tblSCTicket SC	        
 		JOIN dbo.tblICItemUOM UOM ON SC.intItemId = UOM.intItemId
 WHERE	SC.intTicketId = @intTicketId AND UOM.ysnStockUnit = 1		

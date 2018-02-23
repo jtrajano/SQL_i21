@@ -30,7 +30,8 @@ DECLARE @intContractDetailId AS INT,
 		@ysnAccrue AS BIT,
 		@ysnPrice AS BIT,
 		@splitDistribution AS NVARCHAR(40),
-		@ticketStatus AS NVARCHAR(10);
+		@ticketStatus AS NVARCHAR(10),
+		@intContractCostId AS INT;
 
 DECLARE @SALES_CONTRACT AS INT = 1
 		,@SALES_ORDER AS INT = 2
@@ -55,6 +56,7 @@ BEGIN
 	SELECT	@intTicketItemUOMId = UM.intItemUOMId, @intLoadId = SC.intLoadId
 	, @intContractDetailId = SC.intContractId ,@intItemId = SC.intItemId
 	, @splitDistribution = SC.strDistributionOption, @ticketStatus = SC.strTicketStatus
+	, @intContractCostId = SC.intContractCostId
 	FROM dbo.tblICItemUOM UM	
 	JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
 	WHERE	UM.ysnStockUnit = 1 AND SC.intTicketId = @intTicketId
@@ -108,6 +110,7 @@ BEGIN
 		,intSourceId
 		,intSourceType
 		,strSourceScreenName
+		,strChargesLink
 		)
 		SELECT
 		intOrderType				= @intOrderType
@@ -176,7 +179,8 @@ BEGIN
 		,intSourceId				= SC.intTicketId
 		,intSourceType				= 1
 		,strSourceScreenName		= 'Scale Ticket'
-		FROM	@Items LI INNER JOIN  dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId
+		,strChargesLink				= 'CL-'+ CAST (LI.intId AS nvarchar(MAX)) 
+		FROM @Items LI INNER JOIN  dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId
 		INNER JOIN dbo.tblICItemUOM ItemUOM	ON ItemUOM.intItemId = SC.intItemId AND ItemUOM.intItemUOMId = @intTicketItemUOMId
 		INNER JOIN dbo.tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 		LEFT JOIN dbo.tblCTContractDetail CNT ON CNT.intContractDetailId = LI.intTransactionDetailId
@@ -228,6 +232,7 @@ BEGIN
 		,[dblAmount]
 		,[ysnAccrue]
 		,[ysnPrice]
+		,[strChargesLink]
 	)
 	SELECT
 	[intOrderType]						= SE.intOrderType
@@ -241,8 +246,8 @@ BEGIN
 	,[dblForexRate]						= SE.dblForexRate
 
 	--Charges
-	,[intContractId]					= NULL
-	,[intContractDetailId]				= NULL 
+	,[intContractId]					= SE.intOrderId
+	,[intContractDetailId]				= SE.intLineNo 
 	,[intCurrencyId]  					= SE.intCurrencyId
 	,[intChargeId]						= IC.intItemId
 	,[strCostMethod]					= IC.strCostMethod
@@ -274,6 +279,7 @@ BEGIN
 											END
 	,[ysnAccrue]						= 0
 	,[ysnPrice]							= 1
+	,[strChargesLink]					= SE.strChargesLink
 	FROM @ShipmentStagingTable SE
 	LEFT JOIN tblQMTicketDiscount QM ON QM.intTicketId = SE.intSourceId
 	LEFT JOIN tblGRDiscountScheduleCode GR ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
@@ -306,6 +312,7 @@ BEGIN
 		,[dblAmount]
 		,[ysnAccrue]
 		,[ysnPrice]
+		,[strChargesLink]
 	)
 	SELECT	
 	[intOrderType]						= SE.intOrderType
@@ -348,6 +355,7 @@ BEGIN
 										END
 	,[ysnAccrue]						= 0
 	,[ysnPrice]							= 1
+	,[strChargesLink]					= SE.strChargesLink
 	FROM @ShipmentStagingTable SE
 	INNER JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
 	INNER JOIN tblSCScaleSetup SCSetup ON SCSetup.intScaleSetupId = SC.intScaleSetupId
@@ -412,6 +420,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 									,[dblAmount]
 									,[ysnAccrue]
 									,[ysnPrice]
+									,[strChargesLink]
 								)
 								SELECT	
 								[intOrderType]						= SE.intOrderType
@@ -429,26 +438,26 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intContractDetailId]				= SE.intLineNo
 								,[intCurrencyId]  					= SE.intCurrencyId
 								,[intChargeId]						= LoadCost.intItemId
-								,[strCostMethod]					= IC.strCostMethod
+								,[strCostMethod]					= SC.strCostMethod
 								,[dblRate]							= CASE
-																		WHEN IC.strCostMethod = 'Per Unit' THEN LoadCost.dblRate
-																		WHEN IC.strCostMethod = 'Amount' THEN 0
+																		WHEN SC.strCostMethod = 'Per Unit' THEN LoadCost.dblRate
+																		WHEN SC.strCostMethod = 'Amount' THEN 0
 																	END
 								,[intCostUOMId]						= dbo.fnGetMatchingItemUOMId(@intFreightItemId, LoadCost.intItemUOMId)
 								,[intEntityVendorId]				= LoadCost.intVendorId
 								,[dblAmount]						=  CASE
-																		WHEN IC.strCostMethod = 'Per Unit' THEN 0
-																		WHEN IC.strCostMethod = 'Amount' THEN 
+																		WHEN SC.strCostMethod = 'Per Unit' THEN 0
+																		WHEN SC.strCostMethod = 'Amount' THEN 
 																		CASE
 																			WHEN SE.intOwnershipType = 2 THEN 0
-																			WHEN SE.intOwnershipType = 1 THEN LoadCost.dblRate
-																			--ROUND (LoadCost.dblRate  * dbo.fnCalculateQtyBetweenUOM(LoadCost.intItemUOMId, dbo.fnGetMatchingItemUOMId(SE.intItemId, LoadCost.intItemUOMId), SC.dblGrossUnits), 2)
+																			WHEN SE.intOwnershipType = 1 THEN ROUND((SE.dblQuantity / SC.dblNetUnits * LoadCost.dblRate),2)
 																		END
 																	END	
 								,[ysnAccrue]						= @ysnAccrue
 								,[ysnPrice]							= @ysnPrice
+								,[strChargesLink]					= SE.strChargesLink
 								FROM tblLGLoadDetail LoadDetail
-								LEFT JOIN @ShipmentStagingTable SE ON SE.intLineNo = LoadDetail.intPContractDetailId
+								LEFT JOIN @ShipmentStagingTable SE ON SE.intLineNo = LoadDetail.intSContractDetailId
 								LEFT JOIN tblLGLoadCost LoadCost ON LoadCost.intLoadId = LoadDetail.intLoadId
 								LEFT JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
 								LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
@@ -480,6 +489,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 									,[dblAmount]
 									,[ysnAccrue]
 									,[ysnPrice]
+									,[strChargesLink]
 								)
 								SELECT	
 								[intOrderType]						= SE.intOrderType
@@ -509,13 +519,15 @@ IF ISNULL(@intFreightItemId,0) = 0
 																		WHEN LoadCost.strCostMethod = 'Amount' THEN 
 																		CASE
 																			WHEN SE.intOwnershipType = 2 THEN 0
-																			WHEN SE.intOwnershipType = 1 THEN LoadCost.dblRate
+																			WHEN SE.intOwnershipType = 1 THEN ROUND((SE.dblQuantity / SC.dblNetUnits * LoadCost.dblRate),2)
 																		END
 																	END	
 								,[ysnAccrue]						= @ysnAccrue
 								,[ysnPrice]							= @ysnPrice
+								,[strChargesLink]					= SE.strChargesLink
 								FROM tblLGLoadDetail LoadDetail
-								LEFT JOIN @ShipmentStagingTable SE ON SE.intLineNo = LoadDetail.intPContractDetailId
+								LEFT JOIN @ShipmentStagingTable SE ON SE.intLineNo = LoadDetail.intSContractDetailId
+								LEFT JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
 								LEFT JOIN tblLGLoadCost LoadCost ON LoadCost.intLoadId = LoadDetail.intLoadId
 								WHERE LoadCost.intItemId != @intFreightItemId AND LoadDetail.intSContractDetailId = @intLoadContractId 
 								AND LoadCost.intLoadId = @intLoadId AND LoadCost.dblRate != 0
@@ -546,6 +558,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 									,[dblAmount]
 									,[ysnAccrue]
 									,[ysnPrice]
+									,[strChargesLink]
 								)
 								SELECT	
 								[intOrderType]						= SE.intOrderType
@@ -563,24 +576,24 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intContractDetailId]				= SE.intLineNo
 								,[intCurrencyId]  					= SE.intCurrencyId
 								,[intChargeId]						= ContractCost.intItemId
-								,[strCostMethod]					= IC.strCostMethod
+								,[strCostMethod]					= SC.strCostMethod
 								,[dblRate]							= CASE
-																		WHEN IC.strCostMethod = 'Per Unit' THEN ContractCost.dblRate
-																		WHEN IC.strCostMethod = 'Amount' THEN 0
+																		WHEN SC.strCostMethod = 'Per Unit' THEN ContractCost.dblRate
+																		WHEN SC.strCostMethod = 'Amount' THEN 0
 																	END
 								,[intCostUOMId]						= dbo.fnGetMatchingItemUOMId(@intFreightItemId, ContractCost.intItemUOMId)
 								,[intEntityVendorId]				= ContractCost.intVendorId
 								,[dblAmount]						=  CASE
-																		WHEN IC.strCostMethod = 'Per Unit' THEN 0
-																		WHEN IC.strCostMethod = 'Amount' THEN 
+																		WHEN SC.strCostMethod = 'Per Unit' THEN 0
+																		WHEN SC.strCostMethod = 'Amount' THEN 
 																		CASE
 																			WHEN SE.intOwnershipType = 2 THEN 0
-																			WHEN SE.intOwnershipType = 1 THEN ContractCost.dblRate
-																			--ROUND (ContractCost.dblRate  * dbo.fnCalculateQtyBetweenUOM(ContractCost.intItemUOMId, dbo.fnGetMatchingItemUOMId(SE.intItemId, ContractCost.intItemUOMId), SC.dblGrossUnits), 2)
+																			WHEN SE.intOwnershipType = 1 THEN ROUND((SE.dblQuantity / SC.dblNetUnits * ContractCost.dblRate),2)
 																		END
 																	END	
 								,[ysnAccrue]						= @ysnAccrue
 								,[ysnPrice]							= @ysnPrice
+								,[strChargesLink]					= SE.strChargesLink
 								FROM tblCTContractCost ContractCost
 								LEFT JOIN @ShipmentStagingTable SE ON SE.intLineNo = ContractCost.intContractDetailId
 								LEFT JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
@@ -612,6 +625,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 									,[dblAmount]
 									,[ysnAccrue]
 									,[ysnPrice]
+									,[strChargesLink]
 								)
 								SELECT	
 								[intOrderType]						= SE.intOrderType
@@ -641,13 +655,15 @@ IF ISNULL(@intFreightItemId,0) = 0
 																		WHEN ContractCost.strCostMethod = 'Amount' THEN 
 																		CASE
 																			WHEN SE.intOwnershipType = 2 THEN 0
-																			WHEN SE.intOwnershipType = 1 THEN ContractCost.dblRate
+																			WHEN SE.intOwnershipType = 1 THEN ROUND((SE.dblQuantity / SC.dblNetUnits * ContractCost.dblRate),2)
 																		END
 																	END	
 								,[ysnAccrue]						= ContractCost.ysnAccrue
 								,[ysnPrice]							= ContractCost.ysnPrice
+								,[strChargesLink]					= SE.strChargesLink
 								FROM tblCTContractCost ContractCost
 								LEFT JOIN @ShipmentStagingTable SE ON SE.intLineNo = ContractCost.intContractDetailId
+								LEFT JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
 								WHERE ContractCost.intItemId != @intFreightItemId AND SE.intOrderId = @intLoadContractId AND ContractCost.dblRate != 0
 							END
 					END
@@ -679,6 +695,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 									,[dblAmount]
 									,[ysnAccrue]
 									,[ysnPrice]
+									,[strChargesLink]
 								)
 								SELECT	
 								[intOrderType]						= SE.intOrderType
@@ -708,15 +725,17 @@ IF ISNULL(@intFreightItemId,0) = 0
 																		WHEN LoadCost.strCostMethod = 'Amount' THEN 
 																		CASE
 																			WHEN SE.intOwnershipType = 2 THEN 0
-																			WHEN SE.intOwnershipType = 1 THEN LoadCost.dblRate
+																			WHEN SE.intOwnershipType = 1 THEN ROUND((SE.dblQuantity / SC.dblNetUnits * LoadCost.dblRate),2)
 																		END
 																	END	
 								,[ysnAccrue]						= LoadCost.ysnAccrue
 								,[ysnPrice]							= LoadCost.ysnPrice
+								,[strChargesLink]					= SE.strChargesLink
 								FROM tblLGLoadDetail LoadDetail
-								LEFT JOIN @ShipmentStagingTable SE ON SE.intLineNo = LoadDetail.intPContractDetailId
+								LEFT JOIN @ShipmentStagingTable SE ON SE.intLineNo = LoadDetail.intSContractDetailId
+								LEFT JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
 								LEFT JOIN tblLGLoadCost LoadCost ON LoadCost.intLoadId = LoadDetail.intLoadId
-								WHERE LoadCost.intLoadId = @intLoadId AND LoadDetail.intPContractDetailId = @intLoadContractId AND LoadCost.dblRate != 0
+								WHERE LoadCost.intLoadId = @intLoadId AND LoadDetail.intSContractDetailId = @intLoadContractId AND LoadCost.dblRate != 0
 							END
 						ELSE
 							BEGIN
@@ -744,6 +763,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 									,[dblAmount]
 									,[ysnAccrue]
 									,[ysnPrice]
+									,[strChargesLink]
 								)
 								SELECT	
 								[intOrderType]						= SE.intOrderType
@@ -773,13 +793,15 @@ IF ISNULL(@intFreightItemId,0) = 0
 																		WHEN ContractCost.strCostMethod = 'Amount' THEN 
 																		CASE
 																			WHEN SE.intOwnershipType = 2 THEN 0
-																			WHEN SE.intOwnershipType = 1 THEN ContractCost.dblRate
+																			WHEN SE.intOwnershipType = 1 THEN ROUND((SE.dblQuantity / SC.dblNetUnits * ContractCost.dblRate),2)
 																		END
 																	END	
 								,[ysnAccrue]						= ContractCost.ysnAccrue
 								,[ysnPrice]							= ContractCost.ysnPrice
+								,[strChargesLink]					= SE.strChargesLink
 								FROM tblCTContractCost ContractCost
 								LEFT JOIN @ShipmentStagingTable SE ON SE.intLineNo = ContractCost.intContractDetailId 
+								LEFT JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
 								WHERE SE.intOrderId = @intLoadContractId AND ContractCost.dblRate != 0
 							END
 					END
@@ -812,6 +834,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 							,[dblAmount]
 							,[ysnAccrue]
 							,[ysnPrice]
+							,[strChargesLink]
 						)
 						SELECT	
 						[intOrderType]						= SE.intOrderType
@@ -829,10 +852,10 @@ IF ISNULL(@intFreightItemId,0) = 0
 						,[intContractDetailId]				= NULL 
 						,[intCurrencyId]  					= SE.intCurrencyId
 						,[intChargeId]						= @intFreightItemId
-						,[strCostMethod]					= IC.strCostMethod
+						,[strCostMethod]					= SC.strCostMethod
 						,[dblRate]							= CASE
-																WHEN IC.strCostMethod = 'Per Unit' THEN SC.dblFreightRate
-																WHEN IC.strCostMethod = 'Amount' THEN 0
+																WHEN SC.strCostMethod = 'Per Unit' THEN SC.dblFreightRate
+																WHEN SC.strCostMethod = 'Amount' THEN 0
 															END
 						,[intCostUOMId]						= dbo.fnGetMatchingItemUOMId(@intFreightItemId, SE.intItemUOMId)
 						,[intEntityVendorId]				= CASE
@@ -840,15 +863,16 @@ IF ISNULL(@intFreightItemId,0) = 0
 																WHEN @intHaulerId != 0 THEN @intHaulerId
 																END
 						,[dblAmount]						=  CASE
-																WHEN IC.strCostMethod = 'Per Unit' THEN 0
-																WHEN IC.strCostMethod = 'Amount' THEN 
+																WHEN SC.strCostMethod = 'Per Unit' THEN 0
+																WHEN SC.strCostMethod = 'Amount' THEN 
 																CASE
 																	WHEN SE.intOwnershipType = 2 THEN 0
-																	WHEN SE.intOwnershipType = 1 THEN SC.dblFreightRate --ROUND (SC.dblFreightRate * SC.dblGrossUnits, 2)
+																	WHEN SE.intOwnershipType = 1 THEN ROUND ((SE.dblQuantity / SC.dblNetUnits * SC.dblFreightRate), 2)
 																END
 															END 
 						,[ysnAccrue]						= @ysnAccrue
 						,[ysnPrice]							= @ysnPrice
+						,[strChargesLink]					= SE.strChargesLink
 						FROM @ShipmentStagingTable SE 
 						LEFT JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
 						LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
@@ -856,73 +880,151 @@ IF ISNULL(@intFreightItemId,0) = 0
 						WHERE SC.dblFreightRate > 0
 					END
 				ELSE IF ISNULL(@intFreightItemId,0) != 0
-					BEGIN
-						INSERT INTO @ShipmentChargeStagingTable
-						(
-							[intOrderType]
-							,[intSourceType]
-							,[intEntityCustomerId]
-							,[dtmShipDate]
-							,[intShipFromLocationId]
-							,[intShipToLocationId]
-							,[intFreightTermId]
-							,[intForexRateTypeId]
-							,[dblForexRate]
+				BEGIN
+					IF ISNULL(@intContractCostId,0) = 0
+						BEGIN
+							INSERT INTO @ShipmentChargeStagingTable
+							(
+								[intOrderType]
+								,[intSourceType]
+								,[intEntityCustomerId]
+								,[dtmShipDate]
+								,[intShipFromLocationId]
+								,[intShipToLocationId]
+								,[intFreightTermId]
+								,[intForexRateTypeId]
+								,[dblForexRate]
 
-							-- Charges
-							,[intContractId]
-							,[intContractDetailId]
-							,[intCurrency]
-							,[intChargeId]
-							,[strCostMethod]
-							,[dblRate]
-							,[intCostUOMId]
-							,[intEntityVendorId]
-							,[dblAmount]
-							,[ysnAccrue]
-							,[ysnPrice]
-						)
-						SELECT	
-						[intOrderType]						= SE.intOrderType
-						,[intSourceType]					= SE.intSourceType
-						,[intEntityCustomerId]				= SE.intEntityCustomerId
-						,[dtmShipDate]						= SE.dtmShipDate
-						,[intShipFromLocationId]			= SE.intShipFromLocationId
-						,[intShipToLocationId]				= SE.intShipToLocationId
-						,[intFreightTermId]					= SE.intFreightTermId
-						,[intForexRateTypeId]				= SE.intForexRateTypeId
-						,[dblForexRate]						= SE.dblForexRate
+								-- Charges
+								,[intContractId]
+								,[intContractDetailId]
+								,[intCurrency]
+								,[intChargeId]
+								,[strCostMethod]
+								,[dblRate]
+								,[intCostUOMId]
+								,[intEntityVendorId]
+								,[dblAmount]
+								,[ysnAccrue]
+								,[ysnPrice]
+								,[strChargesLink]
+							)
+							SELECT	
+							[intOrderType]				= SE.intOrderType
+							,[intSourceType]			= SE.intSourceType
+							,[intEntityCustomerId]		= SE.intEntityCustomerId
+							,[dtmShipDate]				= SE.dtmShipDate
+							,[intShipFromLocationId]	= SE.intShipFromLocationId
+							,[intShipToLocationId]		= SE.intShipToLocationId
+							,[intFreightTermId]			= SE.intFreightTermId
+							,[intForexRateTypeId]		= SE.intForexRateTypeId
+							,[dblForexRate]				= SE.dblForexRate
 				
-						--Charges
-						,[intContractId]					= SE.intOrderId
-						,[intContractDetailId]				= SE.intLineNo
-						,[intCurrencyId]  					= SE.intCurrencyId
-						,[intChargeId]						= ContractCost.intItemId
-						,[strCostMethod]					= IC.strCostMethod
-						,[dblRate]							= CASE
-																WHEN IC.strCostMethod = 'Per Unit' THEN ContractCost.dblRate
-																WHEN IC.strCostMethod = 'Amount' THEN 0
+							--Charges
+							,[intContractId]			= SE.intOrderId
+							,[intContractDetailId]		= SE.intLineNo
+							,[intCurrencyId]  			= SE.intCurrencyId
+							,[intChargeId]				= ContractCost.intItemId
+							,[strCostMethod]			= SC.strCostMethod
+							,[dblRate]					= CASE
+															WHEN SC.strCostMethod = 'Per Unit' THEN ContractCost.dblRate
+															WHEN SC.strCostMethod = 'Amount' THEN 0
+														END
+							,[intCostUOMId]				= dbo.fnGetMatchingItemUOMId(@intFreightItemId, ContractCost.intItemUOMId)
+							,[intEntityVendorId]		= ContractCost.intVendorId
+							,[dblAmount]				=  CASE
+															WHEN SC.strCostMethod = 'Per Unit' THEN 0
+															WHEN SC.strCostMethod = 'Amount' THEN 
+															CASE
+																WHEN ISNULL(CT.intContractCostId,0) = 0 THEN ROUND((SE.dblQuantity / SC.dblNetUnits * SC.dblFreightRate),2)
+																ELSE ROUND((SE.dblQuantity / SC.dblNetUnits * CT.dblRate),2)
 															END
-						,[intCostUOMId]						= dbo.fnGetMatchingItemUOMId(@intFreightItemId, ContractCost.intItemUOMId)
-						,[intEntityVendorId]				= ContractCost.intVendorId
-						,[dblAmount]						=  CASE
-																WHEN IC.strCostMethod = 'Per Unit' THEN 0
-																WHEN IC.strCostMethod = 'Amount' THEN 
-																CASE
-																	WHEN SE.intOwnershipType = 2 THEN 0
-																	WHEN SE.intOwnershipType = 1 THEN ContractCost.dblRate
-																	--ROUND (ContractCost.dblRate  * dbo.fnCalculateQtyBetweenUOM(ContractCost.intItemUOMId, dbo.fnGetMatchingItemUOMId(SE.intItemId, ContractCost.intItemUOMId), SC.dblGrossUnits), 2)
+														END	
+							,[ysnAccrue]				= @ysnAccrue
+							,[ysnPrice]					= @ysnPrice
+							,[strChargesLink]			= SE.strChargesLink
+							FROM tblCTContractCost ContractCost
+							LEFT JOIN @ShipmentStagingTable SE ON SE.intLineNo = ContractCost.intContractDetailId
+							LEFT JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
+							LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
+							LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
+							OUTER APPLY(
+								SELECT * FROM tblCTContractCost WHERE intContractDetailId = SE.intLineNo 
+								AND dblRate != 0 
+								AND intItemId = @intFreightItemId
+							) CT
+							WHERE SC.dblFreightRate != 0
+						END
+					ELSE
+						BEGIN
+							INSERT INTO @ShipmentChargeStagingTable
+							(
+								[intOrderType]
+								,[intSourceType]
+								,[intEntityCustomerId]
+								,[dtmShipDate]
+								,[intShipFromLocationId]
+								,[intShipToLocationId]
+								,[intFreightTermId]
+								,[intForexRateTypeId]
+								,[dblForexRate]
+
+								-- Charges
+								,[intContractId]
+								,[intContractDetailId]
+								,[intCurrency]
+								,[intChargeId]
+								,[strCostMethod]
+								,[dblRate]
+								,[intCostUOMId]
+								,[intEntityVendorId]
+								,[dblAmount]
+								,[ysnAccrue]
+								,[ysnPrice]
+								,[strChargesLink]
+							)
+							SELECT	
+							[intOrderType]						= SE.intOrderType
+							,[intSourceType]					= SE.intSourceType
+							,[intEntityCustomerId]				= SE.intEntityCustomerId
+							,[dtmShipDate]						= SE.dtmShipDate
+							,[intShipFromLocationId]			= SE.intShipFromLocationId
+							,[intShipToLocationId]				= SE.intShipToLocationId
+							,[intFreightTermId]					= SE.intFreightTermId
+							,[intForexRateTypeId]				= SE.intForexRateTypeId
+							,[dblForexRate]						= SE.dblForexRate
+				
+							--Charges
+							,[intContractId]					= SE.intOrderId
+							,[intContractDetailId]				= SE.intLineNo
+							,[intCurrencyId]  					= SE.intCurrencyId
+							,[intChargeId]						= ContractCost.intItemId
+							,[strCostMethod]					= SC.strCostMethod
+							,[dblRate]							= CASE
+																	WHEN SC.strCostMethod = 'Per Unit' THEN ContractCost.dblRate
+																	WHEN SC.strCostMethod = 'Amount' THEN 0
 																END
-															END	
-						,[ysnAccrue]						= @ysnAccrue
-						,[ysnPrice]							= @ysnPrice
-						FROM tblCTContractCost ContractCost
-						LEFT JOIN @ShipmentStagingTable SE ON SE.intLineNo = ContractCost.intContractDetailId
-						LEFT JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
-						LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
-						LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
-						WHERE ContractCost.intItemId = @intFreightItemId AND SE.intOrderId IS NOT NULL AND ContractCost.dblRate != 0
-					END
+							,[intCostUOMId]						= dbo.fnGetMatchingItemUOMId(@intFreightItemId, ContractCost.intItemUOMId)
+							,[intEntityVendorId]				= ContractCost.intVendorId
+							,[dblAmount]						=  CASE
+																	WHEN SC.strCostMethod = 'Per Unit' THEN 0
+																	WHEN SC.strCostMethod = 'Amount' THEN 
+																	CASE
+																		WHEN SE.intOwnershipType = 2 THEN 0
+																		WHEN SE.intOwnershipType = 1 THEN ROUND((SE.dblQuantity / SC.dblNetUnits * ContractCost.dblRate),2)
+																	END
+																END	
+							,[ysnAccrue]						= @ysnAccrue
+							,[ysnPrice]							= @ysnPrice
+							,[strChargesLink]					= SE.strChargesLink
+							FROM tblCTContractCost ContractCost
+							LEFT JOIN @ShipmentStagingTable SE ON SE.intLineNo = ContractCost.intContractDetailId
+							LEFT JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
+							LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
+							LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
+							WHERE ContractCost.intItemId = @intFreightItemId AND SE.intOrderId IS NOT NULL AND ContractCost.dblRate != 0
+						END
+				END
 				ELSE 
 					BEGIN
 						INSERT INTO @ShipmentChargeStagingTable
@@ -949,6 +1051,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 							,[dblAmount]
 							,[ysnAccrue]
 							,[ysnPrice]
+							,[strChargesLink]
 						)
 						SELECT	
 						[intOrderType]						= SE.intOrderType
@@ -983,6 +1086,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 															END	
 						,[ysnAccrue]						= ContractCost.ysnAccrue
 						,[ysnPrice]							= ContractCost.ysnPrice
+						,[strChargesLink]					= SE.strChargesLink
 						FROM tblCTContractCost ContractCost
 						LEFT JOIN @ShipmentStagingTable SE ON SE.intLineNo = ContractCost.intContractDetailId
 						WHERE ContractCost.intItemId = @intFreightItemId AND SE.intOrderId IS NOT NULL AND ContractCost.dblRate != 0
@@ -1011,6 +1115,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 					,[dblAmount]
 					,[ysnAccrue]
 					,[ysnPrice]
+					,[strChargesLink]
 				)
 				SELECT
 				[intOrderType]						= SE.intOrderType
@@ -1045,6 +1150,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 													END	
 				,[ysnAccrue]						= ContractCost.ysnAccrue
 				,[ysnPrice]							= ContractCost.ysnPrice
+				,[strChargesLink]					= SE.strChargesLink
 				FROM tblCTContractCost ContractCost
 				LEFT JOIN @ShipmentStagingTable SE ON SE.intLineNo = ContractCost.intContractDetailId
 				WHERE ContractCost.intItemId != @intFreightItemId AND SE.intOrderId IS NOT NULL AND ContractCost.dblRate != 0
