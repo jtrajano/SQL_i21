@@ -246,6 +246,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     dataIndex: 'strItemNo',
                     editor: {
                         readOnly: '{readOnlyItemDropdown}',
+                        readOnly: '{isItemComponent}',
                         defaultFilters: [
                             {
                                 column: 'intLocationId',
@@ -371,7 +372,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     dataIndex: 'dblOpenReceive',
                     text: '{changeQtyToReceiveText}',
                     editor: {
-                        readOnly: '{disableQtyInReceiptGrid}'
+                        readOnly: '{disableQtyInReceiptGrid}',
+                        readOnly: '{isItemOption}'
                     }
                 },
                 colLoadToReceive: {
@@ -1008,7 +1010,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     lazy: true,
                     component: Ext.create('iRely.grid.Manager', {
                         grid: grdInventoryReceipt,
-                        deleteButton: grdInventoryReceipt.down('#btnRemoveInventoryReceipt')
+                        deleteButton: grdInventoryReceipt.down('#btnRemoveInventoryReceipt'),
+                        deleteRecord: Ext.bind(me.onReceiptItemDelete, me)
                     }),
                     details: [
                         {
@@ -1132,6 +1135,36 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             intEntityId: current.get('intEntityId'), //Entity Associated
             dtmDate: current.get('dtmDate') // Date
         })
+    },
+
+    onReceiptItemDelete: function(action){
+        var me = this,
+            win = me.getView(),
+            grdInventoryReceipt = win.down('#grdInventoryReceipt'),
+            grdStore = grdInventoryReceipt.getStore(),
+            selectedRecords = grdInventoryReceipt.getSelectionModel().getSelection(),
+            records = Ext.clone(selectedRecords);
+        
+        Ext.Array.forEach(selectedRecords, function(rec){
+            if(!iRely.Functions.isEmpty(rec.get('strItemType')) && rec.get('intParentItemLinkId')){
+
+                var childItems = _.filter(grdStore.data.items, function(x){
+                    return !iRely.Functions.isEmpty(x.get('strItemType'))
+                        && x.get('intChildItemLinkId')
+                        && x.get('intChildItemLinkId') == rec.get('intParentItemLinkId') 
+                        && x.get('intInventoryReceiptItemId') != rec.get('intInventoryReceiptItemId')
+                        && !x.dummy;
+                });
+
+                if(childItems.length > 0) {
+                    childItems.forEach(function(item){
+                        records.push(item);
+                    });
+                }
+            }
+        });
+
+        action(records);
     },
 
     onGridAfterLayout: function (grid) {
@@ -3639,6 +3672,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         currentReceiptItemVM.tblICInventoryReceiptItemLots().add(newReceiptItemLot);
                     }
                 }
+
+                me.calculateLinkedItems(currentReceipt, currentReceiptItem);
             }
         }
         
@@ -7441,6 +7476,69 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         me.calculateGrossNet(current, 1);
     },
 
+    calculateLinkedItems: function(current, activeRecord){
+        var parentLinkId = activeRecord.get('intParentItemLinkId'),
+            itemDetailStore = current.tblICInventoryReceiptItems(),
+            linkType = activeRecord.get('strItemType'),
+            searchURL;
+
+        if(!Ext.isNumber(parentLinkId) || linkType.charAt(0) == 'O' || linkType.charAt(0) == 'S')
+            return;
+        
+        var locationId = current.get('intLocationId'),
+            itemId = activeRecord.get('intItemId'),
+            itemUOMId = activeRecord.get('intUnitMeasureId'),
+            quantity = activeRecord.get('dblOpenReceive');
+
+        switch(linkType.charAt(0)){
+            case 'K':
+                searchURL = './inventory/api/itembundle/getbundlecomponents?intItemId=' + itemId + '&intItemUOMId=' + itemUOMId 
+                    + '&intLocationId=' + locationId + '&dblQuantity=' +  quantity;
+                break;
+            case 'A':
+                searchURL = './inventory/api/itemaddon/getitemaddons?intItemId=' + itemId + '&intItemUOMId=' + itemUOMId 
+                    + '&intLocationId=' + locationId + '&dblQuantity=' +  quantity;
+                break;
+            // case 'S':
+            //     searchURL = './inventory/api/itemsubstitute/getitemsubstitutes?intItemId=' + itemId + '&intItemUOMId=' + itemUOMId 
+            //         + '&intLocationId=' + locationId + '&dblQuantity=' +  quantity;
+            //     break;
+        }
+
+        ic.utils.ajax({
+            url: searchURL,
+            method: 'get'
+        }).subscribe(
+            function(successResponse){
+                var result = Ext.decode(successResponse.responseText);
+                Ext.Array.forEach(result.data, function(rec) {
+                    var childRecord = _.find(itemDetailStore.data.items, function(x){
+                        return x.get('intItemId') == rec.intComponentItemId &&  x.get('intUnitMeasureId') == rec.intComponentUOMId && x.get('intChildItemLinkId') == parentLinkId && !x.dummy;
+                    });
+
+                    if(childRecord){
+                        var dblQty = 0;
+                        switch(linkType.charAt(0)){
+                            case 'K': dblQty = rec.dblBundleComponentQty; break;
+                            case 'A': dblQty = rec.dblAddOnComponentQty; break;
+                            case 'S': dblQty = rec.dblSubstituteComponentQty; break;
+                            default: dblQty = 0; break;
+
+                        }
+                        childRecord.set('dblOpenReceive', dblQty);
+                        childRecord.set('dblLineTotal', dblQty * childRecord.get('dblUnitCost'));
+                    }
+
+                });
+            },
+            function (failureResponse) {
+                var jsonData = Ext.decode(failureResponse.responseText);
+                iRely.Functions.showErrorDialog('Something went wrong while getting the Components of the Kit item.');
+            }
+        );
+
+    },
+
     getBundleComponents: function(addedRecord, selectedItem, current, itemDetailStore){
         'use strict';
         var me = this,
@@ -7492,8 +7590,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }).subscribe(
                 function(successResponse){
                     var result = Ext.decode(successResponse.responseText);
-                    addedRecord.set('dblUnitPrice', 0);
+                    addedRecord.set('dblUnitCost', 0);
+                    addedRecord.set('dblUnitRetail', 0);
                     addedRecord.set('strItemType', 'Kit');
+                    addedRecord.set('intParentItemLinkId', addedRecord.get('intInventoryReceiptItemId'));
 
                     Ext.Array.forEach(result.data, function(rec){
                         var componentQty = rec.dblBundleComponentQty;

@@ -565,6 +565,26 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             }
         },
 
+        isItemComponent: function(get){
+            var linkType = get('grdInventoryReceipt.selection.strItemType'),
+                childLinkId = get('grdInventoryReceipt.selection.intChildItemLinkId');
+
+            if (!iRely.Functions.isEmpty(linkType) && Ext.isNumber(childLinkId))
+                return true;
+            else 
+                return false;
+        },
+
+        isItemOption: function(get){
+            var linkType = get('grdInventoryReceipt.selection.strItemType'),
+                childLinkId = get('grdInventoryReceipt.selection.intChildItemLinkId');
+
+            if (!iRely.Functions.isEmpty(linkType) && linkType.charAt(0) != 'S' && Ext.isNumber(childLinkId))
+                return true;
+            else 
+                return false;
+        },
+
         checkHiddenAddOrders: function(get) {
             var isHidden = false;
             if (get('current.ysnPosted')) {
