@@ -1,4 +1,4 @@
-﻿CREATE PROC [dbo].[uspRKM2MGLPost] 
+﻿CREATE PROC [dbo].[uspRKM2MGLPost]  
 		@intM2MInquiryId INT
 AS
 SET QUOTED_IDENTIFIER OFF
@@ -30,10 +30,42 @@ END
 SELECT @dtmCurrenctGLPostDate, @dtmPrviousGLReverseDate
 IF (@dtmCurrenctGLPostDate >= @dtmPrviousGLReverseDate)
 BEGIN
-
 RAISERROR('Current date cannot lessthan the previous post date',16,1)
 END
 
+IF (@dtmCurrenctGLPostDate >= @dtmPrviousGLReverseDate)
+BEGIN
+RAISERROR('Current date cannot lessthan the previous post date',16,1)
+END
+
+IF EXISTS(SELECT 1 FROM tblRKCompanyPreference WHERE ISNULL(intUnrealizedGainOnBasisId,0) = 0)
+RAISERROR('Unrealized Gain On Basis cannot be blank',16,1)
+IF EXISTS(SELECT * FROM tblRKCompanyPreference WHERE ISNULL(intUnrealizedGainOnFuturesId,0) = 0)
+RAISERROR('Unrealized Gain On Futures cannot be blank',16,1)
+IF EXISTS(SELECT * FROM tblRKCompanyPreference WHERE ISNULL(intUnrealizedGainOnCashId,0) = 0)
+RAISERROR('Unrealized Gain On Cash cannot be blank',16,1)
+IF EXISTS(SELECT * FROM tblRKCompanyPreference WHERE ISNULL(intUnrealizedLossOnBasisId,0) = 0)
+RAISERROR('Unrealized Loss On Basis cannot be blank',16,1)
+IF EXISTS(SELECT * FROM tblRKCompanyPreference WHERE ISNULL(intUnrealizedLossOnFuturesId,0) = 0)
+RAISERROR('Unrealized Loss On Futures cannot be blank',16,1)
+IF EXISTS(SELECT * FROM tblRKCompanyPreference WHERE ISNULL(intUnrealizedLossOnCashId,0) = 0)
+RAISERROR('Unrealized Loss On Cash cannot be blank',16,1)
+IF EXISTS(SELECT * FROM tblRKCompanyPreference WHERE ISNULL(intUnrealizedGainOnInventoryBasisIOSId,0) = 0)
+RAISERROR('Unrealized Gain On Inventory Basis IOS cannot be blank',16,1)
+IF EXISTS(SELECT * FROM tblRKCompanyPreference WHERE ISNULL(intUnrealizedGainOnInventoryFuturesIOSId,0) = 0)
+RAISERROR('Unrealized Gain On Inventory Futures IOS cannot be blank',16,1)
+IF EXISTS(SELECT * FROM tblRKCompanyPreference WHERE ISNULL(intUnrealizedGainOnInventoryCashIOSId,0) = 0)
+RAISERROR('Unrealized Gain On Inventory Cash IOS cannot be blank',16,1)
+IF EXISTS(SELECT * FROM tblRKCompanyPreference WHERE ISNULL(intUnrealizedLossOnInventoryBasisIOSId,0) = 0)
+RAISERROR('Unrealized Loss On Inventory Basis IOS cannot be blank',16,1)
+IF EXISTS(SELECT * FROM tblRKCompanyPreference WHERE ISNULL(intUnrealizedLossOnInventoryFuturesIOSId,0) = 0)
+RAISERROR('Unrealized Loss On Inventory Futures IOS cannot be blank',16,1)
+IF EXISTS(SELECT * FROM tblRKCompanyPreference WHERE ISNULL(intUnrealizedLossOnInventoryCashIOSId,0) = 0)
+RAISERROR('Unrealized Loss On Inventory Cash IOS cannot be blank',16,1)
+IF EXISTS(SELECT * FROM tblRKCompanyPreference WHERE ISNULL(intUnrealizedGainOnInventoryIntransitIOSId,0) = 0)
+RAISERROR('Unrealized Gain On Inventory Intransit IOS cannot be blank',16,1)
+IF EXISTS(SELECT * FROM tblRKCompanyPreference WHERE ISNULL(intUnrealizedLossOnInventoryIntransitIOSId,0) = 0)
+RAISERROR('Unrealized Gain On Inventory Intransit cannot IOS be blank',16,1)
 
 	IF (@batchId IS NULL)
 	BEGIN
