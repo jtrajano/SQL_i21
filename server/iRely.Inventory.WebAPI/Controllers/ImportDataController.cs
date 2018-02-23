@@ -58,6 +58,7 @@ namespace iRely.Inventory.WebApi.Controllers
                 GlobalSettings.Instance.FileType = fileType;
                 GlobalSettings.Instance.AllowOverwriteOnImport = bool.Parse(Request.Headers.GetValues("X-Import-Allow-Overwrite").First());
                 GlobalSettings.Instance.AllowDuplicates = bool.Parse(Request.Headers.GetValues("X-Import-Allow-Duplicates").First());
+                GlobalSettings.Instance.VerboseLog = bool.Parse(Request.Headers.GetValues("X-Import-Enable-Verbose-Logging").First());
                 GlobalSettings.Instance.ImportType = type;
                 GlobalSettings.Instance.FileName = Request.Headers.GetValues("X-File-Name").First();
 

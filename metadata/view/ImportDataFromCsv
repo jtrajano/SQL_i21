@@ -10,7 +10,7 @@
         "collapsible": true,
         "designer|userAlias": "icimportdatafromcsv",
         "designer|userClassName": "ImportDataFromCsv",
-        "height": 225,
+        "height": 273,
         "layout": "fit",
         "maxHeight": null,
         "minHeight": 225,
@@ -31,7 +31,8 @@
         "minWidth": "number",
         "modal": "boolean",
         "title": "string",
-        "width": "auto"
+        "width": "auto",
+        "viewModel": "object"
     },
     "name": "MyWindow",
     "designerId": "fa67247d-7427-454a-9772-9371f6e5d623",
@@ -308,12 +309,11 @@
                                     "userConfig": {
                                         "container|align": "stretch",
                                         "height": 77,
-                                        "hidden": true,
                                         "layout": "vbox",
                                         "layout|flex": 1,
                                         "margin": 8,
                                         "padding": 8,
-                                        "title": "Options"
+                                        "title": "Advanced Options"
                                     },
                                     "configAlternates": {
                                         "container|align": "string",
@@ -360,7 +360,8 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "boxLabel": "Overwrite existing records",
+                                                        "boxLabel": "<span title=\"This will update the existing records found in the database.\">Overwrite existing records</span>",
+                                                        "checked": true,
                                                         "fieldLabel": null,
                                                         "itemId": "chbOverwrite",
                                                         "layout|anchor": "100%"
@@ -369,10 +370,60 @@
                                                         "boxLabel": "string",
                                                         "fieldLabel": "string",
                                                         "itemId": "string",
-                                                        "layout|anchor": "string"
+                                                        "layout|anchor": "string",
+                                                        "checked": "boolean"
                                                     },
                                                     "name": "MyCheckbox1",
-                                                    "designerId": "4bb0898c-20a4-4c7e-9ee0-0be9862d99be"
+                                                    "designerId": "4bb0898c-20a4-4c7e-9ee0-0be9862d99be",
+                                                    "configMeta": {
+                                                        "readOnly": {
+                                                            "bindSingle": true
+                                                        }
+                                                    }
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Checkbox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "boxLabel": "<span title=\"Duplicate records in the CSV file will be inserted into the database.\">Allow duplicates</span>",
+                                                        "fieldLabel": null,
+                                                        "itemId": "chbAllowDuplicates",
+                                                        "layout|anchor": "100%"
+                                                    },
+                                                    "configAlternates": {
+                                                        "boxLabel": "string",
+                                                        "fieldLabel": "string",
+                                                        "itemId": "string",
+                                                        "layout|anchor": "string"
+                                                    },
+                                                    "name": "MyCheckbox3",
+                                                    "designerId": "8180d837-65e6-4296-912b-2ab24465f064"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Checkbox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "boxLabel": "<span title=\"This produces many log messages that include non-critical log messages.\">Verbose Logging</span>",
+                                                        "fieldLabel": "Label",
+                                                        "hideLabel": true,
+                                                        "itemId": "chbVerbose"
+                                                    },
+                                                    "configAlternates": {
+                                                        "boxLabel": "string",
+                                                        "fieldLabel": "string",
+                                                        "hideLabel": "boolean",
+                                                        "itemId": "string"
+                                                    },
+                                                    "name": "MyCheckbox2",
+                                                    "designerId": "c143b8f5-7975-4d5e-af22-d34ec841cc89"
                                                 }
                                             ]
                                         }
