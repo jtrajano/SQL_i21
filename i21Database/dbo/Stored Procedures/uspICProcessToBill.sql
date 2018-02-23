@@ -131,6 +131,19 @@ BEGIN
 					AND rtnVendor.intEntityVendorId = @intEntityVendorId
 		END 
 
+		-- Check if we can convert the RTN to Debit Memo
+		IF NOT EXISTS (
+			SELECT	TOP 1 1 
+			FROM	tblICInventoryReceiptItem ri INNER JOIN @voucherItems vi
+						ON ri.intInventoryReceiptItemId = vi.intInventoryReceiptItemId
+			WHERE	ISNULL(ri.dblOpenReceive, 0) <> ISNULL(ri.dblBillQty, 0)
+		)
+		BEGIN 
+			-- Debit Memo is no longer needed. All items have Debit Memo.
+			EXEC uspICRaiseError 80110;			
+			RETURN -80110;
+		END 
+
 		-- Call the AP sp to convert the Return to Debit Memo. 
 		IF EXISTS (SELECT TOP 1 1 FROM @voucherItems)
 		BEGIN 						
@@ -239,6 +252,21 @@ BEGIN
 						AND ISNULL(rc.dblAmountBilled, 0) < rc.dblAmount
 					)
 				)
+	END 
+
+	-- Check if we can convert the IR to Voucher
+	IF NOT EXISTS (
+		SELECT	TOP 1 1 
+		FROM	tblICInventoryReceiptItem ri INNER JOIN @voucherItems vi
+					ON ri.intInventoryReceiptItemId = vi.intInventoryReceiptItemId
+		WHERE	ISNULL(ri.dblOpenReceive, 0) <> ISNULL(ri.dblBillQty, 0)
+	) AND NOT EXISTS (
+		SELECT TOP 1 1 FROM @voucherOtherCharges
+	)
+	BEGIN 
+		-- Voucher is no longer needed. All items have Voucher. 
+		EXEC uspICRaiseError 80111; 
+		RETURN -80111;
 	END 
 
 	-- Call the AP sp to convert the IR to Voucher. 
