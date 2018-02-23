@@ -9,6 +9,8 @@ SET XACT_ABORT ON
 
 BEGIN
 
+	DELETE tblFRBudgetSummary WHERE intBudgetCode = @intBudgetCode
+
 	INSERT INTO tblFRBudgetSummary (intBudgetCode, intBudgetId, intAccountId, dblBalance, dtmStartDate, dtmEndDate)
 	SELECT intBudgetCode, 
 		   intBudgetId, 
