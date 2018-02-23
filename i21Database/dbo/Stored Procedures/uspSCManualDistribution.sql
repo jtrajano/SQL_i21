@@ -65,7 +65,7 @@ DECLARE @intOrderId INT
 
 BEGIN
 	SELECT	
-		@intTicketItemUOMId = UM.intItemUOMId
+		@intTicketItemUOMId = UOM.intItemUOMId
 		, @intLoadId = SC.intLoadId
 		, @intItemId = SC.intItemId
 		, @dblGrossUnits = SC.dblGrossUnits
