@@ -122,8 +122,8 @@ BEGIN
 	SELECT	
 	 intConcurrencyId 		   = 1
 	,intTicketId       		   = A4GLIdentity
-	,strTicketStatus		   = CASE WHEN ISNULL(LTRIM(RTRIM(gasct_open_close_ind)),'') = '' THEN 'O' ELSE gasct_open_close_ind END
-	,strTicketNumber		   = gasct_tic_no
+	,strTicketStatus		   = CASE WHEN ISNULL(LTRIM(RTRIM(gasct_open_close_ind)),'') = '' THEN 'O' ELSE LTRIM(RTRIM(gasct_open_close_ind)) END
+	,strTicketNumber		   = LTRIM(RTRIM(gasct_tic_no))+'_'+ LTRIM(RTRIM(gasct_cus_no))
 	,intScaleSetupId		   = SS.intScaleSetupId
 	,intTicketPoolId		   = SS.intTicketPoolId
 	,intTicketLocationId	   = CL.intCompanyLocationId
@@ -134,15 +134,15 @@ BEGIN
 								 		WHEN gasct_tic_type = ('T')       THEN 4
 								 		ELSE 5
 								 END 
-	,strInOutFlag			   = gasct_in_out_ind
+	,strInOutFlag			   = LTRIM(RTRIM(gasct_in_out_ind))
 	,dtmTicketDateTime		   = dbo.fnCTConvertToDateTime(gasct_rev_dt,null)
 	,dtmTicketTransferDateTime = NULL
 	,dtmTicketVoidDateTime	   = NULL
 	,intProcessingLocationId   = CL.intCompanyLocationId
-	,strScaleOperatorUser	   = ISNULL(gasct_weigher,'')
+	,strScaleOperatorUser	   = ISNULL(LTRIM(RTRIM(gasct_weigher)),'')
 	,intEntityScaleOperatorId  = 0
-	,strTruckName			   = gasct_truck_id
-	,strDriverName			   = gasct_driver
+	,strTruckName			   = LTRIM(RTRIM(gasct_truck_id))
+	,strDriverName			   = LTRIM(RTRIM(gasct_driver))
 	,ysnDriverOff			   = dbo.fnCTConvertYNToBit(gasct_driver_on_yn,0)
 	,ysnSplitWeightTicket	   = dbo.fnCTConvertYNToBit(gasct_split_wgt_yn,0)
 	,ysnGrossManual			   = dbo.fnCTConvertYNToBit(gasct_gross_manual_yn,0)
@@ -164,20 +164,20 @@ BEGIN
 	,strItemNumber			   = IM.strItemNo
 	,strItemUOM				   = UM.strUnitMeasure
 	,intCustomerId			   = EY.intEntityId
-	,strDistributionOption	   = gasct_dist_option
+	,strDistributionOption	   = LTRIM(RTRIM(gasct_dist_option))
 	,intDiscountSchedule	   = DS.intDiscountScheduleId
 	,strDiscountLocation	   = ''
 	,dtmDeferDate			   = dbo.fnCTConvertToDateTime(gasct_defer_rev_dt,null)
-	,strContractNumber		   = gasct_cnt_no
+	,strContractNumber		   = LTRIM(RTRIM(gasct_cnt_no))
 	,intContractSequence	   = gasct_cnt_seq
-	,strContractLocation	   = gasct_cnt_loc
+	,strContractLocation	   = LTRIM(RTRIM(gasct_cnt_loc))
 	,dblUnitPrice			   = gasct_un_prc
 	,dblUnitBasis			   = NULL
 	,dblTicketFees			   = gasct_fees
 	,intCurrencyId			   = ISNULL(CY.intCurrencyID,@intCurrencyId)
 	,dblCurrencyRate		   = gasct_currency_rt
-	,strTicketComment		   = gasct_comment
-	,strCustomerReference	   = gasct_cus_ref_no
+	,strTicketComment		   = LTRIM(RTRIM(gasct_comment))
+	,strCustomerReference	   = LTRIM(RTRIM(gasct_cus_ref_no))
 	,ysnTicketPrinted		   = NULL
 	,ysnPlantTicketPrinted	   = dbo.fnCTConvertYNToBit(gasct_plant_prt_ind,0)
 	,ysnGradingTagPrinted	   = dbo.fnCTConvertYNToBit(gasct_grade_prt_ind,0)
@@ -187,19 +187,19 @@ BEGIN
 	,dblFreightAdjustment	   = NULL
 	,intFreightCurrencyId	   = ISNULL(FY.intCurrencyID,@intCurrencyId)
 	,dblFreightCurrencyRate	   = gasct_frt_currency_rt
-	,strFreightCContractNumber = gasct_frt_currency_cnt 
+	,strFreightCContractNumber = LTRIM(RTRIM(gasct_frt_currency_cnt)) 
 	,ysnFarmerPaysFreight	   = dbo.fnCTConvertYNToBit(gasct_frt_deduct_yn,0)
-	,strLoadNumber			   = gasct_load_no
+	,strLoadNumber			   = LTRIM(RTRIM(gasct_load_no))
 	,intLoadLocationId		   = CL.intCompanyLocationId
 	,intAxleCount			   = NULL
-	,strBinNumber			   = gasct_bin_no
-	,strPitNumber			   = gasct_pit_no
+	,strBinNumber			   = LTRIM(RTRIM(gasct_bin_no))
+	,strPitNumber			   = LTRIM(RTRIM(gasct_pit_no))
 	,intGradingFactor		   = gasct_grade
-	,strVarietyType			   = gasct_variety
+	,strVarietyType			   = LTRIM(RTRIM(gasct_variety))
 	,strFarmNumber			   = NULL
 	,strFieldNumber			   = NULL
-	,strDiscountComment		   = gasct_tic_comment
-	,strCommodityCode		   = gasct_com_cd
+	,strDiscountComment		   = LTRIM(RTRIM(gasct_tic_comment))
+	,strCommodityCode		   = LTRIM(RTRIM(gasct_com_cd))
 	,intCommodityId			   = CO.intCommodityId
 	,intDiscountId			   = 1
 	,intContractId			   = CD.intContractDetailId
