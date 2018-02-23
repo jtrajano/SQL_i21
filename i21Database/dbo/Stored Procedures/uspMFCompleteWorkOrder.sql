@@ -2,11 +2,11 @@
 	@strXML NVARCHAR(MAX)
 	,@strOutputLotNumber NVARCHAR(50) = '' OUTPUT
 	,@intParentLotId INT = 0 OUTPUT
-	,@dtmCurrentDate DATETIME = NULL 
-)
+	,@dtmCurrentDate DATETIME = NULL
+	)
 AS
 BEGIN TRY
-	SET @dtmCurrentDate = ISNULL(@dtmCurrentDate, GETDATE()) 
+	SET @dtmCurrentDate = ISNULL(@dtmCurrentDate, GETDATE())
 
 	DECLARE @idoc INT
 		,@ErrMsg NVARCHAR(MAX)
@@ -84,9 +84,10 @@ BEGIN TRY
 		,@intInputItemUOMId INT
 		,@strCreateMultipleLots NVARCHAR(50)
 		,@intBusinessShiftId INT
-		,@ysnFillPartialPallet bit
-		,@intSpecialPalletLotId int
-		,@strComputeGrossWeight nvarchar(50)
+		,@ysnFillPartialPallet BIT
+		,@intSpecialPalletLotId INT
+		,@strComputeGrossWeight NVARCHAR(50)
+		,@intAttributeTypeId INT
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -144,8 +145,8 @@ BEGIN TRY
 		,@strComment = strComment
 		,@strParentLotNumber = strParentLotNumber
 		,@ysnIgnoreTolerance = ysnIgnoreTolerance
-		,@ysnFillPartialPallet=ysnFillPartialPallet
-		,@intSpecialPalletLotId=intSpecialPalletLotId
+		,@ysnFillPartialPallet = ysnFillPartialPallet
+		,@intSpecialPalletLotId = intSpecialPalletLotId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intWorkOrderId INT
 			,intManufacturingProcessId INT
@@ -186,8 +187,8 @@ BEGIN TRY
 			,strComment NVARCHAR(MAX)
 			,strParentLotNumber NVARCHAR(50)
 			,ysnIgnoreTolerance BIT
-			,ysnFillPartialPallet bit
-			,intSpecialPalletLotId int
+			,ysnFillPartialPallet BIT
+			,intSpecialPalletLotId INT
 			)
 
 	SELECT @strComputeGrossWeight = strAttributeValue
@@ -196,11 +197,10 @@ BEGIN TRY
 		AND intLocationId = @intLocationId
 		AND intAttributeId = 89
 
-	if @strComputeGrossWeight='True'
-	Begin
-		Select @dblProduceQty =@dblPhysicalCount *@dblUnitQty 
-	end
-
+	IF @strComputeGrossWeight = 'True'
+	BEGIN
+		SELECT @dblProduceQty = @dblPhysicalCount * @dblUnitQty
+	END
 
 	IF @ysnIgnoreTolerance IS NULL
 		SELECT @ysnIgnoreTolerance = 1
@@ -225,7 +225,7 @@ BEGIN TRY
 	IF @intTransactionCount = 0
 		BEGIN TRANSACTION
 
-	SELECT @dtmBusinessDate = ISNULL(dbo.fnGetBusinessDate(@dtmCurrentDate, @intLocationId), GETDATE()) 
+	SELECT @dtmBusinessDate = ISNULL(dbo.fnGetBusinessDate(@dtmCurrentDate, @intLocationId), GETDATE())
 
 	SELECT @intBusinessShiftId = intShiftId
 	FROM dbo.tblMFShift
@@ -327,7 +327,12 @@ BEGIN TRY
 		AND intLocationId = @intLocationId
 		AND intAttributeId = @intAttributeId
 
+	SELECT @intAttributeTypeId = intAttributeTypeId
+	FROM tblMFManufacturingProcess
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+
 	IF @strInstantConsumption = 'False'
+		AND @intAttributeTypeId = 2 --Blending
 	BEGIN
 		SELECT @intBatchId = intBatchID
 		FROM tblMFWorkOrder
@@ -703,7 +708,7 @@ BEGIN TRY
 				,@intUserId = @intUserId
 				,@dblUnitQty = @dblUnitQty
 				,@ysnProducedQtyByWeight = 1
-				,@ysnFillPartialPallet=@ysnFillPartialPallet
+				,@ysnFillPartialPallet = @ysnFillPartialPallet
 
 			EXEC dbo.uspMFConsumeWorkOrder @intWorkOrderId = @intWorkOrderId
 				,@dblProduceQty = @dblProduceQty
@@ -723,7 +728,7 @@ BEGIN TRY
 				,@intUserId = @intUserId
 				,@dblUnitQty = @dblUnitQty
 				,@ysnProducedQtyByWeight = 0
-				,@ysnFillPartialPallet=@ysnFillPartialPallet
+				,@ysnFillPartialPallet = @ysnFillPartialPallet
 
 			EXEC dbo.uspMFConsumeWorkOrder @intWorkOrderId = @intWorkOrderId
 				,@dblProduceQty = @dblPhysicalCount
@@ -733,7 +738,6 @@ BEGIN TRY
 				,@strRetBatchId = @strRetBatchId OUTPUT
 				,@intBatchId = @intBatchId
 				,@ysnPostConsumption = @ysnPostConsumption
-				
 		END
 
 		EXEC uspMFConsumeSKU @intWorkOrderId = @intWorkOrderId
@@ -780,7 +784,7 @@ BEGIN TRY
 			,@ysnLotAlias = @ysnLotAlias
 			,@strLotAlias = @strLotAlias
 			,@intProductionTypeId = @intProductionTypeId
-			,@ysnFillPartialPallet=@ysnFillPartialPallet
+			,@ysnFillPartialPallet = @ysnFillPartialPallet
 
 		SELECT @strCreateMultipleLots = strAttributeValue
 		FROM tblMFManufacturingProcessAttribute
@@ -829,8 +833,8 @@ BEGIN TRY
 					,@strParentLotNumber = @strParentLotNumber
 					,@intInputLotId = @intInputLotId
 					,@intInputStorageLocationId = @intInputLotStorageLocationId
-					,@ysnFillPartialPallet=@ysnFillPartialPallet
-					,@intSpecialPalletLotId=@intSpecialPalletLotId
+					,@ysnFillPartialPallet = @ysnFillPartialPallet
+					,@intSpecialPalletLotId = @intSpecialPalletLotId
 
 				IF @intLotStatusId IS NOT NULL
 					AND NOT EXISTS (
@@ -905,8 +909,8 @@ BEGIN TRY
 				,@strParentLotNumber = @strParentLotNumber
 				,@intInputLotId = @intInputLotId
 				,@intInputStorageLocationId = @intInputLotStorageLocationId
-				,@ysnFillPartialPallet=@ysnFillPartialPallet
-				,@intSpecialPalletLotId=@intSpecialPalletLotId
+				,@ysnFillPartialPallet = @ysnFillPartialPallet
+				,@intSpecialPalletLotId = @intSpecialPalletLotId
 
 			IF @intLotStatusId IS NOT NULL
 				AND NOT EXISTS (
