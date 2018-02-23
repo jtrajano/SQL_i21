@@ -30,366 +30,13 @@ where intTaxAuthorityId = @TaxAuthorityId
 		, strNote
 		, intMasterId
 	)
-	SELECT intProductCodeId = 0, strProductCode = '065', strDescription = 'Automotive Gasoline', strProductCodeGroup = 'Automotive Gasoline', strNote = NULL, intMasterId = 24393
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '124', strDescription = 'Gasohol', strProductCodeGroup = 'Automotive Gasoline', strNote = NULL, intMasterId = 24394
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '123', strDescription = 'Alcohol', strProductCodeGroup = 'Automotive Gasoline', strNote = NULL, intMasterId = 24395
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '090', strDescription = 'Additives', strProductCodeGroup = 'Automotive Gasoline', strNote = NULL, intMasterId = 24396
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '125', strDescription = 'Aviation Gasoline', strProductCodeGroup = 'Aviation Gasoline', strNote = NULL, intMasterId = 24397
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '228', strDescription = 'Dyed Diesel Fuel', strProductCodeGroup = 'Dyed Diesel & Kerosene', strNote = NULL, intMasterId = 24398
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '072', strDescription = 'Dyed Kerosene', strProductCodeGroup = 'Dyed Diesel & Kerosene', strNote = NULL, intMasterId = 24399
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '142', strDescription = 'Undyed Kerosene', strProductCodeGroup = 'Dyed Diesel & Kerosene', strNote = NULL, intMasterId = 24400
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '290', strDescription = 'Dyed Biodiesel Fuel', strProductCodeGroup = 'Dyed Diesel & Kerosene', strNote = NULL, intMasterId = 24401
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '153', strDescription = 'Dye Added Fuel Oil', strProductCodeGroup = 'Fuel Oil & Other Special Fuels', strNote = NULL, intMasterId = 24402
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '154', strDescription = 'Undyed Fuel Oil', strProductCodeGroup = 'Fuel Oil & Other Special Fuels', strNote = NULL, intMasterId = 24403
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '160', strDescription = 'Undyed Diesel Fuel', strProductCodeGroup = 'Clear Diesel', strNote = NULL, intMasterId = 24404
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '284', strDescription = 'Undyed Biodiesel Fuel', strProductCodeGroup = 'Clear Diesel', strNote = NULL, intMasterId = 24405
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '122', strDescription = 'Blend Stock', strProductCodeGroup = 'Clear Diesel', strNote = NULL, intMasterId = 24406
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '130', strDescription = 'Jet Fuel', strProductCodeGroup = 'Jet Fuel', strNote = NULL, intMasterId = 24407
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '065', strDescription = 'Gasoline', strProductCodeGroup = 'Gasoline', strNote = NULL, intMasterId = 182522
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '123', strDescription = 'Alcohol', strProductCodeGroup = 'Gasoline', strNote = NULL, intMasterId = 182523
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '125', strDescription = 'Aviation Gasoline', strProductCodeGroup = 'Aviation', strNote = NULL, intMasterId = 182524
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '130', strDescription = 'Jet Fuel', strProductCodeGroup = 'Aviation', strNote = NULL, intMasterId = 182525
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '124', strDescription = 'Gasohol', strProductCodeGroup = 'Gasohol', strNote = NULL, intMasterId = 182526
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '142', strDescription = 'Kerosene - Undyed', strProductCodeGroup = 'Diesel - Undyed', strNote = NULL, intMasterId = 182527
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '160', strDescription = 'Diesel - Undyed', strProductCodeGroup = 'Diesel - Undyed', strNote = NULL, intMasterId = 182528
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '170', strDescription = 'Biodiesel - Undyed', strProductCodeGroup = 'Diesel - Undyed', strNote = NULL, intMasterId = 182529
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '072', strDescription = 'Kerosene - Dyed', strProductCodeGroup = 'Diesel - Dyed', strNote = NULL, intMasterId = 182530
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '228', strDescription = 'Diesel - Dyed', strProductCodeGroup = 'Diesel - Dyed', strNote = NULL, intMasterId = 182531
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '171', strDescription = 'Biodiesel - Dyed', strProductCodeGroup = 'Diesel - Dyed', strNote = NULL, intMasterId = 182532
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'M00', strDescription = 'Methanol (100%)', strProductCodeGroup = 'Gasohol Ethanol Blend', strNote = NULL, intMasterId = 14263
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'M11', strDescription = 'Methanol (11%)', strProductCodeGroup = 'Gasohol Ethanol Blend', strNote = NULL, intMasterId = 14264
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '125', strDescription = 'Aviation Gasoline', strProductCodeGroup = 'Gasohol Ethanol Blend', strNote = NULL, intMasterId = 14265
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '090', strDescription = 'Additive Miscellaneous', strProductCodeGroup = 'Blending Components', strNote = NULL, intMasterId = 14266
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '248', strDescription = 'Benzene', strProductCodeGroup = 'Blending Components', strNote = NULL, intMasterId = 14267
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '198', strDescription = 'Butylene', strProductCodeGroup = 'Blending Components', strNote = NULL, intMasterId = 14268
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '249', strDescription = 'ETBE', strProductCodeGroup = 'Blending Components', strNote = NULL, intMasterId = 14269
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '052', strDescription = 'Ethane', strProductCodeGroup = 'Blending Components', strNote = NULL, intMasterId = 14270
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '196', strDescription = 'Ethylene', strProductCodeGroup = 'Blending Components', strNote = NULL, intMasterId = 14271
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '058', strDescription = 'Isobutane', strProductCodeGroup = 'Blending Components', strNote = NULL, intMasterId = 14272
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '265', strDescription = 'Methane', strProductCodeGroup = 'Blending Components', strNote = NULL, intMasterId = 14273
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '126', strDescription = 'Napthas', strProductCodeGroup = 'Blending Components', strNote = NULL, intMasterId = 14274
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '059', strDescription = 'Pentanes, including isopentanes', strProductCodeGroup = 'Blending Components', strNote = NULL, intMasterId = 14275
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '075', strDescription = 'Propylene', strProductCodeGroup = 'Blending Components', strNote = NULL, intMasterId = 14276
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '223', strDescription = 'Raffinates', strProductCodeGroup = 'Blending Components', strNote = NULL, intMasterId = 14277
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '121', strDescription = 'TAME', strProductCodeGroup = 'Blending Components', strNote = NULL, intMasterId = 14278
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '199', strDescription = 'Toluene', strProductCodeGroup = 'Blending Components', strNote = NULL, intMasterId = 14279
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '091', strDescription = 'Waste Oil', strProductCodeGroup = 'Blending Components', strNote = NULL, intMasterId = 14280
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '076', strDescription = 'Xylene', strProductCodeGroup = 'Blending Components', strNote = NULL, intMasterId = 14281
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'B00', strDescription = 'Biodiesel - Undyed (100%)', strProductCodeGroup = 'Biodiesel - Undyed', strNote = NULL, intMasterId = 14282
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'B11', strDescription = 'Biodiesel - Undyed (11%)', strProductCodeGroup = 'Biodiesel - Undyed', strNote = NULL, intMasterId = 14283
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'D00', strDescription = 'Biodiesel - Dyed (100%)', strProductCodeGroup = 'Biodiesel - Dyed', strNote = NULL, intMasterId = 14284
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'D11', strDescription = 'Biodiesel - Dyed (11%)', strProductCodeGroup = 'Biodiesel - Dyed', strNote = NULL, intMasterId = 14285
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '226', strDescription = 'High Sulfur Diesel - Dyed', strProductCodeGroup = 'Diesel Fuel - Dyed', strNote = NULL, intMasterId = 14286
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '227', strDescription = 'Low Sulfur Diesel - Dyed', strProductCodeGroup = 'Diesel Fuel - Dyed', strNote = NULL, intMasterId = 14287
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '231', strDescription = 'No. 1 Diesel - Dyed-MFT', strProductCodeGroup = 'Diesel Fuel - Dyed', strNote = NULL, intMasterId = 14288
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '232', strDescription = 'No. 1 Diesel - Dyed-SFT', strProductCodeGroup = 'Diesel Fuel - Dyed', strNote = NULL, intMasterId = 14289
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '153', strDescription = 'Diesel Fuel #4- Dyed', strProductCodeGroup = 'Diesel Fuel - Dyed', strNote = NULL, intMasterId = 14290
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '161', strDescription = 'Low Sulfur Diesel #1 - Undyed', strProductCodeGroup = 'Diesel Fuel - Undyed', strNote = NULL, intMasterId = 14291
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '167', strDescription = 'Low Sulfur Diesel #2 - Undyed', strProductCodeGroup = 'Diesel Fuel - Undyed', strNote = NULL, intMasterId = 14292
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '150', strDescription = 'No. 1 Fuel Oil - Undyed', strProductCodeGroup = 'Diesel Fuel - Undyed', strNote = NULL, intMasterId = 14293
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '154', strDescription = 'Diesel Fuel #4 - Undyed', strProductCodeGroup = 'Diesel Fuel - Undyed', strNote = NULL, intMasterId = 14294
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '282', strDescription = 'High Sulfur Diesel #1 - Undyed', strProductCodeGroup = 'Diesel Fuel - Undyed', strNote = NULL, intMasterId = 14295
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '283', strDescription = 'High Sulfur Diesel #2 - Undyed', strProductCodeGroup = 'Diesel Fuel - Undyed', strNote = NULL, intMasterId = 14296
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '224', strDescription = 'Compressed Natural Gas (CNG)', strProductCodeGroup = 'Natural Gas Products', strNote = NULL, intMasterId = 14297
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '225', strDescription = 'Liquid Natural Gas (LNG)', strProductCodeGroup = 'Natural Gas Products', strNote = NULL, intMasterId = 14298
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '152', strDescription = 'Heating Oil', strProductCodeGroup = 'Gasoline', strNote = NULL, intMasterId = 14299
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '130', strDescription = 'Jet Fuel', strProductCodeGroup = 'Gasoline', strNote = NULL, intMasterId = 14300
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '065', strDescription = 'Gasoline', strProductCodeGroup = 'Gasoline', strNote = NULL, intMasterId = 14301
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '145', strDescription = 'Low Sulfur Kerosene - Undyed- MFT', strProductCodeGroup = 'Kerosene - Undyed', strNote = NULL, intMasterId = 14302
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '146', strDescription = 'Low Sulfur Kerosene - Undyed- SFT', strProductCodeGroup = 'Kerosene - Undyed', strNote = NULL, intMasterId = 14303
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '147', strDescription = 'High Sulfur Kerosene - Undyed- MFT', strProductCodeGroup = 'Kerosene - Undyed', strNote = NULL, intMasterId = 14304
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '148', strDescription = 'High Sulfur Kerosene - Undyed- SFT', strProductCodeGroup = 'Kerosene - Undyed', strNote = NULL, intMasterId = 14305
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '073', strDescription = 'Low Sulfur Kerosene - Dyed', strProductCodeGroup = 'Kerosene - Dyed', strNote = NULL, intMasterId = 14306
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '074', strDescription = 'High Sulfur Kerosene - Dyed', strProductCodeGroup = 'Kerosene - Dyed', strNote = NULL, intMasterId = 14307
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '061', strDescription = 'Natural Gasoline', strProductCodeGroup = '', strNote = NULL, intMasterId = 14308
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '285', strDescription = 'Soy Oil', strProductCodeGroup = '', strNote = NULL, intMasterId = 14309
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '100', strDescription = 'Transmix - MFT', strProductCodeGroup = '', strNote = NULL, intMasterId = 14310
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '101', strDescription = 'Transmix - SFT', strProductCodeGroup = '', strNote = NULL, intMasterId = 14311
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '092', strDescription = 'Undefined products - MFT', strProductCodeGroup = '', strNote = NULL, intMasterId = 14312
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '093', strDescription = 'Undefined products - SFT', strProductCodeGroup = '', strNote = NULL, intMasterId = 14313
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E00', strDescription = 'Ethanol (100%) Blended', strProductCodeGroup = 'Alcohol', strNote = NULL, intMasterId = 14314
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E11', strDescription = 'Ethanol (11%) Blended', strProductCodeGroup = 'Alcohol', strNote = NULL, intMasterId = 14315
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E10', strDescription = 'Ethanol (11%) Blended', strProductCodeGroup = 'Alcohol', strNote = 'This Product Code is now obsolete', intMasterId = 142438
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '065', strDescription = 'Gasoline', strProductCodeGroup = 'Gasoline Products', strNote = NULL, intMasterId = 13369
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '124', strDescription = 'Gasohol', strProductCodeGroup = 'Gasoline Products', strNote = NULL, intMasterId = 13370
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '123', strDescription = 'Alcohol', strProductCodeGroup = 'Gasoline Products', strNote = NULL, intMasterId = 13371
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E00', strDescription = 'Ethanol (100%)', strProductCodeGroup = 'Gasoline Products', strNote = NULL, intMasterId = 13372
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E11', strDescription = 'Ethanol (11%)', strProductCodeGroup = 'Gasoline Products', strNote = NULL, intMasterId = 13373
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '091', strDescription = 'Cooking oil/fat (waste oil, etc)', strProductCodeGroup = 'Special Fuel Products -- Undyed', strNote = NULL, intMasterId = 13374
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '142', strDescription = 'Kerosene - Undyed', strProductCodeGroup = 'Special Fuel Products -- Undyed', strNote = NULL, intMasterId = 13375
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '160', strDescription = 'Diesel Fuel - Undyed', strProductCodeGroup = 'Special Fuel Products -- Undyed', strNote = NULL, intMasterId = 13376
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '285', strDescription = 'Soy Oil', strProductCodeGroup = 'Special Fuel Products -- Undyed', strNote = NULL, intMasterId = 13377
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'B00', strDescription = 'Biodiesel - Undyed (100%)', strProductCodeGroup = 'Special Fuel Products -- Undyed', strNote = NULL, intMasterId = 13378
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'B11', strDescription = 'Biodiesel - Undyed (11%)', strProductCodeGroup = 'Special Fuel Products -- Undyed', strNote = NULL, intMasterId = 13379
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '072', strDescription = 'Kerosene - Dyed', strProductCodeGroup = 'Special Fuel Products -- Dyed', strNote = NULL, intMasterId = 13380
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '228', strDescription = 'Diesel Fuel - Dyed', strProductCodeGroup = 'Special Fuel Products -- Dyed', strNote = NULL, intMasterId = 13381
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'D00', strDescription = 'Biodiesel - Dyed (100%)', strProductCodeGroup = 'Special Fuel Products -- Dyed', strNote = NULL, intMasterId = 13382
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'D11', strDescription = 'Biodiesel - Dyed (11%)', strProductCodeGroup = 'Special Fuel Products -- Dyed', strNote = NULL, intMasterId = 13383
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '073', strDescription = 'Dyed 1-K Reporting Only', strProductCodeGroup = 'Aviation and Other Fuel Products', strNote = NULL, intMasterId = 13384
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '125', strDescription = 'Aviation Gasoline (AvGas)', strProductCodeGroup = 'Aviation and Other Fuel Products', strNote = NULL, intMasterId = 13385
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '130', strDescription = 'Jet Fuel', strProductCodeGroup = 'Aviation and Other Fuel Products', strNote = NULL, intMasterId = 13386
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '145', strDescription = 'Undyed 1-K Reporting Only', strProductCodeGroup = 'Aviation and Other Fuel Products', strNote = NULL, intMasterId = 13387
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '054', strDescription = 'Propane (LP)', strProductCodeGroup = 'Alternative Fuels Products - For On Road Use', strNote = NULL, intMasterId = 13388
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '224', strDescription = 'Compressed Natural Gas (CNG)', strProductCodeGroup = 'Alternative Fuels Products - For On Road Use', strNote = NULL, intMasterId = 13389
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '225', strDescription = 'Liquid Natural Gas (LNG)', strProductCodeGroup = 'Alternative Fuels Products - For On Road Use', strNote = NULL, intMasterId = 13390
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '998', strDescription = 'Motor Fuel Product - (gaseous state)', strProductCodeGroup = 'Other - Use When Your Product Is Not Listed', strNote = NULL, intMasterId = 13391
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '999', strDescription = 'Motor Fuel Product - (liquid state)', strProductCodeGroup = 'Other - Use When Your Product Is Not Listed', strNote = NULL, intMasterId = 13392
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E10', strDescription = 'Ethanol (10%)', strProductCodeGroup = 'Gasoline Products', strNote = NULL, intMasterId = 131410
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'B10', strDescription = 'Biodiesel - Undyed (10%)', strProductCodeGroup = 'Special Fuel Products -- Undyed', strNote = NULL, intMasterId = 131411
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'D10', strDescription = 'Biodiesel - Dyed (10%)', strProductCodeGroup = 'Special Fuel Products -- Dyed', strNote = NULL, intMasterId = 131412
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'B02', strDescription = 'Biodiesel - Undyed (2%)', strProductCodeGroup = 'Special Fuel Products -- Undyed', strNote = NULL, intMasterId = 132441
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'B05', strDescription = 'Biodiesel - Undyed (5%)', strProductCodeGroup = 'Special Fuel Products -- Undyed', strNote = NULL, intMasterId = 132442
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'D02', strDescription = 'Biodiesel - Dyed (2%)', strProductCodeGroup = 'Special Fuel Products -- Dyed', strNote = NULL, intMasterId = 132443
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'D05', strDescription = 'Biodiesel - Dyed (5%)', strProductCodeGroup = 'Special Fuel Products -- Dyed', strNote = NULL, intMasterId = 132444
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E06', strDescription = 'Ethanol (6%)', strProductCodeGroup = 'Gasoline Products', strNote = NULL, intMasterId = 132445
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E08', strDescription = 'Ethanol (8%)', strProductCodeGroup = 'Gasoline Products', strNote = NULL, intMasterId = 132446
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E75', strDescription = 'Ethanol (75%)', strProductCodeGroup = 'Gasoline Products', strNote = NULL, intMasterId = 132447
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '054', strDescription = 'Propane (LPG)', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 27408
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '061', strDescription = 'Natural gas Denaturant', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 27409
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '065', strDescription = 'Gasoline', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 27410
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '123', strDescription = 'Ethanol-Alcohol', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 27411
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '124', strDescription = 'Gasohol', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 27412
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '125', strDescription = 'Aviation Gasoline', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 27413
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '130', strDescription = 'Aviation Jet Fuel', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 27414
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '142', strDescription = 'Undyed Kerosene', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 27415
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '160', strDescription = 'Undyed Diesel', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 27416
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '170', strDescription = 'Undyed Biodiesel Blend', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 27417
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '171', strDescription = 'Dyed Biodiesel Blend', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 27418
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '224', strDescription = 'Compressed Natural Gas (CNG)', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 27419
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '228', strDescription = 'Dyed Diesel', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 27420
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'B00', strDescription = 'Undyed Bioeiesel', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 271408
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'D00', strDescription = 'Dyed Biodiesel', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 271409
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '065', strDescription = 'Gasoline', strProductCodeGroup = 'Gasoline', strNote = NULL, intMasterId = 222448
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '061', strDescription = 'Natural Gasoline', strProductCodeGroup = 'Gasoline', strNote = NULL, intMasterId = 222449
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '071', strDescription = 'Gasoline MTBE', strProductCodeGroup = 'Gasoline', strNote = NULL, intMasterId = 222450
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '100', strDescription = 'Transmix', strProductCodeGroup = 'Gasoline', strNote = NULL, intMasterId = 222451
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '122', strDescription = 'Blending Components', strProductCodeGroup = 'Gasoline', strNote = NULL, intMasterId = 222452
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '126', strDescription = 'Naptha', strProductCodeGroup = 'Gasoline', strNote = NULL, intMasterId = 222453
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '225', strDescription = 'Liquid Natural Gas (LNG)', strProductCodeGroup = 'Gasoline', strNote = NULL, intMasterId = 222454
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '243', strDescription = 'Methanol', strProductCodeGroup = 'Gasoline', strNote = NULL, intMasterId = 222455
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '248', strDescription = 'Benzene / Benzine', strProductCodeGroup = 'Gasoline', strNote = NULL, intMasterId = 222456
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E00', strDescription = 'Ethanol (100%)', strProductCodeGroup = 'Ethanol', strNote = NULL, intMasterId = 222457
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E06', strDescription = 'Ethanol (6%)', strProductCodeGroup = 'Ethanol', strNote = NULL, intMasterId = 222458
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E08', strDescription = 'Ethanol (8%)', strProductCodeGroup = 'Ethanol', strNote = NULL, intMasterId = 222459
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E10', strDescription = 'Ethanol (10%)', strProductCodeGroup = 'Ethanol', strNote = NULL, intMasterId = 222460
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E11', strDescription = 'Ethanol (11%)', strProductCodeGroup = 'Ethanol', strNote = NULL, intMasterId = 222461
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E75', strDescription = 'Ethanol (75%)', strProductCodeGroup = 'Ethanol', strNote = NULL, intMasterId = 222462
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '125', strDescription = 'Aviation Gasoline', strProductCodeGroup = 'Aviation Gasoline', strNote = NULL, intMasterId = 222463
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '130', strDescription = 'Jet Fuel', strProductCodeGroup = 'Jet Fuel', strNote = NULL, intMasterId = 222464
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'B00', strDescription = 'Biodiesel - Undyed (100%)', strProductCodeGroup = 'Biodiesel Undyed', strNote = NULL, intMasterId = 222465
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'B02', strDescription = 'Biodiesel - Undyed (2%)', strProductCodeGroup = 'Biodiesel Undyed', strNote = NULL, intMasterId = 222468
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'B05', strDescription = 'Biodiesel - Undyed (5%)', strProductCodeGroup = 'Biodiesel Undyed', strNote = NULL, intMasterId = 222469
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'B10', strDescription = 'Biodiesel - Undyed (10%)', strProductCodeGroup = 'Biodiesel Undyed', strNote = NULL, intMasterId = 222470
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'B11', strDescription = 'Biodiesel - Undyed (11%)', strProductCodeGroup = 'Biodiesel Undyed', strNote = NULL, intMasterId = 222471
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'D00', strDescription = 'Biodiesel - Dyed (100%)', strProductCodeGroup = 'Biodiesel Dyed', strNote = NULL, intMasterId = 222472
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'D02', strDescription = 'Biodiesel - Dyed (2%)', strProductCodeGroup = 'Biodiesel Dyed', strNote = NULL, intMasterId = 222473
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'D05', strDescription = 'Biodiesel - Dyed (5%)', strProductCodeGroup = 'Biodiesel Dyed', strNote = NULL, intMasterId = 222474
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'D10', strDescription = 'Biodiesel - Dyed (10%)', strProductCodeGroup = 'Biodiesel Dyed', strNote = NULL, intMasterId = 222475
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '001', strDescription = 'Crude Oil', strProductCodeGroup = 'Crude Oil', strNote = NULL, intMasterId = 222476
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '228', strDescription = 'Diesel Fuel - Dyed', strProductCodeGroup = 'Diesel Dyed', strNote = NULL, intMasterId = 222477
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '142', strDescription = 'Kerosene - Undyed', strProductCodeGroup = 'Diesel Undyed', strNote = NULL, intMasterId = 222478
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '145', strDescription = 'Low Sulfur Kerosene - Undyed', strProductCodeGroup = 'Diesel Undyed', strNote = NULL, intMasterId = 222479
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '147', strDescription = 'High Sulfur Kerosene - Undyed', strProductCodeGroup = 'Diesel Undyed', strNote = NULL, intMasterId = 222480
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '150', strDescription = 'No. 1 Fuel Oil - Undyed', strProductCodeGroup = 'Diesel Undyed', strNote = NULL, intMasterId = 222481
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '152', strDescription = 'Heating Oil', strProductCodeGroup = 'Diesel Undyed', strNote = NULL, intMasterId = 222482
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '154', strDescription = 'Diesel Fuel #4 - Undyed', strProductCodeGroup = 'Diesel Undyed', strNote = NULL, intMasterId = 222483
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '160', strDescription = 'Diesel Fuel - Undyed', strProductCodeGroup = 'Diesel Undyed', strNote = NULL, intMasterId = 222484
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '161', strDescription = 'Low Sulfur Diesel #1 - Undyed', strProductCodeGroup = 'Diesel Undyed', strNote = NULL, intMasterId = 222485
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '167', strDescription = 'Low Sulfur Diesel #2 - Undyed', strProductCodeGroup = 'Diesel Undyed', strNote = NULL, intMasterId = 222486
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '281', strDescription = 'Mineral Oils', strProductCodeGroup = 'Diesel Undyed', strNote = NULL, intMasterId = 222487
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '282', strDescription = 'High Sulfur Diesel #1 - Undyed', strProductCodeGroup = 'Diesel Undyed', strNote = NULL, intMasterId = 222488
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '283', strDescription = 'High Sulfur Diesel #2 - Undyed', strProductCodeGroup = 'Diesel Undyed', strNote = NULL, intMasterId = 222489
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '224', strDescription = 'Compressed Natural Gas (CNG)', strProductCodeGroup = 'Other', strNote = NULL, intMasterId = 222491
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '054', strDescription = 'Propane ', strProductCodeGroup = 'Other', strNote = NULL, intMasterId = 222492
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '090', strDescription = 'Additive Misc', strProductCodeGroup = 'Other', strNote = NULL, intMasterId = 222495
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '055', strDescription = 'Butane, including butane-propane mix', strProductCodeGroup = 'Other', strNote = NULL, intMasterId = 222496
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '198', strDescription = 'Butylene', strProductCodeGroup = 'Other', strNote = NULL, intMasterId = 222497
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '249', strDescription = 'ETBE', strProductCodeGroup = 'Other', strNote = NULL, intMasterId = 222498
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '052', strDescription = 'Ethane', strProductCodeGroup = 'Other', strNote = NULL, intMasterId = 222499
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '196', strDescription = 'Ethylene', strProductCodeGroup = 'Other', strNote = NULL, intMasterId = 222500
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '058', strDescription = 'Isobutane', strProductCodeGroup = 'Other', strNote = NULL, intMasterId = 222501
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '279', strDescription = 'Marine Diesel Oil', strProductCodeGroup = 'Other', strNote = NULL, intMasterId = 222507
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '280', strDescription = 'Marine Gas Oil', strProductCodeGroup = 'Other', strNote = NULL, intMasterId = 222508
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '093', strDescription = 'MTBE', strProductCodeGroup = 'Other', strNote = NULL, intMasterId = 222509
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '265', strDescription = 'Methane', strProductCodeGroup = 'Other', strNote = NULL, intMasterId = 222510
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '960', strDescription = 'Organic Oil (food)', strProductCodeGroup = 'Other', strNote = NULL, intMasterId = 222511
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '059', strDescription = 'Pentanes, including isopentanes', strProductCodeGroup = 'Other', strNote = NULL, intMasterId = 222512
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '075', strDescription = 'Propylene', strProductCodeGroup = 'Other', strNote = NULL, intMasterId = 222513
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '285', strDescription = 'Soy Oil (improcessed)', strProductCodeGroup = 'Other', strNote = NULL, intMasterId = 222514
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '223', strDescription = 'Raffinates', strProductCodeGroup = 'Other', strNote = NULL, intMasterId = 222515
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '121', strDescription = 'TAME', strProductCodeGroup = 'Other', strNote = NULL, intMasterId = 222516
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '199', strDescription = 'Toluene', strProductCodeGroup = 'Other', strNote = NULL, intMasterId = 222517
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '091', strDescription = 'Waste Oil', strProductCodeGroup = 'Other', strNote = NULL, intMasterId = 222518
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '076', strDescription = 'Xylene', strProductCodeGroup = 'Other', strNote = NULL, intMasterId = 222519
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '077', strDescription = 'Excluded Liquid', strProductCodeGroup = 'Other', strNote = NULL, intMasterId = 222520
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '092', strDescription = 'Undefined Products', strProductCodeGroup = 'Other', strNote = NULL, intMasterId = 222521
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '054', strDescription = 'Propane', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 332586
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '065', strDescription = 'Gasoline', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 332587
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '072', strDescription = 'Kerosene - Dyed', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 332588
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '123', strDescription = 'Alcohol', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 332589
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '124', strDescription = 'Gasohol', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 332590
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '125', strDescription = 'Aviation Gasoline', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 332591
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '130', strDescription = 'Jet Fuel', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 332592
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '142', strDescription = 'Kerosene - Undyed', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 332593
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '160', strDescription = 'Diesel - Undyed', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 332594
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '224', strDescription = 'Compressed Natural Gas (CNG)', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 332595
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '226', strDescription = 'Diesel – High Sulfur Dyed', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 332596
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '227', strDescription = 'Diesel – Low Sulfur Dyed', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 332597
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '241', strDescription = 'Ethanol', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 332598
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '243', strDescription = 'Methanol', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 332599
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '284', strDescription = 'BioDiesel – Undyed', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 332600
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '290', strDescription = 'Biodiesel – Dyed', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 332601
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '054', strDescription = 'Propane', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 372533
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '061', strDescription = 'Natural Gasoline', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 372535
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '065', strDescription = 'Gasoline', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 372536
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '072', strDescription = 'Kerosene - Dyed', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 372537
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '092', strDescription = 'Undefined Products', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 372538
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '100', strDescription = 'Transmix', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 372539
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '122', strDescription = 'All Other Blending Components', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 372540
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '125', strDescription = 'Aviation Gasoline', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 372541
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '130', strDescription = 'Jet Fuel', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 372542
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '142', strDescription = 'Kerosene - Undyed', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 372543
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '160', strDescription = 'Diesel - Undyed ', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 372544
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '170', strDescription = 'Biodiesel - Undyed (non UCO)', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 372545
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '171', strDescription = 'Biodiesel - Dyed (non UCO)', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 372547
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '175', strDescription = 'Residual Fuel Oil', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 372548
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '224', strDescription = 'Compressed Natural Gas (CNG)', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 372549
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '225', strDescription = 'Liquid Natural Gas (LNG)', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 372550
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '228', strDescription = 'Diesel - Dyed', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 372551
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '279', strDescription = 'Marine Diesel Oil', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 372552
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '280', strDescription = 'Marine Gas Oil', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 372553
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'B20', strDescription = 'Used Cooking Oil - Undyed (20%)', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 372554
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'D20', strDescription = 'Used Cooking Oil - Dyed (20%)', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 372555
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E00', strDescription = 'Ethanol (100%) ', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 372556
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E10', strDescription = 'Gasoline Eth-Blended', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 372557
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E85', strDescription = 'Gasoline Eth-Blended Flex', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 372558
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E99', strDescription = 'Ethanol (99% Denatured Alcohol)', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 372559
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '125', strDescription = 'Aviation Gasoline', strProductCodeGroup = 'Aircraft Fuel', strNote = NULL, intMasterId = 472560
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '130', strDescription = 'Jet Fuel', strProductCodeGroup = 'Aircraft Fuel', strNote = NULL, intMasterId = 472561
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'D05', strDescription = 'Biodiesel - Dyed (5%)', strProductCodeGroup = 'Special Fuel - Dyed', strNote = NULL, intMasterId = 472562
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'D20', strDescription = 'Biodiesel - Dyed (20%)', strProductCodeGroup = 'Special Fuel - Dyed', strNote = NULL, intMasterId = 472563
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'D99', strDescription = 'Biodiesel - Dyed (99%)', strProductCodeGroup = 'Special Fuel - Dyed', strNote = NULL, intMasterId = 472564
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'D00', strDescription = 'Biodiesel - Dyed (100%)', strProductCodeGroup = 'Special Fuel - Dyed', strNote = NULL, intMasterId = 472565
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '228', strDescription = 'Diesel Fuel - Dyed', strProductCodeGroup = 'Special Fuel - Dyed', strNote = NULL, intMasterId = 472566
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '072', strDescription = 'Kerosene - Dyed', strProductCodeGroup = 'Special Fuel - Dyed', strNote = NULL, intMasterId = 472567
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '090', strDescription = 'Additive Misc', strProductCodeGroup = 'Motor Fuel', strNote = NULL, intMasterId = 472568
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '123', strDescription = 'Alcohol', strProductCodeGroup = 'Motor Fuel', strNote = NULL, intMasterId = 472569
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '055', strDescription = 'Butane', strProductCodeGroup = 'Motor Fuel', strNote = NULL, intMasterId = 472570
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E10', strDescription = 'Ethanol (10%)', strProductCodeGroup = 'Motor Fuel', strNote = NULL, intMasterId = 472571
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E85', strDescription = 'Ethanol (85%)', strProductCodeGroup = 'Motor Fuel', strNote = NULL, intMasterId = 472572
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E00', strDescription = 'Ethanol (100%)', strProductCodeGroup = 'Motor Fuel', strNote = NULL, intMasterId = 472573
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '065', strDescription = 'Gasoline', strProductCodeGroup = 'Motor Fuel', strNote = NULL, intMasterId = 472574
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'M00', strDescription = 'Methanol', strProductCodeGroup = 'Motor Fuel', strNote = NULL, intMasterId = 472575
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'B05', strDescription = 'Biodiesel - Undyed (5%)', strProductCodeGroup = 'Special Fuel - Undyed', strNote = NULL, intMasterId = 472576
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'B20', strDescription = 'Biodiesel - Undyed (20%)', strProductCodeGroup = 'Special Fuel - Undyed', strNote = NULL, intMasterId = 472577
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'B99', strDescription = 'Biodiesel - Undyed (99%)', strProductCodeGroup = 'Special Fuel - Undyed', strNote = NULL, intMasterId = 472578
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'B00', strDescription = 'Biodiesel - Undyed (100%)', strProductCodeGroup = 'Special Fuel - Undyed', strNote = NULL, intMasterId = 472579
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '152', strDescription = 'Heating Oil', strProductCodeGroup = 'Special Fuel - Undyed', strNote = NULL, intMasterId = 472580
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '160', strDescription = 'Diesel', strProductCodeGroup = 'Special Fuel - Undyed', strNote = NULL, intMasterId = 472581
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '167', strDescription = 'Low Sulfur Diesel #2 - Undyed', strProductCodeGroup = 'Special Fuel - Undyed', strNote = NULL, intMasterId = 472582
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '100', strDescription = 'Transmix', strProductCodeGroup = 'Special Fuel - Undyed', strNote = NULL, intMasterId = 472583
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '091', strDescription = 'Waste Oil', strProductCodeGroup = 'Special Fuel - Undyed', strNote = NULL, intMasterId = 472584
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '142', strDescription = 'Kerosene - Undyed', strProductCodeGroup = 'Special Fuel - Undyed', strNote = NULL, intMasterId = 472585
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '150', strDescription = 'No. 1 Fuel Oil – Undyed ', strProductCodeGroup = 'CD - Clear Diesel', strNote = NULL, intMasterId = 35737
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '154', strDescription = 'Diesel Fuel #4 – Undyed ', strProductCodeGroup = 'CD - Clear Diesel', strNote = NULL, intMasterId = 35738
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '160', strDescription = 'Diesel Fuel – Undyed ', strProductCodeGroup = 'CD - Clear Diesel', strNote = NULL, intMasterId = 35739
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '161', strDescription = 'Low Sulfur diesel #1 – Undyed ', strProductCodeGroup = 'CD - Clear Diesel', strNote = NULL, intMasterId = 35740
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '167', strDescription = 'Low Sulfur Diesel #2 – Undyed ', strProductCodeGroup = 'CD - Clear Diesel', strNote = NULL, intMasterId = 35741
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '170', strDescription = 'Biodiesel – Undyed ', strProductCodeGroup = 'CD - Clear Diesel', strNote = NULL, intMasterId = 35742
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '282', strDescription = '#1 High Sulfur Diesel – Undyed ', strProductCodeGroup = 'CD - Clear Diesel', strNote = NULL, intMasterId = 35743
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '283', strDescription = '#2 High Sulfur Diesel – Undyed ', strProductCodeGroup = 'CD - Clear Diesel', strNote = NULL, intMasterId = 35744
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '313', strDescription = 'Ultra Low Sulfur Diesel – Undyed ', strProductCodeGroup = 'CD - Clear Diesel', strNote = NULL, intMasterId = 35745
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'B00 ', strDescription = 'Biodiesel - Undyed (100%) ', strProductCodeGroup = 'CD - Clear Diesel', strNote = NULL, intMasterId = 35746
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'B02', strDescription = 'Biodiesel - Undyed (2%)', strProductCodeGroup = 'CD - Clear Diesel', strNote = NULL, intMasterId = 35747
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'B05', strDescription = 'Biodiesel - Undyed (5%)', strProductCodeGroup = 'CD - Clear Diesel', strNote = NULL, intMasterId = 35748
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'B10', strDescription = 'Biodiesel - Undyed (10%)', strProductCodeGroup = 'CD - Clear Diesel', strNote = NULL, intMasterId = 35749
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'B11', strDescription = 'Biodiesel - Undyed (11%)', strProductCodeGroup = 'CD - Clear Diesel', strNote = NULL, intMasterId = 35750
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'B20', strDescription = 'Biodiesel - Undyed (20%)', strProductCodeGroup = 'CD - Clear Diesel', strNote = NULL, intMasterId = 35751
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'B99', strDescription = 'Biodiesel - Undyed (99%)', strProductCodeGroup = 'CD - Clear Diesel', strNote = NULL, intMasterId = 35752
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '224', strDescription = 'Compressed Natural Gas (CNG) ', strProductCodeGroup = 'CG - Compressed Natural Gas', strNote = NULL, intMasterId = 35753
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '123', strDescription = 'Alcohol ', strProductCodeGroup = 'GA - Gasoline', strNote = NULL, intMasterId = 35754
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '124', strDescription = 'Gasohol Blend (Rollup Code) ', strProductCodeGroup = 'GA - Gasoline', strNote = NULL, intMasterId = 35755
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '125', strDescription = 'Aviation Gasoline ', strProductCodeGroup = 'GA - Gasoline', strNote = NULL, intMasterId = 35756
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '065', strDescription = 'Gasoline ', strProductCodeGroup = 'GA - Gasoline', strNote = NULL, intMasterId = 35757
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '071', strDescription = 'Gasoline MTBE ', strProductCodeGroup = 'GA - Gasoline', strNote = NULL, intMasterId = 35758
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E00 ', strDescription = 'Ethanol (100%) ', strProductCodeGroup = 'GA - Gasoline', strNote = NULL, intMasterId = 35759
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E06', strDescription = 'Ethanol (6%)', strProductCodeGroup = 'GA - Gasoline', strNote = NULL, intMasterId = 35760
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E08', strDescription = 'Ethanol (8%)', strProductCodeGroup = 'GA - Gasoline', strNote = NULL, intMasterId = 35761
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E10', strDescription = 'Ethanol (10%)', strProductCodeGroup = 'GA - Gasoline', strNote = NULL, intMasterId = 35762
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E11', strDescription = 'Ethanol (11%)', strProductCodeGroup = 'GA - Gasoline', strNote = NULL, intMasterId = 35763
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E75', strDescription = 'Ethanol (75%)', strProductCodeGroup = 'GA - Gasoline', strNote = NULL, intMasterId = 35764
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E85', strDescription = 'Ethanol (85%)', strProductCodeGroup = 'GA - Gasoline', strNote = NULL, intMasterId = 35765
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'M00 ', strDescription = 'Methanol (100%) ', strProductCodeGroup = 'GA - Gasoline', strNote = NULL, intMasterId = 35766
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'M11', strDescription = 'Methanol (11%)', strProductCodeGroup = 'GA - Gasoline', strNote = NULL, intMasterId = 35767
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '153', strDescription = 'Diesel Fuel #4 – Dyed ', strProductCodeGroup = 'HD - High-Sulfur Dyed Diesel', strNote = NULL, intMasterId = 35768
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '226', strDescription = 'High Sulfur Diesel – Dyed ', strProductCodeGroup = 'HD - High-Sulfur Dyed Diesel', strNote = NULL, intMasterId = 35769
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '228', strDescription = 'Diesel Fuel – Dyed ', strProductCodeGroup = 'HD - High-Sulfur Dyed Diesel', strNote = NULL, intMasterId = 35770
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '074', strDescription = 'High Sulfur Kerosene – Dyed ', strProductCodeGroup = 'HD - High-Sulfur Dyed Diesel', strNote = NULL, intMasterId = 35771
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '130', strDescription = 'Jet Fuel ', strProductCodeGroup = 'KO - Kerosene', strNote = NULL, intMasterId = 35772
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '142', strDescription = 'Kerosene – Undyed ', strProductCodeGroup = 'KO - Kerosene', strNote = NULL, intMasterId = 35773
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '145', strDescription = 'Low Sulfur Kerosene – Undyed ', strProductCodeGroup = 'KO - Kerosene', strNote = NULL, intMasterId = 35774
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '147', strDescription = 'High Sulfur Kerosene – Undyed ', strProductCodeGroup = 'KO - Kerosene', strNote = NULL, intMasterId = 35775
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '171', strDescription = 'Biodiesel – Dyed ', strProductCodeGroup = 'LD - Low-Sulfur Dyed Diesel', strNote = NULL, intMasterId = 35776
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '227', strDescription = 'Low Sulfur Diesel – Dyed ', strProductCodeGroup = 'LD - Low-Sulfur Dyed Diesel', strNote = NULL, intMasterId = 35777
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '231', strDescription = 'No 1 Diesel – Dyed ', strProductCodeGroup = 'LD - Low-Sulfur Dyed Diesel', strNote = NULL, intMasterId = 35778
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '314', strDescription = 'Ultra Low Sulfur Diesel – Dyed ', strProductCodeGroup = 'LD - Low-Sulfur Dyed Diesel', strNote = NULL, intMasterId = 35779
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '072', strDescription = 'Kerosene – Dyed ', strProductCodeGroup = 'LD - Low-Sulfur Dyed Diesel', strNote = NULL, intMasterId = 35780
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '073', strDescription = 'Low Sulfur Kerosene – Dyed ', strProductCodeGroup = 'LD - Low-Sulfur Dyed Diesel', strNote = NULL, intMasterId = 35781
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'D00 ', strDescription = 'Biodiesel - Dyed (100%) ', strProductCodeGroup = 'LD - Low-Sulfur Dyed Diesel', strNote = NULL, intMasterId = 35782
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'D02', strDescription = 'Biodiesel - Dyed (2%)', strProductCodeGroup = 'LD - Low-Sulfur Dyed Diesel', strNote = NULL, intMasterId = 35783
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'D05', strDescription = 'Biodiesel - Dyed (5%)', strProductCodeGroup = 'LD - Low-Sulfur Dyed Diesel', strNote = NULL, intMasterId = 35784
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'D10', strDescription = 'Biodiesel - Dyed (10%)', strProductCodeGroup = 'LD - Low-Sulfur Dyed Diesel', strNote = NULL, intMasterId = 35785
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'D11', strDescription = 'Biodiesel - Dyed (11%)', strProductCodeGroup = 'LD - Low-Sulfur Dyed Diesel', strNote = NULL, intMasterId = 35786
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'D20', strDescription = 'Biodiesel - Dyed (20%)', strProductCodeGroup = 'LD - Low-Sulfur Dyed Diesel', strNote = NULL, intMasterId = 35787
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'D99', strDescription = 'Biodiesel - Dyed (99%)', strProductCodeGroup = 'LD - Low-Sulfur Dyed Diesel', strNote = NULL, intMasterId = 35788
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '225', strDescription = 'Liquid Natural Gas (LNG) ', strProductCodeGroup = 'LG - Liquid Natural Gas', strNote = NULL, intMasterId = 35789
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '100', strDescription = 'Transmix ', strProductCodeGroup = 'OT - Other', strNote = NULL, intMasterId = 35790
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '121', strDescription = 'TAME ', strProductCodeGroup = 'OT - Other', strNote = NULL, intMasterId = 35791
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '122', strDescription = 'Blending Components ', strProductCodeGroup = 'OT - Other', strNote = NULL, intMasterId = 35792
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '126', strDescription = 'Napthas ', strProductCodeGroup = 'OT - Other', strNote = NULL, intMasterId = 35793
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '152', strDescription = 'Heating Oil ', strProductCodeGroup = 'OT - Other', strNote = NULL, intMasterId = 35794
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '175', strDescription = 'Residual Fuel Oil ', strProductCodeGroup = 'OT - Other', strNote = NULL, intMasterId = 35795
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '188', strDescription = 'Asphalt ', strProductCodeGroup = 'OT - Other', strNote = NULL, intMasterId = 35796
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '196', strDescription = 'Ethylene ', strProductCodeGroup = 'OT - Other', strNote = NULL, intMasterId = 35797
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '198', strDescription = 'Butylene ', strProductCodeGroup = 'OT - Other', strNote = NULL, intMasterId = 35798
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '199', strDescription = 'Toluene ', strProductCodeGroup = 'OT - Other', strNote = NULL, intMasterId = 35799
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '223', strDescription = 'Raffinates ', strProductCodeGroup = 'OT - Other', strNote = NULL, intMasterId = 35800
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '248', strDescription = 'Benzene ', strProductCodeGroup = 'OT - Other', strNote = NULL, intMasterId = 35801
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '249', strDescription = 'ETBE ', strProductCodeGroup = 'OT - Other', strNote = NULL, intMasterId = 35802
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '259', strDescription = 'Hydrogen ', strProductCodeGroup = 'OT - Other', strNote = NULL, intMasterId = 35803
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '265', strDescription = 'Methane ', strProductCodeGroup = 'OT - Other', strNote = NULL, intMasterId = 35804
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '279', strDescription = 'Marine Diesel Oil ', strProductCodeGroup = 'OT - Other', strNote = NULL, intMasterId = 35805
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '280', strDescription = 'Marine Gas Oil ', strProductCodeGroup = 'OT - Other', strNote = NULL, intMasterId = 35806
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '281', strDescription = 'Mineral Oils ', strProductCodeGroup = 'OT - Other', strNote = NULL, intMasterId = 35807
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '285', strDescription = 'Soy Oil ', strProductCodeGroup = 'OT - Other', strNote = NULL, intMasterId = 35808
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '301', strDescription = 'CBOB ', strProductCodeGroup = 'OT - Other', strNote = NULL, intMasterId = 35809
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '302', strDescription = 'RBOB ', strProductCodeGroup = 'OT - Other', strNote = NULL, intMasterId = 35810
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '960', strDescription = 'Organic Oils ', strProductCodeGroup = 'OT - Other', strNote = NULL, intMasterId = 35811
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '001', strDescription = 'Crude Oil ', strProductCodeGroup = 'OT - Other', strNote = NULL, intMasterId = 35812
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '052', strDescription = 'Ethane ', strProductCodeGroup = 'OT - Other', strNote = NULL, intMasterId = 35813
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '055', strDescription = 'Butane, including butane-propane mix ', strProductCodeGroup = 'OT - Other', strNote = NULL, intMasterId = 35814
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '058', strDescription = 'Isobutane ', strProductCodeGroup = 'OT - Other', strNote = NULL, intMasterId = 35815
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '059', strDescription = 'Pentanes, including isopentanes ', strProductCodeGroup = 'OT - Other', strNote = NULL, intMasterId = 35816
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '061', strDescription = 'Natural Gasoline ', strProductCodeGroup = 'OT - Other', strNote = NULL, intMasterId = 35817
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '075', strDescription = 'Propylene ', strProductCodeGroup = 'OT - Other', strNote = NULL, intMasterId = 35818
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '076', strDescription = 'Xylene ', strProductCodeGroup = 'OT - Other', strNote = NULL, intMasterId = 35819
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '077', strDescription = 'Excluded Liquid (Mineral Oil) ', strProductCodeGroup = 'OT - Other', strNote = NULL, intMasterId = 35820
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '090', strDescription = 'Additive Miscellaneous ', strProductCodeGroup = 'OT - Other', strNote = NULL, intMasterId = 35821
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '091', strDescription = 'Waste Oil ', strProductCodeGroup = 'OT - Other', strNote = NULL, intMasterId = 35822
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '092', strDescription = 'Undefined Products ', strProductCodeGroup = 'OT - Other', strNote = NULL, intMasterId = 35823
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '093', strDescription = 'MTBE ', strProductCodeGroup = 'OT - Other', strNote = NULL, intMasterId = 35824
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '054', strDescription = 'Propane ', strProductCodeGroup = 'PR - Propane', strNote = NULL, intMasterId = 35825
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E15', strDescription = 'Ethanol (15%)', strProductCodeGroup = 'Gasoline Products', strNote = NULL, intMasterId = 13826
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E85', strDescription = 'Ethanol (85%)', strProductCodeGroup = 'Gasoline Products', strNote = NULL, intMasterId = 13827
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E98', strDescription = 'Ethanol (98%)', strProductCodeGroup = 'Gasoline Products', strNote = NULL, intMasterId = 13828
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'B20', strDescription = 'Biodiesel - Undyed (20%)', strProductCodeGroup = 'Special Fuel Products -- Undyed', strNote = NULL, intMasterId = 13829
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '065', strDescription = 'Gasoline', strProductCodeGroup = 'Gas', strNote = '065 - Gasoline (Gas)', intMasterId = 31847
+	SELECT intProductCodeId = 0, strProductCode = '065', strDescription = 'Gasoline', strProductCodeGroup = 'Gas', strNote = '065 - Gasoline (Gas)', intMasterId = 31847
 	UNION ALL SELECT intProductCodeId = 0, strProductCode = '071', strDescription = 'Gasoline MTBE', strProductCodeGroup = 'Gas', strNote = '071 - Gasoline MTBE (Gas)', intMasterId = 31848
 	UNION ALL SELECT intProductCodeId = 0, strProductCode = '124', strDescription = 'Gasohol', strProductCodeGroup = 'Ethanol', strNote = '124 - Gasohol (Eth)', intMasterId = 31850
 	UNION ALL SELECT intProductCodeId = 0, strProductCode = '125', strDescription = 'Aviation Gasoline', strProductCodeGroup = 'Gas', strNote = '125 - Aviation Gasoline (Gas)', intMasterId = 31851
 	UNION ALL SELECT intProductCodeId = 0, strProductCode = '142', strDescription = 'Kerosene Undyed', strProductCodeGroup = 'Special Fuels', strNote = '142 - Kerosene-Undyed (Spf)', intMasterId = 31852
 	UNION ALL SELECT intProductCodeId = 0, strProductCode = '145', strDescription = 'Lo Sulfur Kero Undyed', strProductCodeGroup = 'Special Fuels', strNote = '145 - Lo Sulf Kero-Undyed(Spf)', intMasterId = 31853
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = '147', strDescription = 'Hi Sulf Kero Undyed', strProductCodeGroup = 'Special Fuels', strNote = '147 - Hi Sulf Kero-Undyed(Spf)', intMasterId = 31855
+	UNION ALL SELECT intProductCodeId = 0, strProductCode = '147', strDescription = 'Hi Sulfur Kero Undyed', strProductCodeGroup = 'Special Fuels', strNote = '147 - Hi Sulf Kero-Undyed(Spf)', intMasterId = 31855
 	UNION ALL SELECT intProductCodeId = 0, strProductCode = '150', strDescription = '#1 Fuel Oil Undyed', strProductCodeGroup = 'Special Fuels', strNote = '150 - #1 Fuel Oil-Undyed (Spf)', intMasterId = 31856
 	UNION ALL SELECT intProductCodeId = 0, strProductCode = '154', strDescription = 'Diesel #4 Undyed', strProductCodeGroup = 'Special Fuels', strNote = '154 - Diesel #4-Undyed (Spf)', intMasterId = 31857
 	UNION ALL SELECT intProductCodeId = 0, strProductCode = '160', strDescription = 'Diesel Undyed', strProductCodeGroup = 'Special Fuels', strNote = '160 - Diesel-Undyed (Spf)', intMasterId = 31858
@@ -409,6 +56,19 @@ where intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'CNG', strDescription = 'CNG', strProductCodeGroup = 'Alternative Fuels', strNote = NULL, intMasterId = 31873
 	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'LNG', strDescription = 'LNG', strProductCodeGroup = 'Alternative Fuels', strNote = NULL, intMasterId = 31874
 	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'A-55', strDescription = 'A-55', strProductCodeGroup = 'Alternative Fuels', strNote = NULL, intMasterId = 31875
+	UNION ALL SELECT intProductCodeId = 0, strProductCode = '072', strDescription = 'Kerosene Dyed', strProductCodeGroup = 'Special Fuels', strNote = '072 - Kerosene-dye added(Spf)', intMasterId = 31876
+	UNION ALL SELECT intProductCodeId = 0, strProductCode = '073', strDescription = 'Lo Sulfur Kero Dyed', strProductCodeGroup = 'Special Fuels', strNote = '073 - LoSulf Kero-dye add(Spf)', intMasterId = 31877
+	UNION ALL SELECT intProductCodeId = 0, strProductCode = '074', strDescription = 'Hi Sulfur Kero Dyed', strProductCodeGroup = 'Special Fuels', strNote = '074 - HiSulf Kero-dye add(Spf)', intMasterId = 31878
+	UNION ALL SELECT intProductCodeId = 0, strProductCode = '092', strDescription = 'Undefined Products', strProductCodeGroup = 'Undefined', strNote = '092 - Undefined Products', intMasterId = 31879
+	UNION ALL SELECT intProductCodeId = 0, strProductCode = '153', strDescription = '#4 Diesel Dyed', strProductCodeGroup = 'Special Fuels', strNote = '153 - #4 Diesel-Dye Added(Spf)', intMasterId = 31880
+	UNION ALL SELECT intProductCodeId = 0, strProductCode = '171', strDescription = 'Biodiesel Dyed', strProductCodeGroup = 'Special Fuels', strNote = '171 - Biodiesel - Dyed (Spf)', intMasterId = 31881
+	UNION ALL SELECT intProductCodeId = 0, strProductCode = '226', strDescription = 'Hi Sulfur Dyed', strProductCodeGroup = 'Special Fuels', strNote = '226 - Hi Sulfur - Dye Add(Spf)', intMasterId = 31882
+	UNION ALL SELECT intProductCodeId = 0, strProductCode = '227', strDescription = 'Lo Sulfur Dyed', strProductCodeGroup = 'Special Fuels', strNote = '227 - Lo Sulfur - Dye Add(Spf)', intMasterId = 31883
+	UNION ALL SELECT intProductCodeId = 0, strProductCode = '228', strDescription = 'Diesel Dyed', strProductCodeGroup = 'Special Fuels', strNote = '228 - Diesel Fuel-Dye Add(Spf)', intMasterId = 31884
+	UNION ALL SELECT intProductCodeId = 0, strProductCode = '231', strDescription = '#1 Diesel Dyed', strProductCodeGroup = 'Special Fuels', strNote = '231 - #1 Diesel-Dye Added(Spf)', intMasterId = 31885
+	UNION ALL SELECT intProductCodeId = 0, strProductCode = '284', strDescription = 'Biodiesel', strProductCodeGroup = 'Special Fuels', strNote = '284 - BioDiesel Fuel', intMasterId = 31886
+	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'D05', strDescription = 'Biodiesel Dyed - 5%', strProductCodeGroup = 'Special Fuels', strNote = 'D05 - BioDiesel/Dyed (D05)', intMasterId = 31888
+	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E00', strDescription = 'Ethanol - 100%', strProductCodeGroup = 'Ethanol', strNote = 'E00 - Ethanol (100)', intMasterId = 31889
 
 	EXEC uspTFUpgradeProductCodes @TaxAuthorityCode = @TaxAuthorityCode, @ProductCodes = @ProductCodes
 
@@ -535,7 +195,7 @@ where intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'Form 41164', strFormName = 'Alternative Fuels Excise Tax Return (Quarterly)', strScheduleCode = 'Deductions', strScheduleName = 'Gallons for Deductions', strType = 'A-55', strNote = '', strTransactionType = 'Invoice', intSort = 610, strSPInventory = 'uspTFGetInventoryTax', strSPInvoice = 'uspTFGetInvoiceTax', strSPRunReport = 'uspTFGenerateNMAlternative', intMasterId = 311202, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'Form 41164', strFormName = 'Alternative Fuels Excise Tax Return (Quarterly)', strScheduleCode = '', strScheduleName = 'Main Form', strType = '', strNote = 'Alternative Fuels Excise Tax Return Main Form', strTransactionType = 'Inventory', intSort = 620, strSPInventory = '', strSPInvoice = '', strSPRunReport = 'uspTFGenerateNMAlternative', intMasterId = 311203, intComponentTypeId = 2
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'Form 41306', strFormName = 'Combined Fuel Tax Report', strScheduleCode = 'A', strScheduleName = 'Gasoline and Ethanol Blended Fuel Sales Delivered into Counties/Locations', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 450, strSPInventory = 'uspTFGetInventoryTax', strSPInvoice = 'uspTFGetInvoiceTax', strSPRunReport = 'uspTFGenerateNMCombined', intMasterId = 311204, intComponentTypeId = 1
-	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'Form 41306', strFormName = 'Combined Fuel Tax Report', strScheduleCode = 'Form-41306', strScheduleName = '', strType = '', strNote = '', strTransactionType = '', intSort = 460, strSPInventory = 'uspTFGetInventoryTax', strSPInvoice = 'uspTFGetInvoiceTax', strSPRunReport = 'uspTFGenerateNMCombined', intMasterId = 311205, intComponentTypeId = 4
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'Form 41306', strFormName = 'Combined Fuel Tax Report', strScheduleCode = 'Form 41306', strScheduleName = 'Excel Export', strType = '', strNote = '', strTransactionType = '', intSort = 460, strSPInventory = 'uspTFGetInventoryTax', strSPInvoice = 'uspTFGetInvoiceTax', strSPRunReport = 'uspTFGenerateNMCombined', intMasterId = 311205, intComponentTypeId = 4	
 	
 	EXEC uspTFUpgradeReportingComponents @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponent = @ReportingComponent
 
@@ -641,26 +301,27 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 		, strType
 		, intMasterId
 	)
-	SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 316902
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 316918
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 316934
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Gasoline', intMasterId = 316843
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Gasoline', intMasterId = 316829
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Gasoline', intMasterId = 316815
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Ethanol', intMasterId = 316887
+	SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 317046
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 317062
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 317078
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 317094
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 317110
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B20', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 317126
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B99', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 317142
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'Form 41306', strScheduleCode = '2A', strType = 'Ethanol', intMasterId = 316860
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'Form 41306', strScheduleCode = '2A', strType = 'Ethanol', intMasterId = 316874
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'Form 41306', strScheduleCode = '2A', strType = 'Ethanol', intMasterId = 316888
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'Form 41306', strScheduleCode = '2A', strType = 'Ethanol', intMasterId = 317172
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'Form 41306', strScheduleCode = '2A', strType = 'Gasoline', intMasterId = 316816
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'Form 41306', strScheduleCode = '2A', strType = 'Gasoline', intMasterId = 316830
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'Form 41306', strScheduleCode = '2A', strType = 'Gasoline', intMasterId = 316844
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'Form 41306', strScheduleCode = '2A', strType = 'Special Fuel', intMasterId = 316903
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = 'Form 41306', strScheduleCode = '2A', strType = 'Special Fuel', intMasterId = 316919
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = 'Form 41306', strScheduleCode = '2A', strType = 'Special Fuel', intMasterId = 316935
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Ethanol', intMasterId = 316873
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Ethanol', intMasterId = 316859
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'Form 41306', strScheduleCode = '10T', strType = 'Gasoline', intMasterId = 316853
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'Form 41306', strScheduleCode = '10T', strType = 'Gasoline', intMasterId = 316839
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'Form 41306', strScheduleCode = '2A', strType = 'Special Fuel', intMasterId = 316951
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '154', strFormCode = 'Form 41306', strScheduleCode = '2A', strType = 'Special Fuel', intMasterId = 316967
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'Form 41306', strScheduleCode = '2A', strType = 'Special Fuel', intMasterId = 316983
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = 'Form 41306', strScheduleCode = '2A', strType = 'Special Fuel', intMasterId = 316999
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = 'Form 41306', strScheduleCode = '2A', strType = 'Special Fuel', intMasterId = 317015
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'Form 41306', strScheduleCode = '2A', strType = 'Special Fuel', intMasterId = 317031
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'Form 41306', strScheduleCode = '2A', strType = 'Special Fuel', intMasterId = 317047
@@ -673,6 +334,28 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'Form 41306', strScheduleCode = '2B', strType = 'Ethanol', intMasterId = 316861
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'Form 41306', strScheduleCode = '2B', strType = 'Ethanol', intMasterId = 316875
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'Form 41306', strScheduleCode = '2B', strType = 'Ethanol', intMasterId = 316889
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 317030
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 317014
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 316998
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 316982
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '154', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 316966
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 316950
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 316934
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 316918
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 316902
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Gasoline', intMasterId = 316843
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Gasoline', intMasterId = 316829
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Gasoline', intMasterId = 316815
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Ethanol', intMasterId = 316887
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Ethanol', intMasterId = 316873
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Ethanol', intMasterId = 316859
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'Form 41306', strScheduleCode = '10T', strType = 'Gasoline', intMasterId = 316853
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'Form 41306', strScheduleCode = '10T', strType = 'Gasoline', intMasterId = 316839
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'Form 41306', strScheduleCode = '10T', strType = 'Gasoline', intMasterId = 316825
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'Form 41306', strScheduleCode = '10T', strType = 'Ethanol', intMasterId = 316886
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'Form 41306', strScheduleCode = '10T', strType = 'Ethanol', intMasterId = 316872
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'Form 41306', strScheduleCode = '10T', strType = 'Ethanol', intMasterId = 316858
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'Form 41306', strScheduleCode = '2B', strType = 'Ethanol', intMasterId = 317173
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'Form 41306', strScheduleCode = '2B', strType = 'Gasoline', intMasterId = 316817
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'Form 41306', strScheduleCode = '2B', strType = 'Gasoline', intMasterId = 316831
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'Form 41306', strScheduleCode = '2B', strType = 'Gasoline', intMasterId = 316845
@@ -693,29 +376,9 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B20', strFormCode = 'Form 41306', strScheduleCode = '2B', strType = 'Special Fuel', intMasterId = 317128
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B99', strFormCode = 'Form 41306', strScheduleCode = '2B', strType = 'Special Fuel', intMasterId = 317144
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'Form 41306', strScheduleCode = '2C', strType = 'Ethanol', intMasterId = 316862
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'Form 41306', strScheduleCode = '10T', strType = 'Gasoline', intMasterId = 316825
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'Form 41306', strScheduleCode = '10T', strType = 'Ethanol', intMasterId = 316886
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'Form 41306', strScheduleCode = '10T', strType = 'Ethanol', intMasterId = 316872
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'Form 41306', strScheduleCode = '10T', strType = 'Ethanol', intMasterId = 316858
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 317094
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 317078
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 317062
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 317046
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 317030
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 317014
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 316998
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 316982
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '154', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 316966
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 316950
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 317110
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B20', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 317126
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B99', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 317142
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'Form 41306', strScheduleCode = '2A', strType = 'Special Fuel', intMasterId = 316951
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '154', strFormCode = 'Form 41306', strScheduleCode = '2A', strType = 'Special Fuel', intMasterId = 316967
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'Form 41306', strScheduleCode = '2A', strType = 'Special Fuel', intMasterId = 316983
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = 'Form 41306', strScheduleCode = '2A', strType = 'Special Fuel', intMasterId = 316999
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'Form 41306', strScheduleCode = '2C', strType = 'Ethanol', intMasterId = 316876
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'Form 41306', strScheduleCode = '2C', strType = 'Ethanol', intMasterId = 316890
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'Form 41306', strScheduleCode = '2C', strType = 'Ethanol', intMasterId = 317174
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'Form 41306', strScheduleCode = '2C', strType = 'Gasoline', intMasterId = 316818
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'Form 41306', strScheduleCode = '2C', strType = 'Gasoline', intMasterId = 316832
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'Form 41306', strScheduleCode = '2C', strType = 'Gasoline', intMasterId = 316846
@@ -738,6 +401,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'Form 41306', strScheduleCode = '3', strType = 'Ethanol', intMasterId = 316863
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'Form 41306', strScheduleCode = '3', strType = 'Ethanol', intMasterId = 316877
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'Form 41306', strScheduleCode = '3', strType = 'Ethanol', intMasterId = 316891
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'Form 41306', strScheduleCode = '3', strType = 'Ethanol', intMasterId = 317175
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'Form 41306', strScheduleCode = '3', strType = 'Gasoline', intMasterId = 316819
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'Form 41306', strScheduleCode = '3', strType = 'Gasoline', intMasterId = 316833
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'Form 41306', strScheduleCode = '3', strType = 'Gasoline', intMasterId = 316847
@@ -760,6 +424,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'Form 41306', strScheduleCode = '4', strType = 'Ethanol', intMasterId = 316864
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'Form 41306', strScheduleCode = '4', strType = 'Ethanol', intMasterId = 316878
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'Form 41306', strScheduleCode = '4', strType = 'Ethanol', intMasterId = 316892
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'Form 41306', strScheduleCode = '4', strType = 'Ethanol', intMasterId = 317176
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'Form 41306', strScheduleCode = '4', strType = 'Gasoline', intMasterId = 316820
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'Form 41306', strScheduleCode = '4', strType = 'Gasoline', intMasterId = 316834
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'Form 41306', strScheduleCode = '4', strType = 'Gasoline', intMasterId = 316848
@@ -823,21 +488,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'Form 41306', strScheduleCode = '5B', strType = 'Special Fuel', intMasterId = 317117
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B20', strFormCode = 'Form 41306', strScheduleCode = '5B', strType = 'Special Fuel', intMasterId = 317133
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B99', strFormCode = 'Form 41306', strScheduleCode = '5B', strType = 'Special Fuel', intMasterId = 317149
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'Form 41306', strScheduleCode = '6J', strType = 'Special Fuel', intMasterId = 316910
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = 'Form 41306', strScheduleCode = '6J', strType = 'Special Fuel', intMasterId = 316926
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = 'Form 41306', strScheduleCode = '6J', strType = 'Special Fuel', intMasterId = 316942
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'Form 41306', strScheduleCode = '6J', strType = 'Special Fuel', intMasterId = 316958
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '154', strFormCode = 'Form 41306', strScheduleCode = '6J', strType = 'Special Fuel', intMasterId = 316974
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'Form 41306', strScheduleCode = '6J', strType = 'Special Fuel', intMasterId = 316990
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = 'Form 41306', strScheduleCode = '6J', strType = 'Special Fuel', intMasterId = 317006
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = 'Form 41306', strScheduleCode = '6J', strType = 'Special Fuel', intMasterId = 317022
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'Form 41306', strScheduleCode = '6J', strType = 'Special Fuel', intMasterId = 317038
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'Form 41306', strScheduleCode = '6J', strType = 'Special Fuel', intMasterId = 317054
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'Form 41306', strScheduleCode = '6J', strType = 'Special Fuel', intMasterId = 317070
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'Form 41306', strScheduleCode = '6J', strType = 'Special Fuel', intMasterId = 317086
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'Form 41306', strScheduleCode = '6J', strType = 'Special Fuel', intMasterId = 317102
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'Form 41306', strScheduleCode = '6J', strType = 'Special Fuel', intMasterId = 317118
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B20', strFormCode = 'Form 41306', strScheduleCode = '6J', strType = 'Special Fuel', intMasterId = 317134
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'Form 41306', strScheduleCode = '6J', strType = 'Special Fuel', intMasterId = 317177
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B99', strFormCode = 'Form 41306', strScheduleCode = '6J', strType = 'Special Fuel', intMasterId = 317150
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'Form 41306', strScheduleCode = '6V', strType = 'Ethanol', intMasterId = 316867
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'Form 41306', strScheduleCode = '6V', strType = 'Ethanol', intMasterId = 316881
@@ -867,22 +518,35 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'Form 41306', strScheduleCode = '7', strType = 'Special Fuel', intMasterId = 317119
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B20', strFormCode = 'Form 41306', strScheduleCode = '7', strType = 'Special Fuel', intMasterId = 317135
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B99', strFormCode = 'Form 41306', strScheduleCode = '7', strType = 'Special Fuel', intMasterId = 317151
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 316901
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 316917
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 316933
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 316949
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '154', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 316965
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 316981
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 316997
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317013
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317029
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317045
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317061
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'Form 41306', strScheduleCode = '8', strType = 'Ethanol', intMasterId = 316869
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'Form 41306', strScheduleCode = '8', strType = 'Ethanol', intMasterId = 316883
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'Form 41306', strScheduleCode = '8', strType = 'Ethanol', intMasterId = 316897
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317192
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317193
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317194
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317195
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '154', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317197
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317198
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317199
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317200
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317201
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317207
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317208
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317077
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317093
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317109
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B20', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317125
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B99', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317141
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317189
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317190
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317191
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '153', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317196
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '171', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317202
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317203
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317204
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317205
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317206
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317209
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'Form 41306', strScheduleCode = '10F', strType = 'Special Fuel', intMasterId = 316900
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = 'Form 41306', strScheduleCode = '10F', strType = 'Special Fuel', intMasterId = 316916
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = 'Form 41306', strScheduleCode = '10F', strType = 'Special Fuel', intMasterId = 316932
@@ -899,25 +563,19 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'Form 41306', strScheduleCode = '10F', strType = 'Special Fuel', intMasterId = 317108
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B20', strFormCode = 'Form 41306', strScheduleCode = '10F', strType = 'Special Fuel', intMasterId = 317124
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B99', strFormCode = 'Form 41306', strScheduleCode = '10F', strType = 'Special Fuel', intMasterId = 317140
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 316899
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 316915
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 316931
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 316947
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '154', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 316963
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 316979
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 316995
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317011
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317027
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317043
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317059
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317075
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317091
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317107
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B20', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317123
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B99', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317139
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317178
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317179
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317180
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '153', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317181
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '171', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317182
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317183
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317184
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317185
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317186
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '284', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317187
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317188
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Gasoline', intMasterId = 316827
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Gasoline', intMasterId = 316841
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Gasoline', intMasterId = 316855
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Ethanol', intMasterId = 316857
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Ethanol', intMasterId = 316871
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Ethanol', intMasterId = 316885
@@ -955,9 +613,6 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'LNG', strFormCode = 'Form 41164', strScheduleCode = 'Deductions', strType = 'LNG', intMasterId = 317160
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'CNG', strFormCode = 'Form 41164', strScheduleCode = 'Deductions', strType = 'CNG', intMasterId = 317157
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'A-55', strFormCode = 'Form 41164', strScheduleCode = 'Deductions', strType = 'A-55', intMasterId = 317163
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'Form 41306', strScheduleCode = '8', strType = 'Ethanol', intMasterId = 316869
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'Form 41306', strScheduleCode = '8', strType = 'Ethanol', intMasterId = 316883
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'Form 41306', strScheduleCode = '8', strType = 'Ethanol', intMasterId = 316897
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'Form 41306', strScheduleCode = '8', strType = 'Gasoline', intMasterId = 316824
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'Form 41306', strScheduleCode = '8', strType = 'Gasoline', intMasterId = 316838
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'Form 41306', strScheduleCode = '8', strType = 'Gasoline', intMasterId = 316852
@@ -1009,21 +664,29 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 		, strStatus
 		, intMasterId
 	)
-	SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Ethanol', strState = 'TX', strStatus = 'Include', intMasterId = 31553
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Gasoline', strState = 'TX', strStatus = 'Include', intMasterId = 31552
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', strState = 'TX', strStatus = 'Include', intMasterId = 31554
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '2A', strType = 'Ethanol', strState = 'NM', strStatus = 'Include', intMasterId = 31556
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '2A', strType = 'Gasoline', strState = 'NM', strStatus = 'Include', intMasterId = 31555
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '2A', strType = 'Special Fuel', strState = 'NM', strStatus = 'Include', intMasterId = 31557
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '3', strType = 'Ethanol', strState = 'NM', strStatus = 'Exclude', intMasterId = 31559
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '3', strType = 'Gasoline', strState = 'NM', strStatus = 'Exclude', intMasterId = 31558
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '3', strType = 'Special Fuel', strState = 'NM', strStatus = 'Exclude', intMasterId = 31560
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '4', strType = 'Ethanol', strState = 'NM', strStatus = 'Exclude', intMasterId = 31562
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '4', strType = 'Gasoline', strState = 'NM', strStatus = 'Exclude', intMasterId = 31561
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '4', strType = 'Special Fuel', strState = 'NM', strStatus = 'Exclude', intMasterId = 31563
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '7', strType = 'Ethanol', strState = 'NM', strStatus = 'Include', intMasterId = 31568
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '7', strType = 'Gasoline', strState = 'NM', strStatus = 'Include', intMasterId = 31567
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '7', strType = 'Special Fuel', strState = 'NM', strStatus = 'Include', intMasterId = 31564
+	SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Ethanol', strState = 'NM', strStatus = 'Include', intMasterId = 31575
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Gasoline', strState = 'NM', strStatus = 'Include', intMasterId = 31574
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Special Fuel', strState = 'NM', strStatus = 'Include', intMasterId = 31576
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Ethanol', strState = 'NM', strStatus = 'Include', intMasterId = 31578
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Gasoline', strState = 'NM', strStatus = 'Include', intMasterId = 31577
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', strState = 'NM', strStatus = 'Include', intMasterId = 31579
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '2A', strType = 'Ethanol', strState = 'NM', strStatus = 'Include', intMasterId = 31581
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '2A', strType = 'Gasoline', strState = 'NM', strStatus = 'Include', intMasterId = 31580
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '2A', strType = 'Special Fuel', strState = 'NM', strStatus = 'Include', intMasterId = 31582
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '3', strType = 'Ethanol', strState = 'NM', strStatus = 'Include', intMasterId = 31584
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '3', strType = 'Gasoline', strState = 'NM', strStatus = 'Include', intMasterId = 31583
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '3', strType = 'Special Fuel', strState = 'NM', strStatus = 'Include', intMasterId = 31585
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '4', strType = 'Ethanol', strState = 'NM', strStatus = 'Include', intMasterId = 31587
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '4', strType = 'Gasoline', strState = 'NM', strStatus = 'Include', intMasterId = 31586
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '4', strType = 'Special Fuel', strState = 'NM', strStatus = 'Include', intMasterId = 31588
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '5A', strType = 'Ethanol', strState = 'NM', strStatus = 'Include', intMasterId = 31590
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '5A', strType = 'Gasoline', strState = 'NM', strStatus = 'Include', intMasterId = 31589
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '5A', strType = 'Special Fuel', strState = 'NM', strStatus = 'Include', intMasterId = 31591
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '6J', strType = 'Special Fuel', strState = 'NM', strStatus = 'Include', intMasterId = 31592
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '7', strType = 'Ethanol', strState = 'NM', strStatus = 'Exclude', intMasterId = 31602
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '7', strType = 'Gasoline', strState = 'NM', strStatus = 'Exclude', intMasterId = 31601
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '7', strType = 'Special Fuel', strState = 'NM', strStatus = 'Exclude', intMasterId = 31595
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '9', strType = 'Special Fuel', strState = 'NM', strStatus = 'Include', intMasterId = 31598
 	
 	INSERT INTO @ValidDestinationStates(
 		intValidDestinationStateId
@@ -1110,13 +773,14 @@ WHERE RC.intTaxAuthorityId = @TaxAuthorityId
 		, ysnOutputDesigner
 		, intMasterId
 	)
-	SELECT intReportTemplateId = 0, strFormCode = 'Form 41164', strScheduleCode = '', strType = '', strTemplateItemId = 'NMAlt-TaxRateLPG', strReportSection = 'Header', intReportItemSequence = '0', intTemplateItemNumber = '1', strDescription = 'Tax Rate - LPG', strScheduleList = NULL, strConfiguration = '0.120', ysnConfiguration = '1', ysnUserDefinedValue = '1', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '1', ysnOutputDesigner = 0, intMasterId = 31878
-	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'Form 41164', strScheduleCode = '', strType = '', strTemplateItemId = 'NMAlt-TaxRateCNG', strReportSection = 'Header', intReportItemSequence = '0', intTemplateItemNumber = '2', strDescription = 'Tax Rate - CNG', strScheduleList = NULL, strConfiguration = '0.133', ysnConfiguration = '1', ysnUserDefinedValue = '1', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '2', ysnOutputDesigner = 0, intMasterId = 31879
-	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'Form 41164', strScheduleCode = '', strType = '', strTemplateItemId = 'NMAlt-TaxRateLNG', strReportSection = 'Header', intReportItemSequence = '0', intTemplateItemNumber = '3', strDescription = 'Tax Rate - LNG', strScheduleList = NULL, strConfiguration = '0.206', ysnConfiguration = '1', ysnUserDefinedValue = '1', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '3', ysnOutputDesigner = 0, intMasterId = 31880
-	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'Form 41164', strScheduleCode = '', strType = '', strTemplateItemId = 'NMAlt-TaxRateA55', strReportSection = 'Header', intReportItemSequence = '0', intTemplateItemNumber = '4', strDescription = 'Tax Rate - A-55', strScheduleList = NULL, strConfiguration = '0.120', ysnConfiguration = '1', ysnUserDefinedValue = '1', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '4', ysnOutputDesigner = 0, intMasterId = 31881
-	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'Form 41306', strScheduleCode = 'A', strType = '', strTemplateItemId = 'NMSchA-County', strReportSection = 'Header', intReportItemSequence = NULL, intTemplateItemNumber = '0', strDescription = 'strNMCounty', strScheduleList = NULL, strConfiguration = '', ysnConfiguration = NULL, ysnUserDefinedValue = '0', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '2', ysnOutputDesigner = 1, intMasterId = 31885
-	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'Form 41306', strScheduleCode = 'A', strType = '', strTemplateItemId = 'NMSchA-Location', strReportSection = 'Header', intReportItemSequence = NULL, intTemplateItemNumber = '0', strDescription = 'strNMLocation', strScheduleList = NULL, strConfiguration = '', ysnConfiguration = NULL, ysnUserDefinedValue = '0', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '3', ysnOutputDesigner = 1, intMasterId = 31886
-	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'Form 41306', strScheduleCode = 'A', strType = '', strTemplateItemId = 'NMSchA-GrossNet', strReportSection = 'Header', intReportItemSequence = '0', intTemplateItemNumber = '1', strDescription = 'Reporting Gross or Net', strScheduleList = NULL, strConfiguration = 'Net', ysnConfiguration = '1', ysnUserDefinedValue = '1', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '1', ysnOutputDesigner = 0, intMasterId = 31887
+	SELECT intReportTemplateId = 0, strFormCode = 'Form 41164', strScheduleCode = '', strType = '', strTemplateItemId = 'NMAlt-TaxRateLPG', strReportSection = '', intReportItemSequence = '0', intTemplateItemNumber = '1', strDescription = 'Tax Rate - LPG', strScheduleList = NULL, strConfiguration = '0.120', ysnConfiguration = '1', ysnUserDefinedValue = '1', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '1', ysnOutputDesigner = 0, intMasterId = 31878
+	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'Form 41164', strScheduleCode = '', strType = '', strTemplateItemId = 'NMAlt-TaxRateCNG', strReportSection = '', intReportItemSequence = '0', intTemplateItemNumber = '2', strDescription = 'Tax Rate - CNG', strScheduleList = NULL, strConfiguration = '0.133', ysnConfiguration = '1', ysnUserDefinedValue = '1', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '2', ysnOutputDesigner = 0, intMasterId = 31879
+	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'Form 41164', strScheduleCode = '', strType = '', strTemplateItemId = 'NMAlt-TaxRateLNG', strReportSection = '', intReportItemSequence = '0', intTemplateItemNumber = '3', strDescription = 'Tax Rate - LNG', strScheduleList = NULL, strConfiguration = '0.206', ysnConfiguration = '1', ysnUserDefinedValue = '1', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '3', ysnOutputDesigner = 0, intMasterId = 31880
+	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'Form 41164', strScheduleCode = '', strType = '', strTemplateItemId = 'NMAlt-TaxRateA55', strReportSection = '', intReportItemSequence = '0', intTemplateItemNumber = '4', strDescription = 'Tax Rate - A-55', strScheduleList = NULL, strConfiguration = '0.120', ysnConfiguration = '1', ysnUserDefinedValue = '1', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '4', ysnOutputDesigner = 0, intMasterId = 31881
+	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'Form 41306', strScheduleCode = 'A', strType = '', strTemplateItemId = 'NMSchA-County', strReportSection = '', intReportItemSequence = '0', intTemplateItemNumber = '0', strDescription = 'strNMCounty', strScheduleList = NULL, strConfiguration = '', ysnConfiguration = NULL, ysnUserDefinedValue = '0', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '2', ysnOutputDesigner = 1, intMasterId = 31885
+	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'Form 41306', strScheduleCode = 'A', strType = '', strTemplateItemId = 'NMSchA-Location', strReportSection = '', intReportItemSequence = '0', intTemplateItemNumber = '0', strDescription = 'strNMLocation', strScheduleList = NULL, strConfiguration = '', ysnConfiguration = NULL, ysnUserDefinedValue = '0', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '3', ysnOutputDesigner = 1, intMasterId = 31886
+	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'Form 41306', strScheduleCode = 'A', strType = '', strTemplateItemId = 'NMSchA-GrossNet', strReportSection = '', intReportItemSequence = '0', intTemplateItemNumber = '1', strDescription = 'Reporting Gross or Net', strScheduleList = NULL, strConfiguration = 'Net', ysnConfiguration = '1', ysnUserDefinedValue = '1', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '1', ysnOutputDesigner = 0, intMasterId = 31887
+		
 	EXEC uspTFUpgradeReportingComponentConfigurations @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponentConfigurations = @ReportingComponentConfigurations
 
 -- Reporting Component - Output Designer
