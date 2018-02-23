@@ -362,6 +362,10 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         intCurrencyId: function(get) {
             return get('current.intCurrencyId');
         },
+
+        contractSequenceVisible: function(get) {
+            return get('current.intOrderType') === 1;
+        },
         
         strTransactionId: function(get) {
             return get('current.strShipmentNumber');

@@ -68,6 +68,7 @@ namespace iRely.Inventory.Model
         public string strForexRateType { get; set; }
         public string strDockDoor { get; set; }
         public decimal? dblDestinationQuantity { get; set; }
+        public int? intContractSeq { get; set; }
 
         public tblICInventoryShipmentItem tblICInventoryShipmentItem { get; set; }
     }

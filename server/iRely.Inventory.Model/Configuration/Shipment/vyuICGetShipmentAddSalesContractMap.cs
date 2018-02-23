@@ -18,6 +18,7 @@ namespace iRely.Inventory.Model
             this.ToTable("vyuICGetShipmentAddSalesContract");
             //this.Property(t => t.intKey).HasColumnName("intKey");
             this.Property(t => t.strOrderType).HasColumnName("strOrderType");
+            Property(t => t.intContractSeq).HasColumnName("intContractSeq");
             this.Property(t => t.strSourceType).HasColumnName("strSourceType");
             this.Property(t => t.intLocationId).HasColumnName("intLocationId");
             this.Property(t => t.strShipFromLocation).HasColumnName("strShipFromLocation");
