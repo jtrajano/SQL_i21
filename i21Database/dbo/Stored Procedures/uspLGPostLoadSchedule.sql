@@ -102,7 +102,15 @@ BEGIN TRY
 				,@ysnUnShip = @ysnUnShip
 				,@intEntityUserSecurityId = @intEntityUserSecurityId
 
-			UPDATE tblLGLoad SET ysnPosted = @ysnPost, dtmPostedDate=GETDATE() WHERE intLoadId = @intLoadId
+			UPDATE tblLGLoad
+			SET ysnPosted = @ysnPost
+				,dtmPostedDate = GETDATE()
+				,intShipmentStatus = CASE 
+					WHEN @ysnPost = 1
+						THEN 6
+					ELSE 1
+					END
+			WHERE intLoadId = @intLoadId
 		END
 	END
 END TRY

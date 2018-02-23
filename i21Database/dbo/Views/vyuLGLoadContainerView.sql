@@ -101,6 +101,8 @@ SELECT   L.intLoadId
 									THEN 'Full Shipment Created'
 								WHEN 10
 									THEN 'Cancelled'
+								WHEN 11
+									THEN 'Invoiced'
 								ELSE ''
 							  END
 		,LDCL.dblReceivedQty AS dblContainerReceivedQty

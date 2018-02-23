@@ -60,6 +60,8 @@ SELECT DISTINCT LW.intLoadWarehouseId
 				THEN 'Full Shipment Created'
 			WHEN 10
 				THEN 'Cancelled'
+			WHEN 11
+				THEN 'Invoiced'
 			ELSE ''
 			END COLLATE Latin1_General_CI_AS AS strShipmentStatus
 		,L.intShipmentType

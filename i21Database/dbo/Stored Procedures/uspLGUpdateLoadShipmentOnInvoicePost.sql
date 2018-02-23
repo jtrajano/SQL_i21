@@ -164,6 +164,15 @@ BEGIN TRY
 			END
 		END
 
+		IF ISNULL(@Post,0) = 1
+		BEGIN
+			UPDATE tblLGLoad SET intShipmentStatus = 11 WHERE intLoadId = @intLoadId
+		END
+		ELSE 
+		BEGIN
+			UPDATE tblLGLoad SET intShipmentStatus = 6 WHERE intLoadId = @intLoadId
+		END
+
 		SELECT @intMinRecordId = MIN(intRecordId)
 		FROM @tblInvoiceDetail
 		WHERE intRecordId > @intMinRecordId
