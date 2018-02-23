@@ -41,8 +41,10 @@ namespace iRely.Inventory.Model
                 outBillIds
             );
 
-            newBill = (int)outBillId.Value;
-            newBills = outBillIds.Value.ToString();
+            //newBill = (int)outBillId.Value;
+            //newBills = outBillIds.Value.ToString();
+            newBill = outBillId.Value != DBNull.Value ? (int?)outBillId.Value : null;
+            newBills = outBillIds.Value != DBNull.Value ? outBillIds.Value.ToString() : null;
         }
     }
 }
