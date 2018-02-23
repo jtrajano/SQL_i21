@@ -8,7 +8,8 @@
 	@ysnIncludeBudget       BIT = 0,
 	@ysnIncludeCredits      BIT = 1,
 	@strCustomerName		NVARCHAR(MAX) = NULL,
-	@strAccountStatusCode	NVARCHAR(100) = NULL
+	@strAccountStatusCode	NVARCHAR(100) = NULL,
+	@strCustomerIds			NVARCHAR(MAX) = NULL
 AS
 
 DECLARE @dtmDateFromLocal			DATETIME		= NULL,
@@ -22,7 +23,8 @@ DECLARE @dtmDateFromLocal			DATETIME		= NULL,
 		@intSalespersonId			INT				= NULL,
 		@intCompanyLocationId		INT				= NULL,
 		@strCustomerNameLocal		NVARCHAR(MAX)	= NULL,
-		@strAccountStatusCodeLocal	NVARCHAR(100)	= NULL
+		@strAccountStatusCodeLocal	NVARCHAR(100)	= NULL,
+		@strCustomerIdsLocal		NVARCHAR(MAX)	= NULL
 
 DECLARE @tblCustomers TABLE (
 	    intEntityCustomerId			INT	  
@@ -41,6 +43,7 @@ SET @ysnIncludeBudgetLocal		= @ysnIncludeBudget
 SET @ysnIncludeCreditsLocal		= @ysnIncludeCredits
 SET @strCustomerNameLocal		= NULLIF(@strCustomerName, '')
 SET @strAccountStatusCodeLocal	= NULLIF(@strAccountStatusCode, '')
+SET @strCustomerIdsLocal		= NULLIF(@strCustomerIds, '')
 
 IF ISNULL(@intEntityCustomerIdLocal, 0) <> 0
 	BEGIN
@@ -55,6 +58,24 @@ IF ISNULL(@intEntityCustomerIdLocal, 0) <> 0
 			     , strName
 			FROM dbo.tblEMEntity WITH (NOLOCK)
 			WHERE intEntityId = @intEntityCustomerIdLocal
+		) EC ON C.intEntityId = EC.intEntityId
+	END
+ELSE IF @strCustomerIdsLocal IS NOT NULL
+	BEGIN
+		INSERT INTO @tblCustomers
+		SELECT C.intEntityId 
+		     , C.strCustomerNumber
+		     , EC.strName
+		     , C.dblCreditLimit
+		FROM tblARCustomer C WITH (NOLOCK)
+		INNER JOIN (
+			SELECT intID
+			FROM dbo.fnGetRowsFromDelimitedValues(@strCustomerIdsLocal)
+		) CUSTOMERS ON C.intEntityId = CUSTOMERS.intID
+		INNER JOIN (
+			SELECT intEntityId
+			     , strName
+			FROM dbo.tblEMEntity WITH (NOLOCK)
 		) EC ON C.intEntityId = EC.intEntityId
 	END
 ELSE
