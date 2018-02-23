@@ -52,7 +52,7 @@ DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 	,@ItemsForPost AS ItemCostingTableType
 	,@ACCOUNT_CATEGORY_OtherChargeExpense AS NVARCHAR(30) = 'Other Charge Expense'
 	,@ACCOUNT_CATEGORY_OtherChargeIncome AS NVARCHAR(30) = 'Other Charge Income'
-	,@ACCOUNT_CATEGORY_Inventory AS NVARCHAR(30) = 'Inventory'
+	,@ACCOUNT_CATEGORY_Inventory AS NVARCHAR(30) = 'Work In Progress'
 	,@OtherChargesGLAccounts AS dbo.ItemOtherChargesGLAccount
 	,@strItemNo NVARCHAR(50)
 	,@intItemId1 INT
