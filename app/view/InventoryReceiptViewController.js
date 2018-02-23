@@ -5842,82 +5842,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     me.calculateWtGainLoss(win);
                                 }
 
-
-                                // Assign the bundle type
-                                // if(newReceiptItem && newReceiptItem.get('strBundleType') == 'Kit')
-                                //     newReceiptItem.set('strItemType', order.get('strBundleType'));                                
-                                
-                               
-
-                                if (ReceiptType === 'Purchase Contract') {
-                                    ContractStore.load({
-                                        filters: [
-                                            {
-                                                column: 'intContractDetailId',
-                                                value: order.get('intLineNo'),
-                                                conjunction: 'and'
-                                            },
-                                            {
-                                                column: 'intContractHeaderId',
-                                                value: order.get('intOrderId'),
-                                                conjunction: 'and'
-                                            }
-                                        ],
-                                        callback: function (result) {
-                                            if (result) {
-                                                Ext.each(result, function (contract) {
-                                                    var contractCosts = contract.get('tblCTContractCosts');
-                                                    var contractCosts = _.filter(contractCosts, function (c) { return !c.ysnBasis; });
-                                                    if (contractCosts) {
-                                                        vm.set('chargesLinkInc', 1);
-                                                        Ext.each(contractCosts, function (otherCharge) {
-                                                            var receiptCharges = currentVM.tblICInventoryReceiptCharges().data.items;
-                                                            var exists = Ext.Array.findBy(receiptCharges, function (row) {
-                                                                if ((row.get('intContractId') === order.get('intOrderId')
-                                                                    && row.get('intChargeId') === otherCharge.intItemId)) {
-                                                                    return true;
-                                                                }
-                                                            });
-
-                                                            if (!exists) {
-                                                                var inventoryCost = otherCharge.ysnInventoryCost ? true : false,
-                                                                    chargesLink = 'CL-'.concat(vm.get('chargesLinkConst'));
-                                                                
-                                                                var newReceiptCharge = Ext.create('Inventory.model.ReceiptCharge', {
-                                                                    intInventoryReceiptId: currentVM.get('intInventoryReceiptId'),
-                                                                    intContractId: order.get('intOrderId'),
-                                                                    intContractDetailId: otherCharge.intContractDetailId,
-                                                                    intContractSeq: contract.get('intContractSeq'),
-                                                                    intChargeId: otherCharge.intItemId,
-                                                                    strChargesLink: chargesLink,
-                                                                    ysnInventoryCost: inventoryCost,
-                                                                    strCostMethod: otherCharge.strCostMethod,
-                                                                    dblRate: otherCharge.strCostMethod == "Amount" ? 0 : otherCharge.dblRate,
-                                                                    intCostUOMId: otherCharge.intItemUOMId,
-                                                                    intEntityVendorId: otherCharge.intVendorId ? otherCharge.intVendorId : currentVM.get('intEntityVendorId'),
-                                                                    dblAmount: otherCharge.strCostMethod == "Amount" ? otherCharge.dblRate : 0,
-                                                                    strAllocateCostBy: 'Unit',
-                                                                    ysnAccrue: otherCharge.intVendorId ? true : false,
-                                                                    //ysnPrice: otherCharge.ysnPrice,
-                                                                    strItemNo: otherCharge.strItemNo,
-                                                                    intCurrencyId: otherCharge.intCurrencyId,
-                                                                    strCurrency: otherCharge.strCurrency,
-                                                                    ysnSubCurrency: otherCharge.ysnSubCurrency,
-                                                                    strCostUOM: otherCharge.strUOM,
-                                                                    strVendorName: otherCharge.strVendorName ? otherCharge.strVendorName : currentVM.get('strVendorName'),
-                                                                    strContractNumber: order.get('strOrderNumber')
-
-                                                                });
-                                                                currentVM.tblICInventoryReceiptCharges().add(newReceiptCharge);
-                                                                newReceiptItem.set('strChargesLink', chargesLink);
-                                                            }
-                                                        });
-
-                                                    }
-                                                });
-                                            }
-                                        }
-                                    });
+                                if (ReceiptType === 'Purchase Contract' && strBundleType != 'Option' && newReceiptItem) {
+                                    me.addContractOtherCharges(currentVM, newReceiptItem, order);
                                 }
 
                                 if (!!order.get('strLotTracking') && order.get('strLotTracking') !== 'No' && newReceiptItem.get('intWeightUOMId') === null) {
@@ -6026,6 +5952,81 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         });
     },
 
+    addContractOtherCharges: function(current, adddedItemDetail, selectedOrder){
+        var me = this,
+            vm = me.getViewModel(),
+            ContractStore = vm.get('purchaseContractList');
+
+        ContractStore.load({
+            filters: [
+                {
+                    column: 'intContractDetailId',
+                    value: selectedOrder.get('intLineNo'),
+                    conjunction: 'and'
+                },
+                {
+                    column: 'intContractHeaderId',
+                    value: selectedOrder.get('intOrderId'),
+                    conjunction: 'and'
+                }
+            ],
+            callback: function (result) {
+                if (result) {
+                    Ext.each(result, function (contract) {
+                        var contractCosts = contract.get('tblCTContractCosts');
+                        var contractCosts = _.filter(contractCosts, function (c) { return !c.ysnBasis; });
+                        if (contractCosts) {
+                            vm.set('chargesLinkInc', 1);
+                            Ext.each(contractCosts, function (otherCharge) {
+                                var receiptCharges = current.tblICInventoryReceiptCharges().data.items;
+                                var exists = Ext.Array.findBy(receiptCharges, function (row) {
+                                    if ((row.get('intContractId') === selectedOrder.get('intOrderId')
+                                        && row.get('intChargeId') === otherCharge.intItemId)) {
+                                        return true;
+                                    }
+                                });
+
+                                if (!exists) {
+                                    var inventoryCost = otherCharge.ysnInventoryCost ? true : false,
+                                        chargesLink = 'CL-'.concat(vm.get('chargesLinkConst'));
+                                    
+                                    var newReceiptCharge = Ext.create('Inventory.model.ReceiptCharge', {
+                                        intInventoryReceiptId: current.get('intInventoryReceiptId'),
+                                        intContractId: selectedOrder.get('intOrderId'),
+                                        intContractDetailId: otherCharge.intContractDetailId,
+                                        intContractSeq: contract.get('intContractSeq'),
+                                        intChargeId: otherCharge.intItemId,
+                                        strChargesLink: chargesLink,
+                                        ysnInventoryCost: inventoryCost,
+                                        strCostMethod: otherCharge.strCostMethod,
+                                        dblRate: otherCharge.strCostMethod == "Amount" ? 0 : otherCharge.dblRate,
+                                        intCostUOMId: otherCharge.intItemUOMId,
+                                        intEntityVendorId: otherCharge.intVendorId ? otherCharge.intVendorId : current.get('intEntityVendorId'),
+                                        dblAmount: otherCharge.strCostMethod == "Amount" ? otherCharge.dblRate : 0,
+                                        strAllocateCostBy: 'Unit',
+                                        ysnAccrue: otherCharge.intVendorId ? true : false,
+                                        //ysnPrice: otherCharge.ysnPrice,
+                                        strItemNo: otherCharge.strItemNo,
+                                        intCurrencyId: otherCharge.intCurrencyId,
+                                        strCurrency: otherCharge.strCurrency,
+                                        ysnSubCurrency: otherCharge.ysnSubCurrency,
+                                        strCostUOM: otherCharge.strUOM,
+                                        strVendorName: otherCharge.strVendorName ? otherCharge.strVendorName : current.get('strVendorName'),
+                                        strContractNumber: selectedOrder.get('strOrderNumber')
+
+                                    });
+                                    current.tblICInventoryReceiptCharges().add(newReceiptCharge);
+                                    adddedItemDetail.set('strChargesLink', chargesLink);
+                                }
+                            });
+
+                        }
+                    });
+                }
+            }
+        });
+    },
+    
     onReplicateBalanceLotClick: function (button) {
         var me = this;
         var win = button.up('window');
@@ -7683,6 +7684,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 // Calculate the Wgt or Volume Gain/Loss 
                                 me.calculateWtGainLoss(win);
                                 addItemLotFunc(addedRecord, rec);
+                                me.addContractOtherCharges(current, addedRecord, selectedItem);
                             });
                         } 
                     }
