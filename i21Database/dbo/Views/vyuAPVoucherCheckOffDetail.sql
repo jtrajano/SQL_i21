@@ -7,11 +7,11 @@ SELECT	DISTINCT
 			,APB.intEntityVendorId
 			,strVendorName =  E.strName
 			,strVendorAddress = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](NULL,NULL, NULL, EL.strAddress, EL.strCity, EL.strState, EL.strZipCode, EL.strCountry, NULL))
-			,ISNULL(TC.strCity, 'N/A') AS strVendorCity
-			,ISNULL(TC.strState, 'N/A') AS strVendorState
-			,ISNULL(TC.strZipCode,'N/A') AS strVendorZipCode
-			,strEmail2
-			,E.strPhone
+			,ISNULL(EL.strCity, 'N/A') AS strVendorCity
+			,ISNULL(EL.strState, 'N/A') AS strVendorState
+			,ISNULL(EL.strZipCode,'N/A') AS strVendorZipCode
+			,ISNULL(vendor.strEmail, vendor.strEmail2) AS strEmail2
+			,ISNULL(vendor.strPhone, vendor.strPhone2) AS strPhone
 			,TC.strTaxCode
 			,TC.strDescription AS strTaxCodeDesc
 			,APBDT.strCalculationMethod
@@ -39,7 +39,8 @@ FROM		dbo.tblAPBill APB
 			INNER JOIN dbo.tblAPBillDetailTax APBDT ON APBD.intBillDetailId = APBDT.intBillDetailId
 			INNER JOIN dbo.tblAPVendor V ON APB.intEntityVendorId = V.intEntityId
 			INNER JOIN dbo.tblEMEntity E ON E.intEntityId = V.intEntityId
-			LEFT JOIN dbo.tblEMEntityLocation EL ON EL.intEntityId = E.intEntityId AND ysnDefaultLocation  =1 
+			INNER JOIN tblEMEntityToContact EC ON EC.intEntityId = E.intEntityId AND ysnDefaultContact = 1
+			LEFT JOIN dbo.tblEMEntityLocation EL ON (EL.intEntityId = E.intEntityId) AND (EL.intEntityLocationId = APB.intShipFromId)  AND ysnDefaultLocation  =1 
 			INNER JOIN dbo.tblICItem IE ON IE.intItemId = APBD.intItemId
 			LEFT JOIN dbo.tblICInventoryReceiptItem IRE ON APBD.intInventoryReceiptItemId = IRE.intInventoryReceiptItemId
 			LEFT JOIN dbo.tblICInventoryReceipt IR ON IRE.intInventoryReceiptId = IR.intInventoryReceiptId 
@@ -59,6 +60,15 @@ OUTER APPLY(
 				  AND intPaymentMethodId = 7 --WILL SHOW TRANSACTION THAT WAS PAID USING CHECK ONLY
 			ORDER BY dtmDatePaid DESC
 			)  Payment 
+			OUTER APPLY (
+				SELECT TOP 1	
+						strEmail,
+						strEmail2,
+						strPhone,
+						strPhone2 
+				FROM tblEMEntity E1
+				WHERE E1.intEntityId = EC.intEntityContactId 
+			) vendor
 WHERE  
 	  APB.ysnPosted = 1 
 		  AND Payment.ysnPaid = 1 
