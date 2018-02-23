@@ -41,8 +41,7 @@ namespace iRely.Inventory.Model
         public decimal? dblTax { get; set; }
         public decimal? dblAdjustedTax { get; set; }
         public string strChargesLink { get; set; }
-        private string _contractNo;
-        
+                
         public tblICInventoryShipment tblICInventoryShipment { get; set; }
         public vyuICGetInventoryShipmentCharge vyuICGetInventoryShipmentCharge { get; set; }
         public ICollection<tblICInventoryShipmentChargeTax> tblICInventoryShipmentChargeTaxes { get; set; }

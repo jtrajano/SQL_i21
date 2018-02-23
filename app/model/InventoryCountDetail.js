@@ -94,7 +94,8 @@ Ext.define('Inventory.model.InventoryCountDetail', {
             },
             depends: ['dblPhysicalCount', 'dblSystemCount', 'dblQtyReceived', 'dblQtySold']},
         { name: 'strUserName', type: 'string' },
-        { name: 'ysnLotted', type: 'boolean' }
+        { name: 'ysnLotted', type: 'boolean' },
+        { name: 'intConcurrencyId', type: 'int', allowNull: true }
     ],
 
     validators: [

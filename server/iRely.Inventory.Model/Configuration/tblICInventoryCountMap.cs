@@ -191,6 +191,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intEntityUserSecurityId).HasColumnName("intEntityUserSecurityId");
             this.Property(t => t.strUserName).HasColumnName("strUserName");
             this.Property(t => t.intSort).HasColumnName("intSort");
+            this.Property(t => t.intConcurrencyId).HasColumnName("intConcurrencyId");
         }
     }
 
