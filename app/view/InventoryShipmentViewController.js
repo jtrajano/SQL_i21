@@ -217,6 +217,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     hidden: '{checkHideOrderNo}',
                     dataIndex: 'strOrderNumber'
                 },
+                colContractSeq: {
+                    hidden: '{!contractSequenceVisible}',
+                    dataIndex: 'intContractSeq'
+                },
                 colSourceNumber: {
                     hidden: '{checkHideSourceNo}',
                     dataIndex: 'strSourceNumber'
@@ -2718,6 +2722,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     { dataIndex: 'intLineNo', text: 'intLineNo', width: 100, dataType: 'numeric', defaultSort: true, sortOrder: 'DESC', key: true, hidden: true },
                     
                     { dataIndex: 'strOrderNumber', text: 'Order Number', width: 100, dataType: 'string' },
+                    { dataIndex: 'intContractSeq', text: 'Sequence', width: 100, dataType: 'numeric', allowNull: true },
                     { dataIndex: 'strSourceNumber', text: 'Source Number', width: 100, dataType: 'string' },
                     { dataIndex: 'strShipFromLocation', text: 'Ship From Location', width: 100, dataType: 'string' },
                     { dataIndex: 'strCustomerNumber', text: 'Customer Number', width: 100, dataType: 'string' },
@@ -2936,6 +2941,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                             intInventoryShipmentId: currentVM.get('intInventoryShipmentId'),
                                             intOrderId: order.get('intOrderId'),
                                             intSourceId: order.get('intSourceId'),
+                                            intContractSeq: order.get('intContractSeq'),
                                             intLineNo: order.get('intLineNo'),
                                             intItemId: order.get('intItemId'),
                                             intSubLocationId: order.get('intSubLocationId'),

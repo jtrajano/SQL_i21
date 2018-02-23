@@ -519,6 +519,7 @@ namespace iRely.Inventory.BusinessLayer
                         s.intInventoryShipmentItemId,
                         s.intInventoryShipmentId,
                         s.intOrderId,
+                        s.vyuICGetInventoryShipmentItem.intContractSeq,
                         s.intSourceId,
                         s.intLineNo,
                         s.intItemId,

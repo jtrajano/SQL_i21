@@ -10,6 +10,7 @@ namespace iRely.Inventory.Model
     {
         //public int intKey { get; set; }
         public string strOrderType { get; set; }
+        public int? intContractSeq { get; set; }
         public string strSourceType { get; set; }
         public int? intLocationId { get; set; }
         public string strShipFromLocation { get; set; }

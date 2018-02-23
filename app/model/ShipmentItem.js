@@ -86,7 +86,8 @@ Ext.define('Inventory.model.ShipmentItem', {
         },
         { name: 'dblComponentQty', type: 'float' },
         { name: 'intParentItemLinkId', type: 'int', allowNull: true },
-        { name: 'intChildItemLinkId', type: 'int', allowNull: true }
+        { name: 'intChildItemLinkId', type: 'int', allowNull: true },
+        { name: 'intContractSeq', type: 'int', allowNull: true }
 
     ],
 
