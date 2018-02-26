@@ -23,6 +23,6 @@ Ext.define('Inventory.model.CompanyPreference', {
         { name: 'strOriginLineOfBusiness', type: 'string' },
         { name: 'ysnAllowDuplicates', type: 'boolean', allowNull: true, defaultValue: false },
         { name: 'ysnOverwrite', type: 'boolean', allowNull: true, defaultValue: true },
-        { name: 'ysnAllowDuplicates', type: 'boolean', allowNull: true, defaultValue: false }
+        { name: 'ysnVerbose', type: 'boolean', allowNull: true, defaultValue: false }
     ]
 });
