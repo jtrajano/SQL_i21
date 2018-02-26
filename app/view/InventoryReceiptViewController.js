@@ -802,18 +802,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 //     disabled: '{current.ysnPosted}',
                 //     dataIndex: 'ysnAccrue'
                 // },
-                // colChargeEntity: {
-                //     disabled: '{current.ysnPosted}',
-                //     dataIndex: 'ysnPrice'
-                // },
-                colChargeEntity:{
-                    dataIndex: 'strChargeEntity',
-                    editor: {
-                        readOnly: '{current.ysnPosted}',
-                        store: '{chargeEntityTypes}',
-                        origValueField: 'strChargeEntity',
-                        forceSelection: true
-                    }
+                colChargeEntity: {
+                    disabled: '{current.ysnPosted}',
+                    dataIndex: 'ysnPrice'
                 },
                 colChargeTax: {
                     dataIndex: 'dblTax'
@@ -1505,10 +1496,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         // var intDefaultCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
         // var strDefaultCurrency = i21.ModuleMgr.SystemManager.getCompanyPreference('strDefaultCurrency');
 
-        var record = Ext.create('Inventory.model.ReceiptCharge', {
-            strAllocateCostBy: 'Unit',
-            strChargeEntity: 'No'
-        });
+        var record = Ext.create('Inventory.model.ReceiptCharge');
+        record.set('strAllocateCostBy', 'Unit');
         // record.set('intCurrencyId', intDefaultCurrencyId);
         // record.set('strCurrency', strDefaultCurrency);
 
@@ -1541,7 +1530,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             if (details.length > 0) {
                 Ext.each(details, function (rec, idx) {
                     rec.set('ysnAccrue', '');
-                    rec.set('ysnPrice', '');
                 });
             }
         }
@@ -2707,20 +2695,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         var chargeCurrencyId = charge.get('intCurrencyId');
                         var otherChargeTax = charge.get('dblTax');
                         var chargeVendorId = charge.get('intEntityVendorId');
-                        //var ysnPrice = charge.get('ysnPrice');
-                        //var ysnAccrue = charge.get('intEntityVendorId') ? true : false;
-                        var chargeEntity = charge.get('strChargeEntity');
+                        var ysnPrice = charge.get('ysnPrice');
+                        var ysnAccrue = charge.get('intEntityVendorId') ? true : false;
 
                         otherChargeTax = Ext.isNumeric(otherChargeTax) ? otherChargeTax : 0.00;  
                         chargeCurrencyId = Ext.isNumeric(chargeCurrencyId) ? chargeCurrencyId : transactionCurrencyId;
                         if (transactionCurrencyId == chargeCurrencyId) {
-                            //totalChargeTaxes += ysnPrice ? -otherChargeTax : (transactionVendorId == chargeVendorId) ? otherChargeTax : 0;
-                            if(chargeEntity == 'No')
-                                totalChargeTaxes += (transactionVendorId == chargeVendorId) ? otherChargeTax : 0;
-                            else if (chargeEntity == 'Add')
-                                totalChargeTaxes += otherChargeTax;
-                            else if (chargeEntity == 'Reduce')
-                                totalChargeTaxes += -otherChargeTax;
+                            totalChargeTaxes += ysnPrice ? -otherChargeTax : (transactionVendorId == chargeVendorId && ysnAccrue) ? otherChargeTax : 0;
                         }
                     }
                 });
@@ -2755,21 +2736,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         var chargeCurrencyId = charge.get('intCurrencyId');
                         var chargeVendorId = charge.get('intEntityVendorId');
                         var amount = charge.get('dblAmount');
-                        //var ysnPrice = charge.get('ysnPrice');
-                        //var ysnAccrue = charge.get('intEntityVendorId') ? true : false;
-                        var chargeEntity = charge.get('strChargeEntity');
+                        var ysnPrice = charge.get('ysnPrice');
+                        var ysnAccrue = charge.get('intEntityVendorId') ? true : false;
 
                         amount = Ext.isNumeric(amount) ? amount : 0.00; 
                         chargeCurrencyId = Ext.isNumeric(chargeCurrencyId) ? chargeCurrencyId : transactionCurrencyId;
                         chargeVendorId = Ext.isNumeric(chargeVendorId) ? chargeVendorId : transactionVendorId;
                         if (transactionCurrencyId == chargeCurrencyId) {
-                            //totalCharges += ysnPrice ? -amount : (transactionVendorId == chargeVendorId && ysnAccrue) ? amount : 0;
-                            if(chargeEntity == 'No')
-                                totalCharges += (transactionVendorId == chargeVendorId) ? amount : 0;
-                            else if (chargeEntity == 'Add')
-                                totalCharges += amount;
-                            else if (chargeEntity == 'Reduce')
-                                totalCharges += -amount;
+                            totalCharges += ysnPrice ? -amount : (transactionVendorId == chargeVendorId && ysnAccrue) ? amount : 0;
                         }
                     }
                 });
@@ -4009,7 +3983,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     dblAmount: 0,
                                     strAllocateCostBy: 'Unit',
                                     ysnAccrue: otherCharge.intVendorId ? true : false,
-                                    //ysnPrice: otherCharge.ysnPrice,
+                                    ysnPrice: otherCharge.ysnPrice,
                                     strItemNo: otherCharge.strItemNo,
                                     intCurrencyId: otherCharge.intCurrencyId,
                                     strCurrency: otherCharge.strCurrency,
@@ -5118,7 +5092,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('intChargeId', record.get('intItemId'));
             current.set('ysnInventoryCost', record.get('ysnInventoryCost'));
             //current.set('ysnAccrue', record.get('ysnAccrue'));
-            //current.set('ysnPrice', record.get('ysnPrice'));
+            current.set('ysnPrice', record.get('ysnPrice'));
 
             // If other charge is accrue, default the vendor and currency from the transaction vendor and currency. 
             // if (record.get('ysnAccrue') === true) {
@@ -5617,7 +5591,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             dblAmount: cost.strCostMethod == "Amount" ? cost.dblRate : 0,
                             strAllocateCostBy: 'Unit',
                             ysnAccrue: cost.intVendorId ? true : false,
-                            //ysnPrice: cost.ysnPrice,
+                            ysnPrice: cost.ysnPrice,
                             strItemNo: cost.strItemNo,
                             intCurrencyId: cost.intCurrencyId,
                             strCurrency: cost.strCurrency,
@@ -6541,7 +6515,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             if (charges) {
                 Ext.Array.each(charges.data.items, function (charge) {
                     var dblForexRate = charge.get('dblForexRate');
-                    var chargeEntity = charge.get('strChargeEntity');
                     dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0;   
 
                     if (!charge.dummy) {
@@ -6559,9 +6532,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 chargeQuantity = Ext.isNumeric(chargeQuantity) ? chargeQuantity : 1; 
                                 var cost = taxableAmount / chargeQuantity;
 
-                                //if (charge.get('ysnPrice')) {
-                                if(chargeEntity != 'No'){
-                                    taxableAmount = chargeEntity == 'Add' ? taxableAmount : -taxableAmount; 
+                                if (charge.get('ysnPrice')) {
+                                    taxableAmount = -taxableAmount; 
                                 }                                   
 
                                 if (itemDetailTax.strCalculationMethod === 'Percentage') {
@@ -6580,8 +6552,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                                 // Do not compute tax if it can't be converted to voucher. 
                                 // This means accrue is false and price down is false. 
-                                //if (!charge.get('intEntityVendorId') && !charge.get('ysnPrice')){
-                                if(!charge.get('intEntityVendorId') && chargeEntity != 'No') {
+                                if (!charge.get('intEntityVendorId') && !charge.get('ysnPrice')){
                                     taxAmount = 0.00;
                                 }
 
@@ -8520,8 +8491,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             selectedRec = records[0],
             costMethod = selectedRec.get('strCostMethod');
 
-        var ysnPrice = selectedRec.get('ysnPrice') ? true : false;
-
         activeGridRecord.set('intContractId', selectedRec.get('intContractHeaderId'));
         activeGridRecord.set('strContractNumber', selectedRec.get('strContractNumber'));
         activeGridRecord.set('intContractDetailId', selectedRec.get('intContractDetailId'));
@@ -8535,8 +8504,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         activeGridRecord.set('dblAmount', costMethod == "Amount" ? selectedRec.get('dblRate') : 0,
         activeGridRecord.set('strAllocateCostBy', 'Unit'));
         activeGridRecord.set('ysnAccrue', selectedRec.get('intVendorId') ? true : false);
-        //activeGridRecord.set('ysnPrice', selectedRec.get('ysnPrice'));
-        activeGridRecord.set('strChargeEntity', ysnPrice ? 'Reduce' : 'No');
+        activeGridRecord.set('ysnPrice', selectedRec.get('ysnPrice'));
         activeGridRecord.set('strItemNo', selectedRec.get('strItemNo'));
         activeGridRecord.set('intCurrencyId', selectedRec.get('intCurrencyId'));
         activeGridRecord.set('strCurrency', selectedRec.get('strCurrency'));

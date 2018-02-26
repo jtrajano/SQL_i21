@@ -62,24 +62,7 @@ Ext.define('Inventory.model.ReceiptCharge', {
             }
         },
         { name: 'intEntityVendorId', type: 'int', allowNull: true },
-        { 
-            name: 'ysnPrice', 
-            type: 'boolean',
-            convert: function(value,record) {
-                if(record){
-                    return record.get('strChargeEntity') != 'No' ? true : false;
-                } else {
-                    return value;
-                }
-            }
-        }, //To be removed IC-2161
-        { 
-            name: 'strChargeEntity', 
-            type:'string',
-            convert: function(value, record) {
-                return !iRely.Functions.isEmpty(value) ? value : 'No';
-            }
-        },
+        { name: 'ysnPrice', type: 'boolean' },
         { name: 'intSort', type: 'int', allowNull: true },
 
         { name: 'strItemNo', type: 'string' },
@@ -104,10 +87,10 @@ Ext.define('Inventory.model.ReceiptCharge', {
         { name: 'dblForexRate', type: 'float', allowNull: true }, 
         { name: 'strCostType', type: 'string' },
         { name: 'dblQuantity', type: 'float', allowNull: true },
-        { name: 'strChargesLink', type: 'string', allowNull: true },
         { 
             name: 'strChargesLink', 
             type: 'string',
+            allowNull: true,
             convert: function(value, record){
                 return !iRely.Functions.isEmpty(value) ? value : null;
             }
@@ -132,8 +115,8 @@ Ext.define('Inventory.model.ReceiptCharge', {
         }
 
         if (
-            this.get('dblRate') <= 0 
-            && this.get('strCostMethod') !== 'Amount'        
+            this.get('dblRate') <= 0 && 
+            this.get('strCostMethod') !== 'Amount'        
         ) {
             errors.add({
                 field: 'dblRate',
@@ -166,31 +149,29 @@ Ext.define('Inventory.model.ReceiptCharge', {
             if (data) {
                 ReceiptVendorId = data.get('intEntityVendorId');
             }
-            //if (this.get('ysnPrice') === true &&
-            if(this.get('strChargeEntity') != 'No' &&
+            if (this.get('ysnPrice') === true &&
                 this.get('ysnAccrue') === true &&
                 iRely.Functions.isEmpty(this.get('intEntityVendorId')) !== true &&
                 this.get('intEntityVendorId') === ReceiptVendorId) {
                 errors.add({
                     field: 'strVendorName',
-                    message: this.get('strItemNo') + '  is both a payable and deductible to the bill of the same vendor.<br>Please select another vendor or change charge entity to Add/Reduce.'
+                    message: this.get('strItemNo') + '  is both a payable and deductible to the bill of the same vendor.<br>Please select another vendor or change price checkbox.'
                 })
                 errors.add({
-                    field: 'strChargeEntity',
-                    message: this.get('strItemNo') + '  is both a payable and deductible to the bill of the same vendor.<br>Please select another vendor or change charge entity to Add/Reduce.'
+                    field: 'ysnPrice',
+                    message: this.get('strItemNo') + '  is both a payable and deductible to the bill of the same vendor.<br>Please select another vendor or change price checkbox.'
                 })
             }
 
             if (this.get('ysnInventoryCost') === true &&
-                //this.get('ysnPrice') === true &&
-                this.get('strChargeEntity') != 'No' &&
+                this.get('ysnPrice') === true &&
                 this.get('ysnAccrue') === true &&
                 iRely.Functions.isEmpty(this.get('intEntityVendorId')) !== true &&
                 this.get('intEntityVendorId') !== ReceiptVendorId 
             ) 
             {
                 errors.add({
-                    field: 'strChargeEntity',
+                    field: 'ysnPrice',
                     message: 'Cannot add expense ' + this.get('strItemNo') + ' to Inventory and pass it on to the vendor.<br>Change Inventory Cost or Price setup.'
                 })
                 errors.add({
@@ -200,8 +181,7 @@ Ext.define('Inventory.model.ReceiptCharge', {
             }
 
             if (this.get('ysnInventoryCost') === true &&
-                //this.get('ysnPrice') === true &&
-                this.get('strChargeEntity') != 'No' &&
+                this.get('ysnPrice') === true &&
                 this.get('ysnAccrue') === false &&
                 iRely.Functions.isEmpty(this.get('intEntityVendorId')) === true &&
                 this.get('strCostType') !== 'Discount'

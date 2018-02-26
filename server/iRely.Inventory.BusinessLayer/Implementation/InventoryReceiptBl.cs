@@ -185,6 +185,7 @@ namespace iRely.Inventory.BusinessLayer
                     s.intForexRateTypeId,
                     s.dblForexRate,
                     s.strChargesLink,
+
                     s.strItemType,
                     s.intParentItemLinkId,
                     s.intChildItemLinkId,
