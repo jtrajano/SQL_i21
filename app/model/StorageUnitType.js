@@ -13,7 +13,7 @@ Ext.define('Inventory.model.StorageUnitType', {
 
     fields: [
         { name: 'intStorageUnitTypeId', type: 'int'},
-        { name: 'strStorageUnitType', type: 'string'},
+        { name: 'strStorageUnitType', type: 'string', auditKey: true},
         { name: 'strDescription', type: 'string'},
         { name: 'strInternalCode', type: 'string'},
         { name: 'intCapacityUnitMeasureId', type: 'int', allowNull: true},

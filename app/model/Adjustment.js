@@ -17,7 +17,7 @@ Ext.define('Inventory.model.Adjustment', {
         { name: 'intLocationId', type: 'int', allowNull: true },
         { name: 'dtmAdjustmentDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },
         { name: 'intAdjustmentType', type: 'int', allowNull: true },
-        { name: 'strAdjustmentNo', type: 'string' },
+        { name: 'strAdjustmentNo', type: 'string', auditKey: true },
         { name: 'strDescription', type: 'string' },
         { name: 'ysnPosted', type: 'boolean'},
         { name: 'intSort', type: 'int', allowNull: true }

@@ -10,7 +10,7 @@ Ext.define('Inventory.model.InventoryCountStockItem', {
     fields: [
         { name: 'intKey', type: 'int' },
         { name: 'intItemId', type: 'int', allowNull: true },   
-        { name: 'strItemNo', type: 'string' },             
+        { name: 'strItemNo', type: 'string', auditKey: true },             
         { name: 'dblOnHand', type: 'float' },
         { name: 'intItemStockUOMId', type: 'int', allowNull: true },
         { name: 'intSubLocationId', type: 'int', allowNull: true },

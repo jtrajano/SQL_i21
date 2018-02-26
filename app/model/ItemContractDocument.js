@@ -42,7 +42,7 @@ Ext.define('Inventory.model.ItemContractDocument', {
         { name: 'intDocumentId', type: 'int', allowNull: true },
         { name: 'intSort', type: 'int'},
 
-        { name: 'strDocumentName', type: 'string'}
+        { name: 'strDocumentName', type: 'string', auditKey: true}
     ],
 
     validators: [

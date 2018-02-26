@@ -37,6 +37,6 @@ Ext.define('Inventory.model.ItemSubLocation', {
             }
         },
         { name: 'intSubLocationId', type: 'int' },
-        { name: 'strSubLocationName', type: 'string' }
+        { name: 'strSubLocationName', type: 'string', auditKey: true }
     ]
 });

@@ -53,7 +53,7 @@ Ext.define('Inventory.model.ShipmentItem', {
 
         { name: 'intDestinationWeightId', type: 'int', allowNull: true },
         { name: 'intDestinationGradeId', type: 'int', allowNull: true },
-        { name: 'strItemNo', type: 'string'},
+        { name: 'strItemNo', type: 'string', auditKey: true},
         { name: 'strUnitMeasure', type: 'string'},
         { name: 'strWeightUOM', type: 'string'},
         { name: 'strSubLocationName', type: 'string'},

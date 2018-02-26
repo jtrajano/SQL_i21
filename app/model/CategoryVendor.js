@@ -60,7 +60,7 @@ Ext.define('Inventory.model.CategoryVendor', {
         { name: 'intSort', type: 'int', allowNull: true },
 
         { name: 'strLocationName', type: 'string'},
-        { name: 'strVendorId', type: 'string'},
+        { name: 'strVendorId', type: 'string', auditKey: true},
         { name: 'strFamilyId', type: 'string'},
         { name: 'strSellClassId', type: 'string'},
         { name: 'strOrderClassId', type: 'string'}

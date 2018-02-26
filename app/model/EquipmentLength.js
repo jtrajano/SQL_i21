@@ -12,7 +12,7 @@ Ext.define('Inventory.model.EquipmentLength', {
 
     fields: [
         { name: 'intEquipmentLengthId', type: 'int'},
-        { name: 'strEquipmentLength', type: 'string'},
+        { name: 'strEquipmentLength', type: 'string', auditKey: true},
         { name: 'strDescription', type: 'string'},
         { name: 'intSort', type: 'int'}
     ],

@@ -12,7 +12,7 @@ Ext.define('Inventory.model.Document', {
 
     fields: [
         { name: 'intDocumentId', type: 'int'},
-        { name: 'strDocumentName', type: 'string'},
+        { name: 'strDocumentName', type: 'string', auditKey: true},
         { name: 'strDescription', type: 'string'},
         { name: 'intDocumentType', type: 'int', allowNull: true},
         { name: 'intCommodityId', type: 'int', allowNull: true},

@@ -49,7 +49,7 @@ Ext.define('Inventory.model.ShipmentChargeTax', {
         { name: 'ysnTaxAdjusted', type: 'boolean' },
         { name: 'ysnTaxOnly', type: 'boolean' },
         { name: 'ysnCheckoffTax', type: 'boolean' },
-        { name: 'strTaxCode', type: 'string' },
+        { name: 'strTaxCode', type: 'string', auditKey: true },
         { name: 'dblQty', type: 'float' },
         { name: 'dblCost', type: 'float' },               
         { name: 'intUnitMeasureId', type: 'int', allowNull: true },

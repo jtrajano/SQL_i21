@@ -44,7 +44,7 @@ Ext.define('Inventory.model.UnitMeasureConversion', {
         { name: 'intStockUnitMeasureId', type: 'int', allowNull: true },
         { name: 'dblConversionToStock', type: 'float' },
         { name: 'strUnitMeasure', type: 'string'},
-        { name: 'strStockUOM', type: 'string'}
+        { name: 'strStockUOM', type: 'string', auditKey: true}
     ],
 
     validators: [

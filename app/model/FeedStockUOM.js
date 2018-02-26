@@ -13,7 +13,7 @@ Ext.define('Inventory.model.FeedStockUom', {
     fields: [
         { name: 'intRinFeedStockUOMId', type: 'int'},
         { name: 'intUnitMeasureId', type: 'int', allowNull: true },
-        { name: 'strRinFeedStockUOMCode', type: 'string'},
+        { name: 'strRinFeedStockUOMCode', type: 'string', auditKey: true},
         { name: 'intSort', type: 'int'},
 
         { name: 'strUnitMeasure', type: 'string'}

@@ -34,7 +34,7 @@ Ext.define('Inventory.model.ManufacturingCellPackType', {
         { name: 'dblLineEfficiencyRate', type: 'float'},
         { name: 'intSort', type: 'int'},
 
-        { name: 'strPackName', type: 'string'},
+        { name: 'strPackName', type: 'string', auditKey: true},
         { name: 'strDescription', type: 'string'}
 
     ],

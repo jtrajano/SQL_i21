@@ -37,7 +37,7 @@ Ext.define('Inventory.model.StorageLocationSku', {
         { name: 'intOwnerId', type: 'int', allowNull: true },
         { name: 'intSort', type: 'int'},
 
-        { name: 'strSKU', type: 'string'},
+        { name: 'strSKU', type: 'string', auditKey: true},
         { name: 'strItemNo', type: 'string'},
         { name: 'strContainer', type: 'string'},
         { name: 'strLotStatus', type: 'string'}

@@ -46,7 +46,7 @@ Ext.define('Inventory.model.ItemFactory', {
         { name: 'ysnDefault', type: 'boolean'},
         { name: 'intSort', type: 'int'},
 
-        { name: 'strLocationName', type: 'string'}
+        { name: 'strLocationName', type: 'string', auditKey: true}
     ],
 
     validators: [

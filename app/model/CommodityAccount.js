@@ -34,7 +34,7 @@ Ext.define('Inventory.model.CommodityAccount', {
 
         { name: 'strLocationName', type: 'string'},
         { name: 'strAccountCategory', type: 'string'},
-        { name: 'strAccountId', type: 'string'}
+        { name: 'strAccountId', type: 'string', auditKey: true}
     ],
 
     validators: [

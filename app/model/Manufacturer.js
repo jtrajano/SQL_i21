@@ -12,7 +12,7 @@ Ext.define('Inventory.model.Manufacturer', {
 
     fields: [
         { name: 'intManufacturerId', type: 'int'},
-        { name: 'strManufacturer', type: 'string'},
+        { name: 'strManufacturer', type: 'string', auditKey: true},
         { name: 'strContact', type: 'string'},
         { name: 'strAddress', type: 'string'},
         { name: 'strZipCode ', type: 'string'},

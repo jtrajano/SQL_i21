@@ -15,7 +15,7 @@ Ext.define('Inventory.model.StorageMeasurementReading', {
         { name: 'intStorageMeasurementReadingId', type: 'int' },
         { name: 'intLocationId', type: 'int', allowNull: true },
         { name: 'dtmDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },
-        { name: 'strReadingNo', type: 'string' },
+        { name: 'strReadingNo', type: 'string', auditKey: true },
         { name: 'intSort', type: 'int', allowNull: true }
     ],
 

@@ -46,7 +46,7 @@ Ext.define('Inventory.model.ItemBundle', {
         { name: 'dblMarkUpOrDown', type: 'float' },
         { name: 'dtmBeginDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d'},
         { name: 'dtmEndDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },
-        { name: 'strComponentItemNo', type: 'string' },
+        { name: 'strComponentItemNo', type: 'string', auditKey: true },
         { name: 'strUnitMeasure', type: 'string' }
     ],
 

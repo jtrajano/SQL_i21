@@ -54,7 +54,7 @@ Ext.define('Inventory.model.ReceiptItemLot', {
             }
         },
         { name: 'intLotId', type: 'int', allowNull: true },
-        { name: 'strLotNumber', type: 'string' },
+        { name: 'strLotNumber', type: 'string', auditKey: true },
         { name: 'strLotAlias', type: 'string' },
         { name: 'intSubLocationId', type: 'int', allowNull: true },
         { name: 'intStorageLocationId', type: 'int', allowNull: true },

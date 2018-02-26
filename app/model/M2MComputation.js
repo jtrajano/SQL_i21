@@ -9,6 +9,6 @@ Ext.define('Inventory.model.M2MComputation', {
     
     fields: [
         { name: 'intM2MComputationId', type: 'int' },
-        { name: 'strM2MComputationId', type: 'string' }
+        { name: 'strM2MComputationId', type: 'string', auditKey: true }
     ]
 });

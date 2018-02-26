@@ -12,7 +12,7 @@ Ext.define('Inventory.model.ReadingPoint', {
 
     fields: [
         { name: 'intReadingPointId', type: 'int'},
-        { name: 'strReadingPoint', type: 'string'},
+        { name: 'strReadingPoint', type: 'string', auditKey: true},
         { name: 'intSort', type: 'int'}
     ],
 

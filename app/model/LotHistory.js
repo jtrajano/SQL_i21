@@ -9,7 +9,7 @@ Ext.define('Inventory.model.LotHistory', {
 
     fields: [
         { name: 'intLotId', type: 'int'},
-        { name: 'strLotNumber', type: 'string' },
+        { name: 'strLotNumber', type: 'string', auditKey: true },
         { name: 'strParentLotNumber', type: 'string' },
         { name: 'strLotUOM', type: 'string' },
         { name: 'dtmExpiryDate', type: 'date', allowNull: true, dateFormat: 'c', dateWriteFormat: 'Y-m-d' },

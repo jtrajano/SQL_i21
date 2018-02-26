@@ -33,7 +33,7 @@ Ext.define('Inventory.model.ItemFactoryManufacturingCell', {
         { name: 'intPreference', type: 'int'},
         { name: 'intSort', type: 'int'},
 
-        { name: 'strCellName', type: 'string'}
+        { name: 'strCellName', type: 'string', auditKey: true}
 
     ],
 

@@ -50,7 +50,7 @@ Ext.define('Inventory.model.ItemVendorXref', {
         { name: 'intSort', type: 'int', allowNull: true },
 
         { name: 'strLocationName', type: 'string'},
-        { name: 'strVendorId', type: 'string'},
+        { name: 'strVendorId', type: 'string', auditKey: true},
         { name: 'strUnitMeasure', type: 'string'}
     ],
 

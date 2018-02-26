@@ -31,7 +31,7 @@ Ext.define('Inventory.model.StorageLocationCategory', {
         { name: 'intCategoryId', type: 'int', allowNull: true},
         { name: 'intSort', type: 'int'},
 
-        { name: 'strCategoryCode', type: 'string'}
+        { name: 'strCategoryCode', type: 'string', auditKey: true}
     ],
 
     validators: [

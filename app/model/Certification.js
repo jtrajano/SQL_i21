@@ -13,7 +13,7 @@ Ext.define('Inventory.model.Certification', {
 
     fields: [
         { name: 'intCertificationId', type: 'int'},
-        { name: 'strCertificationName', type: 'string'},
+        { name: 'strCertificationName', type: 'string', auditKey: true},
         { name: 'strIssuingOrganization', type: 'string'},
         { name: 'ysnGlobalCertification', type: 'boolean'},
         { name: 'intCountryId', type: 'int', allowNull: true},

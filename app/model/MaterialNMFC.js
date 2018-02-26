@@ -13,7 +13,7 @@ Ext.define('Inventory.model.MaterialNMFC', {
     fields: [
         { name: 'intMaterialNMFCId', type: 'int'},
         { name: 'intExternalSystemId', type: 'int'},
-        { name: 'strInternalCode', type: 'string'},
+        { name: 'strInternalCode', type: 'string', auditKey: true},
         { name: 'strDisplayMember', type: 'string'},
         { name: 'ysnDefault', type: 'boolean'},
         { name: 'ysnLocked', type: 'boolean'},

@@ -14,7 +14,7 @@ Ext.define('Inventory.model.Shipment', {
 
     fields: [
         { name: 'intInventoryShipmentId', type: 'int' },
-        { name: 'strShipmentNumber', type: 'string' },
+        { name: 'strShipmentNumber', type: 'string', auditKey: true },
         { name: 'dtmShipDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },
         { name: 'intOrderType', type: 'int', allowNull: true },
         { name: 'intSourceType', type: 'int', allowNull: true },

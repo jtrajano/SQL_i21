@@ -41,7 +41,7 @@ Ext.define('Inventory.model.ItemNote', {
             }
         },
         { name: 'intItemLocationId', type: 'int', allowNull: true },
-        { name: 'strCommentType', type: 'string' },
+        { name: 'strCommentType', type: 'string', auditKey: true },
         { name: 'strComments', type: 'string' },
         { name: 'intSort', type: 'int', allowNull: true },
 

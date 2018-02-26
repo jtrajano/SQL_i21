@@ -12,7 +12,7 @@ Ext.define('Inventory.model.StorageType', {
 
     fields: [
         { name: 'intStorageTypeId', type: 'int'},
-        { name: 'strStorageType', type: 'string'},
+        { name: 'strStorageType', type: 'string', auditKey: true},
         { name: 'strDescription', type: 'string'},
         { name: 'intSort', type: 'int'}
     ],

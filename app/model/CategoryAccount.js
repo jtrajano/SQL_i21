@@ -50,7 +50,7 @@ Ext.define('Inventory.model.CategoryAccount', {
         { name: 'intAccountId', type: 'int', allowNull: true },
         { name: 'intSort', type: 'int', allowNull: true },
 
-        { name: 'strAccountId', type: 'string' },
+        { name: 'strAccountId', type: 'string', auditKey: true },
         { name: 'strAccountCategory', type: 'string' }
     ],
 

@@ -13,7 +13,7 @@ Ext.define('Inventory.model.FuelTaxClass', {
 
     fields: [
         { name: 'intFuelTaxClassId', type: 'int'},
-        { name: 'strTaxClassCode', type: 'string'},
+        { name: 'strTaxClassCode', type: 'string', auditKey: true},
         { name: 'strDescription', type: 'string'},
         { name: 'strIRSTaxCode', type: 'string'}
     ],

@@ -12,7 +12,7 @@ Ext.define('Inventory.model.QAProperty', {
 
     fields: [
         { name: 'intQAPropertyId', type: 'int'},
-        { name: 'strPropertyName', type: 'string'},
+        { name: 'strPropertyName', type: 'string', auditKey: true},
         { name: 'strDescription', type: 'string'},
         { name: 'strAnalysisType', type: 'string'},
         { name: 'strDataType', type: 'string'},

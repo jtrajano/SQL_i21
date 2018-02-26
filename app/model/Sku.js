@@ -13,7 +13,7 @@ Ext.define('Inventory.model.Sku', {
     fields: [
         { name: 'intSKUId', type: 'int'},
         { name: 'intExternalSystemId', type: 'int', allowNull: true },
-        { name: 'strSKU', type: 'string'},
+        { name: 'strSKU', type: 'string', auditKey: true},
         { name: 'intSKUStatusId', type: 'int', allowNull: true },
         { name: 'strLotCode', type: 'string'},
         { name: 'strSerialNo', type: 'string'},

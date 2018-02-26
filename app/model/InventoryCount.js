@@ -18,7 +18,7 @@ Ext.define('Inventory.model.InventoryCount', {
         { name: 'intCommodityId', type: 'int', allowNull: true },
         { name: 'intCountGroupId', type: 'int', allowNull: true },
         { name: 'dtmCountDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },
-        { name: 'strCountNo', type: 'string' },
+        { name: 'strCountNo', type: 'string', auditKey: true },
         { name: 'intSubLocationId', type: 'int', allowNull: true },
         { name: 'intStorageLocationId', type: 'int', allowNull: true },
         { name: 'strDescription', type: 'string' },

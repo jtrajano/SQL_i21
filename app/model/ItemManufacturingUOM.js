@@ -30,7 +30,7 @@ Ext.define('Inventory.model.ItemManufacturingUOM', {
         { name: 'intUnitMeasureId', type: 'int', allowNull: true },
         { name: 'intSort', type: 'int'},
 
-        { name: 'strUnitMeasure', type: 'string'}
+        { name: 'strUnitMeasure', type: 'string', auditKey: true}
     ],
 
     validators: [

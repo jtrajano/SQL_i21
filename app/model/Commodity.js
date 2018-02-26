@@ -21,7 +21,7 @@ Ext.define('Inventory.model.Commodity', {
 
     fields: [
         { name: 'intCommodityId', type: 'int' },
-        { name: 'strCommodityCode', type: 'string' },
+        { name: 'strCommodityCode', type: 'string', auditKey: true },
         { name: 'strDescription', type: 'string' },
         { name: 'ysnExchangeTraded', type: 'boolean' },
         { name: 'intFutureMarketId', type: 'int', allowNull: true },

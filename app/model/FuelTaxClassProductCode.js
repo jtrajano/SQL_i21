@@ -29,7 +29,7 @@ Ext.define('Inventory.model.FuelTaxClassProductCode', {
             }
         },
         { name: 'strState', type: 'string', allowNull: true },
-        { name: 'strProductCode', type: 'string'},
+        { name: 'strProductCode', type: 'string', auditKey: true},
         { name: 'intSort', type: 'int'}
     ],
 

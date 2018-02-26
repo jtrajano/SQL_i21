@@ -12,7 +12,7 @@ Ext.define('Inventory.model.Measurement', {
 
     fields: [
         { name: 'intMeasurementId', type: 'int'},
-        { name: 'strMeasurementName', type: 'string'},
+        { name: 'strMeasurementName', type: 'string', auditKey: true},
         { name: 'strDescription', type: 'string'},
         { name: 'strMeasurementType', type: 'string'},
         { name: 'intSort', type: 'int'}
