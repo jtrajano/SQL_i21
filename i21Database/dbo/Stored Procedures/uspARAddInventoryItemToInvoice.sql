@@ -167,7 +167,7 @@ BEGIN
 END
 	
 	
-DECLARE  @ContractNumber	NVARCHAR(50)
+DECLARE  @ContractNumber	INT
 		,@ContractSeq		INT
 		,@InvoiceType		NVARCHAR(200)
 		,@TermId			INT
