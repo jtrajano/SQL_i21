@@ -278,7 +278,7 @@ BEGIN
 				  END)								--<ysnLocationActive, bit,>
 				,CASE 
 					WHEN (SELECT COUNT(*) FROM galocmst where galoc_loc_no = AG.agloc_loc_no) > 0
-					THEN (SELECT GL.intAccountSegmentId FROM galocmst LEFT OUTER JOIN	tblGLAccountSegment GL 
+					THEN (SELECT TOP 1 GL.intAccountSegmentId FROM galocmst LEFT OUTER JOIN	tblGLAccountSegment GL 
 						  ON galoc_gl_profit_center = CAST(GL.strCode AS INT) WHERE galoc_loc_no = AG.agloc_loc_no)
 					ELSE 
 						GL.intAccountSegmentId 
