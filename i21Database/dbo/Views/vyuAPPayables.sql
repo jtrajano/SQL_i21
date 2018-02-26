@@ -139,7 +139,7 @@ LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId
 	AND C.intTransactionType NOT IN (2, 13)
 	AND A.ysnPrepay = 0 --EXCLUDE THE PREPAYMENT
 UNION ALL
---APPLIED DM
+--APPLIED VOUCHER
 SELECT
 	A.dtmDate
 	,A.intBillId
@@ -160,6 +160,32 @@ SELECT
 	,EC.strClass
 FROM dbo.tblAPBill A
 INNER JOIN dbo.tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intBillId
+INNER JOIN dbo.tblAPBill C ON B.intTransactionId = C.intBillId
+INNER JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId) ON A.intEntityVendorId = D.[intEntityId]
+LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
+WHERE A.ysnPosted = 1
+UNION ALL
+--APPLIED DM/VPRE
+SELECT
+	A.dtmDate
+	,A.intBillId
+	,A.strBillId
+	,B.dblAmountApplied
+	,0 AS dblTotal
+	,0 AS dblAmountDue
+	,0 AS dblWithheld
+	,0 AS dblDiscount
+	,0 AS dblInterest
+	,0 AS dblPrepaidAmount 
+	,ISNULL(D.strVendorId,'') + ' - ' + ISNULL(D2.strName,'') as strVendorIdName 
+	,D.strVendorId
+	,A.dtmDueDate
+	,A.ysnPosted
+	,C.ysnPaid
+	,A.intAccountId
+	,EC.strClass
+FROM dbo.tblAPBill A
+INNER JOIN dbo.tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intTransactionId
 INNER JOIN dbo.tblAPBill C ON B.intTransactionId = C.intBillId
 INNER JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId) ON A.intEntityVendorId = D.[intEntityId]
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
