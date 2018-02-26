@@ -120,7 +120,6 @@ BEGIN
 		END
 
 
-		DELETE FROM tblGLTempAccount WHERE intUserId = @intUserId
 
 		EXEC uspGLAccountOriginSync @intUserId
 
