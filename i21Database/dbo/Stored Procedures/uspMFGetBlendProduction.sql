@@ -52,7 +52,7 @@ w.dblBinSize,w.intBlendRequirementId,
 w.ysnKittingEnabled,w.strComment,w.intLocationId,CASE WHEN ISNULL(w.intStorageLocationId,0)=0 THEN @intDefaultStorageBin ELSE w.intStorageLocationId END AS intStorageLocationId,
 br.strDemandNo,ISNULL(ws.strBackColorName,'') AS strBackColorName,us.strUserName,w.intExecutionOrder,
 ws.strName AS strStatus,sl.strName AS strStorageLocation,
-@dblConfirmedQty AS dblConfirmedQty,w.intPickListId,pl.strPickListNo,i.strLotTracking,@dtmProductionDate AS dtmProductionDate,@intShiftId AS intShiftId,@strShiftName AS strShiftName
+@dblConfirmedQty AS dblConfirmedQty,w.intPickListId,pl.strPickListNo,i.strLotTracking,@dtmProductionDate AS dtmProductionDate,@intShiftId AS intShiftId,@strShiftName AS strShiftName,w.intManufacturingProcessId
 From tblMFWorkOrder w Join tblICItem i on w.intItemId=i.intItemId
 Join tblICItemUOM iu on w.intItemUOMId=iu.intItemUOMId
 Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
