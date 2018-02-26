@@ -21,6 +21,7 @@ INSERT INTO tblARProductRecapStagingTable (
 	, strCustomerName
 	, intCompanyLocationId
 	, strLocationNumber
+	, strLocationName
 	, intItemId
 	, intTaxCodeId
 	, strProductNo
@@ -36,6 +37,7 @@ SELECT DISTINCT
 	, ARC.strCustomerName
 	, ABC.intCompanyLocationId
 	, LOCATION.strLocationNumber
+	, LOCATION.strLocationName
 	, ABC.intItemId
 	, ABC.intTaxCodeId
 	, strProductNo					= CASE WHEN ABC.strTransactionType = 'Items' THEN ABC.strItemNo  
