@@ -198,6 +198,19 @@ IF @transCount = 0 BEGIN TRANSACTION
 
 	IF @transCount = 0 COMMIT TRANSACTION
 
+
+BEGIN
+	EXEC dbo.uspSMAuditLog 
+	   @screenName = 'AccountsPayable.view.Voucher'		-- Screen Namespace
+	  ,@keyValue = @billId								-- Primary Key Value of the Voucher. 
+	  ,@entityId = @userId									-- Entity Id.
+	  ,@actionType = 'Created'                        -- Action Type
+	  ,@changeDescription = 'Integration'				-- Description
+	  ,@fromValue = ''									-- Previous Value
+	  ,@toValue = ''									-- New Value
+END
+
+
 END TRY
 BEGIN CATCH
 	DECLARE @ErrorSeverity INT,
