@@ -52,7 +52,7 @@ SELECT DISTINCT
 	, intLineOfBusinessIds	= LINEOFBUSINESS.intEntityLineOfBusinessIds
 	, ysnProspect			= entityType.Prospect
 	, ysnCreditHold			= CUSTOMER.ysnCreditHold
-	, intFreightTermId		= custLocation.intFreightTermId
+	, intFreightTermId		= ISNULL(shipLocation.intFreightTermId, custLocation.intFreightTermId)
 	, strFreightTerm		= fTerms.strFreightTerm
 	, intShipViaId			= custLocation.intShipViaId
 	, strShipViaName		= shipVia.strShipVia
@@ -75,7 +75,7 @@ LEFT JOIN tblSMLineOfBusiness LOB ON entityLOB.intLineOfBusinessId = LOB.intLine
 LEFT JOIN tblEMEntityClass entityClass ON entityToCustomer.intEntityClassId = entityClass.intEntityClassId
 LEFT JOIN tblSMPaymentMethod custPaymentMethod ON CUSTOMER.intPaymentMethodId = custPaymentMethod.intPaymentMethodID
 LEFT JOIN tblSMTerm custTerm ON CUSTOMER.intTermsId = custTerm.intTermID
-LEFT JOIN tblSMFreightTerms fTerms ON custLocation.intFreightTermId = fTerms.intFreightTermId
+LEFT JOIN tblSMFreightTerms fTerms ON ISNULL(shipLocation.intFreightTermId, custLocation.intFreightTermId) = fTerms.intFreightTermId
 LEFT JOIN tblSMShipVia shipVia on custLocation.intShipViaId = shipVia.intEntityId
 OUTER APPLY (
 	SELECT dtmDate = MAX(INV.dtmDate) 
