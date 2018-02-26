@@ -57,14 +57,14 @@ BEGIN TRY
 					,@ysnPost = @ysnPost
 					,@intPurchaseSale = 1
 					,@intEntityUserSecurityId = @intEntityUserSecurityId
-
-				-- Increase the Inbound In-Transit Qty.
-				EXEC uspLGUpdateInboundIntransitQty 
-					@intLoadId = @intLoadId
-					,@ysnInventorize = @ysnPost
-					,@ysnUnShip = @ysnUnShip
-					,@intEntityUserSecurityId = @intEntityUserSecurityId
 			END
+			
+			-- Increase the Inbound In-Transit Qty.
+			EXEC uspLGUpdateInboundIntransitQty 
+				@intLoadId = @intLoadId
+				,@ysnInventorize = @ysnPost
+				,@ysnUnShip = @ysnUnShip
+				,@intEntityUserSecurityId = @intEntityUserSecurityId
 
 			IF(@ysnPost = 0)
 			BEGIN
