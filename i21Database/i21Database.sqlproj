@@ -6217,7 +6217,6 @@
     <Build Include="dbo\Stored Procedures\uspICGetItemAddOns.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetBundleComponents.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetItemSubtitutes.sql" />
-<<<<<<< HEAD
     <Build Include="dbo\Views\vyuARInvoicePaymentInfo.sql" />
     <Build Include="dbo\Views\vyuICCategoryLocation.sql" />
     <Build Include="dbo\Functions\fnICGetTransWeightedAveCost.sql" />
@@ -6229,10 +6228,6 @@
     <Build Include="dbo\Stored Procedures\uspTFGenerateNM41164.sql" />
     <Build Include="dbo\Tables\tblFRBudgetSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDBudgetSummary.sql" />
-=======
-    <Build Include="dbo\Views\vyuARBundleItemsReport.sql" />
-    <Build Include="dbo\Views\vyuICCategoryLocation.sql" />
->>>>>>> parent of 06f7463d37... AR-5375
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
