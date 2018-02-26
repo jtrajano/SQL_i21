@@ -25,6 +25,7 @@ DECLARE @intDirectType AS INT = 3
 DECLARE @intCommodityUOMId INT
 DECLARE @intCommodityUnitMeasureId INT
 DECLARE @intTicketItemUOMId INT
+DECLARE @intUnitMeasureId INT
 DECLARE @strTransactionId NVARCHAR(40) = NULL
 DECLARE @InventoryReceiptId AS INT
 DECLARE @dblUnits AS DECIMAL (13,3)
@@ -238,7 +239,7 @@ BEGIN TRY
 		RETURN;
 	END
 	
-	SELECT  @intTicketItemUOMId = ItemUOM.intItemUOMId
+	SELECT  @intTicketItemUOMId = ItemUOM.intItemUOMId ,@intUnitMeasureId = ItemUOM.intUnitMeasureId
 	FROM    dbo.tblICItemUOM ItemUOM
 	WHERE   ItemUOM.intItemId = @intItemId AND ItemUOM.ysnStockUnit = 1
 
@@ -275,7 +276,8 @@ BEGIN TRY
 			   ,[intItemId]
 			   ,[intCompanyLocationSubLocationId]
 			   ,[intStorageLocationId]
-			   ,[intUnitMeasureId])
+			   ,[intUnitMeasureId]
+			   ,[intItemUOMId])
 	SELECT 	[intConcurrencyId]		= 1
 			,[intEntityId]			= @intEntityId
 			,[intCommodityId]		= SC.intCommodityId
@@ -307,7 +309,8 @@ BEGIN TRY
 			,SC.[intItemId]
 			,SC.[intSubLocationId]
 			,SC.[intStorageLocationId]
-			,(SELECT intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = @intTicketItemUOMId)
+			,@intUnitMeasureId
+			,@intTicketItemUOMId
 	FROM	dbo.tblSCTicket SC
 	WHERE	SC.intTicketId = @intTicketId
 
@@ -374,23 +377,25 @@ BEGIN TRY
 		   ,[intSort]
 		   ,[strDiscountChargeType])
 		SELECT	 
-			[intConcurrencyId]= 1       
-           ,[dblGradeReading]= SD.[dblGradeReading]
-           ,[strCalcMethod]= SD.[strCalcMethod]
-           ,[strShrinkWhat]= SD.[strShrinkWhat]			
-           ,[dblShrinkPercent]= SD.[dblShrinkPercent]
-           ,[dblDiscountAmount]= SD.[dblDiscountAmount]
-           ,[dblDiscountDue]= SD.[dblDiscountAmount]
-           ,[dblDiscountPaid]= ISNULL(SD.[dblDiscountPaid],0)
-           ,[ysnGraderAutoEntry]= SD.[ysnGraderAutoEntry]
-           ,[intDiscountScheduleCodeId]= SD.[intDiscountScheduleCodeId]
-           ,[dtmDiscountPaidDate]= SD.[dtmDiscountPaidDate]
-           ,[intTicketId]= NULL
-           ,[intTicketFileId]= @intCustomerStorageId
-           ,[strSourceType]= 'Storage'
-		   ,[intSort]=SD.[intSort]
-		   ,[strDiscountChargeType]=SD.[strDiscountChargeType]
-		FROM	dbo.[tblQMTicketDiscount] SD
+			[intConcurrencyId]			= 1       
+           ,[dblGradeReading]			= SD.[dblGradeReading]
+           ,[strCalcMethod]				= SD.[strCalcMethod]
+           ,[strShrinkWhat]				= SD.[strShrinkWhat]			
+           ,[dblShrinkPercent]			= CASE WHEN ISNULL(DCode.intUnitMeasureId,0) = 0 THEN SD.[dblShrinkPercent]  ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intUnitMeasureId,DCode.intUnitMeasureId,SD.[dblShrinkPercent])  END
+           ,[dblDiscountAmount]			= CASE WHEN ISNULL(DCode.intUnitMeasureId,0) = 0 THEN SD.[dblDiscountAmount] ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intUnitMeasureId,DCode.intUnitMeasureId,SD.[dblDiscountAmount]) END
+           ,[dblDiscountDue]			= CASE WHEN ISNULL(DCode.intUnitMeasureId,0) = 0 THEN SD.[dblDiscountAmount] ELSE dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intUnitMeasureId,DCode.intUnitMeasureId,SD.[dblDiscountAmount]) END
+           ,[dblDiscountPaid]			= ISNULL(SD.[dblDiscountPaid],0)
+           ,[ysnGraderAutoEntry]		= SD.[ysnGraderAutoEntry]
+           ,[intDiscountScheduleCodeId] = SD.[intDiscountScheduleCodeId]
+           ,[dtmDiscountPaidDate]		= SD.[dtmDiscountPaidDate]
+           ,[intTicketId]				= NULL
+           ,[intTicketFileId]			= @intCustomerStorageId
+           ,[strSourceType]				= 'Storage'
+		   ,[intSort]					= SD.[intSort]
+		   ,[strDiscountChargeType]		= SD.[strDiscountChargeType]
+		FROM	  dbo.[tblQMTicketDiscount] SD
+		JOIN      tblGRDiscountScheduleCode DCode ON DCode.intDiscountScheduleCodeId = SD.intDiscountScheduleCodeId
+		LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = DCode.intUnitMeasureId
 		WHERE	SD.intTicketId = @intTicketId AND SD.strSourceType = 'Scale'
 		
 		UPDATE CS
