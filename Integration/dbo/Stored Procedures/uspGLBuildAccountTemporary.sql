@@ -10,10 +10,12 @@ EXEC('CREATE PROCEDURE  [dbo].[uspGLBuildAccountTemporary]
 @intUserId INT
 AS
 
+
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
-
+BEGIN TRANSACTION
+BEGIN TRY
 CREATE TABLE #TempResults
 (
 	 strCode					NVARCHAR(50)
@@ -217,5 +219,21 @@ DROP TABLE #Structure
 DROP TABLE #Segments
 DROP TABLE #ConstructAccount
 
-DELETE tblGLTempAccountToBuild WHERE intUserId = @intUserId')
+COMMIT TRANSACTION
+END TRY
+BEGIN CATCH
+    IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
+    DECLARE @ErrorMessage NVARCHAR(4000);  
+    DECLARE @ErrorSeverity INT;  
+    DECLARE @ErrorState INT;  
+    SELECT   
+    @ErrorMessage = ERROR_MESSAGE(),  
+    @ErrorSeverity = ERROR_SEVERITY(),  
+    @ErrorState = ERROR_STATE();  
+    RAISERROR (@ErrorMessage, -- Message text.  
+    @ErrorSeverity, -- Severity.  
+    @ErrorState -- State.  
+    );  
+END CATCH
+--DELETE tblGLTempAccountToBuild WHERE intUserId = @intUserId')
 END

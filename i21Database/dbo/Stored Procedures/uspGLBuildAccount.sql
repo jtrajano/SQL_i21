@@ -106,7 +106,7 @@
 	END
 
 
-	DELETE FROM tblGLTempAccount WHERE intUserId = @intUserId
+	--DELETE FROM tblGLTempAccount WHERE intUserId = @intUserId
 
 	--EXEC uspGLAccountOriginSync @intUserId
 	EXEC uspGLBuildTempCOASegment
