@@ -9,7 +9,6 @@
 	[ysnAccrue] BIT NULL DEFAULT ((0)),
 	[ysnInventoryCost] BIT NULL DEFAULT ((0)),	
 	[ysnPrice] BIT NULL DEFAULT ((0)),	
-	[strChargeEntity] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL DEFAULT('No'),
 	[strChargesLink] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
 	--[dblAmountBilled] NUMERIC(18, 6) NULL DEFAULT ((0)), -- Removed these field. Use tblICInventoryReceiptCharge.dblAmountBilled
 	--[dblAmountPaid] NUMERIC(18, 6) NULL DEFAULT ((0)), -- Removed these field. Use tblICInventoryReceiptCharge.dblAmountBilled

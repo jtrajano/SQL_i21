@@ -26,7 +26,6 @@ SELECT ReceiptCharge.intInventoryReceiptChargeId
 	, Vendor.strVendorId
 	, Vendor.strName AS strVendorName
 	, ReceiptCharge.ysnPrice
-	, ReceiptCharge.strChargeEntity
 	, Currency.intCent
 	, strTaxGroup = SMTaxGroup.strTaxGroup
 	, ReceiptCharge.dblTax

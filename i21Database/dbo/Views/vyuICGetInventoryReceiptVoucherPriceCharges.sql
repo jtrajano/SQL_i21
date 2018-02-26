@@ -141,4 +141,4 @@ FROM	tblICInventoryReceipt Receipt
 				)
 		) allLinkedVoucherId  
 WHERE	Receipt.ysnPosted = 1
-		AND ReceiptCharge.strChargeEntity != 'No'
+		AND ReceiptCharge.ysnPrice = 1 

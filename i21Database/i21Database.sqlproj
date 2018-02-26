@@ -6392,7 +6392,6 @@
     <None Include="Scripts\Post-Deployment\IC\24_ImplementBasketChanges.sql" />
     <None Include="Scripts\Post-Deployment\AP\DefaultData\DeferredPaymentInterest.sql" />
     <Build Include="dbo\Stored Procedures\uspGLInsertOriginCrossReferenceMapping.sql" />
-    <None Include="Scripts\Post-Deployment\IC\28_UpdateChargeEntity.sql" />
     <None Include="Scripts\Post-Deployment\PR\Reports\DashboardPanelViews.sql" />
     <None Include="Scripts\Post-Deployment\AP\CleanBasisAdvance.sql" />
   </ItemGroup>

@@ -1,5 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuICGetInventoryReceiptVoucherCharges]
 AS 
+
 SELECT	intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) 
 		,intInventoryReceiptId = Receipt.intInventoryReceiptId 		
 		,intInventoryReceiptChargeId = receiptAndVoucheredCharges.intInventoryReceiptChargeId
@@ -40,23 +41,18 @@ FROM	tblICInventoryReceipt Receipt
 					,dblReceiptLineTotal = ROUND(rc.dblAmount, 2)
 					,dblVoucherLineTotal = ISNULL(voucher.LineTotal, 0)
 					,dblReceiptTax = 
-						--CASE 
-						--	-- If 3rd party and price down = yes, then return +ve tax. 
-						--	WHEN (ISNULL(rc.intEntityVendorId, Receipt.intEntityVendorId) <> Receipt.intEntityVendorId AND ISNULL(rc.ysnPrice, 0) = 1) THEN 
-						--		ISNULL(rc.dblTax, 0)
-						--	-- If price down = yes, then return -ve tax. 
-						--	WHEN ISNULL(rc.ysnPrice, 0) = 1 THEN 
-						--		-ISNULL(rc.dblTax, 0)
-						--	-- Otherwise, return +ve tax. 
-						--	ELSE 
-						--		ISNULL(rc.dblTax, 0)
-						--END 
+						CASE 
+							-- If 3rd party and price down = yes, then return +ve tax. 
+							WHEN (ISNULL(rc.intEntityVendorId, Receipt.intEntityVendorId) <> Receipt.intEntityVendorId AND ISNULL(rc.ysnPrice, 0) = 1) THEN 
+								ISNULL(rc.dblTax, 0)
+							-- If price down = yes, then return -ve tax. 
+							WHEN ISNULL(rc.ysnPrice, 0) = 1 THEN 
+								-ISNULL(rc.dblTax, 0)
+							-- Otherwise, return +ve tax. 
+							ELSE 
+								ISNULL(rc.dblTax, 0)
+						END 
 
-						-- Charge Entity Implementation
-						CASE WHEN rc.strChargeEntity = 'Reduce' THEN 
-								CASE WHEN (ISNULL(rc.intEntityVendorId, Receipt.intEntityVendorId) <> Receipt.intEntityVendorId) THEN ISNULL(rc.dblTax, 0) ELSE -ISNULL(rc.dblTax, 0) END
-						ELSE ISNULL(rc.dblTax, 0) END
-						
 					,dblVoucherTax = ISNULL(voucher.TaxTotal, 0) 
 					,dblOpenQty = 1 - ISNULL(voucher.QtyTotal, 0)
 					,dblItemsPayable = 
@@ -64,22 +60,18 @@ FROM	tblICInventoryReceipt Receipt
 						- ISNULL(voucher.LineTotal, 0)
 					,dblTaxesPayable = 
 						--ISNULL(CASE WHEN rc.ysnPrice = 1 THEN -rc.dblTax ELSE rc.dblTax END, 0)
-						--CASE 
-						--	-- If 3rd party and price down = yes, then return +ve tax. 
-						--	WHEN (ISNULL(rc.intEntityVendorId, Receipt.intEntityVendorId) <> Receipt.intEntityVendorId AND ISNULL(rc.ysnPrice, 0) = 1) THEN 
-						--		ISNULL(rc.dblTax, 0)
-						--	-- If price down = yes, then return -ve tax. 
-						--	WHEN ISNULL(rc.ysnPrice, 0) = 1 THEN 
-						--		-ISNULL(rc.dblTax, 0)
-						--	-- Otherwise, return +ve tax. 
-						--	ELSE 
-						--		ISNULL(rc.dblTax, 0)
-						--END 
+						CASE 
+							-- If 3rd party and price down = yes, then return +ve tax. 
+							WHEN (ISNULL(rc.intEntityVendorId, Receipt.intEntityVendorId) <> Receipt.intEntityVendorId AND ISNULL(rc.ysnPrice, 0) = 1) THEN 
+								ISNULL(rc.dblTax, 0)
+							-- If price down = yes, then return -ve tax. 
+							WHEN ISNULL(rc.ysnPrice, 0) = 1 THEN 
+								-ISNULL(rc.dblTax, 0)
+							-- Otherwise, return +ve tax. 
+							ELSE 
+								ISNULL(rc.dblTax, 0)
+						END 
 
-						-- Charge Entity Implementation
-						CASE WHEN rc.strChargeEntity = 'Reduce' THEN 
-								CASE WHEN (ISNULL(rc.intEntityVendorId, Receipt.intEntityVendorId) <> Receipt.intEntityVendorId) THEN ISNULL(rc.dblTax, 0) ELSE -ISNULL(rc.dblTax, 0) END
-							 ELSE ISNULL(rc.dblTax, 0) END
 						- ISNULL(voucher.TaxTotal, 0) 
 					,i.strItemNo
 					,strItemDescription = i.strDescription	
@@ -181,4 +173,4 @@ FROM	tblICInventoryReceipt Receipt
 				)
 		) allLinkedVoucherId   
 WHERE	Receipt.ysnPosted = 1
-		AND ReceiptCharge.ysnAccrue = 1
+		AND ReceiptCharge.ysnAccrue = 1 
