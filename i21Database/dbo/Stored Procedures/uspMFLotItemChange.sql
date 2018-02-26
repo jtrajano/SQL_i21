@@ -7,6 +7,7 @@
 	,@strNotes NVARCHAR(MAX) = NULL
 	,@ysnBulkChange BIT = 0
 	,@ysnProducedItemChange BIT = 0
+	,@dblPhysicalCount NUMERIC(38, 20)=NULL
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -44,7 +45,6 @@ BEGIN TRY
 		,@intWorkOrderId INT
 		,@intBatchId INT
 		,@intProducedLotId INT
-		,@dblPhysicalCount NUMERIC(18, 6)
 		,@dblTareWeight NUMERIC(18, 6)
 		,@dblUnitQty NUMERIC(18, 6)
 		,@intPhysicalItemUOMId INT
@@ -236,7 +236,7 @@ BEGIN TRY
 			,@intBatchId = intBatchId
 			,@intProducedLotId = intLotId
 			,@intOldProduceItemUOMId = intItemUOMId
-			,@dblPhysicalCount = dblPhysicalCount
+			,@dblPhysicalCount = Case When @dblPhysicalCount is null then dblPhysicalCount Else @dblPhysicalCount End
 			,@intOldPhysicalItemUOMId = intPhysicalItemUOMId
 			,@dblTareWeight = dblTareWeight
 			,@intContainerId = intContainerId
