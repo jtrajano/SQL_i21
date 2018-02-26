@@ -547,8 +547,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                             conjunction: 'and'
                         },
                         {
-                            column: 'intLotStatusId',
-                            value: 1,
+                            column: 'strPrimaryStatus',
+                            value: 'Active',
                             condition: 'eq',
                             conjunction: 'and'
                         },
