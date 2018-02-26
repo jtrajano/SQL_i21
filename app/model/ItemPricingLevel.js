@@ -54,7 +54,7 @@ Ext.define('Inventory.model.ItemPricingLevel', {
         { name: 'dblCommissionRate', type: 'float' },
         { name: 'intSort', type: 'int', allowNull: true },
 
-        { name: 'strLocationName', type: 'string'},
+        { name: 'strLocationName', type: 'string', auditKey: true},
         { name: 'strUnitMeasure', type: 'string'},
         { name: 'strUPC', type: 'string'},
         { name: 'intCurrencyId', type: 'int', allowNull: true },

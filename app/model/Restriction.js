@@ -12,7 +12,7 @@ Ext.define('Inventory.model.Restriction', {
 
     fields: [
         { name: 'intRestrictionId', type: 'int'},
-        { name: 'strInternalCode', type: 'string'},
+        { name: 'strInternalCode', type: 'string', auditKey: true},
         { name: 'strDisplayMember', type: 'string'},
         { name: 'ysnDefault', type: 'boolean'},
         { name: 'ysnLocked', type: 'boolean'},

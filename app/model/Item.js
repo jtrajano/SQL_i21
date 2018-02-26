@@ -37,7 +37,7 @@ Ext.define('Inventory.model.Item', {
 
     fields: [
         { name: 'intItemId', type: 'int', allowNull: true },
-        { name: 'strItemNo', type: 'string' },
+        { name: 'strItemNo', type: 'string', auditKey: true },
         { name: 'strShortName', type: 'string' },
         { name: 'strType', type: 'string' },
         { name: 'strBundleType', type: 'string', allowNull: true },

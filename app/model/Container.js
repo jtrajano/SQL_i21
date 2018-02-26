@@ -13,7 +13,7 @@ Ext.define('Inventory.model.Container', {
     fields: [
         { name: 'intContainerId', type: 'int'},
         { name: 'intExternalSystemId', type: 'int', allowNull: true},
-        { name: 'strContainerId', type: 'string'},
+        { name: 'strContainerId', type: 'string', auditKey: true},
         { name: 'intContainerTypeId', type: 'int', allowNull: true},
         { name: 'intStorageLocationId', type: 'int', allowNull: true},
         { name: 'strLastUpdateBy', type: 'string'},

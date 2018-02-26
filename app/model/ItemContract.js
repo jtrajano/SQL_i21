@@ -37,7 +37,7 @@ Ext.define('Inventory.model.ItemContract', {
             }
         },
         { name: 'intItemLocationId', type: 'int', allowNull: true },
-        { name: 'strContractItemName', type: 'string' },
+        { name: 'strContractItemName', type: 'string', auditKey: true },
         { name: 'intCountryId', type: 'int', allowNull: true },
         { name: 'strGrade', type: 'string' },
         { name: 'strGradeType', type: 'string' },

@@ -45,7 +45,7 @@ Ext.define('Inventory.model.ItemAccount', {
         { name: 'intAccountId', type: 'int', allowNull: true },
         { name: 'intSort', type: 'int', allowNull: true },
 
-        { name: 'strAccountId', type: 'string'},
+        { name: 'strAccountId', type: 'string', auditKey: true},
         { name: 'strDescription', type: 'string'},
         { name: 'strAccountCategory', type: 'string'}
     ],

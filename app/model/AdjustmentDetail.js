@@ -56,7 +56,7 @@ Ext.define('Inventory.model.AdjustmentDetail', {
         { name: 'dblNewCost', type: 'float', allowNull: true  },
         { name: 'dblLineTotal', type: 'float', allowNull: true  },
         { name: 'intSort', type: 'int', allowNull: true },
-        { name: 'strItemNo', type: 'string'},
+        { name: 'strItemNo', type: 'string', auditKey: true},
         { name: 'intNewLocationId', type: 'int', allowNull: true },
         { name: 'intNewSubLocationId', type: 'int', allowNull: true },
         { name: 'intNewStorageLocationId', type: 'int', allowNull: true },

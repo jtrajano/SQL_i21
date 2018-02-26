@@ -47,7 +47,7 @@ Ext.define('Inventory.model.InventoryCountDetail', {
         { name: 'intEntityUserSecurityId', type: 'int', allowNull: true },
         { name: 'intSort', type: 'int', allowNull: true },
 
-        { name: 'strItemNo', type: 'string' },
+        { name: 'strItemNo', type: 'string', auditKey: true },
         { name: 'strItemDescription', type: 'string' },
         { name: 'strLotTracking', type: 'string' },
         { name: 'strCategory', type: 'string' },

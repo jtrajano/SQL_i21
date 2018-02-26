@@ -16,7 +16,7 @@ Ext.define('Inventory.model.StorageLocation', {
 
     fields: [
         { name: 'intStorageLocationId', type: 'int'},
-        { name: 'strName', type: 'string'},
+        { name: 'strName', type: 'string', auditKey: true},
         { name: 'strDescription', type: 'string'},
         { name: 'intStorageUnitTypeId', type: 'int', allowNull: true },
         { name: 'intLocationId', type: 'int', allowNull: true },

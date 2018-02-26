@@ -12,7 +12,7 @@ Ext.define('Inventory.model.FeedStockCode', {
 
     fields: [
         { name: 'intRinFeedStockId', type: 'int'},
-        { name: 'strRinFeedStockCode', type: 'string'},
+        { name: 'strRinFeedStockCode', type: 'string', auditKey: true},
         { name: 'strDescription', type: 'string'},
         { name: 'intSort', type: 'int'}
     ],

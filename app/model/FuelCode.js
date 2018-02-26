@@ -12,7 +12,7 @@ Ext.define('Inventory.model.FuelCode', {
 
     fields: [
         { name: 'intRinFuelId', type: 'int'},
-        { name: 'strRinFuelCode', type: 'string'},
+        { name: 'strRinFuelCode', type: 'string', auditKey: true},
         { name: 'strDescription', type: 'string'},
         { name: 'intSort', type: 'int'}
     ],

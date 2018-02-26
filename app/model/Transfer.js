@@ -14,7 +14,7 @@ Ext.define('Inventory.model.Transfer', {
 
     fields: [
         { name: 'intInventoryTransferId', type: 'int', allowNull: true },
-        { name: 'strTransferNo', type: 'string' },
+        { name: 'strTransferNo', type: 'string', auditKey: true },
         { name: 'dtmTransferDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },
         { name: 'strTransferType', type: 'string' },
         { name: 'intSourceType', type: 'int', allowNull: true },

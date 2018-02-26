@@ -33,7 +33,7 @@ Ext.define('Inventory.model.StorageLocationMeasurement', {
         { name: 'ysnActive', type: 'boolean'},
         { name: 'intSort', type: 'int'},
 
-        { name: 'strMeasurementName', type: 'string'},
+        { name: 'strMeasurementName', type: 'string', auditKey: true},
         { name: 'strReadingPoint', type: 'string'}
     ],
 

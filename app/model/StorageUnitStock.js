@@ -9,7 +9,7 @@ Ext.define('Inventory.model.StorageUnitStock', {
 
     fields: [
         { name: 'intItemStockUOMId', type: 'int' },
-        { name: 'strItemNo', type: 'string' },
+        { name: 'strItemNo', type: 'string', auditKey: true },
         { name: 'intItemId', type: 'int', allowNull: true },			
         { name: 'intCommodityId', type: 'string', allowNull: true },	
         { name: 'strCommodityCode', type: 'string' },	

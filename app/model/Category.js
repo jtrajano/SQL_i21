@@ -17,7 +17,7 @@ Ext.define('Inventory.model.Category', {
 
     fields: [
         { name: 'intCategoryId', type: 'int' },
-        { name: 'strCategoryCode', type: 'string' },
+        { name: 'strCategoryCode', type: 'string', auditKey: true },
         { name: 'strDescription', type: 'string' },
         { name: 'strInventoryType', type: 'string' },
         { name: 'intLineOfBusinessId', type: 'int', allowNull: true },

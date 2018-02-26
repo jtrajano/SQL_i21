@@ -102,7 +102,7 @@ Ext.define('Inventory.model.ItemLocation', {
         { name: 'ysnCountedDaily', type: 'boolean' },
         { name: 'intSort', type: 'int', allowNull: true },
 
-        { name: 'strLocationName', type: 'string'},
+        { name: 'strLocationName', type: 'string', auditKey: true},
         { name: 'strVendorId', type: 'string'},
         { name: 'strCategory', type: 'string'},
         { name: 'strUnitMeasure', type: 'string'},

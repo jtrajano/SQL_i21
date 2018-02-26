@@ -13,7 +13,7 @@ Ext.define('Inventory.model.PackType', {
 
     fields: [
         { name: 'intPackTypeId', type: 'int'},
-        { name: 'strPackName', type: 'string'},
+        { name: 'strPackName', type: 'string', auditKey: true},
         { name: 'strDescription', type: 'string'}
     ],
 

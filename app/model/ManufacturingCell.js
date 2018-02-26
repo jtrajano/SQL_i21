@@ -13,7 +13,7 @@ Ext.define('Inventory.model.ManufacturingCell', {
 
     fields: [
         { name: 'intManufacturingCellId', type: 'int'},
-        { name: 'strCellName', type: 'string'},
+        { name: 'strCellName', type: 'string', auditKey: true},
         { name: 'strDescription', type: 'string'},
         { name: 'intLocationId', type: 'int', allowNull: true },
         { name: 'ysnActive', type: 'boolean'},

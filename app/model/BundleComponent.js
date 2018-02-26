@@ -13,7 +13,7 @@ Ext.define('Inventory.model.BundleComponent', {
     fields: [
         { name: 'intItemBundleId', type: 'int' },
         { name: 'intItemId', type: 'int' },
-        { name: 'strItemNo', type: 'string' },
+        { name: 'strItemNo', type: 'string', auditKey: true },
         { name: 'strItemDescription', type: 'string' },
         { name: 'intBundleItemId', type: 'int', allowNull: true },
         { name: 'strComponent', type: 'string' },

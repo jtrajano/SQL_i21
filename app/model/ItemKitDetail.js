@@ -34,7 +34,7 @@ Ext.define('Inventory.model.ItemKitDetail', {
         { name: 'ysnSelected', type: 'int', allowNull: true },
         { name: 'inSort', type: 'int', allowNull: true },
 
-        { name: 'strItemNo', type: 'string'},
+        { name: 'strItemNo', type: 'string', auditKey: true},
         { name: 'strDescription', type: 'string'},
         { name: 'strUnitMeasure', type: 'string'}
     ],

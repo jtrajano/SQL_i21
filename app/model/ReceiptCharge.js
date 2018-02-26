@@ -65,7 +65,7 @@ Ext.define('Inventory.model.ReceiptCharge', {
         { name: 'ysnPrice', type: 'boolean' },
         { name: 'intSort', type: 'int', allowNull: true },
 
-        { name: 'strItemNo', type: 'string' },
+        { name: 'strItemNo', type: 'string', auditKey: true },
         { name: 'strItemDescription', type: 'string' },
         { name: 'strCostUOM', type: 'string' },
         { name: 'strUnitType', type: 'string' },

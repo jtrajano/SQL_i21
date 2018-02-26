@@ -70,13 +70,13 @@ Ext.define('Inventory.model.ShipmentItemLot', {
         },
         { name: 'strWarehouseCargoNumber', type: 'string' },
         { name: 'intSort', type: 'int', allowNull: true },
-        { name: 'strLotId', type: 'string'},
+        { name: 'strLotNumber', type: 'string', auditKey: true},
         { name: 'strItemUOM', type: 'string'},
         { name: 'dblWeightPerQty', type: 'float' }
     ],
 
     validators: [
-        {type: 'presence', field: 'strLotId'}
+        {type: 'presence', field: 'strLotNumber'}
     ],
 
     validate: function(options){

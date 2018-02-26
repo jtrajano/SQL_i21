@@ -49,7 +49,7 @@ Ext.define('Inventory.model.ItemCustomerXref', {
         { name: 'intSort', type: 'int', allowNull: true },
 
         { name: 'strLocationName', type: 'string'},
-        { name: 'strCustomerNumber', type: 'string'}
+        { name: 'strCustomerNumber', type: 'string', auditKey: true}
     ],
 
     validators: [

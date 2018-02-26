@@ -12,7 +12,7 @@ Ext.define('Inventory.model.ProductionProcess', {
 
     fields: [
         { name: 'intRinProcessId', type: 'int'},
-        { name: 'strRinProcessCode', type: 'string'},
+        { name: 'strRinProcessCode', type: 'string', auditKey: true},
         { name: 'strDescription', type: 'string'},
         { name: 'intSort', type: 'int'}
     ],

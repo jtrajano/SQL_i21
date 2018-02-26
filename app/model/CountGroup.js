@@ -12,7 +12,7 @@ Ext.define('Inventory.model.CountGroup', {
 
     fields: [
         { name: 'intCountGroupId', type: 'int' },
-        { name: 'strCountGroup', type: 'string' },
+        { name: 'strCountGroup', type: 'string', auditKey: true },
         { name: 'intCountsPerYear', type: 'int' },
         { name: 'ysnIncludeOnHand', type: 'boolean' },
         { name: 'ysnScannedCountEntry', type: 'boolean' },

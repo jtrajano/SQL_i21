@@ -44,7 +44,7 @@ Ext.define('Inventory.model.ItemMotorFuelTax', {
         { name: 'intProductCodeId', type: 'int', allowNull: true },
         { name: 'intSort', type: 'int', allowNull: true },
 
-        { name: 'strTaxAuthorityCode', type: 'string'},
+        { name: 'strTaxAuthorityCode', type: 'string', auditKey: true},
         { name: 'strProductCode', type: 'string'}
     ],
 

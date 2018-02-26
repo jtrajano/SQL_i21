@@ -12,7 +12,7 @@ Ext.define('Inventory.model.Brand', {
 
     fields: [
         { name: 'intBrandId', type: 'int'},
-        { name: 'strBrandCode', type: 'string'},
+        { name: 'strBrandCode', type: 'string', auditKey: true},
         { name: 'strBrandName', type: 'string'},
         { name: 'intManufacturerId', type: 'int', allowNull: true,
             reference: {

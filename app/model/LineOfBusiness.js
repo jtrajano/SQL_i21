@@ -12,7 +12,7 @@ Ext.define('Inventory.model.LineOfBusiness', {
 
     fields: [
         { name: 'intLineOfBusinessId', type: 'int'},
-        { name: 'strLineOfBusiness', type: 'string'},
+        { name: 'strLineOfBusiness', type: 'string', auditKey: true},
         { name: 'intSort', type: 'int'},
     ],
 

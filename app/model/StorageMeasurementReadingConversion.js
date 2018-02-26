@@ -37,7 +37,7 @@ Ext.define('Inventory.model.StorageMeasurementReadingConversion', {
         { name: 'intSort', type: 'int', allowNull: true },
 
         { name: 'strCommodity', type: 'string' },
-        { name: 'strItemNo', type: 'string' },
+        { name: 'strItemNo', type: 'string', auditKey: true },
         { name: 'strStorageLocationName', type: 'string' },
         { name: 'strSubLocationName', type: 'string' },
         { name: 'dblEffectiveDepth', type: 'float' },

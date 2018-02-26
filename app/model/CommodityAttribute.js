@@ -14,7 +14,7 @@ Ext.define('Inventory.model.CommodityAttribute', {
     fields: [
         { name: 'intCommodityAttributeId', type: 'int'},
         { name: 'intCommodityId', type: 'int' },
-        { name: 'strType', type: 'string'},
+        { name: 'strType', type: 'string', auditKey: true},
         { name: 'strDescription', type: 'string'},
         { name: 'intSort', type: 'int'}
     ],

@@ -44,7 +44,7 @@ Ext.define('Inventory.model.ItemSubstitute', {
     ],
 
     validators: [
-        {type: 'presence', field: 'strSubstituteItemNo'},
+        {type: 'presence', field: 'strSubstituteItemNo', auditKey: true},
         {type: 'presence', field: 'strUnitMeasure'}
     ]
 });

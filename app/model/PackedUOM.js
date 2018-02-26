@@ -11,7 +11,7 @@ Ext.define('Inventory.model.PackedUOM', {
     fields: [
         { name: 'intUnitMeasureConversionId', type: 'int', allowNull: true },
         { name: 'intUnitMeasureId', type: 'int', allowNull: true },
-        { name: 'strUnitMeasure', type: 'string' },
+        { name: 'strUnitMeasure', type: 'string', auditKey: true },
         { name: 'strUnitType', type: 'string' },
         { name: 'strSymbol', type: 'string' },
         { name: 'intStockUnitMeasureId', type: 'int', allowNull: true },

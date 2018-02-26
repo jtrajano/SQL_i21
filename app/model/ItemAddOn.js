@@ -35,7 +35,7 @@ Ext.define('Inventory.model.ItemAddOn', {
         { name: 'intAddOnItemId', type: 'int' },
         { name: 'dblQuantity', type: 'float', defaultValue: 1.00 },
         { name: 'intItemUOMId', type: 'int', allowNull: true },
-        { name: 'strAddOnItemNo', type: 'string' },
+        { name: 'strAddOnItemNo', type: 'string', auditKey: true },
         { name: 'strUnitMeasure', type: 'string' },
         { name: 'strDescription', type: 'string' }
     ],

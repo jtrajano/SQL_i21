@@ -13,7 +13,7 @@ Ext.define('Inventory.model.ParentLot', {
     fields: [
         { name: 'intParentLotId', type: 'int'},
         { name: 'intItemId', type: 'int'},
-        { name: 'strParentLotNumber', type: 'string'},
+        { name: 'strParentLotNumber', type: 'string', auditKey: true},
         { name: 'strParentLotAlias', type: 'string'}
     ],
 

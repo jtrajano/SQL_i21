@@ -40,7 +40,7 @@ Ext.define('Inventory.model.ItemPOSSLA', {
                 }
             }
         },
-        { name: 'strSLAContract', type: 'string'},
+        { name: 'strSLAContract', type: 'string', auditKey: true},
         { name: 'dblContractPrice', type: 'float'},
         { name: 'ysnServiceWarranty', type: 'boolean'}
     ],
