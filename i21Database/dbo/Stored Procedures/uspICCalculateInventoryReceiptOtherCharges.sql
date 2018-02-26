@@ -14,6 +14,7 @@ BEGIN
 	DECLARE @COST_METHOD_PER_UNIT AS NVARCHAR(50) = 'Per Unit'
 			,@COST_METHOD_PERCENTAGE AS NVARCHAR(50) = 'Percentage'
 			,@COST_METHOD_AMOUNT AS NVARCHAR(50) = 'Amount'
+			,@COST_METHOD_GROSS_UNIT AS NVARCHAR(50) = 'Gross Unit'
 
 			,@INVENTORY_RECEIPT_TYPE AS INT = 4
 			,@STARTING_NUMBER_BATCH AS INT = 3  
@@ -106,6 +107,158 @@ BEGIN
 				ON Item.intItemId = ReceiptItem.intItemId
 	WHERE	ReceiptItem.intInventoryReceiptId = @intInventoryReceiptId
 			AND Charge.strCostMethod = @COST_METHOD_PER_UNIT
+			AND 
+			(
+				1 =
+				CASE	WHEN 
+							Receipt.strReceiptType = 'Purchase Contract'
+							AND Charge.intContractId IS NULL 
+							AND ReceiptItem.intOrderId IS NULL 
+							AND Charge.strChargesLink IS NULL 
+							AND ReceiptItem.strChargesLink IS NULL 
+						THEN 
+							1
+						
+						WHEN 
+							Receipt.strReceiptType = 'Purchase Contract'
+							AND Charge.intContractId IS NULL 
+							AND ReceiptItem.intOrderId IS NULL 
+							AND Charge.strChargesLink = ReceiptItem.strChargesLink
+						THEN 
+							1
+
+						WHEN 
+							Receipt.strReceiptType = 'Purchase Contract'
+							AND Charge.intContractId IS NOT NULL 
+							AND ReceiptItem.intOrderId = Charge.intContractId
+							AND ReceiptItem.intLineNo = Charge.intContractDetailId
+							AND Charge.strChargesLink IS NULL 
+							AND ReceiptItem.strChargesLink IS NULL 
+						THEN 
+							1
+						
+						WHEN 
+							Receipt.strReceiptType = 'Purchase Contract'
+							AND Charge.intContractId IS NOT NULL 
+							AND ReceiptItem.intOrderId = Charge.intContractId
+							AND ReceiptItem.intLineNo = Charge.intContractDetailId
+							AND Charge.strChargesLink = ReceiptItem.strChargesLink 
+						THEN 
+							1
+
+						WHEN 
+							ISNULL(Receipt.strReceiptType, 'Direct') <> 'Purchase Contract'
+							AND Charge.intContractId IS NULL 
+							AND Charge.strChargesLink IS NULL 
+							AND ReceiptItem.strChargesLink IS NULL 
+						THEN 
+							1
+						
+						WHEN 
+							ISNULL(Receipt.strReceiptType, 'Direct') <> 'Purchase Contract'
+							AND Charge.intContractId IS NULL 
+							AND Charge.strChargesLink = ReceiptItem.strChargesLink 
+						THEN 
+							1
+
+						ELSE 
+							0
+				END 				
+			)
+			AND ChargeItem.intOnCostTypeId IS NULL 
+			AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
+			-- Do not include Bundle types when calculating the other charges. 
+			AND Item.strType <> 'Bundle' 
+
+	-- Check if the calculated values are valid. 
+	BEGIN 
+		SET @intItemId = NULL 
+
+		SELECT	TOP 1 
+				@strItemNo = Item.strItemNo
+				,@strUnitMeasure = UOM.strUnitMeasure
+				,@intItemId = Item.intItemId
+				,@strOtherCharge = ItemOtherCharge.strItemNo
+		FROM	dbo.tblICInventoryReceiptChargePerItem ChargePerItem INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+					ON ChargePerItem.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId		
+				INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
+					ON Charge.intInventoryReceiptChargeId = ChargePerItem.intInventoryReceiptChargeId
+				LEFT JOIN tblICItem Item
+					ON Item.intItemId = ReceiptItem.intItemId					
+				LEFT JOIN tblICItemUOM ChargeUOM
+					ON ChargeUOM.intItemUOMId = Charge.intCostUOMId
+				LEFT JOIN tblICUnitMeasure UOM
+					ON UOM.intUnitMeasureId = ChargeUOM.intUnitMeasureId
+				--For Other Charge
+				LEFT JOIN tblICItem ItemOtherCharge
+					ON ItemOtherCharge.intItemId = ChargePerItem.intChargeId
+		WHERE	ChargePerItem.intInventoryReceiptId = @intInventoryReceiptId 
+				AND ChargePerItem.dblCalculatedAmount IS NULL
+
+		IF @intItemId IS NOT NULL 
+		BEGIN 
+			-- 'Unable to calculate {Other Charge Item} as {Unit of Measure} is not found in {Item} > UOM setup.'
+			EXEC uspICRaiseError 80050, @strOtherCharge, @strUnitMeasure, @strItemNo;
+			GOTO _Exit
+		END 
+	END 
+END 
+
+-- Calculate the cost method for "Gross Unit"
+BEGIN 
+	INSERT INTO dbo.tblICInventoryReceiptChargePerItem (
+			[intInventoryReceiptId]
+			,[intInventoryReceiptChargeId] 
+			,[intInventoryReceiptItemId] 
+			,[intChargeId] 
+			,[intEntityVendorId] 
+			,[dblCalculatedAmount]
+			,[dblCalculatedQty]
+			,[intContractId]
+			,[intContractDetailId]
+			,[strAllocateCostBy]
+			,[ysnAccrue]
+			,[ysnPrice]
+			,[ysnInventoryCost]
+			,[strChargesLink]
+	)
+	SELECT	[intInventoryReceiptId]			= ReceiptItem.intInventoryReceiptId
+			,[intInventoryReceiptChargeId]	= Charge.intInventoryReceiptChargeId
+			,[intInventoryReceiptItemId]	= ReceiptItem.intInventoryReceiptItemId
+			,[intChargeId]					= Charge.intChargeId
+			,[intEntityVendorId]			= Charge.intEntityVendorId
+			,[dblCalculatedAmount]			= ROUND (			
+												Charge.dblRate 
+												* dbo.fnCalculateQtyBetweenUOM(
+													ReceiptItem.intWeightUOMId
+													, dbo.fnGetMatchingItemUOMId(ReceiptItem.intItemId, Charge.intCostUOMId)
+													, ISNULL(ReceiptItem.dblGross, 0)
+												)
+												, 2
+											 )
+			,[dblCalculatedQty]				= dbo.fnCalculateQtyBetweenUOM (
+												ReceiptItem.intWeightUOMId
+												, dbo.fnGetMatchingItemUOMId(ReceiptItem.intItemId, Charge.intCostUOMId)
+												, ISNULL(ReceiptItem.dblGross, 0)
+											 )
+			,[intContractId]				= Charge.intContractId
+			,[intContractDetailId]			= Charge.intContractDetailId
+			,[strAllocateCostBy]			= Charge.strAllocateCostBy
+			,[ysnAccrue]					= Charge.ysnAccrue
+			,[ysnPrice]						= Charge.ysnPrice
+			,[ysnInventoryCost]				= Charge.ysnInventoryCost
+			,[strChargesLink]				= Charge.strChargesLink
+	FROM	tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
+				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+			INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
+				ON ReceiptItem.intInventoryReceiptId = Charge.intInventoryReceiptId
+			INNER JOIN dbo.tblICItem ChargeItem 
+				ON ChargeItem.intItemId = Charge.intChargeId
+			INNER JOIN tblICItem Item
+				ON Item.intItemId = ReceiptItem.intItemId
+	WHERE	ReceiptItem.intInventoryReceiptId = @intInventoryReceiptId
+			AND ReceiptItem.intWeightUOMId IS NOT NULL 
+			AND Charge.strCostMethod = @COST_METHOD_GROSS_UNIT
 			AND 
 			(
 				1 =
