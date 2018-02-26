@@ -19,11 +19,11 @@ SELECT I.intInvoiceId
 	   , I.dtmDueDate
 	   , P.intPaymentId
 	   , P.intPaymentMethodId
-	   , P.strPaymentMethod
+	   , strPaymentMethod = CASE WHEN LEN(RTRIM(LTRIM(P.strPaymentMethod))) = 0 THEN PAYMENTMETHOD.strPaymentMethod  ELSE ISNULL(P.strPaymentMethod, PAYMENTMETHOD.strPaymentMethod) END
 	   , dblDiscount = CASE WHEN (I.strTransactionType  IN ('Invoice','Debit Memo', 'Cash')) THEN ISNULL(I.dblDiscount,0)  ELSE  ISNULL(I.dblDiscount,0) * -1 END
 	   , dblDiscountAvailable = CASE WHEN (I.strTransactionType  IN ('Invoice','Debit Memo', 'Cash')) THEN ISNULL(I.dblDiscountAvailable,0)  ELSE  ISNULL(I.dblDiscountAvailable,0) * -1 END
 	   , dblInterest = CASE WHEN (I.strTransactionType  IN ('Invoice','Debit Memo', 'Cash')) THEN ISNULL(I.dblInterest,0)  ELSE  ISNULL(I.dblInterest,0) * -1 END
-	   , P.dblPayment
+	   , PD.dblPayment
 	   , I.ysnPosted
 	   , I.dtmPostDate
 	   , I.ysnPaid
@@ -34,31 +34,24 @@ SELECT I.intInvoiceId
 	   , I.intCompanyLocationId
 	   , strLocationName = L.strLocationName
 	   , strEnteredBy = EB.strName
-	   , strUserEntered = USERENTERED.strName
+	   ,strUserEntered = USERENTERED.strName
 	   , I.intCurrencyId
 	   , strCurrency = CUR.strCurrency
-FROM tblARInvoice I
-INNER JOIN (
-	SELECT AP.intPaymentId
-		,  APD.intInvoiceId
-		,  AP.ysnPosted
-		,  AP.intPaymentMethodId
-		,  strPaymentMethod = CASE WHEN LEN(RTRIM(LTRIM(AP.strPaymentMethod))) = 0 THEN PM.strPaymentMethod  ELSE ISNULL(AP.strPaymentMethod, PM.strPaymentMethod) END
-		,  APD.dblPayment
-		,  AP.strBatchId
-	FROM tblARPayment AP
+FROM tblARInvoice I 
 	LEFT JOIN (
-		SELECT intPaymentId
-			, intInvoiceId
-			, dblPayment 
+		SELECT intInvoiceId
+		, dblPayment 
+		, MAX(intPaymentId) intPaymentId
 		FROM tblARPaymentDetail
-	) APD ON APD.intPaymentId = AP.intPaymentId
+		GROUP BY intInvoiceId, dblPayment
+	) PD ON I.intInvoiceId = PD.intInvoiceId
+	INNER JOIN (
+		SELECT intPaymentId, intPaymentMethodId, strPaymentMethod, strBatchId FROM tblARPayment
+	) P ON PD.intPaymentId = P.intPaymentId
 	LEFT JOIN (
 		SELECT intPaymentMethodID, strPaymentMethod FROM tblSMPaymentMethod
-	) PM ON PM.intPaymentMethodID = AP.intPaymentMethodId
-	WHERE AP.ysnPosted = 1
-) P ON P.intInvoiceId = I.intInvoiceId
-INNER JOIN (SELECT EME.intEntityId
+	) PAYMENTMETHOD ON P.intPaymentMethodId = PAYMENTMETHOD.intPaymentMethodID
+	INNER JOIN (SELECT EME.intEntityId
 			, EME.strName
 			, ARC.strCustomerNumber
 	FROM dbo.tblEMEntity EME WITH (NOLOCK)  
@@ -126,3 +119,4 @@ INNER JOIN (SELECT EME.intEntityId
 			 , strName 
 		FROM dbo.tblEMEntity WITH (NOLOCK)
 	) USERENTERED ON USERENTERED.intEntityId = I.intPostedById
+WHERE I.intInvoiceId IS NOT NULL
