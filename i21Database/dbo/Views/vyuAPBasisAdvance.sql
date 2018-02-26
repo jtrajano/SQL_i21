@@ -15,6 +15,7 @@ SELECT TOP 100 PERCENT * FROM (
         ,ctd.intContractSeq
         ,ticket.strTicketNumber 
         ,ticket.dtmTicketDateTime
+        ,loc.intPurchaseAdvAccount AS intAccountId
         ,loc.intCompanyLocationId
         ,loc.strLocationName
         ,receipt.intInventoryReceiptId
