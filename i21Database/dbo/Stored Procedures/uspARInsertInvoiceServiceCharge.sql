@@ -242,7 +242,7 @@ AS
 			SELECT @batchId
 				 , @intEntityCustomerId
 				 , @intSCAccountId
-				 , @dtmAsOfDate
+				 , @dtmServiceChargeDate
 				 , @dblInvoiceTotal
 
 			--INSERT INTO RECAP DETAIL TABLE
