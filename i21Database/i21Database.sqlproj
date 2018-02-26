@@ -6228,7 +6228,6 @@
     <Build Include="dbo\Tables\tblFRBudgetSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDBudgetSummary.sql" />
     <Build Include="dbo\Views\vyuARBundleItemsReport.sql" />
-    <Build Include="dbo\Views\vyuICCategoryLocation.sql" />
     <Build Include="dbo\Views\vyuRKBrokerageCommission.sql" />
   </ItemGroup>
   <ItemGroup>

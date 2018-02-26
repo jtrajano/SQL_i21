@@ -13,9 +13,6 @@ BEGIN
 		  , @intSplitEntityId	INT
 		  , @dblSplitPercent	NUMERIC(18,6)
 		  , @newInvoiceNumber	NVARCHAR(50)	
-		  , @newTermId			INT
-		  , @newShipToId		INT
-		  , @newBillToId		INT
 		  , @customerId			INT
 
 	SELECT @intSplitId = intSplitId
@@ -35,7 +32,6 @@ BEGIN
 	WHILE EXISTS(SELECT NULL FROM @splitDetails)
 		BEGIN
 			DECLARE @newInvoiceId	INT = NULL
-				  , @newCustomerId	INT = NULL
 			
 			SELECT TOP 1 @intSplitDetailId = intSplitDetailId FROM @splitDetails WHERE intEntityId <> @customerId ORDER BY intSplitDetailId
 
@@ -49,23 +45,8 @@ BEGIN
 
 			IF ISNULL(@newInvoiceNumber, '') <> ''
 				BEGIN
-					SELECT @newInvoiceId	= intInvoiceId
-					     , @newCustomerId	= intEntityCustomerId 
-					FROM tblARInvoice 
-					WHERE strInvoiceNumber = @newInvoiceNumber
-
-					SELECT @newShipToId = intShipToId
-					     , @newBillToId = intBillToId
-						 , @newTermId	= intTermsId 
-					FROM vyuARCustomerSearch 
-					WHERE [intEntityId] = @newCustomerId
-
-					UPDATE tblARInvoice
-					SET intShipToLocationId	= @newShipToId
-					  , intBillToLocationId	= @newBillToId
-					  , intTermId			= @newTermId
-					  , dtmDueDate			= dbo.fnGetDueDateBasedOnTerm(dtmDate, @newTermId)
-					WHERE intInvoiceId = @newInvoiceId
+					SELECT @newInvoiceId = intInvoiceId
+					FROM tblARInvoice WHERE strInvoiceNumber = @newInvoiceNumber
 
 					SELECT @invoicesToAdd = ISNULL(@invoicesToAdd, '') + CONVERT(NVARCHAR(20), @newInvoiceId) + ','					
 				END
@@ -79,28 +60,58 @@ BEGIN
 	FROM [tblEMEntitySplitDetail] 
 	WHERE intSplitDetailId = @intSplitDetailId
 
-	SELECT @newShipToId = intShipToId
-		 , @newBillToId = intBillToId
-		 , @newTermId	= intTermsId 
-	FROM vyuARCustomerSearch 
-	WHERE [intEntityId] = @intSplitEntityId
-
-	UPDATE tblARInvoice 
-	SET ysnSplitted			= 1
-	  , intSplitId			= intSplitId
-	  , strInvoiceOriginId  = strInvoiceNumber
-	  , intEntityCustomerId = @intSplitEntityId
-	  , intShipToLocationId	= @newShipToId
-	  , intBillToLocationId	= @newBillToId
-	  , intTermId			= @newTermId
-	  , dtmDueDate			= dbo.fnGetDueDateBasedOnTerm(dtmDate, @newTermId)
-	  , dblAmountDue		= dblAmountDue * @dblSplitPercent	  
-	  , dblInvoiceSubtotal  = dblInvoiceSubtotal * @dblSplitPercent
-	  , dblInvoiceTotal     = dblInvoiceTotal * @dblSplitPercent
-	  , dblTax				= dblTax * @dblSplitPercent
-	  , dblSplitPercent     = ISNULL(@dblSplitPercent, 1)
-	WHERE ISNULL(@intSplitEntityId, 0) <> 0 
-	AND intInvoiceId = @intInvoiceId
+	UPDATE I 
+	SET ysnSplitted				= 1
+	  , intSplitId				= I.intSplitId
+	  , strInvoiceOriginId		= I.strInvoiceNumber
+	  , intEntityCustomerId		= @intSplitEntityId
+	  , intShipToLocationId		= SPLITENTITY.intShipToId
+	  , intBillToLocationId		= SPLITENTITY.intBillToId
+	  , intTermId				= SPLITENTITY.intTermsId
+	  , intEntityContactId		= SPLITENTITY.intEntityContactId
+	  , intEntitySalespersonId	= SPLITENTITY.intSalespersonId
+	  , dtmDueDate				= dbo.fnGetDueDateBasedOnTerm(dtmDate, SPLITENTITY.intTermsId)
+	  , dblAmountDue			= dblAmountDue * @dblSplitPercent	  
+	  , dblInvoiceSubtotal		= dblInvoiceSubtotal * @dblSplitPercent
+	  , dblInvoiceTotal			= dblInvoiceTotal * @dblSplitPercent
+	  , dblTax					= dblTax * @dblSplitPercent
+	  , dblSplitPercent			= ISNULL(@dblSplitPercent, 1)
+	  , strShipToLocationName	= SPLITENTITY.strShipToLocationName
+	  , strShipToAddress		= SPLITENTITY.strShipToAddress
+	  , strShipToCity			= SPLITENTITY.strShipToCity
+	  , strShipToState			= SPLITENTITY.strShipToState
+	  , strShipToZipCode		= SPLITENTITY.strShipToZipCode
+	  , strShipToCountry		= SPLITENTITY.strShipToCountry
+	  , strBillToLocationName	= SPLITENTITY.strBillToLocationName
+	  , strBillToAddress		= SPLITENTITY.strBillToAddress
+	  , strBillToCity			= SPLITENTITY.strBillToCity
+	  , strBillToState			= SPLITENTITY.strBillToState
+	  , strBillToZipCode		= SPLITENTITY.strBillToZipCode
+	  , strBillToCountry		= SPLITENTITY.strBillToCountry
+	FROM tblARInvoice I
+	INNER JOIN (
+		SELECT intEntityCustomerId
+			 , intTermsId
+			 , intSalespersonId
+			 , intBillToId
+			 , intShipToId
+			 , intFreightTermId
+			 , intEntityContactId
+			 , strShipToLocationName
+			 , strShipToAddress
+			 , strShipToCity
+			 , strShipToState
+			 , strShipToZipCode
+			 , strShipToCountry
+			 , strBillToLocationName
+			 , strBillToAddress
+			 , strBillToCity
+			 , strBillToState
+			 , strBillToZipCode
+			 , strBillToCountry
+		FROM vyuARCustomerSearch
+	) SPLITENTITY ON SPLITENTITY.intEntityCustomerId = @intSplitEntityId
+	WHERE intInvoiceId = @intInvoiceId
 		
 	INSERT INTO @InvoiceDetails
 	SELECT intInvoiceDetailId 

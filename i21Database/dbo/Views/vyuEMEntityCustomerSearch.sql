@@ -1,141 +1,105 @@
 ﻿CREATE VIEW [dbo].[vyuEMEntityCustomerSearch]
-	AS SELECT DISTINCT
-	cust.intEntityId, 
-	cust.strCustomerNumber, 
-	entityToCustomer.strName AS strName,
-	entityPhone.strPhone,
-	entityToSalesperson.strName AS strSalesPersonName,
-	cust.intSalespersonId,
-	custCurrency.strCurrency,
-	entityLocation.strLocationName AS strWarehouse,
-	intWarehouseId = ISNULL(entityLocation.intCompanyLocationId, -99),
-	cust.dblCreditLimit,
-	entityLocationPricingLevel.strPricingLevelName,
-	entityToCustomer.dtmOriginationDate,
-	--MAX(custInvoice.dtmDate) AS dtmLastInvoice,
-	--MAX(custPayment.dtmDatePaid) AS dtmLastPayment,
-	dtmLastInvoice = (SELECT MAX(INV.dtmDate) FROM tblARInvoice INV WHERE INV.intEntityCustomerId = cust.intEntityId ),
-	dtmLastPayment = (SELECT MAX(PAYMENT.dtmDatePaid) FROM tblARPayment PAYMENT WHERE PAYMENT.intEntityCustomerId = cust.intEntityId ),
-	
-	cust.ysnActive,
-	entityContact.strMobile,
-	entityContact.strEmail,
-	entityContact.strName AS strContactName,
-	entityContact.intEntityId AS intEntityContactId,
-	LOB.strLineOfBusiness,
-	entityClass.strClass,
-	ysnHasBudgetSetup = CAST(CASE WHEN (SELECT TOP 1 1 FROM tblARCustomerBudget WHERE intEntityCustomerId = cust.intEntityId) = 1 THEN 1 ELSE 0 END AS BIT),
-	cust.intPaymentMethodId,
-	custPaymentMethod.strPaymentMethod,
-	custLocation.strLocationName,
-	custLocation.strAddress,
-	custLocation.strCity,
-	custLocation.strState,
-	custLocation.strZipCode,
-	custLocation.strCountry,
-	shipLocation.strLocationName AS strShipToLocationName,
-	shipLocation.strAddress AS strShipToAddress,
-	shipLocation.strCity AS strShipToCity,
-	shipLocation.strState AS strShipToState,
-	shipLocation.strZipCode AS strShipToZipCode,
-	shipLocation.strCountry AS strShipToCountry,
-	billLocation.strLocationName AS strBillToLocationName,
-	billLocation.strAddress AS strBillToAddress,
-	billLocation.strCity AS strBillToCity,
-	billLocation.strState AS strBillToState,
-	billLocation.strZipCode AS strBillToZipCode,
-	billLocation.strCountry AS strBillToCountry,
-	cust.intShipToId,
-	cust.intBillToId,
-	custTerm.strTerm AS strTerm,
-	cust.intCurrencyId,
-	cust.intTermsId,
-	STUFF((SELECT '|^|' + CONVERT(VARCHAR,intLineOfBusinessId) FROM tblEMEntityLineOfBusiness te WHERE te.intEntityId = cust.intEntityId FOR XML PATH('')),1,3,'') as intLineOfBusinessIds,
-	entityType.Prospect AS ysnProspect,
-	cust.ysnCreditHold,
-	custLocation.intFreightTermId,
-	fTerms.strFreightTerm,
-	custLocation.intShipViaId,
-	strShipViaName = shipVia.strShipVia
-FROM tblARCustomer cust
-INNER JOIN tblEMEntity entityToCustomer ON cust.intEntityId = entityToCustomer.intEntityId
-LEFT JOIN tblEMEntity entityToSalesperson ON cust.intSalespersonId = entityToSalesperson.intEntityId
+AS 
+SELECT DISTINCT
+	  intEntityId			= CUSTOMER.intEntityId
+	, strCustomerNumber		= CUSTOMER.strCustomerNumber
+	, strName				= entityToCustomer.strName
+	, strPhone				= entityPhone.strPhone
+	, strSalesPersonName	= entityToSalesperson.strName
+	, intSalespersonId		= CUSTOMER.intSalespersonId
+	, strCurrency			= custCurrency.strCurrency
+	, strWarehouse			= entityLocation.strLocationName
+	, intWarehouseId		= ISNULL(entityLocation.intCompanyLocationId, -99)
+	, dblCreditLimit		= CUSTOMER.dblCreditLimit
+	, strPricingLevelName	= entityLocationPricingLevel.strPricingLevelName
+	, dtmOriginationDate	= entityToCustomer.dtmOriginationDate
+	, dtmLastInvoice		= LASTINVOICE.dtmDate
+	, dtmLastPayment		= LASTPAYMENT.dtmDatePaid
+	, ysnActive				= CUSTOMER.ysnActive
+	, strMobile				= entityContact.strMobile
+	, strEmail				= entityContact.strEmail
+	, strContactName		= entityContact.strName
+	, intEntityContactId	= entityContact.intEntityId
+	, strLineOfBusiness		= LOB.strLineOfBusiness
+	, strClass				= entityClass.strClass
+	, ysnHasBudgetSetup		= ISNULL(BUDGET.ysnHasBudgetSetup, CAST(0 AS BIT))
+	, intPaymentMethodId	= CUSTOMER.intPaymentMethodId
+	, strPaymentMethod		= custPaymentMethod.strPaymentMethod
+	, strLocationName		= custLocation.strLocationName
+	, strAddress			= custLocation.strAddress
+	, strCity				= custLocation.strCity
+	, strState				= custLocation.strState
+	, strZipCode			= custLocation.strZipCode
+	, strCountry			= custLocation.strCountry
+	, strShipToLocationName	= shipLocation.strLocationName
+	, strShipToAddress		= shipLocation.strAddress
+	, strShipToCity			= shipLocation.strCity
+	, strShipToState		= shipLocation.strState
+	, strShipToZipCode		= shipLocation.strZipCode
+	, strShipToCountry		= shipLocation.strCountry
+	, strBillToLocationName	= billLocation.strLocationName
+	, strBillToAddress		= billLocation.strAddress
+	, strBillToCity			= billLocation.strCity
+	, strBillToState		= billLocation.strState
+	, strBillToZipCode		= billLocation.strZipCode
+	, strBillToCountry		= billLocation.strCountry
+	, intShipToId			= CUSTOMER.intShipToId
+	, intBillToId			= CUSTOMER.intBillToId
+	, dblARBalance			= CUSTOMER.dblARBalance
+	, strTerm				= custTerm.strTerm
+	, intCurrencyId			= CUSTOMER.intCurrencyId
+	, intTermsId			= CUSTOMER.intTermsId
+	, intLineOfBusinessIds	= LINEOFBUSINESS.intEntityLineOfBusinessIds
+	, ysnProspect			= entityType.Prospect
+	, ysnCreditHold			= CUSTOMER.ysnCreditHold
+	, intFreightTermId		= ISNULL(shipLocation.intFreightTermId, custLocation.intFreightTermId)
+	, strFreightTerm		= fTerms.strFreightTerm
+	, intShipViaId			= custLocation.intShipViaId
+	, strShipViaName		= shipVia.strShipVia
+FROM tblARCustomer CUSTOMER
+INNER JOIN tblEMEntity entityToCustomer ON CUSTOMER.intEntityId = entityToCustomer.intEntityId
+LEFT JOIN tblEMEntity entityToSalesperson ON CUSTOMER.intSalespersonId = entityToSalesperson.intEntityId
 LEFT JOIN tblEMEntityToContact entityToContact ON entityToCustomer.intEntityId = entityToContact.intEntityId AND entityToContact.ysnDefaultContact = 1
 LEFT JOIN tblEMEntity entityContact ON entityContact.intEntityId = entityToContact.intEntityContactId AND entityToContact.ysnDefaultContact = 1
-LEFT JOIN tblEMEntityLocation custLocation ON cust.intEntityId = custLocation.intEntityId AND custLocation.ysnDefaultLocation = 1
-LEFT JOIN tblEMEntityLocation shipLocation ON cust.intShipToId = shipLocation.intEntityLocationId
-LEFT JOIN tblEMEntityLocation billLocation ON cust.intBillToId = billLocation.intEntityLocationId
+LEFT JOIN tblEMEntityLocation custLocation ON CUSTOMER.intEntityId = custLocation.intEntityId AND custLocation.ysnDefaultLocation = 1
+LEFT JOIN tblEMEntityLocation shipLocation ON CUSTOMER.intShipToId = shipLocation.intEntityLocationId
+LEFT JOIN tblEMEntityLocation billLocation ON CUSTOMER.intBillToId = billLocation.intEntityLocationId
 LEFT JOIN tblEMEntityPhoneNumber entityPhone ON entityToContact.intEntityContactId = entityPhone.intEntityId
 LEFT JOIN tblSMTerm entityLocationTerm ON custLocation.intTermsId = entityLocationTerm.intTermID
-LEFT JOIN tblSMCurrency custCurrency ON cust.intCurrencyId = custCurrency.intCurrencyID
+LEFT JOIN tblSMCurrency custCurrency ON CUSTOMER.intCurrencyId = custCurrency.intCurrencyID
 LEFT JOIN tblSMCompanyLocation entityLocation ON custLocation.intWarehouseId = entityLocation.intCompanyLocationId
-LEFT JOIN vyuEMEntityType entityType ON cust.intEntityId = entityType.intEntityId
-LEFT JOIN tblSMCompanyLocationPricingLevel entityLocationPricingLevel ON cust.intCompanyLocationPricingLevelId = entityLocationPricingLevel.intCompanyLocationPricingLevelId
-/*LEFT JOIN tblARInvoice custInvoice ON cust.intEntityId = custInvoice.intEntityCustomerId
-LEFT JOIN tblARPayment custPayment ON cust.intEntityId = custPayment.intEntityCustomerId*/
-LEFT JOIN tblEMEntityLineOfBusiness entityLOB ON cust.intEntityId = entityLOB.intEntityId
+LEFT JOIN vyuEMEntityType entityType ON CUSTOMER.intEntityId = entityType.intEntityId
+LEFT JOIN tblSMCompanyLocationPricingLevel entityLocationPricingLevel ON CUSTOMER.intCompanyLocationPricingLevelId = entityLocationPricingLevel.intCompanyLocationPricingLevelId
+LEFT JOIN tblEMEntityLineOfBusiness entityLOB ON CUSTOMER.intEntityId = entityLOB.intEntityId
 LEFT JOIN tblSMLineOfBusiness LOB ON entityLOB.intLineOfBusinessId = LOB.intLineOfBusinessId
 LEFT JOIN tblEMEntityClass entityClass ON entityToCustomer.intEntityClassId = entityClass.intEntityClassId
-LEFT JOIN tblSMPaymentMethod custPaymentMethod ON cust.intPaymentMethodId = custPaymentMethod.intPaymentMethodID
-LEFT JOIN tblSMTerm custTerm ON cust.intTermsId = custTerm.intTermID
-LEFT JOIN tblSMFreightTerms fTerms ON custLocation.intFreightTermId = fTerms.intFreightTermId
+LEFT JOIN tblSMPaymentMethod custPaymentMethod ON CUSTOMER.intPaymentMethodId = custPaymentMethod.intPaymentMethodID
+LEFT JOIN tblSMTerm custTerm ON CUSTOMER.intTermsId = custTerm.intTermID
+LEFT JOIN tblSMFreightTerms fTerms ON ISNULL(shipLocation.intFreightTermId, custLocation.intFreightTermId) = fTerms.intFreightTermId
 LEFT JOIN tblSMShipVia shipVia on custLocation.intShipViaId = shipVia.intEntityId
-WHERE		
-		entityType.Customer = 1 -- check if entity is a customer
-		OR
-		entityType.Prospect = 1
-		/*OR 
-		custInvoice.dtmDate = (SELECT MAX(dtmDate) FROM tblARInvoice x WHERE x.intEntityCustomerId = x.intEntityCustomerId)*/
-/*GROUP BY 
-	cust.intEntityId,
-	cust.strCustomerNumber, 
-	entityToCustomer.strName, 
-	entityToSalesperson.strName, 
-	custLocation.strAddress,
-	custLocation.strCity,
-	custLocation.strState,
-	custLocation.strZipCode,
-	custCurrency.strCurrency,
-	entityLocation.strLocationName,
-	entityLocation.intCompanyLocationId,
-	custLocation.intWarehouseId,
-	cust.dblCreditLimit,
-	entityLocationPricingLevel.strPricingLevelName,
-	entityToCustomer.dtmOriginationDate,
-	cust.ysnActive,
-	entityPhone.strPhone,
-	entityContact.strMobile,
-	entityContact.strEmail,
-	entityContact.strName,
-	LOB.strLineOfBusiness,
-	entityClass.strClass,
-	custPaymentMethod.strPaymentMethod,
-	cust.intPaymentMethodId,
-	custLocation.strLocationName,
-	custLocation.strAddress,
-	custLocation.strCity,
-	custLocation.strState,
-	custLocation.strZipCode,
-	custLocation.strCountry,
-	shipLocation.strLocationName,
-	shipLocation.strAddress,
-	shipLocation.strCity,
-	shipLocation.strState,
-	shipLocation.strZipCode,
-	shipLocation.strCountry,
-	billLocation.strLocationName,
-	billLocation.strAddress,
-	billLocation.strCity,
-	billLocation.strState,
-	billLocation.strZipCode,
-	billLocation.strCountry,
-	cust.intShipToId,
-	cust.intBillToId,
-	custTerm.strTerm,
-	cust.intSalespersonId,
-	cust.intCurrencyId,
-	cust.intTermsId,
-	entityContact.intEntityId,
-	entityType.Prospect,
-	cust.ysnCreditHold*/
+OUTER APPLY (
+	SELECT dtmDate = MAX(INV.dtmDate) 
+	FROM dbo.tblARInvoice INV WITH (NOLOCK) 
+	WHERE INV.intEntityCustomerId = CUSTOMER.intEntityId
+) LASTINVOICE
+OUTER APPLY (
+	SELECT dtmDatePaid = MAX(PAYMENT.dtmDatePaid) 
+	FROM dbo.tblARPayment PAYMENT WITH (NOLOCK) 
+	WHERE PAYMENT.intEntityCustomerId = CUSTOMER.intEntityId
+) LASTPAYMENT
+OUTER APPLY (
+	SELECT ysnHasBudgetSetup = CASE WHEN COUNT(*) > 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+	FROM dbo.tblARCustomerBudget WITH (NOLOCK)
+	WHERE intEntityCustomerId = CUSTOMER.intEntityId
+) BUDGET
+OUTER APPLY (
+	SELECT intEntityLineOfBusinessIds = intLineOfBusinessId
+	FROM (
+		SELECT CAST(intLineOfBusinessId AS VARCHAR(200)) + CASE WHEN CAST(intLineOfBusinessId AS VARCHAR(200)) <> NULL THEN '|^|' ELSE '' END
+		FROM dbo.tblEMEntityLineOfBusiness WITH(NOLOCK)
+		WHERE intEntityId = CUSTOMER.intEntityId
+		FOR XML PATH ('')
+	) INV (intLineOfBusinessId)
+) LINEOFBUSINESS
+WHERE entityType.Customer = 1 OR entityType.Prospect = 1
 GO

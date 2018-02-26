@@ -96,6 +96,7 @@ BEGIN
 		,intShipViaId
 		,strPONumber
 		,intTermId
+		,intEntityContactId
 		,dblInvoiceSubtotal
 		,dblShipping
 		,dblTax
@@ -116,7 +117,6 @@ BEGIN
 		,ysnSplitted
 		,dblSplitPercent 
 		,intFreightTermId
-		--,strDeliverPickup 
 		,intShipToLocationId
 		,strShipToLocationName
 		,strShipToAddress
@@ -135,57 +135,79 @@ BEGIN
 		,intConcurrencyId
 		,intEntityId)
 	SELECT 
-		 strInvoiceNumber
-		,CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN @intSplitEntityId ELSE intEntityCustomerId END
-		,@InvoiceDate
-		,dbo.fnGetDueDateBasedOnTerm(@InvoiceDate, intTermId)
-		,intCurrencyId
-		,intCompanyLocationId
-		,[intEntitySalespersonId]
-		,@InvoiceDate
-		,intShipViaId
-		,strPONumber
-		,intTermId
-		,CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN dblInvoiceSubtotal * @dblSplitPercent ELSE dblInvoiceSubtotal END 
-		,CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN dblShipping * @dblSplitPercent ELSE dblShipping END 
-		,CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN dblTax * @dblSplitPercent ELSE dblTax END 
-		,CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN dblInvoiceTotal * @dblSplitPercent ELSE dblInvoiceTotal END 
-		,CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN dblDiscount * @dblSplitPercent ELSE dblDiscount END 
-		,CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN dblInvoiceTotal * @dblSplitPercent ELSE dblInvoiceTotal END 
-		,0
-		,strTransactionType
-		,strType
-		,intPaymentMethodId
-		,strComments + ' Split: ' + strInvoiceNumber
-		,strFooterComments
-		,intAccountId
-		,intSplitId
-		,@InvoiceDate
-		,0
-		,0
-		,CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN 1 ELSE 0 END
-		,CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN ISNULL(@dblSplitPercent,1) ELSE 1 END
-		,intFreightTermId
-		--,strDeliverPickup 
-		,intShipToLocationId
-		,strShipToLocationName
-		,strShipToAddress
-		,strShipToCity
-		,strShipToState
-		,strShipToZipCode
-		,strShipToCountry
-		,intBillToLocationId
-		,strBillToLocationName 
-		,strBillToAddress
-		,strBillToCity
-		,strBillToState
-		,strBillToZipCode
-		,strBillToCountry
-		,strBOLNumber
-		,0
-		,@EntityId
-	FROM 
-		tblARInvoice
+		 strInvoiceOriginId		= I.strInvoiceNumber
+		,intEntityCustomerId	= CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN SPLITENTITY.intEntityCustomerId ELSE I.intEntityCustomerId END
+		,dtmDate				= @InvoiceDate
+		,dtmDueDate				= dbo.fnGetDueDateBasedOnTerm(@InvoiceDate, CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN SPLITENTITY.intTermsId ELSE I.intTermId END)
+		,intCurrencyId			= I.intCurrencyId
+		,intCompanyLocationId	= I.intCompanyLocationId
+		,intEntitySalespersonId	= CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN SPLITENTITY.intSalespersonId ELSE I.intEntitySalespersonId END
+		,dtmShipDate			= @InvoiceDate
+		,intShipViaId			= CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN SPLITENTITY.intShipViaId ELSE I.intShipViaId END
+		,strPONumber			= I.strPONumber
+		,intTermId				= CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN SPLITENTITY.intTermsId ELSE I.intTermId END
+		,intEntityContactId		= CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN SPLITENTITY.intEntityContactId ELSE I.intEntityContactId END
+		,dblInvoiceSubtotal		= CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN dblInvoiceSubtotal * @dblSplitPercent ELSE dblInvoiceSubtotal END 
+		,dblShipping			= CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN dblShipping * @dblSplitPercent ELSE dblShipping END 
+		,dblTax					= CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN dblTax * @dblSplitPercent ELSE dblTax END 
+		,dblInvoiceTotal		= CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN dblInvoiceTotal * @dblSplitPercent ELSE dblInvoiceTotal END 
+		,dblDiscount			= CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN dblDiscount * @dblSplitPercent ELSE dblDiscount END 
+		,dblAmountDue			= CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN dblInvoiceTotal * @dblSplitPercent ELSE dblInvoiceTotal END 
+		,dblPayment				= 0
+		,strTransactionType		= I.strTransactionType
+		,strType				= I.strType
+		,intPaymentMethodId		= I.intPaymentMethodId
+		,strComments			= I.strComments + ' Split: ' + I.strInvoiceNumber
+		,strFooterComments		= I.strFooterComments
+		,intAccountId			= I.intAccountId
+		,intSplitId				= I.intSplitId
+		,dtmPostDate			= @InvoiceDate
+		,ysnPosted				= 0
+		,ysnPaid				= 0
+		,ysnSplitted			= CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN 1 ELSE 0 END
+		,dblSplitPercent		= CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN ISNULL(@dblSplitPercent,1) ELSE 1 END
+		,intFreightTermId		= CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN SPLITENTITY.intFreightTermId ELSE I.intFreightTermId END
+		,intShipToLocationId	= CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN SPLITENTITY.intShipToId ELSE I.intShipToLocationId END
+		,strShipToLocationName	= CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN SPLITENTITY.strShipToLocationName ELSE I.strShipToLocationName END
+		,strShipToAddress		= CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN SPLITENTITY.strShipToAddress ELSE I.strShipToAddress END
+		,strShipToCity			= CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN SPLITENTITY.strShipToCity ELSE I.strShipToCity END
+		,strShipToState			= CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN SPLITENTITY.strShipToState ELSE I.strShipToState END
+		,strShipToZipCode		= CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN SPLITENTITY.strShipToZipCode ELSE I.strShipToZipCode END
+		,strShipToCountry		= CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN SPLITENTITY.strShipToCountry ELSE I.strShipToCountry END
+		,intBillToLocationId	= CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN SPLITENTITY.intBillToId ELSE I.intBillToLocationId END
+		,strBillToLocationName	= CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN SPLITENTITY.strBillToLocationName ELSE I.strBillToLocationName END
+		,strBillToAddress		= CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN SPLITENTITY.strBillToAddress ELSE I.strBillToAddress END
+		,strBillToCity			= CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN SPLITENTITY.strBillToCity ELSE I.strBillToCity END
+		,strBillToState			= CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN SPLITENTITY.strBillToState ELSE I.strBillToState END
+		,strBillToZipCode		= CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN SPLITENTITY.strBillToZipCode ELSE I.strBillToZipCode END
+		,strBillToCountry		= CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN SPLITENTITY.strBillToCountry ELSE I.strBillToCountry END
+		,strBOLNumber			= I.strBOLNumber
+		,intConcurrencyId		= 0
+		,intEntityId			= @EntityId
+	FROM tblARInvoice I
+	LEFT JOIN (
+		SELECT intEntityCustomerId
+			 , intShipViaId
+			 , intTermsId
+			 , intSalespersonId
+			 , intBillToId
+			 , intShipToId
+			 , intFreightTermId
+			 , intEntityContactId
+			 , strShipToLocationName
+			 , strShipToAddress
+			 , strShipToCity
+			 , strShipToState
+			 , strShipToZipCode
+			 , strShipToCountry
+			 , strBillToLocationName
+			 , strBillToAddress
+			 , strBillToCity
+			 , strBillToState
+			 , strBillToZipCode
+			 , strBillToCountry
+		FROM vyuARCustomerSearch
+	) SPLITENTITY ON SPLITENTITY.intEntityCustomerId = @intSplitEntityId
 	WHERE
 		intInvoiceId = @InvoiceId
 				
@@ -240,6 +262,8 @@ BEGIN
 					,@EntitySalespersonId			INT
 					,@ItemSubCurrencyId				INT
 					,@ItemSubCurrencyRate			NUMERIC(18,8)
+					,@ItemSubLocationId				INT
+					,@ItemStorageLocationId			INT
 
 			SELECT TOP 1 @InvoiceDetailId = [intInvoiceDetailId] FROM @InvoiceDetails ORDER BY [intInvoiceDetailId]
 			
@@ -284,6 +308,8 @@ BEGIN
 								,[intTaxGroupId]
 								,[intSubCurrencyId]
 								,[dblSubCurrencyRate]
+								,[intStorageLocationId]
+								,[intSubLocationId]
 								,[intConcurrencyId])
 							SELECT
 								 @NewInvoiceId
@@ -327,6 +353,8 @@ BEGIN
 								,[intTaxGroupId]
 								,[intSubCurrencyId]
 								,[dblSubCurrencyRate]
+								,[intStorageLocationId]
+								,[intSubLocationId]
 								,1
 							FROM
 								tblARInvoiceDetail
@@ -404,7 +432,9 @@ BEGIN
 						,@ItemWeight					= [dblItemWeight]
 						,@EntitySalespersonId			= [intEntitySalespersonId]
 						,@ItemSubCurrencyId				= [intSubCurrencyId]
-						,@ItemSubCurrencyId				= [dblSubCurrencyRate]
+						,@ItemSubCurrencyRate			= [dblSubCurrencyRate]
+						,@ItemSubLocationId				= [intSubLocationId]
+						,@ItemStorageLocationId			= [intStorageLocationId]
 					FROM
 						tblARInvoiceDetail
 					WHERE
@@ -439,6 +469,9 @@ BEGIN
 						,@ItemTaxGroupId				= @ItemTaxGroupId		
 						,@ItemSubCurrencyId				= @ItemSubCurrencyId
 						,@ItemSubCurrencyRate			= @ItemSubCurrencyRate	
+						,@ItemSublocationId				= @ItemSubLocationId
+						,@ItemStorageLocationId			= @ItemStorageLocationId
+
 						IF LEN(ISNULL(@ErrorMessage,'')) > 0
 							BEGIN
 								RAISERROR(@ErrorMessage, 11, 1);

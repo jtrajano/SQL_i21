@@ -7,7 +7,8 @@
 	@intEntityCustomerId    INT	= NULL,
 	@strCustomerName		NVARCHAR(MAX) = NULL,
 	@strAccountStatusCode	NVARCHAR(100) = NULL,
-	@ysnInclude120Days		BIT = 0
+	@ysnInclude120Days		BIT = 0,
+	@strCustomerIds			NVARCHAR(MAX) = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF  
@@ -25,7 +26,8 @@ DECLARE @dtmDateFromLocal			DATETIME = NULL,
 		@intCompanyLocationId		INT	= NULL,
 		@strCustomerNameLocal		NVARCHAR(MAX) = NULL,
 		@strAccountStatusCodeLocal	NVARCHAR(100) = NULL,
-		@intSalespersonId			INT = NULL
+		@intSalespersonId			INT = NULL,
+		@strCustomerIdsLocal		NVARCHAR(MAX)	= NULL
 
 DECLARE @tblCustomers TABLE (
 	    intEntityCustomerId			INT	  
@@ -42,6 +44,7 @@ SET @strCompanyLocationLocal	= NULLIF(@strCompanyLocation, '')
 SET @intEntityCustomerIdLocal	= NULLIF(@intEntityCustomerId, 0)
 SET @strCustomerNameLocal		= NULLIF(@strCustomerName, '')
 SET @strAccountStatusCodeLocal	= NULLIF(@strAccountStatusCode, '')
+SET @strCustomerIdsLocal		= NULLIF(@strCustomerIds, '')
 
 IF ISNULL(@intEntityCustomerIdLocal, 0) <> 0
 	BEGIN
@@ -58,6 +61,24 @@ IF ISNULL(@intEntityCustomerIdLocal, 0) <> 0
 			WHERE intEntityId = @intEntityCustomerIdLocal
 		) EC ON C.intEntityId = EC.intEntityId
 	END
+ELSE IF @strCustomerIdsLocal IS NOT NULL
+	BEGIN
+		INSERT INTO @tblCustomers
+		SELECT C.intEntityId 
+			 , C.strCustomerNumber
+			 , EC.strName
+			 , C.dblCreditLimit
+		FROM tblARCustomer C WITH (NOLOCK)
+		INNER JOIN (
+			SELECT intID
+			FROM dbo.fnGetRowsFromDelimitedValues(@strCustomerIdsLocal)
+		) CUSTOMERS ON C.intEntityId = CUSTOMERS.intID
+		INNER JOIN (
+			SELECT intEntityId
+			     , strName
+			FROM dbo.tblEMEntity WITH (NOLOCK)
+		) EC ON C.intEntityId = EC.intEntityId
+	END
 ELSE
 	BEGIN
 		INSERT INTO @tblCustomers
@@ -70,7 +91,7 @@ ELSE
 			SELECT intEntityId
 				 , strName
 			FROM dbo.tblEMEntity WITH (NOLOCK)
-			WHERE (@strCustomerNameLocal IS NULL OR strName LIKE '%'+ @strCustomerNameLocal +'%')
+			WHERE (@strCustomerNameLocal IS NULL OR strName = @strCustomerNameLocal)
 		) EC ON C.intEntityId = EC.intEntityId
 		OUTER APPLY (
 			SELECT strAccountStatusCode = LEFT(strAccountStatusCode, LEN(strAccountStatusCode) - 1)
@@ -96,7 +117,7 @@ IF ISNULL(@strSalespersonLocal, '') <> ''
 		INNER JOIN (
 			SELECT intEntityId
 			FROM dbo.tblEMEntity WITH (NOLOCK)
-			WHERE (@strSalespersonLocal IS NULL OR strName LIKE '%'+ @strSalespersonLocal +'%')
+			WHERE (@strSalespersonLocal IS NULL OR strName = @strSalespersonLocal)
 		) ES ON SP.intEntityId = ES.intEntityId
 	END
 
@@ -104,7 +125,7 @@ IF ISNULL(@strCompanyLocationLocal, '') <> ''
 	BEGIN
 		SELECT TOP 1 @intCompanyLocationId = intCompanyLocationId
 		FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
-		WHERE (@strCompanyLocationLocal IS NULL OR strLocationName LIKE '%'+ @strCompanyLocationLocal +'%')
+		WHERE (@strCompanyLocationLocal IS NULL OR strLocationName = @strCompanyLocationLocal)
 	END
 
 --DROP TEMP TABLES

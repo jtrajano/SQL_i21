@@ -118,7 +118,9 @@ BEGIN
 			SET @intItemId = (SELECT TOP 1 intItemId FROM tblICItem WHERE strItemNo = @strItemNumber)
 
 				--Invoice Number
-			SET @stri21InvoiceNumber =  CONCAT ((SELECT TOP 1 strPrefix COLLATE Latin1_General_CI_AS FROM tblSMStartingNumber  WHERE strTransactionType COLLATE Latin1_General_CI_AS = 'Truck Billing' AND strModule COLLATE Latin1_General_CI_AS = 'Energy Trac') , REPLACE(@strInvoiceNumber COLLATE Latin1_General_CI_AS,'-', '') )  
+			SET @stri21InvoiceNumber =  ISNULL((SELECT TOP 1 strPrefix COLLATE Latin1_General_CI_AS FROM tblSMStartingNumber  WHERE strTransactionType COLLATE Latin1_General_CI_AS = 'Truck Billing' AND strModule COLLATE Latin1_General_CI_AS = 'Energy Trac') , '')
+									+	REPLACE(@strInvoiceNumber COLLATE Latin1_General_CI_AS,'-', '')   
+			 
 						
 			--Get Entity ID of the Driver
 			SET @intDriverEntityId = (SELECT TOP 1 intEntityId FROM tblEMEntity WHERE strEntityNo COLLATE Latin1_General_CI_AS = @strDriverNumber )
