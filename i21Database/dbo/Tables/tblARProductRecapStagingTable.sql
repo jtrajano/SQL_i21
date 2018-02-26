@@ -7,6 +7,7 @@
 	[intSortNo]					INT NULL,
     [strCustomerName]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strLocationNumber]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+	[strLocationName]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strProductNo]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strDescription]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strTransactionType]		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
