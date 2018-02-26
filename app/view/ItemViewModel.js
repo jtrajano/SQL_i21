@@ -416,7 +416,10 @@ Ext.define('Inventory.view.ItemViewModel', {
                 },
                 {
                     strDescription: 'Amount'
-                }
+                },
+                {
+                    strDescription: 'Gross Unit'
+                }                
             ],
             fields: [
                 {
