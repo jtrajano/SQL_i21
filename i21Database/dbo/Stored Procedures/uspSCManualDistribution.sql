@@ -500,13 +500,12 @@ END
 		INSERT INTO @prePayId(
 			[intId]
 		)
-		SELECT 
-			[intId] = dbo.fnCTGetPrepaidIds(CT.intContractHeaderId)
+		SELECT [intId] = ISNULL(dbo.fnCTGetPrepaidIds(CT.intContractHeaderId),0)
 		FROM #tmpReceiptItem tmp 
 		INNER JOIN tblCTContractDetail CT ON CT.intContractDetailId = tmp.intContractDetailId
 		GROUP BY CT.intContractHeaderId
 		
-		SELECT @total = COUNT(*) FROM @prePayId;
+		SELECT @total = COUNT(intId) FROM @prePayId where intId > 0;
 		IF (@total > 0)
 		BEGIN
 			EXEC uspAPApplyPrepaid @intBillId, @prePayId
@@ -537,7 +536,7 @@ END
 
 
 	IF OBJECT_ID (N'tempdb.dbo.#tmpItemReceiptIds') IS NOT NULL
-        DROP TABLE ##tmpItemReceiptIds
+        DROP TABLE #tmpItemReceiptIds
 
 	CREATE TABLE #tmpItemReceiptIds (
 		[intEntityVendorId] INT
