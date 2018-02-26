@@ -423,6 +423,11 @@ BEGIN
 			SET @ysnHasError = 1
 		END
 	END
+	ELSE
+	BEGIN
+		SET @strPPSiteType = NULL
+	END
+
 	
 	---------------------------------------------------------
 
