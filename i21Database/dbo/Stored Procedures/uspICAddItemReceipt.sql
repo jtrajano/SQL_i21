@@ -1022,7 +1022,7 @@ BEGIN
 		SELECT TOP 1 
 				@valueChargeId = RawData.intChargeId
 		FROM	@OtherCharges RawData   
-		WHERE	RawData.strCostMethod IS NULL OR RTRIM(LTRIM(LOWER(RawData.strCostMethod))) NOT IN ('per unit', 'percentage', 'amount')
+		WHERE	RawData.strCostMethod IS NULL OR RTRIM(LTRIM(LOWER(RawData.strCostMethod))) NOT IN ('per unit', 'percentage', 'amount', 'gross unit')
 		ORDER BY RawData.strCostMethod ASC
 
 		IF @valueChargeId IS NOT NULL
@@ -1037,7 +1037,8 @@ BEGIN
 		END
 
 		-- Validate Cost UOM Id
-		-- Cost UOM Id is required if Cost Method is 'Per Unit'
+		-- Cost UOM Id is required if Cost Method is 'Per Unit'.
+		-- Cost UOM Id is required if Cost Method is 'Gross Unit'.
 		SET @valueChargeId = NULL
 		SET @valueCharge = NULL
 
@@ -1045,7 +1046,7 @@ BEGIN
 		FROM	@OtherCharges RawData LEFT JOIN tblICItemUOM iu
 					ON RawData.intCostUOMId = iu.intItemUOMId
 		WHERE	iu.intItemUOMId IS NULL
-				AND RTRIM(LTRIM(LOWER(RawData.strCostMethod))) = 'per unit'
+				AND RTRIM(LTRIM(LOWER(RawData.strCostMethod))) IN ('per unit', 'gross unit')
 
 		IF @valueChargeId IS NOT NULL
 		BEGIN
