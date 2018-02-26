@@ -246,6 +246,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     dataIndex: 'strItemNo',
                     editor: {
                         readOnly: '{readOnlyItemDropdown}',
+                        readOnly: '{isItemComponent}',
                         defaultFilters: [
                             {
                                 column: 'intLocationId',
@@ -371,7 +372,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     dataIndex: 'dblOpenReceive',
                     text: '{changeQtyToReceiveText}',
                     editor: {
-                        readOnly: '{disableQtyInReceiptGrid}'
+                        readOnly: '{disableQtyInReceiptGrid}',
+                        readOnly: '{isItemOption}'
                     }
                 },
                 colLoadToReceive: {
@@ -999,7 +1001,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     lazy: true,
                     component: Ext.create('iRely.grid.Manager', {
                         grid: grdInventoryReceipt,
-                        deleteButton: grdInventoryReceipt.down('#btnRemoveInventoryReceipt')
+                        deleteButton: grdInventoryReceipt.down('#btnRemoveInventoryReceipt'),
+                        deleteRecord: Ext.bind(me.onReceiptItemDelete, me)
                     }),
                     details: [
                         {
@@ -1123,6 +1126,36 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             intEntityId: current.get('intEntityId'), //Entity Associated
             dtmDate: current.get('dtmDate') // Date
         })
+    },
+
+    onReceiptItemDelete: function(action){
+        var me = this,
+            win = me.getView(),
+            grdInventoryReceipt = win.down('#grdInventoryReceipt'),
+            grdStore = grdInventoryReceipt.getStore(),
+            selectedRecords = grdInventoryReceipt.getSelectionModel().getSelection(),
+            records = Ext.clone(selectedRecords);
+        
+        Ext.Array.forEach(selectedRecords, function(rec){
+            if(!iRely.Functions.isEmpty(rec.get('strItemType')) && rec.get('intParentItemLinkId')){
+
+                var childItems = _.filter(grdStore.data.items, function(x){
+                    return !iRely.Functions.isEmpty(x.get('strItemType'))
+                        && x.get('intChildItemLinkId')
+                        && x.get('intChildItemLinkId') == rec.get('intParentItemLinkId') 
+                        && x.get('intInventoryReceiptItemId') != rec.get('intInventoryReceiptItemId')
+                        && !x.dummy;
+                });
+
+                if(childItems.length > 0) {
+                    childItems.forEach(function(item){
+                        records.push(item);
+                    });
+                }
+            }
+        });
+
+        action(records);
     },
 
     onGridAfterLayout: function (grid) {
@@ -1834,7 +1867,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         );
     },
 
-    getVendorCost: function (cfg, successFn, failureFn) {
+    getVendorCost: function (cfg, successFn, failureFn, currentItem) {
         // Sanitize parameters; 
         cfg = cfg ? cfg : {};
         successFn = successFn && (successFn instanceof Function) ? successFn : function () { /*empty function*/ };
@@ -1855,11 +1888,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             .subscribe(
             function (successResponse) {
                 //var jsonData = Ext.decode(successResponse.responseText);
-                successFn(successResponse);
+                successFn(successResponse, currentItem);
             }
             , function (failureResponse) {
                 //var jsonData = Ext.decode(failureResponse.responseText);
-                failureFn(failureResponse);
+                failureFn(failureResponse, currentItem);
             }
             );
     },
@@ -2052,7 +2085,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 						lot.set('strUnitType', item_strUnitType);
                     }
                 });
-            }               
+            }
+            
+            me.getItemAddOns(current, records[0], currentHeader, currentHeader.tblICInventoryReceiptItems());
+            me.getItemSubstitutes(current, records[0], currentHeader, currentHeader.tblICInventoryReceiptItems());
+            
         }
         
         else if (combo.itemId === 'cboWeightUOM') {
@@ -3609,6 +3646,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         currentReceiptItemVM.tblICInventoryReceiptItemLots().add(newReceiptItemLot);
                     }
                 }
+
+                me.calculateLinkedItems(currentReceipt, currentReceiptItem);
             }
         }
         
@@ -7408,6 +7447,69 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         me.calculateGrossNet(current, 1);
     },
 
+    calculateLinkedItems: function(current, activeRecord){
+        var parentLinkId = activeRecord.get('intParentItemLinkId'),
+            itemDetailStore = current.tblICInventoryReceiptItems(),
+            linkType = activeRecord.get('strItemType'),
+            searchURL;
+
+        if(!Ext.isNumber(parentLinkId) || linkType.charAt(0) == 'O' || linkType.charAt(0) == 'S')
+            return;
+        
+        var locationId = current.get('intLocationId'),
+            itemId = activeRecord.get('intItemId'),
+            itemUOMId = activeRecord.get('intUnitMeasureId'),
+            quantity = activeRecord.get('dblOpenReceive');
+
+        switch(linkType.charAt(0)){
+            case 'K':
+                searchURL = './inventory/api/itembundle/getbundlecomponents?intItemId=' + itemId + '&intItemUOMId=' + itemUOMId 
+                    + '&intLocationId=' + locationId + '&dblQuantity=' +  quantity;
+                break;
+            case 'A':
+                searchURL = './inventory/api/itemaddon/getitemaddons?intItemId=' + itemId + '&intItemUOMId=' + itemUOMId 
+                    + '&intLocationId=' + locationId + '&dblQuantity=' +  quantity;
+                break;
+            // case 'S':
+            //     searchURL = './inventory/api/itemsubstitute/getitemsubstitutes?intItemId=' + itemId + '&intItemUOMId=' + itemUOMId 
+            //         + '&intLocationId=' + locationId + '&dblQuantity=' +  quantity;
+            //     break;
+        }
+
+        ic.utils.ajax({
+            url: searchURL,
+            method: 'get'
+        }).subscribe(
+            function(successResponse){
+                var result = Ext.decode(successResponse.responseText);
+                Ext.Array.forEach(result.data, function(rec) {
+                    var childRecord = _.find(itemDetailStore.data.items, function(x){
+                        return x.get('intItemId') == rec.intComponentItemId &&  x.get('intUnitMeasureId') == rec.intComponentUOMId && x.get('intChildItemLinkId') == parentLinkId && !x.dummy;
+                    });
+
+                    if(childRecord){
+                        var dblQty = 0;
+                        switch(linkType.charAt(0)){
+                            case 'K': dblQty = rec.dblBundleComponentQty; break;
+                            case 'A': dblQty = rec.dblAddOnComponentQty; break;
+                            case 'S': dblQty = rec.dblSubstituteComponentQty; break;
+                            default: dblQty = 0; break;
+
+                        }
+                        childRecord.set('dblOpenReceive', dblQty);
+                        childRecord.set('dblLineTotal', dblQty * childRecord.get('dblUnitCost'));
+                    }
+
+                });
+            },
+            function (failureResponse) {
+                var jsonData = Ext.decode(failureResponse.responseText);
+                iRely.Functions.showErrorDialog('Something went wrong while getting the Components of the Kit item.');
+            }
+        );
+
+    },
+
     getBundleComponents: function(addedRecord, selectedItem, current, itemDetailStore){
         'use strict';
         var me = this,
@@ -7459,8 +7561,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }).subscribe(
                 function(successResponse){
                     var result = Ext.decode(successResponse.responseText);
-                    addedRecord.set('dblUnitPrice', 0);
+                    addedRecord.set('dblUnitCost', 0);
+                    addedRecord.set('dblUnitRetail', 0);
                     addedRecord.set('strItemType', 'Kit');
+                    addedRecord.set('intParentItemLinkId', addedRecord.get('intInventoryReceiptItemId'));
 
                     Ext.Array.forEach(result.data, function(rec){
                         var componentQty = rec.dblBundleComponentQty;
@@ -7691,6 +7795,372 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 }
             });
         }
+    },
+
+    getItemAddOns: function(editingRecord, selectedItem, current, itemDetailStore){
+        var me = this,
+            win = me.getView(),
+            bundleType = selectedItem.get('strBundleType'),
+            itemAddOnId = selectedItem.get('intItemId'),
+            itemUOMId = selectedItem.get('intReceiveUOMId');
+
+        // Get the default Forex Rate Type from the Company Preference. 
+        var intRateType = i21.ModuleMgr.SystemManager.getCompanyPreference('intInventoryRateTypeId');
+
+        // Get the functional currency:
+        var functionalCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
+        
+        // Get the important header data: 
+        var currentHeader = win.viewModel.data.current;
+        var transactionCurrencyId = currentHeader.get('intCurrencyId');
+        var vendorId = currentHeader.get('intEntityVendorId');
+        var vendorLocation = currentHeader.get('intShipFromId');
+        var dtmReceiptDate = currentHeader.get('dtmReceiptDate');
+        var intLocationId = currentHeader.get('intLocationId');
+        var intFreightTermId = currentHeader.get('intFreightTermId');
+
+        var vendorCostCfg = {
+            vendorId: vendorId,
+            itemId: null,
+            currencyId: transactionCurrencyId ? transactionCurrencyId : i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId'),
+            vendorLocation: vendorLocation,
+            itemUOM: null,
+            validDate: dtmReceiptDate
+        };
+
+        var taxCfg = {
+            freightTermId: intFreightTermId,
+            locationId: intLocationId,
+            entityVendorId: vendorId,
+            entityLocationId: vendorLocation,
+            itemId: null 
+        };
+
+        var processForexRateOnSuccess = function (successResponse, isItemLastCost, currentItem) {
+            if (successResponse && successResponse.length > 0) {
+                var dblForexRate = successResponse[0].dblRate;
+                var strRateType = successResponse[0].strRateType;
+                var dblLastCost = currentItem.get('dblLastCost')
+                dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0;
+
+                // Convert the last cost to the transaction currency.
+                // and round it to six decimal places.  
+                if (transactionCurrencyId != functionalCurrencyId && isItemLastCost) {
+                    dblLastCost = dblForexRate != 0 ? dblLastCost / dblForexRate : 0;
+                    dblLastCost = i21.ModuleMgr.Inventory.roundDecimalFormat(dblLastCost, 6);
+                }
+
+                currentItem.set('intForexRateTypeId', intRateType);
+                currentItem.set('strForexRateType', strRateType);
+                currentItem.set('dblForexRate', dblForexRate);
+                currentItem.set('dblUnitCost', dblLastCost);
+                currentItem.set('dblUnitRetail', dblLastCost);
+            }
+        }
+
+        // function variable to process the vendor cost. 
+        var processVendorCostOnSuccess = function (successResponse, currentItem) {
+            var jsonData = Ext.decode(successResponse.responseText);
+            var dblLastCost = currentItem.get('dblLastCost');
+            var isItemLastCost = true;
+
+            // If there is a vendor cost, replace dblLastCost with the vendor cost. 
+            if (jsonData && jsonData.data && jsonData.data.length > 0) {
+                var dataArray = jsonData.data[0];
+                if (dataArray) {
+                    dblLastCost = dataArray.dblUnit;
+                    currentItem.set('dblUnitCost', dblLastCost);
+                    currentItem.set('dblUnitRetail', dblLastCost);
+                    isItemLastCost = false;
+                }
+            }
+
+            // If transaction currency is a foreign currency, get the default forex rate type, forex rate, and convert the last cost to the transaction currency. 
+            if (transactionCurrencyId != functionalCurrencyId && intRateType) {
+                iRely.Functions.getForexRate(
+                    transactionCurrencyId,
+                    intRateType,
+                    win.viewModel.data.current.get('dtmReceiptDate'),
+                    function (successResponse) {
+                        processForexRateOnSuccess(successResponse, isItemLastCost);
+                    },
+                    function (failureResponse) {
+                        //var jsonData = Ext.decode(failureResponse.responseText);
+                        //iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
+                        iRely.Functions.showErrorDialog('Something went wrong while getting the forex data.');
+                    }
+                );
+            }
+
+           
+        };
+
+        var processVendorCostOnFailure = function (failureResponse) {
+            var jsonData = Ext.decode(failureResponse.responseText);
+            //iRely.Functions.showErrorDialog(jsonData.Message);
+            iRely.Functions.showErrorDialog('Something went wrong while getting the item cost from the Vendor Pricing setup.');
+        };
+
+        ic.utils.ajax({
+            url: './inventory/api/itemaddon/getitemaddons?intItemId=' + itemAddOnId + '&intItemUOMId=' + itemUOMId 
+                + '&intLocationId=' + intLocationId + '&dblQuantity=1',
+            method: 'get'
+        }).subscribe(
+            function (successResponse) {
+                var result = Ext.decode(successResponse.responseText);
+                if(current && itemDetailStore && result.data.length > 0){
+                    editingRecord.set('intParentItemLinkId', editingRecord.get('intInventoryReceiptItemId'));
+                    editingRecord.set('strItemType', 'Add-On');
+                    editingRecord.set('dblOpenReceive', 1);
+                    win.down('#colItemNo').focus();
+
+                    var recordIdx = itemDetailStore.findBy(function(rec){
+                        return rec.id == editingRecord.id;
+                    });
+
+                    Ext.Array.forEach(result.data, function(rec, idx){
+      
+                        var itemDetail = Ext.create(itemDetailStore.role.type, {
+                                intInventoryShipmentId: current.get('intInventoryReceiptId'),
+                                strItemType: 'Add-On Item',
+                                intChildItemLinkId: editingRecord.get('intInventoryReceiptItemId'),
+                                dblComponentQty: rec.dblAddOnComponentQty,
+                                dblOpenReceive: rec.dblAddOnComponentQty,
+                                intItemId: rec.intComponentItemId,
+                                strItemNo: rec.strComponentItemNo,
+                                strItemDescription: rec.strComponentDescription,
+                                intUnitMeasureId: rec.intComponentUOMId,
+                                strUnitMeasure: rec.strComponentUOM,
+                                dblItemUOMConvFactor: rec.dblComponentConvFactor,
+                                strCostUOM: rec.strComponentStockUOM,
+                                intCostUOMId: rec.intComponentStockUOMId,
+                                dblCostUOMConvFactor: 1,
+                                dblLastCost: rec.dblLastCost,
+                                dblUnitCost: rec.dblLastCost,
+                                dblUnitRetail: rec.dblLastCost,
+
+                                strLotTracking: rec.strLotTracking,
+                                intSubLocationId: rec.intSubLocationId,
+                                strSubLocationName: rec.strSubLocationName,
+                                intStorageLocationId: rec.intStorageLocationId,
+                                strStorageLocationName: rec.strStorageLocationName,
+                                intGradeId: rec.intGradeId,
+                                strGrade: rec.strGrade,
+                                intCommodityId: rec.intCommodityId,
+                                strOwnershipType: 'Own',
+                                intOwnershipType: 1,
+                        });
+                        
+                        itemDetailStore.insert(recordIdx + (idx + 1), itemDetail);
+
+                        vendorCostCfg.itemId = rec.intComponentItemId;
+                        vendorCostCfg.itemUOM = rec.intComponentUOMId;
+                        
+                        me.getVendorCost(vendorCostCfg, processVendorCostOnSuccess, processVendorCostOnFailure, itemDetail);
+
+                        taxCfg.itemId = rec.intComponentItemId;
+
+                        me.getDefaultReceiptTaxGroupId(itemDetail, taxCfg);
+                        me.calculateGrossNet(itemDetail, 1);
+
+                        itemDetail.set('dblLineTotal', me.calculateLineTotal(current, itemDetail));
+                    });
+                }
+
+
+            }, function (failureResponse) {
+                var jsonData = Ext.decode(failureResponse.responseText);
+                
+                iRely.Functions.showErrorDialog('Something went wrong while getting the Add On Items.');
+            }
+        );
+    },
+
+    getItemSubstitutes: function(editingRecord, selectedItem, current, itemDetailStore){
+        var me = this,
+            win = me.getView(),
+            bundleType = selectedItem.get('strBundleType'),
+            itemSubstituteId = selectedItem.get('intItemId'),
+            itemUOMId = selectedItem.get('intReceiveUOMId');
+
+        // Get the default Forex Rate Type from the Company Preference. 
+        var intRateType = i21.ModuleMgr.SystemManager.getCompanyPreference('intInventoryRateTypeId');
+
+        // Get the functional currency:
+        var functionalCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
+        
+        // Get the important header data: 
+        var currentHeader = win.viewModel.data.current;
+        var transactionCurrencyId = currentHeader.get('intCurrencyId');
+        var vendorId = currentHeader.get('intEntityVendorId');
+        var vendorLocation = currentHeader.get('intShipFromId');
+        var dtmReceiptDate = currentHeader.get('dtmReceiptDate');
+        var intLocationId = currentHeader.get('intLocationId');
+        var intFreightTermId = currentHeader.get('intFreightTermId');
+
+        var vendorCostCfg = {
+            vendorId: vendorId,
+            itemId: null,
+            currencyId: transactionCurrencyId ? transactionCurrencyId : i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId'),
+            vendorLocation: vendorLocation,
+            itemUOM: null,
+            validDate: dtmReceiptDate
+        };
+
+        var taxCfg = {
+            freightTermId: intFreightTermId,
+            locationId: intLocationId,
+            entityVendorId: vendorId,
+            entityLocationId: vendorLocation,
+            itemId: null 
+        };
+
+        var processForexRateOnSuccess = function (successResponse, isItemLastCost, currentItem) {
+            if (successResponse && successResponse.length > 0) {
+                var dblForexRate = successResponse[0].dblRate;
+                var strRateType = successResponse[0].strRateType;
+                var dblLastCost = currentItem.get('dblLastCost')
+                dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0;
+
+                // Convert the last cost to the transaction currency.
+                // and round it to six decimal places.  
+                if (transactionCurrencyId != functionalCurrencyId && isItemLastCost) {
+                    dblLastCost = dblForexRate != 0 ? dblLastCost / dblForexRate : 0;
+                    dblLastCost = i21.ModuleMgr.Inventory.roundDecimalFormat(dblLastCost, 6);
+                }
+
+                currentItem.set('intForexRateTypeId', intRateType);
+                currentItem.set('strForexRateType', strRateType);
+                currentItem.set('dblForexRate', dblForexRate);
+                currentItem.set('dblUnitCost', dblLastCost);
+                currentItem.set('dblUnitRetail', dblLastCost);
+            }
+        }
+
+        // function variable to process the vendor cost. 
+        var processVendorCostOnSuccess = function (successResponse, currentItem) {
+            var jsonData = Ext.decode(successResponse.responseText);
+            var dblLastCost = currentItem.get('dblLastCost');
+            var isItemLastCost = true;
+
+            // If there is a vendor cost, replace dblLastCost with the vendor cost. 
+            if (jsonData && jsonData.data && jsonData.data.length > 0) {
+                var dataArray = jsonData.data[0];
+                if (dataArray) {
+                    dblLastCost = dataArray.dblUnit;
+                    currentItem.set('dblUnitCost', dblLastCost);
+                    currentItem.set('dblUnitRetail', dblLastCost);
+                    isItemLastCost = false;
+                }
+            }
+
+            // If transaction currency is a foreign currency, get the default forex rate type, forex rate, and convert the last cost to the transaction currency. 
+            if (transactionCurrencyId != functionalCurrencyId && intRateType) {
+                iRely.Functions.getForexRate(
+                    transactionCurrencyId,
+                    intRateType,
+                    win.viewModel.data.current.get('dtmReceiptDate'),
+                    function (successResponse) {
+                        processForexRateOnSuccess(successResponse, isItemLastCost);
+                    },
+                    function (failureResponse) {
+                        //var jsonData = Ext.decode(failureResponse.responseText);
+                        //iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
+                        iRely.Functions.showErrorDialog('Something went wrong while getting the forex data.');
+                    }
+                );
+            }
+
+        
+        };
+
+        var processVendorCostOnFailure = function (failureResponse) {
+            var jsonData = Ext.decode(failureResponse.responseText);
+            //iRely.Functions.showErrorDialog(jsonData.Message);
+            iRely.Functions.showErrorDialog('Something went wrong while getting the item cost from the Vendor Pricing setup.');
+        };
+        
+        ic.utils.ajax({
+            url: './inventory/api/itemsubstitute/getitemsubstitutes?intItemId=' + itemSubstituteId + '&intItemUOMId=' + itemUOMId 
+                + '&intLocationId=' + intLocationId + '&dblQuantity=1',
+            method: 'get'
+        }).subscribe(
+            function (successResponse) {
+                var result = Ext.decode(successResponse.responseText);
+                if(current && itemDetailStore && result.data.length > 0) {
+                    editingRecord.set('intParentItemLinkId', editingRecord.get('intInventoryShipmentItemId'));
+                    editingRecord.set('strItemType', 'Substitute');
+                    editingRecord.set('dblOpenReceive', 1);
+                    win.down('#colItemNo').focus();
+
+                    var recordIdx = itemDetailStore.findBy(function(rec){
+                            return rec.id == editingRecord.id;
+                        });
+
+                    Ext.Array.forEach(result.data, function(rec, idx){
+                        // var componentQty = rec.get('dblComponentQuantity') * selectedItem.get('dblQtyToShip'),
+                        //             markUpOrDownCost = 0;
+
+                        // if(rec.get('dtmBeginDate') && rec.get('dtmBeginDate') && 
+                        //     (Ext.Date.between(current.get('dtmShipDate'), rec.get('dtmBeginDate'), rec.get('dtmEndDate'))))
+                        //     markUpOrDownCost = rec.get('dblMarkUpOrDown');
+                        
+                        // var itemCost = (selectedItem.get('dblPrice') + markUpOrDownCost)
+                        //     * (selectedItem.get('intCostUOMId') ? selectedItem.get('dblCostUOMConvFactor') : selectedItem.get('dblOrderUOMConvFactor'));
+
+                        var itemDetail = Ext.create(itemDetailStore.role.type, {
+                                intInventoryShipmentId: current.get('intInventoryShipmentId'),
+                                strItemType: 'Substitute Item',
+                                intChildItemLinkId: editingRecord.get('intInventoryShipmentItemId'),
+                                strItemLink: 'S',
+                                dblComponentQty: rec.dblSubstituteComponentQty,
+                                dblOpenReceive: rec.dblSubstituteComponentQty,
+                                intItemId: rec.intComponentItemId,
+                                strItemNo: rec.strComponentItemNo,
+                                strItemDescription: rec.strComponentDescription,
+                                intUnitMeasureId: rec.intComponentUOMId,
+                                strUnitMeasure: rec.strComponentUOM,
+                                dblItemUOMConvFactor: rec.dblComponentConvFactor,
+                                strCostUOM: rec.strComponentStockUOM,
+                                intCostUOMId: rec.intComponentStockUOMId,
+                                dblCostUOMConvFactor: 1,
+                                dblLastCost: rec.dblLastCost,
+                                dblUnitCost: rec.dblLastCost,
+                                dblUnitRetail: rec.dblLastCost,
+                                strLotTracking: rec.strLotTracking,
+                                intSubLocationId: rec.intSubLocationId,
+                                strSubLocationName: rec.strSubLocationName,
+                                intStorageLocationId: rec.intStorageLocationId,
+                                strStorageLocationName: rec.strStorageLocationName,
+                                intGradeId: rec.intGradeId,
+                                strGrade: rec.strGrade,
+                                intCommodityId: rec.intCommodityId,
+                                strOwnershipType: 'Own',
+                                intOwnershipType: 1,
+                        });
+
+                        itemDetailStore.insert(recordIdx + (idx + 1), itemDetail);
+
+                        vendorCostCfg.itemId = rec.intComponentItemId;
+                        vendorCostCfg.itemUOM = rec.intComponentUOMId;
+                        
+                        me.getVendorCost(vendorCostCfg, processVendorCostOnSuccess, processVendorCostOnFailure, itemDetail);
+
+                        taxCfg.itemId = rec.intComponentItemId; 
+                        me.getDefaultReceiptTaxGroupId(itemDetail, taxCfg);
+                        me.calculateGrossNet(itemDetail, 1);
+
+                        itemDetail.set('dblLineTotal', me.calculateLineTotal(current, itemDetail));
+                    });
+                }
+
+
+            },function (failureResponse) {
+                var jsonData = Ext.decode(failureResponse.responseText);
+                
+                iRely.Functions.showErrorDialog('Something went wrong while getting the Substitute Items.');
+            }
+        );
     },
 
     onChargeCurrencyBeforeQuery: function (obj) {
