@@ -262,14 +262,12 @@
 				,LD.dblNet
 				,VEL.intEntityLocationId AS intVendorLocationId
 				,VEL.strLocationName AS strShipFrom
-				,VEL.strLocationName AS strVendorLocationName
 				,CEL.intEntityLocationId AS intCustomerLocationId
 				,CEL.strLocationName AS strShipTo
-				,CEL.strLocationName AS strCustomerLocationName
 				,L.intTicketId
 			FROM tblLGLoad L
 			INNER JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId 
 			INNER JOIN tblEMEntityLocation VEL ON VEL.intEntityLocationId = LD.intVendorEntityLocationId
-			INNER JOIN tblEMEntityLocation CEL ON CEL.intEntityLocationId = LD.intVendorEntityLocationId
+			INNER JOIN tblEMEntityLocation CEL ON CEL.intEntityLocationId = LD.intCustomerEntityLocationId
 	) LGD on LGD.intLoadId = SCT.intLoadId AND LGD.intTicketId = SCT.intTicketId
 	

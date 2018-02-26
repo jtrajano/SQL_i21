@@ -135,7 +135,6 @@ BEGIN
 										WHEN ISNULL(SC.intContractId ,0) = 0 THEN NULL
 									END
 		
-		
 		,intItemId					= LI.intItemId
 		,intLineNo					= LI.intTransactionDetailId
 		,intOwnershipType			= CASE
@@ -143,7 +142,36 @@ BEGIN
 									  WHEN LI.ysnIsStorage = 1 THEN 2
 									  END
 		,dblQuantity				= LI.dblQty
-		,dblUnitPrice				= LI.dblCost
+		,dblUnitPrice				= CASE 
+											WHEN CNT.ysnUseFXPrice = 1 
+												 AND CNT.intCurrencyExchangeRateId IS NOT NULL 
+												 AND CNT.dblRate IS NOT NULL 
+												 AND CNT.intFXPriceUOMId IS NOT NULL 
+											THEN 
+												dbo.fnCTConvertQtyToTargetItemUOM(
+													CNT.intFXPriceUOMId
+													,ISNULL(CNT.intPriceItemUOMId,CNT.intAdjItemUOMId)
+													,(
+														LI.dblCost / CASE WHEN CNT.ysnSubCurrency = 1 THEN CASE WHEN ISNULL(CNT.intCent,0) = 0 THEN 1 ELSE CNT.intCent END ELSE 1 END			
+													)
+												) * CNT.dblRate
+
+											ELSE
+												LI.dblCost
+										END 
+										* -- AD.dblQtyToPriceUOMConvFactor
+										CASE 
+											WHEN CNT.ysnUseFXPrice = 1 
+												 AND CNT.intCurrencyExchangeRateId IS NOT NULL 
+												 AND CNT.dblRate IS NOT NULL 
+												 AND CNT.intFXPriceUOMId IS NOT NULL 
+											THEN 
+												dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,CNT.intFXPriceUOMId,1)
+											ELSE
+												CASE WHEN ISNULL(CNT.intContractDetailId,0) > 0 THEN dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,ISNULL(CNT.intPriceItemUOMId,CNT.intAdjItemUOMId),1)
+												ELSE 1
+												END
+										END 
 		,intWeightUOMId				= SC.intItemUOMIdFrom
 		,intSubLocationId			= SC.intSubLocationId
 		,intStorageLocationId		= SC.intStorageLocationId
@@ -170,7 +198,7 @@ BEGIN
 
 		,intOrderId					= CASE 
 										WHEN LI.intTransactionDetailId IS NULL THEN NULL
-										WHEN LI.intTransactionDetailId IS NOT NULL THEN (select top 1 intContractHeaderId from tblCTContractDetail where intContractDetailId = LI.intTransactionDetailId)
+										WHEN LI.intTransactionDetailId IS NOT NULL THEN CNT.intContractHeaderId
 									  END
 		,dtmShipDate				= SC.dtmTicketDateTime
 		,intSourceId				= SC.intTicketId
@@ -179,7 +207,28 @@ BEGIN
 		FROM	@Items LI INNER JOIN  dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId
 		INNER JOIN dbo.tblICItemUOM ItemUOM	ON ItemUOM.intItemId = SC.intItemId AND ItemUOM.intItemUOMId = @intTicketItemUOMId
 		INNER JOIN dbo.tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
-		LEFT JOIN dbo.tblCTContractDetail CNT ON CNT.intContractDetailId = LI.intTransactionDetailId
+		LEFT JOIN (
+			SELECT CTD.intContractHeaderId
+			,CTD.intContractDetailId
+			,CTD.intItemId
+			,CTD.intItemUOMId
+			,CTD.intFutureMarketId
+			,CTD.intFutureMonthId
+			,CTD.intRateTypeId 
+			,CTD.intPriceItemUOMId
+			,CTD.ysnUseFXPrice
+			,CTD.intCurrencyExchangeRateId 
+			,CTD.dblRate 
+			,CTD.intFXPriceUOMId 
+			,CTD.intInvoiceCurrencyId 
+			,CTD.intCurrencyId
+			,CTD.intAdjItemUOMId
+			,CTD.intPricingTypeId
+			,CU.intCent
+			,CU.ysnSubCurrency
+			FROM tblCTContractDetail CTD 
+			LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CTD.intCurrencyId
+		) CNT ON CNT.intContractDetailId = LI.intTransactionDetailId
 		LEFT JOIN tblARCustomer AR ON AR.intEntityId = SC.intEntityId
 		WHERE	SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0)
 END 
