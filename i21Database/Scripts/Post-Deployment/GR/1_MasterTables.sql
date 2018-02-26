@@ -281,3 +281,12 @@ BEGIN
 	UPDATE tblSCTicketType set intNextTicketNumber = 1 WHERE intNextTicketNumber = 0
 END
 GO
+IF EXISTS(SELECT 1 FROM tblGRCustomerStorage WHERE intItemUOMId IS NULL)
+BEGIN
+	UPDATE  CS 
+	SET		CS.intItemUOMId = UOM.intItemUOMId 
+	FROM    tblGRCustomerStorage CS
+	JOIN	tblICItemUOM UOM ON UOM.intItemId = CS.intItemId AND UOM.intUnitMeasureId = CS.intUnitMeasureId
+	WHERE   CS.intItemUOMId IS NULL
+END
+GO
