@@ -254,12 +254,12 @@ BEGIN TRY
 				THEN I.strItemNo
 			ELSE I.strDescription
 			END
-		,[intOrderUOMId] = CD.intNetWeightUOMId
+		,[intOrderUOMId] = LD.intWeightItemUOMId
 		,[dblQtyOrdered] = WCD.dblFromNet
-		,[intItemUOMId] = CD.intNetWeightUOMId
-		,[dblQtyShipped] = dbo.fnCTConvertQtyToTargetItemUOM(LD.intWeightItemUOMId,CD.intNetWeightUOMId,ABS(WCD.dblClaimableWt))
-		,[dblDiscount] = 0
-		,[dblItemWeight] = WCD.dblClaimableWt
+		,[intItemUOMId] = WCD.intPriceItemUOMId
+		,[dblQtyShipped] = CASE WHEN LD.intWeightItemUOMId <> WCD.intPriceItemUOMId THEN  ROUND(dbo.fnCTConvertQtyToTargetItemUOM(LD.intWeightItemUOMId,WCD.intPriceItemUOMId,ABS(WCD.dblClaimableWt)),2) ELSE ROUND(WCD.dblClaimableWt,2) END
+		,[dblDiscount] = 0 
+		,[dblItemWeight] = CASE WHEN LD.intWeightItemUOMId <> WCD.intPriceItemUOMId THEN  ROUND(dbo.fnCTConvertQtyToTargetItemUOM(LD.intWeightItemUOMId,WCD.intPriceItemUOMId,ABS(WCD.dblClaimableWt)),2) ELSE ROUND(WCD.dblClaimableWt,2) END
 		,[intItemWeightUOMId] = LD.intWeightItemUOMId
 		,[dblPrice] = WCD.dblUnitPrice
 		,[dblUnitPrice] = WCD.dblUnitPrice
