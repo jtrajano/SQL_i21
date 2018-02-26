@@ -29,7 +29,7 @@ SELECT TAXES.*
 	 , intPurchaseTaxAccountId	= PURCHASEACCOUNT.intAccountId
 	 , intCategoryId			= ITEMDETAIL.intCategoryId
 	 , intTonnageTaxUOMId		= ITEMDETAIL.intTonnageTaxUOMId
-	 , dblQtyTonShipped			= CASE WHEN ITEMDETAIL.intTonnageTaxUOMId IS NOT NULL THEN CONVERT(NUMERIC(18, 6), dbo.fnCalculateQtyBetweenUOM(TAXES.intItemUOMId, ITEMDETAIL.intTonnageTaxUOMId, TAXES.dblQtyShipped)) ELSE TAXES.dblQtyShipped END
+	 , dblQtyTonShipped			= CASE WHEN ITEMDETAIL.intTonnageTaxUOMId IS NOT NULL THEN CONVERT(NUMERIC(18, 6), dbo.fnCalculateQtyBetweenUOM(TAXES.intItemUOMId, ISNULL(ITEMDETAIL.intTonnageUOMSetupId, TAXES.intItemUOMId), TAXES.dblQtyShipped)) ELSE TAXES.dblQtyShipped END
 FROM (
 	SELECT DISTINCT I.intEntityCustomerId
 		 , I.strInvoiceNumber
@@ -224,12 +224,16 @@ OUTER APPLY (
 			   , strItemNo
 			   , strItemCategory	= ICC.strCategoryCode
 			   , strCategoryCode
+			   , intTonnageUOMSetupId = ITEMUOMSETUP.intItemUOMSetupId
 	FROM dbo.tblICItem ICI WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intCategoryId
 			 , strCategoryCode 
 		FROM dbo.tblICCategory WITH (NOLOCK)
 	) ICC ON ICI.intCategoryId = ICC.intCategoryId
+	OUTER APPLY (
+		Select intItemUOMSetupId = intItemUOMId from tblICItemUOM WITH (NOLOCK) where intItemId = ICI.intItemId and  intUnitMeasureId = CASE WHEN ISNULL(ICI.ysnTonnageTax, 0) = 1 THEN ICI.intTonnageTaxUOMId ELSE NULL END
+	) ITEMUOMSETUP
 	WHERE TAXES.intItemId = ICI.intItemId
 ) ITEMDETAIL
 LEFT OUTER JOIN (
