@@ -89,7 +89,7 @@ BEGIN
           ,NULL intPricingTypeId  
            ,CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell=1 THEN intContractTypeId else NULL end as intContractTypeId  
           ,intUnitMeasureId  
-          ,intConcurrencyId,strMarketValuation            
+          ,intConcurrencyId,isnull(strMarketValuation,'') strMarketValuation                        
       FROM vyuRKGetM2MBasis WHERE strContractInventory <>'Inventory'  
    END  
    ELSE IF (@ysnIncludeInventoryM2M = 1)  
@@ -122,7 +122,7 @@ BEGIN
           ,NULL intPricingTypeId  
            ,CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell=1 THEN intContractTypeId else NULL end as intContractTypeId  
           ,intUnitMeasureId  
-          ,intConcurrencyId,strMarketValuation             
+          ,intConcurrencyId,isnull(strMarketValuation,'') strMarketValuation              
       FROM vyuRKGetM2MBasis            
    END  
    
@@ -174,7 +174,7 @@ BEGIN
           ,NULL intPricingTypeId  
           ,CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell=1 THEN intContractTypeId else NULL end as intContractTypeId  
           ,intUnitMeasureId  
-          ,intConcurrencyId,strMarketValuation            
+          ,intConcurrencyId,isnull(strMarketValuation,'') strMarketValuation             
       FROM vyuRKGetM2MBasis WHERE strContractInventory <>'Inventory'  
    END  
    ELSE IF (@ysnIncludeInventoryM2M = 1)  
@@ -207,7 +207,7 @@ BEGIN
           ,NULL intPricingTypeId  
           ,CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell=1 THEN intContractTypeId else NULL end as intContractTypeId  
           ,intUnitMeasureId  
-          ,intConcurrencyId,strMarketValuation             
+          ,intConcurrencyId,isnull(strMarketValuation,'') strMarketValuation              
       FROM vyuRKGetM2MBasis            
    END  
   
@@ -227,7 +227,6 @@ BEGIN
      END  
 END  
   
-SELECT convert(int,ROW_NUMBER() over (ORDER BY strItemNo)) AS intRowNumber,* from @tempBasis   
+SELECT  convert(int,ROW_NUMBER() over (ORDER BY strItemNo)) AS intRowNumber,* from @tempBasis   
 WHERE intFutureMarketId is not null  
-order by strMarketValuation,strFutMarketName,strCommodityCode,strItemNo,strLocationName, convert(datetime,'01 '+strPeriodTo)
-
+order by strMarketValuation,strFutMarketName,strCommodityCode,strItemNo,strLocationName, convert(datetime,'01 '+strPeriodTo) 
