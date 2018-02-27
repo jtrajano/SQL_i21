@@ -58,7 +58,7 @@ BEGIN
 	ELSE IF (@type = 4)
 	BEGIN
 		INSERT INTO @returnTable
-		SELECT	'This voucher was created from Patronage Retire Stock - <strong>'+ CS.strCertificateNo +'</strong>. Unpost it from there.',
+		SELECT	'This voucher was created from Patronage Retire Stock - <strong>'+ RetireStk.strRetireNo +'</strong>. Unpost it from there.',
 				'Voucher',
 				APB.strBillId,
 				APB.intBillId
@@ -80,7 +80,7 @@ BEGIN
 			ON EP.intEquityPayId = EPS.intEquityPayId
 		WHERE APB.ysnPosted = 1 AND APB.intBillId IN (SELECT * FROM @tmpTransactions) AND @transaction != 'Patronage'
 		UNION ALL
-		SELECT	'This voucher was created from Refunds - <strong>'+ R.strRefundNo+'</strong>. Unpost it from there.',
+		SELECT	'This voucher was created from Refunds - <strong>'+ R.strRefundNo +'</strong>. Unpost it from there.',
 				'Voucher',
 				APB.strBillId,
 				APB.intBillId

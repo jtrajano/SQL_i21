@@ -171,7 +171,7 @@ BEGIN
 		[ysnIsUnposted]					=	0,
 		[intUserId]						=	@intUserId,
 		[intEntityId]					=	@intUserId,
-		[strTransactionId]				=	A.intRetireStockId, 
+		[strTransactionId]				=	A.strRetireNo, 
 		[intTransactionId]				=	A.intRetireStockId, 
 		[strTransactionType]			=	'Retire Stock',
 		[strTransactionForm]			=	@RETIRE_STOCK,
@@ -448,7 +448,8 @@ BEGIN
 				ON tmpCS.intCustomerStockId = CS.intCustomerStockId
 				
 		END
-		UPDATE tblPATRetireStock SET @ysnPosted = @ysnPosted WHERE intRetireStockId = @intRetireStockId;
+
+		UPDATE tblPATRetireStock SET ysnPosted = @ysnPosted WHERE intRetireStockId = @intRetireStockId;
 	END
 
 ---------------------------------------------------------------------------------------------------------------------------------------

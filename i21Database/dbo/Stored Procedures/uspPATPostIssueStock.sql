@@ -55,12 +55,9 @@ SET @batchIdUsed = @batchId;
 			IssueStk.dblParValue,
 			IssueStk.dblFaceValue,
 			IssueStk.intInvoiceId,
-			IssueStk.ysnPosted,
-			CS.strActivityStatus
+			IssueStk.ysnPosted
 	INTO #tempCustomerStock
 	FROM tblPATIssueStock IssueStk
-	LEFT JOIN tblPATCustomerStock CS
-		ON CS.intCustomerStockId = IssueStk.intCustomerStockId
 	WHERE intIssueStockId = @intIssueStockId
 		
 
@@ -171,7 +168,7 @@ END
 			[ysnIsUnposted]					=	0,
 			[intUserId]						=	@intUserId,
 			[intEntityId]					=	@intUserId,
-			[strTransactionId]				=	A.intIssueStockId, 
+			[strTransactionId]				=	A.strIssueNo, 
 			[intTransactionId]				=	A.intIssueStockId, 
 			[strTransactionType]			=	'Voting Stock',
 			[strTransactionForm]			=	@ISSUE_STOCK,
@@ -488,8 +485,8 @@ BEGIN
 
 
 			DELETE FROM tblARInvoice WHERE intInvoiceId IN (SELECT intInvoiceId FROM #tempCustomerStock) AND ysnPaid <> 1;
-			DELETE FROM tblPATCustomerStock WHERE intCustomerStockId IN (SELECT intCustomerPatronId FROM #tempCustomerStock);
-			--UPDATE tblPATCustomerStock SET intInvoiceId = null WHERE intCustomerStockId = @intCustomerStockId;
+			DELETE FROM tblPATCustomerStock WHERE intCustomerStockId IN (SELECT intCustomerStockId FROM #tempCustomerStock);
+			
 		END
 		---------- UPDATE CUSTOMER STOCK TABLE ---------------
 		UPDATE tblPATIssueStock SET ysnPosted = @ysnPosted WHERE intIssueStockId = @intIssueStockId;
