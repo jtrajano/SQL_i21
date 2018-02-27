@@ -167,10 +167,14 @@ BEGIN TRY
 					--, tblTFReportingComponentProductCode.intProductCodeId
 					--, tblTFProductCode.strProductCode
 					, tblICInventoryReceipt.strBillOfLading
-					, tblICInventoryReceiptItem.dblReceived
-					, tblICInventoryReceiptItem.dblGross
-					, tblICInventoryReceiptItem.dblNet
-					, tblICInventoryReceiptItem.dblBillQty
+					--, tblICInventoryReceiptItem.dblReceived
+					--, tblICInventoryReceiptItem.dblGross
+					--, tblICInventoryReceiptItem.dblNet
+					--, tblICInventoryReceiptItem.dblBillQty
+					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblReceived END dblReceived
+					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblGross END dblGross
+					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblNet END dblNet
+					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblBillQty END dblBillQty
 					, tblICInventoryReceipt.dtmReceiptDate
 					, tblSMShipVia.strShipVia
 					, tblSMShipVia.strTransporterLicense
@@ -227,6 +231,7 @@ BEGIN TRY
 				LEFT JOIN tblTRLoadReceipt ON  tblTRLoadReceipt.intInventoryReceiptId  = tblICInventoryReceipt.intInventoryReceiptId
 				LEFT JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadReceipt.intLoadHeaderId
 				LEFT JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId
+				LEFT JOIN tblTRLoadDistributionDetail ON tblTRLoadDistributionDetail.intLoadDistributionHeaderId = tblTRLoadDistributionHeader.intLoadDistributionHeaderId
 					LEFT JOIN tblSMCompanyLocation BulkLocation ON BulkLocation.intCompanyLocationId = tblTRLoadDistributionHeader.intCompanyLocationId
 					LEFT JOIN tblEMEntityLocation CustomerLocation ON CustomerLocation.intEntityLocationId = tblTRLoadDistributionHeader.intShipToLocationId
 				LEFT JOIN tblTFTaxAuthorityCustomerLicense ON tblTFTaxAuthorityCustomerLicense.intEntityId = tblTRLoadDistributionHeader.intEntityCustomerId AND tblTFTaxAuthorityCustomerLicense.intTaxAuthorityId = tblTFReportingComponent.intTaxAuthorityId
@@ -325,10 +330,14 @@ BEGIN TRY
 					--, tblTFReportingComponentProductCode.intProductCodeId
 					--, tblTFProductCode.strProductCode
 					, tblICInventoryReceipt.strBillOfLading
-					, tblICInventoryReceiptItem.dblReceived
-					, tblICInventoryReceiptItem.dblGross
-					, tblICInventoryReceiptItem.dblNet
-					, tblICInventoryReceiptItem.dblBillQty
+					--, tblICInventoryReceiptItem.dblReceived
+					--, tblICInventoryReceiptItem.dblGross
+					--, tblICInventoryReceiptItem.dblNet
+					--, tblICInventoryReceiptItem.dblBillQty
+					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblReceived END dblReceived
+					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblGross END dblGross
+					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblNet END dblNet
+					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblBillQty END dblBillQty
 					, tblICInventoryReceipt.dtmReceiptDate
 					, tblSMShipVia.strShipVia
 					, tblSMShipVia.strTransporterLicense
@@ -384,6 +393,7 @@ BEGIN TRY
 				LEFT JOIN tblTRLoadReceipt ON  tblTRLoadReceipt.intInventoryReceiptId  = tblICInventoryReceipt.intInventoryReceiptId
 				LEFT JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadReceipt.intLoadHeaderId
 				LEFT JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId
+				LEFT JOIN tblTRLoadDistributionDetail ON tblTRLoadDistributionDetail.intLoadDistributionHeaderId = tblTRLoadDistributionHeader.intLoadDistributionHeaderId
 					LEFT JOIN tblSMCompanyLocation BulkLocation ON BulkLocation.intCompanyLocationId = tblTRLoadDistributionHeader.intCompanyLocationId
 					LEFT JOIN tblEMEntityLocation CustomerLocation ON CustomerLocation.intEntityLocationId = tblTRLoadDistributionHeader.intShipToLocationId
 				LEFT JOIN tblTFTaxAuthorityCustomerLicense ON tblTFTaxAuthorityCustomerLicense.intEntityId = tblTRLoadDistributionHeader.intEntityCustomerId AND tblTFTaxAuthorityCustomerLicense.intTaxAuthorityId = tblTFReportingComponent.intTaxAuthorityId
