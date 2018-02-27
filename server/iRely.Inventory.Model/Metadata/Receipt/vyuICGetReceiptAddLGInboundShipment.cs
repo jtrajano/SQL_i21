@@ -75,5 +75,6 @@ namespace iRely.Inventory.Model
         public string strFreightTerm { get; set; }
         public string strMarkings { get; set; }
         public string strBundleType { get; set; }
+        public int? intContractSeq { get; set; }
     }
 }
