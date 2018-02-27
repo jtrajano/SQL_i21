@@ -6,9 +6,31 @@ BEGIN
 	-- Update the currency fields 
 	UPDATE	ShipmentCharges
 	SET		intCent = Currency.intCent
-			,ysnSubCurrency = Currency.ysnSubCurrency
+			,ysnSubCurrency = 
+				CASE 
+					WHEN Currency.ysnSubCurrency = 1 AND ShipmentCharges.strCostMethod = 'Amount' AND MainCurrency.intCurrencyID IS NOT NULL THEN 
+						0 
+					ELSE 
+						Currency.ysnSubCurrency
+				END 
+			,intCurrencyId = 
+				CASE 
+					WHEN Currency.ysnSubCurrency = 1 AND ShipmentCharges.strCostMethod = 'Amount' AND MainCurrency.intCurrencyID IS NOT NULL THEN 
+						MainCurrency.intCurrencyID
+					ELSE 
+						ShipmentCharges.intCurrencyId
+				END 
+			,dblAmount = 
+				CASE 
+					WHEN Currency.ysnSubCurrency = 1 AND ShipmentCharges.strCostMethod = 'Amount' AND MainCurrency.intCurrencyID IS NOT NULL THEN 
+						ShipmentCharges.dblAmount / CASE WHEN ISNULL(Currency.intCent, 0) = 0  THEN 1 ELSE Currency.intCent END 
+					ELSE 
+						ShipmentCharges.dblAmount
+				END 
 	FROM	dbo.tblICInventoryShipmentCharge ShipmentCharges INNER JOIN dbo.tblSMCurrency Currency
 				ON ShipmentCharges.intCurrencyId = Currency.intCurrencyID
+			LEFT JOIN dbo.tblSMCurrency MainCurrency
+				ON MainCurrency.intCurrencyID = Currency.intMainCurrencyId
 	WHERE	ShipmentCharges.intInventoryShipmentId = @intInventoryShipmentId
 
 	-- Calculate the other charges. 
