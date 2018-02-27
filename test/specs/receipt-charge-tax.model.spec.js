@@ -52,6 +52,14 @@ UnitTestEngine.testModel({
         "type": "boolean",
         "allowNull": false
     }, {
+        "name": "strUnitMeasure",
+        "type": "string",
+        "allowNull": false
+    }, {
+        "name": "intUnitMeasureId",
+        "type": "int",
+        "allowNull": true
+    }, {
         "name": "ysnTaxOnly",
         "type": "boolean",
         "allowNull": false
@@ -62,6 +70,14 @@ UnitTestEngine.testModel({
     }, {
         "name": "strTaxCode",
         "type": "string",
+        "allowNull": false
+    }, {
+        "name": "dblQty",
+        "type": "float",
+        "allowNull": false
+    }, {
+        "name": "dblCost",
+        "type": "float",
         "allowNull": false
     }, {
         "name": "intSort",

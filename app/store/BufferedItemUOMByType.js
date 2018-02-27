@@ -1,5 +1,5 @@
 Ext.define('Inventory.store.BufferedItemUOMByType', {
-    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
+    extend: 'Ext.data.BufferedStore',
     alias: 'store.icbuffereditemuombytype',
 
     // requires: [

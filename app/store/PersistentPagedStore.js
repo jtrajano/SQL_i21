@@ -2,7 +2,7 @@
     This store is used for paging, when paging out, modified records will be persisted.
 */
 Ext.define('Inventory.store.PersistentPagedStore', {
-    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
+    extend: 'Ext.data.Store',
     storeId: 'PersistentPagedStore',
     pruneModifiedRecords: false,
 

@@ -1,7 +1,7 @@
 UnitTestEngine.testStore({
     name: 'Inventory.store.Store',
     alias: "store.storestore",
-    base: 'Ext.data.BufferedStore',
+    base: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     dependencies: [],
     config: {
         "storeId": "Store",

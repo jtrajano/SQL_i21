@@ -2,7 +2,7 @@
  * Created by LZabala on 9/18/2015.
  */
 Ext.define('Inventory.store.BufferedInventoryValuation', {
-    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
+    extend: 'Ext.data.BufferedStore',
     alias: 'store.icbufferedinventoryvaluation',
 
     requires: [

@@ -1,5 +1,5 @@
 Ext.define('Inventory.store.BufferedValidTargetUOM', {
-    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
+    extend: 'Ext.data.BufferedStore',
     alias: 'store.icbufferedvalidtargetuom',
 
     requires: [

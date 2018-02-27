@@ -1,7 +1,7 @@
 UnitTestEngine.testStore({
     name: 'Inventory.store.LineOfBusiness',
     alias: "store.iclineofbusiness",
-    base: 'Ext.data.Store',
+    base: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     dependencies: ["Inventory.model.LineOfBusiness"],
     config: {
         "model": "Inventory.model.LineOfBusiness",

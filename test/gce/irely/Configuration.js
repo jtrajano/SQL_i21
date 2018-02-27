@@ -47,6 +47,10 @@ Ext.define('iRely.Configuration',{
         Regex: {
             InformalUrl: /(https?:\/\/)?(www.)?[-a-zA-Z0-9]{2,}\.[a-z]{2,}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?/g,
             ProtocolCheck: /^((http|https)\:\/\/)/i
-        }
+        },
+
+        HiddenScreens: [],
+        MinimizedScreens: [],
+        OpenedScreens: []
     }
 });

@@ -72,9 +72,25 @@ UnitTestEngine.testModel({
         "type": "string",
         "allowNull": false
     }, {
+        "name": "dblQty",
+        "type": "float",
+        "allowNull": false
+    }, {
+        "name": "dblCost",
+        "type": "float",
+        "allowNull": false
+    }, {
         "name": "intSort",
         "type": "int",
         "allowNull": true
+    }, {
+        "name": "intUnitMeasureId",
+        "type": "int",
+        "allowNull": true
+    }, {
+        "name": "strUnitMeasure",
+        "type": "string",
+        "allowNull": false
     }],
     validators: [
         [{

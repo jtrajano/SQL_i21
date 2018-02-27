@@ -1,7 +1,7 @@
 UnitTestEngine.testStore({
     name: 'Inventory.store.CategoryLocation',
     alias: "store.iccategorylocation",
-    base: 'Ext.data.Store',
+    base: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     dependencies: ["Inventory.model.CategoryLocation"],
     config: {
         "model": "Inventory.model.CategoryLocation",
@@ -10,7 +10,7 @@ UnitTestEngine.testStore({
         "proxy": {
             "type": "rest",
             "api": {
-                "read": "./inventory/api/categorylocation/get",
+                "read": "./inventory/api/categorylocation/getcategorylocation",
                 "update": "./inventory/api/categorylocation/put",
                 "create": "./inventory/api/categorylocation/post"
             }

@@ -1,7 +1,7 @@
 UnitTestEngine.testStore({
     name: 'Inventory.store.BufferedInventoryCountDetail',
     alias: "store.icbufferedinventorycountdetail",
-    base: 'Ext.data.Store',
+    base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.InventoryCountDetail"],
     config: {
         "model": "Inventory.model.InventoryCountDetail",

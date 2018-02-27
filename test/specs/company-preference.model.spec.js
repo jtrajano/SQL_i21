@@ -43,6 +43,18 @@ UnitTestEngine.testModel({
         "name": "strOriginLineOfBusiness",
         "type": "string",
         "allowNull": false
+    }, {
+        "name": "ysnAllowDuplicates",
+        "type": "boolean",
+        "allowNull": true
+    }, {
+        "name": "ysnOverwrite",
+        "type": "boolean",
+        "allowNull": true
+    }, {
+        "name": "ysnAllowDuplicates",
+        "type": "boolean",
+        "allowNull": true
     }],
     validators: [
         []

@@ -1,7 +1,7 @@
 UnitTestEngine.testStore({
     name: 'Inventory.store.BuildAssembly',
     alias: "store.icbuildassembly",
-    base: 'Ext.data.Store',
+    base: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     dependencies: ["Inventory.model.BuildAssembly"],
     config: {
         "model": "Inventory.model.BuildAssembly",

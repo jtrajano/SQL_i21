@@ -1,7 +1,7 @@
 UnitTestEngine.testStore({
     name: 'Inventory.store.StorageMeasurementReading',
     alias: "store.icstoragemeasurementreading",
-    base: 'Ext.data.Store',
+    base: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     dependencies: ["Inventory.model.StorageMeasurementReading"],
     config: {
         "model": "Inventory.model.StorageMeasurementReading",

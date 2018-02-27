@@ -14,7 +14,7 @@ UnitTestEngine.testModel({
     }, {
         "name": "intBundleItemId",
         "type": "int",
-        "allowNull": true
+        "allowNull": false
     }, {
         "name": "strDescription",
         "type": "string",
@@ -28,15 +28,19 @@ UnitTestEngine.testModel({
         "type": "int",
         "allowNull": true
     }, {
-        "name": "dblUnit",
+        "name": "dblMarkUpOrDown",
         "type": "float",
         "allowNull": false
     }, {
-        "name": "intSort",
-        "type": "int",
-        "allowNull": true
+        "name": "dtmBeginDate",
+        "type": "date",
+        "allowNull": false
     }, {
-        "name": "strItemNo",
+        "name": "dtmEndDate",
+        "type": "date",
+        "allowNull": false
+    }, {
+        "name": "strComponentItemNo",
         "type": "string",
         "allowNull": false
     }, {
@@ -46,10 +50,7 @@ UnitTestEngine.testModel({
     }],
     validators: [
         [{
-            "field": "strItemNo",
-            "type": "presence"
-        }, {
-            "field": "strUnitMeasure",
+            "field": "strComponentItemNo",
             "type": "presence"
         }]
     ]

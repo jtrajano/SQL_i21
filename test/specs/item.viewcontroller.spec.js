@@ -7,10 +7,10 @@ UnitTestEngine.testViewController({
         describe('sale/retail price', function () {
             describe('pricing method is None', function () {
                 // Sale Price = Cost
-                it('should be equal to cost of 100.5', function () {
+                it('should be equal to cost of 0', function () {
                     var config = { standardCost: 100.5, amount: 30.5, pricingMethod: "None" };
                     var salePrice = controller.getSalePrice(config, function () { });
-                    salePrice.should.be.equal(100.5);
+                    salePrice.should.be.equal(0);
                 });
             });
 

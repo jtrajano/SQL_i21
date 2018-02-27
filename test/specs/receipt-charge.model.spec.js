@@ -16,6 +16,10 @@ UnitTestEngine.testModel({
         "type": "int",
         "allowNull": true
     }, {
+        "name": "intContractSeq",
+        "type": "int",
+        "allowNull": true
+    }, {
         "name": "intChargeId",
         "type": "int",
         "allowNull": true
@@ -88,6 +92,10 @@ UnitTestEngine.testModel({
         "type": "string",
         "allowNull": false
     }, {
+        "name": "intCurrencyId",
+        "type": "int",
+        "allowNull": true
+    }, {
         "name": "ysnSubCurrency",
         "type": "boolean",
         "allowNull": true
@@ -122,6 +130,14 @@ UnitTestEngine.testModel({
     }, {
         "name": "dblQuantity",
         "type": "float",
+        "allowNull": true
+    }, {
+        "name": "strChargesLink",
+        "type": "string",
+        "allowNull": true
+    }, {
+        "name": "intCostUnitMeasureId",
+        "type": "int",
         "allowNull": true
     }],
     validators: [

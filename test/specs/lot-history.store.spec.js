@@ -1,7 +1,7 @@
 UnitTestEngine.testStore({
     name: 'Inventory.store.LotHistory',
     alias: "store.iclothistory",
-    base: 'Ext.data.BufferedStore',
+    base: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     dependencies: ["Inventory.model.LotHistory"],
     config: {
         "model": "Inventory.model.LotHistory",

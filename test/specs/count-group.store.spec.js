@@ -1,7 +1,7 @@
 UnitTestEngine.testStore({
     name: 'Inventory.store.CountGroup',
     alias: "store.iccountgroup",
-    base: 'Ext.data.Store',
+    base: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     dependencies: ["Inventory.model.CountGroup"],
     config: {
         "model": "Inventory.model.CountGroup",

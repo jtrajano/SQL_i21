@@ -28,6 +28,10 @@ UnitTestEngine.testModel({
         "type": "boolean",
         "allowNull": false
     }, {
+        "name": "ysnStockUOM",
+        "type": "boolean",
+        "allowNull": true
+    }, {
         "name": "intSort",
         "type": "int",
         "allowNull": true

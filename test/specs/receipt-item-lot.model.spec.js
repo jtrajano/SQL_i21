@@ -163,6 +163,14 @@ UnitTestEngine.testModel({
         "name": "strUnitMeasure",
         "type": "string",
         "allowNull": false
+    }, {
+        "name": "dblQuantityBeforeEdit",
+        "type": "float",
+        "allowNull": true
+    }, {
+        "name": "dblTareWeightBeforeEdit",
+        "type": "float",
+        "allowNull": true
     }],
     validators: [
         [{

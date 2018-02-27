@@ -3,7 +3,16 @@ module.exports = {
         { pattern: 'test/vendor/extjs/ext-6.5.0/build/ext-all-debug.js', watched: false },
         // load the override for Ext.data.Connection.
         {pattern: 'test/resources/test/override/Ext.data.Connection.js', watched: false},
-
+        
+        {pattern: 'test/gce/irely/Functions.js', watched: false},
+        {pattern: 'test/gce/irely/Configuration.js', watched: false },
+        {pattern: 'test/gce/globalcomponentengine/model/MultiCompany.js', watched: false },
+        {pattern: 'test/gce/globalcomponentengine/store/MultiCompany.js', watched: false },
+        {pattern: 'test/gce/globalcomponentengine/store/MultiCompany.js', watched: false },
+        {pattern: 'test/gce/globalcomponentengine/store/MultiCompanyBaseBufferedStore.js', watched: false },
+        {pattern: 'test/gce/globalcomponentengine/store/MultiCompanyBaseStore.js', watched: false },
+        {pattern: 'test/gce/globalcomponentengine/store/MultiCompanyBaseTreeStore.js', watched: false },
+        {pattern: 'test/gce/globalcomponentengine/store/MultiCompanyBaseBuffered.js', watched: false },
         {pattern: 'test/gce/irely/BaseEntity.js', watched: false},
         {pattern: 'test/gce/irely/model/EntityCredential.js', watched: false},
         {pattern: 'test/gce/irely/model/EntityToContact.js', watched: false},
@@ -11,7 +20,6 @@ module.exports = {
         {pattern: 'test/gce/irely/model/EntityNote.js', watched: false},
         {pattern: 'test/gce/irely/model/Entity.js', watched: false},
         {pattern: 'test/gce/irely/model/EntityContact.js', watched: false},
-        {pattern: 'test/gce/irely/Functions.js', watched: false}
     ],
     files: [{
         "pattern": "app/Application.js"
@@ -37,8 +45,6 @@ module.exports = {
         "pattern": "app/search/InventoryShipment.js"
     }, {
         "pattern": "app/search/InventoryTransfer.js"
-    }, {
-        "pattern": "app/search/InventoryUOM.js"
     }, {
         "pattern": "app/search/InventoryValuation.js"
     }, {
@@ -70,10 +76,6 @@ module.exports = {
     }, {
         "pattern": "app/store/BufferedAssemblyItem.js"
     }, {
-        "pattern": "app/model/BundleComponent.js"
-    }, {
-        "pattern": "app/store/BufferedBundleComponent.js"
-    }, {
         "pattern": "app/model/CategoryAccount.js"
     }, {
         "pattern": "app/store/BufferedCategoryAccount.js"
@@ -97,6 +99,14 @@ module.exports = {
         "pattern": "app/model/FuelType.js"
     }, {
         "pattern": "app/store/BufferedFuelType.js"
+    }, {
+        "pattern": "app/model/ImportLogDetail.js"
+    }, {
+        "pattern": "app/model/ImportLog.js"
+    }, {
+        "pattern": "app/store/BufferedImportLog.js"
+    }, {
+        "pattern": "app/store/BufferedImportLogDetail.js"
     }, {
         "pattern": "app/model/InventoryCountDetail.js"
     }, {
@@ -238,6 +248,10 @@ module.exports = {
     }, {
         "pattern": "app/store/FuelType.js"
     }, {
+        "pattern": "app/store/ImportLog.js"
+    }, {
+        "pattern": "app/store/ImportLogDetail.js"
+    }, {
         "pattern": "app/model/InventoryCount.js"
     }, {
         "pattern": "app/store/InventoryCount.js"
@@ -320,13 +334,13 @@ module.exports = {
     }, {
         "pattern": "app/store/Receipt.js"
     }, {
-        "pattern": "app/store/ReceiptItemChargeTax.js"
-    }, {
         "pattern": "app/store/ReceiptItemTax.js"
     }, {
         "pattern": "app/model/ShipmentItemLot.js"
     }, {
         "pattern": "app/model/ShipmentItem.js"
+    }, {
+        "pattern": "app/model/ShipmentChargeTax.js"
     }, {
         "pattern": "app/model/ShipmentCharge.js"
     }, {
@@ -366,12 +380,6 @@ module.exports = {
     }, {
         "pattern": "app/store/Transfer.js"
     }, {
-        "pattern": "app/model/UnitMeasureConversion.js"
-    }, {
-        "pattern": "app/model/UnitMeasure.js"
-    }, {
-        "pattern": "app/store/UnitMeasure.js"
-    }, {
         "pattern": "app/store/BufferedManufacturer.js"
     }, {
         "pattern": "app/view/BrandViewModel.js"
@@ -384,6 +392,34 @@ module.exports = {
     }, {
         "pattern": "app/view/StatusbarPaging1.js"
     }, {
+        "pattern": "app/view/Bundle.js"
+    }, {
+        "pattern": "app/view/BundleViewController.js"
+    }, {
+        "pattern": "app/store/BufferedCompactItem.js"
+    }, {
+        "pattern": "app/store/BufferedCategory.js"
+    }, {
+        "pattern": "app/model/ItemUOM.js"
+    }, {
+        "pattern": "app/store/BufferedItemUnitMeasure.js"
+    }, {
+        "pattern": "app/model/UnitMeasureConversion.js"
+    }, {
+        "pattern": "app/model/UnitMeasure.js"
+    }, {
+        "pattern": "app/store/BufferedUnitMeasure.js"
+    }, {
+        "pattern": "app/store/BufferedBrand.js"
+    }, {
+        "pattern": "app/model/CompactCommodity.js"
+    }, {
+        "pattern": "app/store/BufferedCommodity.js"
+    }, {
+        "pattern": "app/store/BufferedItemLocation.js"
+    }, {
+        "pattern": "app/view/BundleViewModel.js"
+    }, {
         "pattern": "app/view/Category.js"
     }, {
         "pattern": "app/view/CategoryLocation.js"
@@ -394,10 +430,6 @@ module.exports = {
     }, {
         "pattern": "app/view/CategoryViewController.js"
     }, {
-        "pattern": "app/store/BufferedUnitMeasure.js"
-    }, {
-        "pattern": "app/store/BufferedCompactItem.js"
-    }, {
         "pattern": "app/store/BufferedCategoryLocation.js"
     }, {
         "pattern": "app/store/BufferedCategoryUOM.js"
@@ -407,10 +439,6 @@ module.exports = {
         "pattern": "app/view/CertificationProgram.js"
     }, {
         "pattern": "app/view/CertificationProgramViewController.js"
-    }, {
-        "pattern": "app/model/CompactCommodity.js"
-    }, {
-        "pattern": "app/store/BufferedCommodity.js"
     }, {
         "pattern": "app/view/CertificationProgramViewModel.js"
     }, {
@@ -449,8 +477,6 @@ module.exports = {
         "pattern": "app/view/CopyItemLocation.js"
     }, {
         "pattern": "app/view/CopyItemLocationViewController.js"
-    }, {
-        "pattern": "app/model/ItemUOM.js"
     }, {
         "pattern": "app/model/ItemVendorXref.js"
     }, {
@@ -497,6 +523,10 @@ module.exports = {
         "pattern": "app/model/ItemMotorFuelTax.js"
     }, {
         "pattern": "app/model/ItemLicense.js"
+    }, {
+        "pattern": "app/model/ItemAddOn.js"
+    }, {
+        "pattern": "app/model/ItemSubstitute.js"
     }, {
         "pattern": "app/model/Item.js"
     }, {
@@ -564,11 +594,15 @@ module.exports = {
     }, {
         "pattern": "app/view/ImportDataFromCsvViewModel.js"
     }, {
+        "pattern": "app/view/ImportLog.js"
+    }, {
         "pattern": "app/view/ImportLogMessageBox.js"
     }, {
         "pattern": "app/view/ImportLogMessageBoxViewController.js"
     }, {
         "pattern": "app/view/ImportLogMessageBoxViewModel.js"
+    }, {
+        "pattern": "app/view/ImportLogViewModel.js"
     }, {
         "pattern": "app/view/InventoryAdjustment.js"
     }, {
@@ -583,8 +617,6 @@ module.exports = {
         "pattern": "app/store/BufferedLot.js"
     }, {
         "pattern": "app/store/BufferedPostedLot.js"
-    }, {
-        "pattern": "app/store/BufferedItemUnitMeasure.js"
     }, {
         "pattern": "app/store/BufferedItemWeightUOM.js"
     }, {
@@ -615,8 +647,6 @@ module.exports = {
         "pattern": "app/view/InventoryCount.js"
     }, {
         "pattern": "app/view/InventoryCountDetailsViewController.js"
-    }, {
-        "pattern": "app/store/BufferedCategory.js"
     }, {
         "pattern": "app/store/BufferedCountGroup.js"
     }, {
@@ -684,6 +714,10 @@ module.exports = {
     }, {
         "pattern": "app/store/BufferedReceiptItemView.js"
     }, {
+        "pattern": "app/model/BundleComponent.js"
+    }, {
+        "pattern": "app/store/BufferedBundleComponent.js"
+    }, {
         "pattern": "app/view/InventoryReceiptViewModel.js"
     }, {
         "pattern": "app/view/InventoryShipment.js"
@@ -724,6 +758,10 @@ module.exports = {
     }, {
         "pattern": "app/view/InventoryUOMViewController.js"
     }, {
+        "pattern": "app/store/UnitMeasure.js"
+    }, {
+        "pattern": "app/store/BufferedValidTargetUOM.js"
+    }, {
         "pattern": "app/view/InventoryUOMViewModel.js"
     }, {
         "pattern": "app/view/InventoryValuation.js"
@@ -751,10 +789,6 @@ module.exports = {
         "pattern": "app/view/ItemViewController.js"
     }, {
         "pattern": "app/store/BufferedInventoryTag.js"
-    }, {
-        "pattern": "app/store/BufferedItemLocation.js"
-    }, {
-        "pattern": "app/store/BufferedBrand.js"
     }, {
         "pattern": "app/store/BufferedFuelTaxClass.js"
     }, {
@@ -894,14 +928,8 @@ module.exports = {
     }, {
         "pattern": "app/view/StorageUnitViewModel.js"
     }, {
-        "pattern": "app/view/TaxDetailsViewController.js"
-    }, {
-        "pattern": "app/view/TaxDetailsViewModel.js"
-    }, {
-        "pattern": "app/view/TaxDetails.js"
-    }, {
         "pattern": "app/view/Main.js"
     }, {
         "pattern": "app/view/Viewport.js"
     }]
-};
+}

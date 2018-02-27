@@ -1,7 +1,7 @@
 UnitTestEngine.testStore({
     name: 'Inventory.store.ManufacturingCell',
     alias: "store.icmanufacturingcell",
-    base: 'Ext.data.Store',
+    base: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     dependencies: ["Inventory.model.ManufacturingCell"],
     config: {
         "model": "Inventory.model.ManufacturingCell",

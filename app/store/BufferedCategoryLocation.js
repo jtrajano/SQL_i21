@@ -2,7 +2,7 @@
  * Created by LZabala on 1/27/2015.
  */
 Ext.define('Inventory.store.BufferedCategoryLocation', {
-    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
+    extend: 'Ext.data.BufferedStore',
     alias: 'store.icbufferedcategorylocation',
 
     requires: [

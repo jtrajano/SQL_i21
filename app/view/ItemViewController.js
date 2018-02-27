@@ -3071,7 +3071,7 @@ Ext.define('Inventory.view.ItemViewController', {
         var salePrice = 0;
         switch (price.pricingMethod) {
             case "None":
-                salePrice = price.standardCost;
+                salePrice = 0.00;
                 break;
             case "Fixed Dollar Amount":
                 salePrice = price.standardCost + price.amount;
@@ -3103,10 +3103,9 @@ Ext.define('Inventory.view.ItemViewController', {
             pricingMethod: data.pricingMethod
         }, validationCallback);
 
-        if (iRely.Functions.isEmpty(data.pricingMethod) || data.pricingMethod === 'None') {
-            pricing.set('dblAmountPercent', 0.00);
+        if (!(iRely.Functions.isEmpty(data.pricingMethod) || data.pricingMethod === 'None')) {
+            pricing.set('dblSalePrice', salePrice);
         }
-        pricing.set('dblSalePrice', salePrice);
     },
 
     updatePricingLevel: function (item, pricing, data) {

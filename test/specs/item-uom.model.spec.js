@@ -40,6 +40,10 @@ UnitTestEngine.testModel({
         "type": "boolean",
         "allowNull": false
     }, {
+        "name": "ysnStockUOM",
+        "type": "boolean",
+        "allowNull": false
+    }, {
         "name": "ysnAllowPurchase",
         "type": "boolean",
         "allowNull": false

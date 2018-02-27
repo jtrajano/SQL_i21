@@ -1,8 +1,8 @@
 UnitTestEngine.testStore({
     name: 'Inventory.store.UnitMeasure',
     alias: "store.icuom",
-    base: 'Ext.data.Store',
-    dependencies: ["Inventory.model.UnitMeasure"],
+    base: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
+    dependencies: ["Inventory.model.UnitMeasure", "Inventory.model.UnitMeasureConversion", "Ext.data.proxy.Rest", "Ext.data.reader.Json", "Ext.data.writer.Json"],
     config: {
         "model": "Inventory.model.UnitMeasure",
         "storeId": "UnitMeasure",

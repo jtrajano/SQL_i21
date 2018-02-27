@@ -1,7 +1,7 @@
 UnitTestEngine.testStore({
     name: 'Inventory.store.FiscalPeriod',
     alias: "store.icfiscalperiod",
-    base: 'Ext.data.Store',
+    base: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     dependencies: ["Inventory.model.FiscalPeriod"],
     config: {
         "model": "Inventory.model.FiscalPeriod",

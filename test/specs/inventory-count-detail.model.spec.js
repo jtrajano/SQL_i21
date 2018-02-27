@@ -187,6 +187,10 @@ UnitTestEngine.testModel({
         "name": "ysnLotted",
         "type": "boolean",
         "allowNull": false
+    }, {
+        "name": "intConcurrencyId",
+        "type": "int",
+        "allowNull": true
     }],
     validators: [
         [{

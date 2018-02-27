@@ -1,7 +1,7 @@
 UnitTestEngine.testStore({
     name: 'Inventory.store.FuelTaxClass',
     alias: "store.icfueltaxclass",
-    base: 'Ext.data.Store',
+    base: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     dependencies: ["Inventory.model.FuelTaxClass"],
     config: {
         "model": "Inventory.model.FuelTaxClass",

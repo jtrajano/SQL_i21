@@ -1,7 +1,7 @@
 UnitTestEngine.testStore({
     name: 'Inventory.store.ItemStockSummary',
     alias: "store.icitemstocksummary",
-    base: 'Ext.data.Store',
+    base: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     dependencies: ["Inventory.model.ItemStockSummary"],
     config: {
         "model": "Inventory.model.ItemStockSummary",

@@ -1,7 +1,7 @@
 UnitTestEngine.testStore({
     name: 'Inventory.store.ProductionProcess',
     alias: "store.icproductionprocess",
-    base: 'Ext.data.Store',
+    base: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     dependencies: ["Inventory.model.ProductionProcess"],
     config: {
         "model": "Inventory.model.ProductionProcess",

@@ -1,7 +1,7 @@
 UnitTestEngine.testModel({
     name: 'Inventory.model.CategoryLocation',
     base: 'iRely.BaseEntity',
-    idProperty: 'intCategoryStoreId',
+    idProperty: 'intCategoryLocationId',
     dependencies: ["Ext.data.Field"],
     fields: [{
         "name": "intCategoryLocationId",
@@ -143,6 +143,22 @@ UnitTestEngine.testModel({
         "name": "intSort",
         "type": "int",
         "allowNull": true
+    }, {
+        "name": "strLocationName",
+        "allowNull": false,
+        "type": "string"
+    }, {
+        "name": "intCompanyLocationId",
+        "type": "int",
+        "allowNull": true
+    }, {
+        "name": "strFamilyId",
+        "allowNull": false,
+        "type": "string"
+    }, {
+        "name": "strClassId",
+        "allowNull": false,
+        "type": "string"
     }],
     validators: [
         [{

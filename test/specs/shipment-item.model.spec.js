@@ -131,6 +131,30 @@ UnitTestEngine.testModel({
         "name": "dblDestinationQuantity",
         "type": "float",
         "allowNull": true
+    }, {
+        "name": "strChargesLink",
+        "type": "string",
+        "allowNull": true
+    }, {
+        "name": "strItemType",
+        "type": "string",
+        "allowNull": true
+    }, {
+        "name": "dblComponentQty",
+        "type": "float",
+        "allowNull": false
+    }, {
+        "name": "intParentItemLinkId",
+        "type": "int",
+        "allowNull": true
+    }, {
+        "name": "intChildItemLinkId",
+        "type": "int",
+        "allowNull": true
+    }, {
+        "name": "intContractSeq",
+        "type": "int",
+        "allowNull": true
     }],
     validators: [
         [{

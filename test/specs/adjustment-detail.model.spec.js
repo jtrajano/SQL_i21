@@ -167,6 +167,14 @@ UnitTestEngine.testModel({
         "name": "strNewOwnerName",
         "type": "string",
         "allowNull": true
+    }, {
+        "name": "intOwnershipType",
+        "type": "int",
+        "allowNull": false
+    }, {
+        "name": "strOwnershipType",
+        "type": "string",
+        "allowNull": false
     }],
     validators: [
         [{
