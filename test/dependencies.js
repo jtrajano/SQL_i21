@@ -7,8 +7,6 @@ module.exports = {
         {pattern: 'test/gce/irely/Functions.js', watched: false},
         {pattern: 'test/gce/irely/Configuration.js', watched: false },
         {pattern: 'test/gce/globalcomponentengine/model/MultiCompany.js', watched: false },
-        {pattern: 'test/gce/globalcomponentengine/store/MultiCompany.js', watched: false },
-        {pattern: 'test/gce/globalcomponentengine/store/MultiCompany.js', watched: false },
         {pattern: 'test/gce/globalcomponentengine/store/MultiCompanyBaseBufferedStore.js', watched: false },
         {pattern: 'test/gce/globalcomponentengine/store/MultiCompanyBaseStore.js', watched: false },
         {pattern: 'test/gce/globalcomponentengine/store/MultiCompanyBaseTreeStore.js', watched: false },
@@ -454,13 +452,9 @@ module.exports = {
     }, {
         "pattern": "app/view/CompanyPreferenceOption.js"
     }, {
-        "pattern": "app/Utils.js"
-    }, {
         "pattern": "app/ux/GridUOMField.js"
     }, {
         "pattern": "app/ux/GridUOMColumn.js"
-    }, {
-        "pattern": "app/controller/Inventory.js"
     }, {
         "pattern": "app/view/CompanyPreferenceOptionViewController.js"
     }, {
