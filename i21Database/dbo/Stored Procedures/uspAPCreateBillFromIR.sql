@@ -839,9 +839,9 @@ BEGIN
 			
 			SET @chargeCounter = @chargeCounter + 1;
 
+			SET @thirdPartyVoucherId = (SELECT TOP 1 intBillId FROM #tmpReceiptBillIds WHERE intEntityVendorId = @intThirdPartyVendorId AND intCurrencyId = @chargeCurrency)
 			--MAKE SURE VOUCHER WAS NOT CREATED YET			
-			IF NOT EXISTS(SELECT TOP 1 intBillId FROM #tmpReceiptBillIds WHERE intEntityVendorId = @intThirdPartyVendorId AND intCurrencyId = @chargeCurrency)
-				AND @intThirdPartyVendorId IS NOT NULL --AND @ysnThirdPartyVendor > 0
+			IF @thirdPartyVoucherId IS NULL	AND @intThirdPartyVendorId IS NOT NULL --AND @ysnThirdPartyVendor > 0
 			BEGIN
 				EXEC uspSMGetStartingNumber @receiptType, @generatedBillRecordId OUT
 				
@@ -914,100 +914,101 @@ BEGIN
 							AND A.ysnPosted = 1
 
 					SET @thirdPartyVoucherId = SCOPE_IDENTITY()
-
-					INSERT INTO tblAPBillDetail(
-						[intBillId],
-						[intItemId],
-						[intInventoryReceiptItemId],
-						[intInventoryReceiptChargeId],
-						[intPurchaseDetailId],
-						[dblQtyOrdered],
-						[dblQtyReceived],
-						[dblTax],
-						[dblRate],
-						[intCurrencyExchangeRateTypeId],
-						[ysnSubCurrency],
-						[intTaxGroupId],
-						[intAccountId],
-						[dblTotal],
-						[dblCost],
-						[dblOldCost],
-						[dblClaimAmount],
-						[dblNetWeight],
-						[dblNetShippedWeight],
-						[dblWeightLoss],
-						[dblFranchiseWeight],
-						[intContractDetailId],
-						[intContractHeaderId],
-						[intUnitOfMeasureId],
-						[intCostUOMId],
-						[intWeightUOMId],
-						[intLineNo],
-						[dblWeightUnitQty],
-						[dblCostUnitQty],
-						[dblUnitQty],
-						[intCurrencyId],
-						[intStorageLocationId],
-						[int1099Form],
-						[int1099Category]
-					)
-					OUTPUT inserted.intBillDetailId INTO #tmpCreatedBillDetail(intBillDetailId)
-					SELECT DISTINCT
-						[intBillId]					=	@thirdPartyVoucherId,
-						[intItemId]					=	A.intItemId,
-						[intInventoryReceiptItemId]	=	A.intInventoryReceiptItemId,
-						[intInventoryReceiptChargeId]	=	A.[intInventoryReceiptChargeId],
-						[intPODetailId]				=	NULL,
-						[dblQtyOrdered]				=	A.dblOrderQty,
-						[dblQtyReceived]			=	A.dblQuantityToBill,
-						[dblTax]					=	(CASE WHEN @ysnThirdPartyVendor = 1 AND ysnCheckoffTax = 0 THEN ABS(A.dblTax) --3RD PARTY TAX IS ALWAYS POSSITVE UNLESS IT IS CHECK OFF
-															 WHEN @ysnThirdPartyVendor = 1 AND ysnCheckoffTax = 1 THEN A.dblTax --IN THIS CASE IF IT TE TAX IS NEGATIVE, IT SHOULD RETAIN AS NEGATIVE
-															 WHEN ysnCheckoffTax = 1 THEN A.dblTax * -1
-															ELSE ISNULL(A.dblTax,0) END),
-						[dblForexRate]				=	ISNULL(A.dblForexRate,1),
-						[intForexRateTypeId]		=   A.intForexRateTypeId,
-						[ysnSubCurrency]			=	ISNULL(A.ysnSubCurrency,0),
-						[intTaxGroupId]				=	NULL,
-						[intAccountId]				=	[dbo].[fnGetItemGLAccount](A.intItemId, D.intItemLocationId, 'AP Clearing'),
-						--[dblTotal]					=	(CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END),
-						[dblTotal]					=	CASE WHEN C.ysnPrice > 0  AND @ysnThirdPartyVendor = 0 THEN  (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END) * -1 
-															ELSE (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END)
-														END, --3RD PARTY TOTAL WILL BE POSSTIVE / RECEIPT VENDOR PRICE = Y WILL BE NEGATIVE
-						[dblCost]					=	ABS(A.dblUnitCost),
-						[dblOldCost]				=	NULL,
-						[dblClaimAmount]			=	0,
-						[dblNetWeight]				=	0,
-						[dblNetShippedWeight]		=	0,
-						[dblWeightLoss]				=	0,
-						[dblFranchiseWeight]		=	0,
-						[intContractDetailId]		=	A.intContractDetailId,
-						[intContractHeaderId]		=	A.intContractHeaderId,
-						[intUnitOfMeasureId]		=	A.intCostUnitMeasureId,
-						[intCostUOMId]              =    A.intCostUnitMeasureId,
-						[intWeightUOMId]			=	NULL,
-						[intLineNo]					=	1,
-						[dblWeightUnitQty]			=	1,
-						[dblCostUnitQty]			=	1,
-						[dblUnitQty]				=	1,
-						[intCurrencyId]				=	ISNULL(A.intCurrencyId,0),
-						[intStorageLocationId]		=	NULL,
-						[int1099Form]				=	0,
-						[int1099Category]			=	0       
-					FROM [vyuICChargesForBilling] A
-					INNER JOIN tblICItemLocation D
-						ON A.intLocationId = D.intLocationId AND A.intItemId = D.intItemId
-					LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = A.intCurrencyId) 
-					LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G ON F.intCurrencyExchangeRateId = G.intCurrencyExchangeRateId AND G.dtmValidFromDate = (SELECT CONVERT(char(10), GETDATE(),126))
-					OUTER APPLY(
-						SELECT ysnPrice FROM #tmpReceiptChargeData RC
-						WHERE RC.intInventoryReceiptId = A.intInventoryReceiptId AND RC.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
-					) C   
-					OUTER APPLY(
-						SELECT TOP 1 ysnCheckoffTax FROM tblICInventoryReceiptChargeTax CT
-						WHERE CT.intInventoryReceiptChargeId = @intReceiptChargeId
-					) CT   
-					WHERE A.intInventoryReceiptChargeId = @intReceiptChargeId AND A.intEntityVendorId = @intThirdPartyVendorId                 
 			END
+
+			INSERT INTO tblAPBillDetail(
+				[intBillId],
+				[intItemId],
+				[intInventoryReceiptItemId],
+				[intInventoryReceiptChargeId],
+				[intPurchaseDetailId],
+				[dblQtyOrdered],
+				[dblQtyReceived],
+				[dblTax],
+				[dblRate],
+				[intCurrencyExchangeRateTypeId],
+				[ysnSubCurrency],
+				[intTaxGroupId],
+				[intAccountId],
+				[dblTotal],
+				[dblCost],
+				[dblOldCost],
+				[dblClaimAmount],
+				[dblNetWeight],
+				[dblNetShippedWeight],
+				[dblWeightLoss],
+				[dblFranchiseWeight],
+				[intContractDetailId],
+				[intContractHeaderId],
+				[intUnitOfMeasureId],
+				[intCostUOMId],
+				[intWeightUOMId],
+				[intLineNo],
+				[dblWeightUnitQty],
+				[dblCostUnitQty],
+				[dblUnitQty],
+				[intCurrencyId],
+				[intStorageLocationId],
+				[int1099Form],
+				[int1099Category]
+			)
+			OUTPUT inserted.intBillDetailId INTO #tmpCreatedBillDetail(intBillDetailId)
+			SELECT DISTINCT
+				[intBillId]					=	@thirdPartyVoucherId,
+				[intItemId]					=	A.intItemId,
+				[intInventoryReceiptItemId]	=	A.intInventoryReceiptItemId,
+				[intInventoryReceiptChargeId]	=	A.[intInventoryReceiptChargeId],
+				[intPODetailId]				=	NULL,
+				[dblQtyOrdered]				=	A.dblOrderQty,
+				[dblQtyReceived]			=	A.dblQuantityToBill,
+				[dblTax]					=	(CASE WHEN @ysnThirdPartyVendor = 1 AND ysnCheckoffTax = 0 THEN ABS(A.dblTax) --3RD PARTY TAX IS ALWAYS POSSITVE UNLESS IT IS CHECK OFF
+														WHEN @ysnThirdPartyVendor = 1 AND ysnCheckoffTax = 1 THEN A.dblTax --IN THIS CASE IF IT TE TAX IS NEGATIVE, IT SHOULD RETAIN AS NEGATIVE
+														WHEN ysnCheckoffTax = 1 THEN A.dblTax * -1
+													ELSE ISNULL(A.dblTax,0) END),
+				[dblForexRate]				=	ISNULL(A.dblForexRate,1),
+				[intForexRateTypeId]		=   A.intForexRateTypeId,
+				[ysnSubCurrency]			=	ISNULL(A.ysnSubCurrency,0),
+				[intTaxGroupId]				=	NULL,
+				[intAccountId]				=	[dbo].[fnGetItemGLAccount](A.intItemId, D.intItemLocationId, 'AP Clearing'),
+				--[dblTotal]					=	(CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END),
+				[dblTotal]					=	CASE WHEN C.ysnPrice > 0  AND @ysnThirdPartyVendor = 0 THEN  (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END) * -1 
+													ELSE (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END)
+												END, --3RD PARTY TOTAL WILL BE POSSTIVE / RECEIPT VENDOR PRICE = Y WILL BE NEGATIVE
+				[dblCost]					=	ABS(A.dblUnitCost),
+				[dblOldCost]				=	NULL,
+				[dblClaimAmount]			=	0,
+				[dblNetWeight]				=	0,
+				[dblNetShippedWeight]		=	0,
+				[dblWeightLoss]				=	0,
+				[dblFranchiseWeight]		=	0,
+				[intContractDetailId]		=	A.intContractDetailId,
+				[intContractHeaderId]		=	A.intContractHeaderId,
+				[intUnitOfMeasureId]		=	A.intCostUnitMeasureId,
+				[intCostUOMId]              =    A.intCostUnitMeasureId,
+				[intWeightUOMId]			=	NULL,
+				[intLineNo]					=	1,
+				[dblWeightUnitQty]			=	1,
+				[dblCostUnitQty]			=	1,
+				[dblUnitQty]				=	1,
+				[intCurrencyId]				=	ISNULL(A.intCurrencyId,0),
+				[intStorageLocationId]		=	NULL,
+				[int1099Form]				=	0,
+				[int1099Category]			=	0       
+			FROM [vyuICChargesForBilling] A
+			INNER JOIN tblICItemLocation D
+				ON A.intLocationId = D.intLocationId AND A.intItemId = D.intItemId
+			LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = A.intCurrencyId) 
+			LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G ON F.intCurrencyExchangeRateId = G.intCurrencyExchangeRateId AND G.dtmValidFromDate = (SELECT CONVERT(char(10), GETDATE(),126))
+			OUTER APPLY(
+				SELECT ysnPrice FROM #tmpReceiptChargeData RC
+				WHERE RC.intInventoryReceiptId = A.intInventoryReceiptId AND RC.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
+			) C   
+			OUTER APPLY(
+				SELECT TOP 1 ysnCheckoffTax FROM tblICInventoryReceiptChargeTax CT
+				WHERE CT.intInventoryReceiptChargeId = @intReceiptChargeId
+			) CT   
+			WHERE A.intInventoryReceiptChargeId = @intReceiptChargeId AND A.intEntityVendorId = @intThirdPartyVendorId  
+
 			DELETE FROM #tmpReceiptChargeData WHERE intInventoryReceiptChargeId = @intReceiptChargeId
 		END
 	END
