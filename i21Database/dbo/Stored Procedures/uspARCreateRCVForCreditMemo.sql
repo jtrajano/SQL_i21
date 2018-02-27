@@ -69,7 +69,7 @@ AS
 		@intEntityCustomerId, @intCurrencyId, @intPaymentMethodId, @intLocationId, GETDATE(), 'Cash Receipts', @strPaymentMethod,
 		0, 0, 0, 0,
 		0, 0,
-		0, 0,
+		0, 1,
 		'', '', 0
 
 	SET @intPaymentId = @@IDENTITY
