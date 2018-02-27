@@ -100,6 +100,7 @@ FROM (
 		--, ysnIsBasket 				= CAST(CASE ContractView.strBundleType WHEN 'Baset' THEN 1 ELSE 0 END AS BIT)
 		, ContractView.intFreightTermId
 		, ContractView.strFreightTerm
+		, ContractView.intContractSeq
 	FROM vyuCTContractAddOrdersLookup ContractView
 		LEFT JOIN dbo.tblICItemUOM ItemUOM ON ContractView.intItemUOMId = ItemUOM.intItemUOMId
 		LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure ON ItemUnitMeasure.intUnitMeasureId = ItemUOM.intUnitMeasureId
