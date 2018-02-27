@@ -539,15 +539,15 @@ OUTPUT
 			,Source.[intSourceId]					--[intSourceId]
 			,Source.[strSourceId]					--[strSourceId]
 			,Source.[ysnPost]						--[ysnPost]
-			,0										--[ysnRecap]
+			,NULL									--[ysnRecap]
 			,1										--[ysnInsert]
 			,0										--[ysnHeader]
 			,1										--[ysnSuccess]
 			,NULL									--[ysnPosted]
 			,NULL									--[ysnUnPosted]
 			,NULL									--[strBatchId]
-			,1										--[intConcurrencyId]
-		INTO tblARInvoiceIntegrationLogDetail(
+			,Source.[ysnRecomputeTax]				--[[ysnRecomputeTax]]
+		INTO @IntegrationLog(
 			[intIntegrationLogId]
            ,[intInvoiceId]
            ,[intInvoiceDetailId]
@@ -567,7 +567,7 @@ OUTPUT
            ,[ysnPosted]
            ,[ysnUnPosted]
            ,[strBatchId]
-           ,[intConcurrencyId]
+           ,[ysnRecomputeTax]
 		);
 
 	IF ISNULL(@IntegrationLogId, 0) <> 0
