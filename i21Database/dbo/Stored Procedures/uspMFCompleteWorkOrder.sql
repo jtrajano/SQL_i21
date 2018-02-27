@@ -151,7 +151,6 @@ BEGIN TRY
 		,@ysnIgnoreTolerance = ysnIgnoreTolerance
 		,@ysnFillPartialPallet = ysnFillPartialPallet
 		,@intSpecialPalletLotId = intSpecialPalletLotId
-		,@ysnSourceEmptyOut = ysnSourceEmptyOut
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intWorkOrderId INT
 			,intManufacturingProcessId INT
@@ -194,7 +193,6 @@ BEGIN TRY
 			,ysnIgnoreTolerance BIT
 			,ysnFillPartialPallet BIT
 			,intSpecialPalletLotId INT
-			,ysnSourceEmptyOut BIT
 			)
 
 	SELECT @strComputeGrossWeight = strAttributeValue
@@ -1010,14 +1008,14 @@ BEGIN TRY
 	END
 
 	IF @intInputLotId IS NOT NULL
-		AND IsNULL(@ysnSourceEmptyOut, 0) = 1
+		AND IsNULL(@ysnEmptyOutSource, 0) = 1
 	BEGIN
 		EXEC dbo.uspMFLotAdjustQty @intLotId = @intInputLotId
 			,@dblNewLotQty = 0
 			,@intAdjustItemUOMId = @intInputItemUOMId
 			,@intUserId = @intUserId
 			,@strReasonCode = 'Source Empty out'
-			,@strNotes = 'Source Empty out'
+			,@strNotes = NULL
 	END
 
 	IF @intTransactionCount = 0

@@ -456,7 +456,7 @@ BEGIN TRY
 			,@intAdjustItemUOMId = @intDestinationItemUOMId
 			,@intUserId = @intUserId
 			,@strReasonCode = 'Destination Empty out'
-			,@strNotes = 'Destination Empty out'
+			,@strNotes = NULL
 	END
 
 	EXEC uspICInventoryAdjustment_CreatePostLotMove @intItemId
@@ -673,7 +673,7 @@ BEGIN TRY
 			,@intAdjustItemUOMId = @intItemUOMId
 			,@intUserId = @intUserId
 			,@strReasonCode = 'Source Empty out'
-			,@strNotes = 'Source Empty out'
+			,@strNotes = NULL
 	END
 
 	IF @intTransactionCount = 0
