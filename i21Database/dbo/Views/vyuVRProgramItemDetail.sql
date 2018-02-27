@@ -26,9 +26,9 @@ FROM(
 		ON A.intProgramId = B.intProgramId
 	INNER JOIN tblICItem C
 		ON B.intItemId = C.intItemId
-	INNER JOIN tblICItemUOM D
+	LEFT JOIN tblICItemUOM D
 		ON B.intItemUOMId = D.intItemUOMId
-	INNER JOIN tblICUnitMeasure I
+	LEFT JOIN tblICUnitMeasure I
 		ON D.intUnitMeasureId = I.intUnitMeasureId
 	INNER JOIN tblICCategory E
 		ON C.intCategoryId = E.intCategoryId
@@ -66,9 +66,9 @@ FROM(
 		ON B.intCategoryId = E.intCategoryId
 	INNER JOIN tblICItem C
 		ON E.intCategoryId = C.intCategoryId
-	INNER JOIN tblICItemUOM D
+	LEFT JOIN tblICItemUOM D
 		ON B.intItemUOMId = D.intItemUOMId
-	INNER JOIN tblICUnitMeasure I
+	LEFT JOIN tblICUnitMeasure I
 		ON D.intUnitMeasureId = I.intUnitMeasureId
 	INNER JOIN tblVRVendorSetup F
 		ON A.intVendorSetupId = F.intVendorSetupId

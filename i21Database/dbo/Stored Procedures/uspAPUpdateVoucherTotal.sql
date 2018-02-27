@@ -27,22 +27,23 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[dblTotal]					=	ISNULL((CASE WHEN A.ysnSubCurrency > 0 --CHECK IF SUB-CURRENCY
 												THEN (CASE 
 														WHEN A.intWeightUOMId > 0 
-															THEN CAST(A.dblCost / ISNULL(C.intSubCurrencyCents,1)  * A.dblNetWeight * A.dblWeightUnitQty / ISNULL(A.dblCostUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
+															THEN CAST((CASE WHEN D.ysnPrice > 0 THEN -A.dblCost ELSE A.dblCost END) / ISNULL(C.intSubCurrencyCents,1)  * A.dblNetWeight * A.dblWeightUnitQty / ISNULL(A.dblCostUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
 														WHEN (A.intUnitOfMeasureId > 0 AND A.intCostUOMId > 0)
-															THEN CAST((A.dblQtyReceived) *  (A.dblCost / ISNULL(C.intSubCurrencyCents,1))  * (A.dblUnitQty/ ISNULL(A.dblCostUnitQty,1)) AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
-														ELSE CAST((A.dblQtyReceived) * (A.dblCost / ISNULL(C.intSubCurrencyCents,1))  AS DECIMAL(18,2))  --Orig Calculation
-													END) 
+															THEN CAST((A.dblQtyReceived) *  ((CASE WHEN D.ysnPrice > 0 THEN -A.dblCost ELSE A.dblCost END) / ISNULL(C.intSubCurrencyCents,1))  * (A.dblUnitQty/ ISNULL(A.dblCostUnitQty,1)) AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
+														ELSE CAST((A.dblQtyReceived) * ((CASE WHEN D.ysnPrice > 0 THEN -A.dblCost ELSE A.dblCost END) / ISNULL(C.intSubCurrencyCents,1))  AS DECIMAL(18,2))  --Orig Calculation
+													END)
 												ELSE (CASE 
 														WHEN A.intWeightUOMId > 0 --CHECK IF SUB-CURRENCY
-															THEN CAST(A.dblCost  * A.dblNetWeight * A.dblWeightUnitQty / ISNULL(A.dblCostUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
+															THEN CAST((CASE WHEN D.ysnPrice > 0 THEN -A.dblCost ELSE A.dblCost END)  * A.dblNetWeight * A.dblWeightUnitQty / ISNULL(A.dblCostUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
 														WHEN (A.intUnitOfMeasureId > 0 AND A.intCostUOMId > 0)
-															THEN CAST((A.dblQtyReceived) *  (A.dblCost)  * (A.dblUnitQty/ ISNULL(A.dblCostUnitQty,1)) AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
-														ELSE CAST((A.dblQtyReceived) * (A.dblCost)  AS DECIMAL(18,2))  --Orig Calculation
+															THEN CAST((A.dblQtyReceived) *  ((CASE WHEN D.ysnPrice > 0 THEN -A.dblCost ELSE A.dblCost END))  * (A.dblUnitQty/ ISNULL(A.dblCostUnitQty,1)) AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
+														ELSE CAST((A.dblQtyReceived) * ((CASE WHEN D.ysnPrice > 0 THEN -A.dblCost ELSE A.dblCost END))  AS DECIMAL(18,2))  --Orig Calculation
 													END)
 												END),0)	
 	FROM tblAPBillDetail A
 	INNER JOIN @voucherIds B ON A.intBillId = B.intId
 	INNER JOIN tblAPBill C ON A.intBillId = C.intBillId
+	INNER JOIN tblICInventoryReceiptCharge D ON D.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
 
 	--UPDATE PAYMENT
 	UPDATE A

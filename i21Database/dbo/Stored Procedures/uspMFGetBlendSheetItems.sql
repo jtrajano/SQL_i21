@@ -18,9 +18,12 @@ Declare @intManufacturingProcessId int
 Declare @intDayOfYear INT
 Declare @dtmDate DATETIME
 Declare @strPackagingCategoryId NVARCHAR(Max)
+Declare @strBlendItemLotTracking NVARCHAR(50)
 
 Select @intRecipeId = intRecipeId,@intManufacturingProcessId=intManufacturingProcessId 
 from tblMFRecipe where intItemId=@intItemId and intLocationId=@intLocationId and ysnActive=1
+
+Select @strBlendItemLotTracking=strLotTracking From tblICItem Where intItemId=@intItemId
 
 Select @ysnRecipeItemValidityByDueDate=CASE When UPPER(pa.strAttributeValue) = 'TRUE' then 1 Else 0 End 
 From tblMFManufacturingProcessAttribute pa Join tblMFAttribute at on pa.intAttributeId=at.intAttributeId
@@ -222,7 +225,8 @@ ISNULL(ROUND((ISNULL((ISNULL(b.dblPhysicalQty,0) - ISNULL(c.dblReservedQty,0)),0
 a.ysnIsSubstitute,a.intParentItemId,a.ysnHasSubstitute,a.intRecipeItemId,a.intParentRecipeItemId,a.strGroupName,
 a.dblLowerToleranceQty,a.dblUpperToleranceQty,
 a.ysnMinorIngredient,a.ysnScaled,a.dblRecipeQty,
-a.dblRecipeItemQty,a.strRecipeItemUOM,a.strConsumptionStorageLocation,a.intConsumptionMethodId,ISNULL(i.ysnHandAddIngredient,0) AS ysnHandAddIngredient,@intRecipeId AS intRecipeId,a.intConsumptionStorageLocationId
+a.dblRecipeItemQty,a.strRecipeItemUOM,a.strConsumptionStorageLocation,a.intConsumptionMethodId,ISNULL(i.ysnHandAddIngredient,0) AS ysnHandAddIngredient,@intRecipeId AS intRecipeId,a.intConsumptionStorageLocationId,
+@intManufacturingProcessId AS intManufacturingProcessId,@strBlendItemLotTracking AS strBlendItemLotTracking
 from @tblRequiredQty a 
 Left Join @tblPhysicalQty b on a.intItemId=b.intItemId
 Left Join @tblReservedQty c on a.intItemId=c.intItemId

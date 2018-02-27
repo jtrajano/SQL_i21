@@ -35,18 +35,4 @@
 		left join tblCRMStatus e on e.intStatusId = a.intStatusId
 		left join tblSMScreen f on f.strModule = 'CRM' and f.strNamespace = 'CRM.view.Campaign'
 		left join tblSMTransaction g on g.intRecordId = a.intCampaignId and g.intScreenId = f.intScreenId
-		left join tblSMApproval h on h.intTransactionId = g.intTransactionId
-	/*
-	select
-		[tblCRMCampaign].*
-		,tblEMEntity.strName
-		,[tblSMLineOfBusiness].strLineOfBusiness
-		,tblCRMType.strType
-		,[tblCRMStatus].strStatus
-	from
-		[tblCRMCampaign]
-		left outer join tblEMEntity on tblEMEntity.intEntityId = [tblCRMCampaign].intEntityId
-		left outer join [tblSMLineOfBusiness] on [tblSMLineOfBusiness].intLineOfBusinessId = [tblCRMCampaign].intLineOfBusinessId
-		left outer join tblCRMType on tblCRMType.intTypeId = [tblCRMCampaign].[intTypeId]
-		left outer join [tblCRMStatus] on [tblCRMStatus].intStatusId = [tblCRMCampaign].intStatusId
-		*/
+		left join tblSMApproval h on h.intTransactionId = g.intTransactionId and h.ysnCurrent = convert(bit,1)

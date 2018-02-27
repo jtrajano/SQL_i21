@@ -27,6 +27,7 @@
 			,J.intVendorSetupId
 			,A.intInvoiceId
 			,strVendorName = M.strName
+			,dtmSubmittedDate = O.dtmDate
 		FROM tblVRRebate O
 		INNER JOIN tblARInvoiceDetail B
 			ON B.intInvoiceDetailId = O.intInvoiceDetailId

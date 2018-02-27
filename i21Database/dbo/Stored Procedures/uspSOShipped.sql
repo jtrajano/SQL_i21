@@ -66,6 +66,36 @@ BEGIN
 					SOD.intContractDetailId = CD.intContractDetailId AND SOD.intContractHeaderId = CD.intContractHeaderId 
 				WHERE SOD.intSalesOrderId = @intSalesOrderId					
 			END
+
+			--UPDATE SO Status 
+			DECLARE @dblTotalQtyOrdered AS NUMERIC(18,6) = 0
+			DECLARE @dblTotalQtyShipped AS NUMERIC(18,6) = 0
+			DECLARE @ysnShipmentPosted AS BIT = 0
+			DECLARE @strOrderStatus as VARCHAR(MAX)
+
+			SELECT @dblTotalQtyOrdered = SUM(dblQtyOrdered)
+					,@dblTotalQtyShipped = SUM(CASE WHEN dblQtyShipped > dblQtyOrdered THEN dblQtyOrdered ELSE dblQtyShipped END)
+					,@ysnShipmentPosted = [IS].ysnPosted
+			FROM tblSOSalesOrderDetail [SOD]
+			INNER JOIN tblSOSalesOrder [SO]
+				ON [SO].intSalesOrderId = [SOD].intSalesOrderId
+			LEFT JOIN tblICInventoryShipment [IS]
+				ON [IS].strReferenceNumber = SO.strSalesOrderNumber
+			WHERE [SO].intSalesOrderId = @intSalesOrderId
+			GROUP BY [SO].intSalesOrderId, [IS].ysnPosted
+
+			IF (@dblTotalQtyShipped = 0)
+				SET @strOrderStatus = 'Open'
+			ELSE IF @dblTotalQtyShipped < @dblTotalQtyOrdered
+				SET @strOrderStatus = 'Partial'
+			ELSE IF (@dblTotalQtyShipped = @dblTotalQtyOrdered OR @dblTotalQtyShipped > @dblTotalQtyOrdered) AND @ysnShipmentPosted = 0
+				SET @strOrderStatus = 'Pending'
+			ELSE IF (@dblTotalQtyShipped = @dblTotalQtyOrdered OR @dblTotalQtyShipped > @dblTotalQtyOrdered) AND @ysnShipmentPosted = 1
+				SET @strOrderStatus = 'Closed'
+
+			UPDATE tblSOSalesOrder
+			SET strOrderStatus = @strOrderStatus
+			WHERE intSalesOrderId = @intSalesOrderId
 			
 		DELETE FROM @OrderToUpdate WHERE intSalesOrderId = @intSalesOrderId
 	END

@@ -1,78 +1,85 @@
 ﻿CREATE PROCEDURE [dbo].[uspGRCalculateDiscountandShrink]
 	 @intDiscountScheduleCodeId INT
-	,@dblReading DECIMAL(24, 10)
+	,@dblReading				DECIMAL(24, 10)
+	,@intItemUOMId				INT = 0
 AS
 BEGIN TRY
-	DECLARE @ErrMsg NVARCHAR(MAX)
-	DECLARE @intIncrementalKey INT
-	DECLARE @dblFrom DECIMAL(24, 6)
-	DECLARE @dblTo DECIMAL(24, 6)
-	DECLARE @dblIncrementBy DECIMAL(24, 6)
-	DECLARE @dblDiscountAmount DECIMAL(24, 6)
-	DECLARE @dblShrink DECIMAL(24, 6)
-	DECLARE @dblNextRowFrom DECIMAL(24, 6)	
-	DECLARE @dblEndingValue DECIMAL(24, 6)
-	DECLARE @dblNewDiscountAmount DECIMAL(24, 6)
-	DECLARE @dblNewShrink DECIMAL(24, 6)
-	DECLARE @ysnZeroIsValid BIT
-	DECLARE @dblMinimumValue DECIMAL(24, 6)
-	DECLARE @dblMaximumValue DECIMAL(24, 6)
 	
-	DECLARE @strDiscountChargeType Nvarchar(30)
-	DECLARE @intDiscountCalculationOptionId INT
-	DECLARE @strCalculationDiscountOption Nvarchar(50)
-	DECLARE @intShrinkCalculationOptionId INT
-	DECLARE @strCalculationShrinkOption Nvarchar(50)
+	DECLARE @ErrMsg							  NVARCHAR(MAX)
+	DECLARE @intIncrementalKey				  INT
+	DECLARE @dblFrom						  DECIMAL(24, 6)
+	DECLARE @dblTo							  DECIMAL(24, 6)
+	DECLARE @dblIncrementBy					  DECIMAL(24, 6)
+	DECLARE @dblDiscountAmount				  DECIMAL(24, 6)
+	DECLARE @dblShrink						  DECIMAL(24, 6)
+	DECLARE @dblNextRowFrom					  DECIMAL(24, 6)	
+	DECLARE @dblEndingValue					  DECIMAL(24, 6)
+	DECLARE @dblNewDiscountAmount			  DECIMAL(24, 6)
+	DECLARE @dblNewShrink					  DECIMAL(24, 6)
+	DECLARE @ysnZeroIsValid					  BIT
+	DECLARE @dblMinimumValue				  DECIMAL(24, 6)
+	DECLARE @dblMaximumValue				  DECIMAL(24, 6)	
+	DECLARE @strDiscountChargeType			  Nvarchar(30)
+	DECLARE @intDiscountCalculationOptionId   INT
+	DECLARE @strCalculationDiscountOption     Nvarchar(50)
+	DECLARE @intShrinkCalculationOptionId	  INT
+	DECLARE @strCalculationShrinkOption		  Nvarchar(50)	
+	DECLARE @dblMinFromForIncremental		  DECIMAL(24, 6)
+	DECLARE @dblMaxToForIncremental			  DECIMAL(24, 6)	
+	DECLARE @dblMaxFromForDecremental		  DECIMAL(24, 6)
+	DECLARE @dblMinToForDecremental			  DECIMAL(24, 6)
+	DECLARE @intItemId						  INT
+	DECLARE @intItemStockUOMId				  INT
+	DECLARE @intDiscountUOMId				  INT
 	
-	DECLARE @dblMinFromForIncremental DECIMAL(24, 6)
-	DECLARE @dblMaxToForIncremental DECIMAL(24, 6)
 	
-	DECLARE @dblMaxFromForDecremental DECIMAL(24, 6)
-	DECLARE @dblMinToForDecremental DECIMAL(24, 6)
-	
-	
-	SELECT @dblMinimumValue=DSC.dblMinimumValue
-		  ,@dblMaximumValue=DSC.dblMaximumValue
-		  ,@ysnZeroIsValid=DSC.ysnZeroIsValid
-		  ,@intDiscountCalculationOptionId=DSC.intDiscountCalculationOptionId
-		  ,@strCalculationDiscountOption=DCOD.strDiscountCalculationOption
-		  ,@strDiscountChargeType=DSC.strDiscountChargeType
-		  ,@intShrinkCalculationOptionId=DSC.intShrinkCalculationOptionId
-		  ,@strCalculationShrinkOption=DCOS.strShrinkCalculationOption
+	SELECT @dblMinimumValue					=  DSC.dblMinimumValue
+		  ,@dblMaximumValue					=  DSC.dblMaximumValue
+		  ,@ysnZeroIsValid					=  DSC.ysnZeroIsValid
+		  ,@intDiscountCalculationOptionId  =  DSC.intDiscountCalculationOptionId
+		  ,@strCalculationDiscountOption	=  DCOD.strDiscountCalculationOption
+		  ,@strDiscountChargeType			=  DSC.strDiscountChargeType
+		  ,@intShrinkCalculationOptionId	=  DSC.intShrinkCalculationOptionId
+		  ,@strCalculationShrinkOption		=  DCOS.strShrinkCalculationOption
+		  ,@intDiscountUOMId			    =  ISNULL(DSC.intUnitMeasureId,0)
 	 FROM tblGRDiscountScheduleCode DSC 
-	 JOIN tblGRDiscountCalculationOption DCOD ON DCOD.intDiscountCalculationOptionId=DSC.intDiscountCalculationOptionId
-	 JOIN tblGRShrinkCalculationOption DCOS ON DCOS.intShrinkCalculationOptionId=DSC.intShrinkCalculationOptionId  
-	 WHERE intDiscountScheduleCodeId=@intDiscountScheduleCodeId
-	
+	 JOIN tblGRDiscountCalculationOption DCOD ON DCOD.intDiscountCalculationOptionId = DSC.intDiscountCalculationOptionId
+	 JOIN tblGRShrinkCalculationOption   DCOS ON DCOS.intShrinkCalculationOptionId   = DSC.intShrinkCalculationOptionId  
+	 WHERE intDiscountScheduleCodeId = @intDiscountScheduleCodeId
+
+	 SELECT @intItemId = intItemId, @intItemStockUOMId = intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId =@intItemUOMId
+
 	IF ((@dblReading < @dblMinimumValue OR @dblReading > @dblMaximumValue) AND (@ysnZeroIsValid=0)) OR ((@dblReading > 0) AND (@ysnZeroIsValid=1) AND (@dblReading < @dblMinimumValue OR @dblReading > @dblMaximumValue))
 	BEGIN
 		SELECT 
-		 1 AS intExtendedKey
-		,0.0 AS dblFrom
-		,0.0 AS dblTo
-		,0.0 AS dblDiscountAmount
-		,0.0 AS dblShrink
-		,'Invalid reading value entered. Minimum Reading is ' + dbo.fnRemoveTrailingZeroes(@dblMinimumValue) +' and Maximum Reading is ' +  dbo.fnRemoveTrailingZeroes(@dblMaximumValue) AS strMessage
-		,@intDiscountCalculationOptionId AS intDiscountCalculationOptionId
-		,@strCalculationDiscountOption AS strCalculationDiscountOption
-		,@strDiscountChargeType AS strDiscountChargeType
-		,@intShrinkCalculationOptionId AS intShrinkCalculationOptionId
-		,@strCalculationShrinkOption AS strCalculationShrinkOption
+		 intExtendedKey					= 1 
+		,dblFrom						= 0.0 
+		,dblTo							= 0.0 
+		,dblDiscountAmount				= 0.0 
+		,dblShrink						= 0.0 
+		,strMessage						= 'Invalid reading value entered. Minimum Reading is ' + dbo.fnRemoveTrailingZeroes(@dblMinimumValue) +' and Maximum Reading is ' +  dbo.fnRemoveTrailingZeroes(@dblMaximumValue) 
+		,intDiscountCalculationOptionId = @intDiscountCalculationOptionId 
+		,strCalculationDiscountOption   = @strCalculationDiscountOption 
+		,strDiscountChargeType			= @strDiscountChargeType
+		,intShrinkCalculationOptionId	= @intShrinkCalculationOptionId 
+		,strCalculationShrinkOption	    = @strCalculationShrinkOption
+		,intDiscountUOMId				= @intDiscountUOMId 
 	END
 	ELSE IF NOT EXISTS(SELECT 1 FROM tblGRDiscountScheduleLine WHERE intDiscountScheduleCodeId = @intDiscountScheduleCodeId)
 	BEGIN
-				SELECT
-				 1 AS intExtendedKey
-				,0.0 AS dblFrom
-				,0.0 AS dblTo
-				,0.0 AS dblDiscountAmount
-				,0.0 AS dblShrink
-				,'Success' AS strMessage 
-				,@intDiscountCalculationOptionId AS intDiscountCalculationOptionId
-				,@strCalculationDiscountOption AS strCalculationDiscountOption
-				,@strDiscountChargeType AS strDiscountChargeType
-				,@intShrinkCalculationOptionId AS intShrinkCalculationOptionId
-				,@strCalculationShrinkOption AS strCalculationShrinkOption	
+		  SELECT
+		  intExtendedKey				 = 1 
+		 ,dblFrom						 = 0.0 
+		 ,dblTo							 = 0.0 
+		 ,dblDiscountAmount				 = 0.0 
+		 ,dblShrink						 = 0.0 
+		 ,strMessage					 = 'Success' 
+		 ,intDiscountCalculationOptionId = @intDiscountCalculationOptionId
+		 ,strCalculationDiscountOption   = @strCalculationDiscountOption 
+		 ,strDiscountChargeType			 = @strDiscountChargeType
+		 ,intShrinkCalculationOptionId	 = @intShrinkCalculationOptionId 
+		 ,strCalculationShrinkOption	 = @strCalculationShrinkOption
+		 ,intDiscountUOMId				 = @intDiscountUOMId  	
 	END
 	ELSE
 	BEGIN
@@ -252,51 +259,54 @@ BEGIN TRY
 			 IF EXISTS(SELECT 1 FROM @tblExtendedTab WHERE dblFrom <= @dblReading AND dblTo >= @dblReading)
 			 BEGIN
 				 SELECT 
-				 intExtendedKey
-				,dblFrom
-				,dblTo
-				,dblDiscountAmount
-				,dblShrink
-				,'Success' AS strMessage 
-				,@intDiscountCalculationOptionId AS intDiscountCalculationOptionId
-				,@strCalculationDiscountOption AS strCalculationDiscountOption
-				,@strDiscountChargeType AS strDiscountChargeType
-				,@intShrinkCalculationOptionId AS intShrinkCalculationOptionId
-				,@strCalculationShrinkOption AS strCalculationShrinkOption
+				 intExtendedKey					 =  intExtendedKey
+				,dblFrom						 =  dblFrom
+				,dblTo							 =  dblTo
+				,dblDiscountAmount				 =  CASE WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0 THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblDiscountAmount) ELSE dblDiscountAmount END
+				,dblShrink						 =  CASE WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0 THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink)		    ELSE dblShrink		   END
+				,strMessage						 =  'Success'
+				,intDiscountCalculationOptionId  =  @intDiscountCalculationOptionId
+				,strCalculationDiscountOption    =  @strCalculationDiscountOption
+				,strDiscountChargeType			 =  @strDiscountChargeType
+				,intShrinkCalculationOptionId	 =  @intShrinkCalculationOptionId
+				,strCalculationShrinkOption	     =  @strCalculationShrinkOption
+				,intDiscountUOMId				 =  @intDiscountUOMId 
 				 FROM @tblExtendedTab WHERE dblFrom <= @dblReading AND dblTo >= @dblReading
 			 END
 			 ELSE IF (@dblReading < @dblMinFromForIncremental)
 			 BEGIN
 				 SELECT
 				 TOP 1 
-				 intExtendedKey
-				,dblFrom
-				,dblTo
-    			,0.0 AS dblDiscountAmount  
-    			,0.0 AS dblShrink  
-				,'Success' AS strMessage 
-				,@intDiscountCalculationOptionId AS intDiscountCalculationOptionId
-				,@strCalculationDiscountOption AS strCalculationDiscountOption
-				,@strDiscountChargeType AS strDiscountChargeType
-				,@intShrinkCalculationOptionId AS intShrinkCalculationOptionId
-				,@strCalculationShrinkOption AS strCalculationShrinkOption
+				 intExtendedKey					 = intExtendedKey
+				,dblFrom						 = dblFrom
+				,dblTo							 = dblTo
+    			,dblDiscountAmount				 = 0.0 
+    			,dblShrink						 = 0.0
+				,strMessage						 = 'Success'
+				,intDiscountCalculationOptionId  = @intDiscountCalculationOptionId
+				,strCalculationDiscountOption    = @strCalculationDiscountOption
+				,strDiscountChargeType			 = @strDiscountChargeType
+				,intShrinkCalculationOptionId	 = @intShrinkCalculationOptionId
+				,strCalculationShrinkOption		 = @strCalculationShrinkOption
+				,intDiscountUOMId				 = @intDiscountUOMId 
 				 FROM @tblExtendedTab ORDER BY 1 
 			 END
 			 ELSE IF (@dblReading > @dblMaxToForIncremental)
 			 BEGIN
 				 SELECT
 				 TOP 1 
-				 intExtendedKey
-				,dblFrom
-				,dblTo
-				,dblDiscountAmount
-				,dblShrink
-				,'Success' AS strMessage 
-				,@intDiscountCalculationOptionId AS intDiscountCalculationOptionId
-				,@strCalculationDiscountOption AS strCalculationDiscountOption
-				,@strDiscountChargeType AS strDiscountChargeType
-				,@intShrinkCalculationOptionId AS intShrinkCalculationOptionId
-				,@strCalculationShrinkOption AS strCalculationShrinkOption				 
+				 intExtendedKey					 = intExtendedKey
+				,dblFrom						 = dblFrom
+				,dblTo							 = dblTo
+				,dblDiscountAmount				 = CASE WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0  THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblDiscountAmount) ELSE dblDiscountAmount END
+				,dblShrink						 = CASE WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0  THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink)			ELSE dblShrink		   END
+				,strMessage						 = 'Success'
+				,intDiscountCalculationOptionId  = @intDiscountCalculationOptionId
+				,strCalculationDiscountOption    = @strCalculationDiscountOption
+				,strDiscountChargeType			 = @strDiscountChargeType
+				,intShrinkCalculationOptionId	 = @intShrinkCalculationOptionId
+				,strCalculationShrinkOption		 = @strCalculationShrinkOption
+				,intDiscountUOMId				 = @intDiscountUOMId 			 
 				 FROM @tblExtendedTab ORDER BY 1 DESC
 			 END
 		END	 							
@@ -308,51 +318,54 @@ BEGIN TRY
 			BEGIN
 				SELECT 
 				 TOP 1
-				 intExtendedKey
-				,dblFrom
-				,dblTo
-				,dblDiscountAmount
-				,dblShrink
-				,'Success' AS strMessage 
-				,@intDiscountCalculationOptionId AS intDiscountCalculationOptionId
-				,@strCalculationDiscountOption AS strCalculationDiscountOption
-				,@strDiscountChargeType AS strDiscountChargeType
-				,@intShrinkCalculationOptionId AS intShrinkCalculationOptionId
-				,@strCalculationShrinkOption AS strCalculationShrinkOption				  
+				 intExtendedKey					 = intExtendedKey
+				,dblFrom						 = dblFrom
+				,dblTo							 = dblTo
+				,dblDiscountAmount				 = CASE WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0  THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblDiscountAmount) ELSE dblDiscountAmount END
+				,dblShrink						 = CASE WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0  THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink)			ELSE dblShrink		   END
+				,strMessage						 = 'Success'
+				,intDiscountCalculationOptionId  = @intDiscountCalculationOptionId 
+				,strCalculationDiscountOption    = @strCalculationDiscountOption
+				,strDiscountChargeType			 = @strDiscountChargeType
+				,intShrinkCalculationOptionId	 = @intShrinkCalculationOptionId 
+				,strCalculationShrinkOption		 = @strCalculationShrinkOption
+				,intDiscountUOMId				 = @intDiscountUOMId 	  
 				FROM @tblExtendedTab WHERE dblFrom >= @dblReading AND dblTo <= @dblReading ORDER BY intExtendedKey DESC
 			END
 			ELSE IF (@dblReading > @dblMaxFromForDecremental)
 			BEGIN
 				SELECT
 				 TOP 1 
-				 intExtendedKey
-				,dblFrom
-				,dblTo
-    			,0.0 AS dblDiscountAmount  
-    			,0.0 AS dblShrink  
-				,'Success' AS strMessage 
-				,@intDiscountCalculationOptionId AS intDiscountCalculationOptionId
-				,@strCalculationDiscountOption AS strCalculationDiscountOption
-				,@strDiscountChargeType AS strDiscountChargeType
-				,@intShrinkCalculationOptionId AS intShrinkCalculationOptionId
-				,@strCalculationShrinkOption AS strCalculationShrinkOption				 
+				 intExtendedKey					 = intExtendedKey
+				,dblFrom						 = dblFrom
+				,dblTo							 = dblTo
+    			,dblDiscountAmount				 = 0.0
+    			,dblShrink						 = 0.0
+				,strMessage						 = 'Success' 
+				,intDiscountCalculationOptionId  = @intDiscountCalculationOptionId
+				,strCalculationDiscountOption    = @strCalculationDiscountOption
+				,strDiscountChargeType			 = @strDiscountChargeType
+				,intShrinkCalculationOptionId	 = @intShrinkCalculationOptionId
+				,strCalculationShrinkOption		 = @strCalculationShrinkOption
+				,intDiscountUOMId				 = @intDiscountUOMId 				 
 				 FROM @tblExtendedTab ORDER BY intExtendedKey
 			END
 			ELSE IF (@dblReading < @dblMinToForDecremental)
 			BEGIN
 				SELECT
 				 TOP 1 
-				 intExtendedKey
-				,dblFrom
-				,dblTo
-				,dblDiscountAmount
-				,dblShrink
-				,'Success' AS strMessage 
-				,@intDiscountCalculationOptionId AS intDiscountCalculationOptionId
-				,@strCalculationDiscountOption AS strCalculationDiscountOption
-				,@strDiscountChargeType AS strDiscountChargeType
-				,@intShrinkCalculationOptionId AS intShrinkCalculationOptionId
-				,@strCalculationShrinkOption AS strCalculationShrinkOption				 
+				 intExtendedKey					 = intExtendedKey
+				,dblFrom						 = dblFrom
+				,dblTo							 = dblTo
+				,dblDiscountAmount				 = CASE WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0  THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblDiscountAmount) ELSE dblDiscountAmount END
+				,dblShrink						 = CASE WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0  THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink)			ELSE dblShrink		   END
+				,strMessage						 = 'Success'
+				,intDiscountCalculationOptionId  = @intDiscountCalculationOptionId 
+				,strCalculationDiscountOption    = @strCalculationDiscountOption
+				,strDiscountChargeType			 = @strDiscountChargeType
+				,intShrinkCalculationOptionId	 = @intShrinkCalculationOptionId
+				,strCalculationShrinkOption		 = @strCalculationShrinkOption
+				,intDiscountUOMId				 = @intDiscountUOMId 				 
 				 FROM @tblExtendedTab ORDER BY intExtendedKey DESC
 			END
 			
