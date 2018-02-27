@@ -6230,6 +6230,8 @@
     <Build Include="dbo\Views\vyuARBundleItemsReport.sql" />
     <Build Include="dbo\Views\vyuRKBrokerageCommission.sql" />
     <Build Include="dbo\Views\vyuPATRetireStock.sql" />
+    <Build Include="dbo\Views\vyuLGOverallPosition.sql" />
+    <Build Include="dbo\Functions\fnLGGetShipmentStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
