@@ -6,6 +6,5 @@
     [dblGLBalance]			NUMERIC(18, 6) NULL, 
     [dblTotalAR]			NUMERIC(18, 6) NULL,
     [dblTotalPrepayments]	NUMERIC(18, 6) NULL,
-	[dblTotalReportBalance] NUMERIC(18, 6) NULL,
-	[dblGLReportBalance] NUMERIC(18, 6) NULL
+	[dblTotalReportBalance] NUMERIC(18, 6) NULL
 )
