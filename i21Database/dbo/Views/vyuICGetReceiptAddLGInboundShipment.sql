@@ -75,6 +75,7 @@ FROM (
 		, LogisticsView.strFreightTerm 
 		, strMarkings               = LogisticsView.strMarks
 		, Item.strBundleType 
+		, intContractSeq 			= LogisticsView.intPContractSeq
 	FROM	vyuLGLoadContainerReceiptContracts LogisticsView 
 			LEFT JOIN dbo.tblSMCurrency Currency 
 				ON Currency.strCurrency = ISNULL(LogisticsView.strCurrency, LogisticsView.strMainCurrency) 
