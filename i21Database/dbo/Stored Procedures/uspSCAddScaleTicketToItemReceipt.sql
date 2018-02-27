@@ -178,10 +178,7 @@ SELECT
 													 AND CNT.intFXPriceUOMId IS NOT NULL 
 												THEN 
 													dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,CNT.intFXPriceUOMId,1)
-												ELSE
-													CASE WHEN ISNULL(CNT.intContractDetailId,0) > 0 THEN dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,ISNULL(CNT.intPriceItemUOMId,CNT.intAdjItemUOMId),1)
-													ELSE 1
-													END
+												ELSE 1
 											END 
 									END
 		,dblExchangeRate			= 1 -- Need to check this
