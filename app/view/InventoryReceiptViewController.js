@@ -5649,6 +5649,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 columns: [
                     { dataIndex: 'intKey', text: "Key", flex: 1, dataType: 'numeric', key: true, hidden: true },
                     { dataIndex: 'strOrderNumber', text: 'Order Number', width: 100, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewReceiptNo' },
+                    { dataIndex: 'intContractSeq', text: 'Sequence', width: 100, dataType: 'numeric', allowNull: true },
                     { xtype: 'numbercolumn', dataIndex: 'dblOrderUOMConvFactor', text: 'Order UOM Conversion Factor', width: 100, dataType: 'float', hidden: true, required: true },
                     { xtype: 'numbercolumn', dataIndex: 'dblOrdered', text: 'Ordered Qty', width: 100, dataType: 'float' },
                     { xtype: 'numbercolumn', dataIndex: 'dblReceived', text: 'Received Qty', width: 100, dataType: 'float' },
@@ -5790,6 +5791,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     intCommodityId: order.get('intCommodityId'),
                                     intContainerId: order.get('intContainerId'),
                                     strContainer: order.get('strContainer'),
+                                    intContractSeq: order.get('intContractSeq'),
                                     intSubLocationId: order.get('intSubLocationId'),
                                     strSubLocationName: order.get('strSubLocationName'),
                                     intStorageLocationId: order.get('intStorageLocationId'),
@@ -7658,6 +7660,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     columns: [
                             { dataIndex: 'intItemBundleId', text: 'Bundle Item Id', dataType: 'numeric', key: true, hidden: true },
                             { dataIndex: 'intComponentItemId', text: '', dataType: 'numeric', hidden: true, required: true },
+                            { dataIndex: 'intContractSeq', text: 'Sequence', width: 100, dataType: 'numeric', allowNull: true },
                             { dataIndex: 'strComponentItemNo', text: 'Item No', width: 100, dataType: 'string' },
                             { dataIndex: 'strComponentDescription', text: 'Item Description', width: 130, dataType: 'string' },
                             { xtype: 'numbercolumn', dataIndex: 'dblComponentQuantity', text: 'Component Quantity', width: 100, dataType: 'float', required: true, hidden: true  },
@@ -7726,6 +7729,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                         strItemNo: rec.get('strComponentItemNo'),
                                         strItemDescription: rec.get('strComponentDescription'),
                                         dblOpenReceive: componentQty,
+                                        intContractSeq: rec.get('intContractSeq'),
                                         // intLoadReceive: rec.get('intLoadToReceive'),
                                         dblUnitCost: i21.ModuleMgr.Inventory.roundDecimalFormat(itemCost, 6),
                                         dblUnitRetail: i21.ModuleMgr.Inventory.roundDecimalFormat(itemCost, 6),
