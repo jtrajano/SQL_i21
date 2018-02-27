@@ -75,11 +75,14 @@ DECLARE @intInventoryReceiptItemId AS INT
 		,@dblInventoryReceiptCost NUMERIC (38,20)
 		,@intTaxId INT
 		,@vendorOrderNumber NVARCHAR(50)
-		,@voucherDate DATETIME;
+		,@voucherDate DATETIME
+		,@dblGrossUnits AS NUMERIC(38, 20)
+		,@dblTicketNetUnits AS NUMERIC(38, 20);
 
 BEGIN
     SELECT TOP 1 @intLoadId = ST.intLoadId, @dblTicketFreightRate = ST.dblFreightRate, @intScaleStationId = ST.intScaleSetupId,
 	@ysnDeductFreightFarmer = ST.ysnFarmerPaysFreight, @intLocationId = ST.intProcessingLocationId
+	, @dblGrossUnits = ST.dblGrossUnits, @dblTicketNetUnits = ST.dblNetUnits
 	FROM dbo.tblSCTicket ST WHERE
 	ST.intTicketId = @intTicketId
 END
@@ -523,6 +526,8 @@ BEGIN TRY
 		,[intPricingTypeId] INT
 		,[ysnPosted] BIT
 		,[strChargesLink] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL
+		,[dblQtyReceived] NUMERIC(38,20)
+		,[dblCost] NUMERIC(38,20)
 		UNIQUE ([intInventoryReceiptItemId])
 	);
 	INSERT INTO #tmpReceiptItem(
@@ -533,6 +538,8 @@ BEGIN TRY
 		,[intPricingTypeId]
 		,[ysnPosted]
 		,[strChargesLink]
+		,[dblQtyReceived]
+		,[dblCost]
 	)
 	SELECT 
 		ri.intInventoryReceiptItemId
@@ -542,6 +549,8 @@ BEGIN TRY
 		,ISNULL(CT.intPricingTypeId,0)
 		,r.ysnPosted 
 		,ri.strChargesLink
+		,ri.dblOpenReceive - ri.dblBillQty
+		,ri.dblUnitCost
 	FROM tblICInventoryReceipt r 
 	INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
 	LEFT JOIN tblCTContractDetail CT ON CT.intContractDetailId = ri.intLineNo AND ri.intInventoryReceiptId = @InventoryReceiptId 
@@ -583,8 +592,8 @@ BEGIN TRY
 				,[dblQtyReceived] = rc.dblQuantity - ISNULL(-rc.dblQuantityPriced, 0)
 				,[dblCost] = 
 					CASE 
-						WHEN rc.strCostMethod = 'Per Unit' THEN rc.dblRate
-						ELSE rc.dblAmount
+						WHEN rc.strCostMethod = 'Amount' THEN  rc.dblAmount
+						ELSE rc.dblRate
 					END 
 				,[intTaxGroupId] = rc.intTaxGroupId
 		FROM	#tmpReceiptItem tmp 
@@ -676,14 +685,17 @@ BEGIN TRY
 	INSERT INTO #tmpItemReceiptIds([intEntityVendorId],[intInventoryReceiptChargeId],[dblQtyReceived],[dblCost],[intTaxGroupId]) 
 	SELECT rc.intEntityVendorId
 			,rc.intInventoryReceiptChargeId
-			,rc.dblQuantity - ISNULL(rc.dblQuantityBilled, 0) 
 			,CASE 
-				WHEN rc.strCostMethod = 'Per Unit' THEN rc.dblRate
-				ELSE rc.dblAmount
+				WHEN rc.strCostMethod = 'Amount' THEN rc.dblQuantity - ISNULL(-rc.dblQuantityPriced, 0)
+				ELSE dbo.fnSCFreightCalculation(tmp.dblQtyReceived, @dblNetUnits, @dblGrossUnits,null) 
+			END
+			,CASE 
+				WHEN rc.strCostMethod = 'Amount' THEN  rc.dblAmount
+				ELSE rc.dblRate
 			END
 			,rc.intTaxGroupId
 	FROM	#tmpReceiptItem tmp 
-			INNER JOIN tblICInventoryReceiptCharge rc ON rc.intInventoryReceiptId = tmp.intInventoryReceiptId AND rc.strChargesLink = tmp.strChargesLink AND tmp.intPricingTypeId IN (0,1,6)
+			INNER JOIN tblICInventoryReceiptCharge rc ON rc.intInventoryReceiptId = tmp.intInventoryReceiptId AND rc.strChargesLink = tmp.strChargesLink
 	WHERE	tmp.ysnPosted = 1
 			AND tmp.intInventoryReceiptId = @InventoryReceiptId
 			AND rc.ysnAccrue = 1 
