@@ -45,7 +45,7 @@ SELECT DISTINCT strCommodityCode
 		LEFT JOIN tblICItemUOM u ON cd.intItemUOMId = u.intItemUOMId
 		LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = u.intUnitMeasureId
 		LEFT JOIN	tblARMarketZone					mz	ON	mz.intMarketZoneId			=	cd.intMarketZoneId
-		WHERE LEFT(strPricingType,2) <> 'DP' and dblBalance > 0
+		WHERE  dblBalance > 0
 		
 	UNION
 
@@ -88,10 +88,10 @@ SELECT DISTINCT strCommodityCode
 			LEFT JOIN tblICItemUOM u ON cd.intItemUOMId = u.intItemUOMId
 			LEFT JOIN tblSMCurrency muc ON muc.intCurrencyID = fm.intCurrencyId
 			LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = u.intUnitMeasureId
-			LEFT join tblCTContractType ct on ct.intContractTypeId=ch.intContractTypeId
-			LEFT join tblCTPricingType pt on pt.intPricingTypeId=cd.intPricingTypeId
-			LEFT join tblICCommodity c on c.intCommodityId=ch.intCommodityId
+			LEFT JOIN tblCTContractType ct on ct.intContractTypeId=ch.intContractTypeId
+			LEFT JOIN tblCTPricingType pt on pt.intPricingTypeId=cd.intPricingTypeId
+			LEFT JOIN tblICCommodity c on c.intCommodityId=ch.intCommodityId
 			LEFT JOIN tblSMCompanyLocation			cl	ON	cl.intCompanyLocationId		=	cd.intCompanyLocationId
 			LEFT JOIN	tblARMarketZone					mz	ON	mz.intMarketZoneId			=	cd.intMarketZoneId
-			WHERE LEFT(strPricingType,2) <> 'DP' and (iis.dblUnitOnHand > 0 or iis.dblUnitStorage>0) and strContractType <> 'Sale'
+			WHERE (iis.dblUnitOnHand > 0 or iis.dblUnitStorage>0) and strContractType <> 'Sale'
 			   and i.strLotTracking = case when (select top 1 strRiskView from tblRKCompanyPreference) = 'Processor' then i.strLotTracking else 'No' end
