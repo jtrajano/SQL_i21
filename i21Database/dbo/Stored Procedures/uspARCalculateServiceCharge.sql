@@ -13,13 +13,15 @@
 	@totalAmount		NUMERIC(18,6) = NULL OUTPUT
 AS
 	SET NOCOUNT ON
-	CREATE TABLE #tmpCustomers (intEntityId INT, intServiceChargeId INT, intTermId INT)	
+	CREATE TABLE #tmpCustomers (intEntityId INT, intServiceChargeId INT, intTermId INT, ysnActive BIT)	
+	DECLARE @tblComputedBalances TABLE (intEntityId INT, dblTotalAR NUMERIC(18, 6))
 	DECLARE @tblTypeServiceCharge	  [dbo].[ServiceChargeTableType]
 	DECLARE @tempTblTypeServiceCharge [dbo].[ServiceChargeTableType]	
 	DECLARE @zeroDecimal		NUMERIC(18, 6) = 0
 	      , @dblMinimumSC		NUMERIC(18, 6) = 0
 		  , @dblMinFinanceSC    NUMERIC(18, 6) = 0
 		  , @ysnChargeonCharge	BIT = 1
+		  , @strCustomerIds		NVARCHAR(MAX) = NULL
 
 	SELECT TOP 1 @ysnChargeonCharge = ISNULL(ysnChargeonCharge, 1) FROM dbo.tblARCompanyPreference WITH (NOLOCK)
 
@@ -53,15 +55,23 @@ AS
 	--GET SELECTED CUSTOMERS
 	IF (@customerIds = '')
 		BEGIN
-			INSERT INTO #tmpCustomers (intEntityId, intServiceChargeId, intTermId) 
-			SELECT E.[intEntityId], C.intServiceChargeId, C.intTermsId FROM vyuARCustomerSearch E
-				INNER JOIN tblARCustomer C ON E.[intEntityId] = C.[intEntityId]
-				WHERE E.ysnActive = 1 AND ISNULL(C.intServiceChargeId, 0) <> 0
+			INSERT INTO #tmpCustomers (intEntityId, intServiceChargeId, intTermId, ysnActive) 
+			SELECT E.intEntityId, C.intServiceChargeId, C.intTermsId, E.ysnActive
+			FROM tblARCustomer C
+			INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityId
+			WHERE ISNULL(C.intServiceChargeId, 0) <> 0
 		END
 	ELSE
 		BEGIN
-			INSERT INTO #tmpCustomers (intEntityId, intServiceChargeId, intTermId)
-			SELECT [intEntityId], intServiceChargeId, intTermsId FROM tblARCustomer WHERE [intEntityId] IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@customerIds)) AND ISNULL(intServiceChargeId, 0) <> 0
+			INSERT INTO #tmpCustomers (intEntityId, intServiceChargeId, intTermId, ysnActive)
+			SELECT E.intEntityId, C.intServiceChargeId, C.intTermsId, E.ysnActive
+			FROM tblARCustomer C
+			INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityId
+			INNER JOIN (
+				 SELECT intID 
+				 FROM fnGetRowsFromDelimitedValues(@customerIds)
+			) SELECTED ON C.intEntityId = SELECTED.intID
+			WHERE ISNULL(intServiceChargeId, 0) <> 0
 		END
 
 	--GET SELECTED STATUS CODES
@@ -74,6 +84,13 @@ AS
 	--GET CUSTOMER AGING IF CALCULATION IS BY CUSTOMER BALANCE
 	IF (@calculation = 'By Customer Balance')
 		BEGIN
+			SELECT @strCustomerIds = LEFT(intEntityId, LEN(intEntityId) - 1)
+			FROM (
+				SELECT DISTINCT CAST(intEntityId AS VARCHAR(200))  + ', '
+				FROM #tmpCustomers WITH(NOLOCK)	
+				FOR XML PATH ('')
+			) C (intEntityId)
+
 			TRUNCATE TABLE tblARCustomerAgingStagingTable
 			INSERT INTO tblARCustomerAgingStagingTable (
 				   strCustomerName
@@ -109,7 +126,7 @@ AS
 				, strCompanyName
 				, strCompanyAddress
 			)
-			EXEC dbo.uspARCustomerAgingDetailAsOfDateReport @dtmDateTo = @asOfDate, @ysnInclude120Days = 0
+			EXEC dbo.uspARCustomerAgingDetailAsOfDateReport @dtmDateTo = @asOfDate, @ysnInclude120Days = 0, @strCustomerIds = @strCustomerIds
 
 			IF ISNULL(@ysnChargeonCharge, 1) = 0
 				DELETE FROM tblARCustomerAgingStagingTable WHERE strType = 'Service Charge'
@@ -118,6 +135,23 @@ AS
 				DELETE FROM tblARCustomerAgingStagingTable WHERE dtmDueDate = @asOfDate
 
 			DELETE FROM tblARCustomerAgingStagingTable WHERE strType = 'CF Tran'
+
+			--PROCESS BY AGING BALANCE	
+			INSERT INTO @tblComputedBalances (
+				  intEntityId
+				, dblTotalAR
+			)
+			SELECT intEntityId	= AGING.intEntityCustomerId
+				 , dblTotalAR   = SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl120Days) + SUM(dbl121Days) + SUM(dblCredits) + SUM(dblPrepayments) 
+			FROM tblARCustomerAgingStagingTable AGING
+			INNER JOIN #tmpCustomers TC ON AGING.intEntityCustomerId = TC.intEntityId
+			INNER JOIN (
+				SELECT intEntityId
+				FROM dbo.tblARCustomer WITH (NOLOCK)		
+				WHERE YEAR(ISNULL(dtmLastServiceCharge, '01/01/1900')) * 100 + MONTH(ISNULL(dtmLastServiceCharge, '01/01/1900')) < YEAR(@asOfDate) * 100 + MONTH(@asOfDate)
+			) C ON C.intEntityId = AGING.intEntityCustomerId
+			GROUP BY AGING.intEntityCustomerId
+			HAVING SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl120Days) + SUM(dbl121Days) + SUM(dblCredits) + SUM(dblPrepayments) > @zeroDecimal
 		END
 
 	IF EXISTS(SELECT TOP 1 NULL FROM #tmpCustomers WHERE ISNULL(intTermId, 0) = 0) AND @isRecap = 0
@@ -125,47 +159,25 @@ AS
 			RAISERROR(120042, 16, 1)
 			RETURN 0
 		END
-
-	DECLARE @totalAR Table(
-		intEntityId INT,
-		dblTotalAR NUMERIC(18, 6)
-
-	)
-	INSERT INTO @totalAR(
-		intEntityId,
-		dblTotalAR
-	)
-	SELECT AGING.intEntityCustomerId,
-		SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl120Days) + SUM(dbl121Days) + SUM(dblCredits) + SUM(dblPrepayments) 
-	FROM tblARCustomerAgingStagingTable AGING
-	INNER JOIN (
-		SELECT intEntityId
-				, dtmLastServiceCharge = ISNULL(dtmLastServiceCharge, '01/01/1900')
-		FROM tblARCustomer
-	) C ON C.intEntityId = AGING.intEntityCustomerId	
-	WHERE YEAR(dtmLastServiceCharge) * 100 + MONTH(dtmLastServiceCharge) < YEAR(@asOfDate) * 100 + MONTH(@asOfDate)
-
-	GROUP BY AGING.intEntityCustomerId
 	
-
-	--SELECT * FROM @totalAR
-
 	--PROCESS EACH CUSTOMER
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpCustomers)
 		BEGIN
-			DECLARE @entityId			INT,
-					@serviceChargeId	INT
-
-			DECLARE @dblTotalAR			NUMERIC(18, 6) = 0		
+			DECLARE @entityId				INT
+				  , @serviceChargeId		INT
+			      , @strCalculationType 	NVARCHAR (100)
+			      , @dblServiceChargeAPR 	NUMERIC(18, 6)
+			      , @dblPercentage			NUMERIC(18, 6) = 0
 
 			SELECT TOP 1 @entityId = C.intEntityId,
 						 @serviceChargeId = C.intServiceChargeId,
 						 @dblMinimumSC = ISNULL(SC.dblMinimumCharge, 0),
 						 @dblMinFinanceSC = ISNULL(SC.dblMinimumFinanceCharge, 0),
-						 @dblTotalAR = ISNULL(D.dblTotalAR, 0)
+						 @dblServiceChargeAPR = ISNULL(SC.dblServiceChargeAPR, 0),
+						 @strCalculationType = SC.strCalculationType,
+						 @dblPercentage  = SC.dblPercentage
 			FROM #tmpCustomers C
-				LEFT JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId 
-				LEFT JOIN  @totalAR D on C.intEntityId = D.intEntityId
+			INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId 
 
 			DELETE FROM @tempTblTypeServiceCharge
 
@@ -244,32 +256,28 @@ AS
 								AND ((@ysnChargeonCharge = 0 AND I.strType NOT IN ('Service Charge')) OR (@ysnChargeonCharge = 1))
 						END
 					ELSE
-						BEGIN	
-									
-							IF ISNULL(@dblTotalAR, 0) > 0
+						BEGIN
+							IF EXISTS(SELECT TOP 1 NULL FROM @tblComputedBalances)
 								BEGIN
-									--print 'goes here'
 									INSERT INTO @tempTblTypeServiceCharge
-									SELECT intInvoiceId			= AGING.intInvoiceId
+									SELECT intInvoiceId			= NULL
 										 , intBudgetId			= NULL
-										 , intEntityCustomerId	= AGING.intEntityCustomerId
-										 , strInvoiceNumber		= AGING.strInvoiceNumber
+										 , intEntityCustomerId	= BALANCE.intEntityId
+										 , strInvoiceNumber		= NULL
 										 , strBudgetDescription = NULL
-										 , dblAmountDue			= @dblTotalAR
-										 , dblTotalAmount       = dbo.fnRoundBanker(CASE WHEN SC.strCalculationType = 'Percent'
+										 , dblAmountDue			= BALANCE.dblTotalAR
+										 , dblTotalAmount       = dbo.fnRoundBanker(CASE WHEN @strCalculationType = 'Percent'
 																		THEN
-																			CASE WHEN SC.dblServiceChargeAPR > 0
+																			CASE WHEN @dblServiceChargeAPR > 0
 																				THEN
-																					((SC.dblServiceChargeAPR/12) * @dblTotalAR) / 100
+																					((@dblServiceChargeAPR/12) * BALANCE.dblTotalAR) / 100
 																				ELSE 0
 																			END
 																		ELSE
-																			SC.dblPercentage
+																			@dblPercentage	
 						 											END, dbo.fnARGetDefaultDecimal())
-									FROM tblARCustomerAgingStagingTable AGING
-										INNER JOIN #tmpCustomers C ON AGING.intEntityCustomerId = C.[intEntityId]
-										INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId										
-									WHERE AGING.intEntityCustomerId = @entityId
+									FROM @tblComputedBalances BALANCE
+									WHERE BALANCE.intEntityId = @entityId
 
 									IF ISNULL(@isRecap, 0) = 0
 										BEGIN
@@ -318,6 +326,12 @@ AS
 								AND CB.dblBudgetAmount > @zeroDecimal
 								AND (CB.ysnCalculated = 0 OR CB.ysnForgiven = 1)
 						END
+
+					--REMOVE INACTIVE CUSTOMERS WITH ZERO BALANCE
+					DELETE SC
+					FROM @tempTblTypeServiceCharge SC
+					INNER JOIN #tmpCustomers C ON SC.intEntityCustomerId = C.intEntityId					
+					WHERE C.ysnActive = 0 AND ISNULL(SC.dblTotalAmount, 0) <= 0
 
 					IF (@calculation = 'By Invoice')
 						BEGIN
