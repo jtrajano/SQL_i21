@@ -8418,7 +8418,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         me.checkVendorCost(me.getViewModel(), current, dtmReceiptDate, oldValue);
     },
 
-    checkVendorCost(vm, receipt, dtmReceiptDate, oldValue) {
+    checkVendorCost: function(vm, receipt, dtmReceiptDate, oldValue) {
         var me = this;
         ic.utils.ajax({
             url: './inventory/api/item/searchvendorpricing',
@@ -8458,7 +8458,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         });
     },
 
-    clearItems(current) {
+    clearItems: function(current) {
         var items = current.tblICInventoryReceiptItems().data.items; 
         for (var i = items.length - 1; i >= 0; i--){
             if (!items[i].dummy){

@@ -1,7 +1,7 @@
 UnitTestEngine.testStore({
     name: 'Inventory.store.PaidOut',
     alias: "store.storepaidout",
-    base: 'Ext.data.BufferedStore',
+    base: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     dependencies: [],
     config: {
         "storeId": "PaidOut",

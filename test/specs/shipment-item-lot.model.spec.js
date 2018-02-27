@@ -56,11 +56,11 @@ UnitTestEngine.testModel({
         "type": "int",
         "allowNull": true
     }, {
-        "name": "strLotId",
+        "name": "strLotNumber",
         "type": "string",
         "allowNull": false
     }, {
-        "name": "strUnitMeasure",
+        "name": "strItemUOM",
         "type": "string",
         "allowNull": false
     }, {
@@ -70,7 +70,7 @@ UnitTestEngine.testModel({
     }],
     validators: [
         [{
-            "field": "strLotId",
+            "field": "strLotNumber",
             "type": "presence"
         }]
     ]

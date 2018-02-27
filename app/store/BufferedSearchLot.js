@@ -1,5 +1,5 @@
 Ext.define('Inventory.store.BufferedSearchLot', {
-    extend: 'GlobalComponentEngine.store.MultiCompanyBaseBufferedStore',
+    extend: 'Ext.data.BufferedStore',
     alias: 'store.icbufferedsearchlot',
     requires: [
         'Inventory.model.Lot'

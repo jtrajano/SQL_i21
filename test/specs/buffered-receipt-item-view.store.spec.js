@@ -1,7 +1,7 @@
 UnitTestEngine.testStore({
     name: 'Inventory.store.BufferedReceiptItemView',
     alias: "store.icbufferedreceiptitemview",
-    base: 'Ext.data.Store',
+    base: 'Ext.data.BufferedStore',
     dependencies: ["Inventory.model.ReceiptItemView"],
     config: {
         "model": "Inventory.model.ReceiptItemView",

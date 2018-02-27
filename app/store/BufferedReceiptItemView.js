@@ -2,7 +2,7 @@
  * Created by WEstrada on 4/19/2016.
  */
 Ext.define('Inventory.store.BufferedReceiptItemView', {
-    extend: 'GlobalComponentEngine.store.MultiCompanyBaseBufferedStore',
+    extend: 'Ext.data.BufferedStore',
     alias: 'store.icbufferedreceiptitemview',
 
     requires: [

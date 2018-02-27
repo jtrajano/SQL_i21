@@ -148,11 +148,7 @@ UnitTestEngine.testModel({
         "type": "string",
         "allowNull": false
     }, {
-        "name": "dblGrossNetUnitQty",
-        "type": "float",
-        "allowNull": true
-    }, {
-        "name": "dblItemUnitQty",
+        "name": "dblWeightPerQty",
         "type": "float",
         "allowNull": true
     }],

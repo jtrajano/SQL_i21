@@ -2,7 +2,7 @@ UnitTestEngine.testModel({
     name: 'Inventory.model.Item',
     base: 'iRely.BaseEntity',
     idProperty: 'intItemId',
-    dependencies: ["Inventory.model.ItemUOM", "Inventory.model.ItemLocation", "Inventory.model.ItemVendorXref", "Inventory.model.ItemCustomerXref", "Inventory.model.ItemContract", "Inventory.model.ItemCertification", "Inventory.model.ItemPOSSLA", "Inventory.model.ItemPOSCategory", "Inventory.model.ItemManufacturingUOM", "Inventory.model.ItemAccount", "Inventory.model.ItemCommodityCost", "Inventory.model.ItemStock", "Inventory.model.ItemPricing", "Inventory.model.ItemPricingLevel", "Inventory.model.ItemSpecialPricing", "Inventory.model.ItemAssembly", "Inventory.model.ItemBundle", "Inventory.model.ItemKit", "Inventory.model.ItemNote", "Inventory.model.ItemOwner", "Inventory.model.ItemFactory", "Inventory.model.ItemMotorFuelTax", "Inventory.model.ItemLicense", "Ext.data.Field"],
+    dependencies: ["Inventory.model.ItemUOM", "Inventory.model.ItemLocation", "Inventory.model.ItemVendorXref", "Inventory.model.ItemCustomerXref", "Inventory.model.ItemContract", "Inventory.model.ItemCertification", "Inventory.model.ItemPOSSLA", "Inventory.model.ItemPOSCategory", "Inventory.model.ItemManufacturingUOM", "Inventory.model.ItemAccount", "Inventory.model.ItemCommodityCost", "Inventory.model.ItemStock", "Inventory.model.ItemPricing", "Inventory.model.ItemPricingLevel", "Inventory.model.ItemSpecialPricing", "Inventory.model.ItemAssembly", "Inventory.model.ItemBundle", "Inventory.model.ItemKit", "Inventory.model.ItemNote", "Inventory.model.ItemOwner", "Inventory.model.ItemFactory", "Inventory.model.ItemMotorFuelTax", "Inventory.model.ItemLicense", "Inventory.model.ItemAddOn", "Inventory.model.ItemSubstitute", "Ext.data.Field"],
     fields: [{
         "name": "intItemId",
         "type": "int",
@@ -19,6 +19,10 @@ UnitTestEngine.testModel({
         "name": "strType",
         "type": "string",
         "allowNull": false
+    }, {
+        "name": "strBundleType",
+        "type": "string",
+        "allowNull": true
     }, {
         "name": "strDescription",
         "type": "string",
@@ -568,6 +572,10 @@ UnitTestEngine.testModel({
         "type": "string",
         "allowNull": false
     }, {
+        "name": "strCostUOM",
+        "type": "string",
+        "allowNull": false
+    }, {
         "name": "strPickListComments",
         "type": "string",
         "allowNull": false
@@ -599,10 +607,17 @@ UnitTestEngine.testModel({
         "name": "ysnLotWeightsRequired",
         "type": "boolean",
         "allowNull": false
+    }, {
+        "name": "strCategory",
+        "type": "string",
+        "allowNull": false
     }],
     validators: [
         [{
             "field": "strItemNo",
+            "type": "presence"
+        }, {
+            "field": "strCategory",
             "type": "presence"
         }, {
             "field": "strType",

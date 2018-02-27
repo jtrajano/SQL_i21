@@ -1,7 +1,7 @@
 UnitTestEngine.testStore({
     name: 'Inventory.store.Brand',
     alias: "store.icbrand",
-    base: 'Ext.data.Store',
+    base: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     dependencies: ["Inventory.model.Brand"],
     config: {
         "model": "Inventory.model.Brand",

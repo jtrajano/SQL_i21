@@ -56,44 +56,45 @@ UnitTestEngine.testModel({
         "type": "boolean",
         "allowNull": false
     }, {
+        "name": "strFuelCategory",
+        "type": "string",
+        "allowNull": false
+    }, {
         "name": "strRinFuelTypeCodeId",
         "type": "string",
         "allowNull": false
     }, {
-        "name": "strRinFeedStockId",
+        "name": "strFeedStock",
         "type": "string",
         "allowNull": false
     }, {
-        "name": "strRinFuelId",
+        "name": "strFuelCode",
         "type": "string",
         "allowNull": false
     }, {
-        "name": "strRinProcessId",
+        "name": "strProcessCode",
         "type": "string",
         "allowNull": false
     }, {
-        "name": "strRinFeedStockUOMId",
+        "name": "strFeedStockUOM",
         "type": "string",
         "allowNull": false
     }],
     validators: [
         [{
-            "field": "intFuelTypeId",
+            "field": "strFuelCategory",
             "type": "presence"
         }, {
-            "field": "intRinFuelCategoryId",
+            "field": "strFeedStock",
             "type": "presence"
         }, {
-            "field": "intRinFeedStockId",
+            "field": "strFuelCode",
             "type": "presence"
         }, {
-            "field": "intRinFuelId",
+            "field": "strProcessCode",
             "type": "presence"
         }, {
-            "field": "intRinProcessId",
-            "type": "presence"
-        }, {
-            "field": "intRinFeedStockUOMId",
+            "field": "strFeedStockUOM",
             "type": "presence"
         }]
     ]

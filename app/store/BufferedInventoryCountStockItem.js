@@ -1,5 +1,5 @@
 Ext.define('Inventory.store.BufferedInventoryCountStockItem', {
-    extend: 'GlobalComponentEngine.store.MultiCompanyBaseBufferedStore',
+    extend: 'Ext.data.BufferedStore',
     alias: 'store.icbufferedinventorycountstockitem',
 
     requires: [

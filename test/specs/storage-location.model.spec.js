@@ -115,16 +115,31 @@ UnitTestEngine.testModel({
         "name": "dblResidualUnit",
         "type": "float",
         "allowNull": false
+    }, {
+        "name": "strStorageUnitType",
+        "type": "string",
+        "allowNull": false
+    }, {
+        "name": "strLocation",
+        "type": "string",
+        "allowNull": false
+    }, {
+        "name": "strSubLocation",
+        "type": "string",
+        "allowNull": false
     }],
     validators: [
         [{
             "field": "strName",
             "type": "presence"
         }, {
-            "field": "intLocationId",
+            "field": "strStorageUnitType",
             "type": "presence"
         }, {
-            "field": "intSubLocationId",
+            "field": "strLocation",
+            "type": "presence"
+        }, {
+            "field": "strSubLocation",
             "type": "presence"
         }]
     ]

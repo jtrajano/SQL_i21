@@ -2,7 +2,7 @@
  * Created by LZabala on 7/22/2015.
  */
 Ext.define('Inventory.store.BufferedItemWeightVolumeUOM', {
-    extend: 'GlobalComponentEngine.store.MultiCompanyBaseBufferedStore',
+    extend: 'Ext.data.BufferedStore',
     alias: 'store.icbuffereditemweightvolumeuom',
 
     requires: [

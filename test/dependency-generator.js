@@ -2,7 +2,7 @@ var beautify = require('js-beautify').js_beautify;
 var fs = require('fs');
 var gen = require('extjs-dependencies-generator');
 
-var dir = 'app/**/*.js';
+var dir = '../app/**/*.js';
 
 gen.generateDependencies(dir, d => {
     writeFile("dependencies.js", beautify(JSON.stringify(d.files)));

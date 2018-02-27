@@ -2,7 +2,7 @@ UnitTestEngine.testModel({
     name: 'Inventory.model.ShipmentCharge',
     base: 'iRely.BaseEntity',
     idProperty: 'intInventoryShipmentChargeId',
-    dependencies: ["Ext.data.Field"],
+    dependencies: ["Inventory.model.ShipmentChargeTax", "Ext.data.Field"],
     fields: [{
         "name": "intInventoryShipmentChargeId",
         "type": "int",
@@ -79,6 +79,26 @@ UnitTestEngine.testModel({
         "name": "dblQuantity",
         "type": "float",
         "allowNull": true
+    }, {
+        "name": "dblTax",
+        "type": "float",
+        "allowNull": true
+    }, {
+        "name": "ysnAccrue",
+        "type": "boolean",
+        "allowNull": false
+    }, {
+        "name": "ysnPrice",
+        "type": "boolean",
+        "allowNull": false
+    }, {
+        "name": "strChargesLink",
+        "type": "string",
+        "allowNull": true
+    }, {
+        "name": "strItemNo",
+        "type": "string",
+        "allowNull": false
     }],
     validators: [
         [{

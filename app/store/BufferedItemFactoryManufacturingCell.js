@@ -2,7 +2,7 @@
  * Created by LZabala on 1/8/2015.
  */
 Ext.define('Inventory.store.BufferedItemFactoryManufacturingCell', {
-    extend: 'GlobalComponentEngine.store.MultiCompanyBaseBufferedStore',
+    extend: 'Ext.data.BufferedStore',
     alias: 'store.icbuffereditemfactorymanufacturingcell',
 
     requires: [

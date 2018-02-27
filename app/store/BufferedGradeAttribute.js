@@ -2,7 +2,7 @@
  * Created by LZabala on 11/11/2014.
  */
 Ext.define('Inventory.store.BufferedGradeAttribute', {
-    extend: 'GlobalComponentEngine.store.MultiCompanyBaseBufferedStore',
+    extend: 'Ext.data.BufferedStore',
     alias: 'store.icbufferedgradeattribute',
 
     requires: [

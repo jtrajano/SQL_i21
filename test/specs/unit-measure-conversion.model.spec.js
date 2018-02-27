@@ -20,17 +20,20 @@ UnitTestEngine.testModel({
         "type": "float",
         "allowNull": false
     }, {
-        "name": "intSort",
-        "type": "int",
-        "allowNull": true
-    }, {
         "name": "strUnitMeasure",
+        "type": "string",
+        "allowNull": false
+    }, {
+        "name": "strStockUOM",
         "type": "string",
         "allowNull": false
     }],
     validators: [
         [{
-            "field": "strUnitMeasure",
+            "field": "strStockUOM",
+            "type": "presence"
+        }, {
+            "field": "dblConversionToStock",
             "type": "presence"
         }]
     ]

@@ -1,7 +1,7 @@
 UnitTestEngine.testStore({
     name: 'Inventory.store.CompactItem',
     alias: "store.iccompactitem",
-    base: 'Ext.data.Store',
+    base: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     dependencies: ["Inventory.model.CompactItem"],
     config: {
         "model": "Inventory.model.CompactItem",

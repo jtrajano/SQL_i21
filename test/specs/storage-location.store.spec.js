@@ -1,7 +1,7 @@
 UnitTestEngine.testStore({
     name: 'Inventory.store.StorageLocation',
     alias: "store.icstoragelocation",
-    base: 'Ext.data.Store',
+    base: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     dependencies: ["Inventory.model.StorageLocation"],
     config: {
         "model": "Inventory.model.StorageLocation",

@@ -880,7 +880,7 @@ Ext.define('iRely.Functions', {
 
         createIdentityToken: function (user, password, company, userId, entityId, isContact, contactParentId) {
             var token = user + ':' + password + ':' + company + ':' + userId + ':' + entityId + ':' + (isContact === 'undefined' ? false : isContact) + ':' + (contactParentId === 'undefined' ? 0 : contactParentId);
-            var hash = Base64.encode(token);
+            var hash = Ext.util.Base64.encode(token);
             return hash;
         },
 
@@ -1286,7 +1286,7 @@ Ext.define('iRely.Functions', {
 
             if (config.imgPhoto && config.imgPhoto !== "") {
                 imgUser.setVisible(true);
-                imgUser.setSrc("data:image/jpeg;base64," + Base64.decode(config.imgPhoto));
+                imgUser.setSrc("data:image/jpeg;base64," + Ext.util.Base64.decode(config.imgPhoto));
             }
             //            else {
             //                imgUser.setVisible(false);

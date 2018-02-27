@@ -1,7 +1,7 @@
 UnitTestEngine.testStore({
     name: 'Inventory.store.ItemStockUOMView',
     alias: "store.icitemstockuomview",
-    base: 'Ext.data.Store',
+    base: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
     dependencies: ["Inventory.model.ItemStockUOMView"],
     config: {
         "model": "Inventory.model.ItemStockUOMView",

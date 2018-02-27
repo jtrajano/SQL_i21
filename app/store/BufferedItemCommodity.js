@@ -2,7 +2,7 @@
  * Created by LZabala on 6/17/2015.
  */
 Ext.define('Inventory.store.BufferedItemCommodity', {
-    extend: 'GlobalComponentEngine.store.MultiCompanyBaseBufferedStore',
+    extend: 'Ext.data.BufferedStore',
     alias: 'store.icbuffereditemcommodity',
 
     requires: [

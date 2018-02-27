@@ -64,11 +64,19 @@ UnitTestEngine.testModel({
         "type": "int",
         "allowNull": true
     }, {
+        "name": "intItemUOMId",
+        "type": "int",
+        "allowNull": true
+    }, {
         "name": "intCostUOMId",
         "type": "int",
         "allowNull": true
     }, {
         "name": "intWeightUOMId",
+        "type": "int",
+        "allowNull": true
+    }, {
+        "name": "intWeightUnitMeasureId",
         "type": "int",
         "allowNull": true
     }, {
@@ -206,6 +214,26 @@ UnitTestEngine.testModel({
     }, {
         "name": "dblNetBeforeEdit",
         "type": "float",
+        "allowNull": true
+    }, {
+        "name": "strChargesLink",
+        "type": "string",
+        "allowNull": true
+    }, {
+        "name": "strItemType",
+        "type": "string",
+        "allowNull": true
+    }, {
+        "name": "intParentItemLinkId",
+        "type": "int",
+        "allowNull": true
+    }, {
+        "name": "intChildItemLinkId",
+        "type": "int",
+        "allowNull": true
+    }, {
+        "name": "intContractSeq",
+        "type": "int",
         "allowNull": true
     }],
     validators: [
