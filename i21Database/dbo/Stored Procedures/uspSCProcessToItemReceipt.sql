@@ -592,8 +592,8 @@ BEGIN TRY
 				,[dblQtyReceived] = rc.dblQuantity - ISNULL(-rc.dblQuantityPriced, 0)
 				,[dblCost] = 
 					CASE 
-						WHEN rc.strCostMethod = 'Per Unit' THEN rc.dblRate
-						ELSE rc.dblAmount
+						WHEN rc.strCostMethod = 'Amount' THEN  rc.dblAmount
+						ELSE rc.dblRate
 					END 
 				,[intTaxGroupId] = rc.intTaxGroupId
 		FROM	#tmpReceiptItem tmp 
@@ -686,12 +686,12 @@ BEGIN TRY
 	SELECT rc.intEntityVendorId
 			,rc.intInventoryReceiptChargeId
 			,CASE 
-				WHEN rc.strCostMethod = 'Per Unit' THEN dbo.fnSCFreightCalculation(tmp.dblQtyReceived, @dblTicketNetUnits, @dblGrossUnits,null) 
-				ELSE rc.dblQuantity - ISNULL(-rc.dblQuantityPriced, 0)
+				WHEN rc.strCostMethod = 'Amount' THEN rc.dblQuantity - ISNULL(-rc.dblQuantityPriced, 0)
+				ELSE dbo.fnSCFreightCalculation(tmp.dblQtyReceived, @dblNetUnits, @dblGrossUnits,null) 
 			END
 			,CASE 
-				WHEN rc.strCostMethod = 'Per Unit' THEN rc.dblRate
-				ELSE rc.dblAmount
+				WHEN rc.strCostMethod = 'Amount' THEN  rc.dblAmount
+				ELSE rc.dblRate
 			END
 			,rc.intTaxGroupId
 	FROM	#tmpReceiptItem tmp 
