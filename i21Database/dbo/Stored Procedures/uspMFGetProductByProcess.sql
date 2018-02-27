@@ -13,7 +13,7 @@ BEGIN
 		,U.intUnitMeasureId
 		,U.strUnitMeasure
 		,I.strLotTracking
-		,(
+		,CONVERT(BIT, (
 			CASE 
 				WHEN EXISTS (
 						SELECT *
@@ -24,7 +24,7 @@ BEGIN
 					THEN 1
 				ELSE 0
 				END
-			) AS ysnInputItemEnabled
+			)) AS ysnInputItemEnabled
 	FROM dbo.tblMFRecipe R
 	JOIN dbo.tblICItem I ON I.intItemId = R.intItemId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
