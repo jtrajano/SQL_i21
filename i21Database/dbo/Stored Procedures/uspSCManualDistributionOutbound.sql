@@ -391,38 +391,13 @@ BEGIN
 			EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
 
 			--INVOICE intergration
-			SELECT @intDestinationWeightId = intDestinationWeightId, @intShipmentOrderId = intOrderId FROM tblICInventoryShipmentItem WHERE intInventoryShipmentId = @InventoryShipmentId AND ISNULL(intDestinationWeightId, 0) != 0
+			SELECT @intPricingTypeId = CTD.intPricingTypeId FROM tblICInventoryShipmentItem ISI 
+			LEFT JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = ISI.intLineNo
+			WHERE intInventoryShipmentId = @InventoryShipmentId
 
-			SELECT @intPricingTypeId = intPricingTypeId FROM vyuCTContractDetailView where intContractHeaderId = @intShipmentOrderId; 
 			IF ISNULL(@InventoryShipmentId, 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6)
 			BEGIN
-				--IF ISNULL(@intDestinationWeightId,0) = 0
 				EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL;
-
-				--SELECT @dblQtyShipped = dblInvoiceTotal FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId;
-				
-				--IF ISNULL(@intInvoiceId , 0) != 0 AND ISNULL(@intDestinationWeightId,0) = 0 AND @dblQtyShipped > 0
-				--BEGIN
-				--	EXEC dbo.uspARPostInvoice
-				--	@batchId			= NULL,
-				--	@post				= 1,
-				--	@recap				= 0,
-				--	@param				= @intInvoiceId,
-				--	@userId				= @intUserId,
-				--	@beginDate			= NULL,
-				--	@endDate			= NULL,
-				--	@beginTransaction	= NULL,
-				--	@endTransaction		= NULL,
-				--	@exclude			= NULL,
-				--	@successfulCount	= @successfulCount OUTPUT,
-				--	@invalidCount		= @invalidCount OUTPUT,
-				--	@success			= @success OUTPUT,
-				--	@batchIdUsed		= @batchIdUsed OUTPUT,
-				--	@recapId			= @recapId OUTPUT,
-				--	@transType			= N'all',
-				--	@accrueLicense		= 0,
-				--	@raiseError			= 1
-				--END
 			END
 		END
 _Exit:
