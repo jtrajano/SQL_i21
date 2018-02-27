@@ -103,6 +103,8 @@ INSERT into @ReceiptStagingTable(
 		,intSourceType	
 		,strSourceScreenName
 		,strChargesLink
+		,dblGross
+		,dblNet
 )	
 SELECT 
 		strReceiptType				= CASE 
@@ -143,7 +145,7 @@ SELECT
 		,intItemId					= SC.intItemId
 		,intItemLocationId			= SC.intProcessingLocationId
 		,intItemUOMId				= LI.intItemUOMId
-		,intGrossNetUOMId			= NULL
+		,intGrossNetUOMId			= LI.intItemUOMId
 		,intCostUOMId				= CASE
 										WHEN ISNULL(CNT.intPriceItemUOMId,0) = 0 THEN LI.intItemUOMId 
 										WHEN ISNULL(CNT.intPriceItemUOMId,0) > 0 THEN dbo.fnGetMatchingItemUOMId(CNT.intItemId, CNT.intPriceItemUOMId)
@@ -199,6 +201,8 @@ SELECT
 		,intSourceType		 		= 1 -- Source type for scale is 1 
 		,strSourceScreenName		= 'Scale Ticket'
 		,strChargesLink				= 'CL-'+ CAST (LI.intId AS nvarchar(MAX)) 
+		,dblGross					= SC.dblGrossUnits
+		,dblNet						= SC.dblNetUnits
 FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId INNER JOIN dbo.tblICItemUOM ItemUOM	ON ItemUOM.intItemId = SC.intItemId 
 		AND ItemUOM.intItemUOMId = @intTicketItemUOMId
 		INNER JOIN dbo.tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
@@ -622,7 +626,6 @@ IF ISNULL(@intFreightItemId,0) = 0
 																		CASE
 																			WHEN RE.ysnIsStorage = 1 THEN 0
 																			WHEN RE.ysnIsStorage = 0 THEN ContractCost.dblRate
-																			--ROUND (ContractCost.dblRate * dbo.fnCalculateQtyBetweenUOM(ContractCost.intItemUOMId, dbo.fnGetMatchingItemUOMId(RE.intItemId, ContractCost.intItemUOMId), SC.dblGrossUnits), 2)
 																		END
 																		ELSE 0
 																	END
@@ -640,28 +643,28 @@ IF ISNULL(@intFreightItemId,0) = 0
 
 								INSERT INTO @OtherCharges
 								(
-										[intEntityVendorId] 
-										,[strBillOfLadding] 
-										,[strReceiptType] 
-										,[intLocationId] 
-										,[intShipViaId] 
-										,[intShipFromId] 
-										,[intCurrencyId]
-										,[intCostCurrencyId]  	
-										,[intChargeId]
-										,[intForexRateTypeId]
-										,[dblForexRate] 
-										,[ysnInventoryCost] 
-										,[strCostMethod] 
-										,[dblRate] 
-										,[intCostUOMId] 
-										,[intOtherChargeEntityVendorId] 
-										,[dblAmount] 
-										,[intContractHeaderId]
-										,[intContractDetailId] 
-										,[ysnAccrue]
-										,[ysnPrice]
-										,[strChargesLink]
+									[intEntityVendorId] 
+									,[strBillOfLadding] 
+									,[strReceiptType] 
+									,[intLocationId] 
+									,[intShipViaId] 
+									,[intShipFromId] 
+									,[intCurrencyId]
+									,[intCostCurrencyId]  	
+									,[intChargeId]
+									,[intForexRateTypeId]
+									,[dblForexRate] 
+									,[ysnInventoryCost] 
+									,[strCostMethod] 
+									,[dblRate] 
+									,[intCostUOMId] 
+									,[intOtherChargeEntityVendorId] 
+									,[dblAmount] 
+									,[intContractHeaderId]
+									,[intContractDetailId] 
+									,[ysnAccrue]
+									,[ysnPrice]
+									,[strChargesLink]
 								)
 								SELECT	
 								[intEntityVendorId]					= RE.intEntityVendorId
@@ -903,28 +906,28 @@ IF ISNULL(@intFreightItemId,0) = 0
 						BEGIN
 							INSERT INTO @OtherCharges
 							(
-									[intEntityVendorId] 
-									,[strBillOfLadding] 
-									,[strReceiptType] 
-									,[intLocationId] 
-									,[intShipViaId] 
-									,[intShipFromId] 
-									,[intCurrencyId]
-									,[intCostCurrencyId]  	
-									,[intChargeId]
-									,[intForexRateTypeId]
-									,[dblForexRate] 
-									,[ysnInventoryCost] 
-									,[strCostMethod] 
-									,[dblRate] 
-									,[intCostUOMId] 
-									,[intOtherChargeEntityVendorId] 
-									,[dblAmount] 
-									,[intContractHeaderId]
-									,[intContractDetailId] 
-									,[ysnAccrue]
-									,[ysnPrice]
-									,[strChargesLink]
+								[intEntityVendorId] 
+								,[strBillOfLadding] 
+								,[strReceiptType] 
+								,[intLocationId] 
+								,[intShipViaId] 
+								,[intShipFromId] 
+								,[intCurrencyId]
+								,[intCostCurrencyId]  	
+								,[intChargeId]
+								,[intForexRateTypeId]
+								,[dblForexRate] 
+								,[ysnInventoryCost] 
+								,[strCostMethod] 
+								,[dblRate] 
+								,[intCostUOMId] 
+								,[intOtherChargeEntityVendorId] 
+								,[dblAmount] 
+								,[intContractHeaderId]
+								,[intContractDetailId] 
+								,[ysnAccrue]
+								,[ysnPrice]
+								,[strChargesLink]
 							)
 							SELECT	
 							[intEntityVendorId]					= RE.intEntityVendorId
@@ -941,8 +944,9 @@ IF ISNULL(@intFreightItemId,0) = 0
 							,[ysnInventoryCost]					= 0
 							,[strCostMethod]					= IC.strCostMethod
 							,[dblRate]							= CASE
-																	WHEN IC.strCostMethod = 'Per Unit' THEN SC.dblFreightRate
 																	WHEN IC.strCostMethod = 'Amount' THEN 0
+																	ELSE SC.dblFreightRate
+																	
 																END
 							,[intCostUOMId]						= SC.intItemUOMIdTo
 							,[intOtherChargeEntityVendorId]		= CASE
@@ -950,7 +954,6 @@ IF ISNULL(@intFreightItemId,0) = 0
 																		WHEN @intHaulerId != 0 THEN @intHaulerId
 																	END
 							,[dblAmount]						= CASE
-																	WHEN IC.strCostMethod = 'Per Unit' THEN 0
 																	WHEN IC.strCostMethod = 'Amount' THEN 
 																	CASE
 																		WHEN RE.ysnIsStorage = 1 THEN 0
@@ -962,6 +965,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 																				ROUND ((RE.dblQty / SC.dblNetUnits * CT.dblRate), 2)
 																		END
 																	END
+																	ELSE 0
 																END
 							,[intContractHeaderId]				= RE.intContractHeaderId
 							,[intContractDetailId]				= RE.intContractDetailId
@@ -983,28 +987,28 @@ IF ISNULL(@intFreightItemId,0) = 0
 						BEGIN
 							INSERT INTO @OtherCharges
 							(
-									[intEntityVendorId] 
-									,[strBillOfLadding] 
-									,[strReceiptType] 
-									,[intLocationId] 
-									,[intShipViaId] 
-									,[intShipFromId] 
-									,[intCurrencyId]
-									,[intCostCurrencyId]  	
-									,[intChargeId]
-									,[intForexRateTypeId]
-									,[dblForexRate] 
-									,[ysnInventoryCost] 
-									,[strCostMethod] 
-									,[dblRate] 
-									,[intCostUOMId] 
-									,[intOtherChargeEntityVendorId] 
-									,[dblAmount] 
-									,[intContractHeaderId]
-									,[intContractDetailId] 
-									,[ysnAccrue]
-									,[ysnPrice]
-									,[strChargesLink]
+								[intEntityVendorId] 
+								,[strBillOfLadding] 
+								,[strReceiptType] 
+								,[intLocationId] 
+								,[intShipViaId] 
+								,[intShipFromId] 
+								,[intCurrencyId]
+								,[intCostCurrencyId]  	
+								,[intChargeId]
+								,[intForexRateTypeId]
+								,[dblForexRate] 
+								,[ysnInventoryCost] 
+								,[strCostMethod] 
+								,[dblRate] 
+								,[intCostUOMId] 
+								,[intOtherChargeEntityVendorId] 
+								,[dblAmount] 
+								,[intContractHeaderId]
+								,[intContractDetailId] 
+								,[ysnAccrue]
+								,[ysnPrice]
+								,[strChargesLink]
 							)
 							SELECT	
 							[intEntityVendorId]					= RE.intEntityVendorId
@@ -1114,28 +1118,28 @@ IF ISNULL(@intFreightItemId,0) = 0
 					END
 				INSERT INTO @OtherCharges
 				(
-						[intEntityVendorId] 
-						,[strBillOfLadding] 
-						,[strReceiptType] 
-						,[intLocationId] 
-						,[intShipViaId] 
-						,[intShipFromId] 
-						,[intCurrencyId]
-						,[intCostCurrencyId]  	
-						,[intChargeId] 
-						,[intForexRateTypeId]
-						,[dblForexRate]
-						,[ysnInventoryCost] 
-						,[strCostMethod] 
-						,[dblRate] 
-						,[intCostUOMId] 
-						,[intOtherChargeEntityVendorId] 
-						,[dblAmount] 
-						,[intContractHeaderId]
-						,[intContractDetailId] 
-						,[ysnAccrue]
-						,[ysnPrice]
-						,[strChargesLink]
+					[intEntityVendorId] 
+					,[strBillOfLadding] 
+					,[strReceiptType] 
+					,[intLocationId] 
+					,[intShipViaId] 
+					,[intShipFromId] 
+					,[intCurrencyId]
+					,[intCostCurrencyId]  	
+					,[intChargeId] 
+					,[intForexRateTypeId]
+					,[dblForexRate]
+					,[ysnInventoryCost] 
+					,[strCostMethod] 
+					,[dblRate] 
+					,[intCostUOMId] 
+					,[intOtherChargeEntityVendorId] 
+					,[dblAmount] 
+					,[intContractHeaderId]
+					,[intContractDetailId] 
+					,[ysnAccrue]
+					,[ysnPrice]
+					,[strChargesLink]
 				)
 				SELECT	
 				[intEntityVendorId]					= RE.intEntityVendorId
