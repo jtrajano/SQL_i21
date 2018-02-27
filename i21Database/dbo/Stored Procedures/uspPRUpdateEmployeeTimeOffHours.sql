@@ -7,13 +7,30 @@ BEGIN
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpEmployees')) DROP TABLE #tmpEmployees
 
 	--Get Employees with specified Time Off
-	SELECT E.[intEntityId]
-		  ,dtmLastAward = CASE WHEN (ISNULL(T.dtmEligible, E.dtmDateHired) > ISNULL(T.dtmLastAward, E.dtmDateHired)) THEN 
+	SELECT E.intEntityId
+		,dtmLastAward = CASE WHEN (ISNULL(T.dtmEligible, E.dtmDateHired) > ISNULL(T.dtmLastAward, E.dtmDateHired)) THEN 
 								ISNULL(T.dtmEligible, E.dtmDateHired)
 							ELSE
 								ISNULL(T.dtmLastAward, E.dtmDateHired)
 						  END
-		  ,dtmNextAward = CASE WHEN (strAwardPeriod = 'Start of Week') THEN
+		,dtmNextAward = CAST(NULL AS DATETIME)
+		,dblAccruedHours = CAST(0 AS NUMERIC(18, 6))
+		,dblEarnedHours = CAST(0 AS NUMERIC(18, 6))
+		,dblRate
+		,dblPerPeriod
+		,strPeriod
+		,dblRateFactor
+		,strAwardPeriod
+		,dtmDateHired
+	INTO #tmpEmployees
+	FROM tblPREmployee E LEFT JOIN tblPREmployeeTimeOff T
+		ON E.intEntityId = T.intEntityEmployeeId
+	WHERE E.intEntityId = ISNULL(@intEntityEmployeeId, E.intEntityId)
+		 AND T.intTypeTimeOffId = @intTypeTimeOffId
+
+	--Calculate Next Award Date
+	UPDATE #tmpEmployees 
+		SET dtmNextAward = CASE WHEN (strAwardPeriod = 'Start of Week') THEN
 								CAST(DATEADD(WK, DATEDIFF(WK, 6, GETDATE()), 0) AS DATE)
 							 WHEN (strAwardPeriod = 'End of Week') THEN
 								CAST(DATEADD(DD, 7-(DATEPART(DW, GETDATE())), GETDATE()) AS DATE)
@@ -28,62 +45,15 @@ BEGIN
 							 WHEN (strAwardPeriod = 'Start of Year') THEN
 								DATEADD(YY, DATEDIFF(YY,0,getdate()), 0)
 							 WHEN (strAwardPeriod = 'End of Year') THEN
-								DATEADD(YY, DATEDIFF(YY,0,getdate()) + 1, -1)
+								CASE WHEN (dtmLastAward) < (DATEADD(YY, DATEDIFF(YY,0,getdate()), -1)) THEN
+									DATEADD(YY, DATEDIFF(YY,0,GETDATE()), -1)
+								ELSE 
+									DATEADD(YY, DATEDIFF(YY,0,GETDATE()) + 1, -1)
+								END
 							 WHEN (strAwardPeriod = 'Anniversary Date') THEN
-								DATEADD(YY, YEAR(GETDATE()) - YEAR(E.dtmDateHired), E.dtmDateHired)
-							 WHEN (strAwardPeriod = 'Paycheck') THEN
-								(SELECT TOP 1 dtmPayDate FROM tblPRPaycheck WHERE ysnPosted = 1 AND ysnVoid = 0 AND 
-									intEntityEmployeeId = ISNULL(@intEntityEmployeeId, E.intEntityId) ORDER BY dtmPayDate DESC)
+								DATEADD(YY, YEAR(GETDATE()) - YEAR(dtmDateHired), dtmDateHired)
 							 ELSE NULL 
 						END
-		,dblAccruedHours = CAST(0 AS NUMERIC(18, 6))
-		,dblEarnedHours = CAST(0 AS NUMERIC(18, 6))
-		,dblRate
-		,dblPerPeriod
-		,strPeriod
-		,dblRateFactor
-		,strAwardPeriod
-		,strPayPeriod
-	INTO #tmpEmployees
-	FROM tblPREmployee E LEFT JOIN tblPREmployeeTimeOff T
-		ON E.[intEntityId] = T.intEntityEmployeeId
-	WHERE E.[intEntityId] = ISNULL(@intEntityEmployeeId, E.[intEntityId])
-		 AND T.intTypeTimeOffId = @intTypeTimeOffId
-
-	--Clean-up Next Award Date
-	UPDATE #tmpEmployees 
-		SET dtmNextAward = CASE WHEN (dtmNextAward <= dtmLastAward) THEN
-								CASE WHEN (strAwardPeriod IN ('Start of Week', 'End of Week')) THEN
-										DATEADD(WK, 1, dtmNextAward)
-									 WHEN (strAwardPeriod IN ('Start of Month', 'End of Month')) THEN
-										DATEADD(MM, 1, dtmNextAward)
-									 WHEN (strAwardPeriod IN ('Start of Quarter', 'End of Quarter')) THEN
-										DATEADD(QQ, 1, dtmNextAward)
-									 WHEN (strAwardPeriod IN ('Start of Year', 'End of Year', 'Anniversary Date')) THEN
-										DATEADD(YY, 1, dtmNextAward)
-									 WHEN (strAwardPeriod IN ('Paycheck')) THEN
-										CASE WHEN (strPayPeriod = 'Daily') THEN 
-												DATEADD(DD, 1, dtmNextAward)
-											 WHEN (strPayPeriod = 'Weekly') THEN
-												DATEADD(WK, 1, dtmNextAward)
-											 WHEN (strPayPeriod = 'Bi-Weekly') THEN 
-												DATEADD(WK, 2, dtmNextAward)
-											 WHEN (strPayPeriod = 'Semi-Monthly') THEN 
-												DATEADD(DD, 15, dtmNextAward)
-											 WHEN (strPayPeriod = 'Monthly') THEN 
-												DATEADD(MM, 1, dtmNextAward)
-											 WHEN (strPayPeriod = 'Quarterly') THEN 
-												DATEADD(QQ, 1, dtmNextAward)
-											 WHEN (strPayPeriod = 'Annual') THEN 
-												DATEADD(YY, 1, dtmNextAward)
-											 ELSE 
-												dtmNextAward 
-										END
-									 ELSE dtmNextAward 
-								END
-							ELSE
-								dtmNextAward
-							END
 
 	UPDATE #tmpEmployees 
 		--Calculate Total Accrued Hours
