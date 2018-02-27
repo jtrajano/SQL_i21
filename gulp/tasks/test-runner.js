@@ -14,7 +14,7 @@ gulp.task('test', function (done) {
     new Server({
         configFile: config.testing.config,
         singleRun: true,
-        reporters: ['mocha','mocha-junit-reporter'],
+        reporters: ['mocha','junit'],
         junitReporter: {
             outputFile: 'TEST-inventory-unit-tests.xml',
             useBrowserName: true
