@@ -30,19 +30,28 @@ BEGIN
 	 	,intConcurrencyId
 	 )
 	 SELECT 
-	 	 strTicketPool		 = gatkt_pool
-	 	,intNextTicketNumber = gatkt_next_single_tic_no
-	 	,intConcurrencyId    = 1
-	 FROM gatktmst
-	 
-	 UNION ALL
-	 
-	 SELECT 
-	 	 strTicketPool		 = LTRIM(RTRIM(gasci_loc_no)) + LTRIM(RTRIM(gasci_scale_station))
-	 	,intNextTicketNumber = 0
-	 	,intConcurrencyId    = 1
-	 FROM gascimst
-	 WHERE LTRIM(RTRIM(ISNULL(gasci_scale_pool, ''))) = ''
+	  strTicketPool		  = t1.strTicketPool		
+	 ,intNextTicketNumber = t1.intNextTicketNumber
+	 ,intConcurrencyId    = t1.intConcurrencyId
+	 FROM
+	 (
+		SELECT 
+			 strTicketPool		 = gatkt_pool
+			,intNextTicketNumber = gatkt_next_single_tic_no
+			,intConcurrencyId    = 1
+		FROM gatktmst
+		
+		UNION ALL
+		
+		SELECT 
+			 strTicketPool		 = LTRIM(RTRIM(gasci_loc_no)) + LTRIM(RTRIM(gasci_scale_station))
+			,intNextTicketNumber = 0
+			,intConcurrencyId    = 1
+		FROM gascimst
+		WHERE LTRIM(RTRIM(ISNULL(gasci_scale_pool, ''))) = ''
+	  ) t1
+	  LEFT JOIN tblSCTicketPool t2 ON t2.strTicketPool = t1.strTicketPool collate Latin1_General_CI_AS
+	  WHERE t2.strTicketPool IS NULL
 
 	 INSERT INTO tblSCTicketType 
 	 (
@@ -133,7 +142,7 @@ BEGIN
 	 	,intConcurrencyId
 	 )
 	 SELECT DISTINCT
-	 	  strDistributionOption	 = ST.strStorageTypeDescription
+	 	  strDistributionOption	 = ST.strStorageTypeCode
 	 	 ,intTicketPoolId		 = TT.intTicketPoolId
 	 	 ,intTicketTypeId		 = TT.intTicketTypeId
 	 	 ,ysnDistributionAllowed = 1
@@ -152,7 +161,17 @@ BEGIN
 		,strTicketFooter
 		,intConcurrencyId
 	)
-	SELECT 
+	SELECT  
+	   strTicketFormat		            =  t1.strTicketFormat		    
+	  ,intTicketFormatSelection   		=  t1.intTicketFormatSelection 
+	  ,ysnSuppressCompanyName	    	=  t1.ysnSuppressCompanyName	
+	  ,ysnFormFeedEachCopy				=  t1.ysnFormFeedEachCopy		
+	  ,strTicketHeader					=  t1.strTicketHeader			
+	  ,strTicketFooter					=  t1.strTicketFooter			
+	  ,intConcurrencyId 				=  t1.intConcurrencyId 		
+	  FROM
+	 (    
+		 SELECT 
 		 strTicketFormat		       = 'Main-Full'
 		,intTicketFormatSelection      =  1
 		,ysnSuppressCompanyName	       =  0
@@ -161,82 +180,85 @@ BEGIN
 		,strTicketFooter			   =  NULL
 		,intConcurrencyId			   =  1
 	
-	UNION ALL
-	
-	SELECT 
-		 strTicketFormat		       ='Main-Half'
-		,intTicketFormatSelection      =  2
-		,ysnSuppressCompanyName	       =  0
-		,ysnFormFeedEachCopy		   =  0
-		,strTicketHeader			   =  NULL
-		,strTicketFooter			   =  NULL
-		,intConcurrencyId			   =  1
-	
-	UNION ALL
-	
-	SELECT 
-		 strTicketFormat		       = 'Copy-Full'
-		,intTicketFormatSelection      =  1
-		,ysnSuppressCompanyName	       =  0
-		,ysnFormFeedEachCopy		   =  0
-		,strTicketHeader			   =  NULL
-		,strTicketFooter			   =  NULL
-		,intConcurrencyId			   =  1
-	
-	UNION ALL
-	
-	SELECT 
-		 strTicketFormat		       = 'Copy-Half'
-		,intTicketFormatSelection      =  2
-		,ysnSuppressCompanyName	       =  0
-		,ysnFormFeedEachCopy		   =  0
-		,strTicketHeader			   =  NULL
-		,strTicketFooter			   =  NULL
-		,intConcurrencyId			   =  1
-	
-	UNION ALL
-	
-	SELECT 
-		 strTicketFormat		       = 'Grade'
-		,intTicketFormatSelection      =  13
-		,ysnSuppressCompanyName	       =  0
-		,ysnFormFeedEachCopy		   =  0
-		,strTicketHeader			   =  NULL
-		,strTicketFooter			   =  NULL
-		,intConcurrencyId			   =  1
-	
-	UNION ALL
-	
-	SELECT 
-		 strTicketFormat		       = 'Plant'
-		,intTicketFormatSelection      =  12
-		,ysnSuppressCompanyName	       =  0
-		,ysnFormFeedEachCopy		   =  0
-		,strTicketHeader			   =  NULL
-		,strTicketFooter			   =  NULL
-		,intConcurrencyId			   =  1
-	
-	UNION ALL
-	
-	SELECT 
-		 strTicketFormat		       = 'Kiosk-120'
-		,intTicketFormatSelection      =  14
-		,ysnSuppressCompanyName	       =  0
-		,ysnFormFeedEachCopy		   =  0
-		,strTicketHeader			   =  NULL
-		,strTicketFooter			   =  NULL
-		,intConcurrencyId			   =  1
-	
-	UNION ALL
-	
-	SELECT 
-		 strTicketFormat		       = 'Kiosk-80'
-		,intTicketFormatSelection      =  16
-		,ysnSuppressCompanyName	       =  0
-		,ysnFormFeedEachCopy		   =  0
-		,strTicketHeader			   =  NULL
-		,strTicketFooter			   =  NULL
-		,intConcurrencyId			   =  1
+		UNION ALL
+		
+		SELECT 
+			 strTicketFormat		       ='Main-Half'
+			,intTicketFormatSelection      =  2
+			,ysnSuppressCompanyName	       =  0
+			,ysnFormFeedEachCopy		   =  0
+			,strTicketHeader			   =  NULL
+			,strTicketFooter			   =  NULL
+			,intConcurrencyId			   =  1
+		
+		UNION ALL
+		
+		SELECT 
+			 strTicketFormat		       = 'Copy-Full'
+			,intTicketFormatSelection      =  1
+			,ysnSuppressCompanyName	       =  0
+			,ysnFormFeedEachCopy		   =  0
+			,strTicketHeader			   =  NULL
+			,strTicketFooter			   =  NULL
+			,intConcurrencyId			   =  1
+		
+		UNION ALL
+		
+		SELECT 
+			 strTicketFormat		       = 'Copy-Half'
+			,intTicketFormatSelection      =  2
+			,ysnSuppressCompanyName	       =  0
+			,ysnFormFeedEachCopy		   =  0
+			,strTicketHeader			   =  NULL
+			,strTicketFooter			   =  NULL
+			,intConcurrencyId			   =  1
+		
+		UNION ALL
+		
+		SELECT 
+			 strTicketFormat		       = 'Grade'
+			,intTicketFormatSelection      =  13
+			,ysnSuppressCompanyName	       =  0
+			,ysnFormFeedEachCopy		   =  0
+			,strTicketHeader			   =  NULL
+			,strTicketFooter			   =  NULL
+			,intConcurrencyId			   =  1
+		
+		UNION ALL
+		
+		SELECT 
+			 strTicketFormat		       = 'Plant'
+			,intTicketFormatSelection      =  12
+			,ysnSuppressCompanyName	       =  0
+			,ysnFormFeedEachCopy		   =  0
+			,strTicketHeader			   =  NULL
+			,strTicketFooter			   =  NULL
+			,intConcurrencyId			   =  1
+		
+		UNION ALL
+		
+		SELECT 
+			 strTicketFormat		       = 'Kiosk-120'
+			,intTicketFormatSelection      =  14
+			,ysnSuppressCompanyName	       =  0
+			,ysnFormFeedEachCopy		   =  0
+			,strTicketHeader			   =  NULL
+			,strTicketFooter			   =  NULL
+			,intConcurrencyId			   =  1
+		
+		UNION ALL
+		
+		SELECT 
+			 strTicketFormat		       = 'Kiosk-80'
+			,intTicketFormatSelection      =  16
+			,ysnSuppressCompanyName	       =  0
+			,ysnFormFeedEachCopy		   =  0
+			,strTicketHeader			   =  NULL
+			,strTicketFooter			   =  NULL
+			,intConcurrencyId			   =  1
+     )t1
+	LEFT JOIN tblSCTicketFormat t2 ON t2.strTicketFormat = t1.strTicketFormat collate Latin1_General_CI_AS
+	WHERE t2.strTicketFormat IS NULL
     
 END
 GO
