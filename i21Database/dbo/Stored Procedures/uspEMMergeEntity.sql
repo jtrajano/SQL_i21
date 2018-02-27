@@ -127,7 +127,7 @@ BEGIN
 			END
 
 			SET @Columns = ''
-			SELECT @Columns = COALESCE(@Columns + ', ', '') + name FROM SYSCOLUMNS WHERE id = object_id(@CurTableName) AND name <> @CurTableKey
+			SELECT @Columns = COALESCE(@Columns + ', ', '') + name FROM syscolumns WHERE id = object_id(@CurTableName) AND name <> @CurTableKey
 			
 			INSERT INTO @RelationShips
 			SELECT 'UPDATE ' + R.TABLE_NAME + ' SET ' +  R.COLUMN_NAME + '='+ @PrimaryKeyString +' WHERE ' + R.COLUMN_NAME  + '=' + @CurMergeId + '; --relationship' AS stment		
