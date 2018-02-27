@@ -1147,7 +1147,7 @@ IF(ISNULL(@Post,0)) = 1
 		FROM 					
 			@Invoices I
 		INNER JOIN
-			(SELECT [intInvoiceId], [intItemId], [intContractHeaderId], [intContractDetailId], [dblPrice], [intLoadDetailId], [strPricing] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
+			(SELECT [intInvoiceId], [intItemId], [intContractHeaderId], [intContractDetailId], [dblPrice], [intLoadDetailId], [strPricing], [intShipmentId], [intInventoryShipmentItemId] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 				ON I.[intInvoiceId] = ARID.[intInvoiceId]
 		INNER JOIN
 			(SELECT [intItemId], [strItemNo] FROM tblICItem WITH (NOLOCK) WHERE strType NOT IN ('Other Charge')) ICI
@@ -1164,7 +1164,10 @@ IF(ISNULL(@Post,0)) = 1
 			AND CAST(ISNULL(ARCC.[dblCashPrice], @ZeroDecimal) AS MONEY) <> CAST(ISNULL(ARID.[dblPrice], @ZeroDecimal) AS MONEY)
 			AND ARCC.[strPricingType] <> 'Index'
 			AND ISNULL(ARID.[intLoadDetailId],0) = 0
+			AND ISNULL(ARID.[intShipmentId],0) = 0
+			AND ISNULL(ARID.[intInventoryShipmentItemId],0) = 0
 			AND ARID.[strPricing] NOT IN ('Contracts-Max Price','Contracts-Pricing Level')
+			
 
 		UNION
 		--Lot Tracked Item - Direct Invoice
