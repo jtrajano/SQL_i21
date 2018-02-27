@@ -12,7 +12,7 @@ module.exports = {
         {pattern: 'test/gce/globalcomponentengine/store/MultiCompanyBaseBufferedStore.js', watched: false },
         {pattern: 'test/gce/globalcomponentengine/store/MultiCompanyBaseStore.js', watched: false },
         {pattern: 'test/gce/globalcomponentengine/store/MultiCompanyBaseTreeStore.js', watched: false },
-        {pattern: 'test/gce/globalcomponentengine/store/MultiCompanyBaseBuffered.js', watched: false },
+        {pattern: 'test/gce/globalcomponentengine/store/MultiCompanyBuffered.js', watched: false },
         {pattern: 'test/gce/irely/BaseEntity.js', watched: false},
         {pattern: 'test/gce/irely/model/EntityCredential.js', watched: false},
         {pattern: 'test/gce/irely/model/EntityToContact.js', watched: false},
