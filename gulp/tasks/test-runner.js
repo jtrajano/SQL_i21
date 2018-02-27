@@ -13,7 +13,7 @@ var config = require('../config');
 gulp.task('test', function(done) {
     new Server({
         configFile: config.testing.config,
-        singleRun: false,
+        singleRun: true,
         reporters: 'mocha'
     }, done).start();
 });
