@@ -6224,6 +6224,7 @@
     <Build Include="dbo\Stored Procedures\uspRKM2MInqTranExpMonthValidation.sql" />
     <Build Include="dbo\Views\vyuRKGetFutureSettlementPriceString.sql" />
     <Build Include="dbo\Views\vyuRKBrokerageCommission.sql" />
+    <Build Include="dbo\Views\vyuPATRetireStock.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

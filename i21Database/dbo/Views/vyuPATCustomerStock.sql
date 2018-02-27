@@ -1,46 +1,49 @@
 ﻿CREATE VIEW [dbo].[vyuPATCustomerStock]
 	AS
-SELECT	CS.intCustomerStockId,
-		CS.intCustomerPatronId,
-		IssueStk.intIssueStockId,
+SELECT	IssueStk.intIssueStockId,
 		IssueStk.strIssueNo,
 		IssueStk.dtmIssueDate,
-		C.strName,
-		CS.intStockId,
+		CS.intCustomerStockId,
+		IssueStk.intCustomerPatronId,
+		Customer.strName,
+		IssueStk.intStockId,
 		PC.strStockName,
-		CS.strCertificateNo,
-		CS.strStockStatus,
-		CS.dblSharesNo,
+		IssueStk.strCertificateNo,
+		IssueStk.strStockStatus,
+		IssueStk.dblSharesNo,
 		RetireStk.intRetireStockId,
 		RetireStk.strRetireNo,
 		RetireStk.dtmRetireDate,
-		CS.strActivityStatus,
+		strActivityStatus = ISNULL(CS.strActivityStatus,'Open'),
 		CS.intTransferredFrom,
-		CT.strName AS strTransferredFrom,
+		TransferCustomer.strName AS strTransferredFrom,
 		CS.dtmTransferredDate,
-		CS.dblParValue,
-		CS.dblFaceValue,
+		IssueStk.dblParValue,
+		IssueStk.dblFaceValue,
 		IssueStk.intInvoiceId,
 		ARI.strInvoiceNumber,
+		strCheckNumber = ARPAY.strPaymentInfo,
+		dtmCheckDate = ARPAY.dtmDatePaid,
+		dblCheckAmount = ARPAY.dblPayment,
+		ysnPosted = CASE WHEN ISNULL(IssueStk.ysnPosted, 0) = 0 THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END,
 		RetireStk.intBillId,
 		APB.strBillId,
-		strCheckNumber = CASE WHEN RetireStk.intBillId IS NULL THEN ARPAY.strPaymentInfo ELSE APPAY.strPaymentInfo END,
-		dtmCheckDate = CASE WHEN RetireStk.intBillId IS NULL THEN ARPAY.dtmDatePaid ELSE APPAY.dtmDatePaid END,
-		dblCheckAmount = CASE WHEN RetireStk.intBillId IS NULL THEN ARPAY.dblPayment ELSE APPAY.dblPayment END,
-		ysnPosted = CASE WHEN ISNULL(IssueStk.ysnPosted, 0) = 0 THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END,
+		strRetireCheckNumber = APPAY.strPaymentInfo,
+		dtmRetireCheckDate = APPAY.dtmDatePaid,
+		dblRetireCheckAmount = APPAY.dblPayment,
 		ysnRetiredPosted = CASE WHEN ISNULL(RetireStk.ysnPosted, 0) = 0 THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END,
-		CS.intConcurrencyId
-	FROM tblPATCustomerStock CS
-	INNER JOIN tblEMEntity C
-		ON C.intEntityId = CS.intCustomerPatronId
+		IssueStk.intConcurrencyId
+	FROM tblPATIssueStock IssueStk
+	INNER JOIN tblEMEntity Customer
+		ON Customer.intEntityId = IssueStk.intCustomerPatronId
 	INNER JOIN tblPATStockClassification PC
-		ON PC.intStockId = CS.intStockId
-	LEFT OUTER JOIN tblPATIssueStock IssueStk
-		ON IssueStk.intCustomerStockId = CS.intCustomerStockId
+		ON PC.intStockId = IssueStk.intStockId
+	LEFT OUTER JOIN tblPATCustomerStock CS
+		ON CS.intCustomerStockId = IssueStk.intCustomerStockId
 	LEFT OUTER JOIN tblPATRetireStock RetireStk
 		ON RetireStk.intCustomerStockId = CS.intCustomerStockId
-	LEFT OUTER JOIN tblEMEntity CT
-		ON CT.intEntityId = CS.intTransferredFrom
+	LEFT OUTER JOIN tblEMEntity TransferCustomer
+		ON TransferCustomer.intEntityId = CS.intTransferredFrom
 	LEFT OUTER JOIN tblAPBill APB
 		ON APB.intBillId = RetireStk.intBillId
 	LEFT OUTER JOIN tblARInvoice ARI
@@ -49,3 +52,4 @@ SELECT	CS.intCustomerStockId,
 		ON APPAY.intBillId = RetireStk.intBillId
 	LEFT OUTER JOIN (SELECT A.strPaymentInfo, B.intInvoiceId, A.dtmDatePaid, B.dblPayment FROM tblARPayment A INNER JOIN tblARPaymentDetail B ON A.intPaymentId = B.intPaymentId) ARPAY
 		ON ARPAY.intInvoiceId = IssueStk.intInvoiceId
+
