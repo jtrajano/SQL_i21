@@ -228,9 +228,17 @@ BEGIN TRY
 
 		SET @intExecutionOrder = @intExecutionOrder + 1
 
-		SELECT @strWorkOrderNo = convert(VARCHAR, @strDemandNo) + right('00' + Convert(VARCHAR, (Max(Cast(right(strWorkOrderNo, 2) AS INT))) + 1), 2)
-		FROM tblMFWorkOrder
-		WHERE strWorkOrderNo LIKE @strDemandNo + '%'
+		--Generate Work Order No
+		EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+		,@intItemId = @intItemId
+		,@intManufacturingId = @intCellId
+		,@intSubLocationId = @intSubLocationId
+		,@intLocationId = @intLocationId
+		,@intOrderTypeId = NULL
+		,@intBlendRequirementId = @intBlendRequirementId
+		,@intPatternCode = 93
+		,@ysnProposed = 0
+		,@strPatternString = @strWorkOrderNo OUTPUT
 
 		IF ISNULL(@strWorkOrderNo, '') = ''
 			SET @strWorkOrderNo = convert(VARCHAR, @strDemandNo) + '01'
