@@ -16,7 +16,7 @@
 	@upToDateCustomer 	BIT = 0
 AS
 	SET NOCOUNT ON
-	CREATE TABLE #tmpCustomers (intEntityId INT, intServiceChargeId INT, intTermId INT)	
+	CREATE TABLE #tmpCustomers (intEntityId INT, intServiceChargeId INT, intTermId INT, ysnActive BIT)	
 	DECLARE @tblComputedBalances TABLE (intEntityId INT, dblTotalAR NUMERIC(18, 6))
 	DECLARE @tblTypeServiceCharge	  [dbo].[ServiceChargeTableType]
 	DECLARE @tempTblTypeServiceCharge [dbo].[ServiceChargeTableType]	
@@ -58,15 +58,23 @@ AS
 	--GET SELECTED CUSTOMERS
 	IF (@customerIds = '')
 		BEGIN
-			INSERT INTO #tmpCustomers (intEntityId, intServiceChargeId, intTermId) 
-			SELECT E.[intEntityId], C.intServiceChargeId, C.intTermsId FROM vyuARCustomerSearch E
-				INNER JOIN tblARCustomer C ON E.[intEntityId] = C.[intEntityId]
-				WHERE E.ysnActive = 1 AND ISNULL(C.intServiceChargeId, 0) <> 0
+			INSERT INTO #tmpCustomers (intEntityId, intServiceChargeId, intTermId, ysnActive) 
+			SELECT E.intEntityId, C.intServiceChargeId, C.intTermsId, E.ysnActive
+			FROM tblARCustomer C
+			INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityId
+			WHERE ISNULL(C.intServiceChargeId, 0) <> 0
 		END
 	ELSE
 		BEGIN
-			INSERT INTO #tmpCustomers (intEntityId, intServiceChargeId, intTermId)
-			SELECT [intEntityId], intServiceChargeId, intTermsId FROM tblARCustomer WHERE [intEntityId] IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@customerIds)) AND ISNULL(intServiceChargeId, 0) <> 0
+			INSERT INTO #tmpCustomers (intEntityId, intServiceChargeId, intTermId, ysnActive)
+			SELECT E.intEntityId, C.intServiceChargeId, C.intTermsId, E.ysnActive
+			FROM tblARCustomer C
+			INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityId
+			INNER JOIN (
+				 SELECT intID 
+				 FROM fnGetRowsFromDelimitedValues(@customerIds)
+			) SELECTED ON C.intEntityId = SELECTED.intID
+			WHERE ISNULL(intServiceChargeId, 0) <> 0
 		END
 
 	--GET SELECTED STATUS CODES
@@ -147,6 +155,7 @@ AS
 				WHERE YEAR(ISNULL(dtmLastServiceCharge, '01/01/1900')) * 100 + MONTH(ISNULL(dtmLastServiceCharge, '01/01/1900')) < YEAR(@asOfDate) * 100 + MONTH(@asOfDate)
 			) C ON C.intEntityId = AGING.intEntityCustomerId		
 			GROUP BY AGING.intEntityCustomerId
+			HAVING SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl120Days) + SUM(dbl121Days) + SUM(dblCredits) + SUM(dblPrepayments) > @zeroDecimal
 		END
 
 	IF EXISTS(SELECT TOP 1 NULL FROM #tmpCustomers WHERE ISNULL(intTermId, 0) = 0) AND @isRecap = 0
@@ -158,12 +167,11 @@ AS
 	--PROCESS EACH CUSTOMER
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpCustomers)
 		BEGIN
-			DECLARE @entityId			INT,
-					@serviceChargeId	INT
-			
-			declare @strCalculationType 	NVARCHAR (100)
-			declare @dblServiceChargeAPR 	NUMERIC (18, 6)
-			DECLARE @dblPercentage			NUMERIC(18, 6) = 0
+			DECLARE @entityId				INT
+				  , @serviceChargeId		INT
+			      , @strCalculationType 	NVARCHAR (100)
+			      , @dblServiceChargeAPR 	NUMERIC(18, 6)
+			      , @dblPercentage			NUMERIC(18, 6) = 0
 
 			SELECT TOP 1 @entityId = C.intEntityId,
 						 @serviceChargeId = C.intServiceChargeId,
@@ -260,10 +268,10 @@ AS
 							IF EXISTS(SELECT TOP 1 NULL FROM @tblComputedBalances)
 								BEGIN
 									INSERT INTO @tempTblTypeServiceCharge
-									SELECT intInvoiceId			= null
+									SELECT intInvoiceId			= NULL
 										 , intBudgetId			= NULL
 										 , intEntityCustomerId	= BALANCE.intEntityId
-										 , strInvoiceNumber		= null
+										 , strInvoiceNumber		= NULL
 										 , strBudgetDescription = NULL
 										 , dblAmountDue			= BALANCE.dblTotalAR
 										 , dblTotalAmount       = dbo.fnRoundBanker(CASE WHEN @strCalculationType = 'Percent'
@@ -328,6 +336,12 @@ AS
 								AND CB.dblBudgetAmount > @zeroDecimal
 								AND (CB.ysnCalculated = 0 OR CB.ysnForgiven = 1)
 						END
+
+					--REMOVE INACTIVE CUSTOMERS WITH ZERO BALANCE
+					DELETE SC
+					FROM @tempTblTypeServiceCharge SC
+					INNER JOIN #tmpCustomers C ON SC.intEntityCustomerId = C.intEntityId
+					WHERE C.ysnActive = 0 AND ISNULL(SC.dblTotalAmount, 0) <= 0
 
 					IF (@calculation = 'By Invoice')
 						BEGIN
