@@ -413,7 +413,7 @@ BEGIN TRY
 				,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
 				,dblQty = @dblNetUnits 
 				,dblUOMQty = ItemUOM.dblUnitQty
-				,dblCost = 0
+				,dblCost = dbo.fnRKGetFutureAndBasisPrice (1,ScaleTicket.intCommodityId,right(convert(varchar, CNT.dtmEndDate, 106),8),3,NULL,NULL,NULL,NULL,0,ScaleTicket.intItemId)
 				,dblSalesPrice = 0
 				,intCurrencyId = ScaleTicket.intCurrencyId
 				,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
@@ -435,10 +435,10 @@ BEGIN TRY
 				--END
 				,strSourceTransactionId  = @strDistributionOption
 		FROM	dbo.tblSCTicket ScaleTicket
-				INNER JOIN dbo.tblICItemUOM ItemUOM ON ScaleTicket.intItemId = ItemUOM.intItemId
-				INNER JOIN dbo.tblICItemLocation ItemLocation ON ScaleTicket.intItemId = ItemLocation.intItemId AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
-				LEFT JOIN dbo.vyuCTContractDetailView CNT ON CNT.intContractDetailId = ScaleTicket.intContractId
-				LEFT JOIN dbo.tblICCommodity IC ON IC.intCommodityId = ScaleTicket.intCommodityId
+				INNER JOIN tblICItemUOM ItemUOM ON ScaleTicket.intItemId = ItemUOM.intItemId
+				INNER JOIN tblICItemLocation ItemLocation ON ScaleTicket.intItemId = ItemLocation.intItemId AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
+				LEFT JOIN tblCTContractDetail CNT ON CNT.intContractDetailId = ScaleTicket.intContractId
+				LEFT JOIN tblICCommodity IC ON IC.intCommodityId = ScaleTicket.intCommodityId
 		WHERE	ScaleTicket.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
 	
 	CONTINUEISH:

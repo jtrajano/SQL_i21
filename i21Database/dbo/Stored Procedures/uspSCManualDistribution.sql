@@ -24,7 +24,6 @@ DECLARE @strDistributionOption NVARCHAR(50) = NULL
 DECLARE @dblRemainingUnits AS NUMERIC(38, 20)
 DECLARE @LineItems AS ScaleTransactionTableType
 DECLARE @intDirectType AS INT = 3
-DECLARE @intTicketUOM INT
 DECLARE @intTicketItemUOMId INT
 DECLARE @strReceiptType AS NVARCHAR(100)
 DECLARE @intLoadId INT
@@ -36,7 +35,6 @@ DECLARE @ysnIsStorage AS BIT
 DECLARE @intLoadContractId AS INT
 DECLARE @dblLoadScheduledUnits AS NUMERIC(38, 20)
 DECLARE @strInOutFlag AS NVARCHAR(100)
-DECLARE @strLotTracking AS NVARCHAR(100)
 DECLARE @intItemId AS INT
 DECLARE @intStorageScheduleId AS INT
 DECLARE @intInventoryReceiptItemId AS INT
@@ -54,26 +52,12 @@ DECLARE @intInventoryReceiptItemId AS INT
 		,@requireApproval AS BIT
 		,@intLocationId AS INT;
 
-BEGIN
-	SELECT	@intTicketUOM = UOM.intUnitMeasureId, @intItemId = SC.intItemId
-	FROM	dbo.tblSCTicket SC	        
-			JOIN dbo.tblICItemUOM UOM ON SC.intItemId = UOM.intItemId
-	WHERE	SC.intTicketId = @intTicketId AND UOM.ysnStockUnit = 1		
-END
-
-BEGIN 
-	SELECT	@intTicketItemUOMId = UM.intItemUOMId, @intLoadId = SC.intLoadId
-		FROM	dbo.tblICItemUOM UM	
-	      JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
-	WHERE	UM.ysnStockUnit = 1 AND SC.intTicketId = @intTicketId
-END
-
---BEGIN 
---	SELECT	@intTicketItemUOMId = UM.intItemUOMId
---	FROM	dbo.tblICItemUOM UM	
---			JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
---	WHERE	UM.intUnitMeasureId = @intTicketUOM AND SC.intTicketId = @intTicketId
---END
+SELECT @intTicketItemUOMId = UM.intItemUOMId
+	, @intLoadId = SC.intLoadId
+	, @intItemId = SC.intItemId
+FROM dbo.tblICItemUOM UM 
+LEFT JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
+WHERE UM.ysnStockUnit = 1 AND SC.intTicketId = @intTicketId
 
 BEGIN TRY
 DECLARE @intId INT;
@@ -394,12 +378,12 @@ END
 		[intOwnershipType] [INT],
 		UNIQUE ([intInventoryReceiptItemId])
 	);
-	INSERT INTO #tmpItemReceiptIds(intInventoryReceiptItemId,intOrderId,intOwnershipType) SELECT intInventoryReceiptItemId,intOrderId,intOwnershipType FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId = @InventoryReceiptId  AND dblUnitCost > 0
+	INSERT INTO #tmpItemReceiptIds(intInventoryReceiptItemId,intOrderId,intOwnershipType) SELECT intInventoryReceiptItemId,intOrderId,intOwnershipType FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId = @InventoryReceiptId
 
 	DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 	FOR
 	SELECT TOP 1 intInventoryReceiptItemId, intOrderId, intOwnershipType
-	FROM #tmpItemReceiptIds WHERE intOwnershipType = 1;
+	FROM #tmpItemReceiptIds;
 
 	OPEN intListCursor;
 
@@ -408,10 +392,7 @@ END
 
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
-		SELECT @intPricingTypeId = intPricingTypeId FROM vyuCTContractDetailView CT
-		INNER JOIN tblSCTicket SC ON SC.intContractId = CT.intContractDetailId
-		where intContractHeaderId = @intOrderId; 
-		IF ISNULL(@intInventoryReceiptItemId , 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6) AND ISNULL(@intOwnershipType,0) = 1
+		IF ISNULL(@intInventoryReceiptItemId , 0) != 0
 		BEGIN
 			EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intUserId;
 			IF OBJECT_ID (N'tempdb.dbo.#tmpVoucherDetail') IS NOT NULL
