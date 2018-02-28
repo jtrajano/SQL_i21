@@ -983,32 +983,22 @@ BEGIN TRY
 				 )
 				 SELECT 
 				 intCustomerStorageId = SST.intCustomerStorageId
-				,intItemId = ReceiptCharge.[intChargeId]
-				,[intAccountId] = NULL
-				,[dblQtyReceived] = SST.dblUnits
+				,intItemId			  = ReceiptCharge.[intChargeId]
+				,[intAccountId]		  = NULL
+				,[dblQtyReceived]	  = (SC.dblGrossUnits/SC.dblNetUnits) * SST.dblUnits
 				,[strMiscDescription] = Item.[strItemNo]
-				,[dblCost] = CASE 
-								WHEN ReceiptCharge.strCostMethod='Per Unit'		THEN
-																					CASE 
-																									WHEN ReceiptCharge.intEntityVendorId = SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 0 THEN    ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SC.dblFreightRate),2)
-																									WHEN ReceiptCharge.intEntityVendorId = SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 0 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 1 THEN -  ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SC.dblFreightRate), 2)
-																									WHEN ReceiptCharge.intEntityVendorId <> SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 1 THEN - ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SC.dblFreightRate), 2)
-						 															END
-                           
-								WHEN ReceiptCharge.strCostMethod='Amount'		THEN
-																					CASE 
-																									WHEN ReceiptCharge.intEntityVendorId = SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 0 THEN     ROUND(ReceiptCharge.dblAmount/dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CS.intUnitMeasureId,CU.intUnitMeasureId,CS.dblOriginalBalance),2)
-																									WHEN ReceiptCharge.intEntityVendorId = SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 0 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 1 THEN   - ROUND(ReceiptCharge.dblAmount/dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CS.intUnitMeasureId,CU.intUnitMeasureId,CS.dblOriginalBalance), 2)
-																									WHEN ReceiptCharge.intEntityVendorId <> SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 1 THEN  - ROUND(ReceiptCharge.dblAmount/dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CS.intUnitMeasureId,CU.intUnitMeasureId,CS.dblOriginalBalance), 2)
-						 															END
-							 END
+				,[dblCost]			  =  CASE 
+							 			 	  WHEN ReceiptCharge.intEntityVendorId = SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 0 THEN    ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SC.dblFreightRate),2)
+							 			 	  WHEN ReceiptCharge.intEntityVendorId = SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 0 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 1 THEN -  ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SC.dblFreightRate), 2)
+							 			 	  WHEN ReceiptCharge.intEntityVendorId <> SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 1 THEN - ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SC.dblFreightRate), 2)
+							             END
 				,[intContractHeaderId] = NULL
 				,[intContractDetailId] = NULL
-				,[intUnitOfMeasureId] = ReceiptCharge.intCostUOMId
-				,[dblWeightUnitQty] = 1
-				,[dblCostUnitQty] = 1
-				,[dblUnitQty] =1
-				,[dblNetWeight] = 0	
+				,[intUnitOfMeasureId]  = ReceiptCharge.intCostUOMId
+				,[dblWeightUnitQty]    = 1
+				,[dblCostUnitQty]	   = 1
+				,[dblUnitQty]		   = 1
+				,[dblNetWeight]		   = 0	
 				FROM tblICInventoryReceiptCharge ReceiptCharge
 				JOIN tblICItem Item ON Item.intItemId = ReceiptCharge.intChargeId
 				JOIN tblGRStorageHistory SH ON SH.intInventoryReceiptId=ReceiptCharge.intInventoryReceiptId AND SH.strType='FROM Scale'
