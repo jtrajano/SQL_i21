@@ -528,6 +528,7 @@ BEGIN TRY
 		,[strChargesLink] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL
 		,[dblQtyReceived] NUMERIC(38,20)
 		,[dblCost] NUMERIC(38,20)
+		,[intOwnershipType] INT
 		UNIQUE ([intInventoryReceiptItemId])
 	);
 	INSERT INTO #tmpReceiptItem(
@@ -540,6 +541,7 @@ BEGIN TRY
 		,[strChargesLink]
 		,[dblQtyReceived]
 		,[dblCost]
+		,[intOwnershipType]
 	)
 	SELECT 
 		ri.intInventoryReceiptItemId
@@ -551,6 +553,7 @@ BEGIN TRY
 		,ri.strChargesLink
 		,ri.dblOpenReceive - ri.dblBillQty
 		,ri.dblUnitCost
+		,ri.intOwnershipType
 	FROM tblICInventoryReceipt r 
 	INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
 	LEFT JOIN tblCTContractDetail CT ON CT.intContractDetailId = ri.intLineNo AND ri.intInventoryReceiptId = @InventoryReceiptId 
@@ -600,6 +603,7 @@ BEGIN TRY
 				INNER JOIN tblICInventoryReceiptCharge rc ON rc.intInventoryReceiptId = tmp.intInventoryReceiptId AND rc.strChargesLink = tmp.strChargesLink AND tmp.intPricingTypeId IN (0,1,6)
 		WHERE	tmp.ysnPosted = 1
 				AND tmp.intInventoryReceiptId = @InventoryReceiptId
+				AND ri.intOwnershipType = 1
 				AND 
                 (
                     (
@@ -700,6 +704,7 @@ BEGIN TRY
 			AND tmp.intInventoryReceiptId = @InventoryReceiptId
 			AND rc.ysnAccrue = 1 
 			AND rc.intEntityVendorId != tmp.intEntityVendorId
+			AND tmp.intOwnershipType = 1
 
 	DECLARE ListThirdPartyVendor CURSOR LOCAL FAST_FORWARD
 	FOR
