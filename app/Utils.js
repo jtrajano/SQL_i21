@@ -3,12 +3,20 @@ Ext.define('Inventory.Utils', {
     alternateClassName: 'ic.utils',
 
     statics: {
-        Math: {
+        Math: { 
             round: function(number, precision) {
                 if (!Ext.isNumeric(number)) return; 
                 precision = Ext.isNumeric(precision) ? precision : 0; 
 
-                return Number(Math.round(number+'e'+precision)+'e-'+precision);
+                return Number(Math.round(number+'e'+precision)+'e-'+precision); // 1.9768564574630487e+21e-12
+            },
+            roundWithPrecision: function(number, precision) {
+                var zeroes = "";
+                for(var i = 0; i < precision; i++) {
+                    zeroes += "0";
+                }
+                var pattern = "0.[" + zeroes + "]";
+                return parseFloat(numeral(number).format(pattern));
             }
         },
 
