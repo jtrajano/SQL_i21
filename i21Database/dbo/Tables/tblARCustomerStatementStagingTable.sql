@@ -27,7 +27,6 @@
 	[strPaymentMethod]			   NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strCompanyName]               NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strCompanyAddress]            NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-	[strUserId]					   NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[dblTotalAmount]			   NUMERIC (18, 6) NULL,
 	[dblAmountPaid]				   NUMERIC (18, 6) NULL,
 	[dblAmountDue]				   NUMERIC (18, 6) NULL,
