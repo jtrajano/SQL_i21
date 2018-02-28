@@ -26,9 +26,9 @@ Ext.define('Inventory.view.CategoryViewModel', {
                 {
                     strType: 'Inventory'
                 },
-                {
-                    strType: 'Kit'
-                },
+                // {
+                //     strType: 'Kit'
+                // },
                 {
                     strType: 'Finished Good'
                 },
