@@ -56,6 +56,7 @@ module.exports = function (config) {
             includeAllSources: true,
             dir: 'coverage/',
             reporters: [
+                { type: "cobertura" },
                 { type: "html", subdir: "html" },
                 { type: 'text-summary' }
             ]
