@@ -19,7 +19,7 @@ BEGIN
 			)
 		AND CH.intContractHeaderId = @intContractHeaderId
 		AND CD.dblBasis = @dblBasis
-		AND CD.intItemId = @intItemId
+		AND CD.intItemContractId = @intItemId
 		AND CD.dtmStartDate = @dtmStartDate
 		AND CD.dtmEndDate = @dtmEndDate
 	GROUP BY CH.intContractHeaderId
