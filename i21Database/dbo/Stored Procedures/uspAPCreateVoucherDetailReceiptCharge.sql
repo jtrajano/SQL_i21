@@ -176,7 +176,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		D.intBillDetailId = E.intBillDetailId
 
 	UPDATE voucherDetails
-		SET voucherDetails.dblTax = (CASE WHEN D.ysnPrice = 1 THEN -taxes.dblTax ELSE taxes.dblTax END)
+		SET voucherDetails.dblTax = ISNULL((CASE WHEN D.ysnPrice = 1 THEN -taxes.dblTax ELSE taxes.dblTax END),0)
 		,voucherDetails.dbl1099 = CASE WHEN voucherDetails.int1099Form > 0 THEN voucherDetails.dblTotal ELSE 0 END
 	FROM tblAPBillDetail voucherDetails
 	OUTER APPLY (
