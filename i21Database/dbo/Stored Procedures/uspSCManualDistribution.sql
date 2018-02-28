@@ -383,7 +383,8 @@ END
 	DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 	FOR
 	SELECT TOP 1 intInventoryReceiptItemId, intOrderId, intOwnershipType
-	FROM #tmpItemReceiptIds;
+	FROM #tmpItemReceiptIds WHERE intOwnershipType = 1;
+
 
 	OPEN intListCursor;
 
@@ -392,7 +393,7 @@ END
 
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
-		IF ISNULL(@intInventoryReceiptItemId , 0) != 0
+		IF ISNULL(@intInventoryReceiptItemId , 0) != 0 AND ISNULL(@intOwnershipType,0) = 1
 		BEGIN
 			EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intUserId;
 			IF OBJECT_ID (N'tempdb.dbo.#tmpVoucherDetail') IS NOT NULL
