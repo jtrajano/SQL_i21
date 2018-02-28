@@ -3317,17 +3317,101 @@ IF @post = 1
 		IF @recap = 0
 		BEGIN
 			BEGIN TRY
-				UPDATE GLEntries
-				SET [dtmDateEntered] = @PostDate
-				   ,[dblDebitUnit] = DebitUnit.Value
-				   ,[dblCreditUnit] = CreditUnit.Value					
+				DECLARE @FinalGLEntries AS RecapTableType
+				DELETE FROM @FinalGLEntries
+				INSERT INTO @FinalGLEntries
+					([dtmDate]
+					,[strBatchId]
+					,[intAccountId]
+					,[dblDebit]
+					,[dblCredit]
+					,[dblDebitUnit]
+					,[dblCreditUnit]
+					,[strDescription]
+					,[strCode]
+					,[strReference]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[dtmDateEntered]
+					,[dtmTransactionDate]
+					,[strJournalLineDescription]
+					,[intJournalLineNo]
+					,[ysnIsUnposted]
+					,[intUserId]
+					,[intEntityId]
+					,[strTransactionId]
+					,[intTransactionId]
+					,[strTransactionType]
+					,[strTransactionForm]
+					,[strModuleName]
+					,[intConcurrencyId]
+					,[dblDebitForeign]
+					,[dblDebitReport]
+					,[dblCreditForeign]
+					,[dblCreditReport]
+					,[dblReportingRate]
+					,[dblForeignRate]
+					,[strRateType]
+					,[strDocument]
+					,[strComments]
+					,[strSourceDocumentId]
+					,[intSourceLocationId]
+					,[intSourceUOMId]
+					,[dblSourceUnitDebit]
+					,[dblSourceUnitCredit]
+					,[intCommodityId]
+					,[intSourceEntityId])
+				SELECT
+					 [dtmDate]						= GLEntries.[dtmDate]
+					,[strBatchId]					= GLEntries.[strBatchId]
+					,[intAccountId]					= GLEntries.[intAccountId]
+					,[dblDebit]						= GLEntries.[dblDebit]
+					,[dblCredit]					= GLEntries.[dblCredit]
+					,[dblDebitUnit]					= DebitUnit.Value
+					,[dblCreditUnit]				= CreditUnit.Value
+					,[strDescription]				= GLEntries.[strDescription]
+					,[strCode]						= GLEntries.[strCode]
+					,[strReference]					= GLEntries.[strReference]
+					,[intCurrencyId]				= GLEntries.[intCurrencyId]
+					,[dblExchangeRate]				= GLEntries.[dblExchangeRate]
+					,[dtmDateEntered]				= @PostDate
+					,[dtmTransactionDate]			= GLEntries.[dtmTransactionDate]
+					,[strJournalLineDescription]	= GLEntries.[strJournalLineDescription]
+					,[intJournalLineNo]				= GLEntries.[intJournalLineNo]
+					,[ysnIsUnposted]				= GLEntries.[ysnIsUnposted]
+					,[intUserId]					= GLEntries.[intUserId]
+					,[intEntityId]					= GLEntries.[intEntityId]
+					,[strTransactionId]				= GLEntries.[strTransactionId]
+					,[intTransactionId]				= GLEntries.[intTransactionId]
+					,[strTransactionType]			= GLEntries.[strTransactionType]
+					,[strTransactionForm]			= GLEntries.[strTransactionForm]
+					,[strModuleName]				= GLEntries.[strModuleName]
+					,[intConcurrencyId]				= GLEntries.[intConcurrencyId]
+					,[dblDebitForeign]				= GLEntries.[dblDebitForeign]
+					,[dblDebitReport]				= GLEntries.[dblDebitReport]
+					,[dblCreditForeign]				= GLEntries.[dblCreditForeign]
+					,[dblCreditReport]				= GLEntries.[dblCreditReport]
+					,[dblReportingRate]				= GLEntries.[dblReportingRate]
+					,[dblForeignRate]				= GLEntries.[dblForeignRate]
+					,[strRateType]					= GLEntries.[strRateType]
+					,[strDocument]					= GLEntries.[strDocument]
+					,[strComments]					= GLEntries.[strComments]
+					,[strSourceDocumentId]			= GLEntries.[strSourceDocumentId]
+					,[intSourceLocationId]			= GLEntries.[intSourceLocationId]
+					,[intSourceUOMId]				= GLEntries.[intSourceUOMId]
+					,[dblSourceUnitDebit]			= GLEntries.[dblSourceUnitDebit]
+					,[dblSourceUnitCredit]			= GLEntries.[dblSourceUnitCredit]
+					,[intCommodityId]				= GLEntries.[intCommodityId]
+					,[intSourceEntityId]			= GLEntries.[intSourceEntityId]
 				FROM @GLEntries GLEntries
 				CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebitUnit, 0) - ISNULL(GLEntries.dblCreditUnit, 0)) DebitUnit
-				CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebitUnit, 0) - ISNULL(GLEntries.dblCreditUnit, 0))  CreditUnit
+				CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebitUnit, 0) - ISNULL(GLEntries.dblCreditUnit, 0)) CreditUnit
+				ORDER BY
+					GLEntries.[strTransactionId]
 
-				IF EXISTS ( SELECT TOP 1 1 FROM @GLEntries)
+				IF EXISTS ( SELECT TOP 1 1 FROM @FinalGLEntries)
 					EXEC	dbo.uspGLBookEntries
-								 @GLEntries		= @GLEntries
+								 @GLEntries		= @FinalGLEntries
 								,@ysnPost		= @post
 								,@XACT_ABORT_ON = @raiseError
 			END TRY
