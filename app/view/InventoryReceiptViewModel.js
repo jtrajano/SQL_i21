@@ -1001,9 +1001,9 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                             return true;
                         }
                         break; 
-                    case 'Inventory Return': 
-                        return true; 
-                        break;
+                    // case 'Inventory Return': 
+                    //     return true; 
+                    //     break;
                     default:
                         return false;
                 }
