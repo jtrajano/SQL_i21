@@ -17,6 +17,7 @@
 	[intCreatedUserEntityId] [int] NULL,
 	[dtmCreated] [datetime] NULL,
 	[intJobCodeId] [int] NOT NULL,
+	[ysnConvertedToActivity] [bit] null,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDTicketHoursWorked] PRIMARY KEY CLUSTERED ([intTicketHoursWorkedId] ASC),
     CONSTRAINT [FK_TicketHoursWorked_Ticket] FOREIGN KEY ([intTicketId]) REFERENCES [dbo].[tblHDTicket] ([intTicketId])  on delete cascade,

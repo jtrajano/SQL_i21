@@ -45,6 +45,7 @@
 	[intCurrencyId] [int] null,
 	[intCurrencyExchangeRateId] [int] null,
 	[intCurrencyExchangeRateTypeId] [int] null,
+	[ysnConvertedToActivity] [bit] null,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDTicket] PRIMARY KEY CLUSTERED ([intTicketId] ASC),
 	CONSTRAINT [UNQ_tblHDTicketNumber] UNIQUE ([strTicketNumber]),

@@ -18,6 +18,7 @@
 	[dtmJiraCreated] [datetime] null,
 	[dtmJiraUpdated] [datetime] null,
 	[strFixedVersion] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+	[ysnConvertedToActivity] [bit] null,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDTicketJIRAIssue] PRIMARY KEY CLUSTERED ([intTicketJIRAIssueId] ASC),
     CONSTRAINT [FK_Ticket_icketJIRAIssue] FOREIGN KEY ([intTicketId]) REFERENCES [dbo].[tblHDTicket] ([intTicketId])

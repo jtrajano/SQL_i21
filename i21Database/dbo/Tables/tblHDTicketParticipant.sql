@@ -4,6 +4,7 @@
 	[intEntityId] [int] NOT NULL,
 	[intTicketId] [int] NOT NULL,
 	[ysnAddCalendarEvent] [bit] NOT NULL default 0,
+	[ysnConvertedToActivity] [bit] null,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDTicketParticipant] PRIMARY KEY CLUSTERED ([intTicketParticipantId] ASC),
 	CONSTRAINT [AK_tblEMEntity_tblHDTicket] UNIQUE ([intTicketId],[intEntityId]),

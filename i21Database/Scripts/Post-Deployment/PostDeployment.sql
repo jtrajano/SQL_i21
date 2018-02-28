@@ -450,5 +450,6 @@ print 'BEGIN POST DEPLOYMENT'
 --CRM
 :R .\CRM\SplitCRMData.sql
 :R .\CRM\RenameCRMScreen.sql
+:R .\HD\ConvertTicketToActivity.sql
 
 print 'END POST DEPLOYMENT'
