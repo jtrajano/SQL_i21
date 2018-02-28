@@ -5710,6 +5710,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         Ext.each(result, function (order) {
                             //isValidToAdd = true;
                             var strBundleType = order.get('strBundleType');
+                            var intContainerId = order.get('intContainerId');
                             
                             // Check if the Order's Freight Terms is the same with the Receipt Freight Terms
                             addOrderFreightTerms = order.get('intFreightTermId');                            
@@ -5810,9 +5811,15 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     currentVM.tblICInventoryReceiptItems().add(newRecord);
                                     newReceiptItem = currentVM.tblICInventoryReceiptItems().findRecord('intLineNo', newRecord.intLineNo);
                                     me.getBundleComponents(newReceiptItem, order, currentVM, currentVM.tblICInventoryReceiptItems());
-                                } else if(strBundleType == 'Option') {
+                                } 
+                                else if(strBundleType == 'Option') {
                                     me.getBundleComponents(newReceiptItem, order, currentVM, currentVM.tblICInventoryReceiptItems());
-                                } else {
+                                }
+                                else if (intContainerId) {
+                                    currentVM.tblICInventoryReceiptItems().add(newRecord);
+                                    newReceiptItem = currentVM.tblICInventoryReceiptItems().findRecord('intContainerId', newRecord.intContainerId);                                
+                                } 
+                                else {
                                     currentVM.tblICInventoryReceiptItems().add(newRecord);
                                     newReceiptItem = currentVM.tblICInventoryReceiptItems().findRecord('intLineNo', newRecord.intLineNo);
                                 }
