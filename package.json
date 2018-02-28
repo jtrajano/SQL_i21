@@ -15,6 +15,7 @@
     "gulp-changed": "^3.1.0",
     "gulp-cli": "^1.4.0",
     "gulp-extjs-spec-generator": "^1.1.16",
+    "gulp-inline-source": "^3.1.0",
     "gulp-js-prettify": "^0.1.0",
     "karma": "^1.2.0",
     "karma-chai": "^0.1.0",
