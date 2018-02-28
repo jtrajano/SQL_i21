@@ -515,7 +515,7 @@ BEGIN TRY
 
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
-		IF ISNULL(@intInventoryReceiptItemId , 0) != 0
+		IF ISNULL(@intInventoryReceiptItemId , 0) != 0 AND ISNULL(@intOwnershipType,0) = 1
 		BEGIN
 			EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intEntityId;
 			SELECT @intBillId = intBillId, @dblTotal = SUM(dblTotal) FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId GROUP BY intBillId
