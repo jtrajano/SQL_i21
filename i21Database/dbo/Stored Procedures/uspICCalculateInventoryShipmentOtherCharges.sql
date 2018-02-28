@@ -158,7 +158,7 @@ BEGIN
 				END 				
 			)
 			AND ChargeItem.intOnCostTypeId IS NULL 
-			AND ISNULL(ShipmentItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
+			-- AND ISNULL(ShipmentItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
 			-- Do not include Kit Components when calculating the other charges. 
 			AND 1 = 
 				CASE	
@@ -316,7 +316,7 @@ BEGIN
 				END 				
 			)
 			AND ChargeItem.intOnCostTypeId IS NULL 
-			AND ISNULL(ShipmentItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
+			-- AND ISNULL(ShipmentItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
 			-- Do not include Kit Components when calculating the other charges. 
 			AND 1 = 
 				CASE	
