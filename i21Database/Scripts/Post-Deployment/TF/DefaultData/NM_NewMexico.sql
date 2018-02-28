@@ -1616,6 +1616,183 @@ where FP.intTaxAuthorityId = @TaxAuthorityId
 
 	EXEC uspTFUpgradeFilingPackets @TaxAuthorityCode = @TaxAuthorityCode, @FilingPackets = @FilingPackets
 
+-- NM County Location
+
+	SELECT *
+	INTO #tmpNMCompanyLocation
+	FROM (
+	SELECT intCompanyLocationId = 1, strCounty = 'Bernalillo County', strLocation = 'Albuquerque'
+	UNION ALL SELECT intCompanyLocationId = 2, strCounty = 'Bernalillo County', strLocation = 'Bernalillo County, Remainder'
+	UNION ALL SELECT intCompanyLocationId = 3, strCounty = 'Bernalillo County', strLocation = 'Los Ranchos de Albuquerque'
+	UNION ALL SELECT intCompanyLocationId = 4, strCounty = 'Bernalillo County', strLocation = 'Rio Rancho (Bernalillo)'
+	UNION ALL SELECT intCompanyLocationId = 5, strCounty = 'Bernalillo County', strLocation = 'Tijeras'
+	UNION ALL SELECT intCompanyLocationId = 6, strCounty = 'Catron County', strLocation = 'Catron County, Remainder'
+	UNION ALL SELECT intCompanyLocationId = 7, strCounty = 'Catron County', strLocation = 'Reserve'
+	UNION ALL SELECT intCompanyLocationId = 8, strCounty = 'Chaves County', strLocation = 'Chaves County, Remainder'
+	UNION ALL SELECT intCompanyLocationId = 9, strCounty = 'Chaves County', strLocation = 'Dexter'
+	UNION ALL SELECT intCompanyLocationId = 10, strCounty = 'Chaves County', strLocation = 'Hagerman'
+	UNION ALL SELECT intCompanyLocationId = 11, strCounty = 'Chaves County', strLocation = 'Lake Arthur'
+	UNION ALL SELECT intCompanyLocationId = 12, strCounty = 'Chaves County', strLocation = 'Roswell'
+	UNION ALL SELECT intCompanyLocationId = 13, strCounty = 'Cibola County', strLocation = 'Cibola County, Remainder'
+	UNION ALL SELECT intCompanyLocationId = 14, strCounty = 'Cibola County', strLocation = 'Grants'
+	UNION ALL SELECT intCompanyLocationId = 15, strCounty = 'Cibola County', strLocation = 'Milan'
+	UNION ALL SELECT intCompanyLocationId = 16, strCounty = 'Colfax County', strLocation = 'Angel Fire'
+	UNION ALL SELECT intCompanyLocationId = 17, strCounty = 'Colfax County', strLocation = 'Cimarron'
+	UNION ALL SELECT intCompanyLocationId = 18, strCounty = 'Colfax County', strLocation = 'Colfax County, Remainder'
+	UNION ALL SELECT intCompanyLocationId = 19, strCounty = 'Colfax County', strLocation = 'Eagle Nest'
+	UNION ALL SELECT intCompanyLocationId = 20, strCounty = 'Colfax County', strLocation = 'Maxwell'
+	UNION ALL SELECT intCompanyLocationId = 21, strCounty = 'Colfax County', strLocation = 'Raton'
+	UNION ALL SELECT intCompanyLocationId = 22, strCounty = 'Colfax County', strLocation = 'Springer'
+	UNION ALL SELECT intCompanyLocationId = 23, strCounty = 'Curry County', strLocation = 'Clovis'
+	UNION ALL SELECT intCompanyLocationId = 24, strCounty = 'Curry County', strLocation = 'Curry County, Remainder'
+	UNION ALL SELECT intCompanyLocationId = 25, strCounty = 'Curry County', strLocation = 'Grady'
+	UNION ALL SELECT intCompanyLocationId = 26, strCounty = 'Curry County', strLocation = 'Melrose'
+	UNION ALL SELECT intCompanyLocationId = 27, strCounty = 'Curry County', strLocation = 'Texico'
+	UNION ALL SELECT intCompanyLocationId = 28, strCounty = 'De Baca County', strLocation = 'De Baca County, Remainder'
+	UNION ALL SELECT intCompanyLocationId = 29, strCounty = 'De Baca County', strLocation = 'Fort Sumner'
+	UNION ALL SELECT intCompanyLocationId = 30, strCounty = 'Dona Ana County', strLocation = 'Anthony'
+	UNION ALL SELECT intCompanyLocationId = 31, strCounty = 'Dona Ana County', strLocation = 'Dona Ana County, Remainder'
+	UNION ALL SELECT intCompanyLocationId = 32, strCounty = 'Dona Ana County', strLocation = 'Hatch'
+	UNION ALL SELECT intCompanyLocationId = 33, strCounty = 'Dona Ana County', strLocation = 'Las Cruces'
+	UNION ALL SELECT intCompanyLocationId = 34, strCounty = 'Dona Ana County', strLocation = 'Mesilla'
+	UNION ALL SELECT intCompanyLocationId = 35, strCounty = 'Dona Ana County', strLocation = 'Sunland Park'
+	UNION ALL SELECT intCompanyLocationId = 36, strCounty = 'Eddy County', strLocation = 'Artesia'
+	UNION ALL SELECT intCompanyLocationId = 37, strCounty = 'Eddy County', strLocation = 'Carlsbad'
+	UNION ALL SELECT intCompanyLocationId = 38, strCounty = 'Eddy County', strLocation = 'Eddy County, Remainder'
+	UNION ALL SELECT intCompanyLocationId = 39, strCounty = 'Eddy County', strLocation = 'Hope'
+	UNION ALL SELECT intCompanyLocationId = 40, strCounty = 'Eddy County', strLocation = 'Loving'
+	UNION ALL SELECT intCompanyLocationId = 41, strCounty = 'Grant County', strLocation = 'Bayard'
+	UNION ALL SELECT intCompanyLocationId = 42, strCounty = 'Grant County', strLocation = 'Grant County, Remainder'
+	UNION ALL SELECT intCompanyLocationId = 43, strCounty = 'Grant County', strLocation = 'Hurley'
+	UNION ALL SELECT intCompanyLocationId = 44, strCounty = 'Grant County', strLocation = 'Santa Clara'
+	UNION ALL SELECT intCompanyLocationId = 45, strCounty = 'Grant County', strLocation = 'Silver City'
+	UNION ALL SELECT intCompanyLocationId = 46, strCounty = 'Guadalupe County', strLocation = 'Guadalupe County, Remainder'
+	UNION ALL SELECT intCompanyLocationId = 47, strCounty = 'Guadalupe County', strLocation = 'Santa Rosa'
+	UNION ALL SELECT intCompanyLocationId = 48, strCounty = 'Guadalupe County', strLocation = 'Vaughn'
+	UNION ALL SELECT intCompanyLocationId = 49, strCounty = 'Harding County', strLocation = 'Harding County, Remainder'
+	UNION ALL SELECT intCompanyLocationId = 50, strCounty = 'Harding County', strLocation = 'Mosquero (Harding)'
+	UNION ALL SELECT intCompanyLocationId = 51, strCounty = 'Harding County', strLocation = 'Roy'
+	UNION ALL SELECT intCompanyLocationId = 52, strCounty = 'Hidalgo County', strLocation = 'Hidalgo County, Remainder'
+	UNION ALL SELECT intCompanyLocationId = 53, strCounty = 'Hidalgo County', strLocation = 'Lordsburg'
+	UNION ALL SELECT intCompanyLocationId = 54, strCounty = 'Hidalgo County', strLocation = 'Virden'
+	UNION ALL SELECT intCompanyLocationId = 55, strCounty = 'Lea County', strLocation = 'Eunice'
+	UNION ALL SELECT intCompanyLocationId = 56, strCounty = 'Lea County', strLocation = 'Hobbs'
+	UNION ALL SELECT intCompanyLocationId = 57, strCounty = 'Lea County', strLocation = 'Jal'
+	UNION ALL SELECT intCompanyLocationId = 58, strCounty = 'Lea County', strLocation = 'Lea County, Remainder'
+	UNION ALL SELECT intCompanyLocationId = 59, strCounty = 'Lea County', strLocation = 'Lovington'
+	UNION ALL SELECT intCompanyLocationId = 60, strCounty = 'Lea County', strLocation = 'Tatum'
+	UNION ALL SELECT intCompanyLocationId = 61, strCounty = 'Lincoln County', strLocation = 'Capitan'
+	UNION ALL SELECT intCompanyLocationId = 62, strCounty = 'Lincoln County', strLocation = 'Carrizozo'
+	UNION ALL SELECT intCompanyLocationId = 63, strCounty = 'Lincoln County', strLocation = 'Corona'
+	UNION ALL SELECT intCompanyLocationId = 64, strCounty = 'Lincoln County', strLocation = 'Lincoln County, Remainder'
+	UNION ALL SELECT intCompanyLocationId = 65, strCounty = 'Lincoln County', strLocation = 'Ruidoso'
+	UNION ALL SELECT intCompanyLocationId = 66, strCounty = 'Lincoln County', strLocation = 'Ruidoso Downs'
+	UNION ALL SELECT intCompanyLocationId = 67, strCounty = 'Los Alamos', strLocation = 'Los Alamos (city & county)'
+	UNION ALL SELECT intCompanyLocationId = 68, strCounty = 'Luna County', strLocation = 'Columbus'
+	UNION ALL SELECT intCompanyLocationId = 69, strCounty = 'Luna County', strLocation = 'Deming'
+	UNION ALL SELECT intCompanyLocationId = 70, strCounty = 'Luna County', strLocation = 'Luna County, Remainder'
+	UNION ALL SELECT intCompanyLocationId = 71, strCounty = 'McKinley County', strLocation = 'Gallup'
+	UNION ALL SELECT intCompanyLocationId = 72, strCounty = 'McKinley County', strLocation = 'McKinley County, Remainder'
+	UNION ALL SELECT intCompanyLocationId = 73, strCounty = 'Mora County', strLocation = 'Mora County, Remainder'
+	UNION ALL SELECT intCompanyLocationId = 74, strCounty = 'Mora County', strLocation = 'Wagon Mound'
+	UNION ALL SELECT intCompanyLocationId = 75, strCounty = 'Otero County', strLocation = 'Alamogordo'
+	UNION ALL SELECT intCompanyLocationId = 76, strCounty = 'Otero County', strLocation = 'Cloudcroft'
+	UNION ALL SELECT intCompanyLocationId = 77, strCounty = 'Otero County', strLocation = 'Otero County, Remainder'
+	UNION ALL SELECT intCompanyLocationId = 78, strCounty = 'Otero County', strLocation = 'Tularosa'
+	UNION ALL SELECT intCompanyLocationId = 79, strCounty = 'Quay County', strLocation = 'House'
+	UNION ALL SELECT intCompanyLocationId = 80, strCounty = 'Quay County', strLocation = 'Logan'
+	UNION ALL SELECT intCompanyLocationId = 81, strCounty = 'Quay County', strLocation = 'Quay County, Remainder'
+	UNION ALL SELECT intCompanyLocationId = 82, strCounty = 'Quay County', strLocation = 'San Jon'
+	UNION ALL SELECT intCompanyLocationId = 83, strCounty = 'Quay County', strLocation = 'Tucumcari'
+	UNION ALL SELECT intCompanyLocationId = 84, strCounty = 'Rio Arriba County', strLocation = 'Chama'
+	UNION ALL SELECT intCompanyLocationId = 85, strCounty = 'Rio Arriba County', strLocation = 'Espanola (Rio Arriba)'
+	UNION ALL SELECT intCompanyLocationId = 86, strCounty = 'Rio Arriba County', strLocation = 'Rio Arriba County, Remainder'
+	UNION ALL SELECT intCompanyLocationId = 87, strCounty = 'Roosevelt County', strLocation = 'Causey'
+	UNION ALL SELECT intCompanyLocationId = 88, strCounty = 'Roosevelt County', strLocation = 'Dora'
+	UNION ALL SELECT intCompanyLocationId = 89, strCounty = 'Roosevelt County', strLocation = 'Elida'
+	UNION ALL SELECT intCompanyLocationId = 90, strCounty = 'Roosevelt County', strLocation = 'Floyd'
+	UNION ALL SELECT intCompanyLocationId = 91, strCounty = 'Roosevelt County', strLocation = 'Portales'
+	UNION ALL SELECT intCompanyLocationId = 92, strCounty = 'Roosevelt County', strLocation = 'Roosevelt County, Remainder'
+	UNION ALL SELECT intCompanyLocationId = 93, strCounty = 'San Juan County', strLocation = 'Aztec'
+	UNION ALL SELECT intCompanyLocationId = 94, strCounty = 'San Juan County', strLocation = 'Bloomfield'
+	UNION ALL SELECT intCompanyLocationId = 95, strCounty = 'San Juan County', strLocation = 'Farmington'
+	UNION ALL SELECT intCompanyLocationId = 96, strCounty = 'San Juan County', strLocation = 'San Juan County, Remainder'
+	UNION ALL SELECT intCompanyLocationId = 97, strCounty = 'San Miguel County', strLocation = 'Las Vegas'
+	UNION ALL SELECT intCompanyLocationId = 98, strCounty = 'San Miguel County', strLocation = 'Mosquero (San Miguel)'
+	UNION ALL SELECT intCompanyLocationId = 99, strCounty = 'San Miguel County', strLocation = 'Pecos'
+	UNION ALL SELECT intCompanyLocationId = 100, strCounty = 'San Miguel County', strLocation = 'San Miguel County, Remainder'
+	UNION ALL SELECT intCompanyLocationId = 101, strCounty = 'Sandoval County', strLocation = 'Bernalillo (city)'
+	UNION ALL SELECT intCompanyLocationId = 102, strCounty = 'Sandoval County', strLocation = 'Corrales (Sandoval)'
+	UNION ALL SELECT intCompanyLocationId = 103, strCounty = 'Sandoval County', strLocation = 'Cuba'
+	UNION ALL SELECT intCompanyLocationId = 104, strCounty = 'Sandoval County', strLocation = 'Jemez Springs'
+	UNION ALL SELECT intCompanyLocationId = 105, strCounty = 'Sandoval County', strLocation = 'Rio Rancho (Sandoval)'
+	UNION ALL SELECT intCompanyLocationId = 106, strCounty = 'Sandoval County', strLocation = 'San Ysidro'
+	UNION ALL SELECT intCompanyLocationId = 107, strCounty = 'Sandoval County', strLocation = 'Sandoval County, Remainder'
+	UNION ALL SELECT intCompanyLocationId = 108, strCounty = 'Santa Fe County', strLocation = 'Edgewood'
+	UNION ALL SELECT intCompanyLocationId = 109, strCounty = 'Santa Fe County', strLocation = 'Espanola (Santa Fe)'
+	UNION ALL SELECT intCompanyLocationId = 110, strCounty = 'Santa Fe County', strLocation = 'Santa Fe (city)'
+	UNION ALL SELECT intCompanyLocationId = 111, strCounty = 'Santa Fe County', strLocation = 'Santa Fe County, Remainder'
+	UNION ALL SELECT intCompanyLocationId = 112, strCounty = 'Sierra County', strLocation = 'Elephant Butte'
+	UNION ALL SELECT intCompanyLocationId = 113, strCounty = 'Sierra County', strLocation = 'Sierra County, Remainder'
+	UNION ALL SELECT intCompanyLocationId = 114, strCounty = 'Sierra County', strLocation = 'Truth or Consequences'
+	UNION ALL SELECT intCompanyLocationId = 115, strCounty = 'Sierra County', strLocation = 'Williamsburg'
+	UNION ALL SELECT intCompanyLocationId = 116, strCounty = 'Socorro County', strLocation = 'Magdalena'
+	UNION ALL SELECT intCompanyLocationId = 117, strCounty = 'Socorro County', strLocation = 'Socorro (city)'
+	UNION ALL SELECT intCompanyLocationId = 118, strCounty = 'Socorro County', strLocation = 'Socorro County, Remainder'
+	UNION ALL SELECT intCompanyLocationId = 119, strCounty = 'Taos County', strLocation = 'Questa'
+	UNION ALL SELECT intCompanyLocationId = 120, strCounty = 'Taos County', strLocation = 'Red River'
+	UNION ALL SELECT intCompanyLocationId = 121, strCounty = 'Taos County', strLocation = 'Taos (city)'
+	UNION ALL SELECT intCompanyLocationId = 122, strCounty = 'Taos County', strLocation = 'Taos County, Remainder'
+	UNION ALL SELECT intCompanyLocationId = 123, strCounty = 'Taos County', strLocation = 'Taos Ski Valley'
+	UNION ALL SELECT intCompanyLocationId = 124, strCounty = 'Torrance County', strLocation = 'Encino'
+	UNION ALL SELECT intCompanyLocationId = 125, strCounty = 'Torrance County', strLocation = 'Estancia'
+	UNION ALL SELECT intCompanyLocationId = 126, strCounty = 'Torrance County', strLocation = 'Moriarty'
+	UNION ALL SELECT intCompanyLocationId = 127, strCounty = 'Torrance County', strLocation = 'Mountainair'
+	UNION ALL SELECT intCompanyLocationId = 128, strCounty = 'Torrance County', strLocation = 'Torrance County, Remainder'
+	UNION ALL SELECT intCompanyLocationId = 129, strCounty = 'Torrance County', strLocation = 'Willard'
+	UNION ALL SELECT intCompanyLocationId = 130, strCounty = 'Union County', strLocation = 'Clayton'
+	UNION ALL SELECT intCompanyLocationId = 131, strCounty = 'Union County', strLocation = 'Des Moines'
+	UNION ALL SELECT intCompanyLocationId = 132, strCounty = 'Union County', strLocation = 'Folsom'
+	UNION ALL SELECT intCompanyLocationId = 133, strCounty = 'Union County', strLocation = 'Grenville'
+	UNION ALL SELECT intCompanyLocationId = 134, strCounty = 'Union County', strLocation = 'Union County, Remainder'
+	UNION ALL SELECT intCompanyLocationId = 135, strCounty = 'Valencia County', strLocation = 'Belen'
+	UNION ALL SELECT intCompanyLocationId = 136, strCounty = 'Valencia County', strLocation = 'Bosque Farms'
+	UNION ALL SELECT intCompanyLocationId = 137, strCounty = 'Valencia County', strLocation = 'Los Lunas'
+	UNION ALL SELECT intCompanyLocationId = 138, strCounty = 'Valencia County', strLocation = 'Peralta'
+	UNION ALL SELECT intCompanyLocationId = 139, strCounty = 'Valencia County', strLocation = 'Valencia County, Remainder'
+	) NMCompanyLocation
+
+	SET IDENTITY_INSERT tblTFNMCountyLocation ON
+
+	MERGE	
+	INTO	tblTFNMCountyLocation 
+	WITH	(HOLDLOCK) 
+	AS		TARGET
+	USING (
+		SELECT * FROM #tmpNMCompanyLocation
+	) AS SOURCE
+		ON TARGET.intCompanyLocationId = SOURCE.intCompanyLocationId
+	WHEN MATCHED THEN 
+		UPDATE
+		SET strCounty		 = SOURCE.strCounty
+			, strLocation	 = SOURCE.strLocation
+	WHEN NOT MATCHED BY TARGET THEN 
+		INSERT (
+			intCompanyLocationId
+			,strCounty
+			,strLocation
+		)
+		VALUES (
+			SOURCE.intCompanyLocationId
+			, SOURCE.strCounty
+			, SOURCE.strLocation
+		)
+	WHEN NOT MATCHED BY SOURCE THEN
+		DELETE;
+
+	SET IDENTITY_INSERT tblTFNMCountyLocation OFF
+
+	DROP TABLE #tmpNMCompanyLocation
 END
 
 GO
