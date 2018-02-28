@@ -11,7 +11,7 @@ var Server = require('karma').Server;
 var config = require('../config');
 var inlinesource = require('gulp-inline-source');
 
-gulp.task('test', function (done) {
+gulp.task('test-coverage', function (done) {
     new Server({
         configFile: config.testing.config,
         singleRun: true,
@@ -23,10 +23,10 @@ gulp.task('test', function (done) {
 gulp.task('style-coverage', function (done) {
     return gulp.src('./coverage/html/*.html')
         .pipe(inlinesource({attribute: false}))
-        .pipe(gulp.dest('./coverage/html/inline-index.html'));
+        .pipe(gulp.dest('./coverage/html'));
 });
 
-gulp.task('test-coverage', ['test'], function() {
+gulp.task('test', ['test-coverage'], function() {
     gulp.start('style-coverage');
 });
 /* --------------------------------------------- */
