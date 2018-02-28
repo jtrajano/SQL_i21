@@ -29,6 +29,7 @@ AS
 			CD.dblQuantityPerLoad,				CD.strReference,				CD.intStorageScheduleRuleId,
 			CD.dblNetWeight,					CD.ysnUseFXPrice,				CD.intSplitId,
 			CD.intFarmFieldId,					CD.intRateTypeId,				CD.intCurrencyExchangeRateId,
+			CD.strItemSpecification,
 
 			IM.strItemNo,						FT.strFreightTerm,				IM.strDescription				AS	strItemDescription,
 			SV.strShipVia,						PT.strPricingType,				U1.strUnitMeasure				AS	strItemUOM,
