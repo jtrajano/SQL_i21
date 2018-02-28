@@ -21,10 +21,12 @@ SET ANSI_WARNINGS OFF
 			   , @ysnPT = CASE WHEN ISNULL(coctl_pt, '') = 'Y' THEN 1 ELSE 0 END 
 	FROM coctlmst	
 
-	DECLARE @defaultSalePerson AS INT, 
+	DECLARE @defaultSalePerson AS INT, @defaultCurrencyId AS INT,
 			@MaxContractId as INT
 
 	SELECT @defaultSalePerson = intEntityId FROM tblARSalesperson WHERE strSalespersonId = 'CO'
+
+	SELECT @defaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference
 
 	SELECT @MaxContractId = MAX(intContractHeaderId) FROM tblCTContractHeader 
 	SET @MaxContractId = ISNULL(@MaxContractId, 0)
@@ -102,7 +104,8 @@ IF @ysnGA = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TAB
 		SELECT	TY.intContractTypeId,
 				CV.intEntityId,
 				CO.intCommodityId,
-				LTRIM(RtRIM(gacnt_cnt_no))+'_'+LTRIM(RtRIM(gacnt_cus_no))+'_'+CAST(CT.gacnt_seq_no AS CHAR(3)),--CAST(CT.A4GLIdentity AS CHAR(6)) AS strContractNumber,
+				LTRIM(RtRIM(gacnt_cnt_no))+'_'+LTRIM(RtRIM(gacnt_cus_no))+'_'+LTRIM(RtRIM(CAST(CT.gacnt_seq_no AS CHAR(3))))+'_'
+					+LTRIM(RtRIM(CAST(CT.gacnt_sub_seq_no AS CHAR(3))))+'_'+CAST(CT.A4GLIdentity AS CHAR(6)) AS strContractNumber,
 				CONVERT(DATETIME, LEFT(gacnt_cnt_rev_dt,8)) dtmContractDate,		
 				PT.intPricingTypeId,
 				gacnt_no_un AS dblQuantity,		
@@ -154,6 +157,8 @@ IF @ysnGA = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TAB
 				,intPricingTypeId
 				,intItemId
 				,intItemUOMId
+				,intPriceItemUOMId
+				,intBasisUOMId
 				,intUnitMeasureId
 				,dblQuantity
 				,dblBalance
@@ -168,17 +173,21 @@ IF @ysnGA = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TAB
 				,intRailGradeId
 				,intCreatedById
 				,dtmCreated
+				,intCurrencyId
+				,intBasisCurrencyId
 				,intConcurrencyId)		
 		SELECT	CH.intContractHeaderId,
 				CASE WHEN gacnt_un_bal = 0 THEN 5 ELSE 1 END AS intContractStatusId,
 				CL.intCompanyLocationId,
 				gacnt_seq_no intContractSeq,
-				CONVERT(DATETIME, LEFT(gacnt_beg_ship_rev_dt,8)) AS dtmStartDate,
-				CONVERT(DATETIME, LEFT(gacnt_due_rev_dt,8)) AS dtmEndDate,
+				CONVERT(DATETIME, LEFT(CASE WHEN ISNULL(gacnt_beg_ship_rev_dt,'19000101') = '0' THEN '19000101' ELSE ISNULL(gacnt_beg_ship_rev_dt,'19000101') END,8)),
+				CONVERT(DATETIME, LEFT(CASE WHEN ISNULL(gacnt_due_rev_dt,'19000101') = '0' THEN '19000101' ELSE ISNULL(gacnt_due_rev_dt,'19000101') END,8)),
 				FT.intFreightTermId,
 				PT.intPricingTypeId,
 				IM.intItemId,
 				IU.intItemUOMId,
+				IU.intItemUOMId as intPriceItemUOMId,
+				IU.intItemUOMId as intBasisUOMId,
 				IU.intUnitMeasureId,
 				gacnt_no_un AS dblQuantity,
 				gacnt_un_bal AS dblBalance,
@@ -201,9 +210,12 @@ IF @ysnGA = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TAB
 				RG.intRailGradeId,
 				@UserId AS intCreatedById,
 				CONVERT(DATETIME, LEFT(CASE WHEN ISNULL(gacnt_user_rev_dt,'19000101') = '0' THEN '19000101' ELSE ISNULL(gacnt_user_rev_dt,'19000101') END,8)) dtmCreated,
+				@defaultCurrencyId AS intCurrencyId,
+				@defaultCurrencyId AS intBasisCurrencyId,
 				1
 		FROM gacntmst				CT
-		JOIN tblCTContractHeader    CH	ON	LTRIM(RTRIM(strContractNumber)) collate Latin1_General_CI_AS = LTRIM(RtRIM(gacnt_cnt_no))+'_'+LTRIM(RtRIM(gacnt_cus_no))+'_'+CAST(CT.gacnt_seq_no AS CHAR(3)) collate Latin1_General_CI_AS
+		JOIN tblCTContractHeader    CH	ON	LTRIM(RTRIM(strContractNumber)) collate Latin1_General_CI_AS = LTRIM(RtRIM(gacnt_cnt_no))+'_'+LTRIM(RtRIM(gacnt_cus_no))
+											+'_'+LTRIM(RtRIM(CAST(CT.gacnt_seq_no AS CHAR(3))))+'_'+LTRIM(RtRIM(CAST(CT.gacnt_sub_seq_no AS CHAR(3))))+'_'+CAST(CT.A4GLIdentity AS CHAR(6)) collate Latin1_General_CI_AS
 		JOIN tblCTPricingType		PT	ON	PT.strPricingType	=	CASE	WHEN LTRIM(RTRIM(ISNULL(gacnt_pbhcu_ind,''))) = ''	 THEN 'DP (Priced Later)' 
 																				WHEN LTRIM(RTRIM(ISNULL(gacnt_pbhcu_ind,''))) = 'B'  THEN 'Basis' 
 																				WHEN LTRIM(RTRIM(ISNULL(gacnt_pbhcu_ind,''))) = 'H'  THEN 'HTA' 
@@ -221,14 +233,14 @@ IF @ysnGA = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TAB
 																						WHEN LTRIM(RTRIM(ISNULL(gacnt_trk_rail_ind,''))) = 'F'  THEN 'FOB'
 																					END
 		JOIN tblRKFutureMarket		MA	ON	LTRIM(RTRIM(MA.strFutSymbol)) collate Latin1_General_CI_AS	= LTRIM(RTRIM(CT.gacnt_bot))
-		JOIN tblRKFuturesMonth		MO	ON	UPPER(REPLACE(LTRIM(RTRIM(MO.strFutureMonth)),' ','')) collate Latin1_General_CI_AS = CT.gacnt_bot_option
-		JOIN tblCTDiscountType		DT	ON	LTRIM(RTRIM(DT.strDiscountType)) = CASE	WHEN LTRIM(RTRIM(ISNULL(gacnt_disc_dca_ind,''))) = 'D'	 THEN 'Deliver' 
+		LEFT JOIN tblRKFuturesMonth		MO	ON	UPPER(REPLACE(LTRIM(RTRIM(MO.strFutureMonth)),' ','')) collate Latin1_General_CI_AS = CT.gacnt_bot_option
+		LEFT JOIN tblCTDiscountType		DT	ON	LTRIM(RTRIM(DT.strDiscountType)) = CASE	WHEN LTRIM(RTRIM(ISNULL(gacnt_disc_dca_ind,''))) = 'D'	 THEN 'Deliver' 
 			 																		WHEN LTRIM(RTRIM(ISNULL(gacnt_disc_dca_ind,''))) = 'A'  THEN 'As-Is' 
 			 																		WHEN LTRIM(RTRIM(ISNULL(gacnt_disc_dca_ind,''))) = 'C'  THEN 'Contract' 
 			 																	END
 		JOIN tblICCommodityUnitMeasure	CU	ON	CU.intCommodityUnitMeasureId = CH.intCommodityUOMId
 		JOIN tblICCommodity		CM  ON  CM.strCommodityCode COLLATE LATIN1_GENERAL_CI_AS = CT.gacnt_com_cd COLLATE LATIN1_GENERAL_CI_AS
-		JOIN tblICItem			IM	ON	IM.intCommodityId = CM.intCommodityId AND  LTRIM(RtRIM(IM.strItemNo)) COLLATE LATIN1_GENERAL_CI_AS = LTRIM(RTRIM(CT.gacnt_com_cd)) COLLATE LATIN1_GENERAL_CI_AS
+		JOIN tblICItem			IM	ON	 RtRIM(IM.strItemNo) COLLATE LATIN1_GENERAL_CI_AS = RTRIM(CT.gacnt_com_cd) COLLATE LATIN1_GENERAL_CI_AS
 		JOIN tblICItemUOM		IU	ON	IU.intItemId = IM.intItemId AND IU.intUnitMeasureId = CU.intUnitMeasureId
 		LEFT JOIN	tblCTRailGrade		RG	ON	LTRIM(RTRIM(RG.strRailGrade)) =		CASE	WHEN LTRIM(RTRIM(ISNULL(gacnt_avg_car_grade,''))) = 'A'	 THEN 'Average' 
 																							WHEN LTRIM(RTRIM(ISNULL(gacnt_avg_car_grade,''))) = 'C'  THEN 'Car' 
@@ -371,9 +383,4 @@ IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TAB
 
 END
 
-
-
-
-
-
-
+GO
