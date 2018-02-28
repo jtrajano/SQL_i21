@@ -3,7 +3,6 @@
     [intInvoiceId]                 INT             NULL,
     [intPaymentId]                 INT             NULL,
 	[intDaysDue]				   INT			   NULL,
-	[intEntityUserId]			   INT			   NULL,
     [dtmDate]                      DATETIME        NULL,
     [dtmDueDate]                   DATETIME        NULL,
     [dtmShipDate]                  DATETIME        NULL,
