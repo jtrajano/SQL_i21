@@ -12,12 +12,32 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+
 DECLARE  @ZeroDecimal		DECIMAL(18,6)
 		,@DateOnly			DATETIME
 		,@ShipmentNumber	NVARCHAR(100)
 		,@InvoiceId			INT
-		,@InvoiceNumber		NVARCHAR(25) 
+		,@InvoiceNumber		NVARCHAR(25) = ''
 		,@strReferenceNumber NVARCHAR(100)
+
+SELECT TOP 1
+	@InvoiceNumber = ARI.[strInvoiceNumber]
+FROM
+	tblARInvoiceDetail ARID 
+INNER JOIN
+	tblARInvoice ARI 
+		ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
+INNER JOIN
+	tblICInventoryShipmentItem ICISI
+		ON ARID.[intInventoryShipmentItemId] = ICISI.[intInventoryShipmentItemId]
+WHERE
+	ICISI.[intInventoryShipmentId] = @ShipmentId
+
+IF (ISNULL(@InvoiceNumber,'') <> '')
+	BEGIN
+			RAISERROR('There is already an existing Invoice(%s) for this shipment!', 16, 1,@InvoiceNumber);
+		RETURN 0;
+	END
 
 SELECT
 	 @ZeroDecimal	= 0.000000	
