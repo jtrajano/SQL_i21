@@ -692,7 +692,10 @@ Ext.define('Inventory.view.ItemViewController', {
             //Cost Tab//
             //--------//
             chkInventoryCost: '{current.ysnInventoryCost}',
-            chkAccrue: '{current.ysnAccrue}',
+            chkAccrue: {
+                value: '{current.ysnAccrue}',
+                hidden: true
+            },
             chkMTM: '{current.ysnMTM}',
             // cboM2M: {
             //     value: '{current.intM2MComputationId}',
