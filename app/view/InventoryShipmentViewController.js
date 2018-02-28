@@ -2736,9 +2736,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     { dataIndex: 'strLotTracking', text: 'Lot Tracking', width: 100, dataType: 'string' },
                     { dataIndex: 'intCommodityId', text: 'Commodity Id', width: 100, dataType: 'numeric', hidden: true, allowNull: true },
                     { dataIndex: 'intSubLocationId', text: 'SubLocation Id', width: 100, dataType: 'numeric', hidden: true, allowNull: true, allowNull: true },
-                    { dataIndex: 'strSubLocationName', text: 'SubLocation Name', width: 100, dataType: 'string' },
+                    { dataIndex: 'strSubLocationName', text: 'Storage Location', width: 100, dataType: 'string' },
                     { dataIndex: 'intStorageLocationId', text: 'Storage Location Id', width: 100, dataType: 'numeric', hidden: true, allowNull: true },
-                    { dataIndex: 'strStorageLocationName', text: 'Storage Location Name', width: 100, dataType: 'string' },
+                    { dataIndex: 'strStorageLocationName', text: 'Storage Unit', width: 100, dataType: 'string' },
     
                     { dataIndex: 'intFreightTermId', text: 'Freight Terms Id', width: 100, dataType: 'numeric', hidden: true, allowNull: true },
                     { dataIndex: 'strFreightTerm', text: 'Freight Terms', width: 100, dataType: 'string' },           
