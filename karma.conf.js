@@ -1,7 +1,7 @@
 var libFiles = [
     { pattern: 'app/lib/rx.all.js', watched: true },
     { pattern: 'app/lib/numeraljs/numeral.js', watched: true },
-    { pattern: 'app/lib/underscore.js', watched: true }  
+    { pattern: 'app/lib/underscore.js', watched: true }
 ];
 
 var dependencies = require('./test/dependencies.js');
@@ -12,7 +12,7 @@ var mockFiles = [
 
 var appFiles = [
     { pattern: 'app/Utils.js', watched: true },
-    { pattern: 'app/controller/Inventory.js', watched: true }    
+    { pattern: 'app/controller/Inventory.js', watched: true }
 ];
 
 var testFiles = [
@@ -45,15 +45,21 @@ module.exports = function (config) {
 
         // preprocess matching files before serving them to the browser
         // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
-       //preprocessors: { 'app/**/*.js': ['coverage'] },
-
+        preprocessors: { './app/**/*.js': ['coverage'] },
 
         // test results reporter to use
         // possible values: 'dots', 'progress'
         // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-        reporters: ['mocha', 'junit'],
+        reporters: ['mocha', 'junit', 'coverage'],
 
-
+        coverageReporter: {
+            includeAllSources: true,
+            dir: 'coverage/',
+            reporters: [
+                { type: "html", subdir: "html" },
+                { type: 'text-summary' }
+            ]
+        },
         // web server port
         port: 9876,
 
