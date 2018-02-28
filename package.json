@@ -2,8 +2,8 @@
   "name": "inventory",
   "version": "1.0.1",
   "scripts": {
-    "preinstall": "npm install karma-cli -g",
-    "postinstall": "npm install gulp-cli -g",
+    "preinstallthis": "npm install karma-cli -g",
+    "postinstallthis": "npm install gulp-cli -g",
     "test": "karma start karma.conf.js"
   },
   "dependencies": {
@@ -15,12 +15,14 @@
     "gulp-changed": "^3.1.0",
     "gulp-cli": "^1.4.0",
     "gulp-extjs-spec-generator": "^1.1.16",
+    "gulp-inline-source": "^3.1.0",
     "gulp-js-prettify": "^0.1.0",
     "karma": "^1.2.0",
     "karma-chai": "^0.1.0",
     "karma-chrome-launcher": "^2.2.0",
     "karma-coverage": "^1.1.1",
     "karma-html-reporter": "^0.2.7",
+    "karma-istanbul": "0.0.2",
     "karma-junit-reporter": "^1.2.0",
     "karma-mocha": "^1.3.0",
     "karma-mocha-reporter": "^2.2.5",
@@ -30,7 +32,6 @@
     "mocha": "^3.5.3",
     "mocha-junit-reporter": "^1.17.0",
     "phantomjs-prebuilt": "^2.1.16",
-    "puppeteer": "^1.1.1",
     "require-dir": "^0.3.1",
     "should": "^13.1.3"
   },

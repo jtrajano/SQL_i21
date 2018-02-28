@@ -9,18 +9,27 @@
 var gulp = require('gulp');
 var Server = require('karma').Server;
 var config = require('../config');
+var inlinesource = require('gulp-inline-source');
 
-gulp.task('test', function (done) {
+gulp.task('test-coverage', function (done) {
     new Server({
         configFile: config.testing.config,
         singleRun: true,
-        reporters: ['mocha','junit'],
-        junitReporter: {
-            outputFile: 'TEST-inventory-unit-tests.xml',
-            useBrowserName: true
-        }
+        reporters: ['mocha', 'junit', 'coverage']
     }, done).start();
 });
+
+/* VSTS blocked css & scripts for code coverage so we need to generate a new html file with all scripts and css transformed inline. */
+gulp.task('style-coverage', function (done) {
+    return gulp.src('./coverage/html/*.html')
+        .pipe(inlinesource({attribute: false}))
+        .pipe(gulp.dest('./coverage/html'));
+});
+
+gulp.task('test', ['test-coverage'], function() {
+    gulp.start('style-coverage');
+});
+/* --------------------------------------------- */
 
 gulp.task('test-mocha', function (done) {
     new Server({
