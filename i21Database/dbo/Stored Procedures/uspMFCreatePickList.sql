@@ -270,7 +270,9 @@ Begin
 		Begin
 			Insert Into @tblPickedLots
 			Select 0,l.intLotId,l.strLotNumber,i.strItemNo,i.strDescription,SUM(wi.dblQuantity),wi.intItemUOMId,um.strUnitMeasure,
-			SUM(wi.dblIssuedQuantity),wi.intItemIssuedUOMId,um1.strUnitMeasure,i.intItemId,
+			SUM(CASE WHEN wi.dblIssuedQuantity - CAST(wi.dblIssuedQuantity AS INT) > 0 THEN wi.dblQuantity ELSE wi.dblIssuedQuantity END), --If issued Qty is in decimal fraction (ex. 0.513918 60KG Bag) then use weight as Pick Qty
+			CASE WHEN wi.dblIssuedQuantity - CAST(wi.dblIssuedQuantity AS INT) > 0 THEN wi.intItemUOMId ELSE wi.intItemIssuedUOMId END,
+			CASE WHEN wi.dblIssuedQuantity - CAST(wi.dblIssuedQuantity AS INT) > 0 THEN um.strUnitMeasure ELSE um1.strUnitMeasure END,i.intItemId,
 			0,0.0,0.0,0.0,AVG(CASE When ISNULL(l.dblWeightPerQty,0)=0 Then 1 Else l.dblWeightPerQty End),0.0,l.intStorageLocationId,sl.strName,'',@intLocationId,'',0,l.strLotAlias,0,'Added'
 			From tblMFWorkOrderInputLot wi join tblICLot l on wi.intLotId=l.intLotId 
 			Join tblICItem i on l.intItemId=i.intItemId
@@ -282,7 +284,7 @@ Begin
 			Where intWorkOrderId in (Select intWorkOrderId From @tblWorkOrder) 
 			Group By l.intLotId,l.strLotNumber,i.strItemNo,i.strDescription,wi.intItemUOMId,um.strUnitMeasure,
 			wi.intItemIssuedUOMId,um1.strUnitMeasure,i.intItemId,
-			l.intStorageLocationId,sl.strName,l.strLotAlias
+			l.intStorageLocationId,sl.strName,l.strLotAlias,wi.dblIssuedQuantity
 
 			Insert Into @tblRemainingPickedItems(intItemId,dblRemainingQuantity,intConsumptionMethodId,ysnIsSubstitute)
 			Select ti.intItemId,ti.dblRequiredQty AS dblRemainingQuantity,ti.intConsumptionMethodId,ti.ysnIsSubstitute 
