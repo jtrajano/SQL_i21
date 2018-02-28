@@ -6232,7 +6232,9 @@
     <Build Include="dbo\Views\vyuPATRetireStock.sql" />
     <Build Include="dbo\Views\vyuLGOverallPosition.sql" />
     <Build Include="dbo\Functions\fnLGGetShipmentStatus.sql" />
-    <Build Include="dbo\tblTFNMCountyLocation.sql" />
+    <Build Include="dbo\Tables\tblTFTaxAuthorityCountyLocation.sql" />
+    <Build Include="dbo\Tables\tblTFCountyLocation.sql" />
+    <Build Include="dbo\Views\vyuTFGetTaxAuthorityCountyLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
