@@ -78,6 +78,7 @@ BEGIN
 		,ISNULL(C.intItemContractOriginId, C.intOriginId) AS intCountryId
 		,ISNULL(C.strItemContractOrigin, C.strItemOrigin) AS strCountry
 		,C.intContractTypeId
+		,C.strItemSpecification
 	FROM vyuCTContractDetailView C
 	JOIN tblICItem I ON I.intItemId = C.intItemId
 	WHERE C.intContractDetailId = @intProductValueId
@@ -117,6 +118,7 @@ BEGIN
 		,S.intPSubLocationId AS intCompanyLocationSubLocationId
 		,S.strSubLocationName
 		,C.intContractTypeId
+		,C.strItemSpecification
 	--FROM vyuLGShipmentContainerReceiptContracts S
 	--JOIN vyuCTContractDetailView C ON C.intContractDetailId = S.intContractDetailId
 	--WHERE S.intShipmentBLContainerContractId = @intProductValueId
@@ -153,6 +155,7 @@ BEGIN
 		,ISNULL(C.strItemContractOrigin, C.strItemOrigin) AS strCountry
 		,S.strMarks
 		,C.intContractTypeId
+		,C.strItemSpecification
 	--FROM vyuLGShipmentContainerReceiptContracts S
 	--JOIN vyuCTContractDetailView C ON C.intContractDetailId = S.intContractDetailId
 	--WHERE S.intShipmentContractQtyId = @intProductValueId
