@@ -52,9 +52,14 @@ module.exports = function (config) {
         // available reporters: https://npmjs.org/browse/keyword/karma-reporter
         reporters: ['mocha', 'junit', 'coverage'],
 
+        junitReporter: {
+            outputFile: 'TEST-unittests.xml',
+            useBrowserName: true
+        },
+        
         coverageReporter: {
             includeAllSources: true,
-            dir: 'coverage/',
+            dir: 'coverage',
             reporters: [
                 { type: "cobertura" },
                 { type: "html", subdir: "html" },
