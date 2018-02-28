@@ -410,7 +410,7 @@ AS
 
 	DROP TABLE #tmpCustomers
 
-	IF @isRecap = 0 and @upToDateCustomer = 1
+	IF @isRecap = 0 and @upToDateCustomer = 1 and @calculation = 'By Customer Balance'
 	BEGIN
 		UPDATE tblARCustomer set dtmLastServiceCharge = @asOfDate WHERE dtmLastServiceCharge is null or dtmLastServiceCharge < @asOfDate
 	END
