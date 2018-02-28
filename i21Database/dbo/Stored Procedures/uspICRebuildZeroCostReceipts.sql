@@ -23,15 +23,30 @@ DECLARE @SourceTypeNone AS INT = 0
 -- Assign the RM and Basis cost to the IR. 
 UPDATE	ri
 SET		ri.dblUnitCost = 
+		--ISNULL( 
+		--	dbo.fnRKGetFutureAndBasisPrice (
+		--		@PurchaseTicketType	-- @intTicketType, -- 1- purchase. 2- sale.
+		--		,st.intCommodityId	-- @intCommodityId
+		--		,dbo.fnGetSeqMonth(cd.dtmEndDate) -- @strSeqMonth nvarchar(10) --'Dec 2016'
+		--		,@ReturnFuturesUOMSequenceType -- @intSequenceTypeId -- 1.	‘01’ – Returns, Basis($) and Unit of Measure 2.	‘02’ – Returns, Futures($) and Unit of Measure   3. 	‘03’ – Returns, Futures($), Basis ($) and Unit of Measure
+		--		,c.intFutureMarketId -- @intFutureMarketId  
+		--		,r.intLocationId -- @intLocationId int = null,
+		--		,cd.dblBasis -- @dblBasisCost NUMERIC(18, 6)
+		--	), 0
+		--) 
+
 		ISNULL( 
 			dbo.fnRKGetFutureAndBasisPrice (
-				@PurchaseTicketType	-- @intTicketType, -- 1- purchase. 2- sale.
-				,st.intCommodityId	-- @intCommodityId
-				,dbo.fnGetSeqMonth(cd.dtmEndDate) -- @strSeqMonth nvarchar(10) --'Dec 2016'
-				,@ReturnFuturesUOMSequenceType -- @intSequenceTypeId -- 1.	‘01’ – Returns, Basis($) and Unit of Measure 2.	‘02’ – Returns, Futures($) and Unit of Measure   3. 	‘03’ – Returns, Futures($), Basis ($) and Unit of Measure
-				,c.intFutureMarketId -- @intFutureMarketId  
-				,r.intLocationId -- @intLocationId int = null,
-				,cd.dblBasis -- @dblBasisCost NUMERIC(18, 6)
+				@PurchaseTicketType	--@intTicketType INT = 1	,-- 1- purchase. 2- sale.
+				,st.intCommodityId--@intCommodityId INT = NULL
+				,dbo.fnGetSeqMonth(cd.dtmEndDate)--@strSeqMonth NVARCHAR(10)	,--'Dec 2016'
+				,1--cd.intPricingTypeId--@intSequenceTypeId INT,   -- 1.	‘01’ – Basis 2.	‘02’ – HTA   3. ‘03’ – DP    (PricingType Need to pass)
+				,cd.intFutureMarketId--@intFutureMarketId INT= NULL  -- Contract Futre market Name
+				,cd.intFutureMonthId--@intFutureMonthId INT= NULL -- Contract Future Month Id
+				,r.intLocationId--@intLocationId INT = NULL
+				,cd.intMarketZoneId--@intMarketZoneId INT = NULL
+				,cd.dblBasis--@dblBasisCost NUMERIC(18, 6)
+				,ri.intItemId--@intItemId int = null
 			), 0
 		) 
 FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
