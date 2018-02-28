@@ -5997,33 +5997,100 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     var inventoryCost = otherCharge.ysnInventoryCost ? true : false,
                                         chargesLink = 'CL-'.concat(vm.get('chargesLinkConst'));
                                     
-                                    var newReceiptCharge = Ext.create('Inventory.model.ReceiptCharge', {
-                                        intInventoryReceiptId: current.get('intInventoryReceiptId'),
-                                        intContractId: selectedOrder.get('intOrderId'),
-                                        intContractDetailId: otherCharge.intContractDetailId,
-                                        intContractSeq: contract.get('intContractSeq'),
-                                        intChargeId: otherCharge.intItemId,
-                                        strChargesLink: chargesLink,
-                                        ysnInventoryCost: inventoryCost,
-                                        strCostMethod: otherCharge.strCostMethod,
-                                        dblRate: otherCharge.strCostMethod == "Amount" ? 0 : otherCharge.dblRate,
-                                        intCostUOMId: otherCharge.intItemUOMId,
-                                        intEntityVendorId: otherCharge.intVendorId ? otherCharge.intVendorId : current.get('intEntityVendorId'),
-                                        dblAmount: otherCharge.strCostMethod == "Amount" ? otherCharge.dblRate : 0,
-                                        strAllocateCostBy: 'Unit',
-                                        ysnAccrue: otherCharge.intVendorId ? true : false,
-                                        //ysnPrice: otherCharge.ysnPrice,
-                                        strItemNo: otherCharge.strItemNo,
-                                        intCurrencyId: otherCharge.intCurrencyId,
-                                        strCurrency: otherCharge.strCurrency,
-                                        ysnSubCurrency: otherCharge.ysnSubCurrency,
-                                        strCostUOM: otherCharge.strUOM,
-                                        strVendorName: otherCharge.strVendorName ? otherCharge.strVendorName : current.get('strVendorName'),
-                                        strContractNumber: selectedOrder.get('strOrderNumber')
+                                    var functionalCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
+                                    var defaultForexRateTypeId = i21.ModuleMgr.SystemManager.getCompanyPreference('intInventoryRateTypeId');
+                                    var otherChargeCurrency = otherCharge.intCurrencyId; 
+                                    
+                                    var intForexRateTypeId  = otherCharge.intForexRateTypeId;
+                                    var dblFx = otherCharge.dblFX; 
 
-                                    });
-                                    current.tblICInventoryReceiptCharges().add(newReceiptCharge);
-                                    adddedItemDetail.set('strChargesLink', chargesLink);
+                                    intForexRateTypeId = Ext.isNumeric(intForexRateTypeId) ? intForexRateTypeId : defaultForexRateTypeId; 
+
+                                    // function variable to process the default forex rate. 
+                                    var processForexRateOnSuccess = function (successResponse) {
+                                        if (successResponse && successResponse.length > 0) {
+                                            var dblForexRate = successResponse[0].dblRate;
+                                            var strRateType = successResponse[0].strRateType;
+
+                                            dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0;
+                                            dblForexRate = dblFx ? dblFx : dblForexRate;
+
+                                            var newReceiptCharge = Ext.create('Inventory.model.ReceiptCharge', {
+                                                intInventoryReceiptId: current.get('intInventoryReceiptId'),
+                                                intContractId: selectedOrder.get('intOrderId'),
+                                                intContractDetailId: otherCharge.intContractDetailId,
+                                                intContractSeq: contract.get('intContractSeq'),
+                                                intChargeId: otherCharge.intItemId,
+                                                strChargesLink: chargesLink,
+                                                ysnInventoryCost: inventoryCost,
+                                                strCostMethod: otherCharge.strCostMethod,
+                                                dblRate: otherCharge.strCostMethod == "Amount" ? 0 : otherCharge.dblRate,
+                                                intCostUOMId: otherCharge.intItemUOMId,
+                                                intEntityVendorId: otherCharge.intVendorId ? otherCharge.intVendorId : current.get('intEntityVendorId'),
+                                                dblAmount: otherCharge.strCostMethod == "Amount" ? otherCharge.dblRate : 0,
+                                                strAllocateCostBy: 'Unit',
+                                                ysnAccrue: otherCharge.intVendorId ? true : false,
+                                                //ysnPrice: otherCharge.ysnPrice,
+                                                strItemNo: otherCharge.strItemNo,
+                                                intCurrencyId: otherCharge.intCurrencyId,
+                                                strCurrency: otherCharge.strCurrency,
+                                                ysnSubCurrency: otherCharge.ysnSubCurrency,
+                                                strCostUOM: otherCharge.strUOM,
+                                                strVendorName: otherCharge.strVendorName ? otherCharge.strVendorName : current.get('strVendorName'),
+                                                strContractNumber: selectedOrder.get('strOrderNumber'),
+                                                intForexRateTypeId: intForexRateTypeId,
+                                                strForexRateType: strRateType,
+                                                dblForexRate: dblForexRate 
+                                            });
+                                            current.tblICInventoryReceiptCharges().add(newReceiptCharge);
+                                            adddedItemDetail.set('strChargesLink', chargesLink);                                            
+                                        }
+                                    }	                                    
+
+                                    // If transaction currency is a foreign currency, get the default forex rate type, forex rate, and convert the last cost to the transaction currency. 
+                                    if (otherChargeCurrency != functionalCurrencyId && intForexRateTypeId) {
+                                        iRely.Functions.getForexRate(
+                                            otherChargeCurrency,
+                                            intForexRateTypeId,
+                                            current.get('dtmReceiptDate'),
+                                            function (successResponse) {
+                                                processForexRateOnSuccess(successResponse);
+                                            },
+                                            function (failureResponse) {
+                                                //var jsonData = Ext.decode(failureResponse.responseText);
+                                                //iRely.Functions.showErrorDialog(jsonData.message.statusText);                    
+                                                iRely.Functions.showErrorDialog('Something went wrong while getting the forex data for the other charges.');
+                                            }
+                                        );
+                                    }
+                                    else {
+                                        var newReceiptCharge = Ext.create('Inventory.model.ReceiptCharge', {
+                                            intInventoryReceiptId: current.get('intInventoryReceiptId'),
+                                            intContractId: selectedOrder.get('intOrderId'),
+                                            intContractDetailId: otherCharge.intContractDetailId,
+                                            intContractSeq: contract.get('intContractSeq'),
+                                            intChargeId: otherCharge.intItemId,
+                                            strChargesLink: chargesLink,
+                                            ysnInventoryCost: inventoryCost,
+                                            strCostMethod: otherCharge.strCostMethod,
+                                            dblRate: otherCharge.strCostMethod == "Amount" ? 0 : otherCharge.dblRate,
+                                            intCostUOMId: otherCharge.intItemUOMId,
+                                            intEntityVendorId: otherCharge.intVendorId ? otherCharge.intVendorId : current.get('intEntityVendorId'),
+                                            dblAmount: otherCharge.strCostMethod == "Amount" ? otherCharge.dblRate : 0,
+                                            strAllocateCostBy: 'Unit',
+                                            ysnAccrue: otherCharge.intVendorId ? true : false,
+                                            //ysnPrice: otherCharge.ysnPrice,
+                                            strItemNo: otherCharge.strItemNo,
+                                            intCurrencyId: otherCharge.intCurrencyId,
+                                            strCurrency: otherCharge.strCurrency,
+                                            ysnSubCurrency: otherCharge.ysnSubCurrency,
+                                            strCostUOM: otherCharge.strUOM,
+                                            strVendorName: otherCharge.strVendorName ? otherCharge.strVendorName : current.get('strVendorName'),
+                                            strContractNumber: selectedOrder.get('strOrderNumber')
+                                        });
+                                        current.tblICInventoryReceiptCharges().add(newReceiptCharge);
+                                        adddedItemDetail.set('strChargesLink', chargesLink);
+                                    }
                                 }
                             });
 
