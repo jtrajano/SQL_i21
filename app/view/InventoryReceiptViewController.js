@@ -1244,47 +1244,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
-    updateWeightLossText: function(window, clear, weightLoss) {
-        if (!window) return;
-
-        weightLoss = weightLoss ? weightLoss : {
-            dblWeightLoss: 0.00,
-            dblWeightLossPercentage: 0.00,
-            dblFranchise: 0.00
-        }; 
-
-        var txtWeightLossMsgValue =  window.down("#txtWeightLossMsgValue"); 
-        var txtWeightLossMsgPercent = window.down("#txtWeightLossMsgPercent"); 
-
-        if(clear) {
-            txtWeightLossMsgValue.setValue(0.00);
-            txtWeightLossMsgPercent.setValue(Ext.util.Format.number(0.00, "0,000.00%"));
-            
-            document.getElementsByName(txtWeightLossMsgValue.name)[0].style.color = 'gray';
-            document.getElementsByName(txtWeightLossMsgPercent.name)[0].style.color = 'gray';
-        } else {
-            txtWeightLossMsgValue.setValue(weightLoss.dblWeightLoss);
-            txtWeightLossMsgPercent.setValue(Ext.util.Format.number(weightLoss.dblWeightLossPercentage, "0,000.00%"));
-            
-            // If there is no Gain/Loss, set the color to gray. Otherwise, set it to Red.          
-            // Gray is the color of Readonly fields.   
-            if (weightLoss.dblWeightLoss === 0) {
-                document.getElementsByName(txtWeightLossMsgValue.name)[0].style.color = 'gray';
-            }
-            else {
-                document.getElementsByName(txtWeightLossMsgValue.name)[0].style.color = 'red';
-            }
-
-            // If there is percentage > franchise, set the color to red, Otherwise, set it to Gray. 
-            if (weightLoss.dblFranchise !=0 && Math.abs(weightLoss.dblWeightLossPercentage) > Math.abs(weightLoss.dblFranchise)) { 
-                document.getElementsByName(txtWeightLossMsgPercent.name)[0].style.color = 'red';
-            }
-            else {
-                document.getElementsByName(txtWeightLossMsgPercent.name)[0].style.color = 'gray';
-            }            
-        }
-    },
-
     createRecord: function (config, action) {
         var win = config.window;
         win.down("#txtWeightLossMsgValue").setValue("");
@@ -6502,6 +6461,49 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var weightLoss = this.getWeightLoss(ReceiptItems, sourceType);
             win.viewModel.set('weightLoss', weightLoss);
             me.updateWeightLossText(win, false, weightLoss);
+        }
+    },
+
+    updateWeightLossText: function(window, clear, weightLoss) {
+        if (!window) return;
+
+        weightLoss = weightLoss ? weightLoss : {
+            dblWeightLoss: 0.00,
+            dblWeightLossPercentage: 0.00,
+            dblFranchise: 0.00
+        }; 
+
+        var txtWeightLossMsgValue =  window.down("#txtWeightLossMsgValue"); 
+        var txtWeightLossMsgPercent = window.down("#txtWeightLossMsgPercent"); 
+
+        if(clear) {
+            txtWeightLossMsgValue.setValue(0.00);
+            txtWeightLossMsgPercent.setValue(Ext.util.Format.number(0.00, "0,000.00%"));
+            
+            document.getElementsByName(txtWeightLossMsgValue.name)[0].style.color = 'gray';
+            document.getElementsByName(txtWeightLossMsgPercent.name)[0].style.color = 'gray';
+        } else {
+            txtWeightLossMsgValue.setValue(weightLoss.dblWeightLoss);
+            txtWeightLossMsgPercent.setValue(Ext.util.Format.number(weightLoss.dblWeightLossPercentage, "0,000.00%"));
+            
+            // If there is no Gain/Loss, set the color to gray. Otherwise, set it to Red.          
+            // Gray is the color of Readonly fields.   
+            if (weightLoss.dblWeightLoss === 0) {
+                document.getElementsByName(txtWeightLossMsgValue.name)[0].style.color = 'gray';
+            }
+            else {
+                document.getElementsByName(txtWeightLossMsgValue.name)[0].style.color = 'red';
+            }
+
+            var percentageColor = document.getElementsByName(txtWeightLossMsgPercent.name)[0].style.color;            
+            var isLoss = weightLoss.dblWeightLossPercentage < 0;
+            var franchise = Math.abs(weightLoss.dblFranchise ? weightLoss.dblFranchise : 0.00);
+            var wgtLoss = Math.abs(weightLoss.dblWeightLossPercentage ? weightLoss.dblWeightLossPercentage : 0.00);
+            if(wgtLoss >= franchise && isLoss) {
+                document.getElementsByName(txtWeightLossMsgPercent.name)[0].style.color = 'red';
+            } else {
+                document.getElementsByName(txtWeightLossMsgPercent.name)[0].style.color = 'blue';
+            }
         }
     },
 
