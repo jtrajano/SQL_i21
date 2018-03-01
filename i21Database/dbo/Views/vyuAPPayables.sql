@@ -139,7 +139,7 @@ SELECT
 	A.dtmDate
 	,A.intBillId
 	,A.strBillId
-	,B.dblAmountApplied
+	,B.dblAmountApplied * (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END)
 	,0 AS dblTotal
 	,0 AS dblAmountDue
 	,0 AS dblWithheld
