@@ -615,7 +615,7 @@ BEGIN TRY
 				,tblARCustomerStatementStagingTable.strCFTermCode					   = 		cfInv.strTermCode		
 		FROM tblCFInvoiceStagingTable cfInv
 		WHERE tblARCustomerStatementStagingTable.intEntityCustomerId = cfInv.intCustomerId
-		AND strUserId = @UserId
+		AND cfInv.strUserId = @UserId
 
 		UPDATE tblARCustomerStatementStagingTable
 		SET
@@ -784,7 +784,7 @@ BEGIN TRY
 						
 			FROM tblCFInvoiceStagingTable cfInv
 			WHERE tblARCustomerStatementStagingTable.intEntityCustomerId = cfInv.intCustomerId
-			AND strUserId = @UserId
+			AND cfInv.strUserId = @UserId
 
 
 			DELETE FROM tblARCustomerStatementStagingTable 

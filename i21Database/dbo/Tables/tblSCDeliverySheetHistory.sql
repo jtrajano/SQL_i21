@@ -10,7 +10,7 @@
 	[dtmDeliverySheetHistoryDate] DATE NULL, 
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSCDeliverySheetHistory_intDeliverySheetHistoryId] PRIMARY KEY ([intDeliverySheetHistoryId]) ,
-	CONSTRAINT [FK_tblSCDeliverySheetHistory_tblSCDeliverySheet_intDeliverySheetId] FOREIGN KEY ([intDeliverySheetId]) REFERENCES [tblSCDeliverySheet]([intDeliverySheetId]),
+	CONSTRAINT [FK_tblSCDeliverySheetHistory_tblSCDeliverySheet_intDeliverySheetId] FOREIGN KEY ([intDeliverySheetId]) REFERENCES [tblSCDeliverySheet]([intDeliverySheetId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblSCDeliverySheetHistory_tblGRStorageType_intStorageScheduleTypeId] FOREIGN KEY ([intStorageScheduleTypeId]) REFERENCES [tblGRStorageType]([intStorageScheduleTypeId]),
 	CONSTRAINT [FK_tblSCDeliverySheetHistory_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [tblEMEntity]([intEntityId])
 )

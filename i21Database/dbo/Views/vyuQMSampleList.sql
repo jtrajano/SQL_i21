@@ -56,6 +56,7 @@ SELECT S.intSampleId
 	,S.strComment
 	,ISNULL(ito1.intOwnerId, ito2.intOwnerId) AS intEntityId
 	,S1.strSampleNumber AS strParentSampleNo
+	,CD.strItemSpecification
 FROM dbo.tblQMSample S
 JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 	AND S.ysnIsContractCompleted <> 1

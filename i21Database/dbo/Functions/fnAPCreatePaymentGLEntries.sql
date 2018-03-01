@@ -513,7 +513,9 @@ BEGIN
 				ON A.intEntityVendorId = C.[intEntityId]
 			LEFT JOIN tblSMCurrencyExchangeRateType rateType ON A.intCurrencyExchangeRateTypeId = rateType.intCurrencyExchangeRateTypeId
 	WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
-	AND 1 = (CASE WHEN B.dblAmountDue = CAST(((B.dblPayment + B.dblDiscount) - B.dblInterest) AS DECIMAL(18,2)) THEN 1 ELSE 0 END)
+	AND 1 = (CASE WHEN B.dblAmountDue = CAST(((B.dblPayment + B.dblDiscount) - B.dblInterest) AS DECIMAL(18,2)) THEN 1 
+				  WHEN CAST(((B.dblPayment + B.dblDiscount) - B.dblInterest) AS DECIMAL(18,2)) < B.dblAmountDue THEN 1 
+			 ELSE 0 END)
 	AND B.dblInterest <> 0 AND B.dblPayment > 0
 	--GROUP BY A.[strPaymentRecordNum],
 	--A.intPaymentId,

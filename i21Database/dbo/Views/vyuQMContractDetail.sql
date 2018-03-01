@@ -33,6 +33,7 @@ SELECT CD.intContractDetailId
 	,CD.intContractStatusId
 	,ISNULL(CD.strERPPONumber, '') AS strERPPONumber
 	,CH.intContractTypeId
+	,CD.strItemSpecification
 FROM tblCTContractDetail CD
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId

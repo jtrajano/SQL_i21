@@ -404,6 +404,7 @@ END
 		,[strChargesLink] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL
 		,[dblQtyReceived] NUMERIC(38,20)
 		,[dblCost] NUMERIC(38,20)
+		,[intOwnershipType] INT
 		UNIQUE ([intInventoryReceiptItemId])
 	);
 	INSERT INTO #tmpReceiptItem(
@@ -416,6 +417,7 @@ END
 		,[strChargesLink]
 		,[dblQtyReceived]
 		,[dblCost]
+		,[intOwnershipType]
 	)
 	SELECT 
 		ri.intInventoryReceiptItemId
@@ -427,6 +429,7 @@ END
 		,ri.strChargesLink
 		,ri.dblOpenReceive - ri.dblBillQty
 		,ri.dblUnitCost
+		,ri.intOwnershipType
 	FROM tblICInventoryReceipt r 
 	INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
 	LEFT JOIN tblCTContractDetail CT ON CT.intContractDetailId = ri.intLineNo AND ri.intInventoryReceiptId = @InventoryReceiptId 
@@ -468,14 +471,15 @@ END
 				,[dblQtyReceived] = rc.dblQuantity - ISNULL(-rc.dblQuantityPriced, 0)
 				,[dblCost] = 
 					CASE 
-						WHEN rc.strCostMethod = 'Per Unit' THEN rc.dblRate
-						ELSE rc.dblAmount
+						WHEN rc.strCostMethod = 'Amount' THEN  rc.dblAmount
+						ELSE rc.dblRate
 					END 
 				,[intTaxGroupId] = rc.intTaxGroupId
 		FROM	#tmpReceiptItem tmp 
 				INNER JOIN tblICInventoryReceiptCharge rc ON rc.intInventoryReceiptId = tmp.intInventoryReceiptId AND rc.strChargesLink = tmp.strChargesLink AND tmp.intPricingTypeId IN (0,1,6)
 		WHERE	tmp.ysnPosted = 1
 				AND tmp.intInventoryReceiptId = @InventoryReceiptId
+				AND tmp.intOwnershipType = 1
 				AND 
                 (
                     (
@@ -488,6 +492,7 @@ END
                         AND ISNULL(rc.dblAmountBilled, 0) < rc.dblAmount
                     )
                 )
+				
 	END 
 
 	SELECT @total = COUNT(*) FROM @voucherItems;
@@ -562,12 +567,12 @@ END
 	SELECT rc.intEntityVendorId
 			,rc.intInventoryReceiptChargeId
 			,CASE 
-				WHEN rc.strCostMethod = 'Per Unit' THEN dbo.fnSCFreightCalculation(tmp.dblQtyReceived, @dblNetUnits, @dblGrossUnits,null) 
-				ELSE rc.dblQuantity - ISNULL(-rc.dblQuantityPriced, 0)
+				WHEN rc.strCostMethod = 'Amount' THEN rc.dblQuantity - ISNULL(-rc.dblQuantityPriced, 0)
+				ELSE dbo.fnSCFreightCalculation(tmp.dblQtyReceived, @dblNetUnits, @dblGrossUnits,null) 
 			END
 			,CASE 
-				WHEN rc.strCostMethod = 'Per Unit' THEN rc.dblRate
-				ELSE rc.dblAmount
+				WHEN rc.strCostMethod = 'Amount' THEN  rc.dblAmount
+				ELSE rc.dblRate
 			END
 			,rc.intTaxGroupId
 	FROM	#tmpReceiptItem tmp 
@@ -576,6 +581,7 @@ END
 			AND tmp.intInventoryReceiptId = @InventoryReceiptId
 			AND rc.ysnAccrue = 1 
 			AND rc.intEntityVendorId != tmp.intEntityVendorId
+			AND tmp.intOwnershipType = 1
 
 	DECLARE ListThirdPartyVendor CURSOR LOCAL FAST_FORWARD
 	FOR
