@@ -180,7 +180,31 @@ declare @intGeneratedActivityIdentityAct int
 declare @intGeneratedActivityTransactionIdentity int
 
 SET @queryResultAct = CURSOR FOR
-
+	select
+		intTransactionId
+		,strType
+		,strSubject
+		,intEntityContactId
+		,intEntityId
+		,intCompanyLocationId
+		,dtmStartDate
+		,dtmEndDate
+		,dtmStartTime
+		,dtmEndTime
+		,strStatus
+		,strPriority
+		,strCategory
+		,intAssignedTo
+		,strActivityNo
+		,strDetails
+		,ysnPublic
+		,dtmCreated
+		,dtmModified
+		,intCreatedBy
+		,intConcurrencyId
+		,intTicketId
+	from
+	(
 	select
 		intTransactionId = (select top 1 tblSMTransaction.intTransactionId from tblSMTransaction where tblSMTransaction.intRecordId = tblHDProject.intProjectId and tblSMTransaction.intScreenId = (select top 1 tblSMScreen.intScreenId from tblSMScreen where tblSMScreen.strNamespace = 'HelpDesk.view.Project'))
 		,strType = 'Task'
@@ -239,6 +263,8 @@ SET @queryResultAct = CURSOR FOR
 	where tblHDTicket.strType <> 'CRM'
 		and tblHDTicket.intTicketId not in (select distinct tblHDProjectTask.intTicketId from tblHDProjectTask)
 		and isnull(tblHDTicket.ysnConvertedToActivity, convert(bit,0)) <> convert(bit,1)
+	) as queryresult
+	ORDER BY intTicketId
 
 OPEN @queryResultAct
 FETCH NEXT
@@ -386,11 +412,11 @@ BEGIN
 			,intTransactionId
 			,intConcurrencyId
 		)
-		select
-			strJiraKey = strJiraKey
+		select distinct
+			strJiraKey = strKey
 			,intTransactionId = @intGeneratedActivityTransactionIdentity
 			,intConcurrencyId = 1
-		from tblHDTicketJIRAIssue where intTicketId = @intTicketIdAct and isnull(ysnConvertedToActivity, convert(bit,0)) <> convert(bit,1)
+		from tblHDTicketJIRAIssue where intTicketId = @intTicketIdAct and strKey is not null and isnull(ysnConvertedToActivity, convert(bit,0)) <> convert(bit,1)
 
 		update tblHDTicketJIRAIssue set ysnConvertedToActivity = convert(bit,1) where intTicketId = @intTicketIdAct;
 
@@ -435,6 +461,7 @@ BEGIN
 			and a.intTicketId = @intTicketIdAct
 			and c.intTicketId = a.intTicketId
 			and isnull(a.ysnConvertedToActivity, convert(bit,0)) <> convert(bit,1)
+			and a.intAgentEntityId is not null
 
 		update tblHDTicketHoursWorked set ysnConvertedToActivity = convert(bit,1) where intTicketId = @intTicketIdAct;
 
