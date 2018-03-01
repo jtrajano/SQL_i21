@@ -1362,11 +1362,18 @@ BEGIN TRY
 				INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
 				INNER JOIN tblICItem ICI ON ID.intItemId = ICI.intItemId
 				INNER JOIN tblICItemLocation ICL ON ID.intItemId = ICL.intItemId AND I.intCompanyLocationId = ICL.intLocationId
+				LEFT OUTER JOIN tblICItemStock ICIS ON ICI.intItemId = ICIS.intItemId AND ICL.intItemLocationId = ICIS.intItemLocationId 
 			WHERE I.intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
 			AND ID.ysnBlended <> @post
 			AND ICI.ysnAutoBlend = 1
 			AND I.strTransactionType NOT IN ('Credit Memo', 'Customer Prepayment', 'Overpayment')
 			AND ISNULL(ICI.strType,'') = 'Finished Good'
+			AND 
+				(
+				@post = 0
+				OR
+				[dbo].[fnICConvertUOMtoStockUnit](ICI.intItemId, ID.intItemUOMId, ID.dblQtyShipped) > ISNULL(ICIS.dblUnitOnHand,0.000000)
+				)
 
 			WHILE EXISTS (SELECT NULL FROM @FinishedGoodItems)
 				BEGIN
