@@ -542,9 +542,9 @@ BEGIN TRY
 				AND (L.dtmExpiryDate IS NULL OR L.dtmExpiryDate >= GETDATE())
 				AND L.dblWeight > 0
 				AND L.intStorageLocationId NOT IN (
-					@intKitStagingLocationId
-					,@intBlendStagingLocationId
-					,@intPartialQuantityStorageLocationId
+					ISNULL(@intKitStagingLocationId,0)
+					,ISNULL(@intBlendStagingLocationId,0)
+					--,@intPartialQuantityStorageLocationId
 					) --Exclude Kit Staging,Blend Staging,Partial Qty Storage Locations
 
 			--Get Either Parent Lot OR Child Lot Based on Setting
@@ -681,6 +681,7 @@ BEGIN TRY
 				SET @strSQL ='INSERT INTO '+ @strInputTables + 
 				' SELECT ' + @strPivotSelect + 
 					'FROM (
+						SELECT * From ( 
 						SELECT DISTINCT pl.intParentLotId
 							,pl.intItemId
 							,ABS(ISNULL(r.strPropertyValue, 0) - ISNULL(p.dblMedian, 0)) AS dblDeviation
@@ -729,6 +730,9 @@ BEGIN TRY
 							,pl.dtmExpiryDate
 							,pl.dblUnitCost
 							,CONVERT(NUMERIC(38,20), ISNULL(r.strPropertyValue, 0)) AS dblPropertyValue
+							,p.dblMedian
+							,p.dblMaxValue
+							,p.dblMinValue
 						FROM #tblProductProperty p
 						INNER JOIN tblQMTestResult AS r ON p.intPropertyId=r.intPropertyId
 							AND ISNUMERIC(r.strPropertyValue) = 1
@@ -744,13 +748,9 @@ BEGIN TRY
 						WHERE pl.intItemId = '+ CONVERT(varchar,@intRawItemId) + '
 							AND pl.dblQty > 0
 							AND pl.intLocationId = '+ CONVERT(varchar,@intLocationId) +'
-							AND ABS(ISNULL((
-										CASE 
-											WHEN ISNUMERIC(r.strPropertyValue) = 1
-												THEN CONVERT(NUMERIC(38,20), r.strPropertyValue)
-											ELSE 0.0
-											END
-										), 0) - ISNULL(p.dblMedian, 0)) <= (ISNULL(p.dblMaxValue, 0) - ISNULL(p.dblMinValue, 0))
+							) t Where ABS(ISNULL(
+										t.dblPropertyValue
+										, 0) - ISNULL(t.dblMedian, 0)) <= (ISNULL(t.dblMaxValue, 0) - ISNULL(t.dblMinValue, 0))
 						) P
 					PIVOT(Sum(dblPropertyValue) FOR intPropertyId IN (' + @strPivotfor + ')) AS pvt
 					GROUP BY intParentLotId
@@ -1181,9 +1181,9 @@ BEGIN TRY
 				AND (L.dtmExpiryDate IS NULL OR L.dtmExpiryDate >= GETDATE())
 				AND L.dblWeight > 0
 				AND L.intStorageLocationId NOT IN (
-					@intKitStagingLocationId
-					,@intBlendStagingLocationId
-					,@intPartialQuantityStorageLocationId
+					ISNULL(@intKitStagingLocationId,0)
+					,ISNULL(@intBlendStagingLocationId,0)
+					--,@intPartialQuantityStorageLocationId
 					) --Exclude Kit Staging,Blend Staging,Partial Qty Storage Locations
 
 			DECLARE cursor_NextBestPick CURSOR LOCAL FAST_FORWARD FOR                        
