@@ -208,6 +208,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuICGetItemPricingMap());
             modelBuilder.Configurations.Add(new vyuICGetItemLocationMap());
             modelBuilder.Configurations.Add(new vyuSMGetCompanyLocationSearchListMap());
+            modelBuilder.Configurations.Add(new vyuICGetItemRunningStockMap());
 
             modelBuilder.Configurations.Add(new tblICCompanyPreferenceMap());
             modelBuilder.Configurations.Add(new tblSMStartingNumberMap());

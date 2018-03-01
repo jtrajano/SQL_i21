@@ -974,6 +974,49 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
+
+        public async Task<GetObjectResult> GetItemRunningStock(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICGetItemRunningStock>().Filter(param, true);
+            var key = Methods.GetPrimaryKey<vyuICGetItemRunningStock>(_db.ContextManager);
+
+            var data = await query.Execute(param, key).ToListAsync(param.cancellationToken);
+
+            var finalData = data.GroupBy(g => new {
+                g.intItemId,
+                g.strItemNo,
+                g.intLocationId,
+                g.strLocationName,
+                g.intSubLocationId,
+                g.strSubLocationName,
+                g.intStorageLocationId,
+                g.strStorageLocationName,
+                g.intLotId,
+                g.strLotNumber,
+                g.intOwnershipType
+            }).Select(s => new {
+                intItemId = s.Key.intItemId,
+                strItemNo = s.Key.strItemNo,
+                intLocationId = s.Key.intLocationId,
+                strLocationName = s.Key.strLocationName,
+                intSubLocationId = s.Key.intSubLocationId,
+                strSubLocationName = s.Key.strSubLocationName,
+                intStorageLocationId = s.Key.intStorageLocationId,
+                strStorageLocationName = s.Key.strStorageLocationName,
+                intLotId = s.Key.intLotId,
+                strLotNumber = s.Key.strLotNumber,
+                intOwnershipType = s.Key.intOwnershipType,
+                dtmAsOfDate = s.Max(m => m.dtmAsOfDate),
+                dblRunningAvailableQty = s.Sum(d => d.dblQty)
+            }).ToList();
+
+            return new GetObjectResult()
+            {
+                data = finalData,
+                total = finalData.Count(),
+            };
+        }
+
         private IQueryable<vyuICGetInventoryValuation> GetOpeningBalances(List<SearchFilter> priorBalanceFilter) {
             var priorBalanceParam = new GetParameter()
             {

@@ -1113,17 +1113,57 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         var locationId = current.get('intLocationId'),
             itemId = record.get('intItemId'),
             subLocationId = record.get('intSubLocationId'),
-            storageLocationId = record.get('intStorageLocationId');
+            storageLocationId = record.get('intStorageLocationId'),
+            asOfDate = current.get('dtmAdjustmentDate');
+        
         var qty = 0;
+
+        var filters = [
+            {
+                column: 'intItemId',
+                value: itemId,
+                condition: 'eq',
+                conjunction: 'and'
+            },
+            {
+                inner: [
+                    {
+                        column: 'dtmAsOfDate',
+                        value: asOfDate,
+                        condition: 'lt',
+                        conjunction: 'or'
+                    },
+                    {
+                        column: 'dtmAsOfDate',
+                        value: asOfDate,
+                        condition: 'eq',
+                        conjunction: 'or'
+                    }
+                ],
+                conjunction: 'and'
+            },{
+                column: 'intLocationId',
+                value: locationId,
+                condition: 'eq',
+                conjunction: 'and'
+            }
+        ];
+
+        if(subLocationId)
+            filters.push([{ column: 'intSubLocationId', value: subLocationId, condition: 'eq', conjunction: 'and'}]);
+        if(storageLocationId)
+            filters.push([{ column: 'intStorageLocationId', value: storageLocationId, condition: 'eq', conjunction: 'and'}]);
 
         ic.utils.ajax({
             timeout: 120000,   
-            url: './inventory/api/item/getitemstockuomsummary',
+            //url: './inventory/api/item/getitemstockuomsummary',
+            url: './inventory/api/item/getitemrunningstock',
             params: {
-                ItemId: itemId,
-                LocationId: locationId,
-                SubLocationId: subLocationId,
-                StorageLocationId: storageLocationId
+                // ItemId: itemId,
+                // LocationId: locationId,
+                // SubLocationId: subLocationId,
+                // StorageLocationId: storageLocationId
+                filter: iRely.Functions.encodeFilters(filters)
             } 
         })
         .map(function(x) { return Ext.decode(x.responseText); })
@@ -1132,15 +1172,16 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 if (data.success) {
                     if (data.data.length > 0) {
                         var stockRecord = data.data[0];
-                        qty = stockRecord.dblOnHand;
+                        qty = stockRecord.dblRunningAvailableQty;
 
-                        if(record.get('intOwnershipType') === 2)
-                            qty = stockRecord.dblUnitStorage;
+                        // if(record.get('intOwnershipType') === 2)
+                        //     qty = stockRecord.dblUnitStorage;
                     }
                 }
                 else {
                     iRely.Functions.showErrorDialog(data.message.statusText);
                 }
+
                 record.set('dblQuantity', qty);
                 var adjustByQuantity = record.get('dblAdjustByQuantity')
                 var newQty = null;
@@ -1149,6 +1190,15 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                     newQty = qty + adjustByQuantity;
                 }
                 record.set('dblNewQuantity', newQty); 
+
+                if(iRely.Functions.isEmpty(record.get('intLotId'))) {
+                    record.set('intLotId', stockRecord.intLotId);
+                    record.set('strLotNumber', stockRecord.strLotNumber);
+                    record.set('intSubLocationId', stockRecord.intSubLocationId);
+                    record.set('strSubLocation', stockRecord.strSubLocationName);
+                    record.set('intStorageLocationId', stockRecord.intStorageLocationId);
+                    record.set('strStorageLocation', stockRecord.strStorageLocationName);
+                }
             },
             function(error) {
                 var json = Ext.decode(error.responseText);
@@ -1646,7 +1696,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             case 'pgePostPreview':
                 me.doPostPreview(win);
         }
-    },     
+    },
 
     init: function (application) {
         this.control({
@@ -1730,7 +1780,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             },
             "#tabInventoryAdjustment": {
                 tabChange: this.onAdjustmentTabChange
-            }               
+            }             
         });
     }
 });
