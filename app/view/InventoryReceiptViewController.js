@@ -2310,6 +2310,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     var taxableAmount,
                         taxAmount;
 
+                    var adjustedTax = itemDetailTax.dblAdjustedTax;
+                    adjustedTax = Ext.isNumeric(adjustedTax) ? adjustedTax : 0;                                
+                    // If a line is using a foreign currency, convert the adjusted tax from functional currency to the charge currency. 
+                    adjustedTax = dblForexRate != 0 ? adjustedTax / dblForexRate : adjustedTax;
+
                     taxableAmount = me.getTaxableAmount(qtyOrdered, unitCost, itemDetailTax, itemTaxes);
                     if (itemDetailTax.strCalculationMethod === 'Percentage') {
                         taxAmount = (taxableAmount * (itemDetailTax.dblRate / 100));
@@ -2339,7 +2344,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                     else {
                         itemDetailTax.dblTax = taxAmount;
-                        itemDetailTax.dblAdjustedTax = itemDetailTax.dblAdjustedTax;
+                        itemDetailTax.dblAdjustedTax = adjustedTax;
                         itemDetailTax.ysnTaxAdjusted = true;
                     }
                     totalItemTax = totalItemTax + itemDetailTax.dblAdjustedTax;
@@ -6610,6 +6615,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 chargeQuantity = Ext.isNumeric(chargeQuantity) ? chargeQuantity : 1; 
                                 var cost = taxableAmount / chargeQuantity;
 
+                                var adjustedTax = itemDetailTax.dblAdjustedTax;
+                                adjustedTax = Ext.isNumeric(adjustedTax) ? adjustedTax : 0;                                
+                                // If a line is using a foreign currency, convert the adjusted tax from functional currency to the charge currency. 
+                                adjustedTax = dblForexRate != 0 ? adjustedTax / dblForexRate : adjustedTax;
+
                                 if (charge.get('ysnPrice')) {
                                     taxableAmount = -taxableAmount; 
                                 }                                   
@@ -6643,7 +6653,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 }
                                 else {
                                     itemDetailTax.dblTax = taxAmount;
-                                    itemDetailTax.dblAdjustedTax = itemDetailTax.dblAdjustedTax;
+                                    itemDetailTax.dblAdjustedTax = adjustedTax;
                                     itemDetailTax.ysnTaxAdjusted = true;
                                 }
                                 totalItemTax = totalItemTax + itemDetailTax.dblAdjustedTax;
