@@ -1,5 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspARProcessNSF]
-	@intNSFTransactionId	INT
+	  @intNSFTransactionId	INT
+	, @intUserId			INT
+	, @strCreatedIvoices	NVARCHAR(MAX)	= NULL OUTPUT
 AS
 
 DECLARE @intNSFPaymentMethodId INT = NULL
@@ -54,14 +56,14 @@ SELECT NSF.intPaymentId
 	 , P.strRecordNumber
 	 , P.intEntityCustomerId
 	 , P.intCurrencyId
-	 , P.intLocationId
+	 , P.intLocationId	 
 FROM dbo.tblARNSFStagingTableDetail NSF WITH (NOLOCK)
 INNER JOIN (
 	SELECT intPaymentId
 		 , intEntityCustomerId
 		 , intCurrencyId
 		 , intLocationId
-		 , strRecordNumber
+		 , strRecordNumber		 
 	FROM dbo.tblARPayment P WITH (NOLOCK)
 	INNER JOIN (
 		SELECT intPaymentMethodID
@@ -69,11 +71,19 @@ INNER JOIN (
 		WHERE strPaymentMethod IN ('Check', 'eCheck')
 	) PM ON P.intPaymentMethodId = PM.intPaymentMethodID
 	WHERE ysnPosted = 1
+	  AND ysnProcessedToNSF = 0
 ) P ON NSF.intPaymentId = P.intPaymentId
+WHERE NSF.ysnProcessed = 0
 
 IF NOT EXISTS (SELECT TOP 1 NULL FROM #SELECTEDPAYMENTS)
 	BEGIN
 		RAISERROR('There are no Payments to process to NSF.', 16, 1) 
+		RETURN 0;
+	END
+
+IF ISNULL(@intUserId, 0) = 0
+	BEGIN
+		RAISERROR('User Id is required when processing to NSF.', 16, 1) 
 		RETURN 0;
 	END
 
@@ -194,9 +204,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #SELECTEDPAYMENTS WHERE ysnInvoiceToCustomer =
 		DELETE FROM #SELECTEDPAYMENTS WHERE ysnInvoiceToCustomer = 0
 
 		DECLARE @InvoiceEntries		InvoiceIntegrationStagingTable
-			  , @UserId				INT
-			  , @GroupingOption		INT = 0
-
+				
 		INSERT INTO @InvoiceEntries (
 			  [strTransactionType]
 			, [strType]
@@ -204,9 +212,9 @@ IF EXISTS (SELECT TOP 1 NULL FROM #SELECTEDPAYMENTS WHERE ysnInvoiceToCustomer =
 			, [intSourceId]
 			, [strSourceId]
 			, [intEntityCustomerId]
-			, [intCompanyLocationId]
-			, [intAccountId]
+			, [intCompanyLocationId]			
 			, [intCurrencyId]
+			, [intEntityId]
 			, [dtmDate]
 			, [dtmDueDate]
 			, [dtmShipDate]
@@ -214,7 +222,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #SELECTEDPAYMENTS WHERE ysnInvoiceToCustomer =
 			, [strComments]
 			, [ysnPost]
 			--detail
-			
+			, [intSalesAccountId]
 			, [ysnInventory]
 			, [strItemDescription]
 			, [dblQtyShipped]
@@ -228,9 +236,9 @@ IF EXISTS (SELECT TOP 1 NULL FROM #SELECTEDPAYMENTS WHERE ysnInvoiceToCustomer =
 			 , P.intPaymentId
 			 , P.strRecordNumber
 			 , P.intEntityCustomerId
-			 , P.intCompanyLocationId
-			 , P.intNSFAccountId
+			 , P.intCompanyLocationId			 
 			 , P.intCurrencyId
+			 , @intUserId
 			 , P.dtmDate
 			 , P.dtmDate
 			 , P.dtmDate
@@ -239,6 +247,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #SELECTEDPAYMENTS WHERE ysnInvoiceToCustomer =
 			 , 1
 
 			 --detail
+			 , P.intNSFAccountId
 			 , 0
 			 , 'Bank Fees'
 			 , 1
@@ -250,6 +259,8 @@ IF EXISTS (SELECT TOP 1 NULL FROM #SELECTEDPAYMENTS WHERE ysnInvoiceToCustomer =
 		  AND intNSFAccountId IS NOT NULL
 		  AND dblNSFBankCharge > 0.00
 		
+		IF EXISTS (SELECT TOP 1 NULL FROM @InvoiceEntries)
+			EXEC dbo.uspARProcessInvoices @InvoiceEntries = @InvoiceEntries, @UserId = @intUserId, @GroupingOption = 0, @CreatedIvoices = @strCreatedIvoices OUT
 	END
 
 UPDATE tblARNSFStagingTableDetail 
