@@ -56,7 +56,7 @@ BEGIN TRY
 			ELSE
 			ISNULL(E.strLocationName,'') +' '+ ISNULL(E.strAddress,'') +' '+ ISNULL(E.strCity,'') +' '+ ISNULL(E.strCountry,'') +' '+ ISNULL(E.strState,'') +' '+ ISNULL(E.strZipCode,'') 
 			END [Ship To Address]
-			,SO.strSalesOrderNumber [SalesOrder No]
+			,[SalesOrder No] = SO.strOrderNumber --SO.strSalesOrderNumber 
 			,I.strItemNo [Item No]
 			,I.strDescription [Item]
 			,UM.strUnitMeasure [UOM]
@@ -75,8 +75,9 @@ BEGIN TRY
 		LEFT JOIN tblSMCompanyLocation SM ON SM.intCompanyLocationId = S.intShipToCompanyLocationId
 		LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = SI.intSubLocationId
 		LEFT JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLocationId = SI.intStorageLocationId
-		LEFT JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = SI.intOrderId
+		--LEFT JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = SI.intOrderId
 		LEFT JOIN tblEMEntity EN ON S.intEntityCustomerId = EN.intEntityId
+		LEFT JOIN vyuICGetShipmentItemSource SO ON SO.intInventoryShipmentItemId = SI.intInventoryShipmentItemId
 		WHERE S.strShipmentNumber = @strShipmentNo
 	END
 END TRY
