@@ -390,12 +390,7 @@ AS
 					
 					IF EXISTS(SELECT TOP 1 1 FROM @tblTypeServiceCharge)
 						BEGIN
-							SET @totalAmount = @totalAmount + CASE WHEN @calculation = 'By Invoice' 
-																THEN 
-																	(SELECT SUM(dblTotalAmount) FROM @tblTypeServiceCharge)
-																ELSE 
-																	(SELECT AVG(dblTotalAmount) FROM @tblTypeServiceCharge)
-																END
+							SET @totalAmount = @totalAmount + ISNULL((SELECT SUM(ISNULL(dblTotalAmount, 0)) FROM @tblTypeServiceCharge), 0)
 
 							DELETE FROM @tempTblTypeServiceCharge WHERE ISNULL(dblAmountDue, @zeroDecimal) = @zeroDecimal OR ISNULL(dblTotalAmount, @zeroDecimal) = @zeroDecimal
 
