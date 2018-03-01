@@ -163,6 +163,8 @@
     <None Include="dbo\Stored Procedures\uspGRImportStorageTicket.sql" />
     <None Include="dbo\Stored Procedures\uspGRImportCustomerSplit.sql" />
     <None Include="dbo\Stored Procedures\uspGRImportTicketPool.sql" />
+    <None Include="dbo\Stored Procedures\uspPRImportOriginTaxTypes.sql" />
+    <None Include="dbo\Stored Procedures\uspPRImportOriginEmployeeTaxes.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />
