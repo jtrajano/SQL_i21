@@ -579,7 +579,7 @@ BEGIN TRY
 		FROM	tblICInventoryReceiptItem ri
 				INNER JOIN #tmpReceiptItem tmp ON tmp.intInventoryReceiptItemId = ri.intInventoryReceiptItemId AND tmp.intPricingTypeId IN (0,1,6)
 		WHERE	ri.intInventoryReceiptId = @InventoryReceiptId
-				AND ri.intOwnershipType = 1		
+				AND tmp.intOwnershipType = 1		
 	END 
 
 	-- Assemble the Other Charges
@@ -603,7 +603,7 @@ BEGIN TRY
 				INNER JOIN tblICInventoryReceiptCharge rc ON rc.intInventoryReceiptId = tmp.intInventoryReceiptId AND rc.strChargesLink = tmp.strChargesLink AND tmp.intPricingTypeId IN (0,1,6)
 		WHERE	tmp.ysnPosted = 1
 				AND tmp.intInventoryReceiptId = @InventoryReceiptId
-				AND ri.intOwnershipType = 1
+				AND tmp.intOwnershipType = 1
 				AND 
                 (
                     (

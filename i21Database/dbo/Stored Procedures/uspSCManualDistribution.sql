@@ -455,7 +455,7 @@ END
 		FROM	tblICInventoryReceiptItem ri
 				INNER JOIN #tmpReceiptItem tmp ON tmp.intInventoryReceiptItemId = ri.intInventoryReceiptItemId AND tmp.intPricingTypeId IN (0,1,6)
 		WHERE	ri.intInventoryReceiptId = @InventoryReceiptId
-				AND ri.intOwnershipType = 1		
+				AND tmp.intOwnershipType = 1		
 	END 
 
 	-- Assemble the Other Charges
