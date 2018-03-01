@@ -383,6 +383,9 @@ BEGIN
 			,@intWorkOrderProducedLotId
 			,NULL
 			,@intShiftId
+			,NULL
+			,NULL
+			,@strComment
 	END
 	ELSE
 	BEGIN
@@ -419,6 +422,7 @@ BEGIN
 			,@intStorageLocationId = @intStorageLocationId
 			,@dtmProductionDate = @dtmProductionDate
 			,@intTransactionDetailId = @intWorkOrderProducedLotId
+			,@strNotes=@strComment
 	END
 
 	IF @strParentLotNumber IS NULL

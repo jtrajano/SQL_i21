@@ -15,6 +15,7 @@
 	,@intStorageLocationId INT
 	,@dtmProductionDate DATETIME = NULL
 	,@intTransactionDetailId INT = NULL
+	,@strNotes NVARCHAR(MAX) = NULL
 AS
 BEGIN
 	SET QUOTED_IDENTIFIER OFF
@@ -402,7 +403,7 @@ BEGIN
 			,strVessel = NULL
 			,strReceiptNumber = NULL
 			,strMarkings = NULL
-			,strNotes = NULL
+			,strNotes = @strNotes
 			,intEntityVendorId = NULL
 			,strVendorLotNo = @strVendorLotNo
 			,strGarden = NULL
