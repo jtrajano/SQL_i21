@@ -549,7 +549,7 @@ END
 		END
 	END
 
-
+	/*
 	IF OBJECT_ID (N'tempdb.dbo.#tmpItemReceiptIds') IS NOT NULL
         DROP TABLE #tmpItemReceiptIds
 
@@ -646,6 +646,7 @@ END
 
 	CLOSE ListThirdPartyVendor;
 	DEALLOCATE ListThirdPartyVendor;
+	*/
 
 _Exit:
 	

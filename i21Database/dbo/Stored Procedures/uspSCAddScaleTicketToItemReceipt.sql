@@ -148,7 +148,15 @@ SELECT
 		,intGrossNetUOMId			= LI.intItemUOMId
 		,intCostUOMId				= CASE
 										WHEN ISNULL(CNT.intPriceItemUOMId,0) = 0 THEN LI.intItemUOMId 
-										WHEN ISNULL(CNT.intPriceItemUOMId,0) > 0 THEN dbo.fnGetMatchingItemUOMId(CNT.intItemId, CNT.intPriceItemUOMId)
+										WHEN ISNULL(CNT.intPriceItemUOMId,0) > 0 THEN 
+										CASE 
+											WHEN CNT.ysnUseFXPrice = 1 
+												AND CNT.intCurrencyExchangeRateId IS NOT NULL 
+												AND CNT.dblRate IS NOT NULL 
+												AND CNT.intFXPriceUOMId IS NOT NULL 
+											THEN dbo.fnGetMatchingItemUOMId(CNT.intItemId, LI.intItemUOMId)
+											ELSE dbo.fnGetMatchingItemUOMId(CNT.intItemId, CNT.intPriceItemUOMId)
+										END
 									END
 		,intContractHeaderId		= CASE 
 										WHEN LI.intTransactionDetailId IS NULL THEN NULL
