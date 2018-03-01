@@ -84,6 +84,9 @@ SET @maxInvoiceId = ISNULL(@maxInvoiceId, 0)
 IF OBJECT_ID(N'tempdb..#tmpInvoice') IS NOT NULL DROP TABLE #tmpInvoice
 CREATE TABLE #tmpInvoice(intInvoiceId INT, intBackupId INT);
 
+IF EXISTS (SELECT NULL FROM sys.key_constraints WHERE name = 'UK_tblARInvoice_strInvoiceNumber')
+	ALTER TABLE tblARInvoice DROP CONSTRAINT [UK_tblARInvoice_strInvoiceNumber]
+
 MERGE INTO tblARInvoice AS destination
 USING
 (
@@ -205,6 +208,9 @@ VALUES
 OUTPUT inserted.intInvoiceId, SourceData.intBackupId INTO #tmpInvoice;
 
 SET @totalInsertedInvoice = @@ROWCOUNT
+
+IF NOT EXISTS (SELECT NULL FROM sys.key_constraints WHERE name = 'UK_tblARInvoice_strInvoiceNumber')
+	ALTER TABLE tblARInvoice ADD CONSTRAINT [UK_tblARInvoice_strInvoiceNumber] UNIQUE ([strInvoiceNumber])
 
 --IF OBJECT_ID('tempdb..#tmpInvoicesWithRecordNumber') IS NOT NULL DROP TABLE #tmpInvoicesWithRecordNumber
 
