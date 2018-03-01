@@ -303,4 +303,3 @@ LEFT OUTER JOIN
 		ON ARIFP.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
 CROSS APPLY
 		[dbo].[fnARGetDefaultForexRate](ARIFP.[dtmDate], ARIFP.[intCurrencyId], NULL) DFR
-WHERE (ARIFP.dblAmountDue > 0 and ARIFP.dblBaseAmountDue > 0)
