@@ -208,6 +208,7 @@
     <Compile Include="Metadata\Item\tblICItemAddOn.cs" />
     <Compile Include="Metadata\Item\tblICItemLicense.cs" />
     <Compile Include="Metadata\Item\tblICItemSubLocation.cs" />
+    <Compile Include="Metadata\Item\vyuICGetItemsWithNoLocation.cs" />
     <Compile Include="Metadata\Item\vyuICGetItemRunningStock.cs" />
     <Compile Include="Metadata\Item\vyuICGetItemStockUOMTotalsAllLocations.cs" />
     <Compile Include="Metadata\Item\vyuICGetItemStockUOMTotalsAllStorageUnits.cs" />

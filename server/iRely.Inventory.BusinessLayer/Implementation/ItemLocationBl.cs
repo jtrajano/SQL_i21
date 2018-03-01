@@ -152,8 +152,20 @@ namespace iRely.Inventory.BusinessLayer
                 data = await query.Execute(param, key).ToListAsync().ConfigureAwait(false),
                 total = await query.CountAsync().ConfigureAwait(false)
             };
-
         }
+
+        public async Task<GetObjectResult> GetItemsWithNoLocation(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICGetItemsWithNoLocation>().Filter(param, true);
+            var key = Methods.GetPrimaryKey<vyuICGetItemsWithNoLocation>(_db.ContextManager);
+
+            return new GetObjectResult()
+            {
+                data = await query.Execute(param, key).ToListAsync().ConfigureAwait(false),
+                total = await query.CountAsync().ConfigureAwait(false)
+            };
+        }
+
         public SaveResult CheckCostingMethod(int ItemId, int ItemLocationId, int CostingMethod)
         {
             SaveResult saveResult = new SaveResult();

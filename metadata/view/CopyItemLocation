@@ -287,29 +287,6 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "dataIndex": "strLocationName",
-                                                "flex": 1.2,
-                                                "itemId": "colLocationName",
-                                                "text": "Location Name"
-                                            },
-                                            "configAlternates": {
-                                                "dataIndex": "datafield",
-                                                "flex": "number",
-                                                "itemId": "string",
-                                                "text": "string",
-                                                "scrollable": "boolean"
-                                            },
-                                            "name": "MyColumn41",
-                                            "designerId": "c0d4bc17-be2a-4591-a7cf-f9656a877a97"
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
                                                 "dataIndex": "strType",
                                                 "flex": 1,
                                                 "itemId": "colType",
