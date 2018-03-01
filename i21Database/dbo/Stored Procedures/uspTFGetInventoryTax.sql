@@ -26,6 +26,7 @@ BEGIN TRY
 	-- USER DEFINED TABLES
 	DECLARE @TFTransaction TFTransaction
 	DECLARE @tmpInventoryReceiptDetail TFInventoryReceiptDetailTransaction
+	DECLARE @tmpDistReceiptDetail TFInventoryReceiptDetailTransaction
 	DECLARE @tmpRC TABLE (intReportingComponentId INT)
 
 	IF @Refresh = 1
@@ -69,7 +70,7 @@ BEGIN TRY
 				LEFT JOIN tblSMTaxCode AS OriginCountyTaxCode ON OriginCountyTaxCode.intTaxCodeId = tblEMEntityLocation.intCountyTaxCodeId
 				INNER JOIN tblTRSupplyPoint ON tblTRSupplyPoint.intEntityLocationId = tblICInventoryReceipt.intShipFromId 
 				INNER JOIN tblSMCompanyLocation ON tblICInventoryReceipt.intLocationId = tblSMCompanyLocation.intCompanyLocationId
-			LEFT JOIN tblTRLoadReceipt ON  tblTRLoadReceipt.intInventoryReceiptId  = tblICInventoryReceipt.intInventoryReceiptId
+			LEFT JOIN tblTRLoadReceipt ON tblTRLoadReceipt.intInventoryReceiptId = tblICInventoryReceipt.intInventoryReceiptId
 			LEFT JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadReceipt.intLoadHeaderId
 			LEFT JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId
 				LEFT JOIN tblSMCompanyLocation BulkLocation ON BulkLocation.intCompanyLocationId = tblTRLoadDistributionHeader.intCompanyLocationId
@@ -171,10 +172,12 @@ BEGIN TRY
 					--, tblICInventoryReceiptItem.dblGross
 					--, tblICInventoryReceiptItem.dblNet
 					--, tblICInventoryReceiptItem.dblBillQty
-					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblReceived END dblReceived
-					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblGross END dblGross
-					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblNet END dblNet
-					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblBillQty END dblBillQty
+					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' OR tblTRLoadDistributionHeader.strDestination = 'Customer' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblReceived END dblReceived
+					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' OR tblTRLoadDistributionHeader.strDestination = 'Customer' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblGross END dblGross
+					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' OR tblTRLoadDistributionHeader.strDestination = 'Customer' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblNet END dblNet
+					, tblICInventoryReceiptItem.dblBillQty
+					--(CASE WHEN tblICInventoryReceiptItem.dblBillQty >= tblTRLoadDistributionDetail.dblUnits THEN tblTRLoadDistributionDetail.dblUnits ELSE 0 END) 
+					--ELSE tblICInventoryReceiptItem.dblBillQty END dblBillQty
 					, tblICInventoryReceipt.dtmReceiptDate
 					, tblSMShipVia.strShipVia
 					, tblSMShipVia.strTransporterLicense
@@ -194,8 +197,10 @@ BEGIN TRY
 					, tblEMEntityLocation.strState AS strOriginState
 					, tblEMEntityLocation.strCity AS strOriginCity
 					, OriginCountyTaxCode.strCounty AS strOriginCounty
-					, CASE WHEN tblTRLoadDistributionHeader.strDestination IS NULL THEN tblSMCompanyLocation.strStateProvince WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN BulkLocation.strStateProvince ELSE CustomerLocation.strState END strDestinationState
-					, CASE WHEN tblTRLoadDistributionHeader.strDestination IS NULL THEN tblSMCompanyLocation.strCity WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN BulkLocation.strCity ELSE CustomerLocation.strCity END strDestinationCity
+					--, tblSMCompanyLocation.strStateProvince
+					--, tblSMCompanyLocation.strCity
+					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN BulkLocation.strStateProvince WHEN tblTRLoadDistributionHeader.strDestination = 'Customer' THEN CustomerLocation.strState ELSE tblSMCompanyLocation.strStateProvince END strDestinationState
+					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN BulkLocation.strCity WHEN tblTRLoadDistributionHeader.strDestination = 'Customer' THEN CustomerLocation.strCity ELSE tblSMCompanyLocation.strCity END strDestinationCity
 					, NULL AS strDestinationCounty
 					, tblTFTerminalControlNumber.strTerminalControlNumber
 					, strTransporterIdType = 'FEIN'
@@ -231,9 +236,9 @@ BEGIN TRY
 				LEFT JOIN tblTRLoadReceipt ON  tblTRLoadReceipt.intInventoryReceiptId  = tblICInventoryReceipt.intInventoryReceiptId
 				LEFT JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadReceipt.intLoadHeaderId
 				LEFT JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId
-				LEFT JOIN tblTRLoadDistributionDetail ON tblTRLoadDistributionDetail.intLoadDistributionHeaderId = tblTRLoadDistributionHeader.intLoadDistributionHeaderId
-					LEFT JOIN tblSMCompanyLocation BulkLocation ON BulkLocation.intCompanyLocationId = tblTRLoadDistributionHeader.intCompanyLocationId
-					LEFT JOIN tblEMEntityLocation CustomerLocation ON CustomerLocation.intEntityLocationId = tblTRLoadDistributionHeader.intShipToLocationId
+					LEFT JOIN tblTRLoadDistributionDetail ON tblTRLoadDistributionDetail.intLoadDistributionHeaderId = tblTRLoadDistributionHeader.intLoadDistributionHeaderId
+						LEFT JOIN tblSMCompanyLocation BulkLocation ON BulkLocation.intCompanyLocationId = tblTRLoadDistributionHeader.intCompanyLocationId
+						LEFT JOIN tblEMEntityLocation CustomerLocation ON CustomerLocation.intEntityLocationId = tblTRLoadDistributionHeader.intShipToLocationId
 				LEFT JOIN tblTFTaxAuthorityCustomerLicense ON tblTFTaxAuthorityCustomerLicense.intEntityId = tblTRLoadDistributionHeader.intEntityCustomerId AND tblTFTaxAuthorityCustomerLicense.intTaxAuthorityId = tblTFReportingComponent.intTaxAuthorityId
 				LEFT JOIN tblTRState ON tblTRState.intStateId = tblTRLoadHeader.intStateId
 				CROSS JOIN tblSMCompanySetup
@@ -245,15 +250,19 @@ BEGIN TRY
 						OR tblEMEntityLocation.strState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Include'))
 					AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Exclude') = 0
 						OR tblEMEntityLocation.strState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Exclude'))
+					--AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include') = 0
+					--	OR (tblSMCompanyLocation.strStateProvince IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')))
+					--AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude') = 0
+					--	OR (tblSMCompanyLocation.strStateProvince NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')))
 					AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include') = 0
-					OR (tblTRLoadDistributionHeader.strDestination IS NULL AND tblSMCompanyLocation.strStateProvince IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')
-						OR tblTRLoadDistributionHeader.strDestination = 'Location' AND BulkLocation.strStateProvince IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')
-						OR tblTRLoadDistributionHeader.strDestination = 'Customer' AND CustomerLocation.strState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')
-					))
+						OR (tblTRLoadDistributionHeader.strDestination IS NULL AND tblSMCompanyLocation.strStateProvince IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')
+                        OR tblTRLoadDistributionHeader.strDestination = 'Location' AND BulkLocation.strStateProvince IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')
+                        OR tblTRLoadDistributionHeader.strDestination = 'Customer' AND CustomerLocation.strState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')
+                    ))
 					AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude') = 0
-					OR (tblTRLoadDistributionHeader.strDestination IS NULL AND tblSMCompanyLocation.strStateProvince NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')
-						OR tblTRLoadDistributionHeader.strDestination = 'Location' AND BulkLocation.strStateProvince NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')
-						OR tblTRLoadDistributionHeader.strDestination = 'Customer' AND CustomerLocation.strState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')
+					    OR (tblTRLoadDistributionHeader.strDestination IS NULL AND tblSMCompanyLocation.strStateProvince NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')
+                        OR tblTRLoadDistributionHeader.strDestination = 'Location' AND BulkLocation.strStateProvince NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')
+                        OR tblTRLoadDistributionHeader.strDestination = 'Customer' AND CustomerLocation.strState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')
 					))
 					AND ((SELECT COUNT(*) FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0
 						OR Vendor.intEntityId IN (SELECT intVendorId FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId AND ysnInclude = 1))
@@ -334,10 +343,10 @@ BEGIN TRY
 					--, tblICInventoryReceiptItem.dblGross
 					--, tblICInventoryReceiptItem.dblNet
 					--, tblICInventoryReceiptItem.dblBillQty
-					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblReceived END dblReceived
-					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblGross END dblGross
-					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblNet END dblNet
-					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblBillQty END dblBillQty
+					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' OR tblTRLoadDistributionHeader.strDestination = 'Customer' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblReceived END dblReceived
+					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' OR tblTRLoadDistributionHeader.strDestination = 'Customer' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblGross END dblGross
+					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' OR tblTRLoadDistributionHeader.strDestination = 'Customer' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblNet END dblNet
+					, tblICInventoryReceiptItem.dblBillQty
 					, tblICInventoryReceipt.dtmReceiptDate
 					, tblSMShipVia.strShipVia
 					, tblSMShipVia.strTransporterLicense
@@ -357,8 +366,10 @@ BEGIN TRY
 					, tblEMEntityLocation.strState AS strOriginState
 					, tblEMEntityLocation.strCity AS strOriginCity
 					, OriginCountyTaxCode.strCounty AS strOriginCounty
-					, CASE WHEN tblTRLoadDistributionHeader.strDestination IS NULL THEN tblSMCompanyLocation.strStateProvince WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN BulkLocation.strStateProvince ELSE CustomerLocation.strState END strDestinationState
-					, CASE WHEN tblTRLoadDistributionHeader.strDestination IS NULL THEN tblSMCompanyLocation.strCity WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN BulkLocation.strCity ELSE CustomerLocation.strCity END strDestinationCity
+					--, tblSMCompanyLocation.strStateProvince
+					--, tblSMCompanyLocation.strCity 
+					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN BulkLocation.strStateProvince WHEN tblTRLoadDistributionHeader.strDestination = 'Customer' THEN CustomerLocation.strState ELSE tblSMCompanyLocation.strStateProvince END strDestinationState
+					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN BulkLocation.strCity WHEN tblTRLoadDistributionHeader.strDestination = 'Customer' THEN CustomerLocation.strCity ELSE tblSMCompanyLocation.strCity END strDestinationCity
 					, NULL AS strDestinationCounty
 					, tblTFTerminalControlNumber.strTerminalControlNumber
 					, strTransporterIdType = 'FEIN'
@@ -393,9 +404,9 @@ BEGIN TRY
 				LEFT JOIN tblTRLoadReceipt ON  tblTRLoadReceipt.intInventoryReceiptId  = tblICInventoryReceipt.intInventoryReceiptId
 				LEFT JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadReceipt.intLoadHeaderId
 				LEFT JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId
-				LEFT JOIN tblTRLoadDistributionDetail ON tblTRLoadDistributionDetail.intLoadDistributionHeaderId = tblTRLoadDistributionHeader.intLoadDistributionHeaderId
-					LEFT JOIN tblSMCompanyLocation BulkLocation ON BulkLocation.intCompanyLocationId = tblTRLoadDistributionHeader.intCompanyLocationId
-					LEFT JOIN tblEMEntityLocation CustomerLocation ON CustomerLocation.intEntityLocationId = tblTRLoadDistributionHeader.intShipToLocationId
+					LEFT JOIN tblTRLoadDistributionDetail ON tblTRLoadDistributionDetail.intLoadDistributionHeaderId = tblTRLoadDistributionHeader.intLoadDistributionHeaderId
+						LEFT JOIN tblSMCompanyLocation BulkLocation ON BulkLocation.intCompanyLocationId = tblTRLoadDistributionHeader.intCompanyLocationId
+						LEFT JOIN tblEMEntityLocation CustomerLocation ON CustomerLocation.intEntityLocationId = tblTRLoadDistributionHeader.intShipToLocationId
 				LEFT JOIN tblTFTaxAuthorityCustomerLicense ON tblTFTaxAuthorityCustomerLicense.intEntityId = tblTRLoadDistributionHeader.intEntityCustomerId AND tblTFTaxAuthorityCustomerLicense.intTaxAuthorityId = tblTFReportingComponent.intTaxAuthorityId
 				LEFT JOIN tblTRState ON tblTRState.intStateId = tblTRLoadHeader.intStateId
 				CROSS JOIN tblSMCompanySetup
@@ -407,15 +418,19 @@ BEGIN TRY
 						OR tblEMEntityLocation.strState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Include'))
 					AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Exclude') = 0
 						OR tblEMEntityLocation.strState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Exclude'))
+					--AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include') = 0
+					--	OR (tblSMCompanyLocation.strStateProvince IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')))
+					--AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude') = 0
+					--	OR (tblSMCompanyLocation.strStateProvince NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')))
 					AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include') = 0
-					OR (tblTRLoadDistributionHeader.strDestination IS NULL AND tblSMCompanyLocation.strStateProvince IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')
-						OR tblTRLoadDistributionHeader.strDestination = 'Location' AND BulkLocation.strStateProvince IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')
-						OR tblTRLoadDistributionHeader.strDestination = 'Customer' AND CustomerLocation.strState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')
-					))
+						OR (tblTRLoadDistributionHeader.strDestination IS NULL AND tblSMCompanyLocation.strStateProvince IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')
+                        OR tblTRLoadDistributionHeader.strDestination = 'Location' AND BulkLocation.strStateProvince IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')
+                        OR tblTRLoadDistributionHeader.strDestination = 'Customer' AND CustomerLocation.strState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Include')
+                    ))
 					AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude') = 0
-					OR (tblTRLoadDistributionHeader.strDestination IS NULL AND tblSMCompanyLocation.strStateProvince NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')
-						OR tblTRLoadDistributionHeader.strDestination = 'Location' AND BulkLocation.strStateProvince NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')
-						OR tblTRLoadDistributionHeader.strDestination = 'Customer' AND CustomerLocation.strState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')
+					    OR (tblTRLoadDistributionHeader.strDestination IS NULL AND tblSMCompanyLocation.strStateProvince NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')
+                        OR tblTRLoadDistributionHeader.strDestination = 'Location' AND BulkLocation.strStateProvince NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')
+                        OR tblTRLoadDistributionHeader.strDestination = 'Customer' AND CustomerLocation.strState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = @RCId AND strType = 'Exclude')
 					))
 					AND ((SELECT COUNT(*) FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0
 						OR Vendor.intEntityId IN (SELECT intVendorId FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId AND ysnInclude = 1))
@@ -428,9 +443,78 @@ BEGIN TRY
 				) tblTFTransaction
 		END
 		
-		WHILE EXISTS(SELECT TOP 1 1 FROM @tmpInventoryReceiptDetail) -- LOOP ON INVENTORY RECEIPT ITEM ID/S
-		BEGIN
+		-- TR Billed Qty
+		INSERT INTO @tmpDistReceiptDetail (intInventoryReceiptItemId) 
+		SELECT DISTINCT intInventoryReceiptItemId FROM @tmpInventoryReceiptDetail
 
+		WHILE EXISTS(SELECT TOP 1 1 FROM @tmpDistReceiptDetail)
+		BEGIN
+			DECLARE @ReceiptItemId INT = NULL
+			DECLARE @TRDetail TFTransaction 
+			DECLARE @SumBillQty INT = NULL
+
+			SELECT TOP 1 @ReceiptItemId = intInventoryReceiptItemId FROM @tmpDistReceiptDetail
+
+			INSERT INTO @TRDetail (intId ,intInventoryReceiptItemId, dblNet, strDestinationState, dblBillQty)
+			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInventoryReceiptItemId, strState) AS intId, *
+			FROM (SELECT tblICInventoryReceiptItem.intInventoryReceiptItemId AS intInventoryReceiptItemId, tblTRLoadDistributionDetail.dblUnits AS dblUnits,
+					CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN BulkLocation.strStateProvince WHEN tblTRLoadDistributionHeader.strDestination = 'Customer' THEN CustomerLocation.strState ELSE NULL END strState, NULL AS  dblBillQty
+					FROM tblICInventoryReceiptItem INNER JOIN tblICInventoryReceipt ON tblICInventoryReceiptItem.intInventoryReceiptId = tblICInventoryReceipt.intInventoryReceiptId
+					INNER JOIN tblTRLoadReceipt ON tblTRLoadReceipt.intInventoryReceiptId = tblICInventoryReceipt.intInventoryReceiptId
+							INNER JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadReceipt.intLoadHeaderId
+							INNER JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId
+								INNER JOIN tblTRLoadDistributionDetail ON tblTRLoadDistributionDetail.intLoadDistributionHeaderId = tblTRLoadDistributionHeader.intLoadDistributionHeaderId
+									LEFT JOIN tblSMCompanyLocation BulkLocation ON BulkLocation.intCompanyLocationId = tblTRLoadDistributionHeader.intCompanyLocationId
+									LEFT JOIN tblEMEntityLocation CustomerLocation ON CustomerLocation.intEntityLocationId = tblTRLoadDistributionHeader.intShipToLocationId
+					WHERE tblICInventoryReceiptItem.intInventoryReceiptItemId = @ReceiptItemId) trans
+
+			WHILE EXISTS(SELECT TOP 1 1 FROM @TRDetail)
+			BEGIN
+				DECLARE @TRReceiptItemId INT = NULL, @TRNet NUMERIC = NULL, @TRDestinationState NVARCHAR(100) = NULL, @TRBillQty NUMERIC = NULL
+				
+				SELECT TOP 1 @TRReceiptItemId = intInventoryReceiptItemId, @TRNet = dblNet, @TRDestinationState = strDestinationState, @TRBillQty = dblBillQty FROM @TRDetail
+
+				IF (@TRBillQty IS NULL)
+				BEGIN	
+					SELECT @TRBillQty = dblBillQty FROM @TFTransaction WHERE intInventoryReceiptItemId = @TRReceiptItemId AND strDestinationState = @TRDestinationState
+					SET @TRBillQty = ISNULL(@TRBillQty, 0)
+					IF (@TRBillQty >= @TRNet)
+					BEGIN
+						UPDATE @TFTransaction SET dblBillQty = dblNet WHERE intInventoryReceiptItemId = @TRReceiptItemId AND strDestinationState = @TRDestinationState		
+						UPDATE @TRDetail SET dblBillQty = @TRBillQty - @TRNet WHERE intInventoryReceiptItemId = @TRReceiptItemId
+					END
+					ELSE
+					BEGIN
+						UPDATE @TFTransaction SET dblBillQty = 0 WHERE intInventoryReceiptItemId = @TRReceiptItemId AND strDestinationState = @TRDestinationState
+						UPDATE @TRDetail SET dblBillQty = @TRBillQty WHERE intInventoryReceiptItemId = @TRReceiptItemId
+					END	
+				END
+				ELSE
+				BEGIN
+					SET @TRBillQty = ISNULL(@TRBillQty, 0)
+					IF (@TRBillQty >= @TRNet)
+					BEGIN
+						UPDATE @TFTransaction SET dblBillQty = dblNet WHERE intInventoryReceiptItemId = @TRReceiptItemId AND strDestinationState = @TRDestinationState
+						UPDATE @TRDetail SET dblBillQty = @TRBillQty - @TRNet WHERE intInventoryReceiptItemId = @TRReceiptItemId
+					END
+					ELSE
+					BEGIN
+						UPDATE @TFTransaction SET dblBillQty = 0 WHERE intInventoryReceiptItemId = @TRReceiptItemId AND strDestinationState = @TRDestinationState
+						UPDATE @TRDetail SET dblBillQty = @TRBillQty WHERE intInventoryReceiptItemId = @TRReceiptItemId
+					END
+				END
+
+				DELETE @TRDetail WHERE intInventoryReceiptItemId = @TRReceiptItemId AND dblNet = @TRNet AND strDestinationState = @TRDestinationState
+
+			END
+
+			DELETE FROM @tmpDistReceiptDetail WHERE intInventoryReceiptItemId = @ReceiptItemId
+
+		END
+
+		WHILE EXISTS(SELECT TOP 1 1 FROM @tmpInventoryReceiptDetail) -- LOOP ON INVENTORY RECEIPT ITEM ID/S
+		BEGIN	
+			
 			DECLARE @InventoryReceiptItemId NVARCHAR(30) = NULL, @intDetailTaxCodeId INT = NULL
 
 			SELECT TOP 1 @InventoryReceiptItemId = intInventoryReceiptItemId, @intDetailTaxCodeId = intTaxCodeId FROM @tmpInventoryReceiptDetail
@@ -516,7 +600,6 @@ BEGIN TRY
 			DELETE FROM @tmpInventoryReceiptDetail WHERE intInventoryReceiptItemId = @InventoryReceiptItemId
 			
 		END
-		
 			
 		IF (@ReportingComponentId <> '')
 		BEGIN
