@@ -1263,4 +1263,28 @@ namespace iRely.Inventory.Model
         }
     }
 
+    public class vyuICGetItemsWithNoLocationMap : EntityTypeConfiguration<vyuICGetItemsWithNoLocation>
+    {
+        public vyuICGetItemsWithNoLocationMap()
+        {
+            // Primary Key
+            this.HasKey(p => p.intItemId);
+
+            // Table & Column Mappings
+            this.ToTable("vyuICGetItemsWithNoLocation");
+            this.Property(t => t.intItemId).HasColumnName("intItemId");
+            this.Property(t => t.strItemNo).HasColumnName("strItemNo");
+            this.Property(t => t.strItemDescription).HasColumnName("strItemDescription");
+            this.Property(t => t.strType).HasColumnName("strType");
+            this.Property(t => t.strCommodityCode).HasColumnName("strCommodityCode");
+            this.Property(t => t.intCategoryId).HasColumnName("intCategoryId");
+            this.Property(t => t.strCategoryCode).HasColumnName("strCategoryCode");
+            this.Property(t => t.strManufacturer).HasColumnName("strManufacturer");
+            this.Property(t => t.strBrandName).HasColumnName("strBrandName");
+            this.Property(t => t.intVendorId).HasColumnName("intVendorId");
+            this.Property(t => t.strVendorId).HasColumnName("strVendorId");
+            this.Property(t => t.strVendorName).HasColumnName("strVendorName");
+        }
+    }
+
 }

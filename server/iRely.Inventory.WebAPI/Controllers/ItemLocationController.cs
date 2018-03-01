@@ -37,6 +37,14 @@ namespace iRely.Inventory.WebApi
             return Request.CreateResponse(HttpStatusCode.OK, result);
         }
 
+        [HttpGet]
+        [ActionName("GetItemsWithNoLocation")]
+        public async Task<HttpResponseMessage> GetItemsWithNoLocation(GetParameter param)
+        {
+            var result = await _bl.GetItemsWithNoLocation(param);
+            return Request.CreateResponse(HttpStatusCode.OK, result);
+        }
+
         public struct ItemLocationParam
         {
             public int ItemId { get; set; }

@@ -13,7 +13,6 @@ Ext.define('Inventory.view.CopyItemLocationViewController', {
             grdItems: {
                 colStrItemNo: 'strItemNo',
                 colDescription: 'strItemDescription',
-                colLocationName: 'strLocationName',
                 colType: 'strType',
                 colCommodity: 'strCommodityCode',
                 colCategory: 'strCategoryCode',
@@ -39,7 +38,7 @@ Ext.define('Inventory.view.CopyItemLocationViewController', {
         var selected = grid.getSelectionModel().selected;
         var win = grid.up('window');
 
-        if(selected && selected.count() > 0) {
+        if(selected && selected.length > 0) {
             var msgAction = function (button) {
                 if (button === 'yes') {
                     var sourceItem = me.view.viewModel.get('hasSourceItem');
@@ -99,7 +98,7 @@ Ext.define('Inventory.view.CopyItemLocationViewController', {
         var win = me.getView();
         var store = Ext.create('Inventory.store.ItemLocation', { pageSize: 0 });
         
-        store.getProxy().api.read = './inventory/api/itemlocation/getitemlocation';
+        store.getProxy().api.read = './inventory/api/itemlocation/getitemswithnolocation';
 
         win.context = Ext.create('iRely.Engine', {
             window : win,

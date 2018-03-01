@@ -14,5 +14,6 @@ namespace iRely.Inventory.BusinessLayer
         Task<SearchResult> SearchItemLocationViews(GetParameter param);
         Task<GetObjectResult> GetItemLocation(GetParameter param);
         SaveResult CheckCostingMethod(int ItemId, int ItemLocationId, int CostingMethod);
+        Task<GetObjectResult> GetItemsWithNoLocation(GetParameter param);
     }
 }
