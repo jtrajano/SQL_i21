@@ -375,7 +375,7 @@
             this.tableCell2.StylePriority.UseForeColor = false;
             this.tableCell2.StylePriority.UsePadding = false;
             this.tableCell2.StylePriority.UseTextAlignment = false;
-            this.tableCell2.Text = "Sales Order No.";
+            this.tableCell2.Text = "Order No.";
             this.tableCell2.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
             this.tableCell2.Weight = 0.4864034311702633D;
             // 
