@@ -73,8 +73,7 @@
 	[intRecipeGuideId]			INT				NULL,
 	[intLineOfBusinessId] INT				NULL,
 	[intOpportunityId]		    INT				NULL,
-    CONSTRAINT [PK_tblSOSalesOrder] PRIMARY KEY CLUSTERED ([intSalesOrderId] ASC),
-	CONSTRAINT [UK_tblSOSalesOrder_strSalesOrderNumber] UNIQUE ([strSalesOrderNumber]),	
+    CONSTRAINT [PK_tblSOSalesOrder] PRIMARY KEY CLUSTERED ([intSalesOrderId] ASC),	
     CONSTRAINT [FK_tblSOSalesOrder_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
     CONSTRAINT [FK_tblSOSalesOrder_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
 	CONSTRAINT [FK_tblSOSalesOrder_tblGLAccount_intAccountId] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
@@ -143,3 +142,7 @@ BEGIN
 	WHERE intSalesOrderId = @intSalesOrderId
 
 END
+GO
+CREATE UNIQUE NONCLUSTERED INDEX [UK_tblSOSalesOrder_strSalesOrderNumber]
+ON [dbo].[tblSOSalesOrder] ([strSalesOrderNumber])
+WHERE [strSalesOrderNumber] IS NOT NULL
