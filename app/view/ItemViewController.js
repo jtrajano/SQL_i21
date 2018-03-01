@@ -1676,6 +1676,8 @@ Ext.define('Inventory.view.ItemViewController', {
 
     onSubstituteItemCreateRecord: function(config, action) {
         var record = Ext.create('Inventory.model.ItemSubstitute');
+        record.set('dblQuantity', 1.00);
+        record.set('dblMarkUpOrDown', 1.00);
         action(record);
     },    
 

@@ -33,8 +33,8 @@ Ext.define('Inventory.model.ItemSubstitute', {
                 }
             }},
         { name: 'intSubstituteItemId', type: 'int' },
-        { name: 'dblQuantity', type: 'float', defaultValue: 1.00 },
-        { name: 'dblMarkUpOrDown', type: 'float', defaultValue: 1.00 },
+        { name: 'dblQuantity', type: 'float', allowNull: true }, //, defaultValue: 1.00 },
+        { name: 'dblMarkUpOrDown', type: 'float', allowNull: true }, //, defaultValue: 1.00 }, 
         { name: 'dtmBeginDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d'},
         { name: 'dtmEndDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },       
         { name: 'intItemUOMId', type: 'int', allowNull: true },
