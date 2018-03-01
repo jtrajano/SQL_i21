@@ -1,4 +1,4 @@
-﻿CREATE  PROCEDURE [dbo].[uspICBeforePostInventoryShipmentIntegration]
+﻿CREATE PROCEDURE uspICBeforePostInventoryShipmentIntegration
 	@ysnPost BIT = 0  
 	,@intTransactionId INT = NULL   
 	,@intEntityUserSecurityId INT  = NULL      
