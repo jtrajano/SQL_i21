@@ -6236,6 +6236,7 @@
     <Build Include="dbo\Tables\tblTFCountyLocation.sql" />
     <Build Include="dbo\Views\vyuTFGetTaxAuthorityCountyLocation.sql" />
     <Build Include="dbo\Views\vyuICGetItemRunningStock.sql" />
+    <Build Include="dbo\Views\vyuICGetItemsWithNoLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
