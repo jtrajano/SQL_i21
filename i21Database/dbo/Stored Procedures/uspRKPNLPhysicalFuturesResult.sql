@@ -1,13 +1,19 @@
 ﻿CREATE PROCEDURE [dbo].[uspRKPNLPhysicalFuturesResult]
 	@intSContractDetailId	INT,
-	@intUnitMeasureId		INT
+	@intUnitMeasureId		INT,
+	@intCurrencyId			INT,
+	@intWeightUOMId			INT
 AS
 
 BEGIN
 	DECLARE	@strPContractDetailId	NVARCHAR(MAX),
-			@strDetailIds			NVARCHAR(MAX)
+			@strDetailIds			NVARCHAR(MAX),
+			@ysnSubCurrency			BIT
 	--		,@intSContractDetailId INT = 14604
 	--		,@intUnitMeasureId INT = 10
+	--      ,@intCurrencyId	INT = 9
+
+	SELECT @ysnSubCurrency = ysnSubCurrency FROM tblSMCurrency WHERE intCurrencyID = @intCurrencyId
 
 	DECLARE @tblLGAllocationDetail TABLE
 	(
@@ -68,18 +74,20 @@ BEGIN
 			,CAST(ysnPosted AS BIT) ysnPosted,
 			CASE	WHEN strType IN ('Invoice') THEN dblAccounting 
 					WHEN strType IN ('Amount')	THEN dblTranValue 
-			ELSE ISNULL(dblAllocatedQty,dblBooked) * dblPrice	END AS	dblTransactionValue,
+			ELSE ISNULL(dblAllocatedQtyPrice,dblBookedPrice) * dblPrice / CASE WHEN @ysnSubCurrency = 1 THEN 100 ELSE 1 END END AS	dblTransactionValue,
 			CASE	WHEN strType IN ('Amount')	THEN dblTranValue  / dblFX
-					WHEN strType IN ('Per Unit') THEN ISNULL(dblAllocatedQty,dblBooked) * dblPrice / dblFX
-					ELSE ISNULL(dblAllocatedQty,dblBooked) * dblPrice * dblFX	
-			END AS	dblForecast,@intSContractDetailId as intContractDetailId
+					WHEN strType IN ('Per Unit') THEN ISNULL(dblAllocatedQtyPrice,dblBookedPrice) * dblPrice / dblFX / CASE WHEN @ysnSubCurrency = 1 THEN 100 ELSE 1 END
+					ELSE ISNULL(dblAllocatedQtyPrice,dblBookedPrice) * dblPrice * dblFX / CASE WHEN @ysnSubCurrency = 1 THEN 100 ELSE 1 END	
+			END AS	dblForecast,
+			@intSContractDetailId as intContractDetailId
 	FROM
 	(
 		SELECT	TP.strContractType + ' - ' + CH.strContractNumber strContractType,
 				'Sales - ' + SH.strContractNumber	AS	strNumber,
 				'Allocated' AS strDescription,
 				NULL AS strConfirmed,
-				dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,AD.intPUnitMeasureId,@intUnitMeasureId, AD.dblPAllocatedQty) *-1AS dblAllocatedQty,
+				dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,AD.intPUnitMeasureId,@intWeightUOMId, AD.dblPAllocatedQty) *-1 AS dblAllocatedQty,
+				dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,AD.intPUnitMeasureId,@intUnitMeasureId, AD.dblPAllocatedQty) *-1 AS dblAllocatedQtyPrice,
 				CASE	WHEN CD.dblCashPrice IS NULL 
 						THEN	(
 									(
@@ -93,11 +101,12 @@ BEGIN
 								ISNULL(PF.dblTotalLots,ISNULL(CD.dblNoOfLots,ISNULL(CH.dblNoOfLots,0))) +  
 								dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,@intUnitMeasureId,PU.intUnitMeasureId,CD.dblConvertedBasis)
 						ELSE	dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,@intUnitMeasureId,PU.intUnitMeasureId, CD.dblCashPrice)
-				END /
+				END *
 				CASE WHEN CY.ysnSubCurrency = 1 THEN 100 ELSE 1 END	AS	dblPrice,
 				ISNULL(MY.strCurrency,CY.strCurrency) AS strCurrency,
 				ISNULL(dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0),1) AS dblFX,
 				NUll AS dblBooked,
+				NUll AS dblBookedPrice,
 				NULL AS dblAccounting,
 				AD.dtmAllocatedDate AS dtmDate,
 				'3 Purchase Allocated'	AS strType,
@@ -115,7 +124,7 @@ BEGIN
 		JOIN	tblCTContractType		TP	ON	TP.intContractTypeId	=	CH.intContractTypeId
 		JOIN	tblICItemUOM			PU	ON	PU.intItemUOMId			=	CD.intPriceItemUOMId	
 		JOIN	tblRKFutureMarket		MA	ON	MA.intFutureMarketId	=	CD.intFutureMarketId
-		JOIN	tblSMCurrency			CY	ON	CY.intCurrencyID		=	CD.intCurrencyId		LEFT 
+		JOIN	tblSMCurrency			CY	ON	CY.intCurrencyID		=	@intCurrencyId			LEFT 
 		JOIN	tblSMCurrency			MY	ON	MY.intCurrencyID		=	CY.intMainCurrencyId	LEFT
 		JOIN	tblCTPriceFixation		PF	ON	PF.intContractDetailId	=	CASE	WHEN CH.ysnMultiplePriceFixation = 1 
 																					THEN PF.intContractDetailId
@@ -135,11 +144,13 @@ BEGIN
 					'Invoice' AS strDescription,
 					NULL AS strConfirmed,
 					NULL AS dblAllocatedQty,
-					dbo.[fnCTConvertQuantityToTargetItemUOM](ID.intItemId,@intUnitMeasureId,QU.intUnitMeasureId,ID.dblPrice) /
+					NULL AS dblAllocatedQtyPrice,
+					dbo.[fnCTConvertQuantityToTargetItemUOM](ID.intItemId,@intUnitMeasureId,QU.intUnitMeasureId,ID.dblPrice) *
 					CASE WHEN SY.ysnSubCurrency = 1 THEN 100 ELSE 1 END	AS	dblPrice,
 					ISNULL(MY.strCurrency,CY.strCurrency) AS strCurrency,
 					NULL AS dblFX,
-					dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId,QU.intUnitMeasureId,@intUnitMeasureId, ID.dblQtyShipped) AS dblBooked,
+					dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId,QU.intUnitMeasureId,@intWeightUOMId, ID.dblQtyShipped) AS dblBooked,
+					dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId,QU.intUnitMeasureId,@intUnitMeasureId, ID.dblQtyShipped) AS dblBookedPrice,
 					ID.dblTotal AS dblAccounting,
 					IV.dtmDate AS dtmDate,
 					'2 Invoice'	AS strType,
@@ -154,7 +165,7 @@ BEGIN
 			JOIN	tblICItemUOM			QU	ON	QU.intItemUOMId			=	ID.intItemUOMId	
 			JOIN	tblICItemUOM			PU	ON	PU.intItemUOMId			=	CD.intPriceItemUOMId	
 			JOIN	tblSMCurrency			CY	ON	CY.intCurrencyID		=	IV.intCurrencyId
-			JOIN	tblSMCurrency			SY	ON	SY.intCurrencyID		=	ID.intSubCurrencyId
+			JOIN	tblSMCurrency			SY	ON	SY.intCurrencyID		=	@intCurrencyId
 			JOIN	@tblLGAllocationDetail	AD	ON	AD.intSContractDetailId	=	ID.intContractDetailId
 	LEFT	JOIN	tblSMCurrency			MY	ON	MY.intCurrencyID		=	CY.intMainCurrencyId
 			WHERE	ID.intContractDetailId	=	@intSContractDetailId
@@ -167,10 +178,12 @@ BEGIN
 				'Supp. Invoice' AS strDescription,
 				NULL AS strConfirmed,
 				NULL AS dblAllocatedQty,
+				NULL AS dblAllocatedQtyPrice,
 				ID.dblCost dblPrice,
 				CY.strCurrency AS strCurrency,
 				NULL AS dblFX,
-				dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId,QU.intUnitMeasureId,@intUnitMeasureId, ID.dblQtyReceived)*-1 AS dblBooked,
+				dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId,QU.intUnitMeasureId,@intWeightUOMId, ID.dblQtyReceived) * -1 AS dblBooked,
+				dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId,QU.intUnitMeasureId,@intUnitMeasureId, ID.dblQtyReceived) * -1 AS dblBookedPrice,
 				ID.dblTotal *-1 AS dblAccounting,
 				IV.dtmDate AS dtmDate,
 				'4 Supp. Invoice'	AS strType,
@@ -198,7 +211,8 @@ BEGIN
 					'Purchase - ' + PH.strContractNumber  AS strNumbe,
 					'Allocated' AS strDescription,
 					NULL AS strConfirmed,
-					dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,AD.intPUnitMeasureId,@intUnitMeasureId, AD.dblPAllocatedQty) AS dblAllocatedQty,
+					dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,AD.intPUnitMeasureId,@intWeightUOMId, AD.dblPAllocatedQty) AS dblAllocatedQty,
+					dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,AD.intPUnitMeasureId,@intUnitMeasureId, AD.dblPAllocatedQty) AS dblAllocatedQtyPrice,
 					CASE	WHEN CD.dblCashPrice IS NULL 
 							THEN	(
 										(
@@ -210,11 +224,12 @@ BEGIN
 									)/ISNULL(PF.dblTotalLots,ISNULL(CD.dblNoOfLots,ISNULL(CH.dblNoOfLots,0))) +  
 									dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,@intUnitMeasureId,PU.intUnitMeasureId,CD.dblConvertedBasis)
 							ELSE	dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,@intUnitMeasureId,PU.intUnitMeasureId, CD.dblCashPrice)
-					END /
+					END *
 					CASE WHEN CY.ysnSubCurrency = 1 THEN 100 ELSE 1 END	AS	dblPrice,
 					ISNULL(MY.strCurrency,CY.strCurrency) AS strCurrency,
 					ISNULL(dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0),1) AS dblFX,
 					NUll AS dblBooked,
+					NUll AS dblBookedPrice,
 					NULL AS dblAccounting,
 					AD.dtmAllocatedDate AS dtmDate,
 					'1 Sales Allocated'	AS strType,
@@ -229,7 +244,7 @@ BEGIN
 			JOIN	tblCTContractHeader		PH	ON	PH.intContractHeaderId	=	PD.intContractHeaderId
 			JOIN	tblICItemUOM			PU	ON	PU.intItemUOMId			=	CD.intPriceItemUOMId	
 			JOIN	tblRKFutureMarket		MA	ON	MA.intFutureMarketId	=	CD.intFutureMarketId
-			JOIN	tblSMCurrency			CY	ON	CY.intCurrencyID		=	CD.intCurrencyId		LEFT 
+			JOIN	tblSMCurrency			CY	ON	CY.intCurrencyID		=	@intCurrencyId			LEFT 
 			JOIN	tblSMCurrency			MY	ON	MY.intCurrencyID		=	CY.intMainCurrencyId	LEFT
 			JOIN	tblCTPriceFixation		PF	ON	PF.intContractDetailId	=	CASE	WHEN CH.ysnMultiplePriceFixation = 1 
 																						THEN PF.intContractDetailId
@@ -244,23 +259,26 @@ BEGIN
 
 		UNION ALL
 
-		SELECT TOP 100 PERCENT strItemNo, strBillId, strDescription, strConfirmed, SUM(dblAllocatedQty) dblAllocatedQty, dblPrice, strCurrency, dblFX, dblBooked, dblAccounting, dtmContractDate, strType,dblTranValue, intSort, ysnPosted
+		SELECT TOP 100 PERCENT strItemNo, strBillId, strDescription, strConfirmed, SUM(dblAllocatedQty) dblAllocatedQty, SUM(dblAllocatedQtyPrice) dblAllocatedQtyPrice, dblPrice, strCurrency, dblFX, dblBooked, dblBookedPrice, dblAccounting, dtmContractDate, strType,dblTranValue, intSort, ysnPosted
 		FROM(
 			SELECT	IM.strItemNo,
 					strBillId,
 					TP.strContractType + ' - ' +  CH.strContractNumber AS strDescription,
 					NULL AS strConfirmed,
-					dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,AD.intPUnitMeasureId,@intUnitMeasureId, AD.dblPAllocatedQty) AS dblAllocatedQty,
+					dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,AD.intPUnitMeasureId,@intWeightUOMId, AD.dblPAllocatedQty) AS dblAllocatedQty,
+					dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,AD.intPUnitMeasureId,@intUnitMeasureId, AD.dblPAllocatedQty) AS dblAllocatedQtyPrice,
 					CASE	WHEN	CC.strCostMethod = 'Per Unit'	THEN 
 							dbo.fnCTConvertQuantityToTargetItemUOM(CC.intItemId,@intUnitMeasureId,CU.intUnitMeasureId,1)*CC.dblRate
 						WHEN	CC.strCostMethod = 'Amount'		THEN
 							CC.dblRate/
 							dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CD.intUnitMeasureId,@intUnitMeasureId,CD.dblQuantity)
-					END /
-					CASE WHEN OY.ysnSubCurrency = 1 THEN 100 ELSE 1 END	 * -1 AS	dblPrice,
+					END *
+					CASE WHEN OY.ysnSubCurrency = 1 THEN 100 ELSE 1 END	 * -1 
+					AS	dblPrice,
 					ISNULL(MY.strCurrency,CY.strCurrency) AS strCurrency,
 					ISNULL(dbo.fnCTGetCurrencyExchangeRate(CC.intContractCostId,1),1) AS dblFX,
 					NULL dblBooked,
+					NUll AS dblBookedPrice,
 					BL.dblAccounting * -1 dblAccounting,
 					CH.dtmContractDate,
 					CC.strCostMethod strType,
@@ -276,7 +294,7 @@ BEGIN
 			JOIN	tblCTContractType		TP	ON	TP.intContractTypeId	=	CH.intContractTypeId
 			JOIN	tblICItemUOM			PU	ON	PU.intItemUOMId			=	CD.intPriceItemUOMId	LEFT
 			JOIN	tblICItemUOM			CU	ON	CU.intItemUOMId			=	CC.intItemUOMId			LEFT
-			JOIN	tblSMCurrency			OY	ON	OY.intCurrencyID		=	CC.intCurrencyId		LEFT 
+			JOIN	tblSMCurrency			OY	ON	OY.intCurrencyID		=	@intCurrencyId			LEFT 
 			JOIN	tblSMCurrency			CY	ON	CY.intCurrencyID		=	CC.intCurrencyId		LEFT 
 			JOIN	tblICM2MComputation		MC	ON	MC.intM2MComputationId	=	IM.intM2MComputationId	LEFT
 			JOIN	tblSMCurrency			MY	ON	MY.intCurrencyID		=	CY.intMainCurrencyId	LEFT
@@ -297,7 +315,7 @@ BEGIN
 					)						BL	ON	BL.intContractCostId = CC.intContractCostId	
 			WHERE	intSContractDetailId	IN (SELECT * FROM dbo.fnSplitString(@strDetailIds,',')) AND ISNULL(MC.strM2MComputation,'No')	=	'No'
 		)d
-		GROUP BY strItemNo, strBillId, strDescription, strConfirmed, dblPrice, strCurrency, dblFX, dblBooked, dblAccounting, dtmContractDate, intSort, strType, dblTranValue, ysnPosted
+		GROUP BY strItemNo, strBillId, strDescription, strConfirmed, dblPrice, strCurrency, dblFX, dblBooked, dblBookedPrice, dblAccounting, dtmContractDate, intSort, strType, dblTranValue, ysnPosted
 		ORDER BY strItemNo
 	)t
 	ORDER by intSort,strType
