@@ -6227,6 +6227,7 @@
     <Build Include="dbo\Views\vyuPATRetireStock.sql" />
     <Build Include="dbo\Views\vyuLGOverallPosition.sql" />
     <Build Include="dbo\Functions\fnLGGetShipmentStatus.sql" />
+    <Build Include="dbo\Views\vyuICGetItemRunningStock.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
