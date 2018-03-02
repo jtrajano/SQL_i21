@@ -206,19 +206,29 @@ AS
 																			--MIN. FINANCE CHARGE BAL > INVOICE AMOUNT DUE = 0
 																			CASE WHEN ISNULL(SC.dblMinimumFinanceCharge, 0) > I.dblInvoiceTotal - ISNULL(PAYMENT.dblAmountPaid, @zeroDecimal)
 																				 THEN 0
-																				 ELSE  ((SC.dblServiceChargeAPR/365) / 100) * DATEDIFF(DAYOFYEAR, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 AND ISNULL(I.ysnCalculated, 0) = 0
+																				 ELSE  ((SC.dblServiceChargeAPR/365) / 100) * CASE WHEN (I.dblInvoiceTotal - ISNULL(PAYMENT.dblAmountPaid, @zeroDecimal)) > 0  
+																																			THEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @asOfDate)
+																																			ELSE
+																																			DATEDIFF(DAYOFYEAR, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 AND ISNULL(I.ysnCalculated, 0) = 0
 																																				 THEN I.dtmDueDate 
 																																				 ELSE I.dtmCalculated 
-																																			END, ISNULL(ISNULL(PAYMENT.dtmDatePaid, PAYMENT2.dtmDatePaid), @asOfDate)) * (I.dblInvoiceTotal - ISNULL(PAYMENT.dblAmountPaid, @zeroDecimal))
+																																			END, ISNULL(ISNULL(PAYMENT.dtmDatePaid, PAYMENT2.dtmDatePaid), @asOfDate))
+																																			 END
+																																			* (I.dblInvoiceTotal - ISNULL(PAYMENT.dblAmountPaid, @zeroDecimal))
 																			END
 						 		  										THEN SC.dblMinimumCharge
 						 		  										ELSE 
 																			CASE WHEN ISNULL(SC.dblMinimumFinanceCharge, 0) > I.dblInvoiceTotal - ISNULL(PAYMENT.dblAmountPaid, @zeroDecimal)
 																				 THEN 0
-																				 ELSE  ((SC.dblServiceChargeAPR/365) / 100) * DATEDIFF(DAYOFYEAR, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 AND ISNULL(I.ysnCalculated, 0) = 0
+																				 ELSE  ((SC.dblServiceChargeAPR/365) / 100) * CASE WHEN (I.dblInvoiceTotal - ISNULL(PAYMENT.dblAmountPaid, @zeroDecimal)) > 0  
+																																			THEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @asOfDate)
+																																			ELSE
+																																			DATEDIFF(DAYOFYEAR, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 AND ISNULL(I.ysnCalculated, 0) = 0
 																																				 THEN I.dtmDueDate 
 																																				 ELSE I.dtmCalculated 
-																																			END, ISNULL(ISNULL(PAYMENT.dtmDatePaid, PAYMENT2.dtmDatePaid), @asOfDate)) * (I.dblInvoiceTotal - ISNULL(PAYMENT.dblAmountPaid, @zeroDecimal))
+																																			END, ISNULL(ISNULL(PAYMENT.dtmDatePaid, PAYMENT2.dtmDatePaid), @asOfDate))
+																																			 END
+																																			* (I.dblInvoiceTotal - ISNULL(PAYMENT.dblAmountPaid, @zeroDecimal))
 																			END
 						 											END
 						 										ELSE 0
@@ -226,10 +236,14 @@ AS
 						 								ELSE 
 						 									SC.dblPercentage
 						 							END, dbo.fnARGetDefaultDecimal())
-									, DATEDIFF(DAYOFYEAR, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 AND ISNULL(I.ysnCalculated, 0) = 0
-														THEN I.dtmDueDate 
-														ELSE I.dtmCalculated 
-												END, ISNULL(ISNULL(PAYMENT.dtmDatePaid, PAYMENT2.dtmDatePaid), @asOfDate))
+									, CASE WHEN (I.dblInvoiceTotal - ISNULL(PAYMENT.dblAmountPaid, @zeroDecimal)) > 0  
+											THEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @asOfDate)
+											ELSE
+											DATEDIFF(DAYOFYEAR, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 AND ISNULL(I.ysnCalculated, 0) = 0
+													THEN I.dtmDueDate 
+													ELSE I.dtmCalculated 
+											END, ISNULL(ISNULL(PAYMENT.dtmDatePaid, PAYMENT2.dtmDatePaid), @asOfDate))
+												END
 							FROM tblARInvoice I
 								INNER JOIN #tmpCustomers C ON I.intEntityCustomerId = C.[intEntityId]
 								INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId
@@ -258,7 +272,12 @@ AS
 								AND I.strType NOT IN ('CF Tran')
 								AND I.intEntityCustomerId = @entityId
 								AND DATEADD(DAYOFYEAR, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 AND ISNULL(I.ysnCalculated, 0) = 0 THEN SC.intGracePeriod ELSE 0 END, I.dtmDueDate) < @asOfDate
-							    AND (ISNULL(PAYMENT.dtmDatePaid, PAYMENT2.dtmDatePaid) IS NOT NULL AND DATEADD(DAYOFYEAR, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 AND ISNULL(I.ysnCalculated, 0) = 0 THEN SC.intGracePeriod ELSE 0 END, I.dtmDueDate) < ISNULL(PAYMENT.dtmDatePaid, PAYMENT2.dtmDatePaid) OR ISNULL(PAYMENT.dtmDatePaid, PAYMENT2.dtmDatePaid) IS NULL)
+							    AND (
+										(ISNULL(PAYMENT.dtmDatePaid, PAYMENT2.dtmDatePaid) IS NOT NULL 
+											AND (DATEADD(DAYOFYEAR, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 AND ISNULL(I.ysnCalculated, 0) = 0 THEN SC.intGracePeriod ELSE 0 END, I.dtmDueDate) < ISNULL(PAYMENT.dtmDatePaid, PAYMENT2.dtmDatePaid))
+										OR  DATEDIFF(DAYOFYEAR, I.dtmDueDate, @asOfDate) > 0)
+											OR ISNULL(PAYMENT.dtmDatePaid, PAYMENT2.dtmDatePaid) IS NULL
+									)
                                 AND ((I.strType = 'Service Charge' AND ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND ysnForgiven = 0)))
                                 AND I.dblInvoiceTotal - ISNULL(PAYMENT.dblAmountPaid, @zeroDecimal) > @zeroDecimal
 								AND ((@ysnChargeonCharge = 0 AND I.strType NOT IN ('Service Charge')) OR (@ysnChargeonCharge = 1))
