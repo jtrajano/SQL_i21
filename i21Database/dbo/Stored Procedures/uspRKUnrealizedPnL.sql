@@ -22,7 +22,7 @@ SELECT (convert(int,isnull((Long1-MatchLong),0)- isnull(Sell1-MatchShort,0)))*db
 isnull((Long1-MatchLong),0) as dblLong,isnull(Sell1-MatchShort,0) as dblShort, isnull(((Sell1-MatchShort)*dblPrice),0) ShortWaitedPrice,  
 convert(int,isnull((Long1-MatchLong),0)- isnull(Sell1-MatchShort,0)) * -dblFutCommission1 / case when ComSubCurrency = 'true' then ComCent else 1 end  AS dblFutCommission2,
 convert(int,isnull((Long1-MatchLong),0)- isnull(Sell1-MatchShort,0)) as  intNet,  
-dbo.fnRKGetLatestClosingPrice (intFutureMarketId,intFutureMonthId,@dtmToDate) as dblClosing,     
+ISNULL(dbo.fnRKGetLatestClosingPrice (intFutureMarketId,intFutureMonthId,@dtmToDate),0) as dblClosing,     
 * FROM (   
 SELECT  intFutOptTransactionId,
 		fm.strFutMarketName,  
@@ -46,7 +46,16 @@ SELECT  intFutOptTransactionId,
 		ot.dblPrice as dblActual,  		
 		isnull(ot.dblPrice,0) dblPrice,  
 		fm.dblContractSize dblContractSize,0 as intConcurrencyId,  
-		CASE WHEN bc.intFuturesRateType= 1 then 0 else  isnull(bc.dblFutCommission,0) end as dblFutCommission1,  
+		--CASE WHEN bc.intFuturesRateType= 1 then 0 else  isnull(bc.dblFutCommission,0) end as dblFutCommission1,  
+		 --This filter is to get the correct commission based on date						
+       dblFutCommission1 = ISNULL((select TOP 1
+		(case when bc.intFuturesRateType = 2 then 0  
+			else  isnull(bc.dblFutCommission,0) / case when cur.ysnSubCurrency = 'true' then cur.intCent else 1 end 
+		end) 
+		from tblRKBrokerageCommission bc
+		LEFT JOIN tblSMCurrency cur on cur.intCurrencyID=bc.intFutCurrencyId
+		where bc.intFutureMarketId = ot.intFutureMarketId and bc.intBrokerageAccountId = ot.intBrokerageAccountId and  ot.dtmTransactionDate between bc.dtmEffectiveDate and bc.dtmEndDate),0),
+	  
 	   ISNULL((SELECT SUM(dblMatchQty) from tblRKMatchFuturesPSDetail psd 
 				JOIN tblRKMatchFuturesPSHeader h on psd.intMatchFuturesPSHeaderId=h.intMatchFuturesPSHeaderId
 				WHERE psd.intLFutOptTransactionId=ot.intFutOptTransactionId 
@@ -55,7 +64,7 @@ SELECT  intFutOptTransactionId,
 			   JOIN tblRKMatchFuturesPSHeader h on psd.intMatchFuturesPSHeaderId=h.intMatchFuturesPSHeaderId
 			  WHERE psd.intSFutOptTransactionId=ot.intFutOptTransactionId
 			  AND convert(datetime,CONVERT(VARCHAR(10),h.dtmMatchDate,110),110) <= @dtmToDate),0) as MatchShort,            
-		c.intCurrencyID as intCurrencyId,c.intCent,c.ysnSubCurrency,intFutOptTransactionHeaderId,ysnExpired,cur.intCent ComCent,cur.ysnSubCurrency ComSubCurrency            
+		c.intCurrencyID as intCurrencyId,c.intCent,c.ysnSubCurrency,intFutOptTransactionHeaderId,ysnExpired,c.intCent ComCent,c.ysnSubCurrency ComSubCurrency            
 		,IsNull(dbo.fnRKGetVariationMargin (ot.intFutOptTransactionId ,@dtmToDate,ot.dtmFilledDate), 0.0)*fm.dblContractSize dblVariationMargin1
 		,IsNull(dbo.fnRKGetInitialMargin (ot.intFutOptTransactionId ,@dtmToDate,ot.dtmFilledDate), 0.0) as dblInitialMargin		
  FROM tblRKFutOptTransaction ot   
@@ -67,9 +76,9 @@ SELECT  intFutOptTransactionId,
  JOIN tblEMEntity e on e.intEntityId=ot.intEntityId  
  JOIN tblRKFutureMarket fm on ot.intFutureMarketId=fm.intFutureMarketId  
  JOIN tblSMCurrency c on c.intCurrencyID=fm.intCurrencyId
- JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId=ot.intFutureMarketId AND ot.intBrokerageAccountId=bc.intBrokerageAccountId     
- JOIN tblSMCurrency cur on cur.intCurrencyID=bc.intFutCurrencyId
- JOIN tblRKBrokerageAccount ba on bc.intBrokerageAccountId=ba.intBrokerageAccountId and ot.intInstrumentTypeId = 1 
+ --JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId=ot.intFutureMarketId AND ot.intBrokerageAccountId=bc.intBrokerageAccountId     
+ --JOIN tblSMCurrency cur on cur.intCurrencyID=bc.intFutCurrencyId
+ --JOIN tblRKBrokerageAccount ba on bc.intBrokerageAccountId=ba.intBrokerageAccountId and ot.intInstrumentTypeId = 1 
  LEFT JOIN tblCTBook cb on cb.intBookId= ot.intBookId  
  LEFT JOIN tblCTSubBook csb on csb.intSubBookId=ot.intSubBookId 
  WHERE ot.intCommodityId= CASE WHEN ISNULL(@intCommodityId,0)=0 then ot.intCommodityId else @intCommodityId end
