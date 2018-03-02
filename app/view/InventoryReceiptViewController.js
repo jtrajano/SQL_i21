@@ -6004,7 +6004,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     
                                     var functionalCurrencyId = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
                                     var defaultForexRateTypeId = i21.ModuleMgr.SystemManager.getCompanyPreference('intInventoryRateTypeId');
-                                    var otherChargeCurrency = otherCharge.intCurrencyId; 
+                                    var otherChargeCurrency = otherCharge.intCurrencyId ? otherCharge.intCurrencyId : current.get('intCurrencyId'); 
                                     
                                     var intForexRateTypeId  = otherCharge.intForexRateTypeId;
                                     var dblFx = otherCharge.dblFX; 
