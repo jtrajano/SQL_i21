@@ -140,6 +140,45 @@ EXEC('
 END
 
 /*
+* Earning Types
+* 1. Attempt to convert Fixed Salary earnings to 'Salary' Calculation Type
+* 2...
+*/
+
+IF EXISTS(SELECT * FROM sys.tables WHERE object_id = object_id('tblPRTypeEarning'))
+BEGIN
+
+EXEC('
+	UPDATE tblPRTypeEarning 
+	SET strCalculationType = ''Salary''
+	WHERE LOWER(strEarning) LIKE ''sal%'' AND strCalculationType IN (''Fixed Amount'', ''Annual Salary'')
+	AND NOT EXISTS (SELECT TOP 1 1 FROM tblPRTypeEarning WHERE strCalculationType = ''Salary'')
+
+	UPDATE E
+	SET strCalculationType = ''Salary''
+	FROM tblPREmployeeEarning E
+	INNER JOIN tblPRTypeEarning T ON E.intTypeEarningId = T.intTypeEarningId
+	WHERE T.strCalculationType = ''Salary'' AND E.strCalculationType <> ''Salary''
+	AND NOT EXISTS (SELECT TOP 1 1 FROM tblPREmployeeEarning WHERE strCalculationType = ''Salary'')
+
+	UPDATE E
+	SET strCalculationType = ''Salary''
+	FROM tblPRTemplateEarning E
+	INNER JOIN tblPRTypeEarning T ON E.intTypeEarningId = T.intTypeEarningId
+	WHERE T.strCalculationType = ''Salary'' AND E.strCalculationType <> ''Salary''
+	AND NOT EXISTS (SELECT TOP 1 1 FROM tblPRTemplateEarning WHERE strCalculationType = ''Salary'')
+
+	UPDATE E
+	SET strCalculationType = ''Salary''
+	FROM tblPRPaycheckEarning E
+	INNER JOIN tblPRTypeEarning T ON E.intTypeEarningId = T.intTypeEarningId
+	WHERE T.strCalculationType = ''Salary'' AND E.strCalculationType <> ''Salary''
+	AND NOT EXISTS (SELECT TOP 1 1 FROM tblPRPaycheckEarning WHERE strCalculationType = ''Salary'')
+')
+
+END
+
+/*
 * Employee Time Off
 * 1. Reset Hours Used (run once)
 * 2...
