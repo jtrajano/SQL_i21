@@ -5,93 +5,94 @@ StartTest (function (t) {
 
         //Presetup
         //region
-        .displayText('===== Pre-setup =====')
-        /*====================================== Add Another Company Location for Irelyadmin User and setup default decimals ======================================*/
-        .displayText('===== 1. Add Indianapolis for Company Location for irelyadmin User =====')
-        .clickMenuFolder('System Manager','Folder')
-        .clickMenuScreen('Users','Screen')
-        .waitUntilLoaded()
-        .doubleClickSearchRowValue('irelyadmin', 'strUsername', 1)
-        .waitUntilLoaded('')
-        .waitUntilLoaded()
-        .selectComboBoxRowValue('Timezone', '(UTC+08:00) Beijing, Chongqing, Hong Kong, Urumqi', 'Timezone',0)
-        .clickTab('User')
-        .waitUntilLoaded()
-        .clickTab('User Roles')
+        // .displayText('===== Pre-setup =====')
+        // /*====================================== Add Another Company Location for Irelyadmin User and setup default decimals ======================================*/
+        // .displayText('===== 1. Add Indianapolis for Company Location for irelyadmin User =====')
+        // .clickMenuFolder('System Manager','Folder')
+        // .clickMenuScreen('Users','Screen')
+        // .waitUntilLoaded()
+        // .doubleClickSearchRowValue('irelyadmin', 'strUsername', 1)
+        // .waitUntilLoaded('')
+        // .waitUntilLoaded()
+        // .selectComboBoxRowValue('Timezone', '(UTC+08:00) Beijing, Chongqing, Hong Kong, Urumqi', 'Timezone',0)
+        // .clickTab('User')
+        // .waitUntilLoaded()
+        // .clickTab('User Roles')
 
-        .waitUntilLoaded()
-        .filterGridRecords('UserRoleCompanyLocationRolePermission', 'FilterGrid', '0002 - Indianapolis')
-        .waitUntilLoaded()
+        // .waitUntilLoaded()
+        // .filterGridRecords('UserRoleCompanyLocationRolePermission', 'FilterGrid', '0002 - Indianapolis')
+        // .waitUntilLoaded()
 
-        .continueIf({
-            expected: true,
-            actual: function (win,next) {
-                new iRely.FunctionalTest().start(t, next)
-                    .displayText('Location already exists.')
-                return win.down('#grdUserRoleCompanyLocationRolePermission').store.getCount() == 0;
-            },
-            success: function(next){
-                new iRely.FunctionalTest().start(t, next)
+        // .continueIf({
+        //     expected: true,
+        //     actual: function (win,next) {
+        //         new iRely.FunctionalTest().start(t, next)
+        //             .displayText('Location already exists.')
+        //         return win.down('#grdUserRoleCompanyLocationRolePermission').store.getCount() == 0;
+        //     },
+        //     success: function(next){
+        //         new iRely.FunctionalTest().start(t, next)
 
-                    .displayText('Location is not yet existing.')
-                    .clickButton('Close')
-                    .waitUntilLoaded()
-                    .clickMessageBoxButton('no')
-                    .waitUntilLoaded()
-                    .doubleClickSearchRowValue('irelyadmin', 'strUsername', 1)
-                    .waitUntilLoaded('')
-                    .clickTab('User')
-                    .waitUntilLoaded()
-                    .clickTab('User Roles')
-                    .waitUntilLoaded()
-                    .selectGridComboBoxRowValue('UserRoleCompanyLocationRolePermission', 'Dummy','strLocationName', '0002 - Indianapolis','strLocationName', 1)
-                    .selectGridComboBoxBottomRowValue('UserRoleCompanyLocationRolePermission', 'strUserRole', 'ADMIN', 'strUserRole', 1)
-                    .clickTab('Detail')
-                    .waitUntilLoaded()
-                    .selectComboBoxRowValue('UserNumberFormat', '1,234,567.89', 'UserNumberFormat',1)
-                    .clickButton('Save')
-                    .waitUntilLoaded()
-                    .clickButton('Close')
-                    .waitUntilLoaded()
-                    .doubleClickSearchRowValue('irelyadmin', 'strUsername', 1)
-                    .waitUntilLoaded('')
-                    .clickTab('User')
-                    .waitUntilLoaded()
-                    .clickTab('User Roles')
-                    .waitUntilLoaded()
-                    .filterGridRecords('UserRoleCompanyLocationRolePermission', 'FilterGrid', '0002 - Indianapolis')
-                    .waitUntilLoaded()
-                    .done();
-            },
-            continueOnFail: true
-        })
-        .continueIf({
-            expected: true,
-            actual: function (win,next) {
-                new iRely.FunctionalTest().start(t, next)
-                    .displayText('Location already exists.')
-                return win.down('#grdUserRoleCompanyLocationRolePermission').store.getCount() != 0;
-            },
-            success: function(next){
-                new iRely.FunctionalTest().start(t, next)
-                    .clickButton('Close')
-                    .waitUntilLoaded()
-                    .clickMessageBoxButton('no')
-                    .waitUntilLoaded()
-                    .clickMenuFolder('System Manager','Folder')
-                    .waitUntilLoaded()
-                    .done();
-            },
-            continueOnFail: true
-        })
-
+        //             .displayText('Location is not yet existing.')
+        //             .clickButton('Close')
+        //             .waitUntilLoaded()
+        //             .clickMessageBoxButton('no')
+        //             .waitUntilLoaded()
+        //             .doubleClickSearchRowValue('irelyadmin', 'strUsername', 1)
+        //             .waitUntilLoaded('')
+        //             .clickTab('User')
+        //             .waitUntilLoaded()
+        //             .clickTab('User Roles')
+        //             .waitUntilLoaded()
+        //             .selectGridComboBoxRowValue('UserRoleCompanyLocationRolePermission', 'Dummy','strLocationName', '0002 - Indianapolis','strLocationName', 1)
+        //             .selectGridComboBoxBottomRowValue('UserRoleCompanyLocationRolePermission', 'strUserRole', 'ADMIN', 'strUserRole', 1)
+        //             .clickTab('Detail')
+        //             .waitUntilLoaded()
+        //             .selectComboBoxRowValue('UserNumberFormat', '1,234,567.89', 'UserNumberFormat',1)
+        //             .clickButton('Save')
+        //             .waitUntilLoaded()
+        //             .clickButton('Close')
+        //             .waitUntilLoaded()
+        //             .doubleClickSearchRowValue('irelyadmin', 'strUsername', 1)
+        //             .waitUntilLoaded('')
+        //             .clickTab('User')
+        //             .waitUntilLoaded()
+        //             .clickTab('User Roles')
+        //             .waitUntilLoaded()
+        //             .filterGridRecords('UserRoleCompanyLocationRolePermission', 'FilterGrid', '0002 - Indianapolis')
+        //             .waitUntilLoaded()
+        //             .done();
+        //     },
+        //     continueOnFail: true
+        // })
+        // .continueIf({
+        //     expected: true,
+        //     actual: function (win,next) {
+        //         new iRely.FunctionalTest().start(t, next)
+        //             .displayText('Location already exists.')
+        //         return win.down('#grdUserRoleCompanyLocationRolePermission').store.getCount() != 0;
+        //     },
+        //     success: function(next){
+        //         new iRely.FunctionalTest().start(t, next)
+        //             .clickButton('Close')
+        //             .waitUntilLoaded()
+        //             .clickMessageBoxButton('yes')
+        //             .waitUntilLoaded()
+        //             //.clickMenuFolder('System Manager','Folder')
+        //             .waitUntilLoaded()
+        //             .done();
+        //     },
+        //     continueOnFail: true
+        // })
+        // .clickButton('Close')
 
         /*====================================== Add Storage Location for Indianapolis======================================*/
-        .clickMenuFolder('Inventory','Folder')
+       .clickMenuFolder('Inventory','Folder')
         .waitUntilLoaded()
-        .clickMenuScreen('Storage Locations','Screen')
-        .filterGridRecords('Search', 'FilterGrid', 'Indy Storage')
-        .waitUntilLoaded()
+        .clickMenuScreen('Storage Units','Screen')
+        .filterGridRecords('Search', 'From', 'Indy Storage')
+        .waitUntilLoaded().waitUntilLoaded().waitUntilLoaded()
+        //.waitUntilGridLoaded('Search')
         .continueIf({
             expected: true,
             actual: function (win,next) {
@@ -100,7 +101,7 @@ StartTest (function (t) {
             success: function(next){
                 new iRely.FunctionalTest().start(t, next)
                     .displayText('===== Scenario 1: Add New Storage Location. =====')
-                    .clickMenuScreen('Storage Locations','Screen')
+                    //.clickMenuScreen('Storage Locations','Screen')
                     .clickButton('New')
                     .waitUntilLoaded('')
                     .enterData('Text Field','Name','Indy Storage')
@@ -123,12 +124,13 @@ StartTest (function (t) {
             },
             continueOnFail: true
         })
-        .clickMenuFolder('Inventory','Folder')
+        .clickButton('Close')
+        //.clickMenuFolder('Inventory','Folder')
         /*====================================== Add Category ======================================*/
         //region
-        .clickMenuFolder('Inventory','Folder')
+        //.clickMenuFolder('Inventory','Folder')
         .clickMenuScreen('Categories','Screen')
-        .filterGridRecords('Search', 'FilterGrid', 'DIR - Category')
+        .filterGridRecords('Search', 'From', 'DIR - Category')
         .waitUntilLoaded()
         .continueIf({
             expected: true,
@@ -142,50 +144,53 @@ StartTest (function (t) {
                 new iRely.FunctionalTest().start(t, next)
                     //Add Category
                     .displayText('===== Scenario 4: Add Category =====')
-                    .clickMenuFolder('Inventory','Folder')
+                    //.clickMenuFolder('Inventory','Folder')
+                   // .clickButton('New')
                     .addFunction(function(next){
                         commonIC.addCategory (t,next, 'DIR - Category', 'Test DIR - Category', 2)
                     })
-                    .clickMenuFolder('Inventory','Folder')
+                    //.clickMenuFolder('Inventory','Folder')
                     .waitUntilLoaded('')
                     .done();
             },
             continueOnFail: true
         })
-
+        .clickButton('Close')
 
         /*====================================== Add Commodity ======================================*/
 
-        .clickMenuScreen('Commodities','Screen')
-        .filterGridRecords('Search', 'FilterGrid', 'DIR - Commodity')
-        .waitUntilLoaded()
-        .continueIf({
-            expected: true,
-            actual: function (win,next) {
-                new iRely.FunctionalTest().start(t, next)
-                    .displayText('Commodity already exists.')
-                return win.down('#grdSearch').store.getCount() == 0;
-            },
+        // .clickMenuScreen('Commodities','Screen')
+        // .filterGridRecords('Search', 'From', 'DIR - Commodity')
+        // .waitUntilLoaded()
+        // .continueIf({
+        //     expected: true,
+        //     actual: function (win,next) {
+        //         new iRely.FunctionalTest().start(t, next)
+        //             .displayText('Commodity already exists.')
+        //         return win.down('#grdSearch').store.getCount() == 0;
+        //     },
 
-            success: function(next){
-                new iRely.FunctionalTest().start(t, next)
-                    .clickMenuFolder('Inventory','Folder')
+        //     success: function(next){
+        //         new iRely.FunctionalTest().start(t, next)
+                    //.clickMenuFolder('Inventory','Folder')
                     //Add Commodity
+                    //.clickButton('New')
                     .displayText('===== Scenario 6: Add Commodity =====')
                     .addFunction(function(next){
                         commonIC.addCommodity (t,next, 'DIR - Commodity', 'Test DIR - Commodity')
-                    })
-                    .clickMenuFolder('Inventory','Folder')
-                    .waitUntilLoaded('')
-                    .done();
-            },
-            continueOnFail: true
-        })
+                     })
+        //             //.clickMenuFolder('Inventory','Folder')
+        //             .waitUntilLoaded('')
+        //             .done();
+        //     },
+        //     continueOnFail: true
+        // })
+        .clickButton('Close')
 
 
         /*====================================== Add Lotted Item ======================================*/
         .clickMenuScreen('Items','Screen')
-        .filterGridRecords('Search', 'FilterGrid', 'Direct - LTI - 01')
+        .filterGridRecords('Search', 'From', 'Direct - LTI - 01')
         .waitUntilLoaded()
         .continueIf({
             expected: true,
@@ -197,7 +202,8 @@ StartTest (function (t) {
 
             success: function(next){
                 new iRely.FunctionalTest().start(t, next)
-                    .clickMenuFolder('Inventory','Folder')
+                    //.clickMenuFolder('Inventory','Folder')
+                    //.clickButton('New')
                     .displayText('===== Scenario 5: Add Lotted Item =====')
                     .addFunction(function(next){
                         commonIC.addInventoryItem
@@ -214,17 +220,18 @@ StartTest (function (t) {
                             , 40
                         )
                     })
-                    .clickMenuFolder('Inventory','Folder')
+                    //.clickMenuFolder('Inventory','Folder')
                     .waitUntilLoaded('')
                     .done();
             },
             continueOnFail: true
         })
+        .clickButton('Close')
 
 
         /*====================================== Add Non Lotted Item ======================================*/
         .clickMenuScreen('Items','Screen')
-        .filterGridRecords('Search', 'FilterGrid', 'Direct - NLTI - 01')
+        .filterGridRecords('Search', 'From', 'Direct - NLTI - 01')
         .waitUntilLoaded()
         .continueIf({
             expected: true,
@@ -236,7 +243,8 @@ StartTest (function (t) {
 
             success: function(next){
                 new iRely.FunctionalTest().start(t, next)
-                    .clickMenuFolder('Inventory','Folder')
+                    //.clickMenuFolder('Inventory','Folder')
+                    //.clickButton('New')
                     .displayText('===== Scenario 6: Add Non Lotted Item =====')
                     .addFunction(function(next){
                         commonIC.addInventoryItem
@@ -254,20 +262,21 @@ StartTest (function (t) {
                         )
                     })
                     .waitUntilLoaded('')
-                    .clickMenuFolder('Inventory','Folder')
+                    //.clickMenuFolder('Inventory','Folder')
                     .done();
             },
             continueOnFail: true
         })
-        .clickMenuFolder('Inventory','Folder')
+        //.clickMenuFolder('Inventory','Folder')
+        .clickButton('Close')
 
 
 
         //Create Lotted Item Stock Unit KG
         .displayText('===== Add Commodity KG Stock Unit =====')
-        .clickMenuFolder('Inventory','Folder')
+        //.clickMenuFolder('Inventory','Folder')
         .clickMenuScreen('Commodities','Screen')
-        .filterGridRecords('Search', 'FilterGrid', 'DIR - Commodity - 01')
+        .filterGridRecords('Search', 'From', 'DIR - Commodity - 01')
         .waitUntilLoaded()
         .continueIf({
             expected: true,
@@ -279,7 +288,7 @@ StartTest (function (t) {
 
             success: function(next){
                 new iRely.FunctionalTest().start(t, next)
-                    .clickMenuScreen('Commodities','Screen')
+                    //.clickMenuScreen('Commodities','Screen')
                     .clickButton('New')
                     .waitUntilLoaded('')
                     .enterData('Text Field','CommodityCode','DIR - Commodity - 01')
@@ -302,9 +311,10 @@ StartTest (function (t) {
             },
             continueOnFail: true
         })
+        .clickButton('Close')
 
         .clickMenuScreen('Items','Screen')
-        .filterGridRecords('Search', 'FilterGrid', 'Direct - LTI - 02')
+        .filterGridRecords('Search', 'From', 'Direct - LTI - 02')
         .waitUntilLoaded()
         .continueIf({
             expected: true,
@@ -369,13 +379,13 @@ StartTest (function (t) {
                     .displayText('===== Setup Item Pricing=====')
                     .clickTab('Pricing')
                     .waitUntilLoaded('')
-                    .verifyGridData('Pricing', 1, 'strLocationName', '0001 - Fort Wayne')
+                    .verifyGridData('Pricing', 1, 'strLocationName', '0001-Fort Wayne')
                     .enterGridData('Pricing', 1, 'dblLastCost', '10')
                     .enterGridData('Pricing', 1, 'dblStandardCost', '10')
                     .selectGridComboBoxRowNumber('Pricing', 1, 'strPricingMethod',3)
                     .enterGridData('Pricing', 1, 'dblAmountPercent', '40')
 
-                    .verifyGridData('Pricing', 2, 'strLocationName', '0002 - Indianapolis')
+                    .verifyGridData('Pricing', 2, 'strLocationName', '0002-Indianapolis')
                     .enterGridData('Pricing', 2, 'dblLastCost', '10')
                     .enterGridData('Pricing', 2, 'dblStandardCost', '10')
                     .selectGridComboBoxRowNumber('Pricing', 2, 'strPricingMethod',3)
@@ -387,7 +397,8 @@ StartTest (function (t) {
             },
             continueOnFail: true
         })
-        .clickMenuFolder('Inventory','Folder')
+         .clickButton('Close')
+        //.clickMenuFolder('Inventory','Folder')
         .displayText('===== Pre-setup done =====')
         //endregion
 
