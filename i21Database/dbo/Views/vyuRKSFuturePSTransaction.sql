@@ -29,7 +29,7 @@ SELECT intSelectedInstrumentTypeId,
 		end) as dblFutCommission
 		from tblRKBrokerageCommission bc
 		LEFT JOIN tblSMCurrency cur on cur.intCurrencyID=bc.intFutCurrencyId
-		where bc.intFutureMarketId = ot.intFutureMarketId and bc.intBrokerageAccountId = ot.intBrokerageAccountId and  ot.dtmTransactionDate between bc.dtmEffectiveDate and bc.dtmEndDate),0)
+		where bc.intFutureMarketId = ot.intFutureMarketId and bc.intBrokerageAccountId = ot.intBrokerageAccountId and  ot.dtmTransactionDate between bc.dtmEffectiveDate and bc.dtmEndDate),0)  * -1 --commision is always negative (RM-1174)
 	  ,dtmFilledDate
 	  ,ot.intFutOptTransactionHeaderId,
 	   c.intCurrencyID as intCurrencyId,c.intCent,c.ysnSubCurrency 

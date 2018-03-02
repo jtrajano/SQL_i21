@@ -23,7 +23,7 @@ SELECT
 	,intCurrencyId
 	,intCent
 	,ysnSubCurrency
-	,isnull((dblGrossPL-dblFutCommission),0.0)  AS dblNetPL 
+	,isnull((dblGrossPL + dblFutCommission),0.0)  AS dblNetPL 
 FROM
 	(SELECT 
 		((dblSPrice - dblLPrice)*dblMatchQty*dblContractSize)/ case when ysnSubCurrency = 'true' then intCent else 1 end as dblGrossPL
