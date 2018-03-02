@@ -229,6 +229,10 @@ namespace iRely.Inventory.BusinessLayer
                                         context.Entry<T>(entity).State = EntityState.Modified;
                                         AddSuccessLog(entity, record, false);
                                     }
+                                    else
+                                    {
+                                        AddNoChangesWarning(entity, record);
+                                    }
                                 }
                             }
                             else
@@ -262,6 +266,10 @@ namespace iRely.Inventory.BusinessLayer
                                 {
                                     context.Entry<T>(entity).State = EntityState.Modified;
                                     AddSuccessLog(entity, record, false); 
+                                }
+                                else
+                                {
+                                    AddNoChangesWarning(entity, record);
                                 }
                             }
                         }
@@ -307,6 +315,22 @@ namespace iRely.Inventory.BusinessLayer
                 Value = "",
                 Exception = null,
                 Message = isNew ? "Import successful." : "Update successful."
+            });
+            ImportResult.Type = Constants.TYPE_INFO;
+        }
+
+        protected void AddNoChangesWarning(T entity, CsvRecord record)
+        {
+            ImportResult.AddMessage(new ImportDataMessage()
+            {
+                Type = Constants.TYPE_INFO,
+                Status = Constants.STAT_SUCCESS,
+                Action = Constants.ACTION_SKIPPED,
+                Column = "",
+                Row = record.RecordNo,
+                Value = "",
+                Exception = null,
+                Message = "No changes to existing record. Skipped."
             });
             ImportResult.Type = Constants.TYPE_INFO;
         }

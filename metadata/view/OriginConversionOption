@@ -378,6 +378,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "focusable": true,
+                                                        "hidden": true,
                                                         "itemId": "mnuStorageLocations",
                                                         "menuId": "storagelocations",
                                                         "text": "Storage Locations"
@@ -387,7 +388,8 @@
                                                         "text": "string",
                                                         "scrollable": "boolean",
                                                         "focusable": "boolean",
-                                                        "menuId": "string"
+                                                        "menuId": "string",
+                                                        "hidden": "boolean"
                                                     },
                                                     "name": "MyMenuItem7",
                                                     "designerId": "e1076e47-e2b4-4e09-b283-a972c2b98a17",
