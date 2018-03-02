@@ -478,6 +478,8 @@ BEGIN
 		,strParentLotNumber = IsNULL(@strParentLotNumber2, @strParentLotNumber)
 	WHERE intWorkOrderProducedLotId = @intWorkOrderProducedLotId
 
+	Update tblMFLotInventory Set dblTareWeight =@dblTareWeight Where intLotId=@intLotId
+
 	IF @intSpecialPalletLotId IS NOT NULL
 	BEGIN
 		INSERT INTO dbo.tblMFWorkOrderConsumedLot (

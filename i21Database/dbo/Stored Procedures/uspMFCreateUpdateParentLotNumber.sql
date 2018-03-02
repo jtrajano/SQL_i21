@@ -202,6 +202,7 @@ BEGIN
 		,@intSplitFromLotId INT
 		,@ysnBonded BIT
 		,@strLotReceiptNumber NVARCHAR(50)
+		,@dblTareWeight numeric(38,20)
 
 	SELECT @strLotNumber = strLotNumber
 		,@strCondition = strCondition
@@ -245,6 +246,7 @@ BEGIN
 			,@strWarehouseRefNo = LI.strWarehouseRefNo
 			,@strReceiptNumber = LI.strReceiptNumber
 			,@dtmReceiptDate = dtmReceiptDate
+			,@dblTareWeight=dblTareWeight
 		FROM tblMFLotInventory LI
 		WHERE LI.intLotId = @intSplitFromLotId
 
@@ -315,6 +317,7 @@ BEGIN
 			,strReceiptNumber
 			,dtmReceiptDate
 			,dtmLastMoveDate 
+			,dblTareWeight
 			)
 		SELECT @intLotId
 			,@intBondStatusId
@@ -323,6 +326,7 @@ BEGIN
 			,@strReceiptNumber
 			,@dtmReceiptDate
 			,@dtmCurrentDateTime
+			,@dblTareWeight
 	END
 	ELSE
 	BEGIN
@@ -400,5 +404,9 @@ BEGIN
 
 	DELETE
 	FROM tblMFEDI944
+	WHERE intInventoryReceiptId = @intInventoryReceiptId
+
+	DELETE
+	FROM tblMFLotTareWeight 
 	WHERE intInventoryReceiptId = @intInventoryReceiptId
 END
