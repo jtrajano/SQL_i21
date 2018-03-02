@@ -153,27 +153,62 @@ BEGIN TRY
 			END
 		ELSE
 			BEGIN
-				IF @intEntityId = 0
+				IF ISNULL(@ysnTransfer ,0) = 1
 					BEGIN
-						SELECT @intInventoryTransferId = ICTD.intInventoryTransferId, @strTransactionId = ICTD.strTransferNo, @intMatchTicketId = SC.intMatchTicketId
-						FROM vyuICGetInventoryTransferDetail  ICTD
-						LEFT JOIN tblSCTicket SC ON SC.strTicketNumber = ICTD.strSourceNumber AND SC.intTicketId = ICTD.intSourceId
-						WHERE intSourceId = @intTicketId
+						SELECT @intInvoiceId = ARD.intInvoiceId, @ysnPosted = AR.ysnPosted FROM tblSCTicket SCT
+						LEFT JOIN tblARInvoiceDetail ARD ON ARD.intSalesOrderDetailId = SCT.intSalesOrderDetailId
+						LEFT JOIN tblARInvoice AR ON AR.intInvoiceId = ARD.intInvoiceId
+						WHERE SCT.intTicketId = @intTicketId
 
-						IF @intMatchTicketId > 0
+						IF @ysnPosted = 1
 						BEGIN
-							SET @ErrorMessage = 'Undistribute failed, this ticket is using in other ticket';
-							RAISERROR(@ErrorMessage, 11, 1);
-						END 
-
-						IF @intInventoryTransferId > 0
-							EXEC [dbo].[uspICPostInventoryTransfer] 0, 0, @strTransactionId, @intUserId;	
-							EXEC [dbo].[uspICDeleteInventoryTransfer] @intInventoryTransferId, @intUserId	
-
+							EXEC [dbo].[uspARPostInvoice]
+									@batchId			= NULL,
+									@post				= 0,
+									@recap				= 0,
+									@param				= @intInvoiceId,
+									@userId				= @intUserId,
+									@beginDate			= NULL,
+									@endDate			= NULL,
+									@beginTransaction	= NULL,
+									@endTransaction		= NULL,
+									@exclude			= NULL,
+									@successfulCount	= @successfulCount OUTPUT,
+									@invalidCount		= @invalidCount OUTPUT,
+									@success			= @success OUTPUT,
+									@batchIdUsed		= @batchIdUsed OUTPUT,
+									@recapId			= @recapId OUTPUT,
+									@transType			= N'all',
+									@accrueLicense		= 0,
+									@raiseError			= 1
+						END
+						IF ISNULL(@intInvoiceId, 0) > 0
+							EXEC [dbo].[uspARDeleteInvoice] @intInvoiceId, @intUserId
 						EXEC [dbo].[uspSCUpdateStatus] @intTicketId, 1;
 					END
+				ELSE
+					BEGIN
+						IF @intEntityId = 0
+							BEGIN
+								SELECT @intInventoryTransferId = ICTD.intInventoryTransferId, @strTransactionId = ICTD.strTransferNo, @intMatchTicketId = SC.intMatchTicketId
+								FROM vyuICGetInventoryTransferDetail  ICTD
+								LEFT JOIN tblSCTicket SC ON SC.strTicketNumber = ICTD.strSourceNumber AND SC.intTicketId = ICTD.intSourceId
+								WHERE intSourceId = @intTicketId
+
+								IF @intMatchTicketId > 0
+								BEGIN
+									SET @ErrorMessage = 'Undistribute failed, this ticket is using in other ticket';
+									RAISERROR(@ErrorMessage, 11, 1);
+								END 
+
+								IF @intInventoryTransferId > 0
+									EXEC [dbo].[uspICPostInventoryTransfer] 0, 0, @strTransactionId, @intUserId;	
+									EXEC [dbo].[uspICDeleteInventoryTransfer] @intInventoryTransferId, @intUserId	
+
+								EXEC [dbo].[uspSCUpdateStatus] @intTicketId, 1;
+							END
 				
-				IF @intEntityId > 0
+						IF @intEntityId > 0
 					BEGIN
 						CREATE TABLE #tmpItemShipmentIds (
 							[intInventoryShipmentId] [INT] PRIMARY KEY,
@@ -232,6 +267,7 @@ BEGIN TRY
 						DEALLOCATE intListCursor 
 						EXEC [dbo].[uspSCUpdateStatus] @intTicketId, 1;
 					END
+				END
 			END
 		
 		--Audit Log
