@@ -97,7 +97,8 @@ BEGIN
 							WHEN CalculatedCharges.intContractDetailId = ShipmentItem.intLineNo THEN 1
 							WHEN CalculatedCharges.strChargesLink = ShipmentItem.strChargesLink THEN 1 
 							ELSE 0 
-						END					LEFT JOIN (
+						END					
+				LEFT JOIN (
 					SELECT  dblTotalStockUnit = SUM(dbo.fnCalculateStockUnitQty(ShipmentItem.dblQuantity, ItemUOM.dblUnitQty))
 							,ShipmentItem.intOrderId 
 							,ShipmentItem.intLineNo
