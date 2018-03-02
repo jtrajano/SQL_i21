@@ -46,7 +46,49 @@ namespace iRely.Inventory.BusinessLayer
 
             valid = SetText(record, "Line of Business", e => entity.strLineOfBusiness = e, required: true);
             var lu = GetFieldValue(record, "Sales Person Id");
-            valid = SetIntLookupId<tblEMEntity>(record, "Sales Person Id", e => e.strName == lu, e => e.intEntityId, e => entity.intEntityId = e, required: true);
+            //valid = GetLookUpId<vyuEMSalesperson>(record, "Sales Person Id", e => e.strSalespersonId == lu, e => e.intEntityId, e => entity.intEntityId = e, required: true);
+            var sqlParam = new SqlParameter("@strSalespersonId", lu);
+            var query = "SELECT intEntityId, strSalespersonId, strName FROM vyuEMSalesperson WHERE strSalespersonId = @strSalespersonId";
+            IEnumerable<vyuEMSalesperson> salesReps = Context.Database.SqlQuery<vyuEMSalesperson>(query, sqlParam);
+            try
+            {
+                vyuEMSalesperson salesRep = salesReps.FirstOrDefault();
+
+                if (salesRep != null)
+                    entity.intEntityId = salesRep.intEntityId;
+                else
+                {
+                    var msg = new ImportDataMessage()
+                    {
+                        Column = "Sales Person Id",
+                        Row = record.RecordNo,
+                        Type = Constants.TYPE_ERROR,
+                        Status = Constants.STAT_FAILED,
+                        Action = Constants.ACTION_SKIPPED,
+                        Exception = null,
+                        Value = lu,
+                        Message = $"Can't find Sales Person Id: {lu}.",
+                    };
+                    ImportResult.AddError(msg);
+                    valid = false;
+                }
+            }
+            catch (Exception)
+            {
+                var msg = new ImportDataMessage()
+                {
+                    Column = "Sales Person Id",
+                    Row = record.RecordNo,
+                    Type = Constants.TYPE_ERROR,
+                    Status = Constants.STAT_FAILED,
+                    Action = Constants.ACTION_SKIPPED,
+                    Exception = null,
+                    Value = lu,
+                    Message = $"Can't find Sales Person Id: {lu}.",
+                };
+                ImportResult.AddError(msg);
+                valid = false;
+            }
 
             SetText(record, "Sic Code", e => entity.strSICCode = e);
             SetBoolean(record, "Visible on Web", e => entity.ysnVisibleOnWeb = e);
@@ -92,7 +134,7 @@ namespace iRely.Inventory.BusinessLayer
                         {
                             Column = "Sales Person Id",
                             Row = Record.RecordNo,
-                            Type = Constants.TYPE_WARNING,
+                            Type = Constants.TYPE_ERROR,
                             Status = Constants.STAT_FAILED,
                             Action = Constants.ACTION_SKIPPED,
                             Exception = null,
@@ -109,7 +151,7 @@ namespace iRely.Inventory.BusinessLayer
                     {
                         Column = "Sales Person Id",
                         Row = Record.RecordNo,
-                        Type = Constants.TYPE_WARNING,
+                        Type = Constants.TYPE_ERROR,
                         Status = Constants.STAT_FAILED,
                         Action = Constants.ACTION_SKIPPED,
                         Exception = null,

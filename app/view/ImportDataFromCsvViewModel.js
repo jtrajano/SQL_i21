@@ -17,9 +17,9 @@ Ext.define('Inventory.view.ImportDataFromCsvViewModel', {
     extend: 'Ext.app.ViewModel',
     alias: 'viewmodel.icimportdatafromcsv',
 
-    // data: {
-    //     ysnAllowDuplicates: true,
-    //     ysnOverwrite: true,
-    //     ysnVerbose: false
-    // }
+    data: {
+        ysnAllowDuplicates: false,
+        ysnOverwrite: true,
+        ysnVerbose: false
+    }
 });

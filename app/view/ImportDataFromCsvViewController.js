@@ -46,6 +46,12 @@ Ext.define('Inventory.view.ImportDataFromCsvViewController', {
         var context = me.setupContext();
         context.data.load();
     },
+
+    onOverwriteEnabled: function(field, newValue, oldValue, fn, length) {
+        var me = this;
+        if(newValue === true)
+            me.getViewModel().setData({ ysnAllowDuplicates: false});
+    },
     
     setupContext: function(options) {
         var me = this,
@@ -130,6 +136,9 @@ Ext.define('Inventory.view.ImportDataFromCsvViewController', {
             },
             "icimportdatafromcsv #btnDownload": {
                 click: this.onDownloadTemplate
+            },
+            "icimportdatafromcsv #chbOverwrite": {
+                change: this.onOverwriteEnabled    
             }
         });
     },
