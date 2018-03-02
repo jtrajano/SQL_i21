@@ -206,8 +206,8 @@ SELECT
 		,intSourceType		 		= 1 -- Source type for scale is 1 
 		,strSourceScreenName		= 'Scale Ticket'
 		,strChargesLink				= 'CL-'+ CAST (LI.intId AS nvarchar(MAX)) 
-		,dblGross					= SC.dblGrossUnits
-		,dblNet						= SC.dblNetUnits
+		,dblGross					= (LI.dblQty / SC.dblNetUnits) * SC.dblGrossUnits
+		,dblNet						= LI.dblQty
 FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId INNER JOIN dbo.tblICItemUOM ItemUOM	ON ItemUOM.intItemId = SC.intItemId 
 		AND ItemUOM.intItemUOMId = @intTicketItemUOMId
 		INNER JOIN dbo.tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
