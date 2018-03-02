@@ -80,10 +80,10 @@ BEGIN TRY
 
 		SELECT @dblConvertedQty =	dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,@intToItemUOMId,@dblQty)
 
-		IF ISNULL(@dblConvertedQty,0) = 0
-		BEGIN
-			RAISERROR('UOM does not exist.',16,1)
-		END
+		--IF ISNULL(@dblConvertedQty,0) = 0
+		--BEGIN
+		--	RAISERROR('UOM does not exist.',16,1)
+		--END
 
 		EXEC	uspCTUpdateSequenceBalance
 				@intContractDetailId	=	@intContractDetailId,
