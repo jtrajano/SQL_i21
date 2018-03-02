@@ -9,6 +9,8 @@ SELECT
 	,intLFutOptTransactionId
 	,intSFutOptTransactionId
 	,isnull(dblMatchQty,0.0) dblMatchQty
+	,intLFutOptTransactionHeaderId
+	,intSFutOptTransactionHeaderId
 	,dtmLTransDate
 	,dtmSTransDate
 	,isnull(dblLPrice,0.0) as dblLPrice
@@ -33,6 +35,8 @@ FROM
 		,psd.intLFutOptTransactionId
 		,psd.intSFutOptTransactionId
 		,isnull(psd.dblMatchQty,0) as dblMatchQty
+		,ot.intFutOptTransactionHeaderId as intLFutOptTransactionHeaderId
+		,ot1.intFutOptTransactionHeaderId as intSFutOptTransactionHeaderId
 		,ot.dtmTransactionDate dtmLTransDate
 		,ot1.dtmTransactionDate dtmSTransDate
 		,isnull(ot.dblPrice,0) dblLPrice
