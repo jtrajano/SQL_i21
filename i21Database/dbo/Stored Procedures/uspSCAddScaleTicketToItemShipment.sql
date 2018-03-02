@@ -170,7 +170,7 @@ BEGIN
 												 AND CNT.intFXPriceUOMId IS NOT NULL 
 											THEN 
 												dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,CNT.intFXPriceUOMId,1)
-											ELSE 1
+											ELSE ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,ISNULL(CNT.intPriceItemUOMId,CNT.intAdjItemUOMId),1),1)
 										END 
 		,intWeightUOMId				= SC.intItemUOMIdFrom
 		,intSubLocationId			= SC.intSubLocationId

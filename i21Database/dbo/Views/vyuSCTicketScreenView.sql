@@ -211,7 +211,7 @@
 	,SCT.intConcurrencyId
 	,SCT.strOfflineGuid
 	,SO.strSalesOrderNumber
-	,SO.strLocationName as strSOCompanyLocation
+	,SMC.strLocationName as strSOCompanyLocation
 	,SO.intCompanyLocationId AS intSOCompanyLocation
 	,SO.intSalesOrderId
   FROM tblSCTicket SCT
@@ -276,5 +276,6 @@
 			LEFT JOIN tblEMEntityLocation VEL ON VEL.intEntityLocationId = LD.intVendorEntityLocationId
 			LEFT JOIN tblEMEntityLocation CEL ON CEL.intEntityLocationId = LD.intCustomerEntityLocationId
 	) LGD on LGD.intLoadId = SCT.intLoadId AND LGD.intTicketId = SCT.intTicketId
-	LEFT JOIN vyuARGetSalesOrdersToWeight SO on SO.intSalesOrderDetailId = SCT.intSalesOrderDetailId
+	LEFT JOIN tblSOSalesOrderDetail SOD on SOD.intSalesOrderDetailId = SCT.intSalesOrderDetailId
+	LEFT JOIN tblSOSalesOrder SO on SO.intSalesOrderId = SOD.intSalesOrderId
 	
