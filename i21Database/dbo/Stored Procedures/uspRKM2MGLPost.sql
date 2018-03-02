@@ -13,7 +13,7 @@ BEGIN TRY
 	DECLARE @strBatchId NVARCHAR(100)
 	DECLARE @ErrMsg NVARCHAR(Max)
 
-BEGIN TRANSACTION
+
 
 DECLARE @intCommodityId int
 DECLARE @dtmCurrenctGLPostDate DATETIME
@@ -27,13 +27,8 @@ IF (@dtmGLReverseDate IS NULL)
 BEGIN
 RAISERROR('Please save the record before posting.',16,1)
 END
-SELECT @dtmCurrenctGLPostDate, @dtmPrviousGLReverseDate
-IF (@dtmCurrenctGLPostDate >= @dtmPrviousGLReverseDate)
-BEGIN
-RAISERROR('Current date cannot lessthan the previous post date',16,1)
-END
 
-IF (@dtmCurrenctGLPostDate >= @dtmPrviousGLReverseDate)
+IF (convert(datetime,@dtmCurrenctGLPostDate) <= convert(datetime,@dtmPrviousGLReverseDate))
 BEGIN
 RAISERROR('Current date cannot lessthan the previous post date',16,1)
 END
@@ -67,6 +62,7 @@ RAISERROR('Unrealized Gain On Inventory Intransit IOS cannot be blank',16,1)
 IF EXISTS(SELECT * FROM tblRKCompanyPreference WHERE ISNULL(intUnrealizedLossOnInventoryIntransitIOSId,0) = 0)
 RAISERROR('Unrealized Gain On Inventory Intransit cannot IOS be blank',16,1)
 
+BEGIN TRANSACTION
 	IF (@batchId IS NULL)
 	BEGIN
 		EXEC uspSMGetStartingNumber 3, @batchId OUT
@@ -130,7 +126,7 @@ RAISERROR('Unrealized Gain On Inventory Intransit cannot IOS be blank',16,1)
 	WHERE intM2MInquiryId = @intM2MInquiryId
 
 	EXEC dbo.uspGLBookEntries @GLEntries,1 --@ysnPost
-
+	SElect 1
 	UPDATE tblRKM2MPostRecap SET ysnIsUnposted=1,strBatchId=@strBatchId WHERE intM2MInquiryId = @intM2MInquiryId
 	UPDATE tblRKM2MInquiry SET ysnPost=1,dtmPostedDateTime=getdate(),strBatchId=@batchId WHERE intM2MInquiryId = @intM2MInquiryId
 
