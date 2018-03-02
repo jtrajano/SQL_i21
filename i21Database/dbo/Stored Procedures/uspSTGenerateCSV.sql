@@ -65,7 +65,7 @@ BEGIN
 				[strMultiPackIndicator] nvarchar(1) COLLATE Latin1_General_CI_AS NULL,
 				[intMultiPackRequiredQuantity] int NULL,
 				[dblMultiPackDiscountAmount] numeric(10, 2) NULL,
-				[strRetailerFundedDIscountName] nvarchar(20) COLLATE Latin1_General_CI_AS NULL,
+				[strRetailerFundedDIscountName] nvarchar(150) COLLATE Latin1_General_CI_AS NULL,
 				[dblRetailerFundedDiscountAmount] numeric(10, 2) NULL,
 				[strMFGDealNameONE] nvarchar(20) COLLATE Latin1_General_CI_AS NULL,
 				[dblMFGDealDiscountAmountONE] numeric(10, 2) NULL,
@@ -198,8 +198,8 @@ BEGIN
 								, CASE WHEN strTrpPaycode = 'CASH' AND dblTrlQty >= 2 THEN 'Y' ELSE 'N' END as strMultiPackIndicator
 								, CASE WHEN strTrpPaycode = 'CASH' THEN dblTrlQty ELSE 0 END as intMultiPackRequiredQuantity
 								, CASE WHEN strTrpPaycode = 'CASH' AND dblTrlQty >= 2 THEN 0.50 ELSE 0 END as dblMultiPackDiscountAmount
-								, CASE WHEN strTrpPaycode = 'CASH' AND dblTrlQty >= 2 THEN 'Sale' ELSE '' END as strRetailerFundedDiscountName
-								, CASE WHEN strTrpPaycode = 'CASH' AND dblTrlQty >= 2 THEN 0.50 ELSE 0 END as dblRetailerFundedDiscountAmount
+								, CRP.strProgramName as strRetailerFundedDiscountName
+								, CRP.dblManufacturerBuyDownAmount as dblRetailerFundedDiscountAmount
 								, CASE WHEN strTrpPaycode = 'COUPONS' THEN 'Coupon' ELSE '' END as strMFGDealNameONE
 								, CASE WHEN strTrpPaycode = 'COUPONS' THEN 0.50 ELSE 0 END as dblMFGDealDiscountAmountONE
 								, '' as strMFGDealNameTWO
@@ -218,6 +218,7 @@ BEGIN
 				JOIN tblSTStore ST ON ST.intStoreId = TR.intStoreId
 				JOIN tblSTRetailAccount STRT ON STRT.intStoreId = ST.intStoreId AND STRT.intEntityId = @intVendorId
 				JOIN tblEMEntity EM ON EM.intEntityId = @intVendorId
+				LEFT JOIN vyuSTCigaretteRebatePrograms CRP ON TR.strTrlUPC = CRP.strLongUPCCode
 				WHERE TR.intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)) 
 				AND CAST(TR.dtmDate as DATE) >= @dtmBeginningDate 
 				AND CAST(TR.dtmDate as DATE) <= @dtmEndingDate 
@@ -278,16 +279,19 @@ BEGIN
 								, 0 as intManufacturerMultipackQuantity
 								, 0 as dblManufacturerMultipackDiscountAmount
 								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN strTrpPaycode ELSE '' END as strManufacturerPromotionDescription
-								, '' as strManufacturerBuydownDescription
-								, 0 as dblManufacturerBuydownAmount
+								, CRP.strProgramName as strManufacturerBuydownDescription
+								, CRP.dblManufacturerBuyDownAmount as dblManufacturerBuydownAmount
 								, '' as strManufacturerMultiPackDescription
 								, TR.strTrLoyaltyProgramTrloAccount as strAccountLoyaltyIDNumber
 								, TR.strTrLoyaltyProgramProgramID as strCouponDescription
 					FROM tblSTTranslogRebates TR
 					JOIN tblSTStore ST ON ST.intStoreId = TR.intStoreId
+					LEFT JOIN vyuSTCigaretteRebatePrograms CRP ON TR.strTrlUPC = CRP.strLongUPCCode
 					WHERE TR.intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)) 
-					AND CAST(TR.dtmDate as DATE) >= @dtmBeginningDate
-					AND CAST(TR.dtmDate as DATE) <= @dtmEndingDate
+					AND CAST(TR.dtmDate AS DATE) >= @dtmBeginningDate
+					AND CAST(TR.dtmDate AS DATE) <= @dtmEndingDate
+					--AND CAST(CRP.dtmStartDate AS DATE) >= @dtmBeginningDate
+					--AND CAST(CRP.dtmEndDate as DATE) <= @dtmEndingDate
 					AND ysnSubmitted = 0
 					AND strTrLineType = 'plu'
 					AND strTrlDept COLLATE DATABASE_DEFAULT IN (SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId IN (SELECT Item FROM dbo.fnSTSeparateStringToColumns(ST.strDepartment, ',')))
