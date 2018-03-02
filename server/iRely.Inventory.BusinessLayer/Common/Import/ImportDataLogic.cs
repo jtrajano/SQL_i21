@@ -237,6 +237,11 @@ namespace iRely.Inventory.BusinessLayer
                                 return;
                             }
                         }
+                        else
+                        {
+                            Entities.Add(entity);
+                            AddSuccessLog(entity, record);
+                        }
                     }
                 }
                 else
@@ -256,7 +261,7 @@ namespace iRely.Inventory.BusinessLayer
                                 if (context.Entry<T>(entity).State == EntityState.Unchanged)
                                 {
                                     context.Entry<T>(entity).State = EntityState.Modified;
-                                    AddSuccessLog(entity, record, false);
+                                    AddSuccessLog(entity, record, false); 
                                 }
                             }
                         }
