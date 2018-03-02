@@ -2842,6 +2842,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         if (ysnCalculatedInLot === 1) {
             if (record.get('dblGross') === 0 && record.get('dblNet') === 0) {
+                totalGross = i21.ModuleMgr.Inventory.roundDecimalFormat(totalGross, 6);
+                totalNet = i21.ModuleMgr.Inventory.roundDecimalFormat(totalNet, 6);
+
                 record.set('dblGross', totalGross);
                 record.set('dblNet', totalNet);
             }
@@ -2871,6 +2874,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }
             totalGross = Ext.isNumeric(totalGross) ? totalGross : 0.00;
             totalNet = totalGross;
+
+            totalGross = i21.ModuleMgr.Inventory.roundDecimalFormat(totalGross, 6);
+            totalNet = i21.ModuleMgr.Inventory.roundDecimalFormat(totalNet, 6);
 
             record.set('dblGross', totalGross);
             record.set('dblNet', totalNet);
@@ -3646,8 +3652,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 var dblOriginalGross = currentReceiptItem.get('dblGrossBeforeEdit') ? currentReceiptItem.get('dblGrossBeforeEdit') : currentReceiptItem.get('dblGross');
                 var dblOriginalNet = currentReceiptItem.get('dblNetBeforeEdit') ? currentReceiptItem.get('dblNetBeforeEdit') : currentReceiptItem.get('dblNet');
 
-                currentReceiptItem.set('dblGross', i21.ModuleMgr.Inventory.roundDecimalFormat(dblProposedQty * (dblOriginalGross / dblQty), 2));
-                currentReceiptItem.set('dblNet', i21.ModuleMgr.Inventory.roundDecimalFormat(dblProposedQty * (dblOriginalNet / dblQty), 2));
+                currentReceiptItem.set('dblGross', i21.ModuleMgr.Inventory.roundDecimalFormat(dblProposedQty * (dblOriginalGross / dblQty), 6));
+                currentReceiptItem.set('dblNet', i21.ModuleMgr.Inventory.roundDecimalFormat(dblProposedQty * (dblOriginalNet / dblQty), 6));
                 // ic.utils.ajax({
                 //     url: './Inventory/api/InventoryReceipt/CalculateGrossQtyRatio',
                 //     params: {
@@ -5862,8 +5868,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     //Set default value for Gross/Net UOM
                                     newReceiptItem.set('intWeightUOMId', order.get('intItemUOMId'));
                                     newReceiptItem.set('strWeightUOM', order.get('strUnitMeasure'));
-                                    newReceiptItem.set('dblGross', order.get('dblQtyToReceive'));
-                                    newReceiptItem.set('dblNet', order.get('dblQtyToReceive'));
+                                    newReceiptItem.set('dblGross', i21.ModuleMgr.Inventory.roundDecimalFormat(order.get('dblQtyToReceive'), 6));
+                                    newReceiptItem.set('dblNet', i21.ModuleMgr.Inventory.roundDecimalFormat(order.get('dblQtyToReceive'), 6));
                                     newReceiptItem.set('dblWeightUOMConvFactor', order.get('dblItemUOMConvFactor'));
 
                                     //Calculate Line Total
@@ -5873,11 +5879,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                                 if (order.get('intWeightUOMId') !== null) {
                                     if (order.get('dblGross') === 0 && order.get('dblNet') !== 0) {
-                                        newReceiptItem.set('dblGross', order.get('dblNet'));
+                                        newReceiptItem.set('dblGross', i21.ModuleMgr.Inventory.roundDecimalFormat(order.get('dblNet'), 6));
                                     }
 
                                     else if (order.get('dblGross') !== 0 && order.get('dblNet') === 0) {
-                                        newReceiptItem.set('dblNet', order.get('dblGross'));
+                                        newReceiptItem.set('dblNet', i21.ModuleMgr.Inventory.roundDecimalFormat(order.get('dblGross'), 6));
                                     }
 
                                     else if (order.get('dblGross') === 0 && order.get('dblNet') === 0) {
