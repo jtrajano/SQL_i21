@@ -20,6 +20,8 @@ DECLARE @COST_METHOD_Per_Unit AS NVARCHAR(50) = 'Per Unit'
 		,@OWNERSHIP_TYPE_ConsignedPurchase AS INT = 3
 		,@OWNERSHIP_TYPE_ConsignedSale AS INT = 4
 
+		,@SHIPMENT_ITEM_TYPE AS NVARCHAR(50) = 'Kit Item'
+
 DECLARE	-- Shipment Types
 		@SHIPMENT_TYPE_SalesContract AS INT = 1  --Sales Contract
 		,@SHIPMENT_TYPE_SalesOrder AS INT = 2  --Sales Order
@@ -56,7 +58,15 @@ BEGIN
 								 WHEN Shipment.intOrderType <> @SHIPMENT_TYPE_SalesContract THEN 1
 								 ELSE 0
 							END 					
-					AND ISNULL(ShipmentItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own			
+					AND ISNULL(ShipmentItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
+				INNER JOIN dbo.tblICItem Item 
+					ON Item.intItemId = ShipmentItem.intItemId
+					-- Do not include Kit Components when calculating the other charges. 
+					AND 1 = 
+						CASE	
+							WHEN ShipmentItem.strItemType = @SHIPMENT_ITEM_TYPE THEN 0
+							ELSE 1
+						END
 				INNER JOIN dbo.tblICItemUOM ItemUOM	
 					ON ItemUOM.intItemUOMId = ISNULL(ShipmentItem.intWeightUOMId, ShipmentItem.intItemUOMId) 
 				INNER JOIN (
@@ -88,10 +98,18 @@ BEGIN
 					ON ShipmentItem.intInventoryShipmentId = CalculatedCharges.intInventoryShipmentId
 				LEFT JOIN (
 							SELECT	dblTotalUnits = SUM(ISNULL(ShipmentItem.dblQuantity, 0))
-							,ShipmentItem.intInventoryShipmentId 
-							,ShipmentItem.strChargesLink 
+									,ShipmentItem.intInventoryShipmentId 
+									,ShipmentItem.strChargesLink 
 					FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentItem ShipmentItem
 								ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
+							INNER JOIN dbo.tblICItem Item 
+								ON Item.intItemId = ShipmentItem.intItemId
+								-- Do not include Kit Components when calculating the other charges. 
+								AND 1 = 
+									CASE	
+										WHEN ShipmentItem.strItemType = @SHIPMENT_ITEM_TYPE THEN 0
+										ELSE 1
+									END
 							INNER JOIN dbo.tblICItemUOM ItemUOM
 								ON ItemUOM.intItemUOMId = ISNULL(ShipmentItem.intWeightUOMId, ShipmentItem.intItemUOMId) 
 					WHERE	Shipment.intInventoryShipmentId = @intInventoryShipmentId
