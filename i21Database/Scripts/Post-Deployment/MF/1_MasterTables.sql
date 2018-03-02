@@ -3349,6 +3349,8 @@ BEGIN
 		,0
 END
 GO
-
-
+UPDATE tblMFCompanyPreference
+SET intLotDueDays = 0
+Where intLotDueDays IS NULL
+GO
 

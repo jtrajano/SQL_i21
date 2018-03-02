@@ -28,11 +28,14 @@ BEGIN
 		,@dtmManufacturedDate DATETIME
 		,@strLifeTimeType NVARCHAR(50)
 		,@intLifeTime INT
+		,@intLotDueDays INT
+		,@dtmDueDate DATETIME
 
 	SELECT @ysnPickByLotCode = ysnPickByLotCode
 		,@intLotCodeStartingPosition = intLotCodeStartingPosition
 		,@intLotCodeNoOfDigits = intLotCodeNoOfDigits
 		,@intDamagedStatusId = intDamagedStatusId
+		,@intLotDueDays = intLotDueDays
 	FROM tblMFCompanyPreference
 
 	SELECT @dtmCurrentDateTime = GETDATE()
@@ -202,7 +205,7 @@ BEGIN
 		,@intSplitFromLotId INT
 		,@ysnBonded BIT
 		,@strLotReceiptNumber NVARCHAR(50)
-		,@dblTareWeight numeric(38,20)
+		,@dblTareWeight NUMERIC(38, 20)
 
 	SELECT @strLotNumber = strLotNumber
 		,@strCondition = strCondition
@@ -246,9 +249,15 @@ BEGIN
 			,@strWarehouseRefNo = LI.strWarehouseRefNo
 			,@strReceiptNumber = LI.strReceiptNumber
 			,@dtmReceiptDate = dtmReceiptDate
-			,@dblTareWeight=dblTareWeight
+			,@dblTareWeight = dblTareWeight
+			,@dtmDueDate = dtmDueDate
 		FROM tblMFLotInventory LI
 		WHERE LI.intLotId = @intSplitFromLotId
+
+		IF @dtmDueDate IS NULL
+		BEGIN
+			SELECT @dtmDueDate = DateAdd(dd, @intLotDueDays, @dtmCurrentDateTime)
+		END
 
 		SELECT @ysnRequireCustomerApproval = ysnRequireCustomerApproval
 		FROM tblICItem
@@ -316,8 +325,9 @@ BEGIN
 			,strWarehouseRefNo
 			,strReceiptNumber
 			,dtmReceiptDate
-			,dtmLastMoveDate 
+			,dtmLastMoveDate
 			,dblTareWeight
+			,dtmDueDate
 			)
 		SELECT @intLotId
 			,@intBondStatusId
@@ -327,6 +337,7 @@ BEGIN
 			,@dtmReceiptDate
 			,@dtmCurrentDateTime
 			,@dblTareWeight
+			,@dtmDueDate
 	END
 	ELSE
 	BEGIN
@@ -398,7 +409,7 @@ BEGIN
 							)
 				ELSE intBondStatusId
 				END
-			,dtmLastMoveDate =@dtmCurrentDateTime
+			,dtmLastMoveDate = @dtmCurrentDateTime
 		WHERE intLotId = @intLotId
 	END
 
@@ -407,6 +418,6 @@ BEGIN
 	WHERE intInventoryReceiptId = @intInventoryReceiptId
 
 	DELETE
-	FROM tblMFLotTareWeight 
+	FROM tblMFLotTareWeight
 	WHERE intInventoryReceiptId = @intInventoryReceiptId
 END
