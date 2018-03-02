@@ -605,7 +605,7 @@ BEGIN TRY
 				, tblEMEntityLocation.strCity AS strOriginCity
 				, OriginCounty.strCounty AS strOriginCounty
 				, tblEMEntityLocation.strState AS strOriginState
-				, tblSMCompanyLocation.strLocationName AS strCustomerName
+				, tblSMCompanySetup.strCompanyName AS strCustomerName
 				, tblSMCompanySetup.strEin AS strCustomerFEIN
 				--, NULL AS strAccountStatusCode
 				, tblSMShipVia.strShipVia
