@@ -33,6 +33,13 @@ BEGIN
 	WHERE intAttributeId = @intBlendAttributeId
 		AND strAttributeValue <> ''
 
+	If @strBlendAttributeValue is null or @strBlendAttributeValue=''
+	Begin
+		Select @strBlendAttributeValue=''
+		Select @strBlendAttributeValue=@strBlendAttributeValue+strCategoryCode+','
+		from tblICCategory
+	End
+
 	SELECT @strPackagingCategory = strAttributeValue
 	FROM tblMFManufacturingProcessAttribute
 	WHERE intAttributeId = 46

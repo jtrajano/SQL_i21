@@ -14,6 +14,14 @@ BEGIN
 	SELECT @strBlendAttributeValue = strAttributeValue
 	FROM tblMFManufacturingProcessAttribute
 	WHERE intAttributeId = @intBlendAttributeId
+	AND strAttributeValue <> ''
+
+	If @strBlendAttributeValue is null or @strBlendAttributeValue=''
+	Begin
+		Select @strBlendAttributeValue=''
+		Select @strBlendAttributeValue=@strBlendAttributeValue+strCategoryCode+','
+		from tblICCategory
+	End
 
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
