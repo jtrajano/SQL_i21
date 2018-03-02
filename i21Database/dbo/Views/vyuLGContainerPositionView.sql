@@ -9,8 +9,8 @@ FROM (
 		,CH.strContractNumber
 		,CH.strCustomerContract
 		,strEntityName = EY.strName
-		,IC.strContractItemName
-		--,strItemDescription = I.strDescription
+		,I.strItemNo
+		,strItemDescription = IC.strContractItemName
 		,strContractBasis = CB.strDescription
 		,strFixationStatus = CASE MAX(PT.strPricingType)
 			WHEN 'Priced'
@@ -87,7 +87,7 @@ FROM (
 		) RSamp ON RSamp.intContractDetailId = CD.intContractDetailId
 		AND RSamp.intItemId = CD.intItemId
 	WHERE ISNULL(LC.ysnRejected, 0) = 0
-	GROUP BY IC.intItemContractId,IC.strContractItemName,CH.strContractNumber,CH.intContractHeaderId,CH.strCustomerContract
+	GROUP BY IC.intItemContractId,IC.strContractItemName,I.strItemNo,CH.strContractNumber,CH.intContractHeaderId,CH.strCustomerContract
 		,Pos.strPosition,EY.strName,CB.strDescription,CH.dblQuantity
 		,CH.strInternalComment,CD.dblBasis, CD.dtmStartDate, CD.dtmEndDate
 	) tbl
