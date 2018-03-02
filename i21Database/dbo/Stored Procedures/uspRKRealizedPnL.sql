@@ -9,7 +9,7 @@ SET @dtmFromDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromDate, 110), 11
 SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
 
 SELECT convert(int,DENSE_RANK() OVER(ORDER BY CONVERT(DATETIME,'01 '+strFutureMonth))) RowNum, strFutMarketName+ ' - ' + strFutureMonth + ' - ' + strName MonthOrder,
-dblGrossPL+dblFutCommission  AS dblNetPL,dblGrossPL,
+dblGrossPL - dblFutCommission  AS dblNetPL,dblGrossPL,
 intMatchFuturesPSHeaderId ,
 intMatchFuturesPSDetailId ,
 intFutOptTransactionId ,
@@ -23,7 +23,7 @@ dblSPrice,
 strLBrokerTradeNo,
 strSBrokerTradeNo,
 dblContractSize,
-dblFutCommission,
+dblFutCommission * -1 as dblFutCommission,
 strFutMarketName,
 strFutureMonth,
 intMatchNo ,
@@ -36,10 +36,10 @@ intFutureMarketId ,
 intCommodityId ,
 ysnExpired ,intFutureMonthId
  from (
-SELECT *,-dblFutCommission1/ case when ComSubCurrency = 'true' then ComCent else 1 end as dblFutCommission FROM(  
+SELECT * FROM(  
 SELECT   
 ((dblSPrice - dblLPrice)*dblMatchQty*dblContractSize) as dblGrossPL1,((dblSPrice - dblLPrice)*dblMatchQty*dblContractSize)/ case when ysnSubCurrency = 'true' then intCent else 1 end as dblGrossPL,* FROM  
-(  
+( 
 SELECT psh.intMatchFuturesPSHeaderId,  
     psd.intMatchFuturesPSDetailId,  
     ot.intFutOptTransactionId,    
@@ -53,7 +53,8 @@ SELECT psh.intMatchFuturesPSHeaderId,
     ot.strInternalTradeNo strLBrokerTradeNo,  
     ot1.strInternalTradeNo strSBrokerTradeNo,  
     fm.dblContractSize dblContractSize,0 as intConcurrencyId,  
-    CASE WHEN bc.intFuturesRateType= 2 then isnull(bc.dblFutCommission,0)* isnull(psd.dblMatchQty,0)*2 else  isnull(bc.dblFutCommission,0)* isnull(psd.dblMatchQty,0) end as dblFutCommission1,  
+    --CASE WHEN bc.intFuturesRateType= 2 then isnull(bc.dblFutCommission,0)* isnull(psd.dblMatchQty,0)*2 else  isnull(bc.dblFutCommission,0)* isnull(psd.dblMatchQty,0) end as dblFutCommission1,  
+	psd.dblFutCommission,
     fm.strFutMarketName,  
     om.strFutureMonth,  
     psh.intMatchNo,  
@@ -62,7 +63,7 @@ SELECT psh.intMatchFuturesPSHeaderId,
     acc.strAccountNumber,  
     icc.strCommodityCode,  
     sl.strLocationName,ot.intFutureMonthId,ot.intCommodityId,ot.intFutureMarketId,
-	c.intCurrencyID as intCurrencyId,c.intCent,c.ysnSubCurrency,ysnExpired,cur.intCent ComCent,cur.ysnSubCurrency ComSubCurrency                  
+	c.intCurrencyID as intCurrencyId,c.intCent,c.ysnSubCurrency,ysnExpired,c.intCent ComCent,c.ysnSubCurrency ComSubCurrency                  
  FROM tblRKMatchFuturesPSHeader psh  
  JOIN tblRKMatchFuturesPSDetail psd on psd.intMatchFuturesPSHeaderId=psh.intMatchFuturesPSHeaderId   
  JOIN tblRKFutOptTransaction ot on psd.intLFutOptTransactionId= ot.intFutOptTransactionId  
@@ -74,9 +75,9 @@ SELECT psh.intMatchFuturesPSHeaderId,
  JOIN tblRKFutureMarket fm on ot.intFutureMarketId=fm.intFutureMarketId  
  JOIN tblSMCurrency c on c.intCurrencyID=fm.intCurrencyId
  JOIN tblRKFutOptTransaction ot1 on psd.intSFutOptTransactionId= ot1.intFutOptTransactionId  
- JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId=psh.intFutureMarketId AND psh.intBrokerageAccountId=bc.intBrokerageAccountId   
-  JOIN tblSMCurrency cur on cur.intCurrencyID=bc.intFutCurrencyId
- JOIN tblRKBrokerageAccount ba on bc.intBrokerageAccountId=ba.intBrokerageAccountId AND ot.intInstrumentTypeId =1
+ --JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId=psh.intFutureMarketId AND psh.intBrokerageAccountId=bc.intBrokerageAccountId   
+ -- JOIN tblSMCurrency cur on cur.intCurrencyID=bc.intFutCurrencyId
+ --JOIN tblRKBrokerageAccount ba on bc.intBrokerageAccountId=ba.intBrokerageAccountId AND ot.intInstrumentTypeId =1
  WHERE ot.intCommodityId= CASE WHEN ISNULL(@intCommodityId,0)=0 then ot.intCommodityId else @intCommodityId end
 	AND ot.intFutureMarketId= CASE WHEN ISNULL(@intFutureMarketId,0)=0 then ot.intFutureMarketId else @intFutureMarketId end
 	AND CONVERT(DATETIME,CONVERT(VARCHAR(10),psh.dtmMatchDate,110),110) BETWEEN @dtmFromDate AND @dtmToDate
