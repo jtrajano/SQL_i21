@@ -24,6 +24,8 @@ BEGIN
 			,@OWNERSHIP_TYPE_ConsignedPurchase AS INT = 3
 			,@OWNERSHIP_TYPE_ConsignedSale AS INT = 4
 
+			,@SHIPMENT_ITEM_TYPE AS NVARCHAR(50) = 'Kit Item'
+
 	DECLARE @strItemNo AS NVARCHAR(50)
 			,@strUnitMeasure AS NVARCHAR(50)
 			,@intItemId AS INT
@@ -162,10 +164,10 @@ BEGIN
 			-- Do not include Kit Components when calculating the other charges. 
 			AND 1 = 
 				CASE	
-					WHEN Item.strType <> 'Bundle' AND ShipmentItem.strItemType = 'Kit' THEN 0
+					WHEN ShipmentItem.strItemType = @SHIPMENT_ITEM_TYPE THEN 0
 					ELSE 1
 				END
-
+			
 
 	-- Check if the calculated values are valid. 
 	BEGIN 
@@ -320,7 +322,7 @@ BEGIN
 			-- Do not include Kit Components when calculating the other charges. 
 			AND 1 = 
 				CASE	
-					WHEN Item.strType <> 'Bundle' AND ShipmentItem.strItemType = 'Kit' THEN 0
+					WHEN ShipmentItem.strItemType = @SHIPMENT_ITEM_TYPE THEN 0
 					ELSE 1
 				END
 END 
