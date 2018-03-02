@@ -1177,3 +1177,11 @@ UPDATE tblQMSample
 SET ysnAdjustInventoryQtyBySampleQty = 0
 WHERE ysnAdjustInventoryQtyBySampleQty IS NULL
 GO
+
+UPDATE tblQMSample
+SET intStorageLocationId = L.intStorageLocationId
+FROM tblQMSample S
+JOIN tblICLot L ON L.intLotId = S.intProductValueId
+WHERE S.intProductTypeId = 6
+	AND S.intStorageLocationId IS NULL
+GO
