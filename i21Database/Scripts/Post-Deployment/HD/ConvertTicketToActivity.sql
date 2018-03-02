@@ -173,6 +173,7 @@ declare @dtmModifiedAct datetime
 declare @intCreatedByAct int
 declare @intConcurrencyIdAct int
 declare @intTicketIdAct int
+declare @strTicketNumber nvarchar(50)
 declare @intActivitySourceId int
 
 declare @intCurrentActivityNoAct int
@@ -203,6 +204,7 @@ SET @queryResultAct = CURSOR FOR
 		,intCreatedBy
 		,intConcurrencyId
 		,intTicketId
+		,strTicketNumber
 	from
 	(
 	select
@@ -228,6 +230,7 @@ SET @queryResultAct = CURSOR FOR
 		,intCreatedBy = tblHDTicket.intCreatedUserEntityId
 		,intConcurrencyId = 1
 		,intTicketId = tblHDTicket.intTicketId
+		,strTicketNumber = tblHDTicket.strTicketNumber
 	from tblHDProject, tblHDProjectTask, tblHDTicket
 	where tblHDProject.strType <> 'CRM'
 		and tblHDProjectTask.intProjectId = tblHDProject.intProjectId
@@ -259,6 +262,7 @@ SET @queryResultAct = CURSOR FOR
 		,intCreatedBy = tblHDTicket.intCreatedUserEntityId
 		,intConcurrencyId = 1
 		,intTicketId = tblHDTicket.intTicketId
+		,strTicketNumber = tblHDTicket.strTicketNumber
 	from tblHDTicket
 	where tblHDTicket.strType <> 'CRM'
 		and tblHDTicket.intTicketId not in (select distinct tblHDProjectTask.intTicketId from tblHDProjectTask)
@@ -293,6 +297,7 @@ INTO
 	,@intCreatedByAct
 	,@intConcurrencyIdAct
 	,@intTicketIdAct
+	,@strTicketNumber
 
 WHILE @@FETCH_STATUS = 0
 BEGIN
@@ -368,9 +373,27 @@ BEGIN
 				,intConcurrencyId = @intConcurrencyIdAct
 		)
 
-		update tblHDTicket set ysnConvertedToActivity = convert(bit,1) where intTicketId = @intTicketIdAct;
 		
 		set @intGeneratedActivityIdentityAct =  SCOPE_IDENTITY();
+		update tblHDTicket set ysnConvertedToActivity = convert(bit,1) where intTicketId = @intTicketIdAct;
+		insert into tblHDTicketToActivity
+		(
+			intTicketId
+			,intActivityId
+			,strTicketNumber
+			,strActivityNo
+			,strActivityType
+			,intConcurrencyId
+		)
+		(
+		select
+			intTicketId = @intTicketIdAct
+			,intActivityId = @intGeneratedActivityIdentityAct
+			,strTicketNumber = @strTicketNumber
+			,strActivityNo = @strActivityNoAct
+			,strActivityType = 'Task'
+			,intConcurrencyId = 1
+		)
 
 		insert into tblHDProjectActivityTmp
 		(
@@ -513,6 +536,7 @@ BEGIN
 		,@intCreatedByAct
 		,@intConcurrencyIdAct
 		,@intTicketIdAct
+		,@strTicketNumber
 END
 
 CLOSE @queryResultAct

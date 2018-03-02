@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuCRMActivitySearch2]
+﻿CREATE VIEW [dbo].[vyuHDActivitySearch]
 	AS
 		select
 			a.intActivityId
@@ -30,4 +30,4 @@
 			left join tblSMScreen e on e.intScreenId = d.intScreenId-- and e.strNamespace = 'CRM.view.Opportunity' and e.strScreenName = 'Opportunity'
 			left join tblEMEntity f on f.intEntityId = a.intCreatedBy
 			left join tblEMEntity g on g.intEntityId = a.intAssignedTo
-		where isnull(a.intActivitySourceId,0) <> (select z.intActivitySourceId from tblSMActivitySource z where z.strActivitySource = 'Help Desk')
+		where a.intActivitySourceId = (select z.intActivitySourceId from tblSMActivitySource z where z.strActivitySource = 'Help Desk')
