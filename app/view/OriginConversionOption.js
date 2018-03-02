@@ -118,6 +118,7 @@ Ext.define('Inventory.view.OriginConversionOption', {
                                             {
                                                 xtype: 'menuitem',
                                                 menuId: 'storagelocations',
+                                                hidden: true,
                                                 itemId: 'mnuStorageLocations',
                                                 text: 'Storage Locations',
                                                 focusable: true

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -17,6 +18,11 @@ namespace iRely.Inventory.BusinessLayer
         protected override string[] GetRequiredFields()
         {
             return new string[] { "name", "storage location", "location" };
+        }
+
+        protected override Expression<Func<tblICStorageLocation, bool>> GetUniqueKeyExpression(tblICStorageLocation entity)
+        {
+            return (e => e.strName == entity.strName);
         }
 
         protected override string GetPrimaryKeyName()
