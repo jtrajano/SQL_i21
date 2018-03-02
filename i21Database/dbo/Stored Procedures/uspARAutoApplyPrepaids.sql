@@ -89,7 +89,7 @@ IF @ysnAutoApplyPrepaids = 1 AND EXISTS (SELECT TOP 1 NULL FROM @tblInvoiceIds)
 				  AND CREDITS.dblAmountDue > 0
 				  AND CREDITS.strTransactionType IN ('Customer Prepayment', 'Credit Memo', 'Overpayment')
 				  AND CREDITS.intEntityCustomerId = @intEntityCustomerId
-				  AND CREDITS.dtmPostDate < @dtmPostDate
+				  AND CREDITS.dtmPostDate <= @dtmPostDate
 				ORDER BY CREDITS.dtmPostDate
 
 				IF EXISTS (SELECT TOP 1 NULL FROM @tblPrepaids)
