@@ -514,17 +514,29 @@ END
 
 	IF ISNULL(@intBillId , 0) != 0
 	BEGIN
-		INSERT INTO @prePayId(
-			[intId]
-		)
-		SELECT [intId] = ISNULL(dbo.fnCTGetPrepaidIds(CT.intContractHeaderId),0)
+		IF OBJECT_ID (N'tempdb.dbo.#tmpContractPrepay') IS NOT NULL
+			DROP TABLE #tmpContractPrepay
+
+		CREATE TABLE #tmpContractPrepay (
+			[intPrepayId] INT
+		);
+		INSERT INTO #tmpContractPrepay(
+			[intPrepayId]
+		) 
+		SELECT ISNULL(dbo.fnCTGetPrepaidIds(CT.intContractHeaderId),0)
 		FROM #tmpReceiptItem tmp 
 		INNER JOIN tblCTContractDetail CT ON CT.intContractDetailId = tmp.intContractDetailId
 		GROUP BY CT.intContractHeaderId
 		
-		SELECT @total = COUNT(intId) FROM @prePayId where intId > 0;
+		SELECT @total = COUNT(intPrepayId) FROM #tmpContractPrepay where intPrepayId > 0;
 		IF (@total > 0)
 		BEGIN
+			INSERT INTO @prePayId(
+				[intId]
+			)
+			SELECT [intId] = intPrepayId
+			FROM #tmpContractPrePay where intPrepayId > 0
+			
 			EXEC uspAPApplyPrepaid @intBillId, @prePayId
 			update tblAPBillDetail set intScaleTicketId = @intTicketId WHERE intBillId = @intBillId
 		END
