@@ -8,7 +8,8 @@
         @intForecastWeeklyConsumption INTEGER = null,
         @intForecastWeeklyConsumptionUOMId INTEGER = null,
 		@intBookId int = NULL, 
-		@intSubBookId int = NULL   
+		@intSubBookId int = NULL,
+		@strPositionBy nvarchar(100) = NULL   
 AS  
 
 IF isnull(@intForecastWeeklyConsumptionUOMId, 0) = 0
@@ -110,7 +111,7 @@ DECLARE @PricedContractList AS TABLE (
 
 INSERT INTO @PricedContractList
 SELECT fm.strFutureMonth
-	,strContractType + ' - ' + isnull(ca.strDescription, '') AS strAccountNumber
+	,strContractType + ' - ' + case when @strPositionBy= 'Product Type' then isnull(ca.strDescription, '') else isnull(cv.strEntityName, '') end AS strAccountNumber
 	,dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId, @intUOMId, CASE WHEN @ysnIncludeInventoryHedge = 0 THEN isnull(dblBalance, 0) ELSE dblDetailQuantity END) AS dblNoOfContract
 	,LEFT(strContractType, 1) + ' - ' + strContractNumber + ' - ' + convert(NVARCHAR, intContractSeq) AS strTradeNo
 	,dtmStartDate AS TransactionDate
