@@ -7,6 +7,7 @@ SELECT fm.intFutureMarketId
 	,um1.strUnitMeasure
 	,c.intCurrencyID intCurrencyId
 	,c.strCurrency strCurrency
+	,fm.intForecastWeeklyConsumption
 	,um.strUnitMeasure strForecastUnitMeasure
 	,um.intUnitMeasureId intForecastWeeklyConsumptionUOMId
 	,mm.intCommodityId intCommodityMarketId
@@ -14,6 +15,7 @@ SELECT fm.intFutureMarketId
 	,fm.dblContractSize
 	,fm.strOptMarketName
 	,fm.ysnOptions
+	,mm.intCommodityId
 FROM tblRKFutureMarket fm
 INNER JOIN tblRKCommodityMarketMapping mm ON fm.intFutureMarketId = mm.intFutureMarketId
 INNER JOIN tblSMCurrency c ON c.intCurrencyID = fm.intCurrencyId
