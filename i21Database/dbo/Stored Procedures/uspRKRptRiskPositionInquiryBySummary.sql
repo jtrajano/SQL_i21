@@ -10,7 +10,11 @@ DECLARE @idoc INT,
         @intUOMId INTEGER,  
         @intDecimal INTEGER,
         @intForecastWeeklyConsumption INTEGER = NULL,
-        @intForecastWeeklyConsumptionUOMId INTEGER = NULL   
+        @intForecastWeeklyConsumptionUOMId INTEGER = NULL,
+		@intBookId  INTEGER = NULL,
+        @intSubBookId  INTEGER = NULL,
+        @strPositionBy nvarchar(100) = NULL
+
 
 IF LTRIM(RTRIM(@xmlParam)) = ''
   SET @xmlParam = NULL
@@ -50,6 +54,9 @@ SELECT @intUOMId = [from] FROM @temp_xml_table WHERE [fieldname] = 'intUOMId'
 SELECT @intDecimal = [from] FROM @temp_xml_table WHERE [fieldname] = 'intDecimal' 
 SELECT @intForecastWeeklyConsumption = [from] FROM @temp_xml_table WHERE [fieldname] = 'intForecastWeeklyConsumption' 
 SELECT @intForecastWeeklyConsumptionUOMId = [from] FROM @temp_xml_table WHERE [fieldname] = 'intForecastWeeklyConsumptionUOMId'
+SELECT @intBookId = [from] FROM @temp_xml_table WHERE [fieldname] = 'intBookId'
+SELECT @intSubBookId = [from] FROM @temp_xml_table WHERE [fieldname] = 'intSubBookId'
+SELECT @strPositionBy = [from] FROM @temp_xml_table WHERE [fieldname] = 'strPositionBy'
 
 DECLARE @temp as Table (  
      intRowNumber int,
@@ -57,6 +64,7 @@ DECLARE @temp as Table (
      Selection  nvarchar(200) COLLATE Latin1_General_CI_AS,  
      PriceStatus  nvarchar(50) COLLATE Latin1_General_CI_AS,  
      strFutureMonth  nvarchar(20) COLLATE Latin1_General_CI_AS,  
+	 strFutureMonthOrder  nvarchar(20) COLLATE Latin1_General_CI_AS,  
      strAccountNumber  nvarchar(200) COLLATE Latin1_General_CI_AS,  
      dblNoOfContract  decimal(24,10),  
      strTradeNo  nvarchar(200) COLLATE Latin1_General_CI_AS,  
@@ -73,7 +81,8 @@ DECLARE @strRiskView nvarchar(100)
 SELECT TOP 1 @strRiskView = strRiskView from tblRKCompanyPreference
 if(@strRiskView='Trader/Elevator') 
 BEGIN
-INSERT INTO @temp (intRowNumber,Selection,PriceStatus,strFutureMonth,strAccountNumber,dblNoOfContract,strTradeNo,TransactionDate,  
+
+INSERT INTO @temp (intRowNumber,Selection,PriceStatus,strFutureMonth,strFutureMonthOrder,strAccountNumber,dblNoOfContract,strTradeNo,TransactionDate,  
      TranType, CustVendor,dblNoOfLot,dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId)
 Exec uspRKRiskPositionInquiry  @intCommodityId=@intCommodityId,  
         @intCompanyLocationId=@intCompanyLocationId,  
@@ -82,9 +91,11 @@ Exec uspRKRiskPositionInquiry  @intCommodityId=@intCommodityId,
         @intUOMId = @intUOMId,  
         @intDecimal = @intDecimal,
         @intForecastWeeklyConsumption  =@intForecastWeeklyConsumption ,
-        @intForecastWeeklyConsumptionUOMId =@intForecastWeeklyConsumptionUOMId
-
-
+        @intForecastWeeklyConsumptionUOMId =@intForecastWeeklyConsumptionUOMId,
+		@intBookId=@intBookId,
+		@intSubBookId=@intSubBookId,
+		@strPositionBy=@strPositionBy
+		
 UPDATE @temp
 SET strGroup =  case when Selection IN ('Physical position / Differential cover', 'Physical position / Basis risk') then '01.'+ Selection
 				     when Selection = 'Specialities & Low grades' then  '02.'+ Selection 
@@ -122,8 +133,11 @@ Exec uspRKRiskPositionInquiryBySummary  @intCommodityId=@intCommodityId,
         @intUOMId = @intUOMId,  
         @intDecimal = @intDecimal,
         @intForecastWeeklyConsumption  =@intForecastWeeklyConsumption ,
-        @intForecastWeeklyConsumptionUOMId =@intForecastWeeklyConsumptionUOMId
-
+        @intForecastWeeklyConsumptionUOMId =@intForecastWeeklyConsumptionUOMId,
+		@intBookId=@intBookId,
+		@intSubBookId=@intSubBookId,
+		@strPositionBy=@strPositionBy
+		
 SELECT  intRowNumber ,strGroup,Selection ,  
             PriceStatus  ,  
             strFutureMonth ,  
