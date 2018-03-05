@@ -977,7 +977,7 @@ BEGIN TRY
 			,dtmDate = GETDATE() 
 			,dblQty = - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CU.intUnitMeasureId,CS.intUnitMeasureId,SV.[dblUnits])
 			,dblUOMQty = @dblUOMQty
-			,dblCost = CASE WHEN St.ysnDPOwnedType = 0 THEN SV.[dblCashPrice] ELSE 0 END
+			,dblCost = SV.[dblCashPrice]
 			,dblSalesPrice = 0.00
 			,intCurrencyId = @intCurrencyId
 			,dblExchangeRate = 1
@@ -1025,7 +1025,7 @@ BEGIN TRY
 			,dtmDate = GETDATE() 
 			,dblQty = dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CU.intUnitMeasureId,CS.intUnitMeasureId,SV.[dblUnits])
 			,dblUOMQty = @dblUOMQty
-			,dblCost = CASE WHEN St.ysnDPOwnedType = 0 THEN SV.[dblCashPrice] ELSE 0 END
+			,dblCost = SV.[dblCashPrice]
 			,dblSalesPrice = 0.00
 			,intCurrencyId = @intCurrencyId
 			,dblExchangeRate = 1
