@@ -64,7 +64,7 @@ SELECT Lot.intLotId
        , Lot.intConcurrencyId
        , Receipt.dtmReceiptDate
        , ReceiptLot.intInventoryReceiptItemLotId
-       , ReceiptLot.strCondition
+       , Lot.strCondition
        , ReceiptItem.intSourceId
        , CTHeader.strContractNumber
        , CTDetail.intContractDetailId
