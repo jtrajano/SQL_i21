@@ -478,13 +478,27 @@ INNER JOIN (
 		WHERE ysnPosted = 1
 			AND ((strType = ''Service Charge'' AND ysnForgiven = 0) OR ((strType <> ''Service Charge'' AND ysnForgiven = 1) OR (strType <> ''Service Charge'' AND ysnForgiven = 0)))
 			AND strType <> ''CF Tran''
-	) I ON I.intInvoiceId = PD.intInvoiceId
+	) I ON I.intInvoiceId = PD.intInvoiceId	
 	GROUP BY intPaymentId, PD.intInvoiceId, I.strInvoiceNumber, I.dblInvoiceTotal	
-) PD ON P.intPaymentId = PD.intPaymentId AND PD.dblInvoiceTotal - PD.dblPayment <> 0
+) PD ON P.intPaymentId = PD.intPaymentId
+LEFT JOIN (
+	SELECT dblPayment = SUM(dblPayment) + SUM(dblDiscount) - SUM(dblInterest)
+			, intInvoiceId 
+	FROM tblARPaymentDetail PD WITH (NOLOCK) 
+	INNER JOIN (
+		SELECT intPaymentId
+		FROM dbo.tblARPayment WITH (NOLOCK)
+		WHERE ysnPosted = 1
+		  AND ysnInvoicePrepayment = 0 
+		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) <= '+ @strDateTo +'
+	) P ON PD.intPaymentId = P.intPaymentId
+	GROUP BY intInvoiceId
+) TOTALPAYMENT ON PD.intInvoiceId = TOTALPAYMENT.intInvoiceId
 WHERE ysnInvoicePrepayment = 0
   AND ysnPosted = 1
-	AND P.intPaymentMethodId IN (select intPaymentMethodID from tblSMPaymentMethod where strPaymentMethod ' + @strPaymentMethod + ')
+  AND P.intPaymentMethodId IN (select intPaymentMethodID from tblSMPaymentMethod where strPaymentMethod ' + @strPaymentMethod + ')
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
+  AND PD.dblInvoiceTotal - ABS(ISNULL(TOTALPAYMENT.dblPayment, 0)) <> 0
 GROUP BY P.intPaymentId, intEntityCustomerId, intLocationId, strRecordNumber, strPaymentInfo, dblAmountPaid, dtmDatePaid, PD.intInvoiceId, strInvoiceNumber, strNotes'
 
 SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
@@ -539,7 +553,7 @@ FROM vyuARCustomerSearch C
 										   WHEN strTransactionType = ''Customer Prepayment'' THEN 0.00
 										   ELSE I.dblInvoiceTotal 
 									  END - ISNULL(TOTALPAYMENT.dblPayment, 0)
-			 , dblPayment			= CASE WHEN strTransactionType = ''Customer Prepayment'' THEN I.dblInvoiceTotal ELSE ' + CASE WHEN @ysnPrintFromCFLocal = 1 THEN '0.00' ELSE 'CASE WHEN I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0) = 0 THEN ISNULL(TOTALPAYMENT.dblPayment, 0) ELSE 0.00 END' END +' END
+			 , dblPayment			= CASE WHEN strTransactionType = ''Customer Prepayment'' THEN I.dblInvoiceTotal ELSE ' + CASE WHEN @ysnPrintFromCFLocal = 1 THEN '0.00' ELSE 'CASE WHEN dbo.fnARGetInvoiceAmountMultiplier(strTransactionType) * I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0) = 0 THEN ISNULL(TOTALPAYMENT.dblPayment, 0) ELSE 0.00 END' END +' END
 			 , dtmDate				= I.dtmDate
 			 , dtmDueDate			= I.dtmDueDate
 			 , dtmShipDate			= I.dtmShipDate
@@ -551,11 +565,12 @@ FROM vyuARCustomerSearch C
 			SELECT dblPayment = SUM(dblPayment) + SUM(dblDiscount) - SUM(dblInterest)
 				 , intInvoiceId 
 			FROM tblARPaymentDetail PD WITH (NOLOCK) 
-			INNER JOIN (SELECT intPaymentId
-						FROM dbo.tblARPayment WITH (NOLOCK)
-						WHERE ysnPosted = 1
-							AND ysnInvoicePrepayment = 0 
-							AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) <= '+ @strDateTo +'
+			INNER JOIN (
+				SELECT intPaymentId
+				FROM dbo.tblARPayment WITH (NOLOCK)
+				WHERE ysnPosted = 1
+				  AND ysnInvoicePrepayment = 0 
+				  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) <= '+ @strDateTo +'
 			) P ON PD.intPaymentId = P.intPaymentId
 			GROUP BY intInvoiceId
 		) TOTALPAYMENT ON I.intInvoiceId = TOTALPAYMENT.intInvoiceId
@@ -698,21 +713,6 @@ IF @ysnPrintFromCFLocal = 1
 	BEGIN
 		UPDATE @temp_balanceforward_table SET dblTotalAR = dblTotalAR - dblFuture
 
-		--UPDATE BALANCEFORWARD
-		--SET BALANCEFORWARD.dblTotalAR = BALANCEFORWARD.dblTotalAR + ISNULL(CF.dblTotalFuture, 0)
-		--  , BALANCEFORWARD.dblFuture = CF.dblTotalFuture
-		--FROM @temp_balanceforward_table BALANCEFORWARD
-		--INNER JOIN (
-		--	SELECT intEntityCustomerId
-		--		 , dblTotalFuture = SUM(dblAmountDue)
-		--	FROM tblARInvoice WITH (NOLOCK)
-		--	WHERE strType = 'CF Tran'
-		--	AND dtmPostDate < @dtmDateFromLocal
-		--	AND ysnPaid = 0
-		--	AND ysnPosted = 1
-		--	GROUP BY intEntityCustomerId
-		--) CF ON BALANCEFORWARD.intEntityCustomerId = CF.intEntityCustomerId
-
 		UPDATE AGINGREPORT
 		SET AGINGREPORT.dbl0Days = AGINGREPORT.dbl0Days + ISNULL(CF.dblTotalFuture, 0)
 		  , AGINGREPORT.dblFuture = AGINGREPORT.dblFuture - ISNULL(CF.dblTotalFuture, 0)
@@ -722,7 +722,6 @@ IF @ysnPrintFromCFLocal = 1
 				 , dblTotalFuture = SUM(dbo.fnARGetInvoiceAmountMultiplier(strTransactionType) * dblAmountDue)
 			FROM tblARInvoice WITH (NOLOCK)
 			WHERE strType = 'CF Tran'
-			--AND dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 			AND ysnPaid = 0
 			AND ysnPosted = 1
 			AND intInvoiceId IN (SELECT intInvoiceId FROM tblCFInvoiceStagingTable)
