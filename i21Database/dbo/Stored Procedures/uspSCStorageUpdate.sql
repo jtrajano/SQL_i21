@@ -418,7 +418,10 @@ BEGIN TRY
 				,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
 				,dblQty = @dblNetUnits 
 				,dblUOMQty = ItemUOM.dblUnitQty
-				,dblCost = dbo.fnRKGetFutureAndBasisPrice (1,ScaleTicket.intCommodityId,right(convert(varchar, CNT.dtmEndDate, 106),8),3,NULL,NULL,NULL,NULL,0,ScaleTicket.intItemId)
+				,dblCost = (
+					SELECT dbo.fnCTConvertQtyToTargetItemUOM(ScaleTicket.intItemUOMIdTo,intSettlementUOMId,dblSettlementPrice) + dbo.fnCTConvertQtyToTargetItemUOM(ScaleTicket.intItemUOMIdTo,intBasisUOMId,dblBasis)
+					FROM dbo.fnRKGetFutureAndBasisPrice (1,ScaleTicket.intCommodityId,right(convert(varchar, CNT.dtmEndDate, 106),8),3,NULL,NULL,NULL,NULL,0,ScaleTicket.intItemId)
+				)
 				,dblSalesPrice = 0
 				,intCurrencyId = ScaleTicket.intCurrencyId
 				,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
