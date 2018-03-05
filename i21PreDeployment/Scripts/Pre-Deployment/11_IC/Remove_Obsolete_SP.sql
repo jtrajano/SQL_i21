@@ -1,7 +1,7 @@
 ﻿GO
 PRINT N'Removing obsolete stored procedures in IC'
+GO
 
-IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspICRebuildZeroCostReceipts]') AND type in (N'P', N'PC'))
-DROP PROCEDURE [dbo].uspICRebuildZeroCostReceipts
-
+IF EXISTS(select top 1 1 from sys.procedures where name = 'uspICRebuildZeroCostReceipts')
+	EXEC('DROP PROCEDURE uspICRebuildZeroCostReceipts')
 GO
