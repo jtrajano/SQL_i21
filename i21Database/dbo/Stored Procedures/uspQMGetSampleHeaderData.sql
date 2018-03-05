@@ -218,6 +218,8 @@ BEGIN
 		,@strContainerNumber AS strContainerNumber
 		,L.intStorageLocationId
 		,SL.strName AS strStorageLocationName
+		,CL.intCompanyLocationSubLocationId
+		,CL.strSubLocationName
 	FROM tblICLot L
 	JOIN tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 	JOIN tblICItem I ON I.intItemId = L.intItemId
@@ -225,6 +227,7 @@ BEGIN
 		AND IU.ysnStockUnit = 1
 	JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IU.intUnitMeasureId
 	JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
+	JOIN tblSMCompanyLocationSubLocation CL ON CL.intCompanyLocationSubLocationId = L.intSubLocationId
 	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
 	WHERE L.intLotId = @intProductValueId
 END
