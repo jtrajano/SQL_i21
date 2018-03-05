@@ -32,7 +32,7 @@ BEGIN TRY
 		IF @FutureMonthId >0
 		SELECT @strFutureMonth=LEFT(strFutureMonth,3)+' 20'+RIGHT(strFutureMonth,2) FROM tblRKFuturesMonth WHERE intFutureMonthId=@FutureMonthId
 
-		SELECT @dblFuturesPurchaseBasis=ISNULL(dbo.fnRKGetFutureAndBasisPrice(1,@intCommodityId,@strFutureMonth,1,@FutureMarketId,null,null,null,0,null),0)		
+		SELECT @dblFuturesPurchaseBasis=isnull(dblBasis,0) from dbo.fnRKGetFutureAndBasisPrice(1,@intCommodityId,@strFutureMonth,1,@FutureMarketId,null,null,null,0,null)		
 	END
 
 END TRY
