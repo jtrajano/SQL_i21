@@ -3358,3 +3358,7 @@ SET ysnLifeTimeByEndOfMonth = 0
 Where ysnLifeTimeByEndOfMonth IS NULL
 GO
 
+UPDATE tblMFCompanyPreference
+SET intDefaultMaterialRequirementDuration = 7
+Where intDefaultMaterialRequirementDuration IS NULL
+GO
