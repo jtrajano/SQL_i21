@@ -4521,7 +4521,6 @@
     <Build Include="dbo\Tables\tblICBackupDetailInventoryTransactionStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspICBackupInventory.sql" />
     <Build Include="dbo\Functions\fnGetSeqMonth.sql" />
-    <Build Include="dbo\Stored Procedures\uspICRebuildZeroCostReceipts.sql" />
     <Build Include="dbo\Views\vyuCTSearchPriceContract.sql" />
     <Build Include="dbo\Views\vyuCTSearchPriceContractDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUndoStartCycleCount.sql" />
