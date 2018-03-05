@@ -6242,6 +6242,7 @@
     <Build Include="dbo\Views\vyuLGInsurancePremiumOnPhysicalStock.sql" />
     <Build Include="dbo\Tables\tblMFLotTareWeight.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUpdateLotTareWeight.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetWorkOrderByPlannedDate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

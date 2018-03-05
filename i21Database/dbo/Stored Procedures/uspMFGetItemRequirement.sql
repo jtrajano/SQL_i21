@@ -1,7 +1,8 @@
-﻿CREATE PROCEDURE dbo.uspMFGetItemRequirement @dtmStartDate DATETIME
-	,@dtmEndDate DATETIME
+﻿CREATE PROCEDURE dbo.uspMFGetItemRequirement @dtmStartDate DATETIME=NULL
+	,@dtmEndDate DATETIME=NULL
 	,@strManufacturingCellId NVARCHAR(MAX)
 	,@intLocationId INT
+	,@strWorkOrderId NVARCHAR(MAX)=NULL
 AS
 BEGIN
 	DECLARE @dtmCurrentDate DATETIME
@@ -34,6 +35,22 @@ BEGIN
 		,strLotTracking NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		)
 
+		Declare @tblMFWorkOrder table(intWorkOrderId int,strWorkOrderNo nvarchar(50))
+
+	if @strWorkOrderId is null
+	Begin
+		Insert into @tblMFWorkOrder
+		EXEC dbo.uspMFGetWorkOrderByPlannedDate @dtmStartDate =@dtmStartDate
+			,@dtmEndDate =@dtmEndDate
+			,@strManufacturingCellId =@strManufacturingCellId
+			,@intLocationId =@intLocationId
+	End
+	Else
+	Begin
+		Insert into @tblMFWorkOrder(intWorkOrderId )
+		SELECT Item
+				FROM dbo.fnSplitString(@strWorkOrderId, ',')
+	end
 	SELECT @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, GETDATE(), 101))
 
 	SELECT @dtmStartDate = convert(DATETIME, Convert(CHAR, @dtmStartDate, 101))
@@ -71,7 +88,8 @@ BEGIN
 			AND S.ysnStandard = 1
 			AND S.intLocationId = @intLocationId
 		JOIN dbo.tblMFScheduleWorkOrderDetail SWD ON SWD.intScheduleWorkOrderId = SW.intScheduleWorkOrderId
-		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = SW.intWorkOrderId
+		JOIN @tblMFWorkOrder W1 ON W1.intWorkOrderId = SW.intWorkOrderId
+		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = W1.intWorkOrderId
 			AND W.intStatusId <> 13
 		JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId
@@ -140,7 +158,8 @@ BEGIN
 			AND S.ysnStandard = 1
 			AND S.intLocationId = @intLocationId
 		JOIN dbo.tblMFScheduleWorkOrderDetail SWD ON SWD.intScheduleWorkOrderId = SW.intScheduleWorkOrderId
-		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = SW.intWorkOrderId
+		JOIN @tblMFWorkOrder W1 ON W1.intWorkOrderId = SW.intWorkOrderId
+		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = W1.intWorkOrderId
 			AND W.intStatusId <> 13
 		JOIN dbo.tblMFRecipe R ON R.intItemId = W.intItemId
 			AND R.intLocationId = @intLocationId
@@ -340,6 +359,7 @@ BEGIN
 			,SH.strShiftName
 			,0 AS intConcurrencyId
 		FROM dbo.tblMFWorkOrder W
+		JOIN @tblMFWorkOrder W1 ON W1.intWorkOrderId = W.intWorkOrderId
 		JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 			AND W.intStatusId <> 13
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId
@@ -399,6 +419,7 @@ BEGIN
 			,RI.intItemUOMId
 			,I.strLotTracking
 		FROM dbo.tblMFWorkOrder W
+		JOIN @tblMFWorkOrder W1 ON W1.intWorkOrderId = W.intWorkOrderId
 		JOIN dbo.tblMFRecipe R ON R.intItemId = W.intItemId
 			AND W.intStatusId <> 13
 			AND R.intLocationId = @intLocationId
