@@ -241,7 +241,8 @@ BEGIN TRY
 		FROM tblARInvoiceDetail 
 		WHERE intSalesOrderDetailId = @ItemSalesOrderDetailId 
 		  AND strSalesOrderNumber = @ItemSalesOrderNumber 
-		  AND intInvoiceId = @InvoiceId		  
+		  AND intInvoiceId = @InvoiceId
+		  AND intInventoryShipmentItemId = @ItemInventoryShipmentItemId
 
 	IF ISNULL(@existingInvoiceDetail, 0) > 0
 		BEGIN

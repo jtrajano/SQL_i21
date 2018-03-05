@@ -898,7 +898,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemCommentTypeId		= intCommentTypeId,
 						@ItemMargin				= dblMargin,
 						@ItemRecipeQty			= dblRecipeQuantity,
-						@ItemSalesOrderNumber	= strSalesOrderNumber,
+						@ItemSalesOrderNumber	= ISNULL(NULLIF(strShipmentNumber, ''), strSalesOrderNumber),
 						@ItemShipmentNumber		= strShipmentNumber,
 						@ItemMaintenanceType	= strMaintenanceType,
 						@ItemFrequency			= strFrequency,
@@ -960,9 +960,14 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 							,@ItemCurrencyExchangeRateTypeId	= @ItemCurrencyExchangeRateTypeId
 							,@ItemCurrencyExchangeRate		= @ItemCurrencyExchangeRate
 
-				UPDATE tblARInvoiceDetail SET dblContractBalance = @ContractBalance, dblContractAvailable = @ContractAvailable
+				UPDATE tblARInvoiceDetail 
+				SET dblContractBalance = @ContractBalance
+				  , dblContractAvailable = @ContractAvailable
 				FROM @tblItemsToInvoice 
-				WHERE intInvoiceId = @NewInvoiceId AND tblARInvoiceDetail.intItemId = @ItemId AND tblARInvoiceDetail.intContractHeaderId = @ItemContractHeaderId AND tblARInvoiceDetail.intContractDetailId = @ItemContractDetailId
+				WHERE intInvoiceId = @NewInvoiceId 
+				AND tblARInvoiceDetail.intItemId = @ItemId 
+				AND tblARInvoiceDetail.intContractHeaderId = @ItemContractHeaderId 
+				AND tblARInvoiceDetail.intContractDetailId = @ItemContractDetailId
 
 				IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 					BEGIN
