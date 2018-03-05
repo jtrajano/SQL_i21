@@ -159,7 +159,7 @@ Cross Apply
 	,(select intAccountCategoryId from tblGLAccountCategory where strAccountCategory = 'Other Charge Income') intAccountCategoryId
 	,act.intAccountId
 	FROM gacommst AS itm 
-	INNER JOIN tblICItem AS inv ON inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = LTRIM(RTRIM(itm.gacom_com_cd))+' Freight' COLLATE SQL_Latin1_General_CP1_CS_AS)
+	INNER JOIN tblICItem AS inv ON inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = LTRIM(RTRIM(itm.gacom_com_cd))+' Freight' COLLATE SQL_Latin1_General_CP1_CS_AS
 	INNER JOIN tblGLCOACrossReference AS coa ON substring(strOldId, 0, CHARINDEX('-', strOldId)) = cast(itm.gacom_gl_frt_inc as nvarchar)
 	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 	--WHERE coa.strExternalId = itm.gacdc_sls_gl_acct_no
@@ -180,7 +180,7 @@ Cross Apply
 	,(select intAccountCategoryId from tblGLAccountCategory where strAccountCategory = 'Other Charge Expense') intAccountCategoryId
 	,act.intAccountId
 	FROM gacommst AS itm 
-	INNER JOIN tblICItem AS inv ON inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = LTRIM(RTRIM(itm.gacom_com_cd))+' Freight' COLLATE SQL_Latin1_General_CP1_CS_AS)
+	INNER JOIN tblICItem AS inv ON inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = LTRIM(RTRIM(itm.gacom_com_cd))+' Freight' COLLATE SQL_Latin1_General_CP1_CS_AS
 	INNER JOIN tblGLCOACrossReference AS coa ON substring(strOldId, 0, CHARINDEX('-', strOldId)) = cast(itm.gacom_gl_frt_exp as nvarchar)
 	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 	--WHERE coa.strExternalId = itm.gacdc_sls_gl_acct_no
