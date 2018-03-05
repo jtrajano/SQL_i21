@@ -3353,4 +3353,8 @@ UPDATE tblMFCompanyPreference
 SET intLotDueDays = 0
 Where intLotDueDays IS NULL
 GO
+UPDATE tblMFCompanyPreference
+SET ysnLifeTimeByEndOfMonth = 0
+Where ysnLifeTimeByEndOfMonth IS NULL
+GO
 

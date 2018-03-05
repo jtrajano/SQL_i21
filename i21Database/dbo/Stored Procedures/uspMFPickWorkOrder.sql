@@ -78,10 +78,12 @@ BEGIN TRY
 		,@intPMStageLocationId INT
 		,@intNoOfDecimalPlacesOnConsumption INT
 		,@ysnConsumptionByRatio BIT
-		,@intStageLocationId int
+		,@intStageLocationId INT
+		,@ysnLifeTimeByEndOfMonth BIT
 
 	SELECT @intNoOfDecimalPlacesOnConsumption = intNoOfDecimalPlacesOnConsumption
 		,@ysnConsumptionByRatio = ysnConsumptionByRatio
+		,@ysnLifeTimeByEndOfMonth = ysnLifeTimeByEndOfMonth
 	FROM tblMFCompanyPreference
 
 	IF @intNoOfDecimalPlacesOnConsumption IS NULL
@@ -215,10 +217,11 @@ BEGIN TRY
 		AND intLocationId = @intLocationId
 		AND intAttributeId = @intPackagingCategoryId
 
-	If @intPMCategoryId is null
-	Begin
-		Select @intPMCategoryId=0,@strPackagingCategory=''
-	End
+	IF @intPMCategoryId IS NULL
+	BEGIN
+		SELECT @intPMCategoryId = 0
+			,@strPackagingCategory = ''
+	END
 
 	IF @intTransactionCount = 0
 		BEGIN TRAN
@@ -421,8 +424,7 @@ BEGIN TRY
 				AND IsNull(WC.intBatchId, @intBatchId) = @intBatchId
 				AND WC.intItemId = SI.intSubstituteItemId
 				AND SI.intItemId = ri.intItemId
-				AND IsNULL(WC.ysnPosted,0) =0
-
+				AND IsNULL(WC.ysnPosted, 0) = 0
 			--AND @ysnFillPartialPallet = 0
 			
 			UNION
@@ -432,7 +434,7 @@ BEGIN TRY
 			WHERE WC.intWorkOrderId = @intWorkOrderId
 				AND IsNull(WC.intBatchId, @intBatchId) = @intBatchId
 				AND WC.intItemId = ri.intItemId
-				AND IsNULL(WC.ysnPosted,0) =0
+				AND IsNULL(WC.ysnPosted, 0) = 0
 			)
 	--AND @ysnFillPartialPallet = 0
 	
@@ -1603,7 +1605,11 @@ BEGIN TRY
 				IF @strLifeTimeType = 'Years'
 					SET @dtmExpiryDate = DateAdd(yy, @intLifeTime, @dtmCurrentDateTime)
 				ELSE IF @strLifeTimeType = 'Months'
+					AND @ysnLifeTimeByEndOfMonth = 0
 					SET @dtmExpiryDate = DateAdd(mm, @intLifeTime, @dtmCurrentDateTime)
+				ELSE IF @strLifeTimeType = 'Months'
+					AND @ysnLifeTimeByEndOfMonth = 1
+					SET @dtmExpiryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, DateAdd(mm, @intLifeTime, @dtmCurrentDateTime)) + 1, 0))
 				ELSE IF @strLifeTimeType = 'Days'
 					SET @dtmExpiryDate = DateAdd(dd, @intLifeTime, @dtmCurrentDateTime)
 				ELSE IF @strLifeTimeType = 'Hours'
@@ -1900,7 +1906,7 @@ BEGIN TRY
 				,@dblSubstituteRatio = NULL
 				,@intItemUOMId = NULL
 				,@intItemIssuedUOMId = NULL
-				,@intStageLocationId=NULL
+				,@intStageLocationId = NULL
 
 			SELECT @intLotId = intLotId
 				,@intLotItemId = intItemId
@@ -1910,7 +1916,7 @@ BEGIN TRY
 				,@dblSubstituteRatio = dblSubstituteRatio
 				,@intItemUOMId = intItemUOMId
 				,@intItemIssuedUOMId = intItemIssuedUOMId
-				,@intStageLocationId=intStorageLocationId
+				,@intStageLocationId = intStorageLocationId
 			FROM @tblLot
 			WHERE intLotRecordId = @intLotRecordId
 
@@ -2059,7 +2065,11 @@ BEGIN TRY
 						FROM tblMFProductionSummary
 						WHERE intWorkOrderId = @intWorkOrderId
 							AND intItemId = @intLotItemId
-							AND IsNULL(intMachineId,0) = Case When intMachineId is not null then IsNULL(@intMachineId ,0) else IsNULL(intMachineId,0) end
+							AND IsNULL(intMachineId, 0) = CASE 
+								WHEN intMachineId IS NOT NULL
+									THEN IsNULL(@intMachineId, 0)
+								ELSE IsNULL(intMachineId, 0)
+								END
 							AND intItemTypeId IN (
 								1
 								,3
@@ -2114,10 +2124,15 @@ BEGIN TRY
 				ELSE
 				BEGIN
 					UPDATE tblMFProductionSummary
-					SET dblConsumedQuantity = dblConsumedQuantity + @dblReqQty,intStageLocationId=@intStageLocationId
+					SET dblConsumedQuantity = dblConsumedQuantity + @dblReqQty
+						,intStageLocationId = @intStageLocationId
 					WHERE intWorkOrderId = @intWorkOrderId
 						AND intItemId = @intLotItemId
-						AND IsNULL(intMachineId,0) = Case When intMachineId is not null then IsNULL(@intMachineId ,0) else IsNULL(intMachineId,0) end
+						AND IsNULL(intMachineId, 0) = CASE 
+							WHEN intMachineId IS NOT NULL
+								THEN IsNULL(@intMachineId, 0)
+							ELSE IsNULL(intMachineId, 0)
+							END
 						AND intItemTypeId IN (
 							1
 							,3
@@ -2194,7 +2209,11 @@ BEGIN TRY
 						FROM tblMFProductionSummary
 						WHERE intWorkOrderId = @intWorkOrderId
 							AND intItemId = @intLotItemId
-							AND IsNULL(intMachineId,0) = Case When intMachineId is not null then IsNULL(@intMachineId ,0) else IsNULL(intMachineId,0) end
+							AND IsNULL(intMachineId, 0) = CASE 
+								WHEN intMachineId IS NOT NULL
+									THEN IsNULL(@intMachineId, 0)
+								ELSE IsNULL(intMachineId, 0)
+								END
 							AND intItemTypeId IN (
 								1
 								,3
@@ -2249,10 +2268,15 @@ BEGIN TRY
 				ELSE
 				BEGIN
 					UPDATE tblMFProductionSummary
-					SET dblConsumedQuantity = dblConsumedQuantity + @dblQty,intStageLocationId=@intStageLocationId
+					SET dblConsumedQuantity = dblConsumedQuantity + @dblQty
+						,intStageLocationId = @intStageLocationId
 					WHERE intWorkOrderId = @intWorkOrderId
 						AND intItemId = @intLotItemId
-						AND IsNULL(intMachineId,0) = Case When intMachineId is not null then IsNULL(@intMachineId ,0) else IsNULL(intMachineId,0) end
+						AND IsNULL(intMachineId, 0) = CASE 
+							WHEN intMachineId IS NOT NULL
+								THEN IsNULL(@intMachineId, 0)
+							ELSE IsNULL(intMachineId, 0)
+							END
 						AND intItemTypeId IN (
 							1
 							,3

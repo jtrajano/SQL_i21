@@ -36,6 +36,7 @@ BEGIN TRY
 		,@strMsg NVARCHAR(MAX)
 		,@dblWeight DECIMAL(24, 10)
 		,@intMachineId INT
+		,@ysnLifeTimeByEndOfMonth BIT
 
 	SELECT @dtmCurrentDateTime = GETDATE()
 
@@ -458,10 +459,17 @@ BEGIN TRY
 					FROM dbo.tblICItem
 					WHERE intItemId = @intItemId
 
+					SELECT @ysnLifeTimeByEndOfMonth = ysnLifeTimeByEndOfMonth
+					FROM tblMFCompanyPreference
+
 					IF @strLifeTimeType = 'Years'
 						SET @dtmExpiryDate = DateAdd(yy, @intLifeTime, @dtmCurrentDateTime)
 					ELSE IF @strLifeTimeType = 'Months'
+						AND @ysnLifeTimeByEndOfMonth = 0
 						SET @dtmExpiryDate = DateAdd(mm, @intLifeTime, @dtmCurrentDateTime)
+					ELSE IF @strLifeTimeType = 'Months'
+						AND @ysnLifeTimeByEndOfMonth = 1
+						SET @dtmExpiryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, DateAdd(mm, @intLifeTime, @dtmCurrentDateTime)) + 1, 0))
 					ELSE IF @strLifeTimeType = 'Days'
 						SET @dtmExpiryDate = DateAdd(dd, @intLifeTime, @dtmCurrentDateTime)
 					ELSE IF @strLifeTimeType = 'Hours'

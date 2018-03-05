@@ -30,13 +30,51 @@ BEGIN
 		,@intLifeTime INT
 		,@intLotDueDays INT
 		,@dtmDueDate DATETIME
+		,@ysnLifeTimeByEndOfMonth BIT
+		,@strLotNumber NVARCHAR(50)
+		,@intBondStatusId INT
+		,@strContainerNo NVARCHAR(50)
+		,@intInventoryReceiptItemId INT
+		,@intInventoryReceiptId INT
+		,@strVendorRefNo NVARCHAR(50)
+		,@strWarehouseRefNo NVARCHAR(50)
+		,@strReceiptNumber NVARCHAR(50)
+		,@strTransactionId NVARCHAR(50)
+		,@dtmReceiptDate DATETIME
+		,@strCondition NVARCHAR(50)
+		,@intSplitFromLotId INT
+		,@ysnBonded BIT
+		,@strLotReceiptNumber NVARCHAR(50)
+		,@dblTareWeight NUMERIC(38, 20)
 
 	SELECT @ysnPickByLotCode = ysnPickByLotCode
 		,@intLotCodeStartingPosition = intLotCodeStartingPosition
 		,@intLotCodeNoOfDigits = intLotCodeNoOfDigits
 		,@intDamagedStatusId = intDamagedStatusId
 		,@intLotDueDays = intLotDueDays
+		,@ysnLifeTimeByEndOfMonth = ysnLifeTimeByEndOfMonth
 	FROM tblMFCompanyPreference
+
+	SELECT @strLotNumber = strLotNumber
+		,@strCondition = strCondition
+		,@intSplitFromLotId = intSplitFromLotId
+		,@strLotReceiptNumber = strReceiptNumber
+	FROM tblICLot
+	WHERE intLotId = @intLotId
+
+	If @intSplitFromLotId is null and @ysnLifeTimeByEndOfMonth=1
+	Begin
+		SELECT @strLifeTimeType = strLifeTimeType
+			,@intLifeTime = intLifeTime
+		FROM dbo.tblICItem
+		WHERE intItemId = @intItemId
+
+		If @strLifeTimeType = 'Months'
+		Begin
+			SET @dtmExpiryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, DateAdd(mm, @intLifeTime, GetDate())) + 1, 0))
+		End
+
+	End
 
 	SELECT @dtmCurrentDateTime = GETDATE()
 
@@ -121,7 +159,11 @@ BEGIN
 			IF @strLifeTimeType = 'Years'
 				SET @dtmExpiryDate = DateAdd(yy, @intLifeTime, @dtmManufacturedDate)
 			ELSE IF @strLifeTimeType = 'Months'
+				AND @ysnLifeTimeByEndOfMonth = 0
 				SET @dtmExpiryDate = DateAdd(mm, @intLifeTime, @dtmManufacturedDate)
+			ELSE IF @strLifeTimeType = 'Months'
+				AND @ysnLifeTimeByEndOfMonth = 1
+				SET @dtmExpiryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, DateAdd(mm, @intLifeTime, @dtmManufacturedDate)) + 1, 0))
 			ELSE IF @strLifeTimeType = 'Days'
 				SET @dtmExpiryDate = DateAdd(dd, @intLifeTime, @dtmManufacturedDate)
 			ELSE IF @strLifeTimeType = 'Hours'
@@ -165,8 +207,8 @@ BEGIN
 				ELSE dtmManufacturedDate
 				END
 			,dtmExpiryDate = CASE 
-				WHEN @ysnPickByLotCode = 1
-					AND Len(@strLotCode) = 5
+				WHEN (@ysnPickByLotCode = 1
+					AND Len(@strLotCode) = 5) or (@strLifeTimeType = 'Months' and @intSplitFromLotId is null and @ysnLifeTimeByEndOfMonth=1)
 					THEN @dtmExpiryDate
 				ELSE dtmExpiryDate
 				END
@@ -183,36 +225,15 @@ BEGIN
 				ELSE dtmManufacturedDate
 				END
 			,dtmExpiryDate = CASE 
-				WHEN @ysnPickByLotCode = 1
-					AND Len(@strLotCode) = 5
+				WHEN (@ysnPickByLotCode = 1
+					AND Len(@strLotCode) = 5) or (@strLifeTimeType = 'Months' and @intSplitFromLotId is null and @ysnLifeTimeByEndOfMonth=1)
 					THEN @dtmExpiryDate
 				ELSE dtmExpiryDate
 				END
 		WHERE intLotId = @intLotId
 	END
 
-	DECLARE @strLotNumber NVARCHAR(50)
-		,@intBondStatusId INT
-		,@strContainerNo NVARCHAR(50)
-		,@intInventoryReceiptItemId INT
-		,@intInventoryReceiptId INT
-		,@strVendorRefNo NVARCHAR(50)
-		,@strWarehouseRefNo NVARCHAR(50)
-		,@strReceiptNumber NVARCHAR(50)
-		,@strTransactionId NVARCHAR(50)
-		,@dtmReceiptDate DATETIME
-		,@strCondition NVARCHAR(50)
-		,@intSplitFromLotId INT
-		,@ysnBonded BIT
-		,@strLotReceiptNumber NVARCHAR(50)
-		,@dblTareWeight NUMERIC(38, 20)
 
-	SELECT @strLotNumber = strLotNumber
-		,@strCondition = strCondition
-		,@intSplitFromLotId = intSplitFromLotId
-		,@strLotReceiptNumber = strReceiptNumber
-	FROM tblICLot
-	WHERE intLotId = @intLotId
 
 	IF @intSplitFromLotId IS NULL
 		AND @strCondition = 'Damaged'

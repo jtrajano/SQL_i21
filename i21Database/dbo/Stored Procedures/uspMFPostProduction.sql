@@ -61,6 +61,7 @@ DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 	,@strLocationName NVARCHAR(50)
 	,@strProduceBatchId NVARCHAR(40)
 	,@intManufacturingCellId INT
+	,@ysnLifeTimeByEndOfMonth INT
 
 SET @strProduceBatchId = ISNULL(@strBatchId, '') + '-P'
 
@@ -255,10 +256,17 @@ BEGIN
 	FROM dbo.tblICItem
 	WHERE intItemId = @intItemId
 
+	SELECT @ysnLifeTimeByEndOfMonth = ysnLifeTimeByEndOfMonth
+	FROM tblMFCompanyPreference
+
 	IF @strLifeTimeType = 'Years'
 		SET @dtmExpiryDate = DateAdd(yy, @intLifeTime, @dtmProductionDate)
 	ELSE IF @strLifeTimeType = 'Months'
+		AND @ysnLifeTimeByEndOfMonth = 0
 		SET @dtmExpiryDate = DateAdd(mm, @intLifeTime, @dtmProductionDate)
+	ELSE IF @strLifeTimeType = 'Months'
+		AND @ysnLifeTimeByEndOfMonth = 1
+		SET @dtmExpiryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, DateAdd(mm, @intLifeTime, @dtmProductionDate)) + 1, 0))
 	ELSE IF @strLifeTimeType = 'Days'
 		SET @dtmExpiryDate = DateAdd(dd, @intLifeTime, @dtmProductionDate)
 	ELSE IF @strLifeTimeType = 'Hours'

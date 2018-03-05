@@ -56,8 +56,10 @@ BEGIN
 		,@strLotTracking NVARCHAR(50)
 		,@strLocationName NVARCHAR(50)
 		,@intManufacturingCellId INT
+		,@ysnLifeTimeByEndOfMonth BIT
 
 	SELECT TOP 1 @dblDefaultResidueQty = ISNULL(dblDefaultResidueQty, 0.00001)
+		,@ysnLifeTimeByEndOfMonth = ysnLifeTimeByEndOfMonth
 	FROM tblMFCompanyPreference
 
 	DECLARE @tblMFLot TABLE (
@@ -344,7 +346,11 @@ BEGIN
 		IF @strLifeTimeType = 'Years'
 			SET @dtmExpiryDate = DateAdd(yy, @intLifeTime, GetDate())
 		ELSE IF @strLifeTimeType = 'Months'
+			AND @ysnLifeTimeByEndOfMonth = 0
 			SET @dtmExpiryDate = DateAdd(mm, @intLifeTime, GetDate())
+		ELSE IF @strLifeTimeType = 'Months'
+			AND @ysnLifeTimeByEndOfMonth = 1
+			SET @dtmExpiryDate = DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, DateAdd(mm, @intLifeTime, GetDate())) + 1, 0))
 		ELSE IF @strLifeTimeType = 'Days'
 			SET @dtmExpiryDate = DateAdd(dd, @intLifeTime, GetDate())
 		ELSE IF @strLifeTimeType = 'Hours'
