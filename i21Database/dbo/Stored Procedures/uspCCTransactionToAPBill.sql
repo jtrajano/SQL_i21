@@ -28,23 +28,24 @@ BEGIN
 			DECLARE @dtmDate DATETIME
 			DECLARE @ccdReference NVARCHAR(50)
 			DECLARE @vendorId INT
-			DECLARE @CCRItemToAPItem TABLE
-			(
-				intSiteHeaderId int, 
-				strItem nvarchar(100)
-			)
+				DECLARE @CCRItemToAPItem TABLE
+				(
+					intSiteHeaderId int, 
+					strItem nvarchar(100)
+				)
 
-			INSERT INTO @CCRItemToAPItem VALUES (@intSiteHeaderId,'Dealer Sites Net')
-			INSERT INTO @CCRItemToAPItem VALUES (@intSiteHeaderId,'Company Owned Gross')
-			INSERT INTO @CCRItemToAPItem VALUES (@intSiteHeaderId,'Company Owned Fees')
+				INSERT INTO @CCRItemToAPItem VALUES (@intSiteHeaderId,'Dealer Sites Net')
+				INSERT INTO @CCRItemToAPItem VALUES (@intSiteHeaderId,'Company Owned Gross')
+				INSERT INTO @CCRItemToAPItem VALUES (@intSiteHeaderId,'Company Owned Fees')
+				INSERT INTO @CCRItemToAPItem VALUES (@intSiteHeaderId,'Dealer Sites Shared Fees')
 
-			SELECT @ccdReference = ccSiteHeader.strCcdReference
-				, @dtmDate = ccSiteHeader.dtmDate
-				, @shipTo = ccSiteHeader.intCompanyLocationId
-				, @vendorId = ccVendorDefault.intVendorId
-			FROM tblCCSiteHeader ccSiteHeader
-			INNER JOIN tblCCVendorDefault ccVendorDefault ON ccVendorDefault.intVendorDefaultId = ccSiteHeader.intVendorDefaultId
-			WHERE ccSiteHeader.intSiteHeaderId = @intSiteHeaderId
+				SELECT @ccdReference = ccSiteHeader.strCcdReference
+					, @dtmDate = ccSiteHeader.dtmDate
+					, @shipTo = ccSiteHeader.intCompanyLocationId
+					, @vendorId = ccVendorDefault.intVendorId
+				FROM tblCCSiteHeader ccSiteHeader
+				INNER JOIN tblCCVendorDefault ccVendorDefault ON ccVendorDefault.intVendorDefaultId = ccSiteHeader.intVendorDefaultId
+				WHERE ccSiteHeader.intSiteHeaderId = @intSiteHeaderId
 
 			INSERT INTO @voucherDetailCC([intAccountId] 
 				,[intSiteDetailId] 
@@ -63,17 +64,21 @@ BEGIN
 				 ,(CASE WHEN ccItem.strItem = 'Dealer Sites Net' AND ccSite.strSiteType = 'Dealer Site' THEN ccSite.intAccountId 
 					WHEN ccItem.strItem = 'Company Owned Gross' AND ccSite.strSiteType = 'Company Owned' THEN ccSite.intCreditCardReceivableAccountId  
 					WHEN ccItem.strItem = 'Company Owned Fees' AND ccSite.strSiteType = 'Company Owned' THEN ccSite.intFeeExpenseAccountId
+					WHEN ccItem.strItem = 'Dealer Sites Net' AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN ccSite.intAccountId 
+					WHEN ccItem.strItem = 'Dealer Sites Shared Fees' AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN ccSite.intFeeExpenseAccountId
 					ELSE null END) AS intAccountId
 				 ,(CASE WHEN ccItem.strItem = 'Dealer Sites Net' AND ccSite.strSiteType = 'Dealer Site' THEN ccSiteDetail.dblNet 
 					WHEN ccItem.strItem = 'Company Owned Gross' AND ccSite.strSiteType = 'Company Owned' THEN ccSiteDetail.dblGross 
-					WHEN ccItem.strItem = 'Company Owned Fees' AND ccSite.strSiteType = 'Company Owned' THEN ccSiteDetail.dblFees 
+					WHEN ccItem.strItem = 'Company Owned Fees' AND ccSite.strSiteType = 'Company Owned' THEN ccSiteDetail.dblFees
+					WHEN ccItem.strItem = 'Dealer Sites Net' AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN ccSiteDetail.dblNet
+					WHEN ccItem.strItem = 'Dealer Sites Shared Fees' AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN ccSiteDetail.dblFees - (ccSiteDetail.dblFees * (ccSite.dblSharedFeePercentage / 100))
 					ELSE null END) AS dblCost
 			FROM tblCCSiteHeader ccSiteHeader
 			LEFT JOIN tblCCSiteDetail ccSiteDetail ON ccSiteDetail.intSiteHeaderId = ccSiteHeader.intSiteHeaderId
 			LEFT JOIN vyuCCSite ccSite ON ccSite.intSiteId = ccSiteDetail.intSiteId
 			LEFT JOIN @CCRItemToAPItem ccItem ON ccItem.intSiteHeaderId = ccSiteHeader.intSiteHeaderId 
 			WHERE ccSiteHeader.intSiteHeaderId = @intSiteHeaderId and ccSiteHeader.strApType <> 'Cash Deposited') A
-			WHERE intAccountId IS NOT NULL
+			WHERE intAccountId IS NOT NULL AND dblCost != 0
 			GROUP BY  intAccountId, intSiteDetailId, strItem 
 
 			DECLARE @intCountDetail INT = 0
