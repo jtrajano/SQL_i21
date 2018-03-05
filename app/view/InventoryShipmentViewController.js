@@ -670,14 +670,14 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         store: '{allocateBy}'
                     }
                 },
-                colAccrue: {
-                    dataIndex: 'ysnAccrue',
-                    disabled: '{current.ysnPosted}',
-                },
+                // colAccrue: {
+                //     dataIndex: 'ysnAccrue',
+                //     disabled: '{current.ysnPosted}',
+                // },
                 colCostVendor: {
                     dataIndex: 'strVendorName',
                     editor: {
-                        readOnly: '{readOnlyAccrue}',
+                        //readOnly: '{readOnlyAccrue}',
                         origValueField: 'intEntityId',
                         origUpdateField: 'intEntityVendorId',
                         store: '{vendor}'
@@ -742,6 +742,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             enableActivity: true,
             enableCustomTab: true,
             createTransaction: Ext.bind(me.createTransaction, me),
+            validateRecord: me.validateRecord,
             enableAudit: true,
             createRecord: me.createRecord,
             binding: me.config.binding,
@@ -801,6 +802,25 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             txtShipQty.on('change', me.onCalculateGrossWeight);
         }
         return win.context;
+    },
+
+    validateRecord: function(config, action){
+        var current = config.window.viewModel.data.current;
+        if (current) {
+            var details = current.tblICInventoryShipmentCharges().data.items;
+            details = _.filter(details, function(x) { return !x.dummy; });
+            if (details.length > 0) {
+                Ext.each(details, function (rec, idx) {
+                    rec.set('ysnAccrue', '');
+                });
+            }
+        }
+
+        this.validateRecord(config, function (result) {
+            if (result) {
+                action(true);
+            }
+        });
     },
 
     onShipmentItemDelete: function(action) {
@@ -2385,10 +2405,13 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             current.set('strCostUOM', record.get('strCostUOM'));
             current.set('strOnCostType', record.get('strOnCostType'));
             current.set('ysnPrice', record.get('ysnPrice'));
-            current.set('ysnAccrue', record.get('ysnAccrue'));
+            //current.set('ysnAccrue', record.get('ysnAccrue'));
             current.set('intCurrencyId', chargeCurrencyId);
             current.set('strCurrency', chargeCurrency);
             current.set('dblTax', null);
+
+            current.set('intEntityVendorId', masterRecord.get('intEntityCustomerId'));
+            current.set('strVendorName', masterRecord.get('strCustomerName'));
 
             if (!iRely.Functions.isEmpty(record.get('strOnCostType'))) {
                 current.set('strCostMethod', 'Percentage');
@@ -3049,16 +3072,16 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                                                         dblQuantity: otherCharge.strCostMethod == 'Amount' ? 1 : order.get('dblQtyToShip'),
                                                                         dblRate: otherCharge.strCostMethod == 'Amount' ? 0 : otherCharge.dblRate,
                                                                         intCostUOMId: otherCharge.intItemUOMId,
-                                                                        intEntityVendorId: otherCharge.intVendorId,
+                                                                        intEntityVendorId: otherCharge.intVendorId ? otherCharge.intVendorId : currentRecord.get('intEntityCustomerId'),
                                                                         dblAmount: otherCharge.strCostMethod == 'Amount' ? otherCharge.dblRate : 0,
                                                                         strAllocatePriceBy: 'Unit',
-                                                                        ysnAccrue: otherCharge.ysnAccrue,
+                                                                        //ysnAccrue: otherCharge.ysnAccrue,
+                                                                        strVendorName: otherCharge.intVendorId ? otherCharge.strVendorName : currentRecord.get('strCustomerName'),
                                                                         ysnPrice: otherCharge.ysnPrice,
                                                                         strItemNo: otherCharge.strItemNo,
                                                                         intCurrencyId: otherCharge.intCurrencyId,
                                                                         strCurrency: otherCharge.strCurrency,
                                                                         strCostUOM: otherCharge.strUOM,
-                                                                        strVendorId: otherCharge.strVendorName,
                                                                         strContractNumber: order.get('strOrderNumber')
                                                                     });
                                                                     currentVM.tblICInventoryShipmentCharges().add(newCost);
@@ -3276,7 +3299,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
                                 // Do not compute tax if it can't be converted to voucher. 
                                 // This means accrue is false and price down is false. 
-                                if (!charge.get('ysnAccrue') && !charge.get('ysnPrice')){
+                                if (!charge.get('intEntityVendorId') && !charge.get('ysnPrice')){
                                     taxAmount = 0.00;
                                 }
 
@@ -3428,19 +3451,19 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         });
     },
     
-    onAccrueCheckChange: function (obj, rowIndex, checked, eOpts) {
-        if (obj.dataIndex === 'ysnAccrue') {
-            var grid = obj.up('grid');
-            var win = obj.up('window');
-            var current = grid.view.getRecord(rowIndex);
+    // onAccrueCheckChange: function (obj, rowIndex, checked, eOpts) {
+    //     if (obj.dataIndex === 'ysnAccrue') {
+    //         var grid = obj.up('grid');
+    //         var win = obj.up('window');
+    //         var current = grid.view.getRecord(rowIndex);
 
-            if (checked === false) {
-                current.set('intEntityVendorId', null);
-                current.set('strVendorName', null);
-                current.set('dblTax', null);
-            }
-        }
-    },
+    //         if (checked === false) {
+    //             current.set('intEntityVendorId', null);
+    //             current.set('strVendorName', null);
+    //             current.set('dblTax', null);
+    //         }
+    //     }
+    // },
 
     onItemBeforeQuery: function(obj) {
         if(obj.combo) {
@@ -4662,9 +4685,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             "#btnCalculateCharges": {
                 click: this.onCalculateChargeClick
             },
-            "#colAccrue": {
-                beforecheckchange: this.onAccrueCheckChange
-            },
+            // "#colAccrue": {
+            //     beforecheckchange: this.onAccrueCheckChange
+            // },
             "#txtComments": {
                 specialKey: this.onSpecialKeyTab
             },
