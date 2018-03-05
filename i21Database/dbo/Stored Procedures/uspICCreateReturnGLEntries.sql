@@ -315,22 +315,24 @@ AS
 			,dblReturnUnitCostInFunctionalCurrency = 
 				CASE 
 					WHEN ISNULL(r.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ri.dblForexRate, 0) <> 0 THEN 
-						(
-							dbo.fnCalculateReceiptUnitCost(
-								ri.intItemId
-								,ri.intUnitMeasureId		
-								,ri.intCostUOMId
-								,ri.intWeightUOMId
-								,ri.dblUnitCost
-								,ri.dblNet
-								,t.intLotId
-								,t.intItemUOMId
-								,AggregrateItemLots.dblTotalNet
-								,ri.ysnSubCurrency
-								,r.intSubCurrencyCents
+						dbo.fnMultiply(
+							(
+								dbo.fnCalculateReceiptUnitCost(
+									ri.intItemId
+									,ri.intUnitMeasureId		
+									,ri.intCostUOMId
+									,ri.intWeightUOMId
+									,ri.dblUnitCost
+									,ri.dblNet
+									,t.intLotId
+									,t.intItemUOMId
+									,AggregrateItemLots.dblTotalNet
+									,ri.ysnSubCurrency
+									,r.intSubCurrencyCents
+								)
 							)
+							,ri.dblForexRate
 						)
-						* ri.dblForexRate
 					ELSE 
 						(
 							dbo.fnCalculateReceiptUnitCost(
@@ -650,19 +652,27 @@ FROM	ForGLEntries_CTE
 		INNER JOIN dbo.tblGLAccount 
 			ON tblGLAccount.intAccountId = GLAccounts.intAutoNegativeId
 		CROSS APPLY dbo.fnGetDebit(
-			dbo.fnMultiply(ISNULL(dblQty, 0), (ISNULL(dblCost, 0) - ISNULL(dblReturnUnitCostInFunctionalCurrency, 0)))
+			ROUND(dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)), 2)
+			- ROUND(dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblReturnUnitCostInFunctionalCurrency, 0)), 2)
 		) Debit
 		CROSS APPLY dbo.fnGetCredit(
-			dbo.fnMultiply(ISNULL(dblQty, 0), (ISNULL(dblCost, 0) - ISNULL(dblReturnUnitCostInFunctionalCurrency, 0)))
+			ROUND(dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)), 2)
+			- ROUND(dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblReturnUnitCostInFunctionalCurrency, 0)), 2) 
 		) Credit
 		CROSS APPLY dbo.fnGetDebitForeign(
-			dbo.fnMultiply(ISNULL(dblQty, 0), (ISNULL(dblCost, 0) - ISNULL(dblReturnUnitCostInFunctionalCurrency, 0)))
+			(
+				ROUND(dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0) ), 2)
+				- ROUND(dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblReturnUnitCostInFunctionalCurrency, 0)), 2)
+			)
 			,ForGLEntries_CTE.intCurrencyId
 			,@intFunctionalCurrencyId
 			,ForGLEntries_CTE.dblForexRate
 		) DebitForeign
 		CROSS APPLY dbo.fnGetCreditForeign(
-			dbo.fnMultiply(ISNULL(dblQty, 0), (ISNULL(dblCost, 0) - ISNULL(dblReturnUnitCostInFunctionalCurrency, 0)))
+			(
+				ROUND(dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)),2)
+				- ROUND(dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblReturnUnitCostInFunctionalCurrency, 0)), 2)
+			)
 			,ForGLEntries_CTE.intCurrencyId
 			,@intFunctionalCurrencyId
 			,ForGLEntries_CTE.dblForexRate
@@ -681,7 +691,11 @@ WHERE	ForGLEntries_CTE.intTransactionTypeId NOT IN (
 			, @InventoryTransactionTypeId_AutoNegative
 			, @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
 		)
-		AND (ISNULL(dblCost, 0) - ISNULL(dblReturnUnitCostInFunctionalCurrency, 0)) <> 0 
+		AND (
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0))
+			- dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblReturnUnitCostInFunctionalCurrency, 0))
+		) <> 0 
+
 
 -- Inventory 
 UNION ALL 
@@ -902,6 +916,7 @@ FROM	ForGLEntries_CTE
 
 WHERE	ForGLEntries_CTE.intTransactionTypeId = @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
 		AND (Debit.Value <> 0 OR Credit.Value <> 0)
+
 UNION ALL 
 SELECT	
 		dtmDate						= ForGLEntries_CTE.dtmDate
@@ -1042,6 +1057,7 @@ FROM	ForGLEntries_CTE
 
 WHERE	ForGLEntries_CTE.intTransactionTypeId = @InventoryTransactionTypeId_AutoNegative
 		AND (Debit.Value <> 0 OR Credit.Value <> 0)
+
 UNION ALL 
 SELECT	
 		dtmDate						= ForGLEntries_CTE.dtmDate
