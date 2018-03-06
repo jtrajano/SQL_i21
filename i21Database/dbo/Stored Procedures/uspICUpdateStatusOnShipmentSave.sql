@@ -15,11 +15,11 @@ BEGIN
 			,@SourceTypeInboundShipment AS INT = 2
 			,@SourceTypePickLot AS INT = 3
 			
-	-- Update the Sales Order Status. 
-	IF EXISTS(SELECT TOP 1 1 FROM tblICInventoryShipment WHERE intInventoryShipmentId = @intShipmentId AND intOrderType = @OrderTypeSalesOrder)
-	BEGIN
-		EXEC uspSOUpdateOrderShipmentStatus @intShipmentId, 'Inventory', @ysnOpenStatus		
-	END
+	---- Update the Sales Order Status. 
+	--IF EXISTS(SELECT TOP 1 1 FROM tblICInventoryShipment WHERE intInventoryShipmentId = @intShipmentId AND intOrderType = @OrderTypeSalesOrder)
+	--BEGIN
+	--	EXEC uspSOUpdateOrderShipmentStatus @intShipmentId, 'Inventory', @ysnOpenStatus		
+	--END
 
 	-- Update the Logistic Status
 	IF EXISTS(SELECT TOP 1 1 FROM tblICInventoryShipment WHERE intInventoryShipmentId = @intShipmentId AND intOrderType = @OrderTypeSalesContract AND intSourceType = @SourceTypePickLot)
