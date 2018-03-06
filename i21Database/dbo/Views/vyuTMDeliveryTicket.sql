@@ -83,9 +83,9 @@ LEFT JOIN tblEMEntityPhoneNumber ConPhone
 INNER JOIN tblTMDispatch J
 	ON A.intSiteID = J.intSiteID
 INNER JOIN tblICItem I
-	ON J.intProductID = I.intItemId
+	ON A.intProduct = I.intItemId
 LEFT JOIN tblICItem O
-	ON J.intProductID = O.intItemId
+	ON J.intSubstituteProductID = O.intItemId
 LEFT JOIN [vyuARCustomerInquiryReport] CI
 	ON Ent.intEntityId = CI.intEntityCustomerId
 LEFT JOIN tblTMFillMethod H
