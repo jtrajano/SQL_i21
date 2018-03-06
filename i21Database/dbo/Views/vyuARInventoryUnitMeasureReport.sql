@@ -2,14 +2,21 @@
 AS 
 SELECT DETAIL.intItemId
 	 , DETAIL.intItemUOMId	 
-	 , dblTotalQtyShipped	= SUM(ISNULL(DETAIL.dblQtyShipped, 0))
-	 , dblTotal				= SUM(ISNULL(DETAIL.dblQtyShipped, 0)) * SUM(ISNULL(DETAIL.dblPrice, 0))
+	, dblTotalQtyShipped	= SUM([dbo].[fnARGetInvoiceAmountMultiplier](INV.strTransactionType) * ISNULL(DETAIL.dblQtyShipped, 0))
+	, dblTotal				= SUM([dbo].[fnARGetInvoiceAmountMultiplier](INV.strTransactionType) * ISNULL(DETAIL.dblQtyShipped, 0)) * SUM(ISNULL(DETAIL.dblPrice, 0))
+	
 	 , ITEM.strItemNo
 	 , ITEM.strItemDescription
 	 , UOM.strUnitMeasure
 	 , COMPANY.strCompanyName
 	 , COMPANY.strCompanyAddress
 FROM dbo.tblARInvoiceDetail DETAIL WITH (NOLOCK)
+INNER JOIN (
+	SELECT 
+		intInvoiceId,
+		strTransactionType
+	FROM tblARInvoice WITH (NOLOCK)
+) INV ON DETAIL.intInvoiceId = INV.intInvoiceId
 INNER JOIN (
 	SELECT intItemId
 		 , strItemNo
