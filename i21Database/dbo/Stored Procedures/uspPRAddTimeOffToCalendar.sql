@@ -92,7 +92,7 @@ SELECT @intTimeOffRequestId = @intTransactionId
 	END
 	ELSE
 	BEGIN
-		/* Post to Calendar */
+		/* Post to Global Calendar */
 		DECLARE @udtSMEventsIn TABLE(intEventId INT)
 
 		INSERT INTO tblSMEvents
@@ -120,7 +120,6 @@ SELECT @intTimeOffRequestId = @intTransactionId
 			,'<table style="font-size: 14px;"><tbody>'
 				+ '<tr><td><strong>Time Off Type</strong></td><td>' + REPLACE(TTO.strTimeOff, '''', '''''') +'</td></tr>'
 				+ '<tr><td><strong>Time Off Hours</strong></td><td>' + CAST(CAST(TOR.dblRequest AS FLOAT) AS NVARCHAR(50)) + '</td></tr>'
-				+ '<tr><td><strong>Reason</strong></td><td>' + REPLACE(TOR.strReason, '''', '''''') + '</td></tr>'
 				+ '<tr><td><strong>Address while on Time Off</strong></td><td>' + REPLACE(TOR.strAddress, '''', '''''') + '</td></tr>'
 				+ '</tbody></table>'
 			,'{"allDay":"true","drillDown":{"enabled":true,"url":"#/PR/TimeOffRequest?routeId=' + CAST(intTimeOffRequestId AS NVARCHAR(20))+'%7C%5E%7C&activeTab=Details","text":"View Time Off Request "},"title":"Time Off - ' + REPLACE(ENT.strName, '', '''') + '"}'
