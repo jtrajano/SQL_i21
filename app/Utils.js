@@ -11,13 +11,16 @@ Ext.define('Inventory.Utils', {
                 return Number(Math.round(number+'e'+precision)+'e-'+precision); // 1.9768564574630487e+21e-12
             },
             roundWithPrecision: function(number, precision) {
-                var zeroes = "";
-                for(var i = 0; i < precision; i++) {
-                    zeroes += "0";
-                }
-                var pattern = "0.[" + zeroes + "]";
-                return parseFloat(numeral(number).format(pattern));
-            }
+                return parseFloat(numeral(number).format(ic.utils.Number.getPrecisionPattern('0.[', precision, ']')))
+            },
+
+            // Math.trunc is not supported by PhantomJs and IE so it needs to be polyfilled.
+            truncate: function(v) {
+                v = +v;
+                if (!isFinite(v)) return v;
+                
+                return (v - v % 1)   ||   (v < 0 ? -0 : v === 0 ? v : 0);
+            },
         },
 
         Date: {
@@ -34,6 +37,42 @@ Ext.define('Inventory.Utils', {
                     return ic.utils.Math.round((((valueInSeconds / 60.0) / 60.0)) / 24, 2).toString().concat("<em>d</em>");
                 else
                     return ic.utils.Math.round((valueInSeconds), 2).toString().concat("<em>s</em>");
+            }
+        },
+
+        Number: {
+            format: function(number, pattern) {
+                return numeral(number).format(pattern);
+            },
+            formatAccounting: function(number, decimals) {
+                return numeral(number).format(ic.utils.Number.getPrecisionPattern('(0,0.', decimals, ')'));
+            },
+            formatPercentage: function(number) {
+                return numeral(number).format('0%');
+            },
+            getPrecisionPattern: function(prefix, precision, suffix) {
+                var zeroes = "";
+                for(var i = 0; i < precision; i++) {
+                    zeroes += "0";
+                }
+                var pattern = prefix + zeroes + suffix;
+                return pattern;
+            }
+        },
+
+        Uom: {
+            convertQtyBetweenUOM: function (sourceUOMConversionFactor, targetUOMConversionFactor, qty) {
+                var result = 0;
+        
+                if (sourceUOMConversionFactor === targetUOMConversionFactor) {
+                    result = qty;
+                }
+                else if (targetUOMConversionFactor !== 0) {
+                    result = (sourceUOMConversionFactor * qty) / targetUOMConversionFactor;
+                }
+        
+                //return Math.round(result, 12);
+                return ic.utils.Math.roundWithPrecision(result, 12); 
             }
         },
         

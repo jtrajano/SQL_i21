@@ -12,6 +12,7 @@ module.exports = {
         testui: test_ui_dest
     },
     testing: {
-        config: __dirname.replace('gulp', '') +  '/karma.conf.js'
+        config: __dirname.replace('gulp', '') +  '/karma.conf.js',
+        single: __dirname.replace('gulp', '') + '/karma.single.conf.js'
     }
 };

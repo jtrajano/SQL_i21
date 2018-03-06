@@ -35,7 +35,15 @@ gulp.task('test-mocha', function (done) {
     new Server({
         configFile: config.testing.config,
         singleRun: false,
-        reporters: 'nyan'
+        reporters: 'mocha'
+    }, done).start();
+});
+
+gulp.task('test-mocha-single', function (done) {
+    new Server({
+        configFile: config.testing.single,
+        singleRun: false,
+        reporters: 'mocha'
     }, done).start();
 });
 

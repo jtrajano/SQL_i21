@@ -892,7 +892,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             grossQty = lotQty;
         }
         else if (weightUOMConversionFactor !== 0) {
-            grossQty = me.convertQtyBetweenUOM(itemUOMConversionFactor, weightUOMConversionFactor, lotQty);
+            grossQty = ic.utils.Uom.convertQtyBetweenUOM(itemUOMConversionFactor, weightUOMConversionFactor, lotQty);
         }
 
         return {
@@ -900,20 +900,6 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             tare: tareWeight,
             net: grossQty - tareWeight
         };
-    },
-
-    convertQtyBetweenUOM: function (sourceUOMConversionFactor, targetUOMConversionFactor, qty) {
-        var result = 0;
-
-        if (sourceUOMConversionFactor === targetUOMConversionFactor) {
-            result = qty;
-        }
-        else if (targetUOMConversionFactor !== 0) {
-            result = (sourceUOMConversionFactor * qty) / targetUOMConversionFactor;
-        }
-
-        //return Math.round(result, 12);
-        return ic.utils.Math.round(result, 12);
     },
 
     attachOnEditListener: function(win, grdPhysicalCount) {

@@ -21,7 +21,8 @@ var domainFiles = [
 
 var testFiles = [
     { pattern: 'node_modules/extjs-spec-generator/src/UnitTestEngine.js', watched: true },
-    { pattern: 'test/specs/**/*.spec.js', watched: true }
+    { pattern: 'test/specs/business/**/*.spec.js', watched: true },
+    { pattern: 'test/specs/**/item.viewcontroller.spec.js', watched: true }
 ];
 
 var files = libFiles.concat(dependencies.frameworkFiles).concat(mockFiles).concat(dependencies.files).concat(appFiles).concat(domainFiles).concat(testFiles);

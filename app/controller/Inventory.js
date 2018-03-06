@@ -19,7 +19,10 @@ Ext.define('Inventory.controller.Inventory', {
         'iRely.grid.Manager',
         'GeneralLedger.controller.Global',
         'GeneralLedger.controls.AccountComboBox',
-        "Grain.controller.Grain"
+        "Grain.controller.Grain",
+        "Inventory.domain.receipt.LotReplicationAnalyzer",
+        "Inventory.domain.receipt.LotReplicator",
+        "Inventory.domain.receipt.LotReplicationProgress"
     ],
     singleton: true,
 
