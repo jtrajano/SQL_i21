@@ -179,8 +179,11 @@ BEGIN
 		SET @FormattedDifference =  CAST(ABS(@ReceiptItemNet - @LotQtyInItemUOM) AS NVARCHAR(50))
 
 		-- 'Net quantity mismatch. It is {@FormattedReceiptItemNet} on item {@strItemNo} but the total net from the lot(s) is {@FormattedLotQty}.'
-		EXEC uspICRaiseError 80081, @ReceiptItemNet, @strItemNo, @LotQtyInItemUOM; 
-		RETURN -1; 
+		-- TEMPORARY MESSAGE. Needs enhancements on fnICFormatErrorMessage, doesn't support precision display.
+		DECLARE @msg NVARCHAR(200)
+		SET @msg = 'Net quantity mismatch. It is ' + CAST(dbo.fnICFormatNumber(@ReceiptItemNet) AS NVARCHAR(50)) + ' on item ' + @strItemNo + ' but the total net from the lot(s) is ' + CAST(dbo.fnICFormatNumber(@LotQtyInItemUOM) AS NVARCHAR(50)) + '.'
+		RAISERROR(@msg, 11, 1)
+		RETURN -1;
 	END 
 END
 
