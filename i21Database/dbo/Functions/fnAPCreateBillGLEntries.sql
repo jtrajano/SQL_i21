@@ -607,10 +607,10 @@ BEGIN
 		[dblDebit]						=	CAST(CASE WHEN B.dblOldCost IS NULL THEN B.dblTotal 
 												 ELSE D.dblAmount--(CASE WHEN D.ysnInventoryCost = 0 THEN D.dblAmount ELSE B.dblTotal END)
 													--commented on AP-3227, taxes for other charges should not be added here as it is already part of taxes entries
-											END AS DECIMAL(18,2))
+											END 
 											* ISNULL(NULLIF(B.dblRate,0),1) 
 											* CASE WHEN A.intTransactionType IN (2, 3, 13) THEN (-1) 
-														ELSE 1 END,
+														ELSE 1 END AS DECIMAL(18,2)),
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	ISNULL(units.dblTotalUnits,0),
 		[dblCreditUnit]					=	0,
@@ -638,10 +638,10 @@ BEGIN
 		[dblDebitForeign]				=	CAST(CASE WHEN B.dblOldCost IS NULL THEN B.dblTotal 
 												 ELSE D.dblAmount--(CASE WHEN D.ysnInventoryCost = 0 THEN D.dblAmount ELSE B.dblTotal END)
 													--commented on AP-3227, taxes for other charges should not be added here as it is already part of taxes entries
-											END AS DECIMAL(18,2))
+												 END 
 											-- * ISNULL(NULLIF(B.dblRate,0),1) 
 											* CASE WHEN A.intTransactionType IN (2, 3, 13) THEN (-1) 
-														ELSE 1 END,      
+														ELSE 1 END AS DECIMAL(18,2)),      
 		[dblDebitReport]				=	0,
 		[dblCreditForeign]				=	0,
 		[dblCreditReport]				=	0,
