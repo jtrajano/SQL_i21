@@ -62,5 +62,5 @@ EXEC sp_addmessage 60014,11,@strmessage,'us_english','False'
 
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 60015) EXEC sp_dropmessage 60015, 'us_english'	
-SET @strmessage = 'Unable to post with an inactive account %s'
+SET @strmessage = 'Unable to post/unpost with an inactive account %s'
 EXEC sp_addmessage 60015,11,@strmessage,'us_english','False'

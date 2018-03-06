@@ -63,17 +63,15 @@ DECLARE @intOrderId INT
 		,@dblGrossUnits AS NUMERIC(38, 20)
 		,@dblNetUnits AS NUMERIC(38, 20);
 
-BEGIN
-	SELECT	
-		@intTicketItemUOMId = UOM.intItemUOMId
-		, @intLoadId = SC.intLoadId
-		, @intItemId = SC.intItemId
-		, @dblGrossUnits = SC.dblGrossUnits
-		, @dblNetUnits = SC.dblNetUnits
-	FROM	dbo.tblSCTicket SC	        
-			JOIN dbo.tblICItemUOM UOM ON SC.intItemId = UOM.intItemId
-	WHERE	SC.intTicketId = @intTicketId AND UOM.ysnStockUnit = 1		
-END
+SELECT	
+	@intTicketItemUOMId = UOM.intItemUOMId
+	, @intLoadId = SC.intLoadId
+	, @intItemId = SC.intItemId
+	, @dblGrossUnits = SC.dblGrossUnits
+	, @dblNetUnits = SC.dblNetUnits
+FROM	dbo.tblSCTicket SC	        
+		JOIN dbo.tblICItemUOM UOM ON SC.intItemId = UOM.intItemId
+WHERE	SC.intTicketId = @intTicketId AND UOM.ysnStockUnit = 1		
 
 BEGIN TRY
 DECLARE @intId INT;

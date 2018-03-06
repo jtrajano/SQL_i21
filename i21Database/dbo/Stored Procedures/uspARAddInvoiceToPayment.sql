@@ -99,6 +99,7 @@ DECLARE @InvoiceTotal		NUMERIC(18, 6)
 	,@PaymentTotal			NUMERIC(18, 6)
 	,@BasePaymentTotal		NUMERIC(18, 6)
 	,@PaymentDate			DATETIME
+	,@dtmDiscountDate		DATETIME
 	,@InvoiceReportNumber	NVARCHAR(MAX)
  
 SELECT
@@ -114,14 +115,21 @@ SELECT
 	,@BaseInvoiceTotal		= [dblBaseInvoiceTotal] * dbo.fnARGetInvoiceAmountMultiplier([strTransactionType])
 	,@InvoiceAmountDue		= [dblAmountDue] * dbo.fnARGetInvoiceAmountMultiplier([strTransactionType])
 	,@BaseInvoiceAmountDue	= [dblBaseAmountDue] * dbo.fnARGetInvoiceAmountMultiplier([strTransactionType])
-	,@TermDiscount			= [dbo].fnRoundBanker(ISNULL(dbo.[fnGetDiscountBasedOnTerm](@PaymentDate, [dtmDate], [intTermId], [dblInvoiceTotal]), @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
-	,@BaseTermDiscount		= [dbo].fnRoundBanker(ISNULL(dbo.[fnGetDiscountBasedOnTerm](@PaymentDate, [dtmDate], [intTermId], [dblBaseInvoiceTotal]), @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
-	,@AvailableDiscount		= [dblDiscountAvailable]
-	,@BaseAvailableDiscount	= [dblBaseDiscountAvailable]
+	,@TermDiscount			= [dbo].fnRoundBanker(ISNULL(dbo.[fnGetDiscountBasedOnTerm](@PaymentDate, [dtmDate], [intTermId], [dblInvoiceTotal]), @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()) * dbo.fnARGetInvoiceAmountMultiplier([strTransactionType])
+	,@BaseTermDiscount		= [dbo].fnRoundBanker(ISNULL(dbo.[fnGetDiscountBasedOnTerm](@PaymentDate, [dtmDate], [intTermId], [dblBaseInvoiceTotal]), @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()) * dbo.fnARGetInvoiceAmountMultiplier([strTransactionType])
+	,@AvailableDiscount		= [dblDiscountAvailable] * dbo.fnARGetInvoiceAmountMultiplier([strTransactionType])
+	,@BaseAvailableDiscount	= [dblBaseDiscountAvailable] * dbo.fnARGetInvoiceAmountMultiplier([strTransactionType])
 	,@InvoiceNumber			= [strInvoiceNumber]
 	,@TransactionType		= [strTransactionType]
-FROM
-	tblARInvoice
+	,@dtmDiscountDate		= CASE WHEN ISNULL(dblDiscountAvailable, 0) = 0
+									THEN NULL
+									ELSE CASE WHEN ISNULL(intDiscountDay, 0) = 0 OR ISNULL(intDiscountDay, 0) > DATEDIFF(DAY, DATEADD(DAY, 1-DAY(dtmDate), dtmDate), DATEADD(MONTH, 1, DATEADD(DAY, 1-DAY(dtmDate), dtmDate)))
+											THEN DATEADD(DAY, 1, dtmDate)
+										ELSE DATEADD(DAY, intDiscountDay, dtmDate)
+									END
+							  END
+FROM tblARInvoice I
+LEFT OUTER JOIN tblSMTerm T ON I.[intTermId] = T.[intTermID]
 WHERE
 	[intInvoiceId] = @InvoiceId
 
@@ -207,7 +215,7 @@ BEGIN TRY
 		,[dblBasePayment]		
 		,[strInvoiceReportNumber]
 		,[intConcurrencyId]
-
+		,[dtmDiscountDate]
 		)
 	SELECT
 		 [intPaymentId]				= @PaymentId
@@ -220,8 +228,8 @@ BEGIN TRY
 		,[dblBaseInvoiceTotal]		= @BaseInvoiceTotal 
 		,[dblDiscount]				= (CASE WHEN @ApplyTermDiscount = 1 THEN @TermDiscount ELSE @Discount END)
 		,[dblBaseDiscount]			= (CASE WHEN @ApplyTermDiscount = 1 THEN @BaseTermDiscount ELSE @BaseDiscount END)
-		,[dblDiscountAvailable]		= ARI.[dblDiscountAvailable]
-		,[dblBaseDiscountAvailable]	= ARI.[dblBaseDiscountAvailable]
+		,[dblDiscountAvailable]		= ARI.[dblDiscountAvailable] * dbo.fnARGetInvoiceAmountMultiplier([strTransactionType])
+		,[dblBaseDiscountAvailable]	= ARI.[dblBaseDiscountAvailable] * dbo.fnARGetInvoiceAmountMultiplier([strTransactionType])
 		,[dblInterest]				= @Interest
 		,[dblBaseInterest]			= @BaseInterest
 		,[dblAmountDue]				= (@InvoiceAmountDue + @Interest) - (@Payment + (CASE WHEN @ApplyTermDiscount = 1 THEN @TermDiscount ELSE @Discount END))
@@ -230,6 +238,7 @@ BEGIN TRY
 		,[dblBasePayment]			= @BasePayment		
 		,[strInvoiceReportNumber]	= @InvoiceReportNumber
 		,[intConcurrencyId]			= 0
+		,[dtmDiscountDate]			= @dtmDiscountDate
 	FROM	
 		tblARInvoice ARI	
 	WHERE

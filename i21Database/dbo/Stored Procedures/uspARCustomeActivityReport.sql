@@ -264,9 +264,9 @@ INNER JOIN (
 		 , strTaxGroup				= ID.strTaxGroup
 		 , strItemDescription		= ID.strItemDescription
 		 , strUnitMeasure			= ID.strUnitMeasure
-		 , dblAdjustedTax			= ID.dblAdjustedTax
+		 , dblAdjustedTax			= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(ID.dblAdjustedTax, 0) * -1 ELSE ISNULL(ID.dblAdjustedTax, 0) END 
 		 , dblQtyShipped			= ID.dblQtyShipped
-		 , dblTotalTax				= ID.dblTotalTax
+		 , dblTotalTax				= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(ID.dblTotalTax, 0) * -1 ELSE ISNULL(ID.dblTotalTax, 0) END
 	FROM dbo.tblARInvoice I WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT ARID.intInvoiceId

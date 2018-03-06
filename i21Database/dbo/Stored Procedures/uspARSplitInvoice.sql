@@ -309,6 +309,7 @@ BEGIN
 								,[intSubCurrencyId]
 								,[dblSubCurrencyRate]
 								,[intStorageLocationId]
+								,[intCompanyLocationSubLocationId]
 								,[intSubLocationId]
 								,[intConcurrencyId])
 							SELECT
@@ -354,6 +355,7 @@ BEGIN
 								,[intSubCurrencyId]
 								,[dblSubCurrencyRate]
 								,[intStorageLocationId]
+								,[intCompanyLocationSubLocationId]
 								,[intSubLocationId]
 								,1
 							FROM

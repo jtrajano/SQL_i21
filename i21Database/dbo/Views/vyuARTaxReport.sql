@@ -236,6 +236,12 @@ OUTER APPLY (
 	) ITEMUOMSETUP
 	WHERE TAXES.intItemId = ICI.intItemId
 ) ITEMDETAIL
+INNER JOIN (
+	SELECT intTaxClassId
+		 , intCategoryId
+	FROM dbo.tblICCategoryTax ICT WITH (NOLOCK)
+) ITEMTAXCATEGORY ON ITEMTAXCATEGORY.intTaxClassId = TAXCODE.intTaxClassId
+				 AND ITEMTAXCATEGORY.intCategoryId = ITEMDETAIL.intCategoryId
 LEFT OUTER JOIN (
 	SELECT ENTITY.intEntityId 
 		 , strCustomerNumber = CASE WHEN CUS.strCustomerNumber = '' THEN ENTITY.strEntityNo ELSE CUS.strCustomerNumber END

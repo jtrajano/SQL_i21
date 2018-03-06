@@ -202,7 +202,8 @@ FROM
 			,[strBillId]				= APB.[strBillId]
 			,[strTransactionType]		= (CASE WHEN APB.[intTransactionType] = 11 THEN 'Weight Claim' 
 												WHEN APB.[intTransactionType] = 3 THEN 'Debit Memo' 
-												WHEN APB.[intTransactionType] = 2 THEN 'Vendor Prepayment' 
+												WHEN APB.[intTransactionType] = 2 THEN 'Vendor Prepayment'
+												WHEN APB.[intTransactionType] = 1 THEN 'Voucher' 
 											ELSE '' END)
 			,[strType]					= 'Voucher'
 			,[intEntityCustomerId]		= APB.[intEntityVendorId]
@@ -271,10 +272,7 @@ FROM
 				ysnActive
 				FROM tblEMEntityEFTInformation
 				) AS EFT ON CE.intEntityId = EFT.intEntityId								
-		WHERE
-			(([ysnPosted] = 1 AND APB.intTransactionType IN (11,3)) 
-				OR 
-				(ysnPosted = 1 AND APB.intTransactionType = 2))
+		WHERE [ysnPosted] = 1 AND APB.intTransactionType IN (1,2,3,11) 
 	) ARIFP
 LEFT OUTER JOIN 
 	(

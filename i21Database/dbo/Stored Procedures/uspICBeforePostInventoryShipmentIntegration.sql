@@ -89,9 +89,19 @@ END
 
 -- Call the Grain stored procedures. 
 BEGIN 
+	DECLARE @intSalesOrderId INT
+	SELECT TOP 1 @intSalesOrderId = ISNULL(ISI.intOrderId,0) FROM tblICInventoryShipment [IS]
+	INNER JOIN tblICInventoryShipmentItem ISI
+		ON ISI.intInventoryShipmentId = [IS].intInventoryShipmentId	
+	WHERE [IS].intInventoryShipmentId = @intTransactionId
 
 	IF @ysnPost = 1 --AND ISNULL(@SourceType, @INT_SOURCE_TYPE_NONE) = @INT_SOURCE_TYPE_SCALE		
 	BEGIN 
+		IF	@OrderType = @INT_ORDER_TYPE_SALES_ORDER AND ISNULL(@SourceType, @INT_SOURCE_TYPE_NONE) = @INT_SOURCE_TYPE_NONE
+		BEGIN 
+			EXEC dbo.uspSOUpdateOrderShipmentStatus @intSalesOrderId, 'InventoryShipment', 0
+		END
+
 		-- Call this to generate the Other Charges coming from Grain. 
 		EXEC dbo.uspGRShipped 
 			@ItemsFromInventoryShipment
@@ -108,4 +118,4 @@ BEGIN
 	END 
 END 
 
-_Exit: 
+_Exit:
