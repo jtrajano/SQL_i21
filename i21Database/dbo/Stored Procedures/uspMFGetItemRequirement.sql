@@ -1,8 +1,8 @@
-﻿CREATE PROCEDURE dbo.uspMFGetItemRequirement @dtmStartDate DATETIME=NULL
-	,@dtmEndDate DATETIME=NULL
+﻿CREATE PROCEDURE dbo.uspMFGetItemRequirement @dtmStartDate DATETIME = NULL
+	,@dtmEndDate DATETIME = NULL
 	,@strManufacturingCellId NVARCHAR(MAX)
 	,@intLocationId INT
-	,@strWorkOrderId NVARCHAR(MAX)=NULL
+	,@strWorkOrderId NVARCHAR(MAX) = ''
 AS
 BEGIN
 	DECLARE @dtmCurrentDate DATETIME
@@ -34,23 +34,26 @@ BEGIN
 		,intItemUOMId INT
 		,strLotTracking NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		)
+	DECLARE @tblMFWorkOrder TABLE (
+		intWorkOrderId INT
+		,strWorkOrderNo NVARCHAR(50)
+		)
 
-		Declare @tblMFWorkOrder table(intWorkOrderId int,strWorkOrderNo nvarchar(50))
-
-	if @strWorkOrderId is null
-	Begin
-		Insert into @tblMFWorkOrder
-		EXEC dbo.uspMFGetWorkOrderByPlannedDate @dtmStartDate =@dtmStartDate
-			,@dtmEndDate =@dtmEndDate
-			,@strManufacturingCellId =@strManufacturingCellId
-			,@intLocationId =@intLocationId
-	End
-	Else
-	Begin
-		Insert into @tblMFWorkOrder(intWorkOrderId )
+	IF @strWorkOrderId = ''
+	BEGIN
+		INSERT INTO @tblMFWorkOrder
+		EXEC dbo.uspMFGetWorkOrderByPlannedDate @dtmStartDate = @dtmStartDate
+			,@dtmEndDate = @dtmEndDate
+			,@strManufacturingCellId = @strManufacturingCellId
+			,@intLocationId = @intLocationId
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @tblMFWorkOrder (intWorkOrderId)
 		SELECT Item
-				FROM dbo.fnSplitString(@strWorkOrderId, ',')
-	end
+		FROM dbo.fnSplitString(@strWorkOrderId, ',')
+	END
+
 	SELECT @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, GETDATE(), 101))
 
 	SELECT @dtmStartDate = convert(DATETIME, Convert(CHAR, @dtmStartDate, 101))
@@ -285,27 +288,6 @@ BEGIN
 			AND IL.intLocationId = @intLocationId
 		GROUP BY I.intItemId
 
-		INSERT INTO @tblMFLot (
-			intItemId
-			,dblQty
-			)
-		SELECT I.intItemId
-			,SUM(IsNULL((
-						CASE 
-							WHEN L.intWeightUOMId IS NULL
-								THEN dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty)
-							ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intWeightUOMId, I.intItemUOMId, L.dblWeight)
-							END
-						), 0))
-		FROM @tblInputItem I
-		JOIN tblICLot L ON L.intItemId = I.intItemId
-			AND I.strLotTracking <> 'No'
-			AND L.intLotStatusId = 1
-			AND L.intLocationId = @intLocationId
-			AND ISNULL(L.dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
-			AND L.dblQty > 0
-		GROUP BY I.intItemId
-
 		UPDATE L
 		SET dblQty = CASE 
 				WHEN L.dblQty - IsNULL(R.dblPlannedQty, 0) > 0
@@ -535,27 +517,6 @@ BEGIN
 			AND IL.intItemId = I.intItemId
 			AND S.dblOnHand > 0
 			AND IL.intLocationId = @intLocationId
-		GROUP BY I.intItemId
-
-		INSERT INTO @tblMFLot (
-			intItemId
-			,dblQty
-			)
-		SELECT I.intItemId
-			,SUM(IsNULL((
-						CASE 
-							WHEN L.intWeightUOMId IS NULL
-								THEN dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty)
-							ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intWeightUOMId, I.intItemUOMId, L.dblWeight)
-							END
-						), 0))
-		FROM @tblInputItem I
-		JOIN tblICLot L ON L.intItemId = I.intItemId
-			AND I.strLotTracking <> 'No'
-			AND L.intLotStatusId = 1
-			AND L.intLocationId = @intLocationId
-			AND ISNULL(L.dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
-			AND L.dblQty > 0
 		GROUP BY I.intItemId
 
 		UPDATE L

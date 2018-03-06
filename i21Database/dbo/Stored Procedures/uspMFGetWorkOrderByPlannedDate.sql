@@ -2,8 +2,14 @@
 	,@dtmEndDate DATETIME
 	,@strManufacturingCellId NVARCHAR(MAX)
 	,@intLocationId INT
+	,@intWorkOrderId INT = 0
+	,@strWorkOrderNo NVARCHAR(50) = '%'
 AS
 BEGIN
+	SELECT @dtmStartDate = convert(DATETIME, Convert(CHAR, @dtmStartDate, 101))
+
+	SELECT @dtmEndDate = convert(DATETIME, Convert(CHAR, @dtmEndDate, 101)) + 1
+
 	IF EXISTS (
 			SELECT *
 			FROM tblMFSchedule
@@ -35,6 +41,14 @@ BEGIN
 				SELECT Item
 				FROM dbo.fnSplitString(@strManufacturingCellId, ',')
 				)
+			AND W.strWorkOrderNo LIKE @strWorkOrderNo + '%'
+			AND W.intWorkOrderId = (
+				CASE 
+					WHEN @intWorkOrderId > 0
+						THEN @intWorkOrderId
+					ELSE W.intWorkOrderId
+					END
+				)
 	END
 	ELSE
 	BEGIN
@@ -47,6 +61,13 @@ BEGIN
 				)
 			AND W.dtmPlannedDate >= @dtmStartDate
 			AND W.dtmPlannedDate <= @dtmEndDate
+			AND W.strWorkOrderNo LIKE @strWorkOrderNo + '%'
+			AND W.intWorkOrderId = (
+				CASE 
+					WHEN @intWorkOrderId > 0
+						THEN @intWorkOrderId
+					ELSE W.intWorkOrderId
+					END
+				)
 	END
 END
-
